@@ -1,8 +1,8 @@
 /-!
 # The KeY taclets, as a Lean type
 
-`solidityProgramRules.key` is the calculus solkey actually runs: 313 named
-taclets (solkey `100f7f24c3`).  This module is that list of names, one constructor each, plus the
+`solidityProgramRules.key` is the calculus solkey actually runs: 323 named
+taclets (solkey `1b4341a303`).  This module is that list of names, one constructor each, plus the
 `\heuristics` annotation each one carries.  It exists so that
 `RuleShapes.lean` can say *which* KeY taclet each rule transcribes with a
 typed `KeyOrigin` rather than a string — a misspelling is then a type error, and
@@ -30,11 +30,11 @@ and rebuild the three tables below in that order.  The `SolKey` reader's
 than going unnoticed.
 
 `name` is deliberately a `match` and not a lookup in `all`: the corpus check is
-a `native_decide` over 313 strings, and a lookup would make it quadratic.
+a `native_decide` over 323 strings, and a lookup would make it quadratic.
 
 ## `\heuristics` is documentary
 
-Four values occur in the corpus — `simplify_prog` (219 taclets),
+Four values occur in the corpus — `simplify_prog` (229 taclets),
 `simplify_expression` (87), `concrete_solidity` (5, the literal-condition
 `if` rules) and `simplify_prog_expensive` (2, the memory-to-storage index
 writes that capture everything).  They are KeY's *strategy* annotations: which
@@ -50,7 +50,7 @@ namespace Solidity
 
 /-- A KeY `\heuristics(...)` rule set.  The corpus uses exactly these four. -/
 inductive Heuristic where
-  /-- `simplify_prog`: the program-rewriting rule set (219 taclets). -/
+  /-- `simplify_prog`: the program-rewriting rule set (229 taclets). -/
   | simplifyProg
   /-- `simplify_expression`: the eager expression rule set (87 taclets). -/
   | simplifyExpression
@@ -66,8 +66,12 @@ inductive Heuristic where
 /-- One taclet of `solidityProgramRules.key`, named as the file names it. -/
 inductive KeyTaclet where
   | functionBodyExpand
+  | internalCallExpand
   | emptyModality
   | blockEmpty
+  | blockReturn
+  | functionFrameReturn
+  | functionFrameEmpty
   | revertDiamond
   | revertBox
   | storageRootWriteStore
@@ -362,6 +366,8 @@ inductive KeyTaclet where
   | requireSimple
   | transfer_unfold_leftFstReceiver
   | transfer_unfold_rightSndArgument
+  | send_unfold_leftFstReceiver
+  | send_unfold_rightSndArgument
   | storageIndexWriteCaptureAllComplexRecv
   | storageIndexWriteCaptureAllNonSimpleIndex
   | memoryIndexWriteCaptureAllComplexRecv
@@ -374,9 +380,13 @@ inductive KeyTaclet where
   | memoryIndexWriteMemRefCaptureAllNonSimpleIndex
   | transferNoCallbackBox
   | transferNoCallbackDiamond
+  | sendNoCallbackBox
+  | sendNoCallbackDiamond
   | tryCallNoCallbackBox
   | transferWithCallbackBox
   | transferWithCallbackDiamond
+  | sendWithCallbackBox
+  | sendWithCallbackDiamond
   | tryCallWithCallbackBox
   deriving DecidableEq, Repr
 
@@ -385,8 +395,12 @@ namespace KeyTaclet
 /-- The taclet's name, exactly as `solidityProgramRules.key` spells it. -/
 def name : KeyTaclet -> String
   | functionBodyExpand => "functionBodyExpand"
+  | internalCallExpand => "internalCallExpand"
   | emptyModality => "emptyModality"
   | blockEmpty => "blockEmpty"
+  | blockReturn => "blockReturn"
+  | functionFrameReturn => "functionFrameReturn"
+  | functionFrameEmpty => "functionFrameEmpty"
   | revertDiamond => "revertDiamond"
   | revertBox => "revertBox"
   | storageRootWriteStore => "storageRootWriteStore"
@@ -681,6 +695,8 @@ def name : KeyTaclet -> String
   | requireSimple => "requireSimple"
   | transfer_unfold_leftFstReceiver => "transfer_unfold_leftFstReceiver"
   | transfer_unfold_rightSndArgument => "transfer_unfold_rightSndArgument"
+  | send_unfold_leftFstReceiver => "send_unfold_leftFstReceiver"
+  | send_unfold_rightSndArgument => "send_unfold_rightSndArgument"
   | storageIndexWriteCaptureAllComplexRecv => "storageIndexWriteCaptureAllComplexRecv"
   | storageIndexWriteCaptureAllNonSimpleIndex => "storageIndexWriteCaptureAllNonSimpleIndex"
   | memoryIndexWriteCaptureAllComplexRecv => "memoryIndexWriteCaptureAllComplexRecv"
@@ -693,16 +709,24 @@ def name : KeyTaclet -> String
   | memoryIndexWriteMemRefCaptureAllNonSimpleIndex => "memoryIndexWriteMemRefCaptureAllNonSimpleIndex"
   | transferNoCallbackBox => "transferNoCallbackBox"
   | transferNoCallbackDiamond => "transferNoCallbackDiamond"
+  | sendNoCallbackBox => "sendNoCallbackBox"
+  | sendNoCallbackDiamond => "sendNoCallbackDiamond"
   | tryCallNoCallbackBox => "tryCallNoCallbackBox"
   | transferWithCallbackBox => "transferWithCallbackBox"
   | transferWithCallbackDiamond => "transferWithCallbackDiamond"
+  | sendWithCallbackBox => "sendWithCallbackBox"
+  | sendWithCallbackDiamond => "sendWithCallbackDiamond"
   | tryCallWithCallbackBox => "tryCallWithCallbackBox"
 
 /-- The `\heuristics` rule set the taclet is filed under. -/
 def heuristic : KeyTaclet -> Heuristic
   | functionBodyExpand => Heuristic.simplifyProg
+  | internalCallExpand => Heuristic.simplifyProg
   | emptyModality => Heuristic.simplifyProg
   | blockEmpty => Heuristic.simplifyProg
+  | blockReturn => Heuristic.simplifyProg
+  | functionFrameReturn => Heuristic.simplifyProg
+  | functionFrameEmpty => Heuristic.simplifyProg
   | revertDiamond => Heuristic.simplifyProg
   | revertBox => Heuristic.simplifyProg
   | storageRootWriteStore => Heuristic.simplifyProg
@@ -997,6 +1021,8 @@ def heuristic : KeyTaclet -> Heuristic
   | requireSimple => Heuristic.simplifyProg
   | transfer_unfold_leftFstReceiver => Heuristic.simplifyProg
   | transfer_unfold_rightSndArgument => Heuristic.simplifyProg
+  | send_unfold_leftFstReceiver => Heuristic.simplifyProg
+  | send_unfold_rightSndArgument => Heuristic.simplifyProg
   | storageIndexWriteCaptureAllComplexRecv => Heuristic.simplifyProg
   | storageIndexWriteCaptureAllNonSimpleIndex => Heuristic.simplifyProg
   | memoryIndexWriteCaptureAllComplexRecv => Heuristic.simplifyProg
@@ -1009,16 +1035,24 @@ def heuristic : KeyTaclet -> Heuristic
   | memoryIndexWriteMemRefCaptureAllNonSimpleIndex => Heuristic.simplifyProg
   | transferNoCallbackBox => Heuristic.simplifyProg
   | transferNoCallbackDiamond => Heuristic.simplifyProg
+  | sendNoCallbackBox => Heuristic.simplifyProg
+  | sendNoCallbackDiamond => Heuristic.simplifyProg
   | tryCallNoCallbackBox => Heuristic.simplifyProg
   | transferWithCallbackBox => Heuristic.simplifyProg
   | transferWithCallbackDiamond => Heuristic.simplifyProg
+  | sendWithCallbackBox => Heuristic.simplifyProg
+  | sendWithCallbackDiamond => Heuristic.simplifyProg
   | tryCallWithCallbackBox => Heuristic.simplifyProg
 
 /-- Every taclet, in the order `solidityProgramRules.key` declares them. -/
 def all : List KeyTaclet := [
   KeyTaclet.functionBodyExpand,
+  KeyTaclet.internalCallExpand,
   KeyTaclet.emptyModality,
   KeyTaclet.blockEmpty,
+  KeyTaclet.blockReturn,
+  KeyTaclet.functionFrameReturn,
+  KeyTaclet.functionFrameEmpty,
   KeyTaclet.revertDiamond,
   KeyTaclet.revertBox,
   KeyTaclet.storageRootWriteStore,
@@ -1313,6 +1347,8 @@ def all : List KeyTaclet := [
   KeyTaclet.requireSimple,
   KeyTaclet.transfer_unfold_leftFstReceiver,
   KeyTaclet.transfer_unfold_rightSndArgument,
+  KeyTaclet.send_unfold_leftFstReceiver,
+  KeyTaclet.send_unfold_rightSndArgument,
   KeyTaclet.storageIndexWriteCaptureAllComplexRecv,
   KeyTaclet.storageIndexWriteCaptureAllNonSimpleIndex,
   KeyTaclet.memoryIndexWriteCaptureAllComplexRecv,
@@ -1325,9 +1361,13 @@ def all : List KeyTaclet := [
   KeyTaclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex,
   KeyTaclet.transferNoCallbackBox,
   KeyTaclet.transferNoCallbackDiamond,
+  KeyTaclet.sendNoCallbackBox,
+  KeyTaclet.sendNoCallbackDiamond,
   KeyTaclet.tryCallNoCallbackBox,
   KeyTaclet.transferWithCallbackBox,
   KeyTaclet.transferWithCallbackDiamond,
+  KeyTaclet.sendWithCallbackBox,
+  KeyTaclet.sendWithCallbackDiamond,
   KeyTaclet.tryCallWithCallbackBox
 ]
 

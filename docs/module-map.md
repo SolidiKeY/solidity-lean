@@ -64,7 +64,7 @@ lemma (`TermTaclet.sound`).
 |---|---|
 | `Calculus/RuleSyntax.lean` | The `dl{ … }` notation: schemas (taclets, sequents `..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ`, update schemas `{u ‖ {u}u2}`), `tm{ … }` for terms, and the printers for taclets, premises, goals, terms (`pp.sol.key`: KeY's long forms). |
 | `Calculus/Rules.lean` | `Taclet` (solkey's rules), `LeanTaclet` (rules solkey lacks), `Rule`, `CallbackTaclet`. |
-| `Calculus/KeyTaclets.lean` | The 313 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
+| `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the constructor for each. |
 | `Calculus/Completeness.lean` | `Stmt.step`, the rule for every statement, and `Stmt.complete`. |

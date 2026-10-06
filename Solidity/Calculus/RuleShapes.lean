@@ -459,6 +459,12 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   and book the payment; here a payment has a rule under the box only, and the
   diamond closes to `false` (`LeanTaclet.transferDiamond`): whether the world
   pays is the compiler theorem's, not the calculus's.
+* `internalCallExpand`, `blockReturn`, `functionFrameReturn`,
+  `functionFrameEmpty`, `send_unfold_leftFstReceiver`,
+  `send_unfold_rightSndArgument`, `sendNoCallbackBox`, `sendNoCallbackDiamond`,
+  `sendWithCallbackBox`, `sendWithCallbackDiamond` — not yet ported: solkey
+  `b959555181`..`1b4341a303` added them (internal calls with return targets,
+  the function frame, `send`), after the pin the table was written against.
 
 The other semantics of `transfer`, `transferWithCallbackBox`, is claimed by
 `callbackOrigins`. -/
@@ -467,7 +473,11 @@ def unclaimedTaclets : List KeyTaclet :=
     .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
     .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
-    .transferNoCallbackDiamond, .transferWithCallbackDiamond ]
+    .transferNoCallbackDiamond, .transferWithCallbackDiamond,
+    .internalCallExpand, .blockReturn, .functionFrameReturn, .functionFrameEmpty,
+    .send_unfold_leftFstReceiver, .send_unfold_rightSndArgument,
+    .sendNoCallbackBox, .sendNoCallbackDiamond,
+    .sendWithCallbackBox, .sendWithCallbackDiamond ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses, with nothing in both and nothing in neither.  A taclet
@@ -479,7 +489,7 @@ theorem taclets_partitioned :
 
 theorem claimedTaclets_count : claimedTaclets.length = 300 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 13 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 23 := by decide +kernel
 
 /-! ## The rules with no taclet
 

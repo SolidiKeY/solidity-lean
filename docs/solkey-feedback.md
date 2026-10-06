@@ -5,13 +5,15 @@ The only outbound document: what the Lean model shows solkey (`~/projects/solkey
 direction, solkey rules the Lean calculus lacks, is tracked as `planned` rows in
 `docs/lean-key-rule-map.md`.
 
-**Pinned to solkey `100f7f24c3`** (313 taclets, the `solkeycheck` baseline in
+**Pinned to solkey `1b4341a303`** (323 taclets, the `solkeycheck` baseline in
 `AGENTS.md`). The items were checked against `f2eb3d98eb`; the commits since
 add `try`/`catch` (`tryCallNoCallbackBox`, `tryCallWithCallbackBox`) and
 rename memory's `default` to `init`, and touch no rule an item below is
-about. `78f42fde33`, one past the pin, adds `\sameUpdateLevel` to the four
-allocation taclets; Lean needs no counterpart
-(`docs/lean-key-rule-map.md`, legend).
+about. `78f42fde33` adds `\sameUpdateLevel` to the four allocation taclets;
+Lean needs no counterpart (`docs/lean-key-rule-map.md`, legend).
+`b959555181`, `671f6762a9` and `1b4341a303` add `send`, internal calls with
+return targets and the function frame (ten taclets, not yet ported:
+`RuleShapes.unclaimedTaclets`).
 
 **Ranking.** Items that let KeY close a goal that is false on the chain come
 first, then missing rules and missing invariants, then refusals, then
@@ -226,7 +228,9 @@ Each was found by the Lean side and is fixed in solkey; git has the details.
   `selfBalanceSk` after a callback), added the `\if(sadr = self)` booking, and
   left the diamonds owing `0 <= se` only; Lean has no diamond rule for a
   payment (`LeanTaclet.transferDiamond`), and its callback leaves the funds as
-  they were (`State.havoc`).
+  they were (`State.havoc`).  `0b885c229d` dropped the last `selfBalanceSk`:
+  `tryCallWithCallbackBox`'s "call succeeded" no longer havocs `selfBalance`,
+  which is what `State.havoc` does (storage and ledger only).
 - The four `*IndexedReceiver_unfold_leftFst` taclets that did not fire (a null
   proposal in `VariableNamer`).
 - Determinism under the block modality: no box/diamond twin pairs remain.

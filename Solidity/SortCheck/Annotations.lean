@@ -5,8 +5,8 @@ import Solidity.AST
 
 A machine-checked transcription of the *read-sort annotations* carried
 by the read-bearing taclets of solkey's `solidityProgramRules.key`
-(transcribed at solkey commit `f2eb3d98eb`, re-checked at `100f7f24c3`: 313
-taclets, 115 of them read-bearing, one row each; the two `try` taclets read
+(transcribed at solkey commit `f2eb3d98eb`, re-checked at `1b4341a303`: 323
+taclets, 119 of them read-bearing, one row each; the two `try` taclets read
 nothing). The sort-relevant history is
 `12e72a1b4b` "removed find<int> to be more generic", `52c9c2477a`
 "removed valAt", `0f9b99ad55` "removed different fields" (which
@@ -319,6 +319,17 @@ def tacletReadAnns : List TacletReadAnn :=
     { keyName := "transferWithCallbackBox"
       reads := [⟨.net, .net, .fixed .int⟩] },
     { keyName := "transferWithCallbackDiamond"
+      reads := [⟨.net, .net, .fixed .int⟩] },
+    -- `send` (solkey `b959555181`): the same booking on the "send succeeded"
+    -- goal of the no-callback rules and the "invariant on exit" goal of the
+    -- callback rules, one ledger read each.
+    { keyName := "sendNoCallbackBox"
+      reads := [⟨.net, .net, .fixed .int⟩] },
+    { keyName := "sendNoCallbackDiamond"
+      reads := [⟨.net, .net, .fixed .int⟩] },
+    { keyName := "sendWithCallbackBox"
+      reads := [⟨.net, .net, .fixed .int⟩] },
+    { keyName := "sendWithCallbackDiamond"
       reads := [⟨.net, .net, .fixed .int⟩] } ]
   ++ compoundRows ++ incDecRows
 
@@ -372,7 +383,7 @@ def preFixTacletReadAnns : List TacletReadAnn :=
 -- Taclet names must be unique, and the table has one row per
 -- read-bearing taclet of the pinned file.
 #guard (tacletReadAnns.map (·.keyName)).Nodup
-#guard tacletReadAnns.length = 115
+#guard tacletReadAnns.length = 119
 
 end TacletAnnotations
 end Solidity

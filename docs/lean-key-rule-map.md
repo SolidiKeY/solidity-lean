@@ -3,7 +3,11 @@
 The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `ifThenElseRules.key`) to `Solidity.Taclet` (`Calculus/Rules.lean`), then the
 symbol table for updates and the data-structure theories. **Pinned to solkey
-`100f7f24c3`**: 313 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
+`1b4341a303`**: 323 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
+The ten taclets `b959555181`..`1b4341a303` added (`internalCallExpand`,
+`blockReturn`, `functionFrameReturn`, `functionFrameEmpty`, the two
+`send_unfold_…` and the four `send…Callback…` rules) are unclaimed as "not yet
+ported" until their rows below are written.
 
 These tables are the prose companion of `Calculus/RuleShapes.lean`, which
 checks the correspondence: `tacletOrigins` gives every constructor a typed
@@ -11,7 +15,7 @@ checks the correspondence: `tacletOrigins` gives every constructor a typed
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
-(`claimedTaclets_count = 300`, `unclaimedTaclets_count = 13`). A rule that
+(`claimedTaclets_count = 300`, `unclaimedTaclets_count = 23`). A rule that
 transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are three,
 `functionCallArgCapture`, `tryCallDiamond` and `transferDiamond`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
@@ -35,7 +39,7 @@ Legend (a row with several taclets or constructors lists them in one cell):
   `solidityProgramRules.key` taclet is listed in `RuleShapes.unclaimedTaclets`;
   a row from another `.key` file names that file.
 
-**`\sameUpdateLevel`.** solkey `78f42fde33`, one commit past the pin, adds it
+**`\sameUpdateLevel`.** solkey `78f42fde33` adds it
 to the four allocation taclets (`memoryReferenceDeclFreshAlloc`,
 `memoryRootDeleteFreshRebind`, `memoryArrayFreshAlloc`, `memoryStorageCopy`);
 the memory index and delete taclets with an `\add` carry it already. In KeY

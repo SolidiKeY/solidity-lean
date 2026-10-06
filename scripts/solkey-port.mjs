@@ -1112,8 +1112,12 @@ function readImported() {
  */
 function importedRows(functions, lean) {
   const where = `${IMPORTED.file} (${functions.length} functions)`;
-  if (functions.length !== lean.total) {
-    throw new Error(`${where}: Report.lean counts ${lean.total} functions ` +
+  // `parseContract` reads the public and external functions; an internal
+  // helper is counted by Report.lean (`internal f`) but has no obligation
+  const internal = [...lean.other.values()].filter((st) => st === "internal").length;
+  if (functions.length !== lean.total - internal) {
+    throw new Error(`${where}: Report.lean counts ${lean.total} functions, ` +
+      `${internal} of them internal ` +
       "(is --solkey/SOLKEY_EXAMPLES the checkout TestSuite was imported from?)");
   }
   const rows = [];
