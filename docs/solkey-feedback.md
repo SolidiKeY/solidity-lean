@@ -9,7 +9,9 @@ direction, solkey rules the Lean calculus lacks, is tracked as `planned` rows in
 `AGENTS.md`). The items were checked against `f2eb3d98eb`; the commits since
 add `try`/`catch` (`tryCallNoCallbackBox`, `tryCallWithCallbackBox`) and
 rename memory's `default` to `init`, and touch no rule an item below is
-about.
+about. `78f42fde33`, one past the pin, adds `\sameUpdateLevel` to the four
+allocation taclets; Lean needs no counterpart
+(`docs/lean-key-rule-map.md`, legend).
 
 **Ranking.** Items that let KeY close a goal that is false on the chain come
 first, then missing rules and missing invariants, then refusals, then
@@ -173,6 +175,14 @@ None is wrong on the corpus; each matters for a future taclet.
 - **`commuteSimpleUpdates`** (commented out in `updateRules.key`) is false as
   state equality on an assoc-list storage; it holds only pointwise. Keep it dead
   (`Semantics/Properties.lean`).
+- **`requireSimple` states a branch in another form than its siblings.**
+  `ifElseSplit` and `assertSimple` put the condition in the antecedent
+  (`\find( ==> …)`, `\add(se = TRUE ==>)`); `requireSimple` writes each goal
+  as a disjunction, `se = FALSE | ⟨…⟩post` and `se = TRUE | ⟨revert(); …⟩post`.
+  The two agree on a `bool`, but the proof tree shows one idea in two shapes.
+  Writing `requireSimple` as `ifElseSplit` is written, `"Holds": \add(se =
+  TRUE ==>)` and `"Reverts": \add(se = FALSE ==>)`, is what Lean's
+  `requireSimple` already states (a `.split` premise, as `ifElseSplit`'s).
 - **Overlapping taclets are separated by strategy cost, not by guards.** Lean's
   side conditions leave one rule per statement (`Rule.premise_unique`,
   `Calculus/Uniqueness.lean`); the cases where solkey leaves two taclets open

@@ -30,6 +30,19 @@ Legend (a row with several taclets or constructors lists them in one cell):
 - **unclaimed** — no constructor; the note is the reason from
   `unclaimedTaclets`.
 - **Lean only** — a `LeanTaclet`: no taclet behind it.
+- **⊢ rule** — no `Taclet` constructor: a `Proves` constructor
+  (`Calculus/Logic.lean`) is the rule, and `RuleShapes.lean` lists the taclet
+  in `unclaimedTaclets`.
+
+**`\sameUpdateLevel`.** solkey `78f42fde33`, one commit past the pin, adds it
+to the four allocation taclets (`memoryReferenceDeclFreshAlloc`,
+`memoryRootDeleteFreshRebind`, `memoryArrayFreshAlloc`, `memoryStorageCopy`);
+the memory index and delete taclets with an `\add` carry it already. In KeY
+it lets a taclet with an `\add` fire under the update prefix of its `\find`,
+the added formula read under the same updates. Here the updates of a goal sit
+in its context (`Proves.update` appends `.upd m U` to `Γ`) and a premise's
+hypothesis is appended after them (`.pre c`), so every rule fires at the
+goal's update level and reads what it adds there: nothing to port.
 
 ## Modality / sequent rules
 
@@ -37,7 +50,8 @@ Legend (a row with several taclets or constructors lists them in one cell):
 | --- | --- | --- | --- |
 | `functionBodyExpand` | `functionBodyExpand` | same | a call carries its callee inlined (`Stmt.call`, KeY's `FunctionBodyStatement`); with every argument simple the premise is KeY's `expand_function_body`. The parameters are the elaborator's fresh names, so KeY's fresh renaming is done once, at elaboration |
 | — | `LeanTaclet.functionCallArgCapture` | Lean only | `unfoldArgument`, which solkey's `docs/net.md` lists as missing: the leftmost non-simple argument is captured into a fresh `se` first, so that `Stmt.step` has one rule per call |
-| `emptyModality`, `blockEmpty` | — | unclaimed | a program is a list of statements with branch bodies inlined: no nested block to erase, no `{} ; rest` to find; reaching `⟨[ ]⟩` is the analogue |
+| `emptyModality` | `Proves.empty` | ⊢ rule | `⟨[ ]⟩ φ ⇝ φ` under either modality, as KeY's `#allmodal`; the proof tree prints the step under this name (`Calculus/ProofTree.lean`) |
+| `blockEmpty` | — | unclaimed | a program is a list of statements with branch bodies inlined: no nested block to erase, no `{} ; rest` to find |
 | `revertDiamond` | `revertDiamond` | same | closes to `false`: a reverted run satisfies no diamond formula |
 | `revertBox` | `revertBox` | same | closes to `true`. These two are the **only** rules that tell the modalities apart: the modality is a parameter of `Taclet`, so every other rule fires under either |
 
@@ -178,7 +192,8 @@ storage ones.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
-| `localValueDeclInitDrop`, `valueDeclSkip` | same names | same | |
+| `localValueDeclInitDrop` | same | same | |
+| `valueDeclSkip` | same | find same | `T v; ⇝ { v := defVal(T) } ⟨[ ]⟩`: KeY drops the declaration (`\addprogvars(v)`) and leaves `v` unconstrained; a Lean declaration is its default, as solc's |
 | `localValueAssign` | same | same | terminal `v = se;` |
 | `storageRootWriteValueRhsCapture` | same | same | `gsp = nse; ⇝ T se = nse; gsp = se;` |
 | `fieldWriteValueRhsCapture` | `fieldWriteValueRhsCapture`, `memoryFieldWriteUnfoldSource` | same | the second is the memory instance |
@@ -247,7 +262,7 @@ receiver kind, Lean does not.
 | `assertConditionCapture` | same | same | |
 | `assertSimple` | same | same | KeY's two branches: "Holds" `se = true ⟹ ⟨[ ]⟩` and "Violated" `se = true` (`Premise.check`, `Proves.check`); a failed `assert` panics (`Halt.panic`), which neither modality accepts (`Modality.afterRun`) |
 | `requireConditionCapture` | same | same | the assert capture over `Stmt.require` |
-| `requireSimple` | same | same | `require(se); ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩` |
+| `requireSimple` | same | find same | reshaped: `require(se); ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩`. KeY writes each goal as a disjunction, "Holds" `se = FALSE \| ⟨[ ]⟩ post` and "Reverts" `se = TRUE \| ⟨[ revert(); ]⟩ post`; for a `bool` each is the implication Lean's `.split` premise states with the condition in the context. Under the diamond `Proves.split` also owes the cover (`Premise.cover`), which KeY's disjunctions need not |
 | `ifElseUnfold` | same | same | also claims `ifUnfold` |
 | `ifUnfold` | `ifElseUnfold` | merged | `Stmt.ite` always has both branches (an absent `else` is `[]`) |
 | `ifElseSplit` | same | same | `if (se) thn else els; ⇝ se = true ⟹ ⟨[ thn ]⟩ ; se = false ⟹ ⟨[ els ]⟩`: a `.split` premise is the two-goal shape. Also claims `ifSplit` |
@@ -260,7 +275,7 @@ receiver kind, Lean does not.
 | --- | --- | --- | --- |
 | `transfer_unfold_leftFstReceiver`, `transfer_unfold_rightSndArgument` | same names | same | |
 | `transferNoCallbackBox` | same name | same | the box only, one terminal update (`UpdElem.pay`): `{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩`, solkey's `\if(sadr = self) \then(net) \else(storeSt(…))`, with no guard: the amount is read as a word by the element itself, which halts where it is not, as the interpreter does (`transferAt`). The arithmetic is KeY's `int`. Whether the world pays is the compiler theorem's (`Evm.compile_correct`), where a refused payment is a revert of the machine alone; the contract's own entry is never moved (`Evm.Sim.netSelf`) |
-| `transferNoCallbackDiamond` | — | not ported | a payment under the diamond closes to `false` (`LeanTaclet.transferDiamond`); KeY's "non-negative amount" goal and its diamond booking have no counterpart |
+| `transferNoCallbackDiamond` | — | not ported | KeY's two goals, "non-negative amount" `0 <= se` and "transfer booked" (the box's booking under the diamond), have no counterpart: a payment under the diamond closes to `false` instead (`LeanTaclet.transferDiamond`, below), which is sound and proves less |
 | `transferWithCallbackBox` | `CallbackTaclet.transferWithCallbackBox` | same | a constructor of `CallbackTaclet`, sound for the callback reading (`holdsC`), not of `Taclet`. The premise is `transferNoCallbackBox`'s booking `U`, read as KeY's two goals (`CallbackTaclet.sound`): `{U} I` ("invariant on exit") and `{U} {havoc} (I → [ ω ] φ)` ("resume after callback"; `{havoc}` is KeY's anonymising update, read by `CbResume`). Used by `ProvesC` |
 | `transferWithCallbackDiamond` | — | not ported | as `transferNoCallbackDiamond`: no diamond over a payment is derived |
 
@@ -285,7 +300,10 @@ changes").
 
 | KeY rule | Lean | Status | Notes |
 | --- | --- | --- | --- |
-| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge`; `Proves.mergeStorage`; + under a branch (`LineRw.mergeIn`, `Calculus/ChainBranches.lean`) | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` of locals (`Upd.envOnly`); `mergeStorage` over a storage write, for terms whose every storage read is a `storage` term (`stExplicit`); in a chain also at the first spine under `∧`, `→`, `¬` |
+| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge`; + under a branch (`LineRw.mergeIn`, `Calculus/ChainBranches.lean`) | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` of locals (`Upd.envOnly`); in a chain also at the first spine under `∧`, `→`, `¬` |
+| `sequentialToParallel1-3` over a storage write | `Proves.mergeStorage` | done | `{storage := s}{V}φ ⇝ {storage := s ‖ {storage := s}V}φ` (`Upd.withSt`), for a `V` whose every storage read is a `storage` term (`stExplicit`, `Upd.mergeStorage_holds`) |
+| `sequentialToParallel1-3`, read backwards | `Fml.seqUpd` (`Calculus/Derive.lean`) | Lean only | before the closer runs, a parallel update whose last element binds a local the others neither read nor write is split into that element first and the others after it (`{ r := x + 1 }{ x := x + 1 }`), which `Fml.toL` reads; a push with its alias (`pushAlias?`) is split into the storage write and the alias, and an allocation's pair is kept whole (`memAlloc?`) |
+| — (KeY keeps an update on its formula) | `Proves.updIntro` | arch | `⟹ {U} φ` becomes `{U} ⟹ φ`: the update joins the context, where every rule reads it, the sequent KeY writes with the update on the formula. A specification's `{ old := storage }` enters the derivation so |
 | `applyOnElementary`, `applyOnParallel` | `UpdElem.subst`, `Upd.subst` | functions | `{u}` pushed into right-hand sides |
 | `applyOnPV`, `applyOnPVLastInParallel`, `applyOnDifferentPV`, `applyOnDifferentPVLastInParallel` | `Fml.subst` (`Upd.lastWrite`) | functions | the last write of a local wins; an unwritten local is kept |
 | `simplifyUpdate1-3` | `UpdRule.simplifyUpdate`, `Upd.dropEffectless`, `Proves.simplify` | done | only elements that cannot halt are dropped (`UpdElem.total`) |
@@ -333,7 +351,13 @@ step.  "closer clause X" names the definition the clause lives in.
 | `closeFalse`, `replace_known_left` | closer clauses `Facts.refute`, `Facts.apart` | subsumed | a premise refuted (two literals apart, a side that halts, a pair the premises keep apart) closes the leaf |
 | `cut`, `cut_direct` on a `bool` | closer clause `Facts.split` | subsumed | a case split on a `bool` local or a condition compared with a literal |
 | `selectOnTypedStruct`, `selectOnTypedMember`, `selectOnTypedElement`, `selectOnTypedMapSize`, `selectOnTypedFixedSize`, `selectOnTypedLeafSize` | closer clauses `LPath.ty`, `Facts.retsW`, `Facts.halts` | subsumed | under `wt(storage)` a read at a path the layout types returns, of its type's kind; a test for a shape the layout says is not there halts |
-| `selectOnTypedDynSize` | closer clause `Facts.lo` | partly | a length is at least `0` (`values.length + 1 > 0` after a `push`); no bound above, so `values.length - 1` after a `push` is not known to fit a `uint` (`storagePushReadBack` stays underived: `divergent` in `tests/solkey/expected.tsv`) |
+| `sizeNotNegative` | closer clause `Facts.lo` | subsumed | a length is at least `0` (`values.length + 1 > 0` after a `push`), KeY's `\add(0 <= selectSt<[int]>(st, size) ==>)`. No taclet bounds a length above, so `values.length - 1` after a `push` is not known to fit a `uint` (`storagePushReadBack` stays underived: `divergent` in `tests/solkey/expected.tsv`) |
+| `findDefinition*`, then `selectOnSaveCons` (`a1 = a2` down the written path, `a1 ≠ a2` off it), `saveOnEmptyPrim` at the word | `.save` arm of `LStor.readU`: `cmpSegs`, then `saveLeaf` (`Calculus/Decide.lean`) | subsumed | the read compared with the write a segment at a time (`cmpSegs`; two keys the terms do not settle, `keyCmp`, are one `kite`): the word written where the paths are equal (`.eq`), the old read where they diverge (`.diverge`); above or below the word the read halts (`.err`, Lean only: a struct is no word, a word has no members). `save_readU_sim` (`findLive_saveLive_same`, `findLive_saveLive_diverge`, `save_through`); the Theory's `findDefinitionCons`, `selectOnSaveCons`, `saveOnStoreCons` (`Theory/Storage.lean`) |
+| `selectOnDelAtCons`, then `delFieldDefault`, `delFieldRef`, `delFieldMap`, `delFieldFixed`, `selectStDelNode{Map,Ref,Fixed,Default}`, `selectStDelNodeFixed{Element,Size,Value}` below the deleted node | `.del` arm of `LStor.readU`: `cmpSegs`, then `delLeaf` and `delBelow` | subsumed | at the deleted path the old word's default (`.zero`); below it, through a member the deleted value's member, at a key the old entry where the node above is a mapping (`selectStDelNodeMap`), the reset element where it is a fixed-size array (`selectStDelNodeFixedElement`), and nothing where it is a dynamic one, which is emptied; apart, the old read. The node's kind is a test on the storage below (`mapU`), not the field's sort. `del_readU_sim`, `delBelow_sim`; the Theory's `selectOnDelAtCons`, `find_delAt_same`, `find_delAt_below` |
+| — (Lean only: KeY's reads are total, the interpreter's halt where a location is not there) | `.save`/`.del` arms of `LStor.hasU` (`saveHas`, `delHas`) | Lean only | a write leaves its path and every location above it there, none below a word; a delete as `delBelow` walks it below the path; apart, as before. `save_hasU_sim`, `del_hasU_sim` |
+| `selectOnDelAtCons`, `selectStDelNodeDefault` and `selectStDelNodeFixedSize` at `size` | `.save`/`.del` arms of `LStor.lenU` (`saveMap`, `delLen`, `lenEnd`) | subsumed | a write keeps the length of every array above it; a delete leaves a fixed-size array's length (`selectStDelNodeFixedSize`) and a dynamic array's `0` (`selectStDelNodeDefault`) at its path, as `delBelow` walks it below. `save_lenU_sim`, `del_lenU_sim` |
+| — (Lean only: KeY reads a mapping or a fixed-size array off the field's sort, `MapField`/`FixedField`) | `.save`/`.del` arms of `LStor.mapU` (`saveMap`, `delMap`) | Lean only | the kind of the node at `Q`: a write keeps the shape of every location above it, a delete the shape of its default. `save_mapU_sim`, `del_mapU_sim` |
+| — (Lean only: KeY's `save` and `delAt` are total, the interpreter's halt) | `.save`/`.del` arms of `LStor.okE`, the run guard | Lean only | the write returns where the storage below does, the value written and the path return, and the location is there (`hasU`); a write through a `length` segment is kept whole (`.sok`). `save_okE_sim`, `del_okE_sim` (`save_ok_iff_find_ok`). `LStor.cpokU` passes a word written over a word (its row is with the memory clauses below) |
 | `selectOnSaveCons` on a `size` write, `selectOnDelAtCons` past the end | `LStor.arr` with `arrKey`, `arrRead`, `arrLength` (`Calculus/Decide.lean`) | subsumed | a read below a pushed or popped array compares its index with the old length: the pushed word or default there, the old element below it; the length after is the old one plus or minus one, counted unchecked |
 | `selectOnSaveEmptyRef`, `selectOnSaveEmptyFixed`, `selectOnSaveEmptyIndexStruct`, `selectOnSaveEmptyDefault` | `LStor.copy` with `copyLeaf`, `copyKeys`, `overlay_findLive_fields`, `overlay_findLive_nomap` | subsumed | a read below a copy reads the source, through members and key by key (an element of a fixed-size or dynamic array, as solc's element-wise copy leaves it); the target's elements past the source's length are past the end |
 | `selectOnSaveEmptyMap` below a key of a copy | `copyKeys` | partly | where the source has a mapping at a key, the read is kept whole (a mapping met in both keeps the target's entries); a copy of a well-typed program meets none, solc rejects it |
@@ -476,7 +500,7 @@ them as KeY's `\replacewith` updates do.
 
 | KeY sort | Here | Notes |
 | --- | --- | --- |
-| a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)`, `read(m, a)`, `select(s, r)` (`Term.find` at a state variable), an array's length (`Term.len`, printed `p.length` at `storage` and `find(s, p.length)` elsewhere; `Term.mlen`), `c ? a : b`, `selectSt(net, at(a))` (`Term.net`), `selectSt(oldNet, at(a))` (`Term.netOf`), `delValue(t)` (`Term.delValue`, KeY's `delValue<[α]>`), `wt(s)` (`Term.wt`/`Op1.wt`, KeY's `wellFormed(heap)`: `true` on a storage the contract can be in, stated `defined(wt(storage))`, the premise of an obligation) |
+| a value | `Term` | a constant, a stack local, `a ⊕ b`, `find(s, p)`, `read(m, a)`, `select(s, r)` (`Term.find` at a state variable), an array's length (`Term.len`, printed `p.length` at `storage` and `find(s, p.length)` elsewhere; `Term.mlen`), `c ? a : b`, `selectSt(net, at(a))` (`Term.net`), `selectSt(oldNet, at(a))` (`Term.netOf`), `delValue(t)` (`Term.delValue`, the default of a word; solkey replaced its `delValue<[α]>` by `delField<[α]>(st, a)`, which is `delValue(selectSt(st, a))` here), `wt(s)` (`Term.wt`/`Op1.wt`, KeY's `wellFormed(heap)`: `true` on a storage the contract can be in, stated `defined(wt(storage))`, the premise of an obligation) |
 | `Path[storage]` | `PTerm` | a state variable (`.root`), an alias (`.pv`), `.field`/`.at`; `p[i]@S` (`.atIn`) and `p[p.length]@S` (`.nextIn`) for an index check or a push slot merged under a storage write, their check performed in `S` (no KeY counterpart: KeY's `at(i)` is unchecked) |
 | `Storage` | `STerm` | `.storage`, `.save`, `.delAt`; `.push`/`.pushSlot`/`.pop`/`.shrink`/`.extend` for the array writes; `.select` for `selectSt<[Struct]>(s, r)`, the struct at a member, written `select(s, r)` |
 | what a storage `save` writes | `SValT` | a value (`.val`), a subtree read from a storage (`.find`), a memory object copied back (`.copyMem`, KeY's `copyMem(mtSt, m, i)`), or a fresh array (`.newArr`; a concrete one prints `newArr(T, n)`, `T` the array type) |
