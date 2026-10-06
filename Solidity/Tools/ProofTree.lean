@@ -15,9 +15,10 @@ The three requests solkey's web prover answers about a proof
 tree `ProofTree.ofFormula` grows for `⊢ φ` (`Calculus/ProofTree.lean`):
 
 * `#proof_tree φ` — the tree as solkey's GUI lays it out, one line
-  `serial: rule` per node, a sub-branch per goal of a split, its label the
-  goal's case name, an open leaf with its sequent; and the summary: closed or
-  not, open goals, nodes, branches.
+  `serial: rule` per node under KeY's name, a sub-branch per goal of a split
+  labelled as solkey labels it (`"Holds"`, `"if se true"`, …;
+  `ProofTree.branchLabels`), an open leaf with its sequent; and the summary:
+  closed or not, open goals, nodes, branches.
 * `#proof_node n φ` — node `n`: its sequent `dl{ Γ ⟹ φ }`, its rule, its
   state, the branch it starts, its parent and its children, and the tactics
   that applied its rule (or closed it).

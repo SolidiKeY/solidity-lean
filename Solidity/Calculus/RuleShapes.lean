@@ -367,6 +367,57 @@ def callbackOrigins : List (Lean.Name × KeyOrigin) := [
 
 #check_constructor_table CallbackTaclet, callbackOrigins.map Prod.fst
 
+/-! ## KeY's taclet at an operator
+
+A `merged` row of an operator family lists KeY's taclets in the order of
+its operators (`operatorOrder`): the proof tree prints a node as KeY's
+taclet at the operator its statement has (`keyTacletAt`), `additionAssignment`
+where the row is `binopAssignment`.  A row split by something other than the
+operator (a mapping against an array, an assignment against a declaration)
+is not listed, and prints under its own name. -/
+
+/-- The operators of a merged row, in the order of its taclets. -/
+def operatorOrder : List (Lean.Name × List Lean.Name) :=
+  let arith := [``BinOp.add, ``BinOp.sub, ``BinOp.mul, ``BinOp.pow, ``BinOp.div, ``BinOp.mod]
+  let cmp := [``BinOp.lt, ``BinOp.gt, ``BinOp.le, ``BinOp.ge, ``BinOp.eqB, ``BinOp.neB]
+  let compound := [``BinOp.add, ``BinOp.sub, ``BinOp.mul, ``BinOp.div, ``BinOp.mod]
+  let incDec := [``IncDec.preInc, ``IncDec.preDec, ``IncDec.postInc, ``IncDec.postDec]
+  [(``Taclet.binopAssignment, arith ++ cmp ++ [``BinOp.and, ``BinOp.or]),
+   (``Taclet.binopUnfoldLeft, arith ++ cmp ++ [``BinOp.and, ``BinOp.or]),
+   (``Taclet.binopUnfoldRight, arith ++ cmp),
+   (``Taclet.unopAssignment, [``UnOp.neg, ``UnOp.not]),
+   (``Taclet.unopCapture, [``UnOp.neg, ``UnOp.not])] ++
+  ([``Taclet.localOpAssign, ``Taclet.storageRootOpAssign, ``Taclet.storageFieldOpAssign,
+    ``Taclet.storageIndexMappingOpAssign, ``Taclet.storageIndexArrayOpAssign,
+    ``Taclet.memoryFieldOpAssign, ``Taclet.memoryIndexArrayOpAssign,
+    ``Taclet.storageFieldOpAssignUnfoldLeftFst, ``Taclet.storageIndexOpAssignUnfoldLeftFst,
+    ``Taclet.memoryFieldOpAssignUnfoldLeftFst, ``Taclet.memoryIndexOpAssignUnfoldLeftFst,
+    ``Taclet.compoundAssignValueRhsCapture].map (·, compound)) ++
+  ([``Taclet.localIncrement, ``Taclet.storageRootIncrement, ``Taclet.storageFieldIncrement,
+    ``Taclet.memoryFieldIncrement, ``Taclet.memoryIndexArrayIncrement,
+    ``Taclet.storageFieldIncrementUnfoldLeftFst, ``Taclet.storageIndexIncrementUnfoldLeftFst,
+    ``Taclet.memoryFieldIncrementUnfoldLeftFst, ``Taclet.memoryIndexIncrementUnfoldLeftFst,
+    ``Taclet.storageRootIncrementAssignment, ``Taclet.storageFieldIncrementAssignment,
+    ``Taclet.memoryFieldIncrementAssignment, ``Taclet.memoryIndexArrayIncrementAssignment].map
+    (·, incDec))
+
+/-- KeY's taclet for the row of the constructor `c` at the operator `op` (a
+constructor of `BinOp`, `UnOp` or `IncDec`). -/
+def keyTacletAt (c op : Lean.Name) : Option KeyTaclet := do
+  let ops ← operatorOrder.lookup c
+  let .merged ts ← tacletOrigins.lookup c | none
+  (ops.zip ts).lookup op
+
+-- Every listed row is merged, one taclet per operator.
+#guard operatorOrder.all fun (c, ops) =>
+  match tacletOrigins.lookup c with
+  | some (.merged ts) => ts.length == ops.length
+  | _ => false
+
+#guard keyTacletAt ``Taclet.binopAssignment ``BinOp.eqB == some .boolEqualityAssignment
+#guard keyTacletAt ``Taclet.storageFieldIncrement ``IncDec.postDec ==
+  some .storageFieldPostdecrement
+
 /-! ## Which KeY taclets the table claims -/
 
 /-- Whether some row names the taclet. -/
@@ -378,10 +429,12 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
 
 /-- The taclets of `solidityProgramRules.key` that **no** row claims, and why.
 
-* `emptyModality`, `blockEmpty` — architectural.  A program is a list of
-  statements with branch bodies inlined, so there is no nested block to erase
-  and no `{} ; rest` to find; a derivation that reaches `⟨[ ]⟩` *is* the Lean
-  analogue of `emptyModality`.
+* `emptyModality` — a rule of `⊢`, not of a statement: `Proves.empty`
+  (`Proves.emptyModality`), which the proof tree prints under this name.  The
+  table lists `Taclet` constructors only, so it does not claim it.
+* `blockEmpty` — architectural.  A program is a list of statements with
+  branch bodies inlined, so there is no nested block to erase and no
+  `{} ; rest` to find.
 * `memoryFieldRead_unfold_rightSndResult`, `memoryIndexRead_unfold_rightSndResult`,
   `memoryFieldWriteCaptureSrc`, `memoryIndexWriteMemRefRhsCapture` — KeY
   captures a memory reference into an alias before writing it; here a memory

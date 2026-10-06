@@ -65,7 +65,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/RuleSyntax.lean` | The `dl{ … }` notation: schemas (taclets, sequents `..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ`, update schemas `{u ‖ {u}u2}`), `tm{ … }` for terms, and the printers for taclets, premises, goals, terms (`pp.sol.key`: KeY's long forms). |
 | `Calculus/Rules.lean` | `Taclet` (solkey's rules), `LeanTaclet` (rules solkey lacks), `Rule`, `CallbackTaclet`. |
 | `Calculus/KeyTaclets.lean` | The 313 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
-| `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`). |
+| `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the constructor for each. |
 | `Calculus/Completeness.lean` | `Stmt.step`, the rule for every statement, and `Stmt.complete`. |
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
@@ -79,7 +79,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Logic.lean` | The sequent calculus `Proves` (`⊢` all rules, `⊢ₖ` solkey's), its rules written as sequents `dl{ ..Γ, c ⟹[R] φ }`, solkey's names for them (`impRight`, `allRight`, …) and `Proves.sound`; the update, rewrite and close rules. |
 | `Calculus/Callback.lean` | `CallbackTaclet.sound`, `ProvesC` (sequents `dl{ ..Γ ⟹ᶜ[I] φ }`) and `ProvesC.sound`. |
 | `Calculus/SolkeyFragment.lean` | `Stmt.inSolkey m`, where solkey's rules alone are the calculus under a modality; and where they fall short. |
-| `Calculus/Symex.lean` | `Fml.step`, `symex`, `symex_sound`; `sol_step`, `sol_symex`, `sol_derive`. |
+| `Calculus/Symex.lean` | `Fml.step`, `symex`, `symex_sound`; `sol_step`, `sol_symex`, `sol_derive`; `Proves.closeTrue` and `Proves.splitBox`, a box split with KeY's two goals. |
 | `Calculus/Close.lean` | `sol_close`: first-order goals by weakest preconditions. Its docstring lists what it does not close. |
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
 | `Calculus/ReadWrite.lean` | Reads after writes: the four-way path comparison; the simp sets `close_rw`, `decide_eval`. |
@@ -92,14 +92,14 @@ lemma (`TermTaclet.sound`).
 | `Calculus/DecideSyn.lean` | `LFml.syn`: a reduction closed by its terms, KeY's syntactic closing; `sol_decide`'s first try. |
 | `Calculus/DecideComplete.lean` | The starting storage's reads are realizable; `Fml.valid_iff_cons`. |
 | `Calculus/Closer.lean` | `LFml.close`: the closer, KeY's first-order and arithmetic taclets as clauses of one `Bool` (ground evaluation, `applyEq`, `bool` case splits, intervals by constants and bounds below, reads typed by `wt`'s layout, the slot a `push()` recycles typed by its element type, a copy into memory of a type with no mapping, `Facts.cpokInit`), `LFml.close_holds`; `LFml.fits`, the size count; literal powers folded (`foldBin`). |
-| `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a step budget over the whole derivation, leaves closed by `LFml.close` with `wt` read as a layout, parallel updates split, a push's returned alias read after the push, `Derive.fitsClose` bounding a leaf and its reduction), `Proves.of_residue`, `Proves.close_dropWt`; `sol_prove`, `sol_prove?`. |
+| `Calculus/Derive.lean` | The strategy as one kernel evaluation: `Derive.residue` (per-goal fresh names, any number of branches, a box split's two goals as `Proves.splitBox`'s, a step budget over the whole derivation, leaves closed by `LFml.close` with `wt` read as a layout, parallel updates split, a push's returned alias read after the push, `Derive.fitsClose` bounding a leaf and its reduction), `Proves.of_residue`, `Proves.close_dropWt`; `sol_prove`, `sol_prove?`. |
 | `Calculus/Problem.lean` | solkey's obligation forms (`Problem.fml`: `∀x̄. wt(storage) → [f] true` or `⟨f⟩ true`), `Fml.wt`, `shape_iff_reachable`, `wt_iff_reachable`, `initStorage_wt`; `Problem.text` in solkey's syntax. |
 | `Calculus/Spec.lean` | Specifications compiled to dynamic logic as solkey's `SpecCompiler` does; `spec[C]{f}`, `sol_spec`. |
 | `Calculus/Notation.lean` | `dl[C]{ … }` and `dl!{ … }`: concrete formulas read against a contract; `dl![m]{ … }`, `⟨[ ]⟩` at a modality `m`; a Lean formula where a formula stands; `Γ ⟹ φ` lines; `st!{ … }`, `pt!{ … }` for a storage term and a path. |
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so the kernel re-checks a computed goal. |
 | `Calculus/Chains.lean` | Derivations as values: `~>`, `~*>`, chain terms `A ~[r]~> B ~*> C …` (`Fml.Via`), `sol_chain`, `#derivation`; lines at a modality `m` over a postcondition `φ : Post C`; rewrite links (`~[sequentialToParallel]~>`, `~[findOnSave]~>`), proved over `m` by `cases m` where a merge compares modalities. |
 | `Calculus/Sequents.lean` | `sequent!{ Γ ⟹ φ }`: the goals of a `⊢` walk (`Proves`) read back, for checked `show` lines; a chain under a context (`Fml.Steps.valid_in`). |
-| `Calculus/ProofTree.lean` | solkey's proof tree of a goal `Γ ⊢ φ` (`ProofTree.build`, `Tree.rows`, `Tree.toJson`); `sol_derive?`, the walk it is, and `sol_chain?`, a derivation as its `calc`. |
+| `Calculus/ProofTree.lean` | solkey's proof tree of a goal `Γ ⊢ φ` (`ProofTree.build`, `Tree.rows`, `Tree.toJson`), with KeY's rule names and branch labels (`branchLabels`); `sol_derive?`, the walk it is, and `sol_chain?`, a derivation as its `calc`. |
 | `Calculus/UpdateRules.lean` | KeY's update simplification as `UpdRule`s (`dl_schema{ {u}{u2}φ }`), and the semantics of the update constructors. |
 | `Calculus/StateParts.lean` | Readings compared where a write looks (`Srt.AgreePart`: a storage by its storage, a memory by its heap): `{memory := M}` and `{L ‖ storage := s}` substituted into an update's right-hand sides, memory reads included (`Tm.withMem`, `Tm.substSt`: an index check or push slot becomes `p[i]@s`, `p[p.length]@s`), and the two merges' soundness. |
 | `Calculus/LastLine.lean` | `#last_line chain`: the chain ends at a last line — no program left, one parallel update in front of each goal, no rewrite a chain takes still applies (every one `~=>` tries but `simplifyUpdate`, under either modality); silent when it does, else one error with what is left and the rewrite that goes on. |

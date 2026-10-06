@@ -27,8 +27,10 @@ local instance : InContract := ⟨StandardExample⟩
 /-! ## The tree
 
 `a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1`: a run of steps, one
-flat branch, then `requireSimple`'s three goals, each a sub-branch labelled
-with its case name. -/
+flat branch, then `requireSimple`'s goals, each a sub-branch labelled as
+solkey labels it ("Holds", "Reverts"); the diamond owes a third, `cov`, that
+one of the conditions holds.  `x == 1` is `binopAssignment` at `==`, which
+prints as KeY's `boolEqualityAssignment`. -/
 
 /--
 info: 0: impRight
@@ -36,12 +38,12 @@ info: 0: impRight
 2: localValueAssign
 3: requireConditionCapture
 4: localValueDeclInitDrop
-5: binopAssignment
+5: boolEqualityAssignment
 6: requireSimple
-  [thn]
+  [Holds]
     7: emptyModality
     8: Closed goal
-  [els]
+  [Reverts]
     9: revertDiamond
     10: Closed goal
   [cov]
@@ -74,7 +76,7 @@ sequent:
   dl{ true ≐ true ⟹ [ x = 2; ] ¬x = 0 }
 rule: localValueAssign
 state: inner
-branch: thn
+branch: if se true
 parent: 0
 children: [2]
 tactics: apply update .localValueAssign
@@ -83,7 +85,7 @@ tactics: apply update .localValueAssign
 #proof_node 1 dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
 
 /--
-info: {"stats": {"nodes": 8, "branches": 3},
+info: {"stats": {"nodes": 7, "branches": 2},
  "sequents":
  ["dl{ ⟹ [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }",
   "dl{ true ≐ true ⟹ [ x = 2; ] ¬x = 0 }",
@@ -91,22 +93,77 @@ info: {"stats": {"nodes": 8, "branches": 3},
   "dl{ true ≐ true, { x := 2 } ⟹ ¬x = 0 }",
   "dl{ true ≐ false ⟹ [ x = 1; ] ¬x = 0 }",
   "dl{ true ≐ false, { x := 1 } ⟹ [ ] ¬x = 0 }",
-  "dl{ true ≐ false, { x := 1 } ⟹ ¬x = 0 }",
-  "dl{ ⟹ true }"],
+  "dl{ true ≐ false, { x := 1 } ⟹ ¬x = 0 }"],
  "openGoalCount": 0,
  "nodes":
  [[0, -1, "ifElseSplit", null, "inner"],
-  [1, 0, "localValueAssign", "thn", "inner"],
+  [1, 0, "localValueAssign", "if se true", "inner"],
   [2, 1, "emptyModality", null, "inner"],
   [3, 2, "Closed goal", null, "closed"],
-  [4, 0, "localValueAssign", "els", "inner"],
+  [4, 0, "localValueAssign", "if se false", "inner"],
   [5, 4, "emptyModality", null, "inner"],
-  [6, 5, "Closed goal", null, "closed"],
-  [7, 0, "Closed goal", "cov", "closed"]],
+  [6, 5, "Closed goal", null, "closed"]],
  "closed": true}
 -/
 #guard_msgs in
 #proof_tree_json dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
+
+/-! Under the box a split has KeY's two goals (`Proves.splitBox`): no `cov`. -/
+
+/--
+info: 0: impRight
+1: localValueDeclInitDrop
+2: localValueAssign
+3: requireConditionCapture
+4: localValueDeclInitDrop
+5: boolEqualityAssignment
+6: requireSimple
+  [Holds]
+    7: emptyModality
+    8: Closed goal
+  [Reverts]
+    9: revertBox
+    10: Closed goal
+closed: 0 open goal(s), 11 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ a == 1 → [ uint x = a; require(x == 1); ] x == 1 }
+
+/--
+info: Try this:
+  apply splitBox .ifElseSplit
+    case thn =>
+      apply update .localValueAssign
+      apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    case els =>
+      apply update .localValueAssign
+      apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
+  sol_derive?
+
+/-- The suggestion replayed. -/
+example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
+  apply splitBox .ifElseSplit
+  case thn =>
+    apply update .localValueAssign
+    apply emptyModality
+    refine close ?_
+    sol_symex
+    sol_close
+  case els =>
+    apply update .localValueAssign
+    apply emptyModality
+    refine close ?_
+    sol_symex
+    sol_close
 
 /-! ## `sol_derive?`: the walk
 
@@ -114,7 +171,7 @@ The suggestion is the walk `ApplySteps.guardedCopy` writes by hand. -/
 
 /--
 info: Try this:
-  apply intro
+  apply impRight
     apply unfold .localValueDeclInitDrop
     apply update .localValueAssign
     apply unfold .requireConditionCapture
@@ -122,7 +179,7 @@ info: Try this:
     apply update .binopAssignment
     apply split .requireSimple
     case thn =>
-      apply empty
+      apply emptyModality
       refine close ?_
       sol_symex
       sol_close
@@ -151,7 +208,7 @@ info: Try this:
     apply update .transferNoCallbackBox
     apply unfold .localValueDeclInitDrop
     apply update .storageFieldReadFind
-    apply empty
+    apply emptyModality
     refine close ?_
     sol_symex
     sol_close
@@ -409,12 +466,12 @@ info: 0: impRight
 2: localValueAssign
 3: assertConditionCapture
 4: localValueDeclInitDrop
-5: binopAssignment
+5: boolEqualityAssignment
 6: assertSimple
-  [thn]
+  [Holds]
     7: emptyModality
     8: Closed goal
-  [els]
+  [Violated]
     9: Closed goal
 closed: 0 open goal(s), 10 node(s), 2 branch(es)
 -/
@@ -423,7 +480,7 @@ closed: 0 open goal(s), 10 node(s), 2 branch(es)
 
 /--
 info: Try this:
-  apply intro
+  apply impRight
     apply unfold .localValueDeclInitDrop
     apply update .localValueAssign
     apply unfold .assertConditionCapture
@@ -431,7 +488,7 @@ info: Try this:
     apply update .binopAssignment
     apply Proves.check .assertSimple
     case thn =>
-      apply empty
+      apply emptyModality
       refine close ?_
       sol_symex
       sol_close

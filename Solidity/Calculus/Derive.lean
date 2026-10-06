@@ -76,9 +76,17 @@ def allRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)
       | none => none
     | none => none
 
+/-- Whether a split's third goal, `Γ ⟹ true` under the box, is left out:
+where `Proves.closeTrue` proves it, as `Proves.splitBox` leaves it out. -/
+def coverFree (m : Modality) (Γ : List (Hyp C)) : Bool :=
+  match m with
+  | .box => Hyp.boxOnly Γ && (Hyp.wrap Γ .tt).modalFree
+  | .diamond => false
+
 /-- The goals of a rule's premise, fired on `⟨[ s; ω ]⟩ ψ` in the context `Γ`,
 handed to `r` with the budget `b`: the goals of `Proves.updateRule`,
-`unfoldRule`, `splitRule` (`thn`, `els`, `cov`), `checkRule` (`thn`, `els`),
+`unfoldRule`, `splitRule` (`thn`, `els`, and `cov` unless `coverFree`: KeY's
+two goals under the box, `splitBoxRule`), `checkRule` (`thn`, `els`),
 `doneRule`, `branchesRule` (one per outcome). -/
 def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)) (b : Nat)
     (Γ : List (Hyp C)) (m : Modality) (ω : Prog C) (ψ : Fml C) :
@@ -86,8 +94,8 @@ def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × 
   | .update U => r b (Γ ++ [.upd m U]) (.modal m ω ψ)
   | .unfold P => r b Γ (.modal m (P ++ ω) ψ)
   | .split c c' P Q =>
-    allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ),
-      (Γ, Premise.cover m c c')]
+    allRes r b ([(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ)] ++
+      bif coverFree m Γ then [] else [(Γ, Premise.cover m c c')])
   | .check c P => allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ, c)]
   | .done d => r b Γ ((Premise.done d).fml m ω ψ)
   | .branches bs => allRes r b (bs.map fun o => (Γ, .alls o.1 (.modal m (o.2 ++ ω) ψ)))
@@ -707,6 +715,15 @@ theorem synClose_sound {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = tr
   rw [Decide.Fml.toL_holds _ (Decide.Rel.empty σ) hf, ← Decide.LFml.elim_holds σ]
   exact Decide.LFml.close_holds hL hs
 
+/-- The third goal a split leaves out (`coverFree`) is `Proves.closeTrue`'s. -/
+theorem cover_of_coverFree {m : Modality} {Γ : List (Hyp C)} {c c' : Fml C}
+    (h : coverFree m Γ = true) : Proves .all Γ (Premise.cover m c c') := by
+  cases m with
+  | box =>
+    simp only [coverFree, Bool.and_eq_true] at h
+    exact Proves.closeTrue h.1 h.2
+  | diamond => cases h
+
 section
 variable {r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)}
   (hr : ∀ b Γ φ ls b', r b Γ φ = some (ls, b') → (∀ l ∈ ls, Proves .all l.1 l.2) →
@@ -740,8 +757,13 @@ theorem premiseRes_sound {b : Nat} {Γ : List (Hyp C)} {m : Modality} {s : Stmt 
   | unfold P => exact Proves.unfoldRule d (hr _ _ _ _ _ h hl)
   | split c c' P Q =>
     have hg := allRes_sound hr h hl
-    exact Proves.splitRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
-      (hg _ (.tail _ (.tail _ (.head _))))
+    refine Proves.splitRule d (hg _ (List.mem_append_left _ (.head _)))
+      (hg _ (List.mem_append_left _ (.tail _ (.head _)))) ?_
+    cases hc : coverFree m Γ with
+    | true => exact cover_of_coverFree hc
+    | false =>
+      rw [hc] at hg
+      exact hg _ (List.mem_append_right _ (.head _))
   | check c P =>
     have hg := allRes_sound hr h hl
     exact Proves.checkRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))

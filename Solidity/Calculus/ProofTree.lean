@@ -1,4 +1,5 @@
 import Solidity.Calculus.Sequents
+import Solidity.Calculus.RuleShapes
 
 /-!
 # The proof tree, and the tactics that write a proof out: `sol_derive?`, `sol_chain?`
@@ -27,11 +28,17 @@ proof term the tree's tactics build.
 * `sol_chain?` proves a derivation `φ ~*> ψ` as `sol_chain` does and suggests
   it as a `calc`, every line written and every step named, `~[r]~>`.
 
-The branch labels are the goals' case names (`thn`, `els`, `cov` of
-`Proves.split`), where solkey prints the taclet's
-(`"if se true"`): they are what the suggested walk names.  The commands that
-print the tree (`#proof_tree`, `#proof_node`, `#proof_tree_json`) are in
-`Tools/ProofTree.lean`.
+A node prints as solkey's: a rule of `⊢` under KeY's name (`impRight`,
+`allRight`, `emptyModality`), a taclet of an operator family as KeY's taclet
+at its operator (`additionAssignment` for `binopAssignment`,
+`RuleShapes.keyTacletAt`).  A branch is labelled as the taclet labels it
+(`"if se true"`, `"Holds"`, `"Reverts"`, `"Violated"`, a `try`'s four
+outcomes: `branchLabels`); the suggested walk names the goals by their case
+names (`thn`, `els`, `cov` of `Proves.split`).  Under the box a split has
+KeY's two goals (`Proves.splitBox`); the third, `cov`, is left only where
+`Proves.closeTrue` does not prove it, and under the diamond.  The commands
+that print the tree (`#proof_tree`, `#proof_node`, `#proof_tree_json`) are
+in `Tools/ProofTree.lean`.
 -/
 
 namespace Solidity
@@ -99,6 +106,25 @@ def closed (t : Tree) : Bool := t.openGoals.isEmpty
 
 /-! ## solkey's rows -/
 
+/-- solkey's labels of a taclet's goals, in order: `thn` and `els` of a split
+or a check, the outcomes of `branches`. -/
+def branchLabels : List (String × List String) := [
+  ("ifElseSplit", ["if se true", "if se false"]),
+  ("requireSimple", ["Holds", "Reverts"]),
+  ("assertSimple", ["Holds", "Violated"]),
+  ("tryCallNoCallbackBox",
+    ["call succeeded", "Error caught", "Panic caught", "other failure caught"])]
+
+/-- The label of `c`, the goal `i` of the node `p`: solkey's, by its case
+name (`thn`, `els`) or, for an outcome with none, its place; else its case
+name (`cov`, which solkey does not have). -/
+def branchLabel (p : Tree) (i : Nat) (c : Tree) : Option String :=
+  let idx := match c.label with
+    | some l => if l == `thn then some 0 else if l == `els then some 1 else none
+    | none => if p.children.size > 1 then some i else none
+  let solkey := do (← (branchLabels.lookup p.name))[← idx]?
+  solkey <|> c.label.map (·.toString)
+
 /-- A row of solkey's `ProofSession.tree()`: the node's serial number (in
 depth-first order, as KeY numbers them), its parent's, its name, the label
 of the branch it starts, and its state; with the node's goal. -/
@@ -110,14 +136,17 @@ structure Row where
   state : String
   node : Tree
 
-partial def rowsAux (parent : Option Nat) (t : Tree) : StateM (Array Row) Unit := do
+partial def rowsAux (parent : Option Nat) (label : Option String) (t : Tree) :
+    StateM (Array Row) Unit := do
   let serial := (← get).size
-  modify (·.push { serial, parent, name := t.name, branchLabel := t.label.map (·.toString),
-                   state := t.state, node := t })
-  for c in t.children do rowsAux (some serial) c
+  modify (·.push { serial, parent, name := t.name, branchLabel := label, state := t.state,
+                   node := t })
+  for h : i in [0:t.children.size] do
+    let c := t.children[i]
+    rowsAux (some serial) (branchLabel t i c) c
 
 /-- The rows, in depth-first order: row `n` is the node of serial `n`. -/
-def rows (t : Tree) : Array Row := (rowsAux none t |>.run #[]).2
+def rows (t : Tree) : Array Row := (rowsAux none none t |>.run #[]).2
 
 /-- The goal of a node, printed as its sequent `dl{ Γ ⟹ φ }`. -/
 def ppSequent (t : Tree) : MetaM Std.Format :=
@@ -165,7 +194,7 @@ partial def displayAux (t : Tree) (ind : Nat) : StateT Nat MetaM (Array MessageD
   | cs =>
     for h : i in [0:cs.size] do
       let c := cs[i]
-      let l := (c.label.map (·.toString)).getD s!"#{i + 1}"
+      let l := (branchLabel t i c).getD s!"#{i + 1}"
       out := out.push m!"{pad}  [{l}]"
       out := out ++ (← displayAux c (ind + 4))
   return out
@@ -227,6 +256,23 @@ def premiseOf (C k m s d : Expr) : MetaM (Option Lean.Name) := do
   let p ← whnf (← mkAppM ``Step.premise #[mkAppN (mkConst ``Stmt.step) #[C, k, m, s]])
   return p.getAppFn.constName?
 
+/-- The name a node prints for the constructor `c`, fired as the derivation
+`d`: KeY's taclet at the operator of `d`, for a row of an operator family
+(`RuleShapes.keyTacletAt`); else `c`'s own. -/
+def keyName (c : Lean.Name) (d : Expr) : MetaM Lean.Name := do
+  let own := Chain.lastName c
+  if (RuleShapes.operatorOrder.lookup c).isNone then return own
+  let d := (Chain.unwrapRule? d).getD d
+  for a in d.getAppArgs do
+    let found ← try
+        let ty ← whnfR (← inferType a)
+        if ty.isConstOf ``BinOp || ty.isConstOf ``UnOp || ty.isConstOf ``IncDec then
+          pure ((← whnf a).constName?.bind (RuleShapes.keyTacletAt c))
+        else pure none
+      catch _ => pure none
+    if let some t := found then return Lean.Name.mkSimple t.name
+  return own
+
 /-- One way to take the step at a goal: the rule's name, the tactics, and
 whether the goal a `branches` rule leaves still has to be split. -/
 structure Move where
@@ -242,15 +288,17 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
   let_expr Proves C _ Γ φ0 := ty | return #[]
   let φ ← whnf φ0
   match_expr φ with
-  | Fml.imp _ _ _ => return #[{ name := `impRight, tacs := #[← `(tactic| apply $(← short ``Proves.intro))] }]
+  | Fml.imp _ _ _ =>
+    return #[{ name := `impRight, tacs := #[← `(tactic| apply $(← short ``Proves.impRight))] }]
   | Fml.all _ _ _ _ =>
-    return #[{ name := `allRight, tacs := #[← `(tactic| apply $(← short ``Proves.allIntro))] }]
+    return #[{ name := `allRight, tacs := #[← `(tactic| apply $(← short ``Proves.allRight))] }]
   | Fml.upd _ _ _ _ =>
     return #[{ name := `updIntro, tacs := #[← `(tactic| apply $(← short ``Proves.updIntro))] }]
   | Fml.modal _ m P _ =>
     let P ← whnf P
     if P.isAppOf ``List.nil then
-      return #[{ name := `emptyModality, tacs := #[← `(tactic| apply $(← short ``Proves.empty))] }]
+      let em ← short ``Proves.emptyModality
+      return #[{ name := `emptyModality, tacs := #[← `(tactic| apply $em)] }]
     let_expr List.cons _ s _ := P | return #[]
     let k := mkAppN (mkConst ``Hyp.fresh) #[C, Γ, φ0]
     let (d, c?) ← Chain.stepTaclet C k m s
@@ -262,9 +310,17 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let generic ← `(tactic| apply $(← short generic) ($st _ _ _).rule)
     let fallback : Move :=
       { name := (c?.map Chain.lastName).getD `taclet, branches := branches, tacs := #[generic] }
-    let some c := c? | return #[fallback]
+    -- under the box, a split with KeY's two goals first (`splitBox`), where it applies
+    let box := premise == ``Premise.split && (← whnf m).isConstOf ``Modality.box
+    let boxRule ← `(tactic| apply $(← short ``Proves.splitBoxRule) ($st _ _ _).rule)
+    let some c := c? |
+      return (if box then #[{ fallback with tacs := #[boxRule] }] else #[]) ++ #[fallback]
+    let name ← keyName c d
     let named ← `(tactic| apply $(← short ctor) $(dotIdent (Chain.lastName c)))
-    return #[{ name := Chain.lastName c, branches := branches, tacs := #[named] }, fallback]
+    let boxNamed ← `(tactic| apply $(← short ``Proves.splitBox) $(dotIdent (Chain.lastName c)))
+    let fallback := { fallback with name }
+    let first := if box then #[{ name, branches, tacs := #[boxNamed] : Move }] else #[]
+    return first ++ #[{ name, branches := branches, tacs := #[named] }, fallback]
   | _ => return #[]
 
 /-- Run `tacs` on the goal `g`, errors as errors; the goals left. -/

@@ -218,6 +218,44 @@ theorem splitRule {c c' : Fml C} {P Q : Prog C}
   · exact .split d thn els cov
   · cases d
 
+/-! ### A box split in KeY's two branches
+
+Under the box, `Proves.split`'s third goal is `Γ ⟹ true` (`Premise.cover`),
+which KeY's `ifElseSplit` and `requireSimple` do not have.  `closeTrue`
+proves it behind a context with no diamond update and no modality, so
+`splitBox` is the split with KeY's two goals.  The strategy splits so under
+the box (`sol_derive`, `Derive.residue`, the proof tree), and falls back to
+`split` where `closeTrue` does not apply. -/
+
+/-- `closeTrue`: `true` holds behind a context with no diamond update
+(`Hyp.boxOnly`) and no modality. -/
+theorem closeTrue {R : RuleSet} {Γ : List (Hyp C)}
+    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide)
+    (hm : (Hyp.wrap Γ .tt).modalFree = true := by first | rfl | decide) :
+    dl{ ..Γ ⟹[R] true } :=
+  .close (Hyp.valid_wrap hb fun _ => trivial) hm
+
+/-- `split` under the box, with KeY's two goals: the third is `closeTrue`'s. -/
+theorem splitBox {R : RuleSet} {Γ : List (Hyp C)} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+    {c c' : Fml C} {P Q : Prog C}
+    (d : Taclet C (Hyp.fresh Γ dl_schema{ [ s; ..ω ] φ }) .box s (.split c c' P Q))
+    (thn : dl{ ..Γ, c ⟹[R] [ P; ..ω ] φ })
+    (els : dl{ ..Γ, c' ⟹[R] [ Q; ..ω ] φ })
+    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide)
+    (hm : (Hyp.wrap Γ .tt).modalFree = true := by first | rfl | decide) :
+    dl{ ..Γ ⟹[R] [ s; ..ω ] φ } :=
+  .split d thn els (closeTrue hb hm)
+
+/-- `splitBox` by whichever rule `Rule` names. -/
+theorem splitBoxRule {c c' : Fml C} {P Q : Prog C}
+    (d : Rule C (Hyp.fresh Γ (.modal .box (s :: ω) φ)) .box s (.split c c' P Q))
+    (thn : Proves .all (Γ ++ [.pre c]) (.modal .box (P ++ ω) φ))
+    (els : Proves .all (Γ ++ [.pre c']) (.modal .box (Q ++ ω) φ))
+    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide)
+    (hm : (Hyp.wrap Γ .tt).modalFree = true := by first | rfl | decide) :
+    Proves .all Γ (.modal .box (s :: ω) φ) :=
+  splitRule d thn els (closeTrue hb hm)
+
 /-- `check` by whichever rule `Rule` names. -/
 theorem checkRule {c : Fml C} {P : Prog C}
     (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.check c P))
@@ -247,13 +285,15 @@ end Proves
 
 /-- `sol_derive`: run the strategy as a derivation.  On every goal it drops
 an empty modality, fires the rule `Stmt.step` picks (as `update`, `unfold`,
-`split`, `check`, `done` or `branches`), or moves a precondition, a quantified local
+`split`, `check`, `done` or `branches`; a split under the box as
+`splitBox`, with KeY's two goals, where it applies), or moves a precondition, a quantified local
 or an update in front of the formula into the context, until no goal has a modality left; what
 is left is for `close`. -/
 macro "sol_derive" : tactic => `(tactic| repeat' (first
   | apply Proves.empty
   | apply Proves.updateRule (Stmt.step _ _ _).rule
   | apply Proves.unfoldRule (Stmt.step _ _ _).rule
+  | apply Proves.splitBoxRule (Stmt.step _ _ _).rule
   | apply Proves.splitRule (Stmt.step _ _ _).rule
   | apply Proves.checkRule (Stmt.step _ _ _).rule
   | apply Proves.doneRule (Stmt.step _ _ _).rule

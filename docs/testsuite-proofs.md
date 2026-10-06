@@ -206,6 +206,19 @@ in both orders (the second number with `sol_derive` first). The replay
 gains 5–6%, inside the noise of the 12–13 s its leaves take, so the
 theorem keeps `sol_derive`.
 
+**A box split in KeY's two goals** (`Proves.splitBox`, 2026-10-06). Under
+the box `Derive.residue` leaves out a split's third goal `Γ ⟹ true` where
+`Proves.closeTrue` proves it (`Derive.coverFree`), instead of handing it to
+the closer. Whole-file wall time with `Elab.async false`, two runs each:
+
+| File | before | after |
+|---|---:|---:|
+| `Examples/Benchmark/ERC20.lean` | 6554, 6646 ms | 6642, 6653 ms |
+| `TestSuite/Derived1.lean` | 7394, 7371 ms | 7317, 7313 ms |
+
+Both inside the noise (+0.7%, −1%), so the strategy, the walk and the proof
+tree all split so.
+
 No heartbeat override was added. The aux-lemma kernel check stays far below
 the limit, at about 0.5–5k heartbeats for a whole obligation.
 

@@ -53,6 +53,7 @@ goal's update level and reads what it adds there: nothing to port.
 | `emptyModality` | `Proves.empty` (also `Proves.emptyModality`) | ⊢ rule | `⟨[ ]⟩ φ ⇝ φ` under either modality, as KeY's `#allmodal`; the proof tree prints the step under this name (`Calculus/ProofTree.lean`) |
 | `impRight` (`propRule.key`) | `Proves.intro` (also `Proves.impRight`) | ⊢ rule | `⟹ a → φ` becomes `a ⟹ φ` |
 | `allRight` (`firstOrderRules.key`) | `Proves.allIntro` (also `Proves.allRight`) | ⊢ rule | `⟹ ∀ T x; φ` becomes `∀ T x ⟹ φ`: the local holds any value of `T`, KeY's skolem constant (`Hyp.all`) |
+| `closeTrue` (`propRule.key`) | `Proves.closeTrue` | ⊢ rule (derived) | `⟹ true`, behind a context with no diamond update and no modality (`Hyp.boxOnly`); the third goal of a box split, which `Proves.splitBox` discharges with it |
 | `blockEmpty` | — | unclaimed | a program is a list of statements with branch bodies inlined: no nested block to erase, no `{} ; rest` to find |
 | `revertDiamond` | `revertDiamond` | same | closes to `false`: a reverted run satisfies no diamond formula |
 | `revertBox` | `revertBox` | same | closes to `true`. These two are the **only** rules that tell the modalities apart: the modality is a parameter of `Taclet`, so every other rule fires under either |
@@ -205,7 +206,10 @@ storage ones.
 
 One constructor per **shape**, not per operator: `op : BinOp` is a free
 variable, so an instance is `binopAssignment (op := .add)`. The comparison and
-boolean operators share the arithmetic constructors.
+boolean operators share the arithmetic constructors. The proof tree prints a
+node of an operator family as KeY's taclet at its operator
+(`RuleShapes.operatorOrder`, `keyTacletAt`): `binopAssignment` at `==` is
+`boolEqualityAssignment`.
 
 | KeY taclets | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
@@ -267,7 +271,7 @@ receiver kind, Lean does not.
 | `requireSimple` | same | find same | reshaped: `require(se); ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩`. KeY writes each goal as a disjunction, "Holds" `se = FALSE \| ⟨[ ]⟩ post` and "Reverts" `se = TRUE \| ⟨[ revert(); ]⟩ post`; for a `bool` each is the implication Lean's `.split` premise states with the condition in the context. Under the diamond `Proves.split` also owes the cover (`Premise.cover`), which KeY's disjunctions need not |
 | `ifElseUnfold` | same | same | also claims `ifUnfold` |
 | `ifUnfold` | `ifElseUnfold` | merged | `Stmt.ite` always has both branches (an absent `else` is `[]`) |
-| `ifElseSplit` | same | same | `if (se) thenStm else elseStm; ⇝ se = true ⟹ ⟨[ thenStm ]⟩ ; se = false ⟹ ⟨[ elseStm ]⟩`: a `.split` premise is the two-goal shape. Also claims `ifSplit` |
+| `ifElseSplit` | same | same | `if (se) thenStm else elseStm; ⇝ se = true ⟹ ⟨[ thenStm ]⟩ ; se = false ⟹ ⟨[ elseStm ]⟩`: a `.split` premise is the two-goal shape. Under the box the derivation has KeY's two goals, "if se true" and "if se false" (`Proves.splitBox`); under the diamond `Proves.split` also owes the cover. Also claims `ifSplit` |
 | `ifSplit` | `ifElseSplit` | merged | |
 | `ifTrue`, `ifFalse`, `ifElseTrue`, `ifElseFalse`, `ifElseNegated` | — | unclaimed | `concrete_solidity` strategy shortcuts. A literal is simple, so `ifElseSplit` applies (one goal assumes `true = false`); `!se` is not simple, so `ifElseUnfold` captures it. The table has no strategy |
 
