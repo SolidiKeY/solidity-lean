@@ -387,37 +387,37 @@ theorem CallbackTaclet.sound_branches {I : Fml C} {s : Stmt C} {xs : List (PrimT
 inductive ProvesC (I : Invariant C) : List (Hyp C) → Fml C → Prop
   /-- A goal with no `transfer` left is a goal of the calculus: there the
   two readings agree. -/
-  | plain {Γ : List (Hyp C)} {φ : Fml C} (h : Proves .all Γ φ)
-      (hφ : (Hyp.wrap Γ φ).hasTransfer = false) : ProvesC I Γ φ
+  | plain {Γ : List (Hyp C)} {φ : Fml C} (h : dl{ ..Γ ⟹ φ })
+      (hφ : (Hyp.wrap Γ φ).hasTransfer = false) : dl{ ..Γ ⟹ᶜ[I] φ }
   /-- `impRight`. -/
-  | intro {Γ : List (Hyp C)} {a φ : Fml C} (h : ProvesC I (Γ ++ [.pre a]) φ) :
-      ProvesC I Γ (.imp a φ)
+  | intro {Γ : List (Hyp C)} {a φ : Fml C} (h : dl{ ..Γ, a ⟹ᶜ[I] φ }) :
+      dl{ ..Γ ⟹ᶜ[I] a → φ }
   /-- A taclet that produces an update, on a statement that runs no other
   and pays nothing. -/
   | update {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {U : Upd C}
-      (d : Taclet C (Hyp.fresh Γ (.and I.fml (.modal m (s :: ω) φ))) m s (.update U))
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ‹I.fml› ∧ ⟨[ s; ..ω ]⟩ φ }) m s (.update U))
       (hs : s.forks = false)
-      (h : ProvesC I (Γ ++ [.upd m U]) (.modal m ω φ)) : ProvesC I Γ (.modal m (s :: ω) φ)
+      (h : dl{ ..Γ, {U} ⟹ᶜ[I] ⟨[ ..ω ]⟩ φ }) : dl{ ..Γ ⟹ᶜ[I] ⟨[ s; ..ω ]⟩ φ }
   /-- A taclet that produces statements, on a statement that runs no other
   and pays nothing, when they pay nothing either. -/
   | unfold {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {P : Prog C}
-      (d : Taclet C (Hyp.fresh Γ (.and I.fml (.modal m (s :: ω) φ))) m s (.unfold P))
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ‹I.fml› ∧ ⟨[ s; ..ω ]⟩ φ }) m s (.unfold P))
       (hs : s.forks = false) (hP : Prog.hasTransfer P = false)
-      (h : ProvesC I Γ (.modal m (P ++ ω) φ)) : ProvesC I Γ (.modal m (s :: ω) φ)
+      (h : dl{ ..Γ ⟹ᶜ[I] ⟨[ P; ..ω ]⟩ φ }) : dl{ ..Γ ⟹ᶜ[I] ⟨[ s; ..ω ]⟩ φ }
   /-- `unfold`, by a rule solkey does not have. -/
   | unfoldLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ (.and I.fml (.modal m (s :: ω) φ))) m s (.unfold P))
+      {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ‹I.fml› ∧ ⟨[ s; ..ω ]⟩ φ }) m s (.unfold P))
       (hs : s.forks = false) (hP : Prog.hasTransfer P = false)
-      (h : ProvesC I Γ (.modal m (P ++ ω) φ)) : ProvesC I Γ (.modal m (s :: ω) φ)
+      (h : dl{ ..Γ ⟹ᶜ[I] ⟨[ P; ..ω ]⟩ φ }) : dl{ ..Γ ⟹ᶜ[I] ⟨[ s; ..ω ]⟩ φ }
   /-- **A callback taclet**: the invariant on exit (`{U} I`) and the rest
   resumed after the callback, from any state the callee may leave in which
   the invariant holds (`{U} {havoc} (I → [ ω ] φ)`). -/
   | callback {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {U : Upd C}
       (d : CallbackTaclet C m s (.update U))
-      (exit : ProvesC I Γ (.upd m U I.fml))
+      (exit : dl{ ..Γ ⟹ᶜ[I] {U} ‹I.fml› })
       (resume : ProvesC I (Γ ++ [.upd m U, .havoc, .pre I.fml]) (.modal m ω φ)) :
-      ProvesC I Γ (.modal m (s :: ω) φ)
+      dl{ ..Γ ⟹ᶜ[I] ⟨[ s; ..ω ]⟩ φ }
   /-- **`tryCallWithCallbackBox`**: the invariant where control leaves
   ("invariant on exit"); the call's success, from any state the callee may
   leave in which the invariant holds, for every value of its return data
@@ -426,17 +426,17 @@ inductive ProvesC (I : Invariant C) : List (Hyp C) → Fml C → Prop
   | tryCall {Γ : List (Hyp C)} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {xs : List (PrimTy × Var)} {P : Prog C} {bs : List (List (PrimTy × Var) × Prog C)}
       (d : CallbackTaclet C .box s (.branches ((xs, P) :: bs)))
-      (exit : ProvesC I Γ I.fml)
+      (exit : dl{ ..Γ ⟹ᶜ[I] ‹I.fml› })
       (ok : ProvesC I (Γ ++ [.havoc, .pre I.fml]) (.alls xs (.modal .box (P ++ ω) φ)))
-      (caught : ∀ b ∈ bs, ProvesC I Γ (.alls b.1 (.modal .box (b.2 ++ ω) φ))) :
-      ProvesC I Γ (.modal .box (s :: ω) φ)
+      (caught : ∀ b ∈ bs, dl{ ..Γ ⟹ᶜ[I] ‹.alls b.1 (.modal .box (b.2 ++ ω) φ)› }) :
+      dl{ ..Γ ⟹ᶜ[I] [ s; ..ω ] φ }
   /-- `allRight`. -/
   | allIntro {Γ : List (Hyp C)} {x : Var} {p : PrimTy} {φ : Fml C}
-      (h : ProvesC I (Γ ++ [.all x p]) φ) : ProvesC I Γ (.all x p φ)
+      (h : dl{ ..Γ, ∀ p x ⟹ᶜ[I] φ }) : dl{ ..Γ ⟹ᶜ[I] ‹.all x p φ› }
   /-- Leave the calculus: with no modality left anywhere in the sequent, what
   is left is proved about the callback reading. -/
   | close {Γ : List (Hyp C)} {φ : Fml C} (h : ValidC I (Hyp.wrap Γ φ))
-      (hφ : (Hyp.wrap Γ φ).modalFree = true := by first | rfl | decide) : ProvesC I Γ φ
+      (hφ : (Hyp.wrap Γ φ).modalFree = true := by first | rfl | decide) : dl{ ..Γ ⟹ᶜ[I] φ }
 
 /-- A taclet in a context, its fresh names avoiding the invariant too. -/
 theorem Taclet.avoids_in {I : Fml C} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
@@ -510,5 +510,30 @@ theorem ProvesC.sound {I : Invariant C} {Γ : List (Hyp C)} {φ : Fml C} (h : Pr
 
 /-- A derivation from the empty context proves validity with callbacks. -/
 theorem ProvesC.valid {I : Invariant C} {φ : Fml C} (h : ProvesC I [] φ) : ValidC I φ := h.sound
+
+/-! ## Printing sequents with callbacks -/
+
+section Print
+open Lean Meta PrettyPrinter Delaborator SubExpr
+set_option hygiene false
+
+/-- `ProvesC I Γ φ`: `dl{ Γ ⟹ᶜ[I] φ }`, the context printed as `Proves`'s. -/
+@[delab app.Solidity.ProvesC]
+def delabProvesC : Delab := do
+  unless ← ppOn do failure
+  let e ← getExpr
+  guard (e.getAppNumArgs == 4)
+  let some (rest, hs) ← hypSpine? (e.getArg! 2) | failure
+  let mut out := #[]
+  if let some Γ := rest then out := out.push (← `(dl_hyp| ..$Γ:ident))
+  for h in hs do
+    let some h ← ppHyp? h | failure
+    out := out.push h
+  let φ ← ppFml (e.getArg! 3)
+  guard !(isEscape φ)
+  let I ← withNaryArg 1 delab
+  `(dl{ $[$out],* ⟹ᶜ[$I] $φ:dl_fml })
+
+end Print
 
 end Solidity

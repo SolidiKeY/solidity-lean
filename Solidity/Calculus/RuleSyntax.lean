@@ -22,6 +22,7 @@ pp.sol.dl false` shows the constructors again.
 | `dl[LeanTaclet C k]{ ⟨ s; ⟩ ⇝ p }` | a rule of another judgement, `LeanTaclet C k .diamond s p` |
 | `dl{ p }` | a premise |
 | `dl{ ..Γ, c, {U} ⟹[R] ⟨[ s; ..ω ]⟩ φ }` | the sequent `Proves R (Γ ++ [.pre c] ++ [.upd m U]) (.modal m (s :: ω) φ)` |
+| `dl{ ..Γ, {U} [ ] ⟹ᶜ[I] [ s; ..ω ] φ }` | an update produced under the box; the sequent `ProvesC I Γ φ` with callbacks |
 | `tm{ find(save(s, p, v), q) }` | a term (`Tm`), every name a Lean variable |
 | `⊨ φ` | `Valid φ` |
 | `σ ⊧ φ` | `holds σ φ` |
@@ -181,6 +182,9 @@ syntax:max "⟨" "[ " (sol_stmt "; ")* "]" "⟩ " dl_fml:50 : dl_fml
 /-- `⟨[ s; ..ω ]⟩ φ`: statements in front of the rest `ω` of the program
 (KeY's `c# s #c`), `s :: ω`; a program schema variable `P; ..ω` is `P ++ ω`. -/
 syntax:max "⟨" "[ " (sol_stmt "; ")* ".." term:max " ]" "⟩ " dl_fml:50 : dl_fml
+/-- `[ s; ..ω ] φ`, `⟨ s; ..ω ⟩ φ`: the same at the box, at the diamond. -/
+syntax:max "[ " (sol_stmt "; ")* ".." term:max " ] " dl_fml:50 : dl_fml
+syntax:max "⟨ " (sol_stmt "; ")* ".." term:max " ⟩ " dl_fml:50 : dl_fml
 /-- `⟨[ P ]⟩ φ`: either modality over a program that is a schema variable. -/
 syntax:max "⟨" "[ " sol_block " ]" "⟩ " dl_fml:50 : dl_fml
 /-- A modality over a program that is a schema variable. -/
@@ -244,6 +248,10 @@ syntax dl_branch " ; " sepBy1(dl_branch, " ; ") : dl_premise
 /-- An entry of a sequent's context: an update or a precondition. -/
 declare_syntax_cat dl_hyp (behavior := both)
 syntax dl_upd : dl_hyp
+/-- `{U} [ ]`, `{U} ⟨ ⟩`: an update produced under the box, under the
+diamond (`Hyp.upd .box U`); `{U}` alone is produced under the schema's `m`. -/
+syntax dl_upd " [ " "]" : dl_hyp
+syntax dl_upd " ⟨ " "⟩" : dl_hyp
 syntax (priority := high) "{ " &"havoc" " }" : dl_hyp
 syntax dl_fml : dl_hyp
 /-- `∀ T x`: the local `x` holds any value of `T` (`Hyp.all`), KeY's skolem
@@ -269,6 +277,10 @@ syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ " dl_fml " }" : term
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ₖ " dl_fml " }" : term
 /-- A sequent `Γ ⟹[R] φ` over the rule set `R` (`Proves R Γ φ`). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹[" term "] " dl_fml " }" : term
+/-- A sequent `Γ ⟹ᶜ[I] φ` of the calculus with callbacks, every `transfer`
+calling back into a contract with the invariant `I` (`ProvesC I Γ φ`,
+`Calculus/Callback.lean`). -/
+syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ᶜ[" term "] " dl_fml " }" : term
 /-- A term of the logic (`Tm`), its sort read off its head (`find(…)` a
 value, `save(…)` a storage, `write(…)` a memory, `consr(…)` a path).  Every
 name is a Lean variable of a term sort: `tm{ find(save(st, p, v), q) }`. -/
@@ -1356,6 +1368,8 @@ partial def fmlModality? (either : Lean.Term) : TSyntax `dl_fml → MacroM (Opti
     some <$> `(Modality.diamond)
   | `(dl_fml| [ $[$_:sol_stmt;]* ] $_:dl_fml) | `(dl_fml| [ $_:sol_block ] $_:dl_fml) =>
     some <$> `(Modality.box)
+  | `(dl_fml| ⟨ $[$_:sol_stmt;]* .. $_:term ⟩ $_:dl_fml) => some <$> `(Modality.diamond)
+  | `(dl_fml| [ $[$_:sol_stmt;]* .. $_:term ] $_:dl_fml) => some <$> `(Modality.box)
   | `(dl_fml| ⟨[ $[$_:sol_stmt;]* ]⟩ $_:dl_fml) | `(dl_fml| ⟨[ $[$_:sol_stmt;]* .. $_:term ]⟩ $_:dl_fml)
   | `(dl_fml| ⟨[ $_:sol_block ]⟩ $_:dl_fml) => pure (some either)
   | `(dl_fml| $_:dl_upd $φ:dl_fml) | `(dl_fml| { havoc } $φ:dl_fml) => fmlModality? either φ
@@ -1397,6 +1411,12 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| ⟨[ $[$ss:sol_stmt;]* .. $ω:term ]⟩ $φ:dl_fml) => do
     let (ts, _) ← schemaProg false [] ss
     `(Fml.modal $(schemaIdent "m") $(← progTerm false ts (some ω)) $(← schemaFml φ))
+  | `(dl_fml| ⟨ $[$ss:sol_stmt;]* .. $ω:term ⟩ $φ:dl_fml) => do
+    let (ts, _) ← schemaProg false [] ss
+    `(Fml.modal .diamond $(← progTerm false ts (some ω)) $(← schemaFml φ))
+  | `(dl_fml| [ $[$ss:sol_stmt;]* .. $ω:term ] $φ:dl_fml) => do
+    let (ts, _) ← schemaProg false [] ss
+    `(Fml.modal .box $(← progTerm false ts (some ω)) $(← schemaFml φ))
   | `(dl_fml| ⟨[ $b:sol_block ]⟩ $φ:dl_fml) => do
     `(Fml.modal $(schemaIdent "m") $(← schemaBlock false [] b) $(← schemaFml φ))
   | `(dl_fml| ⟨ $b:sol_block ⟩ $φ:dl_fml) => do
@@ -1589,6 +1609,8 @@ def schemaPrim (T : Ident) : MacroM Lean.Term :=
 
 def schemaHyp : TSyntax `dl_hyp → MacroM Lean.Term
   | `(dl_hyp| { havoc }) => `($(mkIdent `Solidity.Hyp.havoc))
+  | `(dl_hyp| $U:dl_upd [ ]) => do `($(mkIdent `Solidity.Hyp.upd) .box $(← schemaUpd [] U))
+  | `(dl_hyp| $U:dl_upd ⟨ ⟩) => do `($(mkIdent `Solidity.Hyp.upd) .diamond $(← schemaUpd [] U))
   | `(dl_hyp| $U:dl_upd) => do `($(mkIdent `Solidity.Hyp.upd) $(schemaIdent "m") $(← schemaUpd [] U))
   | `(dl_hyp| ∀ $T:ident $x:ident) => do `($(mkIdent `Solidity.Hyp.all) $x $(← schemaPrim T))
   | stx@`(dl_hyp| .. $_:term) => Macro.throwErrorAt stx "`..Γ`, the rest of the context, comes first"
@@ -1615,6 +1637,8 @@ macro_rules
       $(← schemaFml φ))
   | `(dl{ $[$hs:dl_hyp],* ⟹[ $R:term ] $φ:dl_fml }) => do
     `($(mkIdent `Solidity.Proves) $R $(← schemaHyps hs) $(← schemaFml φ))
+  | `(dl{ $[$hs:dl_hyp],* ⟹ᶜ[ $I:term ] $φ:dl_fml }) => do
+    `($(mkIdent `Solidity.ProvesC) $I $(← schemaHyps hs) $(← schemaFml φ))
   | `(tm{ $t:dl_term }) => schemaTerm rawScope (tmSort t) t
   | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTaclet (schemaIdent "m") s p
   | `(dl{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.box)) s p
@@ -2798,8 +2822,12 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
       let some (ss, t) ← ppProgParts? P | escape
       match t with
       | some ω =>
-        if (← fvarName? m).isNone then return ← escape
-        `(dl_fml| ⟨[ $[$ss;]* .. $ω:ident ]⟩ $(← arg φ):dl_fml)
+        if (← fvarName? m).isSome then
+          return ← `(dl_fml| ⟨[ $[$ss;]* .. $ω:ident ]⟩ $(← arg φ):dl_fml)
+        match_expr (← whnf m) with
+        | Modality.diamond => `(dl_fml| ⟨ $[$ss;]* .. $ω:ident ⟩ $(← arg φ):dl_fml)
+        | Modality.box => `(dl_fml| [ $[$ss;]* .. $ω:ident ] $(← arg φ):dl_fml)
+        | _ => escape
       | none =>
         match_expr (← whnf m) with
         | Modality.diamond => `(dl_fml| ⟨ $[$ss;]* ⟩ $(← arg φ):dl_fml)

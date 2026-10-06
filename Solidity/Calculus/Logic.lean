@@ -11,7 +11,11 @@ premise is read as a formula in front of the rest of the program
 (`Premise.fml`), `Premise.sound` says that formula implies the one the rule
 fired on, and `Proves Γ φ` is the calculus as an inductive judgement, in the
 style of PLFA's `Γ ⊢ M ⦂ A`: a theorem is stated as `⊢ φ` and proved by a
-derivation built with `apply`.
+derivation built with `apply`.  Each constructor is written as KeY writes a
+sequent rule, its premises above its conclusion:
+`dl{ ..Γ, c ⟹[R] ⟨[ P; ..ω ]⟩ φ }` is `Proves R (Γ ++ [.pre c]) (.modal m (P ++ ω) φ)`
+(`RuleSyntax.lean`), and the rules KeY names otherwise have its names too
+(`Proves.impRight` for `intro`).
 
 The context `Γ` holds what sits in front of the current formula: the
 preconditions and the updates generated so far.  A rule that produces an
@@ -58,8 +62,8 @@ variable {C : Contract}
 holds.  A box branch owes nothing. -/
 def Premise.cover (m : Modality) (c c' : Fml C) : Fml C :=
   match m with
-  | .diamond => .not (.and (.not c) (.not c'))
-  | .box => .tt
+  | .diamond => dl_schema{ c ∨ c' }
+  | .box => dl_schema{ true }
 
 /-- The cover as a branch's premise formula carries it, one formula under
 either modality: `⟨[ revert(); ]⟩ false ∨ c ∨ c'`.  A halted run satisfies
@@ -67,7 +71,7 @@ either modality: `⟨[ revert(); ]⟩ false ∨ c ∨ c'`.  A halted run satisfi
 holds exactly where `Premise.cover m c c'` does (`Premise.coverFml_holds`).
 It is no goal of the strategy: under its negation it is not active. -/
 def Premise.coverFml (m : Modality) (c c' : Fml C) : Fml C :=
-  .not (.and (.not (.modal m [.revert] .ff)) (.not (.not (.and (.not c) (.not c')))))
+  dl_schema{ ⟨[ revert(); ]⟩ ‹.ff› ∨ c ∨ c' }
 
 /-- The premise's cover says what the third goal of a branch says. -/
 theorem Premise.coverFml_holds (m : Modality) (c c' : Fml C) (σ : State) :
@@ -80,13 +84,12 @@ theorem Premise.coverFml_holds (m : Modality) (c c' : Fml C) (σ : State) :
 /-- The premise as one formula, under the modality `m` the rule found, in
 front of the rest `ω` of the program and the postcondition `φ`. -/
 def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
-  | .update U, ω, φ => .upd m U (.modal m ω φ)
-  | .unfold P, ω, φ => .modal m (P ++ ω) φ
+  | .update U, ω, φ => dl_schema{ {U} ⟨[ ..ω ]⟩ φ }
+  | .unfold P, ω, φ => dl_schema{ ⟨[ P; ..ω ]⟩ φ }
   | .split c c' P Q, ω, φ =>
-    .and (.imp c (.modal m (P ++ ω) φ))
-      (.and (.imp c' (.modal m (Q ++ ω) φ)) (Premise.coverFml m c c'))
-  | .check c P, ω, φ => .and (.imp c (.modal m (P ++ ω) φ)) c
-  | .done true, _, _ => .tt
+    dl_schema{ (c → ⟨[ P; ..ω ]⟩ φ) ∧ (c' → ⟨[ Q; ..ω ]⟩ φ) ∧ ‹Premise.coverFml m c c'› }
+  | .check c P, ω, φ => dl_schema{ (c → ⟨[ P; ..ω ]⟩ φ) ∧ c }
+  | .done true, _, _ => dl_schema{ true }
   | .done false, _, _ => .ff
   | .branches bs, ω, φ => .conj (bs.map fun b => .alls b.1 (.modal m (b.2 ++ ω) φ))
 
@@ -268,9 +271,9 @@ inductive Hyp (C : Contract) where
 /-- Put the context back in front of a formula. -/
 def Hyp.wrap : List (Hyp C) → Fml C → Fml C
   | [], φ => φ
-  | .pre a :: Γ, φ => .imp a (Hyp.wrap Γ φ)
-  | .upd m U :: Γ, φ => .upd m U (Hyp.wrap Γ φ)
-  | .havoc :: Γ, φ => .havoc (Hyp.wrap Γ φ)
+  | .pre a :: Γ, φ => dl_schema{ a → ‹Hyp.wrap Γ φ› }
+  | .upd m U :: Γ, φ => dl_schema{ {U} ‹Hyp.wrap Γ φ› }
+  | .havoc :: Γ, φ => dl_schema{ { havoc } ‹Hyp.wrap Γ φ› }
   | .all x p :: Γ, φ => .all x p (Hyp.wrap Γ φ)
 
 /-- A Theory rewrite of the context (`Fml.rwEq`): in every precondition; an
@@ -309,118 +312,118 @@ inductive RuleSet where
 rules alone do. -/
 inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   /-- `impRight`: the precondition moves into the context. -/
-  | intro {R : RuleSet} {Γ : List (Hyp C)} {a φ : Fml C} (h : Proves R (Γ ++ [.pre a]) φ) :
-      Proves R Γ (.imp a φ)
+  | intro {R : RuleSet} {Γ : List (Hyp C)} {a φ : Fml C} (h : dl{ ..Γ, a ⟹[R] φ }) :
+      dl{ ..Γ ⟹[R] a → φ }
   /-- A taclet that produces an update: the update joins the context. -/
   | update {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {U : Upd C}
-      (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.update U))
-      (h : Proves R (Γ ++ [.upd m U]) (.modal m ω φ)) : Proves R Γ (.modal m (s :: ω) φ)
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.update U))
+      (h : dl{ ..Γ, {U} ⟹[R] ⟨[ ..ω ]⟩ φ }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
   /-- A taclet that produces statements: they replace the first one. -/
   | unfold {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {P : Prog C}
-      (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.unfold P))
-      (h : Proves R Γ (.modal m (P ++ ω) φ)) : Proves R Γ (.modal m (s :: ω) φ)
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.unfold P))
+      (h : dl{ ..Γ ⟹[R] ⟨[ P; ..ω ]⟩ φ }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
   /-- A taclet that branches: two goals, one per condition, and under the
   diamond the fact that one of the conditions holds. -/
   | split {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {c c' : Fml C} {P Q : Prog C}
-      (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.split c c' P Q))
-      (thn : Proves R (Γ ++ [.pre c]) (.modal m (P ++ ω) φ))
-      (els : Proves R (Γ ++ [.pre c']) (.modal m (Q ++ ω) φ))
-      (cov : Proves R Γ (Premise.cover m c c')) : Proves R Γ (.modal m (s :: ω) φ)
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.split c c' P Q))
+      (thn : dl{ ..Γ, c ⟹[R] ⟨[ P; ..ω ]⟩ φ })
+      (els : dl{ ..Γ, c' ⟹[R] ⟨[ Q; ..ω ]⟩ φ })
+      (cov : dl{ ..Γ ⟹[R] ‹Premise.cover m c c'› }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
   /-- A taclet that checks (`assertSimple`): the goal with the condition
   assumed, and the condition — KeY's "Holds" and "Violated". -/
   | check {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {c : Fml C} {P : Prog C}
-      (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.check c P))
-      (thn : Proves R (Γ ++ [.pre c]) (.modal m (P ++ ω) φ))
-      (els : Proves R Γ c) : Proves R Γ (.modal m (s :: ω) φ)
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.check c P))
+      (thn : dl{ ..Γ, c ⟹[R] ⟨[ P; ..ω ]⟩ φ })
+      (els : dl{ ..Γ ⟹[R] c }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
   /-- A taclet that closes the modality (`revertBox`, `revertDiamond`): what
   is left is `true` or `false`. -/
   | done {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {b : Bool}
-      (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.done b))
-      (h : Proves R Γ ((Premise.done b).fml m ω φ)) : Proves R Γ (.modal m (s :: ω) φ)
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.done b))
+      (h : dl{ ..Γ ⟹[R] ‹(Premise.done b).fml m ω φ› }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
   /-- A taclet with a goal per way an external call may end
   (`tryCallNoCallbackBox`): each clause's block in the statement's place, for
   every value of the locals the outcome binds. -/
   | branches {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
       {φ : Fml C} {bs : List (List (PrimTy × Var) × Prog C)}
-      (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.branches bs))
-      (h : ∀ b ∈ bs, Proves R Γ (.alls b.1 (.modal m (b.2 ++ ω) φ))) :
-      Proves R Γ (.modal m (s :: ω) φ)
+      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.branches bs))
+      (h : ∀ b ∈ bs, dl{ ..Γ ⟹[R] ‹.alls b.1 (.modal m (b.2 ++ ω) φ)› }) :
+      dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
   /-- `allRight`: a quantified local joins the context, holding any value of
   its type. -/
   | allIntro {R : RuleSet} {Γ : List (Hyp C)} {x : Var} {p : PrimTy} {φ : Fml C}
-      (h : Proves R (Γ ++ [.all x p]) φ) : Proves R Γ (.all x p φ)
+      (h : dl{ ..Γ, ∀ p x ⟹[R] φ }) : dl{ ..Γ ⟹[R] ‹.all x p φ› }
   /-- An update in front of the formula joins the context: `⟹ {U} φ` is
   `{U} ⟹ φ`, the sequent KeY writes with the update on the formula.  The
   snapshot `{ old := storage }` of a specification (`Calculus/Spec.lean`)
   enters the derivation so. -/
   | updIntro {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
-      (h : Proves R (Γ ++ [.upd m U]) φ) : Proves R Γ (.upd m U φ)
+      (h : dl{ ..Γ, {U} ⟹[R] φ }) : dl{ ..Γ ⟹[R] {U} φ }
   /-- A rule solkey does not have, closing the modality (`tryCallDiamond`). -/
   | doneLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {b : Bool}
-      (d : LeanTaclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.done b))
-      (h : Proves .all Γ ((Premise.done b).fml m ω φ)) : Proves .all Γ (.modal m (s :: ω) φ)
+      (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.done b))
+      (h : dl{ ..Γ ⟹ ‹(Premise.done b).fml m ω φ› }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
   /-- A rule solkey does not have, producing statements. -/
   | unfoldLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.unfold P))
-      (h : Proves .all Γ (.modal m (P ++ ω) φ)) : Proves .all Γ (.modal m (s :: ω) φ)
+      {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.unfold P))
+      (h : dl{ ..Γ ⟹ ⟨[ P; ..ω ]⟩ φ }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
   /-- `emptyModality`: `⟨⟩ φ` and `[] φ` are `φ`. -/
-  | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : Proves R Γ φ) :
-      Proves R Γ (.modal m [] φ)
+  | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : dl{ ..Γ ⟹[R] φ }) :
+      dl{ ..Γ ⟹[R] ⟨[ ]⟩ φ }
   /-- A term taclet as a rewrite rule (`TermTaclet`, `Calculus/TermTaclets.lean`):
   `t` becomes `t'` in every equation of the sequent, at any depth
   (`Hyp.rwEq`, `Fml.rwEq`).  The derivation names the taclet; why it is
   sound is `TermTaclet.sound`, on the `⊨` side. -/
   | rewrite {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
-      (r : TermTaclet t t') (d : Proves R (Hyp.rwEq (t, t') Γ) (Fml.rwEq (t, t') φ)) :
-      Proves R Γ φ
+      (r : TermTaclet t t') (d : dl{ ..(Hyp.rwEq (t, t') Γ) ⟹[R] ‹Fml.rwEq (t, t') φ› }) :
+      dl{ ..Γ ⟹[R] φ }
   /-- A term taclet inside the context's updates: `t` becomes `t'` in the
   right-hand sides of every box update (`Hyp.rwUpd`), where `t'` cannot halt
   (`Tm.total`), so returns whatever `t` returns.  With `rewrite` it reaches
   the whole sequent, as mini-solkey's `rewrite` does. -/
   | updRw {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} {t t' : Term C}
-      (r : TermTaclet t t') (ht : t'.total = true) (d : Proves R (Hyp.rwUpd (t, t') Γ) φ) :
-      Proves R Γ φ
+      (r : TermTaclet t t') (ht : t'.total = true) (d : dl{ ..(Hyp.rwUpd (t, t') Γ) ⟹[R] φ }) :
+      dl{ ..Γ ⟹[R] φ }
   /-- `sequentialToParallel`: the last two updates of the context merge into
   one parallel update, the first substituted into the second, when the first
   writes only locals (`UpdRule.sequentialToParallel`). -/
   | merge {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}
-      (hU : U.envOnly = true) (h : Proves R (Γ ++ [.upd m (U ++ V.subst U)]) φ) :
-      Proves R (Γ ++ [.upd m U] ++ [.upd m V]) φ
+      (hU : U.envOnly = true) (h : dl{ ..Γ, {U ‖ {U}V} ⟹[R] φ }) :
+      dl{ ..Γ, {U}, {V} ⟹[R] φ }
   /-- `sequentialToParallel` over a storage write, `{storage := s ‖ {storage := s}V}`,
   for a `V` whose storage reads are all `storage` terms (`Upd.mergeStorage_holds`). -/
   | mergeStorage {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : STerm C} {V : Upd C}
       {φ : Fml C} (h : Proves R (Γ ++ [.upd m (.storage s :: V.withSt s)]) φ)
       (hV : V.all (·.stExplicit) = true := by rfl) :
-      Proves R (Γ ++ [.upd m [.storage s]] ++ [.upd m V]) φ
+      dl{ ..Γ, {storage := s}, {V} ⟹[R] φ }
   /-- `simplifyUpdate`: the effectless elements of the last update are
   dropped (`Upd.dropEffectless`). -/
   | simplify {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
-      (h : Proves R (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ) : Proves R (Γ ++ [.upd m U]) φ
+      (h : Proves R (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ) : dl{ ..Γ, {U} ⟹[R] φ }
   /-- `applyOnRigidFormula` under the box: the last update, of locals (or
   locals and a storage write, under a goal that reads no storage), applied to
   a first-order goal and dropped (`Fml.subst_box`, `Fml.subst_box_st`). -/
   | applyOnRigidBox {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {φ : Fml C}
-      (h : Proves R Γ (φ.subst U))
+      (h : dl{ ..Γ ⟹[R] ‹φ.subst U› })
       (hU : (U.envOnly || U.localsOrStorage && φ.stFree) = true := by first | rfl | decide)
       (hr : φ.rigid = true := by first | rfl | decide)
       (hs : φ.sortedFor U = true := by first | rfl | decide) :
-      Proves R (Γ ++ [.upd .box U]) φ
+      dl{ ..Γ, {U} [ ] ⟹[R] φ }
   /-- `applyOnRigidFormula` for a storage write under the box: `s` for every
   `storage` of a first-order goal (`Fml.withSt_box`). -/
   | applyStorageBox {R : RuleSet} {Γ : List (Hyp C)} {s : STerm C} {φ : Fml C}
-      (h : Proves R Γ (φ.withSt s))
+      (h : dl{ ..Γ ⟹[R] ‹φ.withSt s› })
       (hr : φ.rigid = true := by first | rfl | decide)
       (he : φ.stExplicit = true := by first | rfl | decide) :
-      Proves R (Γ ++ [.upd .box [.storage s]]) φ
+      dl{ ..Γ, {storage := s} [ ] ⟹[R] φ }
   /-- Leave the calculus: with no modality left anywhere in the sequent, what
   is left is proved in the logic. -/
   | close {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Valid (Hyp.wrap Γ φ))
-      (hφ : (Hyp.wrap Γ φ).modalFree = true := by first | rfl | decide) : Proves R Γ φ
+      (hφ : (Hyp.wrap Γ φ).modalFree = true := by first | rfl | decide) : dl{ ..Γ ⟹[R] φ }
 
 namespace Proves
 scoped notation:25 Γ:26 " ⊢ " φ:26 => Proves RuleSet.all Γ φ
@@ -428,6 +431,48 @@ scoped notation:25 "⊢ " φ:26 => Proves RuleSet.all [] φ
 scoped notation:25 Γ:26 " ⊢ₖ " φ:26 => Proves RuleSet.solkey Γ φ
 scoped notation:25 "⊢ₖ " φ:26 => Proves RuleSet.solkey [] φ
 end Proves
+
+/-! ### The rules by solkey's names
+
+The constructors whose rule KeY has under another name, under that name too:
+`apply Proves.impRight` is `apply Proves.intro`. -/
+
+/-- `impRight` (`intro`). -/
+theorem Proves.impRight {R : RuleSet} {Γ : List (Hyp C)} {a φ : Fml C}
+    (h : dl{ ..Γ, a ⟹[R] φ }) : dl{ ..Γ ⟹[R] a → φ } := .intro h
+
+/-- `allRight` (`allIntro`). -/
+theorem Proves.allRight {R : RuleSet} {Γ : List (Hyp C)} {x : Var} {p : PrimTy} {φ : Fml C}
+    (h : dl{ ..Γ, ∀ p x ⟹[R] φ }) : dl{ ..Γ ⟹[R] ‹.all x p φ› } := .allIntro h
+
+/-- `emptyModality` (`empty`). -/
+theorem Proves.emptyModality {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C}
+    (h : dl{ ..Γ ⟹[R] φ }) : dl{ ..Γ ⟹[R] ⟨[ ]⟩ φ } := .empty h
+
+/-- `sequentialToParallel` (`merge`). -/
+theorem Proves.sequentialToParallel {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C}
+    {φ : Fml C} (hU : U.envOnly = true) (h : dl{ ..Γ, {U ‖ {U}V} ⟹[R] φ }) :
+    dl{ ..Γ, {U}, {V} ⟹[R] φ } := .merge hU h
+
+/-- `sequentialToParallel` over a storage write (`mergeStorage`). -/
+theorem Proves.sequentialToParallelStorage {R : RuleSet} {Γ : List (Hyp C)} {m : Modality}
+    {s : STerm C} {V : Upd C} {φ : Fml C}
+    (h : Proves R (Γ ++ [.upd m (.storage s :: V.withSt s)]) φ)
+    (hV : V.all (·.stExplicit) = true := by rfl) :
+    dl{ ..Γ, {storage := s}, {V} ⟹[R] φ } := .mergeStorage h hV
+
+/-- `simplifyUpdate` (`simplify`). -/
+theorem Proves.simplifyUpdate {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C}
+    {φ : Fml C} (h : Proves R (Γ ++ [.upd m (U.dropEffectless φ.vars)]) φ) :
+    dl{ ..Γ, {U} ⟹[R] φ } := .simplify h
+
+/-- `applyOnRigidFormula` under the box (`applyOnRigidBox`). -/
+theorem Proves.applyOnRigidFormula {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {φ : Fml C}
+    (h : dl{ ..Γ ⟹[R] ‹φ.subst U› })
+    (hU : (U.envOnly || U.localsOrStorage && φ.stFree) = true := by first | rfl | decide)
+    (hr : φ.rigid = true := by first | rfl | decide)
+    (hs : φ.sortedFor U = true := by first | rfl | decide) :
+    dl{ ..Γ, {U} [ ] ⟹[R] φ } := .applyOnRigidBox h hU hr hs
 
 theorem Hyp.wrap_append (Γ Δ : List (Hyp C)) (φ : Fml C) :
     Hyp.wrap (Γ ++ Δ) φ = Hyp.wrap Γ (Hyp.wrap Δ φ) := by
@@ -748,19 +793,48 @@ set_option hygiene false
 def ppHyp? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_hyp)) := do
   match_expr (← whnf (← instantiateMVars e)) with
   | Hyp.pre _ a => return some (← `(dl_hyp| $(← ppFml a):dl_fml))
-  | Hyp.upd _ _ U => return some (← `(dl_hyp| $(← ppUpd U):dl_upd))
+  | Hyp.upd _ m U =>
+    let u ← ppUpd U
+    -- an escaped update would read back as a precondition
+    if isEscape u then return none
+    -- a rule's update, at a fixed modality: `{U} [ ]`, `{U} ⟨ ⟩`
+    if (← instantiateMVars U).hasFVar then
+      match_expr (← whnf m) with
+      | Modality.box => return some (← `(dl_hyp| $u:dl_upd [ ]))
+      | Modality.diamond => return some (← `(dl_hyp| $u:dl_upd ⟨ ⟩))
+      | _ => pure ()
+    return some (← `(dl_hyp| $u:dl_upd))
   | Hyp.havoc _ => return some (← `(dl_hyp| { havoc }))
+  | Hyp.all _ x p =>
+    let some x ← ppVar? x | return none
+    let some T ← (do pure ((← primName? p) <|> (← fvarName? p))) | return none
+    return some (← `(dl_hyp| ∀ $(mkIdent (Name.mkSimple T)):ident $x:ident))
   | _ => return none
 
-/-- `Proves .all Γ φ`: `dl{ Γ ⟹ φ }`; `Proves .solkey Γ φ`: `dl{ Γ ⟹ₖ φ }`. -/
+/-- A context: the rest `..Γ` when it is a variable, then its entries, read
+off the spine `Γ ++ [h₁] ++ …` the rules write. -/
+partial def hypSpine? (e : Lean.Expr) : MetaM (Option (Option Ident × Array Lean.Expr)) := do
+  let e ← instantiateMVars e
+  if let some n ← fvarName? e then return some (some (nameIdent n), #[])
+  if e.isAppOfArity ``HAppend.hAppend 6 then
+    let some (Γ, hs) ← hypSpine? (e.getArg! 4) | return none
+    let some hs' ← listElems? (e.getArg! 5) | return none
+    return some (Γ, hs ++ hs')
+  let some hs ← listElems? e | return none
+  return some (none, hs)
+
+/-- `Proves .all Γ φ`: `dl{ Γ ⟹ φ }`; `Proves .solkey Γ φ`: `dl{ Γ ⟹ₖ φ }`;
+over a rule set `R` that is a variable, `dl{ Γ ⟹[R] φ }`.  A context `Γ ++ […]`
+prints `..Γ` first. -/
 @[delab app.Solidity.Proves]
 def delabProves : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
   guard (e.getAppNumArgs == 4)
   let R ← whnf (e.getArg! 1)
-  let some hs ← listElems? (e.getArg! 2) | failure
+  let some (rest, hs) ← hypSpine? (e.getArg! 2) | failure
   let mut out := #[]
+  if let some Γ := rest then out := out.push (← `(dl_hyp| ..$Γ:ident))
   for h in hs do
     let some h ← ppHyp? h | failure
     out := out.push h
@@ -768,6 +842,7 @@ def delabProves : Delab := do
   guard !(isEscape φ)
   if R.isConstOf ``RuleSet.all then `(dl{ $[$out],* ⟹ $φ:dl_fml })
   else if R.isConstOf ``RuleSet.solkey then `(dl{ $[$out],* ⟹ₖ $φ:dl_fml })
+  else if let some r ← fvarName? R then `(dl{ $[$out],* ⟹[$(nameIdent r)] $φ:dl_fml })
   else failure
 
 end Print

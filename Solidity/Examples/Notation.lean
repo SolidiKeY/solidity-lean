@@ -205,4 +205,28 @@ theorem twoKeys : ⊢ dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] bala
   sol_symex
   sol_close
 
+/-! ## The rules of `⊢` are sequents
+
+A constructor of `Proves` is written as KeY writes its rule: a sequent over
+the rest `..Γ` of the context, the premises above the conclusion.  `{U} [ ]`
+is an update produced under the box.  `impRight`, `allRight`,
+`emptyModality`, `sequentialToParallel`, `simplifyUpdate` and
+`applyOnRigidFormula` are the constructors by solkey's names. -/
+
+/--
+info: @impRight : ∀ {C : Contract} {R : RuleSet} {Γ : List (Hyp C)} {a φ : Fml C}, dl{ ..Γ, a ⟹[R] φ } → dl{ ..Γ ⟹[R] a → φ }
+-/
+#guard_msgs in #check @Proves.impRight
+
+/--
+info: @merge : ∀ {C : Contract} {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C},
+  U.envOnly = true → dl{ ..Γ, { U ‖ {U}V } ⟹[R] φ } → dl{ ..Γ, { U }, { V } ⟹[R] φ }
+-/
+#guard_msgs in #check @Proves.merge
+
+/-- The sequents read back as the terms they print. -/
+example {C : Contract} (R : RuleSet) (Γ : List (Hyp C)) (x : Var) (p : PrimTy) (U : Upd C)
+    (φ : Fml C) :
+    dl{ ..Γ, ∀ p x, {U} [ ] ⟹[R] φ } = Proves R (Γ ++ [.all x p] ++ [.upd .box U]) φ := rfl
+
 end Solidity.Examples.Notation

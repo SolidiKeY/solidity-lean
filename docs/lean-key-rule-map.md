@@ -50,7 +50,9 @@ goal's update level and reads what it adds there: nothing to port.
 | --- | --- | --- | --- |
 | `functionBodyExpand` | `functionBodyExpand` | same | a call carries its callee inlined (`Stmt.call`, KeY's `FunctionBodyStatement`); with every argument simple the premise is KeY's `expand_function_body`. The parameters are the elaborator's fresh names, so KeY's fresh renaming is done once, at elaboration |
 | — | `LeanTaclet.functionCallArgCapture` | Lean only | `unfoldArgument`, which solkey's `docs/net.md` lists as missing: the leftmost non-simple argument is captured into a fresh `se` first, so that `Stmt.step` has one rule per call |
-| `emptyModality` | `Proves.empty` | ⊢ rule | `⟨[ ]⟩ φ ⇝ φ` under either modality, as KeY's `#allmodal`; the proof tree prints the step under this name (`Calculus/ProofTree.lean`) |
+| `emptyModality` | `Proves.empty` (also `Proves.emptyModality`) | ⊢ rule | `⟨[ ]⟩ φ ⇝ φ` under either modality, as KeY's `#allmodal`; the proof tree prints the step under this name (`Calculus/ProofTree.lean`) |
+| `impRight` (`propRule.key`) | `Proves.intro` (also `Proves.impRight`) | ⊢ rule | `⟹ a → φ` becomes `a ⟹ φ` |
+| `allRight` (`firstOrderRules.key`) | `Proves.allIntro` (also `Proves.allRight`) | ⊢ rule | `⟹ ∀ T x; φ` becomes `∀ T x ⟹ φ`: the local holds any value of `T`, KeY's skolem constant (`Hyp.all`) |
 | `blockEmpty` | — | unclaimed | a program is a list of statements with branch bodies inlined: no nested block to erase, no `{} ; rest` to find |
 | `revertDiamond` | `revertDiamond` | same | closes to `false`: a reverted run satisfies no diamond formula |
 | `revertBox` | `revertBox` | same | closes to `true`. These two are the **only** rules that tell the modalities apart: the modality is a parameter of `Taclet`, so every other rule fires under either |
@@ -300,17 +302,17 @@ changes").
 
 | KeY rule | Lean | Status | Notes |
 | --- | --- | --- | --- |
-| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge`; + under a branch (`LineRw.mergeIn`, `Calculus/ChainBranches.lean`) | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` of locals (`Upd.envOnly`); in a chain also at the first spine under `∧`, `→`, `¬` |
-| `sequentialToParallel1-3` over a storage write | `Proves.mergeStorage` | done | `{storage := s}{V}φ ⇝ {storage := s ‖ {storage := s}V}φ` (`Upd.withSt`), for a `V` whose every storage read is a `storage` term (`stExplicit`, `Upd.mergeStorage_holds`) |
+| `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge` (also `Proves.sequentialToParallel`); + under a branch (`LineRw.mergeIn`, `Calculus/ChainBranches.lean`) | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` of locals (`Upd.envOnly`); in a chain also at the first spine under `∧`, `→`, `¬` |
+| `sequentialToParallel1-3` over a storage write | `Proves.mergeStorage` (also `Proves.sequentialToParallelStorage`) | done | `{storage := s}{V}φ ⇝ {storage := s ‖ {storage := s}V}φ` (`Upd.withSt`), for a `V` whose every storage read is a `storage` term (`stExplicit`, `Upd.mergeStorage_holds`) |
 | `sequentialToParallel1-3`, read backwards | `Fml.seqUpd` (`Calculus/Derive.lean`) | Lean only | before the closer runs, a parallel update whose last element binds a local the others neither read nor write is split into that element first and the others after it (`{ r := x + 1 }{ x := x + 1 }`), which `Fml.toL` reads; a push with its alias (`pushAlias?`) is split into the storage write and the alias, and an allocation's pair is kept whole (`memAlloc?`) |
 | — (KeY keeps an update on its formula) | `Proves.updIntro` | arch | `⟹ {U} φ` becomes `{U} ⟹ φ`: the update joins the context, where every rule reads it, the sequent KeY writes with the update on the formula. A specification's `{ old := storage }` enters the derivation so |
 | `applyOnElementary`, `applyOnParallel` | `UpdElem.subst`, `Upd.subst` | functions | `{u}` pushed into right-hand sides |
 | `applyOnPV`, `applyOnPVLastInParallel`, `applyOnDifferentPV`, `applyOnDifferentPVLastInParallel` | `Fml.subst` (`Upd.lastWrite`) | functions | the last write of a local wins; an unwritten local is kept |
-| `simplifyUpdate1-3` | `UpdRule.simplifyUpdate`, `Upd.dropEffectless`, `Proves.simplify` | done | only elements that cannot halt are dropped (`UpdElem.total`) |
+| `simplifyUpdate1-3` | `UpdRule.simplifyUpdate`, `Upd.dropEffectless`, `Proves.simplify` (also `Proves.simplifyUpdate`) | done | only elements that cannot halt are dropped (`UpdElem.total`) |
 | `applySkip1-3`, `applyOnSkip` | `UpdRule.applySkip` | done | `skip` is `[]` |
 | `parallelWithSkip1-2` | — | arch | `‖` is `++`, `skip` is `[]`: nothing to rewrite |
 | `applyOnRigidFormula` | `UpdRule.applyOnRigid`; + through `∧`, `→`, `¬` (`Fml.push`, `Calculus/ChainBranches.lean`) | done | an equivalence, for an update that cannot halt (`Upd.total`) and a formula reading no variable at another sort than the update writes it (`Fml.sortedFor`); `Fml.push` substitutes each rigid leaf and keeps any other part under the update |
-| `applyOnRigidFormula`, under the box | `Proves.applyOnRigidBox`, `Proves.applyStorageBox` (`{storage := s}`); `sol_apply_upd`; + through `∧`, `→`, `¬` (`Fml.pushBox`) | done | one direction, **no totality premise**: the last update of the context is applied to a first-order goal and dropped; a halting box update proves what follows; `Fml.pushBox` keeps an antecedent and a negated part whole under the box, where no direction holds with the update substituted |
+| `applyOnRigidFormula`, under the box | `Proves.applyOnRigidBox` (also `Proves.applyOnRigidFormula`), `Proves.applyStorageBox` (`{storage := s}`); `sol_apply_upd`; + through `∧`, `→`, `¬` (`Fml.pushBox`) | done | one direction, **no totality premise**: the last update of the context is applied to a first-order goal and dropped; a halting box update proves what follows; `Fml.pushBox` keeps an antecedent and a negated part whole under the box, where no direction holds with the update substituted |
 | `elimSelfUpdate*` | `UpdElem.elimSelf_box`, `UpdElem.elimSelf_diamond` | done, one direction each | commented out in KeY; `x := x` halts when `x` holds no value, so it is no equivalence |
 | `simplifyIfThenElseUpdate1-4`, `commuteSimpleUpdates` | — | arch | commented-out dead code in KeY |
 
