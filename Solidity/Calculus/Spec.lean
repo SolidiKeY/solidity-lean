@@ -50,6 +50,22 @@ when an `\old(…)` reads `net(a)`.  The booking of `msg.value`, the sender's
 ledger entry and the contract's funds credited, is there for a `payable`
 function only: `M` makes the other's a booking of `0`.
 
+**A constructor's obligation** (`spec!{constructor}`) is solkey's
+deployment, from the empty storage:
+
+```
+R ∧ M ∧ requires →
+  {storage := mtSt ‖ old := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+   selfBalance := msg.value} [ constructor(x₁, …, xₙ); ] (I ∧ ensures ∧ A)
+```
+
+It assumes no `I` (solkey's has no `CInv(storage, net)` premise) and no
+`L`: both would be of the storage the update discards.  Lean only: a
+`requires` that reads a state variable, the ledger or the funds is refused,
+since solkey reads it before the update, of a storage the deployment never
+sees; and so is an `\old(net(a))`, whose snapshot `oldNet := mtSt` has no
+term here.
+
 Not ported: the benchmarks' clauses over `net(a)` are not tried.  A spec's
 arithmetic is Solidity's, checked at its operands' type, where solkey's is
 KeY's unbounded `int`: an overflowing side makes its equation false rather
@@ -409,10 +425,15 @@ is, `M`), the premises the specification states (`I ∧ requires`), the
 update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
 `msg.value`), the call
 `T result; result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
-`A` one by one (a counterexample search names the one that fails). -/
+`A` one by one (a counterexample search names the one that fails).  For
+`constructor`, the deployment's (the module docstring). -/
 def specPieces (f : String) :
     Except String (List (Fml C) × List (Fml C) × Upd C × Prog C × List (Fml C)) := do
-  let some d := lookupBy f C.funs | throw s!"{f} is not a function of the contract"
+  -- `constructor` names the contract's constructor (`Contract.ctor`)
+  let ctor := f == "constructor"
+  let some d := if ctor then C.ctor else lookupBy f C.funs
+    | throw (if ctor then "the contract declares no constructor: an implicit one has no obligation"
+      else s!"{f} is not a function of the contract")
   if d.spec.skip then throw s!"{f} is marked `skip`: it has no obligation"
   let ps ← d.params.mapM fun (n, T) => match T with
     | .prim p => pure (n, p)
@@ -430,6 +451,16 @@ def specPieces (f : String) :
   let res := match rets with
     | [(_, _, p)] => some p
     | _ => none
+  -- a deployment discards the state a `requires` would read (Lean only:
+  -- solkey reads it before `storage := mtSt`, of a storage the run never sees)
+  if ctor then
+    for r in d.spec.requires do
+      if let some x := r.names.find? fun x => (C.rootType x).isSome && !ps.any (·.1 == x) then
+        throw s!"constructor: a `requires` reads the state variable {x}, which a deployment discards"
+      if r.usesNet || r.any (fun | .field (.name "this") "balance" => some true | _ => none) then
+        throw "constructor: a `requires` reads the ledger or the funds, which a deployment sets"
+    if d.spec.ensures.any SpecExpr.usesOldNet || (d.spec.assignable.getD []).any SpecLoc.usesNet then
+      throw "constructor: `\\old(net(…))` reads the ledger before a deployment, which is empty"
   let pre : SpecCtx C := { storage := .storage, ensures := false, locals := ps, result := none }
   let post : SpecCtx C := { pre with ensures := true, result := res, rets := rets }
   let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [] })
@@ -442,28 +473,38 @@ def specPieces (f : String) :
   let args := ps.map fun (n, _) => RawExpr.name n
   -- `T result; result = f(x̄)@C;`: the call returns to its targets (none
   -- for a void function, `f(x̄)@C;`, still a `FunctionBodyStatement`)
-  let call : List RawStmt :=
+  let call : List RawStmt := if ctor then [.call (.name f) args] else
     rets.map (fun (_, v, p) => RawStmt.decl (.named (primName p)) v none) ++
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
   let P ← ((elabStmts C call).run { funs := C.funs }).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
   -- the snapshots `\old` reads, taken where something reads them
+  -- (a deployment's `old` is the empty storage: the update is parallel, so
+  -- `old := storage` would bind the storage it discards)
+  let start : STerm C := if ctor then .mtSt C.vars else .storage
   let snap : Upd C :=
-    (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar .storage]
+    (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar start]
       else []) ++
     if d.spec.ensures.any SpecExpr.usesOldNet || (d.spec.assignable.getD []).any SpecLoc.usesNet
     then [.saveNet oldNetVar] else []
   -- the payment booked, KeY's `{net := store(net, at(msgSender),
   -- net(msgSender) + msgValue) ‖ selfBalance := selfBalance + msgValue}`; a
   -- function that is not `payable` is called with `msg.value == 0`, so its
-  -- booking is left out: it changes nothing
-  let U := snap ++ if d.payable then
+  -- booking is left out: it changes nothing.  A deployment's is solkey's
+  -- `{storage := mtSt ‖ old := mtSt ‖ net := storeSt(mtSt, at(msgSender),
+  -- msgValue) ‖ selfBalance := msgValue}`, payable or not
+  let U := if ctor then
+    [.storage (.mtSt C.vars)] ++ snap ++ [.netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
+  else snap ++ if d.payable then
     [.net (.env .msgSender) .add (.env .msgValue), .selfBalance .add (.env .msgValue)] else []
   let msgValue : Fml C := if d.payable then cmpFml .ge .uint (.env .msgValue) (.lit (.int 0))
     else .eqD (.env .msgValue) (.lit (.int 0))
   let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names ++
     (d.spec.assignable.getD []).flatMap SpecLoc.names
-  pure (ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++ layoutFmls C read ++ [msgValue],
-    inv ++ reqs, U, P, inv ++ enss ++ frame)
+  -- a deployment assumes no invariant and no layout: both are of the
+  -- storage it discards (solkey's has no `CInv(storage, net)` premise)
+  pure (ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++
+      (if ctor then [] else layoutFmls C read) ++ [msgValue],
+    (if ctor then [] else inv) ++ reqs, U, P, inv ++ enss ++ frame)
 
 /-- The conclusion `{U} [ P ] (φ₁ ∧ … ∧ φₙ)`, the update left out when it
 is empty. -/
