@@ -2087,7 +2087,8 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .call f as => f :: as
   | .eval as => as
   | .tryCall r _ as .. => r :: as
-  | .send _ x r a => [x, r, a]
+  | .send none x r a => [x, r, a]
+  | .send (some _) _ r a => [r, a]
   | .revert | .unchecked _ => []
 
 /-- A statement's blocks: an `if`'s branches, an `unchecked` block's body. -/

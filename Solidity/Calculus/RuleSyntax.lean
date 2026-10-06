@@ -43,7 +43,7 @@ hypothesis):
 
 | name | is | Lean sort | side condition |
 |---|---|---|---|
-| `v`, `lv`, `vp` | a stack local | `Var` | |
+| `v`, `lv`, `vp`, `pv` | a stack local (`pv`: where a send's outcome lands) | `Var` | |
 | `lsv` | a storage alias | `Var` | |
 | `mv` | a memory local | `Var` | |
 | `pmv`, `rmv` | a memory local, an array of primitives, of references (`delete pmv[ie]` fixes the element type) | `Var` | |
