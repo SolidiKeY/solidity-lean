@@ -1569,6 +1569,15 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
     split at h
     · exact nomatch h
     · cases h; rw [State.pay_eq]; exact hcn.of_eq rfl rfl
+  | .send pv r a, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
+    obtain ⟨hc, rfl⟩ := wt_if hs
+    simp only [Bool.and_eq_true] at hc
+    iterate 4 bind_inv h
+    refine ⟨H, .refl H, hwt.sendAt hc.1.1 h, ?_⟩
+    unfold sendAt at h
+    split at h
+    · exact nomatch h
+    · split at h <;> cases h <;> exact hcn.of_eq rfl rfl
   | .declMem R x init hd, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     cases init with

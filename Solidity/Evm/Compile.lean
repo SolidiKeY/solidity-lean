@@ -907,11 +907,12 @@ def pushesP : List (Stmt C) → Nat
 end
 
 mutual
-/-- Whether a statement pays: a `transfer`, or one in a branch or a called
-body.  Only a payment can be refused by the world, so code that does not pay
-reverts exactly where the interpreter does. -/
+/-- Whether a statement pays: a `transfer` or a `send` (which is outside the
+compiled fragment, `wtStmt`), or one in a branch or a called body.  Only a
+payment can be refused by the world, so code that does not pay reverts
+exactly where the interpreter does. -/
 def pays : Stmt C → Bool
-  | .transfer .. => true
+  | .transfer .. | .send .. => true
   | .ite _ t e => paysP t || paysP e
   | .call _ _ _ _ body => paysP body
   | _ => false

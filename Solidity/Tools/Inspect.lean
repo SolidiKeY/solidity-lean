@@ -296,6 +296,7 @@ def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
         | some ``Premise.check => ``Taclet.sound_check
         | some ``Premise.done => ``Taclet.sound_done
         | some ``Premise.branches => ``Taclet.sound_branches
+        | some ``Premise.cases => ``Taclet.sound_cases
         | _ => ``Taclet.sound
   let upd := Name.mkStr `Solidity ("upd_" ++ n.getString!)
   let extra := if env.contains upd then s!", {upd}" else ""

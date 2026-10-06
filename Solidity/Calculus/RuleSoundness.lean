@@ -120,6 +120,14 @@ theorem Taclet.sound_branches {k : Nat} {m : Modality} {s : Stmt C}
         | other => exact .inr ⟨([], other), by simp, σ, ⟨[], rfl⟩,
               by simp [Stmt.run, hk, hl, bind, Except.bind]⟩
 
+/-- `sendNoCallbackBox`, `sendNoCallbackDiamond`: a send runs as one of its
+updates (`upd_send_cases`); the diamond's formula goal is owed on top. -/
+theorem Taclet.sound_cases {k : Nat} {m : Modality} {s : Stmt C} {fs : List (Fml C)}
+    {us : List (Upd C)} (d : Taclet C k m s (.cases fs us)) :
+    ∀ σ, ∃ U ∈ us, SameOk [] (U.apply σ) (s.run σ) := by
+  cases d <;> intro σ <;> rcases upd_send_cases _ _ _ σ with h | h <;>
+    exact ⟨_, by simp only [List.mem_cons, List.not_mem_nil, or_false, true_or, or_true], h⟩
+
 /-- **The taclets are sound.**  `alice.age = 10;` is `storageFieldWriteSave`,
 and its update saves `10` at `alice.age` as running the statement does;
 `people[i].age = 10;` is `storageFieldWrite_unfold_leftFst`, whose three
@@ -133,6 +141,7 @@ theorem Taclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
   | check c P => exact Taclet.sound_check d
   | done b => exact Taclet.sound_done d
   | branches bs => exact Taclet.sound_branches d
+  | cases fs us => exact Taclet.sound_cases d
 
 /-- The rules solkey does not have are sound: `functionCallArgCapture` reads
 the argument where the call would (`Stmt.call_capture_sound`). -/

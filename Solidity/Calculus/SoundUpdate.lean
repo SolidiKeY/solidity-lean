@@ -590,6 +590,40 @@ theorem upd_transferNoCallbackBox (sadr se : Simple C .uint) (σ : State) :
   rw [upd_transferNoCallbackBox_eq]
   exact SameOk.self _ _
 
+/-- `sendNoCallbackBox`, `sendNoCallbackDiamond`: a send runs as one of its
+two updates.  Taken (or halting, where the booking halts too), as the
+booking with `pv` true; refused, as `pv` false. -/
+theorem upd_send_cases (pv : Var) (sadr se : Simple C .uint) (σ : State) :
+    SameOk [] (Upd.apply [.pay sadr.lower se.lower, .val pv (.lit (.bool true))] σ)
+        ((Stmt.send pv (.simple sadr) (.simple se)).run σ) ∨
+      SameOk [] (Upd.apply (C := C) [.val pv (.lit (.bool false))] σ)
+        ((Stmt.send pv (.simple sadr) (.simple se)).run σ) := by
+  simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.write, Stmt.run, Val.eval,
+    Simple.lower_eval, sendAt, State.pay, bind, Except.bind, pure, Except.pure, Value.asInt,
+    Term.lit, Tm.eval, Op0.eval]
+  cases sadr.eval σ with
+  | error _ => exact .inl (SameOk.self _ _)
+  | ok v =>
+    cases v with
+    | bool _ => exact .inl (SameOk.self _ _)
+    | int addr =>
+      cases se.eval σ with
+      | error _ => exact .inl (SameOk.self _ _)
+      | ok w =>
+        cases w with
+        | bool _ => exact .inl (SameOk.self _ _)
+        | int amt =>
+          by_cases hn : amt < 0
+          · simp only [hn, if_true]
+            exact .inl (SameOk.self _ _)
+          · simp only [hn, if_false]
+            cases lookupBy (sendKey addr amt) σ.tx.ext with
+            | none => exact .inl (SameOk.self _ _)
+            | some r =>
+              cases r with
+              | ok _ => exact .inl (SameOk.self _ _)
+              | error | panic _ | other => exact .inr (SameOk.self _ _)
+
 theorem Taclet.sound_update {k : Nat} {m : Modality} {s : Stmt C} {U : Upd C}
     (d : Taclet C k m s (.update U)) : ∀ σ, SameOk [] (U.apply σ) (s.run σ) := by
   cases d

@@ -294,6 +294,10 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.transfer_unfold_leftFstReceiver, .taclet .transfer_unfold_leftFstReceiver),
   (``Taclet.transfer_unfold_rightSndArgument, .taclet .transfer_unfold_rightSndArgument),
   (``Taclet.transferNoCallbackBox, .taclet .transferNoCallbackBox),
+  (``Taclet.send_unfold_leftFstReceiver, .taclet .send_unfold_leftFstReceiver),
+  (``Taclet.send_unfold_rightSndArgument, .taclet .send_unfold_rightSndArgument),
+  (``Taclet.sendNoCallbackBox, .taclet .sendNoCallbackBox),
+  (``Taclet.sendNoCallbackDiamond, .taclet .sendNoCallbackDiamond),
   -- Memory: `msrc` is a value or a memory reference, so a row covers `…MemRef…` except
   -- for the index captures, which KeY and the table split by the source
   (``Taclet.memoryFieldRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
@@ -363,6 +367,7 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
 `transferSemantics`), and the solkey taclets they transcribe. -/
 def callbackOrigins : List (Lean.Name × KeyOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .taclet .transferWithCallbackBox),
+  (``CallbackTaclet.sendWithCallbackBox, .taclet .sendWithCallbackBox),
   (``CallbackTaclet.tryCallWithCallbackBox, .taclet .tryCallWithCallbackBox) ]
 
 #check_constructor_table CallbackTaclet, callbackOrigins.map Prod.fst
@@ -459,15 +464,19 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   and book the payment; here a payment has a rule under the box only, and the
   diamond closes to `false` (`LeanTaclet.transferDiamond`): whether the world
   pays is the compiler theorem's, not the calculus's.
+* `sendWithCallbackDiamond` — a send that may call back, under the diamond:
+  the callback reading is the box's only (`Calculus/Callback.lean`).  A send
+  with no callback has its diamond (`sendNoCallbackDiamond`): a refused send
+  is an outcome of the run (`Semantics.sendAt`), not the world's.
 
-The other semantics of `transfer`, `transferWithCallbackBox`, is claimed by
-`callbackOrigins`. -/
+The other semantics of `transfer` and `send`, `transferWithCallbackBox` and
+`sendWithCallbackBox`, are claimed by `callbackOrigins`. -/
 def unclaimedTaclets : List KeyTaclet :=
   [ .emptyModality, .blockEmpty,
     .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
     .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
-    .transferNoCallbackDiamond, .transferWithCallbackDiamond ]
+    .transferNoCallbackDiamond, .transferWithCallbackDiamond, .sendWithCallbackDiamond ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses, with nothing in both and nothing in neither.  A taclet
@@ -477,9 +486,9 @@ theorem taclets_partitioned :
     KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 300 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 305 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 13 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 14 := by decide +kernel
 
 /-! ## The rules with no taclet
 

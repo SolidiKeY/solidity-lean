@@ -76,6 +76,26 @@ def allRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)
       | none => none
     | none => none
 
+/-- The goals of `Premise.cases`: each formula in `Γ`, then the rest after
+each update.  Built by recursion on the formulas, with no `List.append` for
+`decide +kernel` to unfold. -/
+def casesGoals (Γ : List (Hyp C)) (m : Modality) (ω : Prog C) (ψ : Fml C) :
+    List (Fml C) → List (Upd C) → List (Leaf C)
+  | f :: fs, us => (Γ, f) :: casesGoals Γ m ω ψ fs us
+  | [], us => us.map fun U => (Γ ++ [.upd m U], .modal m ω ψ)
+
+theorem casesGoals_mem_fml {Γ : List (Hyp C)} {m : Modality} {ω : Prog C} {ψ : Fml C}
+    {us : List (Upd C)} {f : Fml C} : {fs : List (Fml C)} → f ∈ fs →
+      (Γ, f) ∈ casesGoals Γ m ω ψ fs us
+  | _ :: _, .head _ => .head _
+  | _ :: _, .tail _ h => .tail _ (casesGoals_mem_fml h)
+
+theorem casesGoals_mem_upd {Γ : List (Hyp C)} {m : Modality} {ω : Prog C} {ψ : Fml C}
+    {us : List (Upd C)} {U : Upd C} (hU : U ∈ us) : {fs : List (Fml C)} →
+      (Γ ++ [.upd m U], .modal m ω ψ) ∈ casesGoals Γ m ω ψ fs us
+  | [] => List.mem_map_of_mem hU
+  | _ :: _ => .tail _ (casesGoals_mem_upd hU)
+
 /-- Whether a split's third goal, `Γ ⟹ true` under the box, is left out:
 where `Proves.closeTrue` proves it, as `Proves.splitBox` leaves it out. -/
 def coverFree (m : Modality) (Γ : List (Hyp C)) : Bool :=
@@ -87,7 +107,7 @@ def coverFree (m : Modality) (Γ : List (Hyp C)) : Bool :=
 handed to `r` with the budget `b`: the goals of `Proves.updateRule`,
 `unfoldRule`, `splitRule` (`thn`, `els`, and `cov` unless `coverFree`: KeY's
 two goals under the box, `splitBoxRule`), `checkRule` (`thn`, `els`),
-`doneRule`, `branchesRule` (one per outcome). -/
+`doneRule`, `branchesRule` (one per outcome), `casesRule` (`casesGoals`). -/
 def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)) (b : Nat)
     (Γ : List (Hyp C)) (m : Modality) (ω : Prog C) (ψ : Fml C) :
     Premise C → Option (List (Leaf C) × Nat)
@@ -103,6 +123,7 @@ def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × 
   | .check c P => allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ, c)]
   | .done d => r b Γ ((Premise.done d).fml m ω ψ)
   | .branches bs => allRes r b (bs.map fun o => (Γ, .alls o.1 (.modal m (o.2 ++ ω) ψ)))
+  | .cases fs us => allRes r b (casesGoals Γ m ω ψ fs us)
 
 /-- **The residue** of `Γ ⟹ φ`: the strategy run as `sol_derive` runs it,
 the leaves `close` accepts dropped, and the budget left.  `n` bounds the
@@ -777,6 +798,10 @@ theorem premiseRes_sound {b : Nat} {Γ : List (Hyp C)} {m : Modality} {s : Stmt 
   | branches bs =>
     have hg := allRes_sound hr h hl
     exact Proves.branchesRule d fun o ho => hg (Γ, _) (List.mem_map_of_mem ho)
+  | cases fs us =>
+    have hg := allRes_sound hr h hl
+    exact Proves.casesRule d (fun _ hf => hg _ (casesGoals_mem_fml hf))
+      (fun _ hU => hg _ (casesGoals_mem_upd hU))
 
 end
 

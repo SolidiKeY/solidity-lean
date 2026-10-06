@@ -359,7 +359,7 @@ theorem Stmt.exec_run (I : Fml C) :
         · exact .inr (.tryOther hk h)
   | .assign .., σ | .rebind .., σ | .assignLocal .., σ | .declLocal .., σ | .declStorage .., σ
   | .opAssign .., σ | .incDec .., σ | .assignIncDec .., σ | .push .., σ | .pop .., σ
-  | .declMem .., σ | .rebindMem .., σ | .assignFromMem .., σ | .assignMem .., σ | .delete .., σ
+  | .send .., σ | .declMem .., σ | .rebindMem .., σ | .assignFromMem .., σ | .assignMem .., σ | .delete .., σ
   | .deleteMem .., σ | .assignNew .., σ | .require .., σ | .assert .., σ | .revert, σ =>
     .inl (.det rfl)
 

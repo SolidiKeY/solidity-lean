@@ -398,6 +398,19 @@ def transferStep : (r a : Val C .uint) → Step k m (.transfer r a)
   | .read _, _ | .binop .., _ | .unop .., _ | .ternary .., _ | .readMem _, _ | .len .., _
   | .mlen .., _ => ⟨_, .key .transfer_unfold_leftFstReceiver⟩
 
+/-- `ok = people[i].wallet.send(x + 1);`: the receiver first, then the
+amount, as `transferStep`; both simple, the send's two outcomes (and under
+the diamond the amount's sign). -/
+def sendStep (pv : Var) : (r a : Val C .uint) → Step k m (.send pv r a)
+  | .simple _, .simple _ => match m with
+    | .box => ⟨_, .key .sendNoCallbackBox⟩
+    | .diamond => ⟨_, .key .sendNoCallbackDiamond⟩
+  | .simple _, .read _ | .simple _, .binop .. | .simple _, .unop .. | .simple _, .ternary ..
+  | .simple _, .readMem _ | .simple _, .len .. | .simple _, .mlen .. =>
+    ⟨_, .key .send_unfold_rightSndArgument⟩
+  | .read _, _ | .binop .., _ | .unop .., _ | .ternary .., _ | .readMem _, _ | .len .., _
+  | .mlen .., _ => ⟨_, .key .send_unfold_leftFstReceiver⟩
+
 /-! ## Memory -/
 
 /-- A memory local bound: `m = n;`, `m = n.items[i];` (unfolded until it is
@@ -511,6 +524,7 @@ def Stmt.step (k : Nat) (m : Modality) : (s : Stmt C) → Step k m s
   | .push b v hd => pushStep b v hd
   | .pop b => popStep b
   | .transfer r a => transferStep r a
+  | .send pv r a => sendStep pv r a
   | .declMem _ _ none _ => ⟨_, .key .memoryReferenceDeclFreshAlloc⟩
   | .declMem _ _ (some _) _ => ⟨_, .key .memoryLocalDeclInitDrop⟩
   | .rebindMem x r => rebindMemStep x r

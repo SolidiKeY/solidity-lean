@@ -152,6 +152,12 @@ theorem transferAt_setEnv (addr amt : Int) :
   · simp only [h1, if_true]; rfl
   · simp only [h1, if_false, State.pay_eq]; rfl
 
+/-- A send after a fresh binding: the same, off the fresh names (`pv` is set
+after the binding here and before it there). -/
+theorem sendAt_setEnv {ns : List Var} (hx : x ∈ ns) (pv : Var) (addr amt : Int) :
+    SameOk ns (sendAt (σ.setEnv x b) pv addr amt) (sendAt σ pv addr amt) :=
+  SameOk.of_agree (sendAt_agree ((EnvAgreeExcept.refl ns σ).setEnv_left hx b) pv addr amt)
+
 theorem copyMem_setEnv (v : MVal) : copyMem (σ.setEnv x b) v = copyMem σ v :=
   copyMem_congr (agree_setEnv σ x b) v
 end
@@ -454,6 +460,13 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
   all_goals repeat' cases_holes
   all_goals vars_simp
   all_goals (try (unf_simp; res_split; all_goals agree_tac; done))
+  -- a send past a fresh binding: the same send, off the fresh names
+  case send_unfold_leftFstReceiver | send_unfold_rightSndArgument =>
+    unf_simp
+    res_split
+    all_goals first
+      | (agree_tac; done)
+      | exact sendAt_setEnv _ _ _ (by simp [freshVars]) _ _ _
   -- the element fails to evaluate: the same halt, not a panic, on both sides
   case storagePushValue_unfold_rightSndArgument =>
     unf_simp

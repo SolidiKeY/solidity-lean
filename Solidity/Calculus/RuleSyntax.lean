@@ -247,6 +247,13 @@ syntax (str ": ")? ("∀ " ident ". ")? "⟨" "[ " sol_block " ]" "⟩" : dl_bra
 syntax (str ": ")? ("∀ " ident ". ")? "[ " sol_block " ]" : dl_branch
 /-- Goals, one per branch (`Premise.branches`), separated by `;`. -/
 syntax dl_branch " ; " sepBy1(dl_branch, " ; ") : dl_premise
+/-- One goal of `Premise.cases`, with solkey's label: a formula to prove, or
+the rest after an update, `{U} ⟨[ ]⟩`. -/
+declare_syntax_cat dl_case (behavior := both)
+syntax (str ": ")? dl_upd " ⟨" "[ " "]" "⟩" : dl_case
+syntax (str ": ")? dl_fml : dl_case
+/-- Labelled goals (`Premise.cases`), the formulas first, separated by `;`. -/
+syntax dl_case " ; " sepBy1(dl_case, " ; ") : dl_premise
 
 /-- An entry of a sequent's context: an update or a precondition. -/
 declare_syntax_cat dl_hyp (behavior := both)
@@ -405,7 +412,7 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
   | some (.mem v) => .mem v
   | some .raw => .other x
   | none => if Γ.isRaw then .other x else match stemOf s with
-    | "v" | "lv" | "vp" => .local x
+    | "v" | "lv" | "vp" | "pv" => .local x
     | "lsv" => .alias x
     | "mv" | "pmv" | "rmv" => .mem x
     | "gsp" => .root x (proofIdent x s)
@@ -893,6 +900,12 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     return (← `(Stmt.pop (E := $(schemaIdent "E")) $(← schemaAt Γ .spath b)), Γ)
   | `(sol_stmt| $r:sol_expr .transfer( $a:sol_expr )) => do
     return (← `(Stmt.transfer $(← schemaAt Γ .val r) $(← schemaAt Γ .val a)), Γ)
+  | `(sol_stmt| $l:sol_expr = $r:sol_expr .send( $a:sol_expr )) => do
+    let some (.local v) := lhsHead Γ l | Macro.throwErrorAt l "a send's result lands in a stack local"
+    return (← `(Stmt.send $v $(← schemaAt Γ .val r) $(← schemaAt Γ .val a)), Γ)
+  | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $a:sol_expr )) => do
+    let some (b, "send") ← callRecv? f | Macro.throwErrorAt f "only `r.send(a)` is a call assigned"
+    schemaStmt fresh Γ (← `(sol_stmt| $l:sol_expr = $b:sol_expr .send( $a )))
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) => do
     let some (b, m) ← callRecv? f | Macro.throwErrorAt f "only `b.push(a)` and `r.transfer(a)` are calls"
     match m with
@@ -1481,6 +1494,17 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
   | `(dl_premise| $b:dl_branch ; $bs:dl_branch;*) => do
     let bs ← (#[b] ++ bs.getElems).mapM (schemaBranch fresh Γ)
     `($(mkIdent `Solidity.Premise.branches) [$bs,*])
+  | `(dl_premise| $c:dl_case ; $cs:dl_case;*) => do
+    let mut fs : Array Lean.Term := #[]
+    let mut us : Array Lean.Term := #[]
+    for c in #[c] ++ cs.getElems do
+      match c with
+      | `(dl_case| $[$_:str :]? $U:dl_upd ⟨[ ]⟩) => us := us.push (← schemaUpd Γ U)
+      | `(dl_case| $[$_:str :]? $φ:dl_fml) =>
+        unless us.isEmpty do Macro.throwErrorAt c "the formula goals come first"
+        fs := fs.push (← schemaFml φ)
+      | _ => Macro.throwUnsupported
+    `($(mkIdent `Solidity.Premise.cases) [$fs,*] [$us,*])
   | _ => Macro.throwUnsupported
 
 /-- The identifiers of a `\find`, outside `‹…›`. -/
@@ -2062,6 +2086,9 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     | _ => escape
   | Stmt.pop _ _ b => `(sol_stmt| $(← ppExpr b):sol_expr .pop())
   | Stmt.transfer _ r a => `(sol_stmt| $(← ppExpr r):sol_expr .transfer( $(← ppExpr a) ))
+  | Stmt.send _ x r a =>
+    let some x ← ppVar? x | escape
+    `(sol_stmt| $x:ident = $(← ppExpr r):sol_expr .send( $(← ppExpr a) ))
   | Stmt.delete _ _ l => `(sol_stmt| delete $(← ppExpr l):sol_expr)
   | Stmt.deleteMem _ _ p _ => `(sol_stmt| delete $(← ppExpr p):sol_expr)
   | Stmt.assignNew _ R l n _ =>
@@ -2979,6 +3006,7 @@ attribute [delab app.Solidity.Stmt.assign, delab app.Solidity.Stmt.rebind,
   delab app.Solidity.Stmt.declStorage, delab app.Solidity.Stmt.opAssign,
   delab app.Solidity.Stmt.incDec, delab app.Solidity.Stmt.assignIncDec,
   delab app.Solidity.Stmt.push, delab app.Solidity.Stmt.pop, delab app.Solidity.Stmt.transfer,
+  delab app.Solidity.Stmt.send,
   delab app.Solidity.Stmt.declMem, delab app.Solidity.Stmt.rebindMem,
   delab app.Solidity.Stmt.assignFromMem, delab app.Solidity.Stmt.assignMem,
   delab app.Solidity.Stmt.delete, delab app.Solidity.Stmt.deleteMem,
