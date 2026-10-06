@@ -87,15 +87,17 @@ where `d` returns. -/
 info: symbolic execution leaves:
     dl{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x = 42 }
 update-free:
-    has(storage, alice.age) == has(storage, alice.age) → (has(storage, alice.age); 42) == (has(storage, alice.age); 42) → (has(storage, alice.age); 42) == 42
+    has(storage, alice.age) = has(storage, alice.age) → (has(storage, alice.age); 42) = (has(storage, alice.age); 42) → (has(storage, alice.age); 42) = 42
 -/
 #guard_msgs in #wp dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
 
 
-/-! Memory is pushed in as one term (`LMem`): a copy from storage under its
-guard (`copyOk`, the subtree copies), the `k`-th allocation `#k`, a
-`new T[](n)` one node (`newArr`), and a copy of memory into storage read
-through its view (`copyMem(…)` at `#view`). -/
+/-! Memory is pushed in as one term (`LMem`), printed as KeY writes it: a
+copy from storage under its guard (`copyOk`, the subtree copies), the `k`-th
+allocation `addM(m, shaped(idpk, T))` and its objects `idC(idpk, flds)`, a
+`new T[](n)` as the allocation and the write of its `size`, and a copy of
+memory into storage `save(s, p, copyMem(mtSt, m, i))`, read through its
+view. -/
 
 /--
 info: symbolic execution leaves:
@@ -103,7 +105,7 @@ info: symbolic execution leaves:
   { carol := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
     { x := read(memory, carol.age) } x = find(storage, alice.age) }
 update-free:
-    (copyOk(storage, alice); orElse((find(storage, alice); true), false) ? err : true) == (copyOk(storage, alice); orElse((find(storage, alice); true), false) ? err : true) → find(storage, alice.age) == find(storage, alice.age) → find(storage, alice.age) == find(storage, alice.age)
+    (copyOk(storage, alice); if(orElse((find(storage, alice); true), false)) then err else true) = (copyOk(storage, alice); if(orElse((find(storage, alice); true), false)) then err else true) → find(storage, alice.age) = find(storage, alice.age) → find(storage, alice.age) = find(storage, alice.age)
 -/
 #guard_msgs in #wp dl!{ [ Person memory carol = alice; uint x = carol.age; ] x == alice.age }
 
@@ -114,7 +116,7 @@ info: symbolic execution leaves:
     { memory := write(memory, xs[i], 7) }
       { storage := store(storage, values, copyMem(mtSt, memory, xs)) } find(storage, values[i]) = 7 }
 update-free:
-    (n ≡ n ? true : true) == (n ≡ n ? true : true) → ((i ≡ i ? true : true); ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err) == ((i ≡ i ? true : true); ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err) → ((n ≡ n ? true : true), ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err; has(storage, values)) == ((n ≡ n ? true : true), ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err; has(storage, values)) → ((n ≡ n ? true : true), ((0 <= i) && (i < ((n < 0) ? 0 : n))) ? true : err, has(storage, values), ok(values[i]); orElse((err; true), false) ? find(copy(storage, values, copyMem(write(newArr(memory, #0, n), #0[i], 7), #0), #view), values[i]) : (i ≡ i ? 7 : (((0 <= i) && (i < n)) ? true : err; 0))) == 7
+    (if(n = n) then true else true) = (if(n = n) then true else true) → ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) = ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) = ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err), has(storage, values), ok(values[i]); if(orElse((err; true), false)) then find(save(storage, values, copyMem(mtSt, write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, n), idC(idp0, nil), at(i), 7), idC(idp0, nil))), values[i]) else if(i = i) then 7 else ((if((0 <= i) && (i < n)) then true else err); 0)) = 7
 -/
 #guard_msgs in
 #wp dl!{ [ uint[] memory xs = new uint[](n); xs[i] = 7; values = xs; ] values[i] == 7 }

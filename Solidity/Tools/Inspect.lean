@@ -19,7 +19,9 @@ import Solidity.Tools.Common
   When that formula is in `sol_decide`'s fragment (`Fml.inL`) it also prints
   its reduction (`Fml.reduce`): the updates pushed in and every read of a
   write eliminated, a formula over the initial state alone, printed by
-  `LFml.fmt` (`find(storage, alice.age)`, `save(s, p, w)`, `∧`, `→`, `¬`).
+  `LFml.fmt` in KeY's spelling (`find(storage, alice.age)`, `save(s, p, w)`,
+  `delAt(s, p)`, `if(i = j) then a else b`, `write(m, idC(idp0, nil), at(i),
+  v)`, `=`, `∧`, `→`, `¬`, `∀ uint x; φ`).
 * `#step φ` takes one step and names the rule, as a line of `#derivation`.
 * `#taclet r` prints a rule: its statement (the delaborator shows it as
   `dl{ ⟨[ s; ]⟩ ⇝ p }`), the solkey taclets it transcribes and their
@@ -68,33 +70,46 @@ def LTerm.guards : LTerm → List LTerm × LTerm
     (gd ++ [vd] ++ ga, va)
   | t => ([], t)
 
-/-- A memory name, its root ordinal and its literal path: `#0.account`. -/
+/-- The allocation ordinal `k` as KeY's Skolem identity: `idp0`. -/
+def idpFmt (k : Nat) : String := s!"idp{k}"
+
+/-- A memory name as KeY writes it, `idC(idp, flds)`: `idC(idp0, nil)`,
+`idC(idp0, [account, at(2)])`. -/
 def LId.fmt (i : LId) : String :=
-  i.path.foldl (fun acc a => match a with
-    | .field f => s!"{acc}.{f}"
-    | .at k => s!"{acc}[{k}]") s!"#{i.root}"
+  let seg : Seg → String
+    | .field f => f
+    | .at k => s!"at({k})"
+  let flds := if i.path.isEmpty then "nil" else "[" ++ ", ".intercalate (i.path.map seg) ++ "]"
+  s!"idC({idpFmt i.root}, {flds})"
 
 mutual
-/-- A term of the target language. -/
+/-- A term of the target language, in KeY's spelling where KeY has the
+symbol (`find`, `delValue`, `if(…) then … else …`); the guards only Lean has
+keep Lean's names (`has`, `isMap`, `isFixed`, `ok`, `copyOk`, `orElse`,
+`err`), and `(d; a)` is `a` where `d` returns. -/
 partial def LTerm.fmt [FreshNames] : LTerm → String
   | .lit v => Value.fmt v
   | .var x => toString x
   | .binop op _ a b => s!"{LTerm.fmtArg a} {BinOp.sym op} {LTerm.fmtArg b}"
   | .unop op _ a => s!"{UnOp.sym op}{LTerm.fmtArg a}"
-  | .ite c a b => s!"{LTerm.fmtArg c} ? {LTerm.fmtArg a} : {LTerm.fmtArg b}"
+  | .ite c a b => s!"if({LTerm.fmt c}) then {LTerm.fmtArg a} else {LTerm.fmt b}"
   | .find s q => s!"find({LStor.fmt s}, {LPath.fmt q})"
   | .has s q => s!"has({LStor.fmt s}, {LPath.fmt q})"
   | .kmap sh s q => s!"{KShape.fmt sh}({LStor.fmt s}, {LPath.fmt q})"
-  | .len s q => s!"length({LStor.fmt s}, {LPath.fmt q})"
+  | .len s q => s!"find({LStor.fmt s}, {LPath.fmt q}.length)"
   | .sok s => s!"ok({LStor.fmt s})"
   | .pok q => s!"ok({LPath.fmt q})"
   | t@(.seq ..) =>
     let (gs, v) := LTerm.guards t
-    let gs := (gs.filter (!LTerm.total ·)).map LTerm.fmt |>.eraseDups
+    let guard : LTerm → String
+      | g@(.ite ..) | g@(.kite ..) => s!"({LTerm.fmt g})"
+      | g => LTerm.fmt g
+    let gs := (gs.filter (!LTerm.total ·)).map guard |>.eraseDups
     if gs.isEmpty then LTerm.fmt v else s!"({", ".intercalate gs}; {LTerm.fmt v})"
   | .orElse a b => s!"orElse({LTerm.fmt a}, {LTerm.fmt b})"
-  | .kite a b t e => s!"({LTerm.fmt a} ≡ {LTerm.fmt b} ? {LTerm.fmt t} : {LTerm.fmt e})"
-  | .zero a => s!"zero({LTerm.fmt a})"
+  | .kite a b t e =>
+    s!"if({LTerm.fmt a} = {LTerm.fmt b}) then {LTerm.fmtArg t} else {LTerm.fmt e}"
+  | .zero a => s!"delValue({LTerm.fmt a})"
   | .err => "err"
   | .env k => k.toStr
   | .findP s q => s!"find({LStor.fmt s}, {LPath.fmt q})"
@@ -102,7 +117,7 @@ partial def LTerm.fmt [FreshNames] : LTerm → String
 
 /-- A term as an operand: parenthesised unless it is atomic. -/
 partial def LTerm.fmtArg [FreshNames] : LTerm → String
-  | t@(.binop ..) | t@(.ite ..) => s!"({LTerm.fmt t})"
+  | t@(.binop ..) | t@(.ite ..) | t@(.kite ..) => s!"({LTerm.fmt t})"
   | t => LTerm.fmt t
 
 /-- A path, the root first: `alice.account.balance`, `balances[k]`. -/
@@ -111,34 +126,46 @@ partial def LPath.fmt [FreshNames] : LPath → String
   | .field q f => s!"{LPath.fmt q}.{f}"
   | .at q k => s!"{LPath.fmt q}[{LTerm.fmt k}]"
 
-/-- A storage: `storage`, and the writes on top of it. -/
+/-- A storage: `storage`, and the writes on top of it.  A copy is KeY's
+`save(s, q, find(src, sq))`, and a copy of memory `save(s, q, copyMem(mtSt,
+m, i))`; a write through a stale alias is `staleSave`, a node only Lean has
+(`staleSave` in `Calculus/DecideLang.lean`). -/
 partial def LStor.fmt [FreshNames] : LStor → String
   | .init => "storage"
   | .save s q w => s!"save({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .del s q => s!"del({LStor.fmt s}, {LPath.fmt q})"
+  | .del s q => s!"delAt({LStor.fmt s}, {LPath.fmt q})"
   | .arr .push s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
   | .arr (.slot _) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
   | .arr (.pop _) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"
-  | .stale none s q w => s!"save({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
+  | .stale none s q w => s!"staleSave({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
   | .stale (some .push) s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
   | .stale (some (.slot _)) s q _ => s!"pushSlot({LStor.fmt s}, {LPath.fmt q})"
   | .stale (some (.pop _)) s q _ => s!"pop({LStor.fmt s}, {LPath.fmt q})"
-  | .copy s q src sq => s!"copy({LStor.fmt s}, {LPath.fmt q}, {LStor.fmt src}, {LPath.fmt sq})"
-  | .view m i => s!"copyMem({LMem.fmt m}, {LId.fmt i})"
+  | .copy s q src@(.view ..) (.root r) =>
+    if r = viewRoot then s!"save({LStor.fmt s}, {LPath.fmt q}, {LStor.fmt src})"
+    else s!"save({LStor.fmt s}, {LPath.fmt q}, find({LStor.fmt src}, {r}))"
+  | .copy s q src sq =>
+    s!"save({LStor.fmt s}, {LPath.fmt q}, find({LStor.fmt src}, {LPath.fmt sq}))"
+  | .view m i => s!"copyMem(mtSt, {LMem.fmt m}, {LId.fmt i})"
 
-/-- A memory: `memory`, and the allocations and writes on top of it. -/
+/-- A memory: `memory`, and the allocations and writes on top of it, as KeY
+writes them.  The `k`-th allocation is `shaped(idpk, T)`, its type in place
+of KeY's `#shapeOf`; a `new T[](n)` is the allocation and the write of its
+`size`. -/
 partial def LMem.fmt [FreshNames] : LMem → String
   | .init => "memory"
-  | .addM m k _ => s!"addM({LMem.fmt m}, #{k})"
-  | .newArr m k _ n => s!"newArr({LMem.fmt m}, #{k}, {LTerm.fmt n})"
-  | .copySt m k s q => s!"copySt({LMem.fmt m}, #{k}, {LStor.fmt s}, {LPath.fmt q})"
-  | .write m i a v => s!"write({LMem.fmt m}, {LId.fmt i}{LSel.fmt a}, {LMV.fmt v})"
+  | .addM m k R => s!"addM({LMem.fmt m}, shaped({idpFmt k}, {(Ty.ref R).toStr}))"
+  | .newArr m k R n =>
+    s!"write(addM({LMem.fmt m}, shaped({idpFmt k}, {(Ty.ref R).toStr})), \
+      {LId.fmt ⟨k, []⟩}, size, {LTerm.fmt n})"
+  | .copySt m k s q => s!"copySt({LMem.fmt m}, {idpFmt k}, find({LStor.fmt s}, {LPath.fmt q}))"
+  | .write m i a v => s!"write({LMem.fmt m}, {LId.fmt i}, {LSel.fmt a}, {LMV.fmt v})"
 
-/-- A selector: `.f`, `[t]`, `.size`. -/
+/-- A selector, as KeY's: a member `f`, an element `at(t)`, the length `size`. -/
 partial def LSel.fmt [FreshNames] : LSel → String
-  | .fld f => s!".{f}"
-  | .idx t => s!"[{LTerm.fmt t}]"
-  | .size => ".size"
+  | .fld f => f
+  | .idx t => s!"at({LTerm.fmt t})"
+  | .size => "size"
 
 /-- A memory value: a word, or a name. -/
 partial def LMV.fmt [FreshNames] : LMV → String
@@ -147,23 +174,23 @@ partial def LMV.fmt [FreshNames] : LMV → String
 end
 
 /-- A reduced formula: `∧` binds tighter than `→`, which associates to the
-right. -/
+right; `=` is KeY's equality, and `∀ uint x; φ` its quantifier. -/
 partial def LFml.fmt [FreshNames] : LFml → String
   | .tt => "true"
-  | .eq a b => s!"{LTerm.fmtArg a} == {LTerm.fmtArg b}"
+  | .eq a b => s!"{LTerm.fmtArg a} = {LTerm.fmtArg b}"
   | .not φ => s!"¬{atom φ}"
   | .and φ ψ => s!"{conj φ} ∧ {conj ψ}"
   | .imp φ ψ => s!"{atom' φ} → {LFml.fmt ψ}"
-  | .all x p φ => s!"∀ {p.toStr} {x}, {LFml.fmt φ}"
+  | .all x p φ => s!"∀ {p.toStr} {x}; {LFml.fmt φ}"
 where
   atom : LFml → String
     | φ@(.tt) | φ@(.not _) => LFml.fmt φ
     | φ => s!"({LFml.fmt φ})"
   conj : LFml → String
-    | φ@(.imp ..) => s!"({LFml.fmt φ})"
+    | φ@(.imp ..) | φ@(.all ..) => s!"({LFml.fmt φ})"
     | φ => LFml.fmt φ
   atom' : LFml → String
-    | φ@(.imp ..) => s!"({LFml.fmt φ})"
+    | φ@(.imp ..) | φ@(.all ..) => s!"({LFml.fmt φ})"
     | φ => LFml.fmt φ
 
 /-! ## What the commands evaluate -/

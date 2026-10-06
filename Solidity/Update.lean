@@ -120,8 +120,9 @@ inductive Op1 : Srt → Srt → Type where
   /-- `x[a]`: what the ledger bound at `x` holds for `a`, KeY's
   `selectSt(oldNet, at(a))`, which a specification's `\old(net(a))` reads. -/
   | netOf (x : Var) : Op1 .val .val
-  /-- `delValue(t)`: the default of the word `t`, KeY's `delValue<[α]>`, what
-  a delete leaves at a word (`Theory.delValue`). -/
+  /-- `delValue(t)`: the default of the word `t`, what a delete leaves at a
+  word (`Theory.delValue`).  solkey replaced its `delValue<[α]>` by
+  `delField<[α]>(st, a)`, which is `delValue(selectSt(st, a))` here. -/
   | delValue : Op1 .val .val
   | field (f : Name) : Op1 .path .path
   /-- `p[p.length]`: the slot one past the end, where `lsv = p.push()` binds
@@ -203,7 +204,8 @@ inductive Op2 : Srt → Srt → Srt → Type where
 inductive Op3 : Srt → Srt → Srt → Srt → Type where
   /-- `c ? a : b`, KeY's `if c then a else b`. -/
   | ite : Op3 .val .val .val .val
-  /-- `save(s, p, v)`; at a state variable, KeY's `store(s, r, v)`. -/
+  /-- `save(s, p, v)`, KeY's `save`, at a state variable as well
+  (`storageRootWriteStore`: `save(storage, gsp, se)`). -/
   | save : Op3 .st .path .sv .st
   /-- `save(save(s, p[p.length], v), p.length, p.length + 1)`. -/
   | push : Op3 .st .path .sv .st
