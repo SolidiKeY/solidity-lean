@@ -413,11 +413,31 @@ taclets	TestSuite	ternaryToIfStorage	derived	diamond	`Solkey.TestSuite.ternaryTo
 taclets	TestSuite	transferToOwner	derived	box	`Solkey.TestSuite.transferToOwner.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	transferUnfoldReceiver	derived	box	`Solkey.TestSuite.transferUnfoldReceiver.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	transferUnfoldArgument	derived	box	`Solkey.TestSuite.transferUnfoldArgument.proved` (`Solidity/TestSuite/Derived6.lean`)
-taclets	TestSuite	tryCalleeGet	skip	skip; for all x	TestSuite.sol:3483: tagged `@custom:key skip`
-taclets	TestSuite	tryCalleePing	skip	skip	TestSuite.sol:3488: tagged `@custom:key skip`
+taclets	TestSuite	sendToOwner	derived	box	`Solkey.TestSuite.sendToOwner.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	sendUnfoldReceiver	derived	box	`Solkey.TestSuite.sendUnfoldReceiver.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	sendUnfoldArgument	derived	box	`Solkey.TestSuite.sendUnfoldArgument.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	callToSender	derived	box	`Solkey.TestSuite.callToSender.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tryCalleeGet	skip	skip; for all x	TestSuite.sol:3511: tagged `@custom:key skip`
+taclets	TestSuite	tryCalleePing	skip	skip	TestSuite.sol:3516: tagged `@custom:key skip`
 taclets	TestSuite	tryCallCatchKeepsState	derived	box	`Solkey.TestSuite.tryCallCatchKeepsState.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	tryCallBindsReturnAndPanicCode	derived	box	`Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	tryCallUnmatchedFailureReverts	derived	box	`Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved` (`Solidity/TestSuite/Derived6.lean`)
+taclets	TestSuite	internalCallDeclaration	derived	diamond	`Solkey.TestSuite.internalCallDeclaration.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	internalCallInExpression	derived	diamond	`Solkey.TestSuite.internalCallInExpression.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	internalCallToStorage	derived	diamond	`Solkey.TestSuite.internalCallToStorage.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnEarly	derived	diamond	`Solkey.TestSuite.returnEarly.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleReturnPair	derived	diamond	`Solkey.TestSuite.tupleReturnPair.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleReturnReadsReturnVariables	derived	diamond	`Solkey.TestSuite.tupleReturnReadsReturnVariables.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleReturnDiscardsComponents	derived	diamond	`Solkey.TestSuite.tupleReturnDiscardsComponents.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleReturnAssignsExisting	derived	diamond	`Solkey.TestSuite.tupleReturnAssignsExisting.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleAssignmentRotates	derived	diamond	`Solkey.TestSuite.tupleAssignmentRotates.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	tupleDeclaration	derived	diamond	`Solkey.TestSuite.tupleDeclaration.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnLeavesNestedBlocks	derived	diamond	`Solkey.TestSuite.returnLeavesNestedBlocks.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnOrFallThroughNamed	derived	diamond	`Solkey.TestSuite.returnOrFallThroughNamed.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnFromNestedCall	derived	diamond	`Solkey.TestSuite.returnFromNestedCall.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnAfterRevertGuard	derived	diamond	`Solkey.TestSuite.returnAfterRevertGuard.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnFromTryBranches	derived	box	`Solkey.TestSuite.returnFromTryBranches.proved` (`Solidity/TestSuite/Derived14.lean`)
+taclets	TestSuite	returnFromVoidFunction	derived	diamond	`Solkey.TestSuite.returnFromVoidFunction.proved` (`Solidity/TestSuite/Derived14.lean`)
 solc	SolcExpressions	postIncrementYieldsOldValue	proved	`T r = x++;` split into `T r; r = x++;`	
 solc	SolcExpressions	preIncrementYieldsNewValue	proved	`T r = x++;` split into `T r; r = x++;`	
 solc	SolcExpressions	incDecChainOnLocal	proved	`T r = x++;` split into `T r; r = x++;`	
@@ -503,7 +523,7 @@ net	Net	casino_placeBet_invariant	unsupported		assumes an uninterpreted CInv ove
 net	Net	escrow_placeInEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	escrow_releaseEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	escrow_withdrawFrom_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	net_call_withcallback_simple	unsupported		`(bool ok, ) = a.call{value: v}("")` is lowered to a send only once `sol{}` has tuples, and the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	net_call_withcallback_simple	unsupported		`(bool ok, ) = a.call{value: v}("")` is the send `bool ok = a.send(v)`, as solkey lowers it, and its callback reading is ported (`Calculus/Callback.lean`, `ProvesC.send`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
 net	Net	net_msg_value	unsupported		`msg.value` is not a program expression
 net	Net	net_send_simple	proved	solkey net-send-simple.key	`Examples/Tactics/Net.lean` `Net.netSendSimple`
 net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key	`Examples/Tactics/Net.lean` `Net.netTransferCapturedAmount`

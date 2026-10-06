@@ -1,12 +1,12 @@
 # Proving solkey's TestSuite by `⊢`
 
-The goal: every obligation of solkey's `TestSuite.sol` (418 functions, 2 more
-tagged skip), stated as solkey's `SolidityProblemSynthesizer` states it and
+The goal: every obligation of solkey's `TestSuite.sol` (438 functions, 2 more
+tagged skip, 12 internal), stated as solkey's `SolidityProblemSynthesizer` states it and
 derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today 415 of the 418 are derived by `⊢` (`TestSuite/Report.lean`), and the
+Today 435 of the 438 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 ## Decisions (2026-10-05)
@@ -21,6 +21,15 @@ corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 - **Front end.** solc's JSON AST → normalized `sol` text → the existing
   `contract!`/`sol_raw!` macros: one lowering path.
 - **Scope.** M0 and M1, then M2 (done, below).
+- **Two replays past `Derive.replayFits` (2026-10-06).**  `returnEarly`
+  and `tupleReturnDiscardsComponents` (`TestSuite/Derived14.lean`) stay
+  bare `sol_prove` theorems although `#solkey_derive?` calls them pending:
+  their kernel check counts about 270k and 490k heartbeats and is not
+  stopped by `maxHeartbeats` on v4.24.  An exception, not a precedent: no
+  override, the proofs are kernel-checked, and `TestSuite/Suggestions.lean`
+  pins `returnEarly` as past the limit, so pruning by ground conditions in
+  `Derive.residue` (the follow-up, W7 review below), or a toolchain whose
+  kernel stops at the limit, is noticed.
 
 ## Measurements (2026-10-05)
 
@@ -108,6 +117,9 @@ What they say:
 - **Dangling aliases.** Writes and pushes through an alias bound through
   an index, made live again by a `push()`, a `delete` or a copy.  Done
   (below): 415 derived; `testArrayCopyClearsOldElements` stays pending.
+- **Re-import at solkey `1b4341a303`** (W6, W7, below): 452 functions,
+  12 of them internal; the twenty new obligations (`send`, internal calls,
+  `return`, tuples) derived in `Derived14`: 435 derived.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`
@@ -2087,3 +2099,122 @@ on master and on this branch, one after the other with `Elab.async false`,
 before merging. `TestSuite/Derived*` was not built in this lane (no
 `lake build SolkeyTestSuite` here); its obligations contain none of the
 new terms.
+
+## The fixture at `1b4341a303` (W6, 2026-10-06)
+
+- `scripts/solc-ast.mjs --solkey <clone> --soljson <dir>` (the new
+  `--soljson` takes the pinned compiler from another checkout, since a fresh
+  clone has not run `downloadSoljson`; its sha256 is still checked against
+  the clone's `build.gradle`) re-imported `TestSuite.sol`: header
+  `solkeyCommit` `1b4341a3032b…`, hash `0x7d6bb282699871b5`.
+- The import: **452 functions (331 diamond, 107 box, 2 skip, 12
+  internal): 449 elaborated, 2 skipped, 1 excluded, 0 unsupported**.  All
+  32 new functions import (the 12 internal ones are programs, inlined at
+  their calls; `callToSender`'s `(bool success, ) = payable(msg.sender)
+  .call{value: amount}("")` is the send, as `isValueCall` reads it); the
+  skip rows moved to lines 3511 and 3516.  `Problems.lean`: 437
+  statements.
+- `Report.lean`: **452 functions: 415 derived, 22 pending, 15 other**; the
+  20 new obligations are pending (W7).  `expected.tsv`: 440 TestSuite rows
+  (415 derived, 21 pending, 1 divergent, 1 excluded, 2 skip);
+  `check-testsuite.sh` ok against the clone.  The `solc/` sources did not
+  change between `78f42fde33` and `1b4341a303`, so those rows keep their
+  verdicts and only their headers move.
+- `net_call_withcallback_simple`'s reason was stale (it waited for tuples);
+  it now says the call is the send solkey lowers it to and that only `CInv`
+  over the ledger stands in the way.  `sol{}` has no spelling of the
+  `call{value: v}("")` form itself: adding it is a `Syntax.lean` edit, which
+  re-checks the whole package and the 13 `Derived` modules, for a row that
+  stays unsupported because of `CInv`.  Left for the next change that
+  touches `Syntax.lean` anyway.
+- **Derived1, before and after** (a scratch module importing `Problems`,
+  `Elab.async false`, the 40 theorems between two `IO.monoNanosNow`, warm):
+  7672, 7662 ms at `78f42fde33`; 7281, 7293 ms at `1b4341a303`.  No
+  slowdown: the 12 function bodies the contract now carries are not
+  unfolded by the kernel on the old obligations.
+- The new printer paths of W5 (returns, tuples, the value call) are now
+  exercised by the committed fixture.
+
+## The twenty new obligations (W7, 2026-10-06)
+
+- `TestSuite/Derived14.lean`: all twenty, in the order of the source, each
+  `sol_prove` with no leaf (the closer takes every path).  `Report.lean`:
+  **452 functions: 435 derived, 2 pending, 15 other**, the pending ones
+  `storagePushReadBack` (divergent in the tables) and
+  `testArrayCopyClearsOldElements`.  `expected.tsv` and
+  `Corpus/TestSuite.lean` regenerated (`solkey-port.mjs` without `--probe`:
+  the TestSuite rows are read off the pin): 435 derived, 1 pending, 1
+  divergent, 1 excluded, 2 skip, and twenty more corollaries
+  (`box_of_proved`/`diamond_of_proved`).  `check-testsuite.sh` ok against
+  the clone; `Report.lean` and `Corpus/TestSuite.lean` check clean, so each
+  theorem uses Lean's three axioms only.
+- **Two replays past `Derive.replayFits`.**  `#solkey_derive?` prints
+  `returnEarly` and `tupleReturnDiscardsComponents` as pending ("its replay
+  is past maxHeartbeats as one declaration", 270k and 493k heartbeats).
+  Both close with no leaf, so the replay is `sol_prove` alone: its cost is
+  the kernel's check of `Derive.proves … = true`, which raises the counter
+  but is not stopped by the limit (v4.24, "Measurements" above), and nothing
+  follows it in the declaration.  Both check at the default limit, with no
+  override.  They are many paths, each run to its end before the closer
+  prunes it: `returnEarly` calls `returnSign` (three exits) three times,
+  27 paths; `returnStats` has four conditionals and an `&&`, 32 paths.
+- **Cost, a warning.**  `Derived14` (scratch copy, `Elab.async false`,
+  `IO.monoMsNow` between theorems, warm) takes 155 s: `tupleReturnDiscardsComponents`
+  98.3 s and `returnEarly` 25.0 s, the eighteen others 32 s (the slowest
+  `returnFromVoidFunction` 6.9 s, `returnLeavesNestedBlocks` 5.0 s,
+  `returnOrFallThroughNamed` 4.7 s; the four `send` obligations about
+  0.2 s each).  That is more than 10% on the `SolkeyTestSuite` target:
+  `Derived7`, the slowest module before, takes 58 s for 40 theorems, so
+  one theorem now costs more than any module.  With `Elab.async` the
+  theorems of the module are checked in parallel, so the build's wall
+  clock grows by about the slowest theorem, 98 s.  The cheaper route is
+  pruning a path at its split when the condition is ground under its
+  updates (here every argument is a literal), in `Derive.residue`; that
+  is a change to the strategy, which re-checks every `Derived` module, and
+  is left for its own change.
+
+## W7 review (2026-10-06)
+
+A finder and a skeptic over W6 and W7; what the skeptic confirmed, fixed:
+
+- **The two replays past `maxHeartbeats`** are kept, as a decision
+  (Decisions, above), with `returnEarly` pinned in `Suggestions.lean`
+  (`#solkey_derive? … only returnEarly`: "pending, its replay is past
+  maxHeartbeats as one declaration"; `tupleReturnDiscardsComponents`, same
+  cause, is not pinned, its search being 98 s more).  `Derived14`'s
+  docstring says so, with their times (25 s and 98 s, scratch, warm).
+- **Follow-up: prune by ground conditions.**  In `Derive.residue`, a split
+  whose condition is ground under the updates before it keeps only the
+  branch it takes, as the closer would prune the other at its leaf; with it
+  `returnEarly`'s 27 paths and `returnStats`' 32 are one each, and both
+  replays should fit.  A change to the strategy, so its own change: every
+  `Derived` module re-checks.
+- **The command-line build.**  This lane runs no Lake in the shell, so
+  `./run-lean.sh` is left for the merge; every module of `SolkeyTestSuite`
+  was built by Lake, though, as the language server's file setup builds a
+  file's imports (`lean --tstack=131072 … -o`, the command `lake build`
+  runs, logged in each `.trace`), from scratch roots importing three
+  `Derived` modules at a time, after the edits to `Frontend/Problems.lean`
+  and `TestSuite/Problems.lean` below invalidated them all.  All clean.
+  Wall clock per module, the other lane building beside it: `Derived14`
+  214 s alone (219 s on a first run), `Derived7` 213 s, `Derived8` and
+  `Derived9` under 90 s, `Derived1`–`6` and `10`–`13` under 80 s each
+  (`Derived3` 75 s),
+  `Suggestions` 84 s (its three searches), `Report` 1 s.  On the command
+  line `Derived14` costs what `Derived7` costs, so the target's critical
+  path, its slowest module, does not grow by the 98 s estimated in W7.
+- **`#solkey_obligations` took nine minutes** (531 s, measured in a
+  scratch module; `Report.lean`'s build took 8 min), not the "under
+  100 ms" M3b review 2 says: `union.all std || (← collectAxioms t).all std`
+  runs `collectAxioms t` for every theorem, since `do` hoists a `←` out of
+  the `||`, and each run traverses the library afresh (0.6–1.2 s, 435
+  theorems).  Split into two `if`s (`Frontend/Problems.lean`): `Report`
+  now builds in about 1 s.  It was so before W7 too, at a little less.
+- Docstrings: `Derived14` cites `sendNoCallbackBox` alone (the four `send`
+  obligations are box); `TestSuite/Problems.lean` says a statement is per
+  public or external function (449 elaborated, 437 statements);
+  `docs/module-map.md`'s `Report.lean` row says fifteen with no statement.
+  `solkey-port.mjs` writes "440 obligations (452 functions, 12 internal)"
+  in `Corpus/TestSuite.lean`'s header and the same count in
+  `docs/corpus-parity.md`'s prose; `expected.tsv` does not move, and
+  `check-testsuite.sh` is ok against the clone.

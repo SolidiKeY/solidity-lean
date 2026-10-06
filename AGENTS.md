@@ -188,7 +188,7 @@ import changes and final confirmation. The `lean-verify` skill in
 
 | Command | What it covers |
 |---|---|
-| `./run-lean.sh` | `lake build` (default targets), `lake build SolkeyTestSuite` (the solc import, 417 statements, the derived theorems `TestSuite/Report.lean` counts: the slowest part), then the solkey sort check |
+| `./run-lean.sh` | `lake build` (default targets), `lake build SolkeyTestSuite` (the solc import, 437 statements, the derived theorems `TestSuite/Report.lean` counts: the slowest part), then the solkey sort check |
 | `node scripts/check-orphans.mjs` | every module is reachable from a library root |
 | `./scripts/check-doc-paths.sh` | every backticked `*.lean` in the prose names a file that exists |
 | `lake exe solkeycheck` | sort annotations against solkey's `.key` |

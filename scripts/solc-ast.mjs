@@ -27,8 +27,11 @@
  * bytes): the import refuses a fixture of another hash, and this script
  * rewrites the literal, which makes Lake re-check the module.
  *
- * Usage: node scripts/solc-ast.mjs [--solkey <checkout>] [--out <file>] [--no-wrapper]
+ * Usage: node scripts/solc-ast.mjs [--solkey <checkout>] [--soljson <dir>] [--out <file>] [--no-wrapper]
  *   --solkey      the solkey checkout (default ../solkey, or SOLKEY_ROOT)
+ *   --soljson     the directory holding the pinned soljson (default the
+ *                 checkout's `keyext.solidity.core/build/soljson`; a fresh
+ *                 clone has none, so point it at another checkout's)
  *   --out         where to write the fixture (default tests/solc/TestSuite.ast.json)
  *   --no-wrapper  leave the importing module's hash literal alone
  *   --compare-cache  also compare the trimmed AST with solkey's own cached solc
@@ -66,7 +69,8 @@ const gradle = readFileSync(join(SOLKEY, "keyext.solidity.core/build.gradle"), "
 const soljsonFile = gradle.match(/ext\.soljsonFile\s*=\s*"([^"]+)"/)?.[1];
 const soljsonSha = gradle.match(/ext\.soljsonSha256\s*=\s*"([0-9a-f]{64})"/)?.[1];
 if (!soljsonFile || !soljsonSha) fail("no soljsonFile/soljsonSha256 in build.gradle");
-const soljsonPath = join(SOLKEY, "keyext.solidity.core/build/soljson", soljsonFile);
+const soljsonDir = optionOf("--soljson", join(SOLKEY, "keyext.solidity.core/build/soljson"));
+const soljsonPath = join(soljsonDir, soljsonFile);
 if (!existsSync(soljsonPath)) {
   fail(`${soljsonPath} is missing: run solkey's \`./gradlew downloadSoljson\` first`);
 }

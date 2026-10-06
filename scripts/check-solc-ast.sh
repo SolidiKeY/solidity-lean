@@ -4,7 +4,7 @@
 # compare it with solkey's own cached solc output where there is one. Then check
 # that the importing module names the fixture's hash.
 #
-# Usage: scripts/check-solc-ast.sh [--solkey <checkout>]
+# Usage: scripts/check-solc-ast.sh [--solkey <checkout>] [--soljson <dir>]
 # Exit 0 = the fixture is what the compiler writes, 1 = it drifted (re-pin with
 # `node scripts/solc-ast.mjs`).
 set -euo pipefail
