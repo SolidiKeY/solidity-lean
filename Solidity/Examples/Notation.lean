@@ -28,7 +28,7 @@ per family. -/
 
 /--
 info: @Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Ty} {lhs : Hole C x}
-  {x_1 : Name} {nsp : SPath C (Ty.struct x_1)} {fld : Name} {hfld : C.fieldType x_1 fld = some x},
+  {x_1 : Name} {nsp : SPath C (Ty.struct x_1)} {fld : Name},
   dl{ ⟨[ lhs = nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; lhs = sp.fld; ]⟩ }
 -/
 #guard_msgs in #check @Taclet.storageFieldRead_unfold_rightFst
@@ -46,7 +46,7 @@ info: @Taclet.storageIndexWriteCaptureAllComplexRecv : ∀ {C : Contract} {k : N
 
 /--
 info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Name} {sp : SPath C (Ty.struct x)}
-  {fld : Name} {x_1 : PrimTy} {hfld : C.fieldType x fld = some (Ty.prim x_1)} {se : Simple C x_1},
+  {fld : Name} {x_1 : PrimTy} {se : Simple C x_1},
   dl{ ⟨[ sp.fld = se; ]⟩ ⇝ { storage := save(storage, sp.fld, se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.storageFieldWriteSave
@@ -55,7 +55,7 @@ info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality
 
 /--
 info: @Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Modality} {R : RefTy} {mv : Var} {rfld x : Name}
-  {hrfld : C.fieldType x rfld = some (Ty.ref R)} {hd : (Ty.ref R).defaultOkS = true},
+  {hd : (Ty.ref R).defaultOkS = true},
   dl{ ⟨[ delete mv.rfld; ]⟩ ⇝ { memory := write(addM(memory), mv.rfld, freshId(addM(memory))) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.memoryFieldDeleteReference
@@ -84,16 +84,15 @@ info: @Taclet.valueDeclSkip : ∀ {C : Contract} {k : Nat} {m : Modality} {p : P
 /-! ### Compound assignment and `++`: `⊕` and `⊕⊕` are operator schema variables -/
 
 /--
-info: @Taclet.storageRootOpAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {p : PrimTy} {op : BinOp}
-  {hop : op.hasCompoundAssign = true} {hp : p.isNumeric = true} {gsp : Name} {hgsp : C.rootType gsp = some (Ty.prim p)}
-  {se : Simple C p}, dl{ ⟨[ gsp ⊕= se; ]⟩ ⇝ { storage := store(storage, gsp, select(storage, gsp) ⊕ se) } ⟨[ ]⟩ }
+info: @Taclet.storageRootOpAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {p : PrimTy} {op : BinOp} {gsp : Name}
+  {se : Simple C p}, dl{ ⟨[ gsp ⊕= se; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, gsp) ⊕ se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.storageRootOpAssign
 
 /--
 info: @Taclet.storageFieldIncrementAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {p : PrimTy} {v : Var} {op : IncDec}
-  {hp : p.isNumeric = true} {x : Name} {sp : SPath C (Ty.struct x)} {fld : Name}
-  {hfld : C.fieldType x fld = some (Ty.prim p)} {hs : (OpLoc.field sp fld hfld).recvSimple = true},
+  {x : Name} {sp : SPath C (Ty.struct x)} {fld : Name} {hfld : C.fieldType x fld = some (Ty.prim p)}
+  {hs : (OpLoc.field sp fld hfld).recvSimple = true},
   dl{ ⟨[ v = sp.fld⊕⊕; ]⟩ ⇝
     { storage := save(storage, sp.fld, find(storage, sp.fld) ± 1) ‖ v := find(storage, sp.fld)⊕⊕ } ⟨[ ]⟩ }
 -/
@@ -112,8 +111,7 @@ info: @Taclet.storagePushValueSave : ∀ {C : Contract} {k : Nat} {m : Modality}
 
 /--
 info: @Taclet.memoryFieldWriteStore : ∀ {C : Contract} {k : Nat} {m : Modality} {mv : Var} {fld x : Name} {x_1 : PrimTy}
-  {hfld : C.fieldType x fld = some (Ty.prim x_1)} {se : Simple C x_1},
-  dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
+  {se : Simple C x_1}, dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.memoryFieldWriteStore
 

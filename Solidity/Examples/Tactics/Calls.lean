@@ -29,9 +29,8 @@ local instance : InContract := ⟨CallsExample⟩
 /-! ## The rules -/
 
 /--
-info: @Taclet.functionBodyExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {f : Name} {args : List (Arg C)}
-  {hsep : Arg.separatedFrom [] args = true} {ret : CallRet} {body : List (Stmt C)},
-  Taclet C k m (Stmt.call f args hsep ret body) (Premise.unfold (Stmt.expandBody args ret body))
+info: @Taclet.functionBodyExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {f : Name} {args : List (Arg C)} {ret : CallRet}
+  {body : List (Stmt C)}, dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.functionBodyExpand
 

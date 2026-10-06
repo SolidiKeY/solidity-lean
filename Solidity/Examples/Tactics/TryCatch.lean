@@ -36,15 +36,15 @@ local instance : InContract := ⟨Pinger⟩
 /--
 info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {call : ExtCall C} {rets : List (PrimTy × Var)}
   {ok err : List (Stmt C)} {code : Option Var} {pnc other : List (Stmt C)},
-  Taclet C k Modality.box (Stmt.tryCall call rets ok err code pnc other)
-    (Premise.branches [(rets, ok), ([], err), (codeBinders code, pnc), ([], other)])
+  dl{ [ try call returns (rets) ok catch Error err catch Panic(code) pnc catch other; ] ⇝
+    ∀ rets. ⟨[ ok ]⟩ ; ⟨[ err ]⟩ ; ∀ code. ⟨[ pnc ]⟩ ; ⟨[ other ]⟩ }
 -/
 #guard_msgs in #check @Taclet.tryCallNoCallbackBox
 
 /--
 info: @LeanTaclet.tryCallDiamond : ∀ {C : Contract} {k : Nat} {call : ExtCall C} {rets : List (PrimTy × Var)}
   {ok err : List (Stmt C)} {code : Option Var} {pnc other : List (Stmt C)},
-  LeanTaclet C k Modality.diamond (Stmt.tryCall call rets ok err code pnc other) (dl{ false })
+  dl{ ⟨ try call returns (rets) ok catch Error err catch Panic(code) pnc catch other; ⟩ ⇝ false }
 -/
 #guard_msgs in #check @LeanTaclet.tryCallDiamond
 

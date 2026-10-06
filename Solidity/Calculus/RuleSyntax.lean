@@ -20,8 +20,15 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ ⟨[ s; ]⟩ ⇝ p }` | the taclet `Taclet C k m s p`, for either modality (solkey's `#mod`) |
 | `dl{ [ s; ] ⇝ p }`, `dl{ ⟨ s; ⟩ ⇝ p }` | a taclet for the box only, the diamond only |
 | `dl{ p }` | a premise |
+| `dl{ ..Γ, c, {U} ⟹[R] ⟨[ s; ..ω ]⟩ φ }` | the sequent `Proves R (Γ ++ [.pre c] ++ [.upd m U]) (.modal m (s :: ω) φ)` |
+| `tm{ find(save(s, p, v), q) }` | a term (`Tm`), every name a Lean variable |
 | `⊨ φ` | `Valid φ` |
 | `σ ⊧ φ` | `holds σ φ` |
+
+At a state variable a write is `save(storage, gsp, se)` and a read
+`find(storage, gsp)`, as solkey writes them; `store`/`select` still read.
+`set_option pp.sol.key true` (on in `#taclet`) prints KeY's long forms,
+`consr(sp, fld)`, `find(storage, consr(sp, size))`, which read as well.
 
 ## Names are schema variables, and a name carries its kind
 
@@ -56,6 +63,9 @@ hypothesis):
 | `x` | where a value lands (`VHole`) | | |
 | `loc`, `nlhs` | a member or entry a copy lands in | `Loc C T` | `loc`: a target, not a state variable |
 | `l` | the target of `⊕=` and `++` | `OpLoc C p` | |
+| `s`; `P`, `Q`, `ω` | a statement; a program, spliced in place (`P; ..ω` is `P ++ ω`) | `Stmt C`; `Prog C` | |
+| `fbs` | a call with its body (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args hsep ret body` | its arguments simple |
+| `call`, `rets`, `code`; `body`, `errorBody`, `panicBody`, `otherBody` | a `try`'s call, its return locals, its `Panic` code; its blocks | `ExtCall C`, …; `List (Stmt C)` | |
 
 The position says which sort an operand is read at: `sp.fld` is a location
 left of `=`, a value right of it, a path under `delete`.  A copy is a write
@@ -67,16 +77,23 @@ statements after it; in a taclet's `\replacewith` a declared `se`, `sp`,
 `ie`, `mv` is **fresh**, `seV k` and the like (KeY's `\newLocalVars`).
 
 `‹t›` puts any Lean term in any position; where a formula stands, so does a
-bare name (`φ`, the postcondition).
+bare name (`φ`, the postcondition), and where an update stands an update
+schema variable (`{u}`, `{u ‖ {u}u2}`).  A fresh name beside a schema
+variable of its spelling prints primed: `T storage sp' = sp.fld;`.
 -/
 
 namespace Solidity
 
 /-! ## Grammar -/
 
-/-- Terms of the logic.  `f(…)` is read by its head: `select`, `find`,
-`store`, `save`, `delAt`, `write`, `read`, `addM`, `copySt`, `copyMem`,
-`freshId`. -/
+/-- Terms of the logic.  `f(…)` is read by its head: `find`, `save`,
+`delAt`, `select`, `write`, `read`, `addM`, `copySt`, `copyMem`, `freshId`,
+`delValue`, `lit`; at a state variable `store` and `select` (the older
+spellings of `save` and `find`).  KeY's long forms are read as well:
+`consr(p, f)` for `p.f`, `consr(p, at(i))` for `p[i]`, `find(s, consr(p,
+size))` for `find(s, p.length)`, `read(m, i, f)` and `write(m, i, f, v)` for a
+memory member or element (`at(k)`, `size`), `storeSt`/`selectSt`/`self` in the
+ledger's update; `pp.sol.key` prints them. -/
 declare_syntax_cat dl_term
 syntax:max num : dl_term
 syntax:max ident : dl_term
@@ -124,6 +141,11 @@ syntax dl_term " := " dl_term:56 " <= " dl_term:56 : dl_upd_elem
 syntax dl_term " := " dl_term:56 " < " dl_term:56 : dl_upd_elem
 syntax dl_term " := " dl_term:56 " > " dl_term:56 : dl_upd_elem
 syntax dl_term " := " dl_term:56 " >= " dl_term:56 : dl_upd_elem
+/-- `u`: an update schema variable, its elements in place (KeY's `{u}`). -/
+syntax ident : dl_upd_elem
+/-- `{u}u2`: the update `u2` with `u` applied to its right-hand sides
+(`Upd.subst`), KeY's `{u}u2` in `{u ‖ {u}u2}`. -/
+syntax "{" ident "}" ident : dl_upd_elem
 
 /-- A parallel update `{ a ‖ b }`. -/
 declare_syntax_cat dl_upd (behavior := both)
@@ -146,14 +168,20 @@ syntax:max "¬" dl_fml:50 : dl_fml
 syntax:35 dl_fml:36 " ∧ " dl_fml:35 : dl_fml
 syntax:25 dl_fml:26 " → " dl_fml:25 : dl_fml
 syntax:max dl_upd ppSpace dl_fml:50 : dl_fml
-/-- `{ havoc } φ`: `φ` after any storage and ledger a callee may leave. -/
-syntax:max "{ " &"havoc" " } " dl_fml:50 : dl_fml
+/-- `{ havoc } φ`: `φ` after any storage and ledger a callee may leave.
+Above an update schema variable named `havoc`, which it also reads as. -/
+syntax:max (priority := high) "{ " &"havoc" " } " dl_fml:50 : dl_fml
 /-- The diamond: `P` runs to the end, and `φ` holds after. -/
 syntax:max "⟨ " (sol_stmt "; ")* "⟩ " dl_fml:50 : dl_fml
 /-- The box: if `P` runs to the end, `φ` holds after. -/
 syntax:max "[ " (sol_stmt "; ")* "] " dl_fml:50 : dl_fml
 /-- Either modality, `⟨[ P ]⟩ φ` (solkey's `#mod`), in a taclet. -/
 syntax:max "⟨" "[ " (sol_stmt "; ")* "]" "⟩ " dl_fml:50 : dl_fml
+/-- `⟨[ s; ..ω ]⟩ φ`: statements in front of the rest `ω` of the program
+(KeY's `c# s #c`), `s :: ω`; a program schema variable `P; ..ω` is `P ++ ω`. -/
+syntax:max "⟨" "[ " (sol_stmt "; ")* ".." term:max " ]" "⟩ " dl_fml:50 : dl_fml
+/-- `⟨[ P ]⟩ φ`: either modality over a program that is a schema variable. -/
+syntax:max "⟨" "[ " sol_block " ]" "⟩ " dl_fml:50 : dl_fml
 /-- A modality over a program that is a schema variable. -/
 syntax:max "⟨ " sol_block " ⟩ " dl_fml:50 : dl_fml
 syntax:max "[ " sol_block " ] " dl_fml:50 : dl_fml
@@ -202,12 +230,33 @@ syntax dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; "
 syntax dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; " dl_fml : dl_premise
 syntax &"true" : dl_premise
 syntax &"false" : dl_premise
+/-- One goal of a taclet with a goal per way a statement may end (KeY's
+`"label": \replacewith(…)`): the block in the statement's place, for every
+value of the locals `xs` it binds (`∀ xs.`).  The label is solkey's; the
+macro drops it (the proof tree's label table prints it). -/
+declare_syntax_cat dl_branch (behavior := both)
+syntax (str ": ")? ("∀ " ident ". ")? "⟨" "[ " sol_block " ]" "⟩" : dl_branch
+syntax (str ": ")? ("∀ " ident ". ")? "[ " sol_block " ]" : dl_branch
+/-- Goals, one per branch (`Premise.branches`), separated by `;`. -/
+syntax dl_branch " ; " sepBy1(dl_branch, " ; ") : dl_premise
 
 /-- An entry of a sequent's context: an update or a precondition. -/
 declare_syntax_cat dl_hyp (behavior := both)
 syntax dl_upd : dl_hyp
-syntax "{ " &"havoc" " }" : dl_hyp
+syntax (priority := high) "{ " &"havoc" " }" : dl_hyp
 syntax dl_fml : dl_hyp
+/-- `∀ T x`: the local `x` holds any value of `T` (`Hyp.all`), KeY's skolem
+constant. -/
+syntax "∀ " ident ident : dl_hyp
+/-- `..Γ`: the rest of the context, a Lean term, written first: `..Γ, c` is
+`Γ ++ [c]`. -/
+syntax ".." term:max : dl_hyp
+
+/-- A statement that is a schema variable: `s`; `fbs`, a call with its body
+(KeY's `FunctionBody`); `P`, `Q`, a program spliced in place. -/
+syntax (priority := low) ident : sol_stmt
+/-- `catch Error errorBody`: the `Error` clause as KeY's schema writes it. -/
+syntax "catch " &"Error" sol_block : sol_catch
 
 /-- A formula whose names are Lean variables. -/
 syntax "dl_schema{ " dl_fml " }" : term
@@ -217,6 +266,12 @@ syntax (priority := high) "dl{ " dl_fml " }" : term
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ " dl_fml " }" : term
 /-- A sequent `Γ ⟹ₖ φ`, to be proved with solkey's rules alone (`⊢ₖ`). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ₖ " dl_fml " }" : term
+/-- A sequent `Γ ⟹[R] φ` over the rule set `R` (`Proves R Γ φ`). -/
+syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹[" term "] " dl_fml " }" : term
+/-- A term of the logic (`Tm`), its sort read off its head (`find(…)` a
+value, `save(…)` a storage, `write(…)` a memory, `consr(…)` a path).  Every
+name is a Lean variable of a term sort: `tm{ find(save(st, p, v), q) }`. -/
+syntax "tm{ " dl_term " }" : term
 /-- A taclet for either modality (`⟨[ s; ]⟩`). -/
 syntax "dl{ " "⟨" "[ " sol_stmt "; " "]" "⟩" " ⇝ " dl_premise " }" : term
 /-- A taclet for the box only. -/
@@ -273,8 +328,16 @@ inductive Decl where
   | val (x : Lean.Term)
   | alias (x : Lean.Term)
   | mem (x : Lean.Term)
+  /-- The mark of `tm{ … }`: every name is a Lean variable of a term sort. -/
+  | raw
 
 abbrev Scope := List (String × Decl)
+
+/-- The scope of `tm{ … }`, whose names carry no kind. -/
+def rawScope : Scope := [("‹raw›", .raw)]
+
+/-- Whether names are read without their kinds (`tm{ … }`). -/
+def Scope.isRaw (Γ : Scope) : Bool := Γ.any (·.1 == "‹raw›")
 
 /-- A variable named `s`, resolved where the notation is used. -/
 def schemaIdent (s : String) : Ident := mkIdent (Name.mkSimple s)
@@ -319,7 +382,8 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
   | some (.val v) => .local v
   | some (.alias v) => .alias v
   | some (.mem v) => .mem v
-  | none => match stemOf s with
+  | some .raw => .other x
+  | none => if Γ.isRaw then .other x else match stemOf s with
     | "v" | "lv" | "vp" => .local x
     | "lsv" => .alias x
     | "mv" | "pmv" | "rmv" => .mem x
@@ -593,11 +657,93 @@ def lhsHead (Γ : Scope) : TSyntax `sol_expr → Option Head
     | _ => none
   | _ => none
 
+/-- What a statement of a schema stands for: one statement, or a program
+spliced in its place (`P`, `expand_function_body(fbs)`). -/
+inductive Item where
+  | one (t : Lean.Term)
+  | many (t : Lean.Term)
+  deriving Inhabited
+
+/-- A program schema variable, by its stem. -/
+def isProgStem (s : String) : Bool := ["P", "Q", "ω"].contains (stemOf s)
+
+/-- `fbs`, a call with its body (KeY's `FunctionBody`): `Stmt.call f args
+hsep ret body`, its parts the taclet's schema variables. -/
+def fbsCall : MacroM Lean.Term :=
+  `(Stmt.call $(schemaIdent "f") $(schemaIdent "args") $(schemaIdent "hsep") $(schemaIdent "ret")
+      $(schemaIdent "body"))
+
+/-- The program of `items` in front of `tail`: `[s₁, …, sₙ]` when every item
+is one statement and there is no tail (with the type ascribed if `ascribe`),
+else the items consed and appended onto it, `s :: P ++ ω` (right-nested, as
+`s :: ω` is written). -/
+def progTerm (ascribe : Bool) (items : Array Item) (tail : Option Lean.Term) :
+    MacroM Lean.Term := do
+  let ones := items.filterMap fun | .one t => some t | .many _ => none
+  if tail.isNone && ones.size == items.size then
+    return ← if ascribe then `(([$ones,*] : List (Stmt _))) else `([$ones,*])
+  let mut acc : Option Lean.Term := tail
+  for it in items.reverse do
+    acc ← match it, acc with
+      | .one s, none => some <$> `([$s])
+      | .one s, some r => some <$> `($s :: $r)
+      | .many P, none => pure (some P)
+      | .many P, some r => some <$> `($P ++ $r)
+  match acc with
+  | some t => pure t
+  | none => `([])
+
+/-- A clause parameter that is one name, a schema variable: `rets`, `code`. -/
+def tparamVar? (p : TSyntax `sol_tparam) : Option Ident :=
+  match p with
+  | `(sol_tparam| $T:sol_ty) => match T with
+    | `(sol_ty| $x:ident) => some x
+    | _ => none
+  | _ => none
+
+/-- The `try` of a taclet's `\find`, in KeY's schema: `try call returns (rets)
+body catch Error errorBody catch Panic (code) panicBody catch otherBody`.  The
+names are the schema variables they spell (`call`, `rets`, `code`, the blocks). -/
+def schemaTry (stx : TSyntax `sol_stmt) : MacroM Lean.Term := do
+  let (c, rets, ok, cs) ← match stx with
+    | `(sol_stmt| try $c:sol_expr returns ($ps,*) $ok:sol_block $cs:sol_catch*) => do
+      let #[p] := ps.getElems | Macro.throwErrorAt stx "a taclet's `try` returns `(rets)`"
+      let some x := tparamVar? p | Macro.throwErrorAt p "a taclet's `try` returns `(rets)`"
+      pure (c, (x : Lean.Term), ok, cs)
+    | `(sol_stmt| try $c:sol_expr $ok:sol_block $cs:sol_catch*) => do
+      pure (c, ← `([]), ok, cs)
+    | _ => Macro.throwUnsupported
+  let `(sol_expr| $call:ident) := c | Macro.throwErrorAt c "a taclet's `try` calls `call`"
+  let block (b : TSyntax `sol_block) : MacroM Lean.Term := match b with
+    | `(sol_block| $x:ident) => pure x
+    | `(sol_block| ‹ $t:term ›) => pure t
+    | _ => Macro.throwErrorAt b "a taclet's `try` has a schema variable for each block"
+  let #[e, p, o] := cs |
+    Macro.throwErrorAt stx "a taclet's `try` has the clauses `catch Error`, `catch Panic (code)`, `catch`"
+  let err ← match e with
+    | `(sol_catch| catch Error $b:sol_block) => block b
+    | _ => Macro.throwErrorAt e "`catch Error errorBody`"
+  let (code, pnc) ← match p with
+    | `(sol_catch| catch Panic ($t:sol_tparam) $b:sol_block) =>
+      match tparamVar? t with
+      | some x => do pure ((x : Lean.Term), ← block b)
+      | none => Macro.throwErrorAt t "`catch Panic (code) panicBody`"
+    | _ => Macro.throwErrorAt p "`catch Panic (code) panicBody`"
+  let other ← match o with
+    | `(sol_catch| catch $b:sol_block) => block b
+    | _ => Macro.throwErrorAt o "`catch otherBody`"
+  `(Stmt.tryCall $call $rets $(← block ok) $err $code $pnc $other)
+
 mutual
 
 partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     TSyntax `sol_stmt → MacroM (Lean.Term × Scope)
   | `(sol_stmt| ‹ $t:term ›) => return (t, Γ)
+  | stx@`(sol_stmt| $x:ident) => do
+    let s := x.getId.toString
+    if isProgStem s then Macro.throwErrorAt stx s!"`{s}` is a program, not one statement"
+    if stemOf s == "fbs" then return (← fbsCall, Γ)
+    return (x, Γ)
   | `(sol_stmt| $l:sol_expr = $b:sol_expr .push()) => do
     let some (.alias x) := lhsHead Γ l | Macro.throwErrorAt l "`= b.push()` binds a storage alias"
     return (← `(Stmt.rebind (R := $(schemaIdent "R")) $x (ARhs.push $(← schemaAt Γ .spath b) $(schemaIdent "hd"))), Γ)
@@ -754,16 +900,36 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     if k == ``solRequire then return (← `(Stmt.require $(← schemaAt Γ .val ⟨stx.raw[2]⟩)), Γ)
     if k == ``solAssert then return (← `(Stmt.assert $(← schemaAt Γ .val ⟨stx.raw[2]⟩)), Γ)
     if k == ``solRevert then return (← `(Stmt.revert), Γ)
+    if k == ``solTry then return (← schemaTry stx, Γ)
     if k == Lean.choiceKind then
       let alts := stx.raw.getArgs
       for alt in alts.filter (·[0].isAtom) ++ alts do
         try return ← schemaStmt fresh Γ ⟨alt⟩ catch _ => pure ()
     Macro.throwUnsupported
 
+/-- A statement of a program: one statement, or a program in its place — a
+program schema variable (`P`), `expand_function_body(fbs)` (KeY's, the
+statements a call runs: `Stmt.expandBody`). -/
+partial def schemaItem (fresh : Bool) (Γ : Scope) (s : TSyntax `sol_stmt) :
+    MacroM (Item × Scope) := do
+  match s with
+  | `(sol_stmt| $x:ident) =>
+    if isProgStem x.getId.toString then return (.many x, Γ)
+  | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) =>
+    if let `(sol_expr| $g:ident) := f then
+      if g.getId.toString == "expand_function_body" then
+        unless stemOfExpr? a == some "fbs" do
+          Macro.throwErrorAt a "`expand_function_body(fbs)`, of the call `fbs`"
+        return (.many (← `(Stmt.expandBody $(schemaIdent "args") $(schemaIdent "ret")
+          $(schemaIdent "body"))), Γ)
+  | _ => pure ()
+  let (t, Γ) ← schemaStmt fresh Γ s
+  return (.one t, Γ)
+
 partial def schemaProg (fresh : Bool) (Γ : Scope) (ss : Array (TSyntax `sol_stmt)) :
-    MacroM (Array Lean.Term × Scope) :=
+    MacroM (Array Item × Scope) :=
   ss.foldlM (init := (#[], Γ)) fun (ts, Γ) s => do
-    let (t, Γ) ← schemaStmt fresh Γ s
+    let (t, Γ) ← schemaItem fresh Γ s
     return (ts.push t, Γ)
 
 /-- A branch: its statements (their declarations stay inside), or a schema
@@ -771,7 +937,7 @@ variable standing for all of them. -/
 partial def schemaBlock (fresh : Bool) (Γ : Scope) : TSyntax `sol_block → MacroM Lean.Term
   | `(sol_block| { $[$ss:sol_stmt;]* }) => do
     let (ts, _) ← schemaProg fresh Γ ss
-    `(([$ts,*] : List (Stmt _)))
+    progTerm true ts none
   | `(sol_block| $x:ident) => pure x
   | `(sol_block| ‹ $t:term ›) => pure t
   | _ => Macro.throwUnsupported
@@ -802,7 +968,7 @@ def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
   if n == "storage" && pos == .storage then return ← `(STerm.storage)
   if n == "memory" && pos == .memory then return ← `(MTerm.memory)
   if n == "selfBalance" && pos == .val then return ← `(Term.env EnvKey.selfBalance)
-  if n == "this" && pos == .val then return ← `(Term.env EnvKey.selfAddress)
+  if (n == "this" || n == "self") && pos == .val then return ← `(Term.env EnvKey.selfAddress)
   match headOf Γ x, pos with
   | .local v, .val => `(Term.pv $v)
   | .local v, .svalue => `(SValT.val (Term.pv $v))
@@ -836,8 +1002,9 @@ def memMember (pos : TPos) (stx : Lean.Syntax) : Lean.Term → List Ident → Ma
     | _ => tposError stx "a memory member" pos
   | b, f :: fs => do memMember pos stx (← `(ITerm.read MTerm.memory (MAddr.field $b $f))) fs
 
-/-- `p.length`, however it was parsed: the path `p`. -/
+/-- `p.length`, however it was parsed, or KeY's `consr(p, size)`: the path `p`. -/
 def lengthBase? : TSyntax `dl_term → MacroM (Option (TSyntax `dl_term))
+  | `(dl_term| consr($b, $sz:ident)) => pure (if sz.getId.toString == "size" then some b else none)
   | `(dl_term| $x:ident) =>
     match (nameParts x.getId).reverse with
     | "length" :: r :: rs => do
@@ -853,6 +1020,10 @@ mutual
 wrapped as one; a path, `find(…)` and `copyMem(…)` are storage values of
 their own, a memory path a memory value of its own. -/
 partial def schemaTerm (Γ : Scope) (pos : TPos) (t : TSyntax `dl_term) : MacroM Lean.Term := do
+  -- in `tm{ … }` a name is a variable of the sort it stands at
+  if Γ.isRaw && (pos == .svalue || pos == .mvalue) then
+    if let `(dl_term| $x:ident) := t then
+      if (nameParts x.getId).length == 1 then return x
   match pos with
   | .svalue =>
     match t with
@@ -963,13 +1134,63 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     let st := schemaTerm Γ .storage
     let pa := schemaTerm Γ .path
     let me := schemaTerm Γ .memory
+    -- KeY's three-argument `read(m, i, f)`, four-argument `write(m, i, f, v)`:
+    -- the member `f`, the element `at(k)`
+    let maddr (i a : TSyntax `dl_term) : MacroM Lean.Term := do
+      match a with
+      | `(dl_term| at($k)) => `(MAddr.at $(← schemaTerm Γ .ident i) $(← schemaTerm Γ .val k))
+      | `(dl_term| $g:ident) => `(MAddr.field $(← schemaTerm Γ .ident i) $g)
+      | _ => tposError a "a member `f` or an element `at(k)`" .addr
     match f.getId.toString, args, pos with
     | "select", #[s, r], .val => `(Term.find $(← st s) $(← pa r))
+    | "select", #[s, r], .storage | "selectSt", #[s, r], .storage =>
+      let `(dl_term| $r:ident) := r | tposError r "a member name" .storage
+      `(STerm.select $(← st s) $r)
     | "net", #[a], .val => `(Term.net $(← schemaTerm Γ .val a))
-    | "find", #[s, p], .val => `(Term.find $(← st s) $(← pa p))
-    | "find", #[s, p], .svalue => `(SValT.find $(← st s) $(← pa p))
+    | "selectSt", #[n, a], .val =>
+      let `(dl_term| net) := n | tposError n "`net`" .val
+      let `(dl_term| at($a)) := a | tposError a "`at(a)`" .val
+      `(Term.net $(← schemaTerm Γ .val a))
+    | "find", #[s, p], .val =>
+      match ← lengthBase? p with
+      | some b => `(Term.len $(← st s) $(← pa b))
+      | none => `(Term.find $(← st s) $(← pa p))
+    | "find", #[s, p], .svalue =>
+      match ← lengthBase? p with
+      | some b => `(SValT.val (Term.len $(← st s) $(← pa b)))
+      | none => `(SValT.find $(← st s) $(← pa p))
+    | "consr", #[p, f], .path =>
+      match f with
+      | `(dl_term| at($i)) =>
+        -- `consr(p, at(find(storage, consr(p, size))))`: the slot past the end
+        let past ← match i with
+          | `(dl_term| find(storage, $q)) => do
+            match ← lengthBase? q with
+            | some b => pure (b.raw.structEq p.raw)
+            | none => pure false
+          | _ => pure false
+        if past then `(PTerm.next $(← pa p)) else `(PTerm.at $(← pa p) $(← schemaTerm Γ .val i))
+      | `(dl_term| atMap($i)) => `(PTerm.at $(← pa p) $(← schemaTerm Γ .val i))
+      | `(dl_term| $g:ident) =>
+        if g.getId.toString == "size" then tposError f "`consr(p, size)` outside `find`" .path
+        else `(PTerm.field $(← pa p) $g)
+      | _ => tposError f "a member, `at(i)` or `atMap(i)`" .path
     | "read", #[m, a], .val => `(Term.read $(← me m) $(← schemaTerm Γ .addr a))
     | "read", #[m, a], .ident => `(ITerm.read $(← me m) $(← schemaTerm Γ .addr a))
+    | "read", #[m, i, a], .val =>
+      if let `(dl_term| $g:ident) := a then
+        if g.getId.toString == "size" then
+          return ← `(Term.mlen $(← me m) $(← schemaTerm Γ .ident i))
+      `(Term.read $(← me m) $(← maddr i a))
+    | "read", #[m, i, a], .ident => `(ITerm.read $(← me m) $(← maddr i a))
+    | "write", #[m, i, a, v], .memory =>
+      `(MTerm.write $(← me m) $(← maddr i a) $(← schemaTerm Γ .mvalue v))
+    | "delValue", #[t], .val => `(Term.delValue $(← schemaTerm Γ .val t))
+    | "lit", #[v], .val =>
+      match v with
+      | `(dl_term| $x:ident) => `(Term.lit $x)
+      | `(dl_term| ‹ $x:term ›) => `(Term.lit $x)
+      | _ => tposError v "a value variable" .val
     | "copyMem", #[_, m, i], .svalue => `(SValT.copyMem $(← me m) $(← schemaTerm Γ .ident i))
     | "newArr", #[n], .svalue => `(SValT.newArr $(schemaIdent "R") $(← schemaTerm Γ .val n))
     | "freshId", #[t], .ident =>
@@ -982,14 +1203,21 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
       -- push and pop, nested writes over the extent
       match ← lengthBase? p with
       | some b =>
+        -- the element written or deleted: `p[i]`, KeY's `consr(p, at(i))`
+        let elem (q : TSyntax `dl_term) : Bool := match q with
+          | `(dl_term| $_[$_]) => true
+          | `(dl_term| consr($_, at($_))) => true
+          | _ => false
         match s, v with
-        | `(dl_term| save($s', $_[$_], $w)), `(dl_term| $_ + 1) =>
-          `(STerm.push $(← st s') $(← pa b) $(← schemaTerm Γ .svalue w))
-        | `(dl_term| delAt($s', $_[$_])), `(dl_term| $_ + 1) =>
-          `(STerm.pushSlot $(← st s') $(← pa b) $(schemaIdent "E"))
-        | `(dl_term| delAt($s', $_[$_])), `(dl_term| $_ - 1) =>
-          `(STerm.pop $(← st s') $(← pa b))
-        | _, `(dl_term| $_ + 1) =>
+        | `(dl_term| save($s', $q, $w)), `(dl_term| $_ + 1) =>
+          if elem q then return ← `(STerm.push $(← st s') $(← pa b) $(← schemaTerm Γ .svalue w))
+        | `(dl_term| delAt($s', $q)), `(dl_term| $_ + 1) =>
+          if elem q then return ← `(STerm.pushSlot $(← st s') $(← pa b) $(schemaIdent "E"))
+        | `(dl_term| delAt($s', $q)), `(dl_term| $_ - 1) =>
+          if elem q then return ← `(STerm.pop $(← st s') $(← pa b))
+        | _, _ => pure ()
+        match v with
+        | `(dl_term| $_ + 1) =>
           -- a bare `rarr.push()` extends at its element type `E`, an alias's
           -- `lsv = sp.push()` at the alias's `R`
           let bare := match b with
@@ -997,8 +1225,8 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
             | _ => false
           if bare then `(STerm.extend $(← st s) $(← pa b) $(schemaIdent "E"))
           else `(STerm.extend $(← st s) $(← pa b) (Ty.ref $(schemaIdent "R")))
-        | _, `(dl_term| $_ - 1) => `(STerm.shrink $(← st s) $(← pa b))
-        | _, _ => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
+        | `(dl_term| $_ - 1) => `(STerm.shrink $(← st s) $(← pa b))
+        | _ => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
       | none => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
     | "delAt", #[s, p], .storage => `(STerm.delAt $(← st s) $(← pa p))
     | "defVal", #[_], .val => `(Term.lit (PrimTy.default $(schemaIdent "p")))
@@ -1010,6 +1238,24 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
   | _ => Macro.throwUnsupported
 
 end
+
+/-- The sort of a term of `tm{ … }`, read off its head. -/
+def tmSort : TSyntax `dl_term → TPos
+  | `(dl_term| $f:ident($_,*)) =>
+    match f.getId.toString with
+    | "save" | "delAt" | "store" | "select" | "selectSt" => .storage
+    | "write" | "addM" | "copySt" => .memory
+    | "consr" => .path
+    | "freshId" => .ident
+    | "copyMem" | "newArr" => .svalue
+    | _ => .val
+  | `(dl_term| $x:ident) =>
+    match x.getId.toString with
+    | "storage" => .storage
+    | "memory" => .memory
+    | _ => if (nameParts x.getId).length > 1 then .path else .val
+  | `(dl_term| $_:dl_term . $_:ident) | `(dl_term| $_:dl_term [ $_:dl_term ]) => .path
+  | _ => .val
 
 /-- One elementary update: the sort of `x := t` is read off `x`. -/
 def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
@@ -1033,8 +1279,18 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
           if a.raw.structEq a'.raw then do
             `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.add $(← schemaTerm Γ .val v))
           else Macro.throwErrorAt a' "the entry read is the one written"
+        | `(dl_term| storeSt(net, at($a), selectSt(net, at($a')) - $v)) =>
+          if a.raw.structEq a'.raw then do
+            `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.sub $(← schemaTerm Γ .val v))
+          else Macro.throwErrorAt a' "the entry read is the one written"
+        | `(dl_term| storeSt(net, at($a), selectSt(net, at($a')) + $v)) =>
+          if a.raw.structEq a'.raw then do
+            `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.add $(← schemaTerm Γ .val v))
+          else Macro.throwErrorAt a' "the entry read is the one written"
+        | `(dl_term| if($a = $t:ident) then $n':ident else storeSt(net, at($a'), selectSt(net, at($a'')) - $v))
         | `(dl_term| if($a = $t:ident) then $n':ident else store(net, at($a'), net($a'') - $v)) => do
-          unless t.getId.toString == "this" do Macro.throwErrorAt t "a payment compares with `this`"
+          unless ["this", "self"].contains t.getId.toString do
+            Macro.throwErrorAt t "a payment compares with `this`"
           unless n'.getId.toString == "net" do Macro.throwErrorAt n' "a payment to `this` leaves `net`"
           unless a.raw.structEq a'.raw && a.raw.structEq a''.raw do
             Macro.throwErrorAt a' "the entry read is the one written, and the one compared"
@@ -1051,11 +1307,40 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
         `storage` or `memory`"
   | _ => Macro.throwUnsupported
 
+/-- An update schema variable among the elements: `u` (its elements), or
+`{u}u2` (`u2` with `u` applied, `Upd.subst`). -/
+def updVar? : TSyntax `dl_upd_elem → MacroM (Option Lean.Term)
+  | `(dl_upd_elem| $u:ident) => pure (some u)
+  | `(dl_upd_elem| { $u:ident } $v:ident) => some <$> `($(mkIdent `Solidity.Upd.subst) $v $u)
+  | _ => pure none
+
+/-- Whether an update has a schema variable among its elements: the formula
+under it is then judged under the schema's modality `m`. -/
+def hasUpdVar (U : TSyntax `dl_upd) : Bool :=
+  match U with
+  | `(dl_upd| ‹ $_:term ›) => false
+  | _ => U.raw[1].getSepArgs.any fun e => match (⟨e⟩ : TSyntax `dl_upd_elem) with
+    | `(dl_upd_elem| $_:ident) => true
+    | `(dl_upd_elem| { $_:ident } $_:ident) => true
+    | _ => false
+
 def schemaUpd (Γ : Scope) (U : TSyntax `dl_upd) : MacroM Lean.Term := do
   if let `(dl_upd| ‹ $t:term ›) := U then return t
   -- the elements, read off the `sepBy1` node: `‖` does not splice in a pattern
-  let elems ← U.raw[1].getSepArgs.mapM fun e => schemaUpdElem Γ ⟨e⟩
-  `(([$elems,*] : Upd _))
+  let mut segs : Array Lean.Term := #[]
+  let mut run : Array Lean.Term := #[]
+  for e in U.raw[1].getSepArgs do
+    match ← updVar? ⟨e⟩ with
+    | some u =>
+      unless run.isEmpty do segs := segs.push (← `([$run,*]))
+      run := #[]
+      segs := segs.push u
+    | none => run := run.push (← schemaUpdElem Γ ⟨e⟩)
+  -- no schema variable: the list of the elements, as ever
+  if segs.isEmpty then return ← `(([$run,*] : Upd _))
+  unless run.isEmpty do segs := segs.push (← `([$run,*]))
+  -- the parts appended, left-nested as `u ++ u2.subst u` is written
+  segs[1:].foldlM (init := segs[0]!) fun acc t => `($acc ++ $t)
 
 /-- The modality of the formula under an update: an update is judged as the
 goal it came from.  `⟨[ ]⟩` is `either`: the taclet's `m` in `dl{ … }`, the
@@ -1065,7 +1350,8 @@ partial def fmlModality? (either : Lean.Term) : TSyntax `dl_fml → MacroM (Opti
     some <$> `(Modality.diamond)
   | `(dl_fml| [ $[$_:sol_stmt;]* ] $_:dl_fml) | `(dl_fml| [ $_:sol_block ] $_:dl_fml) =>
     some <$> `(Modality.box)
-  | `(dl_fml| ⟨[ $[$_:sol_stmt;]* ]⟩ $_:dl_fml) => pure (some either)
+  | `(dl_fml| ⟨[ $[$_:sol_stmt;]* ]⟩ $_:dl_fml) | `(dl_fml| ⟨[ $[$_:sol_stmt;]* .. $_:term ]⟩ $_:dl_fml)
+  | `(dl_fml| ⟨[ $_:sol_block ]⟩ $_:dl_fml) => pure (some either)
   | `(dl_fml| $_:dl_upd $φ:dl_fml) | `(dl_fml| { havoc } $φ:dl_fml) => fmlModality? either φ
   | `(dl_fml| ( $φ:dl_fml )) => fmlModality? either φ
   | _ => pure none
@@ -1088,19 +1374,25 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
     `(Fml.and (Fml.imp $φ $ψ) (Fml.imp $ψ $φ))
   | `(dl_fml| { havoc } $φ:dl_fml) => do `(Fml.havoc $(← schemaFml φ))
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
+    -- an update schema variable is judged under the schema's modality
     let m ← match ← fmlModality? (schemaIdent "m") φ with
       | some m => pure m
-      | none => `(Modality.diamond)
+      | none => if hasUpdVar U then pure (schemaIdent "m") else `(Modality.diamond)
     `(Fml.upd $m $(← schemaUpd [] U) $(← schemaFml φ))
   | `(dl_fml| ⟨ $[$ss:sol_stmt;]* ⟩ $φ:dl_fml) => do
     let (ts, _) ← schemaProg false [] ss
-    `(Fml.modal .diamond [$ts,*] $(← schemaFml φ))
+    `(Fml.modal .diamond $(← progTerm false ts none) $(← schemaFml φ))
   | `(dl_fml| [ $[$ss:sol_stmt;]* ] $φ:dl_fml) => do
     let (ts, _) ← schemaProg false [] ss
-    `(Fml.modal .box [$ts,*] $(← schemaFml φ))
+    `(Fml.modal .box $(← progTerm false ts none) $(← schemaFml φ))
   | `(dl_fml| ⟨[ $[$ss:sol_stmt;]* ]⟩ $φ:dl_fml) => do
     let (ts, _) ← schemaProg false [] ss
-    `(Fml.modal $(schemaIdent "m") [$ts,*] $(← schemaFml φ))
+    `(Fml.modal $(schemaIdent "m") $(← progTerm false ts none) $(← schemaFml φ))
+  | `(dl_fml| ⟨[ $[$ss:sol_stmt;]* .. $ω:term ]⟩ $φ:dl_fml) => do
+    let (ts, _) ← schemaProg false [] ss
+    `(Fml.modal $(schemaIdent "m") $(← progTerm false ts (some ω)) $(← schemaFml φ))
+  | `(dl_fml| ⟨[ $b:sol_block ]⟩ $φ:dl_fml) => do
+    `(Fml.modal $(schemaIdent "m") $(← schemaBlock false [] b) $(← schemaFml φ))
   | `(dl_fml| ⟨ $b:sol_block ⟩ $φ:dl_fml) => do
     `(Fml.modal .diamond $(← schemaBlock false [] b) $(← schemaFml φ))
   | `(dl_fml| [ $b:sol_block ] $φ:dl_fml) => do
@@ -1123,11 +1415,24 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
       "a quantifier is read against a contract: write `dl[C]{ … }` or `dl!{ … }`"
   | _ => Macro.throwUnsupported
 
+/-- One goal of `Premise.branches`: the locals it binds (`∀ rets.`; `∀ code.`
+the `Panic` code's, `codeBinders`), and its block.  The label is dropped. -/
+def schemaBranch (fresh : Bool) (Γ : Scope) (b : TSyntax `dl_branch) : MacroM Lean.Term := do
+  let (x?, blk) ← match b with
+    | `(dl_branch| $[$_:str :]? $[∀ $x?:ident .]? ⟨[ $blk:sol_block ]⟩) => pure (x?, blk)
+    | `(dl_branch| $[$_:str :]? $[∀ $x?:ident .]? [ $blk:sol_block ]) => pure (x?, blk)
+    | _ => Macro.throwUnsupported
+  let xs ← match x? with
+    | none => `([])
+    | some x =>
+      if stemOf x.getId.toString == "code" then `($(mkIdent `Solidity.codeBinders) $x) else pure x
+  `(($xs, $(← schemaBlock fresh Γ blk)))
+
 def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM Lean.Term
   | `(dl_premise| $U:dl_upd ⟨[ ]⟩) => do `($(mkIdent `Solidity.Premise.update) $(← schemaUpd Γ U))
   | `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) => do
     let (ts, _) ← schemaProg fresh Γ ss
-    `($(mkIdent `Solidity.Premise.unfold) [$ts,*])
+    `($(mkIdent `Solidity.Premise.unfold) $(← progTerm false ts none))
   | `(dl_premise| $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ ; $nc:dl_fml ⟹ ⟨[ $f:sol_block ]⟩) => do
     `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
         $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f))
@@ -1135,14 +1440,17 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
     let (ts, _) ← schemaProg fresh Γ ts
     let (fs, _) ← schemaProg fresh Γ fs
     `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
-        ([$ts,*] : List (Stmt _)) ([$fs,*] : List (Stmt _)))
+        $(← progTerm true ts none) $(← progTerm true fs none))
   | `(dl_premise| $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $c':dl_fml) => do
     unless c.raw.structEq c'.raw do
       Macro.throwErrorAt c' "a check assumes the condition it checks: write it on both sides"
     let (ts, _) ← schemaProg fresh Γ ts
-    `($(mkIdent `Solidity.Premise.check) $(← schemaFml c) ([$ts,*] : List (Stmt _)))
+    `($(mkIdent `Solidity.Premise.check) $(← schemaFml c) $(← progTerm true ts none))
   | `(dl_premise| true) => `($(mkIdent `Solidity.Premise.done) true)
   | `(dl_premise| false) => `($(mkIdent `Solidity.Premise.done) false)
+  | `(dl_premise| $b:dl_branch ; $bs:dl_branch;*) => do
+    let bs ← (#[b] ++ bs.getElems).mapM (schemaBranch fresh Γ)
+    `($(mkIdent `Solidity.Premise.branches) [$bs,*])
   | _ => Macro.throwUnsupported
 
 /-- The identifiers of a `\find`, outside `‹…›`. -/
@@ -1215,6 +1523,10 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
     unless ["e", "nse"].contains (stemOf n) do return #[]
     return #[(hyp (n ++ "_nt"), ← `($(mkIdent `Solidity.Val.notTernary) $(schemaIdent n) = true))]
   match s with
+  | `(sol_stmt| $x:ident) =>
+    -- `fbs`, a call: its arguments simple (`functionCallArgCapture` first)
+    unless stemOf x.getId.toString == "fbs" do return out
+    return out.push (mkIdent `hexp, ← `($(mkIdent `Solidity.Arg.firstNonSimple) $(schemaIdent "args") = none))
   | `(sol_stmt| $l:sol_expr = $r:sol_expr) =>
     match lhsHead [] l with
     | some (.other h) =>
@@ -1253,21 +1565,43 @@ def schemaTaclet (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_premis
   let cs := conds.map (·.2)
   `(taclet_side% $t $[($hs : $cs)]*)
 
+/-- A primitive type of a schema: `uint`, `int`, `bool`, or a variable. -/
+def schemaPrim (T : Ident) : MacroM Lean.Term :=
+  match T.getId.toString with
+  | "uint" => `(PrimTy.uint)
+  | "int" => `(PrimTy.int)
+  | "bool" => `(PrimTy.bool)
+  | _ => pure T
+
 def schemaHyp : TSyntax `dl_hyp → MacroM Lean.Term
-  | `(dl_hyp| $U:dl_upd) => do `($(mkIdent `Solidity.Hyp.upd) $(schemaIdent "m") $(← schemaUpd [] U))
   | `(dl_hyp| { havoc }) => `($(mkIdent `Solidity.Hyp.havoc))
+  | `(dl_hyp| $U:dl_upd) => do `($(mkIdent `Solidity.Hyp.upd) $(schemaIdent "m") $(← schemaUpd [] U))
+  | `(dl_hyp| ∀ $T:ident $x:ident) => do `($(mkIdent `Solidity.Hyp.all) $x $(← schemaPrim T))
+  | stx@`(dl_hyp| .. $_:term) => Macro.throwErrorAt stx "`..Γ`, the rest of the context, comes first"
   | `(dl_hyp| $φ:dl_fml) => do `($(mkIdent `Solidity.Hyp.pre) $(← schemaFml φ))
   | _ => Macro.throwUnsupported
+
+/-- A context: `[h₁, …]`, or with the rest `..Γ` first, `Γ ++ [h₁] ++ …`
+(left-nested, as the rules write `Γ ++ [.pre c]`). -/
+def schemaHyps (hs : Array (TSyntax `dl_hyp)) : MacroM Lean.Term := do
+  if let some (h : TSyntax `dl_hyp) := hs[0]? then
+    if let `(dl_hyp| .. $Γ:term) := h then
+      return ← (hs.extract 1 hs.size).foldlM (init := Γ) fun acc h => do
+        `($acc ++ [$(← schemaHyp h)])
+  `([$(← hs.mapM schemaHyp),*])
 
 macro_rules
   | `(dl_schema{ $φ:dl_fml }) => schemaFml φ
   | `(dl{ $φ:dl_fml }) => schemaFml φ
   | `(dl{ $[$hs:dl_hyp],* ⟹ $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.all) [$(← hs.mapM schemaHyp),*]
+    `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.all) $(← schemaHyps hs)
       $(← schemaFml φ))
   | `(dl{ $[$hs:dl_hyp],* ⟹ₖ $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.solkey) [$(← hs.mapM schemaHyp),*]
+    `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.solkey) $(← schemaHyps hs)
       $(← schemaFml φ))
+  | `(dl{ $[$hs:dl_hyp],* ⟹[ $R:term ] $φ:dl_fml }) => do
+    `($(mkIdent `Solidity.Proves) $R $(← schemaHyps hs) $(← schemaFml φ))
+  | `(tm{ $t:dl_term }) => schemaTerm rawScope (tmSort t) t
   | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTaclet (schemaIdent "m") s p
   | `(dl{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.box)) s p
   | `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.diamond)) s p
@@ -1324,6 +1658,23 @@ register_option pp.sol.dl : Bool := {
 }
 
 def ppOn : MetaM Bool := return pp.sol.dl.get (← getOptions)
+
+register_option pp.sol.key : Bool := {
+  defValue := false
+  descr := "print terms in KeY's long forms: `consr(p, f)` for `p.f`, `consr(p, at(i))` for \
+            `p[i]`, `find(storage, consr(p, size))` for `p.length`, `read(m, i, f)`, \
+            `write(m, i, f, v)`, `storeSt`/`selectSt`/`self` in the ledger (`#taclet` sets it)"
+}
+
+/-- Whether terms print in KeY's long forms (`pp.sol.key`). -/
+def keyOn : MetaM Bool := return pp.sol.key.get (← getOptions)
+
+register_option pp.sol.reduce : Bool := {
+  defValue := true
+  descr := "the notation's printers compute (`whnf`) each term before they print it; \
+            `tm{ … }` prints a term as it is written, with this off"
+}
+
 
 def nameIdent (s : String) : Ident := mkIdent (Name.mkSimple s)
 
@@ -1383,7 +1734,12 @@ def ppVar? (e : Lean.Expr) : MetaM (Option Ident) := do
     let some b ← nameOf? b | return none
     match ← natOf? k with
     | some n => return some (nameIdent (← freshName b n))
-    | none => return some (nameIdent b)
+    | none =>
+      -- a taclet's fresh `sp` beside a schema variable `sp` it reads: `sp'`
+      let lctx ← getLCtx
+      let mut x := b
+      while (lctx.findFromUserName? (Name.mkSimple x)).isSome do x := x ++ "'"
+      return some (nameIdent x)
   | _ => return none
 
 /-! ### Programs -/
@@ -1582,6 +1938,8 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
       (e.isAppOfArity · 4) then
     let args := e.getAppArgs
     if (← fvarName? args[2]!).isSome then return ← hole args[2]! (← ppExpr args[3]!)
+  -- a statement schema variable `s`
+  if let some n ← fvarName? e then return ← `(sol_stmt| $(nameIdent n):ident)
   match_expr (← whnf e) with
   | Stmt.assign _ _ l r => `(sol_stmt| $(← ppExpr l):sol_expr = $(← ppExpr r):sol_expr)
   | Stmt.rebind _ _ x r =>
@@ -1667,7 +2025,10 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
   | Stmt.require _ c => `(sol_stmt| require($(← ppExpr c)))
   | Stmt.assert _ c => `(sol_stmt| assert($(← ppExpr c)))
   | Stmt.revert _ => `(sol_stmt| revert())
-  | Stmt.call _ f args _ ret _ =>
+  | Stmt.call _ f args _ ret body =>
+    -- KeY's `fbs`: a call whose parts are all schema variables
+    if (← [f, args, ret, body].allM fun x => return (← fvarName? x).isSome) then
+      return ← `(sol_stmt| fbs)
     let some (fe, xs) ← ppCallParts? f args | escape
     let res ← match_expr (← whnf ret) with
       | CallRet.val _ _ res =>
@@ -1682,6 +2043,18 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     | some y, [] => `(sol_stmt| $y:ident = $fe:sol_expr ( ))
     | some y, bs => `(sol_stmt| $y:ident = $fe:sol_expr ( $(bs.toArray),* ))
   | Stmt.tryCall _ c rets ok err code pnc other =>
+    if let some c ← fvarName? c then
+      -- KeY's schema: `try call returns (rets) body catch Error errorBody …`
+      let some code ← fvarName? code | return ← escape
+      let catches : Array (TSyntax `sol_catch) := #[
+        ← `(sol_catch| catch Error $(← ppBlock err):sol_block),
+        ← `(sol_catch| catch Panic($(nameIdent code):ident) $(← ppBlock pnc):sol_block),
+        ← `(sol_catch| catch $(← ppBlock other):sol_block)]
+      let call ← `(sol_expr| $(nameIdent c):ident)
+      let some r ← fvarName? rets |
+        return ← `(sol_stmt| try $call:sol_expr $(← ppBlock ok):sol_block $catches:sol_catch*)
+      let r ← `(sol_tparam| $(nameIdent r):ident)
+      return ← `(sol_stmt| try $call:sol_expr returns ($r) $(← ppBlock ok):sol_block $catches:sol_catch*)
     let some call ← ppExtCall? c | escape
     let some rs ← listElems? rets | escape
     let some ps := (← rs.mapM ppRet?).mapM id | escape
@@ -1727,6 +2100,9 @@ partial def ppExtCall? (c : Lean.Expr) : MetaM (Option (TSyntax `sol_expr)) := d
   return some (← `(sol_expr| $recv:sol_expr . $(nameIdent f):ident ( $es,* )))
 
 partial def ppProg? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `sol_stmt))) := do
+  -- KeY's `expand_function_body(fbs)`, the statements of a call `fbs`
+  if (← instantiateMVars e).isAppOfArity ``Stmt.expandBody 4 then
+    return some #[← `(sol_stmt| expand_function_body(fbs))]
   let some ss ← listElems? e | return none
   let mut out : Array (TSyntax `sol_stmt) := #[]
   let mut i := 0
@@ -1739,6 +2115,23 @@ partial def ppProg? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `sol_stmt)))
     out := out.push (← ppStmt ss[i]!)
     i := i + 1
   return some out
+
+/-- A program with schema variables in it: `s :: ω`, `P ++ ω` — its
+statements (a program variable as a statement, `P;`) and the rest `ω`, a
+variable.  For a program `ppProg?` does not print. -/
+partial def ppProgParts? (e : Lean.Expr) :
+    MetaM (Option (Array (TSyntax `sol_stmt) × Option Ident)) := do
+  let e ← instantiateMVars e
+  if let some n ← fvarName? e then return some (#[], some (nameIdent n))
+  if e.isAppOfArity ``List.cons 3 then
+    let some (ss, t) ← ppProgParts? (e.getArg! 2) | return none
+    return some (#[← ppStmt (e.getArg! 1)] ++ ss, t)
+  if e.isAppOfArity ``HAppend.hAppend 6 then
+    let some n ← fvarName? (e.getArg! 4) | return none
+    let some (ss, t) ← ppProgParts? (e.getArg! 5) | return none
+    return some (#[← `(sol_stmt| $(nameIdent n):ident)] ++ ss, t)
+  let some ss ← ppProg? e | return none
+  return some (ss, none)
 
 /-- A branch: `{ s₁; …; sₙ; }`, or the name of a schema variable. -/
 partial def ppBlock (e : Lean.Expr) : MetaM (TSyntax `sol_block) := do
@@ -1829,8 +2222,10 @@ def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
 
 /-- A term's head symbol folded back to its constructor's name:
 `Tm.app2 C Op2.find s p` is `Term.find C s p` (`Update.lean`).  Reduction
-unfolds the constructor abbreviations; the printers and `rw` match on them. -/
-def foldTmHead (e : Lean.Expr) : MetaM Lean.Expr := do
+unfolds the constructor abbreviations; the printers and `rw` match on them.
+With `red` off the symbol is not computed either: it is a constructor or
+the term stays as it is. -/
+def foldTmHead (e : Lean.Expr) (red : Bool := true) : MetaM Lean.Expr := do
   let mk (n : Lean.Name) (args : Array Lean.Expr) : Lean.Expr := mkAppN (mkConst n) args
   let args := e.getAppArgs
   let some f := e.getAppFn.constName? | return e
@@ -1839,7 +2234,7 @@ def foldTmHead (e : Lean.Expr) : MetaM Lean.Expr := do
   if f == ``Tm.pvS && args.size == 2 then return mk ``STerm.pv args
   if f == ``Tm.pvI && args.size == 2 then return mk ``ITerm.pv args
   let opOf (o : Lean.Expr) : MetaM (Option (Lean.Name × Array Lean.Expr)) := do
-    let o ← whnf o
+    let o ← if red then whnf o else pure o.consumeMData
     let some n := o.getAppFn.constName? | return none
     return some (n, o.getAppArgs)
   if f == ``Tm.app0 && args.size == 3 then
@@ -1916,6 +2311,20 @@ def foldTmHead (e : Lean.Expr) : MetaM Lean.Expr := do
 def whnfTm (e : Lean.Expr) : MetaM Lean.Expr := do
   foldTmHead (← whnf e)
 
+/-- A variable of a term sort, by its name, where a term prints as it is
+written (`tm{ … }`, `pp.sol.reduce false`, whose names are such variables). -/
+def tmVar? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
+  if pp.sol.reduce.get (← getOptions) then return none
+  let some n ← fvarName? e | return none
+  return some (← `(dl_term| $(nameIdent n):ident))
+
+/-- What a term printer matches on: the term computed (`whnfTm`), or under
+`pp.sol.reduce false` the term as it is written, its head folded back to its
+constructor's name all the same. -/
+def whnfPP (e : Lean.Expr) : MetaM Lean.Expr := do
+  if pp.sol.reduce.get (← getOptions) then whnfTm e
+  else foldTmHead (red := false) (← instantiateMVars e)
+
 /-- Every term of `e` folded back to its constructors' names: what a `simp`
 over the generic `Tm` functions leaves (`Tm.app2 C Op2.find s p`) read as it
 was written (`Term.find C s p`), so that `rw` finds it and it prints. -/
@@ -1926,23 +2335,25 @@ mutual
 
 partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some x ← loweredExpr? e then return x
+  if let some x ← tmVar? e then return x
   let e ← instantiateMVars e
   if e.isAppOfArity ``Term.bumped 4 && (← fvarName? (e.getArg! 1)).isSome then
     return ← `(dl_term| $(← ppTerm e.appArg!):dl_term ⊕⊕)
-  match_expr (← whnfTm e) with
+  match_expr (← whnfPP e) with
   | Term.lit _ v =>
-    match_expr (← whnfTm v) with
+    match_expr (← whnfPP v) with
     | Semantics.PrimVal.int n =>
       let some n ← intOf? n | escapeDl e
       `(dl_term| $(Syntax.mkNumLit (toString n)):num)
     | Semantics.PrimVal.bool b =>
-      match_expr (← whnfTm b) with
+      match_expr (← whnfPP b) with
       | Bool.true => `(dl_term| true)
       | Bool.false => `(dl_term| false)
       | _ => escapeDl e
     | _ =>
       if v.isAppOfArity ``PrimTy.default 1 then
         return ← `(dl_term| defVal(T))
+      if let some n ← fvarName? v then return ← `(dl_term| lit($(nameIdent n):ident))
       escapeDl e
   | Term.pv _ x =>
     let some x ← ppVar? x | escapeDl e
@@ -1954,22 +2365,20 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     if (← fvarName? op).isSome then return ← `(dl_term| ⊖$(← ppTerm a))
     if (← whnf op).isConstOf ``UnOp.not then return ← `(dl_term| !$(← ppTerm a))
     escapeDl e
-  | Term.find _ s p =>
-    let s' ← ppSTerm s
-    match_expr (← whnfTm p) with
-    | PTerm.root _ r =>
-      let some r ← nameOf? r | escapeDl e
-      `(dl_term| select($s', $(nameIdent r):ident))
-    | _ => `(dl_term| find($s', $(← ppPTerm p)))
+  | Term.find _ s p => `(dl_term| find($(← ppSTerm s), $(← ppPTerm p)))
   | Term.len _ s p =>
-    let (len, _) ← lenTerms (← ppPTerm p)
-    if (← whnfTm s).isAppOfArity ``STerm.storage 1 then return len
-    `(dl_term| find($(← ppSTerm s), $len))
+    let (lenPath, lenVal, _) ← lenTerms (← ppPTerm p)
+    if !(← keyOn) && (← whnfPP s).isAppOfArity ``STerm.storage 1 then return lenVal
+    `(dl_term| find($(← ppSTerm s), $lenPath))
   | Term.delValue _ t => `(dl_term| delValue($(← ppTerm t)))
   | Term.wt _ _ s => `(dl_term| wt($(← ppSTerm s)))
-  | Term.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
+  | Term.read _ m a =>
+    if ← keyOn then
+      if let some (i, f) ← keyAddr? a then return ← `(dl_term| read($(← ppMTerm m), $i, $f))
+    `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
   | Term.mlen _ m i =>
-    unless (← whnfTm m).isAppOfArity ``MTerm.memory 1 do return ← escapeDl e
+    if ← keyOn then return ← `(dl_term| read($(← ppMTerm m), $(← ppITerm i), size))
+    unless (← whnfPP m).isAppOfArity ``MTerm.memory 1 do return ← escapeDl e
     let `(dl_term| $x:ident) ← ppITerm i | escapeDl e
     `(dl_term| $(mkIdent (x.getId.str "length")):ident)
   | Term.env _ k =>
@@ -1978,17 +2387,30 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     | EnvKey.msgValue => `(dl_term| msg.value)
     | EnvKey.timestamp => `(dl_term| block.timestamp)
     | EnvKey.selfBalance => `(dl_term| selfBalance)
-    | EnvKey.selfAddress => `(dl_term| this)
+    | EnvKey.selfAddress => if ← keyOn then `(dl_term| self) else `(dl_term| this)
     | _ => escapeDl e
-  | Term.net _ a => `(dl_term| net($(← ppTerm a)))
+  | Term.net _ a =>
+    if ← keyOn then return ← `(dl_term| selectSt(net, at($(← ppTerm a))))
+    `(dl_term| net($(← ppTerm a)))
   | Term.netOf _ x a =>
     let some x ← ppVar? x | escapeDl e
     `(dl_term| net($x:ident, $(← ppTerm a)))
   | _ => escapeDl e
 
+/-- KeY's member or element of a memory location (`read(m, i, f)`,
+`read(m, i, at(k))`): the identity and the field. -/
+partial def keyAddr? (a : Lean.Expr) : MetaM (Option (TSyntax `dl_term × TSyntax `dl_term)) := do
+  match_expr (← whnfPP a) with
+  | MAddr.field _ i f =>
+    let some f ← nameOf? f | return none
+    return some (← ppITerm i, ← `(dl_term| $(nameIdent f):ident))
+  | MAddr.at _ i k => return some (← ppITerm i, ← `(dl_term| at($(← ppTerm k))))
+  | _ => return none
+
 partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some x ← loweredExpr? e then return x
-  match_expr (← whnfTm e) with
+  if let some x ← tmVar? e then return x
+  match_expr (← whnfPP e) with
   | PTerm.root _ r =>
     let some r ← nameOf? r | escapeDl e
     `(dl_term| $(nameIdent r):ident)
@@ -1997,63 +2419,72 @@ partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
     `(dl_term| $x:ident)
   | PTerm.field _ p f =>
     let some f ← nameOf? f | escapeDl e
+    if ← keyOn then return ← `(dl_term| consr($(← ppPTerm p), $(nameIdent f):ident))
     dotTerm (← ppPTerm p) f
-  | PTerm.at _ p i => `(dl_term| $(← recvTerm (← ppPTerm p)):dl_term[$(← ppTerm i):dl_term])
-  | PTerm.next _ p => return (← lenTerms (← ppPTerm p)).2
+  | PTerm.at _ p i => elemTerm (← ppPTerm p) (← ppTerm i)
+  | PTerm.next _ p => return (← lenTerms (← ppPTerm p)).2.2
   | PTerm.atIn _ s p i =>
     `(dl_term| $(← recvTerm (← ppPTerm p)):dl_term[$(← ppTerm i):dl_term]@$(← ppSTerm s):dl_term)
   | PTerm.nextIn _ s p =>
     let p ← recvTerm (← ppPTerm p)
-    let (len, _) ← lenTerms p
+    let (_, len, _) ← withOptions (fun o => pp.sol.key.set o false) (lenTerms p)
     `(dl_term| $p:dl_term[$len:dl_term]@$(← ppSTerm s):dl_term)
   | _ => escapeDl e
 
-/-- `p.length`, and `p[p.length]`, the push positions. -/
-partial def lenTerms (p : TSyntax `dl_term) : MetaM (TSyntax `dl_term × TSyntax `dl_term) := do
+/-- `p[i]`, KeY's `consr(p, at(i))`. -/
+partial def elemTerm (p i : TSyntax `dl_term) : MetaM (TSyntax `dl_term) := do
+  if ← keyOn then `(dl_term| consr($p, at($i))) else `(dl_term| $(← recvTerm p):dl_term[$i:dl_term])
+
+/-- The push positions of the array `p`: its length as a path, as the value
+read in `storage`, and the slot past the end — `p.length`, `p.length` and
+`p[p.length]`, KeY's `consr(p, size)`, `find(storage, consr(p, size))` and
+`consr(p, at(find(storage, consr(p, size))))`. -/
+partial def lenTerms (p : TSyntax `dl_term) :
+    MetaM (TSyntax `dl_term × TSyntax `dl_term × TSyntax `dl_term) := do
+  if ← keyOn then
+    let path ← `(dl_term| consr($p, size))
+    let val ← `(dl_term| find(storage, $path))
+    return (path, val, ← `(dl_term| consr($p, at($val))))
   let p ← recvTerm p
   let len ← match p with
     | `(dl_term| $x:ident) => `(dl_term| $(mkIdent (x.getId.str "length")):ident)
     | _ => `(dl_term| $p . $(nameIdent "length"):ident)
-  return (len, ← `(dl_term| $p[$len]))
+  return (len, len, ← `(dl_term| $p[$len]))
 
 partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some n ← fvarName? e then return ← `(dl_term| $(nameIdent n):ident)
-  match_expr (← whnfTm e) with
+  match_expr (← whnfPP e) with
   | STerm.storage _ => `(dl_term| storage)
   | STerm.pv _ x =>
     let some x ← ppVar? x | escapeDl e
     `(dl_term| $x:ident)
-  | STerm.save _ s p v =>
-    let s ← ppSTerm s
-    match_expr (← whnfTm p) with
-    | PTerm.root _ r =>
-      let some r ← nameOf? r | escapeDl e
-      `(dl_term| store($s, $(nameIdent r):ident, $(← ppSVal v)))
-    | _ => `(dl_term| save($s, $(← ppPTerm p), $(← ppSVal v)))
+  | STerm.save _ s p v => `(dl_term| save($(← ppSTerm s), $(← ppPTerm p), $(← ppSVal v)))
   | STerm.delAt _ s p => `(dl_term| delAt($(← ppSTerm s), $(← ppPTerm p)))
   | STerm.push _ s p v =>
-    let (len, slot) ← lenTerms (← ppPTerm p)
-    `(dl_term| save(save($(← ppSTerm s), $slot, $(← ppSVal v)), $len, $len + 1))
+    let (len, val, slot) ← lenTerms (← ppPTerm p)
+    `(dl_term| save(save($(← ppSTerm s), $slot, $(← ppSVal v)), $len, $val + 1))
   | STerm.pushSlot _ s p _ =>
-    let (len, slot) ← lenTerms (← ppPTerm p)
-    `(dl_term| save(delAt($(← ppSTerm s), $slot), $len, $len + 1))
+    let (len, val, slot) ← lenTerms (← ppPTerm p)
+    `(dl_term| save(delAt($(← ppSTerm s), $slot), $len, $val + 1))
   | STerm.pop _ s p =>
     let p ← ppPTerm p
-    let (len, _) ← lenTerms p
-    `(dl_term| save(delAt($(← ppSTerm s), $p[$len - 1]), $len, $len - 1))
+    let (len, val, _) ← lenTerms p
+    `(dl_term| save(delAt($(← ppSTerm s), $(← elemTerm p (← `(dl_term| $val - 1)))), $len, $val - 1))
   | STerm.extend _ s p _ =>
-    let (len, _) ← lenTerms (← ppPTerm p)
-    `(dl_term| save($(← ppSTerm s), $len, $len + 1))
+    let (len, val, _) ← lenTerms (← ppPTerm p)
+    `(dl_term| save($(← ppSTerm s), $len, $val + 1))
   | STerm.shrink _ s p =>
-    let (len, _) ← lenTerms (← ppPTerm p)
-    `(dl_term| save($(← ppSTerm s), $len, $len - 1))
+    let (len, val, _) ← lenTerms (← ppPTerm p)
+    `(dl_term| save($(← ppSTerm s), $len, $val - 1))
   | STerm.select _ s r =>
     let some r ← nameOf? r | escapeDl e
+    if ← keyOn then return ← `(dl_term| selectSt($(← ppSTerm s), $(nameIdent r):ident))
     `(dl_term| select($(← ppSTerm s), $(nameIdent r):ident))
   | _ => escapeDl e
 
 partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
-  match_expr (← whnfTm e) with
+  if let some x ← tmVar? e then return x
+  match_expr (← whnfPP e) with
   | SValT.val _ t => ppTerm t
   | SValT.find _ s p => `(dl_term| find($(← ppSTerm s), $(← ppPTerm p)))
   | SValT.copyMem _ m i => `(dl_term| copyMem(mtSt, $(← ppMTerm m), $(← ppITerm i)))
@@ -2065,11 +2496,15 @@ partial def ppSVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
 
 partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some x ← loweredExpr? e then return x
-  match_expr (← whnfTm e) with
+  if let some x ← tmVar? e then return x
+  match_expr (← whnfPP e) with
   | ITerm.pv _ x =>
     let some x ← ppVar? x | escapeDl e
     `(dl_term| $x:ident)
-  | ITerm.read _ m a => `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
+  | ITerm.read _ m a =>
+    if ← keyOn then
+      if let some (i, f) ← keyAddr? a then return ← `(dl_term| read($(← ppMTerm m), $i, $f))
+    `(dl_term| read($(← ppMTerm m), $(← ppMAddr a)))
   | ITerm.alloc _ m R =>
     let m ← ppMTerm m
     match ← allocTy? R with
@@ -2079,7 +2514,8 @@ partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | _ => escapeDl e
 
 partial def ppMAddr (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
-  match_expr (← whnfTm e) with
+  if let some x ← tmVar? e then return x
+  match_expr (← whnfPP e) with
   | MAddr.field _ i f =>
     let some f ← nameOf? f | escapeDl e
     dotTerm (← ppITerm i) f
@@ -2088,9 +2524,13 @@ partial def ppMAddr (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
 
 partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some n ← fvarName? e then return ← `(dl_term| $(nameIdent n):ident)
-  match_expr (← whnfTm e) with
+  match_expr (← whnfPP e) with
   | MTerm.memory _ => `(dl_term| memory)
-  | MTerm.write _ m a v => `(dl_term| write($(← ppMTerm m), $(← ppMAddr a), $(← ppMVal v)))
+  | MTerm.write _ m a v =>
+    if ← keyOn then
+      if let some (i, f) ← keyAddr? a then
+        return ← `(dl_term| write($(← ppMTerm m), $i, $f, $(← ppMVal v)))
+    `(dl_term| write($(← ppMTerm m), $(← ppMAddr a), $(← ppMVal v)))
   | MTerm.addM _ m R =>
     let m ← ppMTerm m
     match ← allocTy? R with
@@ -2100,7 +2540,8 @@ partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | _ => escapeDl e
 
 partial def ppMVal (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
-  match_expr (← whnfTm e) with
+  if let some x ← tmVar? e then return x
+  match_expr (← whnfPP e) with
   | MValT.val _ t => ppTerm t
   | MValT.ref _ i => ppITerm i
   | _ => escapeDl e
@@ -2147,13 +2588,22 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
   | UpdElem.net _ r op a =>
     let r ← ppTerm r
     let a ← ppTerm a
+    let key ← keyOn
     match_expr (← whnf op) with
-    | IntOp.sub => return some (← `(dl_upd_elem| net := store(net, at($r), net($r) - $a)))
-    | IntOp.add => return some (← `(dl_upd_elem| net := store(net, at($r), net($r) + $a)))
+    | IntOp.sub =>
+      if key then return some (← `(dl_upd_elem| net := storeSt(net, at($r), selectSt(net, at($r)) - $a)))
+      return some (← `(dl_upd_elem| net := store(net, at($r), net($r) - $a)))
+    | IntOp.add =>
+      if key then return some (← `(dl_upd_elem| net := storeSt(net, at($r), selectSt(net, at($r)) + $a)))
+      return some (← `(dl_upd_elem| net := store(net, at($r), net($r) + $a)))
     | _ => return none
   | UpdElem.pay _ r a =>
     let r ← ppTerm r
     let a ← ppTerm a
+    if ← keyOn then
+      return some (← `(dl_upd_elem|
+        net := if($r = $(mkIdent `self):ident) then $(mkIdent `net):ident
+          else storeSt(net, at($r), selectSt(net, at($r)) - $a)))
     return some (← `(dl_upd_elem|
       net := if($r = $(mkIdent `this):ident) then $(mkIdent `net):ident
         else store(net, at($r), net($r) - $a)))
@@ -2162,14 +2612,29 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
     return some (← `(dl_upd_elem| $x:dl_term := net))
   | _ => return none
 
-def ppUpd (e : Lean.Expr) : MetaM (TSyntax `dl_upd) := do
-  let escape := do `(dl_upd| ‹$(← escapeTerm e):term›)
-  let some xs ← listElems? e | escape
-  if xs.isEmpty then return ← escape
+/-- The elements of an update made of schema variables (`u`, `{u}u2`) and
+lists of elements appended, as `{u ‖ {u}u2}` reads: none if it is not one. -/
+partial def updParts? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `dl_upd_elem))) := do
+  let e ← instantiateMVars e
+  if let some n ← fvarName? e then return some #[← `(dl_upd_elem| $(nameIdent n):ident)]
+  if e.isAppOfArity ``HAppend.hAppend 6 then
+    if let (some a, some b) := (← updParts? (e.getArg! 4), ← updParts? (e.getArg! 5)) then
+      return some (a ++ b)
+  if e.isAppOfArity `Solidity.Upd.subst 3 then
+    if let (some v, some u) := (← fvarName? (e.getArg! 1), ← fvarName? (e.getArg! 2)) then
+      return some #[← `(dl_upd_elem| { $(nameIdent u):ident } $(nameIdent v):ident)]
+  -- anything else: the list it computes to
+  let some xs ← listElems? e | return none
   let mut out := #[]
   for x in xs do
-    let some u ← ppUpdElem? x | return ← escape
+    let some u ← ppUpdElem? x | return none
     out := out.push u
+  return some out
+
+def ppUpd (e : Lean.Expr) : MetaM (TSyntax `dl_upd) := do
+  let escape := do `(dl_upd| ‹$(← escapeTerm e):term›)
+  let some out ← updParts? e | escape
+  if out.isEmpty then return ← escape
   `(dl_upd| { $[$out]‖* })
 
 /-- `defined(a) ∧ defined(b) ∧ a ≐ b`, which `Fml.eqD a b` unfolds to and
@@ -2298,12 +2763,23 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
   | Fml.havoc _ φ => `(dl_fml| { havoc } $(← arg φ):dl_fml)
   | Fml.modal _ m P φ =>
     let some ss ← ppProg? P |
-      let some n ← fvarName? P | escape
-      let b ← `(sol_block| $(nameIdent n):ident)
-      match_expr (← whnf m) with
-      | Modality.diamond => `(dl_fml| ⟨ $b:sol_block ⟩ $(← arg φ):dl_fml)
-      | Modality.box => `(dl_fml| [ $b:sol_block ] $(← arg φ):dl_fml)
-      | _ => escape
+      if let some n ← fvarName? P then
+        let b ← `(sol_block| $(nameIdent n):ident)
+        return ← match_expr (← whnf m) with
+          | Modality.diamond => `(dl_fml| ⟨ $b:sol_block ⟩ $(← arg φ):dl_fml)
+          | Modality.box => `(dl_fml| [ $b:sol_block ] $(← arg φ):dl_fml)
+          | _ => `(dl_fml| ⟨[ $b:sol_block ]⟩ $(← arg φ):dl_fml)
+      -- `⟨[ s; ..ω ]⟩ φ`: statements in front of the rest of the program
+      let some (ss, t) ← ppProgParts? P | escape
+      match t with
+      | some ω =>
+        if (← fvarName? m).isNone then return ← escape
+        `(dl_fml| ⟨[ $[$ss;]* .. $ω:ident ]⟩ $(← arg φ):dl_fml)
+      | none =>
+        match_expr (← whnf m) with
+        | Modality.diamond => `(dl_fml| ⟨ $[$ss;]* ⟩ $(← arg φ):dl_fml)
+        | Modality.box => `(dl_fml| [ $[$ss;]* ] $(← arg φ):dl_fml)
+        | _ => `(dl_fml| ⟨[ $[$ss;]* ]⟩ $(← arg φ):dl_fml)
     match_expr (← whnf m) with
     | Modality.diamond => `(dl_fml| ⟨ $[$ss;]* ⟩ $(← arg φ):dl_fml)
     | Modality.box => `(dl_fml| [ $[$ss;]* ] $(← arg φ):dl_fml)
@@ -2452,6 +2928,75 @@ attribute [delab app.Solidity.Stmt.assign, delab app.Solidity.Stmt.rebind,
   delab app.Solidity.Stmt.assignNew, delab app.Solidity.Stmt.ite, delab app.Solidity.Stmt.require,
   delab app.Solidity.Stmt.assert, delab app.Solidity.Stmt.revert,
   delab app.Solidity.Stmt.call] delabStmt
+
+/-- Whether `e` has at most `n` nodes (shared ones counted each time). -/
+partial def sizeAtMost (n : Nat) (e : Lean.Expr) : Bool :=
+  (go e n).isSome
+where
+  /-- The fuel left once `e` is counted, if any is. -/
+  go (e : Lean.Expr) (fuel : Nat) : Option Nat := do
+    if fuel == 0 then none
+    match e with
+    | .app f a => go a (← go f (fuel - 1))
+    | .mdata _ b => go b fuel
+    | .lam _ t b _ | .forallE _ t b _ => go b (← go t (fuel - 1))
+    | .letE _ t v b _ => go b (← go v (← go t (fuel - 1)))
+    | .proj _ _ b => go b (fuel - 1)
+    | _ => some (fuel - 1)
+
+/-- The largest term `tm{ … }` prints; a larger one prints as Lean prints it. -/
+def tmCutoff : Nat := 2000
+
+/-- A term of the logic standing alone, over schema variables: `tm{ t }`.
+Printed as it is written (`pp.sol.reduce false`: no `whnf`), and only up to
+`tmCutoff` nodes. -/
+def delabTm : Delab := do
+  unless ← ppOn do failure
+  let e ← getExpr
+  let some c := e.getAppFn.constName? | failure
+  guard (e.getAppNumArgs == (← getConstInfo c).type.getNumHeadForalls)
+  -- a schema's term, over variables (the contract aside): a closed one reads
+  -- better as Lean prints it (`PTerm.root "alice"`, a root, not a variable)
+  let fvs := (collectFVars {} (← instantiateMVars e)).fvarIds
+  guard (← fvs.anyM fun fv => return !(← fv.getType).isConstOf ``Contract)
+  guard (sizeAtMost tmCutoff e)
+  let_expr Tm _ s := (← whnfR (← inferType e)) | failure
+  let some srt := (← whnf s).constName? | failure
+  let printer : Lean.Expr → MetaM (TSyntax `dl_term) ← match srt with
+    | ``Srt.val => pure ppTerm
+    | ``Srt.path => pure ppPTerm
+    | ``Srt.st => pure ppSTerm
+    | ``Srt.sv => pure ppSVal
+    | ``Srt.ident => pure ppITerm
+    | ``Srt.addr => pure ppMAddr
+    | ``Srt.mem => pure ppMTerm
+    | ``Srt.mv => pure ppMVal
+    | _ => failure
+  let t ← withOptions (fun o => pp.sol.reduce.set o false) (printer e)
+  guard !(isEscape t)
+  `(tm{ $t })
+
+attribute [delab app.Solidity.Tm.pvV, delab app.Solidity.Tm.pvP, delab app.Solidity.Tm.pvS,
+  delab app.Solidity.Tm.pvI, delab app.Solidity.Tm.app0, delab app.Solidity.Tm.app1,
+  delab app.Solidity.Tm.app2, delab app.Solidity.Tm.app3,
+  delab app.Solidity.Term.lit, delab app.Solidity.Term.pv, delab app.Solidity.Term.binop,
+  delab app.Solidity.Term.unop, delab app.Solidity.Term.find, delab app.Solidity.Term.len,
+  delab app.Solidity.Term.read, delab app.Solidity.Term.ite, delab app.Solidity.Term.mlen,
+  delab app.Solidity.Term.env, delab app.Solidity.Term.net, delab app.Solidity.Term.netOf,
+  delab app.Solidity.Term.delValue, delab app.Solidity.Term.wt,
+  delab app.Solidity.PTerm.root, delab app.Solidity.PTerm.pv, delab app.Solidity.PTerm.field,
+  delab app.Solidity.PTerm.at, delab app.Solidity.PTerm.next, delab app.Solidity.PTerm.nextIn,
+  delab app.Solidity.PTerm.atIn,
+  delab app.Solidity.STerm.storage, delab app.Solidity.STerm.pv, delab app.Solidity.STerm.save,
+  delab app.Solidity.STerm.delAt, delab app.Solidity.STerm.push, delab app.Solidity.STerm.pushSlot,
+  delab app.Solidity.STerm.pop, delab app.Solidity.STerm.shrink, delab app.Solidity.STerm.extend,
+  delab app.Solidity.STerm.select,
+  delab app.Solidity.SValT.val, delab app.Solidity.SValT.find, delab app.Solidity.SValT.copyMem,
+  delab app.Solidity.SValT.newArr,
+  delab app.Solidity.ITerm.pv, delab app.Solidity.ITerm.read, delab app.Solidity.ITerm.alloc,
+  delab app.Solidity.ITerm.copy, delab app.Solidity.MAddr.field, delab app.Solidity.MAddr.at,
+  delab app.Solidity.MTerm.memory, delab app.Solidity.MTerm.write, delab app.Solidity.MTerm.addM,
+  delab app.Solidity.MTerm.copySt, delab app.Solidity.MValT.val, delab app.Solidity.MValT.ref] delabTm
 
 end Print
 

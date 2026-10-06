@@ -747,6 +747,26 @@ def ppPremise? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_premise)) := do
     | Bool.true => return some (← `(dl_premise| true))
     | Bool.false => return some (← `(dl_premise| false))
     | _ => return none
+  | Premise.branches _ bs =>
+    -- a goal per block, `∀ xs. ⟨[ P ]⟩`, without solkey's labels
+    let some bs ← listElems? bs | return none
+    let mut out : Array (TSyntax `dl_branch) := #[]
+    for b in bs do
+      let b ← whnf b
+      unless b.isAppOfArity ``Prod.mk 4 do return none
+      let blk ← ppBlock (b.getArg! 3)
+      let xs ← instantiateMVars (b.getArg! 2)
+      let x? ← if let some n ← fvarName? xs then pure (some n)
+        else if xs.isAppOfArity ``codeBinders 1 then fvarName? xs.appArg!
+        else pure none
+      match x? with
+      | some x => out := out.push (← `(dl_branch| ∀ $(nameIdent x):ident . ⟨[ $blk ]⟩))
+      | none =>
+        let some #[] ← listElems? xs | return none
+        out := out.push (← `(dl_branch| ⟨[ $blk ]⟩))
+    let some b := out[0]? | return none
+    if out.size < 2 then return none
+    return some (← `(dl_premise| $b:dl_branch ; $[$(out.extract 1 out.size)];*))
   | _ => return none
 
 /-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, with the modality it is for. -/
@@ -772,7 +792,7 @@ def delabPremise : Delab := do
 
 attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
   delab app.Solidity.Premise.split, delab app.Solidity.Premise.check,
-  delab app.Solidity.Premise.done] delabPremise
+  delab app.Solidity.Premise.done, delab app.Solidity.Premise.branches] delabPremise
 
 /-- The type without its `autoParam` hypotheses (a taclet's side conditions),
 which nothing after them depends on. -/
@@ -783,17 +803,60 @@ partial def dropSide : Lean.Expr → Lean.Expr
     else .forallE n t b' bi
   | e => e
 
-/-- A taclet's side conditions stay out of sight: `#check @Taclet.x` prints
-its schema variables and its line, as `sideConds` read them off the line.
-`set_option pp.sol.dl false` shows them. -/
+/-- Whether a binder type of the telescope `e` mentions the bound variable `i`. -/
+def usedInBinders : Lean.Expr → Nat → Bool
+  | .forallE _ t b _, i => t.hasLooseBVar i || usedInBinders b (i + 1)
+  | _, _ => false
+
+/-- The binders of a taclet's type and its line.  The proof a name carries
+(`hfld : C.fieldType R fld = …` for `fld`, `hgsp` for `gsp`, `hop` for `op`;
+`hsep` for the arguments of a call `fbs`) stays out of sight, unless another
+binder's type names it, the line saying it; binders of one type are
+grouped, as Lean groups them. -/
+partial def delabTacletBinders (names : Array Lean.Name)
+    (acc : Array (Lean.Ident × Lean.Term × BinderInfo)) : DelabM Lean.Term := do
+  let .forallE n t rest bi := ← getExpr | do
+    let body ← delab
+    -- consecutive binders of one type and kind, grouped
+    let mut groups : Array (Array Lean.Ident × Lean.Term × BinderInfo) := #[]
+    for (x, ty, bi) in acc do
+      match groups.back? with
+      | some (xs, ty', bi') =>
+        if bi == bi' && ty.raw.structEq ty'.raw && bi != .instImplicit then
+          groups := groups.pop.push (xs.push x, ty', bi')
+        else groups := groups.push (#[x], ty, bi)
+      | none => groups := groups.push (#[x], ty, bi)
+    if groups.isEmpty then return body
+    let bs ← groups.mapM fun (xs, ty, bi) => match bi with
+      | .implicit => `(Lean.Parser.Term.bracketedBinderF| {$xs* : $ty})
+      | .strictImplicit => `(Lean.Parser.Term.bracketedBinderF| ⦃$xs* : $ty⦄)
+      | .instImplicit => `(Lean.Parser.Term.bracketedBinderF| [$(xs[0]!) : $ty])
+      | .default => `(Lean.Parser.Term.bracketedBinderF| ($xs* : $ty))
+    `(∀ $bs*, $body)
+  -- `hx`, of a fact about the binder `x` before it
+  let s := n.eraseMacroScopes.toString
+  let carried ← if s == "hsep" then pure true else if !s.startsWith "h" then pure false else
+    match (← getLCtx).findFromUserName? (Lean.Name.mkSimple (s.drop 1)) with
+    | some d => pure (names.contains d.userName && t.containsFVar d.fvarId)
+    | none => pure false
+  let hide := bi == .implicit && carried && !(usedInBinders rest 0) && (← isProp t)
+  let ty ← withBindingDomain delab
+  withBindingBodyUnusedName fun x => do
+    let x : Lean.Ident := ⟨x⟩
+    let names := names.push x.getId
+    if hide then return ← delabTacletBinders names acc
+    delabTacletBinders names (acc.push (x, ty, bi))
+
+/-- A taclet's side conditions and the proofs its names carry stay out of
+sight (`delabTacletBinders`): `#check @Taclet.x` prints its schema variables
+and its line, as `sideConds` read them off the line.  `set_option pp.sol.dl
+false` shows them. -/
 @[delab forallE]
 def delabTacletSide : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
   unless e.getForallBody.isAppOf ``Taclet || e.getForallBody.isAppOf ``LeanTaclet do failure
-  let e' := dropSide e
-  if e' == e then failure
-  withTheReader SubExpr (fun s => { s with expr := e' }) delab
+  withTheReader SubExpr (fun s => { s with expr := dropSide e }) (delabTacletBinders #[] #[])
 
 end Print
 

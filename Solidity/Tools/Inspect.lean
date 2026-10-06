@@ -323,9 +323,14 @@ def keyTacletInfo (s : String) : MetaM MessageData := do
 name (as an identifier or a string). -/
 syntax (name := tacletCmd) "#taclet " (ident <|> str) : command
 
+/-- `#taclet` prints a rule in KeY's long forms (`pp.sol.key`): `consr(sp, fld)`,
+`find(storage, consr(sp, size))`. -/
+def withKeyForms {α : Type} (x : TermElabM α) : TermElabM α :=
+  withOptions (fun o => pp.sol.key.set o true) x
+
 @[command_elab tacletCmd] def elabTaclet : CommandElab
-  | `(#taclet $s:str) => liftTermElabM do logInfo (← keyTacletInfo s.getString)
-  | `(#taclet $id:ident) => liftTermElabM do
+  | `(#taclet $s:str) => liftTermElabM <| withKeyForms do logInfo (← keyTacletInfo s.getString)
+  | `(#taclet $id:ident) => liftTermElabM <| withKeyForms do
     match ← resolveRule id.getId with
     | some n => logInfo (← tacletInfo n)
     | none => logInfo (← keyTacletInfo id.getId.toString)

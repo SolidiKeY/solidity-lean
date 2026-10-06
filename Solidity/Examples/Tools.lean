@@ -114,7 +114,7 @@ info: symbolic execution leaves:
     dl{
   { xs := freshId(copySt(memory, newArr(uint[], n))) ‖ memory := copySt(memory, newArr(uint[], n)) }
     { memory := write(memory, xs[i], 7) }
-      { storage := store(storage, values, copyMem(mtSt, memory, xs)) } find(storage, values[i]) = 7 }
+      { storage := save(storage, values, copyMem(mtSt, memory, xs)) } find(storage, values[i]) = 7 }
 update-free:
     (if(n = n) then true else true) = (if(n = n) then true else true) → ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) = ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) = ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err), has(storage, values), ok(values[i]); if(orElse((err; true), false)) then find(save(storage, values, copyMem(mtSt, write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, n), idC(idp0, nil), at(i), 7), idC(idp0, nil))), values[i]) else if(i = i) then 7 else ((if((0 <= i) && (i < n)) then true else err); 0)) = 7
 -/
@@ -136,12 +136,14 @@ end Inspect
 
 A rule of the calculus by its constructor, and a solkey taclet by its `.key`
 name: `storageFieldWriteCaptureSrc` is one of the two taclets
-`storageFieldRead_unfold_rightSndResult` merges. -/
+`storageFieldRead_unfold_rightSndResult` merges.  Terms print in KeY's long
+forms (`consr(sp, fld)`, `pp.sol.key`), and a fresh name beside the schema
+variable it copies is primed (`sp'`). -/
 
 /--
 info: Solidity.Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Name}
-  {sp : SPath C (Ty.struct x)} {fld : Name} {x_1 : PrimTy} {hfld : C.fieldType x fld = some (Ty.prim x_1)}
-  {se : Simple C x_1}, dl{ ⟨[ sp.fld = se; ]⟩ ⇝ { storage := save(storage, sp.fld, se) } ⟨[ ]⟩ }
+  {sp : SPath C (Ty.struct x)} {fld : Name} {x_1 : PrimTy} {se : Simple C x_1},
+  dl{ ⟨[ sp.fld = se; ]⟩ ⇝ { storage := save(storage, consr(sp, fld), se) } ⟨[ ]⟩ }
 solkey: storageFieldWriteSave (simplify_prog)
 printed: storageFieldWriteSave
 sound: Solidity.Taclet.sound_update
@@ -152,9 +154,8 @@ sound: Solidity.Taclet.sound_update
 info: solkey: storageFieldWriteCaptureSrc (simplify_prog), transcribed by
 
 Solidity.Taclet.storageFieldRead_unfold_rightSndResult : ∀ {C : Contract} {k : Nat} {m : Modality} {x : RefTy}
-  {loc : Loc C (Ty.ref x)} {x_1 : Name} {sp : SPath C (Ty.struct x_1)} {fld : Name}
-  {hfld : C.fieldType x_1 fld = some (Ty.ref x)} {hm : (Ty.ref x).mapFree = true},
-  dl{ ⟨[ loc = sp.fld; ]⟩ ⇝ ⟨[ T storage sp = sp.fld; loc = sp; ]⟩ }
+  {loc : Loc C (Ty.ref x)} {x_1 : Name} {sp : SPath C (Ty.struct x_1)} {fld : Name} {hm : (Ty.ref x).mapFree = true},
+  dl{ ⟨[ loc = sp.fld; ]⟩ ⇝ ⟨[ T storage sp' = sp.fld; loc = sp'; ]⟩ }
 solkey (merged): storageFieldRead_unfold_rightSndResult (simplify_prog), storageFieldWriteCaptureSrc (simplify_prog)
 printed (merged): storageFieldRead_unfold_rightSndResult, storageFieldWriteCaptureSrc
 sound: Solidity.Taclet.sound_unfold
@@ -165,9 +166,8 @@ sound: Solidity.Taclet.sound_unfold
 
 /--
 info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {f : Name} {args : List (Arg C)}
-  {hsep : Arg.separatedFrom [] args = true} {ret : CallRet} {body : List (Stmt C)} {a : Arg C},
-  LeanTaclet C k m (Stmt.call f args hsep ret body)
-    (dl{ ⟨[ T se = ‹a.e›; ‹Stmt.call f (Arg.captureFirst (Var.fresh "se" k) args) ⋯ ret body›; ]⟩ })
+  {ret : CallRet} {body : List (Stmt C)} {a : Arg C},
+  dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ T se = ‹a.e›; ‹Stmt.call f (Arg.captureFirst (Var.fresh "se" k) args) ⋯ ret body›; ]⟩ }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.LeanTaclet.sound
