@@ -313,7 +313,8 @@ theorem ExecP.append_stop {I : Fml C} {Q : Prog C} :
 callbacks, `Stmt.run`'s. -/
 theorem ExecS.det_inv {I : Fml C} {σ : State} {s : Stmt C} {o : COut} (h : ExecS I σ s o)
     (hs : s.forks = false) : o = .ofRes (s.run σ) := by
-  cases h <;> first | rfl | simp [Stmt.forks] at hs
+  cases h <;> first | rfl | (simp_all only [Stmt.forks, Bool.true_eq_false]; done) |
+    simp [Stmt.forks] at hs
 
 /-- A transfer-free block's run with callbacks from a state is its run. -/
 theorem ExecP.of_run {I : Fml C} {σ τ : State} {P : Prog C} (hP : Prog.hasTransfer P = false)

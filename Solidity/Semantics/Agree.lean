@@ -474,6 +474,11 @@ def CallRet.vars : CallRet → List Var
   | .val _ r res => r :: res.toList
   | .rets rs => rs.map (·.2)
 
+/-- The variables a loop's annotation reads. -/
+def LoopAnn.vars : LoopAnn C → List Var
+  | .unwind _ => []
+  | .inv I dec => I.vars ++ optVars Val.vars dec
+
 mutual
 
 /-- The variables a statement mentions: `uint x = y + 1;` mentions `x` and
@@ -506,6 +511,7 @@ def Stmt.vars : Stmt C → List Var
   | .tryCall c rets ok err code pnc other =>
     c.vars ++ rets.map (·.2) ++ Prog.vars ok ++ Prog.vars err ++ code.toList ++ Prog.vars pnc ++
       Prog.vars other
+  | .loop a c body => a.vars ++ c.vars ++ Prog.vars body
 
 def Prog.vars : List (Stmt C) → List Var
   | [] => []
@@ -1003,6 +1009,21 @@ theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     · exact ResultsAgree.bind (bindData_frame _ [v] hag) fun _ _ h' =>
         Prog.run_frame h' pnc h.left.right
     · exact Prog.run_frame hag other h.right
+  | .loop _ c body, h => by
+    simp only [Stmt.run]
+    refine Loop.run_rel (R := EnvAgreeExcept ns) (Q := ResultsAgree ns) hag
+      (fun τ₁ τ₂ hτ => ?_) rfl
+    simp only [Loop.step, c.eval_frame hτ h.left.right]
+    rcases c.eval τ₂ with e | (_ | b)
+    · exact (rfl : e = e)
+    · exact (rfl : Halt.stuck = Halt.stuck)
+    · cases b
+      · exact hτ
+      · rcases (Prog.run_frame hτ body h.right).cases with ⟨e, h₁, h₂⟩ | ⟨s₁, s₂, h₁, h₂, hs⟩
+        · simp only [h₁, h₂]
+          exact (rfl : e = e)
+        · simp only [h₁, h₂]
+          exact hs
 
 theorem Prog.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (P : List (Stmt C)) → Avoids (Prog.vars P) ns → ResultsAgree ns (Prog.run σ P) (Prog.run τ P)

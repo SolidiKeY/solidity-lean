@@ -46,7 +46,7 @@ lemma (`TermTaclet.sound`).
 | `Syntax.lean` | The typed syntax (`Val C p`, `SPath`, `Loc`, `MPath`, `Stmt C`), `Contract`/`FunDecl`, and the elaborator behind `sol[C]{…}` and `contract!{…}`. |
 | `FreshNames.lean` | `FreshNames.ofTable`: the examples' names for the rules' fresh variables, one table per example; `FreshNames.clashes`. |
 | `SpecSyntax.lean` | The specification language (`SolSpec.g4`: `SpecExpr`, `spec!(…)`) and a function's clauses (`FunSpec`). |
-| `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`). |
+| `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`); a loop's run as the least fixed point of its unwinding (`Loop.run`, `Loop.run_rel`). |
 | `Semantics/Properties.lean` | Read-after-write, frame and result-monad lemmas about the state operations, shared by every later layer. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept`: states agreeing off scratch names, and a frame lemma per evaluator. |
 | `Semantics/WellFormed.lean` | `storageWtB`: well-formed storage (the shape `SVal.canon ∧ SVal.tight`, and words in range, `SVal.wordsB`) as a test the term `wt(storage)` runs; `SVal.isDfltB`, a default the kernel can recognise. |
@@ -256,6 +256,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Dangling.lean` | Writes and pushes through a stale alias (one a `pop` left dangling), made live by a `push()`, past a `delete` and a copy, by `sol_prove?`; rounds of them refused past `elimSize` in milliseconds. |
 | `Examples/Tactics/ApplySteps.lean`, `UpdateRules.lean`, `Decide.lean`, `TermTaclets.lean` | The proof style, update simplification, `sol_decide`, term taclets. |
 | `Examples/Tactics/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
+| `Examples/Tactics/Loops.lean` | `while`, `for`, `do … while`, `break`, `continue`, `return` in a loop: the lowering's shapes pinned, `#run` of loops, a concrete loop decided (`Prog.run_loop_of_iterN`). |
 
 At the root, the notation's own tests:
 

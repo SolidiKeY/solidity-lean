@@ -190,6 +190,11 @@ def bindCtx : List (PrimTy × Var) → Ctx → Ctx
 def ExtCall.wt (Γ : Ctx) (c : ExtCall C) : Bool :=
   c.addr.wt Γ && c.args.all fun a => a.2.wt Γ
 
+/-- A loop's annotation reads locals as declared. -/
+def LoopAnn.wt (Γ : Ctx) : LoopAnn C → Bool
+  | .unwind _ => true
+  | .inv I dec => I.wt Γ && dec.all (·.wt Γ)
+
 mutual
 
 /-- The context a statement leaves, if its locals are used as declared:
@@ -249,6 +254,12 @@ def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
       | some Γ₁, some Γ₂, some Γ₃, some Γ₄ =>
         if Ctx.le Γ Γ₁ && Ctx.le Γ Γ₂ && Ctx.le Γ Γ₃ && Ctx.le Γ Γ₄ then some Γ else none
       | _, _, _, _ => none
+    else none
+  | .loop a c body =>
+    if a.wt Γ && c.wt Γ then
+      match Prog.wt Γ body with
+      | some Γb => if Ctx.le Γ Γb then some Γ else none
+      | none => none
     else none
 
 /-- The context a block leaves. -/
@@ -1609,6 +1620,31 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
           exact ⟨H', hext, hwt'.weaken hle.1.2⟩
         · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt other hwt h₄ h
           exact ⟨H', hext, hwt'.weaken hle.2⟩
+      · exact nomatch hs
+    · exact nomatch hs
+  | .loop a c body, Γ, Γ', H, σ, σ', hwt, hs, h => by
+    -- the invariant: every loop head is well-typed under `Γ`, the body's
+    -- declarations forgotten as at an `if`'s join
+    simp only [Stmt.wt] at hs
+    split at hs
+    · split at hs
+      · rename_i Γb hb
+        obtain ⟨hle, rfl⟩ := wt_if hs
+        simp only [Stmt.run] at h
+        refine Loop.run_induct (P := fun τ => ∃ H', H.Extends H' ∧ RunWT C Γ H' τ)
+          (Q := fun r => ∀ τ, r = .ok τ → ∃ H', H.Extends H' ∧ RunWT C Γ H' τ)
+          ⟨H, .refl H, hwt⟩ (fun τ ⟨H₁, hext₁, hwt₁⟩ => ?_) (fun _ h => nomatch h) _ h
+        simp only [Loop.step]
+        rcases c.eval τ with _ | (_ | b)
+        · exact fun _ h => nomatch h
+        · exact fun _ h => nomatch h
+        · cases b
+          · exact fun _ h => by cases h; exact ⟨H₁, hext₁, hwt₁⟩
+          · cases hr : Prog.run τ body with
+            | error _ => exact fun _ h => nomatch h
+            | ok τ' =>
+              obtain ⟨H₂, hext₂, hwt₂⟩ := Prog.run_wt body hwt₁ hb hr
+              exact ⟨H₂, hext₁.trans hext₂, hwt₂.weaken hle⟩
       · exact nomatch hs
     · exact nomatch hs
 

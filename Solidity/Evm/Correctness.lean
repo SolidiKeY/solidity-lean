@@ -39,7 +39,8 @@ slot what the interpreter reads there.
 
 The bound is solc's: `push` reverts at `2^64` elements (`Panic(0x41)`), the
 interpreter's arrays are unbounded, and the two agree as long as no array
-reaches it.  A program has no loops, so it grows an array by at most its
+reaches it.  A compiled program has no loops (`wtStmt` refuses one), so it
+grows an array by at most its
 `push` count; from a fresh contract (`L = 1`) any program with fewer than
 `2^64 - 1` pushes qualifies.
 
@@ -2325,6 +2326,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
   | .assignFromMem .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
   | .assignMem .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
   | .tryCall .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
+  | .loop .., _, _, _, _, _, _, hw, _ => by simp only [wtStmt, reduceCtorEq] at hw
   | .send .., _, _, _, _, _, _, hw, _ => by simp only [wtStmt, reduceCtorEq] at hw
 
 /-- A block's code does what the block does. -/

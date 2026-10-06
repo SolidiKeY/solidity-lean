@@ -36,6 +36,12 @@ statement (`hoist`), in the order solc evaluates the operands.  A statement
 ending in a block (`if (c) { … }`, `unchecked { … }`) may leave out its `;`
 (`solSemi`), and `else if` nests an `if` in the `else` branch.
 
+`while`, `for`, `do … while`, `break` and `continue` are lowered to one
+loop, `Stmt.loop`, solkey's lowered `while`, by solkey's `LoopLowering`
+(`lowerLoops`): a jump sets a flag, and a `return` inside a loop too.  The
+`/// @custom:key` lines above a loop are its annotation (`LoopAnn`), which
+chooses the rule that proves it.
+
 A contract declares its internal functions (`contract!{ function f(uint x)
 returns (uint r) { … } }`), each calling only the ones declared before it.
 A call (`f(a);`, `y = f(a);`, `uint y = f(a);`) is elaborated by inlining:
@@ -135,6 +141,19 @@ inductive RawExpr where
   | tuple (es : List RawExpr)
   deriving Repr, Inhabited
 
+/-- A loop's specification as read, solkey's `///` lines above the loop:
+`/// @custom:key invariant e` (several conjoined), `/// @custom:key
+decreases e` (at most one) and, Lean only, `/// @custom:key unwind k`, the
+bound on unwinding (`LoopAnn`). -/
+structure RawLoopSpec where
+  inv : List RawExpr := []
+  dec : Option RawExpr := none
+  unwind : Option Nat := none
+  deriving Repr, Inhabited
+
+/-- The expressions of a loop's specification, as written. -/
+def RawLoopSpec.exprs (a : RawLoopSpec) : List RawExpr := a.inv ++ a.dec.toList
+
 inductive RawStmt where
   | assign (l r : RawExpr)
   | decl (T : RawTy) (x : String) (init : Option RawExpr)
@@ -180,6 +199,23 @@ inductive RawStmt where
   | tupleAssign (targets : List (Option RawExpr)) (rhs : RawExpr)
   /-- `{ … }`: a block, whose declarations are scoped to it. -/
   | block (body : List RawStmt)
+  /-- `while (c) { … }`, with its specification. -/
+  | whileLoop (spec : RawLoopSpec) (c : RawExpr) (body : List RawStmt)
+  /-- `for (init; c; upd) { … }`: `init` and `upd` are a statement or none,
+  `c` none when left out (`true`). -/
+  | forLoop (spec : RawLoopSpec) (init : List RawStmt) (c : Option RawExpr) (upd : List RawStmt)
+      (body : List RawStmt)
+  /-- `do { … } while (c);` -/
+  | doWhile (spec : RawLoopSpec) (body : List RawStmt) (c : RawExpr)
+  /-- `break;` -/
+  | brk
+  /-- `continue;` -/
+  | cont
+  /-- A loop as `lowerLoops` leaves it, solkey's lowered `while`: no
+  `break`, `continue` or `return` in its body. -/
+  | loop (spec : RawLoopSpec) (c : RawExpr) (body : List RawStmt)
+  /-- `_;`: where a modifier's body runs the function's (`wrapMods`). -/
+  | hole
   deriving Repr, Inhabited
 
 /-- Evaluating `e` can neither revert nor have an effect: a literal, a name,
@@ -201,15 +237,14 @@ def RawStmt.requireWith (c : RawExpr) (args : List RawExpr) : RawStmt :=
 
 /-- A modifier as a function applies it (`function f() onlyOwner
 inState(State.Created) { … }`): its parameters, the arguments of this
-application (read in the function's scope), and its body split at its one
-`_;`, the code before and the code after.  The elaborator inlines it around
-the function's body (`wrapMods`). -/
+application (read in the function's scope), and its body, where each `_;`
+(`RawStmt.hole`, one at least, anywhere) runs the function's.  The
+elaborator inlines it around the function's body (`wrapMods`). -/
 structure ModApp where
   name : String
   params : List (Name × Ty)
   args : List RawExpr
-  pre : List RawStmt
-  post : List RawStmt
+  body : List RawStmt
   deriving Repr, Inhabited
 
 /-- An internal function as the contract declares it: its parameters and
@@ -637,6 +672,14 @@ structure ExtCall (C : Contract) where
   fn : Name
   args : List (ExtArg C)
 
+/-- What a loop is proved by (`docs/loops.md`, Decision 3), chosen by the
+source, so that a loop has one rule: unwound at most `k` times (Lean only:
+solkey's strategy unwinds without a bound), or by its invariant `I` and,
+under the diamond, its variant `dec` (solkey's `/// @custom:key invariant`
+and `decreases`).  `Stmt.run` does not read it. -/
+inductive LoopAnn (C : Contract) where
+  | unwind (k : Nat)
+  | inv (I : Val C .bool) (dec : Option (Val C .uint))
 
 /-! ## Statements -/
 
@@ -712,6 +755,10 @@ inductive Stmt (C : Contract) where
   an `Error`'s message and a catch-all's data are not modelled. -/
   | tryCall (call : ExtCall C) (rets : List (PrimTy × Var)) (ok err : List (Stmt C))
       (code : Option Var) (panic other : List (Stmt C))
+  /-- `while (c) { … }`, solkey's lowered `while`: `for`, `do … while`,
+  `break`, `continue` and a `return` inside a loop are lowered to it by the
+  elaborator (`lowerLoops`), so its body ends only normally or by halting. -/
+  | loop (a : LoopAnn C) (c : Val C .bool) (body : List (Stmt C))
 
 /-- A block. -/
 abbrev Prog (C : Contract) := List (Stmt C)
@@ -878,6 +925,14 @@ def Stmt.tupleCallStr? : Stmt C → List (Stmt C) → Option (String × Nat)
       some (s!"({", ".intercalate slots}) = {call}", ts.length)
   | _, _ => none
 
+/-- A loop's annotation, as the `///` lines above it: none for `.unwind 0`. -/
+def LoopAnn.toStr : LoopAnn C → String
+  | .unwind 0 => ""
+  | .unwind k => s!"/// @custom:key unwind {k} "
+  | .inv I dec =>
+    s!"/// @custom:key invariant {I.toStr true} " ++
+      ((dec.map fun d => s!"/// @custom:key decreases {d.toStr true} ").getD "")
+
 mutual
 
 def Stmt.toStr : Stmt C → String
@@ -933,6 +988,7 @@ def Stmt.toStr : Stmt C → String
       catch Error(string memory) \{ {" ".intercalate (Prog.toStrs 0 err)} } \
       catch Panic({code}) \{ {" ".intercalate (Prog.toStrs 0 pnc)} } \
       catch \{ {" ".intercalate (Prog.toStrs 0 other)} }"
+  | .loop a c body => s!"{a.toStr}while ({c.toStr true}) \{ {" ".intercalate (Prog.toStrs 0 body)} }"
 
 /-- The statements of a block, one string each; a memory call and the
 statement binding its result are one (`Stmt.memCallStr?`), and so are a call
@@ -1170,6 +1226,25 @@ syntax (name := solTupleDecl) "(" (sol_ty ident)? (", " (sol_ty ident)?)+ ")" " 
   sol_stmt
 /-- `{ … }`: a block (`RawStmt.block`). -/
 syntax (name := solBlockStmt) "{" (sol_stmt solSemi)* "}" : sol_stmt
+/-- `while (c) { … }` -/
+syntax (name := solWhile) "while " "(" sol_expr ") " sol_block : sol_stmt
+/-- `for (init; c; upd) { … }`, each of the three parts optional. -/
+syntax (name := solFor) "for " "(" (sol_stmt)? "; " (sol_expr)? "; " (sol_stmt)? ") " sol_block :
+  sol_stmt
+/-- `do { … } while (c);` -/
+syntax (name := solDoWhile) "do " sol_block " while " "(" sol_expr ")" : sol_stmt
+/-- `break;` -/
+syntax (name := solBreak) "break" : sol_stmt
+/-- `continue;` -/
+syntax (name := solContinue) "continue" : sol_stmt
+/-! `/// @custom:key invariant e`, `/// @custom:key decreases e` above a loop,
+solkey's loop specification, and, Lean only, `/// @custom:key unwind k`
+(`RawLoopSpec`).  A clause is a category of its own: a statement's leading
+atom must already be a token (`sol_stmt` reads leading keywords as
+identifiers too), and `///` is not one. -/
+declare_syntax_cat sol_loop_clause
+syntax "/// " "@" &"custom" ":" &"key" ident sol_expr : sol_loop_clause
+syntax (name := solLoopSpec) sol_loop_clause ppLine sol_stmt : sol_stmt
 /-! `try e.f(a) returns (uint v) { … } catch Error(string memory m) { … }
 catch Panic(uint c) { … } catch (bytes memory d) { … } catch { … }`: an
 external call.  A clause's parameter is `sol_tparam`: a type, `memory` for
@@ -1394,7 +1469,41 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRequireMsg => `(RawStmt.require $(← expandExpr ⟨s.raw[2]⟩))
   | ``solRequireErr => `(RawStmt.requireWith $(← expandExpr ⟨s.raw[2]⟩) [$(← exprs s.raw[6]),*])
   | ``solRevertErr | ``solRevertMsg => `(RawStmt.revert)
-  | ``solHole => Macro.throwErrorAt s "`_;` stands once, at the top level of a modifier's body"
+  | ``solHole => `(RawStmt.hole)
+  | ``solBreak => `(RawStmt.brk)
+  | ``solContinue => `(RawStmt.cont)
+  | ``solWhile | ``solFor | ``solDoWhile => expandStmt.loop s (← `({}))
+  | ``solLoopSpec => do
+    -- the clauses down to the loop, in the order written
+    let mut cur := s.raw
+    let mut inv : Array Term := #[]
+    let mut dec : Option Term := none
+    let mut unw : Option Term := none
+    while cur.getKind == ``solLoopSpec do
+      let cl := cur[0]
+      let k := cl[5].getId.toString
+      let e := cl[6]
+      match k with
+      | "invariant" => inv := inv.push (← expandExpr ⟨e⟩)
+      | "decreases" =>
+        if dec.isSome then Macro.throwErrorAt cur "a loop has one `decreases` clause"
+        dec := some (← expandExpr ⟨e⟩)
+      | "unwind" =>
+        let some n := e.isNatLit? <|> e[0].isNatLit? |
+          Macro.throwErrorAt e "`/// @custom:key unwind k` takes a number"
+        if unw.isSome then Macro.throwErrorAt cur "a loop has one `unwind` clause"
+        unw := some (quote n)
+      | _ => Macro.throwErrorAt cl[5] "a loop's clause is `invariant`, `decreases` or `unwind`"
+      cur := cur[1]
+    unless cur.getKind == ``solWhile || cur.getKind == ``solFor || cur.getKind == ``solDoWhile do
+      Macro.throwErrorAt cur "a `/// @custom:key` clause stands above a loop"
+    let decT ← match dec with
+      | some d => `(some $d)
+      | none => `(none)
+    let unwT ← match unw with
+      | some n => `(some $n)
+      | none => `(none)
+    expandStmt.loop ⟨cur⟩ (← `({ inv := [$inv,*], dec := $decT, unwind := $unwT : RawLoopSpec }))
   | ``solPushTarget =>
     expandStmt.pushTarget s ⟨s.raw[0]⟩ (← expandExpr ⟨s.raw[0]⟩) (← expandExpr ⟨s.raw[3]⟩)
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
@@ -1547,6 +1656,21 @@ where
   expandBlock : TSyntax `sol_block → MacroM Term
     | `(sol_block| { $[$ss:sol_stmt;]* }) => do `([$(← ss.mapM expandStmt),*])
     | _ => Macro.throwUnsupported
+  /-- A loop, with its specification `spec`. -/
+  loop (s : TSyntax `sol_stmt) (spec : Term) : MacroM Term := do
+    let r := s.raw
+    match r.getKind with
+    | ``solWhile => `(RawStmt.whileLoop $spec $(← expandExpr ⟨r[2]⟩) $(← expandBlock ⟨r[4]⟩))
+    | ``solDoWhile => `(RawStmt.doWhile $spec $(← expandBlock ⟨r[1]⟩) $(← expandExpr ⟨r[4]⟩))
+    | _ =>
+      let part (o : Syntax) : MacroM Term := do
+        match payload o with
+        | #[t] => `([$(← expandStmt ⟨t⟩)])
+        | _ => `([])
+      let c ← match payload r[4] with
+        | #[e] => `(some $(← expandExpr ⟨e⟩))
+        | _ => `(none)
+      `(RawStmt.forLoop $spec $(← part r[2]) $c $(← part r[6]) $(← expandBlock ⟨r[8]⟩))
   /-- A clause's parameter: its type and its name, if it has one. -/
   tparam (p : Syntax) : MacroM (Term × Option String) := do
     let T ← expandTy ⟨p[0]⟩
@@ -1732,22 +1856,18 @@ def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
     if let some n := w then ws := ws.push (← `(($(strLit x), $(quote n))))
   pure (rows, ws)
 
-/-- A modifier: its name, its parameters, and its body before and after its
-`_;`, which stands once, at the top level. -/
+/-- A modifier: its name, its parameters, and its body, with a `_;` at least
+(solc's "Modifier body does not contain '_'"), anywhere. -/
 def expandModifier (enums : List String) (m : Ident) (ps : Array (TSyntax `sol_param))
-    (b : TSyntax `sol_block) : MacroM (String × Array Term × Term × Term) := do
+    (b : TSyntax `sol_block) : MacroM (String × Array Term × Term) := do
   let `(sol_block| { $[$ss:sol_stmt;]* }) := b | Macro.throwErrorAt b "a modifier's body is a block"
-  let isHole (s : TSyntax `sol_stmt) := s.raw.isOfKind ``solHole
-  unless (ss.filter isHole).size == 1 do
-    Macro.throwErrorAt b "a modifier's body has one `_;`, at its top level"
-  let i := (ss.findIdx? isHole).getD 0
-  let pre ← (ss.extract 0 i).mapM expandStmt
-  let post ← (ss.extract (i + 1) ss.size).mapM expandStmt
-  pure (m.getId.toString, ← expandParams enums ps, ← `([$pre,*]), ← `([$post,*]))
+  unless (b.raw.find? (·.isOfKind ``solHole)).isSome do
+    Macro.throwErrorAt b "a modifier's body has a `_;`"
+  pure (m.getId.toString, ← expandParams enums ps, ← `([$(← ss.mapM expandStmt),*]))
 
 /-- A function's declaration, as a term: its return variable and its
 modifiers read off its attributes. -/
-def expandFun (enums : List String) (mods : List (String × Array Term × Term × Term)) (f : Ident)
+def expandFun (enums : List String) (mods : List (String × Array Term × Term)) (f : Ident)
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
     (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
   let (ps, ws) ← expandParamsW enums ps
@@ -1781,12 +1901,12 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
     | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>
       let name := m.getId.toString
       if attrKeywords.contains name then continue
-      let some (_, params, pre, post) := mods.find? (·.1 == name) |
+      let some (_, params, mb) := mods.find? (·.1 == name) |
         Macro.throwErrorAt m s!"{name} is not a modifier of this contract"
       let args ← match as with
         | some as => as.getElems.mapM expandExpr
         | none => pure #[]
-      apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $pre $post))
+      apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $mb))
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   `(($(strLit f),
@@ -2199,14 +2319,24 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .send (some _) _ r a => [r, a]
   | .tupleDecl _ r => [r]
   | .tupleAssign ts r => ts.filterMap id ++ [r]
-  | .revert | .unchecked _ | .block _ => []
+  | .revert | .unchecked _ | .block _ | .brk | .cont | .hole => []
+  | .whileLoop a c _ | .doWhile a _ c | .loop a c _ => a.exprs ++ [c]
+  | .forLoop a _ c _ _ => a.exprs ++ c.toList
 
-/-- A statement's blocks: an `if`'s branches, an `unchecked` block's body. -/
+/-- A statement's blocks: an `if`'s branches, an `unchecked` block's body, a
+loop's body (a `for`'s initialisation, body and update). -/
 def RawStmt.blocks : RawStmt → List (List RawStmt)
   | .ite _ t e => [t, e]
   | .unchecked b | .block b => [b]
   | .tryCall _ _ _ _ ok err _ pnc other => [ok, err, pnc, other]
+  | .whileLoop _ _ b | .doWhile _ b _ | .loop _ _ b => [b]
+  | .forLoop _ i _ u b => [i, b, u]
   | _ => []
+
+/-- A loop's specification with its expressions rewritten by `f`. -/
+def RawLoopSpec.mapM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) (a : RawLoopSpec) :
+    m RawLoopSpec :=
+  return { a with inv := ← a.inv.mapM f, dec := ← a.dec.mapM f }
 
 /-- A statement with its own expressions rewritten by `f`, left to right (its
 blocks as they are). -/
@@ -2236,6 +2366,13 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .tupleDecl vs r => return .tupleDecl vs (← f r)
   | .tupleAssign ts r => return .tupleAssign (← ts.mapM (·.mapM f)) (← f r)
   | .block b => pure (.block b)
+  | .brk => pure .brk
+  | .cont => pure .cont
+  | .hole => pure .hole
+  | .whileLoop a c b => return .whileLoop (← a.mapM f) (← f c) b
+  | .doWhile a b c => return .doWhile (← a.mapM f) b (← f c)
+  | .loop a c b => return .loop (← a.mapM f) (← f c) b
+  | .forLoop a i c u b => return .forLoop (← a.mapM f) i (← c.mapM f) u b
 
 /-- The name a statement declares in its own block. -/
 def RawStmt.declared? : RawStmt → Option String
@@ -2759,6 +2896,7 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
   | [] => pure []
   | s :: ss => do
     let r := RawExpr.rename ρ
+    let ra (a : RawLoopSpec) : RawLoopSpec := Id.run (a.mapM (pure ∘ r))
     let fresh (base x : String) : ElabM (String × List (String × String)) := do
       let y := toString (← freshCapture base)
       pure (y, (x, y) :: ρ)
@@ -2805,6 +2943,22 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
         | none => pure (none, ρ)
       pure (.tryCall (r e) g (as.map r) rets' (← renameStmts ρok ok) (← renameStmts ρ err) code'
         (← renameStmts ρp pnc) (← renameStmts ρ other) :: (← renameStmts ρ ss))
+    | .whileLoop a c b =>
+      pure (.whileLoop (ra a) (r c) (← renameStmts ρ b) :: (← renameStmts ρ ss))
+    | .doWhile a b c =>
+      pure (.doWhile (ra a) (← renameStmts ρ b) (r c) :: (← renameStmts ρ ss))
+    | .loop a c b =>
+      pure (.loop (ra a) (r c) (← renameStmts ρ b) :: (← renameStmts ρ ss))
+    | .forLoop a [] c u b =>
+      pure (.forLoop (ra a) [] (c.map r) (← renameStmts ρ u) (← renameStmts ρ b) ::
+        (← renameStmts ρ ss))
+    | .forLoop a i c u b =>
+      -- the initialisation's declarations scope over the rest of the loop
+      let out ← renameStmts ρ (i ++ [.forLoop a [] c u b])
+      match out.getLast? with
+      | some (.forLoop a' [] c' u' b') =>
+        pure (.forLoop a' out.dropLast c' u' b' :: (← renameStmts ρ ss))
+      | _ => throw "a `for` loop's initialisation, renamed"
     | s => pure ((Id.run (s.mapExprsM (pure ∘ r))) :: (← renameStmts ρ ss))
 
 /-- `return e;`, lowered to the return variables `rs`: `r = e;` for one;
@@ -2844,9 +2998,10 @@ in scope over the moved statements, so a moved statement may not name one
 (Solidity scopes it to the branch); in an inlined body every local is
 already fresh (`renameStmts`), and that never happens.  A block with a
 `return` inside is spliced into the statements after it (solkey's
-`blockReturn`, by the same guard).  A `return` inside a loop would need an
-early exit from the loop, which this cannot give (`docs/kernel-port.md`);
-there are no loops.  A function on a body as read: it may run before or
+`blockReturn`, by the same guard).  A `return` inside a loop is lowered
+first, to a flag (`lowerLoops`), since this cannot give an early exit from a
+loop: what is left of it is the `if (ret) return;` after the outermost loop.
+A function on a body as read: it may run before or
 after the body is renamed. -/
 partial def lowerReturns (r : List String) : List RawStmt → Except String (List RawStmt)
   | [] => pure []
@@ -2886,22 +3041,242 @@ partial def lowerReturns (r : List String) : List RawStmt → Except String (Lis
     pure (.unchecked (← lowerReturns r b) :: (← lowerReturns r ss))
   | s :: ss => do pure (s :: (← lowerReturns r ss))
 
+/-! ### Loops, lowered
+
+solkey's `LoopLowering` (`docs/loops.md`, Decision 2), shape for shape: a
+loop's `break`, `continue` and `return` become fresh `bool` flags `brk`,
+`cnt`, `ret`, made only when used; the rest of a block after a statement
+that may set one runs under `if (!brk && !cnt && !ret) { … }`, testing only
+the flags it may set; the loop's condition gets `!brk && !ret`; `for` and
+`do … while` become a `while` (`RawStmt.loop`).  In an inlined body it runs
+before `lowerReturns`, which then lowers the `if (ret) return;` after the
+outermost loop as any early `return`. -/
+
+/-- How a statement in a loop may end abruptly: solkey's `Abrupt`. -/
+inductive Abrupt where
+  | brk | cnt | ret
+  deriving DecidableEq, Repr
+
+/-- The kinds of `a` or `b`, in solkey's order (`brk`, `cnt`, `ret`). -/
+def Abrupt.union (a b : List Abrupt) : List Abrupt :=
+  [.brk, .cnt, .ret].filter fun k => a.contains k || b.contains k
+
+/-- The flags of the loop being lowered (its `brk` and `cnt`, and the `ret`
+the loops of one nest share), each made when first used; `inLoop` is false
+outside every loop. -/
+structure LoopFlags where
+  brk : Option String := none
+  cnt : Option String := none
+  ret : Option String := none
+  inLoop : Bool := false
+
+/-- Lowering loops: the elaborator, and the flags of the loop being lowered. -/
+abbrev LowerM := StateT LoopFlags ElabM
+
+/-- The flag of `k`, made fresh on its first use (`brk1`, `cnt2`, `ret3`). -/
+def LoopFlags.flag (k : Abrupt) : LowerM String := do
+  let fl ← get
+  let cur := match k with
+    | .brk => fl.brk
+    | .cnt => fl.cnt
+    | .ret => fl.ret
+  if let some x := cur then return x
+  let x := toString (← freshCapture (match k with | .brk => "brk" | .cnt => "cnt" | .ret => "ret"))
+  match k with
+  | .brk => set { fl with brk := some x }
+  | .cnt => set { fl with cnt := some x }
+  | .ret => set { fl with ret := some x }
+  pure x
+
+/-- `e₁ && e₂ && … && c`, nested to the right as it reads. -/
+def RawExpr.andAll (es : List RawExpr) (c : RawExpr) : RawExpr :=
+  es.foldr (fun e acc => .binop .and e acc) c
+
+/-- `!brk && !cnt && !ret`, of the flags of `ks`, before `c`; solkey's
+`notAny`. -/
+def notAny (ks : List Abrupt) (c : Option RawExpr := none) : LowerM RawExpr := do
+  let gs ← ks.mapM fun k => do pure (RawExpr.unop .not (.name (← LoopFlags.flag k)))
+  match c, gs.reverse with
+  | some c, _ => pure (RawExpr.andAll gs c)
+  | none, g :: rest => pure (RawExpr.andAll rest.reverse g)
+  | none, [] => pure (.bool true)
+
+/-- `bool x = b;` -/
+def RawStmt.declBool (x : String) (b : Bool) : RawStmt := .decl (.named "bool") x (some (.bool b))
+
+/-- `x = b;` -/
+def RawStmt.setBool (x : String) (b : Bool) : RawStmt := .assign (.name x) (.bool b)
+
+/-- A `break`, `continue` or `return`. -/
+def RawStmt.isJump : RawStmt → Bool
+  | .brk | .cont | .ret _ => true
+  | _ => false
+
+/-- Whether a `break`, `continue` or `return` occurs in the statement, at any
+depth (solkey's `containsJump`). -/
+partial def RawStmt.hasJump (s : RawStmt) : Bool :=
+  s.isJump || s.blocks.any (·.any RawStmt.hasJump)
+
+/-- Lower outside every loop: a `try`'s clauses inside a loop, which have no
+jump. -/
+def LowerM.outside {α : Type} (x : LowerM α) : LowerM α := do
+  let fl ← get
+  set ({} : LoopFlags)
+  let r ← x
+  set fl
+  pure r
+
+mutual
+
+/-- A block, lowered: its statements, and how it may end abruptly.  After a
+statement that may set a flag, the rest runs under `if (!flag…)`; after a
+jump it is dropped. -/
+partial def lowerList (rs : Option (List String)) :
+    List RawStmt → LowerM (List RawStmt × List Abrupt)
+  | [] => pure ([], [])
+  | s :: ss => do
+    let (s', ab) ← lowerStmt rs s
+    if ab.isEmpty then
+      let (ss', ab') ← lowerList rs ss
+      pure (s' :: ss', ab')
+    else if s.isJump then pure ([s'], ab)
+    else
+      let (ss', ab') ← lowerList rs ss
+      if ss'.isEmpty then pure ([s'], ab)
+      else pure ([s', .ite (← notAny ab) ss' []], Abrupt.union ab ab')
+
+/-- A statement, lowered.  `rs` are the return variables of the body it is
+in, none outside a function. -/
+partial def lowerStmt (rs : Option (List String)) (s : RawStmt) :
+    LowerM (RawStmt × List Abrupt) := do
+  if s matches .whileLoop .. | .forLoop .. | .doWhile .. | .loop .. then return ← lowerLoop rs s
+  let lowerB (b : List RawStmt) : LowerM (List RawStmt) := do pure (← lowerList rs b).1
+  unless (← get).inLoop do
+    return ← match s with
+      | .block b => do pure (.block (← lowerB b), [])
+      | .unchecked b => do pure (.unchecked (← lowerB b), [])
+      | .ite c t e => do pure (.ite c (← lowerB t) (← lowerB e), [])
+      | .tryCall e g as rets ok err code pnc other => do
+        pure (.tryCall e g as rets (← lowerB ok) (← lowerB err) code (← lowerB pnc) (← lowerB other),
+          [])
+      | .brk => throw "`break` outside a loop"
+      | .cont => throw "`continue` outside a loop"
+      | s => pure (s, [])
+  match s with
+  | .brk => pure (.setBool (← LoopFlags.flag .brk) true, [.brk])
+  | .cont => pure (.setBool (← LoopFlags.flag .cnt) true, [.cnt])
+  | .ret e =>
+    let some rs := rs | throw "`return` outside a function's body"
+    let pre ← match e with
+      | none => pure []
+      | some e => ElabM.lift (lowerReturn rs e)
+    pure (.block (pre ++ [.setBool (← LoopFlags.flag .ret) true]), [.ret])
+  | .block b => do
+    let (b', ab) ← lowerList rs b
+    pure (.block b', ab)
+  | .unchecked b => do
+    let (b', ab) ← lowerList rs b
+    pure (.unchecked b', ab)
+  | .ite c t e => do
+    let (t', a) ← lowerList rs t
+    let (e', b) ← lowerList rs e
+    pure (.ite c t' e', Abrupt.union a b)
+  | .tryCall e g as rets ok err code pnc other => do
+    if s.hasJump then throw "`break`, `continue` or `return` inside `try` inside a loop"
+    LowerM.outside do
+      pure (.tryCall e g as rets (← lowerB ok) (← lowerB err) code (← lowerB pnc) (← lowerB other),
+        [])
+  | s => pure (s, [])
+
+/-- A loop, lowered to `RawStmt.loop`: `{ before; while (!brk && !ret && c)
+{ bool cnt = false; body } }`, with what `for` and `do … while` add, and
+`if (ret) return;` after the outermost loop of a nest with a `return`. -/
+partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
+    LowerM (RawStmt × List Abrupt) := do
+  let (spec, c, init, upd, body, isDo) := match s with
+    | .forLoop a i c u b => (a, c.getD (.bool true), i, u, b, false)
+    | .doWhile a b c => (a, c, [], [], b, true)
+    | .whileLoop a c b | .loop a c b => (a, c, [], [], b, false)
+    | _ => ({}, .bool true, [], [], [], false)
+  let outer ← get
+  let outermost := !outer.inLoop
+  set ({ ret := if outermost then none else outer.ret, inLoop := true } : LoopFlags)
+  let (body', ab) ← lowerList rs body
+  let exits := ab.filter (· != .cnt)
+  let mut before : List RawStmt := init
+  let mut iter : List RawStmt := []
+  let mut cond := c
+  if isDo then
+    let first := toString (← freshCapture "first")
+    before := before ++ [.declBool first true]
+    iter := [.setBool first false]
+    cond := .binop .or (.name first) cond
+  if let some x := (← get).cnt then iter := iter ++ [.declBool x false]
+  iter := iter ++ body'
+  unless upd.isEmpty do
+    if exits.isEmpty then iter := iter ++ upd
+    else iter := iter ++ [.ite (← notAny exits) upd []]
+  unless exits.isEmpty do cond ← notAny exits (some cond)
+  let fl ← get
+  if let some x := fl.brk then before := before ++ [.declBool x false]
+  let returns := exits.contains .ret
+  let retX := fl.ret.getD ""
+  if returns && outermost then before := before ++ [.declBool retX false]
+  set { outer with ret := if outermost then outer.ret else fl.ret }
+  let w := RawStmt.loop spec cond iter
+  let ab' := if returns then [Abrupt.ret] else []
+  if before.isEmpty && !(returns && outermost) then return (w, ab')
+  if returns && outermost then
+    return (.block (before ++ [w, .ite (.name retX) [.ret none] []]), [])
+  pure (.block (before ++ [w]), ab')
+
+end
+
+/-- **Loops, lowered** in a block (`lowerList`), outside every loop. -/
+def lowerLoops (rs : Option (List String)) (ss : List RawStmt) : ElabM (List RawStmt) := do
+  pure (← (lowerList rs ss).run' {}).1
+
+/-- Whether a `_;` occurs in the statement, at any depth. -/
+partial def RawStmt.hasHole (s : RawStmt) : Bool :=
+  s matches .hole || s.blocks.any (·.any RawStmt.hasHole)
+
+/-- A modifier's body with each `_;` the block `inner`, at any depth.  Not
+inside `unchecked`, as solc refuses it there. -/
+partial def RawStmt.fillHole (inner : List RawStmt) (s : RawStmt) : Except String RawStmt :=
+  let go := fun (b : List RawStmt) => b.mapM (RawStmt.fillHole inner)
+  match s with
+  | .hole => pure (.block inner)
+  | .ite c t e => return .ite c (← go t) (← go e)
+  | .block b => return .block (← go b)
+  | .unchecked b =>
+    if b.any RawStmt.hasHole then throw "`_;` inside `unchecked { … }`" else pure (.unchecked b)
+  | .tryCall e g as rets ok err code pnc other =>
+    return .tryCall e g as rets (← go ok) (← go err) code (← go pnc) (← go other)
+  | .whileLoop a c b => return .whileLoop a c (← go b)
+  | .doWhile a b c => return .doWhile a (← go b) c
+  | .loop a c b => return .loop a c (← go b)
+  | .forLoop a i c u b => return .forLoop a i c u (← go b)
+  | s => pure s
+
 /-- **Modifiers, inlined** around a function's body (its locals already
 fresh), the first listed outermost, as solc runs them: a modifier's
 parameters are declared fresh with its arguments (read in the function's
 scope, and evaluated when the modifier is entered: after the code before
-the `_;` of the modifiers outside it), then its code before `_;`, the next
-modifier (or the body), its code after `_;`.  A modifier's locals are
+the `_;` of the modifiers outside it), then its body with each `_;` the
+next modifier (or the function's body), as a block.  A modifier's locals are
 renamed fresh, so the body cannot see them.  A `return` in a modifier is
 not read; one in the body is its last statement (`lowerReturns`), so the
-code after `_;` runs after it, as it does in solc. -/
+code after `_;` runs after it, as it does in solc.  A body run by several
+`_;` (or by one in a loop) is run again in the same locals, its parameters
+and return variables not reset: solc's legacy pipeline (via-IR resets
+them). -/
 partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt)
   | [] => pure body
   | m :: ms => do
     let inner ← wrapMods body ms
     unless m.params.length == m.args.length do
       throw s!"modifier {m.name} takes {m.params.length} arguments, not {m.args.length}"
-    if (m.pre ++ m.post).any RawStmt.hasReturn then throw s!"modifier {m.name}: `return` in a modifier"
+    if m.body.any RawStmt.hasReturn then throw s!"modifier {m.name}: `return` in a modifier"
     let mut ρ : List (String × String) := []
     let mut decls : List RawStmt := []
     for ((n, T), a) in m.params.zip m.args do
@@ -2909,9 +3284,8 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
       let y := toString (← freshCapture "se")
       decls := decls ++ [.decl (.named (primName p)) y (some a)]
       ρ := (n, y) :: ρ
-    -- one renaming for both parts: a local declared before `_;` is in scope after it
-    let code ← renameStmts ρ (m.pre ++ m.post)
-    pure (decls ++ code.take m.pre.length ++ inner ++ code.drop m.pre.length)
+    let code ← renameStmts ρ m.body
+    pure (decls ++ (← ElabM.lift (code.mapM (RawStmt.fillHole inner))))
 
 /-- The statements of `unchecked { … }` with their arithmetic wrapping: `x += 1;`
 and `x++;` are `x = x +% 1;`.  A call's callee stays checked, as in solc. -/
@@ -2931,6 +3305,13 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
       | .tryCall e g as rets ok err code pnc other => do
         pure (.tryCall (← e.uncheck) g (← as.mapM RawExpr.uncheck) rets (← uncheckStmts ok)
           (← uncheckStmts err) code (← uncheckStmts pnc) (← uncheckStmts other))
+      -- a loop's specification is not a program's arithmetic: it stays as written
+      | .whileLoop a c b => do pure (.whileLoop a (← c.uncheck) (← uncheckStmts b))
+      | .doWhile a b c => do pure (.doWhile a (← uncheckStmts b) (← c.uncheck))
+      | .loop a c b => do pure (.loop a (← c.uncheck) (← uncheckStmts b))
+      | .forLoop a i c u b => do
+        pure (.forLoop a (← uncheckStmts i) (← c.mapM RawExpr.uncheck) (← uncheckStmts u)
+          (← uncheckStmts b))
       | s => s.mapExprsM RawExpr.uncheck
     pure (s' :: (← uncheckStmts ss))
 
@@ -3212,6 +3593,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         mrets := mrets ++ [(p, r, w)]
       if targets then pure (CallRet.rets (mrets.map fun (p, r, _) => (p, r))) else pure CallRet.none
   let body ← renameStmts ρ d.body
+  let body ← lowerLoops (some (d.rets.map fun (n, _) => (lookupBy n ρ).getD n)) body
   let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
   let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
   modify fun (_, k) => (Γf, k)
@@ -3326,6 +3708,9 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
 (`hoistStmt`), then the statement,
 whose compound target may need a capture of its own. -/
 partial def elabStmt (s : RawStmt) : ElabM (Prog C) := do
+  -- a loop outside a function's body, lowered here (`lowerLoops`)
+  if s matches .whileLoop .. | .forLoop .. | .doWhile .. then
+    return ← elabStmts (← lowerLoops none [s])
   let s ← ElabM.lift (s.mapExprsM (narrowPure C (← ctx)))
   let (P, s) ← hoistStmt s
   pure (P ++ (← elabStmt1 s))
@@ -3511,6 +3896,23 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
   | .call (.name f) args => elabCall f args none
   | .call .. => throw "only push, pop and transfer are calls on a receiver"
   | .ret _ => throw "`return` outside a function's body"
+  | .brk => throw "`break` outside a loop"
+  | .cont => throw "`continue` outside a loop"
+  | .hole => throw "`_;` outside a modifier's body"
+  | s@(.whileLoop ..) | s@(.forLoop ..) | s@(.doWhile ..) => do elabStmts (← lowerLoops none [s])
+  | .loop a c body => do
+    -- evaluated again each iteration, so it is not captured before the loop
+    let c ← loopExpr .bool c "condition"
+    let a ← match a.inv, a.unwind with
+      | [], u => do
+        if a.dec.isSome then throw "a loop's `decreases` clause without an `invariant`"
+        pure (LoopAnn.unwind (u.getD 0))
+      | i :: is, none => do
+        let I ← loopExpr .bool (RawExpr.andAll (i :: is).dropLast ((i :: is).getLast?.getD i))
+          "invariant"
+        pure (.inv I (← a.dec.mapM fun d => loopExpr .uint d "variant"))
+      | _ :: _, some _ => throw "a loop has an `invariant` or an `unwind` clause, not both"
+    pure [.loop a c (← elabBranch body)]
   | .block b => elabBranch b
   | .tupleAssign ts rhs => elabTuple ts rhs
   | .tupleDecl vs rhs => do
@@ -3562,6 +3964,16 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     set (Γ, k)
     let other ← elabBranch other
     pure (Q ++ [.tryCall ⟨addr, g, args⟩ rets' ok err (code.map Var.ofName) pnc other])
+
+/-- A loop's condition, invariant or variant, of type `p`: no effect may be
+captured before it, since it is evaluated where the loop is, again. -/
+partial def loopExpr (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C p) := do
+  let e ← ElabM.lift (narrowPure C (← ctx) e)
+  let st ← get
+  let (P, _) ← hoist e
+  set st
+  unless P.isEmpty do throw s!"{e.toStr}: a loop's {what} with an effect"
+  checkM C p e
 
 /-- A block. -/
 partial def elabStmts : List RawStmt → ElabM (Prog C)
@@ -3809,6 +4221,12 @@ def ExtCall.quote (call : ExtCall C) : Lean.Expr :=
     (mkAppN (mkConst ``List.nil [0]) #[argTy])
   mkAppN (mkConst ``ExtCall.mk) #[c, Simple.quote c .uint call.addr, toExpr call.fn, args]
 
+def LoopAnn.quote : LoopAnn C → Lean.Expr
+  | .unwind k => mkAppN (mkConst ``LoopAnn.unwind) #[c, toExpr k]
+  | .inv I dec =>
+    mkAppN (mkConst ``LoopAnn.inv) #[c, Val.quote c .bool I,
+      optE (mkAppN (mkConst ``Val) #[c, toExpr PrimTy.uint]) (dec.map (Val.quote c .uint))]
+
 mutual
 
 def Stmt.quote : Stmt C → Lean.Expr
@@ -3862,6 +4280,8 @@ def Stmt.quote : Stmt C → Lean.Expr
     mkAppN (mkConst ``Stmt.tryCall)
       #[c, ExtCall.quote c call, toExpr rets, Prog.quote ok, Prog.quote err, toExpr code,
         Prog.quote pnc, Prog.quote other]
+  | .loop a cond body =>
+    mkAppN (mkConst ``Stmt.loop) #[c, LoopAnn.quote c a, Val.quote c .bool cond, Prog.quote body]
 
 def Prog.quote : List (Stmt C) → Lean.Expr
   | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``Stmt) #[c]]

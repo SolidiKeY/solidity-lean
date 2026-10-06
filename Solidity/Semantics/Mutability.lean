@@ -88,6 +88,7 @@ def Stmt.within (μ : Mutability) : Stmt C → Bool
   | .revert => true
   | .ite c thn els => μ.reads c && Prog.within μ thn && Prog.within μ els
   | .call _ args _ _ body => args.all (fun a => μ.reads a.e) && Prog.within μ body
+  | .loop _ c body => μ.reads c && Prog.within μ body
   | .assign .. | .delete _ | .transfer .. | .send .. => μ == .nonpayable
   | _ => false
 
@@ -109,6 +110,7 @@ def Stmt.writes : Stmt C → List Var
   | .ite _ thn els => Prog.writes thn ++ Prog.writes els
   | .call _ args _ ret body => args.map (·.x) ++ ret.vars ++ Prog.writes body
   | .send pv _ _ => [pv]
+  | .loop _ _ body => Prog.writes body
   | _ => []
 
 def Prog.writes : List (Stmt C) → List Var
@@ -475,6 +477,21 @@ theorem Stmt.frame_of_within {μ : Mutability} : (s : Stmt C) → s.within μ = 
       Frame.ofAgree μ (agree_setEnv (List.mem_singleton_self x) σ' _)
     exact (e₁.mono fun _ hy => List.mem_cons_of_mem _ hy).trans
       (e₂.mono fun _ hy => by rw [List.mem_singleton.1 hy]; exact List.mem_cons_self ..)
+  | .loop _ c body, hw, σ, _, h => by
+    simp only [Stmt.within, Bool.and_eq_true] at hw
+    simp only [Stmt.run] at h
+    refine Loop.run_induct (P := μ.Frame (Prog.writes body) σ)
+      (Q := fun r => ∀ τ, r = .ok τ → μ.Frame (Prog.writes body) σ τ) (Frame.refl μ _ σ)
+      (fun τ hτ => ?_) (fun _ h => by cases h) _ h
+    simp only [Loop.step]
+    rcases c.eval τ with _ | (_ | b)
+    · exact fun _ h => by cases h
+    · exact fun _ h => by cases h
+    · cases b
+      · exact fun _ h => by cases h; exact hτ
+      · cases hb : Prog.run τ body with
+        | error _ => exact fun _ h => by cases h
+        | ok τ' => exact hτ.trans (Prog.frame_of_within body hw.2 hb)
   | .rebind .., hw, _, _, _ | .declStorage .., hw, _, _, _
   | .push .., hw, _, _, _ | .pop _, hw, _, _, _ | .declMem .., hw, _, _, _
   | .rebindMem .., hw, _, _, _ | .assignFromMem .., hw, _, _, _ | .assignMem .., hw, _, _, _

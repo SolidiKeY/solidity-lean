@@ -153,6 +153,7 @@ theorem LeanTaclet.eq_step {s : Stmt C} {p : Premise C} (d : LeanTaclet C k m s 
     split <;> simp_all <;> subst_vars <;> rfl
   | tryCallDiamond => rfl
   | transferDiamond => rfl
+  | whileClose => rfl
 
 theorem Rule.eq_step {s : Stmt C} {p : Premise C} (d : Rule C k m s p) :
     p = (s.step k m).premise := by

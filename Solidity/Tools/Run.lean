@@ -31,7 +31,8 @@ same way, but a call of several returns as the bare `f(a, b);`, whose returns
 the inlined body declares.
 
 The output is `ok`, the value returned, and the storage one root per line
-(`fmtStorage`); or `revert`, or `stuck`.
+(`fmtStorage`); or `revert`, or `stuck`.  A loop runs by iterating it
+(`Loop.runImpl`), so a call that never ends does not return.
 -/
 
 namespace Solidity.Tools

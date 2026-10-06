@@ -91,7 +91,8 @@ None uses more than `propext`, `Classical.choice` and `Quot.sound`; no
 elements (`Panic(0x41)`); the interpreter's arrays are unbounded. The two
 agree while no array reaches the limit, and that is the hypothesis: `Sim`
 carries a bound `L ≤ 2^64` on every dynamic array's length (`ReprAt.array`),
-each `push` raises it by one, and a program has no loops, so it raises it by
+each `push` raises it by one, and a compiled program has no loops (`wtStmt`
+refuses one), so it raises it by
 at most `pushesP P`, its number of `push` statements. From a fresh contract
 the hypothesis is `pushesP P < 2^64`, which `decide` discharges for any
 program one can write. The compiled `push` emits solc's check all the same;
@@ -112,7 +113,8 @@ says why):
   `data s o` (`keccak256(s) + o`) — so keccak never collides, solc's assumption
   made structural; an offset added to a slot does not wrap;
 - **relative forward jumps** (`exec` carries the instructions still to skip,
-  so it is structural; the fragment has no loops, and the one solc emits for it,
+  so it is structural; the fragment has no loops (`wtStmt` refuses a
+  `Stmt.loop`), and the one solc emits for it,
   `checked_exp_helper`'s, is unrolled: it runs at most 255 times);
 - **locals in memory cells** addressed by the variable (solc keeps them on the
   stack); `KECCAK256` takes its inputs from the stack;
@@ -183,6 +185,7 @@ Out, and why:
 | Construct | Why |
 | --- | --- |
 | memory (`T memory m`, reads and writes, `new T[](n)`, `delete m`, copies storage↔memory) | The machine's memory holds the locals, one cell per variable; there is no heap. Laying one out means a word-addressed heap with solc's free-memory pointer, an injective map from the interpreter's object identities to addresses with the objects disjoint below the pointer and zero above it, and a heap typing (an object's layout depends on its type, and aliases share objects), all carried by `Sim` and preserved by every write. Two parts cannot agree with the interpreter at all: `new T[](n)` with a run-time `n` (solc's `allocate_memory` panics once the free pointer passes `2^64`, `Panic(0x41)`, the interpreter allocates any size, and unlike `push` the size is not bounded by the program text), and a copy of a dynamic array or an allocation of an array of structs (a loop over a run-time length). The part that could — structs of primitives, `new` of a literal size, copies of static values — is not built. |
+| loops (`while`, `for`, `do … while`: `Stmt.loop`) | The machine has forward jumps only, so `exec` is structural; a loop needs backward jumps, a program counter and fuel, and a third outcome in the simulation for "out of fuel at every fuel" (`docs/loops.md`, "The EVM"). |
 | storage copies of a value holding a dynamic array (`basketA = basketB;`, `matrix = …`) | solc copies element by element and clears the old tail: a loop over a run-time length; the machine has no loops. Copies of static values (`staticF`) are in. |
 | `push()` of a struct or an array element | solc does not clear the slot it grows into (a `pop` cleared it), and the interpreter revives the popped value there (`pushSlot`); the representation does not relate slots past the end (relating them would need `delete` and `pop` to clear them, which for a dynamic array is a loop). `push()` of a primitive (solc writes `0`) and `push(e)`/`push(sp)` (every slot written) are in. |
 | a fragile alias used after a `pop` or `delete` | See above: it may name a slot past the end, which the representation does not relate. |

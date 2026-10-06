@@ -80,6 +80,7 @@ def fmtHalt : Halt → String
   | .revert => "revert"
   | .stuck => "stuck (the program is outside the interpreter's typing)"
   | .panic => "panic (an `assert` failed)"
+  | .diverge => "diverge (a loop that never ends)"
 
 /-- How tightly a clause binds, as `SpecSyntax.lean` parses it: `*` 70,
 `+` 65, a comparison 50, `==` 45, `&&` 35, `||` 30, `->` 25, `<->` 20. -/

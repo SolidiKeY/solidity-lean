@@ -724,6 +724,13 @@ inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise 
   | transferDiamond :
       dl[LeanTaclet C k]{ ⟨ sadr.transfer(se); ⟩ ⇝ false }
 
+  /-- A loop closes to `false`, under either modality, until the loop rules
+  land (`docs/loops.md`, stages L3 and L4: solkey's `whileUnwind`,
+  `whileInvariantBox`, `whileInvariantDiamond`): sound, and nothing about a
+  loop is derived. -/
+  | whileClose :
+      dl[LeanTaclet C k]{ ⟨[ while (e) body; ]⟩ ⇝ false }
+
 /-- A rule of the calculus: solkey's, or one it does not have. -/
 inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) : Prop where
   | key (d : Taclet C k m s p)

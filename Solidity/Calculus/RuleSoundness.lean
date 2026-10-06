@@ -149,7 +149,7 @@ theorem LeanTaclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     (d : LeanTaclet C k m s pr) (hs : Avoids s.vars (freshVars k)) : pr.Correct k m s := by
   cases d with
   | functionCallArgCapture h => exact Stmt.call_capture_sound h hs
-  | tryCallDiamond | transferDiamond => exact fun h => nomatch h
+  | tryCallDiamond | transferDiamond | whileClose => exact fun h => nomatch h
 
 /-- **Every rule of the calculus is sound**, solkey's and the ones it lacks. -/
 theorem Rule.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}

@@ -408,6 +408,7 @@ def Stmt.mayPanic : Stmt C → Bool
   | .call _ _ _ _ body => Prog.mayPanic body
   | .tryCall _ _ ok err _ pnc other =>
     Prog.mayPanic ok || Prog.mayPanic err || Prog.mayPanic pnc || Prog.mayPanic other
+  | .loop _ _ body => Prog.mayPanic body
   | _ => false
 
 def Prog.mayPanic : List (Stmt C) → Bool
@@ -495,6 +496,24 @@ theorem Stmt.run_noPanic (σ : State) : (s : Stmt C) → s.mayPanic = false → 
     · exact h₂ _
     · exact NoPanic.bind (by simp only [ne_eq, bindData_noPanic, not_false_eq_true]) fun _ _ => h₃ _
     · exact h₄ _
+  | .loop _ c body, h => by
+    simp only [Stmt.mayPanic] at h
+    have h₁ := fun τ => Prog.run_noPanic τ body h
+    simp only [Stmt.run]
+    refine Loop.run_induct (P := fun _ => True) (Q := NoPanic) trivial (fun τ _ => ?_)
+      (by simp only [ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true])
+    have hc : NoPanic (c.eval τ) := by simp only [ne_eq, Val.eval_noPanic, not_false_eq_true]
+    simp only [Loop.step]
+    rcases hv : c.eval τ with e | (_ | b)
+    · rw [hv] at hc
+      simp only [ne_eq, Except.error.injEq] at hc ⊢
+      exact hc
+    · simp only [ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true]
+    · cases b
+      · simp only [ne_eq, reduceCtorEq, not_false_eq_true]
+      · have hb := h₁ τ
+        revert hb
+        cases Prog.run τ body <;> simp only [imp_self, implies_true]
 
 theorem Prog.run_noPanic (σ : State) : (P : List (Stmt C)) → Prog.mayPanic P = false →
     NoPanic (Prog.run σ P)

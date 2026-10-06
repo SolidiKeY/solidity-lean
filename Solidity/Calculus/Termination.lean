@@ -175,6 +175,9 @@ def Stmt.weight : Stmt C → Nat
   | .call _ args _ ret body => Arg.weight args + ret.weight + Prog.weight body + 1
   | .tryCall _ _ ok err _ pnc other =>
     max (max (Prog.weight ok) (Prog.weight err)) (max (Prog.weight pnc) (Prog.weight other)) + 3
+  -- `docs/loops.md`, Decision 3: an unwinding is lighter than the loop it unwinds
+  | .loop (.unwind k) c body => (k + 1) * (c.cost + c.pen + Prog.weight body + 3)
+  | .loop (.inv I _) c body => c.cost + c.pen + Prog.weight body + I.cost + 2
 
 /-- The weight of a block: the sum of its statements'. -/
 def Prog.weight : List (Stmt C) → Nat
@@ -946,6 +949,7 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
       have hp : 0 < 2 ^ max (max a b) (max c d) := Nat.pow_pos (by decide)
       rw [Nat.pow_succ, Nat.pow_succ, Nat.pow_succ]
       omega
+  | .loop .. => trivial
 
 /-- **Every rule makes the program smaller**, as a fact about the rules
 rather than the dispatcher: any derivation of `s` is the one `Stmt.step`
@@ -992,6 +996,10 @@ theorem Stmt.weight_pos (s : Stmt C) : 0 < s.weight := by
   | declStorage _ _ i => cases i <;> simp only [Stmt.weight] <;> omega
   | declMem _ _ i _ => cases i <;> simp only [Stmt.weight] <;> omega
   | push _ v _ => cases v <;> simp only [Stmt.weight] <;> omega
+  | loop a _ _ =>
+    cases a with
+    | unwind k => simp only [Stmt.weight]; exact Nat.mul_pos (Nat.succ_pos k) (by omega)
+    | inv _ _ => simp only [Stmt.weight]; omega
   | _ => simp only [Stmt.weight] <;> omega
 
 /-- A modality costs `2 ^ weight` times what follows it; the hypothesis of an

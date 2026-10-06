@@ -15,7 +15,7 @@ the debit) and may assume whenever control comes back.
 
 A callback is nondeterministic, so it cannot live in the total interpreter.
 This module is a *relational* layer over it (the removed untyped layer's
-`ExecC`, here over the typed syntax and through branches and calls):
+`ExecC`, here over the typed syntax and through branches, calls and loops):
 `ExecS I σ s o` runs `s` exactly as `Stmt.run` does, except at a `transfer`,
 where the run either leaves the contract with `I` broken (`violated`, an
 outcome no formula accepts) or resumes in any state the callee may leave
@@ -23,7 +23,9 @@ outcome no formula accepts) or resumes in any state the callee may leave
 that satisfies `I`.  A `pv = a.send(v);` runs so too, `pv` then `true`, and
 may also fail whatever the transaction's oracle says (`sendFailed`: the
 callee may always revert, and what it did with it), nothing booked and `pv`
-`false`.  `holdsC I` reads the modalities over it; everything else
+`false`.  A loop whose body pays runs iteration by iteration, and may
+diverge (`ExecS.loopDiverge`, an over-approximation: an inductive relation
+has no derivation of an infinite run).  `holdsC I` reads the modalities over it; everything else
 is `holds`.  `TransferSem` names the two semantics, and `holdsT` is the
 judgement parameterised by it.
 
@@ -78,12 +80,6 @@ def COut.after (m : Modality) (p : State → Prop) : COut → Prop
 
 /-! ## Which statements the callback reading sees -/
 
-/-- The statements the relation does not take from `Stmt.run`: a `transfer`,
-a `send`, a `try`, and the two that run others (`if`, a call). -/
-def Stmt.forks : Stmt C → Bool
-  | .transfer .. | .send .. | .tryCall .. | .ite .. | .call .. => true
-  | _ => false
-
 mutual
 
 /-- Whether a `transfer`, a `send` or a `try` occurs in the statement, in a
@@ -93,6 +89,7 @@ def Stmt.hasTransfer : Stmt C → Bool
   | .transfer .. | .send .. | .tryCall .. => true
   | .ite _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els
   | .call _ _ _ _ body => Prog.hasTransfer body
+  | .loop _ _ body => Prog.hasTransfer body
   | _ => false
 
 def Prog.hasTransfer : List (Stmt C) → Bool
@@ -100,6 +97,14 @@ def Prog.hasTransfer : List (Stmt C) → Bool
   | s :: P => s.hasTransfer || Prog.hasTransfer P
 
 end
+
+/-- The statements the relation does not take from `Stmt.run`: a `transfer`,
+a `send`, a `try`, the two that run others (`if`, a call), and a loop whose
+body pays (a loop that pays nothing runs as `Stmt.run`). -/
+def Stmt.forks : Stmt C → Bool
+  | .transfer .. | .send .. | .tryCall .. | .ite .. | .call .. => true
+  | .loop _ _ body => Prog.hasTransfer body
+  | _ => false
 
 /-- Whether a `transfer` occurs in a program of the formula. -/
 def Fml.hasTransfer : Fml C → Bool
@@ -212,6 +217,30 @@ inductive ExecS (I : Fml C) : State → Stmt C → COut → Prop where
   | tryOther {σ : State} {c : ExtCall C} {rets : List (PrimTy × Var)} {ok err : List (Stmt C)}
       {code : Option Var} {pnc other : List (Stmt C)} {k : ExtKey} {o : COut} :
       c.key σ = .ok k → ExecP I σ other o → ExecS I σ (.tryCall c rets ok err code pnc other) o
+
+  /-- A loop that pays, whose condition halts. -/
+  | loopHalt {σ : State} {a : LoopAnn C} {c : Val C .bool} {body : List (Stmt C)} {e : Halt} :
+      Prog.hasTransfer body = true → c.eval σ = .error e → ExecS I σ (.loop a c body) (.halt e)
+  | loopStuck {σ : State} {a : LoopAnn C} {c : Val C .bool} {body : List (Stmt C)} {n : Int} :
+      Prog.hasTransfer body = true → c.eval σ = .ok (.int n) →
+        ExecS I σ (.loop a c body) (.halt .stuck)
+  /-- The condition is false: the loop ends where it is. -/
+  | loopExit {σ : State} {a : LoopAnn C} {c : Val C .bool} {body : List (Stmt C)} :
+      Prog.hasTransfer body = true → c.eval σ = .ok (.bool false) →
+        ExecS I σ (.loop a c body) (.ok σ)
+  /-- One iteration, and the loop again from where the body ends. -/
+  | loopIter {σ σ₁ : State} {a : LoopAnn C} {c : Val C .bool} {body : List (Stmt C)} {o : COut} :
+      Prog.hasTransfer body = true → c.eval σ = .ok (.bool true) → ExecP I σ body (.ok σ₁) →
+        ExecS I σ₁ (.loop a c body) o → ExecS I σ (.loop a c body) o
+  /-- An iteration whose body halts or breaks the invariant. -/
+  | loopStop {σ : State} {a : LoopAnn C} {c : Val C .bool} {body : List (Stmt C)} {o : COut} :
+      Prog.hasTransfer body = true → c.eval σ = .ok (.bool true) → ExecP I σ body o →
+        o.isOk = false → ExecS I σ (.loop a c body) o
+  /-- A loop that pays may diverge: an over-approximation, which a box accepts
+  and a diamond does not (an inductive relation has no derivation of an
+  infinite run, and the callback reading has no diamond to lose). -/
+  | loopDiverge {σ : State} {a : LoopAnn C} {c : Val C .bool} {body : List (Stmt C)} :
+      Prog.hasTransfer body = true → ExecS I σ (.loop a c body) (.halt .diverge)
 
 /-- `ExecP I σ P o`: the same, for a block. -/
 inductive ExecP (I : Fml C) : State → List (Stmt C) → COut → Prop where
@@ -429,6 +458,39 @@ theorem Stmt.exec_run (I : Fml C) :
       · rcases Prog.exec_run I other σ with h | h
         · exact .inl (.tryOther hk h)
         · exact .inr (.tryOther hk h)
+  | .loop a c body, σ => by
+    cases ht : Prog.hasTransfer body with
+    | false => exact .inl (.det (by simp only [Stmt.forks, ht]))
+    | true =>
+      have hb : ∀ τ, ExecP I τ body (.ofRes (Prog.run τ body)) ∨ ExecP I τ body .violated :=
+        fun τ => Prog.exec_run I body τ
+      simp only [Stmt.run]
+      by_cases hex : ∃ r n, Loop.iterN (fun τ => Prog.run τ body) (fun τ => c.eval τ) n σ = .inr r
+      · obtain ⟨r, n, hn⟩ := hex
+        induction n generalizing σ with
+        | zero => simp only [Loop.iterN, reduceCtorEq] at hn
+        | succ n ih =>
+          rw [Loop.run_unfold]
+          simp only [Loop.iterN, Loop.step] at hn ⊢
+          rcases hc : c.eval σ with e | (m | b)
+          · exact .inl (.loopHalt ht hc)
+          · exact .inl (.loopStuck ht hc)
+          · cases b
+            · exact .inl (.loopExit ht hc)
+            · rcases hb σ with h | h
+              · cases hr : Prog.run σ body with
+                | error e =>
+                  rw [hr] at h
+                  exact .inl (.loopStop ht hc h rfl)
+                | ok σ₁ =>
+                  rw [hr] at h
+                  rw [hc, hr] at hn
+                  rcases ih σ₁ hn with h' | h'
+                  · exact .inl (.loopIter ht hc h h')
+                  · exact .inr (.loopIter ht hc h h')
+              · exact .inr (.loopStop ht hc h rfl)
+      · rw [Loop.run_of_forall fun n r h => hex ⟨r, n, h⟩]
+        exact .inl (.loopDiverge ht)
   | .assign .., σ | .rebind .., σ | .assignLocal .., σ | .declLocal .., σ | .declStorage .., σ
   | .opAssign .., σ | .incDec .., σ | .assignIncDec .., σ | .push .., σ | .pop .., σ
   | .declMem .., σ | .rebindMem .., σ | .assignFromMem .., σ | .assignMem .., σ | .delete .., σ
@@ -470,6 +532,9 @@ theorem ExecS.eq_run {I : Fml C} {σ : State} {s : Stmt C} {o : COut} :
   | .tryHalt _, h | .tryRevert _, h | .tryViolated _ _, h | .tryOk _ _ _ _ _, h
   | .tryError _ _, h | .tryPanic _ _ _, h | .tryOther _ _, h => by
     simp [Stmt.hasTransfer] at h
+  | .loopHalt ht _, h | .loopStuck ht _, h | .loopExit ht _, h | .loopIter ht _ _ _, h
+  | .loopStop ht _ _ _, h | .loopDiverge ht, h => by
+    simp only [Stmt.hasTransfer, ht, Bool.true_eq_false] at h
   | .iteHalt hc, _ => by simp [Stmt.run, hc, bind, Except.bind, COut.ofRes]
   | .iteStuck hc, _ => by simp [Stmt.run, hc, bind, Except.bind, COut.ofRes]
   | .iteThen hc hp, h => by
@@ -779,6 +844,35 @@ theorem ExecS.frame {I : Fml C} (hI : I.vars = []) {σ τ : State} {s : Stmt C} 
     rw [← c.key_frame hag hs.left.left.left.left.left.left] at hk
     obtain ⟨o, ho, hag'⟩ := ExecP.frame hI hp hs.right hag
     exact ⟨o, .tryOther hk ho, hag'⟩
+
+  | .loopHalt (c := c) ht hc, hs, hag => by
+    have hc' : c.eval σ = c.eval _ := c.eval_frame hag hs.left.right
+    rw [hc] at hc'
+    exact ⟨_, .loopHalt ht hc', rfl⟩
+  | .loopStuck (c := c) ht hc, hs, hag => by
+    have hc' : c.eval σ = c.eval _ := c.eval_frame hag hs.left.right
+    rw [hc] at hc'
+    exact ⟨_, .loopStuck ht hc', rfl⟩
+  | .loopExit (c := c) ht hc, hs, hag => by
+    have hc' : c.eval σ = c.eval _ := c.eval_frame hag hs.left.right
+    rw [hc] at hc'
+    exact ⟨_, .loopExit ht hc', hag⟩
+  | .loopIter (c := c) ht hc hp hl, hs, hag => by
+    have hc' : c.eval σ = c.eval _ := c.eval_frame hag hs.left.right
+    rw [hc] at hc'
+    obtain ⟨o₁, ho₁, hag₁⟩ := ExecP.frame hI hp hs.right hag
+    cases o₁ with
+    | ok σ₁ =>
+      obtain ⟨o, ho, hag'⟩ := ExecS.frame hI hl hs hag₁
+      exact ⟨o, .loopIter ht hc' ho₁ ho, hag'⟩
+    | halt _ => exact hag₁.elim
+    | violated => exact hag₁.elim
+  | .loopStop (c := c) ht hc hp ho, hs, hag => by
+    have hc' : c.eval σ = c.eval _ := c.eval_frame hag hs.left.right
+    rw [hc] at hc'
+    obtain ⟨o, ho', hag'⟩ := ExecP.frame hI hp hs.right hag
+    exact ⟨o, .loopStop ht hc' ho' (by rw [hag'.isOk]; exact ho), hag'⟩
+  | .loopDiverge ht, _, _ => ⟨_, .loopDiverge ht, rfl⟩
 
 /-- **Frame, for blocks with callbacks.** -/
 theorem ExecP.frame {I : Fml C} (hI : I.vars = []) {σ τ : State} {P : List (Stmt C)}

@@ -130,16 +130,28 @@ info: uint se1 = owner; uint se2 = 5; uint se4 = se1; require(se4 == owner); uin
 -/
 #guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol{ pay(owner, 5); })))
 
-/--
-error: `_;` stands once, at the top level of a modifier's body
----
-error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors
--/
+/-- error: Solidity elaboration failed: `_;` outside a modifier's body -/
 #guard_msgs in #check sol{ _; }
 
-/-- error: a modifier's body has one `_;`, at its top level -/
+/-- error: a modifier's body has a `_;` -/
 #guard_msgs (error, drop info) in
-#check contract!{ uint n; modifier twice() { _; _; } }
+#check contract!{ uint n; modifier none() { n = 1; } }
+
+/-! A modifier may run the body several times, with `_;` anywhere: the body
+runs again in the same locals, its parameters and return variable not
+reset, as solc's legacy pipeline runs it (via-IR resets them):
+`f(0)` under `twice` returns `1`, the second run reading the `a` the first
+bumped (`Examples/Tactics/Loops.lean` runs it, and `thrice`, which runs
+`g`'s body in a loop). -/
+
+def Twice : Contract := contract!{ uint n;
+  modifier twice() { _; _; }
+  modifier thrice() { for (uint i = 0; i < 3; i++) { _; } }
+  function f(uint a) twice returns (uint r) { r = a++; }
+  function g() thrice { n += 2; } }
+
+/-- info: uint y; uint se1 = 0; uint se2; se2 = se1++; se2 = se1++; y = se2; -/
+#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol[Twice]{ uint y = f(0); })))
 
 /-- A modifier applied without its argument. -/
 def MissingArg : Contract := contract!{ uint owner;

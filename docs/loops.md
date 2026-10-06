@@ -1,7 +1,9 @@
 # Loops
 
 `while`, `for`, `do … while`, `break`, `continue`. This is a design plan:
-four decisions and an ordered implementation plan. Nothing here is built.
+four decisions and an ordered implementation plan. L1 and L2 are built (the
+syntax, the lowering, the semantics, the typing; `Examples/Tactics/Loops.lean`):
+until L3, a loop closes to `false` (`LeanTaclet.whileClose`).
 Background: `docs/kernel-port.md` (its topics "Modalities", "Semantics",
 "One rule per statement" and "Conditions" are the decisions this plan
 extends).
@@ -95,17 +97,21 @@ Rejected:
 | An inductive `Exec` beside `Stmt.run` | Two denotations. Every taclet's `Premise.Correct`/`SameOk` (`Calculus/SoundKit.lean`) is over `Prog.run`, the corpus is decided by kernel evaluation of it (`corpus_decide`), and the callback relation anchors to it (`ExecS.det`). `Stmt.run` is the only semantics. |
 | `partial_fixpoint` | `Res = Except Halt` is not a CCPO, and the kernel cannot unfold the result. |
 
-**Cost: computability.** The existential makes `Loop.run` classical, so
-`Stmt.run` becomes `noncomputable`. Kernel reduction of a loop-free program is
-unaffected, so `corpus_decide` and `Evm/Examples.lean` keep working; `#eval`
-breaks (the examples in `Semantics.lean`, the corpus's `evaluated` pins). The
-fix is `@[implemented_by]` on `Loop.run`, pointing at a fuelled `partial def`
-the kernel never sees (to confirm on v4.24). A concrete loop is decided by
-`Loop.run_of_iterN : iterN n σ = done r → Loop.run … σ = r`, with `n` found
-by `#eval`.
+**Cost: computability.** The existential makes `Loop.run` classical, but
+`@[implemented_by Loop.runImpl]` (a `partial def` that iterates until done,
+which the kernel never sees) keeps `Stmt.run` compiled: `#eval` and `#run`
+run loops (and do not return from one that never ends). Kernel reduction of a
+loop-free program is unaffected, so `corpus_decide` and `Evm/Examples.lean`
+keep working. A concrete loop is decided by `Loop.run_of_iterN : iterN n σ =
+.inr r → Loop.run … σ = r` (`Prog.run_loop_of_iterN` for a block), with `n`
+found by `#eval` and the iteration computed by `rfl`.
 
-**Proofs that recurse on `Stmt.run`** each get the same new case, an
-induction on `n` over `iterN` and a congruence through the choice of `n`:
+**Proofs that recurse on `Stmt.run`** take a loop's case from two lemmas:
+`Loop.run_rel` (two loops whose iterations go in step from related states
+run alike: `Prog.run_frame`) and `Loop.run_induct` (an invariant of the loop
+head: `Stmt.run_wt`, `run_canon`, `run_tight`, `run_noPanic`,
+`frame_of_within`); `Loop.run_unfold` is the unwinding. In more detail:
+
 `Stmt.run_frame`/`Prog.run_frame` (`Semantics/Agree.lean`: states agreeing off
 `ns` iterate alike), `Stmt.run_wt` (`Typing/Soundness.lean`: `RunWT … Γ` at
 the loop head is the invariant, the body typed as a branch),
@@ -119,12 +125,16 @@ modality over it would hold vacuously. `Stmt.run_call_expand` is unaffected;
 `stmt_sim` is out of the fragment at first ("The EVM"); `Stmt.read?` is
 `none`; `Stmt.weight` is Decision 3.
 
-**A loop that transfers, with callbacks**, needs `ExecS` constructors (exit,
-iterate, halt) and an outcome for divergence, since an inductive relation has
-no derivation for an infinite run and the callback diamond would accept one.
-Divergence needs no coinduction: *some set of states contains σ and is closed
-under "the condition is true and the body ends in the set"*. This is the last
-stage.
+**A loop that transfers, with callbacks**, has `ExecS` constructors
+(`Semantics/Callback.lean`): the condition halts or is stuck, the loop
+exits, iterates (`loopIter`), stops in its body, or diverges
+(`loopDiverge`). An inductive relation has no derivation of an infinite run,
+so `loopDiverge` over-approximates: a loop whose body pays may always
+diverge. A box accepts a divergence, and the callback reading is box-only
+(solkey's), so nothing is lost; a diamond over such a loop is never valid.
+Each constructor requires `Prog.hasTransfer body`, so a loop that pays
+nothing has only its deterministic run (`ExecS.det`), and
+`Stmt.exec_run`, `ExecS.eq_run` and `ExecS.frame` keep their statements.
 
 ## Decision 2: `break`, `continue`, `for`, `do … while` are lowered
 
@@ -297,7 +307,7 @@ EVM stage is worth doing once, for all.
 | **L3 Unwinding** | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`, `Premise.exit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.exit`), `RuleSoundness`, `RuleSyntax` printers, `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
 | **L4 Invariant rule** | `Update.lean` (`Fml.anon`, `State.anon`, frame lemmas), `Semantics/Agree.lean` (`Prog.frame`, `Prog.run_frameOff`), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `Logic`, `RuleSoundness`, `Termination`. Check whether `sol_decide` handles `anon` (a local in `F` is a fresh free local, anonymised storage a fresh free storage). Examples: a counting loop, a sum with a closed form. | Medium to high: `Prog.run_frameOff` over every statement, and extending `Decide`'s reduction to a second base storage. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
-| **L6 Callbacks** | `Semantics/Callback.lean` (loop `ExecS` constructors, the divergence outcome), `Calculus/Callback.lean` (the loop rules under `ProvesC`). | Medium. |
+| **L6 Callbacks** | `Calculus/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
 | **L7 EVM** | `Evm/{Machine,Compile,Correctness}.lean`, as above. | High: the largest stage. |
 
 L1 to L4 make loops provable. L5 is what Ballot and BlindAuction need once

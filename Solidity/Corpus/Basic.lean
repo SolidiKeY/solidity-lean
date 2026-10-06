@@ -116,7 +116,7 @@ theorem diamond_of_isOk {C : Contract} {σ : State} {P : Prog C}
   | ok τ => exact ⟨trivial, nofun⟩
   | error e => simp [hr, Except.isOk, Except.toBool] at h
 
-/-- How the run of `P` from `σ` ends: `"ok"`, `"revert"`, `"panic"` or `"stuck"`.  What
+/-- How the run of `P` from `σ` ends: `"ok"`, `"revert"`, `"panic"`, `"stuck"` or `"diverge"`.  What
 `#eval` pins where the kernel cannot decide `Diamond σ P`. -/
 def outcome {C : Contract} (σ : State) (P : Prog C) : String :=
   match Prog.run σ P with
@@ -124,6 +124,7 @@ def outcome {C : Contract} (σ : State) (P : Prog C) : String :=
   | .error .revert => "revert"
   | .error .panic => "panic"
   | .error .stuck => "stuck"
+  | .error .diverge => "diverge"
 
 /-- `corpus_decide h`: rewrite the store with its unfolding `h`, then let the
 kernel run the program. -/

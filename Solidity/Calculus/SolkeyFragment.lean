@@ -43,12 +43,14 @@ under the box, where solkey books it (`transferNoCallbackBox`), the diamond
 closing to `false` (`LeanTaclet.transferDiamond`); a send is under either
 modality (`sendNoCallbackBox`, `sendNoCallbackDiamond`); and there is no `try`:
 solkey has a rule for it under the box only (`tryCallNoCallbackBox`), with
-its blocks outside the fragment's claim. -/
+its blocks outside the fragment's claim; and there is no loop, which closes
+(`LeanTaclet.whileClose`) until its rules land. -/
 def Stmt.inSolkey (m : Modality) : Stmt C → Bool
   | .ite _ thn els => Prog.inSolkey m thn && Prog.inSolkey m els
   | .call _ args _ _ body => (Arg.firstNonSimple args).isNone && Prog.inSolkey m body
   | .transfer .. => m == .box
   | .tryCall .. => false
+  | .loop .. => false
   | _ => true
 
 /-- Every statement of the block is in the fragment. -/
@@ -146,7 +148,7 @@ theorem LeanTaclet.not_inSolkey {s : Stmt C} {p : Premise C} (d : LeanTaclet C k
     s.inSolkey m = false := by
   cases d with
   | functionCallArgCapture h => simp [Stmt.inSolkey, h]
-  | tryCallDiamond | transferDiamond => rfl
+  | tryCallDiamond | transferDiamond | whileClose => rfl
 
 /-- **solkey's rules are complete on the fragment**: the rule `Stmt.step`
 fires on a statement of the fragment is one of solkey's. -/

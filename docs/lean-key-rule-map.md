@@ -12,8 +12,8 @@ fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
 (`claimedTaclets_count = 306`, `unclaimedTaclets_count = 17`). A rule that
-transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are three,
-`functionCallArgCapture`, `tryCallDiamond` and `transferDiamond`. A taclet may be claimed by two constructors (the
+transcribes no taclet is a `LeanTaclet` (`leanTaclets`); there are four,
+`functionCallArgCapture`, `tryCallDiamond`, `transferDiamond` and `whileClose`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
 member `length`; `memoryFieldWrite`/`memoryIndexWriteArray` by the value and
 reference writes). What stays prose here is what a `KeyOrigin` cannot say:
@@ -302,6 +302,18 @@ receiver kind, Lean does not.
 | `tryCallWithCallbackBox` | `CallbackTaclet.tryCallWithCallbackBox` | same | read by `ProvesC.tryCall` (`CallbackTaclet.sound_branches`): `I` where control leaves ("invariant on exit"), the success block after `{havoc}` and `I` ("call succeeded"), each `catch` block from where the call was made |
 | — | `LeanTaclet.tryCallDiamond` | Lean only | a diamond `try` closes to `false`; solkey has no rule. The call may revert in the caller (no code at the address, data that does not decode), which no clause catches and no formula rules out |
 | — | `LeanTaclet.transferDiamond` | Lean only | a diamond payment closes to `false`; solkey's diamond rules are not ported. Whether the world pays is the compiler theorem's, not the calculus's |
+
+## Loops
+
+solkey's loop taclets landed after the pin (`ed7849d5b6`); `docs/loops.md`
+gives their shapes and the stages that port them.
+
+| KeY taclet | Lean | Status | Notes |
+| --- | --- | --- | --- |
+| `whileUnwind` | — | not ported (past the pin) | `while (s#cond) s#body` ⇝ `if (s#cond) { s#body while (s#cond) s#body }`; here bounded by the loop's annotation (`LoopAnn.unwind`), stage L3 |
+| `whileInvariantBox`, `whileInvariantDiamond` | — | not ported (past the pin) | "invariant initially valid", "invariant preserved and used" under `#loopAnon`; stage L4 |
+| — | `LeanTaclet.whileClose` | Lean only | a loop, under either modality, closes to `false` until the rules above land: sound, and nothing about a loop is derived. `Stmt.inSolkey` is `false` on a loop |
+| `LoopLowering` (meta-construct) | `lowerLoops` (`Syntax.lean`) | elaborator | `break`/`continue`/`return` in a loop to the flags `brk`/`cnt`/`ret`, `for` and `do … while` to `while`, shape for shape |
 
 ## Function contracts
 

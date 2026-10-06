@@ -941,6 +941,10 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     if k == ``solAssert then return (← `(Stmt.assert $(← schemaAt Γ .val ⟨stx.raw[2]⟩)), Γ)
     if k == ``solRevert then return (← `(Stmt.revert), Γ)
     if k == ``solTry then return (← schemaTry stx, Γ)
+    if k == ``solWhile then
+      -- `while (se) body`: the annotation is the schema variable `ann`
+      return (← `(Stmt.loop $(schemaIdent "ann") $(← schemaAt Γ .val ⟨stx.raw[2]⟩)
+        $(← schemaBlock fresh Γ ⟨stx.raw[4]⟩)), Γ)
     if k == Lean.choiceKind then
       let alts := stx.raw.getArgs
       for alt in alts.filter (·[0].isAtom) ++ alts do
@@ -2213,6 +2217,25 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
       `(sol_stmt| try $call:sol_expr $(← ppBlock ok):sol_block $catches:sol_catch*)
     else
       `(sol_stmt| try $call:sol_expr returns ($ps,*) $(← ppBlock ok):sol_block $catches:sol_catch*)
+  | Stmt.loop _ a c body =>
+    let w ← `(sol_stmt| while ($(← ppExpr c)) $(← ppBlock body):sol_block)
+    -- the annotation: none for a schema variable (`ann`) and for `.unwind 0`
+    if (← fvarName? a).isSome then return w
+    let clause (k : String) (e : TSyntax `sol_expr) (s : TSyntax `sol_stmt) :
+        MetaM (TSyntax `sol_stmt) := do
+      `(sol_stmt| /// @custom:key $(Lean.mkIdent (Lean.Name.mkSimple k)):ident $e:sol_expr $s:sol_stmt)
+    match_expr (← whnf a) with
+    | LoopAnn.unwind _ k =>
+      let some n ← (evalNat k).run | escape
+      if n == 0 then return w
+      clause "unwind" (← `(sol_expr| $(Lean.Syntax.mkNumLit (toString n)):num)) w
+    | LoopAnn.inv _ I dec =>
+      let w ← match_expr (← whnf dec) with
+        | Option.some _ d => clause "decreases" (← ppExpr d) w
+        | Option.none _ => pure w
+        | _ => escape
+      clause "invariant" (← ppExpr I) w
+    | _ => escape
   | _ => escape
 
 /-- A return local of a `try`: `uint v`. -/
