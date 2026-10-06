@@ -57,37 +57,38 @@ inductive SelRel where
   | apart
   | key (r w : LTerm)
 
-/-- The selector `a` read against the selector `b` written: members by name,
-literal indices by value, other indices by a `kite`. -/
+/-- `selRel a1 a2`: the selector `a1` written against the selector `a2` read,
+`readOnWrite`'s `a1 = a2` decided statically: members by name, literal
+indices by value, other indices by a `kite` (`.key r w`, the index read `r`
+first). -/
 def selRel : LSel → LSel → SelRel
   | .fld f, .fld g => if f = g then .same else .apart
-  | .idx w, .idx r =>
+  | key{ at(w) }, key{ at(r) } =>
     match r, w with
     | .lit (.int c), .lit (.int d) => if c = d then .same else .apart
     | _, _ => .key r w
   | _, _ => .apart
 
-/-- The word a memory value is: a reference is none. -/
+/-- The word a memory value is, KeY's `cast(v)`: a reference is none. -/
 def LMV.wordT : LMV → LTerm
   | .word t => t
-  | .ref _ => .err
+  | .ref _ => key{ err }
 
 /-- `true` where `0 ≤ k < n`, halting elsewhere. -/
 def ltG (k n : LTerm) : LTerm :=
-  .ite (.binop .and .bool (.binop .le .uint (.lit (.int 0)) k) (.binop .lt .uint k n))
-    (.lit (.bool true)) .err
+  key{ if(0 <= k && k < n) then true else err }
 
 /-- `ltG`, decided on literals. -/
 def ltR (k n : LTerm) : LTerm :=
   match k, n with
-  | .lit (.int c), .lit (.int d) => if 0 ≤ c ∧ c < d then .lit (.bool true) else .err
+  | .lit (.int c), .lit (.int d) => if 0 ≤ c ∧ c < d then key{ true } else key{ err }
   | _, _ => ltG k n
 
 /-- `n`, or `0` where it is negative: the length `new T[](n)` allocates. -/
 def natL (n : LTerm) : LTerm :=
   match n with
   | .lit (.int c) => .lit (.int c.toNat)
-  | n => .ite (.binop .lt .int n (.lit (.int 0))) (.lit (.int 0)) n
+  | n => key{ if(binop(‹.lt›, int, n, 0)) then 0 else n }
 
 /-- No segment of the path asks for a `length`. -/
 def noLen (p : List Seg) : Bool := p.all fun s => s != .field "length"
@@ -108,149 +109,188 @@ def LSel.seg? : LSel → Option Seg
   | _ => none
 
 /-- What a selector reads below a copy, its storage reads given: `find` for a
-word, `len` for the length. -/
-def copySelG (find len : LPath → LTerm) (q : LPath) (p : List Seg) : LSel → Option LTerm
-  | .fld f => if noLen (p ++ [.field f]) then some (find ((q.ext p).field f)) else none
-  | .idx t => if noLen p then some (find ((q.ext p).at t)) else none
-  | .size => if noLen p then some (len (q.ext p)) else none
+word, `len` for the length (`readFromCopyToStorage`'s
+`find(st, consr(fxs, a))`). -/
+def copySelG (find len : LPath → LTerm) (q : LPath) (fxs : List Seg) : LSel → Option LTerm
+  | .fld f => if noLen (fxs ++ [.field f]) then some (find ((q.ext fxs).field f)) else none
+  | key{ at(t) } => if noLen fxs then some (find ((q.ext fxs).at t)) else none
+  | key{ size } => if noLen fxs then some (len (q.ext fxs)) else none
 
 /-! ### What an allocation holds -/
 
-/-- The word a default of the type `T` holds: a primitive's default. -/
+/-- The word a default of the type `T` holds: a primitive's default
+(`defaultValueInt`, `defaultValueBool`). -/
 def dfltWord : Option Ty → LTerm
   | some (.prim q) => .lit q.default
-  | _ => .err
+  | _ => key{ err }
 
-/-- What a selector reads in a fresh default of `T` (`initMember`,
-`initElement`, `initSize`). -/
+/-- What a selector reads in a fresh default of `T`, KeY's
+`init(idC(idp, flds), a)`. -/
 def dfltSel : Option Ty → LSel → LTerm
+  -- initMember
   | some T, .fld f => dfltWord (T.at (.field f))
-  | some (.ref (.fixed E n)), .idx t => seqL (ltR t (.lit (.int n))) (dfltWord (some E))
-  | some (.ref (.fixed _ n)), .size => .lit (.int n)
-  | some (.ref (.array _)), .size => .lit (.int 0)
-  | _, _ => .err
+  -- initElement, below the length (sizeOfFixed)
+  | some (.ref (.fixed E n)), key{ at(t) } => seqL (ltR t (.lit (.int n))) (dfltWord (some E))
+  -- initSize: sizeOfFixed
+  | some (.ref (.fixed _ n)), key{ size } => .lit (.int n)
+  -- initSize: sizeOfDyn
+  | some (.ref (.array _)), key{ size } => key{ 0 }
+  -- sizeOfLeaf, and an element of an empty `T[]`: halts
+  | _, _ => key{ err }
 
 /-- `true` where the object at `p` of a fresh default of `T` is there. -/
 def dfltRef (T : Option Ty) : LTerm :=
   match T with
-  | some (.ref _) => .lit (.bool true)
-  | _ => .err
+  | some (.ref _) => key{ true }
+  | _ => key{ err }
 
 /-- `true` where the object at `p` of a fresh default of `T` is a struct. -/
 def dfltStruct (T : Option Ty) : LTerm :=
   match T with
-  | some (.ref (.struct _)) => .lit (.bool true)
-  | _ => .err
+  | some (.ref (.struct _)) => key{ true }
+  | _ => key{ err }
 
-/-- What a selector reads below `new R(n)` at the path `p`: an element is
-there below the length `n` (`memoryArrayFreshAlloc`). -/
-def newSel (R : RefTy) (n : LTerm) (p : List Seg) (a : LSel) : LTerm :=
-  match R, p, a with
-  | .array _, [], .fld _ => .err
-  | .array E, [], .idx t => seqL (ltR t n) (dfltWord (some E))
-  | .array _, [], .size => natL n
+/-- What a selector reads below `new R(n)` at the path `flds`: an element is
+there below the length `n` (`memoryArrayFreshAlloc`, `shapeAtDyn`). -/
+def newSel (R : RefTy) (n : LTerm) (flds : List Seg) (a : LSel) : LTerm :=
+  match R, flds, a with
+  | .array _, [], .fld _ => key{ err }
+  -- initElement below the length written
+  | .array E, [], key{ at(t) } => seqL (ltR t n) (dfltWord (some E))
+  -- readOnWrite at `size`: the length written, `0` where negative
+  | .array _, [], key{ size } => natL n
+  -- shapeAtDyn: below an element, its type's default
   | .array E, .at j :: rest, a => seqL (ltR (.lit (.int j)) n) (dfltSel (E.memberTy rest) a)
-  | .array _, .field _ :: _, _ => .err
-  | R, p, a => dfltSel ((Ty.ref R).memberTy p) a
+  | .array _, .field _ :: _, _ => key{ err }
+  | R, flds, a => dfltSel ((Ty.ref R).memberTy flds) a
 
 /-- `g` of the type at `p` below `new R(n)`, an element guarded by the length. -/
 def newObj (g : Option Ty → LTerm) (R : RefTy) (n : LTerm) (p : List Seg) : LTerm :=
   match R, p with
   | .array E, [] => g (some (.ref (.array E)))
   | .array E, .at j :: rest => seqL (ltR (.lit (.int j)) n) (g (E.memberTy rest))
-  | .array _, .field _ :: _ => .err
+  | .array _, .field _ :: _ => key{ err }
   | R, p => g ((Ty.ref R).memberTy p)
 
-/-- A test that the object at `Q` of the storage `s` is one memory would
+/-- A test that the object at `Q` of the storage `st` is one memory would
 hold by reference: present, and no word. -/
-def refT (s : LStor) (Q : LPath) : LTerm := .ite (isT (.find s Q)) .err (.has s Q)
+def refT (st : LStor) (Q : LPath) : LTerm := key{ if(‹isT key{ find(st, Q) }›) then err else has(st, Q) }
 
-/-- What a selector reads below a copy of the subtree at `q` of `s`, at the
-path `p`: the storage read one segment further (`readFromCopyToStorage`). -/
-def copySel (s : LStor) (q : LPath) (p : List Seg) : LSel → Option LTerm
-  | .fld f => if noLen (p ++ [.field f]) then some (.find s ((q.ext p).field f)) else none
-  | .idx t => if noLen p then some (.find s ((q.ext p).at t)) else none
-  | .size => if noLen p then some (.len s (q.ext p)) else none
+/-- What a selector reads below a copy of the subtree at `q` of `st`, at the
+path `fxs`: the storage read one segment further (`readFromCopyToStorage`,
+`find(st, consr(fxs, a))`; at `size`, `findDefinitionSize`). -/
+def copySel (st : LStor) (q : LPath) (fxs : List Seg) : LSel → Option LTerm :=
+  copySelG (LTerm.find st) (LTerm.len st) q fxs
 
 /-- `refT`'s test, a struct and no array: what a member write asks. -/
-def structT (s : LStor) (Q : LPath) : LTerm := .ite (isT (.len s Q)) .err (refT s Q)
+def structT (st : LStor) (Q : LPath) : LTerm :=
+  key{ if(‹isT key{ find(st, Q.length) }›) then err else ‹refT st Q› }
 
-/-! ### The readers -/
+/-! ### The readers
+
+Each arm is the taclet named above it, in that taclet's schema variables:
+KeY's `\find(read(write(mem, id1, a1, v), id2, a2))` is the arm
+`key{ write(mem, id1, a1, v) }, id2, a2`. -/
 
 /-- **The word a read of memory finds** (`readOnWrite`, `readOnAddM`,
 `readFromCopyToStorage`): the writes walked from the newest, each compared
 with the read statically, down to the allocation of the name's root.  A
 word written is the term written, so a read holds no memory. -/
 def LMem.readT : LMem → LId → LSel → Option LTerm
-  | .init, _, _ => none
-  | .addM m k R, i, a => if i.root = k then some (dfltSel ((Ty.ref R).memberTy i.path) a)
-      else m.readT i a
-  | .newArr m k R n, i, a => if i.root = k then some (newSel R n i.path a) else m.readT i a
-  | .copySt m k s q, i, a => if i.root = k then copySel s q i.path a else m.readT i a
-  | .write m j b v, i, a =>
-    if i = j then
-      match selRel b a with
-      | .same => some v.wordT
-      | .apart => m.readT i a
-      | .key r w => (m.readT i a).map (.kite r w v.wordT)
-    else m.readT i a
+  -- readFromEmptyMemory: refused (the bottom is the pre-state, not `mtMem`)
+  | key{ memory }, _, _ => none
+  -- readOnAddM: \if(idp1 = idp2) \then init(idC(idp2, flds), a2) \else read(mem, id2, a2)
+  | key{ addM(mem, shaped(idp1, R)) }, id2, a2 =>
+    if id2.root = idp1 then some (dfltSel ((Ty.ref R).memberTy id2.path) a2) else mem.readT id2 a2
+  -- memoryArrayFreshAlloc: readOnAddM and readOnWrite at `size`, as one node
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) }, id2, a2 =>
+    if id2.root = idp1 then some (newSel R n id2.path a2) else mem.readT id2 a2
+  -- readFromCopyToStorage: \if(idp1 = idp2) \then find(st, consr(fxs, a2)) \else read(mem, id2, a2)
+  | key{ copySt(mem, idp1, find(st, q)) }, id2, a2 =>
+    if id2.root = idp1 then copySel st q id2.path a2 else mem.readT id2 a2
+  -- readOnWrite: \if(id1 = id2 & a1 = a2) \then cast(v) \else read(mem, id2, a2)
+  | key{ write(mem, id1, a1, v) }, id2, a2 =>
+    if id2 = id1 then
+      match selRel a1 a2 with
+      | .same => some key{ cast(v) }
+      | .apart => mem.readT id2 a2
+      -- if(r = w) then cast(v) else read(mem, id2, a2)
+      | .key r w => (mem.readT id2 a2).map (.kite r w v.wordT)
+    else mem.readT id2 a2
 
 /-- **The object a reference slot names** (`initIdentity`,
 `readFromCopyToStorageIdentity`, `readOnWrite` at an `Identity`): the name
 one segment longer where nothing wrote the slot, the name written where a
 reference was. -/
 def LMem.readI : LMem → LId → LSel → Option LId
-  | .init, _, _ => none
-  | .addM m k _, i, a => if i.root = k then a.seg?.map i.extend else m.readI i a
-  | .newArr m k _ _, i, a => if i.root = k then a.seg?.map i.extend else m.readI i a
-  | .copySt m k _ _, i, a => if i.root = k then a.seg?.map i.extend else m.readI i a
-  | .write m j b v, i, a =>
-    if i = j then
-      match selRel b a, v with
+  -- readFromEmptyMemory: refused
+  | key{ memory }, _, _ => none
+  -- readOnAddM, then initIdentity: idC(idp2, consr(flds, a2))
+  | key{ addM(mem, shaped(idp1, _)) }, id2, a2 =>
+    if id2.root = idp1 then a2.seg?.map id2.extend else mem.readI id2 a2
+  -- memoryArrayFreshAlloc, then initIdentity
+  | key{ write(addM(mem, shaped(idp1, _)), idC(idp1, nil), size, _) }, id2, a2 =>
+    if id2.root = idp1 then a2.seg?.map id2.extend else mem.readI id2 a2
+  -- readFromCopyToStorageIdentity: \then idC(idp1, consr(fxs, a2))
+  | key{ copySt(mem, idp1, find(_, _)) }, id2, a2 =>
+    if id2.root = idp1 then a2.seg?.map id2.extend else mem.readI id2 a2
+  -- readOnWrite at an Identity; a word, or a symbolic index, is refused
+  | key{ write(mem, id1, a1, v) }, id2, a2 =>
+    if id2 = id1 then
+      match selRel a1 a2, v with
       | .same, .ref j' => some j'
-      | .apart, _ => m.readI i a
+      | .apart, _ => mem.readI id2 a2
       | _, _ => none
-    else m.readI i a
+    else mem.readI id2 a2
 
 /-- A test that the name denotes an object: decided by the type below an
-allocation, read off the storage below a copy. -/
+allocation, read off the storage below a copy (Lean only). -/
 def LMem.nameG : LMem → LId → Option LTerm
-  | .init, _ => none
-  | .addM m k R, i => if i.root = k then some (dfltRef ((Ty.ref R).memberTy i.path)) else m.nameG i
-  | .newArr m k R n, i => if i.root = k then some (newObj dfltRef R n i.path) else m.nameG i
-  | .copySt m k s q, i => if i.root = k then
-      (if noLen i.path then some (refT s (q.ext i.path)) else none) else m.nameG i
-  | .write m _ _ _, i => m.nameG i
+  | key{ memory }, _ => none
+  | key{ addM(mem, shaped(idp1, R)) }, id2 =>
+    if id2.root = idp1 then some (dfltRef ((Ty.ref R).memberTy id2.path)) else mem.nameG id2
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) }, id2 =>
+    if id2.root = idp1 then some (newObj dfltRef R n id2.path) else mem.nameG id2
+  -- readFromCopyToStorageIdentity: there where the storage holds no word
+  | key{ copySt(mem, idp1, find(st, q)) }, id2 => if id2.root = idp1 then
+      (if noLen id2.path then some (refT st (q.ext id2.path)) else none) else mem.nameG id2
+  -- newFromWrite: a write allocates nothing
+  | key{ write(mem, _, _, _) }, id2 => mem.nameG id2
 
-/-- A test that the name denotes a struct: what a member write needs. -/
+/-- A test that the name denotes a struct: what a member write needs (Lean
+only). -/
 def LMem.structG : LMem → LId → Option LTerm
-  | .init, _ => none
-  | .addM m k R, i => if i.root = k then some (dfltStruct ((Ty.ref R).memberTy i.path))
-      else m.structG i
-  | .newArr m k R n, i => if i.root = k then some (newObj dfltStruct R n i.path) else m.structG i
-  | .copySt m k s q, i => if i.root = k then
-      (if noLen i.path then some (structT s (q.ext i.path)) else none) else m.structG i
-  | .write m _ _ _, i => m.structG i
+  | key{ memory }, _ => none
+  | key{ addM(mem, shaped(idp1, R)) }, id2 =>
+    if id2.root = idp1 then some (dfltStruct ((Ty.ref R).memberTy id2.path)) else mem.structG id2
+  | key{ write(addM(mem, shaped(idp1, R)), idC(idp1, nil), size, n) }, id2 =>
+    if id2.root = idp1 then some (newObj dfltStruct R n id2.path) else mem.structG id2
+  | key{ copySt(mem, idp1, find(st, q)) }, id2 => if id2.root = idp1 then
+      (if noLen id2.path then some (structT st (q.ext id2.path)) else none) else mem.structG id2
+  | key{ write(mem, _, _, _) }, id2 => mem.structG id2
 
-/-- The length of the object a name denotes (`initSize`, `findDefinitionSize`). -/
-def LMem.lenT (m : LMem) (i : LId) : Option LTerm := m.readT i .size
+/-- The length of the object a name denotes, `read(mem, id, size)`
+(`initSize`, `findDefinitionSize`). -/
+def LMem.lenT (mem : LMem) (id : LId) : Option LTerm := mem.readT id key{ size }
 
 /-- **The guard of a write** (Lean only, the program rules'
 `\add(0 <= ie & ie < read(memory, mv, size))`): a member is written in a
 struct, an element below the length. -/
-def LMem.writeG (m : LMem) (i : LId) : LSel → Option LTerm
-  | .fld _ => m.structG i
-  | .idx t => (m.lenT i).map (ltR t)
-  | .size => none
+def LMem.writeG (mem : LMem) (id : LId) : LSel → Option LTerm
+  | .fld _ => mem.structG id
+  | key{ at(t) } => (mem.lenT id).map (ltR t)
+  | key{ size } => none
 
 /-- Every reference written in the memory names an object of an older root,
 so a copy out of it halts on no cycle (Lean only; `MemNames.DescFrom`). -/
 def LMem.refDesc : LMem → Bool
-  | .init => true
-  | .addM m _ _ | .newArr m _ _ _ | .copySt m _ _ _ => m.refDesc
-  | .write m j _ v => m.refDesc && match v with
+  | key{ memory } => true
+  | key{ addM(mem, shaped(_, _)) }
+  | key{ write(addM(mem, shaped(_, _)), idC(_, nil), size, _) }
+  | key{ copySt(mem, _, find(_, _)) } => mem.refDesc
+  | key{ write(mem, id1, _, v) } => mem.refDesc && match v with
     | .word _ => true
-    | .ref j' => decide (j'.root < j.root)
+    | .ref j' => decide (j'.root < id1.root)
 
 /-! ### Soundness: the runs -/
 
@@ -1172,7 +1212,7 @@ theorem copy_read_sim (h : CopyAt σ μ s q r) (p : List Seg) (a : LSel) {t : LT
   have hx := State.HeapExt.refl μ
   cases a with
   | fld f =>
-    simp only [copySel] at ht
+    simp only [copySel, copySelG] at ht
     split at ht
     · rename_i hl
       cases ht
@@ -1185,7 +1225,7 @@ theorem copy_read_sim (h : CopyAt σ μ s q r) (p : List Seg) (a : LSel) {t : LT
       exact copy_slot_sim h hl
     · cases ht
   | idx t' =>
-    simp only [copySel] at ht
+    simp only [copySel, copySelG] at ht
     split at ht
     · rename_i hl
       cases ht
@@ -1208,7 +1248,7 @@ theorem copy_read_sim (h : CopyAt σ μ s q r) (p : List Seg) (a : LSel) {t : LT
           exact copy_slot_sim h hl' u
     · cases ht
   | size =>
-    simp only [copySel] at ht
+    simp only [copySel, copySelG] at ht
     split at ht
     · rename_i hl
       cases ht
@@ -2156,7 +2196,8 @@ theorem LPath.lit?_eval (σ : State) : (Q : LPath) → ∀ {r : Name} {p : List 
           Value.asInt, List.cons_append]
     · cases h
 
-/-- The name a literal path reaches from a name, slot by slot (`readRCons`). -/
+/-- The name a literal path reaches from a name, slot by slot: KeY's
+`readR(mem, id, flds)` (`readRCons`). -/
 def LMem.walk (m : LMem) (i : LId) : List Seg → Option LId
   | [] => some i
   | s :: p => (m.readI i (LSel.ofSeg s)).bind fun j => m.walk j p

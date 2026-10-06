@@ -440,7 +440,9 @@ partial def keyCall (lit : Bool) (s : KSort) (stx : TSyntax `key_term) : MacroM 
     unless keyParts (keyArgs as[0]!)[0]! == ["this"] && as[0]!.raw.getKind == ``ktIdent do
       Macro.throwErrorAt as[0]! "key{}: `address(this)`"
     `(LTerm.env EnvKey.selfAddress)
-  | .term, "cast" => do arity 1; `(LMV.wordT $(← at_ .mv 0))
+  | .term, "cast" => do
+    -- `LMV.wordT` is defined downstream (`MemRead`), so it is named, not resolved here
+    arity 1; `($(mkCIdentFrom stx `Solidity.Decide.LMV.wordT) $(← at_ .mv 0))
   -- storages
   | .stor, "save" => do
     arity 3

@@ -571,7 +571,7 @@ theorem copySel_agree (σ : State) (decl : Name → Ty) (loc : Theory.Identity) 
   cases a with
   | fld f =>
     obtain ⟨-, rfl⟩ := toSeg_fld hs
-    simp only [copySel] at hc
+    simp only [copySel, copySelG] at hc
     split at hc
     · cases hc
       simp only [LTerm.eval, hse, LPath.ext_field_eval hq, Res.ok_bind] at hv
@@ -582,7 +582,7 @@ theorem copySel_agree (σ : State) (decl : Name → Ty) (loc : Theory.Identity) 
     · cases hc
   | idx t' =>
     obtain ⟨c, hcv, rfl⟩ := toSeg_idx hs
-    simp only [copySel] at hc
+    simp only [copySel, copySelG] at hc
     split at hc
     · cases hc
       simp only [LTerm.eval, hse, LPath.ext_at_eval hq hcv, Res.ok_bind] at hv
@@ -594,7 +594,7 @@ theorem copySel_agree (σ : State) (decl : Name → Ty) (loc : Theory.Identity) 
   | size =>
     simp only [LSel.toSeg, Option.some.injEq] at hs
     subst hs
-    simp only [copySel] at hc
+    simp only [copySel, copySelG] at hc
     split at hc
     · cases hc
       simp only [LTerm.eval, hse, LPath.ext_eval, hq, Res.ok_bind] at hv

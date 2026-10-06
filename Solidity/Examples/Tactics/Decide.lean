@@ -402,15 +402,16 @@ section MemoryClauses
 open Solidity.Decide
 
 /-- `Person memory p;` -/
-private def pNew : LMem := .addM .init 0 (.struct "Person")
+private def pNew : LMem := key!{ addM(memory, shaped(idp0, Person)) }
 /-- `p.age = 5;` -/
-private def pAge : LMem := .write pNew ⟨0, []⟩ (.fld "age") (.word (.lit (.int 5)))
+private def pAge : LMem := key!{ write(‹pNew›, idC(idp0, nil), age, 5) }
 /-- `uint[] memory xs = new uint[](3); xs[i] = 7;` -/
 private def xsNew : LMem :=
-  .write (.newArr .init 0 (.array .uint) (.lit (.int 3))) ⟨0, []⟩ (.idx (.var (.user "i")))
-    (.word (.lit (.int 7)))
+  key!{ write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, 3),
+    idC(idp0, nil), at(i), 7) }
 /-- `Person memory a = alice; Person memory q;` -/
-private def aCopy : LMem := .addM (.copySt .init 0 .init (.root "alice")) 1 (.struct "Person")
+private def aCopy : LMem :=
+  key!{ addM(copySt(memory, idp0, find(storage, alice)), shaped(idp1, Person)) }
 
 /-- info: true -/
 #guard_msgs in -- `readOnWrite`: the slot written reads the word written
@@ -435,7 +436,7 @@ private def aCopy : LMem := .addM (.copySt .init 0 .init (.root "alice")) 1 (.st
 
 /-- info: true -/
 #guard_msgs in -- `readFromCopyToStorage`: a member of a copy reads the storage copied
-#eval aCopy.readT ⟨0, []⟩ (.fld "age") == some (.find .init ((LPath.root "alice").field "age"))
+#eval aCopy.readT ⟨0, []⟩ (.fld "age") == some key!{ find(storage, alice.age) }
 
 /-- info: true -/
 #guard_msgs in -- `newFromAdd`: another root is apart, `q.age` reads its default

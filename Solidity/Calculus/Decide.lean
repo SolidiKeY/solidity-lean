@@ -8808,7 +8808,7 @@ theorem copySelU_sim {σ : State} {s : LStor} {q q' : LPath} (p : List Seg) (a :
     split at h
     · rename_i hl
       cases h
-      exact ⟨LTerm.find s ((q.ext p).field f), by simp only [copySel, hl, if_true],
+      exact ⟨LTerm.find s ((q.ext p).field f), by simp only [copySel, copySelG, hl, if_true],
         guard_sim hs (Sim.bind he fun _ => Sim.refl _) fun _ _ hv hq => hrd _ hv hq⟩
     · cases h
   | idx t =>
@@ -8816,7 +8816,7 @@ theorem copySelU_sim {σ : State} {s : LStor} {q q' : LPath} (p : List Seg) (a :
     split at h
     · rename_i hl
       cases h
-      exact ⟨LTerm.find s ((q.ext p).at t), by simp only [copySel, hl, if_true],
+      exact ⟨LTerm.find s ((q.ext p).at t), by simp only [copySel, copySelG, hl, if_true],
         guard_sim hs (Sim.bind he fun _ => Sim.refl _) fun _ _ hv hq => hrd _ hv hq⟩
     · cases h
   | size =>
@@ -8824,7 +8824,7 @@ theorem copySelU_sim {σ : State} {s : LStor} {q q' : LPath} (p : List Seg) (a :
     split at h
     · rename_i hl
       cases h
-      exact ⟨LTerm.len s (q.ext p), by simp only [copySel, hl, if_true],
+      exact ⟨LTerm.len s (q.ext p), by simp only [copySel, copySelG, hl, if_true],
         guard_sim hs he fun _ _ hv hq => hln _ hv hq⟩
     · cases h
 
