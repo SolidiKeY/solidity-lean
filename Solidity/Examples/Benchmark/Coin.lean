@@ -10,9 +10,10 @@ Source: solkey's `keyext.solidity.examples/benchmark/Coin.sol`, itself from
 Changes from the published text, as solkey's benchmark file makes them: the
 event `Sent` and the custom error `InsufficientBalance` are dropped, and so
 is the `emit`; `require(c, Err(..))` is `require(c)`.  Here besides: the
-`public` getters are not declared (a state variable is read directly), and
-the constructor's body `minter = msg.sender;` is stated as a statement of its
-own (`ctor`), since a contract here has no constructor.
+`public` getters are not declared (a state variable is read directly).
+The constructor is the contract's (`Contract.ctor`): `constructor();` runs it
+(`ctor`), and a deployment runs it from the empty storage
+(`Contract.deploy`, `deployMinter`; `Examples/Tactics/Constructors.lean`).
 
 solkey's `@custom:key` clauses are written above the functions, as its
 file has them.  `spec!{ mint }`, the obligation solkey synthesizes
@@ -23,7 +24,7 @@ and each leaf closed by the closer (`LFml.close`), in one kernel evaluation.
 `\old(e)` is a local declared before the call (`uint b = balances[r];`), and
 `msg.sender` is the transaction's (`Simple.env`), the same before and after.
 `requires amount >= 0` holds of a `uint`.  The runs of the interpreter
-(`sendRun`) show the same debit and credit on a concrete state.
+(`sendRun`) show the same debit and credit on a deployed contract.
 -/
 
 namespace Solidity.Examples.Benchmark.Coin
@@ -34,6 +35,9 @@ open Proves
 def Coin : Contract := contract!{
   address minter;
   mapping(address => uint) balances;
+  constructor() {
+    minter = msg.sender;
+  }
   requires amount >= 0;
   ensures \old(minter) == msg.sender && minter == \old(minter);
   ensures balances[receiver] == \old(balances[receiver]) + amount;
@@ -58,9 +62,19 @@ local instance : InContract := ⟨Coin⟩
 
 /-! ## The constructor -/
 
-/-- `minter = msg.sender;` — the constructor's body. -/
-theorem ctor : ⊢ dl!{ [ minter = msg.sender; ] minter == msg.sender } := by
+/-- `constructor()`: the caller is the minter, from any storage. -/
+theorem ctor : ⊢ dl!{ [ constructor(); ] minter == msg.sender } := by
   sol_prove
+
+/-- A deployment, from the empty storage: it returns, the deployer the
+minter.  (That no one holds a coin, a read at a free key of the empty
+storage, is outside `sol_close_mt`; `deployRun` shows it of one run.) -/
+theorem deployMinter :
+    ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+        selfBalance := msg.value }
+      ⟨ constructor(); ⟩ minter == msg.sender } := by
+  sol_symex
+  sol_close_mt
 
 /-! ## `mint`
 
@@ -139,24 +153,42 @@ theorem sendOthers :
 the credit of `send` when the two differ (`sendMovesSender`,
 `sendMovesReceiver`), on one state. -/
 
-/-- A fresh `Coin`, called by `7`. -/
-def store : Semantics.State :=
-  { storage := [("minter", .int 0), ("balances", .map [] (.int 0))], tx := { msgSender := 7 } }
+/-- `7`, deploying and calling. -/
+def tx : Semantics.TxEnv := { msgSender := 7 }
 
-/-- `balances[a]` after `P` runs from `store`. -/
+/-- `balances[a]` after `P` deploys and runs, `7` calling. -/
 def balanceAfter (P : Prog Coin) (a : Int) : Semantics.Res Semantics.SVal := do
-  (← Prog.run store P).findStorage "balances" [.at a]
+  (← Coin.deploy P tx).findStorage "balances" [.at a]
+
+/-- The deployer is the minter, and no one holds a coin. -/
+theorem deployRun :
+    (Coin.deploy sol{ constructor(); } tx).map (·.storage) =
+      .ok [("minter", .prim (.int 7)), ("balances", .map [] (.int 0))] := by
+  simp only [Contract.deploy, Contract.deployState, Contract.initStorage, Coin,
+    List.map, Semantics.defaultForTy]
+  rfl
 
 /-- The sender is debited. -/
 theorem sendRunSender :
-    balanceAfter sol{ minter = msg.sender; mint(7, 10); send(9, 4); } 7 = .ok (.int 6) := rfl
+    balanceAfter sol{ constructor(); mint(7, 10); send(9, 4); } 7 = .ok (.int 6) := by
+  simp only [balanceAfter, Contract.deploy, Contract.deployState, Contract.initStorage, Coin,
+    List.map, Semantics.defaultForTy]
+  rfl
 
 /-- The receiver is credited. -/
 theorem sendRunReceiver :
-    balanceAfter sol{ minter = msg.sender; mint(7, 10); send(9, 4); } 9 = .ok (.int 4) := rfl
+    balanceAfter sol{ constructor(); mint(7, 10); send(9, 4); } 9 = .ok (.int 4) := by
+  simp only [balanceAfter, Contract.deploy, Contract.deployState, Contract.initStorage, Coin,
+    List.map, Semantics.defaultForTy]
+  rfl
 
-/-- Anyone but the minter: `mint` reverts. -/
+/-- Anyone but the minter: deployed by `3`, a `mint` by `7` reverts. -/
 theorem mintRunOther :
-    Prog.run store (sol{ minter = 3; mint(7, 10); } : Prog Coin) = .error .revert := rfl
+    (do
+      let σ ← Coin.deploy sol{ constructor(); } { msgSender := 3 }
+      Prog.run { σ with tx := tx } (sol{ mint(7, 10); } : Prog Coin)) = .error .revert := by
+  simp only [Contract.deploy, Contract.deployState, Contract.initStorage, Coin,
+    List.map, Semantics.defaultForTy]
+  rfl
 
 end Solidity.Examples.Benchmark.Coin
