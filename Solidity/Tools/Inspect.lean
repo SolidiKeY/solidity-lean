@@ -280,7 +280,7 @@ def texLine (n : Lean.Name) : String :=
 
 /-- The theorem that makes the constructor `n` sound: by its family, and for
 a `Taclet` by its premise's kind; with the per-rule update lemma
-`Solidity.upd_<n>` when there is one. -/
+`Solidity.upd_<n>` when there is one (`upd_send_cases` for a send's). -/
 def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
   let env ← getEnv
   let family := n.getPrefix
@@ -300,6 +300,8 @@ def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
         | some ``Premise.cases => ``Taclet.sound_cases
         | _ => ``Taclet.sound
   let upd := Name.mkStr `Solidity ("upd_" ++ n.getString!)
+  -- a send's two outcomes are one lemma for both modalities
+  let upd := if thm == ``Taclet.sound_cases then ``upd_send_cases else upd
   let extra := if env.contains upd then s!", {upd}" else ""
   return s!"sound: {thm}{extra}"
 

@@ -128,7 +128,7 @@ theorem ExecS.send_inv {I : Fml C} {σ : State} {pv : Var} {r a : Val C .uint} {
       o = .ok ((σ₁.havoc st nt).setEnv pv (.val (.bool true)))) ∨
     o = .ok (σ.setEnv pv (.val (.bool false))) := by
   cases h with
-  | det hf => simp [Stmt.forks] at hf
+  | det hf => simp only [Stmt.forks, Bool.true_eq_false] at hf
   | sendHalt h => exact .inl ⟨_, h, rfl⟩
   | sendViolated h hn => exact .inr (.inl ⟨_, h, hn, rfl⟩)
   | sendResume h _ h₂ => exact .inr (.inr (.inl ⟨_, _, _, h, h₂, rfl⟩))
@@ -194,8 +194,8 @@ theorem CallbackTaclet.sound_send {I : Fml C} (hI : I.vars = []) {pv : Var} {sad
       exact ⟨trivial, hp⟩
     · rw [h] at hexit
       exact (hn hexit).elim
-    · simp [COut.isOk] at ho
-    · simp [COut.isOk] at ho
+    · simp only [COut.isOk, Bool.true_eq_false] at ho
+    · simp only [COut.isOk, Bool.true_eq_false] at ho
 
 /-! ## Contexts, read with callbacks -/
 

@@ -211,6 +211,90 @@ closed: 0 open goal(s), 8 node(s), 3 branch(es)
 #guard_msgs in
 #proof_tree dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true }
 
+/-! A send's walk takes the rule's goals apart on its `apply` line, so a
+replayed walk touches only them. -/
+
+/--
+info: Try this:
+  apply Proves.valid
+    apply cases .sendNoCallbackBox <;>
+        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
+      (try and_intros)
+    · apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    · apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
+  sol_derive?
+
+/--
+info: Try this:
+  apply Proves.valid
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply cases .sendNoCallbackDiamond <;>
+        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
+      (try and_intros)
+    · refine close ?_
+      sol_symex
+      sol_close
+    · apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    · apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊨ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
+  sol_derive?
+
+/-! The box walk replayed beside another open goal, which it leaves alone. -/
+
+example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
+  refine ⟨?_, ?_⟩
+  apply Proves.valid
+  apply cases .sendNoCallbackBox <;>
+      (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
+        and_true]) <;>
+    (try and_intros)
+  · apply emptyModality
+    refine close ?_
+    sol_symex
+    sol_close
+  · apply emptyModality
+    refine close ?_
+    sol_symex
+    sol_close
+  exact ⟨rfl, rfl⟩
+
+/-! The same two by the reflective driver (`Derive.residue`, its
+`Premise.cases` arm). -/
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ ok = to.send(5); ] true } := by
+  sol_prove?
+
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
+  sol_prove?
+
 /-! Under the box a split has KeY's two goals (`Proves.splitBox`): no `cov`. -/
 
 /--

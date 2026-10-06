@@ -147,4 +147,17 @@ theorem sendCapturedValid : ⊨ dl!{ [ ok = owner.send(x + 2); ] true } := by
   sol_symex
   sol_close
 
+/--
+info: @Taclet.send_unfold_leftFstReceiver : ∀ {C : Contract} {k : Nat} {m : Modality} {pv : Var} {nadr e : Val C PrimTy.uint},
+  dl{ ⟨[ pv = nadr .send(e); ]⟩ ⇝ ⟨[ uint se = nadr; pv = se .send(e); ]⟩ }
+-/
+#guard_msgs in #check @Taclet.send_unfold_leftFstReceiver
+
+/--
+info: @Taclet.send_unfold_rightSndArgument : ∀ {C : Contract} {k : Nat} {m : Modality} {pv : Var}
+  {sadr : Simple C PrimTy.uint} {nse : Val C PrimTy.uint},
+  dl{ ⟨[ pv = sadr .send(nse); ]⟩ ⇝ ⟨[ uint se = nse; pv = sadr .send(se); ]⟩ }
+-/
+#guard_msgs in #check @Taclet.send_unfold_rightSndArgument
+
 end Solidity.Examples.Tactics.Payment

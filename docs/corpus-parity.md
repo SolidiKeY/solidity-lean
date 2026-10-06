@@ -68,9 +68,9 @@ their verdicts:
 | SolcMemory | 3 | 6 | 0 | 2 | 0 |
 | SolcMappings | 7 | 1 | 0 | 1 | 0 |
 | SolcControlFlow | 6 | 2 | 0 | 2 | 0 |
-| Net | 3 | 0 | 0 | 22 | 0 |
+| Net | 4 | 0 | 0 | 23 | 0 |
 | Rules | 0 | 0 | 0 | 8 | 34 |
-| **all** | **38** | **16** | **0** | **52** | **34** |
+| **all** | **39** | **16** | **0** | **53** | **34** |
 
 ### Open
 
@@ -91,5 +91,6 @@ None.
 | field-name overloading: Depth0.recursive and Depth1.recursive have different types, and Semantics.structDef is one global name->fields table | 1 | SolcStructs 1 |
 | field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint) | 1 | SolcStructs 1 |
 | `b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet | 1 | SolcArrays 1 |
+| `(bool ok, ) = a.call{value: v}("")` is lowered to a send only once `sol{}` has tuples, and the problem's invariant `CInv` reads the ledger `net`, which no term reads | 1 | Net 1 |
 | `msg.value` is not a program expression | 1 | Net 1 |
 | storage-theory problem over a `MapField`: a copy of a mapping-carrying type, which no program writes (solc ≥ 0.7 and solkey's parser reject it); `Theory/Copy.lean` states the rule it exercises (`selectOnCopyMap`), and the corpus's obligations are programs' (`⟨ f() ⟩ true`) | 1 | Rules 1 |

@@ -466,7 +466,8 @@ theorem Taclet.sound_unfold {k : Nat} {m : Modality} {s : Stmt C} {P : Prog C}
     res_split
     all_goals first
       | (agree_tac; done)
-      | exact sendAt_setEnv _ _ _ (by simp [freshVars]) _ _ _
+      | exact sendAt_setEnv _ _ _ (by simp only [freshVars, List.mem_cons, Var.fresh.injEq,
+          String.reduceEq, and_true, List.not_mem_nil, or_self, or_false]) _ _ _
   -- the element fails to evaluate: the same halt, not a panic, on both sides
   case storagePushValue_unfold_rightSndArgument =>
     unf_simp

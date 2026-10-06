@@ -193,11 +193,10 @@ payment, `ok` then `true`, and books nothing when it refuses, `ok` then
 takes it.  The calculus reads none of it, `sendNoCallbackBox` having a goal
 for each outcome, so a claim about the ledger after a send holds of both. -/
 
-/-- `PiggyBankNet`'s `sendTo`, its `sent = ok;` left out: the closer does not
-carry a ledger read across a storage write (`[ to.transfer(5); total = 1; ]
-net(to) = 2` does not close either), and the claim below reads no storage. -/
+/-- `PiggyBankNet`'s field `sent` and `sendTo`, which stores the outcome. -/
 def PiggySend : Contract := contract!{
-  function sendTo(address a) { bool ok = a.send(5); }
+  bool sent;
+  function sendTo(address a) { bool ok = a.send(5); sent = ok; }
 }
 
 /-- `net-send-simple.key`: after `sendTo(to)` from an empty ledger, `to`'s
@@ -212,6 +211,13 @@ theorem netSendSimple :
 down by `5`. -/
 theorem netSendOk :
     ⊨ dl!{ to != this → net(to) = 7 → [ ok = to.send(5); ] (ok == true → net(to) = 2) } := by
+  sol_symex
+  sol_close
+
+/-- A ledger read crosses a storage write: `total = 1;` leaves `net` as it
+was (`Modality.wp_box_saveStorage`). -/
+theorem netTransferThenStore :
+    ⊨ dl!{ to != this → net(to) = 7 → [ to.transfer(5); total = 1; ] net(to) = 2 } := by
   sol_symex
   sol_close
 

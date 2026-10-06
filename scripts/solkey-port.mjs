@@ -251,7 +251,10 @@ const KEY_SUITES = [
     },
     unported: {},
     reason: (name) =>
-      name.includes("withcallback")
+      name === "net-call-withcallback-simple"
+        ? "`(bool ok, ) = a.call{value: v}(\"\")` is lowered to a send only once `sol{}` has " +
+          "tuples, and the problem's invariant `CInv` reads the ledger `net`, which no term reads"
+      : name.includes("withcallback")
         ? "the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), " +
           "but the problem's invariant `CInv` reads the ledger `net`, which no term reads"
         : name === "net-msg-value"

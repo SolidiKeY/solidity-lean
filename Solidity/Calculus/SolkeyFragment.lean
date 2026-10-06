@@ -204,7 +204,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     have := d.premise_inSolkey hφ.1.1
     simp only [Premise.inSolkey, List.all_eq_true] at this
     exact .cases d (fun f hf => ih₁ f hf (this f hf))
-      (fun U hU => ih₂ U hU (by simp_all [Fml.inSolkey]))
+      (fun U hU => ih₂ U hU (by simp_all only [forall_const, Fml.inSolkey, Bool.and_self]))
   | allIntro _ ih => exact .allIntro (ih (by simp_all [Fml.inSolkey]))
   | updIntro _ ih => exact .updIntro (ih (by simp_all [Fml.inSolkey]))
   | split d _ _ _ ih₁ ih₂ ih₃ =>

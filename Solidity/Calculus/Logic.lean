@@ -118,7 +118,7 @@ the statement's. -/
 theorem Premise.sound_upd {m : Modality} {s : Stmt C} {U : Upd C} {σ : State}
     (hs : SameOk [] (U.apply σ) (s.run σ)) (ω : Prog C) (φ : Fml C) :
     holds σ (.upd m U (.modal m ω φ)) → holds σ (.modal m (s :: ω) φ) := by
-  have h₀ : Avoids (Prog.vars ω ++ φ.vars) [] := fun _ _ h => by simp at h
+  have h₀ : Avoids (Prog.vars ω ++ φ.vars) [] := fun _ _ h => by simp only [List.not_mem_nil] at h
   simp only [holds]
   intro hU
   cases hu : U.apply σ with
@@ -741,7 +741,9 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
         obtain ⟨b, hb, rfl⟩ := List.mem_map.1 hψ
         exact ih b hb) (by simpa using hne) σ)
   | @cases _ Γ m s ω φ fs us d _ _ ih₁ ih₂ =>
-    have hne : fs ++ us.map (fun U => Fml.upd m U (.modal m ω φ)) ≠ [] := by cases d <;> simp
+    have hne : fs ++ us.map (fun U => Fml.upd m U (.modal m ω φ)) ≠ [] := by
+      cases d <;> simp only [List.map_cons, List.map_nil, List.cons_append, List.nil_append,
+        ne_eq, reduceCtorEq, not_false_eq_true]
     exact fun σ => Hyp.wrap_mono d.sound_in _ σ (Hyp.wrap_conj _ _
       (fun ψ hψ => by
         rcases List.mem_append.1 hψ with hf | hu

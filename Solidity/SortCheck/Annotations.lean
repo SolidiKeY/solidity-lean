@@ -7,7 +7,8 @@ A machine-checked transcription of the *read-sort annotations* carried
 by the read-bearing taclets of solkey's `solidityProgramRules.key`
 (transcribed at solkey commit `f2eb3d98eb`, re-checked at `100f7f24c3`: 313
 taclets, 115 of them read-bearing, one row each; the two `try` taclets read
-nothing). The sort-relevant history is
+nothing; plus the four `send` taclets of `b959555181` that read the ledger,
+ahead of a re-pin: 119 rows). The sort-relevant history is
 `12e72a1b4b` "removed find<int> to be more generic", `52c9c2477a`
 "removed valAt", `0f9b99ad55` "removed different fields" (which
 dropped the `Field[primitive]`/`Field[reference]` schema sorts in favour
@@ -311,7 +312,9 @@ def tacletReadAnns : List TacletReadAnn :=
     -- rule books the debit unconditionally (as `transferNoCallbackBox` does),
     -- the diamond rule additionally owes a "non-negative amount" goal (not
     -- ported: `LeanTaclet.transferDiamond`). The ledger read is the same
-    -- `selectSt<[int]>(net, at(a))` in all four.
+    -- `selectSt<[int]>(net, at(a))` in all four, and in the four `send`
+    -- taclets solkey `b959555181` added (ahead of the `100f7f24c3` pin), at
+    -- the receiver `sadr`.
     { keyName := "transferNoCallbackBox"
       reads := [⟨.net, .net, .fixed .int⟩] },
     { keyName := "transferNoCallbackDiamond"
@@ -319,6 +322,14 @@ def tacletReadAnns : List TacletReadAnn :=
     { keyName := "transferWithCallbackBox"
       reads := [⟨.net, .net, .fixed .int⟩] },
     { keyName := "transferWithCallbackDiamond"
+      reads := [⟨.net, .net, .fixed .int⟩] },
+    { keyName := "sendNoCallbackBox"
+      reads := [⟨.net, .net, .fixed .int⟩] },
+    { keyName := "sendNoCallbackDiamond"
+      reads := [⟨.net, .net, .fixed .int⟩] },
+    { keyName := "sendWithCallbackBox"
+      reads := [⟨.net, .net, .fixed .int⟩] },
+    { keyName := "sendWithCallbackDiamond"
       reads := [⟨.net, .net, .fixed .int⟩] } ]
   ++ compoundRows ++ incDecRows
 
@@ -372,7 +383,7 @@ def preFixTacletReadAnns : List TacletReadAnn :=
 -- Taclet names must be unique, and the table has one row per
 -- read-bearing taclet of the pinned file.
 #guard (tacletReadAnns.map (·.keyName)).Nodup
-#guard tacletReadAnns.length = 115
+#guard tacletReadAnns.length = 119
 
 end TacletAnnotations
 end Solidity

@@ -335,8 +335,8 @@ theorem Stmt.exec_run (I : Fml C) :
       by_cases hI : holds σ₁ I
       · left
         have := ExecS.sendResume (I := I) (pv := pv) (st := σ₁.storage) (nt := σ₁.net)
-          ht hI (by simpa using hI)
-        simpa using this
+          ht hI (by simpa only [State.havoc_self] using hI)
+        simpa only [State.havoc_self] using this
       · exact .inr (.sendViolated ht hI)
     · rw [hs]; exact .inl (.sendFailed ht)
   | .ite c thn els, σ => by

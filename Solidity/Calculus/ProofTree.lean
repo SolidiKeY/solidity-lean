@@ -383,17 +383,19 @@ def splitBranches (g : MVarId) : TacticM (Array (TSyntax `tactic) × List MVarId
   let refine ← `(tactic| refine ⟨$holes,*⟩)
   return (#[simp, refine], ← runOn g' #[refine])
 
-/-- After `apply cases r`: its goals `∀ f ∈ fs, …` and `∀ U ∈ us, …` taken
-apart, as `sol_derive` does, the formulas first, then one goal per update. -/
-def splitCases (gs : List MVarId) : TacticM (Array (TSyntax `tactic) × List MVarId) := do
+/-- `apply cases r` with its goals `∀ f ∈ fs, …` and `∀ U ∈ us, …` taken
+apart, as `sol_derive` does, the formulas first, then one goal per update:
+one line, `apply … <;> (try simp only […]) <;> (try and_intros)`, so that a
+replayed walk touches only the goals the rule leaves. -/
+def applyCases (g : MVarId) (tacs : Array (TSyntax `tactic)) :
+    TacticM (Array (TSyntax `tactic) × List MVarId) := do
   let names := #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
     ``and_true]
   let lemmas ← names.mapM fun n => do `(Lean.Parser.Tactic.simpLemma| $(← short n):ident)
-  let tacs := #[← `(tactic| all_goals (try simp only [$lemmas,*])),
-    ← `(tactic| all_goals (try and_intros))]
-  setGoals gs
-  for t in tacs do Term.withoutErrToSorry (evalTactic t)
-  return (tacs, ← getUnsolvedGoals)
+  let some last := tacs.back? | return (tacs, ← runOn g tacs)
+  let t ← `(tactic| $last <;> (try simp only [$lemmas,*]) <;> (try and_intros))
+  let tacs := tacs.pop.push t
+  return (tacs, ← runOn g tacs)
 
 /-- Grow the tree at the goal `g`, whose branch is labelled `label`. -/
 partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (g : MVarId) :
@@ -406,15 +408,16 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
     -- only the move is tried: an error in the goals it leaves is the tree's
     let s ← saveState
     let applied ← try
-        let gs ← runOn g mv.tacs
-        if mv.branches then
-          match gs with
-          | [g'] => some <$> splitBranches g'
-          | _ => pure (some (#[], gs))
-        else if mv.cases then some <$> splitCases gs
-        else pure (some (#[], gs))
+        if mv.cases then some <$> applyCases g mv.tacs
+        else
+          let gs ← runOn g mv.tacs
+          if mv.branches then
+            match gs with
+            | [g'] => (fun (more, gs) => some (mv.tacs ++ more, gs)) <$> splitBranches g'
+            | _ => pure (some (mv.tacs, gs))
+          else pure (some (mv.tacs, gs))
       catch _ => s.restore; pure none
-    let some (more, gs) := applied | continue
+    let some (tacs, gs) := applied | continue
     -- a `branches` rule's outcomes are `refine`'s holes, with no names of their own
     let labels ← if gs.length < 2 || mv.branches || mv.cases then pure (gs.map fun _ => none) else
       gs.mapM fun c => do
@@ -422,7 +425,7 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
         pure (match t with | .str _ l => some (Lean.Name.mkSimple l) | _ => none)
     let mut cs := #[]
     for (c, l) in gs.zip labels do cs := cs.push (← grow cfg fuel l c)
-    return .node g sequent label (.rule mv.name (mv.tacs ++ more) mv.se) cs
+    return .node g sequent label (.rule mv.name tacs mv.se) cs
   -- a leaf
   if cfg.close then
     let s ← saveState
