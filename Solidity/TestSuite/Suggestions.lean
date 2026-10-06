@@ -39,3 +39,16 @@ testStorageNestedPushReturnAlias: derived
 -/
 #guard_msgs in
 #solkey_derive? Solkey.TestSuite only testStorageNestedPushReturnAlias
+
+/-! `returnEarly` closes with no leaf, but its replay is past
+`maxHeartbeats` (`Derive.replayFits`), so the search calls it pending;
+`Derived14.lean` keeps its `sol_prove` as a recorded exception
+(`docs/testsuite-proofs.md`).  When pruning by ground conditions makes
+the replay fit, this pin moves; `tupleReturnDiscardsComponents`, past the
+limit for the same cause, is not pinned, its search taking 98 s more. -/
+
+/--
+info: returnEarly: pending, its replay is past maxHeartbeats as one declaration
+-/
+#guard_msgs in
+#solkey_derive? Solkey.TestSuite only returnEarly

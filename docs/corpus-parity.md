@@ -13,7 +13,8 @@ its obligations are stated as solkey states them, under `wt(storage)`
 statuses are read off `Solidity/TestSuite/Report.lean`'s pin, and
 `scripts/check-testsuite.sh` checks the parity with solkey's
 `testSuiteFunctions` (every public or external function not tagged skip;
-an internal helper has no obligation):
+an internal helper has no obligation, so the table's
+440 rows are the 452 functions but the 12 internal ones):
 
 - **derived**: `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, with no
   axiom but Lean's three; with no parameters, also stated at the initial

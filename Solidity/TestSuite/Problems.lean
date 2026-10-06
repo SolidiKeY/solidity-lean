@@ -4,8 +4,9 @@ import Solidity.Frontend.Problems
 /-!
 # solkey's `TestSuite` obligations
 
-One statement per function the import elaborated (`solc_problems`,
-`Frontend/Problems.lean`): `Solkey.TestSuite.f.problem`, the obligation as
+One statement per public or external function the import elaborated
+(`solc_problems`, `Frontend/Problems.lean`); an internal helper has none,
+as solkey inlines it at its calls: `Solkey.TestSuite.f.problem`, the obligation as
 solkey's `SolidityProblemSynthesizer` states it, the modality the
 function's tag, `∀` over its parameters, under `wt(storage)`
 (`Calculus/Problem.lean`).  The theorems are in the `Derived*` modules

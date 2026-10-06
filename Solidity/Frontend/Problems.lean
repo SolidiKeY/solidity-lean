@@ -213,7 +213,10 @@ def elabSolkeyObligations : CommandElab := fun stx => do
   let union := (((matched.forM fun (p : String × Lean.Name) => CollectAxioms.collect p.2).run env).run {}).2.axioms
   let mut derived : Array String := #[]
   for (name, t) in matched do
-    if union.all std || (← collectAxioms t).all std then derived := derived.push name
+    -- not `union.all std || (← collectAxioms t).all std`: `do` hoists the `←`
+    -- out of the `||`, and each theorem's traversal then runs whatever the union
+    if union.all std then derived := derived.push name
+    else if (← collectAxioms t).all std then derived := derived.push name
     else other := other.push s!"unsound {name}"
   let mut lines : Array String := #[]
   for x in pending, i in [0:pending.size] do
