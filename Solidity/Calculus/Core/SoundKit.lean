@@ -296,6 +296,192 @@ theorem Premise.Sound.captureMV {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
 
 end Shapes
 
+/-! ## Outcomes a modality cannot tell apart
+
+A rule that captures a part evaluates it first, where the statement may read
+another part first (`sp[e]` with `sp` an alias: the alias first, then `e`).
+The two runs then halt alike but maybe not with the same halt; a modality
+tells a halt only from a panic (`Modality.afterRunC`), and an expression
+never panics (`Val.eval_noPanic`), so the two are alike (`Res.Sim`, today's
+`SameOk` with no fresh names). -/
+
+section Sim
+
+variable {α β : Type}
+
+/-- The same state, or two halts that are both panics or both not. -/
+def Res.Sim : Res α → Res α → Prop
+  | .ok a, .ok b => a = b
+  | .error e, .error e' => (e = .panic ↔ e' = .panic)
+  | _, _ => False
+
+theorem Res.Sim.refl (r : Res α) : Res.Sim r r := by
+  cases r <;> simp only [Res.Sim]
+
+theorem Res.Sim.of_eq {r r' : Res α} (h : r = r') : Res.Sim r r' := h ▸ Res.Sim.refl r
+
+theorem Res.Sim.bind {r r' : Res α} (h : Res.Sim r r') (f : α → Res β) :
+    Res.Sim (r >>= f) (r' >>= f) := by
+  cases r with
+  | ok a => cases r' with
+    | ok b => cases (h : a = b); exact Res.Sim.refl _
+    | error => exact h.elim
+  | error e => cases r' with
+    | ok => exact h.elim
+    | error e' => exact h
+
+theorem Res.Sim.afterRunC {m : Modality} {p : α → Prop} {r r' : Res α} (h : Res.Sim r r') :
+    m.afterRunC p r → m.afterRunC p r' := by
+  cases r with
+  | ok a => cases r' with
+    | ok b => cases (h : a = b); exact id
+    | error => exact h.elim
+  | error e => cases r' with
+    | ok => exact h.elim
+    | error e' =>
+      exact fun ⟨h₁, h₂⟩ => ⟨h₁, fun h' => h₂ (congrArg Except.error (h.2 (Except.error.inj h')))⟩
+
+/-- Two reads that do not panic, in either order. -/
+theorem Res.Sim.bind_comm {γ : Type} (x : Res α) (y : Res β) (f : α → β → Res γ)
+    (hx : NoPanic x) (hy : NoPanic y) :
+    Res.Sim (x >>= fun a => y >>= f a) (y >>= fun b => x >>= fun a => f a b) := by
+  cases x with
+  | ok a => exact Res.Sim.refl _
+  | error e => cases y with
+    | ok b => exact Res.Sim.refl _
+    | error e' =>
+      exact ⟨fun h => absurd (congrArg Except.error h) hx,
+        fun h => absurd (congrArg Except.error h) hy⟩
+
+end Sim
+
+/-! ## Expressions never panic -/
+
+section NoPanicE
+
+variable {Γ : Ctx} (σ : State C Γ)
+
+theorem Val.eval_noPanic {p : PrimTy} (v : Val C Γ p) : NoPanic (v.eval σ) := by
+  have h := Tm.eval_noPanic σ v.lower
+  rw [Val.eval_lower] at h
+  exact h
+
+theorem SPath.resolve_noPanic {T : Ty} (b : SPath C Γ T) : NoPanic (b.resolve σ) := by
+  have h := Tm.eval_noPanic σ b.lower
+  rw [SPath.eval_lower] at h
+  exact h
+
+theorem Loc.resolve_noPanic {T : Ty} (l : Loc C Γ T) : NoPanic (l.resolve σ) := by
+  have h := Tm.eval_noPanic σ l.lower
+  rw [Loc.eval_lower] at h
+  exact h
+
+theorem MPath.ref_noPanic {T : Ty} (b : MPath C Γ T) : NoPanic (do (← b.mval σ).asRef) := by
+  have h := Tm.eval_noPanic σ b.lower
+  rw [MPath.eval_lower] at h
+  exact h
+
+end NoPanicE
+
+/-! ## The premise shapes, up to the halt -/
+
+section ShapesSim
+
+variable {Γ Γ' : Ctx} {m : Modality}
+
+/-- **A block** is sound when it runs as the statement up to the halt, its
+fresh locals popped. -/
+theorem Premise.Sound.unfoldSim {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Ext Γ' Γ''} {s : Stmt C Γ Γ'}
+    {σ : State C Γ} (hs : Res.Sim ((Prog.run σ P).map (State.drop h)) (s.run σ)) :
+    Premise.Sound m s (.unfold P h) σ := by
+  intro Γ₁ Γ₀ ω κ φ hp
+  have hp' : m.afterRunC (holds · φ) (do Frames.run (← Prog.run σ P) (.pop .capture h (.seq ω κ))) :=
+    hp
+  have e : (do Frames.run (← Prog.run σ P) (.pop .capture h (.seq ω κ))) =
+      ((Prog.run σ P).map (State.drop h)) >>= fun τ => (do Frames.run (← Prog.run τ ω) κ) := by
+    cases Prog.run σ P <;> rfl
+  show m.afterRunC _ _
+  rw [run_cons_frames]
+  rw [e] at hp'
+  exact (hs.bind _).afterRunC hp'
+
+/-- **A value captured**, by what the statement does with the value
+(`G`): the statement on top of the local runs as `G`, and the statement is
+the value read, then `G`, up to the halt. -/
+theorem Premise.Sound.captureK {p : PrimTy} {x : Var} {e : Val C Γ p}
+    {s' : Stmt C (.val p :: Γ) (.val p :: Γ)} {s : Stmt C Γ Γ} {σ : State C Γ}
+    (G : Semantics.Value → Res (State C Γ))
+    (hs' : ∀ v, (s'.run (σ.push v)).map (State.drop (.push .refl)) = G v)
+    (hs : Res.Sim (e.eval σ >>= G) (s.run σ)) :
+    Premise.Sound m s (.capture p x e s') σ := by
+  show Premise.Sound m s (.unfold (.cons (.declLocal p x (some e)) (.cons s' .nil)) (.push .refl)) σ
+  refine Premise.Sound.unfoldSim ?_
+  have : (Prog.run σ (.cons (.declLocal p x (some e)) (.cons s' .nil))).map
+      (State.drop (.push .refl)) = e.eval σ >>= G := by
+    rw [Prog.run_cons]
+    show (Except.bind (Run.declLocal p (some e) σ) fun τ => Prog.run τ (.cons s' .nil)).map _ = _
+    cases he : e.eval σ with
+    | error h => simp only [Run.declLocal, he]; rfl
+    | ok v =>
+      simp only [Run.declLocal, he]
+      show (Prog.run (σ.push v) (.cons s' .nil)).map _ = G v
+      rw [Prog.run_cons, ← hs' v]
+      cases s'.run (σ.push v) <;> rfl
+  rw [this]; exact hs
+
+/-- **A storage path captured**, by what the statement does with the path. -/
+theorem Premise.Sound.captureSPK {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
+    {s' : Stmt C (.alias R :: Γ) (.alias R :: Γ)} {s : Stmt C Γ Γ} {σ : State C Γ}
+    (G : Name × List Semantics.Seg → Res (State C Γ))
+    (hs' : ∀ q, (s'.run (σ.push (t := .alias R) (some q))).map (State.drop (.push .refl)) = G q)
+    (hs : Res.Sim (b.resolve σ >>= G) (s.run σ)) :
+    Premise.Sound m s (.captureSP x b s') σ := by
+  show Premise.Sound m s (.unfold (.cons (.declStorage R x (some (.path b))) (.cons s' .nil))
+    (.push .refl)) σ
+  refine Premise.Sound.unfoldSim ?_
+  have : (Prog.run σ (.cons (.declStorage R x (some (.path b))) (.cons s' .nil))).map
+      (State.drop (.push .refl)) = b.resolve σ >>= G := by
+    rw [Prog.run_cons]
+    show (Except.bind (Run.declStorage R (some (.path b)) σ)
+      fun τ => Prog.run τ (.cons s' .nil)).map _ = _
+    simp only [Run.declStorage, ARhs.eval, bind_assoc, pure_bind]
+    cases b.resolve σ with
+    | error h => rfl
+    | ok q =>
+      show (Prog.run (σ.push (t := .alias R) (some q)) (.cons s' .nil)).map _ = G q
+      rw [Prog.run_cons, ← hs' q]
+      cases s'.run (σ.push (t := .alias R) (some q)) <;> rfl
+  rw [this]; exact hs
+
+/-- **A memory path captured**, by what the statement does with the object. -/
+theorem Premise.Sound.captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
+    {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} {σ : State C Γ}
+    (G : Nat → Res (State C Γ))
+    (hs' : ∀ id, (s'.run (σ.push (t := .mem R) id)).map (State.drop (.push .refl)) = G id)
+    (hs : Res.Sim ((do (← b.mval σ).asRef) >>= G) (s.run σ)) :
+    Premise.Sound m s (.captureMV x b s') σ := by
+  show Premise.Sound m s (.unfold (.cons (.declMem R x (some (.alias b)) rfl b.mapFree)
+    (.cons s' .nil)) (.push .refl)) σ
+  refine Premise.Sound.unfoldSim ?_
+  have : (Prog.run σ (.cons (.declMem R x (some (.alias b)) rfl b.mapFree) (.cons s' .nil))).map
+      (State.drop (.push .refl)) = (do (← b.mval σ).asRef) >>= G := by
+    rw [Prog.run_cons]
+    have hd : Run.declMem R (some (.alias b)) σ =
+        (do (← b.mval σ).asRef) >>= fun id => pure (σ.push (t := .mem R) id) := by
+      simp only [Run.declMem, MRhs.eval, bind_assoc, pure_bind]
+    show (Except.bind (Run.declMem R (some (.alias b)) σ)
+      fun τ => Prog.run τ (.cons s' .nil)).map _ = _
+    rw [hd]
+    cases (do (← b.mval σ).asRef : Res Nat) with
+    | error h => rfl
+    | ok id =>
+      show (Prog.run (σ.push (t := .mem R) id) (.cons s' .nil)).map _ = G id
+      rw [Prog.run_cons, ← hs' id]
+      cases s'.run (σ.push (t := .mem R) id) <;> rfl
+  rw [this]; exact hs
+
+end ShapesSim
+
 /-! ## A state with a local pushed -/
 
 section Push
