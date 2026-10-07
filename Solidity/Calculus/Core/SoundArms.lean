@@ -581,6 +581,185 @@ theorem sound_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = t
     | ok mv =>
       cases hr : mv.asRef <;> cases hn : iv.asInt <;> simp only [Res.bind_ok, hr] <;> rfl
 
+/-- A global step's state and value, with the locals (`Semantics/Core.lean`'s
+private `withGlob₂`). -/
+def glob₂ (x : Semantics.State × Value) : State C Γ × Value := (σ.withGlob x.1, x.2)
+
+@[simp] theorem glob₂_fst (x : Semantics.State × Value) : (glob₂ σ x).1 = σ.withGlob x.1 := rfl
+@[simp] theorem glob₂_snd (x : Semantics.State × Value) : (glob₂ σ x).2 = x.2 := rfl
+
+theorem bind_withGlob (x : Res Semantics.State) :
+    (x >>= fun τ => pure (σ.withGlob τ)) = σ.withGlob <$> x := by
+  cases x <;> rfl
+
+theorem OpLoc.bump_root {p : PrimTy} (op : IncDec) (r : Name) (h : C.rootType r = some (.prim p)) :
+    (OpLoc.root (Γ := Γ) r h).bump σ op = glob₂ σ <$> bumpStore σ.glob op p r [] := rfl
+
+theorem OpLoc.bump_field {p : PrimTy} (op : IncDec) {s : Name} (b : SPath C Γ (.struct s)) (f : Name)
+    (h : C.fieldType s f = some (.prim p)) :
+    (OpLoc.field b f h).bump σ op = (do
+      let (rt, segs) ← (Loc.field b f h).resolve σ
+      glob₂ σ <$> bumpStore σ.glob op p rt segs) := rfl
+
+theorem OpLoc.bump_index {p : PrimTy} (op : IncDec) {R : RefTy} {k : PrimTy}
+    (it : IndexTy R k (.prim p)) (b : SPath C Γ (.ref R)) (i : Simple C Γ k) :
+    (OpLoc.index it b i).bump σ op = (do
+      let (rt, segs) ← (Loc.index it b (.simple i)).resolve σ
+      glob₂ σ <$> bumpStore σ.glob op p rt segs) := rfl
+
+theorem OpLoc.bump_mfield {p : PrimTy} (op : IncDec) {s : Name} (b : MPath C Γ (.struct s)) (f : Name)
+    (h : C.fieldType s f = some (.prim p)) :
+    (OpLoc.mfield b f h).bump σ op = (do
+      let id ← (← b.mval σ).asRef
+      glob₂ σ <$> bumpMem σ.glob op p (.memoryField id f)) := rfl
+
+theorem OpLoc.bump_mindex {p : PrimTy} (op : IncDec) {R : RefTy} (a : ArrTy R (.prim p))
+    (b : MPath C Γ (.ref R)) (i : Simple C Γ .uint) :
+    (OpLoc.mindex a b i).bump σ op = (do
+      let id ← (← b.mval σ).asRef
+      let iv ← (← i.eval σ).asInt
+      glob₂ σ <$> bumpMem σ.glob op p (.memoryIndex id iv)) := rfl
+
+/-- `localIncrement`, `storageRootIncrement`, `storageFieldIncrement`,
+`storageIndexIncrement`, `memoryFieldIncrement`, `memoryIndexArrayIncrement`:
+`{l := l ± 1}`. -/
+theorem incDec_write {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) :
+    (l.set (l.op op.binOp .one)).write σ σ = Run.incDec op l σ := by
+  cases l with
+  | «local» i =>
+    simp only [Rhs.eval, OpLoc.bump, bumpLocal, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write,
+      Tm.eval, Op2.eval, Op0.eval, evalBinop_bump, Solidity.applyBinOp_bump, Run.incDec,
+      bind_assoc, pure_bind]
+  | root r h =>
+    simp only [Loc.lower, OpLoc.bump_root, bumpStore, writeStorage_toSVal, saveStorage_glob,
+      OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Run.incDec,
+      bind_assoc, pure_bind, map_bind, map_pure, glob₂_fst, bind_withGlob]
+  | field b f h =>
+    simp only [Loc.eval_lower, OpLoc.bump_field, bumpStore, writeStorage_toSVal,
+      saveStorage_glob, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Run.incDec,
+      bind_assoc, pure_bind, map_bind, map_pure, glob₂_fst, bind_withGlob]
+    cases Loc.resolve σ (Loc.field b f h) <;> rfl
+  | index it b ie =>
+    simp only [Loc.eval_lower, OpLoc.bump_index, bumpStore, writeStorage_toSVal,
+      saveStorage_glob, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Run.incDec,
+      bind_assoc, pure_bind, map_bind, map_pure, glob₂_fst, bind_withGlob]
+    cases Loc.resolve σ (Loc.index it b (.simple ie)) <;> rfl
+  | mfield b f h =>
+    simp only [MLoc.lower, MPath.eval_lower, OpLoc.bump_mfield, bumpMem, writeAddr_glob,
+      Solidity.readLoc_eq, Solidity.writeLoc_eq, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Run.incDec,
+      bind_assoc, pure_bind, map_bind, map_pure, glob₂_fst, bind_withGlob]
+    cases MPath.mval σ b with
+    | error => rfl
+    | ok mv => cases hr : mv.asRef <;> simp only [Res.bind_ok, hr] <;> rfl
+  | mindex a b ie =>
+    obtain ⟨iv, hi⟩ := Simple.eval_ok σ ie
+    have hi' : ie.eval σ = pure iv := hi
+    simp only [MLoc.lower, MPath.eval_lower, Simple.eval_lower, hi', OpLoc.bump_mindex, bumpMem,
+      writeAddr_glob, Solidity.readLoc_eq, Solidity.writeLoc_eq, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Run.incDec,
+      bind_assoc, pure_bind, map_bind, map_pure, glob₂_fst, bind_withGlob]
+    cases MPath.mval σ b with
+    | error => rfl
+    | ok mv =>
+      cases hr : mv.asRef <;> cases hn : iv.asInt <;> simp only [Res.bind_ok, hr] <;> rfl
+
+theorem sound_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
+    Premise.Sound m (.incDec op hp l) (.upd1 (l.set (l.op op.binOp .one))) σ :=
+  Premise.Sound.update (by rw [upd1_apply]; exact incDec_write σ op l)
+
+theorem saveStorage_ok_with {s x : Semantics.State} {r : Name} {segs : List Seg} {v : SVal}
+    (h : s.saveStorage r segs v = .ok x) : { s with storage := x.storage } = x := by
+  have e := Solidity.State.saveStorage_with s r segs v
+  rw [h] at e
+  exact Except.ok.inj e
+
+theorem writeAddr_ok_with {s x : Semantics.State} {mv : MVal} {a : Semantics.Addr}
+    (h : writeAddr s mv a = .ok x) : { s with heap := x.heap, nextId := x.nextId } = x := by
+  have e := Solidity.writeAddr_with s mv a
+  rw [h] at e
+  exact Except.ok.inj e
+
+theorem upd2_apply (e₁ e₂ : UpdElem C Γ Γ) :
+    ((Upd.nil.snoc e₁).snoc e₂).apply σ = (do e₂.write σ (← e₁.write σ σ)) := rfl
+
+theorem Res.bind_eq_ok {α β : Type} {x : Res α} {f : α → Res β} {b : β} :
+    (x >>= f) = .ok b ↔ ∃ a, x = .ok a ∧ f a = .ok b := by
+  cases x with
+  | error e => exact ⟨fun h => (nomatch h), fun ⟨_, h, _⟩ => (nomatch h)⟩
+  | ok a => exact ⟨fun h => ⟨a, rfl, h⟩, fun ⟨_, h, h'⟩ => by cases h; exact h'⟩
+
+theorem Res.map_eq_ok {α β : Type} {x : Res α} {f : α → β} {b : β} :
+    (f <$> x) = .ok b ↔ ∃ a, x = .ok a ∧ f a = b := by
+  cases x with
+  | error e => exact ⟨fun h => (nomatch h), fun ⟨_, h, _⟩ => (nomatch h)⟩
+  | ok a => exact ⟨fun h => ⟨a, rfl, Except.ok.inj h⟩, fun ⟨_, h, h'⟩ => by cases h; rw [← h']; rfl⟩
+
+/-- The value `l++` gives is what the term `bumped(l)` reads in the state before. -/
+theorem bump_bumped {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) {σ' : State C Γ} {v : Value}
+    (hb : l.bump σ op = .ok (σ', v)) : (Tm.bumped op p l.cur).eval σ = .ok v := by
+  unfold Tm.bumped
+  cases l with
+  | «local» j =>
+    simp only [OpLoc.bump, bumpLocal, Res.bind_eq_ok] at hb
+    obtain ⟨n, hn, new, hnew, he⟩ := hb
+    cases Except.ok.inj he
+    split <;> simp only [OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, evalBinop_bump,
+      Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, *]
+    all_goals rfl
+  | root r h =>
+    simp only [OpLoc.bump_root, bumpStore, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    obtain ⟨⟨τ, w⟩, ⟨sv, hsv, old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
+    cases Except.ok.inj he; cases hg
+    split <;> simp only [Loc.lower, OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hsv, hold, hn, hnew] <;> rfl
+  | field b f h =>
+    simp only [OpLoc.bump_field, bumpStore, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    obtain ⟨⟨rt, segs⟩, hr, ⟨τ, w⟩, ⟨sv, hsv, old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
+    cases Except.ok.inj he; cases hg
+    split <;> simp only [Loc.eval_lower, OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hr, hsv, hold, hn, hnew] <;> rfl
+  | index it b ie =>
+    simp only [OpLoc.bump_index, bumpStore, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    obtain ⟨⟨rt, segs⟩, hr, ⟨τ, w⟩, ⟨sv, hsv, old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
+    cases Except.ok.inj he; cases hg
+    split <;> simp only [Loc.eval_lower, OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hr, hsv, hold, hn, hnew] <;> rfl
+  | mfield b f h =>
+    simp only [OpLoc.bump_mfield, bumpMem, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    obtain ⟨mv, hmv, id, hid, ⟨τ, w⟩, ⟨old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
+    cases Except.ok.inj he; cases hg
+    simp only [Solidity.readLoc_eq, Res.bind_eq_ok] at hold
+    obtain ⟨r, hr, hro⟩ := hold
+    split <;> simp only [MLoc.lower, MPath.eval_lower, OpLoc.cur, Tm.eval, Op2.eval, Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hmv, hid, hr, hro, hn, hnew] <;> rfl
+  | mindex a b ie =>
+    simp only [OpLoc.bump_mindex, bumpMem, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    obtain ⟨mv, hmv, id, hid, iv, hiv, k, hk, ⟨τ, w⟩, ⟨old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
+    cases Except.ok.inj he; cases hg
+    simp only [Solidity.readLoc_eq, Res.bind_eq_ok] at hold
+    obtain ⟨r, hr, hro⟩ := hold
+    split <;> simp only [MLoc.lower, MPath.eval_lower, Simple.eval_lower, OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hmv, hid, hiv, hk,
+      hr, hro, hn, hnew] <;> rfl
+
+/-- `localAssignIncrement`, `storageRootIncrementAssignment`,
+`storageFieldIncrementAssignment`, `storageIndexIncrementAssignment`,
+`memoryFieldIncrementAssignment`, `memoryIndexArrayIncrementAssignment`:
+`{l := l ± 1 ‖ v := bumped(l)}`. -/
+theorem sound_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (hp : p.isNumeric = true)
+    (l : OpLoc C Γ p) (hs : l.recvSimple = true) :
+    Premise.Sound m (.assignIncDec i op hp l hs) (.update ((Upd.nil.snoc (l.set (l.op op.binOp .one))).snoc
+      (.local i (.val (Tm.bumped op p l.cur))))) σ := by
+  refine Premise.Sound.update ?_
+  rw [upd2_apply, incDec_write]
+  show _ = Run.assignIncDec i op l σ
+  simp only [Run.incDec, Run.assignIncDec, bind_assoc, pure_bind]
+  cases hb : l.bump σ op with
+  | error => rfl
+  | ok x =>
+    obtain ⟨σ', v⟩ := x
+    show (do pure (σ'.setLocal i (← (Tm.bumped op p l.cur).eval σ))) = _
+    rw [bump_bumped σ op l hb]; rfl
+
 end Updates
 
 end Solidity.Core
