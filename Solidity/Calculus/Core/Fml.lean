@@ -131,6 +131,10 @@ inductive Upd (C : Contract) (Γ : Ctx) : Ctx → Type where
   | decl {Δ : Ctx} {t : LTy} (U : Upd C Γ Δ) (x : Var) (r : Rhs C Γ t) : Upd C Γ (t :: Δ)
   /-- The locals pushed on `Δ'` popped: a scope ended (Lean only, invisible). -/
   | pop {Δ Δ' : Ctx} (U : Upd C Γ Δ) (h : Ext Δ' Δ) : Upd C Γ Δ'
+  /-- The locals of `Δ` that `Δ'` does not keep dropped, from anywhere in it:
+  a call's frame under the return variables it exports (Lean only,
+  invisible). -/
+  | drop {Δ Δ' : Ctx} (U : Upd C Γ Δ) (h : Thin Δ' Δ) : Upd C Γ Δ'
 
 /-- The element setting the local named `x` to `r`, in `Update.lean`'s terms. -/
 def Rhs.erase {Γ : Ctx} (ns : List Var) (x : Var) : {t : LTy} → Rhs C Γ t → Solidity.UpdElem C
@@ -154,6 +158,14 @@ def UpdElem.erase {Γ Δ : Ctx} (ns ms : List Var) : UpdElem C Γ Δ → Solidit
   | .netMt r a => .netMt (r.erase ns) (a.erase ns)
   | .setBalance a => .setBalance (a.erase ns)
 
+/-- The names of the locals a thinning keeps, from the names `ns` of the
+context it thins into. -/
+def Thin.names : {Γ Δ : Ctx} → Thin Γ Δ → List Var → List Var
+  | _, _, .refl, ns => ns
+  | _, _, .keep h, n :: ns => n :: Thin.names h ns
+  | _, _, .keep h, [] => Thin.names h []
+  | _, _, .drop h, ns => Thin.names h ns.tail
+
 /-- The names of the context an update leaves, from the names `ns` of the
 one it is applied in. -/
 def Upd.names {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → List Var
@@ -161,6 +173,7 @@ def Upd.names {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → List V
   | _, .snoc U _ => U.names ns
   | _, .decl U x _ => x :: U.names ns
   | _, .pop U h => (U.names ns).drop h.depth
+  | _, .drop U h => h.names (U.names ns)
 
 /-- `Update.lean`'s update: the elements in order, a pop none (there, a
 local outlives its scope). -/
@@ -169,36 +182,9 @@ def Upd.erase {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Solidi
   | _, .snoc U e => U.erase ns ++ [e.erase ns (U.names ns)]
   | _, .decl U x r => U.erase ns ++ [r.erase ns x]
   | _, .pop U _ => U.erase ns
+  | _, .drop U _ => U.erase ns
 
 /-! ## Scopes of a program -/
-
-/-- The locals a statement pushes: a declaration's, a call's left in its
-caller. -/
-def CallRet.scopeExt {Γ : Ctx} : {rs Γ' : Ctx} → CallRet Γ rs Γ' → Ext Γ Γ'
-  | _, _, r => CallRet.casesOn (motive := fun _ Γ' _ => Ext Γ Γ') r .refl (fun _ _ _ => .refl)
-      (fun {rs} _ => Ext.append Γ rs) (fun _ _ _ _ => .push .refl)
-
-/-- What a statement pushes on its context (M3's `Stmt.ext` will replace
-it). -/
-def Stmt.scopeExt {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
-  Stmt.casesOn (motive_1 := fun Γ Γ' _ => Ext Γ Γ') s
-    (assign := fun _ _ => .refl) (rebind := fun _ _ => .refl) (assignLocal := fun _ _ => .refl)
-    (declLocal := fun _ _ _ => .push .refl) (declStorage := fun _ _ _ => .push .refl)
-    (opAssign := fun _ _ _ _ _ => .refl) (incDec := fun _ _ _ => .refl)
-    (assignIncDec := fun _ _ _ _ _ => .refl) (push := fun _ _ _ => .refl) (pop := fun _ => .refl)
-    (transfer := fun _ _ => .refl) (send := fun _ _ _ => .refl)
-    (declMem := fun _ _ _ _ _ => .push .refl) (rebindMem := fun _ _ => .refl)
-    (assignFromMem := fun _ _ => .refl) (assignMem := fun _ _ => .refl) (delete := fun _ => .refl)
-    (deleteMem := fun _ _ => .refl) (assignNew := fun _ _ _ => .refl) (ite := fun _ _ _ => .refl)
-    (require := fun _ => .refl) (assert := fun _ => .refl) (revert := .refl)
-    (call := fun _ _ ret _ => ret.scopeExt) (tryCall := fun _ _ _ _ _ _ _ => .refl)
-    (loop := fun _ _ _ => .refl) (block := fun _ => .refl)
-
-/-- What a block pushes on its context: what its scope end pops. -/
-def Prog.scopeExt : {Γ Γ' : Ctx} → Prog C Γ Γ' → Ext Γ Γ'
-  | _, _, P => Prog.casesOn (motive_2 := fun Γ Γ' _ => Ext Γ Γ') P .refl
-      (fun s P => (Stmt.scopeExt s).trans (Prog.scopeExt P))
-  termination_by structural _ _ P => P
 
 /-- The names of the context a block leaves. -/
 def Prog.outNames {Γ : Ctx} (ns : List Var) : {Γ' : Ctx} → Prog C Γ Γ' → List Var
@@ -222,12 +208,17 @@ inductive Frames (C : Contract) : Ctx → Ctx → Type where
   | seq {Γ Γ₁ Γ₀ : Ctx} (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) : Frames C Γ Γ₀
   /-- A scope end: the locals pushed on `Γ` popped, then `κ`. -/
   | pop {Γ Γ' Γ₀ : Ctx} (b : BlockKind) (h : Ext Γ Γ') (κ : Frames C Γ Γ₀) : Frames C Γ' Γ₀
+  /-- A frame end under what it exports: the locals of `Γ'` that `Γ` does
+  not keep dropped, then `κ` (a call's parameters under its return
+  variables; invisible). -/
+  | drop {Γ Γ' Γ₀ : Ctx} (h : Thin Γ Γ') (κ : Frames C Γ Γ₀) : Frames C Γ' Γ₀
 
 /-- The names of the postcondition's context. -/
 def Frames.outNames (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → List Var
   | _, _, .nil => ns
   | _, _, .seq ω κ => κ.outNames (ω.outNames ns)
   | _, _, .pop _ h κ => κ.outNames (ns.drop h.depth)
+  | _, _, .drop h κ => κ.outNames (h.names ns)
 
 /-- The statements the frames hold, as `Update.lean`'s program goes on after
 the head: a scope end is nothing there. -/
@@ -235,6 +226,7 @@ def Frames.erase (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Li
   | _, _, .nil => []
   | _, _, .seq ω κ => ω.erase ns ++ κ.erase (ω.outNames ns)
   | _, _, .pop _ h κ => κ.erase (ns.drop h.depth)
+  | _, _, .drop h κ => κ.erase (h.names ns)
 
 /-! ## Formulas -/
 
@@ -293,6 +285,26 @@ def Fml.erase : {Γ : Ctx} → List Var → Fml C Γ → Solidity.Fml C
 
 /-! ## Premises -/
 
+/-- `φ₁ ∧ … ∧ φₙ`, `true` when there are none (`Update.lean`'s `Fml.conj`). -/
+def Fml.conj {Γ : Ctx} : List (Fml C Γ) → Fml C Γ
+  | [] => .tt
+  | [φ] => φ
+  | φ :: ψs => .and φ (Fml.conj ψs)
+
+/-- `∀ xs. φ`: `φ` for every value of the locals the binders declare, the
+first bound outermost (`Update.lean`'s `Fml.alls`). -/
+def Binders.all {Γ : Ctx} : {ρ : Ctx} → Binders ρ → Fml C (ρ ++ Γ) → Fml C Γ
+  | _, bs, φ => Binders.casesOn (motive := fun ρ _ => Fml C (ρ ++ Γ) → Fml C Γ) bs (fun φ => φ)
+      (fun bs p x φ => Binders.all bs (.all x p φ)) φ
+  termination_by structural _ bs => bs
+
+/-- A block of a `try`: the locals `bs` its outcome binds, on top of `Γ`,
+and its statements. -/
+structure Branch (C : Contract) (Γ : Ctx) where
+  {ρ Γ₁ : Ctx}
+  bs : Binders ρ
+  P : Prog C (ρ ++ Γ) Γ₁
+
 /-- What a rule on a statement `Stmt C Γ Γ'` leaves. -/
 inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   /-- `{U} ⟨[ ]⟩`: the statement is the update `U`. -/
@@ -312,6 +324,33 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   | check (c : Fml C Γ) : Premise C Γ Γ
   /-- The goal closed (`true`) or failed (`false`). -/
   | done {Γ' : Ctx} (b : Bool) : Premise C Γ Γ'
+  /-- One goal per block, each in the statement's place, for every value of
+  the locals it binds: `∀ xs. ⟨[ P ]⟩` (a `try`'s clauses). -/
+  | branches (bs : List (Branch C Γ)) : Premise C Γ Γ
+  /-- Goals labelled as KeY labels a taclet's: each formula of `fs` to prove,
+  then for each update `U` of `us` the rest after it, `{U} ⟨[ ..ω ]⟩ φ`, one
+  per way the statement may end (a `send`). -/
+  | cases (fs : List (Fml C Γ)) (us : List (Upd C Γ Γ)) : Premise C Γ Γ
+  /-- A loop's invariant rule: the invariant `I` now, and, whatever the body's
+  frame holds (`{anon(xs)}`, with `{havoc}` when `hv`), from where `I`
+  holds and after `U` (the condition's value, and under the diamond the
+  variant's, declared on top of `Γ`), the body `P` to `post` where `c`
+  holds, the rest where `c'` does.  The condition's local is popped before
+  the body (`hb`), so the body reads `Δ₀`: `Γ`, or `Γ` with the variant on
+  top (`hu`); every local `U` declares is popped before the rest. -/
+  | inv {Δ₀ Δ Γ₁ : Ctx} (I : Fml C Γ) (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool)
+      (U : Upd C Γ Δ) (c c' : Fml C Δ) (hu : Ext Γ Δ₀) (hb : Ext Δ₀ Δ) (P : Prog C Δ₀ Γ₁)
+      (post : Fml C Δ₀) : Premise C Γ Γ
+  /-- `⟨[ P ]⟩` whose end drops the locals of `Γ''` that `Γ'` does not keep,
+  from anywhere in it: a call's frame under the return variables it leaves
+  its caller. -/
+  | inline {Γ' Γ'' : Ctx} (P : Prog C Γ Γ'') (h : Thin Γ' Γ'') : Premise C Γ Γ'
+
+/-- `{anon(xs)} φ`, and `{anon(xs)} {havoc} φ` when the frame writes the
+storage too (`hv`): `Mutability.lean`'s `Fml.loopAnon`. -/
+def Fml.anonHavoc {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool) (φ : Fml C Γ) :
+    Fml C Γ :=
+  if hv then .anon xs (.havoc φ) else .anon xs φ
 
 /-- A modality whose program is done goes through its frames: a scope end
 pops its locals (an update of pops, which prints as nothing), the rest of
@@ -325,6 +364,7 @@ def Frames.exit (m : Modality) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Fml 
         (fun rest _ => rest ()) (fun s ω _ κ => .modal m (.cons s ω) κ φ)
         (fun _ => Frames.exit m κ φ) κ)
       (fun _ h κ φ => .upd m (Upd.nil.pop h) (Frames.exit m κ φ))
+      (fun h κ φ => .upd m (Upd.nil.drop h) (Frames.exit m κ φ))
   termination_by structural _ _ κ => κ
 
 /-- `⟨ ω κ ⟩ φ`, gone on into the frames when `ω` is empty: the formula a
@@ -345,14 +385,21 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
     (fun P h ω => .modal m P (.pop .capture h (.seq ω κ)) φ)
     (fun x t P ω => .bind x t (.modal m P (.seq ω κ) φ))
     (fun b c c' P Q ω =>
-      .and (.imp c (.modalK m P (.pop b P.scopeExt (.seq ω κ)) φ))
-        (.imp c' (.modalK m Q (.pop b Q.scopeExt (.seq ω κ)) φ)))
+      .and (.imp c (.modalK m P (.pop b P.ext (.seq ω κ)) φ))
+        (.imp c' (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ)))
     (fun c ω => .and (.imp c (.modalK m ω κ φ)) c)
-    (fun b _ => if b then .tt else .ff) ω
+    (fun b _ => if b then .tt else .ff)
+    (fun bs ω => Fml.conj (bs.map fun b =>
+      b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))
+    (fun fs us ω => Fml.conj (fs ++ us.map fun U => .upd m U (.modalK m ω κ φ)))
+    (fun I xs hv U c c' hu hb P post ω => .and I (Fml.anonHavoc xs hv (.imp I (.upd m U
+      (.and (.imp c (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
+        (.imp c' (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ))))))))
+    (fun P h ω => .modal m P (.drop h (.seq ω κ)) φ) ω
 
 /-! ### Equations
 
-`Premise.fml`, `Frames.exit`, `Fml.modalK` and the `scopeExt`s are written with `casesOn`
+`Premise.fml`, `Frames.exit` and `Fml.modalK` are written with `casesOn`
 (Gate G0, condition 1), so they have no equation lemmas of their own: these
 are them, by `rfl`. -/
 
@@ -378,8 +425,8 @@ theorem Premise.fml_split {Γ Γ₁ Γ₀ Δ₁ Δ₂ : Ctx} (m : Modality) (ω 
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (b : BlockKind) (c c' : Fml C Γ) (P : Prog C Γ Δ₁)
     (Q : Prog C Γ Δ₂) :
     (Premise.split b c c' P Q).fml m ω κ φ =
-      .and (.imp c (.modalK m P (.pop b P.scopeExt (.seq ω κ)) φ))
-        (.imp c' (.modalK m Q (.pop b Q.scopeExt (.seq ω κ)) φ)) := rfl
+      .and (.imp c (.modalK m P (.pop b P.ext (.seq ω κ)) φ))
+        (.imp c' (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ)) := rfl
 
 theorem Premise.fml_check {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (c : Fml C Γ) :
@@ -402,10 +449,5 @@ theorem Fml.modalK_nil {Γ Γ₀ : Ctx} (m : Modality) (κ : Frames C Γ Γ₀) 
 theorem Fml.modalK_cons {Γ Γ₁ Γ₂ Γ₀ : Ctx} (m : Modality) (s : Stmt C Γ Γ₁) (ω : Prog C Γ₁ Γ₂)
     (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀) : Fml.modalK m (.cons s ω) κ φ = .modal m (.cons s ω) κ φ :=
   rfl
-
-theorem Prog.scopeExt_nil {Γ : Ctx} : (Prog.nil : Prog C Γ Γ).scopeExt = .refl := rfl
-
-theorem Prog.scopeExt_cons {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) :
-    (Prog.cons s P).scopeExt = s.scopeExt.trans P.scopeExt := rfl
 
 end Solidity.Core

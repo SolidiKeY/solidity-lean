@@ -83,6 +83,13 @@ def qExt (Γ : Ctx) {Δ : Ctx} (h : Ext Γ Δ) : QM Expr :=
     let he ← qExt Γ h
     return mkApp4 (mkConst ``Ext.push) (← qCtx Γ) (qLTy t) (← qCtx Δ) he
 
+partial def qThin : (Γ Δ : Ctx) → Thin Γ Δ → QM Expr
+  | Γ, _, .refl => return mkApp (mkConst ``Thin.refl) (← qCtx Γ)
+  | t :: Γ, _ :: Δ, .keep h => do
+    return mkApp4 (mkConst ``Thin.keep) (qLTy t) (← qCtx Γ) (← qCtx Δ) (← qThin Γ Δ h)
+  | Γ, t :: Δ, .drop h => do
+    return mkApp4 (mkConst ``Thin.drop) (qLTy t) (← qCtx Γ) (← qCtx Δ) (← qThin Γ Δ h)
+
 def qBinders : (ρ : Ctx) → Binders ρ → QM Expr
   | _, .nil => return mkConst ``Binders.nil
   | _ :: ρ, .snoc bs p x => do
@@ -197,7 +204,7 @@ def qCallRet (Γ : Ctx) : (rs Γ' : Ctx) → CallRet Γ rs Γ' → QM Expr
     let ty := mkApp2 (mkConst ``Idx) (← qCtx Γ) (mkApp (mkConst ``LTy.val) (toExpr p))
     let res ← match res with
       | none => pure (optE ty none)
-      | some i => return optE ty (some (← qIdx Γ (.val p) i))
+      | some i => pure (optE ty (some (← qIdx Γ (.val p) i)))
     return mkApp4 (mkConst ``CallRet.val) (← qCtx Γ) (toExpr p) (toExpr r) res
   | rs, _, .rets bs => do
     let b ← qBinders rs bs
@@ -221,7 +228,7 @@ def qLoopAnn (Γ : Ctx) : LoopAnn C Γ → QM Expr
     let ty := mkApp3 (mkConst ``Val) (← contract) (← qCtx Γ) (toExpr PrimTy.uint)
     let d ← match dec with
       | none => pure (optE ty none)
-      | some d => return optE ty (some (← qVal Γ .uint d))
+      | some d => pure (optE ty (some (← qVal Γ .uint d)))
     ctor ``LoopAnn.inv Γ #[← qVal Γ .bool I, d]
 
 /-! ## Statements -/
@@ -402,6 +409,8 @@ partial def qUpd (Γ : Ctx) : (Δ : Ctx) → Upd C Γ Δ → QM Expr
     ctor ``Upd.decl Γ #[← qCtx Δ, qLTy t, ← qUpd Γ Δ U, toExpr x, ← qRhs Γ t r]
   | Δ', @Upd.pop _ _ Δ _ U h => do
     ctor ``Upd.pop Γ #[← qCtx Δ, ← qCtx Δ', ← qUpd Γ Δ U, ← qExt Δ' h]
+  | Δ', @Upd.drop _ _ Δ _ U h => do
+    ctor ``Upd.drop Γ #[← qCtx Δ, ← qCtx Δ', ← qUpd Γ Δ U, ← qThin Δ' Δ h]
 
 def qBlockKind : BlockKind → Expr
   | .block => mkConst ``BlockKind.block
@@ -415,6 +424,8 @@ partial def qFrames (Γ Γ₀ : Ctx) (κ : Frames C Γ Γ₀) : QM Expr := do
   | @Frames.pop _ Γ₁ _ _ b h κ =>
     sctor ``Frames.pop #[← qCtx Γ₁, ← qCtx Γ, ← qCtx Γ₀, qBlockKind b, ← qExt Γ₁ h,
       ← qFrames Γ₁ Γ₀ κ]
+  | @Frames.drop _ Γ₁ _ _ h κ =>
+    sctor ``Frames.drop #[← qCtx Γ₁, ← qCtx Γ, ← qCtx Γ₀, ← qThin Γ₁ Γ h, ← qFrames Γ₁ Γ₀ κ]
 
 partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
   let Γe ← qCtx Γ

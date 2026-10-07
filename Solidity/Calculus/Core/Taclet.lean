@@ -72,6 +72,13 @@ def Premise.erase {Γ Γ' : Ctx} (ns : List Var) : Premise C Γ Γ' → Solidity
   | .split _ c c' P Q => .split (c.erase ns) (c'.erase ns) (P.erase ns) (Q.erase ns)
   | .check c => .check (c.erase ns) []
   | .done b => .done b
+  | .branches bs => .branches (bs.map fun b => (b.bs.toList, b.P.erase (b.bs.names ++ ns)))
+  | .cases fs us => .cases (fs.map (·.erase ns)) (us.map (·.erase ns))
+  | .inv I _ _ U c c' _ hb P post =>
+    let ms := (U.names ns).drop hb.depth
+    .inv (I.erase ns) (U.erase ns) (c.erase (U.names ns)) (c'.erase (U.names ns)) (P.erase ms)
+      (post.erase ms)
+  | .inline P _ => .unfold (P.erase ns)
 
 /-- **Each taclet is an instance of today's rule relation**: its statement
 and premise erase to a `Solidity.Taclet`.  This relates the rules, not what

@@ -71,10 +71,13 @@ lemma (`TermTaclet.sound`).
 |---|---|
 | `Calculus/RuleSyntax.lean` | The `dl{ … }` notation: schemas (taclets, sequents `..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ`, update schemas `{u ‖ {u}u2}`), `tm{ … }` for terms, and the printers for taclets, premises, goals, terms (`pp.sol.key`: KeY's long forms). |
 | `Calculus/Rules.lean` | `Taclet` (solkey's rules), `LeanTaclet` (rules solkey lacks), `Rule`, `CallbackTaclet`. |
-| `Calculus/Core/Fml.lean` | Scoped terms, updates and formulas (`Solidity.Core`, M6a of `docs/intrinsic.md`): `Tm C Γ s`, `Upd C Γ Δ` (assign, declare, pop), `Frames` (`seq`, `pop .block`/`.capture`), `Fml C Γ` with `modal m P κ φ` and the hidden binder `bind`, `Premise C Γ Γ'` (no cover goal) and `Premise.fml`, `Frames.exit`, and `Fml.erase` to `Update.lean`'s. |
+| `Calculus/Core/Fml.lean` | Scoped terms, updates and formulas (`Solidity.Core`, M6a of `docs/intrinsic.md`): `Tm C Γ s`, `Upd C Γ Δ` (assign, declare, pop), `Frames` (`seq`, `pop .block`/`.capture`, `drop` by a `Thin`), `Fml C Γ` with `modal m P κ φ` and the hidden binder `bind`, `Premise C Γ Γ'` (no cover goal; `branches`, `cases`, `inv`, `inline`) and `Premise.fml`, `Frames.exit`, and `Fml.erase` to `Update.lean`'s. |
 | `Calculus/Core/Lower.lean` | Scoped program expressions lowered to `Core.Tm` (`Val.lower`, …), and `lower_erase`: the old lowering of the erasure. |
 | `Calculus/Core/Print.lean` | `Core.Fml.show`: a scoped formula printed as `RuleSyntax.lean` prints its erasure (`}` at a block's end, pops and hidden binders unprinted), pinned against it. |
-| `Calculus/Core/Step.lean` | The strategy on scoped formulas: `Stmt.step` (one `casesOn`; the ported part of the rule table, `none` for the rest), `Fml.maxIdx`/`fresh`, `Fml.stepR` by `Fml.rec` with its compiled twin `Fml.stepAt` (`stepR_eq`), `symex`. |
+| `Calculus/Core/Shift.lean` | A rule's schema variables shifted under its fresh locals (`Val.up` and its kin, `*.up_eq`: `wk up` without a `Thin`), and a call's body read under its caller (`Thin.atop`, `Idx.under`). |
+| `Calculus/Core/Arms.lean` | The rule of each statement on scoped syntax (`Completeness.lean`'s arms): holes (`SHole`, `MHole`, `VHole`), reads, writes, copies, deletes, the conditional, `&&`/`||`, compound assignments, `++`, push/pop, payments, memory, `if`/`require`/`assert`; each arm names its taclet. |
+| `Calculus/Core/Blocks.lean` | The rules of calls (inlined, the frame dropped under exported returns by `Premise.inline`), `try` (`Premise.branches`) and loops (`whileUnwind`, `loopExit`, the invariant rules, `Premise.inv`), and the loop frame (`Stmt.within`, `Prog.frame`). |
+| `Calculus/Core/Step.lean` | The strategy on scoped formulas: `Stmt.step` (one `casesOn`, every statement a rule), `Fml.maxIdx`/`fresh`, `Fml.stepR` by `Fml.rec` with its compiled twin `Fml.stepAt` (`stepR_eq`), `symex`. |
 | `Calculus/Core/Quote.lean` | Scoped formulas quoted back into `Expr` (`Core.Fml.quote`), hash-consed; a block alone is `Syntax/CoreQuote.lean`'s. |
 | `Calculus/Core/Taclet.lean` | A first port of `Taclet` to scoped statements (`localValueAssign`, `storageFieldRead_unfold_rightFst`, `ifElseSplit`): `Taclet.step_eq` (the rule `Stmt.step` fires) and `Taclet.erase` (today's taclet). |
 | `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
@@ -275,6 +278,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Loops.lean` | `while`, `for`, `do … while`, `break`, `continue`, `return` in a loop: the lowering's shapes pinned, `#run` of loops, a concrete loop decided (`Prog.run_loop_of_iterN`); loops proved by unwinding (`whileUnwind`, `loopExit`), solkey's two solc loop ports among them; by an invariant (`whileInvariantBox`, `whileInvariantDiamond`): a counting loop, a sum with a closed form, a loop with `break`, a walk and its proof tree. |
 | `Examples/Tactics/LoopsImport.lean` | Loops from solc's AST (`tests/solc/Loops.sol`): the `/// @custom:key` clauses `scripts/solc-ast.mjs` reads from the source by the loop's `src` offset, printed above the loop by the front end (a clause over several `///` lines joined, as solkey's `KeyNatspec`); a `return` inside a loop lowered on import; five of its seven obligations proved, the two not proved named with why. |
 | `Examples/Tactics/CoreSymex.lean` | `Core.symex` on three programs, checked by the kernel (`Eq.refl`) and against today's `symex` on the erasure. |
+| `Examples/Tactics/CoreStep.lean` | Every arm of `Core.Stmt.step` against today's: each program's `Core.symex` erases to today's `symex` (covers dropped) and is kernel-checked (`Eq.refl`). |
 
 At the root, the notation's own tests:
 

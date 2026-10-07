@@ -46,6 +46,7 @@ def Frames.items (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Me
   | _, _, .seq ω κ => return (← showStmts c (ω.erase ns)) ++ (← κ.items (ω.outNames ns))
   | _, _, .pop .block h κ => return "}" :: (← κ.items (ns.drop h.depth))
   | _, _, .pop .capture h κ => κ.items (ns.drop h.depth)
+  | _, _, .drop h κ => κ.items (h.names ns)
 
 /-- The formula as it prints: the one under an update that prints as nothing
 (only pops) or under a hidden binder. -/
