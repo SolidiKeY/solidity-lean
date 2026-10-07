@@ -430,4 +430,476 @@ theorem SVec.overlay_erase {E : Ty} (hE : TyNodup E) : {n : Nat} → (os ns : SV
       SVec.overlay_erase hE os ns]
 end
 
+/-! ## Storage
+
+Each lemma takes the untyped state `σ` whose storage is the erasure of `st`. -/
+
+namespace Storage
+
+variable {C : Contract} {σ : Semantics.State} {st : Storage C}
+
+/-- `σ` with its storage replaced by the erasure of `st`. -/
+def into (σ : Semantics.State) (st : Storage C) : Semantics.State := { σ with storage := st.erase }
+
+theorem findStorage_erase (hs : σ.storage = st.erase) {U : Ty} (r : SRef C U) :
+    σ.findStorage r.root r.path.erase = toRes SVal.erase (st.find r) := by
+  simp only [Semantics.State.findStorage, hs, Storage.erase, SFields.lookupBy_erase st r.hroot,
+    Storage.find]
+  exact SVal.find_erase _ _
+
+theorem saveStorage_erase (hs : σ.storage = st.erase) {U : Ty} (r : SRef C U) (new : SVal U) :
+    σ.saveStorage r.root r.path.erase new.erase = toRes (into σ) (st.save r new) := by
+  simp only [Semantics.State.saveStorage, hs, Storage.erase, SFields.lookupBy_erase st r.hroot,
+    Storage.save, SVal.save_erase]
+  cases (st.get r.hroot).save r.path new with
+  | none => rfl
+  | some v =>
+    simp only [toRes, bind, Except.bind, Option.bind, into, Storage.erase,
+      SFields.setBy_erase st r.hroot v]
+
+theorem checkIndex_erase (hs : σ.storage = st.erase) {R : RefTy} {k : PrimTy} {V : Ty}
+    (r : SRef C (.ref R)) (it : IndexTy R k V) (i : Int) :
+    σ.checkIndex r.root r.path.erase i = toRes id (st.checkIndex r it i) := by
+  simp only [Semantics.State.checkIndex, findStorage_erase hs, Storage.checkIndex]
+  cases st.find r with
+  | none => rfl
+  | some v =>
+    simp only [toRes, bind, Except.bind, Option.bind]
+    cases it with
+    | map => cases v; rfl
+    | arr a =>
+      cases a with
+      | dyn =>
+        cases v with
+        | array e sh =>
+          simp only [SVal.erase, SList.length_erase]
+          split <;> rfl
+      | fixed =>
+        cases v with
+        | fixed e =>
+          simp only [SVal.erase, SVec.length_erase]
+          split <;> rfl
+
+theorem arrayLen_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E))) :
+    arrayLen σ r.root r.path.erase = toRes (fun n : Nat => Semantics.Value.int n) (st.len r) := by
+  simp only [arrayLen, findStorage_erase hs, Storage.len]
+  cases st.find r with
+  | none => rfl
+  | some v =>
+    cases v with
+    | array e sh => simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.length_erase]; rfl
+
+theorem pushAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E)))
+    (val : Semantics.SVal → Semantics.Res Semantics.SVal) (val' : SVal E → Option (SVal E))
+    (hval : ∀ x : SVal E, val x.erase = toRes SVal.erase (val' x)) :
+    pushAt σ E r.root r.path.erase val = toRes (into σ) (st.push r val') := by
+  simp only [pushAt, findStorage_erase hs, Storage.push]
+  cases st.find r with
+  | none => rfl
+  | some v =>
+    cases v with
+    | array e sh =>
+      simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq sh,
+        pushSlot_erase, hval]
+      cases val' (pushSlot E sh.toList).1 with
+      | none => rfl
+      | some x =>
+        have hnew : Semantics.SVal.array (e.erase ++ [x.erase])
+            (List.map SVal.erase (pushSlot E sh.toList).2) false =
+            (SVal.array (.ofList (e.toList ++ [x])) (.ofList (pushSlot E sh.toList).2)).erase := by
+          simp only [SVal.erase, SList.erase_eq, SList.toList_ofList, List.map_append,
+            List.map_cons, List.map_nil]
+        simp only []
+        rw [hnew, saveStorage_erase hs]
+        rfl
+
+theorem pushPlaceAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E))) :
+    pushPlaceAt σ E r.root r.path.erase =
+      toRes (fun p : Storage C × Nat => (into σ p.1, (p.2 : Int))) (st.pushPlace r) := by
+  simp only [pushPlaceAt, findStorage_erase hs, Storage.pushPlace]
+  cases st.find r with
+  | none => rfl
+  | some v =>
+    cases v with
+    | array e sh =>
+      have hnew : Semantics.SVal.array (e.erase ++ [(pushSlot E sh.toList).1.erase])
+          (List.map SVal.erase (pushSlot E sh.toList).2) false =
+          (SVal.array (.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
+            (.ofList (pushSlot E sh.toList).2)).erase := by
+        simp only [SVal.erase, SList.erase_eq, SList.toList_ofList, List.map_append,
+          List.map_cons, List.map_nil]
+      simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq sh,
+        pushSlot_erase]
+      rw [hnew, saveStorage_erase hs]
+      cases st.save r (SVal.array (.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
+          (.ofList (pushSlot E sh.toList).2)) with
+      | none => rfl
+      | some st' => simp only [toRes, SList.length_erase]; rfl
+
+theorem popAt_erase (hs : σ.storage = st.erase) {E : Ty} (keep : Bool)
+    (r : SRef C (.ref (.array E))) :
+    popAt σ keep r.root r.path.erase = toRes (into σ) (st.pop keep r) := by
+  simp only [popAt, findStorage_erase hs, Storage.pop]
+  cases st.find r with
+  | none => rfl
+  | some v =>
+    cases v with
+    | array e sh =>
+      simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq e,
+        ← List.map_reverse]
+      cases e.toList.reverse with
+      | nil => rfl
+      | cons last restRev =>
+        have hnew : Semantics.SVal.array (List.map SVal.erase restRev).reverse
+            ((if keep then last.erase else last.erase.defaultOf) :: sh.erase) false =
+            (SVal.array (.ofList restRev.reverse)
+              (.ofList ((if keep then last else last.defaultOf) :: sh.toList))).erase := by
+          simp only [SVal.erase, SList.erase_eq, SList.toList_ofList, List.map_reverse,
+            List.map_cons]
+          cases keep <;> simp only [Bool.false_eq_true, ↓reduceIte, SVal.defaultOf_erase]
+        simp only [List.map_cons]
+        rw [hnew, saveStorage_erase hs]
+        rfl
+
+/-- `delete b` on storage, as `Stmt.run` writes it: the value found, reset,
+saved. -/
+theorem delete_erase (hs : σ.storage = st.erase) {T : Ty} (r : SRef C T) :
+    (do
+      let cur ← σ.findStorage r.root r.path.erase
+      σ.saveStorage r.root r.path.erase cur.defaultOf) = toRes (into σ) (st.delete r) := by
+  simp only [findStorage_erase hs, Storage.delete]
+  cases st.find r with
+  | none => rfl
+  | some v =>
+    simp only [toRes, bind, Except.bind, Option.bind, ← SVal.defaultOf_erase]
+    exact saveStorage_erase hs r v.defaultOf
+
+theorem writeStorage_erase (hs : σ.storage = st.erase) {T : Ty} (hT : TyNodup T)
+    (r : SRef C T) (new : SVal T) :
+    σ.writeStorage r.root r.path.erase new.erase = toRes (into σ) (st.write r new) := by
+  have key : ∀ cur : SVal T, σ.saveStorage r.root r.path.erase (cur.erase.overlay new.erase) =
+      toRes (into σ) (st.save r (cur.overlay new)) := fun cur => by
+    rw [← SVal.overlay_erase hT, saveStorage_erase hs]
+  cases new with
+  | prim v => exact saveStorage_erase hs r (.prim v)
+  | struct fs | array e sh | fixed e | map m d =>
+    simp only [Semantics.State.writeStorage, SVal.erase, Storage.write, SVal.isPrim,
+      Bool.false_eq_true, ↓reduceIte, findStorage_erase hs]
+    cases st.find r with
+    | none => rfl
+    | some cur => exact key cur
+
+end Storage
+
+/-! ## Copies through the untyped heap
+
+Until the heap is typed (M4c), a copy between storage and memory goes through
+the untyped one: storage to memory copies the erasure, which is never stuck
+on a type without mappings, and memory to storage reads the copied value
+back at its type (`SVal.ofU`), which can fail only on a heap that does not
+fit the type. -/
+
+theorem mapFree_structDef : ∀ s ∈ mapFreeStructs, ∀ fT ∈ structDef s, fT.2.mapFree = true := by
+  decide
+
+mutual
+theorem SVal.copyStToM_ok : {T : Ty} → (v : SVal T) → T.mapFree = true →
+    ∀ s : Semantics.State, ∃ r, Semantics.copyStToM s v.erase = .ok r
+  | _, @SVal.prim .bool b, _, s => ⟨_, rfl⟩
+  | _, @SVal.prim .uint n, _, s => ⟨_, rfl⟩
+  | _, @SVal.prim .int n, _, s => ⟨_, rfl⟩
+  | _, @SVal.struct sn fs, h, s => by
+    obtain ⟨⟨s', mf⟩, hr⟩ := SFields.copyStFields_ok fs
+      (mapFree_structDef sn (by simpa only [Ty.mapFree, decide_eq_true_eq] using h)) s
+    exact ⟨_, by simp only [SVal.erase, Semantics.copyStToM, hr]; rfl⟩
+  | _, .array e _, h, s => by
+    obtain ⟨⟨s', me⟩, hr⟩ := SList.copyStElems_ok e (by simpa only [Ty.mapFree] using h) s
+    exact ⟨_, by simp only [SVal.erase, Semantics.copyStToM, hr]; rfl⟩
+  | _, .fixed e, h, s => by
+    obtain ⟨⟨s', me⟩, hr⟩ := SVec.copyStElems_ok e (by simpa only [Ty.mapFree] using h) s
+    exact ⟨_, by simp only [SVal.erase, Semantics.copyStToM, hr]; rfl⟩
+  | _, .map _ _, h, _ => by simp only [Ty.mapFree, Bool.false_eq_true] at h
+
+theorem SFields.copyStFields_ok : {fs : List (Name × Ty)} → (st : SFields fs) →
+    (∀ fT ∈ fs, fT.2.mapFree = true) →
+    ∀ s : Semantics.State, ∃ r, Semantics.copyStFields s st.erase = .ok r
+  | _, .nil, _, s => ⟨_, rfl⟩
+  | _, .cons v rest, h, s => by
+    obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v (h _ List.mem_cons_self) s
+    obtain ⟨⟨s₂, mr⟩, h₂⟩ := SFields.copyStFields_ok rest
+      (fun fT hm => h fT (List.mem_cons_of_mem _ hm)) s₁
+    exact ⟨_, by simp only [SFields.erase, Semantics.copyStFields, h₁, bind, Except.bind, h₂]; rfl⟩
+
+theorem SList.copyStElems_ok : {E : Ty} → (l : SList E) → E.mapFree = true →
+    ∀ s : Semantics.State, ∃ r, Semantics.copyStElems s l.erase = .ok r
+  | _, .nil, _, s => ⟨_, rfl⟩
+  | _, .cons v rest, h, s => by
+    obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v h s
+    obtain ⟨⟨s₂, mr⟩, h₂⟩ := SList.copyStElems_ok rest h s₁
+    exact ⟨_, by simp only [SList.erase, Semantics.copyStElems, h₁, bind, Except.bind, h₂]; rfl⟩
+
+theorem SVec.copyStElems_ok : {E : Ty} → {n : Nat} → (l : SVec E n) → E.mapFree = true →
+    ∀ s : Semantics.State, ∃ r, Semantics.copyStElems s l.erase = .ok r
+  | _, _, .nil, _, s => ⟨_, rfl⟩
+  | _, _, .cons v rest, h, s => by
+    obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v h s
+    obtain ⟨⟨s₂, mr⟩, h₂⟩ := SVec.copyStElems_ok rest h s₁
+    exact ⟨_, by simp only [SVec.erase, Semantics.copyStElems, h₁, bind, Except.bind, h₂]; rfl⟩
+end
+
+/-- A storage value copied into fresh memory objects (`copySt`): never stuck
+on a type without mappings. -/
+def SVal.copyToMem (s : Semantics.State) {T : Ty} (v : SVal T) (h : T.mapFree = true) :
+    Semantics.State × Semantics.MVal :=
+  match hc : Semantics.copyStToM s v.erase with
+  | .ok r => r
+  | .error _ => absurd hc (by
+      obtain ⟨r, hr⟩ := v.copyStToM_ok h s
+      rw [hr]
+      exact Except.noConfusion)
+
+theorem SVal.copyStToM_erase (s : Semantics.State) {T : Ty} (v : SVal T) (h : T.mapFree = true) :
+    Semantics.copyStToM s v.erase = .ok (v.copyToMem s h) := by
+  obtain ⟨r, hr⟩ := v.copyStToM_ok h s
+  unfold SVal.copyToMem
+  split
+  · rename_i r' hc; exact hc
+  · rename_i hc; rw [hr] at hc; cases hc
+
+mutual
+/-- An untyped storage value read at a type: `none` where it does not fit. -/
+def SVal.ofU : Semantics.SVal → (T : Ty) → Option (SVal T)
+  | .prim v, .prim p => (PrimTy.ofValue? p v).map SVal.prim
+  | .struct fields, .ref (.struct s) => (SFields.ofU fields (structDef s)).map SVal.struct
+  | .array elems shadow false, .ref (.array E) =>
+    match SList.ofU elems E, SList.ofU shadow E with
+    | some e, some sh => some (.array e sh)
+    | _, _ => none
+  | .array elems [] true, .ref (.fixed E n) => (SVec.ofU elems E n).map SVal.fixed
+  | .map entries dflt, .ref (.mapping _ V) =>
+    match SMap.ofU entries V, SVal.ofU dflt V with
+    | some m, some d => some (.map m d)
+    | _, _ => none
+  | _, _ => none
+
+def SFields.ofU : List (Name × Semantics.SVal) → (fs : List (Name × Ty)) → Option (SFields fs)
+  | [], [] => some .nil
+  | (f, v) :: rest, (f', T) :: fs =>
+    if f = f' then
+      match SVal.ofU v T, SFields.ofU rest fs with
+      | some x, some xs => some (.cons x xs)
+      | _, _ => none
+    else none
+  | _, _ => none
+
+def SList.ofU : List Semantics.SVal → (E : Ty) → Option (SList E)
+  | [], _ => some .nil
+  | v :: rest, E =>
+    match SVal.ofU v E, SList.ofU rest E with
+    | some x, some xs => some (.cons x xs)
+    | _, _ => none
+
+def SVec.ofU : List Semantics.SVal → (E : Ty) → (n : Nat) → Option (SVec E n)
+  | [], _, 0 => some .nil
+  | v :: rest, E, n + 1 =>
+    match SVal.ofU v E, SVec.ofU rest E n with
+    | some x, some xs => some (.cons x xs)
+    | _, _ => none
+  | _, _, _ => none
+
+def SMap.ofU : List (Int × Semantics.SVal) → (V : Ty) → Option (SMap V)
+  | [], _ => some .nil
+  | (k, v) :: rest, V =>
+    match SVal.ofU v V, SMap.ofU rest V with
+    | some x, some xs => some (.cons k x xs)
+    | _, _ => none
+end
+
+mutual
+theorem SVal.ofU_erase : {T : Ty} → (v : SVal T) → SVal.ofU v.erase T = some v
+  | _, @SVal.prim p v => by
+    simp only [SVal.erase, SVal.ofU, PrimTy.ofValue?_erase, Option.map_some]
+  | _, .struct fs => by
+    simp only [SVal.erase, SVal.ofU, SFields.ofU_erase fs, Option.map_some]
+  | _, .array e sh => by
+    simp only [SVal.erase, SVal.ofU, SList.ofU_erase e, SList.ofU_erase sh]
+  | _, .fixed e => by
+    simp only [SVal.erase, SVal.ofU, SVec.ofU_erase e, Option.map_some]
+  | _, .map m d => by
+    simp only [SVal.erase, SVal.ofU, SMap.ofU_erase m, SVal.ofU_erase d]
+
+theorem SFields.ofU_erase : {fs : List (Name × Ty)} → (st : SFields fs) →
+    SFields.ofU st.erase fs = some st
+  | _, .nil => rfl
+  | _, .cons v rest => by
+    simp only [SFields.erase, SFields.ofU, ↓reduceIte, SVal.ofU_erase v,
+      SFields.ofU_erase rest]
+
+theorem SList.ofU_erase : {E : Ty} → (l : SList E) → SList.ofU l.erase E = some l
+  | _, .nil => rfl
+  | _, .cons v rest => by
+    simp only [SList.erase, SList.ofU, SVal.ofU_erase v, SList.ofU_erase rest]
+
+theorem SVec.ofU_erase : {E : Ty} → {n : Nat} → (l : SVec E n) → SVec.ofU l.erase E n = some l
+  | _, _, .nil => rfl
+  | _, _, .cons v rest => by
+    simp only [SVec.erase, SVec.ofU, SVal.ofU_erase v, SVec.ofU_erase rest]
+
+theorem SMap.ofU_erase : {V : Ty} → (m : SMap V) → SMap.ofU m.erase V = some m
+  | _, .nil => rfl
+  | _, .cons k v rest => by
+    simp only [SMap.erase, SMap.ofU, SVal.ofU_erase v, SMap.ofU_erase rest]
+end
+
+/-- Erasure is injective: a typed value is its untyped one. -/
+theorem SVal.erase_injective {T : Ty} {v w : SVal T} (h : v.erase = w.erase) : v = w := by
+  have := SVal.ofU_erase v
+  rw [h, SVal.ofU_erase w] at this
+  exact (Option.some.inj this).symm
+
+mutual
+theorem SVal.erase_of_ofU : (w : Semantics.SVal) → {T : Ty} → {v : SVal T} →
+    SVal.ofU w T = some v → v.erase = w
+  | .prim pv, T, v, h => by
+    cases T with
+    | prim p =>
+      simp only [SVal.ofU, Option.map_eq_some_iff] at h
+      obtain ⟨x, hx, rfl⟩ := h
+      simp only [SVal.erase, PrimTy.erase_of_ofValue? hx]
+    | ref R => cases R <;> simp only [SVal.ofU, reduceCtorEq] at h
+  | .struct fields, T, v, h => by
+    cases T with
+    | prim p => simp only [SVal.ofU, reduceCtorEq] at h
+    | ref R =>
+      cases R with
+      | struct s =>
+        simp only [SVal.ofU, Option.map_eq_some_iff] at h
+        obtain ⟨x, hx, rfl⟩ := h
+        simp only [SVal.erase, SFields.erase_of_ofU fields hx]
+      | array _ | fixed _ _ | mapping _ _ => simp only [SVal.ofU, reduceCtorEq] at h
+  | .array elems shadow fx, T, v, h => by
+    cases T with
+    | prim p => simp only [SVal.ofU, reduceCtorEq] at h
+    | ref R =>
+      cases R with
+      | array E =>
+        cases fx with
+        | true => simp only [SVal.ofU, reduceCtorEq] at h
+        | false =>
+          simp only [SVal.ofU] at h
+          split at h
+          · rename_i e sh he hsh
+            cases h
+            simp only [SVal.erase, SList.erase_of_ofU elems he, SList.erase_of_ofU shadow hsh]
+          · cases h
+      | fixed E n =>
+        cases fx with
+        | false => simp only [SVal.ofU, reduceCtorEq] at h
+        | true =>
+          cases shadow with
+          | cons _ _ => simp only [SVal.ofU, reduceCtorEq] at h
+          | nil =>
+            simp only [SVal.ofU, Option.map_eq_some_iff] at h
+            obtain ⟨x, hx, rfl⟩ := h
+            simp only [SVal.erase, SVec.erase_of_ofU elems hx]
+      | struct _ | mapping _ _ => simp only [SVal.ofU, reduceCtorEq] at h
+  | .map entries dflt, T, v, h => by
+    cases T with
+    | prim p => simp only [SVal.ofU, reduceCtorEq] at h
+    | ref R =>
+      cases R with
+      | mapping K V =>
+        simp only [SVal.ofU] at h
+        split at h
+        · rename_i m d hm hd
+          cases h
+          simp only [SVal.erase, SMap.erase_of_ofU entries hm, SVal.erase_of_ofU dflt hd]
+        · cases h
+      | struct _ | array _ | fixed _ _ => simp only [SVal.ofU, reduceCtorEq] at h
+
+theorem SFields.erase_of_ofU : (l : List (Name × Semantics.SVal)) → {fs : List (Name × Ty)} →
+    {st : SFields fs} → SFields.ofU l fs = some st → st.erase = l
+  | [], fs, st, h => by
+    cases fs with
+    | nil => simp only [SFields.ofU, Option.some.injEq] at h; subst h; rfl
+    | cons _ _ => simp only [SFields.ofU, reduceCtorEq] at h
+  | (f, w) :: rest, fs, st, h => by
+    cases fs with
+    | nil => simp only [SFields.ofU, reduceCtorEq] at h
+    | cons fT fs =>
+      obtain ⟨f', T⟩ := fT
+      simp only [SFields.ofU] at h
+      split at h
+      · rename_i e
+        subst e
+        split at h
+        · rename_i x xs hx hxs
+          cases h
+          simp only [SFields.erase, SVal.erase_of_ofU w hx, SFields.erase_of_ofU rest hxs]
+        · cases h
+      · cases h
+
+theorem SList.erase_of_ofU : (l : List Semantics.SVal) → {E : Ty} → {xs : SList E} →
+    SList.ofU l E = some xs → xs.erase = l
+  | [], E, xs, h => by simp only [SList.ofU, Option.some.injEq] at h; subst h; rfl
+  | w :: rest, E, xs, h => by
+    simp only [SList.ofU] at h
+    split at h
+    · rename_i x ys hx hys
+      cases h
+      simp only [SList.erase, SVal.erase_of_ofU w hx, SList.erase_of_ofU rest hys]
+    · cases h
+
+theorem SVec.erase_of_ofU : (l : List Semantics.SVal) → {E : Ty} → {n : Nat} → {xs : SVec E n} →
+    SVec.ofU l E n = some xs → xs.erase = l
+  | [], E, n, xs, h => by
+    cases n with
+    | zero => simp only [SVec.ofU, Option.some.injEq] at h; subst h; rfl
+    | succ n => simp only [SVec.ofU, reduceCtorEq] at h
+  | w :: rest, E, n, xs, h => by
+    cases n with
+    | zero => simp only [SVec.ofU, reduceCtorEq] at h
+    | succ n =>
+      simp only [SVec.ofU] at h
+      split at h
+      · rename_i x ys hx hys
+        cases h
+        simp only [SVec.erase, SVal.erase_of_ofU w hx, SVec.erase_of_ofU rest hys]
+      · cases h
+
+theorem SMap.erase_of_ofU : (l : List (Int × Semantics.SVal)) → {V : Ty} → {m : SMap V} →
+    SMap.ofU l V = some m → m.erase = l
+  | [], V, m, h => by simp only [SMap.ofU, Option.some.injEq] at h; subst h; rfl
+  | (k, w) :: rest, V, m, h => by
+    simp only [SMap.ofU] at h
+    split at h
+    · rename_i x ys hx hys
+      cases h
+      simp only [SMap.erase, SVal.erase_of_ofU w hx, SMap.erase_of_ofU rest hys]
+    · cases h
+end
+
+/-- A memory value copied to storage (`copyMem`) and read at its type: stuck
+only where the untyped heap does not fit `T` (M4c types the heap). -/
+def SVal.copyFromMem (s : Semantics.State) (mv : Semantics.MVal) (T : Ty) :
+    Semantics.Res (SVal T) := do
+  let w ← Semantics.copyMem s mv
+  match SVal.ofU w T with
+  | some v => pure v
+  | none => .error .stuck
+
+theorem SVal.copyMem_erase {s : Semantics.State} {mv : Semantics.MVal} {T : Ty} {v : SVal T}
+    (h : SVal.copyFromMem s mv T = .ok v) : Semantics.copyMem s mv = .ok v.erase := by
+  unfold SVal.copyFromMem at h
+  cases hc : Semantics.copyMem s mv with
+  | error e => rw [hc] at h; cases h
+  | ok w =>
+    rw [hc] at h
+    simp only [bind, Except.bind] at h
+    split at h
+    · rename_i x hx
+      cases h
+      rw [SVal.erase_of_ofU w hx]
+    · cases h
+
 end Solidity.Core
