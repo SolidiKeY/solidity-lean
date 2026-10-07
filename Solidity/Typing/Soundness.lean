@@ -1,38 +1,37 @@
 import Solidity.Typing.State
+import Solidity.Semantics.Core
 
 /-!
-# Type soundness: `Stmt.run` keeps the state well-typed
+# Type soundness: a scoped run keeps the state well-typed
 
-The typed syntax already rules out every *static* mismatch the old
-checker looked for: a member exists, an operator takes its operand, a copy
-holds no mapping, a pushed default is well-formed.  What it cannot see is
-the **locals**: `Var`s are not typed by the syntax (so a rule can declare
-fresh ones without re-typing the program), and `Simple.local x` may be
-written at `uint` in one place and at `bool` in another.  So what is left to
-check is exactly the locals context, and that is all `Stmt.wt` does: it
-threads a `Ctx` through the block — a declaration extends it, every use of
-a local must agree with it — and returns the context the statement leaves.
+The typed syntax rules out every *static* mismatch: a member exists, an
+operator takes its operand, a copy holds no mapping, a pushed default is
+well-formed, and, since the scoped syntax (`Syntax/Core.lean`), a local is a
+position in a context `Γ`, read and written at the type `Γ` gives it.  So
+there is no locals check left to pass: what a run must keep is that the
+values are of their types.
 
-`RunWT C Γ H σ` is the invariant, `StateWT` (`Typing/State.lean`) adapted
-to the typed syntax in one respect: it drops `envTypedB`'s ban on bindings
-`Γ` does not track.  That ban protected the old resolver, which looked a
-name up in the environment before falling back to a storage root; here an
-alias and a root are different constructors, so an untracked binding is
-never read, and dropping the ban is what lets a branch of an `if` declare
-a local the `if` then forgets (`StateWT.toRunWT` recovers the new
-invariant from the old one).
+`RunWT C H σ` is the invariant: the global part `StateWT`
+(`Typing/State.lean`: storage inhabits `C`'s layout, the heap the store
+typing `H`, the allocation counter is fresh) and every local of its type
+(`LTy.WT`: a number in a `uint` local, a path the layout types at an
+alias's type, an identity `H` claims at a memory local's type).  The locals
+part is still a predicate because values, storage and heap are untyped until
+`docs/intrinsic.md`'s M4.
 
-The headline is `Stmt.run_wt`/`Prog.run_wt`: a checked statement run from
-a `RunWT` state ends, if it ends in a state, in a `RunWT` state under the
-context the check returned and a store typing that only grew (a memory
-allocation adds claims).  A halt (`revert`, `stuck`) is a run the theorem
-says nothing about, as there is no state to type.
+The headline is `Stmt.run_wt`/`Prog.run_wt`: a statement run from a
+`RunWT` state ends, if it ends in a state, in a `RunWT` state under a store
+typing that only grew (a memory allocation adds claims).  A halt (`revert`,
+`stuck`) is a run the theorem says nothing about, as there is no state to
+type.
 
 The proof goes one evaluator at a time, in the order `Semantics.lean`
 defines them: the paths resolve to a place the layout types at the path's
 type (`Loc.resolve_wt`), the memory reads find a slot of the path's type
 (`MLoc.read_wt`), a value evaluates to one of its type (`Val.eval_wt`),
-and each statement's write stores what the place holds.
+and each statement's write stores what the place holds.  The scopes only
+push and pop locals, so they keep any invariant of this shape
+(`Invariant`), which `Reachability.lean` and `Constructibility.lean` reuse.
 -/
 
 namespace Solidity
@@ -57,68 +56,6 @@ theorem Contract.layout_tyAt_root {C : Contract} {r : Name} {T : Ty}
   simp only [Layout.tyAt, Contract.layout]
   rw [show lookupBy r C.vars = some T from h]
   rfl
-
-/-! ## The locals check
-
-`Stmt.wt` and its parts are defined in `Syntax.lean`, below the printer.
-The elaborator checks its blocks with `resolve` instead
-(`Syntax/Resolve.lean`); M3 derives `Stmt.wt` from it. -/
-
-/-- A local the smaller context binds, the larger binds the same way: `y`
-of `uint y;` before the branch is `uint` in it. -/
-theorem Ctx.le_lookup {Γ Γ' : Ctx} {x : Var} {bt : BTy} (hle : Ctx.le Γ Γ' = true)
-    (h : lookupBy x Γ = some bt) : lookupBy x Γ' = some bt := by
-  have hmem := lookupBy_eq_some_mem h
-  have := List.all_eq_true.mp hle _ hmem
-  simp only [beq_iff_eq] at this
-  rw [this, h]
-
-/-! ## The invariant -/
-
-/-- Every local `Γ` tracks is bound as `Γ` says: `x : uint` holds a number,
-`p : Person storage` a path the layout types `Person`, `m : Person memory`
-an identity the store typing claims at `Person`. -/
-def EnvWT (Γ : Ctx) (L : Layout) (H : HeapTy) (env : List (Var × Binding)) : Prop :=
-  ∀ x bt, lookupBy x Γ = some bt → ∃ b, lookupBy x env = some b ∧ BTy.matchesB L H bt b = true
-
-/-- The state invariant for contract `C` under locals `Γ` and store typing
-`H`: storage inhabits `C`'s layout, the locals `Γ` and the heap `H`, and
-the allocation counter is fresh. -/
-structure RunWT (C : Contract) (Γ : Ctx) (H : HeapTy) (σ : State) : Prop where
-  layoutNodup : nodupKeysB C.vars = true
-  storage : wellTypedStorageB C.layout σ.storage = true
-  env : EnvWT Γ C.layout H σ.env
-  heapTyNodup : nodupKeysB H = true
-  heap : heapTypedB H σ.heap = true
-  heapWf : HeapWellFormed σ
-
-/-- The old invariant is a stronger one: a state `StateWT` types under
-`C`'s layout is `RunWT`. -/
-theorem Semantics.StateWT.toRunWT {Γ : Ctx} {H : HeapTy} {σ : State}
-    (h : StateWT Γ H C.layout σ) : RunWT C Γ H σ := by
-  refine ⟨h.layoutNodup, h.storage, ?_, h.heapTyNodup, h.heap, h.heapWf⟩
-  intro x bt hx
-  have henv := h.env
-  simp only [envTypedB, Bool.and_eq_true] at henv
-  have := List.all_eq_true.mp henv.1 _ (lookupBy_eq_some_mem hx)
-  revert this
-  cases hb : lookupBy x σ.env with
-  | none => intro h; exact absurd h (by simp)
-  | some b => intro h; exact ⟨b, rfl, h⟩
-
-namespace RunWT
-
-variable {Γ : Ctx} {H : HeapTy} {σ : State}
-
-/-- A binding a checked local reads. -/
-theorem lookup (hwt : RunWT C Γ H σ) {x : Var} {bt : BTy}
-    (hx : Ctx.has Γ x bt = true) :
-    ∃ b, σ.getEnv x = .ok b ∧ BTy.matchesB C.layout H bt b = true := by
-  simp only [Ctx.has, beq_iff_eq] at hx
-  obtain ⟨b, hb, hm⟩ := hwt.env x bt hx
-  exact ⟨b, by simp [State.getEnv, hb], hm⟩
-
-end RunWT
 
 /-! ## Value and heap lemmas -/
 
@@ -356,185 +293,6 @@ theorem evalUnop_wt {op : UnOp} {p q : PrimTy} {v w : Value}
     · exact nomatch hu
     · cases hu; exact int_toSVal_hasTy (by simp_all [UnOp.accepts, UnOp.ret, PrimTy.isNumeric]) _
 
-/-! ## The evaluators are typed
-
-`H` is fixed here: nothing an expression does allocates. -/
-
-section Eval
-
-variable {Γ : Ctx} {H : HeapTy} {σ : State}
-
-/-- A simple value is of its type: `x` at `uint` holds a number when `Γ`
-says `uint x`. -/
-theorem Simple.eval_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {s : Simple C p} {w : Value}
-    (hw : s.wt Γ = true) (h : s.eval σ = .ok w) : (Value.toSVal w).hasTy (.prim p) = true := by
-  cases s with
-  | lit n hn => cases h; exact int_toSVal_hasTy (PrimTy.isNumeric_of_inRange hn) n
-  | bool b => cases h; rfl
-  | «local» x =>
-    obtain ⟨b, hb, hm⟩ := hwt.lookup hw
-    simp only [Simple.eval, hb, bind, Except.bind] at h
-    cases b with
-    | val v => cases h; simpa [BTy.matchesB] using hm
-    | spath _ _ => exact nomatch h
-    | mref _ => exact nomatch h
-    | store _ => exact nomatch h
-    | ledger _ => exact nomatch h
-    | unset => exact nomatch h
-  | env k hp => subst hp; cases h; rfl
-
-mutual
-
-/-- A checked storage path resolves to a place the layout types at the
-path's type: `p.age`, with `p : Person storage`, at `uint`. -/
-theorem SPath.resolve_wt (hwt : RunWT C Γ H σ) :
-    ∀ {T : Ty} (p : SPath C T) {r : Name} {segs : List Seg},
-      p.wt Γ = true → p.resolve σ = .ok (r, segs) → C.layout.tyAt r segs = some T
-  | _, @SPath.alias _ R x, r, segs, hw, h => by
-    obtain ⟨b, hb, hm⟩ := hwt.lookup (x := x) (bt := .path (.ref R)) hw
-    simp only [SPath.resolve, aliasPath, hb, bind, Except.bind] at h
-    cases b with
-    | spath r' segs' =>
-      cases h
-      simpa [BTy.matchesB] using hm
-    | val _ => exact nomatch h
-    | mref _ => exact nomatch h
-    | store _ => exact nomatch h
-    | ledger _ => exact nomatch h
-    | unset => exact nomatch h
-  | _, .loc l, r, segs, hw, h => Loc.resolve_wt hwt l hw h
-
-/-- `alice.age` resolves to `(alice, [age])`, which the layout types `uint`. -/
-theorem Loc.resolve_wt (hwt : RunWT C Γ H σ) :
-    ∀ {T : Ty} (l : Loc C T) {r : Name} {segs : List Seg},
-      l.wt Γ = true → l.resolve σ = .ok (r, segs) → C.layout.tyAt r segs = some T
-  | _, .root r' hr, r, segs, _, h => by
-    cases h
-    exact Contract.layout_tyAt_root hr
-  | _, .field b f hf, r, segs, hw, h => by
-    obtain ⟨⟨r0, s0⟩, h0, h⟩ := bind_ok_inv h
-    cases h
-    exact tyAt_append_seg (SPath.resolve_wt hwt b hw h0) hf
-  | _, .index it b i, r, segs, hw, h => by
-    simp only [Loc.wt, Bool.and_eq_true] at hw
-    obtain ⟨⟨r0, s0⟩, h0, h⟩ := bind_ok_inv h
-    obtain ⟨k, _, h⟩ := bind_ok_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    bind_inv h
-    cases h
-    have hb := SPath.resolve_wt hwt b hw.1 h0
-    cases it with
-    | map => exact tyAt_append_seg hb rfl
-    | arr a => cases a <;> exact tyAt_append_seg hb rfl
-
-/-- A checked memory path holds a slot of its type: `m`, with
-`m : Person memory`, an identity the store typing claims at `Person`. -/
-theorem MPath.mval_wt (hwt : RunWT C Γ H σ) :
-    ∀ {T : Ty} (p : MPath C T) {mv : MVal},
-      p.wt Γ = true → p.mval σ = .ok mv → MVal.hasTyH H mv T = true
-  | _, @MPath.var _ R x _, mv, hw, h => by
-    obtain ⟨b, hb, hm⟩ := hwt.lookup (x := x) (bt := .mem (.ref R)) hw
-    simp only [MPath.mval, hb, bind, Except.bind] at h
-    cases b with
-    | mref id => cases h; simpa [BTy.matchesB] using hm
-    | val _ => exact nomatch h
-    | spath _ _ => exact nomatch h
-    | store _ => exact nomatch h
-    | ledger _ => exact nomatch h
-    | unset => exact nomatch h
-  | _, .loc l, mv, hw, h => MLoc.read_wt hwt l hw h
-
-/-- `m.age` reads a slot the heap types `uint`. -/
-theorem MLoc.read_wt (hwt : RunWT C Γ H σ) :
-    ∀ {T : Ty} (l : MLoc C T) {mv : MVal},
-      l.wt Γ = true → l.read σ = .ok mv → MVal.hasTyH H mv T = true
-  | _, @MLoc.field _ s _ b f hf, mv, hw, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hb
-    obtain ⟨o, ho, h⟩ := bind_ok_inv h
-    simp only [State.getObj, hobj] at ho
-    cases ho
-    cases obj with
-    | struct fields =>
-      simp only at h
-      split at h
-      · rename_i v hv
-        cases h
-        obtain ⟨ty, hdef, hv⟩ := mHasTyHFields_lookup (by simpa [MObj.hasTyH] using hty) hv
-        have : ty = _ := Option.some.inj (hdef.symm.trans hf)
-        subst this
-        exact hv
-      · exact nomatch h
-    | array _ => exact nomatch h
-  | _, @MLoc.index _ _ E a b i, mv, hw, h => by
-    simp only [MLoc.wt, Bool.and_eq_true] at hw
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw.1 hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hb
-    obtain ⟨elems, fx, rfl, hel⟩ := MObj.hasTyH_arrElem a.arrElem hty
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    obtain ⟨o, ho, h⟩ := bind_ok_inv h
-    simp only [State.getObj, hobj] at ho
-    cases ho
-    simp only at h
-    split at h
-    · cases h
-      exact mHasTyHElems_mem hel (List.get_mem _ _)
-    · exact nomatch h
-
-/-- A checked value evaluates to a value of its type: `alice.age + 1` to
-a number, `x < y` to a boolean. -/
-theorem Val.eval_wt (hwt : RunWT C Γ H σ) :
-    ∀ {p : PrimTy} (v : Val C p) {w : Value},
-      v.wt Γ = true → v.eval σ = .ok w → (Value.toSVal w).hasTy (.prim p) = true
-  | _, .simple s, w, hw, h => Simple.eval_wt hwt hw h
-  | _, .read l, w, hw, h => by
-    obtain ⟨⟨r, segs⟩, hr, h⟩ := bind_ok_inv h
-    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-    exact SVal.asValue_hasTy
-      (findStorage_hasTy hwt.storage (Loc.resolve_wt hwt l hw hr) hsv) h
-  | _, .binop op hacc hq a b, w, _, h => by
-    obtain ⟨lv, _, h⟩ := bind_ok_inv h
-    exact evalBinop_wt hacc hq h
-  | _, .unop op hacc hq a, w, _, h => by
-    obtain ⟨av, _, h⟩ := bind_ok_inv h
-    exact evalUnop_wt hacc hq h
-  | _, .ternary c a b, w, hw, h => by
-    simp only [Val.wt, Bool.and_eq_true] at hw
-    obtain ⟨cv, _, h⟩ := bind_ok_inv h
-    unfold pickBranch at h
-    split at h
-    · exact Val.eval_wt hwt a hw.1.2 h
-    · exact Val.eval_wt hwt b hw.2 h
-    · exact nomatch h
-  | _, .readMem l, w, hw, h => by
-    obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
-    exact MVal.asValue_hasTy (MLoc.read_wt hwt l hw hmv) h
-  | _, .len b hp, w, _, h => by
-    subst hp
-    bind_inv h
-    obtain ⟨sv, _, h⟩ := bind_ok_inv h
-    split at h
-    · cases h; rfl
-    all_goals exact nomatch h
-  | _, .mlen b hp, w, _, h => by
-    subst hp
-    iterate 2 bind_inv h
-    obtain ⟨o, _, h⟩ := bind_ok_inv h
-    split at h
-    · cases h; rfl
-    all_goals exact nomatch h
-
-end
-
-end Eval
-
 /-! ## Well-formed defaults
 
 The syntax carries `defaultOkS`, which the kernel evaluates; the typing
@@ -560,125 +318,77 @@ theorem defaultOk_of_defaultOkS : ∀ {T : Ty}, T.defaultOkS = true → defaultO
   | .ref (.mapping _ _), h => by
     rw [defaultOk]; exact defaultOk_of_defaultOkS (by simpa [Ty.defaultOkS] using h)
 
-/-! ## The invariant under the state operations -/
 
-namespace RunWT
+/-! ## The global invariant under the state operations -/
 
-variable {Γ : Ctx} {H : HeapTy} {σ σ' : State}
+namespace Semantics.StateWT
+
+variable {H : HeapTy} {σ σ' : State}
 
 /-- A storage write of a value of the place's type: `alice.age = 10;`
 writes a number where the layout says `uint`. -/
-theorem save (hwt : RunWT C Γ H σ) {r : Name} {segs : List Seg} {T : Ty} {new : SVal}
+theorem save (hwt : StateWT H C.layout σ) {r : Name} {segs : List Seg} {T : Ty} {new : SVal}
     (hty : C.layout.tyAt r segs = some T) (hnew : new.hasTy T = true)
-    (h : σ.saveStorage r segs new = .ok σ') : RunWT C Γ H σ' := by
-  obtain ⟨hheap, hnext, henv, _⟩ := SemanticsProperties.State.saveStorage_frame h
-  refine ⟨hwt.layoutNodup, State.saveStorage_wellTyped hwt.layoutNodup hwt.storage hty hnew h,
-    ?_, hwt.heapTyNodup, ?_, ?_⟩
-  · rw [henv]; exact hwt.env
+    (h : σ.saveStorage r segs new = .ok σ') : StateWT H C.layout σ' := by
+  obtain ⟨hheap, hnext, _, _⟩ := SemanticsProperties.State.saveStorage_frame h
+  refine ⟨hwt.layoutNodup, hwt.heapTyNodup,
+    State.saveStorage_wellTyped hwt.layoutNodup hwt.storage hty hnew h, ?_, ?_⟩
   · rw [hheap]; exact hwt.heap
   · intro i hi; rw [hheap]; exact hwt.heapWf i (hnext ▸ hi)
 
 /-- A storage write of what an assignment's right-hand side denotes, of the
 place's type: a word saved, or a copy over what is there (`SVal.overlay`),
 which keeps the type the old value had. -/
-theorem write (hwt : RunWT C Γ H σ) {r : Name} {segs : List Seg} {T : Ty} {new : SVal}
+theorem write (hwt : StateWT H C.layout σ) {r : Name} {segs : List Seg} {T : Ty} {new : SVal}
     (hty : C.layout.tyAt r segs = some T) (hnew : new.hasTy T = true)
-    (h : σ.writeStorage r segs new = .ok σ') : RunWT C Γ H σ' := by
+    (h : σ.writeStorage r segs new = .ok σ') : StateWT H C.layout σ' := by
   rcases State.writeStorage_ok_inv h with h | ⟨cur, hcur, h⟩
   · exact hwt.save hty hnew h
   · exact hwt.save hty (SVal.overlay_hasTy (findStorage_hasTy hwt.storage hty hcur) hnew) h
 
-/-- A declaration: `uint x = 1;` binds `x` and `Γ` learns `x : uint`. -/
-theorem setEnv (hwt : RunWT C Γ H σ) {x : Var} {bt : BTy} {b : Binding}
-    (hm : BTy.matchesB C.layout H bt b = true) :
-    RunWT C (setBy x bt Γ) H (σ.setEnv x b) := by
-  refine { hwt with env := ?_ }
-  intro y bt' hy
-  by_cases hyx : y = x
-  · subst hyx
-    rw [lookupBy_setBy_self] at hy
-    cases hy
-    exact ⟨b, by simp [State.setEnv, lookupBy_setBy_self], hm⟩
-  · rw [lookupBy_setBy_ne hyx] at hy
-    obtain ⟨b', hb', hm'⟩ := hwt.env y bt' hy
-    exact ⟨b', by simp only [State.setEnv]; rw [lookupBy_setBy_ne hyx]; exact hb', hm'⟩
-
-/-- An assignment to a declared local: `x = 2;` with `x : uint` in `Γ`
-leaves `Γ` as it was. -/
-theorem setEnv_same (hwt : RunWT C Γ H σ) {x : Var} {bt : BTy} {b : Binding}
-    (hx : Ctx.has Γ x bt = true) (hm : BTy.matchesB C.layout H bt b = true) :
-    RunWT C Γ H (σ.setEnv x b) := by
-  have h := hwt.setEnv (x := x) hm
-  simp only [Ctx.has, beq_iff_eq] at hx
-  refine { h with env := fun y bt' hy => h.env y bt' ?_ }
-  by_cases hyx : y = x
-  · subst hyx; rw [hx] at hy; rw [lookupBy_setBy_self, hy]
-  · rw [lookupBy_setBy_ne hyx]; exact hy
-
-/-- A branch that declared more is still typed under the context it
-started from: after `if (c) { uint y = 1; } else { }`, `Γ` without `y`. -/
-theorem weaken {Γ' : Ctx} (hwt : RunWT C Γ' H σ) (hle : Ctx.le Γ Γ' = true) :
-    RunWT C Γ H σ :=
-  { hwt with env := fun x bt hx => hwt.env x bt (Ctx.le_lookup hle hx) }
-
 /-- Along an allocation (a storage→memory copy, a fresh default) the
 store typing grows and everything typed stays typed. -/
-theorem ofCopyOut {H' : HeapTy} (hwt : RunWT C Γ H σ) (hout : CopyOut H σ H' σ') :
-    RunWT C Γ H' σ' where
+theorem ofCopyOut {H' : HeapTy} (hwt : StateWT H C.layout σ) (hout : CopyOut H σ H' σ') :
+    StateWT H' C.layout σ' where
   layoutNodup := hwt.layoutNodup
-  storage := by rw [hout.storage]; exact hwt.storage
-  env := by
-    rw [hout.env]
-    intro x bt hx
-    obtain ⟨b, hb, hm⟩ := hwt.env x bt hx
-    exact ⟨b, hb, BTy.matchesB_mono hout.ext hm⟩
   heapTyNodup := hout.nodup
+  storage := by rw [hout.storage]; exact hwt.storage
   heap := hout.heap
   heapWf := hout.heapWf
 
 /-- A memory write of an object of the identity's claimed type:
 `m.age = 3;` keeps `m`'s object a `Person`. -/
-theorem setObj (hwt : RunWT C Γ H σ) {id : Nat} {ty : Ty} {obj obj₀ : MObj}
+theorem setObj (hwt : StateWT H C.layout σ) {id : Nat} {ty : Ty} {obj obj₀ : MObj}
     (hclaim : lookupBy id H = some ty) (hpresent : lookupBy id σ.heap = some obj₀)
-    (hobj : obj.hasTyH H ty = true) : RunWT C Γ H (σ.setObj id obj) where
+    (hobj : obj.hasTyH H ty = true) : StateWT H C.layout (σ.setObj id obj) where
   layoutNodup := hwt.layoutNodup
-  storage := hwt.storage
-  env := hwt.env
   heapTyNodup := hwt.heapTyNodup
+  storage := hwt.storage
   heap := heapTypedB_setObj hwt.heapTyNodup hwt.heap hclaim hobj
   heapWf := HeapWellFormed.setObj' hwt.heapWf (by simp [hpresent])
 
+/-- A payment books the ledger only. -/
+theorem pay (hwt : StateWT H C.layout σ) {addr amt : Int} :
+    StateWT H C.layout (σ.pay addr amt) := by
+  rw [State.pay_eq]; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5⟩
+
 /-- `a.transfer(v)` books the ledger only. -/
-theorem transferAt (hwt : RunWT C Γ H σ) {addr amt : Int}
-    (h : Solidity.transferAt σ addr amt = .ok σ') : RunWT C Γ H σ' := by
+theorem transferAt (hwt : StateWT H C.layout σ) {addr amt : Int}
+    (h : Solidity.transferAt σ addr amt = .ok σ') : StateWT H C.layout σ' := by
   unfold Solidity.transferAt at h
   split at h
   · exact nomatch h
-  · cases h; rw [State.pay_eq]; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5, hwt.6⟩
+  · cases h; exact hwt.pay
 
-/-- `pv = a.send(v)` books the ledger, or not, and sets the `bool` local `pv`. -/
-theorem sendAt (hwt : RunWT C Γ H σ) {pv : Var}
-    (hpv : Ctx.has Γ pv (.stack (.prim .bool)) = true) {addr amt : Int}
-    (h : Solidity.sendAt σ pv addr amt = .ok σ') : RunWT C Γ H σ' := by
-  unfold Solidity.sendAt at h
-  split at h
-  · exact nomatch h
-  · have hp : RunWT C Γ H (σ.pay addr amt) := by
-      rw [State.pay_eq]; exact ⟨hwt.1, hwt.2, hwt.3, hwt.4, hwt.5, hwt.6⟩
-    split at h <;> cases h
-    · exact hp.setEnv_same hpv rfl
-    · exact hp.setEnv_same hpv rfl
-    · exact hwt.setEnv_same hpv rfl
+end Semantics.StateWT
 
-end RunWT
-
-/-! ## The statements' effects are typed -/
+/-! ## The statements' effects on the global part are typed -/
 
 section Effects
 
-variable {Γ : Ctx} {H : HeapTy} {σ σ' : State}
+variable {H : HeapTy} {σ σ' : State}
 
-/-- The arithmetic write-back of `x += e` stores a number of `x`'s type. -/
+
 theorem arith_new_wt {op : BinOp} {p : PrimTy} {old v n₁ n₂ : Value}
     (hop : op.isArith = true) (hp : p.isNumeric = true)
     (h₁ : applyBinOp op old v = .ok n₁) (h₂ : checkArith (.prim p) n₁ = .ok n₂) :
@@ -696,26 +406,14 @@ theorem bump_new_wt {p : PrimTy} {m : Int} {n : Value} (hp : p.isNumeric = true)
 theorem compound_isArith {op : BinOp} (h : op.hasCompoundAssign = true) : op.isArith = true := by
   cases op <;> simp_all [BinOp.hasCompoundAssign, BinOp.isArith]
 
-/-- A source stores a value of its type: `alice = bob;` copies a `Person`. -/
-theorem Src.value_wt (hwt : RunWT C Γ H σ) {T : Ty} {r : Src C T} {sv : SVal}
-    (hw : r.wt Γ = true) (h : r.value σ = .ok sv) : sv.hasTy T = true := by
-  cases r with
-  | val v =>
-    obtain ⟨w, hv, h⟩ := bind_ok_inv h
-    cases h
-    exact Val.eval_wt hwt v hw hv
-  | copy p _ =>
-    obtain ⟨⟨r, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact findStorage_hasTy hwt.storage (SPath.resolve_wt hwt p hw hr) h
-
 /-- `b.push(v)` at an array of `E`s appends an `E`.  The slot the push
 lands on is an `E` whenever `E`'s default is well-formed; a push with an
 argument does not look at it. -/
-theorem pushAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List Seg}
+theorem pushAt_wt (hwt : StateWT H C.layout σ) {E : Ty} {r : Name} {segs : List Seg}
     {val : SVal → Res SVal} (hty : C.layout.tyAt r segs = some (.ref (.array E)))
     (hval : ∀ slot v, (defaultOk E = true → slot.hasTy E = true) → val slot = .ok v →
       v.hasTy E = true)
-    (h : pushAt σ E r segs val = .ok σ') : RunWT C Γ H σ' := by
+    (h : pushAt σ E r segs val = .ok σ') : StateWT H C.layout σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
   cases sv with
@@ -733,9 +431,9 @@ theorem pushAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List Seg}
   | map _ _ => exact nomatch h
 
 /-- `b.push()` as a place: the array stays typed. -/
-theorem pushPlaceAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List Seg} {n : Int}
+theorem pushPlaceAt_wt (hwt : StateWT H C.layout σ) {E : Ty} {r : Name} {segs : List Seg} {n : Int}
     (hty : C.layout.tyAt r segs = some (.ref (.array E))) (hok : defaultOk E = true)
-    (h : pushPlaceAt σ E r segs = .ok (σ', n)) : RunWT C Γ H σ' := by
+    (h : pushPlaceAt σ E r segs = .ok (σ', n)) : StateWT H C.layout σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
   cases sv with
@@ -754,9 +452,9 @@ theorem pushPlaceAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {r : Name} {segs : List 
 
 /-- `b.pop()` keeps the array typed: the popped element is cleared into
 the recycled slots at its own type. -/
-theorem popAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {keep : Bool} {r : Name} {segs : List Seg}
+theorem popAt_wt (hwt : StateWT H C.layout σ) {E : Ty} {keep : Bool} {r : Name} {segs : List Seg}
     (hty : C.layout.tyAt r segs = some (.ref (.array E))) (h : popAt σ keep r segs = .ok σ') :
-    RunWT C Γ H σ' := by
+    StateWT H C.layout σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
   cases sv with
@@ -781,10 +479,10 @@ theorem popAt_wt (hwt : RunWT C Γ H σ) {E : Ty} {keep : Bool} {r : Name} {segs
   | map _ _ => exact nomatch h
 
 /-- A write into a memory struct's member of the member's type. -/
-theorem memWriteField_wt (hwt : RunWT C Γ H σ) {id : Nat} {s f : Name} {T : Ty} {mv : MVal}
+theorem memWriteField_wt (hwt : StateWT H C.layout σ) {id : Nat} {s f : Name} {T : Ty} {mv : MVal}
     (hid : lookupBy id H = some (.ref (.struct s))) (hf : lookupBy f (structDef s) = some T)
     (hmv : MVal.hasTyH H mv T = true) (h : memWriteField σ id f mv = .ok σ') :
-    RunWT C Γ H σ' := by
+    StateWT H C.layout σ' := by
   obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hid
   obtain ⟨o, ho, h⟩ := bind_ok_inv h
   simp only [State.getObj, hobj] at ho
@@ -797,10 +495,10 @@ theorem memWriteField_wt (hwt : RunWT C Γ H σ) {id : Nat} {s f : Name} {T : Ty
   | array _ => exact nomatch h
 
 /-- A write into a memory array's element of the element type. -/
-theorem memWriteIndex_wt (hwt : RunWT C Γ H σ) {id : Nat} {i : Int} {R : RefTy} {E : Ty}
+theorem memWriteIndex_wt (hwt : StateWT H C.layout σ) {id : Nat} {i : Int} {R : RefTy} {E : Ty}
     {mv : MVal} (hid : lookupBy id H = some (.ref R)) (hR : R.arrElem? = some E)
     (hmv : MVal.hasTyH H mv E = true)
-    (h : memWriteIndex σ id i mv = .ok σ') : RunWT C Γ H σ' := by
+    (h : memWriteIndex σ id i mv = .ok σ') : StateWT H C.layout σ' := by
   obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hid
   obtain ⟨o, ho, h⟩ := bind_ok_inv h
   simp only [State.getObj, hobj] at ho
@@ -839,40 +537,19 @@ theorem AddrTyT.mono {H H' : HeapTy} {T : Ty} {a : Addr} (hext : H.Extends H')
   | memoryIndex id i => obtain ⟨R, hid, hR⟩ := h; exact ⟨R, hext _ _ hid, hR⟩
 
 /-- `delete m.inner;` writes an object of the member's type there. -/
-theorem writeAddr_wt (hwt : RunWT C Γ H σ) {T : Ty} {a : Addr} {mv : MVal}
+theorem writeAddr_wt (hwt : StateWT H C.layout σ) {T : Ty} {a : Addr} {mv : MVal}
     (ha : AddrTyT H T a) (hmv : MVal.hasTyH H mv T = true)
-    (h : writeAddr σ mv a = .ok σ') : RunWT C Γ H σ' := by
+    (h : writeAddr σ mv a = .ok σ') : StateWT H C.layout σ' := by
   cases a with
   | memoryField id f =>
     obtain ⟨s, hid, hf⟩ := ha
     exact memWriteField_wt hwt hid hf hmv h
   | memoryIndex id i => obtain ⟨R, hid, hR⟩ := ha; exact memWriteIndex_wt hwt hid hR hmv h
 
-/-- A checked memory location resolves to a place of its type. -/
-theorem MLoc.addr_wt (hwt : RunWT C Γ H σ) :
-    ∀ {T : Ty} (l : MLoc C T) {a : Addr}, l.wt Γ = true → l.addr σ = .ok a → AddrTyT H T a
-  | _, @MLoc.field _ s _ b f hf, a, hw, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    have hb := MPath.mval_wt hwt b hw hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact ⟨s, hb, hf⟩
-  | _, .index ak b i, a, hw, h => by
-    simp only [MLoc.wt, Bool.and_eq_true] at hw
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    cases h
-    have hb := MPath.mval_wt hwt b hw.1 hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact ⟨_, hb, ak.arrElem⟩
-
 /-- `m.age -= 1;` writes a number where the heap says `uint`. -/
-theorem writeLoc_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {loc : Addr} {v : Value}
+theorem writeLoc_wt (hwt : StateWT H C.layout σ) {p : PrimTy} {loc : Addr} {v : Value}
     (hloc : AddrTy H p loc) (hv : (Value.toSVal v).hasTy (.prim p) = true)
-    (h : writeLoc σ loc v = .ok σ') : RunWT C Γ H σ' := by
+    (h : writeLoc σ loc v = .ok σ') : StateWT H C.layout σ' := by
   cases loc with
   | memoryField id f =>
     obtain ⟨s, hid, hf⟩ := hloc
@@ -882,72 +559,25 @@ theorem writeLoc_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {loc : Addr} {v : Value
     exact memWriteIndex_wt hwt hid hR (Value.toMVal_hasTyH hv) h
 
 /-- `x ⊕= e` at a storage place of a numeric type. -/
-theorem opStore_wt (hwt : RunWT C Γ H σ) {op : BinOp} {p : PrimTy} {r : Name}
+theorem opStore_wt (hwt : StateWT H C.layout σ) {op : BinOp} {p : PrimTy} {r : Name}
     {segs : List Seg} {v : Value} (hop : op.isArith = true) (hp : p.isNumeric = true)
     (hty : C.layout.tyAt r segs = some (.prim p)) (h : opStore σ op p r segs v = .ok σ') :
-    RunWT C Γ H σ' := by
+    StateWT H C.layout σ' := by
   obtain ⟨_, _, _, h₁, h₂, h⟩ := opStore_ok_inv h
   exact hwt.save hty (arith_new_wt hop hp h₁ h₂) h
 
 /-- `m.age += x;` keeps the heap typed. -/
-theorem opMem_wt (hwt : RunWT C Γ H σ) {op : BinOp} {p : PrimTy} {loc : Addr} {v : Value}
+theorem opMem_wt (hwt : StateWT H C.layout σ) {op : BinOp} {p : PrimTy} {loc : Addr} {v : Value}
     (hop : op.isArith = true) (hp : p.isNumeric = true) (hloc : AddrTy H p loc)
-    (h : opMem σ op p loc v = .ok σ') : RunWT C Γ H σ' := by
+    (h : opMem σ op p loc v = .ok σ') : StateWT H C.layout σ' := by
   obtain ⟨_, _, _, h₁, h₂, h⟩ := opMem_ok_inv h
   exact writeLoc_wt hwt hloc (arith_new_wt hop hp h₁ h₂) h
 
-/-- `x ⊕= e` keeps the state typed: the target is resolved once, and the
-number written back is of its type. -/
-theorem OpLoc.store_wt (hwt : RunWT C Γ H σ) {op : BinOp} (hop : op.isArith = true) :
-    ∀ {p : PrimTy} (l : OpLoc C p) {v : Value}, p.isNumeric = true → l.wt Γ = true →
-      l.store σ op v = .ok σ' → RunWT C Γ H σ'
-  | p, .local x, v, hp, hw, h => by
-    obtain ⟨b, hb, _⟩ := hwt.lookup hw
-    simp only [OpLoc.store, opLocal, hb, bind, Except.bind] at h
-    cases b with
-    | val old =>
-      simp only [pure, Except.pure] at h
-      split at h
-      · exact nomatch h
-      · rename_i n₁ h₁
-        split at h
-        · exact nomatch h
-        · rename_i n₂ h₂
-          cases h
-          exact hwt.setEnv_same hw (by simpa [BTy.matchesB] using arith_new_wt hop hp h₁ h₂)
-    | spath _ _ => exact nomatch h
-    | mref _ => exact nomatch h
-    | store _ => exact nomatch h
-    | ledger _ => exact nomatch h
-    | unset => exact nomatch h
-  | p, .root r hr, v, hp, _, h => opStore_wt hwt hop hp (Contract.layout_tyAt_root hr) h
-  | p, .field b f hf, v, hp, hw, h => by
-    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact opStore_wt hwt hop hp (Loc.resolve_wt hwt (.field b f hf) hw hr) h
-  | p, .index it b i, v, hp, hw, h => by
-    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact opStore_wt hwt hop hp (Loc.resolve_wt hwt (.index it b (.simple i)) hw hr) h
-  | p, @OpLoc.mfield _ s _ b f hf, v, hp, hw, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact opMem_wt hwt hop hp (loc := .memoryField id f) ⟨s, hb, hf⟩ h
-  | p, .mindex ak b i, v, hp, hw, h => by
-    simp only [OpLoc.wt, Bool.and_eq_true] at hw
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw.1 hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact opMem_wt hwt hop hp (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
-
 /-- `alice.age++` stores and yields numbers. -/
-theorem bumpStore_wt (hwt : RunWT C Γ H σ) {op : IncDec} {p : PrimTy} {r : Name}
+theorem bumpStore_wt (hwt : StateWT H C.layout σ) {op : IncDec} {p : PrimTy} {r : Name}
     {segs : List Seg} {w : Value} (hp : p.isNumeric = true)
     (hty : C.layout.tyAt r segs = some (.prim p)) (h : bumpStore σ op p r segs = .ok (σ', w)) :
-    RunWT C Γ H σ' ∧ (Value.toSVal w).hasTy (.prim p) = true := by
+    StateWT H C.layout σ' ∧ (Value.toSVal w).hasTy (.prim p) = true := by
   obtain ⟨m, n, hn, hσ₁, rfl⟩ := bumpStore_ok_inv h
   have hnew := bump_new_wt hp hn
   refine ⟨hwt.save hty hnew hσ₁, ?_⟩
@@ -956,101 +586,15 @@ theorem bumpStore_wt (hwt : RunWT C Γ H σ) {op : IncDec} {p : PrimTy} {r : Nam
   · exact int_toSVal_hasTy hp m
 
 /-- `m.age++` stores and yields numbers. -/
-theorem bumpMem_wt (hwt : RunWT C Γ H σ) {op : IncDec} {p : PrimTy} {loc : Addr} {w : Value}
+theorem bumpMem_wt (hwt : StateWT H C.layout σ) {op : IncDec} {p : PrimTy} {loc : Addr} {w : Value}
     (hp : p.isNumeric = true) (hloc : AddrTy H p loc) (h : bumpMem σ op p loc = .ok (σ', w)) :
-    RunWT C Γ H σ' ∧ (Value.toSVal w).hasTy (.prim p) = true := by
+    StateWT H C.layout σ' ∧ (Value.toSVal w).hasTy (.prim p) = true := by
   obtain ⟨m, n, hn, hσ₁, rfl⟩ := bumpMem_ok_inv h
   have hnew := bump_new_wt hp hn
   refine ⟨writeLoc_wt hwt hloc hnew hσ₁, ?_⟩
   split
   · exact hnew
   · exact int_toSVal_hasTy hp m
-
-/-- `x++` keeps the state typed, and its value is of `x`'s type. -/
-theorem OpLoc.bump_wt (hwt : RunWT C Γ H σ) {op : IncDec} :
-    ∀ {p : PrimTy} (l : OpLoc C p) {w : Value}, p.isNumeric = true → l.wt Γ = true →
-      l.bump σ op = .ok (σ', w) → RunWT C Γ H σ' ∧ (Value.toSVal w).hasTy (.prim p) = true
-  | p, .local x, w, hp, hw, h => by
-    obtain ⟨b, hb, _⟩ := hwt.lookup hw
-    simp only [OpLoc.bump, bumpLocal, hb, bind, Except.bind] at h
-    cases b with
-    | val old =>
-      simp only [pure, Except.pure] at h
-      split at h
-      · exact nomatch h
-      · rename_i m hm
-        split at h
-        · exact nomatch h
-        · rename_i n hn
-          cases h
-          have hnew := bump_new_wt hp hn
-          refine ⟨hwt.setEnv_same hw (by simpa [BTy.matchesB] using hnew), ?_⟩
-          split
-          · exact hnew
-          · rw [Value.asInt_ok hm]; exact int_toSVal_hasTy hp m
-    | spath _ _ => exact nomatch h
-    | mref _ => exact nomatch h
-    | store _ => exact nomatch h
-    | ledger _ => exact nomatch h
-    | unset => exact nomatch h
-  | p, .root r hr, w, hp, _, h => bumpStore_wt hwt hp (Contract.layout_tyAt_root hr) h
-  | p, .field b f hf, w, hp, hw, h => by
-    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact bumpStore_wt hwt hp (Loc.resolve_wt hwt (.field b f hf) hw hr) h
-  | p, .index it b i, w, hp, hw, h => by
-    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact bumpStore_wt hwt hp (Loc.resolve_wt hwt (.index it b (.simple i)) hw hr) h
-  | p, @OpLoc.mfield _ s _ b f hf, w, hp, hw, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact bumpMem_wt hwt hp (loc := .memoryField id f) ⟨s, hb, hf⟩ h
-  | p, .mindex ak b i, w, hp, hw, h => by
-    simp only [OpLoc.wt, Bool.and_eq_true] at hw
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw.1 hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact bumpMem_wt hwt hp (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
-
-/-- `m.age = 3;` writes a slot of the member's type. -/
-theorem MLoc.write_wt (hwt : RunWT C Γ H σ) {mv : MVal} :
-    ∀ {T : Ty} (l : MLoc C T), MVal.hasTyH H mv T = true → l.wt Γ = true →
-      l.write σ mv = .ok σ' → RunWT C Γ H σ'
-  | _, @MLoc.field _ s _ b f hf, hmv, hw, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact memWriteField_wt hwt hb hf hmv h
-  | _, .index ak b i, hmv, hw, h => by
-    simp only [MLoc.wt, Bool.and_eq_true] at hw
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw.1 hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact memWriteIndex_wt hwt hb ak.arrElem hmv h
-
-/-- What a memory write stores is of the place's type: a number, or an
-object the store typing claims at the reference type. -/
-theorem MSrc.mval_wt (hwt : RunWT C Γ H σ) {T : Ty} {r : MSrc C T} {mv : MVal}
-    (hw : r.wt Γ = true) (h : r.mval σ = .ok mv) : MVal.hasTyH H mv T = true := by
-  cases r with
-  | val v =>
-    obtain ⟨w, hv, h⟩ := bind_ok_inv h
-    cases h
-    exact Value.toMVal_hasTyH (Val.eval_wt hwt v hw hv)
-  | ref p =>
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    have := MPath.mval_wt hwt p hw hm0
-    rwa [MVal.asRef_ok hid] at this
 
 /-- `new uint[](n)` copies in a value of its type: `n` well-formed defaults. -/
 theorem newArrVal_hasTy {R : RefTy} (h : R.newArrOk = true) (n : Int) :
@@ -1068,412 +612,11 @@ theorem newArrVal_hasTy {R : RefTy} (h : R.newArrOk = true) (n : Int) :
   | fixed _ _ => simp [RefTy.newArrOk] at h
   | mapping _ _ => simp [RefTy.newArrOk] at h
 
-/-- `m = n;` and `m = alice;` bind `m` to an object of `m`'s type: `n`'s,
-or a fresh deep copy, which grows the store typing. -/
-theorem MRhs.bind_wt (hwt : RunWT C Γ H σ) {x : Var} {R : RefTy} {r : MRhs C R}
-    (hw : r.wt Γ = true) (h : r.bind σ x = .ok σ') :
-    ∃ H' σ₁ id, H.Extends H' ∧ RunWT C Γ H' σ₁ ∧
-      MVal.hasTyH H' (.ref id) (.ref R) = true ∧ σ' = σ₁.setEnv x (.mref id) := by
-  cases r with
-  | alias p =>
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    have := MPath.mval_wt hwt p hw hm0
-    rw [MVal.asRef_ok hid] at this
-    exact ⟨H, σ, id, HeapTy.Extends.refl H, hwt, this, rfl⟩
-  | copy p _ =>
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    have hsvt := findStorage_hasTy hwt.storage (SPath.resolve_wt hwt p hw hr) hsv
-    obtain ⟨H', hout, hmv⟩ := copyStToM_typed hwt.heapTyNodup hwt.heap hwt.heapWf hsvt hcopy
-    rw [MVal.asRef_ok hid] at hmv
-    exact ⟨H', σ₁, id, hout.ext, hwt.ofCopyOut hout, hmv, rfl⟩
-  | newArr n hn =>
-    bind_inv h
-    obtain ⟨nv, _, h⟩ := bind_ok_inv h
-    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    obtain ⟨H', hout, hmv⟩ :=
-      copyStToM_typed hwt.heapTyNodup hwt.heap hwt.heapWf (newArrVal_hasTy hn nv) hcopy
-    rw [MVal.asRef_ok hid] at hmv
-    exact ⟨H', σ₁, id, hout.ext, hwt.ofCopyOut hout, hmv, rfl⟩
-
-/-- `p = alice;` and `p = persons.push();` bind `p` to a path the layout
-types at `p`'s type. -/
-theorem ARhs.bind_wt (hwt : RunWT C Γ H σ) {x : Var} {R : RefTy} {r : ARhs C R}
-    (hw : r.wt Γ = true) (h : r.bind σ x = .ok σ') :
-    ∃ σ₁ root segs, RunWT C Γ H σ₁ ∧ C.layout.tyAt root segs = some (.ref R) ∧
-      σ' = σ₁.setEnv x (.spath root segs) := by
-  cases r with
-  | path p =>
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    cases h
-    exact ⟨σ, root, segs, hwt, SPath.resolve_wt hwt p hw hr, rfl⟩
-  | push b hd =>
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    obtain ⟨⟨σ₁, n⟩, hpush, h⟩ := bind_ok_inv h
-    cases h
-    have hty := SPath.resolve_wt hwt b hw hr
-    exact ⟨σ₁, root, segs ++ [.at n],
-      pushPlaceAt_wt hwt hty (defaultOk_of_defaultOkS hd) hpush, tyAt_append_seg hty rfl, rfl⟩
-
-/-- A call's parameters bound: each argument of its type. -/
-theorem Arg.bindSeq_wt : ∀ {args : List (Arg C)} {Γ Γ' : Ctx} {σ σ' : State},
-    RunWT C Γ H σ → Arg.wt Γ args = some Γ' → Arg.bindSeq args σ = .ok σ' → RunWT C Γ' H σ'
-  | [], _, _, _, _, hwt, hs, h => by cases hs; cases h; exact hwt
-  | a :: as, Γ, Γ', σ, σ', hwt, hs, h => by
-    simp only [Arg.wt] at hs
-    split at hs
-    · rename_i hc
-      obtain ⟨w, hv, h⟩ := bind_ok_inv h
-      exact Arg.bindSeq_wt (hwt.setEnv (by simpa [BTy.matchesB] using Val.eval_wt hwt a.e hc hv)) hs h
-    · exact nomatch hs
-
-theorem CallRet.enterAll_wt : (rs : List (PrimTy × Var)) → {Γ : Ctx} → {σ : State} →
-    RunWT C Γ H σ → RunWT C (CallRet.ctxAll rs Γ) H (CallRet.enterAll rs σ)
-  | [], _, _, hwt => hwt
-  | (p, r) :: rs, _, _, hwt =>
-    CallRet.enterAll_wt rs (hwt.setEnv (x := r) (bt := .stack (.prim p)) (by cases p <;> rfl))
-
-theorem CallRet.enter_wt (hwt : RunWT C Γ H σ) :
-    (ret : CallRet) → RunWT C (ret.ctx Γ) H (ret.enter σ)
-  | .none => hwt
-  | .val p _ _ => hwt.setEnv (by cases p <;> rfl)
-  | .rets rs => CallRet.enterAll_wt rs hwt
-
-theorem CallRet.leave_wt (hwt : RunWT C Γ H σ) {σ' : State} :
-    (ret : CallRet) → ret.wt Γ = true → CallRet.leave (C := C) σ ret = .ok σ' → RunWT C Γ H σ'
-  | .none, _, h => by cases h; exact hwt
-  | .val _ _ Option.none, _, h | .rets _, _, h => by cases h; exact hwt
-  | .val p r (some y), hr, h => by
-    simp only [CallRet.wt, Bool.and_eq_true] at hr
-    obtain ⟨w, hv, h⟩ := bind_ok_inv h
-    cases h
-    have hw : (Simple.local r : Simple C p).wt Γ = true := by simpa [Simple.wt, Ctx.has] using hr.1
-    have := Simple.eval_wt hwt hw hv
-    exact hwt.setEnv_same hr.2 (by simpa [BTy.matchesB] using this)
-
-/-- The locals an outcome of an external call binds, each a value of its
-type: decoding checked it. -/
-theorem bindData_wt : ∀ {xs : List (PrimTy × Var)} {vs : List Value} {Γ : Ctx} {σ σ' : State},
-    RunWT C Γ H σ → bindData xs vs σ = .ok σ' → RunWT C (bindCtx xs Γ) H σ'
-  | [], _, _, _, _, hwt, h => by cases h; exact hwt
-  | _ :: _, [], _, _, _, _, h => by simp [bindData] at h
-  | (p, x) :: xs, v :: vs, Γ, σ, σ', hwt, h => by
-    simp only [bindData] at h
-    split at h
-    · rename_i hv
-      show RunWT C (bindCtx xs (setBy x (.stack (.prim p)) Γ)) H σ'
-      refine bindData_wt (hwt.setEnv ?_) h
-      cases p <;> cases v <;> simp_all [PrimVal.fits, BTy.matchesB, Value.toSVal, SVal.hasTy]
-    · cases h
 
 end Effects
 
-/-! ## The headline -/
 
-theorem wt_if {c : Bool} {a b : Ctx} (h : (if c = true then some a else none) = some b) :
-    c = true ∧ a = b := by
-  split at h
-  · exact ⟨‹_›, Option.some.inj h⟩
-  · exact nomatch h
-
-mutual
-
-/-- **Type soundness, statement level.**  A statement whose locals are
-used as declared, run from a well-typed state, ends in a state well-typed
-under the context the check returns; the store typing only grows.  From
-`uint x = 1;` the state binds `x` to a number and `Γ` learns `x : uint`;
-from `alice.age = x;` storage still inhabits the layout. -/
-theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State},
-    RunWT C Γ H σ → s.wt Γ = some Γ' → s.run σ = .ok σ' →
-      ∃ H', H.Extends H' ∧ RunWT C Γ' H' σ'
-  | .assign l r, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact ⟨H, .refl H, hwt.write (Loc.resolve_wt hwt l hc.1 hr) (Src.value_wt hwt hc.2 hsv) h⟩
-  | .rebind x r, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨σ₁, root, segs, hwt₁, hty, rfl⟩ := ARhs.bind_wt hwt hc.2 h
-    exact ⟨H, .refl H, hwt₁.setEnv_same hc.1 (by simp [BTy.matchesB, hty])⟩
-  | .assignLocal x r, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨w, hv, h⟩ := bind_ok_inv h
-    cases h
-    exact ⟨H, .refl H,
-      hwt.setEnv_same hc.1 (by simpa [BTy.matchesB] using Val.eval_wt hwt r hc.2 hv)⟩
-  | .declLocal p x init, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Stmt.run] at h
-    cases init with
-    | none =>
-      obtain ⟨w, hv, h⟩ := bind_ok_inv h
-      cases hv; cases h
-      exact ⟨H, .refl H, hwt.setEnv (by cases p <;> rfl)⟩
-    | some e =>
-      obtain ⟨w, hv, h⟩ := bind_ok_inv h
-      cases h
-      exact ⟨H, .refl H, hwt.setEnv
-        (by simpa [BTy.matchesB] using Val.eval_wt hwt e (by simpa using hc) hv)⟩
-  | .declStorage R x init, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    cases init with
-    | none =>
-      cases hs; cases h
-      exact ⟨H, .refl H, hwt.setEnv rfl⟩
-    | some r =>
-      obtain ⟨hc, rfl⟩ := wt_if hs
-      obtain ⟨σ₁, root, segs, hwt₁, hty, rfl⟩ := ARhs.bind_wt hwt hc h
-      exact ⟨H, .refl H, hwt₁.setEnv (by simp [BTy.matchesB, hty])⟩
-  | .opAssign op hop hp l r, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨v, _, h⟩ := bind_ok_inv h
-    exact ⟨H, .refl H, OpLoc.store_wt hwt (compound_isArith hop) l hp hc.1 h⟩
-  | .incDec op hp l, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
-    cases h
-    exact ⟨H, .refl H, (OpLoc.bump_wt hwt l hp hc hb).1⟩
-  | .assignIncDec x op hp l _, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
-    cases h
-    obtain ⟨hwt₁, hw⟩ := OpLoc.bump_wt hwt l hp hc.2 hb
-    exact ⟨H, .refl H, hwt₁.setEnv_same hc.1 (by simpa [BTy.matchesB] using hw)⟩
-  | .push b v hd, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    refine ⟨H, .refl H, pushAt_wt hwt (SPath.resolve_wt hwt b hc.1 hr) ?_ h⟩
-    intro slot w hslot hw
-    cases v with
-    | none =>
-      cases hw
-      exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
-    | some r =>
-      obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
-      cases hw
-      exact SVal.strip_hasTy (Src.value_wt hwt (by simpa using hc.2) hv)
-  | .pop b, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact ⟨H, .refl H, popAt_wt hwt (SPath.resolve_wt hwt b hc hr) h⟩
-  | .transfer r a, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨_, rfl⟩ := wt_if hs
-    iterate 4 bind_inv h
-    exact ⟨H, .refl H, hwt.transferAt h⟩
-  | .send pv r a, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    iterate 4 bind_inv h
-    exact ⟨H, .refl H, hwt.sendAt hc.1.1 h⟩
-  | .declMem R x init hd _, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    cases init with
-    | none =>
-      obtain ⟨⟨σ₁, id⟩, ha, h⟩ := bind_ok_inv h
-      cases h
-      obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.heapTyNodup hwt.heap hwt.heapWf
-        (defaultOk_of_defaultOkS (by simpa using hd)) ha
-      exact ⟨H', hout.ext, (hwt.ofCopyOut hout).setEnv (by simpa [BTy.matchesB] using hid)⟩
-    | some r =>
-      obtain ⟨H', σ₁, id, hext, hwt₁, hid, rfl⟩ := MRhs.bind_wt hwt (by simpa using hc) h
-      exact ⟨H', hext, hwt₁.setEnv (by simpa [BTy.matchesB] using hid)⟩
-  | .rebindMem x r, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨H', σ₁, id, hext, hwt₁, hid, rfl⟩ := MRhs.bind_wt hwt hc.2 h
-    have hx : Ctx.has Γ x (.mem (.ref _)) = true := hc.1
-    exact ⟨H', hext, hwt₁.setEnv_same hx (by simpa [BTy.matchesB] using hid)⟩
-  | .assignFromMem l p, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    have hm := MPath.mval_wt hwt p hc.2 hm0
-    rw [MVal.asRef_ok hid] at hm
-    exact ⟨H, .refl H,
-      hwt.write (Loc.resolve_wt hwt l hc.1 hr) (copyMem_hasTy hwt.heap hm hsv) h⟩
-  | .assignMem l r, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
-    exact ⟨H, .refl H, MLoc.write_wt hwt l (MSrc.mval_wt hwt hc.2 hmv) hc.1 h⟩
-  | .delete l, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
-    have hty := Loc.resolve_wt hwt l hc hr
-    exact ⟨H, .refl H,
-      hwt.save hty (SVal.defaultOf_hasTy (findStorage_hasTy hwt.storage hty hcur)) h⟩
-  | @Stmt.deleteMem _ T p hd, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    cases p with
-    | var x =>
-      obtain ⟨⟨σ₁, id⟩, ha, h⟩ := bind_ok_inv h
-      cases h
-      obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.heapTyNodup hwt.heap hwt.heapWf
-        (defaultOk_of_defaultOkS hd) ha
-      exact ⟨H', hout.ext, (hwt.ofCopyOut hout).setEnv_same hc (by simpa [BTy.matchesB] using hid)⟩
-    | loc l =>
-      obtain ⟨a, ha, h⟩ := bind_ok_inv h
-      have hat := MLoc.addr_wt hwt l hc ha
-      cases T with
-      | prim p =>
-        refine ⟨H, .refl H, writeAddr_wt hwt hat (Value.toMVal_hasTyH ?_) h⟩
-        cases p <;> rfl
-      | ref R =>
-        obtain ⟨⟨σ₁, id⟩, hal, h⟩ := bind_ok_inv h
-        obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.heapTyNodup hwt.heap hwt.heapWf
-          (defaultOk_of_defaultOkS hd) hal
-        exact ⟨H', hout.ext, writeAddr_wt (hwt.ofCopyOut hout) (hat.mono hout.ext) hid h⟩
-  | .assignNew l n hn, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    bind_inv h
-    obtain ⟨nv, _, h⟩ := bind_ok_inv h
-    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    obtain ⟨H', hout, hmv⟩ :=
-      copyStToM_typed hwt.heapTyNodup hwt.heap hwt.heapWf (newArrVal_hasTy hn nv) hcopy
-    rw [MVal.asRef_ok hid] at hmv
-    have hwt₁ := hwt.ofCopyOut hout
-    cases l with
-    | store l =>
-      obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-      obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-      exact ⟨H', hout.ext,
-        hwt₁.write (Loc.resolve_wt hwt₁ l hc.1 hr) (copyMem_hasTy hwt₁.heap hmv hsv) h⟩
-    | mem l => exact ⟨H', hout.ext, MLoc.write_wt hwt₁ l hmv hc.1 h⟩
-  | .ite c thn els, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    simp only [Stmt.wt] at hs
-    split at hs
-    · split at hs
-      · rename_i Γt Γe ht he
-        obtain ⟨hle, rfl⟩ := wt_if hs
-        simp only [Bool.and_eq_true] at hle
-        obtain ⟨cv, _, h⟩ := bind_ok_inv h
-        split at h
-        · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt thn hwt ht h
-          exact ⟨H', hext, hwt'.weaken hle.1⟩
-        · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt els hwt he h
-          exact ⟨H', hext, hwt'.weaken hle.2⟩
-        · exact nomatch h
-      · exact nomatch hs
-    · exact nomatch hs
-  | .require c, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨_, rfl⟩ := wt_if hs
-    obtain ⟨cv, _, h⟩ := bind_ok_inv h
-    unfold guardOk at h
-    split at h
-    · cases h; exact ⟨H, .refl H, hwt⟩
-    · exact nomatch h
-    · exact nomatch h
-  | .assert c, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    obtain ⟨_, rfl⟩ := wt_if hs
-    obtain ⟨cv, _, h⟩ := bind_ok_inv h
-    unfold assertOk at h
-    split at h
-    · cases h; exact ⟨H, .refl H, hwt⟩
-    · exact nomatch h
-    · exact nomatch h
-  | .revert, _, _, _, _, _, _, _, h => nomatch h
-  | .call _ args _ ret body, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    simp only [Stmt.wt] at hs
-    split at hs
-    · rename_i Γ₁ h₁
-      split at hs
-      · rename_i Γ₂ h₂
-        obtain ⟨hr, rfl⟩ := wt_if hs
-        simp only [Stmt.run] at h
-        obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
-        obtain ⟨σ₂, hσ₂, h⟩ := bind_ok_inv h
-        obtain ⟨H', hext, hwt₂⟩ :=
-          Prog.run_wt body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) h₂ hσ₂
-        exact ⟨H', hext, CallRet.leave_wt hwt₂ ret hr h⟩
-      · exact nomatch hs
-    · exact nomatch hs
-  | .tryCall c rets ok err code pnc other, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    simp only [Stmt.wt] at hs
-    split at hs
-    · split at hs
-      · rename_i Γ₁ Γ₂ Γ₃ Γ₄ h₁ h₂ h₃ h₄
-        obtain ⟨hle, rfl⟩ := wt_if hs
-        simp only [Bool.and_eq_true] at hle
-        simp only [Stmt.run] at h
-        obtain ⟨k, _, h⟩ := bind_ok_inv h
-        split at h
-        · exact nomatch h
-        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
-          obtain ⟨H', hext, hwt'⟩ := Prog.run_wt ok (bindData_wt hwt hb) h₁ h
-          exact ⟨H', hext, hwt'.weaken hle.1.1.1⟩
-        · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt err hwt h₂ h
-          exact ⟨H', hext, hwt'.weaken hle.1.1.2⟩
-        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
-          obtain ⟨H', hext, hwt'⟩ := Prog.run_wt pnc (bindData_wt hwt hb) h₃ h
-          exact ⟨H', hext, hwt'.weaken hle.1.2⟩
-        · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt other hwt h₄ h
-          exact ⟨H', hext, hwt'.weaken hle.2⟩
-      · exact nomatch hs
-    · exact nomatch hs
-  | .loop a c body, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    -- the invariant: every loop head is well-typed under `Γ`, the body's
-    -- declarations forgotten as at an `if`'s join
-    simp only [Stmt.wt] at hs
-    split at hs
-    · split at hs
-      · rename_i Γb hb
-        obtain ⟨hle, rfl⟩ := wt_if hs
-        simp only [Stmt.run] at h
-        refine Loop.run_induct (P := fun τ => ∃ H', H.Extends H' ∧ RunWT C Γ H' τ)
-          (Q := fun r => ∀ τ, r = .ok τ → ∃ H', H.Extends H' ∧ RunWT C Γ H' τ)
-          ⟨H, .refl H, hwt⟩ (fun τ ⟨H₁, hext₁, hwt₁⟩ => ?_) (fun _ h => nomatch h) _ h
-        simp only [Loop.step]
-        rcases c.eval τ with _ | (_ | b)
-        · exact fun _ h => nomatch h
-        · exact fun _ h => nomatch h
-        · cases b
-          · exact fun _ h => by cases h; exact ⟨H₁, hext₁, hwt₁⟩
-          · cases hr : Prog.run τ body with
-            | error _ => exact fun _ h => nomatch h
-            | ok τ' =>
-              obtain ⟨H₂, hext₂, hwt₂⟩ := Prog.run_wt body hwt₁ hb hr
-              exact ⟨H₂, hext₁.trans hext₂, hwt₂.weaken hle⟩
-      · exact nomatch hs
-    · exact nomatch hs
-
-/-- **Type soundness, block level.** -/
-theorem Prog.run_wt : ∀ (P : List (Stmt C)) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State},
-    RunWT C Γ H σ → Prog.wt Γ P = some Γ' → Prog.run σ P = .ok σ' →
-      ∃ H', H.Extends H' ∧ RunWT C Γ' H' σ'
-  | [], Γ, Γ', H, σ, σ', hwt, hs, h => by
-    cases hs; cases h
-    exact ⟨H, .refl H, hwt⟩
-  | s :: P, Γ, Γ', H, σ, σ', hwt, hs, h => by
-    simp only [Prog.wt] at hs
-    split at hs
-    · rename_i Γ₁ h₁
-      obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
-      obtain ⟨H₁, hext₁, hwt₁⟩ := Stmt.run_wt s hwt h₁ hσ₁
-      obtain ⟨H₂, hext₂, hwt₂⟩ := Prog.run_wt P hwt₁ hs h
-      exact ⟨H₂, hext₁.trans hext₂, hwt₂⟩
-    · exact nomatch hs
-
-end
-
-/-! ## Where a run starts, and what the headline buys -/
+/-! ## Where a run starts -/
 
 theorem lookupBy_map_snd {k : Name} {f : Ty → SVal} :
     ∀ l : List (Name × Ty), lookupBy k (l.map fun (n, T) => (n, f T)) = (lookupBy k l).map f
@@ -1483,13 +626,15 @@ theorem lookupBy_map_snd {k : Name} {f : Ty → SVal} :
     · simp [lookupBy, h]
     · simp [lookupBy, h, lookupBy_map_snd rest]
 
-/-- A contract starts well-typed: each root at its type's default, no
-locals, an empty heap.  `StandardExample` starts in `State.exampleStore`,
-which is `RunWT` (`exampleStore_wt`). -/
-theorem RunWT.init {σ : State} (hnd : nodupKeysB C.vars = true)
+
+/-- A contract starts well-typed: each root at its type's default, an empty
+heap.  `StandardExample` starts in `State.exampleStore`
+(`exampleStore_wt`). -/
+theorem Semantics.StateWT.init {σ : State} (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true)
-    (hst : σ.storage = C.initStorage) (hheap : σ.heap = []) : RunWT C [] [] σ where
+    (hst : σ.storage = C.initStorage) (hheap : σ.heap = []) : StateWT [] C.layout σ where
   layoutNodup := hnd
+  heapTyNodup := rfl
   storage := by
     rw [hst]
     refine List.all_eq_true.mpr fun g hg => ?_
@@ -1498,40 +643,1165 @@ theorem RunWT.init {σ : State} (hnd : nodupKeysB C.vars = true)
       | none => false) = true
     simp only [Contract.initStorage, lookupBy_map_snd, lookupBy_eq_of_nodup hnd hg, Option.map]
     exact defaultForTy_hasTy (defaultOk_of_defaultOkS (List.all_eq_true.mp hok g hg))
-  env := fun x bt hx => nomatch hx
-  heapTyNodup := rfl
   heap := rfl
   heapWf := fun i _ => by rw [hheap]; rfl
 
 /-- `StandardExample`'s store is well-typed. -/
-theorem exampleStore_wt : RunWT StandardExample [] [] State.exampleStore :=
-  RunWT.init (by decide) (by decide) initStorage_standardExample.symm rfl
-
-/-- **Storage stays well-typed.**  Assume `wellFormed(storage)` once and it
-holds after every checked run: after `Person storage p = alice;
-p.age = 10;` storage still inhabits `StandardExample`'s layout. -/
-theorem Prog.run_storage_wt {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State} {P : Prog C}
-    (hwt : RunWT C Γ H σ) (hP : Prog.wt Γ P = some Γ') (h : Prog.run σ P = .ok σ') :
-    wellTypedStorageB C.layout σ'.storage = true :=
-  let ⟨_, _, hwt'⟩ := Prog.run_wt P hwt hP h
-  hwt'.storage
-
-/-- `aliasWrite` (`Person storage p = alice; p.age = 10; uint x = alice.age;
-assert(x == 10);`) uses its locals as it declares them. -/
-example : Prog.wt [] aliasWrite = some [(.user "p", .path (.ref (.struct "Person"))),
-    (.user "x", .stack (.prim .uint))] := by decide
-
-/-- Reading a `uint` local as a `bool` is refused: `uint x = 1; bool y = x;`,
-which `sol{ … }` already rejects, written as a term. -/
-example : Prog.wt [] ([.declLocal .uint (.user "x") (some (.simple (.lit 1 rfl))),
-    .declLocal .bool (.user "y") (some (.simple (.local (.user "x"))))] :
-      Prog StandardExample) = none := by decide
-
-/-- So `aliasWrite` from `StandardExample`'s store leaves storage
-well-typed. -/
-example {σ' : State} (h : Prog.run State.exampleStore aliasWrite = .ok σ') :
-    wellTypedStorageB StandardExample.layout σ'.storage = true :=
-  Prog.run_storage_wt (Γ' := [(.user "p", .path (.ref (.struct "Person"))),
-    (.user "x", .stack (.prim .uint))]) exampleStore_wt (by decide) h
+theorem exampleStore_wt : StateWT [] StandardExample.layout State.exampleStore :=
+  StateWT.init (by decide) (by decide) initStorage_standardExample.symm rfl
 
 end Solidity
+
+/-! # Over the scoped syntax
+
+The locals are typed by their context: `Env.All (LTy.WT C H) σ.env` says each
+local holds what its type says, and `RunWT` adds the global part. -/
+
+namespace Solidity.Core
+
+open Semantics hiding State
+open SemanticsProperties (HeapWellFormed)
+
+variable {C : Contract}
+
+/-! ## Results -/
+
+theorem map_ok_inv {α β : Type} {f : α → β} {x : Res α} {b : β} (h : f <$> x = .ok b) :
+    ∃ a, x = .ok a ∧ f a = b := by
+  cases x with
+  | error e => exact nomatch h
+  | ok a => exact ⟨a, rfl, Except.ok.inj h⟩
+
+/-! ## Locals that satisfy a predicate -/
+
+/-- Every local of `e` satisfies `P` at its type. -/
+def Env.All (P : (t : LTy) → t.Denote C → Prop) : {Γ : Ctx} → Env C Γ → Prop
+  | [], _ => True
+  | _ :: _, e => P _ e.1 ∧ Env.All P e.2
+
+namespace Env.All
+
+variable {P Q : (t : LTy) → t.Denote C → Prop}
+
+theorem get : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → {e : Env C Γ} → Env.All P e →
+    P t (Env.get i e) := by
+  intro Γ t i
+  induction i with
+  | here => intro e h; exact h.1
+  | there i ih => intro e h; exact ih h.2
+
+theorem set : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → {e : Env C Γ} → {v : t.Denote C} →
+    Env.All P e → P t v → Env.All P (Env.set i v e) := by
+  intro Γ t i
+  induction i with
+  | here => intro e v h hv; exact ⟨hv, h.2⟩
+  | there i ih => intro e v h hv; exact ⟨h.1, ih h.2 hv⟩
+
+theorem drop {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → {e : Env C Δ} → Env.All P e →
+    Env.All P (Env.drop h e) := by
+  intro Δ h
+  induction h with
+  | refl => intro e he; exact he
+  | push h ih => intro e he; exact ih he.2
+
+theorem append {Γ : Ctx} : (ρ : Ctx) → {r : Env C ρ} → {e : Env C Γ} → Env.All P r →
+    Env.All P e → Env.All P (Env.append ρ r e)
+  | [], _, _, _, he => he
+  | _ :: ρ, _, _, hr, he => ⟨hr.1, append ρ hr.2 he⟩
+
+theorem take {Γ : Ctx} : (ρ : Ctx) → {e : Env C (ρ ++ Γ)} → Env.All P e → Env.All P (Env.take ρ e)
+  | [], _, _ => trivial
+  | _ :: ρ, _, he => ⟨he.1, take ρ he.2⟩
+
+theorem mono (hPQ : ∀ t v, P t v → Q t v) : {Γ : Ctx} → {e : Env C Γ} → Env.All P e →
+    Env.All Q e
+  | [], _, _ => trivial
+  | _ :: _, _, he => ⟨hPQ _ _ he.1, mono hPQ he.2⟩
+
+theorem and : {Γ : Ctx} → {e : Env C Γ} → Env.All P e → Env.All Q e →
+    Env.All (fun t v => P t v ∧ Q t v) e
+  | [], _, _, _ => trivial
+  | _ :: _, _, hp, hq => ⟨⟨hp.1, hq.1⟩, and hp.2 hq.2⟩
+
+end Env.All
+
+/-- Leaving a call keeps every local satisfying `P` when the caller's and the
+frame's return variables do. -/
+theorem CallRet.leave_all {P : (t : LTy) → t.Denote C → Prop} {Γ rs Γ' : Ctx}
+    (ret : CallRet Γ rs Γ') {e : Env C Γ} {r : Env C rs} (he : Env.All P e) (hr : Env.All P r) :
+    Env.All P (ret.leave e r) := by
+  cases ret with
+  | none => exact he
+  | val p x res =>
+    cases res with
+    | none => exact he
+    | some i => exact Env.All.set i he hr.1
+  | rets bs => exact Env.All.append _ hr he
+  | mem R x hd hm => exact ⟨hr.1, he⟩
+
+/-! ## Invariants of scoped runs
+
+What a run keeps is a part on the global state and a part on each local,
+the latter kept as the store typing grows.  The scopes (a branch, a block,
+a loop's iteration, a call's frame, a `try`'s clause) only push and pop
+locals, so they keep any such invariant once their sub-programs do; the
+statements without sub-programs are each invariant's own (`Stmt.run_wt`,
+`Stmt.run_canon`, `Stmt.run_tight`). -/
+
+/-- An invariant of scoped runs: a part on the global state, a part on each
+local, kept as the store typing `H` grows, and blind to the locals. -/
+structure Invariant (C : Contract) where
+  glob : HeapTy → Semantics.State → Prop
+  loc : HeapTy → (t : LTy) → t.Denote C → Prop
+  loc_mono : ∀ {H H' : HeapTy} {t : LTy} {v : t.Denote C}, H.Extends H' → loc H t v →
+    loc H' t v
+  reglob : ∀ {H : HeapTy} {τ : Semantics.State} {Γ : Ctx} (e : Env C Γ), glob H τ →
+    glob H (State.ofGlob τ e).glob
+
+namespace Invariant
+
+variable (I : Invariant C)
+
+/-- The invariant holds of a state under the store typing `H`. -/
+def Holds {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
+  I.glob H σ.glob ∧ Env.All (I.loc H) σ.env
+
+/-- A run keeps the invariant: from a state it holds of, it ends, if in a
+state, in one it holds of under a store typing that only grew. -/
+def Keeps {Γ Γ' : Ctx} (f : State C Γ → Res (State C Γ')) : Prop :=
+  ∀ (H : HeapTy) (σ : State C Γ) (σ' : State C Γ'), I.Holds H σ → f σ = .ok σ' →
+    ∃ H', H.Extends H' ∧ I.Holds H' σ'
+
+variable {I}
+
+theorem env_mono {Γ : Ctx} {H H' : HeapTy} (hext : H.Extends H') {e : Env C Γ}
+    (h : Env.All (I.loc H) e) : Env.All (I.loc H') e :=
+  Env.All.mono (fun _ _ => I.loc_mono hext) h
+
+theorem Holds.withEnv {Γ Δ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.Holds H σ) {e : Env C Δ}
+    (he : Env.All (I.loc H) e) : I.Holds H (σ.withEnv e) :=
+  ⟨h.1, he⟩
+
+theorem Holds.drop {Γ Δ : Ctx} {H : HeapTy} {σ : State C Δ} (h : I.Holds H σ) (x : Ext Γ Δ) :
+    I.Holds H (σ.drop x) :=
+  ⟨h.1, Env.All.drop x h.2⟩
+
+theorem Keeps.drop {Γ Δ Δ' : Ctx} {f : State C Γ → Res (State C Δ)} (hf : I.Keeps f)
+    (x : Ext Δ' Δ) : I.Keeps (fun σ => (f σ).map (State.drop x)) := by
+  intro H σ σ' hσ h
+  have h : (f σ).map (State.drop x) = .ok σ' := h
+  cases hr : f σ with
+  | error e => rw [hr] at h; exact nomatch h
+  | ok τ =>
+    rw [hr] at h
+    cases h
+    obtain ⟨H', hext, hτ⟩ := hf H σ τ hσ hr
+    exact ⟨H', hext, hτ.drop x⟩
+
+theorem keeps_seq {Γ Γ₁ Γ₂ : Ctx} {s : State C Γ → Res (State C Γ₁)}
+    {P : State C Γ₁ → Res (State C Γ₂)} (hs : I.Keeps s) (hP : I.Keeps P) :
+    I.Keeps (Run.seq s P) := by
+  intro H σ σ' hσ h
+  unfold Run.seq at h
+  split at h
+  · rename_i τ hτ
+    obtain ⟨H₁, hext₁, h₁⟩ := hs H σ τ hσ hτ
+    obtain ⟨H₂, hext₂, h₂⟩ := hP H₁ τ σ' h₁ h
+    exact ⟨H₂, hext₁.trans hext₂, h₂⟩
+  · exact nomatch h
+
+theorem keeps_nil {Γ : Ctx} : I.Keeps (pure : State C Γ → Res (State C Γ)) := by
+  intro H σ σ' hσ h
+  cases h
+  exact ⟨H, .refl H, hσ⟩
+
+theorem keeps_ite {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (h₁ : Ext Γ Γ₁)
+    {thn : State C Γ → Res (State C Γ₁)} (h₂ : Ext Γ Γ₂) {els : State C Γ → Res (State C Γ₂)}
+    (hthn : I.Keeps thn) (hels : I.Keeps els) : I.Keeps (Run.ite c h₁ thn h₂ els) := by
+  intro H σ σ' hσ h
+  unfold Run.ite at h
+  obtain ⟨cv, _, h⟩ := bind_ok_inv h
+  split at h
+  · exact hthn.drop h₁ H σ σ' hσ h
+  · exact hels.drop h₂ H σ σ' hσ h
+  · exact nomatch h
+
+theorem keeps_block {Γ Γ₁ : Ctx} (x : Ext Γ Γ₁) {body : State C Γ → Res (State C Γ₁)}
+    (hb : I.Keeps body) : I.Keeps (Run.block x body) :=
+  hb.drop x
+
+theorem keeps_require {Γ : Ctx} (c : Val C Γ .bool) :
+    I.Keeps (fun σ => do guardOk (← c.eval σ) σ) := by
+  intro H σ σ' hσ h
+  obtain ⟨cv, _, h⟩ := bind_ok_inv h
+  unfold guardOk at h
+  split at h
+  · cases h; exact ⟨H, .refl H, hσ⟩
+  · exact nomatch h
+  · exact nomatch h
+
+theorem keeps_assert {Γ : Ctx} (c : Val C Γ .bool) :
+    I.Keeps (fun σ => do assertOk (← c.eval σ) σ) := by
+  intro H σ σ' hσ h
+  obtain ⟨cv, _, h⟩ := bind_ok_inv h
+  unfold assertOk at h
+  split at h
+  · cases h; exact ⟨H, .refl H, hσ⟩
+  · exact nomatch h
+  · exact nomatch h
+
+theorem keeps_revert {Γ : Ctx} : I.Keeps (fun _ : State C Γ => (.error .revert : Res (State C Γ))) :=
+  fun _ _ _ _ h => nomatch h
+
+end Invariant
+
+/-- **Induction over a loop's run**: `P` holds of the first state and of
+every state an iteration from a state in `P` goes on in, and `Q` of every
+outcome an iteration from a state in `P` is done with, and of a divergence:
+then `Q` holds of the loop's run. -/
+theorem Loop.run_induct {α : Type} {body : α → Res α} {c : α → Res Value} {P : α → Prop}
+    {Q : Res α → Prop} {σ : α} (h0 : P σ)
+    (hstep : ∀ τ, P τ →
+      match Loop.step body c τ with
+      | .inl τ' => P τ'
+      | .inr r => Q r)
+    (hdiv : Q (.error .diverge)) : Q (Loop.run body c σ) := by
+  have key : ∀ (n : Nat) (τ : α) (r : Res α), P τ → Loop.iterN body c n τ = .inr r → Q r := by
+    intro n
+    induction n with
+    | zero => intro τ r _ h; exact nomatch h
+    | succ n ih =>
+      intro τ r hp h
+      have hs := hstep τ hp
+      simp only [Loop.iterN] at h
+      revert hs h
+      cases Loop.step body c τ with
+      | inl τ' => exact fun he hp => ih τ' r hp he
+      | inr r' =>
+        intro he hp
+        cases (show Sum.inr r' = (Sum.inr r : α ⊕ Res α) from he)
+        exact hp
+  unfold Loop.run
+  split
+  · rename_i hex
+    obtain ⟨n, hn⟩ := Classical.choose_spec hex
+    exact key n σ _ h0 hn
+  · exact hdiv
+
+namespace Invariant
+
+variable {I : Invariant C}
+
+theorem keeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁)
+    {body : State C Γ → Res (State C Γ₁)} (hb : I.Keeps body) : I.Keeps (Run.loop c x body) := by
+  intro H σ σ' hσ h
+  unfold Run.loop at h
+  refine Loop.run_induct (P := fun τ => ∃ H', H.Extends H' ∧ I.Holds H' τ)
+    (Q := fun r => ∀ τ, r = .ok τ → ∃ H', H.Extends H' ∧ I.Holds H' τ)
+    ⟨H, .refl H, hσ⟩ (fun τ ⟨H₁, hext₁, h₁⟩ => ?_) (fun _ h => nomatch h) _ h
+  simp only [Loop.step]
+  rcases Val.eval τ c with _ | (_ | b)
+  · exact fun _ h => nomatch h
+  · exact fun _ h => nomatch h
+  · cases b
+    · exact fun _ h => by cases h; exact ⟨H₁, hext₁, h₁⟩
+    · cases hr : (body τ).map (State.drop x) with
+      | error _ => exact fun _ h => nomatch h
+      | ok τ' =>
+        obtain ⟨H₂, hext₂, h₂⟩ := hb.drop x H₁ τ τ' h₁ hr
+        exact ⟨H₂, hext₁.trans hext₂, h₂⟩
+
+theorem keeps_call {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
+    (x : Ext (rs ++ ps) Γf) {body : State C (rs ++ ps) → Res (State C Γf)}
+    (hargs : ∀ (H : HeapTy) (σ : State C Γ) (a : Env C ps), I.Holds H σ → args.eval σ = .ok a →
+      Env.All (I.loc H) a)
+    (henter : ∀ (H : HeapTy) (τ τ' : Semantics.State) (r : Env C rs), I.glob H τ →
+      ret.enter τ = .ok (τ', r) → ∃ H', H.Extends H' ∧ I.glob H' τ' ∧ Env.All (I.loc H') r)
+    (hb : I.Keeps body) : I.Keeps (Run.call args ret x body) := by
+  intro H σ σ' hσ h
+  unfold Run.call at h
+  obtain ⟨a, ha, h⟩ := bind_ok_inv h
+  obtain ⟨⟨τ, r⟩, he, h⟩ := bind_ok_inv h
+  obtain ⟨υ, hυ, h⟩ := bind_ok_inv h
+  cases h
+  obtain ⟨H₁, hext₁, hg₁, hr₁⟩ := henter H σ.glob τ r hσ.1 he
+  obtain ⟨H₂, hext₂, h₂⟩ := hb H₁ (State.ofGlob τ (Env.append rs r a)) υ
+    ⟨I.reglob _ hg₁, Env.All.append rs hr₁ (env_mono hext₁ (hargs H σ a hσ ha))⟩ hυ
+  exact ⟨H₂, hext₁.trans hext₂, h₂.1, CallRet.leave_all ret
+    (env_mono (hext₁.trans hext₂) hσ.2) (Env.All.take rs (Env.All.drop x h₂.2))⟩
+
+theorem keeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+    (h₁ : Ext (ρ ++ Γ) Γ₁) {ok : State C (ρ ++ Γ) → Res (State C Γ₁)}
+    (h₂ : Ext Γ Γ₂) {err : State C Γ → Res (State C Γ₂)} (code : CodeBinder κ)
+    (h₃ : Ext (κ ++ Γ) Γ₃) {pnc : State C (κ ++ Γ) → Res (State C Γ₃)}
+    (h₄ : Ext Γ Γ₄) {other : State C Γ → Res (State C Γ₄)}
+    (hdec : ∀ (H : HeapTy) (vs : List Value) (r : Env C ρ) (rest : List Value),
+      rets.decode vs = .ok (r, rest) → Env.All (I.loc H) r)
+    (hcode : ∀ (H : HeapTy) (c : Value) (r : Env C κ), code.decode c = .ok r → Env.All (I.loc H) r)
+    (hok : I.Keeps ok) (herr : I.Keeps err) (hpnc : I.Keeps pnc) (hoth : I.Keeps other) :
+    I.Keeps (Run.tryCall call rets h₁ ok h₂ err code h₃ pnc h₄ other) := by
+  intro H σ σ' hσ h
+  unfold Run.tryCall at h
+  obtain ⟨k, _, h⟩ := bind_ok_inv h
+  split at h
+  · exact nomatch h
+  · rename_i vs _
+    obtain ⟨⟨r, rest⟩, hr, h⟩ := bind_ok_inv h
+    exact hok.drop ((Ext.append Γ ρ).trans h₁) H _ σ'
+      (hσ.withEnv (Env.All.append ρ (hdec H vs r rest hr) hσ.2)) h
+  · exact herr.drop h₂ H σ σ' hσ h
+  · rename_i c _
+    obtain ⟨r, hr, h⟩ := bind_ok_inv h
+    exact hpnc.drop ((Ext.append Γ κ).trans h₃) H _ σ'
+      (hσ.withEnv (Env.All.append κ (hcode H c r hr) hσ.2)) h
+  · exact hoth.drop h₄ H σ σ' hσ h
+
+end Invariant
+
+/-! ## The typed locals -/
+
+/-- A local's value is of its type: a value of its primitive type, an alias
+bound (if at all) to a path the layout types at its type, a memory local an
+identity the store typing claims at its type. -/
+def LTy.WT (C : Contract) (H : HeapTy) : (t : LTy) → t.Denote C → Prop
+  | .val p, v => (Value.toSVal v).hasTy (.prim p) = true
+  | .alias R, o => ∀ r segs, o = some (r, segs) → C.layout.tyAt r segs = some (.ref R)
+  | .mem R, id => MVal.hasTyH H (.ref id) (.ref R) = true
+  | .old, _ => True
+  | .oldNet, _ => True
+
+theorem LTy.WT.mono {H H' : HeapTy} (hext : H.Extends H') :
+    {t : LTy} → {v : t.Denote C} → LTy.WT C H t v → LTy.WT C H' t v
+  | .val _, _, h => h
+  | .alias _, _, h => h
+  | .mem _, _, h => MVal.hasTyH_mono hext h
+  | .old, _, h => h
+  | .oldNet, _, h => h
+
+theorem LTy.WT.default (p : PrimTy) : LTy.WT C H (.val p) (PrimTy.default p) := by
+  cases p <;> rfl
+
+/-- A storage-and-heap invariant is blind to the locals. -/
+theorem _root_.Solidity.Semantics.StateWT.reglob {H : HeapTy} {L : Layout} {τ : Semantics.State}
+    {Γ : Ctx} (h : StateWT H L τ) (e : Env C Γ) : StateWT H L (State.ofGlob τ e).glob :=
+  ⟨h.1, h.2, h.3, h.4, h.5⟩
+
+/-- Type soundness's invariant: the global part well-typed, every local of
+its type. -/
+def wtInv (C : Contract) : Invariant C where
+  glob H τ := StateWT H C.layout τ
+  loc := LTy.WT C
+  loc_mono hext h := LTy.WT.mono hext h
+  reglob e h := h.reglob e
+
+/-- The state invariant over a context: the global part well-typed under
+`C`'s layout and the store typing `H`, each local of its type. -/
+abbrev RunWT (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop := (wtInv C).Holds H σ
+
+namespace RunWT
+
+variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
+
+theorem glob (hwt : RunWT C H σ) : StateWT H C.layout σ.glob := hwt.1
+
+theorem env (hwt : RunWT C H σ) : Env.All (LTy.WT C H) σ.env := hwt.2
+
+/-- The global part replaced by a well-typed one under a grown store
+typing. -/
+theorem withGlob {H' : HeapTy} (hwt : RunWT C H σ) (hext : H.Extends H') {τ : Semantics.State}
+    (hτ : StateWT H' C.layout τ) : RunWT C H' (σ.withGlob τ) :=
+  ⟨hτ.reglob σ.env, Env.All.mono (fun _ _ => LTy.WT.mono hext) hwt.env⟩
+
+theorem setLocal (hwt : RunWT C H σ) {t : LTy} (i : Idx Γ t) {v : t.Denote C}
+    (hv : LTy.WT C H t v) : RunWT C H (σ.setLocal i v) :=
+  ⟨hwt.glob, Env.All.set i hwt.env hv⟩
+
+theorem push (hwt : RunWT C H σ) {t : LTy} {v : t.Denote C} (hv : LTy.WT C H t v) :
+    RunWT C H (σ.push v) :=
+  ⟨hwt.glob, hv, hwt.env⟩
+
+end RunWT
+
+/-! ## The evaluators are typed
+
+Each mirrors `Semantics.lean`'s evaluator's typing, a local read where the
+old one looked a name up.  `H` is fixed here: nothing an expression does
+allocates. -/
+
+section Eval
+
+variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
+
+/-- A simple value is of its type: the local `x : uint` holds a number. -/
+theorem Simple.eval_wt (hwt : RunWT C H σ) {p : PrimTy} {s : Simple C Γ p} {w : Value}
+    (h : s.eval σ = .ok w) : (Value.toSVal w).hasTy (.prim p) = true := by
+  cases s with
+  | lit n hn => cases h; exact int_toSVal_hasTy (PrimTy.isNumeric_of_inRange hn) n
+  | bool b => cases h; rfl
+  | «local» i => cases h; exact hwt.env.get i
+  | env k hp => subst hp; cases h; rfl
+
+/-- An alias is bound to a path the layout types at its type. -/
+theorem aliasPath_wt (hwt : RunWT C H σ) {R : RefTy} (i : Idx Γ (.alias R)) {r : Name}
+    {segs : List Seg} (h : aliasPath σ i = .ok (r, segs)) :
+    C.layout.tyAt r segs = some (.ref R) := by
+  have hi : LTy.WT C H (.alias R) (Env.get i σ.env) := hwt.env.get i
+  unfold aliasPath at h
+  split at h
+  · rename_i p hp
+    cases h
+    exact hi _ _ hp
+  · exact nomatch h
+
+mutual
+
+/-- A storage path resolves to a place the layout types at the path's type:
+`p.age`, with `p : Person storage`, at `uint`. -/
+theorem SPath.resolve_wt (hwt : RunWT C H σ) :
+    ∀ {T : Ty} (p : SPath C Γ T) {r : Name} {segs : List Seg},
+      p.resolve σ = .ok (r, segs) → C.layout.tyAt r segs = some T
+  | _, .alias i, _, _, h => aliasPath_wt hwt i h
+  | _, .loc l, _, _, h => Loc.resolve_wt hwt l h
+
+/-- `alice.age` resolves to `(alice, [age])`, which the layout types `uint`. -/
+theorem Loc.resolve_wt (hwt : RunWT C H σ) :
+    ∀ {T : Ty} (l : Loc C Γ T) {r : Name} {segs : List Seg},
+      l.resolve σ = .ok (r, segs) → C.layout.tyAt r segs = some T
+  | _, .root r' hr, r, segs, h => by
+    cases h
+    exact Contract.layout_tyAt_root hr
+  | _, .field b f hf, r, segs, h => by
+    obtain ⟨⟨r0, s0⟩, h0, h⟩ := bind_ok_inv h
+    cases h
+    exact tyAt_append_seg (SPath.resolve_wt hwt b h0) hf
+  | _, .index it b i, r, segs, h => by
+    obtain ⟨⟨r0, s0⟩, h0, h⟩ := bind_ok_inv h
+    obtain ⟨k, _, h⟩ := bind_ok_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    bind_inv h
+    cases h
+    have hb := SPath.resolve_wt hwt b h0
+    cases it with
+    | map => exact tyAt_append_seg hb rfl
+    | arr a => cases a <;> exact tyAt_append_seg hb rfl
+
+end
+
+mutual
+
+/-- A memory path holds a slot of its type: `m`, with `m : Person memory`,
+an identity the store typing claims at `Person`. -/
+theorem MPath.mval_wt (hwt : RunWT C H σ) :
+    ∀ {T : Ty} (p : MPath C Γ T) {mv : MVal}, p.mval σ = .ok mv → MVal.hasTyH H mv T = true
+  | _, .var i _, mv, h => by cases h; exact hwt.env.get i
+  | _, .loc l, mv, h => MLoc.read_wt hwt l h
+
+/-- `m.age` reads a slot the heap types `uint`. -/
+theorem MLoc.read_wt (hwt : RunWT C H σ) :
+    ∀ {T : Ty} (l : MLoc C Γ T) {mv : MVal}, l.read σ = .ok mv → MVal.hasTyH H mv T = true
+  | _, @MLoc.field _ _ s _ b f hf, mv, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.glob.heap hb
+    obtain ⟨o, ho, h⟩ := bind_ok_inv h
+    simp only [Semantics.State.getObj, hobj] at ho
+    cases ho
+    cases obj with
+    | struct fields =>
+      simp only at h
+      split at h
+      · rename_i v hv
+        cases h
+        obtain ⟨ty, hdef, hv⟩ := mHasTyHFields_lookup (by simpa [MObj.hasTyH] using hty) hv
+        have : ty = _ := Option.some.inj (hdef.symm.trans hf)
+        subst this
+        exact hv
+      · exact nomatch h
+    | array _ => exact nomatch h
+  | _, @MLoc.index _ _ _ E a b i, mv, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.glob.heap hb
+    obtain ⟨elems, fx, rfl, hel⟩ := MObj.hasTyH_arrElem a.arrElem hty
+    bind_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    obtain ⟨o, ho, h⟩ := bind_ok_inv h
+    simp only [Semantics.State.getObj, hobj] at ho
+    cases ho
+    simp only at h
+    split at h
+    · cases h
+      exact mHasTyHElems_mem hel (List.get_mem _ _)
+    · exact nomatch h
+
+end
+
+/-- A value evaluates to a value of its type: `alice.age + 1` to a number,
+`x < y` to a boolean. -/
+theorem Val.eval_wt (hwt : RunWT C H σ) :
+    ∀ {p : PrimTy} (v : Val C Γ p) {w : Value}, v.eval σ = .ok w →
+      (Value.toSVal w).hasTy (.prim p) = true
+  | _, .simple s, w, h => Simple.eval_wt hwt h
+  | _, .read l, w, h => by
+    obtain ⟨⟨r, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+    exact SVal.asValue_hasTy
+      (findStorage_hasTy hwt.glob.storage (Loc.resolve_wt hwt l hr) hsv) h
+  | _, .binop op hacc hq a b, w, h => by
+    obtain ⟨lv, _, h⟩ := bind_ok_inv h
+    exact evalBinop_wt hacc hq h
+  | _, .unop op hacc hq a, w, h => by
+    obtain ⟨av, _, h⟩ := bind_ok_inv h
+    exact evalUnop_wt hacc hq h
+  | _, .ternary c a b, w, h => by
+    obtain ⟨cv, _, h⟩ := bind_ok_inv h
+    unfold pickBranch at h
+    split at h
+    · exact Val.eval_wt hwt a h
+    · exact Val.eval_wt hwt b h
+    · exact nomatch h
+  | _, .readMem l, w, h => by
+    obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
+    exact MVal.asValue_hasTy (MLoc.read_wt hwt l hmv) h
+  | _, .len b hp, w, h => by
+    subst hp
+    bind_inv h
+    obtain ⟨sv, _, h⟩ := bind_ok_inv h
+    split at h
+    · cases h; rfl
+    all_goals exact nomatch h
+  | _, .mlen b hp, w, h => by
+    subst hp
+    iterate 2 bind_inv h
+    obtain ⟨o, _, h⟩ := bind_ok_inv h
+    split at h
+    · cases h; rfl
+    all_goals exact nomatch h
+
+/-- A source stores a value of its type: `alice = bob;` copies a `Person`. -/
+theorem Src.value_wt (hwt : RunWT C H σ) {T : Ty} {r : Src C Γ T} {sv : SVal}
+    (h : r.value σ = .ok sv) : sv.hasTy T = true := by
+  cases r with
+  | val v =>
+    obtain ⟨w, hv, h⟩ := bind_ok_inv h
+    cases h
+    exact Val.eval_wt hwt v hv
+  | copy p _ =>
+    obtain ⟨⟨r, segs⟩, hr, h⟩ := bind_ok_inv h
+    exact findStorage_hasTy hwt.glob.storage (SPath.resolve_wt hwt p hr) h
+
+/-- A memory location resolves to a place of its type. -/
+theorem MLoc.addr_wt (hwt : RunWT C H σ) :
+    ∀ {T : Ty} (l : MLoc C Γ T) {a : Addr}, l.addr σ = .ok a → AddrTyT H T a
+  | _, @MLoc.field _ _ s _ b f hf, a, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    cases h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    exact ⟨s, hb, hf⟩
+  | _, .index ak b i, a, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    bind_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    cases h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    exact ⟨_, hb, ak.arrElem⟩
+
+/-- What a memory write stores is of the place's type. -/
+theorem MSrc.mval_wt (hwt : RunWT C H σ) {T : Ty} {r : MSrc C Γ T} {mv : MVal}
+    (h : r.mval σ = .ok mv) : MVal.hasTyH H mv T = true := by
+  cases r with
+  | val v =>
+    obtain ⟨w, hv, h⟩ := bind_ok_inv h
+    cases h
+    exact Value.toMVal_hasTyH (Val.eval_wt hwt v hv)
+  | ref p =>
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    cases h
+    have := MPath.mval_wt hwt p hm0
+    rwa [MVal.asRef_ok hid] at this
+
+/-- A call's arguments are of their parameters' types. -/
+theorem Args.eval_wt (hwt : RunWT C H σ) :
+    {ps : Ctx} → (args : Args C Γ ps) → {a : Env C ps} → args.eval σ = .ok a →
+      Env.All (LTy.WT C H) a
+  | _, .nil, _, _ => trivial
+  | _, .snoc as _ _ e, _, h => by
+    obtain ⟨r, hr, h⟩ := bind_ok_inv h
+    obtain ⟨v, hv, h⟩ := bind_ok_inv h
+    cases h
+    exact ⟨Val.eval_wt hwt e hv, Args.eval_wt hwt as hr⟩
+
+end Eval
+
+/-! ## The statements' effects are typed -/
+
+section Effects
+
+variable {Γ : Ctx} {H : HeapTy} {σ σ' : State C Γ}
+
+/-- `x ⊕= e` keeps the state typed: the target is resolved once, and the
+number written back is of its type. -/
+theorem OpLoc.store_wt (hwt : RunWT C H σ) {op : BinOp} (hop : op.isArith = true) :
+    ∀ {p : PrimTy} (l : OpLoc C Γ p) {v : Value}, p.isNumeric = true →
+      l.store σ op v = .ok σ' → RunWT C H σ'
+  | p, .local i, v, hp, h => by
+    obtain ⟨n₁, h₁, h⟩ := bind_ok_inv h
+    obtain ⟨n₂, h₂, h⟩ := bind_ok_inv h
+    cases h
+    exact hwt.setLocal i (arith_new_wt hop hp h₁ h₂)
+  | p, .root r hr, v, hp, h => by
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact hwt.withGlob (.refl H) (opStore_wt hwt.glob hop hp (Contract.layout_tyAt_root hr) hτ)
+  | p, .field b f hf, v, hp, h => by
+    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact hwt.withGlob (.refl H)
+      (opStore_wt hwt.glob hop hp (Loc.resolve_wt hwt (.field b f hf) hr) hτ)
+  | p, .index it b i, v, hp, h => by
+    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact hwt.withGlob (.refl H)
+      (opStore_wt hwt.glob hop hp (Loc.resolve_wt hwt (.index it b (.simple i)) hr) hτ)
+  | p, @OpLoc.mfield _ _ s _ b f hf, v, hp, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact hwt.withGlob (.refl H) (opMem_wt hwt.glob hop hp (loc := .memoryField id f) ⟨s, hb, hf⟩ hτ)
+  | p, .mindex ak b i, v, hp, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    bind_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact hwt.withGlob (.refl H)
+      (opMem_wt hwt.glob hop hp (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ hτ)
+
+/-- `x++` keeps the state typed, and its value is of `x`'s type. -/
+theorem OpLoc.bump_wt (hwt : RunWT C H σ) {op : IncDec} :
+    ∀ {p : PrimTy} (l : OpLoc C Γ p) {w : Value}, p.isNumeric = true →
+      l.bump σ op = .ok (σ', w) → RunWT C H σ' ∧ (Value.toSVal w).hasTy (.prim p) = true
+  | p, .local i, w, hp, h => by
+    obtain ⟨m, hm, h⟩ := bind_ok_inv h
+    obtain ⟨n, hn, h⟩ := bind_ok_inv h
+    cases h
+    have hnew := bump_new_wt hp hn
+    refine ⟨hwt.setLocal i hnew, ?_⟩
+    split
+    · exact hnew
+    · rw [Value.asInt_ok hm]; exact int_toSVal_hasTy hp m
+  | p, .root r hr, w, hp, h => by
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    obtain ⟨hτ', hv⟩ := bumpStore_wt hwt.glob hp (Contract.layout_tyAt_root hr) hτ
+    exact ⟨hwt.withGlob (.refl H) hτ', hv⟩
+  | p, .field b f hf, w, hp, h => by
+    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    obtain ⟨hτ', hv⟩ := bumpStore_wt hwt.glob hp (Loc.resolve_wt hwt (.field b f hf) hr) hτ
+    exact ⟨hwt.withGlob (.refl H) hτ', hv⟩
+  | p, .index it b i, w, hp, h => by
+    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    obtain ⟨hτ', hv⟩ :=
+      bumpStore_wt hwt.glob hp (Loc.resolve_wt hwt (.index it b (.simple i)) hr) hτ
+    exact ⟨hwt.withGlob (.refl H) hτ', hv⟩
+  | p, @OpLoc.mfield _ _ s _ b f hf, w, hp, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    obtain ⟨hτ', hv⟩ := bumpMem_wt hwt.glob hp (loc := .memoryField id f) ⟨s, hb, hf⟩ hτ
+    exact ⟨hwt.withGlob (.refl H) hτ', hv⟩
+  | p, .mindex ak b i, w, hp, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    bind_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    obtain ⟨hτ', hv⟩ := bumpMem_wt hwt.glob hp (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ hτ
+    exact ⟨hwt.withGlob (.refl H) hτ', hv⟩
+
+/-- `m.age = 3;` writes a slot of the member's type. -/
+theorem MLoc.write_wt (hwt : RunWT C H σ) {mv : MVal} :
+    ∀ {T : Ty} (l : MLoc C Γ T), MVal.hasTyH H mv T = true → l.write σ mv = .ok σ' →
+      RunWT C H σ'
+  | _, @MLoc.field _ _ s _ b f hf, hmv, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact hwt.withGlob (.refl H) (memWriteField_wt hwt.glob hb hf hmv hτ)
+  | _, .index ak b i, hmv, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    bind_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact hwt.withGlob (.refl H) (memWriteIndex_wt hwt.glob hb ak.arrElem hmv hτ)
+
+/-- `m = n;` and `m = alice;` name an object of `m`'s type: `n`'s, or a
+fresh deep copy, which grows the store typing. -/
+theorem MRhs.eval_wt (hwt : RunWT C H σ) {R : RefTy} {r : MRhs C Γ R} {σ₁ : State C Γ}
+    {id : Nat} (h : r.eval σ = .ok (σ₁, id)) :
+    ∃ H', H.Extends H' ∧ RunWT C H' σ₁ ∧ MVal.hasTyH H' (.ref id) (.ref R) = true := by
+  cases r with
+  | alias p =>
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id', hid, h⟩ := bind_ok_inv h
+    cases h
+    have := MPath.mval_wt hwt p hm0
+    rw [MVal.asRef_ok hid] at this
+    exact ⟨H, .refl H, hwt, this⟩
+  | copy p _ =>
+    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, mv⟩, hcopy, h⟩ := bind_ok_inv h
+    obtain ⟨id', hid, h⟩ := bind_ok_inv h
+    cases h
+    have hsvt := findStorage_hasTy hwt.glob.storage (SPath.resolve_wt hwt p hr) hsv
+    obtain ⟨H', hout, hmv⟩ :=
+      copyStToM_typed hwt.glob.heapTyNodup hwt.glob.heap hwt.glob.heapWf hsvt hcopy
+    rw [MVal.asRef_ok hid] at hmv
+    exact ⟨H', hout.ext, hwt.withGlob hout.ext (hwt.glob.ofCopyOut hout), hmv⟩
+  | newArr n hn =>
+    bind_inv h
+    obtain ⟨nv, _, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, mv⟩, hcopy, h⟩ := bind_ok_inv h
+    obtain ⟨id', hid, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hmv⟩ := copyStToM_typed hwt.glob.heapTyNodup hwt.glob.heap
+      hwt.glob.heapWf (newArrVal_hasTy hn nv) hcopy
+    rw [MVal.asRef_ok hid] at hmv
+    exact ⟨H', hout.ext, hwt.withGlob hout.ext (hwt.glob.ofCopyOut hout), hmv⟩
+
+/-- `p = alice;` and `p = persons.push();` name a path the layout types at
+`p`'s type. -/
+theorem ARhs.eval_wt (hwt : RunWT C H σ) {R : RefTy} {r : ARhs C Γ R} {σ₁ : State C Γ}
+    {root : Name} {segs : List Seg} (h : r.eval σ = .ok (σ₁, (root, segs))) :
+    RunWT C H σ₁ ∧ C.layout.tyAt root segs = some (.ref R) := by
+  cases r with
+  | path p =>
+    obtain ⟨rs, hr, h⟩ := bind_ok_inv h
+    cases h
+    exact ⟨hwt, SPath.resolve_wt hwt p hr⟩
+  | push b hd =>
+    obtain ⟨⟨root', segs'⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, n⟩, hpush, h⟩ := bind_ok_inv h
+    cases h
+    have hty := SPath.resolve_wt hwt b hr
+    exact ⟨hwt.withGlob (.refl H) (pushPlaceAt_wt hwt.glob hty (defaultOk_of_defaultOkS hd) hpush),
+      tyAt_append_seg hty rfl⟩
+
+/-- An alias bound by what `r` names is of `r`'s type. -/
+theorem ARhs.alias_wt {R : RefTy} {root : Name} {segs : List Seg}
+    (hty : C.layout.tyAt root segs = some (.ref R)) :
+    LTy.WT C H (.alias R) (some (root, segs)) := by
+  intro r s h
+  cases h
+  exact hty
+
+/-- A decoded word is of its local's type. -/
+theorem Value.fits_wt {v : Value} {p : PrimTy} (h : v.fits p = true) :
+    (Value.toSVal v).hasTy (.prim p) = true := by
+  cases p <;> cases v <;> simp_all [PrimVal.fits, Value.toSVal, SVal.hasTy]
+
+/-- The locals an outcome of an external call binds, each a value of its
+type: decoding checked it. -/
+theorem Binders.decode_wt : {ρ : Ctx} → (bs : Binders ρ) → {vs : List Value} → {r : Env C ρ} →
+    {rest : List Value} → bs.decode vs = .ok (r, rest) → Env.All (LTy.WT C H) r
+  | _, .nil, _, _, _, _ => trivial
+  | _, .snoc bs p x, vs, r, rest, h => by
+    obtain ⟨⟨e, rest'⟩, he, h⟩ := bind_ok_inv h
+    cases rest' with
+    | nil => exact nomatch h
+    | cons v rest'' =>
+      by_cases hv : v.fits p = true
+      · simp only [hv, ↓reduceIte] at h
+        cases h
+        exact ⟨Value.fits_wt hv, Binders.decode_wt bs he⟩
+      · simp only [hv] at h
+        exact nomatch h
+
+/-- The `Panic` code a clause binds is a `uint`. -/
+theorem CodeBinder.decode_wt {κ : Ctx} (code : CodeBinder κ) {c : Value} {r : Env C κ}
+    (h : code.decode c = .ok r) : Env.All (LTy.WT C H) r := by
+  cases code with
+  | none => trivial
+  | some x =>
+    unfold CodeBinder.decode at h
+    split at h
+    · rename_i hc
+      cases h
+      exact ⟨Value.fits_wt hc, trivial⟩
+    · exact nomatch h
+
+/-- The return variables at their defaults are of their types. -/
+theorem Binders.defaults_wt : {ρ : Ctx} → (bs : Binders ρ) →
+    Env.All (LTy.WT C H) (Binders.defaults (C := C) bs)
+  | _, .nil => trivial
+  | _, .snoc bs p _ => ⟨LTy.WT.default p, Binders.defaults_wt bs⟩
+
+/-- Entering a call: the return variables at their defaults, a memory
+return a fresh default object, which grows the store typing. -/
+theorem CallRet.enter_wt {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' : Semantics.State}
+    {r : Env C rs} (hτ : StateWT H C.layout τ) (h : ret.enter τ = .ok (τ', r)) :
+    ∃ H', H.Extends H' ∧ StateWT H' C.layout τ' ∧ Env.All (LTy.WT C H') r := by
+  cases ret with
+  | none => cases h; exact ⟨H, .refl H, hτ, trivial⟩
+  | val p x res => cases h; exact ⟨H, .refl H, hτ, LTy.WT.default p, trivial⟩
+  | rets bs => cases h; exact ⟨H, .refl H, hτ, Binders.defaults_wt bs⟩
+  | mem R x hd hm =>
+    obtain ⟨⟨τ₁, id⟩, ha, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hid⟩ := allocDefault_typed hτ.heapTyNodup hτ.heap hτ.heapWf
+      (defaultOk_of_defaultOkS hd) ha
+    exact ⟨H', hout.ext, hτ.ofCopyOut hout, hid, trivial⟩
+
+end Effects
+
+/-! ## One statement at a time -/
+
+section Leaves
+
+variable {Γ : Ctx}
+
+theorem keeps_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
+    (wtInv C).Keeps (Run.assign l r) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
+    (hwt.glob.write (Loc.resolve_wt hwt l hr) (Src.value_wt hwt hsv) hτ)⟩
+
+theorem keeps_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
+    (wtInv C).Keeps (Run.rebind i r) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
+  cases h
+  obtain ⟨hwt₁, hty⟩ := ARhs.eval_wt hwt he
+  exact ⟨H, .refl H, RunWT.setLocal hwt₁ i (ARhs.alias_wt hty)⟩
+
+theorem keeps_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
+    (wtInv C).Keeps (Run.assignLocal i r) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨w, hv, h⟩ := bind_ok_inv h
+  cases h
+  exact ⟨H, .refl H, RunWT.setLocal hwt i (Val.eval_wt hwt r hv)⟩
+
+theorem keeps_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
+    (wtInv C).Keeps (Run.declLocal p init) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  unfold Run.declLocal at h
+  cases init with
+  | none => cases h; exact ⟨H, .refl H, RunWT.push hwt (LTy.WT.default p)⟩
+  | some e =>
+    obtain ⟨w, hv, h⟩ := bind_ok_inv h
+    cases h
+    exact ⟨H, .refl H, RunWT.push hwt (Val.eval_wt hwt e hv)⟩
+
+theorem keeps_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
+    (wtInv C).Keeps (Run.declStorage R init) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  cases init with
+  | none =>
+    cases h
+    exact ⟨H, .refl H, RunWT.push hwt (t := .alias R) (fun _ _ h => nomatch h)⟩
+  | some r =>
+    obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨hwt₁, hty⟩ := ARhs.eval_wt hwt he
+    exact ⟨H, .refl H, RunWT.push hwt₁ (ARhs.alias_wt hty)⟩
+
+theorem keeps_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) :
+    (wtInv C).Keeps (Run.opAssign op l r) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨v, _, h⟩ := bind_ok_inv h
+  exact ⟨H, .refl H, OpLoc.store_wt hwt (compound_isArith hop) l hp h⟩
+
+theorem keeps_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
+    (wtInv C).Keeps (Run.incDec op l) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
+  cases h
+  exact ⟨H, .refl H, (OpLoc.bump_wt hwt l hp hb).1⟩
+
+theorem keeps_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
+    (hp : p.isNumeric = true) (l : OpLoc C Γ p) : (wtInv C).Keeps (Run.assignIncDec i op l) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
+  cases h
+  obtain ⟨hwt₁, hw⟩ := OpLoc.bump_wt hwt l hp hb
+  exact ⟨H, .refl H, RunWT.setLocal hwt₁ i hw⟩
+
+theorem keeps_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) : (wtInv C).Keeps (Run.push b v) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  refine ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
+    (pushAt_wt hwt.glob (SPath.resolve_wt hwt b hr) ?_ hτ)⟩
+  intro slot w hslot hw
+  cases v with
+  | none =>
+    cases hw
+    exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
+  | some r =>
+    obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
+    cases hw
+    exact SVal.strip_hasTy (Src.value_wt hwt hv)
+
+theorem keeps_pop {E : Ty} (b : SPath C Γ (.array E)) : (wtInv C).Keeps (Run.pop b) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
+    (popAt_wt hwt.glob (SPath.resolve_wt hwt b hr) hτ)⟩
+
+theorem keeps_transfer (r a : Val C Γ .uint) : (wtInv C).Keeps (Run.transfer r a) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  iterate 4 bind_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H) (hwt.glob.transferAt hτ)⟩
+
+theorem keeps_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
+    (wtInv C).Keeps (Run.send pv r a) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  iterate 4 bind_inv h
+  unfold sendAt at h
+  split at h
+  · exact nomatch h
+  · split at h <;> cases h
+    · exact ⟨H, .refl H, RunWT.setLocal (RunWT.withGlob hwt (.refl H) hwt.glob.pay) pv rfl⟩
+    · exact ⟨H, .refl H, RunWT.setLocal (RunWT.withGlob hwt (.refl H) hwt.glob.pay) pv rfl⟩
+    · exact ⟨H, .refl H, RunWT.setLocal hwt pv rfl⟩
+
+theorem keeps_declMem (R : RefTy) (init : Option (MRhs C Γ R))
+    (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) : (wtInv C).Keeps (Run.declMem R init) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  cases init with
+  | none =>
+    obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.glob.heapTyNodup hwt.glob.heap
+      hwt.glob.heapWf (defaultOk_of_defaultOkS (by simpa using hd)) ha
+    exact ⟨H', hout.ext,
+      RunWT.push (RunWT.withGlob hwt hout.ext (hwt.glob.ofCopyOut hout)) (t := .mem R) hid⟩
+  | some r =>
+    obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hext, hwt₁, hid⟩ := MRhs.eval_wt hwt he
+    exact ⟨H', hext, RunWT.push hwt₁ (t := .mem R) hid⟩
+
+theorem keeps_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
+    (wtInv C).Keeps (Run.rebindMem i r) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
+  cases h
+  obtain ⟨H', hext, hwt₁, hid⟩ := MRhs.eval_wt hwt he
+  exact ⟨H', hext, RunWT.setLocal hwt₁ i hid⟩
+
+theorem keeps_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
+    (wtInv C).Keeps (Run.assignFromMem l p) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+  obtain ⟨id, hid, h⟩ := bind_ok_inv h
+  obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  have hm := MPath.mval_wt hwt p hm0
+  rw [MVal.asRef_ok hid] at hm
+  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
+    (hwt.glob.write (Loc.resolve_wt hwt l hr) (copyMem_hasTy hwt.glob.heap hm hsv) hτ)⟩
+
+theorem keeps_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
+    (wtInv C).Keeps (Run.assignMem l r) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
+  exact ⟨H, .refl H, MLoc.write_wt hwt l (MSrc.mval_wt hwt hmv) h⟩
+
+theorem keeps_delete {T : Ty} (l : Loc C Γ T) : (wtInv C).Keeps (Run.delete l) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  have hty := Loc.resolve_wt hwt l hr
+  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
+    (hwt.glob.save hty (SVal.defaultOf_hasTy (findStorage_hasTy hwt.glob.storage hty hcur)) hτ)⟩
+
+theorem keeps_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) :
+    (wtInv C).Keeps (Run.deleteMem p) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  cases p with
+  | var i _ =>
+    obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.glob.heapTyNodup hwt.glob.heap
+      hwt.glob.heapWf (defaultOk_of_defaultOkS hd) ha
+    exact ⟨H', hout.ext,
+      RunWT.setLocal (RunWT.withGlob hwt hout.ext (hwt.glob.ofCopyOut hout)) i hid⟩
+  | loc l =>
+    obtain ⟨a, ha, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    have hat := MLoc.addr_wt hwt l ha
+    cases T with
+    | prim p =>
+      refine ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
+        (writeAddr_wt hwt.glob hat (Value.toMVal_hasTyH ?_) hτ)⟩
+      cases p <;> rfl
+    | ref R =>
+      obtain ⟨⟨τ₁, id⟩, hal, hτ⟩ := bind_ok_inv hτ
+      obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.glob.heapTyNodup hwt.glob.heap
+        hwt.glob.heapWf (defaultOk_of_defaultOkS hd) hal
+      exact ⟨H', hout.ext, RunWT.withGlob hwt hout.ext
+        (writeAddr_wt (hwt.glob.ofCopyOut hout) (hat.mono hout.ext) hid hτ)⟩
+
+theorem keeps_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
+    (hn : R.newArrOk = true) : (wtInv C).Keeps (Run.assignNew l n) := by
+  intro H σ σ' hwt h
+  replace hwt : RunWT C H σ := hwt
+  bind_inv h
+  obtain ⟨nv, _, h⟩ := bind_ok_inv h
+  obtain ⟨⟨τ, mv⟩, hcopy, h⟩ := bind_ok_inv h
+  obtain ⟨id, hid, h⟩ := bind_ok_inv h
+  obtain ⟨H', hout, hmv⟩ := copyStToM_typed hwt.glob.heapTyNodup hwt.glob.heap hwt.glob.heapWf
+    (newArrVal_hasTy hn nv) hcopy
+  rw [MVal.asRef_ok hid] at hmv
+  have hτwt : StateWT H' C.layout τ := hwt.glob.ofCopyOut hout
+  have hwt₁ : RunWT C H' (σ.withGlob τ) := RunWT.withGlob hwt hout.ext hτwt
+  cases l with
+  | store l =>
+    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨τ', hτ', rfl⟩ := map_ok_inv h
+    exact ⟨H', hout.ext, RunWT.withGlob hwt₁ (.refl H')
+      (hτwt.write (Loc.resolve_wt hwt₁ l hr) (copyMem_hasTy hτwt.heap hmv hsv) hτ')⟩
+  | mem l => exact ⟨H', hout.ext, MLoc.write_wt hwt₁ l hmv h⟩
+
+end Leaves
+
+/-! ## The headline -/
+
+mutual
+
+/-- **Type soundness, statement level.**  A statement run from a
+well-typed state ends, if in a state, in a well-typed one in the context its
+type says; the store typing only grows.  From `uint x = 1;` the new local
+holds a number; from `alice.age = x;` storage still inhabits the layout.
+There is no locals check to pass: a statement is typed by its context. -/
+theorem Stmt.keeps_wt : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (wtInv C).Keeps (Stmt.runR s)
+  | _, _, .assign l r => keeps_assign l r
+  | _, _, .rebind i r => keeps_rebind i r
+  | _, _, .assignLocal i r => keeps_assignLocal i r
+  | _, _, .declLocal p _ init => keeps_declLocal p init
+  | _, _, .declStorage R _ init => keeps_declStorage R init
+  | _, _, .opAssign op hop hp l r => keeps_opAssign op hop hp l r
+  | _, _, .incDec op hp l => keeps_incDec op hp l
+  | _, _, .assignIncDec i op hp l _ => keeps_assignIncDec i op hp l
+  | _, _, .push b v hd => keeps_push b v hd
+  | _, _, .pop b => keeps_pop b
+  | _, _, .transfer r a => keeps_transfer r a
+  | _, _, .send pv r a => keeps_send pv r a
+  | _, _, .declMem R _ init hd _ => keeps_declMem R init hd
+  | _, _, .rebindMem i r => keeps_rebindMem i r
+  | _, _, .assignFromMem l p => keeps_assignFromMem l p
+  | _, _, .assignMem l r => keeps_assignMem l r
+  | _, _, .delete l => keeps_delete l
+  | _, _, .deleteMem p hd => keeps_deleteMem p hd
+  | _, _, .assignNew l n hn => keeps_assignNew l n hn
+  | _, _, .ite c thn els =>
+    Invariant.keeps_ite c thn.ext els.ext (Prog.keeps_wt thn) (Prog.keeps_wt els)
+  | _, _, .require c => Invariant.keeps_require c
+  | _, _, .assert c => Invariant.keeps_assert c
+  | _, _, .revert => Invariant.keeps_revert
+  | _, _, .call _ args ret body =>
+    Invariant.keeps_call args ret body.ext (fun _ _ _ hwt h => Args.eval_wt hwt args h)
+      (fun _ _ _ _ hτ h => CallRet.enter_wt ret hτ h) (Prog.keeps_wt body)
+  | _, _, .tryCall call rets ok err code pnc other =>
+    Invariant.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
+      (fun _ _ _ _ h => Binders.decode_wt rets h) (fun _ _ _ h => CodeBinder.decode_wt code h)
+      (Prog.keeps_wt ok) (Prog.keeps_wt err) (Prog.keeps_wt pnc) (Prog.keeps_wt other)
+  | _, _, .loop _ c body => Invariant.keeps_loop c body.ext (Prog.keeps_wt body)
+  | _, _, .block body => Invariant.keeps_block body.ext (Prog.keeps_wt body)
+
+/-- **Type soundness, block level.** -/
+theorem Prog.keeps_wt : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (wtInv C).Keeps (Prog.runR P)
+  | _, _, .nil => Invariant.keeps_nil
+  | _, _, .cons s P => Invariant.keeps_seq (Stmt.keeps_wt s) (Prog.keeps_wt P)
+
+end
+
+/-- **Type soundness**: a statement run from a well-typed state ends, if in
+a state, in a well-typed one, under a store typing that only grew. -/
+theorem Stmt.run_wt {Γ Γ' : Ctx} (s : Stmt C Γ Γ') {H : HeapTy} {σ : State C Γ}
+    {σ' : State C Γ'} (hwt : RunWT C H σ) (h : s.run σ = .ok σ') :
+    ∃ H', H.Extends H' ∧ RunWT C H' σ' :=
+  Stmt.keeps_wt s H σ σ' hwt h
+
+/-- **Type soundness, for a block.** -/
+theorem Prog.run_wt {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy} {σ : State C Γ}
+    {σ' : State C Γ'} (hwt : RunWT C H σ) (h : P.run σ = .ok σ') :
+    ∃ H', H.Extends H' ∧ RunWT C H' σ' :=
+  Prog.keeps_wt P H σ σ' hwt h
+
+/-! ## Where a run starts, and what the headline buys -/
+
+/-- A contract starts well-typed: each root at its type's default, no
+locals, an empty heap. -/
+theorem RunWT.init {σ : State C []} (hnd : nodupKeysB C.vars = true)
+    (hok : C.vars.all (·.2.defaultOkS) = true) (hst : σ.storage = C.initStorage)
+    (hheap : σ.heap = []) : RunWT C [] σ :=
+  ⟨StateWT.init (σ := σ.glob) hnd hok hst hheap, trivial⟩
+
+/-- **Storage stays well-typed.**  Assume `wellFormed(storage)` once and it
+holds after every run: after `Person storage p = alice; p.age = 10;`
+storage still inhabits `StandardExample`'s layout. -/
+theorem Prog.run_storage_wt {Γ Γ' : Ctx} {H : HeapTy} {σ : State C Γ} {σ' : State C Γ'}
+    {P : Prog C Γ Γ'} (hwt : RunWT C H σ) (h : P.run σ = .ok σ') :
+    wellTypedStorageB C.layout σ'.storage = true :=
+  let ⟨_, _, hwt'⟩ := Prog.run_wt P hwt h
+  hwt'.glob.storage
+
+end Solidity.Core

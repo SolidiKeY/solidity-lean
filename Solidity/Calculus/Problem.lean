@@ -182,7 +182,7 @@ theorem storageWordsB_init (hnd : nodupKeysB C.vars = true) :
 it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) : holds C.initState (Fml.wt C) :=
-  holds_wt.2 (wt_of_reachable hnd hdeep ⟨[], [], C.initState, rfl, rfl, rfl⟩
+  holds_wt.2 (wt_of_reachable hnd hdeep ⟨[], .nil, Core.State.ofSem C.initState, rfl, rfl⟩
     (storageWordsB_init hnd))
 
 /-! ## The obligations -/

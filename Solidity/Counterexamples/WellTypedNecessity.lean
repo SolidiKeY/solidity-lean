@@ -48,17 +48,18 @@ theorem readSelect_row :
   decide +kernel
 
 /-- **Storage well-typedness is the boundary.**  `badStore` meets every
-conjunct of `RunWT` but `storage`, and there `x = total;` finds a `bool`
-where the row's `\hasSort` read promises a `uint`. -/
+conjunct of `RunWT` but `storage` (it has no locals to type), and there
+`x = total;` finds a `bool` where the row's `\hasSort` read promises a
+`uint`. -/
 theorem readSelect_needs_storage :
-    nodupKeysB Total.vars = true ∧ EnvWT [] Total.layout [] badStore.env ∧
+    nodupKeysB Total.vars = true ∧
     nodupKeysB ([] : HeapTy) = true ∧ heapTypedB [] badStore.heap = true ∧
     HeapWellFormed badStore ∧
     wellTypedStorageB Total.layout badStore.storage = false ∧
     Stmt.read? totalRead = some (.storage (.prim .uint) (.loc (.root "total" rfl))) ∧
     ¬ (Read.storage (.prim .uint) (.loc (.root "total" rfl)) : Read Total).SortOk badStore []
       (.generic .hasSort) := by
-  refine ⟨by decide, (fun _ _ h => nomatch h), rfl, rfl, (fun _ _ => rfl), by decide, rfl, ?_⟩
+  refine ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, rfl, ?_⟩
   intro h
   exact absurd (h "total" [] (.bool true) rfl rfl) (by decide)
 

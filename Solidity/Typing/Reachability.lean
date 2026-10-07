@@ -1057,19 +1057,7 @@ theorem Canon.init {σ : State} (hok : C.vars.all (·.2.defaultOkS) = true)
 
 section Effects
 
-variable {Γ : Ctx} {H : HeapTy} {σ σ' : State}
-
-/-- A source stores a canonical value: `alice = bob;` a canonical `Person`. -/
-theorem Src.value_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {T : Ty} {r : Src C T}
-    {sv : SVal} (hw : r.wt Γ = true) (h : r.value σ = .ok sv) : sv.canon T := by
-  cases r with
-  | val v =>
-    obtain ⟨w, hv, h⟩ := bind_ok_inv h
-    cases h
-    exact canon_prim_iff.mpr (Val.eval_wt hwt v hw hv)
-  | copy p _ =>
-    obtain ⟨⟨r, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact hc.find (SPath.resolve_wt hwt p hw hr) h
+variable {H : HeapTy} {σ σ' : State}
 
 /-- `b.push(v)` keeps storage canonical. -/
 theorem pushAt_canon (hc : Canon C H σ) {E : Ty} {r : Name} {segs : List Seg}
@@ -1156,7 +1144,7 @@ theorem memWriteField_canon (hc : Canon C H σ) {id : Nat} {s f : Name}
   · rw [lookupBy_setBy_ne he]; exact hc.heap id' s' hid'
 
 /-- A write into a memory array's element touches no struct. -/
-theorem memWriteIndex_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {id : Nat} {i : Int}
+theorem memWriteIndex_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {id : Nat} {i : Int}
     {R : RefTy} {E : Ty} {mv : MVal} (hid : lookupBy id H = some (.ref R))
     (hR : R.arrElem? = some E)
     (h : memWriteIndex σ id i mv = .ok σ') : Canon C H σ' := by
@@ -1178,7 +1166,7 @@ theorem memWriteIndex_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {id : Na
   | struct _ => exact nomatch h
 
 /-- `m.age = 3;` through a resolved address keeps the heap canonical. -/
-theorem writeLoc_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {p : PrimTy} {loc : Addr}
+theorem writeLoc_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {p : PrimTy} {loc : Addr}
     {v : Value} (hloc : AddrTy H p loc) (h : writeLoc σ loc v = .ok σ') : Canon C H σ' := by
   cases loc with
   | memoryField id f =>
@@ -1189,127 +1177,21 @@ theorem writeLoc_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {p : PrimTy} 
     exact memWriteIndex_canon hwt hc hid hR h
 
 /-- `m.age += 1;` keeps the heap canonical. -/
-theorem opMem_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : BinOp} {p : PrimTy}
+theorem opMem_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {op : BinOp} {p : PrimTy}
     {loc : Addr} {v : Value} (hloc : AddrTy H p loc) (h : opMem σ op p loc v = .ok σ') :
     Canon C H σ' := by
   obtain ⟨_, _, _, -, -, h⟩ := opMem_ok_inv h
   exact writeLoc_canon hwt hc hloc h
 
 /-- `m.age++;` keeps the heap canonical. -/
-theorem bumpMem_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : IncDec} {p : PrimTy}
+theorem bumpMem_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {op : IncDec} {p : PrimTy}
     {loc : Addr} {w : Value} (hloc : AddrTy H p loc) (h : bumpMem σ op p loc = .ok (σ', w)) :
     Canon C H σ' := by
   obtain ⟨_, _, -, hσ₁, -⟩ := bumpMem_ok_inv h
   exact writeLoc_canon hwt hc hloc hσ₁
 
-/-- `x ⊕= e` keeps the state canonical. -/
-theorem OpLoc.store_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : BinOp}
-    (hop : op.isArith = true) :
-    ∀ {p : PrimTy} (l : OpLoc C p) {v : Value}, p.isNumeric = true → l.wt Γ = true →
-      l.store σ op v = .ok σ' → Canon C H σ'
-  | p, .local x, v, hp, hw, h => by
-    obtain ⟨b, hb, _⟩ := hwt.lookup hw
-    simp only [OpLoc.store, opLocal, hb, bind, Except.bind] at h
-    cases b with
-    | val old =>
-      simp only [pure, Except.pure] at h
-      split at h
-      · exact nomatch h
-      · split at h
-        · exact nomatch h
-        · cases h; exact hc.of_eq rfl rfl
-    | spath _ _ => exact nomatch h
-    | mref _ => exact nomatch h
-    | store _ => exact nomatch h
-    | ledger _ => exact nomatch h
-    | unset => exact nomatch h
-  | p, .root r hr, v, hp, _, h => opStore_canon hc hop hp (Contract.layout_tyAt_root hr) h
-  | p, .field b f hf, v, hp, hw, h => by
-    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact opStore_canon hc hop hp (Loc.resolve_wt hwt (.field b f hf) hw hr) h
-  | p, .index it b i, v, hp, hw, h => by
-    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact opStore_canon hc hop hp (Loc.resolve_wt hwt (.index it b (.simple i)) hw hr) h
-  | p, @OpLoc.mfield _ s _ b f hf, v, hp, hw, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact opMem_canon hwt hc (loc := .memoryField id f) ⟨s, hb, hf⟩ h
-  | p, .mindex ak b i, v, hp, hw, h => by
-    simp only [OpLoc.wt, Bool.and_eq_true] at hw
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw.1 hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact opMem_canon hwt hc (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
-
-/-- `x++` keeps the state canonical. -/
-theorem OpLoc.bump_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {op : IncDec} :
-    ∀ {p : PrimTy} (l : OpLoc C p) {w : Value}, p.isNumeric = true → l.wt Γ = true →
-      l.bump σ op = .ok (σ', w) → Canon C H σ'
-  | p, .local x, w, hp, hw, h => by
-    obtain ⟨b, hb, _⟩ := hwt.lookup hw
-    simp only [OpLoc.bump, bumpLocal, hb, bind, Except.bind] at h
-    cases b with
-    | val old =>
-      simp only [pure, Except.pure] at h
-      split at h
-      · exact nomatch h
-      · split at h
-        · exact nomatch h
-        · cases h; exact hc.of_eq rfl rfl
-    | spath _ _ => exact nomatch h
-    | mref _ => exact nomatch h
-    | store _ => exact nomatch h
-    | ledger _ => exact nomatch h
-    | unset => exact nomatch h
-  | p, .root r hr, w, hp, _, h => bumpStore_canon hc hp (Contract.layout_tyAt_root hr) h
-  | p, .field b f hf, w, hp, hw, h => by
-    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact bumpStore_canon hc hp (Loc.resolve_wt hwt (.field b f hf) hw hr) h
-  | p, .index it b i, w, hp, hw, h => by
-    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
-    exact bumpStore_canon hc hp (Loc.resolve_wt hwt (.index it b (.simple i)) hw hr) h
-  | p, @OpLoc.mfield _ s _ b f hf, w, hp, hw, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact bumpMem_canon hwt hc (loc := .memoryField id f) ⟨s, hb, hf⟩ h
-  | p, .mindex ak b i, w, hp, hw, h => by
-    simp only [OpLoc.wt, Bool.and_eq_true] at hw
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw.1 hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact bumpMem_canon hwt hc (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ h
-
-/-- `m.age = 3;` keeps the heap canonical. -/
-theorem MLoc.write_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {mv : MVal} :
-    ∀ {T : Ty} (l : MLoc C T), l.wt Γ = true → l.write σ mv = .ok σ' → Canon C H σ'
-  | _, @MLoc.field _ s _ b f hf, hw, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact memWriteField_canon hc hb hf h
-  | _, .index ak b i, hw, h => by
-    simp only [MLoc.wt, Bool.and_eq_true] at hw
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    have hb := MPath.mval_wt hwt b hw.1 hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    exact memWriteIndex_canon hwt hc hb ak.arrElem h
-
 /-- `Person memory m;` allocates a canonical `Person`. -/
-theorem allocDefault_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {R : RefTy} {id : Nat}
+theorem allocDefault_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {R : RefTy} {id : Nat}
     (hok : defaultOk (Ty.ref R) = true) (h : allocDefault σ R = .ok (σ', id)) :
     ∃ H', CopyOutC H σ H' σ' ∧ MVal.hasTyH H' (.ref id) (.ref R) = true := by
   simp only [allocDefault] at h
@@ -1344,7 +1226,7 @@ theorem newArrVal_canon {R : RefTy} (h : R.newArrOk = true) (n : Int) :
   | mapping _ _ => simp [RefTy.newArrOk] at h
 
 /-- `delete m.inner;` through a resolved address keeps the heap canonical. -/
-theorem writeAddr_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {T : Ty} {a : Addr}
+theorem writeAddr_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {T : Ty} {a : Addr}
     {mv : MVal} (ha : AddrTyT H T a) (h : writeAddr σ mv a = .ok σ') : Canon C H σ' := by
   cases a with
   | memoryField id f =>
@@ -1354,89 +1236,11 @@ theorem writeAddr_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {T : Ty} {a 
     obtain ⟨R, hid, hR⟩ := ha
     exact memWriteIndex_canon hwt hc hid hR h
 
-/-- `m = n;` and `m = alice;` keep the state canonical, the second by
-allocating a canonical copy. -/
-theorem MRhs.bind_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {x : Var} {R : RefTy}
-    {r : MRhs C R} (hw : r.wt Γ = true) (h : r.bind σ x = .ok σ') :
-    ∃ H' σ₁ id, H.Extends H' ∧ RunWT C Γ H' σ₁ ∧ Canon C H' σ₁ ∧
-      MVal.hasTyH H' (.ref id) (.ref R) = true ∧ σ' = σ₁.setEnv x (.mref id) := by
-  cases r with
-  | alias p =>
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    have := MPath.mval_wt hwt p hw hm0
-    rw [MVal.asRef_ok hid] at this
-    exact ⟨H, σ, id, HeapTy.Extends.refl H, hwt, hc, this, rfl⟩
-  | copy p _ =>
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    have hT := SPath.resolve_wt hwt p hw hr
-    obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.heapTyNodup hwt.heap hwt.heapWf hc.heap
-      (findStorage_hasTy hwt.storage hT hsv) (hc.find hT hsv) hcopy
-    rw [MVal.asRef_ok hid] at hmv
-    exact ⟨H', σ₁, id, hout.out.ext, hwt.ofCopyOut hout.out,
-      ⟨hout.out.storage ▸ hc.storage, hout.canon⟩, hmv, rfl⟩
-  | newArr n hn =>
-    bind_inv h
-    obtain ⟨nv, _, h⟩ := bind_ok_inv h
-    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.heapTyNodup hwt.heap hwt.heapWf hc.heap
-      (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
-    rw [MVal.asRef_ok hid] at hmv
-    exact ⟨H', σ₁, id, hout.out.ext, hwt.ofCopyOut hout.out,
-      ⟨hout.out.storage ▸ hc.storage, hout.canon⟩, hmv, rfl⟩
-
-/-- `p = alice;` and `p = persons.push();` keep the state canonical. -/
-theorem ARhs.bind_canon (hwt : RunWT C Γ H σ) (hc : Canon C H σ) {x : Var} {R : RefTy}
-    {r : ARhs C R} (hw : r.wt Γ = true) (h : r.bind σ x = .ok σ') : Canon C H σ' := by
-  cases r with
-  | path p =>
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    cases h
-    exact hc.of_eq rfl rfl
-  | push b hd =>
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    obtain ⟨⟨σ₁, n⟩, hpush, h⟩ := bind_ok_inv h
-    cases h
-    exact (pushPlaceAt_canon hc (SPath.resolve_wt hwt b hw hr) (defaultOk_of_defaultOkS hd)
-      hpush).of_eq rfl rfl
-
-
 end Effects
 
-/-! ## The run keeps the state canonical -/
-
-/-- Binding a call's parameters only binds locals to values, so it keeps
-whatever such a binding keeps. -/
-theorem Arg.bindSeq_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w))) :
-    ∀ {args : List (Arg C)} {σ σ' : State}, P σ → Arg.bindSeq args σ = .ok σ' → P σ'
-  | [], _, _, hp, h => by cases h; exact hp
-  | a :: _, σ, _, hp, h => by
-    obtain ⟨w, _, h⟩ := bind_ok_inv h
-    exact Arg.bindSeq_induct hset (hset σ a.x w hp) h
-
-/-- Leaving a call binds at most its result local to a value. -/
-theorem CallRet.leave_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w)))
-    {σ σ' : State} : (ret : CallRet) → P σ → CallRet.leave (C := C) σ ret = .ok σ' → P σ'
-  | .none, hp, h | .val _ _ Option.none, hp, h | .rets _, hp, h => by cases h; exact hp
-  | .val _ _ (some _), hp, h => by
-    obtain ⟨w, _, h⟩ := bind_ok_inv h
-    cases h; exact hset _ _ w hp
-
-/-- Binding a call's parameters touches only locals. -/
-theorem Arg.bindSeq_locals {args : List (Arg C)} {σ σ' : State} (h : Arg.bindSeq args σ = .ok σ') :
-    σ'.storage = σ.storage ∧ σ'.heap = σ.heap :=
-  Arg.bindSeq_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
-    (fun _ _ _ hp => hp) ⟨rfl, rfl⟩ h
-
 /-- Binding the locals an outcome of an external call binds only binds
-locals to values. -/
+locals to values (`Calculus/Problem.lean` reads a constructor's parameters
+so, on the untyped interpreter). -/
 theorem bindData_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w))) :
     ∀ {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : State}, P σ →
       bindData xs vs σ = .ok σ' → P σ'
@@ -1448,356 +1252,614 @@ theorem bindData_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.
     · exact bindData_induct hset (hset σ x w hp) h
     · cases h
 
-/-- The locals an outcome of an external call binds are only locals. -/
-theorem bindData_locals {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : State}
-    (h : bindData xs vs σ = .ok σ') : σ'.storage = σ.storage ∧ σ'.heap = σ.heap :=
-  bindData_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
-    (fun _ _ _ hp => hp) ⟨rfl, rfl⟩ h
+end Solidity
 
-theorem CallRet.leave_locals {σ σ' : State} (ret : CallRet)
-    (h : CallRet.leave (C := C) σ ret = .ok σ') : σ'.storage = σ.storage ∧ σ'.heap = σ.heap :=
-  CallRet.leave_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
-    (fun _ _ _ hp => hp) ret ⟨rfl, rfl⟩ h
+/-! ## The run keeps the state canonical -/
+
+namespace Solidity.Core
+
+open Semantics hiding State
+open SemanticsProperties (HeapWellFormed)
+
+variable {C : Contract}
+
+/-- What a run keeps: the state well-typed, and canonical. -/
+def canonInv (C : Contract) : Invariant C where
+  glob H τ := StateWT H C.layout τ ∧ Canon C H τ
+  loc := LTy.WT C
+  loc_mono hext h := LTy.WT.mono hext h
+  reglob e h := ⟨h.1.reglob e, h.2.of_eq rfl rfl⟩
+
+/-- The state well-typed under `H`, and canonical. -/
+abbrev RunCanon (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
+  (canonInv C).Holds H σ
+
+namespace RunCanon
+
+variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
+
+theorem wt (h : RunCanon C H σ) : RunWT C H σ := ⟨h.1.1, h.2⟩
+
+theorem canon (h : RunCanon C H σ) : Canon C H σ.glob := h.1.2
+
+theorem mk' (hwt : RunWT C H σ) (hc : Canon C H σ.glob) : RunCanon C H σ := ⟨⟨hwt.1, hc⟩, hwt.2⟩
+
+end RunCanon
+
+section Effects
+
+variable {Γ : Ctx} {H : HeapTy} {σ σ' : State C Γ}
+
+/-- A source stores a canonical value: `alice = bob;` a canonical `Person`. -/
+theorem Src.value_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {T : Ty} {r : Src C Γ T}
+    {sv : SVal} (h : r.value σ = .ok sv) : sv.canon T := by
+  cases r with
+  | val v =>
+    obtain ⟨w, hv, h⟩ := bind_ok_inv h
+    cases h
+    exact canon_prim_iff.mpr (Val.eval_wt hwt v hv)
+  | copy p _ =>
+    obtain ⟨⟨r, segs⟩, hr, h⟩ := bind_ok_inv h
+    exact hc.find (SPath.resolve_wt hwt p hr) h
+
+/-- `x ⊕= e` keeps the state canonical. -/
+theorem OpLoc.store_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {op : BinOp}
+    (hop : op.isArith = true) :
+    ∀ {p : PrimTy} (l : OpLoc C Γ p) {v : Value}, p.isNumeric = true →
+      l.store σ op v = .ok σ' → Canon C H σ'.glob
+  | p, .local i, v, hp, h => by
+    obtain ⟨n₁, _, h⟩ := bind_ok_inv h
+    obtain ⟨n₂, _, h⟩ := bind_ok_inv h
+    cases h
+    exact hc.of_eq rfl rfl
+  | p, .root r hr, v, hp, h => by
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact (opStore_canon hc hop hp (Contract.layout_tyAt_root hr) hτ).of_eq rfl rfl
+  | p, .field b f hf, v, hp, h => by
+    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact (opStore_canon hc hop hp (Loc.resolve_wt hwt (.field b f hf) hr) hτ).of_eq rfl rfl
+  | p, .index it b i, v, hp, h => by
+    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact (opStore_canon hc hop hp (Loc.resolve_wt hwt (.index it b (.simple i)) hr) hτ).of_eq
+      rfl rfl
+  | p, @OpLoc.mfield _ _ s _ b f hf, v, hp, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact (opMem_canon hwt.glob hc (loc := .memoryField id f) ⟨s, hb, hf⟩ hτ).of_eq rfl rfl
+  | p, .mindex ak b i, v, hp, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    bind_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact (opMem_canon hwt.glob hc (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ hτ).of_eq
+      rfl rfl
+
+/-- `x++` keeps the state canonical. -/
+theorem OpLoc.bump_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {op : IncDec} :
+    ∀ {p : PrimTy} (l : OpLoc C Γ p) {w : Value}, p.isNumeric = true →
+      l.bump σ op = .ok (σ', w) → Canon C H σ'.glob
+  | p, .local i, w, hp, h => by
+    obtain ⟨m, _, h⟩ := bind_ok_inv h
+    obtain ⟨n, _, h⟩ := bind_ok_inv h
+    cases h
+    exact hc.of_eq rfl rfl
+  | p, .root r hr, w, hp, h => by
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact (bumpStore_canon hc hp (Contract.layout_tyAt_root hr) hτ).of_eq rfl rfl
+  | p, .field b f hf, w, hp, h => by
+    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact (bumpStore_canon hc hp (Loc.resolve_wt hwt (.field b f hf) hr) hτ).of_eq rfl rfl
+  | p, .index it b i, w, hp, h => by
+    obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact (bumpStore_canon hc hp (Loc.resolve_wt hwt (.index it b (.simple i)) hr) hτ).of_eq
+      rfl rfl
+  | p, @OpLoc.mfield _ _ s _ b f hf, w, hp, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact (bumpMem_canon hwt.glob hc (loc := .memoryField id f) ⟨s, hb, hf⟩ hτ).of_eq rfl rfl
+  | p, .mindex ak b i, w, hp, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    bind_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, v⟩, hτ, h⟩ := map_ok_inv h
+    obtain ⟨rfl, rfl⟩ := Prod.mk.inj h
+    exact (bumpMem_canon hwt.glob hc (loc := .memoryIndex id iv) ⟨_, hb, ak.arrElem⟩ hτ).of_eq
+      rfl rfl
+
+/-- `m.age = 3;` keeps the heap canonical. -/
+theorem MLoc.write_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {mv : MVal} :
+    ∀ {T : Ty} (l : MLoc C Γ T), l.write σ mv = .ok σ' → Canon C H σ'.glob
+  | _, @MLoc.field _ _ s _ b f hf, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact (memWriteField_canon hc hb hf hτ).of_eq rfl rfl
+  | _, .index ak b i, h => by
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id, hid, h⟩ := bind_ok_inv h
+    have hb := MPath.mval_wt hwt b hm0
+    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
+    bind_inv h
+    obtain ⟨iv, _, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    exact (memWriteIndex_canon hwt.glob hc hb ak.arrElem hτ).of_eq rfl rfl
+
+/-- An allocation's copy keeps the state canonical. -/
+theorem RunCanon.ofCopyOutC (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {H' : HeapTy}
+    {τ : Semantics.State} (hout : CopyOutC H σ.glob H' τ) : RunCanon C H' (σ.withGlob τ) :=
+  RunCanon.mk' (hwt.withGlob hout.out.ext (hwt.glob.ofCopyOut hout.out))
+    (Canon.of_eq ⟨hout.out.storage ▸ hc.storage, hout.canon⟩ rfl rfl)
+
+/-- `m = n;` and `m = alice;` keep the state canonical, the second by
+allocating a canonical copy. -/
+theorem MRhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy}
+    {r : MRhs C Γ R} {σ₁ : State C Γ} {id : Nat} (h : r.eval σ = .ok (σ₁, id)) :
+    ∃ H', H.Extends H' ∧ RunCanon C H' σ₁ ∧ MVal.hasTyH H' (.ref id) (.ref R) = true := by
+  cases r with
+  | alias p =>
+    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+    obtain ⟨id', hid, h⟩ := bind_ok_inv h
+    cases h
+    have := MPath.mval_wt hwt p hm0
+    rw [MVal.asRef_ok hid] at this
+    exact ⟨H, .refl H, RunCanon.mk' hwt hc, this⟩
+  | copy p _ =>
+    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, mv⟩, hcopy, h⟩ := bind_ok_inv h
+    obtain ⟨id', hid, h⟩ := bind_ok_inv h
+    cases h
+    have hT := SPath.resolve_wt hwt p hr
+    obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.glob.heapTyNodup hwt.glob.heap
+      hwt.glob.heapWf hc.heap (findStorage_hasTy hwt.glob.storage hT hsv) (hc.find hT hsv) hcopy
+    rw [MVal.asRef_ok hid] at hmv
+    exact ⟨H', hout.out.ext, RunCanon.ofCopyOutC hwt hc hout, hmv⟩
+  | newArr n hn =>
+    bind_inv h
+    obtain ⟨nv, _, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, mv⟩, hcopy, h⟩ := bind_ok_inv h
+    obtain ⟨id', hid, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.glob.heapTyNodup hwt.glob.heap
+      hwt.glob.heapWf hc.heap (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
+    rw [MVal.asRef_ok hid] at hmv
+    exact ⟨H', hout.out.ext, RunCanon.ofCopyOutC hwt hc hout, hmv⟩
+
+/-- `p = alice;` and `p = persons.push();` keep the state canonical. -/
+theorem ARhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy}
+    {r : ARhs C Γ R} {σ₁ : State C Γ} {p : Name × List Seg} (h : r.eval σ = .ok (σ₁, p)) :
+    Canon C H σ₁.glob := by
+  cases r with
+  | path q =>
+    obtain ⟨rs, hr, h⟩ := bind_ok_inv h
+    cases h
+    exact hc
+  | push b hd =>
+    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨⟨τ, n⟩, hpush, h⟩ := bind_ok_inv h
+    cases h
+    exact (pushPlaceAt_canon hc (SPath.resolve_wt hwt b hr) (defaultOk_of_defaultOkS hd)
+      hpush).of_eq rfl rfl
+
+/-- Entering a call keeps the state canonical: a memory return is a
+canonical default. -/
+theorem CallRet.enter_canon {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' : Semantics.State}
+    {r : Env C rs} (hτ : StateWT H C.layout τ) (hc : Canon C H τ) (h : ret.enter τ = .ok (τ', r)) :
+    ∃ H', H.Extends H' ∧ (StateWT H' C.layout τ' ∧ Canon C H' τ') ∧ Env.All (LTy.WT C H') r := by
+  cases ret with
+  | none => cases h; exact ⟨H, .refl H, ⟨hτ, hc⟩, trivial⟩
+  | val p x res => cases h; exact ⟨H, .refl H, ⟨hτ, hc⟩, LTy.WT.default p, trivial⟩
+  | rets bs => cases h; exact ⟨H, .refl H, ⟨hτ, hc⟩, Binders.defaults_wt bs⟩
+  | mem R x hd hm =>
+    obtain ⟨⟨τ₁, id⟩, ha, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hid⟩ := allocDefault_canon hτ hc (defaultOk_of_defaultOkS hd) ha
+    exact ⟨H', hout.out.ext, ⟨hτ.ofCopyOut hout.out, ⟨hout.out.storage ▸ hc.storage, hout.canon⟩⟩,
+      hid, trivial⟩
+
+end Effects
+
+/-! ### One statement at a time -/
+
+section Leaves
+
+variable {Γ : Ctx}
+
+theorem keepsC_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
+    (canonInv C).Keeps (Run.assign l r) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  have hc := RunCanon.canon hcn
+  obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  have hT := Loc.resolve_wt hwt l hr
+  exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H)
+    (hwt.glob.write hT (Src.value_wt hwt hsv) hτ))
+    ((hc.write hT (Src.value_canon hwt hc hsv) hτ).of_eq rfl rfl)⟩
+
+theorem keepsC_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
+    (canonInv C).Keeps (Run.rebind i r) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
+  cases h
+  obtain ⟨hwt₁, hty⟩ := ARhs.eval_wt hwt he
+  exact ⟨H, .refl H, RunCanon.mk' (hwt₁.setLocal i (ARhs.alias_wt hty))
+    ((ARhs.eval_canon hwt hcn.canon he).of_eq rfl rfl)⟩
+
+theorem keepsC_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
+    (canonInv C).Keeps (Run.assignLocal i r) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨w, hv, h⟩ := bind_ok_inv h
+  cases h
+  exact ⟨H, .refl H, RunCanon.mk' (hwt.setLocal i (Val.eval_wt hwt r hv))
+    (hcn.canon.of_eq rfl rfl)⟩
+
+theorem keepsC_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
+    (canonInv C).Keeps (Run.declLocal p init) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  unfold Run.declLocal at h
+  cases init with
+  | none =>
+    cases h
+    exact ⟨H, .refl H, RunCanon.mk' (hwt.push (LTy.WT.default p)) (hcn.canon.of_eq rfl rfl)⟩
+  | some e =>
+    obtain ⟨w, hv, h⟩ := bind_ok_inv h
+    cases h
+    exact ⟨H, .refl H, RunCanon.mk' (hwt.push (Val.eval_wt hwt e hv)) (hcn.canon.of_eq rfl rfl)⟩
+
+theorem keepsC_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
+    (canonInv C).Keeps (Run.declStorage R init) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  cases init with
+  | none =>
+    cases h
+    exact ⟨H, .refl H, RunCanon.mk' (hwt.push (t := .alias R) (fun _ _ h => nomatch h))
+      (hcn.canon.of_eq rfl rfl)⟩
+  | some r =>
+    obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨hwt₁, hty⟩ := ARhs.eval_wt hwt he
+    exact ⟨H, .refl H, RunCanon.mk' (hwt₁.push (ARhs.alias_wt hty))
+      ((ARhs.eval_canon hwt hcn.canon he).of_eq rfl rfl)⟩
+
+theorem keepsC_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) :
+    (canonInv C).Keeps (Run.opAssign op l r) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨v, _, h⟩ := bind_ok_inv h
+  exact ⟨H, .refl H, RunCanon.mk' (OpLoc.store_wt hwt (compound_isArith hop) l hp h)
+    (OpLoc.store_canon hwt hcn.canon (compound_isArith hop) l hp h)⟩
+
+theorem keepsC_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
+    (canonInv C).Keeps (Run.incDec op l) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
+  cases h
+  exact ⟨H, .refl H, RunCanon.mk' (OpLoc.bump_wt hwt l hp hb).1
+    (OpLoc.bump_canon hwt hcn.canon l hp hb)⟩
+
+theorem keepsC_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
+    (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
+    (canonInv C).Keeps (Run.assignIncDec i op l) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
+  cases h
+  obtain ⟨hwt₁, hw⟩ := OpLoc.bump_wt hwt l hp hb
+  exact ⟨H, .refl H, RunCanon.mk' (hwt₁.setLocal i hw)
+    ((OpLoc.bump_canon hwt hcn.canon l hp hb).of_eq rfl rfl)⟩
+
+theorem keepsC_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) : (canonInv C).Keeps (Run.push b v) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  have hc := RunCanon.canon hcn
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  have hT := SPath.resolve_wt hwt b hr
+  refine ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (pushAt_wt hwt.glob hT ?_ hτ))
+    ((pushAt_canon hc hT ?_ hτ).of_eq rfl rfl)⟩
+  · intro slot w hslot hw
+    cases v with
+    | none =>
+      cases hw
+      exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
+    | some r =>
+      obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
+      cases hw
+      exact SVal.strip_hasTy (Src.value_wt hwt hv)
+  · intro slot w hslot hw
+    cases v with
+    | none =>
+      cases hw
+      exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
+    | some r =>
+      obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
+      cases hw
+      exact SVal.strip_canon (Src.value_canon hwt hc hv)
+
+theorem keepsC_pop {E : Ty} (b : SPath C Γ (.array E)) : (canonInv C).Keeps (Run.pop b) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  have hT := SPath.resolve_wt hwt b hr
+  exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (popAt_wt hwt.glob hT hτ))
+    ((popAt_canon hcn.canon hT hτ).of_eq rfl rfl)⟩
+
+theorem keepsC_transfer (r a : Val C Γ .uint) : (canonInv C).Keeps (Run.transfer r a) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  iterate 4 bind_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  refine ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (hwt.glob.transferAt hτ)) ?_⟩
+  unfold Solidity.transferAt at hτ
+  split at hτ
+  · exact nomatch hτ
+  · cases hτ; rw [Semantics.State.pay_eq]; exact hcn.canon.of_eq rfl rfl
+
+theorem keepsC_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
+    (canonInv C).Keeps (Run.send pv r a) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨_, _, h⟩ := bind_ok_inv h
+  obtain ⟨addr, _, h⟩ := bind_ok_inv h
+  obtain ⟨_, _, h⟩ := bind_ok_inv h
+  obtain ⟨amt, _, h⟩ := bind_ok_inv h
+  unfold sendAt at h
+  split at h
+  · exact nomatch h
+  · have hp : Canon C H (σ.glob.pay addr amt) := by
+      rw [Semantics.State.pay_eq]; exact hcn.canon.of_eq rfl rfl
+    split at h <;> cases h
+    · exact ⟨H, .refl H, RunCanon.mk'
+        ((hwt.withGlob (.refl H) hwt.glob.pay).setLocal pv rfl) (hp.of_eq rfl rfl)⟩
+    · exact ⟨H, .refl H, RunCanon.mk'
+        ((hwt.withGlob (.refl H) hwt.glob.pay).setLocal pv rfl) (hp.of_eq rfl rfl)⟩
+    · exact ⟨H, .refl H, RunCanon.mk' (hwt.setLocal pv rfl) (hcn.canon.of_eq rfl rfl)⟩
+
+theorem keepsC_declMem (R : RefTy) (init : Option (MRhs C Γ R))
+    (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) :
+    (canonInv C).Keeps (Run.declMem R init) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  cases init with
+  | none =>
+    obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hcn.canon
+      (defaultOk_of_defaultOkS (by simpa using hd)) ha
+    have h₁ := RunCanon.ofCopyOutC hwt hcn.canon hout
+    exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.push (t := .mem R) hid) (h₁.canon.of_eq rfl rfl)⟩
+  | some r =>
+    obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hext, h₁, hid⟩ := MRhs.eval_canon hwt hcn.canon he
+    exact ⟨H', hext, RunCanon.mk' (h₁.wt.push (t := .mem R) hid) (h₁.canon.of_eq rfl rfl)⟩
+
+theorem keepsC_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
+    (canonInv C).Keeps (Run.rebindMem i r) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
+  cases h
+  obtain ⟨H', hext, h₁, hid⟩ := MRhs.eval_canon hwt hcn.canon he
+  exact ⟨H', hext, RunCanon.mk' (h₁.wt.setLocal i hid) (h₁.canon.of_eq rfl rfl)⟩
+
+theorem keepsC_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
+    (canonInv C).Keeps (Run.assignFromMem l p) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  have hc := RunCanon.canon hcn
+  obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
+  obtain ⟨id, hid, h⟩ := bind_ok_inv h
+  obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  have hm := MPath.mval_wt hwt p hm0
+  rw [MVal.asRef_ok hid] at hm
+  have hT := Loc.resolve_wt hwt l hr
+  exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H)
+      (hwt.glob.write hT (copyMem_hasTy hwt.glob.heap hm hsv) hτ))
+    ((hc.write hT (copyMToSt_canon hwt.glob.heap hc.heap hm hsv) hτ).of_eq rfl rfl)⟩
+
+theorem keepsC_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
+    (canonInv C).Keeps (Run.assignMem l r) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
+  exact ⟨H, .refl H, RunCanon.mk' (MLoc.write_wt hwt l (MSrc.mval_wt hwt hmv) h)
+    (MLoc.write_canon hwt hcn.canon l h)⟩
+
+theorem keepsC_delete {T : Ty} (l : Loc C Γ T) : (canonInv C).Keeps (Run.delete l) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  have hc := RunCanon.canon hcn
+  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+  obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
+  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+  have hty := Loc.resolve_wt hwt l hr
+  exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (hwt.glob.save hty
+      (SVal.defaultOf_hasTy (findStorage_hasTy hwt.glob.storage hty hcur)) hτ))
+    ((hc.save hty (SVal.defaultOf_canon (hc.find hty hcur)) hτ).of_eq rfl rfl)⟩
+
+theorem keepsC_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) :
+    (canonInv C).Keeps (Run.deleteMem p) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  have hc := RunCanon.canon hcn
+  cases p with
+  | var i _ =>
+    obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
+    cases h
+    obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc (defaultOk_of_defaultOkS hd) ha
+    have h₁ := RunCanon.ofCopyOutC hwt hc hout
+    exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.setLocal i hid) (h₁.canon.of_eq rfl rfl)⟩
+  | loc l =>
+    obtain ⟨a, ha, h⟩ := bind_ok_inv h
+    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
+    have hat := MLoc.addr_wt hwt l ha
+    cases T with
+    | prim p =>
+      refine ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H)
+        (writeAddr_wt hwt.glob hat (Value.toMVal_hasTyH ?_) hτ))
+        ((writeAddr_canon hwt.glob hc hat hτ).of_eq rfl rfl)⟩
+      cases p <;> rfl
+    | ref R =>
+      obtain ⟨⟨τ₁, id⟩, hal, hτ⟩ := bind_ok_inv hτ
+      obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc (defaultOk_of_defaultOkS hd) hal
+      have hg₁ : StateWT H' C.layout τ₁ := hwt.glob.ofCopyOut hout.out
+      have hc₁ : Canon C H' τ₁ := ⟨hout.out.storage ▸ hc.storage, hout.canon⟩
+      exact ⟨H', hout.out.ext, RunCanon.mk'
+        (hwt.withGlob hout.out.ext (writeAddr_wt hg₁ (hat.mono hout.out.ext) hid hτ))
+        ((writeAddr_canon hg₁ hc₁ (hat.mono hout.out.ext) hτ).of_eq rfl rfl)⟩
+
+theorem keepsC_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
+    (hn : R.newArrOk = true) : (canonInv C).Keeps (Run.assignNew l n) := by
+  intro H σ σ' hcn h
+  replace hcn : RunCanon C H σ := hcn
+  have hwt := RunCanon.wt hcn
+  have hc := RunCanon.canon hcn
+  bind_inv h
+  obtain ⟨nv, _, h⟩ := bind_ok_inv h
+  obtain ⟨⟨τ, mv⟩, hcopy, h⟩ := bind_ok_inv h
+  obtain ⟨id, hid, h⟩ := bind_ok_inv h
+  obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.glob.heapTyNodup hwt.glob.heap hwt.glob.heapWf
+    hc.heap (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
+  rw [MVal.asRef_ok hid] at hmv
+  have hg₁ : StateWT H' C.layout τ := hwt.glob.ofCopyOut hout.out
+  have hc₁ : Canon C H' τ := ⟨hout.out.storage ▸ hc.storage, hout.canon⟩
+  have h₁ := RunCanon.ofCopyOutC hwt hc hout
+  cases l with
+  | store l =>
+    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
+    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
+    obtain ⟨τ', hτ', rfl⟩ := map_ok_inv h
+    have hT := Loc.resolve_wt h₁.wt l hr
+    exact ⟨H', hout.out.ext, RunCanon.mk'
+      (h₁.wt.withGlob (.refl H') (hg₁.write hT (copyMem_hasTy hg₁.heap hmv hsv) hτ'))
+      ((hc₁.write hT (copyMToSt_canon hg₁.heap hc₁.heap hmv hsv) hτ').of_eq rfl rfl)⟩
+  | mem l =>
+    exact ⟨H', hout.out.ext, RunCanon.mk' (MLoc.write_wt h₁.wt l hmv h)
+      (MLoc.write_canon h₁.wt h₁.canon l h)⟩
+
+end Leaves
 
 mutual
 
-/-- **Canonicity, statement level.**  A checked statement run from a
-well-typed canonical state ends in one: after `alice.age = 3;` `alice`
-still has both members, after `balances[7] += 1;` key `7` is there once,
-after `alice = m;` the copy has every member `m`'s object has, which is all
-of them. -/
-theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State},
-    RunWT C Γ H σ → Canon C H σ → s.wt Γ = some Γ' → s.run σ = .ok σ' →
-      ∃ H', H.Extends H' ∧ RunWT C Γ' H' σ' ∧ Canon C H' σ'
-  | .assign l r, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    have hT := Loc.resolve_wt hwt l hc.1 hr
-    exact ⟨H, .refl H, hwt.write hT (Src.value_wt hwt hc.2 hsv) h,
-      hcn.write hT (Src.value_canon hwt hcn hc.2 hsv) h⟩
-  | .rebind x r, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    have hcn' := ARhs.bind_canon hwt hcn hc.2 h
-    obtain ⟨σ₁, root, segs, hwt₁, hty, rfl⟩ := ARhs.bind_wt hwt hc.2 h
-    exact ⟨H, .refl H, hwt₁.setEnv_same hc.1 (by simp [BTy.matchesB, hty]), hcn'⟩
-  | .assignLocal x r, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨w, hv, h⟩ := bind_ok_inv h
-    cases h
-    exact ⟨H, .refl H,
-      hwt.setEnv_same hc.1 (by simpa [BTy.matchesB] using Val.eval_wt hwt r hc.2 hv),
-      hcn.of_eq rfl rfl⟩
-  | .declLocal p x init, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Stmt.run] at h
-    cases init with
-    | none =>
-      obtain ⟨w, hv, h⟩ := bind_ok_inv h
-      cases hv; cases h
-      exact ⟨H, .refl H, hwt.setEnv (by cases p <;> rfl), hcn.of_eq rfl rfl⟩
-    | some e =>
-      obtain ⟨w, hv, h⟩ := bind_ok_inv h
-      cases h
-      exact ⟨H, .refl H, hwt.setEnv
-        (by simpa [BTy.matchesB] using Val.eval_wt hwt e (by simpa using hc) hv),
-        hcn.of_eq rfl rfl⟩
-  | .declStorage R x init, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    cases init with
-    | none =>
-      cases hs; cases h
-      exact ⟨H, .refl H, hwt.setEnv rfl, hcn.of_eq rfl rfl⟩
-    | some r =>
-      obtain ⟨hc, rfl⟩ := wt_if hs
-      have hcn' := ARhs.bind_canon hwt hcn hc h
-      obtain ⟨σ₁, root, segs, hwt₁, hty, rfl⟩ := ARhs.bind_wt hwt hc h
-      exact ⟨H, .refl H, hwt₁.setEnv (by simp [BTy.matchesB, hty]), hcn'⟩
-  | .opAssign op hop hp l r, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨v, _, h⟩ := bind_ok_inv h
-    exact ⟨H, .refl H, OpLoc.store_wt hwt (compound_isArith hop) l hp hc.1 h,
-      OpLoc.store_canon hwt hcn (compound_isArith hop) l hp hc.1 h⟩
-  | .incDec op hp l, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
-    cases h
-    exact ⟨H, .refl H, (OpLoc.bump_wt hwt l hp hc hb).1, OpLoc.bump_canon hwt hcn l hp hc hb⟩
-  | .assignIncDec x op hp l _, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
-    cases h
-    obtain ⟨hwt₁, hw⟩ := OpLoc.bump_wt hwt l hp hc.2 hb
-    exact ⟨H, .refl H, hwt₁.setEnv_same hc.1 (by simpa [BTy.matchesB] using hw),
-      (OpLoc.bump_canon hwt hcn l hp hc.2 hb).of_eq rfl rfl⟩
-  | .push b v hd, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    have hT := SPath.resolve_wt hwt b hc.1 hr
-    refine ⟨H, .refl H, pushAt_wt hwt hT ?_ h, pushAt_canon hcn hT ?_ h⟩
-    · intro slot w hslot hw
-      cases v with
-      | none =>
-        cases hw
-        exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
-      | some r =>
-        obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
-        cases hw
-        exact SVal.strip_hasTy (Src.value_wt hwt (by simpa using hc.2) hv)
-    · intro slot w hslot hw
-      cases v with
-      | none =>
-        cases hw
-        exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
-      | some r =>
-        obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
-        cases hw
-        exact SVal.strip_canon (Src.value_canon hwt hcn (by simpa using hc.2) hv)
-  | .pop b, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    have hT := SPath.resolve_wt hwt b hc hr
-    exact ⟨H, .refl H, popAt_wt hwt hT h, popAt_canon hcn hT h⟩
-  | .transfer r a, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨_, rfl⟩ := wt_if hs
-    iterate 4 bind_inv h
-    refine ⟨H, .refl H, hwt.transferAt h, ?_⟩
-    unfold transferAt at h
-    split at h
-    · exact nomatch h
-    · cases h; rw [State.pay_eq]; exact hcn.of_eq rfl rfl
-  | .send pv r a, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    iterate 4 bind_inv h
-    refine ⟨H, .refl H, hwt.sendAt hc.1.1 h, ?_⟩
-    unfold sendAt at h
-    split at h
-    · exact nomatch h
-    · split at h <;> cases h <;> exact hcn.of_eq rfl rfl
-  | .declMem R x init hd _, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    cases init with
-    | none =>
-      obtain ⟨⟨σ₁, id⟩, ha, h⟩ := bind_ok_inv h
-      cases h
-      obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt hcn
-        (defaultOk_of_defaultOkS (by simpa using hd)) ha
-      exact ⟨H', hout.out.ext,
-        (hwt.ofCopyOut hout.out).setEnv (by simpa [BTy.matchesB] using hid),
-        Canon.of_eq ⟨hout.out.storage ▸ hcn.storage, hout.canon⟩ rfl rfl⟩
-    | some r =>
-      obtain ⟨H', σ₁, id, hext, hwt₁, hcn₁, hid, rfl⟩ :=
-        MRhs.bind_canon hwt hcn (by simpa using hc) h
-      exact ⟨H', hext, hwt₁.setEnv (by simpa [BTy.matchesB] using hid), hcn₁.of_eq rfl rfl⟩
-  | .rebindMem x r, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨H', σ₁, id, hext, hwt₁, hcn₁, hid, rfl⟩ := MRhs.bind_canon hwt hcn hc.2 h
-    have hx : Ctx.has Γ x (.mem (.ref _)) = true := hc.1
-    exact ⟨H', hext, hwt₁.setEnv_same hx (by simpa [BTy.matchesB] using hid),
-      hcn₁.of_eq rfl rfl⟩
-  | .assignFromMem l p, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    have hm := MPath.mval_wt hwt p hc.2 hm0
-    rw [MVal.asRef_ok hid] at hm
-    have hT := Loc.resolve_wt hwt l hc.1 hr
-    exact ⟨H, .refl H, hwt.write hT (copyMem_hasTy hwt.heap hm hsv) h,
-      hcn.write hT (copyMToSt_canon hwt.heap hcn.heap hm hsv) h⟩
-  | .assignMem l r, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
-    exact ⟨H, .refl H, MLoc.write_wt hwt l (MSrc.mval_wt hwt hc.2 hmv) hc.1 h,
-      MLoc.write_canon hwt hcn l hc.1 h⟩
-  | .delete l, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
-    have hty := Loc.resolve_wt hwt l hc hr
-    exact ⟨H, .refl H,
-      hwt.save hty (SVal.defaultOf_hasTy (findStorage_hasTy hwt.storage hty hcur)) h,
-      hcn.save hty (SVal.defaultOf_canon (hcn.find hty hcur)) h⟩
-  | @Stmt.deleteMem _ T p hd, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    cases p with
-    | var x =>
-      obtain ⟨⟨σ₁, id⟩, ha, h⟩ := bind_ok_inv h
-      cases h
-      obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt hcn (defaultOk_of_defaultOkS hd) ha
-      exact ⟨H', hout.out.ext,
-        (hwt.ofCopyOut hout.out).setEnv_same hc (by simpa [BTy.matchesB] using hid),
-        Canon.of_eq ⟨hout.out.storage ▸ hcn.storage, hout.canon⟩ rfl rfl⟩
-    | loc l =>
-      obtain ⟨a, ha, h⟩ := bind_ok_inv h
-      have hat := MLoc.addr_wt hwt l hc ha
-      cases T with
-      | prim p =>
-        refine ⟨H, .refl H, writeAddr_wt hwt hat (Value.toMVal_hasTyH ?_) h,
-          writeAddr_canon hwt hcn hat h⟩
-        cases p <;> rfl
-      | ref R =>
-        obtain ⟨⟨σ₁, id⟩, hal, h⟩ := bind_ok_inv h
-        obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt hcn (defaultOk_of_defaultOkS hd) hal
-        have hwt₁ := hwt.ofCopyOut hout.out
-        have hcn₁ : Canon C H' σ₁ := ⟨hout.out.storage ▸ hcn.storage, hout.canon⟩
-        exact ⟨H', hout.out.ext, writeAddr_wt hwt₁ (hat.mono hout.out.ext) hid h,
-          writeAddr_canon hwt₁ hcn₁ (hat.mono hout.out.ext) h⟩
-  | .assignNew l n hn, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨hc, rfl⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    bind_inv h
-    obtain ⟨nv, _, h⟩ := bind_ok_inv h
-    obtain ⟨⟨σ₁, mv⟩, hcopy, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.heapTyNodup hwt.heap hwt.heapWf hcn.heap
-      (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
-    rw [MVal.asRef_ok hid] at hmv
-    have hwt₁ := hwt.ofCopyOut hout.out
-    have hcn₁ : Canon C H' σ₁ := ⟨hout.out.storage ▸ hcn.storage, hout.canon⟩
-    cases l with
-    | store l =>
-      obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-      obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-      have hT := Loc.resolve_wt hwt₁ l hc.1 hr
-      exact ⟨H', hout.out.ext, hwt₁.write hT (copyMem_hasTy hwt₁.heap hmv hsv) h,
-        hcn₁.write hT (copyMToSt_canon hwt₁.heap hcn₁.heap hmv hsv) h⟩
-    | mem l =>
-      exact ⟨H', hout.out.ext, MLoc.write_wt hwt₁ l hmv hc.1 h, MLoc.write_canon hwt₁ hcn₁ l hc.1 h⟩
-  | .ite c thn els, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    simp only [Stmt.wt] at hs
-    split at hs
-    · split at hs
-      · rename_i Γt Γe ht he
-        obtain ⟨hle, rfl⟩ := wt_if hs
-        simp only [Bool.and_eq_true] at hle
-        obtain ⟨cv, _, h⟩ := bind_ok_inv h
-        split at h
-        · obtain ⟨H', hext, hwt', hcn'⟩ := Prog.run_canon thn hwt hcn ht h
-          exact ⟨H', hext, hwt'.weaken hle.1, hcn'⟩
-        · obtain ⟨H', hext, hwt', hcn'⟩ := Prog.run_canon els hwt hcn he h
-          exact ⟨H', hext, hwt'.weaken hle.2, hcn'⟩
-        · exact nomatch h
-      · exact nomatch hs
-    · exact nomatch hs
-  | .require c, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨_, rfl⟩ := wt_if hs
-    obtain ⟨cv, _, h⟩ := bind_ok_inv h
-    unfold guardOk at h
-    split at h
-    · cases h; exact ⟨H, .refl H, hwt, hcn⟩
-    · exact nomatch h
-    · exact nomatch h
-  | .assert c, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    obtain ⟨_, rfl⟩ := wt_if hs
-    obtain ⟨cv, _, h⟩ := bind_ok_inv h
-    unfold assertOk at h
-    split at h
-    · cases h; exact ⟨H, .refl H, hwt, hcn⟩
-    · exact nomatch h
-    · exact nomatch h
-  | .revert, _, _, _, _, _, _, _, _, h => nomatch h
-  | .call _ args _ ret body, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    simp only [Stmt.wt] at hs
-    split at hs
-    · rename_i Γ₁ h₁
-      split at hs
-      · rename_i Γ₂ h₂
-        obtain ⟨hr, rfl⟩ := wt_if hs
-        simp only [Stmt.run] at h
-        obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
-        obtain ⟨σ₂, hσ₂, h⟩ := bind_ok_inv h
-        obtain ⟨hs₁, hh₁⟩ := Arg.bindSeq_locals hσ₁
-        obtain ⟨hs₁', hh₁'⟩ : (ret.enter σ₁).storage = σ.storage ∧ (ret.enter σ₁).heap = σ.heap :=
-          CallRet.enter_induct (P := fun τ => τ.storage = σ.storage ∧ τ.heap = σ.heap)
-            (fun _ _ _ h => h) ret ⟨hs₁, hh₁⟩
-        have hcn₁ : Canon C H (ret.enter σ₁) := hcn.of_eq hs₁' hh₁'
-        obtain ⟨H', hext, hwt₂, hcn₂⟩ :=
-          Prog.run_canon body (CallRet.enter_wt (Arg.bindSeq_wt hwt h₁ hσ₁) ret) hcn₁ h₂ hσ₂
-        obtain ⟨hs₃, hh₃⟩ := CallRet.leave_locals ret h
-        exact ⟨H', hext, CallRet.leave_wt hwt₂ ret hr h, hcn₂.of_eq hs₃ hh₃⟩
-      · exact nomatch hs
-    · exact nomatch hs
-  | .tryCall c rets ok err code pnc other, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    simp only [Stmt.wt] at hs
-    split at hs
-    · split at hs
-      · rename_i Γ₁ Γ₂ Γ₃ Γ₄ h₁ h₂ h₃ h₄
-        obtain ⟨hle, rfl⟩ := wt_if hs
-        simp only [Bool.and_eq_true] at hle
-        simp only [Stmt.run] at h
-        obtain ⟨k, _, h⟩ := bind_ok_inv h
-        split at h
-        · exact nomatch h
-        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
-          obtain ⟨hs₁, hh₁⟩ := bindData_locals hb
-          obtain ⟨H', hext, hwt', hcn'⟩ :=
-            Prog.run_canon ok (bindData_wt hwt hb) (hcn.of_eq hs₁ hh₁) h₁ h
-          exact ⟨H', hext, hwt'.weaken hle.1.1.1, hcn'⟩
-        · obtain ⟨H', hext, hwt', hcn'⟩ := Prog.run_canon err hwt hcn h₂ h
-          exact ⟨H', hext, hwt'.weaken hle.1.1.2, hcn'⟩
-        · obtain ⟨σ₁, hb, h⟩ := bind_ok_inv h
-          obtain ⟨hs₁, hh₁⟩ := bindData_locals hb
-          obtain ⟨H', hext, hwt', hcn'⟩ :=
-            Prog.run_canon pnc (bindData_wt hwt hb) (hcn.of_eq hs₁ hh₁) h₃ h
-          exact ⟨H', hext, hwt'.weaken hle.1.2, hcn'⟩
-        · obtain ⟨H', hext, hwt', hcn'⟩ := Prog.run_canon other hwt hcn h₄ h
-          exact ⟨H', hext, hwt'.weaken hle.2, hcn'⟩
-      · exact nomatch hs
-    · exact nomatch hs
-  | .loop a c body, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    simp only [Stmt.wt] at hs
-    split at hs
-    · split at hs
-      · rename_i Γb hb
-        obtain ⟨hle, rfl⟩ := wt_if hs
-        simp only [Stmt.run] at h
-        refine Loop.run_induct
-          (P := fun τ => ∃ H', H.Extends H' ∧ RunWT C Γ H' τ ∧ Canon C H' τ)
-          (Q := fun r => ∀ τ, r = .ok τ → ∃ H', H.Extends H' ∧ RunWT C Γ H' τ ∧ Canon C H' τ)
-          ⟨H, .refl H, hwt, hcn⟩ (fun τ ⟨H₁, hext₁, hwt₁, hcn₁⟩ => ?_) (fun _ h => nomatch h) _ h
-        simp only [Loop.step]
-        rcases c.eval τ with _ | (_ | b)
-        · exact fun _ h => nomatch h
-        · exact fun _ h => nomatch h
-        · cases b
-          · exact fun _ h => by cases h; exact ⟨H₁, hext₁, hwt₁, hcn₁⟩
-          · cases hr : Prog.run τ body with
-            | error _ => exact fun _ h => nomatch h
-            | ok τ' =>
-              obtain ⟨H₂, hext₂, hwt₂, hcn₂⟩ := Prog.run_canon body hwt₁ hcn₁ hb hr
-              exact ⟨H₂, hext₁.trans hext₂, hwt₂.weaken hle, hcn₂⟩
-      · exact nomatch hs
-    · exact nomatch hs
+/-- **Canonicity, statement level.**  A statement run from a well-typed
+canonical state ends in one: after `alice.age = 3;` `alice` still has both
+members, after `balances[7] += 1;` key `7` is there once, after
+`alice = m;` the copy has every member `m`'s object has, which is all of
+them. -/
+theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv C).Keeps (Stmt.runR s)
+  | _, _, .assign l r => keepsC_assign l r
+  | _, _, .rebind i r => keepsC_rebind i r
+  | _, _, .assignLocal i r => keepsC_assignLocal i r
+  | _, _, .declLocal p _ init => keepsC_declLocal p init
+  | _, _, .declStorage R _ init => keepsC_declStorage R init
+  | _, _, .opAssign op hop hp l r => keepsC_opAssign op hop hp l r
+  | _, _, .incDec op hp l => keepsC_incDec op hp l
+  | _, _, .assignIncDec i op hp l _ => keepsC_assignIncDec i op hp l
+  | _, _, .push b v hd => keepsC_push b v hd
+  | _, _, .pop b => keepsC_pop b
+  | _, _, .transfer r a => keepsC_transfer r a
+  | _, _, .send pv r a => keepsC_send pv r a
+  | _, _, .declMem R _ init hd _ => keepsC_declMem R init hd
+  | _, _, .rebindMem i r => keepsC_rebindMem i r
+  | _, _, .assignFromMem l p => keepsC_assignFromMem l p
+  | _, _, .assignMem l r => keepsC_assignMem l r
+  | _, _, .delete l => keepsC_delete l
+  | _, _, .deleteMem p hd => keepsC_deleteMem p hd
+  | _, _, .assignNew l n hn => keepsC_assignNew l n hn
+  | _, _, .ite c thn els =>
+    Invariant.keeps_ite c thn.ext els.ext (Prog.keeps_canon thn) (Prog.keeps_canon els)
+  | _, _, .require c => Invariant.keeps_require c
+  | _, _, .assert c => Invariant.keeps_assert c
+  | _, _, .revert => Invariant.keeps_revert
+  | _, _, .call _ args ret body =>
+    Invariant.keeps_call args ret body.ext
+      (fun _ _ _ hcn h => Args.eval_wt (RunCanon.wt hcn) args h)
+      (fun _ _ _ _ hτ h => CallRet.enter_canon ret hτ.1 hτ.2 h) (Prog.keeps_canon body)
+  | _, _, .tryCall call rets ok err code pnc other =>
+    Invariant.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
+      (fun _ _ _ _ h => Binders.decode_wt rets h) (fun _ _ _ h => CodeBinder.decode_wt code h)
+      (Prog.keeps_canon ok) (Prog.keeps_canon err) (Prog.keeps_canon pnc)
+      (Prog.keeps_canon other)
+  | _, _, .loop _ c body => Invariant.keeps_loop c body.ext (Prog.keeps_canon body)
+  | _, _, .block body => Invariant.keeps_block body.ext (Prog.keeps_canon body)
 
 /-- **Canonicity, block level.** -/
-theorem Prog.run_canon : ∀ (P : List (Stmt C)) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State},
-    RunWT C Γ H σ → Canon C H σ → Prog.wt Γ P = some Γ' → Prog.run σ P = .ok σ' →
-      ∃ H', H.Extends H' ∧ RunWT C Γ' H' σ' ∧ Canon C H' σ'
-  | [], Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    cases hs; cases h
-    exact ⟨H, .refl H, hwt, hcn⟩
-  | s :: P, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
-    simp only [Prog.wt] at hs
-    split at hs
-    · rename_i Γ₁ h₁
-      obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
-      obtain ⟨H₁, hext₁, hwt₁, hcn₁⟩ := Stmt.run_canon s hwt hcn h₁ hσ₁
-      obtain ⟨H₂, hext₂, hwt₂, hcn₂⟩ := Prog.run_canon P hwt₁ hcn₁ hs h
-      exact ⟨H₂, hext₁.trans hext₂, hwt₂, hcn₂⟩
-    · exact nomatch hs
+theorem Prog.keeps_canon : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (canonInv C).Keeps (Prog.runR P)
+  | _, _, .nil => Invariant.keeps_nil
+  | _, _, .cons s P => Invariant.keeps_seq (Stmt.keeps_canon s) (Prog.keeps_canon P)
 
 end
+
+/-- **Canonicity**: a block run from a well-typed canonical state ends, if
+in a state, in one, under a store typing that only grew. -/
+theorem Prog.run_canon {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy} {σ : State C Γ}
+    {σ' : State C Γ'} (hwt : RunWT C H σ) (hc : Canon C H σ.glob) (h : P.run σ = .ok σ') :
+    ∃ H', H.Extends H' ∧ RunWT C H' σ' ∧ Canon C H' σ'.glob :=
+  let ⟨H', hext, h'⟩ := Prog.keeps_canon P H σ σ' (RunCanon.mk' hwt hc) h
+  ⟨H', hext, RunCanon.wt h', RunCanon.canon h'⟩
+
+end Solidity.Core
+
+namespace Solidity
+
+open Semantics
+open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne HeapWellFormed
+  lookupBy_eq_some_mem)
+
+variable {C : Contract}
 
 /-! ## Reachable storages -/
 
@@ -1811,11 +1873,12 @@ way). -/
 theorem Contract.deployState_empty (C : Contract) :
     C.deployState {} = { C.initState with net := [(0, 0)] } := rfl
 
-/-- A storage is reachable when a program whose locals check runs from the
-initial state to a state holding it. -/
+/-- A storage is reachable when a program runs from the initial state to a
+state holding it.  The program is scoped (`Syntax/Core.lean`), so its
+locals are used as declared by construction. -/
 def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
-  ∃ (P : Prog C) (Γ' : Ctx) (σ : State),
-    Prog.wt [] P = some Γ' ∧ Prog.run C.initState P = .ok σ ∧ σ.storage = st
+  ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (σ : Core.State C Γ'),
+    P.run (Core.State.ofSem C.initState) = .ok σ ∧ σ.storage = st
 
 /-- **Reachable ⇒ well-typed and canonical.**  Every storage a checked
 program reaches from `C`'s initial state holds `C`'s roots in order, each
@@ -1824,10 +1887,10 @@ her `account`. -/
 theorem reachable_canon (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × SVal)}
     (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
-  obtain ⟨P, Γ', σ, hP, hrun, rfl⟩ := h
-  obtain ⟨_, _, hwt, hcn⟩ := Prog.run_canon P (RunWT.init hnd hok rfl rfl) (Canon.init hok rfl)
-    hP hrun
-  exact ⟨hwt.storage, hcn.storage⟩
+  obtain ⟨Γ', P, σ, hrun, rfl⟩ := h
+  obtain ⟨_, _, hwt, hcn⟩ := Core.Prog.run_canon P (Core.RunWT.init hnd hok rfl rfl)
+    (Canon.init hok rfl) hrun
+  exact ⟨hwt.glob.storage, hcn.storage⟩
 
 /-! ## What is not reachable
 
