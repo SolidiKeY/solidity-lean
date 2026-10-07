@@ -111,6 +111,14 @@ partial def trIdx (ns : List Expr) (e : Expr) : TrM Expr := do
   if let .fvar fv := e then return (← read).twins.getD fv unknownVar
   return unknownVar
 
+/-- The names of what a frame end by `h : Thin Γ Δ` keeps, from the names
+`ns` of `Δ`; as many as it can read when `h` does not compute. -/
+partial def thinNames (ns : List Expr) (h : Expr) : MetaM (List Expr) := do
+  let h ← whnf h
+  if h.isAppOf ``Thin.keep then return ns.headD unknownVar :: (← thinNames ns.tail h.appArg!)
+  if h.isAppOf ``Thin.drop then return ← thinNames ns.tail h.appArg!
+  return ns
+
 /-- How many locals a scope end pops, when it computes. -/
 partial def extDepth (e : Expr) : MetaM Nat := do
   let e ← whnf e
@@ -507,6 +515,8 @@ partial def framePieces (ns : List Expr) (κ : Expr) : TrM (Array Piece × List 
     match (← read).blockEnd, close with
     | some e, true => return (#[.one e] ++ qs, ms)
     | _, _ => return (qs, ms)
+  if κ.isAppOf ``Frames.drop then
+    return ← framePieces (← thinNames ns args[4]!) args[5]!
   if κ.isAppOf ``Frames.nil then return (#[], ns)
   return (#[.many κ], ns)
 
@@ -527,6 +537,9 @@ partial def updParts (ns : List Expr) (U : Expr) : TrM (Array Piece × List Expr
   if U.isAppOf ``Upd.pop then
     let (es, ms) ← updParts ns args[4]!
     return (es, ms.drop (← extDepth args[5]!))
+  if U.isAppOf ``Upd.drop then
+    let (es, ms) ← updParts ns args[4]!
+    return (es, ← thinNames ms args[5]!)
   if U.isAppOf ``Upd.nil then return (#[], ns)
   if let .fvar fv := U then return (#[.many ((← read).twins.getD fv U)], ns)
   return (#[.many U], ns)
