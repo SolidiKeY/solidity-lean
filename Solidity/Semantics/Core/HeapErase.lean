@@ -461,8 +461,8 @@ def _root_.Solidity.ArrTy.isFixed : {R : RefTy} → {E : Ty} → ArrTy R E → B
 
 theorem MObj.erase_arr {H : HTy} : {R : RefTy} → {E : Ty} → (a : ArrTy R E) → (o : MObj H R) →
     MObj.erase R o = .array ((MObj.elems a o).map (MVal.erase E)) a.isFixed
-  | _, _, .dyn, _ => rfl
-  | _, _, .fixed, _ => rfl
+  | _, _, .dyn, _ => by rw [MObj.elems_dyn]; rfl
+  | _, _, .fixed, _ => by rw [MObj.elems_fixed]; rfl
 
 theorem MObj.erase_setElem {H : HTy} : {R : RefTy} → {E : Ty} → (a : ArrTy R E) →
     (o : MObj H R) → (i : Nat) → (v : MVal H E) →

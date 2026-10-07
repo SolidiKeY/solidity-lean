@@ -166,16 +166,39 @@ def MFields.set {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T : Ty} →
       (((SFields.lookupBy_cons_pos e h).symm ▸ v : MVal H T'), x.2)
     else (x.1, MFields.set fs x.2 (SFields.lookupBy_cons_neg e h) v)
 
-/-- An array object's elements, either kind. -/
-def MObj.elems {H : HTy} : {R : RefTy} → {E : Ty} → ArrTy R E → MObj H R → List (MVal H E)
-  | _, _, .dyn, o => o
-  | _, _, .fixed, o => o.1
+/-- An array object's elements, either kind.  By `casesOn`, so the kernel
+casts nothing (Gate G0, condition 1). -/
+def MObj.elems {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) : MObj H R → List (MVal H E) :=
+  @ArrTy.casesOn (fun R E _ => MObj H R → List (MVal H E)) R E a
+    (fun {_} o => o) (fun {_} {_} o => o.1)
+
+theorem MObj.elems_dyn {H : HTy} {E : Ty} (o : MObj H (.array E)) :
+    MObj.elems .dyn o = (o : List (MVal H E)) := rfl
+theorem MObj.elems_fixed {H : HTy} {E : Ty} {n : Nat} (o : MObj H (.fixed E n)) :
+    MObj.elems .fixed o = (o : {l : List (MVal H E) // l.length = n}).1 := rfl
+
+attribute [irreducible] MObj.elems
+attribute [eqns MObj.elems_dyn MObj.elems_fixed] MObj.elems
 
 /-- An array object with element `i` replaced. -/
-def MObj.setElem {H : HTy} : {R : RefTy} → {E : Ty} → ArrTy R E → MObj H R → Nat → MVal H E →
-    MObj H R
-  | _, _, .dyn, o, i, v => (o : List _).set i v
-  | _, _, .fixed, o, i, v => ⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩
+def MObj.setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) :
+    MObj H R → Nat → MVal H E → MObj H R :=
+  @ArrTy.casesOn (fun R E _ => MObj H R → Nat → MVal H E → MObj H R) R E a
+    (fun {E} o i v => ((o : List (MVal H E)).set i v : MObj H (.array E)))
+    (fun {E} {n} o i v =>
+      let o : {l : List (MVal H E) // l.length = n} := o
+      (⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩ : MObj H (.fixed E n)))
+
+theorem MObj.setElem_dyn {H : HTy} {E : Ty} (o : MObj H (.array E)) (i : Nat) (v : MVal H E) :
+    MObj.setElem .dyn o i v = ((o : List (MVal H E)).set i v : MObj H (.array E)) := rfl
+theorem MObj.setElem_fixed {H : HTy} {E : Ty} {n : Nat} (o : MObj H (.fixed E n)) (i : Nat)
+    (v : MVal H E) :
+    MObj.setElem .fixed o i v =
+      let o : {l : List (MVal H E) // l.length = n} := o
+      (⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩ : MObj H (.fixed E n)) := rfl
+
+attribute [irreducible] MObj.setElem
+attribute [eqns MObj.setElem_dyn MObj.setElem_fixed] MObj.setElem
 
 namespace Heap
 

@@ -25,12 +25,17 @@ certifies, so the kernel can reduce them, where `defaultForTy` is
 well-founded; their fuel is `rankBound`, which reads no struct name.
 
 Nothing the kernel evaluates `match`es on the indexed families (Gate G0,
-conditions 1 and 2): `find`, `findLive`, `save` and `SFields.get`/`set` are
-written with the recursors (`Path.rec` over `SVal.view`, `SFields.rec`), the
-functions on a whole value are folds (`SVal.fold`), and the array operations
-read their array through `SVal.view`.  Each has a `match` twin as its
-compiled form; the folds state their equations and are irreducible, so a
-proof rewrites them as it would a `match` (`Solidity/Eqns.lean`).
+conditions 1 and 2): `find`, `findLive`, `save`, `SFields.get`/`set` and
+`Path.append` are written with the recursors (`Path.rec` over `SVal.view`,
+`SFields.rec`), `Path.index` and `inBounds` with `casesOn`, the functions on
+a whole value are folds (`SVal.fold`), and the array operations read their
+array through `SVal.view`.  Each recursor form has a `match` twin as its
+compiled form (`implemented_by`) and a theorem that they are equal
+(`SVal.fold_eq_foldM`, `SVal.defaultOf_eq_defaultOfM`, …); `defaultOf`,
+`strip`, `overlay` and the `toList`s have their own twins rather than
+`SVal.foldM`, which is strict and would walk a mapping's entries.  These
+state their equations and are irreducible, so a proof rewrites them as it
+would a `match` (`Solidity/Eqns.lean`).
 -/
 
 namespace Solidity.Core
@@ -360,6 +365,10 @@ theorem toList_cons {E : Ty} (v : SVal E) (rest : SList E) :
 attribute [irreducible] toList
 attribute [eqns toList_nil toList_cons] toList
 
+theorem toList_eq_toListM {E : Ty} : (l : SList E) → l.toList = l.toListM
+  | .nil => by rw [toList_nil, toListM]
+  | .cons v rest => by rw [toList_cons, toListM, toList_eq_toListM rest]
+
 def ofList {E : Ty} : List (SVal E) → SList E
   | [] => .nil
   | v :: rest => .cons v (ofList rest)
@@ -397,6 +406,10 @@ theorem toList_cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
 
 attribute [irreducible] toList
 attribute [eqns toList_nil toList_cons] toList
+
+theorem toList_eq_toListM {E : Ty} : {n : Nat} → (l : SVec E n) → l.toList = l.toListM
+  | _, .nil => by rw [toList_nil, toListM]
+  | _, .cons v rest => by rw [toList_cons, toListM, toList_eq_toListM rest]
 
 theorem length_toList {E : Ty} : {n : Nat} → (v : SVec E n) → v.toList.length = n
   | _, .nil => by rw [toList_nil, List.length_nil]
@@ -459,6 +472,12 @@ theorem set_cons_succ {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) (i : Nat
 attribute [irreducible] set
 attribute [eqns set_nil set_cons_zero set_cons_succ] set
 
+theorem set_eq_setM {E : Ty} : {n : Nat} → (l : SVec E n) → (i : Nat) → (x : SVal E) →
+    l.set i x = l.setM i x
+  | _, .nil, _, _ => by rw [set_nil, setM]
+  | _, .cons _ _, 0, _ => by rw [set_cons_zero, setM]
+  | _, .cons v rest, i + 1, x => by rw [set_cons_succ, setM, set_eq_setM rest i x]
+
 theorem toList_set {E : Ty} : {n : Nat} → (l : SVec E n) → (i : Nat) → (x : SVal E) →
     (l.set i x).toList = l.toList.set i x
   | _, .nil, _, _ => by rw [set_nil, toList_nil, List.set_nil]
@@ -484,6 +503,10 @@ theorem toList_cons {V : Ty} (k : Int) (v : SVal V) (rest : SMap V) :
 
 attribute [irreducible] toList
 attribute [eqns toList_nil toList_cons] toList
+
+theorem toList_eq_toListM {V : Ty} : (m : SMap V) → m.toList = m.toListM
+  | .nil => by rw [toList_nil, toListM]
+  | .cons k v rest => by rw [toList_cons, toListM, toList_eq_toListM rest]
 
 def ofList {V : Ty} : List (Int × SVal V) → SMap V
   | [] => .nil
@@ -672,31 +695,73 @@ def erase : {T U : Ty} → Path T U → List Semantics.Seg
   | _, _, .atF i p => .at i :: p.erase
   | _, _, .key k p => .at k :: p.erase
 
-/-- A path followed by another. -/
-def append : {T U W : Ty} → Path T U → Path U W → Path T W
+/-- `append` by `match`, its compiled form. -/
+def appendM : {T U W : Ty} → Path T U → Path U W → Path T W
   | _, _, _, .nil, q => q
-  | _, _, _, .field h p, q => .field h (p.append q)
-  | _, _, _, .at i p, q => .at i (p.append q)
-  | _, _, _, .atF i p, q => .atF i (p.append q)
-  | _, _, _, .key k p, q => .key k (p.append q)
+  | _, _, _, .field h p, q => .field h (p.appendM q)
+  | _, _, _, .at i p, q => .at i (p.appendM q)
+  | _, _, _, .atF i p, q => .atF i (p.appendM q)
+  | _, _, _, .key k p, q => .key k (p.appendM q)
+
+/-- A path followed by another, by the recursor (the typed run reduces it at
+every `SRef.field`/`index` step). -/
+@[implemented_by appendM]
+def append {T U W : Ty} (p : Path T U) (q : Path U W) : Path T W :=
+  @Path.rec (fun T U _ => Path U W → Path T W) (fun {_} q => q)
+    (fun {_} {_} {_} {_} h _ ih q => .field h (ih q)) (fun {_} {_} i _ ih q => .at i (ih q))
+    (fun {_} {_} {_} i _ ih q => .atF i (ih q)) (fun {_} {_} {_} k _ ih q => .key k (ih q)) T U p q
+
+theorem append_nil {T W : Ty} (q : Path T W) : (Path.nil (T := T)).append q = q := rfl
+theorem append_field {s f : Name} {T U W : Ty} (h : lookupBy f (structDef s) = some T)
+    (p : Path T U) (q : Path U W) : (Path.field h p).append q = .field h (p.append q) := rfl
+theorem append_at {E U W : Ty} (i : Int) (p : Path E U) (q : Path U W) :
+    (Path.at i p).append q = .at i (p.append q) := rfl
+theorem append_atF {E U W : Ty} {n : Nat} (i : Int) (p : Path E U) (q : Path U W) :
+    (Path.atF (n := n) i p).append q = .atF i (p.append q) := rfl
+theorem append_key {K V U W : Ty} (k : Int) (p : Path V U) (q : Path U W) :
+    (Path.key (K := K) k p).append q = .key k (p.append q) := rfl
+
+attribute [irreducible] append
+attribute [eqns append_nil append_field append_at append_atF append_key] append
+
+theorem append_eq_appendM : {T U W : Ty} → (p : Path T U) → (q : Path U W) →
+    p.append q = p.appendM q
+  | _, _, _, .nil, q => by rw [append_nil, appendM]
+  | _, _, _, .field h p, q => by rw [append_field, appendM, append_eq_appendM p q]
+  | _, _, _, .at i p, q => by rw [append_at, appendM, append_eq_appendM p q]
+  | _, _, _, .atF i p, q => by rw [append_atF, appendM, append_eq_appendM p q]
+  | _, _, _, .key k p, q => by rw [append_key, appendM, append_eq_appendM p q]
 
 theorem erase_append : {T U W : Ty} → (p : Path T U) → (q : Path U W) →
     (p.append q).erase = p.erase ++ q.erase
-  | _, _, _, .nil, _ => rfl
-  | _, _, _, .field _ p, q => congrArg (_ :: ·) (erase_append p q)
-  | _, _, _, .at _ p, q => congrArg (_ :: ·) (erase_append p q)
-  | _, _, _, .atF _ p, q => congrArg (_ :: ·) (erase_append p q)
-  | _, _, _, .key _ p, q => congrArg (_ :: ·) (erase_append p q)
+  | _, _, _, .nil, _ => by rw [append_nil]; rfl
+  | _, _, _, .field _ p, q => by rw [append_field]; exact congrArg (_ :: ·) (erase_append p q)
+  | _, _, _, .at _ p, q => by rw [append_at]; exact congrArg (_ :: ·) (erase_append p q)
+  | _, _, _, .atF _ p, q => by rw [append_atF]; exact congrArg (_ :: ·) (erase_append p q)
+  | _, _, _, .key _ p, q => by rw [append_key]; exact congrArg (_ :: ·) (erase_append p q)
 
-/-- The one step `b[i]` takes, by how `R` is indexed. -/
-def index : {R : RefTy} → {k : PrimTy} → {V : Ty} → IndexTy R k V → Int → Path (.ref R) V
-  | _, _, _, .map, i => .key i .nil
-  | _, _, _, .arr .dyn, i => .at i .nil
-  | _, _, _, .arr .fixed, i => .atF i .nil
+/-- The one step `b[i]` takes, by how `R` is indexed.  By `casesOn`, so the
+kernel casts nothing. -/
+def index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) : Path (.ref R) V :=
+  @IndexTy.casesOn (fun R _ V _ => Path (.ref R) V) R k V it (fun {_} {_} => .key i .nil)
+    (fun {_} {_} a => @ArrTy.casesOn (fun R E _ => Path (.ref R) E) _ _ a
+      (fun {_} => .at i .nil) (fun {_} {_} => .atF i .nil))
+
+theorem index_map {k : PrimTy} {V : Ty} (i : Int) :
+    index (IndexTy.map (k := k) (V := V)) i = .key i .nil := rfl
+theorem index_dyn {E : Ty} (i : Int) : index (IndexTy.arr (ArrTy.dyn (E := E))) i = .at i .nil :=
+  rfl
+theorem index_fixed {E : Ty} {n : Nat} (i : Int) :
+    index (IndexTy.arr (ArrTy.fixed (E := E) (n := n))) i = .atF i .nil := rfl
+
+attribute [irreducible] index
+attribute [eqns index_map index_dyn index_fixed] index
 
 theorem erase_index : {R : RefTy} → {k : PrimTy} → {V : Ty} → (it : IndexTy R k V) → (i : Int) →
     (index it i).erase = [.at i]
-  | _, _, _, .map, _ | _, _, _, .arr .dyn, _ | _, _, _, .arr .fixed, _ => rfl
+  | _, _, _, .map, _ => by rw [index_map]; rfl
+  | _, _, _, .arr .dyn, _ => by rw [index_dyn]; rfl
+  | _, _, _, .arr .fixed, _ => by rw [index_fixed]; rfl
 
 end Path
 
@@ -881,6 +946,32 @@ def SVal.save {T U : Ty} (v : SVal T) (p : Path T U) (new : SVal U) : Option (SV
 
 /-! ## Delete, copy over -/
 
+/-! The compiled forms of `defaultOf`, `strip` and `overlay` are the `match`
+twins below, not `SVal.foldM`: the fold is strict in every argument of a
+step, so it would walk a mapping's entries to throw them away. -/
+
+mutual
+/-- `SVal.defaultOf` by `match`, its compiled form. -/
+def SVal.defaultOfM : {T : Ty} → SVal T → SVal T
+  | _, @SVal.prim p _ => .prim (PrimTy.dflt p)
+  | _, .struct fs => .struct (SFields.defaultOfM fs)
+  | _, .array e sh => .array .nil (.ofList ((SList.defaultOfM e).toList ++ sh.toList))
+  | _, .fixed e => .fixed (SVec.defaultOfM e)
+  | _, .map m d => .map m d
+
+def SFields.defaultOfM : {fs : List (Name × Ty)} → SFields fs → SFields fs
+  | _, .nil => .nil
+  | _, .cons v rest => .cons (SVal.defaultOfM v) (SFields.defaultOfM rest)
+
+def SList.defaultOfM : {E : Ty} → SList E → SList E
+  | _, .nil => .nil
+  | _, .cons v rest => .cons (SVal.defaultOfM v) (SList.defaultOfM rest)
+
+def SVec.defaultOfM : {E : Ty} → {n : Nat} → SVec E n → SVec E n
+  | _, _, .nil => .nil
+  | _, _, .cons v rest => .cons (SVal.defaultOfM v) (SVec.defaultOfM rest)
+end
+
 /-- `delete`'s value. -/
 def defaultOfFold : Fold where
   V T := SVal T
@@ -905,9 +996,13 @@ def defaultOfFold : Fold where
 /-- `delete`'s value (`Semantics.SVal.defaultOf`): primitives reset, members
 and elements recursively, a dynamic array emptied into the slots past its
 end, a mapping left as it is. -/
+@[implemented_by SVal.defaultOfM]
 def SVal.defaultOf {T : Ty} (v : SVal T) : SVal T := v.fold defaultOfFold
+@[implemented_by SFields.defaultOfM]
 def SFields.defaultOf {fs : List (Name × Ty)} (x : SFields fs) : SFields fs := x.fold defaultOfFold
+@[implemented_by SList.defaultOfM]
 def SList.defaultOf {E : Ty} (l : SList E) : SList E := l.fold defaultOfFold
+@[implemented_by SVec.defaultOfM]
 def SVec.defaultOf {E : Ty} {n : Nat} (l : SVec E n) : SVec E n := l.fold defaultOfFold
 
 theorem SVal.defaultOf_prim {p : PrimTy} (v : p.Denote) :
@@ -938,6 +1033,59 @@ attribute [eqns SFields.defaultOf_nil SFields.defaultOf_cons] SFields.defaultOf
 attribute [eqns SList.defaultOf_nil SList.defaultOf_cons] SList.defaultOf
 attribute [eqns SVec.defaultOf_nil SVec.defaultOf_cons] SVec.defaultOf
 
+mutual
+theorem SVal.defaultOf_eq_defaultOfM : {T : Ty} → (v : SVal T) → v.defaultOf = v.defaultOfM
+  | _, .prim _ => by rw [SVal.defaultOf_prim, SVal.defaultOfM]
+  | _, .struct fs => by
+    rw [SVal.defaultOf_struct, SVal.defaultOfM, SFields.defaultOf_eq_defaultOfM fs]
+  | _, .array e sh => by
+    rw [SVal.defaultOf_array, SVal.defaultOfM, SList.defaultOf_eq_defaultOfM e]
+  | _, .fixed e => by rw [SVal.defaultOf_fixed, SVal.defaultOfM, SVec.defaultOf_eq_defaultOfM e]
+  | _, .map _ _ => by rw [SVal.defaultOf_map, SVal.defaultOfM]
+
+theorem SFields.defaultOf_eq_defaultOfM : {fs : List (Name × Ty)} → (x : SFields fs) →
+    x.defaultOf = x.defaultOfM
+  | _, .nil => by rw [SFields.defaultOf_nil, SFields.defaultOfM]
+  | _, .cons v rest => by
+    rw [SFields.defaultOf_cons, SFields.defaultOfM, SVal.defaultOf_eq_defaultOfM v,
+      SFields.defaultOf_eq_defaultOfM rest]
+
+theorem SList.defaultOf_eq_defaultOfM : {E : Ty} → (l : SList E) → l.defaultOf = l.defaultOfM
+  | _, .nil => by rw [SList.defaultOf_nil, SList.defaultOfM]
+  | _, .cons v rest => by
+    rw [SList.defaultOf_cons, SList.defaultOfM, SVal.defaultOf_eq_defaultOfM v,
+      SList.defaultOf_eq_defaultOfM rest]
+
+theorem SVec.defaultOf_eq_defaultOfM : {E : Ty} → {n : Nat} → (l : SVec E n) →
+    l.defaultOf = l.defaultOfM
+  | _, _, .nil => by rw [SVec.defaultOf_nil, SVec.defaultOfM]
+  | _, _, .cons v rest => by
+    rw [SVec.defaultOf_cons, SVec.defaultOfM, SVal.defaultOf_eq_defaultOfM v,
+      SVec.defaultOf_eq_defaultOfM rest]
+end
+
+mutual
+/-- `SVal.strip` by `match`, its compiled form. -/
+def SVal.stripM : {T : Ty} → SVal T → SVal T
+  | _, .prim v => .prim v
+  | _, .struct fs => .struct (SFields.stripM fs)
+  | _, .array e _ => .array (SList.stripM e) .nil
+  | _, .fixed e => .fixed (SVec.stripM e)
+  | _, .map m d => .map m d
+
+def SFields.stripM : {fs : List (Name × Ty)} → SFields fs → SFields fs
+  | _, .nil => .nil
+  | _, .cons v rest => .cons (SVal.stripM v) (SFields.stripM rest)
+
+def SList.stripM : {E : Ty} → SList E → SList E
+  | _, .nil => .nil
+  | _, .cons v rest => .cons (SVal.stripM v) (SList.stripM rest)
+
+def SVec.stripM : {E : Ty} → {n : Nat} → SVec E n → SVec E n
+  | _, _, .nil => .nil
+  | _, _, .cons v rest => .cons (SVal.stripM v) (SVec.stripM rest)
+end
+
 /-- A value as nothing has written it. -/
 def stripFold : Fold where
   V T := SVal T
@@ -961,9 +1109,13 @@ def stripFold : Fold where
 
 /-- A value as written to slots nothing has written (`Semantics.SVal.strip`):
 no slots past an array's end. -/
+@[implemented_by SVal.stripM]
 def SVal.strip {T : Ty} (v : SVal T) : SVal T := v.fold stripFold
+@[implemented_by SFields.stripM]
 def SFields.strip {fs : List (Name × Ty)} (x : SFields fs) : SFields fs := x.fold stripFold
+@[implemented_by SList.stripM]
 def SList.strip {E : Ty} (l : SList E) : SList E := l.fold stripFold
+@[implemented_by SVec.stripM]
 def SVec.strip {E : Ty} {n : Nat} (l : SVec E n) : SVec E n := l.fold stripFold
 
 theorem SVal.strip_prim {p : PrimTy} (v : p.Denote) : (SVal.prim v).strip = .prim v := rfl
@@ -991,6 +1143,57 @@ attribute [eqns SVal.strip_prim SVal.strip_struct SVal.strip_array SVal.strip_fi
 attribute [eqns SFields.strip_nil SFields.strip_cons] SFields.strip
 attribute [eqns SList.strip_nil SList.strip_cons] SList.strip
 attribute [eqns SVec.strip_nil SVec.strip_cons] SVec.strip
+
+mutual
+theorem SVal.strip_eq_stripM : {T : Ty} → (v : SVal T) → v.strip = v.stripM
+  | _, .prim _ => by rw [SVal.strip_prim, SVal.stripM]
+  | _, .struct fs => by rw [SVal.strip_struct, SVal.stripM, SFields.strip_eq_stripM fs]
+  | _, .array e _ => by rw [SVal.strip_array, SVal.stripM, SList.strip_eq_stripM e]
+  | _, .fixed e => by rw [SVal.strip_fixed, SVal.stripM, SVec.strip_eq_stripM e]
+  | _, .map _ _ => by rw [SVal.strip_map, SVal.stripM]
+
+theorem SFields.strip_eq_stripM : {fs : List (Name × Ty)} → (x : SFields fs) →
+    x.strip = x.stripM
+  | _, .nil => by rw [SFields.strip_nil, SFields.stripM]
+  | _, .cons v rest => by
+    rw [SFields.strip_cons, SFields.stripM, SVal.strip_eq_stripM v, SFields.strip_eq_stripM rest]
+
+theorem SList.strip_eq_stripM : {E : Ty} → (l : SList E) → l.strip = l.stripM
+  | _, .nil => by rw [SList.strip_nil, SList.stripM]
+  | _, .cons v rest => by
+    rw [SList.strip_cons, SList.stripM, SVal.strip_eq_stripM v, SList.strip_eq_stripM rest]
+
+theorem SVec.strip_eq_stripM : {E : Ty} → {n : Nat} → (l : SVec E n) → l.strip = l.stripM
+  | _, _, .nil => by rw [SVec.strip_nil, SVec.stripM]
+  | _, _, .cons v rest => by
+    rw [SVec.strip_cons, SVec.stripM, SVal.strip_eq_stripM v, SVec.strip_eq_stripM rest]
+end
+
+mutual
+/-- `SVal.overlay` by `match`, its compiled form. -/
+def SVal.overlayM : {T : Ty} → SVal T → SVal T → SVal T
+  | _, _, .prim v => .prim v
+  | _, .struct ofs, .struct nfs => .struct (SFields.overlayM ofs nfs)
+  | _, .array oel osh, .array nel _ =>
+    .array (SList.overlayOnM (oel.toList ++ osh.toList) nel)
+      (.ofList ((oel.toList.drop nel.length).map SVal.defaultOf ++
+        osh.toList.drop (nel.length - oel.length)))
+  | _, .fixed oel, .fixed nel => .fixed (SVec.overlayM oel nel)
+  | _, .map oe od, .map _ _ => .map oe od
+
+def SFields.overlayM : {fs : List (Name × Ty)} → SFields fs → SFields fs → SFields fs
+  | _, .nil, .nil => .nil
+  | _, .cons o os, .cons v rest => .cons (SVal.overlayM o v) (SFields.overlayM os rest)
+
+def SList.overlayOnM : {E : Ty} → List (SVal E) → SList E → SList E
+  | _, [], rest => SList.strip rest
+  | _, o :: os, .cons v rest => .cons (SVal.overlayM o v) (SList.overlayOnM os rest)
+  | _, _ :: _, .nil => .nil
+
+def SVec.overlayM : {E : Ty} → {n : Nat} → SVec E n → SVec E n → SVec E n
+  | _, _, .nil, .nil => .nil
+  | _, _, .cons o os, .cons v rest => .cons (SVal.overlayM o v) (SVec.overlayM os rest)
+end
 
 /-- A copy written over an old value: by recursion on the new one, the old
 one read through the views. -/
@@ -1028,12 +1231,16 @@ def overlayFold : Fold where
 /-- A copy of `new` written over `old` (`Semantics.SVal.overlay`): member by
 member in their order, as solc copies, element by element over the slots
 it lands on, the old elements past the new length cleared, a mapping kept. -/
+@[implemented_by SVal.overlayM]
 def SVal.overlay {T : Ty} (old new : SVal T) : SVal T := new.fold overlayFold old
+@[implemented_by SFields.overlayM]
 def SFields.overlay {fs : List (Name × Ty)} (old new : SFields fs) : SFields fs :=
   new.fold overlayFold old
 /-- The new elements over the old slots, as far as there are old slots. -/
+@[implemented_by SList.overlayOnM]
 def SList.overlayOn {E : Ty} (old : List (SVal E)) (new : SList E) : SList E :=
   new.fold overlayFold old
+@[implemented_by SVec.overlayM]
 def SVec.overlay {E : Ty} {n : Nat} (old new : SVec E n) : SVec E n := new.fold overlayFold old
 
 theorem SVal.overlay_prim {p : PrimTy} (o : SVal (.prim p)) (v : p.Denote) :
@@ -1077,6 +1284,40 @@ them. -/
 theorem SList.overlayOn_nil_left {E : Ty} : (l : SList E) → SList.overlayOn [] l = l.strip
   | .nil => by rw [overlayOn_nil, strip_nil]
   | .cons v rest => by rw [overlayOn_nil_cons, strip_cons]
+
+mutual
+theorem SVal.overlay_eq_overlayM : {T : Ty} → (o v : SVal T) → o.overlay v = o.overlayM v
+  | _, _, .prim _ => by rw [SVal.overlay_prim, SVal.overlayM]
+  | _, .struct ofs, .struct nfs => by
+    rw [SVal.overlay_struct, SVal.overlayM, SFields.overlay_eq_overlayM ofs nfs]
+  | _, .array oel osh, .array nel _ => by
+    rw [SVal.overlay_array, SVal.overlayM, SList.overlayOn_eq_overlayOnM _ nel]
+  | _, .fixed oel, .fixed nel => by
+    rw [SVal.overlay_fixed, SVal.overlayM, SVec.overlay_eq_overlayM oel nel]
+  | _, .map _ _, .map _ _ => by rw [SVal.overlay_map, SVal.overlayM]
+
+theorem SFields.overlay_eq_overlayM : {fs : List (Name × Ty)} → (os x : SFields fs) →
+    os.overlay x = os.overlayM x
+  | _, .nil, .nil => by rw [SFields.overlay_nil, SFields.overlayM]
+  | _, .cons o os, .cons v rest => by
+    rw [SFields.overlay_cons, SFields.overlayM, SVal.overlay_eq_overlayM o v,
+      SFields.overlay_eq_overlayM os rest]
+
+theorem SList.overlayOn_eq_overlayOnM : {E : Ty} → (os : List (SVal E)) → (l : SList E) →
+    SList.overlayOn os l = SList.overlayOnM os l
+  | _, [], l => by rw [SList.overlayOn_nil_left, SList.overlayOnM]
+  | _, o :: os, .cons v rest => by
+    rw [SList.overlayOn_cons_cons, SList.overlayOnM, SVal.overlay_eq_overlayM o v,
+      SList.overlayOn_eq_overlayOnM os rest]
+  | _, _ :: _, .nil => by rw [SList.overlayOn_nil, SList.overlayOnM]
+
+theorem SVec.overlay_eq_overlayM : {E : Ty} → {n : Nat} → (os l : SVec E n) →
+    os.overlay l = os.overlayM l
+  | _, _, .nil, .nil => by rw [SVec.overlay_nil, SVec.overlayM]
+  | _, _, .cons o os, .cons v rest => by
+    rw [SVec.overlay_cons, SVec.overlayM, SVal.overlay_eq_overlayM o v,
+      SVec.overlay_eq_overlayM os rest]
+end
 
 /-- A primitive value: a write stores it, where a reference is copied over.
 Read off the type. -/

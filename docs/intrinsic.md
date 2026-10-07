@@ -402,6 +402,13 @@ untyped operation is never stuck on an erased input.
    `strip`, `overlay`/`overlayOn`, `SVal.copyStToM`, `beq`; `checkIndex`
    (`inBounds`, by `IndexTy.casesOn`/`ArrTy.casesOn`), `len`, `push`,
    `pushPlace`, `pop` read the array by `SVal.view`; `isPrim` reads the type.
+   `Path.append` is `Path.rec`, `Path.index` and the heap's `MObj.elems`/
+   `MObj.setElem` are `IndexTy.casesOn`/`ArrTy.casesOn`.  Every recursor
+   form has its `match` twin as `implemented_by` and a theorem equating them
+   (G0 condition 2: `SVal.fold_eq_foldM`, `SList.toList_eq_toListM`,
+   `SVec.set_eq_setM`, `Path.append_eq_appendM`, …); `defaultOf`, `strip`
+   and `overlay` have twins of their own (`SVal.defaultOfM`, …), since
+   `SVal.foldM` is strict and would rebuild every mapping entry it discards.
    Each fold states its equations by `rfl`, is `@[irreducible]` and names
    them its equation lemmas (`attribute [eqns …]`, `Solidity/Eqns.lean`), so
    `simp only [SVal.erase]` rewrites a constructor application and nothing
