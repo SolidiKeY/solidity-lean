@@ -328,9 +328,9 @@ theorem run_block_frames {Δ : Ctx} (b : BlockKind) (P : Prog C Γ Δ) (ω : Pro
 
 /-- **Two goals**: `(c → ⟨ P } ω κ ⟩ φ) ∧ (c' → ⟨ Q } ω κ ⟩ φ)` gives
 `⟨ s; ω κ ⟩ φ` when one of `c`, `c'` holds, and the branch it guards, its
-locals popped, runs as `s`.  That one holds is the cover goal of today's
-split: here it is the statement's typing (a `bool` condition is `true` or
-`false`), a premise of the rule's soundness until M4a's typed values. -/
+locals popped, runs as `s`.  That one holds is the diamond's cover goal
+(`Premise.cover`); `Calculus/Core/SoundLocal.lean`'s `Premise.Sound.split`
+takes it, the box's stuck case apart. -/
 theorem Premise.sound_split {b : BlockKind} {Δ₁ Δ₂ : Ctx} {c c' : Fml C Γ} {P : Prog C Γ Δ₁}
     {Q : Prog C Γ Δ₂} {s : Stmt C Γ Γ} (σ : State C Γ)
     (hc : holds σ c → (Prog.run σ P).map (State.drop P.ext) = s.run σ)

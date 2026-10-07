@@ -24,7 +24,8 @@ The formulas are `Fml.Plain`: every binder fresh (a declaration, a `∀`, a
 block's locals: `Prog.Fresh`), and no hidden binder or anonymising update,
 whose untyped readings range over more than the typed ones (the untyped
 `anon` over every binding, the erased hidden binder over whatever the name
-held before).
+held before).  One direction holds for each (the last section):
+`holds_erase_bind` and `holds_of_erase_anon`.
 -/
 
 namespace Solidity.Core
@@ -601,5 +602,86 @@ theorem holds_erase : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.
     exact forall_congr' fun v => imp_congr_right fun _ => holds_erase φ hφ.2 (hag.push (t := .val p) hφ.1 v)
   | _, .bind .., _, hφ, _, _, _ => hφ.elim
   | _, .anon .., _, hφ, _, _, _ => hφ.elim
+
+/-! ## Hidden binders and anonymising updates, one way each
+
+`Fml.Plain` leaves them out because their two readings range over different
+states, so `holds_erase`'s `↔` fails for them; one direction holds for each.
+
+* A hidden binder `Fml.bind x t φ` erases to `φ` read at `x`'s current
+  binding: the scoped formula, true for every value, gives the erasure in an
+  untyped state that binds `x` to some value of `t` (`holds_erase_bind`).
+  The converse fails: the erasure reads one value (`x = 0`, with `x` bound
+  to `0`, against `∀ x. x = 0`).
+* `{anon(xs)} φ` erases to the untyped `{anon(…)}`, which ranges over every
+  binding of the names, unbound or of another kind included, and so over
+  more than the scoped one (a value of each local's type): the erasure gives
+  the scoped formula (`holds_of_erase_anon`).  The converse fails: the
+  scoped `{anon(x)} defined(x)` is valid, its erasure false where `x` is
+  anonymised to no binding.
+-/
+
+section OneWay
+
+/-- Agreement only reads the untyped locals by name. -/
+theorem Agree.congrEnv {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ τ' : Semantics.State}
+    (hag : Agree ns σ τ) (hg : withLocals σ.glob τ'.env = τ')
+    (he : ∀ y, lookupBy y τ'.env = lookupBy y τ.env) : Agree ns σ τ' where
+  len := hag.len
+  nodup := hag.nodup
+  glob := hg
+  env m hm := (he m.1).trans (hag.env m hm)
+
+theorem State.glob_anon {Γ : Ctx} (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) :
+    (xs : List ((t : LTy) × Idx Γ t)) → (σ : State C Γ) → (σ.anon xs b).glob = σ.glob
+  | [], _ => rfl
+  | x :: xs, σ => State.glob_anon b xs (σ.setLocal x.2 (b x))
+
+/-- The locals `xs` set as `b` says, on both sides: the untyped state differs
+only at their names. -/
+theorem Agree.anon {Γ : Ctx} {ns : List Var} (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) :
+    (xs : List ((t : LTy) × Idx Γ t)) → {σ : State C Γ} → {τ : Semantics.State} →
+      Agree ns σ τ → ∃ τ₁, Agree ns (σ.anon xs b) τ₁ ∧
+        ∀ y, y ∉ xs.map (fun x => x.2.name ns) → lookupBy y τ₁.env = lookupBy y τ.env
+  | [], _, τ, hag => ⟨τ, hag, fun _ _ => rfl⟩
+  | x :: xs, σ, τ, hag => by
+    obtain ⟨τ₁, h₁, h₂⟩ := Agree.anon b xs (hag.setLocal x.2 (b x))
+    refine ⟨τ₁, h₁, fun y hy => ?_⟩
+    have hne : y ≠ x.2.name ns := fun h => hy (h ▸ List.mem_cons_self)
+    rw [h₂ y fun h => hy (List.mem_cons_of_mem _ h)]
+    exact SemanticsProperties.lookupBy_setBy_ne hne _ _
+
+/-- **A hidden binder, scoped to erased**: in an untyped state that binds
+`x` to a value of `t`. -/
+theorem holds_erase_bind {Γ : Ctx} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} {ns : List Var}
+    (hx : x ∉ ns) (hφ : φ.Plain (x :: ns)) {σ : State C Γ} {τ : Semantics.State}
+    (hag : Agree ns σ τ) {v : t.Denote C} (hv : lookupBy x τ.env = some (t.enc C v)) :
+    holds σ (.bind x t φ) → Solidity.holds τ ((Fml.bind x t φ).erase ns) := fun h =>
+  (holds_erase φ hφ ((hag.push hx v).congrEnv hag.glob fun y => by
+    by_cases hy : y = x
+    · subst hy
+      rw [hv]
+      exact (SemanticsProperties.lookupBy_setBy_self _ _ _).symm
+    · exact (SemanticsProperties.lookupBy_setBy_ne hy _ _).symm)).1 (h v)
+
+/-- **An anonymising update, erased to scoped**: the untyped `{anon(…)}`
+ranges over the scoped one's states and more. -/
+theorem holds_of_erase_anon {Γ : Ctx} {xs : List ((t : LTy) × Idx Γ t)} {φ : Fml C Γ}
+    {ns : List Var} (hφ : φ.Plain ns) {σ : State C Γ} {τ : Semantics.State} (hag : Agree ns σ τ) :
+    Solidity.holds τ ((Fml.anon xs φ).erase ns) → holds σ (.anon xs φ) := fun h b => by
+  obtain ⟨τ₁, h₁, h₂⟩ := Agree.anon b xs hag
+  refine (holds_erase φ hφ (h₁.congrEnv ?_ fun y => ?_)).2 (h fun y => lookupBy y τ₁.env)
+  · rw [State.glob_anon b xs σ]
+    have hw := hag.wl
+    generalize τ.env = env at hw ⊢
+    subst hw
+    rfl
+  · show lookupBy y (anonEnv _ _ τ.env) = _
+    rw [lookupBy_anonEnv]
+    split
+    · rfl
+    · exact (h₂ y ‹_›).symm
+
+end OneWay
 
 end Solidity.Core

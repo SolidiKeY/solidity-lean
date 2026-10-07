@@ -36,6 +36,23 @@ theorem Premise.Sound.splitStuck {b : BlockKind} {Δ₁ Δ₂ : Ctx} {c c' : Fml
     exact ⟨trivial, fun h => nomatch h⟩
   | diamond => exact (hcov ⟨hn, hn'⟩).elim
 
+/-- **A split is sound** when the branch each condition guards, its locals
+popped, runs as `s`, and the statement is stuck where neither holds: one of
+them holds, or the box holds of the stuck run, and under the diamond the
+cover (`Premise.cover`) says one holds. -/
+theorem Premise.Sound.split {b : BlockKind} {Δ₁ Δ₂ : Ctx} {c c' : Fml C Γ}
+    {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂} {s : Stmt C Γ Γ}
+    (hc : holds σ c → (Prog.run σ P).map (State.drop P.ext) = s.run σ)
+    (hc' : holds σ c' → (Prog.run σ Q).map (State.drop Q.ext) = s.run σ)
+    (hst : ¬ holds σ c → ¬ holds σ c' → s.run σ = .error .stuck) :
+    Premise.Sound m s (.split b c c' P Q) σ := by
+  intro _ _ ω κ φ h hcov
+  by_cases h₁ : holds σ c
+  · exact Premise.sound_split σ hc hc' (.inl h₁) ω κ φ h
+  by_cases h₂ : holds σ c'
+  · exact Premise.sound_split σ hc hc' (.inr h₂) ω κ φ h
+  · exact Premise.Sound.splitStuck σ h₁ h₂ (hst h₁ h₂) ω κ φ h hcov
+
 theorem evalBinop_error {op : BinOp} (hsc : op.shortCircuits = false) (p : PrimTy) (lv : Value)
     (h : Halt) : evalBinop op p lv (.error h) = .error h := by
   cases op <;> first | rfl | simp only [BinOp.shortCircuits, Bool.true_eq_false] at hsc
