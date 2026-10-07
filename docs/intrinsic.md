@@ -616,6 +616,33 @@ two runs agree within 8%).
   store rows within 5%.  The gate's open item is the corpus example through
   the typed run (M3 + wiring).
 
+**Timings through the typed run** (2026-10-07, scratch `RunBench`, same
+method: `type checking` of `decide +kernel` of `(run).isOk = true`, two
+distinct statements per row, which agree within 5%).  Each block is a
+corpus theorem's body (`Corpus/*.lean`), resolved and declared by
+`Prog.defineCore`; "old" is today's `Solidity.Prog.run` on `unfoldStore`
+(what `corpus_decide` checks), "scoped" `Core.Prog.run` on the same store,
+"typed" `Core.Prog.trun` (`Semantics/Core/TypedRun.lean`) on `Storage.*`,
+built in the kernel by the fold.
+
+| Block (store) | typed | scoped | old | typed/scoped | typed/old |
+|---|---|---|---|---|---|
+| the corpus example, `p.account.balance = 100` through an alias (`testSuite`) | 14.5 ms | 16.0–16.3 ms | 16.5–16.9 ms | 0.90 | 0.87 |
+| `sMap[1] = sBox` (`solcMappings`) | 12.7–13.0 ms | 14.2 ms | 14.4–14.5 ms | 0.90 | 0.89 |
+| `withSubMap[5] = withSub`, three asserts (`solcMappings`) | 29.4–29.5 ms | 30.9–31.0 ms | 31.2–31.8 ms | 0.95 | 0.93 |
+| `delete triple` and its neighbours (`solcStructs`) | 29.8 ms | 31.8 ms | 33.2–33.3 ms | 0.94 | 0.90 |
+| `p = a++` (`solcExpressions`) | 4.3–4.6 ms | 4.1 ms | 6.4 ms | 1.08 | 0.70 |
+| three pushes, an unrolled loop over them (`solcControlFlow`) | 33.6–34.1 ms | 32.7–33.0 ms | 34.4–34.9 ms | 1.03 | 0.97 |
+| three pushes, writes, reads (`solcArrays`) | 23.6–23.7 ms | 23.8–24.0 ms | 24.3–24.6 ms | 0.99 | 0.97 |
+| `require(age > 3)` (`standardExample`) | 3.0 ms | 3.0–3.2 ms | | 0.97 | |
+| `Outer memory m = outerX;` and four reads (`solcMemory`) | 31.0–31.2 ms | does not reduce | does not reduce | | |
+
+- **Gate (within 20%): passes.**  The typed run costs 0.90–1.08× the scoped
+  untyped run and 0.70–0.97× today's interpreter on every corpus block the
+  untyped runs decide; the 1.08× is the 4 ms `p = a++`, a few tenths of a
+  millisecond.  Memory blocks reduce only through the typed run (the copy is
+  a fold, no well-founded `copyMToSt`).
+
 ### Gate G0: passes, under conditions
 
 The spike (`Solidity/Scratch/IntrinsicSpike.lean`, not committed) has seven
