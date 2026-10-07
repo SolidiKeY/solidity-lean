@@ -198,6 +198,23 @@ def Premise.expandCall (_k : Nat) {Γ' ps rs Γf : Ctx} (args : Args C Γ ps)
       (.keep (Thin.ofExt (Ext.append Γ ps))))
     body
 
+/-- `functionCallArgCapture`'s premise: the leftmost argument that is not
+simple (`v : p`) captured into the fresh `se`, the call made with `as'`, the
+arguments read with it on top; as `callStep` builds it. -/
+def Premise.argCapture (k : Nat) (f : Name) {Γ' ps rs Γf : Ctx} (p : PrimTy) (v : Val C Γ p)
+    (as' : Args C (.val p :: Γ) ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) :
+    Premise C Γ Γ' :=
+  CallRet.casesOn (motive := fun rs Γ' _ => Prog C (rs ++ ps) Γf → Premise C Γ Γ') ret
+    (fun body => .capture p (fse k) v (.call f as' .none body))
+    (fun q r res body => .capture p (fse k) v (.call f as' (.val q r (res.map .there)) body))
+    (fun {rs} bs body => .inline
+      (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.rets bs) body) .nil))
+      (Thin.keepAll rs (.drop .refl)))
+    (fun R r hd hm body => .inline
+      (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.mem R r hd hm) body) .nil))
+      (.keep (.drop .refl)))
+    body
+
 end Prelude
 
 /-! ## The rule table -/
@@ -615,5 +632,112 @@ inductive Taclet (C : Contract) (k : Nat) :
           "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ]
           ; "Panic caught": ∀ code. [ panicBody ] ; "other failure caught": [ otherBody ] }
 -- END scripts/core-rules.mjs: Taclet
+
+/-! ## The rules solkey does not have -/
+
+-- BEGIN scripts/core-rules.mjs: LeanTaclet
+inductive LeanTaclet (C : Contract) (k : Nat) :
+    Modality → {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
+
+  /-- A `try` under the diamond closes to `false`.  solkey has no diamond
+  rule: the call may revert in the caller (no code at the address, data that
+  does not decode), which no clause catches and no formula rules out. -/
+  | tryCallDiamond :
+      dl[LeanTaclet C k]{ ⟨ try call returns (rets) body catch Error errorBody
+          catch Panic (code) panicBody catch otherBody; ⟩ ⇝ false }
+
+  /-- A payment under the diamond closes to `false`.  solkey books a payment
+  under the box only (`transferNoCallbackBox`): whether the world pays is not
+  the calculus's (`Evm.compile_correct`, where a refused payment reverts the
+  machine alone), so no diamond over a payment is derived. -/
+  | transferDiamond :
+      dl[LeanTaclet C k]{ ⟨ sadr.transfer(se); ⟩ ⇝ false }
+
+  /-- solkey's `whileUnwind`, bounded: a loop that may still be unwound `n + 1`
+  times is one iteration, then the loop that may be unwound `n` times (KeY's
+  `if (s#cond) { s#body while (s#cond) s#body }`).  The bound is Lean's
+  (`/// @custom:key unwind n`), so that symbolic execution ends; solkey's
+  strategy unwinds without one. -/
+  | whileUnwind {cond : Val C Γ .bool} :
+      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1
+          while (cond) body; ]⟩ ⇝
+        ⟨[ if (cond) { body; /// @custom:key unwind n
+          while (cond) body; }; ]⟩ }
+
+  /-- A loop unwound to its bound ends there: the rest with the condition
+  false assumed, and that it is false (`Premise.check`).  Not
+  `assert(!cond)`, which would make running out of unwindings a failure of
+  the program; and not a capture of the condition, which the loop must
+  evaluate afresh.  A loop with no clause is `unwind 0`. -/
+  | loopExit {cond : Val C Γ .bool} :
+      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0
+          while (cond) body; ]⟩ ⇝
+        "loop exited": defined(cond) ∧ defined(false) ∧ cond ≐ false ⟹ ⟨[ ]⟩ ;
+        "unwound to the end": defined(cond) ∧ defined(false) ∧ cond ≐ false }
+
+  /-- solkey's `whileInvariantBox`.  The invariant holds now, and from every
+  state the body's frame allows (`{anon(body)}`, solkey's `#loopAnon`) where
+  it holds, the condition's value `b` (solkey's `bType b = cond;`) picks the
+  body, which keeps the invariant, or the rest of the program.  A `b`
+  neither `TRUE` nor `FALSE` (Lean's locals are untyped) is ruled out under
+  the diamond, as a branch's cover is.  A body with no frame
+  (`Prog.loopFrame`) has no invariant rule: one that writes memory, as in
+  solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,
+  rebinds an alias or calls out, which solkey frames as writing storage and
+  the ledger. -/
+  | whileInvariantBox {cond inv : Val C Γ .bool}
+      (hf : Prog.frame body = some (xs, hv) := by side_cond) :
+      dl[LeanTaclet C k]{ [ /// @custom:key invariant inv
+          while (cond) body; ] ⇝
+        "invariant initially valid": inv = TRUE ;
+        "invariant preserved and used": {anon(body)} (inv = TRUE → { b := cond }
+          (b = TRUE ⟹ ⟨[ body ]⟩ inv = TRUE ; b = FALSE ⟹ ⟨[ ]⟩)) }
+
+  /-- solkey's `whileInvariantDiamond`: `whileInvariantBox` with the variant
+  `dec`, its value before the iteration kept in a fresh local (KeY's skolem
+  `variant`), and checked after the body only where the condition holds
+  again (`{ b := cond } (b = TRUE → …)`): an iteration after which the loop
+  ends need not decrease it.  Lean reads `dec` where solkey compares it
+  (`dec = variant`), so the variant must be defined where the invariant
+  holds. -/
+  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
+      (hf : Prog.frame body = some (xs, hv) := by side_cond) :
+      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv
+          /// @custom:key decreases dec
+          while (cond) body; ⟩ ⇝
+        "invariant initially valid": inv = TRUE ;
+        "invariant preserved and used": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }
+          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;
+            b = FALSE ⟹ ⟨[ ]⟩)) }
+
+  /-- A loop with an invariant whose body has no frame closes to `false`,
+  under either modality: sound, and nothing about it is derived.  solkey
+  unwinds it instead (it has no annotation to choose by). -/
+  | whileClose {cond : Val C Γ .bool}
+      (hf : Prog.frame body = none := by side_cond) :
+      dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv
+          while (cond) body; ]⟩ ⇝ false }
+
+  /-- A loop with an invariant and no variant closes to `false` under the
+  diamond: nothing says it ends.  solkey unwinds it instead. -/
+  | whileNoVariantDiamond {cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)}
+      (hf : (Prog.frame body).isSome = true := by side_cond)
+      (hd : dec.isNone = true := by side_cond) :
+      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv
+          while (cond) body; ⟩ ⇝ false }
+-- END scripts/core-rules.mjs: LeanTaclet
+  /-- An argument that is not simple is captured into a fresh local first,
+  the leftmost first (`Args.capture`, the `unfoldArgument` rule): the call is
+  closed over its frame, so the capture is the call's own premise. -/
+  | functionCallArgCapture {Γ : Ctx} {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}
+      {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {p : PrimTy} {v : Val C Γ p}
+      {as' : Args C (.val p :: Γ) ps} (hcap : Args.capture args = some ⟨p, v, as'⟩ := by side_cond) :
+      LeanTaclet C k m (.call f args ret body) (Premise.argCapture k f p v as' ret body)
+
+/-- A rule of the calculus: solkey's, or one it does not have. -/
+inductive Rule (C : Contract) (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ')
+    (p : Premise C Γ Γ') : Prop where
+  | key (d : Taclet C k m s p)
+  | lean (d : LeanTaclet C k m s p)
 
 end Solidity.Core

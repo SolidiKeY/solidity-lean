@@ -127,8 +127,9 @@ macro "to_step_tac" : tactic => `(tactic| (
 /-- `Taclet.<rule>.toStep` for every constructor without one, by
 `to_step_tac`: its statement the constructor's, `Stmt.step` of the
 statement the premise, the side conditions hypotheses. -/
-elab "#derive_toStep" : command => do
-  let some (.inductInfo ii) := (← getEnv).find? ``Taclet | throwError "no `Taclet`"
+elab "#derive_toStep " j:ident : command => do
+  let J ← Command.liftCoreM <| realizeGlobalConstNoOverload j
+  let some (.inductInfo ii) := (← getEnv).find? J | throwError "no inductive `{J}`"
   for c in ii.ctors do
     let n := c ++ `toStep
     if (← getEnv).contains n then continue
@@ -152,9 +153,10 @@ elab "#derive_toStep" : command => do
 
 /-- Close `s.step k m = some p` for the case of `cases h` it is, by its
 constructor's lemma. -/
-elab "apply_toStep" : tactic => do
+elab "apply_toStep " j:ident : tactic => do
+  let J ← realizeGlobalConstNoOverload j
   let tag ← getMainTag
-  let n := ``Taclet ++ tag ++ `toStep
+  let n := J ++ tag ++ `toStep
   evalTactic (← `(tactic| (apply $(mkIdent n) <;> assumption)))
 
 end Tactics
@@ -214,7 +216,8 @@ theorem Taclet.ternaryToIf.toStep {p : PrimTy} {lhs : VHole C Γ p} {se : Simple
     cases l with
     | field b f hf => cases b <;> (try contradiction) <;> rfl
     | index a b i =>
-      cases b <;> cases i <;> first | rfl | (simp [MLoc.isTarget, MPath.isSimple, Val.isSimple] at h)
+      cases b <;> cases i <;> first | rfl | (simp only [MLoc.isTarget, MPath.isSimple, Val.isSimple, Bool.and_false, Bool.false_and,
+          Bool.false_eq_true] at h)
 
 theorem Taclet.ternaryCaptureCond.toStep {p : PrimTy} {lhs : VHole C Γ p} {nse : Val C Γ .bool}
     {thenExpr elseExpr : Val C Γ p} (h1 : nse.isSimple = false) (h : lhs.isTarget = true) :
@@ -239,7 +242,8 @@ theorem Taclet.ternaryCaptureCond.toStep {p : PrimTy} {lhs : VHole C Γ p} {nse 
     | index a b i =>
       cases b <;> cases i <;>
         first
-          | (simp [MLoc.isTarget, MPath.isSimple, Val.isSimple] at h; done)
+          | (simp only [MLoc.isTarget, MPath.isSimple, Val.isSimple, Bool.and_false, Bool.false_and,
+          Bool.false_eq_true] at h; done)
           | (cases nse <;> (try contradiction) <;> rfl)
 
 theorem Taclet.memoryFieldWrite_unfold_leftFst.toStep {s : Name} {nmp : MPath C Γ (Ty.struct s)}
@@ -311,9 +315,65 @@ theorem Taclet.internalCallExpand.toStep {f : Name} {ps : Ctx} {args : Args C Γ
     Stmt.step k m (Stmt.call f args ret body) = some (Premise.expandCall k args ret body) :=
   Premise.expandCall_step h1
 
+theorem LeanTaclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
+    {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ .uint)}
+    {cond inv : Val C Γ .bool} (hf : body.frame = some (xs, hv)) :
+    Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec) cond body) =
+      some (Premise.inv (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) xs hv
+        (Upd.nil.decl (Var.fresh "se" k) (Rhs.val cond.lower))
+        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool true)))
+        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool false))) Ext.refl
+        Ext.refl.push body (Fml.eqD inv.lower (Tms.Term.lit (.bool true)))) := by
+  dsimp only [Stmt.step]
+  simp only [loopStep, hf]
+
+theorem LeanTaclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
+    {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
+    (hf : body.frame = some (xs, hv)) :
+    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec)) cond body) =
+      some (Premise.inv (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) xs hv
+        ((Upd.nil.decl (Var.fresh "ie" k) (Rhs.val (p := .uint) dec.lower)).decl (Var.fresh "se" k)
+          (Rhs.val (p := .bool) cond.lower))
+        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool true)))
+        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool false))) Ext.refl.push
+        Ext.refl.push body.up
+        ((Fml.eqD inv.up.lower (Tms.Term.lit (.bool true))).and
+          (Fml.upd .diamond (Upd.nil.decl (Var.fresh "se" k) (Rhs.val (p := .bool) cond.up.lower))
+            ((Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool true))).imp
+              ((Fml.eqD (Tms.Term.binop .le .uint (Tms.Term.lit (.int 0)) dec.up.up.lower)
+                  (Tms.Term.lit (.bool true))).and
+                (Fml.eqD (Tms.Term.binop .lt .uint dec.up.up.lower (Tms.Term.pv (p := .uint) Idx.here.there))
+                  (Tms.Term.lit (.bool true)))))))) := by
+  dsimp only [Stmt.step]
+  simp only [loopStep, hf]
+
+theorem LeanTaclet.whileClose.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁} {inv : Val C Γ .bool}
+    {dec : Option (Val C Γ .uint)} {cond : Val C Γ .bool} (hf : body.frame = none) :
+    Stmt.step k m (Stmt.loop (LoopAnn.inv inv dec) cond body) = some (Premise.done false) := by
+  dsimp only [Stmt.step]
+  simp only [loopStep, hf]
+
+theorem LeanTaclet.whileNoVariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
+    {inv cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)} (hf : body.frame.isSome = true)
+    (hd : dec.isNone = true) :
+    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv dec) cond body) = some (Premise.done false) := by
+  cases dec with
+  | some => simp only [Option.isNone_some, Bool.false_eq_true] at hd
+  | none =>
+    obtain ⟨⟨xs, hv⟩, hfr⟩ := Option.isSome_iff_exists.mp hf
+    dsimp only [Stmt.step]
+    simp only [loopStep, hfr]
+
+theorem LeanTaclet.functionCallArgCapture.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps}
+    {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {p : PrimTy}
+    {v : Val C Γ p} {as' : Args C (.val p :: Γ) ps} (hcap : Args.capture args = some ⟨p, v, as'⟩) :
+    Stmt.step k m (Stmt.call f args ret body) = some (Premise.argCapture k f p v as' ret body) := by
+  cases ret <;> (dsimp only [Stmt.step]; simp only [callStep, hcap]) <;> rfl
+
 end Hand
 
-#derive_toStep
+#derive_toStep Taclet
+#derive_toStep LeanTaclet
 
 /-! ## The rule `Stmt.step` fires -/
 
@@ -321,7 +381,24 @@ end Hand
 premise is `Stmt.step`'s, so it is sound by `Stmt.Sound`. -/
 theorem Taclet.toStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
     {p : Premise C Γ Γ'} (h : Taclet C k m s p) : s.step k m = some p := by
-  cases h <;> apply_toStep
+  cases h <;> apply_toStep Taclet
+
+/-- The rules solkey does not have are `Stmt.step`'s too. -/
+theorem LeanTaclet.toStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    {p : Premise C Γ Γ'} (h : LeanTaclet C k m s p) : s.step k m = some p := by
+  cases h <;> apply_toStep LeanTaclet
+
+/-- **Every rule of the calculus is the one `Stmt.step` fires**: at most one
+premise per statement, the dispatcher's. -/
+theorem Rule.toStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    {p : Premise C Γ Γ'} : Rule C k m s p → s.step k m = some p
+  | .key d => d.toStep
+  | .lean d => d.toStep
+
+/-- Two rules on one statement leave the same premise. -/
+theorem Rule.premise_unique {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    {p p' : Premise C Γ Γ'} (d : Rule C k m s p) (d' : Rule C k m s p') : p = p' :=
+  Option.some.inj (d.toStep.symm.trans d'.toStep)
 
 /-- `Taclet.toStep`, under its first name. -/
 theorem Taclet.step_eq {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}

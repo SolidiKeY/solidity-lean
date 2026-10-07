@@ -1090,7 +1090,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
   | `(sol_stmt| if ($c:sol_expr) $t:sol_block else $f:sol_block) => do
     return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f)), Γ)
   | `(sol_stmt| if ($c:sol_expr) $t:sol_block) => do
-    return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) []), Γ)
+    let nil : Lean.Term ← if Γ.isCore then pure ⟨(Lean.mkCIdent `Solidity.Core.Prog.nil).raw⟩ else `([])
+    return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) $nil), Γ)
   | stx => do
     let k := stx.raw.getKind
     if k == ``solDelete then
@@ -1930,12 +1931,33 @@ def schemaRhsCore (Γ : Scope) (x : Ident) (r : TSyntax `dl_term) : MacroM Lean.
   | _ => Macro.throwErrorAt x "an update assigns a local, an alias, a memory local, \
       `storage` or `memory`"
 
-/-- A scoped update: its elements `snoc`ed onto `Upd.nil` in order, the
-local the `\find` declares (`found`) declared (`Upd.decl`). -/
+/-- `Ext.push^d .refl`: the `d` fresh locals a premise declared, popped. -/
+def extPush (d : Nat) : MacroM Lean.Term := do
+  let mut h : Lean.Term := Lean.mkCIdent `Solidity.Core.Ext.refl
+  for _ in [0:d] do h ← `($(Lean.mkCIdent `Solidity.Core.Ext.push) $h)
+  return h
+
+/-- The fresh local an update element declares by its spelling: KeY's `b`
+(`bType b = cond;`, a `bool`) and `variant` (`\\skolemTerm int variant`, a
+`uint`), the invariant rules' (`headOf` names them `se`, `ie`). -/
+def updFresh? (n : String) : Option (Lean.Term × Lean.Term) :=
+  let k := schemaIdent "k"
+  match stemOf n with
+  | "b" => some (Lean.Syntax.mkApp (mkIdent ``Var.fresh) #[Lean.Syntax.mkStrLit "se", k],
+      Lean.mkCIdent ``PrimTy.bool)
+  | "variant" => some (Lean.Syntax.mkApp (mkIdent ``Var.fresh) #[Lean.Syntax.mkStrLit "ie", k],
+      Lean.mkCIdent ``PrimTy.uint)
+  | _ => none
+
+/-- A scoped update: its elements `snoc`ed onto `Upd.nil` in order, every
+right-hand side read in `Γ`; the local the `\find` declares (`found`), and
+an invariant rule's `b` and `variant` (`updFresh?`), declared (`Upd.decl`),
+the scope after it returned. -/
 def schemaUpdCore (Γ : Scope) (found : Option String) (U : TSyntax `dl_upd) :
-    MacroM Lean.Term := do
-  if let `(dl_upd| ‹ $t:term ›) := U then return t
+    MacroM (Lean.Term × Scope) := do
+  if let `(dl_upd| ‹ $t:term ›) := U then return (t, Γ)
   let mut acc : Lean.Term := Lean.mkCIdent `Solidity.Core.Upd.nil
+  let mut Γ' := Γ
   for e in U.raw[1].getSepArgs do
     match (⟨e⟩ : TSyntax `dl_upd_elem) with
     | `(dl_upd_elem| $l:dl_term := $r:dl_term) =>
@@ -1943,17 +1965,83 @@ def schemaUpdCore (Γ : Scope) (found : Option String) (U : TSyntax `dl_upd) :
       let n := x.getId.toString
       if found == some n then
         acc ← `($(Lean.mkCIdent `Solidity.Core.Upd.decl) $acc $x $(← schemaRhsCore Γ x r))
+        Γ' := (n, .val x) :: Γ'
+      else if let some (v, p) := updFresh? n then
+        acc ← `($(Lean.mkCIdent `Solidity.Core.Upd.decl) $acc $v
+          ($(Lean.mkCIdent `Solidity.Core.Rhs.val) (p := $p) $(← schemaTerm Γ .val r)))
+        Γ' := (n, .val v) :: Γ'
       else if ["storage", "memory", "net", "selfBalance"].contains n then
         acc ← `($(Lean.mkCIdent `Solidity.Core.Upd.snoc) $acc $(← schemaUpdElem Γ ⟨e⟩))
       else
-        let tgt ← match headOf Γ x with
+        -- the target a local of the scope after the declarations so far
+        let tgt ← match headOf Γ' x with
           | .local v | .alias v | .mem v _ => pure v
           | _ => Macro.throwErrorAt x "an update assigns a local, an alias, a memory local, \
               `storage` or `memory`"
         acc ← `($(Lean.mkCIdent `Solidity.Core.Upd.snoc) $acc
           ($(Lean.mkCIdent `Solidity.Core.UpdElem.local) $tgt $(← schemaRhsCore Γ x r)))
     | _ => Macro.throwErrorAt e "a scoped taclet's update has no update variable"
-  return acc
+  return (acc, Γ')
+
+/-- A scoped formula, its names read in `Γ`: a fresh local an update in it
+declares (`{ b := cond } (b = TRUE → …)`) is a position in the formula after
+it.  The forms the rule lines write. -/
+partial def schemaFmlCore (Γ : Scope) : TSyntax `dl_fml → MacroM Lean.Term
+  | `(dl_fml| true) => `(Fml.tt)
+  | `(dl_fml| false) => `(Fml.not Fml.tt)
+  | `(dl_fml| $a:dl_term = $b:dl_term) => do
+    if let `(dl_term| $c:ident) := b then
+      let n := c.getId.toString
+      if n == "TRUE" || n == "FALSE" then
+        let v := mkIdent (Name.mkSimple (if n == "TRUE" then "true" else "false"))
+        return ← `(Fml.eqD $(← schemaTerm Γ .val a) (Term.lit (.bool $v)))
+    `(Fml.eq $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do
+    `(Fml.eq $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_fml| defined( $t:dl_term )) => do `(Fml.defined $(← schemaTerm Γ .val t))
+  | `(dl_fml| ¬ $φ:dl_fml) => do `(Fml.not $(← schemaFmlCore Γ φ))
+  | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) => do
+    `(Fml.and $(← schemaFmlCore Γ φ) $(← schemaFmlCore Γ ψ))
+  | `(dl_fml| $φ:dl_fml → $ψ:dl_fml) => do
+    `(Fml.imp $(← schemaFmlCore Γ φ) $(← schemaFmlCore Γ ψ))
+  | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
+    let m ← match ← fmlModality? (schemaIdent "m") φ with
+      | some m => pure m
+      | none => `(Modality.diamond)
+    let (U, Γ') ← schemaUpdCore Γ none U
+    `(Fml.upd $m $U $(← schemaFmlCore Γ' φ))
+  | `(dl_fml| ( $φ:dl_fml )) => schemaFmlCore Γ φ
+  | `(dl_fml| ‹ $t:term ›) => pure t
+  | `(dl_fml| $x:ident) => pure x
+  | `(dl_fml| $a:dl_term <= $b:dl_term) => do
+    `(Fml.eqD (Term.binop BinOp.le PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+        (Term.lit (.bool true)))
+  | `(dl_fml| $a:dl_term < $b:dl_term) => do
+    `(Fml.eqD (Term.binop BinOp.lt PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+        (Term.lit (.bool true)))
+  | φ => Macro.throwErrorAt φ "no scoped reading of this formula yet"
+
+/-- The invariant rule's premise, scoped (`schemaInv`): the invariant now;
+the body's frame (`xs`, `hv`, bound by the side condition
+`Prog.frame body = some (xs, hv)`); the update of the condition's value `b`
+(and under the diamond the variant's `variant`), the conditions read after
+it; the body and its postcondition read where `b` is popped (`hb`), the
+variant kept above the loop's context (`hu`). -/
+def schemaInvCore (i : TSyntax `dl_fml) (b : TSyntax `sol_block) (h : TSyntax `dl_fml)
+    (U : TSyntax `dl_upd) (c : TSyntax `dl_fml) (t : TSyntax `sol_block)
+    (post c' : TSyntax `dl_fml) : MacroM Lean.Term := do
+  unless i.raw.structEq h.raw do
+    Macro.throwErrorAt h "the invariant assumed is the one shown initially valid"
+  unless b.raw.structEq t.raw do
+    Macro.throwErrorAt t "the frame is the body's, which the goal runs"
+  let (Ut, Γu) ← schemaUpdCore coreScope none U
+  -- the body's scope: the update's locals but `b`
+  let Γ₀ : Scope := Γu.filter (·.1 != "b")
+  let hu ← extPush (Scope.depth Γ₀)
+  let hb ← extPush (Scope.depth Γu - Scope.depth Γ₀)
+  `($(Lean.mkCIdent `Solidity.Core.Premise.inv) $(← schemaFmlCore coreScope i)
+      $(schemaIdent "xs") $(schemaIdent "hv") $Ut $(← schemaFmlCore Γu c) $(← schemaFmlCore Γu c')
+      $hu $hb $(← schemaBlock true Γ₀ t) $(← schemaFmlCore Γ₀ post))
 
 /-- `expand_function_body(fbs)`, a whole premise. -/
 def expandBody? : TSyntax `sol_stmt → Bool
@@ -1964,19 +2052,13 @@ def expandBody? : TSyntax `sol_stmt → Bool
     | _ => false
   | _ => false
 
-/-- `Ext.push^d .refl`: the `d` fresh locals a premise declared, popped. -/
-def extPush (d : Nat) : MacroM Lean.Term := do
-  let mut h : Lean.Term := Lean.mkCIdent `Solidity.Core.Ext.refl
-  for _ in [0:d] do h ← `($(Lean.mkCIdent `Solidity.Core.Ext.push) $h)
-  return h
-
 /-- A scoped premise.  `Γ` is the scope after the `\find`, `found` the local
 it declares (its name and its variable), `split` how a split's goals end. -/
 def schemaPremiseCore (Γ : Scope) (found : Option (String × Lean.Term)) (split : Lean.Term) :
     TSyntax `dl_premise → MacroM Lean.Term
   | `(dl_premise| $U:dl_upd ⟨[ ]⟩) => do
     `($(Lean.mkCIdent `Solidity.Core.Premise.update)
-      $(← schemaUpdCore coreScope (found.map (·.1)) U))
+      $((← schemaUpdCore coreScope (found.map (·.1)) U).1))
   | `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) => do
     if ss.size == 1 && expandBody? ss[0]! then
       -- a call inlined: the premise `Stmt.step` builds (`Core.Premise.expandCall`)
@@ -1988,19 +2070,19 @@ def schemaPremiseCore (Γ : Scope) (found : Option (String × Lean.Term)) (split
     | some (_, x) => `($(Lean.mkCIdent `Solidity.Core.Premise.bind) $x _ $P)
     | none => `($(Lean.mkCIdent `Solidity.Core.Premise.unfold) $P $(← extPush (Γ'.depth - Γ.depth)))
   | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ ; $[$_:str :]? $nc:dl_fml ⟹ ⟨[ $f:sol_block ]⟩) => do
-    `($(Lean.mkCIdent `Solidity.Core.Premise.split) $split $(← schemaFml c) $(← schemaFml nc)
+    `($(Lean.mkCIdent `Solidity.Core.Premise.split) $split $(← schemaFmlCore coreScope c) $(← schemaFmlCore coreScope nc)
         $(← schemaBlock true Γ t) $(← schemaBlock true Γ f))
   | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ;
       $[$_:str :]? $nc:dl_fml ⟹ ⟨[ $[$fs:sol_stmt;]* ]⟩) => do
     let (ts, _) ← schemaProg true Γ ts
     let (fs, _) ← schemaProg true Γ fs
-    `($(Lean.mkCIdent `Solidity.Core.Premise.split) $split $(← schemaFml c) $(← schemaFml nc)
+    `($(Lean.mkCIdent `Solidity.Core.Premise.split) $split $(← schemaFmlCore coreScope c) $(← schemaFmlCore coreScope nc)
         $(← progTermCore ts) $(← progTermCore fs))
   | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $[$_:str :]? $c':dl_fml) => do
     unless c.raw.structEq c'.raw do
       Macro.throwErrorAt c' "a check assumes the condition it checks: write it on both sides"
     unless ts.isEmpty do Macro.throwErrorAt c "a scoped check goes on with the rest of the program"
-    `($(Lean.mkCIdent `Solidity.Core.Premise.check) $(← schemaFml c))
+    `($(Lean.mkCIdent `Solidity.Core.Premise.check) $(← schemaFmlCore coreScope c))
   | `(dl_premise| true) => `($(Lean.mkCIdent `Solidity.Core.Premise.done) true)
   | `(dl_premise| false) => `($(Lean.mkCIdent `Solidity.Core.Premise.done) false)
   | `(dl_premise| $b:dl_branch ; $bs:dl_branch;*) => do
@@ -2011,12 +2093,15 @@ def schemaPremiseCore (Γ : Scope) (found : Option (String × Lean.Term)) (split
     let mut us : Array Lean.Term := #[]
     for c in #[c] ++ cs.getElems do
       match c with
-      | `(dl_case| $[$_:str :]? $U:dl_upd ⟨[ ]⟩) => us := us.push (← schemaUpdCore coreScope none U)
+      | `(dl_case| $[$_:str :]? $U:dl_upd ⟨[ ]⟩) => us := us.push (← schemaUpdCore coreScope none U).1
       | `(dl_case| $[$_:str :]? $φ:dl_fml) =>
         unless us.isEmpty do Macro.throwErrorAt c "the formula goals come first"
-        fs := fs.push (← schemaFml φ)
+        fs := fs.push (← schemaFmlCore coreScope φ)
       | _ => Macro.throwUnsupported
     `($(Lean.mkCIdent `Solidity.Core.Premise.cases) [$fs,*] [$us,*])
+  | `(dl_premise| $[$_:str :]? $i:dl_fml ; $[$_:str :]? { anon($b:sol_block) } ($h:dl_fml →
+      $U:dl_upd ($c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩))) => do
+    schemaInvCore i b h U c t post c'
   | p => Macro.throwErrorAt p "no scoped reading of this premise yet"
 
 /-- The scoped taclet `s ⇝ p` under the modality `m` (`schemaTaclet`'s

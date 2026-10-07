@@ -1,4 +1,4 @@
-import Solidity.Calculus.Core.Delab
+import Solidity.Calculus.Core.DelabLean
 
 /-!
 # Every scoped rule prints as its old twin
@@ -22,45 +22,55 @@ the notation on, its binders and side conditions left out. -/
 def ruleLine (c : Lean.Name) : MetaM String := do
   forallTelescope (← getConstInfo c).type fun _ body =>
     withOptions (fun o => o.setBool `pp.sol.dl true) do
-      return (← Lean.Meta.ppExpr body).pretty 100000
+      -- the judgement as each namespace names it: `dl[LeanTaclet C k]{ … }`
+      let t := (← Lean.Meta.ppExpr body).pretty 100000
+      return (t.replace "dl[Solidity.Core." "dl[").replace "dl[Solidity." "dl[" |>.replace "dl[Core." "dl["
 
-/-- Today's text of the rule `r` and its scoped twin's, if both exist. -/
-def texts (r : String) : MetaM (Option (String × String)) := do
-  let c := ``Solidity.Taclet ++ Lean.Name.mkSimple r
-  let c' := ``Solidity.Core.Taclet ++ Lean.Name.mkSimple r
+/-- The judgements compared: today's and the scoped one of the same name. -/
+def judgements : List Lean.Name := [`Taclet, `LeanTaclet]
+
+/-- Today's text of the rule `J.r` and its scoped twin's, if both exist. -/
+def texts (J : Lean.Name) (r : String) : MetaM (Option (String × String)) := do
+  let c := `Solidity ++ J ++ Lean.Name.mkSimple r
+  let c' := `Solidity.Core ++ J ++ Lean.Name.mkSimple r
   unless (← getEnv).contains c && (← getEnv).contains c' do return none
   return some (← ruleLine c, ← ruleLine c')
 
-/-- The rules of today's `Taclet` whose scoped twin is missing or prints
-otherwise, and how many there are in all. -/
-def mismatches : MetaM (Nat × Array String) := do
-  let some (.inductInfo old) := (← getEnv).find? ``Solidity.Taclet | throwError "no `Taclet`"
+/-- The rules of today's judgement `J` whose scoped twin is missing or
+prints otherwise, and how many there are in all. -/
+def mismatches (J : Lean.Name) : MetaM (Nat × Array String) := do
+  let some (.inductInfo old) := (← getEnv).find? (`Solidity ++ J) | throwError "no `{J}`"
   let mut bad := #[]
   for c in old.ctors do
     let r := c.getString!
-    match ← texts r with
+    match ← texts J r with
     | some (a, b) => if a != b then bad := bad.push r
     | none => bad := bad.push r
   return (old.ctors.length, bad)
 
-/-- Every rule line the scoped table does not print as today's, by name. -/
+/-- Every rule line the scoped tables do not print as today's, by name. -/
 elab "#check_rule_text" : command => liftTermElabM do
-  let (n, bad) ← mismatches
-  if bad.isEmpty then logInfo m!"all {n} rules of `Taclet` print as their scoped twins"
-  else
-    logInfo m!"{n - bad.size} of {n} rules of `Taclet` print as their scoped twins; not these:\n\
-      {"\n".intercalate bad.toList}"
+  for J in judgements do
+    let (n, bad) ← mismatches J
+    if bad.isEmpty then logInfo m!"all {n} rules of `{J}` print as their scoped twins"
+    else
+      logInfo m!"{n - bad.size} of {n} rules of `{J}` print as their scoped twins; not these:\n\
+        {"\n".intercalate bad.toList}"
 
-/-- The rule `r`, as today's table prints it and as the scoped one does. -/
-elab "#rule_text " r:ident : command => liftTermElabM do
-  match ← texts r.getId.toString with
+/-- The rule `J.r`, as today's table prints it and as the scoped one does. -/
+elab "#rule_text " J:ident r:ident : command => liftTermElabM do
+  match ← texts J.getId r.getId.toString with
   | some (a, b) => logInfo m!"today:  {a}\nscoped: {b}"
-  | none => throwError "no rule `{r.getId}` in both tables"
+  | none => throwError "no rule `{J.getId}.{r.getId}` in both tables"
 
 /-! The lines the scoped printer does not render yet (`docs/intrinsic.md`,
-W1 "rules"): a hole's statement (`lhs = …`, `tgt = mv`), `⊕⊕`'s value
-(`Term.bumped`), a call's inlining (`Premise.expandCall`) and a `try`'s
-binders, which `Calculus/Core/Delab.lean` does not translate. -/
+W1 "rules"): a hole's statement (`lhs = …`, `tgt = mv`: `SHole.fill` and
+its kin), `⊕⊕`'s value (`Tms.Term.bumped`), a call's inlining
+(`Premise.expandCall`), a `try` with schema binders (`rets`, `code`), and a
+block weakened inside a premise's program (`Prog.up`, which
+`Calculus/Core/Delab.lean`'s `progPieces` unfolds before it looks for `up`).
+`functionCallArgCapture` is stated without a line: today's escapes to the
+untyped call (`‹.call f args hsep ret body›`). -/
 
 /--
 info: 140 of 158 rules of `Taclet` print as their scoped twins; not these:
@@ -82,6 +92,11 @@ newArrayCapture
 functionBodyExpand
 internalCallExpand
 tryCallNoCallbackBox
+---
+info: 6 of 9 rules of `LeanTaclet` print as their scoped twins; not these:
+functionCallArgCapture
+tryCallDiamond
+whileInvariantDiamond
 -/
 #guard_msgs in
 #check_rule_text

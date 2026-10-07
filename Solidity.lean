@@ -61,6 +61,7 @@ import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
+import Solidity.Calculus.Core.DelabLean
 import Solidity.Calculus.Core.RuleText
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Notation
