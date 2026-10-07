@@ -623,7 +623,7 @@ from `./run-lean.sh`.
   (`Calculus/Core/SoundStep.lean`), given the block arms (`Stmt.IsBlockArm`:
   calls, `try`, loops; lane `sound2`) and `WkRuns` (a block weakened under
   a captured `if` condition runs as before, the run of `Prog.wk up`, which
-  `sound2`'s `RunWk.lean` proves).  `#print axioms`: `propext`,
+  lane `sound2` proves: `Prog.run_wk`).  `#print axioms`: `propext`,
   `Classical.choice`, `Quot.sound`.
   - Updates (`SoundArms.lean`, `SoundUpdates.lean`): the update ends as the
     statement does (`Premise.Sound.update`), or alike up to the halt
@@ -667,7 +667,7 @@ from `./run-lean.sh`.
     and for a binder only where the block writes the local before reading
     it; not stated.
   - `Premise.sound` over all of `Stmt.step`: `Stmt.stepSound` with
-    `sound2`'s block arms and `WkRuns` from its `RunWk.lean`, once merged.
+    `sound2`'s block arms and `WkRuns` from its `Prog.run_wk`, once merged.
   - `Calculus/Core/Quote.lean` does not build on this branch (its `Premise`
     quoter misses `inline`, `inv`, `cases`, `branches`: the calctools
     lane's), so `Examples/Tactics/CoreStep.lean` and `CoreSymex.lean` were
