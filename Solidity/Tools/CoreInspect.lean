@@ -42,6 +42,10 @@ def stepQuotedC (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) :
 /-- A closed scoped formula of a named contract: the formula, and the
 contract's name quoted. -/
 def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr)) := do
+  -- today's notation (`dl!{ … }`, `dl[C]{ … }`) is today's elaborator's,
+  -- left unread so that it is not elaborated twice
+  if let some (.atom _ v) := t.raw.getHead? then
+    if v.startsWith "dl" then return none
   let φ ← try elabTerm t none catch _ => return none
   synthesizeSyntheticMVarsNoPostponing
   let φ ← instantiateMVars φ

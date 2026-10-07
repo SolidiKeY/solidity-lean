@@ -100,4 +100,14 @@ info:   ~[storageFieldWriteSave]~>
 -/
 #guard_msgs in #step cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }
 
+/-! Today's formula is still today's `#wp`'s. -/
+
+/--
+info: symbolic execution leaves:
+    dl{ { x := 10 } x = 10 }
+update-free:
+    10 = 10 ∧ 10 = 10
+-/
+#guard_msgs in #wp dl!{ ⟨ uint x = 10; ⟩ x == 10 }
+
 end Solidity.Examples.Tactics.CoreNotation
