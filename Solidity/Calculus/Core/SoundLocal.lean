@@ -81,7 +81,7 @@ theorem sound_mlenCapture {p : PrimTy} (i : Idx Γ (.val p)) {E : Ty} (b : MPath
   refine Premise.Sound.captureMVSim σ (fun id hid => ?_) (fun h hh _ => ?_)
   · rw [Stmt.run_assignLocal, Stmt.run_assignLocal,
       Run.assignLocal_push σ (t := .mem _) id i _ (.mlen b hp), pushed_drop]
-    simp only [Val.eval, MPath.mval_here, State.glob_push, Res.bind_ok, pure_bind]
+    simp only [Val.eval, MPath.mval_here, State.glob_push, pure_bind]
     rw [← bind_assoc, hid]; rfl
   · show Res.Sim _ (Run.assignLocal i _ σ)
     simp only [Run.assignLocal, Val.eval, bind_assoc]
@@ -130,8 +130,7 @@ theorem sound_shortAnd (hσ : σ.Typed) (i : Idx Γ (.val .bool)) (ha : BinOp.an
   cases ab with
   | false => exact Res.Sim.refl _
   | true =>
-    simp only [Prog.run_cons, Stmt.run_assignLocal, Run.assignLocal, Val.eval, Simple.eval,
-      State.get_setLocal, Res.map_drop_refl]
+    simp only [Prog.run_cons, Stmt.run_assignLocal, Run.assignLocal, Val.eval, Simple.eval]
     cases hb : b.eval σ with
     | error h => exact Res.Sim.refl _
     | ok bv =>
@@ -158,8 +157,7 @@ theorem sound_shortOr (hσ : σ.Typed) (i : Idx Γ (.val .bool)) (ha : BinOp.or.
   cases ab with
   | true => exact Res.Sim.refl _
   | false =>
-    simp only [Prog.run_cons, Stmt.run_assignLocal, Run.assignLocal, Val.eval, Simple.eval,
-      State.get_setLocal, Res.map_drop_refl]
+    simp only [Prog.run_cons, Stmt.run_assignLocal, Run.assignLocal, Val.eval, Simple.eval]
     cases hb : b.eval σ with
     | error h => exact Res.Sim.refl _
     | ok bv =>
@@ -271,9 +269,9 @@ theorem OpLoc.unfoldRecv_sound (k : Nat) {p : PrimTy}
     (hpush : ∀ {t : LTy} (w : t.Denote C) (l' : OpLoc C (t :: Γ) p) (l : OpLoc C Γ p),
       OpLoc.Agree σ w l' l → (s l').run (σ.push w) = pushed w ((S l).run σ))
     (hstore : ∀ {sn : Name} (b : SPath C Γ (.struct sn)) f h,
-      (S (.field b f h)).run σ = b.resolve σ >>= fun q => (S (.field b f h)).run σ)
+      (S (.field b f h)).run σ = b.resolve σ >>= fun _ => (S (.field b f h)).run σ)
     (hindex : ∀ {R : RefTy} {kp : PrimTy} (it : IndexTy R kp (.prim p)) b ie,
-      (S (.index it b ie)).run σ = b.resolve σ >>= fun q => (S (.index it b ie)).run σ)
+      (S (.index it b ie)).run σ = b.resolve σ >>= fun _ => (S (.index it b ie)).run σ)
     (hmfield : ∀ {sn : Name} (b : MPath C Γ (.struct sn)) f h,
       (S (.mfield b f h)).run σ = (do (← b.mval σ).asRef) >>= fun _ => (S (.mfield b f h)).run σ)
     (hmindex : ∀ {R : RefTy} (a : ArrTy R (.prim p)) b ie,
