@@ -8,8 +8,8 @@ import Solidity.Scope
 (`docs/intrinsic.md`, M2): every part is read in a context `Γ : Ctx`
 (`Scope.lean`), a local is a position `Idx Γ t` that carries its type, and a
 statement `Stmt C Γ Γ'` says which context it leaves.  So a local read
-before it is declared, or at another type than declared, cannot be written,
-and the locals check of `Syntax.lean` (`Stmt.wt`) holds by construction.
+before it is declared, or at another type than declared, cannot be written:
+the typing proofs need no locals check (`Typing/Soundness.lean`).
 
 Scopes are explicit, as in solc: the branches of an `if` and of a `try`, a
 loop's body and a block `{ … }` start from the enclosing context and their

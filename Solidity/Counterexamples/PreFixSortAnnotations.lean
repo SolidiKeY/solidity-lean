@@ -54,16 +54,25 @@ def flagStore : State :=
   { storage := [("flag", .bool false), ("flag2", .bool true)],
     env := [(.user "x", .val (.bool false))] }
 
-/-- `bool x;` -/
-def flagCtx : Ctx := [(.user "x", .stack (.prim .bool))]
+/-- `peopleStore`, as a scoped state with no locals. -/
+def peopleCore : Core.State People [] := Core.State.ofSem peopleStore
+
+/-- `flagStore`, as a scoped state with its local `bool x`. -/
+def flagCore : Core.State Flags [.val .bool] := Core.State.ofGlob flagStore (.bool false, ())
 
 /-- `People`'s store is well-typed. -/
-theorem peopleStore_wt : RunWT People [] [] peopleStore :=
-  (StateWT.ofB (L := People.layout) (s := peopleStore) (by decide)).toRunWT
+theorem peopleStore_wt : Core.RunWT People [] peopleCore :=
+  ⟨StateWT.ofB (L := People.layout) (by decide), trivial⟩
 
-/-- `Flags`'s store is well-typed. -/
-theorem flagStore_wt : RunWT Flags flagCtx [] flagStore :=
-  (StateWT.ofB (Γ := flagCtx) (H := []) (L := Flags.layout) (s := flagStore) (by decide)).toRunWT
+/-- `Flags`'s store is well-typed, `x` a `bool`. -/
+theorem flagStore_wt : Core.RunWT Flags [] flagCore :=
+  ⟨StateWT.ofB (H := []) (L := Flags.layout) (by decide), rfl, trivial⟩
+
+theorem peopleStore_agree : Core.Agree [] peopleCore peopleStore :=
+  ⟨rfl, List.nodup_nil, rfl, fun _ h => nomatch h⟩
+
+theorem flagStore_agree : Core.Agree [.user "x"] flagCore flagStore :=
+  ⟨rfl, List.nodup_cons.2 ⟨List.not_mem_nil, List.nodup_nil⟩, rfl, by decide⟩
 
 /-! ## The copy rule -/
 
@@ -80,7 +89,8 @@ theorem preFix_rootCopy_not_faithful :
   intro h
   obtain ⟨R, hR, _, hall⟩ := h ⟨.storage, .value, .fixed .int⟩ (by decide)
   cases hR
-  have := hall [] [] [] peopleStore peopleStore_wt (by decide) "bob" [] person0 rfl rfl
+  have := hall [] [] [] peopleCore peopleStore peopleStore_wt peopleStore_agree
+    ⟨.loc (.root "bob" rfl), rfl⟩ "bob" [] person0 rfl rfl
   exact absurd this (by decide)
 
 /-- The fixed row (sort-free `find<[StValue]>`) is faithful there, as
@@ -111,7 +121,8 @@ theorem preFix_readSelect_not_faithful :
   intro h
   obtain ⟨R, hR, _, hall⟩ := h ⟨.storage, .value, .fixed .int⟩ (by decide)
   cases hR
-  have := hall flagCtx flagCtx [] flagStore flagStore_wt (by decide) "flag" [] (.bool false) rfl rfl
+  have := hall [.val .bool] [.user "x"] [] flagCore flagStore flagStore_wt flagStore_agree
+    ⟨.loc (.root "flag" rfl), rfl⟩ "flag" [] (.bool false) rfl rfl
   exact absurd this (by decide)
 
 /-- The current row (`\hasSort`) is faithful there. -/
