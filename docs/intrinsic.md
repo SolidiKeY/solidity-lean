@@ -23,7 +23,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 
 | # | Status | Work |
 |---|---|---|
-| M0 | | baselines + scratch spike, gate G0 |
+| M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
 | M2 | | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
 | M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
@@ -116,7 +116,107 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 
 ## Baselines (M0)
 
-(filled by M0)
+Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
+4.24.0, a machine shared with other sessions (repeats differ by up to 25%).
+Method: wall time of `lean_diagnostic_messages` on a freshly opened file
+(imports from the Lake cache, so worker start and header load are included,
+about 1 s), stamped by `date` before and after the call; `Derived10` was
+re-elaborated after a docstring edit instead (imports already loaded).
+`stmt_sim` by `set_option profiler true` on its declaration, and by the wall
+time of re-elaborating the file from it.
+
+| What | Time |
+|---|---|
+| `TestSuite/Derived9` | 7.0 s |
+| `TestSuite/Derived10` | 9.3 s |
+| `TestSuite/Derived11` | 2.8 s |
+| the three (`testsuite-proofs.md`'s 20.2 s is the sum of `sol_prove` CPU) | 19.1 s |
+| `TestSuite/Problems` | 1.2 s |
+| `Solkey/TestSuite` (`solc_import` of `TestSuite.ast.json`) | 10.4 s |
+| `Examples/Benchmark/Syntax` (a `sol{}`/`contract!{}` site) | 1.2 s |
+| `Examples/ProofTree` | 10.1 s |
+| `Examples/Chains/Storage` | 7.5 s |
+| `Evm/Examples` | 9.5 s |
+| `Evm/Correctness`, whole file | 25.6 s |
+| `Evm/Correctness` from `stmt_sim` (:1996) to the end | 19.9 s |
+| `stmt_sim` alone, profiler items over 100 ms (type checking 1.6 s, `simp` 2.6 s, pre-definitions 0.2 s) | 4.4 s |
+
+Not measured: the whole `SolkeyTestSuite` and `check-corpus.sh` (both need
+`lake` from the shell, which this lane may not run); take them at M1's start
+from `./run-lean.sh`.
+
+### Gate G0: passes, under conditions
+
+The spike (`Solidity/Scratch/IntrinsicSpike.lean`, not committed) has seven
+statements (`assignLocal`, `declLocal`, `declStorage`, `write`, scoped `ite`,
+`loop`, `call` over a closed frame), `Prog Γ Γ'` with a variable output
+index, `Frames` with `pop .capture`/`.block`, `storageFieldRead_unfold_rightFst`
+as a capture and `ifElseSplit` into `pop .block`, a typed run, `resolve` from
+the named toy, hand quoters, and a symex checked by the kernel (`Eq.refl` of
+the compiled-and-quoted result, `Environment.addDeclCore`, timed). The program
+has 43 top-level statements (five blocks; the symex variant drops the loop
+and the call). U is today's shape: names, unscoped locals, `stuck`,
+`thn ++ ω`.
+
+| Variant | symex, kernel | run, kernel | result DAG (hash-consed) |
+|---|---|---|---|
+| U, names (reference) | 3.8–3.9 s (500 steps) | 164–184 ms | 1170 |
+| I, `(Var × LTy)` contexts, `match` | 51.8 s | 380 ms | |
+| J, `LTy` contexts, `match` | 45.1 s | 293 ms | |
+| K, `LTy` contexts, `casesOn` + structural | 6.5 s (686 steps) | 44 ms | 1566 |
+| **K, `Fml.rec` step + `implemented_by`** | **3.0–3.3 s (0.8×)** | **44 ms (0.25×)** | **1566 (1.34×)** |
+
+- Kernel ≤ 1.3×: yes for K with the recursor step (0.8× symex, 0.25× run).
+  The literal's own check is 0.8 ms against 0.15 ms (5×, negligible).
+- Quoted size ≤ 2×: yes as a hash-consed DAG (result 1.34×, literal 1.96×);
+  unshared trees are 26–37× larger, because every node carries its contexts.
+- No `Meta.reduce` fallback: the quoter covers every constructor of the
+  closed term, `Idx`/`Ext`/`Frames` included.
+- `cases` with no generalisation: works on `Prog Γ Γ'`, `Prog Γ Γ`,
+  `Prog [] [t]` and `Stmt Γ (t :: Γ)` (the cyclic index is closed by
+  acyclicity); `induction` on `Idx` and a structural proof of `run_append`
+  work too.
+
+The named-scope retry was not needed. The conditions, which M2–M6 follow:
+
+1. **No `match` on an indexed family in kernel-evaluated code.** The equation
+   compiler casts every index (`x = a → x₁ ≍ x₃ → motive`, then `Eq.ndrec`)
+   even for `_` patterns, and the kernel pays a context comparison per cast:
+   11–13× on symex, 4× on a fold. Hot functions use `T.casesOn`/`T.rec` with
+   the motive generalising the indices and the dependent arguments passed
+   after it (`Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames Γ₁ Γ₀ → …) P … κ`).
+   `match` stays fine on parameter-only families (`Expr Γ`, `SPath Γ`) and on
+   elaboration-time code (`resolve`, quoters, `Stmt.wk`).
+2. **The fastest form is `T.rec` + an `@[implemented_by]` twin** written with
+   `casesOn` + structural recursion (the code generator rejects `T.rec`),
+   linked by a theorem (`stepR_eq`, by induction, `show`/`rw`/`rfl`).
+   `casesOn` + structural alone compiles and costs 1.7×.
+3. **Labels stay out of the index**: `Ctx := List LTy`, the name on the
+   binder (`declLocal x`, `Args.cons x`). With `(Var × LTy)` the literal is
+   three times larger (tree 206k against 67k) and symex 15% slower.
+   `resolve` and printers keep the names beside the context
+   (`List (Var × LTy)` and its `map (·.2)`).
+4. **`Env Γ` is computed from Γ** (`Unit`, `t.Denote × Env Γ`), not an
+   inductive family: `get`/`set`/`drop` are recursions on `Idx`/`Ext` over
+   projections, no casts. That is the 0.25× run.
+5. **Scope ends are suffixes** (`Ext Γ Δ`: `refl`, `push`) rather than the
+   general `Thin`; `Prog.ext` and `Ext.trans` recurse on one argument.
+   `Thin` with `keep` is only for `Stmt.wk`.
+6. **No administrative steps**: `Premise.fml` takes the rest ω and the frames
+   κ apart, so an update continues into `box ω κ φ`, not into
+   `box nil (seq ω κ)` (that doubled the steps and cost 1.23×).
+7. **The quoter hash-conses contexts** (`ShareCommon`, or a per-context cache).
+
+Pitfalls met: a `casesOn`-style definition has no per-constructor equations
+(`simp [f]` loops on `f.eq_1`), so the rule lemmas are stated by hand and
+proved by `rfl`; mutual `casesOn` motives are `motive_1`/`motive_2`; Lean
+promotes a uniform first index to a parameter (`Premise`, `Ext`), which
+changes the motive and breaks structural recursion unless that argument is
+bound before the colon; inside `if x = y then match u, t with …` the
+fall-through arm loses the refinement of `t`, so compute it before the
+`match`. `Stmt.wk` is stated as
+`Thin Γ Δ → Stmt Γ Γ' → (Δ' : Ctx) × Thin Γ' Δ' × Stmt Δ Δ'` (mutual with
+`Prog.wk`) and elaborates as is.
 
 ## Design (from the scoping review, design 3 "staged core")
 
