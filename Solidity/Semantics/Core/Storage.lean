@@ -21,11 +21,12 @@ follows its untyped namesake in `Semantics.lean` line for line, and
 
 Defaults (`SVal.dflt`) are structural on the rank `structDef_rank_lt`
 certifies, so the kernel can reduce them, where `defaultForTy` is
-well-founded.
+well-founded; their fuel is `rankBound`, which reads no struct name.
 
-These functions `match` on the indexed families; the kernel-evaluated ones
-may move to `T.rec` twins (Gate G0, condition 1) once the typed interpreter
-runs on them and their cost is measured.
+`find`, `findLive` and `save`, which the kernel evaluates on every storage
+access, are written with `Path.rec` over `SVal.view` (Gate G0, conditions 1
+and 2), each with a `match` twin as its compiled form; the other functions
+still `match` on the indexed families.
 -/
 
 namespace Solidity.Core
@@ -269,8 +270,30 @@ def SVal.dfltBelow : (k : Nat) → (T : Ty) → tyRank T < k → SVal T
   | 0, _, h => absurd h (Nat.not_lt_zero _)
   | k + 1, T, h => SVal.dfltAt k (SVal.dfltBelow k) T h
 
+/-- A bound on `tyRank` that reads no struct's name (every `structRank` is at
+most 4), so the kernel computes the fuel of `SVal.dflt` without matching a
+string: `tyRank` itself costs a `structRank` lookup per default. -/
+def rankBound : Ty → Nat
+  | .prim _ => 0
+  | .ref (.struct _) => 4
+  | .ref (.array E) => rankBound E
+  | .ref (.fixed E _) => rankBound E + 1
+  | .ref (.mapping _ V) => rankBound V
+
+theorem structRank_le_four (s : Name) : structRank s ≤ 4 := by
+  unfold structRank
+  split <;> decide
+
+theorem tyRank_le_rankBound : (T : Ty) → tyRank T ≤ rankBound T
+  | .prim _ => Nat.le_refl _
+  | .ref (.struct s) => structRank_le_four s
+  | .ref (.array E) => tyRank_le_rankBound E
+  | .ref (.fixed E _) => Nat.succ_le_succ (tyRank_le_rankBound E)
+  | .ref (.mapping _ V) => tyRank_le_rankBound V
+
 /-- The default of `T` (`defaultForTy`). -/
-def SVal.dflt (T : Ty) : SVal T := SVal.dfltBelow (tyRank T + 1) T (Nat.lt_succ_self _)
+def SVal.dflt (T : Ty) : SVal T :=
+  SVal.dfltBelow (rankBound T + 1) T (Nat.lt_succ_of_le (tyRank_le_rankBound T))
 
 /-- Every member at its default. -/
 def SFields.dflt : (fs : List (Name × Ty)) → SFields fs
@@ -329,63 +352,84 @@ theorem erase_index : {R : RefTy} → {k : PrimTy} → {V : Ty} → (it : IndexT
 
 end Path
 
-/-! ## Find and save -/
+/-! ## Find and save
 
-/-- The value at a path (`Semantics.SVal.find`): `none` where an index is past
-the slots. -/
-def SVal.find : {T U : Ty} → SVal T → Path T U → Option (SVal U)
+The kernel evaluates these (`decide +kernel`, the symbolic execution's
+`Eq.refl`), so they are written with the recursor of `Path` and read a value
+through `SVal.view`, whose type `Shape T` is computed from `T`: no `match` on
+an indexed family, whose casts cost the kernel a factor of 40 here
+(`docs/intrinsic.md`, "M4 lane", and Gate G0, condition 2).  The compiler
+cannot compile a recursor, so each has a `match` twin (`SVal.findM`, …) as
+its `implemented_by`, and a theorem that they are equal
+(`Semantics/Core/StorageErase.lean`). -/
+
+/-- What a value of type `T` holds, by `T`. -/
+def Shape : Ty → Type
+  | .prim p => p.Denote
+  | .ref (.struct s) => SFields (structDef s)
+  | .ref (.array E) => SList E × SList E
+  | .ref (.fixed E n) => SVec E n
+  | .ref (.mapping _ V) => SMap V × SVal V
+
+/-- A value's contents, at the type its type computes. -/
+def SVal.view {T : Ty} (v : SVal T) : Shape T :=
+  @SVal.casesOn (fun T _ => Shape T) T v (fun {_} x => x) (fun {_} fs => fs)
+    (fun {_} e sh => (e, sh)) (fun {_} {_} e => e) (fun {_} {_} m d => (m, d))
+
+
+/-- `SVal.find` by `match`, its compiled form. -/
+def SVal.findM : {T U : Ty} → SVal T → Path T U → Option (SVal U)
   | _, _, v, .nil => some v
-  | _, _, .struct fs, .field h p => (fs.get h).find p
+  | _, _, .struct fs, .field h p => (fs.get h).findM p
   | _, _, .array e sh, .at i p =>
     if 0 ≤ i then
       match (e.toList ++ sh.toList)[i.toNat]? with
-      | some x => x.find p
+      | some x => x.findM p
       | none => none
     else none
   | _, _, .fixed e, .atF i p =>
     if 0 ≤ i then
       match e.toList[i.toNat]? with
-      | some x => x.find p
+      | some x => x.findM p
       | none => none
     else none
   | _, _, .map m d, .key k p =>
     match lookupBy k m.toList with
-    | some x => x.find p
-    | none => d.find p
+    | some x => x.findM p
+    | none => d.findM p
 
-/-- A read that checks every index against the live length
-(`Semantics.SVal.findLive`): `find` past an array's end is `none`. -/
-def SVal.findLive : {T U : Ty} → SVal T → Path T U → Option (SVal U)
+/-- `SVal.findLive` by `match`, its compiled form. -/
+def SVal.findLiveM : {T U : Ty} → SVal T → Path T U → Option (SVal U)
   | _, _, v, .nil => some v
-  | _, _, .struct fs, .field h p => (fs.get h).findLive p
+  | _, _, .struct fs, .field h p => (fs.get h).findLiveM p
   | _, _, .array e _, .at i p =>
     if 0 ≤ i then
       match e.toList[i.toNat]? with
-      | some x => x.findLive p
+      | some x => x.findLiveM p
       | none => none
     else none
   | _, _, .fixed e, .atF i p =>
     if 0 ≤ i then
       match e.toList[i.toNat]? with
-      | some x => x.findLive p
+      | some x => x.findLiveM p
       | none => none
     else none
   | _, _, .map m d, .key k p =>
     match lookupBy k m.toList with
-    | some x => x.findLive p
-    | none => d.findLive p
+    | some x => x.findLiveM p
+    | none => d.findLiveM p
 
-/-- The value with the one at a path replaced (`Semantics.SVal.save`). -/
-def SVal.save : {T U : Ty} → SVal T → Path T U → SVal U → Option (SVal T)
+/-- `SVal.save` by `match`, its compiled form. -/
+def SVal.saveM : {T U : Ty} → SVal T → Path T U → SVal U → Option (SVal T)
   | _, _, _, .nil, new => some new
   | _, _, .struct fs, .field h p, new => do
-    let x ← (fs.get h).save p new
+    let x ← (fs.get h).saveM p new
     some (.struct (fs.set h x))
   | _, _, .array e sh, .at i p, new =>
     if 0 ≤ i then
       match (e.toList ++ sh.toList)[i.toNat]? with
       | some x => do
-        let x' ← x.save p new
+        let x' ← x.saveM p new
         let slots := (e.toList ++ sh.toList).set i.toNat x'
         some (.array (.ofList (slots.take e.length)) (.ofList (slots.drop e.length)))
       | none => none
@@ -394,18 +438,112 @@ def SVal.save : {T U : Ty} → SVal T → Path T U → SVal U → Option (SVal T
     if 0 ≤ i then
       match e.toList[i.toNat]? with
       | some x => do
-        let x' ← x.save p new
+        let x' ← x.saveM p new
         some (.fixed (e.set i.toNat x'))
       | none => none
     else none
   | _, _, .map m d, .key k p, new =>
     match lookupBy k m.toList with
     | some x => do
-      let x' ← x.save p new
+      let x' ← x.saveM p new
       some (.map (.ofList (setBy k x' m.toList)) d)
     | none => do
-      let x' ← d.save p new
+      let x' ← d.saveM p new
       some (.map (.ofList (setBy k x' m.toList)) d)
+
+/-- The value at a path (`Semantics.SVal.find`): `none` where an index is past
+the slots. -/
+@[implemented_by SVal.findM]
+def SVal.find {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
+  @Path.rec (fun T U _ => SVal T → Option (SVal U))
+    (fun {_} v => some v)
+    (fun {_} {_} {_} {_} h _ ih v => ih (SFields.get (SVal.view v) h))
+    (fun {_} {_} i _ ih v =>
+      let w : SList _ × SList _ := SVal.view v
+      if 0 ≤ i then
+        match (w.1.toList ++ w.2.toList)[i.toNat]? with
+        | some x => ih x
+        | none => none
+      else none)
+    (fun {_} {_} {_} i _ ih v =>
+      if 0 ≤ i then
+        match (SVal.view v : SVec _ _).toList[i.toNat]? with
+        | some x => ih x
+        | none => none
+      else none)
+    (fun {_} {_} {_} k _ ih v =>
+      let w : SMap _ × SVal _ := SVal.view v
+      match lookupBy k w.1.toList with
+      | some x => ih x
+      | none => ih w.2)
+    T U p v
+
+/-- A read that checks every index against the live length
+(`Semantics.SVal.findLive`): `find` past an array's end is `none`. -/
+@[implemented_by SVal.findLiveM]
+def SVal.findLive {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
+  @Path.rec (fun T U _ => SVal T → Option (SVal U))
+    (fun {_} v => some v)
+    (fun {_} {_} {_} {_} h _ ih v => ih (SFields.get (SVal.view v) h))
+    (fun {_} {_} i _ ih v =>
+      let w : SList _ × SList _ := SVal.view v
+      if 0 ≤ i then
+        match w.1.toList[i.toNat]? with
+        | some x => ih x
+        | none => none
+      else none)
+    (fun {_} {_} {_} i _ ih v =>
+      if 0 ≤ i then
+        match (SVal.view v : SVec _ _).toList[i.toNat]? with
+        | some x => ih x
+        | none => none
+      else none)
+    (fun {_} {_} {_} k _ ih v =>
+      let w : SMap _ × SVal _ := SVal.view v
+      match lookupBy k w.1.toList with
+      | some x => ih x
+      | none => ih w.2)
+    T U p v
+
+/-- The value with the one at a path replaced (`Semantics.SVal.save`). -/
+@[implemented_by SVal.saveM]
+def SVal.save {T U : Ty} (v : SVal T) (p : Path T U) (new : SVal U) : Option (SVal T) :=
+  @Path.rec (fun T U _ => SVal T → SVal U → Option (SVal T))
+    (fun {_} _ new => some new)
+    (fun {_} {_} {_} {_} h _ ih v new =>
+      let fs : SFields _ := SVal.view v
+      do
+        let x ← ih (fs.get h) new
+        some (.struct (fs.set h x)))
+    (fun {_} {_} i _ ih v new =>
+      let w : SList _ × SList _ := SVal.view v
+      if 0 ≤ i then
+        match (w.1.toList ++ w.2.toList)[i.toNat]? with
+        | some x => do
+          let x' ← ih x new
+          let slots := (w.1.toList ++ w.2.toList).set i.toNat x'
+          some (.array (.ofList (slots.take w.1.length)) (.ofList (slots.drop w.1.length)))
+        | none => none
+      else none)
+    (fun {_} {_} {_} i _ ih v new =>
+      let e : SVec _ _ := SVal.view v
+      if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => do
+          let x' ← ih x new
+          some (.fixed (e.set i.toNat x'))
+        | none => none
+      else none)
+    (fun {_} {_} {_} k _ ih v new =>
+      let w : SMap _ × SVal _ := SVal.view v
+      match lookupBy k w.1.toList with
+      | some x => do
+        let x' ← ih x new
+        some (.map (.ofList (setBy k x' w.1.toList)) w.2)
+      | none => do
+        let x' ← ih w.2 new
+        some (.map (.ofList (setBy k x' w.1.toList)) w.2))
+    T U p v new
 
 /-! ## Delete, copy over -/
 

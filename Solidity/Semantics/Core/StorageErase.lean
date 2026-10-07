@@ -113,84 +113,210 @@ theorem slot_erase {E : Ty} {β γ : Type} (L : List (SVal E)) (M : List Semanti
   · rw [dif_neg (fun h => hi h.1), if_neg hi]
     rfl
 
-theorem SVal.find_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
-    v.erase.find p.erase = toRes SVal.erase (v.find p)
+/-! ### The recursor forms are their `match` twins
+
+`SVal.find`, `findLive` and `save` are written with `Path.rec` for the
+kernel; these equations are their `match` twins' arms, by `rfl`, and the
+twins agree. -/
+
+namespace SVal
+
+theorem find_nil {T : Ty} (v : SVal T) : v.find .nil = some v := rfl
+
+theorem find_field {s f : Name} {T U : Ty} (fs : SFields (structDef s))
+    (h : lookupBy f (structDef s) = some T) (p : Path T U) :
+    (SVal.struct fs).find (.field h p) = (fs.get h).find p := rfl
+
+theorem find_at {E U : Ty} (e sh : SList E) (i : Int) (p : Path E U) :
+    (SVal.array e sh).find (.at i p) =
+      if 0 ≤ i then
+        match (e.toList ++ sh.toList)[i.toNat]? with
+        | some x => x.find p
+        | none => none
+      else none := rfl
+
+theorem find_atF {E U : Ty} {n : Nat} (e : SVec E n) (i : Int) (p : Path E U) :
+    (SVal.fixed e).find (.atF i p) =
+      if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => x.find p
+        | none => none
+      else none := rfl
+
+theorem find_key {K V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
+    (SVal.map (K := K) m d).find (.key k p) =
+      match lookupBy k m.toList with
+      | some x => x.find p
+      | none => d.find p := rfl
+
+theorem find_eq_findM : {T U : Ty} → (v : SVal T) → (p : Path T U) → v.find p = v.findM p
   | _, _, v, .nil => by cases v <;> rfl
   | _, _, .struct fs, .field h p => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.find, SFields.lookupBy_erase fs h, find,
-      find_erase _ p]
+    rw [find_field, find_eq_findM _ p]
+    simp only [findM]
   | _, _, .array e sh, .at i p => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.find, find]
-    exact slot_erase _ _ (by rw [SList.erase_eq, SList.erase_eq, List.map_append]) i _
-      (fun w => w.find p.erase) _ (fun x => find_erase x p)
+    rw [find_at]
+    simp only [find_eq_findM _ p, findM]
+    rfl
   | _, _, .fixed e, .atF i p => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.find, find]
-    exact slot_erase _ _ (by rw [SVec.erase_eq, List.append_nil]) i _
-      (fun w => w.find p.erase) _ (fun x => find_erase x p)
+    rw [find_atF]
+    simp only [find_eq_findM _ p, findM]
+    rfl
   | _, _, .map m d, .key k p => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.find, find, SMap.erase_eq,
+    rw [find_key]
+    simp only [find_eq_findM _ p, findM]
+    rfl
+
+theorem findLive_eq_findLiveM : {T U : Ty} → (v : SVal T) → (p : Path T U) →
+    v.findLive p = v.findLiveM p
+  | _, _, v, .nil => by cases v <;> rfl
+  | _, _, .struct fs, .field h p => by
+    show (fs.get h).findLive p = _
+    rw [findLive_eq_findLiveM _ p]
+    simp only [findLiveM]
+  | _, _, .array e sh, .at i p => by
+    show (if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => x.findLive p
+        | none => none
+      else none) = _
+    simp only [findLive_eq_findLiveM _ p, findLiveM]
+    rfl
+  | _, _, .fixed e, .atF i p => by
+    show (if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => x.findLive p
+        | none => none
+      else none) = _
+    simp only [findLive_eq_findLiveM _ p, findLiveM]
+    rfl
+  | _, _, .map m d, .key k p => by
+    show (match lookupBy k m.toList with
+      | some x => x.findLive p
+      | none => d.findLive p) = _
+    simp only [findLive_eq_findLiveM _ p, findLiveM]
+    rfl
+
+theorem save_eq_saveM : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new : SVal U) →
+    v.save p new = v.saveM p new
+  | _, _, v, .nil, _ => by cases v <;> rfl
+  | _, _, @SVal.struct s fs, .field h p, new => by
+    show (do
+        let x ← (fs.get h).save p new
+        some (SVal.struct (fs.set h x)) : Option (SVal (.ref (.struct s)))) = _
+    simp only [save_eq_saveM _ p, saveM]
+  | _, _, @SVal.array E e sh, .at i p, new => by
+    show (if 0 ≤ i then
+        match (e.toList ++ sh.toList)[i.toNat]? with
+        | some x => do
+          let x' ← x.save p new
+          let slots := (e.toList ++ sh.toList).set i.toNat x'
+          some (SVal.array (.ofList (slots.take e.length)) (.ofList (slots.drop e.length)))
+        | none => none
+      else none : Option (SVal (.ref (.array E)))) = _
+    simp only [save_eq_saveM _ p, saveM]
+    rfl
+  | _, _, @SVal.fixed E n e, .atF i p, new => by
+    show (if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => do
+          let x' ← x.save p new
+          some (SVal.fixed (e.set i.toNat x'))
+        | none => none
+      else none : Option (SVal (.ref (.fixed E n)))) = _
+    simp only [save_eq_saveM _ p, saveM]
+    rfl
+  | _, _, @SVal.map K V m d, .key k p, new => by
+    show (match lookupBy k m.toList with
+      | some x => do
+        let x' ← x.save p new
+        some (SVal.map (.ofList (setBy k x' m.toList)) d)
+      | none => do
+        let x' ← d.save p new
+        some (SVal.map (.ofList (setBy k x' m.toList)) d) : Option (SVal (.ref (.mapping K V)))) = _
+    simp only [save_eq_saveM _ p, saveM]
+    rfl
+
+end SVal
+
+theorem SVal.findM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
+    v.erase.find p.erase = toRes SVal.erase (v.findM p)
+  | _, _, v, .nil => by cases v <;> rfl
+  | _, _, .struct fs, .field h p => by
+    simp only [SVal.erase, Path.erase, Semantics.SVal.find, SFields.lookupBy_erase fs h, findM,
+      findM_erase _ p]
+  | _, _, .array e sh, .at i p => by
+    simp only [SVal.erase, Path.erase, Semantics.SVal.find, findM]
+    exact slot_erase _ _ (by rw [SList.erase_eq, SList.erase_eq, List.map_append]) i _
+      (fun w => w.find p.erase) _ (fun x => findM_erase x p)
+  | _, _, .fixed e, .atF i p => by
+    simp only [SVal.erase, Path.erase, Semantics.SVal.find, findM]
+    exact slot_erase _ _ (by rw [SVec.erase_eq, List.append_nil]) i _
+      (fun w => w.find p.erase) _ (fun x => findM_erase x p)
+  | _, _, .map m d, .key k p => by
+    simp only [SVal.erase, Path.erase, Semantics.SVal.find, findM, SMap.erase_eq,
       lookupBy_map_snd SVal.erase k m.toList]
     cases lookupBy k m.toList with
-    | none => exact find_erase d p
-    | some x => exact find_erase x p
+    | none => exact findM_erase d p
+    | some x => exact findM_erase x p
 
-theorem SVal.findLive_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
-    v.erase.findLive p.erase = toRes SVal.erase (v.findLive p)
+theorem SVal.findLiveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
+    v.erase.findLive p.erase = toRes SVal.erase (v.findLiveM p)
   | _, _, v, .nil => by cases v <;> rfl
   | _, _, .struct fs, .field h p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, SFields.lookupBy_erase fs h,
-      findLive, findLive_erase _ p]
+      findLiveM, findLiveM_erase _ p]
   | _, _, .array e sh, .at i p => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLive]
+    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLiveM]
     exact slot_erase _ _ (SList.erase_eq e) i _ (fun w => w.findLive p.erase) _
-      (fun x => findLive_erase x p)
+      (fun x => findLiveM_erase x p)
   | _, _, .fixed e, .atF i p => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLive]
+    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLiveM]
     exact slot_erase _ _ (SVec.erase_eq e) i _ (fun w => w.findLive p.erase) _
-      (fun x => findLive_erase x p)
+      (fun x => findLiveM_erase x p)
   | _, _, .map m d, .key k p => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLive, SMap.erase_eq,
+    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLiveM, SMap.erase_eq,
       lookupBy_map_snd SVal.erase k m.toList]
     cases lookupBy k m.toList with
-    | none => exact findLive_erase d p
-    | some x => exact findLive_erase x p
+    | none => exact findLiveM_erase d p
+    | some x => exact findLiveM_erase x p
 
-theorem SVal.save_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new : SVal U) →
-    v.erase.save p.erase new.erase = toRes SVal.erase (v.save p new)
+theorem SVal.saveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new : SVal U) →
+    v.erase.save p.erase new.erase = toRes SVal.erase (v.saveM p new)
   | _, _, v, .nil, new => by cases v <;> rfl
   | _, _, .struct fs, .field h p, new => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.save, SFields.lookupBy_erase fs h, save,
-      save_erase _ p new]
-    cases (fs.get h).save p new with
+    simp only [SVal.erase, Path.erase, Semantics.SVal.save, SFields.lookupBy_erase fs h, saveM,
+      saveM_erase _ p new]
+    cases (fs.get h).saveM p new with
     | none => rfl
     | some x =>
       simp only [toRes, bind, Except.bind, Option.bind, SFields.setBy_erase fs h x]
       rfl
   | _, _, .array e sh, .at i p, new => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.save, save]
+    simp only [SVal.erase, Path.erase, Semantics.SVal.save, saveM]
     refine slot_erase _ (e.erase ++ sh.erase)
       (by rw [SList.erase_eq, SList.erase_eq, List.map_append]) i _ (fun w => do
         let u ← w.save p.erase new.erase
         let slots := (e.erase ++ sh.erase).set i.toNat u
         .ok (Semantics.SVal.array (slots.take e.erase.length) (slots.drop e.erase.length) false))
       _ (fun x => ?_)
-    simp only [save_erase x p new]
-    cases x.save p new with
+    simp only [saveM_erase x p new]
+    cases x.saveM p new with
     | none => rfl
     | some x' =>
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq,
         SList.toList_ofList, SList.length, ← List.map_append, ← List.map_set, ← List.map_take,
         ← List.map_drop, List.length_map]
   | _, _, .fixed e, .atF i p, new => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.save, save]
+    simp only [SVal.erase, Path.erase, Semantics.SVal.save, saveM]
     refine slot_erase _ (e.erase ++ []) (by rw [SVec.erase_eq, List.append_nil]) i _
       (fun w => do
         let u ← w.save p.erase new.erase
         let slots := (e.erase ++ []).set i.toNat u
         .ok (Semantics.SVal.array (slots.take e.erase.length) (slots.drop e.erase.length) true))
       _ (fun x => ?_)
-    simp only [save_erase x p new]
-    cases x.save p new with
+    simp only [saveM_erase x p new]
+    cases x.saveM p new with
     | none => rfl
     | some x' =>
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SVec.erase_eq,
@@ -199,23 +325,35 @@ theorem SVal.save_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) → (ne
         simp only [List.length_map, List.length_set, Nat.le_refl]
       rw [List.take_of_length_le hl, List.drop_of_length_le hl]
   | _, _, .map m d, .key k p, new => by
-    simp only [SVal.erase, Path.erase, Semantics.SVal.save, save, SMap.erase_eq,
+    simp only [SVal.erase, Path.erase, Semantics.SVal.save, saveM, SMap.erase_eq,
       lookupBy_map_snd SVal.erase k m.toList]
     cases lookupBy k m.toList with
     | none =>
-      simp only [Option.map, save_erase d p new]
-      cases d.save p new with
+      simp only [Option.map, saveM_erase d p new]
+      cases d.saveM p new with
       | none => rfl
       | some x' =>
         simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SMap.erase_eq,
           SMap.toList_ofList, setBy_map_snd SVal.erase]
     | some x =>
-      simp only [Option.map, save_erase x p new]
-      cases x.save p new with
+      simp only [Option.map, saveM_erase x p new]
+      cases x.saveM p new with
       | none => rfl
       | some x' =>
         simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SMap.erase_eq,
           SMap.toList_ofList, setBy_map_snd SVal.erase]
+
+theorem SVal.find_erase {T U : Ty} (v : SVal T) (p : Path T U) :
+    v.erase.find p.erase = toRes SVal.erase (v.find p) := by
+  rw [SVal.find_eq_findM]; exact SVal.findM_erase v p
+
+theorem SVal.findLive_erase {T U : Ty} (v : SVal T) (p : Path T U) :
+    v.erase.findLive p.erase = toRes SVal.erase (v.findLive p) := by
+  rw [SVal.findLive_eq_findLiveM]; exact SVal.findLiveM_erase v p
+
+theorem SVal.save_erase {T U : Ty} (v : SVal T) (p : Path T U) (new : SVal U) :
+    v.erase.save p.erase new.erase = toRes SVal.erase (v.save p new) := by
+  rw [SVal.save_eq_saveM]; exact SVal.saveM_erase v p new
 
 /-! ## Defaults -/
 
