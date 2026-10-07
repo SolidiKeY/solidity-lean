@@ -1,7 +1,8 @@
 import Solidity.Tools.Common
+import Solidity.Semantics.Core.TypedRun
 
 /-!
-# `#run`: call a contract's function in the interpreter
+# `#run`: call a contract's function in the typed run
 
 ```
 #run CallsExample.addTwo(3)
@@ -26,13 +27,18 @@ instantiates a function: the call is written as `sol{ … }` would read it
 otherwise — and elaborated by `elabProg`, which inlines the body
 (`Stmt.call`) as for any other call.  The value returned is then the local
 `_r` of the final state; of several, `(uint _r0, uint _r1) = f(a, b);` and
-the locals `_r0`, `_r1`, … (`runStmt`).  `DiffTest.lean` builds its calls the
-same way, but a call of several returns as the bare `f(a, b);`, whose returns
-the inlined body declares.
+the locals `_r0`, `_r1`, … (`runStmt`).  The program is resolved to the
+scoped syntax (`Core.Prog.resolve`) and run typed (`Core.Prog.trun`,
+`Semantics/Core/TypedRun.lean`) from the start state read at the contract's
+types (`typedState?`): its storage, ledger, funds and transaction.  A start
+state that is not of those types, or that has locals or memory, is an error.
+`DiffTest.lean` builds its calls the same way, but a call of several returns
+as the bare `f(a, b);`, whose returns the inlined body declares.
 
 The output is `ok`, the value returned, and the storage one root per line
-(`fmtStorage`); or `revert`, or `stuck`.  A loop runs by iterating it
-(`Loop.runImpl`), so a call that never ends does not return.
+(`fmtStorage`, of the storage erased); or `revert`, or `panic`.  A loop runs
+by iterating it (`TLoop.runImpl'`), so a call that never ends does not
+return.
 
 ```
 #deploy Mini(7) with msg.sender := 3
@@ -100,28 +106,69 @@ def State.withTx (σ : State) (sender value time balance : Option Int) : State :
 def State.withRoots (σ : State) (roots : List (Name × SVal)) : State :=
   { σ with storage := roots.foldl (fun st (r, v) => setBy r v st) σ.storage }
 
+/-- No locals and no memory: what the typed run's start state has
+(`Core.TState C []`, its heap empty). -/
+def noLocals (σ : State) : Bool :=
+  σ.env.isEmpty && σ.heap.isEmpty && σ.nextId == 0
+
+/-- A state of no locals and no memory (`none` for any other), read at the contract's types: the
+storage (`SFields.ofU`), the funds and the transaction's words as `uint`s,
+the ledger as it is; `none` where one is not of its type. -/
+def typedState? (C : Contract) (σ : State) : Option (Core.TState C []) := do
+  guard (noLocals σ)
+  let st ← Core.SFields.ofU σ.storage C.vars
+  let u (n : Int) : Option PrimTy.uint.Denote := PrimTy.ofValue? .uint (.int n)
+  let bal ← u σ.selfBalance
+  let snd ← u σ.tx.msgSender
+  let val ← u σ.tx.msgValue
+  let now ← u σ.tx.timestamp
+  let addr ← u σ.tx.selfAddress
+  let tx : Core.TTx :=
+    { msgSender := snd, msgValue := val, timestamp := now, selfAddress := addr, ext := σ.tx.ext }
+  pure (Core.TState.mk st [] Core.Heap.empty () σ.net bal tx)
+
+/-- The locals of a typed environment, innermost first: each one's level at
+base `0` (`Evm.Core.lvl`), and its type and value if it is a value local. -/
+def localCells {C : Contract} {H : Core.HTy} : (Γ : Core.Ctx) → Core.TEnv C H Γ →
+    List (Nat × Option (PrimTy × Value))
+  | [], _ => []
+  | t :: Γ, e =>
+    (match t, e.1 with
+      | .val p, v => (Γ.length, some (p, PrimTy.erase (p := p) v))
+      | _, _ => (Γ.length, none)) :: localCells Γ e.2
+
+/-- The value locals of a typed environment, by the names of its context. -/
+def localVals {C : Contract} {H : Core.HTy} {Γ : Core.Ctx} (names : List Var)
+    (e : Core.TEnv C H Γ) : List (Var × Value) :=
+  (names.zip (localCells Γ e)).filterMap fun (x, _, c) => c.map fun (_, v) => (x, v)
+
 /-- What `#run` prints: the outcome, the value returned, the storage. -/
 def runReport [FreshNames] (C : Contract) (σ : State) (f : String) (args : List RawExpr) :
     Except String (List String) := do
   let P ← elabProg C [← runStmt C f args]
+  let ⟨Γ', Q⟩ ← Core.Prog.resolve [] P
+  unless noLocals σ do
+    throw "a start state with locals or memory is not supported by the typed run"
+  let some τ := typedState? C σ | throw "the start state is not of the contract's types"
   let n : Nat := ((lookupBy f C.funs).map (·.rets.length)).getD 0
-  pure <| match Prog.run σ P with
-    | .error h => [fmtHalt h]
-    | .ok σ' =>
+  pure <| match Core.Prog.trun τ Q with
+    | .error h => [fmtHalt h.erase]
+    | .ok o =>
+      let vals := localVals Γ'.names o.st.env
       let ret := if n ≥ 2 then
-          let vs := (List.range n).filterMap fun i => σ'.valueOf (Var.ofName s!"{retLocal}{i}")
+          let vs := (List.range n).filterMap fun i => lookupBy (Var.ofName s!"{retLocal}{i}") vals
           [s!"returns ({", ".intercalate (vs.map Value.fmt)})"]
-        else match σ'.valueOf (Var.ofName retLocal) with
+        else match lookupBy (Var.ofName retLocal) vals with
           | some v => [s!"returns {Value.fmt v}"]
           | none => []
-      ["ok"] ++ ret ++ fmtStorage C σ'.storage
+      ["ok"] ++ ret ++ fmtStorage C o.st.storage.erase
 
 /-- One field of the transaction, `msg.sender := 7`, or a state variable,
 `count := 41`. -/
 syntax runEnv := ident " := " term:max
 
 /-- `#run C.f(a, b) [from σ] [with msg.sender := n, count := m, …]`: run the
-call in the interpreter and print its outcome. -/
+call in the typed run and print its outcome. -/
 syntax (name := runCmd) "#run " ident "(" sol_expr,* ")" (" from " term:max)?
   (" with " runEnv,+)? : command
 

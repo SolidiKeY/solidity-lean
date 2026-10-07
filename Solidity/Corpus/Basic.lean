@@ -1,4 +1,6 @@
 import Solidity.Calculus.Notation
+import Solidity.Semantics.RunErase
+import Solidity.Semantics.Core.TypedRunErase
 
 /-!
 # The solkey corpus: what an obligation is
@@ -30,15 +32,20 @@ Why not a validity `⊨`, which is what `sol_symex` and `sol_close` prove:
 
 So the obligation is the diamond *at the store*, which is exactly solkey's
 formula read in the contract's initial state.  It is decided by the kernel
-(`corpus_decide`): the run is a closed term, and `decide +kernel` evaluates
-it.  One thing stops the kernel: a well-founded definition — the default a
-`push()` appends and a fresh memory object starts at (`defaultForTy`, even at
-`uint`), and the memory-to-storage copy (`copyMToSt`) — whose `Acc` proof
-does not reduce.  The *stores* are the one place that is avoided
-here: `unfoldStore` spells every root's default with the structural `dflt`,
-and `*Store_eq` proves it the same store.  A run that still needs one is
-checked by `#eval` of `outcome` under `#guard_msgs` instead, and the verdict
-table (`tests/solkey/expected.tsv`) says `evaluated` rather than `proved`.
+(`corpus_decide`) through the typed run (`Semantics/Core/TypedRun.lean`):
+the program is resolved to the scoped syntax (`Core.Prog.resolve`), and its
+typed run from the store, typed (`Core.Storage.*`, a fold the kernel builds),
+is evaluated by `decide +kernel` (`trunOk`).  The typed run ending is the
+untyped one ending (`diamond_of_trunOk`: `Prog.run_of_trun`, then
+`Prog.run_erase` back to the program resolved from), on programs off the two
+places where the typed and the untyped runs part (`Prog.bridgeOk`: a `bool`
+mapping key, a struct with a repeated member name).  The typed run has no
+well-founded definition in the kernel's way: a default is the structural
+`SVal.dflt`, a memory copy a fold.  `*Store_eq` states each store as the
+erasure of its typed start.  A run that does not end normally is checked by
+`#eval` of `outcome` (the untyped run) under `#guard_msgs` instead, and the
+verdict table (`tests/solkey/expected.tsv`) says `evaluated` rather than
+`proved`.
 
 `TestSuite.sol` is the exception: its obligations are stated as solkey
 states them and derived by `⊢` (`Solidity/TestSuite/`), so its corpus rows
@@ -52,55 +59,56 @@ namespace Solidity.Corpus
 
 open Semantics
 
-/-! ## Defaults the kernel can evaluate -/
+/-! ## The stores, typed -/
 
-/-- `defaultForTy`, by structural recursion on a depth bound.  Every struct of
-`structDef` has rank below 8, so `dflt 8` is `defaultForTy` on the roots of
-every ported contract (`*Store_eq` checks it store by store). -/
-def dflt : Nat → Ty → SVal
-  | _, .prim .bool => .bool false
-  | _, .prim _ => .int 0
-  | 0, .ref _ => .struct []
-  | n + 1, .ref (.struct s) => .struct ((structDef s).map fun (f, t) => (f, dflt n t))
-  | _ + 1, .ref (.array _) => .array [] [] false
-  | n + 1, .ref (.fixed e k) => .array (List.replicate k (dflt n e)) [] true
-  | n + 1, .ref (.mapping _ v) => .map [] (dflt n v)
+/-- A contract's start, typed: the storage `st`, no memory, no locals, the
+funds `bal`. -/
+def start {C : Contract} (st : Core.Storage C)
+    (bal : PrimTy.uint.Denote := PrimTy.dflt .uint) : Core.TState C [] :=
+  { Core.TState.ofStorage st with selfBalance := bal }
 
-/-- `σ` with each root of `C` at its default, spelt with `dflt`. -/
-def unfoldStore (C : Contract) (σ : State) : State :=
-  { σ with storage := C.vars.map fun (n, T) => (n, dflt 8 T) }
-
-theorem testSuiteStore_eq : State.testSuiteStore = unfoldStore TestSuite State.testSuiteStore := by
-  simp [unfoldStore, State.testSuiteStore, TestSuite, defaultForRef, defaultForTy,
-    defaultForFields, structDef, dflt]
+theorem testSuiteStore_eq :
+    State.testSuiteStore =
+      (start Core.Storage.testSuite ⟨1000000000, by decide⟩).erase.erase [] := by
+  simp only [start, Core.TState.ofStorage, Core.TState.erase, Core.State.erase,
+    Core.Storage.testSuite_erase]
+  rfl
 
 theorem solcExpressionsStore_eq :
-    State.solcExpressionsStore = unfoldStore SolcExpressions State.solcExpressionsStore := by
-  simp [unfoldStore, State.solcExpressionsStore, SolcExpressions, dflt]
+    State.solcExpressionsStore = (start Core.Storage.solcExpressions).erase.erase [] := by
+  simp only [start, Core.TState.ofStorage, Core.TState.erase, Core.State.erase,
+    Core.Storage.solcExpressions_erase]
+  rfl
 
 theorem solcStructsStore_eq :
-    State.solcStructsStore = unfoldStore SolcStructs State.solcStructsStore := by
-  simp [unfoldStore, State.solcStructsStore, SolcStructs, defaultForRef, defaultForTy,
-    defaultForFields, structDef, dflt]
+    State.solcStructsStore = (start Core.Storage.solcStructs).erase.erase [] := by
+  simp only [start, Core.TState.ofStorage, Core.TState.erase, Core.State.erase,
+    Core.Storage.solcStructs_erase]
+  rfl
 
 theorem solcArraysStore_eq :
-    State.solcArraysStore = unfoldStore SolcArrays State.solcArraysStore := by
-  simp [unfoldStore, State.solcArraysStore, SolcArrays, dflt]
+    State.solcArraysStore = (start Core.Storage.solcArrays).erase.erase [] := by
+  simp only [start, Core.TState.ofStorage, Core.TState.erase, Core.State.erase,
+    Core.Storage.solcArrays_erase]
+  rfl
 
 theorem solcMemoryStore_eq :
-    State.solcMemoryStore = unfoldStore SolcMemory State.solcMemoryStore := by
-  simp [unfoldStore, State.solcMemoryStore, SolcMemory, defaultForRef, defaultForTy,
-    defaultForFields, structDef, dflt]
+    State.solcMemoryStore = (start Core.Storage.solcMemory).erase.erase [] := by
+  simp only [start, Core.TState.ofStorage, Core.TState.erase, Core.State.erase,
+    Core.Storage.solcMemory_erase]
+  rfl
 
 theorem solcMappingsStore_eq :
-    State.solcMappingsStore = unfoldStore SolcMappings State.solcMappingsStore := by
-  simp [unfoldStore, State.solcMappingsStore, SolcMappings, defaultForRef, defaultForTy,
-    defaultForFields, structDef, dflt]
+    State.solcMappingsStore = (start Core.Storage.solcMappings).erase.erase [] := by
+  simp only [start, Core.TState.ofStorage, Core.TState.erase, Core.State.erase,
+    Core.Storage.solcMappings_erase]
+  rfl
 
 theorem solcControlFlowStore_eq :
-    State.solcControlFlowStore = unfoldStore SolcControlFlow State.solcControlFlowStore := by
-  simp [unfoldStore, State.solcControlFlowStore, SolcControlFlow, defaultForRef, defaultForTy,
-    defaultForFields, structDef, dflt]
+    State.solcControlFlowStore = (start Core.Storage.solcControlFlow).erase.erase [] := by
+  simp only [start, Core.TState.ofStorage, Core.TState.erase, Core.State.erase,
+    Core.Storage.solcControlFlow_erase]
+  rfl
 
 /-! ## The obligation -/
 
@@ -126,10 +134,37 @@ def outcome {C : Contract} (σ : State) (P : Prog C) : String :=
   | .error .stuck => "stuck"
   | .error .diverge => "diverge"
 
-/-- `corpus_decide h`: rewrite the store with its unfolding `h`, then let the
-kernel run the program. -/
+/-- The check `corpus_decide` evaluates: `P` resolves from no locals, is on
+the bridge, and its typed run from `σ` ends. -/
+def trunOk [FreshNames] {C : Contract} (σ : Core.TState C []) (P : Prog C) : Bool :=
+  match Core.Prog.resolve [] P with
+  | .ok ⟨_, Q⟩ => Q.bridgeOk && (Q.trun σ).isOk
+  | .error _ => false
+
+/-- A typed run that ends proves the diamond at its start, erased. -/
+theorem diamond_of_trunOk [FreshNames] {C : Contract} (σ : Core.TState C []) {P : Prog C}
+    (h : trunOk σ P = true) : Diamond (σ.erase.erase []) P := by
+  unfold trunOk at h
+  split at h
+  · rename_i Γ' Q hres
+    simp only [Bool.and_eq_true] at h
+    obtain ⟨hb, hok⟩ := h
+    apply diamond_of_isOk
+    cases ht : Q.trun σ with
+    | error e => rw [ht] at hok; cases hok
+    | ok o =>
+      have h2 := Core.Prog.run_erase Q (Core.Prog.resolve_fresh hres) List.nodup_nil rfl σ.erase
+      rw [Core.Prog.run_of_trun hb ht, Core.Prog.resolve_erase hres] at h2
+      change ResultsAgree _ (Prog.run (σ.erase.erase []) P) _ at h2
+      cases hr : Prog.run (σ.erase.erase []) P with
+      | ok _ => rfl
+      | error _ => rw [hr] at h2; exact h2.elim
+  · cases h
+
+/-- `corpus_decide h`: rewrite the store with its typed start `h`, then let
+the kernel resolve the program and run it typed. -/
 macro "corpus_decide " h:term : tactic =>
-  `(tactic| (rw [$h:term]; apply diamond_of_isOk; decide +kernel))
+  `(tactic| (rw [$h:term]; apply diamond_of_trunOk; decide +kernel))
 
 section Examples
 
