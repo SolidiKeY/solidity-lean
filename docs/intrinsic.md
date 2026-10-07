@@ -1521,7 +1521,8 @@ hypothesis) from `Stmt.stepSound` and the block arms (`stepSound_call`,
   (`Calculus/Core/SoundLocal.lean`) packages `Logic.lean`'s
   `Premise.sound_split` with `splitStuck`: a split is sound given its two
   branch runs and that the statement is stuck where neither condition
-  holds, the cover excluding that case under the diamond.  `inv`'s cover is
+  holds, the cover excluding that case under the diamond (`iteStep_sound`
+  and `requireStep_sound` use it on a simple condition).  `inv`'s cover is
   `whileInvDiamond`'s premise (`SoundLoops.lean`).
 - **No typing hypothesis was left**: `Val.BoolValued` and `State.Typed` do
   not occur in the calculus (the cover replaced both at the integration);

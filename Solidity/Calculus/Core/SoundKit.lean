@@ -8,8 +8,8 @@ import Solidity.Calculus.NoPanic
 What it means for one arm of `Stmt.step` (`Calculus/Core/Step.lean`) to be
 sound against M3's interpreter (`Core.Stmt.run`), stated once here so that
 every arm proves the same shape (`docs/intrinsic.md`, M6a):
-`Calculus/Core/SoundStep.lean` collects the arms but the blocks, and
-`SoundCalls.lean`, `SoundBlocks.lean`, `SoundLoops.lean` prove those.
+`Calculus/Core/SoundStep.lean` collects every arm (`Stmt.stepSound`), the
+blocks' from `SoundCalls.lean`, `SoundBlocks.lean`, `SoundLoops.lean`.
 
 * `Premise.Sound m s p σ`: in the state `σ`, the premise `p` put in front of
   any rest `ω`, frames `κ` and postcondition `φ` (`Premise.fml`), with what

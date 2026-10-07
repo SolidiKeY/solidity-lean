@@ -250,6 +250,12 @@ theorem Proves.valid {R : RuleSet} {φ : Fml C []}
     (d : Proves C R [] .nil φ) : Valid φ :=
   Proves.sound d
 
+/--
+info: 'Solidity.Core.Proves.valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
+#print axioms Proves.valid
+
 /-- `∀ bool b; [ if (b) { } else { } ] true` is valid, by `allRight`,
 `ifElseSplit` and in each goal the block's end and `closeTrue`. -/
 example :
