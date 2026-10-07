@@ -112,4 +112,35 @@ info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 ≐ true → 
 -/
 #guard_msgs in run_meta stepsShow branchφ 9
 
+/-! After a call with a tuple return, the statements read their locals past
+the return variables (`CallRet.outNames`): `uint y = a;`, not the caller's
+`x`.  The call itself prints as `‹…›` from the `Expr`, and `Core.Fml.show`
+folds it into a tuple assignment, so the two agree from the next statement
+on. -/
+
+private def retsφ : Core.Fml SE [] :=
+  .all (.user "x") .uint (.modal .box
+    (.cons (.call "h" .nil (.rets ((Core.Binders.nil.snoc .uint (.user "a")).snoc .uint (.user "b"))) .nil)
+      (.cons (.declLocal .uint (.user "y") (some (.simple (.local (.there .here))))) .nil))
+    .nil .tt)
+
+/-- info: uint y = a; ] true -/
+#guard_msgs in
+run_meta do
+  let c := mkConst ``StandardExample
+  let a ← Core.Delab.fmtFml (Core.Fml.quote c retsφ)
+  let b ← retsφ.show c []
+  -- past `∀ uint x;` and the call
+  let after (t : String) : String := "; ".intercalate ((t.splitOn "; ").drop 2)
+  unless after a == after b do throwError "from the Expr\n{a}\nbut the value prints\n{b}"
+  logInfo (after a)
+
+/-! An update that is a schema variable prints as itself, its elements on
+top of it after it (a position it did not declare is `_`). -/
+
+/-- info: fun U => dl{ { U ‖ _ := 1 } true } : Core.Upd SE [] [Core.LTy.val PrimTy.uint] → Core.Fml SE [] -/
+#guard_msgs in
+#check fun (U : Core.Upd SE [] [.val .uint]) =>
+  (Core.Fml.upd .box (U.snoc (.local .here (.val (.app0 (.lit (.int 1)))))) .tt : Core.Fml SE [])
+
 end Solidity.Examples.Tactics.CorePrint

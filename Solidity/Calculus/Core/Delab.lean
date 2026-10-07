@@ -131,30 +131,61 @@ inductive Piece where
   | one (s : Expr)
   | many (P : Expr)
 
-/-- The program of the pieces: `s :: P ++ ω`, as `progTerm` writes it. -/
-def Piece.build (c : Expr) (ps : Array Piece) : MetaM Expr := do
-  let stmtTy := mkApp (mkConst ``Solidity.Stmt) c
+/-- The list of the pieces, of elements of type `ty` (in `Type`):
+`s :: P ++ ω`.  Built unchecked, so that a piece that did not erase stays
+in place and prints as `‹…›`. -/
+def Piece.buildOf (ty : Expr) (ps : Array Piece) : MetaM Expr := do
+  let L := mkApp (mkConst ``List [levelZero]) ty
+  let app := mkApp4 (mkConst ``HAppend.hAppend [levelZero, levelZero, levelZero]) L L L
+    (← synthInstance (mkApp3 (mkConst ``HAppend [levelZero, levelZero, levelZero]) L L L))
   let mut acc : Option Expr := none
   for p in ps.reverse do
     acc ← match p, acc with
-      | .one s, none => some <$> mkListLit stmtTy [s]
-      | .one s, some r => some <$> mkAppM ``List.cons #[s, r]
-      | .many P, none => pure (some P)
-      | .many P, some r => some <$> mkAppM ``HAppend.hAppend #[P, r]
+      | .one s, none => mkListLit ty [s]
+      | .one s, some r => pure (mkApp3 (mkConst ``List.cons [levelZero]) ty s r)
+      | .many P, none => pure P
+      | .many P, some r => pure (mkApp2 app P r)
   match acc with
   | some t => return t
-  | none => mkListLit stmtTy []
+  | none => mkListLit ty []
+
+/-- The program of the pieces: `s :: P ++ ω`, as `progTerm` writes it. -/
+def Piece.build (c : Expr) (ps : Array Piece) : MetaM Expr :=
+  Piece.buildOf (mkApp (mkConst ``Solidity.Stmt) c) ps
 
 /-- The contract of a scoped term, its type's first argument. -/
 def contractOf (e : Expr) : MetaM Expr := do
   let ty ← whnfR (← inferType e)
   return ty.getArg! 0
 
-/-- The names of the context a call leaves its caller in. -/
+/-- The names of binders, innermost first (`Binders.names`), when they
+compute. -/
+partial def bindersNames? (bs : Expr) : MetaM (Option (List Expr)) := do
+  let bs ← whnf bs
+  if bs.isAppOf ``Binders.nil then return some []
+  if bs.isAppOfArity ``Binders.snoc 4 then
+    let some xs ← bindersNames? (bs.getArg! 1) | return none
+    return some (bs.getArg! 3 :: xs)
+  return none
+
+/-- The length of a context, when it computes. -/
+partial def ctxLength? (Γ : Expr) : MetaM (Option Nat) := do
+  let Γ ← whnf Γ
+  if Γ.isAppOf ``List.nil then return some 0
+  if Γ.isAppOfArity ``List.cons 3 then return (· + 1) <$> (← ctxLength? Γ.appArg!)
+  return none
+
+/-- The names of the context a call leaves its caller in
+(`CallRet.outNames`). -/
 def callOutNames (ns : List Expr) (ret : Expr) : MetaM (List Expr) := do
   let ret ← whnf ret
   match ret.getAppFn.constName? with
   | some ``CallRet.mem => return ret.getArg! 2 :: ns
+  | some ``CallRet.rets => do
+    if let some xs ← bindersNames? (ret.getArg! 2) then return xs ++ ns
+    match ← ctxLength? (ret.getArg! 1) with
+    | some n => return List.replicate n unknownVar ++ ns
+    | none => return ns
   | _ => return ns
 
 /-- The names a statement leaves: its declaration's on top. -/
@@ -192,7 +223,8 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     let (es, ms) ← updParts ns args[4]!
     let φ ← tr ms args[5]!
     if es.isEmpty then return φ
-    return ← mkAppM ``Solidity.Fml.upd #[args[3]!, ← updList args[0]! es, φ]
+    -- built unchecked: a stuck update stays scoped, and prints as `‹…›`
+    return mkApp4 (mkConst ``Solidity.Fml.upd) args[0]! args[3]! (← updList args[0]! args[4]! es) φ
   if n == ``Fml.modal && args.size == 8 then
     let (ps, ms) ← progPieces ns args[5]!
     let (qs, ms) ← framePieces ms args[6]!
@@ -210,7 +242,7 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
       #[← mkListLit (mkConst ``Solidity.Var) xs.toList, ← tr ns args[3]!]
   if n == ``Premise.update && args.size == 4 then
     let (es, _) ← updParts ns args[3]!
-    return ← mkAppM ``Solidity.Premise.update #[← updList args[0]! es]
+    return mkApp2 (mkConst ``Solidity.Premise.update) args[0]! (← updList args[0]! args[3]! es)
   if n == ``Premise.unfold && args.size == 6 then
     return ← mkAppM ``Solidity.Premise.unfold #[← tr ns args[4]!]
   if n == ``Premise.bind && args.size == 6 then
@@ -336,25 +368,29 @@ partial def framePieces (ns : List Expr) (κ : Expr) : TrM (Array Piece × List 
     match (← read).blockEnd, close with
     | some e, true => return (#[.one e] ++ qs, ms)
     | _, _ => return (qs, ms)
-  return (#[], ns)
+  if κ.isAppOf ``Frames.nil then return (#[], ns)
+  return (#[.many κ], ns)
 
-/-- An update's elements, erased, and the names of the context it leaves:
+/-- An update's pieces, erased, and the names of the context it leaves:
 right-hand sides read at `ns`, targets at the names its declarations push;
-a pop is nothing. -/
-partial def updParts (ns : List Expr) (U : Expr) : TrM (Array Expr × List Expr) := do
+a pop is nothing.  A schema variable is its twin, spliced in front; any
+other stuck update is itself, and prints as `‹…›`. -/
+partial def updParts (ns : List Expr) (U : Expr) : TrM (Array Piece × List Expr) := do
   let U ← whnf (← instantiateMVars U)
   let args := U.getAppArgs
   if U.isAppOf ``Upd.snoc then
     let (es, ms) ← updParts ns args[3]!
-    return (es.push (← elem ns ms args[4]!), ms)
+    return (es.push (.one (← elem ns ms args[4]!)), ms)
   if U.isAppOf ``Upd.decl then
     let (es, ms) ← updParts ns args[4]!
     let x := args[5]!
-    return (es.push (← rhs ns x args[6]!), x :: ms)
+    return (es.push (.one (← rhs ns x args[6]!)), x :: ms)
   if U.isAppOf ``Upd.pop then
     let (es, ms) ← updParts ns args[4]!
     return (es, ms.drop (← extDepth args[5]!))
-  return (#[], ns)
+  if U.isAppOf ``Upd.nil then return (#[], ns)
+  if let .fvar fv := U then return (#[.many ((← read).twins.getD fv U)], ns)
+  return (#[.many U], ns)
 
 /-- An assigning element: a local's by its right-hand side, the rest as the
 erased element of the same name. -/
@@ -381,9 +417,12 @@ partial def rhs (ns : List Expr) (x r : Expr) : TrM Expr := do
   | some ``Rhs.saveNetMt => return mkApp2 (mkConst ``Solidity.UpdElem.saveNetMt) (← contractOf r) x
   | _ => return r
 
-/-- The erased update of the elements `es`, of the contract `c`. -/
-partial def updList (c : Expr) (es : Array Expr) : TrM Expr :=
-  mkListLit (mkApp (mkConst ``Solidity.UpdElem) c) es.toList
+/-- The erased update of the pieces `es`, of the contract `c`: `u ++ [e, …]`;
+the scoped update `U` itself (`‹…›`) when it is stuck on a term that is no
+schema variable. -/
+partial def updList (c U : Expr) (es : Array Piece) : TrM Expr := do
+  if es.any (fun | .many P => !P.isFVar | .one _ => false) then return U
+  Piece.buildOf (mkApp (mkConst ``Solidity.UpdElem) c) es
 
 end
 
