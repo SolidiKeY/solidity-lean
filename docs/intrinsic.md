@@ -182,6 +182,47 @@ Not measured: the whole `SolkeyTestSuite` and `check-corpus.sh` (both need
 `lake` from the shell, which this lane may not run); take them at M1's start
 from `./run-lean.sh`.
 
+### M4 notes (lane `intrinsic-values`)
+
+- M4 core (2026-10-07), standalone: nothing on the interpreter's path uses it
+  yet.  `Semantics/Core/Value.lean` (`PrimTy.Denote`, `PrimTy.erase`,
+  `ofValue?`, `Core.toRes`), `Semantics/Core/Ops.lean` (typed operators),
+  `Semantics/Core/Storage.lean` (typed storage, paths, operations) and
+  `Semantics/Core/StorageErase.lean` (agreement).  Each typed operation
+  returns an `Option`, `none` a revert, and its lemma reads
+  `untyped (erase x) = toRes erase (typed x)`: the untyped operation is
+  never stuck on an erased input.
+- Shapes: `SVal T` is mutual with `SFields` (over `structDef s`, exact
+  members), `SList`, `SVec E n` and `SMap V` (explicit families: a nested
+  `List (SVal E)` cannot mention the constructor's `E`).  A dynamic array
+  keeps its slots past the end, a mapping its default (as the untyped
+  ones); a fixed-size array has exactly its length and no such slots, which
+  no operation creates.  Keys stay `Int`.  `Storage C := SFields C.vars`.
+- `SVal.dflt` is structural (rank bound `k`, inside it structural on the
+  type), so the kernel reduces it where it cannot reduce `defaultForTy`:
+  `push` on a typed store computes under `decide +kernel` (50 ms), the
+  untyped `pushAt` does not.  A save-then-find through `alice.account.balance`
+  checks in 22 ms typed against 35 ms untyped, with the `match`es on the
+  `Ty`-indexed families as they are: their casts compare small `Ty`s, not
+  contexts, so no `T.rec` twin is needed yet (re-measure when the typed
+  interpreter runs on them).
+- A struct copy (`SVal.overlay`) is positional, as solc copies; the untyped
+  one looks members up by name, so `SVal.overlay_erase` needs `TyNodup T`
+  (no struct with two members of one name), which `Ty.nodupS` decides by
+  `rfl` (all structs but `BadDup`).
+- Deviation, in `UnOp.evalT`: `-x` at `uint` (solc rejects it) reverts unless
+  `x = 0`; the untyped interpreter leaves it out of range.
+  `UnOp.evalT_erase` excludes it.
+- The copies between storage and memory go through the untyped heap until
+  M4c: `SVal.copyToMem` is `copyStToM` on the erasure (never stuck at a
+  `mapFree` type), `SVal.copyFromMem` reads `copyMem`'s result back at its
+  type (`SVal.ofU`), stuck only on a heap that does not fit.
+- Left for the typed interpreter: `LTy.Denote (.alias R)` as
+  `Option (SRef C (.ref R))`; `Loc` resolved to an `SRef` (a `bool` mapping
+  key is stuck untyped, `Value.asInt`, and needs a decision: solc hashes it
+  as `0`/`1`); the stores of `Semantics.lean` as `Storage.standardExample`
+  … (done, with `_erase` lemmas); typed heap (M4c); `DecidableEq (SVal T)`.
+
 ### Gate G0: passes, under conditions
 
 The spike (`Solidity/Scratch/IntrinsicSpike.lean`, not committed) has seven
