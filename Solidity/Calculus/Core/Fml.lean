@@ -184,13 +184,6 @@ def Upd.erase {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Solidi
   | _, .pop U _ => U.erase ns
   | _, .drop U _ => U.erase ns
 
-/-! ## Scopes of a program -/
-
-/-- The names of the context a block leaves. -/
-def Prog.outNames {Γ : Ctx} (ns : List Var) : {Γ' : Ctx} → Prog C Γ Γ' → List Var
-  | _, .nil => ns
-  | _, .cons s P => P.outNames (s.outNames ns)
-
 /-! ## Frames: what follows the program -/
 
 /-- How a scope ends: a block's `}`, or the fresh locals of a rule
