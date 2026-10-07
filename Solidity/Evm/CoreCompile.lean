@@ -41,9 +41,10 @@ compiling `s.erase ns` give the same code up to the memory cells
 (`Stmt.sepArgs`).  The cells differ by design (a name there, a level here).
 A call whose arguments are not separated is erased with its arguments bound
 at the head of its body, after the return variable is zeroed, so the two
-codes store the same words in another order; the elaborator's calls are
-separated (`Solidity.Stmt.call` requires it), and `Evm/CoreExamples.lean`
-checks the agreement on resolved programs (`sameCode`).
+codes store the same words in another order.  `resolve` returns only
+separated calls, so a resolved program compiles as the block it was
+resolved from (`compileProg_resolve`); `Evm/CoreExamples.lean` checks the
+agreement on examples too (`sameCode`).
 -/
 
 namespace Solidity.Evm
@@ -456,25 +457,7 @@ end
 
 section Erase
 
-open Solidity.Core (Stmt.erase Prog.erase Stmt.outNames)
-
-mutual
-/-- Every call's arguments are separated (`Arg.separatedFrom`) once
-erased: the calls `erase` keeps as calls, whose arguments it does not move
-into the body. -/
-def Stmt.sepArgs {Γ Γ' : Ctx} (ns : List Var) : Solidity.Core.Stmt C Γ Γ' → Bool
-  | .call _ args ret body =>
-    Arg.separatedFrom [] (args.erase ns) && Prog.sepArgs (ret.names ++ args.names) body
-  | .ite _ t e => Prog.sepArgs ns t && Prog.sepArgs ns e
-  | .block body => Prog.sepArgs ns body
-  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
-  | .incDec .. | .assignIncDec .. | .push .. | .pop _ | .transfer .. | .send .. | .declMem ..
-  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => true
-def Prog.sepArgs {Γ Γ' : Ctx} (ns : List Var) : Solidity.Core.Prog C Γ Γ' → Bool
-  | .nil => true
-  | .cons s P => Stmt.sepArgs ns s && Prog.sepArgs (s.outNames ns) P
-end
+open Solidity.Core (Stmt.erase Prog.erase Stmt.outNames Stmt.sepArgs Prog.sepArgs)
 
 local notation "⌊" l "⌋" => List.map Instr.forgetCell l
 
@@ -685,6 +668,16 @@ theorem compileProg_erase (b : Nat) (ns : List Var) {Γ Γ' : Ctx} :
     simp only [compileProg, Prog.erase, Evm.compileProg_append, List.map_append,
       compileStmt_erase b ns s h.1, compileProg_erase b (s.outNames ns) P h.2]
 end
+
+/-- **A resolved program compiles as its source**: the same code as
+`Evm/Compile.lean`'s for the block it was resolved from, up to the memory
+cells (`resolve` separates every call's arguments). -/
+theorem compileProg_resolve [FreshNames] (b : Nat) {Γ Γ' : Solidity.Core.NCtx}
+    {us : List (Solidity.Stmt C)} {P : Solidity.Core.Prog C Γ.ctx Γ'.ctx}
+    (h : Solidity.Core.Prog.resolve Γ us = .ok ⟨Γ', P⟩) :
+    ⌊compileProg b P⌋ = ⌊Evm.compileProg us⌋ := by
+  rw [compileProg_erase b Γ.names P (Solidity.Core.Prog.resolve_sepArgs h),
+    Solidity.Core.Prog.resolve_erase h]
 
 theorem _root_.Solidity.Evm.pushesP_append (P Q : Solidity.Prog C) :
     Evm.pushesP (P ++ Q) = Evm.pushesP P + Evm.pushesP Q := by
