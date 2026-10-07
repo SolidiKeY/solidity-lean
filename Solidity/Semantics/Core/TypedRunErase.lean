@@ -896,6 +896,161 @@ theorem OpLoc.bumpT_erase (σ : TState C Γ) (op : IncDec) {p : PrimTy} (hp : p.
     rw [Simple.evalT_erase σ i, ok_bind, PrimTy.asInt_erase_uint, ok_bind]
     exact bumpMemT_erase σ op hp (.index r a (i.evalT σ).1) fun _ _ => rfl
 
+/-! ### Calls and payments -/
+
+theorem Args.evalT_erase (σ : TState C Γ) : {ps : Ctx} → (as : Args C Γ ps) →
+    as.bridgeOk = true → TRes.Agrees (TEnv.erase ps) (as.evalT σ) (as.eval σ.erase)
+  | _, .nil, _ => rfl
+  | _, .snoc as _ _ e, h => by
+    simp only [Args.bridgeOk, Bool.and_eq_true] at h
+    unfold Args.evalT Args.eval
+    exact TRes.Agrees.bind (as.evalT_erase σ h.1) fun _ =>
+      TRes.Agrees.bind (e.evalT_erase σ h.2) fun _ => rfl
+
+theorem ExtCall.keyT_erase (σ : TState C Γ) (c : ExtCall C Γ) :
+    c.key σ.erase = .ok (c.keyT σ) := by
+  have hm : ∀ l : List (ExtArg C Γ), l.mapM (fun a => a.2.eval σ.erase) =
+      .ok (l.map fun a => PrimTy.erase (a.2.evalT σ)) := by
+    intro l
+    induction l with
+    | nil => rfl
+    | cons a l ih => rw [List.mapM_cons, Simple.evalT_erase, ok_bind, ih, ok_bind]; rfl
+  unfold ExtCall.key
+  rw [Simple.evalT_erase, ok_bind, PrimTy.asInt_erase_uint, ok_bind, hm, ok_bind]
+  rfl
+
+theorem PrimTy.ofValue?_fits (p : PrimTy) (v : Value) :
+    (match PrimTy.ofValue? p v with
+      | some x => v.fits p = true ∧ PrimTy.erase x = v
+      | none => v.fits p = false) := by
+  cases p <;> cases v
+  case bool.bool b => exact ⟨rfl, rfl⟩
+  case uint.int n =>
+    simp only [PrimTy.ofValue?, Semantics.PrimVal.fits, PrimTy.inRange, Semantics.uintBound]
+    by_cases hb : 0 ≤ n ∧ n < ((2 ^ 256 : Nat) : Int)
+    · rw [dif_pos (decide_eq_true hb)]
+      exact ⟨decide_eq_true hb, rfl⟩
+    · rw [dif_neg (fun h => hb (of_decide_eq_true h))]
+      exact decide_eq_false hb
+  case int.int n =>
+    simp only [PrimTy.ofValue?, Semantics.PrimVal.fits, PrimTy.inRange, Semantics.intBound]
+    by_cases hb : -((2 ^ 255 : Nat) : Int) ≤ n ∧ n < ((2 ^ 255 : Nat) : Int)
+    · rw [dif_pos (decide_eq_true hb)]
+      exact ⟨decide_eq_true hb, rfl⟩
+    · rw [dif_neg (fun h => hb (of_decide_eq_true h))]
+      exact decide_eq_false hb
+  all_goals rfl
+
+theorem Binders.decodeT_erase {H : HTy} : {ρ : Ctx} → (bs : Binders ρ) → (vs : List Value) →
+    TRes.Agrees (fun x : TEnv C H ρ × List Value => (TEnv.erase ρ x.1, x.2))
+      (bs.decodeT vs) (bs.decode vs)
+  | _, .nil, _ => rfl
+  | _, .snoc bs p _, vs => by
+    unfold Binders.decodeT Binders.decode
+    refine TRes.Agrees.bind (bs.decodeT_erase vs) fun x => ?_
+    rcases x with ⟨e, rest⟩
+    cases rest with
+    | nil => rfl
+    | cons v rest =>
+      have hf := PrimTy.ofValue?_fits p v
+      cases h : PrimTy.ofValue? p v with
+      | none =>
+        rw [h] at hf
+        simp only [h, hf, Bool.false_eq_true, ↓reduceIte]
+        rfl
+      | some x =>
+        rw [h] at hf
+        simp only [h, hf.1, ↓reduceIte]
+        exact TRes.Agrees.of_eq (by rw [← hf.2]; rfl)
+
+theorem CodeBinder.decodeT_erase {H : HTy} {κ : Ctx} (code : CodeBinder κ) (c : Value) :
+    TRes.Agrees (TEnv.erase κ) (code.decodeT (C := C) (H := H) c) (code.decode c) := by
+  cases code with
+  | none => rfl
+  | some _ =>
+    unfold CodeBinder.decodeT CodeBinder.decode
+    have hf := PrimTy.ofValue?_fits .uint c
+    cases h : PrimTy.ofValue? .uint c with
+    | none =>
+      rw [h] at hf
+      simp only [h, hf, Bool.false_eq_true, ↓reduceIte]
+      rfl
+    | some x =>
+      rw [h] at hf
+      simp only [h, hf.1, ↓reduceIte]
+      exact TRes.Agrees.of_eq (by rw [← hf.2]; rfl)
+
+theorem TEnv.append_erase {H : HTy} {Γ : Ctx} : (ρ : Ctx) → (r : TEnv C H ρ) → (e : TEnv C H Γ) →
+    TEnv.erase (ρ ++ Γ) (TEnv.append ρ r e) = Env.append ρ (TEnv.erase ρ r) (TEnv.erase Γ e)
+  | [], _, _ => rfl
+  | _ :: ρ, r, e => congrArg (Prod.mk _) (TEnv.append_erase ρ r.2 e)
+
+theorem TEnv.take_erase {H : HTy} {Γ : Ctx} : (ρ : Ctx) → (e : TEnv C H (ρ ++ Γ)) →
+    Env.take ρ (TEnv.erase (ρ ++ Γ) e) = TEnv.erase ρ (TEnv.take ρ e)
+  | [], _ => rfl
+  | _ :: ρ, e => congrArg (Prod.mk _) (TEnv.take_erase ρ e.2)
+
+theorem Binders.defaultsT_erase {H : HTy} : {ρ : Ctx} → (bs : Binders ρ) →
+    TEnv.erase ρ (Binders.defaultsT (C := C) (H := H) bs) = Binders.defaults bs
+  | _, .nil => rfl
+  | _, .snoc bs p _ => by
+    show ((PrimTy.erase (PrimTy.dflt p), TEnv.erase _ (Binders.defaultsT bs)) : Env C (.val p :: _)) =
+      (PrimTy.default p, Binders.defaults bs)
+    rw [PrimTy.erase_dflt, Binders.defaultsT_erase bs]
+
+theorem TState.withEnv_erase {Δ : Ctx} (σ : TState C Γ) (e : TEnv C σ.H Δ) :
+    (σ.withEnv e).erase = σ.erase.withEnv (TEnv.erase Δ e) := rfl
+
+/-- Entering a call: the frame the untyped run builds on the erased caller is
+the erasure of the typed one. -/
+theorem CallRet.enterT_erase {rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (σ : TState C Γ)
+    (a : TEnv C σ.H ps) :
+    (do
+      let (τ, r) ← ret.enter σ.erase.glob
+      pure (State.ofGlob τ (Env.append rs r (TEnv.erase ps a)))) =
+      (.ok (ret.enterT (σ.withEnv a)).st.erase : Res (State C (rs ++ ps))) := by
+  cases ret with
+  | none => rfl
+  | val p r res =>
+    show Except.ok (State.ofGlob (Γ := .val p :: ps) σ.erase.glob
+      (PrimTy.default p, TEnv.erase ps a)) = _
+    rw [← PrimTy.erase_dflt]
+    rfl
+  | rets bs =>
+    show Except.ok (State.ofGlob σ.erase.glob (Env.append rs (Binders.defaults bs) (TEnv.erase ps a))) = _
+    rw [← Binders.defaultsT_erase (H := σ.H) bs, ← TEnv.append_erase]
+    rfl
+  | mem R r hd hm =>
+    show (do
+      let (τ, r) ← (do
+        let (τ', id) ← Semantics.allocDefault (σ.withEnv a).erase.glob R
+        pure (τ', ((id, ()) : Env C [.mem R])))
+      pure (State.ofGlob τ (Env.append [.mem R] r (TEnv.erase ps a)))) = _
+    rw [TState.allocDefault_erase (σ.withEnv a) R hm]
+    refine congrArg Except.ok ?_
+    simp only [CallRet.enterT, TState.allocDefaultG, TState.grow, TState.allocDefault,
+      TState.adopt, TState.push, TState.withEnv, TState.erase, State.ofGlob, State.glob,
+      TEnv.erase, Env.append, TEnv.erase_wk]
+    congr 1
+    show (_, TEnv.erase ps a) = (_, TEnv.erase ps (TEnv.wk _ ps a))
+    rw [TEnv.erase_wk]
+    rfl
+
+theorem CallRet.leaveT_erase {H : HTy} {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') (e : TEnv C H Γ)
+    (r : TEnv C H rs) :
+    TEnv.erase Γ' (ret.leaveT e r) = ret.leave (TEnv.erase Γ e) (TEnv.erase rs r) := by
+  cases ret with
+  | none => rfl
+  | val p x res =>
+    cases res with
+    | none => rfl
+    | some i => exact (TEnv.set_erase i r.1 e).symm
+  | rets bs => exact TEnv.append_erase _ r e
+  | mem R x hd hm => rfl
+
+theorem TState.pay_erase (σ : TState C Γ) (addr amt : Int) :
+    (σ.pay addr amt).erase = σ.erase.withGlob (σ.erase.glob.pay addr amt) := rfl
+
 end Eval
 
 end Solidity.Core
