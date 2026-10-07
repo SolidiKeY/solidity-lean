@@ -74,6 +74,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Core/Print.lean` | `Core.Fml.show`: a scoped formula printed as `RuleSyntax.lean` prints its erasure (`}` at a block's end, pops and hidden binders unprinted), pinned against it. |
 | `Calculus/Core/Step.lean` | The strategy on scoped formulas: `Stmt.step` (one `casesOn`; the ported part of the rule table, `none` for the rest), `Fml.maxIdx`/`fresh`, `Fml.stepR` by `Fml.rec` with its compiled twin `Fml.stepAt` (`stepR_eq`), `symex`. |
 | `Calculus/Core/Quote.lean` | Scoped programs and formulas quoted back into `Expr` (`Core.Fml.quote`, `Core.Prog.quote`), hash-consed. |
+| `Calculus/Core/Taclet.lean` | A first port of `Taclet` to scoped statements (`localValueAssign`, `storageFieldRead_unfold_rightFst`, `ifElseSplit`): `Taclet.step_eq` (the rule `Stmt.step` fires) and `Taclet.erase` (today's taclet). |
 | `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the constructor for each. |

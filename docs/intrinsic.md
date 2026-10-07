@@ -244,8 +244,10 @@ from `./run-lean.sh`.
     targets in `Δ`.  A pop is invisible; an update of pops only erases to
     its formula.
   - `Frames.pop` takes `Ext` (condition 5), not `Thin`; so do
-    `Premise.unfold` and `Upd.pop`.  `Frames.leave` is the spike's
-    `frameStep`.
+    `Premise.unfold` and `Upd.pop`.  `Frames.exit` (round 2; the spike's
+    `frameStep`, recursive) goes through every frame of a finished program,
+    and `Fml.modalK` is a modality that exits at once when its program is
+    empty: `Premise.fml` writes it, so no step is administrative.
   - `Premise.bind`'s binder is a formula, `Fml.bind x t φ` ("for every value
     of `x : t`"), printed as `φ`: the update sketch had no right-hand side
     for it.  `Premise.check` has no program (`assertSimple`'s is empty).
@@ -260,8 +262,124 @@ from `./run-lean.sh`.
     (`#taclet`, `#wp`) is still to write.
 - `Calculus/Core/Lower.lean`: `Val.lower` and the rest on `Core.Tm`, with
   `lower_erase`.
-- Left for M6a: `holds`/`holds_erase` (needs M3's `State C Γ`), `Taclet C k m (s : Core.Stmt C Γ Γ')`, `Stmt.step`,
-  symex with `T.rec` + `implemented_by` twins, the quoters, `Hyps`/`Proves`.
+- Round 2 (2026-10-07): `Calculus/Core/Step.lean`, `Calculus/Core/Quote.lean`,
+  `Calculus/Core/Taclet.lean`, `Examples/Tactics/CoreSymex.lean`.
+  - `Core.Stmt.step k m s : Option (Premise C Γ Γ')`: one `Stmt.casesOn`
+    (condition 1); the expression-level arms (`localStep`, `assignStep`, …)
+    `match` on `Val`/`Loc`/`Src`, whose context is a parameter.  Ported:
+    locals (simple, root and member reads, operators, `binopUnfoldLeft`/
+    `Right`, `unopCapture`), root and member writes (with their captures
+    and `storageFieldWrite_unfold_leftFst`), `rebind` to an alias or a root,
+    the value and alias declarations, `if` (`ifElseSplit`, `ifElseUnfold`),
+    `require`, `assert`, `revert`.  Every other arm is `none`: the strategy
+    stops in front of it.  A capture's schema variables are weakened by
+    `Stmt.wk`/`Val.wk` (`up`), which `match` on `Thin`: kernel-evaluated, so
+    a candidate for a `casesOn` shift if it shows in a profile (it did not).
+  - `Fml.stepR` is `Fml.rec`, `@[implemented_by Fml.stepAt]` (`casesOn` +
+    structural), `Fml.stepR_eq` by induction (condition 2).  `Fml.fresh` is
+    one above every binder label's index (`Fml.maxIdx`, `casesOn` +
+    structural): the erased names are today's `se1`, `sp1`.
+  - The quoter writes every context out and hash-conses the result with
+    `ShareCommon` (condition 7); a per-context cache was not needed.
+  - `Examples/Tactics/CoreSymex.lean`: three programs, each resolved, run by
+    `Core.symex`, quoted, added as a theorem `symex n φ = ψ` by `Eq.refl`
+    (kernel-checked), and its erasure compared with today's `symex` with the
+    cover goals dropped (equal, same fresh names).
+  - `Calculus/Core/Taclet.lean`: `Core.Taclet` with three constructors,
+    `Taclet.step_eq` (the rule `Stmt.step` fires) and `Taclet.erase` (each
+    erases to today's `Solidity.Taclet`).  Soundness against M3's run is
+    stated below, not proved: `Core.Stmt.run` has not landed.
+
+### M6a lane: the speed gate (kernel, `Eq.refl` of `symex n φ = ψ`)
+
+Measured with `Solidity/Scratch/CoreBench.lean` (not committed), median of 5
+(3 for e1×5), fuel 5000 both sides, on a machine shared with three other Lean
+agents (±20% noise between runs).  e1 is
+`if (alice.age == 4) { total = 1; } else { total = 2; }; uint y = total;`,
+e2 `uint x = alice.age; uint y = x + 1; alice.age = y;`, e3
+`uint x; x = 4; uint y = x + 1; require(y > 3); total = y;`; ×n repeats the
+program n times.
+
+| program | steps today / Core | today | Core | ratio | symex then `fresh`: today / Core |
+|---|---|---|---|---|---|
+| e1 | 15 / 13 | 32.2 ms | 37.8 ms | 1.17 | 42.5 / 32.2 ms |
+| e2 | 6 / 5 | 10.0 ms | 14.5 ms | 1.45 | 12.8 / 8.9 ms |
+| e3 | 11 / 10 | 27.6 ms | 24.8 ms | 0.90 | 28.8 / 15.8 ms |
+| e1×5 | 435 / 403 | 16.7 s | 5.6 s | 0.34 | |
+| e2×10 | 51 / 50 | 259 ms | 297 ms | 1.15 | 132 / 122 ms |
+| e3×10 | 101 / 100 | 1757 ms | 610 ms | 0.35 | 1654 / 539 ms |
+
+- Branching programs are about three times faster: a branch shares the
+  rest of the program as a frame (`seq ω κ`) instead of copying `thn ++ ω`
+  into each goal, and there is no cover goal.
+- Straight-line programs reduce faster (last column: the symex projected to
+  a number, no comparison of terms), but the `Eq.refl` check is up to 1.45×
+  on the smallest (e2, 4.5 ms more): the kernel compares the result with
+  the quote node by node, and every node carries its contexts.  The type
+  check of the quoted result is 0.6–6.6 ms against 0.1–0.3 ms.
+- Gate: within 20% on four of six, faster in total (6.8 s against 18.8 s);
+  e2 and e2×10's 15–45% is the context comparison.  Next to try if it
+  matters on the TestSuite: quote contexts as `let`-bound constants, or
+  compare a projection instead of the whole result.
+
+### M6a lane: how `dl{ … }` will write a scoped taclet
+
+The cutover (after M4) re-targets `Taclet` at `Core.Stmt C Γ Γ'`
+(`Taclet C k m : Stmt C Γ Γ' → Premise C Γ Γ' → Prop`) without touching the
+rule lines of `Calculus/Rules.lean`: the macro (`RuleSyntax.lean`,
+`schemaAt`/`declVar`) inserts what scoping needs, and the printer hides it.
+
+1. **Schema variables are positions or parts read in the `\find`'s context
+   `Γ`.**  `v`, `lhs`, `lsv`, `mv` become `Idx Γ t`, expression schema
+   variables (`se`, `nse`, `sp`, `nsp`, `e`, …) parts of `Γ`
+   (`Simple C Γ p`, `SPath C Γ T`), program variables (`thenStm`, `ω`)
+   `Prog C Γ Γ₁` with `Γ₁` a fresh implicit.
+2. **A fresh declaration pushes.**  Reading the premise's statements left to
+   right, the macro keeps a count `d` of the fresh locals declared so far
+   (`T se = …`, `T storage sp = …`, `ie`, `mv`: `declVar`'s stems).  A
+   fresh local is `.here` lifted by the declarations after it; every schema
+   variable of the `\find` read after `d` declarations is weakened `d`
+   times: an `Idx` by `.there`, a part by `.wk up` (`Calculus/Core/Step.lean`'s
+   `up`).  The premise is `Premise.unfold P (Ext.push^d .refl)`: the pop
+   `Premise.fml` puts after it (`pop .capture`), which prints as nothing.
+3. **The statement's own declaration binds.**  `T v = e; ⇝ v = e;`
+   (`localValueDeclInitDrop`, `storageLocalDeclInitDrop`,
+   `memoryLocalDeclInitDrop`) is `Premise.bind v t [v = e↑]`: `v` is `.here`
+   and `e` weakened once; the binder prints as nothing, so the line reads
+   as solkey's `⟨[ v = e; ]⟩`.
+4. **A declaration's update declares.**  `T v; ⇝ { v := defVal(T) } ⟨[ ]⟩`
+   is `Upd.nil.decl v …`; an assignment's `{ v := se }` is
+   `Upd.nil.snoc (.local v …)`, its right-hand side lowered as today
+   (`Calculus/Core/Lower.lean`).
+5. **A branch is a block.**  `⟨[ thenStm ]⟩` in a split's goal is the
+   program variable as it is; `Premise.fml` adds the block's pop
+   (`pop .block P.scopeExt`), printed `}` by `Core.Fml.show`.  Side
+   conditions stay as today (`side_cond`), stated on the parts.
+6. **The printer** (`#taclet`, `PrintedRules`) drops `↑`/`.there` on schema
+   variables, the capture's pop and the hidden binder, so every printed
+   rule line is unchanged; `Calculus/Core/Taclet.lean`'s three constructors
+   are what the macro emits for `localValueAssign`,
+   `storageFieldRead_unfold_rightFst` and `ifElseSplit`.
+
+Soundness against M3's interpreter, to prove when `Core.Stmt.run` lands
+(`holds σ φ` the scoped formulas' meaning over `State C Γ`):
+
+    theorem Core.Premise.sound (h : Taclet C k m s p) (ω : Prog C Γ' Γ₁)
+        (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (σ : State C Γ) :
+        holds σ (p.fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ)
+
+with no freshness premise: the fresh locals are positions pushed and popped
+by the premise itself.  Until then `Taclet.erase` carries it over from
+`Taclet.sound`, given `holds_erase`.
+
+- Left for M6a: `holds`/`holds_erase` (needs M3's `State C Γ`); the rest of
+  `Stmt.step`'s arms (index reads and writes, copies, memory, calls, `try`,
+  loops, compound assignments, `push`/`pop`, `transfer`/`send`, `&&`/`||`,
+  the conditional) and the `Premise` constructors `branches`, `cases`,
+  `inv`; the remaining taclets of `Core.Taclet` (by the macro, at the
+  cutover); `Hyps`/`Proves`; a `sol_symex` on `Core` (`normValid` with
+  `Core.Fml.quote`); chains, `Derive.residue` and ProofTree; the
+  delaborator for formulas with schema variables (`#taclet`, `#wp`).
 
 ### Gate G0: passes, under conditions
 
