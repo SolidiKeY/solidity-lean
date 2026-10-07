@@ -1,0 +1,164 @@
+import Solidity.Calculus.Core.Taclet
+import Solidity.Calculus.Logic
+
+/-!
+# Sequents on scoped formulas: the skeleton
+
+`Logic.lean`'s judgement `Γ ⊢ φ` over the scoped formulas of
+`Calculus/Core/Fml.lean` (`docs/intrinsic.md`, M6a): the context is a
+telescope (`Hyps C Γ₀ Γ`), each entry read where the ones before it leave,
+so an update that declares a local, a `∀` and the hidden binder extend the
+scope of what follows them, and the goal is a formula of the last scope.
+
+The rules are stated, one per kind of premise, as `Proves` has them today,
+under solkey's names where solkey has the rule:
+
+* `intro` (`impRight`), `allIntro` (`allRight`), `updIntro`, `bindIntro`
+  (the hidden binder, Lean only: it puts the local of `T v = e;` in scope);
+* `update`, `unfold`, `bind`, `split`, `check`, `done`: a taclet's premise
+  in front of the rest `ω` and the frames `κ` (`Premise.fml`, its parts
+  apart).  `split` has **two goals**, KeY's: a condition cannot be stuck, so
+  there is no cover goal;
+* `empty` (`emptyModality`): a finished program goes through its frames
+  (`Frames.exit`), a scope end a popping update, which `updIntro` takes;
+* `closeTrue`, behind a context with no diamond update (`Hyps.boxOnly`).
+
+The fresh index of a taclet is one above every index in the sequent
+(`Hyps.fresh`), as `Hyp.fresh` numbers it.  `Hyps.wrap` is written with
+`casesOn` (Gate G0, condition 1): the kernel evaluates it when it checks
+that index.
+
+Soundness waits for the scoped interpreter (M3's `Core.State C Γ` and
+`holds`); this module states the rules only.
+-/
+
+namespace Solidity.Core
+
+open Solidity (Modality RuleSet)
+
+variable {C : Contract}
+
+/-- The context of a sequent, from the scope `Γ₀` of the whole goal to the
+scope `Γ` of its last formula. -/
+inductive Hyps (C : Contract) (Γ₀ : Ctx) : Ctx → Type where
+  | nil : Hyps C Γ₀ Γ₀
+  /-- `a → …` -/
+  | pre {Γ : Ctx} (H : Hyps C Γ₀ Γ) (a : Fml C Γ) : Hyps C Γ₀ Γ
+  /-- `{U} …`, produced under the modality `m`: its declarations extend
+  the scope. -/
+  | upd {Γ Δ : Ctx} (H : Hyps C Γ₀ Γ) (m : Modality) (U : Upd C Γ Δ) : Hyps C Γ₀ Δ
+  /-- `{havoc} …` -/
+  | havoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) : Hyps C Γ₀ Γ
+  /-- `∀ p x. …`, KeY's skolem constant for `x`. -/
+  | all {Γ : Ctx} (H : Hyps C Γ₀ Γ) (x : Var) (p : PrimTy) : Hyps C Γ₀ (.val p :: Γ)
+  /-- The hidden binder: the local `x` a declaration put in scope, any value
+  of its type. -/
+  | bind {Γ : Ctx} (H : Hyps C Γ₀ Γ) (x : Var) (t : LTy) : Hyps C Γ₀ (t :: Γ)
+  /-- `{anon(xs)} …` -/
+  | anon {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t)) : Hyps C Γ₀ Γ
+
+/-- The context put back in front of a formula. -/
+def Hyps.wrap {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Fml C Γ → Fml C Γ₀
+  | _, H, φ => Hyps.casesOn (motive := fun Γ _ => Fml C Γ → Fml C Γ₀) H
+      (fun φ => φ)
+      (fun H a φ => Hyps.wrap H (.imp a φ))
+      (fun H m U φ => Hyps.wrap H (.upd m U φ))
+      (fun H φ => Hyps.wrap H (.havoc φ))
+      (fun H x p φ => Hyps.wrap H (.all x p φ))
+      (fun H x t φ => Hyps.wrap H (.bind x t φ))
+      (fun H xs φ => Hyps.wrap H (.anon xs φ)) φ
+  termination_by structural _ H => H
+
+/-- The fresh index of a step on the goal `φ`: one above every index in the
+sequent. -/
+def Hyps.fresh {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (φ : Fml C Γ) : Nat := (H.wrap φ).fresh
+
+/-- No update of the context was produced under the diamond. -/
+def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
+  | _, H => Hyps.casesOn (motive := fun _ _ => Bool) H true
+      (fun H _ => Hyps.boxOnly H)
+      (fun H m _ => match m with
+        | .diamond => false
+        | .box => Hyps.boxOnly H)
+      (fun H => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
+      (fun H _ => Hyps.boxOnly H)
+  termination_by structural _ H => H
+
+/-- `H ⊢ φ`: the calculus proves `φ` in the context `H` (with `R`, solkey's
+rules alone or all of them). -/
+inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
+    {Γ : Ctx} → Hyps C Γ₀ Γ → Fml C Γ → Prop where
+  /-- `impRight`: the precondition moves into the context. -/
+  | intro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {a φ : Fml C Γ} (h : Proves C R Γ₀ (H.pre a) φ) :
+      Proves C R Γ₀ H (.imp a φ)
+  /-- `allRight`: a quantified local joins the context. -/
+  | allIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
+      (h : Proves C R Γ₀ (H.all x p) φ) : Proves C R Γ₀ H (.all x p φ)
+  /-- An update in front of the formula joins the context. -/
+  | updIntro {Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
+      (h : Proves C R Γ₀ (H.upd m U) φ) : Proves C R Γ₀ H (.upd m U φ)
+  /-- The hidden binder joins the context (Lean only). -/
+  | bindIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)}
+      (h : Proves C R Γ₀ (H.bind x t) φ) : Proves C R Γ₀ H (.bind x t φ)
+  /-- A taclet that produces an update: the update joins the context, the
+  rest of the program goes on. -/
+  | update {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {U : Upd C Γ Γ'}
+      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.update U))
+      (h : Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ)) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A taclet that produces statements: they replace the first one, their
+  fresh locals popped after them (`pop .capture`). -/
+  | unfold {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
+      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.unfold P e))
+      (h : Proves C R Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A declaration with its initializer dropped (`localValueDeclInitDrop`):
+  the local joins the context, the assignment replaces the declaration. -/
+  | bind {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {x : Var} {t : LTy}
+      {P : Prog C (t :: Γ) Γ'}
+      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.bind x t P))
+      (h : Proves C R Γ₀ (H.bind x t) (.modal m P (.seq ω κ) φ)) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A taclet that branches: two goals, KeY's, each branch a block ended
+  as the premise says (`}` for an `if`). -/
+  | split {Γ Γ₁ Γ₂ Δ₁ Δ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : BlockKind} {c c' : Fml C Γ}
+      {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂}
+      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.split b c c' P Q))
+      (thn : Proves C R Γ₀ (H.pre c) (.modalK m P (.pop b P.scopeExt (.seq ω κ)) φ))
+      (els : Proves C R Γ₀ (H.pre c') (.modalK m Q (.pop b Q.scopeExt (.seq ω κ)) φ)) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A taclet that checks (`assertSimple`): the goal with the condition
+  assumed ("Holds"), and the condition ("Violated"). -/
+  | check {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {c : Fml C Γ}
+      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.check c))
+      (thn : Proves C R Γ₀ (H.pre c) (.modalK m ω κ φ)) (els : Proves C R Γ₀ H c) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A taclet that closes the modality (`revertBox`, `revertDiamond`). -/
+  | done {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : Bool}
+      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.done b))
+      (h : Proves C R Γ₀ H (if b then .tt else .ff)) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- `emptyModality`: a finished program goes through its frames, the rest
+  of the program next, a scope end a popping update. -/
+  | empty {Γ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {κ : Frames C Γ Γ₂} {φ : Fml C Γ₂}
+      (h : Proves C R Γ₀ H (κ.exit m φ)) : Proves C R Γ₀ H (.modal m .nil κ φ)
+  /-- `closeTrue`, behind a context with no diamond update. -/
+  | closeTrue {Γ : Ctx} {H : Hyps C Γ₀ Γ} (h : H.boxOnly = true) : Proves C R Γ₀ H .tt
+
+/-! ## A derivation
+
+`[ if (b) { } else { } ] true`, `b` a `bool` local: `ifElseSplit`, then in
+each goal the block's end (an update that pops nothing, taken into the
+context) and `closeTrue`. -/
+
+example : Proves StandardExample .all [.val .bool] .nil
+    (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
+  .split .ifElseSplit (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
+
+end Solidity.Core
