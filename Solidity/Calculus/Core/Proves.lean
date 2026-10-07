@@ -21,7 +21,8 @@ under solkey's names where solkey has the rule:
   there is no cover goal;
 * `empty` (`emptyModality`): a finished program goes through its frames
   (`Frames.exit`), a scope end a popping update, which `updIntro` takes;
-* `closeTrue`, behind a context with no diamond update (`Hyps.boxOnly`).
+* `closeTrue`, behind a context with no diamond update but scope ends
+  (`Hyps.boxOnly`).
 
 The fresh index of a taclet is one above every index in the sequent
 (`Hyps.fresh`), as `Hyp.fresh` numbers it.  `Hyps.wrap` is written with
@@ -73,12 +74,19 @@ def Hyps.wrap {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Fml C Γ → Fm
 sequent. -/
 def Hyps.fresh {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (φ : Fml C Γ) : Nat := (H.wrap φ).fresh
 
-/-- No update of the context was produced under the diamond. -/
+/-- The update only pops: scope ends, which always terminate. -/
+def Upd.popsOnly {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
+  | _, U => Upd.casesOn (motive := fun _ _ => Bool) U true
+      (fun _ _ => false) (fun _ _ _ => false) (fun U _ => Upd.popsOnly U)
+  termination_by structural _ U => U
+
+/-- No update of the context was produced under the diamond, but scope
+ends (`Upd.popsOnly`). -/
 def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
   | _, H => Hyps.casesOn (motive := fun _ _ => Bool) H true
       (fun H _ => Hyps.boxOnly H)
-      (fun H m _ => match m with
-        | .diamond => false
+      (fun H m U => match m with
+        | .diamond => U.popsOnly && Hyps.boxOnly H
         | .box => Hyps.boxOnly H)
       (fun H => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
       (fun H _ => Hyps.boxOnly H)
@@ -159,6 +167,11 @@ context) and `closeTrue`. -/
 
 example : Proves StandardExample .all [.val .bool] .nil
     (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
+  .split .ifElseSplit (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
+
+/-- The diamond twin: a scope end pops, so `closeTrue` still fires. -/
+example : Proves StandardExample .all [.val .bool] .nil
+    (.modal .diamond (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
   .split .ifElseSplit (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
 
 end Solidity.Core
