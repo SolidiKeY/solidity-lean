@@ -1813,4 +1813,57 @@ theorem CallRet.leave_erase (hag : Agree ns σ τ) {rs Γ' ps Γf : Ctx} (ret : 
         exact hagF.get (Idx.here : Idx (.mem R :: ps) (.mem R))
       · exact base.env m hm
 
+theorem RunRel.reframe {Γ' : Ctx} {ns' B : List Var} {τ₁ τ₂ : Semantics.State}
+    (h : ∀ z, z ∉ B → lookupBy z τ₁.env = lookupBy z τ₂.env) :
+    {x : Res (State C Γ')} → {y : Res Semantics.State} → RunRel ns' B τ₁ x y → RunRel ns' B τ₂ x y
+  | .error _, .error _, hr => hr
+  | .ok _, .ok _, ⟨hag, hf⟩ => ⟨hag, fun z hz => (hf z hz).trans (h z hz)⟩
+
+theorem Stmt.erases_call {Γ' ps rs Γf : Ctx} (hag : Agree ns σ τ) (f : Name)
+    (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf)
+    (hnd : (ret.names ++ args.names).Nodup) (hfr : ∀ y ∈ ret.names ++ args.names, y ∉ ns)
+    (hsep : Arg.separatedFrom [] (args.erase ns) = true) (hbo : ∀ y ∈ body.binders, y ∉ ns)
+    (ih : ∀ σ' τ', Agree (ret.names ++ args.names) σ' τ' →
+      body.ErasesAt (ret.names ++ args.names) σ' τ') :
+    (Stmt.call f args ret body).ErasesAt ns σ τ := by
+  unfold Stmt.ErasesAt
+  rw [Stmt.erase_call ns f args ret body hsep, Solidity.Prog.run_single]
+  show RunRel (ret.outNames ns) (ns ++ (ret.names ++ args.names ++ body.binders)) τ
+    (Run.call args ret body.ext body.runR σ) _
+  simp only [Run.call, Solidity.Stmt.run]
+  rcases Args.bindSeq_erase hag args (List.nodup_append.1 hnd).2.1
+      (fun y hy => hfr y (List.mem_append_right _ hy)) with
+    ⟨e, h₁, h₂⟩ | ⟨a, τ₁, h₁, h₂, hag₁, hf₁⟩
+  · rw [h₁, h₂]; exact (rfl : e = e)
+  rw [h₁, h₂]
+  simp only [SemanticsProperties.Res.ok_bind, SemanticsProperties.Prog.run_append]
+  rcases CallRet.enter_erase (ns := ns) hag₁ ret hnd with
+    ⟨e, h₃, h₄⟩ | ⟨τg, r, τ₂, h₃, h₄, hag₂, hf₂⟩
+  · rw [h₃, h₄]; exact (rfl : e = e)
+  rw [h₃, h₄]
+  simp only [SemanticsProperties.Res.ok_bind]
+  have hf₂₁ : ∀ z, z ∉ ret.names ++ args.names → lookupBy z τ₂.env = lookupBy z τ.env :=
+    fun z hz => (hf₂ z fun h => hz (List.mem_append_left _ h)).trans
+      (hf₁ z fun h => hz (List.mem_append_right _ h))
+  refine RunRel.reframe (τ₁ := τ₂) (fun z hz => hf₂₁ z fun h =>
+      hz (List.mem_append_right _ (List.mem_append_left _ h)))
+    (RunRel.bind (ih _ _ hag₂) (fun υ τ₃ hag₃ hf₃ => ?_)
+      (fun z h => List.mem_append_right _ h) (fun z h => List.mem_append_left _ h))
+  obtain ⟨qs, hq, _⟩ := body.outNames_suffix (ret.names ++ args.names)
+  rw [hq] at hag₃
+  have hagF : Agree (ret.names ++ args.names) (υ.drop body.ext) τ₃ := by
+    refine hag₃.drop body.ext ?_
+    have h₁ := hag₃.len
+    have h₂ := hag₂.len
+    have h₃ := body.ext.length_eq
+    simp only [List.length_append] at h₁ h₂ h₃ ⊢
+    omega
+  exact CallRet.leave_erase hag ret body.ext hagF
+    (fun y hy => (hf₃ y fun h => by
+      rcases List.mem_append.1 h with h | h
+      · exact hfr y h hy
+      · exact hbo y h hy).trans
+      (hf₂₁ y fun h => hfr y h hy))
+    (fun y hy => hfr y (List.mem_append_left _ hy))
+
 end Calls
