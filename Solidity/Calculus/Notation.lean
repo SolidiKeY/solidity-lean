@@ -1057,6 +1057,8 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Fml C)
   | .modal m P φ => inScope do
     modify fun (Γ, k) => (scopeHints C Γ P, k)
     let mut P' : Prog C := []
+    -- the locals check (`wtCheck`), from the locals in scope at the modality
+    let mut Γw := ECtx.toCtx (← get).1
     for s in P do
       let (Γ, k) ← get
       let k₀ := nextFree taken k
@@ -1067,6 +1069,7 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Fml C)
       if (List.range' k₀ (k₁ - k₀)).any taken.contains then
         set (Γ, max k (taken.foldl max 0 + 1))
         Q ← elabStmt C s
+      Γw ← ElabM.lift (wtCheck C Γw Q)
       P' := P' ++ Q
     pure (.modal m P' (← elabFml taken φ))
   | .lean i => pure (Fml.slot i)

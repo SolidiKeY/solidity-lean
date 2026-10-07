@@ -2068,7 +2068,8 @@ A finder and a skeptic per area (elaborator, calculus), read-only.  Fixed:
 Left: a block's declaration followed by a same-named declaration of
 another type later (`{ bool x; } if (c) { uint x; }`) elaborates, as in
 Solidity, but the flat program fails `Prog.wt` (only type preservation reads
-it; `unchecked { }` had the same before); `narrowPure` runs twice on a tuple's
+it; `unchecked { }` had the same before; since M1 (f) of `docs/intrinsic.md`
+the elaborator refuses it); `narrowPure` runs twice on a tuple's
 components under `unchecked` (a redundant `% 2^n`, same value).
 
 **Constructors S1–S3** (2026-10-06, worktree `ctor`). `Contract` gained

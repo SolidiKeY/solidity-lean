@@ -7,8 +7,9 @@ The second layer of the type-soundness development. `StoragePreservation`
 handles the storage tree; this module adds what full soundness needs on
 top:
 
-- a binding context `Ctx` (what each local name is bound as: a stack
-  value, a storage-path alias, a memory reference) and a store typing
+- over the binding context `Ctx` (what each local name is bound as: a
+  stack value, a storage-path alias, a memory reference; `Syntax.lean`,
+  where the elaborator's locals check reads it), a store typing
   `HeapTy` (the type each memory identity holds) — the standard shallow
   store-typing setup: `MVal.hasTyH` checks a reference against `H`'s
   claim only, so no coinduction is needed and heap cycles cost nothing;
@@ -33,16 +34,6 @@ open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne
   HeapWellFormed lookupBy_eq_some_mem)
 
 /-! ## Contexts and store typings -/
-
-/-- What a local name is bound as (the typing side of `Binding`). -/
-inductive BTy where
-  | stack (ty : Ty)
-  | path (ty : Ty)
-  | mem (ty : Ty)
-  deriving DecidableEq, Repr
-
-/-- Binding context Γ. -/
-abbrev Ctx := List (Var × BTy)
 
 /-- Store typing H: the type each memory identity holds. -/
 abbrev HeapTy := List (Nat × Ty)

@@ -1054,6 +1054,261 @@ def Prog.show (P : List (Stmt C)) : String :=
 
 end Print
 
+/-! ## The locals check
+
+The typed syntax rules out every static mismatch but one: a `Var` is not
+typed by the syntax, so `Simple.local x` may be read at `uint` in one place
+and at `bool` in another.  `Stmt.wt` checks that the locals are used as
+declared, threading a context `Ctx` through the block; the elaborator runs it
+on every block it reads (`Prog.wtFirst`, `elabProgAt`), and
+`Typing/Soundness.lean` proves that a checked run keeps the state typed. -/
+
+namespace Semantics
+
+/-- What a local name is bound as (the typing side of `Binding`). -/
+inductive BTy where
+  | stack (ty : Ty)
+  | path (ty : Ty)
+  | mem (ty : Ty)
+  deriving DecidableEq, Repr
+
+/-- Binding context Γ. -/
+abbrev Ctx := List (Var × BTy)
+
+end Semantics
+
+section Check
+
+open Semantics
+
+variable {C : Contract}
+
+/-- A context sees at least what another sees: every local `Γ` binds is
+bound the same way in `Γ'`.  After `if (c) { uint y = 1; } else { }` the
+branch's context is `Γ` plus `y`, which is `≥ Γ`. -/
+def Ctx.le (Γ Γ' : Ctx) : Bool :=
+  Γ.all fun g => lookupBy g.1 Γ' == lookupBy g.1 Γ
+
+
+/-- What an `if` leaves: `Γ`, and each local both branches declare the same
+way and `Γ` does not bind.  `c ? mx : my` at a memory type declares its `mv1`
+in each branch (`hoist`), and the interpreter has no scopes, so `mv1` is bound
+after the `if` whichever branch ran. -/
+def Ctx.join (Γ Γt Γe : Ctx) : Ctx :=
+  Γt.foldr (fun g J =>
+    if lookupBy g.1 Γ == none && lookupBy g.1 Γt == some g.2 && lookupBy g.1 Γe == some g.2
+    then setBy g.1 g.2 J else J) Γ
+
+/-- A simple value's local, if any, is a stack local of its type:
+`x` read as a `uint` needs `uint x` in `Γ`. -/
+def Simple.wt (Γ : Ctx) : {p : PrimTy} → Simple C p → Bool
+  | p, .local x => lookupBy x Γ == some (.stack (.prim p))
+  | _, .lit .. => true
+  | _, .bool _ => true
+  | _, .env .. => true
+
+mutual
+
+/-- Every local a storage path mentions is bound as it is used: `p.age`
+needs `Person storage p` in `Γ`. -/
+def SPath.wt (Γ : Ctx) : {T : Ty} → SPath C T → Bool
+  | _, @SPath.alias _ R x => lookupBy x Γ == some (.path (.ref R))
+  | _, .loc l => l.wt Γ
+
+/-- `alice.age` has no locals; `balances[i]` needs `i` at the key type. -/
+def Loc.wt (Γ : Ctx) : {T : Ty} → Loc C T → Bool
+  | _, .root .. => true
+  | _, .field b _ _ => b.wt Γ
+  | _, .index _ b i => b.wt Γ && i.wt Γ
+
+/-- `m.age` needs `Person memory m` in `Γ`. -/
+def MPath.wt (Γ : Ctx) : {T : Ty} → MPath C T → Bool
+  | _, @MPath.var _ R x _ => lookupBy x Γ == some (.mem (.ref R))
+  | _, .loc l => l.wt Γ
+
+/-- `ns[i]` needs `ns` a memory array and `i` a `uint` local. -/
+def MLoc.wt (Γ : Ctx) : {T : Ty} → MLoc C T → Bool
+  | _, .field b _ _ => b.wt Γ
+  | _, .index _ b i => b.wt Γ && i.wt Γ
+
+/-- `x + alice.age` needs `x` a `uint`. -/
+def Val.wt (Γ : Ctx) : {p : PrimTy} → Val C p → Bool
+  | _, .simple s => s.wt Γ
+  | _, .read l => l.wt Γ
+  | _, .binop _ _ _ a b => a.wt Γ && b.wt Γ
+  | _, .unop _ _ _ a => a.wt Γ
+  | _, .ternary c a b => c.wt Γ && a.wt Γ && b.wt Γ
+  | _, .readMem l => l.wt Γ
+  | _, .len b _ => b.wt Γ
+  | _, .mlen b _ => b.wt Γ
+
+end
+
+/-- The source of `alice.age = x;` or `alice = p;`. -/
+def Src.wt (Γ : Ctx) {T : Ty} : Src C T → Bool
+  | .val v => v.wt Γ
+  | .copy p _ => p.wt Γ
+
+/-- The path `p = alice;` or `p = persons.push();` binds. -/
+def ARhs.wt (Γ : Ctx) {R : RefTy} : ARhs C R → Bool
+  | .path p => p.wt Γ
+  | .push b _ => b.wt Γ
+
+/-- The object `m = n;` or `m = alice;` binds. -/
+def MRhs.wt (Γ : Ctx) {R : RefTy} : MRhs C R → Bool
+  | .alias p => p.wt Γ
+  | .copy p _ => p.wt Γ
+  | .newArr n _ => n.wt Γ
+
+/-- Where `basket.items = new uint[](n);` lands. -/
+def NewLhs.wt (Γ : Ctx) {R : RefTy} : NewLhs C R → Bool
+  | .store l => l.wt Γ
+  | .mem l => l.wt Γ
+
+/-- What `m.age = x;` or `m.account = n;` writes. -/
+def MSrc.wt (Γ : Ctx) {T : Ty} : MSrc C T → Bool
+  | .val v => v.wt Γ
+  | .ref p => p.wt Γ
+
+/-- The target of `x += 1;`, `alice.age++;`, `m.age -= 1;`. -/
+def OpLoc.wt (Γ : Ctx) : {p : PrimTy} → OpLoc C p → Bool
+  | p, .local x => lookupBy x Γ == some (.stack (.prim p))
+  | _, .root .. => true
+  | _, .field b _ _ => b.wt Γ
+  | _, .index _ b i => b.wt Γ && i.wt Γ
+  | _, .mfield b _ _ => b.wt Γ
+  | _, .mindex _ b i => b.wt Γ && i.wt Γ
+
+/-- `x` is bound as `bt` in `Γ`. -/
+def Ctx.has (Γ : Ctx) (x : Var) (bt : BTy) : Bool := lookupBy x Γ == some bt
+
+/-- The context a call's parameters leave: each argument checked where it is
+bound, as its inlining declares them one after another. -/
+def Arg.wt : Ctx → List (Arg C) → Option Ctx
+  | Γ, [] => some Γ
+  | Γ, a :: as => if a.e.wt Γ then Arg.wt (setBy a.x (.stack (.prim a.p)) Γ) as else none
+
+/-- The context return variables declared one after another leave. -/
+def CallRet.ctxAll : List (PrimTy × Var) → Ctx → Ctx
+  | [], Γ => Γ
+  | (p, r) :: rs, Γ => CallRet.ctxAll rs (setBy r (.stack (.prim p)) Γ)
+
+/-- The context a call's return variables are declared in. -/
+def CallRet.ctx (Γ : Ctx) : CallRet → Ctx
+  | .none => Γ
+  | .val p r _ => setBy r (.stack (.prim p)) Γ
+  | .rets rs => CallRet.ctxAll rs Γ
+
+/-- The returned value lands in a local of its type. -/
+def CallRet.wt (Γ : Ctx) : CallRet → Bool
+  | .val p r (some y) => Ctx.has Γ r (.stack (.prim p)) && Ctx.has Γ y (.stack (.prim p))
+  | _ => true
+
+/-- The context the locals an outcome of an external call binds leave, each
+at its type, in the order `bindData` binds them. -/
+def bindCtx : List (PrimTy × Var) → Ctx → Ctx
+  | [], Γ => Γ
+  | (p, x) :: xs, Γ => bindCtx xs (setBy x (.stack (.prim p)) Γ)
+
+/-- An external call's receiver and arguments read locals as declared. -/
+def ExtCall.wt (Γ : Ctx) (c : ExtCall C) : Bool :=
+  c.addr.wt Γ && c.args.all fun a => a.2.wt Γ
+
+/-- A loop's annotation reads locals as declared. -/
+def LoopAnn.wt (Γ : Ctx) : LoopAnn C → Bool
+  | .unwind _ => true
+  | .inv I dec => I.wt Γ && dec.all (·.wt Γ)
+
+mutual
+
+/-- The context a statement leaves, if its locals are used as declared:
+`uint x = 1;` adds `x : uint`, `x = x + 1;` needs it.  `Person storage p;`
+adds `p` too, bound to no path (`Binding.unset`, through which a read
+reverts), so `p = alice;` may follow.  Each branch of an `if` must not
+rebind what the context binds (`Ctx.le`): the interpreter has no scopes, so
+a branch's declaration outlives it, and one that retyped an outer local
+would break the join.  The `if` leaves the locals both branches declare
+alike (`Ctx.join`). -/
+def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
+  | .assign l r => if l.wt Γ && r.wt Γ then some Γ else none
+  | @Stmt.rebind _ R x r => if Ctx.has Γ x (.path (.ref R)) && r.wt Γ then some Γ else none
+  | @Stmt.assignLocal _ p x r =>
+    if Ctx.has Γ x (.stack (.prim p)) && r.wt Γ then some Γ else none
+  | .declLocal p x init =>
+    if init.all (·.wt Γ) then some (setBy x (.stack (.prim p)) Γ) else none
+  | .declStorage R x init =>
+    match init with
+    | none => some (setBy x (.path (.ref R)) Γ)
+    | some r => if r.wt Γ then some (setBy x (.path (.ref R)) Γ) else none
+  | .opAssign _ _ _ l r => if l.wt Γ && r.wt Γ then some Γ else none
+  | .incDec _ _ l => if l.wt Γ then some Γ else none
+  | @Stmt.assignIncDec _ p x _ _ l _ =>
+    if Ctx.has Γ x (.stack (.prim p)) && l.wt Γ then some Γ else none
+  | .push b v _ => if b.wt Γ && v.all (·.wt Γ) then some Γ else none
+  | .pop b => if b.wt Γ then some Γ else none
+  | .transfer r a => if r.wt Γ && a.wt Γ then some Γ else none
+  | .send pv r a =>
+    if Ctx.has Γ pv (.stack (.prim .bool)) && r.wt Γ && a.wt Γ then some Γ else none
+  | .declMem R x init _ _ =>
+    if init.all (·.wt Γ) then some (setBy x (.mem (.ref R)) Γ) else none
+  | @Stmt.rebindMem _ R x r => if Ctx.has Γ x (.mem (.ref R)) && r.wt Γ then some Γ else none
+  | .assignFromMem l p => if l.wt Γ && p.wt Γ then some Γ else none
+  | .assignMem l r => if l.wt Γ && r.wt Γ then some Γ else none
+  | .delete l => if l.wt Γ then some Γ else none
+  | .deleteMem p _ => if p.wt Γ then some Γ else none
+  | .assignNew l n _ => if l.wt Γ && n.wt Γ then some Γ else none
+  | .ite c thn els =>
+    if c.wt Γ then
+      match Prog.wt Γ thn, Prog.wt Γ els with
+      | some Γt, some Γe => if Ctx.le Γ Γt && Ctx.le Γ Γe then some (Ctx.join Γ Γt Γe) else none
+      | _, _ => none
+    else none
+  | .require c => if c.wt Γ then some Γ else none
+  | .assert c => if c.wt Γ then some Γ else none
+  | .revert => some Γ
+  | .call _ args _ ret body =>
+    match Arg.wt Γ args with
+    | some Γ₁ =>
+      match Prog.wt (ret.ctx Γ₁) body with
+      | some Γ₂ => if ret.wt Γ₂ then some Γ₂ else none
+      | none => none
+    | none => none
+  | .tryCall c rets ok err code pnc other =>
+    if c.wt Γ then
+      match Prog.wt (bindCtx rets Γ) ok, Prog.wt Γ err, Prog.wt (bindCtx (codeBinders code) Γ) pnc,
+          Prog.wt Γ other with
+      | some Γ₁, some Γ₂, some Γ₃, some Γ₄ =>
+        if Ctx.le Γ Γ₁ && Ctx.le Γ Γ₂ && Ctx.le Γ Γ₃ && Ctx.le Γ Γ₄ then some Γ else none
+      | _, _, _, _ => none
+    else none
+  | .loop a c body =>
+    if a.wt Γ && c.wt Γ then
+      match Prog.wt Γ body with
+      | some Γb => if Ctx.le Γ Γb then some Γ else none
+      | none => none
+    else none
+
+/-- The context a block leaves. -/
+def Prog.wt (Γ : Ctx) : List (Stmt C) → Option Ctx
+  | [] => some Γ
+  | s :: P =>
+    match s.wt Γ with
+    | some Γ₁ => Prog.wt Γ₁ P
+    | none => none
+
+end
+
+/-- `Prog.wt`, a statement at a time: the context the block leaves, or the
+first statement it rejects. -/
+def Prog.wtFirst (Γ : Ctx) : List (Stmt C) → Except (Stmt C) Ctx
+  | [] => .ok Γ
+  | s :: P =>
+    match s.wt Γ with
+    | some Γ₁ => Prog.wtFirst Γ₁ P
+    | none => .error s
+
+end Check
+
 /-! ## Surface syntax -/
 
 declare_syntax_cat sol_expr (behavior := both)
@@ -2702,6 +2957,23 @@ abbrev ElabM := ReaderT ElabScope (StateT (ECtx × Nat) (Except String))
 /-- A checking step, in the elaborator. -/
 def ElabM.lift {α : Type} (x : Except String α) : ElabM α := fun _ => StateT.lift x
 
+/-- The locals in scope as the locals check reads them (`Stmt.wt`); `old`
+is none of a program's. -/
+def ECtx.toCtx (Γ : ECtx) : Semantics.Ctx :=
+  Γ.filterMap fun (x, t) => match t with
+    | .val p _ => some (Var.ofName x, .stack (.prim p))
+    | .alias R => some (Var.ofName x, .path (.ref R))
+    | .mem R => some (Var.ofName x, .mem (.ref R))
+    | .store => none
+
+/-- The locals check (`Prog.wt`) of a block read from `Γ`: the context it
+leaves, or an error naming the statement it rejects. -/
+def wtCheck (Γ : Semantics.Ctx) (P : Prog C) : Except String Semantics.Ctx :=
+  match Prog.wtFirst Γ P with
+  | .ok Γ => .ok Γ
+  | .error s => .error s!"the locals check (`Stmt.wt`) rejects `{s.toStr}`: a local \
+      used where it is not declared at that type"
+
 /-- A fresh variable for a capture, `ie1`, `sp2`: numbered past every
 variable the program itself writes. -/
 def freshCapture (base : String) : ElabM Var := do
@@ -4192,20 +4464,28 @@ end
 
 /-- Elaborate a block against `C`, from no locals.  A capture is numbered
 past every fresh variable the block writes. -/
-def elabProg (ss : List RawStmt) : Except String (Prog C) :=
-  ((elabStmts C ss).run { funs := C.funs }).run' ([], RawStmt.maxIdxs ss + 1)
+def elabProg (ss : List RawStmt) : Except String (Prog C) := do
+  let P ← ((elabStmts C ss).run { funs := C.funs }).run' ([], RawStmt.maxIdxs ss + 1)
+  let _ ← wtCheck C [] P
+  pure P
 
 /-- `elabProg`, an error naming the statement of the block it arose in (its
-position): the same block, statement by statement. -/
+position): the same block, statement by statement, each checked
+(`wtCheck`) from the locals in scope where the block starts. -/
 def elabProgAt (ss : List RawStmt) : Except (Nat × String) (Prog C) :=
   go 0 ss ([], RawStmt.maxIdxs ss + 1)
 where
-  go (i : Nat) : List RawStmt → ECtx × Nat → Except (Nat × String) (Prog C)
-    | [], _ => pure []
-    | s :: ss, st =>
+  go (i : Nat) (ss : List RawStmt) (st : ECtx × Nat) : Except (Nat × String) (Prog C) :=
+    goWt i ss st (ECtx.toCtx st.1)
+  goWt (i : Nat) : List RawStmt → ECtx × Nat → Semantics.Ctx → Except (Nat × String) (Prog C)
+    | [], _, _ => pure []
+    | s :: ss, st, Γ =>
       match ((elabStmt C s).run { funs := C.funs }).run st with
       | .error e => .error (i, e)
-      | .ok (P, st) => do pure (P ++ (← go (i + 1) ss st))
+      | .ok (P, st) =>
+        match wtCheck C Γ P with
+        | .error e => .error (i, e)
+        | .ok Γ => do pure (P ++ (← goWt (i + 1) ss st Γ))
 
 /-- A deployment's program, `constructor(args);`, elaborated (`elabCtor`):
 nothing for a contract that declares no constructor and no initializer. -/
@@ -4563,6 +4843,18 @@ example : Prog.toStr (sol{ uint i = 0; values[i++] = 1; }) =
 example : Prog.toStr (sol{ bool c = true; Person storage p = c ? alice : bob; }) =
     "bool c = true; Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; } \
     Person storage p = sp1;" := rfl
+
+/-- A memory one declares its `mv1` in each branch, which the `if` keeps
+(`Ctx.join`), so the locals check passes it. -/
+example : (Prog.wt [] (sol{ bool c = true; Person memory mx = alice; Person memory my = bob;
+    Person memory m = c ? mx : my; })).isSome := by decide
+
+/-- The locals check names the statement it rejects: `x`, which nothing
+declares, read as a `uint`. -/
+example : wtCheck StandardExample [] [.declLocal .bool (.user "b") none,
+    .assignLocal (.user "x") (.simple (.lit 1 rfl) : Val StandardExample .uint)] =
+    .error "the locals check (`Stmt.wt`) rejects `x = 1;`: a local used where \
+      it is not declared at that type" := rfl
 
 -- An increment under `&&` is evaluated only when the left operand does not
 -- decide, so it cannot be captured before the statement.

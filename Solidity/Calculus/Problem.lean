@@ -226,7 +226,9 @@ def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Fml
     | .prim p => pure (n, p)
     | _ => throw s!"constructor: the parameter {n} has a reference type"
   let call : List RawStmt := [.call (.name "constructor") (ps.map fun (n, _) => RawExpr.name n)]
-  let P ← ((elabStmts C call).run { funs := C.funs }).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
+  let Γ : ECtx := ps.map fun (n, p) => (n, LocalTy.val p)
+  let P ← ((elabStmts C call).run { funs := C.funs }).run' (Γ, 1)
+  let _ ← wtCheck C (ECtx.toCtx Γ) P
   pure (Problem.ctorFml m (ps.map fun (n, p) => (p, Var.ofName n)) P)
 
 /-- `problem[C]{constructor}`: `Problem.ctor C .diamond`, the unspecified

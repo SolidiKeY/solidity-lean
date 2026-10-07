@@ -248,4 +248,15 @@ theorem ternaryOfMemoryReferences :
   sol_symex
   sol_close
 
+/-! A local of a block, and a branch after it that declares the same name at
+another type: Solidity scopes the first to its block, the interpreter does
+not, so the branch would retype a local the join keeps.  The elaborator's
+locals check (`Stmt.wt`, `wtCheck`) refuses it, at the statement; the
+scoped locals of M2 (`docs/intrinsic.md`) lift this. -/
+
+/--
+error: Solidity elaboration failed: the locals check (`Stmt.wt`) rejects `if (c) { uint x = 1; } else {  }`: a local used where it is not declared at that type
+-/
+#guard_msgs in #check sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } }
+
 end Solidity.Examples.Tactics.Branch

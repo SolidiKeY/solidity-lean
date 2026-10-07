@@ -24,7 +24,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | # | Status | Work |
 |---|---|---|
 | M0 | | baselines + scratch spike, gate G0 |
-| M1 | (a)–(e) done | stuck causes that need no index |
+| M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
 | M2 | | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
 | M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
@@ -76,6 +76,24 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
   it outside the fragment.  Pins changed: the `Syntax.lean` conditional
   pin and the `StorageCoverage.storageLocalDeclSkip` chain's last line
   (`{ acc := unset } φ`); no `#guard_msgs` output changed.
+- (f) `BTy`, `Ctx` and the locals check (`Stmt.wt`, `Prog.wt`, each part's
+  `wt`) moved from `Typing/State.lean`/`Typing/Soundness.lean` into
+  `Syntax.lean`, below the printer; `Soundness.lean` keeps the theorems.
+  `wtCheck` (`Prog.wtFirst`, an error naming the statement) runs in
+  `elabProg`/`elabProgAt` (so `sol[C]{}`, `solc_import`, `ctorProg`,
+  `Tools/Run`), at a spec's and a constructor problem's call
+  (`specPieces`, `Problem.ctor`) and per statement in a `dl!{}` modality,
+  from the elaborator's locals (`ECtx.toCtx`).  An `if` now leaves
+  `Ctx.join`: the locals both branches declare alike, which the memory
+  conditional of references' `mv1` needs (`Ctx.le_join_thn`/`_els` in the
+  two `ite` cases, `Soundness.lean`, `Reachability.lean`).  All 449
+  TestSuite functions, the corpus and every example pass.  A block's local
+  retyped by a later branch (`{ bool x = true; } if (c) { uint x = 1; }`)
+  is now an elaboration error (pinned in `Examples/Tactics/Branch.lean`),
+  until M2's scoped locals.  Timing (profiler, before → after): the
+  TestSuite `solc_import` 1.69 s → 1.71 s, `TestSuite/Derived3.lean`
+  (cumulative type checking) 17.1 s → 17.0 s, `Examples/Tactics/Branch.lean` unchanged (each
+  declaration within 10 ms).
 
 ## Baselines (M0)
 
@@ -85,7 +103,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 
 END STATE (names after the final rename; during migration the typed families live in `namespace Solidity.Core`, and today's `Stmt C` stays as the elaborator's output IR plus the erasure target).
 
--- AST.lean, merging ECtx/LocalTy (Syntax.lean:2134-2145), BTy/Ctx (Typing/State.lean:38-45) and Evm LTy (Compile.lean:434)
+-- AST.lean, merging ECtx/LocalTy (Syntax.lean:2134-2145), BTy/Ctx (Syntax.lean, the locals check) and Evm LTy (Compile.lean:434)
 inductive LTy | val (p : PrimTy) | alias (R : RefTy) | mem (R : RefTy) | old | oldNet
 abbrev Ctx := List (Var × LTy)              -- innermost first; the Var is a printing label only
 inductive Idx : Ctx → LTy → Type            -- data, positional (de Bruijn index)
@@ -228,7 +246,7 @@ The bridge rule: `Core.*` and the untyped `Stmt` coexist only until M7, with a d
 M3 (typed interpreter over the locals, 2-3 weeks, merge).
 - `Core.State C Γ` with `Env C Γ` (storage and heap still untyped in this milestone), and `Core.Stmt.run`/`Prog.run` with scope pops via `Prog.thin`.
 - `run_erase` against `Stmt.run`, modulo `EnvAgreeExcept` on popped locals, reusing Semantics/Agree.lean.
-- `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` (Soundness.lean:61-320) become corollaries of resolve plus run_erase, then are deleted.
+- `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` (Syntax.lean's locals check; Soundness.lean) become corollaries of resolve plus run_erase, then are deleted.
 - `Stmt.run_wt` is restated as `Core.Stmt.run` preserving the RunWT remainder (storage, heap, heapWf).
 - `Reachable` (Reachability.lean:1814) is redefined over `Core.Prog C [] Γ'`. Problem.lean:131/140/169 statements are unchanged.
 - The Constructibility builder (:91-183) emits `Core.Prog` (`fill : … → Σ Γ', Core.Prog C Γ Γ'`), and KeepΓ (:990-1202) disappears.
