@@ -33,7 +33,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
 | M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
-| M3 | M3.1 done 2026-10-07 (typed run) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
+| M3 | M3.1, M3.2 done 2026-10-07 (typed run, `run_erase`) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
@@ -296,6 +296,39 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     | `i++ + i` | 9.2 ms | 5.4 ms | 9.1 ms |
     | `values[++i] = ++i` | 18.9 ms | 16.5 ms | 21.7 ms |
     | `addTwo(3)`, `larger(y, 7)` | 22.3 ms | 11.7 ms | 18.0 ms |
+
+- M3.2 (2026-10-07): `Semantics/RunErase.lean`, the bridge theorem.
+  - `Prog.run_erase P hP hnd hlen σ : ResultsAgree (P.popped ns)
+    (Solidity.Prog.run (σ.erase ns) (P.erase ns)) ((P.run σ).map (State.erase
+    (P.outNames ns)))`, and `Stmt.run_erase` for a statement (its erasure a
+    list).  `State.erase ns σ` names the locals by `ns` (`LTy.enc`: an unset
+    alias `.unset`, a memory local `.mref`), and `popped` are the binders not
+    in scope at the end, which the untyped run keeps.  `ResultsAgree` and
+    `EnvAgreeExcept` are `Semantics/Agree.lean`'s; its frame lemmas
+    (`Stmt.run_frame`) were not needed.
+  - The hypothesis is `P.Fresh out ns`: no binder reuses a name in scope
+    (`ns`) or of an enclosing call frame (`out`), a frame's names are
+    distinct, and a call's arguments are separated (`erase` then writes
+    `Syntax.lean`'s call, not the arguments-in-the-body fallback).  A name may
+    be declared again after its scope ends (a loop body every iteration,
+    sibling branches): the untyped run overwrites the stale binding.
+    `callsCore_fresh` proves it for a resolved block by `simp only`.
+  - The proof is one invariant, `Agree ns σ τ` (equal global parts, every
+    local of `σ` bound under its name in `τ`), and `RunRel`: the same halt,
+    or agreeing states that bind every name off `ns ++ binders` as before
+    (what a call's caller needs of its body).  The global operations are
+    natural in the locals (`saveStorage_nat` … `memClear_nat`, each by
+    unfolding; `copyMem` through `Agree.lean`'s `copyMem_congr`), so the
+    scoped run's operations on `σ.glob` and the untyped run's on `τ` agree.
+    One lemma per statement (`Stmt.erases_*`), the IH passed in, and a
+    mutual structural `Stmt.erasesAt`/`Prog.erasesAt` that dispatches;
+    loops by `Loop.run_rel₂`, `Loop.run_rel` across the two state types.
+  - Not done: that `resolve`'s output from the elaborator's names is
+    `Fresh` (the separatedness conjunct follows from the others, also not
+    proved); deriving `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` from `resolve`
+    plus `run_erase`.  Applying `Prog.run_erase` to `callsCore` and a state
+    times out in the elaborator at `whnf` (the partial application without the
+    state checks); not yet diagnosed.
 
 ## Baselines (M0)
 

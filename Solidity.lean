@@ -25,6 +25,7 @@ import Solidity.Semantics.Core.Heap
 import Solidity.Semantics.Core.HeapErase
 import Solidity.Semantics.Core
 import Solidity.Semantics.Core.TypedState
+import Solidity.Semantics.RunErase
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules
