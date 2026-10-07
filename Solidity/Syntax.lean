@@ -2594,10 +2594,10 @@ partial def freshenList (flat : Bool) (live later : List String) :
     let mut ss := ss
     let mut own : List String := []
     for x in s.owns do
-      if flat && !live.contains x && later.contains x then
-        -- a local declared again in its own scope: the elaborator's error
-        if (RawStmt.declsList ss).contains x then
-          throw s!"{x} is already declared, or names a state variable"
+      -- a local declared again in its own block is left to the elaborator,
+      -- whose error names the statement it is in
+      if flat && !live.contains x && later.contains x &&
+          !(RawStmt.declsList ss).contains x then
         let y ← FreshenM.pick x
         s := s.renameDecl x y
         ss := ss.map (RawStmt.renameName x y)

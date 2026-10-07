@@ -896,16 +896,19 @@ private theorem ok_of_map {ε α : Type} {P : α → Prop} {x : Except ε {a : �
 
 /-- **`resolve` inverts `erase`**: a resolved statement erases to the one it
 was resolved from. -/
-theorem Stmt.resolve_erase {Γ Γ' : NCtx} {u : Solidity.Stmt C} {s : Stmt C Γ.ctx Γ'.ctx}
-    (h : Stmt.resolve Γ u = .ok ⟨Γ', s⟩) : s.erase Γ.names = [u] :=
+theorem Stmt.resolve_erase {strict : Bool} {Γ Γ' : NCtx} {u : Solidity.Stmt C}
+    {s : Stmt C Γ.ctx Γ'.ctx}
+    (h : Stmt.resolve Γ u strict = .ok ⟨Γ', s⟩) : s.erase Γ.names = [u] :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx =>
     r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true ∧
-      (true = true → r.2.Fresh [] Γ.names)) h).1
+      (strict = true → r.2.Fresh [] Γ.names)) h).1
 
-theorem Prog.resolve_erase {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)} {P : Prog C Γ.ctx Γ'.ctx}
-    (h : Prog.resolve Γ us = .ok ⟨Γ', P⟩) : P.erase Γ.names = us :=
+theorem Prog.resolve_erase {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)}
+    {P : Prog C Γ.ctx Γ'.ctx}
+    (h : Prog.resolve Γ us strict = .ok ⟨Γ', P⟩) : P.erase Γ.names = us :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx =>
-    r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true ∧ (true = true → r.2.Fresh [] Γ.names)) h).1
+    r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true ∧
+      (strict = true → r.2.Fresh [] Γ.names)) h).1
 
 /-- **`resolve`'s output is `Fresh`**: no binder reuses a name in scope, so
 `Prog.run_erase` applies to it. -/
@@ -920,7 +923,8 @@ theorem Prog.resolve_fresh {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)} {P : Pr
   (ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx =>
     r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true ∧ (true = true → r.2.Fresh [] Γ.names)) h).2.2 rfl
 
-/-- `resolveCheck` accepts exactly what `resolve` resolves. -/
+/-- `resolveCheck` accepts exactly what `resolve` resolves, to the context
+it returns (`Prog.resolveCheck_of_resolve` is the converse). -/
 theorem Prog.resolve_of_resolveCheck {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)}
     (h : Prog.resolveCheck Γ us = .ok Γ') : ∃ P : Prog C Γ.ctx Γ'.ctx, Prog.resolve Γ us = .ok ⟨Γ', P⟩ := by
   unfold Prog.resolveCheck at h
@@ -932,18 +936,34 @@ theorem Prog.resolve_of_resolveCheck {Γ Γ' : NCtx} {us : List (Solidity.Stmt C
     cases h
     exact ⟨r.1.2, rfl⟩
 
+theorem Prog.resolveCheck_of_resolve {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)}
+    {P : Prog C Γ.ctx Γ'.ctx}
+    (h : Prog.resolve Γ us = .ok ⟨Γ', P⟩) : Prog.resolveCheck Γ us = .ok Γ' := by
+  unfold Prog.resolve at h
+  unfold Prog.resolveCheck
+  cases hr : resolveProg true [] Γ us with
+  | error e => rw [hr] at h; cases h
+  | ok r =>
+    rw [hr] at h
+    have h' : r.1 = ⟨Γ', P⟩ := Except.ok.inj h
+    show Except.ok r.1.1 = Except.ok Γ'
+    rw [h']
+
 /-- **`resolve` separates every call's arguments**: the calls it returns
 erase to calls, not to their arguments bound in the body. -/
-theorem Stmt.resolve_sepArgs {Γ Γ' : NCtx} {u : Solidity.Stmt C} {s : Stmt C Γ.ctx Γ'.ctx}
-    (h : Stmt.resolve Γ u = .ok ⟨Γ', s⟩) : s.sepArgs Γ.names = true :=
+theorem Stmt.resolve_sepArgs {strict : Bool} {Γ Γ' : NCtx} {u : Solidity.Stmt C}
+    {s : Stmt C Γ.ctx Γ'.ctx}
+    (h : Stmt.resolve Γ u strict = .ok ⟨Γ', s⟩) : s.sepArgs Γ.names = true :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx =>
     r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true ∧
-      (true = true → r.2.Fresh [] Γ.names)) h).2.2.1
+      (strict = true → r.2.Fresh [] Γ.names)) h).2.2.1
 
-theorem Prog.resolve_sepArgs {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)} {P : Prog C Γ.ctx Γ'.ctx}
-    (h : Prog.resolve Γ us = .ok ⟨Γ', P⟩) : P.sepArgs Γ.names = true :=
+theorem Prog.resolve_sepArgs {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)}
+    {P : Prog C Γ.ctx Γ'.ctx}
+    (h : Prog.resolve Γ us strict = .ok ⟨Γ', P⟩) : P.sepArgs Γ.names = true :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx =>
-    r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true ∧ (true = true → r.2.Fresh [] Γ.names)) h).2.1
+    r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true ∧
+      (strict = true → r.2.Fresh [] Γ.names)) h).2.1
 
 end Resolve
 

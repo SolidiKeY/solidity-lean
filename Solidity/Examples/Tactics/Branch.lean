@@ -280,6 +280,12 @@ info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0;
 /-- error: Solidity elaboration failed: x is already declared, or names a state variable -/
 #guard_msgs in #check (sol{ uint x = 2; { uint x = 3; } } : Prog StandardExample)
 
+-- a flat block's local declared twice in it: refused at the block's index
+#guard match elabProgAt StandardExample
+    sol_raw!{ uint a = 0; { uint x = 1; uint x = 2; } uint x = 3; } with
+  | .error (i, _) => i == 1
+  | .ok _ => false
+
 /- Declared alike in both branches, then at another type in a later one. -/
 #guard (Core.Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
     if (c) { bool t = true; } } : Prog StandardExample)).toBool

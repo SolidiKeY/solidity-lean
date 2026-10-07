@@ -19,9 +19,12 @@ of an enclosing frame (`out`), and that a call's arguments are separated, as
 redeclared after it ends (a loop's body every iteration): the untyped run
 overwrites the stale binding, which nothing read.
 
-`Prog.Fresh` is defined beside `resolve` (`Syntax/Resolve.lean`), which
-refuses a binder that is not fresh, so what it returns is `Fresh`
-(`Prog.resolve_fresh`).  The elaborator emits a raw block, a `for` init and a
+`Prog.Fresh` is defined beside `resolve` (`Syntax/Resolve.lean`), which in
+its default strict mode refuses a binder that is not fresh, so what it
+returns is `Fresh` (`Prog.resolve_fresh`), the elaborator's `sol{}`/`dl!{}`
+programs among them.  A `cdl!{}` modality's program is resolved with
+`strict := false`, which may shadow a `∀` or an update binder; it is covered
+only when it is `Fresh` (`Fml.Plain`).  The elaborator emits a raw block, a `for` init and a
 modifier's `_` flat into the untyped program; a local of one whose name is
 declared again in the scope `resolve` reads it in is renamed apart first
 (`freshenBlocks`, `Syntax.lean`), so the elaborator's programs pass.

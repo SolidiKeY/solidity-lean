@@ -419,7 +419,7 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
   make the output `Fresh`, by a per-function set of every name declared so
   far that `checkFresh` reads (refuse, or rename to a fresh capture), or by
   a scope marker `resolve` turns into `Core.Stmt.block`.
-- Done (freshness lane, 2026-10-08), the two items above:
+- Done (freshness lane, 2026-10-08), the item above and the next one:
   - **Decision: rename apart, no scope marker.**  A marker `resolve` turns
     into `Core.Stmt.block` would need a block in `Syntax.lean`'s untyped
     `Stmt`, which every interpreter, rule and printer matches on, and which
@@ -466,9 +466,8 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
   `shape_iff_reachable`, `wt_iff_reachable` and `reachable_iff` say nothing
   yet about the untyped run.  Said in M3.3, `testsuite-proofs.md`,
   `solkey-feedback.md`, `Problem.lean`'s and `Reachability.lean`'s
-  docstrings.  Open: `ReachableU C st := ∃ P σ, resolveCheck [] P = .ok _ ∧
-  Prog.run C.initState P = .ok σ ∧ σ.storage = st` and `ReachableU →
-  Reachable`, from `Prog.resolve_erase` and `run_erase` once `Fresh` holds.
+  docstrings.  Closed: `ReachableU`, `ReachableU.reachable`, `wt_of_reachableU`
+  (`Calculus/Problem.lean`).
 - The memory conditional of references refuses `c ? a[i] : b[j]` when the
   default of the type is not well-formed (`hoist`'s `T memory mv;`): now in
   `solc-alignment.md`'s row.
