@@ -21,8 +21,9 @@ constructor they are written with.  That is what lets a rule declare fresh
 variables (`se1`, `sp1`) without re-typing the rest of the program.
 
 `sol[C]{ … }` reads Solidity statements, elaborates them against the
-contract `C`, and splices the result into the file as a term; `sol{ … }` is
-the same against the file's `InContract` instance.  The elaborator is an
+contract `C`, checks their locals (`resolve`, `Syntax/Resolve.lean`), and
+splices the result into the file as a term (`Syntax/Splice.lean`);
+`sol{ … }` is the same against the file's `InContract` instance.  The elaborator is an
 ordinary function run at compile time; its result is turned back into a
 term with every proof `Eq.refl`, so the kernel re-checks each one: nothing
 the elaborator computed is trusted.
