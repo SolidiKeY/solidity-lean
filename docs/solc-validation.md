@@ -22,8 +22,16 @@ Solidity source ──(1) sol{…} / contract!{…}──▶ Stmt C ──(2) St
 ```
 
 Proved: the rules are sound for (2) (`Rule.sound`, `Proves.sound`,
-`ProvesC.sound`); typed syntax cannot express what (2) cannot run (`not_stuck`,
-`Stmt.run_wt`); the repository's compiler agrees with (2) (`compile_correct`).
+`ProvesC.sound`); the repository's compiler agrees with (2) (`compile_correct`),
+and on the programs it compiles (`wtProg`: no memory, loops or `try`) from a
+state it simulates, (2) is never stuck (`not_stuck`); a run keeps the state
+well-typed (`Stmt.run_wt`, over the scoped syntax, `Typing/Soundness.lean`;
+`run_erase` relates it to (2) only for `Fresh` programs, which excludes
+elaborated ones that redeclare a name after a block, a `for` or a modifier's
+`_`: `docs/intrinsic.md`, M2–M3 review). Not proved: that (2) is never stuck outside
+the compiler's fragment. `Stmt.run_wt` is preservation only; `stuck` stays
+reachable from a value or a storage of the wrong shape until the typed values
+and storage of `docs/intrinsic.md`'s M4 delete it.
 Not proved, and not provable without a model of solc: that (1) reads a program
 as solc does, and that (2) plus the layout equals (3) plus (4). **Every proof
 reaches solc-compiled contracts only through that square.** A rule is wrong
@@ -179,7 +187,7 @@ dependency:
 - a **printer** from `Stmt C` to Solidity (`Solidity.Tools.Emit`), its round trip
   `sol[C]{ print P } = P` checked by `#guard` per program (it prints elaborated
   programs, so a mismatch is the interpreter's fault);
-- the **start state as a program**: `Build.rootsProg` (`Typing/Constructibility.lean`;
+- the **start state as a program**: `Core.Build.rootsProg` (`Typing/Constructibility.lean`;
   `reachable_iff`: it builds every reachable storage whose words, keys and
   slots are in range) printed as `setUp()`, so no
   storage is encoded into slots and past-end slots come from push, pop and aliases;
@@ -322,7 +330,9 @@ equivalences in substance (`Modality.after_sameOk` is an `↔`; `UpdRule.sound` 
 `symex_complete : holds σ φ → holds σ (symex n φ)`. Then a loop-free formula is valid
 exactly when its modality-free form is: relative completeness, so the calculus is never
 why a proof fails, and L3 becomes a theorem. `SameOk` identifies `revert` with `stuck`,
-so the converse needs "not stuck" (`not_stuck`, `Stmt.run_wt`). The callback calculus is
+so the converse needs "not stuck", proved only on the compiler's fragment (`not_stuck`);
+`Stmt.run_wt` preserves types and does not exclude `stuck` (M4 of `docs/intrinsic.md`
+deletes it). The callback calculus is
 incomplete by design (havoc); loops (`docs/loops.md`) make completeness relative to
 invariants.
 

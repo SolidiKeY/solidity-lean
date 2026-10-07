@@ -44,7 +44,7 @@ Decided by the lead since (2026-10-07):
 | M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
 | M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
-| M3 | M3.1, M3.2 done 2026-10-07 (typed run, `run_erase`) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
+| M3 | done 2026-10-07: typed run, `run_erase`, Typing over `Core`, locals checker deleted (no shim left); Typing elaboration 10% faster (below) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | lane: every `Stmt.step` arm and `Premise` ported; gate passed (Decision 9) | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
@@ -334,12 +334,113 @@ Decided by the lead since (2026-10-07):
     One lemma per statement (`Stmt.erases_*`), the IH passed in, and a
     mutual structural `Stmt.erasesAt`/`Prog.erasesAt` that dispatches;
     loops by `Loop.run_rel₂`, `Loop.run_rel` across the two state types.
-  - Not done: that `resolve`'s output from the elaborator's names is
-    `Fresh` (the separatedness conjunct follows from the others, also not
-    proved); deriving `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` from `resolve`
+  - Not true in general (M2–M3 review): `resolve`'s output from the
+    elaborator is not always `Fresh`.  A raw block, a `for` init and a
+    modifier's `_` are elaborated by `elabBranch`, which pops their locals
+    from `ECtx` but emits them flat, so a later declaration of the same name
+    passes `checkFresh` and `resolve` stacks a second binder in one scope:
+    `for (uint i=0;…){} for (uint i=0;…){}`, `Branch.lean`'s pins
+    `{ bool x = true; } if (c) { uint x = 1; }` and
+    `for (int i…){} if (c) { uint i = 1; }`, a modifier applied twice.
+    `run_erase` does not cover these.  Not done either: deriving `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` from `resolve`
     plus `run_erase`.  Applying `Prog.run_erase` to `callsCore` and a state
     times out in the elaborator at `whnf` (the partial application without the
-    state checks); not yet diagnosed.
+    state checks); not yet diagnosed.  (M3.3 did not need the derivation of
+    the locals check: the typing proofs moved to `Core` instead.)
+
+- M3.3 (2026-10-07): Typing over `Core`; the locals checker deleted.
+  - `Typing/State.lean`: `StateWT H L s` is the global part only (layout
+    and store typing unique, storage, heap, `heapWf`; `ofB` decides it).
+    `BTy`, `envTypedB` and the stray-binding ban went with the untyped
+    locals.
+  - `Typing/Soundness.lean`: `Core.RunWT C H σ` is `StateWT H C.layout
+    σ.glob` and `Env.All (LTy.WT C H) σ.env`.  The locals part stays a
+    predicate (a local of type `val p` holds a `Value`, an alias a path the
+    layout must type, a memory local an identity `H` must claim) until M4
+    types values, storage and heap; env typing by construction is M4's.
+    `Core.Stmt.run_wt`/`Prog.run_wt` need no locals hypothesis.  The global
+    lemmas (`StateWT.save`/`write`/`ofCopyOut`/`setObj`/`pay`/`transferAt`,
+    `pushAt_wt` … `bumpMem_wt`) are on `Semantics.State`; the evaluator
+    lemmas (`Core.Val.eval_wt` …) on the scoped syntax.
+  - `Invariant C` (glob part, per-local part monotone in `H`, blind to the
+    locals): `keeps_seq`/`ite`/`block`/`loop`/`call`/`tryCall`/`require`/
+    `assert`/`revert` are proved once; each invariant gives its leaves and
+    four hooks (arguments, `CallRet.enter`, `Binders.decode`,
+    `CodeBinder.decode`).  `wtInv`, `canonInv` (`Reachability.lean`,
+    `Canon` on the glob part) and `tightInv` (`Constructibility.lean`, the
+    untyped `Tight` now storage-only, plus `LTy.Keys` on aliases) are its
+    three instances; a tight leaf is its canonical leaf plus a tightness
+    lemma (`keepsT_of`).  `Core.Loop.run_induct` is the loop's induction.
+  - `Reachable C st := ∃ Γ' (P : Core.Prog C [] Γ') σ, P.run (State.ofSem
+    C.initState) = .ok σ ∧ σ.storage = st`: reachability by the scoped
+    interpreter, where it was the untyped run of a checked program.
+    `Problem.lean`'s statements keep their text (`initStorage_wt`'s witness
+    is `.nil`) but now speak of the scoped run, while `wt(storage)` is read
+    by `holds` over the untyped one.  Open gap: `ReachableU → Reachable`
+    (resolve, `Fresh`, `run_erase`; M2–M3 review).
+  - The builder (`Core.Build`) is a scoped program: `fill d T q v : Prog C
+    Γ Γ` declares each alias in a block of its own (`bound`), so a fill
+    leaves its context, and its caller's aliases (read by position) are
+    untouched: `Keep`/`KeepΓ` and the builder's locals check are gone, the
+    run lemmas carry `σ'.env = σ.env`.  A shadow slot's alias is a block
+    holding its `pop` and the nested fill; `Prog.append`, `Prog.rep`,
+    `Prog.run_append` are local to it.
+  - Faithfulness reads `Agree` (`RunErase.lean`): a row is faithful when its
+    read, the erasure of a scoped read (`Read.Typed ns Γ`), finds what the
+    sort claims in every state agreeing with a `RunWT` state.  The
+    counterexamples give the scoped state and its agreement.  The example
+    of `Branch.lean` that ran `Prog.wt` runs `resolveCheck`.
+  - Deleted: `Syntax.lean`'s locals check (`BTy`, `Semantics.Ctx`, `Ctx.le`,
+    `Ctx.has`, every `.wt`, `Arg.wt`, `CallRet.ctx`/`wt`, `bindCtx`,
+    `Stmt.wt`, `Prog.wt`), `EnvWT`, the untyped `RunWT` and every untyped
+    run traversal (`run_wt`, `run_canon`, `run_tight`).  Shims left: none.
+    `bindData_induct` (Reachability) stays: `Problem.lean` reads the untyped
+    interpreter's parameter binding with it, until M6a.
+  - Elaboration, CPU s of the module alone (`#clock` in a copy with
+    `Elab.async false`, imports cached), before (6cc3fd2, measured in a
+    worktree under the same load) and after:
+
+    | Module | before | after |
+    |---|---|---|
+    | `Typing/State` | 1.60 | 1.59 |
+    | `Typing/Soundness` | 6.40 | 5.98 |
+    | `Typing/Reachability` | 4.55 | 4.34 |
+    | `Typing/Constructibility` | 11.16 | 9.39 |
+    | the four | 23.71 | 21.30 |
+    | `SortCheck/Faithfulness` | 26.22 | 25.57 |
+
+  - For M4: values typed (`LTy.Denote (.val p)` a `PrimTy.Denote`) make
+    `LTy.WT`'s `val` case true by construction; the alias and memory cases
+    go with typed storage and heap.  The untyped `Tight`, `SE` and the
+    global lemmas are on `Semantics.State` and move with it.
+  - MCP: "Lean did not finish" on `Calculus/Problem.lean` hid a real error
+    (a deleted lemma it used); a scratch copy cut in halves found it.
+
+### M2–M3 review
+
+Read-only review of M2–M3, the confirmed findings (2026-10-07):
+
+- `Prog.Fresh` fails for ordinary elaborated programs (a name redeclared
+  after a raw block, a `for` init or a modifier's `_`, which `elabBranch`
+  pops from `ECtx` but emits flat), so `run_erase` does not cover them and
+  "`resolve`'s output is `Fresh`" is false, not unproved.  Docs corrected
+  (`RunErase.lean`'s docstring, M3.2 above, `solc-validation.md`).  Open:
+  make the output `Fresh`, by a per-function set of every name declared so
+  far that `checkFresh` reads (refuse, or rename to a fresh capture), or by
+  a scope marker `resolve` turns into `Core.Stmt.block`.
+- `Reachable` is now reachability by the scoped interpreter, while `holds`
+  reads `wt(storage)` over the untyped one; `reachable_canon`,
+  `shape_iff_reachable`, `wt_iff_reachable` and `reachable_iff` say nothing
+  yet about the untyped run.  Said in M3.3, `testsuite-proofs.md`,
+  `solkey-feedback.md`, `Problem.lean`'s and `Reachability.lean`'s
+  docstrings.  Open: `ReachableU C st := ∃ P σ, resolveCheck [] P = .ok _ ∧
+  Prog.run C.initState P = .ok σ ∧ σ.storage = st` and `ReachableU →
+  Reachable`, from `Prog.resolve_erase` and `run_erase` once `Fresh` holds.
+- The memory conditional of references refuses `c ? a[i] : b[j]` when the
+  default of the type is not well-formed (`hoist`'s `T memory mv;`): now in
+  `solc-alignment.md`'s row.
+- `Core.lean`'s docstring cited a missing `Stmt.run_eq_runC`; it names
+  `Stmt.runR_eq`/`Prog.runR_eq`.
 
 ## Baselines (M0)
 

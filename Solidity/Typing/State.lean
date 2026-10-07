@@ -7,18 +7,13 @@ The second layer of the type-soundness development. `StoragePreservation`
 handles the storage tree; this module adds what full soundness needs on
 top:
 
-- over the binding context `Ctx` (what each local name is bound as: a
-  stack value, a storage-path alias, a memory reference; `Syntax.lean`,
-  where the elaborator's locals check reads it), a store typing
-  `HeapTy` (the type each memory identity holds) — the standard shallow
-  store-typing setup: `MVal.hasTyH` checks a reference against `H`'s
-  claim only, so no coinduction is needed and heap cycles cost nothing;
-- `envTypedB` / `heapTypedB` / `StateWT`, the full state invariant.
-  `envTypedB` also forbids *stray* `spath` and `mref` bindings (names
-  unknown to `Γ`), which the removed untyped resolver needed: it looked
-  a name up in the env before falling back to a storage root.  The
-  typed syntax tells an alias from a root, so `Soundness.lean`'s
-  `RunWT` drops the ban (`StateWT.toRunWT`);
+- a store typing `HeapTy` (the type each memory identity holds) — the
+  standard shallow store-typing setup: `MVal.hasTyH` checks a reference
+  against `H`'s claim only, so no coinduction is needed and heap cycles
+  cost nothing;
+- `heapTypedB` / `StateWT`, the invariant of a state's global part
+  (storage, heap, allocation counter).  The locals are typed by their
+  context (`Typing/Soundness.lean`'s `RunWT`, over the scoped syntax);
 - the cross-domain copy typing theorems: `copyMToSt_hasTy`
   (memory→storage: a heap-typed source lands as a storage value of its
   type — the fuel is the interpreter's own cycle guard, so exhaustion
@@ -136,48 +131,17 @@ def heapTypedB (H : HeapTy) (heap : List (Nat × MObj)) : Bool :=
     | some obj => obj.hasTyH H r.2
     | none => false
 
-/-! ## Env typing -/
-
-/-- The binding matches its context entry. -/
-def BTy.matchesB (L : Layout) (H : HeapTy) : BTy -> Binding -> Bool
-  | BTy.stack ty, Binding.val v => (Value.toSVal v).hasTy ty
-  | BTy.path ty, Binding.spath root segs => L.tyAt root segs == some ty
-  | BTy.path _, Binding.unset => true
-  | BTy.mem ty, Binding.mref id => MVal.hasTyH H (MVal.ref id) ty
-  | _, _ => false
-
-/-- Γ-tracked names are bound as Γ says, and no *untracked* `spath` or
-`mref` binding exists: an untracked alias would shadow a global root
-inside `resolveS` with a path the layout knows nothing about, and an
-untracked memory reference would let `resolveMBase`/`readM` produce an
-identity the store typing knows nothing about. (Untracked `val`
-bindings are harmless — every read of one goes through Γ.) -/
-def envTypedB (Γ : Ctx) (L : Layout) (H : HeapTy)
-    (env : List (Var × Binding)) : Bool :=
-  (Γ.all fun g =>
-    match lookupBy g.1 env with
-    | some b => BTy.matchesB L H g.2 b
-    | none => false) &&
-  (env.all fun nb =>
-    match nb.2 with
-    | Binding.spath _ _ => (lookupBy nb.1 Γ).isSome
-    | Binding.mref _ => (lookupBy nb.1 Γ).isSome
-    | _ => true)
-
 /-! ## The full state invariant -/
 
-/-- Full state well-typedness: layout and context keys unique, storage
-well-typed, env matching Γ, heap matching H, allocation counter fresh.
+/-- The global part of a state is well-typed: layout keys and store typing
+unique, storage well-typed, heap matching `H`, allocation counter fresh.
 The executable model of the `wellFormed` assumption the solkey proof
-obligations need; `Soundness.lean` carries it, less the stray-binding
-ban, through `Stmt.run` (`StateWT.toRunWT`, `Prog.run_wt`). -/
-structure StateWT (Γ : Ctx) (H : HeapTy) (L : Layout) (s : State) :
-    Prop where
+obligations need; `Soundness.lean` adds the locals (`RunWT`) and carries
+both through a run (`Stmt.run_wt`). -/
+structure StateWT (H : HeapTy) (L : Layout) (s : State) : Prop where
   layoutNodup : nodupKeysB L.globals = true
-  ctxNodup : nodupKeysB Γ = true
   heapTyNodup : nodupKeysB H = true
   storage : wellTypedStorageB L s.storage = true
-  env : envTypedB Γ L H s.env = true
   heap : heapTypedB H s.heap = true
   heapWf : HeapWellFormed s
 
@@ -219,15 +183,13 @@ theorem heapWellFormedB_iff {s : State} :
     exact Bool.noConfusion hsome
 
 /-- Every `StateWT` conjunct is decidable once `heapWf` is read through
-`heapWellFormedB`: one `native_decide` per concrete witness. -/
-theorem StateWT.ofB {Γ : Ctx} {H : HeapTy} {L : Layout} {s : State}
-    (h : (nodupKeysB L.globals && nodupKeysB Γ && nodupKeysB H &&
-      wellTypedStorageB L s.storage && envTypedB Γ L H s.env &&
+`heapWellFormedB`: one `decide` per concrete witness. -/
+theorem StateWT.ofB {H : HeapTy} {L : Layout} {s : State}
+    (h : (nodupKeysB L.globals && nodupKeysB H && wellTypedStorageB L s.storage &&
       heapTypedB H s.heap && heapWellFormedB s) = true) :
-    StateWT Γ H L s := by
+    StateWT H L s := by
   simp only [Bool.and_eq_true] at h
-  exact ⟨h.1.1.1.1.1.1, h.1.1.1.1.1.2, h.1.1.1.1.2, h.1.1.1.2, h.1.1.2,
-    h.1.2, heapWellFormedB_iff.mp h.2⟩
+  exact ⟨h.1.1.1.1, h.1.1.1.2, h.1.1.2, h.1.2, heapWellFormedB_iff.mp h.2⟩
 
 /-! ## Weakening -/
 
@@ -300,14 +262,6 @@ theorem MObj.hasTyH_mono {H H' : HeapTy} {obj : MObj} {ty : Ty}
               simp only [MObj.hasTyH, Bool.and_eq_true] at h ⊢
               exact ⟨h.1, hasTyHElems_mono hext h.2⟩
           | mapping k v => simp [MObj.hasTyH] at h
-
-theorem BTy.matchesB_mono {L : Layout} {H H' : HeapTy} {bty : BTy}
-    {b : Binding} (hext : H.Extends H')
-    (h : BTy.matchesB L H bty b = true) :
-    BTy.matchesB L H' bty b = true := by
-  cases bty <;> cases b <;> simp_all [BTy.matchesB]
-  case mem.mref ty id =>
-    exact MVal.hasTyH_mono hext (by simpa [BTy.matchesB] using h)
 
 /-- On a fresh key, `setBy` is exactly an append. -/
 theorem setBy_eq_append_of_fresh [DecidableEq κ] {l : List (κ × α)}

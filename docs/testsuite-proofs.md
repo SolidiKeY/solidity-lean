@@ -419,7 +419,9 @@ one.
   fields, and no solidity taclet mentions a well-formed heap.  Here the
   storage is any state of the interpreter, so the premise says it is one
   the contract can be in: the model's own Solidity-reachability assumption,
-  not KeY's.  Both modalities carry it (M3b review): a box over every
+  not KeY's.  Reachable is by the scoped interpreter (`Reachable`, since
+  M3); `holds` reads the untyped one, and no theorem yet carries a storage
+  it reaches to a `Reachable` one (`docs/intrinsic.md`, M2–M3 review).  Both modalities carry it (M3b review): a box over every
   storage is false of some functions Solidity runs safely (below).  So a
   derived obligation need not imply solkey's: `assert(total >= 0)` on a
   `uint total` holds under `wt`, where solkey's free `total` can be
@@ -440,8 +442,8 @@ one.
   kernel does not reduce the well-founded `defaultForTy`; and every word in
   its type's range, every mapping key in its key type's (`SVal.wordsB`).
   So `shape_iff_reachable`: for `TestSuite`'s roots (no duplicate,
-  `Ty.okDeep`) a storage passes the shape test exactly when a checked
-  program reaches it; `wt_iff_reachable`: it passes `wt` exactly when it is
+  `Ty.okDeep`) a storage passes the shape test exactly when a scoped
+  program reaches it (by the scoped interpreter); `wt_iff_reachable`: it passes `wt` exactly when it is
   reachable and its words fit.  The words are a test of their own: a
   literal is in its type's range (`Simple.lit`, since 2026-10-07), but no
   theorem yet shows that a run keeps every word in range.  Why an
@@ -2069,7 +2071,8 @@ Left: a block's declaration followed by a same-named declaration of
 another type later (`{ bool x; } if (c) { uint x; }`) elaborates, as in
 Solidity, but the flat program fails `Prog.wt` (only type preservation reads
 it; `unchecked { }` had the same before; since M1 (f) of `docs/intrinsic.md`
-the elaborator refuses it); `narrowPure` runs twice on a tuple's
+the elaborator refuses it, and since M3 `Prog.wt` is gone, the typing proofs
+being over the scoped syntax); `narrowPure` runs twice on a tuple's
 components under `unchecked` (a redundant `% 2^n`, same value).
 
 **Constructors S1–S3** (2026-10-06, worktree `ctor`). `Contract` gained
