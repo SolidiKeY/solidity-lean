@@ -7,6 +7,7 @@ import Solidity.Scope
 import Solidity.Syntax.Core
 import Solidity.Syntax.Resolve
 import Solidity.Syntax.Splice
+import Solidity.Syntax.CoreQuote
 import Solidity.FreshNames
 import Solidity.Semantics
 import Solidity.Semantics.DecEq
