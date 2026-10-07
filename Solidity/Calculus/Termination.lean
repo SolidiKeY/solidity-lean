@@ -1170,7 +1170,7 @@ theorem Premise.measure_lt {m : Modality} {s : Stmt C} {p : Premise C} (h : p.Sm
     have hl := Fml.loopAnon_measure P (.imp I (Fml.updIf m U (.and (.imp c (.modal m P post))
       (.and (.imp c' (.modal m ω φ)) (Premise.coverFml m c c')))))
     simp only [Fml.measure, Fml.updIf_measure, Premise.coverFml_measure,
-      Fml.measure_of_modalFree I hI, Fml.measure_of_modalFree post hp, Nat.add_zero,
+      Fml.measure_of_modalFree post hp, Nat.add_zero,
       Nat.zero_add, Nat.mul_one] at hl
     simp only [Premise.fml, Premise.invFml, Fml.measure, Fml.measure_of_modalFree I hI,
       Nat.zero_add, Prog.weight]
