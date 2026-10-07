@@ -127,16 +127,33 @@ end TEnv
 
 /-! ## States -/
 
+/-- The transaction, typed (`Semantics.TxEnv`): its words are `uint`s, so
+`msg.sender` and the other values of the environment are in range by
+construction.  The outcomes of external calls stay untyped data, read back
+at their types when a `try` decodes them. -/
+structure TTx where
+  msgSender : PrimTy.uint.Denote := PrimTy.dflt .uint
+  selfAddress : PrimTy.uint.Denote := PrimTy.dflt .uint
+  msgValue : PrimTy.uint.Denote := PrimTy.dflt .uint
+  timestamp : PrimTy.uint.Denote := PrimTy.dflt .uint
+  ext : List (Semantics.ExtKey × Semantics.ExtResult) := []
+
+/-- The untyped transaction. -/
+def TTx.erase (t : TTx) : Semantics.TxEnv :=
+  { msgSender := t.msgSender.1, selfAddress := t.selfAddress.1, msgValue := t.msgValue.1,
+    timestamp := t.timestamp.1, ext := t.ext }
+
 /-- A state in the context `Γ`, typed: the storage at the contract's
-types, a heap and its typing, the locals typed over it. -/
+types, a heap and its typing, the locals typed over it, the contract's own
+funds a `uint` (no statement changes them: a payment moves the ledger). -/
 structure TState (C : Contract) (Γ : Ctx) where
   storage : Storage C
   H : HTy
   heap : Heap H
   env : TEnv C H Γ
   net : List (Int × Int) := []
-  selfBalance : Int := 0
-  tx : Semantics.TxEnv := {}
+  selfBalance : PrimTy.uint.Denote := PrimTy.dflt .uint
+  tx : TTx := {}
 
 namespace TState
 
@@ -146,7 +163,7 @@ variable {Γ : Ctx}
 identity the heap's length, the locals erased. -/
 def erase (σ : TState C Γ) : State C Γ :=
   { storage := σ.storage.erase, heap := σ.heap.erase, nextId := σ.H.length,
-    env := TEnv.erase Γ σ.env, net := σ.net, selfBalance := σ.selfBalance, tx := σ.tx }
+    env := TEnv.erase Γ σ.env, net := σ.net, selfBalance := σ.selfBalance.1, tx := σ.tx.erase }
 
 /-- The state a contract starts in: every state variable at its default, no
 memory, no locals. -/
