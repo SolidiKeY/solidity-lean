@@ -7,6 +7,7 @@ import Solidity.Scope
 import Solidity.Syntax.Core
 import Solidity.Syntax.Resolve
 import Solidity.Syntax.Splice
+import Solidity.Syntax.CoreQuote
 import Solidity.FreshNames
 import Solidity.Semantics
 import Solidity.Semantics.DecEq
@@ -15,6 +16,8 @@ import Solidity.Semantics.Agree
 import Solidity.Semantics.WellFormed
 import Solidity.Semantics.Callback
 import Solidity.Semantics.Mutability
+import Solidity.Semantics.Core
+import Solidity.Semantics.RunErase
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules

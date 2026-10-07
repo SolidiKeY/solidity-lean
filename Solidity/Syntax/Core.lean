@@ -724,6 +724,46 @@ end
 
 end Weaken
 
+/-! ## What a statement pushes
+
+A statement leaves its context with locals pushed (`Ext`): a declaration
+one, a call its exported return variables, a scope none.  The interpreter
+drops a scope's locals by it (`Prog.ext` of a branch, Gate G0, condition 5),
+so these are `casesOn` and structural recursion (condition 1). -/
+
+section Pushes
+
+variable {C : Contract}
+
+/-- What a call pushes on its caller's context. -/
+def CallRet.ext {Γ : Ctx} {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : Ext Γ Γ' :=
+  CallRet.casesOn (motive := fun _ Γ' _ => Ext Γ Γ') r .refl (fun _ _ _ => .refl)
+    (fun {rs} _ => Ext.append Γ rs) (fun _ _ _ _ => .push .refl)
+
+def Stmt.ext {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
+  Stmt.casesOn (motive_1 := fun Γ Γ' _ => Ext Γ Γ') s
+    (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
+    (fun _ _ _ => .push .refl) (fun _ _ _ => .push .refl)
+    (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ _ _ _ _ => .refl)
+    (fun _ _ _ => .refl) (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
+    (fun _ _ _ _ _ => .push .refl) (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
+    (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
+    (fun _ _ _ => .refl) (fun _ => .refl) (fun _ => .refl) .refl
+    (fun _ _ ret _ => ret.ext)
+    (fun _ _ _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ => .refl)
+
+def Prog.ext : {Γ Γ' : Ctx} → Prog C Γ Γ' → Ext Γ Γ'
+  | _, _, P => Prog.casesOn (motive_2 := fun Γ Γ' _ => Ext Γ Γ') P .refl
+      (fun s P => (Stmt.ext s).trans (Prog.ext P))
+  termination_by structural _ _ P => P
+
+theorem Prog.ext_nil {Γ : Ctx} : (Prog.nil : Prog C Γ Γ).ext = .refl := rfl
+
+theorem Prog.ext_cons {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) :
+    (Prog.cons s P).ext = s.ext.trans P.ext := rfl
+
+end Pushes
+
 /-! ## An example
 
 Every scope at once over `StandardExample`, printed as `Syntax.lean` prints
@@ -790,6 +830,9 @@ private def example₂ : Prog SE [.val .uint] [.val .uint, .val .uint] :=
 -- A block weakened under one more local reads the same locals.
 #guard Prog.toStr [.user "w"] (example₁.wk (.drop (t := .val .bool) .refl)).2.2 =
   Prog.toStr [] example₁
+
+/-- `example₁` pushes its six locals, the memory return's among them. -/
+example : example₁.ext.depth = 6 := by decide
 
 end Example
 

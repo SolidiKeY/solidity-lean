@@ -28,6 +28,9 @@ of its own (`returnBeforeSiblingLoop`).
 
 solc_import "../../../tests/solc/Loops.ast.json" hash 0x499c9a4ed86a4b11 as Solc.Loops
 
+/-- info: 9 programs declared scoped -/
+#guard_msgs in solc_scoped Solc.Loops
+
 namespace Solidity.Examples.LoopsImport
 
 /-- info: 9 functions (4 diamond, 3 box, 0 skip, 2 internal): 9 elaborated, 0 skipped, 0 excluded, 0 unsupported -/

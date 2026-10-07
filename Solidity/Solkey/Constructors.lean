@@ -40,6 +40,22 @@ solc_import "../../tests/solc/InitGap.ast.json" hash 0x83328c56fa8af038 as Solke
 
 solc_problems Solkey.EtherWallet
 
+/-! Each import's programs, scoped (`solc_scoped`): the lint of the scoped
+syntax, `N.f.core` checked by the kernel. -/
+
+/-- info: 2 programs declared scoped -/
+#guard_msgs in solc_scoped Solkey.Counter
+
+/-- info: 2 programs declared scoped -/
+#guard_msgs in solc_scoped Solkey.EtherWallet
+
+/-- info: 1 program declared scoped -/
+#guard_msgs in solc_scoped Solkey.CtorGap
+
+/-- info: 1 program declared scoped -/
+#guard_msgs in solc_scoped Solkey.InitGap
+
+
 /-! ## `Counter.sol`
 
 The initializer `limit = 5` is the contract's, and the constructor its own

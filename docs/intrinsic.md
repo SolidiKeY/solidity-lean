@@ -25,8 +25,8 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 |---|---|---|
 | M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
-| M2 | M2.1, M2.2 done | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
-| M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
+| M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
+| M3 | M3.1, M3.2 done 2026-10-07 (typed run, `run_erase`) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | M5.1, M5.2 on lane `intrinsic-evm` (see M5 lane) | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
@@ -198,8 +198,130 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     call, `resolve` 0.045 ms and the old `Prog.wt` 0.030 ms: the check
     costs 0.015 ms more a block, against the quoting and kernel check that
     dominate a site (the TestSuite import, 449 blocks, is 10.4 s).
-- Left for M2: the quoter (`Core.Prog.quote`) and `Stmt.ext`/`Prog.ext`
-  (M3 needs them; condition 1's form).
+- M2.3 (2026-10-07): `Syntax/CoreQuote.lean`, `solc_scoped`, `Stmt.ext`.
+  - `Core.Prog.quote` takes the term of its context and conses what a
+    statement pushes onto it (`ctxFrom`), so a scope's context shares its
+    enclosing one; `Prog.quoteShared` then hash-conses the whole term
+    (`ShareCommon`, condition 7).  Over the 449 TestSuite programs the
+    scoped terms have 95.5k objects against the untyped quoter's 144.6k
+    (unshared), and quoting them takes 0.14 s with `resolve`.
+    `Prog.defineCore` resolves, quotes and declares; `tour` and a block of
+    calls are pinned in the module (declared, erased back by `rfl`).
+  - The lint: `solc_scoped N` declares `N.f.core : Core.Prog N Γ Γ'` for each
+    program of an import, resolved from its parameters, the kernel checking
+    it, and errs on one that does not resolve; it pins the count
+    (`Solkey/TestSuiteScoped.lean` 449, `Solkey/Constructors.lean` 2+2+1+1,
+    `Examples/Tactics/LoopsImport.lean` 9).  Every `sol{}` site, and each
+    import's elaboration, runs `resolve` already (M2.2), so a block that does
+    not resolve fails the build.  The kernel's check of the scoped terms
+    costs about the untyped ones' (3.0 s against 2.9 s over the 449,
+    synchronously), so inside `solc_import` it made `Solkey/TestSuite` 30%
+    slower: `solc_scoped` is a command of its own, and the TestSuite's is a
+    module of its own (3.5 s, in parallel with the rest of
+    `SolkeyTestSuite`).
+  - `Stmt.ext`/`Prog.ext`/`CallRet.ext` (`Syntax/Core.lean`): what a
+    statement pushes, in condition 1's form (`casesOn`, structural); the
+    kernel reduces them (`decide` on `example₁`).
+  - Timing (the gate: within 10% of M0): wall time from the worker's start
+    to the end of a copy of the file after every kernel check (`#clock` in a
+    scratch module, `/proc/self/stat` against `/proc/uptime`; M0's included
+    the MCP call's overhead too).  `Examples/Benchmark/Syntax` 1.22 s (two
+    runs; M0 1.2 s, +2%), `Solkey/TestSuite` 10.99/11.21/11.07 s (M0 10.4 s,
+    +6%), `Examples/Chains/Storage` 7.21/7.34 s (M0 7.5 s, −3%).
+
+### M3 notes
+
+- M3.1 (2026-10-07): `Semantics/Core.lean`, the interpreter over
+  `Core.Stmt`.
+  - `LTy.Denote C` (reducible): `val p` a `Value`, `alias R` an
+    `Option (Name × List Seg)` (`none` unset: a read reverts), `mem R` a heap
+    identity, `old`/`oldNet` a storage/ledger.  Values, storage and heap stay
+    `Semantics.lean`'s until M4, so `C` is not used yet.
+  - `Env C Γ` is computed (`Unit`, `t.Denote C × Env C Γ`); `get`/`set` recurse
+    on `Idx`, `drop` on `Ext`, by `casesOn` (condition 1); `append`/`take` (a
+    call's frame, a `try`'s returned values) on the list `ρ`.
+  - `State C Γ` has today's fields with `env : Env C Γ`; `State.glob` is the
+    global part as a `Semantics.State` (no locals), so every storage, heap
+    and ledger operation of `Semantics.lean` is called as it is, and
+    `withGlob`/`withEnv` put the result back.
+  - One function per statement (`Run.assign` … `Run.block`, `Run.seq`), given
+    its sub-programs' runs and their `Prog.ext`.  `Stmt.runR`/`Prog.runR` are
+    `Stmt.rec`/`Prog.rec` over them (`@[implemented_by]` the `match` twin
+    `Stmt.runC`/`Prog.runC`, linked by `Stmt.runR_eq`/`Prog.runR_eq`, a
+    mutual structural proof); `Stmt.run σ s`/`Prog.run σ P` are abbreviations
+    with today's argument order.  The twin is a `match`, not `casesOn`: it is
+    compiled code only, never kernel-evaluated.
+  - Scopes: `ite`, `block`, `loop` (each iteration) and the `try` clauses pop
+    by `State.drop` of the sub-program's `Prog.ext` (a `try` clause also pops
+    its `ρ`/`κ`, `Ext.append`).  A call evaluates the arguments in the caller
+    (`Args.eval`, in order), enters the frame `rs ++ ps` (`CallRet.enter`:
+    defaults, a memory return allocated after the arguments are read, as
+    today's first body statement did), runs the body, and leaves the caller
+    its locals plus what `CallRet.leave` exports (`val`'s assignment,
+    `rets`' variables, `mem`'s identity).
+  - The loop is `Core.Loop`, today's `Loop` over any state type (`step`,
+    `iterN`, `run` with `run_of_iterN`), since today's is fixed to
+    `Semantics.State`; it goes when M4 retires the untyped interpreter.
+  - `stuck` now comes only from a value of the wrong shape (`asInt`/`asBool`,
+    a condition that is an `int`: M4a) and from a storage or heap that does
+    not fit (`findStorage`, `getObj`, `copyStToM`, `allocDefault`: M4b, M4c).
+    No local lookup can fail: an unset alias reverts, as today.
+  - Equations: `Prog.run_nil`, `run_cons`, `run_cons_ok`,
+    `run_loop_of_iterN`, `Stmt.run_ite`/`run_block`/`run_loop`/`run_call`
+    (by `rfl` or one rewrite); `Env.get_set`, `take_append`, `drop_append`.
+  - Examples (kernel): a failing `require` reverts, a failing `assert`
+    panics (`rfl`), two of `Semantics.lean`'s three `++`-order runs
+    (`decide +kernel`), `CallsExample`'s `addTwo(3)`/`larger(5, 7)` read from
+    the caller's locals (`rfl`), a loop declaring a local per iteration
+    (`run_loop_of_iterN (n := 4) rfl`).  `aliasWrite` and the third
+    `++`-order run do not reduce in the kernel with either interpreter
+    (storage overlay / nested push), so `aliasWrite` is a `#guard_msgs`
+    `#eval` (`runResolved`), as today.
+  - Timing: kernel check of `Eq.refl` on `(run σ P).isOk`, best of five
+    (`IO.monoNanosNow` around `addDeclCore`, a scratch module), the old
+    interpreter on the untyped block, the new on its `defineCore` term, and
+    the `match` twin `Prog.runC` on the same term:
+
+    | Block | old | `Prog.run` (rec) | `Prog.runC` (match) |
+    |---|---|---|---|
+    | `require(age > 3)` | 2.8 ms | 2.6 ms | 3.2 ms |
+    | `assert(age > 3)` | 2.8 ms | 2.6 ms | 3.2 ms |
+    | `i++ + i` | 9.2 ms | 5.4 ms | 9.1 ms |
+    | `values[++i] = ++i` | 18.9 ms | 16.5 ms | 21.7 ms |
+    | `addTwo(3)`, `larger(y, 7)` | 22.3 ms | 11.7 ms | 18.0 ms |
+
+- M3.2 (2026-10-07): `Semantics/RunErase.lean`, the bridge theorem.
+  - `Prog.run_erase P hP hnd hlen σ : ResultsAgree (P.popped ns)
+    (Solidity.Prog.run (σ.erase ns) (P.erase ns)) ((P.run σ).map (State.erase
+    (P.outNames ns)))`, and `Stmt.run_erase` for a statement (its erasure a
+    list).  `State.erase ns σ` names the locals by `ns` (`LTy.enc`: an unset
+    alias `.unset`, a memory local `.mref`), and `popped` are the binders not
+    in scope at the end, which the untyped run keeps.  `ResultsAgree` and
+    `EnvAgreeExcept` are `Semantics/Agree.lean`'s; its frame lemmas
+    (`Stmt.run_frame`) were not needed.
+  - The hypothesis is `P.Fresh out ns`: no binder reuses a name in scope
+    (`ns`) or of an enclosing call frame (`out`), a frame's names are
+    distinct, and a call's arguments are separated (`erase` then writes
+    `Syntax.lean`'s call, not the arguments-in-the-body fallback).  A name may
+    be declared again after its scope ends (a loop body every iteration,
+    sibling branches): the untyped run overwrites the stale binding.
+    `callsCore_fresh` proves it for a resolved block by `simp only`.
+  - The proof is one invariant, `Agree ns σ τ` (equal global parts, every
+    local of `σ` bound under its name in `τ`), and `RunRel`: the same halt,
+    or agreeing states that bind every name off `ns ++ binders` as before
+    (what a call's caller needs of its body).  The global operations are
+    natural in the locals (`saveStorage_nat` … `memClear_nat`, each by
+    unfolding; `copyMem` through `Agree.lean`'s `copyMem_congr`), so the
+    scoped run's operations on `σ.glob` and the untyped run's on `τ` agree.
+    One lemma per statement (`Stmt.erases_*`), the IH passed in, and a
+    mutual structural `Stmt.erasesAt`/`Prog.erasesAt` that dispatches;
+    loops by `Loop.run_rel₂`, `Loop.run_rel` across the two state types.
+  - Not done: that `resolve`'s output from the elaborator's names is
+    `Fresh` (the separatedness conjunct follows from the others, also not
+    proved); deriving `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` from `resolve`
+    plus `run_erase`.  Applying `Prog.run_erase` to `callsCore` and a state
+    times out in the elaborator at `whnf` (the partial application without the
+    state checks); not yet diagnosed.
 
 ### M5 notes
 
