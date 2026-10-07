@@ -709,6 +709,54 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
 
 **Pins in W1:** none outside `Core*` example files.
 
+### W1 lane `runlemmas` (2026-10-08)
+
+Done, four modules over `TState`/`trun`, no M3 run in their statements:
+
+- `Semantics/Core/TypedRunWk.lean`: `Stmt.trun_wk`/`Prog.trun_wk` (`TWkRel`).
+  The background locals `d` are typed over the start heap and come out
+  weakened along the heap the run grew (`TEnv.wk`, `offWk`); with the
+  background fixed, `TWkRel.eq_lifted` gives the run as `liftedT`.  Also
+  `Frames.trun` (the frames' typed run, for `holds` over `TState`) and the
+  `TLoop` lemmas: `run_map`, `run_unfold`, `run_induct`, `run_variant` (the
+  variant a `TRes Int`, the condition a `Bool`, so no cover).
+- `Semantics/Core/TypedRunFrame.lean`: `Stmt.trun_frame`/`Prog.trun_frame`.
+  A program within a mutability allocates nothing, so the frame keeps the
+  heap typing (`TGFrame.H`) and compares heaps and locals by `HEq`
+  (`TLocAgree`); `TState.anon`, `TState.havoc`, and
+  `TState.eq_anonHavoc`/`Prog.trun_frame_anon`: a state in a loop body's
+  frame is `(σ.anon xs b).havoc st nt` for some `b` (with `TGFrame.keeps`
+  giving `st`, `nt` unchanged in a `view` frame).  This is the semantic half
+  of `holds_anonHavoc`; the `holds` half is W2's.
+- `Semantics/Core/TypedToSem.lean`: `TState.toSem ns` read straight off the
+  typed parts (`LTy.TDenote.bind`), with `lookup_toSem` and the moves under
+  `push`/`setLocal` (`setBy`)/`drop`/`withStorage`/`havoc`/`adopt`; the
+  bridge `toSem_eq` (= `σ.erase.erase ns`) and `agree_toSem` go with
+  `RunErase` at W4.
+- `Semantics/Core/Callback.lean`, rewritten over `TState`: `COut C H Γ`
+  carries `Out` (a call needs the heap extension to give its caller's
+  locals back, `TRun.callLeave`); the invariant is a predicate on states of
+  the empty context (`StateInv`), since `holds` on `TState` does not exist
+  yet; `callEnter` and `tryHalt` are gone (typed entry and `keyT` are
+  total).  `Prog.exec_run`, `Frames.exec_run`, `ExecP.eq_run`,
+  `ExecF.eq_run`, `ExecP.forall_iff`, `ExecF.forall_iff` are proved.
+
+Left for W2 (the `tree` lane, with `holds` on `TState` from `sound`):
+`holdsC`, `ValidC`, `TransferSem`, `holdsC_iff_holds`,
+`holds_of_holdsC_modal`, `valid_of_validC` over `TState`, with
+`StateInv := ⟨fun σ => holds σ I.fml⟩`; the M3 versions are removed with
+this rewrite (their only user was `Examples/Tactics/CoreCallback.lean`,
+re-pinned to the typed relation).
+
+For W2 `sound`: `TypedRunWk.lean` imports `Calculus/Core/RunWk.lean` for
+`Thin.Over` and `Stmt.wk_over`/`Prog.wk_over` (syntax only), and
+`TypedRunFrame.lean` imports `Calculus/Core/RunFrame.lean` for
+`Prog.frame_some` and `frameMut` (syntax only).  Deleting the old
+`RunWk`/`RunFrame` means moving those into these two files first.
+
+Check: `TypedRunWk.lean` re-elaborates in about 7 s warm; `import Solidity`
+elaborates with every module (no name clash).
+
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)
 1. **`sound`** (the critical path)
    - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`.
