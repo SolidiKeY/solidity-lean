@@ -3,7 +3,7 @@ import Solidity.Typing.Soundness
 /-!
 # What every reachable state satisfies beyond its types
 
-`Soundness.lean` shows `RunWT` is *sufficient*: every checked run keeps it.
+`Soundness.lean` shows `RunWT` is *sufficient*: every scoped run keeps it.
 This module asks what else a run keeps, which `SVal.hasTy` forgets — the
 facts that let one refute that a well-typed storage is reachable at all.
 `SVal.canon` adds exactly those:
@@ -23,8 +23,10 @@ struct with a mapping member can exist (the member would need a claim at a
 mapping type, which no object satisfies), and a copy back never produces a
 struct missing its mapping.
 
-`Prog.run_canon` is the preservation theorem, `reachable_canon` its
-corollary from a contract's initial state, and the two refutations the
+`Prog.run_canon` is the preservation theorem (the scoped run's
+`Invariant` with `Canon` on the global part, `canonInv`), `reachable_canon`
+its corollary from a contract's initial state (`Reachable`: a scoped program
+`Core.Prog C [] Γ'` runs there), and the two refutations the
 removed untyped layer left as `sorry` follow: a storage whose mapping default
 is not the default (`map_default_not_reachable`) and one whose struct misses
 a member (`struct_missing_field_not_reachable`) are well-typed and not

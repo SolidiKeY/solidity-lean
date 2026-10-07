@@ -18,24 +18,26 @@ not say; `SVal.tight` is exactly them:
 
 Everything canonical and tight is reachable when its words, mapping keys
 and array slots are in range (`SVal.fits`: a literal is in its type's
-range, `Simple.lit`), by one checked program (`Build.rootsProg`): a word is assigned; a struct is filled member by member
+range, `Simple.lit`), by one scoped program (`Core.Build.rootsProg`, over
+`Syntax/Core.lean`): a word is assigned; a struct is filled member by member
 through an alias bound to it; a dynamic array is pushed to its whole run of
 slots, then each slot past the end is bound to an alias, popped, and filled
 through the alias (the only way to write past an end), then the live
 elements are filled; a fixed-size array element by element; a mapping entry
 by entry, each created by a `delete` so that an entry holding the default is
-there too.  The aliases are `slot d`, one per nesting depth, so a fill never
-disturbs the alias its caller is filling through.  The proof tracks the
-root's value as a chain of writes at one path (`Wrote`), which is why every
-fill starts from the default and from a path where writing what is there
-changes nothing.
+there too.  Each alias is declared in a block of its own (`Build.bound`), so
+a fill leaves the context it starts in and its caller's aliases, read by
+position, as they were.  The proof tracks the root's value as a chain of
+writes at one path (`Wrote`), which is why every fill starts from the
+default and from a path where writing what is there changes nothing.
 
-The other direction is `Prog.run_tight`, a traversal of the interpreter
-beside `Prog.run_canon`, for a contract whose types have well-formed
+The other direction is `Prog.run_tight`, an invariant of the scoped run
+(`Invariant`, `Typing/Soundness.lean`) beside `Prog.run_canon`'s, for a
+contract whose types have well-formed
 defaults all the way down (`Ty.okDeep`).  It needs two facts about paths:
 a word is written only into a live slot (`IdxLive`, from
 `State.checkIndex`), and an alias is bound only along numeric keys
-(`KeysOK`, which the environment keeps).  Under `Ty.okDeep` the first clause
+(`KeysOK`, which every alias local keeps, `LTy.Keys`).  Under `Ty.okDeep` the first clause
 of `SVal.tight` is vacuous, so no memory object needs tracking: a copy out
 of memory has no mapping and nothing past its ends (`SVal.plain`).  Whether
 that clause is also necessary for a contract with, say, a `BadDup[]` root is
@@ -668,7 +670,8 @@ theorem resolve_index_arr {σ : State C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R E
     Semantics.State.checkIndex, hf, hj, bind, Except.bind, pure, Except.pure]
 
 theorem resolve_index_map {σ : State C Γ} {k : PrimTy} {V : Ty} {key : Int}
-    (hk : k.isNumeric = true) (hr : k.inRange key = true) {a : Idx Γ (.alias (.mapping (.prim k) V))}
+    (hk : k.isNumeric = true) (hr : k.inRange key = true)
+    {a : Idx Γ (.alias (.mapping (.prim k) V))}
     {r : Name} {segs : List Seg} {es : List (Int × SVal)} {dflt : SVal}
     (h : Bound σ a r segs) (hf : σ.glob.findStorage r segs = .ok (.map es dflt)) :
     (SPath.loc (C := C)
@@ -888,7 +891,8 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
       (∀ w ∈ S, FillOK C w) → canonElems E S → tightElems E S → fitsElems E S →
       i + S.length ≤ 2 ^ 256 →
       (E.isPrimitive = true → ∀ w ∈ S, w = defaultForTy E) → Bound σ a r segs →
-      Wrote st₀ σ.storage r segs (.array (List.replicate (i + S.length) (defaultForTy E)) SH false) →
+      Wrote st₀ σ.storage r segs
+        (.array (List.replicate (i + S.length) (defaultForTy E)) SH false) →
       ∃ σ', Prog.run σ (fillShadow (C := C) d E a i S) = .ok σ' ∧
         Wrote st₀ σ'.storage r segs (.array (List.replicate i (defaultForTy E)) (S ++ SH) false) ∧
         σ'.env = σ.env
@@ -908,8 +912,9 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
     have hf₁ := Wrote.findStorage (σ := σ₁.glob) hW₁
     obtain ⟨τ, hτ, hWτ⟩ := Wrote.saveCore hW₁
       (.array (List.replicate i (defaultForTy E)) (defaultForTy E :: (S ++ SH)) false)
-    have hdef : ∀ T : Ty, (if T.isMapping = true then defaultForTy T else (defaultForTy T).defaultOf) =
-        defaultForTy T := by
+    have hdef : ∀ T : Ty,
+        (if T.isMapping = true then defaultForTy T else (defaultForTy T).defaultOf) =
+          defaultForTy T := by
       intro T; split <;> simp [defaultOf_default]
     cases E with
     | prim p =>
@@ -923,7 +928,8 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
       have hq := resolve_index_arr (C := C) (ArrTy.dyn (E := .ref R)) (j := i) hB₁ hf₁ (by simp)
         (by simp only [List.length_cons] at hlen; omega)
       -- in the block: the slot bound, popped, then filled through its alias
-      let σ₂ : State C (.alias R :: Γ) := σ₁.push (t := .alias R) (some (r, segs ++ [.at (i : Int)]))
+      let σ₂ : State C (.alias R :: Γ) :=
+        σ₁.push (t := .alias R) (some (r, segs ++ [.at (i : Int)]))
       have hB₂ : Bound σ₂ (Idx.there a) r segs := hB₁
       have hpop : Stmt.run σ₂ (.pop (C := C) (E := .ref R) (.alias (Idx.there a))) =
           .ok (σ₂.withGlob τ) := by
@@ -939,7 +945,8 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
           (defaultForTy (.ref R)) x false
         simpa using this
       obtain ⟨σ₃, hrun₃, hW₃, he₃⟩ := child_step (d := d) (hIH w (List.mem_cons_self ..)) hc.1
-        ht.1 hfit.1 hE (resolve_alias hBτ) (show Wrote st₀ (σ₂.withGlob τ).storage r segs _ from hWτ)
+        ht.1 hfit.1 hE (resolve_alias hBτ)
+        (show Wrote st₀ (σ₂.withGlob τ).storage r segs _ from hWτ)
         (hsh _) (hsh w)
       have hbody : Prog.run σ₂ (.cons (.pop (C := C) (E := .ref R) (.alias (Idx.there a)))
           (fill (d + 1) (.ref R) (.alias .here) w)) = .ok σ₃ := by
@@ -978,9 +985,11 @@ theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty} (hk : k.isNumeric = true
       rw [save_at_map, show done = done ++ [] from (List.append_nil _).symm,
         setBy_append_left_none hkey]
       simp [setBy]
-    obtain ⟨τ, hτ, hWτ⟩ := Wrote.saveCore hW (.map (done ++ [(key, defaultForTy V)]) (defaultForTy V))
+    obtain ⟨τ, hτ, hWτ⟩ :=
+      Wrote.saveCore hW (.map (done ++ [(key, defaultForTy V)]) (defaultForTy V))
     have hdel' : Stmt.run σ (.delete (C := C)
-        (Loc.index .map (.alias a) (.simple (numLit k hk key)) : Loc C Γ V)) = .ok (σ.withGlob τ) := by
+        (Loc.index .map (.alias a) (.simple (numLit k hk key)) : Loc C Γ V)) =
+          .ok (σ.withGlob τ) := by
       rw [hdel, SemanticsProperties.State.saveStorage_append hf, hN₁]
       show σ.withGlob <$> σ.glob.saveStorage r segs _ = _
       rw [hτ]; rfl
@@ -1021,8 +1030,10 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
         obtain ⟨hnames, hcf⟩ := hc
         have hs : s ∈ defaultOkStructs := by simpa [Ty.defaultOkS] using hok
         obtain ⟨hnd, hmok⟩ := struct_ok hs
-        let σ₁ : State C (.alias (.struct s) :: Γ) := σ.push (t := .alias (.struct s)) (some (r, segs))
-        obtain ⟨σ', hrun, hW, he⟩ := fillFields_run (C := C) (d := d) (s := s) (a := .here) fields []
+        let σ₁ : State C (.alias (.struct s) :: Γ) :=
+          σ.push (t := .alias (.struct s)) (some (r, segs))
+        obtain ⟨σ', hrun, hW, he⟩ := fillFields_run (C := C) (d := d) (s := s) (a := .here)
+          fields []
           (structDef s) σ₁ σ.storage
           (fun nw _ => fill_ok nw.2) hcf ht hf hnames
           (fun nt hm => ⟨lookupBy_eq_of_nodup hnd hm, hmok nt hm, rfl⟩) hnd rfl
@@ -1046,7 +1057,8 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
         subst hfx
         obtain ⟨hne, hpr, hte, hts⟩ := ht
         obtain ⟨hlen, hfe, hfs⟩ := hf
-        let σ₁ : State C (.alias (.array E) :: Γ) := σ.push (t := .alias (.array E)) (some (r, segs))
+        let σ₁ : State C (.alias (.array E) :: Γ) :=
+          σ.push (t := .alias (.array E)) (some (r, segs))
         have hB : Bound σ₁ .here r segs := rfl
         have h0' : Wrote σ.storage σ₁.storage r segs (.array [] [] false) := by
           rw [defaultForTy] at h0; exact h0
@@ -1293,7 +1305,7 @@ theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true)
 
 /-! ## Reachable storages are tight
 
-The converse direction: every storage a checked program reaches is tight,
+The converse direction: every storage a program reaches is tight,
 for a contract whose types have well-formed defaults all the way down
 (`Ty.okDeep`: no array of a struct `defaultOkS` refuses, like `BadDup[]`).
 Then the first clause of `SVal.tight` is vacuous, no memory object matters,
@@ -2982,7 +2994,8 @@ theorem Stmt.keeps_tight (hd : DeepOk C) :
       tight_assignFromMem hd hwt hc ht l p h
   | _, _, .assignMem l r =>
     keepsT_of (keepsC_assignMem l r) fun _ _ _ _ _ ht h => tight_assignMem ht l r h
-  | _, _, .delete l => keepsT_of (keepsC_delete l) fun _ _ _ hwt hc ht h => tight_delete hd hwt hc ht l h
+  | _, _, .delete l =>
+    keepsT_of (keepsC_delete l) fun _ _ _ hwt hc ht h => tight_delete hd hwt hc ht l h
   | _, _, .deleteMem p hdo =>
     keepsT_of (keepsC_deleteMem p hdo) fun _ _ _ _ _ ht h => tight_deleteMem ht p h
   | _, _, .assignNew l n hn =>
@@ -3075,7 +3088,7 @@ theorem reachable_shape (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·
 /-- **The reachable storages, exactly**: for a contract whose types have
 well-formed defaults all the way down, a storage whose words, keys and slots
 are in range (`FitsStorage`, what a literal can write) is reachable by a
-checked program iff it is canonical and tight. -/
+program iff it is canonical and tight. -/
 theorem reachable_iff (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
     {st : List (Name × SVal)} (hf : FitsStorage C st) :
     Reachable C st ↔ CanonStorage C st ∧ TightStorage C st :=

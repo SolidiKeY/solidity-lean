@@ -8,8 +8,8 @@ The typed syntax rules out every *static* mismatch: a member exists, an
 operator takes its operand, a copy holds no mapping, a pushed default is
 well-formed, and, since the scoped syntax (`Syntax/Core.lean`), a local is a
 position in a context `Γ`, read and written at the type `Γ` gives it.  So
-there is no locals check left to pass: what a run must keep is that the
-values are of their types.
+the theorem has no locals judgement to assume (the old `Stmt.wt`): what a
+run must keep is that the values are of their types.
 
 `RunWT C H σ` is the invariant: the global part `StateWT`
 (`Typing/State.lean`: storage inhabits `C`'s layout, the heap the store
@@ -850,7 +850,8 @@ theorem keeps_assert {Γ : Ctx} (c : Val C Γ .bool) :
   · exact nomatch h
   · exact nomatch h
 
-theorem keeps_revert {Γ : Ctx} : I.Keeps (fun _ : State C Γ => (.error .revert : Res (State C Γ))) :=
+theorem keeps_revert {Γ : Ctx} :
+    I.Keeps (fun _ : State C Γ => (.error .revert : Res (State C Γ))) :=
   fun _ _ _ _ h => nomatch h
 
 end Invariant
@@ -1277,7 +1278,8 @@ theorem OpLoc.store_wt (hwt : RunWT C H σ) {op : BinOp} (hop : op.isArith = tru
     have hb := MPath.mval_wt hwt b hm0
     rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
     obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-    exact hwt.withGlob (.refl H) (opMem_wt hwt.glob hop hp (loc := .memoryField id f) ⟨s, hb, hf⟩ hτ)
+    exact hwt.withGlob (.refl H)
+      (opMem_wt hwt.glob hop hp (loc := .memoryField id f) ⟨s, hb, hf⟩ hτ)
   | p, .mindex ak b i, v, hp, h => by
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
     obtain ⟨id, hid, h⟩ := bind_ok_inv h
@@ -1613,7 +1615,8 @@ theorem keeps_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
     · exact ⟨H, .refl H, RunWT.setLocal hwt pv rfl⟩
 
 theorem keeps_declMem (R : RefTy) (init : Option (MRhs C Γ R))
-    (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) : (wtInv C).Keeps (Run.declMem R init) := by
+    (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) :
+    (wtInv C).Keeps (Run.declMem R init) := by
   intro H σ σ' hwt h
   replace hwt : RunWT C H σ := hwt
   cases init with
@@ -1730,7 +1733,8 @@ mutual
 well-typed state ends, if in a state, in a well-typed one in the context its
 type says; the store typing only grows.  From `uint x = 1;` the new local
 holds a number; from `alice.age = x;` storage still inhabits the layout.
-There is no locals check to pass: a statement is typed by its context. -/
+A statement is typed by its context: there is no locals judgement to
+assume. -/
 theorem Stmt.keeps_wt : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (wtInv C).Keeps (Stmt.runR s)
   | _, _, .assign l r => keeps_assign l r
   | _, _, .rebind i r => keeps_rebind i r

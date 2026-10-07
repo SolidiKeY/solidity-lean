@@ -10,8 +10,9 @@ The table ↔ semantics edge of the conformance loop: every read-sort
 annotation in `TacletAnnotations.tacletReadAnns` is *faithful* — the sort a
 taclet's value read declares agrees with the value `Stmt.run` actually finds
 there, in every state that agrees (`Agree`, `Semantics/RunErase.lean`) with a
-scoped state the invariant `RunWT` (`Typing/Soundness.lean`) holds of.  `solkeycheck` keeps the table equal to the `.key` text; this module
-keeps it true of the interpreter, so a table updated to match a buggy
+scoped state the invariant `RunWT` (`Typing/Soundness.lean`) holds of.
+`solkeycheck` keeps the table equal to the `.key` text; this module keeps it
+true of the interpreter, so a table updated to match a buggy
 taclet stops building here (`Counterexamples/PreFixSortAnnotations.lean`
 is the bug `12e72a1b4b` fixed, refuted).
 
@@ -245,8 +246,9 @@ theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.Stat
   | mlen p =>
     intro v hv
     obtain ⟨p', rfl⟩ := hw
-    have hty := Value.toMVal_hasTyH (H := H) (Core.Val.eval_wt hwt (Core.Val.mlen (p := .uint) p' rfl)
-      (by rw [← Core.Val.eval_erase hag]; exact hv))
+    have hty := Value.toMVal_hasTyH (H := H)
+      (Core.Val.eval_wt hwt (Core.Val.mlen (p := .uint) p' rfl)
+        (by rw [← Core.Val.eval_erase hag]; exact hv))
     cases rs with
     | generic _ => exact hty
     | fixed s =>
