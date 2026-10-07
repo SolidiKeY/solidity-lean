@@ -293,6 +293,74 @@ theorem assignMemStep_sound (k : Nat) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ 
       | val e => cases hs; exact sound_memIndexWriteRecvUnfold σ k a l i e
       | ref src => cases hs; exact sound_memIndexRefRecvUnfold σ k a l i src
 
+/-! ### `delete` on memory, `new` -/
+
+/-- `memoryFieldDelete_unfold_leftFst`: the receiver bound first. -/
+theorem sound_deleteMemFieldRecv {s : Name} {T : Ty} (b : MPath C Γ (.struct s))
+    (hm : (Ty.ref (.struct s)).mapFree = true) (f : Name) (hf : C.fieldType s f = some T)
+    (hd : T.defaultOkS = true) (x : Var) :
+    Premise.Sound m (.deleteMem (.loc (.field b f hf)) hd)
+      (.captureMV x b (.deleteMem (.loc (.field (.var .here hm) f hf)) hd)) σ := by
+  refine Premise.Sound.captureMVSim σ (fun id hid => ?_) (fun h hh _ => ?_)
+  · rw [Stmt.run_deleteMem, Stmt.run_deleteMem,
+      Run.deleteMem_push σ (t := .mem _) id
+        (.field (b' := .var .here hm) (b := b) f hf (MPath.mval_of_ref σ b hid).symm),
+      pushed_drop]
+  · rw [Stmt.run_deleteMem]
+    simp only [Run.deleteMem, MLoc.addr]
+    rw [← bind_assoc, hh]
+    exact Res.Sim.refl _
+
+/-- `memoryIndexDeleteNonSimpleIndexCapture`: the index captured. -/
+theorem sound_deleteMemIndexCapture {R : RefTy} {T : Ty} (a : ArrTy R T) (mv : Idx Γ (.mem R))
+    (hmv : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (hd : T.defaultOkS = true) (x : Var) :
+    Premise.Sound m (.deleteMem (.loc (.index a (.var mv hmv) i)) hd)
+      (.capture .uint x i (.deleteMem (.loc (.index a (.var mv.there hmv) (.simple (.local .here)))) hd)) σ := by
+  refine Premise.Sound.captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
+  · rw [Stmt.run_deleteMem, Stmt.run_deleteMem,
+      Run.deleteMem_push σ (t := .val .uint) v
+        (.index a (b' := .var mv.there hmv) (b := .var mv hmv) (i' := .simple (.local .here)) (i := i)
+          rfl (by rw [hv]; rfl)),
+      pushed_drop]
+  · rw [Stmt.run_deleteMem]
+    simp only [Run.deleteMem, MLoc.addr, MPath.mval, hh, Res.bind_ok, pure_bind]
+    exact Res.Sim.refl _
+
+/-- `memoryIndexDelete_unfold_leftFst`: the receiver bound first. -/
+theorem sound_deleteMemIndexRecv {R : RefTy} {T : Ty} (a : ArrTy R T) (b : MPath C Γ (.ref R))
+    (hm : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (hd : T.defaultOkS = true) (x : Var) :
+    Premise.Sound m (.deleteMem (.loc (.index a b i)) hd)
+      (.captureMV x b (.deleteMem (.loc (.index a (.var .here hm) i.up)) hd)) σ := by
+  refine Premise.Sound.captureMVSim σ (fun id hid => ?_) (fun h hh _ => ?_)
+  · rw [Stmt.run_deleteMem, Stmt.run_deleteMem,
+      Run.deleteMem_push σ (t := .mem _) id
+        (.index a (b' := .var .here hm) (b := b) (i' := i.up) (i := i) (MPath.mval_of_ref σ b hid).symm
+          (Val.eval_up σ _ i)),
+      pushed_drop]
+  · rw [Stmt.run_deleteMem]
+    simp only [Run.deleteMem, MLoc.addr]
+    rw [← bind_assoc, hh]
+    exact Res.Sim.refl _
+
+/-- **`delete p;` on memory** (`deleteMemStep`). -/
+theorem deleteMemStep_sound (k : Nat) {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true)
+    (q : Premise C Γ Γ) (hs : deleteMemStep k p hd = some q) : Premise.Sound m (.deleteMem p hd) q σ := by
+  cases p with
+  | var i hm => cases hs; exact sound_deleteMemVar σ i hm hd
+  | loc l =>
+    cases l with
+    | field b f hf =>
+      cases b with
+      | var mv hmv => cases hs; exact sound_clearMem σ _ hd
+      | loc l => cases hs; exact sound_deleteMemFieldRecv σ (.loc l) _ f hf hd _
+    | index a b i =>
+      cases b with
+      | var mv hmv =>
+        cases i with
+        | simple ie => cases hs; exact sound_clearMem σ _ hd
+        | _ => cases hs; exact sound_deleteMemIndexCapture σ a mv hmv _ hd _
+      | loc l => cases hs; exact sound_deleteMemIndexRecv σ a (.loc l) _ i hd _
+
 end Mem
 
 end Solidity.Core
