@@ -26,7 +26,8 @@ import Solidity.Tools.Common
 * `#taclet r` prints a rule: its statement (the delaborator shows it as
   `dl{ ⟨[ s; ]⟩ ⇝ p }`), the solkey taclets it transcribes and their
   `\heuristics`, the printed rule, and the theorem that makes it sound.  `r` is a
-  constructor of `Taclet`, `LeanTaclet` or `CallbackTaclet`, or a KeY taclet's
+  constructor of `Taclet`, `LeanTaclet` or `CallbackTaclet` (or of the scoped
+  `Core.Taclet`, printed where `Calculus/Core/Delab.lean` is imported), or a KeY taclet's
   name (an identifier or a string), looked up backwards in
   `RuleShapes.tacletOrigins`.
 
@@ -260,8 +261,14 @@ def Heuristic.keyName : Heuristic → String
 /-- A KeY taclet with its rule set: `storageFieldWriteSave (simplify_prog)`. -/
 def KeyTaclet.fmt (t : KeyTaclet) : String := s!"{t.name} ({Heuristic.keyName t.heuristic})"
 
+/-- A scoped taclet (`Calculus/Core/Taclet.lean`) is looked up as today's
+of the same name: it transcribes the same solkey taclets. -/
+def coreTwin (n : Lean.Name) : Lean.Name :=
+  if (`Solidity.Core.Taclet).isPrefixOf n then n.replacePrefix `Solidity.Core `Solidity else n
+
 /-- The KeY taclets of a constructor, one line. -/
 def keyLine (n : Lean.Name) : String :=
+  let n := coreTwin n
   match lookupBy n (RuleShapes.tacletOrigins ++ RuleShapes.callbackOrigins) with
   | some (.taclet t) => s!"solkey: {KeyTaclet.fmt t}"
   | some (.merged ts) => "solkey (merged): " ++ ", ".intercalate (ts.map KeyTaclet.fmt)
@@ -276,6 +283,7 @@ def keyLine (n : Lean.Name) : String :=
 
 /-- The printed rule of a constructor, one line. -/
 def texLine (n : Lean.Name) : String :=
+  let n := coreTwin n
   let rows := PrintedRules.printedOrigins ++ PrintedRules.leanPrintedOrigins ++
     PrintedRules.callbackPrintedOrigins
   match lookupBy n rows with
@@ -291,6 +299,10 @@ a `Taclet` by its premise's kind; with the per-rule update lemma
 def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
   let env ← getEnv
   let family := n.getPrefix
+  -- a scoped taclet: its soundness waits for the scoped interpreter
+  if family == `Solidity.Core.Taclet then
+    return "sound: pending (the scoped run, M3 of docs/intrinsic.md); \
+      Solidity.Core.Taclet.erase: an instance of today's rule"
   let thm ← if n == ``CallbackTaclet.tryCallWithCallbackBox then pure ``CallbackTaclet.sound_branches
     else if n == ``CallbackTaclet.sendWithCallbackBox then pure ``CallbackTaclet.sound_send
     else if family == ``CallbackTaclet then pure ``CallbackTaclet.sound
@@ -319,7 +331,8 @@ def tacletInfo (n : Lean.Name) : MetaM MessageData := do
   return m!"{n} : {info.type}\n{keyLine n}\n{texLine n}\n{snd}"
 
 /-- The rule families, in the order a bare name is looked up. -/
-def ruleFamilies : List Lean.Name := [``Taclet, ``LeanTaclet, ``CallbackTaclet]
+def ruleFamilies : List Lean.Name :=
+  [``Taclet, ``LeanTaclet, ``CallbackTaclet, `Solidity.Core.Taclet]
 
 /-- The constructor a name denotes: `storageFieldWriteSave`,
 `Taclet.storageFieldWriteSave`, or a full name. -/

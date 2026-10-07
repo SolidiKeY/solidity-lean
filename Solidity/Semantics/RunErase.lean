@@ -1130,11 +1130,6 @@ def Prog.binders : {Γ Γ' : Ctx} → Prog C Γ Γ' → List Var
 
 end
 
-/-- The names of the context a block leaves. -/
-def Prog.outNames : {Γ Γ' : Ctx} → List Var → Prog C Γ Γ' → List Var
-  | _, _, ns, .nil => ns
-  | _, _, ns, .cons s P => Prog.outNames (s.outNames ns) P
-
 mutual
 
 /-- No binder of the statement reuses a name in scope (`ns`) or of an
