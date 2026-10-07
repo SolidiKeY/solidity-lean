@@ -327,6 +327,7 @@ def Fml.rwEq (q : Term C × Term C) : Fml C → Fml C
   | .modal m P φ => .modal m P (φ.rwEq q)
   | .havoc φ => .havoc (φ.rwEq q)
   | .all x p φ => .all x p (φ.rwEq q)
+  | .anon xs φ => .anon xs (φ.rwEq q)
 
 /-- **A Theory equation rewrites a formula into an equivalent one**, in every
 state: the payoff of reading equations in the Theory. -/
@@ -340,7 +341,7 @@ theorem Fml.rwEq_holds {q : Term C × Term C} (h : Term.Theq q.1 q.2) :
   | .not φ, σ => by simp only [Fml.rwEq, holds, φ.rwEq_holds h σ]
   | .and φ ψ, σ => by simp only [Fml.rwEq, holds, φ.rwEq_holds h σ, ψ.rwEq_holds h σ]
   | .imp φ ψ, σ => by simp only [Fml.rwEq, holds, φ.rwEq_holds h σ, ψ.rwEq_holds h σ]
-  | .upd _ _ φ, _ | .modal _ _ φ, _ | .havoc φ, _ | .all _ _ φ, _ => by
+  | .upd _ _ φ, _ | .modal _ _ φ, _ | .havoc φ, _ | .all _ _ φ, _ | .anon _ φ, _ => by
     simp only [Fml.rwEq, holds, φ.rwEq_holds h]
 
 end Solidity

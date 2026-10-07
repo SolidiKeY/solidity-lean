@@ -46,7 +46,7 @@ lemma (`TermTaclet.sound`).
 | `Syntax.lean` | The typed syntax (`Val C p`, `SPath`, `Loc`, `MPath`, `Stmt C`), `Contract`/`FunDecl`, and the elaborator behind `sol[C]{…}` and `contract!{…}`. |
 | `FreshNames.lean` | `FreshNames.ofTable`: the examples' names for the rules' fresh variables, one table per example; `FreshNames.clashes`. |
 | `SpecSyntax.lean` | The specification language (`SolSpec.g4`: `SpecExpr`, `spec!(…)`) and a function's clauses (`FunSpec`). |
-| `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`); a deployment's `Contract.deployState` and `Contract.deploy`. |
+| `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`); a loop's run as the least fixed point of its unwinding (`Loop.run`, `Loop.run_rel`); a deployment's `Contract.deployState` and `Contract.deploy`. |
 | `Semantics/Properties.lean` | Read-after-write, frame and result-monad lemmas about the state operations, shared by every later layer. |
 | `Semantics/Agree.lean` | `EnvAgreeExcept`: states agreeing off scratch names, and a frame lemma per evaluator. |
 | `Semantics/WellFormed.lean` | `storageWtB`: well-formed storage (the shape `SVal.canon ∧ SVal.tight`, and words in range, `SVal.wordsB`) as a test the term `wt(storage)` runs; `SVal.isDfltB`, a default the kernel can recognise. |
@@ -54,9 +54,9 @@ lemma (`TermTaclet.sound`).
 | `Semantics/NoPanicSimp.lean` | The simp set `no_panic_simp` of the `*_noPanic` lemmas. |
 | `Semantics/NoPanic.lean` | Only an `assert` panics: `NoPanic` of every operation, `Stmt.mayPanic`, `Prog.run_noPanic`; the `no_panic` tactic. |
 | `Semantics/Callback.lean` | The callback reading of `transfer`, `send` and `try`: `ExecS`/`ExecP`, `holdsC`, `TransferSem`. |
-| `Semantics/Mutability.lean` | A callee's mutability (`pure`, `view`, `nonpayable`) read off its inlined body (`Stmt.within`, `Prog.writes`), and its frame from `Stmt.run` (`Mutability.Frame`, `Prog.frame_of_within`, `Prog.pure_frame`, `Prog.view_frame`). |
+| `Semantics/Mutability.lean` | A callee's mutability (`pure`, `view`, `nonpayable`) read off its inlined body (`Stmt.within`, `Prog.writes`), and its frame from `Stmt.run` (`Mutability.Frame`, `Prog.frame_of_within`, `Prog.pure_frame`, `Prog.view_frame`); a loop's frame, from the same `Stmt.within` (`Prog.loopFrame`, `Fml.loopAnon`, `Prog.loopFrame_run`: solkey's `#loopAnon`). |
 | `TermSimp.lean` | The simp sets `tm_eval` and `tm_denote` of the generic term functions. |
-| `Update.lean` | Terms as one signature (`Srt`, `Op0`…`Op3`, `Tm`; `Term`, `STerm`, … are its sorts, the old constructors abbreviations), their reading (`Tm.eval`, `Tm.denote`) and frame lemmas, parallel updates, formulas with both modalities (`Fml`, `holds`, `Valid`), lowering of program expressions to terms. |
+| `Update.lean` | Terms as one signature (`Srt`, `Op0`…`Op3`, `Tm`; `Term`, `STerm`, … are its sorts, the old constructors abbreviations), their reading (`Tm.eval`, `Tm.denote`) and frame lemmas, parallel updates (`UpdElem`; a deployment's `.netMt` for `net := storeSt(mtSt, at(r), a)`, `.setBalance` for `selfBalance := a`, `.saveNetMt`), formulas with both modalities (`Fml`, `holds`, `Valid`), lowering of program expressions to terms. |
 | `Theorems.lean` | The headline theorems in notation. |
 
 ## The calculus
@@ -76,6 +76,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/SoundKit.lean` | `SameOk`, `Premise.Correct` and the tactics the soundness proofs use. |
 | `Calculus/SoundUpdate.lean` | Every taclet with an update premise has the statement's effect. |
 | `Calculus/SoundUnfold.lean` | Every unfolding taclet runs like its statement off the fresh names. |
+| `Calculus/SoundLoop.lean` | The loop invariant rules sound: `Stmt.loop_inv_box`, `Stmt.loop_inv_diamond`, `Loop.run_variant`. |
 | `Calculus/RuleSoundness.lean` | `Taclet.sound`, `LeanTaclet.sound`, `Rule.sound`. |
 | `Calculus/Logic.lean` | The sequent calculus `Proves` (`⊢` all rules, `⊢ₖ` solkey's), its rules written as sequents `dl{ ..Γ, c ⟹[R] φ }`, solkey's names for them (`impRight`, `allRight`, …) and `Proves.sound`; the update, rewrite and close rules (`close`, `closeFalse`). |
 | `Calculus/Callback.lean` | `CallbackTaclet.sound`, `CallbackTaclet.sound_send`, `ProvesC` (sequents `dl{ ..Γ ⟹ᶜ[I] φ }`) and `ProvesC.sound`. |
@@ -258,6 +259,8 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Dangling.lean` | Writes and pushes through a stale alias (one a `pop` left dangling), made live by a `push()`, past a `delete` and a copy, by `sol_prove?`; rounds of them refused past `elimSize` in milliseconds. |
 | `Examples/Tactics/ApplySteps.lean`, `UpdateRules.lean`, `Decide.lean`, `TermTaclets.lean` | The proof style, update simplification, `sol_decide`, term taclets. |
 | `Examples/Tactics/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
+| `Examples/Tactics/Loops.lean` | `while`, `for`, `do … while`, `break`, `continue`, `return` in a loop: the lowering's shapes pinned, `#run` of loops, a concrete loop decided (`Prog.run_loop_of_iterN`); loops proved by unwinding (`whileUnwind`, `loopExit`), solkey's two solc loop ports among them; by an invariant (`whileInvariantBox`, `whileInvariantDiamond`): a counting loop, a sum with a closed form, a loop with `break`, a walk and its proof tree. |
+| `Examples/Tactics/LoopsImport.lean` | Loops from solc's AST (`tests/solc/Loops.sol`): the `/// @custom:key` clauses `scripts/solc-ast.mjs` reads from the source by the loop's `src` offset, printed above the loop by the front end (a clause over several `///` lines joined, as solkey's `KeyNatspec`); a `return` inside a loop lowered on import; five of its seven obligations proved, the two not proved named with why. |
 
 At the root, the notation's own tests:
 

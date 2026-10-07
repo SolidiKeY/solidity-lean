@@ -43,12 +43,15 @@ under the box, where solkey books it (`transferNoCallbackBox`), the diamond
 closing to `false` (`LeanTaclet.transferDiamond`); a send is under either
 modality (`sendNoCallbackBox`, `sendNoCallbackDiamond`); and there is no `try`:
 solkey has a rule for it under the box only (`tryCallNoCallbackBox`), with
-its blocks outside the fragment's claim. -/
+its blocks outside the fragment's claim; and there is no loop, whose rules
+here (`LeanTaclet.whileUnwind`, bounded, `loopExit`, `whileClose`) are not
+solkey's at the pinned checkout. -/
 def Stmt.inSolkey (m : Modality) : Stmt C → Bool
   | .ite _ thn els => Prog.inSolkey m thn && Prog.inSolkey m els
   | .call _ args _ _ body => (Arg.firstNonSimple args).isNone && Prog.inSolkey m body
   | .transfer .. => m == .box
   | .tryCall .. => false
+  | .loop .. => false
   | _ => true
 
 /-- Every statement of the block is in the fragment. -/
@@ -62,7 +65,7 @@ end
 modality. -/
 def Fml.inSolkey : Fml C → Bool
   | .tt | .eq .. | .defined _ => true
-  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.inSolkey
+  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.inSolkey
   | .and φ ψ | .imp φ ψ => φ.inSolkey && ψ.inSolkey
   | .modal m P φ => Prog.inSolkey m P && φ.inSolkey
 
@@ -74,6 +77,7 @@ def Premise.inSolkey (m : Modality) : Premise C → Bool
   | .check c P => c.inSolkey && Prog.inSolkey m P
   | .branches bs => bs.all fun b => Prog.inSolkey m b.2
   | .cases fs _ => fs.all Fml.inSolkey
+  | .inv .. => false
 
 @[simp] theorem Prog.inSolkey_nil : Prog.inSolkey m ([] : Prog C) = true := rfl
 
@@ -146,7 +150,8 @@ theorem LeanTaclet.not_inSolkey {s : Stmt C} {p : Premise C} (d : LeanTaclet C k
     s.inSolkey m = false := by
   cases d with
   | functionCallArgCapture h => simp [Stmt.inSolkey, h]
-  | tryCallDiamond | transferDiamond => rfl
+  | tryCallDiamond | transferDiamond | whileUnwind | loopExit | whileClose _
+  | whileInvariantBox _ | whileInvariantDiamond _ | whileNoVariantDiamond _ _ => rfl
 
 /-- **solkey's rules are complete on the fragment**: the rule `Stmt.step`
 fires on a statement of the fragment is one of solkey's. -/
@@ -159,7 +164,7 @@ theorem Stmt.step_taclet {s : Stmt C} (h : s.inSolkey m = true) :
 /-- A Theory rewrite changes no program: a formula in the fragment stays in it. -/
 theorem Fml.rwEq_inSolkey (q : Term C × Term C) : (φ : Fml C) → (φ.rwEq q).inSolkey = φ.inSolkey
   | .tt | .eq .. | .defined _ => rfl
-  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => Fml.rwEq_inSolkey q φ
+  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ | .anon _ φ => Fml.rwEq_inSolkey q φ
   | .modal _ P φ => by simp only [Fml.rwEq, Fml.inSolkey, Fml.rwEq_inSolkey q φ]
   | .and φ ψ | .imp φ ψ => by
     simp only [Fml.rwEq, Fml.inSolkey, Fml.rwEq_inSolkey q φ, Fml.rwEq_inSolkey q ψ]
@@ -172,7 +177,7 @@ theorem Fml.inSolkey_subst (U : Upd C) : (φ : Fml C) → φ.rigid = true → (�
     simp only [Fml.rigid, Bool.and_eq_true] at h
     simp only [Fml.subst, Fml.inSolkey, Fml.inSolkey_subst U φ h.1, Fml.inSolkey_subst U ψ h.2,
       Bool.and_self]
-  | .upd .., h | .modal .., h | .havoc _, h | .all .., h => by
+  | .upd .., h | .modal .., h | .havoc _, h | .all .., h | .anon .., h => by
     simp only [Fml.rigid, Bool.false_eq_true] at h
 
 /-- `Fml.inSolkey_subst` for a storage write. -/
@@ -183,7 +188,7 @@ theorem Fml.inSolkey_withSt (s : STerm C) : (φ : Fml C) → φ.rigid = true →
     simp only [Fml.rigid, Bool.and_eq_true] at h
     simp only [Fml.withSt, Fml.inSolkey, Fml.inSolkey_withSt s φ h.1, Fml.inSolkey_withSt s ψ h.2,
       Bool.and_self]
-  | .upd .., h | .modal .., h | .havoc _, h | .all .., h => by
+  | .upd .., h | .modal .., h | .havoc _, h | .all .., h | .anon .., h => by
     simp only [Fml.rigid, Bool.false_eq_true] at h
 
 /-- **A derivation on the fragment is solkey's**: whatever the calculus
@@ -198,7 +203,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Prov
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     have := d.premise_inSolkey hφ.1.1
     exact .unfold d (ih (by simp_all [Fml.inSolkey, Premise.inSolkey]))
-  | unfoldLean d _ _ | doneLean d _ _ =>
+  | unfoldLean d _ _ | doneLean d _ _ | checkLean d _ _ _ _ | invLean d _ _ _ _ _ _ _ _ =>
     simp only [Fml.inSolkey, Prog.inSolkey_cons, Bool.and_eq_true] at hφ
     exact absurd hφ.1.1 (by simp [d.not_inSolkey])
   | branches d _ _ =>
@@ -294,7 +299,7 @@ theorem Hyp.modalFree_wrap {φ : Fml C} :
   | .pre _ :: Γ, h => by
     simp only [Hyp.wrap, Fml.modalFree, Bool.and_eq_true] at h
     exact Hyp.modalFree_wrap Γ h.2
-  | .upd _ _ :: Γ, h | .havoc :: Γ, h | .all _ _ :: Γ, h => Hyp.modalFree_wrap Γ h
+  | .upd _ _ :: Γ, h | .havoc :: Γ, h | .all _ _ :: Γ, h | .anon _ :: Γ, h => Hyp.modalFree_wrap Γ h
 
 /-- `\dropEffectlessElementaries` keeps what a halt or a refuted context
 says: `{U} false` holds as `{U'} false` does, whatever is dropped. -/
@@ -318,7 +323,7 @@ theorem Proves.solkey_not_call {Γ : List (Hyp C)} {f : Name} {args : List (Arg 
   | update d _ _ | unfold d _ _ | split d _ _ _ _ _ _ | check d _ _ _ _ | done d _ _ =>
     cases hψ; simp [d.call_simple rfl] at ha
   | branches d _ _ | cases d _ _ _ _ => cases hψ; simp [d.call_simple rfl] at ha
-  | unfoldLean | doneLean => cases hR
+  | unfoldLean | doneLean | checkLean | invLean => cases hR
   | intro _ _ | empty _ _ | allIntro _ _ | updIntro _ _ => cases hψ
   | rewrite r _ ih => exact Proves.rewrite_sound r.sound (ih hR (by rw [← hψ]; rfl))
   | updRw r ht _ ih =>

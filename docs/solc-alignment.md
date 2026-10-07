@@ -346,7 +346,9 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   (0x31) and a zero divisor (0x12) are all `.revert`; "rejected at compile
   time" and "outside the fragment" are `.stuck`. The compiled code has no
   panic: there a failing `assert` reverts (`compile_correct`).
-- **Fragment width.** No loops (`docs/loops.md` plans them), `uintN`/`intN`
+- **Fragment width.** Loops run (`Loop.run`, `docs/loops.md`) and are
+  proved by unwinding to a bound or by an invariant, but the EVM compiler
+  refuses them (`wtStmt`); `uintN`/`intN`
   for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
   `transfer`, `send`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur
   rather than silently diverge.

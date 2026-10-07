@@ -12,8 +12,8 @@ importing file) and defines
   by name through `contract!{ … }`, each function checked alone first;
 * `N.f : Prog N` for each function `f` that elaborates, its body read
   against `N` with its parameters as locals in scope, after its return
-  variables declared at their defaults, its `return`s lowered
-  (`lowerReturns`), as a call inlines it;
+  variables declared at their defaults, its loops and then its `return`s
+  lowered (`lowerLoops`, `lowerReturns`), as a call inlines it;
 * `N.constructor : Prog N` for a declared constructor, a deployment:
   `constructor(x̄);` with its parameters as locals in scope (`elabCtor`).
   The contract declares the constructor (its member last, since it may
@@ -140,6 +140,25 @@ them `ret0`, `ret1`, …). -/
 def retNames (f : SolcFun) : List (String × String) :=
   f.rets.zipIdx.map fun ((x, t), i) =>
     (if !x.isEmpty then x else if f.rets.length == 1 then "_ret" else s!"_ret{i}", t)
+
+/-- Whether a loop in the statement, at any depth, has a `return` inside. -/
+partial def hasLoopReturn (s : RawStmt) : Bool :=
+  ((s matches .whileLoop .. | .forLoop .. | .doWhile .. | .loop ..) && s.hasReturn) ||
+    s.blocks.any (·.any hasLoopReturn)
+
+/-- A body's loops lowered (`lowerLoops`), solkey's `LoopLowering` after its
+`ReturnLowering`: a `return` inside a loop becomes a flag, and the
+`if (ret) return;` after the outermost loop is left to `lowerReturns`.  That
+splices the loop's block, and a `for`'s declaration in it, over the
+statements after it, so a body with such a loop is first renamed fresh past
+its `nRets` return variables (`renameStmts`, as a call inlines it): a
+sibling `for (uint i …)` then declares a name of its own. -/
+def lowerBodyLoops (rets : List String) (nRets : Nat) (raw : List RawStmt) :
+    ElabM (List RawStmt) := do
+  let raw ← if raw.any hasLoopReturn then
+      pure (raw.take nRets ++ (← renameStmts [] (raw.drop nRets)))
+    else pure raw
+  lowerLoops (some rets) raw
 
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
   (" renaming " sepBy1(ident " => " ident, ", "))? : command
@@ -288,12 +307,18 @@ def elabSolcImport : CommandElab := fun stx => do
   for ((k, f, ss, _), raw) in raws.toList.zip bodies do
     let fail (msg : String) : Array ImportRow :=
       rows.set! k { rows[k]! with status := .unsupported, reason := msg }
-    -- its `return`s lowered, which moves statements: an error is then the function's
+    -- its loops, then its `return`s lowered, which moves statements: an
+    -- error is then the function's
     let lower := !f.rets.isEmpty || raw.any RawStmt.hasReturn
-    match paramCtx f.params, (if lower then lowerReturns ((retNames f).map (·.1)) raw else pure raw) with
-    | .error m, _ | _, .error m => rows := fail (at_ f 0 m)
-    | .ok Γ, .ok raw =>
-      match elabProgAt.go C 0 raw (Γ, RawStmt.maxIdxs raw + 1) with
+    let rets := (retNames f).map (·.1)
+    let lowered : ECtx → Except String (List RawStmt × (ECtx × Nat)) := fun Γ => do
+      let (raw, st) ← ((lowerBodyLoops rets rets.length raw).run { funs := C.funs }).run
+        (Γ, RawStmt.maxIdxs raw + 1)
+      pure ((← if lower then lowerReturns rets raw else pure raw), st)
+    match paramCtx f.params >>= lowered with
+    | .error m => rows := fail (at_ f 0 m)
+    | .ok (raw, st) =>
+      match elabProgAt.go C 0 raw st with
       | .error (j, m) =>
         rows := fail (at_ f (if lower then 0 else (ss[j]?.map (·.1)).getD 0) m)
       | .ok P =>

@@ -131,16 +131,17 @@ info: uint se1 = owner; uint se2 = 5; uint se4 = se1; require(se4 == owner); uin
 -/
 #guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol{ pay(owner, 5); })))
 
-/--
-error: `_;` stands once, at the top level of a modifier's body
----
-error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors
--/
+/-- error: Solidity elaboration failed: `_;` outside a modifier's body -/
 #guard_msgs in #check sol{ _; }
 
-/-- error: a modifier's body has one `_;`, at its top level -/
+/-- error: a modifier's body has a `_;` -/
 #guard_msgs (error, drop info) in
-#check contract!{ uint n; modifier twice() { _; _; } }
+#check contract!{ uint n; modifier none() { n = 1; } }
+
+/-! A modifier may run the body several times, with `_;` anywhere: the body
+runs again in the same locals, as solc's legacy pipeline runs it
+(`Examples/Tactics/Loops.lean`'s `ModifierRuns` pins its inlining and runs
+it). -/
 
 /-- A modifier applied without its argument. -/
 def MissingArg : Contract := contract!{ uint owner;

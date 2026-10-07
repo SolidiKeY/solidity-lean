@@ -48,6 +48,9 @@ normalises what the grammar spells differently from Solidity:
   reading (`holdsC`, `docs/solc-alignment.md`);
 * an unnamed value a `try`'s call returns is bound to a fresh `tryRetN`,
   which nothing reads;
+* a loop is printed as written, `while`, `for`, `do … while`, `break`,
+  `continue` (the macros lower them), its `/// @custom:key` clauses above it
+  from the fixture's `loopSpec` (`loopSpec`);
 * every function called by name is a `contract!` member
   (`SolcContract.funMembers`), callees first: a call is inlined where it is
   called.  A call that recurses, or of a function left out, leaves the
@@ -788,7 +791,44 @@ partial def stmt1 (j : Json) : PM (List String) := do
         | e, _ => unsupported s!"the catch clause `{e}`"
       pure [s!"try {c}{rets} {← block (← PM.lift (J.get ok "block"))} {" ".intercalate cs}"]
     | [] => unsupported "a try with no clause"
+  | "WhileStatement" =>
+    let c ← expr (← PM.lift (J.get j "condition"))
+    pure [s!"{← loopSpec j}while ({c}) {← block (← PM.lift (J.get j "body"))}"]
+  | "DoWhileStatement" =>
+    let c ← expr (← PM.lift (J.get j "condition"))
+    pure [s!"{← loopSpec j}do {← block (← PM.lift (J.get j "body"))} while ({c})"]
+  | "ForStatement" =>
+    -- `for (init; c; upd)`, each part optional
+    let part (k : String) : PM String := do
+      match J.opt j k with
+      | none | some .null => pure ""
+      | some p =>
+        match ← stmt1 p with
+        | [t] => pure t
+        | _ => unsupported s!"a `for` whose {k} is not one statement"
+    let init ← part "initializationExpression"
+    let c ← match J.opt j "condition" with
+      | none | some .null => pure ""
+      | some c => expr c
+    let upd ← part "loopExpression"
+    pure [s!"{← loopSpec j}for ({init}; {c}; {upd}) {← block (← PM.lift (J.get j "body"))}"]
+  | "Break" => pure ["break"]
+  | "Continue" => pure ["continue"]
   | k => unsupported s!"the statement `{k}`"
+
+/-- A loop's specification, the `/// @custom:key` clauses above it that the
+fixture keeps (`loopSpec`, read from the source by the loop's `src` offset as
+solkey's `LoopSpecCompiler` reads them), each on a line of its own.  A clause
+in the specification language proper (`\forall`, `\old`) is not a program
+expression, which the grammar reads. -/
+partial def loopSpec (j : Json) : PM String := do
+  let some (.arr cs) := J.opt j "loopSpec" | pure ""
+  let mut out := ""
+  for c in cs do
+    let some t := c.getStr?.toOption | unsupported "a loop clause that is not text"
+    if t.contains '\\' then unsupported s!"the loop clause `{t}`: the specification language"
+    out := out ++ s!"/// @custom:key {t}\n"
+  pure out
 
 end
 

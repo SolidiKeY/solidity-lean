@@ -207,6 +207,7 @@ def Hyp.withC (I : Fml C) : List (Hyp C) → State → (State → Prop) → Prop
   | .upd m U :: Γ, σ, P => m.after (fun τ => Hyp.withC I Γ τ P) (U.apply σ)
   | .havoc :: Γ, σ, P => ∀ st nt, Hyp.withC I Γ (σ.havoc st nt) P
   | .all x p :: Γ, σ, P => ∀ v, p.admits v → Hyp.withC I Γ (σ.setEnv x (.val v)) P
+  | .anon xs :: Γ, σ, P => ∀ b, Hyp.withC I Γ (σ.anon xs b) P
 
 theorem Hyp.holdsC_wrap {I : Fml C} {φ : Fml C} :
     (Γ : List (Hyp C)) → ∀ σ, holdsC I σ (Hyp.wrap Γ φ) ↔ Hyp.withC I Γ σ (holdsC I · φ)
@@ -223,6 +224,9 @@ theorem Hyp.holdsC_wrap {I : Fml C} {φ : Fml C} :
   | .all x p :: Γ, σ => by
     simp only [Hyp.wrap, holdsC, Hyp.withC]
     exact forall_congr' fun _ => imp_congr_right fun _ => Hyp.holdsC_wrap Γ _
+  | .anon xs :: Γ, σ => by
+    simp only [Hyp.wrap, holdsC, Hyp.withC]
+    exact forall_congr' fun _ => Hyp.holdsC_wrap Γ _
 
 theorem Hyp.withC_mono {I : Fml C} {P Q : State → Prop} (h : ∀ τ, P τ → Q τ) :
     (Γ : List (Hyp C)) → ∀ σ, Hyp.withC I Γ σ P → Hyp.withC I Γ σ Q
@@ -235,6 +239,7 @@ theorem Hyp.withC_mono {I : Fml C} {P Q : State → Prop} (h : ∀ τ, P τ → 
     | ok τ => exact Hyp.withC_mono h Γ τ
   | .havoc :: Γ => fun σ hP st nt => Hyp.withC_mono h Γ _ (hP st nt)
   | .all _ _ :: Γ => fun σ hP v hv => Hyp.withC_mono h Γ _ (hP v hv)
+  | .anon _ :: Γ => fun σ hP b => Hyp.withC_mono h Γ _ (hP b)
 
 theorem Hyp.withC_mono₂ {I : Fml C} {P Q R : State → Prop} (h : ∀ τ, P τ → Q τ → R τ) :
     (Γ : List (Hyp C)) → ∀ σ, Hyp.withC I Γ σ P → Hyp.withC I Γ σ Q → Hyp.withC I Γ σ R
@@ -247,6 +252,7 @@ theorem Hyp.withC_mono₂ {I : Fml C} {P Q R : State → Prop} (h : ∀ τ, P τ
     | ok τ => exact Hyp.withC_mono₂ h Γ τ
   | .havoc :: Γ => fun σ hP hQ st nt => Hyp.withC_mono₂ h Γ _ (hP st nt) (hQ st nt)
   | .all _ _ :: Γ => fun σ hP hQ v hv => Hyp.withC_mono₂ h Γ _ (hP v hv) (hQ v hv)
+  | .anon _ :: Γ => fun σ hP hQ b => Hyp.withC_mono₂ h Γ _ (hP b) (hQ b)
 
 /-- `Hyp.withC_mono₂` for a list of premises besides one. -/
 theorem Hyp.withC_forall {I : Fml C} {α : Type} {Q : State → Prop} {R : α → State → Prop}
@@ -313,7 +319,8 @@ theorem ExecP.append_stop {I : Fml C} {Q : Prog C} :
 callbacks, `Stmt.run`'s. -/
 theorem ExecS.det_inv {I : Fml C} {σ : State} {s : Stmt C} {o : COut} (h : ExecS I σ s o)
     (hs : s.forks = false) : o = .ofRes (s.run σ) := by
-  cases h <;> first | rfl | simp [Stmt.forks] at hs
+  cases h <;> first | rfl | (simp_all only [Stmt.forks, Bool.true_eq_false]; done) |
+    simp [Stmt.forks] at hs
 
 /-- A transfer-free block's run with callbacks from a state is its run. -/
 theorem ExecP.of_run {I : Fml C} {σ τ : State} {P : Prog C} (hP : Prog.hasTransfer P = false)

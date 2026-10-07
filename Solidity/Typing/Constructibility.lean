@@ -2922,6 +2922,30 @@ theorem Stmt.run_tight (hd : DeepOk C) : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : He
         · exact Prog.run_tight hd other hwt hcn ht h₄ h
       · exact nomatch hs
     · exact nomatch hs
+  | .loop a c body, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
+    simp only [Stmt.wt] at hs
+    split at hs
+    · split at hs
+      · rename_i Γb hb
+        obtain ⟨hle, rfl⟩ := wt_if hs
+        simp only [Stmt.run] at h
+        refine Loop.run_induct
+          (P := fun τ => ∃ H', RunWT C Γ H' τ ∧ Canon C H' τ ∧ Tight C τ)
+          (Q := fun r => ∀ τ, r = .ok τ → Tight C τ)
+          ⟨H, hwt, hcn, ht⟩ (fun τ ⟨H₁, hwt₁, hcn₁, ht₁⟩ => ?_) (fun _ h => nomatch h) _ h
+        simp only [Loop.step]
+        rcases c.eval τ with _ | (_ | b)
+        · exact fun _ h => nomatch h
+        · exact fun _ h => nomatch h
+        · cases b
+          · exact fun _ h => by cases h; exact ht₁
+          · cases hr : Prog.run τ body with
+            | error _ => exact fun _ h => nomatch h
+            | ok τ' =>
+              obtain ⟨H₂, _, hwt₂, hcn₂⟩ := Prog.run_canon body hwt₁ hcn₁ hb hr
+              exact ⟨H₂, hwt₂.weaken hle, hcn₂, Prog.run_tight hd body hwt₁ hcn₁ ht₁ hb hr⟩
+      · exact nomatch hs
+    · exact nomatch hs
 
 /-- **Tightness, block level.** -/
 theorem Prog.run_tight (hd : DeepOk C) : ∀ (P : List (Stmt C)) {Γ Γ' : Ctx} {H : HeapTy}

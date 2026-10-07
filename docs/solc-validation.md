@@ -96,8 +96,9 @@ contract is compiled; take (1) if the corpus needs these programs.
 writes once (IR `:757-771`); base before index; call arguments left to right
 (legacy `:710-712`); `&&`/`||` short-circuit (IR `:855-859`); constants are folded
 (IR `:862-866`). Via IR, a modifier's parameters are re-initialised at each `_;`
-(`docs/ir-breaking-changes.rst:106-157`; the fragment has one top-level `_;`, where
-they agree) and `delete` of a storage struct zeroes padding too (`:77-104`; visible
+(`docs/ir-breaking-changes.rst:106-157`; with one `_;` outside a loop they agree,
+and with several, or one in a loop, the elaborator follows legacy: `wrapMods`
+runs the body again in the same locals) and `delete` of a storage struct zeroes padding too (`:77-104`; visible
 only with packed types and a low-level read).
 
 **Layout and panics.** `Evm/Repr.lean` is solc's layout

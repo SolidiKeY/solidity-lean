@@ -147,7 +147,7 @@ def _root_.Solidity.Fml.litVars : Fml C → Option (List Var)
 
 /-- Whether the element binds the local `x`. -/
 def _root_.Solidity.UpdElem.binds (x : Var) : UpdElem C → Bool
-  | .val y _ | .path y _ | .mref y _ | .store y _ | .saveNet y => y == x
+  | .val y _ | .path y _ | .mref y _ | .store y _ | .saveNet y | .saveNetMt y => y == x
   | _ => false
 
 /-- `Upd.groundStep` on a parallel update's elements read last first. Each
@@ -181,6 +181,7 @@ def groundIn : List (Hyp C) → List Var → Bool
     | none => false
   | .all x _ :: Γ, xs@(_ :: _) => !xs.contains x && groundIn Γ xs
   | .pre _ :: Γ, xs@(_ :: _) | .havoc :: Γ, xs@(_ :: _) => groundIn Γ xs
+  | .anon ys :: Γ, xs@(_ :: _) => !xs.any ys.contains && groundIn Γ xs
 
 /-- Whether a split's condition `c` is ground in the context `Γ`. -/
 def groundCond (Γ : List (Hyp C)) (c : Fml C) : Bool :=
@@ -211,7 +212,8 @@ def splitRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Na
 /-- The goals of a rule's premise, fired on `⟨[ s; ω ]⟩ ψ` in the context `Γ`,
 handed to `r` with the budget `b`: the goals of `Proves.updateRule`,
 `unfoldRule`, `splitRule` (`splitRes`), `checkRule` (`thn`, `els`),
-`doneRule`, `branchesRule` (one per outcome), `casesRule` (`casesGoals`). -/
+`doneRule`, `branchesRule` (one per outcome), `casesRule` (`casesGoals`),
+`invRule` (the invariant, then a split's goals past `Hyp.loopAnon`). -/
 def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat))
     (close : List (Hyp C) → Fml C → Bool) (b : Nat)
     (Γ : List (Hyp C)) (m : Modality) (ω : Prog C) (ψ : Fml C) :
@@ -223,6 +225,15 @@ def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × 
   | .done d => r b Γ ((Premise.done d).fml m ω ψ)
   | .branches bs => allRes r b (bs.map fun o => (Γ, .alls o.1 (.modal m (o.2 ++ ω) ψ)))
   | .cases fs us => allRes r b (casesGoals Γ m ω ψ fs us)
+  | .inv I U c c' P post =>
+    -- the invariant now, then past `{anon(P)}` the goals of a split
+    bif coverFree m (Γ ++ Hyp.loopAnon m P I U) then
+      allRes r b [(Γ, I), (Γ ++ Hyp.loopAnon m P I U ++ [.pre c], .modal m P post),
+        (Γ ++ Hyp.loopAnon m P I U ++ [.pre c'], .modal m ω ψ)]
+    else
+      allRes r b [(Γ, I), (Γ ++ Hyp.loopAnon m P I U ++ [.pre c], .modal m P post),
+        (Γ ++ Hyp.loopAnon m P I U ++ [.pre c'], .modal m ω ψ),
+        (Γ ++ Hyp.loopAnon m P I U, Premise.cover m c c')]
 
 /-- **The residue** of `Γ ⟹ φ`: the strategy run as `sol_derive` runs it,
 except that a split on a ground condition is pruned (`splitRes`), the leaves
@@ -627,7 +638,7 @@ theorem Fml.seqUpd_sound : (φ : Fml C) → ∀ σ, holds σ φ.seqUpd → holds
   | .and φ ψ, σ, h => ⟨Fml.seqUpd_sound φ σ h.1, Fml.seqUpd_sound ψ σ h.2⟩
   | .all x p φ, σ, h => fun v hv => Fml.seqUpd_sound φ _ (h v hv)
   | .tt, _, h | .eq .., _, h | .defined _, _, h | .not _, _, h | .modal .., _, h
-  | .havoc _, _, h => h
+  | .havoc _, _, h | .anon .., _, h => h
 
 /-- The roots `wt(storage)` names. -/
 def wtRoots? : Fml C → Option (List (Name × Ty))
@@ -644,7 +655,7 @@ def topWt : List (Hyp C) → List (Name × Ty)
     | some vs => vs
     | none => topWt Γ
   | .all _ _ :: Γ => topWt Γ
-  | .upd _ _ :: _ | .havoc :: _ => []
+  | .upd _ _ :: _ | .havoc :: _ | .anon _ :: _ => []
 
 /-- The most nodes the closer takes in a leaf's formula with its updates
 pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
@@ -757,6 +768,9 @@ theorem wrap_dropWt {φ : Fml C} : (Γ : List (Hyp C)) →
       | all x p =>
         exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
           fun σ hs => Hyp.wrap_mono ihh [.all x p] σ hs⟩
+      | anon xs =>
+        exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
+          fun σ hs => Hyp.wrap_mono ihh [.anon xs] σ hs⟩
 
 /-- `Proves.close` with the `wt` premises set aside: a leaf of an
 obligation, closed by a tactic that does not read `wt`. -/
@@ -829,6 +843,7 @@ theorem wrap_topWt {φ : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
   | .all x p :: Γ, σ, h => fun v hv => wrap_topWt Γ _ fun hL => h hL v hv
   | .upd m U :: Γ, σ, h => (wrap_dropWt (.upd m U :: Γ)).2 σ (h fun _ _ hT => nomatch hT)
   | .havoc :: Γ, σ, h => (wrap_dropWt (.havoc :: Γ)).2 σ (h fun _ _ hT => nomatch hT)
+  | .anon xs :: Γ, σ, h => (wrap_dropWt (.anon xs :: Γ)).2 σ (h fun _ _ hT => nomatch hT)
 
 /-- The default closer is sound: what it accepts, `Proves.close` proves. -/
 theorem synClose_sound {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = true) :
@@ -926,6 +941,18 @@ theorem premiseRes_sound {b : Nat} {Γ : List (Hyp C)} {m : Modality} {s : Stmt 
     have hg := allRes_sound hr h hl
     exact Proves.casesRule d (fun _ hf => hg _ (casesGoals_mem_fml hf))
       (fun _ hU => hg _ (casesGoals_mem_upd hU))
+  | inv I U c c' P post =>
+    cases hc : coverFree m (Γ ++ Hyp.loopAnon m P I U) with
+    | true =>
+      simp only [premiseRes, hc, cond_true] at h
+      have hg := allRes_sound hr h hl
+      exact Proves.invRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
+        (hg _ (.tail _ (.tail _ (.head _)))) (cover_of_coverFree hc)
+    | false =>
+      simp only [premiseRes, hc, cond_false] at h
+      have hg := allRes_sound hr h hl
+      exact Proves.invRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
+        (hg _ (.tail _ (.tail _ (.head _)))) (hg _ (.tail _ (.tail _ (.tail _ (.head _)))))
 
 end
 
@@ -951,7 +978,7 @@ theorem Proves.of_residue {close : List (Hyp C) → Fml C → Bool}
     | .imp a ψ, h => exact .intro (ih _ _ _ _ _ h hl)
     | .all x p ψ, h => exact .allIntro (ih _ _ _ _ _ h hl)
     | .upd m U ψ, h => exact .updIntro (ih _ _ _ _ _ h hl)
-    | .tt, h | .eq _ _, h | .defined _, h | .not _, h | .and _ _, h | .havoc _, h =>
+    | .tt, h | .eq _ _, h | .defined _, h | .not _, h | .and _ _, h | .havoc _, h | .anon _ _, h =>
       simp only [residue] at h
       split at h
       · exact hclose _ _ ‹_›

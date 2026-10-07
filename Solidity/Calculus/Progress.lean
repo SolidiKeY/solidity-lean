@@ -24,7 +24,7 @@ Example: `dl!{ [ x = 1; ] x == 1 }` steps by `localValueAssign`;
 `dl!{ { x := 1 } x = 1 }` has no modality, and nothing steps it. -/
 theorem Fml.stepAt_active {k : Nat} :
     ∀ {φ ψ : Fml C}, φ.stepAt k = some ψ → φ.active = true
-  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h | .all _ _ φ, _, h => by
+  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h | .all _ _ φ, _, h | .anon _ φ, _, h => by
     simp only [Fml.stepAt, Option.map_eq_some_iff] at h
     obtain ⟨_, h, -⟩ := h
     simpa [Fml.active] using Fml.stepAt_active h
@@ -55,6 +55,9 @@ theorem Fml.stepAt_of_active (k : Nat) :
   | .all x p φ, h => by
     obtain ⟨ψ, hs⟩ := Fml.stepAt_of_active k (φ := φ) (by simpa [Fml.active] using h)
     exact ⟨.all x p ψ, by simp [Fml.stepAt, hs]⟩
+  | .anon xs φ, h => by
+    obtain ⟨ψ, hs⟩ := Fml.stepAt_of_active k (φ := φ) (by simpa [Fml.active] using h)
+    exact ⟨.anon xs ψ, by simp [Fml.stepAt, hs]⟩
   | .and φ₁ φ₂, h => by
     by_cases h₁ : φ₁.active = true
     · obtain ⟨ψ, hs⟩ := Fml.stepAt_of_active k h₁

@@ -302,6 +302,65 @@ Found while porting solkey's constructor obligations (`Problem.ctorFml`,
   (`docs/solc-alignment.md`, "Constructors"). Lean follows solkey; noted for
   a later `selfBalance >= msgValue` reading.
 
+## 10. Loops (`ed7849d5b6`, past the pin)
+
+- **Unwinding without a bound.** `whileUnwind` is sound (the loop and its
+  unwinding run alike: Lean's `Stmt.loop_unwind_run`, from
+  `Loop.run_unfold`), but the strategy applies it to every loop without a
+  specification, so automatic proof search on a loop whose trip count is not
+  a constant does not end. Lean bounds it by the loop's annotation
+  (`/// @custom:key unwind k`, counted down by each unwinding, so the weight
+  of `Calculus/Termination.lean` decreases) and closes the loop at the bound
+  with a check, `loopExit`: "loop exited", the rest with the condition false
+  assumed, and "unwound to the end", the condition false. Its soundness side
+  condition is that the condition *returns* false (`Fml.eqD`, defined and
+  equal), not only that it is not true: a condition that halts makes the
+  loop halt, not exit. Suggested: an `unwind k` clause in `LoopSpecCompiler`
+  and an exit taclet with these two goals, so that a bounded proof attempt
+  ends in an open goal rather than running on.
+- **`LoopLowering` skips a `try`.** With no enclosing loop
+  (`flags == null`), `LoopLowering.lowerStatement` recurses only into a
+  `Block` and a `ConditionStatement`; its `default` returns any other
+  statement unchanged, a `TryStatement` included, and inside a loop a `try`
+  with no jump is returned as is too.  So in
+  `try … { while (c) { if (x) break; } } catch { }` the `break` reaches
+  `whileUnwind` unlowered.  Lean's `lowerStmt` recurses into every clause of
+  a `try` (and into `unchecked`) outside a loop, and through a `try` with no
+  jump inside one (pinned in `Examples/Tactics/Loops.lean`).  Suggested:
+  recurse into a `TryStatement`'s clauses, and any other statement holding
+  blocks, with `flags == null`.
+- **The exit is not an assertion.** Encoding the bound as `assert(!cond)`
+  changes the program: it panics where the loop runs on, so the result is no
+  longer an unwinding of the loop, and the bound reads as a failure of the
+  contract. The bound belongs to the proof, as a goal.
+- **Invariant rules ported (L4).** `whileInvariantBox` and
+  `whileInvariantDiamond` are Lean's `LeanTaclet`s of those names, shape for
+  shape, sound against `Loop.run` (`Calculus/SoundLoop.lean`). What Lean does
+  differently, each a side condition KeY's types give for free:
+  - *the cover.* Lean's locals are untyped, so `b` may be neither `TRUE` nor
+    `FALSE`; under the diamond the premise also owes `b = TRUE ∨ b = FALSE`,
+    as Lean's `ifElseSplit` does.
+  - *the variant is read, not compared.* KeY's `dec = variant` is a total
+    equation; Lean binds `variant := dec`, which under the diamond needs
+    `dec` defined wherever the invariant holds (`n - i` with `i <= n` in the
+    invariant). The checks `0 <= dec & dec < variant` after the body are
+    KeY's, under `<b = cond;>(b = TRUE -> …)`, so the condition must also be
+    defined after the body.
+  - *the frame.* `{anon}` gives each local the body writes any binding, or
+    none (`Fml.anon`), and anonymises storage and ledger together
+    (`{havoc}`), where solkey anonymises storage for a non-local write and
+    `net` for a call separately: Lean's is coarser where a body writes
+    storage but pays nothing. A body that pushes, pops or rebinds an alias
+    has no frame in Lean (`Prog.loopFrame` reuses `Stmt.within`), where
+    solkey refuses only memory.
+  - *the flags are typed by the invariant.* A loop's `brk`, `ret` and
+    `first` are anonymised locals; the lowering conjoins `f || !f` (defined
+    exactly when `f` is a `bool`) to an invariant for each flag the
+    condition reads. KeY's `boolean` type says this.
+  - *a loop with an invariant and no frame, or no variant under the
+    diamond,* closes to `false` (`whileClose`, `whileNoVariantDiamond`),
+    where solkey unwinds it: in Lean the annotation chooses the rule.
+
 ## Resolved (kept for orientation)
 
 Each was found by the Lean side and is fixed in solkey; git has the details.

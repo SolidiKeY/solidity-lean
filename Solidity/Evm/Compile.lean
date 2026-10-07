@@ -896,7 +896,8 @@ end
 
 mutual
 /-- How many `push` statements a statement has: each runs at most once (the
-fragment has no loops), so a run grows an array by at most this many. -/
+fragment has no loops: `wtStmt` refuses one), so a run grows an array by at
+most this many. -/
 def pushes : Stmt C → Nat
   | .push .. => 1
   | .ite _ t e => pushesP t + pushesP e

@@ -132,7 +132,7 @@ inductive StepRule (C : Contract) : Type where
 /-- The rule the strategy fires on a formula, fresh names at index `k`:
 `Fml.stepAt`'s choice, with its derivation. -/
 def Fml.ruleAt (k : Nat) : Fml C → Option (StepRule C)
-  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.ruleAt k
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.ruleAt k
   | .and φ ψ => if φ.active then φ.ruleAt k else ψ.ruleAt k
   | .modal _ [] _ => some .emptyModality
   | .modal m (s :: _) _ => some (.taclet k m s (s.step k m).premise (s.step k m).rule)
@@ -147,7 +147,7 @@ Example: on `⟨ x = 1; ⟩ x == 1` both `localValueAssign` and the step to
 `{ x := 1 } ⟨⟩ x == 1` exist; on `x == 1` neither does. -/
 theorem Fml.ruleAt_isSome {k : Nat} :
     ∀ φ : Fml C, (φ.ruleAt k).isSome = (φ.stepAt k).isSome
-  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => by
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ | .anon _ φ => by
     simp [Fml.ruleAt, Fml.stepAt, Fml.ruleAt_isSome φ]
   | .and φ ψ => by
     simp only [Fml.ruleAt, Fml.stepAt]
@@ -210,6 +210,10 @@ theorem Fml.stepAt_havoc_of {k : Nat} {φ ψ : Fml C}
 
 theorem Fml.stepAt_all_of {k : Nat} {x : Var} {p : PrimTy} {φ ψ : Fml C}
     (h : φ.stepAt k = some ψ) : (Fml.all x p φ).stepAt k = some (.all x p ψ) := by
+  simp only [Fml.stepAt, h, Option.map_some]
+
+theorem Fml.stepAt_anon_of {k : Nat} {xs : List Var} {φ ψ : Fml C}
+    (h : φ.stepAt k = some ψ) : (Fml.anon xs φ).stepAt k = some (.anon xs ψ) := by
   simp only [Fml.stepAt, h, Option.map_some]
 
 /-- The first goal steps while it is active. -/
@@ -378,7 +382,7 @@ or the goals of a branch.  On any other constructor they answer without looking 
 below it (a `⟨ P ⟩ ↑φ` is active whatever `φ` is). -/
 def isConnective (e : Lean.Expr) : Bool :=
   e.isAppOfArity ``Fml.upd 4 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.havoc 2 ||
-    e.isAppOfArity ``Fml.all 4 || e.isAppOfArity ``Fml.and 3
+    e.isAppOfArity ``Fml.all 4 || e.isAppOfArity ``Fml.anon 3 || e.isAppOfArity ``Fml.and 3
 
 /-- `e.active = b`: the postconditions' `Post.inactive`, put together along
 the connectives `Fml.active` looks through; the kernel's `rfl` where no
@@ -394,7 +398,7 @@ partial def activeProof (C e : Lean.Expr) (b : Bool) : MetaM (Option Lean.Expr) 
     return some (← mkExpectedTypeHint (← mkEqRefl (toExpr b)) ty)
   let a := e.getAppArgs
   if e.isAppOfArity ``Fml.upd 4 || e.isAppOfArity ``Fml.imp 3 || e.isAppOfArity ``Fml.havoc 2 ||
-      e.isAppOfArity ``Fml.all 4 then
+      e.isAppOfArity ``Fml.all 4 || e.isAppOfArity ``Fml.anon 3 then
     let some h ← activeProof C a.back! b | return none
     return some (← mkExpectedTypeHint h ty)
   if !b then
@@ -423,7 +427,7 @@ partial def ruleFocus (C k φ : Lean.Expr) : MetaM (Lean.Expr × Lean.Expr) := d
           (mkApp3 (mkConst ``Fml.ruleAt) C k χ))
     return (χ, h)
   if φ.isAppOfArity ``Fml.upd 4 || φ.isAppOfArity ``Fml.imp 3 || φ.isAppOfArity ``Fml.havoc 2 ||
-      φ.isAppOfArity ``Fml.all 4 then
+      φ.isAppOfArity ``Fml.all 4 || φ.isAppOfArity ``Fml.anon 3 then
     return ← into a.back! none
   if φ.isAppOfArity ``Fml.and 3 then
     if let some ha ← activeProof C a[1]! false then
@@ -986,7 +990,7 @@ structure Chain.Line where
 /-- `Fml.active`, `none` where a slot decides it: a slot has no modality,
 but the kernel does not know that of the postcondition put back in it. -/
 def Fml.activeOpen : Fml C → Option Bool
-  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.activeOpen
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.activeOpen
   | .and φ ψ => match φ.activeOpen with
     | some false => ψ.activeOpen
     | r => r
@@ -996,7 +1000,7 @@ def Fml.activeOpen : Fml C → Option Bool
 /-- Whether the step on `φ` is taken without asking a slot whether it has a
 modality: past the first goal of a branch, once it is done, it asks. -/
 def Fml.stepOpenOk : Fml C → Bool
-  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.stepOpenOk
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.stepOpenOk
   | .and φ ψ => match φ.activeOpen with
     | some true => φ.stepOpenOk
     | some false => ψ.stepOpenOk
@@ -1272,6 +1276,9 @@ partial def stepAtProof (C : Lean.Expr) (sp : Splice) (k : Nat) (A B : Lean.Expr
   if A.isAppOfArity ``Fml.all 4 && B.isAppOfArity ``Fml.all 4 then
     return mkAppN (mkConst ``Fml.stepAt_all_of)
       #[C, kE, a[1]!, a[2]!, a[3]!, b[3]!, ← stepAtProof C sp k a[3]! b[3]!]
+  if A.isAppOfArity ``Fml.anon 3 && B.isAppOfArity ``Fml.anon 3 then
+    return mkAppN (mkConst ``Fml.stepAt_anon_of)
+      #[C, kE, a[1]!, a[2]!, b[2]!, ← stepAtProof C sp k a[2]! b[2]!]
   if A.isAppOfArity ``Fml.and 3 && B.isAppOfArity ``Fml.and 3 then
     if let some ha ← activeProof C a[1]! false then
       return mkAppN (mkConst ``Fml.stepAt_and_right)

@@ -657,7 +657,8 @@ the whole elaborator again at every line (half a second each). -/
 attribute [nospecialize] FreshNames
 
 /-- The `k`-th fresh variable of each kind is a prefix and `k`.  The four
-prefixes must be distinct identifiers that do not end in a digit. -/
+prefixes must be distinct identifiers that do not end in a digit.  A loop's
+flags keep solkey's names (`brk1`, `cnt2`, `ret3`, `first4`: `lowerLoops`). -/
 def FreshNames.ofPrefixes (se sp ie mv : String) : FreshNames where
   name b k :=
     let pre := if b = "se" then se else if b = "sp" then sp else if b = "ie" then ie
@@ -667,7 +668,8 @@ def FreshNames.ofPrefixes (se sp ie mv : String) : FreshNames where
     let stem := s.takeWhile (!·.isDigit)
     let digits := s.drop stem.length
     if digits.isEmpty || !digits.all (·.isDigit) then none
-    else ([("se", se), ("sp", sp), ("ie", ie), ("mv", mv)].find? (·.2 == stem)).map
+    else ([("se", se), ("sp", sp), ("ie", ie), ("mv", mv), ("brk", "brk"), ("cnt", "cnt"),
+        ("ret", "ret"), ("first", "first")].find? (·.2 == stem)).map
       (·.1, digits.toNat!)
 
 /-- `se1`, `sp1`, `ie1`, `mv1`, unless a file declares its own. -/

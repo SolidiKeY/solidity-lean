@@ -1753,6 +1753,30 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
           exact ⟨H', hext, hwt'.weaken hle.2, hcn'⟩
       · exact nomatch hs
     · exact nomatch hs
+  | .loop a c body, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
+    simp only [Stmt.wt] at hs
+    split at hs
+    · split at hs
+      · rename_i Γb hb
+        obtain ⟨hle, rfl⟩ := wt_if hs
+        simp only [Stmt.run] at h
+        refine Loop.run_induct
+          (P := fun τ => ∃ H', H.Extends H' ∧ RunWT C Γ H' τ ∧ Canon C H' τ)
+          (Q := fun r => ∀ τ, r = .ok τ → ∃ H', H.Extends H' ∧ RunWT C Γ H' τ ∧ Canon C H' τ)
+          ⟨H, .refl H, hwt, hcn⟩ (fun τ ⟨H₁, hext₁, hwt₁, hcn₁⟩ => ?_) (fun _ h => nomatch h) _ h
+        simp only [Loop.step]
+        rcases c.eval τ with _ | (_ | b)
+        · exact fun _ h => nomatch h
+        · exact fun _ h => nomatch h
+        · cases b
+          · exact fun _ h => by cases h; exact ⟨H₁, hext₁, hwt₁, hcn₁⟩
+          · cases hr : Prog.run τ body with
+            | error _ => exact fun _ h => nomatch h
+            | ok τ' =>
+              obtain ⟨H₂, hext₂, hwt₂, hcn₂⟩ := Prog.run_canon body hwt₁ hcn₁ hb hr
+              exact ⟨H₂, hext₁.trans hext₂, hwt₂.weaken hle, hcn₂⟩
+      · exact nomatch hs
+    · exact nomatch hs
 
 /-- **Canonicity, block level.** -/
 theorem Prog.run_canon : ∀ (P : List (Stmt C)) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : State},

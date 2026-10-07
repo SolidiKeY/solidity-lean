@@ -1,5 +1,6 @@
 import Solidity.Calculus.SoundUpdate
 import Solidity.Calculus.SoundUnfold
+import Solidity.Calculus.SoundLoop
 import Solidity.Theory.Bridge.Denote
 
 /-!
@@ -142,14 +143,63 @@ theorem Taclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
   | done b => exact Taclet.sound_done d
   | branches bs => exact Taclet.sound_branches d
   | cases fs us => exact Taclet.sound_cases d
+  | inv I U c c' P post => cases d
+
+/-- `whileUnwind`: `while (i < 3) { i++; }` runs as
+`if (i < 3) { i++; while (i < 3) { i++; } }` (`Loop.run_unfold`); the bound
+is not read. -/
+theorem Stmt.loop_unwind_run (n : Nat) (cond : Val C .bool) (body : Prog C) (σ : State) :
+    Prog.run σ [.ite cond (body ++ [.loop (.unwind n) cond body]) []] =
+      (Stmt.loop (.unwind (n + 1)) cond body).run σ := by
+  simp only [Prog.run, Stmt.run, Loop.run_unfold (σ := σ), Loop.step, bind, Except.bind, pure,
+    Except.pure, SemanticsProperties.Prog.run_append]
+  cases cond.eval σ with
+  | error e => rfl
+  | ok v =>
+    rcases v with _ | (_ | _) <;> simp only
+    cases Prog.run σ body with
+    | error e => rfl
+    | ok τ =>
+      simp only
+      cases Loop.run (fun τ => Prog.run τ body) (fun τ => cond.eval τ) τ <;> rfl
+
+/-- `loopExit`: where `cond` is defined and false, `while (cond) body` ends
+where it started. -/
+theorem Stmt.loop_exit_run (a : LoopAnn C) (cond : Val C .bool) (body : Prog C) (σ : State)
+    (h : holds σ (Fml.eqD cond.lower (Term.lit (.bool false)))) :
+    (Stmt.loop a cond body).run σ = .ok σ := by
+  obtain ⟨x, hx, hf⟩ := holds_eqD_iff.1 h
+  rw [Val.lower_eval] at hx
+  simp only [tm_eval, pure, Except.pure, Except.ok.injEq] at hf
+  subst hf
+  simp only [Stmt.run, Loop.run_unfold (σ := σ), Loop.step, hx]
 
 /-- The rules solkey does not have are sound: `functionCallArgCapture` reads
-the argument where the call would (`Stmt.call_capture_sound`). -/
+the argument where the call would (`Stmt.call_capture_sound`), `whileUnwind`
+runs as the loop does (`Stmt.loop_unwind_run`), `loopExit` leaves the
+state of a loop whose condition is false (`Stmt.loop_exit_run`), and the
+invariant rules are `Stmt.loop_inv_box` and `Stmt.loop_inv_diamond`
+(`Calculus/SoundLoop.lean`). -/
 theorem LeanTaclet.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     (d : LeanTaclet C k m s pr) (hs : Avoids s.vars (freshVars k)) : pr.Correct k m s := by
   cases d with
   | functionCallArgCapture h => exact Stmt.call_capture_sound h hs
-  | tryCallDiamond | transferDiamond => exact fun h => nomatch h
+  | whileUnwind =>
+    exact fun σ => by rw [Stmt.loop_unwind_run]; exact SameOk.self _ _
+  | loopExit =>
+    exact fun σ h => by
+      simp only [Prog.run, Stmt.loop_exit_run _ _ _ σ h]; exact SameOk.self _ _
+  | whileInvariantBox hf =>
+    obtain ⟨⟨xs, hv⟩, hfe⟩ := Option.isSome_iff_exists.1 hf
+    exact fun ω φ hω σ h => Stmt.loop_inv_box hfe List.mem_cons_self hs ω φ hω σ h
+  | whileInvariantDiamond hf =>
+    obtain ⟨⟨xs, hv⟩, hfe⟩ := Option.isSome_iff_exists.1 hf
+    have hne : Var.fresh "se" k ≠ Var.fresh "ie" k := by
+      simp only [ne_eq, Var.fresh.injEq, String.reduceEq, false_and, not_false_eq_true]
+    exact fun ω φ hω σ h => Stmt.loop_inv_diamond hfe (.tail _ (.tail _ (.head _)))
+      List.mem_cons_self hne hs ω φ hω σ h
+  | tryCallDiamond | transferDiamond | whileClose | whileNoVariantDiamond =>
+    exact fun h => nomatch h
 
 /-- **Every rule of the calculus is sound**, solkey's and the ones it lacks. -/
 theorem Rule.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}

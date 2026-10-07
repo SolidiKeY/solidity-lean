@@ -121,7 +121,8 @@
  *    elaborator inlines it (`Stmt.call`).
  *
  * 6. **Anything else** is `unsupported` with the reason: a state variable
- *    the Lean contract does not declare, loops, a call of a function it does
+ *    the Lean contract does not declare, loops (the translator emits no
+ *    `/// @custom:key` clauses: the solc front end imports them), a call of a function it does
  *    not declare or a call inside an expression, `return` (which ends only a
  *    declared function's body), a type outside `uint`/`int`/`bool`/
  *    `address`/structs/arrays/mappings. What the translator lets through and
@@ -868,7 +869,7 @@ function translateFunction(fn, contract, sol, leanVars, unportedVars) {
   function translate(s) {
     switch (s.kind) {
       case "loop":
-        throw new Unsupported("loops have no rule in the calculus");
+        throw new Unsupported("a loop: the translator emits no `/// @custom:key` clauses (the solc front end, `solc_import`, reads them)");
       case "block":
         throw new Unsupported("a bare block `{ … }` is not a statement of the grammar");
       case "if": {

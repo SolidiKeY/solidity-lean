@@ -37,7 +37,8 @@ at its operator (`additionAssignment` for `binopAssignment`,
 replaced by the node's condition, as KeY's `NodeInfo.setBranchLabel` does:
 `"if se1 true"`); the suggested walk names the goals by their case
 names (`thn`, `els`, `cov` of `Proves.split`).  Under the box a split has
-KeY's two goals (`Proves.splitBox`); the third, `cov`, is left only where
+KeY's two goals (`Proves.splitBox`), and an invariant rule solkey's two
+(`Proves.invBox`); the third, `cov`, is left only where
 `Proves.closeTrue` does not prove it, and under the diamond.  The commands
 that print the tree (`#proof_tree`, `#proof_node`, `#proof_tree_json`) are
 in `Tools/ProofTree.lean`.
@@ -132,8 +133,13 @@ def instLabel (l : String) (se : Option String) : String :=
 name (`thn`, `els`) or, for an outcome with none, its place; else its case
 name (`cov`, which solkey does not have). -/
 def branchLabel (p : Tree) (i : Nat) (c : Tree) : Option String :=
+  -- an invariant rule's first goal is `init`, and its split past `{anon}` the second
+  let inv := p.name == "whileInvariantBox" || p.name == "whileInvariantDiamond"
   let idx := match c.label with
-    | some l => if l == `thn then some 0 else if l == `els then some 1 else none
+    | some l =>
+      if l == `init then some 0
+      else if inv && (l == `thn || l == `els || l == `cov) then some 1
+      else if l == `thn then some 0 else if l == `els then some 1 else none
     | none => if p.children.size > 1 then some i else none
   let solkey := do (← (branchLabels.lookup p.name))[← idx]?
   (solkey.map (instLabel · p.se?)) <|> c.label.map (·.toString)
@@ -250,11 +256,13 @@ def provesCtor (premise : Lean.Name) (lean : Bool) : Option (Lean.Name × Lean.N
   else if premise == ``Premise.unfold then
     some (if lean then ``Proves.unfoldLean else ``Proves.unfold, ``Proves.unfoldRule)
   else if premise == ``Premise.split then some (``Proves.split, ``Proves.splitRule)
-  else if premise == ``Premise.check then some (``Proves.check, ``Proves.checkRule)
+  else if premise == ``Premise.check then
+    some (if lean then ``Proves.checkLean else ``Proves.check, ``Proves.checkRule)
   else if premise == ``Premise.done then
     some (if lean then ``Proves.doneLean else ``Proves.done, ``Proves.doneRule)
   else if premise == ``Premise.branches then some (``Proves.branches, ``Proves.branchesRule)
   else if premise == ``Premise.cases then some (``Proves.cases, ``Proves.casesRule)
+  else if premise == ``Premise.inv then some (``Proves.invLean, ``Proves.invRule)
   else none
 
 /-- The premise `Stmt.step` gives the statement `s` (index `k`, modality
@@ -329,14 +337,18 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let generic ← `(tactic| apply $(← short generic) ($st _ _ _).rule)
     let fallback : Move :=
       { name := (c?.map Chain.lastName).getD `taclet, branches, cases, tacs := #[generic] }
-    -- under the box, a split with KeY's two goals first (`splitBox`), where it applies
-    let box := premise == ``Premise.split && (← whnf m).isConstOf ``Modality.box
-    let boxRule ← `(tactic| apply $(← short ``Proves.splitBoxRule) ($st _ _ _).rule)
+    -- under the box, a split or an invariant with KeY's two goals first
+    -- (`splitBox`, `invBox`), where it applies
+    let inv := premise == ``Premise.inv
+    let box := (premise == ``Premise.split || inv) && (← whnf m).isConstOf ``Modality.box
+    let (boxCtor, boxGeneric) :=
+      if inv then (``Proves.invBox, ``Proves.invBoxRule) else (``Proves.splitBox, ``Proves.splitBoxRule)
+    let boxRule ← `(tactic| apply $(← short boxGeneric) ($st _ _ _).rule)
     let some c := c? |
       return (if box then #[{ fallback with tacs := #[boxRule] }] else #[]) ++ #[fallback]
     let name ← keyName c d
     let named ← `(tactic| apply $(← short ctor) $(dotIdent (Chain.lastName c)))
-    let boxNamed ← `(tactic| apply $(← short ``Proves.splitBox) $(dotIdent (Chain.lastName c)))
+    let boxNamed ← `(tactic| apply $(← short boxCtor) $(dotIdent (Chain.lastName c)))
     -- an `if`'s condition, as `ifElseSplit`'s labels name it
     let se ← if premise == ``Premise.split then
         try

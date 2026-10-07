@@ -729,6 +729,68 @@ theorem holds_revert (m : Modality) (ω : Prog C) (φ : Fml C) :
     Modality.after, Modality.onHalt, ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true,
     and_true]
 
+/-! ### A loop's anonymising update
+
+`{anon(i, s)} φ` (`Fml.anon`) is `φ` in `σ` with `i`, `s` bound to anything,
+or unbound: a read of `i` there is `anonRead (b i)`, a binding nobody knows,
+which the closer names as it names `σ.getEnv x` of a local `σ` does not bind
+(`Close.bindingVal_eq_ok`). -/
+
+/-- What a read of an anonymised local returns. -/
+def anonRead (o : Option Binding) : Res Binding :=
+  match o with
+  | some v => .ok v
+  | none => .error .stuck
+
+/-- `{anon(i)} φ`: `φ` whatever `i` holds. -/
+theorem holds_anon (xs : List Var) (φ : Fml C) :
+    holds σ (.anon xs φ) ↔ ∀ b, holds (σ.anon xs b) φ := Iff.rfl
+
+theorem State.anon_nil (σ : State) (b : Var → Option Binding) : σ.anon [] b = σ := by
+  cases σ; rfl
+
+/-- The local read is the last one anonymised, or one before it. -/
+theorem State.getEnv_anon_cons (σ : State) (x : Var) (xs : List Var) (b : Var → Option Binding)
+    (y : Var) : (σ.anon (x :: xs) b).getEnv y =
+      if y = x then anonRead (b y) else (σ.anon xs b).getEnv y := by
+  simp only [State.anon, State.getEnv, anonEnv]
+  by_cases h : y = x
+  · subst h
+    cases b y with
+    | some v => simp only [SemanticsProperties.lookupBy_setBy_self, anonRead, if_true]
+    | none => simp only [lookupBy_filter_self, anonRead, if_true]
+  · cases b x with
+    | some v => simp only [SemanticsProperties.lookupBy_setBy_ne h, h, if_false]
+    | none => simp only [lookupBy_filter_ne h, h, if_false]
+
+theorem State.findStorage_anon (σ : State) (xs : List Var) (b : Var → Option Binding)
+    (r : Name) (segs : List Seg) : (σ.anon xs b).findStorage r segs = σ.findStorage r segs := rfl
+theorem State.checkIndex_anon (σ : State) (xs : List Var) (b : Var → Option Binding)
+    (r : Name) (segs : List Seg) (i : Int) :
+    (σ.anon xs b).checkIndex r segs i = σ.checkIndex r segs i := rfl
+theorem State.getObj_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (id : Nat) :
+    (σ.anon xs b).getObj id = σ.getObj id := rfl
+theorem arrayLen_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (r : Name)
+    (segs : List Seg) : arrayLen (σ.anon xs b) r segs = arrayLen σ r segs := rfl
+theorem memArrayLen_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (id : Nat) :
+    memArrayLen (σ.anon xs b) id = memArrayLen σ id := rfl
+theorem readAddr_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (a : Addr) :
+    readAddr (σ.anon xs b) a = readAddr σ a := by
+  cases a <;> rfl
+theorem readVal_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (a : Addr) :
+    readVal (σ.anon xs b) a = readVal σ a := by
+  simp only [readVal, readAddr_anon]
+theorem tx_anon (σ : State) (xs : List Var) (b : Var → Option Binding) :
+    (σ.anon xs b).tx = σ.tx := rfl
+theorem selfBalance_anon (σ : State) (xs : List Var) (b : Var → Option Binding) :
+    (σ.anon xs b).selfBalance = σ.selfBalance := rfl
+theorem net_anon (σ : State) (xs : List Var) (b : Var → Option Binding) :
+    (σ.anon xs b).net = σ.net := rfl
+
+/-- What an anonymised local holds, bound: the binding, named. -/
+theorem anonRead_eq_ok {o : Option Binding} {v : Binding} : anonRead o = .ok v ↔ o = some v := by
+  cases o <;> simp only [anonRead, Except.ok.injEq, reduceCtorEq, Option.some.injEq]
+
 end Eval
 
 end Close
@@ -790,6 +852,10 @@ attribute [close_rw]
   State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
   Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
   Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_ite
+  -- a loop's anonymising update
+  Close.holds_anon Close.State.anon_nil Close.State.getEnv_anon_cons Close.State.findStorage_anon
+  Close.State.checkIndex_anon Close.State.getObj_anon Close.arrayLen_anon Close.memArrayLen_anon
+  Close.readAddr_anon Close.readVal_anon Close.tx_anon Close.selfBalance_anon Close.net_anon
   Close.lookupBy_setBy_int State.pay State.setNet
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil

@@ -69,6 +69,7 @@ hypothesis):
 | `fbs` | a call with its body and its targets (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; it returns to targets (`CallRet.isRets`) |
 | `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; not `CallRet.isRets` (a result, if any, assigned inside the expansion: `y = f(a);`) |
 | `call`, `rets`, `code`; `body`, `errorBody`, `panicBody`, `otherBody` | a `try`'s call, its return locals, its `Panic` code; its blocks | `ExtCall C`, …; `List (Stmt C)` | |
+| `cond`; `body`; `n` | a loop's condition (KeY's `s#cond`); its body, a block, or spliced in place inside one (`{ body; … }`); the bound of `/// @custom:key unwind n` | `Val C .bool`; `Prog C`; `Nat` | |
 
 The position says which sort an operand is read at: `sp.fld` is a location
 left of `=`, a value right of it, a path under `delete`.  A copy is a write
@@ -174,6 +175,9 @@ syntax:max dl_upd ppSpace dl_fml:50 : dl_fml
 /-- `{ havoc } φ`: `φ` after any storage and ledger a callee may leave.
 Above an update schema variable named `havoc`, which it also reads as. -/
 syntax:max (priority := high) "{ " &"havoc" " } " dl_fml:50 : dl_fml
+/-- `{ anon(i, s) } φ`: `φ` whatever the locals `i`, `s` hold (`Fml.anon`),
+the anonymising update of a loop's frame. -/
+syntax:max (priority := high) "{ " &"anon" "(" sepBy(ident, ", ") ")" " } " dl_fml:50 : dl_fml
 /-- The diamond: `P` runs to the end, and `φ` holds after. -/
 syntax:max "⟨ " (sol_stmt "; ")* "⟩ " dl_fml:50 : dl_fml
 /-- The box: if `P` runs to the end, `φ` holds after. -/
@@ -239,6 +243,18 @@ syntax (str ": ")? dl_fml " ⟹ " "⟨" "[ " (sol_stmt "; ")* "]" "⟩" " ; " (s
   dl_premise
 syntax &"true" : dl_premise
 syntax &"false" : dl_premise
+/-- A loop's invariant rule (`whileInvariantBox`): the invariant now, and
+under `{anon(body)}` (solkey's `#loopAnon`), the invariant assumed, the body
+from where the condition holds to its postcondition, the rest (`⟨[ ]⟩`)
+from where it does not. -/
+syntax (str ": ")? dl_fml " ; " (str ": ")? "{ " &"anon" "(" sol_block ")" " } " "(" dl_fml:26 " → "
+  dl_fml:26 " ⟹ " "⟨" "[ " sol_block " ]" "⟩ " dl_fml:50 " ; " dl_fml:26 " ⟹ " "⟨" "[ " "]" "⟩" ")" :
+  dl_premise
+/-- The same with an update in front of the two goals (`whileInvariantDiamond`'s
+`{ variant := dec }`). -/
+syntax (str ": ")? dl_fml " ; " (str ": ")? "{ " &"anon" "(" sol_block ")" " } " "(" dl_fml:26 " → "
+  dl_upd " (" dl_fml:26 " ⟹ " "⟨" "[ " sol_block " ]" "⟩ " dl_fml:50 " ; " dl_fml:26 " ⟹ "
+  "⟨" "[ " "]" "⟩" ")" ")" : dl_premise
 /-- One goal of a taclet with a goal per way a statement may end (KeY's
 `"label": \replacewith(…)`): the block in the statement's place, for every
 value of the locals `xs` it binds (`∀ xs.`).  The label is solkey's; the
@@ -264,6 +280,8 @@ diamond (`Hyp.upd .box U`); `{U}` alone is produced under the schema's `m`. -/
 syntax dl_upd " [ " "]" : dl_hyp
 syntax dl_upd " ⟨ " "⟩" : dl_hyp
 syntax (priority := high) "{ " &"havoc" " }" : dl_hyp
+/-- `{ anon(i, s) }`: a loop's anonymising update of the locals `i`, `s`. -/
+syntax (priority := high) "{ " &"anon" "(" sepBy(ident, ", ") ")" " }" : dl_hyp
 syntax dl_fml : dl_hyp
 /-- `∀ T x`: the local `x` holds any value of `T` (`Hyp.all`), KeY's skolem
 constant. -/
@@ -419,7 +437,14 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
     | "mv" | "pmv" | "rmv" => .mem x
     | "gsp" => .root x (proofIdent x s)
     | "se" | "ie" | "sadr" => .simple x
-    | "e" | "nse" | "nadr" => .val x
+    | "e" | "nse" | "nadr" | "cond" | "inv" | "dec" => .val x
+    -- the invariant rules' fresh locals: KeY's `s#b` (`bType b = cond;`), the
+    -- condition's value, and `\skolemTerm int variant`, the variant's before
+    -- the iteration (`whileInvariantBox`, `whileInvariantDiamond`)
+    | "b" => .local (Lean.Syntax.mkApp (mkIdent ``Var.fresh)
+        #[Lean.Syntax.mkStrLit "se", schemaIdent "k"])
+    | "variant" => .local (Lean.Syntax.mkApp (mkIdent ``Var.fresh)
+        #[Lean.Syntax.mkStrLit "ie", schemaIdent "k"])
     | "sp" | "nsp" | "path" | "map" | "arr" | "parr" | "rarr" | "marr" | "darr" => .spath x
     | "nmp" | "mpath" => .mpath x
     | "nlhs" | "loc" => .loc x
@@ -695,7 +720,7 @@ inductive Item where
   deriving Inhabited
 
 /-- A program schema variable, by its stem. -/
-def isProgStem (s : String) : Bool := ["P", "Q", "ω"].contains (stemOf s)
+def isProgStem (s : String) : Bool := ["P", "Q", "ω", "body"].contains (stemOf s)
 
 /-- Whether `s` names a call with its body: `fbs` (KeY's `FunctionBody`) or
 `ic` (`InternalCall`). -/
@@ -767,6 +792,45 @@ def schemaTry (stx : TSyntax `sol_stmt) : MacroM Lean.Term := do
     | `(sol_catch| catch $b:sol_block) => block b
     | _ => Macro.throwErrorAt o "`catch otherBody`"
   `(Stmt.tryCall $call $rets $(← block ok) $err $code $pnc $other)
+
+/-- A taclet's `/// @custom:key` clauses above `while`: the annotation written
+(`unwind 0`, `unwind n`, `unwind n + 1`, `invariant inv` with any `dec`, or
+`invariant inv` and `decreases dec`), and the `while`. -/
+def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
+  let cl := stx[0]
+  let w := stx[1]
+  -- `/// @custom:key invariant inv /// @custom:key decreases dec while …`
+  if w.getKind == ``solLoopSpec && cl[5].getId.toString == "invariant"
+      && w[0][5].getId.toString == "decreases" then
+    let w' := w[1]
+    unless w'.getKind == ``solWhile do
+      Macro.throwErrorAt w' "a taclet's `/// @custom:key` clauses stand above `while`"
+    let msg := "a taclet's clauses are `invariant inv` and `decreases dec`"
+    let x : Ident ← match (⟨cl[6]⟩ : TSyntax `sol_expr) with
+      | `(sol_expr| $x:ident) => pure x
+      | _ => Macro.throwErrorAt cl msg
+    let d : Ident ← match (⟨w[0][6]⟩ : TSyntax `sol_expr) with
+      | `(sol_expr| $d:ident) => pure d
+      | _ => Macro.throwErrorAt cl msg
+    return (← `(LoopAnn.inv $x (some $d)), w')
+  unless w.getKind == ``solWhile do
+    Macro.throwErrorAt w "a taclet's `/// @custom:key` clause stands above `while`"
+  let e : TSyntax `sol_expr := ⟨cl[6]⟩
+  let bad : MacroM Lean.Term := Macro.throwErrorAt cl
+    "a taclet's clause is `unwind 0`, `unwind n`, `unwind n + 1` or `invariant inv`"
+  let kw := cl[5].getId.toString
+  let ann ← if kw == "unwind" then
+      match e with
+      | `(sol_expr| $n:num) => `(LoopAnn.unwind $n)
+      | `(sol_expr| $x:ident) => `(LoopAnn.unwind $x)
+      | `(sol_expr| $x:ident + 1) => `(LoopAnn.unwind ($x + 1))
+      | _ => bad
+    else if kw == "invariant" then
+      match e with
+      | `(sol_expr| $x:ident) => `(LoopAnn.inv $x $(schemaIdent "dec"))
+      | _ => bad
+    else bad
+  return (ann, w)
 
 mutual
 
@@ -926,6 +990,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     | _ => Macro.throwErrorAt f "only `b.push()` and `b.pop()` are calls"
   | `(sol_stmt| if ($c:sol_expr) $t:sol_block else $f:sol_block) => do
     return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f)), Γ)
+  | `(sol_stmt| if ($c:sol_expr) $t:sol_block) => do
+    return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) []), Γ)
   | stx => do
     let k := stx.raw.getKind
     if k == ``solDelete then
@@ -941,6 +1007,13 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     if k == ``solAssert then return (← `(Stmt.assert $(← schemaAt Γ .val ⟨stx.raw[2]⟩)), Γ)
     if k == ``solRevert then return (← `(Stmt.revert), Γ)
     if k == ``solTry then return (← schemaTry stx, Γ)
+    if k == ``solWhile then
+      -- `while (cond) body`: the annotation is the schema variable `ann`
+      return (← `(Stmt.loop $(schemaIdent "ann") $(← schemaAt Γ .val ⟨stx.raw[2]⟩)
+        $(← schemaBlock fresh Γ ⟨stx.raw[4]⟩)), Γ)
+    if k == ``solLoopSpec then
+      let (ann, w) ← schemaLoopSpec stx.raw
+      return (← `(Stmt.loop $ann $(← schemaAt Γ .val ⟨w[2]⟩) $(← schemaBlock fresh Γ ⟨w[4]⟩)), Γ)
     if k == Lean.choiceKind then
       let alts := stx.raw.getArgs
       for alt in alts.filter (·[0].isAtom) ++ alts do
@@ -1402,7 +1475,15 @@ partial def fmlModality? (either : Lean.Term) : TSyntax `dl_fml → MacroM (Opti
 partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| true) => `(Fml.tt)
   | `(dl_fml| false) => `(Fml.not Fml.tt)
-  | `(dl_fml| $a:dl_term = $b:dl_term) | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do
+  | `(dl_fml| $a:dl_term = $b:dl_term) => do
+    -- KeY's `b = TRUE`: the condition defined and true (`Fml.eqD`)
+    if let `(dl_term| $c:ident) := b then
+      let n := c.getId.toString
+      if n == "TRUE" || n == "FALSE" then
+        let v := mkIdent (Name.mkSimple (if n == "TRUE" then "true" else "false"))
+        return ← `(Fml.eqD $(← schemaTerm [] .val a) (Term.lit (.bool $v)))
+    `(Fml.eq $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
+  | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do
     `(Fml.eq $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
   | `(dl_fml| defined( $t:dl_term )) => do `(Fml.defined $(← schemaTerm [] .val t))
   | `(dl_fml| ¬ $φ:dl_fml) => do `(Fml.not $(← schemaFml φ))
@@ -1416,6 +1497,9 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
     let ψ ← schemaFml ψ
     `(Fml.and (Fml.imp $φ $ψ) (Fml.imp $ψ $φ))
   | `(dl_fml| { havoc } $φ:dl_fml) => do `(Fml.havoc $(← schemaFml φ))
+  | `(dl_fml| { anon($xs:ident,*) } $φ:dl_fml) => do
+    let ts : Array Lean.Term := xs.getElems.map fun x => ⟨x.raw⟩
+    `(Fml.anon [$ts,*] $(← schemaFml φ))
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
     -- an update schema variable is judged under the schema's modality
     let m ← match ← fmlModality? (schemaIdent "m") φ with
@@ -1455,7 +1539,10 @@ partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
     -- in a taclet, between `uint`s: `se <= selfBalance`
     `(Fml.eqD (Term.binop BinOp.le PrimTy.uint $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
         (Term.lit (.bool true)))
-  | stx@`(dl_fml| $_:dl_term < $_:dl_term)
+  | `(dl_fml| $a:dl_term < $b:dl_term) => do
+    -- in a taclet, between `uint`s: `dec < variant`
+    `(Fml.eqD (Term.binop BinOp.lt PrimTy.uint $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
+        (Term.lit (.bool true)))
   | stx@`(dl_fml| $_:dl_term > $_:dl_term) | stx@`(dl_fml| $_:dl_term >= $_:dl_term) =>
     Macro.throwErrorAt stx
       "an order between values is read against a contract: write `dl[C]{ … }` or `dl!{ … }`"
@@ -1477,6 +1564,21 @@ def schemaBranch (fresh : Bool) (Γ : Scope) (b : TSyntax `dl_branch) : MacroM L
       if stemOf x.getId.toString == "code" then `($(mkIdent `Solidity.codeBinders) $x) else pure x
   `(($xs, $(← schemaBlock fresh Γ blk)))
 
+/-- The invariant rule's premise: the invariant `i` as written on both goals,
+the frame of the body the loop runs (`b`, `t`). -/
+def schemaInv (fresh : Bool) (Γ : Scope) (i : TSyntax `dl_fml) (b : TSyntax `sol_block)
+    (h : TSyntax `dl_fml) (U : Option (TSyntax `dl_upd)) (c : TSyntax `dl_fml)
+    (t : TSyntax `sol_block) (post c' : TSyntax `dl_fml) : MacroM Lean.Term := do
+  unless i.raw.structEq h.raw do
+    Macro.throwErrorAt h "the invariant assumed is the one shown initially valid"
+  unless b.raw.structEq t.raw do
+    Macro.throwErrorAt t "the frame is the body's, which the goal runs"
+  let U ← match U with
+    | some U => schemaUpd Γ U
+    | none => `([])
+  `($(mkIdent `Solidity.Premise.inv) $(← schemaFml i) $U $(← schemaFml c) $(← schemaFml c')
+      $(← schemaBlock fresh Γ t) $(← schemaFml post))
+
 def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM Lean.Term
   | `(dl_premise| $U:dl_upd ⟨[ ]⟩) => do `($(mkIdent `Solidity.Premise.update) $(← schemaUpd Γ U))
   | `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) => do
@@ -1496,6 +1598,12 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
       Macro.throwErrorAt c' "a check assumes the condition it checks: write it on both sides"
     let (ts, _) ← schemaProg fresh Γ ts
     `($(mkIdent `Solidity.Premise.check) $(← schemaFml c) $(← progTerm true ts none))
+  | `(dl_premise| $[$_:str :]? $i:dl_fml ; $[$_:str :]? { anon($b:sol_block) } ($h:dl_fml →
+      $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩)) => do
+    schemaInv fresh Γ i b h none c t post c'
+  | `(dl_premise| $[$_:str :]? $i:dl_fml ; $[$_:str :]? { anon($b:sol_block) } ($h:dl_fml →
+      $U:dl_upd ($c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩))) => do
+    schemaInv fresh Γ i b h (some U) c t post c'
   | `(dl_premise| true) => `($(mkIdent `Solidity.Premise.done) true)
   | `(dl_premise| false) => `($(mkIdent `Solidity.Premise.done) false)
   | `(dl_premise| $b:dl_branch ; $bs:dl_branch;*) => do
@@ -1648,6 +1756,9 @@ def schemaPrim (T : Ident) : MacroM Lean.Term :=
 
 def schemaHyp : TSyntax `dl_hyp → MacroM Lean.Term
   | `(dl_hyp| { havoc }) => `($(mkIdent `Solidity.Hyp.havoc))
+  | `(dl_hyp| { anon($xs:ident,*) }) => do
+    let ts : Array Lean.Term := xs.getElems.map fun x => ⟨x.raw⟩
+    `($(mkIdent `Solidity.Hyp.anon) [$ts,*])
   | `(dl_hyp| $U:dl_upd [ ]) => do `($(mkIdent `Solidity.Hyp.upd) .box $(← schemaUpd [] U))
   | `(dl_hyp| $U:dl_upd ⟨ ⟩) => do `($(mkIdent `Solidity.Hyp.upd) .diamond $(← schemaUpd [] U))
   | `(dl_hyp| $U:dl_upd) => do `($(mkIdent `Solidity.Hyp.upd) $(schemaIdent "m") $(← schemaUpd [] U))
@@ -2167,7 +2278,10 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     let l ← if let some x ← fvarName? l then `(sol_expr| $(nameIdent x):ident) else ppExpr l
     `(sol_stmt| $l:sol_expr = new $(← ppTy.ppRef R):sol_ty ( $(← ppExpr n) ))
   | Stmt.ite _ c thn els =>
-    `(sol_stmt| if ($(← ppExpr c)) $(← ppBlock thn):sol_block else $(← ppBlock els):sol_block)
+    if (← whnf els).isAppOfArity ``List.nil 1 then
+      `(sol_stmt| if ($(← ppExpr c)) $(← ppBlock thn):sol_block)
+    else
+      `(sol_stmt| if ($(← ppExpr c)) $(← ppBlock thn):sol_block else $(← ppBlock els):sol_block)
   | Stmt.require _ c => `(sol_stmt| require($(← ppExpr c)))
   | Stmt.assert _ c => `(sol_stmt| assert($(← ppExpr c)))
   | Stmt.revert _ => `(sol_stmt| revert())
@@ -2213,6 +2327,35 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
       `(sol_stmt| try $call:sol_expr $(← ppBlock ok):sol_block $catches:sol_catch*)
     else
       `(sol_stmt| try $call:sol_expr returns ($ps,*) $(← ppBlock ok):sol_block $catches:sol_catch*)
+  | Stmt.loop _ a c body =>
+    let w ← `(sol_stmt| while ($(← ppExpr c)) $(← ppBlock body):sol_block)
+    -- the annotation: none for a schema variable (`ann`) and for `.unwind 0`
+    if (← fvarName? a).isSome then return w
+    let clause (k : String) (e : TSyntax `sol_expr) (s : TSyntax `sol_stmt) :
+        MetaM (TSyntax `sol_stmt) := do
+      `(sol_stmt| /// @custom:key $(Lean.mkIdent (Lean.Name.mkSimple k)):ident $e:sol_expr $s:sol_stmt)
+    let name? (e : Lean.Expr) : MetaM (Option Ident) := do
+      return (← fvarName? e).map fun x => Lean.mkIdent (Lean.Name.mkSimple x)
+    let succName? (e : Lean.Expr) : MetaM (Option Ident) := do
+      let_expr HAdd.hAdd _ _ _ _ x o := e | return none
+      unless (← (evalNat o).run) == some 1 do return none
+      name? x
+    match_expr (← whnf a) with
+    | LoopAnn.unwind _ k =>
+      -- a taclet's bound: `n`, `n + 1`
+      if let some x ← name? k then return ← clause "unwind" (← `(sol_expr| $x:ident)) w
+      if let some x ← succName? k then
+        return ← clause "unwind" (← `(sol_expr| $x:ident + 1)) w
+      let some n ← (evalNat k).run | escape
+      if n == 0 then return w
+      clause "unwind" (← `(sol_expr| $(Lean.Syntax.mkNumLit (toString n)):num)) w
+    | LoopAnn.inv _ I dec =>
+      let w ← match_expr (← whnf dec) with
+        | Option.some _ d => clause "decreases" (← ppExpr d) w
+        | Option.none _ => pure w
+        | _ => if (← fvarName? dec).isSome then pure w else escape
+      clause "invariant" (← ppExpr I) w
+    | _ => escape
   | _ => escape
 
 /-- A return local of a `try`: `uint v`. -/
@@ -2284,11 +2427,14 @@ partial def ppProgParts? (e : Lean.Expr) :
   let some ss ← ppProg? e | return none
   return some (ss, none)
 
-/-- A branch: `{ s₁; …; sₙ; }`, or the name of a schema variable. -/
+/-- A branch: `{ s₁; …; sₙ; }`, or the name of a schema variable, or a block
+with one spliced in (`{ body; s; }`). -/
 partial def ppBlock (e : Lean.Expr) : MetaM (TSyntax `sol_block) := do
   let e ← instantiateMVars e
   if let some n ← fvarName? e then return ← `(sol_block| $(nameIdent n):ident)
-  let some ss ← ppProg? e | `(sol_block| ‹$(← escapeTerm e):term›)
+  -- `{ body; … }`: a program variable spliced in a block (`whileUnwind`'s)
+  if let some ss ← ppProg? e then return ← `(sol_block| { $[$ss;]* })
+  let some (ss, none) ← ppProgParts? e | `(sol_block| ‹$(← escapeTerm e):term›)
   `(sol_block| { $[$ss;]* })
 
 end
@@ -2929,6 +3075,12 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
   | Fml.imp _ φ ψ => `(dl_fml| $(← arg φ):dl_fml → $(← ppFml ψ):dl_fml)
   | Fml.upd _ _ U φ => `(dl_fml| $(← ppUpd U):dl_upd $(← arg φ):dl_fml)
   | Fml.havoc _ φ => `(dl_fml| { havoc } $(← arg φ):dl_fml)
+  | Fml.anon _ xs φ =>
+    let some xs ← listElems? xs | escape
+    let ids ← xs.mapM ppVar?
+    if ids.any Option.isNone then return ← escape
+    let ids : Array Ident := ids.filterMap id
+    `(dl_fml| { anon($ids,*) } $(← arg φ):dl_fml)
   | Fml.modal _ m P φ =>
     let some ss ← ppProg? P |
       if let some n ← fvarName? P then
@@ -2990,6 +3142,7 @@ partial def copyDecls (bound : Array String) (e : Lean.Expr) :
   | Fml.not _ φ => copyDecls bound φ
   | Fml.all _ _ _ φ => copyDecls bound φ
   | Fml.havoc _ φ => copyDecls bound φ
+  | Fml.anon _ _ φ => copyDecls bound φ
   | _ => return #[]
 
 /-- `copyDecls` over a program's statements, and the names bound after them. -/
@@ -3058,7 +3211,8 @@ def delabFml : Delab := do
 attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.eqD, delab app.Solidity.Fml.defined,
   delab app.Solidity.Fml.not,
   delab app.Solidity.Fml.and, delab app.Solidity.Fml.imp, delab app.Solidity.Fml.upd,
-  delab app.Solidity.Fml.modal, delab app.Solidity.Fml.all, delab app.Solidity.Fml.havoc] delabFml
+  delab app.Solidity.Fml.modal, delab app.Solidity.Fml.all, delab app.Solidity.Fml.havoc,
+  delab app.Solidity.Fml.anon] delabFml
 
 /-- `Valid φ`: `⊨ φ`. -/
 @[delab app.Solidity.Valid]

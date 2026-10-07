@@ -34,7 +34,8 @@ needs.  Instruction meanings follow the EVM as Nethermind's
   they are the same term, so keccak never collides: the assumption solc makes,
   written into the type.  Adding to a slot adds to its offset, unbounded.
 * **Jumps are relative and forward**: `JUMP n`/`JUMPI n` skip the next `n`
-  instructions.  The fragment has no loops, so no backward jump is needed, and
+  instructions.  The fragment has no loops (`wtStmt` refuses one), so no
+  backward jump is needed, and
   `exec` is structural: it carries the number of instructions still to skip.
   Absolute targets with `JUMPDEST` are an assembler's business.  The one loop
   solc emits for the fragment, `checked_exp_helper`'s, runs at most `255`

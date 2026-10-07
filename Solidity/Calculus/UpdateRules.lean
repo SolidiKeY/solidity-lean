@@ -1260,6 +1260,7 @@ def Fml.updAt (r : UpdRuleName) : Fml C → Option (Fml C)
   | .modal m P φ => (φ.updAt r).map (.modal m P)
   | .havoc φ => (φ.updAt r).map .havoc
   | .all x p φ => (φ.updAt r).map (.all x p)
+  | .anon xs φ => (φ.updAt r).map (.anon xs)
   | .tt | .eq .. | .defined _ => none
 
 /-- Two postconditions that hold in the same states hold after the same run:
@@ -1322,6 +1323,10 @@ theorem Fml.updAt_sound {r : UpdRuleName} :
     simp only [Fml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
     exact forall_congr' fun _ => imp_congr_right fun _ => Fml.updAt_sound φ h' _
+  | .anon _ φ, ψ, h, σ => by
+    simp only [Fml.updAt, Option.map_eq_some_iff] at h
+    obtain ⟨φ', h', rfl⟩ := h
+    exact forall_congr' fun _ => Fml.updAt_sound φ h' _
   | .tt, _, h, _ | .eq .., _, h, _ | .defined _, _, h, _ => by
     simp only [updAt, reduceCtorEq] at h
 
@@ -1352,6 +1357,7 @@ def Fml.simpUpds : Fml C → Fml C
   | .modal m P φ => .modal m P φ.simpUpds
   | .havoc φ => .havoc φ.simpUpds
   | .all x p φ => .all x p φ.simpUpds
+  | .anon xs φ => .anon xs φ.simpUpds
   | φ => φ
 
 /-- `Fml.clean m U φ` holds exactly when `{U} φ` does.
@@ -1408,6 +1414,9 @@ theorem Fml.simpUpds_holds : (φ : Fml C) → ∀ σ, (holds σ φ.simpUpds ↔ 
   | .all _ _ φ, σ => by
     simp only [Fml.simpUpds, holds]
     exact forall_congr' fun _ => imp_congr_right fun _ => Fml.simpUpds_holds φ _
+  | .anon _ φ, σ => by
+    simp only [Fml.simpUpds, holds]
+    exact forall_congr' fun _ => Fml.simpUpds_holds φ _
   | .tt, _ | .eq .., _ | .defined _, _ => Iff.rfl
 
 /-! ## Under the box: `applyOnRigid` without totality
@@ -2264,7 +2273,7 @@ theorem Fml.withSt_holds {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ)
     simp only [Fml.rigid, Bool.and_eq_true] at hr
     simp only [Fml.stExplicit, Bool.and_eq_true] at he
     simp only [Fml.withSt, holds, Fml.withSt_holds hs φ hr.1 he.1, Fml.withSt_holds hs ψ hr.2 he.2]
-  | .upd .., hr, _ | .modal .., hr, _ | .havoc _, hr, _ | .all .., hr, _ => by
+  | .upd .., hr, _ | .modal .., hr, _ | .havoc _, hr, _ | .all .., hr, _ | .anon .., hr, _ => by
     simp only [Fml.rigid, Bool.false_eq_true] at hr
 
 /-- Under the box, a first-order formula with `s` for `storage` gives the

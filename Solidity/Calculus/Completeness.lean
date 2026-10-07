@@ -513,6 +513,18 @@ def callStep (f : Name) (args : List (Arg C)) (hsep : Arg.separatedFrom [] args 
 
 /-! ## The rule for a statement -/
 
+/-- A loop with an invariant: `whileInvariantBox`, or under the diamond
+`whileInvariantDiamond` when it has a variant; closed to `false` when its
+body has no frame (`whileClose`) or, under the diamond, no variant. -/
+def loopInvStep {k : Nat} {m : Modality} (I : Val C .bool) (dec : Option (Val C .uint))
+    (c : Val C .bool) (body : Prog C) : Step k m (.loop (.inv I dec) c body) :=
+  if hf : (Prog.loopFrame body).isSome = true then
+    match m, dec with
+    | .box, _ => ⟨_, .lean (.whileInvariantBox hf)⟩
+    | .diamond, some _ => ⟨_, .lean (.whileInvariantDiamond hf)⟩
+    | .diamond, none => ⟨_, .lean (.whileNoVariantDiamond hf rfl)⟩
+  else ⟨_, .lean (.whileClose (Bool.eq_false_iff.2 hf))⟩
+
 /-- **The rule for a statement** under the modality `m`, its fresh variables
 declared at index `k`.  Total: every statement has one. -/
 def Stmt.step (k : Nat) (m : Modality) : (s : Stmt C) → Step k m s
@@ -558,6 +570,9 @@ def Stmt.step (k : Nat) (m : Modality) : (s : Stmt C) → Step k m s
     match m with
     | .box => ⟨_, .key .tryCallNoCallbackBox⟩
     | .diamond => ⟨_, .lean .tryCallDiamond⟩
+  | .loop (.unwind 0) _ _ => ⟨_, .lean .loopExit⟩
+  | .loop (.unwind (_ + 1)) _ _ => ⟨_, .lean .whileUnwind⟩
+  | .loop (.inv I dec) c body => loopInvStep I dec c body
 
 /-- **Completeness**: under either modality, every statement has a rule.  No
 hypothesis and no residue: `uint x = people[i].age;`, `alice = bob;`,

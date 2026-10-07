@@ -51,8 +51,9 @@ Semantic conventions mirrored from solc, where KeY was more liberal
 
 A run ends in a state or halts: `revert` (the program reverted), `panic`
 (an `assert` failed: solc's `Panic(0x01)`, KeY's `assertSimple` "Violated"
-branch, which no modality accepts), or `stuck` (a state that does not fit the
-program, e.g. a local read before it is bound).  solc's other panics
+branch, which no modality accepts), `stuck` (a state that does not fit the
+program, e.g. a local read before it is bound), or `diverge` (a loop that
+never ends, `Loop.run`).  solc's other panics
 (overflow, a zero divisor, an index out of bounds, `pop()` on an empty array)
 are reverts here, as in KeY, where a box accepts them.  The copy from memory back to storage terminates on the visited-set
 complement `rem` (`copyMToSt`); everything else is structural.
@@ -293,6 +294,9 @@ inductive Halt where
   | revert
   | stuck
   | panic
+  /-- A loop that never ends (`Loop.run`): a box accepts it, a diamond does
+  not, as they do a revert. -/
+  | diverge
   deriving Repr, DecidableEq, Inhabited
 
 abbrev Res (α : Type) := Except Halt α
@@ -1576,6 +1580,193 @@ def assertOk (v : Value) (σ : State) : Res State :=
   | .bool false => .error .panic
   | .int _ => .error .stuck
 
+/-! ## Loops
+
+A loop's run is the least fixed point of its unwinding (`docs/loops.md`,
+Decision 1), with no fuel: `Loop.iterN n` runs at most `n` iterations, and
+the loop ends as the iteration does at any `n` at which it is done (all such
+`n` agree: `Loop.iterN_done_unique`), or diverges when it is done at none.
+So `Stmt.run` stays total and structural: the loop arm calls the body's run
+under a binder. -/
+
+/-- One iteration from `σ`: the loop is done (`.inr`) when the condition is
+false (in `σ`), or when the condition or the body halts; it goes on
+(`.inl`) in the state the body leaves. -/
+def Loop.step (body : State → Res State) (c : State → Res Value) (σ : State) :
+    State ⊕ Res State :=
+  match c σ with
+  | .error h => .inr (.error h)
+  | .ok (.bool false) => .inr (.ok σ)
+  | .ok (.bool true) =>
+    match body σ with
+    | .error h => .inr (.error h)
+    | .ok τ => .inl τ
+  | .ok (.int _) => .inr (.error .stuck)
+
+/-- At most `n` iterations from `σ`: still running (`.inl`), or done. -/
+def Loop.iterN (body : State → Res State) (c : State → Res Value) : Nat → State → State ⊕ Res State
+  | 0, σ => .inl σ
+  | n + 1, σ =>
+    match Loop.step body c σ with
+    | .inl τ => Loop.iterN body c n τ
+    | .inr r => .inr r
+
+/-- The loop run by iterating until it is done, for `#eval`: the kernel never
+sees it (`Loop.run`'s `implemented_by`). -/
+partial def Loop.runImpl (body : State → Res State) (c : State → Res Value) (σ : State) :
+    Res State :=
+  match Loop.step body c σ with
+  | .inl τ => Loop.runImpl body c τ
+  | .inr r => r
+
+open Classical in
+/-- The loop's outcome: what the iteration is done with, or `diverge` when it
+is done at no `n`.  Classical, so the kernel does not reduce a loop; a
+concrete one is computed by `Loop.run_of_iterN`, and `#eval` runs
+`Loop.runImpl`. -/
+@[implemented_by Loop.runImpl]
+noncomputable def Loop.run (body : State → Res State) (c : State → Res Value) (σ : State) :
+    Res State :=
+  if h : ∃ r n, Loop.iterN body c n σ = .inr r then Classical.choose h else .error .diverge
+
+section LoopLemmas
+
+variable {body : State → Res State} {c : State → Res Value}
+
+/-- Done absorbs: an iteration done at `n` is done, alike, at every later `m`. -/
+theorem Loop.iterN_done_le {n m : Nat} {σ : State} {r : Res State} (hnm : n ≤ m)
+    (h : Loop.iterN body c n σ = .inr r) : Loop.iterN body c m σ = .inr r := by
+  induction n generalizing σ m with
+  | zero => simp only [Loop.iterN, reduceCtorEq] at h
+  | succ n ih =>
+    obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
+    simp only [Loop.iterN] at h ⊢
+    cases hs : Loop.step body c σ with
+    | inl τ => rw [hs] at h; exact ih (by omega) h
+    | inr r' => rw [hs] at h; exact h
+
+/-- The iterations done at `n` and at `m` are done alike. -/
+theorem Loop.iterN_done_unique {n m : Nat} {σ : State} {r r' : Res State}
+    (h : Loop.iterN body c n σ = .inr r) (h' : Loop.iterN body c m σ = .inr r') : r = r' := by
+  rcases Nat.le_total n m with hnm | hmn
+  · rw [Loop.iterN_done_le hnm h] at h'
+    exact Sum.inr.inj h'
+  · rw [Loop.iterN_done_le hmn h'] at h
+    exact (Sum.inr.inj h).symm
+
+/-- A loop done at `n` ends as it is done there: how a concrete loop is
+decided, `n` found by `#eval`. -/
+theorem Loop.run_of_iterN {n : Nat} {σ : State} {r : Res State}
+    (h : Loop.iterN body c n σ = .inr r) : Loop.run body c σ = r := by
+  have hex : ∃ r n, Loop.iterN body c n σ = .inr r := ⟨r, n, h⟩
+  simp only [Loop.run, hex, dite_true]
+  obtain ⟨n', h'⟩ := Classical.choose_spec hex
+  exact Loop.iterN_done_unique h' h
+
+/-- A loop done at no `n` diverges. -/
+theorem Loop.run_of_forall {σ : State} (h : ∀ n r, Loop.iterN body c n σ ≠ .inr r) :
+    Loop.run body c σ = .error .diverge := by
+  have hex : ¬ ∃ r n, Loop.iterN body c n σ = .inr r := fun ⟨r, n, h'⟩ => h n r h'
+  simp only [Loop.run, hex, dite_false]
+
+/-- **Unwinding**: a loop is one iteration, then the loop again from the
+state it leaves (`whileUnwind`'s soundness). -/
+theorem Loop.run_unfold (σ : State) :
+    Loop.run body c σ =
+      match Loop.step body c σ with
+      | .inl τ => Loop.run body c τ
+      | .inr r => r := by
+  cases hs : Loop.step body c σ with
+  | inr r => exact Loop.run_of_iterN (n := 1) (by simp only [Loop.iterN, hs])
+  | inl τ =>
+    show Loop.run body c σ = Loop.run body c τ
+    have hshift : ∀ n, Loop.iterN body c (n + 1) σ = Loop.iterN body c n τ := fun n => by
+      simp only [Loop.iterN, hs]
+    by_cases hex : ∃ r n, Loop.iterN body c n τ = .inr r
+    · obtain ⟨r, n, h⟩ := hex
+      rw [Loop.run_of_iterN h, Loop.run_of_iterN (n := n + 1) (by rw [hshift]; exact h)]
+    · have hτ : ∀ n r, Loop.iterN body c n τ ≠ .inr r := fun n r h => hex ⟨r, n, h⟩
+      rw [Loop.run_of_forall hτ, Loop.run_of_forall]
+      intro n r h
+      cases n with
+      | zero => simp only [Loop.iterN, reduceCtorEq] at h
+      | succ n => rw [hshift] at h; exact hτ n r h
+
+/-- Two iterations in step: both still running, related by `R`, or both done,
+related by `Q`. -/
+def Loop.StepRel (R : State → State → Prop) (Q : Res State → Res State → Prop) :
+    State ⊕ Res State → State ⊕ Res State → Prop
+  | .inl τ, .inl τ' => R τ τ'
+  | .inr r, .inr r' => Q r r'
+  | _, _ => False
+
+/-- **Two loops run alike** when their iterations go in step: from states
+related by `R`, one iteration of each ends both running in states related
+by `R`, or both done with outcomes related by `Q`; and `Q` relates two
+divergences.  The proofs that recurse on `Stmt.run` take a loop's case from
+here (`Prog.run_frame`, typing). -/
+theorem Loop.run_rel {body' : State → Res State} {c' : State → Res Value}
+    {R : State → State → Prop} {Q : Res State → Res State → Prop} {σ σ' : State}
+    (h0 : R σ σ')
+    (hstep : ∀ τ τ', R τ τ' → Loop.StepRel R Q (Loop.step body c τ) (Loop.step body' c' τ'))
+    (hdiv : Q (.error .diverge) (.error .diverge)) :
+    Q (Loop.run body c σ) (Loop.run body' c' σ') := by
+  have hiter : ∀ n τ τ', R τ τ' →
+      Loop.StepRel R Q (Loop.iterN body c n τ) (Loop.iterN body' c' n τ') := by
+    intro n
+    induction n with
+    | zero => intro τ τ' h; exact h
+    | succ n ih =>
+      intro τ τ' h
+      have hs := hstep τ τ' h
+      simp only [Loop.iterN]
+      revert hs
+      cases Loop.step body c τ <;> cases Loop.step body' c' τ' <;>
+        simp only [Loop.StepRel, false_imp_iff, imp_self] <;> exact ih _ _
+  by_cases hex : ∃ r n, Loop.iterN body c n σ = .inr r
+  · obtain ⟨r, n, h⟩ := hex
+    have hn := hiter n σ σ' h0
+    rw [h] at hn
+    revert hn
+    cases h' : Loop.iterN body' c' n σ' with
+    | inl _ => simp only [Loop.StepRel, false_imp_iff]
+    | inr r' =>
+      intro hq
+      rw [Loop.run_of_iterN h, Loop.run_of_iterN h']
+      exact hq
+  · have hσ : ∀ n r, Loop.iterN body c n σ ≠ .inr r := fun n r h => hex ⟨r, n, h⟩
+    have hσ' : ∀ n r, Loop.iterN body' c' n σ' ≠ .inr r := by
+      intro n r h
+      have hn := hiter n σ σ' h0
+      rw [h] at hn
+      revert hn
+      cases h'' : Loop.iterN body c n σ with
+      | inl _ => simp only [Loop.StepRel, false_imp_iff]
+      | inr r'' => exact fun _ => hσ n r'' h''
+    rw [Loop.run_of_forall hσ, Loop.run_of_forall hσ']
+    exact hdiv
+
+/-- **A loop's invariant**: `P` holds at the head of every iteration from `σ`,
+and `Q` of every outcome an iteration from a state in `P` is done with, and
+of a divergence: then `Q` holds of the loop's run. -/
+theorem Loop.run_induct {P : State → Prop} {Q : Res State → Prop} {σ : State} (h0 : P σ)
+    (hstep : ∀ τ, P τ →
+      match Loop.step body c τ with
+      | .inl τ' => P τ'
+      | .inr r => Q r)
+    (hdiv : Q (.error .diverge)) : Q (Loop.run body c σ) := by
+  have h := Loop.run_rel (body' := body) (c' := c) (R := fun τ τ' => τ = τ' ∧ P τ)
+    (Q := fun r r' => r = r' ∧ Q r) (σ' := σ) ⟨rfl, h0⟩
+    (fun τ τ' ⟨he, hp⟩ => by
+      subst he
+      have hs := hstep τ hp
+      revert hs
+      cases Loop.step body c τ <;> simp only [Loop.StepRel, true_and, imp_self])
+    ⟨rfl, hdiv⟩
+  exact h.2
+
+end LoopLemmas
+
 mutual
 
 /-- The state a statement leaves, from `σ`: `alice.age = 10;` saves `10` at
@@ -1666,6 +1857,7 @@ def Stmt.run (σ : State) : Stmt C → Res State
     | some .error => Prog.run σ err
     | some (.panic c) => Prog.run (← bindData (codeBinders code) [c] σ) pnc
     | some .other => Prog.run σ other
+  | .loop _ c body => Loop.run (fun τ => Prog.run τ body) (fun τ => c.eval τ) σ
 
 /-- The state a block leaves. -/
 def Prog.run (σ : State) : List (Stmt C) → Res State
@@ -1673,6 +1865,20 @@ def Prog.run (σ : State) : List (Stmt C) → Res State
   | s :: P => do Prog.run (← s.run σ) P
 
 end
+
+/-- A block whose first statement runs to `σ₁` runs the rest from `σ₁`. -/
+theorem Prog.run_cons_ok {σ σ₁ : State} {s : Stmt C} {P : List (Stmt C)}
+    (h : s.run σ = .ok σ₁) : Prog.run σ (s :: P) = Prog.run σ₁ P := by
+  simp only [Prog.run, h, bind, Except.bind]
+
+/-- **A concrete loop, run**: done at its `n`-th iteration with `r`, the
+loop and the rest of its block run as `r` and the rest (`Loop.run_of_iterN`;
+`n` found by `#eval`, the iteration then computed by `rfl`). -/
+theorem Prog.run_loop_of_iterN {σ : State} {a : LoopAnn C} {c : Val C .bool}
+    {body P : List (Stmt C)} {n : Nat} {r : Res State}
+    (h : Loop.iterN (fun τ => Prog.run τ body) (fun τ => c.eval τ) n σ = .inr r) :
+    Prog.run σ (.loop a c body :: P) = r >>= fun τ => Prog.run τ P := by
+  simp only [Prog.run, Stmt.run, Loop.run_of_iterN h]
 
 /-! ## Each contract starts in its store -/
 

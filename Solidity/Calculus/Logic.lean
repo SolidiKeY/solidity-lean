@@ -24,8 +24,8 @@ front again, with nothing to look through.  `Proves.sound` says once and for
 all that a derivation is a proof.
 
 The judgement is indexed by the rules it may use (`RuleSet`): every
-constructor takes solkey's `Taclet`s, and `unfoldLean` alone the rule solkey
-lacks (`LeanTaclet`), at `.all`.  `Γ ⊢ φ` is the whole calculus, `Γ ⊢ₖ φ`
+constructor takes solkey's `Taclet`s, and `unfoldLean`, `doneLean` and
+`checkLean` alone the rules solkey lacks (`LeanTaclet`), at `.all`.  `Γ ⊢ φ` is the whole calculus, `Γ ⊢ₖ φ`
 solkey's; `Calculus/SolkeyFragment.lean` says when the two agree.
 
 Fresh names are numbered above every index in sight (`Hyp.fresh`), which is
@@ -58,29 +58,6 @@ variable {C : Contract}
 
 /-! ## A premise as a formula -/
 
-/-- What a diamond branch owes besides its two goals: one of its conditions
-holds.  A box branch owes nothing. -/
-def Premise.cover (m : Modality) (c c' : Fml C) : Fml C :=
-  match m with
-  | .diamond => dl_schema{ c ∨ c' }
-  | .box => dl_schema{ true }
-
-/-- The cover as a branch's premise formula carries it, one formula under
-either modality: `⟨[ revert(); ]⟩ false ∨ c ∨ c'`.  A halted run satisfies
-`⟨[ revert(); ]⟩ false` under the box and not under the diamond, so it
-holds exactly where `Premise.cover m c c'` does (`Premise.coverFml_holds`).
-It is no goal of the strategy: under its negation it is not active. -/
-def Premise.coverFml (m : Modality) (c c' : Fml C) : Fml C :=
-  dl_schema{ ⟨[ revert(); ]⟩ ‹.ff› ∨ c ∨ c' }
-
-/-- The premise's cover says what the third goal of a branch says. -/
-theorem Premise.coverFml_holds (m : Modality) (c c' : Fml C) (σ : State) :
-    holds σ (Premise.coverFml m c c') ↔ holds σ (Premise.cover m c c') := by
-  cases m <;> simp only [Premise.coverFml, Premise.cover, holds, Prog.run, Stmt.run, bind,
-    Except.bind, Modality.afterRun, Modality.after, Modality.onHalt, not_and, ne_eq,
-    reduceCtorEq, Except.error.injEq, and_true,
-    Classical.not_not, not_true_eq_false, not_false_eq_true, false_implies, true_implies]
-
 /-- The premise as one formula, under the modality `m` the rule found, in
 front of the rest `ω` of the program and the postcondition `φ`. -/
 def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
@@ -93,6 +70,7 @@ def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
   | .done false, _, _ => .ff
   | .branches bs, ω, φ => .conj (bs.map fun b => .alls b.1 (.modal m (b.2 ++ ω) φ))
   | .cases fs us, ω, φ => .conj (fs ++ us.map fun U => .upd m U (.modal m ω φ))
+  | .inv I U c c' P post, ω, φ => Premise.invFml m I U c c' P post (.modal m ω φ)
 
 /-- Two runs that end alike off `ns` satisfy the same modal formula, when
 neither the rest of the program nor the postcondition mentions `ns`. -/
@@ -196,6 +174,7 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     intro hall
     obtain ⟨U, hU, hs⟩ := h σ
     exact Premise.sound_upd hs ω φ (hall _ (.inr ⟨U, hU, rfl⟩))
+  | inv I U c c' P post => exact h ω φ hω σ
 
 /-! ## Fresh names -/
 
@@ -279,6 +258,9 @@ inductive Hyp (C : Contract) where
   /-- `∀ p x. …`: the local `x` holds any value of the type `p`, as KeY's
   skolem constant for a quantified variable (a `try`'s return values). -/
   | all (x : Var) (p : PrimTy)
+  /-- `{anon(xs)} …`: the locals `xs` hold anything, bound or not, as KeY's
+  anonymising update of a loop's frame (`#loopAnon`). -/
+  | anon (xs : List Var)
 
 /-- Put the context back in front of a formula. -/
 def Hyp.wrap : List (Hyp C) → Fml C → Fml C
@@ -287,6 +269,7 @@ def Hyp.wrap : List (Hyp C) → Fml C → Fml C
   | .upd m U :: Γ, φ => dl_schema{ {U} ‹Hyp.wrap Γ φ› }
   | .havoc :: Γ, φ => dl_schema{ { havoc } ‹Hyp.wrap Γ φ› }
   | .all x p :: Γ, φ => .all x p (Hyp.wrap Γ φ)
+  | .anon xs :: Γ, φ => .anon xs (Hyp.wrap Γ φ)
 
 /-- A Theory rewrite of the context (`Fml.rwEq`): in every precondition; an
 update or a `havoc` stays as it is, since its right-hand sides run in the
@@ -297,6 +280,7 @@ def Hyp.rwEq (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
   | .upd m U :: Γ => .upd m U :: Hyp.rwEq q Γ
   | .havoc :: Γ => .havoc :: Hyp.rwEq q Γ
   | .all x p :: Γ => .all x p :: Hyp.rwEq q Γ
+  | .anon xs :: Γ => .anon xs :: Hyp.rwEq q Γ
 
 /-- An update rewrite of the context (`Upd.rw`): in the right-hand sides of
 every box update.  A precondition, a diamond update or a `havoc` stays as it
@@ -309,6 +293,19 @@ def Hyp.rwUpd (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
   | .upd .diamond U :: Γ => .upd .diamond U :: Hyp.rwUpd q Γ
   | .havoc :: Γ => .havoc :: Hyp.rwUpd q Γ
   | .all x p :: Γ => .all x p :: Hyp.rwUpd q Γ
+  | .anon xs :: Γ => .anon xs :: Hyp.rwUpd q Γ
+
+/-- The context the invariant rule's second goal is judged in: past
+`{anon(P)}` (and `{havoc}`, when the body writes storage or pays), the
+invariant `I` assumed, and the variant's update `U` (none under the box). -/
+def Hyp.loopAnon (m : Modality) (P : Prog C) (I : Fml C) (U : Upd C) : List (Hyp C) :=
+  (match Prog.loopFrame P with
+    | some (xs, false) => [.anon xs]
+    | some (xs, true) => [.anon xs, .havoc]
+    | none => []) ++
+  .pre I :: (match U with
+    | [] => []
+    | U => [.upd m U])
 
 /-- Fresh names are numbered one above every index in the whole sequent. -/
 def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := (Hyp.wrap Γ φ).fresh
@@ -391,6 +388,27 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   | unfoldLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
       {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.unfold P))
       (h : dl{ ..Γ ⟹ ⟨[ P; ..ω ]⟩ φ }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
+  /-- A rule solkey does not have, checking (`loopExit`): the goal with the
+  condition assumed, and the condition. -/
+  | checkLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {c : Fml C} {P : Prog C}
+      (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.check c P))
+      (thn : dl{ ..Γ, c ⟹ ⟨[ P; ..ω ]⟩ φ })
+      (els : dl{ ..Γ ⟹ c }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
+  /-- A loop's invariant (`whileInvariantBox`, `whileInvariantDiamond`, solkey's
+  past the pinned checkout): the invariant now ("invariant initially
+  valid"), and past the loop's anonymising update (`Hyp.loopAnon`) the body
+  to its postcondition where the condition holds, the rest where it does
+  not, and under the diamond that one of them holds ("invariant preserved
+  and used", as `split` has its goals). -/
+  | invLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+      {I c c' post : Fml C} {U : Upd C} {P : Prog C}
+      (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.inv I U c c' P post))
+      (init : dl{ ..Γ ⟹ I })
+      (thn : Proves .all (Γ ++ Hyp.loopAnon m P I U ++ [.pre c]) (.modal m P post))
+      (els : Proves .all (Γ ++ Hyp.loopAnon m P I U ++ [.pre c']) (.modal m ω φ))
+      (cov : Proves .all (Γ ++ Hyp.loopAnon m P I U) (Premise.cover m c c')) :
+      dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
   /-- `emptyModality`: `⟨⟩ φ` and `[] φ` are `φ`. -/
   | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : dl{ ..Γ ⟹[R] φ }) :
       dl{ ..Γ ⟹[R] ⟨[ ]⟩ φ }
@@ -519,6 +537,7 @@ def Hyp.Reaches : List (Hyp C) → State → State → Prop
   | .upd _ U :: Γ, σ, τ => ∃ ρ, U.apply σ = .ok ρ ∧ Hyp.Reaches Γ ρ τ
   | .havoc :: Γ, σ, τ => ∃ st nt, Hyp.Reaches Γ (σ.havoc st nt) τ
   | .all x p :: Γ, σ, τ => ∃ v, p.admits v ∧ Hyp.Reaches Γ (σ.setEnv x (.val v)) τ
+  | .anon xs :: Γ, σ, τ => ∃ b, Hyp.Reaches Γ (σ.anon xs b) τ
 
 /-- What follows a context is judged only in the states it leads to. -/
 theorem Hyp.wrap_reach {A B : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
@@ -535,6 +554,8 @@ theorem Hyp.wrap_reach {A B : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
     Hyp.wrap_reach Γ _ (fun τ hr => h τ ⟨st, nt, hr⟩) (hA st nt)
   | .all _ _ :: Γ, σ, h => fun hA v hv =>
     Hyp.wrap_reach Γ _ (fun τ hr => h τ ⟨v, hv, hr⟩) (hA v hv)
+  | .anon _ :: Γ, σ, h => fun hA b =>
+    Hyp.wrap_reach Γ _ (fun τ hr => h τ ⟨b, hr⟩) (hA b)
 
 /-- An implication between two formulas survives wrapping both in the same
 context. -/
@@ -558,6 +579,9 @@ theorem Hyp.reaches_append : (Γ Δ : List (Hyp C)) → ∀ σ τ,
   | .all _ _ :: Γ, Δ, _, τ, ⟨v, hv, h⟩ =>
     let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ _ τ h
     ⟨ρ, ⟨v, hv, h₁⟩, h₂⟩
+  | .anon _ :: Γ, Δ, _, τ, ⟨b, h⟩ =>
+    let ⟨ρ, h₁, h₂⟩ := Hyp.reaches_append Γ Δ _ τ h
+    ⟨ρ, ⟨b, h₁⟩, h₂⟩
 
 /-- No diamond update in the context: a halting update proves what follows. -/
 def Hyp.boxOnly : List (Hyp C) → Bool
@@ -581,6 +605,8 @@ theorem Hyp.wrap_of_reaches {φ : Fml C} : (Γ : List (Hyp C)) → Hyp.boxOnly �
     Hyp.wrap_of_reaches Γ hb _ (fun τ hr => h τ ⟨st, nt, hr⟩)
   | .all _ _ :: Γ, hb, σ, h => fun v hv =>
     Hyp.wrap_of_reaches Γ hb _ (fun τ hr => h τ ⟨v, hv, hr⟩)
+  | .anon _ :: Γ, hb, σ, h => fun b =>
+    Hyp.wrap_of_reaches Γ hb _ (fun τ hr => h τ ⟨b, hr⟩)
 
 /-- What is valid is valid behind a context with no diamond. -/
 theorem Hyp.valid_wrap {φ : Fml C} {Γ : List (Hyp C)} (hb : Hyp.boxOnly Γ = true) (h : Valid φ) :
@@ -610,6 +636,8 @@ theorem Hyp.wrap_mono₃ {ψ₁ ψ₂ ψ₃ φ : Fml C}
     Hyp.wrap_mono₃ h Γ _ (h₁ st nt) (h₂ st nt) (h₃ st nt)
   | .all _ _ :: Γ => fun σ h₁ h₂ h₃ v hv =>
     Hyp.wrap_mono₃ h Γ _ (h₁ v hv) (h₂ v hv) (h₃ v hv)
+  | .anon _ :: Γ => fun σ h₁ h₂ h₃ b =>
+    Hyp.wrap_mono₃ h Γ _ (h₁ b) (h₂ b) (h₃ b)
 
 /-- `Hyp.wrap_mono` for two premises. -/
 theorem Hyp.wrap_mono₂ {ψ₁ ψ₂ φ : Fml C} (h : ∀ σ, holds σ ψ₁ → holds σ ψ₂ → holds σ φ)
@@ -630,7 +658,7 @@ theorem Hyp.wrap_conj (Γ : List (Hyp C)) : (φs : List (Fml C)) →
 theorem Hyp.vars_wrap {x : Var} {φ : Fml C} :
     (Γ : List (Hyp C)) → x ∈ φ.vars → x ∈ (Hyp.wrap Γ φ).vars
   | [], h => h
-  | .pre _ :: Γ, h | .upd _ _ :: Γ, h | .havoc :: Γ, h | .all _ _ :: Γ, h => by
+  | .pre _ :: Γ, h | .upd _ _ :: Γ, h | .havoc :: Γ, h | .all _ _ :: Γ, h | .anon _ :: Γ, h => by
     simp [Hyp.wrap, Fml.vars, Hyp.vars_wrap Γ h]
 
 /-- A taclet applied in a context is sound: its fresh names are fresh.
@@ -656,7 +684,7 @@ theorem LeanTaclet.sound_in {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω 
 theorem Hyp.wrap_rwEq (q : Term C × Term C) (φ : Fml C) :
     (Γ : List (Hyp C)) → Hyp.wrap (Hyp.rwEq q Γ) (φ.rwEq q) = (Hyp.wrap Γ φ).rwEq q
   | [] => rfl
-  | .pre _ :: Γ | .upd _ _ :: Γ | .havoc :: Γ | .all _ _ :: Γ => by
+  | .pre _ :: Γ | .upd _ _ :: Γ | .havoc :: Γ | .all _ _ :: Γ | .anon _ :: Γ => by
     simp only [Hyp.rwEq, Hyp.wrap, Fml.rwEq, Hyp.wrap_rwEq q φ Γ]
 
 /-- A sequent rewritten by a Theory equation holds where the sequent does. -/
@@ -683,6 +711,7 @@ theorem Hyp.rwUpd_wrap {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {�
     | ok τ => rw [hU] at h; exact Hyp.rwUpd_wrap hq Γ τ h
   | .havoc :: Γ, σ, h => fun st nt => Hyp.rwUpd_wrap hq Γ _ (h st nt)
   | .all _ _ :: Γ, σ, h => fun v hv => Hyp.rwUpd_wrap hq Γ _ (h v hv)
+  | .anon _ :: Γ, σ, h => fun b => Hyp.rwUpd_wrap hq Γ _ (h b)
 
 theorem Proves.merge_sound {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C}
     (hU : U.envOnly = true) (d : Valid (Hyp.wrap (Γ ++ [.upd m (U ++ V.subst U)]) φ)) :
@@ -727,6 +756,23 @@ theorem Proves.applyStorageBox_sound {Γ : List (Hyp C)} {s : STerm C} {φ : Fml
   exact Hyp.wrap_mono (fun τ hτ => Fml.withSt_box hr he τ hτ) Γ σ (d σ)
 
 open Proves in
+/-- An invariant rule fires only on a body with a frame. -/
+theorem LeanTaclet.inv_frame {k : Nat} {m : Modality} {s : Stmt C} {I c c' post : Fml C}
+    {U : Upd C} {P : Prog C} (d : LeanTaclet C k m s (.inv I U c c' P post)) :
+    (Prog.loopFrame P).isSome = true := by
+  cases d with
+  | whileInvariantBox hf => exact hf
+  | whileInvariantDiamond hf => exact hf
+
+/-- The invariant rule's context, put back, is its anonymising update. -/
+theorem Hyp.wrap_loopAnon {m : Modality} {P : Prog C} {I : Fml C} {U : Upd C}
+    (hf : (Prog.loopFrame P).isSome = true) (X : Fml C) :
+    Hyp.wrap (Hyp.loopAnon m P I U) X = Fml.loopAnon P (.imp I (Fml.updIf m U X)) := by
+  obtain ⟨⟨xs, hv⟩, hfe⟩ := Option.isSome_iff_exists.1 hf
+  cases hv <;> cases U <;>
+    simp only [Hyp.loopAnon, hfe, Fml.loopAnon, Fml.updIf, Hyp.wrap, List.cons_append,
+      List.nil_append]
+
 /-- **Soundness of the calculus**: a derivation of `Γ ⊢ φ` proves `φ`
 wrapped in its context `Γ`.
 
@@ -766,9 +812,20 @@ theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
     rw [Hyp.wrap_append] at ih₁ ih₂
     exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, (Premise.coverFml_holds _ _ _ τ).2 h₃⟩) _ σ
       (ih₁ σ) (ih₂ σ) (ih₃ σ)
-  | check d _ _ ih₁ ih₂ =>
+  | check d _ _ ih₁ ih₂ | checkLean d _ _ ih₁ ih₂ =>
     rw [Hyp.wrap_append] at ih₁
     exact fun σ => Hyp.wrap_mono₂ (fun τ h₁ h₂ => d.sound_in τ ⟨h₁, h₂⟩) _ σ (ih₁ σ) (ih₂ σ)
+  | @invLean Γ m s ω φ I c c' post U P d _ _ _ _ ih₀ ih₁ ih₂ ih₃ =>
+    have hf := d.inv_frame
+    rw [Hyp.wrap_append, Hyp.wrap_append] at ih₁ ih₂
+    rw [Hyp.wrap_append] at ih₃
+    exact fun σ => Hyp.wrap_mono₂
+      (fun τ h₀ h => d.sound_in τ ⟨h₀, by rw [← Hyp.wrap_loopAnon hf]; exact h⟩) _ σ (ih₀ σ)
+      (Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => Hyp.wrap_mono₃
+        (φ := .and (.imp c (.modal m P post)) (.and (.imp c' (.modal m ω φ))
+          (Premise.coverFml m c c')))
+        (fun ρ a b k => ⟨a, b, (Premise.coverFml_holds _ _ _ ρ).2 k⟩) _ τ h₁ h₂ h₃)
+        _ σ (ih₁ σ) (ih₂ σ) (ih₃ σ))
   | @empty _ Γ m φ _ ih =>
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
       (fun _ h => ⟨by cases m <;> exact h, nofun⟩) Γ σ (ih σ)
@@ -805,6 +862,8 @@ theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves 
   | unfold d _ ih => exact .unfold d ih
   | unfoldLean d h _ => exact .unfoldLean d h
   | doneLean d h _ => exact .doneLean d h
+  | checkLean d h₁ h₂ _ _ => exact .checkLean d h₁ h₂
+  | invLean d h₀ h₁ h₂ h₃ _ _ _ _ => exact .invLean d h₀ h₁ h₂ h₃
   | branches d _ ih => exact .branches d ih
   | cases d _ _ ih₁ ih₂ => exact .cases d ih₁ ih₂
   | allIntro _ ih => exact .allIntro ih
@@ -849,6 +908,12 @@ def ppHyp? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_hyp)) := do
       | _ => pure ()
     return some (← `(dl_hyp| $u:dl_upd))
   | Hyp.havoc _ => return some (← `(dl_hyp| { havoc }))
+  | Hyp.anon _ xs =>
+    let some xs ← listElems? xs | return none
+    let ids ← xs.mapM ppVar?
+    if ids.any Option.isNone then return none
+    let ids : Array Ident := ids.filterMap id
+    return some (← `(dl_hyp| { anon($ids,*) }))
   | Hyp.all _ x p =>
     let some x ← ppVar? x | return none
     let some T ← (do pure ((← primName? p) <|> (← fvarName? p))) | return none

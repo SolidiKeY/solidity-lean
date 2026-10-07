@@ -88,6 +88,7 @@ def Stmt.within (μ : Mutability) : Stmt C → Bool
   | .revert => true
   | .ite c thn els => μ.reads c && Prog.within μ thn && Prog.within μ els
   | .call _ args _ _ body => args.all (fun a => μ.reads a.e) && Prog.within μ body
+  | .loop _ c body => μ.reads c && Prog.within μ body
   | .assign .. | .delete _ | .transfer .. | .send .. => μ == .nonpayable
   | _ => false
 
@@ -109,6 +110,7 @@ def Stmt.writes : Stmt C → List Var
   | .ite _ thn els => Prog.writes thn ++ Prog.writes els
   | .call _ args _ ret body => args.map (·.x) ++ ret.vars ++ Prog.writes body
   | .send pv _ _ => [pv]
+  | .loop _ _ body => Prog.writes body
   | _ => []
 
 def Prog.writes : List (Stmt C) → List Var
@@ -475,6 +477,21 @@ theorem Stmt.frame_of_within {μ : Mutability} : (s : Stmt C) → s.within μ = 
       Frame.ofAgree μ (agree_setEnv (List.mem_singleton_self x) σ' _)
     exact (e₁.mono fun _ hy => List.mem_cons_of_mem _ hy).trans
       (e₂.mono fun _ hy => by rw [List.mem_singleton.1 hy]; exact List.mem_cons_self ..)
+  | .loop _ c body, hw, σ, _, h => by
+    simp only [Stmt.within, Bool.and_eq_true] at hw
+    simp only [Stmt.run] at h
+    refine Loop.run_induct (P := μ.Frame (Prog.writes body) σ)
+      (Q := fun r => ∀ τ, r = .ok τ → μ.Frame (Prog.writes body) σ τ) (Frame.refl μ _ σ)
+      (fun τ hτ => ?_) (fun _ h => by cases h) _ h
+    simp only [Loop.step]
+    rcases c.eval τ with _ | (_ | b)
+    · exact fun _ h => by cases h
+    · exact fun _ h => by cases h
+    · cases b
+      · exact fun _ h => by cases h; exact hτ
+      · cases hb : Prog.run τ body with
+        | error _ => exact fun _ h => by cases h
+        | ok τ' => exact hτ.trans (Prog.frame_of_within body hw.2 hb)
   | .rebind .., hw, _, _, _ | .declStorage .., hw, _, _, _
   | .push .., hw, _, _, _ | .pop _, hw, _, _, _ | .declMem .., hw, _, _, _
   | .rebindMem .., hw, _, _, _ | .assignFromMem .., hw, _, _, _ | .assignMem .., hw, _, _, _
@@ -511,5 +528,150 @@ theorem Prog.view_frame {P : Prog C} (hμ : Prog.within .view P = true) {σ τ :
   ⟨e.storage.symm, e.net.symm⟩
 
 end Body
+
+/-! ## A loop's frame
+
+solkey's `LoopFrame` (`docs/loops.md`, Decision 4): what a loop body may
+change, read off its syntax, for the anonymising update of the invariant
+rule (`whileInvariantBox`, `#loopAnon`).  The locals it writes, and, when it
+writes storage or pays, the storage and the ledger (`State.havoc`).  A body
+outside `nonpayable` (memory, a push or a pop, an alias, an external call)
+has no frame, and no invariant rule: solkey refuses a body that writes
+memory, whose heap it does not anonymise. -/
+
+/-- The locals a loop body may write, and whether it may write storage or
+pay; `none` when it may do anything else. -/
+def Prog.loopFrame (P : Prog C) : Option (List Var × Bool) :=
+  if Prog.within .view P then some (Prog.writes P, false)
+  else if Prog.within .nonpayable P then some (Prog.writes P, true)
+  else none
+
+/-- `{anon(body)} φ`, solkey's `#loopAnon(body, φ)`: `φ` whatever the body's
+frame holds.  `false` for a body with no frame, which no rule anonymises. -/
+def Fml.loopAnon (P : Prog C) (φ : Fml C) : Fml C :=
+  match Prog.loopFrame P with
+  | some (xs, false) => .anon xs φ
+  | some (xs, true) => .anon xs (.havoc φ)
+  | none => .not .tt
+
+theorem OpLoc.writes_sub {p : PrimTy} : (l : OpLoc C p) → ∀ x ∈ l.writes, x ∈ l.vars
+  | .local _, _, h => h
+  | .root .., _, h | .field .., _, h | .index .., _, h | .mfield .., _, h | .mindex .., _, h =>
+    nomatch h
+
+theorem Arg.param_mem_vars : (args : List (Arg C)) → ∀ x ∈ args.map (·.x), x ∈ Arg.vars args
+  | [], _, h => nomatch h
+  | a :: as, x, h => by
+    simp only [List.map_cons, List.mem_cons] at h
+    simp only [Arg.vars, List.mem_cons, List.mem_append]
+    rcases h with rfl | h
+    · exact .inl (.inl rfl)
+    · exact .inr (Arg.param_mem_vars as x h)
+
+mutual
+
+/-- A statement writes only locals it mentions. -/
+theorem Stmt.writes_sub : (s : Stmt C) → ∀ x ∈ s.writes, x ∈ s.vars
+  | .assignLocal .., _, h | .declLocal .., _, h => by
+    simp only [Stmt.writes, List.mem_singleton] at h
+    subst h; exact List.mem_cons_self
+  | .opAssign _ _ _ l _, x, h => by
+    simp only [Stmt.writes] at h
+    exact List.mem_append_left _ (OpLoc.writes_sub l x h)
+  | .incDec _ _ l, x, h => OpLoc.writes_sub l x h
+  | .assignIncDec _ _ _ l _, x, h => by
+    simp only [Stmt.writes, List.mem_cons] at h
+    rcases h with rfl | h
+    · exact List.mem_cons_self
+    · exact List.mem_cons_of_mem _ (OpLoc.writes_sub l x h)
+  | .ite _ thn els, x, h => by
+    simp only [Stmt.writes, List.mem_append] at h
+    simp only [Stmt.vars, List.mem_append]
+    rcases h with h | h
+    · exact .inl (.inr (Prog.writes_sub thn x h))
+    · exact .inr (Prog.writes_sub els x h)
+  | .call _ args _ ret body, x, h => by
+    simp only [Stmt.writes, List.mem_append] at h
+    simp only [Stmt.vars, List.mem_append]
+    rcases h with (h | h) | h
+    · exact .inl (.inl (Arg.param_mem_vars args x h))
+    · exact .inl (.inr h)
+    · exact .inr (Prog.writes_sub body x h)
+  | .send .., _, h => by
+    simp only [Stmt.writes, List.mem_singleton] at h
+    subst h; exact List.mem_cons_self
+  | .loop _ _ body, x, h => by
+    simp only [Stmt.writes] at h
+    simp only [Stmt.vars, List.mem_append]
+    exact .inr (Prog.writes_sub body x h)
+  | .assign .., _, h | .rebind .., _, h | .declStorage .., _, h | .push .., _, h | .pop _, _, h
+  | .transfer .., _, h | .declMem .., _, h | .rebindMem .., _, h | .assignFromMem .., _, h
+  | .assignMem .., _, h | .delete _, _, h | .deleteMem .., _, h | .assignNew .., _, h
+  | .require _, _, h | .assert _, _, h | .revert, _, h | .tryCall .., _, h => by
+    simp only [Stmt.writes, List.not_mem_nil] at h
+
+/-- A block writes only locals it mentions. -/
+theorem Prog.writes_sub : (P : List (Stmt C)) → ∀ x ∈ Prog.writes P, x ∈ Prog.vars P
+  | [], _, h => nomatch h
+  | s :: P, x, h => by
+    simp only [Prog.writes, List.mem_append] at h
+    simp only [Prog.vars, List.mem_append]
+    rcases h with h | h
+    · exact .inl (Stmt.writes_sub s x h)
+    · exact .inr (Prog.writes_sub P x h)
+
+end
+
+/-- The mutability a frame stands for. -/
+def Mutability.ofHavoc : Bool → Mutability
+  | false => .view
+  | true => .nonpayable
+
+theorem Prog.loopFrame_run {P : Prog C} {xs : List Var} {hv : Bool}
+    (hf : Prog.loopFrame P = some (xs, hv)) {σ τ : State} (h : Prog.run σ P = .ok τ) :
+    (Mutability.ofHavoc hv).Frame xs σ τ := by
+  simp only [Prog.loopFrame] at hf
+  split at hf
+  · cases hf; exact Prog.frame_of_within P ‹_› h
+  · split at hf
+    · cases hf; exact Prog.frame_of_within P ‹_› h
+    · cases hf
+
+/-- A frame's locals are the body's writes. -/
+theorem Prog.loopFrame_writes {P : Prog C} {xs : List Var} {hv : Bool}
+    (hf : Prog.loopFrame P = some (xs, hv)) : xs = Prog.writes P := by
+  simp only [Prog.loopFrame] at hf
+  split at hf
+  · cases hf; rfl
+  · split at hf
+    · cases hf; rfl
+    · cases hf
+
+/-- A local outside the frame keeps its binding. -/
+theorem Mutability.Frame.env_of_not_mem {hv : Bool} {xs : List Var} {σ τ : State}
+    (h : (Mutability.ofHavoc hv).Frame xs σ τ) {x : Var} (hx : x ∉ xs) :
+    lookupBy x σ.env = lookupBy x τ.env := by
+  cases hv
+  · exact h.env x hx
+  · exact h.env x hx
+
+/-- **The anonymising update covers every state the frame allows**: what
+holds after `{anon(body)}` holds in every state agreeing with this one off
+the frame. -/
+theorem Fml.loopAnon_holds {P : Prog C} {xs : List Var} {hv : Bool}
+    (hf : Prog.loopFrame P = some (xs, hv)) {φ : Fml C} {σ τ : State}
+    (h : (Mutability.ofHavoc hv).Frame xs σ τ) (hφ : holds σ (Fml.loopAnon P φ)) : holds τ φ := by
+  have h0 : Avoids φ.vars [] := fun _ _ hn => nomatch hn
+  cases hv with
+  | false =>
+    simp only [Fml.loopAnon, hf, holds] at hφ
+    exact (holds_frame φ h0 (State.anon_agree h)).1 (hφ _)
+  | true =>
+    simp only [Fml.loopAnon, hf, holds] at hφ
+    have e : ((σ.havoc τ.storage τ.net).anon xs fun x => lookupBy x τ.env) =
+        (σ.anon xs fun x => lookupBy x τ.env).havoc τ.storage τ.net := rfl
+    have hag := State.anon_agree (σ := σ.havoc τ.storage τ.net) h
+    rw [e] at hag
+    exact (holds_frame φ h0 hag).1 (hφ _ _ _)
 
 end Solidity

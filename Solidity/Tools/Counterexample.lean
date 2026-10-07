@@ -114,6 +114,164 @@ def havocSamples (σ : State) : List (List (Name × SVal) × List (Int × Int)) 
 
 variable {C : Contract}
 
+/-! ## Programs run with fuel
+
+`Loop.run` iterates until the loop is done, in compiled code too
+(`Loop.runImpl`), which heeds no heartbeats: a loop bounded by an argument
+drawn at `2^256 - 1`, or one that never ends, would never return.  So the
+search runs each loop at most `loopFuel` iterations (`Prog.runFuel`), and a
+run past them is `none`, which evaluates to `unknown`; what it does return
+is `Prog.run`'s (`Prog.runFuel_sound`).  The kernel reduces it too, where it
+does not reduce `Loop.run`. -/
+
+/-- The iterations a loop is run for, at most, each time it is entered. -/
+def loopFuel : Nat := 1000
+
+/-- At most `n` iterations of a loop whose body may run out of fuel: `none`
+when they do not finish it. -/
+def _root_.Solidity.Loop.runFuel (body : State → Option (Res State)) (c : State → Res Value) :
+    Nat → State → Option (Res State)
+  | 0, _ => none
+  | n + 1, σ =>
+    match c σ with
+    | .error h => some (.error h)
+    | .ok (.bool false) => some (.ok σ)
+    | .ok (.int _) => some (.error .stuck)
+    | .ok (.bool true) =>
+      match body σ with
+      | none => none
+      | some (.error h) => some (.error h)
+      | some (.ok τ) => Loop.runFuel body c n τ
+
+theorem _root_.Solidity.Loop.runFuel_sound {body : State → Option (Res State)}
+    {body' : State → Res State} {c : State → Res Value}
+    (hb : ∀ τ r, body τ = some r → body' τ = r) :
+    (n : Nat) → ∀ (σ : State) (r : Res State), Loop.runFuel body c n σ = some r →
+      Loop.run body' c σ = r
+  | 0, _, _, h => by simp only [Loop.runFuel, reduceCtorEq] at h
+  | n + 1, σ, r, h => by
+    rw [Loop.run_unfold]
+    simp only [Loop.runFuel] at h
+    simp only [Loop.step]
+    split at h <;> rename_i hc <;> simp only [hc]
+    · exact Option.some.inj h
+    · exact Option.some.inj h
+    · exact Option.some.inj h
+    · split at h <;> rename_i hbd
+      · cases h
+      · simp only [hb _ _ hbd]; exact Option.some.inj h
+      · simp only [hb _ _ hbd]; exact Loop.runFuel_sound hb n _ _ h
+
+mutual
+
+/-- `Stmt.run` with each loop run at most `n` iterations (`Loop.runFuel`). -/
+def _root_.Solidity.Stmt.runFuel (n : Nat) (σ : State) : Stmt C → Option (Res State)
+  | .ite c thn els =>
+    match c.eval σ with
+    | .error h => some (.error h)
+    | .ok (.bool true) => Prog.runFuel n σ thn
+    | .ok (.bool false) => Prog.runFuel n σ els
+    | .ok (.int _) => some (.error .stuck)
+  | .call _ args _ ret body =>
+    match Arg.bindSeq args σ with
+    | .error h => some (.error h)
+    | .ok σ₁ =>
+      (Prog.runFuel n (ret.enter σ₁) body).map fun r => r >>= fun σ₂ => CallRet.leave (C := C) σ₂ ret
+  | .tryCall call rets ok err code pnc other =>
+    match call.key σ with
+    | .error h => some (.error h)
+    | .ok key =>
+      match lookupBy key σ.tx.ext with
+      | none => some (.error .revert)
+      | some (.ok vs) =>
+        match bindData rets vs σ with
+        | .error h => some (.error h)
+        | .ok τ => Prog.runFuel n τ ok
+      | some .error => Prog.runFuel n σ err
+      | some (.panic c) =>
+        match bindData (codeBinders code) [c] σ with
+        | .error h => some (.error h)
+        | .ok τ => Prog.runFuel n τ pnc
+      | some .other => Prog.runFuel n σ other
+  | .loop _ c body => Loop.runFuel (fun τ => Prog.runFuel n τ body) (fun τ => c.eval τ) n σ
+  | s => some (s.run σ)
+
+/-- `Prog.run` with each loop run at most `n` iterations. -/
+def _root_.Solidity.Prog.runFuel (n : Nat) (σ : State) : List (Stmt C) → Option (Res State)
+  | [] => some (pure σ)
+  | s :: P =>
+    match Stmt.runFuel n σ s with
+    | none => none
+    | some (.error h) => some (.error h)
+    | some (.ok τ) => Prog.runFuel n τ P
+
+end
+
+mutual
+
+/-- A run with fuel that returns is the run. -/
+theorem _root_.Solidity.Stmt.runFuel_sound {n : Nat} :
+    (s : Stmt C) → ∀ (σ : State) (r : Res State), s.runFuel n σ = some r → s.run σ = r
+  | .ite c thn els, σ, r, h => by
+    simp only [Stmt.runFuel] at h
+    simp only [Stmt.run, bind, Except.bind]
+    split at h <;> rename_i hc <;> simp only [hc]
+    · exact Option.some.inj h
+    · exact Prog.runFuel_sound thn σ r h
+    · exact Prog.runFuel_sound els σ r h
+    · exact Option.some.inj h
+  | .call _ args _ ret body, σ, r, h => by
+    simp only [Stmt.runFuel] at h
+    simp only [Stmt.run, bind, Except.bind]
+    split at h <;> rename_i hc <;> simp only [hc]
+    · exact Option.some.inj h
+    · cases hP : Prog.runFuel n (ret.enter _) body with
+      | none => rw [hP] at h; cases h
+      | some r' =>
+        rw [hP] at h
+        rw [Prog.runFuel_sound body _ r' hP, ← Option.some.inj h]
+        rfl
+  | .tryCall call rets ok err code pnc other, σ, r, h => by
+    simp only [Stmt.runFuel] at h
+    simp only [Stmt.run, bind, Except.bind]
+    split at h <;> rename_i hc <;> simp only [hc]
+    · exact Option.some.inj h
+    · split at h <;> rename_i hl <;> simp only [hl]
+      · exact Option.some.inj h
+      · split at h <;> rename_i hd <;> simp only [hd]
+        · exact Option.some.inj h
+        · exact Prog.runFuel_sound ok _ r h
+      · exact Prog.runFuel_sound err σ r h
+      · split at h <;> rename_i hd <;> simp only [hd]
+        · exact Option.some.inj h
+        · exact Prog.runFuel_sound pnc _ r h
+      · exact Prog.runFuel_sound other σ r h
+  | .loop _ c body, σ, r, h => by
+    simp only [Stmt.runFuel] at h
+    simp only [Stmt.run]
+    exact Loop.runFuel_sound (fun τ r' h' => Prog.runFuel_sound body τ r' h') n σ r h
+  | .assign .., _, _, h | .rebind .., _, _, h | .assignLocal .., _, _, h | .declLocal .., _, _, h
+  | .declStorage .., _, _, h | .declMem .., _, _, h | .rebindMem .., _, _, h
+  | .assignMem .., _, _, h | .assignFromMem .., _, _, h | .opAssign .., _, _, h
+  | .incDec .., _, _, h | .assignIncDec .., _, _, h | .push .., _, _, h | .pop .., _, _, h
+  | .transfer .., _, _, h | .send .., _, _, h | .delete .., _, _, h | .deleteMem .., _, _, h
+  | .assignNew .., _, _, h | .require .., _, _, h | .assert .., _, _, h | .revert, _, _, h =>
+    Option.some.inj h
+
+theorem _root_.Solidity.Prog.runFuel_sound {n : Nat} :
+    (P : List (Stmt C)) → ∀ (σ : State) (r : Res State), Prog.runFuel n σ P = some r →
+      Prog.run σ P = r
+  | [], _, _, h => Option.some.inj h
+  | s :: P, σ, r, h => by
+    simp only [Prog.runFuel] at h
+    simp only [Prog.run, bind, Except.bind]
+    split at h <;> rename_i hs
+    · cases h
+    · rw [Stmt.runFuel_sound s σ _ hs]; exact Option.some.inj h
+    · rw [Stmt.runFuel_sound s σ _ hs]; exact Prog.runFuel_sound P _ r h
+
+end
+
 /-- **`holds`, evaluated**: `dom p` is the finite domain a quantifier over
 `p` is tried on (only its values of type `p` are). -/
 def _root_.Solidity.Fml.eval3 (dom : PrimTy → List Value) (σ : State) : Fml C → Tri
@@ -130,7 +288,10 @@ def _root_.Solidity.Fml.eval3 (dom : PrimTy → List Value) (σ : State) : Fml C
   | .and φ ψ => (φ.eval3 dom σ).and (ψ.eval3 dom σ)
   | .imp φ ψ => (φ.eval3 dom σ).imp (ψ.eval3 dom σ)
   | .upd m U φ => Tri.after m (fun τ => φ.eval3 dom τ) (U.apply σ)
-  | .modal m P φ => Tri.afterRun m (fun τ => φ.eval3 dom τ) (Prog.run σ P)
+  | .modal m P φ =>
+    match Prog.runFuel loopFuel σ P with
+    | some r => Tri.afterRun m (fun τ => φ.eval3 dom τ) r
+    | none => .unknown
   | .havoc φ =>
     if (havocSamples σ).any fun (st, nt) => φ.eval3 dom (σ.havoc st nt) = .ff then .ff
     else .unknown
@@ -140,6 +301,8 @@ def _root_.Solidity.Fml.eval3 (dom : PrimTy → List Value) (σ : State) : Fml C
     else if p = .bool && rs.any (·.1 = .bool true) && rs.any (·.1 = .bool false) &&
         rs.all (·.2 = .tt) then .tt
     else .unknown
+  -- the locals as they are: one of the states the formula is about
+  | .anon xs φ => if φ.eval3 dom (σ.anon xs fun x => lookupBy x σ.env) = .ff then .ff else .unknown
 
 theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fml C) → ∀ σ : State,
     (φ.eval3 dom σ = .tt → holds σ φ) ∧ (φ.eval3 dom σ = .ff → ¬ holds σ φ)
@@ -184,13 +347,17 @@ theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fm
       reduceCtorEq, imp_self, not_true_eq_false, not_false_eq_true, and_self]
   | .modal m P φ, σ => by
     simp only [Fml.eval3, holds]
-    cases Prog.run σ P with
-    | ok τ =>
-      have ih := Fml.eval3_sound dom φ τ
-      exact ⟨fun h => ⟨ih.1 h, nofun⟩, fun h hh => ih.2 h hh.1⟩
-    | error e => cases e <;> cases m <;> simp only [Tri.afterRun, Tri.after, Modality.afterRun,
-      Modality.after, Modality.onHalt, ne_eq, Except.error.injEq, reduceCtorEq, imp_self,
-      not_true_eq_false, not_false_eq_true, and_self, and_true, and_false]
+    cases hr : Prog.runFuel loopFuel σ P with
+    | none => exact ⟨nofun, nofun⟩
+    | some r =>
+      rw [Prog.runFuel_sound P σ r hr]
+      cases r with
+      | ok τ =>
+        have ih := Fml.eval3_sound dom φ τ
+        exact ⟨fun h => ⟨ih.1 h, nofun⟩, fun h hh => ih.2 h hh.1⟩
+      | error e => cases e <;> cases m <;> simp only [Tri.afterRun, Tri.after, Modality.afterRun,
+        Modality.after, Modality.onHalt, ne_eq, Except.error.injEq, reduceCtorEq, imp_self,
+        not_true_eq_false, not_false_eq_true, and_self, and_true, and_false]
   | .havoc φ, σ => by
     simp only [Fml.eval3, holds]
     split
@@ -223,6 +390,12 @@ theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fm
           · exact (Fml.eval3_sound dom φ _).1 (by simpa only [← hfv] using hall _ ⟨f, hfm, rfl⟩)
           · exact (Fml.eval3_sound dom φ _).1 (by simpa only [← htv] using hall _ ⟨t, htm, rfl⟩)
       · exact ⟨nofun, nofun⟩
+  | .anon xs φ, σ => by
+    simp only [Fml.eval3, holds]
+    split
+    · rename_i h
+      exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ _).2 h (hall _)⟩
+    · exact ⟨nofun, nofun⟩
 
 /-- **A `tt` is a truth**: `φ` holds in `σ`. -/
 theorem _root_.Solidity.Fml.eval3_tt {dom : PrimTy → List Value} {σ : State} {φ : Fml C}
@@ -453,7 +626,13 @@ def SpecProblem.try (P : SpecProblem C) (c : Cand) : Option (Option Witness) :=
   let dom := poolDom P.lits
   let σ := c.state
   if !P.checked.all (fun φ => φ.eval3 dom σ = .tt) then none else
-  let outcome : Res State := P.upd.apply σ >>= fun τ => Prog.run τ P.prog
+  -- a run past `loopFuel` is not a counterexample
+  let run : Option (Res State) := match P.upd.apply σ with
+    | .error h => some (.error h)
+    | .ok τ => Prog.runFuel loopFuel τ P.prog
+  match run with
+  | none => some none
+  | some outcome =>
   match outcome with
   | .error .panic =>
     some (some { state := σ, args := c.args, failing := [], outcome := some outcome })
@@ -507,8 +686,11 @@ def SpecProblem.search (P : SpecProblem C) (budget : Nat) : Search := Id.run do
 implications. -/
 def _root_.Solidity.Fml.runOf (σ : State) : Fml C → Option (Res State)
   | .imp _ ψ => Fml.runOf σ ψ
-  | .upd _ U (.modal _ P _) => some (U.apply σ >>= fun τ => Prog.run τ P)
-  | .modal _ P _ => some (Prog.run σ P)
+  | .upd _ U (.modal _ P _) =>
+    match U.apply σ with
+    | .error h => some (.error h)
+    | .ok τ => Prog.runFuel loopFuel τ P
+  | .modal _ P _ => Prog.runFuel loopFuel σ P
   | .upd _ U _ => some (U.apply σ)
   | _ => none
 
