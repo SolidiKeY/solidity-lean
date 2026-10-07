@@ -170,7 +170,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/Exp.lean` | `**`: solc's `checked_exp_unsigned`, unrolled. |
 | `Evm/Correctness.lean` | `compile_correct`, `compile_box`, `compile_net`, `compile_exact`, `compile_storage`, `not_stuck`. |
 | `Evm/Examples.lean` | Compiled programs run by `decide`. |
-| `Evm/CoreCompile.lean` | The compiler over the scoped syntax (M5, `docs/intrinsic.md`): a local at its level (`cell`, `lvl`), a call's body in its own frame, the fragment `inFrag` over `Frag Γ` (alias flags only), and `compileStmt_erase` (the same code as `Evm/Compile.lean`'s up to the memory cells).  Beside it until M4. |
+| `Evm/CoreCompile.lean` | The compiler over the scoped syntax (M5, `docs/intrinsic.md`): a local at its level (`cell`, `lvl`), a call's body in its own frame, the fragment `inFrag` over `Frag Γ` (alias flags only), `compileStmt_erase` (the same code as `Evm/Compile.lean`'s up to the memory cells) and `pushes_erase`.  Beside it until M4. |
 | `Evm/CoreExamples.lean` | `Evm/Examples.lean`'s programs resolved and compiled by `Evm/CoreCompile.lean`, run by `decide +kernel`. |
 
 ## Tools

@@ -418,6 +418,40 @@ def compileProg (b : Nat) {Γ Γ' : Ctx} : Solidity.Core.Prog C Γ Γ' → List 
   | .cons s P => compileStmt b s ++ compileProg b P
 end
 
+mutual
+/-- How many `push` statements a statement has (`Evm.pushes`): each runs at
+most once, since the fragment has no loop. -/
+def Stmt.pushes {Γ Γ' : Ctx} : Solidity.Core.Stmt C Γ Γ' → Nat
+  | .push .. => 1
+  | .ite _ t e => Prog.pushes t + Prog.pushes e
+  | .block body => Prog.pushes body
+  | .call _ _ _ body => Prog.pushes body
+  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
+  | .incDec .. | .assignIncDec .. | .pop _ | .transfer .. | .send .. | .declMem ..
+  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
+  | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => 0
+def Prog.pushes {Γ Γ' : Ctx} : Solidity.Core.Prog C Γ Γ' → Nat
+  | .nil => 0
+  | .cons s P => Stmt.pushes s + Prog.pushes P
+end
+
+mutual
+/-- Whether a statement pays (`Evm.pays`): a `transfer` or a `send`, or one
+in a branch, a block or a called body. -/
+def Stmt.pays {Γ Γ' : Ctx} : Solidity.Core.Stmt C Γ Γ' → Bool
+  | .transfer .. | .send .. => true
+  | .ite _ t e => Prog.pays t || Prog.pays e
+  | .block body => Prog.pays body
+  | .call _ _ _ body => Prog.pays body
+  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
+  | .incDec .. | .assignIncDec .. | .push .. | .pop _ | .declMem ..
+  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
+  | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => false
+def Prog.pays {Γ Γ' : Ctx} : Solidity.Core.Prog C Γ Γ' → Bool
+  | .nil => false
+  | .cons s P => Stmt.pays s || Prog.pays P
+end
+
 /-! ## Against the untyped compiler -/
 
 section Erase
@@ -650,6 +684,70 @@ theorem compileProg_erase (b : Nat) (ns : List Var) {Γ Γ' : Ctx} :
     simp only [Prog.sepArgs, Bool.and_eq_true] at h
     simp only [compileProg, Prog.erase, Evm.compileProg_append, List.map_append,
       compileStmt_erase b ns s h.1, compileProg_erase b (s.outNames ns) P h.2]
+end
+
+theorem _root_.Solidity.Evm.pushesP_append (P Q : Solidity.Prog C) :
+    Evm.pushesP (P ++ Q) = Evm.pushesP P + Evm.pushesP Q := by
+  induction P with
+  | nil => simp only [List.nil_append, Evm.pushesP, Nat.zero_add]
+  | cons s P ih => simp only [List.cons_append, Evm.pushesP, ih, Nat.add_assoc]
+
+theorem _root_.Solidity.Evm.paysP_append (P Q : Solidity.Prog C) :
+    Evm.paysP (P ++ Q) = (Evm.paysP P || Evm.paysP Q) := by
+  induction P with
+  | nil => simp only [List.nil_append, Evm.paysP, Bool.false_or]
+  | cons s P ih => simp only [List.cons_append, Evm.paysP, ih, Bool.or_assoc]
+
+/-- A call's erased body starts with what has no `push` and no payment: the
+memory return's declaration, the unseparated arguments' declarations. -/
+theorem pushesP_pre {Γ : Ctx} {rs Γ' : Ctx} (ret : Solidity.Core.CallRet Γ rs Γ') :
+    Evm.pushesP (ret.pre (C := C)) = 0 ∧ Evm.paysP (ret.pre (C := C)) = false := by
+  cases ret <;> exact ⟨rfl, rfl⟩
+
+theorem pushesP_decls (as : List (Arg C)) :
+    Evm.pushesP (as.map Arg.decl) = 0 ∧ Evm.paysP (as.map Arg.decl) = false := by
+  induction as with
+  | nil => exact ⟨rfl, rfl⟩
+  | cons a as ih =>
+    simp only [List.map_cons, Evm.pushesP, Evm.paysP, ih.1, ih.2]
+    exact ⟨rfl, rfl⟩
+
+mutual
+/-- The two counts agree with the untyped ones, for every statement. -/
+theorem pushes_erase (ns : List Var) {Γ Γ' : Ctx} : (s : Solidity.Core.Stmt C Γ Γ') →
+    Stmt.pushes s = Evm.pushesP (s.erase ns) ∧ Stmt.pays s = Evm.paysP (s.erase ns)
+  | .ite _ t e => by
+    obtain ⟨ht, ht'⟩ := pushesP_erase ns t
+    obtain ⟨he, he'⟩ := pushesP_erase ns e
+    simp only [Stmt.pushes, Stmt.pays, Stmt.erase, Evm.pushesP, Evm.pushes, Evm.paysP, Evm.pays,
+      ht, he, ht', he', Nat.add_zero, Bool.or_false, and_self]
+  | .block body => by
+    simp only [Stmt.pushes, Stmt.pays, Stmt.erase]
+    exact pushesP_erase ns body
+  | .call f args ret body => by
+    obtain ⟨hb, hb'⟩ := pushesP_erase (ret.names ++ args.names) body
+    obtain ⟨hp, hp'⟩ := pushesP_pre (C := C) ret
+    simp only [Stmt.pushes, Stmt.pays, Stmt.erase]
+    split
+    · simp only [Evm.pushesP, Evm.pushes, Evm.paysP, Evm.pays, Evm.pushesP_append,
+        Evm.paysP_append, hp, hp', hb, hb', Nat.zero_add, Nat.add_zero, Bool.false_or,
+        Bool.or_false, and_self]
+    · obtain ⟨hd, hd'⟩ := pushesP_decls (args.erase ns)
+      simp only [Evm.pushesP, Evm.pushes, Evm.paysP, Evm.pays, Evm.pushesP_append,
+        Evm.paysP_append, hp, hp', hb, hb', hd, hd', Nat.zero_add, Nat.add_zero, Bool.false_or,
+        Bool.or_false, and_self]
+  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
+  | .incDec .. | .assignIncDec .. | .push .. | .pop _ | .transfer .. | .send .. | .declMem ..
+  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
+  | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => ⟨rfl, rfl⟩
+theorem pushesP_erase (ns : List Var) {Γ Γ' : Ctx} : (P : Solidity.Core.Prog C Γ Γ') →
+    Prog.pushes P = Evm.pushesP (P.erase ns) ∧ Prog.pays P = Evm.paysP (P.erase ns)
+  | .nil => ⟨rfl, rfl⟩
+  | .cons s P => by
+    obtain ⟨hs, hs'⟩ := pushes_erase ns s
+    obtain ⟨hP, hP'⟩ := pushesP_erase (s.outNames ns) P
+    simp only [Prog.pushes, Prog.pays, Prog.erase, Evm.pushesP_append, Evm.paysP_append, hs, hs',
+      hP, hP', and_self]
 end
 
 end Erase

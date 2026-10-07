@@ -182,6 +182,8 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     Axioms: `propext`.  Cells differ by design.  `sepArgs` is needed because
     `erase` of a call with unseparated arguments binds them in the body after
     the return variable is zeroed (same words, another order).
+    `Stmt.pushes`/`Stmt.pays` are `Evm.pushesP`/`Evm.paysP` of the erasure
+    for every statement (`pushes_erase`).
   - `Evm/CoreExamples.lean` ports the 45 compile `decide` examples of
     `Evm/Examples.lean` (not the five interpreter theorems: they need the M5
     `compile_correct`), plus a scoped-branch run, a `pop` in a branch
@@ -195,7 +197,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     `pow_run` 3.5–5.5 s in all three.
 - Left for M5: `compile_correct` over `Core` (`Sim` by levels through
   `memAt`, `Sim.bindVal`/`bindAlias` as `Env.cons`, needs M3's `State C Γ`);
-  `Core` twins of `pushes`/`pays`; a quoter-built program (M2.3) to time
+  a quoter-built program (M2.3) to time
   the compiler without the kernel's resolution; the proof that `resolve`
   returns `sepArgs` statements; `Machine.mem : Nat → Word` once
   `Evm/Compile.lean` retires.
