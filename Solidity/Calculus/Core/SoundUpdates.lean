@@ -182,6 +182,179 @@ theorem sound_transferBox (sadr se : Simple C Γ .uint) :
 theorem sound_done_false {Γ' : Ctx} (s : Stmt C Γ Γ') : Premise.Sound m s (.done false) σ :=
   fun ω κ φ => Premise.sound_done σ false (fun h => nomatch h) ω κ φ
 
+/-! ### Several ways to end -/
+
+theorem holds_conj {σ : State C Γ} : (l : List (Fml C Γ)) → (holds σ (Fml.conj l) ↔ ∀ ψ ∈ l, holds σ ψ)
+  | [] => by simp only [Fml.conj, holds, List.not_mem_nil, false_implies, implies_true]
+  | [φ] => by simp only [Fml.conj, List.mem_singleton, forall_eq]
+  | φ :: ψ :: l => by
+    show holds σ φ ∧ holds σ (Fml.conj (ψ :: l)) ↔ _
+    rw [holds_conj (ψ :: l)]
+    simp only [List.mem_cons, forall_eq_or_imp]
+
+/-- **Labelled goals**: the formulas `fs` to prove, then the rest after each
+update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas holding, the statement
+runs as one of the updates up to the halt. -/
+theorem Premise.Sound.cases {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
+    (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ) (s.run σ)) :
+    Premise.Sound m s (.cases fs us) σ := by
+  intro Γ₁ Γ₀ ω κ φ hp
+  have hp' := (holds_conj _).1 hp
+  obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
+  exact Premise.Sound.updateSim σ hs ω κ φ
+    (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
+
+/-- `sendNoCallbackBox`, `sendNoCallbackDiamond`: `pv = sadr.send(se);` runs as
+the payment with `pv` true, or as `pv` false. -/
+theorem sound_send (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) (fs : List (Fml C Γ)) :
+    Premise.Sound m (.send pv (.simple sadr) (.simple se)) (.cases fs
+      [(Upd.nil.snoc (.payTo sadr se)).snoc (.local pv (.val (Tm.lit (.bool true)))),
+        Upd.nil.snoc (.local pv (.val (Tm.lit (.bool false))))]) σ := by
+  refine Premise.Sound.cases σ fun _ => ?_
+  obtain ⟨a, ha⟩ := Simple.eval_ok σ sadr
+  obtain ⟨v, hv⟩ := Simple.eval_ok σ se
+  have e₁ : ((Upd.nil.snoc (.payTo sadr se)).snoc
+      (.local pv (.val (Tm.lit (.bool true))))).apply σ = (do
+        let addr ← a.asInt
+        let amt ← v.asInt
+        if amt < 0 then .error .revert
+        else pure ((σ.withGlob (σ.glob.pay addr amt)).setLocal pv (.bool true))) := by
+    rw [upd2_apply]
+    simp only [UpdElem.write, Rhs.eval, Tm.eval, Op0.eval, Simple.eval_lower, ha, hv, Res.bind_ok,
+      bind_assoc]
+    cases a.asInt with
+    | error => rfl
+    | ok n =>
+      cases v.asInt with
+      | error => rfl
+      | ok k => by_cases hk : k < 0 <;> simp only [Res.bind_ok, hk, ↓reduceIte] <;> rfl
+  have e₂ : (Upd.nil.snoc (.local pv (.val (Tm.lit (C := C) (Γ := Γ) (.bool false))))).apply σ =
+      .ok (σ.setLocal pv (.bool false)) := rfl
+  have hr : Stmt.run σ (.send pv (.simple sadr) (.simple se)) = (do
+      let addr ← a.asInt
+      let amt ← v.asInt
+      sendAt σ pv addr amt) := by
+    show Run.send pv _ _ σ = _
+    simp only [Run.send, Val.eval, ha, hv, Res.bind_ok]
+  rw [hr]
+  cases ha' : a.asInt with
+  | error e => exact ⟨_, List.mem_cons_self .., by rw [e₁, ha']; exact Res.Sim.refl _⟩
+  | ok n =>
+    cases hv' : v.asInt with
+    | error e => exact ⟨_, List.mem_cons_self .., by rw [e₁, ha', hv']; exact Res.Sim.refl _⟩
+    | ok k =>
+      rw [ha', hv'] at e₁
+      simp only [Res.bind_ok, sendAt] at e₁ ⊢
+      by_cases hk : k < 0
+      · exact ⟨_, List.mem_cons_self .., by rw [e₁]; simp only [hk, ↓reduceIte]; exact Res.Sim.refl _⟩
+      · simp only [hk, ↓reduceIte] at e₁ ⊢
+        cases hl : Semantics.lookupBy (sendKey n k) σ.tx.ext with
+        | none => exact ⟨_, List.mem_cons_self .., by rw [e₁]; exact Res.Sim.refl _⟩
+        | some r =>
+          cases r with
+          | ok => exact ⟨_, List.mem_cons_self .., by rw [e₁]; exact Res.Sim.refl _⟩
+          | _ =>
+            exact ⟨_, List.mem_cons_of_mem _ (List.mem_cons_self ..), by rw [e₂]; exact Res.Sim.refl _⟩
+
+/-! ### Fresh memory objects -/
+
+/-- `memoryReferenceDeclFreshAlloc`: `{mv := alloc(memory, R) ‖ memory := addM(memory, R)}`
+for `T memory mv;`. -/
+theorem sound_declMemFresh (R : RefTy) (x : Var) (hd : (none.isSome || (Ty.ref R).defaultOkS) = true)
+    (hm : (Ty.ref R).mapFree = true) :
+    Premise.Sound m (.declMem R x none hd hm) (.update ((Upd.nil.decl x
+      (.mref (.app1 (.alloc R) rfl .memory))).snoc (.memory (.app1 (.addM R) rfl .memory)))) σ :=
+  Premise.Sound.update (by
+    show (do
+      let τ ← (Upd.nil.decl x (.mref (.app1 (.alloc R) rfl .memory))).apply σ
+      UpdElem.write σ (.memory (.app1 (.addM R) rfl .memory)) τ) = Run.declMem R none σ
+    simp only [Upd.apply, UpdElem.write, Rhs.eval, Tm.eval, Op1.eval, Op0.eval, Run.declMem,
+      Solidity.allocDefault_eq, bind_assoc, pure_bind]
+    simp only [bind, Except.bind, pure, Except.pure]
+    cases Solidity.allocHN σ.glob R <;> rfl)
+
+/-- `memoryRootDeleteFreshRebind`: `{mv := alloc(memory, R) ‖ memory := addM(memory, R)}`
+for `delete mv;`. -/
+theorem sound_deleteMemVar {R : RefTy} (i : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
+    (hd : (Ty.ref R).defaultOkS = true) :
+    Premise.Sound m (.deleteMem (.var i hm) hd) (.update ((Upd.nil.snoc
+      (.local i (.mref (.app1 (.alloc R) rfl .memory)))).snoc
+      (.memory (.app1 (.addM R) rfl .memory)))) σ :=
+  Premise.Sound.update (by
+    rw [upd2_apply]
+    show _ = Run.deleteMem (.var i hm) σ
+    simp only [UpdElem.write, Rhs.eval, Tm.eval, Op1.eval, Op0.eval, Run.deleteMem,
+      Solidity.allocDefault_eq, bind_assoc, pure_bind]
+    simp only [bind, Except.bind, pure, Except.pure]
+    cases Solidity.allocHN σ.glob R <;> rfl)
+
+/-- `memoryStorageCopy`, `memoryArrayFreshAlloc`:
+`{mv := freshId(copySt(memory, v)) ‖ memory := copySt(memory, v)}`. -/
+theorem sound_allocCopy {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) (v : Tm C Γ .sv)
+    (hr : r.eval σ = (do
+      let (τ, mv) ← Semantics.copyStToM σ.glob (← v.eval σ)
+      pure (σ.withGlob τ, ← mv.asRef))) :
+    Premise.Sound m (.rebindMem i r) (.allocCopy i v) σ :=
+  Premise.Sound.update (by
+    rw [upd2_apply]
+    show _ = Run.rebindMem i r σ
+    simp only [Run.rebindMem, hr, UpdElem.write, Rhs.eval, Tm.eval, Op2.eval, Op0.eval,
+      Solidity.copyStToM_eq, bind_assoc, pure_bind]
+    simp only [bind, Except.bind, pure, Except.pure]
+    cases v.eval σ with
+    | error => rfl
+    | ok sv =>
+      simp only
+      cases Solidity.copyHN σ.glob sv with
+      | error => rfl
+      | ok q =>
+        simp only
+        cases q.2.2.asRef <;> rfl)
+
+/-- `memoryFieldDeletePrimitive`, `memoryIndexDeletePrimitive`,
+`memoryFieldDeleteReference`, `memoryIndexDeleteReference`: a slot reset to its
+default, `{memory := write(memory, l, defVal)}`, or written a fresh default
+object, `{memory := write(addM(memory), l, alloc(memory))}`. -/
+theorem sound_clearMem {T : Ty} (l : MLoc C Γ T) (hd : T.defaultOkS = true) :
+    Premise.Sound m (.deleteMem (.loc l) hd) (.clearMem l.lower T) σ := by
+  cases T with
+  | prim p =>
+    refine Premise.Sound.update ?_
+    rw [upd1_apply]
+    show _ = Run.deleteMem (.loc l) σ
+    simp only [UpdElem.write, Tm.eval, Op3.eval, Op1.eval, Op0.eval, MLoc.eval_lower_addr,
+      Run.deleteMem, memClear, bind_assoc, pure_bind, writeAddr_glob]
+  | ref R =>
+    refine Premise.Sound.updateSim σ ?_
+    rw [upd1_apply]
+    show Res.Sim _ (Run.deleteMem (.loc l) σ)
+    simp only [UpdElem.write, Tm.eval, Op3.eval, Op1.eval, Op0.eval, MLoc.eval_lower_addr,
+      Run.deleteMem, memClear, Solidity.allocDefault_eq, bind_assoc, pure_bind]
+    simp only [bind, Except.bind, pure, Except.pure, Functor.map, Except.map]
+    have ha : NoPanic (l.addr σ) := by
+      have h := Tm.eval_noPanic σ l.lower
+      rw [MLoc.eval_lower_addr] at h
+      exact h
+    have hal : NoPanic (Solidity.allocHN σ.glob R) := Solidity.allocHN_noPanic σ.glob R
+    revert ha hal
+    cases l.addr σ with
+    | error e =>
+      cases Solidity.allocHN σ.glob R with
+      | error e' => exact fun ha hal => ⟨fun h => absurd (congrArg Except.error h) hal,
+          fun h => absurd (congrArg Except.error h) ha⟩
+      | ok q => intro _ _; exact Res.Sim.refl _
+    | ok a =>
+      cases Solidity.allocHN σ.glob R with
+      | error e' => intro _ _; exact Res.Sim.refl _
+      | ok q =>
+        intro _ _
+        simp only
+        cases hw : writeAddr _ _ a with
+        | error => exact Res.Sim.refl _
+        | ok μ =>
+          simp only [writeAddr_ok_with hw]
+          exact Res.Sim.refl _
+
 end Updates
 
 end Solidity.Core
