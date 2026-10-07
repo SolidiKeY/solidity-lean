@@ -316,9 +316,15 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     One lemma per statement (`Stmt.erases_*`), the IH passed in, and a
     mutual structural `Stmt.erasesAt`/`Prog.erasesAt` that dispatches;
     loops by `Loop.run_rel₂`, `Loop.run_rel` across the two state types.
-  - Not done: that `resolve`'s output from the elaborator's names is
-    `Fresh` (the separatedness conjunct follows from the others, also not
-    proved); deriving `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` from `resolve`
+  - Not true in general (M2–M3 review): `resolve`'s output from the
+    elaborator is not always `Fresh`.  A raw block, a `for` init and a
+    modifier's `_` are elaborated by `elabBranch`, which pops their locals
+    from `ECtx` but emits them flat, so a later declaration of the same name
+    passes `checkFresh` and `resolve` stacks a second binder in one scope:
+    `for (uint i=0;…){} for (uint i=0;…){}`, `Branch.lean`'s pins
+    `{ bool x = true; } if (c) { uint x = 1; }` and
+    `for (int i…){} if (c) { uint i = 1; }`, a modifier applied twice.
+    `run_erase` does not cover these.  Not done either: deriving `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` from `resolve`
     plus `run_erase`.  Applying `Prog.run_erase` to `callsCore` and a state
     times out in the elaborator at `whnf` (the partial application without the
     state checks); not yet diagnosed.  (M3.3 did not need the derivation of
@@ -348,8 +354,12 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     three instances; a tight leaf is its canonical leaf plus a tightness
     lemma (`keepsT_of`).  `Core.Loop.run_induct` is the loop's induction.
   - `Reachable C st := ∃ Γ' (P : Core.Prog C [] Γ') σ, P.run (State.ofSem
-    C.initState) = .ok σ ∧ σ.storage = st`; `Problem.lean`'s statements are
-    unchanged (`initStorage_wt`'s witness is `.nil`).
+    C.initState) = .ok σ ∧ σ.storage = st`: reachability by the scoped
+    interpreter, where it was the untyped run of a checked program.
+    `Problem.lean`'s statements keep their text (`initStorage_wt`'s witness
+    is `.nil`) but now speak of the scoped run, while `wt(storage)` is read
+    by `holds` over the untyped one.  Open gap: `ReachableU → Reachable`
+    (resolve, `Fresh`, `run_erase`; M2–M3 review).
   - The builder (`Core.Build`) is a scoped program: `fill d T q v : Prog C
     Γ Γ` declares each alias in a block of its own (`bound`), so a fill
     leaves its context, and its caller's aliases (read by position) are
@@ -387,6 +397,32 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     global lemmas are on `Semantics.State` and move with it.
   - MCP: "Lean did not finish" on `Calculus/Problem.lean` hid a real error
     (a deleted lemma it used); a scratch copy cut in halves found it.
+
+### M2–M3 review
+
+Read-only review of M2–M3, the confirmed findings (2026-10-07):
+
+- `Prog.Fresh` fails for ordinary elaborated programs (a name redeclared
+  after a raw block, a `for` init or a modifier's `_`, which `elabBranch`
+  pops from `ECtx` but emits flat), so `run_erase` does not cover them and
+  "`resolve`'s output is `Fresh`" is false, not unproved.  Docs corrected
+  (`RunErase.lean`'s docstring, M3.2 above, `solc-validation.md`).  Open:
+  make the output `Fresh`, by a per-function set of every name declared so
+  far that `checkFresh` reads (refuse, or rename to a fresh capture), or by
+  a scope marker `resolve` turns into `Core.Stmt.block`.
+- `Reachable` is now reachability by the scoped interpreter, while `holds`
+  reads `wt(storage)` over the untyped one; `reachable_canon`,
+  `shape_iff_reachable`, `wt_iff_reachable` and `reachable_iff` say nothing
+  yet about the untyped run.  Said in M3.3, `testsuite-proofs.md`,
+  `solkey-feedback.md`, `Problem.lean`'s and `Reachability.lean`'s
+  docstrings.  Open: `ReachableU C st := ∃ P σ, resolveCheck [] P = .ok _ ∧
+  Prog.run C.initState P = .ok σ ∧ σ.storage = st` and `ReachableU →
+  Reachable`, from `Prog.resolve_erase` and `run_erase` once `Fresh` holds.
+- The memory conditional of references refuses `c ? a[i] : b[j]` when the
+  default of the type is not well-formed (`hoist`'s `T memory mv;`): now in
+  `solc-alignment.md`'s row.
+- `Core.lean`'s docstring cited a missing `Stmt.run_eq_runC`; it names
+  `Stmt.runR_eq`/`Prog.runR_eq`.
 
 ## Baselines (M0)
 
