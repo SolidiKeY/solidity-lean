@@ -228,7 +228,7 @@ def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Fml
   let call : List RawStmt := [.call (.name "constructor") (ps.map fun (n, _) => RawExpr.name n)]
   let Γ : ECtx := ps.map fun (n, p) => (n, LocalTy.val p)
   let P ← ((elabStmts C call).run { funs := C.funs }).run' (Γ, 1)
-  let _ ← wtCheck C (ECtx.toCtx Γ) P
+  let _ ← Core.Prog.resolveCheck (ECtx.toNCtx Γ) P
   pure (Problem.ctorFml m (ps.map fun (n, p) => (p, Var.ofName n)) P)
 
 /-- `problem[C]{constructor}`: `Problem.ctor C .diamond`, the unspecified

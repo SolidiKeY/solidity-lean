@@ -249,24 +249,15 @@ theorem ternaryOfMemoryReferences :
   sol_close
 
 /-! A local of a block, and a branch after it that declares the same name at
-another type: Solidity scopes the first to its block, the interpreter does
-not, so the branch would retype a local the join keeps.  The elaborator's
-locals check (`Stmt.wt`, `wtCheck`) refuses it, naming the local; the
-scoped locals of M2 (`docs/intrinsic.md`) lift this.  The same holds for a
-`for` loop's init, which stays declared after the loop.  A local both
-branches of an `if` declare alike is not kept (`Ctx.join` keeps only the
-elaborator's captures), so a later branch may declare it again. -/
+another type: Solidity scopes the first to its block, and so does the
+elaborator's locals check (`resolve`, `Syntax/Resolve.lean`), which reads a
+branch as a scope and a name as its newest declaration.  The same holds for
+a `for` loop's init. -/
 
-/--
-error: Solidity elaboration failed: the locals check (`Stmt.wt`) rejects `if (c) { uint x = 1; } else { }`: its body declares x as uint, which is declared as bool before it (here a block's local outlives its block)
--/
-#guard_msgs in #check sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } }
+example : Prog StandardExample := sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } }
 
-/--
-error: Solidity elaboration failed: the locals check (`Stmt.wt`) rejects `if (c) { uint i = 1; } else { }`: its body declares i as uint, which is declared as int before it (here a block's local outlives its block)
--/
-#guard_msgs in
-#check sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } }
+example : Prog StandardExample :=
+  sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } }
 
 /-- Declared alike in both branches, then at another type in a later one. -/
 example : (Prog.wt [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }

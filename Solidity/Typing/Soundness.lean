@@ -19,7 +19,7 @@ to the typed syntax in one respect: it drops `envTypedB`'s ban on bindings
 name up in the environment before falling back to a storage root; here an
 alias and a root are different constructors, so an untracked binding is
 never read, and dropping the ban is what lets a branch of an `if` declare
-a local the join then forgets (`StateWT.toRunWT` recovers the new
+a local the `if` then forgets (`StateWT.toRunWT` recovers the new
 invariant from the old one).
 
 The headline is `Stmt.run_wt`/`Prog.run_wt`: a checked statement run from
@@ -60,8 +60,9 @@ theorem Contract.layout_tyAt_root {C : Contract} {r : Name} {T : Ty}
 
 /-! ## The locals check
 
-`Stmt.wt` and its parts are defined in `Syntax.lean`, below the printer, so
-that the elaborator runs it at every `sol{ … }` it reads. -/
+`Stmt.wt` and its parts are defined in `Syntax.lean`, below the printer.
+The elaborator checks its blocks with `resolve` instead
+(`Syntax/Resolve.lean`); M3 derives `Stmt.wt` from it. -/
 
 /-- A local the smaller context binds, the larger binds the same way: `y`
 of `uint y;` before the branch is `uint` in it. -/
@@ -71,71 +72,6 @@ theorem Ctx.le_lookup {Γ Γ' : Ctx} {x : Var} {bt : BTy} (hle : Ctx.le Γ Γ' =
   have := List.all_eq_true.mp hle _ hmem
   simp only [beq_iff_eq] at this
   rw [this, h]
-
-private theorem Ctx.mem_setBy {k : Var} {v : BTy} {x : Var × BTy} :
-    ∀ {l : Ctx}, x ∈ setBy k v l → x = (k, v) ∨ x ∈ l
-  | [], h => by simp only [setBy, List.mem_cons, List.not_mem_nil, or_false] at h; exact .inl h
-  | (k', v') :: rest, h => by
-    simp only [setBy] at h
-    split at h
-    · simp only [List.mem_cons] at h ⊢
-      rcases h with h | h
-      · exact .inl h
-      · exact .inr (.inr h)
-    · simp only [List.mem_cons] at h ⊢
-      rcases h with h | h
-      · exact .inr (.inl h)
-      · rcases Ctx.mem_setBy h with h | h
-        · exact .inl h
-        · exact .inr (.inr h)
-
-/-- Binding `x` as `Γ'` binds it keeps a context below `Γ'`. -/
-theorem Ctx.le_setBy {J Γ' : Ctx} {x : Var} {b : BTy} (hle : Ctx.le J Γ' = true)
-    (hx : lookupBy x Γ' = some b) : Ctx.le (setBy x b J) Γ' = true := by
-  unfold Ctx.le at hle ⊢
-  rw [List.all_eq_true] at hle ⊢
-  intro g hg
-  by_cases hgx : g.1 = x
-  · rw [hgx, lookupBy_setBy_self, hx]; exact beq_self_eq_true _
-  · rw [lookupBy_setBy_ne hgx]
-    rcases Ctx.mem_setBy hg with rfl | hg
-    · exact absurd rfl hgx
-    · exact hle g hg
-
-private theorem Ctx.le_foldr_join {Γ Γt Γe Γ' : Ctx} (hle : Ctx.le Γ Γ' = true)
-    (hs : ∀ g : Var × BTy, lookupBy g.1 Γt = some g.2 → lookupBy g.1 Γe = some g.2 →
-      lookupBy g.1 Γ' = some g.2) :
-    ∀ L : Ctx, Ctx.le (L.foldr (fun g J =>
-      if g.1.isFresh && lookupBy g.1 Γ == none && lookupBy g.1 Γt == some g.2 &&
-        lookupBy g.1 Γe == some g.2
-      then setBy g.1 g.2 J else J) Γ) Γ' = true
-  | [] => hle
-  | g :: L => by
-    simp only [List.foldr_cons]
-    split
-    · rename_i hc
-      simp only [Bool.and_eq_true, beq_iff_eq] at hc
-      exact Ctx.le_setBy (Ctx.le_foldr_join hle hs L) (hs g hc.1.2 hc.2)
-    · exact Ctx.le_foldr_join hle hs L
-
-/-- What an `if` leaves is below what a branch leaves, given each side's
-binding of the joined locals (`Ctx.join`). -/
-theorem Ctx.le_join {Γ Γt Γe Γ' : Ctx} (hle : Ctx.le Γ Γ' = true)
-    (hs : ∀ g : Var × BTy, lookupBy g.1 Γt = some g.2 → lookupBy g.1 Γe = some g.2 →
-      lookupBy g.1 Γ' = some g.2) :
-    Ctx.le (Ctx.join Γ Γt Γe) Γ' = true :=
-  Ctx.le_foldr_join hle hs Γt
-
-/-- The join is below the `then` branch's context. -/
-theorem Ctx.le_join_thn {Γ Γt Γe : Ctx} (hle : Ctx.le Γ Γt = true) :
-    Ctx.le (Ctx.join Γ Γt Γe) Γt = true :=
-  Ctx.le_join hle fun _ h _ => h
-
-/-- The join is below the `else` branch's context. -/
-theorem Ctx.le_join_els {Γ Γt Γe : Ctx} (hle : Ctx.le Γ Γe = true) :
-    Ctx.le (Ctx.join Γ Γt Γe) Γe = true :=
-  Ctx.le_join hle fun _ _ h => h
-
 
 /-! ## The invariant -/
 
@@ -1431,9 +1367,9 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
         obtain ⟨cv, _, h⟩ := bind_ok_inv h
         split at h
         · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt thn hwt ht h
-          exact ⟨H', hext, hwt'.weaken (Ctx.le_join_thn hle.1)⟩
+          exact ⟨H', hext, hwt'.weaken hle.1⟩
         · obtain ⟨H', hext, hwt'⟩ := Prog.run_wt els hwt he h
-          exact ⟨H', hext, hwt'.weaken (Ctx.le_join_els hle.2)⟩
+          exact ⟨H', hext, hwt'.weaken hle.2⟩
         · exact nomatch h
       · exact nomatch hs
     · exact nomatch hs

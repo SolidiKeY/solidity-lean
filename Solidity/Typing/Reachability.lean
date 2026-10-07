@@ -1684,9 +1684,9 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
         obtain ⟨cv, _, h⟩ := bind_ok_inv h
         split at h
         · obtain ⟨H', hext, hwt', hcn'⟩ := Prog.run_canon thn hwt hcn ht h
-          exact ⟨H', hext, hwt'.weaken (Ctx.le_join_thn hle.1), hcn'⟩
+          exact ⟨H', hext, hwt'.weaken hle.1, hcn'⟩
         · obtain ⟨H', hext, hwt', hcn'⟩ := Prog.run_canon els hwt hcn he h
-          exact ⟨H', hext, hwt'.weaken (Ctx.le_join_els hle.2), hcn'⟩
+          exact ⟨H', hext, hwt'.weaken hle.2, hcn'⟩
         · exact nomatch h
       · exact nomatch hs
     · exact nomatch hs

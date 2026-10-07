@@ -477,7 +477,7 @@ def specPieces (f : String) :
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
   let Γ : ECtx := ps.map fun (n, p) => (n, LocalTy.val p)
   let P ← ((elabStmts C call).run { funs := C.funs }).run' (Γ, 1)
-  let _ ← wtCheck C (ECtx.toCtx Γ) P
+  let _ ← Core.Prog.resolveCheck (ECtx.toNCtx Γ) P
   -- the snapshots `\old` reads, taken where something reads them
   -- (a deployment's `old` and `oldNet` are solkey's `old := mtSt ‖
   -- oldNet := mtSt`: the update is parallel, so `old := storage` would bind

@@ -5,6 +5,8 @@ import Solidity.SpecSyntax
 import Solidity.Syntax
 import Solidity.Scope
 import Solidity.Syntax.Core
+import Solidity.Syntax.Resolve
+import Solidity.Syntax.Splice
 import Solidity.FreshNames
 import Solidity.Semantics
 import Solidity.Semantics.DecEq

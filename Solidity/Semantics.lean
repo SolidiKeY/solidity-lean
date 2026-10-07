@@ -1,4 +1,4 @@
-import Solidity.Syntax
+import Solidity.Syntax.Splice
 
 /-!
 # The interpreter
