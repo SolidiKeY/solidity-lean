@@ -351,4 +351,59 @@ theorem Tm.denote_erase (hag : Agree ns σ τ) : {s : Srt} → (t : Tm C Γ s) �
 
 end TermsDenote
 
+/-! ## A thinning keeps a sublist of the names -/
+
+section Thin
+
+theorem Thin.names_length : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (ns : List Var) →
+    ns.length = Δ.length → (h.names ns).length = Γ.length
+  | _, _, .refl, _, hl => hl
+  | _, _, .keep h, n :: ns, hl => by
+    simp only [Thin.names, List.length_cons] at hl ⊢
+    rw [Thin.names_length h ns (by omega)]
+  | _, _, .keep _, [], hl => by simp only [List.length_nil, List.length_cons] at hl; omega
+  | _, _, .drop h, ns, hl => by
+    simp only [Thin.names]
+    exact Thin.names_length h ns.tail (by simp only [List.length_tail, hl, List.length_cons]; omega)
+
+theorem Thin.names_sublist : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (ns : List Var) →
+    (h.names ns).Sublist ns
+  | _, _, .refl, _ => List.Sublist.refl _
+  | _, _, .keep h, n :: ns => (Thin.names_sublist h ns).cons₂ n
+  | _, _, .keep h, [] => Thin.names_sublist h []
+  | _, _, .drop h, ns => (Thin.names_sublist h ns.tail).trans (List.tail_sublist ns)
+
+theorem Env.mem_erase_thin : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (ns : List Var) → (e : Env C Δ) →
+    ns.length = Δ.length → ∀ m ∈ Env.erase (h.names ns) (Env.thin h e), m ∈ Env.erase ns e
+  | _, _, .refl, _, _, _, m, hm => hm
+  | _, _, .keep h, n :: ns, e, hl, m, hm => by
+    simp only [Thin.names, Env.thin, Env.erase, List.mem_cons] at hm ⊢
+    rcases hm with hm | hm
+    · exact .inl hm
+    · exact .inr (Env.mem_erase_thin h ns e.2 (by simp only [List.length_cons] at hl; omega) m hm)
+  | _, _, .keep _, [], _, hl, _, _ => by simp only [List.length_nil, List.length_cons] at hl; omega
+  | _, _, .drop h, n :: ns, e, hl, m, hm => by
+    simp only [Thin.names, Env.thin, List.tail_cons] at hm
+    simp only [Env.erase, List.mem_cons]
+    exact .inr (Env.mem_erase_thin h ns e.2 (by simp only [List.length_cons] at hl; omega) m hm)
+  | _, _, .drop _, [], _, hl, _, _ => by simp only [List.length_nil, List.length_cons] at hl; omega
+
+/-- A frame dropped from under what it keeps: the kept locals are still
+bound under their names. -/
+theorem Agree.thin {Γ Δ : Ctx} {ns : List Var} {σ : State C Δ} {τ : Semantics.State}
+    (hag : Agree ns σ τ) (h : Thin Γ Δ) : Agree (h.names ns) (σ.thin h) τ where
+  len := Thin.names_length h ns hag.len
+  nodup := (Thin.names_sublist h ns).nodup hag.nodup
+  glob := hag.glob
+  env m hm := hag.env m (Env.mem_erase_thin h ns σ.env hag.len m hm)
+
+/-- A scope's locals popped, the names of what is left. -/
+theorem Agree.dropNames {Γ Δ : Ctx} {ns : List Var} {σ : State C Δ} {τ : Semantics.State}
+    (hag : Agree ns σ τ) (h : Ext Γ Δ) : Agree (ns.drop h.depth) (σ.drop h) τ := by
+  have hl : (ns.take h.depth).length = h.depth := by
+    rw [List.length_take, hag.len, h.length_eq]; omega
+  exact Agree.drop (by rw [List.take_append_drop]; exact hag) h hl
+
+end Thin
+
 end Solidity.Core
