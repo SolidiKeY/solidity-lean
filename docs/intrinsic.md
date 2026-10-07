@@ -19,6 +19,17 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 7. All milestones run; a failed gate takes its stated fallback, not a stop.
 8. The bridge (typed `Core` beside the untyped `Stmt`) ends at M4, not M7.
 
+Decided by the lead since (2026-10-07):
+
+9. **The M6a gate counts as passed.**  The scoped symex is 1.1–3× faster
+   on the larger programs (e1×5, e3×10, in total 3.2 s against 9.0 s); the
+   1.42–1.45× on the straight-line e2 is 3 ms of a 10 ms check, a cost to
+   reduce (the kernel's comparison of contexts), not a trigger for
+   Decision 1's fallback.  The calculus stays positional.
+10. **A `bool` mapping key follows solc**: it is hashed as the word `0`/`1`,
+   so the typed path takes the key as the `Int` `0`/`1`
+   (`docs/solc-alignment.md`, "`bool` mapping keys").
+
 ## Milestones
 
 | # | Status | Work |
@@ -370,6 +381,8 @@ the program n times.
   the reduction): quote contexts as `let`-bound constants, or check a
   projection of the result instead of the whole term.  This lane has not
   taken the fallback; the call is the user's.
+- **The lead's call (Decision 9): passed.**  The aggregate wins; e2's few
+  milliseconds are to be reduced, not a fallback trigger.
 
 ### M6a lane: how `dl{ … }` will write a scoped taclet
 
@@ -388,8 +401,8 @@ rule lines of `Calculus/Rules.lean`: the macro (`RuleSyntax.lean`,
    (`T se = …`, `T storage sp = …`, `ie`, `mv`: `declVar`'s stems).  A
    fresh local is `.here` lifted by the declarations after it; every schema
    variable of the `\find` read after `d` declarations is weakened `d`
-   times: an `Idx` by `.there`, a part by `.wk up` (`Calculus/Core/Step.lean`'s
-   `up`).  The premise is `Premise.unfold P (Ext.push^d .refl)`: the pop
+   times: an `Idx` by `.there`, a part by its `up` (`Val.up`, `SPath.up`, …,
+   `Calculus/Core/Step.lean`; no `Thin`, Gate G0's condition 1).  The premise is `Premise.unfold P (Ext.push^d .refl)`: the pop
    `Premise.fml` puts after it (`pop .capture`), which prints as nothing.
 3. **The statement's own declaration binds.**  `T v = e; ⇝ v = e;`
    (`localValueDeclInitDrop`, `storageLocalDeclInitDrop`,
@@ -421,14 +434,84 @@ with no freshness premise: the fresh locals are positions pushed and popped
 by the premise itself.  Until then `Taclet.erase` carries it over from
 `Taclet.sound`, given `holds_erase`.
 
+**The prototype** (`Calculus/Core/Schema.lean`, lane `intrinsic-calctools`)
+does 1, 2, 5 and the side conditions for three lines, as `scoped
+macro_rules` on the same `dl{ ⟨[ s; ]⟩ ⇝ p }` syntax, so the lines are
+`Rules.lean`'s text (`storageFieldRead_unfold_rightFst` with `v` for `lhs`:
+the scoped syntax has no holes yet); `Taclet.toCore`/`ofCore` check that they
+write `Core.Taclet`'s hand-written constructors, and a pin shows the
+insertions (`v.there`, `SPath.alias Idx.here`, `Ext.refl.push`, the
+`autoParam` side condition).  How it carries over to `RuleSyntax.lean` at
+the cutover:
+
+- **One threaded list instead of `Scope`'s names.**  `schemaStmt`/
+  `schemaProg` already thread a `Scope` left to right; it becomes the
+  prototype's `Fresh` (the fresh locals, newest first, and their kinds).
+  `declVar` pushes; `headOf` looks a name up there first (a fresh local is
+  `Idx.there^j .here`, `j` its distance from the newest) and otherwise reads
+  a `\find` schema variable weakened `Fresh.length` times (`idxAt`, the
+  family's `up`).  `headAt` is unchanged: it picks the constructor by the
+  position.
+- **The witnesses stay auto-bound.**  The proofs a name carries (`hfld`,
+  `hgsp`, `hmv`: `proofIdent`), the `rfl`s of literals and `hop`/`hq` are
+  read in `Γ` and do not mention positions, so weakening never touches
+  them; the side conditions (`sideConds`) are stated on the `\find`'s parts,
+  in `Γ`, as today (`taclet_side%`).
+- **The premise closes its scope.**  `schemaPremise`'s unfold arm wraps
+  `progTerm`'s `Prog.cons` chain as `Premise.unfold P (Ext.push^d .refl)`
+  with `d` the fresh locals the block declared; a `T v = e;` find whose
+  premise drops the initializer (3. above) becomes `Premise.bind`, a
+  `T v;` one `Upd.decl`; a split takes `BlockKind.block` when the `\find`
+  is an `if`, `.capture` otherwise (`require`'s `revert();`).
+- **Names resolve at the use site.**  The prototype writes `Taclet`
+  unqualified (`mkIdent`), so a line means the `Taclet` in scope; today's
+  quotations are hygienic and fix `Solidity.Stmt.*`.  At the cutover they
+  name `Core.*` (or, after M7's rename, the same names again).
+- **The printer is already there**: `Calculus/Core/Delab.lean` prints a
+  scoped taclet's line as today's (`Examples/Tactics/CorePrint.lean` pins
+  the three, `#taclet` included), so `PrintedRules`, `#taclet` and the
+  ProofTree pins need no change for the frames, binders and weakenings.
+
 - Left for M6a: `holds`/`holds_erase` (needs M3's `State C Γ`); the rest of
   `Stmt.step`'s arms (index reads and writes, copies, memory, calls, `try`,
   loops, compound assignments, `push`/`pop`, `transfer`/`send`, `&&`/`||`,
   the conditional) and the `Premise` constructors `branches`, `cases`,
   `inv`; the remaining taclets of `Core.Taclet` (by the macro, at the
-  cutover); `Hyps`/`Proves`; a `sol_symex` on `Core` (`normValid` with
-  `Core.Fml.quote`); chains, `Derive.residue` and ProofTree; the
-  delaborator for formulas with schema variables (`#taclet`, `#wp`).
+  cutover); `Proves`' soundness and the rules for `branches`/`cases`/`inv`
+  (`Calculus/Core/Proves.lean` states the rest); a `sol_symex` on `Core`
+  (`normValid` with `Core.Fml.quote`); chains, `Derive.residue` and
+  ProofTree; a `dl!{}` reader for `#wp`/`#step` on scoped formulas (M6b;
+  their printing is `Core.Delab`'s).
+
+### M6a lane: tooling (`intrinsic-calctools`, 2026-10-07)
+
+- **Quoters** (`Calculus/Core/Quote.lean`): `Fml.quote`, `Tm.quote`,
+  `Upd.quote`, `Frames.quote`, `Premise.quote`, each writing every context
+  out and hash-consing the result (`ShareCommon`, condition 7).
+- **Printing with schema variables** (`Calculus/Core/Delab.lean`): a scoped
+  `Expr` is translated into its erasure's `Expr` (each free variable of a
+  scoped type gets a twin of the erased type with its name; a position is
+  the name the term declared, `.there` and `up` on a schema variable
+  vanish; a constructor maps to the erased one of the same name, contexts
+  dropped) and printed by `RuleSyntax.lean`'s printers, so the text is
+  today's by construction.  What erasure loses: a capture's pop, an
+  update's pop and the hidden binder print as nothing; a block's end in a
+  formula prints `}`, through a printing-only production (`core_item`,
+  written with at least one `}` so that no program today's grammar reads
+  parses two ways).  Delaborators for `Core.Taclet` (with solkey's branch
+  labels), `Core.Premise`, `Core.Fml`; `#taclet` resolves `Core.Taclet.*`
+  (`Tools/Inspect.lean`: the solkey and printed lines of the rule of the
+  same name; its soundness pending M3).  `Examples/Tactics/CorePrint.lean`
+  pins the three taclets against `Rules.lean`'s lines and the strategy's
+  formulas, from their quoted `Expr`, against `Core.Fml.show`.  Not
+  covered yet: a call and a `try` (printed `‹…›`), and a sequent
+  (`Core.Proves`).
+- **`Hyps`/`Proves`** (`Calculus/Core/Proves.lean`): the telescope
+  `Hyps C Γ₀ Γ` (`pre`, `upd`, `havoc`, `all`, `bind`, `anon`), `wrap`/
+  `fresh`/`boxOnly` by `casesOn`, and `Proves` with `intro`, `allIntro`,
+  `updIntro`, `bindIntro`, `update`, `unfold`, `bind`, `split` (two goals),
+  `check`, `done`, `empty`, `closeTrue`; a derivation of
+  `[ if (b) { } else { } ] true` checks.  Soundness waits for M3.
 
 ### Gate G0: passes, under conditions
 
