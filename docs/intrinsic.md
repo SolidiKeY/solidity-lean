@@ -699,7 +699,7 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
    - **How the 241 constructor lines keep their text:**
      - Fold Schema's insertions into `schemaAt`/`schemaStmt`/`declVar` behind `open scoped Solidity.Core.Schema`. The insertions are `Idx.there^d`, `up^d`, `Premise.unfold P (Ext.push^d .refl)`, `Premise.bind` for the three `…DeclInitDrop` rules, and `BlockKind.block` vs `.capture` on splits.
      - The script copies `Rules.lean`'s lines verbatim under a Core header. `check-rule-text.sh` diffs the two copies and must print nothing.
-     - `Calculus/Core/Taclet.lean`'s hand-written constructors are deleted, along with `Schema.lean`.
+     - `Calculus/Core/Taclet.lean`'s hand-written constructors are deleted, along with the `Core.Schema` prototype.
    - New theorems and modules:
      - `Taclet.toStep : Taclet C k m s p → s.step k m = some p`, one `rfl` per constructor. Soundness then comes from `Stmt.Sound`, with no per-rule proofs.
      - Core `Completeness`: the dispatcher that names the fired rule, for `#step` and `sol_derive?`.
@@ -1455,7 +1455,7 @@ by the premise itself.  Until then `Taclet.erase` carries it over from
   `Hyps`/`Proves`; a `sol_symex` on `Core` (`normValid` with
   `Core.Fml.quote`); chains, `Derive.residue` and ProofTree; the
   delaborator for formulas with schema variables (`#taclet`, `#wp`).
-**The prototype** (`Calculus/Core/Schema.lean`, lane `intrinsic-calctools`)
+**The prototype** (the module `Calculus/Core/Schema`, lane `intrinsic-calctools`; folded into `RuleSyntax.lean` in W1)
 does 1, 2, 5 and the side conditions for three lines, as `scoped
 macro_rules` on the same `dl{ ⟨[ s; ]⟩ ⇝ p }` syntax, so the lines are
 `Rules.lean`'s text (`storageFieldRead_unfold_rightFst` with `v` for `lhs`:

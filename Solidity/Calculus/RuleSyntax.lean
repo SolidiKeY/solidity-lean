@@ -388,6 +388,29 @@ def rawScope : Scope := [("‹raw›", .raw)]
 /-- Whether names are read without their kinds (`tm{ … }`). -/
 def Scope.isRaw (Γ : Scope) : Bool := Γ.any (·.1 == "‹raw›")
 
+/-- The scope of a scoped taclet (`open scoped Solidity.Core.Schema`,
+`docs/intrinsic.md`, "how `dl{ … }` will write a scoped taclet"): every
+name declared above the mark is a position of `Solidity.Core`'s syntax,
+`Idx.there^j .here` with `j` its distance from the newest, and a schema
+variable of the `\find` is read under all of them (`.there`, `up`). -/
+def coreScope : Scope := [("‹core›", .raw)]
+
+/-- Whether names are read as scoped positions. -/
+def Scope.isCore (Γ : Scope) : Bool := Γ.any (·.1 == "‹core›")
+
+/-- The locals declared above the mark, a `\find`'s schema variables read
+under them. -/
+def Scope.depth (Γ : Scope) : Nat := (Γ.takeWhile (·.1 != "‹core›")).length
+
+/-- `f` applied `n` times to `x`. -/
+def iterApp (f : Lean.Name) : Nat → Lean.Term → Lean.Term
+  | 0, x => x
+  | n + 1, x => iterApp f n (Lean.Syntax.mkApp (Lean.mkCIdent f) #[x])
+
+/-- The position `j` locals below the newest: `Idx.there^j .here`. -/
+def corePos (j : Nat) : Lean.Term :=
+  iterApp `Solidity.Core.Idx.there j (Lean.mkCIdent `Solidity.Core.Idx.here)
+
 /-- A variable named `s`, resolved where the notation is used. -/
 def schemaIdent (s : String) : Ident := mkIdent (Name.mkSimple s)
 
@@ -424,9 +447,45 @@ inductive Head where
   | root (x h : Lean.Term) | simple (x : Lean.Term) | val (x : Lean.Term)
   | spath (x : Lean.Term) | mpath (x : Lean.Term) | loc (x : Lean.Term) | mloc (x : Lean.Term)
   | other (x : Lean.Term)
+  /-- A scoped schema variable of no fixed sort read under `d` locals: its
+  position's `up` (`Pos.coreUp`) `d` times. -/
+  | weak (x : Lean.Term) (d : Nat)
+
+/-- The `up` of a position's family (`Calculus/Core/Shift.lean`). -/
+def Pos.coreUp : Pos → Lean.Name
+  | .val => `Solidity.Core.Val.up | .simple => `Solidity.Core.Simple.up
+  | .spath => `Solidity.Core.SPath.up | .loc => `Solidity.Core.Loc.up
+  | .mpath => `Solidity.Core.MPath.up | .mloc => `Solidity.Core.MLoc.up
+  | .oploc => `Solidity.Core.OpLoc.up
+
+/-- `headOf` in a scoped taclet: a name declared above the mark is its
+position; a schema variable of the `\find` is weakened past every local
+declared above the mark, a position by `.there`, a part by its `up`. -/
+def headOfCore (Γ : Scope) (x : Ident) (s : String) : Head :=
+  match Γ.findIdx? (·.1 == s), Γ.lookup s with
+  | some j, some (.val _) => .local (corePos j)
+  | some j, some (.alias _) => .alias (corePos j)
+  | some j, some (.mem _ h) => .mem (corePos j) h
+  | _, _ =>
+    let d := Γ.depth
+    let there := iterApp `Solidity.Core.Idx.there d
+    match stemOf s with
+    | "v" | "lv" | "vp" | "pv" => .local (there x)
+    | "lsv" => .alias (there x)
+    | "mv" | "pmv" | "rmv" => .mem (there x) (proofIdent x s)
+    | "gsp" => .root x (proofIdent x s)
+    | "se" | "ie" | "sadr" => .simple (iterApp `Solidity.Core.Simple.up d x)
+    | "e" | "nse" | "nadr" | "cond" | "inv" | "dec" => .val (iterApp `Solidity.Core.Val.up d x)
+    | "sp" | "nsp" | "path" | "map" | "arr" | "parr" | "rarr" | "marr" | "darr" =>
+      .spath (iterApp `Solidity.Core.SPath.up d x)
+    | "nmp" | "mpath" => .mpath (iterApp `Solidity.Core.MPath.up d x)
+    | "nlhs" | "loc" => .loc (iterApp `Solidity.Core.Loc.up d x)
+    | "mloc" => .mloc (iterApp `Solidity.Core.MLoc.up d x)
+    | _ => if d == 0 then .other x else .weak x d
 
 def headOf (Γ : Scope) (x : Ident) : Head :=
   let s := x.getId.toString
+  if Γ.isCore then headOfCore Γ x s else
   match Γ.lookup s with
   | some (.val v) => .local v
   | some (.alias v) => .alias v
@@ -495,6 +554,7 @@ def headAt (pos : Pos) (stx : Lean.Syntax) : Head → MacroM Lean.Term
     | .val => `(Val.readMem $x)
     | _ => posError stx "a memory location" pos
   | .other x => pure x
+  | .weak x d => pure (iterApp pos.coreUp d x)
 
 /-- Whether an expression is a memory path: its head is a memory local or a
 memory path variable. -/
@@ -530,6 +590,16 @@ partial def isPath (Γ : Scope) : TSyntax `sol_expr → Bool
 def rhsVar? (stem : String) : TSyntax `sol_expr → Option Ident
   | `(sol_expr| $x:ident) => if stemOf x.getId.toString == stem then some x else none
   | _ => none
+
+/-- A whole right-hand side that is a schema variable, as a term: in a
+scoped taclet weakened past the locals declared above the mark. -/
+def rhsTerm (Γ : Scope) (stem : String) (r : TSyntax `sol_expr) : Option Lean.Term :=
+  (rhsVar? stem r).map fun x =>
+    if !Γ.isCore then x else
+    let up := match stem with
+      | "rhs" => `Solidity.Core.ARhs.up | "mrhs" => `Solidity.Core.MRhs.up
+      | "src" => `Solidity.Core.Src.up | _ => `Solidity.Core.MSrc.up
+    iterApp up Γ.depth x
 
 /-- How a storage receiver is indexed: `map[ie]` by key, `arr[ie]` by
 position — into a dynamic or a fixed-size array, the schema variable `ak`
@@ -729,9 +799,20 @@ def isCallStem (s : String) : Bool := ["fbs", "ic"].contains (stemOf s)
 
 /-- `fbs`, `ic`, a call with its body: `Stmt.call f args hsep ret body`, its
 parts the taclet's schema variables. -/
-def fbsCall : MacroM Lean.Term :=
+def fbsCall (core : Bool := false) : MacroM Lean.Term :=
+  -- a scoped call is closed over its frame: no separation proof
+  if core then
+    `(Stmt.call $(schemaIdent "f") $(schemaIdent "args") $(schemaIdent "ret") $(schemaIdent "body"))
+  else
   `(Stmt.call $(schemaIdent "f") $(schemaIdent "args") $(schemaIdent "hsep") $(schemaIdent "ret")
       $(schemaIdent "body"))
+
+/-- A scoped program: the items consed onto `Prog.nil`, a program spliced in
+as one block (`Stmt.block`, the scoped syntax has no append). -/
+def progTermCore (items : Array Item) : MacroM Lean.Term :=
+  items.foldrM (init := Lean.mkCIdent `Solidity.Core.Prog.nil) fun it acc => match it with
+    | .one s => `($(Lean.mkCIdent `Solidity.Core.Prog.cons) $s $acc)
+    | .many P => `($(Lean.mkCIdent `Solidity.Core.Prog.cons) ($(Lean.mkCIdent `Solidity.Core.Stmt.block) $P) $acc)
 
 /-- The program of `items` in front of `tail`: `[s₁, …, sₙ]` when every item
 is one statement and there is no tail (with the type ascribed if `ascribe`),
@@ -841,7 +922,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
   | stx@`(sol_stmt| $x:ident) => do
     let s := x.getId.toString
     if isProgStem s then Macro.throwErrorAt stx s!"`{s}` is a program, not one statement"
-    if isCallStem s then return (← fbsCall, Γ)
+    if isCallStem s then return (← fbsCall Γ.isCore, Γ)
     return (x, Γ)
   | `(sol_stmt| $l:sol_expr = $b:sol_expr .push()) => do
     let some (.alias x) := lhsHead Γ l | Macro.throwErrorAt l "`= b.push()` binds a storage alias"
@@ -875,30 +956,45 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
       | _, _ => Macro.throwErrorAt l "`new` lands in a memory local or a `tgt`"
     if stemOfExpr? l == some "tgt" then
       let `(sol_expr| $x:ident) := l | Macro.throwErrorAt l "a `tgt`"
+      if Γ.isCore then
+        return (← `($(Lean.mkCIdent `Solidity.Core.NewLhs.fill)
+          $(iterApp `Solidity.Core.NewLhs.up Γ.depth x) $(← schemaAt Γ .mpath r)), Γ)
       return (← `($(mkIdent `Solidity.NewLhs.fill) $x $(← schemaAt Γ .mpath r)), Γ)
     let t ← match lhsHead Γ l with
       | some (.local v) => `(Stmt.assignLocal $v $(← schemaAt Γ .val r))
       | some (.alias x) =>
-        match rhsVar? "rhs" r with
+        match rhsTerm Γ "rhs" r with
         | some v => `(Stmt.rebind $x $v)
         | none => `(Stmt.rebind $x (ARhs.path $(← schemaAt Γ .spath r)))
       | some (.mem x _) =>
-        if let some v := rhsVar? "mrhs" r then `(Stmt.rebindMem $x $v) else
+        if let some v := rhsTerm Γ "mrhs" r then `(Stmt.rebindMem $x $v) else
         if isMem Γ r then `(Stmt.rebindMem $x (MRhs.alias $(← schemaAt Γ .mpath r)))
         else `(Stmt.rebindMem $x (MRhs.copy $(← schemaAt Γ .spath r) $(schemaIdent "hm")))
-      | some (.other h) =>
+      | some (.other h) | some (.weak h _) =>
         match h with
         | `($x:ident) =>
+          -- a scoped hole is weakened past the locals declared above the mark
+          let hole (old core : Lean.Name) : Lean.Term × Lean.Term :=
+            if Γ.isCore then
+              (Lean.mkCIdent (`Solidity.Core ++ core ++ `fill),
+                iterApp (`Solidity.Core ++ core ++ `up) Γ.depth x)
+            else (mkIdent (`Solidity ++ old ++ `fill), x)
           match stemOf x.getId.toString with
           | "lhs" =>
-            if isMem Γ r then `($(mkIdent `Solidity.MHole.fill) $x $(← schemaAt Γ .mloc r))
-            else if isPath Γ r then `($(mkIdent `Solidity.Hole.fill) $x $(← schemaAt Γ .spath r))
-            else `($(mkIdent `Solidity.VHole.fill) $x $(← schemaAt Γ .val r))
+            if isMem Γ r then
+              let (f, h) := hole `MHole `MHole
+              `($f $h $(← schemaAt Γ .mloc r))
+            else if isPath Γ r then
+              let (f, h) := hole `Hole `SHole
+              `($f $h $(← schemaAt Γ .spath r))
+            else
+              let (f, h) := hole `VHole `VHole
+              `($f $h $(← schemaAt Γ .val r))
           | _ => Macro.throwErrorAt l "not a left-hand side"
         | _ => Macro.throwErrorAt l "not a left-hand side"
       | _ =>
         if isMem Γ l then
-          if let some v := rhsVar? "msrc" r then `(Stmt.assignMem $(← schemaAt Γ .mloc l) $v) else
+          if let some v := rhsTerm Γ "msrc" r then `(Stmt.assignMem $(← schemaAt Γ .mloc l) $v) else
           if isMem Γ r then `(Stmt.assignMem $(← schemaAt Γ .mloc l) (MSrc.ref $(← schemaAt Γ .mpath r)))
           else
             -- a memory element's type is its value's, named `p` so that a
@@ -912,7 +1008,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
             else `(Stmt.assignMem $(← schemaAt Γ .mloc l) (MSrc.val $(← schemaAt Γ .val r)))
         else if isMem Γ r then
           `(Stmt.assignFromMem $(← schemaAt Γ .loc l) $(← schemaAt Γ .mpath r))
-        else if let some v := rhsVar? "src" r then `(Stmt.assign $(← schemaAt Γ .loc l) $v)
+        else if let some v := rhsTerm Γ "src" r then `(Stmt.assign $(← schemaAt Γ .loc l) $v)
         else if isPath Γ r then
           `(Stmt.assign $(← schemaAt Γ .loc l) (Src.copy $(← schemaAt Γ .spath r) $(schemaIdent "hm")))
         else `(Stmt.assign $(← schemaAt Γ .loc l) (Src.val $(← schemaAt Γ .val r)))
@@ -925,8 +1021,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
   | `(sol_stmt| $T:sol_ty storage $x:ident = $e:sol_expr) => do
     let v ← declVar fresh x
     let _ := T
-    let r : Lean.Term ← match rhsVar? "rhs" e with
-      | some r => pure ⟨r.raw⟩
+    let r : Lean.Term ← match rhsTerm Γ "rhs" e with
+      | some r => pure r
       | none => `(ARhs.path $(← schemaAt Γ .spath e))
     let t ← `(Stmt.declStorage _ $v (some $r))
     return (t, (x.getId.toString, .alias v) :: Γ)
@@ -938,7 +1034,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
   | `(sol_stmt| $T:sol_ty memory $x:ident = $e:sol_expr) => do
     let v ← declVar fresh x
     let _ := T
-    let r : Lean.Term ← if let some r := rhsVar? "mrhs" e then pure ⟨r.raw⟩
+    let r : Lean.Term ← if let some r := rhsTerm Γ "mrhs" e then pure r
       else if let some n := newRhs? e then
         `(MRhs.newArr (R := $(schemaIdent "R")) $(← schemaAt Γ .simple n) $(schemaIdent "hn"))
       else if isMem Γ e then `(MRhs.alias $(← schemaAt Γ .mpath e))
@@ -963,7 +1059,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     let t ← `(Stmt.declLocal $(schemaIdent "p") $v none)
     return (t, (x.getId.toString, .val v) :: Γ)
   | `(sol_stmt| $b:sol_expr .push( $a:sol_expr )) => do
-    let v : Lean.Term ← if let some r := rhsVar? "src" a then pure ⟨r.raw⟩ else if isPath Γ a then `(Src.copy $(← schemaAt Γ .spath a) $(schemaIdent "hm"))
+    let v : Lean.Term ← if let some r := rhsTerm Γ "src" a then pure r else if isPath Γ a then `(Src.copy $(← schemaAt Γ .spath a) $(schemaIdent "hm"))
       else `(Src.val $(← schemaAt Γ .val a))
     return (← `(Stmt.push $(← schemaAt Γ .spath b) (some $v) rfl), Γ)
   | `(sol_stmt| $b:sol_expr .push()) => do
@@ -1054,8 +1150,11 @@ variable standing for all of them. -/
 partial def schemaBlock (fresh : Bool) (Γ : Scope) : TSyntax `sol_block → MacroM Lean.Term
   | `(sol_block| { $[$ss:sol_stmt;]* }) => do
     let (ts, _) ← schemaProg fresh Γ ss
-    progTerm true ts none
-  | `(sol_block| $x:ident) => pure x
+    if Γ.isCore then progTermCore ts else progTerm true ts none
+  | `(sol_block| $x:ident) => do
+    -- a scoped block variable read under fresh locals: weakened by `Prog.wk`
+    -- (`Core.Prog.up`, as `ifElseUnfold`'s branches are, `Calculus/Core/Arms.lean`)
+    return if Γ.isCore then iterApp `Solidity.Core.Prog.up Γ.depth x else x
   | `(sol_block| ‹ $t:term ›) => pure t
   | _ => Macro.throwUnsupported
 
@@ -1567,6 +1666,16 @@ def schemaBranch (fresh : Bool) (Γ : Scope) (b : TSyntax `dl_branch) : MacroM L
     | `(dl_branch| $[$_:str :]? $[∀ $x?:ident .]? ⟨[ $blk:sol_block ]⟩) => pure (x?, blk)
     | `(dl_branch| $[$_:str :]? $[∀ $x?:ident .]? [ $blk:sol_block ]) => pure (x?, blk)
     | _ => Macro.throwUnsupported
+  if Γ.isCore then
+    -- a scoped branch: its binders (`Binders`, the `Panic` code's
+    -- `CodeBinder.binders`) and its block read on top of them
+    let xs ← match x? with
+      | none => pure (Lean.mkCIdent `Solidity.Core.Binders.nil : Lean.Term)
+      | some x =>
+        if stemOf x.getId.toString == "code" then
+          `($(Lean.mkCIdent `Solidity.Core.CodeBinder.binders) $x)
+        else pure x
+    return ← `($(Lean.mkCIdent `Solidity.Core.Branch.mk) $xs $(← schemaBlock fresh Γ blk))
   let xs ← match x? with
     | none => `([])
     | some x =>
@@ -1755,6 +1864,192 @@ def schemaTaclet (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_premis
   let cs := conds.map (·.2)
   `(taclet_side% $t $[($hs : $cs)]*)
 
+/-! ### Scoped taclets
+
+The same lines read into `Solidity.Core`'s scoped syntax
+(`docs/intrinsic.md`, "how `dl{ … }` will write a scoped taclet"), under
+`open scoped Solidity.Core.Schema`.  The statements, expressions and terms
+are read as above, from `coreScope`: a fresh local is a position, a
+`\find`'s schema variable is weakened past the fresh locals before it
+(`headOfCore`); a program is `Prog.cons`; and the names the reader writes
+are then turned into their scoped twins (`coreNames`).  What differs is
+the premise: an unfolding premise pops its fresh locals (`Premise.unfold P
+(Ext.push^d .refl)`), a `\find` that declares binds its local in front of
+the premise (`Premise.bind`) or declares it in the update (`Upd.decl`), a
+split says how its goals end (`BlockKind`), a check has no program. -/
+
+/-- The scoped twin of a family of `Syntax.lean`/`Update.lean`/`Rules.lean`:
+the same name, but for the holes and the arguments; the term symbols
+(`Term.find`, `STerm.save`, …) are `Calculus/Core/Rules.lean`'s, under `Tms`
+(`Solidity.Core.MAddr` is the typed heap's). -/
+def coreFamily? : Lean.Name → Option Lean.Name
+  | `Hole => some `SHole
+  | `Arg => some `Args
+  | n =>
+    if [`Term, `PTerm, `STerm, `SValT, `ITerm, `MAddr, `MTerm, `MValT].contains n then
+      some (`Tms ++ n)
+    else if [`Stmt, `Prog, `Simple, `SPath, `Loc, `MPath, `MLoc, `Val, `Src, `ARhs, `MRhs,
+        `NewLhs, `MSrc, `OpLoc, `LoopAnn, `Tm, `UpdElem, `Upd, `Fml, `Premise, `MHole, `VHole,
+        `CallRet, `BlockKind].contains n
+    then some n else none
+
+/-- `Solidity.F.x` as `Solidity.Core.F'.x`, `F'` the scoped twin of `F`. -/
+def coreName? (n : Lean.Name) : Option Lean.Name :=
+  match n.components with
+  | s :: f :: rest =>
+    if s != `Solidity then none
+    else (coreFamily? f).map fun f' => rest.foldl (· ++ ·) (`Solidity.Core ++ f')
+  | _ => none
+
+/-- Every name the reader wrote, by its quotation's resolution or spelled in
+full, turned into its scoped twin, which must exist. -/
+partial def coreNames (stx : Syntax) : MacroM Syntax := do
+  match stx with
+  | .ident _ _ val pre =>
+    let byPre := pre.findSome? fun
+      | .decl n [] => if (`Solidity).isPrefixOf n then some n else none
+      | _ => none
+    let v := val.eraseMacroScopes
+    let some n := byPre <|> (if (`Solidity).isPrefixOf v then some v else none) | return stx
+    let some n' := coreName? n | return stx
+    unless ← Macro.hasDecl n' do Macro.throwErrorAt stx s!"no scoped twin `{n'}` of `{n}`"
+    return Lean.mkCIdentFrom stx n'
+  | .node info k args => return .node info k (← args.mapM coreNames)
+  | _ => return stx
+
+/-- A scoped update's right-hand side for the local `x`, by its kind:
+`Rhs.val`, `Rhs.path` (`unset` too), `Rhs.mref`. -/
+def schemaRhsCore (Γ : Scope) (x : Ident) (r : TSyntax `dl_term) : MacroM Lean.Term := do
+  match headOf Γ x with
+  | .local _ => `($(Lean.mkCIdent `Solidity.Core.Rhs.val) $(← schemaTerm Γ .val r))
+  | .alias _ =>
+    if let `(dl_term| $u:ident) := r then
+      if u.getId == `unset then return Lean.mkCIdent `Solidity.Core.Rhs.unset
+    `($(Lean.mkCIdent `Solidity.Core.Rhs.path) $(← schemaTerm Γ .path r))
+  | .mem .. => `($(Lean.mkCIdent `Solidity.Core.Rhs.mref) $(← schemaTerm Γ .ident r))
+  | _ => Macro.throwErrorAt x "an update assigns a local, an alias, a memory local, \
+      `storage` or `memory`"
+
+/-- A scoped update: its elements `snoc`ed onto `Upd.nil` in order, the
+local the `\find` declares (`found`) declared (`Upd.decl`). -/
+def schemaUpdCore (Γ : Scope) (found : Option String) (U : TSyntax `dl_upd) :
+    MacroM Lean.Term := do
+  if let `(dl_upd| ‹ $t:term ›) := U then return t
+  let mut acc : Lean.Term := Lean.mkCIdent `Solidity.Core.Upd.nil
+  for e in U.raw[1].getSepArgs do
+    match (⟨e⟩ : TSyntax `dl_upd_elem) with
+    | `(dl_upd_elem| $l:dl_term := $r:dl_term) =>
+      let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
+      let n := x.getId.toString
+      if found == some n then
+        acc ← `($(Lean.mkCIdent `Solidity.Core.Upd.decl) $acc $x $(← schemaRhsCore Γ x r))
+      else if ["storage", "memory", "net", "selfBalance"].contains n then
+        acc ← `($(Lean.mkCIdent `Solidity.Core.Upd.snoc) $acc $(← schemaUpdElem Γ ⟨e⟩))
+      else
+        let tgt ← match headOf Γ x with
+          | .local v | .alias v | .mem v _ => pure v
+          | _ => Macro.throwErrorAt x "an update assigns a local, an alias, a memory local, \
+              `storage` or `memory`"
+        acc ← `($(Lean.mkCIdent `Solidity.Core.Upd.snoc) $acc
+          ($(Lean.mkCIdent `Solidity.Core.UpdElem.local) $tgt $(← schemaRhsCore Γ x r)))
+    | _ => Macro.throwErrorAt e "a scoped taclet's update has no update variable"
+  return acc
+
+/-- `expand_function_body(fbs)`, a whole premise. -/
+def expandBody? : TSyntax `sol_stmt → Bool
+  | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) =>
+    match f with
+    | `(sol_expr| $g:ident) =>
+      g.getId.toString == "expand_function_body" && (stemOfExpr? a).any isCallStem
+    | _ => false
+  | _ => false
+
+/-- `Ext.push^d .refl`: the `d` fresh locals a premise declared, popped. -/
+def extPush (d : Nat) : MacroM Lean.Term := do
+  let mut h : Lean.Term := Lean.mkCIdent `Solidity.Core.Ext.refl
+  for _ in [0:d] do h ← `($(Lean.mkCIdent `Solidity.Core.Ext.push) $h)
+  return h
+
+/-- A scoped premise.  `Γ` is the scope after the `\find`, `found` the local
+it declares (its name and its variable), `split` how a split's goals end. -/
+def schemaPremiseCore (Γ : Scope) (found : Option (String × Lean.Term)) (split : Lean.Term) :
+    TSyntax `dl_premise → MacroM Lean.Term
+  | `(dl_premise| $U:dl_upd ⟨[ ]⟩) => do
+    `($(Lean.mkCIdent `Solidity.Core.Premise.update)
+      $(← schemaUpdCore coreScope (found.map (·.1)) U))
+  | `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) => do
+    if ss.size == 1 && expandBody? ss[0]! then
+      -- a call inlined: the premise `Stmt.step` builds (`Core.Premise.expandCall`)
+      return ← `($(Lean.mkCIdent `Solidity.Core.Premise.expandCall) $(schemaIdent "k")
+        $(schemaIdent "args") $(schemaIdent "ret") $(schemaIdent "body"))
+    let (ts, Γ') ← schemaProg true Γ ss
+    let P ← progTermCore ts
+    match found with
+    | some (_, x) => `($(Lean.mkCIdent `Solidity.Core.Premise.bind) $x _ $P)
+    | none => `($(Lean.mkCIdent `Solidity.Core.Premise.unfold) $P $(← extPush (Γ'.depth - Γ.depth)))
+  | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ ; $[$_:str :]? $nc:dl_fml ⟹ ⟨[ $f:sol_block ]⟩) => do
+    `($(Lean.mkCIdent `Solidity.Core.Premise.split) $split $(← schemaFml c) $(← schemaFml nc)
+        $(← schemaBlock true Γ t) $(← schemaBlock true Γ f))
+  | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ;
+      $[$_:str :]? $nc:dl_fml ⟹ ⟨[ $[$fs:sol_stmt;]* ]⟩) => do
+    let (ts, _) ← schemaProg true Γ ts
+    let (fs, _) ← schemaProg true Γ fs
+    `($(Lean.mkCIdent `Solidity.Core.Premise.split) $split $(← schemaFml c) $(← schemaFml nc)
+        $(← progTermCore ts) $(← progTermCore fs))
+  | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $[$_:str :]? $c':dl_fml) => do
+    unless c.raw.structEq c'.raw do
+      Macro.throwErrorAt c' "a check assumes the condition it checks: write it on both sides"
+    unless ts.isEmpty do Macro.throwErrorAt c "a scoped check goes on with the rest of the program"
+    `($(Lean.mkCIdent `Solidity.Core.Premise.check) $(← schemaFml c))
+  | `(dl_premise| true) => `($(Lean.mkCIdent `Solidity.Core.Premise.done) true)
+  | `(dl_premise| false) => `($(Lean.mkCIdent `Solidity.Core.Premise.done) false)
+  | `(dl_premise| $b:dl_branch ; $bs:dl_branch;*) => do
+    let bs ← (#[b] ++ bs.getElems).mapM (schemaBranch true coreScope)
+    `($(Lean.mkCIdent `Solidity.Core.Premise.branches) [$bs,*])
+  | `(dl_premise| $c:dl_case ; $cs:dl_case;*) => do
+    let mut fs : Array Lean.Term := #[]
+    let mut us : Array Lean.Term := #[]
+    for c in #[c] ++ cs.getElems do
+      match c with
+      | `(dl_case| $[$_:str :]? $U:dl_upd ⟨[ ]⟩) => us := us.push (← schemaUpdCore coreScope none U)
+      | `(dl_case| $[$_:str :]? $φ:dl_fml) =>
+        unless us.isEmpty do Macro.throwErrorAt c "the formula goals come first"
+        fs := fs.push (← schemaFml φ)
+      | _ => Macro.throwUnsupported
+    `($(Lean.mkCIdent `Solidity.Core.Premise.cases) [$fs,*] [$us,*])
+  | p => Macro.throwErrorAt p "no scoped reading of this premise yet"
+
+/-- The scoped taclet `s ⇝ p` under the modality `m` (`schemaTaclet`'s
+reading into `Solidity.Core`): the `\find` read in its context `Γ` (named,
+so that the constructor binds it as `Γ`), the premise after it, the side
+conditions as today, every name its scoped twin. -/
+def schemaTacletCore (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_premise)
+    (J : Option Lean.Term := none) : MacroM Lean.Term := do
+  let conds ← sideConds s
+  let (st, Γ) ← schemaStmt false coreScope s
+  let found : Option (String × Lean.Term) := match Γ with
+    | (n, .val v) :: _ | (n, .alias v) :: _ | (n, .mem v _) :: _ => some (n, v)
+    | _ => none
+  let split := match s with
+    | `(sol_stmt| if ($_:sol_expr) $_:sol_block else $_:sol_block) =>
+      Lean.mkCIdent `Solidity.Core.BlockKind.block
+    | _ => Lean.mkCIdent `Solidity.Core.BlockKind.capture
+  let pt ← schemaPremiseCore Γ found split p
+  let st ← `(($st : $(Lean.mkCIdent `Solidity.Core.Stmt) $(schemaIdent "C") $(schemaIdent "Γ") _))
+  let jArgs : Array Lean.Term := #[schemaIdent "C", schemaIdent "k"]
+  let ((f, args) : Ident × Array Lean.Term) ← match J with
+    | none => pure (mkIdent `Taclet, jArgs)
+    | some J => match J with
+      | `($f:ident $args*) => pure (f, args)
+      | `($f:ident) => pure (f, #[])
+      | _ => Macro.throwErrorAt J "`dl[J]{ … }` names a judgement: `LeanTaclet C k`"
+  let t ← `($f:ident $args* $m $st $pt)
+  let t ← if conds.isEmpty then pure t else
+    let hs := conds.map (·.1)
+    let cs := conds.map (·.2)
+    `(taclet_side% $t $[($hs : $cs)]*)
+  return ⟨← coreNames t⟩
+
 /-- A primitive type of a schema: `uint`, `int`, `bool`, or a variable. -/
 def schemaPrim (T : Ident) : MacroM Lean.Term :=
   match T.getId.toString with
@@ -1811,6 +2106,23 @@ macro_rules
   | `(stmt{ $s:sol_stmt; }) => return (← schemaStmt false [] s).1
 
 end Expand
+
+namespace Core.Schema
+
+/-- Under `open scoped Solidity.Core.Schema`, a taclet line writes a scoped
+taclet (`schemaTacletCore`): the same text, the `Taclet` (or the judgement
+named) in scope where it is used. -/
+scoped macro_rules
+  | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTacletCore (schemaIdent "m") s p
+  | `(dl{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do schemaTacletCore (← `(Modality.box)) s p
+  | `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p:dl_premise }) => do schemaTacletCore (← `(Modality.diamond)) s p
+  | `(dl[ $J:term ]{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTacletCore (schemaIdent "m") s p J
+  | `(dl[ $J:term ]{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do
+    schemaTacletCore (← `(Modality.box)) s p J
+  | `(dl[ $J:term ]{ ⟨ $s:sol_stmt; ⟩ ⇝ $p:dl_premise }) => do
+    schemaTacletCore (← `(Modality.diamond)) s p J
+
+end Core.Schema
 
 section Side
 open Lean Elab Term

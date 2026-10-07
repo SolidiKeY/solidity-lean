@@ -39,6 +39,7 @@ import Solidity.Calculus.Core.Arms
 import Solidity.Calculus.Core.Blocks
 import Solidity.Calculus.Core.Step
 import Solidity.Calculus.Core.Quote
+import Solidity.Calculus.Core.Rules
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.Cover
@@ -60,7 +61,7 @@ import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
-import Solidity.Calculus.Core.Schema
+import Solidity.Calculus.Core.RuleText
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Spec

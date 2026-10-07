@@ -5,8 +5,9 @@ import Solidity.Tools.Inspect
 /-!
 # Scoped taclets and formulas, printed
 
-`Calculus/Core/Delab.lean`'s printers pinned: the three scoped taclets print
-their rule lines as today's do (`Calculus/Rules.lean`), also under
+`Calculus/Core/Delab.lean`'s printers pinned: scoped taclets print
+their rule lines as today's do (`Calculus/Rules.lean`, every one of them:
+`Calculus/Core/RuleText.lean`), also under
 `#taclet` (`Tools/Inspect.lean`), and a formula the
 scoped strategy leaves prints, from its `Expr`, as `Core.Fml.show` prints
 the value: calls (with a tuple and a memory return) and `try` among them.
@@ -24,38 +25,37 @@ local instance : InContract := ⟨StandardExample⟩
 private abbrev SE := StandardExample
 
 /--
-info: @Core.Taclet.localValueAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {p : PrimTy}
-  {v : Core.Idx Γ (Core.LTy.val p)} {se : Core.Simple C Γ p}, dl{ ⟨[ v = se; ]⟩ ⇝ { v := se } ⟨[ ]⟩ }
+info: @Core.Taclet.localValueAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : PrimTy}
+  {v : Core.Idx Γ (Core.LTy.val x)} {se : Core.Simple C Γ x}, dl{ ⟨[ v = se; ]⟩ ⇝ { v := se } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Core.Taclet.localValueAssign
 
 /--
-info: @Core.Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {p : PrimTy}
-  {s : Name} {v : Core.Idx Γ (Core.LTy.val p)} {nsp : Core.SPath C Γ (Ty.struct s)} {fld : Name}
-  {h : C.fieldType s fld = some (Ty.prim p)} (hn : nsp.isSimple = false),
-  dl{ ⟨[ v = nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; v = sp.fld; ]⟩ }
+info: @Core.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : Name}
+  {nsp : Core.SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : Ty},
+  dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete sp.fld; ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.storageFieldRead_unfold_rightFst
+#guard_msgs in #check @Core.Taclet.storageFieldDelete_unfold_leftFst
 
 /--
-info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ Γ₁ Γ₂ : Core.Ctx}
-  {se : Core.Simple C Γ PrimTy.bool} {thn : Core.Prog C Γ Γ₁} {els : Core.Prog C Γ Γ₂},
-  dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ "if s#se true": se ≐ true ⟹ ⟨[ thn ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ els ]⟩ }
+info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {se : Core.Simple C Γ PrimTy.bool}
+  {x : Core.Ctx} {thenStm : Core.Prog C Γ x} {x_1 : Core.Ctx} {elseStm : Core.Prog C Γ x_1},
+  dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
+    "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
 -/
 #guard_msgs in #check @Core.Taclet.ifElseSplit
 
 /-! `#taclet` on a scoped taclet: its line, today's solkey taclets. -/
 
 /--
-info: Solidity.Core.Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
-  {p : PrimTy} {s : Name} {v : Core.Idx Γ (Core.LTy.val p)} {nsp : Core.SPath C Γ (Ty.struct s)} {fld : Name}
-  {h : C.fieldType s fld = some (Ty.prim p)} (hn : nsp.isSimple = false),
-  dl{ ⟨[ v = nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; v = sp.fld; ]⟩ }
-solkey: storageFieldRead_unfold_rightFst (simplify_prog)
-printed: storageFieldRead_unfold_rightFst
+info: Solidity.Core.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+  {x : Name} {nsp : Core.SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : Ty},
+  dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete sp.fld; ]⟩ }
+solkey: storageFieldDelete_unfold_leftFst (simplify_prog)
+printed: storageFieldDelete_unfold_leftFst
 sound: pending (the scoped run, M3 of docs/intrinsic.md); Solidity.Core.Taclet.erase: an instance of today's rule
 -/
-#guard_msgs in #taclet Core.Taclet.storageFieldRead_unfold_rightFst
+#guard_msgs in #taclet Core.Taclet.storageFieldDelete_unfold_leftFst
 
 /-! A rule's premise for a statement, quoted (`Core.Premise.quote`), checked
 by the kernel's type checker and printed: a position outside the term is
