@@ -218,7 +218,7 @@ private def pos₁ : Fml SE [.val .uint] := .eqD (.app2 (.binop .gt .uint) (pv .
 which erasure loses. -/
 private def split₁ : Fml SE [.val .uint] :=
   Premise.fml .box (.cons (.assignLocal .here (litV 2)) .nil) .nil (.eqD (pv .here) (lit 1))
-    (Premise.split pos₁ (.not pos₁) thn₁ els₁)
+    (Premise.split .block pos₁ (.not pos₁) thn₁ els₁)
 
 /--
 info: (x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1) ∧ (¬x > 0 → [ revert(); } x = 2; ] x = 1)

@@ -303,9 +303,11 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   /-- `⟨[ P ]⟩` with the local `x : t` the statement declares bound in front
   of `P`, unprinted: `T v = e;` is `v = e;`. -/
   | bind {Γ' : Ctx} (x : Var) (t : LTy) (P : Prog C (t :: Γ) Γ') : Premise C Γ Γ'
-  /-- Two goals, KeY's: `c ⟹ ⟨[ P ]⟩` and `c' ⟹ ⟨[ Q ]⟩`, each branch a
-  block. -/
-  | split {Γ₁ Γ₂ : Ctx} (c c' : Fml C Γ) (P : Prog C Γ Γ₁) (Q : Prog C Γ Γ₂) : Premise C Γ Γ
+  /-- Two goals, KeY's: `c ⟹ ⟨[ P ]⟩` and `c' ⟹ ⟨[ Q ]⟩`, each branch's
+  scope ended as `b` says: an `if`'s branches are blocks (`}`), a
+  `require`'s goals are not (its `revert();` ends invisibly). -/
+  | split {Γ₁ Γ₂ : Ctx} (b : BlockKind) (c c' : Fml C Γ) (P : Prog C Γ Γ₁) (Q : Prog C Γ Γ₂) :
+      Premise C Γ Γ
   /-- `c ⟹ ⟨[ ]⟩ ; c`: the goal with `c` assumed, and `c` to prove. -/
   | check (c : Fml C Γ) : Premise C Γ Γ
   /-- The goal closed (`true`) or failed (`false`). -/
@@ -342,9 +344,9 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
     (fun U ω => .upd m U (.modalK m ω κ φ))
     (fun P h ω => .modal m P (.pop .capture h (.seq ω κ)) φ)
     (fun x t P ω => .bind x t (.modal m P (.seq ω κ) φ))
-    (fun c c' P Q ω =>
-      .and (.imp c (.modalK m P (.pop .block P.scopeExt (.seq ω κ)) φ))
-        (.imp c' (.modalK m Q (.pop .block Q.scopeExt (.seq ω κ)) φ)))
+    (fun b c c' P Q ω =>
+      .and (.imp c (.modalK m P (.pop b P.scopeExt (.seq ω κ)) φ))
+        (.imp c' (.modalK m Q (.pop b Q.scopeExt (.seq ω κ)) φ)))
     (fun c ω => .and (.imp c (.modalK m ω κ φ)) c)
     (fun b _ => if b then .tt else .ff) ω
 
@@ -373,10 +375,11 @@ theorem Premise.fml_done (b : Bool) :
 end Equations
 
 theorem Premise.fml_split {Γ Γ₁ Γ₀ Δ₁ Δ₂ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁)
-    (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (c c' : Fml C Γ) (P : Prog C Γ Δ₁) (Q : Prog C Γ Δ₂) :
-    (Premise.split c c' P Q).fml m ω κ φ =
-      .and (.imp c (.modalK m P (.pop .block P.scopeExt (.seq ω κ)) φ))
-        (.imp c' (.modalK m Q (.pop .block Q.scopeExt (.seq ω κ)) φ)) := rfl
+    (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (b : BlockKind) (c c' : Fml C Γ) (P : Prog C Γ Δ₁)
+    (Q : Prog C Γ Δ₂) :
+    (Premise.split b c c' P Q).fml m ω κ φ =
+      .and (.imp c (.modalK m P (.pop b P.scopeExt (.seq ω κ)) φ))
+        (.imp c' (.modalK m Q (.pop b Q.scopeExt (.seq ω κ)) φ)) := rfl
 
 theorem Premise.fml_check {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (c : Fml C Γ) :

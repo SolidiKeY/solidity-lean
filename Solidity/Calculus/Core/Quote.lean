@@ -449,8 +449,7 @@ quoted with every context once and every subterm shared. -/
 def Fml.quote {C : Contract} (c : Expr) {Γ : Ctx} (φ : Fml C Γ) : Expr :=
   Lean.ShareCommon.shareCommon ((Quote.qFml Γ φ).run c)
 
-/-- A scoped block, quoted as `Fml.quote` quotes. -/
-def Prog.quote {C : Contract} (c : Expr) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Expr :=
-  Lean.ShareCommon.shareCommon ((Quote.qProg Γ Γ' P).run c)
+/-! A scoped block on its own is quoted by `Syntax/CoreQuote.lean`'s
+`Prog.quoteShared`. -/
 
 end Solidity.Core

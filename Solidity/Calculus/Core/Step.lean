@@ -9,7 +9,8 @@ statement is one function of its constructors (`Stmt.step`), and the strategy
 fires the rule of the first statement of a formula until none is left.  The
 fresh names are numbered as `Symex.lean` numbers them, one above every index
 in the formula (`Fml.fresh`), so the erasure of what `symex` leaves is what
-today's `symex` leaves of the erasure (`Examples/Tactics/CoreSymex.lean` pins it).
+today's `symex` leaves of the erasure, its cover goals dropped
+(`Examples/Tactics/CoreSymex.lean` pins it).
 
 The kernel evaluates these functions when a goal is closed by them, so they
 follow Gate G0's conditions:
@@ -17,7 +18,12 @@ follow Gate G0's conditions:
 * **no `match` on a family indexed by contexts** (condition 1): `Stmt.step`
   is one `Stmt.casesOn` over the statement, and `Prog`, `Frames` and `Fml`
   are taken apart by `casesOn` with a motive over their indices; a `match`
-  is left only on the expression families, whose context is a parameter;
+  is left on the expression families, whose context is a parameter, and a
+  rule's schema variables are shifted under its fresh local by `Val.up` and
+  its kin, which match only on those.  One exception remains:
+  `ifElseUnfold` weakens the branches with `Prog.wk up`, which matches on
+  `Prog`, `Stmt`, `Thin` and `Idx`, so the kernel runs it on every captured
+  condition;
 * **the stepper is `Fml.rec`** (condition 2): `Fml.stepR`, the definition the
   kernel unfolds, recurses by the recursor; `Fml.stepAt` is its compiled
   twin (`implemented_by`), by `casesOn` and structural recursion, and
@@ -69,6 +75,119 @@ def Premise.capture {Γ : Ctx} (p : PrimTy) (x : Var) (e : Val C Γ p)
 /-- A part read in `Γ`, read with one local more on top. -/
 abbrev up {Γ : Ctx} {t : LTy} : Thin Γ (t :: Γ) := .drop .refl
 
+/-! ## Shifting by one
+
+A rule's schema variables, read under the fresh local it declares: every
+local one further down (`.local i ↦ .local i.there`).  This is `wk up`
+without the thinning: `Idx.wk` matches on `Thin` and `Idx`, both indexed by
+contexts, and the kernel would run it on every capture (Gate G0,
+condition 1).  These match only on the expression families, whose context
+is a parameter; `*.up_eq` says each is `wk up`. -/
+
+section Shift
+
+theorem Idx.up_eq {Γ : Ctx} {t u : LTy} (i : Idx Γ t) : i.wk (Core.up (t := u)) = i.there :=
+  congrArg Idx.there (Idx.wk_refl i)
+
+def Simple.up {Γ : Ctx} {t : LTy} {p : PrimTy} : Simple C Γ p → Simple C (t :: Γ) p
+  | .lit n hr => .lit n hr
+  | .bool b => .bool b
+  | .local i => .local i.there
+  | .env k hp => .env k hp
+
+theorem Simple.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} (s : Simple C Γ p) :
+    s.up (t := t) = s.wk Core.up := by
+  cases s with
+  | «local» i => exact congrArg Simple.local (Idx.up_eq i).symm
+  | _ => rfl
+
+mutual
+
+def SPath.up {Γ : Ctx} {t : LTy} {T : Ty} : SPath C Γ T → SPath C (t :: Γ) T
+  | .alias i => .alias i.there
+  | .loc l => .loc l.up
+
+def Loc.up {Γ : Ctx} {t : LTy} {T : Ty} : Loc C Γ T → Loc C (t :: Γ) T
+  | .root r hr => .root r hr
+  | .field b f hf => .field b.up f hf
+  | .index it b i => .index it b.up i.up
+
+def MPath.up {Γ : Ctx} {t : LTy} {T : Ty} : MPath C Γ T → MPath C (t :: Γ) T
+  | .var i hm => .var i.there hm
+  | .loc l => .loc l.up
+
+def MLoc.up {Γ : Ctx} {t : LTy} {T : Ty} : MLoc C Γ T → MLoc C (t :: Γ) T
+  | .field b f hf => .field b.up f hf
+  | .index a b i => .index a b.up i.up
+
+def Val.up {Γ : Ctx} {t : LTy} {p : PrimTy} : Val C Γ p → Val C (t :: Γ) p
+  | .simple s => .simple s.up
+  | .read l => .read l.up
+  | .binop op ha hq a b => .binop op ha hq a.up b.up
+  | .unop op ha hq a => .unop op ha hq a.up
+  | .ternary c a b => .ternary c.up a.up b.up
+  | .readMem l => .readMem l.up
+  | .len b hp => .len b.up hp
+  | .mlen b hp => .mlen b.up hp
+
+end
+
+def ARhs.up {Γ : Ctx} {t : LTy} {R : RefTy} : ARhs C Γ R → ARhs C (t :: Γ) R
+  | .path p => .path p.up
+  | .push b hd => .push b.up hd
+
+mutual
+
+theorem SPath.up_eq {Γ : Ctx} {t : LTy} {T : Ty} :
+    (b : SPath C Γ T) → b.up (t := t) = b.wk Core.up
+  | .alias i => congrArg SPath.alias (Idx.up_eq i).symm
+  | .loc l => congrArg SPath.loc (Loc.up_eq l)
+
+theorem Loc.up_eq {Γ : Ctx} {t : LTy} {T : Ty} :
+    (l : Loc C Γ T) → l.up (t := t) = l.wk Core.up
+  | .root _ _ => rfl
+  | .field b f hf => congrArg (Loc.field · f hf) (SPath.up_eq b)
+  | .index it b i => by
+    show Loc.index it b.up i.up = Loc.index it (b.wk Core.up) (i.wk Core.up)
+    rw [SPath.up_eq b, Val.up_eq i]
+
+theorem MPath.up_eq {Γ : Ctx} {t : LTy} {T : Ty} :
+    (b : MPath C Γ T) → b.up (t := t) = b.wk Core.up
+  | .var i hm => congrArg (MPath.var · hm) (Idx.up_eq i).symm
+  | .loc l => congrArg MPath.loc (MLoc.up_eq l)
+
+theorem MLoc.up_eq {Γ : Ctx} {t : LTy} {T : Ty} :
+    (l : MLoc C Γ T) → l.up (t := t) = l.wk Core.up
+  | .field b f hf => congrArg (MLoc.field · f hf) (MPath.up_eq b)
+  | .index a b i => by
+    show MLoc.index a b.up i.up = MLoc.index a (b.wk Core.up) (i.wk Core.up)
+    rw [MPath.up_eq b, Val.up_eq i]
+
+theorem Val.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} :
+    (v : Val C Γ p) → v.up (t := t) = v.wk Core.up
+  | .simple s => congrArg Val.simple (Simple.up_eq s)
+  | .read l => congrArg Val.read (Loc.up_eq l)
+  | .binop op ha hq a b => by
+    show Val.binop op ha hq a.up b.up = Val.binop op ha hq (a.wk Core.up) (b.wk Core.up)
+    rw [Val.up_eq a, Val.up_eq b]
+  | .unop op ha hq a => congrArg (Val.unop op ha hq) (Val.up_eq a)
+  | .ternary c a b => by
+    show Val.ternary c.up a.up b.up = Val.ternary (c.wk Core.up) (a.wk Core.up) (b.wk Core.up)
+    rw [Val.up_eq c, Val.up_eq a, Val.up_eq b]
+  | .readMem l => congrArg Val.readMem (MLoc.up_eq l)
+  | .len b hp => congrArg (Val.len · hp) (SPath.up_eq b)
+  | .mlen b hp => congrArg (Val.mlen · hp) (MPath.up_eq b)
+
+end
+
+theorem ARhs.up_eq {Γ : Ctx} {t : LTy} {R : RefTy} (r : ARhs C Γ R) :
+    r.up (t := t) = r.wk Core.up := by
+  cases r with
+  | path p => exact congrArg ARhs.path (SPath.up_eq p)
+  | push b hd => exact congrArg (ARhs.push · hd) (SPath.up_eq b)
+
+end Shift
+
 /-- The fresh names of a rule fired at index `k`. -/
 abbrev fse (k : Nat) : Var := .fresh "se" k
 abbrev fsp (k : Nat) : Var := .fresh "sp" k
@@ -101,11 +220,11 @@ def localStep {Γ : Ctx} {p : PrimTy} (i : Idx Γ (.val p)) : Val C Γ p → Opt
     -- binopUnfoldRight; `&&`/`||` not ported
     if op.shortCircuits then none
     else some (.capture p' (fse k) b
-      (.assignLocal i.there (.binop op ha hq (.simple (a.wk up)) (.simple (.local .here)))))
+      (.assignLocal i.there (.binop op ha hq (.simple a.up) (.simple (.local .here)))))
   -- binopUnfoldLeft
   | @Val.binop _ _ p' _ op ha hq a b =>
     some (.capture p' (fse k) a
-      (.assignLocal i.there (.binop op ha hq (.simple (.local .here)) (b.wk up))))
+      (.assignLocal i.there (.binop op ha hq (.simple (.local .here)) b.up)))
   -- unopAssignment
   | .unop op ha hq (.simple a) => some (.setLocal i (.unop op ha hq (.simple a)))
   -- unopCapture
@@ -132,11 +251,11 @@ def assignStep {Γ : Ctx} : {T : Ty} → Loc C Γ T → Src C Γ T → Option (P
       | .simple se => some (.save (.field b f h) (.val (.simple se)))
       -- fieldWriteValueRhsCapture
       | e => some (.capture _ (fse k) e
-          (.assign (.field (b.wk up) f h) (.val (.simple (.local .here)))))
+          (.assign (.field b.up f h) (.val (.simple (.local .here)))))
     -- storageFieldWrite_unfold_leftFst
     else some (.unfold
       (.cons (.declLocal _ (fse k) (some e))
-        (.cons (.declStorage (.struct s) (fsp k) (some (.path (b.wk up))))
+        (.cons (.declStorage (.struct s) (fsp k) (some (.path b.up)))
           (.cons (.assign (.field (.alias .here) f h) (.val (.simple (.local (.there .here))))) .nil)))
       (.push (.push .refl)))
   | _, _, _ => none
@@ -153,14 +272,14 @@ other (`ifElseUnfold`), the branches read with the capture on top. -/
 def iteStep {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) :
     Option (Premise C Γ Γ) :=
   match c with
-  | .simple s => some (.split (Fml.isBool s.lower true) (Fml.isBool s.lower false) thn els)
+  | .simple s => some (.split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false) thn els)
   | c => some (.capture .bool (fse k) c
       (.ite (.simple (.local .here)) (thn.wk up).2.2 (els.wk up).2.2))
 
 /-- `require(c);`: two goals on a simple condition (`requireSimple`), the
 condition captured otherwise (`requireConditionCapture`). -/
 def requireStep {Γ : Ctx} : Val C Γ .bool → Option (Premise C Γ Γ)
-  | .simple s => some (.split (Fml.isBool s.lower true) (Fml.isBool s.lower false) .nil
+  | .simple s => some (.split .capture (Fml.isBool s.lower true) (Fml.isBool s.lower false) .nil
       (.cons .revert .nil))
   | c => some (.capture .bool (fse k) c (.require (.simple (.local .here))))
 
@@ -184,11 +303,11 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Opti
     -- valueDeclSkip, localValueDeclInitDrop
     (declLocal := fun p x init => match init with
       | none => some (.update (Upd.nil.decl x (.val (.app0 (.lit p.default)))))
-      | some e => some (.bind x (.val p) (.cons (.assignLocal .here (e.wk up)) .nil)))
+      | some e => some (.bind x (.val p) (.cons (.assignLocal .here e.up) .nil)))
     -- storageLocalDeclSkip, storageLocalDeclInitDrop
     (declStorage := fun R x init => match init with
       | none => some (.update (Upd.nil.decl (t := .alias R) x .unset))
-      | some r => some (.bind x (.alias R) (.cons (.rebind .here (r.wk up)) .nil)))
+      | some r => some (.bind x (.alias R) (.cons (.rebind .here r.up) .nil)))
     (opAssign := fun _ _ _ _ _ => none) (incDec := fun _ _ _ => none)
     (assignIncDec := fun _ _ _ _ _ => none) (push := fun _ _ _ => none) (pop := fun _ => none)
     (transfer := fun _ _ => none) (send := fun _ _ _ => none)

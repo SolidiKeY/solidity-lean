@@ -273,8 +273,10 @@ from `./run-lean.sh`.
     the value and alias declarations, `if` (`ifElseSplit`, `ifElseUnfold`),
     `require`, `assert`, `revert`.  Every other arm is `none`: the strategy
     stops in front of it.  A capture's schema variables are weakened by
-    `Stmt.wk`/`Val.wk` (`up`), which `match` on `Thin`: kernel-evaluated, so
-    a candidate for a `casesOn` shift if it shows in a profile (it did not).
+    `Val.up` and its kin (`.local i ↦ .local i.there`, no `Thin`;
+    `Val.up_eq` says each is `wk up`), except `ifElseUnfold`'s branches,
+    weakened by `Prog.wk up`, which matches on `Stmt`/`Prog`/`Thin`/`Idx`
+    and runs in the kernel on every captured condition (e4 below).
   - `Fml.stepR` is `Fml.rec`, `@[implemented_by Fml.stepAt]` (`casesOn` +
     structural), `Fml.stepR_eq` by induction (condition 2).  `Fml.fresh` is
     one above every binder label's index (`Fml.maxIdx`, `casesOn` +
@@ -289,38 +291,57 @@ from `./run-lean.sh`.
     `Taclet.step_eq` (the rule `Stmt.step` fires) and `Taclet.erase` (each
     erases to today's `Solidity.Taclet`).  Soundness against M3's run is
     stated below, not proved: `Core.Stmt.run` has not landed.
+  - Review fixes (2026-10-07): `Premise.split` carries the `BlockKind` that
+    ends its branches (`if`: `.block`, printed `}`; `require`: `.capture`,
+    printed as nothing, as KeY's `⟨[ revert(); ω ]⟩`); the schema
+    variables' shift is `Val.up` and its kin; `Taclet.erase` is stated as
+    what it is, an instance of today's rule relation, not soundness of the
+    cover-free split.
 
 ### M6a lane: the speed gate (kernel, `Eq.refl` of `symex n φ = ψ`)
 
 Measured with `Solidity/Scratch/CoreBench.lean` (not committed), median of 5
 (3 for e1×5), fuel 5000 both sides, on a machine shared with three other Lean
-agents (±20% noise between runs).  e1 is
+agents (±20% noise between runs), after the schema variables' shift became
+`Val.up` and its kin (no `Thin`; e2 was 1.45× with `.wk up`).  e1 is
 `if (alice.age == 4) { total = 1; } else { total = 2; }; uint y = total;`,
 e2 `uint x = alice.age; uint y = x + 1; alice.age = y;`, e3
-`uint x; x = 4; uint y = x + 1; require(y > 3); total = y;`; ×n repeats the
-program n times.
+`uint x; x = 4; uint y = x + 1; require(y > 3); total = y;`, e4
+`uint x = alice.age; if (x + 1 == 4) { uint z = x; total = z; } else { total = 2; }`
+(a captured condition: its branches weakened by `Prog.wk up`); ×n repeats
+the program n times.
 
 | program | steps today / Core | today | Core | ratio | symex then `fresh`: today / Core |
 |---|---|---|---|---|---|
-| e1 | 15 / 13 | 32.2 ms | 37.8 ms | 1.17 | 42.5 / 32.2 ms |
-| e2 | 6 / 5 | 10.0 ms | 14.5 ms | 1.45 | 12.8 / 8.9 ms |
-| e3 | 11 / 10 | 27.6 ms | 24.8 ms | 0.90 | 28.8 / 15.8 ms |
-| e1×5 | 435 / 403 | 16.7 s | 5.6 s | 0.34 | |
-| e2×10 | 51 / 50 | 259 ms | 297 ms | 1.15 | 132 / 122 ms |
-| e3×10 | 101 / 100 | 1757 ms | 610 ms | 0.35 | 1654 / 539 ms |
+| e1 | 15 / 13 | 25.2 ms | 29.6 ms | 1.17 | 31.4 / 24.6 ms |
+| e2 | 6 / 5 | 7.4 ms | 10.5 ms | 1.42 | 9.9 / 7.0 ms |
+| e3 | 11 / 10 | 17.7 ms | 15.3 ms | 0.86 | 22.3 / 12.6 ms |
+| e4 | 15 / 13 | 27.2 ms | 34.6 ms | 1.27 | |
+| e1×5 | 435 / 403 | 7.6 s | 2.6 s | 0.34 | |
+| e2×10 | 51 / 50 | 99 ms | 122 ms | 1.23 | 106 / 100 ms |
+| e3×10 | 101 / 100 | 1267 ms | 440 ms | 0.35 | 1348 / 451 ms |
 
-- Branching programs are about three times faster: a branch shares the
-  rest of the program as a frame (`seq ω κ`) instead of copying `thn ++ ω`
-  into each goal, and there is no cover goal.
-- Straight-line programs reduce faster (last column: the symex projected to
-  a number, no comparison of terms), but the `Eq.refl` check is up to 1.45×
-  on the smallest (e2, 4.5 ms more): the kernel compares the result with
-  the quote node by node, and every node carries its contexts.  The type
-  check of the quoted result is 0.6–6.6 ms against 0.1–0.3 ms.
-- Gate: within 20% on four of six, faster in total (6.8 s against 18.8 s);
-  e2 and e2×10's 15–45% is the context comparison.  Next to try if it
-  matters on the TestSuite: quote contexts as `let`-bound constants, or
-  compare a projection instead of the whole result.
+- Repeated branching programs (e1×5, e3×10) are about three times faster:
+  a branch shares the rest of the program as a frame (`seq ω κ`) instead of
+  copying `thn ++ ω` into each goal, and there is no cover goal.  A single
+  branch is not (e1 1.17×, e4 1.27×).
+- Every program reduces faster (last column: the symex projected to a
+  number, no comparison of terms), but the `Eq.refl` check is up to 1.42×
+  on the smallest (e2, 3.1 ms more): the kernel compares the result with
+  the quote node by node, and every node carries its contexts (result DAG
+  195 nodes against 114; its type check 0.58 ms against 0.06 ms).  The
+  shift without `Thin` moved e2 from 1.45× to 1.42×, within the noise: the
+  weakening was not the cost.
+- Gate: within 20% on four of seven (e1, e3, e1×5, e3×10); outside on e2
+  (1.42×), e4 (1.27×) and e2×10 (1.23×), by 3–23 ms each; in total 3.2 s
+  against 9.0 s.
+- **Verdict: the gate fails on a strict reading** (e2, e4, e2×10), and
+  passes only on aggregate.  Under Decisions 1 and 7 that triggers the
+  Church-typed fallback for the calculus.  Before taking it, two cheaper
+  fixes aim at exactly the measured cost (the comparison of contexts, not
+  the reduction): quote contexts as `let`-bound constants, or check a
+  projection of the result instead of the whole term.  This lane has not
+  taken the fallback; the call is the user's.
 
 ### M6a lane: how `dl{ … }` will write a scoped taclet
 
@@ -422,7 +443,11 @@ The named-scope retry was not needed. The conditions, which M2–M6 follow:
    the motive generalising the indices and the dependent arguments passed
    after it (`Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames Γ₁ Γ₀ → …) P … κ`).
    `match` stays fine on parameter-only families (`Expr Γ`, `SPath Γ`) and on
-   elaboration-time code (`resolve`, quoters, `Stmt.wk`).
+   elaboration-time code (`resolve`, quoters).  `Stmt.wk`/`Prog.wk` are not
+   elaboration-time only: `ifElseUnfold` runs `Prog.wk up` in the kernel
+   (`Calculus/Core/Step.lean`); a rule's expression schema variables use
+   `Val.up` and its kin instead, which match only on parameter-only
+   families.
 2. **The fastest form is `T.rec` + an `@[implemented_by]` twin** written with
    `casesOn` + structural recursion (the code generator rejects `T.rec`),
    linked by a theorem (`stepR_eq`, by induction, `show`/`rw`/`rfl`).
@@ -437,7 +462,7 @@ The named-scope retry was not needed. The conditions, which M2–M6 follow:
    projections, no casts. That is the 0.25× run.
 5. **Scope ends are suffixes** (`Ext Γ Δ`: `refl`, `push`) rather than the
    general `Thin`; `Prog.ext` and `Ext.trans` recurse on one argument.
-   `Thin` with `keep` is only for `Stmt.wk`.
+   `Thin` with `keep` is only for `Stmt.wk`/`Prog.wk`.
 6. **No administrative steps**: `Premise.fml` takes the rest ω and the frames
    κ apart, so an update continues into `box ω κ φ`, not into
    `box nil (seq ω κ)` (that doubled the steps and cost 1.23×).

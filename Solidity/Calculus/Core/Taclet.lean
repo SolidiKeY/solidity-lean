@@ -13,9 +13,14 @@ out here; at the cutover the `dl{ … }` macro writes them from the same rule
 lines as today, inserting the weakenings and the scope end itself.
 
 Their soundness against the scoped interpreter waits for it (M3's
-`Core.Stmt.run`).  What holds already is the bridge: each taclet erases to
-today's (`Taclet.erase`), whose soundness `Rules.lean`'s `Taclet.sound`
-proves, and each is the rule `Stmt.step` fires (`Taclet.step_eq`).
+`Core.Stmt.run`).  What holds already: each is the rule `Stmt.step` fires
+(`Taclet.step_eq`), and each is an instance of today's rule relation
+(`Taclet.erase`).  That is not yet soundness of what a Core taclet proves,
+`Core.Premise.fml`.  For `update`, `unfold`, `bind`, `check` and `done` it
+follows from `Taclet.sound` given a `holds_erase` lemma; for `split` it does
+not, since today's `Premise.fml` has a cover conjunct (under the diamond,
+`se = true ∨ se = false`, which untyped states do not guarantee) and
+Core's has none: that needs typed boolean locals (M3/M4's `State C Γ`).
 -/
 
 namespace Solidity.Core
@@ -42,7 +47,7 @@ inductive Taclet (C : Contract) (k : Nat) (m : Modality) :
   se = false ⟹ ⟨[ elseStm ]⟩`, each branch a block (`Premise.fml` pops it). -/
   | ifElseSplit {Γ Γ₁ Γ₂ : Ctx} {se : Simple C Γ .bool} {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂} :
       Taclet C k m (.ite (.simple se) thn els)
-        (.split (Fml.isBool se.lower true) (Fml.isBool se.lower false) thn els)
+        (.split .block (Fml.isBool se.lower true) (Fml.isBool se.lower false) thn els)
 
 /-! ## The rule `Stmt.step` fires -/
 
@@ -64,12 +69,14 @@ def Premise.erase {Γ Γ' : Ctx} (ns : List Var) : Premise C Γ Γ' → Solidity
   | .update U => .update (U.erase ns)
   | .unfold P _ => .unfold (P.erase ns)
   | .bind x _ P => .unfold (P.erase (x :: ns))
-  | .split c c' P Q => .split (c.erase ns) (c'.erase ns) (P.erase ns) (Q.erase ns)
+  | .split _ c c' P Q => .split (c.erase ns) (c'.erase ns) (P.erase ns) (Q.erase ns)
   | .check c => .check (c.erase ns) []
   | .done b => .done b
 
-/-- **Each taclet erases to today's**, so `Taclet.sound` (`RuleSoundness.lean`)
-covers it until the scoped interpreter lands. -/
+/-- **Each taclet is an instance of today's rule relation**: its statement
+and premise erase to a `Solidity.Taclet`.  This relates the rules, not what
+they prove: a split's `Core.Premise.fml` has no cover conjunct, so
+`Taclet.sound` does not cover it (module docstring). -/
 theorem Taclet.erase {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
     {p : Premise C Γ Γ'} (h : Taclet C k m s p) (ns : List Var) :
     ∃ s', s.erase ns = [s'] ∧ Solidity.Taclet C k m s' (p.erase ns) := by
