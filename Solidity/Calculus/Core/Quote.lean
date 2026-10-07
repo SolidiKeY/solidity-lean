@@ -430,6 +430,16 @@ partial def qFrames (Γ Γ₀ : Ctx) (κ : Frames C Γ Γ₀) : QM Expr := do
   | @Frames.drop _ Γ₁ _ _ h κ =>
     sctor ``Frames.drop #[← qCtx Γ₁, ← qCtx Γ, ← qCtx Γ₀, ← qThin Γ₁ Γ h, ← qFrames Γ₁ Γ₀ κ]
 
+/-- A list of positions with their types (`{anon(xs)}`, an invariant's frame). -/
+def qIdxList (Γ : Ctx) (xs : List ((t : LTy) × Idx Γ t)) : QM Expr := do
+  let idxF := mkApp (mkConst ``Idx) (← qCtx Γ)
+  let sigTy := mkApp2 (mkConst ``Sigma [levelZero, levelZero]) ltyE idxF
+  let mut l := mkApp (mkConst ``List.nil [levelZero]) sigTy
+  for ⟨t, i⟩ in xs.reverse do
+    let e := mkAppN (mkConst ``Sigma.mk [levelZero, levelZero]) #[ltyE, idxF, qLTy t, ← qIdx Γ t i]
+    l := mkApp3 (mkConst ``List.cons [levelZero]) sigTy e l
+  return l
+
 partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
   let Γe ← qCtx Γ
   match φ with
@@ -447,14 +457,7 @@ partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
   | .havoc φ => sctor ``Fml.havoc #[Γe, ← qFml Γ φ]
   | .all x p φ => sctor ``Fml.all #[Γe, toExpr x, toExpr p, ← qFml (.val p :: Γ) φ]
   | .bind x t φ => sctor ``Fml.bind #[Γe, toExpr x, qLTy t, ← qFml (t :: Γ) φ]
-  | .anon xs φ => do
-    let idxF := mkApp (mkConst ``Idx) Γe
-    let sigTy := mkApp2 (mkConst ``Sigma [levelZero, levelZero]) ltyE idxF
-    let mut l := mkApp (mkConst ``List.nil [levelZero]) sigTy
-    for ⟨t, i⟩ in xs.reverse do
-      let e := mkAppN (mkConst ``Sigma.mk [levelZero, levelZero]) #[ltyE, idxF, qLTy t, ← qIdx Γ t i]
-      l := mkApp3 (mkConst ``List.cons [levelZero]) sigTy e l
-    sctor ``Fml.anon #[Γe, l, ← qFml Γ φ]
+  | .anon xs φ => do sctor ``Fml.anon #[Γe, ← qIdxList Γ xs, ← qFml Γ φ]
 
 def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
   let pre := #[← contract, ← qCtx Γ]
@@ -469,6 +472,30 @@ def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
       ← qProg Γ Γ₁ P, ← qProg Γ Γ₂ Q]
   | .check c => return mk ``Premise.check #[← qFml Γ c]
   | .done b => return mk ``Premise.done #[← qCtx Γ', toExpr b]
+  | .branches bs => do
+    let brTy := mkApp2 (mkConst ``Branch) (← contract) (← qCtx Γ)
+    let mut l := mkApp (mkConst ``List.nil [levelZero]) brTy
+    for b in bs.reverse do
+      let e := mkAppN (mkConst ``Branch.mk) #[← contract, ← qCtx Γ, ← qCtx b.ρ, ← qCtx b.Γ₁,
+        ← qBinders b.ρ b.bs, ← qProg (b.ρ ++ Γ) b.Γ₁ b.P]
+      l := mkApp3 (mkConst ``List.cons [levelZero]) brTy e l
+    return mk ``Premise.branches #[l]
+  | .cases fs us => do
+    let fTy ← fam ``Fml Γ
+    let uTy := mkAppN (mkConst ``Upd) #[← contract, ← qCtx Γ, ← qCtx Γ]
+    let mut lf := mkApp (mkConst ``List.nil [levelZero]) fTy
+    for φ in fs.reverse do
+      lf := mkApp3 (mkConst ``List.cons [levelZero]) fTy (← qFml Γ φ) lf
+    let mut lu := mkApp (mkConst ``List.nil [levelZero]) uTy
+    for U in us.reverse do
+      lu := mkApp3 (mkConst ``List.cons [levelZero]) uTy (← qUpd Γ Γ U) lu
+    return mk ``Premise.cases #[lf, lu]
+  | @Premise.inv _ _ Δ₀ Δ Γ₁ I xs hv U c c' hu hb P post =>
+    return mk ``Premise.inv #[← qCtx Δ₀, ← qCtx Δ, ← qCtx Γ₁, ← qFml Γ I, ← qIdxList Γ xs,
+      toExpr hv, ← qUpd Γ Δ U, ← qFml Δ c, ← qFml Δ c', ← qExt Γ hu, ← qExt Δ₀ hb,
+      ← qProg Δ₀ Γ₁ P, ← qFml Δ₀ post]
+  | @Premise.inline _ _ Γ' Γ'' P h =>
+    return mk ``Premise.inline #[← qCtx Γ', ← qCtx Γ'', ← qProg Γ Γ'' P, ← qThin Γ' Γ'' h]
 
 end Quote
 
