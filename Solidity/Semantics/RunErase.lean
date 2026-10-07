@@ -1486,3 +1486,157 @@ theorem Stmt.erases_revert : (Stmt.revert : Stmt C Γ Γ).ErasesAt ns σ τ :=
   .of_leaf rfl (rfl : Halt.revert = Halt.revert)
 
 end Leaves
+
+/-! ## Loops in step -/
+
+section Loops
+
+/-- Two iterations in step: both running, related by `R`, or both done,
+related by `Q`. -/
+def StepRel₂ {α β : Type} (R : α → β → Prop) (Q : Res α → Res β → Prop) :
+    α ⊕ Res α → β ⊕ Res β → Prop
+  | .inl a, .inl b => R a b
+  | .inr r, .inr r' => Q r r'
+  | _, _ => False
+
+theorem Loop.run_of_forall {α : Type} {body : α → Res α} {c : α → Res Value} {σ : α}
+    (h : ∀ n r, Loop.iterN body c n σ ≠ .inr r) : Loop.run body c σ = .error .diverge := by
+  have hex : ¬ ∃ r n, Loop.iterN body c n σ = .inr r := fun ⟨r, n, h'⟩ => h n r h'
+  simp only [Loop.run, hex, dite_false]
+
+/-- **A scoped loop and an untyped one run alike** when their iterations go in
+step (`Solidity.Loop.run_rel`, across the two state types). -/
+theorem Loop.run_rel₂ {α : Type} {body₁ : α → Res α} {c₁ : α → Res Value}
+    {body₂ : Semantics.State → Res Semantics.State} {c₂ : Semantics.State → Res Value}
+    {R : α → Semantics.State → Prop} {Q : Res α → Res Semantics.State → Prop}
+    {σ : α} {σ' : Semantics.State} (h0 : R σ σ')
+    (hstep : ∀ a b, R a b →
+      StepRel₂ R Q (Loop.step body₁ c₁ a) (Solidity.Loop.step body₂ c₂ b))
+    (hdiv : Q (.error .diverge) (.error .diverge)) :
+    Q (Loop.run body₁ c₁ σ) (Solidity.Loop.run body₂ c₂ σ') := by
+  have hiter : ∀ n a b, R a b →
+      StepRel₂ R Q (Loop.iterN body₁ c₁ n a) (Solidity.Loop.iterN body₂ c₂ n b) := by
+    intro n
+    induction n with
+    | zero => intro a b h; exact h
+    | succ n ih =>
+      intro a b h
+      have hs := hstep a b h
+      simp only [Loop.iterN, Solidity.Loop.iterN]
+      revert hs
+      cases Loop.step body₁ c₁ a <;> cases Solidity.Loop.step body₂ c₂ b <;>
+        simp only [StepRel₂, false_imp_iff, imp_self] <;> exact ih _ _
+  by_cases hex : ∃ r n, Loop.iterN body₁ c₁ n σ = .inr r
+  · obtain ⟨r, n, h⟩ := hex
+    have hn := hiter n σ σ' h0
+    rw [h] at hn
+    revert hn
+    cases h' : Solidity.Loop.iterN body₂ c₂ n σ' with
+    | inl _ => simp only [StepRel₂, false_imp_iff]
+    | inr r' =>
+      intro hq
+      rw [Loop.run_of_iterN h, Solidity.Loop.run_of_iterN h']
+      exact hq
+  · have hσ : ∀ n r, Loop.iterN body₁ c₁ n σ ≠ .inr r := fun n r h => hex ⟨r, n, h⟩
+    have hσ' : ∀ n r, Solidity.Loop.iterN body₂ c₂ n σ' ≠ .inr r := by
+      intro n r h
+      have hn := hiter n σ σ' h0
+      rw [h] at hn
+      revert hn
+      cases h'' : Loop.iterN body₁ c₁ n σ with
+      | inl _ => simp only [StepRel₂, false_imp_iff]
+      | inr r'' => exact fun _ => hσ n r'' h''
+    rw [Loop.run_of_forall hσ, Solidity.Loop.run_of_forall hσ']
+    exact hdiv
+
+end Loops
+
+/-! ## The statements with sub-programs -/
+
+section Scopes
+
+variable {Γ : Ctx} {ns B : List Var} {τ₀ : Semantics.State}
+
+/-- A scope's locals popped, the names of `ns` left. -/
+theorem RunRel.pop {Δ : Ctx} (h : Ext Γ Δ) {ns' qs : List Var} (hns : ns.length = Γ.length)
+    (hq : ns' = qs ++ ns) : {x : Res (State C Δ)} → {y : Res Semantics.State} →
+      RunRel ns' B τ₀ x y → RunRel ns B τ₀ (x.map (State.drop h)) y
+  | .error _, .error _, hr => hr
+  | .ok _, .ok _, ⟨hag, hf⟩ => by
+    subst hq
+    have h₁ := hag.len
+    have h₂ := h.length_eq
+    simp only [List.length_append] at h₁
+    exact ⟨hag.drop h (by omega), hf⟩
+
+/-- A block's run, its locals popped, from its bridge. -/
+theorem Prog.erases_pop {Γ₁ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+    (P : Prog C Γ Γ₁) (hns : ns.length = Γ.length) (ih : P.ErasesAt ns σ τ) :
+    RunRel ns (ns ++ P.binders) τ ((P.run σ).map (State.drop P.ext))
+      (Solidity.Prog.run τ (P.erase ns)) :=
+  have ⟨_, hq, _⟩ := P.outNames_suffix ns
+  RunRel.pop P.ext hns hq ih
+
+variable {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+
+theorem Stmt.erases_block {Γ₁ : Ctx} (hag : Agree ns σ τ) (body : Prog C Γ Γ₁)
+    (ih : body.ErasesAt ns σ τ) : (Stmt.block body).ErasesAt ns σ τ :=
+  body.erases_pop hag.len ih
+
+theorem Stmt.erases_ite {Γ₁ Γ₂ : Ctx} (hag : Agree ns σ τ) (c : Val C Γ .bool)
+    (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) (ih₁ : thn.ErasesAt ns σ τ)
+    (ih₂ : els.ErasesAt ns σ τ) : (Stmt.ite c thn els).ErasesAt ns σ τ := .of_leaf rfl (by
+  dsimp only [Stmt.run, Stmt.runR, Stmt.outNames, Stmt.binders]
+  simp only [Run.ite, Solidity.Stmt.run, c.eval_erase hag]
+  refine RunRel.bind_pure _ fun v _ => ?_
+  cases v with
+  | int _ => exact (rfl : Halt.stuck = Halt.stuck)
+  | bool b =>
+    cases b
+    · exact (els.erases_pop hag.len ih₂).mono fun y hy => by
+        rcases List.mem_append.1 hy with hy | hy
+        · exact List.mem_append_left _ hy
+        · exact List.mem_append_right _ (List.mem_append_right _ hy)
+    · exact (thn.erases_pop hag.len ih₁).mono fun y hy => by
+        rcases List.mem_append.1 hy with hy | hy
+        · exact List.mem_append_left _ hy
+        · exact List.mem_append_right _ (List.mem_append_left _ hy))
+
+/-- One iteration of each, from agreeing states: the conditions read alike,
+and the bodies run alike. -/
+theorem Loop.step_rel {B : List Var} {τ b : Semantics.State} {a : State C Γ}
+    {body₁ : State C Γ → Res (State C Γ)} {c₁ : State C Γ → Res Value}
+    {body₂ : Semantics.State → Res Semantics.State} {c₂ : Semantics.State → Res Value}
+    (hc : c₂ b = c₁ a) (hab : Agree ns a b)
+    (hf : ∀ z, z ∉ B → lookupBy z b.env = lookupBy z τ.env)
+    (hbody : RunRel ns B b (body₁ a) (body₂ b)) :
+    StepRel₂ (fun a b => Agree ns a b ∧ ∀ z, z ∉ B → lookupBy z b.env = lookupBy z τ.env)
+      (RunRel ns B τ) (Loop.step body₁ c₁ a) (Solidity.Loop.step body₂ c₂ b) := by
+  simp only [Loop.step, Solidity.Loop.step, hc]
+  cases c₁ a with
+  | error e => exact (rfl : e = e)
+  | ok v =>
+    cases v with
+    | int _ => exact (rfl : Halt.stuck = Halt.stuck)
+    | bool b' =>
+      cases b'
+      · exact ⟨hab, hf⟩
+      · revert hbody
+        cases body₁ a <;> cases body₂ b
+        · exact id
+        · exact False.elim
+        · exact False.elim
+        · exact fun ⟨hag', hf'⟩ => ⟨hag', fun z hz => (hf' z hz).trans (hf z hz)⟩
+
+theorem Stmt.erases_loop {Γ₁ : Ctx} (hag : Agree ns σ τ) (a : LoopAnn C Γ) (c : Val C Γ .bool)
+    (body : Prog C Γ Γ₁) (ih : ∀ σ' τ', Agree ns σ' τ' → body.ErasesAt ns σ' τ') :
+    (Stmt.loop a c body).ErasesAt ns σ τ := .of_leaf rfl (by
+  dsimp only [Stmt.run, Stmt.runR, Stmt.outNames, Stmt.binders]
+  simp only [Run.loop, Solidity.Stmt.run]
+  refine Loop.run_rel₂ (R := fun a b => Agree ns a b ∧
+      ∀ y, y ∉ ns ++ body.binders → lookupBy y b.env = lookupBy y τ.env)
+    (Q := RunRel ns (ns ++ body.binders) τ) ⟨hag, fun _ _ => rfl⟩ ?_ (rfl : Halt.diverge = _)
+  intro a b ⟨hab, hf⟩
+  exact Loop.step_rel (c.eval_erase hab) hab hf (body.erases_pop hab.len (ih a b hab)))
+
+end Scopes
