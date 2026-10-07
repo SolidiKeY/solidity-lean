@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.Taclet
+import Solidity.Calculus.Core.Proves
 
 /-!
 # Printing scoped taclets and formulas with schema variables
@@ -110,6 +111,14 @@ partial def trIdx (ns : List Expr) (e : Expr) : TrM Expr := do
   if let .fvar fv := e then return (← read).twins.getD fv unknownVar
   return unknownVar
 
+/-- The names of what a frame end by `h : Thin Γ Δ` keeps, from the names
+`ns` of `Δ`; as many as it can read when `h` does not compute. -/
+partial def thinNames (ns : List Expr) (h : Expr) : MetaM (List Expr) := do
+  let h ← whnf h
+  if h.isAppOf ``Thin.keep then return ns.headD unknownVar :: (← thinNames ns.tail h.appArg!)
+  if h.isAppOf ``Thin.drop then return ← thinNames ns.tail h.appArg!
+  return ns
+
 /-- How many locals a scope end pops, when it computes. -/
 partial def extDepth (e : Expr) : MetaM Nat := do
   let e ← whnf e
@@ -167,6 +176,28 @@ partial def bindersNames? (bs : Expr) : MetaM (Option (List Expr)) := do
     let some xs ← bindersNames? (bs.getArg! 1) | return none
     return some (bs.getArg! 3 :: xs)
   return none
+
+/-- `List (PrimTy × Var)`, the erased binders' type. -/
+def pairsTy : Expr :=
+  mkApp (mkConst ``List [levelZero])
+    (mkApp2 (mkConst ``Prod [levelZero, levelZero]) (mkConst ``PrimTy) (mkConst ``Solidity.Var))
+
+/-- `List (Stmt C)` -/
+def stmtsTy (c : Expr) : Expr := mkApp (mkConst ``List [levelZero]) (mkApp (mkConst ``Solidity.Stmt) c)
+
+/-- Binders as the list `Binders.toList` computes, in the order they are
+bound, and their names, innermost first, when they compute. -/
+partial def bindersPairs? (bs : Expr) : MetaM (Option (Expr × List Expr)) := do
+  let rec go (bs : Expr) : MetaM (Option (Array Expr × List Expr)) := do
+    let bs ← whnf bs
+    if bs.isAppOf ``Binders.nil then return some (#[], [])
+    unless bs.isAppOfArity ``Binders.snoc 4 do return none
+    let some (xs, names) ← go (bs.getArg! 1) | return none
+    let x := bs.getArg! 3
+    return some (xs.push (← mkAppM ``Prod.mk #[bs.getArg! 2, x]), x :: names)
+  let some (xs, names) ← go bs | return none
+  let ty := mkApp2 (mkConst ``Prod [levelZero, levelZero]) (mkConst ``PrimTy) (mkConst ``Solidity.Var)
+  return some (← mkListLit ty xs.toList, names)
 
 /-- The length of a context, when it computes. -/
 partial def ctxLength? (Γ : Expr) : MetaM (Option Nat) := do
@@ -255,6 +286,42 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     return ← mkAppM ``Solidity.Premise.check #[← tr ns args[2]!, nil]
   if n == ``Premise.done && args.size == 4 then
     return mkApp2 (mkConst ``Solidity.Premise.done) args[0]! args[3]!
+  if n == ``Stmt.call && args.size == 10 then
+    if let some r ← callStmt? ns args then return r
+  if n == ``Stmt.tryCall && args.size == 15 then
+    if let some r ← tryStmt? ns args then return r
+  if n == ``Premise.branches && args.size == 3 then
+    let some bs ← Solidity.listElems? args[2]! | return e
+    let c := args[0]!
+    let mut out : Array Expr := #[]
+    for b in bs do
+      let b ← whnf b
+      unless b.isAppOfArity ``Branch.mk 6 do return e
+      let some (xs, names) ← bindersPairs? (b.getArg! 4) | return e
+      let (ps, _) ← progPieces (names ++ ns) (b.getArg! 5)
+      out := out.push (← mkAppM ``Prod.mk #[xs, ← Piece.build c ps])
+    let ty := mkApp2 (mkConst ``Prod [levelZero, levelZero]) (pairsTy) (stmtsTy c)
+    return mkApp2 (mkConst ``Solidity.Premise.branches) c (← mkListLit ty out.toList)
+  if n == ``Premise.cases && args.size == 4 then
+    let c := args[0]!
+    let some fs ← Solidity.listElems? args[2]! | return e
+    let some us ← Solidity.listElems? args[3]! | return e
+    let fs ← fs.mapM (tr ns)
+    let us ← us.mapM fun U => do
+      let (es, _) ← updParts ns U
+      updList c U es
+    return mkApp3 (mkConst ``Solidity.Premise.cases) c
+      (← mkListLit (mkApp (mkConst ``Solidity.Fml) c) fs.toList)
+      (← mkListLit (mkApp (mkConst ``Solidity.Upd) c) us.toList)
+  if n == ``Premise.inv && args.size == 15 then
+    let c := args[0]!
+    let (es, ms) ← updParts ns args[8]!
+    let ks := ms.drop (← extDepth args[12]!)
+    let (ps, _) ← progPieces ks args[13]!
+    return mkAppN (mkConst ``Solidity.Premise.inv) #[c, ← tr ns args[5]!, ← updList c args[8]! es,
+      ← tr ms args[9]!, ← tr ms args[10]!, ← Piece.build c ps, ← tr ks args[14]!]
+  if n == ``Premise.inline && args.size == 6 then
+    return ← mkAppM ``Solidity.Premise.unfold #[← tr ns args[4]!]
   -- a lowering of a constructor: what it computes to
   if lowerFns.contains n then
     let e' ← match ← unfoldDefinition? e with
@@ -308,6 +375,86 @@ partial def generic (ns : List Expr) (e : Expr) (n : Lean.Name) : TrM (Option Ex
     else if isC && out.isEmpty then out := out.push c?
     else out := out.push none
   try return some (← mkAppOptM n' out) catch _ => return none
+
+/-- `Stmt.call f args ret body` as `Syntax.lean` writes it
+(`Core.Stmt.erase`): the arguments with their parameters, the return as
+`CallRet`, a memory return's declaration at the head of the body, the body
+read under the return variables and the parameters. -/
+partial def callStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) := do
+  let c := args[0]!
+  let some (as, pNames) ← argsList? ns args[7]! | return none
+  let ret ← whnf args[8]!
+  let (ret', rNames, pre) ← match ret.getAppFn.constName? with
+    | some ``CallRet.none => pure (mkConst ``Solidity.CallRet.none, [], #[])
+    | some ``CallRet.val => do
+      let r := ret.getArg! 2
+      pure (mkApp3 (mkConst ``Solidity.CallRet.val) (ret.getArg! 1) r (← trArg ns (ret.getArg! 3)),
+        [r], #[])
+    | some ``CallRet.rets => do
+      let some (xs, names) ← bindersPairs? (ret.getArg! 2) | return none
+      pure (mkApp (mkConst ``Solidity.CallRet.rets) xs, names, #[])
+    | some ``CallRet.mem => do
+      let r := ret.getArg! 2
+      let none' ← mkAppOptM ``Option.none
+        #[some (mkApp2 (mkConst ``Solidity.MRhs) c (ret.getArg! 1))]
+      let d := mkAppN (mkConst ``Solidity.Stmt.declMem)
+        #[c, ret.getArg! 1, r, none', ret.getArg! 3, ret.getArg! 4]
+      pure (mkConst ``Solidity.CallRet.none, [r], #[Piece.one d])
+    | _ => return none
+  let (ps, _) ← progPieces (rNames ++ pNames) args[9]!
+  let body ← Piece.build c (pre ++ ps)
+  let hsep := mkApp2 (mkConst ``Eq.refl [levelOne]) (mkConst ``Bool) (mkConst ``Bool.true)
+  let argTy := mkApp (mkConst ``Solidity.Arg) c
+  return some (mkAppN (mkConst ``Solidity.Stmt.call)
+    #[c, args[6]!, ← mkListLit argTy as.toList, hsep, ret', body])
+
+/-- `try a.f(e) returns (…) { ok } catch … { … }` as `Syntax.lean` writes
+it: `ok` read under the returned values, `panic` under the code. -/
+partial def tryStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) := do
+  let c := args[0]!
+  let some call ← extCall? ns args[8]! | return none
+  let some (rets, rNames) ← bindersPairs? args[9]! | return none
+  let code ← whnf args[12]!
+  let (code', cNames) ← match code.getAppFn.constName? with
+    | some ``CodeBinder.none => pure (← mkAppOptM ``Option.none #[mkConst ``Solidity.Var], [])
+    | some ``CodeBinder.some => pure (← mkAppM ``Option.some #[code.appArg!], [code.appArg!])
+    | _ => return none
+  let blk (ms : List Expr) (P : Expr) : TrM Expr := do
+    let (ps, _) ← progPieces ms P
+    Piece.build c ps
+  return some (mkAppN (mkConst ``Solidity.Stmt.tryCall)
+    #[c, call, rets, ← blk (rNames ++ ns) args[10]!, ← blk ns args[11]!, code',
+      ← blk (cNames ++ ns) args[13]!, ← blk ns args[14]!])
+
+/-- An external call, its receiver and arguments erased; a schema variable
+its twin. -/
+partial def extCall? (ns : List Expr) (call : Expr) : TrM (Option Expr) := do
+  let call := (← instantiateMVars call).consumeMData
+  if let .fvar fv := call then return (← read).twins.get? fv
+  let call ← whnf call
+  unless call.isAppOfArity ``ExtCall.mk 5 do return none
+  let c := call.getArg! 0
+  let some xs ← Solidity.listElems? (call.getArg! 4) | return none
+  let β := mkLambda `p .default (mkConst ``PrimTy) (mkApp2 (mkConst ``Solidity.Simple) c (mkBVar 0))
+  let xs ← xs.mapM fun x => do
+    let x ← whnf x
+    let p := x.getArg! 2
+    return mkApp4 (mkConst ``Sigma.mk [levelZero, levelZero]) (mkConst ``PrimTy) β p
+      (← tr ns (x.getArg! 3))
+  let argTy := mkApp (mkConst ``Solidity.ExtArg) c
+  return some (mkApp4 (mkConst ``Solidity.ExtCall.mk) c (← tr ns (call.getArg! 2)) (call.getArg! 3)
+    (← mkListLit argTy xs.toList))
+
+/-- A call's arguments in order, each with its parameter, and the
+parameters' names, innermost first (`Args.names`). -/
+partial def argsList? (ns : List Expr) (as : Expr) : TrM (Option (Array Expr × List Expr)) := do
+  let as ← whnf as
+  if as.isAppOf ``Args.nil then return some (#[], [])
+  unless as.isAppOfArity ``Args.snoc 7 do return none
+  let some (xs, names) ← argsList? ns (as.getArg! 3) | return none
+  let x := as.getArg! 5
+  let a := mkApp4 (mkConst ``Solidity.Arg.mk) (as.getArg! 0) (as.getArg! 4) x (← tr ns (as.getArg! 6))
+  return some (xs.push a, x :: names)
 
 /-- An argument, erased by its type: a position is a name, an option of a
 scoped part the option of its erasure, a scoped part its erasure, anything
@@ -368,6 +515,8 @@ partial def framePieces (ns : List Expr) (κ : Expr) : TrM (Array Piece × List 
     match (← read).blockEnd, close with
     | some e, true => return (#[.one e] ++ qs, ms)
     | _, _ => return (qs, ms)
+  if κ.isAppOf ``Frames.drop then
+    return ← framePieces (← thinNames ns args[4]!) args[5]!
   if κ.isAppOf ``Frames.nil then return (#[], ns)
   return (#[.many κ], ns)
 
@@ -388,6 +537,9 @@ partial def updParts (ns : List Expr) (U : Expr) : TrM (Array Piece × List Expr
   if U.isAppOf ``Upd.pop then
     let (es, ms) ← updParts ns args[4]!
     return (es, ms.drop (← extDepth args[5]!))
+  if U.isAppOf ``Upd.drop then
+    let (es, ms) ← updParts ns args[4]!
+    return (es, ← thinNames ms args[5]!)
   if U.isAppOf ``Upd.nil then return (#[], ns)
   if let .fvar fv := U then return (#[.many ((← read).twins.getD fv U)], ns)
   return (#[.many U], ns)
@@ -443,12 +595,15 @@ partial def twinsFrom {α : Type} (fvs : Array FVarId) (i : Nat) (env : Env) (k 
 
 /-- `k` with a twin for every free variable of `e` of a scoped type, and,
 when `frames`, the statement `}` prints as. -/
-def withTwins {α : Type} (e : Expr) (frames : Bool) (k : Env → MetaM α) : MetaM α := do
+def withTwins {α : Type} (e : Expr) (frames : Bool) (k : Env → MetaM α)
+    (contract? : Option Expr := none) : MetaM α := do
   let e ← instantiateMVars e
   let fvs := (collectFVars {} e).fvarIds
   if !frames then return ← twinsFrom fvs 0 {} k
   -- the contract, for the type of the `}` statement
-  let c? ← try some <$> contractOf e catch _ => pure none
+  let c? ← match contract? with
+    | some c => pure (some c)
+    | none => try some <$> contractOf e catch _ => pure none
   match c? with
   | some c => withLocalDeclD blockEndName (mkApp (mkConst ``Solidity.Stmt) c) fun b =>
       twinsFrom fvs 0 { blockEnd := some b } k
@@ -533,7 +688,9 @@ def delabPremise : Delab := do
 
 attribute [delab app.Solidity.Core.Premise.update, delab app.Solidity.Core.Premise.unfold,
   delab app.Solidity.Core.Premise.bind, delab app.Solidity.Core.Premise.split,
-  delab app.Solidity.Core.Premise.check, delab app.Solidity.Core.Premise.done] delabPremise
+  delab app.Solidity.Core.Premise.check, delab app.Solidity.Core.Premise.done,
+  delab app.Solidity.Core.Premise.branches, delab app.Solidity.Core.Premise.cases,
+  delab app.Solidity.Core.Premise.inv, delab app.Solidity.Core.Premise.inline] delabPremise
 
 /-- A scoped formula standing alone: `dl{ φ }`, a block's end `}`. -/
 def delabFml : Delab := do
@@ -549,6 +706,76 @@ attribute [delab app.Solidity.Core.Fml.eq, delab app.Solidity.Core.Fml.defined,
   delab app.Solidity.Core.Fml.modal, delab app.Solidity.Core.Fml.all,
   delab app.Solidity.Core.Fml.bind, delab app.Solidity.Core.Fml.havoc,
   delab app.Solidity.Core.Fml.anon] delabFml
+
+/-! ## Sequents -/
+
+/-- A sequent's context, erased: the rest `..H` when it is a variable, the
+entries as `Logic.lean`'s `Hyp`s, and the names of the last scope.  What
+erasure loses prints as nothing: an update of pops only, and the hidden
+binder (it only names the local it puts in scope). -/
+partial def hypsParts (c H : Expr) : TrM (Option Lean.Name × Array Expr × List Expr) := do
+  let H := (← instantiateMVars H).consumeMData
+  let unknown (Γ : Expr) : MetaM (List Expr) := do
+    return List.replicate ((← ctxLength? Γ).getD 0) unknownVar
+  if let .fvar fv := H then
+    let ty ← whnfR (← fv.getType)
+    return (some (← fv.getDecl).userName, #[], ← unknown (ty.getArg! 2))
+  let H ← whnf H
+  let args := H.getAppArgs
+  match H.getAppFn.constName? with
+  | some ``Hyps.nil => return (none, #[], ← unknown args[1]!)
+  | some ``Hyps.pre =>
+    let (r, hs, ns) ← hypsParts c args[3]!
+    return (r, hs.push (mkApp2 (mkConst ``Solidity.Hyp.pre) c (← tr ns args[4]!)), ns)
+  | some ``Hyps.upd =>
+    let (r, hs, ns) ← hypsParts c args[4]!
+    let (es, ms) ← updParts ns args[6]!
+    if es.isEmpty then return (r, hs, ms)
+    let U ← updList c args[6]! es
+    return (r, hs.push (mkApp3 (mkConst ``Solidity.Hyp.upd) c args[5]! U), ms)
+  | some ``Hyps.havoc =>
+    let (r, hs, ns) ← hypsParts c args[3]!
+    return (r, hs.push (mkApp (mkConst ``Solidity.Hyp.havoc) c), ns)
+  | some ``Hyps.all =>
+    let (r, hs, ns) ← hypsParts c args[3]!
+    return (r, hs.push (mkApp3 (mkConst ``Solidity.Hyp.all) c args[4]! args[5]!), args[4]! :: ns)
+  | some ``Hyps.bind =>
+    let (r, hs, ns) ← hypsParts c args[3]!
+    return (r, hs, args[4]! :: ns)
+  | some ``Hyps.anon =>
+    let (r, hs, ns) ← hypsParts c args[3]!
+    let some xs ← Solidity.listElems? args[4]! | throwError "anon"
+    let xs ← xs.mapM fun x => do trIdx ns (← whnf x).appArg!
+    let xs ← mkListLit (mkConst ``Solidity.Var) xs.toList
+    return (r, hs.push (mkApp2 (mkConst ``Solidity.Hyp.anon) c xs), ns)
+  | _ => throwError "not a context"
+
+/-- `Core.Proves C R Γ₀ H φ`: the sequent `dl{ ..H, h₁, … ⟹ φ }`, as
+`delabProves` prints today's (`⟹ₖ` for solkey's rules alone, `⟹[R]` over
+a variable rule set), its context's entries erased (`hypsParts`). -/
+@[delab app.Solidity.Core.Proves]
+def delabProves : Delab := do
+  unless ← ppOn do failure
+  let e ← getExpr
+  guard (e.getAppNumArgs == 6)
+  let c := e.getArg! 0
+  let R ← whnf (e.getArg! 1)
+  let out? ← withTwins (contract? := some c) e true fun env => do
+    let some (rest, hs, ns) ← (try some <$> (hypsParts c (e.getArg! 4)).run env catch _ => pure none)
+      | return none
+    let φ ← (tr ns (e.getArg! 5)).run env
+    let mut out : Array (TSyntax `dl_hyp) := #[]
+    if let some r := rest then out := out.push (← `(dl_hyp| ..$(mkIdent r):ident))
+    for h in hs do
+      let some h ← Solidity.ppHyp? h | return none
+      out := out.push ⟨← fixBlockEnds h⟩
+    return some (out, (⟨← fixBlockEnds (← ppFml φ)⟩ : TSyntax `dl_fml))
+  let some (out, φ) := out? | failure
+  guard !(isEscape φ)
+  if R.isConstOf ``RuleSet.all then `(dl{ $[$out],* ⟹ $φ:dl_fml })
+  else if R.isConstOf ``RuleSet.solkey then `(dl{ $[$out],* ⟹ₖ $φ:dl_fml })
+  else if let some r ← Solidity.fvarName? R then `(dl{ $[$out],* ⟹[$(Solidity.nameIdent r)] $φ:dl_fml })
+  else failure
 
 /-- A scoped taclet's type: its side conditions and carried proofs out of
 sight, as `Rules.lean`'s `delabTacletSide`. -/
