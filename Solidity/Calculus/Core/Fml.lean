@@ -328,7 +328,8 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   frame holds (`{anon(xs)}`, with `{havoc}` when `hv`), from where `I`
   holds and after `U` (the condition's value, and under the diamond the
   variant's, declared on top of `Γ`), the body `P` to `post` where `c`
-  holds, the rest where `c'` does.  The condition's local is popped before
+  holds, the rest where `c'` does, and under the diamond one of them
+  (`Fml.invCases`).  The condition's local is popped before
   the body (`hb`), so the body reads `Δ₀`: `Γ`, or `Γ` with the variant on
   top (`hu`); every local `U` declares is popped before the rest. -/
   | inv {Δ₀ Δ Γ₁ : Ctx} (I : Fml C Γ) (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool)
@@ -344,6 +345,16 @@ storage too (`hv`): `Mutability.lean`'s `Fml.loopAnon`. -/
 def Fml.anonHavoc {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool) (φ : Fml C Γ) :
     Fml C Γ :=
   if hv then .anon xs (.havoc φ) else .anon xs φ
+
+/-- A loop invariant rule's two goals after the condition, `(c → A) ∧ (c' → B)`,
+and under the diamond its cover `c ∨ c'` with them (Lean only, today's
+`Premise.coverFml`): a condition that reads as no `bool` (a `bool` storage
+field holding an `int`) leaves the loop stuck, which the diamond does not
+allow and which `c` and `c'` alone would let through. -/
+def Fml.invCases (m : Modality) {Γ : Ctx} (c c' A B : Fml C Γ) : Fml C Γ :=
+  match m with
+  | .box => .and (.imp c A) (.imp c' B)
+  | .diamond => .and (.imp c A) (.and (.imp c' B) (.not (.and (.not c) (.not c'))))
 
 /-- A modality whose program is done goes through its frames: a scope end
 pops its locals (an update of pops, which prints as nothing), the rest of
@@ -386,8 +397,8 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
       b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))
     (fun fs us ω => Fml.conj (fs ++ us.map fun U => .upd m U (.modalK m ω κ φ)))
     (fun I xs hv U c c' hu hb P post ω => .and I (Fml.anonHavoc xs hv (.imp I (.upd m U
-      (.and (.imp c (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
-        (.imp c' (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ))))))))
+      (Fml.invCases m c c' (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post))
+        (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)))))))
     (fun P h ω => .modal m P (.drop h (.seq ω κ)) φ) ω
 
 /-! ### Equations
