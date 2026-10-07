@@ -1,4 +1,5 @@
 import Solidity.Typing.Soundness
+import Solidity.Typing.StraightRun
 
 /-!
 # What every reachable state satisfies beyond its types
@@ -26,8 +27,8 @@ struct missing its mapping.
 `Prog.run_canon` is the preservation theorem (the scoped run's
 `RunInv` with `Canon` on the global part, `canonInv`), `reachable_canon`
 its corollary from a contract's initial state (`Reachable`: a scoped program
-`Core.Prog C [] Γ'` runs there, by the scoped interpreter; the untyped one
-is not related to it yet), and the two refutations the
+`Core.Prog C [] Γ'` on the bridge runs there by the typed interpreter, so the
+scoped one ends in the erased state, `ReachableS`), and the two refutations the
 removed untyped layer left as `sorry` follow: a storage whose mapping default
 is not the default (`map_default_not_reachable`) and one whose struct misses
 a member (`struct_missing_field_not_reachable`) are well-typed and not
@@ -1295,7 +1296,7 @@ variable {Γ : Ctx} {H : HeapTy} {σ σ' : State C Γ}
 
 /-- A source stores a canonical value: `alice = bob;` a canonical `Person`. -/
 theorem Src.value_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {T : Ty} {r : Src C Γ T}
-    {sv : SVal} (h : r.value σ = .ok sv) : sv.canon T := by
+    {sv : Semantics.SVal} (h : r.value σ = .ok sv) : sv.canon T := by
   cases r with
   | val v =>
     obtain ⟨w, hv, h⟩ := bind_ok_inv h
@@ -1390,7 +1391,7 @@ theorem OpLoc.bump_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {op : Inc
       rfl rfl
 
 /-- `m.age = 3;` keeps the heap canonical. -/
-theorem MLoc.write_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {mv : MVal} :
+theorem MLoc.write_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {mv : Semantics.MVal} :
     ∀ {T : Ty} (l : MLoc C Γ T), l.write σ mv = .ok σ' → Canon C H σ'.glob
   | _, @MLoc.field _ _ s _ b f hf, h => by
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
@@ -1876,27 +1877,56 @@ way). -/
 theorem Contract.deployState_empty (C : Contract) :
     C.deployState {} = { C.initState with net := [(0, 0)] } := rfl
 
-/-- A storage is reachable when a scoped program runs from the initial state
-to a state holding it, by the scoped interpreter (`Semantics/Core.lean`).
-The program's locals are used as declared by construction.  The calculus's
-`holds` reads the untyped interpreter; a storage it reaches from a block the
-locals check accepts is `Reachable` (`ReachableU.reachable`,
-`Calculus/Problem.lean`). -/
-def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
+/-- A storage the scoped interpreter reaches (`Semantics/Core.lean`): a
+scoped program runs from the initial state to a state holding it.  The step
+between `Reachable` and the invariants of the scoped run
+(`Core.Prog.run_canon`, `Core.Prog.run_tight`), which `Reachable.reachableS`
+takes. -/
+def ReachableS (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (σ : Core.State C Γ'),
     P.run (Core.State.ofSem C.initState) = .ok σ ∧ σ.storage = st
 
-/-- **Reachable ⇒ well-typed and canonical.**  Every storage a scoped
-program reaches from `C`'s initial state holds `C`'s roots in order, each
-well-typed and canonical: no run of `StandardExample` leaves `alice` without
-her `account`. -/
-theorem reachable_canon (hnd : nodupKeysB C.vars = true)
+/-- A storage is reachable when a scoped program on the bridge runs, by the
+typed interpreter (`Core.Prog.trun`, `Semantics/Core/TypedRun.lean`), from
+the contract's initial state to a state whose storage erases to it.  The
+program's locals are used as declared, and its values are of their types, by
+construction.  On the bridge (`Core.Prog.bridgeOk`: no `bool` mapping key, no
+storage copy at a type with a repeated member name) the scoped run ends in
+the erased state (`Reachable.reachableS`), so what that run keeps holds of a
+reachable storage; a `bool`-keyed entry, which solc writes and the typed run
+does too (decision 10), is outside it until the calculus reads the typed run.
+The calculus's `holds` reads the untyped interpreter; a storage it reaches
+from a block the locals check accepts, with its words, keys and slots in
+range, is `Reachable` (`ReachableU.reachable`, `Calculus/Problem.lean`). -/
+def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
+  ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (o : Core.Out C (Core.TState.init C).H Γ'),
+    P.bridgeOk = true ∧ P.trun (Core.TState.init C) = .ok o ∧ o.st.storage.erase = st
+
+/-- **Reachable by the typed run ⇒ reachable by the scoped one**, in the
+erased state (`Core.Prog.run_of_trun`). -/
+theorem Reachable.reachableS {st : List (Name × SVal)} (h : Reachable C st) : ReachableS C st := by
+  obtain ⟨Γ', P, o, hb, hrun, rfl⟩ := h
+  have hr := Core.Prog.run_of_trun hb hrun
+  rw [Core.TState.init_erase] at hr
+  exact ⟨Γ', P, o.st.erase, hr, rfl⟩
+
+/-- **Reachable by the scoped run ⇒ well-typed and canonical.**  Every
+storage a scoped program reaches from `C`'s initial state holds `C`'s roots
+in order, each well-typed and canonical. -/
+theorem reachableS_canon (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × SVal)}
-    (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
+    (h : ReachableS C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
   obtain ⟨Γ', P, σ, hrun, rfl⟩ := h
   obtain ⟨_, _, hwt, hcn⟩ := Core.Prog.run_canon P (Core.RunWT.init hnd hok rfl rfl)
     (Canon.init hok rfl) hrun
   exact ⟨hwt.glob.storage, hcn.storage⟩
+
+/-- **Reachable ⇒ well-typed and canonical.**  No run of `StandardExample`
+leaves `alice` without her `account`. -/
+theorem reachable_canon (hnd : nodupKeysB C.vars = true)
+    (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × SVal)}
+    (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st :=
+  reachableS_canon hnd hok h.reachableS
 
 /-! ## What is not reachable
 

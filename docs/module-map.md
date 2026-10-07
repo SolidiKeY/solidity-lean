@@ -197,7 +197,8 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Typing/StoragePreservation.lean` | `save` keeps a value's type. |
 | `Typing/State.lean` | `StateWT`, the invariant of a state's global part (storage, heap, allocation counter); copy typing. |
 | `Typing/Soundness.lean` | Type soundness of the scoped run: `Core.Stmt.run_wt`, `Core.Prog.run_wt` (`RunWT`: `StateWT` and every local of its type); `RunInv`, the scope cases every run invariant shares. |
-| `Typing/Reachability.lean` | Every reachable storage is canonical (`Core.Prog.run_canon`); `Reachable` is a scoped program's run from the initial state. |
+| `Typing/StraightRun.lean` | Straight programs (`Core.Prog.straight`: simple values assigned, aliases bound, defaults pushed, `pop`, `delete`, blocks; no loop, length or call): on the bridge, their typed run never diverges (`Prog.trun_noDiv`), so it ends where the scoped run does (`Prog.trun_of_run`). |
+| `Typing/Reachability.lean` | Every reachable storage is canonical (`Core.Prog.run_canon`); `Reachable` is a bridged scoped program's typed run (`Core.Prog.trun`) from the initial state, `ReachableS` the scoped run's (`Reachable.reachableS`). |
 | `Typing/Constructibility.lean` | The converse: reachable ⇔ canonical ∧ tight; the builder `Core.Build.rootsProg` is a scoped program, `Core.Prog.run_tight`. |
 | `Typing/CanonTest.lean` | The tests `wt(storage)` runs decide `canon` and `tight` (`SVal.canonB_iff`, `SVal.tightB_iff`); a default is canonical (`defaultForTy_canonB`). |
 | `SortCheck/Annotations.lean` | The taclets' read-sort annotations, transcribed from the `.key` file. |
