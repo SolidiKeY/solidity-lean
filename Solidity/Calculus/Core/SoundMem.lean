@@ -163,6 +163,136 @@ theorem sound_memIndexRefCapture {R R' : RefTy} (a : ArrTy R (.ref R')) (mv : Id
     simp only [MLoc.write, MPath.mval, hh, Res.bind_ok, pure_bind]
     exact Res.Sim.refl _
 
+/-- `memoryIndexWriteCaptureAllComplexRecv`:
+`T se = e; T memory mv = nmp; uint ie = i; mv[ie] = se;`. -/
+theorem sound_memIndexWriteRecvUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : ArrTy R (.prim p))
+    (l : MLoc C Γ (.ref R)) (i : Val C Γ .uint) (e : Val C Γ p) :
+    Premise.Sound m (.assignMem (.index a (.loc l) i) (.val e))
+      (.unfold (.cons (.declLocal _ (fse k) (some e))
+        (.cons (.declMem R (fmv k) (some (.alias (MPath.loc l).up)) rfl (MPath.loc l).mapFree)
+        (.cons (.declLocal .uint (fie k) (some i.up.up))
+        (.cons (.assignMem (.index a (.var (.there .here) (MPath.loc l).mapFree) (.simple (.local .here)))
+          (.val (.simple (.local (.there (.there .here)))))) .nil))))
+        (.push (.push (.push .refl)))) σ := by
+  refine Premise.Sound.unfoldSim (Res.Sim.of_eq ?_)
+  rw [Prog.run_declLocal_cons, Res.map_bind', Stmt.run_assignMem]
+  cases he : e.eval σ with
+  | error h' => simp only [Run.assignMem, MSrc.mval, he]; rfl
+  | ok v =>
+    simp only [Res.bind_ok]
+    rw [Prog.run_declMem_cons, Res.map_bind', MPath.mval_up]
+    cases hb : (do (← (MPath.loc l).mval σ).asRef : Res Nat) with
+    | error h' =>
+      simp only [Run.assignMem, MSrc.mval, he, MLoc.write, Res.bind_ok, pure_bind]
+      rw [← bind_assoc, hb]; rfl
+    | ok id =>
+      simp only [Res.bind_ok]
+      rw [Prog.run_declLocal_cons, Res.map_bind', Val.eval_up, Val.eval_up]
+      cases hi : i.eval σ with
+      | error h' =>
+        simp only [Run.assignMem, MSrc.mval, he, MLoc.write, Res.bind_ok, pure_bind]
+        rw [← bind_assoc, hb]
+        simp only [Res.bind_ok, hi]; rfl
+      | ok n =>
+        simp only [Res.bind_ok]
+        have hr : (MPath.loc l).mval σ = .ok (.ref id) := MPath.mval_of_ref σ _ hb
+        rw [Prog.run_single, Stmt.run_assignMem,
+          Run.assignMem_push ((σ.push (t := .val p) v).push (t := .mem R) id) (t := .val .uint) n
+            (.index a (b' := .var (.there .here) (MPath.loc l).mapFree)
+              (b := .var .here (MPath.loc l).mapFree) (i' := .simple (.local .here)) (i := i.up.up) rfl
+              (by rw [Val.eval_up, Val.eval_up, hi]; rfl))
+            (.val (.simple (.local (.there (.there .here))))) (.val (.simple (.local (.there .here)))) rfl,
+          Run.assignMem_push (σ.push (t := .val p) v) (t := .mem R) id
+            (.index a (b' := .var .here (MPath.loc l).mapFree) (b := (MPath.loc l).up) (i' := i.up.up)
+              (i := i.up) (by rw [MPath.mval_up, hr]; rfl) (Val.eval_up _ _ i.up))
+            (.val (.simple (.local (.there .here)))) (.val (.simple (.local .here))) rfl,
+          Run.assignMem_push σ (t := .val p) v
+            (.index a (b' := (MPath.loc l).up) (b := .loc l) (i' := i.up) (i := i)
+              (MPath.mval_up σ _ (.loc l)) (Val.eval_up σ _ i))
+            (.val (.simple (.local .here))) (.val e)
+            (by simp only [MSrc.mval, Val.eval, Simple.eval_here, he, Res.bind_ok, pure_bind]),
+          pushed3_drop]
+
+/-- `memoryIndexWriteMemRefCaptureAllComplexRecv`:
+`T memory mv = nmp; uint ie = i; mv[ie] = src;`; the statement reads the
+source first. -/
+theorem sound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref R'))
+    (l : MLoc C Γ (.ref R)) (i : Val C Γ .uint) (src : MPath C Γ (.ref R')) :
+    Premise.Sound m (.assignMem (.index a (.loc l) i) (.ref src))
+      (.unfold (.cons (.declMem R (fmv k) (some (.alias (.loc l))) rfl (MPath.loc l).mapFree)
+        (.cons (.declLocal .uint (fie k) (some i.up))
+        (.cons (.assignMem (.index a (.var (.there .here) (MPath.loc l).mapFree) (.simple (.local .here)))
+          (.ref src.up.up)) .nil))) (.push (.push .refl))) σ := by
+  refine Premise.Sound.unfoldSim ?_
+  rw [Prog.run_declMem_cons, Res.map_bind', Stmt.run_assignMem]
+  cases hb : (do (← (MPath.loc l).mval σ).asRef : Res Nat) with
+  | error h' =>
+    have hp : h' ≠ .panic := fun e => MPath.ref_noPanic σ (.loc l) (e ▸ hb)
+    simp only [Run.assignMem]
+    refine Res.Sim.err_bind (MSrc.mval_noPanic σ _) hp fun _ _ => ?_
+    simp only [MLoc.write]
+    rw [← bind_assoc, hb]
+    exact Res.Sim.refl _
+  | ok id =>
+    simp only [Res.bind_ok]
+    rw [Prog.run_declLocal_cons, Res.map_bind', Val.eval_up]
+    cases hi : i.eval σ with
+    | error h' =>
+      have hp := Val.eval_err_ne σ hi
+      simp only [Run.assignMem]
+      refine Res.Sim.err_bind (MSrc.mval_noPanic σ _) hp fun _ _ => ?_
+      simp only [MLoc.write]
+      rw [← bind_assoc, hb]
+      simp only [Res.bind_ok, hi]
+      exact Res.Sim.refl _
+    | ok n =>
+      simp only [Res.bind_ok]
+      refine Res.Sim.of_eq ?_
+      have hr : (MPath.loc l).mval σ = .ok (.ref id) := MPath.mval_of_ref σ _ hb
+      rw [Prog.run_single, Stmt.run_assignMem,
+        Run.assignMem_push (σ.push (t := .mem R) id) (t := .val .uint) n
+          (.index a (b' := .var (.there .here) (MPath.loc l).mapFree)
+            (b := .var .here (MPath.loc l).mapFree) (i' := .simple (.local .here)) (i := i.up) rfl
+            (by rw [Val.eval_up, hi]; rfl))
+          (.ref src.up.up) (.ref src.up) (MSrc.mval_up _ _ (.ref src.up)),
+        Run.assignMem_push σ (t := .mem R) id
+          (.index a (b' := .var .here (MPath.loc l).mapFree) (b := .loc l) (i' := i.up) (i := i)
+            (by rw [hr]; rfl) (Val.eval_up σ _ i))
+          (.ref src.up) (.ref src) (MSrc.mval_up σ _ (.ref src)),
+        pushed2_drop]
+
+/-- **A memory location written** (`assignMemStep`). -/
+theorem assignMemStep_sound (k : Nat) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) (q : Premise C Γ Γ)
+    (hs : assignMemStep k l r = some q) : Premise.Sound m (.assignMem l r) q σ := by
+  cases l with
+  | field b f hf =>
+    cases b with
+    | var mv hmv =>
+      cases r with
+      | val e =>
+        exact VHole.step_sound σ k (.mem (.field (.var mv hmv) f hf))
+          (fun _ _ hq => by cases hq; exact sound_writeMem σ _ _) e q hs
+      | ref src => exact memRefStep_sound σ k _ src q hs
+    | loc l => cases r <;> (cases hs; exact sound_memFieldWriteRecv σ (.loc l) _ f hf _ _)
+  | index a b i =>
+    cases b with
+    | var mv hmv =>
+      cases i with
+      | simple ie =>
+        cases r with
+        | val e =>
+          exact VHole.step_sound σ k (.mem (.index a (.var mv hmv) (.simple ie)))
+            (fun _ _ hq => by cases hq; exact sound_writeMem σ _ _) e q hs
+        | ref src => exact memRefStep_sound σ k _ src q hs
+      | _ =>
+        cases r with
+        | val e => cases hs; exact sound_memIndexWriteUnfold σ k a mv hmv _ e
+        | ref src => cases hs; exact sound_memIndexRefCapture σ a mv hmv _ src _
+    | loc l =>
+      cases r with
+      | val e => cases hs; exact sound_memIndexWriteRecvUnfold σ k a l i e
+      | ref src => cases hs; exact sound_memIndexRefRecvUnfold σ k a l i src
+
 end Mem
 
 end Solidity.Core
