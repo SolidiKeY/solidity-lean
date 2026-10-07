@@ -413,10 +413,21 @@ untyped operation is never stuck on an erased input.
    in 16 ms), where the untyped `svalDecEq` does not reduce at all.  A `bool`
    key: decision 10; the untyped side stays stuck on one, so its agreement
    holds at numeric keys (`PrimTy.asInt_erase_key`).
-   Left for the wiring (M3 had not landed on `intrinsic` when this was done):
-   `LTy.Denote`/`Core.State` over these values with the heap typing as a
-   field, allocation weakening the env along `Grown.ext`, and `SRef.atKey`
-   at the typed run's index steps.
+   Wiring, after M3.1 (`Semantics/Core.lean`, untyped values) landed:
+   `Semantics/Core/TypedState.lean` holds items 1 and 2 beside `Core.State`,
+   which they replace at M4: `LTy.TDenote C H`, `TEnv C H Γ` (with `wk`
+   along a heap extension and `erase` to `Env`), `TState C Γ` (heap typing
+   `H` a field), `TState.erase : TState C Γ → State C Γ`, and the
+   allocating steps over a `Grown` heap (`adopt`, `alloc`, `copyStToM`,
+   `allocDefault`, `copyMToSt`), each with the lemma `run_erase` will use
+   (`alloc_erase`, `copyStToM_erase`, …; `push_erase`, `setLocal_erase`,
+   `drop_erase` for the locals).  Left: items 3 and 4, the typed run itself
+   (`SPath`/`Loc` to `SRef`, `SRef.atKey` at an index, `MLoc` to `HRef`,
+   `Val.eval` by `BinOp.evalT`/`UnOp.evalT`, then `Stmt.run` on `TState`
+   and `run_erase`), which rewrites `Semantics/Core.lean` while the lead's
+   M3 (`run_erase`, Typing) works in it, and one open design point:
+   `Simple.env` (`msg.sender`, …) is a `uint` whose range a typed run needs
+   (`TState.tx` typed, or a range premise on the transaction).
 
 **Timings** (2026-10-07, scratch modules `HeapBench`/`HeapBench3` under
 `Solidity/Scratch/`, which are not committed: each row is one `decide

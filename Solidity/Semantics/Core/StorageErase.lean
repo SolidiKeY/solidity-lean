@@ -1180,6 +1180,14 @@ theorem solcControlFlow_erase :
     solcControlFlow.erase = Semantics.State.solcControlFlowStore.storage := by
   rw [solcControlFlow, init_erase, initStorage_solcControlFlow]
 
+/-- Storage equality is decided by the kernel (`SFields.beq`): a store is
+itself, and not itself with `alice.age` saved as `7`. -/
+example : (testSuite = testSuite) ∧
+    (testSuite.save ⟨"alice", rfl, .field (f := "age") rfl .nil⟩
+      (.prim (⟨7, rfl⟩ : {n : Int // PrimTy.uint.inRange n = true}))).map
+      (fun st => decide (st = testSuite)) = some false := by
+  decide +kernel
+
 end Storage
 
 end Solidity.Core
