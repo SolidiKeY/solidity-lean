@@ -76,11 +76,16 @@ def TRes.ofOpt {α : Type} : Option α → TRes α
 /-- A `bool` value as the Boolean it is. -/
 @[reducible] def boolT (b : PrimTy.bool.Denote) : Bool := b
 
-/-- A length, as a `uint`: past the range, the run diverges. -/
+theorem lenT_inRange {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int) = true := by
+  simp only [PrimTy.inRange, decide_eq_true_eq]
+  omega
+
+/-- A length, as a `uint`: past the range, the run diverges.  Compared as a
+`Nat`, so a proof about a length the kernel does not know never unfolds
+`Int`'s order against `2^256`. -/
 def lenT (n : Nat) : TRes PrimTy.uint.Denote :=
-  match PrimTy.uint.ofInt? n with
-  | some v => .ok v
-  | none => .error .diverge
+  if h : n < 2 ^ 256 then .ok (⟨n, lenT_inRange h⟩ : {n : Int // PrimTy.uint.inRange n = true})
+  else .error .diverge
 
 /-! ## States -/
 
