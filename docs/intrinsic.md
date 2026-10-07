@@ -825,6 +825,50 @@ the cutover:
   `check`, `done`, `empty`, `closeTrue`; a derivation of
   `[ if (b) { } else { } ] true` checks.  Soundness waits for M3.
 
+### M6a lane: soundness part B (`intrinsic-sound2`, 2026-10-07)
+
+The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
+`Calculus/Core/SoundKit.lean`'s shape (`Stmt.StepSound`):
+
+- `Calculus/Core/RunWk.lean`: a weakened program runs as the program
+  (`Stmt.run_wk`, `Prog.run_wk`, by the mutual recursion, every statement).
+  The state of the wider context is `τ.lift h d` (`Env.put`: `τ`'s locals
+  where `h` keeps, `d`'s elsewhere); the locals `h` drops are kept
+  (`WkRel`, `Env.off`), a scope's end pops alike on both sides
+  (`Thin.Over`, `Prog.wk_over`), a loop whose every turn is lifted runs
+  lifted (`Loop.run_map`).  It is what the call's `Prog.wk (Thin.atop …)`
+  and the diamond's `Prog.wk up` need.
+- `Calculus/Core/SoundCalls.lean`: `Stmt.stepSound_call`, for the four
+  kinds of result, inlined (`expand_function_body`: the frame popped, or
+  dropped from under the returns by `Premise.inline`) or with an argument
+  captured (`functionCallArgCapture`, `Args.eval_capture`: the arguments
+  before it are simple, so read without effect).
+- `Calculus/Core/RunFrame.lean`: `Mutability.lean`'s `frame_of_within`
+  on scoped syntax (`Stmt.run_frame`), positionally: of the locals at
+  least `d` deep only the ones `writesAt d` lists change (`LocAgree`), the
+  global part only in storage and ledger, and those only when
+  `nonpayable` (`GFrame`).  `holds_anonHavoc` turns a state in the frame
+  into one `{anon(xs)}` (`{havoc}`) covers.
+- `Calculus/Core/SoundLoops.lean`: `whileInvariantBox`,
+  `whileInvariantDiamond` (`Loop.run_variant`, ported to any state) and
+  `Stmt.stepSound_loop` (with `SoundBlocks`' `whileUnwind`, `loopExit`,
+  `whileClose`, `whileNoVariantDiamond`).
+- **The anonymised list stays as it is.**  The body's own locals are popped
+  at the end of every iteration (`Run.loop` drops `body.ext`), so the
+  premise read under `{anon(xs)}` lives in the loop's context, where they do
+  not exist: soundness does not need them listed (the erasure still differs
+  from today's `{anon(…)}` by those names, M6a notes above).
+- **One hypothesis left, under the diamond**: the condition reads as a
+  `bool` wherever it returns (`Val.BoolValued`, `stepSound_loop`'s `hcb`,
+  for `m = .diamond` only).  Today's rule proves it as a cover goal; M3's
+  values are untyped (a `bool` storage read may hold an `int`), so it is
+  M4a's typed values that discharge it, as `State.Typed` does a split's.
+- Found on merging: `Semantics/RunErase.lean` (M3) and
+  `Calculus/Core/Fml.lean` (this lane's calculus) both declare
+  `Solidity.Core.Prog.outNames`, so a module importing both fails
+  ("environment already contains `Prog.outNames.match_1`"), the root
+  `Solidity.lean` among them.  One of the two needs renaming.
+
 ### Gate G0: passes, under conditions
 
 The spike (`Solidity/Scratch/IntrinsicSpike.lean`, not committed) has seven
