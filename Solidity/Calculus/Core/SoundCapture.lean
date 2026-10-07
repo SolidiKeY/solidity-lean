@@ -322,25 +322,28 @@ theorem SHole.readStep_sound (k : Nat) {T : Ty} (lhs : SHole C Γ T)
       Option (Premise C Γ Γ)}
     {index : {R : RefTy} → {kp : PrimTy} → IndexTy R kp T → SPath C Γ (.ref R) → Simple C Γ kp →
       Option (Premise C Γ Γ)}
-    (hroot : ∀ r h p, root r h = some p → Premise.Sound m (lhs.fill (.loc (.root r h))) p σ)
-    (hfield : ∀ {s : Name} (b : SPath C Γ (.struct s)) f hf p, field b f hf = some p →
-      Premise.Sound m (lhs.fill (.loc (.field b f hf))) p σ)
+    (l : Loc C Γ T)
+    (hroot : ∀ r h p, l = .root r h → root r h = some p →
+      Premise.Sound m (lhs.fill (.loc (.root r h))) p σ)
+    (hfield : ∀ {s : Name} (b : SPath C Γ (.struct s)) f hf p, l = .field b f hf →
+      field b f hf = some p → Premise.Sound m (lhs.fill (.loc (.field b f hf))) p σ)
     (hindex : ∀ {R : RefTy} {kp : PrimTy} (it : IndexTy R kp T) b (ie : Simple C Γ kp) p,
-      index it b ie = some p → Premise.Sound m (lhs.fill (.loc (.index it b (.simple ie)))) p σ)
-    (l : Loc C Γ T) (p : Premise C Γ Γ) (hp : lhs.readStep k root field index l = some p) :
+      l = .index it b (.simple ie) → index it b ie = some p →
+      Premise.Sound m (lhs.fill (.loc (.index it b (.simple ie)))) p σ)
+    (p : Premise C Γ Γ) (hp : lhs.readStep k root field index l = some p) :
     Premise.Sound m (lhs.fill (.loc l)) p σ := by
   cases l with
-  | root r h => exact hroot r h p hp
+  | root r h => exact hroot r h p rfl hp
   | field b f hf =>
     simp only [SHole.readStep] at hp
     split at hp
-    · exact hfield b f hf p hp
+    · exact hfield b f hf p rfl hp
     · cases hp; exact SHole.sound_fieldCapture σ lhs b f hf _
   | index it b i =>
     simp only [SHole.readStep] at hp
     split at hp
     · split at hp
-      · exact hindex it b _ p hp
+      · exact hindex it b _ p rfl hp
       · cases hp; exact SHole.sound_indexCapture σ lhs it b _ _
     · cases hp; exact SHole.sound_indexRecvCapture σ lhs it b i _
 

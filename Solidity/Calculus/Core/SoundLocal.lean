@@ -197,9 +197,10 @@ theorem localStep_sound (k : Nat) (hσ : σ.Typed) {p : PrimTy} (i : Idx Γ (.va
   cases v with
   | simple s => cases hs; exact sound_setLocal σ i _
   | read l =>
-    exact SHole.readStep_sound σ k (.local i) (fun _ _ _ h => by cases h; exact sound_setLocal σ i _)
+    exact SHole.readStep_sound σ k (.local i) l
       (fun _ _ _ _ h => by cases h; exact sound_setLocal σ i _)
-      (fun _ _ _ _ h => by cases h; exact sound_setLocal σ i _) l q hs
+      (fun _ _ _ _ _ h => by cases h; exact sound_setLocal σ i _)
+      (fun _ _ _ _ _ h => by cases h; exact sound_setLocal σ i _) q hs
   | binop op ha hq a b =>
     cases a with
     | simple a =>
@@ -247,13 +248,13 @@ theorem rebindStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs
     cases p with
     | alias j => cases hs; exact sound_rebindPath σ i (.alias j)
     | loc l =>
-      exact SHole.readStep_sound σ k (.rebind i)
-        (fun r h _ hq => by
+      exact SHole.readStep_sound σ k (.rebind i) l
+        (fun r h _ _ hq => by
           cases hq; exact sound_rebindPath (m := m) σ i (.loc (.root r h)))
-        (fun b f hf _ hq => by
+        (fun b f hf _ _ hq => by
           cases hq; exact sound_rebindPath (m := m) σ i (.loc (.field b f hf)))
-        (fun it b ie _ hq => by
-          cases hq; exact sound_rebindPath (m := m) σ i (.loc (.index it b (.simple ie)))) l q hs
+        (fun it b ie _ _ hq => by
+          cases hq; exact sound_rebindPath (m := m) σ i (.loc (.index it b (.simple ie)))) q hs
   | push b hd =>
     simp only [rebindStep] at hs
     split at hs
