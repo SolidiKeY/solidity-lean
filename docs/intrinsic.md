@@ -208,8 +208,9 @@ from `./run-lean.sh`.
     against `legacyShow` (the erasure printed).  It runs in `MetaM` on a
     concrete formula; the delaborator for formulas with schema variables
     (`#taclet`, `#wp`) is still to write.
-- Left for M6a: `holds`/`holds_erase` (needs M3's `State C Γ`), lowering of
-  `Core.Val` to `Core.Tm`, `Taclet C k m (s : Core.Stmt C Γ Γ')`, `Stmt.step`,
+- `Calculus/Core/Lower.lean`: `Val.lower` and the rest on `Core.Tm`, with
+  `lower_erase`.
+- Left for M6a: `holds`/`holds_erase` (needs M3's `State C Γ`), `Taclet C k m (s : Core.Stmt C Γ Γ')`, `Stmt.step`,
   symex with `T.rec` + `implemented_by` twins, the quoters, `Hyps`/`Proves`.
 
 ### Gate G0: passes, under conditions
