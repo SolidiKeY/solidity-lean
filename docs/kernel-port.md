@@ -42,6 +42,8 @@ specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
   syntax `Solidity.Core` (`Scope.lean`, `Syntax/Core.lean`) lives beside
   `Syntax.lean`'s `Stmt C`, which the elaborator still emits, until it
   replaces it: the one deliberate exception to porting in place.
+  `Syntax/Resolve.lean` maps between them (`erase`, `resolve`), and the
+  elaborator's locals check is `resolve`.
 
 - **Calls.** Parameters and return values of reference type (`Person storage
   p`, `uint[] memory xs`) are elaboration errors (`Syntax.lean`).  An external
