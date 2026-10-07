@@ -11,7 +11,7 @@ within the mutability `μ` (`Stmt.within`, `Calculus/Core/Blocks.lean`) leaves
 the memory, the funds and the transaction as they were, and the storage and
 the ledger too unless `μ` is `nonpayable` (`GFrame`); of the locals of the
 context `d` below its own, it writes only the ones `writesAt d` lists, by
-type and position there (`Agree`).  The body's own locals are popped before
+type and position there (`LocAgree`).  The body's own locals are popped before
 the frame is read (`Env.drop s.ext`), so they need no listing.
 
 `Prog.frame_run` is what the loop invariant rules read: a turn of a body
@@ -61,31 +61,31 @@ end Env
 
 /-- The locals at least `d` deep read alike in `e` and `e'`, but where `W`
 lists them, by type and position below `d`. -/
-def Agree {Γ : Ctx} (d : Nat) (W : List (LTy × Nat)) (e e' : Env C Γ) : Prop :=
+def LocAgree {Γ : Ctx} (d : Nat) (W : List (LTy × Nat)) (e e' : Env C Γ) : Prop :=
   ∀ (t : LTy) (i : Idx Γ t), d ≤ i.toNat → (t, i.toNat - d) ∉ W → Env.get i e' = Env.get i e
 
-namespace Agree
+namespace LocAgree
 
 variable {Γ : Ctx} {d : Nat} {W W' : List (LTy × Nat)}
 
-theorem refl (e : Env C Γ) : Agree d W e e := fun _ _ _ _ => rfl
+theorem refl (e : Env C Γ) : LocAgree d W e e := fun _ _ _ _ => rfl
 
-theorem trans {e₁ e₂ e₃ : Env C Γ} (h₁ : Agree d W e₁ e₂) (h₂ : Agree d W e₂ e₃) :
-    Agree d W e₁ e₃ :=
+theorem trans {e₁ e₂ e₃ : Env C Γ} (h₁ : LocAgree d W e₁ e₂) (h₂ : LocAgree d W e₂ e₃) :
+    LocAgree d W e₁ e₃ :=
   fun t i hd hw => (h₂ t i hd hw).trans (h₁ t i hd hw)
 
-theorem mono (hW : ∀ x ∈ W, x ∈ W') {e e' : Env C Γ} (h : Agree d W e e') : Agree d W' e e' :=
+theorem mono (hW : ∀ x ∈ W, x ∈ W') {e e' : Env C Γ} (h : LocAgree d W e e') : LocAgree d W' e e' :=
   fun t i hd hw => h t i hd fun hx => hw (hW _ hx)
 
-theorem left {e e' : Env C Γ} (h : Agree d W e e') : Agree d (W ++ W') e e' :=
+theorem left {e e' : Env C Γ} (h : LocAgree d W e e') : LocAgree d (W ++ W') e e' :=
   mono (fun _ hx => List.mem_append_left _ hx) h
 
-theorem right {e e' : Env C Γ} (h : Agree d W' e e') : Agree d (W ++ W') e e' :=
+theorem right {e e' : Env C Γ} (h : LocAgree d W' e e') : LocAgree d (W ++ W') e e' :=
   mono (fun _ hx => List.mem_append_right _ hx) h
 
 /-- A local set: the one `Idx.outer` lists. -/
 theorem set {t : LTy} (i : Idx Γ t) (v : t.Denote C) (e : Env C Γ) :
-    Agree d (i.outer d) e (Env.set i v e) := by
+    LocAgree d (i.outer d) e (Env.set i v e) := by
   intro u j hd hw
   refine Env.get_set_ne i j v e fun hij => hw ?_
   have hl : d ≤ i.toNat := hij ▸ hd
@@ -99,14 +99,14 @@ theorem set {t : LTy} (i : Idx Γ t) (v : t.Denote C) (e : Env C Γ) :
   simp only [Idx.outer, hij, hd, if_true, List.mem_singleton]
 
 /-- Popped locals: the positions move down by as many. -/
-theorem drop {Δ : Ctx} (h : Ext Γ Δ) {e e' : Env C Δ} (ha : Agree (d + h.depth) W e e') :
-    Agree d W (Env.drop h e) (Env.drop h e') := by
+theorem drop {Δ : Ctx} (h : Ext Γ Δ) {e e' : Env C Δ} (ha : LocAgree (d + h.depth) W e e') :
+    LocAgree d W (Env.drop h e) (Env.drop h e') := by
   intro t i hd hw
   have := ha t (i.ext h) (by rw [Ext.toNat_idx]; omega)
     (by rw [Ext.toNat_idx, show i.toNat + h.depth - (d + h.depth) = i.toNat - d by omega]; exact hw)
   rwa [Env.get_ext_drop, Env.get_ext_drop] at this
 
-end Agree
+end LocAgree
 
 /-! ## The global part -/
 
@@ -172,7 +172,7 @@ theorem assertOk_eq' {α : Type} {v : Value} {a b : α} (h : assertOk v a = .ok 
 
 theorem OpLoc.store_frame {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (d : Nat) {σ υ : State C Γ}
     {v : Value} (hl : l.writableIn μ = true) (h : l.store σ op v = .ok υ) :
-    GFrame μ σ υ ∧ Agree d (l.writesAt d) σ.env υ.env := by
+    GFrame μ σ υ ∧ LocAgree d (l.writesAt d) σ.env υ.env := by
   cases l with
   | «local» i =>
     change opLocal σ op p i v = .ok υ at h
@@ -180,14 +180,14 @@ theorem OpLoc.store_frame {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (d : Nat)
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     cases h
-    exact ⟨GFrame.env σ _, Agree.set i _ _⟩
+    exact ⟨GFrame.env σ _, LocAgree.set i _ _⟩
   | root r _ =>
     have hμ : μ = .nonpayable := by
       simpa only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.false_or, Bool.and_true,
         beq_iff_eq] using hl
     subst hμ
     obtain ⟨g, hg, rfl⟩ := map_ok_inv h
-    exact ⟨GFrame.ofFrame (Mutability.opStore_frame (W := []) hg), Agree.refl _⟩
+    exact ⟨GFrame.ofFrame (Mutability.opStore_frame (W := []) hg), LocAgree.refl _⟩
   | field b f hf =>
     have hμ : μ = .nonpayable := by
       simpa only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.false_or, Bool.and_true,
@@ -195,7 +195,7 @@ theorem OpLoc.store_frame {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (d : Nat)
     subst hμ
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨g, hg, rfl⟩ := map_ok_inv h
-    exact ⟨GFrame.ofFrame (Mutability.opStore_frame (W := []) hg), Agree.refl _⟩
+    exact ⟨GFrame.ofFrame (Mutability.opStore_frame (W := []) hg), LocAgree.refl _⟩
   | index it b i =>
     have hμ : μ = .nonpayable := by
       simpa only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.false_or, Bool.and_true,
@@ -203,7 +203,7 @@ theorem OpLoc.store_frame {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (d : Nat)
     subst hμ
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨g, hg, rfl⟩ := map_ok_inv h
-    exact ⟨GFrame.ofFrame (Mutability.opStore_frame (W := []) hg), Agree.refl _⟩
+    exact ⟨GFrame.ofFrame (Mutability.opStore_frame (W := []) hg), LocAgree.refl _⟩
   | mfield =>
     simp only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.and_false, Bool.or_self,
       Bool.false_eq_true] at hl
@@ -213,7 +213,7 @@ theorem OpLoc.store_frame {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (d : Nat)
 
 theorem OpLoc.bump_frame {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) (d : Nat) {σ υ : State C Γ}
     {w : Value} (hl : l.writableIn μ = true) (h : l.bump σ op = .ok (υ, w)) :
-    GFrame μ σ υ ∧ Agree d (l.writesAt d) σ.env υ.env := by
+    GFrame μ σ υ ∧ LocAgree d (l.writesAt d) σ.env υ.env := by
   cases l with
   | «local» i =>
     change bumpLocal σ op p i = .ok (υ, w) at h
@@ -221,7 +221,7 @@ theorem OpLoc.bump_frame {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) (d : Nat)
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     cases h
-    exact ⟨GFrame.env σ _, Agree.set i _ _⟩
+    exact ⟨GFrame.env σ _, LocAgree.set i _ _⟩
   | root r _ =>
     have hμ : μ = .nonpayable := by
       simpa only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.false_or, Bool.and_true,
@@ -229,7 +229,7 @@ theorem OpLoc.bump_frame {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) (d : Nat)
     subst hμ
     obtain ⟨⟨g, v⟩, hg, he⟩ := map_ok_inv h
     cases he
-    exact ⟨GFrame.ofFrame (Mutability.bumpStore_frame (W := []) hg), Agree.refl _⟩
+    exact ⟨GFrame.ofFrame (Mutability.bumpStore_frame (W := []) hg), LocAgree.refl _⟩
   | field b f hf =>
     have hμ : μ = .nonpayable := by
       simpa only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.false_or, Bool.and_true,
@@ -238,7 +238,7 @@ theorem OpLoc.bump_frame {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) (d : Nat)
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨⟨g, v⟩, hg, he⟩ := map_ok_inv h
     cases he
-    exact ⟨GFrame.ofFrame (Mutability.bumpStore_frame (W := []) hg), Agree.refl _⟩
+    exact ⟨GFrame.ofFrame (Mutability.bumpStore_frame (W := []) hg), LocAgree.refl _⟩
   | index it b i =>
     have hμ : μ = .nonpayable := by
       simpa only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.false_or, Bool.and_true,
@@ -247,7 +247,7 @@ theorem OpLoc.bump_frame {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) (d : Nat)
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨⟨g, v⟩, hg, he⟩ := map_ok_inv h
     cases he
-    exact ⟨GFrame.ofFrame (Mutability.bumpStore_frame (W := []) hg), Agree.refl _⟩
+    exact ⟨GFrame.ofFrame (Mutability.bumpStore_frame (W := []) hg), LocAgree.refl _⟩
   | mfield =>
     simp only [OpLoc.writableIn, OpLoc.isLocal, OpLoc.isStorage, Bool.and_false, Bool.or_self,
       Bool.false_eq_true] at hl
@@ -279,7 +279,7 @@ mutual
 context `d` below its own at most `s.writesAt d`. -/
 theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ = true → (d : Nat) →
     {σ : State C Γ} → {υ : State C Γ'} → s.run σ = .ok υ →
-      GFrame μ σ υ ∧ Agree d (s.writesAt d) σ.env (Env.drop s.ext υ.env)
+      GFrame μ σ υ ∧ LocAgree d (s.writesAt d) σ.env (Env.drop s.ext υ.env)
   | _, _, .assign l r, hw, d, σ, υ, h => by
     have hμ := nonpayable_of_within hw
     subst hμ
@@ -288,24 +288,24 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨⟨_, _⟩, _, h⟩ := bind_ok_inv h
     obtain ⟨g, hg, rfl⟩ := map_ok_inv h
-    exact ⟨GFrame.ofFrame (Mutability.writeStorage_frame (W := []) hg), Agree.refl _⟩
+    exact ⟨GFrame.ofFrame (Mutability.writeStorage_frame (W := []) hg), LocAgree.refl _⟩
   | _, _, .assignLocal i r, _, d, σ, υ, h => by
     change Run.assignLocal i r σ = .ok υ at h
     unfold Run.assignLocal at h
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     cases h
-    exact ⟨GFrame.env σ _, Agree.set i _ _⟩
+    exact ⟨GFrame.env σ _, LocAgree.set i _ _⟩
   | _, _, .declLocal p _ init, _, d, σ, υ, h => by
     change Run.declLocal p init σ = .ok υ at h
     unfold Run.declLocal at h
     cases init with
     | none =>
       cases h
-      exact ⟨GFrame.env σ _, Agree.refl _⟩
+      exact ⟨GFrame.env σ _, LocAgree.refl _⟩
     | some e =>
       obtain ⟨_, _, h⟩ := bind_ok_inv h
       cases h
-      exact ⟨GFrame.env σ _, Agree.refl _⟩
+      exact ⟨GFrame.env σ _, LocAgree.refl _⟩
   | _, _, .opAssign op _ _ l r, hw, d, σ, υ, h => by
     have hw' : (r.readsIn μ && l.writableIn μ) = true := hw
     rw [Bool.and_eq_true] at hw'
@@ -325,7 +325,7 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     obtain ⟨⟨υ', w⟩, hb, h⟩ := bind_ok_inv h
     cases h
     obtain ⟨hg, ha⟩ := OpLoc.bump_frame op l d hw hb
-    exact ⟨hg.withEnv _, ha.right.trans (Agree.set i w υ'.env).left⟩
+    exact ⟨hg.withEnv _, ha.right.trans (LocAgree.set i w υ'.env).left⟩
   | _, _, .transfer r a, hw, d, σ, υ, h => by
     have hμ := nonpayable_of_within hw
     subst hμ
@@ -340,7 +340,7 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     split at hg
     · cases hg
     · cases hg
-      exact ⟨GFrame.ofFrame (Mutability.Frame.net [] σ.glob _), Agree.refl _⟩
+      exact ⟨GFrame.ofFrame (Mutability.Frame.net [] σ.glob _), LocAgree.refl _⟩
   | _, _, .send pv r a, hw, d, σ, υ, h => by
     have hμ := nonpayable_of_within hw
     subst hμ
@@ -355,8 +355,8 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     · cases h
     · split at h <;> cases h <;>
         first
-        | exact ⟨(GFrame.ofFrame (Mutability.Frame.net [] σ.glob _)).withEnv _, Agree.set pv _ _⟩
-        | exact ⟨GFrame.env σ _, Agree.set pv _ _⟩
+        | exact ⟨(GFrame.ofFrame (Mutability.Frame.net [] σ.glob _)).withEnv _, LocAgree.set pv _ _⟩
+        | exact ⟨GFrame.env σ _, LocAgree.set pv _ _⟩
   | _, _, .delete l, hw, d, σ, υ, h => by
     have hμ := nonpayable_of_within hw
     subst hμ
@@ -365,7 +365,7 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     obtain ⟨⟨_, _⟩, _, h⟩ := bind_ok_inv h
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     obtain ⟨g, hg, rfl⟩ := map_ok_inv h
-    exact ⟨GFrame.ofFrame (Mutability.saveStorage_frame (W := []) hg), Agree.refl _⟩
+    exact ⟨GFrame.ofFrame (Mutability.saveStorage_frame (W := []) hg), LocAgree.refl _⟩
   | _, _, .ite c thn els, hw, d, σ, υ, h => by
     have hw' : (c.readsIn μ && Prog.within μ thn && Prog.within μ els) = true := hw
     simp only [Bool.and_eq_true] at hw'
@@ -384,12 +384,12 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     change (c.eval σ >>= fun v => guardOk v σ) = .ok υ at h
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     cases guardOk_eq' h
-    exact ⟨GFrame.refl σ, Agree.refl _⟩
+    exact ⟨GFrame.refl σ, LocAgree.refl _⟩
   | _, _, .assert c, _, d, σ, υ, h => by
     change (c.eval σ >>= fun v => assertOk v σ) = .ok υ at h
     obtain ⟨_, _, h⟩ := bind_ok_inv h
     cases assertOk_eq' h
-    exact ⟨GFrame.refl σ, Agree.refl _⟩
+    exact ⟨GFrame.refl σ, LocAgree.refl _⟩
   | _, _, .revert, _, _, _, _, h => by cases h
   | _, _, .call _ args ret body, hw, d, σ, υ, h => by
     have hw' : (args.readsIn μ && ret.noMem && Prog.within μ body) = true := hw
@@ -404,19 +404,19 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     cases ret with
     | none =>
       cases he
-      exact ⟨((GFrame.env σ _).trans hg).withEnv _, Agree.refl _⟩
+      exact ⟨((GFrame.env σ _).trans hg).withEnv _, LocAgree.refl _⟩
     | val p x res =>
       cases he
       refine ⟨((GFrame.env σ _).trans hg).withEnv _, ?_⟩
       cases res with
-      | none => exact Agree.refl _
-      | some j => exact Agree.set j _ _
+      | none => exact LocAgree.refl _
+      | some j => exact LocAgree.set j _ _
     | rets bs =>
       cases he
       refine ⟨((GFrame.env σ _).trans hg).withEnv _, ?_⟩
-      show Agree d [] σ.env (Env.drop (Ext.append _ _) (Env.append _ _ σ.env))
+      show LocAgree d [] σ.env (Env.drop (Ext.append _ _) (Env.append _ _ σ.env))
       rw [Env.drop_append]
-      exact Agree.refl _
+      exact LocAgree.refl _
     | mem => exact absurd (hw'.1.2 : false = true) Bool.false_ne_true
   | _, _, .loop _ c body, hw, d, σ, υ, h => by
     have hw' : (c.readsIn μ && Prog.within μ body) = true := hw
@@ -424,9 +424,9 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     change Loop.run (fun τ => (Prog.run τ body).map (State.drop body.ext)) (fun τ => c.eval τ) σ =
       .ok υ at h
     refine Loop.run_induct
-      (P := fun τ => GFrame μ σ τ ∧ Agree d (Prog.writesAt d body) σ.env τ.env)
-      (Q := fun r => ∀ υ, r = .ok υ → GFrame μ σ υ ∧ Agree d (Prog.writesAt d body) σ.env υ.env)
-      ⟨GFrame.refl σ, Agree.refl _⟩ (fun τ hτ => ?_) (fun _ h => by cases h) υ h
+      (P := fun τ => GFrame μ σ τ ∧ LocAgree d (Prog.writesAt d body) σ.env τ.env)
+      (Q := fun r => ∀ υ, r = .ok υ → GFrame μ σ υ ∧ LocAgree d (Prog.writesAt d body) σ.env υ.env)
+      ⟨GFrame.refl σ, LocAgree.refl _⟩ (fun τ hτ => ?_) (fun _ h => by cases h) υ h
     unfold Loop.step
     dsimp only
     cases c.eval τ with
@@ -458,8 +458,8 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
 /-- **A program within `μ` runs within `μ`'s frame.** -/
 theorem Prog.run_frame : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.within μ P = true → (d : Nat) →
     {σ : State C Γ} → {υ : State C Γ'} → Prog.run σ P = .ok υ →
-      GFrame μ σ υ ∧ Agree d (Prog.writesAt d P) σ.env (Env.drop P.ext υ.env)
-  | _, _, .nil, _, _, σ, _, h => by cases h; exact ⟨GFrame.refl σ, Agree.refl _⟩
+      GFrame μ σ υ ∧ LocAgree d (Prog.writesAt d P) σ.env (Env.drop P.ext υ.env)
+  | _, _, .nil, _, _, σ, _, h => by cases h; exact ⟨GFrame.refl σ, LocAgree.refl _⟩
   | _, _, .cons s P, hw, d, σ, υ, h => by
     have hw' : (Stmt.within μ s && Prog.within μ P) = true := hw
     rw [Bool.and_eq_true] at hw'
@@ -471,10 +471,10 @@ theorem Prog.run_frame : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.within 
       obtain ⟨hg₁, ha₁⟩ := Stmt.run_frame s hw'.1 d hs
       obtain ⟨hg₂, ha₂⟩ := Prog.run_frame P hw'.2 (d + s.ext.depth) h
       refine ⟨hg₁.trans hg₂, ?_⟩
-      show Agree d (Stmt.writesAt d s ++ Prog.writesAt (d + s.ext.depth) P) σ.env
+      show LocAgree d (Stmt.writesAt d s ++ Prog.writesAt (d + s.ext.depth) P) σ.env
         (Env.drop (s.ext.trans P.ext) υ.env)
       rw [Env.drop_trans]
-      exact ha₁.left.trans (Agree.drop s.ext ha₂).right
+      exact ha₁.left.trans (LocAgree.drop s.ext ha₂).right
 
 end
 
@@ -561,7 +561,7 @@ state that agrees with it but where the body may write. -/
 theorem holds_anonHavoc {σ τ : State C Γ} {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
     {W : List (LTy × Nat)}
     (hxs : ∀ t (i : Idx Γ t), (t, i.toNat) ∈ W → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs)
-    (hg : GFrame (frameMut hv) σ τ) (ha : Agree 0 W σ.env τ.env) {ψ : Fml C Γ}
+    (hg : GFrame (frameMut hv) σ τ) (ha : LocAgree 0 W σ.env τ.env) {ψ : Fml C Γ}
     (h : holds σ (Fml.anonHavoc xs hv ψ)) : holds τ ψ := by
   let b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C := fun x => Env.get x.2 τ.env
   have henv : (σ.anon xs b).env = τ.env := Env.ext fun t i => by

@@ -55,11 +55,11 @@ theorem Premise.Sound.whileInvBox (k : Nat) (I c : Val C Γ .bool) (dec : Option
           (fun τ => c.eval τ) σ
         Frames.run (← Prog.run τ ω) κ)
   refine Loop.run_induct
-    (P := fun τ => GFrame (frameMut hv) σ τ ∧ Agree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
+    (P := fun τ => GFrame (frameMut hv) σ τ ∧ LocAgree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
       holds τ (Fml.isBoolD I.lower true))
     (Q := fun r => Modality.afterRunC .box (holds · φ)
       (do let τ ← r; Frames.run (← Prog.run τ ω) κ))
-    ⟨GFrame.refl σ, Agree.refl _, hI0⟩ (fun τ hτ => ?_) ⟨trivial, nofun⟩
+    ⟨GFrame.refl σ, LocAgree.refl _, hI0⟩ (fun τ hτ => ?_) ⟨trivial, nofun⟩
   obtain ⟨hg, ha, hI⟩ := hτ
   have hX := holds_anonHavoc hxs hg ha hA hI
   unfold Loop.step
@@ -200,10 +200,10 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
   have key := Loop.run_variant (body := fun τ => (Prog.run τ body).map (State.drop body.ext))
     (c := fun τ => c.eval τ)
-    (H := fun τ => GFrame (frameMut hv) σ τ ∧ Agree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
+    (H := fun τ => GFrame (frameMut hv) σ τ ∧ LocAgree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
       holds τ (Fml.isBoolD I.lower true))
     (G := fun τ => holds τ (Fml.modalK .diamond ω κ φ)) (D := fun τ => d.eval τ) ?_
-    ⟨GFrame.refl σ, Agree.refl _, hI0⟩
+    ⟨GFrame.refl σ, LocAgree.refl _, hI0⟩
   · obtain ⟨τf, hrun, hG⟩ := key
     show Modality.afterRunC .diamond _ _
     rw [run_cons_frames]

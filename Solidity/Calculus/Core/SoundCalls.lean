@@ -96,7 +96,7 @@ section Args
 
 variable {Γ : Ctx}
 
-theorem Args.eval_snoc (σ : State C Γ) {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var)
+theorem Args.eval_snoc_bind (σ : State C Γ) {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var)
     (e : Val C Γ p) :
     (Args.snoc as p x e).eval σ = as.eval σ >>= fun r => e.eval σ >>= fun v => pure (v, r) := rfl
 
@@ -105,7 +105,7 @@ theorem Args.eval_up {t : LTy} (σ : State C Γ) (w : t.Denote C) : {ps : Ctx} �
   | _, .nil => rfl
   | _, .snoc as p x e => by
     show (Args.snoc (as.up (t := t)) p x e.up).eval (σ.push w) = _
-    rw [Args.eval_snoc, Args.eval_snoc, Args.eval_up σ w as, Val.eval_up]
+    rw [Args.eval_snoc_bind, Args.eval_snoc_bind, Args.eval_up σ w as, Val.eval_up]
 
 theorem Args.capture_snoc {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var) (e : Val C Γ p) :
     (Args.snoc as p x e).capture = match as.capture with
@@ -128,7 +128,7 @@ theorem Args.eval_ok (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps) → 
       | simple s =>
         obtain ⟨v, hv⟩ := Simple.eval_ok σ s
         refine ⟨(v, a), ?_⟩
-        rw [Args.eval_snoc, ha]
+        rw [Args.eval_snoc_bind, ha]
         exact (congrArg (· >>= fun v => (pure (v, a) : Res _)) hv : _)
       | _ => simp only [Val.isSimple, Bool.false_eq_true, if_false, reduceCtorEq] at h
 
@@ -146,7 +146,7 @@ theorem Args.eval_capture (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps)
       rw [hc] at h
       dsimp only at h
       cases h
-      simp only [Args.eval_snoc, Args.eval_capture σ as hc, bind_assoc, Val.eval_up]
+      simp only [Args.eval_snoc_bind, Args.eval_capture σ as hc, bind_assoc, Val.eval_up]
     | none =>
       rw [hc] at h
       dsimp only at h
@@ -156,7 +156,7 @@ theorem Args.eval_capture (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps)
         obtain ⟨a, ha⟩ := Args.eval_ok σ as hc
         show _ = e.eval σ >>= fun w =>
           (Args.snoc (as.up (t := .val p')) p' x (.simple (.local .here))).eval (σ.push (t := .val p') w)
-        simp only [Args.eval_snoc, Args.eval_up, ha]
+        simp only [Args.eval_snoc_bind, Args.eval_up, ha]
         cases e.eval σ <;> rfl
 
 theorem Val.eval_unders {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) : (ρ : Ctx) → (r : Env C ρ) →
@@ -179,7 +179,7 @@ theorem Args.run_declsThen {Δ : Ctx} (σ : State C Γ) : {ps : Ctx} → (as : A
     rw [State.withEnv_self]
   | _, .snoc (ps := ps') as p x e, rest => by
     show Prog.run σ (as.declsThen (.cons (.declLocal p x (some (e.unders ps'))) rest)) = _
-    rw [Args.run_declsThen σ as, Args.eval_snoc, bind_assoc]
+    rw [Args.run_declsThen σ as, Args.eval_snoc_bind, bind_assoc]
     refine congrArg (as.eval σ >>= ·) (funext fun a => ?_)
     rw [Prog.run_cons]
     show (Run.declLocal p (some (e.unders ps')) (σ.withEnv (Env.append ps' a σ.env))).bind _ = _
