@@ -84,15 +84,31 @@ run_meta do
 
 /-- The scoped strategy's formula after `n` steps on `φ`, printed from its
 quoted `Expr` and checked against `Core.Fml.show` on the value. -/
-private def stepsShow (φ : Solidity.Fml SE) (n : Nat) : MetaM Unit := do
-  let c := mkConst ``StandardExample
+private def stepsShowOf {C : Contract} (c : Expr) (φ : Solidity.Fml C) (n : Nat) : MetaM Unit := do
   let .modal m P _ := φ | throwError "not a modality"
-  let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := SE) [] P | throwError "the program does not resolve"
-  let ψ := Core.symex n (.modal m Pc .nil .tt : Core.Fml SE [])
+  let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) [] P | throwError "the program does not resolve"
+  let ψ := Core.symex n (.modal m Pc .nil .tt : Core.Fml C [])
   let a ← Core.Delab.fmtFml (Core.Fml.quote c ψ)
   let b ← ψ.show c []
   unless a == b do throwError "from the Expr\n{a}\nbut the value prints\n{b}"
   logInfo a
+
+private def stepsShow (φ : Solidity.Fml SE) (n : Nat) : MetaM Unit :=
+  stepsShowOf (mkConst ``StandardExample) φ n
+
+/-- The premise of the rule on the first statement of `φ`'s program, read in
+the context `Γ`, quoted, checked by the kernel's type checker and printed. -/
+private def headPremise {C : Contract} (c : Expr) (Γ : Core.NCtx) (φ : Solidity.Fml C) :
+    MetaM Unit := do
+  let .modal m P _ := φ | throwError "not a modality"
+  let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
+  match Pc with
+  | .cons s _ =>
+    let some p := s.step 1 m | throwError "no rule"
+    let e := Core.Premise.quote c p
+    Meta.check e
+    logInfo m!"{e}"
+  | .nil => throwError "no statement"
 
 private def branchφ : Solidity.Fml SE :=
   dl!{ [ if (alice.age > 4) { uint z = 1; total = z; } else { total = 2; }; uint y = total; ] true }
@@ -114,9 +130,8 @@ info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 ≐ true → 
 
 /-! After a call with a tuple return, the statements read their locals past
 the return variables (`CallRet.outNames`): `uint y = a;`, not the caller's
-`x`.  The call itself prints as `‹…›` from the `Expr`, and `Core.Fml.show`
-folds it into a tuple assignment, so the two agree from the next statement
-on. -/
+`x`.  The call prints from the `Expr` as `Core.Fml.show` prints it from the
+value, folded with the statements after it that read its returns. -/
 
 private def retsφ : Core.Fml SE [] :=
   .all (.user "x") .uint (.modal .box
@@ -124,16 +139,14 @@ private def retsφ : Core.Fml SE [] :=
       (.cons (.declLocal .uint (.user "y") (some (.simple (.local (.there .here))))) .nil))
     .nil .tt)
 
-/-- info: uint y = a; ] true -/
+/-- info: ∀ uint x; [ h(); uint y = a; ] true -/
 #guard_msgs in
 run_meta do
   let c := mkConst ``StandardExample
   let a ← Core.Delab.fmtFml (Core.Fml.quote c retsφ)
   let b ← retsφ.show c []
-  -- past `∀ uint x;` and the call
-  let after (t : String) : String := "; ".intercalate ((t.splitOn "; ").drop 2)
-  unless after a == after b do throwError "from the Expr\n{a}\nbut the value prints\n{b}"
-  logInfo (after a)
+  unless a == b do throwError "from the Expr\n{a}\nbut the value prints\n{b}"
+  logInfo a
 
 /-! An update that is a schema variable prints as itself, its elements on
 top of it after it (a position it did not declare is `_`). -/
@@ -142,5 +155,112 @@ top of it after it (a position it did not declare is `_`). -/
 #guard_msgs in
 #check fun (U : Core.Upd SE [] [.val .uint]) =>
   (Core.Fml.upd .box (U.snoc (.local .here (.val (.app0 (.lit (.int 1)))))) .tt : Core.Fml SE [])
+
+/-! ## Calls and `try`
+
+A call and a `try` print as the statements they are elaborated from, from
+the `Expr` as from the value: no `‹…›`. -/
+
+section Calls
+
+local instance : InContract := ⟨CallsExample⟩
+
+private def callsφ : Solidity.Fml CallsExample :=
+  dl!{ [ uint y = addOne(4); credit(y, 5); bump(); ] true }
+
+#guard_msgs in run_meta stepsShowOf (mkConst ``CallsExample) callsφ 0
+
+#guard_msgs in run_meta stepsShowOf (mkConst ``CallsExample) callsφ 3
+
+end Calls
+
+/-- Functions returning a pair and a memory object (`CoreStep.lean`'s). -/
+def Rets : Contract := contract!{
+  uint total;
+  function pair(uint x) returns (uint lo, uint hi) { return (x, x + 1); }
+  function mk(uint x) returns (Person memory p) { p.age = x; }
+}
+
+section Rets
+
+local instance : InContract := ⟨Rets⟩
+
+private def re : Expr := mkConst ``Solidity.Examples.Tactics.CorePrint.Rets
+
+private def retsCallφ : Solidity.Fml Rets :=
+  dl!{ [ uint a; uint b; (a, b) = pair(3); Person memory m = mk(2); uint y = m.age; ] true }
+
+#guard_msgs in run_meta stepsShowOf re retsCallφ 0
+
+#guard_msgs in run_meta stepsShowOf re retsCallφ 4
+
+/-- `functionBodyExpand`: a block whose end drops the parameters from under
+the return variables (`Premise.inline`). -/
+#guard_msgs in
+run_meta headPremise re [] dl!{ [ (a, b) = pair(3); ] true }
+
+end Rets
+
+/-- A contract that pings another. -/
+def Pinger : Contract := contract!{ uint pings; uint last; }
+
+section Try
+
+local instance : InContract := ⟨Pinger⟩
+
+private def pe : Expr := mkConst ``Solidity.Examples.Tactics.CorePrint.Pinger
+
+private def tryφ : Solidity.Fml Pinger :=
+  dl!{ [ try I(7).get() returns (uint v) { last = v; } catch Panic(uint c) { last = c; }
+         catch { last = 0; }; pings = 1; ] true }
+
+#guard_msgs in run_meta stepsShowOf pe tryφ 0
+
+#guard_msgs in run_meta stepsShowOf pe tryφ 1
+
+/-- `tryCallNoCallbackBox`: a goal per clause (`Premise.branches`). -/
+#guard_msgs in
+run_meta headPremise pe [] dl!{ [ try I(7).get() { last = 1; } catch { last = 0; }; ] true }
+
+end Try
+
+/-! ## The other premises -/
+
+/-- `sendNoCallbackBox`: labelled goals (`Premise.cases`). -/
+#guard_msgs in
+run_meta headPremise (mkConst ``StandardExample) [(.user "ok", .val .bool)]
+  dl!{ [ ok = owner.send(3); ] true }
+
+/-- `whileInvariantBox` (`Premise.inv`). -/
+#guard_msgs in
+run_meta headPremise (mkConst ``StandardExample) [(.user "i", .val .uint)]
+  dl!{ [ /// @custom:key invariant i <= 3
+         while (i < 3) { i = i + 1; total = i; }; ] true }
+
+/-! ## Sequents
+
+`Core.Proves C R Γ₀ H φ` prints as today's sequent: the context's entries
+left of `⟹`, a variable context as `..H`; an update of pops and the hidden
+binder print as nothing. -/
+
+#guard_msgs in
+#check (Core.Proves SE .all [] (((Core.Hyps.nil.all (.user "x") .uint).pre
+    (.eqD (.pvV .here) (.app0 (.lit (.int 1))))).upd .box
+      (Core.Upd.nil.decl (.user "y") (.val (.pvV .here))))
+  (.modal .box (.cons (.assignLocal (.there .here) (.simple (.local .here))) .nil) .nil .tt))
+
+#guard_msgs in
+#check fun (H : Core.Hyps SE [] [.val .uint]) =>
+  Core.Proves SE .solkey [] (H.bind (.user "z") (.val .bool)) (.eqD (.pvV (.there .here)) (.app0 (.lit (.int 1))))
+
+/-- A goal of a walk prints as the line it is. -/
+#guard_msgs in
+example : Core.Proves SE .all [] .nil (.all (.user "b") .bool
+    (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt)) := by
+  apply Core.Proves.allIntro
+  apply Core.Proves.split rfl
+  · trace_state
+    exact .updIntro (.closeTrue rfl)
+  · exact .updIntro (.closeTrue rfl)
 
 end Solidity.Examples.Tactics.CorePrint
