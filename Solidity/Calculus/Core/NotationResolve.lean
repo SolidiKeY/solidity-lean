@@ -216,7 +216,7 @@ def Fml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → Solidity.Fml C �
     let ⟨Δ, U'⟩ ← Upd.resolveN hint Γ Γ .nil U
     pure (.upd m U' (← Fml.resolveN hint Δ φ))
   | Γ, .modal m P φ => do
-    let ⟨Γ', P'⟩ ← Prog.resolve Γ P
+    let ⟨Γ', P'⟩ ← Prog.resolve Γ P (strict := false)
     pure (.modal m P' .nil (← Fml.resolveN hint Γ' φ))
   | Γ, .havoc φ => do pure (.havoc (← Fml.resolveN hint Γ φ))
   | Γ, .all x p φ => do pure (.all x p (← Fml.resolveN hint ((x, .val p) :: Γ) φ))

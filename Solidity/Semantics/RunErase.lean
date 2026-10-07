@@ -19,12 +19,12 @@ of an enclosing frame (`out`), and that a call's arguments are separated, as
 redeclared after it ends (a loop's body every iteration): the untyped run
 overwrites the stale binding, which nothing read.
 
-Not every elaborated program is `Fresh`.  The elaborator emits a raw block,
-a `for` init and a modifier's `_` flat into the untyped program, so a name
-declared there may be declared again after them (two `for` loops with the
-same index, a modifier applied twice); `resolve` then sees two binders of
-one name in one scope, and the hypothesis fails (`docs/intrinsic.md`,
-M2–M3 review).
+`Prog.Fresh` is defined beside `resolve` (`Syntax/Resolve.lean`), which
+refuses a binder that is not fresh, so what it returns is `Fresh`
+(`Prog.resolve_fresh`).  The elaborator emits a raw block, a `for` init and a
+modifier's `_` flat into the untyped program; a local of one whose name is
+declared again in the scope `resolve` reads it in is renamed apart first
+(`freshenBlocks`, `Syntax.lean`), so the elaborator's programs pass.
 
 The proof is one invariant, `Agree ns σ τ`: the global parts are equal, and
 every local of `σ` is bound in `τ` under its name, encoded (`LTy.enc`).
@@ -1127,38 +1127,6 @@ def Stmt.binders : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List Var
 def Prog.binders : {Γ Γ' : Ctx} → Prog C Γ Γ' → List Var
   | _, _, .nil => []
   | _, _, .cons s P => Stmt.binders s ++ Prog.binders P
-
-end
-
-mutual
-
-/-- No binder of the statement reuses a name in scope (`ns`) or of an
-enclosing frame (`out`), and a call's arguments are separated: what makes
-the untyped run, one map from names to bindings, follow the scoped one. -/
-def Stmt.Fresh (out : List Var) : {Γ Γ' : Ctx} → List Var → Stmt C Γ Γ' → Prop
-  | _, _, ns, .declLocal _ x _ => x ∉ ns ∧ x ∉ out
-  | _, _, ns, .declStorage _ x _ => x ∉ ns ∧ x ∉ out
-  | _, _, ns, .declMem _ x .. => x ∉ ns ∧ x ∉ out
-  | _, _, ns, .ite _ thn els => Prog.Fresh out ns thn ∧ Prog.Fresh out ns els
-  | _, _, ns, .call _ args ret body =>
-    (ret.names ++ args.names).Nodup ∧ (∀ y ∈ ret.names ++ args.names, y ∉ ns ∧ y ∉ out) ∧
-      Arg.separatedFrom [] (args.erase ns) = true ∧
-      Prog.Fresh (ns ++ out) (ret.names ++ args.names) body
-  | _, _, ns, .tryCall _ rets ok err code pnc other =>
-    rets.names.Nodup ∧ (∀ y ∈ rets.names, y ∉ ns ∧ y ∉ out) ∧ Prog.Fresh out (rets.names ++ ns) ok ∧
-      Prog.Fresh out ns err ∧ (∀ y ∈ code.names, y ∉ ns ∧ y ∉ out) ∧
-      Prog.Fresh out (code.names ++ ns) pnc ∧ Prog.Fresh out ns other
-  | _, _, ns, .loop _ _ body => Prog.Fresh out ns body
-  | _, _, ns, .block body => Prog.Fresh out ns body
-  | _, _, _, .assign .. | _, _, _, .rebind .. | _, _, _, .assignLocal .. | _, _, _, .opAssign ..
-  | _, _, _, .incDec .. | _, _, _, .assignIncDec .. | _, _, _, .push .. | _, _, _, .pop ..
-  | _, _, _, .transfer .. | _, _, _, .send .. | _, _, _, .rebindMem .. | _, _, _, .assignFromMem ..
-  | _, _, _, .assignMem .. | _, _, _, .delete .. | _, _, _, .deleteMem .. | _, _, _, .assignNew ..
-  | _, _, _, .require .. | _, _, _, .assert .. | _, _, _, .revert => True
-
-def Prog.Fresh (out : List Var) : {Γ Γ' : Ctx} → List Var → Prog C Γ Γ' → Prop
-  | _, _, _, .nil => True
-  | _, _, ns, .cons s P => Stmt.Fresh out ns s ∧ Prog.Fresh out (s.outNames ns) P
 
 end
 

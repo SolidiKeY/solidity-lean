@@ -2523,6 +2523,120 @@ partial def RawStmt.maxIdxs [FreshNames] (ss : List RawStmt) : Nat :=
 
 end
 
+/-! ### Block locals, renamed apart
+
+The elaborator writes a raw block, a `for` loop's initialisation,
+`unchecked { … }` and a modifier's `_;` flat into the untyped program, which
+has no blocks, so `resolve` keeps their locals in scope until the scope that
+holds them ends (a branch, a loop's body, a call's body, the program).  A
+local of such a block whose name is declared again later in that scope is
+renamed apart first, `x` to `x_1` (KeY's `VariableNamer` spelling, the least
+index naming nothing in the program): Solidity's scope ends at the block, so
+no reader after it sees the change, and the program `resolve` returns is
+`Fresh` (`Prog.resolve_fresh`, `docs/intrinsic.md`, M2–M3 review). -/
+
+/-- A statement with the blocks it holds rewritten by `f`, its own
+expressions as they are. -/
+def RawStmt.mapBlocks (f : List RawStmt → List RawStmt) : RawStmt → RawStmt
+  | .ite c t e => .ite c (f t) (f e)
+  | .unchecked b => .unchecked (f b)
+  | .block b => .block (f b)
+  | .tryCall r g as rets ok err code pnc other =>
+    .tryCall r g as rets (f ok) (f err) code (f pnc) (f other)
+  | .whileLoop a c b => .whileLoop a c (f b)
+  | .doWhile a b c => .doWhile a (f b) c
+  | .loop a c b => .loop a c (f b)
+  | .forLoop a i c u b => .forLoop a (f i) c (f u) (f b)
+  | s => s
+
+/-- Every read of the name `x` renamed `y`, at any depth. -/
+partial def RawStmt.renameName (x y : String) (s : RawStmt) : RawStmt :=
+  (Id.run (s.mapExprsM (pure ∘ RawExpr.rename [(x, y)]))).mapBlocks
+    (·.map (RawStmt.renameName x y))
+
+/-- The names a statement declares in its own block. -/
+def RawStmt.owns (s : RawStmt) : List String :=
+  s.declared?.toList ++ (match s with | .tupleDecl .. => s.binds | _ => [])
+
+/-- The statement declaring `y` where it declared `x`. -/
+def RawStmt.renameDecl (x y : String) : RawStmt → RawStmt
+  | .decl T z i => .decl T (if z == x then y else z) i
+  | .declStorage T z i => .declStorage T (if z == x then y else z) i
+  | .declMemory T z i => .declMemory T (if z == x then y else z) i
+  | .declStoragePush T z b => .declStoragePush T (if z == x then y else z) b
+  | .send (some T) (.name z) r a => .send (some T) (.name (if z == x then y else z)) r a
+  | .tupleDecl vs r => .tupleDecl (vs.map (·.map fun (T, z) => (T, if z == x then y else z))) r
+  | s => s
+
+/-- Renaming apart threads the names taken. -/
+abbrev FreshenM := StateT (List String) (Except String)
+
+/-- `x_k`, for the least `k ≥ 1` naming nothing taken. -/
+def FreshenM.pick (x : String) : FreshenM String := do
+  let taken ← get
+  let k := ((List.range (taken.length + 1)).find? fun k => !taken.contains s!"{x}_{k + 1}").getD
+    taken.length
+  let y := s!"{x}_{k + 1}"
+  set (y :: taken)
+  pure y
+
+mutual
+
+/-- The statements `ss` of one block, `live` the names in Solidity's scope
+before them, `later` the names declared after the block in the scope
+`resolve` reads it in.  A `flat` block's own local named in `later` is
+renamed apart. -/
+partial def freshenList (flat : Bool) (live later : List String) :
+    List RawStmt → FreshenM (List RawStmt)
+  | [] => pure []
+  | s :: ss => do
+    let mut s ← freshenStmt live (RawStmt.declsList ss ++ later) s
+    let mut ss := ss
+    let mut own : List String := []
+    for x in s.owns do
+      if flat && !live.contains x && later.contains x then
+        -- a local declared again in its own scope: the elaborator's error
+        if (RawStmt.declsList ss).contains x then
+          throw s!"{x} is already declared, or names a state variable"
+        let y ← FreshenM.pick x
+        s := s.renameDecl x y
+        ss := ss.map (RawStmt.renameName x y)
+        own := y :: own
+      else own := x :: own
+    pure (s :: (← freshenList flat (own ++ live) later ss))
+
+/-- A statement's blocks renamed apart: a raw block, `unchecked` and a `for`
+loop's initialisation are flat; a branch, a loop's body and a `try`'s
+clauses are scopes of `resolve`'s, so nothing after them is `later`. -/
+partial def freshenStmt (live later : List String) : RawStmt → FreshenM RawStmt
+  | .block b => do pure (.block (← freshenList true live later b))
+  | .unchecked b => do pure (.unchecked (← freshenList true live later b))
+  | .forLoop a [] c u b => do
+    pure (.forLoop a [] c (← freshenList false live [] u) (← freshenList false live [] b))
+  | .forLoop a i c u b => do
+    -- the initialisation's locals scope over the rest of the loop
+    let out ← freshenList true live later (i ++ [.forLoop a [] c u b])
+    match out.getLast? with
+    | some (.forLoop a' [] c' u' b') => pure (.forLoop a' out.dropLast c' u' b')
+    | _ => throw "a `for` loop's initialisation, renamed"
+  | .ite c t e => do pure (.ite c (← freshenList false live [] t) (← freshenList false live [] e))
+  | .whileLoop a c b => do pure (.whileLoop a c (← freshenList false live [] b))
+  | .doWhile a b c => do pure (.doWhile a (← freshenList false live [] b) c)
+  | .loop a c b => do pure (.loop a c (← freshenList false live [] b))
+  | .tryCall r g as rets ok err code pnc other => do
+    pure (.tryCall r g as rets (← freshenList false (rets.map (·.2) ++ live) [] ok)
+      (← freshenList false live [] err) code (← freshenList false (code.toList ++ live) [] pnc)
+      (← freshenList false live [] other))
+  | s => pure s
+
+end
+
+/-- A block's flat locals renamed apart, from the names `live` in scope;
+`avoid` are other names a new one must not take (the state variables). -/
+def freshenBlocks (avoid live : List String) (ss : List RawStmt) : Except String (List RawStmt) :=
+  (freshenList false live [] ss).run'
+    (RawStmt.namesList ss ++ RawStmt.declsList ss ++ live ++ avoid)
+
 section Elab
 
 variable [FreshNames] (C : Contract)
@@ -3760,6 +3874,8 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   -- a constructor's initializers: after its parameters are bound, before its
   -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
   let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
+  -- a block's locals renamed apart (a modifier's `_;` twice repeats the body's)
+  let body ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) (Γf.map (·.1)) body)
   modify fun (_, k) => (Γf, k)
   let P ← withReader (fun _ => { funs := scope, top := false }) (elabStmts body)
   modify fun (_, k) => (Γ, k)

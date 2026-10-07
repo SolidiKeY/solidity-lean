@@ -26,7 +26,9 @@ variable [FreshNames] (C : Contract)
 /-- Elaborate a block against `C`, from no locals.  A capture is numbered
 past every fresh variable the block writes. -/
 def elabProg (ss : List RawStmt) : Except String (Prog C) := do
-  let P ← ((elabStmts C ss).run { funs := C.funs }).run' ([], RawStmt.maxIdxs ss + 1)
+  let k := RawStmt.maxIdxs ss + 1
+  let ss ← freshenBlocks (C.vars.map (·.1)) [] ss
+  let P ← ((elabStmts C ss).run { funs := C.funs }).run' ([], k)
   let _ ← Core.Prog.resolveCheck [] P
   pure P
 
@@ -36,7 +38,9 @@ position): the same block, statement by statement, each checked
 def elabProgAt (ss : List RawStmt) : Except (Nat × String) (Prog C) :=
   go 0 ss ([], RawStmt.maxIdxs ss + 1)
 where
-  go (i : Nat) (ss : List RawStmt) (st : ECtx × Nat) : Except (Nat × String) (Prog C) :=
+  go (i : Nat) (ss : List RawStmt) (st : ECtx × Nat) : Except (Nat × String) (Prog C) := do
+    -- a block's locals renamed apart (`freshenBlocks`)
+    let ss ← (freshenBlocks (C.vars.map (·.1)) (st.1.map (·.1)) ss).mapError (i, ·)
     goWt i ss st (ECtx.toNCtx st.1)
   goWt (i : Nat) : List RawStmt → ECtx × Nat → Core.NCtx → Except (Nat × String) (Prog C)
     | [], _, _ => pure []

@@ -1079,6 +1079,8 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Fml C)
     let mut P' : Prog C := []
     -- the locals check (`resolve`), from the locals in scope at the modality
     let mut Γw := ECtx.toNCtx (← get).1
+    -- a block's locals renamed apart (`freshenBlocks`)
+    let P ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) ((← get).1.map (·.1)) P)
     for s in P do
       let (Γ, k) ← get
       let k₀ := nextFree taken k

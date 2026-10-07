@@ -70,8 +70,8 @@ canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
 `no_hidden_invariant` (`Typing/Constructibility.lean`) prove canonical and tight
 is exactly reachable (for words, keys and slots in range, `SVal.fits`), so no
 hidden invariant is missing. Reachable is by the scoped interpreter
-(`Reachable`); relating it to the untyped run the calculus reads is open
-(`docs/intrinsic.md`, M2–M3 review). `uint` range is not yet proved an invariant of the
+(`Reachable`); a storage the untyped run the calculus reads reaches from a
+block the locals check accepts is reachable (`ReachableU.reachable`). `uint` range is not yet proved an invariant of the
 model (literals are in range since 2026-10-07, `Simple.lit`, but no theorem says
 a run keeps every word in range), which is why item 1 owns it.
 

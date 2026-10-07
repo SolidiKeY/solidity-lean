@@ -249,15 +249,36 @@ theorem ternaryOfMemoryReferences :
   sol_close
 
 /-! A local of a block, and a branch after it that declares the same name at
-another type: Solidity scopes the first to its block, and so does the
-elaborator's locals check (`resolve`, `Syntax/Resolve.lean`), which reads a
-branch as a scope and a name as its newest declaration.  The same holds for
-a `for` loop's init. -/
+another type: Solidity scopes the first to its block.  The untyped program
+has no blocks, so the elaborator writes the block flat and renames its local
+apart (`x_1`, `freshenBlocks`): the locals check (`resolve`,
+`Syntax/Resolve.lean`) reads a branch as a scope and refuses a binder of a
+name in scope, so the program is `Fresh` and `Prog.run_erase` covers it.
+The same holds for a `for` loop's init. -/
 
-example : Prog StandardExample := sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } }
+/-- info: bool c = true; bool x_1 = true; if (c) { uint x = 1; } else { } -/
+#guard_msgs in
+#eval IO.println (Prog.toStr
+  (sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } } : Prog StandardExample))
 
-example : Prog StandardExample :=
-  sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } }
+/-- info: bool c = true; int i_1 = 0; while (i_1 < 1) { i_1++; } if (c) { uint i = 1; } else { } -/
+#guard_msgs in
+#eval IO.println (Prog.toStr
+  (sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } } : Prog StandardExample))
+
+/-! Two loops of one index: the first's is renamed apart, the second keeps
+its name. -/
+
+/--
+info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0; while (i < 3) { n += i; i++; }
+-/
+#guard_msgs in
+#eval IO.println (Prog.toStr (sol{ uint n = 0; for (uint i = 0; i < 2; i++) { n += i; }
+    for (uint i = 0; i < 3; i++) { n += i; } } : Prog StandardExample))
+
+-- a local declared again in its own scope is still refused
+/-- error: Solidity elaboration failed: x is already declared, or names a state variable -/
+#guard_msgs in #check (sol{ uint x = 2; { uint x = 3; } } : Prog StandardExample)
 
 /- Declared alike in both branches, then at another type in a later one. -/
 #guard (Core.Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }

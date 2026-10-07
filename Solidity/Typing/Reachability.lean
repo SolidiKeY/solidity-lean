@@ -1879,9 +1879,9 @@ theorem Contract.deployState_empty (C : Contract) :
 /-- A storage is reachable when a scoped program runs from the initial state
 to a state holding it, by the scoped interpreter (`Semantics/Core.lean`).
 The program's locals are used as declared by construction.  The calculus's
-`holds` reads the untyped interpreter, and no theorem yet carries a storage
-that interpreter reaches to one `Reachable` holds of (`docs/intrinsic.md`,
-M2–M3 review). -/
+`holds` reads the untyped interpreter; a storage it reaches from a block the
+locals check accepts is `Reachable` (`ReachableU.reachable`,
+`Calculus/Problem.lean`). -/
 def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (σ : Core.State C Γ'),
     P.run (Core.State.ofSem C.initState) = .ok σ ∧ σ.storage = st
