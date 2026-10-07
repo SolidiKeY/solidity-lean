@@ -289,4 +289,66 @@ theorem Tm.eval_erase (hag : Agree ns σ τ) : {s : Srt} → (t : Tm C Γ s) →
 
 end Terms
 
+section Denote
+
+variable (g : Semantics.State) (e : List (Var × Binding))
+
+theorem Op0.denote_wl {s : Srt} (o : Op0 s) : o.denote (withLocals g e) = o.denote g := by
+  cases o <;> rfl
+
+theorem Op1.denote_wl {a s : Srt} (o : Op1 a s) (ho : o.named = false) (d : a.Den) :
+    o.denote (withLocals g e) d = o.denote g d := by
+  cases o with
+  | netOf => cases ho
+  | _ => rfl
+
+theorem Op2.denote_wl {a b s : Srt} (o : Op2 a b s) (x : a.Ev) (y : b.Ev) (dx : a.Den) (dy : b.Den) :
+    o.denote (withLocals g e) (Srt.wl e a x) (Srt.wl e b y) dx dy = o.denote g x y dx dy := by
+  cases o with
+  | read => simp only [Op2.denote]; rw [Op2.eval_wl]; rfl
+  | mlen => simp only [Op2.denote]; rw [Op2.eval_wl]; rfl
+  | copyMem => simp only [Op2.denote]; rw [Op2.eval_wl]; rfl
+  | _ => rfl
+
+end Denote
+
+section TermsDenote
+
+variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+
+/-- **A term denotes as its erasure.** -/
+theorem Tm.denote_erase (hag : Agree ns σ τ) : {s : Srt} → (t : Tm C Γ s) →
+    (t.erase ns).denote τ = t.denote σ
+  | _, .pvV i => by simp only [Tm.erase, Solidity.Tm.denote, hag.getEnv i]; rfl
+  | _, .pvP i => by simp only [Tm.erase, Solidity.Tm.denote, aliasPath_erase hag i]; rfl
+  | _, .pvS i => by simp only [Tm.erase, Solidity.Tm.denote, hag.getEnv i]; rfl
+  | _, .pvI i => rfl
+  | _, .netOf i a => by
+    show Op1.denote τ (.netOf (i.name ns)) ((a.erase ns).denote τ) = _
+    rw [Tm.denote_erase hag a]
+    simp only [Op1.denote, hag.getEnv i, Tm.denote]
+    generalize a.denote σ = d
+    cases d with
+    | prim v => cases v <;> rfl
+    | st => rfl
+  | _, .app0 o => by
+    show o.denote τ = _
+    rw [hag.wl]; exact Op0.denote_wl _ _ o
+  | _, .app1 o ho x => by
+    show o.denote τ ((x.erase ns).denote τ) = _
+    rw [Tm.denote_erase hag x, hag.wl]
+    exact Op1.denote_wl _ _ o ho _
+  | _, .app2 o x y => by
+    show o.denote τ ((x.erase ns).eval τ) ((y.erase ns).eval τ) ((x.erase ns).denote τ)
+      ((y.erase ns).denote τ) = _
+    rw [Tm.denote_erase hag x, Tm.denote_erase hag y, Tm.eval_erase hag x, Tm.eval_erase hag y,
+      hag.wl]
+    exact Op2.denote_wl _ _ o _ _ _ _
+  | _, .app3 o x y z => by
+    show o.denote ((x.erase ns).denote τ) ((y.erase ns).denote τ) ((z.erase ns).denote τ) = _
+    rw [Tm.denote_erase hag x, Tm.denote_erase hag y, Tm.denote_erase hag z]
+    rfl
+
+end TermsDenote
+
 end Solidity.Core
