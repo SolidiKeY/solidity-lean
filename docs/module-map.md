@@ -88,6 +88,8 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Core/Delab.lean` | Scoped taclets, premises and formulas printed from their `Expr`, schema variables and all: each translated to its erasure's `Expr` (schema variables as twins of the erased type, positions as the names the term declared) and printed by `RuleSyntax.lean`'s printers; `}` at a block's end (`core_item`, printing only); the delaborators for `Core.Taclet`, `Core.Premise`, `Core.Fml`. |
 | `Calculus/Core/Proves.lean` | The scoped sequent, a skeleton: `Hyps C Γ₀ Γ` (a telescope: updates, `∀` and the hidden binder extend the scope), `Hyps.wrap`/`fresh`/`boxOnly`, and `Proves` with one rule per premise kind (`split` with KeY's two goals), `intro`, `allIntro`, `updIntro`, `bindIntro`, `empty`, `closeTrue`; soundness waits for M3's run. |
 | `Calculus/Core/Schema.lean` | A prototype of `dl{ ⟨[ s; ]⟩ ⇝ p }` writing scoped taclets (`scoped macro_rules`): the `\find` read in its context, the premise's fresh locals counted, `.there`/`up` inserted on the `\find`'s schema variables after them, the pop `Ext.push^d .refl`, a branch's `}`; three of `Rules.lean`'s lines, checked equal to `Core.Taclet`'s constructors (`Taclet.toCore`, `ofCore`). |
+| `Calculus/Core/NotationResolve.lean` | `Update.lean`'s terms, updates and formulas read scoped over a named context (`Tm.resolveN`, `Upd.resolveN`: a target in scope at its type assigned, any other declared; `Fml.resolveN`), `Fml.closeN` (locals bound outermost), and `Core.Post C Γ`, a postcondition at the context it stands in. |
+| `Calculus/Core/Notation.lean` | `cdl!{ φ }`/`cdl[C, m]{ φ }`: `dl!{}`'s text read into `Core.Fml C []` (`elabFmlC`): parameters bound outermost (a `uint` by `∀`, an alias by a hidden binder), only when read before bound; a Lean formula elaborated at the context of its place. |
 | `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the constructor for each. |
@@ -203,6 +205,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Tools/Common.lean` | Shared plumbing: resolving `C` / `C.f`, evaluating terms, report layout. |
 | `Tools/Run.lean` | `#run C.f(args) [from σ] [with msg.sender := n, …]`: the interpreter from a fresh state; `#deploy C(args) [with …]`, a deployment (`Contract.deploy`). |
 | `Tools/Inspect.lean` | `#wp φ`, `#step φ`, `#taclet r`. |
+| `Tools/CoreInspect.lean` | `#wp φ`, `#step φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`. |
 | `Tools/DiffTest.lean` | `#difftest C[.f]`: interpreter against compiled EVM code on random storages. |
 | `Tools/Counterexample.lean` | `Fml.eval3`, witness search and shrinking, `#counterexample`. |
 | `Tools/Verify.lean` | `#verify C[.f]`: each spec'd function proved, refuted or stuck. |
@@ -288,6 +291,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/CoreSymex.lean` | `Core.symex` on three programs, checked by the kernel (`Eq.refl`) and against today's `symex` on the erasure. |
 | `Examples/Tactics/CoreStep.lean` | The arms of `Core.Stmt.step` against today's, by rule family (storage, memory structs and arrays, arrays of mapping-holding structs, operators, payments, loops, calls, `try`): each program's `Core.symex` erases to today's `symex` (covers dropped) and is kernel-checked (`Eq.refl`). |
 | `Examples/Tactics/CorePrint.lean` | The scoped taclets printed as their rule lines, a block's `}`, and the strategy's formulas printed from their `Expr` as `Core.Fml.show` prints them. |
+| `Examples/Tactics/CoreNotation.lean` | `cdl!{}` pinned: parameters, updates' targets, branch scopes, errors; `#wp`/`#step` on scoped formulas. |
 
 At the root, the notation's own tests:
 
