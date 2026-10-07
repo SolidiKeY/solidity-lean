@@ -197,6 +197,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Typing/StoragePreservation.lean` | `save` keeps a value's type. |
 | `Typing/State.lean` | `StateWT`, the invariant of a state's global part (storage, heap, allocation counter); copy typing. |
 | `Typing/Soundness.lean` | Type soundness of the scoped run: `Core.Stmt.run_wt`, `Core.Prog.run_wt` (`RunWT`: `StateWT` and every local of its type); `RunInv`, the scope cases every run invariant shares. |
+| `Typing/TypedWT.lean` | `RunWT` by construction: a typed state erases to a well-typed one (`Core.TState.erase_wt`, under `HTy.toHeapTy`), for state variables and heap types that reach no struct with a repeated member name (`Ty.nodupDeep`). |
 | `Typing/StraightRun.lean` | Straight programs (`Core.Prog.straight`: simple values assigned, aliases bound, defaults pushed, `pop`, `delete`, blocks; no loop, length or call): on the bridge, their typed run never diverges (`Prog.trun_noDiv`), so it ends where the scoped run does (`Prog.trun_of_run`). |
 | `Typing/Reachability.lean` | Every reachable storage is canonical (`Core.Prog.run_canon`); `Reachable` is a bridged scoped program's typed run (`Core.Prog.trun`) from the initial state, `ReachableS` the scoped run's (`Reachable.reachableS`). |
 | `Typing/Constructibility.lean` | The converse: reachable ⇔ canonical ∧ tight; the builder `Core.Build.rootsProg` is a scoped program, `Core.Prog.run_tight`. |
