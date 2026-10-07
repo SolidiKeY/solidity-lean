@@ -1,11 +1,13 @@
 import Solidity.Calculus.Core.Delab
 import Solidity.Examples.Tactics.CoreSymex
+import Solidity.Tools.Inspect
 
 /-!
 # Scoped taclets and formulas, printed
 
 `Calculus/Core/Delab.lean`'s printers pinned: the three scoped taclets print
-their rule lines as today's do (`Calculus/Rules.lean`), and a formula the
+their rule lines as today's do (`Calculus/Rules.lean`), also under
+`#taclet` (`Tools/Inspect.lean`), and a formula the
 scoped strategy leaves prints, from its `Expr`, as `Core.Fml.show` prints
 the value.
 -/
@@ -38,6 +40,19 @@ info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ
   dl{ ⟨[ if (se) thn else els; ]⟩ ⇝ "if s#se true": se ≐ true ⟹ ⟨[ thn ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ els ]⟩ }
 -/
 #guard_msgs in #check @Core.Taclet.ifElseSplit
+
+/-! `#taclet` on a scoped taclet: its line, today's solkey taclets. -/
+
+/--
+info: Solidity.Core.Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+  {p : PrimTy} {s : Name} {v : Core.Idx Γ (Core.LTy.val p)} {nsp : Core.SPath C Γ (Ty.struct s)} {fld : Name}
+  {h : C.fieldType s fld = some (Ty.prim p)} (hn : nsp.isSimple = false),
+  dl{ ⟨[ v = nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; v = sp.fld; ]⟩ }
+solkey: storageFieldRead_unfold_rightFst (simplify_prog)
+printed: storageFieldRead_unfold_rightFst
+sound: pending (the scoped run, M3 of docs/intrinsic.md); Solidity.Core.Taclet.erase: an instance of today's rule
+-/
+#guard_msgs in #taclet Core.Taclet.storageFieldRead_unfold_rightFst
 
 /-! A formula whose program runs into a branch's end: `}`, then the rest. -/
 
