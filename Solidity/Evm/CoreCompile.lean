@@ -18,8 +18,9 @@ level for a call's body, which is closed over its own frame `rs ++ ps`
 still addressed by `Var` until the untyped syntax retires (M4); a level `l`
 is the cell `cell l` (printed `%l`), so `Machine.mem ∘ cell` is the
 level-addressed view.  A scope's locals are not cleared at its end: the next
-local declared at that level overwrites the cell (a declaration always
-writes its cell).
+local declared at that level overwrites the cell (every declaration but
+an unset `T storage x;` writes its cell; that alias is `dead` in `Frag` and
+not read until a rebind writes the cell).
 
 **The fragment is what `inFrag` accepts.**  Typing is the syntax's now: a
 local is read at its declared type and in scope by construction, so
@@ -35,7 +36,7 @@ of its own, where every parameter and return variable may be read; a `pop`
 or `delete` anywhere in it forgets the caller's fragile aliases
 (`Stmt.shrinks`).
 
-**Against the untyped compiler** (`compile_erase`): compiling `s` and
+**Against the untyped compiler** (`compileStmt_erase`, `compileProg_erase`): compiling `s` and
 compiling `s.erase ns` give the same code up to the memory cells
 (`Instr.forgetCell`), for every `s` whose calls have separated arguments
 (`Stmt.sepArgs`).  The cells differ by design (a name there, a level here).
@@ -73,7 +74,7 @@ def lvl (b : Nat) {Γ : Ctx} {t : CLTy} (i : Idx Γ t) : Nat := b + (Γ.length -
 abbrev cellOf (b : Nat) {Γ : Ctx} {t : CLTy} (i : Idx Γ t) : Var := cell (lvl b i)
 
 /-- An instruction with its memory cell forgotten: what the two compilers
-agree on (`compile_erase`). -/
+agree on (`compileStmt_erase`, `compileProg_erase`). -/
 def _root_.Solidity.Evm.Instr.forgetCell : Instr → Instr
   | .mload _ => .mload (.user "")
   | .mstore _ => .mstore (.user "")

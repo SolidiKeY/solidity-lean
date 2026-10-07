@@ -211,7 +211,9 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     the return variables).  `Machine.mem` stays `Var → Word` while the old
     compiler lives: a level `l` is the cell `cell l` (`.fresh "%" l`, printed
     `%l`), and `Machine.memAt` is the level-addressed view.  A scope's cells
-    are not cleared at its end; a declaration always writes its cell.
+    are not cleared at its end; every declaration but an unset
+    `T storage x;` writes its cell; that alias is `dead` in `Frag` and not
+    read until a rebind writes the cell.
   - `inFrag : Frag Γ → Stmt C Γ Γ' → Option (Frag Γ')`.  `Frag Γ` is one flag
     per local (`ok`, `fragile`, `dead`): the alias facts `TyCtx` kept beside
     the types.  An unset `T storage p;` is `dead`.  A branch's or block's
@@ -235,7 +237,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     `Stmt.pushes`/`Stmt.pays` are `Evm.pushesP`/`Evm.paysP` of the erasure
     for every statement (`pushes_erase`).
   - `Evm/CoreExamples.lean` ports the 45 compile `decide` examples of
-    `Evm/Examples.lean` (not the five interpreter theorems: they need the M5
+    `Evm/Examples.lean` (not the four interpreter theorems: they need the M5
     `compile_correct`), plus a scoped-branch run, a `pop` in a branch
     forgetting an outer fragile alias, and `sameCode` on 14 programs.
     Programs come from `sol{}` through `Prog.resolve`, which the
@@ -300,7 +302,8 @@ Env-from-Γ design and everything that does not need the run is proved.
   `simple_sim`/`spath_sim`/`loc_sim`/`val_sim`, `stmt_sim` (gate: at most
   470000 heartbeats, split per constructor family rather than raised),
   `prog_sim`, `compile_correct`/`compile_box`/`compile_net` over `Core`, and
-  the five interpreter theorems of `Evm/Examples.lean`.  The lemmas above
+  the four interpreter theorems of `Evm/Examples.lean` (`setAge_interpreter`,
+  `overflow_interpreter`, `payOwner_interpreter`, `callTwice_interpreter`).  The lemmas above
   are what their cases call.  Also left: timing the compiler on a
   quoter-built program (M2.3); `Machine.mem : Nat → Word` (with
   `cell = id`) once `Evm/Compile.lean` retires at M4.

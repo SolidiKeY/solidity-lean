@@ -236,17 +236,22 @@ theorem Stmt.outNames_castOut [FreshNames] {Γ Δ₁ Δ₂ : Ctx} (h : Δ₁ = �
 
 mutual
 /-- Every call's arguments are separated (`Arg.separatedFrom`) once
-erased: the calls `erase` keeps as calls, whose arguments it does not move
-into the body.  What `resolve` returns (`Prog.resolve_sepArgs`). -/
+erased, in a loop's body and a `try`'s branches too: the calls `erase`
+keeps as calls, whose arguments it does not move into the body.  What
+`resolve` returns (`Prog.resolve_sepArgs`). -/
 def Stmt.sepArgs {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → Bool
   | .call _ args ret body =>
     Arg.separatedFrom [] (args.erase ns) && Prog.sepArgs (ret.names ++ args.names) body
   | .ite _ t e => Prog.sepArgs ns t && Prog.sepArgs ns e
   | .block body => Prog.sepArgs ns body
+  | .tryCall _ rets ok err code pnc other =>
+    Prog.sepArgs (rets.names ++ ns) ok && Prog.sepArgs ns err &&
+      Prog.sepArgs (code.names ++ ns) pnc && Prog.sepArgs ns other
+  | .loop _ _ body => Prog.sepArgs ns body
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .push .. | .pop _ | .transfer .. | .send .. | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => true
+  | .require _ | .assert _ | .revert => true
 def Prog.sepArgs {Γ Γ' : Ctx} (ns : List Var) : Prog C Γ Γ' → Bool
   | .nil => true
   | .cons s P => Stmt.sepArgs ns s && Prog.sepArgs (s.outNames ns) P
@@ -734,21 +739,25 @@ def resolveStmt (Γ : NCtx) : (u : Solidity.Stmt C) → Except String (Resolved 
       ⟨Binders.ofList rets, Binders.toList_ofList rets⟩
     let ⟨⟨κ, cb⟩, hcb⟩ : {r : (κ : Ctx) × CodeBinder κ // r.2.toOption = code} :=
       ⟨CodeBinder.ofOption code, CodeBinder.toOption_ofOption code⟩
-    let ⟨⟨_, ok'⟩, hok, _⟩ ← resolveProg (bs.nctx ++ Γ) ok
-    let ⟨⟨_, err'⟩, herr, _⟩ ← resolveProg Γ err
-    let ⟨⟨_, pnc'⟩, hpnc, _⟩ ← resolveProg (cb.nctx ++ Γ) pnc
-    let ⟨⟨_, other'⟩, hother, _⟩ ← resolveProg Γ other
+    let ⟨⟨_, ok'⟩, hok, hoks⟩ ← resolveProg (bs.nctx ++ Γ) ok
+    let ⟨⟨_, err'⟩, herr, herrs⟩ ← resolveProg Γ err
+    let ⟨⟨_, pnc'⟩, hpnc, hpncs⟩ ← resolveProg (cb.nctx ++ Γ) pnc
+    let ⟨⟨_, other'⟩, hother, hothers⟩ ← resolveProg Γ other
     pure ⟨⟨Γ, .tryCall c' bs (ok'.castIn (by rw [NCtx.ctx_append, Binders.nctx_ctx])) err' cb
         (pnc'.castIn (by rw [NCtx.ctx_append, CodeBinder.nctx_ctx])) other'⟩, by
-      refine ⟨?_, rfl, rfl⟩
-      subst hc herr hother hbs hcb
-      simp only [Stmt.erase, Prog.erase_castIn, ← hok, ← hpnc, NCtx.names_append,
-        Binders.nctx_names, CodeBinder.nctx_names]⟩
+      refine ⟨?_, rfl, ?_⟩
+      · subst hc herr hother hbs hcb
+        simp only [Stmt.erase, Prog.erase_castIn, ← hok, ← hpnc, NCtx.names_append,
+          Binders.nctx_names, CodeBinder.nctx_names]
+      · rw [NCtx.names_append, Binders.nctx_names] at hoks
+        rw [NCtx.names_append, CodeBinder.nctx_names] at hpncs
+        simp only [Stmt.sepArgs, Prog.sepArgs_castIn, hoks, herrs, hpncs, hothers, Bool.and_self]⟩
   | .loop a c body => do
     let ⟨a', ha⟩ ← rejects (.loop a c body) (resolveLoopAnn Γ a)
     let ⟨c', hc⟩ ← rejects (.loop a c body) (resolveVal Γ c)
-    let ⟨⟨_, b⟩, hb, _⟩ ← resolveProg Γ body
-    pure ⟨⟨Γ, .loop a' c' b⟩, by subst ha hc hb; exact ⟨rfl, rfl, rfl⟩⟩
+    let ⟨⟨_, b⟩, hb, hbs⟩ ← resolveProg Γ body
+    pure ⟨⟨Γ, .loop a' c' b⟩, by
+      subst ha hc hb; exact ⟨rfl, rfl, by simp only [Stmt.sepArgs, hbs]⟩⟩
 
 def resolveProg (Γ : NCtx) : (us : List (Solidity.Stmt C)) →
     Except String {r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx //

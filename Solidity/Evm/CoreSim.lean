@@ -77,7 +77,7 @@ theorem memAt_upd (m : Machine) (l l' : Nat) (w : Word) :
     ({ m with mem := upd m.mem (cell l) w } : Machine).memAt l' = if l' = l then w else m.memAt l' := by
   simp only [Machine.memAt, upd]
   by_cases h : l' = l
-  · simp [h]
+  · simp only [h, ↓reduceIte]
   · simp only [h, ↓reduceIte, ite_eq_right_iff]
     intro h'; exact absurd (cell_inj h') h
 
@@ -120,10 +120,11 @@ theorem get_set {Γ : Ctx} {t t' : CLTy} (F : Frag Γ) (i : Idx Γ t) (f : Fl) (
   simp only [get, set, List.getD_eq_getElem?_getD, List.getElem?_set]
   by_cases h1 : i.toNat = j.toNat
   · by_cases h2 : i.toNat < F.fl.length
-    · simp only [h1, ↓reduceIte] at h2 ⊢; simp [h2]
+    · simp only [h1, ↓reduceIte] at h2 ⊢; simp only [h2, ↓reduceIte, Option.getD_some, and_self]
     · have : F.fl.length ≤ j.toNat := by omega
-      simp only [h1, ↓reduceIte] at h2 ⊢; simp [h2]
-  · simp [h1, Ne.symm h1]
+      simp only [h1, ↓reduceIte] at h2 ⊢
+      simp only [h2, ↓reduceIte, Option.getD_none, and_false, not_false_eq_true, getElem?_neg]
+  · simp only [h1, ↓reduceIte, Ne.symm h1, false_and]
 
 theorem get_eq_dead {Γ : Ctx} {t : CLTy} (F : Frag Γ) (i : Idx Γ t) (h : F.fl.length ≤ i.toNat) :
     F.get i = .dead := by
@@ -138,20 +139,26 @@ theorem get_restrict {Γ Δ : Ctx} (h : Ext Γ Δ) (F : Frag Δ) {t : CLTy} (i :
 theorem get_meet {Γ : Ctx} (F G : Frag Γ) {t : CLTy} (i : Idx Γ t) {g : Fl}
     (h : (F.meet G).get i = g) (hg : g ≠ .dead) : F.get i = g := by
   simp only [get, meet, List.getD_eq_getElem?_getD, List.getElem?_zipWith] at h ⊢
-  cases h1 : F.fl[i.toNat]? <;> cases h2 : G.fl[i.toNat]? <;> simp_all
-  split at h <;> simp_all
+  cases h1 : F.fl[i.toNat]? <;> cases h2 : G.fl[i.toNat]? <;>
+    simp_all only [ne_eq, Option.getD_none, getElem?_eq_none_iff, Nat.not_lt, Option.getD_some,
+    not_true_eq_false]
+  split at h <;> simp_all only [not_true_eq_false]
 
 theorem get_meet_right {Γ : Ctx} (F G : Frag Γ) {t : CLTy} (i : Idx Γ t) {g : Fl}
     (h : (F.meet G).get i = g) (hg : g ≠ .dead) : G.get i = g := by
   simp only [get, meet, List.getD_eq_getElem?_getD, List.getElem?_zipWith] at h ⊢
-  cases h1 : F.fl[i.toNat]? <;> cases h2 : G.fl[i.toNat]? <;> simp_all
-  split at h <;> simp_all
+  cases h1 : F.fl[i.toNat]? <;> cases h2 : G.fl[i.toNat]? <;>
+    simp_all only [ne_eq, Option.getD_none, getElem?_eq_none_iff, Nat.not_lt, Option.getD_some,
+    not_true_eq_false]
+  split at h <;> simp_all only [not_true_eq_false]
 
 theorem get_dropFragile {Γ : Ctx} (F : Frag Γ) {t : CLTy} (i : Idx Γ t) {g : Fl}
     (h : F.dropFragile.get i = g) (hg : g ≠ .dead) : F.get i = g ∧ g ≠ .fragile := by
   simp only [get, dropFragile, List.getD_eq_getElem?_getD, List.getElem?_map] at h ⊢
-  cases h1 : F.fl[i.toNat]? <;> simp_all
-  split at h <;> simp_all
+  cases h1 : F.fl[i.toNat]? <;>
+    simp_all only [ne_eq, Option.map_none, Option.map_some, Option.getD_none, Option.getD_some,
+      getElem?_eq_none_iff, Nat.not_lt, true_and, not_true_eq_false]
+  split at h <;> simp_all only [not_true_eq_false, not_false_eq_true, and_self]
 
 end Frag
 
@@ -224,8 +231,8 @@ aliases forgotten (`Frag.dropFragile`). -/
 theorem flags {m : Machine} {G : Frag Γ} (h : Sim C L b F σ ρ m)
     (hG : ∀ {R : RefTy} (i : Idx Γ (.alias R)) (g : Fl), G.get i = g → g ≠ .dead → F.get i = g) :
     Sim C L b G σ ρ m :=
-  ⟨h.store, h.vals, fun i hi => h.aliases i (hG i _ hi (by simp)), h.net, h.netSelf, h.bound,
-    fun i hi => h.fragile i (hG i _ hi (by simp)), h.env⟩
+  ⟨h.store, h.vals, fun i hi => h.aliases i (hG i _ hi (by decide)), h.net, h.netSelf, h.bound,
+    fun i hi => h.fragile i (hG i _ hi (by decide)), h.env⟩
 
 theorem meet {m : Machine} (G : Frag Γ) (h : Sim C L b F σ ρ m) :
     Sim C L b (F.meet G) σ ρ m :=
@@ -240,9 +247,9 @@ aliases forgotten. -/
 theorem storeDrop {m : Machine} (h : Sim C L b F σ ρ m) {st' : Slot → Nat}
     {stor : List (Name × SVal)} (hs : ReprStore C L st' stor) :
     Sim C L b F.dropFragile { σ with storage := stor } ρ { m with store := st' } := by
-  refine ⟨hs, h.vals, fun i hi => h.aliases i (Frag.get_dropFragile F i hi (by simp)).1,
+  refine ⟨hs, h.vals, fun i hi => h.aliases i (Frag.get_dropFragile F i hi (by decide)).1,
     h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
-  exact absurd rfl (Frag.get_dropFragile F i hi (by simp)).2
+  exact absurd rfl (Frag.get_dropFragile F i hi (by decide)).2
 
 /-- A scope's end: its locals popped, the enclosing ones where they were. -/
 theorem drop {Δ : Ctx} {G : Frag Δ} {ρ' : Look Δ} {m : Machine} (hΓ : Ext Γ Δ)
@@ -458,8 +465,8 @@ theorem returnDrop {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : S
   refine ⟨h'.store, fun i => ?_, fun i hi => ?_, h'.net, h'.netSelf, h'.bound, fun i hi => ?_,
     h'.env⟩
   · rw [e]; exact h.vals i
-  · rw [e]; exact h.aliases i (Frag.get_dropFragile F i hi (by simp)).1
-  · exact absurd rfl (Frag.get_dropFragile F i hi (by simp)).2
+  · rw [e]; exact h.aliases i (Frag.get_dropFragile F i hi (by decide)).1
+  · exact absurd rfl (Frag.get_dropFragile F i hi (by decide)).2
 
 end Sim
 
