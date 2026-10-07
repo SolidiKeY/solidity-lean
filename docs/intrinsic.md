@@ -709,6 +709,59 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
 
 **Pins in W1:** none outside `Core*` example files.
 
+### W1 lane `runlemmas` (2026-10-08)
+
+Done, four modules over `TState`/`trun`, no M3 run in their statements:
+
+- `Semantics/Core/TypedRunWk.lean`: `Stmt.trun_wk`/`Prog.trun_wk` (`TWkRel`).
+  The background locals `d` are typed over the start heap and come out
+  weakened along the heap the run grew (`TEnv.wk`, `offWk`); with the
+  background fixed, `TWkRel.eq_lifted` gives the run as `liftedT`.  Also
+  `Frames.trun` (the frames' typed run, for `holds` over `TState`) and the
+  `TLoop` lemmas: `run_map`, `run_unfold`, `run_induct`, `run_variant` (the
+  variant a `TRes Int`, the condition a `Bool`, so no cover).
+- `Semantics/Core/TypedRunFrame.lean`: `Stmt.trun_frame`/`Prog.trun_frame`.
+  A program within a mutability allocates nothing, so the frame keeps the
+  heap typing (`TGFrame.H`) and compares heaps and locals by `HEq`
+  (`TLocAgree`); `TState.anon`, `TState.havoc`, and
+  `TState.eq_anonHavoc`/`Prog.trun_frame_anon`: a state in a loop body's
+  frame is `(σ.anon xs b).havoc st nt` for some `b` (with `TGFrame.keeps`
+  giving `st`, `nt` unchanged in a `view` frame).  This is the semantic half
+  of `holds_anonHavoc`; the `holds` half is W2's.
+- `Semantics/Core/TypedToSem.lean`: `TState.toSem ns` read straight off the
+  typed parts (`LTy.TDenote.bind`), with `lookup_toSem` and the moves under
+  `push`/`setLocal` (`setBy`)/`drop`/`withStorage`/`havoc`/`adopt`; the
+  bridge `toSem_eq` (= `σ.erase.erase ns`) and `agree_toSem` go with
+  `RunErase` at W4.
+- `Semantics/Core/Callback.lean`, rewritten over `TState`: `COut C H Γ`
+  carries `Out` (a call needs the heap extension to give its caller's
+  locals back, `TRun.callLeave`); the invariant is a predicate on states of
+  the empty context (`StateInv`), since `holds` on `TState` does not exist
+  yet; `callEnter` and `tryHalt` are gone (typed entry and `keyT` are
+  total).  `Prog.exec_run`, `Frames.exec_run`, `ExecP.eq_run`,
+  `ExecF.eq_run`, `ExecP.forall_iff`, `ExecF.forall_iff` are proved.
+
+Left for W2 (the `tree` lane, with `holds` on `TState` from `sound`;
+its Work list carries it): everything this rewrite removed that reads a
+formula — `holdsC`, `ValidC`, `TransferSem`, `holdsT`, `ValidT`,
+`validT_noCallback`, `validT_withCallback`, `Modality.afterRunC_congr`,
+`Modality.afterC_congr`, `after_frames_iff`, `holdsC_iff_holds`,
+`holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC` — over
+`TState`, with `StateInv := ⟨fun σ => holds σ I.fml⟩`.  Gone for good
+(the typed run makes them moot): `Invariant`/`Invariant.at` (now
+`StateInv`), `State.havoc`/`havoc_self`, `Val.evalB`, and the `Run.*`
+lemmas (now `TRun.*`).  The M3 versions are removed with this rewrite (their only user was `Examples/Tactics/CoreCallback.lean`,
+re-pinned to the typed relation).
+
+For W2 `sound`: `TypedRunWk.lean` imports `Calculus/Core/RunWk.lean` for
+`Thin.Over` and `Stmt.wk_over`/`Prog.wk_over` (syntax only), and
+`TypedRunFrame.lean` imports `Calculus/Core/RunFrame.lean` for
+`Prog.frame_some` and `frameMut` (syntax only).  Deleting the old
+`RunWk`/`RunFrame` means moving those into these two files first.
+
+Check: `TypedRunWk.lean` re-elaborates in about 7 s warm; `import Solidity`
+elaborates with every module (no name clash).
+
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)
 1. **`sound`** (the critical path)
    - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`.
@@ -736,11 +789,12 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
      - Rewrite links taken over from `ChainRewrites` on erasures (`Via.ofErase`). Only the direction from the erasure is needed.
      - `#chain` and `#derivation` on Core.
 4. **`tree`**
-   - Owns: new `Calculus/Core/{ProofTree,Sequents,Callback,Contracts}.lean`, `Tools/CoreInspect.lean`, `Calculus/Core/{Spec,Notation}.lean`.
+   - Owns: new `Calculus/Core/{ProofTree,Sequents,Callback,Contracts}.lean`, `Tools/CoreInspect.lean`, `Calculus/Core/{Spec,Notation}.lean`, `Semantics/Core/Callback.lean`.
    - Work:
      - ProofTree, `#proof_tree`, `#wp`, `#step`.
      - `sol_spec` on `cspec!`.
      - Callback taclets and `ProvesC`.
+     - The callback reading over `TState` (`Semantics/Core/Callback.lean`, removed by W1 `runlemmas`): `holdsC`/`ValidC`/`TransferSem`/`holdsT`/`ValidT` with `StateInv := ⟨fun σ => holds σ I.fml⟩`, `validT_*`, `after_frames_iff`, and `holdsC_iff_holds`, `holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC`, re-proved from `ExecP.forall_iff`, `ExecF.forall_iff` and `Prog.exec_run`. Then re-pin `Examples/Tactics/CoreCallback.lean` to them.
      - The **flip switch:** `open scoped Solidity.Core.Surface` makes `dl!`, `⊢`, `dl{}`, the chain notation and the `#` commands read Core. Tactics dispatch on the goal's head constant.
 
 **Merge order:** sound → symex → chains → tree. Each later lane merges `intrinsic` and re-checks its own files.
@@ -1665,7 +1719,9 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   hidden binders, as today's free locals range over every value, so the
   erasure is today's obligation exactly (`#guard`ed in
   `Examples/Tactics/CoreSpec.lean`).
-- **Callbacks** (`Semantics/Core/Callback.lean`): `Invariant.fml :
+- **Callbacks** (`Semantics/Core/Callback.lean`; superseded by W1
+  `runlemmas` (2026-10-08): `StateInv` over `TState`; `holdsC` and its
+  theorems removed until W2 `tree`): `Invariant.fml :
   Core.Fml C []`, read on a state's global part (`Invariant.at`), so no
   `I.vars = []` premise and no frame lemmas; `ExecS I : State C Γ →
   Stmt C Γ Γ' → COut C Γ' → Prop`, `ExecP`, and `ExecF` for a modality's
@@ -1717,7 +1773,9 @@ user).  What did not compile together, and how it was resolved:
   `MLoc.addr`); `Core.Stmt.run_declMem` (`SoundCalls.lean` now imports
   `SoundCapture.lean`'s); `Core.Invariant` (M3's run invariant in
   `Typing/Soundness.lean`, renamed `RunInv`, against the callback
-  invariant of `Semantics/Core/Callback.lean`, which keeps today's name).
+  invariant of `Semantics/Core/Callback.lean`, which kept today's name
+  until W1 `runlemmas` (2026-10-08) made it `StateInv`: the name
+  `Core.Invariant` is now free).
 - **`negativeKey` deleted** (`Examples/Tactics/Decide.lean`): `values[-1]`
   no longer elaborates since `UnOp.accepts .neg` is `int` only (M4 lane), as
   solc rejects it; a `uint` key is never negative.

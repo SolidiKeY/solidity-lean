@@ -1,35 +1,42 @@
 import Solidity.Semantics.Core.Callback
-import Solidity.Calculus.Core.Notation
 
 /-!
-# The callback reading on scoped formulas
+# The callback reading on typed runs
 
-`Semantics/Core/Callback.lean` used: an invariant is a closed scoped formula
-(`Core.Fml C []`, no closedness proof), and a modal formula over a program
-that pays, valid with callbacks, is valid without (`valid_of_validC`); with no
-payment the two readings agree (`holdsC_iff_holds`).
+`Semantics/Core/Callback.lean` used: a program that pays has, among its
+callback runs, the deterministic one, unless the invariant breaks on the way
+(`Prog.exec_run`); a program that pays nothing has only the deterministic
+one, so a fact of every callback run is decided by running it
+(`ExecP.forall_iff`).
 -/
 
 namespace Solidity.Examples.Tactics.CoreCallback
 
-open Solidity
+open Solidity Core
 
-local instance : InContract := ⟨StandardExample⟩
+private def pays : Solidity.Prog StandardExample := sol[StandardExample]{
+  uint to = 9; to.transfer(2); }
 
-/-- `total` is never below `alice.age`: a formula of the storage alone. -/
-def inv : Core.Invariant StandardExample := ⟨cdl!{ alice.age <= total }⟩
+open Lean Elab Command in
+run_cmd liftCoreM do
+  if let some e ← Prog.defineCore `Solidity.Examples.Tactics.CoreCallback.paysCore
+      ``StandardExample [] pays then
+    throwError "paysCore: {e}"
 
-/-- A precondition, then a program that pays: valid with callbacks, it is
-valid without. -/
-example (H : Core.ValidC inv cdl!{ alice.age == 0 → [ uint to = 9; to.transfer(2); ] true }) :
-    Core.Valid cdl!{ alice.age == 0 → [ uint to = 9; to.transfer(2); ] true } := by
-  intro σ
-  exact Core.holds_of_holdsC_imp (H σ) rfl rfl rfl
+/-- The program pays. -/
+example : Prog.hasTransfer paysCore = true := rfl
 
-/-- With no payment the two readings agree. -/
-example (σ : Core.State StandardExample []) :
-    Core.holdsC inv σ cdl!{ [ alice.age = 1; uint y = alice.age; ] y == 1 } ↔
-      Core.holds σ cdl!{ [ alice.age = 1; uint y = alice.age; ] y == 1 } :=
-  Core.holdsC_iff_holds _ rfl σ
+/-- Its deterministic run is a callback run, whatever the invariant, unless
+the invariant breaks at the payment. -/
+example (J : StateInv StandardExample) (σ : TState StandardExample []) :
+    ExecP J σ paysCore (.ofRes (Prog.trun σ paysCore)) ∨ ExecP J σ paysCore .violated :=
+  Prog.exec_run J paysCore σ
+
+/-- A failing guard pays nothing, so every callback run of it reverts, as
+its deterministic run does (by the kernel). -/
+example (J : StateInv StandardExample) :
+    ∀ o, ExecP J (TState.ofStorage Storage.standardExample) guardLowCore o →
+      o.halt? = some .revert :=
+  (ExecP.forall_iff rfl (fun o => o.halt? = some .revert)).2 (by decide +kernel)
 
 end Solidity.Examples.Tactics.CoreCallback
