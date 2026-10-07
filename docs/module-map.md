@@ -48,6 +48,7 @@ lemma (`TermTaclet.sound`).
 | `Syntax/Core.lean` | The typed syntax scoped (`Solidity.Core`, `docs/intrinsic.md`): `Stmt C Γ Γ'`/`Prog C Γ Γ'` over `Idx`, scoped branches and blocks, calls closed over their frame (`Args`, `CallRet`), the printers (names beside the context) and `Stmt.wk`.  Beside `Syntax.lean`'s until M4. |
 | `Syntax/Resolve.lean` | Between the two: `erase` (positions to names, a block to its statements) and `resolve` (names to the newest position, branches, loop bodies and call bodies as scopes, a memory return moved into the call's frame), `resolve_erase`, and `Prog.resolveCheck`, the elaborator's locals check. |
 | `Syntax/Splice.lean` | The elaborator's entry points, checked by `resolve` (`elabProg`, `elabProgAt`, `ctorProg`), `sol[C]{…}`/`sol{…}`, and their pins. |
+| `Syntax/CoreQuote.lean` | The scoped syntax quoted (`Core.Prog.quote`, `Idx` as `here`/`there`, proofs `Eq.refl`), contexts shared and the term hash-conses (`quoteShared`); `Prog.defineCore` resolves, quotes and declares a block for the kernel to check. |
 | `FreshNames.lean` | `FreshNames.ofTable`: the examples' names for the rules' fresh variables, one table per example; `FreshNames.clashes`. |
 | `SpecSyntax.lean` | The specification language (`SolSpec.g4`: `SpecExpr`, `spec!(…)`) and a function's clauses (`FunSpec`). |
 | `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`); a loop's run as the least fixed point of its unwinding (`Loop.run`, `Loop.run_rel`); a deployment's `Contract.deployState` and `Contract.deploy`. |
@@ -221,8 +222,9 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | Module | What it defines |
 |---|---|
 | `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member; the functions called by name as `contract!` members, callees first; the constructor (`ctor`, a root of the calls) and the state variables' initializers (`initMembers`, `initGap`). |
-| `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N` per function, `N.constructor : Prog N` (a deployment, `constructor(x̄);`), `N.report : List ImportRow`; one `evalExpr`. |
+| `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N` per function, `N.constructor : Prog N` (a deployment, `constructor(x̄);`), `N.report : List ImportRow`; one `evalExpr`.  `solc_scoped N`, the scoped syntax's lint: `N.f.core : Core.Prog N Γ Γ'` per program, checked by the kernel. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 449 programs and the report, pinned. |
+| `Solkey/TestSuiteScoped.lean` | `solc_scoped Solkey.TestSuite`: the 449 programs scoped, in a module of their own (the kernel's check is a third of the import's). |
 | `Solkey/Constructors.lean` | solkey's `Counter.sol` and `EtherWallet.sol` imported (`tests/solc/Counter.ast.json`, `tests/solc/EtherWallet.ast.json`): their constructors and initializers, and `EtherWallet`'s constructor obligation derived; `tests/solc/CtorGap.sol` and `tests/solc/InitGap.sol` pin what the import leaves out. |
 | `Frontend/Problems.lean` | `solc_problems N` (`N.f.problem : Fml N` per program; the constructor's `Problem.ctorFml`), `#solkey_problem`, `#solkey_scan`, `#solkey_derive?` (the replays to paste, when they fit `maxHeartbeats`), `#solkey_obligations` (derived, checked against `⊢ N.f.problem` and Lean's three axioms / pending). |
 | `TestSuite/Problems.lean` | The 437 statements of `Solkey.TestSuite`, two pinned in solkey's syntax, `initState_wt`. |
