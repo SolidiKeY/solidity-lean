@@ -34,7 +34,7 @@ expression and statement lemmas (`val_sim` … `stmt_sim`) and
 namespace Solidity.Evm
 namespace Core
 
-open Semantics hiding Ctx
+open Semantics
 open SemanticsProperties
 open Solidity.Core (Ctx Idx Ext)
 

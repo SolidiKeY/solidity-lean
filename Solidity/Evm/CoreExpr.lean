@@ -19,7 +19,7 @@ both revert) and `LocOut` (a slot pushed, or both revert), stated on
 namespace Solidity.Evm
 namespace Core
 
-open Semantics hiding Ctx
+open Semantics
 open SemanticsProperties
 open Solidity.Core (Ctx Idx Ext Env)
 

@@ -23,7 +23,7 @@ world paid (`compile_correct`'s third case).  A panic is the outcome of an
 namespace Solidity.Evm
 namespace Core
 
-open Semantics hiding Ctx
+open Semantics
 open SemanticsProperties
 open Solidity.Core (Ctx Idx Ext Env)
 
