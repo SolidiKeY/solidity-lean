@@ -24,13 +24,16 @@ typed values make it true of every state.
 The kit: a scoped term never panics (`Tm.eval_noPanic`, from
 `Calculus/NoPanic.lean`'s symbols), so neither does an update
 (`Upd.apply_noPanic`), and an update rule needs only that its update ends as
-the statement does (`Premise.Sound.update`).
+the statement does (`Premise.Sound.update`); a lowered expression reads what
+it evaluates to (`Val.eval_lower` and its kin, `Update.lean`'s
+`Val.lower_eval`).
 -/
 
 namespace Solidity.Core
 
 open Solidity (Modality Srt NoPanic Op0 Op1 Op2 Op3)
 open Semantics (Value Res Halt)
+open Solidity (readAddr)
 
 variable {C : Contract}
 
@@ -123,6 +126,66 @@ theorem Upd.apply_noPanic (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ
 
 end NoPanic
 
+/-! ## A lowered expression reads what it evaluates to -/
+
+section Lower
+
+variable {Γ : Ctx} (σ : State C Γ)
+
+mutual
+
+theorem SPath.eval_lower : {T : Ty} → (b : SPath C Γ T) → b.lower.eval σ = b.resolve σ
+  | _, .alias _ => rfl
+  | _, .loc l => Loc.eval_lower l
+
+theorem Loc.eval_lower : {T : Ty} → (l : Loc C Γ T) → l.lower.eval σ = l.resolve σ
+  | _, .root .. => rfl
+  | _, .field b f _ => by
+    simp only [Loc.lower, Tm.eval, Op1.eval, Loc.resolve, SPath.eval_lower b]
+  | _, .index _ b i => by
+    simp only [Loc.lower, Tm.eval, Op2.eval, Loc.resolve, SPath.eval_lower b, Val.eval_lower i]
+
+theorem MPath.eval_lower : {T : Ty} → (b : MPath C Γ T) →
+    b.lower.eval σ = (do (← b.mval σ).asRef)
+  | _, .var .. => rfl
+  | _, .loc l => by
+    simp only [MPath.lower, Tm.eval, Op2.eval, Op0.eval, MPath.mval, ← MLoc.eval_lower l,
+      bind_assoc, pure_bind]
+
+theorem MLoc.eval_lower : {T : Ty} → (l : MLoc C Γ T) →
+    (do readAddr σ.glob (← l.lower.eval σ)) = l.read σ
+  | _, .field b f _ => by
+    simp only [MLoc.lower, Tm.eval, Op1.eval, MLoc.read, MPath.eval_lower b, bind_assoc, pure_bind]
+    rfl
+  | _, .index _ b i => by
+    simp only [MLoc.lower, Tm.eval, Op2.eval, MLoc.read, MPath.eval_lower b, Val.eval_lower i,
+      bind_assoc, pure_bind]
+    rfl
+
+theorem Val.eval_lower : {p : PrimTy} → (v : Val C Γ p) → v.lower.eval σ = v.eval σ
+  | _, .simple s => Simple.eval_lower s σ
+  | _, .read l => by
+    simp only [Val.lower, Tm.eval, Op2.eval, Op0.eval, Val.eval, Loc.eval_lower l, pure_bind]
+  | _, .binop _ _ _ a b => by
+    simp only [Val.lower, Tm.eval, Op2.eval, Val.eval, Val.eval_lower a, Val.eval_lower b]
+  | _, .unop _ _ _ a => by
+    simp only [Val.lower, Tm.eval, Op1.eval, Val.eval, Val.eval_lower a]
+  | _, .ternary c a b => by
+    simp only [Val.lower, Tm.eval, Op3.eval, Val.eval, Val.eval_lower c, Val.eval_lower a,
+      Val.eval_lower b]
+  | _, .readMem l => by
+    simp only [Val.lower, Tm.eval, Op2.eval, Op0.eval, Val.eval, ← MLoc.eval_lower l, bind_assoc,
+      pure_bind]
+  | _, .len b _ => by
+    simp only [Val.lower, Tm.eval, Op2.eval, Op0.eval, Val.eval, SPath.eval_lower b, pure_bind]
+  | _, .mlen b _ => by
+    simp only [Val.lower, Tm.eval, Op2.eval, Op0.eval, Val.eval, MPath.eval_lower b, bind_assoc,
+      pure_bind]
+
+end
+
+end Lower
+
 /-! ## The premise shapes, as `Premise.Sound` -/
 
 section Shapes
@@ -154,6 +217,104 @@ theorem Premise.Sound.bind {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : S
     Premise.Sound m s (.bind x t P) σ :=
   fun ω κ φ => Premise.sound_bind σ hs ω κ φ
 
+/-- **A block of a declaration and a statement on top of it**, the local
+popped after: sound when the statement, from where the declaration leaves,
+runs as `s`, its local popped, and `s` halts where the declaration does
+(a capture: `T se = nse; s'`). -/
+theorem Premise.Sound.declThen {t : LTy} {d : Stmt C Γ (t :: Γ)} {s' : Stmt C (t :: Γ) (t :: Γ)}
+    {s : Stmt C Γ Γ} {σ : State C Γ}
+    (hok : ∀ τ, d.run σ = .ok τ → (s'.run τ).map (State.drop (.push .refl)) = s.run σ)
+    (herr : ∀ e, d.run σ = .error e → s.run σ = .error e) :
+    Premise.Sound m s (.unfold (.cons d (.cons s' .nil)) (.push .refl)) σ := by
+  refine Premise.Sound.unfold ?_
+  rw [Prog.run_cons]
+  cases hd : d.run σ with
+  | error e => rw [herr e hd]; rfl
+  | ok τ =>
+    rw [← hok τ hd]
+    show (Prog.run τ (.cons s' .nil)).map _ = _
+    rw [Prog.run_cons]
+    cases s'.run τ <;> rfl
+
+/-- **A value captured**: `T se = nse; s'`. -/
+theorem Premise.Sound.capture {p : PrimTy} {x : Var} {e : Val C Γ p}
+    {s' : Stmt C (.val p :: Γ) (.val p :: Γ)} {s : Stmt C Γ Γ} {σ : State C Γ}
+    (hok : ∀ v, e.eval σ = .ok v → (s'.run (σ.push v)).map (State.drop (.push .refl)) = s.run σ)
+    (herr : ∀ h, e.eval σ = .error h → s.run σ = .error h) :
+    Premise.Sound m s (.capture p x e s') σ :=
+  fun ω κ φ => Premise.sound_capture σ hok herr ω κ φ
+
+/-- **A storage path captured**: `T storage sp = nsp; s'`. -/
+theorem Premise.Sound.captureSP {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
+    {s' : Stmt C (.alias R :: Γ) (.alias R :: Γ)} {s : Stmt C Γ Γ} {σ : State C Γ}
+    (hok : ∀ q, b.resolve σ = .ok q →
+      (s'.run (σ.push (t := .alias R) (some q))).map (State.drop (.push .refl)) = s.run σ)
+    (herr : ∀ h, b.resolve σ = .error h → s.run σ = .error h) :
+    Premise.Sound m s (.captureSP x b s') σ := by
+  refine Premise.Sound.declThen (fun τ hτ => ?_) (fun e he => ?_)
+  · have hd : Stmt.run σ (.declStorage R x (some (.path b))) =
+        (do let q ← b.resolve σ; pure (σ.push (t := .alias R) (some q))) := by
+      show Run.declStorage R (some (.path b)) σ = _
+      simp only [Run.declStorage, ARhs.eval, bind_assoc, pure_bind]
+    rw [hd] at hτ
+    cases hb : b.resolve σ with
+    | error => rw [hb] at hτ; cases hτ
+    | ok q => rw [hb] at hτ; cases hτ; exact hok q hb
+  · have hd : Stmt.run σ (.declStorage R x (some (.path b))) =
+        (do let q ← b.resolve σ; pure (σ.push (t := .alias R) (some q))) := by
+      show Run.declStorage R (some (.path b)) σ = _
+      simp only [Run.declStorage, ARhs.eval, bind_assoc, pure_bind]
+    rw [hd] at he
+    cases hb : b.resolve σ with
+    | error h => rw [hb] at he; cases he; exact herr _ hb
+    | ok q => rw [hb] at he; cases he
+
+/-- **A memory path captured**: `T memory mv = nmp; s'`. -/
+theorem Premise.Sound.captureMV {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
+    {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} {σ : State C Γ}
+    (hok : ∀ id, (do (← b.mval σ).asRef) = .ok id →
+      (s'.run (σ.push (t := .mem R) id)).map (State.drop (.push .refl)) = s.run σ)
+    (herr : ∀ h, (do (← b.mval σ).asRef) = .error h → s.run σ = .error h) :
+    Premise.Sound m s (.captureMV x b s') σ := by
+  have hd : Stmt.run σ (.declMem R x (some (.alias b)) rfl b.mapFree) =
+      (do let id ← (do (← b.mval σ).asRef); pure (σ.push (t := .mem R) id)) := by
+    show Run.declMem R (some (.alias b)) σ = _
+    simp only [Run.declMem, MRhs.eval, bind_assoc, pure_bind]
+  show Premise.Sound m s (.unfold (.cons (.declMem R x (some (.alias b)) rfl b.mapFree)
+    (.cons s' .nil)) (.push .refl)) σ
+  refine Premise.Sound.declThen (fun τ hτ => ?_) (fun e he => ?_)
+  · rw [hd] at hτ
+    revert hτ hok
+    cases (do (← b.mval σ).asRef : Res Nat) with
+    | error => intro _ h; cases h
+    | ok id => intro hok h; cases h; exact hok id rfl
+  · rw [hd] at he
+    revert he herr
+    cases (do (← b.mval σ).asRef : Res Nat) with
+    | error h => intro herr he; cases he; exact herr _ rfl
+    | ok id => intro _ h; cases h
+
 end Shapes
+
+/-! ## A state with a local pushed -/
+
+section Push
+
+variable {Γ : Ctx} {t : LTy} (σ : State C Γ) (w : t.Denote C)
+
+theorem State.push_setLocal {u : LTy} (i : Idx Γ u) (x : u.Denote C) :
+    (σ.push w).setLocal i.there x = (σ.setLocal i x).push w := rfl
+
+theorem State.push_withGlob (g : Semantics.State) :
+    (σ.push w).withGlob g = (σ.withGlob g).push w := rfl
+
+theorem State.drop_push : (σ.push w).drop (.push .refl) = σ := rfl
+
+theorem State.get_push_here : (Env.get .here (σ.push w).env : t.Denote C) = w := rfl
+
+theorem State.get_push_there {u : LTy} (i : Idx Γ u) :
+    (Env.get i.there (σ.push w).env : u.Denote C) = Env.get i σ.env := rfl
+
+end Push
 
 end Solidity.Core
