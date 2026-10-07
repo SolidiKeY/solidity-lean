@@ -151,6 +151,55 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
   reads it after the `if`, which scoped branches forbid; it needs a lowering
   that declares `mv` before the `if` without allocating.
 
+### M5 notes
+
+- M5.1 (lane `intrinsic-evm`, 2026-10-07): `Evm/CoreCompile.lean` compiles
+  `Core.Stmt`/`Core.Prog`, total, beside `Evm/Compile.lean`.
+  - A local of `Γ` at position `i` lives at level `b + (Γ.length - 1 - i)`;
+    `b` is the frame base, `0` for the program, the caller's next free level
+    for a call's body (closed over `rs ++ ps`: parameters from the base, then
+    the return variables).  `Machine.mem` stays `Var → Word` while the old
+    compiler lives: a level `l` is the cell `cell l` (`.fresh "%" l`, printed
+    `%l`), and `Machine.memAt` is the level-addressed view.  A scope's cells
+    are not cleared at its end; a declaration always writes its cell.
+  - `inFrag : Frag Γ → Stmt C Γ Γ' → Option (Frag Γ')`.  `Frag Γ` is one flag
+    per local (`ok`, `fragile`, `dead`): the alias facts `TyCtx` kept beside
+    the types.  An unset `T storage p;` is `dead`.  A branch's or block's
+    result is restricted to `Γ` (`Frag.restrict`, a `drop` by lengths, so no
+    `Prog.ext` is needed) and the branches met.  A call's body is checked from
+    `Frag.init (rs ++ ps)`; the caller's fragile aliases are dropped when the
+    body may shrink an array (`Stmt.shrinks`), which the shared `TyCtx` did
+    implicitly.  Out, as before: memory, `send`, `try`, loops, a call of
+    several returns (`CallRet.rets`, no code) or of a memory return.
+  - Every definition over `Stmt`/`Prog` lists all 27 constructors, with no
+    catch-all, and nested shapes go to helpers (`assignCode`, `opLocCode`,
+    `assignIn`, `declStorageIn`).  A catch-all arm made the equation compiler
+    fail to build the splitter for an indexed `Stmt C Γ Γ'`, so no equation
+    lemmas and no `simp [compileStmt]`.
+  - `compileStmt_erase`/`compileProg_erase`: `⌊compileStmt b s⌋ =
+    ⌊Evm.compileProg (s.erase ns)⌋` (`⌊·⌋` maps `Instr.forgetCell`, which
+    forgets `mload`/`mstore` operands), for `s` with `Stmt.sepArgs ns s`.
+    Axioms: `propext`.  Cells differ by design.  `sepArgs` is needed because
+    `erase` of a call with unseparated arguments binds them in the body after
+    the return variable is zeroed (same words, another order).
+  - `Evm/CoreExamples.lean` ports the 45 compile `decide` examples of
+    `Evm/Examples.lean` (not the five interpreter theorems: they need the M5
+    `compile_correct`), plus a scoped-branch run, a `pop` in a branch
+    forgetting an outer fragile alias, and `sameCode` on 14 programs.
+    Programs come from `sol{}` through `Prog.resolve`, which the
+    elaborator's `whnf` does not reduce, so they run under `decide +kernel`
+    (the kernel evaluates the resolution too).  Timing, the 44 non-`**`
+    examples as one block (`Elab.async false`, two runs on a loaded machine):
+    old `decide` 2.5–4.0 s, old `decide +kernel` 1.8–2.4 s, new 2.3–3.3 s
+    (1.3–1.4× the old kernel run, 0.8–0.9× the committed `decide`);
+    `pow_run` 3.5–5.5 s in all three.
+- Left for M5: `compile_correct` over `Core` (`Sim` by levels through
+  `memAt`, `Sim.bindVal`/`bindAlias` as `Env.cons`, needs M3's `State C Γ`);
+  `Core` twins of `pushes`/`pays`; a quoter-built program (M2.3) to time
+  the compiler without the kernel's resolution; the proof that `resolve`
+  returns `sepArgs` statements; `Machine.mem : Nat → Word` once
+  `Evm/Compile.lean` retires.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean

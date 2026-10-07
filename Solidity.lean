@@ -149,6 +149,8 @@ import Solidity.Counterexamples.WellTypedNecessity
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.StaticRuntimeSort
 import Solidity.Evm.Examples
+import Solidity.Evm.CoreCompile
+import Solidity.Evm.CoreExamples
 import Solidity.Tools.Show
 import Solidity.Tools.Common
 import Solidity.Tools.Run
