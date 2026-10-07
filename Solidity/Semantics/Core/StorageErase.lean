@@ -14,10 +14,9 @@ One copy needs a hypothesis: a struct is copied member by member in order
 (solc), and the untyped `overlay` looks each member up by name, which agrees
 when a struct's members have distinct names (`TyNodup`; `BadDup` does not).
 
-The copies between storage and memory still go through the untyped heap
-(M4c types it): `SVal.copyToMem` is `copyStToM` on the erasure, which is
-never stuck on a type without mappings, and `SVal.ofU` reads a copied-back
-value at its type.
+`copyStToM` is never stuck on a type without mappings (`SVal.copyStToM_ok`),
+and `SVal.ofU` reads an untyped value back at its type.  The typed copies
+between storage and memory are `Semantics/Core/Heap.lean`'s.
 -/
 
 namespace Solidity.Core
@@ -685,13 +684,11 @@ theorem writeStorage_erase (hs : σ.storage = st.erase) {T : Ty} (hT : TyNodup T
 
 end Storage
 
-/-! ## Copies through the untyped heap
+/-! ## Copies, and untyped values read back
 
-Until the heap is typed (M4c), a copy between storage and memory goes through
-the untyped one: storage to memory copies the erasure, which is never stuck
-on a type without mappings, and memory to storage reads the copied value
-back at its type (`SVal.ofU`), which can fail only on a heap that does not
-fit the type. -/
+Storage to memory copies the erasure without getting stuck on a type without
+mappings; an untyped value reads back at its type (`SVal.ofU`) exactly when
+it has that type's shape. -/
 
 theorem mapFree_structDef : ∀ s ∈ mapFreeStructs, ∀ fT ∈ structDef s, fT.2.mapFree = true := by
   decide
@@ -740,25 +737,6 @@ theorem SVec.copyStElems_ok : {E : Ty} → {n : Nat} → (l : SVec E n) → E.ma
     obtain ⟨⟨s₂, mr⟩, h₂⟩ := SVec.copyStElems_ok rest h s₁
     exact ⟨_, by simp only [SVec.erase, Semantics.copyStElems, h₁, bind, Except.bind, h₂]; rfl⟩
 end
-
-/-- A storage value copied into fresh memory objects (`copySt`): never stuck
-on a type without mappings. -/
-def SVal.copyToMem (s : Semantics.State) {T : Ty} (v : SVal T) (h : T.mapFree = true) :
-    Semantics.State × Semantics.MVal :=
-  match hc : Semantics.copyStToM s v.erase with
-  | .ok r => r
-  | .error _ => absurd hc (by
-      obtain ⟨r, hr⟩ := v.copyStToM_ok h s
-      rw [hr]
-      exact Except.noConfusion)
-
-theorem SVal.copyStToM_erase (s : Semantics.State) {T : Ty} (v : SVal T) (h : T.mapFree = true) :
-    Semantics.copyStToM s v.erase = .ok (v.copyToMem s h) := by
-  obtain ⟨r, hr⟩ := v.copyStToM_ok h s
-  unfold SVal.copyToMem
-  split
-  · rename_i r' hc; exact hc
-  · rename_i hc; rw [hr] at hc; cases hc
 
 mutual
 /-- An untyped storage value read at a type: `none` where it does not fit. -/
@@ -972,29 +950,6 @@ theorem SMap.erase_of_ofU : (l : List (Int × Semantics.SVal)) → {V : Ty} → 
       simp only [SMap.erase, SVal.erase_of_ofU w hx, SMap.erase_of_ofU rest hys]
     · cases h
 end
-
-/-- A memory value copied to storage (`copyMem`) and read at its type: stuck
-only where the untyped heap does not fit `T` (M4c types the heap). -/
-def SVal.copyFromMem (s : Semantics.State) (mv : Semantics.MVal) (T : Ty) :
-    Semantics.Res (SVal T) := do
-  let w ← Semantics.copyMem s mv
-  match SVal.ofU w T with
-  | some v => pure v
-  | none => .error .stuck
-
-theorem SVal.copyMem_erase {s : Semantics.State} {mv : Semantics.MVal} {T : Ty} {v : SVal T}
-    (h : SVal.copyFromMem s mv T = .ok v) : Semantics.copyMem s mv = .ok v.erase := by
-  unfold SVal.copyFromMem at h
-  cases hc : Semantics.copyMem s mv with
-  | error e => rw [hc] at h; cases h
-  | ok w =>
-    rw [hc] at h
-    simp only [bind, Except.bind] at h
-    split at h
-    · rename_i x hx
-      cases h
-      rw [SVal.erase_of_ofU w hx]
-    · cases h
 
 /-! ## The stores
 

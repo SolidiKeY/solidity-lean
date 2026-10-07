@@ -19,6 +19,8 @@ import Solidity.Semantics.Core.Value
 import Solidity.Semantics.Core.Ops
 import Solidity.Semantics.Core.Storage
 import Solidity.Semantics.Core.StorageErase
+import Solidity.Semantics.Core.Heap
+import Solidity.Semantics.Core.HeapErase
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules

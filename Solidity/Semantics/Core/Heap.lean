@@ -1,0 +1,363 @@
+import Solidity.Semantics.Core.StorageErase
+
+/-!
+# Typed heap
+
+Memory typed by the objects it holds (`docs/intrinsic.md`, M4c): a heap
+typing `H : HTy` lists each object's type, oldest first, so an object's
+identity is its position, and a memory value of type `T` (`MVal H T`) is a
+word of `T` or a reference `HRef H R`, an identity `H` types at `R`.  An
+object of type `R` (`MObj H R`) holds a struct's members in `structDef`'s
+order, an array's elements, or exactly `n` elements of a `T[n]`; a mapping
+type has none (`Empty`), so a heap holds no mapping.  These are computed from
+the typing, as `Env` is from its context (Gate G0, condition 4): no indexed
+family, no cast but the one at an object's own type.
+
+Allocation appends, so it returns a heap over `H ++ [R]` and the reference,
+and everything typed over `H` is weakened along the prefix (`H <+: H'`, the
+returned extension that replaces `HeapTy.Extends`).  A weakening keeps every
+identity, so it erases to the same untyped value.
+
+The two copies follow `Semantics.lean`'s line for line, allocating in the
+same order, so identities agree: `SVal.copyStToM` (storage to memory) needs
+a type without mappings and cannot fail, and `MVal.copyMToSt` (memory to
+storage) recurses on the type, by rank and inside one rank structurally, as
+`SVal.dflt` does: a reference's target has a smaller type, so there is no
+cycle to guard against and no stuck arm.
+
+The untyped heap is the erasure: object `i` at key `i`, `nextId` the length
+of the typing (`Semantics/Core/HeapErase.lean` proves the agreement).
+-/
+
+namespace Solidity.Core
+
+open Semantics (structDef lookupBy setBy tyRank fieldsRank structRank)
+
+/-- A heap typing: each memory object's type, by identity, oldest first. -/
+abbrev HTy := List RefTy
+
+/-- A reference to a memory object of type `R`: its identity. -/
+structure HRef (H : HTy) (R : RefTy) where
+  id : Nat
+  get? : H[id]? = some R
+
+theorem HTy.getElem?_of_prefix {H H' : HTy} {i : Nat} {R : RefTy} (e : H <+: H')
+    (h : H[i]? = some R) : H'[i]? = some R := by
+  obtain ⟨t, rfl⟩ := e
+  rw [List.getElem?_append_left (List.getElem?_eq_some_iff.mp h).1]
+  exact h
+
+/-- A reference into a grown heap. -/
+def HRef.wk {H H' : HTy} {R : RefTy} (e : H <+: H') (r : HRef H R) : HRef H' R :=
+  ⟨r.id, HTy.getElem?_of_prefix e r.get?⟩
+
+/-- A memory slot of type `T`: a word, or a reference to an object. -/
+def MVal (H : HTy) : Ty → Type
+  | .prim p => p.Denote
+  | .ref R => HRef H R
+
+/-- A struct object's members, one per member, in the members' order. -/
+def MFields (H : HTy) : List (Name × Ty) → Type
+  | [] => Unit
+  | (_, T) :: fs => MVal H T × MFields H fs
+
+/-- A memory object of type `R`.  A mapping has none. -/
+def MObj (H : HTy) : RefTy → Type
+  | .struct s => MFields H (structDef s)
+  | .array E => List (MVal H E)
+  | .fixed E n => {l : List (MVal H E) // l.length = n}
+  | .mapping _ _ => Empty
+
+/-- One object per type in `Rs`. -/
+def Objs (H : HTy) : List RefTy → Type
+  | [] => Unit
+  | R :: Rs => MObj H R × Objs H Rs
+
+/-- A heap: one object per identity its typing lists. -/
+abbrev Heap (H : HTy) : Type := Objs H H
+
+/-! ## Weakening -/
+
+def MVal.wk {H H' : HTy} (e : H <+: H') : (T : Ty) → MVal H T → MVal H' T
+  | .prim _, v => v
+  | .ref _, r => HRef.wk e (r : HRef H _)
+
+def MFields.wk {H H' : HTy} (e : H <+: H') : (fs : List (Name × Ty)) → MFields H fs → MFields H' fs
+  | [], _ => ()
+  | (_, T) :: fs, x => (MVal.wk e T x.1, MFields.wk e fs x.2)
+
+def MObj.wk {H H' : HTy} (e : H <+: H') : (R : RefTy) → MObj H R → MObj H' R
+  | .struct s, o => MFields.wk e (structDef s) o
+  | .array E, o => (o : List (MVal H E)).map (MVal.wk e E)
+  | .fixed E n, o =>
+    let o : {l : List (MVal H E) // l.length = n} := o
+    ⟨o.1.map (MVal.wk e E), by rw [List.length_map]; exact o.2⟩
+  | .mapping _ _, o => (o : Empty).elim
+
+def Objs.wk {H H' : HTy} (e : H <+: H') : (Rs : List RefTy) → Objs H Rs → Objs H' Rs
+  | [], _ => ()
+  | R :: Rs, os => (MObj.wk e R os.1, Objs.wk e Rs os.2)
+
+/-! ## Objects by identity -/
+
+/-- The object at position `i`. -/
+def Objs.get {H : HTy} {R : RefTy} : (Rs : List RefTy) → Objs H Rs → (i : Nat) →
+    Rs[i]? = some R → MObj H R
+  | [], _, _, h => absurd h (by simp only [List.getElem?_nil, reduceCtorEq, not_false_eq_true])
+  | R' :: _, os, 0, h =>
+    (Option.some.inj (by simpa only [List.getElem?_cons_zero] using h) : R' = R) ▸ os.1
+  | _ :: Rs, os, i + 1, h =>
+    Objs.get Rs os.2 i (by simpa only [List.getElem?_cons_succ] using h)
+
+/-- The object at position `i` replaced. -/
+def Objs.set {H : HTy} {R : RefTy} : (Rs : List RefTy) → Objs H Rs → (i : Nat) →
+    Rs[i]? = some R → MObj H R → Objs H Rs
+  | [], os, _, _, _ => os
+  | R' :: _, os, 0, h, o =>
+    (((Option.some.inj (by simpa only [List.getElem?_cons_zero] using h) : R' = R).symm ▸ o),
+      os.2)
+  | _ :: Rs, os, i + 1, h, o =>
+    (os.1, Objs.set Rs os.2 i (by simpa only [List.getElem?_cons_succ] using h) o)
+
+/-- `o` appended after the objects of `Rs`. -/
+def Objs.snoc {H : HTy} {R : RefTy} (o : MObj H R) : (Rs : List RefTy) → Objs H Rs →
+    Objs H (Rs ++ [R])
+  | [], _ => (o, ())
+  | _ :: Rs, os => (os.1, Objs.snoc o Rs os.2)
+
+namespace Heap
+
+variable {H : HTy}
+
+/-- The object a reference names (`State.getObj`). -/
+def get {R : RefTy} (hp : Heap H) (r : HRef H R) : MObj H R := Objs.get H hp r.id r.get?
+
+/-- The object a reference names replaced (`State.setObj`). -/
+def set {R : RefTy} (hp : Heap H) (r : HRef H R) (o : MObj H R) : Heap H :=
+  Objs.set H hp r.id r.get? o
+
+/-- A fresh object (`State.alloc`): the heap grows by its type. -/
+def alloc {R : RefTy} (hp : Heap H) (o : MObj H R) : Heap (H ++ [R]) × HRef (H ++ [R]) R :=
+  let e := List.prefix_append H [R]
+  (Objs.snoc (MObj.wk e R o) H (Objs.wk e H hp),
+    ⟨H.length, by simp only [List.getElem?_append_right (Nat.le_refl _), Nat.sub_self,
+      List.getElem?_cons_zero]⟩)
+
+end Heap
+
+/-! ## Members and elements -/
+
+/-- The value of the first member named `f` (`lookupBy`). -/
+def MFields.get {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T : Ty} → MFields H fs →
+    lookupBy f fs = some T → MVal H T
+  | [], _, _, h => absurd h (by simp only [lookupBy, reduceCtorEq, not_false_eq_true])
+  | (f', T') :: fs, T, x, h =>
+    if e : f = f' then
+      (SFields.lookupBy_cons_pos e h ▸ (x.1 : MVal H T') : MVal H T)
+    else MFields.get fs x.2 (SFields.lookupBy_cons_neg e h)
+
+/-- The first member named `f` replaced (`setBy`). -/
+def MFields.set {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T : Ty} → MFields H fs →
+    lookupBy f fs = some T → MVal H T → MFields H fs
+  | [], _, x, _, _ => x
+  | (f', T') :: fs, _, x, h, v =>
+    if e : f = f' then
+      (((SFields.lookupBy_cons_pos e h).symm ▸ v : MVal H T'), x.2)
+    else (x.1, MFields.set fs x.2 (SFields.lookupBy_cons_neg e h) v)
+
+/-- An array object's elements, either kind. -/
+def MObj.elems {H : HTy} : {R : RefTy} → {E : Ty} → ArrTy R E → MObj H R → List (MVal H E)
+  | _, _, .dyn, o => o
+  | _, _, .fixed, o => o.1
+
+/-- An array object with element `i` replaced. -/
+def MObj.setElem {H : HTy} : {R : RefTy} → {E : Ty} → ArrTy R E → MObj H R → Nat → MVal H E →
+    MObj H R
+  | _, _, .dyn, o, i, v => (o : List _).set i v
+  | _, _, .fixed, o, i, v => ⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩
+
+namespace Heap
+
+variable {H : HTy}
+
+/-- `mv.f` (`MLoc.read`'s member arm). -/
+def field {s f : Name} {T : Ty} (hp : Heap H) (r : HRef H (.struct s))
+    (h : lookupBy f (structDef s) = some T) : MVal H T :=
+  MFields.get (structDef s) (hp.get r) h
+
+/-- `mv.f = v` (`memWriteField`). -/
+def setField {s f : Name} {T : Ty} (hp : Heap H) (r : HRef H (.struct s))
+    (h : lookupBy f (structDef s) = some T) (v : MVal H T) : Heap H :=
+  hp.set r (MFields.set (structDef s) (hp.get r) h v)
+
+/-- `mv[i]` (`MLoc.read`'s index arm): `none`, a revert, out of bounds. -/
+def index {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (i : Int) :
+    Option (MVal H E) :=
+  if 0 ≤ i then (MObj.elems a (hp.get r))[i.toNat]? else none
+
+/-- `mv[i] = v` (`memWriteIndex`): `none`, a revert, out of bounds. -/
+def setIndex {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (i : Int)
+    (v : MVal H E) : Option (Heap H) :=
+  if 0 ≤ i ∧ i.toNat < (MObj.elems a (hp.get r)).length then
+    some (hp.set r (MObj.setElem a (hp.get r) i.toNat v))
+  else none
+
+/-- `mv.length` (`memArrayLen`). -/
+def len {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) : Nat :=
+  (MObj.elems a (hp.get r)).length
+
+end Heap
+
+/-! ## Storage to memory (`copySt`) -/
+
+/-- A heap grown by allocations, and a value over its typing. -/
+structure Grown (H : HTy) (α : HTy → Type) where
+  {H' : HTy}
+  ext : H <+: H'
+  heap : Heap H'
+  val : α H'
+
+/-- A grown heap with one more object, the value its reference. -/
+def Grown.alloc {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) : Grown H (MVal · (.ref R)) :=
+  let a := g.heap.alloc g.val
+  ⟨g.ext.trans (List.prefix_append _ _), a.1, a.2⟩
+
+mutual
+/-- A storage value deep-copied into fresh objects (`copyStToM`), members and
+elements first, as the untyped copy allocates. -/
+def SVal.copyStToM {H : HTy} (hp : Heap H) : {T : Ty} → SVal T → T.mapFree = true →
+    Grown H (MVal · T)
+  | _, .prim v, _ => ⟨List.prefix_refl H, hp, v⟩
+  | _, @SVal.struct s fs, h =>
+    Grown.alloc (R := .struct s) (SFields.copyStToM hp fs
+      (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h)))
+  | _, @SVal.array E e _, h =>
+    Grown.alloc (R := .array E) (SList.copyStToM hp e (by simpa only [Ty.mapFree] using h))
+  | _, @SVal.fixed E n e, h =>
+    Grown.alloc (R := .fixed E n) (SVec.copyStToM hp e (by simpa only [Ty.mapFree] using h))
+  | _, .map _ _, h => absurd h (by simp only [Ty.mapFree, Bool.false_eq_true, not_false_eq_true])
+
+def SFields.copyStToM {H : HTy} (hp : Heap H) : {fs : List (Name × Ty)} → SFields fs →
+    (∀ fT ∈ fs, fT.2.mapFree = true) → Grown H (MFields · fs)
+  | _, .nil, _ => ⟨List.prefix_refl H, hp, ()⟩
+  | _, @SFields.cons _ T _ v rest, h =>
+    let g₁ := SVal.copyStToM hp v (h _ List.mem_cons_self)
+    let g₂ := SFields.copyStToM g₁.heap rest (fun fT hm => h fT (List.mem_cons_of_mem _ hm))
+    ⟨g₁.ext.trans g₂.ext, g₂.heap, (MVal.wk g₂.ext T g₁.val, g₂.val)⟩
+
+def SList.copyStToM {H : HTy} (hp : Heap H) : {E : Ty} → SList E → E.mapFree = true →
+    Grown H (fun H' => List (MVal H' E))
+  | _, .nil, _ => ⟨List.prefix_refl H, hp, []⟩
+  | E, .cons v rest, h =>
+    let g₁ := SVal.copyStToM hp v h
+    let g₂ := SList.copyStToM g₁.heap rest h
+    ⟨g₁.ext.trans g₂.ext, g₂.heap, MVal.wk g₂.ext E g₁.val :: g₂.val⟩
+
+def SVec.copyStToM {H : HTy} (hp : Heap H) : {E : Ty} → {n : Nat} → SVec E n → E.mapFree = true →
+    Grown H (fun H' => {l : List (MVal H' E) // l.length = n})
+  | _, _, .nil, _ => ⟨List.prefix_refl H, hp, ⟨[], rfl⟩⟩
+  | E, _, .cons v rest, h =>
+    let g₁ := SVal.copyStToM hp v h
+    let g₂ := SVec.copyStToM g₁.heap rest h
+    ⟨g₁.ext.trans g₂.ext, g₂.heap,
+      ⟨MVal.wk g₂.ext E g₁.val :: g₂.val.1, congrArg (· + 1) g₂.val.2⟩⟩
+end
+
+/-- A fresh default object (`allocDefault`). -/
+def Heap.allocDefault {H : HTy} (hp : Heap H) (R : RefTy) (h : (Ty.ref R).mapFree = true) :
+    Grown H (MVal · (.ref R)) :=
+  (SVal.dflt (.ref R)).copyStToM hp h
+
+/-! ## Memory to storage (`copyMem`) -/
+
+/-- `n` values of a list of length `n`, mapped into a vector. -/
+def SVec.ofLen {α : Type} {E : Ty} (f : α → SVal E) : (n : Nat) → (l : List α) → l.length = n →
+    SVec E n
+  | 0, [], _ => .nil
+  | n + 1, x :: xs, h => .cons (f x) (SVec.ofLen f n xs (Nat.succ.inj h))
+  | 0, _ :: _, h => absurd h (by simp only [List.length_cons, Nat.add_one_ne_zero,
+      not_false_eq_true])
+  | _ + 1, [], h => absurd h (by simp only [List.length_nil, Nat.zero_ne_add_one,
+      not_false_eq_true])
+
+section CopyMem
+
+variable {H : HTy} (hp : Heap H)
+
+/-- A struct object's members copied, given the copies below rank `k`. -/
+def MFields.copyBelow (k : Nat) (ih : (T : Ty) → tyRank T < k → MVal H T → SVal T) :
+    (fs : List (Name × Ty)) → fieldsRank fs < k → MFields H fs → SFields fs
+  | [], _, _ => .nil
+  | (_, T) :: fs, h, x =>
+    .cons (ih T (Nat.lt_of_le_of_lt (Nat.le_max_left _ _) h) x.1)
+      (MFields.copyBelow k ih fs (Nat.lt_of_le_of_lt (Nat.le_max_right _ _) h) x.2)
+
+mutual
+/-- The copies of rank at most `k`, given those below. -/
+def MVal.copyAt (k : Nat) (ih : (T : Ty) → tyRank T < k → MVal H T → SVal T) :
+    (T : Ty) → tyRank T < k + 1 → MVal H T → SVal T
+  | .prim _, _, v => .prim v
+  | .ref R, h, r => MVal.copyRefAt k ih R h r
+
+def MVal.copyRefAt (k : Nat) (ih : (T : Ty) → tyRank T < k → MVal H T → SVal T) :
+    (R : RefTy) → tyRank (.ref R) < k + 1 → HRef H R → SVal (.ref R)
+  | .struct s, h, r =>
+    .struct (MFields.copyBelow k ih (structDef s)
+      (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (Nat.le_of_lt_succ h)) (hp.get r))
+  | .array E, h, r =>
+    .array (.ofList (((hp.get r : List (MVal H E))).map
+      (MVal.copyAt k ih E (by simpa only [tyRank] using h)))) .nil
+  | .fixed E n, h, r =>
+    let o : {l : List (MVal H E) // l.length = n} := hp.get r
+    .fixed (SVec.ofLen (MVal.copyAt k ih E (Nat.lt_of_succ_lt (by simpa only [tyRank] using h)))
+      n o.1 o.2)
+  | .mapping _ _, _, r => (hp.get r : Empty).elim
+end
+
+/-- The copies below rank `k`. -/
+def MVal.copyBelow : (k : Nat) → (T : Ty) → tyRank T < k → MVal H T → SVal T
+  | 0, _, h, _ => absurd h (Nat.not_lt_zero _)
+  | k + 1, T, h, v => MVal.copyAt hp k (MVal.copyBelow k) T h v
+
+/-- A memory value deep-copied to storage (`copyMToSt`, `copyMem`). -/
+def MVal.copyMToSt {T : Ty} (v : MVal H T) : SVal T :=
+  MVal.copyBelow hp (tyRank T + 1) T (Nat.lt_succ_self _) v
+
+end CopyMem
+
+/-! ## Erasure -/
+
+/-- The untyped slot. -/
+def MVal.erase {H : HTy} : (T : Ty) → MVal H T → Semantics.MVal
+  | .prim p, v => .prim (PrimTy.erase (p := p) v)
+  | .ref _, r => .ref (r : HRef H _).id
+
+def MFields.erase {H : HTy} : (fs : List (Name × Ty)) → MFields H fs → List (Name × Semantics.MVal)
+  | [], _ => []
+  | (f, T) :: fs, x => (f, MVal.erase T x.1) :: MFields.erase fs x.2
+
+/-- The untyped object: a struct's members named, an array marked fixed or not. -/
+def MObj.erase {H : HTy} : (R : RefTy) → MObj H R → Semantics.MObj
+  | .struct s, o => .struct (MFields.erase (structDef s) o)
+  | .array E, o => .array ((o : List (MVal H E)).map (MVal.erase E)) false
+  | .fixed E n, o =>
+    .array ((o : {l : List (MVal H E) // l.length = n}).1.map (MVal.erase E)) true
+  | .mapping _ _, o => (o : Empty).elim
+
+/-- The untyped objects, keyed from `start`. -/
+def Objs.erase {H : HTy} (start : Nat) : (Rs : List RefTy) → Objs H Rs →
+    List (Nat × Semantics.MObj)
+  | [], _ => []
+  | R :: Rs, os => (start, MObj.erase R os.1) :: Objs.erase (start + 1) Rs os.2
+
+/-- The untyped heap: object `i` at key `i`. -/
+def Heap.erase {H : HTy} (hp : Heap H) : List (Nat × Semantics.MObj) := Objs.erase 0 H hp
+
+/-- An untyped state holding a typed heap: `nextId` the next position. -/
+def Heap.into {H : HTy} (σ : Semantics.State) (hp : Heap H) : Semantics.State :=
+  { σ with heap := hp.erase, nextId := H.length }
+
+/-- The empty heap. -/
+def Heap.empty : Heap [] := ()
+
+end Solidity.Core
