@@ -24,7 +24,9 @@ list of roots.  `wt(storage)` (`Fml.wt`) assumes most of what Solidity
 guarantees of a deployed contract's storage: every root there, in order,
 canonical and tight, which is exactly reachable (`shape_iff_reachable`,
 for every word, key and slot in range), and every word in its type's range
-(`storageWtB`, `wt_iff_reachable`).
+(`storageWtB`, `wt_iff_reachable`).  Reachable is by the scoped interpreter
+(`Reachable`); the untyped one `holds` reads is not yet related to it
+(`docs/intrinsic.md`, M2–M3 review).
 It does not bound a dynamic array's length, which solc keeps at most
 `2^64` (`push` panics, 0x41, on an array already that long), and the
 model's `push` (`pushOn`) never panics.  The delta cuts both ways.  A
