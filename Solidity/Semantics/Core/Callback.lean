@@ -225,7 +225,8 @@ inductive ExecS (I : Invariant C) : {Γ Γ' : Ctx} → State C Γ → Stmt C Γ 
   /-- A call whose return variables cannot be made. -/
   | callEnter {Γ Γ' ps rs Γf : Ctx} {σ : State C Γ} {f : Name} {args : Args C Γ ps}
       {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf} {a : Env C ps} {e : Halt} :
-      args.eval σ = .ok a → ret.enter σ.glob = .error e → ExecS I σ (.call f args ret body) (.halt e)
+      args.eval σ = .ok a → ret.enter (C := C) σ.glob = .error e →
+        ExecS I σ (.call f args ret body) (.halt e)
   /-- The body run in the callee's frame, and what the call leaves the
   caller (`Run.call`). -/
   | callBody {Γ Γ' ps rs Γf : Ctx} {σ : State C Γ} {f : Name} {args : Args C Γ ps}
@@ -395,5 +396,539 @@ theorem validT_noCallback {φ : Fml C []} : ValidT .noCallback φ ↔ Valid φ :
 
 theorem validT_withCallback {I : Invariant C} {φ : Fml C []} :
     ValidT (.withCallback I) φ ↔ ValidC I φ := Iff.rfl
+
+/-! ## The deterministic run is a run with callbacks -/
+
+section Det
+
+variable {Γ : Ctx}
+
+/-- **A send runs as its transfer**: it halts where the transfer does, and
+otherwise ends in the booking with `pv` true, or with nothing booked and `pv`
+false (`sendAt`, as the transaction's oracle says). -/
+theorem Run.send_cases (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (σ : State C Γ) :
+    (∃ e, Run.transfer r a σ = .error e ∧ Run.send pv r a σ = .error e) ∨
+    ∃ σ₁, Run.transfer r a σ = .ok σ₁ ∧
+      (Run.send pv r a σ = .ok (σ₁.setLocal pv (.bool true)) ∨
+        Run.send pv r a σ = .ok (σ.setLocal pv (.bool false))) := by
+  simp only [Run.transfer, Run.send, sendAt, transferAt, bind, Except.bind,
+    Semantics.Value.asInt]
+  cases r.eval σ with
+  | error e => exact .inl ⟨e, rfl, rfl⟩
+  | ok v =>
+    cases v with
+    | bool _ => exact .inl ⟨_, rfl, rfl⟩
+    | int addr =>
+      cases a.eval σ with
+      | error e => exact .inl ⟨e, rfl, rfl⟩
+      | ok w =>
+        cases w with
+        | bool _ => exact .inl ⟨_, rfl, rfl⟩
+        | int amt =>
+          by_cases hn : amt < 0
+          · simp only [hn, if_true]
+            exact .inl ⟨_, rfl, rfl⟩
+          · simp only [hn, if_false]
+            refine .inr ⟨_, rfl, ?_⟩
+            cases lookupBy (sendKey addr amt) σ.tx.ext with
+            | none => exact .inl rfl
+            | some o =>
+              cases o with
+              | ok _ => exact .inl rfl
+              | _ => exact .inr rfl
+
+/-- `if` by its condition read as a Boolean. -/
+theorem Run.ite_evalB {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (h₁ : Ext Γ Γ₁)
+    (thn : State C Γ → Res (State C Γ₁)) (h₂ : Ext Γ Γ₂) (els : State C Γ → Res (State C Γ₂))
+    (σ : State C Γ) :
+    Run.ite c h₁ thn h₂ els σ = match c.evalB σ with
+      | .ok true => (thn σ).map (State.drop h₁)
+      | .ok false => (els σ).map (State.drop h₂)
+      | .error e => .error e := by
+  simp only [Run.ite, Val.evalB, bind, Except.bind]
+  cases c.eval σ with
+  | error e => rfl
+  | ok v =>
+    cases v with
+    | int _ => rfl
+    | bool b => cases b <;> rfl
+
+/-- A call whose arguments halt. -/
+theorem Run.call_args {Γ' ps rs Γf : Ctx} {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
+    {hb : Ext (rs ++ ps) Γf} {body : State C (rs ++ ps) → Res (State C Γf)} {σ : State C Γ}
+    {e : Halt} (ha : args.eval σ = .error e) : Run.call args ret hb body σ = .error e := by
+  simp only [Run.call, bind, Except.bind, ha]
+
+/-- A call whose return variables cannot be made. -/
+theorem Run.call_enter {Γ' ps rs Γf : Ctx} {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
+    {hb : Ext (rs ++ ps) Γf} {body : State C (rs ++ ps) → Res (State C Γf)} {σ : State C Γ}
+    {a : Env C ps} {e : Halt} (ha : args.eval σ = .ok a) (he : ret.enter (C := C) σ.glob = .error e) :
+    Run.call args ret hb body σ = .error e := by
+  simp only [Run.call, bind, Except.bind, ha, he]
+
+/-- A call's body run in its frame, and what it leaves the caller. -/
+theorem Run.call_body {Γ' ps rs Γf : Ctx} {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
+    {hb : Ext (rs ++ ps) Γf} {body : State C (rs ++ ps) → Res (State C Γf)} {σ : State C Γ}
+    {a : Env C ps} {τ : Semantics.State} {r : Env C rs} (ha : args.eval σ = .ok a)
+    (he : ret.enter σ.glob = .ok (τ, r)) :
+    Run.call args ret hb body σ = (body (State.ofGlob τ (Env.append rs r a))).map
+      fun υ => υ.withEnv (ret.leave σ.env (Env.take rs (Env.drop hb υ.env))) := by
+  simp only [Run.call, bind, Except.bind, ha, he]
+  cases body (State.ofGlob τ (Env.append rs r a)) <;> rfl
+
+mutual
+
+/-- **The run `Stmt.run` makes is a callback run**, the callee changing
+nothing, unless it leaves `I` broken on the way. -/
+theorem Stmt.exec_run (I : Invariant C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ σ : State C Γ,
+    ExecS I σ s (.ofRes (s.run σ)) ∨ ExecS I σ s .violated
+  | _, _, .transfer r a, σ => by
+    show ExecS I σ _ (.ofRes (Run.transfer r a σ)) ∨ _
+    cases h : Run.transfer r a σ with
+    | error e => exact .inl (.transferHalt h)
+    | ok σ₁ =>
+      by_cases hI : I.at σ₁
+      · left
+        have := ExecS.transferResume (I := I) (st := σ₁.storage) (nt := σ₁.net) h hI
+          (by rw [State.havoc_self]; exact hI)
+        rwa [State.havoc_self] at this
+      · exact .inr (.transferViolated h hI)
+  | _, _, .send pv r a, σ => by
+    show ExecS I σ _ (.ofRes (Run.send pv r a σ)) ∨ _
+    rcases Run.send_cases pv r a σ with ⟨e, ht, hs⟩ | ⟨σ₁, ht, hs | hs⟩
+    · rw [hs]; exact .inl (.sendHalt ht)
+    · rw [hs]
+      by_cases hI : I.at σ₁
+      · left
+        have := ExecS.sendResume (I := I) (pv := pv) (st := σ₁.storage) (nt := σ₁.net) ht hI
+          (by rw [State.havoc_self]; exact hI)
+        rwa [State.havoc_self] at this
+      · exact .inr (.sendViolated ht hI)
+    · rw [hs]; exact .inl (.sendFailed ht)
+  | _, _, .ite c thn els, σ => by
+    show ExecS I σ _ (.ofRes (Run.ite c thn.ext thn.runR els.ext els.runR σ)) ∨ _
+    rw [Run.ite_evalB]
+    cases hc : c.evalB σ with
+    | error e => exact .inl (.iteHalt hc)
+    | ok b =>
+      cases b with
+      | true =>
+        simp only []
+        rw [← COut.map_ofRes]
+        rcases Prog.exec_run I thn σ with h | h
+        · exact .inl (.iteThen hc h)
+        · exact .inr (.iteThen (o := .violated) hc h)
+      | false =>
+        simp only []
+        rw [← COut.map_ofRes]
+        rcases Prog.exec_run I els σ with h | h
+        · exact .inl (.iteElse hc h)
+        · exact .inr (.iteElse (o := .violated) hc h)
+  | _, _, .call f args ret body, σ => by
+    show ExecS I σ _ (.ofRes (Run.call args ret body.ext body.runR σ)) ∨ _
+    simp only [Run.call, bind, Except.bind]
+    cases ha : args.eval σ with
+    | error e => exact .inl (.callArgs ha)
+    | ok a =>
+      cases he : ret.enter σ.glob with
+      | error e => exact .inl (.callEnter ha he)
+      | ok p =>
+        obtain ⟨τ, r⟩ := p
+        simp only []
+        rcases Prog.exec_run I body (State.ofGlob τ (Env.append _ r a)) with h | h
+        · left
+          have h' : ExecP I _ body (.ofRes (body.runR (State.ofGlob τ (Env.append _ r a)))) := h
+          revert h'
+          cases body.runR (State.ofGlob τ (Env.append _ r a)) with
+          | error e => exact fun h' => ExecS.callBody (f := f) ha he h'
+          | ok υ => exact fun h' => ExecS.callBody (f := f) ha he h'
+        · exact .inr (.callBody (o := .violated) ha he h)
+  | _, _, .tryCall call rets ok err code pnc other, σ => by
+    show ExecS I σ _ (.ofRes (Run.tryCall call rets ok.ext ok.runR err.ext err.runR code pnc.ext
+      pnc.runR other.ext other.runR σ)) ∨ _
+    simp only [Run.tryCall, bind, Except.bind]
+    cases hk : call.key σ with
+    | error e => exact .inl (.tryHalt hk)
+    | ok k =>
+      simp only []
+      rcases lookupBy k σ.tx.ext with _ | (vs | _ | v | _) <;> dsimp only
+      · exact .inl (.tryRevert hk)
+      · cases hd : rets.decode (C := C) vs with
+        | error e => exact .inl (.tryDecode hk hd)
+        | ok p =>
+          obtain ⟨r, rest⟩ := p
+          simp only []
+          by_cases hI : I.at σ
+          · have hI' : I.at (σ.havoc σ.storage σ.net) := by rw [State.havoc_self]; exact hI
+            rw [← COut.map_ofRes]
+            rcases Prog.exec_run I ok (σ.withEnv (Env.append _ r σ.env)) with h | h
+            · exact .inl (.tryOk hk hI hI' hd (by rw [State.havoc_self]; exact h))
+            · exact .inr (.tryOk (o := .violated) hk hI hI' hd (by rw [State.havoc_self]; exact h))
+          · exact .inr (.tryViolated hk hI)
+      · rw [← COut.map_ofRes]
+        rcases Prog.exec_run I err σ with h | h
+        · exact .inl (.tryError hk h)
+        · exact .inr (.tryError (o := .violated) hk h)
+      · cases hd : code.decode (C := C) v with
+        | error e => exact .inl (.tryCode hk hd)
+        | ok r =>
+          simp only []
+          rw [← COut.map_ofRes]
+          rcases Prog.exec_run I pnc (σ.withEnv (Env.append _ r σ.env)) with h | h
+          · exact .inl (.tryPanic hk hd h)
+          · exact .inr (.tryPanic (o := .violated) hk hd h)
+      · rw [← COut.map_ofRes]
+        rcases Prog.exec_run I other σ with h | h
+        · exact .inl (.tryOther hk h)
+        · exact .inr (.tryOther (o := .violated) hk h)
+  | _, _, .loop a c body, σ => by
+    cases ht : Prog.hasTransfer body with
+    | false => exact .inl (.det (by simp only [Stmt.forks, ht]))
+    | true =>
+      have hb : ∀ τ, ExecP I τ body (.ofRes (Prog.run τ body)) ∨ ExecP I τ body .violated :=
+        fun τ => Prog.exec_run I body τ
+      show ExecS I σ _ (.ofRes (Loop.run (fun τ => (Prog.run τ body).map (State.drop body.ext))
+        (fun τ => c.eval τ) σ)) ∨ _
+      have key : ∀ n (σ : State C _) r,
+          Loop.iterN (fun τ => (Prog.run τ body).map (State.drop body.ext)) (fun τ => c.eval τ)
+            n σ = .inr r → ExecS I σ (.loop a c body) (.ofRes r) ∨ ExecS I σ (.loop a c body) .violated := by
+        intro n
+        induction n with
+        | zero => intro σ r hn; simp only [Loop.iterN, reduceCtorEq] at hn
+        | succ n ih =>
+          intro σ r hn
+          simp only [Loop.iterN, Loop.step] at hn
+          have hcB : ∀ e, c.eval σ = .error e → c.evalB σ = .error e := by
+            intro e h; simp only [Val.evalB, h]
+          rcases hc : c.eval σ with e | (m | b)
+          · rw [hc] at hn; cases hn
+            exact .inl (.loopHalt ht (hcB e hc))
+          · rw [hc] at hn; cases hn
+            exact .inl (.loopHalt ht (by simp only [Val.evalB, hc]))
+          · cases b with
+            | false =>
+              rw [hc] at hn; cases hn
+              exact .inl (.loopExit ht (by simp only [Val.evalB, hc]))
+            | true =>
+              rw [hc] at hn
+              have hT : c.evalB σ = .ok true := by simp only [Val.evalB, hc]
+              rcases hb σ with h | h
+              · cases hr : Prog.run σ body with
+                | error e =>
+                  rw [hr] at h hn
+                  cases hn
+                  exact .inl (.loopStop (o := .halt e) ht hT h rfl)
+                | ok υ =>
+                  rw [hr] at h hn
+                  rcases ih (υ.drop body.ext) r hn with h' | h'
+                  · exact .inl (.loopIter ht hT h h')
+                  · exact .inr (.loopIter ht hT h h')
+              · exact .inr (.loopStop (o := .violated) ht hT h rfl)
+      by_cases hex : ∃ r n, Loop.iterN (fun τ => (Prog.run τ body).map (State.drop body.ext))
+          (fun τ => c.eval τ) n σ = .inr r
+      · obtain ⟨r, n, hn⟩ := hex
+        rw [Loop.run_of_iterN hn]
+        exact key n σ r hn
+      · have : Loop.run (fun τ => (Prog.run τ body).map (State.drop body.ext))
+            (fun τ => c.eval τ) σ = .error .diverge := by
+          simp only [Loop.run, hex, dite_false]
+        rw [this]
+        exact .inl (.loopDiverge ht)
+  | _, _, .block body, σ => by
+    cases ht : Prog.hasTransfer body with
+    | false => exact .inl (.det (by simp only [Stmt.forks, ht]))
+    | true =>
+      show ExecS I σ _ (.ofRes ((Prog.run σ body).map (State.drop body.ext))) ∨ _
+      rw [← COut.map_ofRes]
+      rcases Prog.exec_run I body σ with h | h
+      · exact .inl (.block ht h)
+      · exact .inr (.block (o := .violated) ht h)
+  | _, _, .assign .., _ | _, _, .rebind .., _ | _, _, .assignLocal .., _ | _, _, .declLocal .., _
+  | _, _, .declStorage .., _ | _, _, .opAssign .., _ | _, _, .incDec .., _
+  | _, _, .assignIncDec .., _ | _, _, .push .., _ | _, _, .pop .., _ | _, _, .declMem .., _
+  | _, _, .rebindMem .., _ | _, _, .assignFromMem .., _ | _, _, .assignMem .., _
+  | _, _, .delete .., _ | _, _, .deleteMem .., _ | _, _, .assignNew .., _ | _, _, .require .., _
+  | _, _, .assert .., _ | _, _, .revert, _ => .inl (.det rfl)
+
+/-- The same, for a sequence. -/
+theorem Prog.exec_run (I : Invariant C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → ∀ σ : State C Γ,
+    ExecP I σ P (.ofRes (Prog.run σ P)) ∨ ExecP I σ P .violated
+  | _, _, .nil, _ => .inl .nil
+  | _, _, .cons s P, σ => by
+    rw [Prog.run_cons]
+    rcases Stmt.exec_run I s σ with h | h
+    · cases hs : s.run σ with
+      | error e => rw [hs] at h; exact .inl (.halt h)
+      | ok σ₁ =>
+        rw [hs] at h
+        rcases Prog.exec_run I P σ₁ with h' | h'
+        · exact .inl (.cons h h')
+        · exact .inr (.cons h h')
+    · exact .inr (.violated h)
+
+end
+
+/-- The same, for the frames after a program. -/
+theorem Frames.exec_run (I : Invariant C) {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C Γ Γ₀) →
+    ∀ σ : State C Γ, ExecF I σ κ (.ofRes (κ.run σ)) ∨ ExecF I σ κ .violated
+  | _, .nil, _ => .inl .nil
+  | _, .seq ω κ, σ => by
+    show ExecF I σ _ (.ofRes ((Prog.run σ ω).bind (Frames.run · κ))) ∨ _
+    rcases Prog.exec_run I ω σ with h | h
+    · cases hs : Prog.run σ ω with
+      | error e => rw [hs] at h; exact .inl (.seqHalt h)
+      | ok σ₁ =>
+        rw [hs] at h
+        rcases Frames.exec_run I κ σ₁ with h' | h'
+        · exact .inl (.seq h h')
+        · exact .inr (.seq h h')
+    · exact .inr (.seqViolated h)
+  | _, .pop _ h κ, σ => (Frames.exec_run I κ (σ.drop h)).imp .pop .pop
+  | _, .drop h κ, σ => (Frames.exec_run I κ (σ.thin h)).imp .drop .drop
+
+end Det
+
+/-! ## With no payment, the run is the deterministic one -/
+
+section NoPay
+
+mutual
+
+/-- **A statement that pays nothing has one callback run**, the
+deterministic one. -/
+theorem Stmt.eq_run (I : Invariant C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
+    Stmt.hasTransfer s = false → ∀ {σ : State C Γ} {o : COut C Γ'}, ExecS I σ s o →
+      o = .ofRes (s.run σ)
+  | _, _, .transfer .., ht, _, _, _ | _, _, .send .., ht, _, _, _
+  | _, _, .tryCall .., ht, _, _, _ => by simp only [Stmt.hasTransfer, Bool.true_eq_false] at ht
+  | _, _, .ite c thn els, ht, σ, _, h => by
+    simp only [Stmt.hasTransfer, Bool.or_eq_false_iff] at ht
+    cases h with
+    | det _ => rfl
+    | iteHalt hc =>
+      show _ = COut.ofRes (Run.ite _ _ _ _ _ _)
+      rw [Run.ite_evalB, hc]
+      rfl
+    | iteThen hc h =>
+      rw [Prog.eq_run I thn ht.1 h]
+      show _ = COut.ofRes (Run.ite _ _ _ _ _ _)
+      rw [Run.ite_evalB, hc]
+      exact COut.map_ofRes _ _
+    | iteElse hc h =>
+      rw [Prog.eq_run I els ht.2 h]
+      show _ = COut.ofRes (Run.ite _ _ _ _ _ _)
+      rw [Run.ite_evalB, hc]
+      exact COut.map_ofRes _ _
+  | _, _, .call f args ret body, ht, σ, _, h => by
+    simp only [Stmt.hasTransfer] at ht
+    cases h with
+    | det _ => rfl
+    | callArgs ha =>
+      show _ = COut.ofRes (Run.call _ _ _ _ _)
+      rw [Run.call_args ha]
+      rfl
+    | callEnter ha he =>
+      show _ = COut.ofRes (Run.call _ _ _ _ _)
+      rw [Run.call_enter ha he]
+      rfl
+    | callBody ha he h =>
+      rw [Prog.eq_run I body ht h]
+      show _ = COut.ofRes (Run.call _ _ _ _ _)
+      rw [Run.call_body ha he, COut.map_ofRes]
+      rfl
+  | _, _, .loop _ _ body, ht, _, _, h => by
+    simp only [Stmt.hasTransfer] at ht
+    cases h with
+    | det _ => rfl
+    | loopHalt hb _ | loopExit hb _ | loopIter hb _ _ _ | loopStop hb _ _ _ | loopDiverge hb =>
+      rw [hb] at ht; cases ht
+  | _, _, .block body, ht, _, _, h => by
+    simp only [Stmt.hasTransfer] at ht
+    cases h with
+    | det _ => rfl
+    | block hb _ => rw [hb] at ht; cases ht
+  | _, _, .assign .., _, _, _, h | _, _, .rebind .., _, _, _, h
+  | _, _, .assignLocal .., _, _, _, h | _, _, .declLocal .., _, _, _, h
+  | _, _, .declStorage .., _, _, _, h | _, _, .opAssign .., _, _, _, h
+  | _, _, .incDec .., _, _, _, h | _, _, .assignIncDec .., _, _, _, h
+  | _, _, .push .., _, _, _, h | _, _, .pop .., _, _, _, h | _, _, .declMem .., _, _, _, h
+  | _, _, .rebindMem .., _, _, _, h | _, _, .assignFromMem .., _, _, _, h
+  | _, _, .assignMem .., _, _, _, h | _, _, .delete .., _, _, _, h
+  | _, _, .deleteMem .., _, _, _, h | _, _, .assignNew .., _, _, _, h
+  | _, _, .require .., _, _, _, h | _, _, .assert .., _, _, _, h
+  | _, _, .revert, _, _, _, h => by cases h; rfl
+
+/-- The same, for a sequence. -/
+theorem Prog.eq_run (I : Invariant C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
+    Prog.hasTransfer P = false → ∀ {σ : State C Γ} {o : COut C Γ'}, ExecP I σ P o →
+      o = .ofRes (Prog.run σ P)
+  | _, _, .nil, _, _, _, h => by cases h; rfl
+  | _, _, .cons s P, ht, σ, _, h => by
+    simp only [Prog.hasTransfer, Bool.or_eq_false_iff] at ht
+    rw [Prog.run_cons]
+    cases h with
+    | cons hs hP =>
+      have e₁ := Stmt.eq_run I s ht.1 hs
+      revert e₁
+      cases s.run σ with
+      | error _ => exact fun e₁ => nomatch e₁
+      | ok υ =>
+        intro e₁
+        cases e₁
+        exact Prog.eq_run I P ht.2 hP
+    | halt hs =>
+      have e₁ := Stmt.eq_run I s ht.1 hs
+      revert e₁
+      cases s.run σ with
+      | error _ => intro e₁; cases e₁; rfl
+      | ok _ => exact fun e₁ => nomatch e₁
+    | violated hs =>
+      have e₁ := Stmt.eq_run I s ht.1 hs
+      revert e₁
+      cases s.run σ <;> exact fun e₁ => nomatch e₁
+
+end
+
+/-- **A statement that pays nothing has one callback run** (`Stmt.eq_run`). -/
+theorem ExecS.eq_run {I : Invariant C} {Γ Γ' : Ctx} {σ : State C Γ} {s : Stmt C Γ Γ'}
+    {o : COut C Γ'} (h : ExecS I σ s o) (ht : Stmt.hasTransfer s = false) :
+    o = .ofRes (s.run σ) :=
+  Stmt.eq_run I s ht h
+
+/-- The same, for a sequence. -/
+theorem ExecP.eq_run {I : Invariant C} {Γ Γ' : Ctx} {σ : State C Γ} {P : Prog C Γ Γ'}
+    {o : COut C Γ'} (h : ExecP I σ P o) (ht : Prog.hasTransfer P = false) :
+    o = .ofRes (Prog.run σ P) :=
+  Prog.eq_run I P ht h
+
+/-- The same, for frames. -/
+theorem ExecF.eq_run {I : Invariant C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ} {κ : Frames C Γ Γ₀}
+    {o : COut C Γ₀} (h : ExecF I σ κ o) (ht : κ.hasTransfer = false) : o = .ofRes (κ.run σ) := by
+  induction h with
+  | nil => rfl
+  | @seq _ _ σ _ ω κ _ hω _ ih =>
+    simp only [Frames.hasTransfer, Bool.or_eq_false_iff] at ht
+    have e₁ := ExecP.eq_run hω ht.1
+    show _ = COut.ofRes ((Prog.run σ ω).bind (Frames.run · κ))
+    revert e₁
+    cases Prog.run σ ω with
+    | error _ => exact fun e₁ => nomatch e₁
+    | ok _ => intro e₁; cases e₁; exact ih ht.2
+  | @seqHalt _ _ σ ω κ _ hω =>
+    simp only [Frames.hasTransfer, Bool.or_eq_false_iff] at ht
+    have e₁ := ExecP.eq_run hω ht.1
+    show _ = COut.ofRes ((Prog.run σ ω).bind (Frames.run · κ))
+    revert e₁
+    cases Prog.run σ ω with
+    | error _ => intro e₁; cases e₁; rfl
+    | ok _ => exact fun e₁ => nomatch e₁
+  | @seqViolated _ _ σ ω κ hω =>
+    simp only [Frames.hasTransfer, Bool.or_eq_false_iff] at ht
+    have e₁ := ExecP.eq_run hω ht.1
+    revert e₁
+    cases Prog.run σ ω <;> exact fun e₁ => nomatch e₁
+  | pop _ ih => exact ih ht
+  | drop _ ih => exact ih ht
+
+/-- With no payment, a property of every callback run of a sequence is one
+of its deterministic run. -/
+theorem ExecP.forall_iff {I : Invariant C} {Γ Γ' : Ctx} {σ : State C Γ} {P : Prog C Γ Γ'}
+    (hP : Prog.hasTransfer P = false) (Q : COut C Γ' → Prop) :
+    (∀ o, ExecP I σ P o → Q o) ↔ Q (.ofRes (Prog.run σ P)) := by
+  refine ⟨fun H => ?_, fun H o h => ExecP.eq_run h hP ▸ H⟩
+  rcases Prog.exec_run I P σ with h | h
+  · exact H _ h
+  · have e := ExecP.eq_run h hP
+    revert e
+    cases Prog.run σ P <;> exact fun e => nomatch e
+
+/-- The same, for frames. -/
+theorem ExecF.forall_iff {I : Invariant C} {Γ₀ Γ : Ctx} {σ : State C Γ} {κ : Frames C Γ Γ₀}
+    (hκ : κ.hasTransfer = false) (Q : COut C Γ₀ → Prop) :
+    (∀ o, ExecF I σ κ o → Q o) ↔ Q (.ofRes (κ.run σ)) := by
+  refine ⟨fun H => ?_, fun H o h => ExecF.eq_run h hκ ▸ H⟩
+  rcases Frames.exec_run I κ σ with h | h
+  · exact H _ h
+  · have e := ExecF.eq_run h hκ
+    revert e
+    cases κ.run σ <;> exact fun e => nomatch e
+
+theorem _root_.Solidity.Modality.afterRunC_congr {α : Type} (m : Modality) {p q : α → Prop}
+    (h : ∀ a, p a ↔ q a) (r : Res α) : m.afterRunC p r ↔ m.afterRunC q r := by
+  cases r with
+  | ok a => exact and_congr_left fun _ => h a
+  | error _ => exact Iff.rfl
+
+theorem _root_.Solidity.Modality.afterC_congr {α : Type} (m : Modality) {p q : α → Prop}
+    (h : ∀ a, p a ↔ q a) (r : Res α) : m.afterC p r ↔ m.afterC q r := by
+  cases r with
+  | ok a => exact h a
+  | error _ => exact Iff.rfl
+
+/-- A modality after its program, with callbacks: the frames' outcome. -/
+theorem after_frames_iff {I : Invariant C} {Γ₁ Γ₀ : Ctx} (m : Modality) {κ : Frames C Γ₁ Γ₀}
+    (hκ : κ.hasTransfer = false) (p : State C Γ₀ → Prop) (r : Res (State C Γ₁)) :
+    (COut.ofRes r).after m (fun σ₁ => ∀ o', ExecF I σ₁ κ o' → o'.after m p) ↔
+      m.afterRunC p (r.bind (Frames.run · κ)) := by
+  cases r with
+  | ok σ₁ =>
+    show (∀ o', ExecF I σ₁ κ o' → o'.after m p) ↔ _
+    rw [ExecF.forall_iff hκ, COut.after_ofRes]
+    rfl
+  | error e =>
+    exact ⟨fun h => ⟨h.1, fun h' => h.2 (Except.error.inj h')⟩,
+      fun h => ⟨h.1, fun h' => h.2 (h' ▸ rfl)⟩⟩
+
+/-- **With no payment, the two readings agree.** -/
+theorem holdsC_iff_holds {I : Invariant C} : {Γ : Ctx} → (φ : Fml C Γ) → φ.hasTransfer = false →
+    ∀ σ : State C Γ, (holdsC I σ φ ↔ holds σ φ)
+  | _, .tt, _, _ | _, .eq .., _, _ | _, .defined _, _, _ => Iff.rfl
+  | _, .not φ, h, σ => not_congr (holdsC_iff_holds φ h σ)
+  | _, .and φ ψ, h, σ => by
+    simp only [Fml.hasTransfer, Bool.or_eq_false_iff] at h
+    exact and_congr (holdsC_iff_holds φ h.1 σ) (holdsC_iff_holds ψ h.2 σ)
+  | _, .imp φ ψ, h, σ => by
+    simp only [Fml.hasTransfer, Bool.or_eq_false_iff] at h
+    exact imp_congr (holdsC_iff_holds φ h.1 σ) (holdsC_iff_holds ψ h.2 σ)
+  | _, .upd m U φ, h, σ => Modality.afterC_congr m (holdsC_iff_holds φ h) (U.apply σ)
+  | _, .modal m P κ φ, h, σ => by
+    simp only [Fml.hasTransfer, Bool.or_eq_false_iff] at h
+    show (∀ o, ExecP I σ P o → _) ↔ m.afterRunC (holds · φ) ((Prog.run σ P).bind (Frames.run · κ))
+    rw [ExecP.forall_iff h.1.1, after_frames_iff m h.1.2]
+    exact Modality.afterRunC_congr m (holdsC_iff_holds φ h.2) _
+  | _, .havoc φ, h, σ => forall_congr' fun _ => forall_congr' fun _ => holdsC_iff_holds φ h _
+  | _, .all _ _ φ, h, σ => forall_congr' fun _ => imp_congr_right fun _ => holdsC_iff_holds φ h _
+  | _, .bind _ _ φ, h, σ => forall_congr' fun _ => holdsC_iff_holds φ h _
+  | _, .anon _ φ, h, σ => forall_congr' fun _ => holdsC_iff_holds φ h _
+
+/-- **A modal formula true with callbacks is true without**, when its frames
+and postcondition pay nothing: the deterministic run is among the callback
+runs (`Prog.exec_run`), and none of those breaks the invariant. -/
+theorem holds_of_holdsC_modal {I : Invariant C} {Γ Γ₁ Γ₀ : Ctx} {σ : State C Γ} {m : Modality}
+    {P : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀} (H : holdsC I σ (.modal m P κ φ))
+    (hκ : κ.hasTransfer = false) (hφ : φ.hasTransfer = false) : holds σ (.modal m P κ φ) := by
+  rcases Prog.exec_run I P σ with he | he
+  · have := (after_frames_iff m hκ _ _).1 (H _ he)
+    exact (Modality.afterRunC_congr m (holdsC_iff_holds φ hφ) _).1 this
+  · exact (H _ he).elim
+
+/-- A precondition and a modal formula, true with callbacks, are true
+without, when only the program pays. -/
+theorem holds_of_holdsC_imp {I : Invariant C} {Γ Γ₁ Γ₀ : Ctx} {σ : State C Γ} {a : Fml C Γ}
+    {m : Modality} {P : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (H : holdsC I σ (.imp a (.modal m P κ φ))) (ha : a.hasTransfer = false)
+    (hκ : κ.hasTransfer = false) (hφ : φ.hasTransfer = false) :
+    holds σ (.imp a (.modal m P κ φ)) :=
+  fun h => holds_of_holdsC_modal (H ((holdsC_iff_holds a ha σ).2 h)) hκ hφ
+
+/-- **Valid with callbacks is valid without**, for `pre → [ P ] post`. -/
+theorem valid_of_validC {I : Invariant C} {Γ₁ Γ₀ : Ctx} {a : Fml C []} {m : Modality}
+    {P : Prog C [] Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (H : ValidC I (.imp a (.modal m P κ φ))) (ha : a.hasTransfer = false)
+    (hκ : κ.hasTransfer = false) (hφ : φ.hasTransfer = false) :
+    Valid (.imp a (.modal m P κ φ)) :=
+  fun σ => holds_of_holdsC_imp (H σ) ha hκ hφ
+
+end NoPay
 
 end Solidity.Core

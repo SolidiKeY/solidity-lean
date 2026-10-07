@@ -295,6 +295,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/CorePrint.lean` | The scoped taclets printed as their rule lines, a block's `}`, and the strategy's formulas printed from their `Expr` as `Core.Fml.show` prints them. |
 | `Examples/Tactics/CoreNotation.lean` | `cdl!{}` pinned: parameters, updates' targets, branch scopes, errors; `#wp`/`#step` on scoped formulas. |
 | `Examples/Tactics/CoreSpec.lean` | `cspec!{f}` and `cproblem!{constructor}` pinned on a contract with snapshots and a result; each erases to today's. |
+| `Examples/Tactics/CoreCallback.lean` | The scoped callback reading used: an invariant as a closed `cdl!{}` formula, `holds_of_holdsC_imp` on a program that pays, `holdsC_iff_holds` on one that does not. |
 
 At the root, the notation's own tests:
 
