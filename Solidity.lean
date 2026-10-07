@@ -33,6 +33,7 @@ import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
+import Solidity.Calculus.Core.ProvesSound
 import Solidity.Calculus.Core.Schema
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.RuleShapes

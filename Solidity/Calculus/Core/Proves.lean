@@ -15,22 +15,25 @@ under solkey's names where solkey has the rule:
 
 * `intro` (`impRight`), `allIntro` (`allRight`), `updIntro`, `bindIntro`
   (the hidden binder, Lean only: it puts the local of `T v = e;` in scope);
-* `update`, `unfold`, `bind`, `split`, `check`, `done`: a taclet's premise
-  in front of the rest `ω` and the frames `κ` (`Premise.fml`, its parts
-  apart).  `split` has **two goals**, KeY's: a condition cannot be stuck, so
-  there is no cover goal;
+* `update`, `unfold`, `bind`, `split`, `check`, `done`, `branches`,
+  `cases`, `inv`, `inline`: a taclet's premise in front of the rest `ω` and
+  the frames `κ` (`Premise.fml`, its parts apart), one goal per conjunct.
+  `split` has **two goals**, KeY's: a condition cannot be stuck, so there is
+  no cover goal, nor under the invariant rule;
 * `empty` (`emptyModality`): a finished program goes through its frames
   (`Frames.exit`), a scope end a popping update, which `updIntro` takes;
 * `closeTrue`, behind a context with no diamond update but scope ends
   (`Hyps.boxOnly`).
 
-The fresh index of a taclet is one above every index in the sequent
+A program rule fires the rule the strategy fires (`Stmt.step`, one per
+statement): its premise is `s.step k m = some p`, which `rfl` proves and
+`Taclet.step_eq` gives from a named taclet (`Calculus/Core/Taclet.lean`).
+The fresh index `k` is one above every index in the sequent
 (`Hyps.fresh`), as `Hyp.fresh` numbers it.  `Hyps.wrap` is written with
 `casesOn` (Gate G0, condition 1): the kernel evaluates it when it checks
 that index.
 
-Soundness waits for the scoped interpreter (M3's `Core.State C Γ` and
-`holds`); this module states the rules only.
+Soundness is `Calculus/Core/ProvesSound.lean`.
 -/
 
 namespace Solidity.Core
@@ -78,6 +81,7 @@ def Hyps.fresh {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (φ : Fml C Γ) : Nat := (
 def Upd.popsOnly {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, U => Upd.casesOn (motive := fun _ _ => Bool) U true
       (fun _ _ => false) (fun _ _ _ => false) (fun U _ => Upd.popsOnly U)
+      (fun U _ => Upd.popsOnly U)
   termination_by structural _ U => U
 
 /-- No update of the context was produced under the diamond, but scope
@@ -91,6 +95,12 @@ def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
       (fun H => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
       (fun H _ => Hyps.boxOnly H)
   termination_by structural _ H => H
+
+/-- `{anon(xs)}`, and `{anon(xs)} {havoc}` when the loop's frame writes the
+storage too (`Fml.anonHavoc`), joined to the context. -/
+def Hyps.anonHavoc {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool) :
+    Hyps C Γ₀ Γ :=
+  if hv then (H.anon xs).havoc else H.anon xs
 
 /-- `H ⊢ φ`: the calculus proves `φ` in the context `H` (with `R`, solkey's
 rules alone or all of them). -/
@@ -112,14 +122,14 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   rest of the program goes on. -/
   | update {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {U : Upd C Γ Γ'}
-      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.update U))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.update U))
       (h : Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ)) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that produces statements: they replace the first one, their
   fresh locals popped after them (`pop .capture`). -/
   | unfold {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
-      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.unfold P e))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.unfold P e))
       (h : Proves C R Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A declaration with its initializer dropped (`localValueDeclInitDrop`):
@@ -127,7 +137,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | bind {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {x : Var} {t : LTy}
       {P : Prog C (t :: Γ) Γ'}
-      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.bind x t P))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.bind x t P))
       (h : Proves C R Γ₀ (H.bind x t) (.modal m P (.seq ω κ) φ)) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that branches: two goals, KeY's, each branch a block ended
@@ -135,22 +145,69 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | split {Γ Γ₁ Γ₂ Δ₁ Δ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : BlockKind} {c c' : Fml C Γ}
       {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂}
-      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.split b c c' P Q))
-      (thn : Proves C R Γ₀ (H.pre c) (.modalK m P (.pop b P.scopeExt (.seq ω κ)) φ))
-      (els : Proves C R Γ₀ (H.pre c') (.modalK m Q (.pop b Q.scopeExt (.seq ω κ)) φ)) :
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.split b c c' P Q))
+      (thn : Proves C R Γ₀ (H.pre c) (.modalK m P (.pop b P.ext (.seq ω κ)) φ))
+      (els : Proves C R Γ₀ (H.pre c') (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ)) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that checks (`assertSimple`): the goal with the condition
   assumed ("Holds"), and the condition ("Violated"). -/
   | check {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {c : Fml C Γ}
-      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.check c))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.check c))
       (thn : Proves C R Γ₀ (H.pre c) (.modalK m ω κ φ)) (els : Proves C R Γ₀ H c) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that closes the modality (`revertBox`, `revertDiamond`). -/
   | done {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : Bool}
-      (d : Taclet C (H.fresh (.modal m (.cons s ω) κ φ)) m s (.done b))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.done b))
       (h : Proves C R Γ₀ H (if b then .tt else .ff)) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A taclet with a goal per way an external call may end
+  (`tryCallNoCallbackBox`): each clause's block in the statement's place,
+  for every value of the locals its outcome binds, its scope ended (`}`).
+  There is at least one clause: a rule with no goal would prove its
+  statement behind any context. -/
+  | branches {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {bs : List (Branch C Γ)}
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.branches bs))
+      (hne : bs.isEmpty = false)
+      (h : ∀ b ∈ bs, Proves C R Γ₀ H
+        (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A taclet with labelled goals (`sendNoCallbackBox`): each formula, then
+  the rest after each update, one per way the statement may end. -/
+  | cases {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {fs : List (Fml C Γ)}
+      {us : List (Upd C Γ Γ)}
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.cases fs us))
+      (hne : (fs.isEmpty && us.isEmpty) = false)
+      (fml : ∀ f ∈ fs, Proves C R Γ₀ H f)
+      (upd : ∀ U ∈ us, Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ)) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A loop's invariant (`whileInvariantBox`, `whileInvariantDiamond`): the
+  invariant now ("invariant initially valid"), and past the frame's
+  anonymising update, the invariant and the condition's update, the body to
+  its postcondition where the condition holds ("body preserves
+  invariant"), the rest where it does not ("use case"). -/
+  | inv {Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {I : Fml C Γ}
+      {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {U : Upd C Γ Δ} {c c' : Fml C Δ}
+      {hu : Ext Γ Δ₀} {hb : Ext Δ₀ Δ} {P : Prog C Δ₀ Γ₃} {post : Fml C Δ₀}
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m =
+        some (.inv I xs hv U c c' hu hb P post))
+      (init : Proves C R Γ₀ H I)
+      (thn : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c)
+        (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
+      (els : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c')
+        (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ))) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- A taclet that produces a block whose end drops a frame from under the
+  locals it keeps (`expand_function_body` of a call that leaves its return
+  variables): the block replaces the statement. -/
+  | inline {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Thin Γ' Γ''}
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.inline P e))
+      (h : Proves C R Γ₀ H (.modal m P (.drop e (.seq ω κ)) φ)) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- `emptyModality`: a finished program goes through its frames, the rest
   of the program next, a scope end a popping update. -/
@@ -167,11 +224,11 @@ context) and `closeTrue`. -/
 
 example : Proves StandardExample .all [.val .bool] .nil
     (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
-  .split .ifElseSplit (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
+  .split (Taclet.step_eq .ifElseSplit) (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
 
 /-- The diamond twin: a scope end pops, so `closeTrue` still fires. -/
 example : Proves StandardExample .all [.val .bool] .nil
     (.modal .diamond (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
-  .split .ifElseSplit (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
+  .split rfl (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
 
 end Solidity.Core
