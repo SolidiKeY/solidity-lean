@@ -113,13 +113,16 @@ found by `#eval` and the iteration computed by `rfl`.
 **Proofs that recurse on `Stmt.run`** take a loop's case from two lemmas:
 `Loop.run_rel` (two loops whose iterations go in step from related states
 run alike: `Prog.run_frame`) and `Loop.run_induct` (an invariant of the loop
-head: `Stmt.run_wt`, `run_canon`, `run_tight`, `run_noPanic`,
-`frame_of_within`); `Loop.run_unfold` is the unwinding. In more detail:
+head: `run_noPanic`, `frame_of_within`); `Loop.run_unfold` is the
+unwinding. The typing proofs recurse on the scoped run (`Semantics/Core.lean`)
+and take a loop's case from `Core.Loop.run_induct`, once for every invariant
+(`Invariant.keeps_loop`: the invariant at the loop head, the body's locals
+popped each iteration). In more detail:
 
 `Stmt.run_frame`/`Prog.run_frame` (`Semantics/Agree.lean`: states agreeing off
-`ns` iterate alike), `Stmt.run_wt` (`Typing/Soundness.lean`: `RunWT … Γ` at
-the loop head is the invariant, the body typed as a branch),
-`Stmt.run_canon` and `Stmt.run_tight` (`Typing/Reachability.lean`,
+`ns` iterate alike), `Core.Stmt.run_wt` (`Typing/Soundness.lean`: `RunWT` at
+the loop head is the invariant), `Core.Prog.run_canon` and
+`Core.Prog.run_tight` (`Typing/Reachability.lean`,
 `Typing/Constructibility.lean`; `reachable_iff` stays true, since a loop
 reaches nothing a finite sequence of body runs does not), and
 `Stmt.exec_run`/`ExecS` (`Semantics/Callback.lean`: a loop whose body has no
@@ -285,11 +288,14 @@ I.cost + 2`, and the premise (`body` alone, `ω` alone, under modal-free
 `{anon}`, `{U}` and conditions) measures less than `loop :: ω`
 (`Premise.measure_lt`, `Fml.loopAnon_measure`).
 
-**Typing and declarations.** `Stmt.wt` requires `c.wt Γ`, the annotation's
-values well-typed at `Γ`, and `Prog.wt Γ body = some Γb` with `Ctx.le Γ Γb`,
-and returns `Γ`, as for `ite`. A local declared in the body is declared
-again each iteration (`declLocal` overwrites, as solc re-initialises); it is
-in the frame, and the invariant, typed at `Γ`, cannot name it.
+**Typing and declarations.** In the scoped syntax (`Syntax/Core.lean`) a
+loop is `Stmt C Γ Γ`: its condition and annotation are read in `Γ`, its body
+is a `Prog C Γ Γb` whose locals the scoped run pops every iteration
+(`Run.loop`), as for `ite`, and type soundness keeps the state typed at `Γ`
+at every head (`Invariant.keeps_loop`, `Typing/Soundness.lean`). The untyped
+interpreter keeps a local declared in the body bound, and declares it again
+each iteration (`declLocal` overwrites, as solc re-initialises); it is in the
+frame, and the invariant, typed at `Γ`, cannot name it.
 
 The loop condition is **not** captured before the loop, since it must be
 re-evaluated: the invariant rule binds it to `b` at the head, the

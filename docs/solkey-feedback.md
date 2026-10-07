@@ -60,7 +60,7 @@ claim does need the invariant). A `\forall` clause over a mapping is provable
 in Lean only under the layout premises `layoutAt` states (`Calculus/Spec.lean`);
 solkey's obligation states none.
 
-**Lean evidence.** `Prog.run_wt` (`Typing/Soundness.lean`) preserves
+**Lean evidence.** `Core.Prog.run_wt` (`Typing/Soundness.lean`) preserves
 `RunWT`, so the invariant can be assumed once. It is not tight:
 `SVal.canon` adds what `hasTy` forgets (mapping default is the type's default,
 mapping keys are unique, a struct carries exactly its declared members), and
