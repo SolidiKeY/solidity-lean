@@ -336,7 +336,7 @@ theorem assertOk_wk (c : Val C Γ .bool) :
   | error => rfl
   | ok v => rcases v with _ | (_ | _) <;> rfl
 
-theorem Run.deleteMem_wk {T : Ty} (p : MPath C Γ T) (hd : p.isSimple = true) :
+theorem Run.deleteMem_wk {T : Ty} (p : MPath C Γ T) :
     Run.deleteMem (p.wk h) (τ.lift h d) = lifted h d (Run.deleteMem p τ) := by
   cases p with
   | var i _ =>
@@ -632,5 +632,154 @@ theorem run_map (hc : ∀ a, c' (f a) = c a) (hb : ∀ a, body' (f a) = (body a)
     rfl
 
 end Loop
+
+/-! ## A weakened statement pops what it popped -/
+
+theorem CallRet.wk_over {Γ Δ : Ctx} (h : Thin Γ Δ) {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') :
+    Thin.Over ret.ext h (ret.wk h).2.2.ext (ret.wk h).2.1 := by
+  cases ret with
+  | none => exact .refl h
+  | val => exact .refl h
+  | rets bs => exact Thin.Over.append h _
+  | mem => exact .push (.refl h)
+
+theorem Stmt.wk_over {Γ Γ' Δ : Ctx} (h : Thin Γ Δ) (s : Stmt C Γ Γ') :
+    Thin.Over s.ext h (s.wk h).2.2.ext (s.wk h).2.1 := by
+  cases s <;> first | exact .refl h | exact .push (.refl h) | exact CallRet.wk_over h _
+
+theorem Prog.wk_over : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → ∀ {Δ : Ctx} (h : Thin Γ Δ),
+    Thin.Over P.ext h (P.wk h).2.2.ext (P.wk h).2.1
+  | _, _, .nil, _, h => .refl h
+  | _, _, .cons s P, _, h => (Stmt.wk_over h s).trans (Prog.wk_over P (s.wk h).2.1)
+
+/-! ## A weakened statement runs as the statement -/
+
+theorem CallRet.enter_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (g : Semantics.State) {rs Γ' : Ctx}
+    (ret : CallRet Γ rs Γ') : (ret.wk h).2.2.enter (C := C) g = ret.enter g := by
+  cases ret <;> rfl
+
+theorem CallRet.leave_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (e : Env C Γ) (d : Env C Δ) {rs Γ' : Ctx}
+    (ret : CallRet Γ rs Γ') (x : Env C rs) :
+    ∃ d', Env.off (ret.wk h).2.1 d' = Env.off h d ∧
+      (ret.wk h).2.2.leave (Env.put h e d) x = Env.put (ret.wk h).2.1 (ret.leave e x) d' := by
+  cases ret with
+  | none => exact ⟨d, rfl, rfl⟩
+  | val p r res =>
+    cases res with
+    | none => exact ⟨d, rfl, rfl⟩
+    | some i => exact ⟨d, rfl, Env.set_put h i x.1 e d⟩
+  | rets bs => exact ⟨Env.append _ x d, Env.off_keepAll h _ x d, (Env.put_keepAll h _ x x e d).symm⟩
+  | mem R r hd hm => exact ⟨(x.1, d), rfl, rfl⟩
+
+mutual
+
+/-- **A weakened statement runs as the statement**: from a state of `Δ`, it
+does what the statement does from that state's locals of `Γ`, and keeps the
+others. -/
+theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} (h : Thin Γ Δ)
+    (d : Env C Δ) (τ : State C Γ),
+    WkRel (s.wk h).2.1 (Env.off h d) (s.run τ) ((s.wk h).2.2.run (τ.lift h d))
+  | _, _, .assign l r, _, h, d, τ => WkRel.of_eq (Run.assign_wk h d τ l r)
+  | _, _, .rebind i r, _, h, d, τ => WkRel.of_eq (Run.rebind_wk h d τ i r)
+  | _, _, .assignLocal i r, _, h, d, τ => WkRel.of_eq (Run.assignLocal_wk h d τ i r)
+  | _, _, .declLocal p _ init, _, h, d, τ => WkRel.of_top (Run.declLocal_wk h d τ p init)
+  | _, _, .declStorage R _ init, _, h, d, τ => WkRel.of_top (Run.declStorage_wk h d τ R init)
+  | _, _, .opAssign op _ _ l r, _, h, d, τ => WkRel.of_eq (Run.opAssign_wk h d τ op l r)
+  | _, _, .incDec op _ l, _, h, d, τ => WkRel.of_eq (Run.incDec_wk h d τ op l)
+  | _, _, .assignIncDec i op _ l _, _, h, d, τ => WkRel.of_eq (Run.assignIncDec_wk h d τ i op l)
+  | _, _, .push b v _, _, h, d, τ => WkRel.of_eq (Run.push_wk h d τ b v)
+  | _, _, .pop b, _, h, d, τ => WkRel.of_eq (Run.pop_wk h d τ b)
+  | _, _, .transfer r a, _, h, d, τ => WkRel.of_eq (Run.transfer_wk h d τ r a)
+  | _, _, .send pv r a, _, h, d, τ => WkRel.of_eq (Run.send_wk h d τ pv r a)
+  | _, _, .declMem R _ init _ _, _, h, d, τ => WkRel.of_top (Run.declMem_wk h d τ R init)
+  | _, _, .rebindMem i r, _, h, d, τ => WkRel.of_eq (Run.rebindMem_wk h d τ i r)
+  | _, _, .assignFromMem l q, _, h, d, τ => WkRel.of_eq (Run.assignFromMem_wk h d τ l q)
+  | _, _, .assignMem l r, _, h, d, τ => WkRel.of_eq (Run.assignMem_wk h d τ l r)
+  | _, _, .delete l, _, h, d, τ => WkRel.of_eq (Run.delete_wk h d τ l)
+  | _, _, .deleteMem q hq, _, h, d, τ => WkRel.of_eq (Run.deleteMem_wk h d τ q)
+  | _, _, .assignNew l n _, _, h, d, τ => WkRel.of_eq (Run.assignNew_wk h d τ l n)
+  | _, _, .require c, _, h, d, τ => WkRel.of_eq (guardOk_wk h d τ c)
+  | _, _, .assert c, _, h, d, τ => WkRel.of_eq (assertOk_wk h d τ c)
+  | _, _, .revert, _, h, d, τ => rfl
+  | _, _, .ite c thn els, _, h, d, τ => by
+    show WkRel h _ (Run.ite c thn.ext thn.runR els.ext els.runR τ)
+      (Run.ite (c.wk h) (thn.wk h).2.2.ext (thn.wk h).2.2.runR (els.wk h).2.2.ext
+        (els.wk h).2.2.runR (τ.lift h d))
+    unfold Run.ite
+    rw [Val.eval_wk]
+    refine WkRel.bind_same _ fun v => ?_
+    rcases v with _ | (_ | _)
+    · rfl
+    · exact WkRel.drop (Prog.wk_over els h) (Prog.run_wk els h d τ)
+    · exact WkRel.drop (Prog.wk_over thn h) (Prog.run_wk thn h d τ)
+  | _, _, .call f args ret body, _, h, d, τ => by
+    show WkRel (ret.wk h).2.1 (Env.off h d) (Run.call args ret body.ext body.runR τ)
+      (Run.call (args.wk h) (ret.wk h).2.2 body.ext body.runR (τ.lift h d))
+    unfold Run.call
+    rw [Args.eval_wk, State.glob_lift, CallRet.enter_wk]
+    refine WkRel.bind_same _ fun a => WkRel.bind_same _ fun ⟨g, r⟩ => WkRel.bind_same _ fun υ => ?_
+    obtain ⟨d', hd', he⟩ := CallRet.leave_wk h τ.env d ret (Env.take _ (Env.drop body.ext υ.env))
+    refine ⟨d', hd', ?_⟩
+    show υ.withEnv ((ret.wk h).2.2.leave (Env.put h τ.env d) _) = _
+    rw [he]; rfl
+  | _, _, .tryCall call rets ok err code pnc other, _, h, d, τ => by
+    show WkRel h (Env.off h d)
+      (Run.tryCall call rets ok.ext ok.runR err.ext err.runR code pnc.ext pnc.runR other.ext
+        other.runR τ)
+      (Run.tryCall (call.wk h) rets (ok.wk (Thin.keepAll _ h)).2.2.ext
+        (ok.wk (Thin.keepAll _ h)).2.2.runR (err.wk h).2.2.ext (err.wk h).2.2.runR code
+        (pnc.wk (Thin.keepAll _ h)).2.2.ext (pnc.wk (Thin.keepAll _ h)).2.2.runR
+        (other.wk h).2.2.ext (other.wk h).2.2.runR (τ.lift h d))
+    unfold Run.tryCall
+    rw [ExtCall.key_wk]
+    refine WkRel.bind_same _ fun k => ?_
+    rw [show (τ.lift h d).tx = τ.tx from rfl]
+    cases Semantics.lookupBy k τ.tx.ext with
+    | none => rfl
+    | some o =>
+      cases o with
+      | ok vs =>
+        refine WkRel.bind_same _ fun ⟨r, _⟩ => ?_
+        have e : (τ.lift h d).withEnv (Env.append _ r (τ.lift h d).env) =
+            (τ.withEnv (Env.append _ r τ.env)).lift (Thin.keepAll _ h) (Env.append _ r d) := by
+          simp only [State.lift, State.withEnv, Env.put_keepAll]
+        dsimp only
+        rw [e]
+        have := WkRel.drop (Thin.Over.trans (Thin.Over.append h _) (Prog.wk_over ok _))
+          (Prog.run_wk ok (Thin.keepAll _ h) (Env.append _ r d) (τ.withEnv (Env.append _ r τ.env)))
+        rwa [Env.off_keepAll] at this
+      | error => exact WkRel.drop (Prog.wk_over err h) (Prog.run_wk err h d τ)
+      | panic c =>
+        refine WkRel.bind_same _ fun r => ?_
+        have e : (τ.lift h d).withEnv (Env.append _ r (τ.lift h d).env) =
+            (τ.withEnv (Env.append _ r τ.env)).lift (Thin.keepAll _ h) (Env.append _ r d) := by
+          simp only [State.lift, State.withEnv, Env.put_keepAll]
+        rw [e]
+        have := WkRel.drop (Thin.Over.trans (Thin.Over.append h _) (Prog.wk_over pnc _))
+          (Prog.run_wk pnc (Thin.keepAll _ h) (Env.append _ r d) (τ.withEnv (Env.append _ r τ.env)))
+        rwa [Env.off_keepAll] at this
+      | other => exact WkRel.drop (Prog.wk_over other h) (Prog.run_wk other h d τ)
+  | _, _, .loop a c body, _, h, d, τ => by
+    apply WkRel.of_eq
+    show Loop.run (fun τ' => (Prog.run τ' (body.wk h).2.2).map (State.drop (body.wk h).2.2.ext))
+        (fun τ' => (c.wk h).eval τ') (τ.lift h d) =
+      lifted h d (Loop.run (fun τ' => (Prog.run τ' body).map (State.drop body.ext))
+        (fun τ' => c.eval τ') τ)
+    exact Loop.run_map (State.lift h d) (fun a => Val.eval_wk h d a c)
+      (fun a => WkRel.eq_lifted (WkRel.drop (Prog.wk_over body h) (Prog.run_wk body h d a))) τ
+  | _, _, .block body, _, h, d, τ => WkRel.drop (Prog.wk_over body h) (Prog.run_wk body h d τ)
+
+/-- **A weakened sequence runs as the sequence.** -/
+theorem Prog.run_wk : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → ∀ {Δ : Ctx} (h : Thin Γ Δ)
+    (d : Env C Δ) (τ : State C Γ),
+    WkRel (P.wk h).2.1 (Env.off h d) (P.run τ) ((P.wk h).2.2.run (τ.lift h d))
+  | _, _, .nil, _, h, d, τ => ⟨d, rfl, rfl⟩
+  | _, _, .cons s P, _, h, d, τ => by
+    show WkRel (P.wk (s.wk h).2.1).2.1 _ (Prog.run τ (.cons s P))
+      (Prog.run (τ.lift h d) (.cons (s.wk h).2.2 (P.wk (s.wk h).2.1).2.2))
+    rw [Prog.run_cons, Prog.run_cons]
+    exact WkRel.bind (Stmt.run_wk s h d τ) fun τ' d' hd' => hd' ▸ Prog.run_wk P _ d' τ'
+
+end
 
 end Solidity.Core
