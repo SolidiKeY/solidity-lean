@@ -209,7 +209,7 @@ private def invDiamondφ : Solidity.Fml StandardExample :=
 
 run_meta agree se `Solidity.Examples.Tactics.CoreStep.invDiamond invDiamondφ
 
-/-- `whileClose`, `whileNoVariantDiamond`. -/
+/-- `whileClose`: the body pushes, so it has no frame. -/
 private def invCloseφ : Solidity.Fml StandardExample :=
   dl!{ [ uint i = 0;
          /// @custom:key invariant i <= 3
@@ -217,7 +217,61 @@ private def invCloseφ : Solidity.Fml StandardExample :=
 
 run_meta agree se `Solidity.Examples.Tactics.CoreStep.invClose invCloseφ
 
+/-- `whileNoVariantDiamond`: a framed body under the diamond, with no
+`decreases`. -/
+private def invNoVariantφ : Solidity.Fml StandardExample :=
+  dl!{ ⟨ uint i = 0;
+         /// @custom:key invariant i <= 3
+         while (i < 3) { i = i + 1; }; ⟩ true }
+
+run_meta agree se `Solidity.Examples.Tactics.CoreStep.invNoVariant invNoVariantφ
+
 end Loops
+
+/-! ## Memory arrays, arrays of mapping-holding structs -/
+
+section Suite
+
+local instance : InContract := ⟨TestSuite⟩
+
+private def ts : Expr := mkConst ``TestSuite
+
+/-- The memory array rules: `memoryIndexReadArrayValue`,
+`memoryIndexRead_unfold_rightSndIndex`, `memoryIndexRead_unfold_rightFst`,
+`memoryLengthRead`, `memoryLengthRead_unfold_rightFst`,
+`memoryIndexWriteCaptureAllComplexRecv`, `…NonSimpleIndex`,
+`memoryIndexWriteMemRefCaptureAllComplexRecv`, `…NonSimpleIndex`, the
+index deletes, `memoryIndexOpAssign…`, `memoryIndexArrayIncrement`,
+`memoryFieldOpAssign…` and their `…UnfoldLeftFst`. -/
+private def memoryArraysφ : Solidity.Fml TestSuite :=
+  dl!{ [ uint i = 1; uint x = 2; Basket memory m = basketA;
+         m.items[i] = x + 1; uint y = m.items[i + 1]; m.items[x] += 2; m.items[1]++;
+         delete m.items[i + 1]; uint l = m.items.length; m.items[i + 1] = x;
+         uint[] memory xs = m.items; uint z = xs[i]; xs[i + 1] = 4; xs[i] = y; xs[i]++;
+         xs[x] -= 1; delete xs[i]; delete xs[i + 1]; uint n = xs.length;
+         TokenBucket memory b = bucket; Token memory t = tok; b.tokens[i] = t;
+         Token[] memory ks = b.tokens; ks[i + 1] = t; b.tokens[i].value = 3;
+         uint v = b.tokens[i + 1].value; t.value += 2; b.tokens[i].value += 1;
+         b.tokens[i].value++; ] true }
+
+run_meta agree ts `Solidity.Examples.Tactics.CoreStep.memoryArrays memoryArraysφ
+
+/-- Arrays whose elements hold a mapping: `storagePopSaveMappingElement`,
+`storageLocalRootPushBindMappingElement`,
+`storageIndexReadArrayBindLocalRootMappingElement`; a reference written
+under a complex receiver (`storageIndexWriteStorageRefCaptureAllComplexRecv`)
+and from memory (`memoryToStorageIndexCaptureAllComplexRecv`,
+`…NonSimpleIndex`). -/
+private def suiteArraysφ : Solidity.Fml TestSuite :=
+  dl!{ [ uint i = 1; uint x = 2; LedgerUse storage u = ledgerUses.push(); ledgerUses.pop();
+         LedgerUse storage w = ledgerUses[i]; w = ledgerUses[x]; u = ledgerUses.push();
+         buckets[x].tokens[i + 1] = tok;
+         Person memory m = alice; persons[i + 1] = m; Token memory t = tok;
+         buckets[x].tokens[i] = t; ] true }
+
+run_meta agree ts `Solidity.Examples.Tactics.CoreStep.suiteArrays suiteArraysφ
+
+end Suite
 
 /-! ## Calls -/
 

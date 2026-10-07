@@ -20,11 +20,15 @@ follow Gate G0's conditions:
   are taken apart by `casesOn` with a motive over their indices; a `match`
   is left on the expression families, whose context is a parameter, and a
   rule's schema variables are shifted under its fresh local by `Val.up` and
-  its kin, which match only on those.  Three exceptions remain, each once
+  its kin, which match only on those.  Five exceptions remain, each once
   per rule fired: `ifElseUnfold` weakens the branches with `Prog.wk up`, a
   call its body with `Prog.wk (Thin.atop …)`, `whileInvariantDiamond` the
   body with `Prog.wk up`; `Prog.wk` matches on `Prog`, `Stmt`, `Thin` and
-  `Idx`, so the kernel runs it;
+  `Idx`, so the kernel runs it.  A call with returns builds its thinning
+  with `Thin.ofExt`, a `match` on `Ext`; and every invariant rule computes
+  the body's frame (`Prog.frame`), whose positions go through `Idx.toNat`
+  (a `match` on `Idx`) and back through `Ctx.idx?` (deciding `LTy`
+  equality, then a cast);
 * **the stepper is `Fml.rec`** (condition 2): `Fml.stepR`, the definition the
   kernel unfolds, recurses by the recursor; `Fml.stepAt` is its compiled
   twin (`implemented_by`), by `casesOn` and structural recursion, and

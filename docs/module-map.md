@@ -280,7 +280,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Loops.lean` | `while`, `for`, `do … while`, `break`, `continue`, `return` in a loop: the lowering's shapes pinned, `#run` of loops, a concrete loop decided (`Prog.run_loop_of_iterN`); loops proved by unwinding (`whileUnwind`, `loopExit`), solkey's two solc loop ports among them; by an invariant (`whileInvariantBox`, `whileInvariantDiamond`): a counting loop, a sum with a closed form, a loop with `break`, a walk and its proof tree. |
 | `Examples/Tactics/LoopsImport.lean` | Loops from solc's AST (`tests/solc/Loops.sol`): the `/// @custom:key` clauses `scripts/solc-ast.mjs` reads from the source by the loop's `src` offset, printed above the loop by the front end (a clause over several `///` lines joined, as solkey's `KeyNatspec`); a `return` inside a loop lowered on import; five of its seven obligations proved, the two not proved named with why. |
 | `Examples/Tactics/CoreSymex.lean` | `Core.symex` on three programs, checked by the kernel (`Eq.refl`) and against today's `symex` on the erasure. |
-| `Examples/Tactics/CoreStep.lean` | Every arm of `Core.Stmt.step` against today's: each program's `Core.symex` erases to today's `symex` (covers dropped) and is kernel-checked (`Eq.refl`). |
+| `Examples/Tactics/CoreStep.lean` | The arms of `Core.Stmt.step` against today's, by rule family (storage, memory structs and arrays, arrays of mapping-holding structs, operators, payments, loops, calls, `try`): each program's `Core.symex` erases to today's `symex` (covers dropped) and is kernel-checked (`Eq.refl`). |
 
 At the root, the notation's own tests:
 

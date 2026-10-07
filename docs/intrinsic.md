@@ -467,11 +467,15 @@ from `./run-lean.sh`.
     erases to today's `{anon(…)}` less those names (the only erasure that
     differs; the test's loops declare none).
   - `Stmt.scopeExt` is gone: M2's `Stmt.ext`/`Prog.ext` replaced it.
-  - `Examples/Tactics/CoreStep.lean`: 20 programs, one or more per rule
+  - `Examples/Tactics/CoreStep.lean`: 22 programs, one or more per rule
     family, each resolved, run by `Core.symex`, its erasure equal to
     today's `symex` with the covers dropped, and kernel-checked
-    (`Eq.refl`), over `StandardExample`, `CallsExample` and two contracts
-    of its own (a pair and a memory return; a `try`).
+    (`Eq.refl`), over `StandardExample`, `TestSuite` (memory arrays,
+    arrays of mapping-holding structs), `CallsExample` and two contracts
+    of its own (a pair and a memory return; a `try`).  Each loop arm has
+    its program, `whileNoVariantDiamond` among them.  Arms no program
+    reaches are not pinned: the file's docstrings name the taclets each
+    program fires.
   - For the calctools lane: its `Premise` quoter needs the four new
     constructors.
   - `Calculus/Core/Logic.lean` (M3 landed): `holds` on scoped formulas over
