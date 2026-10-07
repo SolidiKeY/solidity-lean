@@ -557,6 +557,34 @@ theorem call_frag {Γ' ps rs Γf : Ctx} {f : Name} {args : Solidity.Core.Args C 
     · cases hw
   · cases hw
 
+/-- **A call** in the fragment: no return value or one value, the body's
+outcome given (`ih`, `prog_sim` on the body in its frame). -/
+theorem call_family {Γ' ps rs Γf : Ctx} (f : Name) (args : Solidity.Core.Args C Γ ps)
+    (ret : Solidity.Core.CallRet Γ rs Γ') (body : Solidity.Core.Prog C (rs ++ ps) Γf)
+    {F' : Frag Γ'} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.call f args ret body) = some F')
+    (ih : ∀ {G : Frag Γf} {τ : Solidity.Core.State C (rs ++ ps)} {m₂ : Machine},
+      inFragP (Frag.init (rs ++ ps)) body = some G →
+      Sim C L (b + Γ.length) (Frag.init (rs ++ ps)) τ.glob (Look.ofEnv τ.env) m₂ →
+      StmtOut C (L + Prog.pushes body) (b + Γ.length) G (Prog.shrinks body) (Prog.pays body)
+        (Prog.asserts body) (Solidity.Core.Prog.run τ body)
+        (run (compileProg (b + Γ.length) body) m₂) m₂) :
+    StmtOut C (L + Stmt.pushes (.call f args ret body)) b F'
+      (Stmt.shrinks (.call f args ret body)) (Stmt.pays (.call f args ret body))
+      (Stmt.asserts (.call f args ret body)) (Solidity.Core.Stmt.run σ (.call f args ret body))
+      (run (compileStmt b (.call f args ret body)) m) m := by
+  obtain ⟨hwa, ⟨G, hb⟩, hret⟩ := call_frag hw
+  cases ret with
+  | none =>
+    cases hret
+    exact callNone_sim f args body (Nat.le_add_right _ _) hm hwa fun hm₂ => ⟨G, ih hb hm₂⟩
+  | val p r res =>
+    cases hret
+    exact callVal_sim f args p r res body (Nat.le_add_right _ _) hm hwa
+      fun hm₂ => ⟨G, ih hb hm₂⟩
+  | rets _ => cases hret
+  | mem _ _ _ _ => cases hret
+
 end Families
 
 
@@ -615,55 +643,45 @@ theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Core.Stmt C Γ Γ') {L b : N
     Sim C L b F σ.glob (Look.ofEnv σ.env) m → inFrag F s = some F' → L + Stmt.pushes s ≤ Lmax →
       StmtOut C (L + Stmt.pushes s) b F' (Stmt.shrinks s) (Stmt.pays s) (Stmt.asserts s)
         (Solidity.Core.Stmt.run σ s) (run (compileStmt b s) m) m
-  | _, _, .assign l r, _, _, _, _, _, _, hm, hw, _ => assign_family l r hm hw
-  | _, _, .rebind i r, _, _, _, _, _, _, hm, hw, _ => rebind_family i r hm hw
-  | _, _, .assignLocal i r, _, _, _, _, _, _, hm, hw, _ => assignLocal_family i r hm hw
-  | _, _, .declLocal p x init, _, _, _, _, _, _, hm, hw, _ => declLocal_family p x init hm hw
-  | _, _, .declStorage R x init, _, _, _, _, _, _, hm, hw, _ =>
+  | _, _, .assign l r => fun hm hw _ => assign_family l r hm hw
+  | _, _, .rebind i r => fun hm hw _ => rebind_family i r hm hw
+  | _, _, .assignLocal i r => fun hm hw _ => assignLocal_family i r hm hw
+  | _, _, .declLocal p x init => fun hm hw _ => declLocal_family p x init hm hw
+  | _, _, .declStorage R x init => fun hm hw _ =>
     declStorage_family R x init hm hw
-  | _, _, .opAssign op hop hp l r, _, _, _, _, _, _, hm, hw, _ =>
+  | _, _, .opAssign op hop hp l r => fun hm hw _ =>
     opAssign_family op hop hp l r hm hw
-  | _, _, .incDec op hp l, _, _, _, _, _, _, hm, hw, _ => incDec_family op hp l hm hw
-  | _, _, .assignIncDec i op hp l hs, _, _, _, _, _, _, hm, hw, _ =>
+  | _, _, .incDec op hp l => fun hm hw _ => incDec_family op hp l hm hw
+  | _, _, .assignIncDec i op hp l hs => fun hm hw _ =>
     assignIncDec_family i op hp l hs hm hw
-  | _, _, .push q v hd, _, _, _, _, _, _, hm, hw, hL => push_family q v hd hm hw hL
-  | _, _, .pop q, _, _, _, _, _, _, hm, hw, _ => pop_family q hm hw
-  | _, _, .transfer r a, _, _, _, _, _, _, hm, hw, _ => transfer_family r a hm hw
-  | _, _, .delete l, _, _, _, _, _, _, hm, hw, _ => delete_family l hm hw
-  | _, _, .require c, _, _, _, _, _, _, hm, hw, _ => require_family c hm hw
-  | _, _, .assert c, _, _, _, _, _, _, hm, hw, _ => assert_family c hm hw
-  | _, _, .revert, _, _, _, _, _, _, _, _, _ => .inr ⟨rfl, rfl⟩
-  | _, _, .ite c t e, L, _, _, _, _, _, hm, hw, hL => by
+  | _, _, .push q v hd => fun hm hw hL => push_family q v hd hm hw hL
+  | _, _, .pop q => fun hm hw _ => pop_family q hm hw
+  | _, _, .transfer r a => fun hm hw _ => transfer_family r a hm hw
+  | _, _, .delete l => fun hm hw _ => delete_family l hm hw
+  | _, _, .require c => fun hm hw _ => require_family c hm hw
+  | _, _, .assert c => fun hm hw _ => assert_family c hm hw
+  | _, _, .revert => fun _ _ _ => .inr ⟨rfl, rfl⟩
+  | _, _, .ite c t e => fun hm hw hL => by
     obtain ⟨hwc, F₁, F₂, ht, he, rfl⟩ := ite_frag hw
-    have hL' : L + (Prog.pushes t + Prog.pushes e) ≤ Lmax := hL
+    have hL' : _ + (Prog.pushes t + Prog.pushes e) ≤ Lmax := hL
+    have hite : Stmt.pushes (.ite c t e) = Prog.pushes t + Prog.pushes e := rfl
     exact ite_sim c t e hm hwc ((prog_sim t hm ht (by omega)).mono (by omega) hL')
       ((prog_sim e hm he (by omega)).mono (by omega) hL')
-  | _, _, .block body, _, _, _, _, _, _, hm, hw, hL => by
+  | _, _, .block body => fun hm hw hL => by
     obtain ⟨G, hb, rfl⟩ := block_frag hw
     exact block_sim body (prog_sim body hm hb hL)
-  | _, _, .call f args ret body, L, _, _, _, _, _, hm, hw, hL => by
-    obtain ⟨hwa, ⟨G, hb⟩, hret⟩ := call_frag hw
-    cases ret with
-    | none =>
-      cases hret
-      exact callNone_sim f args body (Nat.le_add_right _ _) hm hwa
-        fun hm₂ => ⟨G, prog_sim body hm₂ hb hL⟩
-    | val p r res =>
-      cases hret
-      exact callVal_sim f args p r res body (Nat.le_add_right _ _) hm hwa
-        fun hm₂ => ⟨G, prog_sim body hm₂ hb hL⟩
-    | rets _ => cases hret
-    | mem _ _ _ _ => cases hret
-  | _, _, .send .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .declMem .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .rebindMem .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .assignFromMem .., _, _, _, _, _, _, _, hw, _ => by
+  | _, _, .call f args ret body => fun hm hw hL =>
+    call_family f args ret body hm hw fun hb hm₂ => prog_sim body hm₂ hb hL
+  | _, _, .send .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .declMem .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .rebindMem .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .assignFromMem .. => fun _ hw _ => by
     simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .assignMem .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .deleteMem .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .assignNew .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .tryCall .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .loop .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .assignMem .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .deleteMem .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .assignNew .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .tryCall .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .loop .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
 
 /-- A block's code does what the block does. -/
 theorem prog_sim : ∀ {Γ Γ' : Ctx} (P : Solidity.Core.Prog C Γ Γ') {L b : Nat} {F : Frag Γ}
@@ -671,15 +689,15 @@ theorem prog_sim : ∀ {Γ Γ' : Ctx} (P : Solidity.Core.Prog C Γ Γ') {L b : N
     Sim C L b F σ.glob (Look.ofEnv σ.env) m → inFragP F P = some F' → L + Prog.pushes P ≤ Lmax →
       StmtOut C (L + Prog.pushes P) b F' (Prog.shrinks P) (Prog.pays P) (Prog.asserts P)
         (Solidity.Core.Prog.run σ P) (run (compileProg b P) m) m
-  | _, _, .nil, _, _, _, _, σ, m, hm, hw, _ => by
+  | _, _, .nil => fun hm hw _ => by
     simp only [inFragP, Option.some.injEq] at hw
     subst hw
-    exact .inl ⟨σ, m, rfl, rfl, rfl, Keeps.refl m, hm⟩
-  | _, _, .cons s P, L, _, _, _, _, _, hm, hw, hL => by
+    exact .inl ⟨_, _, rfl, rfl, rfl, Keeps.refl _, hm⟩
+  | _, _, .cons s P => fun hm hw hL => by
     simp only [inFragP] at hw
     split at hw
     · rename_i F₁ hs
-      have hL' : L + (Stmt.pushes s + Prog.pushes P) ≤ Lmax := hL
+      have hL' : _ + (Stmt.pushes s + Prog.pushes P) ≤ Lmax := hL
       have he : Prog.pushes (.cons s P) = Stmt.pushes s + Prog.pushes P := rfl
       rw [he] at hL ⊢
       exact seq_sim s P (stmt_sim s hm hs (by omega))
