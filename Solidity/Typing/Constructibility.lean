@@ -973,7 +973,7 @@ theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty} (hk : k.isNumeric = true
     -- `delete balances[key];` creates the entry at the default
     have hcur : σ.glob.findStorage r (segs ++ [.at key]) = .ok (defaultForTy V) := by
       rw [SemanticsProperties.State.findStorage_append, hf]
-      simp only [bind, Except.bind, Semantics.SVal.find, hkey, SVal.find_nil]
+      simp only [bind, Except.bind, Semantics.SVal.find, hkey]
     have hdel := run_delete (C := C)
       (l := Loc.index .map (.alias a) (.simple (numLit k hk key)))
       (by simpa only [SPath.resolve] using hq) hcur
