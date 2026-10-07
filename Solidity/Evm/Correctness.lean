@@ -665,11 +665,10 @@ theorem prim_read {st : Slot → Nat} {p : PrimTy} {s : Slot} {sv : SVal}
 Example: `x` with `x = 3` is `MLOAD x`, which pushes `3`. -/
 theorem simple_sim {m : Machine} (hm : Sim C L Γ σ m) : ∀ {p : PrimTy} (s : Simple C p),
     wtSimple Γ s = true → ValOut p (s.eval σ) (run (compileSimple s) m) m
-  | p, .lit n _, hw => by
-    simp only [wtSimple, Bool.or_eq_true, Bool.and_eq_true, beq_iff_eq, decide_eq_true_eq] at hw
-    rcases hw with ⟨⟨rfl, h0⟩, h1⟩ | ⟨⟨rfl, h0⟩, h1⟩
-    · exact .inl ⟨.int n, .val (toWord n), rfl, ⟨h0, h1, by simp [toWord, h0]⟩, rfl⟩
-    · exact .inl ⟨.int n, .val (toWord n), rfl, ReprV.int h0 h1, rfl⟩
+  | p, .lit n hr, _ => by
+    cases p <;> simp only [PrimTy.inRange, decide_eq_true_eq, Bool.false_eq_true] at hr
+    · exact .inl ⟨.int n, .val (toWord n), rfl, ⟨hr.1, hr.2, by simp [toWord, hr.1]⟩, rfl⟩
+    · exact .inl ⟨.int n, .val (toWord n), rfl, ReprV.int hr.1 hr.2, rfl⟩
   | _, .bool b, _ => .inl ⟨.bool b, .val (bword b), rfl, rfl, rfl⟩
   | p, .local x, hw => by
     have hx : Γ x = some (.val p) := by simpa [wtSimple] using hw
@@ -2322,6 +2321,8 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
     obtain ⟨hwp, rfl⟩ := hw
     exact push_sim b v hd hm hwp hL
   | .declMem .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
+  | .deleteMem .., _, _, _, _, _, _, hw, _ => by simp only [wtStmt, reduceCtorEq] at hw
+  | .assignNew .., _, _, _, _, _, _, hw, _ => by simp only [wtStmt, reduceCtorEq] at hw
   | .rebindMem .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
   | .assignFromMem .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw
   | .assignMem .., _, _, _, _, _, _, hw, _ => by simp [wtStmt] at hw

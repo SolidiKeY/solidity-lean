@@ -496,7 +496,7 @@ def Stmt.vars : Stmt C → List Var
   | .pop b => b.vars
   | .transfer r a => r.vars ++ a.vars
   | .send pv r a => pv :: (r.vars ++ a.vars)
-  | .declMem _ x init _ => x :: optVars MRhs.vars init
+  | .declMem _ x init _ _ => x :: optVars MRhs.vars init
   | .rebindMem x r => x :: r.vars
   | .assignFromMem l p => l.vars ++ p.vars
   | .assignMem l r => l.vars ++ r.vars
@@ -557,7 +557,7 @@ theorem Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
 
 theorem MPath.mval_frame (hag : EnvAgreeExcept ns σ τ) :
     {T : Ty} → (p : MPath C T) → Avoids p.vars ns → p.mval σ = p.mval τ
-  | _, .var x, h => by simp only [MPath.mval, getEnv_congr hag (h x (by simp [MPath.vars]))]
+  | _, .var x _, h => by simp only [MPath.mval, getEnv_congr hag (h x (by simp [MPath.vars]))]
   | _, .loc l, h => l.read_frame hag h
 
 theorem MLoc.read_frame (hag : EnvAgreeExcept ns σ τ) :
@@ -946,7 +946,7 @@ theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .send pv r a, h => by
     simp only [Stmt.run, r.eval_frame hag h.tail.left, a.eval_frame hag h.tail.right]
     agree_run hag
-  | .declMem R x init _, h => by
+  | .declMem R x init _ _, h => by
     cases init with
     | none => exact allocDefault_bind_agree hag R x
     | some r => exact r.bind_frame hag x h.tail

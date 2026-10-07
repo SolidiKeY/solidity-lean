@@ -49,8 +49,8 @@ claim (see `docs/compiler-verification.md` for why each exclusion):
 
 * types: `uint`, `int` and `bool` values; storage of any shape; mappings keyed
   by `uint`;
-* expressions: literals (a `uint` below `2^256`, an `int` in `[-2^255,
-  2^255)`), locals, storage reads, every operator (`-x` at `int`), `?:`,
+* expressions: literals (in their type's range by the syntax,
+  `Simple.lit`), locals, storage reads, every operator (`-x` at `int`), `?:`,
   `.length` of a storage array, `msg.sender`, `msg.value`, `block.timestamp`.
   Not memory reads, not `address(this).balance`;
 * statements: `=` of a value into storage, a copy of a *static* value
@@ -489,14 +489,12 @@ def static (T : Ty) : Bool := staticF (tyRank T + 1) T
 
 variable {C : Contract}
 
-/-- A literal is a `uint` below `2^256` or an `int` in `[-2^255, 2^255)`,
-a local is read at its type.  `address(this).balance` is out: the
+/-- A literal is always in, since the syntax keeps it in its type's range
+(`Simple.lit`); a local is read at its type.  `address(this).balance` is out: the
 interpreter's is the funds the transaction found, which a `transfer` leaves,
 and `SELFBALANCE` reads the account a `CALL` debits. -/
 def wtSimple (Γ : TyCtx) : {p : PrimTy} → Simple C p → Bool
-  | p, .lit n _ =>
-    (p == .uint && decide (0 ≤ n) && decide (n < (W : Int))) ||
-      (p == .int && decide (-(H : Int) ≤ n) && decide (n < (H : Int)))
+  | _, .lit .. => true
   | _, .bool _ => true
   | p, .local x => Γ x == some (.val p)
   | _, .env k _ => k != .selfBalance

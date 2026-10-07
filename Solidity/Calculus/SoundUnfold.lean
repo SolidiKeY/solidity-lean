@@ -188,7 +188,7 @@ theorem evalBinop_noShort {op : BinOp} (h : op.shortCircuits = false) (p : PrimT
 
 @[simp] theorem Simple.eval_bool (σ : State) (b : Bool) :
     (Simple.bool b : Simple C .bool).eval σ = pure (.bool b) := rfl
-@[simp] theorem Simple.eval_lit (σ : State) {p : PrimTy} (n : Int) (h : p.isNumeric = true) :
+@[simp] theorem Simple.eval_lit (σ : State) {p : PrimTy} (n : Int) (h : p.inRange n = true) :
     (Simple.lit n h : Simple C p).eval σ = pure (.int n) := rfl
 
 /-- The four fresh names avoid `vs` when each does. -/

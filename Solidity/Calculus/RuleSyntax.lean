@@ -375,7 +375,8 @@ def stemOf (s : String) : String :=
 inductive Decl where
   | val (x : Lean.Term)
   | alias (x : Lean.Term)
-  | mem (x : Lean.Term)
+  /-- A memory local, and the proof its type holds no mapping. -/
+  | mem (x h : Lean.Term)
   /-- The mark of `tm{ … }`: every name is a Lean variable of a term sort. -/
   | raw
 
@@ -419,7 +420,7 @@ def posError (x : Lean.Syntax) (what : String) (pos : Pos) : MacroM α :=
 
 /-- What a name is, by its stem (or its declaration in scope). -/
 inductive Head where
-  | local (x : Lean.Term) | alias (x : Lean.Term) | mem (x : Lean.Term)
+  | local (x : Lean.Term) | alias (x : Lean.Term) | mem (x h : Lean.Term)
   | root (x h : Lean.Term) | simple (x : Lean.Term) | val (x : Lean.Term)
   | spath (x : Lean.Term) | mpath (x : Lean.Term) | loc (x : Lean.Term) | mloc (x : Lean.Term)
   | other (x : Lean.Term)
@@ -429,12 +430,12 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
   match Γ.lookup s with
   | some (.val v) => .local v
   | some (.alias v) => .alias v
-  | some (.mem v) => .mem v
+  | some (.mem v h) => .mem v h
   | some .raw => .other x
   | none => if Γ.isRaw then .other x else match stemOf s with
     | "v" | "lv" | "vp" | "pv" => .local x
     | "lsv" => .alias x
-    | "mv" | "pmv" | "rmv" => .mem x
+    | "mv" | "pmv" | "rmv" => .mem x (proofIdent x s)
     | "gsp" => .root x (proofIdent x s)
     | "se" | "ie" | "sadr" => .simple x
     | "e" | "nse" | "nadr" | "cond" | "inv" | "dec" => .val x
@@ -461,8 +462,8 @@ def headAt (pos : Pos) (stx : Lean.Syntax) : Head → MacroM Lean.Term
   | .alias v => match pos with
     | .spath => `(SPath.alias $v)
     | _ => posError stx "a storage alias" pos
-  | .mem v => match pos with
-    | .mpath => `(MPath.var $v)
+  | .mem v h => match pos with
+    | .mpath => `(MPath.var $v $h)
     | _ => posError stx "a memory local" pos
   | .root r h => match pos with
     | .loc => `(Loc.root $r $h)
@@ -501,7 +502,7 @@ partial def isMem (Γ : Scope) : TSyntax `sol_expr → Bool
   | `(sol_expr| $x:ident) =>
     match nameParts x.getId with
     | h :: _ => match headOf Γ (mkIdent (Name.mkSimple h)) with
-      | .mem _ | .mpath _ | .mloc _ => true
+      | .mem .. | .mpath _ | .mloc _ => true
       | _ => false
     | [] => false
   | `(sol_expr| $e:sol_expr . $_:ident) => isMem Γ e
@@ -594,7 +595,7 @@ partial def schemaAt (Γ : Scope) (pos : Pos) : TSyntax `sol_expr → MacroM Lea
     | h :: fs =>
       let hx := partIdent x h
       let mem := match headOf Γ hx with
-        | .mem _ | .mpath _ | .mloc _ => true
+        | .mem .. | .mpath _ | .mloc _ => true
         | _ => false
       let b ← headAt (if mem then .mpath else .spath) x (headOf Γ hx)
       fieldsAt Γ pos stx mem b (fs.map (partIdent x))
@@ -866,7 +867,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     if let some n := newRhs? r then
       let n ← schemaAt Γ .simple n
       match lhsHead Γ l, stemOfExpr? l with
-      | some (.mem x), _ =>
+      | some (.mem x _), _ =>
         return (← `(Stmt.rebindMem (R := $R) $x (MRhs.newArr (R := $R) $n $(schemaIdent "hn"))), Γ)
       | _, some "tgt" =>
         let `(sol_expr| $x:ident) := l | Macro.throwErrorAt l "a `tgt`"
@@ -881,7 +882,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
         match rhsVar? "rhs" r with
         | some v => `(Stmt.rebind $x $v)
         | none => `(Stmt.rebind $x (ARhs.path $(← schemaAt Γ .spath r)))
-      | some (.mem x) =>
+      | some (.mem x _) =>
         if let some v := rhsVar? "mrhs" r then `(Stmt.rebindMem $x $v) else
         if isMem Γ r then `(Stmt.rebindMem $x (MRhs.alias $(← schemaAt Γ .mpath r)))
         else `(Stmt.rebindMem $x (MRhs.copy $(← schemaAt Γ .spath r) $(schemaIdent "hm")))
@@ -942,13 +943,15 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
         `(MRhs.newArr (R := $(schemaIdent "R")) $(← schemaAt Γ .simple n) $(schemaIdent "hn"))
       else if isMem Γ e then `(MRhs.alias $(← schemaAt Γ .mpath e))
       else `(MRhs.copy $(← schemaAt Γ .spath e) $(schemaIdent "hm"))
-    let t ← `(Stmt.declMem _ $v (some $r) rfl)
-    return (t, (x.getId.toString, .mem v) :: Γ)
+    let h ← `(MRhs.mapFree $r)
+    let t ← `(Stmt.declMem _ $v (some $r) rfl $h)
+    return (t, (x.getId.toString, .mem v h) :: Γ)
   | `(sol_stmt| $T:sol_ty memory $x:ident) => do
     let v ← declVar fresh x
     let _ := T
-    let t ← `(Stmt.declMem $(schemaIdent "R") $v none $(schemaIdent "hd"))
-    return (t, (x.getId.toString, .mem v) :: Γ)
+    let h := proofIdent x x.getId.toString
+    let t ← `(Stmt.declMem $(schemaIdent "R") $v none $(schemaIdent "hd") $h)
+    return (t, (x.getId.toString, .mem v h) :: Γ)
   | `(sol_stmt| $T:sol_ty $x:ident = $e:sol_expr) => do
     let v ← declVar fresh x
     let _ := T
@@ -1088,8 +1091,8 @@ def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
   | .local v, .svalue => `(SValT.val (Term.pv $v))
   | .local v, .mvalue => `(MValT.val (Term.pv $v))
   | .alias v, .path => `(PTerm.pv $v)
-  | .mem v, .ident => `(ITerm.pv $v)
-  | .mem v, .mvalue => `(MValT.ref (ITerm.pv $v))
+  | .mem v _, .ident => `(ITerm.pv $v)
+  | .mem v _, .mvalue => `(MValT.ref (ITerm.pv $v))
   | .root r _, .val => `(Term.find STerm.storage (PTerm.root $r))
   | .root r _, .path => `(PTerm.root $r)
   | .simple s, .val => `(Simple.lower $s)
@@ -1149,7 +1152,7 @@ partial def schemaTerm (Γ : Scope) (pos : TPos) (t : TSyntax `dl_term) : MacroM
     let memHead := match t with
       | `(dl_term| $x:ident) => match nameParts x.getId with
         | [h] => match headOf Γ (mkIdent (Name.mkSimple h)) with
-          | .mem _ | .mpath _ => true
+          | .mem .. | .mpath _ => true
           | _ => false
         | _ => false
       | `(dl_term| $f:ident($_,*)) => f.getId.toString == "freshId"
@@ -1173,7 +1176,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
       -- `sp.fld`: a path, or (at a memory sort) a member of a memory object
       let hx := partIdent x h
       match headOf Γ hx with
-      | .mem _ | .mpath _ =>
+      | .mem .. | .mpath _ =>
         memMember pos stx (← headTerm Γ .ident hx) (fs.map (partIdent x))
       | _ =>
         if fs.getLast? == some "length" then
@@ -1200,7 +1203,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     let mem := match t with
       | `(dl_term| $x:ident) => match nameParts x.getId with
         | h :: _ => match headOf Γ (mkIdent (Name.mkSimple h)) with
-          | .mem _ | .mpath _ => true
+          | .mem .. | .mpath _ => true
           | _ => false
         | [] => false
       | _ => false
@@ -1416,7 +1419,7 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
     match headOf Γ x with
     | .local v => `(UpdElem.val $v $(← schemaTerm Γ .val r))
     | .alias v => `(UpdElem.path $v $(← schemaTerm Γ .path r))
-    | .mem v => `(UpdElem.mref $v $(← schemaTerm Γ .ident r))
+    | .mem v _ => `(UpdElem.mref $v $(← schemaTerm Γ .ident r))
     | _ => Macro.throwErrorAt x "an update assigns a local, an alias, a memory local, \
         `storage` or `memory`"
   | _ => Macro.throwUnsupported
@@ -1708,7 +1711,7 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
       if isMem [] r then return out.push (hyp n, ← `($(mkIdent `Solidity.MHole.isTarget) $h = true))
       if isPath [] r then return out.push (hyp n, ← `($(mkIdent `Solidity.Hole.isTarget) $h = true))
       return out.push (hyp n, ← `($(mkIdent `Solidity.VHole.isTarget) $h = true))
-    | some (.local _) | some (.alias _) | some (.mem _) => return out
+    | some (.local _) | some (.alias _) | some (.mem ..) => return out
     | _ =>
       if isMem [] l then
         if (rhsVar? "msrc" r).isSome then return out
@@ -2026,7 +2029,7 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
   | Loc.root _ _ r _ => name r
   | Loc.field _ _ _ b f _ => field b f
   | Loc.index _ _ _ _ _ b i => index b i
-  | MPath.var _ _ x => var x
+  | MPath.var _ _ x _ => var x
   | MPath.loc _ _ l => ppExpr l
   | MLoc.field _ _ _ b f _ => field b f
   | MLoc.index _ _ _ _ b i => index b i
@@ -2158,17 +2161,17 @@ def ppMemCall? (s t : Lean.Expr) : MetaM (Option (TSyntax `sol_stmt)) := do
   let_expr CallRet.none := (← whnf ret) | return none
   let some bs ← listElems? body | return none
   let some b := bs[0]? | return none
-  let_expr Stmt.declMem _ _ r init _ := (← whnf b) | return none
+  let_expr Stmt.declMem _ _ r init _ _ := (← whnf b) | return none
   let_expr Option.none _ := (← whnf init) | return none
   -- the local `t` binds to `r`, and the statement's form
   let bound (rhs : Lean.Expr) : MetaM Bool := do
     let_expr MRhs.alias _ _ p := (← whnf rhs) | return false
-    let_expr MPath.var _ _ r' := (← whnf p) | return false
+    let_expr MPath.var _ _ r' _ := (← whnf p) | return false
     isDefEq r r'
   let some (fe, xs) ← ppCallParts? f args | return none
   let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
   match_expr (← whnf (← instantiateMVars t)) with
-  | Stmt.declMem _ R x init' _ =>
+  | Stmt.declMem _ R x init' _ _ =>
     let_expr Option.some _ rhs := (← whnf init') | return none
     unless ← bound rhs do return none
     let some x ← ppVar? x | return none
@@ -2223,7 +2226,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
       | ARhs.push _ _ b _ => `(sol_stmt| $T:sol_ty storage $x:ident = $(← ppExpr b):sol_expr .push())
       | _ => `(sol_stmt| $T:sol_ty storage $x:ident = $(← ppExpr r):sol_expr)
     | _ => escape
-  | Stmt.declMem _ R x init _ =>
+  | Stmt.declMem _ R x init _ _ =>
     let some x ← ppVar? x | escape
     let T ← ppTy.ppRef R
     match_expr (← whnf init) with
@@ -3152,7 +3155,7 @@ partial def copyDeclsProg (bound : Array String) (ss : Array Lean.Expr) :
   let mut out := #[]
   for s in ss do
     match_expr (← whnf (← instantiateMVars s)) with
-    | Stmt.declMem _ _ x _ _ => if let some x ← varName? x then bound := bound.push x
+    | Stmt.declMem _ _ x _ _ _ => if let some x ← varName? x then bound := bound.push x
     | Stmt.rebindMem _ R x r =>
       let some x ← varName? x | continue
       if !bound.contains x && (← whnf r).isAppOfArity ``MRhs.copy 4 then

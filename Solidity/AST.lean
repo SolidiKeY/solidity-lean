@@ -127,6 +127,19 @@ def PrimTy.isNumeric : PrimTy -> Bool
   | .uint | .int => true
   | .bool => false
 
+/-- `n` is a value of the numeric type `p`: a `uint` is below `2^256`, an
+`int` in `[-2^255, 2^255)`; no number is a `bool`.  What a literal's type
+proves of it (`Simple.lit`), so a literal out of its type's range is not a
+program, as solc rejects it. -/
+def PrimTy.inRange : PrimTy → Int → Bool
+  | .uint, n => decide (0 ≤ n ∧ n < ((2 ^ 256 : Nat) : Int))
+  | .int, n => decide (-((2 ^ 255 : Nat) : Int) ≤ n ∧ n < ((2 ^ 255 : Nat) : Int))
+  | .bool, _ => false
+
+theorem PrimTy.isNumeric_of_inRange {p : PrimTy} {n : Int} (h : p.inRange n = true) :
+    p.isNumeric = true := by
+  cases p <;> simp only [PrimTy.inRange, Bool.false_eq_true] at h <;> rfl
+
 /-- A key type a program can index a mapping with: `uint` and `int` keys
 evaluate to an `Int`; a `bool` key does not (`Value.asInt`), and a reference
 type is no key (`IndexTy.map`). -/
@@ -580,6 +593,24 @@ def Ty.mapFree : Ty → Bool
   | .ref (.struct s) => s ∈ mapFreeStructs
   | .ref (.array e) => e.mapFree
   | .ref (.fixed e _) => e.mapFree
+
+theorem Semantics.lookupBy_mem {κ α : Type} [DecidableEq κ] {k : κ} {a : α} :
+    ∀ {l : List (κ × α)}, Semantics.lookupBy k l = some a → (k, a) ∈ l
+  | [], h => by simp only [Semantics.lookupBy, reduceCtorEq] at h
+  | (k', v) :: rest, h => by
+    simp only [Semantics.lookupBy] at h
+    split at h
+    · cases h; subst_vars; exact List.mem_cons_self
+    · exact List.mem_cons_of_mem _ (Semantics.lookupBy_mem h)
+
+/-- A member of a struct that holds no mapping holds none: what a memory
+path's type inherits from its receiver's (`MPath.memOk`). -/
+theorem Ty.mapFree_field {s f : Name} {T : Ty} (hs : (Ty.ref (.struct s)).mapFree = true)
+    (h : Semantics.lookupBy f (Semantics.structDef s) = some T) : T.mapFree = true := by
+  have hall : ∀ s ∈ mapFreeStructs, ∀ p ∈ Semantics.structDef s, p.2.mapFree = true := by
+    decide
+  simp only [Ty.mapFree, decide_eq_true_eq] at hs
+  exact hall s hs (f, T) (Semantics.lookupBy_mem h)
 
 /-- The structs whose fresh default is well-formed: all but `BadDup`, whose
 second `a` row is the counterexample the condition exists for. -/

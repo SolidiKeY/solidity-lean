@@ -785,8 +785,9 @@ theorem uintBitwise_natCast (f : Nat → Nat → Nat) (a b : Nat) :
     uintBitwise f (a : Int) (b : Int) = ((f a b : Nat) : Int) := rfl
 
 /-- Arithmetic and relational operators on values. `/` and `%` revert on
-a zero divisor (KeY `divisionAssignment`/`moduloAssignment`); `**` with a
-negative exponent is stuck.  The bitwise operators, the shifts and the
+a zero divisor (KeY `divisionAssignment`/`moduloAssignment`), and `**` on
+a negative exponent (solc's exponent is a `uint`, so no checked program has
+one).  The bitwise operators, the shifts and the
 wrapping arithmetic are solc's at `uint256`: `~x` is `2^256 - 1 - x`,
 `x << n` is `x * 2^n` modulo `2^256`, `x >> n` is `x / 2^n`, a shift by
 `256` or more gives `0`, and `+%` (what `unchecked { a + b; }` is) is `a + b`
@@ -799,7 +800,7 @@ def applyBinOp (op : BinOp) (l r : Value) : Res Value :=
   | .pow => do
       let b ← l.asInt
       let e ← r.asInt
-      if e < 0 then .error .stuck else .ok (Value.int (b ^ e.toNat))
+      if e < 0 then .error .revert else .ok (Value.int (b ^ e.toNat))
   | .div => do
       let d ← r.asInt
       if d = 0 then .error .revert
@@ -835,7 +836,7 @@ def applyBinOp (op : BinOp) (l r : Value) : Res Value :=
   | .powW => do
       let b ← l.asInt
       let e ← r.asInt
-      if e < 0 then .error .stuck else .ok (Value.int (b ^ e.toNat % uintBound))
+      if e < 0 then .error .revert else .ok (Value.int (b ^ e.toNat % uintBound))
 
 def applyUnOp (op : UnOp) (v : Value) : Res Value :=
   match op with
@@ -1193,7 +1194,7 @@ def Loc.resolve (σ : State) : {T : Ty} → Loc C T → Res (Name × List Seg)
 /-- The slot a memory path holds in `σ`: a memory local's reference, or
 what a location holds. -/
 def MPath.mval (σ : State) : {T : Ty} → MPath C T → Res MVal
-  | _, .var x => do
+  | _, .var x _ => do
     match ← σ.getEnv x with
     | .mref id => pure (.ref id)
     | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
@@ -1466,9 +1467,11 @@ theorem Semantics.State.pay_eq (σ : State) (addr amt : Int) : σ.pay addr amt =
     { σ with net := if addr = σ.tx.selfAddress then σ.net
       else setBy addr (σ.getNet addr - amt) σ.net } := rfl
 
-/-- `a.transfer(v)` with both evaluated: book the payment on the ledger. -/
+/-- `a.transfer(v)` with both evaluated: book the payment on the ledger.  A
+negative amount reverts (solc's amount is a `uint`, so no checked program has
+one). -/
 def transferAt (σ : State) (addr amt : Int) : Res State :=
-  if amt < 0 then .error .stuck
+  if amt < 0 then .error .revert
   else .ok (σ.pay addr amt)
 
 /-- The external call a `send` makes: `amt` to `addr` with empty calldata,
@@ -1480,9 +1483,9 @@ payment is the transaction's (`TxEnv.ext`, at `sendKey`).  Taken, as the
 oracle's `ok` or with no entry (an address with no code accepts), it is
 booked as `transfer` books it and `pv` is `true`; refused (any other entry),
 nothing is booked and `pv` is `false`: a `send` does not revert.  A
-negative amount is stuck, as `transfer`'s. -/
+negative amount reverts, as `transfer`'s. -/
 def sendAt (σ : State) (pv : Var) (addr amt : Int) : Res State :=
-  if amt < 0 then .error .stuck
+  if amt < 0 then .error .revert
   else match lookupBy (sendKey addr amt) σ.tx.ext with
     | none | some (.ok _) => .ok ((σ.pay addr amt).setEnv pv (.val (.bool true)))
     | some _ => .ok (σ.setEnv pv (.val (.bool false)))
@@ -1787,7 +1790,7 @@ def Stmt.run (σ : State) : Stmt C → Res State
     match init with
     | none => pure σ
     | some r => r.bind σ x
-  | .declMem R x init _ => do
+  | .declMem R x init _ _ => do
     match init with
     | none =>
       let (σ', id) ← allocDefault σ R
@@ -1824,7 +1827,7 @@ def Stmt.run (σ : State) : Stmt C → Res State
     σ.saveStorage root segs cur.defaultOf
   | .deleteMem (T := T) p _ =>
     match p with
-    | @MPath.var _ R x => do
+    | @MPath.var _ R x _ => do
       let (σ', id) ← allocDefault σ R
       pure (σ'.setEnv x (.mref id))
     | .loc l => do memClear σ (← l.addr σ) T

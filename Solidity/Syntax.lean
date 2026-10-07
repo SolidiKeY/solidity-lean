@@ -441,7 +441,9 @@ inductive IndexTy : RefTy → PrimTy → Ty → Type where
 environment (`msg.sender`), which solkey's `netHeader.key` declares as program
 variables, so a `SimpleExpression` like a local. -/
 inductive Simple (C : Contract) : PrimTy → Type where
-  | lit {p : PrimTy} (n : Int) (h : p.isNumeric = true) : Simple C p
+  /-- A number of its type's range (`PrimTy.inRange`): solc rejects a literal
+  out of it, so no program has one. -/
+  | lit {p : PrimTy} (n : Int) (h : p.inRange n = true) : Simple C p
   | bool (b : Bool) : Simple C .bool
   | local {p : PrimTy} (x : Var) : Simple C p
   /-- `msg.sender`, `msg.value`, `block.timestamp`, `address(this).balance`:
@@ -468,7 +470,8 @@ inductive Loc (C : Contract) : Ty → Type where
 
 /-- A memory path (`mv`, `nmp`): a memory local, or a memory location. -/
 inductive MPath (C : Contract) : Ty → Type where
-  | var {R : RefTy} (x : Var) : MPath C (.ref R)
+  /-- A memory local, of a type that holds no mapping (memory has none). -/
+  | var {R : RefTy} (x : Var) (hm : (Ty.ref R).mapFree = true) : MPath C (.ref R)
   | loc {T : Ty} (l : MLoc C T) : MPath C T
 
 /-- A member or an element of a memory object (memory has no mappings). -/
@@ -526,6 +529,26 @@ inductive MRhs (C : Contract) (R : RefTy) where
   | copy (p : SPath C (.ref R)) (hm : (Ty.ref R).mapFree = true)
   | newArr (n : Simple C .uint) (h : R.newArrOk = true)
 
+mutual
+/-- What a memory path names holds no mapping: its local's type does not, and
+a member or an element of a type that holds none holds none. -/
+theorem MPath.mapFree {C : Contract} : {T : Ty} → MPath C T → T.mapFree = true
+  | _, .var _ hm => hm
+  | _, .loc l => l.mapFree
+theorem MLoc.mapFree {C : Contract} : {T : Ty} → MLoc C T → T.mapFree = true
+  | _, .field b _ h => Ty.mapFree_field b.mapFree h
+  | _, .index .dyn b _ => b.mapFree
+  | _, .index .fixed b _ => b.mapFree
+end
+
+/-- What a memory local is bound to holds no mapping. -/
+theorem MRhs.mapFree {C : Contract} {R : RefTy} : MRhs C R → (Ty.ref R).mapFree = true
+  | .alias p => p.mapFree
+  | .copy _ hm => hm
+  | .newArr _ h => by
+    cases R <;> simp only [RefTy.newArrOk, Bool.and_eq_true, Bool.false_eq_true] at h
+    exact h.1
+
 /-- Where a fresh array lands when it is not bound to a memory local
 (KeY's `newArrayCapture`, `Path[complex] lhs`): a storage location
 (`basket.items = new uint[](2);`) or a memory one (`xs[0] = new uint[](3);`). -/
@@ -567,7 +590,7 @@ def SPath.isSimple {C : Contract} {T : Ty} : SPath C T → Bool
 
 /-- `mv`: a memory local. -/
 def MPath.isSimple {C : Contract} {T : Ty} : MPath C T → Bool
-  | .var _ => true
+  | .var .. => true
   | .loc _ => false
 
 /-- A target whose receiver, if it has one, is simple: `x`, `total`,
@@ -603,7 +626,7 @@ def Loc.vars : {T : Ty} → Loc C T → List Var
   | _, .index _ b i => b.vars ++ i.vars
 
 def MPath.vars : {T : Ty} → MPath C T → List Var
-  | _, .var x => [x]
+  | _, .var x _ => [x]
   | _, .loc l => l.vars
 
 def MLoc.vars : {T : Ty} → MLoc C T → List Var
@@ -727,7 +750,7 @@ inductive Stmt (C : Contract) where
   | send (pv : Var) (r a : Val C .uint)
   /-- `Person memory m;` (a fresh default object), `Person memory m = n;` -/
   | declMem (R : RefTy) (x : Var) (init : Option (MRhs C R))
-      (hd : (init.isSome || (Ty.ref R).defaultOkS) = true)
+      (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true)
   /-- `m = n;`: the memory local now names `n`'s object. -/
   | rebindMem {R : RefTy} (x : Var) (r : MRhs C R)
   /-- `alice = m;`: a storage location written with a deep copy of a memory
@@ -826,7 +849,7 @@ def Loc.toStr {T : Ty} : Loc C T → String
   | .index _ b i => s!"{b.toStr}[{i.toStr true}]"
 
 def MPath.toStr {T : Ty} : MPath C T → String
-  | .var x => toString x
+  | .var x _ => toString x
   | .loc l => l.toStr
 
 def MLoc.toStr {T : Ty} : MLoc C T → String
@@ -890,11 +913,11 @@ after it that binds its fresh return variable, the one the body declares
 first: `Person memory mv1 = choosePersonMem();`, `m = choosePersonMem();`,
 the statement they are elaborated from. -/
 def Stmt.memCallStr? : Stmt C → Stmt C → Option String
-  | .call f args _ .none (.declMem _ r none _ :: _), .declMem R x (some (.alias (.var r'))) _ =>
+  | .call f args _ .none (.declMem _ r none _ _ :: _), .declMem R x (some (.alias (.var r' _))) _ _ =>
     if r' = r then
       some s!"{Ty.toStr (.ref R)} memory {x} = {f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
     else none
-  | .call f args _ .none (.declMem _ r none _ :: _), .rebindMem x (.alias (.var r')) =>
+  | .call f args _ .none (.declMem _ r none _ _ :: _), .rebindMem x (.alias (.var r' _)) =>
     if r' = r then some s!"{x} = {f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
     else none
   | _, _ => none
@@ -957,7 +980,7 @@ def Stmt.toStr : Stmt C → String
     match init with
     | none => s!"{Ty.toStr (.ref R)} storage {x};"
     | some e => s!"{Ty.toStr (.ref R)} storage {x} = {e.toStr};"
-  | .declMem R x init _ =>
+  | .declMem R x init _ _ =>
     match init with
     | none => s!"{Ty.toStr (.ref R)} memory {x};"
     | some r => s!"{Ty.toStr (.ref R)} memory {x} = {r.toStr};"
@@ -2488,6 +2511,20 @@ section Elab
 
 variable [FreshNames] (C : Contract)
 
+/-- A memory object of type `R` holds no mapping: solc has none in memory. -/
+def memOk (R : RefTy) : Except String (PLift ((Ty.ref R).mapFree = true)) :=
+  if h : (Ty.ref R).mapFree = true then pure ⟨h⟩
+  else throw s!"a {Ty.ref R} in memory: it holds a mapping"
+
+/-- The literal `n` at the numeric type `p`, if it is in `p`'s range: one
+out of it is solc's compile error. -/
+def litAt (p : PrimTy) (n : Int) : Except String (Simple C p) :=
+  match h : p.inRange n with
+  | true => pure (.lit n h)
+  | false =>
+    if p.isNumeric then throw s!"the literal {n} is out of the range of {primName p}"
+    else throw s!"a number where a {primName p} is expected"
+
 /-- `E.m` for an enum `E` of the contract that no local or state variable
 shadows: the position of `m`. -/
 def enumLit? (Γ : ECtx) : RawExpr → String → Option Nat
@@ -2500,20 +2537,23 @@ def enumLit? (Γ : ECtx) : RawExpr → String → Option Nat
 mutual
 
 def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
-  | .num n => pure (.val .uint (.simple (.lit n rfl)))
+  | .num n => return .val .uint (.simple (← litAt C .uint n))
   | .bool b => pure (.val .bool (.simple (.bool b)))
   | .name x =>
     match lookupBy x Γ with
     | some (.val p _) => pure (.val p (.simple (.local (Var.ofName x))))
     | some (.alias R) => pure (.path (.ref R) (.alias (Var.ofName x)))
-    | some (.mem R) => pure (.mpath (.ref R) (.var (Var.ofName x)))
+    | some (.mem R) =>
+      match hm : (Ty.ref R).mapFree with
+      | true => pure (.mpath (.ref R) (.var (Var.ofName x) hm))
+      | false => throw s!"{x} is a memory local of a type that holds a mapping"
     | some .store => throw s!"{x} is a storage variable, not a program value"
     | none =>
       match hr : C.rootType x with
       | some T => pure (.path T (.loc (.root x hr)))
       | none => throw s!"unknown name {x}"
   | .field e f => do
-    if let some i := enumLit? C Γ e f then return .val .uint (.simple (.lit i rfl))
+    if let some i := enumLit? C Γ e f then return .val .uint (.simple (← litAt C .uint i))
     match ← synth Γ e with
     | .path (.ref (.array _)) b =>
       if f == "length" then pure (.val .uint (.len b rfl))
@@ -2528,7 +2568,7 @@ def synth (Γ : ECtx) : RawExpr → Except String (TExpr C)
       if f != "length" then throw s!"member access .{f} on an array"
       else if e.hasIndex then
         throw "the length of an indexed fixed-size array under a short-circuit operator or in a conditional's branch"
-      else pure (.val .uint (.simple (.lit n rfl)))
+      else return .val .uint (.simple (← litAt C .uint n))
     | .path (.ref (.struct s)) b =>
       match h : C.fieldType s f with
       | some T => pure (.path T (.loc (.field b f h)))
@@ -2585,13 +2625,10 @@ def checkVia (Γ : ECtx) (p : PrimTy) (e : RawExpr) : Except String (Val C p) :=
 termination_by (sizeOf e, 1)
 
 def check (Γ : ECtx) (p : PrimTy) : RawExpr → Except String (Val C p)
-  | .num n =>
-    match h : p.isNumeric with
-    | true => pure (.simple (.lit n h))
-    | false => throw s!"a number where a {primName p} is expected"
+  | .num n => return .simple (← litAt C p n)
   -- a negative literal takes the type it is checked at: `int e = -5;`
   | .unop .neg (.num n) =>
-    if hp : p = .int then pure (by subst hp; exact .simple (.lit (-(n : Int)) rfl))
+    if p = .int then return .simple (← litAt C p (-(n : Int)))
     else checkVia Γ p (.unop .neg (.num n))
   -- so does arithmetic on literals alone: `int e = -5 + 2;`
   | .binop op a b =>
@@ -2721,10 +2758,11 @@ def elabIncTarget (l : RawExpr) :
       pure (pre ++ [.declStorage _ x (some (.path b))], ⟨p, .index it (.alias x) i, rfl⟩)
     | .mfield b f h =>
       let x ← freshCapture "mv"
-      pure (pre ++ [.declMem (.struct _) x (some (.alias b)) rfl], ⟨p, .mfield (.var x) f h, rfl⟩)
+      pure (pre ++ [.declMem (.struct _) x (some (.alias b)) rfl b.mapFree],
+        ⟨p, .mfield (.var x b.mapFree) f h, rfl⟩)
     | .mindex a b i =>
       let x ← freshCapture "mv"
-      pure (pre ++ [.declMem _ x (some (.alias b)) rfl], ⟨p, .mindex a (.var x) i, rfl⟩)
+      pure (pre ++ [.declMem _ x (some (.alias b)) rfl b.mapFree], ⟨p, .mindex a (.var x b.mapFree) i, rfl⟩)
     | .local _ | .root .. => nomatch hs
 
 /-- Declare `x` in scope. -/
@@ -2938,7 +2976,7 @@ def captureExpr (e : RawExpr) : ElabM (Prog C × RawExpr) := do
     return ([.declStorage R x (some (.path sp))], .name (toString x))
   | _, .mpath (.ref R) mp =>
     let x ← captureAs C "mv" (.mem R)
-    return ([.declMem R x (some (.alias mp)) rfl], .name (toString x))
+    return ([.declMem R x (some (.alias mp)) rfl mp.mapFree], .name (toString x))
   | _, t =>
     let some ⟨p, v⟩ := t.toVal? | throw s!"{e.toStr}: a value or a reference is expected"
     let x ← captureAs C "se" (.val p (widthIn C (← ctx) e))
@@ -3459,8 +3497,8 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       if hR : R' = R then
         let c ← ElabM.lift (check C Γ .bool c)
         let x ← captureAs C "mv" (.mem R)
-        pure (P ++ [.ite c [.declMem R x (some (.alias pa)) rfl]
-          [.declMem R x (some (.alias (hR ▸ pb))) rfl]], .name (toString x))
+        pure (P ++ [.ite c [.declMem R x (some (.alias pa)) rfl pa.mapFree]
+          [.declMem R x (some (.alias (hR ▸ pb))) rfl pa.mapFree]], .name (toString x))
       else throw "a conditional of two reference types"
     | .ok (.path (.ref _) _), .ok (.mpath ..) | .ok (.mpath ..), .ok (.path (.ref _) _) =>
       throw "a conditional of a storage and a memory reference"
@@ -3515,7 +3553,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       | some (_, .ref R) =>
         -- `Account memory mv1 = makeAccount();`
         let x ← freshCapture "mv"
-        let Q ← elabMemCall f args R fun r => .declMem R x (some (.alias (.var r))) rfl
+        let Q ← elabMemCall f args R fun r hm => .declMem R x (some (.alias (.var r hm))) rfl hm
         declare C (toString x) (.mem R)
         pure (P ++ Q, .name (toString x))
       | none =>
@@ -3580,13 +3618,14 @@ partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × Pr
 /-- A call of `f`, which returns a memory reference of type `R`, and `bind r`,
 the statement that binds the callee's return variable `r` where the call
 is: `Account memory mv1 = mv2;`, `m = mv2;` (the module docstring). -/
-partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy) (bind : Var → Stmt C) :
-    ElabM (Prog C) := do
+partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
+    (bind : Var → (Ty.ref R).mapFree = true → Stmt C) : ElabM (Prog C) := do
   let (P, r, _) ← elabCallRet f args none
   match r with
   | some ⟨R', r⟩ =>
     unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
-    pure (P ++ [bind r])
+    let ⟨hm⟩ ← ElabM.lift (memOk R)
+    pure (P ++ [bind r hm])
   | none => throw s!"{f} does not return a memory reference"
 
 /-- `elabCall`, and the fresh return variable of a callee that returns a
@@ -3677,8 +3716,9 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   let P ← match mret with
     | none => pure P
     | some ⟨R, r⟩ =>
+      let ⟨hm⟩ ← ElabM.lift (memOk R)
       match hd : (Ty.ref R).defaultOkS with
-      | true => pure (Stmt.declMem R r none (by simp [hd]) :: P)
+      | true => pure (Stmt.declMem R r none (by simp [hd]) hm :: P)
       | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
   -- several returns of a call that is a statement: declared on entry, at their defaults
   let P := if targets then P else mrets.map (fun (p, r, _) => Stmt.declLocal p r none) ++ P
@@ -3708,7 +3748,7 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   | .assign l r => do
     -- `m = f(a);` to a memory local: its arguments only (`elabStmt1`)
     if let .call f args := r then
-      if (← read).funs.any (·.1 == f) && synth C (← ctx) l matches .ok (.mpath (.ref _) (.var _)) then
+      if (← read).funs.any (·.1 == f) && synth C (← ctx) l matches .ok (.mpath (.ref _) (.var ..)) then
         let (P, args) ← hoistArgs args
         return (P, .assign l (.call f args))
     match r, synth C (← ctx) l with
@@ -3810,7 +3850,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     let ⟨R, hR⟩ ← elabNewTy C T
     let (P, se) ← elabSize C n
     match ← synthM C l with
-    | .mpath (.ref R') (.var x) =>
+    | .mpath (.ref R') (.var x _) =>
       if R' = R then pure (P ++ [.rebindMem (R := R) x (.newArr se hR)])
       else throw "`new` of another type than the memory local's"
     | .mpath T' (.loc ml) =>
@@ -3824,7 +3864,8 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
   | .assign l (.call f args) => do
     match ← synthM C l with
     | .val p (.simple (.local x)) => elabCall f args (some (x, p)) (widthIn C (← ctx) l)
-    | .mpath (.ref R) (.var x) => elabMemCall f args R fun r => .rebindMem (R := R) x (.alias (.var r))
+    | .mpath (.ref R) (.var x _) =>
+      elabMemCall f args R fun r hm => .rebindMem (R := R) x (.alias (.var r hm))
     | _ => throw "a call's value is assigned to a stack local"
   | .assign l r => do
     let post ← narrowPost C l r
@@ -3843,7 +3884,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
           | true => do pure [.assign l (.copy (← checkPath C Γ (.ref R) r) h)]
           | false => throw "a storage copy of a type that holds a mapping"
       | .path (.ref R) (.alias x) => do pure [.rebind x (.path (← checkPath C Γ (.ref R) r))]
-      | .mpath (.ref R) (.var x) => do pure [.rebindMem x (← elabMRhs C Γ R r)]
+      | .mpath (.ref R) (.var x _) => do pure [.rebindMem x (← elabMRhs C Γ R r)]
       | .mpath (.prim p) (.loc l) => do pure [.assignMem l (.val (← checkM C p r))]
       | .mpath (.ref R) (.loc l) => do pure [.assignMem l (.ref (← checkMPath C Γ (.ref R) r))]
     pure (P ++ post)
@@ -3883,20 +3924,23 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     unless R' = R do throw s!"{x}: `new` of another type"
     let (P, se) ← elabSize C n
     declare C x (.mem R')
-    pure (P ++ [.declMem R' (Var.ofName x) (some (.newArr se hR)) rfl])
+    pure (P ++ [.declMem R' (Var.ofName x) (some (.newArr se hR)) rfl (MRhs.newArr se hR).mapFree])
   | .declMemory T x (some (.call f args)) => do
     let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
-    let P ← elabMemCall f args R fun r => .declMem R (Var.ofName x) (some (.alias (.var r))) rfl
+    let P ← elabMemCall f args R fun r hm => .declMem R (Var.ofName x) (some (.alias (.var r hm))) rfl hm
     declare C x (.mem R)
     pure P
   | .declMemory T x init => do
     let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
     let Γ ← ctx
     let s ← match init with
-      | some e => pure (Stmt.declMem R (Var.ofName x) (some (← elabMRhs C Γ R e)) rfl)
+      | some e =>
+        let r ← elabMRhs C Γ R e
+        pure (Stmt.declMem R (Var.ofName x) (some r) rfl r.mapFree)
       | none =>
+        let ⟨hm⟩ ← ElabM.lift (memOk R)
         match hd : (Ty.ref R).defaultOkS with
-        | true => pure (Stmt.declMem R (Var.ofName x) none (by simp [hd]))
+        | true => pure (Stmt.declMem R (Var.ofName x) none (by simp [hd]) hm)
         | false => throw s!"{x}: a memory object whose default is not well-formed"
     declare C x (.mem R)
     pure [s]
@@ -4238,7 +4282,7 @@ def Loc.quote : (T : Ty) → Loc C T → Lean.Expr
       SPath.quote _ b, Val.quote k i]
 
 def MPath.quote : (T : Ty) → MPath C T → Lean.Expr
-  | .ref R, .var x => mkAppN (mkConst ``MPath.var) #[c, toExpr R, toExpr x]
+  | .ref R, .var x _ => mkAppN (mkConst ``MPath.var) #[c, toExpr R, toExpr x, rflTrue]
   | T, .loc l => mkAppN (mkConst ``MPath.loc) #[c, toExpr T, MLoc.quote T l]
 
 def MLoc.quote : (T : Ty) → MLoc C T → Lean.Expr
@@ -4357,9 +4401,9 @@ def Stmt.quote : Stmt C → Lean.Expr
   | .transfer r a => mkAppN (mkConst ``Stmt.transfer) #[c, Val.quote c .uint r, Val.quote c .uint a]
   | .send pv r a =>
     mkAppN (mkConst ``Stmt.send) #[c, toExpr pv, Val.quote c .uint r, Val.quote c .uint a]
-  | .declMem R x init _ =>
+  | .declMem R x init _ _ =>
     mkAppN (mkConst ``Stmt.declMem) #[c, toExpr R, toExpr x,
-      optE (mkAppN (mkConst ``MRhs) #[c, toExpr R]) (init.map (MRhs.quote c R)), rflTrue]
+      optE (mkAppN (mkConst ``MRhs) #[c, toExpr R]) (init.map (MRhs.quote c R)), rflTrue, rflTrue]
   | @Stmt.rebindMem _ R x r => mkAppN (mkConst ``Stmt.rebindMem) #[c, toExpr R, toExpr x, MRhs.quote c R r]
   | @Stmt.assignFromMem _ R l p =>
     mkAppN (mkConst ``Stmt.assignFromMem) #[c, toExpr R, Loc.quote c _ l, MPath.quote c _ p]

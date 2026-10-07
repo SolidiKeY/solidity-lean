@@ -146,7 +146,7 @@ def MLoc.isTarget {T : Ty} : MLoc C T → Bool
 /-- A memory path written as it is (`mv`, `mv.fld`, `mv[ie]`): any other is
 unfolded first (`m.account = n.inner.account;`). -/
 def MPath.isBindable {T : Ty} : MPath C T → Bool
-  | .var _ => true
+  | .var .. => true
   | .loc l => l.isTarget
 
 /-- Not a conditional: a conditional written to storage or memory is lowered
@@ -548,7 +548,7 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
             ⟨[ ]⟩
         ; "send failed": { pv := false } ⟨[ ]⟩ }
   /-- The same under the diamond, and the amount owed non-negative: a send
-  of a negative amount is stuck, as a `transfer` of one is. -/
+  of a negative amount reverts, as a `transfer` of one does. -/
   | sendNoCallbackDiamond :
       dl{ ⟨ pv = sadr.send(se); ⟩ ⇝
           "non-negative amount": 0 <= se

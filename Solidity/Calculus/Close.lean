@@ -614,7 +614,7 @@ unless `to` is the contract itself. -/
 theorem UpdElem.write_pay (σ₀ τ : State) (r a : Term C) :
     (UpdElem.pay r a).write σ₀ τ =
       r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-        if amt < 0 then .error .stuck
+        if amt < 0 then .error .revert
         else .ok { τ with
           net := if addr = σ₀.tx.selfAddress then τ.net else setBy addr (τ.getNet addr - amt) τ.net } := by
   simp only [UpdElem.write, bind, Except.bind]

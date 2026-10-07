@@ -442,9 +442,9 @@ one.
   So `shape_iff_reachable`: for `TestSuite`'s roots (no duplicate,
   `Ty.okDeep`) a storage passes the shape test exactly when a checked
   program reaches it; `wt_iff_reachable`: it passes `wt` exactly when it is
-  reachable and its words fit.  The words are a test of their own because
-  the AST admits unchecked literals (`.lit (i : Int)`), so a program the
-  AST runs can store a `uint` of `-1`, which solc never does.  Why an
+  reachable and its words fit.  The words are a test of their own: a
+  literal is in its type's range (`Simple.lit`, since 2026-10-07), but no
+  theorem yet shows that a run keeps every word in range.  Why an
   `Op1` and not a formula: a new `Fml` constructor touches every formula
   traversal, and an expanded layout (`∀` per root and member) gives every
   leaf quantifiers the closer has to instantiate.  The `Op1` cost one case

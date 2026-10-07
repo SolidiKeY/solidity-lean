@@ -17,10 +17,9 @@ to be a function, and it sits below `Update.lean`, before any typing module.
   mapping key in its key type's, as solc stores them (`PrimVal.fits`).
 
 `Calculus/Problem.lean` proves that a storage passes the shape test exactly
-when it is reachable.  The words are a test of their own because the AST
-reaches more than solc does: a literal `.lit (i : Int)` is not range-checked
-below the front end (`fitCheck`), so a program the AST admits can store a
-`uint` of `-1`.  A well-formed storage is a reachable one whose words fit.
+when it is reachable.  The words are a test of their own: a literal is in its
+type's range (`Simple.lit`), but no theorem yet shows that a run keeps every
+word in range.  A well-formed storage is a reachable one whose words fit.
 -/
 
 namespace Solidity

@@ -180,7 +180,8 @@ dependency:
   `sol[C]{ print P } = P` checked by `#guard` per program (it prints elaborated
   programs, so a mismatch is the interpreter's fault);
 - the **start state as a program**: `Build.rootsProg` (`Typing/Constructibility.lean`;
-  `reachable_iff`: it builds every reachable storage) printed as `setUp()`, so no
+  `reachable_iff`: it builds every reachable storage whose words, keys and
+  slots are in range) printed as `setUp()`, so no
   storage is encoded into slots and past-end slots come from push, pop and aliases;
 - **`lake exe solcases`**, a `lean_exe` beside `solkeycheck` importing only `Syntax`,
   `Semantics` and `Tools/Show.lean`, so mutation runs (H) rebuild it without the

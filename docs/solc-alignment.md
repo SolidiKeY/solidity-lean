@@ -14,7 +14,9 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 |---|---|---|---|
 | Checked arithmetic | `uint` is `uint256`, `int` is `int256`; a result outside the range reverts (`Panic(0x11)`), at the result type of `+ - * **`, `++`/`−−`, and `op=` | `checkArith`, `evalBinop`, `OpLoc.store`, `OpLoc.bump` | `Evm/Examples.lean` (`**`) |
 | Unary minus | checked at `int` only; solc rejects it on `uint` | `unopCheck` | |
-| `**` | reverts on overflow (`2 ** 256`), `0 ** 0` is `1`, a negative exponent is `.stuck` | `applyBinOp` | `Evm/Examples.lean` |
+| `**` | reverts on overflow (`2 ** 256`), `0 ** 0` is `1`, a negative exponent reverts (since 2026-10-07; it was `.stuck`): solc's exponent is unsigned, so no checked program has one | `applyBinOp` | `Evm/Examples.lean` |
+| Literals | a literal is in its type's range, `uint` below `2^256`, `int` in `[-2^255, 2^255)` (since 2026-10-07): one out of it is solc's compile error, and here no term (`Simple.lit` carries `PrimTy.inRange`); the elaborator refuses it (`litAt`), and the EVM fragment no longer checks it | `Simple.lit`, `PrimTy.inRange`, `litAt` | `Typing/Constructibility.lean` (`SVal.fits`) |
+| Mappings in memory | a memory local, a memory declaration and a memory path are at a type with no mapping (since 2026-10-07; solc rejects one, and the interpreter's `allocDefault`/`copyStToM` were stuck on it): `MPath.var` and `declMem` carry `(Ty.ref R).mapFree`, and a member or element of a memory path inherits it (`MPath.mapFree`) | `MPath.var`, `Stmt.declMem`, `memOk` | |
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `applyBinOp`, `RawExpr.uncheck` | |
 | Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Tactics/Checked.lean` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `applyBinOp` | |
@@ -218,8 +220,10 @@ the bind.
 On the EVM a value transfer fails, and with `transfer` reverts, when the
 sending contract's balance does not cover the amount or the recipient
 refuses it (its code reverts, or runs out of the 2300 gas). `transferAt`
-does neither check: a negative amount is `.stuck` (unrepresentable in the
-unsigned value field), and otherwise the payment is booked at the
+does neither check: a negative amount reverts (since 2026-10-07; it was
+`.stuck`): it is unrepresentable in the unsigned value field, so no checked
+program has one, and the update element `.pay` reverts on it the same way;
+otherwise the payment is booked at the
 recipient's end of the ledger, `net(addr) := net(addr) - amt`, unless the
 recipient is the contract itself (`State.pay`; `this` is `address(this)`,
 `TxEnv.selfAddress`), which books nothing, as solkey's
@@ -251,7 +255,7 @@ call up in `TxEnv.ext` at `sendKey a v` (the address, empty calldata, the
 amount as the one word). No entry, or `ok`, is a recipient that takes the
 payment (an address with no code does): the payment is booked as `transfer`
 books it (`State.pay`) and `ok` is `true`. Any other entry is a refusal: nothing
-is booked and `ok` is `false`. A negative amount is `.stuck`, as for `transfer`.
+is booked and `ok` is `false`. A negative amount reverts, as for `transfer`.
 
 The calculus reads none of the oracle: `sendNoCallbackBox` and
 `sendNoCallbackDiamond` have a goal for each outcome, so a proof holds

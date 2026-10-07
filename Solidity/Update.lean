@@ -768,7 +768,7 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
   | .pay r a, τ => do
     let addr ← (← r.eval σ₀).asInt
     let amt ← (← a.eval σ₀).asInt
-    if amt < 0 then .error .stuck
+    if amt < 0 then .error .revert
     else pure { τ with
       net := if addr = σ₀.tx.selfAddress then τ.net else setBy addr (τ.getNet addr - amt) τ.net }
   | .saveNet x, τ => pure (τ.setEnv x (.ledger σ₀.net))
@@ -1466,7 +1466,7 @@ def Loc.lower : {T : Ty} → Loc C T → PTerm C
   | _, .index _ b i => .at b.lower i.lower
 
 def MPath.lower : {T : Ty} → MPath C T → ITerm C
-  | _, .var x => .pv x
+  | _, .var x _ => .pv x
   | _, .loc l => .read .memory l.lower
 
 def MLoc.lower : {T : Ty} → MLoc C T → MAddr C
@@ -1521,7 +1521,7 @@ theorem Loc.lower_eval (σ : State) : {T : Ty} → (l : Loc C T) →
 
 theorem MPath.lower_eval (σ : State) : {T : Ty} → (p : MPath C T) →
     p.lower.eval σ = (do (← p.mval σ).asRef)
-  | _, .var x => by
+  | _, .var x _ => by
     simp only [MPath.lower, tm_eval, MPath.mval, bind, Except.bind]
     cases σ.getEnv x with
     | error _ => rfl

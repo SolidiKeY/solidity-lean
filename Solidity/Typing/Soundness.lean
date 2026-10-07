@@ -99,7 +99,7 @@ def Loc.wt (Γ : Ctx) : {T : Ty} → Loc C T → Bool
 
 /-- `m.age` needs `Person memory m` in `Γ`. -/
 def MPath.wt (Γ : Ctx) : {T : Ty} → MPath C T → Bool
-  | _, @MPath.var _ R x => lookupBy x Γ == some (.mem (.ref R))
+  | _, @MPath.var _ R x _ => lookupBy x Γ == some (.mem (.ref R))
   | _, .loc l => l.wt Γ
 
 /-- `ns[i]` needs `ns` a memory array and `i` a `uint` local. -/
@@ -223,7 +223,7 @@ def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
   | .transfer r a => if r.wt Γ && a.wt Γ then some Γ else none
   | .send pv r a =>
     if Ctx.has Γ pv (.stack (.prim .bool)) && r.wt Γ && a.wt Γ then some Γ else none
-  | .declMem R x init _ =>
+  | .declMem R x init _ _ =>
     if init.all (·.wt Γ) then some (setBy x (.mem (.ref R)) Γ) else none
   | @Stmt.rebindMem _ R x r => if Ctx.has Γ x (.mem (.ref R)) && r.wt Γ then some Γ else none
   | .assignFromMem l p => if l.wt Γ && p.wt Γ then some Γ else none
@@ -568,7 +568,7 @@ says `uint x`. -/
 theorem Simple.eval_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {s : Simple C p} {w : Value}
     (hw : s.wt Γ = true) (h : s.eval σ = .ok w) : (Value.toSVal w).hasTy (.prim p) = true := by
   cases s with
-  | lit n hn => cases h; exact int_toSVal_hasTy hn n
+  | lit n hn => cases h; exact int_toSVal_hasTy (PrimTy.isNumeric_of_inRange hn) n
   | bool b => cases h; rfl
   | «local» x =>
     obtain ⟨b, hb, hm⟩ := hwt.lookup hw
@@ -629,7 +629,7 @@ theorem Loc.resolve_wt (hwt : RunWT C Γ H σ) :
 theorem MPath.mval_wt (hwt : RunWT C Γ H σ) :
     ∀ {T : Ty} (p : MPath C T) {mv : MVal},
       p.wt Γ = true → p.mval σ = .ok mv → MVal.hasTyH H mv T = true
-  | _, @MPath.var _ R x, mv, hw, h => by
+  | _, @MPath.var _ R x _, mv, hw, h => by
     obtain ⟨b, hb, hm⟩ := hwt.lookup (x := x) (bt := .mem (.ref R)) hw
     simp only [MPath.mval, hb, bind, Except.bind] at h
     cases b with
@@ -1471,7 +1471,7 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     simp only [Bool.and_eq_true] at hc
     iterate 4 bind_inv h
     exact ⟨H, .refl H, hwt.sendAt hc.1.1 h⟩
-  | .declMem R x init hd, Γ, Γ', H, σ, σ', hwt, hs, h => by
+  | .declMem R x init hd _, Γ, Γ', H, σ, σ', hwt, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     cases init with
     | none =>

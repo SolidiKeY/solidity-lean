@@ -1578,7 +1578,7 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
     split at h
     · exact nomatch h
     · split at h <;> cases h <;> exact hcn.of_eq rfl rfl
-  | .declMem R x init hd, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
+  | .declMem R x init hd _, Γ, Γ', H, σ, σ', hwt, hcn, hs, h => by
     obtain ⟨hc, rfl⟩ := wt_if hs
     cases init with
     | none =>
@@ -1886,17 +1886,6 @@ theorem map_dup_key_not_reachable :
   simp only [lookupBy, if_pos] at hv
   cases hv
   exact absurd hcv.1 (by decide)
-
-/-- `uint` range is not something a run keeps: literals are unchecked, so
-`total = -5;` reaches a negative `uint`, and `canon` rightly asks no range. -/
-theorem uint_negative_reachable : Reachable Counter [("total", .int (-5))] := by
-  refine
-  ⟨[.assign (.root "total" rfl) (.val (.simple (.lit (-5) rfl)))], [],
-    { storage := [("total", .int (-5))] }, rfl, ?_, rfl⟩
-  simp [Contract.initState, Contract.initStorage, Counter, Prog.run, Stmt.run, Src.value,
-    Val.eval, Simple.eval, Loc.resolve, State.saveStorage, lookupBy, setBy, SVal.save,
-    Value.toSVal]
-  rfl
 
 end Witnesses
 

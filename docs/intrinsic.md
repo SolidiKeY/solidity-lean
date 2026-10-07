@@ -24,7 +24,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | # | Status | Work |
 |---|---|---|
 | M0 | | baselines + scratch spike, gate G0 |
-| M1 | | stuck causes that need no index |
+| M1 | (a), (b) done | stuck causes that need no index |
 | M2 | | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
 | M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
@@ -33,6 +33,30 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | M6b | | `dl!{}`, specs, callbacks |
 | M6c | | closer and Decide on typed `Fml` |
 | M7 | | cleanup, docs, rule-map rows, review pass |
+
+### M1 notes
+
+- (a) `**` with a negative exponent, and `transfer`/`send` (and the update
+  element `.pay`) of a negative amount, revert.  `Simple.lit` carries
+  `PrimTy.inRange` (`AST.lean`; `PrimTy.admits` was taken, a `Value`
+  predicate in `Update.lean`), discharged by `rfl` in quotes and by
+  `litAt` in the elaborator; `Evm.wtSimple` admits every literal.  The
+  storage builder writes literals now, so `canon_reachable`/`reachable_iff`
+  (`Typing/Constructibility.lean`) and `shape_iff_reachable`/
+  `wt_iff_reachable` (`Calculus/Problem.lean`) take `FitsStorage` (every
+  word, key and slot in range); `reachable_shape`, `shape_of_reachable`
+  and `wt_of_reachable` are the unconditional directions.
+  `uint_negative_reachable` is gone (its program no longer elaborates).
+- (b) `R.memOk` is `(Ty.ref R).mapFree`, as `MRhs.copy` already used:
+  `MPath.var` and `Stmt.declMem` carry it; `deleteMem` needs no field,
+  since `MPath.mapFree` derives it for every memory path.  `allocDefault`
+  keeps its stuck arm: the closer's `.alloc R`/`.addM R` terms reach it at
+  an untyped `R` (to go at M4c).  In the `dl{}` macro a memory local's
+  proof is the auto-bound `hmv` (`proofIdent`), a declared one's
+  `MRhs.mapFree r`; this moves a struct name before the member name in some
+  taclets' implicit binders (`Examples/Notation.lean` pins,
+  `SortCheck/Faithfulness.lean`), which the SolKey reader's `GenProved`
+  must be regenerated for.
 
 ## Baselines (M0)
 

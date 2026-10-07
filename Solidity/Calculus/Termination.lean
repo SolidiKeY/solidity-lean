@@ -73,7 +73,7 @@ def Loc.cost : {T : Ty} → Loc C T → Nat
 
 /-- Example: a memory local `m` costs `1`, `m.age` costs `2`. -/
 def MPath.cost : {T : Ty} → MPath C T → Nat
-  | _, .var _ => 1
+  | _, .var .. => 1
   | _, .loc l => l.cost
 
 def MLoc.cost : {T : Ty} → MLoc C T → Nat
@@ -161,8 +161,8 @@ def Stmt.weight : Stmt C → Nat
   | .pop b => b.cost + b.pen + 1
   | .transfer r a => r.cost + r.pen + a.cost + a.pen + 1
   | .send _ r a => r.cost + r.pen + a.cost + a.pen + 2
-  | .declMem _ _ none _ => 1
-  | .declMem _ _ (some r) _ => r.cost + 2
+  | .declMem _ _ none _ _ => 1
+  | .declMem _ _ (some r) _ _ => r.cost + 2
   | .rebindMem _ r => r.cost + 1
   | .assignFromMem l p => l.cost + p.cost + 1
   | .assignMem l r => l.cost + r.cost + 1
@@ -211,7 +211,8 @@ theorem Val.pen_simple {p : PrimTy} (s : Simple C p) : (Val.simple s).pen = 1 :=
 /-- Example: the `sp` of `sp.age = 1;` is charged `1`. -/
 theorem SPath.pen_alias {R : RefTy} (x : Var) : (SPath.alias (C := C) (R := R) x).pen = 1 := rfl
 /-- Example: the `m` of `m.age = 1;` is charged `1`. -/
-theorem MPath.pen_var {R : RefTy} (x : Var) : (MPath.var (C := C) (R := R) x).pen = 1 := rfl
+theorem MPath.pen_var {R : RefTy} (x : Var) (hm : (Ty.ref R).mapFree = true) :
+    (MPath.var (C := C) (R := R) x hm).pen = 1 := rfl
 /-- Example: the `alice` of `alice.age = 1;` is charged `1`. -/
 theorem SPath.pen_root {T : Ty} (r : Name) (h : C.rootType r = some T) :
     (SPath.loc (Loc.root r h)).pen = 1 := rfl
@@ -273,7 +274,7 @@ theorem Loc.cost_pos : {T : Ty} → (l : Loc C T) → 1 ≤ l.cost
   | _, .index _ b _ => by have := b.pen_pos; simp only [Loc.cost]; omega
 /-- Example: a memory local `m` costs `1`. -/
 theorem MPath.cost_pos : {T : Ty} → (b : MPath C T) → 1 ≤ b.cost
-  | _, .var _ => by simp [MPath.cost]
+  | _, .var .. => by simp [MPath.cost]
   | _, .loc l => by simpa [MPath.cost] using l.cost_pos
 /-- Example: `m.age` costs `2`. -/
 theorem MLoc.cost_pos : {T : Ty} → (l : MLoc C T) → 1 ≤ l.cost
@@ -390,19 +391,19 @@ theorem Hole.readStep_small {T : Ty} (lhs : Hole C T) (ht : lhs.isTarget = true)
 Example: `x = m.inner.age;` unfolds into `Inner memory mv = m.inner;
 x = mv.age;`. -/
 theorem MHole.readStep_small {T : Ty} (lhs : MHole C T) (ht : lhs.isTarget = true)
-    {field : {s : Name} → (mv : Var) → (f : Name) → (hf : C.fieldType s f = some T) →
-      Step k m (lhs.fill (.field (.var mv) f hf))}
-    {index : {R : RefTy} → (a : ArrTy R T) → (mv : Var) → (ie : Simple C .uint) →
-      Step k m (lhs.fill (.index a (.var mv) (.simple ie)))}
-    (hf : ∀ {s} mv f (hf : C.fieldType s f = some T), (field mv f hf).Small)
-    (hi : ∀ {R} (a : ArrTy R T) mv ie, (index a mv ie).Small) :
+    {field : {s : Name} → (mv : Var) → (hmv : (Ty.ref (.struct s)).mapFree = true) → (f : Name) →
+      (hf : C.fieldType s f = some T) → Step k m (lhs.fill (.field (.var mv hmv) f hf))}
+    {index : {R : RefTy} → (a : ArrTy R T) → (mv : Var) → (hmv : (Ty.ref R).mapFree = true) →
+      (ie : Simple C .uint) → Step k m (lhs.fill (.index a (.var mv hmv) (.simple ie)))}
+    (hf : ∀ {s} mv hmv f (hf : C.fieldType s f = some T), (field (s := s) mv hmv f hf).Small)
+    (hi : ∀ {R} (a : ArrTy R T) mv hmv ie, (index a mv hmv ie).Small) :
     ∀ l, (lhs.readStep ht field index l).Small
-  | .field (.var _) _ _ => hf ..
+  | .field (.var ..) _ _ => hf ..
   | .field (.loc _) _ _ => by simp only [MHole.readStep]; cases lhs <;> weigh
-  | .index _ (.var _) (.simple _) => hi ..
-  | .index _ (.var _) (.read _) | .index _ (.var _) (.binop ..) | .index _ (.var _) (.unop ..)
-  | .index _ (.var _) (.ternary ..) | .index _ (.var _) (.readMem _) | .index _ (.var _) (.len ..)
-  | .index _ (.var _) (.mlen ..) => by
+  | .index _ (.var ..) (.simple _) => hi ..
+  | .index _ (.var ..) (.read _) | .index _ (.var ..) (.binop ..) | .index _ (.var ..) (.unop ..)
+  | .index _ (.var ..) (.ternary ..) | .index _ (.var ..) (.readMem _) | .index _ (.var ..) (.len ..)
+  | .index _ (.var ..) (.mlen ..) => by
     simp only [MHole.readStep]; cases lhs <;> weigh
   | .index _ (.loc _) _ => by simp only [MHole.readStep]; cases lhs <;> weigh
 
@@ -484,12 +485,12 @@ theorem localStep_small {p : PrimTy} (x : Var) :
     split
     · trivial
     · weigh [SPath.pen_eq_16 ‹_›]
-  | .mlen (.var _) _ => trivial
+  | .mlen (.var ..) _ => trivial
   | .mlen (.loc _) _ => by simp only [localStep]; weigh
   | .ternary c a b => ternaryStep_small (.local x) rfl c a b
   | .readMem l => by
     simp only [localStep]
-    refine MHole.readStep_small (.local x) rfl (fun _ _ _ => ?_) (fun _ _ _ => ?_) l <;> trivial
+    refine MHole.readStep_small (.local x) rfl (fun _ _ _ _ => ?_) (fun _ _ _ _ => ?_) l <;> trivial
 
 /-- An alias bound.
 
@@ -668,8 +669,8 @@ Example: `v = alice.age++;` leaves
 `{ storage := save(…) ‖ v := alice.age++ }`. -/
 theorem assignIncStep_small {p : PrimTy} (v : Var) (op : IncDec) (hp : p.isNumeric = true) :
     ∀ (l : OpLoc C p) (hs : l.recvSimple = true), (assignIncStep (k := k) (m := m) v op hp l hs).Small
-  | .local _, _ | .root _ _, _ | .field _ _ _, _ | .index _ _ _, _ | .mfield (.var _) _ _, _
-  | .mindex _ (.var _) _, _ => trivial
+  | .local _, _ | .root _ _, _ | .field _ _ _, _ | .index _ _ _, _ | .mfield (.var ..) _ _, _
+  | .mindex _ (.var ..) _, _ => trivial
   | .mfield (.loc _) _ _, hs | .mindex _ (.loc _) _, hs => nomatch hs
 
 /-- `push`: the receiver first, then the argument.
@@ -733,10 +734,10 @@ theorem sendStep_small (pv : Var) :
 Example: `m = n.items[i + 1];` captures the index first. -/
 theorem rebindMemStep_small {R : RefTy} (x : Var) :
     ∀ r : MRhs C R, (rebindMemStep (k := k) (m := m) x r).Small
-  | .alias (.var _) => trivial
+  | .alias (.var ..) => trivial
   | .alias (.loc l) => by
     simp only [rebindMemStep]
-    refine MHole.readStep_small (.rebind x) rfl (fun _ _ _ => ?_) (fun _ _ _ => ?_) l <;> trivial
+    refine MHole.readStep_small (.rebind x) rfl (fun _ _ _ _ => ?_) (fun _ _ _ _ => ?_) l <;> trivial
   | .copy sp _ => by
     simp only [rebindMemStep]
     split
@@ -752,16 +753,16 @@ Example: `delete m.inner.age;` unfolds into
 theorem deleteMemStep_small {T : Ty} (p : MPath C T) (hd : T.defaultOkS = true) :
     (deleteMemStep (k := k) (m := m) p hd).Small := by
   cases p with
-  | var _ => trivial
+  | var _ _ => trivial
   | loc l =>
     cases l with
     | field b f hf =>
       cases b with
-      | var _ => cases T <;> trivial
+      | var _ _ => cases T <;> trivial
       | loc _ => simp only [deleteMemStep]; weigh
     | index a b i =>
       cases b with
-      | var _ =>
+      | var _ _ =>
         cases i with
         | simple _ => cases T <;> trivial
         | _ => simp only [deleteMemStep]; weigh
@@ -773,10 +774,10 @@ Example: `m.account = n.inner.account;` binds `n.inner` first. -/
 theorem memRefStep_small {R : RefTy} (l : MLoc C (.ref R)) (hl : l.isTarget = true)
     {copy : (src : MPath C (.ref R)) → src.isBindable = true → Step k m (.assignMem l (.ref src))}
     (hc : ∀ src h, (copy src h).Small) : ∀ src, (memRefStep l hl copy src).Small
-  | .var _ => hc _ _
+  | .var .. => hc _ _
   | .loc sl => by
     simp only [memRefStep]
-    exact MHole.readStep_small (.write l) hl (fun _ _ _ => hc _ _) (fun _ _ _ => hc _ _) sl
+    exact MHole.readStep_small (.write l) hl (fun _ _ _ _ => hc _ _) (fun _ _ _ _ => hc _ _) sl
 
 /-- A memory write: receiver, then index, then source.
 
@@ -789,28 +790,28 @@ theorem assignMemStep_small {T : Ty} (l : MLoc C T) (r : MSrc C T) :
   cases l with
   | field b f hf =>
     cases b with
-    | var mv =>
+    | var mv hmv =>
       cases r with
       | val e =>
-        refine VHole.step_small (VHole.mem (.field (.var mv) f hf)) rfl (fun _ => ?_) e
+        refine VHole.step_small (VHole.mem (.field (.var mv hmv) f hf)) rfl (fun _ => ?_) e
           (fun he _ => ?_)
         · trivial
         · weigh [Val.pen_eq_16 he]
-      | ref src => exact memRefStep_small (.field (.var mv) f hf) rfl (fun _ _ => by trivial) src
+      | ref src => exact memRefStep_small (.field (.var mv hmv) f hf) rfl (fun _ _ => by trivial) src
     | loc _ => cases r <;> (delta assignMemStep; dsimp only; weigh)
   | index a b i =>
     cases b with
-    | var mv =>
+    | var mv hmv =>
       cases i with
       | simple ie =>
         cases r with
         | val e =>
-          refine VHole.step_small (VHole.mem (.index a (.var mv) (.simple ie))) rfl (fun _ => ?_) e
+          refine VHole.step_small (VHole.mem (.index a (.var mv hmv) (.simple ie))) rfl (fun _ => ?_) e
             (fun he _ => ?_)
           · trivial
           · weigh [Val.pen_eq_16 he]
         | ref src =>
-          exact memRefStep_small (.index a (.var mv) (.simple ie)) rfl (fun _ _ => by trivial) src
+          exact memRefStep_small (.index a (.var mv hmv) (.simple ie)) rfl (fun _ _ => by trivial) src
       | _ => cases r <;> (delta assignMemStep; dsimp only; weigh)
     | loc _ => cases r <;> (delta assignMemStep; dsimp only; weigh)
 
@@ -901,9 +902,9 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
   | .assign l r => assignStep_small l r
   | .rebind x r => rebindStep_small x r
   | .assignLocal x v => localStep_small x v
-  | .declLocal _ _ none | .declMem _ _ none _ => trivial
+  | .declLocal _ _ none | .declMem _ _ none _ _ => trivial
   | .declStorage _ _ none | .declLocal _ _ (some _) | .declStorage _ _ (some _)
-  | .declMem _ _ (some _) _ => by
+  | .declMem _ _ (some _) _ _ => by
     simp only [Stmt.step]; weigh
   | .opAssign op hop hp l r => opStep_small op hop hp l r
   | .incDec op hp l => incStep_small op hp l
@@ -1008,7 +1009,7 @@ theorem Stmt.weight_pos (s : Stmt C) : 0 < s.weight := by
   cases s with
   | declLocal _ _ i => cases i <;> simp only [Stmt.weight] <;> omega
   | declStorage _ _ i => cases i <;> simp only [Stmt.weight] <;> omega
-  | declMem _ _ i _ => cases i <;> simp only [Stmt.weight] <;> omega
+  | declMem _ _ i _ _ => cases i <;> simp only [Stmt.weight] <;> omega
   | push _ v _ => cases v <;> simp only [Stmt.weight] <;> omega
   | loop a _ _ =>
     cases a with

@@ -54,8 +54,8 @@ info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality
 /-! ### Memory `delete`, `new T[](n)`, `.length` -/
 
 /--
-info: @Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Modality} {R : RefTy} {mv : Var} {rfld x : Name}
-  {hd : (Ty.ref R).defaultOkS = true},
+info: @Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Modality} {R : RefTy} {mv : Var} {x : Name}
+  {hmv : (Ty.ref (RefTy.struct x)).mapFree = true} {rfld : Name} {hd : (Ty.ref R).defaultOkS = true},
   dl{ ⟨[ delete mv.rfld; ]⟩ ⇝ { memory := write(addM(memory), mv.rfld, freshId(addM(memory))) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.memoryFieldDeleteReference
@@ -110,8 +110,9 @@ info: @Taclet.storagePushValueSave : ∀ {C : Contract} {k : Nat} {m : Modality}
 /-! ### Memory, and a copy from storage: an allocation is two elements -/
 
 /--
-info: @Taclet.memoryFieldWrite : ∀ {C : Contract} {k : Nat} {m : Modality} {mv : Var} {fld x : Name} {x_1 : PrimTy}
-  {se : Simple C x_1}, dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
+info: @Taclet.memoryFieldWrite : ∀ {C : Contract} {k : Nat} {m : Modality} {mv : Var} {x : Name}
+  {hmv : (Ty.ref (RefTy.struct x)).mapFree = true} {fld : Name} {x_1 : PrimTy} {se : Simple C x_1},
+  dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.memoryFieldWrite
 

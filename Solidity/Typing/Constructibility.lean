@@ -16,8 +16,9 @@ not say; `SVal.tight` is exactly them:
 - a mapping keyed by anything but a number has no entries: a key is read
   with `Value.asInt`, so a `bool` key is stuck.
 
-Everything canonical and tight is reachable, by one checked program
-(`Build.rootsProg`): a word is assigned; a struct is filled member by member
+Everything canonical and tight is reachable when its words, mapping keys
+and array slots are in range (`SVal.fits`: a literal is in its type's
+range, `Simple.lit`), by one checked program (`Build.rootsProg`): a word is assigned; a struct is filled member by member
 through an alias bound to it; a dynamic array is pushed to its whole run of
 slots, then each slot past the end is bound to an alias, popped, and filled
 through the alias (the only way to write past an end), then the live
@@ -88,6 +89,40 @@ open Semantics.SVal.tight (tightFields tightElems tightEntries)
 def TightStorage (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∀ r T v, lookupBy r C.vars = some T → lookupBy r st = some v → v.tight T
 
+/-- What the builder needs to write `v` with literals (`Simple.lit`, which is
+in its type's range): every word and every mapping key in its type's range,
+and every array's slots, past its end too, numbered below `2^256`. -/
+def Semantics.SVal.fits : SVal → Ty → Prop
+  | SVal.prim (.int z), Ty.prim p => p.inRange z = true
+  | SVal.struct fields, Ty.ref (RefTy.struct s) => fitsFields s fields
+  | SVal.array elems shadow _, Ty.ref (RefTy.array E) =>
+      elems.length + shadow.length ≤ 2 ^ 256 ∧ fitsElems E elems ∧ fitsElems E shadow
+  | SVal.array elems _ _, Ty.ref (RefTy.fixed E _) => elems.length ≤ 2 ^ 256 ∧ fitsElems E elems
+  | SVal.map entries _, Ty.ref (RefTy.mapping K V) => fitsEntries K V entries
+  | _, _ => True
+where
+  fitsFields (s : Name) : List (Name × SVal) → Prop
+    | [] => True
+    | (n, v) :: rest =>
+        (match lookupBy n (structDef s) with
+         | some T => v.fits T
+         | none => True) ∧ fitsFields s rest
+  fitsElems (E : Ty) : List SVal → Prop
+    | [] => True
+    | v :: rest => v.fits E ∧ fitsElems E rest
+  fitsEntries (K V : Ty) : List (Int × SVal) → Prop
+    | [] => True
+    | (key, v) :: rest =>
+        (match K with
+         | .prim k => k.inRange key = true
+         | .ref _ => True) ∧ v.fits V ∧ fitsEntries K V rest
+
+open Semantics.SVal.fits (fitsFields fitsElems fitsEntries)
+
+/-- Every root's words, keys and slots in range. -/
+def FitsStorage (C : Contract) (st : List (Name × SVal)) : Prop :=
+  ∀ r T v, lookupBy r C.vars = some T → lookupBy r st = some v → v.fits T
+
 namespace Build
 
 /-! ## The builder -/
@@ -95,11 +130,28 @@ namespace Build
 /-- The storage alias the builder binds at depth `d`. -/
 def slot (d : Nat) : Var := .fresh "slot" d
 
+/-- The literal `n` at the numeric type `p`, or `0` where `n` is out of its
+range (a value the builder is given has none, `SVal.fits`). -/
+def numLit (p : PrimTy) (hp : p.isNumeric = true) (n : Int) : Simple C p :=
+  if h : p.inRange n = true then .lit n h
+  else .lit 0 (by cases p <;> first | rfl | exact absurd hp (by decide))
+
+theorem numLit_eq {p : PrimTy} {hp : p.isNumeric = true} {n : Int} (h : p.inRange n = true) :
+    numLit (C := C) p hp n = .lit n h := dif_pos h
+
+@[simp] theorem Simple.wt_numLit {Γ : Ctx} {p : PrimTy} {hp : p.isNumeric = true} {n : Int} :
+    (numLit (C := C) p hp n).wt Γ = true := by
+  unfold numLit; split <;> rfl
+
+theorem inRange_of_lt {j : Nat} (h : j < 2 ^ 256) : PrimTy.uint.inRange (j : Int) = true := by
+  simp only [PrimTy.inRange, decide_eq_true_eq]
+  exact ⟨Int.natCast_nonneg j, Int.ofNat_lt.mpr h⟩
+
 /-- A word written at `l`: `alice.age = 3;`. -/
 def primProg : (p : PrimTy) → Loc C (.prim p) → SVal → Prog C
   | .bool, l, .bool b => [.assign l (.val (.simple (.bool b)))]
-  | .uint, l, .int z => [.assign l (.val (.simple (.lit z rfl)))]
-  | .int, l, .int z => [.assign l (.val (.simple (.lit z rfl)))]
+  | .uint, l, .int z => [.assign l (.val (.simple (numLit .uint rfl z)))]
+  | .int, l, .int z => [.assign l (.val (.simple (numLit .int rfl z)))]
   | _, _, _ => []
 
 mutual
@@ -150,7 +202,7 @@ def fillShadow (d : Nat) (E : Ty) (i : Nat) : List SVal → Prog C
         | .ref R =>
             [.declStorage R (slot (d + 1))
                 (some (.path (.loc (.index (.arr .dyn) (.alias (slot d))
-                  (.simple (.lit (i : Int) rfl)))))),
+                  (.simple (numLit .uint rfl (i : Int))))))),
               .pop (E := .ref R) (.alias (slot d))] ++
               fill (d + 1) (.ref R) (.alias (slot (d + 1))) w
 
@@ -158,7 +210,7 @@ def fillShadow (d : Nat) (E : Ty) (i : Nat) : List SVal → Prog C
 def fillElems {R : RefTy} {E : Ty} (d : Nat) (a : ArrTy R E) (j : Nat) : List SVal → Prog C
   | [] => []
   | w :: rest =>
-      fill (d + 1) E (.loc (.index (.arr a) (.alias (slot d)) (.simple (.lit (j : Int) rfl)))) w ++
+      fill (d + 1) E (.loc (.index (.arr a) (.alias (slot d)) (.simple (numLit .uint rfl (j : Int))))) w ++
         fillElems d a (j + 1) rest
 
 /-- The entries of the mapping bound to `slot d`: each created by `delete`,
@@ -167,8 +219,8 @@ def fillEntries (d : Nat) (k : PrimTy) (V : Ty) (hk : k.isNumeric = true) :
     List (Int × SVal) → Prog C
   | [] => []
   | (key, w) :: rest =>
-      .delete (.index .map (.alias (slot d)) (.simple (.lit key hk)) : Loc C V) ::
-        (fill (d + 1) V (.loc (.index .map (.alias (slot d)) (.simple (.lit key hk)))) w ++
+      .delete (.index .map (.alias (slot d)) (.simple (numLit k hk key)) : Loc C V) ::
+        (fill (d + 1) V (.loc (.index .map (.alias (slot d)) (.simple (numLit k hk key)))) w ++
           fillEntries d k V hk rest)
 
 end
@@ -426,17 +478,22 @@ theorem resolve_field {σ : State} {d : Nat} {s n : Name} {T : Ty} {r : Name} {s
 
 theorem resolve_index_arr {σ : State} {d : Nat} {R : RefTy} {E : Ty} (a : ArrTy R E) {j : Nat}
     {r : Name} {segs : List Seg} {es sh : List SVal} {fx : Bool} (h : Bound σ d r segs)
-    (hf : σ.findStorage r segs = .ok (.array es sh fx)) (hj : j < es.length) :
-    (SPath.loc (C := C) (Loc.index (.arr a) (.alias (slot d)) (.simple (.lit (j : Int) rfl)))).resolve σ =
+    (hf : σ.findStorage r segs = .ok (.array es sh fx)) (hj : j < es.length) (hb : j < 2 ^ 256) :
+    (SPath.loc (C := C)
+        (Loc.index (.arr a) (.alias (slot d)) (.simple (numLit .uint rfl (j : Int))))).resolve σ =
       .ok (r, segs ++ [.at (j : Int)]) := by
+  rw [numLit_eq (inRange_of_lt hb)]
   simp [SPath.resolve, Loc.resolve, aliasPath_slot h, Val.eval, Simple.eval, Value.asInt,
     State.checkIndex, hf, hj, bind, Except.bind, pure, Except.pure]
 
 theorem resolve_index_map {σ : State} {d : Nat} {k : PrimTy} {V : Ty} {key : Int}
-    (hk : k.isNumeric = true) {r : Name} {segs : List Seg} {es : List (Int × SVal)} {dflt : SVal}
+    (hk : k.isNumeric = true) (hr : k.inRange key = true) {r : Name} {segs : List Seg}
+    {es : List (Int × SVal)} {dflt : SVal}
     (h : Bound σ d r segs) (hf : σ.findStorage r segs = .ok (.map es dflt)) :
-    (SPath.loc (C := C) (Loc.index (V := V) .map (.alias (slot d)) (.simple (.lit key hk)))).resolve σ =
+    (SPath.loc (C := C)
+        (Loc.index (V := V) .map (.alias (slot d)) (.simple (numLit k hk key)))).resolve σ =
       .ok (r, segs ++ [.at key]) := by
+  rw [numLit_eq hr]
   simp [SPath.resolve, Loc.resolve, aliasPath_slot h, Val.eval, Simple.eval, Value.asInt,
     State.checkIndex, hf, bind, Except.bind, pure, Except.pure]
 
@@ -467,10 +524,14 @@ theorem run_delete {σ : State} {T : Ty} {l : Loc C T} {r : Name} {segs : List S
   simp [Stmt.run, hl, hf, bind, Except.bind]
 
 theorem run_primProg {σ : State} {p : PrimTy} {l : Loc C (.prim p)} {r : Name} {segs : List Seg}
-    {v : SVal} (hl : l.resolve σ = .ok (r, segs)) (hv : v.canon (.prim p)) :
+    {v : SVal} (hl : l.resolve σ = .ok (r, segs)) (hv : v.canon (.prim p)) (hfit : v.fits (.prim p)) :
     Prog.run σ (primProg p l v) = σ.saveStorage r segs v := by
   cases p <;> cases v <;> try (exact hv.elim)
   all_goals rename_i pv; cases pv <;> try (exact hv.elim)
+  all_goals simp only [SVal.fits] at hfit
+  all_goals first
+    | simp only [primProg, numLit_eq hfit]
+    | skip
   all_goals simp [primProg, Prog.run, Stmt.run, Src.value, Val.eval, Simple.eval, hl,
     Value.toSVal, bind, Except.bind, pure, Except.pure]
   all_goals cases σ.saveStorage r segs _ <;> rfl
@@ -613,26 +674,26 @@ theorem Wrote.saveStorage {σ : State} {st₀ : List (Name × SVal)} {r : Name} 
 `v` there, changing nothing else, and keeps the aliases above depth `d`. -/
 def FillOK (C : Contract) (v : SVal) : Prop :=
   ∀ (T : Ty) (d : Nat) (q : SPath C T) (σ : State) (r : Name) (segs : List Seg),
-    v.canon T → v.tight T → T.defaultOkS = true → q.resolve σ = .ok (r, segs) →
+    v.canon T → v.tight T → v.fits T → T.defaultOkS = true → q.resolve σ = .ok (r, segs) →
     Wrote σ.storage σ.storage r segs (defaultForTy T) →
     ∃ σ', Prog.run σ (fill d T q v) = .ok σ' ∧ Wrote σ.storage σ'.storage r segs v ∧ Keep d σ σ'
 
 /-- A child filled below the node at `r.segs`: the node, `N`, becomes `N'`. -/
 theorem child_step {d : Nat} {T : Ty} {q : SPath C T} {σ : State} {st₀ : List (Name × SVal)}
     {r : Name} {segs : List Seg} {seg : Seg} {N N' w : SVal}
-    (hw : FillOK C w) (hc : w.canon T) (ht : w.tight T) (hok : T.defaultOkS = true)
+    (hw : FillOK C w) (hc : w.canon T) (ht : w.tight T) (hf : w.fits T) (hok : T.defaultOkS = true)
     (hq : q.resolve σ = .ok (r, segs ++ [seg])) (hchain : Wrote st₀ σ.storage r segs N)
     (hnoop : N.save [seg] (defaultForTy T) = .ok N) (hs : N.save [seg] w = .ok N') :
     ∃ σ', Prog.run σ (fill (d + 1) T q w) = .ok σ' ∧ Wrote st₀ σ'.storage r segs N' ∧
       Keep (d + 1) σ σ' := by
   obtain ⟨σ', hrun, hW, hK⟩ :=
-    hw T (d + 1) q σ r (segs ++ [seg]) hc ht hok hq (hchain.noop.down hnoop)
+    hw T (d + 1) q σ r (segs ++ [seg]) hc ht hf hok hq (hchain.noop.down hnoop)
   exact ⟨σ', hrun, hchain.trans (Wrote.up hchain.noop.find hs hW), hK⟩
 
 theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} :
     ∀ (todo pre : List (Name × SVal)) (sdRest : List (Name × Ty)) (σ : State)
       (st₀ : List (Name × SVal)),
-      (∀ nw ∈ todo, FillOK C nw.2) → canonFields s todo → tightFields s todo →
+      (∀ nw ∈ todo, FillOK C nw.2) → canonFields s todo → tightFields s todo → fitsFields s todo →
       todo.map (·.1) = sdRest.map (·.1) →
       (∀ nt ∈ sdRest, lookupBy nt.1 (structDef s) = some nt.2 ∧ nt.2.defaultOkS = true ∧
         lookupBy nt.1 pre = none) →
@@ -640,11 +701,11 @@ theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} :
       Bound σ d r segs → Wrote st₀ σ.storage r segs (.struct (pre ++ defaultForFields sdRest)) →
       ∃ σ', Prog.run σ (fillFields (C := C) d s todo) = .ok σ' ∧
         Wrote st₀ σ'.storage r segs (.struct (pre ++ todo)) ∧ Keep (d + 1) σ σ'
-  | [], pre, sdRest, σ, st₀, _, _, _, hmap, _, _, _, hW => by
+  | [], pre, sdRest, σ, st₀, _, _, _, _, hmap, _, _, _, hW => by
     cases sdRest with
     | cons _ _ => simp at hmap
     | nil => exact ⟨σ, rfl, by simpa [defaultForFields] using hW, Keep.refl _ _⟩
-  | (n, w) :: todo, pre, sdRest, σ, st₀, hIH, hc, ht, hmap, hsd, hnd, hB, hW => by
+  | (n, w) :: todo, pre, sdRest, σ, st₀, hIH, hc, ht, hfit, hmap, hsd, hnd, hB, hW => by
     cases sdRest with
     | nil => simp at hmap
     | cons nt sdRest =>
@@ -656,6 +717,7 @@ theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} :
       simp only [nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at hnd
       simp only [canonFields, hlook] at hc
       simp only [tightFields, hlook] at ht
+      simp only [fitsFields, hlook] at hfit
       simp only [fillFields]
       rw [Prog.run_append]
       split
@@ -671,9 +733,9 @@ theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} :
           simp only [defaultForFields]
           rw [save_field _ (lookupBy_mid hpre), setBy_mid hpre]; simp
         obtain ⟨σ₁, hrun₁, hW₁, hK₁⟩ := child_step (hIH (n, w) (List.mem_cons_self ..)) hc.1 ht.1
-          hok (resolve_field _ hB) hW hN hs
+          hfit.1 hok (resolve_field _ hB) hW hN hs
         obtain ⟨σ₂, hrun₂, hW₂, hK₂⟩ := fillFields_run todo (pre ++ [(n, w)]) sdRest σ₁ st₀
-          (fun nw hm => hIH nw (List.mem_cons_of_mem _ hm)) hc.2 ht.2 hmap
+          (fun nw hm => hIH nw (List.mem_cons_of_mem _ hm)) hc.2 ht.2 hfit.2 hmap
           (fun nt hm => by
             obtain ⟨h1, h2, h3⟩ := hsd nt (List.mem_cons_of_mem _ hm)
             refine ⟨h1, h2, ?_⟩
@@ -690,20 +752,24 @@ theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} :
 theorem fillElems_run {R : RefTy} {E : Ty} {d : Nat} (a : ArrTy R E) {r : Name}
     {segs : List Seg} (hE : E.defaultOkS = true) :
     ∀ (L pre sh : List SVal) (fx : Bool) (σ : State) (st₀ : List (Name × SVal)),
-      (∀ w ∈ L, FillOK C w) → canonElems E L → tightElems E L → Bound σ d r segs →
+      (∀ w ∈ L, FillOK C w) → canonElems E L → tightElems E L → fitsElems E L →
+      pre.length + L.length ≤ 2 ^ 256 → Bound σ d r segs →
       Wrote st₀ σ.storage r segs (.array (pre ++ List.replicate L.length (defaultForTy E)) sh fx) →
       ∃ σ', Prog.run σ (fillElems (C := C) d a pre.length L) = .ok σ' ∧
         Wrote st₀ σ'.storage r segs (.array (pre ++ L) sh fx) ∧ Keep (d + 1) σ σ'
-  | [], pre, sh, fx, σ, st₀, _, _, _, _, hW => ⟨σ, rfl, by simpa using hW, Keep.refl _ _⟩
-  | w :: L, pre, sh, fx, σ, st₀, hIH, hc, ht, hB, hW => by
+  | [], pre, sh, fx, σ, st₀, _, _, _, _, _, _, hW => ⟨σ, rfl, by simpa using hW, Keep.refl _ _⟩
+  | w :: L, pre, sh, fx, σ, st₀, hIH, hc, ht, hfit, hlen, hB, hW => by
     simp only [fillElems]
     rw [Prog.run_append]
     simp only [List.length_cons, List.replicate_succ] at hW
     have hq := resolve_index_arr (C := C) a (j := pre.length) hB hW.findStorage (by simp)
+      (by simp only [List.length_cons] at hlen; omega)
     obtain ⟨σ₁, hrun₁, hW₁, hK₁⟩ := child_step (d := d) (hIH w (List.mem_cons_self ..)) hc.1 ht.1
-      hE hq hW (save_at_live ..) (save_at_live ..)
+      hfit.1 hE hq hW (save_at_live ..) (save_at_live ..)
     obtain ⟨σ₂, hrun₂, hW₂, hK₂⟩ := fillElems_run a hE L (pre ++ [w]) sh fx σ₁ st₀
-      (fun w hm => hIH w (List.mem_cons_of_mem _ hm)) hc.2 ht.2
+      (fun w hm => hIH w (List.mem_cons_of_mem _ hm)) hc.2 ht.2 hfit.2
+      (by simp only [List.length_cons] at hlen; simp only [List.length_append, List.length_cons,
+        List.length_nil]; omega)
       (hK₁.bound (Nat.lt_succ_self d) hB) (by simpa using hW₁)
     refine ⟨σ₂, ?_, by simpa using hW₂, hK₁.trans hK₂⟩
     rw [hrun₁]; simpa using hrun₂
@@ -729,18 +795,20 @@ theorem pushes_run {E : Ty} {d : Nat} {r : Name} {segs : List Seg}
 theorem fillShadow_run {E : Ty} {d : Nat} {r : Name} {segs : List Seg}
     (hE : E.defaultOkS = true) :
     ∀ (S SH : List SVal) (i : Nat) (σ : State) (st₀ : List (Name × SVal)),
-      (∀ w ∈ S, FillOK C w) → canonElems E S → tightElems E S →
+      (∀ w ∈ S, FillOK C w) → canonElems E S → tightElems E S → fitsElems E S →
+      i + S.length ≤ 2 ^ 256 →
       (E.isPrimitive = true → ∀ w ∈ S, w = defaultForTy E) → Bound σ d r segs →
       Wrote st₀ σ.storage r segs (.array (List.replicate (i + S.length) (defaultForTy E)) SH false) →
       ∃ σ', Prog.run σ (fillShadow (C := C) d E i S) = .ok σ' ∧
         Wrote st₀ σ'.storage r segs (.array (List.replicate i (defaultForTy E)) (S ++ SH) false) ∧
         Keep (d + 1) σ σ'
-  | [], SH, i, σ, st₀, _, _, _, _, _, hW => ⟨σ, rfl, by simpa using hW, Keep.refl _ _⟩
-  | w :: S, SH, i, σ, st₀, hIH, hc, ht, hprim, hB, hW => by
+  | [], SH, i, σ, st₀, _, _, _, _, _, _, _, hW => ⟨σ, rfl, by simpa using hW, Keep.refl _ _⟩
+  | w :: S, SH, i, σ, st₀, hIH, hc, ht, hfit, hlen, hprim, hB, hW => by
     simp only [fillShadow]
     rw [Prog.run_append]
     obtain ⟨σ₁, hrun₁, hW₁, hK₁⟩ := fillShadow_run hE S SH (i + 1) σ st₀
-      (fun w hm => hIH w (List.mem_cons_of_mem _ hm)) hc.2 ht.2
+      (fun w hm => hIH w (List.mem_cons_of_mem _ hm)) hc.2 ht.2 hfit.2
+      (by simp only [List.length_cons] at hlen; omega)
       (fun hp w hm => hprim hp w (List.mem_cons_of_mem _ hm)) hB
       (by simpa [Nat.add_assoc, Nat.add_comm 1] using hW)
     rw [hrun₁]
@@ -764,7 +832,7 @@ theorem fillShadow_run {E : Ty} {d : Nat} {r : Name} {segs : List Seg}
     | ref R =>
       dsimp only
       have hq := resolve_index_arr (C := C) (ArrTy.dyn (E := .ref R)) (j := i) hB₁
-        hW₁.findStorage (by simp)
+        hW₁.findStorage (by simp) (by simp only [List.length_cons] at hlen; omega)
       have hB₂ : Bound (σ₁.setEnv (slot (d + 1)) (.spath r (segs ++ [.at (i : Int)]))) d r segs :=
         (Keep.setEnv (d + 1) σ₁ _).bound (Nat.lt_succ_self d) hB₁
       obtain ⟨τ', hτ', hτ'st, hτ'env⟩ : ∃ τ', Stmt.run
@@ -790,7 +858,7 @@ theorem fillShadow_run {E : Ty} {d : Nat} {r : Name} {segs : List Seg}
           (defaultForTy (.ref R)) x false
         simpa using this
       obtain ⟨σ₂, hrun₂, hW₂, hK₂⟩ := child_step (d := d) (hIH w (List.mem_cons_self ..)) hc.1 ht.1
-        hE (resolve_alias hBτ) (show Wrote st₀ τ'.storage r segs _ by rw [hτ'st]; exact hWτ)
+        hfit.1 hE (resolve_alias hBτ) (show Wrote st₀ τ'.storage r segs _ by rw [hτ'st]; exact hWτ)
         (hsh _) (hsh w)
       refine ⟨σ₂, ?_, by simpa using hW₂, ?_⟩
       · simp only [List.cons_append, List.nil_append, Prog.run_cons, run_decl hq, bind,
@@ -804,19 +872,20 @@ theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty} (hk : k.isNumeric = true
     {segs : List Seg} (hV : V.defaultOkS = true) :
     ∀ (todo done : List (Int × SVal)) (σ : State) (st₀ : List (Name × SVal)),
       (∀ kw ∈ todo, FillOK C kw.2) → canonEntries V todo → tightEntries V todo →
-      nodupKeysB (done ++ todo) = true → Bound σ d r segs →
+      fitsEntries (.prim k) V todo → nodupKeysB (done ++ todo) = true → Bound σ d r segs →
       Wrote st₀ σ.storage r segs (.map done (defaultForTy V)) →
       ∃ σ', Prog.run σ (fillEntries (C := C) d k V hk todo) = .ok σ' ∧
         Wrote st₀ σ'.storage r segs (.map (done ++ todo) (defaultForTy V)) ∧ Keep (d + 1) σ σ'
-  | [], done, σ, st₀, _, _, _, _, _, hW => ⟨σ, rfl, by simpa using hW, Keep.refl _ _⟩
-  | (key, w) :: todo, done, σ, st₀, hIH, hc, ht, hnd, hB, hW => by
+  | [], done, σ, st₀, _, _, _, _, _, _, hW => ⟨σ, rfl, by simpa using hW, Keep.refl _ _⟩
+  | (key, w) :: todo, done, σ, st₀, hIH, hc, ht, hfit, hnd, hB, hW => by
     have hkey : lookupBy key done = none := nodupKeysB_mid hnd
-    have hq := resolve_index_map (C := C) (V := V) (key := key) hk hB hW.findStorage
+    have hq := resolve_index_map (C := C) (V := V) (key := key) hk hfit.1 hB hW.findStorage
     -- `delete balances[key];` creates the entry at the default
     have hcur : σ.findStorage r (segs ++ [.at key]) = .ok (defaultForTy V) := by
       rw [State.findStorage_append, hW.findStorage]
       simp only [bind, Except.bind, SVal.find, hkey, SVal.find_nil]
-    have hdel := run_delete (C := C) (l := Loc.index .map (.alias (slot d)) (.simple (.lit key hk)))
+    have hdel := run_delete (C := C)
+      (l := Loc.index .map (.alias (slot d)) (.simple (numLit k hk key)))
       (by simpa only [SPath.resolve] using hq) hcur
     rw [defaultOf_default] at hdel
     have hmid : ∀ x y : SVal, setBy key y (done ++ [(key, x)]) = done ++ [(key, y)] :=
@@ -828,14 +897,14 @@ theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty} (hk : k.isNumeric = true
       simp [setBy]
     obtain ⟨τ, hτ, hWτ, henv⟩ := hW.saveStorage (.map (done ++ [(key, defaultForTy V)]) (defaultForTy V))
     have hdel' : Stmt.run σ (.delete (C := C)
-        (Loc.index .map (.alias (slot d)) (.simple (.lit key hk)) : Loc C V)) = .ok τ := by
+        (Loc.index .map (.alias (slot d)) (.simple (numLit k hk key)) : Loc C V)) = .ok τ := by
       rw [hdel, State.saveStorage_append hW.findStorage, hN₁]; exact hτ
     have hBτ : Bound τ d r segs := by unfold Bound; rw [henv]; exact hB
-    have hqτ := resolve_index_map (C := C) (V := V) (key := key) hk hBτ hWτ.findStorage
+    have hqτ := resolve_index_map (C := C) (V := V) (key := key) hk hfit.1 hBτ hWτ.findStorage
     obtain ⟨σ₂, hrun₂, hW₂, hK₂⟩ := child_step (d := d) (hIH (key, w) (List.mem_cons_self ..)) hc.1
-      ht.1 hV hqτ hWτ (by rw [save_at_map, hmid]) (by rw [save_at_map, hmid])
+      ht.1 hfit.2.1 hV hqτ hWτ (by rw [save_at_map, hmid]) (by rw [save_at_map, hmid])
     obtain ⟨σ₃, hrun₃, hW₃, hK₃⟩ := fillEntries_run hk hV todo (done ++ [(key, w)]) σ₂ st₀
-      (fun kw hm => hIH kw (List.mem_cons_of_mem _ hm)) hc.2 ht.2 (by simpa using hnd)
+      (fun kw hm => hIH kw (List.mem_cons_of_mem _ hm)) hc.2 ht.2 hfit.2.2 (by simpa using hnd)
       (hK₂.bound (Nat.lt_succ_self d) hBτ) hW₂
     refine ⟨σ₃, ?_, by simpa using hW₃, ?_⟩
     · simp only [fillEntries, Prog.run_cons, hdel', bind, Except.bind]
@@ -868,7 +937,7 @@ theorem sizeOf_lt_entries {entries : List (Int × SVal)} {dflt : SVal} {kw : Int
 path, `fill` leaves any canonical, tight value there. -/
 theorem fill_ok : ∀ v : SVal, FillOK C v
   | .prim pv => by
-    intro T d q σ r segs hc ht hok hq h0
+    intro T d q σ r segs hc ht hf hok hq h0
     cases T with
     | ref R => cases pv <;> cases R <;> simp [SVal.canon] at hc
     | prim p =>
@@ -878,9 +947,9 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
         obtain ⟨τ, hτ, hWτ, henv⟩ := h0.saveStorage (.prim pv)
         refine ⟨τ, ?_, hWτ, Keep.of_env henv⟩
         show Prog.run σ (primProg p l (.prim pv)) = _
-        rw [run_primProg hl hc, hτ]
+        rw [run_primProg hl hc hf, hτ]
   | .struct fields => by
-    intro T d q σ r segs hc ht hok hq h0
+    intro T d q σ r segs hc ht hf hok hq h0
     cases T with
     | prim p => simp [SVal.canon] at hc
     | ref R =>
@@ -892,7 +961,7 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
         have hB : Bound (σ.setEnv (slot d) (.spath r segs)) d r segs := lookupBy_setBy_self ..
         obtain ⟨σ', hrun, hW, hK⟩ := fillFields_run (C := C) (d := d) (s := s) fields []
           (structDef s) (σ.setEnv (slot d) (.spath r segs)) σ.storage
-          (fun nw _ => fill_ok nw.2) hcf ht hnames
+          (fun nw _ => fill_ok nw.2) hcf ht hf hnames
           (fun nt hm => ⟨lookupBy_eq_of_nodup hnd hm, hmok nt hm, rfl⟩) hnd hB
           (by rw [defaultForTy] at h0; simpa using h0)
         refine ⟨σ', ?_, by simpa using hW, (Keep.setEnv d σ _).trans (hK.mono (Nat.le_succ d))⟩
@@ -901,7 +970,7 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
       | fixed _ _ => simp [SVal.canon] at hc
       | mapping _ _ => simp [SVal.canon] at hc
   | .array elems shadow fx => by
-    intro T d q σ r segs hc ht hok hq h0
+    intro T d q σ r segs hc ht hf hok hq h0
     cases T with
     | prim p => simp [SVal.canon] at hc
     | ref R =>
@@ -912,6 +981,7 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
         obtain ⟨hfx, hce, hcs⟩ := hc
         subst hfx
         obtain ⟨hne, hpr, hte, hts⟩ := ht
+        obtain ⟨hlen, hfe, hfs⟩ := hf
         have hB : Bound (σ.setEnv (slot d) (.spath r segs)) d r segs := lookupBy_setBy_self ..
         have h0' : Wrote σ.storage (σ.setEnv (slot d) (.spath r segs)).storage r segs
             (.array [] [] false) := by rw [defaultForTy] at h0; exact h0
@@ -920,9 +990,9 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
             (by simp [hE]) (elems.length + shadow.length) [] _ σ.storage hB h0'
           have hB₂ : Bound σ₂ d r segs := by unfold Bound; rw [henv₂]; exact hB
           obtain ⟨σ₃, hrun₃, hW₃, hK₃⟩ := fillShadow_run (C := C) hE shadow [] elems.length σ₂
-            σ.storage (fun w _ => fill_ok w) hcs hts hpr hB₂ (by simpa using hW₂)
+            σ.storage (fun w _ => fill_ok w) hcs hts hfs (by omega) hpr hB₂ (by simpa using hW₂)
           obtain ⟨σ₄, hrun₄, hW₄, hK₄⟩ := fillElems_run (C := C) (ArrTy.dyn (E := E)) hE elems []
-            shadow false σ₃ σ.storage (fun w _ => fill_ok w) hce hte
+            shadow false σ₃ σ.storage (fun w _ => fill_ok w) hce hte hfe (by simp only [List.length_nil, Nat.zero_add]; omega)
             (hK₃.bound (Nat.lt_succ_self d) hB₂) (by simpa using hW₃)
           refine ⟨σ₄, ?_, by simpa using hW₄, ?_⟩
           · simp only [fill, dif_pos hE, Prog.run_cons, run_decl hq, bind, Except.bind]
@@ -939,16 +1009,17 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
         obtain ⟨hfx, hlen, hce, -⟩ := hc
         subst hfx; subst hlen
         obtain ⟨hsh, hte⟩ := ht
+        obtain ⟨hlen, hfe⟩ := hf
         subst hsh
         have hE : E.defaultOkS = true := by simpa [Ty.defaultOkS] using hok
         have hB : Bound (σ.setEnv (slot d) (.spath r segs)) d r segs := lookupBy_setBy_self ..
         obtain ⟨σ', hrun, hW, hK⟩ := fillElems_run (C := C) (ArrTy.fixed (E := E) (n := elems.length))
           hE elems [] [] true (σ.setEnv (slot d) (.spath r segs)) σ.storage (fun w _ => fill_ok w)
-          hce hte hB (by rw [defaultForTy] at h0; simpa using h0)
+          hce hte hfe (by simpa using hlen) hB (by rw [defaultForTy] at h0; simpa using h0)
         refine ⟨σ', ?_, by simpa using hW, (Keep.setEnv d σ _).trans (hK.mono (Nat.le_succ d))⟩
         simp only [fill, Prog.run_cons, run_decl hq, bind, Except.bind]; exact hrun
   | .map entries dflt => by
-    intro T d q σ r segs hc ht hok hq h0
+    intro T d q σ r segs hc ht hf hok hq h0
     cases T with
     | prim p => simp [SVal.canon] at hc
     | ref R =>
@@ -971,7 +1042,7 @@ theorem fill_ok : ∀ v : SVal, FillOK C v
         | prim k =>
           by_cases hk : k.isNumeric = true
           · obtain ⟨σ', hrun, hW, hK⟩ := fillEntries_run (C := C) (d := d) hk hV entries []
-              (σ.setEnv (slot d) (.spath r segs)) σ.storage (fun kw _ => fill_ok kw.2) hce hte
+              (σ.setEnv (slot d) (.spath r segs)) σ.storage (fun kw _ => fill_ok kw.2) hce hte hf
               (by simpa using hnd) hB h0'
             refine ⟨σ', ?_, by simpa using hW,
               (Keep.setEnv d σ _).trans (hK.mono (Nat.le_succ d))⟩
@@ -1051,8 +1122,8 @@ theorem fillElems_wt {R : RefTy} {E : Ty} {d : Nat} (a : ArrTy R E) :
     simp only [fillElems]
     rw [Prog.wt_append']
     obtain ⟨Γ₁, h₁, hK₁⟩ := hIH w (List.mem_cons_self ..) E (d + 1)
-      (.loc (.index (.arr a) (.alias (slot d)) (.simple (.lit (j : Int) rfl)))) Γ
-      (by simp [SPath.wt, Loc.wt, Val.wt, Simple.wt, hΓ])
+      (.loc (.index (.arr a) (.alias (slot d)) (.simple (numLit .uint rfl (j : Int))))) Γ
+      (by simp [SPath.wt, Loc.wt, Val.wt, Simple.wt_numLit, hΓ])
     obtain ⟨Γ₂, h₂, hK₂⟩ := fillElems_wt a L (j + 1) Γ₁
       (fun w hm => hIH w (List.mem_cons_of_mem _ hm)) (hK₁.lookup (Nat.lt_succ_self d) hΓ)
     exact ⟨Γ₂, by rw [h₁]; exact h₂, hK₁.trans hK₂⟩
@@ -1081,7 +1152,7 @@ theorem fillShadow_wt {E : Ty} {d : Nat} :
         (by simp [SPath.wt])
       refine ⟨Γ₃, ?_, hK₁.trans ((KeepΓ.setBy (d + 1) Γ₁ _).trans hK₃)⟩
       simp only [Option.bind, List.cons_append, List.nil_append, Prog.wt, Stmt.wt, ARhs.wt,
-        SPath.wt, Loc.wt, Val.wt, Simple.wt, hΓ₁]
+        SPath.wt, Loc.wt, Val.wt, Simple.wt_numLit, hΓ₁]
       simp only [beq_self_eq_true, Bool.and_self, ↓reduceIte]
       simp only [hΓ₂, beq_self_eq_true, ↓reduceIte]
       exact h₃
@@ -1094,12 +1165,12 @@ theorem fillEntries_wt {d : Nat} {k : PrimTy} {V : Ty} (hk : k.isNumeric = true)
   | (key, w) :: todo, Γ, hIH, hΓ => by
     simp only [fillEntries]
     obtain ⟨Γ₁, h₁, hK₁⟩ := hIH (key, w) (List.mem_cons_self ..) V (d + 1)
-      (.loc (.index .map (.alias (slot d)) (.simple (.lit key hk)))) Γ
-      (by simp [SPath.wt, Loc.wt, Val.wt, Simple.wt, hΓ])
+      (.loc (.index .map (.alias (slot d)) (.simple (numLit k hk key)))) Γ
+      (by simp [SPath.wt, Loc.wt, Val.wt, Simple.wt_numLit, hΓ])
     obtain ⟨Γ₂, h₂, hK₂⟩ := fillEntries_wt hk todo Γ₁
       (fun kw hm => hIH kw (List.mem_cons_of_mem _ hm)) (hK₁.lookup (Nat.lt_succ_self d) hΓ)
     refine ⟨Γ₂, ?_, hK₁.trans hK₂⟩
-    simp only [Prog.wt, Stmt.wt, Loc.wt, SPath.wt, Val.wt, Simple.wt, hΓ, beq_self_eq_true,
+    simp only [Prog.wt, Stmt.wt, Loc.wt, SPath.wt, Val.wt, Simple.wt_numLit, hΓ, beq_self_eq_true,
       Bool.and_self, ↓reduceIte]
     rw [Prog.wt_append', h₁]; exact h₂
 
@@ -1107,7 +1178,7 @@ theorem primProg_wt {p : PrimTy} {l : Loc C (.prim p)} {Γ : Ctx} (hl : l.wt Γ 
     Prog.wt Γ (primProg p l v) = some Γ := by
   cases p <;> cases v <;> try rfl
   all_goals rename_i pv; cases pv <;> simp [primProg, Prog.wt, Stmt.wt, Src.wt, Val.wt,
-    Simple.wt, hl]
+    Simple.wt_numLit, hl] <;> rfl
 
 /-- **The builder's locals check**: `fill` checks wherever its path does. -/
 theorem fill_wt : ∀ v : SVal, WtOK C v
@@ -1220,7 +1291,7 @@ theorem rootsProg_run :
       σ.storage = done ++ cf → cf.map (·.1) = todo.map (·.1) → nodupKeysB (done ++ todo) = true →
       (∀ rv ∈ cf, ∃ T, lookupBy rv.1 C.vars = some T ∧ rv.2 = defaultForTy T) →
       (∀ rv ∈ todo, ∃ T, lookupBy rv.1 C.vars = some T ∧ rv.2.canon T ∧ rv.2.tight T ∧
-        T.defaultOkS = true) →
+        rv.2.fits T ∧ T.defaultOkS = true) →
       ∃ σ', Prog.run σ (rootsProg C todo) = .ok σ' ∧ σ'.storage = done ++ todo
   | [], done, cf, σ, hst, hmap, _, _, _ => by
     cases cf with
@@ -1235,8 +1306,8 @@ theorem rootsProg_run :
       obtain ⟨hr, hmap⟩ := hmap
       subst r'
       obtain ⟨T', hT', rfl⟩ := hcf (r, x) (List.mem_cons_self ..)
-      obtain ⟨T, hT, hc, ht, hok⟩ := htodo (r, v) (List.mem_cons_self ..)
-      dsimp only at hT' hT hc ht hok
+      obtain ⟨T, hT, hc, ht, hf, hok⟩ := htodo (r, v) (List.mem_cons_self ..)
+      dsimp only at hT' hT hc ht hf hok
       have hTT : T' = T := by rw [hT] at hT'; exact (Option.some.inj hT').symm
       subst T'
       have hdone : lookupBy r done = none := nodupKeysB_mid hnd
@@ -1253,7 +1324,7 @@ theorem rootsProg_run :
           unfold Wrote putSt
           simp only [hlook, SVal.save_nil, bind, Except.bind, pure, Except.pure,
             setBy_of_lookupBy hlook]
-        obtain ⟨σ₁, hrun₁, hW₁, -⟩ := fill_ok v T 0 (.loc (.root r h)) σ r [] hc ht hok
+        obtain ⟨σ₁, hrun₁, hW₁, -⟩ := fill_ok v T 0 (.loc (.root r h)) σ r [] hc ht hf hok
           (by simp [SPath.resolve, Loc.resolve]; rfl) h0
         have hst₁ : σ₁.storage = (done ++ [(r, v)]) ++ cf := by
           unfold Wrote putSt at hW₁
@@ -1292,13 +1363,14 @@ theorem nodupKeysB_of_map_fst_eq {α β : Type} :
 /-- **Canonical and tight ⇒ reachable, by one program**: `Build.rootsProg`
 checks, and run from `C`'s initial state it leaves exactly `st`. -/
 theorem storage_tight (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.defaultOkS) = true)
-    {st : List (Name × SVal)} (hc : CanonStorage C st) (ht : TightStorage C st) :
+    {st : List (Name × SVal)} (hc : CanonStorage C st) (ht : TightStorage C st)
+    (hf : FitsStorage C st) :
     (∃ Γ', Prog.wt [] (rootsProg C st) = some Γ') ∧
       ∃ σ, Prog.run C.initState (rootsProg C st) = .ok σ ∧ σ.storage = st := by
   refine ⟨rootsProg_wt st [], ?_⟩
   have hstnd : nodupKeysB st = true := nodupKeysB_of_map_fst_eq hc.1 hnd
   have hroots : ∀ rv ∈ st, ∃ T, lookupBy rv.1 C.vars = some T ∧ rv.2.canon T ∧ rv.2.tight T ∧
-      T.defaultOkS = true := by
+      rv.2.fits T ∧ T.defaultOkS = true := by
     intro rv hmem
     have hname : rv.1 ∈ C.vars.map (·.1) := by rw [← hc.1]; exact List.mem_map_of_mem hmem
     obtain ⟨g, hg, hg1⟩ := List.mem_map.mp hname
@@ -1307,7 +1379,8 @@ theorem storage_tight (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.d
     have hrv : lookupBy rv.1 st = some rv.2 := lookupBy_eq_of_nodup hstnd hmem
     obtain ⟨v, hv, hcv⟩ := hc.2 rv.1 g.2 hlook
     rw [hrv] at hv; cases hv
-    exact ⟨g.2, hlook, hcv, ht rv.1 g.2 rv.2 hlook hrv, List.all_eq_true.mp hok g hg⟩
+    exact ⟨g.2, hlook, hcv, ht rv.1 g.2 rv.2 hlook hrv, hf rv.1 g.2 rv.2 hlook hrv,
+      List.all_eq_true.mp hok g hg⟩
   have hdefs : ∀ rv ∈ C.initStorage, ∃ T, lookupBy rv.1 C.vars = some T ∧ rv.2 = defaultForTy T := by
     intro rv hmem
     obtain ⟨g, hg, rfl⟩ := List.mem_map.mp hmem
@@ -1316,11 +1389,11 @@ theorem storage_tight (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.d
     (by rw [hc.1]; simp [Contract.initStorage]) (by simpa using hstnd) hdefs hroots
   exact ⟨σ, hrun, by simpa using hst⟩
 
-/-- **Canonical and tight ⇒ reachable.** -/
+/-- **Canonical and tight ⇒ reachable**, for words, keys and slots in range. -/
 theorem canon_reachable (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.defaultOkS) = true)
-    {st : List (Name × SVal)} (hc : CanonStorage C st) (ht : TightStorage C st) :
-    Reachable C st := by
-  obtain ⟨⟨Γ', hwt⟩, σ, hrun, hst⟩ := storage_tight hnd hok hc ht
+    {st : List (Name × SVal)} (hc : CanonStorage C st) (ht : TightStorage C st)
+    (hf : FitsStorage C st) : Reachable C st := by
+  obtain ⟨⟨Γ', hwt⟩, σ, hrun, hst⟩ := storage_tight hnd hok hc ht hf
   exact ⟨rootsProg C st, Γ', σ, hwt, hrun, hst⟩
 
 /-- **Nothing inferable is missing**: a property of storage that holds
@@ -1331,8 +1404,9 @@ theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true)
     (hinit : P C.initStorage)
     (hstep : ∀ (σ σ' : State) (prog : Prog C) (Γ' : Ctx), RunWT C [] [] σ → Canon C [] σ →
       Prog.wt [] prog = some Γ' → Prog.run σ prog = .ok σ' → P σ.storage → P σ'.storage)
-    (st : List (Name × SVal)) (hc : CanonStorage C st) (ht : TightStorage C st) : P st := by
-  obtain ⟨⟨Γ', hwt⟩, σ, hrun, rfl⟩ := storage_tight hnd hok hc ht
+    (st : List (Name × SVal)) (hc : CanonStorage C st) (ht : TightStorage C st)
+    (hf : FitsStorage C st) : P st := by
+  obtain ⟨⟨Γ', hwt⟩, σ, hrun, rfl⟩ := storage_tight hnd hok hc ht hf
   exact hstep _ _ _ _ (RunWT.init hnd hok rfl rfl) (Canon.init hok rfl) hwt hrun hinit
 
 /-! ## Reachable storages are tight
@@ -2787,7 +2861,7 @@ theorem Stmt.run_tight (hd : DeepOk C) : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : He
       · exact ((pay_se _ _).tight ht).setEnv pv (fun _ _ h => Binding.noConfusion h)
       · exact ((pay_se _ _).tight ht).setEnv pv (fun _ _ h => Binding.noConfusion h)
       · exact ht.setEnv pv (fun _ _ h => Binding.noConfusion h)
-  | .declMem R x init hdo, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
+  | .declMem R x init hdo _, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
     cases init with
     | none =>
       obtain ⟨⟨σ₁, id⟩, ha, h⟩ := bind_ok_inv h
@@ -2990,13 +3064,20 @@ theorem reachable_tight (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·
   exact (Prog.run_tight (deepOk_of_all hdeep) P (RunWT.init hnd hok rfl rfl) (Canon.init hok rfl)
     (Tight.init (deepOk_of_all hdeep)) hP hrun).storage
 
+/-- **Reachable ⇒ canonical and tight**, for a contract whose types have
+well-formed defaults all the way down. -/
+theorem reachable_shape (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
+    {st : List (Name × SVal)} (h : Reachable C st) : CanonStorage C st ∧ TightStorage C st :=
+  ⟨(reachable_canon hnd (defaultOkS_of_deep hdeep) h).2, reachable_tight hnd hdeep h⟩
+
 /-- **The reachable storages, exactly**: for a contract whose types have
-well-formed defaults all the way down, a storage is reachable by a checked
-program iff it is canonical and tight. -/
+well-formed defaults all the way down, a storage whose words, keys and slots
+are in range (`FitsStorage`, what a literal can write) is reachable by a
+checked program iff it is canonical and tight. -/
 theorem reachable_iff (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
-    {st : List (Name × SVal)} : Reachable C st ↔ CanonStorage C st ∧ TightStorage C st :=
-  ⟨fun h => ⟨(reachable_canon hnd (defaultOkS_of_deep hdeep) h).2, reachable_tight hnd hdeep h⟩,
-    fun ⟨hc, ht⟩ => canon_reachable hnd (defaultOkS_of_deep hdeep) hc ht⟩
+    {st : List (Name × SVal)} (hf : FitsStorage C st) :
+    Reachable C st ↔ CanonStorage C st ∧ TightStorage C st :=
+  ⟨reachable_shape hnd hdeep, fun ⟨hc, ht⟩ => canon_reachable hnd (defaultOkS_of_deep hdeep) hc ht hf⟩
 
 /-! ### What is reachable and what is not -/
 
@@ -3061,7 +3142,8 @@ theorem bool_key_not_reachable :
 before its `pop`: reachable, by the builder. -/
 theorem dangling_slot_reachable :
     Reachable Tokens [("tokens", .array [] [.struct [("value", .int 7)]] false)] := by
-  refine canon_reachable (by decide) (by decide) ⟨rfl, fun r T hr => ?_⟩ fun r T v hr hv => ?_
+  refine canon_reachable (by decide) (by decide) ⟨rfl, fun r T hr => ?_⟩ (fun r T v hr hv => ?_)
+    fun r T v hr hv => ?_
   · simp only [Tokens, lookupBy] at hr
     split at hr
     · rename_i he; subst he; cases hr
@@ -3073,6 +3155,13 @@ theorem dangling_slot_reachable :
       simp only [lookupBy, if_pos] at hv
       cases hv
       exact ⟨fun h => absurd h (by decide), (fun h => nomatch h), trivial, ⟨⟨trivial, trivial⟩, trivial⟩⟩
+    · exact nomatch hr
+  · simp only [Tokens, lookupBy] at hr
+    split at hr
+    · rename_i he; subst he; cases hr
+      simp only [lookupBy, if_pos] at hv
+      cases hv
+      exact ⟨by decide, trivial, ⟨⟨rfl, trivial⟩, trivial⟩⟩
     · exact nomatch hr
 
 end Witnesses

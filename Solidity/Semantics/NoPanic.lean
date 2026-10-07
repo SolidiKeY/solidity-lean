@@ -288,7 +288,7 @@ theorem Loc.resolve_noPanic (σ : State) : {T : Ty} → (l : Loc C T) → NoPani
     simp only [Loc.resolve]; no_panic
 
 theorem MPath.mval_noPanic (σ : State) : {T : Ty} → (p : MPath C T) → NoPanic (p.mval σ)
-  | _, .var x => by simp only [MPath.mval]; no_panic
+  | _, .var x _ => by simp only [MPath.mval]; no_panic
   | _, .loc l => by simp only [MPath.mval]; exact MLoc.read_noPanic σ l
 
 theorem MLoc.read_noPanic (σ : State) : {T : Ty} → (l : MLoc C T) → NoPanic (l.read σ)

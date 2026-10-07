@@ -68,9 +68,10 @@ mapping keys are unique, a struct carries exactly its declared members), and
 `struct_missing_field_not_reachable` (`Typing/Reachability.lean`) prove that
 canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
 `no_hidden_invariant` (`Typing/Constructibility.lean`) prove canonical and tight
-is exactly reachable, so no hidden invariant is missing. `uint` range is not an
-invariant of the model (literals and plain assignments are unchecked), which is
-why item 1 owns it.
+is exactly reachable (for words, keys and slots in range, `SVal.fits`), so no
+hidden invariant is missing. `uint` range is not yet proved an invariant of the
+model (literals are in range since 2026-10-07, `Simple.lit`, but no theorem says
+a run keeps every word in range), which is why item 1 owns it.
 
 **Fix.** Shape it like `heapRules.key`'s `wellFormed(heap)`: *proving* taclets
 per store constructor (`save`, `delAt`, the push/pop `save`s), *using* taclets

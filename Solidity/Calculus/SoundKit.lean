@@ -300,8 +300,8 @@ def envRef (σ : State) (x : Var) : Res Nat := σ.getEnv x >>= Close.bindingRef
 @[simp] theorem Simple.eval_local (σ : State) {p : PrimTy} (x : Var) :
     (Simple.local x : Simple C p).eval σ = envVal σ x := rfl
 @[simp] theorem ITerm.eval_pv (σ : State) (x : Var) : (ITerm.pv x : ITerm C).eval σ = envRef σ x := rfl
-@[simp] theorem MPath.mval_var (σ : State) {R : RefTy} (x : Var) :
-    (MPath.var x : MPath C (.ref R)).mval σ = (do pure (MVal.ref (← envRef σ x))) := by
+@[simp] theorem MPath.mval_var (σ : State) {R : RefTy} (x : Var) (hm : (Ty.ref R).mapFree = true) :
+    (MPath.var x hm : MPath C (.ref R)).mval σ = (do pure (MVal.ref (← envRef σ x))) := by
   simp only [MPath.mval, envRef, Close.bindingRef, bind, Except.bind]
   cases σ.getEnv x with
   | error _ => rfl

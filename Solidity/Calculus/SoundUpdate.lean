@@ -86,46 +86,47 @@ theorem upd_localIncrement {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) 
   res_split
 
 theorem upd_memoryFieldOpAssign {p : PrimTy} {op : BinOp} (hop : op.hasCompoundAssign = true)
-    (hp : p.isNumeric = true) (mv : Var) {fld x : Name} (hfld : C.fieldType x fld = some (Ty.prim p))
-    (se : Simple C p) (σ : State) :
+    (hp : p.isNumeric = true) (mv : Var) {fld x : Name} {hmv : (Ty.ref (.struct x)).mapFree = true}
+    (hfld : C.fieldType x fld = some (Ty.prim p)) (se : Simple C p) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.field (ITerm.pv mv) fld)
             (MValT.val (Term.binop op p (Term.read MTerm.memory (MAddr.field (ITerm.pv mv) fld)) se.lower)))] σ)
-      (Stmt.run σ (Stmt.opAssign op hop hp (OpLoc.mfield (MPath.var mv) fld hfld) (Val.simple se))) := by
+      (Stmt.run σ (Stmt.opAssign op hop hp (OpLoc.mfield (MPath.var mv hmv) fld hfld) (Val.simple se))) := by
   upd_unfold'
   simp only [evalBinop_compound hop]
   res_split
 
 theorem upd_memoryIndexArrayOpAssign {p : PrimTy} {op : BinOp} (hop : op.hasCompoundAssign = true)
-    (hp : p.isNumeric = true) {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) (ie : Simple C PrimTy.uint) (se : Simple C p) (σ : State) :
+    (hp : p.isNumeric = true) {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) {hmv : (Ty.ref R).mapFree = true}
+    (ie : Simple C PrimTy.uint) (se : Simple C p) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower)
             (MValT.val (Term.binop op p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower)) se.lower)))] σ)
-      (Stmt.run σ (Stmt.opAssign op hop hp (OpLoc.mindex a (MPath.var mv) ie) (Val.simple se))) := by
+      (Stmt.run σ (Stmt.opAssign op hop hp (OpLoc.mindex a (MPath.var mv hmv) ie) (Val.simple se))) := by
   upd_unfold'
   simp only [evalBinop_compound hop]
   res_split
 
 theorem upd_memoryFieldIncrement {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (mv : Var)
-    {fld x : Name} (hfld : C.fieldType x fld = some (Ty.prim p)) (σ : State) :
+    {fld x : Name} {hmv : (Ty.ref (.struct x)).mapFree = true} (hfld : C.fieldType x fld = some (Ty.prim p)) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.field (ITerm.pv mv) fld)
             (MValT.val
               (Term.binop op.binOp p (Term.read MTerm.memory (MAddr.field (ITerm.pv mv) fld))
                 (Term.lit (.int 1)))))] σ)
-      (Stmt.run σ (Stmt.incDec op hp (OpLoc.mfield (MPath.var mv) fld hfld))) := by
+      (Stmt.run σ (Stmt.incDec op hp (OpLoc.mfield (MPath.var mv hmv) fld hfld))) := by
   upd_unfold'
   res_split
 
 theorem upd_memoryIndexArrayIncrement {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
-    {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var)
+    {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) {hmv : (Ty.ref R).mapFree = true}
     (ie : Simple C PrimTy.uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower)
             (MValT.val
               (Term.binop op.binOp p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower))
                 (Term.lit (.int 1)))))] σ)
-      (Stmt.run σ (Stmt.incDec op hp (OpLoc.mindex a (MPath.var mv) ie))) := by
+      (Stmt.run σ (Stmt.incDec op hp (OpLoc.mindex a (MPath.var mv hmv) ie))) := by
   upd_unfold'
   res_split
 
@@ -175,27 +176,28 @@ theorem upd_storageIndexIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
   rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
 theorem upd_memoryFieldIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
-    (hp : p.isNumeric = true) (mv : Var) {fld x : Name} (hfld : C.fieldType x fld = some (Ty.prim p))
-    (hs : (OpLoc.mfield (MPath.var mv) fld hfld).recvSimple = true) (σ : State) :
+    (hp : p.isNumeric = true) (mv : Var) {fld x : Name} {hmv : (Ty.ref (.struct x)).mapFree = true}
+    (hfld : C.fieldType x fld = some (Ty.prim p))
+    (hs : (OpLoc.mfield (MPath.var mv hmv) fld hfld).recvSimple = true) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.field (ITerm.pv mv) fld)
             (MValT.val
               (Term.binop op.binOp p (Term.read MTerm.memory (MAddr.field (ITerm.pv mv) fld))
                 (Term.lit (.int 1))))),
         UpdElem.val v (Term.bumped op p (Term.read MTerm.memory (MAddr.field (ITerm.pv mv) fld)))] σ)
-      (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.mfield (MPath.var mv) fld hfld) hs)) := by
+      (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.mfield (MPath.var mv hmv) fld hfld) hs)) := by
   rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
 theorem upd_memoryIndexArrayIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
-    (hp : p.isNumeric = true) {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) (ie : Simple C PrimTy.uint)
-    (hs : (OpLoc.mindex a (MPath.var mv) ie).recvSimple = true) (σ : State) :
+    (hp : p.isNumeric = true) {R : RefTy} (a : ArrTy R (.prim p)) (mv : Var) {hmv : (Ty.ref R).mapFree = true}
+    (ie : Simple C PrimTy.uint) (hs : (OpLoc.mindex a (MPath.var mv hmv) ie).recvSimple = true) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory
           (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower)
             (MValT.val
               (Term.binop op.binOp p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower))
                 (Term.lit (.int 1))))),
         UpdElem.val v (Term.bumped op p (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower)))] σ)
-      (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.mindex a (MPath.var mv) ie) hs)) := by
+      (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.mindex a (MPath.var mv hmv) ie) hs)) := by
   rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
 /-! ### Memory reads, aliases and writes -/
@@ -205,61 +207,68 @@ macro "mem_unfold" : tactic => `(tactic| (
   try simp only [MPath.lower, MLoc.lower]
   upd_unfold'))
 
-theorem upd_memoryFieldRead (v mv : Var) {fld x : Name} {q : PrimTy}
+theorem upd_memoryFieldRead (v mv : Var) {fld x : Name} {q : PrimTy} {hmv : (Ty.ref (.struct x)).mapFree = true}
     (hfld : C.fieldType x fld = some (Ty.prim q)) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.val v (Term.read MTerm.memory (MAddr.field (ITerm.pv mv) fld))] σ)
-      (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.field (MPath.var mv) fld hfld)))) := by
+      (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.field (MPath.var mv hmv) fld hfld)))) := by
   mem_unfold; res_split
 
 theorem upd_memoryIndexReadArrayValue {q : PrimTy} {R : RefTy} (a : ArrTy R (Ty.prim q)) (v mv : Var)
+    {hmv : (Ty.ref R).mapFree = true}
     (ie : Simple C PrimTy.uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.val v (Term.read MTerm.memory (MAddr.at (ITerm.pv mv) ie.lower))] σ)
-      (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.index a (MPath.var mv) (Val.simple ie))))) := by
+      (Stmt.run σ (Stmt.assignLocal v (Val.readMem (MLoc.index a (MPath.var mv hmv) (Val.simple ie))))) := by
   mem_unfold; res_split
 
-theorem upd_memoryRootRebind {R : RefTy} (mv₁ mv₂ : Var) (σ : State) :
+theorem upd_memoryRootRebind {R : RefTy} (mv₁ mv₂ : Var) {hmv₂ : (Ty.ref R).mapFree = true}
+    (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv₁ (ITerm.pv mv₂)] σ)
-      (Stmt.run σ (Stmt.rebindMem mv₁ (MRhs.alias (MPath.var (C := C) (R := R) mv₂)))) := by
+      (Stmt.run σ (Stmt.rebindMem mv₁ (MRhs.alias (MPath.var (C := C) (R := R) mv₂ hmv₂)))) := by
   mem_unfold; res_split
 
 theorem upd_memoryFieldReadAliasRoot (mv₁ mv₂ : Var) {fr x : Name} {R : RefTy}
+    {hmv₂ : (Ty.ref (.struct x)).mapFree = true}
     (hfr : C.fieldType x fr = some (Ty.ref R)) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv₁ (ITerm.read MTerm.memory (MAddr.field (ITerm.pv mv₂) fr))] σ)
-      (Stmt.run σ (Stmt.rebindMem mv₁ (MRhs.alias (MPath.loc (MLoc.field (MPath.var mv₂) fr hfr))))) := by
+      (Stmt.run σ (Stmt.rebindMem mv₁ (MRhs.alias (MPath.loc (MLoc.field (MPath.var mv₂ hmv₂) fr hfr))))) := by
   mem_unfold; res_split
 
 theorem upd_memoryIndexReadArrayMemory {R R' : RefTy} (a : ArrTy R' (Ty.ref R)) (mv₁ mv₂ : Var)
+    {hmv₂ : (Ty.ref R').mapFree = true}
     (ie : Simple C PrimTy.uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv₁ (ITerm.read MTerm.memory (MAddr.at (ITerm.pv mv₂) ie.lower))] σ)
       (Stmt.run σ (Stmt.rebindMem mv₁
-        (MRhs.alias (MPath.loc (MLoc.index a (MPath.var mv₂) (Val.simple ie)))))) := by
+        (MRhs.alias (MPath.loc (MLoc.index a (MPath.var mv₂ hmv₂) (Val.simple ie)))))) := by
   mem_unfold; res_split
 
-theorem upd_memoryFieldWrite (mv : Var) {fld x : Name} {q : PrimTy}
+theorem upd_memoryFieldWrite (mv : Var) {fld x : Name} {q : PrimTy} {hmv : (Ty.ref (.struct x)).mapFree = true}
     (hfld : C.fieldType x fld = some (Ty.prim q)) (se : Simple C q) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write (MAddr.field (ITerm.pv mv) fld) (MValT.val se.lower))] σ)
-      (Stmt.run σ (Stmt.assignMem (MLoc.field (MPath.var mv) fld hfld) (MSrc.val (Val.simple se)))) := by
+      (Stmt.run σ (Stmt.assignMem (MLoc.field (MPath.var mv hmv) fld hfld) (MSrc.val (Val.simple se)))) := by
   mem_unfold; res_split
 
 theorem upd_memoryIndexWriteArray {q : PrimTy} {R : RefTy} (a : ArrTy R (Ty.prim q)) (mv : Var)
+    {hmv : (Ty.ref R).mapFree = true}
     (ie : Simple C PrimTy.uint) (se : Simple C q) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower) (MValT.val se.lower))] σ)
-      (Stmt.run σ (Stmt.assignMem (MLoc.index a (MPath.var mv) (Val.simple ie)) (MSrc.val (Val.simple se)))) := by
+      (Stmt.run σ (Stmt.assignMem (MLoc.index a (MPath.var mv hmv) (Val.simple ie)) (MSrc.val (Val.simple se)))) := by
   mem_unfold; res_split
 
 /-- `memoryFieldWriteCopy` from a memory local; a source that is a location is split by cases in `Taclet.sound_update`. -/
-theorem upd_memoryFieldWriteCopy_var (mv : Var) {fld x : Name} {R : RefTy}
-    (hfld : C.fieldType x fld = some (Ty.ref R)) (y : Var) (σ : State) :
+theorem upd_memoryFieldWriteCopy_var (mv : Var) {fld x : Name} {R : RefTy} {hmv : (Ty.ref (.struct x)).mapFree = true}
+    (hfld : C.fieldType x fld = some (Ty.ref R)) (y : Var) {hy : (Ty.ref R).mapFree = true}
+    (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write (MAddr.field (ITerm.pv mv) fld)
-        (MValT.ref (MPath.var (C := C) (R := R) y).lower))] σ)
-      (Stmt.run σ (Stmt.assignMem (MLoc.field (MPath.var mv) fld hfld) (MSrc.ref (MPath.var y)))) := by
+        (MValT.ref (MPath.var (C := C) (R := R) y hy).lower))] σ)
+      (Stmt.run σ (Stmt.assignMem (MLoc.field (MPath.var mv hmv) fld hfld) (MSrc.ref (MPath.var y hy)))) := by
   mem_unfold; res_split
 
 theorem upd_memoryIndexWriteCopy_var {R R' : RefTy} (a : ArrTy R' (Ty.ref R)) (mv : Var)
-    (ie : Simple C PrimTy.uint) (y : Var) (σ : State) :
+    {hmv : (Ty.ref R').mapFree = true} (ie : Simple C PrimTy.uint) (y : Var)
+    {hy : (Ty.ref R).mapFree = true} (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.memory (MTerm.memory.write (MAddr.at (ITerm.pv mv) ie.lower)
-        (MValT.ref (MPath.var (C := C) (R := R) y).lower))] σ)
-      (Stmt.run σ (Stmt.assignMem (MLoc.index a (MPath.var mv) (Val.simple ie)) (MSrc.ref (MPath.var y)))) := by
+        (MValT.ref (MPath.var (C := C) (R := R) y hy).lower))] σ)
+      (Stmt.run σ (Stmt.assignMem (MLoc.index a (MPath.var mv hmv) (Val.simple ie)) (MSrc.ref (MPath.var y hy)))) := by
   mem_unfold; res_split
 
 /-! ### Copies and allocations: a new heap and counter, the rest kept -/
@@ -310,10 +319,11 @@ theorem allocDefault_eq (σ : State) (R : RefTy) :
   res_frame_eq (allocDefault_frame σ R)
 
 theorem upd_memoryReferenceDeclFreshAlloc (R : RefTy) (mv : Var)
-    (hd : ((none : Option (MRhs C R)).isSome || (Ty.ref R).defaultOkS) = true) (σ : State) :
+    (hd : ((none : Option (MRhs C R)).isSome || (Ty.ref R).defaultOkS) = true)
+    {hm : (Ty.ref R).mapFree = true} (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv (ITerm.alloc MTerm.memory R),
         UpdElem.memory (MTerm.memory.addM R)] σ)
-      (Stmt.run σ (Stmt.declMem R mv none hd)) := by
+      (Stmt.run σ (Stmt.declMem R mv none hd hm)) := by
   upd_unfold'
   simp only [allocDefault_eq, bind_assoc, pure_bind]
   res_split
@@ -342,10 +352,10 @@ theorem upd_memoryArrayFreshAlloc (mv : Var) {R : RefTy} (se : Simple C PrimTy.u
   all_goals simp [State.setEnv, EnvAgreeExcept.refl]
 
 theorem upd_memoryRootDeleteFreshRebind (R : RefTy) (mv : Var) (hd : (Ty.ref R).defaultOkS = true)
-    (σ : State) :
+    {hmv : (Ty.ref R).mapFree = true} (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.mref mv (ITerm.alloc MTerm.memory R),
         UpdElem.memory (MTerm.memory.addM R)] σ)
-      (Stmt.run σ (Stmt.deleteMem (MPath.var (C := C) (R := R) mv) hd)) := by
+      (Stmt.run σ (Stmt.deleteMem (MPath.var (C := C) (R := R) mv hmv) hd)) := by
   upd_unfold'
   simp only [allocDefault_eq, bind_assoc, pure_bind]
   res_split
@@ -356,9 +366,10 @@ theorem Term.eval_mlen' (σ : State) (m : MTerm C) (i : ITerm C) :
       let τ ← m.eval σ
       memArrayLen τ (← i.eval σ)) := rfl
 
-theorem upd_memoryLengthRead {p : PrimTy} {E : Ty} (v mv : Var) (hlen : p = .uint) (σ : State) :
+theorem upd_memoryLengthRead {p : PrimTy} {E : Ty} (v mv : Var)
+    {hmv : (Ty.ref (.array E)).mapFree = true} (hlen : p = .uint) (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.val v (Term.mlen MTerm.memory (ITerm.pv mv))] σ)
-      (Stmt.run σ (Stmt.assignLocal v (Val.mlen (C := C) (E := E) (MPath.var mv) hlen))) := by
+      (Stmt.run σ (Stmt.assignLocal v (Val.mlen (C := C) (E := E) (MPath.var mv hmv) hlen))) := by
   mem_unfold
   res_split
 
@@ -380,18 +391,20 @@ theorem upd_memoryDeleteReference {R : RefTy} (l : MLoc C (Ty.ref R)) (a : MAddr
   simp only [ha, memClear, allocDefault_eq, writeAddr_eq, bind_assoc, pure_bind]
   res_split
 
-theorem MLoc.addr_field_var (mv : Var) {s f : Name} {T : Ty} (hf : C.fieldType s f = some T)
+theorem MLoc.addr_field_var (mv : Var) {s f : Name} {T : Ty}
+    {hmv : (Ty.ref (.struct s)).mapFree = true} (hf : C.fieldType s f = some T)
     (σ : State) :
-    (MAddr.field (ITerm.pv mv) f : MAddr C).eval σ = (MLoc.field (MPath.var mv) f hf).addr σ := by
+    (MAddr.field (ITerm.pv mv) f : MAddr C).eval σ = (MLoc.field (MPath.var mv hmv) f hf).addr σ := by
   simp only [tm_eval, MLoc.addr, MPath.mval, bind_assoc]
   cases σ.getEnv mv with
   | error _ => rfl
   | ok b => cases b <;> rfl
 
 theorem MLoc.addr_index_var (mv : Var) {R : RefTy} {E : Ty} {a : ArrTy R E}
+    {hmv : (Ty.ref R).mapFree = true}
     (ie : Simple C PrimTy.uint) (σ : State) :
     (MAddr.at (ITerm.pv mv) ie.lower : MAddr C).eval σ =
-      (MLoc.index a (MPath.var mv) (Val.simple ie)).addr σ := by
+      (MLoc.index a (MPath.var mv hmv) (Val.simple ie)).addr σ := by
   simp only [tm_eval, MLoc.addr, MPath.mval, Val.eval, Simple.lower_eval, bind_assoc]
   cases σ.getEnv mv with
   | error _ => rfl
