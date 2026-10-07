@@ -1640,3 +1640,177 @@ theorem Stmt.erases_loop {Γ₁ : Ctx} (hag : Agree ns σ τ) (a : LoopAnn C Γ)
   exact Loop.step_rel (c.eval_erase hab) hab hf (body.erases_pop hab.len (ih a b hab)))
 
 end Scopes
+
+/-! ## Calls -/
+
+section Calls
+
+variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+
+/-- Agreement carried to a state with the same locals and other bindings
+that agree on `ns`. -/
+theorem Agree.reglob (hag : Agree ns σ τ) {σ' : State C Γ} {τ' : Semantics.State}
+    (henv : σ'.env = σ.env) (hglob : withLocals σ'.glob τ'.env = τ')
+    (hns : ∀ y ∈ ns, lookupBy y τ'.env = lookupBy y τ.env) : Agree ns σ' τ' where
+  len := hag.len
+  nodup := hag.nodup
+  glob := hglob
+  env m hm := by
+    rw [henv] at hm
+    rw [hns m.1 (Env.mem_erase_key (b := m.2) hm)]
+    exact hag.env m hm
+
+theorem Arg.bindSeq_append (l₁ l₂ : List (Arg C)) (τ : Semantics.State) :
+    Arg.bindSeq (l₁ ++ l₂) τ = Arg.bindSeq l₁ τ >>= Arg.bindSeq l₂ := by
+  induction l₁ generalizing τ with
+  | nil => rfl
+  | cons a l₁ ih =>
+    simp only [List.cons_append, Arg.bindSeq]
+    cases Solidity.Val.eval τ a.e with
+    | error _ => rfl
+    | ok v => exact ih _
+
+theorem Args.eval_snoc {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var) (e : Val C Γ p) :
+    (Args.snoc as p x e).eval σ = (do let r ← as.eval σ; let v ← e.eval σ; pure (v, r)) := rfl
+
+/-- A call's arguments: read in the caller's state and bound to the
+parameters, alike. -/
+theorem Args.bindSeq_erase (hag : Agree ns σ τ) : {ps : Ctx} → (args : Args C Γ ps) →
+    args.names.Nodup → (∀ y ∈ args.names, y ∉ ns) →
+    (∃ e, args.eval σ = .error e ∧ Arg.bindSeq (args.erase ns) τ = .error e) ∨
+    (∃ a τ₁, args.eval σ = .ok a ∧ Arg.bindSeq (args.erase ns) τ = .ok τ₁ ∧
+      Agree args.names (State.ofGlob σ.glob a : State C ps) τ₁ ∧
+      ∀ y, y ∉ args.names → lookupBy y τ₁.env = lookupBy y τ.env)
+  | _, .nil, _, _ => .inr ⟨(), τ, rfl, rfl,
+      ⟨rfl, List.nodup_nil, hag.glob, fun _ h => absurd h List.not_mem_nil⟩, fun _ _ => rfl⟩
+  | _, .snoc as p x e, hnd, hdis => by
+    have hnd' := List.nodup_cons.1 hnd
+    rw [Args.eval_snoc]
+    have hE : (Args.snoc as p x e).erase ns = as.erase ns ++ [⟨p, x, e.erase ns⟩] := rfl
+    rw [hE, Arg.bindSeq_append]
+    rcases Args.bindSeq_erase hag as hnd'.2 (fun y hy => hdis y (List.mem_cons_of_mem _ hy)) with
+      ⟨err, h₁, h₂⟩ | ⟨r, τ₁, h₁, h₂, hag₁, hf₁⟩
+    · exact .inl ⟨err, by rw [h₁]; rfl, by rw [h₂]; rfl⟩
+    · have hagσ : Agree ns σ τ₁ := hag.reglob rfl hag₁.glob fun y hy =>
+        hf₁ y fun h => hdis y (List.mem_cons_of_mem _ h) hy
+      rw [h₁, h₂]
+      simp only [SemanticsProperties.Res.ok_bind, Arg.bindSeq, e.eval_erase hagσ]
+      cases e.eval σ with
+      | error err => exact .inl ⟨err, rfl, rfl⟩
+      | ok v =>
+        refine .inr ⟨(v, r), τ₁.setEnv x (.val v), rfl, rfl, hag₁.push hnd'.1 (t := .val p) v,
+          fun y hy => ?_⟩
+        rw [frame_setEnv (B := x :: as.names) List.mem_cons_self y hy]
+        exact hf₁ y fun h => hy (List.mem_cons_of_mem _ h)
+
+theorem CallRet.enterAll_append (l₁ l₂ : List (PrimTy × Var)) (τ : Semantics.State) :
+    Solidity.CallRet.enterAll (l₁ ++ l₂) τ =
+      Solidity.CallRet.enterAll l₂ (Solidity.CallRet.enterAll l₁ τ) := by
+  induction l₁ generalizing τ with
+  | nil => rfl
+  | cons a l₁ ih => exact ih _
+
+/-- Return variables declared at their defaults, alike. -/
+theorem Binders.enterAll_erase {ps : Ctx} {qs : List Var} {τ₁ : Semantics.State}
+    {g : State C ps} (hag₁ : Agree qs g τ₁) :
+    {ρ : Ctx} → (bs : Binders ρ) → (bs.names ++ qs).Nodup →
+      Agree (bs.names ++ qs) (g.withEnv (Env.append ρ (Binders.defaults bs) g.env))
+        (Solidity.CallRet.enterAll bs.toList τ₁) ∧
+      ∀ y, y ∉ bs.names → lookupBy y (Solidity.CallRet.enterAll bs.toList τ₁).env =
+        lookupBy y τ₁.env
+  | _, .nil, _ => ⟨hag₁, fun _ _ => rfl⟩
+  | _, .snoc bs p x, hnd => by
+    have hnd' := List.nodup_cons.1 hnd
+    obtain ⟨ih, hf⟩ := Binders.enterAll_erase hag₁ bs hnd'.2
+    have hx : x ∉ bs.names ++ qs := hnd'.1
+    have hT : (Binders.snoc bs p x).toList = bs.toList ++ [(p, x)] := rfl
+    rw [hT, CallRet.enterAll_append]
+    refine ⟨ih.push hx (t := .val p) (PrimTy.default p), fun y hy => ?_⟩
+    rw [show Solidity.CallRet.enterAll [(p, x)] (Solidity.CallRet.enterAll bs.toList τ₁) =
+      (Solidity.CallRet.enterAll bs.toList τ₁).setEnv x (.val (PrimTy.default p)) from rfl,
+      frame_setEnv (B := x :: bs.names) List.mem_cons_self y hy]
+    exact hf y fun h => hy (List.mem_cons_of_mem _ h)
+
+/-- Entering a call's frame: the return variables at their defaults (a memory
+return a fresh object, which the erased body declares first), alike. -/
+theorem CallRet.enter_erase {ps rs Γ' : Ctx} {qs : List Var} {a : Env C ps}
+    {τ₁ : Semantics.State} (hag₁ : Agree qs (State.ofGlob σ.glob a : State C ps) τ₁)
+    (ret : CallRet Γ rs Γ') (hnd : (ret.names ++ qs).Nodup) :
+    (∃ e, (ret.enter σ.glob : Res (Semantics.State × Env C rs)) = .error e ∧
+      Solidity.Prog.run (Solidity.CallRet.enter τ₁ (ret.erase ns)) (ret.pre (C := C)) = .error e) ∨
+    (∃ τg r τ₂, (ret.enter σ.glob : Res (Semantics.State × Env C rs)) = .ok (τg, r) ∧
+      Solidity.Prog.run (Solidity.CallRet.enter τ₁ (ret.erase ns)) (ret.pre (C := C)) = .ok τ₂ ∧
+      Agree (ret.names ++ qs) (State.ofGlob τg (Env.append rs r a) : State C (rs ++ ps)) τ₂ ∧
+      ∀ y, y ∉ ret.names → lookupBy y τ₂.env = lookupBy y τ₁.env) := by
+  cases ret with
+  | none => exact .inr ⟨σ.glob, (), τ₁, rfl, rfl, hag₁, fun _ _ => rfl⟩
+  | val p r res =>
+    exact .inr ⟨σ.glob, (PrimTy.default p, ()), τ₁.setEnv r (.val (PrimTy.default p)), rfl, rfl,
+      hag₁.push (List.nodup_cons.1 hnd).1 (t := .val p) _,
+      frame_setEnv (B := [r]) List.mem_cons_self⟩
+  | rets bs =>
+    obtain ⟨h₁, h₂⟩ := Binders.enterAll_erase hag₁ bs hnd
+    exact .inr ⟨σ.glob, Binders.defaults bs, _, rfl, rfl, h₁, h₂⟩
+  | mem R r hd hm =>
+    have hal : allocDefault τ₁ R =
+        (fun p => (withLocals p.1 τ₁.env, p.2)) <$> allocDefault σ.glob R :=
+      hag₁.opA (allocDefault_nat R)
+    simp only [CallRet.pre, CallRet.erase, Solidity.Prog.run_single, Solidity.CallRet.enter,
+      Solidity.Stmt.run, hal]
+    have hen : ((CallRet.mem R r hd hm : CallRet Γ _ _).enter σ.glob :
+        Res (Semantics.State × Env C [.mem R])) =
+        (do let (τ', id) ← allocDefault σ.glob R; pure (τ', (id, ()))) := rfl
+    rw [hen]
+    cases allocDefault σ.glob R with
+    | error e => exact .inl ⟨e, rfl, rfl⟩
+    | ok p =>
+      exact .inr ⟨p.1, (p.2, ()), _, rfl, rfl,
+        (hag₁.withGlob p.1).push (List.nodup_cons.1 hnd).1 (t := .mem R) p.2,
+        frame_setEnv (B := [r]) List.mem_cons_self⟩
+
+/-- Leaving a call: the caller's locals, and what the call leaves them,
+alike. -/
+theorem CallRet.leave_erase (hag : Agree ns σ τ) {rs Γ' ps Γf : Ctx} (ret : CallRet Γ rs Γ')
+    {qs : List Var} (hb : Ext (rs ++ ps) Γf) {υ : State C Γf} {τ₃ : Semantics.State}
+    (hagF : Agree (ret.names ++ qs) (υ.drop hb) τ₃)
+    (hns : ∀ y ∈ ns, lookupBy y τ₃.env = lookupBy y τ.env)
+    (hdis : ∀ y ∈ ret.names, y ∉ ns) :
+    RunRel (ret.outNames ns) ns τ₃
+      (pure (υ.withEnv (ret.leave σ.env (Env.take rs (Env.drop hb υ.env)))))
+      (Solidity.CallRet.leave (C := C) τ₃ (ret.erase ns)) := by
+  have base : Agree ns (υ.withEnv σ.env) τ₃ := hag.reglob rfl hagF.glob hns
+  cases ret with
+  | none => exact ⟨base, fun _ _ => rfl⟩
+  | val p r res =>
+    cases res with
+    | none => exact ⟨base, fun _ _ => rfl⟩
+    | some j =>
+      have hg : τ₃.getEnv r = .ok (.val (Env.get .here (Env.drop hb υ.env))) :=
+        hagF.getEnv (Idx.here : Idx (.val p :: ps) (.val p))
+      simp only [CallRet.erase, Option.map_some, Solidity.CallRet.leave, Solidity.Simple.eval, hg]
+      exact RunRel.ok_setLocal base j _ (Idx.name_mem j ns hag.len)
+  | rets bs =>
+    have hlen : bs.names.length = rs.length := bs.length_names
+    refine ⟨⟨by show (bs.names ++ ns).length = _; simp only [List.length_append, hlen, hag.len],
+      ?_, hagF.glob, fun m hm => ?_⟩,
+      fun _ _ => rfl⟩
+    · refine List.nodup_append.2 ⟨(List.nodup_append.1 hagF.nodup).1, hag.nodup, ?_⟩
+      intro y hy z hz hyz
+      exact hdis y hy (hyz ▸ hz)
+    · show lookupBy m.1 τ₃.env = some m.2
+      have hm' : m ∈ Env.erase (bs.names ++ ns)
+          (Env.append rs (Env.take rs (Env.drop hb υ.env)) σ.env) := hm
+      rw [Env.erase_append _ _ _ _ _ hlen] at hm'
+      rcases List.mem_append.1 hm' with hm' | hm'
+      · exact hagF.env m (Env.mem_erase_take rs bs.names qs _ hlen m hm')
+      · exact base.env m hm'
+  | mem R r hd hm =>
+    refine ⟨⟨by simp only [CallRet.outNames, List.length_cons, hag.len], ?_, hagF.glob,
+      fun m hm => ?_⟩, fun _ _ => rfl⟩
+    · exact List.nodup_cons.2 ⟨hdis r List.mem_cons_self, hag.nodup⟩
+    · rcases List.mem_cons.1 hm with hm | hm
+      · subst hm
+        exact hagF.get (Idx.here : Idx (.mem R :: ps) (.mem R))
+      · exact base.env m hm
+
+end Calls
