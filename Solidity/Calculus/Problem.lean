@@ -134,7 +134,7 @@ theorem shape_of_reachable (hnd : nodupKeysB C.vars = true)
 /-- **The shape is reachability**: for a contract whose types have
 well-formed defaults all the way down, a storage whose words, keys and
 slots are in range (`FitsStorage`) passes the shape test exactly when a
-checked program reaches it from the contract's initial state. -/
+program reaches it from the contract's initial state. -/
 theorem shape_iff_reachable (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} (hf : FitsStorage C st) :
     storageShapeB C.vars st = true ↔ Reachable C st :=
@@ -182,7 +182,7 @@ theorem storageWordsB_init (hnd : nodupKeysB C.vars = true) :
 it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) : holds C.initState (Fml.wt C) :=
-  holds_wt.2 (wt_of_reachable hnd hdeep ⟨[], [], C.initState, rfl, rfl, rfl⟩
+  holds_wt.2 (wt_of_reachable hnd hdeep ⟨[], .nil, Core.State.ofSem C.initState, rfl, rfl⟩
     (storageWordsB_init hnd))
 
 /-! ## The obligations -/

@@ -43,7 +43,7 @@ lemma (`TermTaclet.sound`).
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |
 | `AST.lean` | Types (`PrimTy`/`Ty`/`RefTy`, `RefTy.fixed`), the struct table, operators, `Var`. |
-| `Syntax.lean` | The typed syntax (`Val C p`, `SPath`, `Loc`, `MPath`, `Stmt C`), `Contract`/`FunDecl`, the locals check of the typing proofs (`Stmt.wt`), the elaborator behind `sol[C]{…}` and `contract!{…}`, and the quoter (`Prog.quote`). |
+| `Syntax.lean` | The typed syntax (`Val C p`, `SPath`, `Loc`, `MPath`, `Stmt C`), `Contract`/`FunDecl`, the elaborator behind `sol[C]{…}` and `contract!{…}`, and the quoter (`Prog.quote`). |
 | `Scope.lean` | `Solidity.Core`'s contexts: `LTy`, `Ctx := List LTy`, positions `Idx`, suffixes `Ext` (scope ends), thinnings `Thin` (weakening), `Binders`. |
 | `Syntax/Core.lean` | The typed syntax scoped (`Solidity.Core`, `docs/intrinsic.md`): `Stmt C Γ Γ'`/`Prog C Γ Γ'` over `Idx`, scoped branches and blocks, calls closed over their frame (`Args`, `CallRet`), the printers (names beside the context) and `Stmt.wk`.  Beside `Syntax.lean`'s until M4. |
 | `Syntax/Resolve.lean` | Between the two: `erase` (positions to names, a block to its statements) and `resolve` (names to the newest position, branches, loop bodies and call bodies as scopes, a memory return moved into the call's frame), `resolve_erase`, and `Prog.resolveCheck`, the elaborator's locals check. |
@@ -151,10 +151,10 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 |---|---|
 | `Typing/Storage.lean` | `Layout`, `SVal.hasTy`, read typing, write inversions, runtime sorts. |
 | `Typing/StoragePreservation.lean` | `save` keeps a value's type. |
-| `Typing/State.lean` | `StateWT`, the full-state invariant. |
-| `Typing/Soundness.lean` | Type soundness: `Stmt.run_wt`, `Prog.run_wt`. |
-| `Typing/Reachability.lean` | Every reachable storage is canonical. |
-| `Typing/Constructibility.lean` | The converse: reachable ⇔ canonical ∧ tight. |
+| `Typing/State.lean` | `StateWT`, the invariant of a state's global part (storage, heap, allocation counter); copy typing. |
+| `Typing/Soundness.lean` | Type soundness of the scoped run: `Core.Stmt.run_wt`, `Core.Prog.run_wt` (`RunWT`: `StateWT` and every local of its type); `Invariant`, the scope cases every run invariant shares. |
+| `Typing/Reachability.lean` | Every reachable storage is canonical (`Core.Prog.run_canon`); `Reachable` is a scoped program's run from the initial state. |
+| `Typing/Constructibility.lean` | The converse: reachable ⇔ canonical ∧ tight; the builder `Core.Build.rootsProg` is a scoped program, `Core.Prog.run_tight`. |
 | `Typing/CanonTest.lean` | The tests `wt(storage)` runs decide `canon` and `tight` (`SVal.canonB_iff`, `SVal.tightB_iff`); a default is canonical (`defaultForTy_canonB`). |
 | `SortCheck/Annotations.lean` | The taclets' read-sort annotations, transcribed from the `.key` file. |
 | `SortCheck/Parser.lean` | Token-level `.key` scanner and the `conforms` cross-check. |
