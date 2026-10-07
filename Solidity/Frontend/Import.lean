@@ -1,6 +1,6 @@
 import Lean
 import Solidity.Frontend.SolcJson
-import Solidity.Syntax.Splice
+import Solidity.Syntax.CoreQuote
 
 /-!
 # `solc_import`: a contract from solc's AST, at elaboration time
@@ -41,6 +41,15 @@ Lake does not track the fixture, so the command names its hash (FNV-1a 64
 over the bytes) and refuses a fixture of another one; the script that
 writes the fixture rewrites the literal, which makes Lake re-check the
 importing module.
+
+`solc_scoped N`, after the import, is the lint of the scoped syntax
+(`docs/intrinsic.md`, M2): it declares `N.f.core : Core.Prog N Γ Γ'` for
+every program `N.f` the import made, resolved from its parameters
+(`resolve`) and quoted (`Core.Prog.defineCore`), so the kernel checks the
+scoped form of every imported function; a program that does not resolve is
+an error.  It is a command of its own, run in a module of its own for the
+large imports, because the kernel's check costs about what the import's own
+does.
 
 A function that does not elaborate is a row, not an error: the import
 never fails on one function.  Each body's elaboration has its own
@@ -367,5 +376,32 @@ def elabSolcImport : CommandElab := fun stx => do
   liftCoreM <| addAndCompile <| .defnDecl {
     name := rep, levelParams := [], type := rowsTy, value := toExpr (ctorRow.toList ++ rows.toList),
     hints := .abbrev, safety := .safe }
+
+/-- `solc_scoped N`: every program of the import `N` declared scoped,
+`N.f.core`, the kernel checking each; an info names how many. -/
+syntax (name := solcScoped) "solc_scoped " ident : command
+
+@[command_elab solcScoped]
+def elabSolcScoped : CommandElab := fun stx => do
+  let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
+  let errs ← liftTermElabM do
+    let C ← unsafe evalConst Contract N
+    let rows ← unsafe evalConst (List ImportRow) (N ++ `report)
+    let mut errs : Array String := #[]
+    let mut k := 0
+    for r in rows do
+      if r.status != .elaborated then continue
+      let n := N ++ Lean.Name.mkSimple r.name
+      let P ← unsafe evalConst (Prog C) n
+      let err ← match paramCtx r.params with
+        | .error e => pure (some e)
+        | .ok Γ => Core.Prog.defineCore (n ++ `core) N (ECtx.toNCtx Γ) P
+      match err with
+      | some e => errs := errs.push s!"{r.name}: {e}"
+      | none => k := k + 1
+    if errs.isEmpty then logInfo m!"{k} program{if k == 1 then "" else "s"} declared scoped"
+    pure errs
+  unless errs.isEmpty do
+    throwError "solc_scoped: {errs.size} programs are not scoped:\n{"\n".intercalate errs.toList}"
 
 end Solidity.Frontend
