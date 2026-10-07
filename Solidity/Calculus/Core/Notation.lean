@@ -82,6 +82,8 @@ a capture takes the least index the formula's written fresh variables
 leave. -/
 def elabModalProg (taken : List Nat) (P : List RawStmt) : ElabM (Solidity.Prog C) := do
   let mut P' : Solidity.Prog C := []
+  -- a block's locals renamed apart (`freshenBlocks`)
+  let P ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) ((← get).1.map (·.1)) P)
   for s in P do
     let (Γ, k) ← get
     let k₀ := nextFree taken k
@@ -133,7 +135,7 @@ def elabFmlC (taken : List Nat) : RawFml → (Γ : NCtx) → ElabM (Fml C Γ.ctx
     modify fun (_, k) => (Γh, k)
     withBinds C (fun Γb => do
       let P' ← elabModalProg C taken P
-      let ⟨Γ', Q⟩ ← ElabM.lift (Prog.resolve Γb P')
+      let ⟨Γ', Q⟩ ← ElabM.lift (Prog.resolve Γb P' (strict := false))
       pure (.modal m Q .nil (← elabFmlC taken φ Γ'))) (newBinders Γe Γh) Γ
   | .lean i, _ => pure (Fml.slotC i)
   | .decl ds φ, Γ => inScope do

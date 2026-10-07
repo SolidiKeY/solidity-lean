@@ -165,6 +165,18 @@ info: uint se3 = 2; uint se4 = se3; uint se1 = 5; uint se2 = se1; x = se2; x = s
 -/
 #guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol[Twice]{ h(); })))
 
+/-- A body run twice by `_; _;`: its local, written flat twice into one
+scope, is renamed apart in the first run (`se3_1`, `freshenBlocks`), so the
+program `resolve` returns is `Fresh`. -/
+def TwiceLocal : Contract := contract!{ uint n;
+  modifier twice() { _; _; }
+  function f(uint a) twice returns (uint r) { uint t = a + 1; r = t; n += t; } }
+
+/--
+info: uint y; uint se1 = 0; uint se2; uint se3_1 = se1 + 1; se2 = se3_1; n += se3_1; uint se3 = se1 + 1; se2 = se3; n += se3; y = se2;
+-/
+#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol[TwiceLocal]{ uint y = f(0); })))
+
 /-! ## Named arguments of a call
 
 `f({q: 2, s: 3, p: 1})` binds by name: the arguments are put in the

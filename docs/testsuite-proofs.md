@@ -420,8 +420,9 @@ one.
   storage is any state of the interpreter, so the premise says it is one
   the contract can be in: the model's own Solidity-reachability assumption,
   not KeY's.  Reachable is by the scoped interpreter (`Reachable`, since
-  M3); `holds` reads the untyped one, and no theorem yet carries a storage
-  it reaches to a `Reachable` one (`docs/intrinsic.md`, M2–M3 review).  Both modalities carry it (M3b review): a box over every
+  M3); `holds` reads the untyped one, and a storage it reaches from a block
+  the locals check accepts is `Reachable` (`ReachableU.reachable`,
+  `Calculus/Problem.lean`).  Both modalities carry it (M3b review): a box over every
   storage is false of some functions Solidity runs safely (below).  So a
   derived obligation need not imply solkey's: `assert(total >= 0)` on a
   `uint total` holds under `wt`, where solkey's free `total` can be

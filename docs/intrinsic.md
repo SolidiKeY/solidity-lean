@@ -325,8 +325,8 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     One lemma per statement (`Stmt.erases_*`), the IH passed in, and a
     mutual structural `Stmt.erasesAt`/`Prog.erasesAt` that dispatches;
     loops by `Loop.run_rel₂`, `Loop.run_rel` across the two state types.
-  - Not true in general (M2–M3 review): `resolve`'s output from the
-    elaborator is not always `Fresh`.  A raw block, a `for` init and a
+  - Not true in general before the M2–M3 freshness lane (below):
+    `resolve`'s output from the elaborator was not always `Fresh`.  A raw block, a `for` init and a
     modifier's `_` are elaborated by `elabBranch`, which pops their locals
     from `ECtx` but emits them flat, so a later declaration of the same name
     passes `checkFresh` and `resolve` stacks a second binder in one scope:
@@ -367,8 +367,8 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     interpreter, where it was the untyped run of a checked program.
     `Problem.lean`'s statements keep their text (`initStorage_wt`'s witness
     is `.nil`) but now speak of the scoped run, while `wt(storage)` is read
-    by `holds` over the untyped one.  Open gap: `ReachableU → Reachable`
-    (resolve, `Fresh`, `run_erase`; M2–M3 review).
+    by `holds` over the untyped one.  Closed by `ReachableU.reachable`
+    (M2–M3 review, freshness lane).
   - The builder (`Core.Build`) is a scoped program: `fill d T q v : Prog C
     Γ Γ` declares each alias in a block of its own (`bound`), so a fill
     leaves its context, and its caller's aliases (read by position) are
@@ -419,14 +419,55 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
   make the output `Fresh`, by a per-function set of every name declared so
   far that `checkFresh` reads (refuse, or rename to a fresh capture), or by
   a scope marker `resolve` turns into `Core.Stmt.block`.
+- Done (freshness lane, 2026-10-08), the item above and the next one:
+  - **Decision: rename apart, no scope marker.**  A marker `resolve` turns
+    into `Core.Stmt.block` would need a block in `Syntax.lean`'s untyped
+    `Stmt`, which every interpreter, rule and printer matches on, and which
+    M4 retires.  Instead the elaborator renames a flat block's local apart
+    before elaborating (`freshenBlocks`, `Syntax.lean`): a raw block,
+    `unchecked`, a `for` init and the `_;` a modifier repeats are flat; a
+    branch, a loop's body, a `try` clause and a call's body are `resolve`'s
+    scopes.  A flat local whose name is declared later in the scope
+    `resolve` reads it in is renamed `x_1` (KeY's `VariableNamer` spelling,
+    the least index naming nothing in the program or the state variables),
+    in its block only: Solidity's scope ends there, so no later statement,
+    postcondition or caller sees it, and a redeclaration keeps its name.  A
+    user-style name, not a capture (`se4`): `captureExpr` skips a fresh name
+    as a capture holding its value, which a mutable local is not.  Applied
+    at every entry: `elabProg`, `elabProgAt.go` (and `solc_import`), each
+    inlined body after its modifiers (`elabCallRet`), a `dl!{}` modality and
+    a `cdl!{}` one.  Shadowing a local in scope is still refused, with the
+    elaborator's message.
+  - **`resolve` checks `Fresh`** (`Syntax/Resolve.lean`; `Prog.Fresh` moved
+    there from `RunErase.lean`): a binder of a name in scope or of an
+    enclosing frame is refused, and `resolveStmt`/`resolveProg` return
+    `Fresh` with the erasure, so `Prog.resolve_fresh` holds by construction.
+    `strict := false` skips it for a formula's program (`cdl!{}`,
+    `Fml.resolveN`), which may shadow a `∀` or an update binder
+    (`CoreNotation.lean`'s `x = 1 → ⟨ uint x = 2; ⟩ x = 2`).
+  - `ReachableU C st` (`Calculus/Problem.lean`): a block `resolveCheck [] us`
+    accepts runs untyped from `C.initState` to `st`.  `ReachableU.reachable`
+    by `Prog.resolve_of_resolveCheck`, `resolve_erase`, `resolve_fresh` and
+    `run_erase` at `ns = []` (the erased initial state is `C.initState` by
+    `rfl`); `wt_of_reachableU` follows.  `run_erase` applied to a resolved
+    program and a state elaborates at once here (the `callsCore` timeout
+    of M3.2 is not reproduced).
+  - Pins: no existing pin changed (the four targets build, the corpus and
+    `SolkeyTestSuite` included): `Branch.lean`'s two examples were
+    `example`s, Loops' `ModifierRuns` body declares nothing, and
+    `Benchmark/Syntax`'s `Twice` applies two modifiers, each renamed by the
+    inliner.  New pins show the renaming: `Branch.lean` (`bool x_1`,
+    `int i_1`, two loops of one index, shadowing refused),
+    `Benchmark/Syntax.lean`'s `TwiceLocal` (`se3_1`, the first run of a body
+    `_; _;` repeats).  `CoreNotation.lean`'s three shadowing pins failed
+    under a strict `cdl!{}` until it read non-strict.
 - `Reachable` is now reachability by the scoped interpreter, while `holds`
   reads `wt(storage)` over the untyped one; `reachable_canon`,
   `shape_iff_reachable`, `wt_iff_reachable` and `reachable_iff` say nothing
   yet about the untyped run.  Said in M3.3, `testsuite-proofs.md`,
   `solkey-feedback.md`, `Problem.lean`'s and `Reachability.lean`'s
-  docstrings.  Open: `ReachableU C st := ∃ P σ, resolveCheck [] P = .ok _ ∧
-  Prog.run C.initState P = .ok σ ∧ σ.storage = st` and `ReachableU →
-  Reachable`, from `Prog.resolve_erase` and `run_erase` once `Fresh` holds.
+  docstrings.  Closed: `ReachableU`, `ReachableU.reachable`, `wt_of_reachableU`
+  (`Calculus/Problem.lean`).
 - The memory conditional of references refuses `c ? a[i] : b[j]` when the
   default of the type is not well-formed (`hoist`'s `T memory mv;`): now in
   `solc-alignment.md`'s row.
