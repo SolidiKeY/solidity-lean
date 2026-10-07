@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.SoundBlocks
+import Solidity.Calculus.Core.SoundArms
 import Solidity.Calculus.Core.RunWk
 
 /-!
@@ -94,10 +95,6 @@ end Env
 section Args
 
 variable {Γ : Ctx}
-
-theorem Simple.eval_ok {p : PrimTy} (σ : State C Γ) (s : Simple C Γ p) :
-    ∃ v, s.eval σ = .ok v := by
-  cases s <;> exact ⟨_, rfl⟩
 
 theorem Args.eval_snoc (σ : State C Γ) {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var)
     (e : Val C Γ p) :
