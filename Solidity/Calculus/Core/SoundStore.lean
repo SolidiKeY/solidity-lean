@@ -538,7 +538,7 @@ theorem popStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (q : Premis
       rwa [show E.isMapping = true from hE, if_pos rfl] at hp
     · rename_i hE
       cases hs
-      rwa [show E.isMapping = false by simpa [SPath.elemMapping] using hE, if_neg (by decide)] at hp
+      rwa [show E.isMapping = false from Bool.eq_false_iff.mpr hE, if_neg (by decide)] at hp
   · cases hs; exact sound_popCapture σ b _
 
 end Store

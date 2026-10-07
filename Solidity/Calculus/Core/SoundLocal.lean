@@ -1,18 +1,14 @@
 import Solidity.Calculus.Core.SoundCapture
 
 /-!
-# Soundness of the arms on locals, payments and control flow
+# Soundness of the arms on locals
 
-`Calculus/Core/Arms.lean`'s `localStep`, `rebindStep`, `opStep`, `incStep`,
-`transferStep`, `sendStep`, `iteStep`, `requireStep`, `assertStep`, and
-`Step.lean`'s declarations, `revert` and blocks, each sound in the shape
-of `Calculus/Core/SoundKit.lean` (`Premise.Sound`).  A capture is
+`Calculus/Core/Arms.lean`'s `localStep` (with the `&&`/`||` short
+circuits, which need the local to hold a `bool`: `State.Typed`),
+`rebindStep`, `opStep`, `incStep` and `OpLoc.unfoldRecv`, each sound in the
+shape of `Calculus/Core/SoundKit.lean` (`Premise.Sound`).  A capture is
 `Calculus/Core/SoundCapture.lean`'s, its statement read on the pushed state
 by `Calculus/Core/SoundArms.lean`'s push lemmas.
-
-The split on a simple condition needs it to hold a `bool` (`State.Typed`);
-a captured `if` condition needs the branches, weakened under it, to run as
-before (`WkRuns`, the run of `Prog.wk up`, which the call arms prove).
 -/
 
 namespace Solidity.Core

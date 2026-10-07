@@ -4,8 +4,10 @@ import Solidity.Calculus.Core.SoundLocal
 # Soundness of the arms on payments, control flow and declarations
 
 `Calculus/Core/Arms.lean`'s `transferStep`, `sendStep`, `iteStep`,
-`requireStep`, `assertStep`, and `Step.lean`'s declarations, `revert` and
-blocks, each sound in the shape of `Calculus/Core/SoundKit.lean`.  A split
+`requireStep`, `assertStep`, and the declarations with an initializer, each
+sound in the shape of `Calculus/Core/SoundKit.lean`; `revert` and blocks are
+`Calculus/Core/Logic.lean`'s `Stmt.step_sound_revert` and
+`Stmt.step_sound_block`.  A split
 on a simple condition is sound in a typed state (`State.Typed`: the
 condition holds a `bool`); a captured `if` condition is sound when its
 branches, weakened under the captured local, run as before (`WkRuns`, the
