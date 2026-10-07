@@ -192,7 +192,10 @@ optional variant) or `.unwind (k : Nat)`. `Stmt.step`
 | `.inv I dec` | `whileInvariantBox`, below | `whileInvariantDiamond` with `dec = some v`; with `none`, `whileNoVariantDiamond`, the premise `done false` (sound, unprovable; solkey unwinds instead) |
 | `.inv I dec`, a body with no frame | `whileClose`: `done false` | same |
 
-In the source the annotation is solkey's specification,
+In the source the annotation is solkey's specification (from solc's AST,
+`scripts/solc-ast.mjs` reads the clauses from the source by the loop's `src`
+offset, as solkey does, and the front end prints them above the loop:
+`Examples/Tactics/LoopsImport.lean`),
 `/// @custom:key invariant …` and `/// @custom:key decreases …` above the
 loop, and, Lean only, `/// @custom:key unwind k` for the bound; a loop with
 neither is `.unwind 0`.

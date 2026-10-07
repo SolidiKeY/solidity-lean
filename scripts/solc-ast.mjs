@@ -27,11 +27,19 @@
  * bytes): the import refuses a fixture of another hash, and this script
  * rewrites the literal, which makes Lake re-check the module.
  *
- * Usage: node scripts/solc-ast.mjs [--solkey <checkout>] [--soljson <dir>] [--out <file>] [--no-wrapper]
+ * A loop (`while`, `for`, `do … while`) keeps the `/// @custom:key` lines
+ * directly above it as `loopSpec`, the clause after the tag each: solc drops
+ * them, and solkey reads them from the source by the loop's `src` offset
+ * (`LoopSpecCompiler`), as this does.
+ *
+ * Usage: node scripts/solc-ast.mjs [--solkey <checkout>] [--soljson <dir>] [--source <file>]
+ *          [--out <file>] [--no-wrapper]
  *   --solkey      the solkey checkout (default ../solkey, or SOLKEY_ROOT)
  *   --soljson     the directory holding the pinned soljson (default the
  *                 checkout's `keyext.solidity.core/build/soljson`; a fresh
  *                 clone has none, so point it at another checkout's)
+ *   --source      another source to compile (default the checkout's TestSuite.sol), with
+ *                 the checkout's pinned compiler: `tests/solc/Loops.sol`
  *   --out         where to write the fixture (default tests/solc/TestSuite.ast.json)
  *   --no-wrapper  leave the importing module's hash literal alone
  *   --compare-cache  also compare the trimmed AST with solkey's own cached solc
@@ -56,8 +64,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SOLKEY = optionOf("--solkey", process.env.SOLKEY_ROOT || join(ROOT, "../solkey"));
 const OUT = optionOf("--out", join(ROOT, "tests/solc/TestSuite.ast.json"));
 const WRAPPER = join(ROOT, "Solidity/Solkey/TestSuite.lean");
-const SOURCE = "keyext.solidity.examples/TestSuite.sol";
-const UNIT = "TestSuite.sol";
+const SOURCE_ARG = optionOf("--source", null);
+const SOURCE = SOURCE_ARG ?? "keyext.solidity.examples/TestSuite.sol";
+const SOURCE_PATH = SOURCE_ARG ? SOURCE_ARG : join(SOLKEY, SOURCE);
+const UNIT = SOURCE_ARG ? SOURCE_ARG.split("/").pop() : "TestSuite.sol";
 
 const fail = (msg) => {
   console.error(`solc-ast: ${msg}`);
@@ -83,7 +93,7 @@ const solc = createRequire(import.meta.url)(soljsonPath);
 const compile = solc.cwrap("solidity_compile", "string", ["string", "number", "number"]);
 const version = solc.cwrap("solidity_version", "string", [])();
 
-const source = readFileSync(join(SOLKEY, SOURCE), "utf8");
+const source = readFileSync(SOURCE_PATH, "utf8");
 const input = {
   language: "Solidity",
   sources: { [UNIT]: { content: source } },
@@ -131,6 +141,20 @@ const DECLS = new Set([
 const located = (n, parentKey) =>
   DECLS.has(n.nodeType) || parentKey === "statements" || n.nodeType === "TryCatchClause";
 
+// The `/// @custom:key` clauses directly above the loop starting at byte `b`.
+const sourceLines = source.split("\n");
+const LOOPS = new Set(["WhileStatement", "ForStatement", "DoWhileStatement"]);
+const loopSpecAt = (b) => {
+  const out = [];
+  for (let l = lineOfByte(b) - 2; l >= 0; l--) {
+    const t = sourceLines[l].trim();
+    if (!t.startsWith("///")) break;
+    const c = t.slice(3).trim();
+    if (c.startsWith("@custom:key ")) out.unshift(c.slice("@custom:key ".length).trim());
+  }
+  return out;
+};
+
 // solc's WebAssembly build prints builtin ids (`require` is -18) unsigned.
 const signed = (v) =>
   Number.isInteger(v) && v > 2 ** 31 - 1 && v < 2 ** 32 ? v - 2 ** 32 : v;
@@ -155,6 +179,10 @@ function trim(n, parentKey) {
       continue;
     }
     out[k] = trim(v, k);
+  }
+  if (LOOPS.has(n.nodeType) && typeof n.src === "string") {
+    const spec = loopSpecAt(Number(n.src.split(":")[0]));
+    if (spec.length) out.loopSpec = spec;
   }
   return out;
 }

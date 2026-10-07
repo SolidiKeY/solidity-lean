@@ -90,6 +90,7 @@ import Solidity.Examples.Tactics.Operators
 import Solidity.Examples.Tactics.Checked
 import Solidity.Examples.Tactics.Calls
 import Solidity.Examples.Tactics.Loops
+import Solidity.Examples.Tactics.LoopsImport
 import Solidity.Examples.Tactics.CallOperands
 import Solidity.Examples.Tactics.Callback
 import Solidity.Examples.Tactics.Contracts
