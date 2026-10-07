@@ -1,9 +1,10 @@
-import Solidity.Evm.Compile
+import Solidity.Evm.CoreCompile
+import Solidity.Semantics.Core.TypedRun
 import Solidity.Typing.Storage
 import Solidity.Tools.Run
 
 /-!
-# `#difftest`: the interpreter against the compiled code, on random states
+# `#difftest`: the typed run against the compiled code, on random states
 
 ```
 #difftest CallsExample (runs := 50) (seed := 1)
@@ -12,44 +13,45 @@ import Solidity.Tools.Run
 
 For each function of the contract (or the one function named), `runs`
 times: draw a well-typed storage, arguments and a transaction, call the
-function in the interpreter (`Prog.run`) and run its compiled code on the
-machine (`Evm.run`, `compileProg`) from the storage laid out as solc lays it
-out, and compare.
+function in the typed run (`Core.Prog.trun`, `Semantics/Core/TypedRun.lean`)
+and run its compiled code on the machine (`Evm.run`, `Evm.Core.compileProg`)
+from the storage laid out as solc lays it out, and compare.
 
-**What is compared is what `compile_correct` claims** (`Evm/Correctness.lean`),
+**What is compared is what `compile_correct` claims** (`Evm/CoreCorrect.lean`),
 from a start where its hypotheses hold:
 
-* the call is the program `#run` builds (`callProg`), kept only if it is in
-  the compiled fragment, `wtProg (fun _ => none) P = some Γ'`; otherwise the
-  function is reported skipped;
-* the start machine represents the start state (`Sim C L (fun _ => none) σ m`):
-  its storage is the storage encoded (`SVal.encode`, which is `ReprAt` read
-  as a function), every other slot `0`, which is how a mapping's absent keys
+* the call is the program `#run` builds (`callProg`), resolved to the scoped
+  syntax (`Core.Prog.resolve`), and kept only if it is in the compiled
+  fragment, `inFragP (Frag.init []) Q = some F'`; otherwise the function is
+  reported skipped;
+* the start machine represents the start state (`Sim C L b F σ.sem ρ m`): its
+  storage is the storage encoded (`SVal.encode`, which is `ReprAt` read as a
+  function), every other slot `0`, which is how a mapping's absent keys
   represent its default; no locals; the funds, the sender, the value and the
   time are words and the same on both sides; nothing sent.  The storages
   drawn are canonical (`Typing/Reachability.lean`: no shadow, a mapping's
   default `defaultForTy V`, distinct keys), in range, and checked with
-  `SVal.hasTy`; an array holds fewer than `4` elements, so `L = 4` and
-  `L + pushesP P ≤ 2^64`;
+  `SVal.hasTy`, then read at the contract's types (`SFields.ofU`); an array
+  holds fewer than `4` elements, so `L = 4` and `L + Prog.pushes Q ≤ 2^64`;
 * the two **agree** when both revert, or when both succeed with the machine's
   stack as it was and the machine representing the final state: every slot
   the final storage occupies holds its word (`ReprStore`, for the mapping keys
   either storage mentions: the keys of a mapping entry nobody wrote are `0`
-  on both sides by construction); every value local the final context types
-  (`Γ'`) holds the local's word in its memory cell (`Sim.vals`: the value
-  returned, in `_r`, among them); the ledger is the money that moved
+  on both sides by construction); every value local of the final context
+  holds the local's word in the memory cell of its level (`Sim.vals`: the
+  value returned, in `_r`, among them); the ledger is the money that moved
   (`Sim.net`), at every address the ledger holds but the contract's own,
   whose entry is `0` (`Sim.netSelf`), the contract at an address drawn
-  among the senders, so some payments are to itself.  The
-  aliases' cells (`Sim.aliases`) are not compared, and neither are the slots
-  the final storage no longer occupies (a popped element), which
-  `ReprStore` leaves free.
+  among the senders, so some payments are to itself.  The aliases' cells
+  (`Sim.aliases`) are not compared, and neither are the slots the final
+  storage no longer occupies (a popped element), which `ReprStore` leaves
+  free.
 
-The machine reverting where the interpreter succeeds agrees only in code
-that pays (`paysP`): the world refused a payment, which the draw makes
+The machine reverting where the typed run succeeds agrees only in code that
+pays (`Prog.pays`): the world refused a payment, which the draw makes
 happen, the contract's account holding less than `100` and the recipient
-`3` refusing every payment.  A stuck interpreter or a faulting machine is a
-disagreement: on the fragment, `compile_correct` excludes both.
+`3` refusing every payment.  A diverging typed run or a faulting machine is
+a disagreement: on the fragment, `compile_correct` excludes both.
 
 The generator is `GenSpec.sval` (`Tools/Common.lean`) over Lean core's
 `StdGen`.  Run `i` of the `j`-th function draws from a seed of its own,
@@ -186,7 +188,7 @@ structure Start where
   /-- The contract's address. -/
   self : Nat
 
-/-- The interpreter's start state. -/
+/-- The start state, untyped: what a mismatch prints. -/
 def Start.state (s : Start) : State where
   storage := s.storage
   selfBalance := s.balance
@@ -205,10 +207,10 @@ def genStart (C : Contract) (d : FunDecl) : Gen (Option (Start × List RawExpr))
   pure <| (args.mapM id).map fun args =>
     ({ storage := st, args := args.map (·.2), sender, value, time, balance, self }, args.map (·.1))
 
-/-- A run's outcome, for the report. -/
-def fmtRes : Res State → String
+/-- A typed run's outcome, for the report. -/
+def fmtTRes {α : Type} : Core.TRes α → String
   | .ok _ => "ok"
-  | .error h => fmtHalt h
+  | .error h => fmtHalt h.erase
 
 /-- A machine run's outcome, for the report. -/
 def fmtOut : Out → String
@@ -217,38 +219,38 @@ def fmtOut : Out → String
   | .revert => "revert"
   | .fault => "fault"
 
-/-- Where the final machine fails to represent the final state, one line
-each; empty when it does. -/
-def differences [FreshNames] (C : Contract) (Γ' : TyCtx) (keys : List Nat) (σ' : State)
-    (m' : Machine) : List String :=
-  let store := match encodeStorage C keys σ'.storage with
-    | .error e => [s!"storage: the interpreter's final storage is not representable: {e}"]
+/-- Where the final machine fails to represent the final typed state, one
+line each; empty when it does.  `names` are the final context's names. -/
+def differences {Γ : Core.Ctx} (C : Contract) (names : List Var) (keys : List Nat)
+    (σ' : Core.TState C Γ) (m' : Machine) : List String :=
+  let store := match encodeStorage C keys σ'.storage.erase with
+    | .error e => [s!"storage: the typed run's final storage is not representable: {e}"]
     | .ok ws => ws.filterMap fun (s, w) =>
-      if m'.store s == w then none else some s!"slot {s}: interpreter {w}, machine {m'.store s}"
-  let vals := σ'.env.filterMap fun (x, b) => match Γ' x, b with
-    | some (.val p), .val v =>
-      if wordOf p v == some (m'.mem x) then none
-      else some s!"local {x}: interpreter {Value.fmt v}, machine {m'.mem x}"
-    | _, _ => none
+      if m'.store s == w then none else some s!"slot {s}: typed run {w}, machine {m'.store s}"
+  let vals := (names.zip (localCells Γ σ'.env)).filterMap fun (x, l, c) => match c with
+    | some (p, v) =>
+      if wordOf p v == some (m'.memAt l) then none
+      else some s!"local {x}: typed run {Value.fmt v}, machine {m'.memAt l}"
+    | none => none
   let net := σ'.net.filterMap fun (a, n) =>
     if a = m'.self then
-      (if n != 0 then some s!"net {a}: interpreter {n} at the contract itself, expected 0" else none)
+      (if n != 0 then some s!"net {a}: typed run {n} at the contract itself, expected 0" else none)
     else if 0 ≤ a ∧ a < (W : Int) ∧ n != (m'.bal₀ a.toNat : Int) - m'.bal a.toNat then
-      some s!"net {a}: interpreter {n}, account {m'.bal₀ a.toNat} → {m'.bal a.toNat}"
+      some s!"net {a}: typed run {n}, account {m'.bal₀ a.toNat} → {m'.bal a.toNat}"
     else none
   let stack := if m'.stack.isEmpty then [] else [s!"stack left: {m'.stack}"]
   store ++ vals ++ net ++ stack
 
-/-- One run of `P` from `s`: whether both reverted when the two agree, else
+/-- One run of `Q` from `s`: whether both reverted when the two agree, else
 the lines of the mismatch.  The machine has no panic: a failed `assert`
 reverts there (`compile_correct`'s panic case). -/
-def runOnce [FreshNames] (C : Contract) (P : Prog C) (Γ' : TyCtx) (s : Start) :
+def runOnce (C : Contract) {Γ' : Core.NCtx} (Q : Core.Prog C [] Γ'.ctx) (s : Start) :
     Except (List String) Bool :=
-  let σ := s.state
   let keys0 := s.storage.flatMap (SVal.mapKeys ·.2)
-  match encodeStorage C keys0 s.storage with
-  | .error e => throw [s!"the start storage is not representable: {e}"]
-  | .ok ws =>
+  match encodeStorage C keys0 s.storage, typedState? C s.state with
+  | .error e, _ => throw [s!"the start storage is not representable: {e}"]
+  | _, none => throw ["the start storage is not of the contract's types"]
+  | .ok ws, some σ =>
     let m : Machine :=
       { Machine.init (fun a => if a = s.self then s.balance else 0) s.self with
         accepts := fun a _ => a != 3
@@ -256,19 +258,19 @@ def runOnce [FreshNames] (C : Contract) (P : Prog C) (Γ' : TyCtx) (s : Start) :
         caller := s.sender
         callvalue := s.value
         timestamp := s.time }
-    let res := Prog.run σ P
-    let out := Evm.run (compileProg P) m
+    let res := Core.Prog.trun σ Q
+    let out := Evm.run (Evm.Core.compileProg 0 Q) m
     match res, out with
     | .error .revert, .revert => pure true
     | .error .panic, .revert => pure true
-    | .ok _, .revert => if paysP P then pure true
-      else throw ["interpreter ok, machine revert, and no payment to refuse"]
-    | .ok σ', .ok m' 0 =>
-      let keys := (keys0 ++ σ'.storage.flatMap (SVal.mapKeys ·.2)).eraseDups
-      match differences C Γ' keys σ' m' with
+    | .ok _, .revert => if Evm.Core.Prog.pays Q then pure true
+      else throw ["typed run ok, machine revert, and no payment to refuse"]
+    | .ok o, .ok m' 0 =>
+      let keys := (keys0 ++ o.st.storage.erase.flatMap (SVal.mapKeys ·.2)).eraseDups
+      match differences C Γ'.names keys o.st m' with
       | [] => pure false
       | ds => throw (s!"both ok, and they differ:" :: ds)
-    | _, _ => throw [s!"interpreter {fmtRes res}, machine {fmtOut out}"]
+    | _, _ => throw [s!"typed run {fmtTRes res}, machine {fmtOut out}"]
 
 /-! ## The test -/
 
@@ -288,10 +290,13 @@ def testFun [FreshNames] (C : Contract) (name : String) (runs seed j : Nat) (f :
     let P ← match callProg C f args with
       | .ok P => pure P
       | .error e => return [s!"skipped: {f} ({e})"]
-    let some Γ' := wtProg (fun _ => none) P
-      | return [s!"skipped: {f} (outside the compiled fragment)"]
-    unless pushesP P + 4 ≤ Lmax do return [s!"skipped: {f} (too many pushes)"]
-    match runOnce C P Γ' s with
+    let ⟨Γ', Q⟩ ← match Core.Prog.resolve [] P with
+      | .ok r => pure r
+      | .error e => return [s!"skipped: {f} ({e})"]
+    unless (Evm.Core.inFragP (Evm.Core.Frag.init []) Q).isSome do
+      return [s!"skipped: {f} (outside the compiled fragment)"]
+    unless Evm.Core.Prog.pushes Q + 4 ≤ Lmax do return [s!"skipped: {f} (too many pushes)"]
+    match runOnce C Q s with
     | .ok rev =>
       agreed := agreed + 1
       if rev then reverted := reverted + 1
@@ -313,7 +318,7 @@ def diffTest [FreshNames] (C : Contract) (name : String) (only : Option String)
   pure <| (C.funs.zip (List.range C.funs.length)).flatMap fun ((f, d), j) =>
     if only.all (· == f) then testFun C name runs seed j f d else []
 
-/-- `#difftest C (runs := n) (seed := s)`: compare the interpreter with the
+/-- `#difftest C (runs := n) (seed := s)`: compare the typed run with the
 compiled code on `n` random calls of each function of `C` (default `50`
 runs, seed `0`); `#difftest C.f …`: of the function `f` alone. -/
 syntax (name := difftestCmd) "#difftest " ident ("(" &"runs" " := " num ")")?
