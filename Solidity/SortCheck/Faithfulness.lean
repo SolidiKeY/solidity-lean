@@ -1,4 +1,5 @@
 import Solidity.Typing.Soundness
+import Solidity.Semantics.RunErase
 import Solidity.Calculus.RuleShapes
 import Solidity.SortCheck.Annotations
 
@@ -8,9 +9,10 @@ import Solidity.SortCheck.Annotations
 The table ↔ semantics edge of the conformance loop: every read-sort
 annotation in `TacletAnnotations.tacletReadAnns` is *faithful* — the sort a
 taclet's value read declares agrees with the value `Stmt.run` actually finds
-there, in every state the invariant `RunWT` (`Typing/Soundness.lean`) holds
-of.  `solkeycheck` keeps the table equal to the `.key` text; this module
-keeps it true of the interpreter, so a table updated to match a buggy
+there, in every state that agrees (`Agree`, `Semantics/RunErase.lean`) with a
+scoped state the invariant `RunWT` (`Typing/Soundness.lean`) holds of.
+`solkeycheck` keeps the table equal to the `.key` text; this module keeps it
+true of the interpreter, so a table updated to match a buggy
 taclet stops building here (`Counterexamples/PreFixSortAnnotations.lean`
 is the bug `12e72a1b4b` fixed, refuted).
 
@@ -73,12 +75,14 @@ def Read.ty : Read C → Ty
   | .storage T _ | .memory T _ => T
   | .slen _ | .mlen _ => .uint
 
-/-- The read's locals are used as declared. -/
-def Read.wt (Γ : Ctx) : Read C → Bool
-  | .storage _ p => p.wt Γ
-  | .memory _ p => p.wt Γ
-  | .slen p => p.wt Γ
-  | .mlen p => p.wt Γ
+/-- The read's locals are used as declared: it is the erasure, under the
+names `ns`, of a read in the scoped syntax over `Γ` (`resolve` finds one when
+it accepts the statement). -/
+def Read.Typed (ns : List Var) (Γ : Core.Ctx) : Read C → Prop
+  | .storage T p => ∃ p' : Core.SPath C Γ T, p'.erase ns = p
+  | .memory T p => ∃ p' : Core.MPath C Γ T, p'.erase ns = p
+  | @Read.slen _ E p => ∃ p' : Core.SPath C Γ (.array E), p'.erase ns = p
+  | @Read.mlen _ E p => ∃ p' : Core.MPath C Γ (.array E), p'.erase ns = p
 
 /-- The place `x ⊕= e` and `x++` read: `alice.age` in storage, `m.age` in
 memory; a stack local is not read from a state component. -/
@@ -107,56 +111,6 @@ def Stmt.read? : Stmt C → Option (Read C)
   | .incDec _ _ l => OpLoc.read? l
   | .assignIncDec _ _ _ l _ => OpLoc.read? l
   | _ => none
-
-/-- The place `alice.age += 1;` reads is checked when the target is. -/
-theorem OpLoc.read?_wt {Γ : Ctx} : ∀ {p : PrimTy} {l : OpLoc C p} {R : Read C},
-    l.wt Γ = true → OpLoc.read? l = some R → R.wt Γ = true
-  | _, .local _, _, _, h => nomatch h
-  | _, .root .., _, _, h => by cases h; rfl
-  | _, .field .., _, hw, h => by cases h; exact hw
-  | _, .index .., _, hw, h => by cases h; exact hw
-  | _, .mfield .., _, hw, h => by cases h; exact hw
-  | _, .mindex .., _, hw, h => by cases h; exact hw
-
-/-- A checked statement's read is checked: in `x = p.age;` the alias `p` is
-a `Person storage` in `Γ`. -/
-theorem Stmt.read?_wt {Γ Γ' : Ctx} {s : Stmt C} {R : Read C} (hs : s.wt Γ = some Γ')
-    (h : Stmt.read? s = some R) : R.wt Γ = true := by
-  cases s with
-  | assignLocal x r =>
-    obtain ⟨hc, -⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    cases r <;> simp only [Stmt.read?, reduceCtorEq] at h <;> cases h <;> exact hc.2
-  | assign l r =>
-    obtain ⟨hc, -⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    cases r <;> simp only [Stmt.read?, reduceCtorEq] at h
-    cases h; exact hc.2
-  | push b v _ =>
-    obtain ⟨hc, -⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    rcases v with _ | ⟨_ | _⟩ <;> simp only [Stmt.read?, reduceCtorEq] at h
-    cases h; simpa [Src.wt] using hc.2
-  | rebindMem x r =>
-    obtain ⟨hc, -⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    cases r <;> simp only [Stmt.read?] at h <;> cases h <;> exact hc.2
-  | assignFromMem l p =>
-    obtain ⟨hc, -⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    cases h; exact hc.2
-  | opAssign op _ _ l r =>
-    obtain ⟨hc, -⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    exact OpLoc.read?_wt hc.1 h
-  | incDec _ _ l =>
-    obtain ⟨hc, -⟩ := wt_if hs
-    exact OpLoc.read?_wt hc h
-  | assignIncDec x _ _ l _ =>
-    obtain ⟨hc, -⟩ := wt_if hs
-    simp only [Bool.and_eq_true] at hc
-    exact OpLoc.read?_wt hc.2 h
-  | _ => simp [Stmt.read?] at h
 
 /-! ## What a declared sort claims -/
 
@@ -233,15 +187,20 @@ theorem MVal.ref_of_hasTyH_ref {H : HeapTy} {mv : MVal} {T : Ty}
 
 /-- **The semantic core.**  A read whose locals are used as declared, of a
 class the declared sort is supported by, finds a value the sort claims, in
-every `RunWT` state: `x = total;` finds a number where `total : uint`,
-`alice.age += 1` finds an `int`, `m = alice;` finds a `Struct` node. -/
-theorem Read.sortOk {Γ : Ctx} {H : HeapTy} {σ : State} (hwt : RunWT C Γ H σ) {R : Read C}
-    (hw : R.wt Γ = true) {cls : ReadClass} (hfit : cls.fits R.ty = true) {rs : ReadSort}
-    (hsup : cls.supports R.domain rs = true) : R.SortOk σ H rs := by
+every state that agrees with a `RunWT` state: `x = total;` finds a number
+where `total : uint`, `alice.age += 1` finds an `int`, `m = alice;` finds a
+`Struct` node. -/
+theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.State C Γ}
+    {τ : State} (hwt : Core.RunWT C H σ) (hag : Core.Agree ns σ τ) {R : Read C}
+    (hw : R.Typed ns Γ) {cls : ReadClass} (hfit : cls.fits R.ty = true) {rs : ReadSort}
+    (hsup : cls.supports R.domain rs = true) : R.SortOk τ H rs := by
   cases R with
   | storage T p =>
     intro r segs v hr hv
-    have hty := findStorage_hasTy hwt.storage (SPath.resolve_wt hwt p hw hr) hv
+    obtain ⟨p', rfl⟩ := hw
+    rw [Core.SPath.resolve_erase hag] at hr
+    rw [hag.findStorage] at hv
+    have hty := findStorage_hasTy hwt.glob.storage (Core.SPath.resolve_wt hwt p' hr) hv
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -255,7 +214,9 @@ theorem Read.sortOk {Γ : Ctx} {H : HeapTy} {σ : State} (hwt : RunWT C Γ H σ)
         exact KeySort.le_refl _
   | memory T p =>
     intro mv hmv
-    have hty := MPath.mval_wt hwt p hw hmv
+    obtain ⟨p', rfl⟩ := hw
+    rw [Core.MPath.mval_erase hag] at hmv
+    have hty := Core.MPath.mval_wt hwt p' hmv
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -269,7 +230,9 @@ theorem Read.sortOk {Γ : Ctx} {H : HeapTy} {σ : State} (hwt : RunWT C Γ H σ)
         rfl
   | slen p =>
     intro v hv
-    have hty := Val.eval_wt hwt (Val.len (p := .uint) p rfl) hw hv
+    obtain ⟨p', rfl⟩ := hw
+    have hty := Core.Val.eval_wt hwt (Core.Val.len (p := .uint) p' rfl)
+      (by rw [← Core.Val.eval_erase hag]; exact hv)
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -282,7 +245,10 @@ theorem Read.sortOk {Γ : Ctx} {H : HeapTy} {σ : State} (hwt : RunWT C Γ H σ)
       · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
   | mlen p =>
     intro v hv
-    have hty := Value.toMVal_hasTyH (H := H) (Val.eval_wt hwt (Val.mlen (p := .uint) p rfl) hw hv)
+    obtain ⟨p', rfl⟩ := hw
+    have hty := Value.toMVal_hasTyH (H := H)
+      (Core.Val.eval_wt hwt (Core.Val.mlen (p := .uint) p' rfl)
+        (by rw [← Core.Val.eval_erase hag]; exact hv))
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -294,17 +260,17 @@ theorem Read.sortOk {Γ : Ctx} {H : HeapTy} {σ : State} (hwt : RunWT C Γ H σ)
         rw [hn]; rfl
       · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
 
-/-- The claims hold after any checked run: from a well-typed state, run a
-block whose locals check, and the next statement's read finds what its
-sort declares.  `Person storage p = alice; p.age = 10;` then
-`x = alice.age;` still reads a number. -/
-theorem Read.sortOk_after_run {Γ Γ₁ Γ₂ : Ctx} {H : HeapTy} {σ σ₁ : State} {P : Prog C}
-    {s : Stmt C} {R : Read C} {cls : ReadClass} {rs : ReadSort} (hwt : RunWT C Γ H σ)
-    (hP : Prog.wt Γ P = some Γ₁) (hrun : Prog.run σ P = .ok σ₁) (hs : s.wt Γ₁ = some Γ₂)
-    (hR : Stmt.read? s = some R) (hfit : cls.fits R.ty = true)
-    (hsup : cls.supports R.domain rs = true) : ∃ H', R.SortOk σ₁ H' rs :=
-  let ⟨H', _, hwt'⟩ := Prog.run_wt P hwt hP hrun
-  ⟨H', Read.sortOk hwt' (Stmt.read?_wt hs hR) hfit hsup⟩
+/-- The claims hold after any run: from a well-typed state, run a block, and
+the next statement's read finds what its sort declares.
+`Person storage p = alice; p.age = 10;` then `x = alice.age;` still reads a
+number. -/
+theorem Read.sortOk_after_run {Γ Γ₁ : Core.Ctx} {ns : List Var} {H : HeapTy}
+    {σ : Core.State C Γ} {σ₁ : Core.State C Γ₁} {τ : State} {P : Core.Prog C Γ Γ₁} {R : Read C}
+    {cls : ReadClass} {rs : ReadSort} (hwt : Core.RunWT C H σ) (hrun : P.run σ = .ok σ₁)
+    (hag : Core.Agree ns σ₁ τ) (hR : R.Typed ns Γ₁) (hfit : cls.fits R.ty = true)
+    (hsup : cls.supports R.domain rs = true) : ∃ H', R.SortOk τ H' rs :=
+  let ⟨H', _, hwt'⟩ := Core.Prog.run_wt P hwt hrun
+  ⟨H', Read.sortOk hwt' hag hR hfit hsup⟩
 
 /-! ## Rows, constructors, statements -/
 
@@ -348,12 +314,13 @@ def rowsSupported (n : Lean.Name) (dom : ReadDomain) (cls : ReadClass) : Bool :=
   (rowsOf n).all fun row => (valueReads row).all fun r => r.domain == dom && cls.supports dom r.sort
 
 /-- A row is faithful at a statement: each value read it declares is the
-statement's read, and in every `RunWT` state where the statement's locals
-check, the declared sort holds of what the read finds. -/
+statement's read, and wherever the read's locals are used as declared, in
+every state that agrees with a `RunWT` state, the declared sort holds of
+what the read finds. -/
 def RowFaithful (row : TacletReadAnn) (s : Stmt C) : Prop :=
   ∀ r ∈ valueReads row, ∃ R, Stmt.read? s = some R ∧ R.domain = r.domain ∧
-    ∀ (Γ Γ' : Ctx) (H : HeapTy) (σ : State), RunWT C Γ H σ → s.wt Γ = some Γ' →
-      R.SortOk σ H r.sort
+    ∀ (Γ : Core.Ctx) (ns : List Var) (H : HeapTy) (σ : Core.State C Γ) (τ : State),
+      Core.RunWT C H σ → Core.Agree ns σ τ → R.Typed ns Γ → R.SortOk τ H r.sort
 
 /-- Every row constructor `n` transcribes is faithful at `s`. -/
 def CtorFaithful (n : Lean.Name) (s : Stmt C) : Prop :=
@@ -369,8 +336,8 @@ theorem rowFaithful_of {row : TacletReadAnn} {s : Stmt C} {R : Read C} {dom : Re
   intro r hr
   have h := List.all_eq_true.mp hrow r hr
   simp only [Bool.and_eq_true, beq_iff_eq] at h
-  refine ⟨R, hR, hdom.trans h.1.symm, fun Γ Γ' H σ hwt hs => ?_⟩
-  exact Read.sortOk hwt (Stmt.read?_wt hs hR) hfit (hdom ▸ h.2)
+  refine ⟨R, hR, hdom.trans h.1.symm, fun Γ ns H σ τ hwt hag hw => ?_⟩
+  exact Read.sortOk hwt hag hw hfit (hdom ▸ h.2)
 
 /-- A constructor is faithful at a statement whose read is of a class every
 row's declared sorts are supported by. -/

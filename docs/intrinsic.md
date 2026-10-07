@@ -33,7 +33,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
 | M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
-| M3 | M3.1, M3.2 done 2026-10-07 (typed run, `run_erase`) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
+| M3 | done 2026-10-07: typed run, `run_erase`, Typing over `Core`, locals checker deleted (no shim left); Typing elaboration 10% faster (below) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
@@ -328,7 +328,72 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     proved); deriving `Stmt.wt`/`Prog.wt`/`Ctx.has`/`EnvWT` from `resolve`
     plus `run_erase`.  Applying `Prog.run_erase` to `callsCore` and a state
     times out in the elaborator at `whnf` (the partial application without the
-    state checks); not yet diagnosed.
+    state checks); not yet diagnosed.  (M3.3 did not need the derivation of
+    the locals check: the typing proofs moved to `Core` instead.)
+
+- M3.3 (2026-10-07): Typing over `Core`; the locals checker deleted.
+  - `Typing/State.lean`: `StateWT H L s` is the global part only (layout
+    and store typing unique, storage, heap, `heapWf`; `ofB` decides it).
+    `BTy`, `envTypedB` and the stray-binding ban went with the untyped
+    locals.
+  - `Typing/Soundness.lean`: `Core.RunWT C H σ` is `StateWT H C.layout
+    σ.glob` and `Env.All (LTy.WT C H) σ.env`.  The locals part stays a
+    predicate (a local of type `val p` holds a `Value`, an alias a path the
+    layout must type, a memory local an identity `H` must claim) until M4
+    types values, storage and heap; env typing by construction is M4's.
+    `Core.Stmt.run_wt`/`Prog.run_wt` need no locals hypothesis.  The global
+    lemmas (`StateWT.save`/`write`/`ofCopyOut`/`setObj`/`pay`/`transferAt`,
+    `pushAt_wt` … `bumpMem_wt`) are on `Semantics.State`; the evaluator
+    lemmas (`Core.Val.eval_wt` …) on the scoped syntax.
+  - `Invariant C` (glob part, per-local part monotone in `H`, blind to the
+    locals): `keeps_seq`/`ite`/`block`/`loop`/`call`/`tryCall`/`require`/
+    `assert`/`revert` are proved once; each invariant gives its leaves and
+    four hooks (arguments, `CallRet.enter`, `Binders.decode`,
+    `CodeBinder.decode`).  `wtInv`, `canonInv` (`Reachability.lean`,
+    `Canon` on the glob part) and `tightInv` (`Constructibility.lean`, the
+    untyped `Tight` now storage-only, plus `LTy.Keys` on aliases) are its
+    three instances; a tight leaf is its canonical leaf plus a tightness
+    lemma (`keepsT_of`).  `Core.Loop.run_induct` is the loop's induction.
+  - `Reachable C st := ∃ Γ' (P : Core.Prog C [] Γ') σ, P.run (State.ofSem
+    C.initState) = .ok σ ∧ σ.storage = st`; `Problem.lean`'s statements are
+    unchanged (`initStorage_wt`'s witness is `.nil`).
+  - The builder (`Core.Build`) is a scoped program: `fill d T q v : Prog C
+    Γ Γ` declares each alias in a block of its own (`bound`), so a fill
+    leaves its context, and its caller's aliases (read by position) are
+    untouched: `Keep`/`KeepΓ` and the builder's locals check are gone, the
+    run lemmas carry `σ'.env = σ.env`.  A shadow slot's alias is a block
+    holding its `pop` and the nested fill; `Prog.append`, `Prog.rep`,
+    `Prog.run_append` are local to it.
+  - Faithfulness reads `Agree` (`RunErase.lean`): a row is faithful when its
+    read, the erasure of a scoped read (`Read.Typed ns Γ`), finds what the
+    sort claims in every state agreeing with a `RunWT` state.  The
+    counterexamples give the scoped state and its agreement.  The example
+    of `Branch.lean` that ran `Prog.wt` runs `resolveCheck`.
+  - Deleted: `Syntax.lean`'s locals check (`BTy`, `Semantics.Ctx`, `Ctx.le`,
+    `Ctx.has`, every `.wt`, `Arg.wt`, `CallRet.ctx`/`wt`, `bindCtx`,
+    `Stmt.wt`, `Prog.wt`), `EnvWT`, the untyped `RunWT` and every untyped
+    run traversal (`run_wt`, `run_canon`, `run_tight`).  Shims left: none.
+    `bindData_induct` (Reachability) stays: `Problem.lean` reads the untyped
+    interpreter's parameter binding with it, until M6a.
+  - Elaboration, CPU s of the module alone (`#clock` in a copy with
+    `Elab.async false`, imports cached), before (6cc3fd2, measured in a
+    worktree under the same load) and after:
+
+    | Module | before | after |
+    |---|---|---|
+    | `Typing/State` | 1.60 | 1.59 |
+    | `Typing/Soundness` | 6.40 | 5.98 |
+    | `Typing/Reachability` | 4.55 | 4.34 |
+    | `Typing/Constructibility` | 11.16 | 9.39 |
+    | the four | 23.71 | 21.30 |
+    | `SortCheck/Faithfulness` | 26.22 | 25.57 |
+
+  - For M4: values typed (`LTy.Denote (.val p)` a `PrimTy.Denote`) make
+    `LTy.WT`'s `val` case true by construction; the alias and memory cases
+    go with typed storage and heap.  The untyped `Tight`, `SE` and the
+    global lemmas are on `Semantics.State` and move with it.
+  - MCP: "Lean did not finish" on `Calculus/Problem.lean` hid a real error
+    (a deleted lemma it used); a scratch copy cut in halves found it.
 
 ## Baselines (M0)
 

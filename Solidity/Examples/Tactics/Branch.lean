@@ -259,8 +259,8 @@ example : Prog StandardExample := sol{ bool c = true; { bool x = true; } if (c) 
 example : Prog StandardExample :=
   sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } }
 
-/-- Declared alike in both branches, then at another type in a later one. -/
-example : (Prog.wt [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
-    if (c) { bool t = true; } })).isSome := by decide
+/- Declared alike in both branches, then at another type in a later one. -/
+#guard (Core.Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
+    if (c) { bool t = true; } } : Prog StandardExample)).toBool
 
 end Solidity.Examples.Tactics.Branch
