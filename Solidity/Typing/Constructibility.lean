@@ -1300,9 +1300,9 @@ theorem fill_straight : ∀ v : Semantics.SVal, FillStraight C v
       cases q with
       | loc l =>
         have hl : l.straight = true := hq
-        cases p <;> cases pv <;>
-          simp only [fill, primProg, Prog.straight, Stmt.straight, hl, Src.straight,
-            Val.isSimple, Bool.and_self]
+        cases p <;> cases pv <;> first
+          | rfl
+          | (show (l.straight && true) && true = true; rw [hl]; rfl)
   | .struct fields => by
     intro d T q hq
     cases T with
