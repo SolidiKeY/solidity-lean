@@ -526,13 +526,32 @@ untyped operation is never stuck on an erased input.
    allocating steps over a `Grown` heap (`adopt`, `alloc`, `copyStToM`,
    `allocDefault`, `copyMToSt`), each with the lemma `run_erase` will use
    (`alloc_erase`, `copyStToM_erase`, …; `push_erase`, `setLocal_erase`,
-   `drop_erase` for the locals).  Left: items 3 and 4, the typed run itself
-   (`SPath`/`Loc` to `SRef`, `SRef.atKey` at an index, `MLoc` to `HRef`,
-   `Val.eval` by `BinOp.evalT`/`UnOp.evalT`, then `Stmt.run` on `TState`
-   and `run_erase`), which rewrites `Semantics/Core.lean` while the lead's
-   M3 (`run_erase`, Typing) works in it, and one open design point:
-   `Simple.env` (`msg.sender`, …) is a `uint` whose range a typed run needs
-   (`TState.tx` typed, or a range premise on the transaction).
+   `drop_erase` for the locals).
+6. Done (2026-10-07), items 3 and 4 beside `Semantics/Core.lean` (which
+   the lead's M3 owns): the typed run `Semantics/Core/TypedRun.lean`
+   (`SPath`/`Loc` to `SRef`, `SRef.atKey` at an index, `MLoc`/`MPath` to a
+   heap address `MAddr`, `Val.evalT` by `BinOp.evalT`/`UnOp.evalT`,
+   `Stmt.trun`/`Prog.trun` on `TState`, halting only by `THalt`: `revert`,
+   `panic`, `diverge`), with `TState.tx` typed (`TTx`: the environment's
+   words are `uint`s, so `Simple.env` needs no range premise).  A length is
+   compared as a `Nat` (`lenT`, `n < 2 ^ 256`): `PrimTy.uint.ofInt?` of a
+   length the kernel does not know unfolds `Int`'s order against `2^256`
+   (`Nat.sub` recursing `2^256` times) in any proof that whnf's it.
+   The agreement is `Semantics/Core/TypedRunErase.lean`'s
+   `Prog.trun_erase`: `TRes.Agrees (·.st.erase) (P.trun σ) (P.run σ.erase)`,
+   the erased state, the same `revert` or `panic`, and a typed `diverge`
+   against any untyped outcome (a length past `uint`, which the untyped run
+   reads as an integer, diverges only in the typed run).  It holds on
+   `Prog.bridgeOk` programs (decided by `decide +kernel`): no `bool` mapping
+   key (decision 10; the untyped `asInt` is stuck on one) and no storage copy
+   at a type with a repeated member name (`BadDup`: the typed copy overlays
+   by position, the untyped by name).  Corollaries `Prog.run_of_trun`,
+   `Prog.run_halt_of_trun` (the scoped run is never stuck where the typed
+   one ends) and `Prog.trun_init_erase`.  One lemma per `TRun.*` step
+   against its `Run.*` (`StepAgrees`); the loop by its unwinding
+   (`SumAgrees`, `loop_run_erase`).  Left for M4: the typed run replaces
+   `Core.State`/`Stmt.run` (and with it `Halt.stuck`), and the Typing and
+   calculus layers move onto it.
 
 **Timings** (2026-10-07, scratch modules `HeapBench`/`HeapBench3` under
 `Solidity/Scratch/`, which are not committed: each row is one `decide
@@ -636,6 +655,9 @@ built in the kernel by the fold.
 | three pushes, writes, reads (`solcArrays`) | 23.6–23.7 ms | 23.8–24.0 ms | 24.3–24.6 ms | 0.99 | 0.97 |
 | `require(age > 3)` (`standardExample`) | 3.0 ms | 3.0–3.2 ms | | 0.97 | |
 | `Outer memory m = outerX;` and four reads (`solcMemory`) | 31.0–31.2 ms | does not reduce | does not reduce | | |
+
+No block reads a `.length`, so the change of `lenT` to a `Nat` comparison
+(after these timings) does not move them.
 
 - **Gate (within 20%): passes.**  The typed run costs 0.90–1.08× the scoped
   untyped run and 0.70–0.97× today's interpreter on every corpus block the
