@@ -595,6 +595,328 @@ theorem assignBumpStore_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) (i : I
         Value.asInt, hvn]; rfl
   · exact .inr ⟨by simp [hres], run_append_revert hrunl⟩
 
+/-! ## Copies, arrays, `delete`, payments -/
+
+/-- **`alice = bob;`** of a static type: the source's words loaded, the
+target resolved, the words stored at the target's slots. -/
+theorem copy_sim {R : RefTy} (l : Solidity.Core.Loc C Γ (.ref R))
+    (q : Solidity.Core.SPath C Γ (.ref R)) (hq : (Ty.ref R).mapFree = true)
+    (hst : static (.ref R) = true) (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hwq : spathIn F false q = true) (hwl : locIn F false l = true) :
+    StmtOut C L b F false false false (Solidity.Core.Run.assign l (.copy q hq) σ)
+      (run (compileSPath b q ++ loadLeaves (leaves (.ref R)) ++ [.pop] ++ compileLoc b l ++
+        storeLeaves (leaves (.ref R)).reverse ++ [.pop]) m) m := by
+  simp only [Solidity.Core.Run.assign, Solidity.Core.Src.value, List.append_assoc]
+  rcases spath_sim q hm hwq with ⟨r, segs, s, sv, hres, hsv, hpq, hr, hrun⟩ | ⟨hres, hrun⟩
+  · rw [run_append_ok hrun]
+    simp only [Machine.push]
+    rw [run_append_ok (loadLeaves_run m s _ m.stack)]
+    generalize hvs : ((leaves (.ref R)).map fun o => m.store (s.add o)).reverse = vs
+    rw [run_append_ok (m' := { m with stack := vs.map Word.val ++ m.stack }) rfl]
+    rcases loc_sim l (hm.stack (vs.map Word.val ++ m.stack)) hwl with
+      ⟨r', segs', d, old, hres', hold, hpl, hro, hrunl⟩ | ⟨hres', hrunl⟩
+    · rw [run_append_ok hrunl]
+      simp only [Machine.push]
+      have hlen : (leaves (.ref R)).reverse.length = vs.length := by rw [← hvs]; simp
+      rw [run_append_ok (storeLeaves_run { m with stack := vs.map Word.val ++ m.stack } d _ vs
+        m.stack m.store hlen)]
+      have hvs' : vs = (leaves (.ref R)).reverse.map fun o => m.store (s.add o) := by
+        rw [← hvs, List.map_reverse]
+      subst hvs'
+      have hmove := move_repr (st' := storeAt m.store d (leaves (.ref R)).reverse
+          ((leaves (.ref R)).reverse.map fun o => m.store (s.add o))) hr _ d
+        (Nat.lt_succ_self _) hst fun o ho => storeAt_map _ (List.mem_reverse.2 ho)
+      have hov := (overlay_repr hmove _ (Nat.lt_succ_self _) hst).2 old
+      obtain ⟨stor, hsave, hrep⟩ := save_repr hm.store hpl ⟨_, hold⟩ hov
+        (fun x hx => storeAt_other fun o ho hxo =>
+          hx (hxo ▸ leavesF_occ _ _ d o (List.mem_reverse.1 ho)))
+      refine .inl ⟨σ.withGlob { σ.glob with storage := stor }, _, ?_, rfl, rfl,
+        Keeps.store (storeAt_len hpl hst _),
+        Sim.withGlob (hm.store' hrep (storeAt_len hpl hst _))⟩
+      simp [hres, State.findStorage_of_findLive hsv, hres',
+        writeStorage_static hr hst (State.findStorage_of_findLive hold), hsave]
+    · exact .inr ⟨by simp [hres, State.findStorage_of_findLive hsv, hres'],
+        run_append_revert hrunl⟩
+  · exact .inr ⟨by simp [hres], run_append_revert hrun⟩
+
+/-- **`b.push(…)`**: the array's slot, the value, the length checked against
+solc's `2^64` and grown, the element stored. -/
+theorem push_sim {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
+    (v : Option (Solidity.Core.Src C Γ E)) (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hwp : pushIn F v q = true) (hL : L + 1 ≤ Lmax) :
+    StmtOut C (L + 1) b F false false false (Solidity.Core.Run.push q v σ)
+      (run (pushCode b v q) m) m := by
+  have hm' := hm.mono (Nat.le_succ L) hL
+  cases v with
+  | none =>
+    rw [pushIn] at hwp
+    simp only [Bool.and_eq_true] at hwp
+    obtain ⟨hE, hwb⟩ := hwp
+    obtain ⟨p, rfl⟩ : ∃ p, E = .prim p := by cases E <;> simp_all [Ty.isPrimitive]
+    simp only [Solidity.Core.Run.push, pushCode, List.append_assoc]
+    rcases spath_sim q hm hwb with ⟨r, segs, s, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
+    · have hr' := hr
+      cases hr with
+      | @array _ _ elems shadow hl hW hall =>
+        rw [run_append_ok hrun]
+        simp only [Machine.push]
+        rw [run_append_ok (m' := { m with stack := .slot s :: .val 0 :: .slot s :: m.stack }) rfl,
+          run_append_ok (pushSlotCode_run m _ 1 s (by omega))]
+        obtain ⟨st', hst'⟩ : ∃ st', st' =
+            upd (upd m.store s (m.store s + 1)) (.data s (m.store s * 1)) 0 := ⟨_, rfl⟩
+        have hnew : ReprAt st' (L + 1) (.prim p) (.data s (elems.length * size (.prim p)))
+            (defaultForTy (.prim p)) := zero_prim_repr (by rw [size_prim, ← hl, hst', upd_same])
+        have hout : ∀ x, x ≠ s → x ≠ .data s (elems.length * 1) → st' x = m.store x :=
+          fun x h1 h2 => by rw [hst', hl, upd_other _ _ h2, upd_other _ _ h1]
+        have harr := push_repr (shadow' := (pushSlot (.prim p) shadow).2) hr'
+          (st' := st') (by rw [hst', upd_other _ _ (Slot.ne_data _ _), upd_same, hl]) hnew
+          (fun x hx hx' => hout x hx fun he => hx' (by rw [he, size_prim]; exact Occ.prim))
+        obtain ⟨stor, hsave, hrep⟩ := save_repr hm'.store hp ⟨_, hsv⟩ harr
+          (fun x hx => hout x (fun he => hx (he ▸ Occ.len))
+            (fun he => hx (he ▸ Occ.elem elems.length (by rw [size_prim]; exact Occ.prim))))
+        have hlen : ∀ x, LenSlot C x → m.store x ≤ st' x := push_len hp (m.store s)
+          (by rw [hst', upd_other _ _ (Slot.ne_data _ _), upd_same])
+          (fun x h1 h2 => by
+            by_cases hx : x = .data s (m.store s * 1)
+            · rw [hx]; exact OccAt.prim
+            · exact absurd (by rw [hst', upd_other _ _ hx, upd_other _ _ h1]) h2)
+        subst hst'
+        refine .inl ⟨σ.withGlob { σ.glob with storage := stor }, _, ?_, rfl, rfl, Keeps.store hlen,
+          Sim.withGlob (hm'.store' hrep hlen)⟩
+        simp [hres, pushAt, State.findStorage_of_findLive hsv, Solidity.Core.Src.pushVal,
+          pushSlot_isPrim, hsave, Ty.isPrimitive]
+    · exact .inr ⟨by simp [hres], run_append_revert hrun⟩
+  | some src =>
+    cases src with
+    | @val p e =>
+      rw [pushIn] at hwp
+      simp only [Bool.and_eq_true] at hwp
+      obtain ⟨hwb, hwe⟩ := hwp
+      simp only [Solidity.Core.Run.push, pushCode, List.append_assoc]
+      rcases spath_sim q hm hwb with ⟨r, segs, s, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
+      · have hr' := hr
+        cases hr with
+        | @array _ _ elems shadow hl hW hall =>
+          rw [run_append_ok hrun]
+          rcases val_sim e (hm.push (.slot s)) hwe with ⟨ve, we, hve, hrve, hrune⟩ | ⟨hve, hrune⟩
+          · rw [run_append_ok hrune]
+            simp only [Machine.push]
+            obtain ⟨a, rfl, hnew⟩ := repr_write (L := L + 1) hrve
+              (upd m.store s (m.store s + 1)) (.data s (m.store s * 1))
+            rw [run_append_ok (m' := { m with stack := .slot s :: .val a :: .slot s :: m.stack })
+                rfl,
+              run_append_ok (pushSlotCode_run m _ 1 s (by omega))]
+            obtain ⟨st', hst'⟩ : ∃ st', st' =
+                upd (upd m.store s (m.store s + 1)) (.data s (m.store s * 1)) a := ⟨_, rfl⟩
+            rw [← hst', hl, show elems.length * 1 = elems.length * size (.prim _) by simp] at hnew
+            have hout : ∀ x, x ≠ s → x ≠ .data s (elems.length * 1) → st' x = m.store x :=
+              fun x h1 h2 => by rw [hst', hl, upd_other _ _ h2, upd_other _ _ h1]
+            have harr := push_repr (shadow' := (pushSlot (.prim p) shadow).2) hr'
+              (st' := st') (by rw [hst', upd_other _ _ (Slot.ne_data _ _), upd_same, hl]) hnew
+              (fun x hx hx' => hout x hx fun he => hx' (by rw [he, size_prim]; exact Occ.prim))
+            obtain ⟨stor, hsave, hrep⟩ := save_repr hm'.store hp ⟨_, hsv⟩ harr
+              (fun x hx => hout x (fun he => hx (he ▸ Occ.len))
+                (fun he => hx (he ▸ Occ.elem elems.length (by rw [size_prim]; exact Occ.prim))))
+            have hlen : ∀ x, LenSlot C x → m.store x ≤ st' x := push_len hp (m.store s)
+              (by rw [hst', upd_other _ _ (Slot.ne_data _ _), upd_same])
+              (fun x h1 h2 => by
+                by_cases hx : x = .data s (m.store s * 1)
+                · rw [hx]; exact OccAt.prim
+                · exact absurd (by rw [hst', upd_other _ _ hx, upd_other _ _ h1]) h2)
+            subst hst'
+            refine .inl ⟨σ.withGlob { σ.glob with storage := stor }, _, ?_, rfl, rfl,
+              Keeps.store hlen, Sim.withGlob (hm'.store' hrep hlen)⟩
+            simp [hres, pushAt, State.findStorage_of_findLive hsv, Solidity.Core.Src.pushVal,
+              Solidity.Core.Src.value, hve, Value.toSVal_strip, hsave]
+          · refine .inr ⟨?_, run_append_revert hrune⟩
+            simp [hres, pushAt, State.findStorage_of_findLive hsv, Solidity.Core.Src.pushVal,
+              Solidity.Core.Src.value, hve]
+      · exact .inr ⟨by simp [hres], run_append_revert hrun⟩
+    | @copy R q' hq =>
+      rw [pushIn] at hwp
+      simp only [Bool.and_eq_true] at hwp
+      obtain ⟨⟨hst, hwb⟩, hwq⟩ := hwp
+      simp only [Solidity.Core.Run.push, pushCode, List.append_assoc]
+      rcases spath_sim q hm hwb with ⟨r, segs, s, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
+      · have hr' := hr
+        cases hr with
+        | @array _ _ elems shadow hl hW hall =>
+          rw [run_append_ok hrun]
+          rcases spath_sim q' (hm.push (.slot s)) hwq with
+            ⟨r', segs', src, sv', hres', hsv', hpq, hrq, hrunq⟩ | ⟨hres', hrunq⟩
+          · rw [run_append_ok hrunq]
+            simp only [Machine.push]
+            rw [run_append_ok (loadLeaves_run m src _ (.slot s :: m.stack))]
+            generalize hvs : ((leaves (.ref R)).map fun o => m.store (src.add o)).reverse = vs
+            have hlen : (leaves (.ref R)).reverse.length = vs.length := by rw [← hvs]; simp
+            rw [run_append_ok (m' := { m with stack := .slot s :: (vs.map Word.val ++
+                .slot s :: m.stack) })
+              (by simp [run, Instr.step, Machine.next, ← hlen]),
+              run_append_ok (pushSlotCode_run m _ (size (.ref R)) s (by omega)),
+              run_append_ok (storeLeaves_run m _ _ vs (.slot s :: m.stack) _ hlen)]
+            have hvs' : vs = (leaves (.ref R)).reverse.map fun o => m.store (src.add o) := by
+              rw [← hvs, List.map_reverse]
+            subst hvs'
+            obtain ⟨st', hst'⟩ : ∃ st', st' = storeAt (upd m.store s (m.store s + 1))
+                (.data s (m.store s * size (.ref R))) (leaves (.ref R)).reverse
+                ((leaves (.ref R)).reverse.map fun o => m.store (src.add o)) := ⟨_, rfl⟩
+            have hmove := move_repr (st' := st') hrq _ (.data s (elems.length * size (.ref R)))
+              (Nat.lt_succ_self _) hst fun o ho => by
+                rw [hst', ← hl]; exact storeAt_map _ (List.mem_reverse.2 ho)
+            have hnew := ((overlay_repr hmove _ (Nat.lt_succ_self _) hst).1).mono (Nat.le_succ L)
+            have hout : ∀ x, x ≠ s → ¬ Occ (.ref R) (.data s (elems.length * size (.ref R))) x →
+                st' x = m.store x := fun x h1 h2 => by
+              rw [hst', hl, storeAt_other fun o ho hxo =>
+                h2 (by rw [hxo]; exact leavesF_occ _ _ _ o (List.mem_reverse.1 ho)),
+                upd_other _ _ h1]
+            have harr := push_repr (shadow' := (pushSlot (.ref R) shadow).2) hr' (st' := st')
+              (by rw [hst', storeAt_other fun o _ he => Slot.ne_data s _ he,
+                upd_same, hl]) hnew hout
+            obtain ⟨stor, hsave, hrep⟩ := save_repr hm'.store hp ⟨_, hsv⟩ harr
+              (fun x hx => hout x (fun he => hx (he ▸ Occ.len))
+                (fun he => hx (Occ.elem elems.length he)))
+            have hlen : ∀ x, LenSlot C x → m.store x ≤ st' x := push_len hp (m.store s)
+              (by rw [hst', storeAt_other fun o _ he => Slot.ne_data s _ he, upd_same])
+              (fun x h1 h2 => by
+                by_cases hx : ∃ o ∈ (leaves (.ref R)).reverse,
+                    x = (Slot.data s (m.store s * size (.ref R))).add o
+                · obtain ⟨o, ho, rfl⟩ := hx
+                  exact leavesF_occAt _ _ _ o hst (List.mem_reverse.1 ho)
+                · refine absurd ?_ h2
+                  rw [hst', storeAt_other fun o ho he => hx ⟨o, ho, he⟩, upd_other _ _ h1])
+            refine .inl ⟨σ.withGlob { σ.glob with storage := stor }, { m with store := st' }, ?_,
+              ?_, rfl, Keeps.store hlen, Sim.withGlob (hm'.store' hrep hlen)⟩
+            · simp [hres, pushAt, State.findStorage_of_findLive hsv, Solidity.Core.Src.pushVal,
+                Solidity.Core.Src.value, hres', State.findStorage_of_findLive hsv', hsave]
+            · rw [hst']; rfl
+          · exact .inr ⟨by simp [hres, pushAt, State.findStorage_of_findLive hsv,
+              Solidity.Core.Src.pushVal, Solidity.Core.Src.value, hres'], run_append_revert hrunq⟩
+      · exact .inr ⟨by simp [hres], run_append_revert hrun⟩
+
+/-- `b.pop();`: the length decremented, reverting on an empty array; the
+fragile aliases forgotten. -/
+theorem pop_sim {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hwb : spathIn F false q = true) :
+    StmtOut C L b F.dropFragile true false false (Solidity.Core.Run.pop q σ)
+      (run (compileSPath b q ++ popCode) m) m := by
+  rcases spath_sim q hm hwb with ⟨r, segs, s, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
+  · have hr' := hr
+    cases hr with
+    | array hl hW hall =>
+      rename_i elems shadow
+      rw [run_append_ok hrun]
+      have hpc := popCode_run m m.stack s
+        (by rw [hl]; have := hm.bound; have := Lmax_lt_W; omega)
+      simp only [Machine.push] at hpc ⊢
+      rw [hpc, hl]
+      by_cases h0 : elems.length = 0
+      · rw [if_pos h0]
+        have : elems = [] := List.eq_nil_of_length_eq_zero h0
+        subst this
+        exact .inr ⟨by simp [Solidity.Core.Run.pop, hres, popAt,
+          State.findStorage_of_findLive hsv], rfl⟩
+      · rw [if_neg h0]
+        obtain ⟨last, restRev, hrev⟩ : ∃ last restRev, elems.reverse = last :: restRev := by
+          cases h : elems.reverse with
+          | nil => simp at h; exact absurd (by simp [h]) h0
+          | cons last restRev => exact ⟨last, restRev, rfl⟩
+        have hnew := pop_repr (if E.isMapping then last else last.defaultOf) hr' hrev
+        obtain ⟨stor, hsave, hrep⟩ := save_repr hm.store hp ⟨_, hsv⟩ hnew
+          (fun x hx => upd_other _ _ fun he => hx (he ▸ Occ.len))
+        refine .inl ⟨σ.withGlob { σ.glob with storage := stor }, _, ?_, rfl, rfl, Keeps.shrink,
+          Sim.withGlob (hm.storeDrop hrep)⟩
+        simp [Solidity.Core.Run.pop, hres, popAt, State.findStorage_of_findLive hsv, hrev, hsave]
+  · exact .inr ⟨by simp [Solidity.Core.Run.pop, hres], run_append_revert hrun⟩
+
+/-- `delete l;`: every leaf of `l` zeroed; the fragile aliases forgotten. -/
+theorem delete_sim {T : Ty} (l : Solidity.Core.Loc C Γ T)
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hwl : locIn F false l = true) :
+    StmtOut C L b F.dropFragile true false false (Solidity.Core.Run.delete l σ)
+      (run (compileLoc b l ++ zeroCode (leaves T) ++ [.pop]) m) m := by
+  simp only [List.append_assoc]
+  rcases loc_sim l hm hwl with ⟨r, segs, s, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
+  · rw [run_append_ok hrun]
+    simp only [Machine.push]
+    rw [run_append_ok (zeroCode_run m m.stack s (leaves T))]
+    have hnew := zero_repr hr (tyRank T + 1) (Nat.lt_succ_self _)
+      (st' := zeroAt m.store s (leaves T)) (fun o ho => zeroAt_zero ⟨o, ho, rfl⟩)
+      (fun x _ hx => zeroAt_other hx)
+    obtain ⟨stor, hsave, hrep⟩ := save_repr hm.store hp ⟨_, hsv⟩ hnew
+      (fun x hx => zeroAt_other fun o ho hxo => hx (hxo ▸ leavesF_occ _ T s o ho))
+    refine .inl ⟨σ.withGlob { σ.glob with storage := stor },
+      { m with store := zeroAt m.store s (leaves T) }, ?_, rfl, rfl, Keeps.shrink,
+      Sim.withGlob (hm.storeDrop hrep)⟩
+    simp [Solidity.Core.Run.delete, hres, State.findStorage_of_findLive hsv, hsave]
+  · exact .inr ⟨by simp [Solidity.Core.Run.delete, hres], run_append_revert hrun⟩
+
+/-- **A payment**: `to.transfer(5);` books `net(to) - 5`; the machine's
+`CALL` moves `5`, or nothing when `to` is the contract, or is refused and
+reverts, the interpreter's state then represented by the world that paid. -/
+theorem transfer_sim (r a : Solidity.Core.Val C Γ .uint)
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hwr : valIn F r = true)
+    (hwa : valIn F a = true) :
+    StmtOut C L b F false true false (Solidity.Core.Run.transfer r a σ)
+      (run (compileVal b r ++ compileVal b a ++ [.call] ++ assertTop) m) m := by
+  simp only [Solidity.Core.Run.transfer, List.append_assoc]
+  rcases val_sim r hm hwr with ⟨vr, wr, hvr, hrv, hrunr⟩ | ⟨hvr, hrunr⟩
+  · obtain ⟨x, hx, rfl, rfl⟩ := hrv.uint_inv
+    rw [run_append_ok hrunr]
+    rcases val_sim a (hm.push _) hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
+    · obtain ⟨y, hy, rfl, rfl⟩ := hra.uint_inv
+      rw [run_append_ok hruna]
+      have hsrc : transferAt σ.glob x y = .ok (σ.glob.pay x y) := by
+        unfold transferAt
+        rw [if_neg (by omega)]
+      simp only [hvr, hva, Value.asInt, Res.ok_bind, hsrc, Res.map_ok]
+      obtain ⟨-, -, -, hself, -, -, -, hsw⟩ := hm.env
+      have hpay : ∀ a : Nat, (σ.glob.pay x y).getNet a =
+          if x = m.self then σ.glob.getNet a else if a = x then σ.glob.getNet x - y
+          else σ.glob.getNet a := by
+        intro a
+        rw [getNet_pay, hself]
+        simp only [Int.ofNat_inj]
+      have hns : (σ.glob.pay x y).getNet m.self = 0 := by
+        rw [hpay m.self]
+        split
+        · exact hm.netSelf
+        · rename_i hxs
+          rw [if_neg (fun h => hxs h.symm)]
+          exact hm.netSelf
+      by_cases hrf : m.bal m.self < y ∨ m.accepts x y = false
+      · refine .refused rfl ⟨by simp [run, Instr.step, Machine.next, Machine.push, hrf, assertTop],
+          σ.withGlob (σ.glob.pay x y), { m with bal := upd m.bal x (m.bal x + y) }, rfl,
+          ⟨fun _ _ => rfl, fun _ _ _ => Nat.le_refl _⟩,
+          Sim.withGlob (hm.book x y _ _ (fun c hc hcs => ?_) hns)⟩
+        have h1 := hm.net c hc hcs
+        rw [hpay c]
+        simp only [upd]
+        by_cases hxs : x = m.self
+        · subst hxs
+          simp only [hcs, ↓reduceIte]; exact h1
+        · by_cases hcx : c = x
+          · subst hcx; simp only [hxs, ↓reduceIte]; omega
+          · simp only [hxs, hcx, ↓reduceIte]; exact h1
+      · by_cases hxe : x = m.self
+        · subst hxe
+          have hb := hm.book _ _ m.bal m.bal₀ (fun c hc hcs => by
+            rw [hpay c]; simp only [↓reduceIte]; exact hm.net c hc hcs) hns
+          refine .inl ⟨σ.withGlob (σ.glob.pay _ y), m, rfl, ?_, rfl, Keeps.refl m,
+            Sim.withGlob hb⟩
+          simp [run, Instr.step, Machine.next, Machine.push, hrf, assertTop]
+        · simp only [not_or, Bool.not_eq_false] at hrf
+          refine .inl ⟨σ.withGlob (σ.glob.pay x y), { m with bal := pay m.bal m.self x y }, rfl,
+            ?_, rfl, ⟨fun _ _ => rfl, fun _ _ _ => Nat.le_refl _⟩,
+            Sim.withGlob (hm.book x y _ m.bal₀ (fun c hc hcs => ?_) hns)⟩
+          · simp [run, Instr.step, Machine.push, hrf, hxe, assertTop]
+          · have h1 := hm.net c hc hcs
+            rw [hpay c]
+            simp only [pay, upd, hxe, ↓reduceIte]
+            by_cases hcx : c = x
+            · subst hcx; simp only [↓reduceIte]; omega
+            · simp only [hcx, hcs, ↓reduceIte]; exact h1
+    · exact .inr ⟨by simp [hvr, hva, Value.asInt], run_append_revert hruna⟩
+  · exact .inr ⟨by simp [hvr], run_append_revert hrunr⟩
+
 end Stmts
 
 end Core
