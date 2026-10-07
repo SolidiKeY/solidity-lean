@@ -35,7 +35,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
 | M3 | done 2026-10-07: typed run, `run_erase`, Typing over `Core`, locals checker deleted (no shim left); Typing elaboration 10% faster (below) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
-| M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
+| M5 | M5.1–M5.3 on lane `intrinsic-evm` (see M5 lane) | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
 | M6b | | `dl!{}`, specs, callbacks |
 | M6c | | closer and Decide on typed `Fml` |
@@ -430,6 +430,183 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
   `solc-alignment.md`'s row.
 - `Core.lean`'s docstring cited a missing `Stmt.run_eq_runC`; it names
   `Stmt.runR_eq`/`Prog.runR_eq`.
+
+### M5 notes
+
+- M5.1 (lane `intrinsic-evm`, 2026-10-07): `Evm/CoreCompile.lean` compiles
+  `Core.Stmt`/`Core.Prog`, total, beside `Evm/Compile.lean`.
+  - A local of `Γ` at position `i` lives at level `b + (Γ.length - 1 - i)`;
+    `b` is the frame base, `0` for the program, the caller's next free level
+    for a call's body (closed over `rs ++ ps`: parameters from the base, then
+    the return variables).  `Machine.mem` stays `Var → Word` while the old
+    compiler lives: a level `l` is the cell `cell l` (`.fresh "%" l`, printed
+    `%l`), and `Machine.memAt` is the level-addressed view.  A scope's cells
+    are not cleared at its end; every declaration but an unset
+    `T storage x;` writes its cell; that alias is `dead` in `Frag` and not
+    read until a rebind writes the cell.
+  - `inFrag : Frag Γ → Stmt C Γ Γ' → Option (Frag Γ')`.  `Frag Γ` is one flag
+    per local (`ok`, `fragile`, `dead`): the alias facts `TyCtx` kept beside
+    the types.  An unset `T storage p;` is `dead`.  A branch's or block's
+    result is restricted to `Γ` (`Frag.restrict`, a `drop` by lengths, so no
+    `Prog.ext` is needed) and the branches met.  A call's body is checked from
+    `Frag.init (rs ++ ps)`; the caller's fragile aliases are dropped when the
+    body may shrink an array (`Stmt.shrinks`), which the shared `TyCtx` did
+    implicitly.  Out, as before: memory, `send`, `try`, loops, a call of
+    several returns (`CallRet.rets`, no code) or of a memory return.
+  - Every definition over `Stmt`/`Prog` lists all 27 constructors, with no
+    catch-all, and nested shapes go to helpers (`assignCode`, `opLocCode`,
+    `assignIn`, `declStorageIn`).  A catch-all arm made the equation compiler
+    fail to build the splitter for an indexed `Stmt C Γ Γ'`, so no equation
+    lemmas and no `simp [compileStmt]`.
+  - `compileStmt_erase`/`compileProg_erase`: `⌊compileStmt b s⌋ =
+    ⌊Evm.compileProg (s.erase ns)⌋` (`⌊·⌋` maps `Instr.forgetCell`, which
+    forgets `mload`/`mstore` operands), for `s` with `Stmt.sepArgs ns s`.
+    Axioms: `propext`.  Cells differ by design.  `sepArgs` is needed because
+    `erase` of a call with unseparated arguments binds them in the body after
+    the return variable is zeroed (same words, another order).
+    `Stmt.pushes`/`Stmt.pays` are `Evm.pushesP`/`Evm.paysP` of the erasure
+    for every statement (`pushes_erase`).
+  - `Evm/CoreExamples.lean` ports the 45 compile `decide` examples of
+    `Evm/Examples.lean` (not the four interpreter theorems, which need the M5
+    `compile_correct` and are in `Evm/CoreInterpreter.lean`, M5.3), plus a scoped-branch run, a `pop` in a branch
+    forgetting an outer fragile alias, and `sameCode` on 14 programs.
+    Programs come from `sol{}` through `Prog.resolve`, which the
+    elaborator's `whnf` does not reduce, so they run under `decide +kernel`
+    (the kernel evaluates the resolution too).  Timing, the 44 non-`**`
+    examples as one block (`Elab.async false`, two runs on a loaded machine):
+    old `decide` 2.5–4.0 s, old `decide +kernel` 1.8–2.4 s, new 2.3–3.3 s
+    (1.3–1.4× the old kernel run, 0.8–0.9× the committed `decide`; split
+    by phase under "G0 condition 1" in the M5 lane);
+    `pow_run` 3.5–5.5 s in all three.
+- Left for M5 after M5.1: see "M5 lane" below.
+
+### M5 lane
+
+Lane `intrinsic-evm` (worktree `solidity-lean-i-evm`), beside M2.3/M3 on
+`intrinsic`.  Status 2026-10-07, round 3 (after M3): the correctness
+proof over `Core` is done, with no `sorry` and the axioms `propext`,
+`Classical.choice`, `Quot.sound`; see "M5.3" below.
+
+- M5.2 `Evm/CoreSim.lean`, done (no `sorry`):
+  - `Look Γ := ∀ {t}, Idx Γ t → Binding`, the locals by position: what
+    M3's `Env.get` will instantiate (the binding a denotation stands for).
+    `Look.cons` is `Env.cons` (the pair), `Look.drop h` (along an `Ext`) a
+    scope's end, `Look.set` an assignment.  Kept abstract so that M3's choice
+    of `LTy.Denote` (untyped `Value` until M4a, `PrimTy.Denote` after) does
+    not change the statements.
+  - `Sim C L b F σ ρ m`: storage, ledger, bound and transaction as before
+    (`σ.env` unread); `vals : ∀ i : Idx Γ (.val p), ∃ v, ρ i = .val v ∧
+    ReprV p v (m.memAt (lvl b i))`; `aliases`/`fragile` by `F.get i`.  The
+    design's `ReprV p (env.get i) (m.mem (level i))` once values are typed
+    (M4a drops the `∃ v`).
+  - Old → new: `bindVal`/`bindAlias`/`bindFragile`/`unbind` →
+    `consVal`/`consAlias`/`consFragile`/`consDead`; `weaken` → `drop`
+    (a scope's end, `Frag.restrict`) and `flags` (`meet`, `meet_right`,
+    `storeDrop`); assignments `setVal`/`setAlias`/`setFragile`; `stack`,
+    `push`, `book`, `mono`, `store'` as before; `congrMem` (memory changed
+    above the frame only).  Each is a few lines: positions need no
+    `TyCtx.set` case split, only `lvl_there`/`lvl_ext`/`lvl_eq_iff`.
+  - A call's frame: `Sim.enter` (the callee's frame at base `b + Γ.length`)
+    and `Sim.return`/`returnDrop` (the caller's locals back over the
+    callee's machine).  Their memory side is static:
+    `storesFrom_compileStmt` (code compiled at base `b` stores to no level
+    below `b`), `storesFrom_callFrame` (arguments, return variable and body
+    store at `b + Γ.length` and above), and `exec_mem`/`StoresFrom.exec`
+    (code that does not store to a cell leaves it).  `NoStore` covers the
+    expression and guard codes (`expLoop 255` is held opaque: unfolding it
+    hits the recursion limit).
+  - Check: the whole file re-elaborates in about 7 s (MCP wall time,
+    machine shared with three other Lean agents).
+- `resolve` returns separated calls (`Stmt.resolve_sepArgs`,
+  `Prog.resolve_sepArgs`, `Syntax/Resolve.lean`): `Resolved` and
+  `resolveProg`'s result carry `sepArgs`, which moved there from
+  `Evm/CoreCompile.lean`.  So `compileProg_resolve`: a resolved program
+  compiles as the block it was resolved from, up to cells, with no
+  hypothesis.  (This edits a module below `Semantics.lean`; the merge into
+  `intrinsic` rebuilds from there.)
+- **G0 condition 1: the EVM compiler is exempt.**  `compileStmt`/`compileProg`,
+  `inFrag`/`inFragP`, `Stmt.pushes`/`pays`/`shrinks`,
+  `Stmt.asserts`/`Prog.asserts`, `argsCode` and
+  `retEnterCode`/`retLeaveCode` `match` on `Stmt C Γ Γ'`, `Prog C Γ Γ'`,
+  `Args C Γ ps` and `CallRet Γ rs Γ'`, and `Evm/CoreExamples.lean` and
+  `Evm/CoreInterpreter.lean` evaluate them in the kernel.  They are kept as `match`: the calculus never
+  evaluates them (no symex or closer step reaches the compiler), the only
+  kernel evaluations are the example checks of `Evm/CoreExamples.lean` and
+  the fragment, bound, `pays` and `asserts` checks of
+  `Evm/CoreInterpreter.lean`, and every proof
+  about them (`compileStmt_erase`, `storesFrom_compileStmt`, the `Sim`
+  lemmas) is structural and uses their equation lemmas.  Timing (scratch
+  module, `Elab.async false`, the same 44 non-`**` examples as one block
+  each, two runs, the order of the two compilers swapped between them):
+  elaboration alone (each program under `(fun _ => true) P`, warm)
+  1.03–1.04 s; elaboration plus `Prog.resolve` (`(resolve [] P).toBool`)
+  1.08–1.10 s, so `resolve` is 0.04–0.07 s; old compiler and run
+  (`decide +kernel`) 1.77–1.89 s; new resolve, compiler, fragment check and
+  run 2.25–2.47 s.  So the kernel cost of compiling and running is 0.73–0.85 s
+  old against 1.15–1.36 s new (1.5–1.6×), and none of it is `resolve`; how
+  much of it is the `match` casts against the level arithmetic and `inFrag`
+  is not measured.  If the EVM examples ever join a speed gate, the fix is
+  condition 1's: `Stmt.rec` with the motive over the indices for
+  `compileStmt`/`inFrag`, the `match` versions kept as `implemented_by`
+  twins and for the equation lemmas.
+- M5.3, done (no `sorry`), over M3's `Core.Stmt.run`/`Core.Prog.run`:
+  - `Evm/CoreExpr.lean`: `Look.ofEnv σ.env` instantiates `Look` (each
+    local's `LTy.enc` of `Env.get`; `Look.ofEnv_cons`/`_set`/`_drop` are
+    `Look.cons`/`set`/`drop`), and the simulation is `Sim … σ.glob
+    (Look.ofEnv σ.env) m`.  `simple_sim`, `spath_sim`, `loc_sim`,
+    `val_sim` as the untyped ones, `ValOut`/`LocOut` on `σ.glob`.
+  - `Evm/CoreStmt.lean`: one lemma per statement with no sub-program
+    (`assign_sim` … `transfer_sim`).  `StmtOut` is the untyped dichotomy
+    plus `Keeps` (the cells below the frame's base unchanged, and no
+    array's length lowered unless the statement `shrinks`), which a call
+    needs of its body; the panic case only for code that `asserts`.
+  - `Evm/CoreCorrect.lean`: `stmt_sim`/`prog_sim` by mutual structural
+    recursion, every arm one call: the families (`assign_family` …
+    `assert_family`, what `inFrag` admits and the `CoreStmt` lemma),
+    `ite_sim`, `block_sim` (`StmtOut.drop`: a scope's end pops the state's
+    locals, the machine's cells stay) and `call_family` (`callNone_sim`,
+    `callVal_sim`, `Sim.enter`/`Sim.back`), each sub-program's outcome a
+    hypothesis.  The `cases` on a call's `CallRet` inside `stmt_sim` took
+    more than 200000 heartbeats (a `whnf` timeout on the declaration);
+    moved into `call_family` it is gone.  Then `compile_correct` (both
+    succeed; both revert, a panic only with an `assert`; or a refused
+    payment), `compile_exact`, `compile_box`, `compile_net`, `Sim.init`
+    and `compile_storage`.
+  - `Evm/CoreInterpreter.lean`: the four interpreter theorems of
+    `Evm/Examples.lean` (`setAge_interpreter`, `overflow_interpreter`,
+    `payOwner_interpreter`, `callTwice_interpreter`) over
+    `Core.Prog.run (State.ofSem (State.fresh C 0)) (scopedOf P).2`, from
+    `Evm/CoreExamples.lean`'s runs; fragment checks, bounds, `pays` and
+    `asserts` by `decide +kernel`.  `overflow_interpreter` needs no
+    `run_noPanic`: the program has no `assert`, so `compile_exact`
+    excludes the panic.
+  - `not_stuck`/`never_stuck`: none on the Core path.  `compile_correct`
+    lists every outcome and none is `stuck`; the untyped `not_stuck`
+    (`Evm/Correctness.lean`) and `never_stuck` (`Theorems.lean`) stay with
+    the untyped compiler until M4 retires it.
+  - Timing against the M0 baselines (same method: wall time of
+    `lean_diagnostic_messages` after an edit at the top of the file, a
+    fresh worker, so header load and about 1 s of round trip included;
+    machine shared with other agents).  The gate: `stmt_sim` (the mutual
+    block with `prog_sim`) passes at `maxHeartbeats 10000` and fails at
+    5000, against 470000 for the untyped one (M0: 4.4 s by the profiler);
+    its profiler items over 10 ms sum to 0.25 s (type checking 0.15 s,
+    `simp` 0.05 s, pre-definitions 0.03 s).  Whole files:
+    `Evm/CoreSim.lean` 7.1 s, `Evm/CoreExpr.lean` 5.9 s,
+    `Evm/CoreStmt.lean` 4.8 s, `Evm/CoreCorrect.lean` 4.9 s (the four
+    add 22.7 s after `Evm/Correctness.lean` (25.6 s), which they import
+    and do not replace; each elaborates in its own worker, so in a build they run in
+    a chain).  `Evm/CoreExamples.lean` 10.7 s against `Evm/Examples.lean`'s
+    9.5 s (+13%, within the 20% gate), and `Evm/CoreInterpreter.lean`
+    4.9 s.
+- Left: timing the compiler on a quoter-built program (M2.3);
+  `Machine.mem : Nat → Word` (with `cell = id`) once `Evm/Compile.lean`
+  retires at M4; at M4, moving the machine-level lemmas the Core path uses
+  out of `Evm/Correctness.lean` into a module of their own
+  (`ValOut`/`LocOut`/`EnvSim`, the `*_run` code lemmas, `State.fresh`,
+  `Evm.Sim.init`), then deleting `wtStmt`, the untyped
+  `stmt_sim`/`compile_*`/`not_stuck`/`never_stuck` with the untyped
+  compiler, and re-timing the chain.
 
 ## Baselines (M0)
 

@@ -234,6 +234,37 @@ theorem Stmt.outNames_castOut [FreshNames] {Γ Δ₁ Δ₂ : Ctx} (h : Δ₁ = �
     (ns : List Var) : (s.castOut h).outNames ns = s.outNames ns := by
   subst h; rfl
 
+mutual
+/-- Every call's arguments are separated (`Arg.separatedFrom`) once
+erased, in a loop's body and a `try`'s branches too: the calls `erase`
+keeps as calls, whose arguments it does not move into the body.  What
+`resolve` returns (`Prog.resolve_sepArgs`). -/
+def Stmt.sepArgs {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → Bool
+  | .call _ args ret body =>
+    Arg.separatedFrom [] (args.erase ns) && Prog.sepArgs (ret.names ++ args.names) body
+  | .ite _ t e => Prog.sepArgs ns t && Prog.sepArgs ns e
+  | .block body => Prog.sepArgs ns body
+  | .tryCall _ rets ok err code pnc other =>
+    Prog.sepArgs (rets.names ++ ns) ok && Prog.sepArgs ns err &&
+      Prog.sepArgs (code.names ++ ns) pnc && Prog.sepArgs ns other
+  | .loop _ _ body => Prog.sepArgs ns body
+  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
+  | .incDec .. | .assignIncDec .. | .push .. | .pop _ | .transfer .. | .send .. | .declMem ..
+  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
+  | .require _ | .assert _ | .revert => true
+def Prog.sepArgs {Γ Γ' : Ctx} (ns : List Var) : Prog C Γ Γ' → Bool
+  | .nil => true
+  | .cons s P => Stmt.sepArgs ns s && Prog.sepArgs (s.outNames ns) P
+end
+
+theorem Prog.sepArgs_castIn {Γ₁ Γ₂ Δ : Ctx} (h : Γ₁ = Γ₂) (P : Prog C Γ₁ Δ) (ns : List Var) :
+    (P.castIn h).sepArgs ns = P.sepArgs ns := by
+  subst h; rfl
+
+theorem Stmt.sepArgs_castOut {Γ Δ₁ Δ₂ : Ctx} (h : Δ₁ = Δ₂) (s : Stmt C Γ Δ₁) (ns : List Var) :
+    (s.castOut h).sepArgs ns = s.sepArgs ns := by
+  subst h; rfl
+
 end Erase
 
 /-! ## Named contexts -/
@@ -546,7 +577,7 @@ def rejects {α : Type} (u : Solidity.Stmt C) (x : Except String α) : Except St
 context it leaves, and that it erases to `u` and leaves the names it binds. -/
 abbrev Resolved (Γ : NCtx) (u : Solidity.Stmt C) :=
   {r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx //
-    r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names}
+    r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true}
 
 mutual
 
@@ -554,90 +585,92 @@ def resolveStmt (Γ : NCtx) : (u : Solidity.Stmt C) → Except String (Resolved 
   | .assign l r => rejects (.assign l r) do
     let ⟨l', hl⟩ ← resolveLoc Γ l
     let ⟨r', hr⟩ ← resolveSrc Γ r
-    pure ⟨⟨Γ, .assign l' r'⟩, by subst hl hr; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .assign l' r'⟩, by subst hl hr; exact ⟨rfl, rfl, rfl⟩⟩
   | .rebind (R := R) x r => rejects (.rebind x r) do
     let ⟨i, hi⟩ ← Γ.find x (.alias R)
     let ⟨r', hr⟩ ← resolveARhs Γ r
-    pure ⟨⟨Γ, .rebind i r'⟩, by subst hi hr; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .rebind i r'⟩, by subst hi hr; exact ⟨rfl, rfl, rfl⟩⟩
   | .assignLocal (p := p) x r => rejects (.assignLocal x r) do
     let ⟨i, hi⟩ ← Γ.find x (.val p)
     let ⟨r', hr⟩ ← resolveVal Γ r
-    pure ⟨⟨Γ, .assignLocal i r'⟩, by subst hi hr; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .assignLocal i r'⟩, by subst hi hr; exact ⟨rfl, rfl, rfl⟩⟩
   | .declLocal p x init => rejects (.declLocal p x init) do
     let ⟨init', h⟩ ← resolveOpt (Val.erase Γ.names) (resolveVal Γ) init
-    pure ⟨⟨(x, .val p) :: Γ, .declLocal p x init'⟩, by subst h; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨(x, .val p) :: Γ, .declLocal p x init'⟩, by subst h; exact ⟨rfl, rfl, rfl⟩⟩
   | .declStorage R x init => rejects (.declStorage R x init) do
     let ⟨init', h⟩ ← resolveOpt (ARhs.erase Γ.names) (resolveARhs Γ) init
-    pure ⟨⟨(x, .alias R) :: Γ, .declStorage R x init'⟩, by subst h; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨(x, .alias R) :: Γ, .declStorage R x init'⟩, by subst h; exact ⟨rfl, rfl, rfl⟩⟩
   | .opAssign op hop hp l r => rejects (.opAssign op hop hp l r) do
     let ⟨l', hl⟩ ← resolveOpLoc Γ l
     let ⟨r', hr⟩ ← resolveVal Γ r
-    pure ⟨⟨Γ, .opAssign op hop hp l' r'⟩, by subst hl hr; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .opAssign op hop hp l' r'⟩, by subst hl hr; exact ⟨rfl, rfl, rfl⟩⟩
   | .incDec op hp l => rejects (.incDec op hp l) do
     let ⟨l', hl⟩ ← resolveOpLoc Γ l
-    pure ⟨⟨Γ, .incDec op hp l'⟩, by subst hl; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .incDec op hp l'⟩, by subst hl; exact ⟨rfl, rfl, rfl⟩⟩
   | .assignIncDec (p := p) x op hp l hs => rejects (.assignIncDec x op hp l hs) do
     let ⟨i, hi⟩ ← Γ.find x (.val p)
     let ⟨l', hl⟩ ← resolveOpLoc Γ l
     have hs' : l'.recvSimple = true := by
       rw [← OpLoc.recvSimple_erase Γ.names l', hl]; exact hs
-    pure ⟨⟨Γ, .assignIncDec i op hp l' hs'⟩, by subst hi hl; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .assignIncDec i op hp l' hs'⟩, by subst hi hl; exact ⟨rfl, rfl, rfl⟩⟩
   | .push b v hd => rejects (.push b v hd) do
     let ⟨b', hb⟩ ← resolveSPath Γ b
     let ⟨v', hv⟩ ← resolveOpt (Src.erase Γ.names) (resolveSrc Γ) v
     have hd' : (v'.isSome || _) = true := by rw [← Option.isSome_map (f := Src.erase Γ.names), hv]; exact hd
-    pure ⟨⟨Γ, .push b' v' hd'⟩, by subst hb hv; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .push b' v' hd'⟩, by subst hb hv; exact ⟨rfl, rfl, rfl⟩⟩
   | .pop b => rejects (.pop b) do
     let ⟨b', hb⟩ ← resolveSPath Γ b
-    pure ⟨⟨Γ, .pop b'⟩, by subst hb; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .pop b'⟩, by subst hb; exact ⟨rfl, rfl, rfl⟩⟩
   | .transfer r a => rejects (.transfer r a) do
     let ⟨r', hr⟩ ← resolveVal Γ r
     let ⟨a', ha⟩ ← resolveVal Γ a
-    pure ⟨⟨Γ, .transfer r' a'⟩, by subst hr ha; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .transfer r' a'⟩, by subst hr ha; exact ⟨rfl, rfl, rfl⟩⟩
   | .send pv r a => rejects (.send pv r a) do
     let ⟨i, hi⟩ ← Γ.find pv (.val .bool)
     let ⟨r', hr⟩ ← resolveVal Γ r
     let ⟨a', ha⟩ ← resolveVal Γ a
-    pure ⟨⟨Γ, .send i r' a'⟩, by subst hi hr ha; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .send i r' a'⟩, by subst hi hr ha; exact ⟨rfl, rfl, rfl⟩⟩
   | .declMem R x init hd hm => rejects (.declMem R x init hd hm) do
     let ⟨init', h⟩ ← resolveOpt (MRhs.erase Γ.names) (resolveMRhs Γ) init
     have hd' : (init'.isSome || _) = true := by
       rw [← Option.isSome_map (f := MRhs.erase Γ.names), h]; exact hd
-    pure ⟨⟨(x, .mem R) :: Γ, .declMem R x init' hd' hm⟩, by subst h; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨(x, .mem R) :: Γ, .declMem R x init' hd' hm⟩, by subst h; exact ⟨rfl, rfl, rfl⟩⟩
   | .rebindMem (R := R) x r => rejects (.rebindMem x r) do
     let ⟨i, hi⟩ ← Γ.find x (.mem R)
     let ⟨r', hr⟩ ← resolveMRhs Γ r
-    pure ⟨⟨Γ, .rebindMem i r'⟩, by subst hi hr; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .rebindMem i r'⟩, by subst hi hr; exact ⟨rfl, rfl, rfl⟩⟩
   | .assignFromMem l p => rejects (.assignFromMem l p) do
     let ⟨l', hl⟩ ← resolveLoc Γ l
     let ⟨p', hp⟩ ← resolveMPath Γ p
-    pure ⟨⟨Γ, .assignFromMem l' p'⟩, by subst hl hp; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .assignFromMem l' p'⟩, by subst hl hp; exact ⟨rfl, rfl, rfl⟩⟩
   | .assignMem l r => rejects (.assignMem l r) do
     let ⟨l', hl⟩ ← resolveMLoc Γ l
     let ⟨r', hr⟩ ← resolveMSrc Γ r
-    pure ⟨⟨Γ, .assignMem l' r'⟩, by subst hl hr; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .assignMem l' r'⟩, by subst hl hr; exact ⟨rfl, rfl, rfl⟩⟩
   | .delete l => rejects (.delete l) do
     let ⟨l', hl⟩ ← resolveLoc Γ l
-    pure ⟨⟨Γ, .delete l'⟩, by subst hl; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .delete l'⟩, by subst hl; exact ⟨rfl, rfl, rfl⟩⟩
   | .deleteMem p hd => rejects (.deleteMem p hd) do
     let ⟨p', hp⟩ ← resolveMPath Γ p
-    pure ⟨⟨Γ, .deleteMem p' hd⟩, by subst hp; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .deleteMem p' hd⟩, by subst hp; exact ⟨rfl, rfl, rfl⟩⟩
   | .assignNew l n h => rejects (.assignNew l n h) do
     let ⟨l', hl⟩ ← resolveNewLhs Γ l
     let ⟨n', hn⟩ ← resolveSimple Γ n
-    pure ⟨⟨Γ, .assignNew l' n' h⟩, by subst hl hn; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .assignNew l' n' h⟩, by subst hl hn; exact ⟨rfl, rfl, rfl⟩⟩
   | .ite c thn els => do
     let ⟨c', hc⟩ ← rejects (.ite c thn els) (resolveVal Γ c)
-    let ⟨⟨_, t⟩, ht⟩ ← resolveProg Γ thn
-    let ⟨⟨_, e⟩, he⟩ ← resolveProg Γ els
-    pure ⟨⟨Γ, .ite c' t e⟩, by subst hc ht he; exact ⟨rfl, rfl⟩⟩
+    let ⟨⟨_, t⟩, ht, hts⟩ ← resolveProg Γ thn
+    let ⟨⟨_, e⟩, he, hes⟩ ← resolveProg Γ els
+    pure ⟨⟨Γ, .ite c' t e⟩, by
+      subst hc ht he
+      exact ⟨rfl, rfl, by simp only [Stmt.sepArgs, hts, hes, Bool.and_self]⟩⟩
   | .require c => rejects (.require c) do
     let ⟨c', hc⟩ ← resolveVal Γ c
-    pure ⟨⟨Γ, .require c'⟩, by subst hc; exact ⟨rfl, rfl⟩⟩
+    pure ⟨⟨Γ, .require c'⟩, by subst hc; exact ⟨rfl, rfl, rfl⟩⟩
   | .assert c => rejects (.assert c) do
     let ⟨c', hc⟩ ← resolveVal Γ c
-    pure ⟨⟨Γ, .assert c'⟩, by subst hc; exact ⟨rfl, rfl⟩⟩
-  | .revert => pure ⟨⟨Γ, .revert⟩, rfl, rfl⟩
+    pure ⟨⟨Γ, .assert c'⟩, by subst hc; exact ⟨rfl, rfl, rfl⟩⟩
+  | .revert => pure ⟨⟨Γ, .revert⟩, rfl, rfl, rfl⟩
   | .call f args hsep ret body => do
     let ⟨⟨P, as⟩, has, hP⟩ ← rejects (.call f args hsep ret body) (resolveArgs Γ args)
     match ret with
@@ -645,26 +678,40 @@ def resolveStmt (Γ : NCtx) : (u : Solidity.Stmt C) → Except String (Resolved 
       match body with
       | .declMem R r Option.none hd hm :: rest =>
         -- a memory return: declared by the frame, left to the caller
-        let ⟨⟨_, b⟩, hb⟩ ← resolveProg ((r, .mem R) :: P) rest
+        let ⟨⟨_, b⟩, hb, hbs⟩ ← resolveProg ((r, .mem R) :: P) rest
         pure ⟨⟨(r, .mem R) :: Γ, .call f as (.mem R r hd hm) b⟩, by
-          refine ⟨?_, rfl⟩
+          refine ⟨?_, rfl, ?_⟩
+          rotate_left
+          · subst has
+            simp only [NCtx.names, List.map_cons, hP] at hbs
+            simp only [Stmt.sepArgs, hsep, CallRet.names, List.cons_append, List.nil_append, hbs,
+              Bool.and_self]
           subst has hb
           rw [Stmt.erase_call _ _ _ _ _ hsep]
           simp only [CallRet.erase, CallRet.pre, CallRet.names, List.cons_append, List.nil_append,
             NCtx.names, List.map_cons, ← hP]⟩
       | body =>
-        let ⟨⟨_, b⟩, hb⟩ ← resolveProg P body
+        let ⟨⟨_, b⟩, hb, hbs⟩ ← resolveProg P body
         pure ⟨⟨Γ, .call f as .none b⟩, by
-          refine ⟨?_, rfl⟩
+          refine ⟨?_, rfl, ?_⟩
+          rotate_left
+          · subst has
+            rw [hP] at hbs
+            simp only [Stmt.sepArgs, hsep, CallRet.names, List.nil_append, hbs, Bool.and_self]
           subst has hb
           rw [Stmt.erase_call _ _ _ _ _ hsep]
           simp only [CallRet.erase, CallRet.pre, CallRet.names, List.nil_append, hP]⟩
     | .val p r res =>
       let ⟨res', hres⟩ ← rejects (.call f args hsep (.val p r res) body)
         (resolveOpt (Idx.name Γ.names) (fun y => Γ.find y (.val p)) res)
-      let ⟨⟨_, b⟩, hb⟩ ← resolveProg ((r, .val p) :: P) body
+      let ⟨⟨_, b⟩, hb, hbs⟩ ← resolveProg ((r, .val p) :: P) body
       pure ⟨⟨Γ, .call f as (.val p r res') b⟩, by
-        refine ⟨?_, rfl⟩
+        refine ⟨?_, rfl, ?_⟩
+        rotate_left
+        · subst has
+          simp only [NCtx.names, List.map_cons, hP] at hbs
+          simp only [Stmt.sepArgs, hsep, CallRet.names, List.cons_append, List.nil_append, hbs,
+            Bool.and_self]
         subst has hb hres
         rw [Stmt.erase_call _ _ _ _ _ hsep]
         simp only [CallRet.erase, CallRet.pre, CallRet.names, List.cons_append, List.nil_append,
@@ -672,47 +719,59 @@ def resolveStmt (Γ : NCtx) : (u : Solidity.Stmt C) → Except String (Resolved 
     | .rets rs =>
       let ⟨⟨ρ, bs⟩, hbs⟩ : {r : (ρ : Ctx) × Binders ρ // r.2.toList = rs} :=
         ⟨Binders.ofList rs, Binders.toList_ofList rs⟩
-      let ⟨⟨_, b⟩, hb⟩ ← resolveProg (bs.nctx ++ P) body
+      let ⟨⟨_, b⟩, hb, hbsep⟩ ← resolveProg (bs.nctx ++ P) body
       let b' := b.castIn (by rw [NCtx.ctx_append, Binders.nctx_ctx])
       let s := (Stmt.call f as (.rets bs) b').castOut (by rw [NCtx.ctx_append, Binders.nctx_ctx])
       pure ⟨⟨bs.nctx ++ Γ, s⟩, by
-        refine ⟨?_, ?_⟩
+        refine ⟨?_, ?_, ?_⟩
         · subst has hb hbs
           rw [Stmt.erase_castOut, Stmt.erase_call _ _ _ _ _ hsep, Prog.erase_castIn]
           simp only [CallRet.erase, CallRet.pre, CallRet.names, List.nil_append,
             NCtx.names_append, Binders.nctx_names, hP]
-        · rw [Stmt.outNames_castOut, NCtx.names_append, Binders.nctx_names]; rfl⟩
+        · rw [Stmt.outNames_castOut, NCtx.names_append, Binders.nctx_names]; rfl
+        · subst has
+          rw [NCtx.names_append, Binders.nctx_names, hP] at hbsep
+          simp only [s, b', Stmt.sepArgs_castOut, Stmt.sepArgs, hsep, CallRet.names,
+            Prog.sepArgs_castIn, hbsep, Bool.and_self]⟩
   | .tryCall c rets ok err code pnc other => do
     let ⟨c', hc⟩ ← rejects (.tryCall c rets ok err code pnc other) (resolveExtCall Γ c)
     let ⟨⟨ρ, bs⟩, hbs⟩ : {r : (ρ : Ctx) × Binders ρ // r.2.toList = rets} :=
       ⟨Binders.ofList rets, Binders.toList_ofList rets⟩
     let ⟨⟨κ, cb⟩, hcb⟩ : {r : (κ : Ctx) × CodeBinder κ // r.2.toOption = code} :=
       ⟨CodeBinder.ofOption code, CodeBinder.toOption_ofOption code⟩
-    let ⟨⟨_, ok'⟩, hok⟩ ← resolveProg (bs.nctx ++ Γ) ok
-    let ⟨⟨_, err'⟩, herr⟩ ← resolveProg Γ err
-    let ⟨⟨_, pnc'⟩, hpnc⟩ ← resolveProg (cb.nctx ++ Γ) pnc
-    let ⟨⟨_, other'⟩, hother⟩ ← resolveProg Γ other
+    let ⟨⟨_, ok'⟩, hok, hoks⟩ ← resolveProg (bs.nctx ++ Γ) ok
+    let ⟨⟨_, err'⟩, herr, herrs⟩ ← resolveProg Γ err
+    let ⟨⟨_, pnc'⟩, hpnc, hpncs⟩ ← resolveProg (cb.nctx ++ Γ) pnc
+    let ⟨⟨_, other'⟩, hother, hothers⟩ ← resolveProg Γ other
     pure ⟨⟨Γ, .tryCall c' bs (ok'.castIn (by rw [NCtx.ctx_append, Binders.nctx_ctx])) err' cb
         (pnc'.castIn (by rw [NCtx.ctx_append, CodeBinder.nctx_ctx])) other'⟩, by
-      refine ⟨?_, rfl⟩
-      subst hc herr hother hbs hcb
-      simp only [Stmt.erase, Prog.erase_castIn, ← hok, ← hpnc, NCtx.names_append,
-        Binders.nctx_names, CodeBinder.nctx_names]⟩
+      refine ⟨?_, rfl, ?_⟩
+      · subst hc herr hother hbs hcb
+        simp only [Stmt.erase, Prog.erase_castIn, ← hok, ← hpnc, NCtx.names_append,
+          Binders.nctx_names, CodeBinder.nctx_names]
+      · rw [NCtx.names_append, Binders.nctx_names] at hoks
+        rw [NCtx.names_append, CodeBinder.nctx_names] at hpncs
+        simp only [Stmt.sepArgs, Prog.sepArgs_castIn, hoks, herrs, hpncs, hothers, Bool.and_self]⟩
   | .loop a c body => do
     let ⟨a', ha⟩ ← rejects (.loop a c body) (resolveLoopAnn Γ a)
     let ⟨c', hc⟩ ← rejects (.loop a c body) (resolveVal Γ c)
-    let ⟨⟨_, b⟩, hb⟩ ← resolveProg Γ body
-    pure ⟨⟨Γ, .loop a' c' b⟩, by subst ha hc hb; exact ⟨rfl, rfl⟩⟩
+    let ⟨⟨_, b⟩, hb, hbs⟩ ← resolveProg Γ body
+    pure ⟨⟨Γ, .loop a' c' b⟩, by
+      subst ha hc hb; exact ⟨rfl, rfl, by simp only [Stmt.sepArgs, hbs]⟩⟩
 
 def resolveProg (Γ : NCtx) : (us : List (Solidity.Stmt C)) →
-    Except String {r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx // r.2.erase Γ.names = us}
-  | [] => pure ⟨⟨Γ, .nil⟩, rfl⟩
+    Except String {r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx //
+      r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true}
+  | [] => pure ⟨⟨Γ, .nil⟩, rfl, rfl⟩
   | u :: us => do
-    let ⟨⟨Γ₁, s⟩, hs, hn⟩ ← resolveStmt Γ u
-    let ⟨⟨Γ₂, P⟩, hP⟩ ← resolveProg Γ₁ us
+    let ⟨⟨Γ₁, s⟩, hs, hn, hss⟩ ← resolveStmt Γ u
+    let ⟨⟨Γ₂, P⟩, hP, hPs⟩ ← resolveProg Γ₁ us
     pure ⟨⟨Γ₂, .cons s P⟩, by
-      show s.erase Γ.names ++ P.erase (s.outNames Γ.names) = u :: us
-      rw [hs, ← hn, hP]; rfl⟩
+      refine ⟨?_, ?_⟩
+      · show s.erase Γ.names ++ P.erase (s.outNames Γ.names) = u :: us
+        rw [hs, ← hn, hP]; rfl
+      · show (s.sepArgs Γ.names && P.sepArgs (s.outNames Γ.names)) = true
+        rw [hss, ← hn, hPs]; rfl⟩
 
 end
 
@@ -746,11 +805,24 @@ was resolved from. -/
 theorem Stmt.resolve_erase {Γ Γ' : NCtx} {u : Solidity.Stmt C} {s : Stmt C Γ.ctx Γ'.ctx}
     (h : Stmt.resolve Γ u = .ok ⟨Γ', s⟩) : s.erase Γ.names = [u] :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx =>
-    r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names) h).1
+    r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true) h).1
 
 theorem Prog.resolve_erase {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)} {P : Prog C Γ.ctx Γ'.ctx}
     (h : Prog.resolve Γ us = .ok ⟨Γ', P⟩) : P.erase Γ.names = us :=
-  ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx => r.2.erase Γ.names = us) h
+  (ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx =>
+    r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true) h).1
+
+/-- **`resolve` separates every call's arguments**: the calls it returns
+erase to calls, not to their arguments bound in the body. -/
+theorem Stmt.resolve_sepArgs {Γ Γ' : NCtx} {u : Solidity.Stmt C} {s : Stmt C Γ.ctx Γ'.ctx}
+    (h : Stmt.resolve Γ u = .ok ⟨Γ', s⟩) : s.sepArgs Γ.names = true :=
+  (ok_of_map (P := fun r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx =>
+    r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true) h).2.2
+
+theorem Prog.resolve_sepArgs {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)} {P : Prog C Γ.ctx Γ'.ctx}
+    (h : Prog.resolve Γ us = .ok ⟨Γ', P⟩) : P.sepArgs Γ.names = true :=
+  (ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx =>
+    r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true) h).2
 
 end Resolve
 
