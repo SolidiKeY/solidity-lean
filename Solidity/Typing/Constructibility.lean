@@ -3289,46 +3289,49 @@ def BoolKeyed : Contract := contract!{ mapping(bool => uint) flags; }
 def Tokens : Contract := contract!{ Token[] tokens; }
 
 /-- A word past the end of a `uint[]` that is not cleared: canonical, not
-reachable, since `pop`, `delete` and a shorter copy clear the words they
+reached by a scoped run, since `pop`, `delete` and a shorter copy clear the words they
 leave behind and nothing writes past the end of an array of words. -/
 theorem dirty_word_not_reachable :
     CanonStorage Words [("xs", .array [] [.int 5] false)] ∧
-      ¬ Reachable Words [("xs", .array [] [.int 5] false)] := by
+      ¬ ReachableS Words [("xs", .array [] [.int 5] false)] := by
   refine ⟨⟨rfl, fun r T hr => ?_⟩, fun h => ?_⟩
   · simp only [Words, lookupBy] at hr
     split at hr
     · rename_i he; subst he; cases hr
       exact ⟨_, rfl, rfl, trivial, trivial, trivial⟩
     · exact nomatch hr
-  · have ht := reachable_tight (by decide) (by decide) h "xs" _ _ rfl rfl
+  · have ht := reachableS_tight (by decide) (by decide) h "xs" _ _ rfl rfl
     have := ht.2.1 rfl (.int 5) (by simp)
     simp [defaultForTy] at this
 
-/-- A slot past the end of a fixed-size array: canonical, not reachable. -/
+/-- A slot past the end of a fixed-size array: canonical, not reached by a
+scoped run. -/
 theorem fixed_past_end_not_reachable :
     CanonStorage Pairs [("pair", .array [.int 0, .int 0] [.int 0] true)] ∧
-      ¬ Reachable Pairs [("pair", .array [.int 0, .int 0] [.int 0] true)] := by
+      ¬ ReachableS Pairs [("pair", .array [.int 0, .int 0] [.int 0] true)] := by
   refine ⟨⟨rfl, fun r T hr => ?_⟩, fun h => ?_⟩
   · simp only [Pairs, lookupBy] at hr
     split at hr
     · rename_i he; subst he; cases hr
       exact ⟨_, rfl, rfl, rfl, ⟨trivial, trivial, trivial⟩, trivial, trivial⟩
     · exact nomatch hr
-  · have ht := reachable_tight (by decide) (by decide) h "pair" _ _ rfl rfl
+  · have ht := reachableS_tight (by decide) (by decide) h "pair" _ _ rfl rfl
     exact nomatch ht.1
 
-/-- An entry in a `bool`-keyed mapping: canonical, not reachable, since a
-key is read as a number (`Value.asInt`) and a `bool` is not one. -/
+/-- An entry in a `bool`-keyed mapping: canonical, reached by no scoped run,
+since the scoped run reads a key as a number (`Value.asInt`) and a `bool` is
+not one.  The typed run writes `bool` keys (decision 10); `Reachable` keeps
+it on the bridge (`Core.Prog.bridgeOk`), which has no `bool` key. -/
 theorem bool_key_not_reachable :
     CanonStorage BoolKeyed [("flags", .map [(1, .int 3)] (.int 0))] ∧
-      ¬ Reachable BoolKeyed [("flags", .map [(1, .int 3)] (.int 0))] := by
+      ¬ ReachableS BoolKeyed [("flags", .map [(1, .int 3)] (.int 0))] := by
   refine ⟨⟨rfl, fun r T hr => ?_⟩, fun h => ?_⟩
   · simp only [BoolKeyed, lookupBy] at hr
     split at hr
     · rename_i he; subst he; cases hr
       exact ⟨_, rfl, rfl, ⟨trivial, trivial⟩, defaultForTy_uint.symm, trivial⟩
     · exact nomatch hr
-  · have ht := reachable_tight (by decide) (by decide) h "flags" _ _ rfl rfl
+  · have ht := reachableS_tight (by decide) (by decide) h "flags" _ _ rfl rfl
     exact nomatch ht.1 rfl
 
 /-- A `Token` past the end of `tokens`, written through a reference taken

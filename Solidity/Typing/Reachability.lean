@@ -31,8 +31,8 @@ its corollary from a contract's initial state (`Reachable`: a scoped program
 scoped one ends in the erased state, `ReachableS`), and the two refutations the
 removed untyped layer left as `sorry` follow: a storage whose mapping default
 is not the default (`map_default_not_reachable`) and one whose struct misses
-a member (`struct_missing_field_not_reachable`) are well-typed and not
-reachable.
+a member (`struct_missing_field_not_reachable`) are well-typed and reached by
+no scoped run (`ReachableS`), hence not `Reachable`.
 
 The converse is `Constructibility.lean`: canonical is not enough, and
 canonical and tight (`SVal.tight`) is exactly reachable.
@@ -1928,10 +1928,18 @@ theorem reachable_canon (hnd : nodupKeysB C.vars = true)
     (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st :=
   reachableS_canon hnd hok h.reachableS
 
+/-- Not reached by the scoped run ⇒ not `Reachable`: the witnesses below are
+stated over `ReachableS`, the stronger claim. -/
+theorem not_reachable_of_not_reachableS {st : List (Name × SVal)}
+    (h : ¬ ReachableS C st) : ¬ Reachable C st :=
+  fun hr => h hr.reachableS
+
 /-! ## What is not reachable
 
-Three storages `wellTypedStorageB` accepts and no program reaches: the
-facts `SVal.hasTy` forgets are exactly what refutes them. -/
+Three storages `wellTypedStorageB` accepts and no scoped program reaches
+(`ReachableS`, so no `Reachable` program either,
+`not_reachable_of_not_reachableS`): the facts `SVal.hasTy` forgets are
+exactly what refutes them. -/
 
 section Witnesses
 
@@ -1948,13 +1956,14 @@ def Counter : Contract := contract!{ uint total; }
 theorem defaultForTy_uint : defaultForTy Ty.uint = SVal.int 0 := by
   simp [defaultForTy]
 
-/-- A mapping whose absent keys read `5`: well-typed, not reachable, since
+/-- A mapping whose absent keys read `5`: well-typed, not reached by a scoped run,
+since
 every mapping's default is its type's default. -/
 theorem map_default_not_reachable :
     wellTypedStorageB Balances.layout [("balances", .map [] (.int 5))] = true ∧
-      ¬ Reachable Balances [("balances", .map [] (.int 5))] := by
+      ¬ ReachableS Balances [("balances", .map [] (.int 5))] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachableS_canon (by decide) (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "balances" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv
@@ -1963,26 +1972,27 @@ theorem map_default_not_reachable :
   cases hd
 
 /-- An `Account` without its `token`: well-typed (`hasTy` checks the members
-present), not reachable, since every struct carries all its members. -/
+present), not reached by a scoped run, since every struct carries all its members. -/
 theorem struct_missing_field_not_reachable :
     wellTypedStorageB Accounts.layout [("acct", .struct [("balance", .int 0)])] = true ∧
-      ¬ Reachable Accounts [("acct", .struct [("balance", .int 0)])] := by
+      ¬ ReachableS Accounts [("acct", .struct [("balance", .int 0)])] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachableS_canon (by decide) (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "acct" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv
   have hn := hcv.1
   simp [structDef] at hn
 
-/-- A mapping with key `1` twice: well-typed, not reachable, since keys only
+/-- A mapping with key `1` twice: well-typed, not reached by a scoped run,
+since keys only
 grow by `setBy`. -/
 theorem map_dup_key_not_reachable :
     wellTypedStorageB Balances.layout
         [("balances", .map [(1, .int 0), (1, .int 1)] (.int 0))] = true ∧
-      ¬ Reachable Balances [("balances", .map [(1, .int 0), (1, .int 1)] (.int 0))] := by
+      ¬ ReachableS Balances [("balances", .map [(1, .int 0), (1, .int 1)] (.int 0))] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachableS_canon (by decide) (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "balances" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv
