@@ -1,5 +1,6 @@
 import Solidity.Calculus.Core.SoundBlocks
 import Solidity.Calculus.Core.SoundArms
+import Solidity.Calculus.Core.SoundCapture
 import Solidity.Calculus.Core.RunWk
 
 /-!
@@ -207,11 +208,6 @@ theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) : (Except.ok a :
 
 theorem Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) :
     Except.bind (Except.ok a : Res α) f = f a := rfl
-
-theorem Stmt.run_declMem {Γ : Ctx} (σ : State C Γ) (R : RefTy) (x : Var)
-    (init : Option (MRhs C Γ R)) (hd : init.isSome || (Ty.ref R).defaultOkS)
-    (hm : (Ty.ref R).mapFree = true) :
-    Stmt.run σ (.declMem R x init hd hm) = Run.declMem R init σ := rfl
 
 theorem Run.declMem_none {Γ : Ctx} (R : RefTy) (σ : State C Γ) :
     Run.declMem R none σ =
@@ -539,7 +535,7 @@ captured, or its body inlined. -/
 theorem Stmt.stepSound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name)
     (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) :
     Stmt.StepSound k m (.call f args ret body) := by
-  intro σ _ pr hp
+  intro σ pr hp
   change callStep k f args ret body = some pr at hp
   unfold callStep at hp
   cases ret with

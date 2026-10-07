@@ -671,10 +671,6 @@ theorem writeLoc_eq (s : Semantics.State) (a : Semantics.Addr) (v : Value) :
     Semantics.writeLoc s a v = writeAddr s v.toMVal a := by
   cases a <;> rfl
 
-theorem MLoc.write_eq (σ : State C Γ) (mv : Semantics.MVal) {T : Ty} (l : MLoc C Γ T) :
-    l.write σ mv = l.addr σ >>= fun a => σ.withGlob <$> writeAddr σ.glob mv a := by
-  cases l <;> simp only [MLoc.write, MLoc.addr, writeAddr, bind_assoc, pure_bind]
-
 /-! ### Compound assignments and `++` -/
 
 theorem bind_bind_eq {ε α β γ : Type} {x : Except ε α} {f : α → Except ε β}

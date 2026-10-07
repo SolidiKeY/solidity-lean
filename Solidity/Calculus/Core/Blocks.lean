@@ -267,7 +267,7 @@ end Frame
 
 /-- A loop (`loopStep`): unwound (`whileUnwind`), ended (`loopExit`), or by
 its invariant (`whileInvariantBox`, `whileInvariantDiamond`, under the
-diamond with a cover goal, `Fml.invCases`), closed to
+diamond with a cover goal, `Premise.cover`), closed to
 `false` when its body has no frame (`whileClose`) or, under the diamond,
 it has no variant (`whileNoVariantDiamond`). -/
 def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool)

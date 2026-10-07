@@ -36,8 +36,8 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
 | M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
 | M3 | done 2026-10-07: typed run, `run_erase`, Typing over `Core`, locals checker deleted (no shim left); Typing elaboration 10% faster (below) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
-| M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
-| M5 | M5.1–M5.3 on lane `intrinsic-evm` (see M5 lane) | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
+| M4 | lane `intrinsic-values` merged 2026-10-07: typed values, storage, heap, typed run and `trun` erasure (M4 lane); left: the typed run on the interpreter's path, delete `stuck`, retire old `Stmt` | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
+| M5 | M5.1–M5.3 done and merged 2026-10-07 (compiler, `Sim`, `compile_correct` over `Core`, M5 lane); left: delete `wtStmt`, `not_stuck` and the untyped compiler, which wait for M4 to retire `Stmt` | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | lane: every `Stmt.step` arm and `Premise` ported; gate passed (Decision 9) | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
 | M6b | lane `intrinsic-frontend` 2026-10-07: reader, obligations, specs, callbacks (notes below) | `dl!{}`, specs, callbacks |
 | M6c | | closer and Decide on typed `Fml` |
@@ -353,7 +353,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     lemmas (`StateWT.save`/`write`/`ofCopyOut`/`setObj`/`pay`/`transferAt`,
     `pushAt_wt` … `bumpMem_wt`) are on `Semantics.State`; the evaluator
     lemmas (`Core.Val.eval_wt` …) on the scoped syntax.
-  - `Invariant C` (glob part, per-local part monotone in `H`, blind to the
+  - `RunInv C` (glob part, per-local part monotone in `H`, blind to the
     locals): `keeps_seq`/`ite`/`block`/`loop`/`call`/`tryCall`/`require`/
     `assert`/`revert` are proved once; each invariant gives its leaves and
     four hooks (arguments, `CallRet.enter`, `Binders.decode`,
@@ -881,6 +881,7 @@ No block reads a `.length`, so the change of `lenT` to a `Nat` comparison
   untyped runs decide; the 1.12× is the 4 ms `p = a++`, a few tenths of a
   millisecond.  Memory blocks reduce only through the typed run (the copy is
   a fold, no well-founded `copyMToSt`).
+
 ### M6a notes
 
 - Lane `intrinsic-calculus`, round 1 (2026-10-07): `Calculus/Core/Fml.lean`
@@ -1083,7 +1084,7 @@ No block reads a `.length`, so the change of `lenT` to a `Nat` comparison
 
 ### M6a lane: the speed gate (kernel, `Eq.refl` of `symex n φ = ψ`)
 
-Measured with `Solidity/Scratch/CoreBench.lean` (not committed), median of 5
+Measured with a scratch module (`Solidity/Scratch/CoreBench`, not committed), median of 5
 (3 for e1×5), fuel 5000 both sides, on a machine shared with three other Lean
 agents (±20% noise between runs), after the schema variables' shift became
 `Val.up` and its kin (no `Thin`; e2 was 1.45× with `.wk up`).  e1 is
@@ -1122,7 +1123,7 @@ the program n times.
   e2, e4 and e2×10, and passed on aggregate (3.2 s against 9.0 s); the lead
   ruled the aggregate the gate, the straight-line overhead a cost to
   reduce.
-- Reducing it (round 3, `Solidity/Scratch/CoreBench.lean`, median of 7;
+- Reducing it (round 3, the scratch `CoreBench`, median of 7;
   e2 legacy 7.3 ms):
   - the reduction is not the cost: `Core.Fml.maxIdx (Core.symex n φ)`
     checked against its number, which evaluates the whole result, is
@@ -1376,9 +1377,11 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   `.int 5` makes both `b = TRUE →` and `b = FALSE →` vacuous while
   `Loop.step` is stuck), and a `Val.BoolValued` hypothesis would have
   excluded every condition that reads a local or storage.  So
-  `whileInvariantDiamond`'s premise carries `b = TRUE ∨ b = FALSE` under its
-  update (`Fml.invCases`, Lean only, today's `Premise.coverFml`), and
-  `Stmt.stepSound_loop` has no hypothesis.  The box keeps KeY's two goals.
+  `whileInvariantDiamond` owes `b = TRUE ∨ b = FALSE` under its update
+  (Lean only, today's `Premise.coverFml`), and `Stmt.stepSound_loop` has no
+  hypothesis.  The box keeps KeY's two goals.  (This lane first put the
+  cover inside `Premise.fml`, `Fml.invCases`; at the integration it is the
+  calctools lane's `Premise.cover`, a goal apart, as for `split`.)
 - `Prog.outNames` was declared both in `Semantics/RunErase.lean` (M3) and
   `Calculus/Core/Fml.lean`, which broke the root `Solidity.lean`; it is now
   one definition, in `Syntax/Core.lean` beside `Stmt.outNames`.
@@ -1441,6 +1444,66 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   `cspec!` obligation (the closer is M6c's); `UpdElem.target?` of
   `Derive.lean` and the reader's `UpdElem.setsLocal?` are two names for two
   questions (the split's two kinds, every local an element sets).
+
+### Integration of the lanes (2026-10-07)
+
+The six lanes merged into `intrinsic` in order: `intrinsic-values`,
+`intrinsic-evm`, `intrinsic-calculus`, `intrinsic-sound2`,
+`intrinsic-calctools`, `intrinsic-frontend`.  Text conflicts only in
+`docs/intrinsic.md` (Decisions 9 and 10 written twice: the longer kept),
+`docs/module-map.md` (union; one row per module, the newer wording) and
+`Calculus/Core/SoundArms.lean` (both sorry-free: `sound2`'s kept, which
+also proves `++`/`--`; `calctools`' `opStore_loc`/`opMem_loc` had no other
+user).  What did not compile together, and how it was resolved:
+
+- **One cover design.**  `sound2` proved its arms against
+  `Premise.Sound` over `State.Typed` states (a `bool` local holds a `bool`)
+  with the loop cover inside `Premise.fml` (`Fml.invCases`); `calctools`
+  dropped `State.Typed` for a cover goal apart (`Premise.cover`,
+  `Calculus/Core/Cover.lean`), which `Premise.Sound` takes as a premise and
+  `Proves.split`/`Proves.inv` prove under the diamond.  `calctools`' design
+  is kept (a formula's binders and a capture of a `bool` storage word give
+  a non-`bool` local, so `State.Typed` is not preserved by a derivation):
+  `Fml.invCases` is gone, `whileInvDiamond` reads the cover from
+  `Premise.cover`, and the splits on a simple condition (`iteStep`,
+  `requireStep`) take a value that is no `bool` by
+  `Premise.Sound.splitStuck` (`Calculus/Core/SoundLocal.lean`: the run is
+  stuck, which the box allows and the diamond's cover excludes).  The
+  short circuits need no typing: on a non-`bool` left operand both sides
+  halt, and no expression panics (`Val.eval_noPanic`).
+- **Names declared twice** (an import of both fails at the root):
+  `Core.Prog.outNames` (one, in `Syntax/Core.lean`, already on
+  `intrinsic-calculus`); `Core.MLoc.write_eq` (`Semantics/Core/TypedRunErase.lean`
+  and `Calculus/Core/SoundArms.lean`: one, in `Semantics/Core.lean` beside
+  `MLoc.addr`); `Core.Stmt.run_declMem` (`SoundCalls.lean` now imports
+  `SoundCapture.lean`'s); `Core.Invariant` (M3's run invariant in
+  `Typing/Soundness.lean`, renamed `RunInv`, against the callback
+  invariant of `Semantics/Core/Callback.lean`, which keeps today's name).
+- **`negativeKey` deleted** (`Examples/Tactics/Decide.lean`): `values[-1]`
+  no longer elaborates since `UnOp.accepts .neg` is `int` only (M4 lane), as
+  solc rejects it; a `uint` key is never negative.
+- `docs/intrinsic.md` cited files that do not exist (the side-projects
+  `Corresp/Proved`, the scratch `CoreBench`): no longer as paths.
+
+**Full build: green.**  `lean_build` over `Solidity`, `solkeycheck`,
+`SolidityCorpus` and `SolkeyTestSuite` (283 jobs; the last two added to
+`defaultTargets` for the run only), no `sorry`, no new `axiom`, no new
+`maxHeartbeats`.  Wall time 173 s for the final build, which rebuilt every
+module above `Semantics/Core.lean` (the `MLoc.write_eq` move) from the Lake
+cache below it; the first build of the merged tree took 311 s (251 jobs, up
+to the failures).  M0 has no whole-build time to compare with (it timed
+single files in fresh workers); under the build's parallel load the per-file
+times are not comparable with M0's either (`TestSuite/Derived9` 17 s
+against 7.0 s, `Derived10` 23 s against 9.3 s, `Derived11` 4.6 s against
+2.8 s, `Examples/ProofTree` 21 s against 10.1 s, `Solkey/TestSuite` 13 s
+against 10.4 s).  `scripts/check-orphans.mjs`: 269 reachable, none
+orphaned (without the git-excluded `Solidity/Scratch/`);
+`scripts/check-doc-paths.sh`: OK.
+
+Left after the integration: `Stmt.Sound C` itself (`Calculus/Core/ProvesSound.lean`'s
+hypothesis) from `Stmt.stepSound` and the block arms (`stepSound_call`,
+`stepSound_tryCall`, `stepSound_loop`) once `WkRuns` is discharged by
+`Prog.run_wk`; the M4/M5 deletions above; M6c; M7.
 
 ### Gate G0: passes, under conditions
 
@@ -1727,7 +1790,7 @@ Rule fidelity:
 - `pop .capture` frames and the invisible binder of `Premise.bind` are Lean-only scope markers, so printers must hide them for `#taclet`/PrintedRules/ProofTree pins to keep solkey's `\find`/`\replacewith` shape. Each needs a rule-map row.
 - `storageLocalDeclSkip` (`T storage lsv; ⇝ ⟨[]⟩`) becomes `{lsv := unset}`, a visible deviation.
 - On the other side, `blockEmpty`/`functionFrameEmpty`/`functionBodyExpand` become claimed (RuleShapes.lean:450-482), and the `cov` goal (not in KeY) disappears.
-The SolKey reader (side-projects lean/solkey) depends on Taclet constructor names and arities and on `Stmt.*` arity in LeanShape. M6a breaks its 590-reference generated `Corresp/Proved.lean`. Regenerating it requires the user's explicit go-ahead (memory: do not touch the side-projects reader unless asked).
+The SolKey reader (side-projects lean/solkey) depends on Taclet constructor names and arities and on `Stmt.*` arity in LeanShape. M6a breaks its 590-reference generated correspondence file (`Corresp/Proved` in the side-projects repository). Regenerating it requires the user's explicit go-ahead (memory: do not touch the side-projects reader unless asked).
 Semantic change: scoped blocks and loops pop locals, and today they outlive the branch. This follows solc (≥0.5 C99 scoping) but changes `ifElseSplit`'s continuation (now through a pop frame), loop frames (`Prog.loopFrame`, `Fml.loopAnon`), modifier `_; _;` (commit 9ab7d94) and lowerReturns (Syntax.lean:3064-3110), where the continuation copied into branches may see branch locals. Each needs a solc-alignment.md row.
 Dependent elimination: `Prog.cons`'s output stays a variable (no `Δ₂ ++ Δ₁`), but `Thin`/`Suffix` casts in `Env.thin`, `Frames.pop` and Stmt.step's dispatcher (Completeness.lean:531) can still produce 'motive is not type correct' in the about 387 match arms across 28 files. Dispatcher arms must use top-level patterns and `if h :`, as the old port learned.
 Typed storage through `structDef` (a String match) may make the kernel whnf structDef in defeq checks. This risks whnf timeouts in Corpus `decide +kernel` and in concrete stores (Semantics.lean:977-985 already records one). uint as a subtype must not make the kernel unfold `Nat.land` (56642ee).

@@ -12,10 +12,9 @@ rest, frames and postcondition, with its cover under the diamond
 (`Calculus/Core/Cover.lean`), gives the modality over `s` (`Premise.Sound`,
 `Calculus/Core/SoundKit.lean`).  That hypothesis is the per-arm soundness,
 stated per statement as `Stmt.StepSound` and collected by
-`Stmt.Sound.of_stepSound`.  It is not proved yet: `Calculus/Core/SoundArms.lean`
-proves the premises of the update arms as `Premise.Sound`, and no arm as
-`Stmt.StepSound`.  This module is the structural part, which does not
-depend on any arm.
+`Stmt.Sound.of_stepSound`, from the arms' `Stmt.stepSound`
+(`Calculus/Core/SoundStep.lean`, given the block arms and `WkRuns`).  This
+module is the structural part, which does not depend on any arm.
 
 The hypothesis holds in untyped states too: a branch on a condition that is
 stuck (a `bool` local holding no `bool`, which a formula's binders allow)

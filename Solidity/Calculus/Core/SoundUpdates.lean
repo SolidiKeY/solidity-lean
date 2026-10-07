@@ -27,7 +27,7 @@ variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
 /-- **An update** is sound when it ends as the statement does up to the halt. -/
 theorem Premise.Sound.updateSim {Γ' : Ctx} {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'}
     (hs : Res.Sim (U.apply σ) (s.run σ)) : Premise.Sound m s (.update U) σ := by
-  intro Γ₁ Γ₀ ω κ φ h
+  intro Γ₁ Γ₀ ω κ φ h _
   have hU : NoPanic (U.apply σ) := Upd.apply_noPanic σ U
   have h' : m.afterC (holds · (Fml.modalK m ω κ φ)) (U.apply σ) := h
   show m.afterRunC _ _
@@ -180,7 +180,7 @@ theorem sound_transferBox (sadr se : Simple C Γ .uint) :
 
 /-- `transferDiamond` (Lean): the goal fails. -/
 theorem sound_done_false {Γ' : Ctx} (s : Stmt C Γ Γ') : Premise.Sound m s (.done false) σ :=
-  fun ω κ φ => Premise.sound_done σ false (fun h => nomatch h) ω κ φ
+  fun ω κ φ h _ => Premise.sound_done σ false (fun h => nomatch h) ω κ φ h
 
 /-! ### Several ways to end -/
 
@@ -198,11 +198,11 @@ runs as one of the updates up to the halt. -/
 theorem Premise.Sound.cases {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
     (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ) (s.run σ)) :
     Premise.Sound m s (.cases fs us) σ := by
-  intro Γ₁ Γ₀ ω κ φ hp
+  intro Γ₁ Γ₀ ω κ φ hp _
   have hp' := (holds_conj _).1 hp
   obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
   exact Premise.Sound.updateSim σ hs ω κ φ
-    (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
+    (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU))) (by cases m <;> exact trivial)
 
 /-- `sendNoCallbackBox`, `sendNoCallbackDiamond`: `pv = sadr.send(se);` runs as
 the payment with `pv` true, or as `pv` false. -/

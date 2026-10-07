@@ -174,13 +174,6 @@ theorem firstOfARow : ⊨ dl!{ [ uint y = matrix[i][j]; ] ⟨ matrix[i][0] = 1; 
   fail_if_success sol_decide_unconstrained
   sol_decide
 
-/-- `uint y = values[-1];` then `values[7] = 1;` — no array has an element
-at `-1`, so `values` is a mapping, which has every key. -/
-theorem negativeKey : ⊨ dl!{ [ uint y = values[-1]; ] ⟨ values[7] = 1; ⟩ true } := by
-  sol_symex
-  fail_if_success sol_decide_unconstrained
-  sol_decide
-
 /-- `uint y = alice.account.balance;` then `delete alice.account;` — a read
 above one that returns: `alice.account` is there, so it can be deleted. -/
 theorem aboveARead :

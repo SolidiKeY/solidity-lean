@@ -8,8 +8,8 @@ import Solidity.Calculus.Core.SoundLocal
 sound in the shape of `Calculus/Core/SoundKit.lean`; `revert` and blocks are
 `Calculus/Core/Logic.lean`'s `Stmt.step_sound_revert` and
 `Stmt.step_sound_block`.  A split
-on a simple condition is sound in a typed state (`State.Typed`: the
-condition holds a `bool`); a captured `if` condition is sound when its
+on a simple condition that reads as no `bool` is stuck
+(`Premise.Sound.splitStuck`); a captured `if` condition is sound when its
 branches, weakened under the captured local, run as before (`WkRuns`, the
 run of `Prog.wk up`; the call arms of `Calculus/Core/Blocks.lean` prove the
 run of a weakened block).
@@ -136,30 +136,44 @@ theorem sound_iteCapture {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C 
     exact Res.Sim.refl _
 
 /-- **An `if`** (`iteStep`). -/
-theorem iteStep_sound (k : Nat) (hσ : σ.Typed) (hwk : WkRuns σ (.val .bool)) {Γ₁ Γ₂ : Ctx}
+theorem iteStep_sound (k : Nat) (hwk : WkRuns σ (.val .bool)) {Γ₁ Γ₂ : Ctx}
     (c : Val C Γ .bool) (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) (q : Premise C Γ Γ)
     (hs : iteStep k c thn els = some q) : Premise.Sound m (.ite c thn els) q σ := by
   cases c with
   | simple se =>
     cases hs
-    exact fun ω κ φ => Stmt.step_sound_ifElseSplit se thn els σ (Simple.eval_bool σ hσ se) ω κ φ
+    obtain ⟨v, hv⟩ := Simple.eval_ok σ se
+    cases v with
+    | bool b => exact fun ω κ φ h _ => Stmt.step_sound_ifElseSplit se thn els σ ⟨b, hv⟩ ω κ φ h
+    | int n =>
+      refine Premise.Sound.splitStuck σ (fun h => nomatch (holds_isBool se σ hv true).1 h)
+        (fun h => nomatch (holds_isBool se σ hv false).1 h) ?_
+      rw [Stmt.run_ite]
+      simp only [Run.ite, Val.eval, hv, Res.bind_ok]
   | _ => cases hs; exact sound_iteCapture σ _ thn els _ hwk
 
 /-- **A `require`** (`requireStep`). -/
-theorem requireStep_sound (k : Nat) (hσ : σ.Typed) (c : Val C Γ .bool) (q : Premise C Γ Γ)
+theorem requireStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
     (hs : requireStep k c = some q) : Premise.Sound m (.require c) q σ := by
   cases c with
   | simple se =>
     cases hs
-    exact fun ω κ φ => Stmt.step_sound_requireSimple se σ (Simple.eval_bool σ hσ se) ω κ φ
-  | _ => cases hs; exact fun ω κ φ => Stmt.step_sound_requireConditionCapture k _ σ ω κ φ
+    obtain ⟨v, hv⟩ := Simple.eval_ok σ se
+    cases v with
+    | bool b => exact fun ω κ φ h _ => Stmt.step_sound_requireSimple se σ ⟨b, hv⟩ ω κ φ h
+    | int n =>
+      refine Premise.Sound.splitStuck σ (fun h => nomatch (holds_isBool se σ hv true).1 h)
+        (fun h => nomatch (holds_isBool se σ hv false).1 h) ?_
+      rw [Stmt.run_require]
+      simp only [Val.eval, hv, Res.bind_ok, guardOk]
+  | _ => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_requireConditionCapture k _ σ ω κ φ h
 
 /-- **An `assert`** (`assertStep`). -/
 theorem assertStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
     (hs : assertStep k c = some q) : Premise.Sound m (.assert c) q σ := by
   cases c with
-  | simple se => cases hs; exact fun ω κ φ => Stmt.step_sound_assertSimple se σ ω κ φ
-  | _ => cases hs; exact fun ω κ φ => Stmt.step_sound_assertConditionCapture k _ σ ω κ φ
+  | simple se => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_assertSimple se σ ω κ φ h
+  | _ => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_assertConditionCapture k _ σ ω κ φ h
 
 /-! ### Declarations, `revert`, blocks -/
 

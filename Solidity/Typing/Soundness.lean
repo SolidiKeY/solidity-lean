@@ -31,7 +31,7 @@ type (`Loc.resolve_wt`), the memory reads find a slot of the path's type
 (`MLoc.read_wt`), a value evaluates to one of its type (`Val.eval_wt`),
 and each statement's write stores what the place holds.  The scopes only
 push and pop locals, so they keep any invariant of this shape
-(`Invariant`), which `Reachability.lean` and `Constructibility.lean` reuse.
+(`RunInv`), which `Reachability.lean` and `Constructibility.lean` reuse.
 -/
 
 namespace Solidity
@@ -752,7 +752,7 @@ statements without sub-programs are each invariant's own (`Stmt.run_wt`,
 
 /-- An invariant of scoped runs: a part on the global state, a part on each
 local, kept as the store typing `H` grows, and blind to the locals. -/
-structure Invariant (C : Contract) where
+structure RunInv (C : Contract) where
   glob : HeapTy → Semantics.State → Prop
   loc : HeapTy → (t : LTy) → t.Denote C → Prop
   loc_mono : ∀ {H H' : HeapTy} {t : LTy} {v : t.Denote C}, H.Extends H' → loc H t v →
@@ -760,9 +760,9 @@ structure Invariant (C : Contract) where
   reglob : ∀ {H : HeapTy} {τ : Semantics.State} {Γ : Ctx} (e : Env C Γ), glob H τ →
     glob H (State.ofGlob τ e).glob
 
-namespace Invariant
+namespace RunInv
 
-variable (I : Invariant C)
+variable (I : RunInv C)
 
 /-- The invariant holds of a state under the store typing `H`. -/
 def Holds {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
@@ -856,7 +856,7 @@ theorem keeps_revert {Γ : Ctx} :
     I.Keeps (fun _ : State C Γ => (.error .revert : Res (State C Γ))) :=
   fun _ _ _ _ h => nomatch h
 
-end Invariant
+end RunInv
 
 /-- **Induction over a loop's run**: `P` holds of the first state and of
 every state an iteration from a state in `P` goes on in, and `Q` of every
@@ -891,9 +891,9 @@ theorem Loop.run_induct {α : Type} {body : α → Res α} {c : α → Res Value
     exact key n σ _ h0 hn
   · exact hdiv
 
-namespace Invariant
+namespace RunInv
 
-variable {I : Invariant C}
+variable {I : RunInv C}
 
 theorem keeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁)
     {body : State C Γ → Res (State C Γ₁)} (hb : I.Keeps body) : I.Keeps (Run.loop c x body) := by
@@ -959,7 +959,7 @@ theorem keeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C
       (hσ.withEnv (Env.All.append κ (hcode H c r hr) hσ.2)) h
   · exact hoth.drop h₄ H σ σ' hσ h
 
-end Invariant
+end RunInv
 
 /-! ## The typed locals -/
 
@@ -991,7 +991,7 @@ theorem _root_.Solidity.Semantics.StateWT.reglob {H : HeapTy} {L : Layout} {τ :
 
 /-- Type soundness's invariant: the global part well-typed, every local of
 its type. -/
-def wtInv (C : Contract) : Invariant C where
+def wtInv (C : Contract) : RunInv C where
   glob H τ := StateWT H C.layout τ
   loc := LTy.WT C
   loc_mono hext h := LTy.WT.mono hext h
@@ -1758,24 +1758,24 @@ theorem Stmt.keeps_wt : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (wtInv C).Kee
   | _, _, .deleteMem p hd => keeps_deleteMem p hd
   | _, _, .assignNew l n hn => keeps_assignNew l n hn
   | _, _, .ite c thn els =>
-    Invariant.keeps_ite c thn.ext els.ext (Prog.keeps_wt thn) (Prog.keeps_wt els)
-  | _, _, .require c => Invariant.keeps_require c
-  | _, _, .assert c => Invariant.keeps_assert c
-  | _, _, .revert => Invariant.keeps_revert
+    RunInv.keeps_ite c thn.ext els.ext (Prog.keeps_wt thn) (Prog.keeps_wt els)
+  | _, _, .require c => RunInv.keeps_require c
+  | _, _, .assert c => RunInv.keeps_assert c
+  | _, _, .revert => RunInv.keeps_revert
   | _, _, .call _ args ret body =>
-    Invariant.keeps_call args ret body.ext (fun _ _ _ hwt h => Args.eval_wt hwt args h)
+    RunInv.keeps_call args ret body.ext (fun _ _ _ hwt h => Args.eval_wt hwt args h)
       (fun _ _ _ _ hτ h => CallRet.enter_wt ret hτ h) (Prog.keeps_wt body)
   | _, _, .tryCall call rets ok err code pnc other =>
-    Invariant.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
+    RunInv.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
       (fun _ _ _ _ h => Binders.decode_wt rets h) (fun _ _ _ h => CodeBinder.decode_wt code h)
       (Prog.keeps_wt ok) (Prog.keeps_wt err) (Prog.keeps_wt pnc) (Prog.keeps_wt other)
-  | _, _, .loop _ c body => Invariant.keeps_loop c body.ext (Prog.keeps_wt body)
-  | _, _, .block body => Invariant.keeps_block body.ext (Prog.keeps_wt body)
+  | _, _, .loop _ c body => RunInv.keeps_loop c body.ext (Prog.keeps_wt body)
+  | _, _, .block body => RunInv.keeps_block body.ext (Prog.keeps_wt body)
 
 /-- **Type soundness, block level.** -/
 theorem Prog.keeps_wt : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (wtInv C).Keeps (Prog.runR P)
-  | _, _, .nil => Invariant.keeps_nil
-  | _, _, .cons s P => Invariant.keeps_seq (Stmt.keeps_wt s) (Prog.keeps_wt P)
+  | _, _, .nil => RunInv.keeps_nil
+  | _, _, .cons s P => RunInv.keeps_seq (Stmt.keeps_wt s) (Prog.keeps_wt P)
 
 end
 

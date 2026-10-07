@@ -13,7 +13,7 @@ today's.  Every loop head is a state the body's frame allows from the first
 iterations (`Loop.run_induct`).  Under the diamond the body is read under the
 variant's local (`Prog.wk up`), which it therefore keeps (`Prog.run_wk`), and
 the variant bounds the iterations left (`Loop.run_variant`), and the
-rule's cover (`Fml.invCases`) that the condition reads as a `bool`.
+rule's cover (`Premise.cover`) that the condition reads as a `bool`.
 
 The body's own locals are popped at the end of every iteration, so the
 frame need not list them (`Calculus/Core/Blocks.lean`): the anonymised
@@ -46,7 +46,7 @@ theorem Premise.Sound.whileInvBox (k : Nat) (I c : Val C Γ .bool) (dec : Option
       (.inv (.isBoolD I.lower true) xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
         (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
         .refl (.push .refl) body (.isBoolD I.lower true)) σ := by
-  intro _ _ ω κ φ hp
+  intro _ _ ω κ φ hp _
   obtain ⟨hI0, hA⟩ := hp
   obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
   show Modality.afterRunC .box _ _
@@ -179,7 +179,7 @@ section Diamond
 
 variable {Γ Γ₁ : Ctx}
 
-/-- **`whileInvariantDiamond` is sound**: the cover (`Fml.invCases`) says the
+/-- **`whileInvariantDiamond` is sound**: the cover (`Premise.cover`) says the
 condition reads as a `bool` at every head. -/
 theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
     (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
@@ -190,7 +190,7 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   rw [hf] at hp
   dsimp only at hp
   cases hp
-  intro _ _ ω κ φ hp
+  intro _ _ ω κ φ hp hcv
   obtain ⟨hI0, hA⟩ := hp
   obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
   have key := Loop.run_variant (body := fun τ => (Prog.run τ body).map (State.drop body.ext))
@@ -210,7 +210,8 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     exact (holds_modalK .diamond ω κ φ τf).1 hG
   intro τ ⟨hg, ha, hI⟩
   have hX := holds_anonHavoc hxs hg ha hA hI
-  change Modality.afterC .diamond _ (Upd.apply τ _) at hX
+  have hC := holds_anonHavoc hxs hg ha hcv hI
+  change Modality.afterC .diamond _ (Upd.apply τ _) at hX hC
   have hU : ((Upd.nil.decl (fie k) (Rhs.val (p := .uint) d.lower)).decl (fse k)
       (Rhs.val (p := .bool) c.lower)).apply τ =
       (d.eval τ >>= fun dv => c.eval τ >>= fun cv =>
@@ -220,15 +221,16 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       pure (τ₁.push (t := .val .bool) (← c.lower.eval τ))) = _
     rw [Val.eval_lower, Val.eval_lower]
     cases d.eval τ <;> cases c.eval τ <;> rfl
-  rw [hU] at hX
+  rw [hU] at hX hC
   cases hd : d.eval τ with
   | error e => rw [hd] at hX; exact False.elim hX
   | ok dv =>
   cases hc : c.eval τ with
   | error e => rw [hd, hc] at hX; exact False.elim hX
   | ok cv =>
-  rw [hd, hc] at hX
-  obtain ⟨hT, hF, hcov⟩ := hX
+  rw [hd, hc] at hX hC
+  obtain ⟨hT, hF⟩ := hX
+  have hcov := hC
   have hcb : ∃ b : Bool, cv = .bool b :=
     Classical.byContradiction fun hn => hcov
       ⟨fun h => hn ⟨true, Except.ok.inj ((holds_isBoolD _ _ _).1 h)⟩,
@@ -299,7 +301,7 @@ closed to `false`. -/
 theorem Stmt.stepSound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ)
     (c : Val C Γ .bool) (body : Prog C Γ Γ₁) :
     Stmt.StepSound k m (.loop a c body) := by
-  intro σ _ p hp
+  intro σ p hp
   change loopStep k m a c body = some p at hp
   cases a with
   | unwind n =>

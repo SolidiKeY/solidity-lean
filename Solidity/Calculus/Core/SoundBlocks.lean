@@ -170,15 +170,15 @@ theorem Premise.Sound.whileUnwind (n : Nat) (c : Val C Γ .bool) (body : Prog C 
 /-- `loopExit`: `⟨[ while (nse) body ]⟩ ⇝ nse = FALSE ⟹ ⟨[ ]⟩ ; nse = FALSE`. -/
 theorem Premise.Sound.loopExit (c : Val C Γ .bool) (body : Prog C Γ Γ₁) (σ : State C Γ) :
     Premise.Sound m (.loop (.unwind 0) c body) (.check (Fml.isBoolD c.lower false)) σ :=
-  fun ω κ φ => Premise.sound_check σ (fun h => by
+  fun ω κ φ hp _ => Premise.sound_check σ (fun h => by
     rw [Stmt.run_loop, Loop.run_unfold]
-    simp only [Loop.step, (holds_isBoolD_lower c σ false).1 h]) ω κ φ
+    simp only [Loop.step, (holds_isBoolD_lower c σ false).1 h]) ω κ φ hp
 
 /-- A rule that closes its goal to `false` is sound: `false` gives nothing
 to prove from (`whileClose`, `whileNoVariantDiamond`, `tryCallDiamond`). -/
 theorem Premise.Sound.fail {Γ' : Ctx} (s : Stmt C Γ Γ') (σ : State C Γ) :
     Premise.Sound m s (.done false) σ :=
-  fun ω κ φ => Premise.sound_done σ false (fun h => absurd h (by decide)) ω κ φ
+  fun ω κ φ h _ => Premise.sound_done σ false (fun h => absurd h (by decide)) ω κ φ h
 
 end Loops
 
@@ -277,7 +277,7 @@ theorem Premise.Sound.tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx} (call : Ex
     Premise.Sound .box (.tryCall call rets ok err code pnc other)
       (.branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩]) σ := by
   intro _ _ ω κ φ
-  rintro ⟨h1, h2, h3, h4⟩
+  rintro ⟨h1, h2, h3, h4⟩ _
   show Modality.afterRunC .box _ _
   rw [run_cons_frames]
   have herr : ∀ {α : Type} {e : Halt} (r : Res α), NoPanic r → r = .error e →
@@ -328,8 +328,8 @@ theorem Stmt.stepSound_tryCall (k : Nat) (m : Modality) {ρ κc Γ₁ Γe Γ₃ 
     (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) :
     Stmt.StepSound k m (.tryCall call rets ok err code pnc other) := by
   cases m with
-  | box => exact Stmt.StepSound.of_eq rfl fun σ _ => Premise.Sound.tryCallBox call rets ok err code pnc other σ
-  | diamond => exact Stmt.StepSound.of_eq rfl fun σ _ => Premise.Sound.fail _ σ
+  | box => exact Stmt.StepSound.of_eq rfl fun σ => Premise.Sound.tryCallBox call rets ok err code pnc other σ
+  | diamond => exact Stmt.StepSound.of_eq rfl fun σ => Premise.Sound.fail _ σ
 
 end Try
 

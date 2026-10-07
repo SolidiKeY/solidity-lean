@@ -32,7 +32,7 @@ writes at one path (`Wrote`), which is why every fill starts from the
 default and from a path where writing what is there changes nothing.
 
 The other direction is `Prog.run_tight`, an invariant of the scoped run
-(`Invariant`, `Typing/Soundness.lean`) beside `Prog.run_canon`'s, for a
+(`RunInv`, `Typing/Soundness.lean`) beside `Prog.run_canon`'s, for a
 contract whose types have well-formed
 defaults all the way down (`Ty.okDeep`).  It needs two facts about paths:
 a word is written only into a live slot (`IdxLive`, from
@@ -2878,7 +2878,7 @@ end Leaves
 /-! #### The run keeps the state tight -/
 
 /-- What a run keeps: the state well-typed, canonical and tight. -/
-def tightInv (C : Contract) : Invariant C where
+def tightInv (C : Contract) : RunInv C where
   glob H τ := (canonInv C).glob H τ ∧ Solidity.Tight C τ
   loc H t v := LTy.WT C H t v ∧ LTy.Keys C t v
   loc_mono hext h := ⟨LTy.WT.mono hext h.1, h.2⟩
@@ -3002,12 +3002,12 @@ theorem Stmt.keeps_tight (hd : DeepOk C) :
     keepsT_of (keepsC_assignNew l n hn) fun _ _ _ hwt hc ht h =>
       tight_assignNew hd hwt hc ht l n hn h
   | _, _, .ite c thn els =>
-    Invariant.keeps_ite c thn.ext els.ext (Prog.keeps_tight hd thn) (Prog.keeps_tight hd els)
-  | _, _, .require c => Invariant.keeps_require c
-  | _, _, .assert c => Invariant.keeps_assert c
-  | _, _, .revert => Invariant.keeps_revert
+    RunInv.keeps_ite c thn.ext els.ext (Prog.keeps_tight hd thn) (Prog.keeps_tight hd els)
+  | _, _, .require c => RunInv.keeps_require c
+  | _, _, .assert c => RunInv.keeps_assert c
+  | _, _, .revert => RunInv.keeps_revert
   | _, _, .call _ args ret body =>
-    Invariant.keeps_call args ret body.ext
+    RunInv.keeps_call args ret body.ext
       (fun _ _ _ h ha => Env.All.and (Args.eval_wt (RunCanon.wt (RunTight.canon h)) args ha)
         (Args.eval_keys args ha))
       (fun _ _ _ _ hτ he => by
@@ -3016,19 +3016,19 @@ theorem Stmt.keeps_tight (hd : DeepOk C) :
         exact ⟨H', hext, ⟨hg, hτ.2.of_eq hs⟩, Env.All.and hr hk⟩)
       (Prog.keeps_tight hd body)
   | _, _, .tryCall call rets ok err code pnc other =>
-    Invariant.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
+    RunInv.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
       (fun _ _ r _ h => Env.All.and (Binders.decode_wt rets h) (Binders.keys rets r))
       (fun _ _ r h => Env.All.and (CodeBinder.decode_wt code h) (CodeBinder.keys code r))
       (Prog.keeps_tight hd ok) (Prog.keeps_tight hd err) (Prog.keeps_tight hd pnc)
       (Prog.keeps_tight hd other)
-  | _, _, .loop _ c body => Invariant.keeps_loop c body.ext (Prog.keeps_tight hd body)
-  | _, _, .block body => Invariant.keeps_block body.ext (Prog.keeps_tight hd body)
+  | _, _, .loop _ c body => RunInv.keeps_loop c body.ext (Prog.keeps_tight hd body)
+  | _, _, .block body => RunInv.keeps_block body.ext (Prog.keeps_tight hd body)
 
 /-- **Tightness, block level.** -/
 theorem Prog.keeps_tight (hd : DeepOk C) :
     {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (tightInv C).Keeps (Prog.runR P)
-  | _, _, .nil => Invariant.keeps_nil
-  | _, _, .cons s P => Invariant.keeps_seq (Stmt.keeps_tight hd s) (Prog.keeps_tight hd P)
+  | _, _, .nil => RunInv.keeps_nil
+  | _, _, .cons s P => RunInv.keeps_seq (Stmt.keeps_tight hd s) (Prog.keeps_tight hd P)
 
 end
 

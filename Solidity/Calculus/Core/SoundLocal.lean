@@ -4,7 +4,7 @@ import Solidity.Calculus.Core.SoundCapture
 # Soundness of the arms on locals
 
 `Calculus/Core/Arms.lean`'s `localStep` (with the `&&`/`||` short
-circuits, which need the local to hold a `bool`: `State.Typed`),
+circuits, stuck on both sides where the local holds no `bool`),
 `rebindStep`, `opStep`, `incStep` and `OpLoc.unfoldRecv`, each sound in the
 shape of `Calculus/Core/SoundKit.lean` (`Premise.Sound`).  A capture is
 `Calculus/Core/SoundCapture.lean`'s, its statement read on the pushed state
@@ -22,16 +22,19 @@ section Local
 
 variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
 
-/-- A simple condition holds a `bool` in a typed state. -/
-theorem Simple.eval_bool (hσ : σ.Typed) (se : Simple C Γ .bool) :
-    ∃ b : Bool, se.eval σ = .ok (.bool b) := by
-  cases se with
-  | lit n h => simp only [PrimTy.inRange, Bool.false_eq_true] at h
-  | bool b => exact ⟨b, rfl⟩
-  | «local» i =>
-    obtain ⟨b, hb⟩ := hσ i
-    exact ⟨b, by rw [← hb]; rfl⟩
-  | env k hp => cases hp
+/-- **A split whose statement is stuck** (a condition that reads as no
+`bool`), neither condition holding: the box holds of a stuck run, and the
+diamond's cover (`Premise.cover`) excludes it. -/
+theorem Premise.Sound.splitStuck {b : BlockKind} {Δ₁ Δ₂ : Ctx} {c c' : Fml C Γ}
+    {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂} {s : Stmt C Γ Γ} (hn : ¬ holds σ c) (hn' : ¬ holds σ c')
+    (hst : s.run σ = .error .stuck) : Premise.Sound m s (.split b c c' P Q) σ := by
+  intro _ _ ω κ φ _ hcov
+  cases m with
+  | box =>
+    show Modality.afterRunC .box _ _
+    rw [run_cons_frames, hst]
+    exact ⟨trivial, fun h => nomatch h⟩
+  | diamond => exact (hcov ⟨hn, hn'⟩).elim
 
 theorem evalBinop_error {op : BinOp} (hsc : op.shortCircuits = false) (p : PrimTy) (lv : Value)
     (h : Halt) : evalBinop op p lv (.error h) = .error h := by
@@ -112,17 +115,26 @@ theorem evalBinop_or_false (bv : Value) :
 
 /-- `logicalAndShortCircuitRhs`: `v = se && nse;` is
 `if (se) { v = nse; v = v && true; } else v = false;`. -/
-theorem sound_shortAnd (hσ : σ.Typed) (i : Idx Γ (.val .bool)) (ha : BinOp.and.accepts .bool = true)
+theorem sound_shortAnd (i : Idx Γ (.val .bool)) (ha : BinOp.and.accepts .bool = true)
     (hq : BinOp.and.ret .bool = .bool) (a : Simple C Γ .bool) (b : Val C Γ .bool) :
     Premise.Sound m (.assignLocal i (.binop .and ha hq (.simple a) b))
       (.unfold (.cons (.ite (.simple a)
         (.cons (.assignLocal i b)
           (.cons (.assignLocal i (.binop .and rfl rfl (.simple (.local i)) (.simple (.bool true)))) .nil))
         (.cons (.assignLocal i (.simple (.bool false))) .nil)) .nil) .refl) σ := by
-  obtain ⟨ab, hab⟩ := Simple.eval_bool σ hσ a
+  obtain ⟨av, hav⟩ := Simple.eval_ok σ a
   refine Premise.Sound.unfoldSim ?_
   rw [Res.map_drop_refl, Prog.run_single, Stmt.run_ite, Stmt.run_assignLocal]
-  simp only [Run.ite, Run.assignLocal, Val.eval, hab, Res.bind_ok]
+  simp only [Run.ite, Run.assignLocal, Val.eval, hav, Res.bind_ok]
+  cases av with
+  | int n =>
+    have hnp : NoPanic (b.eval σ) := Val.eval_noPanic σ b
+    cases hb : b.eval σ with
+    | error h =>
+      show Res.Sim (.error .stuck) (.error h)
+      exact ⟨fun e => (nomatch e), fun e => absurd (hb.trans (congrArg _ e)) hnp⟩
+    | ok bv => exact Res.Sim.refl (.error .stuck)
+  | bool ab =>
   cases ab with
   | false => exact Res.Sim.refl _
   | true =>
@@ -138,7 +150,7 @@ theorem sound_shortAnd (hσ : σ.Typed) (i : Idx Γ (.val .bool)) (ha : BinOp.an
 
 /-- `logicalOrShortCircuitRhs`: `v = se || nse;` is
 `if (se) v = true; else { v = nse; v = v || false; }`. -/
-theorem sound_shortOr (hσ : σ.Typed) (i : Idx Γ (.val .bool)) (ha : BinOp.or.accepts .bool = true)
+theorem sound_shortOr (i : Idx Γ (.val .bool)) (ha : BinOp.or.accepts .bool = true)
     (hq : BinOp.or.ret .bool = .bool) (a : Simple C Γ .bool) (b : Val C Γ .bool) :
     Premise.Sound m (.assignLocal i (.binop .or ha hq (.simple a) b))
       (.unfold (.cons (.ite (.simple a)
@@ -146,10 +158,19 @@ theorem sound_shortOr (hσ : σ.Typed) (i : Idx Γ (.val .bool)) (ha : BinOp.or.
         (.cons (.assignLocal i b)
           (.cons (.assignLocal i (.binop .or rfl rfl (.simple (.local i)) (.simple (.bool false)))) .nil)))
         .nil) .refl) σ := by
-  obtain ⟨ab, hab⟩ := Simple.eval_bool σ hσ a
+  obtain ⟨av, hav⟩ := Simple.eval_ok σ a
   refine Premise.Sound.unfoldSim ?_
   rw [Res.map_drop_refl, Prog.run_single, Stmt.run_ite, Stmt.run_assignLocal]
-  simp only [Run.ite, Run.assignLocal, Val.eval, hab, Res.bind_ok]
+  simp only [Run.ite, Run.assignLocal, Val.eval, hav, Res.bind_ok]
+  cases av with
+  | int n =>
+    have hnp : NoPanic (b.eval σ) := Val.eval_noPanic σ b
+    cases hb : b.eval σ with
+    | error h =>
+      show Res.Sim (.error .stuck) (.error h)
+      exact ⟨fun e => (nomatch e), fun e => absurd (hb.trans (congrArg _ e)) hnp⟩
+    | ok bv => exact Res.Sim.refl (.error .stuck)
+  | bool ab =>
   cases ab with
   | true => exact Res.Sim.refl _
   | false =>
@@ -164,16 +185,16 @@ theorem sound_shortOr (hσ : σ.Typed) (i : Idx Γ (.val .bool)) (ha : BinOp.or.
       | ok r => exact Res.Sim.of_eq (congrArg Except.ok (State.setLocal_setLocal σ i bv r))
 
 /-- `logicalAndShortCircuitRhs`, `logicalOrShortCircuitRhs` (`shortStep`). -/
-theorem shortStep_sound (hσ : σ.Typed) {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
+theorem shortStep_sound {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
     (ha : op.accepts p' = true) (hq : op.ret p' = p) (a : Simple C Γ p') (b : Val C Γ p')
     (q : Premise C Γ Γ) (hs : shortStep i op ha hq a b = some q) :
     Premise.Sound m (.assignLocal i (.binop op ha hq (.simple a) b)) q σ := by
   cases op <;> cases p' <;> (try cases hs) <;> subst hq <;> cases hs
-  · exact sound_shortAnd σ hσ i ha rfl a b
-  · exact sound_shortOr σ hσ i ha rfl a b
+  · exact sound_shortAnd σ i ha rfl a b
+  · exact sound_shortOr σ i ha rfl a b
 
 /-- `binopUnfoldRight`, or the short circuit of `&&`/`||`. -/
-theorem binopRight_sound (k : Nat) (hσ : σ.Typed) {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
+theorem binopRight_sound (k : Nat) {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
     (ha : op.accepts p' = true) (hq : op.ret p' = p) (a : Simple C Γ p') (b : Val C Γ p')
     (q : Premise C Γ Γ)
     (hs : (if op.shortCircuits then shortStep i op ha hq a b
@@ -182,10 +203,10 @@ theorem binopRight_sound (k : Nat) (hσ : σ.Typed) {p p' : PrimTy} (i : Idx Γ 
     Premise.Sound m (.assignLocal i (.binop op ha hq (.simple a) b)) q σ := by
   cases hsc : op.shortCircuits
   · rw [hsc] at hs; cases hs; exact sound_binopRight σ i op ha hq hsc a b _
-  · rw [hsc] at hs; exact shortStep_sound σ hσ i op ha hq a b q hs
+  · rw [hsc] at hs; exact shortStep_sound σ i op ha hq a b q hs
 
 /-- **A local assigned** (`localStep`). -/
-theorem localStep_sound (k : Nat) (hσ : σ.Typed) {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p)
+theorem localStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p)
     (q : Premise C Γ Γ) (hs : localStep k i v = some q) :
     Premise.Sound m (.assignLocal i v) q σ := by
   cases v with
@@ -200,12 +221,12 @@ theorem localStep_sound (k : Nat) (hσ : σ.Typed) {p : PrimTy} (i : Idx Γ (.va
     | simple a =>
       cases b with
       | simple b => cases hs; exact sound_setLocal σ i _
-      | _ => exact binopRight_sound σ k hσ i op ha hq a _ q hs
-    | _ => cases hs; exact fun ω κ φ => Stmt.step_sound_binopUnfoldLeft k i op ha hq _ b σ ω κ φ
+      | _ => exact binopRight_sound σ k i op ha hq a _ q hs
+    | _ => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_binopUnfoldLeft k i op ha hq _ b σ ω κ φ h
   | unop op ha hq a =>
     cases a with
     | simple a => cases hs; exact sound_setLocal σ i _
-    | _ => cases hs; exact fun ω κ φ => Stmt.step_sound_unopCapture k i op ha hq _ σ ω κ φ
+    | _ => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_unopCapture k i op ha hq _ σ ω κ φ h
   | ternary c a b => exact ternaryStep_sound σ k (.local i) c a b q hs
   | readMem l =>
     exact MHole.readStep_sound σ k (.local i) (fun _ _ _ _ _ h => by cases h; exact sound_setLocal σ i _)

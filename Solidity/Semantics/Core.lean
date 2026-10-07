@@ -282,6 +282,11 @@ def MLoc.addr (σ : State C Γ) {T : Ty} : MLoc C Γ T → Res Semantics.Addr
     let id ← (← b.mval σ).asRef
     pure (.memoryIndex id (← (← i.eval σ).asInt))
 
+/-- A memory write is a write at its location's address. -/
+theorem MLoc.write_eq (σ : State C Γ) (mv : MVal) {T : Ty} (l : MLoc C Γ T) :
+    l.write σ mv = l.addr σ >>= fun a => σ.withGlob <$> Solidity.writeAddr σ.glob mv a := by
+  cases l <;> simp only [MLoc.write, MLoc.addr, Solidity.writeAddr, bind_assoc, pure_bind]
+
 /-- `x ⊕= v` on a local. -/
 def opLocal (σ : State C Γ) (op : BinOp) (p : PrimTy) (i : Idx Γ (.val p)) (v : Value) :
     Res (State C Γ) := do

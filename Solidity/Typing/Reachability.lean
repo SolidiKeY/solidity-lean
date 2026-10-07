@@ -24,7 +24,7 @@ mapping type, which no object satisfies), and a copy back never produces a
 struct missing its mapping.
 
 `Prog.run_canon` is the preservation theorem (the scoped run's
-`Invariant` with `Canon` on the global part, `canonInv`), `reachable_canon`
+`RunInv` with `Canon` on the global part, `canonInv`), `reachable_canon`
 its corollary from a contract's initial state (`Reachable`: a scoped program
 `Core.Prog C [] Γ'` runs there, by the scoped interpreter; the untyped one
 is not related to it yet), and the two refutations the
@@ -1267,7 +1267,7 @@ open SemanticsProperties (HeapWellFormed)
 variable {C : Contract}
 
 /-- What a run keeps: the state well-typed, and canonical. -/
-def canonInv (C : Contract) : Invariant C where
+def canonInv (C : Contract) : RunInv C where
   glob H τ := StateWT H C.layout τ ∧ Canon C H τ
   loc := LTy.WT C
   loc_mono hext h := LTy.WT.mono hext h
@@ -1823,26 +1823,26 @@ theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv 
   | _, _, .deleteMem p hd => keepsC_deleteMem p hd
   | _, _, .assignNew l n hn => keepsC_assignNew l n hn
   | _, _, .ite c thn els =>
-    Invariant.keeps_ite c thn.ext els.ext (Prog.keeps_canon thn) (Prog.keeps_canon els)
-  | _, _, .require c => Invariant.keeps_require c
-  | _, _, .assert c => Invariant.keeps_assert c
-  | _, _, .revert => Invariant.keeps_revert
+    RunInv.keeps_ite c thn.ext els.ext (Prog.keeps_canon thn) (Prog.keeps_canon els)
+  | _, _, .require c => RunInv.keeps_require c
+  | _, _, .assert c => RunInv.keeps_assert c
+  | _, _, .revert => RunInv.keeps_revert
   | _, _, .call _ args ret body =>
-    Invariant.keeps_call args ret body.ext
+    RunInv.keeps_call args ret body.ext
       (fun _ _ _ hcn h => Args.eval_wt (RunCanon.wt hcn) args h)
       (fun _ _ _ _ hτ h => CallRet.enter_canon ret hτ.1 hτ.2 h) (Prog.keeps_canon body)
   | _, _, .tryCall call rets ok err code pnc other =>
-    Invariant.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
+    RunInv.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
       (fun _ _ _ _ h => Binders.decode_wt rets h) (fun _ _ _ h => CodeBinder.decode_wt code h)
       (Prog.keeps_canon ok) (Prog.keeps_canon err) (Prog.keeps_canon pnc)
       (Prog.keeps_canon other)
-  | _, _, .loop _ c body => Invariant.keeps_loop c body.ext (Prog.keeps_canon body)
-  | _, _, .block body => Invariant.keeps_block body.ext (Prog.keeps_canon body)
+  | _, _, .loop _ c body => RunInv.keeps_loop c body.ext (Prog.keeps_canon body)
+  | _, _, .block body => RunInv.keeps_block body.ext (Prog.keeps_canon body)
 
 /-- **Canonicity, block level.** -/
 theorem Prog.keeps_canon : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (canonInv C).Keeps (Prog.runR P)
-  | _, _, .nil => Invariant.keeps_nil
-  | _, _, .cons s P => Invariant.keeps_seq (Stmt.keeps_canon s) (Prog.keeps_canon P)
+  | _, _, .nil => RunInv.keeps_nil
+  | _, _, .cons s P => RunInv.keeps_seq (Stmt.keeps_canon s) (Prog.keeps_canon P)
 
 end
 

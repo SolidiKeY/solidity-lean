@@ -402,12 +402,6 @@ theorem MLoc.eval_lower_addr {T : Ty} (l : MLoc C Γ T) : l.lower.eval σ = l.ad
   | index a b i => simp only [MLoc.lower, Tm.eval, Op2.eval, MLoc.addr, MPath.eval_lower,
       Val.eval_lower, bind_assoc]
 
-theorem MLoc.write_eq {T : Ty} (l : MLoc C Γ T) (mv : MVal) :
-    l.write σ mv = (do σ.withGlob <$> writeAddr σ.glob mv (← l.addr σ)) := by
-  cases l with
-  | field b f h => simp only [MLoc.write, MLoc.addr, bind_assoc, pure_bind]; rfl
-  | index a b i => simp only [MLoc.write, MLoc.addr, bind_assoc, pure_bind]; rfl
-
 /-- A storage write through the term: the global part with the storage it
 leaves. -/
 theorem storage_glob (x : Res Semantics.State)

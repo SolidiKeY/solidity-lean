@@ -10,9 +10,8 @@ import Solidity.Calculus.Close
 by arm: each program below is read into the scoped syntax
 (`Prog.resolve`), run to its end by `Core.symex`, and its erasure compared
 with what today's `symex` leaves of the same formula, each branch's cover
-goal dropped from both (the scoped calculus has one only under the diamond's
-invariant rule, `c ∨ c'`, `Fml.invCases`).  So each premise erases to
-the one today's rule leaves, with the same fresh names.  The result is also
+goal dropped (the scoped calculus keeps it apart, `Premise.cover`).  So
+each premise erases to the one today's rule leaves, with the same fresh names.  The result is also
 quoted and added as a theorem `Core.symex n φ = ψ` by `Eq.refl`, so the
 kernel evaluates every arm too (a call's `Prog.wk`, a loop's frame).
 
@@ -26,13 +25,11 @@ namespace Solidity.Examples.Tactics.CoreStep
 
 open Solidity Lean Meta
 
-/-- A formula with each branch's cover goal dropped: today's
-(`Premise.coverFml`) or the scoped invariant rule's (`c ∨ c'`). -/
+/-- Today's formula with each branch's cover goal dropped. -/
 private partial def dropCover {C : Contract} (c : Expr) : Solidity.Fml C → Solidity.Fml C
   | .and (.imp a x) (.and (.imp a' y) z) =>
     let q := Solidity.Fml.quote c
-    if q z == q (Premise.coverFml .box a a') || q z == q (Premise.coverFml .diamond a a') ||
-        q z == q (.not (.and (.not a) (.not a'))) then
+    if q z == q (Premise.coverFml .box a a') || q z == q (Premise.coverFml .diamond a a') then
       .and (.imp a (dropCover c x)) (.imp a' (dropCover c y))
     else .and (.imp a (dropCover c x)) (.and (.imp a' (dropCover c y)) (dropCover c z))
   | .and a b => .and (dropCover c a) (dropCover c b)
@@ -57,7 +54,7 @@ private def agree (c : Expr) {C : Contract} (name : Lean.Name) (φ : Solidity.Fm
   let φc : Core.Fml C [] := .modal m Pc .nil .tt
   let ψ := Core.symex fuel φc
   let today := dropCover c (symex fuel (.modal m P .tt))
-  unless Solidity.Fml.quote c (dropCover c (ψ.erase [])) == Solidity.Fml.quote c today do
+  unless Solidity.Fml.quote c (ψ.erase []) == Solidity.Fml.quote c today do
     throwError "the erasure is not today's result:\n{← Core.legacyShow c (ψ.erase [])}\n\
       today:\n{← Core.legacyShow c today}"
   let lhs := mkAppN (mkConst ``Core.symex) #[c, Core.Quote.qCtxRaw [], toExpr fuel, Core.Fml.quote c φc]
