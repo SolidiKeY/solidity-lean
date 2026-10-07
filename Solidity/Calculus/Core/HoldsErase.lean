@@ -71,6 +71,23 @@ theorem Res.Rel.bind {α β γ δ : Type} {R : α → β → Prop} {S : γ → �
     | ok => exact h.elim
     | error e' => exact h
 
+theorem Res.Rel.bind_same {α γ δ : Type} {S : γ → δ → Prop} (x : Res α) {f : α → Res γ}
+    {g : α → Res δ} (h : ∀ a, x = .ok a → Res.Rel S (f a) (g a)) : Res.Rel S (x >>= f) (x >>= g) := by
+  cases hx : x with
+  | ok a => exact h a hx
+  | error e => rfl
+
+theorem Res.Rel.map_left {α β γ : Type} {R : α → β → Prop} {S : γ → β → Prop} {x : Res α}
+    {y : Res β} (h : Res.Rel R x y) {f : α → γ} (hf : ∀ a b, R a b → S (f a) b) :
+    Res.Rel S (x.map f) y := by
+  cases x with
+  | ok a => cases y with
+    | ok b => exact hf a b h
+    | error => exact h.elim
+  | error e => cases y with
+    | ok => exact h.elim
+    | error e' => exact h
+
 theorem Res.Rel.map {α β γ δ : Type} {R : α → β → Prop} {S : γ → δ → Prop} {x : Res α} {y : Res β}
     (h : Res.Rel R x y) {f : α → γ} {g : β → δ} (hfg : ∀ a b, R a b → S (f a) (g b)) :
     Res.Rel S (f <$> x) (g <$> y) := by
@@ -405,5 +422,119 @@ theorem Agree.dropNames {Γ Δ : Ctx} {ns : List Var} {σ : State C Δ} {τ : Se
   exact Agree.drop (by rw [List.take_append_drop]; exact hag) h hl
 
 end Thin
+
+/-! ## An update ends in agreeing states -/
+
+/-- Every local an update declares takes a name not in scope. -/
+def Upd.Fresh {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Prop
+  | _, .nil => True
+  | _, .snoc U _ => U.Fresh ns
+  | _, .decl U x _ => U.Fresh ns ∧ x ∉ U.names ns
+  | _, .pop U _ => U.Fresh ns
+  | _, .drop U _ => U.Fresh ns
+
+section Updates
+
+variable {Γ : Ctx} {ns : List Var} {σ₀ : State C Γ} {τ₀ : Semantics.State}
+
+theorem Rhs.write_erase (hag : Agree ns σ₀ τ₀) {t : LTy} (r : Rhs C Γ t) (x : Var)
+    (τ : Semantics.State) :
+    (r.erase ns x).write τ₀ τ = (fun v => τ.setEnv x (t.enc C v)) <$> r.eval σ₀ := by
+  cases r with
+  | val a =>
+    simp only [Rhs.erase, Solidity.UpdElem.write, Tm.eval_erase hag a, Srt.wl, Rhs.eval]
+    cases a.eval σ₀ <;> rfl
+  | path p =>
+    simp only [Rhs.erase, Solidity.UpdElem.write, Tm.eval_erase hag p, Srt.wl, Rhs.eval]
+    cases p.eval σ₀ <;> rfl
+  | unset => rfl
+  | mref i =>
+    simp only [Rhs.erase, Solidity.UpdElem.write, Tm.eval_erase hag i, Srt.wl, Rhs.eval]
+    cases i.eval σ₀ <;> rfl
+  | store st =>
+    simp only [Rhs.erase, Solidity.UpdElem.write, Tm.eval_erase hag st, Srt.wl, Rhs.eval]
+    cases st.eval σ₀ <;> rfl
+  | saveNet => simp only [Rhs.erase, Solidity.UpdElem.write, Rhs.eval]; rw [hag.wl]; rfl
+  | saveNetMt => rfl
+
+/-- One element written into agreeing states, read in agreeing ones. -/
+theorem UpdElem.write_erase (hag : Agree ns σ₀ τ₀) {Δ : Ctx} {ms : List Var} {σ : State C Δ}
+    {τ : Semantics.State} (hag' : Agree ms σ τ) (e : UpdElem C Γ Δ) :
+    Res.Rel (Agree ms) (e.write σ₀ σ) ((e.erase ns ms).write τ₀ τ) := by
+  rw [hag'.wl]
+  cases e with
+  | «local» i r =>
+    rw [← hag'.wl]
+    simp only [UpdElem.erase, UpdElem.write, Rhs.write_erase hag]
+    cases r.eval σ₀ with
+    | error => rfl
+    | ok v => exact hag'.setLocal i v
+  | storage st =>
+    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag st, Srt.wl]
+    cases st.eval σ₀ with
+    | error => rfl
+    | ok g => exact hag'.withGlob _
+  | memory mm =>
+    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag mm, Srt.wl]
+    cases mm.eval σ₀ with
+    | error => rfl
+    | ok g => exact hag'.withGlob _
+  | selfBalance op a =>
+    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag a, Srt.wl]
+    rw [hag.wl]
+    exact Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ => hag'.withGlob _
+  | net r op a =>
+    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag r,
+      Tm.eval_erase hag a, Srt.wl]
+    exact Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ =>
+      Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ => hag'.withGlob _
+  | pay r a =>
+    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag r,
+      Tm.eval_erase hag a, Srt.wl]
+    rw [hag.wl]
+    refine Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ =>
+      Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun k _ => ?_
+    by_cases hk : k < 0
+    · simp only [hk, ↓reduceIte]; rfl
+    · simp only [hk, ↓reduceIte]; exact hag'.withGlob _
+  | netMt r a =>
+    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag r,
+      Tm.eval_erase hag a, Srt.wl]
+    exact Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ =>
+      Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ => hag'.withGlob _
+  | setBalance a =>
+    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag a, Srt.wl]
+    exact Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ => hag'.withGlob _
+
+/-- **An update ends in agreeing states**: the untyped update of its
+erasure, read in an agreeing state, halts alike or agrees on the names of
+the context it leaves. -/
+theorem Upd.apply_erase (hag : Agree ns σ₀ τ₀) : {Δ : Ctx} → (U : Upd C Γ Δ) → U.Fresh ns →
+    Res.Rel (Agree (U.names ns)) (U.apply σ₀) (Solidity.Upd.apply (U.erase ns) τ₀)
+  | _, .nil, _ => hag
+  | _, .snoc U e, hU => by
+    show Res.Rel _ (do e.write σ₀ (← U.apply σ₀))
+      ((U.erase ns ++ [e.erase ns (U.names ns)]).foldlM (fun τ e => e.write τ₀ τ) τ₀)
+    rw [List.foldlM_append]
+    refine Res.Rel.bind (Upd.apply_erase hag U hU) fun σ' τ' h' => ?_
+    simp only [List.foldlM_cons, List.foldlM_nil, bind_pure]
+    exact UpdElem.write_erase hag h' e
+  | _, .decl U x r, hU => by
+    show Res.Rel _ (do let τ ← U.apply σ₀; pure (τ.push (← r.eval σ₀)))
+      ((U.erase ns ++ [r.erase ns x]).foldlM (fun τ e => e.write τ₀ τ) τ₀)
+    rw [List.foldlM_append]
+    refine Res.Rel.bind (Upd.apply_erase hag U hU.1) fun σ' τ' h' => ?_
+    simp only [List.foldlM_cons, List.foldlM_nil, bind_pure, Rhs.write_erase hag]
+    cases r.eval σ₀ with
+    | error => rfl
+    | ok v => exact h'.push hU.2 v
+  | _, .pop U h, hU => by
+    show Res.Rel _ ((U.apply σ₀).map (State.drop h)) (Solidity.Upd.apply (U.erase ns) τ₀)
+    exact (Upd.apply_erase hag U hU).map_left fun _ _ h' => h'.dropNames h
+  | _, .drop U h, hU => by
+    show Res.Rel _ ((U.apply σ₀).map (State.thin h)) (Solidity.Upd.apply (U.erase ns) τ₀)
+    exact (Upd.apply_erase hag U hU).map_left fun _ _ h' => h'.thin h
+
+end Updates
 
 end Solidity.Core
