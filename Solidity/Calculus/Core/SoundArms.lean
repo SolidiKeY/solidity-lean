@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.SoundKit
+import Solidity.Calculus.SoundUpdate
 
 /-!
 # Soundness of the arms of `Calculus/Core/Arms.lean` and `Step.lean`
@@ -369,5 +370,160 @@ theorem assertOk_push (c' : Val C (t :: Γ) .bool) (c : Val C Γ .bool)
   | ok v => rcases v with _ | (_ | _) <;> rfl
 
 end Push
+
+/-! ## Updates: the update ends as the statement does
+
+Step 3 of every family.  The update reads its right-hand sides in the state
+it is applied in, the statement left to right; both reach the same writes
+through the same reads, and a write of the storage (the heap) changes
+nothing else (`Calculus/SoundUpdate.lean`'s `*_with`). -/
+
+section Updates
+
+variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
+
+theorem Src.eval_lower {T : Ty} (r : Src C Γ T) : r.lower.eval σ = r.value σ := by
+  cases r with
+  | val v => simp only [Src.lower, Tm.eval, Op1.eval, Src.value, Val.eval_lower]
+  | copy p hm => simp only [Src.lower, Tm.eval, Op2.eval, Op0.eval, Src.value, SPath.eval_lower,
+      pure_bind]
+
+theorem MSrc.eval_lower {T : Ty} (r : MSrc C Γ T) : r.lower.eval σ = r.mval σ := by
+  cases r with
+  | val v => simp only [MSrc.lower, Tm.eval, Op1.eval, MSrc.mval, Val.eval_lower]
+  | ref p => simp only [MSrc.lower, Tm.eval, Op1.eval, MSrc.mval, MPath.eval_lower, bind_assoc]
+
+theorem MLoc.eval_lower_addr {T : Ty} (l : MLoc C Γ T) : l.lower.eval σ = l.addr σ := by
+  cases l with
+  | field b f h => simp only [MLoc.lower, Tm.eval, Op1.eval, MLoc.addr, MPath.eval_lower, bind_assoc]
+  | index a b i => simp only [MLoc.lower, Tm.eval, Op2.eval, MLoc.addr, MPath.eval_lower,
+      Val.eval_lower, bind_assoc]
+
+theorem MLoc.write_eq {T : Ty} (l : MLoc C Γ T) (mv : MVal) :
+    l.write σ mv = (do σ.withGlob <$> writeAddr σ.glob mv (← l.addr σ)) := by
+  cases l with
+  | field b f h => simp only [MLoc.write, MLoc.addr, bind_assoc, pure_bind]; rfl
+  | index a b i => simp only [MLoc.write, MLoc.addr, bind_assoc, pure_bind]; rfl
+
+/-- A storage write through the term: the global part with the storage it
+leaves. -/
+theorem storage_glob (x : Res Semantics.State)
+    (hx : (x >>= fun τ => pure { σ.glob with storage := τ.storage }) = x) :
+    (x >>= fun st => pure (σ.withGlob { σ.glob with storage := st.storage })) = σ.withGlob <$> x := by
+  conv => rhs; rw [← hx]
+  cases x <;> rfl
+
+/-- A heap write through the term. -/
+theorem memory_glob (x : Res Semantics.State)
+    (hx : (x >>= fun μ => pure { σ.glob with heap := μ.heap, nextId := μ.nextId }) = x) :
+    (x >>= fun μ => pure (σ.withGlob { σ.glob with heap := μ.heap, nextId := μ.nextId })) =
+      σ.withGlob <$> x := by
+  conv => rhs; rw [← hx]
+  cases x <;> rfl
+
+theorem upd1_apply (e : UpdElem C Γ Γ) : (Upd.nil.snoc e).apply σ = e.write σ σ := rfl
+
+/-- `localValueAssign`, `storageRootReadSelect`, `storageFieldReadFind`,
+`storageIndexReadMappingFind`, `storageIndexReadArrayFind`, `binopAssignment`,
+`unopAssignment`, `memoryFieldRead`, `memoryIndexReadArrayValue`,
+`storageLengthRead`, `memoryLengthRead`: `{v := e}` for `v = e;`. -/
+theorem sound_setLocal {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) :
+    Premise.Sound m (.assignLocal i v) (.setLocal i v) σ :=
+  Premise.Sound.update (by
+    show (do pure (σ.setLocal i (← v.lower.eval σ))) = Run.assignLocal i v σ
+    rw [Val.eval_lower]; rfl)
+
+/-- `storageRootWriteStore`, `storageFieldWriteSave`, `storageIndexWrite*Save`,
+`…CopySource`: `{storage := save(storage, l, src)}` for `l = src;`. -/
+theorem sound_save {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
+    Premise.Sound m (.assign l r) (.save l r) σ :=
+  Premise.Sound.update (by
+    show (do
+      let st ← Op3.eval σ.glob .save (pure σ.glob) (l.lower.eval σ) (r.lower.eval σ)
+      pure (σ.withGlob { σ.glob with storage := st.storage })) = Run.assign l r σ
+    simp only [Op3.eval, Loc.eval_lower, Src.eval_lower, Run.assign, bind_assoc, pure_bind]
+    congr 1; funext sv; congr 1; funext q
+    exact storage_glob σ _ (Solidity.State.writeStorage_with _ _ _ _))
+
+/-- `memoryToStorageStoreRoot`, `…FieldCopyRoot`, `…IndexMappingCopyRoot`,
+`…IndexArrayCopyRoot`: `{storage := save(storage, l, copyMem(memory, p))}`. -/
+theorem sound_saveMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
+    Premise.Sound m (.assignFromMem l p) (.saveMem l p) σ :=
+  Premise.Sound.update (by
+    show (do
+      let st ← Op3.eval σ.glob .save (pure σ.glob) (l.lower.eval σ)
+        (Op2.eval σ.glob .copyMem (pure σ.glob) (p.lower.eval σ))
+      pure (σ.withGlob { σ.glob with storage := st.storage })) = Run.assignFromMem l p σ
+    simp only [Op3.eval, Op2.eval, Loc.eval_lower, MPath.eval_lower, Run.assignFromMem, bind_assoc,
+      pure_bind]
+    congr 1; funext mv; congr 1; funext id; congr 1; funext sv; congr 1; funext q
+    exact storage_glob σ _ (Solidity.State.writeStorage_with _ _ _ _))
+
+/-- `storageRootDelete`, `storageFieldDelete`, `storageIndexDelete`,
+`storageIndexArrayDelete`: `{storage := delAt(storage, l)}`. -/
+theorem sound_delAt {T : Ty} (l : Loc C Γ T) : Premise.Sound m (.delete l) (.delAt l) σ :=
+  Premise.Sound.update (by
+    show (do
+      let st ← Op2.eval σ.glob .delAt (pure σ.glob) (l.lower.eval σ)
+      pure (σ.withGlob { σ.glob with storage := st.storage })) = Run.delete l σ
+    simp only [Op2.eval, Loc.eval_lower, Run.delete, bind_assoc, pure_bind]
+    congr 1; funext q; congr 1; funext cur
+    exact storage_glob σ _ (Solidity.State.saveStorage_with _ _ _ _))
+
+/-- `memoryFieldWrite`, `memoryIndexWriteArray`, `memoryFieldWriteCopy`,
+`memoryIndexWriteCopy`: `{memory := write(memory, l, src)}`. -/
+theorem sound_writeMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
+    Premise.Sound m (.assignMem l r) (.writeMem l r) σ :=
+  Premise.Sound.update (by
+    show (do
+      let μ ← Op3.eval σ.glob .write (pure σ.glob) (l.lower.eval σ) (r.lower.eval σ)
+      pure (σ.withGlob { σ.glob with heap := μ.heap, nextId := μ.nextId })) = Run.assignMem l r σ
+    simp only [Op3.eval, MLoc.eval_lower_addr, MSrc.eval_lower, Run.assignMem, MLoc.write_eq,
+      bind_assoc, pure_bind]
+    congr 1; funext mv; congr 1; funext a
+    exact memory_glob σ _ (Solidity.writeAddr_with _ _ _))
+
+/-- `storageLocalRootRebind`, `storageFieldReadBindLocalRoot`,
+`storageIndexReadMappingBindLocalRoot`, `storageIndexReadArrayBindLocalRoot`:
+`{lsv := p}`. -/
+theorem sound_rebindPath {R : RefTy} (i : Idx Γ (.alias R)) (p : SPath C Γ (.ref R)) :
+    Premise.Sound m (.rebind i (.path p)) (.upd1 (.local i (.path p.lower))) σ :=
+  Premise.Sound.update (by
+    show (do pure (σ.setLocal i (← do pure (some (← p.lower.eval σ))))) = Run.rebind i (.path p) σ
+    simp only [SPath.eval_lower, Run.rebind, ARhs.eval, bind_assoc, pure_bind])
+
+/-- `memoryRootRebind`, `memoryFieldReadAliasRoot`, `memoryIndexReadArrayMemory`:
+`{mv := p}`. -/
+theorem sound_rebindMemAlias {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (.ref R)) :
+    Premise.Sound m (.rebindMem i (.alias p)) (.upd1 (.local i (.mref p.lower))) σ :=
+  Premise.Sound.update (by
+    show (do pure (σ.setLocal i (← p.lower.eval σ))) = Run.rebindMem i (.alias p) σ
+    simp only [MPath.eval_lower, Run.rebindMem, MRhs.eval, bind_assoc, pure_bind])
+
+theorem Simple.eval_ok {p : PrimTy} (s : Simple C Γ p) : ∃ v, s.eval σ = .ok v := by
+  cases s <;> exact ⟨_, rfl⟩
+
+/-- `localOpAssign`, `storageRootOpAssign`, `storageFieldOpAssign`,
+`storageIndexMappingOpAssign`, `storageIndexArrayOpAssign`,
+`memoryFieldOpAssign`, `memoryIndexArrayOpAssign`: `{l := l ⊕ se}`. -/
+theorem sound_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (l : OpLoc C Γ p) (se : Simple C Γ p) :
+    Premise.Sound m (.opAssign op hop hp l (.simple se)) (.upd1 (l.set (l.op op se.lower))) σ := by
+  refine Premise.Sound.update ?_
+  obtain ⟨v, hv⟩ := Simple.eval_ok σ se
+  rw [upd1_apply]
+  show _ = Run.opAssign op l (.simple se) σ
+  cases l with
+  | «local» i =>
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Rhs.eval, Tm.eval, Op2.eval,
+      Simple.eval_lower, hv, evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store, opLocal,
+      bind_assoc, pure_bind]
+  | root r h => sorry
+  | field b f h => sorry
+  | index it b ie => sorry
+  | mfield b f h => sorry
+  | mindex a b ie => sorry
+
+end Updates
 
 end Solidity.Core
