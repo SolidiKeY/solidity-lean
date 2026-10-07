@@ -726,6 +726,12 @@ theorem tx (hag : Agree ns σ τ) : τ.tx = σ.tx := by
 
 end Agree
 
+/-- Binding a name of `B` leaves every other name's binding. -/
+theorem frame_setEnv {B : List Var} {τ : Semantics.State} {x : Var} {b : Binding} (hx : x ∈ B) :
+    ∀ y, y ∉ B → lookupBy y (τ.setEnv x b).env = lookupBy y τ.env := fun y hy => by
+  simp only [Semantics.State.setEnv]
+  exact lookupBy_setBy_ne (fun h => hy (by rw [h]; exact hx)) _ _
+
 /-- Two outcomes with a result: the same halt, or the same result in states
 related as `RunRel`'s. -/
 def RunRelA {Γ : Ctx} {α : Type} (ns B : List Var) (τ₀ : Semantics.State) :
@@ -801,3 +807,682 @@ theorem bind {Γ' : Ctx} {α : Type} {ns' B₂ B' : List Var} {x : Res (State C 
     | .error _, .ok _ => exact False.elim
 
 end RunRelA
+
+/-! ## Expressions read alike -/
+
+section Eval
+
+variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+
+theorem Simple.eval_erase (hag : Agree ns σ τ) {p : PrimTy} :
+    (s : Simple C Γ p) → Solidity.Simple.eval τ (s.erase ns) = s.eval σ
+  | .lit .. => rfl
+  | .bool _ => rfl
+  | .local i => by
+    simp only [Simple.erase, Solidity.Simple.eval, hag.getEnv i, Simple.eval]
+    rfl
+  | .env k _ => by simp only [Simple.erase, Solidity.Simple.eval, hag.envVal k, Simple.eval]
+
+theorem aliasPath_erase (hag : Agree ns σ τ) {R : RefTy} (i : Idx Γ (.alias R)) :
+    Solidity.aliasPath τ (i.name ns) = aliasPath σ i := by
+  simp only [Solidity.aliasPath, hag.getEnv i, aliasPath]
+  generalize (Env.get i σ.env : Option (Name × List Seg)) = v
+  rcases v with _ | ⟨r, segs⟩ <;> rfl
+
+mutual
+
+theorem SPath.resolve_erase (hag : Agree ns σ τ) :
+    {T : Ty} → (p : SPath C Γ T) → Solidity.SPath.resolve τ (p.erase ns) = p.resolve σ
+  | _, .alias i => aliasPath_erase hag i
+  | _, .loc l => l.resolve_erase hag
+
+theorem Loc.resolve_erase (hag : Agree ns σ τ) :
+    {T : Ty} → (l : Loc C Γ T) → Solidity.Loc.resolve τ (l.erase ns) = l.resolve σ
+  | _, .root .. => rfl
+  | _, .field b _ _ => by
+    simp only [Loc.erase, Solidity.Loc.resolve, b.resolve_erase hag, Loc.resolve]
+  | _, .index _ b i => by
+    simp only [Loc.erase, Solidity.Loc.resolve, b.resolve_erase hag, i.eval_erase hag,
+      hag.checkIndex, Loc.resolve]
+
+theorem MPath.mval_erase (hag : Agree ns σ τ) :
+    {T : Ty} → (p : MPath C Γ T) → Solidity.MPath.mval τ (p.erase ns) = p.mval σ
+  | _, .var i _ => by
+    simp only [MPath.erase, Solidity.MPath.mval, hag.getEnv i, MPath.mval]
+    rfl
+  | _, .loc l => l.read_erase hag
+
+theorem MLoc.read_erase (hag : Agree ns σ τ) :
+    {T : Ty} → (l : MLoc C Γ T) → Solidity.MLoc.read τ (l.erase ns) = l.read σ
+  | _, .field b _ _ => by
+    simp only [MLoc.erase, Solidity.MLoc.read, b.mval_erase hag, hag.getObj, MLoc.read]
+    rfl
+  | _, .index _ b i => by
+    simp only [MLoc.erase, Solidity.MLoc.read, b.mval_erase hag, i.eval_erase hag, hag.getObj,
+      MLoc.read]
+    rfl
+
+theorem Val.eval_erase (hag : Agree ns σ τ) :
+    {p : PrimTy} → (v : Val C Γ p) → Solidity.Val.eval τ (v.erase ns) = v.eval σ
+  | _, .simple s => s.eval_erase hag
+  | _, .read l => by
+    simp only [Val.erase, Solidity.Val.eval, l.resolve_erase hag, hag.findStorage, Val.eval]
+  | _, .binop _ _ _ a b => by
+    simp only [Val.erase, Solidity.Val.eval, a.eval_erase hag, b.eval_erase hag, Val.eval]
+  | _, .unop _ _ _ a => by
+    simp only [Val.erase, Solidity.Val.eval, a.eval_erase hag, Val.eval]
+  | _, .ternary c a b => by
+    simp only [Val.erase, Solidity.Val.eval, c.eval_erase hag, a.eval_erase hag,
+      b.eval_erase hag, Val.eval]
+  | _, .readMem l => by
+    simp only [Val.erase, Solidity.Val.eval, l.read_erase hag, Val.eval]
+  | _, .len b _ => by
+    simp only [Val.erase, Solidity.Val.eval, b.resolve_erase hag, hag.arrayLen, Val.eval]
+  | _, .mlen b _ => by
+    simp only [Val.erase, Solidity.Val.eval, b.mval_erase hag, hag.memArrayLen, Val.eval]
+
+end
+
+theorem Src.value_erase (hag : Agree ns σ τ) {T : Ty} :
+    (r : Src C Γ T) → Solidity.Src.value τ (r.erase ns) = r.value σ
+  | .val v => by simp only [Src.erase, Solidity.Src.value, v.eval_erase hag, Src.value]
+  | .copy p _ => by
+    simp only [Src.erase, Solidity.Src.value, p.resolve_erase hag, hag.findStorage, Src.value]
+
+theorem Src.pushVal_erase (hag : Agree ns σ τ) {T : Ty} (v : Option (Src C Γ T)) :
+    Solidity.Src.pushVal τ (v.map (Src.erase ns)) = Src.pushVal σ v := by
+  funext slot
+  cases v with
+  | none => rfl
+  | some r => simp only [Option.map_some, Solidity.Src.pushVal, r.value_erase hag, Src.pushVal]
+
+theorem MSrc.mval_erase (hag : Agree ns σ τ) {T : Ty} :
+    (r : MSrc C Γ T) → Solidity.MSrc.mval τ (r.erase ns) = r.mval σ
+  | .val v => by simp only [MSrc.erase, Solidity.MSrc.mval, v.eval_erase hag, MSrc.mval]
+  | .ref p => by simp only [MSrc.erase, Solidity.MSrc.mval, p.mval_erase hag, MSrc.mval]
+
+theorem MLoc.addr_erase (hag : Agree ns σ τ) {T : Ty} :
+    (l : MLoc C Γ T) → Solidity.MLoc.addr τ (l.erase ns) = l.addr σ
+  | .field b _ _ => by simp only [MLoc.erase, Solidity.MLoc.addr, b.mval_erase hag, MLoc.addr]
+  | .index _ b i => by
+    simp only [MLoc.erase, Solidity.MLoc.addr, b.mval_erase hag, i.eval_erase hag, MLoc.addr]
+
+theorem ExtCall.key_erase (hag : Agree ns σ τ) (c : ExtCall C Γ) :
+    Solidity.ExtCall.key τ (c.erase ns) = c.key σ := by
+  have hargs : ∀ as : List (ExtArg C Γ),
+      (as.map (ExtArg.erase ns)).mapM (fun a => Solidity.Simple.eval τ a.2) =
+        as.mapM (fun a => a.2.eval σ) := by
+    intro as
+    induction as with
+    | nil => rfl
+    | cons a as ih =>
+      simp only [List.map_cons, List.mapM_cons, ExtArg.erase, a.2.eval_erase hag, ih]
+  simp only [ExtCall.erase, Solidity.ExtCall.key, c.addr.eval_erase hag, hargs, ExtCall.key]
+
+end Eval
+
+/-! ## Effects alike -/
+
+section Effects
+
+variable {Γ : Ctx} {ns B : List Var} {σ : State C Γ} {τ : Semantics.State}
+
+theorem MLoc.write_erase (hag : Agree ns σ τ) (mv : MVal) {T : Ty} :
+    (l : MLoc C Γ T) → RunRel ns B τ (l.write σ mv) (Solidity.MLoc.write τ mv (l.erase ns))
+  | .field b f _ => by
+    simp only [MLoc.erase, Solidity.MLoc.write, b.mval_erase hag, MLoc.write]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun id _ =>
+      RunRel.glob hag (memWriteField_nat id f mv)
+  | .index _ b i => by
+    simp only [MLoc.erase, Solidity.MLoc.write, b.mval_erase hag, i.eval_erase hag, MLoc.write]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun id _ =>
+      RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun iv _ =>
+      RunRel.glob hag (memWriteIndex_nat id iv mv)
+
+theorem OpLoc.store_erase (hag : Agree ns σ τ) (hB : ∀ y ∈ ns, y ∈ B) (op : BinOp) {p : PrimTy} :
+    (l : OpLoc C Γ p) → (v : Value) →
+      RunRel ns B τ (l.store σ op v) (Solidity.OpLoc.store τ op (l.erase ns) v)
+  | .local i, v => by
+    simp only [OpLoc.erase, Solidity.OpLoc.store, Solidity.opLocal, hag.getEnv i, OpLoc.store,
+      opLocal]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun new _ =>
+      RunRel.ok_setLocal hag i new (hB _ (Idx.name_mem i ns hag.len))
+  | .root .., v => RunRel.glob hag (opStore_nat _ _ _ _ _)
+  | .field b f h, v => by
+    simp only [OpLoc.erase, Solidity.OpLoc.store, OpLoc.store]
+    rw [show Solidity.Loc.field (b.erase ns) f h = (Loc.field b f h).erase ns from rfl,
+      Loc.resolve_erase hag]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.glob hag (opStore_nat _ _ _ _ _)
+  | .index it b i, v => by
+    simp only [OpLoc.erase, Solidity.OpLoc.store, OpLoc.store]
+    rw [show Solidity.Loc.index it (b.erase ns) (.simple (i.erase ns)) =
+      (Loc.index it b (.simple i)).erase ns from rfl, Loc.resolve_erase hag]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.glob hag (opStore_nat _ _ _ _ _)
+  | .mfield b f _, v => by
+    simp only [OpLoc.erase, Solidity.OpLoc.store, b.mval_erase hag, OpLoc.store]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ => RunRel.glob hag (opMem_nat _ _ _ _)
+  | .mindex _ b i, v => by
+    simp only [OpLoc.erase, Solidity.OpLoc.store, b.mval_erase hag, i.eval_erase hag, OpLoc.store]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+      RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ => RunRel.glob hag (opMem_nat _ _ _ _)
+
+theorem RunRelA.bind_pure {α β : Type} {τ₀ : Semantics.State} (x : Res β)
+    {f : β → Res (State C Γ × α)} {g : β → Res (Semantics.State × α)}
+    (h : ∀ a, x = .ok a → RunRelA ns B τ₀ (f a) (g a)) :
+    RunRelA ns B τ₀ (x >>= f) (x >>= g) := by
+  cases x with
+  | error e => exact (rfl : e = e)
+  | ok a => exact h a rfl
+
+theorem RunRelA.glob (hag : Agree ns σ τ) {α : Type} {f : Semantics.State → Res (Semantics.State × α)}
+    (hf : NaturalA f) :
+    RunRelA ns B τ ((fun p => (σ.withGlob p.1, p.2)) <$> f σ.glob) (f τ) := by
+  rw [hag.opA hf]
+  cases f σ.glob with
+  | error _ => exact (rfl : _ = _)
+  | ok p => exact ⟨rfl, hag.withGlob p.1, fun _ _ => rfl⟩
+
+theorem OpLoc.bump_erase (hag : Agree ns σ τ) (hB : ∀ y ∈ ns, y ∈ B) (op : IncDec) {p : PrimTy} :
+    (l : OpLoc C Γ p) → RunRelA ns B τ (l.bump σ op) (Solidity.OpLoc.bump τ op (l.erase ns))
+  | .local i => by
+    simp only [OpLoc.erase, Solidity.OpLoc.bump, Solidity.bumpLocal, hag.getEnv i, OpLoc.bump,
+      bumpLocal]
+    exact RunRelA.bind_pure _ fun _ _ => RunRelA.bind_pure _ fun new _ =>
+      ⟨rfl, hag.setLocal i new, frame_setEnv (hB _ (Idx.name_mem i ns hag.len))⟩
+  | .root .. => RunRelA.glob hag (bumpStore_nat _ _ _ _)
+  | .field b f h => by
+    simp only [OpLoc.erase, Solidity.OpLoc.bump, OpLoc.bump]
+    rw [show Solidity.Loc.field (b.erase ns) f h = (Loc.field b f h).erase ns from rfl,
+      Loc.resolve_erase hag]
+    exact RunRelA.bind_pure _ fun _ _ => RunRelA.glob hag (bumpStore_nat _ _ _ _)
+  | .index it b i => by
+    simp only [OpLoc.erase, Solidity.OpLoc.bump, OpLoc.bump]
+    rw [show Solidity.Loc.index it (b.erase ns) (.simple (i.erase ns)) =
+      (Loc.index it b (.simple i)).erase ns from rfl, Loc.resolve_erase hag]
+    exact RunRelA.bind_pure _ fun _ _ => RunRelA.glob hag (bumpStore_nat _ _ _ _)
+  | .mfield b f _ => by
+    simp only [OpLoc.erase, Solidity.OpLoc.bump, b.mval_erase hag, OpLoc.bump]
+    exact RunRelA.bind_pure _ fun _ _ => RunRelA.bind_pure _ fun _ _ =>
+      RunRelA.glob hag (bumpMem_nat _ _ _)
+  | .mindex _ b i => by
+    simp only [OpLoc.erase, Solidity.OpLoc.bump, b.mval_erase hag, i.eval_erase hag, OpLoc.bump]
+    exact RunRelA.bind_pure _ fun _ _ => RunRelA.bind_pure _ fun _ _ =>
+      RunRelA.bind_pure _ fun _ _ => RunRelA.bind_pure _ fun _ _ =>
+      RunRelA.glob hag (bumpMem_nat _ _ _)
+
+/-- A memory local bound to what `r` names: the scoped evaluation, then what
+the scoped run does with it, against the untyped binding. -/
+theorem MRhs.bind_erase (hag : Agree ns σ τ) {R : RefTy} (r : MRhs C Γ R) (x : Var)
+    {Γ' : Ctx} {ns' B' : List Var} {k : State C Γ × Nat → Res (State C Γ')}
+    (hk : ∀ σ' id τ', Agree ns σ' τ' → τ'.env = τ.env →
+      RunRel ns' B' τ (k (σ', id)) (.ok (τ'.setEnv x (.mref id)))) :
+    RunRel ns' B' τ (r.eval σ >>= k) (Solidity.MRhs.bind τ x (r.erase ns)) := by
+  cases r with
+  | alias p =>
+    simp only [MRhs.erase, Solidity.MRhs.bind, p.mval_erase hag, MRhs.eval, bind_assoc, pure_bind]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun id _ => hk σ id τ hag rfl
+  | copy p _ =>
+    simp only [MRhs.erase, Solidity.MRhs.bind, p.resolve_erase hag, hag.findStorage, MRhs.eval,
+      bind_assoc, pure_bind]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun sv _ =>
+      RunRel.bind_globA (f := fun s => copyStToM s sv) hag (fun s e => copyStToM_nat s e sv) fun s mv _ =>
+      RunRel.bind_pure _ fun id _ => hk _ id _ (hag.withGlob s) rfl
+  | newArr n _ =>
+    simp only [MRhs.erase, Solidity.MRhs.bind, n.eval_erase hag, MRhs.eval, bind_assoc, pure_bind]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+      RunRel.bind_globA (f := fun s => copyStToM s _) hag (fun s e => copyStToM_nat s e _) fun s mv _ =>
+      RunRel.bind_pure _ fun id _ => hk _ id _ (hag.withGlob s) rfl
+
+/-- A storage alias bound to what `r` names. -/
+theorem ARhs.bind_erase (hag : Agree ns σ τ) {R : RefTy} (r : ARhs C Γ R) (x : Var)
+    {Γ' : Ctx} {ns' B' : List Var} {k : State C Γ × (Name × List Seg) → Res (State C Γ')}
+    (hk : ∀ σ' q τ', Agree ns σ' τ' → τ'.env = τ.env →
+      RunRel ns' B' τ (k (σ', q)) (.ok (τ'.setEnv x (.spath q.1 q.2)))) :
+    RunRel ns' B' τ (r.eval σ >>= k) (Solidity.ARhs.bind τ x (r.erase ns)) := by
+  cases r with
+  | path p =>
+    simp only [ARhs.erase, Solidity.ARhs.bind, p.resolve_erase hag, ARhs.eval, bind_assoc,
+      pure_bind]
+    exact RunRel.bind_pure _ fun q _ => hk σ q τ hag rfl
+  | push b _ =>
+    simp only [ARhs.erase, Solidity.ARhs.bind, b.resolve_erase hag, ARhs.eval, bind_assoc,
+      pure_bind]
+    exact RunRel.bind_pure _ fun q _ =>
+      RunRel.bind_globA hag (pushPlaceAt_nat _ _ _) fun s n _ =>
+      hk _ (q.1, q.2 ++ [.at n]) _ (hag.withGlob s) rfl
+
+end Effects
+
+/-! ## Statements -/
+
+section Stmts
+
+variable {Γ : Ctx} {ns B : List Var} {σ : State C Γ} {τ τ₀ : Semantics.State}
+
+namespace RunRel
+
+theorem env_eq {Γ' : Ctx} {ns' : List Var} {τ₁ τ₂ : Semantics.State} (h : τ₁.env = τ₂.env) :
+    {x : Res (State C Γ')} → {y : Res Semantics.State} → RunRel ns' B τ₁ x y → RunRel ns' B τ₂ x y
+  | .error _, .error _, hr => hr
+  | .ok _, .ok _, ⟨hag, hf⟩ => ⟨hag, fun z hz => (hf z hz).trans (by rw [h])⟩
+
+/-- A global step from a state whose global part is `s`. -/
+theorem glob' {s : Semantics.State} {e : List (Var × Binding)} (hag : Agree ns σ (withLocals s e))
+    (he : e = τ₀.env) {f : Semantics.State → Res Semantics.State} (hf : Natural f) :
+    RunRel ns B τ₀ (σ.withGlob <$> f s) (f (withLocals s e)) := by
+  rw [hf s e]
+  cases f s with
+  | error _ => exact (rfl : _ = _)
+  | ok s' => exact ⟨hag.withGlob s', fun _ _ => by rw [← he]⟩
+
+theorem ok_setLocal' (hag : Agree ns σ τ) (henv : τ.env = τ₀.env) {t : LTy} (i : Idx Γ t)
+    (v : t.Denote C) (hB : i.name ns ∈ B) :
+    RunRel ns B τ₀ (.ok (σ.setLocal i v)) (.ok (τ.setEnv (i.name ns) (t.enc C v))) :=
+  ⟨hag.setLocal i v, fun y hy => (frame_setEnv hB y hy).trans (by rw [henv])⟩
+
+theorem ok_push' (hag : Agree ns σ τ) (henv : τ.env = τ₀.env) {x : Var} (hx : x ∉ ns) {t : LTy}
+    (v : t.Denote C) (hB : x ∈ B) :
+    RunRel (x :: ns) B τ₀ (.ok (σ.push v)) (.ok (τ.setEnv x (t.enc C v))) :=
+  ⟨hag.push hx v, fun y hy => (frame_setEnv hB y hy).trans (by rw [henv])⟩
+
+end RunRel
+
+theorem _root_.Solidity.Prog.run_single (τ : Semantics.State) (u : Solidity.Stmt C) :
+    Solidity.Prog.run τ [u] = Solidity.Stmt.run τ u := by
+  simp only [Solidity.Prog.run]
+  cases Solidity.Stmt.run τ u <;> rfl
+
+end Stmts
+
+/-! ## Names a program binds, and freshness -/
+
+mutual
+
+/-- The names a statement binds anywhere inside it: its declarations, a
+branch's or a body's, a call's frame, a `try`'s returned values and code.
+The untyped run writes no other name, but those of the locals in scope. -/
+def Stmt.binders : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List Var
+  | _, _, .declLocal _ x _ => [x]
+  | _, _, .declStorage _ x _ => [x]
+  | _, _, .declMem _ x .. => [x]
+  | _, _, .ite _ thn els => Prog.binders thn ++ Prog.binders els
+  | _, _, .call _ args ret body => ret.names ++ args.names ++ Prog.binders body
+  | _, _, .tryCall _ rets ok err code pnc other =>
+    rets.names ++ Prog.binders ok ++ Prog.binders err ++ code.names ++ Prog.binders pnc ++
+      Prog.binders other
+  | _, _, .loop _ _ body => Prog.binders body
+  | _, _, .block body => Prog.binders body
+  | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .opAssign ..
+  | _, _, .incDec .. | _, _, .assignIncDec .. | _, _, .push .. | _, _, .pop ..
+  | _, _, .transfer .. | _, _, .send .. | _, _, .rebindMem .. | _, _, .assignFromMem ..
+  | _, _, .assignMem .. | _, _, .delete .. | _, _, .deleteMem .. | _, _, .assignNew ..
+  | _, _, .require .. | _, _, .assert .. | _, _, .revert => []
+
+def Prog.binders : {Γ Γ' : Ctx} → Prog C Γ Γ' → List Var
+  | _, _, .nil => []
+  | _, _, .cons s P => Stmt.binders s ++ Prog.binders P
+
+end
+
+/-- The names of the context a block leaves. -/
+def Prog.outNames : {Γ Γ' : Ctx} → List Var → Prog C Γ Γ' → List Var
+  | _, _, ns, .nil => ns
+  | _, _, ns, .cons s P => Prog.outNames (s.outNames ns) P
+
+mutual
+
+/-- No binder of the statement reuses a name in scope (`ns`) or of an
+enclosing frame (`out`), and a call's arguments are separated: what makes
+the untyped run, one map from names to bindings, follow the scoped one. -/
+def Stmt.Fresh (out : List Var) : {Γ Γ' : Ctx} → List Var → Stmt C Γ Γ' → Prop
+  | _, _, ns, .declLocal _ x _ => x ∉ ns ∧ x ∉ out
+  | _, _, ns, .declStorage _ x _ => x ∉ ns ∧ x ∉ out
+  | _, _, ns, .declMem _ x .. => x ∉ ns ∧ x ∉ out
+  | _, _, ns, .ite _ thn els => Prog.Fresh out ns thn ∧ Prog.Fresh out ns els
+  | _, _, ns, .call _ args ret body =>
+    (ret.names ++ args.names).Nodup ∧ (∀ y ∈ ret.names ++ args.names, y ∉ ns ∧ y ∉ out) ∧
+      Arg.separatedFrom [] (args.erase ns) = true ∧
+      Prog.Fresh (ns ++ out) (ret.names ++ args.names) body
+  | _, _, ns, .tryCall _ rets ok err code pnc other =>
+    rets.names.Nodup ∧ (∀ y ∈ rets.names, y ∉ ns ∧ y ∉ out) ∧ Prog.Fresh out (rets.names ++ ns) ok ∧
+      Prog.Fresh out ns err ∧ (∀ y ∈ code.names, y ∉ ns ∧ y ∉ out) ∧
+      Prog.Fresh out (code.names ++ ns) pnc ∧ Prog.Fresh out ns other
+  | _, _, ns, .loop _ _ body => Prog.Fresh out ns body
+  | _, _, ns, .block body => Prog.Fresh out ns body
+  | _, _, _, .assign .. | _, _, _, .rebind .. | _, _, _, .assignLocal .. | _, _, _, .opAssign ..
+  | _, _, _, .incDec .. | _, _, _, .assignIncDec .. | _, _, _, .push .. | _, _, _, .pop ..
+  | _, _, _, .transfer .. | _, _, _, .send .. | _, _, _, .rebindMem .. | _, _, _, .assignFromMem ..
+  | _, _, _, .assignMem .. | _, _, _, .delete .. | _, _, _, .deleteMem .. | _, _, _, .assignNew ..
+  | _, _, _, .require .. | _, _, _, .assert .. | _, _, _, .revert => True
+
+def Prog.Fresh (out : List Var) : {Γ Γ' : Ctx} → List Var → Prog C Γ Γ' → Prop
+  | _, _, _, .nil => True
+  | _, _, ns, .cons s P => Stmt.Fresh out ns s ∧ Prog.Fresh out (s.outNames ns) P
+
+end
+
+mutual
+
+/-- A fresh statement binds no name of an enclosing frame. -/
+theorem Stmt.binders_not_out {out : List Var} : {Γ Γ' : Ctx} → {ns : List Var} →
+    (s : Stmt C Γ Γ') → s.Fresh out ns → ∀ y ∈ s.binders, y ∉ out
+  | _, _, _, .declLocal .., h, y, hy | _, _, _, .declStorage .., h, y, hy
+  | _, _, _, .declMem .., h, y, hy => by
+    simp only [Stmt.binders, List.mem_singleton] at hy
+    exact hy ▸ h.2
+  | _, _, _, .ite _ thn els, h, y, hy => by
+    simp only [Stmt.binders, List.mem_append] at hy
+    rcases hy with hy | hy
+    · exact Prog.binders_not_out thn h.1 y hy
+    · exact Prog.binders_not_out els h.2 y hy
+  | _, _, _, .call _ args ret body, h, y, hy => by
+    simp only [Stmt.binders, List.mem_append] at hy
+    rcases hy with (hy | hy) | hy
+    · exact (h.2.1 y (List.mem_append_left _ hy)).2
+    · exact (h.2.1 y (List.mem_append_right _ hy)).2
+    · exact fun ho => Prog.binders_not_out body h.2.2.2 y hy (List.mem_append_right _ ho)
+  | _, _, _, .tryCall _ rets ok err code pnc other, h, y, hy => by
+    simp only [Stmt.binders, List.mem_append] at hy
+    rcases hy with ((((hy | hy) | hy) | hy) | hy) | hy
+    · exact (h.2.1 y hy).2
+    · exact Prog.binders_not_out ok h.2.2.1 y hy
+    · exact Prog.binders_not_out err h.2.2.2.1 y hy
+    · exact (h.2.2.2.2.1 y hy).2
+    · exact Prog.binders_not_out pnc h.2.2.2.2.2.1 y hy
+    · exact Prog.binders_not_out other h.2.2.2.2.2.2 y hy
+  | _, _, _, .loop _ _ body, h, y, hy => Prog.binders_not_out body h y hy
+  | _, _, _, .block body, h, y, hy => Prog.binders_not_out body h y hy
+  | _, _, _, .assign .., _, _, hy | _, _, _, .rebind .., _, _, hy
+  | _, _, _, .assignLocal .., _, _, hy | _, _, _, .opAssign .., _, _, hy
+  | _, _, _, .incDec .., _, _, hy | _, _, _, .assignIncDec .., _, _, hy
+  | _, _, _, .push .., _, _, hy | _, _, _, .pop .., _, _, hy
+  | _, _, _, .transfer .., _, _, hy | _, _, _, .send .., _, _, hy
+  | _, _, _, .rebindMem .., _, _, hy | _, _, _, .assignFromMem .., _, _, hy
+  | _, _, _, .assignMem .., _, _, hy | _, _, _, .delete .., _, _, hy
+  | _, _, _, .deleteMem .., _, _, hy | _, _, _, .assignNew .., _, _, hy
+  | _, _, _, .require .., _, _, hy | _, _, _, .assert .., _, _, hy
+  | _, _, _, .revert, _, _, hy => absurd hy List.not_mem_nil
+
+theorem Prog.binders_not_out {out : List Var} : {Γ Γ' : Ctx} → {ns : List Var} →
+    (P : Prog C Γ Γ') → P.Fresh out ns → ∀ y ∈ P.binders, y ∉ out
+  | _, _, _, .nil, _, _, hy => absurd hy List.not_mem_nil
+  | _, _, _, .cons s P, h, y, hy => by
+    simp only [Prog.binders, List.mem_append] at hy
+    rcases hy with hy | hy
+    · exact Stmt.binders_not_out s h.1 y hy
+    · exact Prog.binders_not_out P h.2 y hy
+
+end
+
+/-- What a call leaves its caller: names in its frame. -/
+theorem CallRet.outNames_suffix {Γ rs Γ' : Ctx} (ns : List Var) (ret : CallRet Γ rs Γ') :
+    ∃ qs, ret.outNames ns = qs ++ ns ∧ ∀ y ∈ qs, y ∈ ret.names := by
+  cases ret with
+  | none => exact ⟨[], rfl, fun _ h => absurd h List.not_mem_nil⟩
+  | val => exact ⟨[], rfl, fun _ h => absurd h List.not_mem_nil⟩
+  | rets bs => exact ⟨bs.names, rfl, fun _ h => h⟩
+  | mem _ r _ _ => exact ⟨[r], rfl, fun _ h => h⟩
+
+/-- A statement pushes its own binders. -/
+theorem Stmt.outNames_suffix {Γ Γ' : Ctx} (ns : List Var) (s : Stmt C Γ Γ') :
+    ∃ qs, s.outNames ns = qs ++ ns ∧ ∀ y ∈ qs, y ∈ s.binders := by
+  cases s with
+  | declLocal _ x _ => exact ⟨[x], rfl, fun _ h => h⟩
+  | declStorage _ x _ => exact ⟨[x], rfl, fun _ h => h⟩
+  | declMem _ x _ _ _ => exact ⟨[x], rfl, fun _ h => h⟩
+  | call _ args ret body =>
+    obtain ⟨qs, hq, hm⟩ := ret.outNames_suffix ns
+    exact ⟨qs, hq, fun y hy => List.mem_append_left _ (List.mem_append_left _ (hm y hy))⟩
+  | _ => exact ⟨[], rfl, fun _ h => absurd h List.not_mem_nil⟩
+
+theorem Prog.outNames_suffix : {Γ Γ' : Ctx} → (ns : List Var) → (P : Prog C Γ Γ') →
+    ∃ qs, P.outNames ns = qs ++ ns ∧ ∀ y ∈ qs, y ∈ P.binders
+  | _, _, _, .nil => ⟨[], rfl, fun _ h => absurd h List.not_mem_nil⟩
+  | _, _, ns, .cons s P => by
+    obtain ⟨qs₁, h₁, m₁⟩ := s.outNames_suffix ns
+    obtain ⟨qs₂, h₂, m₂⟩ := Prog.outNames_suffix (s.outNames ns) P
+    refine ⟨qs₂ ++ qs₁, ?_, fun y hy => ?_⟩
+    · show P.outNames (s.outNames ns) = _
+      rw [h₂, h₁, List.append_assoc]
+    · rcases List.mem_append.1 hy with hy | hy
+      · exact List.mem_append_right _ (m₂ y hy)
+      · exact List.mem_append_left _ (m₁ y hy)
+
+/-- The bridge for one statement: its scoped run, against the untyped run
+of its erasure, from agreeing states. -/
+abbrev Stmt.ErasesAt {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (ns : List Var) (σ : State C Γ)
+    (τ : Semantics.State) : Prop :=
+  RunRel (s.outNames ns) (ns ++ s.binders) τ (s.run σ) (Solidity.Prog.run τ (s.erase ns))
+
+/-- The bridge for a block. -/
+abbrev Prog.ErasesAt {Γ Γ' : Ctx} (P : Prog C Γ Γ') (ns : List Var) (σ : State C Γ)
+    (τ : Semantics.State) : Prop :=
+  RunRel (P.outNames ns) (ns ++ P.binders) τ (P.run σ) (Solidity.Prog.run τ (P.erase ns))
+
+theorem Stmt.ErasesAt.of_leaf {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {ns : List Var} {σ : State C Γ}
+    {τ : Semantics.State} {u : Solidity.Stmt C} (he : s.erase ns = [u])
+    (h : RunRel (s.outNames ns) (ns ++ s.binders) τ (s.run σ) (Solidity.Stmt.run τ u)) :
+    s.ErasesAt ns σ τ := by
+  unfold Stmt.ErasesAt
+  rw [he, Solidity.Prog.run_single]
+  exact h
+
+/-! ## The statements without sub-programs -/
+
+section Leaves
+
+variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+
+/-- The leaves' common preamble: the scoped step and the untyped statement. -/
+macro "leaf_pre" : tactic => `(tactic| dsimp only [Stmt.run, Stmt.runR, Stmt.outNames, Stmt.binders])
+
+theorem Stmt.erases_assign (hag : Agree ns σ τ) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
+    (Stmt.assign l r).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.assign, Solidity.Stmt.run, r.value_erase hag, l.resolve_erase hag]
+  exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+    RunRel.glob hag (writeStorage_nat _ _ _))
+
+theorem Stmt.erases_rebind (hag : Agree ns σ τ) {R : RefTy} (i : Idx Γ (.alias R))
+    (r : ARhs C Γ R) : (Stmt.rebind i r).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.rebind, Solidity.Stmt.run]
+  exact r.bind_erase hag _ fun σ' q τ' hag' he =>
+    RunRel.ok_setLocal' hag' he i (some q) (List.mem_append_left _ (Idx.name_mem i ns hag.len)))
+
+theorem Stmt.erases_assignLocal (hag : Agree ns σ τ) {p : PrimTy} (i : Idx Γ (.val p))
+    (r : Val C Γ p) : (Stmt.assignLocal i r).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.assignLocal, Solidity.Stmt.run, r.eval_erase hag]
+  exact RunRel.bind_pure _ fun v _ =>
+    RunRel.ok_setLocal hag i v (List.mem_append_left _ (Idx.name_mem i ns hag.len)))
+
+theorem Stmt.erases_declLocal (hag : Agree ns σ τ) (p : PrimTy) {x : Var} (hx : x ∉ ns)
+    (init : Option (Val C Γ p)) : (Stmt.declLocal p x init).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  cases init with
+  | none => exact RunRel.ok_push hag hx (t := .val p) _ (List.mem_append_right _ List.mem_cons_self)
+  | some e =>
+    simp only [Run.declLocal, Solidity.Stmt.run, Option.map_some, e.eval_erase hag]
+    exact RunRel.bind_pure _ fun v _ =>
+      RunRel.ok_push hag hx (t := .val p) v (List.mem_append_right _ List.mem_cons_self))
+
+theorem Stmt.erases_declStorage (hag : Agree ns σ τ) (R : RefTy) {x : Var} (hx : x ∉ ns)
+    (init : Option (ARhs C Γ R)) : (Stmt.declStorage R x init).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  cases init with
+  | none =>
+    exact RunRel.ok_push hag hx (t := LTy.alias R) Option.none
+      (List.mem_append_right _ List.mem_cons_self)
+  | some r =>
+    simp only [Run.declStorage, Solidity.Stmt.run, Option.map_some]
+    exact r.bind_erase hag _ fun σ' q τ' hag' he =>
+      RunRel.ok_push' hag' he hx (t := .alias R) (some q)
+        (List.mem_append_right _ List.mem_cons_self))
+
+theorem Stmt.erases_opAssign (hag : Agree ns σ τ) {p : PrimTy} (op : BinOp) (hop) (hp)
+    (l : OpLoc C Γ p) (r : Val C Γ p) : (Stmt.opAssign op hop hp l r).ErasesAt ns σ τ :=
+  .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.opAssign, Solidity.Stmt.run, r.eval_erase hag]
+  exact RunRel.bind_pure _ fun v _ =>
+    l.store_erase hag (fun _ h => List.mem_append_left _ h) op v)
+
+theorem Stmt.erases_incDec (hag : Agree ns σ τ) {p : PrimTy} (op : IncDec) (hp)
+    (l : OpLoc C Γ p) : (Stmt.incDec op hp l).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.incDec, Solidity.Stmt.run]
+  exact RunRelA.bind (l.bump_erase hag (fun _ h => List.mem_append_left _ h) op)
+    (fun _ _ _ hag' _ => RunRel.ok_refl hag') (fun _ h => h) (fun _ h => h))
+
+theorem Stmt.erases_assignIncDec (hag : Agree ns σ τ) {p : PrimTy} (i : Idx Γ (.val p))
+    (op : IncDec) (hp) (l : OpLoc C Γ p) (hs) : (Stmt.assignIncDec i op hp l hs).ErasesAt ns σ τ :=
+  .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.assignIncDec, Solidity.Stmt.run]
+  exact RunRelA.bind (l.bump_erase hag (fun _ h => List.mem_append_left _ h) op)
+    (fun _ _ v hag' _ => RunRel.ok_setLocal hag' i v
+      (List.mem_append_left _ (Idx.name_mem i ns hag.len))) (fun _ h => h) (fun _ h => h))
+
+theorem Stmt.erases_push (hag : Agree ns σ τ) {E : Ty} (b : SPath C Γ (.array E))
+    (v : Option (Src C Γ E)) (hd) : (Stmt.push b v hd).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.push, Solidity.Stmt.run, b.resolve_erase hag, Src.pushVal_erase hag]
+  exact RunRel.bind_pure _ fun _ _ => RunRel.glob hag (pushAt_nat _ _ _ _))
+
+theorem Stmt.erases_pop (hag : Agree ns σ τ) {E : Ty} (b : SPath C Γ (.array E)) :
+    (Stmt.pop b).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.pop, Solidity.Stmt.run, b.resolve_erase hag]
+  exact RunRel.bind_pure _ fun _ _ => RunRel.glob hag (popAt_nat _ _ _))
+
+theorem Stmt.erases_transfer (hag : Agree ns σ τ) (r a : Val C Γ .uint) :
+    (Stmt.transfer r a).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.transfer, Solidity.Stmt.run, r.eval_erase hag, a.eval_erase hag]
+  exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+    RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+    RunRel.glob hag (transferAt_nat _ _))
+
+theorem Stmt.erases_send (hag : Agree ns σ τ) (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
+    (Stmt.send pv r a).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.send, Solidity.Stmt.run, r.eval_erase hag, a.eval_erase hag]
+  refine RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun addr _ =>
+    RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun amt _ => ?_
+  have hB : pv.name ns ∈ ns ++ [] := List.mem_append_left _ (Idx.name_mem pv ns hag.len)
+  simp only [Solidity.sendAt, sendAt, hag.tx]
+  split
+  · exact (rfl : Halt.revert = Halt.revert)
+  · have hpay : τ.pay addr amt = withLocals (σ.glob.pay addr amt) τ.env := by
+      rw [← hag.glob]; rfl
+    have hT := RunRel.ok_setLocal' (hag.withGlob (σ.glob.pay addr amt)) rfl pv (.bool true) hB
+    have hF := RunRel.ok_setLocal hag pv (.bool false) hB
+    rw [hpay]
+    rcases lookupBy (sendKey addr amt) σ.tx.ext with _ | ⟨_ | _ | _ | _⟩
+    · exact hT
+    · exact hT
+    · exact hF
+    · exact hF
+    · exact hF)
+
+theorem Stmt.erases_declMem (hag : Agree ns σ τ) (R : RefTy) {x : Var} (hx : x ∉ ns)
+    (init : Option (MRhs C Γ R)) (hd) (hm) : (Stmt.declMem R x init hd hm).ErasesAt ns σ τ :=
+  .of_leaf rfl (by
+  leaf_pre
+  cases init with
+  | none =>
+    simp only [Run.declMem, Solidity.Stmt.run, Option.map_none]
+    exact RunRel.bind_globA hag (allocDefault_nat R) fun s id _ =>
+      RunRel.ok_push' (hag.withGlob s) rfl hx (t := .mem R) id
+        (List.mem_append_right _ List.mem_cons_self)
+  | some r =>
+    simp only [Run.declMem, Solidity.Stmt.run, Option.map_some]
+    exact r.bind_erase hag _ fun σ' id τ' hag' he =>
+      RunRel.ok_push' hag' he hx (t := .mem R) id (List.mem_append_right _ List.mem_cons_self))
+
+theorem Stmt.erases_rebindMem (hag : Agree ns σ τ) {R : RefTy} (i : Idx Γ (.mem R))
+    (r : MRhs C Γ R) : (Stmt.rebindMem i r).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.rebindMem, Solidity.Stmt.run]
+  exact r.bind_erase hag _ fun σ' id τ' hag' he =>
+    RunRel.ok_setLocal' hag' he i id (List.mem_append_left _ (Idx.name_mem i ns hag.len)))
+
+theorem Stmt.erases_assignFromMem (hag : Agree ns σ τ) {R : RefTy} (l : Loc C Γ (.ref R))
+    (p : MPath C Γ (.ref R)) : (Stmt.assignFromMem l p).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.assignFromMem, Solidity.Stmt.run, p.mval_erase hag, l.resolve_erase hag,
+    hag.copyMem]
+  exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+    RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+    RunRel.glob hag (writeStorage_nat _ _ _))
+
+theorem Stmt.erases_assignMem (hag : Agree ns σ τ) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
+    (Stmt.assignMem l r).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.assignMem, Solidity.Stmt.run, r.mval_erase hag]
+  exact RunRel.bind_pure _ fun mv _ => l.write_erase hag mv)
+
+theorem Stmt.erases_delete (hag : Agree ns σ τ) {T : Ty} (l : Loc C Γ T) :
+    (Stmt.delete l).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.delete, Solidity.Stmt.run, l.resolve_erase hag, hag.findStorage]
+  exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+    RunRel.glob hag (saveStorage_nat _ _ _))
+
+theorem Stmt.erases_deleteMem (hag : Agree ns σ τ) {T : Ty} (p : MPath C Γ T) (hd) :
+    (Stmt.deleteMem p hd).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  cases p with
+  | var i _ =>
+    simp only [Run.deleteMem, Solidity.Stmt.run, MPath.erase]
+    exact RunRel.bind_globA hag (allocDefault_nat _) fun s id _ =>
+      RunRel.ok_setLocal' (hag.withGlob s) rfl i id
+        (List.mem_append_left _ (Idx.name_mem i ns hag.len))
+  | loc l =>
+    simp only [Run.deleteMem, Solidity.Stmt.run, MPath.erase, l.addr_erase hag]
+    exact RunRel.bind_pure _ fun _ _ => RunRel.glob hag (memClear_nat _ _))
+
+theorem Stmt.erases_assignNew (hag : Agree ns σ τ) {R : RefTy} (l : NewLhs C Γ R)
+    (n : Simple C Γ .uint) (h) : (Stmt.assignNew l n h).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Run.assignNew, Solidity.Stmt.run, n.eval_erase hag]
+  refine RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun k _ =>
+    RunRel.bind_globA (f := fun s => copyStToM s (newArrVal R k)) hag
+      (fun s e => copyStToM_nat s e _) fun s mv _ => RunRel.bind_pure _ fun id _ => ?_
+  have hag' := hag.withGlob s
+  cases l with
+  | store l =>
+    simp only [NewLhs.erase, copyMem_wl, l.resolve_erase hag']
+    exact RunRel.bind_pure _ fun _ _ => RunRel.bind_pure _ fun _ _ =>
+      RunRel.glob' hag' rfl (writeStorage_nat _ _ _)
+  | mem l => exact RunRel.env_eq rfl (l.write_erase hag' _))
+
+theorem Stmt.erases_require (hag : Agree ns σ τ) (c : Val C Γ .bool) :
+    (Stmt.require c).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Solidity.Stmt.run, c.eval_erase hag]
+  refine RunRel.bind_pure _ fun v _ => ?_
+  cases v with
+  | int _ => exact (rfl : Halt.stuck = Halt.stuck)
+  | bool b =>
+    cases b
+    · exact (rfl : Halt.revert = Halt.revert)
+    · exact RunRel.ok_refl hag)
+
+theorem Stmt.erases_assert (hag : Agree ns σ τ) (c : Val C Γ .bool) :
+    (Stmt.assert c).ErasesAt ns σ τ := .of_leaf rfl (by
+  leaf_pre
+  simp only [Solidity.Stmt.run, c.eval_erase hag]
+  refine RunRel.bind_pure _ fun v _ => ?_
+  cases v with
+  | int _ => exact (rfl : Halt.stuck = Halt.stuck)
+  | bool b =>
+    cases b
+    · exact (rfl : Halt.panic = Halt.panic)
+    · exact RunRel.ok_refl hag)
+
+theorem Stmt.erases_revert : (Stmt.revert : Stmt C Γ Γ).ErasesAt ns σ τ :=
+  .of_leaf rfl (rfl : Halt.revert = Halt.revert)
+
+end Leaves
