@@ -281,6 +281,17 @@ resume, where KeY puts `pv := TRUE` into the anonymising update.
   loop halt, not exit. Suggested: an `unwind k` clause in `LoopSpecCompiler`
   and an exit taclet with these two goals, so that a bounded proof attempt
   ends in an open goal rather than running on.
+- **`LoopLowering` skips a `try`.** With no enclosing loop
+  (`flags == null`), `LoopLowering.lowerStatement` recurses only into a
+  `Block` and a `ConditionStatement`; its `default` returns any other
+  statement unchanged, a `TryStatement` included, and inside a loop a `try`
+  with no jump is returned as is too.  So in
+  `try … { while (c) { if (x) break; } } catch { }` the `break` reaches
+  `whileUnwind` unlowered.  Lean's `lowerStmt` recurses into every clause of
+  a `try` (and into `unchecked`) outside a loop, and through a `try` with no
+  jump inside one (pinned in `Examples/Tactics/Loops.lean`).  Suggested:
+  recurse into a `TryStatement`'s clauses, and any other statement holding
+  blocks, with `flags == null`.
 - **The exit is not an assertion.** Encoding the bound as `assert(!cond)`
   changes the program: it panics where the loop runs on, so the result is no
   longer an unwinding of the loop, and the bound reads as a failure of the

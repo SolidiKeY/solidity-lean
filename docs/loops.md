@@ -1,7 +1,7 @@
 # Loops
 
-`while`, `for`, `do … while`, `break`, `continue`. This is a design plan:
-four decisions and an ordered implementation plan. L1 to L4 are built (the
+`while`, `for`, `do … while`, `break`, `continue`: four decisions and the
+stages that implement them. L1 to L4 are built (the
 syntax, the lowering, the semantics, the typing, unwinding and the
 invariant rules; `Examples/Tactics/Loops.lean`): a loop is unwound to the
 bound its `/// @custom:key unwind k` clause gives (`LeanTaclet.whileUnwind`)
@@ -293,8 +293,13 @@ in the frame, and the invariant, typed at `Γ`, cannot name it.
 
 The loop condition is **not** captured before the loop, since it must be
 re-evaluated: the invariant rule binds it to `b` at the head, the
-unwinding's `if` captures it per copy, and an `++` in it is an elaboration
-error, as under `&&`.
+unwinding's `if` captures it per copy.  So a condition, invariant or variant
+that needs a statement before it is an elaboration error (`loopExpr`): an
+`++`, as under `&&`, and also a call to a declared function, a cast, a
+narrow operation that needs a capture, or a struct constructor, none of
+them an effect, which solkey evaluates per iteration (`bType b = cond;`).
+`while (i < len())` is refused; writing `uint n = len();` before the loop,
+or `if (!(i < len())) break;` at the head of its body, is the workaround.
 
 ## The EVM
 
@@ -318,8 +323,8 @@ EVM stage is worth doing once, for all.
 
 | Stage | Scope (files) | Risk |
 |---|---|---|
-| **L1 Syntax and semantics** | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/Quote.lean`, `Calculus/Notation.lean`. | Medium: structural recursion through `Loop.run`, and `#eval` under `implemented_by`. Check both first in a scratch file. |
-| **L2 Typing** | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Low: the same proof three times. |
+| **L1 Syntax and semantics** (built) | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/Quote.lean`, `Calculus/Notation.lean`. | Done: `Stmt.run` stays structural (the loop arm calls the body's run under a binder), `#eval` runs `Loop.runImpl`. |
+| **L2 Typing** (built) | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Done. |
 | **L3 Unwinding** (built) | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
 | **L4 Invariant rule** (built) | `Update.lean` (`Fml.anon`, `State.anon`), `Semantics/Mutability.lean` (`Prog.loopFrame`, `Fml.loopAnon`, `Prog.loopFrame_run`: the frame is `Stmt.within`'s, no new run lemma), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic` (`Hyp.anon`, `Proves.invLean`), `Termination`, `Close` (`holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |

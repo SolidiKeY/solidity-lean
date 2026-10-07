@@ -179,6 +179,16 @@ example : Prog StandardExample := sol{ uint i = 0;
 example : Prog StandardExample := sol{ uint i = 0;
   while (i < 3) { try address(7).get() { break; } catch { } i++; } }
 
+/-! A loop inside a `try` clause, outside every loop, is lowered: its
+`break` sets its flag (solkey's `LoopLowering` leaves a `try` as it is,
+`docs/solkey-feedback.md`). -/
+
+/-- info: uint i = 0;
+try address(7).get() { bool brk1 = false; while (!brk1 && (i < 3)) { if (i == 1) { brk1 = true; } else {  } if (!brk1) { i++; } else {  } } } catch Error(string memory) {  } catch Panic(uint) {  } catch {  } -/
+#guard_msgs in
+#eval IO.println (Prog.show (sol{ uint i = 0;
+  try address(7).get() { while (i < 3) { if (i == 1) { break; } i++; } } catch { } }))
+
 /-! ## Runs
 
 `#run` runs a loop by iterating it (`Loop.runImpl`, which the kernel never
