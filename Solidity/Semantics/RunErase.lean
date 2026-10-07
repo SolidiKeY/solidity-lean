@@ -2004,3 +2004,88 @@ theorem Stmt.erases_tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (hag : Agree n
       simp only [List.mem_append]; exact .inr hy))
 
 end Try
+
+/-! ## The bridge -/
+
+section Bridge
+
+theorem Prog.erases_nil {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+    (hag : Agree ns σ τ) : (Prog.nil : Prog C Γ Γ).ErasesAt ns σ τ :=
+  RunRel.ok_refl hag
+
+theorem Prog.erases_cons {Γ Γ₁ Γ₂ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+    (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) (ihs : s.ErasesAt ns σ τ)
+    (ihP : ∀ σ' τ', Agree (s.outNames ns) σ' τ' → P.ErasesAt (s.outNames ns) σ' τ') :
+    (Prog.cons s P).ErasesAt ns σ τ := by
+  unfold Prog.ErasesAt
+  rw [Prog.run_cons]
+  show RunRel (P.outNames (s.outNames ns)) (ns ++ (s.binders ++ P.binders)) τ _
+    (Solidity.Prog.run τ (s.erase ns ++ P.erase (s.outNames ns)))
+  rw [SemanticsProperties.Prog.run_append]
+  obtain ⟨qs, hq, hqm⟩ := s.outNames_suffix ns
+  refine RunRel.bind ihs (fun σ' τ' hag' _ => ihP σ' τ' hag') (fun y hy => ?_) (fun y hy => ?_)
+  · rcases List.mem_append.1 hy with hy | hy
+    · exact List.mem_append_left _ hy
+    · exact List.mem_append_right _ (List.mem_append_left _ hy)
+  · rcases List.mem_append.1 hy with hy | hy
+    · rw [hq] at hy
+      rcases List.mem_append.1 hy with hy | hy
+      · exact List.mem_append_right _ (List.mem_append_left _ (hqm y hy))
+      · exact List.mem_append_left _ hy
+    · exact List.mem_append_right _ (List.mem_append_right _ hy)
+
+mutual
+
+/-- **The bridge, relationally**, for a statement: from agreeing states, a
+fresh statement's scoped run and its erasure's untyped run end alike. -/
+theorem Stmt.erasesAt : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → {out ns : List Var} →
+    s.Fresh out ns → {σ : State C Γ} → {τ : Semantics.State} → Agree ns σ τ → s.ErasesAt ns σ τ
+  | _, _, .assign l r, _, _, _, _, _, hag => Stmt.erases_assign hag l r
+  | _, _, .rebind i r, _, _, _, _, _, hag => Stmt.erases_rebind hag i r
+  | _, _, .assignLocal i r, _, _, _, _, _, hag => Stmt.erases_assignLocal hag i r
+  | _, _, .declLocal p _ init, _, _, hs, _, _, hag => Stmt.erases_declLocal hag p hs.1 init
+  | _, _, .declStorage R _ init, _, _, hs, _, _, hag => Stmt.erases_declStorage hag R hs.1 init
+  | _, _, .opAssign op hop hp l r, _, _, _, _, _, hag => Stmt.erases_opAssign hag op hop hp l r
+  | _, _, .incDec op hp l, _, _, _, _, _, hag => Stmt.erases_incDec hag op hp l
+  | _, _, .assignIncDec i op hp l hl, _, _, _, _, _, hag =>
+    Stmt.erases_assignIncDec hag i op hp l hl
+  | _, _, .push b v hd, _, _, _, _, _, hag => Stmt.erases_push hag b v hd
+  | _, _, .pop b, _, _, _, _, _, hag => Stmt.erases_pop hag b
+  | _, _, .transfer r a, _, _, _, _, _, hag => Stmt.erases_transfer hag r a
+  | _, _, .send pv r a, _, _, _, _, _, hag => Stmt.erases_send hag pv r a
+  | _, _, .declMem R _ init hd hm, _, _, hs, _, _, hag =>
+    Stmt.erases_declMem hag R hs.1 init hd hm
+  | _, _, .rebindMem i r, _, _, _, _, _, hag => Stmt.erases_rebindMem hag i r
+  | _, _, .assignFromMem l p, _, _, _, _, _, hag => Stmt.erases_assignFromMem hag l p
+  | _, _, .assignMem l r, _, _, _, _, _, hag => Stmt.erases_assignMem hag l r
+  | _, _, .delete l, _, _, _, _, _, hag => Stmt.erases_delete hag l
+  | _, _, .deleteMem p hd, _, _, _, _, _, hag => Stmt.erases_deleteMem hag p hd
+  | _, _, .assignNew l n h, _, _, _, _, _, hag => Stmt.erases_assignNew hag l n h
+  | _, _, .ite c thn els, _, _, hs, _, _, hag =>
+    Stmt.erases_ite hag c thn els (Prog.erasesAt thn hs.1 hag) (Prog.erasesAt els hs.2 hag)
+  | _, _, .require c, _, _, _, _, _, hag => Stmt.erases_require hag c
+  | _, _, .assert c, _, _, _, _, _, hag => Stmt.erases_assert hag c
+  | _, _, .revert, _, _, _, _, _, _ => Stmt.erases_revert
+  | _, _, .call f args ret body, _, _, hs, _, _, hag =>
+    Stmt.erases_call hag f args ret body hs.1 (fun y hy => (hs.2.1 y hy).1) hs.2.2.1
+      (fun y hy h => Prog.binders_not_out body hs.2.2.2 y hy (List.mem_append_left _ h))
+      (fun _ _ h => Prog.erasesAt body hs.2.2.2 h)
+  | _, _, .tryCall call rets ok err code pnc other, _, _, hs, _, _, hag =>
+    Stmt.erases_tryCall hag call rets ok err code pnc other hs.1 (fun y hy => (hs.2.1 y hy).1)
+      (fun y hy => (hs.2.2.2.2.1 y hy).1) (fun _ _ h => Prog.erasesAt ok hs.2.2.1 h)
+      (Prog.erasesAt err hs.2.2.2.1 hag) (fun _ _ h => Prog.erasesAt pnc hs.2.2.2.2.2.1 h)
+      (Prog.erasesAt other hs.2.2.2.2.2.2 hag)
+  | _, _, .loop a c body, _, _, hs, _, _, hag =>
+    Stmt.erases_loop hag a c body (fun _ _ h => Prog.erasesAt body hs h)
+  | _, _, .block body, _, _, hs, _, _, hag => Stmt.erases_block hag body (Prog.erasesAt body hs hag)
+
+/-- **The bridge, relationally**, for a block. -/
+theorem Prog.erasesAt : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → {out ns : List Var} →
+    P.Fresh out ns → {σ : State C Γ} → {τ : Semantics.State} → Agree ns σ τ → P.ErasesAt ns σ τ
+  | _, _, .nil, _, _, _, _, _, hag => Prog.erases_nil hag
+  | _, _, .cons s P, _, _, hs, _, _, hag =>
+    Prog.erases_cons s P (Stmt.erasesAt s hs.1 hag) (fun _ _ h => Prog.erasesAt P hs.2 h)
+
+end
+
+end Bridge
