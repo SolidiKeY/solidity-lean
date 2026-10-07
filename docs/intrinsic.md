@@ -816,14 +816,41 @@ the cutover:
   same name; its soundness pending M3).  `Examples/Tactics/CorePrint.lean`
   pins the three taclets against `Rules.lean`'s lines and the strategy's
   formulas, from their quoted `Expr`, against `Core.Fml.show`.  Not
-  covered yet: a call and a `try` (printed `‹…›`), and a sequent
-  (`Core.Proves`).
+  covered at first: a call and a `try` (printed `‹…›`), and a sequent
+  (`Core.Proves`); both landed in round 2 below.
 - **`Hyps`/`Proves`** (`Calculus/Core/Proves.lean`): the telescope
   `Hyps C Γ₀ Γ` (`pre`, `upd`, `havoc`, `all`, `bind`, `anon`), `wrap`/
   `fresh`/`boxOnly` by `casesOn`, and `Proves` with `intro`, `allIntro`,
   `updIntro`, `bindIntro`, `update`, `unfold`, `bind`, `split` (two goals),
   `check`, `done`, `empty`, `closeTrue`; a derivation of
-  `[ if (b) { } else { } ] true` checks.  Soundness waits for M3.
+  `[ if (b) { } else { } ] true` checks.  Soundness: round 2.
+- **Round 2** (2026-10-07, after M3 and the calculus lane's `SoundKit`):
+  - `Proves` gains `branches` (a goal per clause, at least one), `cases`
+    (a goal per formula and per way the statement ends, at least one),
+    `inv` (the invariant now, then the body and the rest under the
+    frame's `{anon(…)}`) and `inline`.  No rule has zero goals: behind a
+    diamond update that halts, a rule without goals would not be sound,
+    and `closeTrue` asks the context to have no diamond update but scope
+    ends (`Hyps.boxOnly`).
+  - `Calculus/Core/ProvesSound.lean`: `Proves.sound` (`H.wrap φ` in every
+    state) and `Proves.valid`, by induction on the derivation, given
+    `Stmt.Sound C`: every premise `Stmt.step` gives is `Premise.Sound`
+    (`Calculus/Core/SoundKit.lean`'s) in every state.  `Stmt.Sound.of_stepSound` builds it
+    from the arms' `Stmt.StepSound` (stated in typed states) once every
+    state is typed, which M4a's typed values give; until then the
+    hypothesis is what the arms owe.  No `sorry`, no axiom beyond Lean's
+    three.
+  - Printing: a call and a `try` print as the statements they are
+    elaborated from (a tuple call as `(a, b) = f(…)`, folded with the
+    assignments after it), from the `Expr` as from the value; a frame or
+    update end by `Thin` (`Frames.drop`, `Upd.drop`) prints as nothing; the
+    four new premises have delaborators (a premise read alone names its
+    context's locals `_`); a `Core.Proves` goal prints as today's sequent
+    (`dl{ ∀ uint x, x = 1, { y := x } ⟹ [ x = y; ] true }`, `⟹ₖ` for
+    solkey's rules alone, a schema context as `..H`).  Pinned in
+    `Examples/Tactics/CorePrint.lean`.
+  - The `Premise` quoter has the four new constructors (the same hunk as
+    the frontend lane's, so the merge is clean).
 
 ### Gate G0: passes, under conditions
 
