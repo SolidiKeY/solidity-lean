@@ -274,7 +274,7 @@ theorem Loc.cost_pos : {T : Ty} → (l : Loc C T) → 1 ≤ l.cost
   | _, .index _ b _ => by have := b.pen_pos; simp only [Loc.cost]; omega
 /-- Example: a memory local `m` costs `1`. -/
 theorem MPath.cost_pos : {T : Ty} → (b : MPath C T) → 1 ≤ b.cost
-  | _, .var .. => by simp [MPath.cost]
+  | _, .var .. => by simp only [MPath.cost, Nat.le_refl]
   | _, .loc l => by simpa [MPath.cost] using l.cost_pos
 /-- Example: `m.age` costs `2`. -/
 theorem MLoc.cost_pos : {T : Ty} → (l : MLoc C T) → 1 ≤ l.cost

@@ -143,7 +143,7 @@ example : Prog.toStr (sol{ uint8 a = 200; uint8 b = 100; uint c = a + b; uint16 
 /-- Inside an expression, captured with its check before the statement. -/
 example : Prog.toStr (sol{ uint8 a = 1; bool t = a + 1 > 3; if (a * 2 > a) { a = 0; } }) =
     "uint a = 1; uint se1 = a + 1; require(se1 <= 255); bool t = se1 > 3; uint se2 = a * 2; " ++
-    "require(se2 <= 255); if (se2 > a) { a = 0; } else {  }" := by decide
+    "require(se2 <= 255); if (se2 > a) { a = 0; } else { }" := by decide
 
 /-- `++` and `−−`, as a statement and inside an expression. -/
 example : Prog.toStr (sol{ uint8 i = 0; i++; uint8 j = i++; uint k = ++i + 1; }) =

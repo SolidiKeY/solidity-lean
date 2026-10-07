@@ -667,7 +667,8 @@ theorem simple_sim {m : Machine} (hm : Sim C L Γ σ m) : ∀ {p : PrimTy} (s : 
     wtSimple Γ s = true → ValOut p (s.eval σ) (run (compileSimple s) m) m
   | p, .lit n hr, _ => by
     cases p <;> simp only [PrimTy.inRange, decide_eq_true_eq, Bool.false_eq_true] at hr
-    · exact .inl ⟨.int n, .val (toWord n), rfl, ⟨hr.1, hr.2, by simp [toWord, hr.1]⟩, rfl⟩
+    · exact .inl ⟨.int n, .val (toWord n), rfl,
+        ⟨hr.1, hr.2, by simp only [toWord, hr.1, ↓reduceIte]⟩, rfl⟩
     · exact .inl ⟨.int n, .val (toWord n), rfl, ReprV.int hr.1 hr.2, rfl⟩
   | _, .bool b, _ => .inl ⟨.bool b, .val (bword b), rfl, rfl, rfl⟩
   | p, .local x, hw => by
@@ -1086,14 +1087,14 @@ theorem Sim.unbind {m : Machine} (h : Sim C L Γ σ m) (x : Var) (b : Binding) :
   refine ⟨h.store, fun y q hy => ?_, fun y R hy => ?_, h.net, h.netSelf, h.bound,
     fun y R hy => ?_, h.env⟩
   all_goals by_cases hyx : y = x
-  all_goals try (subst hyx; simp [TyCtx.set] at hy)
+  all_goals try (subst hyx; simp only [TyCtx.set, upd_same, reduceCtorEq] at hy)
   all_goals simp only [TyCtx.set, upd_other _ _ hyx] at hy
   · obtain ⟨v', h1, h2⟩ := h.vals y q hy
-    exact ⟨v', by simp [State.setEnv, lookupBy_setBy_ne hyx, h1], h2⟩
+    exact ⟨v', by simp only [State.setEnv, lookupBy_setBy_ne hyx, h1], h2⟩
   · obtain ⟨r, segs, s, h1, h2, h3⟩ := h.aliases y R hy
-    exact ⟨r, segs, s, by simp [State.setEnv, lookupBy_setBy_ne hyx, h1], h2, h3⟩
+    exact ⟨r, segs, s, by simp only [State.setEnv, lookupBy_setBy_ne hyx, h1], h2, h3⟩
   · obtain ⟨r, segs, s, h1, h2, h3, h4⟩ := h.fragile y R hy
-    exact ⟨r, segs, s, by simp [State.setEnv, lookupBy_setBy_ne hyx, h1], h2, h3, h4⟩
+    exact ⟨r, segs, s, by simp only [State.setEnv, lookupBy_setBy_ne hyx, h1], h2, h3, h4⟩
 
 /-- `Person storage p = alice;`: the cell of `p` holds `alice`'s slot. -/
 theorem Sim.bindAlias {m : Machine} (h : Sim C L Γ σ m) (x : Var) {R : RefTy} {r : Name}

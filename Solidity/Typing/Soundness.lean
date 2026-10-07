@@ -106,7 +106,8 @@ private theorem Ctx.le_foldr_join {Γ Γt Γe Γ' : Ctx} (hle : Ctx.le Γ Γ' = 
     (hs : ∀ g : Var × BTy, lookupBy g.1 Γt = some g.2 → lookupBy g.1 Γe = some g.2 →
       lookupBy g.1 Γ' = some g.2) :
     ∀ L : Ctx, Ctx.le (L.foldr (fun g J =>
-      if lookupBy g.1 Γ == none && lookupBy g.1 Γt == some g.2 && lookupBy g.1 Γe == some g.2
+      if g.1.isFresh && lookupBy g.1 Γ == none && lookupBy g.1 Γt == some g.2 &&
+        lookupBy g.1 Γe == some g.2
       then setBy g.1 g.2 J else J) Γ) Γ' = true
   | [] => hle
   | g :: L => by
@@ -1291,7 +1292,7 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     cases init with
     | none =>
       cases hs; cases h
-      exact ⟨H, .refl H, hwt.setEnv (by simp [BTy.matchesB])⟩
+      exact ⟨H, .refl H, hwt.setEnv rfl⟩
     | some r =>
       obtain ⟨hc, rfl⟩ := wt_if hs
       obtain ⟨σ₁, root, segs, hwt₁, hty, rfl⟩ := ARhs.bind_wt hwt hc h

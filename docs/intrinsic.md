@@ -84,7 +84,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
   `Tools/Run`), at a spec's and a constructor problem's call
   (`specPieces`, `Problem.ctor`) and per statement in a `dl!{}` modality,
   from the elaborator's locals (`ECtx.toCtx`).  An `if` now leaves
-  `Ctx.join`: the locals both branches declare alike, which the memory
+  `Ctx.join`: the fresh locals both branches declare alike, which the memory
   conditional of references' `mv1` needs (`Ctx.le_join_thn`/`_els` in the
   two `ite` cases, `Soundness.lean`, `Reachability.lean`).  All 449
   TestSuite functions, the corpus and every example pass.  A block's local
@@ -94,6 +94,25 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
   TestSuite `solc_import` 1.69 s → 1.71 s, `TestSuite/Derived3.lean`
   (cumulative type checking) 17.1 s → 17.0 s, `Examples/Tactics/Branch.lean` unchanged (each
   declaration within 10 ms).
+- M1 review (2026-10-07), confirmed findings fixed:
+  `Ctx.join` keeps only fresh locals (`Var.isFresh`), so a user local
+  declared alike in both branches no longer blocks a later retyping.  The
+  general rule until M2: a name declared in a block, a `for` init or one
+  branch cannot be redeclared at another type later in the program (both
+  shapes pinned in `Examples/Tactics/Branch.lean`).  `wtCheck` names the
+  innermost rejected statement and, for a retyping, the local and both types
+  (`Stmt.wtWhy`, `Ctx.retyped`); an empty block prints `{ }` (`braced`; six
+  pins updated).  `check` folds `+ - *` and an exact `/` of two literals
+  when an operand is out of range (`BinOp.foldLit?`; solc's constant
+  folding, pinned in `Syntax.lean`).  `x := unset` in `dl!{}` accepts only
+  an alias or an unbound name (and keeps `x` out of the `uint` parameters,
+  `RawFml.unsets`); pins in `Notation.lean`.  The unset-alias revert has
+  witnesses (`StorageSuite.unsetAliasWrite`/`Read` and a loop pin).
+  Docstrings and solc-alignment rows no longer claim that no checked program
+  has a negative exponent or amount (`TxEnv` fields are unconstrained);
+  solc-alignment gains a "Block-scoped locals" row and delta, and its error
+  classification and mappings-in-memory rows say what reverts and what stays
+  stuck.  New bare `simp`s are `simp only` (or `rfl`).
 
 ## Baselines (M0)
 
@@ -227,7 +246,7 @@ Gate G0, to proceed with the positional Idx design:
 If G0 fails, retry with named `lookupBy` Bool witnesses (the c26d16e^ Kernel style). If that fails too, the calculus takes the Church-typed fallback.
 M1 (semantic debt, current representation, 1-2 weeks, merge). Remove the stuck causes that need no index.
 (a) A negative `**` exponent (Semantics.lean:802, 838) and a negative transfer/send amount (:1471, :1485) revert. `Simple.lit` gets `(h : p.admits n = true)`, the EVM's literal range moved into the syntax.
-(b) `R.memOk` proof on `declMem`/`deleteMem`/`MPath.var`, closing the mapping-in-memory hole (`allocDefault` stuck at :674-682).
+(b) `R.memOk` proof on `declMem`/`deleteMem`/`MPath.var`, keeping a mapping out of memory in the syntax (`allocDefault`'s stuck arms at :674-682 stay, reached by the closer's untyped terms, until M4c).
 (c) In the elaborator, `declare` every `freshCapture` (Syntax.lean:2700, 2707, 2724-2729, 2752, 3627).
 (d) Lower the reference ternary (hoist :3451-3463) to `T storage sp1; if (c) { sp1 = a; } else { sp1 = b; }`.
 (e) Add `Binding.unset`: `declStorage R x none` binds it, and a read of it reverts. `storageLocalDeclSkip` (Rules.lean:336) gets a rule-map deviation row.

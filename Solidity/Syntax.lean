@@ -966,6 +966,10 @@ def LoopAnn.toStr : LoopAnn C → String
     s!"/// @custom:key invariant {I.toStr true} " ++
       ((dec.map fun d => s!"/// @custom:key decreases {d.toStr true} ").getD "")
 
+/-- A block's statements in braces: `{ x = 1; }`, and `{ }` for none. -/
+def braced (ss : List String) : String :=
+  if ss.isEmpty then "{ }" else s!"\{ {" ".intercalate ss} }"
+
 mutual
 
 def Stmt.toStr : Stmt C → String
@@ -1001,7 +1005,7 @@ def Stmt.toStr : Stmt C → String
   | .deleteMem p _ => s!"delete {p.toStr};"
   | .assignNew (R := R) l n _ => s!"{l.toStr} = new {Ty.toStr (.ref R)}({n.toStr});"
   | .ite c thn els =>
-    s!"if ({c.toStr true}) \{ {" ".intercalate (Prog.toStrs 0 thn)} } else \{ {" ".intercalate (Prog.toStrs 0 els)} }"
+    s!"if ({c.toStr true}) {braced (Prog.toStrs 0 thn)} else {braced (Prog.toStrs 0 els)}"
   | .require c => s!"require({c.toStr true});"
   | .assert c => s!"assert({c.toStr true});"
   | .revert => "revert();"
@@ -1017,11 +1021,11 @@ def Stmt.toStr : Stmt C → String
     let code := match code with
       | some x => s!"uint {x}"
       | none => "uint"
-    s!"try address({c.addr.toStr}).{c.fn}({args}){rets} \{ {" ".intercalate (Prog.toStrs 0 ok)} } \
-      catch Error(string memory) \{ {" ".intercalate (Prog.toStrs 0 err)} } \
-      catch Panic({code}) \{ {" ".intercalate (Prog.toStrs 0 pnc)} } \
-      catch \{ {" ".intercalate (Prog.toStrs 0 other)} }"
-  | .loop a c body => s!"{a.toStr}while ({c.toStr true}) \{ {" ".intercalate (Prog.toStrs 0 body)} }"
+    s!"try address({c.addr.toStr}).{c.fn}({args}){rets} {braced (Prog.toStrs 0 ok)} \
+      catch Error(string memory) {braced (Prog.toStrs 0 err)} \
+      catch Panic({code}) {braced (Prog.toStrs 0 pnc)} \
+      catch {braced (Prog.toStrs 0 other)}"
+  | .loop a c body => s!"{a.toStr}while ({c.toStr true}) {braced (Prog.toStrs 0 body)}"
 
 /-- The statements of a block, one string each; a memory call and the
 statement binding its result are one (`Stmt.memCallStr?`), and so are a call
@@ -1075,6 +1079,13 @@ inductive BTy where
 /-- Binding context Γ. -/
 abbrev Ctx := List (Var × BTy)
 
+/-- A binding's type as a declaration writes it: `uint`, `Person storage`,
+`Person memory`. -/
+def BTy.toStr : BTy → String
+  | .stack ty => toString ty
+  | .path ty => s!"{ty} storage"
+  | .mem ty => s!"{ty} memory"
+
 end Semantics
 
 section Check
@@ -1090,13 +1101,21 @@ def Ctx.le (Γ Γ' : Ctx) : Bool :=
   Γ.all fun g => lookupBy g.1 Γ' == lookupBy g.1 Γ
 
 
-/-- What an `if` leaves: `Γ`, and each local both branches declare the same
-way and `Γ` does not bind.  `c ? mx : my` at a memory type declares its `mv1`
-in each branch (`hoist`), and the interpreter has no scopes, so `mv1` is bound
-after the `if` whichever branch ran. -/
+/-- A variable the elaborator made (`se1`, `mv2`), not one the program names. -/
+def Var.isFresh : Var → Bool
+  | .fresh .. => true
+  | .user _ => false
+
+/-- What an `if` leaves: `Γ`, and each fresh local (an elaborator's capture)
+both branches declare the same way and `Γ` does not bind.  `c ? mx : my` at a
+memory type declares its `mv1` in each branch (`hoist`), and the interpreter
+has no scopes, so `mv1` is bound after the `if` whichever branch ran.  A
+user's local declared in both branches is not kept: solc scopes it to its
+branch, so a later branch may declare it again at another type. -/
 def Ctx.join (Γ Γt Γe : Ctx) : Ctx :=
   Γt.foldr (fun g J =>
-    if lookupBy g.1 Γ == none && lookupBy g.1 Γt == some g.2 && lookupBy g.1 Γe == some g.2
+    if g.1.isFresh && lookupBy g.1 Γ == none && lookupBy g.1 Γt == some g.2 &&
+      lookupBy g.1 Γe == some g.2
     then setBy g.1 g.2 J else J) Γ
 
 /-- A simple value's local, if any, is a stack local of its type:
@@ -1227,8 +1246,8 @@ adds `p` too, bound to no path (`Binding.unset`, through which a read
 reverts), so `p = alice;` may follow.  Each branch of an `if` must not
 rebind what the context binds (`Ctx.le`): the interpreter has no scopes, so
 a branch's declaration outlives it, and one that retyped an outer local
-would break the join.  The `if` leaves the locals both branches declare
-alike (`Ctx.join`). -/
+would break the join.  The `if` leaves the fresh locals both branches
+declare alike (`Ctx.join`). -/
 def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
   | .assign l r => if l.wt Γ && r.wt Γ then some Γ else none
   | @Stmt.rebind _ R x r => if Ctx.has Γ x (.path (.ref R)) && r.wt Γ then some Γ else none
@@ -1298,14 +1317,53 @@ def Prog.wt (Γ : Ctx) : List (Stmt C) → Option Ctx
 
 end
 
-/-- `Prog.wt`, a statement at a time: the context the block leaves, or the
-first statement it rejects. -/
-def Prog.wtFirst (Γ : Ctx) : List (Stmt C) → Except (Stmt C) Ctx
+/-- The first local `Γ` binds that a body's context `Γb` binds another way:
+the local, how `Γ` binds it, and how `Γb` does. -/
+def Ctx.retyped (Γ Γb : Ctx) : Option (Var × BTy × Option BTy) :=
+  (Γ.find? fun g => lookupBy g.1 Γb != some g.2).map fun g => (g.1, g.2, lookupBy g.1 Γb)
+
+mutual
+
+/-- Why `Stmt.wt` rejects `s`: the innermost statement it rejects (inside a
+branch, a loop's body or a `try`'s clause, when that body is rejected), and
+the local a body retyped, when that is the reason (`Ctx.le`). -/
+def Stmt.wtWhy (Γ : Ctx) : Stmt C → Stmt C × Option (Var × BTy × Option BTy)
+  | s@(.ite c thn els) =>
+    if c.wt Γ then
+      match Prog.wtFirst Γ thn, Prog.wtFirst Γ els with
+      | .error e, _ => e
+      | _, .error e => e
+      | .ok Γt, .ok Γe => (s, (Ctx.retyped Γ Γt).orElse fun _ => Ctx.retyped Γ Γe)
+    else (s, none)
+  | s@(.loop a c body) =>
+    if a.wt Γ && c.wt Γ then
+      match Prog.wtFirst Γ body with
+      | .error e => e
+      | .ok Γb => (s, Ctx.retyped Γ Γb)
+    else (s, none)
+  | s@(.tryCall c rets ok err code pnc other) =>
+    if c.wt Γ then
+      match Prog.wtFirst (bindCtx rets Γ) ok, Prog.wtFirst Γ err,
+          Prog.wtFirst (bindCtx (codeBinders code) Γ) pnc, Prog.wtFirst Γ other with
+      | .error e, _, _, _ => e
+      | _, .error e, _, _ => e
+      | _, _, .error e, _ => e
+      | _, _, _, .error e => e
+      | .ok Γ₁, .ok Γ₂, .ok Γ₃, .ok Γ₄ =>
+        (s, [Γ₁, Γ₂, Γ₃, Γ₄].findSome? (Ctx.retyped Γ))
+    else (s, none)
+  | s => (s, none)
+
+/-- `Prog.wt`, a statement at a time: the context the block leaves, or why
+it is rejected (`Stmt.wtWhy`). -/
+def Prog.wtFirst (Γ : Ctx) : List (Stmt C) → Except (Stmt C × Option (Var × BTy × Option BTy)) Ctx
   | [] => .ok Γ
   | s :: P =>
     match s.wt Γ with
     | some Γ₁ => Prog.wtFirst Γ₁ P
-    | none => .error s
+    | none => .error (Stmt.wtWhy Γ s)
+
+end
 
 end Check
 
@@ -2780,6 +2838,15 @@ def litAt (p : PrimTy) (n : Int) : Except String (Simple C p) :=
     if p.isNumeric then throw s!"the literal {n} is out of the range of {primName p}"
     else throw s!"a number where a {primName p} is expected"
 
+/-- Arithmetic on two literals as solc folds it, exactly (a rational
+constant): `+`, `-`, `*`, and `/` when it divides.  The rest is not folded. -/
+def BinOp.foldLit? : BinOp → Int → Int → Option Int
+  | .add, a, b | .addW, a, b => some (a + b)
+  | .sub, a, b | .subW, a, b => some (a - b)
+  | .mul, a, b | .mulW, a, b => some (a * b)
+  | .div, a, b => if b != 0 && a % b == 0 then some (a / b) else none
+  | _, _, _ => none
+
 /-- `E.m` for an enum `E` of the contract that no local or state variable
 shadows: the position of `m`. -/
 def enumLit? (Γ : ECtx) : RawExpr → String → Option Nat
@@ -2885,12 +2952,24 @@ def check (Γ : ECtx) (p : PrimTy) : RawExpr → Except String (Val C p)
   | .unop .neg (.num n) =>
     if p = .int then return .simple (← litAt C p (-(n : Int)))
     else checkVia Γ p (.unop .neg (.num n))
-  -- so does arithmetic on literals alone: `int e = -5 + 2;`
+  -- so does arithmetic on literals alone: `int e = -5 + 2;`; an operand out
+  -- of `p`'s range is folded as solc folds a constant (`foldLit?`):
+  -- `uint x = 2**256 - 1` written out is the literal `2**256 - 1`
   | .binop op a b =>
     if a.isLit && b.isLit && op.isArith then
       match h : op.accepts p with
       | true =>
-        if hq : op.ret p = p then do pure (.binop op h hq (← check Γ p a) (← check Γ p b))
+        if hq : op.ret p = p then
+          match (do pure (.binop op h hq (← check Γ p a) (← check Γ p b)) :
+              Except String (Val C p)) with
+          | .ok v => pure v
+          | .error e =>
+            match a.litVal?, b.litVal? with
+            | some x, some y =>
+              match op.foldLit? x y with
+              | some v => if p.inRange v then return .simple (← litAt C p v) else throw e
+              | none => throw e
+            | _, _ => throw e
         else checkVia Γ p (.binop op a b)
       | false => checkVia Γ p (.binop op a b)
     else checkVia Γ p (.binop op a b)
@@ -2971,8 +3050,14 @@ leaves, or an error naming the statement it rejects. -/
 def wtCheck (Γ : Semantics.Ctx) (P : Prog C) : Except String Semantics.Ctx :=
   match Prog.wtFirst Γ P with
   | .ok Γ => .ok Γ
-  | .error s => .error s!"the locals check (`Stmt.wt`) rejects `{s.toStr}`: a local \
+  | .error (s, none) => .error s!"the locals check (`Stmt.wt`) rejects `{s.toStr}`: a local \
       used where it is not declared at that type"
+  | .error (s, some (x, t, t')) =>
+    let now := match t' with
+      | some t' => s!"its body declares {x} as {t'.toStr}"
+      | none => s!"its body leaves {x} unbound"
+    .error s!"the locals check (`Stmt.wt`) rejects `{s.toStr}`: {now}, which is declared as \
+      {t.toStr} before it (here a block's local outlives its block)"
 
 /-- A fresh variable for a capture, `ie1`, `sp2`: numbered past every
 variable the program itself writes. -/
@@ -4867,6 +4952,18 @@ example : (sol{ int e = -5; } : Prog StandardExample) =
 
 /-- info: int e = -5; -/
 #guard_msgs in #eval IO.println (Prog.show (sol{ int e = -5; } : Prog StandardExample))
+
+/-- A constant expression is folded as solc folds it: an operand out of
+range whose result is in range is accepted (`BinOp.foldLit?`). -/
+example : (sol{ uint x = 115792089237316195423570985008687907853269984665640564039457584007913129639936 - 1;
+    int y = 57896044618658097711785492504343953926634992332820282019728792003956564819968 - 1; } :
+    Prog StandardExample) =
+    [.declLocal .uint (.user "x") (some (.simple (.lit 115792089237316195423570985008687907853269984665640564039457584007913129639935 rfl))),
+     .declLocal .int (.user "y") (some (.simple (.lit 57896044618658097711785492504343953926634992332820282019728792003956564819967 rfl)))] := rfl
+
+-- One whose result is out of range is refused.
+/-- error: Solidity elaboration failed: the literal 115792089237316195423570985008687907853269984665640564039457584007913129639936 is out of the range of uint -/
+#guard_msgs in #check (sol{ uint x = 115792089237316195423570985008687907853269984665640564039457584007913129639936 + 1; } : Prog StandardExample)
 
 /-- `delete` in memory, and a fresh array written to a location. -/
 example : Prog.toStr (sol[TestSuite]{ Person memory m; delete m.age; delete m;

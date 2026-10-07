@@ -14,10 +14,11 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 |---|---|---|---|
 | Checked arithmetic | `uint` is `uint256`, `int` is `int256`; a result outside the range reverts (`Panic(0x11)`), at the result type of `+ - * **`, `++`/`−−`, and `op=` | `checkArith`, `evalBinop`, `OpLoc.store`, `OpLoc.bump` | `Evm/Examples.lean` (`**`) |
 | Unary minus | checked at `int` only; solc rejects it on `uint` | `unopCheck` | |
-| `**` | reverts on overflow (`2 ** 256`), `0 ** 0` is `1`, a negative exponent reverts (since 2026-10-07; it was `.stuck`): solc's exponent is unsigned, so no checked program has one | `applyBinOp` | `Evm/Examples.lean` |
-| Literals | a literal is in its type's range, `uint` below `2^256`, `int` in `[-2^255, 2^255)` (since 2026-10-07): one out of it is solc's compile error, and here no term (`Simple.lit` carries `PrimTy.inRange`); the elaborator refuses it (`litAt`), and the EVM fragment no longer checks it | `Simple.lit`, `PrimTy.inRange`, `litAt` | `Typing/Constructibility.lean` (`SVal.fits`) |
-| Mappings in memory | a memory local, a memory declaration and a memory path are at a type with no mapping (since 2026-10-07; solc rejects one, and the interpreter's `allocDefault`/`copyStToM` were stuck on it): `MPath.var` and `declMem` carry `(Ty.ref R).mapFree`, and a member or element of a memory path inherits it (`MPath.mapFree`) | `MPath.var`, `Stmt.declMem`, `memOk` | |
-| Storage pointer without a target | `T storage p;` binds `p` to no path (since 2026-10-07; it bound nothing, so a loop's next iteration saw the last one's binding and a read was `.stuck`): a read or a write through `p` reverts.  solc rejects such a read statically; KeY's `storageLocalDeclSkip` binds nothing (`docs/lean-key-rule-map.md`) | `Binding.unset`, `aliasPath`, `UpdElem.unset` | `Examples/Tactics/StorageSuite.lean` (`localDeclSkip`) |
+| `**` | reverts on overflow (`2 ** 256`), `0 ** 0` is `1`, a negative exponent reverts (since 2026-10-07; it was `.stuck`): solc's exponent is unsigned, so never negative on the EVM; here one can be, from an out-of-range environment value (`TxEnv` fields are unconstrained `Int`s) or storage word | `applyBinOp` | `Evm/Examples.lean` |
+| Literals | a literal is in its type's range, `uint` below `2^256`, `int` in `[-2^255, 2^255)` (since 2026-10-07): one out of it is solc's compile error, and here no term (`Simple.lit` carries `PrimTy.inRange`); the elaborator refuses it (`litAt`), and the EVM fragment no longer checks it.  In a constant expression solc folds the literals exactly first: `2**256 - 1` written out as one literal minus `1` is the literal `2^256 - 1`, and so here (`check` folds `+ - *` and an exact `/` of two literals, `BinOp.foldLit?`; a result out of range is still refused) | `Simple.lit`, `PrimTy.inRange`, `litAt`, `BinOp.foldLit?` | `Typing/Constructibility.lean` (`SVal.fits`) |
+| Mappings in memory | a memory local, a memory declaration and a memory path are at a type with no mapping (since 2026-10-07; solc rejects one): `MPath.var` and `declMem` carry `(Ty.ref R).mapFree`, and a member or element of a memory path inherits it (`MPath.mapFree`).  The interpreter's `allocDefault`/`copyStToM` keep their stuck arms on a mapping: no theorem yet connects `mapFree` to them, and the closer's untyped `.alloc R`/`.addM R` terms reach them, until M4c (`docs/intrinsic.md`) | `MPath.var`, `Stmt.declMem`, `memOk` | |
+| Storage pointer without a target | `T storage p;` binds `p` to no path (since 2026-10-07; it bound nothing, so a loop's next iteration saw the last one's binding and a read was `.stuck`): a read or a write through `p` reverts.  solc rejects such a read statically; KeY's `storageLocalDeclSkip` binds nothing (`docs/lean-key-rule-map.md`) | `Binding.unset`, `aliasPath`, `UpdElem.unset` | `Examples/Tactics/StorageSuite.lean` (`unsetAliasWrite`, `unsetAliasRead`, `unsetAliasLoop`) |
+| Block-scoped locals | not yet (since 2026-10-07, when the elaborator began running the locals check): a local declared in a block, a `for` init or a branch stays declared after it here, so the check (`Stmt.wt`, `wtCheck`) refuses a later branch, loop or `try` body that declares it again at another type, which solc accepts: `{ bool x = true; } if (c) { uint x = 1; }`.  A local both branches of an `if` declare alike is not kept (`Ctx.join` keeps only the elaborator's captures), so it may be redeclared.  M2 (`docs/intrinsic.md`) scopes locals and lifts this | `Stmt.wt`, `wtCheck`, `Ctx.join` | `Examples/Tactics/Branch.lean` |
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `applyBinOp`, `RawExpr.uncheck` | |
 | Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Tactics/Checked.lean` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `applyBinOp` | |
@@ -222,8 +223,10 @@ On the EVM a value transfer fails, and with `transfer` reverts, when the
 sending contract's balance does not cover the amount or the recipient
 refuses it (its code reverts, or runs out of the 2300 gas). `transferAt`
 does neither check: a negative amount reverts (since 2026-10-07; it was
-`.stuck`): it is unrepresentable in the unsigned value field, so no checked
-program has one, and the update element `.pay` reverts on it the same way;
+`.stuck`): it is unrepresentable in the unsigned value field, so never
+negative on the EVM, but here one can come from an out-of-range environment
+value (`msg.value`) or storage word; the update element `.pay` reverts on it
+the same way;
 otherwise the payment is booked at the
 recipient's end of the ledger, `net(addr) := net(addr) - amt`, unless the
 recipient is the contract itself (`State.pay`; `this` is `address(this)`,
@@ -349,8 +352,13 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   codes, `Error(string)` and empty revert data. Checked overflow (Panic
   0x11, at a narrow width too), an out-of-range index (0x32), an empty `pop`
   (0x31) and a zero divisor (0x12) are all `.revert`; "rejected at compile
-  time" and "outside the fragment" are `.stuck`. The compiled code has no
+  time" and "outside the fragment" are `.stuck`, except an access through
+  an unset storage pointer, a negative `**` exponent and a negative
+  `transfer`/`send` amount, which revert (since 2026-10-07; the table above). The compiled code has no
   panic: there a failing `assert` reverts (`compile_correct`).
+- **Block-scoped locals.** A block's local outlives its block, so the
+  elaborator's locals check refuses a redeclaration at another type after
+  it that solc accepts (the table above), until M2 (`docs/intrinsic.md`).
 - **Fragment width.** Loops run (`Loop.run`, `docs/loops.md`) and are
   proved by unwinding to a bound or by an invariant, but the EVM compiler
   refuses them (`wtStmt`); `uintN`/`intN`

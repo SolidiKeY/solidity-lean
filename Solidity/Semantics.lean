@@ -790,8 +790,8 @@ theorem uintBitwise_natCast (f : Nat → Nat → Nat) (a b : Nat) :
 
 /-- Arithmetic and relational operators on values. `/` and `%` revert on
 a zero divisor (KeY `divisionAssignment`/`moduloAssignment`), and `**` on
-a negative exponent (solc's exponent is a `uint`, so no checked program has
-one).  The bitwise operators, the shifts and the
+a negative exponent (solc's exponent is a `uint`, never negative on the EVM;
+here one can be, from an out-of-range environment value or storage word).  The bitwise operators, the shifts and the
 wrapping arithmetic are solc's at `uint256`: `~x` is `2^256 - 1 - x`,
 `x << n` is `x * 2^n` modulo `2^256`, `x >> n` is `x / 2^n`, a shift by
 `256` or more gives `0`, and `+%` (what `unchecked { a + b; }` is) is `a + b`
@@ -1473,8 +1473,9 @@ theorem Semantics.State.pay_eq (σ : State) (addr amt : Int) : σ.pay addr amt =
       else setBy addr (σ.getNet addr - amt) σ.net } := rfl
 
 /-- `a.transfer(v)` with both evaluated: book the payment on the ledger.  A
-negative amount reverts (solc's amount is a `uint`, so no checked program has
-one). -/
+negative amount reverts (solc's amount is a `uint`, never negative on the
+EVM; here one can be, from an out-of-range environment value such as
+`msg.value` or a storage word). -/
 def transferAt (σ : State) (addr amt : Int) : Res State :=
   if amt < 0 then .error .revert
   else .ok (σ.pay addr amt)

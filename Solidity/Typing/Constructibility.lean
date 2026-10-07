@@ -1123,7 +1123,7 @@ theorem fillElems_wt {R : RefTy} {E : Ty} {d : Nat} (a : ArrTy R E) :
     rw [Prog.wt_append']
     obtain ⟨Γ₁, h₁, hK₁⟩ := hIH w (List.mem_cons_self ..) E (d + 1)
       (.loc (.index (.arr a) (.alias (slot d)) (.simple (numLit .uint rfl (j : Int))))) Γ
-      (by simp [SPath.wt, Loc.wt, Val.wt, Simple.wt_numLit, hΓ])
+      (by simp only [SPath.wt, Loc.wt, hΓ, BEq.rfl, Val.wt, Simple.wt_numLit, Bool.and_self])
     obtain ⟨Γ₂, h₂, hK₂⟩ := fillElems_wt a L (j + 1) Γ₁
       (fun w hm => hIH w (List.mem_cons_of_mem _ hm)) (hK₁.lookup (Nat.lt_succ_self d) hΓ)
     exact ⟨Γ₂, by rw [h₁]; exact h₂, hK₁.trans hK₂⟩
@@ -1166,7 +1166,7 @@ theorem fillEntries_wt {d : Nat} {k : PrimTy} {V : Ty} (hk : k.isNumeric = true)
     simp only [fillEntries]
     obtain ⟨Γ₁, h₁, hK₁⟩ := hIH (key, w) (List.mem_cons_self ..) V (d + 1)
       (.loc (.index .map (.alias (slot d)) (.simple (numLit k hk key)))) Γ
-      (by simp [SPath.wt, Loc.wt, Val.wt, Simple.wt_numLit, hΓ])
+      (by simp only [SPath.wt, Loc.wt, hΓ, BEq.rfl, Val.wt, Simple.wt_numLit, Bool.and_self])
     obtain ⟨Γ₂, h₂, hK₂⟩ := fillEntries_wt hk todo Γ₁
       (fun kw hm => hIH kw (List.mem_cons_of_mem _ hm)) (hK₁.lookup (Nat.lt_succ_self d) hΓ)
     refine ⟨Γ₂, ?_, hK₁.trans hK₂⟩
@@ -2307,7 +2307,7 @@ theorem SPath.resolve_keys (hwt : RunWT C Γ H σ) (hte : TightEnv C σ.env) :
       | mref _ => simp [hx, bind, Except.bind] at h
       | store _ => simp [hx, bind, Except.bind] at h
       | ledger _ => simp [hx, bind, Except.bind] at h
-      | unset => simp [hx, bind, Except.bind] at h
+      | unset => simp only [bind, Except.bind, hx, reduceCtorEq] at h
   | _, .loc l, r, segs, hw, h, T₀, hr => Loc.resolve_keys hwt hte l hw h T₀ hr
 
 theorem Loc.resolve_keys (hwt : RunWT C Γ H σ) (hte : TightEnv C σ.env) :

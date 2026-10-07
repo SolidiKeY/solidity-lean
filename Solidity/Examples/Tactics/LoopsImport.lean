@@ -84,16 +84,16 @@ obligation, only their programs, the `return` lowered to a flag. -/
 /-- info: uint r;
 uint se1 = 0;
 bool ret3 = false;
-while (!ret3 && (se1 < 3)) { uint se2 = 0; while (!ret3 && (se2 < 3)) { if (((se1 * 3) + se2) == k) { r = (se1 * 10) + se2; ret3 = true; } else {  } if (!ret3) { se2++; } else {  } } if (!ret3) { se1++; } else {  } }
-if (ret3) {  } else { r = 99; } -/
+while (!ret3 && (se1 < 3)) { uint se2 = 0; while (!ret3 && (se2 < 3)) { if (((se1 * 3) + se2) == k) { r = (se1 * 10) + se2; ret3 = true; } else { } if (!ret3) { se2++; } else { } } if (!ret3) { se1++; } else { } }
+if (ret3) { } else { r = 99; } -/
 #guard_msgs in
 #eval IO.println (Prog.show Solc.Loops.loopNestedReturn)
 
 /-- info: uint r;
 uint se1 = 0;
 bool ret3 = false;
-while (!ret3 && (se1 < 3)) { if (se1 == k) { r = se1; ret3 = true; } else {  } if (!ret3) { se1++; } else {  } }
-if (ret3) {  } else { uint se2 = 0; while (se2 < 2) { r = r + se2; se2++; } } -/
+while (!ret3 && (se1 < 3)) { if (se1 == k) { r = se1; ret3 = true; } else { } if (!ret3) { se1++; } else { } }
+if (ret3) { } else { uint se2 = 0; while (se2 < 2) { r = r + se2; se2++; } } -/
 #guard_msgs in
 #eval IO.println (Prog.show Solc.Loops.returnBeforeSiblingLoop)
 

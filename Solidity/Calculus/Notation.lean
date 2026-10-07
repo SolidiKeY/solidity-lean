@@ -469,7 +469,9 @@ def RawTerm.hasSelectList : List RawTerm → Bool
 end
 
 def RawUpdElem.names : RawUpdElem → List String
-  | .assign x t => if x = "storage" || x = "memory" then t.names else x :: t.names
+  | .assign x t =>
+    if x = "storage" || x = "memory" then t.names
+    else if t matches .name "unset" then [x] else x :: t.names
   | .selfBalance _ a => a.names
   | .net r _ a => r.names ++ a.names
   | .pay r a | .netMt r a => r.names ++ a.names
@@ -500,6 +502,15 @@ def RawFml.names : RawFml → List String × List String
   | .decl ds φ =>
     let (u, d) := φ.names
     (u, RawStmt.declsList ds ++ d)
+
+/-- The names a formula's updates bind to no path (`x := unset`): aliases,
+so no `uint` parameters. -/
+def RawFml.unsets : RawFml → List String
+  | .all _ _ φ | .not φ | .modal _ _ φ | .decl _ φ => φ.unsets
+  | .and φ ψ | .imp φ ψ => φ.unsets ++ ψ.unsets
+  | .upd _ U φ =>
+    U.filterMap (fun | .assign x (.name "unset") => some x | _ => none) ++ φ.unsets
+  | _ => []
 
 /-- The statements of every program in a formula. -/
 def RawFml.stmts : RawFml → List RawStmt
@@ -885,8 +896,17 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
     -- empty ledger (a storage variable otherwise, `old := mtSt`)
     if x = "oldNet" && (t matches .name "mtSt") then
       return (.saveNetMt (Var.ofName x) :: U', Γ')
-    -- `lsv := unset`: an alias declared without a path (`storageLocalDeclSkip`)
-    if (t matches .name "unset") && (C.rootType "unset").isNone then
+    -- `lsv := unset`: an alias declared without a path (`storageLocalDeclSkip`);
+    -- `x` is an alias, or a name not yet bound (an alias by its hints)
+    if (t matches .name "unset") && (C.rootType "unset").isNone && (lookupBy "unset" Γ).isNone then
+      let what? : Option String := match lookupBy x Γ with
+        | some (.alias _) => none
+        | some (.val ..) => some "a value local"
+        | some (.mem _) => some "a memory local"
+        | some .store => some "a storage variable"
+        | none => if (C.rootType x).isSome then some "a state variable" else none
+      if let some what := what? then
+        throw s!"`{x} := unset` binds a storage alias; `{x}` is {what}"
       return (.unset (Var.ofName x) :: U', Γ')
     -- `old := storage`: a storage variable
     if isStorTerm t then return (.store (Var.ofName x) (← tStor C Γ t) :: U', setBy x .store Γ')
@@ -1103,11 +1123,12 @@ def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C) :=
   -- an enum's name (`State` in `State.Locked`) is no parameter
   let free := (used.filter fun x => !declared.contains x && (C.rootType x).isNone &&
     (lookupBy x C.enums).isNone).eraseDups
+  let unsets := φ.unsets
   let params := free.filterMap fun x =>
     match lookupBy x hints, Var.ofName x with
     | some R, _ => some (x, LocalTy.alias R)
     | none, .fresh "sp" _ | none, .fresh "mv" _ => none
-    | none, _ => some (x, LocalTy.val .uint)
+    | none, _ => if unsets.contains x then none else some (x, LocalTy.val .uint)
   let taken := ((used ++ declared).map fun x => (Var.ofName x).idx).filter (· > 0)
   let taken := if pastAll then List.range' 1 (taken.foldl max 0) else taken
   ((elabFml C taken φ).run { funs := C.funs }).run' (params, 1)
@@ -1286,6 +1307,16 @@ example : Fml StandardExample :=
 
 /-- An alias bound by an update is an alias under it, in a program too. -/
 example : Fml StandardExample := dl!{ { p := alice } ⟨ p.age = 3; ⟩ p.age == 3 }
+
+/-- `x := unset` binds a storage alias to no path (`storageLocalDeclSkip`);
+a value local, a memory local or a state variable is refused. -/
+example : Fml StandardExample := dl!{ { p := unset } true }
+
+/-- error: Solidity elaboration failed: `v := unset` binds a storage alias; `v` is a value local -/
+#guard_msgs in #check dl!{ [ uint v = 1; ] { v := unset } v == 1 }
+
+/-- error: Solidity elaboration failed: `age := unset` binds a storage alias; `age` is a state variable -/
+#guard_msgs in #check dl!{ { age := unset } true }
 
 /-- A push, in nested `save`s, reads back as one. -/
 example : dl!{ { storage := save(save(storage, values[values.length], 7), values.length,

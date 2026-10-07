@@ -41,7 +41,7 @@ while (i < 3) { i++; } -/
 /-- info: uint s = 0;
 uint i = 0;
 bool brk2 = false;
-while (!brk2 && (i < 9)) { bool cnt1 = false; if (i == 1) { cnt1 = true; } else {  } if (!cnt1) { if (i == 5) { brk2 = true; } else {  } if (!brk2) { s += i; } else {  } } else {  } if (!brk2) { i++; } else {  } } -/
+while (!brk2 && (i < 9)) { bool cnt1 = false; if (i == 1) { cnt1 = true; } else { } if (!cnt1) { if (i == 5) { brk2 = true; } else { } if (!brk2) { s += i; } else { } } else { } if (!brk2) { i++; } else { } } -/
 #guard_msgs in
 #eval IO.println (Prog.show (sol{ uint s = 0;
   for (uint i = 0; i < 9; i++) { if (i == 1) { continue; } if (i == 5) { break; } s += i; } }))
@@ -136,8 +136,8 @@ uint se1 = 3;
 uint se2;
 uint se3 = 0;
 bool ret4 = false;
-while (!ret4 && (se3 < values.length)) { if (values[se3] == se1) { se2 = se3; ret4 = true; } else {  } if (!ret4) { se3++; } else {  } }
-if (ret4) {  } else { se2 = 100; }
+while (!ret4 && (se3 < values.length)) { if (values[se3] == se1) { se2 = se3; ret4 = true; } else { } if (!ret4) { se3++; } else { } }
+if (ret4) { } else { se2 = 100; }
 y = se2; -/
 #guard_msgs in
 #eval IO.println (Prog.show (Prog.inlined (sol[Loops]{ uint y = find(3); })))
@@ -151,8 +151,8 @@ uint se2 = 4;
 uint se3;
 uint se4 = 0;
 bool ret6 = false;
-while (!ret6 && (se4 < se1)) { uint se5 = 0; while (!ret6 && (se5 < se1)) { if ((se4 + se5) == se2) { se3 = (10 * se4) + se5; ret6 = true; } else {  } if (!ret6) { se5++; } else {  } } if (!ret6) { se4++; } else {  } }
-if (ret6) {  } else { se3 = 100; }
+while (!ret6 && (se4 < se1)) { uint se5 = 0; while (!ret6 && (se5 < se1)) { if ((se4 + se5) == se2) { se3 = (10 * se4) + se5; ret6 = true; } else { } if (!ret6) { se5++; } else { } } if (!ret6) { se4++; } else { } }
+if (ret6) { } else { se3 = 100; }
 y = se3; -/
 #guard_msgs in
 #eval IO.println (Prog.show (Prog.inlined (sol[Loops]{ uint y = pair(3, 4); })))
@@ -184,7 +184,7 @@ example : Prog StandardExample := sol{ uint i = 0;
 `docs/solkey-feedback.md`). -/
 
 /-- info: uint i = 0;
-try address(7).get() { bool brk1 = false; while (!brk1 && (i < 3)) { if (i == 1) { brk1 = true; } else {  } if (!brk1) { i++; } else {  } } } catch Error(string memory) {  } catch Panic(uint) {  } catch {  } -/
+try address(7).get() { bool brk1 = false; while (!brk1 && (i < 3)) { if (i == 1) { brk1 = true; } else { } if (!brk1) { i++; } else { } } } catch Error(string memory) { } catch Panic(uint) { } catch { } -/
 #guard_msgs in
 #eval IO.println (Prog.show (sol{ uint i = 0;
   try address(7).get() { while (i < 3) { if (i == 1) { break; } i++; } } catch { } }))
@@ -484,7 +484,7 @@ KeY's types say: an anonymised local holds anything. -/
 
 /-- info: uint i = 0;
 bool brk1 = false;
-/// @custom:key invariant (i <= 10) && (brk1 || !brk1) while (!brk1 && (i < 10)) { if (i == 5) { brk1 = true; } else {  } if (!brk1) { i++; } else {  } } -/
+/// @custom:key invariant (i <= 10) && (brk1 || !brk1) while (!brk1 && (i < 10)) { if (i == 5) { brk1 = true; } else { } if (!brk1) { i++; } else { } } -/
 #guard_msgs in
 #eval IO.println (Prog.show (sol{ uint i = 0;
   /// @custom:key invariant i <= 10

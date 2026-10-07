@@ -129,7 +129,7 @@ then `counted`, whose code after `_;` runs after the body; each modifier's
 parameter a fresh local bound when the modifier is entered. -/
 
 /--
-info: uint se1 = owner; uint se2 = 5; uint se4 = se1; require(se4 == owner); uint se3 = 0; if (phase != se3) { revert(); } else {  } total += se2; total += 1;
+info: uint se1 = owner; uint se2 = 5; uint se4 = se1; require(se4 == owner); uint se3 = 0; if (phase != se3) { revert(); } else { } total += se2; total += 1;
 -/
 #guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol{ pay(owner, 5); })))
 

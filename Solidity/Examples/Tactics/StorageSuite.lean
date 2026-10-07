@@ -139,6 +139,34 @@ theorem localDeclSkip :
   sol_symex
   sol_close
 
+/-- A write through an alias bound to no path reverts (`aliasPath`); solc
+rejects the program statically. -/
+theorem unsetAliasWrite :
+    Prog.run State.exampleStore (sol{ Person storage p; p.age = 1; } : Prog StandardExample) =
+      .error .revert := rfl
+
+/-- So does a read through it. -/
+theorem unsetAliasRead :
+    Prog.run State.exampleStore
+      (sol{ Person storage p; uint r = p.age; } : Prog StandardExample) = .error .revert := rfl
+
+/-! `unsetAliasLoop`: in a loop, `Person storage p;` unbinds what the last
+iteration bound: the first iteration writes through `alice`, the second
+reverts.  A loop runs by well-founded recursion, which `rfl` does not unfold,
+so the run is printed. -/
+
+/-- info: ("ok", "revert") -/
+#guard_msgs in
+#eval
+  let halt (r : Res State) := match r with
+    | .error .revert => "revert" | .ok _ => "ok" | .error _ => "another halt"
+  (halt (Prog.run State.exampleStore
+      (sol{ uint i = 0; while (i < 1) { Person storage p; if (i == 0) { p = alice; }
+            p.age = 1; i++; } } : Prog StandardExample)),
+   halt (Prog.run State.exampleStore
+      (sol{ uint i = 0; while (i < 2) { Person storage p; if (i == 0) { p = alice; }
+            p.age = 1; i++; } } : Prog StandardExample)))
+
 /-! ## 3 · Arrays and mappings -/
 
 /-- `values[3] = 5; values[3] = 8; uint result = values[3];`

@@ -267,7 +267,7 @@ local instance : InContract := ⟨Purchase⟩
 parameter bound fresh, then the body; the event is gone. -/
 
 /--
-info: if (msgSender != seller) { revert(); } else {  } uint se1 = 0; if (state != se1) { revert(); } else {  } state = 3; seller.transfer(thisBalance);
+info: if (msgSender != seller) { revert(); } else { } uint se1 = 0; if (state != se1) { revert(); } else { } state = 3; seller.transfer(thisBalance);
 -/
 #guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol{ abort(); })))
 

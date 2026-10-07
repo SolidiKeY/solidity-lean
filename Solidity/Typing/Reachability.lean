@@ -1509,7 +1509,7 @@ theorem Stmt.run_canon : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : 
     cases init with
     | none =>
       cases hs; cases h
-      exact ⟨H, .refl H, hwt.setEnv (by simp [BTy.matchesB]), hcn.of_eq rfl rfl⟩
+      exact ⟨H, .refl H, hwt.setEnv rfl, hcn.of_eq rfl rfl⟩
     | some r =>
       obtain ⟨hc, rfl⟩ := wt_if hs
       have hcn' := ARhs.bind_canon hwt hcn hc h
