@@ -755,8 +755,9 @@ theorem Prog.resolve_erase {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)} {P : Pr
 end Resolve
 
 /-- The elaborator's locals in scope as a named context: `old` is a
-specification's storage snapshot. -/
-def _root_.Solidity.ECtx.toNCtx (Γ : ECtx) : NCtx :=
+specification's storage snapshot.  A name is read as the file's
+`FreshNames` spells it (`acc` may be `sp1`). -/
+def _root_.Solidity.ECtx.toNCtx [FreshNames] (Γ : ECtx) : NCtx :=
   Γ.map fun (x, t) => (Var.ofName x, match t with
     | .val p _ => .val p
     | .alias R => .alias R
