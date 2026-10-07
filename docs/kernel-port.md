@@ -38,6 +38,11 @@ specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
 
 ## Still open
 
+- **The bridge (2026-10-07, ends at M4 of `docs/intrinsic.md`).** The scoped
+  syntax `Solidity.Core` (`Scope.lean`, `Syntax/Core.lean`) lives beside
+  `Syntax.lean`'s `Stmt C`, which the elaborator still emits, until it
+  replaces it: the one deliberate exception to porting in place.
+
 - **Calls.** Parameters and return values of reference type (`Person storage
   p`, `uint[] memory xs`) are elaboration errors (`Syntax.lean`).  An external
   call is a `try` only (`Stmt.tryCall`): a bare `I(a).f();`, `try new C()`,

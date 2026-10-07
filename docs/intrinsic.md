@@ -25,7 +25,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 |---|---|---|
 | M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
-| M2 | | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
+| M2 | M2.1 done | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
 | M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
@@ -113,6 +113,43 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
   solc-alignment gains a "Block-scoped locals" row and delta, and its error
   classification and mappings-in-memory rows say what reverts and what stays
   stuck.  New bare `simp`s are `simp only` (or `rfl`).
+
+### M2 notes
+
+- M2.1 (2026-10-07): `Scope.lean` (`LTy`, `Ctx := List LTy`, `Idx`, `Ext`,
+  `Thin`, `Binders`, `CodeBinder`) and `Syntax/Core.lean` (every family at
+  `C Γ`, `Args`, `CallRet`, mutual `Stmt C Γ Γ'`/`Prog C Γ Γ'`, printers,
+  `Stmt.wk`/`Prog.wk`), both in `Solidity.Core`.  Departures from the sketch
+  below:
+  - The contexts are in their own module, not `AST.lean`:
+    `Solidity.Semantics.Ctx` (the locals check's `List (Var × BTy)`) would
+    clash wherever `Semantics` is open, until M3 deletes it.
+  - `Thin` is `refl | keep | drop` (the spike's), not `done | keep | drop`:
+    the identity is one constructor.  `Ext`'s functions are `casesOn` +
+    structural (`Ext.trans`, `Ext.depth`, `Idx.ext`), `Thin`'s `match`.
+    `Ext` is a `Subsingleton`.
+  - Constructors keep today's argument order (`declLocal p x init`), a use
+    is an `Idx`, a binder a `Var`.  New: `Stmt.block`.  `call` has no `hsep`.
+  - A call's frame is `rs ++ ps`: `Args` binds the parameters in order
+    (`snoc`, the last innermost), and the frame declares the return
+    variables `rs` at their defaults.  `CallRet Γ rs Γ'` (no `C`) is `none`,
+    `val p r res` (`res : Option (Idx Γ (.val p))`), `rets bs` (left in the
+    caller, `Γ' = rs ++ Γ`: the tuple's targets read them) and `mem R r hd
+    hm` (`Γ' = .mem R :: Γ`).  The memory return's declaration moves from
+    the body's head (`Person memory mv2;`) into the frame, so `erase` must
+    put it back.
+  - A `try`'s returned values are `Binders ρ` and its code a `CodeBinder κ`
+    (`[]` or `[.val .uint]`).
+  - Printers take the names of the context (`List Var`, innermost first) and
+    write what `Syntax.lean`'s write; `Stmt.memCallStr?` and
+    `Stmt.tupleCallStr?` compare names, as there.  Pinned by `example₁`
+    (every scope) and two weakening `#guard`s at the end of the module.
+- Left for M2: `erase`, `resolve` and `resolve_erase`, the quoter, the lint
+  over the 449 functions and the `sol{}` sites, and `Stmt.ext`/`Prog.ext`
+  (M3 needs them; condition 1's form).  For `resolve`: the memory
+  conditional of references (M1 d) declares its `mv` in each branch and
+  reads it after the `if`, which scoped branches forbid; it needs a lowering
+  that declares `mv` before the `if` without allocating.
 
 ## Baselines (M0)
 

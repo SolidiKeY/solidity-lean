@@ -3,6 +3,8 @@ import Solidity.KeySort
 import Solidity.AST
 import Solidity.SpecSyntax
 import Solidity.Syntax
+import Solidity.Scope
+import Solidity.Syntax.Core
 import Solidity.FreshNames
 import Solidity.Semantics
 import Solidity.Semantics.DecEq

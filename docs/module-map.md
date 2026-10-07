@@ -44,6 +44,8 @@ lemma (`TermTaclet.sound`).
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |
 | `AST.lean` | Types (`PrimTy`/`Ty`/`RefTy`, `RefTy.fixed`), the struct table, operators, `Var`. |
 | `Syntax.lean` | The typed syntax (`Val C p`, `SPath`, `Loc`, `MPath`, `Stmt C`), `Contract`/`FunDecl`, the locals check (`Stmt.wt`, `wtCheck`), and the elaborator behind `sol[C]{…}` and `contract!{…}`. |
+| `Scope.lean` | `Solidity.Core`'s contexts: `LTy`, `Ctx := List LTy`, positions `Idx`, suffixes `Ext` (scope ends), thinnings `Thin` (weakening), `Binders`. |
+| `Syntax/Core.lean` | The typed syntax scoped (`Solidity.Core`, `docs/intrinsic.md`): `Stmt C Γ Γ'`/`Prog C Γ Γ'` over `Idx`, scoped branches and blocks, calls closed over their frame (`Args`, `CallRet`), the printers (names beside the context) and `Stmt.wk`.  Beside `Syntax.lean`'s until M4. |
 | `FreshNames.lean` | `FreshNames.ofTable`: the examples' names for the rules' fresh variables, one table per example; `FreshNames.clashes`. |
 | `SpecSyntax.lean` | The specification language (`SolSpec.g4`: `SpecExpr`, `spec!(…)`) and a function's clauses (`FunSpec`). |
 | `Semantics.lean` | The interpreter `Stmt.run`, following solc where KeY is more liberal (`docs/solc-alignment.md`); a loop's run as the least fixed point of its unwinding (`Loop.run`, `Loop.run_rel`); a deployment's `Contract.deployState` and `Contract.deploy`. |
