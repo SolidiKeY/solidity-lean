@@ -31,6 +31,7 @@ import Solidity.Calculus.Core.Step
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.Logic
+import Solidity.Calculus.Core.Cover
 import Solidity.Calculus.Core.SoundKit
 import Solidity.Calculus.Core.SoundArms
 import Solidity.Calculus.Core.Delab
