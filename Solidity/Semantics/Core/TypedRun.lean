@@ -920,15 +920,17 @@ example : (Prog.trun (TState.ofStorage Storage.standardExample) assertLowCore).h
   decide +kernel
 
 /-- solc's order of `++` inside an expression. -/
-example : ((Prog.trun (TState.ofStorage Storage.testSuite) incOrderCore).halt?,
-    (Prog.trun (TState.ofStorage Storage.testSuite) indexOrderCore).halt?) = (none, none) := by
+example : (Prog.trun (TState.ofStorage Storage.testSuite) incOrderCore).halt? = none := by
+  decide +kernel
+
+example : (Prog.trun (TState.ofStorage Storage.testSuite) indexOrderCore).halt? = none := by
   decide +kernel
 
 /-- The calls of `CallsExample`: `addTwo(3)` is `5`, `larger(5, 7)` is `7`. -/
 example : (match Prog.trun (TState.ofStorage (Storage.init CallsExample)) callsCore with
     | .ok o => some ((TEnv.get .here o.st.env : PrimTy.uint.Denote).1,
         (TEnv.get (.there .here) o.st.env : PrimTy.uint.Denote).1)
-    | .error _ => none) = some (7, 6) := by
+    | .error _ => none) = some (7, 5) := by
   decide +kernel
 
 end Examples
