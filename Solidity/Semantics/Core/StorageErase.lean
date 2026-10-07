@@ -70,9 +70,27 @@ theorem lookupBy_erase {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (s
     · subst e
       have hT : T' = _ := lookupBy_cons_pos rfl h
       subst hT
-      simp only [SFields.erase, get, lookupBy, ↓reduceIte, ↓reduceDIte]
-    · simp only [SFields.erase, get, lookupBy, if_neg e, dif_neg e]
+      simp only [SFields.erase, get_cons, lookupBy, ↓reduceIte, ↓reduceDIte]
+    · simp only [SFields.erase, get_cons, lookupBy, if_neg e, dif_neg e]
       exact lookupBy_erase rest _
+
+theorem get_eq_getM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (st : SFields fs) →
+    (h : lookupBy f fs = some T) → st.get h = st.getM h
+  | _, _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
+  | _, _, @SFields.cons f' T' _ v rest, h => by
+    rw [get_cons]
+    by_cases e : f = f'
+    · simp only [e, ↓reduceDIte, getM]
+    · simp only [e, ↓reduceDIte, getM, get_eq_getM rest]
+
+theorem set_eq_setM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (st : SFields fs) →
+    (h : lookupBy f fs = some T) → (x : SVal T) → st.set h x = st.setM h x
+  | _, _, .nil, _, _ => rfl
+  | _, _, @SFields.cons f' T' _ v rest, h, x => by
+    rw [set_cons]
+    by_cases e : f = f'
+    · simp only [e, ↓reduceDIte, setM]
+    · simp only [e, ↓reduceDIte, setM, set_eq_setM rest]
 
 theorem setBy_erase {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (st : SFields fs) →
     (h : lookupBy f fs = some T) → (x : SVal T) → setBy f x.erase st.erase = (st.set h x).erase
@@ -82,8 +100,8 @@ theorem setBy_erase {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (st :
     · subst e
       have hT : T' = _ := lookupBy_cons_pos rfl h
       subst hT
-      simp only [SFields.erase, set, setBy, ↓reduceIte, ↓reduceDIte]
-    · simp only [SFields.erase, set, setBy, if_neg e, dif_neg e]
+      simp only [SFields.erase, set_cons, setBy, ↓reduceIte, ↓reduceDIte]
+    · simp only [SFields.erase, set_cons, setBy, if_neg e, dif_neg e]
       exact congrArg _ (setBy_erase rest _ x)
 
 end SFields

@@ -23,10 +23,11 @@ Defaults (`SVal.dflt`) are structural on the rank `structDef_rank_lt`
 certifies, so the kernel can reduce them, where `defaultForTy` is
 well-founded; their fuel is `rankBound`, which reads no struct name.
 
-`find`, `findLive` and `save`, which the kernel evaluates on every storage
-access, are written with `Path.rec` over `SVal.view` (Gate G0, conditions 1
-and 2), each with a `match` twin as its compiled form; the other functions
-still `match` on the indexed families.
+`find`, `findLive`, `save` and `SFields.get`/`set`, which the kernel
+evaluates on every storage access, are written with the recursors (`Path.rec`
+over `SVal.view`, `SFields.rec`; Gate G0, conditions 1 and 2), each with a
+`match` twin as its compiled form; the other functions still `match` on the
+indexed families.
 -/
 
 namespace Solidity.Core
@@ -214,21 +215,66 @@ theorem lookupBy_cons_neg {f f' : Name} {T T' : Ty} {fs : List (Name × Ty)} (e 
   simp only [lookupBy, if_neg e] at h
   exact h
 
-/-- The value of the first member named `f`. -/
-def get {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → SFields fs →
+/-- `get` by `match`, its compiled form. -/
+def getM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → SFields fs →
     lookupBy f fs = some T → SVal T
   | _, _, .nil, h => absurd h (by simp only [lookupBy, reduceCtorEq, not_false_eq_true])
   | _, _, @SFields.cons f' _ _ v rest, h =>
     if e : f = f' then lookupBy_cons_pos e h ▸ v
-    else rest.get (lookupBy_cons_neg e h)
+    else rest.getM (lookupBy_cons_neg e h)
 
-/-- The first member named `f` replaced. -/
-def set {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → SFields fs →
+/-- `set` by `match`, its compiled form. -/
+def setM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → SFields fs →
     lookupBy f fs = some T → SVal T → SFields fs
   | _, _, .nil, _, _ => .nil
   | _, _, @SFields.cons f' _ _ v rest, h, x =>
     if e : f = f' then .cons ((lookupBy_cons_pos e h).symm ▸ x) rest
-    else .cons v (rest.set (lookupBy_cons_neg e h) x)
+    else .cons v (rest.setM (lookupBy_cons_neg e h) x)
+
+/-- The value of the first member named `f`.  By the recursor, for the kernel
+(Gate G0, condition 2); `getM` is its compiled form. -/
+@[implemented_by getM]
+def get {f : Name} {fs : List (Name × Ty)} {T : Ty} (x : SFields fs)
+    (h : lookupBy f fs = some T) : SVal T :=
+  @SFields.rec (fun _ _ => Unit) (fun fs _ => ∀ T, lookupBy f fs = some T → SVal T)
+    (fun _ _ => Unit) (fun _ _ _ => Unit) (fun _ _ => Unit)
+    (fun {_} _ => ()) (fun {_} _ _ => ()) (fun {_} _ _ _ _ => ()) (fun {_} {_} _ _ => ())
+    (fun {_} {_} _ _ _ _ => ())
+    (fun _ h => absurd h (by simp only [lookupBy, reduceCtorEq, not_false_eq_true]))
+    (fun {f'} {_} {_} v _ _ ih _ h =>
+      if e : f = f' then lookupBy_cons_pos e h ▸ v else ih _ (lookupBy_cons_neg e h))
+    (fun {_} => ()) (fun {_} _ _ _ _ => ()) (fun {_} => ()) (fun {_} {_} _ _ _ _ => ())
+    (fun {_} => ()) (fun {_} _ _ _ _ _ => ()) fs x T h
+
+/-- The first member named `f` replaced.  By the recursor; `setM` is its
+compiled form. -/
+@[implemented_by setM]
+def set {f : Name} {fs : List (Name × Ty)} {T : Ty} (x : SFields fs)
+    (h : lookupBy f fs = some T) (y : SVal T) : SFields fs :=
+  @SFields.rec (fun _ _ => Unit) (fun fs _ => ∀ T, lookupBy f fs = some T → SVal T → SFields fs)
+    (fun _ _ => Unit) (fun _ _ _ => Unit) (fun _ _ => Unit)
+    (fun {_} _ => ()) (fun {_} _ _ => ()) (fun {_} _ _ _ _ => ()) (fun {_} {_} _ _ => ())
+    (fun {_} {_} _ _ _ _ => ())
+    (fun _ _ _ => .nil)
+    (fun {f'} {_} {_} v rest _ ih _ h y =>
+      if e : f = f' then .cons ((lookupBy_cons_pos e h).symm ▸ y) rest
+      else .cons v (ih _ (lookupBy_cons_neg e h) y))
+    (fun {_} => ()) (fun {_} _ _ _ _ => ()) (fun {_} => ()) (fun {_} {_} _ _ _ _ => ())
+    (fun {_} => ()) (fun {_} _ _ _ _ _ => ()) fs x T h y
+
+theorem get_cons {f f' : Name} {T T' : Ty} {fs : List (Name × Ty)} (v : SVal T')
+    (rest : SFields fs) (h : lookupBy f ((f', T') :: fs) = some T) :
+    (SFields.cons v rest).get h =
+      if e : f = f' then lookupBy_cons_pos e h ▸ v else rest.get (lookupBy_cons_neg e h) := rfl
+
+theorem set_nil {f : Name} {T : Ty} (h : lookupBy f [] = some T) (y : SVal T) :
+    SFields.nil.set h y = .nil := rfl
+
+theorem set_cons {f f' : Name} {T T' : Ty} {fs : List (Name × Ty)} (v : SVal T')
+    (rest : SFields fs) (h : lookupBy f ((f', T') :: fs) = some T) (y : SVal T) :
+    (SFields.cons v rest).set h y =
+      if e : f = f' then .cons ((lookupBy_cons_pos e h).symm ▸ y) rest
+      else .cons v (rest.set (lookupBy_cons_neg e h) y) := rfl
 
 end SFields
 

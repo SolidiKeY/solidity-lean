@@ -256,7 +256,8 @@ untyped operation is never stuck on an erased input.
   by `rfl` (all structs but `BadDup`).  `find`, `findLive` and `save` are
   `Path.rec` over `SVal.view` (its type `Shape T` computed from `T`), each
   with a `match` twin (`findM`, …) as `implemented_by` and an equality
-  theorem (`SVal.find_eq_findM`).  The eight stores of `Semantics.lean` are
+  theorem (`SVal.find_eq_findM`); `SFields.get`/`set` likewise (`getM`,
+  `setM`, `SFields.get_eq_getM`).  The eight stores of `Semantics.lean` are
   named constants (`Storage.testSuite`, …) with `_erase` lemmas.
 - **Heap (M4c).** `Semantics/Core/Heap.lean`, `Semantics/Core/HeapErase.lean`.
   A heap typing `HTy := List RefTy` (identity = position, oldest first);
@@ -313,8 +314,8 @@ today's form: `unfoldStore` (`Corpus/Basic.lean`), `findStorage`/
 | store `solcMappings` | 16.4 ms | 17.2 ms | 1.05 |
 | store `solcControlFlow` | 5.0 ms | 4.9 ms | 0.99 |
 | stores `solcExpressions`, `solcArrays` | < 1 ms | < 1.3 ms | — |
-| read `alice.account.balance` | 10.3 ms | 12.4 ms (`match`: 14.1) | 1.20 |
-| save it, read it back | 12.1 ms | 16.1 ms (`match` read: 17.9) | 1.33 |
+| read `alice.account.balance` | 11.7 ms | 11.7 ms | 1.00 |
+| save it, read it back | 14.2 ms | 13.2 ms | 0.93 |
 | fresh `Person memory m; m.age = 3;` read back | does not reduce | 10.3 ms | — |
 | `alice` storage → memory → storage | does not reduce | 17–18 ms | — |
 | the corpus example (a whole untyped run) | 19 ms | needs the typed run | — |
@@ -328,13 +329,13 @@ today's form: `unfoldStore` (`Corpus/Basic.lean`), `findStorage`/
 - Untyped memory does not reduce in the kernel: `allocDefault` stops at the
   well-founded `defaultForTy`, `copyMem` at the well-founded `copyMToSt`
   (the corpus pins memory programs by `#eval` for this reason).
-- **Gate (within 20%)**: the stores pass (≤ 1.09×), a read is at 1.20×, a
-  save then read fails at 1.33×.  The rest of a read's cost is the member
-  lookup by name: two `structDef` unfoldings cost 4 ms alone, and
-  `SFields.get`/`set` cast each member by its `lookupBy` proof.  Next:
-  `SFields.get`/`set` by the recursor, then a positional member index in
-  `Path.field` (resolved once from the name, like `Idx`), and re-measure on
-  the typed run.
+- The read rows compare the value read (three runs each).  With `find`,
+  `save` and `SFields.get`/`set` by `match`, a read cost 1.37× and a save
+  then read 1.48×; `find`/`save` by the recursor alone, 1.20× and 1.33×.
+- **Gate (within 20%)**: passes, the stores at ≤ 1.09×, a read at 1.00×, a
+  save then read at 0.93×.  Re-measure on the typed run (M3 + wiring), where
+  `erase`, `overlay`, `defaultOf` and the heap copies, still by `match`, enter
+  the path.
 
 ### Gate G0: passes, under conditions
 
