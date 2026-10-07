@@ -37,7 +37,7 @@ Decided by the lead since (2026-10-07):
 | M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
 | M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
-| M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
+| M3 | M3.1 done 2026-10-07 (typed run) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
@@ -239,6 +239,67 @@ Decided by the lead since (2026-10-07):
     the MCP call's overhead too).  `Examples/Benchmark/Syntax` 1.22 s (two
     runs; M0 1.2 s, +2%), `Solkey/TestSuite` 10.99/11.21/11.07 s (M0 10.4 s,
     +6%), `Examples/Chains/Storage` 7.21/7.34 s (M0 7.5 s, −3%).
+
+### M3 notes
+
+- M3.1 (2026-10-07): `Semantics/Core.lean`, the interpreter over
+  `Core.Stmt`.
+  - `LTy.Denote C` (reducible): `val p` a `Value`, `alias R` an
+    `Option (Name × List Seg)` (`none` unset: a read reverts), `mem R` a heap
+    identity, `old`/`oldNet` a storage/ledger.  Values, storage and heap stay
+    `Semantics.lean`'s until M4, so `C` is not used yet.
+  - `Env C Γ` is computed (`Unit`, `t.Denote C × Env C Γ`); `get`/`set` recurse
+    on `Idx`, `drop` on `Ext`, by `casesOn` (condition 1); `append`/`take` (a
+    call's frame, a `try`'s returned values) on the list `ρ`.
+  - `State C Γ` has today's fields with `env : Env C Γ`; `State.glob` is the
+    global part as a `Semantics.State` (no locals), so every storage, heap
+    and ledger operation of `Semantics.lean` is called as it is, and
+    `withGlob`/`withEnv` put the result back.
+  - One function per statement (`Run.assign` … `Run.block`, `Run.seq`), given
+    its sub-programs' runs and their `Prog.ext`.  `Stmt.runR`/`Prog.runR` are
+    `Stmt.rec`/`Prog.rec` over them (`@[implemented_by]` the `match` twin
+    `Stmt.runC`/`Prog.runC`, linked by `Stmt.runR_eq`/`Prog.runR_eq`, a
+    mutual structural proof); `Stmt.run σ s`/`Prog.run σ P` are abbreviations
+    with today's argument order.  The twin is a `match`, not `casesOn`: it is
+    compiled code only, never kernel-evaluated.
+  - Scopes: `ite`, `block`, `loop` (each iteration) and the `try` clauses pop
+    by `State.drop` of the sub-program's `Prog.ext` (a `try` clause also pops
+    its `ρ`/`κ`, `Ext.append`).  A call evaluates the arguments in the caller
+    (`Args.eval`, in order), enters the frame `rs ++ ps` (`CallRet.enter`:
+    defaults, a memory return allocated after the arguments are read, as
+    today's first body statement did), runs the body, and leaves the caller
+    its locals plus what `CallRet.leave` exports (`val`'s assignment,
+    `rets`' variables, `mem`'s identity).
+  - The loop is `Core.Loop`, today's `Loop` over any state type (`step`,
+    `iterN`, `run` with `run_of_iterN`), since today's is fixed to
+    `Semantics.State`; it goes when M4 retires the untyped interpreter.
+  - `stuck` now comes only from a value of the wrong shape (`asInt`/`asBool`,
+    a condition that is an `int`: M4a) and from a storage or heap that does
+    not fit (`findStorage`, `getObj`, `copyStToM`, `allocDefault`: M4b, M4c).
+    No local lookup can fail: an unset alias reverts, as today.
+  - Equations: `Prog.run_nil`, `run_cons`, `run_cons_ok`,
+    `run_loop_of_iterN`, `Stmt.run_ite`/`run_block`/`run_loop`/`run_call`
+    (by `rfl` or one rewrite); `Env.get_set`, `take_append`, `drop_append`.
+  - Examples (kernel): a failing `require` reverts, a failing `assert`
+    panics (`rfl`), two of `Semantics.lean`'s three `++`-order runs
+    (`decide +kernel`), `CallsExample`'s `addTwo(3)`/`larger(5, 7)` read from
+    the caller's locals (`rfl`), a loop declaring a local per iteration
+    (`run_loop_of_iterN (n := 4) rfl`).  `aliasWrite` and the third
+    `++`-order run do not reduce in the kernel with either interpreter
+    (storage overlay / nested push), so `aliasWrite` is a `#guard_msgs`
+    `#eval` (`runResolved`), as today.
+  - Timing: kernel check of `Eq.refl` on `(run σ P).isOk`, best of five
+    (`IO.monoNanosNow` around `addDeclCore`, a scratch module), the old
+    interpreter on the untyped block, the new on its `defineCore` term, and
+    the `match` twin `Prog.runC` on the same term:
+
+    | Block | old | `Prog.run` (rec) | `Prog.runC` (match) |
+    |---|---|---|---|
+    | `require(age > 3)` | 2.8 ms | 2.6 ms | 3.2 ms |
+    | `assert(age > 3)` | 2.8 ms | 2.6 ms | 3.2 ms |
+    | `i++ + i` | 9.2 ms | 5.4 ms | 9.1 ms |
+    | `values[++i] = ++i` | 18.9 ms | 16.5 ms | 21.7 ms |
+    | `addTwo(3)`, `larger(y, 7)` | 22.3 ms | 11.7 ms | 18.0 ms |
 
 ## Baselines (M0)
 
