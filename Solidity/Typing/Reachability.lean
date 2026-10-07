@@ -26,7 +26,8 @@ struct missing its mapping.
 `Prog.run_canon` is the preservation theorem (the scoped run's
 `Invariant` with `Canon` on the global part, `canonInv`), `reachable_canon`
 its corollary from a contract's initial state (`Reachable`: a scoped program
-`Core.Prog C [] Γ'` runs there), and the two refutations the
+`Core.Prog C [] Γ'` runs there, by the scoped interpreter; the untyped one
+is not related to it yet), and the two refutations the
 removed untyped layer left as `sorry` follow: a storage whose mapping default
 is not the default (`map_default_not_reachable`) and one whose struct misses
 a member (`struct_missing_field_not_reachable`) are well-typed and not
@@ -1875,14 +1876,17 @@ way). -/
 theorem Contract.deployState_empty (C : Contract) :
     C.deployState {} = { C.initState with net := [(0, 0)] } := rfl
 
-/-- A storage is reachable when a program runs from the initial state to a
-state holding it.  The program is scoped (`Syntax/Core.lean`), so its
-locals are used as declared by construction. -/
+/-- A storage is reachable when a scoped program runs from the initial state
+to a state holding it, by the scoped interpreter (`Semantics/Core.lean`).
+The program's locals are used as declared by construction.  The calculus's
+`holds` reads the untyped interpreter, and no theorem yet carries a storage
+that interpreter reaches to one `Reachable` holds of (`docs/intrinsic.md`,
+M2–M3 review). -/
 def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (σ : Core.State C Γ'),
     P.run (Core.State.ofSem C.initState) = .ok σ ∧ σ.storage = st
 
-/-- **Reachable ⇒ well-typed and canonical.**  Every storage a checked
+/-- **Reachable ⇒ well-typed and canonical.**  Every storage a scoped
 program reaches from `C`'s initial state holds `C`'s roots in order, each
 well-typed and canonical: no run of `StandardExample` leaves `alice` without
 her `account`. -/
