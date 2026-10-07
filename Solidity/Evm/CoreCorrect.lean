@@ -15,9 +15,10 @@ A scope's end pops its locals in the state (`State.drop`) and nothing on the
 machine: the cells stay, above the enclosing scope's level, and `Sim.drop`
 forgets them.  A branch's fragment is met with the other's (`Frag.meet`).
 
-There is no `not_stuck` here: the scoped interpreter's statements in the
-fragment never reach `.stuck` (a `Value` of the wrong shape), and
-`compile_correct` says so by listing every outcome without it.
+There is no `not_stuck` here: from a state some machine represents (`Sim`),
+the scoped interpreter's statements in the fragment never reach `.stuck` (a
+`Value` of the wrong shape), and `compile_correct` says so by listing every
+outcome without it.
 -/
 
 namespace Solidity.Evm
@@ -44,7 +45,8 @@ theorem Frag.guard_some {Γ : Ctx} {F F' : Frag Γ} {ok : Bool} (h : F.guard ok 
 
 theorem Keeps.weaken {sh' : Bool} {m m' : Machine} (h : Keeps C b sh m m')
     (hs : sh = true → sh' = true) : Keeps C b sh' m m' :=
-  ⟨h.mem, fun h' => h.len (by cases sh <;> simp_all)⟩
+  ⟨h.mem, fun h' => h.len (by
+    cases sh <;> simp_all only [Bool.false_eq_true, Bool.true_eq_false, implies_true])⟩
 
 /-- A scope's end in the state: its locals popped. -/
 theorem Sim.dropState {Γ Δ : Ctx} {G : Frag Δ} {σ' : Solidity.Core.State C Δ} (h : Ext Γ Δ)
@@ -112,11 +114,15 @@ theorem ite_sim {Γ₁ Γ₂ : Ctx} (c : Solidity.Core.Val C Γ .bool)
         show exec ([Instr.jump (compileProg b e).length] ++ compileProg b e) 1 m =
           run (compileProg b e) m from rfl]
       exact (ihe.drop e.ext).weaken (fun i _ hg hd => Frag.get_meet_right _ _ i hg hd)
-        (by simp_all) (by simp_all) (by simp_all)
+        (by simp_all only [Bool.or_true, implies_true])
+        (by simp_all only [Bool.or_true, implies_true])
+        (by simp_all only [Bool.or_true, implies_true])
     · rw [run_append_skip (m' := m) (k := 0) rfl]
       refine (StmtOut.drop (sh := Prog.shrinks t) (pays := Prog.pays t)
         (asserts := Prog.asserts t) t.ext ?_).weaken (fun i _ hg hd => Frag.get_meet _ _ i hg hd)
-        (by simp_all) (by simp_all) (by simp_all)
+        (by simp_all only [Bool.true_or, implies_true])
+        (by simp_all only [Bool.true_or, implies_true])
+        (by simp_all only [Bool.true_or, implies_true])
       rcases iht with ⟨τ', m', hτ', hrun', hst', hk', hm'⟩ | ⟨hτ', hrun'⟩ | ⟨ha, hτ', hrun'⟩ |
           ⟨hp, hrun', τ', m', hτ', hk', hm'⟩
       · refine .inl ⟨τ', m', hτ', ?_, hst', hk', hm'⟩
@@ -430,8 +436,8 @@ theorem opAssign_family {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = 
   | root rt h => exact opStore_sim hp hop rfl r hm hl hr
   | field q f h => exact opStore_sim hp hop rfl r hm hl hr
   | index it q i => exact opStore_sim hp hop rfl r hm hl hr
-  | mfield _ _ _ => simp [opLocIn, opLocToLoc] at hl
-  | mindex _ _ _ => simp [opLocIn, opLocToLoc] at hl
+  | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
+  | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
 
 theorem incDec_family {p : PrimTy} (op : IncDec) (hpn : p.isNumeric = true)
     (l : Solidity.Core.OpLoc C Γ p) {F' : Frag Γ} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
@@ -447,8 +453,8 @@ theorem incDec_family {p : PrimTy} (op : IncDec) (hpn : p.isNumeric = true)
   | root rt h => exact bumpStore_sim hp op rfl hm hl
   | field q f h => exact bumpStore_sim hp op rfl hm hl
   | index it q i => exact bumpStore_sim hp op rfl hm hl
-  | mfield _ _ _ => simp [opLocIn, opLocToLoc] at hl
-  | mindex _ _ _ => simp [opLocIn, opLocToLoc] at hl
+  | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
+  | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
 
 theorem assignIncDec_family {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hpn : p.isNumeric = true) (l : Solidity.Core.OpLoc C Γ p) (hs : l.recvSimple = true)
@@ -465,8 +471,8 @@ theorem assignIncDec_family {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
   | root rt h => exact assignBumpStore_sim hp op i rfl hm hl
   | field q f h => exact assignBumpStore_sim hp op i rfl hm hl
   | index it q j => exact assignBumpStore_sim hp op i rfl hm hl
-  | mfield _ _ _ => simp [opLocIn, opLocToLoc] at hl
-  | mindex _ _ _ => simp [opLocIn, opLocToLoc] at hl
+  | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
+  | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
 
 theorem push_family {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
     (v : Option (Solidity.Core.Src C Γ E)) (hd : (v.isSome || E.defaultOkS) = true) {F' : Frag Γ}
@@ -814,7 +820,7 @@ machine holds at its slot; or the world refuses a payment, and the machine
 alone reverts.
 
 Example: `alice.age = 10;` leaves `10` at slot `13` of `StandardExample`
-(`Evm/CoreExamples.lean` derives it from this theorem). -/
+(`Evm/CoreInterpreter.lean`'s `setAge_interpreter` derives it from this theorem). -/
 theorem compile_storage {P : Solidity.Core.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')
     (hL : Prog.pushes P < Lmax) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
     (∃ σ' m', Solidity.Core.Prog.run (Solidity.Core.State.ofSem (State.fresh C balance self)) P =

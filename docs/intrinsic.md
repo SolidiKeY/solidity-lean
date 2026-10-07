@@ -518,12 +518,15 @@ proof over `Core` is done, with no `sorry` and the axioms `propext`,
   hypothesis.  (This edits a module below `Semantics.lean`; the merge into
   `intrinsic` rebuilds from there.)
 - **G0 condition 1: the EVM compiler is exempt.**  `compileStmt`/`compileProg`,
-  `inFrag`/`inFragP`, `Stmt.pushes`/`pays`/`shrinks`, `argsCode` and
+  `inFrag`/`inFragP`, `Stmt.pushes`/`pays`/`shrinks`,
+  `Stmt.asserts`/`Prog.asserts`, `argsCode` and
   `retEnterCode`/`retLeaveCode` `match` on `Stmt C Γ Γ'`, `Prog C Γ Γ'`,
-  `Args C Γ ps` and `CallRet Γ rs Γ'`, and `Evm/CoreExamples.lean` evaluates
-  them in the kernel.  They are kept as `match`: the calculus never
+  `Args C Γ ps` and `CallRet Γ rs Γ'`, and `Evm/CoreExamples.lean` and
+  `Evm/CoreInterpreter.lean` evaluate them in the kernel.  They are kept as `match`: the calculus never
   evaluates them (no symex or closer step reaches the compiler), the only
-  kernel evaluations are the 44 example checks of one file, and every proof
+  kernel evaluations are the example checks of `Evm/CoreExamples.lean` and
+  the fragment, bound, `pays` and `asserts` checks of
+  `Evm/CoreInterpreter.lean`, and every proof
   about them (`compileStmt_erase`, `storesFrom_compileStmt`, the `Sim`
   lemmas) is structural and uses their equation lemmas.  Timing (scratch
   module, `Elab.async false`, the same 44 non-`**` examples as one block
@@ -584,15 +587,19 @@ proof over `Core` is done, with no `sorry` and the axioms `propext`,
     `simp` 0.05 s, pre-definitions 0.03 s).  Whole files:
     `Evm/CoreSim.lean` 7.1 s, `Evm/CoreExpr.lean` 5.9 s,
     `Evm/CoreStmt.lean` 4.8 s, `Evm/CoreCorrect.lean` 4.9 s (the four
-    together 22.7 s, against `Evm/Correctness.lean`'s 25.6 s, which they
-    replace; each elaborates in its own worker, so in a build they run in
+    add 22.7 s after `Evm/Correctness.lean` (25.6 s), which they import
+    and do not replace; each elaborates in its own worker, so in a build they run in
     a chain).  `Evm/CoreExamples.lean` 10.7 s against `Evm/Examples.lean`'s
     9.5 s (+13%, within the 20% gate), and `Evm/CoreInterpreter.lean`
     4.9 s.
 - Left: timing the compiler on a quoter-built program (M2.3);
   `Machine.mem : Nat → Word` (with `cell = id`) once `Evm/Compile.lean`
-  retires at M4; deleting `wtStmt`, `Evm/Correctness.lean` and the untyped
-  `not_stuck`/`never_stuck` with the untyped compiler (M4).
+  retires at M4; at M4, moving the machine-level lemmas the Core path uses
+  out of `Evm/Correctness.lean` into a module of their own
+  (`ValOut`/`LocOut`/`EnvSim`, the `*_run` code lemmas, `State.fresh`,
+  `Evm.Sim.init`), then deleting `wtStmt`, the untyped
+  `stmt_sim`/`compile_*`/`not_stuck`/`never_stuck` with the untyped
+  compiler, and re-timing the chain.
 
 ## Baselines (M0)
 

@@ -126,13 +126,13 @@ theorem simple_sim {m : Machine} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m
     subst hp
     obtain ⟨h1, h2, h3, h4, w1, w2, w3, w4⟩ := hm.env
     have hn : ∀ n : Nat, n < W → ReprV .uint (.int n) (.val n) := fun n h =>
-      ⟨by omega, by exact_mod_cast h, by simp⟩
+      ⟨by omega, by exact_mod_cast h, by simp only [Int.toNat_natCast]⟩
     cases k
-    · exact .inl ⟨_, _, by simp [Solidity.Core.Simple.eval, State.envVal, h1]; rfl, hn _ w1, rfl⟩
-    · exact .inl ⟨_, _, by simp [Solidity.Core.Simple.eval, State.envVal, h2]; rfl, hn _ w2, rfl⟩
-    · exact .inl ⟨_, _, by simp [Solidity.Core.Simple.eval, State.envVal, h3]; rfl, hn _ w3, rfl⟩
-    · simp [simpleIn] at hw
-    · exact .inl ⟨_, _, by simp [Solidity.Core.Simple.eval, State.envVal, h4]; rfl, hn _ w4, rfl⟩
+    · exact .inl ⟨_, _, by simp only [Core.Simple.eval, State.envVal, h1]; rfl, hn _ w1, rfl⟩
+    · exact .inl ⟨_, _, by simp only [Core.Simple.eval, State.envVal, h2]; rfl, hn _ w2, rfl⟩
+    · exact .inl ⟨_, _, by simp only [Core.Simple.eval, State.envVal, h3]; rfl, hn _ w3, rfl⟩
+    · simp only [simpleIn, bne_self_eq_false, Bool.false_eq_true] at hw
+    · exact .inl ⟨_, _, by simp only [Core.Simple.eval, State.envVal, h4]; rfl, hn _ w4, rfl⟩
 
 mutual
 
@@ -164,7 +164,7 @@ theorem spath_sim : ∀ {T : Ty} (q : Solidity.Core.SPath C Γ T) {free : Bool} 
       · rw [hsv₀] at hsv; cases hsv
   | _, .loc l, free, m, hm, hw => by
     simp only [Solidity.Core.SPath.resolve, compileSPath]
-    exact loc_sim l hm (by simpa [spathIn] using hw)
+    exact loc_sim l hm (by simpa only [spathIn] using hw)
 
 /-- A location pushes its slot, checking every array index against the
 length on the way.
@@ -176,9 +176,10 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
       LocOut C L σ.glob free T (l.resolve σ) (run (compileLoc b l) m) m
   | _, .root r h, free, m, hm, _ => by
     obtain ⟨sv, hl, hr⟩ := hm.store r _ h
-    exact .inl ⟨r, [], rootSlot C r, sv, rfl, by simp [State.findLive, hl], .root h, hr, rfl⟩
+    exact .inl ⟨r, [], rootSlot C r, sv, rfl, by simp only [State.findLive, hl, SVal.findLive_nil],
+        .root h, hr, rfl⟩
   | _, @Solidity.Core.Loc.field _ _ s T q f h, free, m, hm, hw => by
-    have hwb : spathIn F free q = true := by simpa [locIn] using hw
+    have hwb : spathIn F free q = true := by simpa only [locIn] using hw
     have h' : lookupBy f (structDef s) = some T := h
     simp only [Solidity.Core.Loc.resolve, compileLoc]
     rcases spath_sim q hm hwb with ⟨r, segs, s₀, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
@@ -187,10 +188,12 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
         obtain ⟨v, hv⟩ := hex f T h'
         refine .inl ⟨r, segs ++ [.field f], s₀.add (offset s f), v, ?_, ?_, .field hp h,
           hall f T v h' hv, ?_⟩
-        · simp [hres]; rfl
-        · rw [findLive_append, hsv]; simp [bind, Except.bind, SVal.findLive, hv]
-        · rw [run_append_ok hrun]; simp [run, Instr.step, Machine.next, Machine.push]
-    · exact .inr ⟨by simp [hres]; rfl, run_append_revert hrun⟩
+        · simp only [hres, bind_pure_comp]; rfl
+        · rw [findLive_append, hsv]; simp only [bind, Except.bind, SVal.findLive, hv,
+            SVal.findLive_nil]
+        · rw [run_append_ok hrun]; simp only [run, Machine.push, exec_cons_zero, Instr.step,
+            Machine.next, Out.ok_bind, exec_nil]
+    · exact .inr ⟨by simp only [hres, bind_pure_comp]; rfl, run_append_revert hrun⟩
   | _, @Solidity.Core.Loc.index _ _ _ k V .map q i, free, m, hm, hw => by
     have ihb : ∀ {m : Machine}, Sim C L b F σ.glob (Look.ofEnv σ.env) m →
         spathIn F free q = true →
@@ -213,14 +216,15 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
           have hp' := PathSlot.key hp (Int.natCast_nonneg n) (by omega)
           rw [Int.toNat_natCast] at hp'
           refine .inl ⟨r, segs ++ [.at n], .hash n s₀ 0, _, ?_, ?_, hp', hall n hn, ?_⟩
-          · simp [hres, hv, Value.asInt, State.checkIndex, State.findStorage_of_findLive hsv, bind,
-              Except.bind, pure, Except.pure] <;> rfl
+          · simp only [bind, Except.bind, hres, hv, Value.asInt, State.checkIndex,
+              State.findStorage_of_findLive hsv, pure, Except.pure] <;> rfl
           · rw [findLive_append, hsv]
             simp only [bind, Except.bind, SVal.findLive]
-            cases lookupBy (n : Int) entries <;> simp
-          · rw [run_append_ok hrun']; simp [run, Instr.step, Machine.next, Machine.push]
-        · exact .inr ⟨by simp [hres, hv]; rfl, run_append_revert hrun'⟩
-    · exact .inr ⟨by simp [hres]; rfl, run_append_revert hrun⟩
+            cases lookupBy (n : Int) entries <;> simp only [Option.getD_none, Option.getD_some]
+          · rw [run_append_ok hrun']; simp only [run, Machine.push, exec_cons_zero, Instr.step,
+              Machine.next, exec_nil, Out.ok_bind]
+        · exact .inr ⟨by simp only [hres, hv, bind_pure_comp]; rfl, run_append_revert hrun'⟩
+    · exact .inr ⟨by simp only [hres, bind_pure_comp]; rfl, run_append_revert hrun⟩
   | _, @Solidity.Core.Loc.index _ _ _ _ E (.arr .dyn) q i, free, m, hm, hw => by
     have ihb : ∀ {m : Machine}, Sim C L b F σ.glob (Look.ofEnv σ.env) m →
         spathIn F free q = true →
@@ -244,8 +248,9 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
           have hres' : (Solidity.Core.Loc.index (.arr .dyn) q i).resolve σ =
               (if n < elems.length then .ok (r, segs ++ [.at n]) else .error .revert) := by
             by_cases hin : n < elems.length <;>
-              simp [Solidity.Core.Loc.resolve, hres, hv, Value.asInt, State.checkIndex, hsv', hin,
-                bind, Except.bind, pure, Except.pure] <;> rfl
+              simp only [Core.Loc.resolve, bind, Except.bind, hres, hv, Value.asInt,
+                  State.checkIndex, hsv', Int.ofNat_zero_le, Int.toNat_natCast, hin, and_self,
+                  and_false, ↓reduceIte, pure, Except.pure] <;> rfl
           rw [hres']
           have hb := boundsCheck_run m m.stack (elemSlot (size E)) n s₀
           simp only [Machine.push] at hb ⊢
@@ -257,12 +262,14 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
             refine .inl ⟨r, segs ++ [.at n], .data s₀ (n * size E), elems[n], rfl, ?_, hp',
               hall n hin, elemSlot_run m m.stack n (size E) s₀⟩
             rw [findLive_append, hsv]
-            simp [bind, Except.bind, SVal.findLive, hin]
+            simp only [bind, Except.bind, SVal.findLive, Int.ofNat_zero_le, Int.toNat_natCast, hin,
+                and_self, ↓reduceDIte, List.get_eq_getElem, SVal.findLive_nil]
           · rw [if_neg hin, if_neg hin]
             exact .inr ⟨rfl, rfl⟩
-        · exact .inr ⟨by simp [Solidity.Core.Loc.resolve, hres, hv]; rfl,
+        · exact .inr ⟨by simp only [Core.Loc.resolve, hres, hv, bind_pure_comp]; rfl,
             run_append_revert hrun'⟩
-    · exact .inr ⟨by simp [Solidity.Core.Loc.resolve, hres]; rfl, run_append_revert hrun⟩
+    · exact .inr ⟨by simp only [Core.Loc.resolve, hres, bind_pure_comp]; rfl,
+        run_append_revert hrun⟩
   | _, @Solidity.Core.Loc.index _ _ _ _ E (@IndexTy.arr _ _ (@ArrTy.fixed _ n)) q i, free, m,
       hm, hw => by
     have ihb : ∀ {m : Machine}, Sim C L b F σ.glob (Look.ofEnv σ.env) m →
@@ -287,8 +294,9 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
           have hres' : (Solidity.Core.Loc.index (.arr .fixed) q i).resolve σ =
               (if k < elems.length then .ok (r, segs ++ [.at k]) else .error .revert) := by
             by_cases hin : k < elems.length <;>
-              simp [Solidity.Core.Loc.resolve, hres, hv, Value.asInt, State.checkIndex, hsv', hin,
-                bind, Except.bind, pure, Except.pure] <;> rfl
+              simp only [Core.Loc.resolve, bind, Except.bind, hres, hv, Value.asInt,
+                  State.checkIndex, hsv', Int.ofNat_zero_le, Int.toNat_natCast, hin, and_self,
+                  and_false, ↓reduceIte, pure, Except.pure] <;> rfl
           rw [hres']
           have hb := fixedCheck_run m m.stack (fixedSlot (size E)) n k s₀
           simp only [Machine.push] at hb ⊢
@@ -300,12 +308,14 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
             refine .inl ⟨r, segs ++ [.at k], s₀.add (k * size E), elems[k], rfl, ?_, hp',
               hall k hin, fixedSlot_run m m.stack k (size E) s₀⟩
             rw [findLive_append, hsv]
-            simp [bind, Except.bind, SVal.findLive, hin]
+            simp only [bind, Except.bind, SVal.findLive, Int.ofNat_zero_le, Int.toNat_natCast, hin,
+                and_self, ↓reduceDIte, List.get_eq_getElem, SVal.findLive_nil]
           · rw [if_neg hin, if_neg hin]
             exact .inr ⟨rfl, rfl⟩
-        · exact .inr ⟨by simp [Solidity.Core.Loc.resolve, hres, hv]; rfl,
+        · exact .inr ⟨by simp only [Core.Loc.resolve, hres, hv, bind_pure_comp]; rfl,
             run_append_revert hrun'⟩
-    · exact .inr ⟨by simp [Solidity.Core.Loc.resolve, hres]; rfl, run_append_revert hrun⟩
+    · exact .inr ⟨by simp only [Core.Loc.resolve, hres, bind_pure_comp]; rfl,
+        run_append_revert hrun⟩
 
 /-- An expression pushes its value, or reverts where the interpreter does.
 
@@ -316,7 +326,7 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
       ValOut p (e.eval σ) (run (compileVal b e) m) m
   | _, .simple s, m, hm, hw => by
     simp only [Solidity.Core.Val.eval, compileVal]
-    exact simple_sim hm s (by simpa [valIn] using hw)
+    exact simple_sim hm s (by simpa only [valIn] using hw)
   | p, .read l, m, hm, hw => by
     simp only [valIn] at hw
     simp only [Solidity.Core.Val.eval, compileVal]
@@ -324,8 +334,8 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
     · rw [run_append_ok hrun]
       obtain ⟨v, hv, hrv, _⟩ := prim_read hr
       refine .inl ⟨v, .val (m.store s), ?_, hrv, rfl⟩
-      simp [hres, (State.findStorage_of_findLive hsv), hv, bind, Except.bind]
-    · exact .inr ⟨by simp [hres]; rfl, run_append_revert hrun⟩
+      simp only [bind, Except.bind, hres, (State.findStorage_of_findLive hsv), hv]
+    · exact .inr ⟨by simp only [hres]; rfl, run_append_revert hrun⟩
   | _, @Solidity.Core.Val.binop _ _ p q op hacc hq x y, m, hm, hw => by
     have iha : ∀ {m : Machine}, Sim C L b F σ.glob (Look.ofEnv σ.env) m → valIn F x = true →
         ValOut p (x.eval σ) (run (compileVal b x) m) m := fun hm hw => val_sim x hm hw
@@ -337,7 +347,8 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
     simp only [Solidity.Core.Val.eval]
     by_cases hand : op = .and
     · subst hand
-      obtain rfl : p = .bool := by cases p <;> simp [binInFrag] at hop ⊢
+      obtain rfl : p = .bool := by cases p <;> simp only [binInFrag, BEq.rfl, beq_iff_eq,
+          reduceCtorEq] at hop ⊢
       simp only [compileVal, List.append_assoc]
       rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
       · obtain ⟨z, rfl, rfl⟩ := hra.bool_inv
@@ -356,12 +367,14 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
           rcases ihb hm hwb with ⟨vb, wb, hvb, hrb, hrunb⟩ | ⟨hvb, hrunb⟩
           · obtain ⟨z, rfl, rfl⟩ := hrb.bool_inv
             refine .inl ⟨.bool z, .val (bword z), ?_, rfl, hrunb⟩
-            simp [evalBinop, hvb, applyBinOp, Value.asBool, checkArith, bind, Except.bind]
-          · exact .inr ⟨by simp [evalBinop, hvb, bind, Except.bind], hrunb⟩
-      · exact .inr ⟨by simp [hva, bind, Except.bind], run_append_revert hruna⟩
+            simp only [bind, Except.bind, evalBinop, hvb, applyBinOp, Value.asBool, Bool.true_and,
+                checkArith]
+          · exact .inr ⟨by simp only [bind, Except.bind, evalBinop, hvb], hrunb⟩
+      · exact .inr ⟨by simp only [bind, Except.bind, hva], run_append_revert hruna⟩
     by_cases hor : op = .or
     · subst hor
-      obtain rfl : p = .bool := by cases p <;> simp [binInFrag] at hop ⊢
+      obtain rfl : p = .bool := by cases p <;> simp only [binInFrag, BEq.rfl, beq_iff_eq,
+          reduceCtorEq] at hop ⊢
       simp only [compileVal, List.append_assoc]
       rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
       · obtain ⟨z, rfl, rfl⟩ := hra.bool_inv
@@ -373,18 +386,20 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
           rcases ihb hm hwb with ⟨vb, wb, hvb, hrb, hrunb⟩ | ⟨hvb, hrunb⟩
           · obtain ⟨z, rfl, rfl⟩ := hrb.bool_inv
             refine .inl ⟨.bool z, .val (bword z), ?_, rfl, hrunb⟩
-            simp [evalBinop, hvb, applyBinOp, Value.asBool, checkArith, bind, Except.bind]
-          · exact .inr ⟨by simp [evalBinop, hvb, bind, Except.bind], hrunb⟩
+            simp only [bind, Except.bind, evalBinop, hvb, applyBinOp, Value.asBool, Bool.false_or,
+                checkArith]
+          · exact .inr ⟨by simp only [bind, Except.bind, evalBinop, hvb], hrunb⟩
         · refine .inl ⟨.bool true, .val (bword true), rfl, rfl, ?_⟩
           rw [show [Instr.dup 1, .jumpi ((compileVal b y).length + 1), .pop] ++ compileVal b y
             = [Instr.dup 1, .jumpi ((compileVal b y).length + 1)] ++ ([.pop] ++ compileVal b y)
             from rfl, run_append_skip (m' := m.push (.val (bword true)))
             (k := (compileVal b y).length + 1) rfl]
           exact exec_length ([.pop] ++ compileVal b y) _
-      · exact .inr ⟨by simp [hva, bind, Except.bind], run_append_revert hruna⟩
+      · exact .inr ⟨by simp only [bind, Except.bind, hva], run_append_revert hruna⟩
     have hcode : compileVal b (.binop op hacc rfl x y) =
         compileVal b x ++ compileVal b y ++ binTail p op := by
-      cases op <;> simp_all [compileVal]
+      cases op <;> simp_all only [forall_const, reduceCtorEq, not_false_eq_true, compileVal,
+          List.append_assoc, not_true_eq_false]
     rw [hcode, List.append_assoc]
     rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
     · rw [run_append_ok hruna, hva]
@@ -394,7 +409,7 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
       · rw [run_append_ok hrunb, hvb]
         exact tail_sim hop hand hor hra hrb m
       · exact .inr ⟨by rw [hvb]; rfl, run_append_revert hrunb⟩
-    · exact .inr ⟨by simp [hva, bind, Except.bind], run_append_revert hruna⟩
+    · exact .inr ⟨by simp only [bind, Except.bind, hva], run_append_revert hruna⟩
   | _, @Solidity.Core.Val.unop _ _ p q op hacc hq x, m, hm, hw => by
     have iha : ∀ {m : Machine}, Sim C L b F σ.glob (Look.ofEnv σ.env) m → valIn F x = true →
         ValOut p (x.eval σ) (run (compileVal b x) m) m := fun hm hw => val_sim x hm hw
@@ -403,17 +418,18 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
     obtain ⟨hop, hwa⟩ := hw
     cases op with
     | not =>
-      obtain rfl : p = .bool := by cases p <;> simp [UnOp.accepts] at hacc ⊢
+      obtain rfl : p = .bool := by cases p <;> simp only [UnOp.accepts, BEq.rfl, beq_iff_eq,
+          reduceCtorEq] at hacc ⊢
       simp only [Solidity.Core.Val.eval, compileVal]
       rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
       · obtain ⟨z, rfl, rfl⟩ := hra.bool_inv
         rw [run_append_ok hruna, hva]
         refine .inl ⟨.bool !z, .val (bword !z), ?_, rfl, ?_⟩
-        · simp [applyUnOp, Value.asBool, unopCheck, bind, Except.bind]; rfl
+        · simp only [bind, Except.bind, applyUnOp, Value.asBool, unopCheck]; rfl
         · cases z <;> rfl
-      · exact .inr ⟨by simp [hva, bind, Except.bind], run_append_revert hruna⟩
+      · exact .inr ⟨by simp only [bind, Except.bind, hva], run_append_revert hruna⟩
     | neg =>
-      obtain rfl : p = .int := by simpa [unInFrag] using hop
+      obtain rfl : p = .int := by simpa only [unInFrag, beq_iff_eq] using hop
       simp only [Solidity.Core.Val.eval, compileVal]
       rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
       · obtain ⟨a, ha, rfl, rfl⟩ := hra.int_inv
@@ -425,9 +441,9 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
         by_cases h : -(H : Int) ≤ -sgn a ∧ -sgn a < H
         · rw [if_pos h, if_pos h]; exact .inl ⟨_, _, rfl, ReprV.int h.1 h.2, rfl⟩
         · rw [if_neg h, if_neg h]; exact .inr ⟨rfl, rfl⟩
-      · exact .inr ⟨by simp [hva, bind, Except.bind], run_append_revert hruna⟩
+      · exact .inr ⟨by simp only [bind, Except.bind, hva], run_append_revert hruna⟩
     | bnot =>
-      obtain rfl : p = .uint := by simpa [unInFrag] using hop
+      obtain rfl : p = .uint := by simpa only [unInFrag, beq_iff_eq] using hop
       simp only [Solidity.Core.Val.eval, compileVal]
       rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
       · obtain ⟨a, ha, rfl, rfl⟩ := hra.uint_inv
@@ -437,8 +453,8 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
         · simp only [applyUnOp, Value.asInt, unopCheck, bind, Except.bind, pure, Except.pure,
             uintBound_eq]
           congr 2; omega
-        · simp [run, Instr.step, Machine.next]; rfl
-      · exact .inr ⟨by simp [hva, bind, Except.bind], run_append_revert hruna⟩
+        · simp only [run, exec_cons_zero, Instr.step, Machine.next, exec_nil]; rfl
+      · exact .inr ⟨by simp only [bind, Except.bind, hva], run_append_revert hruna⟩
   | p, .ternary c x y, m, hm, hw => by
     have ihc : ∀ {m : Machine}, Sim C L b F σ.glob (Look.ofEnv σ.env) m → valIn F c = true →
         ValOut .bool (c.eval σ) (run (compileVal b c) m) m := fun hm hw => val_sim c hm hw
@@ -465,7 +481,7 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
           rw [run_append_ok hruna]
           exact exec_length _ _
         · exact .inr ⟨hva, run_append_revert hruna⟩
-    · exact .inr ⟨by simp [hvc, bind, Except.bind], run_append_revert hrunc⟩
+    · exact .inr ⟨by simp only [bind, Except.bind, hvc], run_append_revert hrunc⟩
   | _, .len q hp, m, hm, hw => by
     cases hp
     simp only [valIn] at hw
@@ -476,11 +492,12 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
         rw [run_append_ok hrun]
         have := hm.bound; have := Lmax_lt_W
         refine .inl ⟨.int elems.length, .val elems.length, ?_, ReprV.uint (by omega), ?_⟩
-        · simp [hres, State.findStorage_of_findLive hsv, arrayLen, bind, Except.bind]; rfl
-        · simp [run, Instr.step, Machine.next, Machine.push, hl]
-    · exact .inr ⟨by simp [hres]; rfl, run_append_revert hrun⟩
-  | _, .readMem _, _, _, hw => by simp [valIn] at hw
-  | _, .mlen .., _, _, hw => by simp [valIn] at hw
+        · simp only [bind, Except.bind, hres, arrayLen, State.findStorage_of_findLive hsv]; rfl
+        · simp only [run, Machine.push, exec_cons_zero, Instr.step, Machine.next, hl, exec_nil,
+            Out.ok_bind]
+    · exact .inr ⟨by simp only [hres]; rfl, run_append_revert hrun⟩
+  | _, .readMem _, _, _, hw => by simp only [valIn, Bool.false_eq_true] at hw
+  | _, .mlen .., _, _, hw => by simp only [valIn, Bool.false_eq_true] at hw
 
 end
 
