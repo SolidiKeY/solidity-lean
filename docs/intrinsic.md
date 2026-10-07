@@ -21,11 +21,12 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 
 Decided by the lead since (2026-10-07):
 
-9. **The M6a gate counts as passed.**  The scoped symex is 1.1–3× faster
-   on the larger programs (e1×5, e3×10, in total 3.2 s against 9.0 s); the
-   1.42–1.45× on the straight-line e2 is 3 ms of a 10 ms check, a cost to
-   reduce (the kernel's comparison of contexts), not a trigger for
-   Decision 1's fallback.  The calculus stays positional.
+9. **The M6a gate counts as passed.**  The scoped symex is about 2.9×
+   faster on e1×5 and e3×10 (3.2 s against 9.0 s in total); it is outside
+   the 20% gate on e2 (1.42×), e4 (1.27×) and e2×10 (1.23×), each by
+   3–23 ms, a cost to reduce (the kernel's comparison of contexts) rather
+   than a trigger for Decision 1's fallback.  The calculus stays
+   positional.
 10. **A `bool` mapping key follows solc**: it is hashed as the word `0`/`1`,
    so the typed path takes the key as the `Int` `0`/`1`
    (`docs/solc-alignment.md`, "`bool` mapping keys").
