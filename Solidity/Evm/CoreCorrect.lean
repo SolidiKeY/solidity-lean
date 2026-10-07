@@ -708,5 +708,140 @@ end
 
 end Sim
 
+/-! ## The headline -/
+
+section Headline
+
+variable {L b : Nat} {Γ Γ' : Ctx} {F : Frag Γ} {F' : Frag Γ'} {σ : Solidity.Core.State C Γ}
+  {m : Machine}
+
+/-- **The compiler is correct.**  For a program of the fragment and a machine
+representing the state it starts in, the interpreter and the compiled code
+agree: both succeed — the machine's stack as it was, its storage, locals and
+balances representing the interpreter's final state and ledger — or both
+revert (a panic, a failed `assert`, is solc's revert with `Panic(0x01)`
+data, and only code with an `assert` panics), or, in code that pays, the
+world refuses a payment and the machine alone reverts.  There is no fourth
+case: the scoped interpreter is never stuck on the fragment.
+
+Example: from a state where `total = 3`,
+```solidity
+total += 1; if (total > 3) { delete alice; } else { revert(); }
+```
+runs in the interpreter to `total = 4` and a default `alice`, and on the
+machine to slot `0` holding `4` and slots `11`–`13` holding `0`. -/
+theorem compile_correct {P : Solidity.Core.Prog C Γ Γ'} (hP : inFragP F P = some F')
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax) :
+    (∃ σ' m', Solidity.Core.Prog.run σ P = .ok σ' ∧ run (compileProg b P) m = .ok m' 0 ∧
+      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' σ'.glob (Look.ofEnv σ'.env) m') ∨
+    ((Solidity.Core.Prog.run σ P = .error .revert ∨
+        (Prog.asserts P = true ∧ Solidity.Core.Prog.run σ P = .error .panic)) ∧
+      run (compileProg b P) m = .revert) ∨
+    (Prog.pays P = true ∧ run (compileProg b P) m = .revert ∧ ∃ σ' m',
+      Solidity.Core.Prog.run σ P = .ok σ' ∧
+      Sim C (L + Prog.pushes P) b F' σ'.glob (Look.ofEnv σ'.env) m') := by
+  rcases prog_sim P hm hP hL with ⟨σ', m', h1, h2, h3, -, h5⟩ | ⟨h1, h2⟩ | ⟨ha, h1, h2⟩ |
+      ⟨hp, h1, σ', m', h2, -, h5⟩
+  · exact .inl ⟨σ', m', h1, h2, h3, h5⟩
+  · exact .inr (.inl ⟨.inl h1, h2⟩)
+  · exact .inr (.inl ⟨.inr ⟨ha, h1⟩, h2⟩)
+  · exact .inr (.inr ⟨hp, h1, σ', m', h2, h5⟩)
+
+/-- **Code that pays no one agrees exactly**: with no `transfer`, nothing can
+be refused, and the machine reverts where the interpreter does; with no
+`assert` either, the interpreter's revert is a plain one.
+
+Example: `total += 1;` at `2^256 - 1` reverts in both. -/
+theorem compile_exact {P : Solidity.Core.Prog C Γ Γ'} (hP : inFragP F P = some F')
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax)
+    (hpay : Prog.pays P = false) :
+    (∃ σ' m', Solidity.Core.Prog.run σ P = .ok σ' ∧ run (compileProg b P) m = .ok m' 0 ∧
+      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' σ'.glob (Look.ofEnv σ'.env) m') ∨
+    ((Solidity.Core.Prog.run σ P = .error .revert ∨
+        (Prog.asserts P = true ∧ Solidity.Core.Prog.run σ P = .error .panic)) ∧
+      run (compileProg b P) m = .revert) := by
+  rcases compile_correct hP hm hL with h | h | ⟨hp, _⟩
+  · exact .inl h
+  · exact .inr h
+  · rw [hpay] at hp; cases hp
+
+/-- **What the machine does, the interpreter did**: the box reading of
+`compile_correct`.  Where the compiled code succeeds, so does the
+interpreter, in a state the final machine represents.
+
+Example: `to.transfer(5);` that the machine completes is one the interpreter
+completes, its ledger `5` less at `to` (`compile_net`). -/
+theorem compile_box {P : Solidity.Core.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F P = some F')
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax)
+    (hrun : run (compileProg b P) m = .ok m' 0) :
+    ∃ σ', Solidity.Core.Prog.run σ P = .ok σ' ∧
+      Sim C (L + Prog.pushes P) b F' σ'.glob (Look.ofEnv σ'.env) m' := by
+  rcases compile_correct hP hm hL with ⟨σ', m'', h1, h2, _, h4⟩ | ⟨_, h2⟩ | ⟨_, h2, _⟩
+  · rw [hrun] at h2; cases h2; exact ⟨σ', h1, h4⟩
+  · rw [hrun] at h2; cases h2
+  · rw [hrun] at h2; cases h2
+
+/-- **The ledger is the money that moved.**  Where the compiled code
+succeeds, the interpreter's `net(a)` is what `a`'s account lost since the
+transaction began, at every address but the contract's own, whose entry
+stays at `0`.
+
+Example: `to.transfer(5);` from an empty ledger, completed by the machine,
+leaves `net(to) = -5` and `to`'s account `5` richer. -/
+theorem compile_net {P : Solidity.Core.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F P = some F')
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax)
+    (hrun : run (compileProg b P) m = .ok m' 0) :
+    ∃ σ', Solidity.Core.Prog.run σ P = .ok σ' ∧
+      (∀ a : Nat, a < W → a ≠ m'.self → σ'.glob.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
+      σ'.glob.getNet m'.self = 0 := by
+  obtain ⟨σ', h1, h2⟩ := compile_box hP hm hL hrun
+  exact ⟨σ', h1, h2.net, h2.netSelf⟩
+
+/-- A fresh machine represents a fresh contract with no locals
+(`Evm.Sim.init`). -/
+theorem Sim.init (C : Contract) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
+    Sim C 1 0 (Frag.init []) (Solidity.Core.State.ofSem (C := C) (State.fresh C balance self)).glob
+      (Look.ofEnv (Solidity.Core.State.ofSem (C := C) (State.fresh C balance self)).env)
+      (Machine.init bal self) :=
+  have h := Evm.Sim.init C balance bal self hs
+  ⟨h.store, (fun i => nomatch i), (fun i => nomatch i), h.net, h.netSelf, h.bound,
+    (fun i => nomatch i), h.env⟩
+
+/-- **The EVM agrees with the interpreter's storage.**  From a fresh contract,
+a program of the fragment either reverts in both, or runs in both, and then
+every `uint` path the interpreter reads with its indices in bounds, the
+machine holds at its slot; or the world refuses a payment, and the machine
+alone reverts.
+
+Example: `alice.age = 10;` leaves `10` at slot `13` of `StandardExample`
+(`Evm/CoreExamples.lean` derives it from this theorem). -/
+theorem compile_storage {P : Solidity.Core.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')
+    (hL : Prog.pushes P < Lmax) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
+    (∃ σ' m', Solidity.Core.Prog.run (Solidity.Core.State.ofSem (State.fresh C balance self)) P =
+        .ok σ' ∧ run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧
+      ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
+        σ'.glob.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
+    ((Solidity.Core.Prog.run (Solidity.Core.State.ofSem (State.fresh C balance self)) P =
+          .error .revert ∨
+        (Prog.asserts P = true ∧
+          Solidity.Core.Prog.run (Solidity.Core.State.ofSem (State.fresh C balance self)) P =
+            .error .panic)) ∧
+      run (compileProg 0 P) (Machine.init bal self) = .revert) ∨
+    (Prog.pays P = true ∧ run (compileProg 0 P) (Machine.init bal self) = .revert ∧
+      ∃ σ', Solidity.Core.Prog.run (Solidity.Core.State.ofSem (State.fresh C balance self)) P =
+        .ok σ') := by
+  rcases compile_correct hP (Sim.init C balance bal self hs) (by omega) with
+    ⟨σ', m', h1, h2, _, hm⟩ | h | ⟨hp, h1, σ', _, h2, _⟩
+  · refine .inl ⟨σ', m', h1, h2, fun r segs s n hp hf => ?_⟩
+    rcases find_repr hm.store hp with ⟨sv, hsv, hr⟩ | ⟨_, hsv⟩
+    · rw [hf] at hsv; cases hsv
+      cases hr with
+      | uint _ _ h => exact h
+    · rw [hf] at hsv; cases hsv
+  · exact .inr (.inl h)
+  · exact .inr (.inr ⟨hp, h1, σ', h2⟩)
+
+end Headline
+
 end Core
 end Solidity.Evm
