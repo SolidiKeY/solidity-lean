@@ -48,7 +48,7 @@ Decided by the lead since (2026-10-07):
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | lane: every `Stmt.step` arm and `Premise` ported; gate passed (Decision 9) | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
-| M6b | | `dl!{}`, specs, callbacks |
+| M6b | lane `intrinsic-frontend` 2026-10-07: reader, obligations, specs, callbacks (notes below) | `dl!{}`, specs, callbacks |
 | M6c | | closer and Decide on typed `Fml` |
 | M7 | | cleanup, docs, rule-map rows, review pass |
 
@@ -824,6 +824,62 @@ the cutover:
   `updIntro`, `bindIntro`, `update`, `unfold`, `bind`, `split` (two goals),
   `check`, `done`, `empty`, `closeTrue`; a derivation of
   `[ if (b) { } else { } ] true` checks.  Soundness waits for M3.
+
+### M6b lane: formula frontends (`intrinsic-frontend`, 2026-10-07)
+
+- **The reader** (`Calculus/Core/Notation.lean`, `NotationResolve.lean`):
+  `cdl!{ φ }`/`cdl[C, m]{ φ }` read `dl!{}`'s text into `Core.Fml C []`.
+  `elabFmlC` walks the formula with today's reader scope (`ECtx`) beside a
+  named context: a quantifier, an update (`Upd.resolveN`: a target in scope
+  at its type assigned, any other declared), a program's hints (`scopeHints`,
+  hidden binders) and a `where` push on both; an atom is today's `elabFml`,
+  resolved (`Fml.resolveN`).  A program's postcondition is read in the
+  context the program leaves (`Prog.resolve`), so a branch's local is out of
+  scope after it (`Examples/Tactics/CoreNotation.lean` pins the error).
+  Parameters (names nothing declares) are bound outermost (`Fml.closeN`): a
+  `uint` by `∀`, an alias by a hidden binder, each only when the formula
+  reads it before something binds it (tried without each, in order).  A Lean
+  formula is elaborated at `Core.Fml C Γ` for the `Γ` of its place, so a
+  `Core.Post C Γ` needs no weakening.  At the cutover `dl!` becomes `cdl!`.
+- **`#wp`/`#step`** (`Tools/CoreInspect.lean`): a second elaborator of the
+  commands that takes a closed `Core.Fml`, runs `Core.symex`/`Fml.step`
+  compiled, and prints the quoted result by `Core.Delab`; the rule name is
+  today's strategy's on the erasure.  `Core.Delab` now prints a closed call
+  or `try` by running `Stmt.erase` (no more `‹…›` for a call in a formula);
+  a taclet's call still prints `‹…›`.
+- **Obligations** (`Calculus/Core/Spec.lean`): `Core.Problem.fml`/`ctorFml`
+  take the program at the parameters' context (`paramsN`, the first
+  parameter deepest) and bind it by `∀`; `Problem.ofLegacy` reads today's
+  obligation's parts (`Problem.parts`) and resolves the program.
+  `solc_scoped_problems N` (`Frontend/Problems.lean`) declares
+  `N.f.problem.core : Core.Fml N []`, kernel-checked
+  (`Solkey/Constructors.lean` pins EtherWallet's, and that it erases to
+  `N.f.problem`).
+- **Specifications**: `Core.specObligation` (`cspec!{f}`) is today's
+  obligation read in its parameters' context: `old := storage` declares a
+  local of `LTy.old`, `oldNet := net` one of `LTy.oldNet` (their own types,
+  `UpdElem.ownTy?`), `result` is the program's; the parameters are bound by
+  hidden binders, as today's free locals range over every value, so the
+  erasure is today's obligation exactly (`#guard`ed in
+  `Examples/Tactics/CoreSpec.lean`).
+- **Callbacks** (`Semantics/Core/Callback.lean`): `Invariant.fml :
+  Core.Fml C []`, read on a state's global part (`Invariant.at`), so no
+  `I.vars = []` premise and no frame lemmas; `ExecS I : State C Γ →
+  Stmt C Γ Γ' → COut C Γ' → Prop`, `ExecP`, and `ExecF` for a modality's
+  frames.  No `iteStuck`/`loopStuck`: a condition is read by `Val.evalB`,
+  whose word case is one more halt (it goes when values are typed, M4).  A
+  branch, a block, a loop body and a callee's frame pop their locals on
+  every outcome (`COut.map`); a block that pays runs statement by statement.
+  Proved: `Prog.exec_run` (the deterministic run is a callback run unless
+  `I` breaks), `Prog.eq_run` (with no payment it is the only one),
+  `holdsC_iff_holds`, `holds_of_holdsC_modal`, `valid_of_validC`.
+  `havoc` still ranges over untyped storages (`List (Name × SVal)`): typed
+  `Storage C` is the values lane's.
+- **Left**: the callback taclets and `ProvesC` on `Core`
+  (`Calculus/Callback.lean`'s, at M6c or the cutover); `sol_spec` and `sol_symex` on a
+  `cspec!` obligation (the closer is M6c's); `UpdElem.target?` of
+  `Derive.lean` and the reader's `UpdElem.setsLocal?` are two names for two
+  questions (the split's two kinds, every local an element sets).
 
 ### Gate G0: passes, under conditions
 

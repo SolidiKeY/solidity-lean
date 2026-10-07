@@ -74,6 +74,16 @@ info: dl{
 /-- error: a name where a formula stands is a Lean formula (φ : Core.Post C Γ): unknown `φ` -/
 #guard_msgs in #check cdl!{ φ where Person memory carol }
 
+/-! A Lean formula where a formula stands is read at the context of its
+place: a postcondition after `uint x = 10;` is a `Core.Post C [uint]`, with
+no weakening. -/
+
+/-- `x` is defined: a postcondition over the one local `x`. -/
+def xDefined : Core.Post StandardExample [.val .uint] := ⟨.defined (.pvV .here), by decide, by decide⟩
+
+/-- info: dl{ ⟨ uint x = 10; ⟩ defined(x) } : Core.Fml StandardExample [] -/
+#guard_msgs in #check cdl!{ ⟨ uint x = 10; ⟩ xDefined }
+
 /-! `#wp` and `#step` on a scoped formula. -/
 
 /--
