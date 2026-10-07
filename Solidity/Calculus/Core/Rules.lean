@@ -632,6 +632,12 @@ inductive Taclet (C : Contract) (k : Nat) :
           "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ]
           ; "Panic caught": ∀ code. [ panicBody ] ; "other failure caught": [ otherBody ] }
 -- END scripts/core-rules.mjs: Taclet
+  /-- solkey's `blockEmpty`, scoped only: a block is its statements, its
+  locals popped where it ends (`Premise.unfold`'s `Ext`); when they are done,
+  the end goes (`Frames.exit`), KeY's `{} ⇝`.  Today's programs have no
+  nested block, so `Rules.lean` has no line for it. -/
+  | blockEmpty {Γ Γ₁ : Ctx} {body : Prog C Γ Γ₁} :
+      Taclet C k m (.block body) (.unfold body body.ext)
 
 /-! ## The rules solkey does not have -/
 

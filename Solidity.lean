@@ -41,6 +41,9 @@ import Solidity.Calculus.Core.Step
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.Rules
 import Solidity.Calculus.Core.Taclet
+import Solidity.Calculus.Core.RuleShapes
+import Solidity.Calculus.Core.Completeness
+import Solidity.Calculus.Core.PrintedRules
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.Cover
 import Solidity.Calculus.Core.SoundKit
@@ -162,6 +165,7 @@ import Solidity.Examples.Tactics.Dangling
 import Solidity.Examples.Tactics.CoreSymex
 import Solidity.Examples.Tactics.CoreStep
 import Solidity.Examples.Tactics.CorePrint
+import Solidity.Examples.Tactics.CoreRules
 import Solidity.Examples.Tactics.CoreNotation
 import Solidity.Examples.Tactics.CoreSpec
 import Solidity.Examples.Tactics.CoreCallback
