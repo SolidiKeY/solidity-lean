@@ -232,46 +232,109 @@ Not measured: the whole `SolkeyTestSuite` and `check-corpus.sh` (both need
 `lake` from the shell, which this lane may not run); take them at M1's start
 from `./run-lean.sh`.
 
-### M4 notes (lane `intrinsic-values`)
+### M4 lane (`intrinsic-values`)
 
-- M4 core (2026-10-07), standalone: nothing on the interpreter's path uses it
-  yet.  `Semantics/Core/Value.lean` (`PrimTy.Denote`, `PrimTy.erase`,
-  `ofValue?`, `Core.toRes`), `Semantics/Core/Ops.lean` (typed operators),
-  `Semantics/Core/Storage.lean` (typed storage, paths, operations) and
-  `Semantics/Core/StorageErase.lean` (agreement).  Each typed operation
-  returns an `Option`, `none` a revert, and its lemma reads
-  `untyped (erase x) = toRes erase (typed x)`: the untyped operation is
-  never stuck on an erased input.
-- Shapes: `SVal T` is mutual with `SFields` (over `structDef s`, exact
-  members), `SList`, `SVec E n` and `SMap V` (explicit families: a nested
-  `List (SVal E)` cannot mention the constructor's `E`).  A dynamic array
-  keeps its slots past the end, a mapping its default (as the untyped
-  ones); a fixed-size array has exactly its length and no such slots, which
-  no operation creates.  Keys stay `Int`.  `Storage C := SFields C.vars`.
-- `SVal.dflt` is structural (rank bound `k`, inside it structural on the
-  type), so the kernel reduces it where it cannot reduce `defaultForTy`:
-  `push` on a typed store computes under `decide +kernel` (50 ms), the
-  untyped `pushAt` does not.  A save-then-find through `alice.account.balance`
-  checks in 22 ms typed against 35 ms untyped, with the `match`es on the
-  `Ty`-indexed families as they are: their casts compare small `Ty`s, not
-  contexts, so no `T.rec` twin is needed yet (re-measure when the typed
-  interpreter runs on them).
-- A struct copy (`SVal.overlay`) is positional, as solc copies; the untyped
-  one looks members up by name, so `SVal.overlay_erase` needs `TyNodup T`
-  (no struct with two members of one name), which `Ty.nodupS` decides by
-  `rfl` (all structs but `BadDup`).
-- Deviation, in `UnOp.evalT`: `-x` at `uint` (solc rejects it) reverts unless
-  `x = 0`; the untyped interpreter leaves it out of range.
-  `UnOp.evalT_erase` excludes it.
-- The copies between storage and memory go through the untyped heap until
-  M4c: `SVal.copyToMem` is `copyStToM` on the erasure (never stuck at a
-  `mapFree` type), `SVal.copyFromMem` reads `copyMem`'s result back at its
-  type (`SVal.ofU`), stuck only on a heap that does not fit.
-- Left for the typed interpreter: `LTy.Denote (.alias R)` as
-  `Option (SRef C (.ref R))`; `Loc` resolved to an `SRef` (a `bool` mapping
-  key is stuck untyped, `Value.asInt`, and needs a decision: solc hashes it
-  as `0`/`1`); the stores of `Semantics.lean` as `Storage.standardExample`
-  … (done, with `_erase` lemmas); typed heap (M4c); `DecidableEq (SVal T)`.
+**What exists** (2026-10-07), standalone: nothing on the interpreter's path
+uses it yet.  Each typed operation returns an `Option`, `none` a revert, and
+its agreement lemma reads `untyped (erase x) = toRes erase (typed x)`: the
+untyped operation is never stuck on an erased input.
+
+- **Values (M4a).** `Semantics/Core/Value.lean` (`PrimTy.Denote`,
+  `PrimTy.erase`, `ofValue?`, `Core.toRes`), `Semantics/Core/Ops.lean`
+  (`BinOp.evalT`, `UnOp.evalT`).  Deviation in `UnOp.evalT`: `-x` at `uint`
+  (solc rejects it) reverts unless `x = 0`; the untyped interpreter leaves it
+  out of range, and `UnOp.evalT_erase` excludes it.
+- **Storage (M4b).** `Semantics/Core/Storage.lean`,
+  `Semantics/Core/StorageErase.lean`.  `SVal T` is mutual with `SFields`
+  (over `structDef s`, exact members), `SList`, `SVec E n` and `SMap V`; a
+  dynamic array keeps its slots past the end, a mapping its default, as the
+  untyped ones; keys stay `Int`; `Storage C := SFields C.vars`.  `SVal.dflt`
+  is structural (fuel `rankBound`, which reads no struct name, inside it
+  structural on the type), so the kernel reduces it where it cannot reduce
+  `defaultForTy`.  A struct copy (`SVal.overlay`) is positional, as solc
+  copies; `SVal.overlay_erase` needs `TyNodup T`, which `Ty.nodupS` decides
+  by `rfl` (all structs but `BadDup`).  `find`, `findLive` and `save` are
+  `Path.rec` over `SVal.view` (its type `Shape T` computed from `T`), each
+  with a `match` twin (`findM`, …) as `implemented_by` and an equality
+  theorem (`SVal.find_eq_findM`).  The eight stores of `Semantics.lean` are
+  named constants (`Storage.testSuite`, …) with `_erase` lemmas.
+- **Heap (M4c).** `Semantics/Core/Heap.lean`, `Semantics/Core/HeapErase.lean`.
+  A heap typing `HTy := List RefTy` (identity = position, oldest first);
+  `HRef H R` an identity typed at `R`; `MVal H T`, `MFields`, `MObj H R` (a
+  mapping has none: `Empty`) and `Heap H` are computed from the typing, as
+  `Env` is from Γ.  `Heap.alloc` returns a heap over `H ++ [R]`, weakening
+  the old objects along `H <+: H'` (identities kept, so the erasure is the
+  same); `SVal.copyStToM` returns a `Grown` heap (the extension, the heap,
+  the value) and allocates members first, as the untyped copy;
+  `MVal.copyMToSt` recurses on the type (rank fuel, then structural), with no
+  cycle arm.  The agreement lemmas hold on `σ.heap = hp.erase` (and
+  `σ.nextId = H.length` where they allocate): `getObj_erase`,
+  `setObj_erase`, `alloc_erase`, `SVal.copyStToM_erase`, `allocDefault_erase`,
+  `MVal.copyMem_erase` (the untyped cycle guard never fires: a reference's
+  target has a smaller type by `(tyRank, sizeOf)`, `RemOk`),
+  `memWriteField_erase`, `memWriteIndex_erase`, `memArrayLen_erase`,
+  `readField_erase`, `readIndex_erase`.  The round-1 bridge copies through the
+  untyped heap (`SVal.copyToMem`, `SVal.copyFromMem`) are deleted.
+
+**Wiring, once M3's `Env`/`State`/typed run land.**
+
+1. `Core.State C Γ` holds `storage : Storage C`, a heap typing `H` as a
+   field and `heap : Heap H`; `LTy.Denote` takes `C` and `H`:
+   `.val p ↦ p.Denote`, `.alias R ↦ Option (SRef C (.ref R))`,
+   `.mem R ↦ HRef H R`.  `Env` stays computed from Γ (condition 4).  `H` is
+   a field, not an index, so `Stmt.run`'s type does not change.
+2. An allocating step (`declMem`, a memory copy, `new`, `delete` of a memory
+   reference) gets a `Grown` heap and weakens the env along its extension
+   (`Env.wk e`, which only rewrites `.mem` slots' proofs).
+3. Locations: `Loc`/`SPath` resolve to an `SRef` (`SRef.field`,
+   `SRef.index`), `MLoc`/`MPath` to an `HRef` read through `Heap.field`/
+   `Heap.index`; `Val.eval` uses `BinOp.evalT`/`UnOp.evalT`.
+4. `run_erase` erases the state to `{ storage := st.erase, heap := hp.erase,
+   nextId := H.length, env := … }`; the lemmas above are its per-operation
+   steps, so `Halt.stuck` leaves `Core`.
+5. Open: a `bool` mapping key (`IndexTy.map` allows it; the untyped
+   `Value.asInt` is stuck on one, solc hashes it as `0`/`1`);
+   `DecidableEq (SVal T)`; `SFields.get`/`set`, `erase`, `overlay` and
+   `SVal.copyStToM` still `match` on indexed families.
+
+**Timings** (2026-10-07, `Solidity/Scratch/HeapBench.lean`, not committed).
+Kernel time (`type checking` under `profiler`) of `decide +kernel`, with
+`Elab.async false`; each run is a distinct statement, since `decide` shares
+one auxiliary lemma per statement.  Repeats agree within 5%.  Untyped is
+today's form: `unfoldStore` (`Corpus/Basic.lean`), `findStorage`/
+`saveStorage`.
+
+| What | untyped | typed | ratio |
+|---|---|---|---|
+| store `standardExample`, every value walked | 11.2 ms | 11.6 ms | 1.04 |
+| store `testSuite` | 29.7 ms | 32.3 ms | 1.09 |
+| store `solcStructs` | 21.9 ms | 22.4 ms | 1.02 |
+| store `solcMemory` | 10.6 ms | 11.0 ms | 1.04 |
+| store `solcMappings` | 16.4 ms | 17.2 ms | 1.05 |
+| store `solcControlFlow` | 5.0 ms | 4.9 ms | 0.99 |
+| stores `solcExpressions`, `solcArrays` | < 1 ms | < 1.3 ms | — |
+| read `alice.account.balance` | 10.3 ms | 12.4 ms (`match`: 14.1) | 1.20 |
+| save it, read it back | 12.1 ms | 16.1 ms (`match` read: 17.9) | 1.33 |
+| fresh `Person memory m; m.age = 3;` read back | does not reduce | 10.3 ms | — |
+| `alice` storage → memory → storage | does not reduce | 17–18 ms | — |
+| the corpus example (a whole untyped run) | 19 ms | needs the typed run | — |
+
+- The store rows walk the value with `SFields.rec`; walked by `match`, the
+  typed stores cost 1.15–1.55× the untyped ones (1.75–1.95× before
+  `rankBound`, whose `tyRank` fuel matched a struct's name per default).
+- `Path.rec` is lazy where `match` is not: a walk whose value nobody reads
+  (`(st.find r).isSome`) costs 0.3 ms against 13.7 ms by `match` and
+  10.3 ms untyped.  Rows that read the value are the fair ones.
+- Untyped memory does not reduce in the kernel: `allocDefault` stops at the
+  well-founded `defaultForTy`, `copyMem` at the well-founded `copyMToSt`
+  (the corpus pins memory programs by `#eval` for this reason).
+- **Gate (within 20%)**: the stores pass (≤ 1.09×), a read is at 1.20×, a
+  save then read fails at 1.33×.  The rest of a read's cost is the member
+  lookup by name: two `structDef` unfoldings cost 4 ms alone, and
+  `SFields.get`/`set` cast each member by its `lookupBy` proof.  Next:
+  `SFields.get`/`set` by the recursor, then a positional member index in
+  `Path.field` (resolved once from the name, like `Idx`), and re-measure on
+  the typed run.
 
 ### Gate G0: passes, under conditions
 
