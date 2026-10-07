@@ -26,7 +26,7 @@ every local of `σ` is bound in `τ` under its name, encoded (`LTy.enc`).
 outcomes: the same halt, or states in `Agree` whose bindings off the
 statement's names (`ns` and `Stmt.binders`) are untouched, which is what a
 call's caller needs of its body.  The global operations are shared: each is
-natural in the locals (`*_withEnv`), so the run on `σ.glob` and on `τ` agree.
+natural in the locals (`*_nat`), so the run on `σ.glob` and on `τ` agree.
 -/
 
 namespace Solidity.Core
@@ -2089,3 +2089,106 @@ theorem Prog.erasesAt : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → {out ns : Lis
 end
 
 end Bridge
+
+/-! ## `run_erase` -/
+
+section RunErase
+
+variable {Γ Γ' : Ctx}
+
+/-- The locals a statement's scopes pop: bound inside it, not in scope after
+it.  The untyped run keeps them. -/
+def Stmt.popped (ns : List Var) (s : Stmt C Γ Γ') : List Var :=
+  s.binders.filter fun y => y ∉ s.outNames ns
+
+/-- The locals a block's scopes pop. -/
+def Prog.popped (ns : List Var) (P : Prog C Γ Γ') : List Var :=
+  P.binders.filter fun y => y ∉ P.outNames ns
+
+theorem lookupBy_of_mem_nodup {κ α : Type} [DecidableEq κ] :
+    {l : List (κ × α)} → (l.map Prod.fst).Nodup → {m : κ × α} → m ∈ l → lookupBy m.1 l = some m.2
+  | [], _, _, hm => absurd hm List.not_mem_nil
+  | (k, v) :: l, hnd, m, hm => by
+    have hnd' := List.nodup_cons.1 hnd
+    rcases List.mem_cons.1 hm with hm | hm
+    · subst hm; simp only [lookupBy, if_true]
+    · have hne : m.1 ≠ k := fun h => hnd'.1 (by rw [← h]; exact List.mem_map.2 ⟨m, hm, rfl⟩)
+      simp only [lookupBy, hne, if_false]
+      exact lookupBy_of_mem_nodup hnd'.2 hm
+
+/-- A state agrees with its erasure. -/
+theorem Agree.erase {ns : List Var} (σ : State C Γ) (hnd : ns.Nodup) (hlen : ns.length = Γ.length) :
+    Agree ns σ (σ.erase ns) where
+  len := hlen
+  nodup := hnd
+  glob := rfl
+  env _ hm := lookupBy_of_mem_nodup (l := Env.erase ns σ.env)
+    (by rw [Env.erase_keys ns σ.env hlen]; exact hnd) hm
+
+/-- Two related outcomes from an erased state, read as the untyped run
+against the erased scoped one: they agree off the popped locals. -/
+theorem ResultsAgree.of_runRel {ns ns' B : List Var} {σ : State C Γ}
+    (hlen : ns.length = Γ.length) (hsub : ∀ y ∈ ns, y ∈ ns') :
+    {x : Res (State C Γ')} → {y : Res Semantics.State} →
+      RunRel ns' (ns ++ B) (σ.erase ns) x y →
+      Semantics.ResultsAgree (B.filter fun y => y ∉ ns') y (x.map (State.erase ns'))
+  | .error _, .error _, h => h.symm
+  | .ok σ', .ok τ', ⟨hag, hf⟩ => by
+    have hg := hag.glob
+    have hkeys := Env.erase_keys ns' σ'.env hag.len
+    refine ⟨by rw [← hg]; rfl, by rw [← hg]; rfl, by rw [← hg]; rfl, by rw [← hg]; rfl,
+      fun n hn => ?_, by rw [← hg]; rfl, by rw [← hg]; rfl⟩
+    show lookupBy n τ'.env = lookupBy n (Env.erase ns' σ'.env)
+    by_cases hn' : n ∈ ns'
+    · rw [← hkeys] at hn'
+      obtain ⟨m, hm, rfl⟩ := List.mem_map.1 hn'
+      rw [hag.env m hm, lookupBy_of_mem_nodup (by rw [hkeys]; exact hag.nodup) hm]
+    · have hnB : n ∉ B := fun h => hn (List.mem_filter.2 ⟨h, by simp only [hn',
+        not_false_eq_true, decide_true]⟩)
+      have hnns : n ∉ ns := fun h => hn' (hsub n h)
+      rw [hf n (fun h => (List.mem_append.1 h).elim hnns hnB)]
+      show lookupBy n (Env.erase ns σ.env) = _
+      rw [lookupBy_none_of_not_mem _ (by rw [Env.erase_keys ns σ.env hlen]; exact hnns),
+        lookupBy_none_of_not_mem _ (by rw [hkeys]; exact hn')]
+
+/-- **`run_erase`, for a block**: run from the erased state, the erasure of a
+fresh block ends as the scoped run does, erased: the same halt, or states
+that agree but on the locals the block's scopes popped. -/
+theorem Prog.run_erase {out ns : List Var} (P : Prog C Γ Γ') (hP : P.Fresh out ns)
+    (hnd : ns.Nodup) (hlen : ns.length = Γ.length) (σ : State C Γ) :
+    Semantics.ResultsAgree (P.popped ns) (Solidity.Prog.run (σ.erase ns) (P.erase ns))
+      ((P.run σ).map (State.erase (P.outNames ns))) :=
+  ResultsAgree.of_runRel hlen (fun y hy => by
+      obtain ⟨qs, hq, _⟩ := P.outNames_suffix ns
+      rw [hq]; exact List.mem_append_right _ hy)
+    (P.erasesAt hP (Agree.erase σ hnd hlen))
+
+/-- **`run_erase`, for a statement**. -/
+theorem Stmt.run_erase {out ns : List Var} (s : Stmt C Γ Γ') (hs : s.Fresh out ns)
+    (hnd : ns.Nodup) (hlen : ns.length = Γ.length) (σ : State C Γ) :
+    Semantics.ResultsAgree (s.popped ns) (Solidity.Prog.run (σ.erase ns) (s.erase ns))
+      ((s.run σ).map (State.erase (s.outNames ns))) :=
+  ResultsAgree.of_runRel hlen (fun y hy => by
+      obtain ⟨qs, hq, _⟩ := s.outNames_suffix ns
+      rw [hq]; exact List.mem_append_right _ hy)
+    (s.erasesAt hs (Agree.erase σ hnd hlen))
+
+end RunErase
+
+/-! ## Examples -/
+
+/-- `CallsExample`'s calls are fresh, so `Prog.run_erase` applies to them.
+(Applying it to `callsCore` and a state times out in the elaborator, at
+`whnf`, while the application to everything but the state checks: the cause
+is not yet found.) -/
+theorem callsCore_fresh : Prog.Fresh [] [] callsCore := by
+  unfold callsCore
+  simp only [Prog.Fresh, Stmt.Fresh, List.not_mem_nil, not_false_eq_true,
+    and_self, CallRet.names, Args.names, List.cons_append, List.nil_append, List.nodup_cons,
+    List.mem_cons, Var.fresh.injEq, Nat.succ_ne_self, and_false, or_self, List.nodup_nil, or_false,
+    Stmt.outNames, and_true, forall_eq_or_imp, reduceCtorEq, forall_eq, Args.erase, Val.erase,
+    Simple.erase, Arg.separatedFrom, Solidity.Val.isSimple, List.contains_eq_mem, decide_false,
+    Bool.not_false, Bool.true_or, Bool.and_self, not_or, List.append_nil, Nat.reduceEqDiff,
+    CallRet.outNames, Var.user.injEq, String.reduceEq]
+
+end Solidity.Core
