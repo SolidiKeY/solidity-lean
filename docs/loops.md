@@ -336,3 +336,74 @@ their other blockers (`bytes32`, events, `keccak256`) are gone. L3 and L4
 each add a `docs/solkey-feedback.md` entry: the rules solkey's plan asks
 for, with their soundness side conditions (the frame, the cover, the
 variant bound).
+
+## L1–L4 review (2026-10-07)
+
+A finder and a skeptic per area; what the skeptic confirmed, fixed:
+
+- **A `return` inside a loop on import.** `solc_import` lowered a body's
+  `return`s without its loops first, so a public function with one was
+  refused.  It now runs `lowerLoops` before `lowerReturns`, as `contract!`
+  and solkey's `ExpandFunctionBody` do (`Frontend/Import.lean`,
+  `lowerBodyLoops`); a body with such a loop is renamed fresh first, so a
+  `for`'s declaration spliced over the statements after the loop does not
+  clash with a sibling `for (uint i …)`.  Pinned by `loopNestedReturn`
+  (solkey's) and `returnBeforeSiblingLoop` in `tests/solc/Loops.sol`.
+- **Unbounded runs in the counterexample search.** `Fml.eval3` ran programs
+  through `Prog.run`, whose compiled `Loop.runImpl` heeds no heartbeats.  It
+  now runs `Prog.runFuel` (`Tools/Counterexample.lean`): each loop at most
+  `loopFuel` iterations, `unknown` past them, proved to agree with
+  `Prog.run` where it returns (`Prog.runFuel_sound`).  The kernel reduces
+  it, so a counterexample through a loop is certified
+  (`Examples/Verify.lean`).
+- **Loop specifications as solkey reads them.** `scripts/solc-ast.mjs`
+  joins the `///` lines above a loop and splits them at a line that starts
+  with a tag, as `KeyNatspec.of`: a clause over two lines is kept whole
+  (`invariantTwoLines`).  It reads them only where the loop starts its line,
+  and refuses a directive other than `invariant`, `decreases` and Lean's
+  `unwind`.  `--source` resolves in this repository first, needs `--out`,
+  and `--wrapper` names the importing module (the ctor lane's flags, so the
+  two merge); `Examples/Tactics/LoopsImport.lean` names the command.
+- **The fixture.** `tests/solc/Loops.sol` says which clauses (`unwind`) and
+  functions are Lean's own, and has solkey's
+  `invariantVariantSkipsBreakIteration` with its `break`.  Five of its seven
+  obligations are proved; `forContinueStillUpdates` (`sol_symex` passes
+  `simp`'s step bound, `sol_prove` `Derive.budget`) and
+  `invariantVariantSkipsBreakIteration` (the diamond's cover) are named in
+  `LoopsImport.lean` as not proved.
+- **A condition that needs a capture** (a call, a cast, a narrow operation,
+  a constructor) is refused with a message that says so, and the
+  restriction is written above (Typing and declarations) and in the rule
+  map.
+- **`invBox`**: under the box the invariant rule has solkey's two goals past
+  `init` in the walk and the proof tree (`Calculus/Symex.lean`,
+  `Calculus/ProofTree.lean`), `cov` proved by `closeTrue`, as `splitBox`.
+- **Pins.** `#taclet whileNoVariantDiamond`, `#step` pins of `whileClose`
+  and `whileNoVariantDiamond` firing, the `sol_derive?` walks of an unwound
+  loop and an invariant loop (`Examples/ProofTree.lean`), a loop inside a
+  `try` clause lowered (solkey's `LoopLowering` leaves it,
+  `docs/solkey-feedback.md` §9).
+- **Wording.** Memory is refused for an invariant as in solkey; push, pop,
+  alias and external call are Lean's own refusals (`Stmt.within`).
+  `ed7849d5b6` is the commit that added loops, after the pinned
+  `1b4341a303`.  The modifier contract of several `_;` is `ModifierRuns`
+  in `Examples/Tactics/Loops.lean` only.  `docs/README.md`,
+  `docs/solc-alignment.md`, `docs/module-map.md` and
+  `scripts/solkey-port.mjs` describe loops as built.
+
+**Cost.**  After the fixes, the whole `Solidity` target rebuilt, then
+`Derived1`, `Derived12`, `Derived14` and `SolkeyTestSuite.lean` checked
+clean one at a time: `Report.lean`'s pin still reads 435 derived.  Each
+file copied to a scratch module with `set_option Elab.async false`, timed
+by `IO.monoMsNow` at its first and last command, load average under 1 (the
+other lanes idle); master `2979bb8` is the ctor lane's measurement under
+the same method (`docs/testsuite-proofs.md` on that branch, "Constructors"):
+
+| File | master `2979bb8` | `loops` | change |
+|---|---:|---:|---:|
+| `Examples/Tactics/Calls.lean` | 130.3 s, 120.9 s | 120.8 s | −4% |
+| `Calculus/Uniqueness.lean` | 151.6 s, 151.6 s | 154.7 s | +2% |
+| `TestSuite/Derived14.lean` | — | 75.3 s | — |
+
+Both within 10%.  `Derived14` has no master time under this method (W7's
+155 s predates its review), so it is recorded for the next lane.
