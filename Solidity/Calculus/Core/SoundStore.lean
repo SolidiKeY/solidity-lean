@@ -454,6 +454,93 @@ theorem deleteStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (q : Premise C Γ �
             pure_bind])
         (fun e he => by simp only [Loc.resolve, he]; rfl)
 
+/-! ### Push and pop -/
+
+/-- `storagePushValue_unfold_rightSndArgument`: the argument captured; the
+statement reads the receiver and the array first. -/
+theorem sound_pushCapture {p : PrimTy} (b : SPath C Γ (.array (.prim p))) (e : Val C Γ p)
+    (hd : ((some (Src.val e)).isSome || (Ty.prim p).defaultOkS) = true) (x : Var) :
+    Premise.Sound m (.push b (some (.val e)) hd)
+      (.capture p x e (.push b.up (some (.val (.simple (.local .here)))) rfl)) σ := by
+  refine Premise.Sound.captureSim σ (fun v hv => ?_) (fun h hh hp => ?_)
+  · rw [Stmt.run_push, Stmt.run_push,
+      Run.push_push σ (t := .val p) v b.up b _ (some (.val e)) (SPath.resolve_up σ _ b)
+        (by funext slot; simp only [Src.pushVal, Src.value, Val.eval, Simple.eval_here, hv]; rfl),
+      pushed_drop]
+  · rw [Stmt.run_push]
+    simp only [Run.push]
+    refine Res.Sim.err_bind (SPath.resolve_noPanic σ b) hp fun q _ => ?_
+    refine Res.Sim.err_of_not_ok hp ?_ fun a ha => ?_
+    · rw [NoPanic.map]
+      exact Solidity.pushAt_noPanic _ _ _ _ fun _ => by
+        simp only [Src.pushVal, Src.value, hh]; exact fun e => hp (Except.error.inj e)
+    · simp only [pushAt, Src.pushVal, Src.value, hh] at ha
+      revert ha
+      cases σ.glob.findStorage q.1 q.2 with
+      | error => exact nofun
+      | ok sv => cases sv <;> exact nofun
+
+/-- `storagePush_unfold_leftFstReceiver`, `storagePushValue_unfold_leftFstReceiver`:
+the receiver bound first. -/
+theorem sound_pushRecvCapture {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) (hd' : ((v.map Src.up).isSome || E.defaultOkS) = true)
+    (x : Var) :
+    Premise.Sound m (.push b v hd) (.captureSP x b (.push (.alias .here) (v.map Src.up) hd')) σ := by
+  refine Premise.Sound.captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
+  · rw [Stmt.run_push, Stmt.run_push,
+      Run.push_push σ (t := .alias _) (some q) (.alias .here) b _ v (by rw [hq]; rfl)
+        (Src.pushVal_up σ _ v), pushed_drop]
+  · rw [Stmt.run_push]
+    simp only [Run.push, hh]
+    exact Res.Sim.refl _
+
+/-- **`b.push(v);`** (`pushStep`). -/
+theorem pushStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) (q : Premise C Γ Γ) (hs : pushStep k b v hd = some q) :
+    Premise.Sound m (.push b v hd) q σ := by
+  simp only [pushStep] at hs
+  split at hs
+  · cases v with
+    | none =>
+      simp only at hs
+      split at hs
+      · cases hs; exact sound_pushSlot σ b hd
+      · cases hs; exact sound_extend σ b hd
+    | some r =>
+      cases r with
+      | val e =>
+        cases e with
+        | simple se => cases hs; exact sound_pushSome σ b _ hd
+        | _ => cases hs; exact sound_pushCapture σ b _ hd _
+      | copy p hm => cases hs; exact sound_pushSome σ b _ hd
+  · cases hs; exact sound_pushRecvCapture σ b v hd _ _
+
+/-- `storagePop_unfold_leftFstReceiver`: the receiver bound first. -/
+theorem sound_popCapture {E : Ty} (b : SPath C Γ (.array E)) (x : Var) :
+    Premise.Sound m (.pop b) (.captureSP x b (.pop (.alias .here))) σ := by
+  refine Premise.Sound.captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
+  · rw [Stmt.run_pop, Stmt.run_pop,
+      Run.pop_push σ (t := .alias _) (some q) (.alias .here) b (by rw [hq]; rfl), pushed_drop]
+  · rw [Stmt.run_pop]
+    simp only [Run.pop, hh]
+    exact Res.Sim.refl _
+
+/-- **`b.pop();`** (`popStep`). -/
+theorem popStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (q : Premise C Γ Γ)
+    (hs : popStep k b = some q) : Premise.Sound m (.pop b) q σ := by
+  simp only [popStep] at hs
+  split at hs
+  · have hp : Premise.Sound m (.pop b) (.upd1 (.storage (.app2 (if E.isMapping then .shrink else .pop)
+        .storage b.lower))) σ := sound_pop σ b
+    split at hs
+    · rename_i hE
+      cases hs
+      rwa [show E.isMapping = true from hE, if_pos rfl] at hp
+    · rename_i hE
+      cases hs
+      rwa [show E.isMapping = false by simpa [SPath.elemMapping] using hE, if_neg (by decide)] at hp
+  · cases hs; exact sound_popCapture σ b _
+
 end Store
 
 end Solidity.Core
