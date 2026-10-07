@@ -55,6 +55,17 @@ syntax, `N.f.core` checked by the kernel. -/
 /-- info: 1 program declared scoped -/
 #guard_msgs in solc_scoped Solkey.InitGap
 
+/-! `EtherWallet`'s obligations, scoped (`solc_scoped_problems`): each
+program resolved in its parameters' context, `N.f.problem.core`. -/
+
+/-- info: 1 obligation declared scoped -/
+#guard_msgs in solc_scoped_problems Solkey.EtherWallet
+
+-- the scoped obligation erases to today's
+#guard Fml.quote (Lean.mkConst ``Solkey.EtherWallet)
+    (Solkey.EtherWallet.constructor.problem.core.erase []) ==
+  Fml.quote (Lean.mkConst ``Solkey.EtherWallet) Solkey.EtherWallet.constructor.problem
+
 
 /-! ## `Counter.sol`
 

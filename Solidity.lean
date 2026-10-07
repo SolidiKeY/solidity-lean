@@ -36,6 +36,7 @@ import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.Schema
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Notation
+import Solidity.Calculus.Core.Spec
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.RuleShapes
 import Solidity.Calculus.PrintedRules
@@ -132,6 +133,7 @@ import Solidity.Examples.Tactics.CoreSymex
 import Solidity.Examples.Tactics.CoreStep
 import Solidity.Examples.Tactics.CorePrint
 import Solidity.Examples.Tactics.CoreNotation
+import Solidity.Examples.Tactics.CoreSpec
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.SimpleStorage

@@ -119,7 +119,7 @@ def Tm.resolveN (Γ : NCtx) : {s : Srt} → Solidity.Tm C s → Except String (T
 /-! ## Updates -/
 
 /-- The local an element sets, if it sets one. -/
-def _root_.Solidity.UpdElem.target? : Solidity.UpdElem C → Option Var
+def _root_.Solidity.UpdElem.setsLocal? : Solidity.UpdElem C → Option Var
   | .val x _ | .path x _ | .unset x | .mref x _ | .store x _ | .saveNet x | .saveNetMt x => some x
   | _ => none
 
@@ -189,7 +189,7 @@ def Upd.resolveN (hint : Var → Option LTy) (Γ : NCtx) :
   | Δ, U, .setBalance a :: es => do
     Upd.resolveN hint Γ Δ (U.snoc (.setBalance (← Tm.resolveN Γ a))) es
   | Δ, U, e :: es => do
-    let some x := e.target? | .error "an update element of no kind"
+    let some x := e.setsLocal? | .error "an update element of no kind"
     let t ← elemTy hint Δ x e
     let r ← Rhs.resolveN Γ t e
     match Δ.find x t with
