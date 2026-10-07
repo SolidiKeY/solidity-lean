@@ -135,6 +135,27 @@ theorem SVal.find_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
     | none => exact find_erase d p
     | some x => exact find_erase x p
 
+theorem SVal.findLive_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
+    v.erase.findLive p.erase = toRes SVal.erase (v.findLive p)
+  | _, _, v, .nil => by cases v <;> rfl
+  | _, _, .struct fs, .field h p => by
+    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, SFields.lookupBy_erase fs h,
+      findLive, findLive_erase _ p]
+  | _, _, .array e sh, .at i p => by
+    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLive]
+    exact slot_erase _ _ (SList.erase_eq e) i _ (fun w => w.findLive p.erase) _
+      (fun x => findLive_erase x p)
+  | _, _, .fixed e, .atF i p => by
+    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLive]
+    exact slot_erase _ _ (SVec.erase_eq e) i _ (fun w => w.findLive p.erase) _
+      (fun x => findLive_erase x p)
+  | _, _, .map m d, .key k p => by
+    simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLive, SMap.erase_eq,
+      lookupBy_map_snd SVal.erase k m.toList]
+    cases lookupBy k m.toList with
+    | none => exact findLive_erase d p
+    | some x => exact findLive_erase x p
+
 theorem SVal.save_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new : SVal U) →
     v.erase.save p.erase new.erase = toRes SVal.erase (v.save p new)
   | _, _, v, .nil, new => by cases v <;> rfl
@@ -245,6 +266,16 @@ theorem SVal.dfltBelow_erase : (k : Nat) → (T : Ty) → (h : tyRank T < k) →
 theorem SVal.dflt_erase (T : Ty) : (SVal.dflt T).erase = Semantics.defaultForTy T :=
   SVal.dfltBelow_erase _ T _
 
+theorem SFields.dflt_erase : (fs : List (Name × Ty)) →
+    (SFields.dflt fs).erase = fs.map fun (n, T) => (n, Semantics.defaultForTy T)
+  | [] => rfl
+  | (f, T) :: fs => by
+    simp only [SFields.dflt, SFields.erase, SVal.dflt_erase, SFields.dflt_erase fs, List.map_cons]
+
+/-- A contract starts in the erasure of `Storage.init`. -/
+theorem Storage.init_erase (C : Contract) : (Storage.init C).erase = C.initStorage :=
+  SFields.dflt_erase C.vars
+
 theorem pushSlot_erase (E : Ty) : (l : List (SVal E)) →
     Semantics.pushSlot E (l.map SVal.erase) =
       ((pushSlot E l).1.erase, (pushSlot E l).2.map SVal.erase)
@@ -347,6 +378,61 @@ inductive TyNodup : Ty → Prop where
   | fixed {E : Ty} {n : Nat} (h : TyNodup E) : TyNodup (.ref (.fixed E n))
   | mapping {K V : Ty} : TyNodup (.ref (.mapping K V))
 
+/-- The structs whose members have distinct names: all but `BadDup`. -/
+def nodupStructs : List Name :=
+  ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
+   "Toggle", "FixedTriple", "Pair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
+   "WithArray", "Triple"]
+
+/-- `TyNodup`, structurally: the structs `T` reaches are in `nodupStructs`
+(`TyNodup.of_nodupS`), so a proof of it is `rfl`. -/
+def _root_.Solidity.Ty.nodupS : Ty → Bool
+  | .prim _ => true
+  | .ref (.struct s) => s ∈ nodupStructs
+  | .ref (.array e) => e.nodupS
+  | .ref (.fixed e _) => e.nodupS
+  | .ref (.mapping _ _) => true
+
+theorem nodupStructs_ok : ∀ s ∈ nodupStructs,
+    Semantics.nodupKeysB (structDef s) = true ∧ ∀ fT ∈ structDef s, fT.2.nodupS = true := by
+  decide
+
+theorem tyRank_le_fieldsRank : {fs : List (Name × Ty)} → {fT : Name × Ty} → fT ∈ fs →
+    tyRank fT.2 ≤ fieldsRank fs
+  | _ :: _, _, .head _ => Nat.le_max_left _ _
+  | _ :: _, _, .tail _ h => Nat.le_trans (tyRank_le_fieldsRank h) (Nat.le_max_right _ _)
+
+mutual
+theorem TyNodup.of_nodupS_at (k : Nat) (ih : ∀ T : Ty, tyRank T < k → T.nodupS = true → TyNodup T) :
+    (T : Ty) → tyRank T < k + 1 → T.nodupS = true → TyNodup T
+  | .prim _, _, _ => .prim
+  | .ref R, h, hn => TyNodup.of_nodupS_ref k ih R h hn
+
+theorem TyNodup.of_nodupS_ref (k : Nat)
+    (ih : ∀ T : Ty, tyRank T < k → T.nodupS = true → TyNodup T) :
+    (R : RefTy) → tyRank (.ref R) < k + 1 → (Ty.ref R).nodupS = true → TyNodup (.ref R)
+  | .struct s, h, hn => by
+    have hs := nodupStructs_ok s (by simpa only [Ty.nodupS, decide_eq_true_eq] using hn)
+    exact .struct hs.1 fun fT hm => ih fT.2
+      (Nat.lt_of_le_of_lt (tyRank_le_fieldsRank hm)
+        (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (Nat.le_of_lt_succ h)))
+      (hs.2 fT hm)
+  | .array E, h, hn => .array (TyNodup.of_nodupS_at k ih E (by simpa only [tyRank] using h)
+      (by simpa only [Ty.nodupS] using hn))
+  | .fixed E _, h, hn => .fixed (TyNodup.of_nodupS_at k ih E
+      (Nat.lt_of_succ_lt (by simpa only [tyRank] using h)) (by simpa only [Ty.nodupS] using hn))
+  | .mapping _ _, _, _ => .mapping
+end
+
+theorem TyNodup.of_nodupS_lt : (k : Nat) → (T : Ty) → tyRank T < k → T.nodupS = true → TyNodup T
+  | 0, _, h, _ => absurd h (Nat.not_lt_zero _)
+  | k + 1, T, h, hn => TyNodup.of_nodupS_at k (TyNodup.of_nodupS_lt k) T h hn
+
+/-- A type whose structs are in `nodupStructs` has no struct with two members
+of one name. -/
+theorem TyNodup.of_nodupS {T : Ty} (h : T.nodupS = true) : TyNodup T :=
+  TyNodup.of_nodupS_lt _ T (Nat.lt_succ_self _) h
+
 theorem lookupBy_append_of_none {κ α : Type} [DecidableEq κ] {k : κ} :
     (l₁ l₂ : List (κ × α)) → lookupBy k l₁ = none → lookupBy k (l₁ ++ l₂) = lookupBy k l₂
   | [], _, _ => rfl
@@ -446,6 +532,12 @@ theorem findStorage_erase (hs : σ.storage = st.erase) {U : Ty} (r : SRef C U) :
   simp only [Semantics.State.findStorage, hs, Storage.erase, SFields.lookupBy_erase st r.hroot,
     Storage.find]
   exact SVal.find_erase _ _
+
+theorem findLive_erase (hs : σ.storage = st.erase) {U : Ty} (r : SRef C U) :
+    σ.findLive r.root r.path.erase = toRes SVal.erase (st.findLive r) := by
+  simp only [Semantics.State.findLive, hs, Storage.erase, SFields.lookupBy_erase st r.hroot,
+    Storage.findLive]
+  exact SVal.findLive_erase _ _
 
 theorem saveStorage_erase (hs : σ.storage = st.erase) {U : Ty} (r : SRef C U) (new : SVal U) :
     σ.saveStorage r.root r.path.erase new.erase = toRes (into σ) (st.save r new) := by

@@ -270,6 +270,11 @@ def SVal.dfltBelow : (k : Nat) → (T : Ty) → tyRank T < k → SVal T
 /-- The default of `T` (`defaultForTy`). -/
 def SVal.dflt (T : Ty) : SVal T := SVal.dfltBelow (tyRank T + 1) T (Nat.lt_succ_self _)
 
+/-- Every member at its default. -/
+def SFields.dflt : (fs : List (Name × Ty)) → SFields fs
+  | [] => .nil
+  | (_, T) :: fs => .cons (SVal.dflt T) (SFields.dflt fs)
+
 /-! ## Paths -/
 
 /-- A typed storage path: from a `T` to a `U`, a member by name, an array
@@ -350,6 +355,28 @@ def SVal.find : {T U : Ty} → SVal T → Path T U → Option (SVal U)
     match lookupBy k m.toList with
     | some x => x.find p
     | none => d.find p
+
+/-- A read that checks every index against the live length
+(`Semantics.SVal.findLive`): `find` past an array's end is `none`. -/
+def SVal.findLive : {T U : Ty} → SVal T → Path T U → Option (SVal U)
+  | _, _, v, .nil => some v
+  | _, _, .struct fs, .field h p => (fs.get h).findLive p
+  | _, _, .array e _, .at i p =>
+    if 0 ≤ i then
+      match e.toList[i.toNat]? with
+      | some x => x.findLive p
+      | none => none
+    else none
+  | _, _, .fixed e, .atF i p =>
+    if 0 ≤ i then
+      match e.toList[i.toNat]? with
+      | some x => x.findLive p
+      | none => none
+    else none
+  | _, _, .map m d, .key k p =>
+    match lookupBy k m.toList with
+    | some x => x.findLive p
+    | none => d.findLive p
 
 /-- The value with the one at a path replaced (`Semantics.SVal.save`). -/
 def SVal.save : {T U : Ty} → SVal T → Path T U → SVal U → Option (SVal T)
@@ -515,9 +542,17 @@ variable {C : Contract}
 /-- The untyped storage. -/
 def erase (st : Storage C) : List (Name × Semantics.SVal) := SFields.erase st
 
+/-- The storage a contract starts with: every state variable at its default
+(`Contract.initStorage`). -/
+def init (C : Contract) : Storage C := SFields.dflt C.vars
+
 /-- The value at a reference (`State.findStorage`). -/
 def find {U : Ty} (st : Storage C) (r : SRef C U) : Option (SVal U) :=
   (st.get r.hroot).find r.path
+
+/-- `SVal.findLive` at a reference (`State.findLive`). -/
+def findLive {U : Ty} (st : Storage C) (r : SRef C U) : Option (SVal U) :=
+  (st.get r.hroot).findLive r.path
 
 /-- The storage with the value at a reference replaced (`State.saveStorage`). -/
 def save {U : Ty} (st : Storage C) (r : SRef C U) (new : SVal U) : Option (Storage C) := do
