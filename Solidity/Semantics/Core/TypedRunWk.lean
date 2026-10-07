@@ -293,6 +293,16 @@ theorem lift_grow {α : HTy → Type} (h : Thin Γ Δ) (τ : TState C Γ) (d : T
 
 end TState
 
+/-! ## Frames, run -/
+
+/-- What the frames after a program do (`Frames.run`, typed): the rest run,
+a scope's locals popped or thinned, the heap's growth carried. -/
+def Frames.trun {Γ₀ : Ctx} : {Γ : Ctx} → (σ : TState C Γ) → Frames C Γ Γ₀ → TRes (Out C σ.H Γ₀)
+  | _, σ, .nil => .ok ⟨σ, List.prefix_refl _⟩
+  | _, σ, .seq ω κ => TRun.seq (fun τ => Prog.trun τ ω) (fun τ => Frames.trun τ κ) σ
+  | _, σ, .pop _ h κ => Frames.trun (σ.drop h) κ
+  | _, σ, .drop h κ => Frames.trun (σ.thin h) κ
+
 /-! ## Outcomes, lifted -/
 
 theorem TRes.map_bind {α β γ : Type} (f : β → γ) (x : TRes α) (g : α → TRes β) :
