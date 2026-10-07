@@ -160,7 +160,7 @@ theorem sound_memIndexRefCapture {R R' : RefTy} (a : ArrTy R (.ref R')) (mv : Id
   · rw [Stmt.run_assignMem]
     simp only [Run.assignMem]
     refine Res.Sim.err_bind (MSrc.mval_noPanic σ _) hp fun _ _ => ?_
-    simp only [MLoc.write, MPath.mval, hh, Res.bind_ok, pure_bind]
+    simp only [MLoc.write, MPath.mval, hh, pure_bind]
     exact Res.Sim.refl _
 
 /-- `memoryIndexWriteCaptureAllComplexRecv`:
@@ -323,7 +323,7 @@ theorem sound_deleteMemIndexCapture {R : RefTy} {T : Ty} (a : ArrTy R T) (mv : I
           rfl (by rw [hv]; rfl)),
       pushed_drop]
   · rw [Stmt.run_deleteMem]
-    simp only [Run.deleteMem, MLoc.addr, MPath.mval, hh, Res.bind_ok, pure_bind]
+    simp only [Run.deleteMem, MLoc.addr, MPath.mval, hh, pure_bind]
     exact Res.Sim.refl _
 
 /-- `memoryIndexDelete_unfold_leftFst`: the receiver bound first. -/
@@ -360,6 +360,43 @@ theorem deleteMemStep_sound (k : Nat) {T : Ty} (p : MPath C Γ T) (hd : T.defaul
         | simple ie => cases hs; exact sound_clearMem σ _ hd
         | _ => cases hs; exact sound_deleteMemIndexCapture σ a mv hmv _ hd _
       | loc l => cases hs; exact sound_deleteMemIndexRecv σ a (.loc l) _ i hd _
+
+/-- `newArrayCapture`: `T memory mv = new T(se); tgt = mv;`. -/
+theorem sound_assignNew (k : Nat) {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
+    (h : R.newArrOk = true) :
+    Premise.Sound m (.assignNew l n h)
+      (.unfold (.cons (.declMem R (fmv k) (some (.newArr n h)) rfl (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree)
+        (.cons (l.up.fill (.var .here (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree)) .nil)) (.push .refl)) σ := by
+  refine Premise.Sound.unfold ?_
+  obtain ⟨v, hv⟩ := Simple.eval_ok σ n
+  rw [Prog.run_cons, Stmt.run_declMem, Stmt.run_assignNew]
+  simp only [Run.declMem, Run.assignNew, MRhs.eval, hv, Res.bind_ok, Solidity.copyStToM_eq, bind_assoc,
+    pure_bind]
+  cases v.asInt with
+  | error => rfl
+  | ok z =>
+    simp only [Res.bind_ok]
+    cases Solidity.copyHN σ.glob (newArrVal R z) with
+    | error => rfl
+    | ok q =>
+      simp only [Res.bind_ok]
+      cases hr : q.2.2.asRef with
+      | error => rfl
+      | ok id =>
+        simp only [Res.bind_ok]
+        show Except.map _ (Prog.run _ (.cons _ .nil)) = _
+        rw [Prog.run_single]
+        cases l with
+        | store l =>
+          show Except.map _ (Run.assignFromMem l.up (.var .here _) _) = _
+          simp only [Run.assignFromMem, MPath.mval, pure_bind, State.glob_push,
+            Loc.resolve_up, withGlob_map_push]
+          simp only [Res.map_bind', State.get_push_here, MVal.asRef, pushed_drop]
+          rfl
+        | mem l =>
+          show Except.map _ (Run.assignMem l.up (.ref (.var .here _)) _) = _
+          simp only [Run.assignMem, MSrc.mval, MPath.mval, State.get_push_here, MVal.asRef,
+            pure_bind, (MLoc.Agree.of_up (t := .mem R) _ id l).write, pushed_drop]
 
 end Mem
 
