@@ -19,8 +19,9 @@ returned extension that replaces `HeapTy.Extends`).  A weakening keeps every
 identity, so it erases to the same untyped value.
 
 The two copies follow `Semantics.lean`'s line for line, allocating in the
-same order, so identities agree: `SVal.copyStToM` (storage to memory) needs
-a type without mappings and cannot fail, and `MVal.copyMToSt` (memory to
+same order, so identities agree: `SVal.copyStToM` (storage to memory, a fold
+of `Semantics/Core/Storage.lean`, so the kernel reduces it) needs a type
+without mappings and cannot fail, and `MVal.copyMToSt` (memory to
 storage) recurses on the type, by rank (fuel `rankBound`, which reads no
 struct name) and inside one rank structurally, as `SVal.dflt` does: a reference's target has a smaller type, so there is no
 cycle to guard against and no stuck arm.
@@ -222,46 +223,120 @@ def Grown.alloc {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) : Grown H (MVal 
   let a := g.heap.alloc g.val
   ⟨g.ext.trans (List.prefix_append _ _), a.1, a.2⟩
 
-mutual
-/-- A storage value deep-copied into fresh objects (`copyStToM`), members and
-elements first, as the untyped copy allocates. -/
-def SVal.copyStToM {H : HTy} (hp : Heap H) : {T : Ty} → SVal T → T.mapFree = true →
-    Grown H (MVal · T)
-  | _, .prim v, _ => ⟨List.prefix_refl H, hp, v⟩
-  | _, @SVal.struct s fs, h =>
-    Grown.alloc (R := .struct s) (SFields.copyStToM hp fs
-      (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h)))
-  | _, @SVal.array E e _, h =>
-    Grown.alloc (R := .array E) (SList.copyStToM hp e (by simpa only [Ty.mapFree] using h))
-  | _, @SVal.fixed E n e, h =>
-    Grown.alloc (R := .fixed E n) (SVec.copyStToM hp e (by simpa only [Ty.mapFree] using h))
-  | _, .map _ _, h => absurd h (by simp only [Ty.mapFree, Bool.false_eq_true, not_false_eq_true])
-
-def SFields.copyStToM {H : HTy} (hp : Heap H) : {fs : List (Name × Ty)} → SFields fs →
-    (∀ fT ∈ fs, fT.2.mapFree = true) → Grown H (MFields · fs)
-  | _, .nil, _ => ⟨List.prefix_refl H, hp, ()⟩
-  | _, @SFields.cons _ T _ v rest, h =>
-    let g₁ := SVal.copyStToM hp v (h _ List.mem_cons_self)
-    let g₂ := SFields.copyStToM g₁.heap rest (fun fT hm => h fT (List.mem_cons_of_mem _ hm))
-    ⟨g₁.ext.trans g₂.ext, g₂.heap, (MVal.wk g₂.ext T g₁.val, g₂.val)⟩
-
-def SList.copyStToM {H : HTy} (hp : Heap H) : {E : Ty} → SList E → E.mapFree = true →
-    Grown H (fun H' => List (MVal H' E))
-  | _, .nil, _ => ⟨List.prefix_refl H, hp, []⟩
-  | E, .cons v rest, h =>
-    let g₁ := SVal.copyStToM hp v h
-    let g₂ := SList.copyStToM g₁.heap rest h
-    ⟨g₁.ext.trans g₂.ext, g₂.heap, MVal.wk g₂.ext E g₁.val :: g₂.val⟩
-
-def SVec.copyStToM {H : HTy} (hp : Heap H) : {E : Ty} → {n : Nat} → SVec E n → E.mapFree = true →
+/-- A storage value deep-copied into fresh objects: at each type, from any
+heap, given that the type has no mapping. -/
+def copyStToMFold : Fold where
+  V T := (H : HTy) → Heap H → T.mapFree = true → Grown H (MVal · T)
+  F fs := (H : HTy) → Heap H → (∀ fT ∈ fs, fT.2.mapFree = true) → Grown H (MFields · fs)
+  L E := (H : HTy) → Heap H → E.mapFree = true → Grown H (fun H' => List (MVal H' E))
+  W E n := (H : HTy) → Heap H → E.mapFree = true →
     Grown H (fun H' => {l : List (MVal H' E) // l.length = n})
-  | _, _, .nil, _ => ⟨List.prefix_refl H, hp, ⟨[], rfl⟩⟩
-  | E, _, .cons v rest, h =>
-    let g₁ := SVal.copyStToM hp v h
-    let g₂ := SVec.copyStToM g₁.heap rest h
+  M _ := Unit
+  prim := fun v H hp _ => ⟨List.prefix_refl H, hp, v⟩
+  struct := fun {s} _ ih H hp h =>
+    Grown.alloc (R := .struct s)
+      (ih H hp (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h)))
+  array := fun {E} _ _ ie _ H hp h =>
+    Grown.alloc (R := .array E) (ie H hp (by simpa only [Ty.mapFree] using h))
+  fixed := fun {E n} _ ie H hp h =>
+    Grown.alloc (R := .fixed E n) (ie H hp (by simpa only [Ty.mapFree] using h))
+  map := fun _ _ _ _ _ _ h =>
+    absurd h (by simp only [Ty.mapFree, Bool.false_eq_true, not_false_eq_true])
+  fnil := fun H hp _ => ⟨List.prefix_refl H, hp, ()⟩
+  fcons := fun {_} {T} {_} _ _ iv ir H hp h =>
+    let g₁ := iv H hp (h _ List.mem_cons_self)
+    let g₂ := ir g₁.H' g₁.heap (fun fT hm => h fT (List.mem_cons_of_mem _ hm))
+    ⟨g₁.ext.trans g₂.ext, g₂.heap, (MVal.wk g₂.ext T g₁.val, g₂.val)⟩
+  lnil := fun H hp _ => ⟨List.prefix_refl H, hp, []⟩
+  lcons := fun {E} _ _ iv ir H hp h =>
+    let g₁ := iv H hp h
+    let g₂ := ir g₁.H' g₁.heap h
+    ⟨g₁.ext.trans g₂.ext, g₂.heap, MVal.wk g₂.ext E g₁.val :: g₂.val⟩
+  wnil := fun H hp _ => ⟨List.prefix_refl H, hp, ⟨[], rfl⟩⟩
+  wcons := fun {E} {_} _ _ iv ir H hp h =>
+    let g₁ := iv H hp h
+    let g₂ := ir g₁.H' g₁.heap h
     ⟨g₁.ext.trans g₂.ext, g₂.heap,
       ⟨MVal.wk g₂.ext E g₁.val :: g₂.val.1, congrArg (· + 1) g₂.val.2⟩⟩
-end
+  mnil := ()
+  mcons := fun _ _ _ _ _ => ()
+
+/-- A storage value deep-copied into fresh objects (`copyStToM`), members and
+elements first, as the untyped copy allocates. -/
+def SVal.copyStToM {H : HTy} (hp : Heap H) {T : Ty} (v : SVal T) (h : T.mapFree = true) :
+    Grown H (MVal · T) :=
+  (v.fold copyStToMFold : (H : HTy) → Heap H → T.mapFree = true → Grown H (MVal · T)) H hp h
+
+def SFields.copyStToM {H : HTy} (hp : Heap H) {fs : List (Name × Ty)} (x : SFields fs)
+    (h : ∀ fT ∈ fs, fT.2.mapFree = true) : Grown H (MFields · fs) :=
+  (x.fold copyStToMFold :
+    (H : HTy) → Heap H → (∀ fT ∈ fs, fT.2.mapFree = true) → Grown H (MFields · fs)) H hp h
+
+def SList.copyStToM {H : HTy} (hp : Heap H) {E : Ty} (l : SList E) (h : E.mapFree = true) :
+    Grown H (fun H' => List (MVal H' E)) :=
+  (l.fold copyStToMFold :
+    (H : HTy) → Heap H → E.mapFree = true → Grown H (fun H' => List (MVal H' E))) H hp h
+
+def SVec.copyStToM {H : HTy} (hp : Heap H) {E : Ty} {n : Nat} (l : SVec E n)
+    (h : E.mapFree = true) : Grown H (fun H' => {l : List (MVal H' E) // l.length = n}) :=
+  (l.fold copyStToMFold : (H : HTy) → Heap H → E.mapFree = true →
+    Grown H (fun H' => {l : List (MVal H' E) // l.length = n})) H hp h
+
+theorem SVal.copyStToM_prim {H : HTy} (hp : Heap H) {p : PrimTy} (v : p.Denote)
+    (h : (Ty.prim p).mapFree = true) :
+    SVal.copyStToM hp (.prim v) h = ⟨List.prefix_refl H, hp, v⟩ := rfl
+theorem SVal.copyStToM_struct {H : HTy} (hp : Heap H) {s : Name} (fs : SFields (structDef s))
+    (h : (Ty.ref (.struct s)).mapFree = true) :
+    SVal.copyStToM hp (.struct fs) h =
+      Grown.alloc (R := .struct s) (SFields.copyStToM hp fs
+        (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h))) := rfl
+theorem SVal.copyStToM_array {H : HTy} (hp : Heap H) {E : Ty} (e sh : SList E)
+    (h : (Ty.ref (.array E)).mapFree = true) :
+    SVal.copyStToM hp (.array e sh) h =
+      Grown.alloc (R := .array E) (SList.copyStToM hp e (by simpa only [Ty.mapFree] using h)) :=
+  rfl
+theorem SVal.copyStToM_fixed {H : HTy} (hp : Heap H) {E : Ty} {n : Nat} (e : SVec E n)
+    (h : (Ty.ref (.fixed E n)).mapFree = true) :
+    SVal.copyStToM hp (.fixed e) h =
+      Grown.alloc (R := .fixed E n) (SVec.copyStToM hp e (by simpa only [Ty.mapFree] using h)) :=
+  rfl
+theorem SVal.copyStToM_map {H : HTy} (hp : Heap H) {K U : Ty} (m : SMap U) (d : SVal U)
+    (h : (Ty.ref (.mapping K U)).mapFree = true) :
+    SVal.copyStToM hp (.map m d) h =
+      absurd h (by simp only [Ty.mapFree, Bool.false_eq_true, not_false_eq_true]) := rfl
+theorem SFields.copyStToM_nil {H : HTy} (hp : Heap H) (h : ∀ fT ∈ ([] : List (Name × Ty)),
+    fT.2.mapFree = true) : SFields.copyStToM hp .nil h = ⟨List.prefix_refl H, hp, ()⟩ := rfl
+theorem SFields.copyStToM_cons {H : HTy} (hp : Heap H) {f : Name} {T : Ty}
+    {fs : List (Name × Ty)} (v : SVal T) (rest : SFields fs)
+    (h : ∀ fT ∈ (f, T) :: fs, fT.2.mapFree = true) :
+    SFields.copyStToM hp (.cons v rest) h =
+      let g₁ := SVal.copyStToM hp v (h _ List.mem_cons_self)
+      let g₂ := SFields.copyStToM g₁.heap rest (fun fT hm => h fT (List.mem_cons_of_mem _ hm))
+      ⟨g₁.ext.trans g₂.ext, g₂.heap, (MVal.wk g₂.ext T g₁.val, g₂.val)⟩ := rfl
+theorem SList.copyStToM_nil {H : HTy} (hp : Heap H) {E : Ty} (h : E.mapFree = true) :
+    SList.copyStToM hp .nil h = ⟨List.prefix_refl H, hp, []⟩ := rfl
+theorem SList.copyStToM_cons {H : HTy} (hp : Heap H) {E : Ty} (v : SVal E) (rest : SList E)
+    (h : E.mapFree = true) :
+    SList.copyStToM hp (.cons v rest) h =
+      let g₁ := SVal.copyStToM hp v h
+      let g₂ := SList.copyStToM g₁.heap rest h
+      ⟨g₁.ext.trans g₂.ext, g₂.heap, MVal.wk g₂.ext E g₁.val :: g₂.val⟩ := rfl
+theorem SVec.copyStToM_nil {H : HTy} (hp : Heap H) {E : Ty} (h : E.mapFree = true) :
+    SVec.copyStToM hp .nil h = ⟨List.prefix_refl H, hp, ⟨[], rfl⟩⟩ := rfl
+theorem SVec.copyStToM_cons {H : HTy} (hp : Heap H) {E : Ty} {n : Nat} (v : SVal E)
+    (rest : SVec E n) (h : E.mapFree = true) :
+    SVec.copyStToM hp (.cons v rest) h =
+      let g₁ := SVal.copyStToM hp v h
+      let g₂ := SVec.copyStToM g₁.heap rest h
+      ⟨g₁.ext.trans g₂.ext, g₂.heap,
+        ⟨MVal.wk g₂.ext E g₁.val :: g₂.val.1, congrArg (· + 1) g₂.val.2⟩⟩ := rfl
+
+attribute [irreducible] SVal.copyStToM SFields.copyStToM SList.copyStToM SVec.copyStToM
+attribute [eqns SVal.copyStToM_prim SVal.copyStToM_struct SVal.copyStToM_array
+  SVal.copyStToM_fixed SVal.copyStToM_map] SVal.copyStToM
+attribute [eqns SFields.copyStToM_nil SFields.copyStToM_cons] SFields.copyStToM
+attribute [eqns SList.copyStToM_nil SList.copyStToM_cons] SList.copyStToM
+attribute [eqns SVec.copyStToM_nil SVec.copyStToM_cons] SVec.copyStToM
 
 /-- A fresh default object (`allocDefault`). -/
 def Heap.allocDefault {H : HTy} (hp : Heap H) (R : RefTy) (h : (Ty.ref R).mapFree = true) :

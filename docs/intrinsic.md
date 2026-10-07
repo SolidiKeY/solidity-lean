@@ -18,6 +18,13 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 6. The closer and Decide are ported (M6c); `Fml.erase` is a bridge only.
 7. All milestones run; a failed gate takes its stated fallback, not a stop.
 8. The bridge (typed `Core` beside the untyped `Stmt`) ends at M4, not M7.
+9. (lead, 2026-10-07) The M6a gate counts as **passed**: the aggregate
+   symbolic execution is 1.1–3× faster on the larger programs; the 1.45× on
+   the 10 ms straight-line `e2` is a few milliseconds, a cost to reduce, not
+   a trigger for decision 1's fallback.
+10. (lead, 2026-10-07) A `bool` mapping key follows solc, which hashes it as
+   `0`/`1`: the typed path takes that integer (`PrimTy.key`, `SRef.atKey`;
+   `docs/solc-alignment.md`, "`bool` mapping keys").
 
 ## Milestones
 
@@ -324,16 +331,31 @@ untyped operation is never stuck on an erased input.
 4. `run_erase` erases the state to `{ storage := st.erase, heap := hp.erase,
    nextId := H.length, env := … }`; the lemmas above are its per-operation
    steps, so `Halt.stuck` leaves `Core`.
-5. Open: a `bool` mapping key (`IndexTy.map` allows it; the untyped
-   `Value.asInt` is stuck on one, solc hashes it as `0`/`1`);
-   `DecidableEq (SVal T)`; G0 condition 1 debt, code the kernel will
-   evaluate that still `match`es on the indexed families: the helpers
-   `SList.toList`/`length`, `SMap.toList`, `SVec.toList` (run on every
-   array and mapping step of `find`/`findLive`/`save`); `Storage.checkIndex`,
-   `len`, `push`, `pushPlace`, `pop`, `delete`, `write`; and `SVal.defaultOf`,
-   `strip`, `overlay`, `erase`, `isPrim`, `SVal.copyStToM`.  The `toList`
-   helpers come first: rewrite them by `SList.rec`/`SMap.rec`/`SVec.rec`, as
-   `SFields.get` is.
+5. Done (2026-10-07, G0 condition 1 paid): every function the kernel
+   evaluates on storage values is a fold (`Fold`, the recursor of the five
+   families: `SVal.fold`, `match` twin `SVal.foldM` as `implemented_by`,
+   `SVal.fold_eq_foldM`) or reads through a view whose type the index
+   computes (`SVal.view`, `SFields.view`, `SVec.view`, `SList.uncons`,
+   `SMap.uncons`): `erase`, the `toList`s (their own `match` twins, so
+   compiled code does not walk the elements), `SVec.set`, `defaultOf`,
+   `strip`, `overlay`/`overlayOn`, `SVal.copyStToM`, `beq`; `checkIndex`
+   (`inBounds`, by `IndexTy.casesOn`/`ArrTy.casesOn`), `len`, `push`,
+   `pushPlace`, `pop` read the array by `SVal.view`; `isPrim` reads the type.
+   Each fold states its equations by `rfl`, is `@[irreducible]` and names
+   them its equation lemmas (`attribute [eqns …]`, `Solidity/Eqns.lean`), so
+   `simp only [SVal.erase]` rewrites a constructor application and nothing
+   else, as it did by `match`; a proof that needs the definitional unfolding
+   says `with_unfolding_all rfl` (and the elaborator's `decide`/`rfl` do not
+   see through them: use `decide +kernel`).  `DecidableEq (SVal T)` and
+   `(SFields fs)` are `SVal.beq`/`SFields.beq` with `beq_iff`; the kernel
+   reduces them (`decide +kernel` of `Storage.testSuite = Storage.testSuite`
+   in 16 ms), where the untyped `svalDecEq` does not reduce at all.  A `bool`
+   key: decision 10; the untyped side stays stuck on one, so its agreement
+   holds at numeric keys (`PrimTy.asInt_erase_key`).
+   Left for the wiring (M3 had not landed on `intrinsic` when this was done):
+   `LTy.Denote`/`Core.State` over these values with the heap typing as a
+   field, allocation weakening the env along `Grown.ext`, and `SRef.atKey`
+   at the typed run's index steps.
 
 **Timings** (2026-10-07, scratch modules `HeapBench`/`HeapBench3` under
 `Solidity/Scratch/`, which are not committed: each row is one `decide
@@ -384,8 +406,38 @@ today's form: `unfoldStore` (`Corpus/Basic.lean`), `findStorage`/
   mapping paths (0.93–1.01×).  Open: the corpus examples (they need the
   typed run, M3 + wiring), and the operations still walked by `match`
   (`erase`, `overlay`, `defaultOf`, the heap copies: stores walked by
-  `match` cost up to 1.55×).  The gate stays open until the corpus
-  example runs through the typed forms.
+  `match` cost up to 1.55×; since paid, below).  The gate stays open until
+  the corpus example runs through the typed forms.
+
+**Timings after the folds** (2026-10-07, scratch `FoldBench`, same method:
+`type checking` of each `decide +kernel` statement, `Elab.async false`;
+two runs agree within 8%).
+
+| What | typed | untyped | ratio |
+|---|---|---|---|
+| store `testSuite` built and walked (`Fold` size; bare recursor; `match`) | 33.5–36.7 ms; 34.8–37.5 ms; 50.8–54.4 ms | 33.8–34.8 ms | 0.99–1.05 (fold), 1.46–1.56 (`match`) |
+| store `standardExample`, same | 12.6; 12.8; 18.4 ms | 12.7–13.1 ms | 0.99 |
+| store `solcStructs`, same | 24.7; 25.0; 29.0 ms | 25.1 ms | 0.98 |
+| `testSuite` erased by the fold, by `match` (`foldM`), then walked untyped | 42.9 / 59 ms | 33.8 ms | 0.73 fold/`match` |
+| `standardExample`, same | 15.8 / 21.4 ms | 12.7 ms | 0.74 |
+| `solcMappings`, same | 21.5 / 26.3 ms | 18.8 ms | 0.82 |
+| the eight stores erased by the fold and walked untyped | | | 1.07–1.33 (by `match` before: 1.15–1.55) |
+| save `alice.account.balance`, read it back | 13.1 ms | 14.3 ms | 0.92 |
+| save a 3-element `persons`, read `persons[1].age` | 11.2 ms | 11.7 ms | 0.96 |
+| read `folks[3].age` (a mapping's default) | 8.4 ms | 8.5 ms | 0.99 |
+| save `folks[3].age`, read `folks[5].age`, `folks[3].age` | 10.3 ms | 11.1 ms | 0.93 |
+| `persons.push()`, then the length | 7.2 ms | 8.2 ms | 0.87 |
+| `alice = bob` (a struct copied over, `overlay`), read back | 12.9 ms | 15.6 ms | 0.83 |
+| `delete alice`, read back | 13.3 ms | — | |
+| fresh `Person memory m; m.age = 3;` read back | 10.8 ms | does not reduce | (10.3 ms before) |
+| `alice` storage → memory → storage | 6.1 ms | does not reduce | (15.4 ms before) |
+| `Storage.testSuite = Storage.testSuite` (`DecidableEq`) | 16.3 ms | does not reduce | |
+
+- A fold costs what the bare recursor does (0.96–0.98×): the `Fold`
+  structure's projections are free.  `match` costs 1.2–1.5× it.
+- Every operation row is now at most the untyped one (0.83–0.99×), and the
+  store rows within 5%.  The gate's open item is the corpus example through
+  the typed run (M3 + wiring).
 
 ### Gate G0: passes, under conditions
 

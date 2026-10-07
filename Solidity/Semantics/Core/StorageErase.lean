@@ -259,7 +259,7 @@ end SVal
 
 theorem SVal.findM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
     v.erase.find p.erase = toRes SVal.erase (v.findM p)
-  | _, _, v, .nil => by cases v <;> rfl
+  | _, _, v, .nil => by cases v <;> with_unfolding_all rfl
   | _, _, .struct fs, .field h p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.find, SFields.lookupBy_erase fs h, findM,
       findM_erase _ p]
@@ -280,7 +280,7 @@ theorem SVal.findM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
 
 theorem SVal.findLiveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
     v.erase.findLive p.erase = toRes SVal.erase (v.findLiveM p)
-  | _, _, v, .nil => by cases v <;> rfl
+  | _, _, v, .nil => by cases v <;> with_unfolding_all rfl
   | _, _, .struct fs, .field h p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, SFields.lookupBy_erase fs h,
       findLiveM, findLiveM_erase _ p]
@@ -301,7 +301,7 @@ theorem SVal.findLiveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) �
 
 theorem SVal.saveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new : SVal U) →
     v.erase.save p.erase new.erase = toRes SVal.erase (v.saveM p new)
-  | _, _, v, .nil, new => by cases v <;> rfl
+  | _, _, v, .nil, new => by cases v <;> with_unfolding_all rfl
   | _, _, .struct fs, .field h p, new => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.save, SFields.lookupBy_erase fs h, saveM,
       saveM_erase _ p new]
@@ -309,7 +309,7 @@ theorem SVal.saveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) → (n
     | none => rfl
     | some x =>
       simp only [toRes, bind, Except.bind, Option.bind, SFields.setBy_erase fs h x]
-      rfl
+      with_unfolding_all rfl
   | _, _, .array e sh, .at i p, new => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.save, saveM]
     refine slot_erase _ (e.erase ++ sh.erase)
@@ -423,7 +423,7 @@ theorem SVal.dflt_erase (T : Ty) : (SVal.dflt T).erase = Semantics.defaultForTy 
 
 theorem SFields.dflt_erase : (fs : List (Name × Ty)) →
     (SFields.dflt fs).erase = fs.map fun (n, T) => (n, Semantics.defaultForTy T)
-  | [] => rfl
+  | [] => by with_unfolding_all rfl
   | (f, T) :: fs => by
     simp only [SFields.dflt, SFields.erase, SVal.dflt_erase, SFields.dflt_erase fs, List.map_cons]
 
@@ -453,7 +453,7 @@ theorem stripElems_eq : (l : List Semantics.SVal) →
 
 mutual
 theorem SVal.defaultOf_erase : {T : Ty} → (v : SVal T) → v.defaultOf.erase = v.erase.defaultOf
-  | _, @SVal.prim .bool _ | _, @SVal.prim .uint _ | _, @SVal.prim .int _ => rfl
+  | _, @SVal.prim .bool _ | _, @SVal.prim .uint _ | _, @SVal.prim .int _ => by with_unfolding_all rfl
   | _, .struct fs => by
     simp only [SVal.defaultOf, SVal.erase, Semantics.SVal.defaultOf, SFields.defaultOf_erase fs]
   | _, .array e sh => by
@@ -461,25 +461,25 @@ theorem SVal.defaultOf_erase : {T : Ty} → (v : SVal T) → v.defaultOf.erase =
       List.map_append, ← SList.erase_eq, SList.defaultOf_erase e, SList.erase]
   | _, .fixed e => by
     simp only [SVal.defaultOf, SVal.erase, Semantics.SVal.defaultOf, SVec.defaultOf_erase e]
-  | _, .map m d => rfl
+  | _, .map m d => by with_unfolding_all rfl
 
 theorem SFields.defaultOf_erase : {fs : List (Name × Ty)} → (st : SFields fs) →
     (SFields.defaultOf st).erase = Semantics.SVal.defaultOf.defaultOfFields st.erase
-  | _, .nil => rfl
+  | _, .nil => by with_unfolding_all rfl
   | _, .cons v rest => by
     simp only [SFields.defaultOf, SFields.erase, Semantics.SVal.defaultOf.defaultOfFields,
       SVal.defaultOf_erase v, SFields.defaultOf_erase rest]
 
 theorem SList.defaultOf_erase : {E : Ty} → (l : SList E) →
     (SList.defaultOf l).erase = Semantics.SVal.defaultOf.defaultOfElems l.erase
-  | _, .nil => rfl
+  | _, .nil => by with_unfolding_all rfl
   | _, .cons v rest => by
     simp only [SList.defaultOf, SList.erase, Semantics.SVal.defaultOf.defaultOfElems,
       SVal.defaultOf_erase v, SList.defaultOf_erase rest]
 
 theorem SVec.defaultOf_erase : {E : Ty} → {n : Nat} → (l : SVec E n) →
     (SVec.defaultOf l).erase = Semantics.SVal.defaultOf.defaultOfElems l.erase
-  | _, _, .nil => rfl
+  | _, _, .nil => by with_unfolding_all rfl
   | _, _, .cons v rest => by
     simp only [SVec.defaultOf, SVec.erase, Semantics.SVal.defaultOf.defaultOfElems,
       SVal.defaultOf_erase v, SVec.defaultOf_erase rest]
@@ -487,32 +487,32 @@ end
 
 mutual
 theorem SVal.strip_erase : {T : Ty} → (v : SVal T) → v.strip.erase = v.erase.strip
-  | _, .prim _ => rfl
+  | _, .prim _ => by with_unfolding_all rfl
   | _, .struct fs => by
     simp only [SVal.strip, SVal.erase, Semantics.SVal.strip, SFields.strip_erase fs]
   | _, .array e _ => by
     simp only [SVal.strip, SVal.erase, Semantics.SVal.strip, SList.strip_erase e, SList.erase]
   | _, .fixed e => by
     simp only [SVal.strip, SVal.erase, Semantics.SVal.strip, SVec.strip_erase e]
-  | _, .map m d => rfl
+  | _, .map m d => by with_unfolding_all rfl
 
 theorem SFields.strip_erase : {fs : List (Name × Ty)} → (st : SFields fs) →
     (SFields.strip st).erase = Semantics.SVal.strip.stripFields st.erase
-  | _, .nil => rfl
+  | _, .nil => by with_unfolding_all rfl
   | _, .cons v rest => by
     simp only [SFields.strip, SFields.erase, Semantics.SVal.strip.stripFields,
       SVal.strip_erase v, SFields.strip_erase rest]
 
 theorem SList.strip_erase : {E : Ty} → (l : SList E) →
     (SList.strip l).erase = Semantics.SVal.strip.stripElems l.erase
-  | _, .nil => rfl
+  | _, .nil => by with_unfolding_all rfl
   | _, .cons v rest => by
     simp only [SList.strip, SList.erase, Semantics.SVal.strip.stripElems,
       SVal.strip_erase v, SList.strip_erase rest]
 
 theorem SVec.strip_erase : {E : Ty} → {n : Nat} → (l : SVec E n) →
     (SVec.strip l).erase = Semantics.SVal.strip.stripElems l.erase
-  | _, _, .nil => rfl
+  | _, _, .nil => by with_unfolding_all rfl
   | _, _, .cons v rest => by
     simp only [SVec.strip, SVec.erase, Semantics.SVal.strip.stripElems,
       SVal.strip_erase v, SVec.strip_erase rest]
@@ -606,7 +606,7 @@ theorem overlayElems_eq_zip : (os vs : List Semantics.SVal) → os.length = vs.l
 mutual
 theorem SVal.overlay_erase : {T : Ty} → TyNodup T → (o v : SVal T) →
     (o.overlay v).erase = o.erase.overlay v.erase
-  | _, _, .prim _, .prim _ => rfl
+  | _, _, .prim _, .prim _ => by with_unfolding_all rfl
   | _, .struct hk hf, .struct ofs, .struct nfs => by
     simp only [SVal.overlay, SVal.erase, Semantics.SVal.overlay]
     rw [SFields.overlay_erase [] (fun _ _ _ => rfl) hk hf ofs nfs, List.nil_append]
@@ -627,14 +627,14 @@ theorem SVal.overlay_erase : {T : Ty} → TyNodup T → (o v : SVal T) →
     rw [overlayElems_eq_zip _ _ (by rw [SVec.length_erase, SVec.length_erase]),
       List.drop_of_length_le (by rw [SVec.length_erase]; exact Nat.le_refl _)]
     rfl
-  | _, _, .map _ _, .map _ _ => rfl
+  | _, _, .map _ _, .map _ _ => by with_unfolding_all rfl
 
 theorem SFields.overlay_erase (pre : List (Name × Semantics.SVal)) :
     {fs : List (Name × Ty)} →
     (∀ k T, lookupBy k fs = some T → lookupBy k pre = none) →
     Semantics.nodupKeysB fs = true → (∀ fT ∈ fs, TyNodup fT.2) → (os ns : SFields fs) →
     (SFields.overlay os ns).erase = Semantics.SVal.overlay.overlayFields (pre ++ os.erase) ns.erase
-  | [], _, _, _, .nil, .nil => rfl
+  | [], _, _, _, .nil, .nil => by with_unfolding_all rfl
   | (f, T) :: fs, hpre, hk, hf, .cons o os, .cons v ns => by
     simp only [Semantics.nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at hk
     have hf0 : lookupBy f (pre ++ (f, o.erase) :: os.erase) = some o.erase := by
@@ -655,17 +655,17 @@ theorem SList.overlayOn_erase {E : Ty} (hE : TyNodup E) : (L : List (SVal E)) �
     (SList.overlayOn L ns).erase =
       Semantics.SVal.overlay.overlayElems (L.map SVal.erase) ns.erase
   | [], ns => by
-    simp only [SList.overlayOn, List.map_nil, Semantics.SVal.overlay.overlayElems,
+    simp only [SList.overlayOn_nil_left, List.map_nil, Semantics.SVal.overlay.overlayElems,
       SList.strip_erase]
   | o :: os, .cons v rest => by
     simp only [SList.overlayOn, SList.erase, List.map_cons,
       Semantics.SVal.overlay.overlayElems, SVal.overlay_erase hE o v,
       SList.overlayOn_erase hE os rest]
-  | _ :: _, .nil => rfl
+  | _ :: _, .nil => by with_unfolding_all rfl
 
 theorem SVec.overlay_erase {E : Ty} (hE : TyNodup E) : {n : Nat} → (os ns : SVec E n) →
     (SVec.overlay os ns).erase = List.zipWith Semantics.SVal.overlay os.erase ns.erase
-  | _, .nil, .nil => rfl
+  | _, .nil, .nil => by with_unfolding_all rfl
   | _, .cons o os, .cons v ns => by
     simp only [SVec.overlay, SVec.erase, List.zipWith_cons_cons, SVal.overlay_erase hE o v,
       SVec.overlay_erase hE os ns]
@@ -713,18 +713,18 @@ theorem checkIndex_erase (hs : σ.storage = st.erase) {R : RefTy} {k : PrimTy} {
   | some v =>
     simp only [toRes, bind, Except.bind, Option.bind]
     cases it with
-    | map => cases v; rfl
+    | map => cases v; with_unfolding_all rfl
     | arr a =>
       cases a with
       | dyn =>
         cases v with
         | array e sh =>
-          simp only [SVal.erase, SList.length_erase]
+          simp only [SVal.erase, SList.length_erase, Storage.inBounds, SVal.view_array]
           split <;> rfl
       | fixed =>
         cases v with
         | fixed e =>
-          simp only [SVal.erase, SVec.length_erase]
+          simp only [SVal.erase, SVec.length_erase, Storage.inBounds]
           split <;> rfl
 
 theorem arrayLen_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E))) :
@@ -749,9 +749,9 @@ theorem pushAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.a
     cases v with
     | array e sh =>
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq sh,
-        pushSlot_erase, hval]
+        pushSlot_erase, hval, SVal.view_array]
       cases val' (pushSlot E sh.toList).1 with
-      | none => rfl
+      | none => with_unfolding_all rfl
       | some x =>
         have hnew : Semantics.SVal.array (e.erase ++ [x.erase])
             (List.map SVal.erase (pushSlot E sh.toList).2) false =
@@ -760,7 +760,7 @@ theorem pushAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.a
             List.map_cons, List.map_nil]
         simp only []
         rw [hnew, saveStorage_erase hs]
-        rfl
+        with_unfolding_all rfl
 
 theorem pushPlaceAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E))) :
     pushPlaceAt σ E r.root r.path.erase =
@@ -778,12 +778,12 @@ theorem pushPlaceAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.re
         simp only [SVal.erase, SList.erase_eq, SList.toList_ofList, List.map_append,
           List.map_cons, List.map_nil]
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq sh,
-        pushSlot_erase]
+        pushSlot_erase, SVal.view_array]
       rw [hnew, saveStorage_erase hs]
       cases st.save r (SVal.array (.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
           (.ofList (pushSlot E sh.toList).2)) with
-      | none => rfl
-      | some st' => simp only [toRes, SList.length_erase]; rfl
+      | none => with_unfolding_all rfl
+      | some st' => simp only [toRes, SList.length_erase]; with_unfolding_all rfl
 
 theorem popAt_erase (hs : σ.storage = st.erase) {E : Ty} (keep : Bool)
     (r : SRef C (.ref (.array E))) :
@@ -795,9 +795,9 @@ theorem popAt_erase (hs : σ.storage = st.erase) {E : Ty} (keep : Bool)
     cases v with
     | array e sh =>
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq e,
-        ← List.map_reverse]
+        ← List.map_reverse, SVal.view_array]
       cases e.toList.reverse with
-      | nil => rfl
+      | nil => with_unfolding_all rfl
       | cons last restRev =>
         have hnew : Semantics.SVal.array (List.map SVal.erase restRev).reverse
             ((if keep then last.erase else last.erase.defaultOf) :: sh.erase) false =
@@ -808,7 +808,7 @@ theorem popAt_erase (hs : σ.storage = st.erase) {E : Ty} (keep : Bool)
           cases keep <;> simp only [Bool.false_eq_true, ↓reduceIte, SVal.defaultOf_erase]
         simp only [List.map_cons]
         rw [hnew, saveStorage_erase hs]
-        rfl
+        with_unfolding_all rfl
 
 /-- `delete b` on storage, as `Stmt.run` writes it: the value found, reset,
 saved. -/
@@ -830,13 +830,21 @@ theorem writeStorage_erase (hs : σ.storage = st.erase) {T : Ty} (hT : TyNodup T
       toRes (into σ) (st.save r (cur.overlay new)) := fun cur => by
     rw [← SVal.overlay_erase hT, saveStorage_erase hs]
   cases new with
-  | prim v => exact saveStorage_erase hs r (.prim v)
+  | prim v =>
+    simp only [Semantics.State.writeStorage, SVal.erase, Storage.write, SVal.isPrim,
+      Ty.isPrimitive, ↓reduceIte]
+    have h := saveStorage_erase hs r (.prim v)
+    rw [SVal.erase_prim] at h
+    exact h
   | struct fs | array e sh | fixed e | map m d =>
     simp only [Semantics.State.writeStorage, SVal.erase, Storage.write, SVal.isPrim,
-      Bool.false_eq_true, ↓reduceIte, findStorage_erase hs]
+      Ty.isPrimitive, Bool.false_eq_true, ↓reduceIte, findStorage_erase hs]
     cases st.find r with
     | none => rfl
-    | some cur => exact key cur
+    | some cur =>
+      have h := key cur
+      simp only [SVal.erase] at h
+      exact h
 
 end Storage
 
@@ -852,9 +860,9 @@ theorem mapFree_structDef : ∀ s ∈ mapFreeStructs, ∀ fT ∈ structDef s, fT
 mutual
 theorem SVal.copyStToM_ok : {T : Ty} → (v : SVal T) → T.mapFree = true →
     ∀ s : Semantics.State, ∃ r, Semantics.copyStToM s v.erase = .ok r
-  | _, @SVal.prim .bool b, _, s => ⟨_, rfl⟩
-  | _, @SVal.prim .uint n, _, s => ⟨_, rfl⟩
-  | _, @SVal.prim .int n, _, s => ⟨_, rfl⟩
+  | _, @SVal.prim .bool b, _, s => ⟨_, by with_unfolding_all rfl⟩
+  | _, @SVal.prim .uint n, _, s => ⟨_, by with_unfolding_all rfl⟩
+  | _, @SVal.prim .int n, _, s => ⟨_, by with_unfolding_all rfl⟩
   | _, @SVal.struct sn fs, h, s => by
     obtain ⟨⟨s', mf⟩, hr⟩ := SFields.copyStFields_ok fs
       (mapFree_structDef sn (by simpa only [Ty.mapFree, decide_eq_true_eq] using h)) s
@@ -870,7 +878,7 @@ theorem SVal.copyStToM_ok : {T : Ty} → (v : SVal T) → T.mapFree = true →
 theorem SFields.copyStFields_ok : {fs : List (Name × Ty)} → (st : SFields fs) →
     (∀ fT ∈ fs, fT.2.mapFree = true) →
     ∀ s : Semantics.State, ∃ r, Semantics.copyStFields s st.erase = .ok r
-  | _, .nil, _, s => ⟨_, rfl⟩
+  | _, .nil, _, s => ⟨_, by with_unfolding_all rfl⟩
   | _, .cons v rest, h, s => by
     obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v (h _ List.mem_cons_self) s
     obtain ⟨⟨s₂, mr⟩, h₂⟩ := SFields.copyStFields_ok rest
@@ -879,7 +887,7 @@ theorem SFields.copyStFields_ok : {fs : List (Name × Ty)} → (st : SFields fs)
 
 theorem SList.copyStElems_ok : {E : Ty} → (l : SList E) → E.mapFree = true →
     ∀ s : Semantics.State, ∃ r, Semantics.copyStElems s l.erase = .ok r
-  | _, .nil, _, s => ⟨_, rfl⟩
+  | _, .nil, _, s => ⟨_, by with_unfolding_all rfl⟩
   | _, .cons v rest, h, s => by
     obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v h s
     obtain ⟨⟨s₂, mr⟩, h₂⟩ := SList.copyStElems_ok rest h s₁
@@ -887,7 +895,7 @@ theorem SList.copyStElems_ok : {E : Ty} → (l : SList E) → E.mapFree = true �
 
 theorem SVec.copyStElems_ok : {E : Ty} → {n : Nat} → (l : SVec E n) → E.mapFree = true →
     ∀ s : Semantics.State, ∃ r, Semantics.copyStElems s l.erase = .ok r
-  | _, _, .nil, _, s => ⟨_, rfl⟩
+  | _, _, .nil, _, s => ⟨_, by with_unfolding_all rfl⟩
   | _, _, .cons v rest, h, s => by
     obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v h s
     obtain ⟨⟨s₂, mr⟩, h₂⟩ := SVec.copyStElems_ok rest h s₁
@@ -958,23 +966,23 @@ theorem SVal.ofU_erase : {T : Ty} → (v : SVal T) → SVal.ofU v.erase T = some
 
 theorem SFields.ofU_erase : {fs : List (Name × Ty)} → (st : SFields fs) →
     SFields.ofU st.erase fs = some st
-  | _, .nil => rfl
+  | _, .nil => by with_unfolding_all rfl
   | _, .cons v rest => by
     simp only [SFields.erase, SFields.ofU, ↓reduceIte, SVal.ofU_erase v,
       SFields.ofU_erase rest]
 
 theorem SList.ofU_erase : {E : Ty} → (l : SList E) → SList.ofU l.erase E = some l
-  | _, .nil => rfl
+  | _, .nil => by with_unfolding_all rfl
   | _, .cons v rest => by
     simp only [SList.erase, SList.ofU, SVal.ofU_erase v, SList.ofU_erase rest]
 
 theorem SVec.ofU_erase : {E : Ty} → {n : Nat} → (l : SVec E n) → SVec.ofU l.erase E n = some l
-  | _, _, .nil => rfl
+  | _, _, .nil => by with_unfolding_all rfl
   | _, _, .cons v rest => by
     simp only [SVec.erase, SVec.ofU, SVal.ofU_erase v, SVec.ofU_erase rest]
 
 theorem SMap.ofU_erase : {V : Ty} → (m : SMap V) → SMap.ofU m.erase V = some m
-  | _, .nil => rfl
+  | _, .nil => by with_unfolding_all rfl
   | _, .cons k v rest => by
     simp only [SMap.erase, SMap.ofU, SVal.ofU_erase v, SMap.ofU_erase rest]
 end
@@ -1049,7 +1057,7 @@ theorem SFields.erase_of_ofU : (l : List (Name × Semantics.SVal)) → {fs : Lis
     {st : SFields fs} → SFields.ofU l fs = some st → st.erase = l
   | [], fs, st, h => by
     cases fs with
-    | nil => simp only [SFields.ofU, Option.some.injEq] at h; subst h; rfl
+    | nil => simp only [SFields.ofU, Option.some.injEq] at h; subst h; with_unfolding_all rfl
     | cons _ _ => simp only [SFields.ofU, reduceCtorEq] at h
   | (f, w) :: rest, fs, st, h => by
     cases fs with
@@ -1069,7 +1077,7 @@ theorem SFields.erase_of_ofU : (l : List (Name × Semantics.SVal)) → {fs : Lis
 
 theorem SList.erase_of_ofU : (l : List Semantics.SVal) → {E : Ty} → {xs : SList E} →
     SList.ofU l E = some xs → xs.erase = l
-  | [], E, xs, h => by simp only [SList.ofU, Option.some.injEq] at h; subst h; rfl
+  | [], E, xs, h => by simp only [SList.ofU, Option.some.injEq] at h; subst h; with_unfolding_all rfl
   | w :: rest, E, xs, h => by
     simp only [SList.ofU] at h
     split at h
@@ -1082,7 +1090,7 @@ theorem SVec.erase_of_ofU : (l : List Semantics.SVal) → {E : Ty} → {n : Nat}
     SVec.ofU l E n = some xs → xs.erase = l
   | [], E, n, xs, h => by
     cases n with
-    | zero => simp only [SVec.ofU, Option.some.injEq] at h; subst h; rfl
+    | zero => simp only [SVec.ofU, Option.some.injEq] at h; subst h; with_unfolding_all rfl
     | succ n => simp only [SVec.ofU, reduceCtorEq] at h
   | w :: rest, E, n, xs, h => by
     cases n with
@@ -1097,7 +1105,7 @@ theorem SVec.erase_of_ofU : (l : List Semantics.SVal) → {E : Ty} → {n : Nat}
 
 theorem SMap.erase_of_ofU : (l : List (Int × Semantics.SVal)) → {V : Ty} → {m : SMap V} →
     SMap.ofU l V = some m → m.erase = l
-  | [], V, m, h => by simp only [SMap.ofU, Option.some.injEq] at h; subst h; rfl
+  | [], V, m, h => by simp only [SMap.ofU, Option.some.injEq] at h; subst h; with_unfolding_all rfl
   | (k, w) :: rest, V, m, h => by
     simp only [SMap.ofU] at h
     split at h

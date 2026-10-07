@@ -191,6 +191,7 @@ theorem SVal.copyStToM_erase : {T : Ty} → (v : SVal T) → (h : T.mapFree = tr
       (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h))).heap)
       rfl rfl (R := .struct s) (SFields.copyStToM hp fs
       (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h))).val
+    rw [SVal.copyStToM]
     exact (congrArg (fun p => Except.ok (p.1, Semantics.MVal.ref p.2)) ha).trans rfl
   | _, @SVal.array E e _, h, _, hp, σ, hh, hn => by
     have hl := SList.copyStToM_erase e (by simpa only [Ty.mapFree] using h) hp σ hh hn
@@ -198,6 +199,7 @@ theorem SVal.copyStToM_erase : {T : Ty} → (v : SVal T) → (h : T.mapFree = tr
     have ha := Heap.alloc_erase (σ := Heap.into σ (SList.copyStToM hp e
       (by simpa only [Ty.mapFree] using h)).heap) rfl rfl (R := .array E)
       (SList.copyStToM hp e (by simpa only [Ty.mapFree] using h)).val
+    rw [SVal.copyStToM]
     exact (congrArg (fun p => Except.ok (p.1, Semantics.MVal.ref p.2)) ha).trans rfl
   | _, @SVal.fixed E n e, h, _, hp, σ, hh, hn => by
     have hl := SVec.copyStToM_erase e (by simpa only [Ty.mapFree] using h) hp σ hh hn
@@ -205,6 +207,7 @@ theorem SVal.copyStToM_erase : {T : Ty} → (v : SVal T) → (h : T.mapFree = tr
     have ha := Heap.alloc_erase (σ := Heap.into σ (SVec.copyStToM hp e
       (by simpa only [Ty.mapFree] using h)).heap) rfl rfl (R := .fixed E n)
       (SVec.copyStToM hp e (by simpa only [Ty.mapFree] using h)).val
+    rw [SVal.copyStToM]
     exact (congrArg (fun p => Except.ok (p.1, Semantics.MVal.ref p.2)) ha).trans rfl
   | _, .map _ _, h, _, _, _, _, _ => by
     simp only [Ty.mapFree, Bool.false_eq_true] at h
@@ -355,7 +358,7 @@ theorem copyMElems_erase {E : Ty} (f : MVal H E → SVal E) (rem : List Nat)
 
 theorem SVec.erase_ofLen {α : Type} {E : Ty} (f : α → SVal E) : (n : Nat) → (l : List α) →
     (h : l.length = n) → (SVec.ofLen f n l h).erase = l.map (fun v => (f v).erase)
-  | 0, [], _ => rfl
+  | 0, [], _ => by with_unfolding_all rfl
   | n + 1, x :: xs, h => by
     simp only [SVec.ofLen, SVec.erase, List.map_cons, SVec.erase_ofLen f n xs]
   | 0, _ :: _, h => by simp only [List.length_cons, Nat.add_one_ne_zero] at h

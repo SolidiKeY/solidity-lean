@@ -95,6 +95,22 @@ theorem asInt_erase_int (v : PrimTy.int.Denote) : Semantics.Value.asInt (erase v
 /-- A `bool` is the Boolean it holds: `Value.asBool` never fails on one. -/
 theorem asBool_erase (v : PrimTy.bool.Denote) : Semantics.Value.asBool (erase v) = .ok v := rfl
 
+/-- A mapping key as the integer it is hashed as.  solc hashes a key padded
+to a word (`keccak256(h(k) . p)`), and a `bool` pads to `0` or `1`, so
+`mapping(bool => V)` keeps two slots, at the keys `0` and `1`
+(`docs/solc-alignment.md`); a number is itself. -/
+def key : {p : PrimTy} → p.Denote → Int
+  | .bool, b => cond (b : Bool) 1 0
+  | .uint, n => n.1
+  | .int, n => n.1
+
+/-- A numeric key is the integer the untyped interpreter reads.  A `bool` one
+is not: `Value.asInt` is stuck on it, where the typed key is `0` or `1`. -/
+theorem asInt_erase_key : {p : PrimTy} → p ≠ .bool → (v : p.Denote) →
+    Semantics.Value.asInt (erase v) = .ok (key v)
+  | .uint, _, _ | .int, _, _ => rfl
+  | .bool, h, _ => absurd rfl h
+
 end PrimTy
 
 namespace Core
