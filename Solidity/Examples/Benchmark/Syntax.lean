@@ -19,6 +19,8 @@ away").  Each is pinned here by what it elaborates to, printed.
 * a struct constructor `T(a, b)`, `T({b: y, a: x})` is a fresh memory object
   written member by member, the arguments evaluated first, left to right;
 * a modifier is inlined around the body of the function that applies it;
+* a call with named arguments `f({q: b, p: a})` is `f(a, b)`, in the
+  parameters' order;
 * a `constructor` is the contract's constructor, which only a deployment
   calls (`constructor(args);`), and `constant`, like `immutable`, is a
   storage root, with its initializer run by the constructor.
@@ -150,6 +152,35 @@ def MissingArg : Contract := contract!{ uint owner;
 
 /-- error: Solidity elaboration failed: modifier onlyOwner takes 1 arguments, not 0 -/
 #guard_msgs in #check sol[MissingArg]{ f(); }
+
+/-- A modifier applied twice: each application has locals of its own, so
+the outer `x = c;` writes the outer `c` (solc's
+`function_modifier_multiple_times_local_vars`: `x` ends `2`). -/
+def Twice : Contract := contract!{ uint x;
+  modifier m(uint y) { uint c = y; _; x = c; }
+  function h() m(2) m(5) { } }
+
+/--
+info: uint se3 = 2; uint se4 = se3; uint se1 = 5; uint se2 = se1; x = se2; x = se4;
+-/
+#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol[Twice]{ h(); })))
+
+/-! ## Named arguments of a call
+
+`f({q: 2, s: 3, p: 1})` binds by name: the arguments are put in the
+parameters' order before the call is inlined (solc's `named_args`). -/
+
+def NamedArgs : Contract := contract!{ uint r;
+  function f(uint p, uint q, uint s) returns (uint) { return p * 100 + q * 10 + s; }
+  function g() { r = f({q: 2, s: 3, p: 1}); } }
+
+/--
+info: uint se1; uint se2 = 1; uint se3 = 2; uint se4 = 3; uint se5; se5 = ((se2 * 100) + (se3 * 10)) + se4; se1 = se5; r = se1;
+-/
+#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol[NamedArgs]{ r = f({q: 2, s: 3, p: 1}); })))
+
+/-- error: Solidity elaboration failed: f({…}) names each parameter of f once: [p, q, s] -/
+#guard_msgs in #check sol[NamedArgs]{ r = f({q: 2, p: 1}); }
 
 /-! ## Constructors and constants -/
 

@@ -132,7 +132,9 @@ inductive RawExpr where
   the statement anywhere else (`hoist`). -/
   | call (f : String) (args : List RawExpr)
   /-- `T({f: a, g: b})`, a struct constructor with named arguments: put in
-  the members' order by `hoist`, then read as the positional `T(a, b)`. -/
+  the members' order by `hoist`, then read as the positional `T(a, b)`; a
+  function's call `f({q: b, p: a})`, put in its parameters' order
+  (`RawExpr.orderNamed`). -/
   | named (f : String) (names : List String) (args : List RawExpr)
   /-- `msg.sender`, `address(this).balance`, …: a value of the environment. -/
   | env (k : EnvKey)
@@ -1094,7 +1096,8 @@ syntax:max &"address" "(" &"this" ")" "." &"balance" : sol_expr
 /-! What elaborates away (`sol{ … }` reads it, no statement or value holds
 it): an ether or time unit on a number literal (`2 ether`, `3 days`), the
 casts `payable(e)` and `address(e)` of a value (identities: an address is a
-`uint`), a struct constructor with named arguments (`T({f: a, g: b})`). -/
+`uint`), a struct constructor with named arguments (`T({f: a, g: b})`), and
+a call's (`f({q: b, p: a})`). -/
 
 /-- `2 ether`, `3 days`: the literal times its unit (`wei gwei ether`,
 `seconds minutes hours days weeks`). -/
@@ -2282,6 +2285,22 @@ def RawExpr.hasIncDec : RawExpr → Bool :=
     | .call f _ => (castTy? f).isNone
     | _ => false
 
+/-- `f({q: b, p: a})`, a call of a function `funs` declares with named
+arguments: put in its parameters' order, `f(a, b)`, as solkey's parser
+does.  Any other `T({…})` is left to `hoist`, a struct's constructor. -/
+def RawExpr.orderNamed (funs : List (Name × FunDecl)) : RawExpr → Except String RawExpr :=
+  RawExpr.mapM fun
+    | .named f ns as => match funs.find? (·.1 == f) with
+      | some (_, d) => do
+        let ps := d.params.map (·.1)
+        unless ns.length == ps.length && ps.all ns.contains do
+          throw s!"{f}(\{…}) names each parameter of {f} once: {ps}"
+        if ns != ps && as.any (·.hasIncDec) then
+          throw s!"{f}(\{…}): an argument with an effect, out of the parameters' order"
+        pure (.call f (ps.map fun p => (lookupBy p (ns.zip as)).getD (.num 0)))
+      | none => pure (.named f ns as)
+    | e => pure e
+
 /-- Whether a cast `uint8(e)` occurs in the expression: `hoist` captures it. -/
 def RawExpr.hasCast : RawExpr → Bool :=
   RawExpr.any fun | .call f _ => (castTy? f).isSome | _ => false
@@ -3459,7 +3478,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
   | .named f ns args => do
     -- the members' order; an effect may not move
     let flds := (structDef f).map (·.1)
-    if flds.isEmpty then throw s!"{f}(\{…}): named arguments of a struct's constructor only"
+    if flds.isEmpty then throw s!"{f}(\{…}): {f} is not a struct or a function declared before this one"
     unless ns.length == flds.length && flds.all ns.contains do
       throw s!"{f}(\{…}) names each member of {f} once: {flds}"
     if ns != flds && args.any (·.hasIncDec) then
@@ -3777,6 +3796,7 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
 (`hoistStmt`), then the statement,
 whose compound target may need a capture of its own. -/
 partial def elabStmt (s : RawStmt) : ElabM (Prog C) := do
+  let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
   -- a loop outside a function's body, lowered here (`lowerLoops`)
   if s matches .whileLoop .. | .forLoop .. | .doWhile .. then
     return ← elabStmts (← lowerLoops none [s])
