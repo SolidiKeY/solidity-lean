@@ -28,7 +28,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
 | M3 | done 2026-10-07: typed run, `run_erase`, Typing over `Core`, locals checker deleted (no shim left); Typing elaboration 10% faster (below) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
-| M5 | M5.1, M5.2 on lane `intrinsic-evm` (see M5 lane) | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
+| M5 | M5.1–M5.3 on lane `intrinsic-evm` (see M5 lane) | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
 | M6b | | `dl!{}`, specs, callbacks |
 | M6c | | closer and Decide on typed `Fml` |
@@ -460,8 +460,8 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
     `Stmt.pushes`/`Stmt.pays` are `Evm.pushesP`/`Evm.paysP` of the erasure
     for every statement (`pushes_erase`).
   - `Evm/CoreExamples.lean` ports the 45 compile `decide` examples of
-    `Evm/Examples.lean` (not the four interpreter theorems: they need the M5
-    `compile_correct`), plus a scoped-branch run, a `pop` in a branch
+    `Evm/Examples.lean` (not the four interpreter theorems, which need the M5
+    `compile_correct` and are in `Evm/CoreInterpreter.lean`, M5.3), plus a scoped-branch run, a `pop` in a branch
     forgetting an outer fragile alias, and `sameCode` on 14 programs.
     Programs come from `sol{}` through `Prog.resolve`, which the
     elaborator's `whnf` does not reduce, so they run under `decide +kernel`
@@ -476,9 +476,9 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
 ### M5 lane
 
 Lane `intrinsic-evm` (worktree `solidity-lean-i-evm`), beside M2.3/M3 on
-`intrinsic`.  Status 2026-10-07, round 2: M3 (`Env Γ`, `State C Γ`, the
-typed run) had not landed, so the simulation is stated against the
-Env-from-Γ design and everything that does not need the run is proved.
+`intrinsic`.  Status 2026-10-07, round 3 (after M3): the correctness
+proof over `Core` is done, with no `sorry` and the axioms `propext`,
+`Classical.choice`, `Quot.sound`; see "M5.3" below.
 
 - M5.2 `Evm/CoreSim.lean`, done (no `sorry`):
   - `Look Γ := ∀ {t}, Idx Γ t → Binding`, the locals by position: what
@@ -539,20 +539,60 @@ Env-from-Γ design and everything that does not need the run is proved.
   condition 1's: `Stmt.rec` with the motive over the indices for
   `compileStmt`/`inFrag`, the `match` versions kept as `implemented_by`
   twins and for the equation lemmas.
-- `not_stuck`/`never_stuck`: nothing to delete yet on the Core path, since
-  there is no Core run to be stuck.  When M3/M4 land, `compile_correct` over
-  `Core` has no `not_stuck` corollary (its `Halt` has no `stuck`); the
-  untyped `not_stuck` (`Evm/Correctness.lean`) and `never_stuck`
-  (`Theorems.lean`) stay with the untyped compiler until M4 retires it.
-- Left (needs M3's `Core.Stmt.run`/expression evaluation over `State C Γ`):
-  `simple_sim`/`spath_sim`/`loc_sim`/`val_sim`, `stmt_sim` (gate: at most
-  470000 heartbeats, split per constructor family rather than raised),
-  `prog_sim`, `compile_correct`/`compile_box`/`compile_net` over `Core`, and
-  the four interpreter theorems of `Evm/Examples.lean` (`setAge_interpreter`,
-  `overflow_interpreter`, `payOwner_interpreter`, `callTwice_interpreter`).  The lemmas above
-  are what their cases call.  Also left: timing the compiler on a
-  quoter-built program (M2.3); `Machine.mem : Nat → Word` (with
-  `cell = id`) once `Evm/Compile.lean` retires at M4.
+- M5.3, done (no `sorry`), over M3's `Core.Stmt.run`/`Core.Prog.run`:
+  - `Evm/CoreExpr.lean`: `Look.ofEnv σ.env` instantiates `Look` (each
+    local's `LTy.enc` of `Env.get`; `Look.ofEnv_cons`/`_set`/`_drop` are
+    `Look.cons`/`set`/`drop`), and the simulation is `Sim … σ.glob
+    (Look.ofEnv σ.env) m`.  `simple_sim`, `spath_sim`, `loc_sim`,
+    `val_sim` as the untyped ones, `ValOut`/`LocOut` on `σ.glob`.
+  - `Evm/CoreStmt.lean`: one lemma per statement with no sub-program
+    (`assign_sim` … `transfer_sim`).  `StmtOut` is the untyped dichotomy
+    plus `Keeps` (the cells below the frame's base unchanged, and no
+    array's length lowered unless the statement `shrinks`), which a call
+    needs of its body; the panic case only for code that `asserts`.
+  - `Evm/CoreCorrect.lean`: `stmt_sim`/`prog_sim` by mutual structural
+    recursion, every arm one call: the families (`assign_family` …
+    `assert_family`, what `inFrag` admits and the `CoreStmt` lemma),
+    `ite_sim`, `block_sim` (`StmtOut.drop`: a scope's end pops the state's
+    locals, the machine's cells stay) and `call_family` (`callNone_sim`,
+    `callVal_sim`, `Sim.enter`/`Sim.back`), each sub-program's outcome a
+    hypothesis.  The `cases` on a call's `CallRet` inside `stmt_sim` took
+    more than 200000 heartbeats (a `whnf` timeout on the declaration);
+    moved into `call_family` it is gone.  Then `compile_correct` (both
+    succeed; both revert, a panic only with an `assert`; or a refused
+    payment), `compile_exact`, `compile_box`, `compile_net`, `Sim.init`
+    and `compile_storage`.
+  - `Evm/CoreInterpreter.lean`: the four interpreter theorems of
+    `Evm/Examples.lean` (`setAge_interpreter`, `overflow_interpreter`,
+    `payOwner_interpreter`, `callTwice_interpreter`) over
+    `Core.Prog.run (State.ofSem (State.fresh C 0)) (scopedOf P).2`, from
+    `Evm/CoreExamples.lean`'s runs; fragment checks, bounds, `pays` and
+    `asserts` by `decide +kernel`.  `overflow_interpreter` needs no
+    `run_noPanic`: the program has no `assert`, so `compile_exact`
+    excludes the panic.
+  - `not_stuck`/`never_stuck`: none on the Core path.  `compile_correct`
+    lists every outcome and none is `stuck`; the untyped `not_stuck`
+    (`Evm/Correctness.lean`) and `never_stuck` (`Theorems.lean`) stay with
+    the untyped compiler until M4 retires it.
+  - Timing against the M0 baselines (same method: wall time of
+    `lean_diagnostic_messages` after an edit at the top of the file, a
+    fresh worker, so header load and about 1 s of round trip included;
+    machine shared with other agents).  The gate: `stmt_sim` (the mutual
+    block with `prog_sim`) passes at `maxHeartbeats 10000` and fails at
+    5000, against 470000 for the untyped one (M0: 4.4 s by the profiler);
+    its profiler items over 10 ms sum to 0.25 s (type checking 0.15 s,
+    `simp` 0.05 s, pre-definitions 0.03 s).  Whole files:
+    `Evm/CoreSim.lean` 7.1 s, `Evm/CoreExpr.lean` 5.9 s,
+    `Evm/CoreStmt.lean` 4.8 s, `Evm/CoreCorrect.lean` 4.9 s (the four
+    together 22.7 s, against `Evm/Correctness.lean`'s 25.6 s, which they
+    replace; each elaborates in its own worker, so in a build they run in
+    a chain).  `Evm/CoreExamples.lean` 10.7 s against `Evm/Examples.lean`'s
+    9.5 s (+13%, within the 20% gate), and `Evm/CoreInterpreter.lean`
+    4.9 s.
+- Left: timing the compiler on a quoter-built program (M2.3);
+  `Machine.mem : Nat → Word` (with `cell = id`) once `Evm/Compile.lean`
+  retires at M4; deleting `wtStmt`, `Evm/Correctness.lean` and the untyped
+  `not_stuck`/`never_stuck` with the untyped compiler (M4).
 
 ## Baselines (M0)
 

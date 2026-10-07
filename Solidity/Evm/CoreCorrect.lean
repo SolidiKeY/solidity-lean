@@ -7,7 +7,7 @@ import Solidity.Evm.CoreStmt
 M5): `stmt_sim`/`prog_sim` by structural recursion on `Core.Stmt`/`Core.Prog`,
 each statement dispatched to its lemma in `Evm/CoreStmt.lean` or, for the
 statements with a sub-program, to a lemma here that takes the sub-program's
-outcome as a hypothesis (`ite_sim`, `block_sim`, `call_sim`), so that every
+outcome as a hypothesis (`ite_sim`, `block_sim`, `call_family`), so that every
 family elaborates on its own.  Then `compile_correct`, `compile_exact`,
 `compile_box`, `compile_net` and `compile_storage`.
 
