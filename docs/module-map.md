@@ -178,6 +178,10 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/CoreCompile.lean` | The compiler over the scoped syntax (M5, `docs/intrinsic.md`): a local at its level (`cell`, `lvl`), a call's body in its own frame, the fragment `inFrag` over `Frag Γ` (alias flags only), `compileStmt_erase` (the same code as `Evm/Compile.lean`'s up to the memory cells) and `pushes_erase`.  Beside it until M4. |
 | `Evm/CoreExamples.lean` | `Evm/Examples.lean`'s programs resolved and compiled by `Evm/CoreCompile.lean`, run by `decide +kernel`. |
 | `Evm/CoreSim.lean` | `Sim` over the scoped syntax (M5): the locals by position (`Look Γ`, M3's `Env.get`), declarations as `Look.cons` (`Sim.consVal`/`consAlias`/`consFragile`/`consDead`), a scope's end as `Sim.drop`, the fragment's flags (`Sim.flags`, `meet`, `storeDrop`), a call's frame (`Sim.enter`, `Sim.return`); compiled code at base `b` stores to no level below `b` (`storesFrom_compileStmt`, `storesFrom_callFrame`, `exec_mem`). |
+| `Evm/CoreExpr.lean` | The expression lemmas over the scoped interpreter (M5): `Look.ofEnv` (M3's `Env.get` as `Look`), `simple_sim`, `spath_sim`, `loc_sim`, `val_sim`. |
+| `Evm/CoreStmt.lean` | One lemma per statement of the fragment over the scoped interpreter (M5): `StmtOut` (with `Keeps`: cells below the frame, array lengths), `Stmt.asserts`, `assign_sim` … `transfer_sim`. |
+| `Evm/CoreCorrect.lean` | `stmt_sim`/`prog_sim` over `Core` (one lemma per family, `ite_sim`, `block_sim`, `callNone_sim`/`callVal_sim`), then `compile_correct`, `compile_exact`, `compile_box`, `compile_net`, `compile_storage`; no `not_stuck` (no stuck outcome). |
+| `Evm/CoreInterpreter.lean` | `Evm/Examples.lean`'s interpreter theorems over `Core.Prog.run` (`setAge_interpreter`, `overflow_interpreter`, `payOwner_interpreter`, `callTwice_interpreter`), from `Evm/CoreExamples.lean`'s machine runs. |
 
 ## Tools
 
