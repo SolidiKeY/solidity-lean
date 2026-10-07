@@ -25,7 +25,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 |---|---|---|
 | M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
-| M2 | M2.1 done | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
+| M2 | M2.1, M2.2 done | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
 | M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
@@ -144,12 +144,62 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     write what `Syntax.lean`'s write; `Stmt.memCallStr?` and
     `Stmt.tupleCallStr?` compare names, as there.  Pinned by `example₁`
     (every scope) and two weakening `#guard`s at the end of the module.
-- Left for M2: `erase`, `resolve` and `resolve_erase`, the quoter, the lint
-  over the 449 functions and the `sol{}` sites, and `Stmt.ext`/`Prog.ext`
-  (M3 needs them; condition 1's form).  For `resolve`: the memory
-  conditional of references (M1 d) declares its `mv` in each branch and
-  reads it after the `if`, which scoped branches forbid; it needs a lowering
-  that declares `mv` before the `if` without allocating.
+- M2.2 (2026-10-07): `Syntax/Resolve.lean` (`erase`, `resolve`,
+  `resolve_erase`, `Prog.resolveCheck`) and `Syntax/Splice.lean` (the entry
+  points).  Departures and choices:
+  - `resolve` returns the context it leaves as an `NCtx` (names beside
+    types), `Σ Γ' : NCtx, Stmt C Γ.ctx Γ'.ctx`, not a bare `Ctx`: the next
+    statement needs the names.  `erase` takes the names `ns` of its context
+    (`Stmt.erase ns : Stmt C Γ Γ' → List (Solidity.Stmt C)`, a block its
+    statements), so `resolve_erase` reads `s.erase Γ.names = [u]`.
+  - Each `resolveX` returns its result with the proof that it erases to its
+    input (a subtype), so `resolve_erase` holds by construction and needs no
+    induction; the functions are structural, at elaboration time only.
+  - A name is its newest declaration, which must be at the type its use
+    needs (no fallback to an older one).  Branches of `if`/`try`, loop
+    bodies and call bodies are scopes; the untyped programs have no block,
+    so a block's locals stay in scope in its enclosing one (harmless: the
+    elaborator's own scopes keep the program from reading them).
+  - A call: each argument is read in the caller's context and may not read
+    a parameter (a new check; the elaborator's parameters are fresh); the
+    body sees only its frame.  `CallRet.none` with a body starting
+    `T memory r;` is a memory return (`CallRet.mem`), the declaration moved
+    into the frame and back by `erase` (`CallRet.pre`).  `erase` of a call
+    whose arguments are not separated (never `resolve`'s output) binds them
+    at the head of its body, since `Syntax.lean`'s call needs `hsep`.
+  - The memory conditional of references: `T memory mv1 = a; if (c) { mv1 =
+    a; } else { mv1 = b; }`, `mv1` bound first to a branch that indexes
+    nothing (`MPath.indexFree`, a read that cannot revert), or, when both
+    index, to a fresh default object (`T memory mv1;`, an object nothing
+    reaches; a `solc-alignment.md` row).  With it, `Stmt.wt`'s `if` leaves
+    `Γ`: `Ctx.join`, `Var.isFresh` and their lemmas are gone.
+  - The entry points (`elabProg`, `elabProgAt`, `ctorProg`, `sol[C]{}`,
+    `solc_import` through `elabProgAt.go`, `specPieces`, `Problem.ctor`,
+    each statement of a `dl!{}` modality) run `Prog.resolveCheck` from the
+    elaborator's locals (`ECtx.toNCtx`, read under the file's
+    `FreshNames`); `wtCheck`, `Prog.wtFirst`, `Stmt.wtWhy`, `Ctx.retyped`
+    and `ECtx.toCtx` are gone.  The error names the innermost statement and
+    the local: ``the locals check (`resolve`) rejects `x = 1;`: x is not
+    declared``, `… b is declared as bool, used as uint`.  `contract!{}` checks
+    no body: a body is checked where it is inlined.
+  - `elabProg` and the rest moved out of `Syntax.lean` into
+    `Syntax/Splice.lean`, which imports `Resolve` (itself above
+    `Syntax/Core.lean`, above `Syntax.lean`); `Semantics.lean`,
+    `Frontend/Import.lean` and `Examples/Benchmark/Syntax.lean` import it.
+  - The lint: the TestSuite import (`Solkey/TestSuite.lean`, 449
+    elaborated, 0 unsupported), every module of `Solidity`,
+    `SolidityCorpus` and `SolkeyTestSuite`, and so every `sol{}` site,
+    elaborate under `resolve`.  The two `Branch.lean` retyping errors of M1
+    now elaborate.  Not run here: `check-corpus.sh` and `solkeycheck` (need
+    `lake`).
+  - Timing (the gate: `sol{}` sites within 10%): on the TestSuite contract's
+    12 functions, each called with its parameters in scope, 50 rounds by
+    `IO.monoNanosNow` in a scratch module, elaboration takes 0.155 ms a
+    call, `resolve` 0.045 ms and the old `Prog.wt` 0.030 ms: the check
+    costs 0.015 ms more a block, against the quoting and kernel check that
+    dominate a site (the TestSuite import, 449 blocks, is 10.4 s).
+- Left for M2: the quoter (`Core.Prog.quote`) and `Stmt.ext`/`Prog.ext`
+  (M3 needs them; condition 1's form).
 
 ### M5 notes
 
