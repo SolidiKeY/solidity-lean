@@ -141,7 +141,8 @@ def replicate {E : Ty} (v : SVal E) : (n : Nat) → SVec E n
   | 0 => .nil
   | n + 1 => .cons v (replicate v n)
 
-theorem toList_replicate {E : Ty} (v : SVal E) : (n : Nat) → (replicate v n).toList = List.replicate n v
+theorem toList_replicate {E : Ty} (v : SVal E) :
+    (n : Nat) → (replicate v n).toList = List.replicate n v
   | 0 => rfl
   | n + 1 => congrArg (v :: ·) (toList_replicate v n)
 
@@ -258,7 +259,8 @@ def SVal.dfltRefAt (k : Nat) (ih : (T : Ty) → tyRank T < k → SVal T) :
       (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (Nat.le_of_lt_succ h)))
   | .array _, _ => .array .nil .nil
   | .fixed E n, h =>
-    .fixed (SVec.replicate (SVal.dfltAt k ih E (Nat.lt_of_succ_lt (by simpa only [tyRank] using h))) n)
+    .fixed (SVec.replicate
+      (SVal.dfltAt k ih E (Nat.lt_of_succ_lt (by simpa only [tyRank] using h))) n)
   | .mapping _ V, h => .map .nil (SVal.dfltAt k ih V (by simpa only [tyRank] using h))
 end
 

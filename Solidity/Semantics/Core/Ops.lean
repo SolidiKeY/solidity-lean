@@ -120,7 +120,8 @@ theorem applyBinOp_int {op : BinOp} (hA : op.isArith = true) (x y : Int) :
 /-- An arithmetic operator: `applyBinOp`, then the range check. -/
 theorem evalBinop_arith {op : BinOp} (hA : op.isArith = true) {p : PrimTy}
     (hp : p.isNumeric = true) (x y : Int) :
-    evalBinop op p (.int x) (.ok (.int y)) = toRes PrimTy.erase ((arithInt op x y).bind p.ofInt?) := by
+    evalBinop op p (.int x) (.ok (.int y)) =
+      toRes PrimTy.erase ((arithInt op x y).bind p.ofInt?) := by
   have hb : evalBinop op p (.int x) (.ok (.int y)) =
       Except.bind (Semantics.applyBinOp op (.int x) (.int y)) (Semantics.checkArith (.prim p)) := by
     cases op <;> simp only [isArith, Bool.false_eq_true] at hA <;> rfl

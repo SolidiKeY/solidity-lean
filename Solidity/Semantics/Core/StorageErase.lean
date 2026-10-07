@@ -579,7 +579,9 @@ theorem arrayLen_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (
   | none => rfl
   | some v =>
     cases v with
-    | array e sh => simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.length_erase]; rfl
+    | array e sh =>
+      simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.length_erase]
+      rfl
 
 theorem pushAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E)))
     (val : Semantics.SVal → Semantics.Res Semantics.SVal) (val' : SVal E → Option (SVal E))
@@ -993,5 +995,72 @@ theorem SVal.copyMem_erase {s : Semantics.State} {mv : Semantics.MVal} {T : Ty} 
       cases h
       rw [SVal.erase_of_ofU w hx]
     · cases h
+
+/-! ## The stores
+
+The ported contracts' stores, typed: each a named constant, so a proof about
+one unfolds it only where it reads it (the kernel then reduces `SVal.dflt`,
+which `defaultForTy` does not let it), each the erasure of its untyped store
+(`Semantics.lean`, "The stores"). -/
+
+namespace Storage
+
+/-- `StandardExample`'s storage at deployment. -/
+def standardExample : Storage StandardExample := Storage.init StandardExample
+
+theorem standardExample_erase :
+    standardExample.erase = Semantics.State.exampleStore.storage := by
+  rw [standardExample, init_erase, initStorage_standardExample]
+
+/-- `TestSuite`'s storage at deployment. -/
+def testSuite : Storage TestSuite := Storage.init TestSuite
+
+theorem testSuite_erase :
+    testSuite.erase = Semantics.State.testSuiteStore.storage := by
+  rw [testSuite, init_erase, initStorage_testSuite]
+
+/-- `SolcExpressions`'s storage at deployment. -/
+def solcExpressions : Storage SolcExpressions := Storage.init SolcExpressions
+
+theorem solcExpressions_erase :
+    solcExpressions.erase = Semantics.State.solcExpressionsStore.storage := by
+  rw [solcExpressions, init_erase, initStorage_solcExpressions]
+
+/-- `SolcStructs`'s storage at deployment. -/
+def solcStructs : Storage SolcStructs := Storage.init SolcStructs
+
+theorem solcStructs_erase :
+    solcStructs.erase = Semantics.State.solcStructsStore.storage := by
+  rw [solcStructs, init_erase, initStorage_solcStructs]
+
+/-- `SolcArrays`'s storage at deployment. -/
+def solcArrays : Storage SolcArrays := Storage.init SolcArrays
+
+theorem solcArrays_erase :
+    solcArrays.erase = Semantics.State.solcArraysStore.storage := by
+  rw [solcArrays, init_erase, initStorage_solcArrays]
+
+/-- `SolcMemory`'s storage at deployment. -/
+def solcMemory : Storage SolcMemory := Storage.init SolcMemory
+
+theorem solcMemory_erase :
+    solcMemory.erase = Semantics.State.solcMemoryStore.storage := by
+  rw [solcMemory, init_erase, initStorage_solcMemory]
+
+/-- `SolcMappings`'s storage at deployment. -/
+def solcMappings : Storage SolcMappings := Storage.init SolcMappings
+
+theorem solcMappings_erase :
+    solcMappings.erase = Semantics.State.solcMappingsStore.storage := by
+  rw [solcMappings, init_erase, initStorage_solcMappings]
+
+/-- `SolcControlFlow`'s storage at deployment. -/
+def solcControlFlow : Storage SolcControlFlow := Storage.init SolcControlFlow
+
+theorem solcControlFlow_erase :
+    solcControlFlow.erase = Semantics.State.solcControlFlowStore.storage := by
+  rw [solcControlFlow, init_erase, initStorage_solcControlFlow]
+
+end Storage
 
 end Solidity.Core
