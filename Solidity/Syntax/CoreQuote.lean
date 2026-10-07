@@ -19,8 +19,8 @@ equal contexts of sibling scopes too.  Unshared, the tree is 26–37 times
 larger (the spike's measure).
 
 The quoter is a pure function: the compiled elaborator runs it, and the
-kernel checks its result where it is declared (`solc_import`'s
-`N.f.core`, `Frontend/Import.lean`, the lint over every imported function).
+kernel checks its result where it is declared (`Prog.defineCore`; the lint
+`solc_scoped`, `Frontend/Import.lean`, declares every imported program so).
 -/
 
 namespace Solidity.Core
