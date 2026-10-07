@@ -97,4 +97,16 @@ theorem asBool_erase (v : PrimTy.bool.Denote) : Semantics.Value.asBool (erase v)
 
 end PrimTy
 
+namespace Core
+
+/-- An `Option` as a run's result: `none` is a revert, the one way a typed
+operation fails.  A typed operation's agreement with its untyped namesake
+reads `untyped (erase x) = toRes erase (typed x)`, so the untyped one is
+never stuck there. -/
+def toRes {α β : Type} (f : α → β) : Option α → Semantics.Res β
+  | some a => .ok (f a)
+  | none => .error .revert
+
+end Core
+
 end Solidity

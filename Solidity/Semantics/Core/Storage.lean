@@ -327,11 +327,6 @@ theorem erase_index : {R : RefTy} → {k : PrimTy} → {V : Ty} → (it : IndexT
 
 end Path
 
-/-- An `Option` as a run's result: `none` is a revert. -/
-def toRes {α β : Type} (f : α → β) : Option α → Semantics.Res β
-  | some a => .ok (f a)
-  | none => .error .revert
-
 /-! ## Find and save -/
 
 /-- The value at a path (`Semantics.SVal.find`): `none` where an index is past
