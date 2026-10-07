@@ -39,6 +39,7 @@ import Solidity.Calculus.Core.SoundBlocks
 import Solidity.Calculus.Core.SoundCalls
 import Solidity.Calculus.Core.SoundLoops
 import Solidity.Calculus.Core.SoundUpdates
+import Solidity.Calculus.Core.SoundCapture
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.Schema
