@@ -612,6 +612,67 @@ from `./run-lean.sh`.
     (with M3's `Agree`, `Semantics/RunErase.lean`), and a
     `Premise.sound` over `Stmt.step` once every arm is proved.
 
+### M6a lane: soundness, part A (`intrinsic-calculus`, 2026-10-07)
+
+- The statement (`Calculus/Core/SoundKit.lean`): `Premise.Sound m s p σ` (the
+  premise in front of any rest, frames and postcondition gives
+  `⟨ s; ω κ ⟩ φ`), `Stmt.StepSound k m s` (in every `State.Typed` state, the
+  premise `s.step k m` gives is sound).  `State.Typed`: a `bool` local holds a
+  `bool`, the one typing fact a split needs until M4a.
+- Every arm of `Stmt.step` but the blocks is sound: `Stmt.stepSound`
+  (`Calculus/Core/SoundStep.lean`), given the block arms (`Stmt.IsBlockArm`:
+  calls, `try`, loops; lane `sound2`) and `WkRuns` (a block weakened under
+  a captured `if` condition runs as before, the run of `Prog.wk up`, which
+  `sound2`'s `RunWk.lean` proves).  `#print axioms`: `propext`,
+  `Classical.choice`, `Quot.sound`.
+  - Updates (`SoundArms.lean`, `SoundUpdates.lean`): the update ends as the
+    statement does (`Premise.Sound.update`), or alike up to the halt
+    (`updateSim`: `delete` of a memory reference reads the address and the
+    fresh object in the other order); `send` by `Premise.Sound.cases`.
+  - Captures (`SoundCapture.lean`): `captureSim`/`captureSPSim`/
+    `captureMVSim`.  The statement read with the captured part on top runs
+    as before (the push lemmas of `SoundArms.lean`); where the part halts
+    the statement halts alike: with the same halt where it reads the part
+    first, with another halt that is not a panic where it reads another part
+    first (`Res.Sim.err_bind`, no expression panics).  Out of order are
+    `sp[ie]`'s index with a simple receiver (read and `delete`), a storage
+    write of a copy and a write from memory with the target captured first,
+    a push's argument (read after the array), memory writes with the
+    receiver or the index captured before a source.
+  - The holes are read once: a statement with a hole filled is the read and
+    then what the hole does (`SHole.cont`, `MHole.cont`, `VHole.cont`), so
+    `readStep`, `VHole.step` and `ternaryStep` are sound for every hole.
+  - Blocks of captures (`indexCaptureAll`, the memory `CaptureAll` rules)
+    run one push at a time (`Prog.run_declLocal_cons` and kin,
+    `pushed2_drop`, `pushed3_drop`).
+- `holds_erase` (`Calculus/Core/HoldsErase.lean`): a scoped formula holds in
+  `σ` iff its erasure holds, by `Update.lean`'s `holds`, in any untyped state
+  agreeing with `σ` on the names `ns` (`Agree`), for `Fml.Plain` formulas:
+  every binder fresh (an update's declarations, a `∀`, a modality's blocks:
+  `Prog.Fresh [] ns` and `Frames.Fresh`), no hidden binder and no `anon`.
+  A term reads as its erasure up to the locals a storage carries
+  (`Tm.eval_erase`, `Srt.wl`: every symbol is natural in the locals, the
+  `*_nat` lemmas of `RunErase.lean`), denotes the same (`Tm.denote_erase`);
+  an update ends in agreeing states (`Upd.apply_erase`), a pop by
+  `Agree.dropNames`, a frame dropped by `Agree.thin`; a modality is
+  `run_erase`'s `Prog.erasesAt` and its frames (`Frames.run_erase`).
+- `Prog.outNames` was defined twice (`Calculus/Core/Fml.lean`,
+  `Semantics/RunErase.lean`), so the two could not be imported together: it
+  is `Syntax/Core.lean`'s now, beside `Stmt.outNames` (as lane `sound2`
+  moves it, the same hunk).
+- Left:
+  - `holds_erase` for a hidden binder and `anon`: their untyped readings
+    range over more states (`anon` over any binding, the erased binder over
+    whatever the name held), so only the direction from the erasure holds,
+    and for a binder only where the block writes the local before reading
+    it; not stated.
+  - `Premise.sound` over all of `Stmt.step`: `Stmt.stepSound` with
+    `sound2`'s block arms and `WkRuns` from its `RunWk.lean`, once merged.
+  - `Calculus/Core/Quote.lean` does not build on this branch (its `Premise`
+    quoter misses `inline`, `inv`, `cases`, `branches`: the calctools
+    lane's), so `Examples/Tactics/CoreStep.lean` and `CoreSymex.lean` were
+    not re-checked here.
+
 ### M6a lane: the speed gate (kernel, `Eq.refl` of `symex n φ = ψ`)
 
 Measured with `Solidity/Scratch/CoreBench.lean` (not committed), median of 5
