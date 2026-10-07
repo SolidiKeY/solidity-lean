@@ -18,6 +18,12 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 6. The closer and Decide are ported (M6c); `Fml.erase` is a bridge only.
 7. All milestones run; a failed gate takes its stated fallback, not a stop.
 8. The bridge (typed `Core` beside the untyped `Stmt`) ends at M4, not M7.
+9. (lead, 2026-10-07) The M6a speed gate counts as **passed**: aggregate
+   symex is 1.1–3× faster on the larger programs; the 1.45× of the 10 ms
+   straight-line e2 is a few ms, to be reduced, not a fallback trigger.
+10. (lead, 2026-10-07) A `bool` mapping key follows solc: it is hashed as
+    `0`/`1`, so the typed path (M4b) takes the `Int` `0`/`1` for it
+    (`docs/solc-alignment.md`).
 
 ## Milestones
 
@@ -29,7 +35,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | M3 | M3.1 done 2026-10-07 (typed run) | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
-| M6a | | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
+| M6a | lane: every `Stmt.step` arm and `Premise` ported; gate passed (Decision 9) | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
 | M6b | | `dl!{}`, specs, callbacks |
 | M6c | | closer and Decide on typed `Fml` |
 | M7 | | cleanup, docs, rule-map rows, review pass |
@@ -340,7 +346,7 @@ from `./run-lean.sh`.
   - `Premise.bind`'s binder is a formula, `Fml.bind x t φ` ("for every value
     of `x : t`"), printed as `φ`: the update sketch had no right-hand side
     for it.  `Premise.check` has no program (`assertSimple`'s is empty).
-    `branches`, `cases`, `inv` are not ported yet.
+    `branches`, `cases`, `inv` came in round 3.
   - `Stmt.scopeExt`/`Prog.scopeExt` (named apart from M3's coming
     `Stmt.ext`/`Prog.ext`, which should replace them at the merge).
   - Printing: `Fml.show` walks the formula with the precedences of
@@ -360,7 +366,7 @@ from `./run-lean.sh`.
     `Right`, `unopCapture`), root and member writes (with their captures
     and `storageFieldWrite_unfold_leftFst`), `rebind` to an alias or a root,
     the value and alias declarations, `if` (`ifElseSplit`, `ifElseUnfold`),
-    `require`, `assert`, `revert`.  Every other arm is `none`: the strategy
+    `require`, `assert`, `revert`.  Every other arm was `none` (until round 3): the strategy
     stops in front of it.  A capture's schema variables are weakened by
     `Val.up` and its kin (`.local i ↦ .local i.there`, no `Thin`;
     `Val.up_eq` says each is `wk up`), except `ifElseUnfold`'s branches,
@@ -386,6 +392,55 @@ from `./run-lean.sh`.
     variables' shift is `Val.up` and its kin; `Taclet.erase` is stated as
     what it is, an instance of today's rule relation, not soundness of the
     cover-free split.
+
+- Round 3 (2026-10-07): every arm of `Stmt.step`, `Calculus/Core/Shift.lean`,
+  `Calculus/Core/Arms.lean`, `Calculus/Core/Blocks.lean`,
+  `Examples/Tactics/CoreStep.lean`.
+  - Every statement has a rule, each the one `Completeness.lean` fires and
+    commented with its taclet: index reads and writes, copies, deletes,
+    aliases (and `lsv = sp.push()`), the conditional (`ternaryToIf`,
+    `ternaryCaptureCond`, into a local, storage or memory), `&&`/`||`,
+    compound assignments and `++`/`--`, push/pop, transfer/send, every
+    memory statement, `new T(n)`, calls, `try`, loops, a block.  Today's
+    holes are kept (`SHole`, `MHole`, `VHole`, with `up`), so each unfold
+    rule is written once.
+  - `Premise` gains `branches` (a `try`, each clause a `Branch`: binders and
+    block), `cases` (a `send`'s outcomes), `inv` (the invariant rules) and
+    `inline` (a block whose end drops locals from under the ones it keeps).
+    No cover goal anywhere.  `Frames.drop`/`Upd.drop` are the frame end by
+    a `Thin`: a call that leaves its return variables (`CallRet.rets`, a
+    memory return), or whose argument was captured first, leaves its frame
+    (or the capture) *under* them, which no suffix (`Ext`) pops.  Printed as
+    nothing; `Calculus/Core/Quote.lean` got `qThin` and the two cases,
+    `Calculus/Core/Print.lean` the one case of `Frames.items` (the only
+    edits there), and a fix to `qCallRet`/`qLoopAnn`, whose `return` inside
+    a `match` returned the `Option` alone (a call with a result and a loop
+    with `decreases` did not quote).
+  - A call is inlined as `expand_function_body`: the parameters declared
+    with the arguments (`Args.declsThen`, each argument shifted under the
+    ones before), the return variables, the body as a block weakened once by
+    `Prog.wk (Thin.keepAll rs (Thin.atop ps Γ))` (the design's one `wk` per
+    call expansion), the result assigned; the frame is popped (`unfold`) or
+    dropped under the returns (`inline`).  `whileUnwind` writes
+    `if (c) { { body } while (c) body }`: the body a block, so the loop
+    after it reads the loop's context and nothing is weakened; the erasure
+    is today's (a block erases to its statements).  `whileInvariantDiamond`
+    weakens the body once (`Prog.wk up`) under the variant's local; the
+    box rule pops the condition's local before the body instead.
+  - The invariant rule's frame (`Prog.frame`, `Stmt.within`, `writesAt`)
+    anonymises the locals of the loop's context the body writes; the
+    body's own locals, which `Prog.loopFrame` lists, are popped every
+    iteration and are not in the context, so a loop that declares locals
+    erases to today's `{anon(…)}` less those names (the only erasure that
+    differs; the test's loops declare none).
+  - `Stmt.scopeExt` is gone: M2's `Stmt.ext`/`Prog.ext` replaced it.
+  - `Examples/Tactics/CoreStep.lean`: 20 programs, one or more per rule
+    family, each resolved, run by `Core.symex`, its erasure equal to
+    today's `symex` with the covers dropped, and kernel-checked
+    (`Eq.refl`), over `StandardExample`, `CallsExample` and two contracts
+    of its own (a pair and a memory return; a `try`).
+  - For the calctools lane: its `Premise` quoter needs the four new
+    constructors.
 
 ### M6a lane: the speed gate (kernel, `Eq.refl` of `symex n φ = ψ`)
 
@@ -424,13 +479,37 @@ the program n times.
 - Gate: within 20% on four of seven (e1, e3, e1×5, e3×10); outside on e2
   (1.42×), e4 (1.27×) and e2×10 (1.23×), by 3–23 ms each; in total 3.2 s
   against 9.0 s.
-- **Verdict: the gate fails on a strict reading** (e2, e4, e2×10), and
-  passes only on aggregate.  Under Decisions 1 and 7 that triggers the
-  Church-typed fallback for the calculus.  Before taking it, two cheaper
-  fixes aim at exactly the measured cost (the comparison of contexts, not
-  the reduction): quote contexts as `let`-bound constants, or check a
-  projection of the result instead of the whole term.  This lane has not
-  taken the fallback; the call is the user's.
+- **Verdict (Decision 9): passed.**  On a strict reading it failed on
+  e2, e4 and e2×10, and passed on aggregate (3.2 s against 9.0 s); the lead
+  ruled the aggregate the gate, the straight-line overhead a cost to
+  reduce.
+- Reducing it (round 3, `Solidity/Scratch/CoreBench.lean`, median of 7;
+  e2 legacy 7.3 ms):
+  - the reduction is not the cost: `Core.Fml.maxIdx (Core.symex n φ)`
+    checked against its number, which evaluates the whole result, is
+    7.3 ms, today's `Eq.refl` 7.4 ms; the `Eq.refl` against the quote is
+    10.6 ms.  The comparison with the quote costs about 3 ms more than the
+    evaluation, for today's formulas about nothing;
+  - against the quote declared as a constant first (its type check out of
+    the measurement): 10.0 ms, so typing the quote is 0.6 ms of it;
+  - **contexts as named constants** (every context of `φ` and `ψ` declared
+    once, `ctxᵢ := t :: ctxⱼ`, both sides written with them, a scratch
+    pass over the quoted `Expr`): 10.6 ms on e2, 1.42–1.46× against 1.45×,
+    e4 1.27× against 1.30×, e2×10 1.07–1.26× against 1.17–1.25×: within
+    the noise.  The kernel's reduct carries the input's contexts along, so
+    they were mostly shared already;
+  - **a projection**, the erasure checked instead of the scoped result
+    (`Core.Fml.erase [] (Core.symex n φ) = ψ'`, which `holds_erase` would
+    make enough for the closer): 14.7 ms, slower, since `erase` names every
+    position;
+  - so the remaining cost is per node of the comparison: the kernel infers
+    the type of both sides of every pair it compares that is not one
+    object (proof irrelevance first), and a scoped node carries two to
+    five context arguments more (result DAG 195 nodes against 114).  What
+    would remove it is not to compare terms at all: a Boolean structural
+    equality on `Core.Fml` evaluated by the kernel (`decide`), with its
+    soundness lemma, or fewer nodes (`Idx` as a number with a proof).
+    Neither is done; both are larger than this lane's round.
 
 ### M6a lane: how `dl{ … }` will write a scoped taclet
 
@@ -482,12 +561,9 @@ with no freshness premise: the fresh locals are positions pushed and popped
 by the premise itself.  Until then `Taclet.erase` carries it over from
 `Taclet.sound`, given `holds_erase`.
 
-- Left for M6a: `holds`/`holds_erase` (needs M3's `State C Γ`); the rest of
-  `Stmt.step`'s arms (index reads and writes, copies, memory, calls, `try`,
-  loops, compound assignments, `push`/`pop`, `transfer`/`send`, `&&`/`||`,
-  the conditional) and the `Premise` constructors `branches`, `cases`,
-  `inv`; the remaining taclets of `Core.Taclet` (by the macro, at the
-  cutover); `Hyps`/`Proves`; a `sol_symex` on `Core` (`normValid` with
+- Left for M6a: `holds_erase` (needs M3's state erasure, `run_erase`);
+  the remaining taclets of `Core.Taclet` (by the macro, at the cutover);
+  `Hyps`/`Proves`; a `sol_symex` on `Core` (`normValid` with
   `Core.Fml.quote`); chains, `Derive.residue` and ProofTree; the
   delaborator for formulas with schema variables (`#taclet`, `#wp`).
 

@@ -33,6 +33,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `sendAt`, `TxEnv.ext` | `Examples/Tactics/Net.lean` |
 | Call arguments | all read, left to right, before the callee runs | `Arg.bindSeq`, `Arg.separatedFrom` | |
 | `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is imported as `bool ok = a.send(v)`, as solkey's `SolJSONParser.isValueCall` reads it; solc forwards all gas there, so the callee can re-enter and write storage, which `holds` ignores (the no-callback reading) and only `holdsC` covers (`Semantics/Callback.lean`). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`) | |
+| `bool` mapping keys | solc hashes a `bool` key as the word `0` or `1`; the typed path of M4b (`docs/intrinsic.md`, Decision 10) takes the `Int` `0`/`1` for it.  Until then the untyped interpreter reads a `bool` key as `.stuck` (`Value.asInt`) | `Value.asInt`; M4b's typed `Path` | |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule) | `Stmt.run` (`.tryCall`), `bindData` | `Examples/Tactics/TryCatch.lean` |
 
 ## Evaluation order
