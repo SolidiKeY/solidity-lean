@@ -4,11 +4,15 @@ import Solidity.Calculus.SoundUpdate
 /-!
 # Soundness of the arms of `Calculus/Core/Arms.lean` and `Step.lean`
 
-Every arm of `Stmt.step` but the calls, `try` and loops of
-`Calculus/Core/Blocks.lean` is sound against M3's interpreter
-(`Core.Stmt.run`), in the shape `Calculus/Core/SoundKit.lean` states
-(`Stmt.StepSound`).  The proofs follow today's (`Calculus/SoundUpdate.lean`,
-`Calculus/SoundUnfold.lean`): a term reads what the expression it lowers
+The premises of the update arms of `Stmt.step` are sound against M3's
+interpreter (`Core.Stmt.run`), as `Premise.Sound`
+(`Calculus/Core/SoundKit.lean`): an assignment to a local (`sound_setLocal`),
+a storage write (`sound_save`, `sound_saveMem`), a `delete` (`sound_delAt`),
+a memory write (`sound_writeMem`), a rebinding (`sound_rebindPath`,
+`sound_rebindMemAlias`) and a compound assignment (`sound_opAssign`).  No arm
+is proved as `Stmt.StepSound` yet (the other arms, and the calls, `try` and
+loops of `Calculus/Core/Blocks.lean`, are not proved).  The proofs follow
+today's (`Calculus/SoundUpdate.lean`, `Calculus/SoundUnfold.lean`): a term reads what the expression it lowers
 evaluates to (`Val.eval_lower` and its kin, as `Update.lean`'s
 `Val.lower_eval`), so an update rule's update ends as its statement does;
 a capture's statement, read with the fresh local on top, runs as the
@@ -500,6 +504,121 @@ theorem sound_rebindMemAlias {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (
     show (do pure (σ.setLocal i (← p.lower.eval σ))) = Run.rebindMem i (.alias p) σ
     simp only [MPath.eval_lower, Run.rebindMem, MRhs.eval, bind_assoc, pure_bind])
 
+/-- A compound assignment at a resolved storage location, as the update
+writes it: read, apply, write back at the root. -/
+theorem opStore_write (op : BinOp) (p : PrimTy) (rt : Name) (segs : List Seg) (v : Value) :
+    (do
+      let x ← σ.glob.findStorage rt segs
+      let x ← x.asValue
+      let x ← Semantics.applyBinOp op x v
+      let x ← Semantics.checkArith (.prim p) x
+      let w ← σ.glob.writeStorage rt segs x.toSVal
+      pure (σ.withGlob { σ.glob with storage := w.storage })) =
+      σ.withGlob <$> Solidity.opStore σ.glob op p rt segs v := by
+  simp only [Solidity.opStore, map_bind]
+  congr 1; funext sv; congr 1; funext a; congr 1; funext b; congr 1; funext c
+  cases c <;> exact storage_glob σ _ (Solidity.State.writeStorage_with _ _ _ _)
+
+/-- The same at a storage location, resolved once by the statement and
+twice by the update (its read and its write). -/
+theorem opStore_loc {T : Ty} (op : BinOp) (p : PrimTy) (L : Loc C Γ T) (v : Value) :
+    (do
+      let x ← L.resolve σ
+      let x ← σ.glob.findStorage x.fst x.snd
+      let x ← x.asValue
+      let x ← Semantics.applyBinOp op x v
+      let x ← Semantics.checkArith (.prim p) x
+      let q ← L.resolve σ
+      let w ← σ.glob.writeStorage q.fst q.snd x.toSVal
+      pure (σ.withGlob { σ.glob with storage := w.storage })) =
+      (do let q ← L.resolve σ; σ.withGlob <$> Solidity.opStore σ.glob op p q.fst q.snd v) := by
+  cases L.resolve σ with
+  | error e => rfl
+  | ok q => exact opStore_write σ op p q.fst q.snd v
+
+/-- A compound assignment at a memory address, from the old value read:
+apply, check, write back. -/
+theorem opMem_tail (op : BinOp) (p : PrimTy) (a : Semantics.Addr) (v : Value) (r : Res Value) :
+    (do
+      let x ← r
+      let x ← Semantics.applyBinOp op x v
+      let x ← Semantics.checkArith (.prim p) x
+      let μ ← writeAddr σ.glob x.toMVal a
+      pure (σ.withGlob { σ.glob with heap := μ.heap, nextId := μ.nextId })) =
+      σ.withGlob <$> (do
+        let old ← r
+        let new ← Semantics.applyBinOp op old v
+        let new ← Semantics.checkArith (.prim p) new
+        Semantics.writeLoc σ.glob a new) := by
+  simp only [map_bind]
+  congr 1; funext x; congr 1; funext y; congr 1; funext c
+  cases a <;> exact memory_glob σ _ (Solidity.writeAddr_with _ _ _)
+
+/-- A compound assignment at a memory location, as the update writes it:
+read, apply, write back at the address. -/
+theorem opMem_loc {T : Ty} (op : BinOp) (p : PrimTy) (L : MLoc C Γ T) (v : Value) :
+    (do
+      let x ← L.read σ
+      let x ← x.asValue
+      let x ← Semantics.applyBinOp op x v
+      let x ← Semantics.checkArith (.prim p) x
+      let a ← L.addr σ
+      let μ ← writeAddr σ.glob x.toMVal a
+      pure (σ.withGlob { σ.glob with heap := μ.heap, nextId := μ.nextId })) =
+      (do let a ← L.addr σ; σ.withGlob <$> Solidity.opMem σ.glob op p a v) := by
+  cases L with
+  | field b f h =>
+    simp only [MLoc.read, MLoc.addr, bind_assoc, pure_bind]
+    cases MPath.mval σ b with
+    | error e => rfl
+    | ok mv =>
+      simp only [Solidity.SemanticsProperties.Res.ok_bind]
+      cases mv.asRef with
+      | error e => rfl
+      | ok id =>
+        simp only [Solidity.SemanticsProperties.Res.ok_bind, Solidity.opMem, Semantics.readLoc, bind_assoc]
+        cases σ.glob.getObj id with
+        | error e => rfl
+        | ok o =>
+          simp only [Solidity.SemanticsProperties.Res.ok_bind]
+          cases o with
+          | array _ _ => rfl
+          | struct fields =>
+            dsimp only
+            cases Semantics.lookupBy f fields with
+            | none => rfl
+            | some w => exact opMem_tail σ op p _ v w.asValue
+  | index a b i =>
+    simp only [MLoc.read, MLoc.addr, bind_assoc, pure_bind]
+    cases MPath.mval σ b with
+    | error e => rfl
+    | ok mv =>
+      simp only [Solidity.SemanticsProperties.Res.ok_bind]
+      cases mv.asRef with
+      | error e => rfl
+      | ok id =>
+        simp only [Solidity.SemanticsProperties.Res.ok_bind]
+        cases Val.eval σ i with
+        | error e => rfl
+        | ok iv =>
+          simp only [Solidity.SemanticsProperties.Res.ok_bind]
+          cases iv.asInt with
+          | error e => rfl
+          | ok n =>
+            simp only [Solidity.SemanticsProperties.Res.ok_bind, Solidity.opMem, Semantics.readLoc, bind_assoc]
+            cases σ.glob.getObj id with
+            | error e => rfl
+            | ok o =>
+              simp only [Solidity.SemanticsProperties.Res.ok_bind]
+              cases o with
+              | struct _ => rfl
+              | array elems fx =>
+                by_cases hn : 0 ≤ n ∧ n.toNat < elems.length
+                · simp only [dif_pos hn]
+                  exact opMem_tail σ op p _ v _
+                · simp only [dif_neg hn]
+                  rfl
+
 theorem Simple.eval_ok {p : PrimTy} (s : Simple C Γ p) : ∃ v, s.eval σ = .ok v := by
   cases s <;> exact ⟨_, rfl⟩
 
@@ -511,6 +630,7 @@ theorem sound_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = t
     Premise.Sound m (.opAssign op hop hp l (.simple se)) (.upd1 (l.set (l.op op se.lower))) σ := by
   refine Premise.Sound.update ?_
   obtain ⟨v, hv⟩ := Simple.eval_ok σ se
+  have hv' : se.eval σ = pure v := hv
   rw [upd1_apply]
   show _ = Run.opAssign op l (.simple se) σ
   cases l with
@@ -518,11 +638,33 @@ theorem sound_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = t
     simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Rhs.eval, Tm.eval, Op2.eval,
       Simple.eval_lower, hv, evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store, opLocal,
       bind_assoc, pure_bind]
-  | root r h => sorry
-  | field b f h => sorry
-  | index it b ie => sorry
-  | mfield b f h => sorry
-  | mindex a b ie => sorry
+  | root r h =>
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval, Op1.eval,
+      Op0.eval, Simple.eval_lower, hv', evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store,
+      Loc.eval_lower, Val.eval_lower, bind_assoc, pure_bind]
+    exact opStore_loc σ op p _ v
+  | field b f h =>
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval, Op1.eval,
+      Op0.eval, Simple.eval_lower, hv', evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store,
+      Loc.eval_lower, Val.eval_lower, bind_assoc, pure_bind]
+    exact opStore_loc σ op p _ v
+  | index it b ie =>
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval, Op1.eval,
+      Op0.eval, Simple.eval_lower, hv', evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store,
+      Loc.eval_lower, Val.eval_lower, bind_assoc, pure_bind]
+    exact opStore_loc σ op p _ v
+  | mfield b f h =>
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval, Op1.eval,
+      Op0.eval, Simple.eval_lower, hv', evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store,
+      MLoc.eval_lower_addr, Val.eval_lower, bind_assoc, pure_bind]
+    refine (opMem_loc σ op p _ v).trans ?_
+    simp only [MLoc.addr, bind_assoc, pure_bind]
+  | mindex a b ie =>
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval, Op1.eval,
+      Op0.eval, Simple.eval_lower, hv', evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store,
+      MLoc.eval_lower_addr, Val.eval_lower, bind_assoc, pure_bind]
+    refine (opMem_loc σ op p _ v).trans ?_
+    simp only [MLoc.addr, Val.eval, bind_assoc, pure_bind]
 
 end Updates
 
