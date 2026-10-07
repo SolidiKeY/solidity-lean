@@ -172,6 +172,20 @@ x = 1
 -/
 #guard_msgs in #deploy Paid() with msg.value := 3
 
+/-- A loop in a constructor: lowered (`lowerLoops`) with the body before it
+is inlined, the initializer still first. -/
+def Looped : Contract := contract!{
+  uint x = 1;
+  constructor(uint n) { for (uint i = 0; i < n; i++) { x = x + 1; } }
+}
+
+/--
+info: ok
+balance 0
+x = 4
+-/
+#guard_msgs in #deploy Looped(3)
+
 -- `constructor(7);` is a call: its one rule is `functionBodyExpand`, the
 -- initializer inlined after the parameter
 /--

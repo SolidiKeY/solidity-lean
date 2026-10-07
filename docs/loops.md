@@ -382,7 +382,7 @@ A finder and a skeptic per area; what the skeptic confirmed, fixed:
   and `whileNoVariantDiamond` firing, the `sol_derive?` walks of an unwound
   loop and an invariant loop (`Examples/ProofTree.lean`), a loop inside a
   `try` clause lowered (solkey's `LoopLowering` leaves it,
-  `docs/solkey-feedback.md` §9).
+  `docs/solkey-feedback.md` §10).
 - **Wording.** Memory is refused for an invariant as in solkey; push, pop,
   alias and external call are Lean's own refusals (`Stmt.within`).
   `ed7849d5b6` is the commit that added loops, after the pinned
@@ -397,7 +397,7 @@ clean one at a time: `Report.lean`'s pin still reads 435 derived.  Each
 file copied to a scratch module with `set_option Elab.async false`, timed
 by `IO.monoMsNow` at its first and last command, load average under 1 (the
 other lanes idle); master `2979bb8` is the ctor lane's measurement under
-the same method (`docs/testsuite-proofs.md` on that branch, "Constructors"):
+the same method (`docs/testsuite-proofs.md`, "Constructors review"):
 
 | File | master `2979bb8` | `loops` | change |
 |---|---:|---:|---:|

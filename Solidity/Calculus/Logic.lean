@@ -24,8 +24,8 @@ front again, with nothing to look through.  `Proves.sound` says once and for
 all that a derivation is a proof.
 
 The judgement is indexed by the rules it may use (`RuleSet`): every
-constructor takes solkey's `Taclet`s, and `unfoldLean`, `doneLean` and
-`checkLean` alone the rules solkey lacks (`LeanTaclet`), at `.all`.  `Γ ⊢ φ` is the whole calculus, `Γ ⊢ₖ φ`
+constructor takes solkey's `Taclet`s, and `unfoldLean`, `doneLean`,
+`checkLean` and `invLean` alone the rules solkey lacks (`LeanTaclet`), at `.all`.  `Γ ⊢ φ` is the whole calculus, `Γ ⊢ₖ φ`
 solkey's; `Calculus/SolkeyFragment.lean` says when the two agree.
 
 Fresh names are numbered above every index in sight (`Hyp.fresh`), which is

@@ -5,7 +5,8 @@ import Solidity.Calculus.Rules
 
 `Stmt.step k m s` is the rule for the statement `s` under the modality `m`:
 its premise, and the derivation `Rule C k m s p` (`Rules.lean`): solkey's
-`Taclet`, or the one `LeanTaclet` when a call has an argument to capture.  Its
+`Taclet`, or a `LeanTaclet` (an argument capture, `tryCallDiamond`,
+`transferDiamond`, the loop rules).  Its
 fresh variables are declared at index `k`.  It is a **total function** over the typed
 syntax, so Lean's exhaustiveness check on its patterns is the coverage
 proof; `Stmt.complete` states it.  A combination the types rule out (a value

@@ -2086,9 +2086,10 @@ numbers recorded above:
 | `Examples/Tactics/Memory.lean` | 78 s | 88 s (+13%) |
 | `Calculus/Uniqueness.lean` | ~150 s | 198 s (+32%) |
 
-These were not measured against master under the same load, and the
-interleaved re-measurement of the review (below) puts `Calls` and
-`Uniqueness` within 4% of master. `TestSuite/Derived*` was not built in
+These were not measured against master under the same load.  The
+re-measurement of the review (below) puts `Calls` and `Uniqueness` within
+4% of master, and the integration's (2026-10-07, at the end of this file)
+puts `Calls` 37% below it. `TestSuite/Derived*` was not built in
 S1–S3 (rebuilt in S4–S5, below); its obligations contain none of the new
 terms.
 
@@ -2110,7 +2111,8 @@ as much as the branch could.  `Elab.async false` also crashed the worker
 of either checkout at random (no OOM kill was recorded; a stack overflow on
 the main thread is likely), so run 3 was repeated under a fresh file name,
 and a fourth run (`ctor` again) crashed twice and was given up.  Superseded
-by the review's measurement, below: within 10%.  The TestSuite chain was rebuilt on this branch, one `Derived`
+by the review's measurement, below (within 10%), and by the integration's,
+at the end of this file (`Calls` 37% faster than master).  The TestSuite chain was rebuilt on this branch, one `Derived`
 module at a time, then `Report` and `SolkeyTestSuite.lean`: all clean, the
 435 derived obligations kept.
 
@@ -2401,3 +2403,82 @@ A finder and a skeptic over the pruning; what the skeptic confirmed, fixed:
 Not applied here: two findings on the constructor lane (its timing
 baseline, its `UpdElem` rows in `lean-key-rule-map.md`) belong to that
 lane's branch.
+
+## Integration of pruning, constructors and loops (2026-10-07)
+
+Branch `merge-ctor-loops-prune`, from master `2979bb8`: `derive-prune`
+(fast-forward), then `ctor`, then `loops`.  The conflicts of the `loops`
+merge, each resolved keeping both lanes:
+
+- `Calculus/Derive.lean`: `premiseRes` takes the closer (pruning's
+  `splitRes`) and has the `.inv` arm (loops'); `groundIn` gained a
+  `Hyp.anon` arm (a local a loop anonymised is not ground), and
+  `UpdElem.binds` the `.saveNetMt` element (ctor's), which binds a local as
+  `.saveNet` does.  `premiseRes_sound` and `Proves.of_residue` merged
+  without a conflict and cover `closeFalse` and the invariant rule.
+- `Frontend/Import.lean`: the docstring's two bullets; the loops lane's
+  `lowerBodyLoops … .run C.funs` reads the elaborator's `ElabScope`
+  (ctor's), `{ funs := C.funs }`.
+- `Solidity.lean` (both lanes' example imports), `Tools/Run.lean` (both
+  docstring paragraphs), `scripts/solc-ast.mjs` (loops' version, a superset
+  of ctor's `--source`/`--wrapper`, with ctor's fixture named),
+  `docs/kernel-port.md` (loops' Modifiers row, ctor's Constructors row),
+  `docs/module-map.md` (`Semantics.lean`: the loop's run and the
+  deployment), `docs/solkey-feedback.md` (§9 Constructors, §10 Loops).
+
+Left over from the ctor review: `module-map.md`'s `Update.lean` row names
+`UpdElem`'s `.netMt`, `.setBalance` and `.saveNetMt` (`#deploy` already
+had its `Tools/Run.lean` row).
+
+**Timing**, nothing else running (load average 1–1.4).  Each file copied
+to a scratch module with `set_option Elab.async false`, timed by
+`IO.monoMsNow` at its first and last command, master `2979bb8` in a
+detached worktree (the main checkout had uncommitted edits to
+`Syntax.lean`), interleaved:
+
+| File | master `2979bb8` | this branch | change |
+|---|---:|---:|---:|
+| `Examples/Tactics/Calls.lean` | 120.5 s, 120.1 s | 75.2 s, 75.3 s | −37% |
+| `TestSuite/Derived1.lean` | 7.2 s, 7.6 s | 7.0 s, 7.4 s | −3% |
+
+No regression.  `Elab.async false` did not crash a worker.  The
+`Derived1` second pair ran side by side; the other runs one at a time.
+Where `Calls` gains was not profiled: the pruning is the likely cause
+(inlined calls with literal arguments make ground splits; it took 84% off
+`Derived14`, above).
+
+**Checked.**  The default target (186 jobs), `SolkeyTestSuite.lean`
+(every `Derived` module, the `Report` pin: 435 derived),
+`Corpus/TestSuite.lean`; `solkeycheck` against `1b4341a303` (OK),
+`check-orphans` (203 reachable, 0 orphaned), `check-doc-paths`,
+`check-testsuite` (438 = 435 derived + 1 pending + 1 divergent + 1
+excluded).  All clean, before and after the review fixes.
+
+### Integration review (2026-10-07)
+
+A finder and a skeptic, no Lean, on what the lanes do to each other.
+Checked and right: the order in `elabCallRet` (renamed, loops lowered,
+`return`s lowered, modifiers, then a constructor's initializers), so a
+loop in a constructor is lowered like one in a function and no flag
+meets an initializer; `ctorMember` prints a loop's `/// @custom:key`
+clauses as a function member does, and `solc-ast.mjs` reads them in any
+body; `sol_close_mt` reads `{anon}` (`close_rw`'s anon lemmas); every
+match on `Proves` and `UpdElem` has both lanes' arms.  Confirmed and fixed:
+
+- **A deployment inside a branch or a loop.**  `ElabScope.top` was cleared
+  only in an inlined body, so `if (c) { constructor(); }` (ctor) and
+  `while (c) { constructor(); }` (now) elaborated, a second or conditional
+  deployment.  `elabBranch` clears it; `Examples/Benchmark/Syntax.lean`
+  pins both refusals, `kernel-port.md`'s Constructors row says so.
+- **No loop in a constructor was tested.**  `Examples/Tactics/Constructors.lean`
+  deploys `Looped(3)`: the initializer, then three iterations.
+- **Pruning does not reach a loop's frame or a constructor obligation.**
+  `synClose` refuses `Fml.anon` and the deployment's `netMt`/`setBalance`
+  (`inL` is false on them), so no split there is pruned and `groundIn`'s
+  `.anon` arm only matters for a closer that reads them; its docstring
+  says so.
+- **Prose.**  `docs/loops.md` cited `solkey-feedback.md` §9 (now §10) and
+  this file "on that branch"; `Derive.lean`'s header and its
+  `module-map.md` row now name the invariant rule (and `cases`);
+  `Logic.lean` names `invLean`; `Completeness.lean` and
+  `solkey-feedback.md` §3 no longer say there is one `LeanTaclet`.

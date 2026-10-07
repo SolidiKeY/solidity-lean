@@ -2633,8 +2633,8 @@ def checkFresh (Γ : ECtx) (x : Name) : Except String Unit :=
 
 /-- What elaboration reads: the functions a call may name — the contract's,
 and in a function's body the ones declared before it — and whether the block
-is a program (`top`), where `constructor(args);` may stand, rather than an
-inlined body. -/
+is a program's own statements (`top`), where `constructor(args);` may stand,
+rather than an inlined body or a branch, loop or block of the program. -/
 structure ElabScope where
   funs : List (Name × FunDecl)
   top : Bool := true
@@ -3673,10 +3673,12 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
 after its parameters are bound; with no `constructor` declared, the implicit
 one, of no parameters and no body.  It returns to no targets
 (`CallRet.rets []`), a `FunctionBodyStatement` as solkey's is
-(`functionBodyExpand`).  Only a program deploys, never an inlined body: no
-function calls the constructor. -/
+(`functionBodyExpand`).  Only a program's own statements deploy, never an
+inlined body (no function calls the constructor), and not a branch, a loop
+or a block (`elabBranch`), which would deploy again or only sometimes. -/
 partial def elabCtor (args : List RawExpr) : ElabM (Prog C) := do
-  unless (← read).top do throw "constructor(…) in a function's body: only a program deploys"
+  unless (← read).top do
+    throw "constructor(…) in a function's body or a block: only a program's own statements deploy"
   pure (← elabCallRet "constructor" args none (targets := true) (ctor := true)).1
 
 /-- The captures a statement's own expressions need (`hoist`), and the
@@ -4056,10 +4058,11 @@ partial def elabStmts : List RawStmt → ElabM (Prog C)
     let Q ← elabStmts ss
     pure (P ++ Q)
 
-/-- A branch: its declarations stay inside it. -/
+/-- A branch: its declarations stay inside it, and it does not deploy
+(`ElabScope.top`). -/
 partial def elabBranch (ss : List RawStmt) : ElabM (Prog C) := do
   let (Γ, _) ← get
-  let P ← elabStmts ss
+  let P ← withReader (fun sc => { sc with top := false }) (elabStmts ss)
   let (_, k) ← get
   set (Γ, k)
   pure P

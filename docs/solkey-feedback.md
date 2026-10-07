@@ -95,7 +95,7 @@ matches only the whole-program call statement, and no rule hoists the argument
 into a fresh local. It is on solkey's own backlog (`docs/net.md` §4 item 1;
 `docs/bugs.md`, "Internal calls are never inlined").
 
-**Lean evidence.** The one rule of the Lean calculus solkey lacks:
+**Lean evidence.** The rule of the Lean calculus solkey lacks here:
 `LeanTaclet.functionCallArgCapture` (`Calculus/Rules.lean`), proved
 `LeanTaclet.sound` (`Calculus/RuleSoundness.lean`). Its hypotheses are the
 taclet's side conditions: the captured argument mentions no callee parameter,

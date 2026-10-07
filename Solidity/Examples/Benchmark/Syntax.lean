@@ -186,8 +186,14 @@ example : Prog.toStr (C := WithInits) (sol[WithInits]{ constructor(); }) = "cons
 /-- A function that calls the constructor. -/
 def CallsCtor : Contract := contract!{ uint n; constructor() { n = 1; } function f() { constructor(); } }
 
-/-- error: Solidity elaboration failed: constructor(…) in a function's body: only a program deploys -/
+/-- error: Solidity elaboration failed: constructor(…) in a function's body or a block: only a program's own statements deploy -/
 #guard_msgs in #check sol[CallsCtor]{ f(); }
+
+/-- error: Solidity elaboration failed: constructor(…) in a function's body or a block: only a program's own statements deploy -/
+#guard_msgs in #check sol[CallsCtor]{ if (n == 0) { constructor(); } }
+
+/-- error: Solidity elaboration failed: constructor(…) in a function's body or a block: only a program's own statements deploy -/
+#guard_msgs in #check sol[CallsCtor]{ while (n == 0) { constructor(); } }
 
 /-- error: a second constructor: a contract declares one -/
 #guard_msgs (error, drop info) in

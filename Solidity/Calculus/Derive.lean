@@ -11,7 +11,8 @@ import Solidity.Calculus.ProofTree
 each an elaborator unification over the whole sequent.  `Derive.residue`
 runs the same walk as a function: on a sequent `Γ ⟹ φ` it drops an empty
 modality, fires the rule `Stmt.step` picks (as `update`, `unfold`, `split`,
-`check`, `done`, or `branches` with any number of outcomes), or moves a precondition,
+`check`, `done`, `branches` with any number of outcomes, `cases`, or `inv`,
+the invariant then a split's goals past `Hyp.loopAnon`), or moves a precondition,
 a quantified local or an update into the context, in `sol_derive`'s order;
 a sequent none of these fits is a leaf, dropped when the closer accepts it.
 One step `sol_derive` does not take: a split whose condition is ground under
@@ -171,7 +172,12 @@ def _root_.Solidity.Upd.groundStep (U : Upd C) (xs : List Var) : Option (List Va
   groundStepRev U.reverse xs
 
 /-- Whether every local of `xs` is bound by the context `Γ`, its entries
-last first, to a term of literals, transitively. -/
+last first, to a term of literals, transitively.  A local a loop
+anonymised (`.anon`) is not.  Under `synClose` that arm is never reached
+with a closer that accepts: `Fml.inL` is `false` on `anon`, as `UpdElem.inL`
+is on a deployment's `netMt`/`setBalance`, so no split is pruned past a
+loop's frame or in a constructor obligation; it is kept for a closer that
+reads them. -/
 def groundIn : List (Hyp C) → List Var → Bool
   | _, [] => true
   | [], _ :: _ => false
