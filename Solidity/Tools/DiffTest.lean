@@ -290,7 +290,7 @@ def testFun [FreshNames] (C : Contract) (name : String) (runs seed j : Nat) (f :
     let P ← match callProg C f args with
       | .ok P => pure P
       | .error e => return [s!"skipped: {f} ({e})"]
-    let ⟨Γ', Q⟩ ← match Core.Prog.resolve [] P with
+    let ⟨_, Q⟩ ← match Core.Prog.resolve [] P with
       | .ok r => pure r
       | .error e => return [s!"skipped: {f} ({e})"]
     unless (Evm.Core.inFragP (Evm.Core.Frag.init []) Q).isSome do
