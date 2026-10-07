@@ -951,6 +951,42 @@ elaborates with every module (no name clash).
   today's, to `storageFieldDelete_unfold_leftFst`); `lake exe solkeycheck` was not run here (no rule names,
   sort annotations or `KeyTaclets.lean` changed).
 
+### W1 integration (2026-10-08)
+
+- **Merged** into `intrinsic`, in order: `w1-runlemmas`, `w1-typing`,
+  `w1-evm`, `w1-rules`.  Text conflicts only in this file (each lane's
+  section kept); `Solidity.lean` and `docs/module-map.md` merged clean, no
+  duplicate import or row.  No fully-qualified declaration is declared twice
+  across modules.
+- **Full build: green on the first try**, no fix needed.  `lean_build` over
+  `Solidity`, `solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (294
+  jobs; the last two in `defaultTargets` for the run only): 168 s wall,
+  rebuilding from the Lake cache what the merge changed.  The slowest
+  modules under the build's load: `Examples/Tactics/Calls` 102 s,
+  `TestSuite/Derived7` 93 s, `Examples/Tactics/Decide` 70 s,
+  `TestSuite/Derived8` 53 s, `Examples/Tactics/Loops` 52 s.
+  No new `sorry`, `axiom`, or raised `maxHeartbeats` (the one new
+  override, `stmt_sim`'s `10000`, is the evm gate).
+- `scripts/check-orphans.mjs`: 280 reachable, none orphaned but the
+  git-excluded `Solidity/Scratch/`.  `scripts/check-doc-paths.sh`: OK (the
+  plan's three citations of the reader's `Corresp` files, which live in
+  side-projects, are now module names, not paths).
+- Lane gates as the lanes measured them (above): typing's four modules
+  22.3 s ≤ 25.6, Faithfulness 25.3 s ≤ 30.7; evm's `stmt_sim` within 10000
+  heartbeats, `Evm/CoreExamples` 7.9 s ≤ 11.4; rules' `Core/RuleText`
+  print check and `scripts/check-rule-text.sh` empty.  The `SolidityCorpus`
+  build re-checks every pinned corpus verdict and passes.
+  `scripts/check-corpus.sh` was not run (it calls `lake`, which this session
+  may not); the evm lane expects its probe to report `evaluated → proved`
+  drift (the typed `corpus_decide` proves more), and re-pinning is a pin
+  change, for the lead to decide.  `solkeycheck` was built, not run; no
+  rule name, annotation or `KeyTaclets.lean` changed.
+- Docs outside the lanes updated as the typing lane asked:
+  `docs/testsuite-proofs.md` and `docs/solkey-feedback.md` now say
+  `Reachable` is by the typed run on the bridge, `ReachableU.reachableS`
+  unconditional and `ReachableU.reachable` under `FitsStorage`.
+- The four lane worktrees are removed (the branches stay).
+
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)
 1. **`sound`** (the critical path)
    - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`.
@@ -1052,8 +1088,8 @@ Before the lanes branch, the lead makes `Surface` the default and removes the `o
    - The untyped `Stmt` becomes `Surface.Stmt`.
 4. **`reader-dry`** (side-projects `lean/solkey`, branch `intrinsic`, user approved)
    - On that branch only, point the `lakefile.toml` require at `../../../solidity-lean-intrinsic`.
-   - Port `Corresp/LeanShape.lean` (19 `Stmt.` references) to read Core constructor types, erasing `.there`/`up` as `Core.Delab` does and mapping `unfold`/`bind`/`inline` to today's premise shapes.
-   - Regenerate `Corresp/Proved.lean` with `GenProved`.
+   - Port the reader's `Corresp.LeanShape` module (19 `Stmt.` references) to read Core constructor types, erasing `.there`/`up` as `Core.Delab` does and mapping `unfold`/`bind`/`inline` to today's premise shapes.
+   - Regenerate the reader's `Corresp.Proved` module with `GenProved`.
    - `expectedPins` may move only on the rows for the newly claimed `blockEmpty`, `functionFrameEmpty` and `functionBodyExpand`.
 
 **Merge order:** sem-del → calc-del → modal.
@@ -1070,7 +1106,7 @@ Before the lanes branch, the lead makes `Surface` the default and removes the `o
   - `trun` → `run`, `TState` → `State`, `Evm/Core*` → `Evm/*`.
 - A full rebuild follows: about 24 minutes, plus the TestSuite.
 - **Pins:** only those that print qualified constants (`#taclet` naming `Core.Taclet.*`, `#print axioms`) may change.
-- **Reader:** the dry-run branch renames its identifiers and regenerates `Proved.lean`. The require goes back to `../../../solidity-lean` when `intrinsic` merges into `master`; the reader merges then.
+- **Reader:** the dry-run branch renames its identifiers and regenerates the reader's `Corresp.Proved`. The require goes back to `../../../solidity-lean` when `intrinsic` merges into `master`; the reader merges then.
 - **Docs (M7):**
   - `module-map`, the `kernel-port` row.
   - `lean-key-rule-map` rows: the claimed rules, the capture pop, the hidden binder, `unset`.
