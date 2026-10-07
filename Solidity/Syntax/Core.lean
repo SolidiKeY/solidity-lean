@@ -401,6 +401,11 @@ def Stmt.outNames {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → List Var
   | .call _ _ ret _ => ret.outNames ns
   | _ => ns
 
+/-- The names of the context a block leaves. -/
+def Prog.outNames {Γ : Ctx} (ns : List Var) : {Γ' : Ctx} → Prog C Γ Γ' → List Var
+  | _, .nil => ns
+  | _, .cons s P => P.outNames (s.outNames ns)
+
 /-- `f(e₁, …, eₙ);` -/
 def callStr {Γ : Ctx} {ps : Ctx} (ns : List Var) (f : Name) (args : Args C Γ ps) : String :=
   s!"{f}({", ".intercalate (args.toStrs ns)});"

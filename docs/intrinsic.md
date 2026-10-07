@@ -858,16 +858,17 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   premise read under `{anon(xs)}` lives in the loop's context, where they do
   not exist: soundness does not need them listed (the erasure still differs
   from today's `{anon(…)}` by those names, M6a notes above).
-- **One hypothesis left, under the diamond**: the condition reads as a
-  `bool` wherever it returns (`Val.BoolValued`, `stepSound_loop`'s `hcb`,
-  for `m = .diamond` only).  Today's rule proves it as a cover goal; M3's
-  values are untyped (a `bool` storage read may hold an `int`), so it is
-  M4a's typed values that discharge it, as `State.Typed` does a split's.
-- Found on merging: `Semantics/RunErase.lean` (M3) and
-  `Calculus/Core/Fml.lean` (this lane's calculus) both declare
-  `Solidity.Core.Prog.outNames`, so a module importing both fails
-  ("environment already contains `Prog.outNames.match_1`"), the root
-  `Solidity.lean` among them.  One of the two needs renaming.
+- **The diamond's cover goal stays** (review fix): without it the rule is
+  unsound in M3, whose values are untyped (a `bool` storage field holding
+  `.int 5` makes both `b = TRUE →` and `b = FALSE →` vacuous while
+  `Loop.step` is stuck), and a `Val.BoolValued` hypothesis would have
+  excluded every condition that reads a local or storage.  So
+  `whileInvariantDiamond`'s premise carries `b = TRUE ∨ b = FALSE` under its
+  update (`Fml.invCases`, Lean only, today's `Premise.coverFml`), and
+  `Stmt.stepSound_loop` has no hypothesis.  The box keeps KeY's two goals.
+- `Prog.outNames` was declared both in `Semantics/RunErase.lean` (M3) and
+  `Calculus/Core/Fml.lean`, which broke the root `Solidity.lean`; it is now
+  one definition, in `Syntax/Core.lean` beside `Stmt.outNames`.
 
 ### Gate G0: passes, under conditions
 

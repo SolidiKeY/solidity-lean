@@ -14,9 +14,9 @@ context `d` below its own, it writes only the ones `writesAt d` lists, by
 type and position there (`LocAgree`).  The body's own locals are popped before
 the frame is read (`Env.drop s.ext`), so they need no listing.
 
-`Prog.frame_run` is what the loop invariant rules read: a turn of a body
-whose frame is `(xs, hv)` leaves the state `{anon(xs)}`, with `{havoc}` when
-`hv`, makes of it (`State.anon_frame`).
+`holds_anonHavoc` is what the loop invariant rules read: a state in a body's
+frame `(xs, hv)` (`Prog.frame_some`) is one `{anon(xs)}`, with `{havoc}` when
+`hv`, makes of the first (`State.anon_get`).
 -/
 
 namespace Solidity.Core

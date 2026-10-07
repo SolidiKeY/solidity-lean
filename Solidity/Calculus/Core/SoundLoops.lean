@@ -12,7 +12,8 @@ today's.  Every loop head is a state the body's frame allows from the first
 (`holds_anonHavoc`); the invariant holds at every head by induction on the
 iterations (`Loop.run_induct`).  Under the diamond the body is read under the
 variant's local (`Prog.wk up`), which it therefore keeps (`Prog.run_wk`), and
-the variant bounds the iterations left (`Loop.run_variant`).
+the variant bounds the iterations left (`Loop.run_variant`), and the
+rule's cover (`Fml.invCases`) that the condition reads as a `bool`.
 
 The body's own locals are popped at the end of every iteration, so the
 frame need not list them (`Calculus/Core/Blocks.lean`): the anonymised
@@ -174,21 +175,15 @@ theorem evalBinop_cmp_true {op : BinOp} (hop : op = .lt ∨ op = .le) {a : Value
         refine ⟨x, y, rfl, rfl, fun hh => ?_, fun hh => ?_⟩ <;>
           first | exact of_decide_eq_true h' | cases hh
 
-/-- A condition that reads as a `bool` wherever it returns (M4a's typed
-values make it true of every condition; today's rule proves it as its cover
-goal). -/
-def Val.BoolValued {Γ : Ctx} (c : Val C Γ .bool) : Prop :=
-  ∀ (τ : State C Γ) (v : Value), c.eval τ = .ok v → ∃ b : Bool, v = .bool b
-
 section Diamond
 
 variable {Γ Γ₁ : Ctx}
 
-/-- **`whileInvariantDiamond` is sound**, where the condition reads as a
-`bool`. -/
+/-- **`whileInvariantDiamond` is sound**: the cover (`Fml.invCases`) says the
+condition reads as a `bool` at every head. -/
 theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
     (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
-    (hf : body.frame = some (xs, hv)) (hcb : c.BoolValued) (σ : State C Γ) {p : Premise C Γ Γ}
+    (hf : body.frame = some (xs, hv)) (σ : State C Γ) {p : Premise C Γ Γ}
     (hp : loopStep k .diamond (.inv I (some d)) c body = some p) :
     Premise.Sound .diamond (.loop (.inv I (some d)) c body) p σ := by
   unfold loopStep at hp
@@ -233,8 +228,12 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   | error e => rw [hd, hc] at hX; exact False.elim hX
   | ok cv =>
   rw [hd, hc] at hX
-  obtain ⟨b, rfl⟩ := hcb τ cv hc
-  obtain ⟨hT, hF⟩ := hX
+  obtain ⟨hT, hF, hcov⟩ := hX
+  have hcb : ∃ b : Bool, cv = .bool b :=
+    Classical.byContradiction fun hn => hcov
+      ⟨fun h => hn ⟨true, Except.ok.inj ((holds_isBoolD _ _ _).1 h)⟩,
+        fun h => hn ⟨false, Except.ok.inj ((holds_isBoolD _ _ _).1 h)⟩⟩
+  obtain ⟨b, rfl⟩ := hcb
   refine ⟨dv, hd, ?_, fun hc' => ?_, fun hc' => ?_⟩
   · cases b
     · exact .inr hc
@@ -296,10 +295,9 @@ end Diamond
 /-! ## The rule of a loop -/
 
 /-- **The rule of a loop is sound**: unwound, ended, by its invariant, or
-closed to `false`; under the diamond, where the condition reads as a `bool`
-(the cover goal today's rules prove; M4a's typed values make it true). -/
+closed to `false`. -/
 theorem Stmt.stepSound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ)
-    (c : Val C Γ .bool) (body : Prog C Γ Γ₁) (hcb : m = .diamond → c.BoolValued) :
+    (c : Val C Γ .bool) (body : Prog C Γ Γ₁) :
     Stmt.StepSound k m (.loop a c body) := by
   intro σ _ p hp
   change loopStep k m a c body = some p at hp
@@ -338,6 +336,6 @@ theorem Stmt.stepSound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopA
           dsimp only at hp
           cases hp
           exact Premise.Sound.fail _ σ
-        | some d => exact Premise.Sound.whileInvDiamond k I c d body hf (hcb rfl) σ hp
+        | some d => exact Premise.Sound.whileInvDiamond k I c d body hf σ hp
 
 end Solidity.Core
