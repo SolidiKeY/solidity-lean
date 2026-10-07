@@ -348,5 +348,347 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Core.Args C Γ ps
 
 end Calls
 
+
+/-! ## One lemma per family
+
+What `inFrag` admits of each statement with no sub-program, and that
+statement's lemma of `Evm/CoreStmt.lean`. -/
+
+section Families
+
+variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : Solidity.Core.State C Γ} {m : Machine}
+
+theorem assign_family {T : Ty} (l : Solidity.Core.Loc C Γ T) (r : Solidity.Core.Src C Γ T)
+    {F' : Frag Γ} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.assign l r) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.assign l r))
+      (run (compileStmt b (.assign l r)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  cases r with
+  | val v =>
+    simp only [assignIn, Bool.and_eq_true] at hok
+    exact assign_sim l v hm hok.1 hok.2
+  | copy q hq =>
+    simp only [assignIn, Bool.and_eq_true] at hok
+    exact copy_sim l q hq hok.1.1 hm hok.1.2 hok.2
+
+theorem rebind_family {R : RefTy} (i : Idx Γ (.alias R)) (r : Solidity.Core.ARhs C Γ R)
+    {F' : Frag Γ} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.rebind i r) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.rebind i r))
+      (run (compileStmt b (.rebind i r)) m) m := by
+  cases r with
+  | path q => simp only [inFrag] at hw; exact rebind_sim i q hm hw
+  | push _ _ => simp only [inFrag, reduceCtorEq] at hw
+
+theorem assignLocal_family {p : PrimTy} (i : Idx Γ (.val p)) (r : Solidity.Core.Val C Γ p)
+    {F' : Frag Γ} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.assignLocal i r) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.assignLocal i r))
+      (run (compileStmt b (.assignLocal i r)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  exact assignLocal_sim i r hm hok
+
+theorem declLocal_family (p : PrimTy) (x : Var) (init : Option (Solidity.Core.Val C Γ p))
+    {F' : Frag (.val p :: Γ)} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.declLocal p x init) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.declLocal p x init))
+      (run (compileStmt b (.declLocal p x init)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  cases init with
+  | none => exact declLocal_sim p none hm hok
+  | some e => exact declLocal_sim p (some e) hm hok
+
+theorem declStorage_family (R : RefTy) (x : Var) (init : Option (Solidity.Core.ARhs C Γ R))
+    {F' : Frag (.alias R :: Γ)} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.declStorage R x init) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.declStorage R x init))
+      (run (compileStmt b (.declStorage R x init)) m) m := by
+  simp only [inFrag] at hw
+  rcases init with _ | (q | _)
+  · simp only [declStorageIn, Option.some.injEq] at hw
+    subst hw
+    exact .inl ⟨σ.push (t := .alias R) none, m, rfl, rfl, rfl, Keeps.refl m, hm.pushDead R none⟩
+  · exact declAlias_sim q hm hw
+  · simp only [declStorageIn, reduceCtorEq] at hw
+
+theorem opAssign_family {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hpn : p.isNumeric = true) (l : Solidity.Core.OpLoc C Γ p) (r : Solidity.Core.Val C Γ p)
+    {F' : Frag Γ} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.opAssign op hop hpn l r) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.opAssign op hop hpn l r))
+      (run (compileStmt b (.opAssign op hop hpn l r)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at hok
+  obtain ⟨⟨hp, hl⟩, hr⟩ := hok
+  cases l with
+  | «local» i => exact opLocal_sim hp hop i r hm hr
+  | root rt h => exact opStore_sim hp hop rfl r hm hl hr
+  | field q f h => exact opStore_sim hp hop rfl r hm hl hr
+  | index it q i => exact opStore_sim hp hop rfl r hm hl hr
+  | mfield _ _ _ => simp [opLocIn, opLocToLoc] at hl
+  | mindex _ _ _ => simp [opLocIn, opLocToLoc] at hl
+
+theorem incDec_family {p : PrimTy} (op : IncDec) (hpn : p.isNumeric = true)
+    (l : Solidity.Core.OpLoc C Γ p) {F' : Frag Γ} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.incDec op hpn l) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.incDec op hpn l))
+      (run (compileStmt b (.incDec op hpn l)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at hok
+  obtain ⟨hp, hl⟩ := hok
+  cases l with
+  | «local» i => exact bumpLocal_sim hp op i hm
+  | root rt h => exact bumpStore_sim hp op rfl hm hl
+  | field q f h => exact bumpStore_sim hp op rfl hm hl
+  | index it q i => exact bumpStore_sim hp op rfl hm hl
+  | mfield _ _ _ => simp [opLocIn, opLocToLoc] at hl
+  | mindex _ _ _ => simp [opLocIn, opLocToLoc] at hl
+
+theorem assignIncDec_family {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
+    (hpn : p.isNumeric = true) (l : Solidity.Core.OpLoc C Γ p) (hs : l.recvSimple = true)
+    {F' : Frag Γ} (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m)
+    (hw : inFrag F (.assignIncDec i op hpn l hs) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.assignIncDec i op hpn l hs))
+      (run (compileStmt b (.assignIncDec i op hpn l hs)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at hok
+  obtain ⟨hp, hl⟩ := hok
+  cases l with
+  | «local» j => exact assignBumpLocal_sim hp op i j hm
+  | root rt h => exact assignBumpStore_sim hp op i rfl hm hl
+  | field q f h => exact assignBumpStore_sim hp op i rfl hm hl
+  | index it q j => exact assignBumpStore_sim hp op i rfl hm hl
+  | mfield _ _ _ => simp [opLocIn, opLocToLoc] at hl
+  | mindex _ _ _ => simp [opLocIn, opLocToLoc] at hl
+
+theorem push_family {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
+    (v : Option (Solidity.Core.Src C Γ E)) (hd : (v.isSome || E.defaultOkS) = true) {F' : Frag Γ}
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hw : inFrag F (.push q v hd) = some F')
+    (hL : L + 1 ≤ Lmax) :
+    StmtOut C (L + 1) b F' false false false (Solidity.Core.Stmt.run σ (.push q v hd))
+      (run (compileStmt b (.push q v hd)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  exact push_sim q v hm hok hL
+
+theorem pop_family {E : Ty} (q : Solidity.Core.SPath C Γ (.array E)) {F' : Frag Γ}
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hw : inFrag F (.pop q) = some F') :
+    StmtOut C L b F' true false false (Solidity.Core.Stmt.run σ (.pop q))
+      (run (compileStmt b (.pop q)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  exact pop_sim q hm hok
+
+theorem delete_family {T : Ty} (l : Solidity.Core.Loc C Γ T) {F' : Frag Γ}
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hw : inFrag F (.delete l) = some F') :
+    StmtOut C L b F' true false false (Solidity.Core.Stmt.run σ (.delete l))
+      (run (compileStmt b (.delete l)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  exact delete_sim l hm hok
+
+theorem transfer_family (r a : Solidity.Core.Val C Γ .uint) {F' : Frag Γ}
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hw : inFrag F (.transfer r a) = some F') :
+    StmtOut C L b F' false true false (Solidity.Core.Stmt.run σ (.transfer r a))
+      (run (compileStmt b (.transfer r a)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  simp only [Bool.and_eq_true] at hok
+  exact transfer_sim r a hm hok.1 hok.2
+
+theorem require_family (c : Solidity.Core.Val C Γ .bool) {F' : Frag Γ}
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hw : inFrag F (.require c) = some F') :
+    StmtOut C L b F' false false false (Solidity.Core.Stmt.run σ (.require c))
+      (run (compileStmt b (.require c)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  exact require_sim c hm hok
+
+theorem assert_family (c : Solidity.Core.Val C Γ .bool) {F' : Frag Γ}
+    (hm : Sim C L b F σ.glob (Look.ofEnv σ.env) m) (hw : inFrag F (.assert c) = some F') :
+    StmtOut C L b F' false false true (Solidity.Core.Stmt.run σ (.assert c))
+      (run (compileStmt b (.assert c)) m) m := by
+  simp only [inFrag] at hw
+  obtain ⟨hok, rfl⟩ := Frag.guard_some hw
+  exact assert_sim c hm hok
+
+/-- What `inFrag` admits of a branch. -/
+theorem ite_frag {Γ₁ Γ₂ : Ctx} {c : Solidity.Core.Val C Γ .bool} {t : Solidity.Core.Prog C Γ Γ₁}
+    {e : Solidity.Core.Prog C Γ Γ₂} {F' : Frag Γ} (hw : inFrag F (.ite c t e) = some F') :
+    valIn F c = true ∧ ∃ F₁ F₂, inFragP F t = some F₁ ∧ inFragP F e = some F₂ ∧
+      F' = (F₁.restrict Γ).meet (F₂.restrict Γ) := by
+  simp only [inFrag] at hw
+  split at hw
+  · rename_i hc
+    split at hw
+    · rename_i F₁ F₂ ht he
+      cases hw
+      exact ⟨hc, F₁, F₂, ht, he, rfl⟩
+    · cases hw
+  · cases hw
+
+/-- What `inFrag` admits of a block. -/
+theorem block_frag {Γ₁ : Ctx} {body : Solidity.Core.Prog C Γ Γ₁} {F' : Frag Γ}
+    (hw : inFrag F (.block body) = some F') :
+    ∃ G, inFragP F body = some G ∧ F' = G.restrict Γ := by
+  simp only [inFrag, Option.map_eq_some_iff] at hw
+  obtain ⟨G, hG, rfl⟩ := hw
+  exact ⟨G, hG, rfl⟩
+
+/-- What `inFrag` admits of a call. -/
+theorem call_frag {Γ' ps rs Γf : Ctx} {f : Name} {args : Solidity.Core.Args C Γ ps}
+    {ret : Solidity.Core.CallRet Γ rs Γ'} {body : Solidity.Core.Prog C (rs ++ ps) Γf}
+    {F' : Frag Γ'} (hw : inFrag F (.call f args ret body) = some F') :
+    argsIn F args = true ∧ (∃ G, inFragP (Frag.init (rs ++ ps)) body = some G) ∧
+      CallRetIn (F.after (Prog.shrinks body)) ret = some F' := by
+  simp only [inFrag] at hw
+  split at hw
+  · rename_i ha
+    split at hw
+    · rename_i G hG
+      exact ⟨ha, ⟨G, hG⟩, hw⟩
+    · cases hw
+  · cases hw
+
+end Families
+
+
+/-! ## Statements and blocks -/
+
+section Sim
+
+variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : Solidity.Core.State C Γ} {m : Machine}
+
+/-- **A sequence**: the first statement, then the rest from where it left
+both; after a refused payment the machine has stopped, and the interpreter
+goes on from the world that paid. -/
+theorem seq_sim {Γ₁ Γ₂ : Ctx} (s : Solidity.Core.Stmt C Γ Γ₁) (P : Solidity.Core.Prog C Γ₁ Γ₂)
+    {L₁ L₂ : Nat} {F₁ : Frag Γ₁} {F₂ : Frag Γ₂} {sh₁ p₁ a₁ sh₂ p₂ a₂ : Bool}
+    (hs : StmtOut C L₁ b F₁ sh₁ p₁ a₁ (Solidity.Core.Stmt.run σ s) (run (compileStmt b s) m) m)
+    (hP : ∀ {τ : Solidity.Core.State C Γ₁} {m₁ : Machine},
+      Sim C L₁ b F₁ τ.glob (Look.ofEnv τ.env) m₁ →
+      StmtOut C L₂ b F₂ sh₂ p₂ a₂ (Solidity.Core.Prog.run τ P) (run (compileProg b P) m₁) m₁) :
+    StmtOut C L₂ b F₂ (sh₁ || sh₂) (p₁ || p₂) (a₁ || a₂)
+      (Solidity.Core.Prog.run σ (.cons s P)) (run (compileProg b (.cons s P)) m) m := by
+  rw [Solidity.Core.Prog.run_cons]
+  simp only [compileProg]
+  rcases hs with ⟨τ₁, m₁, hτ₁, hrun₁, hst₁, hk₁, hm₁⟩ | ⟨hτ₁, hrun₁⟩ | ⟨ha₁, hτ₁, hrun₁⟩ |
+      ⟨hp₁, hrun₁, τ₁, m₁, hτ₁, hk₁, hm₁⟩
+  · rw [run_append_ok hrun₁, hτ₁]
+    rcases hP hm₁ with ⟨τ₂, m₂, hτ₂, hrun₂, hst₂, hk₂, hm₂⟩ | ⟨hτ₂, hrun₂⟩ | ⟨ha₂, hτ₂, hrun₂⟩ |
+        ⟨hp₂, hrun₂, τ₂, m₂, hτ₂, hk₂, hm₂⟩
+    · exact .inl ⟨τ₂, m₂, hτ₂, hrun₂, hst₂.trans hst₁, hk₁.trans hk₂, hm₂⟩
+    · exact .inr ⟨hτ₂, hrun₂⟩
+    · exact .panic (by simp only [ha₂, Bool.or_true]) ⟨hτ₂, hrun₂⟩
+    · exact .refused (by simp only [hp₂, Bool.or_true]) ⟨hrun₂, τ₂, m₂, hτ₂, hk₁.trans hk₂, hm₂⟩
+  · exact .inr ⟨by rw [hτ₁]; rfl, run_append_revert hrun₁⟩
+  · exact .panic (by simp only [ha₁, Bool.true_or]) ⟨by rw [hτ₁]; rfl, run_append_revert hrun₁⟩
+  · -- the machine stopped at a refused payment; the interpreter goes on
+    rw [run_append_revert hrun₁, hτ₁]
+    rcases hP hm₁ with ⟨τ₂, m₂, hτ₂, -, -, hk₂, hm₂⟩ | ⟨hτ₂, -⟩ | ⟨ha₂, hτ₂, -⟩ |
+        ⟨-, -, τ₂, m₂, hτ₂, hk₂, hm₂⟩
+    · exact .refused (by simp only [hp₁, Bool.true_or]) ⟨rfl, τ₂, m₂, hτ₂, hk₁.trans hk₂, hm₂⟩
+    · exact .inr ⟨hτ₂, rfl⟩
+    · exact .panic (by simp only [ha₂, Bool.or_true]) ⟨hτ₂, rfl⟩
+    · exact .refused (by simp only [hp₁, Bool.true_or]) ⟨rfl, τ₂, m₂, hτ₂, hk₁.trans hk₂, hm₂⟩
+
+mutual
+
+/-- **A statement's code does what the statement does**: both succeed, the
+machine's stack as it was, the cells below the frame and (unless it may
+shrink one) every array's length kept, and the states related; or both
+revert; or, in code with an `assert`, the interpreter panics where the
+machine reverts; or, in code that pays, the world refuses a payment and the
+machine alone reverts.
+
+Example: `alice.age = 10;` is `PUSH 10; PUSH @11; PUSH 2; ADD; SSTORE`, which
+writes slot `13`; `require(total > 3);` with `total = 2` reverts in both. -/
+theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Core.Stmt C Γ Γ') {L b : Nat} {F : Frag Γ}
+    {F' : Frag Γ'} {σ : Solidity.Core.State C Γ} {m : Machine},
+    Sim C L b F σ.glob (Look.ofEnv σ.env) m → inFrag F s = some F' → L + Stmt.pushes s ≤ Lmax →
+      StmtOut C (L + Stmt.pushes s) b F' (Stmt.shrinks s) (Stmt.pays s) (Stmt.asserts s)
+        (Solidity.Core.Stmt.run σ s) (run (compileStmt b s) m) m
+  | _, _, .assign l r, _, _, _, _, _, _, hm, hw, _ => assign_family l r hm hw
+  | _, _, .rebind i r, _, _, _, _, _, _, hm, hw, _ => rebind_family i r hm hw
+  | _, _, .assignLocal i r, _, _, _, _, _, _, hm, hw, _ => assignLocal_family i r hm hw
+  | _, _, .declLocal p x init, _, _, _, _, _, _, hm, hw, _ => declLocal_family p x init hm hw
+  | _, _, .declStorage R x init, _, _, _, _, _, _, hm, hw, _ =>
+    declStorage_family R x init hm hw
+  | _, _, .opAssign op hop hp l r, _, _, _, _, _, _, hm, hw, _ =>
+    opAssign_family op hop hp l r hm hw
+  | _, _, .incDec op hp l, _, _, _, _, _, _, hm, hw, _ => incDec_family op hp l hm hw
+  | _, _, .assignIncDec i op hp l hs, _, _, _, _, _, _, hm, hw, _ =>
+    assignIncDec_family i op hp l hs hm hw
+  | _, _, .push q v hd, _, _, _, _, _, _, hm, hw, hL => push_family q v hd hm hw hL
+  | _, _, .pop q, _, _, _, _, _, _, hm, hw, _ => pop_family q hm hw
+  | _, _, .transfer r a, _, _, _, _, _, _, hm, hw, _ => transfer_family r a hm hw
+  | _, _, .delete l, _, _, _, _, _, _, hm, hw, _ => delete_family l hm hw
+  | _, _, .require c, _, _, _, _, _, _, hm, hw, _ => require_family c hm hw
+  | _, _, .assert c, _, _, _, _, _, _, hm, hw, _ => assert_family c hm hw
+  | _, _, .revert, _, _, _, _, _, _, _, _, _ => .inr ⟨rfl, rfl⟩
+  | _, _, .ite c t e, L, _, _, _, _, _, hm, hw, hL => by
+    obtain ⟨hwc, F₁, F₂, ht, he, rfl⟩ := ite_frag hw
+    have hL' : L + (Prog.pushes t + Prog.pushes e) ≤ Lmax := hL
+    exact ite_sim c t e hm hwc ((prog_sim t hm ht (by omega)).mono (by omega) hL')
+      ((prog_sim e hm he (by omega)).mono (by omega) hL')
+  | _, _, .block body, _, _, _, _, _, _, hm, hw, hL => by
+    obtain ⟨G, hb, rfl⟩ := block_frag hw
+    exact block_sim body (prog_sim body hm hb hL)
+  | _, _, .call f args ret body, L, _, _, _, _, _, hm, hw, hL => by
+    obtain ⟨hwa, ⟨G, hb⟩, hret⟩ := call_frag hw
+    cases ret with
+    | none =>
+      cases hret
+      exact callNone_sim f args body (Nat.le_add_right _ _) hm hwa
+        fun hm₂ => ⟨G, prog_sim body hm₂ hb hL⟩
+    | val p r res =>
+      cases hret
+      exact callVal_sim f args p r res body (Nat.le_add_right _ _) hm hwa
+        fun hm₂ => ⟨G, prog_sim body hm₂ hb hL⟩
+    | rets _ => cases hret
+    | mem _ _ _ _ => cases hret
+  | _, _, .send .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .declMem .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .rebindMem .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .assignFromMem .., _, _, _, _, _, _, _, hw, _ => by
+    simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .assignMem .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .deleteMem .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .assignNew .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .tryCall .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .loop .., _, _, _, _, _, _, _, hw, _ => by simp only [inFrag, reduceCtorEq] at hw
+
+/-- A block's code does what the block does. -/
+theorem prog_sim : ∀ {Γ Γ' : Ctx} (P : Solidity.Core.Prog C Γ Γ') {L b : Nat} {F : Frag Γ}
+    {F' : Frag Γ'} {σ : Solidity.Core.State C Γ} {m : Machine},
+    Sim C L b F σ.glob (Look.ofEnv σ.env) m → inFragP F P = some F' → L + Prog.pushes P ≤ Lmax →
+      StmtOut C (L + Prog.pushes P) b F' (Prog.shrinks P) (Prog.pays P) (Prog.asserts P)
+        (Solidity.Core.Prog.run σ P) (run (compileProg b P) m) m
+  | _, _, .nil, _, _, _, _, σ, m, hm, hw, _ => by
+    simp only [inFragP, Option.some.injEq] at hw
+    subst hw
+    exact .inl ⟨σ, m, rfl, rfl, rfl, Keeps.refl m, hm⟩
+  | _, _, .cons s P, L, _, _, _, _, _, hm, hw, hL => by
+    simp only [inFragP] at hw
+    split at hw
+    · rename_i F₁ hs
+      have hL' : L + (Stmt.pushes s + Prog.pushes P) ≤ Lmax := hL
+      have he : Prog.pushes (.cons s P) = Stmt.pushes s + Prog.pushes P := rfl
+      rw [he] at hL ⊢
+      exact seq_sim s P (stmt_sim s hm hs (by omega))
+        fun hm₁ => (prog_sim P hm₁ hw (by omega)).mono (by omega) hL'
+    · cases hw
+
+end
+
+end Sim
+
 end Core
 end Solidity.Evm
