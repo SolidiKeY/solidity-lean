@@ -1,5 +1,6 @@
 import Solidity.Evm.Correctness
 import Solidity.Evm.CoreCompile
+import Solidity.Semantics.Core.TypedRun
 
 /-!
 # The simulation over the scoped syntax
@@ -8,12 +9,15 @@ import Solidity.Evm.CoreCompile
 compiler (`docs/intrinsic.md`, M5): a local is read by its position and
 lives at its level (`lvl b i`), not under its name.
 
-**The locals by position.**  `Look Γ` is what each local of `Γ` holds, as
-the simulation reads it: M3's `Env Γ` (computed from `Γ`, `Unit` and
-`t.Denote × Env Γ`) instantiates it by `Env.get` and the binding a denotation
-stands for.  Declaring a local is `Look.cons` (the `Env`'s pair), a scope end
-`Look.drop` along an `Ext` (the `Env`'s projections), an assignment
-`Look.set`.  So `Sim.bindVal`/`bindAlias`/`bindFragile`/`unbind` become
+**The locals by position.**  `Look C Γ` is what each local of `Γ` holds, as
+the simulation reads it (`Seen`: a value of its type, the storage reference
+an alias holds): the typed run's `TEnv` instantiates it (`Look.ofTEnv`,
+`Evm/CoreExpr.lean`), forgetting the heap typing, so a call that grows the
+heap leaves the caller's locals read as they were.  Declaring a local is
+`Look.cons` (`TEnv`'s pair), a scope end `Look.drop` along an `Ext`, an
+assignment `Look.set` (by recursion on the position, as `TEnv.set`).  A
+value local's cell represents its value outright (`ReprV p (PrimTy.erase
+v)`).  So `Sim.bindVal`/`bindAlias`/`bindFragile`/`unbind` become
 `Sim.consVal`/`consAlias`/`consFragile`/`consDead`, and `Sim.weaken`, which
 forgot names a branch declared, becomes `Sim.drop` (the branch's locals
 popped) and `Sim.flags` (the branches met, the fragile aliases forgotten).
@@ -26,9 +30,8 @@ a cell leaves it (`exec_mem`), so the caller's `Sim` survives the call:
 `Sim.return` (`returnDrop` after a callee that may shrink an array) puts the
 caller's locals back over the machine the callee left.
 
-What needs the typed interpreter (`Core.Stmt.run`, M3) is not here: the
-expression and statement lemmas (`val_sim` … `stmt_sim`) and
-`compile_correct` over `Core`.
+What needs the typed run (`Core.Stmt.trun`) is not here: the expression and
+statement lemmas (`val_sim` … `stmt_sim`) and `compile_correct` over `Core`.
 -/
 
 namespace Solidity.Evm
@@ -83,27 +86,62 @@ theorem memAt_upd (m : Machine) (l l' : Nat) (w : Word) :
 
 /-! ## The locals by position -/
 
-/-- What each local of `Γ` holds, by position. -/
-abbrev Look (Γ : Ctx) := ∀ {t : CLTy}, Idx Γ t → Binding
+/-- What the simulation reads of a local of type `t`: a value of its type,
+the storage reference an alias holds (`none` while unset); nothing of a
+memory reference, a whole storage or a ledger, which the fragment has
+none of. -/
+@[reducible] def Seen (C : Contract) : CLTy → Type
+  | .val p => p.Denote
+  | .alias R => Option (Solidity.Core.SRef C (.ref R))
+  | .mem _ | .old | .oldNet => Unit
 
-/-- A local declared: `Env.cons`. -/
-def Look.cons {Γ : Ctx} {u : CLTy} (v : Binding) (ρ : Look Γ) : Look (u :: Γ) :=
+/-- What each local of `Γ` holds, by position, as the simulation reads it:
+`TEnv.get` of the typed run's locals, seen (`Look.ofTEnv`). -/
+abbrev Look (C : Contract) (Γ : Ctx) := ∀ {t : CLTy}, Idx Γ t → Seen C t
+
+/-- A local declared: `TEnv`'s pair. -/
+def Look.cons {Γ : Ctx} {u : CLTy} (v : Seen C u) (ρ : Look C Γ) : Look C (u :: Γ) :=
   fun {t} i => match t, i with
     | _, .here => v
     | _, .there j => ρ j
 
-/-- A local assigned. -/
-def Look.set {Γ : Ctx} {t : CLTy} (ρ : Look Γ) (i : Idx Γ t) (v : Binding) : Look Γ :=
-  fun j => if j.toNat = i.toNat then v else ρ j
+/-- The locals below the innermost. -/
+def Look.tail {Γ : Ctx} {u : CLTy} (ρ : Look C (u :: Γ)) : Look C Γ := fun j => ρ (.there j)
+
+/-- A local assigned: `TEnv.set`, by recursion on the position. -/
+def Look.set : {Γ : Ctx} → {t : CLTy} → Look C Γ → Idx Γ t → Seen C t → Look C Γ
+  | _ :: _, _, ρ, .here, v => Look.cons v ρ.tail
+  | _ :: _, _, ρ, .there i, v => Look.cons (ρ .here) (Look.set ρ.tail i v)
 
 /-- A scope's locals popped. -/
-def Look.drop {Γ Δ : Ctx} (h : Ext Γ Δ) (ρ : Look Δ) : Look Γ := fun i => ρ (i.ext h)
+def Look.drop {Γ Δ : Ctx} (h : Ext Γ Δ) (ρ : Look C Δ) : Look C Γ := fun i => ρ (i.ext h)
 
-@[simp] theorem Look.cons_here {Γ : Ctx} {u : CLTy} (v : Binding) (ρ : Look Γ) :
+@[simp] theorem Look.cons_here {Γ : Ctx} {u : CLTy} (v : Seen C u) (ρ : Look C Γ) :
     Look.cons (u := u) v ρ .here = v := rfl
 
-@[simp] theorem Look.cons_there {Γ : Ctx} {u t : CLTy} (v : Binding) (ρ : Look Γ) (j : Idx Γ t) :
-    Look.cons (u := u) v ρ (.there j) = ρ j := rfl
+@[simp] theorem Look.cons_there {Γ : Ctx} {u t : CLTy} (v : Seen C u) (ρ : Look C Γ)
+    (j : Idx Γ t) : Look.cons (u := u) v ρ (.there j) = ρ j := rfl
+
+/-- Two positions with one number are one. -/
+theorem Idx.eq_of_toNat {Γ : Ctx} {t : CLTy} : (i j : Idx Γ t) → i.toNat = j.toNat → i = j
+  | .here, .here, _ => rfl
+  | .there i, .there j, h => by
+    rw [Idx.eq_of_toNat i j (by simp only [Idx.toNat, Nat.add_right_cancel_iff] at h; exact h)]
+  | .here, .there j, h => by simp only [Idx.toNat, Nat.zero_ne_add_one] at h
+  | .there i, .here, h => by simp only [Idx.toNat, Nat.add_one_ne_zero] at h
+
+theorem Look.set_same : {Γ : Ctx} → {t : CLTy} → (ρ : Look C Γ) → (i : Idx Γ t) →
+    (v : Seen C t) → Look.set ρ i v i = v
+  | _ :: _, _, _, .here, _ => rfl
+  | _ :: _, _, ρ, .there i, v => Look.set_same ρ.tail i v
+
+theorem Look.set_other : {Γ : Ctx} → {t t' : CLTy} → (ρ : Look C Γ) → (i : Idx Γ t) →
+    (v : Seen C t) → (j : Idx Γ t') → j.toNat ≠ i.toNat → Look.set ρ i v j = ρ j
+  | _ :: _, _, _, _, .here, _, .here, h => absurd rfl h
+  | _ :: _, _, _, _, .here, _, .there _, _ => rfl
+  | _ :: _, _, _, _, .there _, _, .here, _ => rfl
+  | _ :: _, _, _, _, .there i, v, .there j, h =>
+    Look.set_other _ i v j (fun h' => h (by simp only [Idx.toNat, h']))
 
 /-! ## What the fragment knows, by position -/
 
@@ -164,17 +202,18 @@ end Frag
 
 /-! ## The simulation relation -/
 
-/-- The machine `m` represents the state `σ` (its storage, ledger and
+/-- The machine `m` represents the global state `σ` (its storage, ledger and
 transaction; `σ.env` is not read) and the locals `ρ` of `Γ`, which a frame
 based at `b` keeps at their levels, and of whose aliases the fragment knows
-`F`. -/
-structure Sim (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State) (ρ : Look Γ)
+`F`.  A value local is represented by its cell outright (`ReprV` of the
+value it holds), an alias by the slot of the path its reference names. -/
+structure Sim (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State) (ρ : Look C Γ)
     (m : Machine) : Prop where
   store : ReprStore C L m.store σ.storage
-  vals : ∀ {p : PrimTy} (i : Idx Γ (.val p)), ∃ v, ρ i = .val v ∧ ReprV p v (m.memAt (lvl b i))
+  vals : ∀ {p : PrimTy} (i : Idx Γ (.val p)), ReprV p (PrimTy.erase (ρ i)) (m.memAt (lvl b i))
   aliases : ∀ {R : RefTy} (i : Idx Γ (.alias R)), F.get i = .ok →
-    ∃ r segs s, ρ i = .spath r segs ∧ m.memAt (lvl b i) = .slot s ∧
-      PathSlot C true r segs (.ref R) s
+    ∃ r s, ρ i = some r ∧ m.memAt (lvl b i) = .slot s ∧
+      PathSlot C true r.root r.path.erase (.ref R) s
   /-- `net(a)` is what `a`'s account lost, at every address but the
   contract's own. -/
   net : ∀ a : Nat, a < W → a ≠ m.self → σ.getNet a = (m.bal₀ a : Int) - m.bal a
@@ -185,12 +224,13 @@ structure Sim (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State) (
   /-- A fragile alias: its cell holds the slot of a path that indexes an
   array, and that path is in bounds. -/
   fragile : ∀ {R : RefTy} (i : Idx Γ (.alias R)), F.get i = .fragile →
-    ∃ r segs s, ρ i = .spath r segs ∧ m.memAt (lvl b i) = .slot s ∧
-      PathSlot C false r segs (.ref R) s ∧ ∃ sv, σ.findLive r segs = .ok sv
+    ∃ r s, ρ i = some r ∧ m.memAt (lvl b i) = .slot s ∧
+      PathSlot C false r.root r.path.erase (.ref R) s ∧
+      ∃ sv, σ.findLive r.root r.path.erase = .ok sv
   /-- `msg.sender`, `msg.value`, `block.timestamp`, `address(this)`. -/
   env : EnvSim σ m
 
-variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : State} {ρ : Look Γ}
+variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : State} {ρ : Look C Γ}
 
 namespace Sim
 
@@ -221,8 +261,8 @@ theorem store' {m : Machine} (h : Sim C L b F σ ρ m) {st' : Slot → Nat}
     (hlen : ∀ x, LenSlot C x → m.store x ≤ st' x) :
     Sim C L b F { σ with storage := stor } ρ { m with store := st' } :=
   ⟨hs, h.vals, h.aliases, h.net, h.netSelf, h.bound, fun i hi => by
-    obtain ⟨r, segs, s, h1, h2, h3, h4⟩ := h.fragile i hi
-    exact ⟨r, segs, s, h1, h2, h3, live_mono (σ' := { σ with storage := stor }) h.store hs hlen h3 h4⟩,
+    obtain ⟨r, s, h1, h2, h3, h4⟩ := h.fragile i hi
+    exact ⟨r, s, h1, h2, h3, live_mono (σ' := { σ with storage := stor }) h.store hs hlen h3 h4⟩,
     h.env⟩
 
 /-- Forgetting what the fragment knew: every alias it still reads, it read
@@ -252,7 +292,7 @@ theorem storeDrop {m : Machine} (h : Sim C L b F σ ρ m) {st' : Slot → Nat}
   exact absurd rfl (Frag.get_dropFragile F i hi (by decide)).2
 
 /-- A scope's end: its locals popped, the enclosing ones where they were. -/
-theorem drop {Δ : Ctx} {G : Frag Δ} {ρ' : Look Δ} {m : Machine} (hΓ : Ext Γ Δ)
+theorem drop {Δ : Ctx} {G : Frag Δ} {ρ' : Look C Δ} {m : Machine} (hΓ : Ext Γ Δ)
     (h : Sim C L b G σ ρ' m) : Sim C L b (G.restrict Γ) σ (ρ'.drop hΓ) m := by
   refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
   · rw [← lvl_ext b hΓ]; exact h.vals (i.ext hΓ)
@@ -270,12 +310,20 @@ theorem congrMem {m : Machine} {mem : Var → Word} (h : Sim C L b F σ ρ m)
   · rw [e]; exact h.aliases i hi
   · rw [e]; exact h.fragile i hi
 
-/-! ### Declarations: `Env.cons` -/
+/-- `Sim` reads the locals pointwise. -/
+theorem congrLook {ρ' : Look C Γ} {m : Machine} (h : Sim C L b F σ ρ m)
+    (hρ : ∀ {t : CLTy} (i : Idx Γ t), ρ' i = ρ i) : Sim C L b F σ ρ' m := by
+  refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
+  · rw [hρ]; exact h.vals i
+  · rw [hρ]; exact h.aliases i hi
+  · rw [hρ]; exact h.fragile i hi
+
+/-! ### Declarations: `TEnv`'s pair -/
 
 /-- `uint x = e;`: the local pushed, its value in the cell of the next level. -/
-theorem consVal {m : Machine} (h : Sim C L b F σ ρ m) {p : PrimTy} {v : Value} {w : Word}
-    (hv : ReprV p v w) :
-    Sim C L b (F.push (.val p) .ok) σ (ρ.cons (.val v))
+theorem consVal {m : Machine} (h : Sim C L b F σ ρ m) {p : PrimTy} {v : p.Denote} {w : Word}
+    (hv : ReprV p (PrimTy.erase v) w) :
+    Sim C L b (F.push (.val p) .ok) σ (ρ.cons (u := .val p) v)
       { m with mem := upd m.mem (cell (b + Γ.length)) w } := by
   have e : ∀ {t : CLTy} (i : Idx Γ t),
       ({ m with mem := upd m.mem (cell (b + Γ.length)) w } : Machine).memAt (lvl b i) =
@@ -283,7 +331,7 @@ theorem consVal {m : Machine} (h : Sim C L b F σ ρ m) {p : PrimTy} {v : Value}
     rw [memAt_upd, if_neg (Nat.ne_of_lt (lvl_lt b i))]
   refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
   · cases i with
-    | here => exact ⟨v, rfl, by rw [lvl_here, memAt_upd, if_pos rfl]; exact hv⟩
+    | here => rw [lvl_here, memAt_upd, if_pos rfl]; exact hv
     | there j => rw [lvl_there, e]; exact h.vals j
   · cases i with
     | there j => rw [lvl_there, e]; exact h.aliases j hi
@@ -291,9 +339,10 @@ theorem consVal {m : Machine} (h : Sim C L b F σ ρ m) {p : PrimTy} {v : Value}
     | there j => rw [lvl_there, e]; exact h.fragile j hi
 
 /-- `Person storage p = alice;`: the local pushed, the slot in its cell. -/
-theorem consAlias {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} {r : Name}
-    {segs : List Seg} {s : Slot} (hp : PathSlot C true r segs (.ref R) s) :
-    Sim C L b (F.push (.alias R) .ok) σ (ρ.cons (.spath r segs))
+theorem consAlias {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy}
+    {r : Solidity.Core.SRef C (.ref R)} {s : Slot}
+    (hp : PathSlot C true r.root r.path.erase (.ref R) s) :
+    Sim C L b (F.push (.alias R) .ok) σ (ρ.cons (u := .alias R) (some r))
       { m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } := by
   have e : ∀ {t : CLTy} (i : Idx Γ t),
       ({ m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } : Machine).memAt (lvl b i) =
@@ -303,17 +352,18 @@ theorem consAlias {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} {r : Name}
   · cases i with
     | there j => rw [lvl_there, e]; exact h.vals j
   · cases i with
-    | here => exact ⟨r, segs, s, rfl, by rw [lvl_here, memAt_upd, if_pos rfl], hp⟩
+    | here => exact ⟨r, s, rfl, by rw [lvl_here, memAt_upd, if_pos rfl], hp⟩
     | there j => rw [lvl_there, e]; exact h.aliases j hi
   · cases i with
     | here => cases hi
     | there j => rw [lvl_there, e]; exact h.fragile j hi
 
 /-- `Person storage p = persons[i];`: a fragile alias pushed. -/
-theorem consFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} {r : Name}
-    {segs : List Seg} {s : Slot} (hp : PathSlot C false r segs (.ref R) s)
-    (hlive : ∃ sv, σ.findLive r segs = .ok sv) :
-    Sim C L b (F.push (.alias R) .fragile) σ (ρ.cons (.spath r segs))
+theorem consFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy}
+    {r : Solidity.Core.SRef C (.ref R)} {s : Slot}
+    (hp : PathSlot C false r.root r.path.erase (.ref R) s)
+    (hlive : ∃ sv, σ.findLive r.root r.path.erase = .ok sv) :
+    Sim C L b (F.push (.alias R) .fragile) σ (ρ.cons (u := .alias R) (some r))
       { m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } := by
   have e : ∀ {t : CLTy} (i : Idx Γ t),
       ({ m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } : Machine).memAt (lvl b i) =
@@ -326,13 +376,13 @@ theorem consFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} {r : Nam
     | here => cases hi
     | there j => rw [lvl_there, e]; exact h.aliases j hi
   · cases i with
-    | here => exact ⟨r, segs, s, rfl, by rw [lvl_here, memAt_upd, if_pos rfl], hp, hlive⟩
+    | here => exact ⟨r, s, rfl, by rw [lvl_here, memAt_upd, if_pos rfl], hp, hlive⟩
     | there j => rw [lvl_there, e]; exact h.fragile j hi
 
 /-- `Person storage p;`: an alias pushed that the fragment may not read
 (`unset`), its cell left. -/
-theorem consDead {m : Machine} (h : Sim C L b F σ ρ m) (R : RefTy) (v : Binding) :
-    Sim C L b (F.push (.alias R) .dead) σ (ρ.cons v) m := by
+theorem consDead {m : Machine} (h : Sim C L b F σ ρ m) (R : RefTy) (v : Seen C (.alias R)) :
+    Sim C L b (F.push (.alias R) .dead) σ (ρ.cons (u := .alias R) v) m := by
   refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
   · cases i with
     | there j => rw [lvl_there]; exact h.vals j
@@ -345,29 +395,31 @@ theorem consDead {m : Machine} (h : Sim C L b F σ ρ m) (R : RefTy) (v : Bindin
 
 /-! ### Assignments -/
 
-/-- `x = e;`: the local's binding and its cell change together. -/
+/-- `x = e;`: the local's value and its cell change together. -/
 theorem setVal {m : Machine} (h : Sim C L b F σ ρ m) {p : PrimTy} (i : Idx Γ (.val p))
-    {v : Value} {w : Word} (hv : ReprV p v w) :
-    Sim C L b F σ (ρ.set i (.val v)) { m with mem := upd m.mem (cellOf b i) w } := by
+    {v : p.Denote} {w : Word} (hv : ReprV p (PrimTy.erase v) w) :
+    Sim C L b F σ (ρ.set i v) { m with mem := upd m.mem (cellOf b i) w } := by
   have e : ∀ {t : CLTy} (j : Idx Γ t),
       ({ m with mem := upd m.mem (cellOf b i) w } : Machine).memAt (lvl b j) =
         if j.toNat = i.toNat then w else m.memAt (lvl b j) := fun j => by
     simp only [memAt_upd, lvl_eq_iff]
   refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env⟩
-  · simp only [Look.set, e]
+  · rw [e]
     by_cases hji : j.toNat = i.toNat
     · cases Idx.ty_eq j i hji
-      simp only [hji, ↓reduceIte]; exact ⟨v, rfl, hv⟩
-    · simp only [hji, ↓reduceIte]; exact h.vals j
+      cases Idx.eq_of_toNat j i hji
+      rw [if_pos rfl, Look.set_same]; exact hv
+    · rw [if_neg hji, Look.set_other ρ i v j hji]; exact h.vals j
   · have hji : ¬ j.toNat = i.toNat := fun hh => by cases Idx.ty_eq j i hh
-    simp only [Look.set, e, hji, ↓reduceIte]; exact h.aliases j hj
+    rw [e, if_neg hji, Look.set_other ρ i v j hji]; exact h.aliases j hj
   · have hji : ¬ j.toNat = i.toNat := fun hh => by cases Idx.ty_eq j i hh
-    simp only [Look.set, e, hji, ↓reduceIte]; exact h.fragile j hj
+    rw [e, if_neg hji, Look.set_other ρ i v j hji]; exact h.fragile j hj
 
 /-- `p = alice;`: an alias rebound to a path that indexes no array. -/
 theorem setAlias {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx Γ (.alias R))
-    {r : Name} {segs : List Seg} {s : Slot} (hp : PathSlot C true r segs (.ref R) s) :
-    Sim C L b (F.set i .ok) σ (ρ.set i (.spath r segs))
+    {r : Solidity.Core.SRef C (.ref R)} {s : Slot}
+    (hp : PathSlot C true r.root r.path.erase (.ref R) s) :
+    Sim C L b (F.set i .ok) σ (ρ.set i (some r))
       { m with mem := upd m.mem (cellOf b i) (.slot s) } := by
   have e : ∀ {t : CLTy} (j : Idx Γ t),
       ({ m with mem := upd m.mem (cellOf b i) (.slot s) } : Machine).memAt (lvl b j) =
@@ -375,15 +427,16 @@ theorem setAlias {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx Γ
     simp only [memAt_upd, lvl_eq_iff]
   refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env⟩
   · have hji : ¬ j.toNat = i.toNat := fun hh => by cases Idx.ty_eq j i hh
-    simp only [Look.set, e, hji, ↓reduceIte]; exact h.vals j
+    rw [e, if_neg hji, Look.set_other ρ i _ j hji]; exact h.vals j
   · rw [Frag.get_set] at hj
     by_cases hji : j.toNat = i.toNat
     · cases Idx.ty_eq j i hji
+      cases Idx.eq_of_toNat j i hji
       split at hj
-      · simp only [Look.set, e, hji, ↓reduceIte]; exact ⟨r, segs, s, rfl, rfl, hp⟩
-      · rw [Frag.get_eq_dead F j (by omega)] at hj; cases hj
+      · rw [e, if_pos rfl, Look.set_same]; exact ⟨r, s, rfl, rfl, hp⟩
+      · rw [Frag.get_eq_dead F _ (by omega)] at hj; cases hj
     · simp only [hji, false_and, ↓reduceIte] at hj
-      simp only [Look.set, e, hji, ↓reduceIte]; exact h.aliases j hj
+      rw [e, if_neg hji, Look.set_other ρ i _ j hji]; exact h.aliases j hj
   · rw [Frag.get_set] at hj
     by_cases hji : j.toNat = i.toNat
     · simp only [hji, true_and] at hj
@@ -391,13 +444,14 @@ theorem setAlias {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx Γ
       · cases hj
       · rw [Frag.get_eq_dead F j (by omega)] at hj; cases hj
     · simp only [hji, false_and, ↓reduceIte] at hj
-      simp only [Look.set, e, hji, ↓reduceIte]; exact h.fragile j hj
+      rw [e, if_neg hji, Look.set_other ρ i _ j hji]; exact h.fragile j hj
 
 /-- `p = persons[i];`: an alias rebound through an index, fragile. -/
 theorem setFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx Γ (.alias R))
-    {r : Name} {segs : List Seg} {s : Slot} (hp : PathSlot C false r segs (.ref R) s)
-    (hlive : ∃ sv, σ.findLive r segs = .ok sv) :
-    Sim C L b (F.set i .fragile) σ (ρ.set i (.spath r segs))
+    {r : Solidity.Core.SRef C (.ref R)} {s : Slot}
+    (hp : PathSlot C false r.root r.path.erase (.ref R) s)
+    (hlive : ∃ sv, σ.findLive r.root r.path.erase = .ok sv) :
+    Sim C L b (F.set i .fragile) σ (ρ.set i (some r))
       { m with mem := upd m.mem (cellOf b i) (.slot s) } := by
   have e : ∀ {t : CLTy} (j : Idx Γ t),
       ({ m with mem := upd m.mem (cellOf b i) (.slot s) } : Machine).memAt (lvl b j) =
@@ -405,7 +459,7 @@ theorem setFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx 
     simp only [memAt_upd, lvl_eq_iff]
   refine ⟨h.store, fun j => ?_, fun j hj => ?_, h.net, h.netSelf, h.bound, fun j hj => ?_, h.env⟩
   · have hji : ¬ j.toNat = i.toNat := fun hh => by cases Idx.ty_eq j i hh
-    simp only [Look.set, e, hji, ↓reduceIte]; exact h.vals j
+    rw [e, if_neg hji, Look.set_other ρ i _ j hji]; exact h.vals j
   · rw [Frag.get_set] at hj
     by_cases hji : j.toNat = i.toNat
     · simp only [hji, true_and] at hj
@@ -413,23 +467,24 @@ theorem setFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx 
       · cases hj
       · rw [Frag.get_eq_dead F j (by omega)] at hj; cases hj
     · simp only [hji, false_and, ↓reduceIte] at hj
-      simp only [Look.set, e, hji, ↓reduceIte]; exact h.aliases j hj
+      rw [e, if_neg hji, Look.set_other ρ i _ j hji]; exact h.aliases j hj
   · rw [Frag.get_set] at hj
     by_cases hji : j.toNat = i.toNat
     · cases Idx.ty_eq j i hji
+      cases Idx.eq_of_toNat j i hji
       split at hj
-      · simp only [Look.set, e, hji, ↓reduceIte]; exact ⟨r, segs, s, rfl, rfl, hp, hlive⟩
-      · rw [Frag.get_eq_dead F j (by omega)] at hj; cases hj
+      · rw [e, if_pos rfl, Look.set_same]; exact ⟨r, s, rfl, rfl, hp, hlive⟩
+      · rw [Frag.get_eq_dead F _ (by omega)] at hj; cases hj
     · simp only [hji, false_and, ↓reduceIte] at hj
-      simp only [Look.set, e, hji, ↓reduceIte]; exact h.fragile j hj
+      rw [e, if_neg hji, Look.set_other ρ i _ j hji]; exact h.fragile j hj
 
 /-! ### A call's frame -/
 
 /-- **Entering a call**: the callee's frame `Δ` (its parameters, then its
 return variable: values only) at base `b'`, every local readable, its
 values in their cells; the caller's storage, ledger and transaction. -/
-theorem enter {m : Machine} {Δ : Ctx} (b' : Nat) (h : Sim C L b F σ ρ m) (ρ' : Look Δ)
-    (hv : ∀ {p : PrimTy} (i : Idx Δ (.val p)), ∃ v, ρ' i = .val v ∧ ReprV p v (m.memAt (lvl b' i)))
+theorem enter {m : Machine} {Δ : Ctx} (b' : Nat) (h : Sim C L b F σ ρ m) (ρ' : Look C Δ)
+    (hv : ∀ {p : PrimTy} (i : Idx Δ (.val p)), ReprV p (PrimTy.erase (ρ' i)) (m.memAt (lvl b' i)))
     (hal : ∀ {R : RefTy}, Idx Δ (.alias R) → False) :
     Sim C L b' (Frag.init Δ) σ ρ' m :=
   ⟨h.store, hv, fun i _ => (hal i).elim, h.net, h.netSelf, h.bound, fun i _ => (hal i).elim, h.env⟩
@@ -440,7 +495,7 @@ caller's locals where they were (the callee stored above them,
 having lowered no array's length.  A callee that may (`Stmt.shrinks`) is
 `returnDrop`. -/
 theorem «return» {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : State}
-    {ρ' : Look Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
+    {ρ' : Look C Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
     (hmem : ∀ l, l < b + Γ.length → m'.memAt l = m.memAt l)
     (hlen : ∀ x, LenSlot C x → m.store x ≤ m'.store x) :
     Sim C L b F σ' ρ m' := by
@@ -450,14 +505,14 @@ theorem «return» {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : S
     h'.env⟩
   · rw [e]; exact h.vals i
   · rw [e]; exact h.aliases i hi
-  · obtain ⟨r, segs, s, h1, h2, h3, h4⟩ := h.fragile i hi
+  · obtain ⟨r, s, h1, h2, h3, h4⟩ := h.fragile i hi
     rw [e]
-    exact ⟨r, segs, s, h1, h2, h3, live_mono (σ' := σ') h.store h'.store hlen h3 h4⟩
+    exact ⟨r, s, h1, h2, h3, live_mono (σ' := σ') h.store h'.store hlen h3 h4⟩
 
 /-- Back from a call that may have shrunk an array: the caller's fragile
 aliases forgotten. -/
 theorem returnDrop {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : State}
-    {ρ' : Look Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
+    {ρ' : Look C Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
     (hmem : ∀ l, l < b + Γ.length → m'.memAt l = m.memAt l) :
     Sim C L b F.dropFragile σ' ρ m' := by
   have e : ∀ {t : CLTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=

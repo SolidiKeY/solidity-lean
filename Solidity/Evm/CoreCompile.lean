@@ -1,5 +1,6 @@
 import Solidity.Evm.Compile
 import Solidity.Syntax.Resolve
+import Solidity.Semantics.Core.StorageErase
 
 /-!
 # The compiler over the scoped syntax
@@ -218,12 +219,14 @@ def Frag.after {Γ : Ctx} (F : Frag Γ) (shrinks : Bool) : Frag Γ :=
 /-- `F` if the check passes. -/
 def Frag.guard {Γ : Ctx} (F : Frag Γ) (ok : Bool) : Option (Frag Γ) := if ok then some F else none
 
-/-- `l = r;` of the fragment: a value, or a copy of a static value. -/
+/-- `l = r;` of the fragment: a value, or a copy of a static value whose
+structs have distinct member names (`Ty.nodupS`: all but `BadDup`), where the
+typed run's positional copy is the name-wise one the representation reads. -/
 def assignIn {Γ : Ctx} (F : Frag Γ) : {T : Ty} → Solidity.Core.Src C Γ T →
     Solidity.Core.Loc C Γ T → Bool
   | _, .val v, l => locIn F false l && valIn F v
   | _, @Solidity.Core.Src.copy _ _ R q _, l =>
-    static (.ref R) && spathIn F false q && locIn F false l
+    static (.ref R) && (Ty.ref R).nodupS && spathIn F false q && locIn F false l
 
 /-- A storage alias declared: unset (not readable), or bound to a path of
 the fragment. -/
