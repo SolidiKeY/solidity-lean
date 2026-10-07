@@ -1,5 +1,5 @@
 import Solidity.Calculus.Core.Proves
-import Solidity.Calculus.Core.Logic
+import Solidity.Calculus.Core.SoundKit
 
 /-!
 # The scoped sequent is sound
@@ -7,12 +7,14 @@ import Solidity.Calculus.Core.Logic
 `H ⊢ φ` (`Calculus/Core/Proves.lean`) gives `H.wrap φ` in every state of the
 outer scope (`Proves.sound`), and a goal with an empty context is valid
 (`Proves.valid`), given that every rule the strategy fires is sound
-(`Stmt.StepSound`): the premise `p` of `s.step k m = some p`, in front of
-any rest, frames and postcondition, gives the modality over `s`
-(`Premise.Sound`).  That hypothesis is the per-arm soundness, proved arm by
-arm against `Core.Stmt.run` (`Calculus/Core/Logic.lean`'s
-`Stmt.step_sound_*`, from the premise shapes `Premise.sound_*`); this module
-is the structural part, which does not depend on any arm.
+(`Stmt.Sound`): the premise `p` of `s.step k m = some p`, in front of any
+rest, frames and postcondition, gives the modality over `s`
+(`Premise.Sound`, `Calculus/Core/SoundKit.lean`).  That hypothesis is the
+per-arm soundness: `Calculus/Core/SoundKit.lean` states it per statement in
+typed states (`Stmt.StepSound`), `Calculus/Core/SoundArms.lean` proves it
+arm by arm, and `Stmt.Sound.of_stepSound` collects the arms once every state
+is typed (M4a).  This module is the structural part, which does not depend
+on any arm.
 
 A rule's goals are the conjuncts of its premise's formula, each under the
 context: the context is monotone and keeps a conjunction
@@ -31,19 +33,19 @@ variable {C : Contract}
 
 /-! ## The per-arm interface -/
 
-/-- **The rule `s ⇝ p` is sound** under `m`: in front of any rest `ω`,
-frames `κ` and postcondition `φ`, the premise's formula gives the modality
-over `s`.  `Premise.sound_update` and its kin prove it for each shape from
-what the statement's run is. -/
-def Premise.Sound {Γ Γ' : Ctx} (m : Modality) (s : Stmt C Γ Γ') (p : Premise C Γ Γ') : Prop :=
-  ∀ {Γ₁ Γ₀ : Ctx} (ω : Prog C Γ' Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (σ : State C Γ),
-    holds σ (p.fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ)
-
-/-- **Every rule the strategy fires is sound**, at any fresh index (a rule's
-fresh locals are positions, so soundness needs no freshness premise). -/
-def Stmt.StepSound (C : Contract) : Prop :=
+/-- **Every rule the strategy fires is sound** in every state, at any fresh
+index (a rule's fresh locals are positions, so soundness needs no freshness
+premise): what `Proves.sound` asks of the arms. -/
+def Stmt.Sound (C : Contract) : Prop :=
   ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ'),
-    s.step k m = some p → Premise.Sound m s p
+    s.step k m = some p → ∀ σ : State C Γ, Premise.Sound m s p σ
+
+/-- The arms' interface (`Calculus/Core/SoundKit.lean`) gives it, once every
+state is typed (M4a's typed values). -/
+theorem Stmt.Sound.of_stepSound (hT : ∀ {Γ : Ctx} (σ : State C Γ), σ.Typed)
+    (hS : ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ'), Stmt.StepSound k m s) :
+    Stmt.Sound C :=
+  fun k m _ _ s p hp σ => hS k m s σ (hT σ) p hp
 
 /-! ## Outcomes -/
 
@@ -157,7 +159,7 @@ end Wrap
 /-- **Soundness of the scoped sequent**: what `H ⊢ φ` proves holds, its
 context in front, in every state of the outer scope, given that every rule
 the strategy fires is sound. -/
-theorem Proves.sound (hS : Stmt.StepSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
+theorem Proves.sound (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
     {φ : Fml C Γ} (d : Proves C R Γ₀ H φ) : ∀ σ, holds σ (H.wrap φ) := by
   induction d with
   | intro _ ih => exact ih
@@ -165,24 +167,24 @@ theorem Proves.sound (hS : Stmt.StepSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H :
   | updIntro _ ih => exact ih
   | bindIntro _ ih => exact ih
   | @update Γ Γ' Γ₁ Γ₂ H m s ω κ φ U d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.update U).fml m ω κ φ) (hS _ _ s _ d ω κ φ) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.update U).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @unfold Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.unfold P e).fml m ω κ φ) (hS _ _ s _ d ω κ φ) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.unfold P e).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @bind Γ Γ' Γ₁ Γ₂ H m s ω κ φ x t P d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.bind x t P).fml m ω κ φ) (hS _ _ s _ d ω κ φ) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.bind x t P).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @split Γ Γ₁ Γ₂ Δ₁ Δ₂ H m s ω κ φ b c c' P Q d _ _ ihT ihE =>
     exact fun σ => H.wrap_and
-      (fun τ x y => hS _ _ s _ d ω κ φ τ (show holds τ ((Premise.split b c c' P Q).fml m ω κ φ)
+      (fun τ x y => hS _ _ s _ d τ ω κ φ (show holds τ ((Premise.split b c c' P Q).fml m ω κ φ)
         from ⟨x, y⟩)) σ (ihT σ) (ihE σ)
   | @check Γ Γ₁ Γ₂ H m s ω κ φ c d _ _ ihT ihE =>
     exact fun σ => H.wrap_and
-      (fun τ a b => hS _ _ s _ d ω κ φ τ (show holds τ ((Premise.check c).fml m ω κ φ)
+      (fun τ a b => hS _ _ s _ d τ ω κ φ (show holds τ ((Premise.check c).fml m ω κ φ)
         from ⟨a, b⟩)) σ (ihT σ) (ihE σ)
   | @done Γ Γ' Γ₁ Γ₂ H m s ω κ φ b d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.done b).fml m ω κ φ) (hS _ _ s _ d ω κ φ) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.done b).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @branches Γ Γ₁ Γ₂ H m s ω κ φ bs d hne _ ih =>
     intro σ
-    refine H.wrap_mono (φ := (Premise.branches bs).fml m ω κ φ) (hS _ _ s _ d ω κ φ) σ ?_
+    refine H.wrap_mono (φ := (Premise.branches bs).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
     refine H.wrap_conj σ _ ?_ ?_
     · cases bs with
       | nil => exact nomatch hne
@@ -192,7 +194,7 @@ theorem Proves.sound (hS : Stmt.StepSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H :
       exact ih b hb σ
   | @cases Γ Γ₁ Γ₂ H m s ω κ φ fs us d hne _ _ ihF ihU =>
     intro σ
-    refine H.wrap_mono (φ := (Premise.cases fs us).fml m ω κ φ) (hS _ _ s _ d ω κ φ) σ ?_
+    refine H.wrap_mono (φ := (Premise.cases fs us).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
     refine H.wrap_conj σ _ ?_ ?_
     · cases fs with
       | cons _ _ => exact List.cons_ne_nil _ _
@@ -208,7 +210,7 @@ theorem Proves.sound (hS : Stmt.StepSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H :
   | @inv Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ H m s ω κ φ I xs hv U c c' hu hb P post d _ _ _ ihI ihT ihE =>
     intro σ
     refine H.wrap_mono (φ := (Premise.inv I xs hv U c c' hu hb P post).fml m ω κ φ)
-      (hS _ _ s _ d ω κ φ) σ ?_
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
     let A : Fml C Δ := .upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)
     let B : Fml C Δ := .upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)
     let X : Fml C Γ := .imp I (.upd m U (.and (.imp c A) (.imp c' B)))
@@ -220,21 +222,21 @@ theorem Proves.sound (hS : Stmt.StepSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H :
     exact H.wrap_and (φ := I) (ψ := Fml.anonHavoc xs hv X) (χ := .and I (Fml.anonHavoc xs hv X))
       (fun _ x y => ⟨x, y⟩) σ (ihI σ) hX
   | @inline Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.inline P e).fml m ω κ φ) (hS _ _ s _ d ω κ φ) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.inline P e).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @empty Γ Γ₂ H m κ φ _ ih =>
     exact fun σ => H.wrap_mono (φ := κ.exit m φ) (ψ := .modal m .nil κ φ)
       (fun τ h => (holds_exit m κ φ τ).1 h) σ (ih σ)
   | @closeTrue Γ H h => exact H.wrap_valid (φ := .tt) h fun _ => trivial
 
 /-- **A goal proved with an empty context is valid.** -/
-theorem Proves.valid (hS : Stmt.StepSound C) {R : RuleSet} {φ : Fml C []}
+theorem Proves.valid (hS : Stmt.Sound C) {R : RuleSet} {φ : Fml C []}
     (d : Proves C R [] .nil φ) : Valid φ :=
   Proves.sound hS d
 
 /-- `∀ bool b; [ if (b) { } else { } ] true` is valid, by `allRight`,
 `ifElseSplit` and in each goal the block's end and `closeTrue`, given the
 rules sound. -/
-example (hS : Stmt.StepSound StandardExample) :
+example (hS : Stmt.Sound StandardExample) :
     Valid (C := StandardExample) (.all (.user "b") .bool
       (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt)) :=
   Proves.valid (R := .all) hS
