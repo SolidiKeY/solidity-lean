@@ -43,7 +43,11 @@ specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
   `Syntax.lean`'s `Stmt C`, which the elaborator still emits, until it
   replaces it: the one deliberate exception to porting in place.
   `Syntax/Resolve.lean` maps between them (`erase`, `resolve`), and the
-  elaborator's locals check is `resolve`.
+  elaborator's locals check is `resolve`.  `Syntax/CoreQuote.lean` quotes
+  the scoped form (`Core.Prog.quote`, hash-consed), and `solc_scoped` declares
+  every imported program scoped for the kernel to check (the lint, M2.3,
+  2026-10-07).  They go at M4 with the untyped `Stmt C` and its quoter,
+  when the import emits the scoped form itself.
 
 - **Calls.** Parameters and return values of reference type (`Person storage
   p`, `uint[] memory xs`) are elaboration errors (`Syntax.lean`).  An external

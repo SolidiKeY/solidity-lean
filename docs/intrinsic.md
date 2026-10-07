@@ -25,7 +25,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 |---|---|---|
 | M0 | done 2026-10-07: G0 passes under the conditions below | baselines + scratch spike, gate G0 |
 | M1 | done | stuck causes that need no index; the elaborator runs the locals check (`wtCheck`) |
-| M2 | M2.1, M2.2 done | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
+| M2 | done 2026-10-07: every import and `sol{}` site resolves, the scoped form kernel-checked; elaboration within 10% (below) | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve`, quoter, lint |
 | M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
 | M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
@@ -198,8 +198,36 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     call, `resolve` 0.045 ms and the old `Prog.wt` 0.030 ms: the check
     costs 0.015 ms more a block, against the quoting and kernel check that
     dominate a site (the TestSuite import, 449 blocks, is 10.4 s).
-- Left for M2: the quoter (`Core.Prog.quote`) and `Stmt.ext`/`Prog.ext`
-  (M3 needs them; condition 1's form).
+- M2.3 (2026-10-07): `Syntax/CoreQuote.lean`, `solc_scoped`, `Stmt.ext`.
+  - `Core.Prog.quote` takes the term of its context and conses what a
+    statement pushes onto it (`ctxFrom`), so a scope's context shares its
+    enclosing one; `Prog.quoteShared` then hash-conses the whole term
+    (`ShareCommon`, condition 7).  Over the 449 TestSuite programs the
+    scoped terms have 95.5k objects against the untyped quoter's 144.6k
+    (unshared), and quoting them takes 0.14 s with `resolve`.
+    `Prog.defineCore` resolves, quotes and declares; `tour` and a block of
+    calls are pinned in the module (declared, erased back by `rfl`).
+  - The lint: `solc_scoped N` declares `N.f.core : Core.Prog N Γ Γ'` for each
+    program of an import, resolved from its parameters, the kernel checking
+    it, and errs on one that does not resolve; it pins the count
+    (`Solkey/TestSuiteScoped.lean` 449, `Solkey/Constructors.lean` 2+2+1+1,
+    `Examples/Tactics/LoopsImport.lean` 9).  Every `sol{}` site, and each
+    import's elaboration, runs `resolve` already (M2.2), so a block that does
+    not resolve fails the build.  The kernel's check of the scoped terms
+    costs about the untyped ones' (3.0 s against 2.9 s over the 449,
+    synchronously), so inside `solc_import` it made `Solkey/TestSuite` 30%
+    slower: `solc_scoped` is a command of its own, and the TestSuite's is a
+    module of its own (3.5 s, in parallel with the rest of
+    `SolkeyTestSuite`).
+  - `Stmt.ext`/`Prog.ext`/`CallRet.ext` (`Syntax/Core.lean`): what a
+    statement pushes, in condition 1's form (`casesOn`, structural); the
+    kernel reduces them (`decide` on `example₁`).
+  - Timing (the gate: within 10% of M0): wall time from the worker's start
+    to the end of a copy of the file after every kernel check (`#clock` in a
+    scratch module, `/proc/self/stat` against `/proc/uptime`; M0's included
+    the MCP call's overhead too).  `Examples/Benchmark/Syntax` 1.22 s (two
+    runs; M0 1.2 s, +2%), `Solkey/TestSuite` 10.99/11.21/11.07 s (M0 10.4 s,
+    +6%), `Examples/Chains/Storage` 7.21/7.34 s (M0 7.5 s, −3%).
 
 ## Baselines (M0)
 
