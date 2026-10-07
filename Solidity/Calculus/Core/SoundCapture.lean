@@ -42,6 +42,9 @@ theorem Res.Sim.err_bind {α β : Type} {X : Res α} (hX : NoPanic X) {h : Halt}
     rw [hx] at hX
     exact ⟨fun e => absurd e hh, fun e => absurd (congrArg Except.error e) hX⟩
 
+theorem Res.bind_error {α β : Type} (h : Halt) (f : α → Res β) :
+    ((Except.error h : Res α) >>= f) = .error h := rfl
+
 theorem Res.Sim.err_refl {α : Type} {h : Halt} {r : Res α} (hr : r = .error h) :
     Res.Sim (.error h) r := hr ▸ Res.Sim.refl _
 
@@ -104,6 +107,55 @@ theorem MPath.mval_here {R : RefTy} (id : Nat) (hm : (Ty.ref R).mapFree = true) 
     (MPath.var (C := C) (Γ := .mem R :: Γ) .here hm).mval (σ.push (t := .mem R) id) = pure (.ref id) := rfl
 
 end Capture
+
+/-! ## Each statement's run, by name -/
+
+section RunEq
+
+variable {Γ : Ctx} (σ : State C Γ)
+
+theorem Stmt.run_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
+    Stmt.run σ (.assign l r) = Run.assign l r σ := rfl
+theorem Stmt.run_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
+    Stmt.run σ (.rebind i r) = Run.rebind i r σ := rfl
+theorem Stmt.run_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) :
+    Stmt.run σ (.assignLocal i v) = Run.assignLocal i v σ := rfl
+theorem Stmt.run_declLocal (p : PrimTy) (x : Var) (init : Option (Val C Γ p)) :
+    Stmt.run σ (.declLocal p x init) = Run.declLocal p init σ := rfl
+theorem Stmt.run_declStorage (R : RefTy) (x : Var) (init : Option (ARhs C Γ R)) :
+    Stmt.run σ (.declStorage R x init) = Run.declStorage R init σ := rfl
+theorem Stmt.run_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) :
+    Stmt.run σ (.opAssign op hop hp l r) = Run.opAssign op l r σ := rfl
+theorem Stmt.run_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
+    Stmt.run σ (.incDec op hp l) = Run.incDec op l σ := rfl
+theorem Stmt.run_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) : Stmt.run σ (.push b v hd) = Run.push b v σ := rfl
+theorem Stmt.run_pop {E : Ty} (b : SPath C Γ (.array E)) : Stmt.run σ (.pop b) = Run.pop b σ := rfl
+theorem Stmt.run_transfer (r a : Val C Γ .uint) : Stmt.run σ (.transfer r a) = Run.transfer r a σ :=
+  rfl
+theorem Stmt.run_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
+    Stmt.run σ (.send pv r a) = Run.send pv r a σ := rfl
+theorem Stmt.run_declMem (R : RefTy) (x : Var) (init : Option (MRhs C Γ R))
+    (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
+    Stmt.run σ (.declMem R x init hd hm) = Run.declMem R init σ := rfl
+theorem Stmt.run_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
+    Stmt.run σ (.rebindMem i r) = Run.rebindMem i r σ := rfl
+theorem Stmt.run_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
+    Stmt.run σ (.assignFromMem l p) = Run.assignFromMem l p σ := rfl
+theorem Stmt.run_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
+    Stmt.run σ (.assignMem l r) = Run.assignMem l r σ := rfl
+theorem Stmt.run_delete {T : Ty} (l : Loc C Γ T) : Stmt.run σ (.delete l) = Run.delete l σ := rfl
+theorem Stmt.run_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) :
+    Stmt.run σ (.deleteMem p hd) = Run.deleteMem p σ := rfl
+theorem Stmt.run_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
+    (h : R.newArrOk = true) : Stmt.run σ (.assignNew l n h) = Run.assignNew l n σ := rfl
+theorem Stmt.run_require (c : Val C Γ .bool) :
+    Stmt.run σ (.require c) = (do guardOk (← c.eval σ) σ) := rfl
+theorem Stmt.run_assert (c : Val C Γ .bool) :
+    Stmt.run σ (.assert c) = (do assertOk (← c.eval σ) σ) := rfl
+
+end RunEq
 
 /-! ## Holes: the read, then what the hole does with it -/
 
