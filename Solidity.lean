@@ -34,6 +34,7 @@ import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.SoundKit
 import Solidity.Calculus.Core.SoundArms
 import Solidity.Calculus.Core.RunWk
+import Solidity.Calculus.Core.RunFrame
 import Solidity.Calculus.Core.SoundBlocks
 import Solidity.Calculus.Core.SoundCalls
 import Solidity.Calculus.Core.Delab
