@@ -651,6 +651,204 @@ proof over `Core` is done, with no `sorry` and the axioms `propext`,
   `stmt_sim`/`compile_*`/`not_stuck`/`never_stuck` with the untyped
   compiler, and re-timing the chain.
 
+## Cutover waves (W0–W6), plan of record 2026-10-08: moving the calculus onto Core (M4 retirement, M6a, M6c, M7)
+
+The plan finishes each part in three steps: build the Core version beside the old one, switch the users file by file, then delete the old one. Every wave leaves `lake build Solidity SolkeyTestSuite SolidityCorpus` green.
+
+**Decision 8, replaced:** the bridge ends at **W4**. By then the calculus, the strategy and the closer entry run on Core, and the old runs are deleted. Two IRs with no semantics stay unless the user decides otherwise:
+- `Surface.Stmt` is today's `Stmt` with no run, no `Taclet` and no `wt`. It is the elaborator's output and the printers' target (`resolve`/`erase`, `Core.Delab`). M2 measured `resolve` at 0.045 ms a block, so porting about 4k elaborator lines and 2k printer lines buys nothing.
+- `NFml` is today's `Fml` with `.modal` removed. It is the closer's input until the M6c waves retire it.
+
+**One user decision is needed:** does demoting the old `Stmt` to `Surface.Stmt` count as "deleting the untyped Stmt"?
+
+## W0 — land the four lanes (the lead, one agent)
+- Merge calculus, sound2, calctools and frontend. `docs/intrinsic.md` is still `UU`; keep every lane section.
+- Build the unconditional `Core.Stmt.Sound C` from `stepSound`, sound2's block arms and `WkRuns := Prog.run_wk`. Then `Core.Proves.valid` needs no hypothesis.
+- **Low-module fix, before any lane branches:** make `resolve`'s output `Fresh`.
+  - Today `elabBranch` emits a raw block, a `for` init and a modifier's `_` flat.
+  - Emit them as `Core.Stmt.block` scope markers instead.
+  - `holds_erase` on leaves needs this: two `for (uint i…)` loops must not shadow each other.
+- Checks: full build, `check-orphans`, `check-doc-paths`. No pins change.
+- Record the Core example timings as the W-baseline.
+
+## W1 — off the M3 run; build the rule table beside the old one (4 lanes)
+Each lane owns the files listed for it. Merge in the order the lanes are listed.
+
+1. **`runlemmas`**
+   - Owns: new `Semantics/Core/TypedRunWk.lean` and `TypedRunFrame.lean`; `Semantics/Core/Callback.lean`; `Examples/Tactics/CoreCallback.lean`.
+   - Work:
+     - `Prog.trun_wk`, `trun_frame`, `Loop.run_variant` over `TState`.
+     - `TState.toSem ns : TState C Γ → Semantics.State` and its agreement lemmas.
+     - Callbacks over `TState`; `havoc` over typed `Storage C`.
+2. **`typing`**
+   - Owns: `Typing/{State,Soundness,Reachability,Constructibility}.lean`, `SortCheck/Faithfulness.lean`, `Calculus/Problem.lean`.
+   - Work:
+     - `RunWT` mostly by construction.
+     - `Reachable` by `trun`; the builder runs over `trun`.
+     - Close the `ReachableU → Reachable` gap.
+   - Gate: the four Typing modules ≤ 25.6 s (21.3 s +20%); Faithfulness ≤ 30.7 s.
+3. **`evm`**
+   - Owns: `Evm/Core*.lean`, `Corpus/Basic.lean` (`corpus_decide` on `trun`), `Tools/{Run,DiffTest,Counterexample}.lean`.
+   - Work: `Look.ofEnv` over `TEnv`; `ReprV` without `∃ v`; `Machine.mem : Nat → Word`.
+   - Gates:
+     - `stmt_sim` within 10000 heartbeats.
+     - `Evm/CoreExamples` ≤ 11.4 s (M0 9.5 s +20%).
+     - `check-corpus.sh` unchanged.
+4. **`rules`**
+   - Owns: `RuleSyntax.lean`; `Calculus/Core/{Schema,Taclet}.lean`; new `Calculus/Core/{Rules,Completeness,RuleShapes,PrintedRules}.lean`; `scripts/core-rules.mjs`; `scripts/check-rule-text.sh`.
+   - **How the 241 constructor lines keep their text:**
+     - Fold Schema's insertions into `schemaAt`/`schemaStmt`/`declVar` behind `open scoped Solidity.Core.Schema`. The insertions are `Idx.there^d`, `up^d`, `Premise.unfold P (Ext.push^d .refl)`, `Premise.bind` for the three `…DeclInitDrop` rules, and `BlockKind.block` vs `.capture` on splits.
+     - The script copies `Rules.lean`'s lines verbatim under a Core header. `check-rule-text.sh` diffs the two copies and must print nothing.
+     - `Calculus/Core/Taclet.lean`'s hand-written constructors are deleted, along with `Schema.lean`.
+   - New theorems and modules:
+     - `Taclet.toStep : Taclet C k m s p → s.step k m = some p`, one `rfl` per constructor. Soundness then comes from `Stmt.Sound`, with no per-rule proofs.
+     - Core `Completeness`: the dispatcher that names the fired rule, for `#step` and `sol_derive?`.
+     - Core `RuleShapes`: `blockEmpty`, `functionFrameEmpty` and `functionBodyExpand` become claimed.
+   - Restriction: `Step`/`Arms`/`Blocks` are frozen. Where a line cannot be produced, change the macro, or list the mismatch for W2.
+   - Checks: a `#guard` that every Core rule prints exactly as the old one does (`Core.Delab`). `solkeycheck` stays at zero (no names change).
+
+**Pins in W1:** none outside `Core*` example files.
+
+## W2 — soundness over the typed run; Core strategy tools (4 lanes)
+1. **`sound`** (the critical path)
+   - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`.
+   - First commit, pushed on day one: `split`/`inv` lose `cov`, and `Cover.lean` is deleted (`bool` locals are typed now). The other three lanes merge this commit at once.
+   - Then:
+     - `holds` over `TState`. Arms are re-proved through `StorageErase`/`HeapErase`'s `_erase` lemmas into `Update.lean`'s symbols.
+     - `holds_of_erase` (one direction) for the hidden binder and `anon`.
+     - `Proves.close`: a leaf closes if its erasure is valid.
+     - `Taclet.sound`.
+     - Delete the old `RunWk`/`RunFrame`.
+2. **`symex`**
+   - Owns: new `Calculus/Core/{Symex,Derive,Close,Termination}.lean`.
+   - Work:
+     - `normValid` with `Core.Fml.quote`.
+     - `sol_symex`, `sol_derive`, `sol_derive?`.
+     - `sol_prove`: kernel `Eq.refl` of `Core.symex`, then each leaf is erased and handed to today's closer (`close_of_erase`).
+     - Uniqueness is free, because `step` is a function. Termination is either restated on Core or retired with a docs row.
+   - **Early gate, in a `Core*` twin:** `sol_prove` over Derived9–11 ≤ 22.9 s (M0 19.1 s +20%).
+     - If it fails, stop before W3.
+     - The fix to try first is a kernel-evaluated Boolean equality on `Core.Fml`, or `Idx` as a number.
+3. **`chains`**
+   - Owns: new `Calculus/Core/{Chains,ChainGen,LastLine}.lean`.
+   - Work:
+     - Program links `~[r]~>` by Core rule names.
+     - Rewrite links taken over from `ChainRewrites` on erasures (`Via.ofErase`). Only the direction from the erasure is needed.
+     - `#chain` and `#derivation` on Core.
+4. **`tree`**
+   - Owns: new `Calculus/Core/{ProofTree,Sequents,Callback,Contracts}.lean`, `Tools/CoreInspect.lean`, `Calculus/Core/{Spec,Notation}.lean`.
+   - Work:
+     - ProofTree, `#proof_tree`, `#wp`, `#step`.
+     - `sol_spec` on `cspec!`.
+     - Callback taclets and `ProvesC`.
+     - The **flip switch:** `open scoped Solidity.Core.Surface` makes `dl!`, `⊢`, `dl{}`, the chain notation and the `#` commands read Core. Tactics dispatch on the goal's head constant.
+
+**Merge order:** sound → symex → chains → tree. Each later lane merges `intrinsic` and re-checks its own files.
+
+## W3 — the flip, file by file (4 lanes)
+Each lane adds the `open scoped` line to the files it owns and re-pins them.
+
+| Lane | Files |
+|---|---|
+| `testsuite` | `TestSuite/**`, `Solkey/**`, `Frontend/Problems.lean` |
+| `tactics` | `Examples/Tactics/**`, `Examples/Benchmark/**` |
+| `chains` | `Examples/Chains/**` (14 files, 188 theorems), `ChainNotation`, `ChainRewrites` |
+| `tree` | `Examples/{ProofTree,Tools,Verify,Notation,ExampleNames}.lean` |
+
+**TestSuite:**
+- `solc_scoped_problems` declares `N.f.problem` at Core; the old problems become `N.f.problem.legacy`.
+- A `#guard` checks that each Core problem erases to its legacy one.
+- The text of Derived1–14 (`⊢ … := by sol_prove`) is unchanged.
+- `Report.lean`'s count of 437 and `check-testsuite.sh` must not move.
+- Keep at most 3 open files: the Derived workers take 3–4 GB each.
+
+**Pins that may change, each with its reason:**
+1. `cov` is gone: ProofTree branch rows and `case cov` in `sol_derive?` suggestions.
+2. A split's goals print the branch's `}` (`core_item`).
+3. Fewer steps, because branches share the rest of the program as a frame: `#derivation` lines, ProofTree serial numbers, `~*>` spans.
+4. A loop's `{anon(…)}` list no longer names the body's own locals.
+5. Return values that are read but not assigned print as `(uint a, uint b) = f(…)`.
+6. Errors for reading a block's local after the block ends (`Branch.lean`).
+
+The fresh names (`se1`, `sp1`) must not change. Any other pin change is a bug. Each lane lists every pin it changed, with its reason, in its doc section.
+
+**Gates vs M0:**
+
+| Module | M0 | Limit (+20%) |
+|---|---|---|
+| Derived9–11 | 19.1 s | 22.9 s |
+| `TestSuite/Problems` | 1.2 s | 1.44 s |
+| `Examples/ProofTree` | 10.1 s | 12.1 s |
+| `Examples/Chains/Storage` | 7.5 s | 9.0 s |
+| `Solkey/TestSuite` | 10.4 s | 12.5 s |
+| `Examples/Benchmark/Syntax` | 1.2 s | 1.44 s |
+
+Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
+
+## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
+Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.
+
+1. **`sem-del`**
+   - Delete:
+     - The old `Stmt.run`/`Loop`.
+     - `Semantics/Core.lean`'s M3 `State` and run.
+     - `RunErase`, `TypedRunErase`, the fresh-name lemmas in `Agree`.
+     - `Evm/{Compile,Correctness,Examples}.lean` and `never_stuck`.
+     - The old `Mutability`/`NoPanic`/`Callback`.
+   - `Halt` loses `stuck`. The term model's error for ill-sorted terms becomes `Res.undef`, because the closer's terms stay untyped.
+2. **`calc-del`**
+   - Delete every old calculus module that has a Core twin: `Logic`, `Symex`, `Quote`, `Derive`, `SoundKit`, `SoundUpdate`, `SoundUnfold`, `SoundLoop`, `RuleSoundness`, `Completeness`, `Uniqueness`, `Progress`, `SolkeyFragment`, `Sequents`, `ProofTree`, `Chains`, `ChainGen`, `LastLine`, `Notation`, `Spec`, `Contracts`, `Callback`, and the old body of `Rules.lean`.
+3. **`modal`**
+   - `Update.lean`'s `Fml` loses `.modal` and becomes `NFml`.
+   - Delete the modal arms in `Close`, `UpdateRules`, `ChainRewrites` and `Decide`.
+   - The untyped `Stmt` becomes `Surface.Stmt`.
+4. **`reader-dry`** (side-projects `lean/solkey`, branch `intrinsic`, user approved)
+   - On that branch only, point the `lakefile.toml` require at `../../../solidity-lean-intrinsic`.
+   - Port `Corresp/LeanShape.lean` (19 `Stmt.` references) to read Core constructor types, erasing `.there`/`up` as `Core.Delab` does and mapping `unfold`/`bind`/`inline` to today's premise shapes.
+   - Regenerate `Corresp/Proved.lean` with `GenProved`.
+   - `expectedPins` may move only on the rows for the newly claimed `blockEmpty`, `functionFrameEmpty` and `functionBodyExpand`.
+
+**Merge order:** sem-del → calc-del → modal.
+
+**Checks:**
+- All three libraries build; `check-orphans`, `check-doc-paths`, `check-corpus`, `check-testsuite`; `solkeycheck` at zero.
+- No pins change.
+- Re-time every M0 row: deleting modules must not slow anything.
+
+## W5 — final rename (the lead alone)
+- One scripted commit (`git mv` plus `rg`/`sed`, no hand edits):
+  - `Solidity.Core.X` → `Solidity.X`.
+  - `Calculus/Core/*` → `Calculus/*`; `TypedRun` → `Semantics`.
+  - `trun` → `run`, `TState` → `State`, `Evm/Core*` → `Evm/*`.
+- A full rebuild follows: about 24 minutes, plus the TestSuite.
+- **Pins:** only those that print qualified constants (`#taclet` naming `Core.Taclet.*`, `#print axioms`) may change.
+- **Reader:** the dry-run branch renames its identifiers and regenerates `Proved.lean`. The require goes back to `../../../solidity-lean` when `intrinsic` merges into `master`; the reader merges then.
+- **Docs (M7):**
+  - `module-map`, the `kernel-port` row.
+  - `lean-key-rule-map` rows: the claimed rules, the capture pop, the hidden binder, `unset`.
+  - `solc-alignment`, `loops.md`.
+  - `solc-validation`'s "not stuck" claim, now true.
+  - Trim `intrinsic.md` to its module-map entry.
+- Then the review pass: a finder and a skeptic per area.
+
+## W6+ — porting the closer (M6c), gated
+- **The boundary moves top-down.** A ported module takes `Fml C Γ` and erases only before calling the modules below it.
+- **Scope is smaller than 25k lines.** The symbol libraries never need porting, because Core terms share `Op0`–`Op3`: `ReadWrite`, `TermRules`, `TermTaclets`, `MemRead`, `MemNames`, `MemTheory`, `SlotLemmas`, `KeyNotation`, `DecideLang`, `Literals` and `Theory/**`. Only modules that handle locals, updates or formula structure port.
+- **Waves:**
+  - 6a: `Closer`, `DecideSyn`, `DecideComplete`, `Close`, with symbolic atoms keyed by `Idx`.
+  - 6b: `Decide.lean` alone (10k lines in one file, so one agent).
+  - 6c: `UpdateRules`, `StateParts`, `Rewrite`, `TheoryRewrite`, `ChainRewrites`, `ChainBranches`.
+- **Gate per module:** the Derived* files and `Examples/Tactics/Decide` must stay within 1.2× of the erased-form timings taken at W5.
+- **Fallback (Decision 7):** a module that fails the gate stays on `NFml` for good, documented as the decision procedure's IR. When nothing uses `NFml` any more, `NFml` and `Fml.erase` are deleted.
+
+**Agent and memory limits:** at most 4 Lean agents in any wave, each with 3–4 open files. W0 and W5 rebuild low modules, so they run one agent.
+
+Decision 11 (lead, 2026-10-08, open to the user's override before W4): the
+untyped `Stmt` survives only as `Surface.Stmt`, the elaborator's output and
+the printers' target, with no run, no taclet and no `wt`; every semantics is
+on Core. W0 is done: `Core.Proves.valid` is unconditional, and the
+elaborator's output is `Fresh` (`ReachableU → Reachable`).
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
