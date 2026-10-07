@@ -537,4 +537,140 @@ theorem Upd.apply_erase (hag : Agree ns σ₀ τ₀) : {Δ : Ctx} → (U : Upd C
 
 end Updates
 
+/-! ## A modality runs as its erasure -/
+
+/-- Every block the frames hold binds fresh names. -/
+def Frames.Fresh : {Γ Γ₀ : Ctx} → List Var → Frames C Γ Γ₀ → Prop
+  | _, _, _, .nil => True
+  | _, _, ns, .seq ω κ => ω.Fresh [] ns ∧ κ.Fresh (ω.outNames ns)
+  | _, _, ns, .pop _ h κ => κ.Fresh (ns.drop h.depth)
+  | _, _, ns, .drop h κ => κ.Fresh (h.names ns)
+
+section Runs
+
+theorem RunRel.toRel {Γ : Ctx} {ns B : List Var} {τ₀ : Semantics.State} :
+    {x : Res (State C Γ)} → {y : Res Semantics.State} → RunRel ns B τ₀ x y → Res.Rel (Agree ns) x y
+  | .error _, .error _, h => h
+  | .ok _, .ok _, h => h.1
+
+/-- A block runs as its erasure (`run_erase`, from any agreeing state). -/
+theorem Prog.run_rel {Γ Γ' : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+    (hag : Agree ns σ τ) (P : Prog C Γ Γ') (hP : P.Fresh [] ns) :
+    Res.Rel (Agree (P.outNames ns)) (P.run σ) (Solidity.Prog.run τ (P.erase ns)) :=
+  (Prog.erasesAt P hP hag).toRel
+
+/-- The frames run as the statements they hold, a scope's end nothing. -/
+theorem Frames.run_erase {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C Γ Γ₀) → {ns : List Var} →
+    κ.Fresh ns → {σ : State C Γ} → {τ : Semantics.State} → Agree ns σ τ →
+    Res.Rel (Agree (κ.outNames ns)) (Frames.run σ κ) (Solidity.Prog.run τ (κ.erase ns))
+  | _, .nil, _, _, _, _, hag => hag
+  | _, .seq ω κ, _, hκ, _, _, hag => by
+    show Res.Rel _ (do Frames.run (← Prog.run _ ω) κ) (Solidity.Prog.run _ (ω.erase _ ++ κ.erase _))
+    rw [Solidity.SemanticsProperties.Prog.run_append]
+    exact Res.Rel.bind (Prog.run_rel hag ω hκ.1) fun _ _ h => Frames.run_erase κ hκ.2 h
+  | _, .pop _ h κ, _, hκ, _, _, hag => Frames.run_erase κ hκ (hag.dropNames h)
+  | _, .drop h κ, _, hκ, _, _, hag => Frames.run_erase κ hκ (hag.thin h)
+
+end Runs
+
+/-! ## The formulas -/
+
+/-- A formula whose binders are all fresh, and with no hidden binder nor an
+anonymising update: their untyped readings range over more states than the
+typed ones (the untyped `anon` over any binding, the erased hidden binder
+over whatever the name held). -/
+def Fml.Plain : {Γ : Ctx} → List Var → Fml C Γ → Prop
+  | _, _, .tt => True
+  | _, _, .eq _ _ => True
+  | _, _, .defined _ => True
+  | _, ns, .not φ => φ.Plain ns
+  | _, ns, .and φ ψ => φ.Plain ns ∧ ψ.Plain ns
+  | _, ns, .imp φ ψ => φ.Plain ns ∧ ψ.Plain ns
+  | _, ns, .upd _ U φ => U.Fresh ns ∧ φ.Plain (U.names ns)
+  | _, ns, .modal _ P κ φ =>
+    P.Fresh [] ns ∧ κ.Fresh (P.outNames ns) ∧ φ.Plain (κ.outNames (P.outNames ns))
+  | _, ns, .havoc φ => φ.Plain ns
+  | _, ns, .all x _ φ => x ∉ ns ∧ φ.Plain (x :: ns)
+  | _, _, .bind .. => False
+  | _, _, .anon .. => False
+
+theorem _root_.Solidity.Modality.afterC_rel (m : Modality) {α : Type} {p : α → Prop} {q : Semantics.State → Prop}
+    {R : α → Semantics.State → Prop} {x : Res α} {y : Res Semantics.State} (h : Res.Rel R x y)
+    (hpq : ∀ a b, R a b → (p a ↔ q b)) : m.afterC p x ↔ m.after q y := by
+  cases x with
+  | ok a => cases y with
+    | ok b => exact hpq a b h
+    | error => exact h.elim
+  | error e => cases y with
+    | ok => exact h.elim
+    | error e' => exact Iff.rfl
+
+theorem _root_.Solidity.Modality.afterRunC_rel (m : Modality) {α : Type} {p : α → Prop} {q : Semantics.State → Prop}
+    {R : α → Semantics.State → Prop} {x : Res α} {y : Res Semantics.State} (h : Res.Rel R x y)
+    (hpq : ∀ a b, R a b → (p a ↔ q b)) : m.afterRunC p x ↔ m.afterRun q y := by
+  cases x with
+  | ok a => cases y with
+    | ok b =>
+      show m.afterC p (.ok a) ∧ _ ↔ m.after q (.ok b) ∧ _
+      simp only [ne_eq, reduceCtorEq, not_false_eq_true, and_true]
+      exact hpq a b h
+    | error => exact h.elim
+  | error e => cases y with
+    | ok => exact h.elim
+    | error e' =>
+      cases (h : e = e')
+      simp only [Modality.afterRunC, Modality.afterRun, Modality.afterC, Modality.after, ne_eq,
+        Except.error.injEq]
+
+/-- **A scoped formula holds where its erasure does** (`Update.lean`'s
+`holds`), in every untyped state that agrees with `σ` on the locals named
+`ns`. -/
+theorem holds_erase : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.Plain ns →
+    {σ : State C Γ} → {τ : Semantics.State} → Agree ns σ τ →
+    (holds σ φ ↔ Solidity.holds τ (φ.erase ns))
+  | _, .tt, _, _, _, _, _ => Iff.rfl
+  | _, .eq a b, _, _, _, _, hag => by
+    show _ ↔ Theory.StValue.Equiv ((a.erase _).denote _) ((b.erase _).denote _)
+    rw [Tm.denote_erase hag a, Tm.denote_erase hag b]; rfl
+  | _, .defined t, _, _, _, _, hag => by
+    show _ ↔ ∃ x, (t.erase _).eval _ = .ok x
+    rw [Tm.eval_erase hag t]; rfl
+  | _, .not φ, _, hφ, _, _, hag => not_congr (holds_erase φ hφ hag)
+  | _, .and φ ψ, _, hφ, _, _, hag => and_congr (holds_erase φ hφ.1 hag) (holds_erase ψ hφ.2 hag)
+  | _, .imp φ ψ, _, hφ, _, _, hag => imp_congr (holds_erase φ hφ.1 hag) (holds_erase ψ hφ.2 hag)
+  | _, .upd m U φ, ns, hφ, σ, τ, hag => by
+    have hU := Upd.apply_erase hag U hφ.1
+    show m.afterC (holds · φ) (U.apply σ) ↔ Solidity.holds τ (Fml.erase ns (.upd m U φ))
+    simp only [Fml.erase]
+    split
+    · rename_i hnil
+      rw [hnil] at hU
+      revert hU
+      cases U.apply σ with
+      | error => exact False.elim
+      | ok σ' => exact fun h => holds_erase φ hφ.2 h
+    · rename_i U' hne
+      show _ ↔ m.after _ (Solidity.Upd.apply (U.erase ns) τ)
+      exact m.afterC_rel hU fun _ _ h => holds_erase φ hφ.2 h
+  | _, .modal m P κ φ, ns, hφ, σ, τ, hag => by
+    show _ ↔ m.afterRun _ (Solidity.Prog.run τ (P.erase ns ++ κ.erase (P.outNames ns)))
+    rw [Solidity.SemanticsProperties.Prog.run_append]
+    exact m.afterRunC_rel (Res.Rel.bind (Prog.run_rel hag P hφ.1) fun _ _ h =>
+      Frames.run_erase κ hφ.2.1 h) fun _ _ h => holds_erase φ hφ.2.2 h
+  | _, .havoc φ, _, hφ, σ, τ, hag => by
+    show (∀ st nt, holds (σ.withGlob (σ.glob.havoc st nt)) φ) ↔ ∀ st nt, Solidity.holds _ _
+    refine forall_congr' fun st => forall_congr' fun nt => ?_
+    have h := hag.withGlob (σ.glob.havoc st nt)
+    have e : τ.havoc st nt = withLocals (σ.glob.havoc st nt) τ.env := by
+      have hw := hag.wl
+      generalize τ.env = env at hw ⊢
+      subst hw; rfl
+    rw [e]
+    exact holds_erase φ hφ h
+  | _, .all x p φ, _, hφ, σ, τ, hag => by
+    show (∀ v, p.admits v → holds (σ.push v) φ) ↔ ∀ v, p.admits v → Solidity.holds _ _
+    exact forall_congr' fun v => imp_congr_right fun _ => holds_erase φ hφ.2 (hag.push (t := .val p) hφ.1 v)
+  | _, .bind .., _, hφ, _, _, _ => hφ.elim
+  | _, .anon .., _, hφ, _, _, _ => hφ.elim
+
 end Solidity.Core
