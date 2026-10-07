@@ -11,8 +11,8 @@ sound in the shape of `Calculus/Core/SoundKit.lean`; `revert` and blocks are
 on a simple condition that reads as no `bool` is stuck
 (`Premise.Sound.splitStuck`); a captured `if` condition is sound when its
 branches, weakened under the captured local, run as before (`WkRuns`, the
-run of `Prog.wk up`; the call arms of `Calculus/Core/Blocks.lean` prove the
-run of a weakened block).
+run of `Prog.wk up`; `Calculus/Core/SoundStep.lean`'s `WkRuns.of_run_wk`
+proves it from `Calculus/Core/RunWk.lean`).
 -/
 
 namespace Solidity.Core

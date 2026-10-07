@@ -1,25 +1,24 @@
 import Solidity.Calculus.Core.Proves
-import Solidity.Calculus.Core.SoundKit
+import Solidity.Calculus.Core.SoundStep
 
 /-!
 # The scoped sequent is sound
 
 `H ⊢ φ` (`Calculus/Core/Proves.lean`) gives `H.wrap φ` in every state of the
 outer scope (`Proves.sound`), and a goal with an empty context is valid
-(`Proves.valid`), given that every rule the strategy fires is sound
-(`Stmt.Sound`): the premise `p` of `s.step k m = some p`, in front of any
+(`Proves.valid`), since every rule the strategy fires is sound
+(`Stmt.sound`): the premise `p` of `s.step k m = some p`, in front of any
 rest, frames and postcondition, with its cover under the diamond
 (`Calculus/Core/Cover.lean`), gives the modality over `s` (`Premise.Sound`,
-`Calculus/Core/SoundKit.lean`).  That hypothesis is the per-arm soundness,
-stated per statement as `Stmt.StepSound` and collected by
-`Stmt.Sound.of_stepSound`, from the arms' `Stmt.stepSound`
-(`Calculus/Core/SoundStep.lean`, given the block arms and `WkRuns`).  This
-module is the structural part, which does not depend on any arm.
+`Calculus/Core/SoundKit.lean`).  That is the arms' soundness,
+`Calculus/Core/SoundStep.lean`'s `Stmt.stepSound`, collected by
+`Stmt.Sound.of_stepSound`; the rest of this module is the structural part,
+which does not depend on any arm.
 
-The hypothesis holds in untyped states too: a branch on a condition that is
-stuck (a `bool` local holding no `bool`, which a formula's binders allow)
-satisfies the box, and under the diamond the cover goal (`Proves.split`'s,
-`Proves.inv`'s) rules it out.
+It holds in untyped states too, with no typing hypothesis: a branch on a
+condition that is stuck (a `bool` local holding no `bool`, which a formula's
+binders allow) satisfies the box, and under the diamond the cover goal
+(`Proves.split`'s, `Proves.inv`'s, `Premise.cover`) rules it out.
 
 A rule's goals are the conjuncts of its premise's formula, each under the
 context: the context is monotone and keeps a conjunction
@@ -40,7 +39,8 @@ variable {C : Contract}
 
 /-- **Every rule the strategy fires is sound** in every state, at any fresh
 index (a rule's fresh locals are positions, so soundness needs no freshness
-premise), given its cover: what `Proves.sound` asks of the arms. -/
+premise), given its cover: what `Proves.sound` asks of the arms
+(`Stmt.sound`). -/
 def Stmt.Sound (C : Contract) : Prop :=
   ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ'),
     s.step k m = some p → ∀ σ : State C Γ, Premise.Sound m s p σ
@@ -50,6 +50,10 @@ theorem Stmt.Sound.of_stepSound
     (hS : ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ'), Stmt.StepSound k m s) :
     Stmt.Sound C :=
   fun k m _ _ s p hp σ => hS k m s σ p hp
+
+/-- **Every rule the strategy fires is sound** (`Stmt.stepSound`). -/
+theorem Stmt.sound : Stmt.Sound C :=
+  Stmt.Sound.of_stepSound Stmt.stepSound
 
 /-! ## Outcomes -/
 
@@ -161,10 +165,10 @@ end Wrap
 /-! ## Soundness -/
 
 /-- **Soundness of the scoped sequent**: what `H ⊢ φ` proves holds, its
-context in front, in every state of the outer scope, given that every rule
-the strategy fires is sound. -/
-theorem Proves.sound (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
+context in front, in every state of the outer scope. -/
+theorem Proves.sound {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
     {φ : Fml C Γ} (d : Proves C R Γ₀ H φ) : ∀ σ, holds σ (H.wrap φ) := by
+  have hS : Stmt.Sound C := Stmt.sound
   induction d with
   | intro _ ih => exact ih
   | allIntro _ ih => exact ih
@@ -242,17 +246,16 @@ theorem Proves.sound (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyp
   | @closeTrue Γ H h => exact H.wrap_valid (φ := .tt) h fun _ => trivial
 
 /-- **A goal proved with an empty context is valid.** -/
-theorem Proves.valid (hS : Stmt.Sound C) {R : RuleSet} {φ : Fml C []}
+theorem Proves.valid {R : RuleSet} {φ : Fml C []}
     (d : Proves C R [] .nil φ) : Valid φ :=
-  Proves.sound hS d
+  Proves.sound d
 
 /-- `∀ bool b; [ if (b) { } else { } ] true` is valid, by `allRight`,
-`ifElseSplit` and in each goal the block's end and `closeTrue`, given the
-rules sound. -/
-example (hS : Stmt.Sound StandardExample) :
+`ifElseSplit` and in each goal the block's end and `closeTrue`. -/
+example :
     Valid (C := StandardExample) (.all (.user "b") .bool
       (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt)) :=
-  Proves.valid (R := .all) hS
+  Proves.valid (R := .all)
     (.allIntro (.split rfl (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl)) nofun))
 
 end Solidity.Core

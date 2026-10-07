@@ -8,9 +8,8 @@ A statement read with a local pushed runs as before (`Run.*_push`,
 `OpLoc.Agree`, `MLoc.Agree`), and the update arms of
 `Calculus/Core/Arms.lean` (`sound_setLocal` … `sound_assignIncDec`) are
 sound against M3's interpreter (`Core.Stmt.run`), each by
-`Premise.Sound.update`.  Every arm but the blocks is assembled in
-`Calculus/Core/SoundStep.lean`'s `Stmt.stepSound`, under the `IsBlockArm`
-and `WkRuns` premises.  The proofs follow today's (`Calculus/SoundUpdate.lean`,
+`Premise.Sound.update`.  Every arm is assembled in
+`Calculus/Core/SoundStep.lean`'s `Stmt.stepSound`.  The proofs follow today's (`Calculus/SoundUpdate.lean`,
 `Calculus/SoundUnfold.lean`): a term reads what the expression it lowers
 evaluates to (`Val.eval_lower` and its kin, as `Update.lean`'s
 `Val.lower_eval`), so an update rule's update ends as its statement does;

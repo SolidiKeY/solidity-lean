@@ -1,18 +1,21 @@
 import Solidity.Calculus.Core.SoundControl
 import Solidity.Calculus.Core.SoundMem
+import Solidity.Calculus.Core.SoundCalls
+import Solidity.Calculus.Core.SoundLoops
 
 /-!
-# Every arm of `Stmt.step` but the blocks is sound
+# Every arm of `Stmt.step` is sound
 
 The dispatch over `Stmt.step`'s constructors (`Calculus/Core/Step.lean`):
 each statement's rule is sound in the shape of
 `Calculus/Core/SoundKit.lean` (`Stmt.StepSound`), by its arm's theorem in
 `Calculus/Core/SoundLocal.lean`, `SoundControl.lean`, `SoundStore.lean`,
-`SoundMem.lean`, `SoundArms.lean`, `SoundUpdates.lean` and
-`Calculus/Core/Logic.lean`.  Two facts come from the call arms of
-`Calculus/Core/Blocks.lean` and are premises here: the arms of the calls,
-`try` and loops themselves (`Stmt.IsBlockArm`), and that a block weakened
-under a captured `if` condition runs as before (`WkRuns`).
+`SoundMem.lean`, `SoundArms.lean`, `SoundUpdates.lean`,
+`Calculus/Core/Logic.lean`, and for the arms of `Calculus/Core/Blocks.lean`
+`SoundCalls.lean` (calls), `SoundBlocks.lean` (`try`) and `SoundLoops.lean`
+(loops).  A captured `if` condition's branches, weakened under its local,
+run as before (`WkRuns`) by `Calculus/Core/RunWk.lean`'s `Prog.run_wk` at
+`up`.
 -/
 
 namespace Solidity.Core
@@ -21,19 +24,15 @@ open Solidity (Modality)
 
 variable {C : Contract}
 
-/-- The statements whose rules `Calculus/Core/Blocks.lean` gives: calls,
-`try`, loops. -/
-def Stmt.IsBlockArm {Γ Γ' : Ctx} : Stmt C Γ Γ' → Prop
-  | .call .. => True
-  | .tryCall .. => True
-  | .loop .. => True
-  | _ => False
+/-- **A block weakened under one local runs as before** (`Prog.run_wk` at
+`up`, the local's value the lift's background). -/
+theorem WkRuns.of_run_wk {Γ : Ctx} (σ : State C Γ) (t : LTy) : WkRuns σ t := fun P w =>
+  let d : Env C (t :: Γ) := (w, σ.env)
+  WkRel.eq_lifted (d := d) (WkRel.drop (Prog.wk_over P up) (Prog.run_wk P up d σ))
 
-/-- **The rule of every statement is sound**, given the block arms and the
-run of a weakened block. -/
-theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ')
-    (hwk : ∀ σ : State C Γ, WkRuns σ (.val .bool))
-    (hb : s.IsBlockArm → Stmt.StepSound k m s) : Stmt.StepSound k m s := by
+/-- **The rule of every statement is sound.** -/
+theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
+    Stmt.StepSound k m s := by
   intro σ p hp
   cases s with
   | assign l r => exact assignStep_sound σ k l r p hp
@@ -64,13 +63,14 @@ theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ
   | delete l => exact deleteStep_sound σ k l p hp
   | deleteMem q hd => exact deleteMemStep_sound σ k q hd p hp
   | assignNew l n h => cases hp; exact sound_assignNew σ k l n h
-  | ite c thn els => exact iteStep_sound σ k (hwk σ) c thn els p hp
+  | ite c thn els => exact iteStep_sound σ k (WkRuns.of_run_wk σ _) c thn els p hp
   | require c => exact requireStep_sound σ k c p hp
   | assert c => exact assertStep_sound σ k c p hp
   | revert => cases m <;> cases hp <;> exact fun ω κ φ h _ => Stmt.step_sound_revert σ ω κ φ h
-  | call f args ret body => exact hb trivial σ p hp
-  | tryCall call rets ok err code pnc other => exact hb trivial σ p hp
-  | loop a c body => exact hb trivial σ p hp
+  | call f args ret body => exact Stmt.stepSound_call k m f args ret body σ p hp
+  | tryCall call rets ok err code pnc other =>
+    exact Stmt.stepSound_tryCall k m call rets ok err code pnc other σ p hp
+  | loop a c body => exact Stmt.stepSound_loop k m a c body σ p hp
   | block body => cases hp; exact fun ω κ φ h _ => Stmt.step_sound_block body σ ω κ φ h
 
 end Solidity.Core
