@@ -503,6 +503,27 @@ theorem sound_rebindMemAlias {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (
 theorem Simple.eval_ok {p : PrimTy} (s : Simple C Γ p) : ∃ v, s.eval σ = .ok v := by
   cases s <;> exact ⟨_, rfl⟩
 
+theorem Res.bind_ok {α β : Type} (a : α) (f : α → Res β) : ((Except.ok a : Res α) >>= f) = f a :=
+  rfl
+
+theorem writeStorage_toSVal (s : Semantics.State) (r : Name) (segs : List Seg) (v : Value) :
+    s.writeStorage r segs v.toSVal = s.saveStorage r segs v.toSVal := by
+  cases v <;> rfl
+
+/-- A storage save through the term, as the statement's write. -/
+theorem saveStorage_glob (r : Name) (segs : List Seg) (v : SVal) :
+    (σ.glob.saveStorage r segs v >>= fun d =>
+      pure (σ.withGlob { σ.glob with storage := d.storage })) =
+      σ.withGlob <$> σ.glob.saveStorage r segs v :=
+  storage_glob σ _ (Solidity.State.saveStorage_with _ _ _ _)
+
+/-- A heap write through the term, as the statement's write. -/
+theorem writeAddr_glob (mv : MVal) (a : Semantics.Addr) :
+    (writeAddr σ.glob mv a >>= fun μ =>
+      pure (σ.withGlob { σ.glob with heap := μ.heap, nextId := μ.nextId })) =
+      σ.withGlob <$> writeAddr σ.glob mv a :=
+  memory_glob σ _ (Solidity.writeAddr_with _ _ _)
+
 /-- `localOpAssign`, `storageRootOpAssign`, `storageFieldOpAssign`,
 `storageIndexMappingOpAssign`, `storageIndexArrayOpAssign`,
 `memoryFieldOpAssign`, `memoryIndexArrayOpAssign`: `{l := l ⊕ se}`. -/
@@ -518,11 +539,47 @@ theorem sound_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = t
     simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Rhs.eval, Tm.eval, Op2.eval,
       Simple.eval_lower, hv, evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store, opLocal,
       bind_assoc, pure_bind]
-  | root r h => sorry
-  | field b f h => sorry
-  | index it b ie => sorry
-  | mfield b f h => sorry
-  | mindex a b ie => sorry
+  | root r h =>
+    have hv' : se.eval σ = pure v := hv
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, Loc.lower, Simple.eval_lower, hv', evalBinop_compound hop,
+      Run.opAssign, Val.eval, OpLoc.store, opStore, bind_assoc, pure_bind, writeStorage_toSVal,
+      saveStorage_glob, map_bind]
+  | field b f h =>
+    have hv' : se.eval σ = pure v := hv
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, Loc.eval_lower, Simple.eval_lower, hv', evalBinop_compound hop,
+      Run.opAssign, Val.eval, OpLoc.store, opStore, bind_assoc, pure_bind, writeStorage_toSVal,
+      saveStorage_glob, map_bind]
+    cases Loc.resolve σ (Loc.field b f h) <;> rfl
+  | index it b ie =>
+    have hv' : se.eval σ = pure v := hv
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, Loc.eval_lower, Simple.eval_lower, hv', evalBinop_compound hop,
+      Run.opAssign, Val.eval, OpLoc.store, opStore, bind_assoc, pure_bind, writeStorage_toSVal,
+      saveStorage_glob, map_bind]
+    cases Loc.resolve σ (Loc.index it b (.simple ie)) <;> rfl
+  | mfield b f h =>
+    have hv' : se.eval σ = pure v := hv
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, MLoc.lower, MPath.eval_lower, Simple.eval_lower, hv',
+      evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store, opMem, bind_assoc, pure_bind,
+      writeAddr_glob, map_bind, Solidity.readLoc_eq, Solidity.writeLoc_eq]
+    cases MPath.mval σ b with
+    | error => rfl
+    | ok mv => cases hr : mv.asRef <;> simp only [Res.bind_ok, hr] <;> rfl
+  | mindex a b ie =>
+    have hv' : se.eval σ = pure v := hv
+    obtain ⟨iv, hi⟩ := Simple.eval_ok σ ie
+    have hi' : ie.eval σ = pure iv := hi
+    simp only [OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Op1.eval, Op0.eval, Val.lower, MLoc.lower, MPath.eval_lower, Simple.eval_lower, hv', hi',
+      evalBinop_compound hop, Run.opAssign, Val.eval, OpLoc.store, opMem, bind_assoc, pure_bind,
+      writeAddr_glob, map_bind, Solidity.readLoc_eq, Solidity.writeLoc_eq]
+    cases MPath.mval σ b with
+    | error => rfl
+    | ok mv =>
+      cases hr : mv.asRef <;> cases hn : iv.asInt <;> simp only [Res.bind_ok, hr] <;> rfl
 
 end Updates
 
