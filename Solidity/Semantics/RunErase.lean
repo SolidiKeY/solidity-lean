@@ -1867,3 +1867,140 @@ theorem Stmt.erases_call {Γ' ps rs Γf : Ctx} (hag : Agree ns σ τ) (f : Name)
     (fun y hy => hfr y (List.mem_append_left _ hy))
 
 end Calls
+
+/-! ## `try` -/
+
+section Try
+
+variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+
+/-- An external call's returned data decoded into the clause's locals,
+alike: the scoped decoding, against the untyped binding (followed by any
+more binders). -/
+theorem Binders.decode_erase (hag : Agree ns σ τ) : {ρ : Ctx} → (bs : Binders ρ) →
+    (bs.names ++ ns).Nodup → (vs : List Value) →
+    (∃ e, (bs.decode vs : Res (Env C ρ × List Value)) = .error e ∧
+      ∀ more, bindData (bs.toList ++ more) vs τ = .error e) ∨
+    (∃ r rest τ', (bs.decode vs : Res (Env C ρ × List Value)) = .ok (r, rest) ∧
+      (∀ more, bindData (bs.toList ++ more) vs τ = bindData more rest τ') ∧
+      Agree (bs.names ++ ns) (σ.withEnv (Env.append ρ r σ.env)) τ' ∧
+      ∀ y, y ∉ bs.names → lookupBy y τ'.env = lookupBy y τ.env)
+  | _, .nil, _, vs => .inr ⟨(), vs, τ, rfl, fun _ => rfl, hag, fun _ _ => rfl⟩
+  | _, .snoc bs p x, hnd, vs => by
+    have hnd' := List.nodup_cons.1 hnd
+    have hT : ∀ more, (Binders.snoc bs p x).toList ++ more = bs.toList ++ ((p, x) :: more) :=
+      fun more => by simp only [Binders.toList, List.append_assoc, List.singleton_append]
+    have hD : ((Binders.snoc bs p x).decode vs : Res (Env C (.val p :: _) × List Value)) =
+        (do let (e, rest) ← (bs.decode vs : Res (Env C _ × List Value))
+            match rest with
+            | v :: rest => if v.fits p then pure ((v, e), rest) else .error .revert
+            | [] => .error .revert) := rfl
+    rw [hD]
+    simp only [hT]
+    rcases Binders.decode_erase hag bs hnd'.2 vs with ⟨e, h₁, h₂⟩ | ⟨r, rest, τ', h₁, h₂, hag', hf⟩
+    · exact .inl ⟨e, by rw [h₁]; rfl, fun more => h₂ _⟩
+    · rw [h₁]
+      simp only [h₂, SemanticsProperties.Res.ok_bind]
+      cases rest with
+      | nil => exact .inl ⟨.revert, rfl, fun _ => rfl⟩
+      | cons v rest =>
+        simp only [bindData]
+        by_cases hv : v.fits p
+        · simp only [hv, if_true]
+          refine .inr ⟨(v, r), rest, τ'.setEnv x (.val v), rfl, fun _ => rfl,
+            hag'.push hnd'.1 (t := .val p) v, fun y hy => ?_⟩
+          rw [frame_setEnv (B := x :: bs.names) List.mem_cons_self y hy]
+          exact hf y fun h => hy (List.mem_cons_of_mem _ h)
+        · simp only [hv]
+          exact .inl ⟨.revert, rfl, fun _ => rfl⟩
+
+theorem Stmt.erases_tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (hag : Agree ns σ τ) (call : ExtCall C Γ)
+    (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
+    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄)
+    (hnd : rets.names.Nodup) (hr : ∀ y ∈ rets.names, y ∉ ns) (hc : ∀ y ∈ code.names, y ∉ ns)
+    (ihOk : ∀ σ' τ', Agree (rets.names ++ ns) σ' τ' → ok.ErasesAt (rets.names ++ ns) σ' τ')
+    (ihErr : err.ErasesAt ns σ τ)
+    (ihPnc : ∀ σ' τ', Agree (code.names ++ ns) σ' τ' → pnc.ErasesAt (code.names ++ ns) σ' τ')
+    (ihOther : other.ErasesAt ns σ τ) :
+    (Stmt.tryCall call rets ok err code pnc other).ErasesAt ns σ τ := .of_leaf rfl (by
+  dsimp only [Stmt.run, Stmt.runR, Stmt.outNames, Stmt.binders]
+  simp only [Run.tryCall, Solidity.Stmt.run, call.key_erase hag, hag.tx]
+  refine RunRel.bind_pure _ fun k _ => ?_
+  have hB : ∀ {B : List Var}, (∀ y ∈ B, y ∈ rets.names ++ ok.binders ++ err.binders ++
+      code.names ++ pnc.binders ++ other.binders) → ∀ y ∈ ns ++ B, y ∈ ns ++ (rets.names ++
+      ok.binders ++ err.binders ++ code.names ++ pnc.binders ++ other.binders) :=
+    fun hsub y hy => by
+      rcases List.mem_append.1 hy with hy | hy
+      · exact List.mem_append_left _ hy
+      · exact List.mem_append_right _ (hsub y hy)
+  rcases lookupBy k σ.tx.ext with _ | ⟨vs | _ | c | _⟩
+  · exact (rfl : Halt.revert = Halt.revert)
+  · -- the call returned
+    have hnd' : (rets.names ++ ns).Nodup :=
+      List.nodup_append.2 ⟨hnd, hag.nodup, fun y hy z hz hyz => hr y hy (hyz ▸ hz)⟩
+    dsimp only
+    rcases Binders.decode_erase hag rets hnd' vs with ⟨e, h₁, h₂⟩ | ⟨r, rest, τ', h₁, h₂, hag', hf⟩
+    · have h₂' := h₂ []
+      rw [List.append_nil] at h₂'
+      rw [h₁, h₂']
+      exact (rfl : e = e)
+    · have h₂' := h₂ []
+      rw [List.append_nil] at h₂'
+      rw [h₁, h₂']
+      simp only [SemanticsProperties.Res.ok_bind]
+      obtain ⟨qs, hq, _⟩ := ok.outNames_suffix (rets.names ++ ns)
+      refine RunRel.reframe (τ₁ := τ') (fun z hz => hf z fun h => hz (hB (B := rets.names)
+        (fun y hy => by simp only [List.mem_append]; exact .inl (.inl (.inl (.inl (.inl hy)))))
+        z (List.mem_append_right _ h))) ?_
+      refine (RunRel.pop ((Ext.append Γ ρ).trans ok.ext) hag.len (qs := qs ++ rets.names)
+        (by rw [hq, List.append_assoc]) (ihOk _ _ hag')).mono fun y hy => ?_
+      rcases List.mem_append.1 hy with hy | hy
+      · rcases List.mem_append.1 hy with hy | hy
+        · exact hB (B := rets.names) (fun y hy => by
+            simp only [List.mem_append]; exact .inl (.inl (.inl (.inl (.inl hy))))) y
+            (List.mem_append_right _ hy)
+        · exact List.mem_append_left _ hy
+      · exact hB (B := ok.binders) (fun y hy => by
+          simp only [List.mem_append]; exact .inl (.inl (.inl (.inl (.inr hy))))) y
+          (List.mem_append_right _ hy)
+  · -- `Error(string)`
+    exact (err.erases_pop hag.len ihErr).mono (hB fun y hy => by
+      simp only [List.mem_append]; exact .inl (.inl (.inl (.inr hy))))
+  · -- `Panic(uint)`
+    dsimp only
+    cases code with
+    | none =>
+      obtain ⟨qs, hq, _⟩ := pnc.outNames_suffix ns
+      exact (RunRel.pop ((Ext.append Γ []).trans pnc.ext) hag.len hq
+        (ihPnc (σ.withEnv (Env.append [] () σ.env)) τ hag)).mono (hB fun y hy => by
+          simp only [List.mem_append]; exact .inl (.inr hy))
+    | some x =>
+      have hx : x ∉ ns := hc x List.mem_cons_self
+      simp only [CodeBinder.decode, codeBinders, CodeBinder.toOption, Option.toList,
+        List.map_cons, List.map_nil, bindData]
+      by_cases hv : c.fits .uint
+      · simp only [hv, if_true]
+        have hag' := hag.push hx (t := .val .uint) c
+        obtain ⟨qs, hq, _⟩ := pnc.outNames_suffix ((CodeBinder.some x).names ++ ns)
+        refine RunRel.reframe (τ₁ := τ.setEnv x (.val c)) (fun z hz =>
+          frame_setEnv (B := [x]) List.mem_cons_self z fun h => hz (hB (B := [x]) (fun y hy => by
+            simp only [List.mem_append]; exact .inl (.inl (.inr hy))) z
+            (List.mem_append_right _ h))) ?_
+        refine (RunRel.pop ((Ext.append Γ [.val .uint]).trans pnc.ext) hag.len
+          (qs := qs ++ [x]) (by rw [hq, List.append_assoc]; rfl) (ihPnc _ _ hag')).mono
+          fun y hy => ?_
+        rcases List.mem_append.1 hy with hy | hy
+        · rcases List.mem_append.1 hy with hy | hy
+          · exact hB (B := [x]) (fun y hy => by
+              simp only [List.mem_append]; exact .inl (.inl (.inr hy))) y
+              (List.mem_append_right _ hy)
+          · exact List.mem_append_left _ hy
+        · exact hB (B := pnc.binders) (fun y hy => by
+            simp only [List.mem_append]; exact .inl (.inr hy)) y (List.mem_append_right _ hy)
+      · simp only [hv]
+        exact (rfl : Halt.revert = Halt.revert)
+  · -- any other way
+    exact (other.erases_pop hag.len ihOther).mono (hB fun y hy => by
+      simp only [List.mem_append]; exact .inr hy))
+
+end Try
