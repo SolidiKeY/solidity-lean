@@ -17,6 +17,7 @@ import Solidity.Semantics.WellFormed
 import Solidity.Semantics.Callback
 import Solidity.Semantics.Mutability
 import Solidity.Semantics.Core
+import Solidity.Semantics.RunErase
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules
