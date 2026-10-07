@@ -708,7 +708,7 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
    - **How the 241 constructor lines keep their text:**
      - Fold Schema's insertions into `schemaAt`/`schemaStmt`/`declVar` behind `open scoped Solidity.Core.Schema`. The insertions are `Idx.there^d`, `up^d`, `Premise.unfold P (Ext.push^d .refl)`, `Premise.bind` for the three `…DeclInitDrop` rules, and `BlockKind.block` vs `.capture` on splits.
      - The script copies `Rules.lean`'s lines verbatim under a Core header. `check-rule-text.sh` diffs the two copies and must print nothing.
-     - `Calculus/Core/Taclet.lean`'s hand-written constructors are deleted, along with `Schema.lean`.
+     - `Calculus/Core/Taclet.lean`'s hand-written constructors are deleted, along with the `Core.Schema` prototype.
    - New theorems and modules:
      - `Taclet.toStep : Taclet C k m s p → s.step k m = some p`, one `rfl` per constructor. Soundness then comes from `Stmt.Sound`, with no per-rule proofs.
      - Core `Completeness`: the dispatcher that names the fired rule, for `#step` and `sol_derive?`.
@@ -863,6 +863,93 @@ elaborates with every module (no name clash).
   - `Tools/Counterexample.lean` stays on the untyped `Prog.runFuel` (its
     `Fml.eval3` evaluates the old `Fml`'s modalities, `.stuck` included);
     its port is listed under W4 `sem-del`.
+
+### W1 lane: rules (`w1-rules`, 2026-10-08)
+
+- **The reader** (`RuleSyntax.lean`, under `open scoped Solidity.Core.Schema`,
+  `schemaTacletCore`): the same `dl{ … }` text read from `coreScope`.
+  `headOfCore` makes a declared name a position (`Idx.there^j .here`) and
+  weakens a `\find` schema variable past the fresh locals (`.there`, the
+  family's `up`; a hole by `SHole.up` and kin, a whole right-hand side by
+  `ARhs.up`/`MRhs.up`/`Src.up`/`MSrc.up`, a block by `Core.Prog.up`).  The
+  premise: `Premise.unfold P (Ext.push^d .refl)`, `Premise.bind` when the
+  `\find` declares, `Upd.decl` for a declared update target (and the
+  invariant rules' `b`/`variant`), `BlockKind.block` for an `if`'s split, a
+  check with no program, `Premise.branches` with `Branch.mk`, the invariant
+  premise (`schemaInvCore`: `xs`/`hv` bound by the side condition
+  `Prog.frame body = some (xs, hv)`).  A program spliced in is `Stmt.block`.
+  `coreNames` then turns every name the reader wrote into its scoped twin
+  (`Solidity.F.x` ↦ `Solidity.Core.F.x`; the term symbols under `Core.Tms`,
+  since `Solidity.Core.MAddr` is the typed heap's; `Hole` ↦ `SHole`), and
+  fails on a missing twin.  Old-mode output is unchanged (the full build
+  re-checked every old pin).
+- **The table** (`Calculus/Core/Rules.lean`): `Taclet` (158 lines) and
+  `LeanTaclet` (8 lines) copied by `scripts/core-rules.mjs`, docstrings and
+  lines verbatim; only binders change (`Val C .bool` ↦ `Val C Γ .bool`,
+  `Prog.loopFrame` ↦ `Prog.frame`).  `scripts/check-rule-text.sh` compares
+  docstrings and lines, binders aside, and prints nothing.  Stated by hand
+  after the markers: `Taclet.blockEmpty` (scoped only: a block is a
+  statement now) and `LeanTaclet.functionCallArgCapture` (today's line
+  escapes to the untyped call); `Rule`.
+- **`Taclet.toStep`, `LeanTaclet.toStep`, `Rule.toStep`,
+  `Rule.premise_unique`** (`Calculus/Core/Taclet.lean`; axioms: `propext`):
+  one lemma per constructor, 157 (153 `Taclet`, 4 `LeanTaclet`) replayed
+  from two `#replay_toStep` tables, 15 by hand (an array's element type, a
+  call's arguments, a hole that is a copy, a conditional written to a
+  member, the loop rules).  The table is the plan `#derive_toStep?` found
+  by `to_step_tac`'s search (holes taken apart, side conditions settled,
+  `rfl` after case splits, each lemma its own heartbeat budget), so a
+  re-check does not search (AGENTS.md, "Writing or fixing a tactic").  The
+  search never backtracked: every plan is "n goals, each by `rfl`", and the
+  replay costs what the search did, 19.2 s for `Taclet` (7 ms for
+  `LeanTaclet`), in the case splits and the `rfl`s, not in failed
+  attempts: `storageIndexWriteCaptureAllNonSimpleIndex` (1682 goals) and
+  `memoryIndexRead_unfold_rightSndIndex` (116) 4.8 s each,
+  `binopUnfoldLeft`/`Right` (667/609) 1.2 s each, the four
+  `storage…Read_unfold_right{Fst,SndResult}` 0.5–0.8 s each, the rest
+  under 0.3 s.  `Taclet.step_eq` stays
+  as an alias (`Calculus/Core/Proves.lean` uses it).
+- **Printing** (`Calculus/Core/RuleText.lean`, `#check_rule_text`, pinned):
+  140 of 158 `Taclet` lines and 6 of 9 `LeanTaclet` lines print as today's
+  (`Calculus/Core/DelabLean.lean` adds the printer for `Core.LeanTaclet`).
+  The others need `Calculus/Core/Delab.lean`, which no W1 lane owns, **for
+  W2**:
+  - a hole's statement: `SHole.fill`/`MHole.fill`/`VHole.fill`/`NewLhs.fill`
+    (with `SHole.up` and kin transparent) to today's `Hole.fill` and kin —
+    the six `…_unfold_right…` reads through `lhs`, `ternaryToIf`,
+    `ternaryCaptureCond`, `newArrayCapture`;
+  - `Tms.Term.bumped` to today's `Term.bumped` — the six
+    `…IncrementAssignment` rules;
+  - `Premise.expandCall` to `⟨[ expand_function_body(ic); ]⟩` (with twins
+    for `Args`/`CallRet` schema variables) — `functionBodyExpand`,
+    `internalCallExpand`;
+  - a `try` whose binders are schema variables (`rets`, `code.binders`) —
+    `tryCallNoCallbackBox`, `tryCallDiamond`;
+  - `progPieces` reduces a block before it looks for `up`, so `Prog.up body`
+    inside a premise's program prints as an escape — `whileInvariantDiamond`;
+  - `functionCallArgCapture` has no line to print.
+- **Shapes** (`Calculus/Core/RuleShapes.lean`, `Calculus/Core/PrintedRules.lean`):
+  today's rows by name; `blockEmpty` and `functionFrameEmpty` claimed
+  (308 claimed, 15 excused); printed rules partitioned as today's.  The
+  callback rows stay today's until the callback taclets are scoped (W2
+  `tree`).
+- **The dispatcher** (`Calculus/Core/Completeness.lean`, `ruleOf?`,
+  `#rule_of m s`, pinned in `Examples/Tactics/CoreRules.lean`): the
+  constructor whose line matches and whose side conditions evaluate, its
+  premise checked against `Stmt.step`; a hole's statement matched by the
+  hole and part read off the statement (`holeCandidates`).  It names a rule;
+  a proof that every `Stmt.step` premise is some rule (today's
+  `Stmt.complete`) is not stated.
+- Left: the Delab items above; `CallbackTaclet` on Core (W2 `tree`);
+  `Tools/Inspect.lean` (not this lane's) still prints the deleted
+  `Core.Taclet.erase` as a scoped taclet's soundness line, which should name
+  `Taclet.toStep` (`soundLine`: e.g. "sound: Solidity.Core.Taclet.toStep (the
+  premise is Stmt.step's; Core.Stmt.Sound)", and the same for
+  `Core.LeanTaclet`), then re-pin `Examples/Tactics/CorePrint.lean`'s
+  `#taclet`, which carries the stale line on purpose until then (its rule
+  moved from `storageFieldRead_unfold_rightFst`, which no longer prints as
+  today's, to `storageFieldDelete_unfold_leftFst`); `lake exe solkeycheck` was not run here (no rule names,
+  sort annotations or `KeyTaclets.lean` changed).
 
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)
 1. **`sound`** (the critical path)
@@ -1616,7 +1703,7 @@ by the premise itself.  Until then `Taclet.erase` carries it over from
   `Hyps`/`Proves`; a `sol_symex` on `Core` (`normValid` with
   `Core.Fml.quote`); chains, `Derive.residue` and ProofTree; the
   delaborator for formulas with schema variables (`#taclet`, `#wp`).
-**The prototype** (`Calculus/Core/Schema.lean`, lane `intrinsic-calctools`)
+**The prototype** (the module `Calculus/Core/Schema`, lane `intrinsic-calctools`; folded into `RuleSyntax.lean` in W1)
 does 1, 2, 5 and the side conditions for three lines, as `scoped
 macro_rules` on the same `dl{ ⟨[ s; ]⟩ ⇝ p }` syntax, so the lines are
 `Rules.lean`'s text (`storageFieldRead_unfold_rightFst` with `v` for `lhs`:
