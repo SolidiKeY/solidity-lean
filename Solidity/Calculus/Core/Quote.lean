@@ -4,6 +4,9 @@ import Solidity.Calculus.Quote
 /-!
 # Quoting scoped formulas back into Lean
 
+Entry points: `Fml.quote`, `Tm.quote`, `Upd.quote`, `Frames.quote` and
+`Premise.quote`, each hash-consed.
+
 `Calculus/Quote.lean`'s quoter for the scoped formulas of
 `Calculus/Core/Fml.lean` and the programs of `Syntax/Core.lean`: a formula
 computed by compiled code (the strategy, `Calculus/Core/Step.lean`) becomes
@@ -442,12 +445,48 @@ partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
       l := mkApp3 (mkConst ``List.cons [levelZero]) sigTy e l
     sctor ``Fml.anon #[Γe, l, ← qFml Γ φ]
 
+def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
+  let pre := #[← contract, ← qCtx Γ]
+  let mk (n : Lean.Name) (args : Array Expr) : Expr := mkAppN (mkConst n) (pre ++ args)
+  match p with
+  | .update U => return mk ``Premise.update #[← qCtx Γ', ← qUpd Γ Γ' U]
+  | @Premise.unfold _ _ _ Γ'' P h =>
+    return mk ``Premise.unfold #[← qCtx Γ', ← qCtx Γ'', ← qProg Γ Γ'' P, ← qExt Γ' h]
+  | .bind x t P => return mk ``Premise.bind #[← qCtx Γ', toExpr x, qLTy t, ← qProg (t :: Γ) Γ' P]
+  | @Premise.split _ _ Γ₁ Γ₂ b c c' P Q =>
+    return mk ``Premise.split #[← qCtx Γ₁, ← qCtx Γ₂, qBlockKind b, ← qFml Γ c, ← qFml Γ c',
+      ← qProg Γ Γ₁ P, ← qProg Γ Γ₂ Q]
+  | .check c => return mk ``Premise.check #[← qFml Γ c]
+  | .done b => return mk ``Premise.done #[← qCtx Γ', toExpr b]
+
 end Quote
 
-/-- A scoped formula of the contract `c` (an `Expr`, `mkConst` of its name),
-quoted with every context once and every subterm shared. -/
+/-! ## The entry points
+
+Each quotes with every context written out, then hash-conses the result
+(`ShareCommon`, Gate G0's condition 7): every copy of a context, and every
+other repeated subterm, is one object, which the kernel's caches see once.
+The contract is the `Expr` `c` that names it (`mkConst ``StandardExample`). -/
+
+/-- A scoped formula. -/
 def Fml.quote {C : Contract} (c : Expr) {Γ : Ctx} (φ : Fml C Γ) : Expr :=
   Lean.ShareCommon.shareCommon ((Quote.qFml Γ φ).run c)
+
+/-- A term of sort `s`. -/
+def Tm.quote {C : Contract} (c : Expr) {Γ : Ctx} {s : Srt} (t : Tm C Γ s) : Expr :=
+  Lean.ShareCommon.shareCommon ((Quote.qTm Γ s t).run c)
+
+/-- An update. -/
+def Upd.quote {C : Contract} (c : Expr) {Γ Δ : Ctx} (U : Upd C Γ Δ) : Expr :=
+  Lean.ShareCommon.shareCommon ((Quote.qUpd Γ Δ U).run c)
+
+/-- The frames after a program. -/
+def Frames.quote {C : Contract} (c : Expr) {Γ Γ₀ : Ctx} (κ : Frames C Γ Γ₀) : Expr :=
+  Lean.ShareCommon.shareCommon ((Quote.qFrames Γ Γ₀ κ).run c)
+
+/-- What a rule leaves (`Stmt.step`'s result). -/
+def Premise.quote {C : Contract} (c : Expr) {Γ Γ' : Ctx} (p : Premise C Γ Γ') : Expr :=
+  Lean.ShareCommon.shareCommon ((Quote.qPremise Γ Γ' p).run c)
 
 /-! A scoped block on its own is quoted by `Syntax/CoreQuote.lean`'s
 `Prog.quoteShared`. -/

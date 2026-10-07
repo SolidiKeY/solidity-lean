@@ -54,6 +54,21 @@ sound: pending (the scoped run, M3 of docs/intrinsic.md); Solidity.Core.Taclet.e
 -/
 #guard_msgs in #taclet Core.Taclet.storageFieldRead_unfold_rightFst
 
+/-! A rule's premise for a statement, quoted (`Core.Premise.quote`), checked
+by the kernel's type checker and printed: a position outside the term is
+`_`, as `Idx.name` names it. -/
+
+private def readS : Core.Stmt SE [.val .uint] [.val .uint] :=
+  .assignLocal .here (.read (.field (.loc (.root "alice" rfl)) "age" rfl))
+
+/-- info: dl{ { _ := find(storage, alice.age) } ⟨[ ]⟩ } -/
+#guard_msgs in
+run_meta do
+  let some p := readS.step 1 .box | throwError "no rule"
+  let e := Core.Premise.quote (mkConst ``StandardExample) p
+  Meta.check e
+  logInfo m!"{e}"
+
 /-! A formula whose program runs into a branch's end: `}`, then the rest. -/
 
 /-- info: dl{ ∀ uint x; x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1 } : Core.Fml SE [] -/
