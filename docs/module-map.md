@@ -70,6 +70,8 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Core/Fml.lean` | Scoped terms, updates and formulas (`Solidity.Core`, M6a of `docs/intrinsic.md`): `Tm C Γ s`, `Upd C Γ Δ` (assign, declare, pop), `Frames` (`seq`, `pop .block`/`.capture`), `Fml C Γ` with `modal m P κ φ` and the hidden binder `bind`, `Premise C Γ Γ'` (no cover goal) and `Premise.fml`, `Frames.leave`, and `Fml.erase` to `Update.lean`'s. |
 | `Calculus/Core/Lower.lean` | Scoped program expressions lowered to `Core.Tm` (`Val.lower`, …), and `lower_erase`: the old lowering of the erasure. |
 | `Calculus/Core/Print.lean` | `Core.Fml.show`: a scoped formula printed as `RuleSyntax.lean` prints its erasure (`}` at a block's end, pops and hidden binders unprinted), pinned against it. |
+| `Calculus/Core/Step.lean` | The strategy on scoped formulas: `Stmt.step` (one `casesOn`; the ported part of the rule table, `none` for the rest), `Fml.maxIdx`/`fresh`, `Fml.stepR` by `Fml.rec` with its compiled twin `Fml.stepAt` (`stepR_eq`), `symex`. |
+| `Calculus/Core/Quote.lean` | Scoped programs and formulas quoted back into `Expr` (`Core.Fml.quote`, `Core.Prog.quote`), hash-consed. |
 | `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the constructor for each. |
@@ -266,6 +268,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |
 | `Examples/Tactics/Loops.lean` | `while`, `for`, `do … while`, `break`, `continue`, `return` in a loop: the lowering's shapes pinned, `#run` of loops, a concrete loop decided (`Prog.run_loop_of_iterN`); loops proved by unwinding (`whileUnwind`, `loopExit`), solkey's two solc loop ports among them; by an invariant (`whileInvariantBox`, `whileInvariantDiamond`): a counting loop, a sum with a closed form, a loop with `break`, a walk and its proof tree. |
 | `Examples/Tactics/LoopsImport.lean` | Loops from solc's AST (`tests/solc/Loops.sol`): the `/// @custom:key` clauses `scripts/solc-ast.mjs` reads from the source by the loop's `src` offset, printed above the loop by the front end (a clause over several `///` lines joined, as solkey's `KeyNatspec`); a `return` inside a loop lowered on import; five of its seven obligations proved, the two not proved named with why. |
+| `Examples/Tactics/CoreSymex.lean` | `Core.symex` on three programs, checked by the kernel (`Eq.refl`) and against today's `symex` on the erasure. |
 
 At the root, the notation's own tests:
 

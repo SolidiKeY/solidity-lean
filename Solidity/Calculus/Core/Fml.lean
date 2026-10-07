@@ -272,7 +272,7 @@ abbrev Fml.eqD {Γ : Ctx} (a b : Tm C Γ .val) : Fml C Γ :=
 
 /-- `Update.lean`'s formula, the positions named by `ns`: a frame is the
 statements it holds, a pop and a hidden binder nothing, and an update of
-pops only (`Frames.leave`) its formula. -/
+pops only (`Frames.exit`) its formula. -/
 def Fml.erase : {Γ : Ctx} → List Var → Fml C Γ → Solidity.Fml C
   | _, _, .tt => .tt
   | _, ns, .eq a b => .eq (a.erase ns) (b.erase ns)
@@ -311,33 +311,46 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   /-- The goal closed (`true`) or failed (`false`). -/
   | done {Γ' : Ctx} (b : Bool) : Premise C Γ Γ'
 
+/-- A modality whose program is done goes through its frames: a scope end
+pops its locals (an update of pops, which prints as nothing), the rest of
+the program is the next modality, and with no frame left the postcondition
+is the goal.  No rule fires on the way (Gate G0, condition 6). -/
+def Frames.exit (m : Modality) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Fml C Γ₀ → Fml C Γ
+  | _, _, κ => Frames.casesOn (motive := fun Γ Γ₀ _ => Fml C Γ₀ → Fml C Γ) κ
+      (fun φ => φ)
+      (fun ω κ φ => Prog.casesOn
+        (motive_2 := fun Γ Γ₁ _ => (Unit → Fml C Γ₁) → Frames C Γ₁ _ → Fml C Γ) ω
+        (fun rest _ => rest ()) (fun s ω _ κ => .modal m (.cons s ω) κ φ)
+        (fun _ => Frames.exit m κ φ) κ)
+      (fun _ h κ φ => .upd m (Upd.nil.pop h) (Frames.exit m κ φ))
+  termination_by structural _ _ κ => κ
+
+/-- `⟨ ω κ ⟩ φ`, gone on into the frames when `ω` is empty: the formula a
+rule leaves in front of the rest of the program. -/
+def Fml.modalK {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
+    (φ : Fml C Γ₀) : Fml C Γ :=
+  Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames C Γ₁ Γ₀ → Fml C Γ) ω
+    (fun κ => κ.exit m φ) (fun s ω κ => .modal m (.cons s ω) κ φ) κ
+
 /-- The premise as one formula, under the modality `m` the rule found, in
 front of the rest `ω` of the program, the frames `κ` and the postcondition
 `φ`.  The rest and the frames are passed apart (Gate G0, condition 6): an
-update goes on into `⟨ ω κ ⟩ φ`. -/
+update goes on into `⟨ ω κ ⟩ φ`, or into the frames when `ω` is empty. -/
 def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁) (κ : Frames C Γ₁ Γ₀)
     (φ : Fml C Γ₀) (p : Premise C Γ Γ') : Fml C Γ :=
   Premise.casesOn (motive := fun Γ' _ => Prog C Γ' Γ₁ → Fml C Γ) p
-    (fun U ω => .upd m U (.modal m ω κ φ))
+    (fun U ω => .upd m U (.modalK m ω κ φ))
     (fun P h ω => .modal m P (.pop .capture h (.seq ω κ)) φ)
     (fun x t P ω => .bind x t (.modal m P (.seq ω κ) φ))
     (fun c c' P Q ω =>
-      .and (.imp c (.modal m P (.pop .block P.scopeExt (.seq ω κ)) φ))
-        (.imp c' (.modal m Q (.pop .block Q.scopeExt (.seq ω κ)) φ)))
-    (fun c ω => .and (.imp c (.modal m ω κ φ)) c)
+      .and (.imp c (.modalK m P (.pop .block P.scopeExt (.seq ω κ)) φ))
+        (.imp c' (.modalK m Q (.pop .block Q.scopeExt (.seq ω κ)) φ)))
+    (fun c ω => .and (.imp c (.modalK m ω κ φ)) c)
     (fun b _ => if b then .tt else .ff) ω
-
-/-- A modality whose program is done goes on into its frames: the rest of
-the program, or a scope end, which pops the scope's locals (no rule fires). -/
-def Frames.leave {Γ Γ₀ : Ctx} (m : Modality) (κ : Frames C Γ Γ₀) (φ : Fml C Γ₀) : Fml C Γ :=
-  Frames.casesOn (motive := fun Γ Γ₀ _ => Fml C Γ₀ → Fml C Γ) κ
-    (fun φ => φ)
-    (fun ω κ φ => .modal m ω κ φ)
-    (fun _ h κ φ => .upd m (Upd.nil.pop h) (.modal m .nil κ φ)) φ
 
 /-! ### Equations
 
-`Premise.fml`, `Frames.leave` and the `scopeExt`s are written with `casesOn`
+`Premise.fml`, `Frames.exit`, `Fml.modalK` and the `scopeExt`s are written with `casesOn`
 (Gate G0, condition 1), so they have no equation lemmas of their own: these
 are them, by `rfl`. -/
 
@@ -346,7 +359,7 @@ section Equations
 variable {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀)
 
 theorem Premise.fml_update (U : Upd C Γ Γ') :
-    (Premise.update U).fml m ω κ φ = .upd m U (.modal m ω κ φ) := rfl
+    (Premise.update U).fml m ω κ φ = .upd m U (.modalK m ω κ φ) := rfl
 
 theorem Premise.fml_unfold {Γ'' : Ctx} (P : Prog C Γ Γ'') (h : Ext Γ' Γ'') :
     (Premise.unfold P h).fml m ω κ φ = .modal m P (.pop .capture h (.seq ω κ)) φ := rfl
@@ -362,22 +375,30 @@ end Equations
 theorem Premise.fml_split {Γ Γ₁ Γ₀ Δ₁ Δ₂ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (c c' : Fml C Γ) (P : Prog C Γ Δ₁) (Q : Prog C Γ Δ₂) :
     (Premise.split c c' P Q).fml m ω κ φ =
-      .and (.imp c (.modal m P (.pop .block P.scopeExt (.seq ω κ)) φ))
-        (.imp c' (.modal m Q (.pop .block Q.scopeExt (.seq ω κ)) φ)) := rfl
+      .and (.imp c (.modalK m P (.pop .block P.scopeExt (.seq ω κ)) φ))
+        (.imp c' (.modalK m Q (.pop .block Q.scopeExt (.seq ω κ)) φ)) := rfl
 
 theorem Premise.fml_check {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (c : Fml C Γ) :
-    (Premise.check c).fml m ω κ φ = .and (.imp c (.modal m ω κ φ)) c := rfl
+    (Premise.check c).fml m ω κ φ = .and (.imp c (.modalK m ω κ φ)) c := rfl
 
-theorem Frames.leave_nil {Γ : Ctx} (m : Modality) (φ : Fml C Γ) :
-    (Frames.nil : Frames C Γ Γ).leave m φ = φ := rfl
+theorem Frames.exit_nil {Γ : Ctx} (m : Modality) (φ : Fml C Γ) :
+    (Frames.nil : Frames C Γ Γ).exit m φ = φ := rfl
 
-theorem Frames.leave_seq {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
-    (φ : Fml C Γ₀) : (Frames.seq ω κ).leave m φ = .modal m ω κ φ := rfl
+theorem Frames.exit_seq {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
+    (φ : Fml C Γ₀) : (Frames.seq ω κ).exit m φ = .modalK m ω κ φ := by
+  cases ω <;> rfl
 
-theorem Frames.leave_pop {Γ Γ' Γ₀ : Ctx} (m : Modality) (b : BlockKind) (h : Ext Γ Γ')
+theorem Frames.exit_pop {Γ Γ' Γ₀ : Ctx} (m : Modality) (b : BlockKind) (h : Ext Γ Γ')
     (κ : Frames C Γ Γ₀) (φ : Fml C Γ₀) :
-    (Frames.pop b h κ).leave m φ = .upd m (Upd.nil.pop h) (.modal m .nil κ φ) := rfl
+    (Frames.pop b h κ).exit m φ = .upd m (Upd.nil.pop h) (κ.exit m φ) := rfl
+
+theorem Fml.modalK_nil {Γ Γ₀ : Ctx} (m : Modality) (κ : Frames C Γ Γ₀) (φ : Fml C Γ₀) :
+    Fml.modalK m .nil κ φ = κ.exit m φ := rfl
+
+theorem Fml.modalK_cons {Γ Γ₁ Γ₂ Γ₀ : Ctx} (m : Modality) (s : Stmt C Γ Γ₁) (ω : Prog C Γ₁ Γ₂)
+    (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀) : Fml.modalK m (.cons s ω) κ φ = .modal m (.cons s ω) κ φ :=
+  rfl
 
 theorem Prog.scopeExt_nil {Γ : Ctx} : (Prog.nil : Prog C Γ Γ).scopeExt = .refl := rfl
 

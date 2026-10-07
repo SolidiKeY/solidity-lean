@@ -232,7 +232,7 @@ info: (x > 0 → [ uint y = x; x = y; x = 2; ] x = 1) ∧ (¬x > 0 → [ revert(
 
 /-- `T storage sp1 = alice; x = sp1.age;` in place of `x = alice.age;`, its
 capture popped after it, invisibly; then the frames left: the pop is an
-update that prints as nothing. -/
+update that prints as nothing, and the empty modality is gone. -/
 private def unfold₁ : Fml SE [.val .uint] :=
   Premise.fml .diamond .nil .nil (.eqD (pv .here) (lit 1))
     (Premise.unfold (.cons (.declStorage (.struct "Person") (.fresh "sp" 1) (some (.path alice))) <|
@@ -242,9 +242,9 @@ private def unfold₁ : Fml SE [.val .uint] :=
 /-- info: ⟨ Person storage sp1 = alice; x = sp1.age; ⟩ x = 1 -/
 #guard_msgs in #eval showSame cSE [x] unfold₁
 
-/-- info: ⟨ ⟩ x = 1 -/
+/-- info: x = 1 -/
 #guard_msgs in #eval showSame cSE [.fresh "sp" 1, x]
-  (Frames.leave (C := SE) (Γ := [.alias (.struct "Person"), .val .uint]) .diamond
+  (Frames.exit (C := SE) (Γ := [.alias (.struct "Person"), .val .uint]) .diamond
     (.pop .capture (.push .refl) .nil) (.eqD (pv .here) (lit 1)))
 
 /-- `uint v = x;` with its initializer dropped (`localValueDeclInitDrop`):
