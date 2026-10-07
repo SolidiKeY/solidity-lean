@@ -509,8 +509,8 @@ diamond closed to `false`, where solkey has no rule (a call may revert in the
 caller, which no formula rules out); and `transferDiamond`, a payment under
 the diamond closed to `false`, where solkey's diamond rules are not ported;
 `whileUnwind`, `whileInvariantBox` and `whileInvariantDiamond`, solkey's
-taclets of those names past the pinned checkout (`ed7849d5b6`), the first
-with a bound on the unwinding; `loopExit`, the loop at its bound; and
+taclets of those names, added in `ed7849d5b6` after the pinned `1b4341a303`,
+the first with a bound on the unwinding; `loopExit`, the loop at its bound; and
 `whileClose` and `whileNoVariantDiamond`, a loop with an invariant closed to
 `false` where its body has no frame or, under the diamond, it has no
 variant (solkey unwinds those).  The list is checked against the

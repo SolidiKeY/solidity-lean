@@ -3976,13 +3976,18 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     pure (Q ++ [.tryCall ⟨addr, g, args⟩ rets' ok err (code.map Var.ofName) pnc other])
 
 /-- A loop's condition, invariant or variant, of type `p` (its narrow
-rewrites done, `elabStmt`): no effect may be captured before it, since it is
-evaluated where the loop is, again. -/
+rewrites done, `elabStmt`): nothing may be captured before it, since it is
+evaluated where the loop is, again.  So an effect, a call to a declared
+function, a cast, a narrow operation that needs a capture or a struct
+constructor in it is refused (`docs/loops.md`), where solkey evaluates it
+per iteration. -/
 partial def loopExpr (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C p) := do
   let st ← get
   let (P, _) ← hoist e
   set st
-  unless P.isEmpty do throw s!"{e.toStr}: a loop's {what} with an effect"
+  unless P.isEmpty do
+    throw s!"{e.toStr}: a loop's {what} needs a statement before it (an effect, a call, \
+      a cast, a narrow operation or a constructor), and is evaluated again each iteration"
   checkM C p e
 
 /-- A block. -/

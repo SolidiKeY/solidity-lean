@@ -759,9 +759,11 @@ inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise 
   it holds, the condition's value `b` (solkey's `bType b = cond;`) picks the
   body, which keeps the invariant, or the rest of the program.  A `b`
   neither `TRUE` nor `FALSE` (Lean's locals are untyped) is ruled out under
-  the diamond, as a branch's cover is.  A body with no frame (memory, a
-  push, an alias, an external call: `Prog.loopFrame`) has no invariant rule,
-  as in solkey. -/
+  the diamond, as a branch's cover is.  A body with no frame
+  (`Prog.loopFrame`) has no invariant rule: one that writes memory, as in
+  solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,
+  rebinds an alias or calls out, which solkey frames as writing storage and
+  the ledger. -/
   | whileInvariantBox {cond inv : Val C .bool}
       (hf : (Prog.loopFrame body).isSome = true := by side_cond) :
       dl[LeanTaclet C k]{ [ /// @custom:key invariant inv

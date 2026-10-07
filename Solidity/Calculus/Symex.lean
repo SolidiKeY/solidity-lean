@@ -309,6 +309,32 @@ theorem invRule {I c c' post : Fml C} {U : Upd C} {P : Prog C}
   · cases d
   · exact .invLean d init thn els cov
 
+/-- `invLean` under the box, with solkey's two goals: the third, `true` past
+`{anon}`, is `closeTrue`'s, as `splitBox`'s is. -/
+theorem invBox {Γ : List (Hyp C)} {s : Stmt C} {ω : Prog C} {φ : Fml C}
+    {I c c' post : Fml C} {U : Upd C} {P : Prog C}
+    (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ [ s; ..ω ] φ }) .box s (.inv I U c c' P post))
+    (init : dl{ ..Γ ⟹ I })
+    (thn : Proves .all (Γ ++ Hyp.loopAnon .box P I U ++ [.pre c]) (.modal .box P post))
+    (els : Proves .all (Γ ++ Hyp.loopAnon .box P I U ++ [.pre c']) (.modal .box ω φ))
+    (hb : Hyp.boxOnly (Γ ++ Hyp.loopAnon .box P I U) = true := by first | rfl | decide)
+    (hm : (Hyp.wrap (Γ ++ Hyp.loopAnon .box P I U) .tt).modalFree = true := by
+      first | rfl | decide) :
+    dl{ ..Γ ⟹ [ s; ..ω ] φ } :=
+  .invLean d init thn els (closeTrue hb hm)
+
+/-- `invBox` by whichever rule `Rule` names. -/
+theorem invBoxRule {I c c' post : Fml C} {U : Upd C} {P : Prog C}
+    (d : Rule C (Hyp.fresh Γ (.modal .box (s :: ω) φ)) .box s (.inv I U c c' P post))
+    (init : Proves .all Γ I)
+    (thn : Proves .all (Γ ++ Hyp.loopAnon .box P I U ++ [.pre c]) (.modal .box P post))
+    (els : Proves .all (Γ ++ Hyp.loopAnon .box P I U ++ [.pre c']) (.modal .box ω φ))
+    (hb : Hyp.boxOnly (Γ ++ Hyp.loopAnon .box P I U) = true := by first | rfl | decide)
+    (hm : (Hyp.wrap (Γ ++ Hyp.loopAnon .box P I U) .tt).modalFree = true := by
+      first | rfl | decide) :
+    Proves .all Γ (.modal .box (s :: ω) φ) :=
+  invRule d init thn els (closeTrue hb hm)
+
 end Proves
 
 /-- `sol_derive`: run the strategy as a derivation.  On every goal it drops

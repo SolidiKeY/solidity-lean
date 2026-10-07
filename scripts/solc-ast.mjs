@@ -27,24 +27,37 @@
  * bytes): the import refuses a fixture of another hash, and this script
  * rewrites the literal, which makes Lake re-check the module.
  *
- * A loop (`while`, `for`, `do … while`) keeps the `/// @custom:key` lines
- * directly above it as `loopSpec`, the clause after the tag each: solc drops
- * them, and solkey reads them from the source by the loop's `src` offset
- * (`LoopSpecCompiler`), as this does.
+ * A loop (`while`, `for`, `do … while`) keeps the `/// @custom:key` clauses
+ * of the `///` lines directly above it as `loopSpec`, the text after the tag
+ * each: solc drops them, and solkey reads them from the source by the loop's
+ * `src` offset (`SolJSONParser.loopSpec`), as this does: only where the
+ * loop starts its line, the `///` lines joined and split at a line that
+ * starts with a tag, a line without one continuing the clause before it,
+ * whitespace collapsed (`KeyNatspec.of`).  A loop takes `invariant` and
+ * `decreases`, as in solkey, and `unwind`, Lean's own bound on the
+ * unwinding, which solkey rejects.
  *
  * Usage: node scripts/solc-ast.mjs [--solkey <checkout>] [--soljson <dir>] [--source <file>]
- *          [--out <file>] [--no-wrapper]
+ *          [--out <file>] [--wrapper <module>] [--no-wrapper]
  *   --solkey      the solkey checkout (default ../solkey, or SOLKEY_ROOT)
  *   --soljson     the directory holding the pinned soljson (default the
  *                 checkout's `keyext.solidity.core/build/soljson`; a fresh
  *                 clone has none, so point it at another checkout's)
- *   --source      another source to compile (default the checkout's TestSuite.sol), with
- *                 the checkout's pinned compiler: `tests/solc/Loops.sol`
+ *   --source      the source, a path in this repository if there is one, else
+ *                 in the checkout (default keyext.solidity.examples/TestSuite.sol);
+ *                 another one is another fixture, and needs --out
  *   --out         where to write the fixture (default tests/solc/TestSuite.ast.json)
+ *   --wrapper     the importing module (default Solidity/Solkey/TestSuite.lean):
+ *                 the literal rewritten is the one of the import of `--out`'s file
  *   --no-wrapper  leave the importing module's hash literal alone
  *   --compare-cache  also compare the trimmed AST with solkey's own cached solc
  *                 output for the same source (`~/.cache/solkey/solc/<soljson>/`,
  *                 keyed by the sha256 of `SolcWrapper`'s input), when there is one
+ *
+ * The loops fixture:
+ *   node scripts/solc-ast.mjs --solkey <clone at the pin> --soljson <dir> \
+ *     --source tests/solc/Loops.sol --out tests/solc/Loops.ast.json \
+ *     --wrapper Solidity/Examples/Tactics/LoopsImport.lean
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
@@ -62,17 +75,20 @@ const optionOf = (flag, fallback) => {
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SOLKEY = optionOf("--solkey", process.env.SOLKEY_ROOT || join(ROOT, "../solkey"));
-const OUT = optionOf("--out", join(ROOT, "tests/solc/TestSuite.ast.json"));
-const WRAPPER = join(ROOT, "Solidity/Solkey/TestSuite.lean");
-const SOURCE_ARG = optionOf("--source", null);
-const SOURCE = SOURCE_ARG ?? "keyext.solidity.examples/TestSuite.sol";
-const SOURCE_PATH = SOURCE_ARG ? SOURCE_ARG : join(SOLKEY, SOURCE);
-const UNIT = SOURCE_ARG ? SOURCE_ARG.split("/").pop() : "TestSuite.sol";
+const OUT_ARG = optionOf("--out", null);
+const OUT = OUT_ARG ?? join(ROOT, "tests/solc/TestSuite.ast.json");
+const WRAPPER = optionOf("--wrapper", join(ROOT, "Solidity/Solkey/TestSuite.lean"));
+const SOURCE = optionOf("--source", "keyext.solidity.examples/TestSuite.sol");
+const SOURCE_PATH = existsSync(join(ROOT, SOURCE)) ? join(ROOT, SOURCE) : join(SOLKEY, SOURCE);
+const UNIT = SOURCE.split("/").pop();
 
 const fail = (msg) => {
   console.error(`solc-ast: ${msg}`);
   process.exit(1);
 };
+if (args.includes("--source") && !OUT_ARG) {
+  fail("--source needs --out: the default is the TestSuite fixture");
+}
 
 // The pinned compiler, checked against the checkout's build script.
 const gradle = readFileSync(join(SOLKEY, "keyext.solidity.core/build.gradle"), "utf8");
@@ -141,17 +157,34 @@ const DECLS = new Set([
 const located = (n, parentKey) =>
   DECLS.has(n.nodeType) || parentKey === "statements" || n.nodeType === "TryCatchClause";
 
-// The `/// @custom:key` clauses directly above the loop starting at byte `b`.
-const sourceLines = source.split("\n");
+// The `@custom:key` clauses of the `///` lines directly above the loop
+// starting at byte `b` (solkey's `SolJSONParser.loopSpec`, `KeyNatspec.of`).
+const TAG = "@custom:key";
 const LOOPS = new Set(["WhileStatement", "ForStatement", "DoWhileStatement"]);
+const LOOP_KINDS = new Set(["invariant", "decreases", "unwind"]);
 const loopSpecAt = (b) => {
-  const out = [];
-  for (let l = lineOfByte(b) - 2; l >= 0; l--) {
-    const t = sourceLines[l].trim();
-    if (!t.startsWith("///")) break;
-    const c = t.slice(3).trim();
-    if (c.startsWith("@custom:key ")) out.unshift(c.slice("@custom:key ".length).trim());
+  const lines = bytes.subarray(0, b).toString("utf8").split("\n");
+  // only a loop that starts its line
+  if (lines[lines.length - 1].trim() !== "") return [];
+  const comment = [];
+  for (let l = lines.length - 2; l >= 0 && lines[l].trim().startsWith("///"); l--) {
+    comment.unshift(lines[l].trim().slice(3));
   }
+  const doc = comment.join("\n");
+  if (!doc.includes(TAG)) return [];
+  // a clause runs from its tag to the next tag that starts a line
+  const tags = [...doc.matchAll(/^[ \t]*@[A-Za-z][\w:-]*/gm)];
+  const out = [];
+  tags.forEach((m, i) => {
+    if (m[0].trim() !== TAG) return;
+    const end = i + 1 < tags.length ? tags[i + 1].index : doc.length;
+    const text = doc.slice(m.index + m[0].length, end).trim().replace(/\s+/g, " ");
+    const kind = text.split(" ")[0];
+    if (!LOOP_KINDS.has(kind)) {
+      fail(`a loop takes only ${TAG} invariant, decreases and unwind, not '${kind}'`);
+    }
+    out.push(text);
+  });
   return out;
 };
 
@@ -233,9 +266,11 @@ const hash = `0x${h.toString(16).padStart(16, "0")}`;
 
 if (!args.includes("--no-wrapper") && existsSync(WRAPPER)) {
   const w = readFileSync(WRAPPER, "utf8");
-  // the import's literal, and the stale-fixture test's expected message
-  const w2 = w.replace(/(solc_import\s+"[^"]*"\s+hash\s+)0x[0-9a-f]+/, `$1${hash}`)
-    .replace(/(has the hash )0x[0-9a-f]+/g, `$1${hash}`);
+  // the import of this fixture's literal, and the stale-fixture test's
+  // expected message: a module may import several fixtures
+  const file = OUT.split("/").pop().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const w2 = w.replace(new RegExp(`(solc_import\\s+"[^"]*${file}"\\s+hash\\s+)0x[0-9a-f]+`), `$1${hash}`)
+    .replace(new RegExp(`(${file} has the hash )0x[0-9a-f]+`, "g"), `$1${hash}`);
   if (w2 !== w) writeFileSync(WRAPPER, w2);
 }
 let cacheDiffers = false;
@@ -245,7 +280,7 @@ if (args.includes("--compare-cache")) {
   // is the source's absolute path; `astOf` and `build` select differently.
   const cacheRoot = process.env.XDG_CACHE_HOME || join(process.env.HOME || "", ".cache");
   const dir = join(cacheRoot, "solkey/solc", soljsonSha.slice(0, 16));
-  const unit = join(SOLKEY, SOURCE);
+  const unit = SOURCE_PATH;
   const selections = [
     { "": ["ast"] },
     { "": ["ast"], "*": ["evm.bytecode.object", "evm.deployedBytecode.object"] },

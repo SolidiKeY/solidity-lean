@@ -852,4 +852,83 @@ closed: 0 open goal(s), 13 node(s), 1 branch(es)
 #guard_msgs in
 #proof_tree dl[Callees]{ ⟨ (uint a, uint b) = pair(1); ⟩ b == 2 }
 
+/-! ## Loops (`Examples/Tactics/Loops.lean`)
+
+`whileUnwind` is `unfoldLean`, `loopExit` is `checkLean`; under the box the
+invariant rule is `invBox`, solkey's two goals past `init`. -/
+
+/--
+info: Try this:
+  apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply unfoldLean .whileUnwind
+    apply unfold .ifElseUnfold
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply split .ifElseSplit
+    case thn =>
+      apply update .localIncrement
+      apply checkLean .loopExit
+      case thn =>
+        apply emptyModality
+        refine close ?_
+        sol_symex
+        sol_close
+      case els =>
+        refine close ?_
+        sol_symex
+        sol_close
+    case els =>
+      apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    case cov =>
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊢ dl!{ ⟨ uint i = 0;
+    /// @custom:key unwind 1
+    while (i < 1) { i++; }; ⟩ i == 1 } := by
+  sol_derive?
+
+/--
+info: Try this:
+  apply unfold .requireConditionCapture
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply splitBox .requireSimple
+    case thn =>
+      apply unfold .localValueDeclInitDrop
+      apply update .localValueAssign
+      apply invBox .whileInvariantBox
+      case init =>
+        refine close ?_
+        sol_symex
+        sol_close
+      case thn =>
+        apply update .binopAssignment
+        apply emptyModality
+        refine close ?_
+        sol_symex
+        sol_close
+      case els =>
+        apply emptyModality
+        refine close ?_
+        sol_symex
+        sol_close
+    case els =>
+      apply done .revertBox
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ require(n >= 0); uint i = 0;
+    /// @custom:key invariant i <= n
+    while (i < n) { i = i + 1; }; ] i == n } := by
+  sol_derive?
+
 end Solidity.Examples.ProofTree

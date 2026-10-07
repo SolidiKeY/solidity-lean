@@ -125,6 +125,22 @@ info: counterexample (certified):
 
 /-- info: no counterexample found in 2000 candidates -/
 #guard_msgs in #counterexample dl!{ [ count = a; ] count == a }
+
+/-! A loop runs at most `loopFuel` iterations in the search
+(`Prog.runFuel`): bounded by `a`, which the pools draw at `2^256 - 1`, its
+run is `unknown` past them, not endless.  A loop that ends within them is
+run, and its counterexample certified. -/
+
+/-- info: no counterexample found in 2000 candidates -/
+#guard_msgs in #counterexample dl!{ [ uint i = 0; while (i < a) { i++; }; ] i == a }
+
+/--
+info: counterexample (certified):
+  i = 0, msg.sender = 1, msg.value = 0
+  before: count = 0; total = 0
+  after: count = 0; total = 0
+-/
+#guard_msgs in #counterexample dl!{ [ uint i = 0; while (i < 3) { i++; }; ] i == 2 }
 end
 
 end Solidity.Examples.Verify

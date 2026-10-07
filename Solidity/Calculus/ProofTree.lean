@@ -37,7 +37,8 @@ at its operator (`additionAssignment` for `binopAssignment`,
 replaced by the node's condition, as KeY's `NodeInfo.setBranchLabel` does:
 `"if se1 true"`); the suggested walk names the goals by their case
 names (`thn`, `els`, `cov` of `Proves.split`).  Under the box a split has
-KeY's two goals (`Proves.splitBox`); the third, `cov`, is left only where
+KeY's two goals (`Proves.splitBox`), and an invariant rule solkey's two
+(`Proves.invBox`); the third, `cov`, is left only where
 `Proves.closeTrue` does not prove it, and under the diamond.  The commands
 that print the tree (`#proof_tree`, `#proof_node`, `#proof_tree_json`) are
 in `Tools/ProofTree.lean`.
@@ -336,14 +337,18 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let generic ← `(tactic| apply $(← short generic) ($st _ _ _).rule)
     let fallback : Move :=
       { name := (c?.map Chain.lastName).getD `taclet, branches, cases, tacs := #[generic] }
-    -- under the box, a split with KeY's two goals first (`splitBox`), where it applies
-    let box := premise == ``Premise.split && (← whnf m).isConstOf ``Modality.box
-    let boxRule ← `(tactic| apply $(← short ``Proves.splitBoxRule) ($st _ _ _).rule)
+    -- under the box, a split or an invariant with KeY's two goals first
+    -- (`splitBox`, `invBox`), where it applies
+    let inv := premise == ``Premise.inv
+    let box := (premise == ``Premise.split || inv) && (← whnf m).isConstOf ``Modality.box
+    let (boxCtor, boxGeneric) :=
+      if inv then (``Proves.invBox, ``Proves.invBoxRule) else (``Proves.splitBox, ``Proves.splitBoxRule)
+    let boxRule ← `(tactic| apply $(← short boxGeneric) ($st _ _ _).rule)
     let some c := c? |
       return (if box then #[{ fallback with tacs := #[boxRule] }] else #[]) ++ #[fallback]
     let name ← keyName c d
     let named ← `(tactic| apply $(← short ctor) $(dotIdent (Chain.lastName c)))
-    let boxNamed ← `(tactic| apply $(← short ``Proves.splitBox) $(dotIdent (Chain.lastName c)))
+    let boxNamed ← `(tactic| apply $(← short boxCtor) $(dotIdent (Chain.lastName c)))
     -- an `if`'s condition, as `ifElseSplit`'s labels name it
     let se ← if premise == ``Premise.split then
         try

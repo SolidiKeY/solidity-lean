@@ -163,7 +163,7 @@ y = se3; -/
 #guard_msgs in
 example : Prog StandardExample := sol{ break; }
 
-/-- error: Solidity elaboration failed: i++ < 3: a loop's condition with an effect -/
+/-- error: Solidity elaboration failed: i++ < 3: a loop's condition needs a statement before it (an effect, a call, a cast, a narrow operation or a constructor), and is evaluated again each iteration -/
 #guard_msgs in
 example : Prog StandardExample := sol{ uint i = 0; while (i++ < 3) { } }
 
@@ -229,10 +229,12 @@ values = []
 #guard_msgs in #run Loops.pair(3, 4)
 
 /-! A modifier's `_;` in a loop runs the body once per iteration, and two
-`_;` run it twice, in the same locals (`Examples/Benchmark/Syntax.lean`):
-`g()` under `thrice` adds `2` three times, `f(0)` under `twice` returns `1`. -/
+`_;` run it twice, in the same locals, its parameters and return variable
+not reset, as solc's legacy pipeline runs it (via-IR resets them): `g()`
+under `thrice` adds `2` three times, `f(0)` under `twice` returns `1`, the
+second run reading the `a` the first bumped. -/
 
-def Twice : Contract := contract!{ uint n;
+def ModifierRuns : Contract := contract!{ uint n;
   modifier twice() { _; _; }
   modifier thrice() { for (uint i = 0; i < 3; i++) { _; } }
   function f(uint a) twice returns (uint r) { r = a++; }
@@ -242,14 +244,18 @@ def Twice : Contract := contract!{ uint n;
 info: ok
 n = 6
 -/
-#guard_msgs in #run Twice.g()
+#guard_msgs in #run ModifierRuns.g()
 
 /--
 info: ok
 returns 1
 n = 0
 -/
-#guard_msgs in #run Twice.f(0)
+#guard_msgs in #run ModifierRuns.f(0)
+
+/-- info: uint y; uint se1 = 0; uint se2; se2 = se1++; se2 = se1++; y = se2; -/
+#guard_msgs in
+#eval IO.println (Prog.toStr (Prog.inlined (sol[ModifierRuns]{ uint y = f(0); })))
 
 /-! ## A loop decided
 
@@ -483,10 +489,11 @@ theorem breakKeepsBound :
   sol_symex
   sol_close
 
-/-- The counting loop by the walk `sol_derive?` writes: the invariant rule is
-`invLean`, its goals `init` ("invariant initially valid") and, past the
-anonymising update, `thn`, `els` and `cov` ("invariant preserved and
-used"). -/
+/-- The counting loop by the walk `sol_derive?` writes
+(`Examples/ProofTree.lean`): the invariant rule is `invBox`, `invLean` with
+solkey's two goals under the box, `init` ("invariant initially valid") and,
+past the anonymising update, `thn` and `els` ("invariant preserved and
+used"); the third, `cov`, is `true`, which `closeTrue` proves. -/
 theorem countToNWalk : ⊢ dl!{ [ require(n >= 0); uint i = 0;
     /// @custom:key invariant i <= n
     while (i < n) { i = i + 1; }; ] i == n } := by
@@ -497,7 +504,7 @@ theorem countToNWalk : ⊢ dl!{ [ require(n >= 0); uint i = 0;
   case thn =>
     apply unfold .localValueDeclInitDrop
     apply update .localValueAssign
-    apply invLean .whileInvariantBox
+    apply invBox .whileInvariantBox
     case init =>
       refine close ?_
       sol_symex
@@ -510,10 +517,6 @@ theorem countToNWalk : ⊢ dl!{ [ require(n >= 0); uint i = 0;
       sol_close
     case els =>
       apply emptyModality
-      refine close ?_
-      sol_symex
-      sol_close
-    case cov =>
       refine close ?_
       sol_symex
       sol_close
@@ -543,21 +546,21 @@ info: 0: requireConditionCapture
       [invariant preserved and used]
         11: emptyModality
         12: Closed goal
-      [invariant preserved and used]
-        13: Closed goal
   [Reverts]
-    14: revertBox
-    15: Closed goal
-closed: 0 open goal(s), 16 node(s), 5 branch(es)
+    13: revertBox
+    14: Closed goal
+closed: 0 open goal(s), 15 node(s), 4 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ [ require(n >= 0); uint i = 0;
              /// @custom:key invariant i <= n
              while (i < n) { i = i + 1; }; ] i == n }
 
-/-! A body that writes memory, pushes or calls out has no frame, and no
-invariant rule, as in solkey: such a loop closes to `false` (`whileClose`), as
-one under the diamond with no variant does (`whileNoVariantDiamond`). -/
+/-! A body with no frame has no invariant rule: one that writes memory, as in
+solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,
+rebinds an alias or calls out, which solkey frames as writing storage and
+the ledger.  Such a loop closes to `false` (`whileClose`), as one under the
+diamond with no variant does (`whileNoVariantDiamond`). -/
 
 /--
 info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {body : Prog C} {m : Modality} {inv : Val C PrimTy.bool}
@@ -568,5 +571,35 @@ printed: none (theory only Lean has)
 sound: Solidity.LeanTaclet.sound
 -/
 #guard_msgs in #taclet whileClose
+
+/--
+info: Solidity.LeanTaclet.whileNoVariantDiamond : ∀ {C : Contract} {k : Nat} {body : Prog C} {inv cond : Val C PrimTy.bool}
+  {dec : Option (Val C PrimTy.uint)}, dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv while (cond) body; ⟩ ⇝ false }
+solkey: none (a rule solkey does not have)
+printed: none (theory only Lean has)
+sound: Solidity.LeanTaclet.sound
+-/
+#guard_msgs in #taclet whileNoVariantDiamond
+
+/-! `whileClose` fired: the body pushes, so the loop has no frame. -/
+
+/--
+info:   ~[whileClose]~>
+    dl{ false }
+-/
+#guard_msgs in
+#step dl!{ [ /// @custom:key invariant i <= 3
+             while (i < 3) { values.push(i); i = i + 1; }; ] true }
+
+/-! `whileNoVariantDiamond` fired: an invariant under the diamond, and no
+`decreases`. -/
+
+/--
+info:   ~[whileNoVariantDiamond]~>
+    dl{ false }
+-/
+#guard_msgs in
+#step dl!{ ⟨ /// @custom:key invariant i <= 3
+             while (i < 3) { i = i + 1; }; ⟩ true }
 
 end Solidity.Examples.Loops

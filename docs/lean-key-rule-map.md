@@ -307,7 +307,8 @@ receiver kind, Lean does not.
 
 ## Loops
 
-solkey's loop taclets landed after the pin (`ed7849d5b6`); `docs/loops.md`
+solkey's loop taclets were added in `ed7849d5b6`, after the pinned
+`1b4341a303`; `docs/loops.md`
 gives their shapes and the stages that port them.
 
 | KeY taclet | Lean | Status | Notes |

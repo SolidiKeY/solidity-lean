@@ -1,8 +1,8 @@
 {
  "header": {
   "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
-  "sourceSha256": "b60f048696b99aaeeb36aac463f0d29ad844c8b4d93f9c8773df40f4ef78434b",
-  "solkeyCommit": "a094a3a7380cb615cd89dacbca56bb89338df408",
+  "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1",
+  "solkeyCommit": "1b4341a3032b925dc6c282273429abc873697a19",
   "source": "tests/solc/Loops.sol"
  },
  "ast": {
@@ -19,7 +19,7 @@
    },
    {
     "contractKind": "contract",
-    "id": 195,
+    "id": 334,
     "name": "Loops",
     "nodeType": "ContractDefinition",
     "nodes": [
@@ -29,8 +29,8 @@
       "mutability": "mutable",
       "name": "values",
       "nodeType": "VariableDeclaration",
-      "src": "235:13:0",
-      "line": 7,
+      "src": "529:13:0",
+      "line": 12,
       "stateVariable": true,
       "storageLocation": "default",
       "typeDescriptions": {
@@ -57,8 +57,8 @@
       "mutability": "mutable",
       "name": "total",
       "nodeType": "VariableDeclaration",
-      "src": "254:10:0",
-      "line": 8,
+      "src": "548:10:0",
+      "line": 13,
       "stateVariable": true,
       "storageLocation": "default",
       "typeDescriptions": {
@@ -77,9 +77,9 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"declarations":[{"constant":false,"id":10,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"318:6:0","line":11,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"318:10:0","line":11},
-        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"399:9:0","line":14}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key unwind 3","nodeType":"WhileStatement","src":"371:48:0","line":13,"loopSpec":["unwind 3"]},
-        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"428:14:0","line":16}
+        {"declarations":[{"constant":false,"id":10,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"612:6:0","line":16,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"612:10:0","line":16},
+        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"693:9:0","line":19}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key unwind 3","nodeType":"WhileStatement","src":"665:48:0","line":18,"loopSpec":["unwind 3"]},
+        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":10,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"722:14:0","line":21}
        ]
       },
       "id": 31,
@@ -94,8 +94,8 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "271:178:0",
-      "line": 10,
+      "src": "565:178:0",
+      "line": 15,
       "stateMutability": "pure",
       "visibility": "public"
      },
@@ -103,9 +103,9 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"declarations":[{"constant":false,"id":35,"mutability":"mutable","name":"s","nodeType":"VariableDeclaration","src":"512:6:0","line":20,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"512:10:0","line":20},
-        {"body":{"nodeType":"Block","statements":[{"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":39,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"608:53:0","line":23,"trueBody":{"nodeType":"Block","statements":[{"nodeType":"Continue","src":"638:8:0","line":24}]}},{"expression":{"leftHandSide":{"name":"s","nodeType":"Identifier","referencedDeclaration":35,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"s","nodeType":"Identifier","referencedDeclaration":35,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":39,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"674:9:0","line":26}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":39,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 5"},"value":"5"},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key unwind 5","initializationExpression":{"declarations":[{"constant":false,"id":39,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"570:6:0","line":22,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement"},"isSimpleCounterLoop":true,"loopExpression":{"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":39,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement"},"nodeType":"ForStatement","src":"565:129:0","line":22,"loopSpec":["unwind 5"]},
-        {"expression":{"arguments":[{"leftExpression":{"name":"s","nodeType":"Identifier","referencedDeclaration":35,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 9"},"value":"9"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"703:14:0","line":28}
+        {"declarations":[{"constant":false,"id":35,"mutability":"mutable","name":"s","nodeType":"VariableDeclaration","src":"806:6:0","line":25,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"806:10:0","line":25},
+        {"body":{"nodeType":"Block","statements":[{"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":39,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"902:53:0","line":28,"trueBody":{"nodeType":"Block","statements":[{"nodeType":"Continue","src":"932:8:0","line":29}]}},{"expression":{"leftHandSide":{"name":"s","nodeType":"Identifier","referencedDeclaration":35,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"s","nodeType":"Identifier","referencedDeclaration":35,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":39,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"968:9:0","line":31}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":39,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 5"},"value":"5"},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key unwind 5","initializationExpression":{"declarations":[{"constant":false,"id":39,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"864:6:0","line":27,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement"},"isSimpleCounterLoop":true,"loopExpression":{"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":39,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement"},"nodeType":"ForStatement","src":"859:129:0","line":27,"loopSpec":["unwind 5"]},
+        {"expression":{"arguments":[{"leftExpression":{"name":"s","nodeType":"Identifier","referencedDeclaration":35,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 9"},"value":"9"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"997:14:0","line":33}
        ]
       },
       "id": 69,
@@ -120,8 +120,8 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "455:269:0",
-      "line": 19,
+      "src": "749:269:0",
+      "line": 24,
       "stateMutability": "pure",
       "visibility": "public"
      },
@@ -129,9 +129,9 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"declarations":[{"constant":false,"id":73,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"784:6:0","line":32,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 7"},"value":"7"},"nodeType":"VariableDeclarationStatement","src":"784:10:0","line":32},
-        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":73,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":73,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"821:9:0","line":34}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":73,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"DoWhileStatement","src":"804:52:0","line":33},
-        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":73,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 8"},"value":"8"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"865:14:0","line":36}
+        {"declarations":[{"constant":false,"id":73,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"1078:6:0","line":37,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 7"},"value":"7"},"nodeType":"VariableDeclarationStatement","src":"1078:10:0","line":37},
+        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":73,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":73,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1148:9:0","line":40}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":73,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key unwind 1","nodeType":"DoWhileStatement","src":"1131:52:0","line":39,"loopSpec":["unwind 1"]},
+        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":73,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 8"},"value":"8"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1192:14:0","line":42}
        ]
       },
       "id": 94,
@@ -146,8 +146,8 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "730:156:0",
-      "line": 31,
+      "src": "1024:189:0",
+      "line": 36,
       "stateMutability": "pure",
       "visibility": "public"
      },
@@ -155,17 +155,159 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"arguments":[{"leftExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":97,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":">=","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"978:15:0","line":41},
-        {"declarations":[{"constant":false,"id":107,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"1003:6:0","line":42,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"1003:10:0","line":42},
-        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":107,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":107,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1092:9:0","line":45}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":107,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":97,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key invariant i <= n","nodeType":"WhileStatement","src":"1064:48:0","line":44,"loopSpec":["invariant i <= n"]},
-        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":107,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":97,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1121:14:0","line":47}
+        {"body":{"nodeType":"Block","statements":[{"body":{"nodeType":"Block","statements":[{"condition":{"leftExpression":{"leftExpression":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":102,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"*","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"j","nodeType":"Identifier","referencedDeclaration":112,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"k","nodeType":"Identifier","referencedDeclaration":96,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"1384:78:0","line":48,"trueBody":{"nodeType":"Block","statements":[{"expression":{"leftExpression":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":102,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"*","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"j","nodeType":"Identifier","referencedDeclaration":112,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"1426:17:0","line":49}]}}]},"condition":{"leftExpression":{"name":"j","nodeType":"Identifier","referencedDeclaration":112,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"initializationExpression":{"declarations":[{"constant":false,"id":112,"mutability":"mutable","name":"j","nodeType":"VariableDeclaration","src":"1342:6:0","line":47,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement"},"isSimpleCounterLoop":true,"loopExpression":{"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"j","nodeType":"Identifier","referencedDeclaration":112,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement"},"nodeType":"ForStatement","src":"1337:139:0","line":47}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":102,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"initializationExpression":{"declarations":[{"constant":false,"id":102,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"1299:6:0","line":46,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement"},"isSimpleCounterLoop":true,"loopExpression":{"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":102,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement"},"nodeType":"ForStatement","src":"1294:192:0","line":46},
+        {"expression":{"leftHandSide":{"name":"r","nodeType":"Identifier","referencedDeclaration":99,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 99"},"value":"99"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1495:6:0","line":53}
+       ]
+      },
+      "id": 145,
+      "kind": "function",
+      "name": "loopNestedReturn",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 96,
+         "mutability": "mutable",
+         "name": "k",
+         "nodeType": "VariableDeclaration",
+         "src": "1245:6:0",
+         "line": 45,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 99,
+         "mutability": "mutable",
+         "name": "r",
+         "nodeType": "VariableDeclaration",
+         "src": "1276:6:0",
+         "line": 45,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "1219:289:0",
+      "line": 45,
+      "stateMutability": "pure",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"body":{"nodeType":"Block","statements":[{"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":153,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"k","nodeType":"Identifier","referencedDeclaration":147,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"1713:53:0","line":59,"trueBody":{"nodeType":"Block","statements":[{"expression":{"name":"i","nodeType":"Identifier","referencedDeclaration":153,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"1743:8:0","line":60}]}}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":153,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"initializationExpression":{"declarations":[{"constant":false,"id":153,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"1675:6:0","line":58,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement"},"isSimpleCounterLoop":true,"loopExpression":{"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":153,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement"},"nodeType":"ForStatement","src":"1670:106:0","line":58},
+        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"r","nodeType":"Identifier","referencedDeclaration":150,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"r","nodeType":"Identifier","referencedDeclaration":150,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":172,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1828:9:0","line":64}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":172,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}},"initializationExpression":{"declarations":[{"constant":false,"id":172,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"1790:6:0","line":63,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement"},"isSimpleCounterLoop":true,"loopExpression":{"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":172,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement"},"nodeType":"ForStatement","src":"1785:63:0","line":63}
+       ]
+      },
+      "id": 190,
+      "kind": "function",
+      "name": "returnBeforeSiblingLoop",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 147,
+         "mutability": "mutable",
+         "name": "k",
+         "nodeType": "VariableDeclaration",
+         "src": "1621:6:0",
+         "line": 57,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 150,
+         "mutability": "mutable",
+         "name": "r",
+         "nodeType": "VariableDeclaration",
+         "src": "1652:6:0",
+         "line": 57,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "1588:266:0",
+      "line": 57,
+      "stateMutability": "pure",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"leftExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":193,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":">=","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1946:15:0","line":70},
+        {"declarations":[{"constant":false,"id":203,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"1971:6:0","line":71,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"1971:10:0","line":71},
+        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":203,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":203,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"2060:9:0","line":74}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":203,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":193,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key invariant i <= n","nodeType":"WhileStatement","src":"2032:48:0","line":73,"loopSpec":["invariant i <= n"]},
+        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":203,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":193,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2089:14:0","line":76}
        ]
       },
       "documentation": {
        "nodeType": "StructuredDocumentation",
        "text": "@custom:key box"
       },
-      "id": 128,
+      "id": 224,
       "kind": "function",
       "name": "invariantCountsToBound",
       "nodeType": "FunctionDefinition",
@@ -174,12 +316,12 @@
        "parameters": [
         {
          "constant": false,
-         "id": 97,
+         "id": 193,
          "mutability": "mutable",
          "name": "n",
          "nodeType": "VariableDeclaration",
-         "src": "948:6:0",
-         "line": 40,
+         "src": "1916:6:0",
+         "line": 69,
          "stateVariable": false,
          "storageLocation": "default",
          "typeDescriptions": {
@@ -200,8 +342,8 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "916:226:0",
-      "line": 40,
+      "src": "1884:226:0",
+      "line": 69,
       "stateMutability": "pure",
       "visibility": "public"
      },
@@ -209,16 +351,71 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"declarations":[{"constant":false,"id":135,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"1226:6:0","line":52,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"1226:10:0","line":52},
-        {"body":{"nodeType":"Block","statements":[{"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":135,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":131,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"1317:17:0","line":55,"trueBody":{"nodeType":"Break"}},{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":135,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":135,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1348:9:0","line":56}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":135,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key invariant i <= 10","nodeType":"WhileStatement","src":"1288:80:0","line":54,"loopSpec":["invariant i <= 10"]},
-        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":135,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<=","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1377:15:0","line":58}
+        {"expression":{"arguments":[{"leftExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":227,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":">=","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2251:15:0","line":82},
+        {"declarations":[{"constant":false,"id":237,"mutability":"mutable","name":"s","nodeType":"VariableDeclaration","src":"2276:6:0","line":83,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"2276:10:0","line":83},
+        {"declarations":[{"constant":false,"id":241,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"2296:6:0","line":84,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"2296:10:0","line":84},
+        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"s","nodeType":"Identifier","referencedDeclaration":237,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"s","nodeType":"Identifier","referencedDeclaration":237,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"2411:9:0","line":88},{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":241,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":241,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"2434:9:0","line":89}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":241,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":227,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key invariant i <= n\n     && s == i","nodeType":"WhileStatement","src":"2383:71:0","line":87,"loopSpec":["invariant i <= n && s == i"]},
+        {"expression":{"arguments":[{"leftExpression":{"name":"s","nodeType":"Identifier","referencedDeclaration":237,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":227,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2463:14:0","line":91}
        ]
       },
       "documentation": {
        "nodeType": "StructuredDocumentation",
        "text": "@custom:key box"
       },
-      "id": 161,
+      "id": 268,
+      "kind": "function",
+      "name": "invariantTwoLines",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 227,
+         "mutability": "mutable",
+         "name": "n",
+         "nodeType": "VariableDeclaration",
+         "src": "2221:6:0",
+         "line": 81,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2194:290:0",
+      "line": 81,
+      "stateMutability": "pure",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"declarations":[{"constant":false,"id":275,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"2636:6:0","line":97,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"2636:10:0","line":97},
+        {"body":{"nodeType":"Block","statements":[{"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":275,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":271,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"2727:17:0","line":100,"trueBody":{"nodeType":"Break"}},{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":275,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":275,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"2758:9:0","line":101}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":275,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key invariant i <= 10","nodeType":"WhileStatement","src":"2698:80:0","line":99,"loopSpec":["invariant i <= 10"]},
+        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":275,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<=","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2787:15:0","line":103}
+       ]
+      },
+      "documentation": {
+       "nodeType": "StructuredDocumentation",
+       "text": "@custom:key box"
+      },
+      "id": 301,
       "kind": "function",
       "name": "invariantBreak",
       "nodeType": "FunctionDefinition",
@@ -227,12 +424,12 @@
        "parameters": [
         {
          "constant": false,
-         "id": 131,
+         "id": 271,
          "mutability": "mutable",
          "name": "n",
          "nodeType": "VariableDeclaration",
-         "src": "1196:6:0",
-         "line": 51,
+         "src": "2606:6:0",
+         "line": 96,
          "stateVariable": false,
          "storageLocation": "default",
          "typeDescriptions": {
@@ -253,8 +450,8 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "1172:227:0",
-      "line": 51,
+      "src": "2582:227:0",
+      "line": 96,
       "stateMutability": "pure",
       "visibility": "public"
      },
@@ -262,27 +459,26 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"arguments":[{"leftExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":163,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<=","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1000"},"value":"1000"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1461:18:0","line":62},
-        {"declarations":[{"constant":false,"id":173,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"1489:6:0","line":63,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"1489:10:0","line":63},
-        {"body":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":173,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":173,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1628:9:0","line":67}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":173,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":163,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key invariant 0 <= i && i <= n\n @custom:key decreases n - i","nodeType":"WhileStatement","src":"1600:48:0","line":66,"loopSpec":["invariant 0 <= i && i <= n","decreases n - i"]},
-        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":173,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":163,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1657:14:0","line":69}
+        {"declarations":[{"constant":false,"id":307,"mutability":"mutable","name":"i","nodeType":"VariableDeclaration","src":"2890:6:0","line":107,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"2890:10:0","line":107},
+        {"body":{"nodeType":"Block","statements":[{"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":307,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"n","nodeType":"Identifier","referencedDeclaration":303,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"3032:17:0","line":111,"trueBody":{"nodeType":"Break"}},{"expression":{"leftHandSide":{"name":"i","nodeType":"Identifier","referencedDeclaration":307,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":307,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"3063:9:0","line":112}]},"condition":{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":307,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}},"documentation":"@custom:key invariant 0 <= i && i <= 10\n @custom:key decreases 10 - i","nodeType":"WhileStatement","src":"3003:80:0","line":110,"loopSpec":["invariant 0 <= i && i <= 10","decreases 10 - i"]},
+        {"expression":{"arguments":[{"leftExpression":{"name":"i","nodeType":"Identifier","referencedDeclaration":307,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<=","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3092:15:0","line":114}
        ]
       },
-      "id": 194,
+      "id": 333,
       "kind": "function",
-      "name": "invariantVariant",
+      "name": "invariantVariantSkipsBreakIteration",
       "nodeType": "FunctionDefinition",
       "parameters": {
        "nodeType": "ParameterList",
        "parameters": [
         {
          "constant": false,
-         "id": 163,
+         "id": 303,
          "mutability": "mutable",
          "name": "n",
          "nodeType": "VariableDeclaration",
-         "src": "1431:6:0",
-         "line": 61,
+         "src": "2860:6:0",
+         "line": 106,
          "stateVariable": false,
          "storageLocation": "default",
          "typeDescriptions": {
@@ -303,14 +499,14 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "1405:273:0",
-      "line": 61,
+      "src": "2815:299:0",
+      "line": 106,
       "stateMutability": "pure",
       "visibility": "public"
      }
     ],
-    "src": "214:1466:0",
-    "line": 6
+    "src": "508:2608:0",
+    "line": 11
    }
   ]
  }
