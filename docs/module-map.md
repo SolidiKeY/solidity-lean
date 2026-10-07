@@ -172,6 +172,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/Examples.lean` | Compiled programs run by `decide`. |
 | `Evm/CoreCompile.lean` | The compiler over the scoped syntax (M5, `docs/intrinsic.md`): a local at its level (`cell`, `lvl`), a call's body in its own frame, the fragment `inFrag` over `Frag Γ` (alias flags only), `compileStmt_erase` (the same code as `Evm/Compile.lean`'s up to the memory cells) and `pushes_erase`.  Beside it until M4. |
 | `Evm/CoreExamples.lean` | `Evm/Examples.lean`'s programs resolved and compiled by `Evm/CoreCompile.lean`, run by `decide +kernel`. |
+| `Evm/CoreSim.lean` | `Sim` over the scoped syntax (M5): the locals by position (`Look Γ`, M3's `Env.get`), declarations as `Look.cons` (`Sim.consVal`/`consAlias`/`consFragile`/`consDead`), a scope's end as `Sim.drop`, the fragment's flags (`Sim.flags`, `meet`, `storeDrop`); compiled code at base `b` stores to no level below `b` (`storesFrom_compileStmt`, `storesFrom_callFrame`, `exec_mem`). |
 
 ## Tools
 
