@@ -494,7 +494,25 @@ partial def stmtPieces (ns : List Expr) (s : Expr) : TrM (Array Piece × List Ex
   if s.isAppOf ``Stmt.block then
     let (ps, _) ← progPieces ns s.appArg!
     return (ps, ns)
+  if s.isAppOf ``Stmt.call || s.isAppOf ``Stmt.tryCall then
+    if let some P ← closedErase? ns s then return (#[.many P], ← stmtOutNames ns s)
   return (#[.one (← tr ns s)], ← stmtOutNames ns s)
+
+/-- A closed call or `try` (a formula's, no schema variable in it, its
+context's names known) erased by `Stmt.erase` itself, run as compiled
+code, and quoted back: the callee's body is closed over its own frame, which
+`tr`'s names do not reach. -/
+partial def closedErase? (ns : List Expr) (s : Expr) : TrM (Option Expr) := do
+  if s.hasFVar || s.hasMVar || ns.any (fun n => n.hasFVar || n.hasMVar) then return none
+  let c ← contractOf s
+  if c.hasFVar || c.hasMVar then return none
+  let e ← mkAppM ``Stmt.erase #[← mkListLit (mkConst ``Solidity.Var) ns, s]
+  try
+    -- the contract is a phantom of the erased syntax: the value's
+    -- representation does not depend on it
+    let P ← unsafe evalExpr (List (Solidity.Stmt Solidity.StandardExample)) (← inferType e) e
+    return some (Solidity.Prog.quote c P)
+  catch _ => return none
 
 /-- The statements frames hold, `}` where a block ends when `blockEnd` is
 set, and the names of the postcondition's context. -/

@@ -61,6 +61,10 @@ import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
 import Solidity.Calculus.Core.Schema
+import Solidity.Calculus.Core.NotationResolve
+import Solidity.Calculus.Core.Notation
+import Solidity.Calculus.Core.Spec
+import Solidity.Semantics.Core.Callback
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.RuleShapes
 import Solidity.Calculus.PrintedRules
@@ -156,6 +160,9 @@ import Solidity.Examples.Tactics.Dangling
 import Solidity.Examples.Tactics.CoreSymex
 import Solidity.Examples.Tactics.CoreStep
 import Solidity.Examples.Tactics.CorePrint
+import Solidity.Examples.Tactics.CoreNotation
+import Solidity.Examples.Tactics.CoreSpec
+import Solidity.Examples.Tactics.CoreCallback
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.SimpleStorage
@@ -206,6 +213,7 @@ import Solidity.Tools.Show
 import Solidity.Tools.Common
 import Solidity.Tools.Run
 import Solidity.Tools.Inspect
+import Solidity.Tools.CoreInspect
 import Solidity.Tools.DiffTest
 import Solidity.Tools.Counterexample
 import Solidity.Tools.Verify

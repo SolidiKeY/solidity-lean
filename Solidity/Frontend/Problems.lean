@@ -1,5 +1,6 @@
 import Solidity.Frontend.Import
 import Solidity.Calculus.Problem
+import Solidity.Calculus.Core.Spec
 
 /-!
 # The obligations of an imported contract
@@ -28,6 +29,11 @@ A parameter is bound at its type's 256-bit range (`PrimTy`), not at its
 width: an `int8` binder admits values solc's ABI decoder rejects.  The
 obligation is then stronger than Solidity's, never weaker, since the body
 is elaborated at the width (`paramCtx`).
+
+`solc_scoped_problems N` (`docs/intrinsic.md`, M6b) states each of them
+scoped, `N.f.problem.core : Core.Fml N []` (`Core.Problem.fml`,
+`Core.Problem.ctorFml`, `Calculus/Core/Spec.lean`): the program resolved in
+the context of its parameters, which `∀` binds; the kernel checks each.
 
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
   (`Problem.text`), to compare with `--print-problem`.
@@ -78,6 +84,46 @@ def elabSolcProblems : CommandElab := fun stx => do
       name := n, levelParams := [], type := fmlTy, value, hints := .abbrev, safety := .safe }
     defined := defined.push n
   liftCoreM <| compileDecls defined
+
+/-- `solc_scoped_problems N`: each obligation `solc_problems` states,
+scoped, `N.f.problem.core`; an info names how many. -/
+syntax (name := solcScopedProblems) "solc_scoped_problems " ident : command
+
+@[command_elab solcScopedProblems]
+def elabSolcScopedProblems : CommandElab := fun stx => do
+  let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
+  let rows ← reportRows N
+  let fmlTy := mkApp2 (mkConst ``Core.Fml) (mkConst N) (mkApp (mkConst ``List.nil [0]) (mkConst ``Core.LTy))
+  let errs ← liftTermElabM do
+    let C ← unsafe evalConst Contract N
+    let mut errs : Array String := #[]
+    let mut defined : Array Lean.Name := #[]
+    for r in rows do
+      unless r.status == .elaborated do continue
+      let some m := r.tag.modality? | continue
+      let some xs := r.params.mapM (fun (x, t) =>
+        (paramTy? t).map fun (pn : PrimTy × Nat) => (pn.1, Var.ofName x)) | continue
+      let n := N ++ Lean.Name.mkSimple r.name
+      let P ← unsafe evalConst (Prog C) n
+      match Core.Problem.resolve (r.name == "constructor") m xs P with
+      | .error e => errs := errs.push s!"{r.name}: {e}"
+      | .ok φ =>
+        let dn := n ++ `problem ++ `core
+        let decl := Declaration.defnDecl {
+          name := dn, levelParams := [], type := fmlTy,
+          value := φ.quote (mkConst N), hints := .abbrev, safety := .safe }
+        try
+          addDecl decl
+          defined := defined.push dn
+        catch ex => errs := errs.push s!"{r.name}: the kernel rejects it: {← ex.toMessageData.toString}"
+    -- compiled, as `N.f.problem` is, for compiled consumers
+    compileDecls defined
+    if errs.isEmpty then
+      let k := defined.size
+      logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped"
+    pure errs
+  unless errs.isEmpty do
+    throwError "solc_scoped_problems: {errs.size} obligations are not scoped:\n{"\n".intercalate errs.toList}"
 
 syntax (name := solkeyProblem) "#solkey_problem " ident : command
 
