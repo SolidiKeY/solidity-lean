@@ -15,10 +15,16 @@ environment is one map from names to bindings, so a local declared under a
 name in scope overwrites the outer one, where the scoped run shadows it.
 `Prog.Fresh out ns P` says no binder of `P` reuses a name in scope (`ns`) or
 of an enclosing frame (`out`), and that a call's arguments are separated, as
-`erase` needs to write the call as `Syntax.lean`'s (the elaborator's names
-are fresh, so its programs are).  A scope's locals may be redeclared after
-it ends (a loop's body every iteration): the untyped run overwrites the
-stale binding, which nothing read.
+`erase` needs to write the call as `Syntax.lean`'s.  A scope's locals may be
+redeclared after it ends (a loop's body every iteration): the untyped run
+overwrites the stale binding, which nothing read.
+
+Not every elaborated program is `Fresh`.  The elaborator emits a raw block,
+a `for` init and a modifier's `_` flat into the untyped program, so a name
+declared there may be declared again after them (two `for` loops with the
+same index, a modifier applied twice); `resolve` then sees two binders of
+one name in one scope, and the hypothesis fails (`docs/intrinsic.md`,
+M2–M3 review).
 
 The proof is one invariant, `Agree ns σ τ`: the global parts are equal, and
 every local of `σ` is bound in `τ` under its name, encoded (`LTy.enc`).

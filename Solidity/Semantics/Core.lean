@@ -23,7 +23,7 @@ storage or heap that does not fit (M4b, M4c), never by a local.
 Where the kernel evaluates (`rfl` and `decide` on a run, Gate G0): `Env`'s
 functions recurse on `Idx`/`Ext` by `casesOn` (condition 1), and `Stmt.run`
 and `Prog.run` are `Stmt.rec` with a twin for the compiler (`Stmt.runC`,
-condition 2) linked by `Stmt.run_eq_runC`.  Each statement's step is one
+condition 2) linked by `Stmt.runR_eq`/`Prog.runR_eq`.  Each statement's step is one
 function (`Run.*`) that both call, given its sub-programs' runs.
 -/
 

@@ -25,8 +25,10 @@ Proved: the rules are sound for (2) (`Rule.sound`, `Proves.sound`,
 `ProvesC.sound`); the repository's compiler agrees with (2) (`compile_correct`),
 and on the programs it compiles (`wtProg`: no memory, loops or `try`) from a
 state it simulates, (2) is never stuck (`not_stuck`); a run keeps the state
-well-typed (`Stmt.run_wt`, over the scoped syntax, `Typing/Soundness.lean`,
-which `run_erase` relates to (2)). Not proved: that (2) is never stuck outside
+well-typed (`Stmt.run_wt`, over the scoped syntax, `Typing/Soundness.lean`;
+`run_erase` relates it to (2) only for `Fresh` programs, which excludes
+elaborated ones that redeclare a name after a block, a `for` or a modifier's
+`_`: `docs/intrinsic.md`, M2–M3 review). Not proved: that (2) is never stuck outside
 the compiler's fragment. `Stmt.run_wt` is preservation only; `stuck` stays
 reachable from a value or a storage of the wrong shape until the typed values
 and storage of `docs/intrinsic.md`'s M4 delete it.
