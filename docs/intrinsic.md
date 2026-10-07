@@ -182,6 +182,36 @@ Not measured: the whole `SolkeyTestSuite` and `check-corpus.sh` (both need
 `lake` from the shell, which this lane may not run); take them at M1's start
 from `./run-lean.sh`.
 
+### M6a notes
+
+- Lane `intrinsic-calculus`, round 1 (2026-10-07): `Calculus/Core/Fml.lean`
+  and `Calculus/Core/Print.lean`.  Departures from the sketch below:
+  - `Tm C Γ s` keeps `Update.lean`'s signature (`app0`…`app3` over `Op0`…`Op3`);
+    the locals are `pvV`/`pvP`/`pvS`/`pvI` and `netOf` by position, and
+    `app1` refuses `Op1.netOf` (`Op1.named`).
+  - `Upd C Γ Δ` is a snoc list (`nil`, `snoc` an assigning `UpdElem C Γ Δ`,
+    `decl x r` with `r : Rhs C Γ t`, `pop h`), right-hand sides in `Γ`,
+    targets in `Δ`.  A pop is invisible; an update of pops only erases to
+    its formula.
+  - `Frames.pop` takes `Ext` (condition 5), not `Thin`; so do
+    `Premise.unfold` and `Upd.pop`.  `Frames.leave` is the spike's
+    `frameStep`.
+  - `Premise.bind`'s binder is a formula, `Fml.bind x t φ` ("for every value
+    of `x : t`"), printed as `φ`: the update sketch had no right-hand side
+    for it.  `Premise.check` has no program (`assertSimple`'s is empty).
+    `branches`, `cases`, `inv` are not ported yet.
+  - `Stmt.scopeExt`/`Prog.scopeExt` (named apart from M3's coming
+    `Stmt.ext`/`Prog.ext`, which should replace them at the merge).
+  - Printing: `Fml.show` walks the formula with the precedences of
+    `RuleSyntax.lean`'s grammar and prints terms, updates and statements by
+    the `dl{}` printers on the erased part, so the text is today's; pinned
+    against `legacyShow` (the erasure printed).  It runs in `MetaM` on a
+    concrete formula; the delaborator for formulas with schema variables
+    (`#taclet`, `#wp`) is still to write.
+- Left for M6a: `holds`/`holds_erase` (needs M3's `State C Γ`), lowering of
+  `Core.Val` to `Core.Tm`, `Taclet C k m (s : Core.Stmt C Γ Γ')`, `Stmt.step`,
+  symex with `T.rec` + `implemented_by` twins, the quoters, `Hyps`/`Proves`.
+
 ### Gate G0: passes, under conditions
 
 The spike (`Solidity/Scratch/IntrinsicSpike.lean`, not committed) has seven
