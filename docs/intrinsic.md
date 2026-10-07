@@ -1503,7 +1503,37 @@ orphaned (without the git-excluded `Solidity/Scratch/`);
 Left after the integration: `Stmt.Sound C` itself (`Calculus/Core/ProvesSound.lean`'s
 hypothesis) from `Stmt.stepSound` and the block arms (`stepSound_call`,
 `stepSound_tryCall`, `stepSound_loop`) once `WkRuns` is discharged by
-`Prog.run_wk`; the M4/M5 deletions above; M6c; M7.
+`Prog.run_wk` (done below); the M4/M5 deletions above; M6c; M7.
+
+### Core soundness, unconditional (`intrinsic-calculus`, 2026-10-07)
+
+- **`Proves.valid` has no hypothesis**: `Calculus/Core/SoundStep.lean`'s
+  `Stmt.stepSound` now imports `SoundCalls` and `SoundLoops` and dispatches
+  the call, `try` and loop arms to `stepSound_call`, `stepSound_tryCall`,
+  `stepSound_loop` (`Stmt.IsBlockArm` is gone); `WkRuns` is
+  `WkRuns.of_run_wk`, `Prog.run_wk` at `up` with the pushed value as the
+  lift's background (`σ.lift up (w, σ.env)` is `σ.push w` by `rfl`).
+  `ProvesSound.lean` proves `Stmt.sound : Stmt.Sound C` from it, and
+  `Proves.sound`/`Proves.valid` take no `Stmt.Sound` argument.
+  `#print axioms Proves.valid`: `propext`, `Classical.choice`, `Quot.sound`.
+- **The cover is already threaded**: since the integration `Premise.Sound`
+  takes `holds σ (p.cover m)`; `Premise.Sound.split`
+  (`Calculus/Core/SoundLocal.lean`) packages `Logic.lean`'s
+  `Premise.sound_split` with `splitStuck`: a split is sound given its two
+  branch runs and that the statement is stuck where neither condition
+  holds, the cover excluding that case under the diamond.  `inv`'s cover is
+  `whileInvDiamond`'s premise (`SoundLoops.lean`).
+- **No typing hypothesis was left**: `Val.BoolValued` and `State.Typed` do
+  not occur in the calculus (the cover replaced both at the integration);
+  every arm holds in every state of M3's untyped values.
+- **`holds_erase`, one way for the two excluded binders**
+  (`Calculus/Core/HoldsErase.lean`): `holds_erase_bind` (scoped to erased,
+  in an untyped state binding `x` to a value of `t`; the converse fails,
+  the erasure reading one value) and `holds_of_erase_anon` (erased to
+  scoped, the untyped `{anon(…)}` ranging over every binding; the converse
+  fails, `{anon(x)} defined(x)`).  Both are for a `Plain` body, at the top:
+  a polarity-indexed `Plain` that admits them under negation is not done.
+- `lean_build` of the default targets: green.
 
 ### Gate G0: passes, under conditions
 
