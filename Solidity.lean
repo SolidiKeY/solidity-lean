@@ -178,6 +178,8 @@ import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
 import Solidity.Typing.Soundness
+import Solidity.Typing.StraightRun
+import Solidity.Typing.TypedWT
 import Solidity.Typing.Reachability
 import Solidity.Typing.Constructibility
 import Solidity.Typing.CanonTest

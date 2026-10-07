@@ -762,6 +762,56 @@ For W2 `sound`: `TypedRunWk.lean` imports `Calculus/Core/RunWk.lean` for
 Check: `TypedRunWk.lean` re-elaborates in about 7 s warm; `import Solidity`
 elaborates with every module (no name clash).
 
+### W1 `typing` note (2026-10-08)
+- New modules: `Typing/StraightRun.lean` (the builder's straight-line typed
+  run) and `Typing/TypedWT.lean` (`RunWT` by construction).
+  `Reachability` now imports `Semantics.Core.TypedRunErase`, through
+  `StraightRun`.
+- **`Reachable` is the typed run of a program on the bridge.** It needs
+  `Core.Prog.bridgeOk`: no `bool` mapping key, even in a read, and no storage
+  copy at a type with a repeated member name.  It is a subset of
+  `ReachableS`, the scoped run (`Reachable.reachableS`).  The six
+  non-reachability witnesses are stated over `ReachableS`, the stronger
+  claim: `map_default`, `struct_missing_field`, `map_dup_key`
+  (`Reachability`), and `dirty_word`, `fixed_past_end`, `bool_key`
+  (`Constructibility`).  `not_reachable_of_not_reachableS` gives the
+  `Reachable` form.  `bool_key_not_reachable` is about the scoped run, which
+  reads a key with `Value.asInt`.  The typed run writes `bool` keys
+  (decision 10), which `bridgeOk` keeps out of `Reachable`.
+- **The `ReachableU → Reachable` gap is closed only under premises.**
+  W0's unconditional theorem is now `ReachableU.reachableS`.
+  `ReachableU.reachable` (`Calculus/Problem.lean`) needs `nodupKeysB C.vars`,
+  `C.vars.all okDeep` and `FitsStorage C st` (words, keys and slots in range).
+  It goes through the builder (`ReachableS.reachable`).
+- **`RunWT` by construction is conditional and not yet used.**
+  `TState.erase_wt` needs `Ty.nodupDeep` of the state variables and of the
+  heap typing (no struct with two members of one name: every struct but
+  `BadDup`), and `nodupKeysB C.vars`.  `Soundness.lean` still proves
+  `Stmt.run_wt` by following the scoped run, until the calculus reads the
+  typed run.
+- Docs outside the lane, for the lead at merge: `docs/testsuite-proofs.md`
+  (the Diamond item) and `docs/solkey-feedback.md` (item 1) still say
+  `Reachable` is by the scoped interpreter, and that `ReachableU.reachable`
+  holds with no condition.  They should say: `Reachable` is by the typed run
+  on the bridge.  The untyped run's storage is `ReachableS` unconditionally
+  (`ReachableU.reachableS`), and `Reachable` when its words, keys and slots
+  are in range (`ReachableU.reachable`).
+- Gate, measured as in M3.3: CPU s of the module alone (`#clock`, reading
+  `/proc/self/stat`, at both ends of a copy with `Elab.async false`, imports
+  cached), with other lanes' agents running.  Both gates pass.
+
+  | Module | M3.3 | W1 `typing` |
+  |---|---|---|
+  | `Typing/State` | 1.59 | 1.39 |
+  | `Typing/Soundness` | 5.98 | 6.44 |
+  | `Typing/Reachability` | 4.34 | 3.82 |
+  | `Typing/Constructibility` | 9.39 | 10.66 |
+  | the four (gate ≤ 25.6) | 21.30 | 22.31 |
+  | `Typing/StraightRun` (new) | — | 2.69 |
+  | `Typing/TypedWT` (new) | — | 0.83 |
+  | the six | — | 25.83 |
+  | `SortCheck/Faithfulness` (gate ≤ 30.7) | 25.57 | 25.31 |
+
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)
 1. **`sound`** (the critical path)
    - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`.
