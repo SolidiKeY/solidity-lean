@@ -245,7 +245,8 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     (the kernel evaluates the resolution too).  Timing, the 44 non-`**`
     examples as one block (`Elab.async false`, two runs on a loaded machine):
     old `decide` 2.5–4.0 s, old `decide +kernel` 1.8–2.4 s, new 2.3–3.3 s
-    (1.3–1.4× the old kernel run, 0.8–0.9× the committed `decide`);
+    (1.3–1.4× the old kernel run, 0.8–0.9× the committed `decide`; split
+    by phase under "G0 condition 1" in the M5 lane);
     `pow_run` 3.5–5.5 s in all three.
 - Left for M5 after M5.1: see "M5 lane" below.
 
@@ -293,6 +294,28 @@ Env-from-Γ design and everything that does not need the run is proved.
   compiles as the block it was resolved from, up to cells, with no
   hypothesis.  (This edits a module below `Semantics.lean`; the merge into
   `intrinsic` rebuilds from there.)
+- **G0 condition 1: the EVM compiler is exempt.**  `compileStmt`/`compileProg`,
+  `inFrag`/`inFragP`, `Stmt.pushes`/`pays`/`shrinks`, `argsCode` and
+  `retEnterCode`/`retLeaveCode` `match` on `Stmt C Γ Γ'`, `Prog C Γ Γ'`,
+  `Args C Γ ps` and `CallRet Γ rs Γ'`, and `Evm/CoreExamples.lean` evaluates
+  them in the kernel.  They are kept as `match`: the calculus never
+  evaluates them (no symex or closer step reaches the compiler), the only
+  kernel evaluations are the 44 example checks of one file, and every proof
+  about them (`compileStmt_erase`, `storesFrom_compileStmt`, the `Sim`
+  lemmas) is structural and uses their equation lemmas.  Timing (scratch
+  module, `Elab.async false`, the same 44 non-`**` examples as one block
+  each, two runs, the order of the two compilers swapped between them):
+  elaboration alone (each program under `(fun _ => true) P`, warm)
+  1.03–1.04 s; elaboration plus `Prog.resolve` (`(resolve [] P).toBool`)
+  1.08–1.10 s, so `resolve` is 0.04–0.07 s; old compiler and run
+  (`decide +kernel`) 1.77–1.89 s; new resolve, compiler, fragment check and
+  run 2.25–2.47 s.  So the kernel cost of compiling and running is 0.73–0.85 s
+  old against 1.15–1.36 s new (1.5–1.6×), and none of it is `resolve`; how
+  much of it is the `match` casts against the level arithmetic and `inFrag`
+  is not measured.  If the EVM examples ever join a speed gate, the fix is
+  condition 1's: `Stmt.rec` with the motive over the indices for
+  `compileStmt`/`inFrag`, the `match` versions kept as `implemented_by`
+  twins and for the equation lemmas.
 - `not_stuck`/`never_stuck`: nothing to delete yet on the Core path, since
   there is no Core run to be stuck.  When M3/M4 land, `compile_correct` over
   `Core` has no `not_stuck` corollary (its `Halt` has no `stuck`); the
