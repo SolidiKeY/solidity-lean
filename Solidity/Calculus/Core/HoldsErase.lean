@@ -124,4 +124,169 @@ theorem StEq.read {α : Type} {f : Semantics.State → α}
   rw [h₁, h₂]
   exact congrArg f h
 
+/-! ## Symbols read the global part -/
+
+/-- A reading with the locals `e` put back into its storage or memory. -/
+def Srt.wl (e : List (Var × Binding)) : (s : Srt) → s.Ev → s.Ev
+  | .st, x => (withLocals · e) <$> x
+  | .mem, x => (withLocals · e) <$> x
+  | .val, x => x
+  | .path, x => x
+  | .sv, x => x
+  | .ident, x => x
+  | .addr, x => x
+  | .mv, x => x
+
+section Ops
+
+variable (g : Semantics.State) (e : List (Var × Binding))
+
+theorem Op0.eval_wl {s : Srt} (o : Op0 s) : o.eval (withLocals g e) = Srt.wl e s (o.eval g) := by
+  cases o <;> rfl
+
+theorem Op1.eval_wl {a s : Srt} (o : Op1 a s) (ho : o.named = false) (x : a.Ev) :
+    o.eval (withLocals g e) (Srt.wl e a x) = Srt.wl e s (o.eval g x) := by
+  cases o with
+  | netOf => cases ho
+  | select r =>
+    show (do let τ ← (withLocals · e) <$> x; _) = (withLocals · e) <$> (do let τ ← x; _)
+    cases x with
+    | error => rfl
+    | ok τ =>
+      have h₁ : ((withLocals · e) <$> (Except.ok τ : Res Semantics.State)) = .ok (withLocals τ e) := rfl
+      rw [h₁]
+      simp only [bind, Except.bind, findStorage_wl]
+      cases τ.findStorage r [] with
+      | error => rfl
+      | ok v => cases v <;> rfl
+  | alloc R =>
+    show (do let τ ← (withLocals · e) <$> x; return (← Semantics.allocDefault τ R).2) =
+      (do let τ ← x; return (← Semantics.allocDefault τ R).2)
+    cases x with
+    | error => rfl
+    | ok τ =>
+      show (do return (← Semantics.allocDefault (withLocals τ e) R).2) = _
+      have h := allocDefault_nat R τ e
+      simp only at h
+      rw [h]
+      simp only [bind, Except.bind, Functor.map, Except.map]
+      cases Semantics.allocDefault τ R <;> rfl
+  | addM R =>
+    show (do let τ ← (withLocals · e) <$> x; return (← Semantics.allocDefault τ R).1) =
+      (withLocals · e) <$> (do let τ ← x; return (← Semantics.allocDefault τ R).1)
+    cases x with
+    | error => rfl
+    | ok τ =>
+      show (do return (← Semantics.allocDefault (withLocals τ e) R).1) = _
+      have h := allocDefault_nat R τ e
+      simp only at h
+      rw [h]
+      simp only [bind, Except.bind, Functor.map, Except.map]
+      cases Semantics.allocDefault τ R <;> rfl
+  | wt vs =>
+    cases x with
+    | error => rfl
+    | ok τ => rfl
+  | _ => rfl
+
+end Ops
+
+section OpLemmas
+
+variable (s : Semantics.State) (e : List (Var × Binding))
+
+theorem saveStorage_wl' (r : Name) (segs : List Seg) (v : SVal) :
+    (withLocals s e).saveStorage r segs v = (withLocals · e) <$> s.saveStorage r segs v :=
+  saveStorage_nat r segs v s e
+
+theorem writeStorage_wl' (r : Name) (segs : List Seg) (v : SVal) :
+    (withLocals s e).writeStorage r segs v = (withLocals · e) <$> s.writeStorage r segs v :=
+  writeStorage_nat r segs v s e
+
+theorem pushAt_wl' (E : Ty) (r : Name) (segs : List Seg) (val : SVal → Res SVal) :
+    pushAt (withLocals s e) E r segs val = (withLocals · e) <$> pushAt s E r segs val :=
+  pushAt_nat E r segs val s e
+
+theorem popAt_wl' (keep : Bool) (r : Name) (segs : List Seg) :
+    popAt (withLocals s e) keep r segs = (withLocals · e) <$> popAt s keep r segs :=
+  popAt_nat keep r segs s e
+
+theorem pushPlaceAt_wl' (E : Ty) (r : Name) (segs : List Seg) :
+    pushPlaceAt (withLocals s e) E r segs =
+      (fun p => (withLocals p.1 e, p.2)) <$> pushPlaceAt s E r segs :=
+  pushPlaceAt_nat E r segs s e
+
+theorem writeAddr_wl' (mv : MVal) (a : Semantics.Addr) :
+    writeAddr (withLocals s e) mv a = (withLocals · e) <$> writeAddr s mv a :=
+  writeAddr_nat mv a s e
+
+theorem readAddr_wl (a : Semantics.Addr) : readAddr (withLocals s e) a = readAddr s a := by
+  cases a <;> rfl
+
+end OpLemmas
+
+/-- The monad laws the readings are normalized with. -/
+macro "wl_norm" : tactic => `(tactic| simp only [Srt.wl, Op2.eval, Op3.eval, findStorage_wl,
+  checkIndex_wl, arrayLen_wl, memArrayLen_wl, copyMem_wl, readAddr_wl, saveStorage_wl',
+  writeStorage_wl', pushAt_wl', popAt_wl', pushPlaceAt_wl', writeAddr_wl', copyStToM_nat,
+  map_bind, bind_map_left, bind_assoc, pure_bind, map_pure, Functor.map_map])
+
+section Ops2
+
+variable (g : Semantics.State) (e : List (Var × Binding))
+
+theorem Op2.eval_wl {a b s : Srt} (o : Op2 a b s) (x : a.Ev) (y : b.Ev) :
+    o.eval (withLocals g e) (Srt.wl e a x) (Srt.wl e b y) = Srt.wl e s (o.eval g x y) := by
+  cases o <;> wl_norm
+
+theorem Op3.eval_wl {a b c s : Srt} (o : Op3 a b c s) (x : a.Ev) (y : b.Ev) (z : c.Ev) :
+    o.eval (withLocals g e) (Srt.wl e a x) (Srt.wl e b y) (Srt.wl e c z) =
+      Srt.wl e s (o.eval (withLocals g e) x y z) := by
+  cases o <;> wl_norm
+
+end Ops2
+
+/-! ## A term reads and denotes as its erasure -/
+
+section Terms
+
+variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+
+theorem Agree.wl (hag : Agree ns σ τ) : τ = withLocals σ.glob τ.env := hag.glob.symm
+
+/-- **A term reads as its erasure**: the storage and memory it reads to carry
+the untyped state's locals. -/
+theorem Tm.eval_erase (hag : Agree ns σ τ) : {s : Srt} → (t : Tm C Γ s) →
+    (t.erase ns).eval τ = Srt.wl τ.env s (t.eval σ)
+  | _, .pvV i => by
+    simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i]; rfl
+  | _, .pvP i => aliasPath_erase hag i
+  | _, .pvS i => by
+    simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i]
+    rw [hag.wl]; rfl
+  | _, .pvI i => by
+    simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i]; rfl
+  | _, .netOf i a => by
+    show Op1.eval τ (.netOf (i.name ns)) ((a.erase ns).eval τ) = _
+    rw [Tm.eval_erase hag a]
+    simp only [Op1.eval, hag.getEnv i]
+    rfl
+  | _, .app0 o => by
+    show o.eval τ = _
+    rw [hag.wl]; exact Op0.eval_wl _ _ o
+  | _, .app1 o ho x => by
+    show o.eval τ ((x.erase ns).eval τ) = _
+    rw [Tm.eval_erase hag x, hag.wl]
+    exact Op1.eval_wl _ _ o ho _
+  | _, .app2 o x y => by
+    show o.eval τ ((x.erase ns).eval τ) ((y.erase ns).eval τ) = _
+    rw [Tm.eval_erase hag x, Tm.eval_erase hag y, hag.wl]
+    exact Op2.eval_wl _ _ o _ _
+  | _, .app3 o x y z => by
+    show o.eval τ ((x.erase ns).eval τ) ((y.erase ns).eval τ) ((z.erase ns).eval τ) = _
+    rw [Tm.eval_erase hag x, Tm.eval_erase hag y, Tm.eval_erase hag z, Op3.eval_wl]
+    rfl
+
+end Terms
+
 end Solidity.Core
