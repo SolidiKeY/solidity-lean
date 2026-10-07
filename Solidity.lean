@@ -29,6 +29,7 @@ import Solidity.Calculus.Core.Blocks
 import Solidity.Calculus.Core.Step
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.Taclet
+import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.RuleShapes
 import Solidity.Calculus.PrintedRules

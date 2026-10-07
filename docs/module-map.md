@@ -80,6 +80,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Core/Step.lean` | The strategy on scoped formulas: `Stmt.step` (one `casesOn`, every statement a rule), `Fml.maxIdx`/`fresh`, `Fml.stepR` by `Fml.rec` with its compiled twin `Fml.stepAt` (`stepR_eq`), `symex`. |
 | `Calculus/Core/Quote.lean` | Scoped formulas quoted back into `Expr` (`Core.Fml.quote`), hash-consed; a block alone is `Syntax/CoreQuote.lean`'s. |
 | `Calculus/Core/Taclet.lean` | A first port of `Taclet` to scoped statements (`localValueAssign`, `storageFieldRead_unfold_rightFst`, `ifElseSplit`): `Taclet.step_eq` (the rule `Stmt.step` fires) and `Taclet.erase` (today's taclet). |
+| `Calculus/Core/Logic.lean` | What a scoped formula means over M3's `State C Γ`: `Tm.eval`/`denote` (locals by position, symbols on `State.glob`), `Upd.apply`, `Frames.run`, `holds`; `holds_exit`/`holds_modalK`; the premise shapes (`Premise.sound_update`, `_unfold`, `_inline`, `_bind`, `_capture`, `_split`, `_check`, `_done`); `Val.eval_up` (a shifted part reads as before); soundness of thirteen arms against `Core.Stmt.run`. |
 | `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the constructor for each. |

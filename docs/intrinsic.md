@@ -441,6 +441,26 @@ from `./run-lean.sh`.
     of its own (a pair and a memory return; a `try`).
   - For the calctools lane: its `Premise` quoter needs the four new
     constructors.
+  - `Calculus/Core/Logic.lean` (M3 landed): `holds` on scoped formulas over
+    `State C Γ`, terms read by position and `Update.lean`'s symbols on
+    `State.glob`, `Upd.apply` (parallel; `decl` pushes, `pop`/`drop` drop),
+    `Frames.run`, a hidden binder a universal.  The premise shapes are
+    proved once (`Premise.sound_update`, `_unfold`, `_inline`, `_bind`,
+    `_capture`, `_split`, `_check`, `_done`, each: what the statement's run
+    must be for `p.fml m ω κ φ` to give `⟨ s; ω κ ⟩ φ`, no freshness
+    premise), with `Val.eval_up` and its kin (a shifted part reads in the
+    pushed state as before).  Proved arms: `localValueAssign`,
+    `valueDeclSkip`, `storageLocalDeclSkip`, `revertBox`/`revertDiamond`,
+    `localValueDeclInitDrop`, a block, `binopUnfoldLeft`, `unopCapture`,
+    `requireConditionCapture`, `assertConditionCapture`, `ifElseSplit`,
+    `requireSimple`, `assertSimple`.  A split is sound only where its
+    condition holds a `bool` (`hb`): M3's values are untyped, so an `int`
+    in a `bool` local would make both goals vacuous; M4a's typed values
+    discharge it (it is the cover goal today's split proves).
+  - Left: soundness of the other arms (the shapes are there; each needs
+    its statement's run equation), `holds_erase` against today's `holds`
+    (with M3's `Agree`, `Semantics/RunErase.lean`), and a
+    `Premise.sound` over `Stmt.step` once every arm is proved.
 
 ### M6a lane: the speed gate (kernel, `Eq.refl` of `symex n φ = ψ`)
 
@@ -561,7 +581,8 @@ with no freshness premise: the fresh locals are positions pushed and popped
 by the premise itself.  Until then `Taclet.erase` carries it over from
 `Taclet.sound`, given `holds_erase`.
 
-- Left for M6a: `holds_erase` (needs M3's state erasure, `run_erase`);
+- Left for M6a: `holds_erase` (M3's `Agree`, `Semantics/RunErase.lean`), the
+  soundness of the arms not proved in `Calculus/Core/Logic.lean`;
   the remaining taclets of `Core.Taclet` (by the macro, at the cutover);
   `Hyps`/`Proves`; a `sol_symex` on `Core` (`normValid` with
   `Core.Fml.quote`); chains, `Derive.residue` and ProofTree; the
