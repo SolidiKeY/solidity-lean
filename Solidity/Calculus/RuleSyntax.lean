@@ -2122,16 +2122,19 @@ def ppRetTarget? (t : Lean.Expr) : MetaM (Option (TSyntax `sol_expr × Lean.Expr
 it assigning them, as the one statement they are elaborated from:
 `(lo, , sum) = returnStats(3, 1, 2);`, `result = inc(x);`
 (`Stmt.tupleCallStr?`), with the number of statements after the call it
-covers. -/
+covers.  Returns that no statement after the call assigns but one reads
+print as the declarations they are: `(uint a, uint b) = h();`. -/
 def ppTupleCall? (s : Lean.Expr) (rest : List Lean.Expr) :
     MetaM (Option (TSyntax `sol_stmt × Nat)) := do
   let_expr Stmt.call _ f args _ ret _ := (← whnf (← instantiateMVars s)) | return none
   let_expr CallRet.rets rs := (← whnf ret) | return none
   let some rs ← listElems? rs | return none
   let mut rvs : Array Lean.Expr := #[]
+  let mut rps : Array Lean.Expr := #[]
   for r in rs do
-    let_expr Prod.mk _ _ _ v := (← whnf r) | return none
+    let_expr Prod.mk _ _ p v := (← whnf r) | return none
     rvs := rvs.push v
+    rps := rps.push p
   let some (fe, xs) ← ppCallParts? f args | return none
   let mut slots : Array (Option (TSyntax `sol_expr)) := Array.replicate rvs.size none
   let mut start := 0
@@ -2150,6 +2153,22 @@ def ppTupleCall? (s : Lean.Expr) (rest : List Lean.Expr) :
   -- every value discarded, `(, ) = f(x);`: a call with targets still
   if n == 0 && rvs.size < 2 then return none
   let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
+  -- none assigned but read after the call (a scoped call leaves them in
+  -- scope, `Core.CallRet.outNames`): the declarations they are,
+  -- `(uint a, uint b) = f(x);`
+  if n == 0 then
+    let mut reads := false
+    for t in rest do
+      let t ← instantiateMVars t
+      if rvs.any fun r => (t.find? (· == r)).isSome then reads := true
+    if reads then
+      let mut decls : Array Syntax := #[]
+      for i in [0:rvs.size] do
+        let some x ← ppVar? rvs[i]! | return none
+        decls := decls.push (mkNullNode #[(← ppTy.ppPrim rps[i]!).raw, x.raw])
+      let groups := (decls.extract 1 decls.size).map fun d => mkNode groupKind #[mkAtom ",", d]
+      return some (⟨mkNode ``Solidity.solTupleDecl
+        #[mkAtom "(", decls[0]!, mkNullNode groups, mkAtom ")", mkAtom "=", call.raw]⟩, 0)
   if let #[some y] := slots then
     return some (← `(sol_stmt| $y:sol_expr = $call:sol_expr), n)
   let opt (x : Option (TSyntax `sol_expr)) : Syntax := mkNullNode ((x.map fun x => #[x.raw]).getD #[])

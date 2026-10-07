@@ -146,7 +146,9 @@ info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 ≐ true → 
 /-! After a call with a tuple return, the statements read their locals past
 the return variables (`CallRet.outNames`): `uint y = a;`, not the caller's
 `x`.  The call prints from the `Expr` as `Core.Fml.show` prints it from the
-value, folded with the statements after it that read its returns. -/
+value, folded with the statements after it that assign its returns;
+returns that none assigns but one reads print as the declarations they
+are. -/
 
 private def retsφ : Core.Fml SE [] :=
   .all (.user "x") .uint (.modal .box
@@ -154,7 +156,7 @@ private def retsφ : Core.Fml SE [] :=
       (.cons (.declLocal .uint (.user "y") (some (.simple (.local (.there .here))))) .nil))
     .nil .tt)
 
-/-- info: ∀ uint x; [ (, ) = h(); uint y = a; ] true -/
+/-- info: ∀ uint x; [ (uint a, uint b) = h(); uint y = a; ] true -/
 #guard_msgs in
 run_meta do
   let c := mkConst ``StandardExample
@@ -350,5 +352,6 @@ example : Core.Proves SE .all [] .nil (.all (.user "b") .bool
   · trace_state
     exact .updIntro (.closeTrue rfl)
   · exact .updIntro (.closeTrue rfl)
+  · nofun
 
 end Solidity.Examples.Tactics.CorePrint

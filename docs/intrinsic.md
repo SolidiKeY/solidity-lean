@@ -821,7 +821,8 @@ the cutover:
 - **`Hyps`/`Proves`** (`Calculus/Core/Proves.lean`): the telescope
   `Hyps C Γ₀ Γ` (`pre`, `upd`, `havoc`, `all`, `bind`, `anon`), `wrap`/
   `fresh`/`boxOnly` by `casesOn`, and `Proves` with `intro`, `allIntro`,
-  `updIntro`, `bindIntro`, `update`, `unfold`, `bind`, `split` (two goals),
+  `updIntro`, `bindIntro`, `update`, `unfold`, `bind`, `split` (two goals,
+  and the cover under the diamond since the review),
   `check`, `done`, `empty`, `closeTrue`; a derivation of
   `[ if (b) { } else { } ] true` checks.  Soundness: round 2.
 - **Round 2** (2026-10-07, after M3 and the calculus lane's `SoundKit`):
@@ -836,13 +837,29 @@ the cutover:
     state) and `Proves.valid`, by induction on the derivation, given
     `Stmt.Sound C`: every premise `Stmt.step` gives is `Premise.Sound`
     (`Calculus/Core/SoundKit.lean`'s) in every state.  `Stmt.Sound.of_stepSound` builds it
-    from the arms' `Stmt.StepSound` (stated in typed states) once every
-    state is typed, which M4a's typed values give; until then the
-    hypothesis is what the arms owe.  No `sorry`, no axiom beyond Lean's
-    three.
+    from the arms' `Stmt.StepSound`.  The hypothesis is what the arms owe;
+    none is proved as `Stmt.StepSound` yet.  `ProvesSound.lean` has no
+    `sorry` and no axiom beyond Lean's three.
+  - **Review fix: the cover goal.**  As first stated, `Stmt.Sound` could
+    not hold: a `bool` local may hold any value (a formula's binders range
+    over every `Value`), `Run.ite` is then stuck, and under the diamond
+    `split`'s two goals proved `⟨ if (b) { } else { } ⟩ true` of every
+    state.  `split` and `inv` now have today's third goal under the
+    diamond, one of the two conditions (`cov : m = .diamond → …`, after the
+    frame's update for `inv`; `Calculus/Core/Cover.lean`'s
+    `Premise.cover`), and `Premise.Sound` takes the cover as a premise.
+    `State.Typed` went: the cover is what it gave.
+  - **Review fix: `sound_opAssign`.**  Its five storage and memory cases
+    were `sorry` (commit 762d904); they are proved (`opStore_loc`,
+    `opMem_loc`), so `Calculus/Core/SoundArms.lean` has no `sorry`.  It
+    proves the update premises as `Premise.Sound` and no arm as
+    `Stmt.StepSound`; the call, `try` and loop arms of
+    `Calculus/Core/Blocks.lean` have no soundness proof.
   - Printing: a call and a `try` print as the statements they are
     elaborated from (a tuple call as `(a, b) = f(…)`, folded with the
-    assignments after it), from the `Expr` as from the value; a frame or
+    assignments after it; returns that none assigns but one reads as
+    their declarations, `(uint a, uint b) = f(…)`, since the review: they
+    stay in scope, `CallRet.outNames`), from the `Expr` as from the value; a frame or
     update end by `Thin` (`Frames.drop`, `Upd.drop`) prints as nothing; the
     four new premises have delaborators (a premise read alone names its
     context's locals `_`); a `Core.Proves` goal prints as today's sequent
