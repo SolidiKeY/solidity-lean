@@ -37,6 +37,7 @@ import Solidity.Calculus.Core.Schema
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Spec
+import Solidity.Semantics.Core.Callback
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.RuleShapes
 import Solidity.Calculus.PrintedRules
