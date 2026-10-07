@@ -130,44 +130,84 @@ mutual
 /-- Whether a `transfer`, a `send` or a `try` occurs in the statement, in a
 branch, a block, a loop or a callee included. -/
 def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
-  | _, _, .transfer .. | _, _, .send .. | _, _, .tryCall .. => true
-  | _, _, .ite _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els
-  | _, _, .call _ _ _ body => Prog.hasTransfer body
-  | _, _, .loop _ _ body => Prog.hasTransfer body
-  | _, _, .block body => Prog.hasTransfer body
-  | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
-  | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
-  | _, _, .push .. | _, _, .pop .. | _, _, .declMem .. | _, _, .rebindMem ..
-  | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete .. | _, _, .deleteMem ..
-  | _, _, .assignNew .. | _, _, .require .. | _, _, .assert .. | _, _, .revert => false
+  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
+    (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
+    (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (push := fun _ _ _ => false) (pop := fun _ => false)
+    (transfer := fun _ _ => true) (send := fun _ _ _ => true)
+    (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
+    (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
+    (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
+    (ite := fun _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false)
+    (call := fun _ _ _ body => Prog.hasTransfer body)
+    (tryCall := fun _ _ _ _ _ _ _ => true)
+    (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
+  termination_by structural _ _ s => s
 
 def Prog.hasTransfer : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
-  | _, _, .nil => false
-  | _, _, .cons s P => Stmt.hasTransfer s || Prog.hasTransfer P
+  | _, _, P => Prog.casesOn (motive_2 := fun _ _ _ => Bool) P false
+      (fun s P => Stmt.hasTransfer s || Prog.hasTransfer P)
+  termination_by structural _ _ P => P
 
 end
 
 /-- The statements the relation does not take from `Stmt.run`: a `transfer`,
 a `send`, a `try`, the two that run others by a choice (`if`, a call), and
 a loop or a block whose body pays. -/
-def Stmt.forks {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
-  | .transfer .. | .send .. | .tryCall .. | .ite .. | .call .. => true
-  | .loop _ _ body | .block body => Prog.hasTransfer body
-  | _ => false
+def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
+  Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
+    (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
+    (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (push := fun _ _ _ => false) (pop := fun _ => false)
+    (transfer := fun _ _ => true) (send := fun _ _ _ => true)
+    (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
+    (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
+    (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
+    (ite := fun _ _ _ => true)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false)
+    (call := fun _ _ _ _ => true)
+    (tryCall := fun _ _ _ _ _ _ _ => true)
+    (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
 
 /-- Whether a `transfer` occurs in a program of the frames. -/
-def Frames.hasTransfer {Γ₀ : Ctx} : {Γ : Ctx} → Frames C Γ Γ₀ → Bool
-  | _, .nil => false
-  | _, .seq ω κ => Prog.hasTransfer ω || Frames.hasTransfer κ
-  | _, .pop _ _ κ | _, .drop _ κ => Frames.hasTransfer κ
+def Frames.hasTransfer : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Bool
+  | _, _, κ => Frames.casesOn (motive := fun _ _ _ => Bool) κ false
+      (fun ω κ => Prog.hasTransfer ω || Frames.hasTransfer κ) (fun _ _ κ => Frames.hasTransfer κ)
+      (fun _ κ => Frames.hasTransfer κ)
+  termination_by structural _ _ κ => κ
 
 /-- Whether a `transfer` occurs in a program of the formula. -/
 def Fml.hasTransfer : {Γ : Ctx} → Fml C Γ → Bool
-  | _, .tt | _, .eq .. | _, .defined _ => false
-  | _, .not φ | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ φ | _, .anon _ φ =>
-    φ.hasTransfer
-  | _, .and φ ψ | _, .imp φ ψ => φ.hasTransfer || ψ.hasTransfer
-  | _, .modal _ P κ φ => Prog.hasTransfer P || κ.hasTransfer || φ.hasTransfer
+  | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
+    (tt := false) (eq := fun _ _ => false) (defined := fun _ => false)
+    (not := fun φ => Fml.hasTransfer φ)
+    (and := fun φ ψ => Fml.hasTransfer φ || Fml.hasTransfer ψ)
+    (imp := fun φ ψ => Fml.hasTransfer φ || Fml.hasTransfer ψ)
+    (upd := fun _ _ φ => Fml.hasTransfer φ)
+    (modal := fun _ P κ φ => Prog.hasTransfer P || κ.hasTransfer || Fml.hasTransfer φ)
+    (havoc := fun φ => Fml.hasTransfer φ) (all := fun _ _ φ => Fml.hasTransfer φ)
+    (bind := fun _ _ φ => Fml.hasTransfer φ) (anon := fun _ φ => Fml.hasTransfer φ)
+  termination_by structural _ φ => φ
+
+theorem Prog.hasTransfer_cons {Γ Γ₁ Γ' : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ') :
+    Prog.hasTransfer (.cons s P) = (Stmt.hasTransfer s || Prog.hasTransfer P) := rfl
+
+theorem Frames.hasTransfer_seq {Γ Γ₁ Γ₀ : Ctx} (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) :
+    Frames.hasTransfer (.seq ω κ) = (Prog.hasTransfer ω || κ.hasTransfer) := rfl
+
+theorem Fml.hasTransfer_and {Γ : Ctx} (φ ψ : Fml C Γ) :
+    Fml.hasTransfer (.and φ ψ) = (φ.hasTransfer || ψ.hasTransfer) := rfl
+
+theorem Fml.hasTransfer_imp {Γ : Ctx} (φ ψ : Fml C Γ) :
+    Fml.hasTransfer (.imp φ ψ) = (φ.hasTransfer || ψ.hasTransfer) := rfl
+
+theorem Fml.hasTransfer_modal {Γ Γ' Γ₀ : Ctx} (m : Modality) (P : Prog C Γ Γ') (κ : Frames C Γ' Γ₀)
+    (φ : Fml C Γ₀) :
+    Fml.hasTransfer (.modal m P κ φ) = (Prog.hasTransfer P || κ.hasTransfer || φ.hasTransfer) :=
+  rfl
 
 /-! ## Runs with callbacks -/
 
@@ -764,7 +804,7 @@ theorem Prog.eq_run (I : Invariant C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') �
       o = .ofRes (Prog.run σ P)
   | _, _, .nil, _, _, _, h => by cases h; rfl
   | _, _, .cons s P, ht, σ, _, h => by
-    simp only [Prog.hasTransfer, Bool.or_eq_false_iff] at ht
+    simp only [Prog.hasTransfer_cons, Bool.or_eq_false_iff] at ht
     rw [Prog.run_cons]
     cases h with
     | cons hs hP =>
@@ -807,7 +847,7 @@ theorem ExecF.eq_run {I : Invariant C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ
   induction h with
   | nil => rfl
   | @seq _ _ σ _ ω κ _ hω _ ih =>
-    simp only [Frames.hasTransfer, Bool.or_eq_false_iff] at ht
+    simp only [Frames.hasTransfer_seq, Bool.or_eq_false_iff] at ht
     have e₁ := ExecP.eq_run hω ht.1
     show _ = COut.ofRes ((Prog.run σ ω).bind (Frames.run · κ))
     revert e₁
@@ -815,7 +855,7 @@ theorem ExecF.eq_run {I : Invariant C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ
     | error _ => exact fun e₁ => nomatch e₁
     | ok _ => intro e₁; cases e₁; exact ih ht.2
   | @seqHalt _ _ σ ω κ _ hω =>
-    simp only [Frames.hasTransfer, Bool.or_eq_false_iff] at ht
+    simp only [Frames.hasTransfer_seq, Bool.or_eq_false_iff] at ht
     have e₁ := ExecP.eq_run hω ht.1
     show _ = COut.ofRes ((Prog.run σ ω).bind (Frames.run · κ))
     revert e₁
@@ -823,7 +863,7 @@ theorem ExecF.eq_run {I : Invariant C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ
     | error _ => intro e₁; cases e₁; rfl
     | ok _ => exact fun e₁ => nomatch e₁
   | @seqViolated _ _ σ ω κ hω =>
-    simp only [Frames.hasTransfer, Bool.or_eq_false_iff] at ht
+    simp only [Frames.hasTransfer_seq, Bool.or_eq_false_iff] at ht
     have e₁ := ExecP.eq_run hω ht.1
     revert e₁
     cases Prog.run σ ω <;> exact fun e₁ => nomatch e₁
@@ -885,14 +925,14 @@ theorem holdsC_iff_holds {I : Invariant C} : {Γ : Ctx} → (φ : Fml C Γ) → 
   | _, .tt, _, _ | _, .eq .., _, _ | _, .defined _, _, _ => Iff.rfl
   | _, .not φ, h, σ => not_congr (holdsC_iff_holds φ h σ)
   | _, .and φ ψ, h, σ => by
-    simp only [Fml.hasTransfer, Bool.or_eq_false_iff] at h
+    simp only [Fml.hasTransfer_and, Bool.or_eq_false_iff] at h
     exact and_congr (holdsC_iff_holds φ h.1 σ) (holdsC_iff_holds ψ h.2 σ)
   | _, .imp φ ψ, h, σ => by
-    simp only [Fml.hasTransfer, Bool.or_eq_false_iff] at h
+    simp only [Fml.hasTransfer_imp, Bool.or_eq_false_iff] at h
     exact imp_congr (holdsC_iff_holds φ h.1 σ) (holdsC_iff_holds ψ h.2 σ)
   | _, .upd m U φ, h, σ => Modality.afterC_congr m (holdsC_iff_holds φ h) (U.apply σ)
   | _, .modal m P κ φ, h, σ => by
-    simp only [Fml.hasTransfer, Bool.or_eq_false_iff] at h
+    simp only [Fml.hasTransfer_modal, Bool.or_eq_false_iff] at h
     show (∀ o, ExecP I σ P o → _) ↔ m.afterRunC (holds · φ) ((Prog.run σ P).bind (Frames.run · κ))
     rw [ExecP.forall_iff h.1.1, after_frames_iff m h.1.2]
     exact Modality.afterRunC_congr m (holdsC_iff_holds φ h.2) _

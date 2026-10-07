@@ -31,6 +31,12 @@ local instance : InContract := ⟨StandardExample⟩
 /-- info: dl{ ∀ uint a; ∀ uint y; y = a } : Core.Fml StandardExample [] -/
 #guard_msgs in #check cdl!{ ∀ uint y; y == a }
 
+/-! So is a name a term reads before the program declares it, as `dl!`
+reads it (a `pv`); the declaration shadows it. -/
+
+/-- info: dl{ ∀ uint x; x = 1 → ⟨ uint x = 2; ⟩ x = 2 } : Core.Fml StandardExample [] -/
+#guard_msgs in #check cdl!{ x = 1 → ⟨ uint x = 2; ⟩ x = 2 }
+
 /-! An update declares what it binds; an alias is bound by a hidden binder. -/
 
 /--
@@ -64,6 +70,10 @@ info: dl{
 -/
 #guard_msgs in
 #check cdl!{ ⟨ if (alice.age == 4) { uint z = 1; total = z; } else { total = 2; }; ⟩ total == 1 }
+
+/-- error: Solidity elaboration failed: unknown name z -/
+#guard_msgs in
+#check cdl!{ ⟨ if (alice.age == 4) { uint z = 1; total = z; } else { total = 2; }; ⟩ z == 1 }
 
 /-- info: dl{ ⟨ uint y = 1; ⟩ (true ∧ y = 1) } : Core.Fml StandardExample [] -/
 #guard_msgs in #check cdl!{ ⟨ uint y = 1; ⟩ (true ∧ y == 1) }

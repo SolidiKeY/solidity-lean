@@ -10,8 +10,9 @@ import Solidity.Calculus.Core.Quote
 reading of every name; what changes is that every local is now bound
 somewhere in the formula, at the type the reading gave it:
 
-* **parameters** (a name nothing declares, `x` in `x == 1 → ⟨ y = x; ⟩ …`)
-  are bound outermost: a `uint` by `∀ uint x;` (`Fml.all`), an alias (what a
+* **parameters** (a name read before anything declares it, `x` in
+  `x == 1 → ⟨ y = x; ⟩ …` or in `x == 1 → ⟨ uint x = 2; ⟩ …`) are bound
+  outermost: a `uint` by `∀ uint x;` (`Fml.all`), an alias (what a
   program binds to a storage path, `p = alice;`) by a hidden binder
   (`Fml.bind`).  A parameter no term or program reads before something
   binds it (`{ x := 10 } x == 10`, where the update declares `x`) is not
@@ -145,12 +146,14 @@ def elabFmlC (taken : List Nat) : RawFml → (Γ : NCtx) → ElabM (Fml C Γ.ctx
     ElabM.lift (Fml.resolveN (fun _ => none) Γ ψ)
 
 /-- **A formula against `C`, scoped**: `elabDl`'s parameters (the names
-nothing declares) bound outermost (`Fml.closeN`), each only if the formula
-reads it before anything binds it (tried without it, in order). -/
+read, a declared one included) bound outermost (`Fml.closeN`), each only if
+the formula reads it before anything binds it (tried without it, in order).
+A declared name's parameter is bound but not in the elaborator's scope, so
+the program's declaration shadows it, as `dl!` reads it. -/
 def elabDlC (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C []) := do
   let (used, declared) := φ.names
   let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
-  let free := (used.filter fun x => !declared.contains x && (C.rootType x).isNone &&
+  let free := (used.filter fun x => (C.rootType x).isNone &&
     (lookupBy x C.enums).isNone).eraseDups
   let unsets := φ.unsets
   let params : ECtx := free.filterMap fun x =>
@@ -162,7 +165,10 @@ def elabDlC (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C []) :
   let taken := if pastAll then List.range' 1 (taken.foldl max 0) else taken
   let run (ps : ECtx) : Except String (Fml C []) :=
     let Γ : NCtx := ps.map fun (x, t) => (Var.ofName x, t.toLTy)
-    (((elabFmlC C taken φ Γ).run { funs := C.funs }).run' (ps, 1)).map (Fml.closeN true Γ)
+    -- a declared name's parameter is not in the program's scope, which may
+    -- declare it (as `dl!` reads it free, a `pv`)
+    let scope := ps.filter fun (x, _) => !declared.contains x
+    (((elabFmlC C taken φ Γ).run { funs := C.funs }).run' (scope, 1)).map (Fml.closeN true Γ)
   let mut ps := params
   for p in params do
     let ps' := ps.erase p

@@ -42,11 +42,14 @@ variable {C : Contract}
 
 /-- Whether a modality occurs in the formula. -/
 def Fml.active : {Γ : Ctx} → Fml C Γ → Bool
-  | _, .tt | _, .eq .. | _, .defined _ => false
-  | _, .not φ | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ φ | _, .anon _ φ =>
-    φ.active
-  | _, .and φ ψ | _, .imp φ ψ => φ.active || ψ.active
-  | _, .modal .. => true
+  | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
+    (tt := false) (eq := fun _ _ => false) (defined := fun _ => false)
+    (not := fun φ => Fml.active φ) (and := fun φ ψ => Fml.active φ || Fml.active ψ)
+    (imp := fun φ ψ => Fml.active φ || Fml.active ψ) (upd := fun _ _ φ => Fml.active φ)
+    (modal := fun _ _ _ _ => true) (havoc := fun φ => Fml.active φ)
+    (all := fun _ _ φ => Fml.active φ) (bind := fun _ _ φ => Fml.active φ)
+    (anon := fun _ φ => Fml.active φ)
+  termination_by structural _ φ => φ
 
 /-- A postcondition at the context `Γ`: a formula that binds no fresh name
 (`se1`, `sp1`, …), so the rules' fresh names avoid it, and has no modality,

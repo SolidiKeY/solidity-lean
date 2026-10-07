@@ -836,9 +836,12 @@ the cutover:
   resolved (`Fml.resolveN`).  A program's postcondition is read in the
   context the program leaves (`Prog.resolve`), so a branch's local is out of
   scope after it (`Examples/Tactics/CoreNotation.lean` pins the error).
-  Parameters (names nothing declares) are bound outermost (`Fml.closeN`): a
-  `uint` by `∀`, an alias by a hidden binder, each only when the formula
-  reads it before something binds it (tried without each, in order).  A Lean
+  Parameters (every name read, a declared one included) are bound outermost
+  (`Fml.closeN`): a `uint` by `∀`, an alias by a hidden binder, each only
+  when the formula reads it before something binds it (tried without each,
+  in order).  A declared name's parameter stays out of the reader's scope,
+  so the program's declaration shadows it, as `dl!` reads it: `x = 1 → ⟨
+  uint x = 2; ⟩ x = 2` binds `∀ uint x;`.  A Lean
   formula is elaborated at `Core.Fml C Γ` for the `Γ` of its place, so a
   `Core.Post C Γ` needs no weakening.  At the cutover `dl!` becomes `cdl!`.
 - **`#wp`/`#step`** (`Tools/CoreInspect.lean`): a second elaborator of the
