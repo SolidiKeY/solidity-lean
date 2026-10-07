@@ -28,6 +28,7 @@ import Solidity.Semantics.Core.TypedState
 import Solidity.Semantics.Core.TypedRun
 import Solidity.Semantics.Core.TypedRunErase
 import Solidity.Semantics.Core.TypedRunWk
+import Solidity.Semantics.Core.TypedRunFrame
 import Solidity.Semantics.RunErase
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
