@@ -154,7 +154,14 @@ theorem LeanTaclet.eq_step {s : Stmt C} {p : Premise C} (d : LeanTaclet C k m s 
     split <;> simp_all <;> subst_vars <;> rfl
   | tryCallDiamond => rfl
   | transferDiamond => rfl
-  | whileUnwind | loopExit | whileClose => rfl
+  | whileUnwind | loopExit => rfl
+  | whileInvariantBox hf | whileInvariantDiamond hf => simp only [Stmt.step, loopInvStep, hf, dif_pos]
+  | whileClose hf =>
+    simp only [Stmt.step, loopInvStep, hf, Bool.false_eq_true, dif_neg, not_false_eq_true]
+  | whileNoVariantDiamond hf hd =>
+    simp only [Option.isNone_iff_eq_none] at hd
+    subst hd
+    simp only [Stmt.step, loopInvStep, hf, dif_pos]
 
 theorem Rule.eq_step {s : Stmt C} {p : Premise C} (d : Rule C k m s p) :
     p = (s.step k m).premise := by

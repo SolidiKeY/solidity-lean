@@ -132,8 +132,13 @@ def instLabel (l : String) (se : Option String) : String :=
 name (`thn`, `els`) or, for an outcome with none, its place; else its case
 name (`cov`, which solkey does not have). -/
 def branchLabel (p : Tree) (i : Nat) (c : Tree) : Option String :=
+  -- an invariant rule's first goal is `init`, and its split past `{anon}` the second
+  let inv := p.name == "whileInvariantBox" || p.name == "whileInvariantDiamond"
   let idx := match c.label with
-    | some l => if l == `thn then some 0 else if l == `els then some 1 else none
+    | some l =>
+      if l == `init then some 0
+      else if inv && (l == `thn || l == `els || l == `cov) then some 1
+      else if l == `thn then some 0 else if l == `els then some 1 else none
     | none => if p.children.size > 1 then some i else none
   let solkey := do (← (branchLabels.lookup p.name))[← idx]?
   (solkey.map (instLabel · p.se?)) <|> c.label.map (·.toString)
@@ -256,6 +261,7 @@ def provesCtor (premise : Lean.Name) (lean : Bool) : Option (Lean.Name × Lean.N
     some (if lean then ``Proves.doneLean else ``Proves.done, ``Proves.doneRule)
   else if premise == ``Premise.branches then some (``Proves.branches, ``Proves.branchesRule)
   else if premise == ``Premise.cases then some (``Proves.cases, ``Proves.casesRule)
+  else if premise == ``Premise.inv then some (``Proves.invLean, ``Proves.invRule)
   else none
 
 /-- The premise `Stmt.step` gives the statement `s` (index `k`, modality

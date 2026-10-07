@@ -500,7 +500,7 @@ theorem unclaimedTaclets_count : unclaimedTaclets.length = 17 := by decide +kern
 /-! ## The rules with no taclet
 
 A rule upstream has no counterpart for is a `LeanTaclet`, not a `Taclet`, so
-every row above claims a taclet.  There are six:
+every row above claims a taclet.  There are nine:
 `functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
 `docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
 to the arguments as they are; here a parameter is bound to a ready argument
@@ -508,16 +508,19 @@ only, so that inlining is exact); `tryCallDiamond`, a `try` under the
 diamond closed to `false`, where solkey has no rule (a call may revert in the
 caller, which no formula rules out); and `transferDiamond`, a payment under
 the diamond closed to `false`, where solkey's diamond rules are not ported;
-`whileUnwind`, solkey's taclet of that name (past the pinned checkout,
-`ed7849d5b6`) with a bound on the unwinding, and `loopExit`, the loop at its
-bound; and `whileClose`, a loop with an invariant closed to `false` until
-solkey's `whileInvariantBox`, `whileInvariantDiamond` are ported.  The list is checked against the constructors, so one added later has to say
-so here. -/
+`whileUnwind`, `whileInvariantBox` and `whileInvariantDiamond`, solkey's
+taclets of those names past the pinned checkout (`ed7849d5b6`), the first
+with a bound on the unwinding; `loopExit`, the loop at its bound; and
+`whileClose` and `whileNoVariantDiamond`, a loop with an invariant closed to
+`false` where its body has no frame or, under the diamond, it has no
+variant (solkey unwinds those).  The list is checked against the
+constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
 def leanTaclets : List Lean.Name :=
   [``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond,
-    ``LeanTaclet.whileUnwind, ``LeanTaclet.loopExit, ``LeanTaclet.whileClose]
+    ``LeanTaclet.whileUnwind, ``LeanTaclet.loopExit, ``LeanTaclet.whileInvariantBox,
+    ``LeanTaclet.whileInvariantDiamond, ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond]
 
 #check_constructor_table LeanTaclet, leanTaclets
 

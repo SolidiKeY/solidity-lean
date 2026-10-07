@@ -43,6 +43,7 @@ partial def goalsOf (e : Expr) (n : Nat) : MetaM (Array (Nat × Expr)) := do
   | (``Fml.imp, #[_, _, ψ]) => goalsOf ψ n
   | (``Fml.not, #[_, ψ]) => goalsOf ψ n
   | (``Fml.havoc, #[_, ψ]) => goalsOf ψ n
+  | (``Fml.anon, #[_, _, ψ]) => goalsOf ψ n
   | (``Fml.all, #[_, _, _, ψ]) => goalsOf ψ n
   | _ => return #[(n, e)]
 

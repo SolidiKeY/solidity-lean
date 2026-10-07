@@ -124,6 +124,7 @@ def Fml.quote : Fml C → Lean.Expr
   | .modal m P φ => mkAppN (mkConst ``Fml.modal) #[c, toExpr m, Prog.quote c P, Fml.quote φ]
   | .havoc φ => mkAppN (mkConst ``Fml.havoc) #[c, Fml.quote φ]
   | .all x p φ => mkAppN (mkConst ``Fml.all) #[c, toExpr x, toExpr p, Fml.quote φ]
+  | .anon xs φ => mkAppN (mkConst ``Fml.anon) #[c, toExpr xs, Fml.quote φ]
 
 /-- The expression `Lean.mkConst n []`: the `c` a quoter takes for the
 contract named `n`, when the quoter runs as compiled code (`evalExpr`). -/

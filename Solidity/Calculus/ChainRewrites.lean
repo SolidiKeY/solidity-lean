@@ -947,6 +947,7 @@ def Fml.freshVars : Fml C → List Var
   | .upd _ U φ => U.vars.filter (·.idx != 0) ++ φ.freshVars
   | .modal _ P φ => (Prog.vars P).filter (·.idx != 0) ++ φ.freshVars
   | .all x _ φ => [x].filter (·.idx != 0) ++ φ.freshVars
+  | .anon xs φ => xs.filter (·.idx != 0) ++ φ.freshVars
 
 theorem Fml.freshVars_eq : (φ : Fml C) → φ.freshVars = φ.vars.filter (·.idx != 0)
   | .tt | .eq .. | .defined _ => rfl
@@ -957,6 +958,8 @@ theorem Fml.freshVars_eq : (φ : Fml C) → φ.freshVars = φ.vars.filter (·.id
     simp only [Fml.freshVars, Fml.vars, List.filter_append, Fml.freshVars_eq φ]
   | .all x _ φ => by
     simp only [Fml.freshVars, Fml.vars, Fml.freshVars_eq φ, ← List.filter_append, List.singleton_append]
+  | .anon _ φ => by
+    simp only [Fml.freshVars, Fml.vars, List.filter_append, Fml.freshVars_eq φ]
 
 /-- Dropping the effectless elements, reading `F` for what the formula
 reads, changes no binding the formula sees, if `F` holds every variable of
@@ -1098,7 +1101,7 @@ right-hand sides of a box update it rewrites too when `t'` cannot halt
 /-- Some equation of the formula changes under the rewrite. -/
 def Fml.eqRewrites (q : Term C × Term C) : Fml C → Bool
   | .eq a b => a.rw q != a || b.rw q != b
-  | .not φ | .upd _ _ φ | .modal _ _ φ | .havoc φ | .all _ _ φ => φ.eqRewrites q
+  | .not φ | .upd _ _ φ | .modal _ _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.eqRewrites q
   | .and φ ψ | .imp φ ψ => φ.eqRewrites q || ψ.eqRewrites q
   | .tt | .defined _ => false
 

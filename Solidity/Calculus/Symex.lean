@@ -31,7 +31,7 @@ variable {C : Contract}
 
 /-- A modality is left: a statement to run, or a `⟨⟩` (or `[]`) to drop. -/
 def Fml.active : Fml C → Bool
-  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.active
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.active
   | .and φ ψ => φ.active || ψ.active
   | .modal .. => true
   | _ => false
@@ -43,6 +43,7 @@ def Fml.stepAt (k : Nat) : Fml C → Option (Fml C)
   | .imp a φ => (φ.stepAt k).map (.imp a)
   | .havoc φ => (φ.stepAt k).map .havoc
   | .all x p φ => (φ.stepAt k).map (.all x p)
+  | .anon xs φ => (φ.stepAt k).map (.anon xs)
   | .and φ ψ =>
     if φ.active then (φ.stepAt k).map (.and · ψ) else (ψ.stepAt k).map (.and φ)
   | .modal _ [] φ => some φ
@@ -86,6 +87,11 @@ theorem Fml.stepAt_sound {k : Nat} :
     obtain ⟨ψ', h', rfl⟩ := h
     have := maxIdx_lt_of_sub (φ := φ) (fun x hx => by simp [Fml.vars, hx]) hk
     exact fun hψ v hv => Fml.stepAt_sound this h' _ (hψ v hv)
+  | .anon xs φ, ψ, hk, h, σ => by
+    simp only [Fml.stepAt, Option.map_eq_some_iff] at h
+    obtain ⟨ψ', h', rfl⟩ := h
+    have := maxIdx_lt_of_sub (φ := φ) (fun x hx => by simp [Fml.vars, hx]) hk
+    exact fun hψ b => Fml.stepAt_sound this h' _ (hψ b)
   | .and φ₁ φ₂, ψ, hk, h, σ => by
     have h₁ := maxIdx_lt_of_sub (φ := φ₁) (fun x hx => by simp [Fml.vars, hx]) hk
     have h₂ := maxIdx_lt_of_sub (φ := φ₂) (fun x hx => by simp [Fml.vars, hx]) hk
@@ -194,7 +200,7 @@ elab "sol_symex" : tactic => do
 `symex_sound`.  `sol_derive` runs it on a sequent instead: each step is a
 constructor of `Proves`, with the rule `Stmt.step` picks, so what it builds
 is a derivation, and `close` takes over only once no modality is left.  The
-five lemmas below are `Proves.unfoldRule` for the other premises; a rule
+lemmas below are `Proves.unfoldRule` for the other premises; a rule
 solkey lacks only ever unfolds. -/
 
 namespace Proves
@@ -290,6 +296,18 @@ theorem casesRule {fs : List (Fml C)} {us : List (Upd C)}
   rcases d with d | d
   · exact .cases d fml upd
   · cases d
+
+/-- `invLean` by whichever rule `Rule` names. -/
+theorem invRule {I c c' post : Fml C} {U : Upd C} {P : Prog C}
+    (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.inv I U c c' P post))
+    (init : Proves .all Γ I)
+    (thn : Proves .all (Γ ++ Hyp.loopAnon m P I U ++ [.pre c]) (.modal m P post))
+    (els : Proves .all (Γ ++ Hyp.loopAnon m P I U ++ [.pre c']) (.modal m ω φ))
+    (cov : Proves .all (Γ ++ Hyp.loopAnon m P I U) (Premise.cover m c c')) :
+    Proves .all Γ (.modal m (s :: ω) φ) := by
+  rcases d with d | d
+  · cases d
+  · exact .invLean d init thn els cov
 
 end Proves
 

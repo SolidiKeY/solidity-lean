@@ -1030,7 +1030,7 @@ def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
   | _, .modal .box _ _ => .tt
   | _, .modal .diamond _ _ => .not .tt
   | ρ, .all x p φ => .all x p (φ.toL (ρ.free x))
-  | _, .havoc _ => .tt
+  | _, .havoc _ | _, .anon .. => .tt
 
 /-- The fragment `Fml.toL` is exact on: no modality, one element per update
 but an allocation's pair (`pairL`), and every alias bound by an update. -/
@@ -1055,7 +1055,7 @@ def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
     | none => false
   | _, .modal _ P _ => P.reverts
   | ρ, .all x _ φ => !ρ.vars.contains x && φ.inL (ρ.free x)
-  | _, .havoc _ => false
+  | _, .havoc _ | _, .anon .. => false
 
 
 /-! ### The updates pushed in keep the meaning -/
@@ -3530,7 +3530,7 @@ theorem Fml.toL_holds :
         show md.after (fun τ' => holds τ' φ) (Upd.apply [.mref x i, .memory mm] τ) ↔ _
         simp only [Fml.toL, pairView, hq]
         exact after_guardM hs.1 fun τ' hτ => Fml.toL_holds φ (hs.2 τ' hτ) hf.2
-  | .havoc _, _, _, _, _, hf => by
+  | .havoc _, _, _, _, _, hf | .anon .., _, _, _, _, hf => by
     simp only [Fml.inL, Bool.false_eq_true] at hf
 
 /-- `⊨ φ` is the formula with its updates pushed in, true in every state. -/

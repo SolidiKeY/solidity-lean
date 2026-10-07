@@ -266,8 +266,12 @@ def keyLine (n : Lean.Name) : String :=
   | some (.taclet t) => s!"solkey: {KeyTaclet.fmt t}"
   | some (.merged ts) => "solkey (merged): " ++ ", ".intercalate (ts.map KeyTaclet.fmt)
   | none =>
-    -- solkey's taclet past the pinned checkout (`ed7849d5b6`), bounded here
+    -- solkey's taclets past the pinned checkout (`ed7849d5b6`), unwinding bounded here
     if n == ``LeanTaclet.whileUnwind then "solkey: whileUnwind (loop_expand), past the pin"
+    else if n == ``LeanTaclet.whileInvariantBox then
+      "solkey: whileInvariantBox (loop_inv), past the pin"
+    else if n == ``LeanTaclet.whileInvariantDiamond then
+      "solkey: whileInvariantDiamond (loop_inv), past the pin"
     else "solkey: none (a rule solkey does not have)"
 
 /-- The printed rule of a constructor, one line. -/

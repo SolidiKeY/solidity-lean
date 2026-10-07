@@ -777,6 +777,83 @@ theorem Semantics.EnvAgreeExcept.havoc {ns : List Var} {σ τ : State} (h : EnvA
     EnvAgreeExcept ns (σ.havoc st nt) (τ.havoc st nt) :=
   ⟨rfl, h.heap, h.nextId, rfl, h.env, h.selfBalance, h.tx⟩
 
+/-! ## States a loop iteration may leave
+
+solkey's `#loopAnon` gives every local a loop body assigns or declares a
+fresh constant (`LoopFrame`).  Here the locals `xs` are bound as `b` says,
+or unbound: an untyped state may hold anything there, and a local the body
+declares is unbound before the first iteration. -/
+
+/-- The environment `e` with each local of `xs` bound as `b` says. -/
+def anonEnv (b : Var → Option Binding) : List Var → List (Var × Binding) → List (Var × Binding)
+  | [], e => e
+  | x :: xs, e =>
+    match b x with
+    | some v => setBy x v (anonEnv b xs e)
+    | none => (anonEnv b xs e).filter (·.1 != x)
+
+/-- The state after an anonymising update of the locals `xs`. -/
+def Semantics.State.anon (σ : State) (xs : List Var) (b : Var → Option Binding) : State :=
+  { σ with env := anonEnv b xs σ.env }
+
+theorem lookupBy_filter_self {α : Type} (x : Var) :
+    (l : List (Var × α)) → lookupBy x (l.filter (·.1 != x)) = none
+  | [] => rfl
+  | (y, v) :: l => by
+    by_cases h : y = x
+    · subst h; simp only [List.filter, bne_self_eq_false]; exact lookupBy_filter_self y l
+    · have h' : (y != x) = true := bne_iff_ne.2 h
+      simp only [List.filter, h', lookupBy, Ne.symm h, if_false]
+      exact lookupBy_filter_self x l
+
+theorem lookupBy_filter_ne {α : Type} {x y : Var} (hne : y ≠ x) :
+    (l : List (Var × α)) → lookupBy y (l.filter (·.1 != x)) = lookupBy y l
+  | [] => rfl
+  | (z, v) :: l => by
+    by_cases h : z = x
+    · subst h
+      simp only [List.filter, bne_self_eq_false, lookupBy, hne, if_false]
+      exact lookupBy_filter_ne hne l
+    · have h' : (z != x) = true := bne_iff_ne.2 h
+      simp only [List.filter, h', lookupBy]
+      split
+      · rfl
+      · exact lookupBy_filter_ne hne l
+
+/-- A local of `xs` reads as `b` says, any other as before. -/
+theorem lookupBy_anonEnv (b : Var → Option Binding) (y : Var) :
+    (xs : List Var) → (e : List (Var × Binding)) →
+      lookupBy y (anonEnv b xs e) = if y ∈ xs then b y else lookupBy y e
+  | [], e => by simp only [anonEnv, List.not_mem_nil, if_false]
+  | x :: xs, e => by
+    have ih := lookupBy_anonEnv b y xs e
+    by_cases h : y = x
+    · subst h
+      simp only [anonEnv, List.mem_cons, true_or, if_true]
+      cases hb : b y with
+      | some v => exact SemanticsProperties.lookupBy_setBy_self _ _ _
+      | none => exact lookupBy_filter_self _ _
+    · simp only [anonEnv, List.mem_cons, h, false_or]
+      cases b x with
+      | some v => rw [SemanticsProperties.lookupBy_setBy_ne h, ih]
+      | none => rw [lookupBy_filter_ne h, ih]
+
+theorem Semantics.EnvAgreeExcept.anon {ns : List Var} {σ τ : State} (h : EnvAgreeExcept ns σ τ)
+    (xs : List Var) (b : Var → Option Binding) :
+    EnvAgreeExcept ns (σ.anon xs b) (τ.anon xs b) :=
+  ⟨h.storage, h.heap, h.nextId, h.net, fun n hn => by
+    simp only [State.anon, lookupBy_anonEnv, h.env n hn], h.selfBalance, h.tx⟩
+
+/-- Every state that agrees with `σ` off `xs` is, up to agreement, `σ` with
+`xs` anonymised: bound as they are there. -/
+theorem Semantics.State.anon_agree {xs : List Var} {σ τ : State} (h : EnvAgreeExcept xs σ τ) :
+    EnvAgreeExcept [] (σ.anon xs fun x => lookupBy x τ.env) τ :=
+  ⟨h.storage, h.heap, h.nextId, h.net, fun n _ => by
+    simp only [State.anon, lookupBy_anonEnv]
+    split
+    · rfl
+    · exact h.env n ‹_›, h.selfBalance, h.tx⟩
+
 /-! ## Formulas -/
 
 /-- A formula about programs of the contract `C`. -/
@@ -800,6 +877,10 @@ inductive Fml (C : Contract) where
   /-- `∀ p x. φ`: `φ` for every value of the type `p` the local `x` may
   hold (a `uint` in `[0, 2^256)`), KeY's `\forall`. -/
   | all (x : Var) (p : PrimTy) (φ : Fml C)
+  /-- `{anon(xs)} φ`: `φ` whatever the locals `xs` hold, bound or not —
+  KeY's anonymising update of a loop's frame (`#loopAnon`), its fresh
+  constants the locals' new bindings. -/
+  | anon (xs : List Var) (φ : Fml C)
 
 instance : Inhabited (Fml C) := ⟨.tt⟩
 
@@ -830,6 +911,7 @@ def holds (σ : State) : Fml C → Prop
   | .modal m P φ => m.afterRun (holds · φ) (Prog.run σ P)
   | .havoc φ => ∀ st nt, holds (σ.havoc st nt) φ
   | .all x p φ => ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ
+  | .anon xs φ => ∀ b, holds (σ.anon xs b) φ
 
 /-- Valid: true in every state. -/
 def Valid (φ : Fml C) : Prop := ∀ σ, holds σ φ
@@ -885,7 +967,7 @@ theorem holds_alls {φ : Fml C} : {xs : List (PrimTy × Var)} → {σ : State} �
 included: a formula of the logic, which the calculus leaves to `Valid`. -/
 def Fml.modalFree : Fml C → Bool
   | .tt | .eq .. | .defined _ => true
-  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.modalFree
+  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.modalFree
   | .and φ ψ | .imp φ ψ => φ.modalFree && ψ.modalFree
   | .modal .. => false
 
@@ -934,6 +1016,7 @@ def Fml.vars : Fml C → List Var
   | .modal _ P φ => Prog.vars P ++ φ.vars
   | .havoc φ => φ.vars
   | .all x _ φ => x :: φ.vars
+  | .anon xs φ => xs ++ φ.vars
 
 section Frame
 
@@ -1311,6 +1394,10 @@ theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State}
     simp only [holds]
     exact forall_congr' fun v => imp_congr_right fun _ =>
       holds_frame φ h.tail (hag.setEnv_both x (.val v))
+  | .anon xs φ, h, _, _, hag => by
+    simp only [holds]
+    exact forall_congr' fun b =>
+      holds_frame φ (fun y hy hn => h y (List.mem_append_right _ hy) hn) (hag.anon xs b)
 
 end Frame
 

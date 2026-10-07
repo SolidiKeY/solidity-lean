@@ -109,7 +109,7 @@ def Stmt.forks : Stmt C → Bool
 /-- Whether a `transfer` occurs in a program of the formula. -/
 def Fml.hasTransfer : Fml C → Bool
   | .tt | .eq .. | .defined _ => false
-  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ => φ.hasTransfer
+  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.hasTransfer
   | .and φ ψ | .imp φ ψ => φ.hasTransfer || ψ.hasTransfer
   | .modal _ P φ => Prog.hasTransfer P || φ.hasTransfer
 
@@ -268,6 +268,7 @@ def holdsC (I : Fml C) (σ : State) : Fml C → Prop
   | .modal m P φ => ∀ o, ExecP I σ P o → o.after m (holdsC I · φ)
   | .havoc φ => ∀ st nt, holdsC I (σ.havoc st nt) φ
   | .all x p φ => ∀ v, p.admits v → holdsC I (σ.setEnv x (.val v)) φ
+  | .anon xs φ => ∀ b, holdsC I (σ.anon xs b) φ
 
 /-- Valid with callbacks: true in every state. -/
 def ValidC (I : Invariant C) (φ : Fml C) : Prop := ∀ σ, holdsC I.fml σ φ
@@ -633,6 +634,9 @@ theorem holdsC_iff_holds {I : Fml C} : (φ : Fml C) → φ.hasTransfer = false �
   | .all _ _ φ, h, _ => by
     simp only [holdsC, holds]
     exact forall_congr' fun _ => imp_congr_right fun _ => holdsC_iff_holds φ h
+  | .anon _ φ, h, _ => by
+    simp only [holdsC, holds]
+    exact forall_congr' fun _ => holdsC_iff_holds φ h
 
 /-- **A modal formula true with callbacks is true without**, when its
 postcondition has no program paying: the deterministic run is among the
@@ -926,6 +930,10 @@ theorem holdsC_frame {I : Fml C} (hI : I.vars = []) :
     simp only [holdsC]
     exact forall_congr' fun v => imp_congr_right fun _ =>
       holdsC_frame hI φ h.tail (hag.setEnv_both x (.val v))
+  | .anon xs φ, h, _, _, hag => by
+    simp only [holdsC]
+    exact forall_congr' fun b =>
+      holdsC_frame hI φ (fun y hy hn => h y (List.mem_append_right _ hy) hn) (hag.anon xs b)
 
 end Frame
 

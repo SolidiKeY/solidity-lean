@@ -285,6 +285,33 @@ resume, where KeY puts `pv := TRUE` into the anonymising update.
   changes the program: it panics where the loop runs on, so the result is no
   longer an unwinding of the loop, and the bound reads as a failure of the
   contract. The bound belongs to the proof, as a goal.
+- **Invariant rules ported (L4).** `whileInvariantBox` and
+  `whileInvariantDiamond` are Lean's `LeanTaclet`s of those names, shape for
+  shape, sound against `Loop.run` (`Calculus/SoundLoop.lean`). What Lean does
+  differently, each a side condition KeY's types give for free:
+  - *the cover.* Lean's locals are untyped, so `b` may be neither `TRUE` nor
+    `FALSE`; under the diamond the premise also owes `b = TRUE ∨ b = FALSE`,
+    as Lean's `ifElseSplit` does.
+  - *the variant is read, not compared.* KeY's `dec = variant` is a total
+    equation; Lean binds `variant := dec`, which under the diamond needs
+    `dec` defined wherever the invariant holds (`n - i` with `i <= n` in the
+    invariant). The checks `0 <= dec & dec < variant` after the body are
+    KeY's, under `<b = cond;>(b = TRUE -> …)`, so the condition must also be
+    defined after the body.
+  - *the frame.* `{anon}` gives each local the body writes any binding, or
+    none (`Fml.anon`), and anonymises storage and ledger together
+    (`{havoc}`), where solkey anonymises storage for a non-local write and
+    `net` for a call separately: Lean's is coarser where a body writes
+    storage but pays nothing. A body that pushes, pops or rebinds an alias
+    has no frame in Lean (`Prog.loopFrame` reuses `Stmt.within`), where
+    solkey refuses only memory.
+  - *the flags are typed by the invariant.* A loop's `brk`, `ret` and
+    `first` are anonymised locals; the lowering conjoins `f || !f` (defined
+    exactly when `f` is a `bool`) to an invariant for each flag the
+    condition reads. KeY's `boolean` type says this.
+  - *a loop with an invariant and no frame, or no variant under the
+    diamond,* closes to `false` (`whileClose`, `whileNoVariantDiamond`),
+    where solkey unwinds it: in Lean the annotation chooses the rule.
 
 ## Resolved (kept for orientation)
 

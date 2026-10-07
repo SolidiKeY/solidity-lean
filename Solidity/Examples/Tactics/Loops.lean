@@ -14,8 +14,9 @@ runs as the least fixed point of its unwinding (`Loop.run`), so `#run` runs
 it and a concrete one is decided by `Prog.run_loop_of_iterN`.  The calculus
 unwinds a loop to the bound its `/// @custom:key unwind k` clause gives
 (`whileUnwind`, solkey's taclet with a bound) and leaves it there by
-`loopExit`; a loop with an invariant closes to `false` until its rules land
-(`LeanTaclet.whileClose`).
+`loopExit`; a loop with an invariant is proved by it (`whileInvariantBox`,
+`whileInvariantDiamond`, with a variant), past the anonymising update of the
+locals its body writes (`{anon(…)}`).
 -/
 
 namespace Solidity.Examples.Loops
@@ -396,16 +397,171 @@ theorem forLoopOverArray :
 
 end
 
-/-! ## An invariant: no rule yet
+/-! ## Invariants
 
-A loop with an invariant closes to `false` under either modality
-(`whileClose`), so nothing about it is derived until solkey's
-`whileInvariantBox` and `whileInvariantDiamond` are ported (`docs/loops.md`,
-stage L4). -/
+solkey's `whileInvariantBox` and `whileInvariantDiamond` (`docs/loops.md`,
+Decision 4): the invariant now, and, whatever the locals the body writes
+hold (`{anon(body)}`, solkey's `#loopAnon`), from where it holds the
+condition's value `b` picks the body, which keeps it, or the rest.  Under the
+diamond the variant's value before the iteration is kept (`variant`) and
+checked after it only where the condition holds again.  The fresh `b` and
+`variant` print as `se` and `ie`, the fresh names they are. -/
 
 /--
-info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {m : Modality} {inv : Val C PrimTy.bool}
-  {dec : Option (Val C PrimTy.uint)} {body : List (Stmt C)} {cond : Val C PrimTy.bool},
+info: Solidity.LeanTaclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {body : Prog C} {dec : Option (Val C PrimTy.uint)}
+  {cond inv : Val C PrimTy.bool},
+  dl[LeanTaclet C k]{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
+    "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
+      { se := cond } (se = true ⟹ ⟨[ body ]⟩ inv = true ; se = false ⟹ ⟨[ ]⟩)) }
+solkey: whileInvariantBox (loop_inv), past the pin
+printed: none (a solkey taclet not printed)
+sound: Solidity.LeanTaclet.sound
+-/
+#guard_msgs in #taclet whileInvariantBox
+
+/--
+info: Solidity.LeanTaclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {body : Prog C} {cond inv : Val C PrimTy.bool}
+  {dec : Val C PrimTy.uint},
+  dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
+    "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
+      { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
+      (inv = true ∧ { se := cond } (se = true → 0 <= dec ∧ dec < ie)) ; se = false ⟹ ⟨[ ]⟩)) }
+solkey: whileInvariantDiamond (loop_inv), past the pin
+printed: none (a solkey taclet not printed)
+sound: Solidity.LeanTaclet.sound
+-/
+#guard_msgs in #taclet whileInvariantDiamond
+
+/-- A counting loop: from `i = 0`, `i <= n` holds at every head, so the loop
+ends at `n`.  The `require` keeps `n` a number: `⊨` reads every state, and a
+local there may hold anything. -/
+theorem countToN :
+    ⊨ dl!{ [ require(n >= 0); uint i = 0;
+             /// @custom:key invariant i <= n
+             while (i < n) { i = i + 1; }; ] i == n } := by
+  sol_symex
+  sol_close
+
+/-- The same under the diamond: `n - i` decreases while the loop goes on, so
+it ends.  The invariant says `0 <= i`: the anonymised `i` is any number. -/
+theorem countToNDiamond :
+    ⊨ dl!{ n >= 0 && n <= 1000 → ⟨ uint i = 0;
+             /// @custom:key invariant 0 <= i && i <= n
+             /// @custom:key decreases n - i
+             while (i < n) { i = i + 1; }; ⟩ i == n } := by
+  sol_symex
+  sol_close
+
+/-- A sum with a closed form, solkey's `invariantClosedFormSum`: adding `2`
+`n` times leaves `2 * n`. -/
+theorem sumClosedForm :
+    ⊨ dl!{ [ require(n >= 0); uint s = 0; uint i = 0;
+             /// @custom:key invariant i <= n && s == 2 * i
+             while (i < n) { s = s + 2; i = i + 1; }; ] s == n + n } := by
+  sol_symex
+  sol_close
+
+/-! A loop with `break`: the invariant moves to the `while` the lowering
+leaves, so it holds at the head of the iteration the `break` ends too.  Lean
+adds that the flag the condition tests is a `bool` (`brk1 || !brk1`), which
+KeY's types say: an anonymised local holds anything. -/
+
+/-- info: uint i = 0;
+bool brk1 = false;
+/// @custom:key invariant (i <= 10) && (brk1 || !brk1) while (!brk1 && (i < 10)) { if (i == 5) { brk1 = true; } else {  } if (!brk1) { i++; } else {  } } -/
+#guard_msgs in
+#eval IO.println (Prog.show (sol{ uint i = 0;
+  /// @custom:key invariant i <= 10
+  while (i < 10) { if (i == 5) { break; } i++; } }))
+
+/-- A loop left by `break` keeps its bound: `i <= 10` holds at every head,
+the one after the `break` included. -/
+theorem breakKeepsBound :
+    ⊨ dl!{ [ uint i = 0;
+             /// @custom:key invariant i <= 10
+             while (i < 10) { if (i == n) { break; } i = i + 1; }; ] i <= 10 } := by
+  sol_symex
+  sol_close
+
+/-- The counting loop by the walk `sol_derive?` writes: the invariant rule is
+`invLean`, its goals `init` ("invariant initially valid") and, past the
+anonymising update, `thn`, `els` and `cov` ("invariant preserved and
+used"). -/
+theorem countToNWalk : ⊢ dl!{ [ require(n >= 0); uint i = 0;
+    /// @custom:key invariant i <= n
+    while (i < n) { i = i + 1; }; ] i == n } := by
+  apply unfold .requireConditionCapture
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply splitBox .requireSimple
+  case thn =>
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply invLean .whileInvariantBox
+    case init =>
+      refine close ?_
+      sol_symex
+      sol_close
+    case thn =>
+      apply update .binopAssignment
+      apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    case els =>
+      apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    case cov =>
+      refine close ?_
+      sol_symex
+      sol_close
+  case els =>
+    apply done .revertBox
+    refine close ?_
+    sol_symex
+    sol_close
+
+/-! The proof tree labels the invariant rule's goals as solkey does. -/
+
+/--
+info: 0: requireConditionCapture
+1: localValueDeclInitDrop
+2: greaterEqualAssignment
+3: requireSimple
+  [Holds]
+    4: localValueDeclInitDrop
+    5: localValueAssign
+    6: whileInvariantBox
+      [invariant initially valid]
+        7: Closed goal
+      [invariant preserved and used]
+        8: additionAssignment
+        9: emptyModality
+        10: Closed goal
+      [invariant preserved and used]
+        11: emptyModality
+        12: Closed goal
+      [invariant preserved and used]
+        13: Closed goal
+  [Reverts]
+    14: revertBox
+    15: Closed goal
+closed: 0 open goal(s), 16 node(s), 5 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ [ require(n >= 0); uint i = 0;
+             /// @custom:key invariant i <= n
+             while (i < n) { i = i + 1; }; ] i == n }
+
+/-! A body that writes memory, pushes or calls out has no frame, and no
+invariant rule, as in solkey: such a loop closes to `false` (`whileClose`), as
+one under the diamond with no variant does (`whileNoVariantDiamond`). -/
+
+/--
+info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {body : Prog C} {m : Modality} {inv : Val C PrimTy.bool}
+  {dec : Option (Val C PrimTy.uint)} {cond : Val C PrimTy.bool},
   dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)

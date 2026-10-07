@@ -1,12 +1,12 @@
 # Loops
 
 `while`, `for`, `do … while`, `break`, `continue`. This is a design plan:
-four decisions and an ordered implementation plan. L1 to L3 are built (the
-syntax, the lowering, the semantics, the typing, and unwinding;
-`Examples/Tactics/Loops.lean`): a loop is unwound to the bound its
-`/// @custom:key unwind k` clause gives (`LeanTaclet.whileUnwind`) and left
-there (`LeanTaclet.loopExit`); until L4, a loop with an invariant closes to
-`false` (`LeanTaclet.whileClose`).
+four decisions and an ordered implementation plan. L1 to L4 are built (the
+syntax, the lowering, the semantics, the typing, unwinding and the
+invariant rules; `Examples/Tactics/Loops.lean`): a loop is unwound to the
+bound its `/// @custom:key unwind k` clause gives (`LeanTaclet.whileUnwind`)
+and left there (`LeanTaclet.loopExit`), or proved by its invariant
+(`LeanTaclet.whileInvariantBox`, `whileInvariantDiamond`).
 Background: `docs/kernel-port.md` (its topics "Modalities", "Semantics",
 "One rule per statement" and "Conditions" are the decisions this plan
 extends).
@@ -189,7 +189,8 @@ optional variant) or `.unwind (k : Nat)`. `Stmt.step`
 |---|---|---|
 | `.unwind (k+1)` | `whileUnwind`: `unfold [if (c) { body while[k] (c) body }]` | same |
 | `.unwind 0` | `loopExit`: `Premise.check (c = false) []`, the goals "loop exited" (`c = false ⟹ ⟨[ ω ]⟩ φ`) and "unwound to the end" (`c = false`), by `Proves.checkLean` | same |
-| `.inv I dec` | `whileInvariantBox`, below | `whileInvariantDiamond` with `dec = some v`; with `none`, the premise is `done false` (sound, unprovable; solkey unwinds instead) |
+| `.inv I dec` | `whileInvariantBox`, below | `whileInvariantDiamond` with `dec = some v`; with `none`, `whileNoVariantDiamond`, the premise `done false` (sound, unprovable; solkey unwinds instead) |
+| `.inv I dec`, a body with no frame | `whileClose`: `done false` | same |
 
 In the source the annotation is solkey's specification,
 `/// @custom:key invariant …` and `/// @custom:key decreases …` above the
@@ -215,75 +216,82 @@ and its premise (`body` alone, `ω` alone) is lighter than `loop :: ω` under
 survive. Without the annotation, unwinding would copy the loop and no weight
 could decrease.
 
-## Decision 4: the invariant rule and its soundness
+## Decision 4: the invariant rule and its soundness (built)
 
-Write `Ic` for `I.lower == true`, `c⁺`/`c⁻` for `c.lower == true`/`false`.
-solkey's two goals (`whileInvariantBox`), under the context's update `{U}`:
+solkey's two goals, as `whileInvariantBox` writes them (`Calculus/Rules.lean`),
+in the context's update `{U}`:
 
 ```
-  "invariant initially valid":     Γ ⟹ {U} Ic
-  "invariant preserved and used":  Γ ⟹ {U} {anon F} (Ic → cover ∧ (c⁺ → [ body ] Ic) ∧ (c⁻ → [ ω ] φ))
+  "invariant initially valid":     Γ ⟹ {U} inv = TRUE
+  "invariant preserved and used":  Γ ⟹ {U} {anon(body)} (inv = TRUE → { b := cond }
+                                       ((b = TRUE → [ body ] inv = TRUE) ∧ (b = FALSE → [ ω ] φ) ∧ cover))
   ──────────────────────────────────────────────────────
-  Γ ⟹ {U} [ while (c) body; ω ] φ
+  Γ ⟹ {U} [ /// @custom:key invariant inv while (cond) body; ω ] φ
 ```
 
-solkey evaluates the condition into a fresh `b` (`[bool b = c;]`); Lean
-lowers it, and `cover` is `Premise.cover` (`Calculus/Logic.lean`) of `c⁺`,
-`c⁻`: `c⁺ ∨ c⁻` under the diamond, `true` under the box.
-`whileInvariantDiamond` adds the variant: the hypothesis is
-`Ic ∧ dec = v` with `v` fresh, and the body's postcondition
-`Ic ∧ (c⁺ → 0 ≤ dec < v)`. **The variant is checked only when the condition
-holds again** after the body, as solkey checks it: an iteration after which
-the condition is false is the last, and under the flag lowering the
-iteration a `break` ends sets `brk` without decreasing anything. The rule
-fires on the first statement of the modality, so `{U}` is the context's
-update, as in `CallbackTaclet` (`Calculus/Callback.lean`).
+`b` is KeY's `s#b` of `bType b = cond;`, a fresh local; `= TRUE` is
+`Fml.eqD` (defined and equal). The cover is a branch's (`Premise.coverFml`):
+`b = TRUE ∨ b = FALSE` under the diamond, `true` under the box, since Lean's
+locals are untyped. `whileInvariantDiamond` binds the variant first,
+`{ variant := dec ‖ b := cond }`, and the body's postcondition is
+`inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)`: **the
+variant is checked only when the condition holds again**, as solkey checks
+it. Lean reads `dec` where KeY compares it with a skolem (`dec = variant`),
+so under the diamond `dec` must be defined wherever the invariant holds.
 
-**The anonymising update `{anon F}`** generalises `Fml.havoc`/`Hyp.havoc`,
-which replace storage and ledger and keep locals, memory and funds. `F` is
-solkey's `LoopFrame`, computed from the body's syntax (`Prog.frame body`):
-the locals it assigns or declares (the flags included), storage if it writes
-a non-local, the ledger (and storage) if it calls anything but
-`require`/`assert`/`revert`. **A body that allocates or writes memory has no
-invariant rule**, as in solkey: the heap is not anonymised, and such a loop
-can only be unwound. `holds σ (.anon F φ)` quantifies over every state
-agreeing with `σ` off `F`; `Fml.havoc` is `anon` at storage + ledger. A
-syntactic frame needs one lemma, `Prog.run_frameOff` (a run changes nothing
-outside `Prog.frame body`), proved beside `Prog.run_frame`.
+**The anonymising update `{anon(body)}`** is `Fml.loopAnon`
+(`Semantics/Mutability.lean`), solkey's `#loopAnon`: `Fml.anon xs`, where
+`xs = Prog.writes body` (the locals the body assigns or declares, the
+lowering's flags included), each bound to anything or to nothing
+(`State.anon`), and `{havoc}` inside it when the body writes storage or pays
+(`Prog.within .nonpayable`, storage and ledger together). A body outside
+`nonpayable` (memory, a push or a pop, an alias, an external call) has no
+frame, and its loop closes to `false` (`whileClose`). The frame lemma is
+`Prog.loopFrame_run`, from `Prog.frame_of_within`; `Fml.loopAnon_holds`
+turns it into the premise at every loop head.
 
-**Soundness, box.** Fix `σ` with `Γ` true, `τ₀ = U σ`. By induction on the
-iteration count `n` of `iterN`, every loop-head state `τₙ` satisfies `Ic` and
-agrees with `τ₀` off `F`: for `n = 0` by the first goal; for `n + 1`, `τₙ` is
-one of the states the second goal quantifies over, so a body run ending
-normally ends in `Ic`, and by `Prog.run_frameOff` agrees with `τₙ`, hence
-`τ₀`, off `F`. The loop then ends done at `τₙ` with `c⁻` (the second goal's use case
-gives `[ ω ] φ`), in a halt of the body or of `c`, or in `diverge`; the box
-accepts the last two.
+**The flags are typed by the invariant.** An anonymised `brk`, `ret` or
+`first` may hold anything, but the condition reads it; `lowerLoops`
+conjoins `f || !f` (defined exactly when `f` is a `bool`) to an invariant for
+each flag the condition tests, which KeY's `boolean` type gives.
 
-**Soundness, diamond.** The variant is non-negative and strictly decreasing
-on every iteration after which the loop goes on, so the iteration is done
-within `v + 1` steps and `Loop.run` is not `diverge`. Neither
-the body (the preserved goal is a diamond) nor the condition (the cover
-conjunct) can halt.
+**Soundness** (`Calculus/SoundLoop.lean`). Box (`Stmt.loop_inv_box`): by
+`Loop.run_induct`, every loop head is in the frame of the first and
+satisfies the invariant; where the condition is `TRUE` the body's box keeps
+it (and rules out a panic), where it is `FALSE` the rest's goal holds.
+Diamond (`Stmt.loop_inv_diamond`): `Loop.run_variant` bounds the iterations
+by the variant's value after the first, which is a `uint` below the one
+before wherever the loop goes on; neither the condition (the cover) nor the
+body (a diamond) can halt.
 
-**In Lean.** A new `Premise` constructor `inv` whose `Premise.fml` is the
-conjunction above (`Fml.stepAt` reads premises through `Premise.fml`, so
-`sol_symex` needs no change), a `Proves` constructor for it (as L3 added
-`Proves.checkLean` for `loopExit`, whose premise is a check), and two cases
-in `LeanTaclet.sound`. `Stmt.inSolkey m (.loop …) =
-false` (`Calculus/SolkeyFragment.lean`), so `Proves.toSolkey` is untouched
-and `Proves.solkey_lt_calculus` gains a witness.
+**In Lean.** `Premise.inv`, read by `Premise.invFml` (`Calculus/SoundKit.lean`),
+so `sol_symex` steps it as any premise; `Proves.invLean` for a walk, its
+goals `init` ("invariant initially valid") and `thn`, `els`, `cov` past
+`Hyp.loopAnon` ("invariant preserved and used"), which the proof tree labels
+as solkey does. `Hyp.anon` is the context's anonymising update.
+`sol_close` reads `{anon(…)}` (`Close.holds_anon`, `State.getEnv_anon_cons`:
+a read of an anonymised local is `anonRead (b x)`, a binding nobody knows);
+`sol_decide` and `sol_prove`'s closer do not (`Fml.inL` is `false` on `anon`,
+as on `havoc`), so `sol_prove` leaves such a leaf to `sol_close`. Under the
+diamond the closer is slow: a counting loop closes, a loop with a `break`
+(whose flag is read through the cover) and a sum do not within the default
+heartbeats; their box versions close (`Examples/Tactics/Loops.lean`).
+
+**Termination.** `.inv I _` weighs `c.cost + c.pen + Prog.weight body +
+I.cost + 2`, and the premise (`body` alone, `ω` alone, under modal-free
+`{anon}`, `{U}` and conditions) measures less than `loop :: ω`
+(`Premise.measure_lt`, `Fml.loopAnon_measure`).
 
 **Typing and declarations.** `Stmt.wt` requires `c.wt Γ`, the annotation's
 values well-typed at `Γ`, and `Prog.wt Γ body = some Γb` with `Ctx.le Γ Γb`,
 and returns `Γ`, as for `ite`. A local declared in the body is declared
 again each iteration (`declLocal` overwrites, as solc re-initialises); it is
-in `F`, and the invariant, typed at `Γ`, cannot name it.
+in the frame, and the invariant, typed at `Γ`, cannot name it.
 
 The loop condition is **not** captured before the loop, since it must be
-re-evaluated: the invariant rule lowers it (`Val.lower`), the unwinding's
-`if` captures it per copy, and an `++` in it is an elaboration error, as
-under `&&`.
+re-evaluated: the invariant rule binds it to `b` at the head, the
+unwinding's `if` captures it per copy, and an `++` in it is an elaboration
+error, as under `&&`.
 
 ## The EVM
 
@@ -310,7 +318,7 @@ EVM stage is worth doing once, for all.
 | **L1 Syntax and semantics** | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/Quote.lean`, `Calculus/Notation.lean`. | Medium: structural recursion through `Loop.run`, and `#eval` under `implemented_by`. Check both first in a scratch file. |
 | **L2 Typing** | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Low: the same proof three times. |
 | **L3 Unwinding** (built) | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
-| **L4 Invariant rule** | `Update.lean` (`Fml.anon`, `State.anon`, frame lemmas), `Semantics/Agree.lean` (`Prog.frame`, `Prog.run_frameOff`), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `Logic`, `RuleSoundness`, `Termination`. Check whether `sol_decide` handles `anon` (a local in `F` is a fresh free local, anonymised storage a fresh free storage). Examples: a counting loop, a sum with a closed form. | Medium to high: `Prog.run_frameOff` over every statement, and extending `Decide`'s reduction to a second base storage. |
+| **L4 Invariant rule** (built) | `Update.lean` (`Fml.anon`, `State.anon`), `Semantics/Mutability.lean` (`Prog.loopFrame`, `Fml.loopAnon`, `Prog.loopFrame_run`: the frame is `Stmt.within`'s, no new run lemma), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic` (`Hyp.anon`, `Proves.invLean`), `Termination`, `Close` (`holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
 | **L6 Callbacks** | `Calculus/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
 | **L7 EVM** | `Evm/{Machine,Compile,Correctness}.lean`, as above. | High: the largest stage. |

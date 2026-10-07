@@ -12,9 +12,10 @@ fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed or excused, never both
 (`claimedTaclets_count = 306`, `unclaimedTaclets_count = 17`). A rule that
-transcribes no taclet at the pin is a `LeanTaclet` (`leanTaclets`); there are six,
+transcribes no taclet at the pin is a `LeanTaclet` (`leanTaclets`); there are nine,
 `functionCallArgCapture`, `tryCallDiamond`, `transferDiamond`, `whileUnwind`,
-`loopExit` and `whileClose`. A taclet may be claimed by two constructors (the
+`loopExit`, `whileInvariantBox`, `whileInvariantDiamond`, `whileClose` and
+`whileNoVariantDiamond`. A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
 member `length`; `memoryFieldWrite`/`memoryIndexWriteArray` by the value and
 reference writes). What stays prose here is what a `KeyOrigin` cannot say:
@@ -313,8 +314,10 @@ gives their shapes and the stages that port them.
 | --- | --- | --- | --- |
 | `whileUnwind` | `LeanTaclet.whileUnwind` | bounded (past the pin) | `/// @custom:key unwind n + 1 while (cond) body` ⇝ `if (cond) { body; /// @custom:key unwind n while (cond) body; }`, KeY's `s#cond`, `s#body` as `cond`, `body`. solkey's strategy unwinds a loop with no specification without a bound; here the annotation counts the unwindings down (`LoopAnn.unwind`), so that symbolic execution ends (`Stmt.weight`). Sound by `Loop.run_unfold` (`Stmt.loop_unwind_run`). A `LeanTaclet` until the solkey pin moves past `ed7849d5b6`, then a `Taclet` |
 | — | `LeanTaclet.loopExit` | Lean only | a loop at its bound (`unwind 0`, the annotation of a loop with no clause): a check (`Premise.check`, `Proves.checkLean`), "loop exited" the rest with `cond = false` assumed, "unwound to the end" `cond = false` (`Fml.eqD`, so a condition that halts is not false). Sound by `Stmt.loop_exit_run`. Not `assert(!cond)`, which would make running out of unwindings a panic of the program |
-| `whileInvariantBox`, `whileInvariantDiamond` | — | not ported (past the pin) | "invariant initially valid", "invariant preserved and used" under `#loopAnon`; stage L4 |
-| — | `LeanTaclet.whileClose` | Lean only | a loop with an invariant (`/// @custom:key invariant inv`), under either modality, closes to `false` until the rules above land: sound, and nothing about it is derived. `Stmt.inSolkey` is `false` on a loop |
+| `whileInvariantBox` | `LeanTaclet.whileInvariantBox` | ported (past the pin) | `[ /// @custom:key invariant inv while (cond) body; ]` ⇝ "invariant initially valid": `inv = TRUE`; "invariant preserved and used": `{anon(body)} (inv = TRUE → { b := cond } (b = TRUE ⟹ ⟨[ body ]⟩ inv = TRUE ; b = FALSE ⟹ ⟨[ ]⟩))`. KeY's `s#b` (`bType b = cond;`) is a fresh local (printed `se`), `#loopAnon` is `{anon(body)}` (`Fml.loopAnon`: `Fml.anon` of `Prog.writes body`, with `{havoc}` when the body writes storage or pays). `TRUE` is `Fml.eqD` (defined and equal). Premise `Premise.inv`, derivation rule `Proves.invLean` (goals `init`, and `thn`, `els`, `cov` past `Hyp.loopAnon`). Sound by `Stmt.loop_inv_box` (`Calculus/SoundLoop.lean`, `Loop.run_induct`) |
+| `whileInvariantDiamond` | `LeanTaclet.whileInvariantDiamond` | ported (past the pin) | the box's premise with `{ variant := dec ‖ b := cond }` and the body's postcondition `inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)`: KeY's skolem `variant` a fresh local (printed `ie`), the variant checked only where the condition holds again. Lean reads `dec` where KeY compares it, so it must be defined where the invariant holds; and under the diamond the cover (`b` is `TRUE` or `FALSE`), as for a branch. Sound by `Stmt.loop_inv_diamond` (`Loop.run_variant`) |
+| — | `LeanTaclet.whileClose` | Lean only | a loop with an invariant whose body has no frame (`Prog.loopFrame`: it writes memory, pushes, pops, rebinds an alias or calls out), under either modality, closes to `false`: sound, and nothing about it is derived. solkey refuses memory-writing bodies too, and unwinds them |
+| — | `LeanTaclet.whileNoVariantDiamond` | Lean only | a loop with an invariant and no `decreases` closes to `false` under the diamond (solkey unwinds it). `Stmt.inSolkey` is `false` on every loop |
 | `LoopLowering` (meta-construct) | `lowerLoops` (`Syntax.lean`) | elaborator | `break`/`continue`/`return` in a loop to the flags `brk`/`cnt`/`ret`, `for` and `do … while` to `while`, shape for shape |
 
 ## Function contracts

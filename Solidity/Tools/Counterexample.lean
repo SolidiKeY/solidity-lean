@@ -140,6 +140,8 @@ def _root_.Solidity.Fml.eval3 (dom : PrimTy → List Value) (σ : State) : Fml C
     else if p = .bool && rs.any (·.1 = .bool true) && rs.any (·.1 = .bool false) &&
         rs.all (·.2 = .tt) then .tt
     else .unknown
+  -- the locals as they are: one of the states the formula is about
+  | .anon xs φ => if φ.eval3 dom (σ.anon xs fun x => lookupBy x σ.env) = .ff then .ff else .unknown
 
 theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fml C) → ∀ σ : State,
     (φ.eval3 dom σ = .tt → holds σ φ) ∧ (φ.eval3 dom σ = .ff → ¬ holds σ φ)
@@ -223,6 +225,12 @@ theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fm
           · exact (Fml.eval3_sound dom φ _).1 (by simpa only [← hfv] using hall _ ⟨f, hfm, rfl⟩)
           · exact (Fml.eval3_sound dom φ _).1 (by simpa only [← htv] using hall _ ⟨t, htm, rfl⟩)
       · exact ⟨nofun, nofun⟩
+  | .anon xs φ, σ => by
+    simp only [Fml.eval3, holds]
+    split
+    · rename_i h
+      exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ _).2 h (hall _)⟩
+    · exact ⟨nofun, nofun⟩
 
 /-- **A `tt` is a truth**: `φ` holds in `σ`. -/
 theorem _root_.Solidity.Fml.eval3_tt {dom : PrimTy → List Value} {σ : State} {φ : Fml C}

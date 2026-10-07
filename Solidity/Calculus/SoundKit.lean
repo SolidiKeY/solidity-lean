@@ -82,6 +82,47 @@ variable {σ : State} {x : Var} {b : Binding}
     l.addr (σ.setEnv x b) = l.addr σ := l.addr_frame (agree_setEnv σ x b) (avoids_single h)
 end
 
+/-! ## Premise formulas the soundness statements read
+
+A branch's cover (`Proves.split`), and a loop invariant rule's premise as a
+formula (`Premise.fml` reads it so): what `Premise.Correct` says of
+`whileInvariantBox` is that this formula implies the loop's. -/
+
+/-- What a diamond branch owes besides its two goals: one of its conditions
+holds.  A box branch owes nothing. -/
+def Premise.cover (m : Modality) (c c' : Fml C) : Fml C :=
+  match m with
+  | .diamond => dl_schema{ c ∨ c' }
+  | .box => dl_schema{ true }
+
+/-- The cover as a branch's premise formula carries it, one formula under
+either modality: `⟨[ revert(); ]⟩ false ∨ c ∨ c'`.  A halted run satisfies
+`⟨[ revert(); ]⟩ false` under the box and not under the diamond, so it
+holds exactly where `Premise.cover m c c'` does (`Premise.coverFml_holds`).
+It is no goal of the strategy: under its negation it is not active. -/
+def Premise.coverFml (m : Modality) (c c' : Fml C) : Fml C :=
+  dl_schema{ ⟨[ revert(); ]⟩ ‹.ff› ∨ c ∨ c' }
+
+/-- The premise's cover says what the third goal of a branch says. -/
+theorem Premise.coverFml_holds (m : Modality) (c c' : Fml C) (σ : State) :
+    holds σ (Premise.coverFml m c c') ↔ holds σ (Premise.cover m c c') := by
+  cases m <;> simp only [Premise.coverFml, Premise.cover, holds, Prog.run, Stmt.run, bind,
+    Except.bind, Modality.afterRun, Modality.after, Modality.onHalt, not_and, ne_eq,
+    reduceCtorEq, Except.error.injEq, and_true,
+    Classical.not_not, not_true_eq_false, not_false_eq_true, false_implies, true_implies]
+
+/-- `{U} φ`, nothing when `U` is empty. -/
+def Fml.updIf (m : Modality) : Upd C → Fml C → Fml C
+  | [], φ => φ
+  | U, φ => .upd m U φ
+
+/-- A loop invariant rule's premise in front of `use`, the rest of the
+program: `I ∧ {anon(P)} (I → {U} ((c → ⟨[ P ]⟩ post) ∧ (c' → use) ∧ cover))`. -/
+def Premise.invFml (m : Modality) (I : Fml C) (U : Upd C) (c c' : Fml C) (P : Prog C)
+    (post use : Fml C) : Fml C :=
+  .and I (Fml.loopAnon P (.imp I (Fml.updIf m U
+    (.and (.imp c (.modal m P post)) (.and (.imp c' use) (Premise.coverFml m c c'))))))
+
 /-- What a premise means for the statement it replaces. -/
 def Premise.Correct (k : Nat) (m : Modality) (s : Stmt C) : Premise C → Prop
   | .update U => ∀ σ, SameOk [] (U.apply σ) (s.run σ)
@@ -95,6 +136,9 @@ def Premise.Correct (k : Nat) (m : Modality) (s : Stmt C) : Premise C → Prop
   | .branches bs => ∀ σ, (m = .box ∧ ∃ e, s.run σ = .error e ∧ e ≠ .panic) ∨
       ∃ b ∈ bs, ∃ σ', Binds b.1 σ σ' ∧ Prog.run σ' b.2 = s.run σ
   | .cases _ us => ∀ σ, ∃ U ∈ us, SameOk [] (U.apply σ) (s.run σ)
+  | .inv I U c c' P post => ∀ (ω : Prog C) (φ : Fml C),
+      Avoids (Prog.vars ω ++ φ.vars) (freshVars k) → ∀ σ,
+        holds σ (Premise.invFml m I U c c' P post (.modal m ω φ)) → holds σ (.modal m (s :: ω) φ)
 
 /-! ### Writes as a new storage or heap, the rest of the state kept -/
 

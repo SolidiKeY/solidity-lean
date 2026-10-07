@@ -1,5 +1,6 @@
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.KeyTaclets
+import Solidity.Semantics.Mutability
 
 /-!
 # The taclets
@@ -272,6 +273,13 @@ inductive Premise (C : Contract) where
   each formula of `fs` to prove, then for each update `U` of `us` the rest
   after it, `{U} ⟨[ ..ω ]⟩ φ`, one per way the statement may end. -/
   | cases (fs : List (Fml C)) (us : List (Upd C))
+  /-- A loop's invariant rule (`whileInvariantBox`, `whileInvariantDiamond`):
+  the invariant `I` now ("invariant initially valid"), and, whatever the
+  body's frame holds (`{anon(P)}`, `Fml.loopAnon`), from where `I` holds and
+  after `U` (the variant's value, under the diamond), the body `P` to `post`
+  where the condition `c` holds, the rest where `c'` does, and under the
+  diamond one of them ("invariant preserved and used"). -/
+  | inv (I : Fml C) (U : Upd C) (c c' : Fml C) (P : Prog C) (post : Fml C)
 
 /-! ## The rule table -/
 
@@ -746,13 +754,54 @@ inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise 
         "loop exited": defined(cond) ∧ defined(false) ∧ cond ≐ false ⟹ ⟨[ ]⟩ ;
         "unwound to the end": defined(cond) ∧ defined(false) ∧ cond ≐ false }
 
-  /-- A loop with an invariant closes to `false`, under either modality,
-  until its rules land (`docs/loops.md`, stage L4: solkey's
-  `whileInvariantBox`, `whileInvariantDiamond`): sound, and nothing about it
-  is derived. -/
-  | whileClose {cond : Val C .bool} :
+  /-- solkey's `whileInvariantBox`.  The invariant holds now, and from every
+  state the body's frame allows (`{anon(body)}`, solkey's `#loopAnon`) where
+  it holds, the condition's value `b` (solkey's `bType b = cond;`) picks the
+  body, which keeps the invariant, or the rest of the program.  A `b`
+  neither `TRUE` nor `FALSE` (Lean's locals are untyped) is ruled out under
+  the diamond, as a branch's cover is.  A body with no frame (memory, a
+  push, an alias, an external call: `Prog.loopFrame`) has no invariant rule,
+  as in solkey. -/
+  | whileInvariantBox {cond inv : Val C .bool}
+      (hf : (Prog.loopFrame body).isSome = true := by side_cond) :
+      dl[LeanTaclet C k]{ [ /// @custom:key invariant inv
+          while (cond) body; ] ⇝
+        "invariant initially valid": inv = TRUE ;
+        "invariant preserved and used": {anon(body)} (inv = TRUE → { b := cond }
+          (b = TRUE ⟹ ⟨[ body ]⟩ inv = TRUE ; b = FALSE ⟹ ⟨[ ]⟩)) }
+
+  /-- solkey's `whileInvariantDiamond`: `whileInvariantBox` with the variant
+  `dec`, its value before the iteration kept in a fresh local (KeY's skolem
+  `variant`), and checked after the body only where the condition holds
+  again (`{ b := cond } (b = TRUE → …)`): an iteration after which the loop
+  ends need not decrease it.  Lean reads `dec` where solkey compares it
+  (`dec = variant`), so the variant must be defined where the invariant
+  holds. -/
+  | whileInvariantDiamond {cond inv : Val C .bool} {dec : Val C .uint}
+      (hf : (Prog.loopFrame body).isSome = true := by side_cond) :
+      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv
+          /// @custom:key decreases dec
+          while (cond) body; ⟩ ⇝
+        "invariant initially valid": inv = TRUE ;
+        "invariant preserved and used": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }
+          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;
+            b = FALSE ⟹ ⟨[ ]⟩)) }
+
+  /-- A loop with an invariant whose body has no frame closes to `false`,
+  under either modality: sound, and nothing about it is derived.  solkey
+  unwinds it instead (it has no annotation to choose by). -/
+  | whileClose {cond : Val C .bool}
+      (hf : (Prog.loopFrame body).isSome = false := by side_cond) :
       dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv
           while (cond) body; ]⟩ ⇝ false }
+
+  /-- A loop with an invariant and no variant closes to `false` under the
+  diamond: nothing says it ends.  solkey unwinds it instead. -/
+  | whileNoVariantDiamond {cond : Val C .bool} {dec : Option (Val C .uint)}
+      (hf : (Prog.loopFrame body).isSome = true := by side_cond)
+      (hd : dec.isNone = true := by side_cond) :
+      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv
+          while (cond) body; ⟩ ⇝ false }
 
 /-- A rule of the calculus: solkey's, or one it does not have. -/
 inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise C) : Prop where
@@ -808,7 +857,9 @@ def Taclet.branchLabels : List (String × List String) := [
     ["call succeeded", "Error caught", "Panic caught", "other failure caught"]),
   ("sendNoCallbackBox", ["send succeeded", "send failed"]),
   ("sendNoCallbackDiamond", ["non-negative amount", "send succeeded", "send failed"]),
-  ("loopExit", ["loop exited", "unwound to the end"])]
+  ("loopExit", ["loop exited", "unwound to the end"]),
+  ("whileInvariantBox", ["invariant initially valid", "invariant preserved and used"]),
+  ("whileInvariantDiamond", ["invariant initially valid", "invariant preserved and used"])]
 
 /-- The taclet whose goals a premise for the statement of head `c` labels:
 an `if` splits by `ifElseSplit`, a `require` by `requireSimple`, an `assert`
@@ -906,6 +957,17 @@ def ppPremise? (e : Lean.Expr) (labels : List String := []) (box : Bool := false
     let some c := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $c:dl_case ; $[$(out.extract 1 out.size)];*))
+  | Premise.inv _ I U c c' P post =>
+    let I ← ppFml I
+    let c ← ppFml c
+    let c' ← ppFml c'
+    let post ← ppFml post
+    let b ← ppBlock P
+    if let some #[] ← listElems? U then
+      return some (← `(dl_premise| $[$l0:str :]? $I:dl_fml ; $[$l1:str :]? { anon($b) } ($I →
+        $c:dl_fml ⟹ ⟨[ $b ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩)))
+    return some (← `(dl_premise| $[$l0:str :]? $I:dl_fml ; $[$l1:str :]? { anon($b) } ($I →
+      $(← ppUpd U):dl_upd ($c:dl_fml ⟹ ⟨[ $b ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩))))
   | _ => return none
 
 /-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, with the modality it is for;
@@ -920,8 +982,11 @@ def delabTaclet : Delab := do
   guard (e.getAppNumArgs == n + 3)
   let st ← whnf (e.getArg! (n + 1))
   let m ← whnf (e.getArg! n)
-  let labels := (do (← Taclet.branchLabels.lookup
-    (← Taclet.labelledBy (← st.getAppFn.constName?) (m.isConstOf ``Modality.diamond))))
+  -- a loop's goals are labelled by the rule its annotation picks
+  let inv := (← whnf (e.getArg! (n + 2))).isAppOf ``Premise.inv
+  let rule? : Option String := if inv then some "whileInvariantBox" else do
+    Taclet.labelledBy (← st.getAppFn.constName?) (m.isConstOf ``Modality.diamond)
+  let labels := (do (← Taclet.branchLabels.lookup (← rule?)))
   let some p ← ppPremise? (e.getArg! (n + 2)) (labels.getD []) (m.isConstOf ``Modality.box)
     | failure
   let s ← ppStmt (e.getArg! (n + 1))
@@ -958,7 +1023,7 @@ def delabPremise : Delab := do
 attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
   delab app.Solidity.Premise.split, delab app.Solidity.Premise.check,
   delab app.Solidity.Premise.done, delab app.Solidity.Premise.branches,
-  delab app.Solidity.Premise.cases] delabPremise
+  delab app.Solidity.Premise.cases, delab app.Solidity.Premise.inv] delabPremise
 
 /-- The type without its `autoParam` hypotheses (a taclet's side conditions),
 which nothing after them depends on. -/

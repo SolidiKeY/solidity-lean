@@ -20,6 +20,7 @@ import Solidity.Calculus.PrintedRules
 import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundUpdate
 import Solidity.Calculus.SoundUnfold
+import Solidity.Calculus.SoundLoop
 import Solidity.Calculus.RuleSoundness
 import Solidity.Calculus.TermRules
 import Solidity.Calculus.TheoryRewrite

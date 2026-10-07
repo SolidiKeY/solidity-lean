@@ -298,6 +298,7 @@ def Premise.Smaller (s : Stmt C) : Premise C → Prop
   | .check c P => Prog.weight P < s.weight ∧ c.modalFree = true
   | .branches bs => (bs.map fun b => 2 ^ Prog.weight b.2).sum < 2 ^ s.weight
   | .cases fs us => us.length < 2 ^ s.weight ∧ fs.all Fml.modalFree = true
+  | .inv I _ _ _ P post => Prog.weight P + 2 ≤ s.weight ∧ I.modalFree = true ∧ post.modalFree = true
 
 /-- The rule leaves a premise smaller than its statement. -/
 def Step.Small {k : Nat} {m : Modality} {s : Stmt C} (st : Step k m s) : Prop :=
@@ -957,7 +958,12 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
       Nat.succ_mul (n + 1)]
     generalize (n + 1) * (c.cost + c.pen + Prog.weight body + 3) = t
     omega
-  | .loop (.inv ..) _ _ => trivial
+  | .loop (.inv I dec) c body => by
+    simp only [Stmt.step, loopInvStep]
+    split
+    · split <;> simp only [Premise.Smaller, Stmt.weight, Fml.modalFree, Bool.and_self,
+        and_true] <;> omega
+    · trivial
 
 /-- **Every rule makes the program smaller**, as a fact about the rules
 rather than the dispatcher: any derivation of `s` is the one `Stmt.step`
@@ -1016,14 +1022,14 @@ implication and a negated formula cost nothing (no rule steps inside them).
 Example: `dl!{ [ total = 1; ] total == 1 }` measures `2 ^ 4 * 1 = 16`. -/
 def Fml.measure : Fml C → Nat
   | .modal _ P φ => 2 ^ Prog.weight P * (φ.measure + 1)
-  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ => φ.measure
+  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.measure
   | .and φ ψ => φ.measure + ψ.measure
   | .tt | .eq .. | .defined _ | .not _ => 0
 
 /-- A formula with no modality measures nothing. -/
 theorem Fml.measure_of_modalFree : (φ : Fml C) → φ.modalFree = true → φ.measure = 0
   | .tt, _ | .eq .., _ | .defined _, _ | .not _, _ => rfl
-  | .upd _ _ φ, h | .havoc φ, h | .all _ _ φ, h => Fml.measure_of_modalFree φ h
+  | .upd _ _ φ, h | .havoc φ, h | .all _ _ φ, h | .anon _ φ, h => Fml.measure_of_modalFree φ h
   | .and φ ψ, h => by
     simp only [Fml.modalFree, Bool.and_eq_true] at h
     simp only [Fml.measure, Fml.measure_of_modalFree φ h.1, Fml.measure_of_modalFree ψ h.2]
@@ -1089,6 +1095,16 @@ Example: `⟨[ revert(); ]⟩ false ∨ se ≐ true ∨ se ≐ false` measures `
 theorem Premise.coverFml_measure (m : Modality) (c c' : Fml C) :
     (Premise.coverFml m c c').measure = 0 := rfl
 
+/-- `{anon(P)}` costs nothing: no rule steps inside it but where it is. -/
+theorem Fml.loopAnon_measure (P : Prog C) (φ : Fml C) : (Fml.loopAnon P φ).measure ≤ φ.measure := by
+  unfold Fml.loopAnon
+  split <;> simp only [Fml.measure, Nat.le_refl, Nat.zero_le]
+
+/-- `{U}` costs nothing. -/
+theorem Fml.updIf_measure (m : Modality) (U : Upd C) (φ : Fml C) :
+    (Fml.updIf m U φ).measure = φ.measure := by
+  cases U <;> rfl
+
 /-- A premise that weighs less than its statement lowers the measure of the
 modality: an update, new statements, the two goals of a branch, or the
 `true`/`false` of a revert, which measures `0`.
@@ -1147,6 +1163,30 @@ theorem Premise.measure_lt {m : Modality} {s : Stmt C} {p : Premise C} (h : p.Sm
     rw [Premise.cases_measure m ω φ fs h.2 us]
     simp only [Fml.measure, Prog.weight, Nat.pow_add, Nat.mul_assoc]
     exact Nat.mul_lt_mul_of_pos_right h.1 (Nat.mul_pos (Nat.pow_pos (by decide)) hM)
+  | inv I U c c' P post =>
+    -- the body's goal and the rest's are each below a quarter of the loop's
+    simp only [Premise.Smaller] at h
+    obtain ⟨hw, hI, hp⟩ := h
+    have hl := Fml.loopAnon_measure P (.imp I (Fml.updIf m U (.and (.imp c (.modal m P post))
+      (.and (.imp c' (.modal m ω φ)) (Premise.coverFml m c c')))))
+    simp only [Fml.measure, Fml.updIf_measure, Premise.coverFml_measure,
+      Fml.measure_of_modalFree I hI, Fml.measure_of_modalFree post hp, Nat.add_zero,
+      Nat.zero_add, Nat.mul_one] at hl
+    simp only [Premise.fml, Premise.invFml, Fml.measure, Fml.measure_of_modalFree I hI,
+      Nat.zero_add, Prog.weight]
+    generalize Prog.weight ω = a at hl ⊢
+    generalize hX : 2 ^ (s.weight - 2 + a) = X
+    have hP : 2 ^ Prog.weight P ≤ X := hX ▸ Nat.pow_le_pow_right (by decide) (by omega)
+    have hQ : 2 ^ a ≤ X := hX ▸ Nat.pow_le_pow_right (by decide) (by omega)
+    have h4 : 4 * X = 2 ^ (s.weight + a) := by
+      rw [← hX, show s.weight + a = s.weight - 2 + a + 2 by omega, Nat.pow_succ, Nat.pow_succ]
+      omega
+    have hXM : 2 ^ a * (φ.measure + 1) ≤ X * (φ.measure + 1) := Nat.mul_le_mul_right _ hQ
+    have hXp : 0 < X * (φ.measure + 1) := Nat.mul_pos (hX ▸ Nat.pow_pos (by decide)) hM
+    have : X ≤ X * (φ.measure + 1) := Nat.le_mul_of_pos_right _ hM
+    calc _ ≤ 2 ^ Prog.weight P + 2 ^ a * (φ.measure + 1) := hl
+      _ < 4 * X * (φ.measure + 1) := by rw [Nat.mul_assoc]; omega
+      _ = 2 ^ (s.weight + a) * (φ.measure + 1) := by rw [h4]
 
 /-- Every step decreases the measure, whatever index its fresh names get.
 
@@ -1155,7 +1195,7 @@ Example: `dl!{ [ total = 1; ] total == 1 }` (measure `16`) steps to
 (measure `1`). -/
 theorem Fml.stepAt_decreases {k : Nat} :
     ∀ {φ ψ : Fml C}, φ.stepAt k = some ψ → ψ.measure < φ.measure
-  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h | .all _ _ φ, _, h => by
+  | .upd _ _ φ, _, h | .imp _ φ, _, h | .havoc φ, _, h | .all _ _ φ, _, h | .anon _ φ, _, h => by
     simp only [Fml.stepAt, Option.map_eq_some_iff] at h
     obtain ⟨_, h, rfl⟩ := h
     simpa [Fml.measure] using Fml.stepAt_decreases h
@@ -1203,7 +1243,7 @@ Example: `{ x := 1 } [ ] x = 1` still has the empty modality and measures
 `1`; a formula of measure `0`, such as `{ x := 1 } x = 1`, is first order. -/
 theorem Fml.measure_pos : ∀ {φ : Fml C}, φ.active = true → 0 < φ.measure
   | .modal .., _ => Nat.mul_pos (Nat.pow_pos (by decide)) (Nat.succ_pos _)
-  | .upd _ _ φ, h | .imp _ φ, h | .havoc φ, h | .all _ _ φ, h =>
+  | .upd _ _ φ, h | .imp _ φ, h | .havoc φ, h | .all _ _ φ, h | .anon _ φ, h =>
     Fml.measure_pos (φ := φ) (by simpa [Fml.active] using h)
   | .and φ ψ, h => by
     simp only [Fml.active, Bool.or_eq_true] at h

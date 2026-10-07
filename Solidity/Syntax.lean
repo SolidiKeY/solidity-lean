@@ -3206,11 +3206,14 @@ partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
   let mut before : List RawStmt := init
   let mut iter : List RawStmt := []
   let mut cond := c
+  -- the flags the condition reads, which an invariant says are `bool`s
+  let mut heads : List String := []
   if isDo then
     let first := toString (← freshCapture "first")
     before := before ++ [.declBool first true]
     iter := [.setBool first false]
     cond := .binop .or (.name first) cond
+    heads := heads ++ [first]
   if let some x := (← get).cnt then iter := iter ++ [.declBool x false]
   iter := iter ++ body'
   unless upd.isEmpty do
@@ -3218,11 +3221,18 @@ partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
     else iter := iter ++ [.ite (← notAny exits) upd []]
   unless exits.isEmpty do cond ← notAny exits (some cond)
   let fl ← get
+  if exits.contains .brk then heads := heads ++ fl.brk.toList
+  if exits.contains .ret then heads := heads ++ fl.ret.toList
   if let some x := fl.brk then before := before ++ [.declBool x false]
   let returns := exits.contains .ret
   let retX := fl.ret.getD ""
   if returns && outermost then before := before ++ [.declBool retX false]
   set { outer with ret := if outermost then outer.ret else fl.ret }
+  -- Lean's locals are untyped: an invariant says the flags its condition
+  -- reads hold a `bool` (`f || !f` is defined exactly then), which KeY's
+  -- types say of `brk`, `ret` and `first`
+  let spec := if spec.inv.isEmpty then spec else
+    { spec with inv := spec.inv ++ heads.map fun f => .binop .or (.name f) (.unop .not (.name f)) }
   let w := RawStmt.loop spec cond iter
   let ab' := if returns then [Abrupt.ret] else []
   if before.isEmpty && !(returns && outermost) then return (w, ab')

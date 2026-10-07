@@ -453,15 +453,19 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
 /-- The rules solkey does not have (`LeanTaclet`), and the printed rule each is.
 The capture of an argument (`unfoldArgument`), a `try` and a payment under
 the diamond, a loop at its bound and one with an invariant, have no taclet
-and no printed rule; `whileUnwind` is solkey's, past the pinned checkout, and
-not printed. -/
+and no printed rule; `whileUnwind`, `whileInvariantBox` and
+`whileInvariantDiamond` are solkey's, past the pinned checkout, and not
+printed. -/
 def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus),
   (``LeanTaclet.tryCallDiamond, .leanOnly .calculus),
   (``LeanTaclet.transferDiamond, .leanOnly .calculus),
   (``LeanTaclet.whileUnwind, .leanOnly .keyTier),
   (``LeanTaclet.loopExit, .leanOnly .calculus),
-  (``LeanTaclet.whileClose, .leanOnly .calculus) ]
+  (``LeanTaclet.whileInvariantBox, .leanOnly .keyTier),
+  (``LeanTaclet.whileInvariantDiamond, .leanOnly .keyTier),
+  (``LeanTaclet.whileClose, .leanOnly .calculus),
+  (``LeanTaclet.whileNoVariantDiamond, .leanOnly .calculus) ]
 
 #check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 
@@ -516,9 +520,9 @@ theorem unclaimedRules_count : unclaimedRules.length = 8 := by decide +kernel
 def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
   ((printedOrigins ++ leanPrintedOrigins).filter fun r => r.2 == .leanOnly why).map Prod.fst
 
-theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 40 := by decide +kernel
+theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 42 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 5 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 6 := by decide +kernel
 
 end PrintedRules
 end Solidity
