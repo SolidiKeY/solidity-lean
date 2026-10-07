@@ -2349,7 +2349,7 @@ def Facts.unRets (F : Facts) (N : LTerm → LTerm) (op : UnOp) (p : PrimTy) (a :
   match op with
   | .not => F.isBool a
   | .bnot => F.isInt a
-  | .neg => (p != .int && F.isInt a) ||
+  | .neg =>
     match N a with
     | .lit x => resOk (applyUnOp .neg x >>= unopCheck .neg p)
     | _ => false
@@ -2494,17 +2494,11 @@ theorem Facts.unRets_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm �
     exact ⟨_, rfl⟩
   · obtain ⟨i, rfl⟩ := F.isInt_sound hF a h ha
     exact ⟨_, rfl⟩
-  · simp only [Bool.or_eq_true, Bool.and_eq_true, bne_iff_ne, ne_eq] at h
-    rcases h with ⟨hp, hi⟩ | h
-    · obtain ⟨i, rfl⟩ := F.isInt_sound hF a hi ha
-      cases p with
-      | int => exact absurd rfl hp
-      | uint | bool => exact ⟨_, rfl⟩
-    · split at h
-      · rename_i x' hx'
-        cases lit_of_keeps (hN _) hx' ha
-        exact resOk_iff.1 h
-      · cases h
+  · split at h
+    · rename_i x' hx'
+      cases lit_of_keeps (hN _) hx' ha
+      exact resOk_iff.1 h
+    · cases h
 
 /-- A path the layout types and whose keys return resolves in the initial
 storage, to a value canonical at its type. -/

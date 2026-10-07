@@ -269,9 +269,12 @@ untyped operation is never stuck on an erased input.
 
 - **Values (M4a).** `Semantics/Core/Value.lean` (`PrimTy.Denote`,
   `PrimTy.erase`, `ofValue?`, `Core.toRes`), `Semantics/Core/Ops.lean`
-  (`BinOp.evalT`, `UnOp.evalT`).  Deviation in `UnOp.evalT`: `-x` at `uint`
-  (solc rejects it) reverts unless `x = 0`; the untyped interpreter leaves it
-  out of range, and `UnOp.evalT_erase` excludes it.
+  (`BinOp.evalT`, `UnOp.evalT`).  `UnOp.accepts .neg` is `int` only, as
+  solc's (since 2026-10-07; it accepted `uint`, where the untyped
+  `unopCheck` does not range-check, so `-x` left the type), and the
+  elaborator and `Calculus/Spec.lean` reject `-x` at `uint`;
+  `UnOp.evalT_erase` holds at every accepted type, and the closer's
+  `Facts.unRets` lost its `-a` at non-`int` arm.
 - **Storage (M4b).** `Semantics/Core/Storage.lean`,
   `Semantics/Core/StorageErase.lean`.  `SVal T` is mutual with `SFields`
   (over `structDef s`, exact members), `SList`, `SVec E n` and `SMap V`; a
@@ -323,10 +326,18 @@ untyped operation is never stuck on an erased input.
    steps, so `Halt.stuck` leaves `Core`.
 5. Open: a `bool` mapping key (`IndexTy.map` allows it; the untyped
    `Value.asInt` is stuck on one, solc hashes it as `0`/`1`);
-   `DecidableEq (SVal T)`; `SFields.get`/`set`, `erase`, `overlay` and
-   `SVal.copyStToM` still `match` on indexed families.
+   `DecidableEq (SVal T)`; G0 condition 1 debt, code the kernel will
+   evaluate that still `match`es on the indexed families: the helpers
+   `SList.toList`/`length`, `SMap.toList`, `SVec.toList` (run on every
+   array and mapping step of `find`/`findLive`/`save`); `Storage.checkIndex`,
+   `len`, `push`, `pushPlace`, `pop`, `delete`, `write`; and `SVal.defaultOf`,
+   `strip`, `overlay`, `erase`, `isPrim`, `SVal.copyStToM`.  The `toList`
+   helpers come first: rewrite them by `SList.rec`/`SMap.rec`/`SVec.rec`, as
+   `SFields.get` is.
 
-**Timings** (2026-10-07, `Solidity/Scratch/HeapBench.lean`, not committed).
+**Timings** (2026-10-07, scratch modules `HeapBench`/`HeapBench3` under
+`Solidity/Scratch/`, which are not committed: each row is one `decide
++kernel` of the statement it names).
 Kernel time (`type checking` under `profiler`) of `decide +kernel`, with
 `Elab.async false`; each run is a distinct statement, since `decide` shares
 one auxiliary lemma per statement.  Repeats agree within 5%.  Untyped is
@@ -344,8 +355,11 @@ today's form: `unfoldStore` (`Corpus/Basic.lean`), `findStorage`/
 | stores `solcExpressions`, `solcArrays` | < 1 ms | < 1.3 ms | — |
 | read `alice.account.balance` | 11.7 ms | 11.7 ms | 1.00 |
 | save it, read it back | 14.2 ms | 13.2 ms | 0.93 |
+| save a 3-element `persons`, read `persons[1].age` | 9.8 ms | 9.9 ms | 1.01 |
+| read `folks[3].age` (a mapping's default) | 7.4 ms | 7.5 ms | 1.01 |
+| save `folks[3].age`, read `folks[5].age`, `folks[3].age` | 9.5 ms | 9.4 ms | 0.99 |
 | fresh `Person memory m; m.age = 3;` read back | does not reduce | 10.3 ms | — |
-| `alice` storage → memory → storage | does not reduce | 17–18 ms | — |
+| `alice` storage → memory → storage | does not reduce | 15.4–15.6 ms (17–18 ms with `tyRank` fuel) | — |
 | the corpus example (a whole untyped run) | 19 ms | needs the typed run | — |
 
 - The store rows walk the value with `SFields.rec`; walked by `match`, the
@@ -360,10 +374,18 @@ today's form: `unfoldStore` (`Corpus/Basic.lean`), `findStorage`/
 - The read rows compare the value read (three runs each).  With `find`,
   `save` and `SFields.get`/`set` by `match`, a read cost 1.37× and a save
   then read 1.48×; `find`/`save` by the recursor alone, 1.20× and 1.33×.
-- **Gate (within 20%)**: passes, the stores at ≤ 1.09×, a read at 1.00×, a
-  save then read at 0.93×.  Re-measure on the typed run (M3 + wiring), where
-  `erase`, `overlay`, `defaultOf` and the heap copies, still by `match`, enter
-  the path.
+- The array and mapping rows run `find`/`save` by the recursor over the
+  `match`-walked `SList.toList`/`SMap.toList` (median of three; the typed
+  array row also checks its statement's `SRef.ofRoot "persons" rfl`
+  once, 4.5 ms, outside the run).  The round trip is the typed copy back
+  with `rankBound` fuel, as `SVal.dflt`.
+- **Gate (within 20%)**: passes for store construction walked by the
+  recursor (≤ 1.09×) and for reads and saves along struct, array and
+  mapping paths (0.93–1.01×).  Open: the corpus examples (they need the
+  typed run, M3 + wiring), and the operations still walked by `match`
+  (`erase`, `overlay`, `defaultOf`, the heap copies: stores walked by
+  `match` cost up to 1.55×).  The gate stays open until the corpus
+  example runs through the typed forms.
 
 ### Gate G0: passes, under conditions
 

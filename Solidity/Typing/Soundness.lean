@@ -344,7 +344,9 @@ theorem evalUnop_wt {op : UnOp} {p q : PrimTy} {v w : Value}
     simp only [applyUnOp, bind, Except.bind] at hu
     split at hu
     · exact nomatch hu
-    · cases hu; exact int_toSVal_hasTy (by simpa [UnOp.accepts] using hacc) _
+    · cases hu
+      obtain rfl : p = .int := by simpa only [UnOp.accepts, beq_iff_eq] using hacc
+      exact int_toSVal_hasTy rfl _
   | not =>
     simp only [applyUnOp, bind, Except.bind] at hu
     split at hu

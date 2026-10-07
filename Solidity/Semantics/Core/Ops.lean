@@ -14,9 +14,8 @@ a zero divisor, a negative exponent).  Arithmetic is on `Int`, as the untyped
 `BinOp.evalT_erase` and `UnOp.evalT_erase` are the agreement with
 `evalBinop` and `applyUnOp`/`unopCheck`: on an operand type the operator
 accepts, the untyped operator is the typed one erased, so it is never stuck
-(`asInt`/`asBool`, `checkArith`'s junk arms).  One combination differs:
-`-x` at `uint`, which solc rejects and the untyped interpreter does not
-range-check, reverts here unless `x` is `0` (`UnOp.evalT_erase` excludes it).
+(`asInt`/`asBool`, `checkArith`'s junk arms).  `-x` is accepted at `int`
+only (`UnOp.accepts`), as solc accepts it.
 -/
 
 namespace Solidity
@@ -147,25 +146,22 @@ end BinOp
 
 namespace UnOp
 
-/-- `⊖ a` on a typed value: `none` where it reverts.  `-x` at `uint` is
-range-checked (solc rejects it; the untyped interpreter leaves it unchecked). -/
+/-- `⊖ a` on a typed value: `none` where it reverts, and at an operand type
+the operator does not accept. -/
 def evalT : (op : UnOp) → {p : PrimTy} → p.Denote → Option (op.ret p).Denote
-  | .neg, .uint, a => PrimTy.uint.ofInt? (-a.1)
   | .neg, .int, a => PrimTy.int.ofInt? (-a.1)
-  | .neg, .bool, _ => none
+  | .neg, .uint, _ | .neg, .bool, _ => none
   | .not, .bool, a => some (!a)
   | .not, .uint, _ | .not, .int, _ => none
   | .bnot, .uint, a => PrimTy.uint.ofInt? (Semantics.uintBound - 1 - a.1)
   | .bnot, .bool, _ | .bnot, .int, _ => none
 
 /-- **`applyUnOp` then `unopCheck` is `evalT` erased**, at an operand type the
-operator accepts, but `-x` at `uint`. -/
-theorem evalT_erase (op : UnOp) {p : PrimTy} (h : op.accepts p = true)
-    (hn : ¬(op = .neg ∧ p = .uint)) (a : p.Denote) :
+operator accepts. -/
+theorem evalT_erase (op : UnOp) {p : PrimTy} (h : op.accepts p = true) (a : p.Denote) :
     (do unopCheck op p (← Semantics.applyUnOp op (PrimTy.erase a))) =
       toRes PrimTy.erase (op.evalT a) := by
   cases op <;> cases p <;> first | exact absurd h (by decide) | skip
-  · exact absurd ⟨rfl, rfl⟩ hn
   · exact PrimTy.checkArith_ofInt (p := .int) rfl _
   · rfl
   · have hx := a.2

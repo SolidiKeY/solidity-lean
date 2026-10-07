@@ -650,7 +650,8 @@ def BinOp.ret (op : BinOp) (p : PrimTy) : PrimTy :=
   if op.isArith then p else .bool
 
 def UnOp.accepts : UnOp → PrimTy → Bool
-  | .neg, p => p.isNumeric
+  -- `-x` at `int` only, as solc: it rejects unary minus on an unsigned type
+  | .neg, p => p == .int
   | .not, p => p == .bool
   | .bnot, p => p == .uint
 

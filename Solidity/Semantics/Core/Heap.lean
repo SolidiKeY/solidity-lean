@@ -21,8 +21,8 @@ identity, so it erases to the same untyped value.
 The two copies follow `Semantics.lean`'s line for line, allocating in the
 same order, so identities agree: `SVal.copyStToM` (storage to memory) needs
 a type without mappings and cannot fail, and `MVal.copyMToSt` (memory to
-storage) recurses on the type, by rank and inside one rank structurally, as
-`SVal.dflt` does: a reference's target has a smaller type, so there is no
+storage) recurses on the type, by rank (fuel `rankBound`, which reads no
+struct name) and inside one rank structurally, as `SVal.dflt` does: a reference's target has a smaller type, so there is no
 cycle to guard against and no stuck arm.
 
 The untyped heap is the erasure: object `i` at key `i`, `nextId` the length
@@ -321,7 +321,7 @@ def MVal.copyBelow : (k : Nat) → (T : Ty) → tyRank T < k → MVal H T → SV
 
 /-- A memory value deep-copied to storage (`copyMToSt`, `copyMem`). -/
 def MVal.copyMToSt {T : Ty} (v : MVal H T) : SVal T :=
-  MVal.copyBelow hp (tyRank T + 1) T (Nat.lt_succ_self _) v
+  MVal.copyBelow hp (rankBound T + 1) T (Nat.lt_succ_of_le (tyRank_le_rankBound T)) v
 
 end CopyMem
 
