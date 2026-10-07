@@ -21,8 +21,10 @@ popped) and `Sim.flags` (the branches met, the fragile aliases forgotten).
 **A frame's cells.**  Code compiled at base `b` over `Γ` writes only cells
 at levels `b` and above (`Stmt.storesFrom`), and a call's body, compiled at
 `b + Γ.length`, only above the caller's locals; code that does not store to
-a cell leaves it (`exec_mem`), so the caller's `Sim` survives the call
-(`Sim.congrMem`).
+a cell leaves it (`exec_mem`), so the caller's `Sim` survives the call:
+`Sim.enter` starts the callee's frame from the caller's state, and
+`Sim.return` (`returnDrop` after a callee that may shrink an array) puts the
+caller's locals back over the machine the callee left.
 
 What needs the typed interpreter (`Core.Stmt.run`, M3) is not here: the
 expression and statement lemmas (`val_sim` … `stmt_sim`) and
@@ -413,6 +415,51 @@ theorem setFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx 
       · rw [Frag.get_eq_dead F j (by omega)] at hj; cases hj
     · simp only [hji, false_and, ↓reduceIte] at hj
       simp only [Look.set, e, hji, ↓reduceIte]; exact h.fragile j hj
+
+/-! ### A call's frame -/
+
+/-- **Entering a call**: the callee's frame `Δ` (its parameters, then its
+return variable: values only) at base `b'`, every local readable, its
+values in their cells; the caller's storage, ledger and transaction. -/
+theorem enter {m : Machine} {Δ : Ctx} (b' : Nat) (h : Sim C L b F σ ρ m) (ρ' : Look Δ)
+    (hv : ∀ {p : PrimTy} (i : Idx Δ (.val p)), ∃ v, ρ' i = .val v ∧ ReprV p v (m.memAt (lvl b' i)))
+    (hal : ∀ {R : RefTy}, Idx Δ (.alias R) → False) :
+    Sim C L b' (Frag.init Δ) σ ρ' m :=
+  ⟨h.store, hv, fun i _ => (hal i).elim, h.net, h.netSelf, h.bound, fun i _ => (hal i).elim, h.env⟩
+
+/-- **Back from a call**: the machine and state the callee left (`h'`), the
+caller's locals where they were (the callee stored above them,
+`storesFrom_callFrame`), and its fragile aliases still in bounds, the callee
+having lowered no array's length.  A callee that may (`Stmt.shrinks`) is
+`returnDrop`. -/
+theorem «return» {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : State}
+    {ρ' : Look Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
+    (hmem : ∀ l, l < b + Γ.length → m'.memAt l = m.memAt l)
+    (hlen : ∀ x, LenSlot C x → m.store x ≤ m'.store x) :
+    Sim C L b F σ' ρ m' := by
+  have e : ∀ {t : CLTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=
+    fun i => hmem _ (lvl_lt b i)
+  refine ⟨h'.store, fun i => ?_, fun i hi => ?_, h'.net, h'.netSelf, h'.bound, fun i hi => ?_,
+    h'.env⟩
+  · rw [e]; exact h.vals i
+  · rw [e]; exact h.aliases i hi
+  · obtain ⟨r, segs, s, h1, h2, h3, h4⟩ := h.fragile i hi
+    rw [e]
+    exact ⟨r, segs, s, h1, h2, h3, live_mono (σ' := σ') h.store h'.store hlen h3 h4⟩
+
+/-- Back from a call that may have shrunk an array: the caller's fragile
+aliases forgotten. -/
+theorem returnDrop {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : State}
+    {ρ' : Look Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
+    (hmem : ∀ l, l < b + Γ.length → m'.memAt l = m.memAt l) :
+    Sim C L b F.dropFragile σ' ρ m' := by
+  have e : ∀ {t : CLTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=
+    fun i => hmem _ (lvl_lt b i)
+  refine ⟨h'.store, fun i => ?_, fun i hi => ?_, h'.net, h'.netSelf, h'.bound, fun i hi => ?_,
+    h'.env⟩
+  · rw [e]; exact h.vals i
+  · rw [e]; exact h.aliases i (Frag.get_dropFragile F i hi (by simp)).1
+  · exact absurd rfl (Frag.get_dropFragile F i hi (by simp)).2
 
 end Sim
 

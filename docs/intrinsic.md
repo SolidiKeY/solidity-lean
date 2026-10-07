@@ -28,7 +28,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | M2 | M2.1, M2.2 done | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
 | M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
-| M5 | | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
+| M5 | M5.1, M5.2 on lane `intrinsic-evm` (see M5 lane) | EVM on typed syntax; delete `wtStmt`, `not_stuck` |
 | M6a | | calculus: `Fml C Γ`, `Frames`, `Premise`, symex, chains, ProofTree |
 | M6b | | `dl!{}`, specs, callbacks |
 | M6c | | closer and Decide on typed `Fml` |
@@ -245,12 +245,65 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     old `decide` 2.5–4.0 s, old `decide +kernel` 1.8–2.4 s, new 2.3–3.3 s
     (1.3–1.4× the old kernel run, 0.8–0.9× the committed `decide`);
     `pow_run` 3.5–5.5 s in all three.
-- Left for M5: `compile_correct` over `Core` (`Sim` by levels through
-  `memAt`, `Sim.bindVal`/`bindAlias` as `Env.cons`, needs M3's `State C Γ`);
-  a quoter-built program (M2.3) to time
-  the compiler without the kernel's resolution; the proof that `resolve`
-  returns `sepArgs` statements; `Machine.mem : Nat → Word` once
-  `Evm/Compile.lean` retires.
+- Left for M5 after M5.1: see "M5 lane" below.
+
+### M5 lane
+
+Lane `intrinsic-evm` (worktree `solidity-lean-i-evm`), beside M2.3/M3 on
+`intrinsic`.  Status 2026-10-07, round 2: M3 (`Env Γ`, `State C Γ`, the
+typed run) had not landed, so the simulation is stated against the
+Env-from-Γ design and everything that does not need the run is proved.
+
+- M5.2 `Evm/CoreSim.lean`, done (no `sorry`):
+  - `Look Γ := ∀ {t}, Idx Γ t → Binding`, the locals by position: what
+    M3's `Env.get` will instantiate (the binding a denotation stands for).
+    `Look.cons` is `Env.cons` (the pair), `Look.drop h` (along an `Ext`) a
+    scope's end, `Look.set` an assignment.  Kept abstract so that M3's choice
+    of `LTy.Denote` (untyped `Value` until M4a, `PrimTy.Denote` after) does
+    not change the statements.
+  - `Sim C L b F σ ρ m`: storage, ledger, bound and transaction as before
+    (`σ.env` unread); `vals : ∀ i : Idx Γ (.val p), ∃ v, ρ i = .val v ∧
+    ReprV p v (m.memAt (lvl b i))`; `aliases`/`fragile` by `F.get i`.  The
+    design's `ReprV p (env.get i) (m.mem (level i))` once values are typed
+    (M4a drops the `∃ v`).
+  - Old → new: `bindVal`/`bindAlias`/`bindFragile`/`unbind` →
+    `consVal`/`consAlias`/`consFragile`/`consDead`; `weaken` → `drop`
+    (a scope's end, `Frag.restrict`) and `flags` (`meet`, `meet_right`,
+    `storeDrop`); assignments `setVal`/`setAlias`/`setFragile`; `stack`,
+    `push`, `book`, `mono`, `store'` as before; `congrMem` (memory changed
+    above the frame only).  Each is a few lines: positions need no
+    `TyCtx.set` case split, only `lvl_there`/`lvl_ext`/`lvl_eq_iff`.
+  - A call's frame: `Sim.enter` (the callee's frame at base `b + Γ.length`)
+    and `Sim.return`/`returnDrop` (the caller's locals back over the
+    callee's machine).  Their memory side is static:
+    `storesFrom_compileStmt` (code compiled at base `b` stores to no level
+    below `b`), `storesFrom_callFrame` (arguments, return variable and body
+    store at `b + Γ.length` and above), and `exec_mem`/`StoresFrom.exec`
+    (code that does not store to a cell leaves it).  `NoStore` covers the
+    expression and guard codes (`expLoop 255` is held opaque: unfolding it
+    hits the recursion limit).
+  - Check: the whole file re-elaborates in about 7 s (MCP wall time,
+    machine shared with three other Lean agents).
+- `resolve` returns separated calls (`Stmt.resolve_sepArgs`,
+  `Prog.resolve_sepArgs`, `Syntax/Resolve.lean`): `Resolved` and
+  `resolveProg`'s result carry `sepArgs`, which moved there from
+  `Evm/CoreCompile.lean`.  So `compileProg_resolve`: a resolved program
+  compiles as the block it was resolved from, up to cells, with no
+  hypothesis.  (This edits a module below `Semantics.lean`; the merge into
+  `intrinsic` rebuilds from there.)
+- `not_stuck`/`never_stuck`: nothing to delete yet on the Core path, since
+  there is no Core run to be stuck.  When M3/M4 land, `compile_correct` over
+  `Core` has no `not_stuck` corollary (its `Halt` has no `stuck`); the
+  untyped `not_stuck` (`Evm/Correctness.lean`) and `never_stuck`
+  (`Theorems.lean`) stay with the untyped compiler until M4 retires it.
+- Left (needs M3's `Core.Stmt.run`/expression evaluation over `State C Γ`):
+  `simple_sim`/`spath_sim`/`loc_sim`/`val_sim`, `stmt_sim` (gate: at most
+  470000 heartbeats, split per constructor family rather than raised),
+  `prog_sim`, `compile_correct`/`compile_box`/`compile_net` over `Core`, and
+  the five interpreter theorems of `Evm/Examples.lean`.  The lemmas above
+  are what their cases call.  Also left: timing the compiler on a
+  quoter-built program (M2.3); `Machine.mem : Nat → Word` (with
+  `cell = id`) once `Evm/Compile.lean` retires at M4.
 
 ## Baselines (M0)
 
