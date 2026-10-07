@@ -1779,6 +1779,12 @@ end
 locals, an empty heap. -/
 def Contract.initState (C : Contract) : State := { storage := C.initStorage }
 
+/-- A deployment of no value from address `0` starts in `initState`, but
+for the ledger, which books the `0` paid at `0` (`getNet` reads `0` either
+way). -/
+theorem Contract.deployState_empty (C : Contract) :
+    C.deployState {} = { C.initState with net := [(0, 0)] } := rfl
+
 /-- A storage is reachable when a program whose locals check runs from the
 initial state to a state holding it. -/
 def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=

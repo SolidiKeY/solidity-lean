@@ -2396,6 +2396,7 @@ def foldTmHead (e : Lean.Expr) (red : Bool := true) : MetaM Lean.Expr := do
       | ``Op0.env => mk ``Term.env (#[C] ++ oa)
       | ``Op0.root => mk ``PTerm.root (#[C] ++ oa)
       | ``Op0.storage => mk ``STerm.storage #[C]
+      | ``Op0.mtSt => mk ``STerm.mtSt (#[C] ++ oa)
       | ``Op0.memory => mk ``MTerm.memory #[C]
       | _ => e
   if f == ``Tm.app1 && args.size == 5 then
@@ -2606,6 +2607,7 @@ partial def ppSTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some n ← fvarName? e then return ← `(dl_term| $(nameIdent n):ident)
   match_expr (← whnfPP e) with
   | STerm.storage _ => `(dl_term| storage)
+  | STerm.mtSt _ _ => `(dl_term| mtSt)
   | STerm.pv _ x =>
     let some x ← ppVar? x | escapeDl e
     `(dl_term| $x:ident)
@@ -2767,6 +2769,15 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
   | UpdElem.saveNet _ x =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := net))
+  | UpdElem.saveNetMt _ x =>
+    let some x ← var x | return none
+    return some (← `(dl_upd_elem| $x:dl_term := mtSt))
+  | UpdElem.netMt _ r a =>
+    let r ← ppTerm r
+    let a ← ppTerm a
+    if ← keyOn then return some (← `(dl_upd_elem| net := storeSt(mtSt, at($r), $a)))
+    return some (← `(dl_upd_elem| net := store(mtSt, at($r), $a)))
+  | UpdElem.setBalance _ a => return some (← `(dl_upd_elem| selfBalance := $(← ppTerm a)))
   | _ => return none
 
 /-- The elements of an update made of schema variables (`u`, `{u}u2`) and
@@ -3152,7 +3163,7 @@ attribute [delab app.Solidity.Tm.pvV, delab app.Solidity.Tm.pvP, delab app.Solid
   delab app.Solidity.PTerm.root, delab app.Solidity.PTerm.pv, delab app.Solidity.PTerm.field,
   delab app.Solidity.PTerm.at, delab app.Solidity.PTerm.next, delab app.Solidity.PTerm.nextIn,
   delab app.Solidity.PTerm.atIn,
-  delab app.Solidity.STerm.storage, delab app.Solidity.STerm.pv, delab app.Solidity.STerm.save,
+  delab app.Solidity.STerm.storage, delab app.Solidity.STerm.mtSt, delab app.Solidity.STerm.pv, delab app.Solidity.STerm.save,
   delab app.Solidity.STerm.delAt, delab app.Solidity.STerm.push, delab app.Solidity.STerm.pushSlot,
   delab app.Solidity.STerm.pop, delab app.Solidity.STerm.shrink, delab app.Solidity.STerm.extend,
   delab app.Solidity.STerm.select,

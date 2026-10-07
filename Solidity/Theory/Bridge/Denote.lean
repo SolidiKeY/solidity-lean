@@ -41,7 +41,7 @@ def Srt.Bridge : (s : Srt) → s.Den → s.Ev → Prop
 theorem Op0.denote_eval {σ : State} : (o : Op0 s) → Srt.Bridge s (o.denote σ) (o.eval σ)
   | .lit _ | .env _ => by intro _ h; cases h; rfl
   | .root _ => by intro _ _ h; cases h; rfl
-  | .storage => by intro _ h; cases h; exact StValue.Equiv.refl _
+  | .storage | .mtSt _ => by intro _ h; cases h; exact StValue.Equiv.refl _
   | .memory => trivial
 
 theorem Op1.denote_eval {σ : State} :

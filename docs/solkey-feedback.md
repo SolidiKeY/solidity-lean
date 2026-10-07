@@ -252,6 +252,14 @@ resume, where KeY puts `pv := TRUE` into the anonymising update.
   `assert(g() == 0)` holds in solc and is unprovable in KeY:
   `ExpandFunctionBody` declares `R ri;` with no value. Lean declares each
   return variable at its default (`CallRet.enter`).
+- **An `address` named return starts unconstrained.** `ExpandFunctionBody`
+  starts only `int` and `bool` returns at their default, so after
+  `function z() internal pure returns (address r) {}`,
+  `assert(z() == address(0))` leaves `r = 0` open; solc returns
+  `address(0)`. solkey records it in `docs/bugs.md` ("True facts that
+  cannot be proved"). Lean follows solc: every return, `address` included,
+  starts at its type's default (`CallRet.enter`; an `address` is a `uint`,
+  so `0`).
 - **Dropped tuple components (diamond).** `(uint x, ) = (1, arr[5]);` reverts
   in solc, but `ParserUtils.tupleAssignment` drops a component that is not a
   call, so `⟨…⟩ true` is provable. Category 4: keep the component (Lean
@@ -264,6 +272,35 @@ resume, where KeY puts `pv := TRUE` into the anonymising update.
   `InternalCall` matches `f(args);` / `lhs = f(args);` with any arguments, so a
   non-simple argument is no longer stuck. Lean still captures it first (`functionCallArgCapture`), for
   its separation condition (decision D3).
+
+## 9. Constructors (`a764703bf1`)
+
+Found while porting solkey's constructor obligations (`Problem.ctorFml`,
+`spec!{constructor}`, `Calculus/Problem.lean`, `Calculus/Spec.lean`).
+
+- **The precondition is read before `storage := mtSt`.** A constructor's
+  `requires` and the `msgSender != self` fact are compiled outside the
+  update, so a `requires` that reads state talks about a storage the
+  deployment discards. Category 4: refuse it. Lean refuses a constructor
+  `requires` that reads a state variable, `net(…)` or `this.balance`.
+- **Initializers without a constructor are never checked.** A contract with
+  `uint x = 5;` and no `constructor` gets no obligation, so its initializers
+  (and the invariant they should establish) are never proved. Suggest
+  synthesizing `constructor()` when a contract has initializers.
+- **Constants and immutables are storage fields** (`SolJSONParser` never
+  tests `constant`), so `uint constant L = 5; … assert(L == 5)` is
+  unprovable in a function's obligation, which starts from any storage.
+  Suggest reading a `constant` as its value (an inlined literal) and an
+  `immutable` as a field the invariant fixes after deployment.
+- **The unspecified obligation does not set `selfBalance`**, and books no
+  payment: `{storage := mtSt || net := mtSt}`, where the specified one
+  writes `net := storeSt(mtSt, at(msgSender), msgValue)` and
+  `selfBalance := msgValue`. The two should agree; Lean states both with
+  the specified one's update (`Problem.deployUpd`, a deviation recorded in
+  `Problem.text`).
+- **`selfBalance := msgValue` ignores a pre-funded address**
+  (`docs/solc-alignment.md`, "Constructors"). Lean follows solkey; noted for
+  a later `selfBalance >= msgValue` reading.
 
 ## Resolved (kept for orientation)
 

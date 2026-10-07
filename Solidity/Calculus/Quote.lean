@@ -31,6 +31,7 @@ def Op0.quote : Op0 s → Lean.Expr
   | .root r => mkAppN (mkConst ``PTerm.root) #[c, toExpr r]
   | .storage => mkAppN (mkConst ``STerm.storage) #[c]
   | .memory => mkAppN (mkConst ``MTerm.memory) #[c]
+  | .mtSt vs => mkAppN (mkConst ``STerm.mtSt) #[c, toExpr vs]
 
 /-- A unary symbol over its quoted argument `x`. -/
 def Op1.quote : Op1 a s → Lean.Expr → Lean.Expr
@@ -107,6 +108,9 @@ def UpdElem.quote : UpdElem C → Lean.Expr
     mkAppN (mkConst ``UpdElem.net) #[c, Tm.quote c r, IntOp.quote op, Tm.quote c a]
   | .pay r a => mkAppN (mkConst ``UpdElem.pay) #[c, Tm.quote c r, Tm.quote c a]
   | .saveNet x => mkAppN (mkConst ``UpdElem.saveNet) #[c, toExpr x]
+  | .saveNetMt x => mkAppN (mkConst ``UpdElem.saveNetMt) #[c, toExpr x]
+  | .netMt r a => mkAppN (mkConst ``UpdElem.netMt) #[c, Tm.quote c r, Tm.quote c a]
+  | .setBalance a => mkAppN (mkConst ``UpdElem.setBalance) #[c, Tm.quote c a]
 
 def Upd.quote : List (UpdElem C) → Lean.Expr
   | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``UpdElem) #[c]]

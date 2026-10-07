@@ -8,7 +8,9 @@ import Solidity.Calculus.Problem
 `f` that elaborated its obligation as solkey states it,
 `N.f.problem : Fml N` (`Problem.fml`, `Calculus/Problem.lean`): the
 modality is the function's tag, the binders its parameters, the program
-`N.f`.  A statement is a constant, so `sol_prove` names it and the
+`N.f`.  The constructor's, `N.constructor.problem`, is a deployment's
+(`Problem.ctorFml`): the program `constructor(x̄);` from solkey's
+deployment update, with no `wt(storage)` premise.  A statement is a constant, so `sol_prove` names it and the
 elaborator never unfolds it; it is compiled, since `sol_prove` evaluates
 its sequent with compiled code.
 
@@ -68,7 +70,9 @@ def elabSolcProblems : CommandElab := fun stx => do
           statement"
         continue
     let n := N ++ Lean.Name.mkSimple r.name ++ `problem
-    let value := mkAppN (mkConst ``Problem.fml) #[mkConst N, toExpr m, toExpr xs,
+    -- the constructor's is a deployment's, from the empty storage
+    let stmt := if r.name == "constructor" then ``Problem.ctorFml else ``Problem.fml
+    let value := mkAppN (mkConst stmt) #[mkConst N, toExpr m, toExpr xs,
       mkConst (N ++ Lean.Name.mkSimple r.name)]
     liftCoreM <| addDecl <| .defnDecl {
       name := n, levelParams := [], type := fmlTy, value, hints := .abbrev, safety := .safe }

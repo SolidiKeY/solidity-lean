@@ -109,6 +109,11 @@ inductive Op0 : Srt → Type where
   | root (r : Name) : Op0 .path
   | storage : Op0 .st
   | memory : Op0 .mem
+  /-- `mtSt`: KeY's empty storage, a deployment's (`structRules.key`'s
+  `selectOnEmptyStorage` reads the default anywhere in it).  Here every root
+  of `vs`, the contract's, is present at its type's default
+  (`Contract.initStorage`): reads agree, which is all a formula sees. -/
+  | mtSt (vs : List (Name × Ty)) : Op0 .st
   deriving DecidableEq, Repr
 
 /-- Unary symbols. -/
@@ -284,6 +289,8 @@ variable {C : Contract}
   .app3 .atIn s p i
 
 @[match_pattern, reducible] def STerm.storage : STerm C := .app0 .storage
+/-- `mtSt`, the empty storage of a contract of roots `vs` (`C.vars`). -/
+@[match_pattern, reducible] def STerm.mtSt (vs : List (Name × Ty)) : STerm C := .app0 (.mtSt vs)
 @[match_pattern, reducible] def STerm.pv (x : Var) : STerm C := .pvS x
 @[match_pattern, reducible] def STerm.save (s : STerm C) (p : PTerm C) (v : SValT C) : STerm C :=
   .app3 .save s p v
@@ -369,6 +376,7 @@ def Op0.eval (σ : State) : Op0 s → s.Ev
   | .root r => pure (r, [])
   | .storage => pure σ
   | .memory => pure σ
+  | .mtSt vs => pure { σ with storage := vs.map fun (n, T) => (n, defaultForTy T) }
 
 /-- A unary symbol read in `σ`, its argument's reading given. -/
 def Op1.eval (σ : State) : Op1 a s → a.Ev → s.Ev
@@ -575,6 +583,7 @@ def Op0.denote (σ : State) : Op0 s → s.Den
   | .root r => [.field r]
   | .storage => σ.abs
   | .memory => ()
+  | .mtSt vs => ({ σ with storage := vs.map fun (n, T) => (n, defaultForTy T) } : State).abs
 
 /-- A unary symbol in the Theory, its argument's denotation given. -/
 def Op1.denote (σ : State) : Op1 a s → a.Den → s.Den
@@ -721,6 +730,17 @@ inductive UpdElem (C : Contract) where
   /-- `oldNet := net`: a ledger variable binds the ledger, which
   `\old(net(a))` reads. -/
   | saveNet (x : Var)
+  /-- `oldNet := mtSt`: a ledger variable binds the empty ledger, a
+  deployment's snapshot for `\old(net(a))` (solkey's constructor problem,
+  where `net := storeSt(mtSt, …)` is a `Struct` as `storage` is). -/
+  | saveNetMt (x : Var)
+  /-- `net := storeSt(mtSt, at(r), a)`: a deployment's ledger, empty but for
+  the payment `a` of `r` (solkey's constructor obligation, `r` the
+  `msgSender` and `a` the `msgValue`). -/
+  | netMt (r a : Term C)
+  /-- `selfBalance := a`: the funds set, a deployment's
+  `selfBalance := msgValue`. -/
+  | setBalance (a : Term C)
 
 /-- A parallel update `{a ‖ b ‖ …}`. -/
 abbrev Upd (C : Contract) := List (UpdElem C)
@@ -752,6 +772,14 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
     else pure { τ with
       net := if addr = σ₀.tx.selfAddress then τ.net else setBy addr (τ.getNet addr - amt) τ.net }
   | .saveNet x, τ => pure (τ.setEnv x (.ledger σ₀.net))
+  | .saveNetMt x, τ => pure (τ.setEnv x (.ledger []))
+  | .netMt r a, τ => do
+    let addr ← (← r.eval σ₀).asInt
+    let amt ← (← a.eval σ₀).asInt
+    pure { τ with net := [(addr, amt)] }
+  | .setBalance a, τ => do
+    let amt ← (← a.eval σ₀).asInt
+    pure { τ with selfBalance := amt }
 
 /-- The state an update leaves, from `σ`. -/
 def Upd.apply (U : Upd C) (σ : State) : Res State :=
@@ -916,7 +944,9 @@ def UpdElem.vars : UpdElem C → List Var
   | .selfBalance _ a => a.vars
   | .net r _ a => r.vars ++ a.vars
   | .pay r a => r.vars ++ a.vars
-  | .saveNet x => [x]
+  | .saveNet x | .saveNetMt x => [x]
+  | .netMt r a => r.vars ++ a.vars
+  | .setBalance a => a.vars
 
 def Upd.vars : Upd C → List Var
   | [] => []
@@ -989,6 +1019,7 @@ theorem Op0.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .lit _ | .root _ => rfl
   | .env _ => by simp only [Srt.Agree, Op0.eval, State.envVal_congr hag]
   | .storage | .memory => hag
+  | .mtSt _ => ⟨rfl, hag.heap, hag.nextId, hag.net, hag.env, hag.selfBalance, hag.tx⟩
 
 theorem Op1.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (o : Op1 a s) → Avoids o.vars ns → {x₁ x₂ : a.Ev} → Srt.Agree ns a x₁ x₂ →
@@ -1158,6 +1189,7 @@ theorem Op0.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .lit _ | .root _ | .memory => rfl
   | .env _ => by simp only [Op0.denote, State.envVal_congr hag]
   | .storage => by simp only [Op0.denote, State.abs, hag.storage]
+  | .mtSt _ => rfl
 
 theorem Op1.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (o : Op1 a s) → Avoids o.vars ns → (d : a.Den) → o.denote σ d = o.denote τ d
@@ -1253,6 +1285,15 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
     show ResultsAgree ns (.ok (τ.setEnv x (.ledger σ₀.net))) (.ok (τ'.setEnv x (.ledger σ₀'.net)))
     rw [h₀.net]
     exact h.setEnv_both x _
+  | .saveNetMt x, _ => h.setEnv_both x _
+  | .netMt r a, hv => by
+    simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right]
+    agree_run h
+    exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, h.selfBalance, h.tx⟩
+  | .setBalance a, hv => by
+    simp only [UpdElem.write, a.eval_frame h₀ hv]
+    agree_run h
+    exact ⟨h.storage, h.heap, h.nextId, h.net, h.env, rfl, h.tx⟩
 
 theorem Upd.foldl_frame {σ₀ σ₀' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀') :
     (U : Upd C) → Avoids (Upd.vars U) ns → ∀ {τ τ' : State}, EnvAgreeExcept ns τ τ' →

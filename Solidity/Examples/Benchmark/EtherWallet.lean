@@ -11,8 +11,9 @@ Changes from the published text, as solkey's benchmark file makes them: the
 `require` message is dropped (a string literal).  Here besides:
 `payable(msg.sender)` and `payable(…)` are the identity on a `uint` and are
 written without the conversion (stream A's `payable(x)`); the `payable`
-`receive()` is dropped, since nothing here calls it; the constructor's body
-`owner = msg.sender;` is stated on its own (`ctor`).  `getBalance()`, which
+`receive()` is dropped, since nothing here calls it.  The constructor is
+the contract's (`Contract.ctor`), and the runs deploy the wallet with it
+(`Contract.deploy`).  `getBalance()`, which
 solkey's copy drops because `address(this).balance` crashed its parser, is
 back (`getBalance`).
 
@@ -30,6 +31,9 @@ open Proves
 
 def EtherWallet : Contract := contract!{
   address owner;
+  constructor() {
+    owner = msg.sender;
+  }
   function withdraw(uint _amount) {
     require(msg.sender == owner);
     msg.sender.transfer(_amount);
@@ -41,9 +45,18 @@ def EtherWallet : Contract := contract!{
 
 local instance : InContract := ⟨EtherWallet⟩
 
-/-- `owner = msg.sender;` — the constructor's body. -/
-theorem ctor : ⊢ dl!{ [ owner = msg.sender; ] owner == msg.sender } := by
+/-- `constructor()`: the caller is the owner, from any storage. -/
+theorem ctor : ⊢ dl!{ [ constructor(); ] owner == msg.sender } := by
   sol_prove
+
+/-- A deployment, from the empty storage: it returns, the deployer the
+owner. -/
+theorem deployOwner :
+    ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+        selfBalance := msg.value }
+      ⟨ constructor(); ⟩ owner == msg.sender } := by
+  sol_symex
+  sol_close_mt
 
 /-- `ensures msg.sender == owner && owner == \old(owner)`. -/
 theorem withdrawOwner :
@@ -68,28 +81,39 @@ theorem getBalanceFunds :
 
 /-! ## Runs: the ledger
 
-`7` deploys the wallet with `100` wei and withdraws `30`. -/
+`7` deploys the wallet, sends it `100` wei, and withdraws `30`. -/
 
-/-- A fresh wallet holding `100`, called by `7`. -/
-def store : Semantics.State :=
-  { storage := [("owner", .int 0)], selfBalance := 100,
-    tx := { msgSender := 7 } }
+/-- The wallet `7` deploys, then holding `100` (what the dropped
+`receive()` would take). -/
+def deployed : Semantics.Res Semantics.State := do
+  let σ ← EtherWallet.deploy sol{ constructor(); } { msgSender := 7 }
+  pure { σ with selfBalance := 100 }
 
 /-- `ensures net(owner) == \old(net(owner)) - _amount`: `7`'s entry is `30`
 less, and the funds as the transaction found them. -/
 theorem withdrawRunNet :
-    (do let σ ← Prog.run store (sol{ owner = msg.sender; withdraw(30); } : Prog EtherWallet)
-        pure (σ.getNet 7, σ.selfBalance)) = .ok (-30, 100) := rfl
+    (do let σ ← Prog.run (← deployed) (sol{ withdraw(30); } : Prog EtherWallet)
+        pure (σ.getNet 7, σ.selfBalance)) = .ok (-30, 100) := by
+  simp only [deployed, Contract.deploy, Contract.deployState, Contract.initStorage, EtherWallet,
+    List.map, Semantics.defaultForTy]
+  rfl
 
 /-- More than the funds: the ledger books it all the same.  That the contract
 can pay is not the ledger's to check; on the EVM the payment is refused and
 the call reverts (`Evm.compile_correct`). -/
 theorem withdrawRunOverdrawn :
-    (do let σ ← Prog.run store (sol{ owner = msg.sender; withdraw(130); } : Prog EtherWallet)
-        pure (σ.getNet 7)) = .ok (-130) := rfl
+    (do let σ ← Prog.run (← deployed) (sol{ withdraw(130); } : Prog EtherWallet)
+        pure (σ.getNet 7)) = .ok (-130) := by
+  simp only [deployed, Contract.deploy, Contract.deployState, Contract.initStorage, EtherWallet,
+    List.map, Semantics.defaultForTy]
+  rfl
 
 /-- Anyone but the owner: `withdraw` reverts. -/
 theorem withdrawRunOther :
-    Prog.run store (sol{ owner = 3; withdraw(30); } : Prog EtherWallet) = .error .revert := rfl
+    (do Prog.run { (← deployed) with tx := { msgSender := 3 } } (sol{ withdraw(30); } : Prog EtherWallet)) =
+      .error .revert := by
+  simp only [deployed, Contract.deploy, Contract.deployState, Contract.initStorage, EtherWallet,
+    List.map, Semantics.defaultForTy]
+  rfl
 
 end Solidity.Examples.Benchmark.EtherWallet

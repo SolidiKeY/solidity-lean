@@ -88,6 +88,7 @@ import Solidity.Examples.Tactics.Values
 import Solidity.Examples.Tactics.Operators
 import Solidity.Examples.Tactics.Checked
 import Solidity.Examples.Tactics.Calls
+import Solidity.Examples.Tactics.Constructors
 import Solidity.Examples.Tactics.CallOperands
 import Solidity.Examples.Tactics.Callback
 import Solidity.Examples.Tactics.Contracts
@@ -156,3 +157,4 @@ import Solidity.Theorems
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
+import Solidity.Solkey.Constructors

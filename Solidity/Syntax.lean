@@ -267,6 +267,14 @@ structure Contract where
   /-- Its state variables of a narrow integer type (`uint8 small;`), with their
   width: each is a `uint` or an `int` in `vars`. -/
   widths : List (Name × Nat) := []
+  /-- `constructor(…) { … }`: what a deployment runs, called as
+  `constructor(args);` (`elabCtor`).  `none` for a contract that declares
+  none: solc's implicit one, which runs the initializers only. -/
+  ctor : Option FunDecl := none
+  /-- `uint x = 5;`: the state variables declared with an initializer, in
+  declaration order, each with it as read.  The constructor runs them first
+  (`elabCtor`), as solkey's `ExpandFunctionBody` prepends them. -/
+  inits : List (Name × RawExpr) := []
   deriving Repr, Inhabited
 
 namespace Contract
@@ -1636,6 +1644,10 @@ syntax &"constant" : sol_vis
 
 /-- `uint public count;`: a state variable. -/
 syntax sol_ty sol_vis* ident ";" : sol_member
+/-- `uint x = 5;`: a state variable with an initializer, which the
+constructor runs (`Contract.inits`).  A `constant` or an `immutable` is one
+too, as solkey reads it: a storage root with an initializer. -/
+syntax sol_ty sol_vis* ident " = " sol_expr ";" : sol_member
 
 /-- A parameter, `uint x`. -/
 declare_syntax_cat sol_param (behavior := both)
@@ -1655,8 +1667,8 @@ syntax (name := solAttrMod) ident ("(" sol_expr,* ")")? : sol_fattr
 function, which may call the functions declared before it. -/
 syntax &"function " ident "(" sol_param,* ")" sol_fattr* ppSpace sol_block : sol_member
 
-/-- `constructor(uint v) payable { … }`: the function `init`, the name the
-benchmark ports give their constructors (`Examples/Benchmark/Purchase.lean`). -/
+/-- `constructor(uint v) payable { … }`: the contract's constructor
+(`Contract.ctor`), which only a deployment calls, `constructor(args);`. -/
 syntax (name := solConstructor) &"constructor" "(" sol_param,* ")" sol_fattr* ppSpace sol_block :
   sol_member
 
@@ -1823,15 +1835,12 @@ macro_rules
       let mut skip := false
       let mut asg : Option Lean.Term := none
       let mut invs : Array Lean.Term := #[]
+      let mut ctor : Option Lean.Term := none
+      let mut initRows : Array Lean.Term := #[]
       for m in ms do
         -- `requires x;` also reads as a state variable `x` of a type `requires`
         let m : Lean.TSyntax `sol_member := ⟨preferReading m.raw fun a =>
           [``solRequires, ``solEnsures, ``solSkip, ``solInvariant, ``solAssignable].any a.isOfKind⟩
-        -- a constructor is the function `init`
-        let m : Lean.TSyntax `sol_member ← match m with
-          | `(sol_member| constructor ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
-            `(sol_member| function $(Lean.mkIdent `init):ident ( $ps,* ) $as:sol_fattr* $b:sol_block)
-          | _ => pure m
         match m with
         | `(sol_member| requires $e:spec_expr ;) => reqs := reqs.push (← expandSpec e)
         | `(sol_member| ensures $e:spec_expr ;) => enss := enss.push (← expandSpec e)
@@ -1844,7 +1853,27 @@ macro_rules
           let (t, w) ← expandMemberTyW enums T
           rows := rows.push (← `(($(strLit x), $t)))
           if let some n := w then widthRows := widthRows.push (← `(($(strLit x), $(Lean.quote n))))
+        | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident = $e:sol_expr ;) =>
+          let (t, w) ← expandMemberTyW enums T
+          rows := rows.push (← `(($(strLit x), $t)))
+          if let some n := w then widthRows := widthRows.push (← `(($(strLit x), $(Lean.quote n))))
+          initRows := initRows.push (← `(($(strLit x), $(← expandExpr e))))
+        | `(sol_member| constructor ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
+          if ctor.isSome then Lean.Macro.throwErrorAt m "a second constructor: a contract declares one"
+          for a in as do
+            if (preferReading a.raw (!·.isOfKind ``solAttrMod)).isOfKind ``solAttrReturns then
+              Lean.Macro.throwErrorAt a "a constructor returns nothing: no `returns`"
+          let asgT ← match asg with
+            | some ls => `(some $ls)
+            | none => `(none)
+          let spec ← `(({ requires := [$reqs,*], ensures := [$enss,*], assignable := $asgT,
+                          skip := $(Lean.quote skip) } : FunSpec))
+          let d ← expandFun enums mods (Lean.mkIdent `constructor) ps.getElems as b spec
+          ctor := some (← `(some ($d).2))
+          reqs := #[]; enss := #[]; skip := false; asg := none
         | `(sol_member| function $f:ident ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
+          if f.getId.toString == "constructor" then
+            Lean.Macro.throwErrorAt f "`constructor` names the constructor, not a function"
           let asgT ← match asg with
             | some ls => `(some $ls)
             | none => `(none)
@@ -1860,8 +1889,11 @@ macro_rules
       unless reqs.isEmpty && enss.isEmpty && !skip && asg.isNone do
         Lean.Macro.throwError
           "a `requires`, `ensures`, `assignable` or `skip` clause after the last function"
+      let ctorT ← match ctor with
+        | some t => pure t
+        | none => `(none)
       `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*],
-           widths := [$widthRows,*] } : Contract))
+           widths := [$widthRows,*], ctor := $ctorT, inits := [$initRows,*] } : Contract))
 /-! ### The contracts
 
 One per store of `Semantics.lean`, under the store's renames, with
@@ -2462,10 +2494,17 @@ def checkFresh (Γ : ECtx) (x : Name) : Except String Unit :=
     throw s!"{x} is already declared, or names a state variable"
   else pure ()
 
+/-- What elaboration reads: the functions a call may name — the contract's,
+and in a function's body the ones declared before it — and whether the block
+is a program (`top`), where `constructor(args);` may stand, rather than an
+inlined body. -/
+structure ElabScope where
+  funs : List (Name × FunDecl)
+  top : Bool := true
+
 /-- Elaboration threads the locals in scope and the index of the next
-variable a capture declares, and reads the functions a call may name: the
-contract's, and in a function's body the ones declared before it. -/
-abbrev ElabM := ReaderT (List (Name × FunDecl)) (StateT (ECtx × Nat) (Except String))
+variable a capture declares, and reads its scope (`ElabScope`). -/
+abbrev ElabM := ReaderT ElabScope (StateT (ECtx × Nat) (Except String))
 
 /-- A checking step, in the elaborator. -/
 def ElabM.lift {α : Type} (x : Except String α) : ElabM α := fun _ => StateT.lift x
@@ -3045,7 +3084,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
     -- object, its members written in order, after the arguments are evaluated
     -- left to right (`T memory mv1; mv1.a = x; mv1.b = y;`)
     let flds := structDef f
-    if (← read).all (·.1 != f) && !flds.isEmpty then
+    if (← read).funs.all (·.1 != f) && !flds.isEmpty then
       let (P, args) ← hoistArgs args
       unless flds.length == args.length do
         throw s!"{f} has {flds.length} members, not {args.length}"
@@ -3055,7 +3094,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       return (P ++ Q, .name x)
     -- a call inside an expression runs before the statement, into a fresh local
     let (P, args) ← hoistArgs args
-    let some (_, d) := (← read).find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
+    let some (_, d) := (← read).funs.find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
     match d.ret with
       | some (r, .prim p) =>
         let n := (lookupBy r d.widths).getD 256
@@ -3151,11 +3190,14 @@ their fresh variables, types and widths.  A callee of several returns called
 as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
 its body and returns nothing. -/
 partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat := 256) (targets : Bool := false) :
+    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) :
     ElabM (Prog C × Option (RefTy × Var) × List (PrimTy × Var × Nat)) := do
-  let funs ← read
-  let some i := funs.findIdx? (·.1 == f) | throw s!"{f} is not a function declared before this one"
-  let d := (funs[i]?.map (·.2)).getD default
+  let funs := (← read).funs
+  -- the callee and the functions its body may call: the constructor (`elabCtor`)
+  -- may call every function, a function those declared before it
+  let (d, scope) ← if ctor then pure (C.ctor.getD { params := [], body := [] }, C.funs) else
+    let some i := funs.findIdx? (·.1 == f) | throw s!"{f} is not a function declared before this one"
+    pure ((funs[i]?.map (·.2)).getD default, funs.take i)
   unless d.params.length == args.length do
     throw s!"{f} takes {d.params.length} arguments, not {args.length}"
   let Γ ← ctx
@@ -3214,8 +3256,11 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   let body ← renameStmts ρ d.body
   let body ← ElabM.lift (lowerReturns (d.rets.map fun (n, _) => (lookupBy n ρ).getD n) body)
   let body ← wrapMods body (d.mods.map fun m => { m with args := m.args.map (·.rename ρ) })
+  -- a constructor's initializers: after its parameters are bound, before its
+  -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
+  let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
   modify fun (_, k) => (Γf, k)
-  let P ← withReader (fun _ => funs.take i) (elabStmts body)
+  let P ← withReader (fun _ => { funs := scope, top := false }) (elabStmts body)
   modify fun (_, k) => (Γ, k)
   -- a memory return variable: declared on entry, a fresh default object
   let P ← match mret with
@@ -3230,6 +3275,18 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   | true => pure ([.call f targs hsep ret P], mret, mrets)
   | false => throw s!"{f}: an argument reads a parameter"
 
+/-- **`constructor(args);`**, a deployment (solkey's obligation's
+`constructor(x̄)@C;`): the constructor inlined as any call is
+(`elabCallRet`), the state variables' initializers prepended to its body
+after its parameters are bound; with no `constructor` declared, the implicit
+one, of no parameters and no body.  It returns to no targets
+(`CallRet.rets []`), a `FunctionBodyStatement` as solkey's is
+(`functionBodyExpand`).  Only a program deploys, never an inlined body: no
+function calls the constructor. -/
+partial def elabCtor (args : List RawExpr) : ElabM (Prog C) := do
+  unless (← read).top do throw "constructor(…) in a function's body: only a program deploys"
+  pure (← elabCallRet "constructor" args none (targets := true) (ctor := true)).1
+
 /-- The captures a statement's own expressions need (`hoist`), and the
 statement left: a right-hand side before the left-hand side, as the
 interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
@@ -3238,7 +3295,7 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   | .assign l r => do
     -- `m = f(a);` to a memory local: its arguments only (`elabStmt1`)
     if let .call f args := r then
-      if (← read).any (·.1 == f) && synth C (← ctx) l matches .ok (.mpath (.ref _) (.var _)) then
+      if (← read).funs.any (·.1 == f) && synth C (← ctx) l matches .ok (.mpath (.ref _) (.var _)) then
         let (P, args) ← hoistArgs args
         return (P, .assign l (.call f args))
     match r, synth C (← ctx) l with
@@ -3270,7 +3327,7 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
   | s@(.tryCall ..) => do
     -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
     if let .declMemory T x (some (.call f args)) := s then
-      if (← read).any (·.1 == f) then
+      if (← read).funs.any (·.1 == f) then
         let (P, args) ← hoistArgs args
         return (P, .declMemory T x (some (.call f args)))
     let (s, P) ← (s.mapExprsM fun e => do
@@ -3508,6 +3565,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
       match ← synthM C x with
       | .val .bool (.simple (.local y)) => pure [.send y r v]
       | _ => throw s!"{x.toStr}: a send's result goes to a bool local"
+  | .call (.name "constructor") args => elabCtor args
   | .call (.name f) args => elabCall f args none
   | .call .. => throw "only push, pop and transfer are calls on a receiver"
   | .ret _ => throw "`return` outside a function's body"
@@ -3533,7 +3591,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
   | .unchecked ss => do elabBranch (← ElabM.lift (uncheckStmts ss))
   | .tryCall e g as rets ok err code pnc other => do
     -- `I(a)` is `a`
-    let funs ← read
+    let funs := (← read).funs
     let e := match e with
       | .call h [a] => if funs.any (·.1 == h) then e else a
       | e => e
@@ -3640,7 +3698,7 @@ end
 /-- Elaborate a block against `C`, from no locals.  A capture is numbered
 past every fresh variable the block writes. -/
 def elabProg (ss : List RawStmt) : Except String (Prog C) :=
-  ((elabStmts C ss).run C.funs).run' ([], RawStmt.maxIdxs ss + 1)
+  ((elabStmts C ss).run { funs := C.funs }).run' ([], RawStmt.maxIdxs ss + 1)
 
 /-- `elabProg`, an error naming the statement of the block it arose in (its
 position): the same block, statement by statement. -/
@@ -3650,9 +3708,15 @@ where
   go (i : Nat) : List RawStmt → ECtx × Nat → Except (Nat × String) (Prog C)
     | [], _ => pure []
     | s :: ss, st =>
-      match ((elabStmt C s).run C.funs).run st with
+      match ((elabStmt C s).run { funs := C.funs }).run st with
       | .error e => .error (i, e)
       | .ok (P, st) => do pure (P ++ (← go (i + 1) ss st))
+
+/-- A deployment's program, `constructor(args);`, elaborated (`elabCtor`):
+nothing for a contract that declares no constructor and no initializer. -/
+def ctorProg (args : List RawExpr) : Except String (Prog C) :=
+  if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then .ok []
+  else elabProg C [.call (.name "constructor") args]
 
 end Elab
 

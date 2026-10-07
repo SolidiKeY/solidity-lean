@@ -1,0 +1,153 @@
+{
+ "header": {
+  "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+  "sourceSha256": "c54199c6a9b8df5820c5a16ef37ce609a45619045c11d0f400048608e111a2e3",
+  "solkeyCommit": "1b4341a3032b925dc6c282273429abc873697a19",
+  "source": "keyext.solidity.examples/benchmark/EtherWallet.sol"
+ },
+ "ast": {
+  "nodeType": "SourceUnit",
+  "nodes": [
+   {
+    "literals": [
+     "solidity",
+     "^",
+     "0.8",
+     ".26"
+    ],
+    "nodeType": "PragmaDirective"
+   },
+   {
+    "contractKind": "contract",
+    "id": 43,
+    "name": "EtherWallet",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 3,
+      "mutability": "mutable",
+      "name": "owner",
+      "nodeType": "VariableDeclaration",
+      "src": "387:28:0",
+      "line": 8,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "address payable"
+      },
+      "typeName": {
+       "name": "address",
+       "nodeType": "ElementaryTypeName",
+       "stateMutability": "payable",
+       "typeDescriptions": {
+        "typeString": "address payable"
+       }
+      },
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"owner","nodeType":"Identifier","referencedDeclaration":3,"typeDescriptions":{"typeString":"address payable"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"arguments":[{"expression":{"name":"msg","nodeType":"Identifier","referencedDeclaration":-15,"typeDescriptions":{"typeString":"msg"}},"memberName":"sender","nodeType":"MemberAccess","typeDescriptions":{"typeString":"address"}}],"expression":{"nodeType":"ElementaryTypeNameExpression","typeDescriptions":{"typeString":"type(address payable)"},"typeName":{"name":"address","nodeType":"ElementaryTypeName","stateMutability":"payable"}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"address payable"}},"typeDescriptions":{"typeString":"address payable"}},"nodeType":"ExpressionStatement","src":"446:27:0","line":11}
+       ]
+      },
+      "id": 15,
+      "kind": "constructor",
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "422:58:0",
+      "line": 10,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": []
+      },
+      "id": 19,
+      "kind": "receive",
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "486:29:0",
+      "line": 14,
+      "stateMutability": "payable",
+      "visibility": "external"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"leftExpression":{"expression":{"name":"msg","nodeType":"Identifier","referencedDeclaration":-15,"typeDescriptions":{"typeString":"msg"}},"memberName":"sender","nodeType":"MemberAccess","typeDescriptions":{"typeString":"address"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"owner","nodeType":"Identifier","referencedDeclaration":3,"typeDescriptions":{"typeString":"address payable"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"758:28:0","line":20},
+        {"expression":{"arguments":[{"name":"_amount","nodeType":"Identifier","referencedDeclaration":22,"typeDescriptions":{"typeString":"uint256"}}],"expression":{"expression":{"arguments":[{"expression":{"name":"msg","nodeType":"Identifier","referencedDeclaration":-15,"typeDescriptions":{"typeString":"msg"}},"memberName":"sender","nodeType":"MemberAccess","typeDescriptions":{"typeString":"address"}}],"expression":{"nodeType":"ElementaryTypeNameExpression","typeDescriptions":{"typeString":"type(address payable)"},"typeName":{"name":"address","nodeType":"ElementaryTypeName","stateMutability":"payable"}},"kind":"typeConversion","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"address payable"}},"memberName":"transfer","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"796:37:0","line":21}
+       ]
+      },
+      "documentation": {
+       "nodeType": "StructuredDocumentation",
+       "text": "@custom:key requires _amount >= 0\n @custom:key ensures msg.sender == owner && owner == \\old(owner)\n @custom:key ensures net(owner) == \\old(net(owner)) - _amount"
+      },
+      "id": 42,
+      "kind": "function",
+      "name": "withdraw",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 22,
+         "mutability": "mutable",
+         "name": "_amount",
+         "nodeType": "VariableDeclaration",
+         "src": "722:15:0",
+         "line": 19,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint256",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "704:136:0",
+      "line": 19,
+      "stateMutability": "nonpayable",
+      "visibility": "external"
+     }
+    ],
+    "src": "360:482:0",
+    "line": 7
+   }
+  ]
+ }
+}

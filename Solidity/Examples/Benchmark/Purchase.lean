@@ -15,8 +15,9 @@ read when this port was written:
   variables `msgSender`, `msgValue` and `thisBalance` (the language now
   has all three, `Examples/Benchmark/Coin.lean` reads `msg.sender`; the
   theorems below are over this form);
-* the constructor is the function `init` (no constructors here; solkey
-  skips it, `@custom:key skip`);
+* the constructor is marked `skip;`, solkey's `@custom:key skip`: it has no
+  obligation (`spec!{constructor}` refuses it); `ctor_spec` states its
+  clause by hand;
 * the spelling of `contract!{ … }`: a branch is a block (`if (c) { revert
   OnlyBuyer(); }`), and a block statement ends with `;`.
 
@@ -159,7 +160,7 @@ namespace Solidity.Examples.Benchmark.Purchase
 open Proves
 
 /-- `Purchase`, with `msg.sender`, `msg.value`, `address(this).balance` as
-state variables and the constructor as `init`. -/
+state variables and the constructor marked `skip`. -/
 def Purchase : Contract := contract!{
   uint public value;
   address payable public seller;
@@ -207,7 +208,8 @@ def Purchase : Contract := contract!{
   event ItemReceived();
   event SellerRefunded();
 
-  function init() payable {
+  skip;
+  constructor() payable {
     seller = payable(msgSender);
     value = msgValue / 2;
     if ((2 * value) != msgValue) {
@@ -270,6 +272,21 @@ info: if (msgSender != seller) { revert(); } else {  } uint se1 = 0; if (state !
 #guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol{ abort(); })))
 
 /-! ## The clauses -/
+
+/-- The constructor: the caller is the seller, and the value sent is twice
+`value` (an odd one reverts, `revert ValueNotEven();`). -/
+theorem ctor_spec :
+    ⊢ dl!{ [ constructor(); ] (seller == msgSender ∧ value + value == msgValue) } := by
+  sol_prove
+  refine close ?_
+  sol_symex
+  sol_close
+
+-- `skip;`: the constructor has no obligation
+/--
+error: Solidity elaboration failed: constructor is marked `skip`: it has no obligation
+-/
+#guard_msgs in #check spec!{ constructor }
 
 /-- `abort()`: `requires msg.sender == seller && state == State.Created`,
 `ensures state == State.Inactive`. -/

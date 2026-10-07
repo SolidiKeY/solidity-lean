@@ -38,8 +38,15 @@ Clauses are NatSpec lines above a function, or above the contract for
 
   Parameters are unconstrained KeY `int`s, so a bound must come from
   `requires`. The invariant is assumed on entry and proved on exit (and at
-  every `transfer` under `transferSemantics:withCallback`). Constructors get
-  no obligation.
+  every `transfer` under `transferSemantics:withCallback`). A constructor's
+  obligation (solkey `a764703bf1`) starts from the empty storage,
+  `{storage := mtSt ‖ old := mtSt ‖ oldNet := mtSt ‖
+  net := storeSt(mtSt, at(msgSender), …) ‖ selfBalance := msgValue}`, and
+  assumes no `CInv`. In Lean it is `spec!{constructor}`
+  (`Calculus/Spec.lean`), where `\old(net(a))` reads the empty ledger
+  (`UpdElem.saveNetMt`); a `requires` that reads the state, the ledger or
+  the funds is refused there (Lean only: solkey reads it of the storage the
+  update discards).
 
 The benchmark README reports 19 of 21 obligations closed; ERC20's
 `mint`/`burn` stay open on internal calls.

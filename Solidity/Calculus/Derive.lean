@@ -492,13 +492,13 @@ theorem UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
     all_goals first
       | (cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy])
       | cases h
-  | .saveNet y, hx, h => by
+  | .saveNet y, hx, h | .saveNetMt y, hx, h => by
     have hy : x ≠ y := fun e => hx (by simp only [UpdElem.vars, e, List.mem_cons,
       List.not_mem_nil, or_false])
     simp only [UpdElem.write, pure, Except.pure] at h
     cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy]
   | .storage s, _, h | .memory s, _, h | .selfBalance _ s, _, h | .net _ _ s, _, h
-  | .pay _ s, _, h => by
+  | .pay _ s, _, h | .netMt _ s, _, h | .setBalance s, _, h => by
     simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
     repeat' split at h
     all_goals first | (cases h; rfl) | cases h

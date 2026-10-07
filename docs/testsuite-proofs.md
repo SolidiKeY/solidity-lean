@@ -2071,6 +2071,106 @@ Solidity, but the flat program fails `Prog.wt` (only type preservation reads
 it; `unchecked { }` had the same before); `narrowPure` runs twice on a tuple's
 components under `unchecked` (a redundant `% 2^n`, same value).
 
+**Constructors S1–S3** (2026-10-06, worktree `ctor`). `Contract` gained
+`ctor`/`inits`, `Op0` the constant `mtSt`, `UpdElem` the deployment's
+`net := storeSt(mtSt, at(r), a)` (`netMt`) and `selfBalance := a`
+(`setBalance`), and the elaborator's reader a `top` flag (`ElabScope`).
+No `Taclet` changed. Whole-file wall times in the default build (its
+parallelism, with a second Lean lane running on the machine), against the
+numbers recorded above:
+
+| File | recorded | this build |
+|---|---:|---:|
+| `Examples/Tactics/Calls.lean` | 81 s | 121 s (+49%); 121 s alone through the server |
+| `Examples/Tactics/CrossDomain.lean` | 77 s | 97 s (+26%) |
+| `Examples/Tactics/Memory.lean` | 78 s | 88 s (+13%) |
+| `Calculus/Uniqueness.lean` | ~150 s | 198 s (+32%) |
+
+These were not measured against master under the same load, and the
+interleaved re-measurement of the review (below) puts `Calls` and
+`Uniqueness` within 4% of master. `TestSuite/Derived*` was not built in
+S1–S3 (rebuilt in S4–S5, below); its obligations contain none of the new
+terms.
+
+**Constructors S4–S5** (2026-10-06). The obligations are solkey's
+(`Problem.ctorFml`, `problem!{constructor}`, `spec!{constructor}`), and the
+benchmarks `Coin`, `EtherWallet` and `Purchase` declare their constructors.
+`Calls` re-measured, the whole file in one worker with
+`set_option Elab.async false`, timed by `IO.monoMsNow` at its first and
+last command (imports loaded), three Lean lanes running on the machine:
+
+| Run | Checkout | load average | `Examples/Tactics/Calls.lean` |
+|---|---|---:|---:|
+| 1 | master `2979bb8` | not taken | 174 s |
+| 2 | `ctor` | ~17 | 229 s (+32% on run 1) |
+| 3 | master `2979bb8` | ~19–24 | 213 s (`ctor` +8% on it) |
+
+The two master runs differ by 22%: the other lanes' load moved the number
+as much as the branch could.  `Elab.async false` also crashed the worker
+of either checkout at random (no OOM kill was recorded; a stack overflow on
+the main thread is likely), so run 3 was repeated under a fresh file name,
+and a fourth run (`ctor` again) crashed twice and was given up.  Superseded
+by the review's measurement, below: within 10%.  The TestSuite chain was rebuilt on this branch, one `Derived`
+module at a time, then `Report` and `SolkeyTestSuite.lean`: all clean, the
+435 derived obligations kept.
+
+**Constructors S6–S8** (2026-10-06). The solc import reads the
+constructor (`SolcContract.ctor`, a root of the calls; a modifier on it a
+`Gap`) and mutable initializers (`uint x = 5;`, `initMembers`; one that does
+not print leaves the constructor out, not the variable), defines
+`N.constructor : Prog N`, the deployment `constructor(x̄);`, and states its
+obligation with `Problem.ctorFml` (`solc_problems`).  `scripts/solc-ast.mjs`
+takes `--source` and `--wrapper`; `Solidity/Solkey/Constructors.lean`
+imports solkey's `contracts/Counter.sol` and `benchmark/EtherWallet.sol`,
+and derives `EtherWallet`'s constructor obligation (`sol_prove`, its one
+leaf by `sol_close_mt`, since `Decide` has no `mtSt` clause).
+`TestSuite.sol` has no constructor and no initializer: its import, `Report`
+(435 derived), `check-testsuite.sh` and the generated corpus are unchanged;
+`Derived1`, `Derived12`, `Derived14` and `SolkeyTestSuite.lean` re-checked
+clean.
+
+**Constructors review** (2026-10-07). A finder and a skeptic per area;
+the confirmed findings fixed:
+
+- `\old(net(a))` in a constructor's specification reads solkey's
+  `oldNet := mtSt` (`UpdElem.saveNetMt`, the empty ledger, an arm next to
+  every `.saveNet` one), where it was refused; the solkey-feedback item
+  that blamed KeY is gone, and `function-specs.md` prints the snapshot.
+- `problem!{constructor}` refuses a constructor marked `skip` and a
+  specified contract or constructor (solkey states the unspecified form
+  for neither); the docstrings no longer call its update solkey's
+  unspecified one, and `solc-alignment.md` records the deviation.
+- The solc import warns when an implicit constructor's initializers are
+  left out (`initGap`); `tests/solc/CtorGap.sol` (a declared constructor
+  left out takes the initializer with it) and `tests/solc/InitGap.sol`
+  (the warning) pin both paths in `Solkey/Constructors.lean`.
+- Pins in `Examples/Tactics/Constructors.lean`: the refusals (`requires`
+  over the funds or the ledger, no constructor, `skip`, a specified
+  contract), `\old(net(a))` derived, the initializer before a modifier, a
+  shadowing parameter, `#deploy … with msg.value`, `#step` firing
+  `functionBodyExpand`; and `sol_close_mt`'s two limits, pinned open with
+  `fail_if_success`: a read at a free key of a mapping, and a member of a
+  struct root (`defaultForFields` is not unfolded).  Measured: a struct
+  root stays open, so contracts with one need more than `sol_close_mt`.
+- The rule map's `UpdElem` row names `.netMt` (and its shortening of
+  solkey's `selectSt(mtSt, at(r)) +`), `.setBalance` and `.saveNetMt`;
+  `module-map.md` names `#deploy`, `sol_close_mt`, `spec!{constructor}`
+  and `Contract.deploy`.
+
+Timing, master `2979bb8` against `ctor` (`93dd6e0`), interleaved, each file
+copied to a fresh scratch module with `set_option Elab.async false` and
+timed by `IO.monoMsNow` at its first and last command, load average 1–2.7
+(the other lanes idle):
+
+| File | master | `ctor` | change |
+|---|---:|---:|---:|
+| `Examples/Tactics/Calls.lean` | 130.3 s, 120.9 s | 129.7 s, 129.6 s | +3% |
+| `Calculus/Uniqueness.lean` | 151.6 s, 151.6 s | 151.5 s, 153.4 s | +1% |
+
+Both within 10%: the S1–S5 warnings were the other lanes' load.  After
+the `UpdElem` change, `Derived1`, `Derived12`, `Derived14` and
+`SolkeyTestSuite.lean` re-checked clean, the 435 derived obligations kept.
+
 ## The fixture at `1b4341a303` (W6, 2026-10-06)
 
 - `scripts/solc-ast.mjs --solkey <clone> --soljson <dir>` (the new

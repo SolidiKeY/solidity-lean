@@ -446,6 +446,10 @@ theorem PTerm.eval_next (p : PTerm C) : (PTerm.next p).eval σ =
   cases p.eval σ <;> rfl
 /-- `storage` is the storage of the state it is read in. -/
 theorem STerm.eval_storage : (STerm.storage : STerm C).eval σ = .ok σ := rfl
+/-- `mtSt`, a deployment's storage: every root of the contract at its default
+(`Contract.initStorage`). -/
+theorem STerm.eval_mtSt (vs : List (Name × Ty)) : (STerm.mtSt vs : STerm C).eval σ =
+    .ok { σ with storage := vs.map fun (n, T) => (n, defaultForTy T) } := rfl
 /-- `old` is the storage it was bound to, in the state it is read in. -/
 theorem STerm.eval_pv (x : Var) : (STerm.pv x : STerm C).eval σ =
     σ.getEnv x >>= bindingStore >>= fun st => .ok { σ with storage := st } := by
@@ -624,11 +628,41 @@ theorem UpdElem.write_pay (σ₀ τ : State) (r a : Term C) :
       | error => rfl
       | ok w => cases w <;> rfl
 
+/-- `{net := store(mtSt, at(r), a)}`: a deployment's ledger, the address and
+the amount read, then a ledger holding that entry only. -/
+theorem UpdElem.write_netMt (σ₀ τ : State) (r a : Term C) :
+    (UpdElem.netMt r a).write σ₀ τ =
+      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
+        .ok { τ with net := [(addr, amt)] } := by
+  simp only [UpdElem.write, bind, Except.bind]
+  cases r.eval σ₀ with
+  | error => rfl
+  | ok v =>
+    cases v with
+    | bool b => rfl
+    | int addr =>
+      cases a.eval σ₀ with
+      | error => rfl
+      | ok w => cases w <;> rfl
+
+/-- `{selfBalance := msgValue}`: the funds set to the amount. -/
+theorem UpdElem.write_setBalance (σ₀ τ : State) (a : Term C) :
+    (UpdElem.setBalance a).write σ₀ τ = a.eval σ₀ >>= Value.asInt >>= fun amt =>
+      .ok { τ with selfBalance := amt } := by
+  simp only [UpdElem.write, bind, Except.bind]
+  cases a.eval σ₀ <;> rfl
+
 /-- `{oldNet := net}` binds the ledger variable `oldNet` to the ledger. -/
 theorem UpdElem.write_saveNet (σ₀ τ : State) (x : Var) :
     (UpdElem.saveNet x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger σ₀.net)) := rfl
+/-- `{oldNet := mtSt}` binds the ledger variable `oldNet` to the empty ledger. -/
+theorem UpdElem.write_saveNetMt (σ₀ τ : State) (x : Var) :
+    (UpdElem.saveNetMt x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger [])) := rfl
 /-- Binding a local leaves the ledger. -/
 theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
+/-- Binding a local leaves the storage. -/
+theorem storage_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).storage = σ.storage :=
+  rfl
 /-- A ledger entry after a payment: the entry of the ledger the payment chose. -/
 theorem lookupBy_ite (c : Prop) [Decidable c] (k : Int) (l l' : List (Int × Int)) :
     lookupBy k (if c then l else l') = if c then lookupBy k l else lookupBy k l' := by
@@ -714,7 +748,8 @@ attribute [close_rw]
   Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
   Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory
   Close.UpdElem.write_selfBalance Close.UpdElem.write_net Close.UpdElem.write_pay
-  Close.UpdElem.write_saveNet IntOp.apply
+  Close.UpdElem.write_saveNet Close.UpdElem.write_saveNetMt Close.UpdElem.write_netMt
+  Close.UpdElem.write_setBalance IntOp.apply
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
   Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
@@ -724,7 +759,7 @@ attribute [close_rw]
   Close.forall_unit Close.exists_unit
   Close.find_overlay_fields Close.layAt_prim Close.fieldPath_nil Close.fieldPath_field
   Close.fieldPath_at
-  Close.STerm.eval_storage Close.STerm.eval_pv Close.STerm.eval_save Close.STerm.eval_save_find
+  Close.STerm.eval_storage Close.STerm.eval_mtSt Close.STerm.eval_pv Close.STerm.eval_save Close.STerm.eval_save_find
   Close.STerm.eval_save_copyMem Close.STerm.eval_delAt Close.STerm.eval_push
   Close.STerm.eval_pushSlot Close.STerm.eval_pop Close.STerm.eval_shrink
   Close.SValT.eval_val Close.SValT.eval_find Close.SValT.eval_copyMem
@@ -835,6 +870,29 @@ macro "sol_close" : tactic => `(tactic|
     all_goals (try intros)
     -- a bounds check returns `()`: nothing is left to choose
     all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+    all_goals first | omega | grind))
+
+/-- `sol_close` from a deployment's storage, `{storage := mtSt ‖ …}` in
+front (`STerm.eval_mtSt`): the storage is then a list of the roots at their
+defaults, and the storage evaluators are unfolded over it — solkey's
+`selectOnEmptyStorage` and `saveOnEmptyStorage` (`structRules.key`), read off
+that list, which is what lets a write under the diamond return.  Not in
+`close_rw`: an arbitrary storage is left to the read-after-write facts.
+Known limits (pinned open in `Examples/Tactics/Constructors.lean`): a read
+at a free key of a mapping the deployment does not write (the default
+map's `checkIndex`), and a member of a struct root (`defaultForTy` of a
+struct, `defaultForFields` of the struct table, is not unfolded). -/
+macro "sol_close_mt" : tactic => `(tactic|
+  all_goals
+   (sol_close_unwrap
+    intro σ
+    simp (config := { decide := true }) only [close_rw, List.map_cons, List.map_nil,
+      defaultForTy, State.saveStorage, State.findStorage, lookupBy, setBy, SVal.save, SVal.find,
+      Close.storage_setEnv, Except.ok.injEq, exists_eq_left']
+    all_goals try sol_close_facts
+    all_goals try sol_close_reads
+    all_goals try (intros; sol_close_reads_all)
+    all_goals (try intros)
     all_goals first | omega | grind))
 
 end Solidity

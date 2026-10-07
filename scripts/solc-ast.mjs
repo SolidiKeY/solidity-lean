@@ -27,12 +27,18 @@
  * bytes): the import refuses a fixture of another hash, and this script
  * rewrites the literal, which makes Lake re-check the module.
  *
- * Usage: node scripts/solc-ast.mjs [--solkey <checkout>] [--soljson <dir>] [--out <file>] [--no-wrapper]
+ * Usage: node scripts/solc-ast.mjs [--solkey <checkout>] [--soljson <dir>] [--source <file>]
+ *          [--out <file>] [--wrapper <module>] [--no-wrapper]
  *   --solkey      the solkey checkout (default ../solkey, or SOLKEY_ROOT)
+ *   --source      the source, a path in the checkout (default
+ *                 keyext.solidity.examples/TestSuite.sol); another one is
+ *                 another fixture (`Solidity/Solkey/Constructors.lean`)
  *   --soljson     the directory holding the pinned soljson (default the
  *                 checkout's `keyext.solidity.core/build/soljson`; a fresh
  *                 clone has none, so point it at another checkout's)
  *   --out         where to write the fixture (default tests/solc/TestSuite.ast.json)
+ *   --wrapper     the importing module (default Solidity/Solkey/TestSuite.lean):
+ *                 the literal rewritten is the one of the import of `--out`'s file
  *   --no-wrapper  leave the importing module's hash literal alone
  *   --compare-cache  also compare the trimmed AST with solkey's own cached solc
  *                 output for the same source (`~/.cache/solkey/solc/<soljson>/`,
@@ -55,9 +61,9 @@ const optionOf = (flag, fallback) => {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SOLKEY = optionOf("--solkey", process.env.SOLKEY_ROOT || join(ROOT, "../solkey"));
 const OUT = optionOf("--out", join(ROOT, "tests/solc/TestSuite.ast.json"));
-const WRAPPER = join(ROOT, "Solidity/Solkey/TestSuite.lean");
-const SOURCE = "keyext.solidity.examples/TestSuite.sol";
-const UNIT = "TestSuite.sol";
+const WRAPPER = optionOf("--wrapper", join(ROOT, "Solidity/Solkey/TestSuite.lean"));
+const SOURCE = optionOf("--source", "keyext.solidity.examples/TestSuite.sol");
+const UNIT = SOURCE.split("/").pop();
 
 const fail = (msg) => {
   console.error(`solc-ast: ${msg}`);
@@ -205,9 +211,11 @@ const hash = `0x${h.toString(16).padStart(16, "0")}`;
 
 if (!args.includes("--no-wrapper") && existsSync(WRAPPER)) {
   const w = readFileSync(WRAPPER, "utf8");
-  // the import's literal, and the stale-fixture test's expected message
-  const w2 = w.replace(/(solc_import\s+"[^"]*"\s+hash\s+)0x[0-9a-f]+/, `$1${hash}`)
-    .replace(/(has the hash )0x[0-9a-f]+/g, `$1${hash}`);
+  // the import of this fixture's literal, and the stale-fixture test's
+  // expected message: a module may import several fixtures
+  const file = OUT.split("/").pop().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const w2 = w.replace(new RegExp(`(solc_import\\s+"[^"]*${file}"\\s+hash\\s+)0x[0-9a-f]+`), `$1${hash}`)
+    .replace(new RegExp(`(${file} has the hash )0x[0-9a-f]+`, "g"), `$1${hash}`);
   if (w2 !== w) writeFileSync(WRAPPER, w2);
 }
 let cacheDiffers = false;

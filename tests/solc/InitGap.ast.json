@@ -1,0 +1,213 @@
+{
+ "header": {
+  "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+  "sourceSha256": "e02a53c8d72bd06843d4fea2cd90022da3f286b5939924dcae26d7c6a0883491",
+  "solkeyCommit": "unknown",
+  "source": "tests/solc/InitGap.sol"
+ },
+ "ast": {
+  "nodeType": "SourceUnit",
+  "nodes": [
+   {
+    "literals": [
+     "solidity",
+     "^",
+     "0.8",
+     ".0"
+    ],
+    "nodeType": "PragmaDirective"
+   },
+   {
+    "contractKind": "contract",
+    "id": 30,
+    "name": "InitGap",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 5,
+      "mutability": "mutable",
+      "name": "limit",
+      "nodeType": "VariableDeclaration",
+      "src": "236:18:0",
+      "line": 7,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "value": {
+       "arguments": [],
+       "expression": {
+        "name": "cap",
+        "nodeType": "Identifier",
+        "referencedDeclaration": 21,
+        "typeDescriptions": {
+         "typeString": "function () pure returns (uint256)"
+        }
+       },
+       "kind": "functionCall",
+       "names": [],
+       "nodeType": "FunctionCall",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 7,
+      "mutability": "mutable",
+      "name": "count",
+      "nodeType": "VariableDeclaration",
+      "src": "260:10:0",
+      "line": 8,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"nodeType":"PlaceholderStatement","src":"305:1:0","line":11}
+       ]
+      },
+      "name": "always",
+      "nodeType": "ModifierDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 5"},"value":"5"},"nodeType":"Return","src":"380:8:0","line":15}
+       ]
+      },
+      "id": 21,
+      "kind": "function",
+      "modifiers": [
+       {
+        "kind": "modifierInvocation",
+        "modifierName": {
+         "name": "always",
+         "nodeType": "IdentifierPath",
+         "referencedDeclaration": 11
+        },
+        "nodeType": "ModifierInvocation"
+       }
+      ],
+      "name": "cap",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 16,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "364:4:0",
+         "line": 14,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "319:76:0",
+      "line": 14,
+      "stateMutability": "pure",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"name":"count","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"453:12:0","line":19}
+       ]
+      },
+      "id": 29,
+      "kind": "function",
+      "name": "get",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 24,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "437:4:0",
+         "line": 18,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "401:71:0",
+      "line": 18,
+      "stateMutability": "view",
+      "visibility": "public"
+     }
+    ],
+    "src": "213:261:0",
+    "line": 6
+   }
+  ]
+ }
+}

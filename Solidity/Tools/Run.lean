@@ -32,6 +32,16 @@ the inlined body declares.
 
 The output is `ok`, the value returned, and the storage one root per line
 (`fmtStorage`); or `revert`, or `stuck`.
+
+```
+#deploy Mini(7) with msg.sender := 3
+```
+
+`#deploy C(args)` deploys `C` (`Contract.deploy`): it runs
+`constructor(args);` (`ctorProg`, the initializers and the constructor's
+body) from `Contract.deployState`, whose ledger and funds hold what
+`msg.value := n` sends; `with` takes the transaction's fields only.  The
+output is `ok`, the funds, and the storage; or how it halted.
 -/
 
 namespace Solidity.Tools
@@ -147,6 +157,39 @@ open Lean Elab Command Term Meta in
     let t ← `(runReport $Ct (State.withRoots (State.withTx $σ $sender $value $time $bal)
       ([$roots,*] : List (Solidity.Name × Solidity.Semantics.SVal))) $(quote f) [$args,*])
     logInfo (String.intercalate "\n" (← evalLines "#run" t))
+  | _ => throwUnsupportedSyntax
+
+/-- What `#deploy` prints: the deployment's outcome (`Contract.deploy`), the
+contract's funds and its storage. -/
+def deployReport [FreshNames] (C : Contract) (args : List RawExpr) (tx : TxEnv) :
+    Except String (List String) := do
+  let P ← ctorProg C args
+  pure <| match C.deploy P tx with
+    | .error h => [fmtHalt h]
+    | .ok σ => ["ok", s!"balance {σ.selfBalance}"] ++ fmtStorage C σ.storage
+
+/-- `#deploy C(a, b) [with msg.sender := n, msg.value := m, …]`: deploy the
+contract `C` in the interpreter and print its outcome. -/
+syntax (name := deployCmd) "#deploy " ident "(" sol_expr,* ")" (" with " runEnv,+)? : command
+
+open Lean Elab Command Term Meta in
+@[command_elab deployCmd] def elabDeploy : CommandElab
+  | `(#deploy $c:ident ( $args:sol_expr,* ) $[with $envs?,*]?) => liftTermElabM do
+    let some c ← contractConst? c.getId | throwErrorAt c "#deploy: {c.getId} is not a contract"
+    let args ← liftMacroM <| args.getElems.mapM expandExpr
+    let mut sender : Lean.Term ← `(0)
+    let mut value : Lean.Term ← `(0)
+    let mut time : Lean.Term ← `(0)
+    for e in (envs?.map (·.getElems)).getD #[] do
+      let `(runEnv| $k:ident := $v) := e | throwErrorAt e "#deploy: expected `name := value`"
+      match k.getId.toString with
+      | "msg.sender" => sender := v
+      | "msg.value" => value := v
+      | "block.timestamp" => time := v
+      | n => throwErrorAt k "#deploy: {n} is not one of msg.sender, msg.value, block.timestamp"
+    let t ← `(deployReport $(mkCIdent c) [$args,*]
+      { msgSender := ($sender : Int), msgValue := ($value : Int), timestamp := ($time : Int) })
+    logInfo (String.intercalate "\n" (← evalLines "#deploy" t))
   | _ => throwUnsupportedSyntax
 
 end Solidity.Tools

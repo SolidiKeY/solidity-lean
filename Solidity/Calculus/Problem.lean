@@ -179,11 +179,109 @@ under the modality `m`: `∀xs. wt(storage) → [ P ] true`, or the same with
 def Problem.fml (m : Modality) (xs : List (PrimTy × Var)) (P : Prog C) : Fml C :=
   Fml.alls xs (.imp (Fml.wt C) (.modal m P .tt))
 
-/-- The parameters an obligation binds, its modality and its program, read
-back off the formula: what `Problem.text` prints. -/
-def Problem.parts : Fml C → Option (List (PrimTy × Var) × Modality × Prog C)
+/-- solkey's deployment update,
+`{storage := mtSt ‖ net := storeSt(mtSt, at(msgSender), msgValue) ‖ selfBalance := msgValue}`:
+the empty storage, a ledger holding the deployer's payment, and the value
+sent as the contract's funds (`Contract.deployState`). -/
+def Problem.deployUpd (C : Contract) : Upd C :=
+  [.storage (.mtSt C.vars), .netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
+
+/-- solkey's obligation for a constructor, of parameters `xs`, deployed by
+`P` (`constructor(x̄);`): `∀xs. {deployUpd} ⟨ P ⟩ true`, or the box.  No
+`wt(storage)` premise: the update discards the storage, and the empty one
+is well formed (`initStorage_wt`). -/
+def Problem.ctorFml (m : Modality) (xs : List (PrimTy × Var)) (P : Prog C) : Fml C :=
+  Fml.alls xs (.upd m (Problem.deployUpd C) (.modal m P .tt))
+
+/-- A constructor's obligation with no specification, `Problem.ctorFml` of
+the contract's constructor: its parameters bound, the program
+`constructor(x̄);` elaborated with them in scope.  solkey states this form
+only where neither the contract nor the constructor is specified, and with
+`{storage := mtSt || net := mtSt}`; Lean with `Problem.deployUpd`, its
+specified problem's update (`docs/solkey-feedback.md`).  A constructor
+marked `skip`, or specified, is refused. -/
+def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Fml C) := do
+  let some d := C.ctor | throw "the contract declares no constructor: an implicit one has no obligation"
+  if d.spec.skip then throw "constructor is marked `skip`: it has no obligation"
+  -- solkey states the unspecified form only where neither the contract
+  -- nor the constructor is specified
+  unless C.inv.isEmpty && d.spec.requires.isEmpty && d.spec.ensures.isEmpty &&
+      d.spec.assignable.isNone do
+    throw "constructor: the contract or its constructor is specified: its obligation is `spec!{constructor}`"
+  let ps ← d.params.mapM fun (n, T) => match T with
+    | .prim p => pure (n, p)
+    | _ => throw s!"constructor: the parameter {n} has a reference type"
+  let call : List RawStmt := [.call (.name "constructor") (ps.map fun (n, _) => RawExpr.name n)]
+  let P ← ((elabStmts C call).run { funs := C.funs }).run' (ps.map fun (n, p) => (n, LocalTy.val p), 1)
+  pure (Problem.ctorFml m (ps.map fun (n, p) => (p, Var.ofName n)) P)
+
+/-- `problem[C]{constructor}`: `Problem.ctor C .diamond`, the unspecified
+constructor obligation, elaborated (`constructor` is a keyword,
+not an `ident`). -/
+syntax (name := problemCtor) "problem[" term "]{ " &"constructor" " }" : term
+
+/-- `problem!{constructor}`: `problem[C]{constructor}` for the file's
+`InContract` contract. -/
+syntax (name := problemCtorBang) "problem!{ " &"constructor" " }" : term
+
+open Lean Elab Term Meta in
+elab_rules (kind := problemCtor) : term
+  | `(problem[ $c ]{ constructor }) =>
+    elabAgainst c fun q => `((Problem.ctor ($c) Modality.diamond).map (Fml.quote $q))
+
+macro_rules (kind := problemCtorBang)
+  | `(problem!{ constructor }) => `(problem[InContract.contract]{ constructor })
+
+/-- What a binding of a constructor's parameters keeps of a deployment's
+start: the empty storage, the payment booked, the value as the funds. -/
+private def DeployStart (C : Contract) (σ : State) : Prop :=
+  σ.storage = C.initStorage ∧ σ.net = [(σ.tx.msgSender, σ.tx.msgValue)] ∧
+    σ.selfBalance = σ.tx.msgValue
+
+/-- The deployment update leaves a deployment's start as it is. -/
+private theorem deployUpd_apply {σ : State} (h : DeployStart C σ) :
+    (Problem.deployUpd C).apply σ = .ok σ := by
+  obtain ⟨hs, hn, hb⟩ := h
+  cases σ
+  simp only at hs hn hb
+  subst hs hn hb
+  rfl
+
+/-- **A derived constructor obligation holds of the deployment**: from
+`deployState tx`, the parameters bound to any values of their types
+(`Binds`), the program runs under `m`, and does not panic. -/
+theorem Problem.deploy_of_valid {m : Modality} {xs : List (PrimTy × Var)} {P : Prog C}
+    (h : Valid (Problem.ctorFml m xs P)) (tx : TxEnv) {σ : State}
+    (hb : Binds xs (C.deployState tx) σ) : m.afterRun (fun _ => True) (Prog.run σ P) := by
+  have hσ : holds σ (.upd m (Problem.deployUpd C) (.modal m P .tt)) := holds_alls.1 (h _) σ hb
+  obtain ⟨_, hvs⟩ := hb
+  have hd : DeployStart C σ :=
+    bindData_induct (P := DeployStart C) (fun _ _ _ hp => hp) ⟨rfl, rfl, rfl⟩ hvs
+  simp only [holds, deployUpd_apply hd, Modality.after] at hσ
+  exact hσ
+
+/-- With no parameters, `Contract.deploy` itself: a constructor that is not
+`payable` is sent no value. -/
+theorem Problem.deploy_of_valid_nil {m : Modality} {P : Prog C}
+    (h : Valid (Problem.ctorFml m [] P)) (tx : TxEnv)
+    (hpay : (C.ctor.map (·.payable)).getD false = true ∨ tx.msgValue = 0) :
+    m.afterRun (fun _ => True) (C.deploy P tx) := by
+  have hrun : C.deploy P tx = Prog.run (C.deployState tx) P := by
+    rcases hpay with hp | hv
+    · simp only [Contract.deploy, hp, Bool.not_true, Bool.false_and, Bool.false_eq_true, if_false]
+    · simp only [Contract.deploy, hv, bne_self_eq_false, Bool.and_false, Bool.false_eq_true, if_false]
+  rw [hrun]
+  exact Problem.deploy_of_valid h tx ⟨[], rfl⟩
+
+/-- The parameters an obligation binds, whether it is a deployment, its
+modality and its program, read back off the formula: what `Problem.text`
+prints. -/
+def Problem.parts : Fml C → Option (List (PrimTy × Var) × Bool × Modality × Prog C)
   | .all x p φ => (Problem.parts φ).map fun (xs, r) => ((p, x) :: xs, r)
-  | .imp (.defined (.app1 (.wt _) (.app0 .storage))) (.modal m P .tt) => some ([], m, P)
+  | .imp (.defined (.app1 (.wt _) (.app0 .storage))) (.modal m P .tt) => some ([], false, m, P)
+  | .upd m [.storage (.app0 (.mtSt _)), .netMt (.env .msgSender) (.env .msgValue),
+      .setBalance (.env .msgValue)] (.modal m' P .tt) =>
+    if m = m' then some ([], true, m, P) else none
   | _ => none
 
 /-- How many storage writes the context's updates hold. -/
@@ -208,18 +306,25 @@ def PrimTy.keySort : PrimTy → String
 
 /-- The obligation in solkey's problem syntax (`--print-problem`): the
 parameters as program variables, the call under the modality, and the
-premise `wt(storage)`, which solkey's has not. -/
+premise `wt(storage)`, which solkey's has not.  A deployment is printed
+with its update, solkey's specified one: solkey's unspecified constructor
+problem writes `{storage := mtSt || net := mtSt}`, an empty ledger and free
+funds, where the interpreter's deployment books the payment
+(`Contract.deployState`). -/
 def Problem.text (contract fn : String) (φ : Fml C) : String :=
   match Problem.parts φ with
   | none => "(not an obligation)"
-  | some (xs, m, _) =>
+  | some (xs, deploy, m, _) =>
     let vars := if xs.isEmpty then "" else
       "\\programVariables {\n" ++
         String.join (xs.map fun (p, x) => s!"    {p.keySort} {x};\n") ++ "}\n\n"
     let call := s!"{fn}({", ".intercalate (xs.map fun (_, x) => toString x)})@{contract};"
+    let pre := if deploy then
+      "{storage := mtSt || net := storeSt(mtSt, at(msgSender), msgValue) || selfBalance := msgValue} "
+      else "wt(storage) -> "
     let body := match m with
-      | .box => s!"wt(storage) -> \\[\{ {call} }\\](true)"
-      | .diamond => s!"wt(storage) -> \\<\{ {call} }\\>(true)"
+      | .box => s!"{pre}\\[\{ {call} }\\](true)"
+      | .diamond => s!"{pre}\\<\{ {call} }\\>(true)"
     vars ++ "\\problem {\n    " ++ body ++ "\n}"
 
 end Solidity
