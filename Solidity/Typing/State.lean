@@ -151,6 +151,7 @@ def heapTypedB (H : HeapTy) (heap : List (Nat × MObj)) : Bool :=
 def BTy.matchesB (L : Layout) (H : HeapTy) : BTy -> Binding -> Bool
   | BTy.stack ty, Binding.val v => (Value.toSVal v).hasTy ty
   | BTy.path ty, Binding.spath root segs => L.tyAt root segs == some ty
+  | BTy.path _, Binding.unset => true
   | BTy.mem ty, Binding.mref id => MVal.hasTyH H (MVal.ref id) ty
   | _, _ => false
 

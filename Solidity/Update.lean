@@ -385,7 +385,7 @@ def Op1.eval (σ : State) : Op1 a s → a.Ev → s.Ev
   | .netOf x, ra => do
     match ← σ.getEnv x with
     | .ledger l => pure (.int ((lookupBy (← (← ra).asInt) l).getD 0))
-    | .val _ | .spath .. | .mref _ | .store _ => .error .stuck
+    | .val _ | .spath .. | .mref _ | .store _ | .unset => .error .stuck
   | .delValue, ra => do pure (Theory.StValue.primDefault (← ra))
   | .field f, rp => do
     let (r, segs) ← rp
@@ -515,16 +515,16 @@ def Tm.eval (σ : State) : Tm C s → s.Ev
   | .pvV x => do
     match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
   | .pvP x => aliasPath σ x
   | .pvS x => do
     match ← σ.getEnv x with
     | .store st => pure { σ with storage := st }
-    | .val _ | .spath .. | .mref _ | .ledger _ => .error .stuck
+    | .val _ | .spath .. | .mref _ | .ledger _ | .unset => .error .stuck
   | .pvI x => do
     match ← σ.getEnv x with
     | .mref id => pure id
-    | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
+    | .val _ | .spath .. | .store _ | .ledger _ | .unset => .error .stuck
   | .app0 o => o.eval σ
   | .app1 o a => o.eval σ (a.eval σ)
   | .app2 o a b => o.eval σ (a.eval σ) (b.eval σ)
@@ -706,6 +706,10 @@ inductive UpdElem (C : Contract) where
   | val (x : Var) (t : Term C)
   /-- `lsv := p`: an alias binds a path. -/
   | path (x : Var) (p : PTerm C)
+  /-- `lsv := unset`: an alias declared without a path (`T storage lsv;`),
+  through which a read or a write reverts.  Lean only: solkey's
+  `storageLocalDeclSkip` binds nothing. -/
+  | unset (x : Var)
   /-- `mv := i`: a memory local binds an identity. -/
   | mref (x : Var) (i : ITerm C)
   /-- `storage := s` -/
@@ -752,6 +756,7 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
   | .path x p, τ => do
     let (r, segs) ← p.eval σ₀
     pure (τ.setEnv x (.spath r segs))
+  | .unset x, τ => pure (τ.setEnv x .unset)
   | .mref x i, τ => do pure (τ.setEnv x (.mref (← i.eval σ₀)))
   | .storage s, τ => do pure { τ with storage := (← s.eval σ₀).storage }
   | .store x s, τ => do pure (τ.setEnv x (.store (← s.eval σ₀).storage))
@@ -1026,7 +1031,7 @@ def UpdElem.vars : UpdElem C → List Var
   | .selfBalance _ a => a.vars
   | .net r _ a => r.vars ++ a.vars
   | .pay r a => r.vars ++ a.vars
-  | .saveNet x | .saveNetMt x => [x]
+  | .saveNet x | .saveNetMt x | .unset x => [x]
   | .netMt r a => r.vars ++ a.vars
   | .setBalance a => a.vars
 
@@ -1368,7 +1373,7 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
     show ResultsAgree ns (.ok (τ.setEnv x (.ledger σ₀.net))) (.ok (τ'.setEnv x (.ledger σ₀'.net)))
     rw [h₀.net]
     exact h.setEnv_both x _
-  | .saveNetMt x, _ => h.setEnv_both x _
+  | .saveNetMt x, _ | .unset x, _ => h.setEnv_both x _
   | .netMt r a, hv => by
     simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right]
     agree_run h

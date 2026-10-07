@@ -340,7 +340,7 @@ theorem UpdElem.write_setStorage (σ₀ : State) (st : List (Name × SVal)) (ρ 
           | int _ =>
             simp only [bind, Except.bind, Value.asInt, pure, Except.pure]
             split <;> rfl
-  | .saveNet _ | .saveNetMt _ => rfl
+  | .saveNet _ | .saveNetMt _ | .unset _ => rfl
   | .netMt r a => by
     simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases r.eval σ₀ with
@@ -509,7 +509,7 @@ theorem UpdElem.write_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat)
           | int _ =>
             simp only [bind, Except.bind, Value.asInt, pure, Except.pure]
             split <;> rfl
-  | .saveNet _ | .saveNetMt _ => rfl
+  | .saveNet _ | .saveNetMt _ | .unset _ => rfl
   | .netMt r a => by
     simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases r.eval σ₀ with
@@ -2527,7 +2527,7 @@ theorem Upd.holdsWrite_eval {U : Upd C} {w : STerm C} (h : U.holdsWrite w = true
         rw [hS'] at hS
         cases hS
     | val _ _ | path _ _ | mref _ _ | store _ _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _
-    | saveNet _ | saveNetMt _ | netMt _ _ | setBalance _ =>
+    | saveNet _ | saveNetMt _ | unset _ | netMt _ _ | setBalance _ =>
       nomatch hs
   · nomatch h
 
@@ -2845,7 +2845,7 @@ theorem UpdElem.mapTm_write_le (hq : Tm.EvalRefinesAt q.1 q.2) (σ₀ τ : State
     Res.Le.bind (Tm.rwEv_eval hq r σ₀) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
       Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
   | .selfBalance _ a | .setBalance a => Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
-  | .saveNet _ | .saveNetMt _ => Res.Le.refl _
+  | .saveNet _ | .saveNetMt _ | .unset _ => Res.Le.refl _
 
 theorem UpdElem.mapTm_write_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) (q.1.eval σ₀))
     (τ : State) :
@@ -2856,7 +2856,7 @@ theorem UpdElem.mapTm_write_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) 
     Res.Le.bind (Tm.rwEv_eval_rev hq r) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
       Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
   | .selfBalance _ a | .setBalance a => Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
-  | .saveNet _ | .saveNetMt _ => Res.Le.refl _
+  | .saveNet _ | .saveNetMt _ | .unset _ => Res.Le.refl _
 
 theorem Upd.rwEv_foldl (hq : Tm.EvalRefinesAt q.1 q.2) (σ₀ : State) :
     (U : Upd C) → ∀ ρ, Res.Le (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
@@ -3636,7 +3636,7 @@ theorem Upd.holdsMem_eval {U : Upd C} {w : MTerm C} (h : U.holdsMem w = true) {�
       rw [hM'] at hM
       cases hM
   | val _ _ | path _ _ | mref _ _ | storage _ | store _ _ | selfBalance _ _ | net _ _ _ | pay _ _
-  | saveNet _ | saveNetMt _ | netMt _ _ | setBalance _ =>
+  | saveNet _ | saveNetMt _ | unset _ | netMt _ _ | setBalance _ =>
     nomatch hs
 
 /-- `U` returns only where the memory law is exact: `q.1` reads back a

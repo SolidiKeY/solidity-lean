@@ -1418,7 +1418,13 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
     if n == "memory" then return ← `(UpdElem.memory $(← schemaTerm Γ .memory r))
     match headOf Γ x with
     | .local v => `(UpdElem.val $v $(← schemaTerm Γ .val r))
-    | .alias v => `(UpdElem.path $v $(← schemaTerm Γ .path r))
+    | .alias v =>
+      -- `lsv := unset`: the alias of a declaration without a path (Lean only)
+      match r with
+      | `(dl_term| $u:ident) =>
+        if u.getId == `unset then `(UpdElem.unset $v)
+        else `(UpdElem.path $v $(← schemaTerm Γ .path r))
+      | _ => `(UpdElem.path $v $(← schemaTerm Γ .path r))
     | .mem v _ => `(UpdElem.mref $v $(← schemaTerm Γ .ident r))
     | _ => Macro.throwErrorAt x "an update assigns a local, an alias, a memory local, \
         `storage` or `memory`"
@@ -2879,6 +2885,9 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
   | UpdElem.path _ x p =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppPTerm p):dl_term))
+  | UpdElem.unset _ x =>
+    let some x ← var x | return none
+    return some (← `(dl_upd_elem| $x:dl_term := unset))
   | UpdElem.mref _ x i =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppITerm i):dl_term))

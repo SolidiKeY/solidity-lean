@@ -2718,6 +2718,18 @@ def synthM (e : RawExpr) : ElabM (TExpr C) := do ElabM.lift (synth C (← ctx) e
 /-- `check`, in the locals in scope. -/
 def checkM (p : PrimTy) (e : RawExpr) : ElabM (Val C p) := do ElabM.lift (check C (← ctx) p e)
 
+/-- Declare `x` in scope. -/
+def declare (x : Name) (t : LocalTy) : ElabM Unit := do
+  let (Γ, k) ← get
+  checkFresh C Γ x
+  set (setBy x t Γ, k)
+
+/-- A capture: a fresh `base` variable (`freshCapture`), declared at `t`. -/
+def captureAs (base : String) (t : LocalTy) : ElabM Var := do
+  let x ← freshCapture base
+  declare C (toString x) t
+  pure x
+
 /-- A compound assignment's target, with a non-simple index captured into a
 fresh `ie` first: `values[i + 1] += 1;` is `uint ie1 = i + 1; values[ie1] += 1;`. -/
 def elabOpTarget (l : RawExpr) : ElabM (Prog C × (p : PrimTy) × OpLoc C p) := do
@@ -2729,14 +2741,14 @@ def elabOpTarget (l : RawExpr) : ElabM (Prog C × (p : PrimTy) × OpLoc C p) := 
     match i.toSimple? with
     | some ie => pure ([], ⟨p, .index it b ie⟩)
     | none =>
-      let x ← freshCapture "ie"
+      let x ← captureAs C "ie" (.val k)
       pure ([.declLocal k x (some i)], ⟨p, .index it b (.local x)⟩)
   | .mpath (.prim p) (.loc (.field b f h)) => pure ([], ⟨p, .mfield b f h⟩)
   | .mpath (.prim p) (.loc (.index a b i)) =>
     match i.toSimple? with
     | some ie => pure ([], ⟨p, .mindex a b ie⟩)
     | none =>
-      let x ← freshCapture "ie"
+      let x ← captureAs C "ie" (.val .uint)
       pure ([.declLocal .uint x (some i)], ⟨p, .mindex a b (.local x)⟩)
   | _ => throw "a compound assignment needs a local or a place of value type"
 
@@ -2750,32 +2762,20 @@ def elabIncTarget (l : RawExpr) :
   | true => pure (pre, ⟨p, t, hs⟩)
   | false =>
     match t with
-    | .field b f h =>
-      let x ← freshCapture "sp"
+    | @OpLoc.field _ s _ b f h =>
+      let x ← captureAs C "sp" (.alias (.struct s))
       pure (pre ++ [.declStorage (.struct _) x (some (.path b))], ⟨p, .field (.alias x) f h, rfl⟩)
-    | .index it b i =>
-      let x ← freshCapture "sp"
+    | @OpLoc.index _ R _ _ it b i =>
+      let x ← captureAs C "sp" (.alias R)
       pure (pre ++ [.declStorage _ x (some (.path b))], ⟨p, .index it (.alias x) i, rfl⟩)
-    | .mfield b f h =>
-      let x ← freshCapture "mv"
+    | @OpLoc.mfield _ s _ b f h =>
+      let x ← captureAs C "mv" (.mem (.struct s))
       pure (pre ++ [.declMem (.struct _) x (some (.alias b)) rfl b.mapFree],
         ⟨p, .mfield (.var x b.mapFree) f h, rfl⟩)
-    | .mindex a b i =>
-      let x ← freshCapture "mv"
+    | @OpLoc.mindex _ R _ a b i =>
+      let x ← captureAs C "mv" (.mem R)
       pure (pre ++ [.declMem _ x (some (.alias b)) rfl b.mapFree], ⟨p, .mindex a (.var x b.mapFree) i, rfl⟩)
     | .local _ | .root .. => nomatch hs
-
-/-- Declare `x` in scope. -/
-def declare (x : Name) (t : LocalTy) : ElabM Unit := do
-  let (Γ, k) ← get
-  checkFresh C Γ x
-  set (setBy x t Γ, k)
-
-/-- A capture: a fresh `base` variable (`freshCapture`), declared at `t`. -/
-def captureAs (base : String) (t : LocalTy) : ElabM Var := do
-  let x ← freshCapture base
-  declare C (toString x) t
-  pure x
 
 /-- The size of `new T[](n)` as a simple value: a size that is not one is
 captured into a fresh `uint` first (KeY's `memoryArrayFreshAlloc` takes a
@@ -2785,7 +2785,7 @@ def elabSize (n : RawExpr) : ElabM (Prog C × Simple C .uint) := do
   match v.toSimple? with
   | some se => pure ([], se)
   | none =>
-    let x ← freshCapture "se"
+    let x ← captureAs C "se" (.val .uint)
     pure ([.declLocal .uint x (some v)], .local x)
 
 /-- `e` as a simple value of type `p`, captured into a fresh local first
@@ -3435,10 +3435,11 @@ index: an operand read before an effect is captured with `captureExpr`),
 into fresh locals (KeY's captures): `values[i++] = 1;`
 is `uint se1; se1 = i++; values[se1] = 1;`, and
 `Person storage p = c ? alice : bob;` is
-`if (c) { Person storage sp1 = alice; } else { Person storage sp1 = bob; }
-Person storage p = sp1;`.  Under the right operand of `&&`/`||` or in a
-branch of a conditional an effect would be evaluated where the program does
-not evaluate it, so there it is an error. -/
+`Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; }
+Person storage p = sp1;`, the alias declared before the branches (a memory
+conditional still declares its `mv` in each branch).  Under the right
+operand of `&&`/`||` or in a branch of a conditional an effect would be
+evaluated where the program does not evaluate it, so there it is an error. -/
 partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
   | .field e f => do
     let (P, e) ← hoist e
@@ -3490,8 +3491,8 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
       if hR : R' = R then
         let c ← ElabM.lift (check C Γ .bool c)
         let x ← captureAs C "sp" (.alias R)
-        pure (P ++ [.ite c [.declStorage R x (some (.path pa))]
-          [.declStorage R x (some (.path (hR ▸ pb)))]], .name (toString x))
+        pure (P ++ [.declStorage R x none,
+          .ite c [.rebind x (.path pa)] [.rebind x (.path (hR ▸ pb))]], .name (toString x))
       else throw "a conditional of two reference types"
     | .ok (.mpath (.ref R) pa), .ok (.mpath (.ref R') pb) =>
       if hR : R' = R then
@@ -4558,9 +4559,9 @@ local. -/
 example : Prog.toStr (sol{ uint i = 0; values[i++] = 1; }) =
     "uint i = 0; uint se1; se1 = i++; values[se1] = 1;" := rfl
 
-/-- A conditional of references is bound in a branch to a fresh alias. -/
+/-- A conditional of references binds a fresh alias, declared before the branches. -/
 example : Prog.toStr (sol{ bool c = true; Person storage p = c ? alice : bob; }) =
-    "bool c = true; if (c) { Person storage sp1 = alice; } else { Person storage sp1 = bob; } \
+    "bool c = true; Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; } \
     Person storage p = sp1;" := rfl
 
 -- An increment under `&&` is evaluated only when the left operand does not

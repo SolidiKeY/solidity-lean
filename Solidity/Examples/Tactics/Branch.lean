@@ -226,9 +226,9 @@ theorem branchOnStorage :
 
 A conditional whose branches are references (`c ? alice : bob`) has no value
 to lower: the elaborator binds the reference it picks to a fresh alias (or
-memory local) in a branch, and the statement uses that
+memory local), and the statement uses that
 (`sol{ … }`, `Syntax.lean`): `Person storage p = c ? alice : bob;` is
-`if (c) { Person storage sp1 = alice; } else { Person storage sp1 = bob; }
+`Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; }
 Person storage p = sp1;`.  The branch is `ifElseSplit`'s, as `ternaryToIf`'s
 is for a value. -/
 

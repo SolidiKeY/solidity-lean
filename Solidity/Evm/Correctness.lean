@@ -1080,6 +1080,21 @@ theorem Sim.bindVal {m : Machine} (h : Sim C L Γ σ m) (x : Var) {p : PrimTy} {
       exact ⟨r, segs, s, by simp [State.setEnv, lookupBy_setBy_ne hyx, h1],
         by simp [upd_other _ _ hyx, h2], h3, h4⟩
 
+/-- `Person storage p;`: `p` bound to no path and forgotten, its cell left. -/
+theorem Sim.unbind {m : Machine} (h : Sim C L Γ σ m) (x : Var) (b : Binding) :
+    Sim C L (Γ.set x none) (σ.setEnv x b) m := by
+  refine ⟨h.store, fun y q hy => ?_, fun y R hy => ?_, h.net, h.netSelf, h.bound,
+    fun y R hy => ?_, h.env⟩
+  all_goals by_cases hyx : y = x
+  all_goals try (subst hyx; simp [TyCtx.set] at hy)
+  all_goals simp only [TyCtx.set, upd_other _ _ hyx] at hy
+  · obtain ⟨v', h1, h2⟩ := h.vals y q hy
+    exact ⟨v', by simp [State.setEnv, lookupBy_setBy_ne hyx, h1], h2⟩
+  · obtain ⟨r, segs, s, h1, h2, h3⟩ := h.aliases y R hy
+    exact ⟨r, segs, s, by simp [State.setEnv, lookupBy_setBy_ne hyx, h1], h2, h3⟩
+  · obtain ⟨r, segs, s, h1, h2, h3, h4⟩ := h.fragile y R hy
+    exact ⟨r, segs, s, by simp [State.setEnv, lookupBy_setBy_ne hyx, h1], h2, h3, h4⟩
+
 /-- `Person storage p = alice;`: the cell of `p` holds `alice`'s slot. -/
 theorem Sim.bindAlias {m : Machine} (h : Sim C L Γ σ m) (x : Var) {R : RefTy} {r : Name}
     {segs : List Seg} {s : Slot} (hp : PathSlot C true r segs (.ref R) s) :
@@ -2055,10 +2070,7 @@ theorem stmt_sim : ∀ (s : Stmt C) {L : Nat} {Δ Δ' : TyCtx} {τ : State} {m :
   | .declStorage R x none, L, Δ, Δ', τ, m, hm, hw, hL => by
     simp only [wtStmt, Option.some.injEq] at hw
     subst hw
-    refine .inl ⟨τ, m, rfl, rfl, rfl, hm.weaken fun y t hy => ?_⟩
-    by_cases hyx : y = x
-    · subst hyx; simp [TyCtx.set] at hy
-    · simpa [TyCtx.set, upd_other _ _ hyx] using hy
+    exact .inl ⟨_, m, rfl, rfl, rfl, hm.unbind x .unset⟩
   | .declStorage R x (some (.path q)), L, Δ, Δ', τ, m, hm, hw, hL => by
     simp only [wtStmt, bindAliasTy] at hw
     split at hw

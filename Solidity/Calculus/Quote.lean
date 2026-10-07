@@ -99,6 +99,7 @@ def IntOp.quote : IntOp → Lean.Expr
 def UpdElem.quote : UpdElem C → Lean.Expr
   | .val x t => mkAppN (mkConst ``UpdElem.val) #[c, toExpr x, Tm.quote c t]
   | .path x p => mkAppN (mkConst ``UpdElem.path) #[c, toExpr x, Tm.quote c p]
+  | .unset x => mkAppN (mkConst ``UpdElem.unset) #[c, toExpr x]
   | .mref x i => mkAppN (mkConst ``UpdElem.mref) #[c, toExpr x, Tm.quote c i]
   | .storage s => mkAppN (mkConst ``UpdElem.storage) #[c, Tm.quote c s]
   | .store x s => mkAppN (mkConst ``UpdElem.store) #[c, toExpr x, Tm.quote c s]

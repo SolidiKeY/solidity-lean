@@ -71,7 +71,9 @@ What a name is:
   object `i` of a type the scope gives (`freshId(addM(memory, Person))`,
   `freshId(addM(memory, uint[]))`, `read(memory, carol.account)`), as a
   memory local of that type, and `x := t`, for a `bool` term `t`
-  (`se1 := x <= 255`), as a `bool` local;
+  (`se1 := x <= 255`), as a `bool` local; `x := unset` is the alias of
+  `T storage x;` bound to no path (`storageLocalDeclSkip`), `unset` a
+  keyword there;
 * a program binds the names it assigns without declaring them, at the type
   of the right-hand side, for the program and its postcondition
   (`scopeHints`): what a rule leaves of a declaration it drops.  `x =
@@ -883,6 +885,9 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
     -- empty ledger (a storage variable otherwise, `old := mtSt`)
     if x = "oldNet" && (t matches .name "mtSt") then
       return (.saveNetMt (Var.ofName x) :: U', Γ')
+    -- `lsv := unset`: an alias declared without a path (`storageLocalDeclSkip`)
+    if (t matches .name "unset") && (C.rootType "unset").isNone then
+      return (.unset (Var.ofName x) :: U', Γ')
     -- `old := storage`: a storage variable
     if isStorTerm t then return (.store (Var.ofName x) (← tStor C Γ t) :: U', setBy x .store Γ')
     if let some (.ref R) := pathTy C Γ t then

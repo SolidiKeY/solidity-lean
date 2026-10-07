@@ -902,8 +902,8 @@ theorem Stmt.step_smaller (k : Nat) (m : Modality) :
   | .assign l r => assignStep_small l r
   | .rebind x r => rebindStep_small x r
   | .assignLocal x v => localStep_small x v
-  | .declLocal _ _ none | .declMem _ _ none _ _ => trivial
-  | .declStorage _ _ none | .declLocal _ _ (some _) | .declStorage _ _ (some _)
+  | .declLocal _ _ none | .declMem _ _ none _ _ | .declStorage _ _ none => trivial
+  | .declLocal _ _ (some _) | .declStorage _ _ (some _)
   | .declMem _ _ (some _) _ _ => by
     simp only [Stmt.step]; weigh
   | .opAssign op hop hp l r => opStep_small op hop hp l r

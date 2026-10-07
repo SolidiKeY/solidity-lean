@@ -658,6 +658,9 @@ theorem UpdElem.write_saveNet (σ₀ τ : State) (x : Var) :
 /-- `{oldNet := mtSt}` binds the ledger variable `oldNet` to the empty ledger. -/
 theorem UpdElem.write_saveNetMt (σ₀ τ : State) (x : Var) :
     (UpdElem.saveNetMt x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger [])) := rfl
+/-- `{lsv := unset}` binds the alias `lsv` to no path. -/
+theorem UpdElem.write_unset (σ₀ τ : State) (x : Var) :
+    (UpdElem.unset x : UpdElem C).write σ₀ τ = .ok (τ.setEnv x .unset) := rfl
 /-- Binding a local leaves the ledger. -/
 theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
 /-- Binding a local leaves the storage. -/
@@ -810,7 +813,8 @@ attribute [close_rw]
   Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
   Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory
   Close.UpdElem.write_selfBalance Close.UpdElem.write_net Close.UpdElem.write_pay
-  Close.UpdElem.write_saveNet Close.UpdElem.write_saveNetMt Close.UpdElem.write_netMt
+  Close.UpdElem.write_saveNet Close.UpdElem.write_saveNetMt Close.UpdElem.write_unset
+  Close.UpdElem.write_netMt
   Close.UpdElem.write_setBalance IntOp.apply
   -- terms
   Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop

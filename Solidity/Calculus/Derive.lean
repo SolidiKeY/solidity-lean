@@ -148,7 +148,7 @@ def _root_.Solidity.Fml.litVars : Fml C → Option (List Var)
 
 /-- Whether the element binds the local `x`. -/
 def _root_.Solidity.UpdElem.binds (x : Var) : UpdElem C → Bool
-  | .val y _ | .path y _ | .mref y _ | .store y _ | .saveNet y | .saveNetMt y => y == x
+  | .val y _ | .path y _ | .mref y _ | .store y _ | .saveNet y | .saveNetMt y | .unset y => y == x
   | _ => false
 
 /-- `Upd.groundStep` on a parallel update's elements read last first. Each
@@ -509,7 +509,7 @@ theorem UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
     all_goals first
       | (cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy])
       | cases h
-  | .saveNet y, hx, h | .saveNetMt y, hx, h => by
+  | .saveNet y, hx, h | .saveNetMt y, hx, h | .unset y, hx, h => by
     have hy : x ≠ y := fun e => hx (by simp only [UpdElem.vars, e, List.mem_cons,
       List.not_mem_nil, or_false])
     simp only [UpdElem.write, pure, Except.pure] at h

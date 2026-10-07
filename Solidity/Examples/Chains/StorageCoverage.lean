@@ -121,10 +121,10 @@ theorem localValueDeclInitDrop :
   sol_chain
 #last_line localValueDeclInitDrop
 
-/-- `Account storage acc;`: nothing is left. -/
+/-- `Account storage acc;`: `acc` is bound to no path (`unset`, Lean only). -/
 def storageLocalDeclSkip :
     dl![m]{ ⟨[ Account storage acc; ]⟩ φ }
-    ~*> dl![m]{ φ } := by
+    ~*> dl![m]{ { acc := unset } φ } := by
   sol_chain
 #last_line storageLocalDeclSkip
 

@@ -2307,6 +2307,7 @@ theorem SPath.resolve_keys (hwt : RunWT C Γ H σ) (hte : TightEnv C σ.env) :
       | mref _ => simp [hx, bind, Except.bind] at h
       | store _ => simp [hx, bind, Except.bind] at h
       | ledger _ => simp [hx, bind, Except.bind] at h
+      | unset => simp [hx, bind, Except.bind] at h
   | _, .loc l, r, segs, hw, h, T₀, hr => Loc.resolve_keys hwt hte l hw h T₀ hr
 
 theorem Loc.resolve_keys (hwt : RunWT C Γ H σ) (hte : TightEnv C σ.env) :
@@ -2675,6 +2676,7 @@ theorem OpLoc.store_tight (hd : DeepOk C) (hwt : RunWT C Γ H σ) (hc : Canon C 
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
     | ledger _ => exact nomatch h
+    | unset => exact nomatch h
   | p, .root r hr, v, _, h =>
     opStore_tight hd hc ht (Contract.layout_tyAt_root hr) (fun _ _ => trivial)
       (fun V _ => IdxLive.nil V) h
@@ -2713,6 +2715,7 @@ theorem OpLoc.bump_tight (hd : DeepOk C) (hwt : RunWT C Γ H σ) (hc : Canon C H
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
     | ledger _ => exact nomatch h
+    | unset => exact nomatch h
   | p, .root r hr, w, _, h =>
     bumpStore_tight hd hc ht (Contract.layout_tyAt_root hr) (fun _ _ => trivial)
       (fun V _ => IdxLive.nil V) h
@@ -2810,7 +2813,7 @@ theorem Stmt.run_tight (hd : DeepOk C) : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : He
       exact ht.setEnv x (fun _ _ h => Binding.noConfusion h)
   | .declStorage R x init, Γ, Γ', H, σ, σ', hwt, hcn, ht, hs, h => by
     cases init with
-    | none => cases h; exact ht
+    | none => cases h; exact ht.setEnv x (fun _ _ h => Binding.noConfusion h)
     | some r =>
       obtain ⟨hc, rfl⟩ := wt_if hs
       exact ARhs.bind_tight hd hwt hcn ht hc h

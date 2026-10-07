@@ -260,28 +260,29 @@ namespace Close
 a memory local has none. -/
 def bindingVal : Binding → Res Value
   | .val v => .ok v
-  | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
+  | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
 
 /-- The path an alias holds: `p` after `Person storage p = alice;` is
 `alice`. -/
 def bindingPath : Binding → Res (Name × List Seg)
   | .spath r segs => .ok (r, segs)
+  | .unset => .error .revert
   | .val _ | .mref _ | .store _ | .ledger _ => .error .stuck
 
 /-- The object a memory local holds: `m` after `Person memory m;`. -/
 def bindingRef : Binding → Res Nat
   | .mref id => .ok id
-  | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
+  | .val _ | .spath .. | .store _ | .ledger _ | .unset => .error .stuck
 
 /-- The storage a storage variable holds: `old` after `{old := storage}`. -/
 def bindingStore : Binding → Res (List (Name × SVal))
   | .store st => .ok st
-  | .val _ | .spath .. | .mref _ | .ledger _ => .error .stuck
+  | .val _ | .spath .. | .mref _ | .ledger _ | .unset => .error .stuck
 
 /-- The ledger a ledger variable holds: `oldNet` after `{oldNet := net}`. -/
 def bindingLedger : Binding → Res (List (Int × Int))
   | .ledger l => .ok l
-  | .val _ | .spath .. | .mref _ | .store _ => .error .stuck
+  | .val _ | .spath .. | .mref _ | .store _ | .unset => .error .stuck
 
 end Close
 
@@ -371,7 +372,7 @@ theorem Tm.eval_pvP (x : Var) : (Tm.pvP x : PTerm C).eval σ = aliasPath σ x :=
 theorem Tm.eval_pvS (x : Var) : (Tm.pvS x : STerm C).eval σ = (do
     match ← σ.getEnv x with
     | .store st => pure { σ with storage := st }
-    | .val _ | .spath .. | .mref _ | .ledger _ => .error .stuck) := rfl
+    | .val _ | .spath .. | .mref _ | .ledger _ | .unset => .error .stuck) := rfl
 theorem Tm.eval_app0 {s : Srt} (o : Op0 s) : (Tm.app0 o : Tm C s).eval σ = o.eval σ := rfl
 theorem Tm.eval_app1 {a s : Srt} (o : Op1 a s) (x : Tm C a) :
     (Tm.app1 o x).eval σ = o.eval σ (x.eval σ) := rfl

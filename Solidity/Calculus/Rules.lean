@@ -333,8 +333,9 @@ inductive Taclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise C �
       dl{ ⟨[ T v; ]⟩ ⇝ { v := defVal(T) } ⟨[ ]⟩ }
   | storageLocalDeclInitDrop :
       dl{ ⟨[ T storage lsv = rhs; ]⟩ ⇝ ⟨[ lsv = rhs; ]⟩ }
+  -- Lean only: KeY binds nothing; `unset` makes a read through `lsv` revert
   | storageLocalDeclSkip :
-      dl{ ⟨[ T storage lsv; ]⟩ ⇝ ⟨[ ]⟩ }
+      dl{ ⟨[ T storage lsv; ]⟩ ⇝ { lsv := unset } ⟨[ ]⟩ }
   | memoryLocalDeclInitDrop :
       dl{ ⟨[ T memory mv = mrhs; ]⟩ ⇝ ⟨[ mv = mrhs; ]⟩ }
   | memoryReferenceDeclFreshAlloc :

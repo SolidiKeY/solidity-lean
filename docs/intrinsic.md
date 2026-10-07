@@ -24,7 +24,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
 | # | Status | Work |
 |---|---|---|
 | M0 | | baselines + scratch spike, gate G0 |
-| M1 | (a), (b) done | stuck causes that need no index |
+| M1 | (a)–(e) done | stuck causes that need no index |
 | M2 | | `Ctx`/`Idx`/`Thin`, typed `Core` syntax, `resolve` |
 | M3 | | `Env Γ`, `State C Γ`, typed run; delete the locals checker |
 | M4 | | typed values, storage, heap; delete `stuck`; retire old `Stmt` |
@@ -57,6 +57,25 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
   taclets' implicit binders (`Examples/Notation.lean` pins,
   `SortCheck/Faithfulness.lean`), which the SolKey reader's `GenProved`
   must be regenerated for.
+- (c) The seven captures that did not declare their local now do
+  (`captureAs`): `elabOpTarget`'s `ie` (two), `elabIncTarget`'s `sp`/`mv`
+  (four), `elabSize`'s `se`.  The rest declare it already: `hoist`'s call
+  captures after the call, a callee's renamed locals, loop flags and
+  modifier parameters when their raw declaration is elaborated, a call's
+  arguments and return variables in the callee's own context (`Γf`).
+- (d) A storage conditional of references is
+  `T storage sp1; if (c) { sp1 = a; } else { sp1 = b; }` (`hoist`; the
+  `Syntax.lean` pin).  A memory one still declares its `mv` in each branch:
+  `T memory mv1;` would allocate, so it waits for M2's scoped branches.
+- (e) `Binding.unset`: `declStorage R x none` binds it, `aliasPath` reverts
+  on it.  `storageLocalDeclSkip` is `T storage lsv; ⇝ {lsv := unset} ⟨[ ]⟩`
+  (`UpdElem.unset`, printed and read as `lsv := unset`, a keyword in
+  `dl!{}`; rule-map deviation row, solc-alignment row).  `Stmt.wt` adds
+  `x` at its alias type (`BTy.matchesB` accepts `unset`), the EVM forgets
+  it (`Sim.unbind`), and Decide carries it as `SymB.unset`, a read through
+  it outside the fragment.  Pins changed: the `Syntax.lean` conditional
+  pin and the `StorageCoverage.storageLocalDeclSkip` chain's last line
+  (`{ acc := unset } φ`); no `#guard_msgs` output changed.
 
 ## Baselines (M0)
 

@@ -235,6 +235,10 @@ inductive Binding where
   /-- A whole ledger: KeY's `oldNet`, which a specification's `\old(net(a))`
   reads; no statement binds one either. -/
   | ledger (l : List (Int × Int))
+  /-- An alias declared without a path, `T storage p;` (`declStorage R x
+  none`): a read or a write through it reverts.  solc rejects such a read
+  statically; KeY's `storageLocalDeclSkip` leaves the variable unbound. -/
+  | unset
   deriving Repr, DecidableEq
 
 /-- How an external call ends, as its caller sees it: it returns this data,
@@ -1112,6 +1116,7 @@ variable {C : Contract}
 def aliasPath (σ : State) (x : Var) : Res (Name × List Seg) := do
   match ← σ.getEnv x with
   | .spath root segs => pure (root, segs)
+  | .unset => .error .revert
   | .val _ | .mref _ | .store _ | .ledger _ => .error .stuck
 
 /-- A word is stored as it is. -/
@@ -1152,7 +1157,7 @@ def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
   | .local x => do
     match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
   | .env k _ => pure (.int (σ.envVal k))
 
 /-- The length of the array at a storage path: `values.length`. -/
@@ -1197,7 +1202,7 @@ def MPath.mval (σ : State) : {T : Ty} → MPath C T → Res MVal
   | _, .var x _ => do
     match ← σ.getEnv x with
     | .mref id => pure (.ref id)
-    | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
+    | .val _ | .spath .. | .store _ | .ledger _ | .unset => .error .stuck
   | _, .loc l => l.read σ
 
 def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal
@@ -1340,7 +1345,7 @@ def opStore (σ : State) (op : BinOp) (p : PrimTy) (root : Name) (segs : List Se
 def opLocal (σ : State) (op : BinOp) (p : PrimTy) (x : Var) (v : Value) : Res State := do
   let old ← match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
   let new ← applyBinOp op old v
   let new ← checkArith (.prim p) new
   pure (σ.setEnv x (.val new))
@@ -1384,7 +1389,7 @@ def bumpStore (σ : State) (op : IncDec) (p : PrimTy) (root : Name) (segs : List
 def bumpLocal (σ : State) (op : IncDec) (p : PrimTy) (x : Var) : Res (State × Value) := do
   let old ← match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
   let oldInt ← old.asInt
   let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
   pure (σ.setEnv x (.val new), if op.isPre then new else old)
@@ -1788,7 +1793,7 @@ def Stmt.run (σ : State) : Stmt C → Res State
     pure (σ.setEnv x (.val v))
   | .declStorage _ x init =>
     match init with
-    | none => pure σ
+    | none => pure (σ.setEnv x .unset)
     | some r => r.bind σ x
   | .declMem R x init _ _ => do
     match init with

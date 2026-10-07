@@ -131,8 +131,9 @@ theorem aliasBindMember :
   sol_symex
   sol_close
 
-/-- `Person storage p; age = 7;` — an alias declared without a target binds
-nothing (`storageLocalDeclSkip`, `storage-local-decl-skip.key`). -/
+/-- `Person storage p; age = 7;` — an alias declared without a target is
+bound to no path, `{p := unset}` (`storageLocalDeclSkip`,
+`storage-local-decl-skip.key`, where KeY binds nothing). -/
 theorem localDeclSkip :
     ⊨ dl!{ [ Person storage p; age = 7; uint result = age; ] result == 7 } := by
   sol_symex

@@ -199,7 +199,8 @@ mutual
 
 /-- The context a statement leaves, if its locals are used as declared:
 `uint x = 1;` adds `x : uint`, `x = x + 1;` needs it.  `Person storage p;`
-binds nothing at run time, so it adds nothing.  An `if` keeps the context
+adds `p` too, bound to no path (`Binding.unset`, through which a read
+reverts), so `p = alice;` may follow.  An `if` keeps the context
 it started with, and each branch must not rebind what that context binds
 (`Ctx.le`): the interpreter has no scopes, so a branch's declaration
 outlives it, and one that retyped an outer local would break the join. -/
@@ -212,7 +213,7 @@ def Stmt.wt (Γ : Ctx) : Stmt C → Option Ctx
     if init.all (·.wt Γ) then some (setBy x (.stack (.prim p)) Γ) else none
   | .declStorage R x init =>
     match init with
-    | none => some Γ
+    | none => some (setBy x (.path (.ref R)) Γ)
     | some r => if r.wt Γ then some (setBy x (.path (.ref R)) Γ) else none
   | .opAssign _ _ _ l r => if l.wt Γ && r.wt Γ then some Γ else none
   | .incDec _ _ l => if l.wt Γ then some Γ else none
@@ -579,6 +580,7 @@ theorem Simple.eval_wt (hwt : RunWT C Γ H σ) {p : PrimTy} {s : Simple C p} {w 
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
     | ledger _ => exact nomatch h
+    | unset => exact nomatch h
   | env k hp => subst hp; cases h; rfl
 
 mutual
@@ -599,6 +601,7 @@ theorem SPath.resolve_wt (hwt : RunWT C Γ H σ) :
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
     | ledger _ => exact nomatch h
+    | unset => exact nomatch h
   | _, .loc l, r, segs, hw, h => Loc.resolve_wt hwt l hw h
 
 /-- `alice.age` resolves to `(alice, [age])`, which the layout types `uint`. -/
@@ -638,6 +641,7 @@ theorem MPath.mval_wt (hwt : RunWT C Γ H σ) :
     | spath _ _ => exact nomatch h
     | store _ => exact nomatch h
     | ledger _ => exact nomatch h
+    | unset => exact nomatch h
   | _, .loc l, mv, hw, h => MLoc.read_wt hwt l hw h
 
 /-- `m.age` reads a slot the heap types `uint`. -/
@@ -1115,6 +1119,7 @@ theorem OpLoc.store_wt (hwt : RunWT C Γ H σ) {op : BinOp} (hop : op.isArith = 
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
     | ledger _ => exact nomatch h
+    | unset => exact nomatch h
   | p, .root r hr, v, hp, _, h => opStore_wt hwt hop hp (Contract.layout_tyAt_root hr) h
   | p, .field b f hf, v, hp, hw, h => by
     obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
@@ -1187,6 +1192,7 @@ theorem OpLoc.bump_wt (hwt : RunWT C Γ H σ) {op : IncDec} :
     | mref _ => exact nomatch h
     | store _ => exact nomatch h
     | ledger _ => exact nomatch h
+    | unset => exact nomatch h
   | p, .root r hr, w, hp, _, h => bumpStore_wt hwt hp (Contract.layout_tyAt_root hr) h
   | p, .field b f hf, w, hp, hw, h => by
     obtain ⟨⟨rt, segs⟩, hr, h⟩ := bind_ok_inv h
@@ -1422,7 +1428,7 @@ theorem Stmt.run_wt : ∀ (s : Stmt C) {Γ Γ' : Ctx} {H : HeapTy} {σ σ' : Sta
     cases init with
     | none =>
       cases hs; cases h
-      exact ⟨H, .refl H, hwt⟩
+      exact ⟨H, .refl H, hwt.setEnv (by simp [BTy.matchesB])⟩
     | some r =>
       obtain ⟨hc, rfl⟩ := wt_if hs
       obtain ⟨σ₁, root, segs, hwt₁, hty, rfl⟩ := ARhs.bind_wt hwt hc h

@@ -362,6 +362,9 @@ inductive SymB where
   | stor (s : LStor)
   /-- A memory local bound to the object a name denotes. -/
   | mref (i : LId)
+  /-- An alias bound to no path (`{ lsv := unset }`): a read through it is
+  outside the fragment. -/
+  | unset
   deriving Inhabited
 
 /-- The updates so far: the names bound, newest first, the storage, and the
@@ -629,7 +632,7 @@ def _root_.Solidity.Tm.toL (ρ : Sym) : Tm C s → s.LTy
   | .pvV x =>
     match lookupBy x ρ.env with
     | some (.val t) => t
-    | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) => .err
+    | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) | some .unset => .err
     | none => .var x
   | .pvP x =>
     match lookupBy x ρ.env with
@@ -657,7 +660,7 @@ def SymB.vars : SymB → List Var
   | .path q => q.vars
   | .stale q => q.vars
   | .stor s => s.vars
-  | .mref _ => []
+  | .mref _ | .unset => []
 
 /-- The locals the updates so far read: a quantifier may bind none of them. -/
 def Sym.vars (ρ : Sym) : List Var :=
@@ -748,7 +751,7 @@ def _root_.Solidity.Tm.inL (ρ : Sym) : Tm C s → Bool
   | .pvP x =>
     match lookupBy x ρ.env with
     | some (.path _) | some (.val _) => true
-    | some (.stale _) | some (.stor _) | some (.mref _) | none => false
+    | some (.stale _) | some (.stor _) | some (.mref _) | some .unset | none => false
   | .pvS _ => false
   | .pvI x =>
     match lookupBy x ρ.env with
@@ -898,6 +901,7 @@ def _root_.Solidity.UpdElem.toL (ρ : Sym) : UpdElem C → LTerm × Sym
     match m.toL ρ with
     | some (M, g) => if M.within memSize then (g, { ρ with mem := M }) else (.err, ρ)
     | none => (.err, ρ)
+  | .unset x => (.lit (.bool true), { ρ with env := (x, .unset) :: ρ.env })
   | .selfBalance .. | .saveNet .. | .saveNetMt .. | .netMt .. | .setBalance .. => (.err, ρ)
 
 /-- The memory an update leaves holds at most `memSize` writes and
@@ -908,8 +912,8 @@ def memWithin : Option (LMem × LTerm) → Bool
 
 /-- An update in the fragment: a local, an alias, the storage, a storage
 variable bound to it, a ledger entry (`transfer`'s, which no term of the
-fragment reads), a memory local bound to a name, or the memory (within
-`memSize`); no funds. -/
+fragment reads), a memory local bound to a name, an alias bound to no path
+(`unset`), or the memory (within `memSize`); no funds. -/
 def _root_.Solidity.UpdElem.inL (ρ : Sym) : UpdElem C → Bool
   | .val _ t => t.inL ρ
   | .path _ p => p.inL ρ
@@ -918,6 +922,7 @@ def _root_.Solidity.UpdElem.inL (ρ : Sym) : UpdElem C → Bool
   | .net r _ a | .pay r a => r.inL ρ && a.inL ρ
   | .mref _ i => i.inL ρ
   | .memory m => m.inL ρ && memWithin (m.toL ρ)
+  | .unset _ => true
   | .selfBalance .. | .saveNet .. | .saveNetMt .. | .netMt .. | .setBalance .. => false
 
 /-- `{x := freshId(addM(memory)) ‖ memory := addM(memory)}`, or the same of
@@ -1100,6 +1105,7 @@ def EnvRel (σ τ : State) (B : MemNames.Births) (x : Var) : Option SymB → Pro
       τ.getEnv x = .ok (.spath r segs)
   | some (.stor s) => ∃ st, s.eval σ = .ok (.struct st) ∧ τ.getEnv x = .ok (.store st)
   | some (.mref i) => ∃ n, LId.evalR B i = .ok n ∧ τ.getEnv x = .ok (.mref n)
+  | some .unset => τ.getEnv x = .ok .unset
 
 /-- The memory `M` runs from `σ` to the heap and the next identity of `τ`. -/
 def MemAt (σ : State) (M : LMem) (τ : State) : Prop :=
@@ -1178,7 +1184,7 @@ theorem Rel.free {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) {x : Var} (hx : x
         simp only [Sym.free, lookupBy, hy, ↓reduceIte]
       rw [hl]
       have he := h.env y
-      rcases hb : lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | ⟨q⟩ | ⟨S⟩ | ⟨k⟩ <;> rw [hb] at he <;>
+      rcases hb : lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | ⟨q⟩ | ⟨S⟩ | ⟨k⟩ | _ <;> rw [hb] at he <;>
         simp only [EnvRel] at he ⊢ <;>
         simp only [State.getEnv_setEnv_ne hy]
       · exact he
@@ -1194,6 +1200,7 @@ theorem Rel.free {σ τ : State} {ρ : Sym} (h : Rel σ ρ τ) {x : Var} (hx : x
       · have hv := lookupBy_vars (x := x) ρ.env hb hx₂
         simp only [SymB.vars] at hv
         rw [LStor.eval_setEnv _ hv]; exact he
+      · exact he
       · exact he
   · obtain ⟨μ, B, hr, hh⟩ := h.mem
     exact ⟨μ, B, by rw [show (ρ.free x).mem = ρ.mem from rfl, LMem.run_setEnv _ hx₃]; exact hr,
@@ -1746,7 +1753,7 @@ theorem lookupBy_onWrite (y : Var) : ∀ (env : List (Var × SymB)),
 theorem EnvRel.onWrite {σ τ τ' : State} {B : MemNames.Births} {y : Var} {o : Option SymB}
     (h : EnvRel σ τ B y o) (he : τ'.getEnv y = τ.getEnv y) :
     EnvRel σ τ' B y (o.map SymB.onWrite) := by
-  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨s⟩ | ⟨k⟩
+  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨s⟩ | ⟨k⟩ | _
   · simp only [EnvRel, Option.map] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
   · simp only [EnvRel] at h
@@ -1756,6 +1763,7 @@ theorem EnvRel.onWrite {σ τ τ' : State} {B : MemNames.Births} {y : Var} {o : 
       exact ⟨r, segs, h₁, by rw [he]; exact h₂, LiveTo.of_noAt _ (LPath.noAt_eval σ hn h₁)⟩
     · simp only [Option.map, SymB.onWrite, hn, if_false, EnvRel, Bool.false_eq_true]
       exact ⟨r, segs, h₁, by rw [he]; exact h₂⟩
+  · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
   · simp only [EnvRel, Option.map, SymB.onWrite] at h ⊢; rw [he]; exact h
@@ -1799,7 +1807,7 @@ open MemNames in
 /-- A name's relation holds in a run that allocates more. -/
 theorem EnvRel.grow {σ τ : State} {B B' : Births} (hp : B <+: B') {x : Var} {o : Option SymB}
     (h : EnvRel σ τ B x o) : EnvRel σ τ B' x o := by
-  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨s⟩ | ⟨j⟩
+  rcases o with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨s⟩ | ⟨j⟩ | _
   · exact h
   · exact h
   · exact h
@@ -1807,6 +1815,7 @@ theorem EnvRel.grow {σ τ : State} {B B' : Births} (hp : B <+: B') {x : Var} {o
   · exact h
   · obtain ⟨n, hn, he⟩ := h
     exact ⟨n, LId.evalR_prefix hp hn, he⟩
+  · exact h
 
 open MemNames in
 /-- A name's relation reads only the name's binding and the storage. -/
@@ -1968,7 +1977,7 @@ theorem Term.toL_step (h : Rel σ ρ τ) {n : Nat}
     have hx := h.env x
     rw [Close.Term.eval_pv]
     apply Sim.of_eq
-    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨S⟩ | ⟨k⟩ <;> rw [hl] at hx <;>
+    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨S⟩ | ⟨k⟩ | _ <;> rw [hl] at hx <;>
       simp only [EnvRel] at hx <;> simp only [Tm.toL, hl]
     · rw [hx]; rfl
     · obtain ⟨v, h₁, h₂⟩ := hx; rw [h₁, h₂]; rfl
@@ -1976,6 +1985,7 @@ theorem Term.toL_step (h : Rel σ ρ τ) {n : Nat}
     · obtain ⟨r, segs, -, h₂⟩ := hx; rw [h₂]; rfl
     · obtain ⟨st, -, h₂⟩ := hx; rw [h₂]; rfl
     · obtain ⟨n', -, h₂⟩ := hx; rw [h₂]; rfl
+    · rw [hx]; rfl
   | .binop op p a b, hn, hf => by
     simp only [Tm.inL, Op2.inL, Bool.and_eq_true] at hf
     rw [Close.Term.eval_binop]
@@ -2141,7 +2151,7 @@ theorem PTerm.toL_step (h : Rel σ ρ τ) {n : Nat}
     have hx := h.env x
     rw [Close.PTerm.eval_pv]
     simp only [Tm.inL] at hf
-    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨S⟩ | ⟨k⟩ <;> rw [hl] at hx hf <;>
+    rcases hl : lookupBy x ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ | ⟨S⟩ | ⟨k⟩ | _ <;> rw [hl] at hx hf <;>
       simp only [EnvRel, Bool.false_eq_true] at hx hf <;>
       simp only [Tm.toL, hl]
     · obtain ⟨v, _, h₂⟩ := hx
@@ -3506,6 +3516,12 @@ theorem Fml.toL_holds :
         cases he
         obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
         exact Fml.toL_holds φ (h.setMem hrun hp hh) hf2
+    | unset x =>
+      rw [Close.UpdElem.write_unset]
+      refine after_guardM (by simp only [UpdElem.toL, LTerm.eval]; exact ⟨fun _ => ⟨_, rfl⟩,
+        fun _ => ⟨_, rfl⟩⟩) fun τ' hτ => ?_
+      cases hτ
+      exact Fml.toL_holds φ (h.bind x _ _ (by simp only [EnvRel, State.getEnv_setEnv_self])) hf.2
     | selfBalance _ _ | saveNet _ | saveNetMt _ | netMt _ _ | setBalance _ =>
       simp only [UpdElem.inL, Bool.false_eq_true, false_and] at hf
   | .modal m P φ, _, _, _, _, hf => by

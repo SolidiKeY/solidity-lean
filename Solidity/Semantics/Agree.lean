@@ -919,7 +919,7 @@ theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
       agree_run hag
   | .declStorage _ x init, h => by
     cases init with
-    | none => exact hag
+    | none => exact EnvAgreeExcept.setEnv_both hag _ _
     | some r => exact r.bind_frame hag x h.tail
   | .opAssign op _ _ l r, h => by
     simp only [Stmt.run, r.eval_frame hag h.right]
