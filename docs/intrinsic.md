@@ -738,11 +738,21 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
   escapes to the untyped call); `Rule`.
 - **`Taclet.toStep`, `LeanTaclet.toStep`, `Rule.toStep`,
   `Rule.premise_unique`** (`Calculus/Core/Taclet.lean`; axioms: `propext`):
-  one lemma per constructor, `#derive_toStep` writing 153 of the 168 by
-  `to_step_tac` (holes taken apart, side conditions settled, `rfl` after
-  case splits, each lemma its own heartbeat budget), the rest by hand (an
-  array's element type, a call's arguments, a hole that is a copy, a
-  conditional written to a member, the loop rules).  `Taclet.step_eq` stays
+  one lemma per constructor, 157 (153 `Taclet`, 4 `LeanTaclet`) replayed
+  from two `#replay_toStep` tables, 15 by hand (an array's element type, a
+  call's arguments, a hole that is a copy, a conditional written to a
+  member, the loop rules).  The table is the plan `#derive_toStep?` found
+  by `to_step_tac`'s search (holes taken apart, side conditions settled,
+  `rfl` after case splits, each lemma its own heartbeat budget), so a
+  re-check does not search (AGENTS.md, "Writing or fixing a tactic").  The
+  search never backtracked: every plan is "n goals, each by `rfl`", and the
+  replay costs what the search did, 19.2 s for `Taclet` (7 ms for
+  `LeanTaclet`), in the case splits and the `rfl`s, not in failed
+  attempts: `storageIndexWriteCaptureAllNonSimpleIndex` (1682 goals) and
+  `memoryIndexRead_unfold_rightSndIndex` (116) 4.8 s each,
+  `binopUnfoldLeft`/`Right` (667/609) 1.2 s each, the four
+  `storage…Read_unfold_right{Fst,SndResult}` 0.5–0.8 s each, the rest
+  under 0.3 s.  `Taclet.step_eq` stays
   as an alias (`Calculus/Core/Proves.lean` uses it).
 - **Printing** (`Calculus/Core/RuleText.lean`, `#check_rule_text`, pinned):
   140 of 158 `Taclet` lines and 6 of 9 `LeanTaclet` lines print as today's
@@ -751,7 +761,7 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
   W2**:
   - a hole's statement: `SHole.fill`/`MHole.fill`/`VHole.fill`/`NewLhs.fill`
     (with `SHole.up` and kin transparent) to today's `Hole.fill` and kin —
-    the eight `…_unfold_right…` reads through `lhs`, `ternaryToIf`,
+    the six `…_unfold_right…` reads through `lhs`, `ternaryToIf`,
     `ternaryCaptureCond`, `newArrayCapture`;
   - `Tms.Term.bumped` to today's `Term.bumped` — the six
     `…IncrementAssignment` rules;
@@ -778,7 +788,12 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
 - Left: the Delab items above; `CallbackTaclet` on Core (W2 `tree`);
   `Tools/Inspect.lean` (not this lane's) still prints the deleted
   `Core.Taclet.erase` as a scoped taclet's soundness line, which should name
-  `Taclet.toStep`; `lake exe solkeycheck` was not run here (no rule names,
+  `Taclet.toStep` (`soundLine`: e.g. "sound: Solidity.Core.Taclet.toStep (the
+  premise is Stmt.step's; Core.Stmt.Sound)", and the same for
+  `Core.LeanTaclet`), then re-pin `Examples/Tactics/CorePrint.lean`'s
+  `#taclet`, which carries the stale line on purpose until then (its rule
+  moved from `storageFieldRead_unfold_rightFst`, which no longer prints as
+  today's, to `storageFieldDelete_unfold_leftFst`); `lake exe solkeycheck` was not run here (no rule names,
   sort annotations or `KeyTaclets.lean` changed).
 
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)

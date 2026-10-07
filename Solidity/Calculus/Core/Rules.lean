@@ -15,7 +15,8 @@ weakened past the fresh locals before them (`.there`, `up`), the premise's
 fresh locals popped after it (`Premise.unfold P (Ext.push^d .refl)`), a
 declaration's own local bound (`Premise.bind`) or declared (`Upd.decl`), a
 branch of an `if` a block.  `Calculus/Core/Delab.lean` prints each line as
-today's.
+today's, all but the rules `#check_rule_text` lists
+(`Calculus/Core/RuleText.lean`, deferred to W2's Delab).
 
 What a line needs that `Rules.lean` has under another shape is stated here
 first: the term symbols the lines write (`Tms`, the scoped `Term.find`,

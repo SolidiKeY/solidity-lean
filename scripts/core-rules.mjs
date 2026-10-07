@@ -15,7 +15,7 @@
 //   node scripts/core-rules.mjs --check  exit 1 if the copy is stale
 //   node scripts/core-rules.mjs --diff   print where the lines differ (exit 1 if they do)
 //
-// `scripts/check-rule-text.sh` runs `--diff`.
+// `scripts/check-rule-text.sh` runs `--diff`, then `--check`.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';

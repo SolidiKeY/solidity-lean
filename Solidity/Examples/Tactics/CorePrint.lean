@@ -6,8 +6,9 @@ import Solidity.Tools.Inspect
 # Scoped taclets and formulas, printed
 
 `Calculus/Core/Delab.lean`'s printers pinned: scoped taclets print
-their rule lines as today's do (`Calculus/Rules.lean`, every one of them:
-`Calculus/Core/RuleText.lean`), also under
+their rule lines as today's do (`Calculus/Rules.lean`), all but the rules
+`#check_rule_text` lists (`Calculus/Core/RuleText.lean`, deferred to W2's
+Delab), also under
 `#taclet` (`Tools/Inspect.lean`), and a formula the
 scoped strategy leaves prints, from its `Expr`, as `Core.Fml.show` prints
 the value: calls (with a tuple and a memory return) and `try` among them.
@@ -45,7 +46,12 @@ info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ
 -/
 #guard_msgs in #check @Core.Taclet.ifElseSplit
 
-/-! `#taclet` on a scoped taclet: its line, today's solkey taclets. -/
+/-! `#taclet` on a scoped taclet: its line, today's solkey taclets.  The
+rule is one that prints as today's (`storageFieldRead_unfold_rightFst`, a
+read through a hole, is on `#check_rule_text`'s list until W2's Delab).
+The `sound:` line is `Tools/Inspect.lean`'s, which still names the deleted
+`Core.Taclet.erase`: pinned as it prints until that file's owner makes it
+name `Taclet.toStep` (`docs/intrinsic.md`, W1 lane `rules`, "Left"). -/
 
 /--
 info: Solidity.Core.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}

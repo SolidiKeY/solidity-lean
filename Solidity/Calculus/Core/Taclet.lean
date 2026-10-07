@@ -12,11 +12,14 @@ with no proof per rule.
 
 The proof is one lemma per constructor (`Taclet.<rule>.toStep`), each its
 own declaration, so that a rule added checks alone.  Most are written by
-`#derive_toStep`: the hole a rule writes through is taken apart, the side
+`to_step_tac`: the hole a rule writes through is taken apart, the side
 conditions that compute are settled, the parts a side condition speaks of
 taken apart until it does (`core_cases_part`, as `Uniqueness.lean`'s
 `cases_part`), and what is left closes by `rfl`, or after taking apart a
-path, a location or a value the dispatcher reads (`core_brute`).  The rules
+path, a location or a value the dispatcher reads (`core_brute`, which
+searches).  The search runs once, under `#derive_toStep?`, which offers the
+plans it found as a `#replay_toStep` table; the file keeps the table, and
+its replay tries no `rfl` the search saw fail and undoes no split.  The rules
 whose dispatcher branches on what no side condition decides by computing
 (an array's element type, a call's arguments, a read through a hole that
 is a copy, a conditional written to a member) are proved by hand first.
@@ -98,58 +101,173 @@ elab "core_cases_part" : tactic => withMainContext do
         return
   throwError "core_cases_part: no part to case on"
 
+/-- The parts `core_brute` splits, in the order it tries them, by the letter
+a replay plan names them with. -/
+def coreBruteHeads : List (Char × Lean.Name) :=
+  [('S', ``SPath), ('M', ``MPath), ('L', ``Loc), ('m', ``MLoc), ('R', ``MSrc), ('V', ``Val)]
+
+/-- The plans of consecutive goals, a run of one plan written once after
+its length (`58.`: fifty-eight goals, each by `rfl`). -/
+def corePlans (ps : List String) : String :=
+  let runs := ps.foldl (init := ([] : List (Nat × String))) fun
+    | (n, q) :: rs, p => if p == q then (n + 1, q) :: rs else (1, p) :: (n, q) :: rs
+    | [], p => [(1, p)]
+  String.join (runs.reverse.map fun (n, p) => if n == 1 then p else s!"{n}{p}")
+
 /-- `rfl`, or a case split on a part the dispatcher reads (a path, a
-location, a memory source, a value), `n` deep. -/
-partial def coreBrute : Nat → TacticM Unit
-  | 0 => do evalTactic (← `(tactic| rfl))
+location, a memory source, a value), `n` deep.  Returns the plan that
+closed the goal: `.` for `rfl`, `S(…)` for a split on an `SPath` and the
+plans of its cases (`corePlans`). -/
+partial def coreBrute : Nat → TacticM String
+  | 0 => do evalTactic (← `(tactic| rfl)); return "."
   | n + 1 => do
-    try evalTactic (← `(tactic| rfl))
+    try evalTactic (← `(tactic| rfl)); return "."
     catch _ =>
-      for heads in [[``SPath], [``MPath], [``Loc], [``MLoc], [``MSrc], [``Val]] do
+      for (c, h) in coreBruteHeads do
         let s ← saveState
         try
-          unless ← coreCasesFirst heads do continue
+          unless ← coreCasesFirst [h] do continue
+          let mut plans := #[]
           for g in ← getGoals do
             setGoals [g]
-            coreBrute n
+            plans := plans.push (← coreBrute n)
           setGoals []
-          return
+          return s!"{c}({corePlans plans.toList})"
         catch _ => s.restore
       throwError "core_brute: no split closes the goal"
 
-elab "core_brute" : tactic => coreBrute 2
+/-- The plan of one goal at the head of `cs`, and what follows it. -/
+partial def corePlanSpan (cs : List Char) : List Char × List Char :=
+  let rec go : Nat → List Char → List Char → List Char × List Char
+    | 0, acc, '.' :: rest => ((acc ++ ['.']), rest)
+    | d, acc, '(' :: rest => go (d + 1) (acc ++ ['(']) rest
+    | 1, acc, ')' :: rest => ((acc ++ [')']), rest)
+    | d + 1, acc, ')' :: rest => go d (acc ++ [')']) rest
+    | d, acc, c :: rest => go d (acc ++ [c]) rest
+    | _, acc, [] => (acc, [])
+  go 0 [] cs
 
-/-- A constructor's premise is `Stmt.step`'s. -/
-macro "to_step_tac" : tactic => `(tactic| (
-  (try core_cases_hole) <;> core_settle_side <;>
-  (repeat' (core_cases_part <;> core_settle_side)) <;> core_brute))
+mutual
+/-- `coreBrute`'s plan replayed on one goal: no `rfl` tried that the search
+saw fail, no split undone. -/
+partial def coreReplay : List Char → TacticM Unit
+  | ['.'] => do evalTactic (← `(tactic| rfl))
+  | c :: '(' :: rest => do
+    let some (_, h) := coreBruteHeads.find? (·.1 == c) | throwError "core_replay: no part `{c}`"
+    unless ← coreCasesFirst [h] do throwError "core_replay: no `{h}` to split"
+    let left ← coreReplayGoals (← getGoals) rest
+    unless left == [')'] do throwError "core_replay: `)` expected"
+  | p => throwError "core_replay: no plan `{String.mk p}`"
 
-/-- `Taclet.<rule>.toStep` for every constructor without one, by
-`to_step_tac`: its statement the constructor's, `Stmt.step` of the
-statement the premise, the side conditions hypotheses. -/
-elab "#derive_toStep " j:ident : command => do
-  let J ← Command.liftCoreM <| realizeGlobalConstNoOverload j
+/-- The plans of `gs`, read off the head of a plan (`corePlans`); what follows
+them. -/
+partial def coreReplayGoals : List MVarId → List Char → TacticM (List Char)
+  | [], cs => do setGoals []; return cs
+  | gs, cs => do
+    let digits := cs.takeWhile Char.isDigit
+    let n := if digits.isEmpty then 1 else (String.mk digits).toNat!
+    let (p, rest) := corePlanSpan (cs.drop digits.length)
+    if p.isEmpty then throwError "core_replay: the plan ended"
+    if gs.length < n then throwError "core_replay: the plan has more goals than the proof"
+    for g in gs.take n do
+      setGoals [g]
+      coreReplay p
+    coreReplayGoals (gs.drop n) rest
+end
+
+/-- What `to_step_tac` does before it searches: the hole taken apart, the
+side conditions settled, the parts they speak of taken apart until they do. -/
+def toStepPrefix : TacticM Unit := do
+  evalTactic (← `(tactic| (intros; (try core_cases_hole) <;> core_settle_side <;>
+    (repeat' (core_cases_part <;> core_settle_side)))))
+
+/-- A constructor's premise is `Stmt.step`'s, by a search; its plan. -/
+def toStepSearch : TacticM String := do
+  toStepPrefix
+  let mut plans := #[]
+  for g in ← getGoals do
+    setGoals [g]
+    plans := plans.push (← coreBrute 2)
+  setGoals []
+  return corePlans plans.toList
+
+/-- A constructor's premise is `Stmt.step`'s, by the plan a search found. -/
+def toStepReplay (plan : String) : TacticM Unit := do
+  toStepPrefix
+  let rest ← coreReplayGoals (← getGoals) plan.toList
+  unless rest.isEmpty do throwError "core_replay: the plan has more goals than the proof"
+
+elab "core_brute" : tactic => discard <| coreBrute 2
+
+/-- A constructor's premise is `Stmt.step`'s (searches; `to_step_replay`
+replays). -/
+elab "to_step_tac" : tactic => discard toStepSearch
+
+elab "to_step_replay " plan:str : tactic => toStepReplay plan.getString
+
+/-- `Taclet.<rule>.toStep`'s statement: the constructor's statement, `Stmt.step`
+of the statement the premise, the side conditions hypotheses. -/
+def toStepType (c : Lean.Name) : MetaM Expr := do
+  let ty ← forallTelescope (← getConstInfo c).type fun xs body => do
+    let args := body.getAppArgs
+    let concl ← mkEq (← mkAppM ``Stmt.step #[args[1]!, args[2]!, args[5]!])
+      (← mkAppM ``Option.some #[args[6]!])
+    mkForallFVars xs concl
+  return ty.replace fun e => if e.isAppOfArity ``autoParam 2 then some (e.getArg! 0) else none
+
+/-- Add `c.toStep`, proved by `tac`, in its own heartbeat budget; what `tac`
+returned, or an error logged. -/
+def addToStep {α} (c : Lean.Name) (tac : TacticM α) : Command.CommandElabM (Option α) :=
+  Command.liftTermElabM <| withCurrHeartbeats do
+    let ty ← toStepType c
+    let mvar ← mkFreshExprMVar ty
+    let r ← tryCatchRuntimeEx (do
+        let out ← IO.mkRef none
+        let gs ← Term.withoutErrToSorry <|
+          Tactic.run mvar.mvarId! do out.set (some (← tac))
+        let a ← out.get
+        pure (if gs.isEmpty && !(← instantiateMVars mvar).hasSorry then a else none))
+      (fun ex => do logError m!"{c}: {ex.toMessageData}"; pure none)
+    let some a := r | throwError "no proof that `{c}` is `Stmt.step`'s rule"
+    addDecl (Declaration.thmDecl
+      { name := c ++ `toStep, levelParams := [], type := ty, value := ← instantiateMVars mvar })
+    return some a
+
+/-- The constructors of `J` without a `toStep` lemma. -/
+def missingToStep (J : Lean.Name) : Command.CommandElabM (Array Lean.Name) := do
   let some (.inductInfo ii) := (← getEnv).find? J | throwError "no inductive `{J}`"
-  for c in ii.ctors do
-    let n := c ++ `toStep
-    if (← getEnv).contains n then continue
-    Command.liftTermElabM <| withCurrHeartbeats do
-      let ty ← forallTelescope (← getConstInfo c).type fun xs body => do
-        let args := body.getAppArgs
-        let concl ← mkEq (← mkAppM ``Stmt.step #[args[1]!, args[2]!, args[5]!])
-          (← mkAppM ``Option.some #[args[6]!])
-        mkForallFVars xs concl
-      let ty := ty.replace fun e =>
-        if e.isAppOfArity ``autoParam 2 then some (e.getArg! 0) else none
-      let mvar ← mkFreshExprMVar ty
-      let ok ← tryCatchRuntimeEx (do
-          let gs ← Term.withoutErrToSorry <|
-            Tactic.run mvar.mvarId! (evalTactic (← `(tactic| (intros; to_step_tac))))
-          pure (gs.isEmpty && !(← instantiateMVars mvar).hasSorry))
-        (fun ex => do logError m!"{c}: {ex.toMessageData}"; pure false)
-      unless ok do throwError "#derive_toStep: no proof that `{c}` is `Stmt.step`'s rule"
-      let val ← instantiateMVars mvar
-      addDecl (Declaration.thmDecl { name := n, levelParams := [], type := ty, value := val })
+  let env ← getEnv
+  return ii.ctors.toArray.filter fun c => !env.contains (c ++ `toStep)
+
+/-- `#derive_toStep? J` searches a `Taclet.<rule>.toStep` for every
+constructor of `J` without one (`to_step_tac`), and offers the
+`#replay_toStep` table that replays the plans it found.  Run it once, after
+a rule is added; the file keeps the table. -/
+elab tk:"#derive_toStep? " j:ident : command => do
+  let J ← Command.liftCoreM <| realizeGlobalConstNoOverload j
+  let t0 ← IO.monoMsNow
+  let mut rows : Array String := #[]
+  for c in ← missingToStep J do
+    let some plan ← addToStep c toStepSearch | pure ()
+    rows := rows.push s!"\n  {c.replacePrefix J .anonymous} \"{plan}\""
+  let text := s!"#replay_toStep {j.getId}" ++ String.join rows.toList
+  Command.liftTermElabM do
+    logInfoAt tk m!"searched in {(← IO.monoMsNow) - t0} ms"
+    Lean.Meta.Tactic.TryThis.addSuggestion tk { suggestion := .string text }
+
+/-- `#replay_toStep J  r₁ "plan₁" …` proves `J.rᵢ.toStep` by
+`to_step_replay "planᵢ"`, the plan `#derive_toStep?` found, and fails if a
+constructor of `J` is then left without its lemma. -/
+syntax (name := replayToStep) "#replay_toStep " ident (ppLine ident ppSpace str)* : command
+
+elab_rules : command
+  | `(#replay_toStep $j $[$cs $ps]*) => do
+    let J ← Command.liftCoreM <| realizeGlobalConstNoOverload j
+    for c in cs, p in ps do
+      discard <| addToStep (J ++ c.getId) (toStepReplay p.getString)
+    let left ← missingToStep J
+    unless left.isEmpty do
+      throwError "#replay_toStep: no lemma for {left.toList}; run `#derive_toStep? {J}`"
 
 /-- Close `s.step k m = some p` for the case of `cases h` it is, by its
 constructor's lemma. -/
@@ -372,8 +490,165 @@ theorem LeanTaclet.functionCallArgCapture.toStep {f : Name} {ps : Ctx} {args : A
 
 end Hand
 
-#derive_toStep Taclet
-#derive_toStep LeanTaclet
+/-! The plans `#derive_toStep? Taclet` and `#derive_toStep? LeanTaclet` found:
+a count of goals the prefix leaves, each closed by `rfl`. -/
+
+#replay_toStep Taclet
+  storageFieldRead_unfold_rightFst "14."
+  storageIndexRead_unfold_rightFst "14."
+  storageFieldRead_unfold_rightSndResult "8."
+  storageIndexRead_unfold_rightSndResult "8."
+  storageFieldWrite_unfold_leftFst "58."
+  storageFieldWriteStorageRef_unfold_leftFst "2."
+  storageIndexWriteCaptureAllComplexRecv "58."
+  storageIndexWriteStorageRefCaptureAllComplexRecv "2."
+  storageIndexWriteCaptureAllNonSimpleIndex "1682."
+  storageIndexWriteStorageRefCaptureAllNonSimpleIndex "58."
+  storageRootWriteValueRhsCapture "28."
+  fieldWriteValueRhsCapture "56."
+  indexWriteValueRhsCapture "56."
+  storageFieldDelete_unfold_leftFst "2."
+  storageIndexDelete_unfold_leftFst "2."
+  storageIndexDeleteNonSimpleIndexCapture "58."
+  localValueDeclInitDrop "."
+  valueDeclSkip "."
+  storageLocalDeclInitDrop "."
+  storageLocalDeclSkip "."
+  memoryLocalDeclInitDrop "."
+  memoryReferenceDeclFreshAlloc "."
+  localValueAssign "."
+  storageRootReadSelect "."
+  storageFieldReadFind "2."
+  storageIndexReadMappingFind "2."
+  storageIndexReadArrayFind "2."
+  storageRootWriteStore "."
+  storageRootWriteCopySource "2."
+  storageFieldReadStoreRoot "2."
+  storageIndexReadMappingStoreRoot "2."
+  storageIndexReadArrayStoreRoot "2."
+  storageFieldWriteSave "2."
+  storageFieldWriteCopySource "4."
+  storageIndexWriteMappingSave "2."
+  storageIndexWriteArraySave "2."
+  storageIndexWriteMappingCopySource "4."
+  storageIndexWriteArrayCopySource "4."
+  storageLocalRootRebind "2."
+  storageFieldReadBindLocalRoot "2."
+  storageIndexReadMappingBindLocalRoot "2."
+  storageIndexReadArrayBindLocalRoot "2."
+  storageIndexReadArrayBindLocalRootMappingElement "2."
+  storageRootDelete "."
+  storageFieldDelete "2."
+  storageIndexDelete "2."
+  storageIndexArrayDelete "2."
+  storageLengthRead "2."
+  storageLengthRead_unfold_rightFst "2."
+  memoryLengthRead "."
+  memoryLengthRead_unfold_rightFst "."
+  binopAssignment "23."
+  binopUnfoldLeft "667."
+  binopUnfoldRight "609."
+  logicalAndShortCircuitRhs "29."
+  logicalOrShortCircuitRhs "29."
+  unopAssignment "."
+  unopCapture "29."
+  localOpAssign "."
+  storageRootOpAssign "."
+  storageFieldOpAssign "2."
+  storageIndexMappingOpAssign "2."
+  storageIndexArrayOpAssign "2."
+  memoryFieldOpAssign "."
+  memoryIndexArrayOpAssign "."
+  storageFieldOpAssignUnfoldLeftFst "2."
+  storageIndexOpAssignUnfoldLeftFst "2."
+  memoryFieldOpAssignUnfoldLeftFst "."
+  memoryIndexOpAssignUnfoldLeftFst "."
+  compoundAssignValueRhsCapture "29."
+  localIncrement "."
+  storageRootIncrement "."
+  storageFieldIncrement "2."
+  storageIndexIncrement "2."
+  memoryFieldIncrement "."
+  memoryIndexArrayIncrement "."
+  storageFieldIncrementUnfoldLeftFst "2."
+  storageIndexIncrementUnfoldLeftFst "2."
+  memoryFieldIncrementUnfoldLeftFst "."
+  memoryIndexIncrementUnfoldLeftFst "."
+  localAssignIncrement "."
+  storageRootIncrementAssignment "."
+  storageFieldIncrementAssignment "2."
+  storageIndexIncrementAssignment "2."
+  memoryFieldIncrementAssignment "."
+  memoryIndexArrayIncrementAssignment "."
+  storagePushValueSave "2."
+  storagePushValueCopySource "2."
+  storagePushValue_unfold_rightSndArgument "58."
+  storagePushValue_unfold_leftFstReceiver "2."
+  storagePush_unfold_leftFstReceiver "2."
+  storagePop_unfold_leftFstReceiver "2."
+  storageLocalRootPush_unfold_leftFstReceiver "2."
+  storageLocalRootPushBind "2."
+  storageLocalRootPushBindMappingElement "2."
+  transfer_unfold_leftFstReceiver "29."
+  transfer_unfold_rightSndArgument "29."
+  transferNoCallbackBox "."
+  send_unfold_leftFstReceiver "29."
+  send_unfold_rightSndArgument "29."
+  sendNoCallbackBox "."
+  sendNoCallbackDiamond "."
+  memoryFieldRead_unfold_rightFst "4."
+  memoryIndexRead_unfold_rightFst "4."
+  memoryIndexRead_unfold_rightSndIndex "116."
+  memoryFieldRead "."
+  memoryIndexReadArrayValue "."
+  memoryRootRebind "."
+  memoryFieldReadAliasRoot "."
+  memoryIndexReadArrayMemory "."
+  memoryFieldWrite "."
+  memoryIndexWriteArray "."
+  memoryFieldWriteCopy "3."
+  memoryIndexWriteCopy "3."
+  memoryIndexWriteCaptureAllComplexRecv "."
+  memoryIndexWriteMemRefCaptureAllComplexRecv "."
+  memoryIndexWriteCaptureAllNonSimpleIndex "29."
+  memoryIndexWriteMemRefCaptureAllNonSimpleIndex "29."
+  memoryFieldWriteUnfoldSource "28."
+  memoryIndexWriteUnfoldSource "28."
+  memoryRootDeleteFreshRebind "."
+  memoryFieldDeletePrimitive "."
+  memoryFieldDeleteReference "."
+  memoryIndexDeletePrimitive "."
+  memoryIndexDeleteReference "."
+  memoryFieldDelete_unfold_leftFst "."
+  memoryIndexDelete_unfold_leftFst "."
+  memoryIndexDeleteNonSimpleIndexCapture "29."
+  memoryArrayFreshAlloc "."
+  newArrayCapture "."
+  memoryStorageCopy "2."
+  memoryStorageCopyUnfold "2."
+  memoryToStorageStoreRoot "."
+  memoryToStorageFieldCopyRoot "2."
+  memoryToStorageIndexMappingCopyRoot "2."
+  memoryToStorageIndexArrayCopyRoot "2."
+  memoryToStorageField_unfold_leftFst "2."
+  memoryToStorageIndexCaptureAllComplexRecv "2."
+  memoryToStorageIndexCaptureAllNonSimpleIndex "58."
+  ifElseUnfold "29."
+  ifElseSplit "."
+  requireConditionCapture "29."
+  requireSimple "."
+  assertConditionCapture "29."
+  assertSimple "."
+  revertBox "."
+  revertDiamond "."
+  tryCallNoCallbackBox "."
+  blockEmpty "."
+
+#replay_toStep LeanTaclet
+  tryCallDiamond "."
+  transferDiamond "."
+  whileUnwind "."
+  loopExit "."
 
 /-! ## The rule `Stmt.step` fires -/
 
