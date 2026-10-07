@@ -30,9 +30,10 @@ otherwise — and elaborated by `elabProg`, which inlines the body
 the locals `_r0`, `_r1`, … (`runStmt`).  The program is resolved to the
 scoped syntax (`Core.Prog.resolve`) and run typed (`Core.Prog.trun`,
 `Semantics/Core/TypedRun.lean`) from the start state read at the contract's
-types (`typedState?`); a start state that is not is an error.  `DiffTest.lean` builds its calls the
-same way, but a call of several returns as the bare `f(a, b);`, whose returns
-the inlined body declares.
+types (`typedState?`): its storage, ledger, funds and transaction.  A start
+state that is not of those types, or that has locals or memory, is an error.
+`DiffTest.lean` builds its calls the same way, but a call of several returns
+as the bare `f(a, b);`, whose returns the inlined body declares.
 
 The output is `ok`, the value returned, and the storage one root per line
 (`fmtStorage`, of the storage erased); or `revert`, or `panic`.  A loop runs
@@ -105,10 +106,16 @@ def State.withTx (σ : State) (sender value time balance : Option Int) : State :
 def State.withRoots (σ : State) (roots : List (Name × SVal)) : State :=
   { σ with storage := roots.foldl (fun st (r, v) => setBy r v st) σ.storage }
 
-/-- A state of no locals and no memory, read at the contract's types: the
+/-- No locals and no memory: what the typed run's start state has
+(`Core.TState C []`, its heap empty). -/
+def noLocals (σ : State) : Bool :=
+  σ.env.isEmpty && σ.heap.isEmpty && σ.nextId == 0
+
+/-- A state of no locals and no memory (`none` for any other), read at the contract's types: the
 storage (`SFields.ofU`), the funds and the transaction's words as `uint`s,
 the ledger as it is; `none` where one is not of its type. -/
 def typedState? (C : Contract) (σ : State) : Option (Core.TState C []) := do
+  guard (noLocals σ)
   let st ← Core.SFields.ofU σ.storage C.vars
   let u (n : Int) : Option PrimTy.uint.Denote := PrimTy.ofValue? .uint (.int n)
   let bal ← u σ.selfBalance
@@ -140,6 +147,8 @@ def runReport [FreshNames] (C : Contract) (σ : State) (f : String) (args : List
     Except String (List String) := do
   let P ← elabProg C [← runStmt C f args]
   let ⟨Γ', Q⟩ ← Core.Prog.resolve [] P
+  unless noLocals σ do
+    throw "a start state with locals or memory is not supported by the typed run"
   let some τ := typedState? C σ | throw "the start state is not of the contract's types"
   let n : Nat := ((lookupBy f C.funs).map (·.rets.length)).getD 0
   pure <| match Core.Prog.trun τ Q with

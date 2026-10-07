@@ -495,7 +495,11 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
     `Frag.init (rs ++ ps)`; the caller's fragile aliases are dropped when the
     body may shrink an array (`Stmt.shrinks`), which the shared `TyCtx` did
     implicitly.  Out, as before: memory, `send`, `try`, loops, a call of
-    several returns (`CallRet.rets`, no code) or of a memory return.
+    several returns (`CallRet.rets`, no code) or of a memory return; since
+    W1 (lane `w1-evm`), also a struct copy at a type whose structs repeat a
+    member name (`assignIn` needs `(Ty.ref R).nodupS`, so a copy at `BadDup`
+    leaves the fragment): the typed run copies by position, the
+    representation reads by name.
   - Every definition over `Stmt`/`Prog` lists all 27 constructors, with no
     catch-all, and nested shapes go to helpers (`assignCode`, `opLocCode`,
     `assignIn`, `declStorageIn`).  A catch-all arm made the equation compiler
@@ -592,7 +596,12 @@ proof over `Core` is done, with no `sorry` and the axioms `propext`,
   condition 1's: `Stmt.rec` with the motive over the indices for
   `compileStmt`/`inFrag`, the `match` versions kept as `implemented_by`
   twins and for the equation lemmas.
-- M5.3, done (no `sorry`), over M3's `Core.Stmt.run`/`Core.Prog.run`:
+- M5.3, done (no `sorry`), over M3's `Core.Stmt.run`/`Core.Prog.run`.
+  **Superseded in W1** (lane `w1-evm`, "W1 evm lane" below): the symbols
+  these bullets name are gone; read `Look.ofTEnv` for `Look.ofEnv`,
+  `TState.sem` for `σ.glob`, `ValOutT`/`LocOutT` for `ValOut`/`LocOut`,
+  `Core.Prog.trun` from `freshT C 0 …` for `Core.Prog.run (State.ofSem
+  (State.fresh C 0))`.  The structure and the timings below are M5.3's.
   - `Evm/CoreExpr.lean`: `Look.ofEnv σ.env` instantiates `Look` (each
     local's `LTy.enc` of `Env.get`; `Look.ofEnv_cons`/`_set`/`_drop` are
     `Look.cons`/`set`/`drop`), and the simulation is `Sim … σ.glob
@@ -709,6 +718,49 @@ Each lane owns the files listed for it. Merge in the order the lanes are listed.
 
 **Pins in W1:** none outside `Core*` example files.
 
+### W1 evm lane (`w1-evm`, 2026-10-08)
+
+- The EVM correctness proof runs over the typed run (`Core.Prog.trun`,
+  `TState`), no longer M3's `Core.Prog.run`:
+  - `Evm/CoreExpr.lean`: `Look.ofTEnv σ.env` instantiates `Look`
+    (`Look.ofTEnv_cons`/`_set`); the global part a machine-level lemma reads
+    is `TState.sem` (storage erased, ledger, funds, transaction), and the
+    simulation is `Sim … σ.sem (Look.ofTEnv σ.env) m`.  The dichotomies are
+    `ValOutT`/`LocOutT`, on typed results.
+  - `Evm/CoreCorrect.lean`: `freshT C balance hb self hs` is the fresh typed
+    state (`freshT_sem`: its `sem` is `Evm.State.fresh`), and `Sim.init`
+    now takes `hb : balance < W`, since the typed state's funds are a `uint`.
+  - `Evm/CoreInterpreter.lean`: the four interpreter theorems over
+    `Core.Prog.trun (freshT C 0 W_pos 0 W_pos)`.
+  - `Evm/CoreCompile.lean`: a struct copy needs `nodupS` (M5.1's "Out" list).
+  - `Corpus/Basic.lean` (`corpus_decide`), `Tools/Run.lean` (`#run`) and
+    `Tools/DiffTest.lean` (`#difftest`) run `Core.Prog.trun`.  `#run … from σ`
+    reads only σ's storage, ledger, funds and transaction (`typedState?`); a
+    start state with locals or memory is an error, no longer run.
+- Gates:
+  - `stmt_sim` within `maxHeartbeats 10000`, pinned in
+    `Evm/CoreCorrect.lean`.
+  - `Evm/CoreExamples.lean` 7.9 s (two runs, both 7.9 s) against the 11.4 s
+    gate.  Method: a fresh worker, wall time from its start until its CPU
+    stays idle (header load included, no MCP round trip); `Evm/Examples.lean`
+    measured the same way takes 10.0 s.
+  - Corpus: the lane changes only `Corpus/Basic.lean`; the generated modules
+    and `tests/solkey/expected.tsv` are untouched, and the six `Corpus/Solc*`
+    modules, which re-check every pinned `corpus_decide` verdict, check clean
+    (per-file diagnostics), as do `Evm/CoreInterpreter.lean`,
+    `Tools/{Run,DiffTest}.lean` and `Examples/Tools.lean`.
+    `./scripts/check-corpus.sh` itself runs `lake`, which a lane may not:
+    the lead runs it at the W1 merge build.
+- Not done, moved:
+  - `Machine.mem : Nat → Word` is deferred to W4 (`sem-del`): `Machine.lean`
+    is outside this lane, and its untyped users (`Evm/Compile.lean`,
+    `Evm/Correctness.lean`) go there; until then a level is the cell
+    `cell l` (M5.1).
+  - `ReprV` keeps its `∃ v` in `ValOutT`.
+  - `Tools/Counterexample.lean` stays on the untyped `Prog.runFuel` (its
+    `Fml.eval3` evaluates the old `Fml`'s modalities, `.stuck` included);
+    its port is listed under W4 `sem-del`.
+
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)
 1. **`sound`** (the critical path)
    - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`.
@@ -795,6 +847,11 @@ Before the lanes branch, the lead makes `Surface` the default and removes the `o
      - `RunErase`, `TypedRunErase`, the fresh-name lemmas in `Agree`.
      - `Evm/{Compile,Correctness,Examples}.lean` and `never_stuck`.
      - The old `Mutability`/`NoPanic`/`Callback`.
+   - First, port `Tools/Counterexample.lean` off `Prog.runFuel` (and its
+     `.stuck`): `Fml.eval3` over the Core formulas, its loops by the typed
+     run's fuel, `eval3_tt`/`eval3_ff` against `Core.Prog.trun`.  Its
+     docstring's soundness is against the `Prog.run` deleted here.
+   - Then `Machine.mem : Nat → Word` (`cell = id`), deferred from W1 `evm`.
    - `Halt` loses `stuck`. The term model's error for ill-sorted terms becomes `Res.undef`, because the closer's terms stay untyped.
 2. **`calc-del`**
    - Delete every old calculus module that has a Core twin: `Logic`, `Symex`, `Quote`, `Derive`, `SoundKit`, `SoundUpdate`, `SoundUnfold`, `SoundLoop`, `RuleSoundness`, `Completeness`, `Uniqueness`, `Progress`, `SolkeyFragment`, `Sequents`, `ProofTree`, `Chains`, `ChainGen`, `LastLine`, `Notation`, `Spec`, `Contracts`, `Callback`, and the old body of `Rules.lean`.
