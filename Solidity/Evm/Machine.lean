@@ -3,7 +3,7 @@ import Solidity.Semantics
 /-!
 # An EVM-style stack machine
 
-The target of `Evm/Compile.lean`: mini-solkey's `Ch08_EVM` machine with the
+The target of `Evm/CoreCompile.lean`: mini-solkey's `Ch08_EVM` machine with the
 control flow, the arithmetic and the value transfer the typed fragment
 needs.  Instruction meanings follow the EVM as Nethermind's
 [EVMYulLean](https://github.com/NethermindEth/EVMYulLean) formalises it:
@@ -34,23 +34,24 @@ needs.  Instruction meanings follow the EVM as Nethermind's
   they are the same term, so keccak never collides: the assumption solc makes,
   written into the type.  Adding to a slot adds to its offset, unbounded.
 * **Jumps are relative and forward**: `JUMP n`/`JUMPI n` skip the next `n`
-  instructions.  The fragment has no loops (`wtStmt` refuses one), so no
+  instructions.  The fragment has no loops (`inFrag` refuses one), so no
   backward jump is needed, and
   `exec` is structural: it carries the number of instructions still to skip.
   Absolute targets with `JUMPDEST` are an assembler's business.  The one loop
   solc emits for the fragment, `checked_exp_helper`'s, runs at most `255`
-  times and is unrolled (`expLoop`, `Compile.lean`).
+  times and is unrolled (`expLoop`, `Evm/Layout.lean`).
 * `KECCAK256` takes its inputs from the stack (real code first `MSTORE`s them),
   in two forms: `keccakMap` for a mapping entry, `keccakArr` for array data.
-* **Locals live in memory**, one cell per variable, addressed by the variable
-  itself (as Vyper does); solc keeps them on the stack.
+* **Locals live in memory**, one cell per local, addressed by the local's
+  level (`Evm/CoreCompile.lean`'s `lvl`, as Vyper keeps locals in memory);
+  solc keeps them on the stack.
 * **The world is the accounts' balances** (the Yellow Paper's `σ[a].b`):
   `bal a` for every address `a`, the contract's own at `self`
   (`SELFBALANCE` reads it, `ADDRESS` pushes `self`).  There is no ledger:
   KeY's `net` is a ghost of the interpreter, what each account lost since the
   transaction began, `bal₀ a - bal a`, at every account but the contract's
   own, whose entry is never moved (`Sim.net`, `Sim.netSelf`,
-  `Evm/Correctness.lean`).  A recipient's code is
+  `Evm/CoreSim.lean`).  A recipient's code is
   not run; whether it accepts a payment is `accepts`, which no instruction
   changes, and the compiler theorem holds for every one.  `caller`,
   `callvalue`, `timestamp` are the transaction's (`CALLER`, `CALLVALUE`,
@@ -141,8 +142,8 @@ inductive Instr where
   | keccakArr
   | sload
   | sstore
-  | mload (x : Var)
-  | mstore (x : Var)
+  | mload (l : Nat)
+  | mstore (l : Nat)
   | jump (n : Nat)
   | jumpi (n : Nat)
   | call
@@ -170,8 +171,8 @@ instance : ToString Instr where
     | .keccakMap => "KECCAK256" | .keccakArr => "KECCAK256"
     | .sload => "SLOAD"
     | .sstore => "SSTORE"
-    | .mload x => s!"MLOAD {x}"
-    | .mstore x => s!"MSTORE {x}"
+    | .mload l => s!"MLOAD %{l}"
+    | .mstore l => s!"MSTORE %{l}"
     | .jump n => s!"JUMP +{n}"
     | .jumpi n => s!"JUMPI +{n}"
     | .call => "CALL"
@@ -196,7 +197,7 @@ theorem upd_other {α β : Type} [DecidableEq α] (f : α → β) {x y : α} (v 
 structure Machine where
   stack : List Word
   store : Slot → Nat
-  mem : Var → Word
+  mem : Nat → Word
   /-- Every account's balance. -/
   bal : Nat → Nat
   /-- The balances when the transaction began: a ghost, which no

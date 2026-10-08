@@ -3,7 +3,7 @@ import Solidity.Evm.CoreSim
 /-!
 # Expressions over the typed run
 
-`Evm/Correctness.lean`'s expression lemmas (`simple_sim` … `val_sim`), for
+The expression lemmas (`simple_sim` … `val_sim`), for
 `Evm/CoreCompile.lean`'s code and the typed run's evaluation
 (`Semantics/Core/TypedRun.lean`, `docs/intrinsic.md`, W1).  The simulation
 is `Evm/CoreSim.lean`'s `Sim` with its locals read off the typed state:
@@ -12,7 +12,7 @@ alias holds), and the global part `σ.sem`, the storage erased, which the
 machine-level lemmas of `Evm/Repr.lean` read.  A local is read at its level
 (`lvl b i`), never missing.
 
-The dichotomies are the untyped compiler's on typed results: `ValOutT` (a
+The dichotomies are `Evm/SimLemmas.lean`'s on typed results: `ValOutT` (a
 value pushed, or both revert) and `LocOutT` (the slot of a reference
 pushed, or both revert).  A typed operator's agreement with the untyped one
 (`BinOp.evalT_erase`, `UnOp.evalT_erase`, `Storage.*_erase`) carries the

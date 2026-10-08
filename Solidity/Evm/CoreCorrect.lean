@@ -3,7 +3,7 @@ import Solidity.Evm.CoreStmt
 /-!
 # The scoped compiler is correct
 
-`Evm/Correctness.lean`'s headline over the scoped syntax and the typed run
+The compiler's headline over the scoped syntax and the typed run
 (`docs/intrinsic.md`, M5, W1): `stmt_sim`/`prog_sim` by structural recursion on `Core.Stmt`/`Core.Prog`,
 each statement dispatched to its lemma in `Evm/CoreStmt.lean` or, for the
 statements with a sub-program, to a lemma here that takes the sub-program's
@@ -895,16 +895,18 @@ theorem freshT_sem (C : Contract) (balance : Nat) (hb : balance < W) (self : Nat
   simp only [Solidity.Core.TState.sem, freshT, Solidity.Core.Storage.init_erase, State.fresh]
   rfl
 
-/-- A fresh machine represents a fresh contract with no locals
-(`Evm.Sim.init`). -/
+/-- A fresh machine represents a fresh contract with no locals: every slot
+`0`, nothing moved, whatever the world's balances and the contract's
+address. -/
 theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) (bal : Nat → Nat) (self : Nat)
     (hs : self < W) :
     Sim C 1 0 (Frag.init []) (freshT C balance hb self hs).sem
       (Look.ofTEnv (freshT C balance hb self hs).env) (Machine.init bal self) := by
-  have h := Evm.Sim.init C balance bal self hs
-  rw [← freshT_sem C balance hb self hs] at h
-  exact ⟨h.store, (fun i => nomatch i), (fun i => nomatch i), h.net, h.netSelf, h.bound,
-    (fun i => nomatch i), h.env⟩
+  rw [freshT_sem C balance hb self hs]
+  exact ⟨initStorage_repr C Nat.one_pos, (fun i => nomatch i), (fun i => nomatch i),
+    fun _ _ _ => by simp [State.getNet, State.fresh, lookupBy, Machine.init],
+    by simp [State.getNet, State.fresh, lookupBy, Machine.init],
+    by unfold Lmax; decide, (fun i => nomatch i), ⟨rfl, rfl, rfl, rfl, W_pos, W_pos, W_pos, hs⟩⟩
 
 /-- **The EVM agrees with the typed run's storage.**  From a fresh contract,
 a program of the fragment either reverts in both, or runs in both, and then

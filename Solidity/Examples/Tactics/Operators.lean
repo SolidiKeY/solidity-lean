@@ -1,5 +1,5 @@
 import Solidity.Calculus.Close
-import Solidity.Evm.Examples
+import Solidity.Evm.CoreExamples
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -139,20 +139,17 @@ example : Prog.toStr (sol{ uint x = 1; x &= ~x; x <<= 2; }) =
 The operators compile to their opcodes with no guard (`uTail`), and the
 compiler's correctness covers them (`tail_sim`). -/
 
-open Evm in
+open Evm.Core.Examples in
 /-- `total = 12 & 10 | 1 << 4;` stores `24`; `unchecked { total = total + 1; }`
 at `2^256 - 1` stores `0`, where the checked `total += 1;` reverts. -/
 theorem machine_run :
-    Evm.Examples.storeAt (run (compileProg sol{ total = 12 & 10 | 1 << 4; }) Evm.Examples.fresh)
-      (.root 0) = some 24 ∧
-    Evm.Examples.storeAt (run (compileProg sol{
+    slotAfter sol{ total = 12 & 10 | 1 << 4; } (.root 0) = some 24 ∧
+    slotAfter sol{
       total = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
-      unchecked { total = total + 1; }; }) Evm.Examples.fresh) (.root 0) = some 0 ∧
-    Evm.Examples.storeAt (run (compileProg sol{ total = 0; total = ~total >> 255; total ^= 3; })
-      Evm.Examples.fresh) (.root 0) = some 2 ∧
-    Evm.Examples.storeAt (run (compileProg sol{ unchecked { total = 3 ** 2 - 10; }; })
-      Evm.Examples.fresh) (.root 0) =
+      unchecked { total = total + 1; }; } (.root 0) = some 0 ∧
+    slotAfter sol{ total = 0; total = ~total >> 255; total ^= 3; } (.root 0) = some 2 ∧
+    slotAfter sol{ unchecked { total = 3 ** 2 - 10; }; } (.root 0) =
       some 115792089237316195423570985008687907853269984665640564039457584007913129639935 := by
-  decide
+  decide +kernel
 
 end Solidity.Examples.Tactics.Operators

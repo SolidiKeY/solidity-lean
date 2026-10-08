@@ -2,7 +2,7 @@ import Solidity.Evm.Machine
 import Solidity.Semantics.Properties
 
 /-!
-# Storage layout and the compiler
+# Storage layout and the code sequences
 
 ## Layout (what solc does)
 
@@ -32,44 +32,23 @@ every slot `Occ T s` names *descends* from `s` plus an offset below `size T`
 (`occ_desc`), and a slot has one ancestor per depth (`desc_unique`); the rest
 is the prefix-sum arithmetic of mini-solkey's `offset_disjoint`.
 
-## The compiler
+## The code sequences
 
-`compileVal e` leaves `e`'s value on the stack, `compileLoc l` the slot of the
-location `l`.  Every Solidity guard solc emits is emitted here: a checked
-`+`/`-`/`*` reverts on overflow (`uTail`, and `sTail` at `int`, two's
+The guards solc emits, which `Evm/CoreCompile.lean`'s compiler assembles: a
+checked `+`/`-`/`*` reverts on overflow (`uTail`, and `sTail` at `int`, two's
 complement, with `SLT`/`SGT`/`SDIV`/`SMOD`), `/`/`%` on a zero divisor and
 `-2^255 / -1`, `-x` on `-2^255` (`negCode`), `**` on overflow (`expCode`,
 solc's `checked_exp_unsigned` with its loop unrolled), an array index out of
 bounds (`boundsCheck`), `pop` on an empty array, `push` at `2^64` elements
-(`pushSlotCode`), a `transfer` the world refuses; `&&`/`||`, `?:` and
-`if` jump.
-
-**The fragment** is what `wtStmt` accepts, so a program outside it has no
-claim (see `docs/compiler-verification.md` for why each exclusion):
-
-* types: `uint`, `int` and `bool` values; storage of any shape; mappings keyed
-  by `uint`;
-* expressions: literals (in their type's range by the syntax,
-  `Simple.lit`), locals, storage reads, every operator (`-x` at `int`), `?:`,
-  `.length` of a storage array, `msg.sender`, `msg.value`, `block.timestamp`.
-  Not memory reads, not `address(this).balance`;
-* statements: `=` of a value into storage, a copy of a *static* value
-  (`staticF`: no dynamic array, no mapping; `bob = alice;`), `=` to a local,
-  `uint x = e;`, storage aliases (bound through an array index too: a
-  *fragile* alias, forgotten at the next `pop` or `delete`), `op=`,
-  `x++;`/`--x;`, `v = x++;`, `push()` of a primitive, `push(e)`, `push(sp)` of a
-  static value, `delete` at any type, `pop`, `transfer`, `if`, `require`,
-  `assert`, `revert();`, and calls.  Not copies of dynamic arrays, `push()` of a
-  struct or an array, nothing in memory.
-
-`wtStmt` also types the locals, as mini-solkey's does: a local lives in one
-memory cell, a word for a `uint x` and a slot for a `T storage x`.
+(`pushSlotCode`).  The fragment's operators are `binInFrag`/`unInFrag`, its
+statically laid out types `static`.
 -/
 
 namespace Solidity
 namespace Evm
 
 open Semantics
+
 
 /-! ## Layout -/
 
@@ -425,35 +404,6 @@ theorem leavesF_occ : ∀ (fuel : Nat) (T : Ty) (s : Slot) (o : Nat), o ∈ leav
       exact Occ.field hT (by rw [← Slot.add_add]; exact leavesF_occ fuel T _ o' ho')
     · cases hf
 
-/-! ## Typing the locals -/
-
-/-- What a local holds: a value of a primitive type, or a storage alias —
-bound to a path that indexes no array (`alias`), or to one that does
-(`falias`, *fragile*: a later `pop` or `delete` could leave it past the end of
-an array, so the fragment forgets it there). -/
-inductive LTy where
-  | val (p : PrimTy)
-  | alias (R : RefTy)
-  | falias (R : RefTy)
-  deriving DecidableEq, Repr
-
-/-- `Γ x = some (.val uint)`: `x` is a `uint` local; `some (.alias R)`: a
-`R storage` alias; `none`: nothing the fragment may read. -/
-abbrev TyCtx := Var → Option LTy
-
-def TyCtx.set (Γ : TyCtx) (x : Var) (t : Option LTy) : TyCtx := upd Γ x t
-
-/-- After a `pop` or a `delete`: the fragile aliases forgotten.  An array may
-have shrunk under one of them (solc still writes the slot, the interpreter its
-`shadow`, and the representation relates live elements only). -/
-def TyCtx.dropFragile (Γ : TyCtx) : TyCtx := fun x =>
-  match Γ x with
-  | some (.falias _) => none
-  | t => t
-
-/-- After an `if`: what both branches agree on. -/
-def TyCtx.meet (Γ₁ Γ₂ : TyCtx) : TyCtx := fun x => if Γ₁ x = Γ₂ x then Γ₁ x else none
-
 /-- The operators compiled at operand type `p`: arithmetic and comparisons
 at `uint` and `int`, `**` at `uint` (the only type it takes), `==`/`!=` at any
 type, `&&`/`||` at `bool`, and the bitwise, shift and wrapping operators at
@@ -486,132 +436,6 @@ def staticF : Nat → Ty → Bool
 
 /-- `staticF` with enough fuel. -/
 def static (T : Ty) : Bool := staticF (tyRank T + 1) T
-
-variable {C : Contract}
-
-/-- A literal is always in, since the syntax keeps it in its type's range
-(`Simple.lit`); a local is read at its type.  `address(this).balance` is out: the
-interpreter's is the funds the transaction found, which a `transfer` leaves,
-and `SELFBALANCE` reads the account a `CALL` debits. -/
-def wtSimple (Γ : TyCtx) : {p : PrimTy} → Simple C p → Bool
-  | _, .lit .. => true
-  | _, .bool _ => true
-  | p, .local x => Γ x == some (.val p)
-  | _, .env k _ => k != .selfBalance
-
-mutual
-/-- `free`: the path indexes no array (what an alias may be bound to). -/
-def wtSPath (Γ : TyCtx) (free : Bool) : {T : Ty} → SPath C T → Bool
-  | _, @SPath.alias _ R x => Γ x == some (.alias R) || (!free && Γ x == some (.falias R))
-  | _, .loc l => wtLoc Γ free l
-def wtLoc (Γ : TyCtx) (free : Bool) : {T : Ty} → Loc C T → Bool
-  | _, .root .. => true
-  | _, .field b _ _ => wtSPath Γ free b
-  | _, @Loc.index _ _ k _ .map b i => k == .uint && wtSPath Γ free b && wtVal Γ i
-  | _, .index (.arr .dyn) b i => !free && wtSPath Γ free b && wtVal Γ i
-  | _, .index (.arr .fixed) b i => !free && wtSPath Γ free b && wtVal Γ i
-def wtVal (Γ : TyCtx) : {p : PrimTy} → Val C p → Bool
-  | _, .simple s => wtSimple Γ s
-  | _, .read l => wtLoc Γ false l
-  | _, @Val.binop _ p _ op _ _ a b => binInFrag op p && wtVal Γ a && wtVal Γ b
-  | _, @Val.unop _ p _ op _ _ a => unInFrag op p && wtVal Γ a
-  | _, .ternary c a b => wtVal Γ c && wtVal Γ a && wtVal Γ b
-  | _, .len b _ => wtSPath Γ false b
-  | _, .readMem _ | _, .mlen .. => false
-end
-
-/-- The storage location an `op=` target names, if it is one. -/
-def opLocToLoc : {p : PrimTy} → OpLoc C p → Option (Loc C (.prim p))
-  | _, .root r h => some (.root r h)
-  | _, .field b f h => some (.field b f h)
-  | _, .index it b i => some (.index it b (.simple i))
-  | _, .local _ | _, .mfield .. | _, .mindex .. => none
-
-def wtOpLoc (Γ : TyCtx) : {p : PrimTy} → OpLoc C p → Bool
-  | p, .local x => Γ x == some (.val p)
-  | _, l => match opLocToLoc l with
-    | some loc => wtLoc Γ false loc
-    | none => false
-
-/-- A call's parameters, bound one after another: each argument of the
-fragment, at a type the fragment has. -/
-def wtArgs (Γ : TyCtx) : List (Arg C) → Option TyCtx
-  | [] => some Γ
-  | a :: as =>
-    if wtVal Γ a.e then wtArgs (Γ.set a.x (some (.val a.p))) as else none
-
-/-- A call's return variable declared, at a type the fragment has.  A call
-of several returns is outside the fragment. -/
-def wtRetEnter (Γ : TyCtx) : CallRet → Option TyCtx
-  | .none => some Γ
-  | .val p r _ => some (Γ.set r (some (.val p)))
-  | .rets _ => none
-
-/-- The returned value read and assigned. -/
-def wtRetLeave (Γ : TyCtx) : CallRet → Bool
-  | .val p r (some y) => Γ r == some (.val p) && Γ y == some (.val p)
-  | _ => true
-
-/-- An alias bound to `q`: a plain one if `q` indexes no array, a fragile
-one if it does. -/
-def bindAliasTy (Γ : TyCtx) (x : Var) (R : RefTy) (q : SPath C (.ref R)) : Option TyCtx :=
-  if wtSPath Γ true q then some (Γ.set x (some (.alias R)))
-  else if wtSPath Γ false q then some (Γ.set x (some (.falias R)))
-  else none
-
-/-- A `push` of the fragment: `push()` of a primitive element, `push(e)`, and
-`push(sp)` of a static element (a fixed sequence of loads and stores). -/
-def wtPush (Γ : TyCtx) : {E : Ty} → Option (Src C E) → SPath C (.array E) → Bool
-  | E, none, b => E.isPrimitive && wtSPath Γ false b
-  | _, some (.val e), b => wtSPath Γ false b && wtVal Γ e
-  | _, some (@Src.copy _ R q _), b => static (.ref R) && wtSPath Γ false b && wtSPath Γ false q
-
-mutual
-/-- A statement of the fragment, and the context it leaves. -/
-def wtStmt (Γ : TyCtx) : Stmt C → Option TyCtx
-  | .assign l (.val v) => if wtLoc Γ false l && wtVal Γ v then some Γ else none
-  | @Stmt.assign _ (.ref R) l (.copy q _) =>
-    if static (.ref R) && wtSPath Γ false q && wtLoc Γ false l then some Γ else none
-  | @Stmt.rebind _ R x (.path q) => bindAliasTy Γ x R q
-  | @Stmt.assignLocal _ p x r => if Γ x == some (.val p) && wtVal Γ r then some Γ else none
-  | .declLocal p x none => some (Γ.set x (some (.val p)))
-  | .declLocal p x (some e) => if wtVal Γ e then some (Γ.set x (some (.val p))) else none
-  | .declStorage _ x none => some (Γ.set x none)
-  | .declStorage R x (some (.path q)) => bindAliasTy Γ x R q
-  | @Stmt.opAssign _ p _ _ _ l r => if p != .bool && wtOpLoc Γ l && wtVal Γ r then some Γ else none
-  | @Stmt.incDec _ p _ _ l => if p != .bool && wtOpLoc Γ l then some Γ else none
-  | @Stmt.assignIncDec _ p x _ _ l _ =>
-    if p != .bool && Γ x == some (.val p) && wtOpLoc Γ l then some Γ else none
-  | .push b v _ => if wtPush Γ v b then some Γ else none
-  | .pop b => if wtSPath Γ false b then some Γ.dropFragile else none
-  | .transfer r a => if wtVal Γ r && wtVal Γ a then some Γ else none
-  | .delete l => if wtLoc Γ false l then some Γ.dropFragile else none
-  | .ite c t e =>
-    if wtVal Γ c then
-      match wtProg Γ t, wtProg Γ e with
-      | some Γ₁, some Γ₂ => some (Γ₁.meet Γ₂)
-      | _, _ => none
-    else none
-  | .require c | .assert c => if wtVal Γ c then some Γ else none
-  | .revert => some Γ
-  -- a call is compiled inlined, as symbolic execution runs it
-  | .call _ args _ ret body =>
-    match wtArgs Γ args with
-    | some Γ₁ =>
-      match wtRetEnter Γ₁ ret with
-      | some Γ₂ =>
-        match wtProg Γ₂ body with
-        | some Γ₃ => if wtRetLeave Γ₃ ret then some Γ₃ else none
-        | none => none
-      | none => none
-    | none => none
-  | _ => none
-def wtProg (Γ : TyCtx) : List (Stmt C) → Option TyCtx
-  | [] => some Γ
-  | s :: P => match wtStmt Γ s with
-    | some Γ' => wtProg Γ' P
-    | none => none
-end
 
 /-! ## The compiler -/
 
@@ -746,47 +570,6 @@ def envInstr : EnvKey → Instr
   | .selfBalance => .selfbalance
   | .selfAddress => .address
 
-def compileSimple : {p : PrimTy} → Simple C p → List Instr
-  | _, .lit n _ => [.push (.val (toWord n))]
-  | _, .bool b => [.push (.val (bword b))]
-  | _, .local x => [.mload x]
-  | _, .env k _ => [envInstr k]
-
-mutual
-/-- Push the slot a storage path names. -/
-def compileSPath : {T : Ty} → SPath C T → List Instr
-  | _, .alias x => [.mload x]
-  | _, .loc l => compileLoc l
-/-- Push the slot of a location. -/
-def compileLoc : {T : Ty} → Loc C T → List Instr
-  | _, .root r _ => [.push (.slot (rootSlot C r))]
-  | _, @Loc.field _ s _ b f _ => compileSPath b ++ [.push (.val (offset s f)), .add]
-  | _, .index .map b i => compileSPath b ++ compileVal i ++ [.keccakMap]
-  | _, @Loc.index _ _ _ E (.arr .dyn) b i =>
-    compileSPath b ++ compileVal i ++ boundsCheck ++ elemSlot (size E)
-  | _, @Loc.index _ _ _ E (@IndexTy.arr _ _ (@ArrTy.fixed _ n)) b i =>
-    compileSPath b ++ compileVal i ++ fixedCheck n ++ fixedSlot (size E)
-/-- Push the value of an expression. -/
-def compileVal : {p : PrimTy} → Val C p → List Instr
-  | _, .simple s => compileSimple s
-  | _, .read l => compileLoc l ++ [.sload]
-  | _, @Val.binop _ p _ op _ _ a b =>
-    match op with
-    | .and => compileVal a ++ [.dup 1, .iszero, .jumpi ((compileVal b).length + 1), .pop] ++
-        compileVal b
-    | .or => compileVal a ++ [.dup 1, .jumpi ((compileVal b).length + 1), .pop] ++ compileVal b
-    | op => compileVal a ++ compileVal b ++ binTail p op
-  | _, .unop op _ _ a =>
-    compileVal a ++ match op with
-      | .not => [.iszero]
-      | .neg => negCode
-      | .bnot => [.not]
-  | _, .ternary c a b =>
-    compileVal c ++ [.iszero, .jumpi ((compileVal a).length + 1)] ++ compileVal a ++
-      [.jump (compileVal b).length] ++ compileVal b
-  | _, .len b _ => compileSPath b ++ [.sload]
-  | _, .readMem _ | _, .mlen .. => []
-end
 
 /-- `… s → … s` with `0` written at `s + o` for each `o`. -/
 def zeroCode (os : List Nat) : List Instr :=
@@ -819,109 +602,6 @@ expression, the new word for `++x`, the old one for `x++`. -/
 def bumpCode (p : PrimTy) (op : IncDec) : List Instr :=
   if op.isPre then [.push (.val 1)] ++ binTail p op.binOp ++ [.dup 1]
   else [.dup 1, .push (.val 1)] ++ binTail p op.binOp
-
-/-- A call's parameters bound: each argument's value stored in its cell. -/
-def argsCode : List (Arg C) → List Instr
-  | [] => []
-  | a :: as => compileVal a.e ++ [.mstore a.x] ++ argsCode as
-
-/-- The return variable declared: `0` in its cell. -/
-def retEnterCode : CallRet → List Instr
-  | .none | .rets _ => []
-  | .val _ r _ => [.push (.val 0), .mstore r]
-
-/-- The returned value copied where the call lands. -/
-def retLeaveCode : CallRet → List Instr
-  | .val _ r (some y) => [.mload r, .mstore y]
-  | _ => []
-
-/-- `b.push(…)`: the array's slot, the value (a word, or a static value's
-words), the length checked and grown, the value stored at the new element. -/
-def pushCode : {E : Ty} → Option (Src C E) → SPath C (.array E) → List Instr
-  | _, none, b => compileSPath b ++ [.push (.val 0), .dup 2] ++ pushSlotCode 1 ++ [.sstore, .pop]
-  | _, some (.val e), b =>
-    compileSPath b ++ compileVal e ++ [.dup 2] ++ pushSlotCode 1 ++ [.sstore, .pop]
-  | _, some (@Src.copy _ R q _), b =>
-    compileSPath b ++ compileSPath q ++ loadLeaves (leaves (.ref R)) ++
-      [.pop, .dup ((leaves (.ref R)).length + 1)] ++ pushSlotCode (size (.ref R)) ++
-      storeLeaves (leaves (.ref R)).reverse ++ [.pop, .pop]
-
-mutual
-/-- The code of a statement; `[]` outside the fragment (which `wtStmt` rejects). -/
-def compileStmt : Stmt C → List Instr
-  | .assign l (.val v) => compileVal v ++ compileLoc l ++ [.sstore]
-  | @Stmt.assign _ (.ref R) l (.copy q _) =>
-    compileSPath q ++ loadLeaves (leaves (.ref R)) ++ [.pop] ++ compileLoc l ++
-      storeLeaves (leaves (.ref R)).reverse ++ [.pop]
-  | .rebind x (.path q) => compileSPath q ++ [.mstore x]
-  | .assignLocal x r => compileVal r ++ [.mstore x]
-  | .declLocal _ x none => [.push (.val 0), .mstore x]
-  | .declLocal _ x (some e) => compileVal e ++ [.mstore x]
-  | .declStorage _ x (some (.path q)) => compileSPath q ++ [.mstore x]
-  | @Stmt.opAssign _ p op _ _ (.local x) r =>
-    [.mload x] ++ compileVal r ++ binTail p op ++ [.mstore x]
-  | @Stmt.opAssign _ p op _ _ l r => match opLocToLoc l with
-    | some loc =>
-      compileLoc loc ++ [.dup 1, .sload] ++ compileVal r ++ binTail p op ++ [.swap 1, .sstore]
-    | none => []
-  | @Stmt.incDec _ p op _ (.local x) =>
-    [.mload x, .push (.val 1)] ++ binTail p op.binOp ++ [.mstore x]
-  | @Stmt.incDec _ p op _ l => match opLocToLoc l with
-    | some loc =>
-      compileLoc loc ++ [.dup 1, .sload, .push (.val 1)] ++ binTail p op.binOp ++ [.swap 1, .sstore]
-    | none => []
-  | @Stmt.assignIncDec _ p x op _ (.local y) _ => [.mload y] ++ bumpCode p op ++ [.mstore y, .mstore x]
-  | @Stmt.assignIncDec _ p x op _ l _ => match opLocToLoc l with
-    | some loc =>
-      compileLoc loc ++ [.dup 1, .sload] ++ bumpCode p op ++ [.dup 3, .sstore, .swap 1, .pop, .mstore x]
-    | none => []
-  | .push b v _ => pushCode v b
-  | .pop b => compileSPath b ++ popCode
-  | .transfer r a => compileVal r ++ compileVal a ++ [.call] ++ assertTop
-  | @Stmt.delete _ T l => compileLoc l ++ zeroCode (leaves T) ++ [.pop]
-  | .ite c t e =>
-    compileVal c ++ [.iszero, .jumpi ((compileProg t).length + 1)] ++ compileProg t ++
-      [.jump (compileProg e).length] ++ compileProg e
-  | .require c | .assert c => compileVal c ++ assertTop
-  | .revert => [.revert]
-  | .call _ args _ ret body => argsCode args ++ retEnterCode ret ++ compileProg body ++ retLeaveCode ret
-  | _ => []
-/-- The code of a block: its statements' codes in order. -/
-def compileProg : List (Stmt C) → List Instr
-  | [] => []
-  | s :: P => compileStmt s ++ compileProg P
-end
-
-mutual
-/-- How many `push` statements a statement has: each runs at most once (the
-fragment has no loops: `wtStmt` refuses one), so a run grows an array by at
-most this many. -/
-def pushes : Stmt C → Nat
-  | .push .. => 1
-  | .ite _ t e => pushesP t + pushesP e
-  | .call _ _ _ _ body => pushesP body
-  | _ => 0
-/-- `pushes` of a block. -/
-def pushesP : List (Stmt C) → Nat
-  | [] => 0
-  | s :: P => pushes s + pushesP P
-end
-
-mutual
-/-- Whether a statement pays: a `transfer` or a `send` (which is outside the
-compiled fragment, `wtStmt`), or one in a branch or a called body.  Only a
-payment can be refused by the world, so code that does not pay reverts
-exactly where the interpreter does. -/
-def pays : Stmt C → Bool
-  | .transfer .. | .send .. => true
-  | .ite _ t e => paysP t || paysP e
-  | .call _ _ _ _ body => paysP body
-  | _ => false
-/-- `pays` of a block. -/
-def paysP : List (Stmt C) → Bool
-  | [] => false
-  | s :: P => pays s || paysP P
-end
 
 end Evm
 end Solidity

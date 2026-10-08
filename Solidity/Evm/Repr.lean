@@ -1,4 +1,4 @@
-import Solidity.Evm.Compile
+import Solidity.Evm.Layout
 
 /-!
 # The machine's storage represents the interpreter's
@@ -19,7 +19,7 @@ The two lemmas the compiler proof needs:
 * `save_repr`: the interpreter's write of a subtree at a typed path is the
   machine's write of the slots that subtree occupies (`Occ`), and leaves every
   other slot as it was.  The step with content is the layout's injectivity
-  (`occ_members_disjoint` and its siblings, `Compile.lean`).
+  (`occ_members_disjoint` and its siblings, `Evm/Layout.lean`).
 
 A fixed-size array is laid out inline, as solc lays it out: its elements one
 after the other from its own slot, no length slot, its length its type's.

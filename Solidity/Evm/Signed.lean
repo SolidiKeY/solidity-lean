@@ -1,11 +1,11 @@
-import Solidity.Evm.Compile
+import Solidity.Evm.Layout
 
 /-!
 # Signed words
 
 An `int256` lives in a word as its two's complement (`toWord`), and the word
 reads back as the value (`sgn`).  This file proves the signed guard
-sequences of `Compile.lean` (`sTail`, `negCode`) exact: each computes the
+sequences of `Evm/Layout.lean` (`sTail`, `negCode`) exact: each computes the
 word of the interpreter's checked result, or reverts exactly when the
 result leaves `[-2^255, 2^255)` (or divides by zero), as solc's
 `checked_add_t_int256` and its siblings do.

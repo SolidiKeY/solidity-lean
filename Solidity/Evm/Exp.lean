@@ -1,4 +1,4 @@
-import Solidity.Evm.Compile
+import Solidity.Evm.Layout
 
 /-!
 # Checked exponentiation
@@ -7,7 +7,7 @@ import Solidity.Evm.Compile
 (`checked_exp_helper`) squares the base and halves the exponent until the
 exponent is `1`.  The machine has no backward jumps, but the loop does not need
 one: an exponent below `2^256` reaches `1` after at most `255` halvings, so
-`expLoop 255` (`Compile.lean`) is the loop unrolled, each round skipping the
+`expLoop 255` (`Evm/Layout.lean`) is the loop unrolled, each round skipping the
 rest once it is done.
 
 `exp_tail` is the result: the code computes `b ^ e`, or reverts exactly when

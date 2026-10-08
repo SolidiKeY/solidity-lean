@@ -1,15 +1,111 @@
-import Solidity.Evm.Examples
 import Solidity.Evm.CoreCompile
 
 /-!
 # The scoped compiler at work
 
-`Evm/Examples.lean`'s programs, resolved into the scoped syntax
-(`Prog.resolve`) and compiled by `Evm/CoreCompile.lean`: the same runs, and
-the same code up to the memory cells (`sameCode`).  `resolve` does not
+Programs of `StandardExample`, `CallsExample` and `TestSuite`, resolved into
+the scoped syntax (`Prog.resolve`), compiled by `Evm/CoreCompile.lean` and
+run on the machine.  `resolve` does not
 reduce in the elaborator's `whnf`, so the checks run in the kernel
 (`decide +kernel`), which evaluates the resolution with the compiler.
 -/
+
+namespace Solidity.Evm.Examples
+
+open Semantics
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-- The word at slot `s` after a run that succeeded. -/
+def storeAt : Out → Slot → Option Nat
+  | .ok m _, s => some (m.store s)
+  | _, _ => none
+
+/-- Whether a run reverted. -/
+def reverted : Out → Bool
+  | .revert => true
+  | _ => false
+
+/-- A run the checker saw revert reverted: `total += 1;` at `2^256 - 1`. -/
+theorem reverted_eq {o : Out} (h : reverted o = true) : o = .revert := by
+  cases o <;> simp_all [reverted]
+
+/-- A fresh `StandardExample` at address `0`, its account holding `balance`,
+every other account empty. -/
+abbrev fresh (balance : Nat := 0) : Machine :=
+  Machine.init (fun a => if a = 0 then balance else 0) 0
+
+/-! ## The programs
+
+The layout of `StandardExample`: `total`, `age`, `owner`, `balance` are slots
+`0`–`3`, `values` is `4`, `balances` `5`, `flags` `6`, `folks` `7`, `matrix`
+`8`, `persons` `9`, `people` `10`, `alice` `[11, 14)`, `bob` `[14, 17)`,
+`wallet` `[17, 19)`. -/
+
+/-- `alice.age = 10;` -/
+def setAge : Prog StandardExample := sol{ alice.age = 10; }
+
+/-- `balances[7] = 5; total = balances[7] + balances[8]; folks[7].age = 3;` -/
+def mappings : Prog StandardExample :=
+  sol{ balances[7] = 5; total = balances[7] + balances[8]; folks[7].age = 3; }
+
+/-- `Person storage p = folks[7]; p.age = 9; total = folks[7].age;` -/
+def alias : Prog StandardExample := sol{
+  Person storage p = folks[7]; p.age = 9; total = folks[7].age;
+}
+
+/-- `uint x = 3; x += 4; age = x > 5 ? x : 0;` -/
+def locals : Prog StandardExample := sol{ uint x = 3; x += 4; age = x > 5 ? x : 0; }
+
+/-- `total = 2^256 - 1; total += 1;` -/
+def overflow : Prog StandardExample := sol{
+  total = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+  total += 1;
+}
+
+/-- `owner = 5; owner.transfer(30);` -/
+def payOwner : Prog StandardExample := sol{ owner = 5; owner.transfer(30); }
+
+/-- `owner = msg.sender; total = msg.value;`, called by `7` with `100`:
+`CALLER` and `CALLVALUE` push them. -/
+def envReads : Prog StandardExample := sol{ owner = msg.sender; total = msg.value; }
+
+/-- `uint x = 5; uint y = x++; total = y; age = ++x;`: `x++` is the old value,
+`++x` the new one. -/
+def bumps : Prog StandardExample := sol{ uint x = 5; uint y = x++; total = y; y = ++x; age = y; }
+
+/-- `alice.age = 7; alice.account.balance = 3; bob = alice;` copies `alice`'s
+three slots onto `bob`'s: `bob.age` is slot `16`, `bob.account.balance` `14`. -/
+def copyPerson : Prog StandardExample :=
+  sol{ alice.age = 7; alice.account.balance = 3; bob = alice; }
+
+/-- `values.push(7); values.push(); total = values.length;`: two elements, the
+first `7` at `keccak(4)`, the length `2`. -/
+def pushes2 : Prog StandardExample := sol{ values.push(7); values.push(); total = values.length; }
+
+/-- An alias bound through an array index: `persons[0]`'s slot, its index
+checked once, when it is bound.  With one person on the machine, writing
+`p.age` writes `keccak(9) + 2`, which `persons[0].age` reads back. -/
+def elemAlias : Prog StandardExample :=
+  sol{ Person storage p = persons[0]; p.age = 7; total = persons[0].age; }
+
+/-- `uint y = addTwo(3); total = y;` over `CallsExample`: `addTwo` calls
+`addOne` twice. -/
+def callTwice : Prog CallsExample := sol[CallsExample]{ uint y = addTwo(3); total = y; }
+
+section Signed
+
+local instance : InContract := ⟨TestSuite⟩
+
+/-- `int x = -5; int y = 3; signedTotal = x * y + 2;` -/
+def signed : Prog TestSuite := sol{ int x = -5; int y = 3; signedTotal = x * y + 2; }
+
+/-- `fixedValues[2] = 7;` -/
+def fixedWrite : Prog TestSuite := sol{ fixedValues[2] = 7; }
+
+end Signed
+
+end Solidity.Evm.Examples
 
 namespace Solidity.Evm.Core.Examples
 
@@ -38,10 +134,6 @@ abbrev reverts {C : Contract} (P : Solidity.Prog C) (m : Machine := fresh) : Boo
 /-- `P` resolves and is in the compiled fragment, from no locals. -/
 abbrev compiles {C : Contract} (P : Solidity.Prog C) : Bool :=
   (Solidity.Core.Prog.resolve [] P).toBool && (inFragP (Frag.init []) (scopedOf P).2).isSome
-
-/-- Both compilers give the same code, up to the memory cells. -/
-abbrev sameCode {C : Contract} (P : Solidity.Prog C) : Bool :=
-  (codeOf P).map Instr.forgetCell == (Evm.compileProg P).map Instr.forgetCell
 
 /-! ## Storage writes -/
 
@@ -211,7 +303,7 @@ theorem elemAlias_run :
     Examples.storeAt o (.data (.root 9) 2) = some 7 ∧ Examples.storeAt o (.root 0) = some 7 := by
   decide +kernel
 
-/-- `inFrag` rejects what `wtProg` rejects: a `push()` of a struct, a memory
+/-- `inFrag` rejects a `push()` of a struct, a memory
 local, a copy of a struct holding a dynamic array, a fragile alias read after
 a `pop`; and, through a branch, an alias forgotten by a `pop` in it. -/
 theorem rejected :
@@ -310,14 +402,5 @@ theorem fixedOutOfBounds_run :
   decide +kernel
 
 end Signed
-
-/-! ## The same code as the untyped compiler -/
-
-theorem sameCode_run :
-    sameCode setAge ∧ sameCode mappings ∧ sameCode alias ∧ sameCode locals ∧
-    sameCode overflow ∧ sameCode payOwner ∧ sameCode envReads ∧ sameCode bumps ∧
-    sameCode copyPerson ∧ sameCode pushes2 ∧ sameCode elemAlias ∧ sameCode callTwice ∧
-    sameCode signed ∧ sameCode fixedWrite := by
-  decide +kernel
 
 end Solidity.Evm.Core.Examples

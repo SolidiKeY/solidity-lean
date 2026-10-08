@@ -1,13 +1,13 @@
-import Solidity.Evm.Correctness
+import Solidity.Evm.SimLemmas
 import Solidity.Evm.CoreCompile
 import Solidity.Semantics.Core.TypedRun
 
 /-!
 # The simulation over the scoped syntax
 
-`Evm/Correctness.lean`'s `Sim`, restated for `Evm/CoreCompile.lean`'s
-compiler (`docs/intrinsic.md`, M5): a local is read by its position and
-lives at its level (`lvl b i`), not under its name.
+The simulation relation for `Evm/CoreCompile.lean`'s compiler
+(`docs/intrinsic.md`, M5): a local is read by its position and lives at its
+level (`lvl b i`).
 
 **The locals by position.**  `Look C Γ` is what each local of `Γ` holds, as
 the simulation reads it (`Seen`: a value of its type, the storage reference
@@ -17,10 +17,9 @@ heap leaves the caller's locals read as they were.  Declaring a local is
 `Look.cons` (`TEnv`'s pair), a scope end `Look.drop` along an `Ext`, an
 assignment `Look.set` (by recursion on the position, as `TEnv.set`).  A
 value local's cell represents its value outright (`ReprV p (PrimTy.erase
-v)`).  So `Sim.bindVal`/`bindAlias`/`bindFragile`/`unbind` become
-`Sim.consVal`/`consAlias`/`consFragile`/`consDead`, and `Sim.weaken`, which
-forgot names a branch declared, becomes `Sim.drop` (the branch's locals
-popped) and `Sim.flags` (the branches met, the fragile aliases forgotten).
+v)`).  A declaration is `Sim.consVal`/`consAlias`/`consFragile`/`consDead`,
+a scope's end `Sim.drop` (its locals popped), and the end of a branch
+`Sim.flags` (the branches met, the fragile aliases forgotten).
 
 **A frame's cells.**  Code compiled at base `b` over `Γ` writes only cells
 at levels `b` and above (`Stmt.storesFrom`), and a call's body, compiled at
@@ -79,10 +78,6 @@ theorem Idx.ty_eq {Γ : Ctx} {t t' : CLTy} (i : Idx Γ t) (j : Idx Γ t') (h : i
 theorem memAt_upd (m : Machine) (l l' : Nat) (w : Word) :
     ({ m with mem := upd m.mem (cell l) w } : Machine).memAt l' = if l' = l then w else m.memAt l' := by
   simp only [Machine.memAt, upd]
-  by_cases h : l' = l
-  · simp only [h, ↓reduceIte]
-  · simp only [h, ↓reduceIte, ite_eq_right_iff]
-    intro h'; exact absurd (cell_inj h') h
 
 /-! ## The locals by position -/
 
@@ -300,7 +295,7 @@ theorem drop {Δ : Ctx} {G : Frag Δ} {ρ' : Look C Δ} {m : Machine} (hΓ : Ext
   · rw [Frag.get_restrict hΓ] at hi; rw [← lvl_ext b hΓ]; exact h.fragile (i.ext hΓ) hi
 
 /-- The machine's memory changed above the frame's locals only. -/
-theorem congrMem {m : Machine} {mem : Var → Word} (h : Sim C L b F σ ρ m)
+theorem congrMem {m : Machine} {mem : Nat → Word} (h : Sim C L b F σ ρ m)
     (hm : ∀ l, b ≤ l → l < b + Γ.length → mem (cell l) = m.mem (cell l)) :
     Sim C L b F σ ρ { m with mem := mem } := by
   have e : ∀ {t : CLTy} (i : Idx Γ t), ({ m with mem := mem } : Machine).memAt (lvl b i) =
@@ -528,7 +523,7 @@ end Sim
 /-! ## A frame's cells -/
 
 /-- One instruction other than a store to `x` leaves `x`'s cell. -/
-theorem step_mem {i : Instr} {m m' : Machine} {k : Nat} {x : Var} (hi : i ≠ .mstore x)
+theorem step_mem {i : Instr} {m m' : Machine} {k : Nat} {x : Nat} (hi : i ≠ .mstore x)
     (h : i.step m = .ok m' k) : m'.mem x = m.mem x := by
   cases i <;> simp only [Instr.step, Machine.next] at h <;>
     (try split at h) <;> (try split at h) <;> (try split at h) <;>
@@ -537,7 +532,7 @@ theorem step_mem {i : Instr} {m m' : Machine} {k : Nat} {x : Var} (hi : i ≠ .m
   exact upd_other _ _ fun e => hi (e ▸ rfl)
 
 /-- Code with no store to `x` leaves `x`'s cell. -/
-theorem exec_mem {x : Var} : ∀ {c : List Instr} {k k' : Nat} {m m' : Machine},
+theorem exec_mem {x : Nat} : ∀ {c : List Instr} {k k' : Nat} {m m' : Machine},
     Instr.mstore x ∉ c → exec c k m = .ok m' k' → m'.mem x = m.mem x
   | [], _, _, _, _, _, h => by simp only [exec_nil, Out.ok.injEq] at h; rw [h.1]
   | i :: c, k + 1, _, _, _, hx, h => exec_mem (fun hc => hx (List.mem_cons_of_mem _ hc)) h
@@ -564,7 +559,7 @@ abbrev NoStore (c : List Instr) : Prop := c.all (fun i => !i.isStore) = true
 theorem noStore_append {c₁ c₂ : List Instr} : NoStore (c₁ ++ c₂) ↔ NoStore c₁ ∧ NoStore c₂ := by
   simp only [NoStore, List.all_append, Bool.and_eq_true]
 
-theorem NoStore.not_mem {c : List Instr} (h : NoStore c) (x : Var) : Instr.mstore x ∉ c := by
+theorem NoStore.not_mem {c : List Instr} (h : NoStore c) (x : Nat) : Instr.mstore x ∉ c := by
   intro hx
   have := List.all_eq_true.1 h _ hx
   simp only [Instr.isStore, Bool.not_true, Bool.false_eq_true] at this
@@ -759,7 +754,7 @@ theorem noStore_pushCode (b : Nat) {Γ : Ctx} {E : Ty} (v : Option (Solidity.Cor
     simp only [pushCode]; no_store
 
 theorem storesFrom_opLocCode (b n : Nat) {Γ : Ctx} {p : PrimTy} (l : Solidity.Core.OpLoc C Γ p)
-    (onLocal : Var → List Instr) (onLoc : Solidity.Core.Loc C Γ (.prim p) → List Instr)
+    (onLocal : Nat → List Instr) (onLoc : Solidity.Core.Loc C Γ (.prim p) → List Instr)
     (h₁ : ∀ {t : CLTy} (i : Idx Γ t), StoresFrom n (onLocal (cellOf b i)))
     (h₂ : ∀ l, StoresFrom n (onLoc l)) : StoresFrom n (opLocCode b l onLocal onLoc) := by
   cases l <;> simp only [opLocCode] <;> first | exact h₁ _ | exact h₂ _ | exact fun _ _ h => nomatch h

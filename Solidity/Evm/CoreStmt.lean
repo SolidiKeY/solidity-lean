@@ -10,7 +10,8 @@ untyped one's (`Evm/Repr.lean`'s `save_repr`) read back typed through its
 agreement (`Storage.saveStorage_erase`, `into_ok`).  `stmt_sim`
 (`Evm/CoreCorrect.lean`) dispatches to them, so each elaborates on its own.
 
-`StmtOut` is `Evm/Correctness.lean`'s dichotomy with two facts more, kept
+`StmtOut` is the statements' dichotomy (the machine's outcome and the
+typed run's agree), with two facts kept
 by every outcome that goes on (`Keeps`): the cells below the frame's base
 are as they were, and, unless the statement may shrink an array
 (`Stmt.shrinks`), no array's length went down.  A call needs both of its
