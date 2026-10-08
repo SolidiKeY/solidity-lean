@@ -25,8 +25,9 @@ A leaf is closed by `closeTrue` (`true` behind a context of scope ends and
 box updates), else as a walk ends: `Proves.close` takes the sequent, its
 context in front, to its erasure (`Calculus/Core/CloseErase.lean`), which
 today's `sol_symex; sol_close` closes (`closeTacs`), then by the tactics
-`Config.closers` lists.  `Proves.close` is box-only (`Fml.closableB`), so a
-leaf behind a diamond update stays open.
+`Config.closers` lists.  `Proves.close` takes a leaf behind a diamond
+update when the update keeps the `bool` locals `bool`s (`Fml.closableB`,
+`Upd.boolB`); behind any other, the leaf stays open.
 
 A rule of an operator family prints as KeY's taclet at its operator
 (`RuleShapes.keyTacletAt`, at today's name of the constructor).
@@ -87,10 +88,12 @@ def provesCtor (premise : Lean.Name) : Option Lean.Name :=
    (``Premise.inv, ``Proves.inv), (``Premise.inline, ``Proves.inline)].lookup premise
 
 /-- The operator a statement applies, its first `BinOp`, `UnOp` or `IncDec`
-constructor. -/
-def operatorOf? (s : Expr) : Option Lean.Name :=
+constructor: a constructor, not a function of the namespace (`BinOp.ret` in
+a value's type, which an `if`'s branch carries). -/
+def operatorOf? (env : Environment) (s : Expr) : Option Lean.Name :=
   (s.find? fun e => match e.constName? with
-    | some n => n.getPrefix == ``BinOp || n.getPrefix == ``UnOp || n.getPrefix == ``IncDec
+    | some n => (n.getPrefix == ``BinOp || n.getPrefix == ``UnOp || n.getPrefix == ``IncDec) &&
+        env.isConstructor n
     | none => false).bind (·.constName?)
 
 /-- The name a node prints for the scoped constructor `c` fired on `s`:
@@ -101,7 +104,7 @@ def keyName (c : Lean.Name) (s : Expr) : MetaM Lean.Name := do
   let today := (`Solidity.Taclet).append own
   if (RuleShapes.operatorOrder.lookup today).isNone then return own
   let s ← instantiateMVars s
-  let some op := operatorOf? s | return own
+  let some op := operatorOf? (← getEnv) s | return own
   match RuleShapes.keyTacletAt today op with
   | some t => return Lean.Name.mkSimple t.name
   | none => return own

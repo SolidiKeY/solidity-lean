@@ -14,8 +14,8 @@ trees differ from today's:
   past the frames to the postcondition, in one step (`Fml.modalK`, Gate G0's
   condition 6), so there is no `emptyModality` after it;
 * a leaf is closed by `closeTrue`, else by `Proves.close` and today's closer
-  on its erasure, which is box-only: a leaf behind a diamond update stays
-  open.
+  on its erasure, behind a diamond update only one that keeps the `bool`
+  locals `bool`s (`Upd.boolB`).
 -/
 
 namespace Solidity.Examples.Tactics.CoreProofTree
@@ -96,22 +96,20 @@ closed: 0 open goal(s), 4 node(s), 2 branch(es)
 #proof_tree cdl!{ [ ok = to.send(5); ] true }
 
 /-! The hidden binder of `ok`, which the program assigns without declaring,
-is no node. -/
+is no node; the leaves close behind the diamond's updates (`to := 9`,
+`ok := true`, `ok := false` keep the `bool` locals `bool`s). -/
 
 /--
 info: 0: localValueDeclInitDrop
 1: localValueAssign
 2: sendNoCallbackDiamond
   [non-negative amount]
-    3: OPEN GOAL
-        dl{ { to := 9 } ⟹ 0 <= 5 }
+    3: Closed goal
   [send succeeded]
-    4: OPEN GOAL
-        dl{ { to := 9 }, { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true } ⟹ true }
+    4: Closed goal
   [send failed]
-    5: OPEN GOAL
-        dl{ { to := 9 }, { ok := false } ⟹ true }
-open: 3 open goal(s), 6 node(s), 3 branch(es)
+    5: Closed goal
+closed: 0 open goal(s), 6 node(s), 3 branch(es)
 -/
 #guard_msgs in
 #proof_tree cdl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true }

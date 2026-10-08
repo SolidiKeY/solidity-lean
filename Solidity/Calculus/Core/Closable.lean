@@ -12,7 +12,9 @@ two-way condition (`Calculus/Core/HoldsErase.lean`'s `holds_erase`);
 `Fml.Closable` the one-way one a goal closed by its erasure's validity needs
 (`Calculus/Core/CloseErase.lean`): hidden binders and anonymising updates
 in positive positions, as a leaf's context puts them, each name a hidden
-binder binds left alone by the updates above it (`Fml.bindNames`).
+binder binds left alone by the updates above it (`Fml.bindNames`), and an
+update under the diamond one that keeps the `bool` locals `bool`s
+(`Upd.boolB`, as `Fml.posB` asks, `Calculus/Core/Close.lean`).
 `Fml.TClosable` is the condition over the typed state
 (`Calculus/Core/TCloseErase.lean`), where an update in a positive position
 may be a diamond.  `Proves.close` asks the Bool twins (`Fml.closableB`),
@@ -23,6 +25,95 @@ they call here, are written with `casesOn` (Gate G0, condition 1).
 namespace Solidity.Core
 
 variable {C : Contract}
+
+/-! ## Updates that keep the `bool` locals `bool`s
+
+Each by the recursor, which the kernel unfolds with no `brecOn`, and a
+compiled twin by `match` (`implemented_by`) for the tactics' first look.
+`Fml.Closable` takes an update under the diamond that is one, as
+`Fml.posB` does (`Calculus/Core/Close.lean`). -/
+
+/-- The modality is the box: an update under the diamond reads into states
+whose `bool` locals hold `bool`s (`State.BoolOK`), which its erasure does
+not say. -/
+def _root_.Solidity.Modality.isBox : Modality → Bool
+  | .box => true
+  | .diamond => false
+
+theorem _root_.Solidity.Modality.eq_box_of_isBox {m : Modality} (h : m.isBox = true) : m = .box := by
+  cases m with
+  | box => rfl
+  | diamond => cases h
+
+/-- A `bool` literal (`Tm.boolB`). -/
+def _root_.Solidity.Op0.boolLitB {s : Srt} (o : Op0 s) : Bool :=
+  Op0.casesOn (motive := fun _ _ => Bool) o
+    (fun v => match v with | .bool _ => true | _ => false)
+    (fun _ => false) (fun _ => false) false false (fun _ => false)
+
+/-- A negation (`Tm.boolB`). -/
+def _root_.Solidity.Op1.notB {a s : Srt} (o : Op1 a s) : Bool :=
+  Op1.casesOn (motive := fun _ _ _ => Bool) o
+    (fun op _ => match op with | .not => true | _ => false)
+    false (fun _ => false) false (fun _ => false) false (fun _ => false) false (fun _ => false)
+    (fun _ => false) (fun _ => false) (fun _ => false) false false (fun _ => false)
+
+/-- A comparison or a connective (`Tm.boolB`). -/
+def _root_.Solidity.Op2.boolB {a b s : Srt} (o : Op2 a b s) : Bool :=
+  Op2.casesOn (motive := fun _ _ _ _ => Bool) o (fun op _ => !op.isArith)
+    false false false false false false false (fun _ => false) false false (fun _ => false)
+    false false false false false false
+
+/-- `Tm.boolB`'s compiled twin. -/
+def Tm.boolM {Γ : Ctx} : Tm C Γ .val → Bool
+  | .app2 (.binop op _) _ _ => !op.isArith
+  | .app1 (.unop .not _) _ _ => true
+  | .app0 (.lit (.bool _)) => true
+  | .pvV (p := .bool) _ => true
+  | _ => false
+
+/-- A value term each outcome of which is a `bool`, read in a state whose
+`bool` locals hold `bool`s: a comparison or a connective, a negation, a
+`bool` literal, a `bool` local.  By `casesOn`, the motive generalising the
+sort, as the operators' checks are (Gate G0, condition 1). -/
+@[implemented_by Tm.boolM]
+def Tm.boolB {Γ : Ctx} (t : Tm C Γ .val) : Bool :=
+  Tm.casesOn (motive := fun _ _ => Bool) t
+    (fun {p} _ => match p with | .bool => true | _ => false)
+    (fun _ => false) (fun _ => false) (fun _ => false) (fun _ _ => false)
+    (fun o => o.boolLitB) (fun o _ _ => o.notB) (fun o _ _ => o.boolB) (fun _ _ _ _ => false)
+
+/-- `Rhs.boolB`'s compiled twin. -/
+def Rhs.boolM {Γ : Ctx} : {t : LTy} → Rhs C Γ t → Bool
+  | _, .val (p := .bool) t => t.boolB
+  | _, _ => true
+
+/-- A right-hand side that keeps a `bool` local a `bool`. -/
+@[implemented_by Rhs.boolM]
+def Rhs.boolB {Γ : Ctx} {t : LTy} (r : Rhs C Γ t) : Bool :=
+  Rhs.casesOn (motive := fun _ _ => Bool) r
+    (fun {p} t => match p with | .bool => t.boolB | _ => true)
+    (fun _ => true) true (fun _ => true) (fun _ => true) true true
+
+/-- An element that keeps the `bool` locals `bool`s. -/
+def UpdElem.boolB {Γ Δ : Ctx} : UpdElem C Γ Δ → Bool
+  | .local _ r => r.boolB
+  | _ => true
+
+/-- `Upd.boolB`'s compiled twin. -/
+def Upd.boolM {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
+  | _, .nil => true
+  | _, .snoc U e => U.boolM && e.boolB
+  | _, .decl U _ r => U.boolM && r.boolB
+  | _, .pop U _ | _, .drop U _ => U.boolM
+
+/-- **An update that keeps the `bool` locals `bool`s**, as the diamond asks
+of the state it leaves (`Modality.afterT`): every `bool` local it sets is
+set to a `bool` (`Tm.boolB`). -/
+@[implemented_by Upd.boolM]
+def Upd.boolB {Γ : Ctx} {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
+  Upd.rec (motive := fun _ _ => Bool) true (fun _ e ih => ih && e.boolB)
+    (fun _ _ r ih => ih && r.boolB) (fun _ _ ih => ih) (fun _ _ ih => ih) U
 
 /-- Every local an update declares takes a name not in scope. -/
 def Upd.Fresh {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Prop
@@ -76,8 +167,10 @@ def Fml.bindNames : {Γ : Ctx} → Fml C Γ → List Var
 
 /-- A formula whose erasure's validity gives it: as `Fml.Plain`, but a
 hidden binder and an anonymising update allowed in a positive position, out
-of a modality, and every name a hidden binder binds out of scope and left
-alone by the updates above it. -/
+of a modality, every name a hidden binder binds out of scope and left
+alone by the updates above it, and an update in a positive position a
+diamond if it keeps the `bool` locals `bool`s (`Upd.boolB`: the diamond's
+reading asks `State.BoolOK` of the state it ends in). -/
 def Fml.Closable : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, _, .tt => True
   | _, _, .eq _ _ => True
@@ -86,7 +179,7 @@ def Fml.Closable : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, ns, .and φ ψ => φ.Closable ns ∧ ψ.Closable ns
   | _, ns, .imp φ ψ => φ.Plain ns ∧ ψ.Closable ns
   | _, ns, .upd m U φ =>
-    m = .box ∧ U.Fresh ns ∧ Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames ∧
+    (m = .box ∨ U.boolB = true) ∧ U.Fresh ns ∧ Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames ∧
       Avoids φ.bindNames (U.names ns) ∧ φ.Closable (U.names ns)
   | _, ns, .modal m P κ φ => (Fml.modal m P κ φ).Plain ns
   | _, ns, .havoc φ => φ.Closable ns
@@ -230,7 +323,7 @@ def Fml.closableB : {Γ : Ctx} → List Var → Fml C Γ → Bool
     (not := fun φ => Fml.foFreshB ns φ)
     (and := fun φ ψ => Fml.closableB ns φ && Fml.closableB ns ψ)
     (imp := fun φ ψ => Fml.foFreshB ns φ && Fml.closableB ns ψ)
-    (upd := fun m U φ => decide (m = .box) && U.freshB ns &&
+    (upd := fun m U φ => (decide (m = .box) || U.boolB) && U.freshB ns &&
       decide (Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames) &&
       decide (Avoids φ.bindNames (U.names ns)) && Fml.closableB (U.names ns) φ)
     (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.closableB ns φ)
@@ -255,10 +348,10 @@ theorem Fml.closableB_sound : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var}
     have b := Fml.closableB_sound ψ h'.2
     exact ⟨⟨a.1, b.1⟩, Bool.and_eq_true_iff.mpr ⟨a.2, b.2⟩⟩
   | _, .upd m U φ, ns, h => by
-    have h' : (decide (m = .box) && U.freshB ns &&
+    have h' : ((decide (m = .box) || U.boolB) && U.freshB ns &&
         decide (Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames) &&
         decide (Avoids φ.bindNames (U.names ns)) && φ.closableB (U.names ns)) = true := h
-    simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
+    simp only [Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq] at h'
     obtain ⟨⟨⟨⟨hm, hU⟩, h₁⟩, h₂⟩, hφ⟩ := h'
     have a := Fml.closableB_sound φ hφ
     exact ⟨⟨hm, Upd.freshB_sound U hU, h₁, h₂, a.1⟩, a.2⟩

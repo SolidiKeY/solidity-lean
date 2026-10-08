@@ -391,18 +391,23 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   match gs with
   | [g'] => return head ++ (← walk fuel leaves g' close)
   | gs =>
-    let mut out := head
-    for g' in gs do
-      let body ← walk fuel leaves g' close
+    -- a goal is cited by its name when every goal of the step has one to
+    -- cite (`thn`, `els`); else bullets, in order, as today's walk takes a
+    -- rule's goals apart (`cases`' formula goal is `fml`, its updates'
+    -- goals, and `and_intros`' `refine_1`, … have none)
+    let tags ← gs.mapM fun g' => do
       match ← g'.getTag with
-      -- `and_intros`' goals (`refine_1`, …) have no name to cite: bullets
-      | .str _ l =>
-        if l.startsWith "refine_" then
-          out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
-          continue
+      | .str _ l => return if l.startsWith "refine_" then none else some l
+      | _ => return none
+    let cite := tags.all Option.isSome
+    let mut out := head
+    for g' in gs, tag in tags do
+      let body ← walk fuel leaves g' close
+      match cite, tag with
+      | true, some l =>
         out := out.push s!"case {l} =>"
         out := out ++ body.map ("  " ++ ·)
-      | _ => out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
+      | _, _ => out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
     return out
 
 /-- The walk from the goal `g` (`Core.Valid φ` starts with `Proves.valid`):
