@@ -1,22 +1,26 @@
-import Solidity.Calculus.Spec
+import Solidity.Calculus.Core.SolSpec
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.SoundLoops
+import Solidity.Semantics.Core.TypedRunFuel
 import Solidity.Tools.Common
-import Solidity.Theory.Bridge.Denote
 
 /-!
-# Counterexamples: formulas evaluated in a state
+# Counterexamples: scoped formulas evaluated in a typed state
 
-`holds σ φ` is a `Prop`: a quantifier ranges over `2^256` values and
-`{havoc}` over every storage, so it cannot be computed.  `Fml.eval3` is its
-three-valued shadow, which evaluates everything else (terms, updates, the
-programs under a modality) with the interpreter itself: a quantifier is
-tried on a finite domain, `ff` as soon as one instance is `ff`, `tt` only
-where the domain is the whole type (`bool`), `unknown` otherwise, and the
-connectives are Kleene's.  An equation is decided where both sides
-return (`Term.holdsEq_of_eval`) and `unknown` where one halts: `holds`
-reads it through `denote`, where two halting sides may agree (`eqD` puts
-the halt in its `defined` conjuncts, which are decided).  So an answer is
-never wrong, only sometimes missing: `eval3_tt` and `eval3_ff` say that
-`tt` implies `holds σ φ` and `ff` implies `¬ holds σ φ`.
+`holds σ φ` (`Calculus/Core/Logic.lean`) is a `Prop`: a quantifier ranges
+over `2^256` values, an update over the typed states that erase to where it
+ends, `{havoc}` over every storage, so it cannot be computed.
+`Core.Fml.eval3` is its three-valued shadow over the typed state
+(`TState`): terms and updates are read on the erasure, the programs under a
+modality are run by the typed run with fuel (`Prog.trunF`,
+`Semantics/Core/TypedRunFuel.lean`: a loop entered at most `loopFuel`
+iterations, `unknown` past them), a quantifier and a hidden binder are
+tried on a finite domain (`ff` as soon as one instance is), an update is
+read in the one typed state its end lifts to (`TState.lift?`: the heap
+empty, the storage and the transaction its own), and the connectives are
+Kleene's.  An answer is never wrong, only sometimes missing:
+`Fml.eval3_tt` and `Fml.eval3_ff` say that `tt` implies `holds σ φ` and
+`ff` implies `¬ holds σ φ`.
 
 A counterexample to a specification (`refuteSpec`) is a state in
 which the stated premises (`I ∧ requires`) evaluate to `tt` and a
@@ -26,26 +30,26 @@ evaluated but made true by the generator: arguments are drawn in their
 type's range, storages are canonical (`Typing/Reachability.lean`: every
 struct member present in order, a mapping's keys unique and its default the
 type's), their words in range, and `msg.value` is `0` for a function that
-is not `payable`.
+is not `payable`.  The candidate is untyped data (`Cand`), read as a typed
+state by `TState.ofSem?` (the storage decoded at the contract's types).
 
 The search is testing: small pools of values per primitive type (the
 bounds, `0`, `1`, `2`, and the spec's own literals), all-default storages
 over every combination of arguments first, then random states
 (`GenSpec.sval` of `Tools/Common.lean` over the pools, seeded, so the result
-is the same on every run).  A witness found
-is shrunk before it is shown (Shrinking, below).
+is the same on every run).  A witness found is shrunk before it is shown
+(Shrinking, below).
 
-A witness is **certified** when the kernel checks `¬ ⊨ φ` from it:
-`eval3_ff` applied to `φ.eval3 dom σ₀ = .ff`, which the kernel decides by
-evaluating `eval3` on the closed terms (`certifyRefl`).  That needs every
-premise to evaluate to `tt` in `σ₀`, and so fails when one is quantified
-over a `uint`, as the layout premise of a mapping is; the witness is then
-only **tested**.
+A witness is **certified** when the kernel checks `¬ ⊨ φ` of the scoped
+formula from it: `Fml.not_valid_of_eval3` applied to
+`φ.eval3 dom σ₀ = .ff`, which the kernel decides by evaluating `eval3`, the
+typed run and the decoding of the candidate's storage on closed terms
+(`certifyRefl`).  That needs every premise to evaluate to `tt` in `σ₀`, and
+so fails when one is quantified over a `uint`, as the layout premise of a
+mapping is; the witness is then only **tested**.
 -/
 
 namespace Solidity.Tools
-
-open Semantics
 
 /-! ## Three truth values -/
 
@@ -79,318 +83,471 @@ def imp : Tri → Tri → Tri
   | tt, ff => ff
   | _, _ => unknown
 
-/-- What a modality says of a run, as `Modality.after` says it. -/
-def after (m : Modality) (k : State → Tri) : Res State → Tri
-  | .ok τ => k τ
-  | .error _ => match m with
-    | .box => tt
-    | .diamond => ff
-
-/-- `after` for a program's run: a panic satisfies neither modality. -/
-def afterRun (m : Modality) (k : State → Tri) : Res State → Tri
-  | .error .panic => ff
-  | r => after m k r
-
 end Tri
 
-/-- `PrimTy.admits`, decided. -/
-def _root_.Solidity.PrimTy.admitsB : PrimTy → Value → Bool
-  | .bool, .bool _ => true
-  | .uint, .int n => decide (0 ≤ n ∧ n < uintBound)
-  | .int, .int n => decide (-intBound ≤ n ∧ n < intBound)
-  | _, _ => false
+end Solidity.Tools
 
-theorem _root_.Solidity.PrimTy.admitsB_iff :
-    (p : PrimTy) → (v : Value) → PrimTy.admitsB p v = true ↔ p.admits v
-  | .bool, .bool _ | .uint, .int _ | .int, .int _
-  | .bool, .int _ | .uint, .bool _ | .int, .bool _ => by
-    simp only [PrimTy.admitsB, PrimTy.admits, Bool.decide_and, Bool.and_eq_true, decide_eq_true_eq,
-      Bool.false_eq_true]
+namespace Solidity.Core
 
-/-- The callee states `{havoc} φ` is tried at: none, and an emptied
-ledger. -/
-def havocSamples (σ : State) : List (List (Name × SVal) × List (Int × Int)) :=
-  [(σ.storage, σ.net), (σ.storage, [])]
+open Solidity.Tools (Tri)
+open Semantics (Value)
 
 variable {C : Contract}
 
-/-! ## Programs run with fuel
+/-! ## The typed state of a candidate
 
-`Loop.run` iterates until the loop is done, in compiled code too
-(`Loop.runImpl`), which heeds no heartbeats: a loop bounded by an argument
-drawn at `2^256 - 1`, or one that never ends, would never return.  So the
-search runs each loop at most `loopFuel` iterations (`Prog.runFuel`), and a
-run past them is `none`, which evaluates to `unknown`; what it does return
-is `Prog.run`'s (`Prog.runFuel_sound`).  The kernel reduces it too, where it
-does not reduce `Loop.run`. -/
+An untyped storage read at the contract's types: kernel-reducible, by
+recursion on a depth `k` (a struct's members, an array's elements and a
+mapping's values one level down), each list by its own recursion. -/
+
+/-- Exactly `n` values, each decoded by `f`. -/
+def SVec.decode {E : Ty} (f : Semantics.SVal → Option (SVal E)) :
+    (n : Nat) → List Semantics.SVal → Option (SVec E n)
+  | 0, [] => some .nil
+  | n + 1, v :: vs => do pure (.cons (← f v) (← SVec.decode f n vs))
+  | _, _ => none
+
+/-- A list of values, each decoded by `f`. -/
+def SList.decode {E : Ty} (f : Semantics.SVal → Option (SVal E)) :
+    List Semantics.SVal → Option (SList E)
+  | [] => some .nil
+  | v :: vs => do pure (.cons (← f v) (← SList.decode f vs))
+
+/-- A mapping's entries, each value decoded by `f`. -/
+def SMap.decode {V : Ty} (f : Semantics.SVal → Option (SVal V)) :
+    List (Int × Semantics.SVal) → Option (SMap V)
+  | [] => some .nil
+  | (k, v) :: es => do pure (.cons k (← f v) (← SMap.decode f es))
+
+/-- A struct's members, by name and in order, each decoded at its type by `f`. -/
+def SFields.decode (f : (T : Ty) → Semantics.SVal → Option (SVal T)) :
+    (fs : List (Name × Ty)) → List (Name × Semantics.SVal) → Option (SFields fs)
+  | [], [] => some .nil
+  | (n, T) :: fs, (n', v) :: vs =>
+    if n = n' then do pure (.cons (← f T v) (← SFields.decode f fs vs)) else none
+  | _, _ => none
+
+/-- An untyped storage value read at the type `T`, at most `k` levels deep:
+`none` where it has another shape (a value out of its type's range among
+them). -/
+def SVal.decodeN : Nat → (T : Ty) → Semantics.SVal → Option (SVal T)
+  | 0, _, _ => none
+  | _ + 1, .prim p, .prim v => (PrimTy.ofValue? p v).map .prim
+  | k + 1, .ref (.struct s), .struct fs =>
+    (SFields.decode (SVal.decodeN k) (Semantics.structDef s) fs).map .struct
+  | k + 1, .ref (.array E), .array es sh false =>
+    if h : es.length < 2 ^ 256 then do
+      pure (.array (← SVec.decode (SVal.decodeN k E) es.length es)
+        (← SList.decode (SVal.decodeN k E) sh) h)
+    else none
+  | k + 1, .ref (.fixed E n), .array es [] true =>
+    (SVec.decode (SVal.decodeN k E) n es).map .fixed
+  | k + 1, .ref (.mapping _ V), .map es d => do
+    pure (.map (← SMap.decode (SVal.decodeN k V) es) (← SVal.decodeN k V d))
+  | _ + 1, _, _ => none
+
+/-- An untyped storage read at the contract's types. -/
+def Storage.decode (C : Contract) (st : List (Name × Semantics.SVal)) : Option (Storage C) :=
+  SFields.decode (SVal.decodeN 32) C.vars st
+
+/-- **The typed state of an untyped one**, with no locals: the storage
+decoded, the words of the transaction and the funds read as `uint`s. -/
+def TState.ofSem? (C : Contract) (s : Semantics.State) : Option (TState C []) := do
+  let u (n : Int) : Option PrimTy.uint.Denote := PrimTy.ofValue? .uint (.int n)
+  let st ← Storage.decode C s.storage
+  let bal ← u s.selfBalance
+  let sender ← u s.tx.msgSender
+  let self ← u s.tx.selfAddress
+  let value ← u s.tx.msgValue
+  let time ← u s.tx.timestamp
+  pure { storage := st, H := [], heap := Heap.empty, env := (), net := s.net,
+         selfBalance := bal,
+         tx := { msgSender := sender, selfAddress := self, msgValue := value, timestamp := time,
+                 ext := s.tx.ext } }
+
+/-- `TState.ofSem?`, the initial state where it fails. -/
+def TState.ofSemD (C : Contract) (s : Semantics.State) : TState C [] :=
+  (TState.ofSem? C s).getD (TState.init C)
+
+/-! ## Comparing untyped storages in the kernel
+
+`Semantics.SVal`'s `DecidableEq` (a nested inductive's, written by hand) does
+not reduce in the kernel; `SVal.beqK` is a structural Boolean equality that
+does, and implies equality (`SVal.eq_of_beqK`). -/
+
+mutual
+/-- Boolean equality of untyped storage values, structural. -/
+def _root_.Solidity.Semantics.SVal.beqK : Semantics.SVal → Semantics.SVal → Bool
+  | .prim a, .prim b => decide (a = b)
+  | .struct fs, .struct gs => Semantics.SVal.fieldsBeqK fs gs
+  | .array es sh f, .array es' sh' f' =>
+    Semantics.SVal.listBeqK es es' && Semantics.SVal.listBeqK sh sh' && f == f'
+  | .map es d, .map es' d' => Semantics.SVal.entriesBeqK es es' && Semantics.SVal.beqK d d'
+  | _, _ => false
+  termination_by structural a => a
+
+/-- Members, by name and value. -/
+def _root_.Solidity.Semantics.SVal.fieldsBeqK :
+    List (Name × Semantics.SVal) → List (Name × Semantics.SVal) → Bool
+  | [], [] => true
+  | (n, v) :: fs, (n', v') :: gs =>
+    decide (n = n') && Semantics.SVal.beqK v v' && Semantics.SVal.fieldsBeqK fs gs
+  | _, _ => false
+  termination_by structural a => a
+
+/-- Elements. -/
+def _root_.Solidity.Semantics.SVal.listBeqK : List Semantics.SVal → List Semantics.SVal → Bool
+  | [], [] => true
+  | v :: vs, v' :: vs' => Semantics.SVal.beqK v v' && Semantics.SVal.listBeqK vs vs'
+  | _, _ => false
+  termination_by structural a => a
+
+/-- Entries, by key and value. -/
+def _root_.Solidity.Semantics.SVal.entriesBeqK :
+    List (Int × Semantics.SVal) → List (Int × Semantics.SVal) → Bool
+  | [], [] => true
+  | (k, v) :: es, (k', v') :: es' =>
+    decide (k = k') && Semantics.SVal.beqK v v' && Semantics.SVal.entriesBeqK es es'
+  | _, _ => false
+  termination_by structural a => a
+end
+
+mutual
+theorem _root_.Solidity.Semantics.SVal.eq_of_beqK : (a b : Semantics.SVal) →
+    Semantics.SVal.beqK a b = true → a = b
+  | .prim a, .prim b, h => by
+    simp only [Semantics.SVal.beqK, decide_eq_true_eq] at h
+    rw [h]
+  | .struct fs, .struct gs, h => by
+    simp only [Semantics.SVal.beqK] at h
+    rw [Semantics.SVal.eq_of_fieldsBeqK fs gs h]
+  | .array es sh f, .array es' sh' f', h => by
+    simp only [Semantics.SVal.beqK, Bool.and_eq_true, beq_iff_eq] at h
+    rw [Semantics.SVal.eq_of_listBeqK es es' h.1.1, Semantics.SVal.eq_of_listBeqK sh sh' h.1.2,
+      h.2]
+  | .map es d, .map es' d', h => by
+    simp only [Semantics.SVal.beqK, Bool.and_eq_true] at h
+    rw [Semantics.SVal.eq_of_entriesBeqK es es' h.1, Semantics.SVal.eq_of_beqK d d' h.2]
+  | .prim _, .struct _, h | .prim _, .array .., h | .prim _, .map .., h
+  | .struct _, .prim _, h | .struct _, .array .., h | .struct _, .map .., h
+  | .array .., .prim _, h | .array .., .struct _, h | .array .., .map .., h
+  | .map .., .prim _, h | .map .., .struct _, h | .map .., .array .., h => by
+    simp only [Semantics.SVal.beqK, Bool.false_eq_true] at h
+
+theorem _root_.Solidity.Semantics.SVal.eq_of_fieldsBeqK :
+    (a b : List (Name × Semantics.SVal)) → Semantics.SVal.fieldsBeqK a b = true → a = b
+  | [], [], _ => rfl
+  | (n, v) :: fs, (n', v') :: gs, h => by
+    simp only [Semantics.SVal.fieldsBeqK, Bool.and_eq_true, decide_eq_true_eq] at h
+    rw [h.1.1, Semantics.SVal.eq_of_beqK v v' h.1.2, Semantics.SVal.eq_of_fieldsBeqK fs gs h.2]
+  | [], _ :: _, h | _ :: _, [], h => by
+    simp only [Semantics.SVal.fieldsBeqK, Bool.false_eq_true] at h
+
+theorem _root_.Solidity.Semantics.SVal.eq_of_listBeqK :
+    (a b : List Semantics.SVal) → Semantics.SVal.listBeqK a b = true → a = b
+  | [], [], _ => rfl
+  | v :: vs, v' :: vs', h => by
+    simp only [Semantics.SVal.listBeqK, Bool.and_eq_true] at h
+    rw [Semantics.SVal.eq_of_beqK v v' h.1, Semantics.SVal.eq_of_listBeqK vs vs' h.2]
+  | [], _ :: _, h | _ :: _, [], h => by
+    simp only [Semantics.SVal.listBeqK, Bool.false_eq_true] at h
+
+theorem _root_.Solidity.Semantics.SVal.eq_of_entriesBeqK :
+    (a b : List (Int × Semantics.SVal)) → Semantics.SVal.entriesBeqK a b = true → a = b
+  | [], [], _ => rfl
+  | (k, v) :: es, (k', v') :: es', h => by
+    simp only [Semantics.SVal.entriesBeqK, Bool.and_eq_true, decide_eq_true_eq] at h
+    rw [h.1.1, Semantics.SVal.eq_of_beqK v v' h.1.2, Semantics.SVal.eq_of_entriesBeqK es es' h.2]
+  | [], _ :: _, h | _ :: _, [], h => by
+    simp only [Semantics.SVal.entriesBeqK, Bool.false_eq_true] at h
+end
+
+/-! ## The typed state an update ends in
+
+An update is read on the erasure (`Upd.apply`), and what follows it in
+every typed state that erases to where it ends (`holds`).  One of them is
+enough to refute it: `TState.lift?` reads the end back as a typed state
+where the heap is empty and the storage and the transaction are the
+starting state's (a snapshot `old := storage` is that storage), every
+local a value of its type, an unset alias or memory local, a ledger. -/
+
+/-- The locals of an untyped environment, typed over the empty heap: a
+snapshot of the storage only where it is `st`'s erasure. -/
+def TEnv.lift? (st : Storage C) : (Δ : Ctx) → Env C Δ → Option (TEnv C [] Δ)
+  | [], _ => some ()
+  | .val p :: Δ, e => do pure (← PrimTy.ofValue? p e.1, ← TEnv.lift? st Δ e.2)
+  | .alias _ :: Δ, e => match e.1 with
+    | none => do pure (none, ← TEnv.lift? st Δ e.2)
+    | some _ => none
+  | .mem _ :: Δ, e => match e.1 with
+    | none => do pure (none, ← TEnv.lift? st Δ e.2)
+    | some _ => none
+  | .old :: Δ, e =>
+    if Semantics.SVal.fieldsBeqK e.1 st.erase then do pure (st, ← TEnv.lift? st Δ e.2) else none
+  | .oldNet :: Δ, e => do pure (e.1, ← TEnv.lift? st Δ e.2)
+
+theorem TEnv.lift?_erase (st : Storage C) : (Δ : Ctx) → (e : Env C Δ) → (e' : TEnv C [] Δ) →
+    TEnv.lift? st Δ e = some e' → TEnv.erase Δ e' = e
+  | [], (), (), _ => rfl
+  | .val p :: Δ, (v, e), e', h => by
+    simp only [TEnv.lift?, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+      Option.some.injEq] at h
+    obtain ⟨w, hw, e'', he, rfl⟩ := h
+    simp only [TEnv.erase, LTy.TDenote.erase, PrimTy.erase_of_ofValue? hw,
+      TEnv.lift?_erase st Δ e e'' he]
+  | .alias _ :: Δ, (a, e), e', h => by
+    cases a with
+    | some _ => simp only [TEnv.lift?, reduceCtorEq] at h
+    | none =>
+      simp only [TEnv.lift?, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+        Option.some.injEq] at h
+      obtain ⟨e'', he, rfl⟩ := h
+      simp only [TEnv.erase, LTy.TDenote.erase, Option.map_none, TEnv.lift?_erase st Δ e e'' he]
+  | .mem _ :: Δ, (r, e), e', h => by
+    cases r with
+    | some _ => simp only [TEnv.lift?, reduceCtorEq] at h
+    | none =>
+      simp only [TEnv.lift?, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+        Option.some.injEq] at h
+      obtain ⟨e'', he, rfl⟩ := h
+      simp only [TEnv.erase, LTy.TDenote.erase, Option.map_none, TEnv.lift?_erase st Δ e e'' he]
+  | .old :: Δ, (s, e), e', h => by
+    simp only [TEnv.lift?] at h
+    split at h
+    · rename_i hs
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+        Option.some.injEq] at h
+      obtain ⟨e'', he, rfl⟩ := h
+      simp only [TEnv.erase, LTy.TDenote.erase, Semantics.SVal.eq_of_fieldsBeqK _ _ hs,
+        TEnv.lift?_erase st Δ e e'' he]
+    · cases h
+  | .oldNet :: Δ, (l, e), e', h => by
+    simp only [TEnv.lift?, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+      Option.some.injEq] at h
+    obtain ⟨e'', he, rfl⟩ := h
+    simp only [TEnv.erase, LTy.TDenote.erase, TEnv.lift?_erase st Δ e e'' he]
+
+/-- **A typed state the untyped `τ` erases from**, over the empty heap, with
+`σ`'s storage and transaction: `none` where `σ`'s heap typing is not empty
+or `τ` holds memory, another storage or transaction, or a local no typed
+value of its type erases to. -/
+def TState.lift? {Γ Δ : Ctx} (σ : TState C Γ) (τ : State C Δ) : Option (TState C Δ) :=
+  if σ.H.isEmpty && τ.heap.isEmpty && τ.nextId == 0 &&
+      Semantics.SVal.fieldsBeqK τ.storage σ.storage.erase &&
+      decide (τ.tx = σ.tx.erase) then do
+    let bal ← PrimTy.ofValue? .uint (.int τ.selfBalance)
+    let env ← TEnv.lift? σ.storage Δ τ.env
+    pure { storage := σ.storage, H := [], heap := Heap.empty, env, net := τ.net,
+           selfBalance := bal, tx := σ.tx }
+  else none
+
+theorem TState.lift?_spec {Γ Δ : Ctx} {σ : TState C Γ} {τ : State C Δ} {σ' : TState C Δ}
+    (h : σ.lift? τ = some σ') : σ'.erase = τ ∧ σ.H <+: σ'.H := by
+  unfold TState.lift? at h
+  split at h
+  · rename_i hc
+    simp only [Bool.and_eq_true, List.isEmpty_iff, beq_iff_eq, decide_eq_true_eq] at hc
+    obtain ⟨⟨⟨⟨hH, hheap⟩, hid⟩, hst⟩, htx⟩ := hc
+    have hst := Semantics.SVal.eq_of_fieldsBeqK _ _ hst
+    simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+      Option.some.injEq] at h
+    obtain ⟨bal, hbal, env, henv, rfl⟩ := h
+    refine ⟨?_, by rw [hH]; exact List.nil_prefix⟩
+    have hb : bal.1 = τ.selfBalance := by
+      have := PrimTy.erase_of_ofValue? hbal
+      simp only [PrimTy.erase] at this
+      exact Semantics.PrimVal.int.inj this
+    cases τ
+    simp only at hheap hid hst htx hb
+    simp only [TState.erase, TEnv.lift?_erase σ.storage Δ _ env henv, hheap, hid, hst, htx, hb]
+    rfl
+  · cases h
+
+/-! ## Evaluation -/
+
+/-- The values a quantifier over each primitive type is tried on. -/
+abbrev TDom := (p : PrimTy) → List p.Denote
 
 /-- The iterations a loop is run for, at most, each time it is entered. -/
 def loopFuel : Nat := 1000
 
-/-- At most `n` iterations of a loop whose body may run out of fuel: `none`
-when they do not finish it. -/
-def _root_.Solidity.Loop.runFuel (body : State → Option (Res State)) (c : State → Res Value) :
-    Nat → State → Option (Res State)
-  | 0, _ => none
-  | n + 1, σ =>
-    match c σ with
-    | .error h => some (.error h)
-    | .ok (.bool false) => some (.ok σ)
-    | .ok (.int _) => some (.error .stuck)
-    | .ok (.bool true) =>
-      match body σ with
-      | none => none
-      | some (.error h) => some (.error h)
-      | some (.ok τ) => Loop.runFuel body c n τ
+/-- The values a hidden binder of type `t` is tried on in `σ`: the domain
+for a value, unset for an alias or a memory local, `σ`'s storage and ledger
+for a snapshot. -/
+def TDom.bind {Γ : Ctx} (dom : TDom) (σ : TState C Γ) : (t : LTy) → List (t.TDenote C σ.H)
+  | .val p => dom p
+  | .alias _ => [none]
+  | .mem _ => [none]
+  | .old => [σ.storage]
+  | .oldNet => [σ.net]
 
-theorem _root_.Solidity.Loop.runFuel_sound {body : State → Option (Res State)}
-    {body' : State → Res State} {c : State → Res Value}
-    (hb : ∀ τ r, body τ = some r → body' τ = r) :
-    (n : Nat) → ∀ (σ : State) (r : Res State), Loop.runFuel body c n σ = some r →
-      Loop.run body' c σ = r
-  | 0, _, _, h => by simp only [Loop.runFuel, reduceCtorEq] at h
-  | n + 1, σ, r, h => by
-    rw [Loop.run_unfold]
-    simp only [Loop.runFuel] at h
-    simp only [Loop.step]
-    split at h <;> rename_i hc <;> simp only [hc]
-    · exact Option.some.inj h
-    · exact Option.some.inj h
-    · exact Option.some.inj h
-    · split at h <;> rename_i hbd
-      · cases h
-      · simp only [hb _ _ hbd]; exact Option.some.inj h
-      · simp only [hb _ _ hbd]; exact Loop.runFuel_sound hb n _ _ h
+/-- What a modality says of a typed run: of the state it ends in, a halt as
+`Modality.onTHalt` says, `ff` on a panic, `unknown` on `diverge` (a loop
+past `loopFuel` iterations is one). -/
+def Tri.afterT {α : Type} (m : Modality) (k : α → Tri) : TRes α → Tri
+  | .ok a => k a
+  | .error .panic => .ff
+  | .error .diverge => .unknown
+  | .error .exhausted => .tt
+  | .error .revert => match m with
+    | .box => .tt
+    | .diamond => .ff
 
-mutual
+/-- The program, then its frames, run with fuel (`Prog.trunFrames`). -/
+def Prog.trunFramesF {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : TState C Γ) (P : Prog C Γ Γ₁)
+    (κ : Frames C Γ₁ Γ₀) : TRes (TState C Γ₀) := do
+  let o ← Prog.trunF n P σ
+  let o' ← Frames.trunF n o.st κ
+  pure o'.st
 
-/-- `Stmt.run` with each loop run at most `n` iterations (`Loop.runFuel`). -/
-def _root_.Solidity.Stmt.runFuel (n : Nat) (σ : State) : Stmt C → Option (Res State)
-  | .ite c thn els =>
-    match c.eval σ with
-    | .error h => some (.error h)
-    | .ok (.bool true) => Prog.runFuel n σ thn
-    | .ok (.bool false) => Prog.runFuel n σ els
-    | .ok (.int _) => some (.error .stuck)
-  | .call _ args _ ret body =>
-    match Arg.bindSeq args σ with
-    | .error h => some (.error h)
-    | .ok σ₁ =>
-      (Prog.runFuel n (ret.enter σ₁) body).map fun r => r >>= fun σ₂ => CallRet.leave (C := C) σ₂ ret
-  | .tryCall call rets ok err code pnc other =>
-    match call.key σ with
-    | .error h => some (.error h)
-    | .ok key =>
-      match lookupBy key σ.tx.ext with
-      | none => some (.error .revert)
-      | some (.ok vs) =>
-        match bindData rets vs σ with
-        | .error h => some (.error h)
-        | .ok τ => Prog.runFuel n τ ok
-      | some .error => Prog.runFuel n σ err
-      | some (.panic c) =>
-        match bindData (codeBinders code) [c] σ with
-        | .error h => some (.error h)
-        | .ok τ => Prog.runFuel n τ pnc
-      | some .other => Prog.runFuel n σ other
-  | .loop _ c body => Loop.runFuel (fun τ => Prog.runFuel n τ body) (fun τ => c.eval τ) n σ
-  | s => some (s.run σ)
-
-/-- `Prog.run` with each loop run at most `n` iterations. -/
-def _root_.Solidity.Prog.runFuel (n : Nat) (σ : State) : List (Stmt C) → Option (Res State)
-  | [] => some (pure σ)
-  | s :: P =>
-    match Stmt.runFuel n σ s with
-    | none => none
-    | some (.error h) => some (.error h)
-    | some (.ok τ) => Prog.runFuel n τ P
-
-end
-
-mutual
-
-/-- A run with fuel that returns is the run. -/
-theorem _root_.Solidity.Stmt.runFuel_sound {n : Nat} :
-    (s : Stmt C) → ∀ (σ : State) (r : Res State), s.runFuel n σ = some r → s.run σ = r
-  | .ite c thn els, σ, r, h => by
-    simp only [Stmt.runFuel] at h
-    simp only [Stmt.run, bind, Except.bind]
-    split at h <;> rename_i hc <;> simp only [hc]
-    · exact Option.some.inj h
-    · exact Prog.runFuel_sound thn σ r h
-    · exact Prog.runFuel_sound els σ r h
-    · exact Option.some.inj h
-  | .call _ args _ ret body, σ, r, h => by
-    simp only [Stmt.runFuel] at h
-    simp only [Stmt.run, bind, Except.bind]
-    split at h <;> rename_i hc <;> simp only [hc]
-    · exact Option.some.inj h
-    · cases hP : Prog.runFuel n (ret.enter _) body with
-      | none => rw [hP] at h; cases h
-      | some r' =>
-        rw [hP] at h
-        rw [Prog.runFuel_sound body _ r' hP, ← Option.some.inj h]
-        rfl
-  | .tryCall call rets ok err code pnc other, σ, r, h => by
-    simp only [Stmt.runFuel] at h
-    simp only [Stmt.run, bind, Except.bind]
-    split at h <;> rename_i hc <;> simp only [hc]
-    · exact Option.some.inj h
-    · split at h <;> rename_i hl <;> simp only [hl]
-      · exact Option.some.inj h
-      · split at h <;> rename_i hd <;> simp only [hd]
-        · exact Option.some.inj h
-        · exact Prog.runFuel_sound ok _ r h
-      · exact Prog.runFuel_sound err σ r h
-      · split at h <;> rename_i hd <;> simp only [hd]
-        · exact Option.some.inj h
-        · exact Prog.runFuel_sound pnc _ r h
-      · exact Prog.runFuel_sound other σ r h
-  | .loop _ c body, σ, r, h => by
-    simp only [Stmt.runFuel] at h
-    simp only [Stmt.run]
-    exact Loop.runFuel_sound (fun τ r' h' => Prog.runFuel_sound body τ r' h') n σ r h
-  | .assign .., _, _, h | .rebind .., _, _, h | .assignLocal .., _, _, h | .declLocal .., _, _, h
-  | .declStorage .., _, _, h | .declMem .., _, _, h | .rebindMem .., _, _, h
-  | .assignMem .., _, _, h | .assignFromMem .., _, _, h | .opAssign .., _, _, h
-  | .incDec .., _, _, h | .assignIncDec .., _, _, h | .push .., _, _, h | .pop .., _, _, h
-  | .transfer .., _, _, h | .send .., _, _, h | .delete .., _, _, h | .deleteMem .., _, _, h
-  | .assignNew .., _, _, h | .require .., _, _, h | .assert .., _, _, h | .revert, _, _, h =>
-    Option.some.inj h
-
-theorem _root_.Solidity.Prog.runFuel_sound {n : Nat} :
-    (P : List (Stmt C)) → ∀ (σ : State) (r : Res State), Prog.runFuel n σ P = some r →
-      Prog.run σ P = r
-  | [], _, _, h => Option.some.inj h
-  | s :: P, σ, r, h => by
-    simp only [Prog.runFuel] at h
-    simp only [Prog.run, bind, Except.bind]
-    split at h <;> rename_i hs
-    · cases h
-    · rw [Stmt.runFuel_sound s σ _ hs]; exact Option.some.inj h
-    · rw [Stmt.runFuel_sound s σ _ hs]; exact Prog.runFuel_sound P _ r h
-
-end
+theorem Prog.trunFramesF_approx {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : TState C Γ) (P : Prog C Γ Γ₁)
+    (κ : Frames C Γ₁ Γ₀) : TRes.Approx (Prog.trunFramesF n σ P κ) (Prog.trunFrames σ P κ) :=
+  (Prog.trunF_approx n P σ).bind fun o => (Frames.trunF_approx n o.st κ).bind fun _ => .refl _
 
 /-- **`holds`, evaluated**: `dom p` is the finite domain a quantifier over
-`p` is tried on (only its values of type `p` are). -/
-def _root_.Solidity.Fml.eval3 (dom : PrimTy → List Value) (σ : State) : Fml C → Tri
-  | .tt => .tt
-  | .eq a b =>
-    match a.eval σ, b.eval σ with
+`p` is tried on. -/
+def Fml.eval3 (dom : TDom) : {Γ : Ctx} → TState C Γ → Fml C Γ → Tri
+  | _, _, .tt => .tt
+  | _, σ, .eq a b =>
+    match a.eval σ.erase, b.eval σ.erase with
     | .ok x, .ok y => if x = y then .tt else .ff
     | _, _ => .unknown
-  | .defined t =>
-    match t.eval σ with
+  | _, σ, .defined t =>
+    match t.eval σ.erase with
     | .ok _ => .tt
     | .error _ => .ff
-  | .not φ => (φ.eval3 dom σ).not
-  | .and φ ψ => (φ.eval3 dom σ).and (ψ.eval3 dom σ)
-  | .imp φ ψ => (φ.eval3 dom σ).imp (ψ.eval3 dom σ)
-  | .upd m U φ => Tri.after m (fun τ => φ.eval3 dom τ) (U.apply σ)
-  | .modal m P φ =>
-    match Prog.runFuel loopFuel σ P with
-    | some r => Tri.afterRun m (fun τ => φ.eval3 dom τ) r
-    | none => .unknown
-  | .havoc φ =>
-    if (havocSamples σ).any fun (st, nt) => φ.eval3 dom (σ.havoc st nt) = .ff then .ff
-    else .unknown
-  | .all x p φ =>
-    let rs := ((dom p).filter p.admitsB).map fun v => (v, φ.eval3 dom (σ.setEnv x (.val v)))
-    if rs.any (·.2 = .ff) then .ff
-    else if p = .bool && rs.any (·.1 = .bool true) && rs.any (·.1 = .bool false) &&
-        rs.all (·.2 = .tt) then .tt
-    else .unknown
-  -- the locals as they are: one of the states the formula is about
-  | .anon xs φ => if φ.eval3 dom (σ.anon xs fun x => lookupBy x σ.env) = .ff then .ff else .unknown
+  | _, σ, .not φ => (φ.eval3 dom σ).not
+  | _, σ, .and φ ψ => (φ.eval3 dom σ).and (ψ.eval3 dom σ)
+  | _, σ, .imp φ ψ => (φ.eval3 dom σ).imp (ψ.eval3 dom σ)
+  | _, σ, .upd m U φ =>
+    match U.apply σ.erase with
+    | .error _ => match m with
+      | .box => .tt
+      | .diamond => .ff
+    | .ok τ => match σ.lift? τ with
+      | some σ' => if φ.eval3 dom σ' = .ff then .ff else .unknown
+      | none => .unknown
+  | _, σ, .modal m P κ φ => Tri.afterT m (fun τ => φ.eval3 dom τ) (Prog.trunFramesF loopFuel σ P κ)
+  | _, σ, .havoc φ =>
+    if φ.eval3 dom σ = .ff || φ.eval3 dom (σ.havoc σ.storage []) = .ff then .ff else .unknown
+  | _, σ, .all _ p φ =>
+    if (dom p).any fun v => φ.eval3 dom (σ.push (t := .val p) v) = .ff then .ff else .unknown
+  | _, σ, .bind _ _ t φ =>
+    if (dom.bind σ t).any fun v => φ.eval3 dom (σ.push v) = .ff then .ff else .unknown
+  | _, σ, .anon xs φ =>
+    if φ.eval3 dom (σ.anon xs fun x => TEnv.get x.2 σ.env) = .ff then .ff else .unknown
 
-theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fml C) → ∀ σ : State,
+theorem Fml.eval3_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : TState C Γ,
     (φ.eval3 dom σ = .tt → holds σ φ) ∧ (φ.eval3 dom σ = .ff → ¬ holds σ φ)
-  | .tt, σ => ⟨fun _ => trivial, nofun⟩
-  | .eq a b, σ => by
+  | _, .tt, _ => ⟨fun _ => trivial, nofun⟩
+  | _, .eq a b, σ => by
     simp only [Fml.eval3, holds]
     split
     · rename_i x y ha hb
-      rw [Term.holdsEq_of_eval ha hb]
-      by_cases hxy : x = y <;> simp only [hxy, if_true, if_false, reduceCtorEq, imp_false,
-        not_true_eq_false, not_false_eq_true, implies_true, and_self]
+      have hda := Tm.denote_eval σ.erase a x ha
+      have hdb := Tm.denote_eval σ.erase b y hb
+      rw [hda, hdb, Theory.StValue.Equiv.prim_iff]
+      by_cases hxy : x = y
+      · subst hxy
+        simp only [if_true, reduceCtorEq, false_implies, and_true]
+        exact fun _ => trivial
+      · simp only [hxy, if_false, reduceCtorEq, false_implies, true_and]
+        exact fun _ h => hxy (Theory.StValue.prim.inj h)
     · simp only [reduceCtorEq, false_implies, and_self]
-  | .defined t, σ => by
+  | _, .defined t, σ => by
     simp only [Fml.eval3, holds]
     split <;> rename_i h <;> simp only [h, Except.ok.injEq, exists_eq', exists_false, imp_self,
       reduceCtorEq, not_true_eq_false, not_false_eq_true, and_self]
-  | .not φ, σ => by
+  | _, .not φ, σ => by
     have ih := Fml.eval3_sound dom φ σ
     simp only [Fml.eval3, holds]
     cases h : φ.eval3 dom σ <;> simp_all only [Tri.not, reduceCtorEq, false_implies, forall_const,
       true_and, and_true, and_self, implies_true, not_true_eq_false, not_false_eq_true,
       Classical.not_not]
-  | .and φ ψ, σ => by
+  | _, .and φ ψ, σ => by
     have ih₁ := Fml.eval3_sound dom φ σ
     have ih₂ := Fml.eval3_sound dom ψ σ
     simp only [Fml.eval3, holds]
     cases h₁ : φ.eval3 dom σ <;> cases h₂ : ψ.eval3 dom σ <;>
       simp_all only [Tri.and, reduceCtorEq, false_implies, forall_const, true_and, and_true,
         and_false, false_and, and_self, implies_true, not_true_eq_false, not_false_eq_true, not_and]
-  | .imp φ ψ, σ => by
+  | _, .imp φ ψ, σ => by
     have ih₁ := Fml.eval3_sound dom φ σ
     have ih₂ := Fml.eval3_sound dom ψ σ
     simp only [Fml.eval3, holds]
     cases h₁ : φ.eval3 dom σ <;> cases h₂ : ψ.eval3 dom σ <;>
       simp_all only [Tri.imp, reduceCtorEq, false_implies, forall_const, true_and, and_true,
         and_self, implies_true, not_true_eq_false, not_false_eq_true, not_imp]
-  | .upd m U φ, σ => by
+  | _, .upd m U φ, σ => by
     simp only [Fml.eval3, holds]
-    cases U.apply σ with
-    | ok τ => exact Fml.eval3_sound dom φ τ
-    | error _ => cases m <;> simp only [Tri.after, Modality.after, Modality.onHalt,
-      reduceCtorEq, imp_self, not_true_eq_false, not_false_eq_true, and_self]
-  | .modal m P φ, σ => by
+    cases hU : U.apply σ.erase with
+    | error e => cases m <;> simp only [Modality.afterC, Modality.onHalt, reduceCtorEq,
+        imp_self, not_true_eq_false, not_false_eq_true, and_self]
+    | ok τ =>
+      simp only [Modality.afterC]
+      cases hl : σ.lift? τ with
+      | none => exact ⟨nofun, nofun⟩
+      | some σ' =>
+        simp only
+        split
+        · rename_i hff
+          obtain ⟨he, hp⟩ := TState.lift?_spec hl
+          exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ σ').2 hff (hall σ' he hp)⟩
+        · exact ⟨nofun, nofun⟩
+  | _, .modal m P κ φ, σ => by
     simp only [Fml.eval3, holds]
-    cases hr : Prog.runFuel loopFuel σ P with
-    | none => exact ⟨nofun, nofun⟩
-    | some r =>
-      rw [Prog.runFuel_sound P σ r hr]
-      cases r with
-      | ok τ =>
-        have ih := Fml.eval3_sound dom φ τ
-        exact ⟨fun h => ⟨ih.1 h, nofun⟩, fun h hh => ih.2 h hh.1⟩
-      | error e => cases e <;> cases m <;> simp only [Tri.afterRun, Tri.after, Modality.afterRun,
-        Modality.after, Modality.onHalt, ne_eq, Except.error.injEq, reduceCtorEq, imp_self,
-        not_true_eq_false, not_false_eq_true, and_self, and_true, and_false]
-  | .havoc φ, σ => by
+    have happ := Prog.trunFramesF_approx loopFuel σ P κ
+    cases hr : Prog.trunFramesF loopFuel σ P κ with
+    | ok τ =>
+      rw [hr] at happ
+      rw [← happ.eq nofun]
+      have ih := Fml.eval3_sound dom φ τ
+      simp only [Tri.afterT, Modality.afterRunTR]
+      exact ⟨fun h => ⟨ih.1 h, nofun⟩, fun h hh => ih.2 h hh.1⟩
+    | error e =>
+      rw [hr] at happ
+      cases e with
+      | diverge => exact ⟨nofun, nofun⟩
+      | panic =>
+        rw [← happ.eq nofun]
+        simp only [Tri.afterT, Modality.afterRunTR, reduceCtorEq, ne_eq,
+          not_true_eq_false, and_false, not_false_eq_true, imp_self, and_self]
+      | exhausted =>
+        rw [← happ.eq nofun]
+        cases m <;> simp only [Tri.afterT, Modality.afterRunTR, Modality.onTHalt, ne_eq,
+          Except.error.injEq, reduceCtorEq, not_false_eq_true, and_self, implies_true,
+          false_implies]
+      | revert =>
+        rw [← happ.eq nofun]
+        cases m <;> simp only [Tri.afterT, Modality.afterRunTR, Modality.onTHalt, ne_eq,
+          Except.error.injEq, reduceCtorEq, not_false_eq_true, and_self, implies_true,
+          and_true, not_true_eq_false, imp_self]
+  | _, .havoc φ, σ => by
     simp only [Fml.eval3, holds]
     split
     · rename_i h
-      obtain ⟨⟨st, nt⟩, _, hff⟩ := List.any_eq_true.mp h
-      exact ⟨nofun, fun _ hall =>
-        (Fml.eval3_sound dom φ _).2 (of_decide_eq_true hff) (hall st nt)⟩
+      simp only [Bool.or_eq_true, decide_eq_true_eq] at h
+      refine ⟨nofun, fun _ hall => ?_⟩
+      rcases h with h | h
+      · exact (Fml.eval3_sound dom φ σ).2 h
+          (by simpa only [TState.havoc_self] using hall σ.storage σ.net)
+      · exact (Fml.eval3_sound dom φ _).2 h (hall _ _)
     · exact ⟨nofun, nofun⟩
-  | .all x p φ, σ => by
+  | _, .all _ p φ, σ => by
     simp only [Fml.eval3, holds]
     split
     · rename_i h
-      obtain ⟨_, hmem, hff⟩ := List.any_eq_true.mp h
-      obtain ⟨v, hv, rfl⟩ := List.mem_map.mp hmem
-      have hff : φ.eval3 dom (σ.setEnv x (.val v)) = .ff := of_decide_eq_true hff
-      obtain ⟨_, hadm⟩ := List.mem_filter.mp hv
-      exact ⟨nofun, fun _ hall =>
-        (Fml.eval3_sound dom φ _).2 hff (hall v ((PrimTy.admitsB_iff p v).mp hadm))⟩
-    · split
-      · rename_i h
-        simp only [Bool.and_eq_true, decide_eq_true_eq, List.any_eq_true, List.all_eq_true,
-          List.mem_map] at h
-        obtain ⟨⟨⟨hp, ⟨_, ⟨t, htm, rfl⟩, htv⟩⟩, ⟨_, ⟨f, hfm, rfl⟩, hfv⟩⟩, hall⟩ := h
-        subst hp
-        refine ⟨fun _ v hv => ?_, nofun⟩
-        cases v with
-        | int _ => exact hv.elim
-        | bool b =>
-          cases b
-          · exact (Fml.eval3_sound dom φ _).1 (by simpa only [← hfv] using hall _ ⟨f, hfm, rfl⟩)
-          · exact (Fml.eval3_sound dom φ _).1 (by simpa only [← htv] using hall _ ⟨t, htm, rfl⟩)
-      · exact ⟨nofun, nofun⟩
-  | .anon xs φ, σ => by
+      obtain ⟨v, _, hff⟩ := List.any_eq_true.mp h
+      exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ _).2 (of_decide_eq_true hff) (hall v)⟩
+    · exact ⟨nofun, nofun⟩
+  | _, .bind m _ t φ, σ => by
+    simp only [Fml.eval3, holds]
+    split
+    · rename_i h
+      obtain ⟨v, _, hff⟩ := List.any_eq_true.mp h
+      exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ _).2 (of_decide_eq_true hff) (hall v)⟩
+    · exact ⟨nofun, nofun⟩
+  | _, .anon xs φ, σ => by
     simp only [Fml.eval3, holds]
     split
     · rename_i h
@@ -398,21 +555,28 @@ theorem _root_.Solidity.Fml.eval3_sound (dom : PrimTy → List Value) : (φ : Fm
     · exact ⟨nofun, nofun⟩
 
 /-- **A `tt` is a truth**: `φ` holds in `σ`. -/
-theorem _root_.Solidity.Fml.eval3_tt {dom : PrimTy → List Value} {σ : State} {φ : Fml C}
+theorem Fml.eval3_tt {dom : TDom} {Γ : Ctx} {σ : TState C Γ} {φ : Fml C Γ}
     (h : φ.eval3 dom σ = .tt) : holds σ φ :=
   (Fml.eval3_sound dom φ σ).1 h
 
-/-- **An `ff` is a counterexample**: `φ` does not hold in `σ`, so `φ` is not
-valid. -/
-theorem _root_.Solidity.Fml.eval3_ff {dom : PrimTy → List Value} {σ : State} {φ : Fml C}
+/-- **An `ff` is a counterexample**: `φ` does not hold in `σ`. -/
+theorem Fml.eval3_ff {dom : TDom} {Γ : Ctx} {σ : TState C Γ} {φ : Fml C Γ}
     (h : φ.eval3 dom σ = .ff) : ¬ holds σ φ :=
   (Fml.eval3_sound dom φ σ).2 h
 
-/-- A state where `φ` evaluates to `ff` refutes `⊨ φ`: the statement a
+/-- A typed state where `φ` evaluates to `ff` refutes `⊨ φ`: the statement a
 certificate proves. -/
-theorem _root_.Solidity.Fml.not_valid_of_eval3 {dom : PrimTy → List Value} (σ : State) {φ : Fml C}
+theorem Fml.not_valid_of_eval3 {dom : TDom} (σ : TState C []) {φ : Fml C []}
     (h : φ.eval3 dom σ = .ff) : ¬ Valid φ :=
   fun hv => Fml.eval3_ff h (hv σ)
+
+end Solidity.Core
+
+namespace Solidity.Tools
+
+open Semantics
+
+variable {C : Contract}
 
 /-! ## The values tried -/
 
@@ -442,9 +606,8 @@ def intPool (lits : List Int) : List Int :=
   (([0, 1, -1] ++ lits.flatMap (fun n => [n, -n, n + 1, n - 1]) ++ [-intBound, intBound - 1]).filter
     fun n => decide (-intBound ≤ n ∧ n < intBound)).eraseDups
 
-/-- The domain a quantifier is tried on, and the pool arguments and stored
-words are drawn from. -/
-def poolDom (lits : List Int) : PrimTy → List Value
+/-- The pool arguments and stored words are drawn from. -/
+def poolVals (lits : List Int) : PrimTy → List Value
   | .bool => [.bool true, .bool false]
   | .uint => (uintPool lits).map .int
   | .int => (intPool lits).map .int
@@ -482,7 +645,7 @@ def Cand.state [FreshNames] (c : Cand) : State :=
 `C`'s layout whose mapping keys include the arguments and the sender. -/
 def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
     (payable : Bool) : Gen Cand := do
-  let dom := poolDom lits
+  let dom := poolVals lits
   let args ← ps.mapM fun (n, p) => do pure (n, ← pickD (PrimTy.default p) (dom p))
   let sender ← pickD 1 ([1, 2] ++ uintPool lits)
   let argInts := args.filterMap fun (_, v) => match v with
@@ -569,16 +732,117 @@ def Cand.shrink (C : Contract) (ok : Cand → Bool) : Nat → Cand → Cand
     | some c' => Cand.shrink C ok fuel c'
     | none => c
 
+
+/-- **The domain a quantifier and a hidden binder are tried on**: the pools
+of `lits` (`uintPool`, `intPool`) read at their types. -/
+def poolDom (lits : List Int) : Core.TDom
+  | .bool => [true, false]
+  | .uint => (uintPool lits).filterMap fun n => PrimTy.ofValue? .uint (.int n)
+  | .int => (intPool lits).filterMap fun n => PrimTy.ofValue? .int (.int n)
+
+end Solidity.Tools
+
+/-! ## Reading a scoped formula against a candidate -/
+
+namespace Solidity.Core
+
+open Solidity.Tools (Tri)
+open Semantics (Value)
+
+variable {C : Contract}
+
+/-- The leading parameters of a scoped formula, outermost first: its `∀`s
+and the hidden binders of value type in front of it (a specification's
+parameters, `Calculus/Core/Spec.lean`). -/
+def Fml.params : {Γ : Ctx} → Fml C Γ → List (Var × PrimTy)
+  | _, .all x p φ => (x, p) :: Fml.params φ
+  | _, .bind _ x (.val p) φ => (x, p) :: Fml.params φ
+  | _, _ => []
+
+/-- The leading parameters bound to `vals`, by name, as far as each is
+given: the state and the formula under them. -/
+def Fml.peel (vals : List (Var × Value)) : {Γ : Ctx} → TState C Γ →
+    Fml C Γ → (Δ : Ctx) × TState C Δ × Fml C Δ
+  | _, σ, .all x p φ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
+    | some w => Fml.peel vals (σ.push (t := .val p) w) φ
+    | none => ⟨_, σ, .all x p φ⟩
+  | _, σ, .bind m x (.val p) φ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
+    | some w => Fml.peel vals (σ.push (t := .val p) w) φ
+    | none => ⟨_, σ, .bind m x (.val p) φ⟩
+  | _, σ, φ => ⟨_, σ, φ⟩
+
+/-- The first `n` conjuncts of `φ₁ ∧ (φ₂ ∧ …)`, the last one the rest
+(`Fml.conj`'s shape). -/
+def Fml.conjN {Γ : Ctx} : Nat → Fml C Γ → List (Fml C Γ)
+  | 0, _ => []
+  | 1, φ => [φ]
+  | n + 2, .and φ ψ => φ :: Fml.conjN (n + 1) ψ
+  | _ + 2, φ => [φ]
+
+/-- What the run in front of a formula leaves, for the report: the storage
+it ends with, or how it halts; under implications, a binder at its first
+value, an update in the typed state it lifts to.  `none` where the run is
+past its fuel or the update lifts to no typed state. -/
+def Fml.outcome (dom : TDom) : {Γ : Ctx} → TState C Γ →
+    Fml C Γ → Option (Except Semantics.Halt (List (Name × Semantics.SVal)))
+  | _, σ, .imp _ ψ => Fml.outcome dom σ ψ
+  | _, σ, .all _ p ψ => match dom p with
+    | v :: _ => Fml.outcome dom (σ.push (t := .val p) v) ψ
+    | [] => none
+  | _, σ, .bind _ _ t ψ => match dom.bind σ t with
+    | v :: _ => Fml.outcome dom (σ.push v) ψ
+    | [] => none
+  | _, σ, .upd _ U ψ => match U.apply σ.erase with
+    | .error h => some (.error h)
+    | .ok τ => match σ.lift? τ with
+      | some σ' => match Fml.outcome dom σ' ψ with
+        | some r => some r
+        | none => some (.ok σ'.storage.erase)
+      | none => none
+  | _, σ, .modal _ P κ _ => match Prog.trunFramesF loopFuel σ P κ with
+    | .ok τ => some (.ok τ.storage.erase)
+    | .error .diverge => none
+    | .error e => some (.error e.erase)
+  | _, _, _ => none
+
+/-- A specification's body `{U} [ P ] (φ₁ ∧ … ∧ φₙ)` read in `σ`: the halt
+the run ends in, or the indices of the conjuncts that evaluate to `ff`
+where it ends; `none` where the run is past its fuel or the update lifts to
+no typed state. -/
+def Fml.postFails (dom : TDom) (n : Nat) : {Γ : Ctx} → TState C Γ →
+    Fml C Γ → Option (Option Semantics.Halt × List Nat)
+  | _, σ, .upd _ U ψ => match U.apply σ.erase with
+    | .error h => some (some h, [])
+    | .ok τ => match σ.lift? τ with
+      | some σ' => Fml.postFails dom n σ' ψ
+      | none => none
+  | _, σ, .modal _ P κ φ => match Prog.trunFramesF loopFuel σ P κ with
+    | .ok τ =>
+      some (none, ((List.range n).zip (Fml.conjN n φ)).filterMap fun (i, ψ) =>
+        if ψ.eval3 dom τ = .ff then some i else none)
+    | .error .diverge => none
+    | .error e => some (some e.erase, [])
+  | _, _, _ => none
+
+end Solidity.Core
+
+namespace Solidity.Tools
+
+open Semantics
+
+variable {C : Contract}
+
 /-! ## The search -/
 
 /-- **A counterexample**: the state the call starts in (its storage, the
 arguments bound as locals, the transaction, the ledger), the arguments, the
-run's outcome (`none` for a formula with no run in front), and the indices
-of the conjuncts after the call that evaluate to `ff`. -/
+storage the typed run ends with or how it halts (`none` for a formula with
+no run in front), and the indices of the conjuncts after the call that
+evaluate to `ff`. -/
 structure Witness where
   state : State
   args : List (String × Value)
-  outcome : Option (Res State)
+  outcome : Option (Except Halt (List (Name × SVal)))
   failing : List Nat
 
 /-- What a search found, among how many candidates, of which how many met
@@ -588,60 +852,81 @@ structure Search where
   tried : Nat
   admitted : Nat
 
+/-- The integers a candidate's arguments are, first in its domain: a
+binder tries them before the pools. -/
+def Cand.argInts (c : Cand) : List Int :=
+  c.args.filterMap fun (_, v) => match v with
+    | .int n => some n
+    | .bool _ => none
+
 section Search
 
 variable [FreshNames]
 
+/-- The arguments of a candidate by variable, as `Fml.peel` binds them. -/
+def Cand.vals (c : Cand) : List (Var × Value) := c.args.map fun (n, v) => (Var.ofName n, v)
+
+/-- The typed state a candidate starts in, with no locals: its parameters are
+the formula's binders. -/
+def Cand.tstate (C : Contract) (c : Cand) : Core.TState C [] := Core.TState.ofSemD C c.state
+
 /-- The obligation of `f` in pieces, and what the search needs of `f`: its
-declaration, its parameters of value type, the literals of the clauses. -/
+declaration, the scoped obligation, how many premises are met by
+construction and how many stated, the conjuncts after the call (today's,
+as the specification writes them), its parameters of value type, the
+literals of the clauses. -/
 structure SpecProblem (C : Contract) where
   decl : FunDecl
-  checked : List (Fml C)
-  upd : Upd C
-  prog : Prog C
+  fml : Core.Fml C []
+  assumed : Nat
+  checked : Nat
   posts : List (Fml C)
   params : List (String × PrimTy)
   payable : Bool
   lits : List Int
 
-/-- The problem of `f`: `specPieces`, the parameters, the literals. -/
+/-- The problem of `f`: `specPieces`, the scoped obligation, the
+parameters, the literals. -/
 def SpecProblem.of (C : Contract) (f : String) : Except String (SpecProblem C) := do
-  let (_, checked, upd, prog, posts) ← specPieces C f
+  let (assumed, checked, _, _, posts) ← specPieces C f
+  let fml ← Core.specObligation C f
   let some d := lookupBy f C.funs | throw s!"{f} is not a function of the contract"
   let params := d.params.filterMap fun (n, T) => match T with
     | .prim p => some (n, p)
     | _ => none
   let lits := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap specNums ++
     (d.spec.assignable.getD []).flatMap locNums
-  pure { decl := d, checked, upd, prog, posts, params, payable := d.payable, lits }
+  pure { decl := d, fml, assumed := assumed.length, checked := checked.length, posts, params,
+         payable := d.payable, lits }
+
+/-- The literals a candidate's domain is drawn from: its arguments, then
+the specification's. -/
+def SpecProblem.domLits (P : SpecProblem C) (c : Cand) : List Int := c.argInts ++ P.lits
 
 /-- A candidate tried: `none` unless the stated premises evaluate to `tt`;
 then the conjuncts that evaluate to `ff`, if any.  A run that panics (an
 `assert` failed) refutes the box whatever follows it, so it is a
 counterexample with no conjunct blamed: the witness's outcome names it.
-The update and the call run once, and each conjunct is read in the state
-they leave: that is `(specBody C P.upd P.prog [φ]).eval3` (`Fml.eval3`
-under the box), without a run per conjunct. -/
+The update and the call run once (the typed run, with fuel), and each
+conjunct is read in the state they leave. -/
 def SpecProblem.try (P : SpecProblem C) (c : Cand) : Option (Option Witness) :=
-  let dom := poolDom P.lits
-  let σ := c.state
-  if !P.checked.all (fun φ => φ.eval3 dom σ = .tt) then none else
-  -- a run past `loopFuel` is not a counterexample
-  let run : Option (Res State) := match P.upd.apply σ with
-    | .error h => some (.error h)
-    | .ok τ => Prog.runFuel loopFuel τ P.prog
-  match run with
-  | none => some none
-  | some outcome =>
-  match outcome with
-  | .error .panic =>
-    some (some { state := σ, args := c.args, failing := [], outcome := some outcome })
-  | .error _ => some none
-  | .ok τ =>
-    let failing := ((List.range P.posts.length).zip P.posts).filterMap fun (i, φ) =>
-      if φ.eval3 dom τ = .ff then some i else none
-    if failing.isEmpty then some none else
-    some (some { state := σ, args := c.args, failing, outcome := some outcome })
+  let dom := poolDom (P.domLits c)
+  let ⟨_, σ, ψ⟩ := Core.Fml.peel c.vals (c.tstate C) P.fml
+  match ψ with
+  | .imp pre body =>
+    let pres := (Core.Fml.conjN (P.assumed + P.checked) pre).drop P.assumed
+    if !pres.all (fun φ => φ.eval3 dom σ = .tt) then none else
+    match Core.Fml.postFails dom P.posts.length σ body with
+    | none => some none
+    | some (some .panic, _) =>
+      some (some { state := c.state, args := c.args, failing := [],
+                   outcome := some (.error .panic) })
+    | some (some _, _) => some none
+    | some (none, []) => some none
+    | some (none, failing) =>
+      some (some { state := c.state, args := c.args, failing,
+                   outcome := Core.Fml.outcome dom σ body })
+  | _ => none
 
 /-- Whether a candidate is a counterexample. -/
 def SpecProblem.refutes (P : SpecProblem C) (c : Cand) : Bool :=
@@ -654,7 +939,7 @@ all-default storage with every combination of pooled arguments first (when
 there are at most half the budget of them), then random candidates up to
 `budget`; what is found is shrunk. -/
 def SpecProblem.search (P : SpecProblem C) (budget : Nat) : Search := Id.run do
-  let dom := poolDom P.lits
+  let dom := poolVals P.lits
   let combos := products (P.params.map fun (_, p) => dom p)
   let combos := if combos.length * 2 ≤ budget then combos else []
   let cands := combos.map fun vs =>
@@ -682,44 +967,38 @@ def SpecProblem.search (P : SpecProblem C) (budget : Nat) : Search := Id.run do
   let c := c.shrink C P.refutes 64
   return { witness := (P.try c).join, tried, admitted := admitted + 1 }
 
-/-- The run in front of a formula: `{U} [ P ]`, `[ P ]`, `{U}`, under
-implications. -/
-def _root_.Solidity.Fml.runOf (σ : State) : Fml C → Option (Res State)
-  | .imp _ ψ => Fml.runOf σ ψ
-  | .upd _ U (.modal _ P _) =>
-    match U.apply σ with
-    | .error h => some (.error h)
-    | .ok τ => Prog.runFuel loopFuel τ P
-  | .modal _ P _ => Prog.runFuel loopFuel σ P
-  | .upd _ U _ => some (U.apply σ)
-  | _ => none
-
-/-- **A counterexample to a closed formula**: its user-named variables bound
-to pooled `uint`s (every combination first), the storage all-default, then
-random storages of `C`'s layout; what is found is shrunk. -/
-def searchFml (C : Contract) (φ : Fml C) (budget : Nat := 2000) : Search := Id.run do
-  let xs := (φ.vars.filterMap fun | .user n => some n | .fresh .. => none).eraseDups
-  let dom := poolDom []
-  let refutes (c : Cand) : Bool := φ.eval3 dom c.state = .ff
-  let combos := products (xs.map fun _ => dom .uint)
+/-- **A counterexample to a closed scoped formula**: its parameters bound to
+pooled `uint`s (every combination first), the storage all-default, then
+random storages of `C`'s layout; what is found is shrunk.  A candidate is
+one where the formula under its arguments evaluates to `ff`. -/
+def searchFml (C : Contract) (φ : Core.Fml C []) (budget : Nat := 2000) : Search := Id.run do
+  let ps := (Core.Fml.params φ).filterMap fun (x, p) => match x with
+    | .user n => some (n, p)
+    | .fresh .. => none
+  -- the candidate's arguments bound, so that the witness is what refutes
+  let refutes (c : Cand) : Bool :=
+    let ⟨_, σ, ψ⟩ := Core.Fml.peel c.vals (c.tstate C) φ
+    ψ.eval3 (poolDom c.argInts) σ = Tri.ff
+  let combos := products (ps.map fun (_, p) => poolVals [] p)
   let combos := if combos.length * 2 ≤ budget then combos else []
   let mut tried := 0
   let mut g := mkStdGen 2026
   let mut found : Option Cand := none
   for vs in combos do
     tried := tried + 1
-    let c : Cand := { st := C.initStorage, args := xs.zip vs }
+    let c : Cand := { st := C.initStorage, args := ps.map (·.1) |>.zip vs }
     if refutes c then found := some c; break
   if found.isNone then
     for _ in [0:budget - tried] do
-      let (c, g') := (genCandidate C [] (xs.map (·, .uint)) true).run g
+      let (c, g') := (genCandidate C [] ps true).run g
       g := g'
       tried := tried + 1
       if refutes c then found := some c; break
   let some c := found | return { witness := none, tried, admitted := tried }
   let c := c.shrink C refutes 64
-  let σ := c.state
-  return { witness := some { state := σ, args := c.args, failing := [], outcome := φ.runOf σ },
+  let ⟨_, σ, ψ⟩ := Core.Fml.peel c.vals (c.tstate C) φ
+  return { witness := some { state := c.state, args := c.args, failing := [],
+                             outcome := Core.Fml.outcome (poolDom c.argInts) σ ψ },
            tried, admitted := tried }
 
 /-! ## Printing a witness -/
@@ -732,9 +1011,7 @@ def Witness.lines (C : Contract) (w : Witness) : List String :=
   let after := match w.outcome with
     | none => []
     | some (.error h) => [s!"after: {fmtHalt h}"]
-    | some (.ok τ) =>
-      let res := ((τ.valueOf resultVar).map fun v => s!"\\result = {Value.fmt v}").toList
-      ["after: " ++ "; ".intercalate (fmtStorage C τ.storage ++ res)]
+    | some (.ok st) => ["after: " ++ fmtStorageLine C st]
   [", ".intercalate (args ++ fmtTx σ), "before: " ++ fmtStorageLine C σ.storage] ++ after
 
 /-! ## Certificates -/
@@ -753,28 +1030,30 @@ deriving instance ToExpr for Semantics.ExtResult
 deriving instance ToExpr for Semantics.TxEnv
 deriving instance ToExpr for Semantics.State
 
-/-- **The certificate**: the kernel checks `¬ ⊨ φ` as `Fml.not_valid_of_eval3`
-at `σ`, deciding `φ.eval3 (poolDom lits) σ = .ff` by evaluation.  The
-kernel runs under `heartbeats` (thousands), below the default, and the
-declaration is checked, never added. -/
+/-- **The certificate**: the kernel checks `¬ ⊨ φ` of the scoped `φ` as
+`Core.Fml.not_valid_of_eval3` at the typed state of `σ`
+(`TState.ofSemD`), deciding `φ.eval3 (poolDom lits) _ = .ff` by evaluation:
+the decoding of `σ`'s storage, the typed run and the formula.  The kernel
+runs under `heartbeats` (thousands), below the default, and the declaration
+is checked, never added. -/
 def certifyRefl (cE φE : Expr) (lits : List Int) (σ : Semantics.State)
-    (heartbeats : Nat := 100000) :
-    MetaM Bool := do
+    (heartbeats : Nat := 200000) : MetaM Bool := do
   let domE := mkApp (mkConst ``poolDom) (toExpr lits)
-  let σE := toExpr σ
-  let eq ← mkEq (mkAppN (mkConst ``Fml.eval3) #[cE, domE, σE, φE]) (mkConst ``Tri.ff)
+  let σE := mkApp2 (mkConst ``Core.TState.ofSemD) cE (toExpr σ)
+  let ev ← mkAppM ``Core.Fml.eval3 #[domE, σE, φE]
+  let eq ← mkEq ev (mkConst ``Tri.ff)
   let h ← mkDecideProof eq
+  let type := mkNot (← mkAppM ``Core.Valid #[φE])
+  let value ← mkAppM ``Core.Fml.not_valid_of_eval3 #[σE, h]
   let decl := Declaration.thmDecl {
-    name := `_counterexample_certificate, levelParams := []
-    type := mkNot (mkApp2 (mkConst ``Valid) cE φE)
-    value := mkAppN (mkConst ``Fml.not_valid_of_eval3) #[cE, domE, σE, φE, h] }
+    name := `_counterexample_certificate, levelParams := [], type, value }
   let opts := maxHeartbeats.set (← getOptions) heartbeats
   match Kernel.Environment.addDecl (← getEnv).toKernelEnv opts decl with
   | .ok _ => pure true
   | .error _ => pure false
 
 /-- A refutation: the witness, whether the kernel certified it, and the
-conjuncts it fails, as the specification writes them. -/
+conjuncts it fails. -/
 structure Refutation where
   witness : Witness
   certified : Bool
@@ -791,21 +1070,23 @@ def postLabel (C : Contract) (d : FunDecl) (cE : Expr) (i : Nat) (φ : Fml C) : 
     let locs := (d.spec.assignable.getD []).map SpecLoc.fmt
     m!"assignable {if locs.isEmpty then "\\nothing" else ", ".intercalate locs}: {Fml.quote cE φ}"
 
-/-- **Refute `f`'s specification**: search, then certify what was found.
-`n` names the contract `C`. -/
+/-- **Refute `f`'s specification**: search, then certify what was found
+against the scoped obligation.  `n` names the contract `C`. -/
 def refuteSpec (n : Lean.Name) (C : Contract) (f : String) (budget : Nat := 2000) :
     MetaM (Except String (Search × Option Refutation)) := do
-  match SpecProblem.of C f, specObligation C f with
-  | .error e, _ | _, .error e => pure (.error e)
-  | .ok P, .ok φ =>
+  match SpecProblem.of C f with
+  | .error e => pure (.error e)
+  | .ok P =>
     let s := P.search budget
     let some w := s.witness | pure (.ok (s, none))
     let cE := mkConst n
+    let c : Cand := { st := w.state.storage, args := w.args }
+    let lits := P.domLits c
     -- the kernel is asked only what the evaluator already answered
-    let certified ← if φ.eval3 (poolDom P.lits) w.state = .ff then
-        certifyRefl cE (Fml.quote cE φ) P.lits w.state
+    let certified ← if P.fml.eval3 (poolDom lits) (Core.TState.ofSemD C w.state) = .ff then
+        certifyRefl cE (Core.Fml.quote cE P.fml) lits w.state
       else pure false
-    let fails := w.failing.map fun i => postLabel C P.decl cE i (P.posts.getD i .tt)
+    let fails := w.failing.map fun i => postLabel C P.decl cE i (P.posts.getD i Fml.tt)
     pure (.ok (s, some { witness := w, certified, fails }))
 
 /-- The report of a refutation: the witness and the conjuncts it fails. -/
@@ -831,8 +1112,9 @@ end Search
 
 /-- `#counterexample C.f`: a counterexample to the specification of the
 function `f` of the contract `C`; `#counterexample C`: to each of its
-functions with an obligation; `#counterexample φ`: to the closed formula
-`φ : Fml C`. -/
+functions with an obligation; `#counterexample φ`: to the closed scoped
+formula `φ : Core.Fml C []` (`dl!{ … }` under `open scoped
+Solidity.Core.Surface`, or `cdl!{ … }`). -/
 syntax (name := counterexampleCmd) "#counterexample " term : command
 
 open Lean Elab Command Term Meta in
@@ -853,13 +1135,25 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
     if fs.isEmpty then logInfo m!"{c} has no function with a specification"
     for (f, _) in fs do one c C f
   | none =>
-    let (φE, cE, _) ← elabFormula "#counterexample" ⟨t⟩
+    let φE ← elabTerm t none
+    synthesizeSyntheticMVarsNoPostponing
+    let φE ← instantiateMVars φE
+    let ty ← whnf (← inferType φE)
+    unless ty.isAppOfArity ``Core.Fml 2 && (← whnfR ty.appArg!).isAppOf ``List.nil do
+      throwError "#counterexample: not a closed scoped formula `Core.Fml C []` (`cdl!\{ … }`, or \
+        `dl!\{ … }` under `open scoped Solidity.Core.Surface`){indentExpr φE}"
+    if φE.hasFVar || φE.hasMVar then
+      throwError "#counterexample: the formula is not closed{indentExpr φE}"
+    let cE := ty.appFn!.appArg!
+    unless (← whnfR cE).isConst do throwError "#counterexample: not a named contract: {cE}"
     let C ← unsafe evalExpr Contract (Lean.mkConst ``Contract) cE
-    let φ ← unsafe evalExpr (Fml C) (← inferType φE) φE
+    let φ ← unsafe evalExpr (Core.Fml C []) ty φE
     let s := searchFml C φ
     let some w := s.witness
       | logInfo m!"no counterexample found in {s.tried} candidates"
-    let certified ← if φ.eval3 (poolDom []) w.state = .ff then certifyRefl cE φE [] w.state
+    let lits := Cand.argInts { st := w.state.storage, args := w.args }
+    let certified ← if φ.eval3 (poolDom lits) (Core.TState.ofSemD C w.state) = .ff then
+        certifyRefl cE φE lits w.state
       else pure false
     logReport m!"counterexample ({if certified then "certified" else "tested"}):"
       ((w.lines C).map toMessageData)
