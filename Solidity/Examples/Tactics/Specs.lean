@@ -1,4 +1,8 @@
 import Solidity.Calculus.Spec
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.SolSpec
+import Solidity.Tools.CoreInspect
 
 /-!
 # Specifications: clauses as obligations
@@ -54,6 +58,8 @@ def ERC20 : Contract := contract!{
 
 section
 local instance : InContract := ⟨ERC20⟩
+
+open scoped Solidity.Core.Surface
 /-- `approve(spender, amount)`: `ensures \result && allowance[msg.sender][spender] == amount`. -/
 theorem erc_approve : ⊨ spec!{ approve } := by sol_spec
 set_option maxHeartbeats 1000000 in
@@ -84,6 +90,8 @@ def Tally : Contract := contract!{
 
 section
 local instance : InContract := ⟨Tally⟩
+
+open scoped Solidity.Core.Surface
 /-! `pay()`'s obligation: `msg.value` is booked to the sender's ledger entry
 in front of the call, `\old(net(msg.sender))` reads the snapshot `oldNet`,
 and `assignable \nothing` owes every word of the storage where it was.  The
@@ -100,7 +108,7 @@ info: dl{
               (find(old, total) = find(old, total) → find(storage, total) = find(old, total)) ∧
                 (∀ uint k1;
                     find(old, seen[k1]) = find(old, seen[k1]) →
-                      find(storage, seen[k1]) = find(old, seen[k1]))) } : Fml Tally
+                      find(storage, seen[k1]) = find(old, seen[k1]))) } : Core.Fml Tally []
 -/
 #guard_msgs in #check spec!{ pay }
 
@@ -136,12 +144,15 @@ def Ordered : Contract := contract!{
 section
 local instance : InContract := ⟨Ordered⟩
 
+open scoped Solidity.Core.Surface
+
 /--
 info: dl{
   ((0 <= x ∧ x <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
         (0 <= y ∧ y <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
           msg.value = 0) →
-    [ uint result_lo; uint result_hi; (result_lo, result_hi) = order(x, y); ] result_lo <= result_hi } : Fml Ordered
+    [ uint result_lo; uint result_hi; (result_lo, result_hi) = order(x, y); ]
+      result_lo <= result_hi } : Core.Fml Ordered []
 -/
 #guard_msgs in #check spec!{ order }
 
