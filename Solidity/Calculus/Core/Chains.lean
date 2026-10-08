@@ -803,9 +803,20 @@ def matchWritten (sp : Splice) (C : Expr) (w : Written) (B : Expr) (erased : Arr
     -- a constant modality read once against both runs: the run's own
     return es'.any (same rs[0]! ·)
 
-/-- The computed line, shown for an error as today's `showLines` shows it
-(`Calculus/Chains.lean`): every line with the rule that reached it. -/
+/-- The computed line, shown (`#derivation`). -/
 def showLines (φ : Expr) (lines : List Line) : MetaM MessageData := do
+  let mut out := m!"{← indentLine φ}"
+  for l in lines do
+    let r := match ← labelOfFocus? l.focus with
+      | some (n, _) => toString n
+      | none => "?"
+    out := out ++ m!"\n  ~[{r}]~>{← indentLine l.fml}"
+  return out
+
+/-- The computed lines, shown for an error as today's `sol_chain` shows them
+(`Calculus/Chains.lean`'s `notReached`): every line with the rule that
+reached it. -/
+def showLinesErr (φ : Expr) (lines : List Line) : MetaM MessageData := do
   let mut out := m!"    {← showLine φ}"
   for l in lines do
     let r := match ← labelOfFocus? l.focus with
@@ -968,7 +979,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       return indentD (shown?.getD (.ofSyntax l[1]))
     let notReached (ls : List Line) : TermElabM Unit := do
       throwError "sol_chain: the derivation of{← indentLine cur}\ndoes not reach{← written}\n\
-        Its lines:\n{← showLines cur ls}{stuckNote run}"
+        Its lines:\n{← showLinesErr cur ls}{stuckNote run}"
     match arrow with
     | `(chain_arrow| ~*>) =>
       let cands : List (Expr × Array Expr) := (cur, run.erased) :: run.lines.map fun l => (l.fml, l.erased)
@@ -1033,7 +1044,7 @@ def nextLine (A B : Expr) : MetaM (Run × Line) := do
   let some q := run.lines.head? | throwError "sol_chain: no rule applies to{← indentLine A}"
   unless q.fml == B do
     throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}\n\
-      Its lines:\n{← showLines A [q]}{stuckNote run}"
+      Its lines:\n{← showLinesErr A [q]}{stuckNote run}"
   return (run, q)
 
 /-- Whether a goal is a scoped chain's. -/
