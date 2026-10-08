@@ -358,6 +358,5 @@ example : Core.Proves SE .all [] .nil (.all (.user "b") .bool
   · trace_state
     exact .updIntro (.closeTrue rfl)
   · exact .updIntro (.closeTrue rfl)
-  · nofun
 
 end Solidity.Examples.Tactics.CorePrint

@@ -1,5 +1,4 @@
 import Solidity.Calculus.Core.Logic
-import Solidity.Calculus.Core.Cover
 import Solidity.Calculus.NoPanic
 
 /-!
@@ -12,15 +11,16 @@ every arm proves the same shape (`docs/intrinsic.md`, M6a):
 blocks' from `SoundCalls.lean`, `SoundBlocks.lean`, `SoundLoops.lean`.
 
 * `Premise.Sound m s p σ`: in the state `σ`, the premise `p` put in front of
-  any rest `ω`, frames `κ` and postcondition `φ` (`Premise.fml`), with what
-  it owes under the diamond (`Premise.cover`, `Calculus/Core/Cover.lean`),
-  gives `⟨ s; ω κ ⟩ φ`;
+  any rest `ω`, frames `κ` and postcondition `φ` (`Premise.fml`) gives
+  `⟨ s; ω κ ⟩ φ`;
 * `Stmt.StepSound k m s`: whatever premise `s.step k m` gives is sound in
   every state.
 
 Every state, typed or not: a `bool` local may hold no `bool` (M3's values
 are untyped, and a formula's binders range over every value).  A branch on
-it is stuck, which the box allows, and the diamond's cover goal excludes.
+it is stuck, which the box allows; the diamond reads only from states whose
+`bool` locals hold `bool`s (`State.BoolOK`, `Calculus/Core/Logic.lean`), so
+a branch's conditions cover them.
 
 The kit: a scoped term never panics (`Tm.eval_noPanic`, from
 `Calculus/NoPanic.lean`'s symbols), so neither does an update
@@ -41,11 +41,11 @@ variable {C : Contract}
 /-! ## The statement -/
 
 /-- **A premise is sound** for the statement `s` in `σ` under `m`: in front of
-any rest, frames and postcondition, with its cover, it gives `⟨ s; ω κ ⟩ φ`. -/
+any rest, frames and postcondition, it gives `⟨ s; ω κ ⟩ φ`. -/
 def Premise.Sound (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ')
     (σ : State C Γ) : Prop :=
   ∀ {Γ₁ Γ₀ : Ctx} (ω : Prog C Γ' Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀),
-    holds σ (p.fml m ω κ φ) → holds σ (p.cover m) → holds σ (.modal m (.cons s ω) κ φ)
+    holds σ (p.fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ)
 
 /-- **The rule of `s` is sound**: the premise `Stmt.step` gives, fresh names
 at `k`, is sound in every state.  Each arm proves this of its
@@ -191,27 +191,27 @@ variable {Γ Γ' : Ctx} {m : Modality}
 /-- **An update** is sound when it ends as the statement does. -/
 theorem Premise.Sound.update {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {σ : State C Γ}
     (hs : U.apply σ = s.run σ) : Premise.Sound m s (.update U) σ :=
-  fun ω κ φ h _ => Premise.sound_update σ hs (hs ▸ Upd.apply_noPanic σ U) ω κ φ h
+  fun ω κ φ h => Premise.sound_update σ hs (hs ▸ Upd.apply_noPanic σ U) ω κ φ h
 
 /-- **A block** is sound when it runs as the statement, its fresh locals
 popped. -/
 theorem Premise.Sound.unfold {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Ext Γ' Γ''} {s : Stmt C Γ Γ'}
     {σ : State C Γ} (hs : (Prog.run σ P).map (State.drop h) = s.run σ) :
     Premise.Sound m s (.unfold P h) σ :=
-  fun ω κ φ h _ => Premise.sound_unfold σ hs ω κ φ h
+  fun ω κ φ h => Premise.sound_unfold σ hs ω κ φ h
 
 /-- **A block dropping a frame** from under what it keeps. -/
 theorem Premise.Sound.inline {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Thin Γ' Γ''} {s : Stmt C Γ Γ'}
     {σ : State C Γ} (hs : (Prog.run σ P).map (State.thin h) = s.run σ) :
     Premise.Sound m s (.inline P h) σ :=
-  fun ω κ φ h _ => Premise.sound_inline σ hs ω κ φ h
+  fun ω κ φ h => Premise.sound_inline σ hs ω κ φ h
 
 /-- **A hidden binder** is sound when, for some value of the local, the
 block runs as the statement. -/
 theorem Premise.Sound.bind {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : Stmt C Γ Γ'}
-    {σ : State C Γ} (hs : ∃ v, Prog.run (σ.push v) P = s.run σ) :
+    {σ : State C Γ} (hs : ∃ v, LTy.BoolOK t v ∧ Prog.run (σ.push v) P = s.run σ) :
     Premise.Sound m s (.bind x t P) σ :=
-  fun ω κ φ h _ => Premise.sound_bind σ hs ω κ φ h
+  fun ω κ φ h => Premise.sound_bind σ hs ω κ φ h
 
 /-- **A block of a declaration and a statement on top of it**, the local
 popped after: sound when the statement, from where the declaration leaves,
@@ -238,7 +238,7 @@ theorem Premise.Sound.capture {p : PrimTy} {x : Var} {e : Val C Γ p}
     (hok : ∀ v, e.eval σ = .ok v → (s'.run (σ.push v)).map (State.drop (.push .refl)) = s.run σ)
     (herr : ∀ h, e.eval σ = .error h → s.run σ = .error h) :
     Premise.Sound m s (.capture p x e s') σ :=
-  fun ω κ φ h _ => Premise.sound_capture σ hok herr ω κ φ h
+  fun ω κ φ h => Premise.sound_capture σ hok herr ω κ φ h
 
 /-- **A storage path captured**: `T storage sp = nsp; s'`. -/
 theorem Premise.Sound.captureSP {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
@@ -390,13 +390,12 @@ fresh locals popped. -/
 theorem Premise.Sound.unfoldSim {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Ext Γ' Γ''} {s : Stmt C Γ Γ'}
     {σ : State C Γ} (hs : Res.Sim ((Prog.run σ P).map (State.drop h)) (s.run σ)) :
     Premise.Sound m s (.unfold P h) σ := by
-  intro Γ₁ Γ₀ ω κ φ hp _
-  have hp' : m.afterRunC (holds · φ) (do Frames.run (← Prog.run σ P) (.pop .capture h (.seq ω κ))) :=
-    hp
+  intro Γ₁ Γ₀ ω κ φ hp
+  refine holds_modal_intro fun hT => ?_
+  have hp' := (holds_modal P (.pop .capture h (.seq ω κ)) φ hT).1 hp
   have e : (do Frames.run (← Prog.run σ P) (.pop .capture h (.seq ω κ))) =
       ((Prog.run σ P).map (State.drop h)) >>= fun τ => (do Frames.run (← Prog.run τ ω) κ) := by
     cases Prog.run σ P <;> rfl
-  show m.afterRunC _ _
   rw [run_cons_frames]
   rw [e] at hp'
   exact (hs.bind _).afterRunC hp'
