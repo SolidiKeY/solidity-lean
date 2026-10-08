@@ -41,15 +41,16 @@ the list `N.problems.core`, which the kernel checks once, and each
 (`Fml.erase`, compared as quoted expressions).  The flip
 (`docs/intrinsic.md`, W3) is `solc_problems N legacy`
 (`N.f.problem.legacy`, not compiled) then `solc_scoped_problems N main`
-(`N.f.problem`, the table `N.problems`); `#solkey_problem` and
-`#solkey_scan` read the legacy statement wherever it is
-(`legacyStatement`), `#solkey_derive?` searches the scoped `⊢` once there
-is one, and `#solkey_obligations` counts a theorem of either `⊢`.
+(`N.f.problem`, the table `N.problems`); `#solkey_problem` reads the
+legacy statement wherever it is (`legacyStatement`), `#solkey_scan` the
+scoped one (`scopedStatement?`; today's walk on the legacy statement went
+with today's rule table), `#solkey_derive?` searches the scoped `⊢` once
+there is one, and `#solkey_obligations` counts a theorem of either `⊢`.
 
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
   (`Problem.text`), to compare with `--print-problem`.
-* `#solkey_scan N` runs `sol_prove`'s walk on every statement with compiled
-  code and lists what it leaves, with times: a search, to choose the
+* `#solkey_scan N` runs `sol_prove`'s walk on every scoped statement with
+  compiled code and lists what it leaves, with times: a search, to choose the
   theorems to state.  It is not used in a checked file.  `#solkey_scan N
   walk` lists the leaves without closing them; the closer skips a leaf
   past its bounds (`Derive.fitsClose`: the leaf's nodes and its
@@ -208,10 +209,19 @@ def elabSolkeyProblem : CommandElab := fun stx => do
   let s ← liftTermElabM <| unsafe evalExpr String (mkConst ``String) e
   logInfo s
 
+/-- `N.f`'s scoped statement, if there is one: `N.f.problem.core`, or
+`N.f.problem` once it is the scoped one (`solc_scoped_problems N main`,
+beside `N.f.problem.legacy`). -/
+def scopedStatement? (env : Environment) (f : Lean.Name) : Option Expr :=
+  if env.contains (f ++ `problem ++ `core) then some (mkConst (f ++ `problem ++ `core))
+  else if env.contains (f ++ `problem ++ `legacy) then some (mkConst (f ++ `problem))
+  else none
+
 syntax (name := solkeyScan) "#solkey_scan " ident (&" walk")? : command
 
-/-- `#solkey_scan N`: per statement, the leaves `sol_prove` leaves and the
-time; with `walk`, the leaves of the walk before any is closed. -/
+/-- `#solkey_scan N`: per statement, the leaves `sol_prove` leaves on its
+scoped statement (`Core.Seq.scanLeaves`) and the time; with `walk`, the
+leaves of the walk before any is closed. -/
 @[command_elab solkeyScan]
 def elabSolkeyScan : CommandElab := fun stx => do
   let N := stx[1].getId
@@ -221,8 +231,11 @@ def elabSolkeyScan : CommandElab := fun stx => do
   let mut out : Array String := #[]
   for r in rows do
     unless r.status == .elaborated do continue
-    let φ := legacyStatement (← getEnv) (N ++ Lean.Name.mkSimple r.name)
-    let e := mkAppN (mkConst ``Derive.scanLeaves) #[C, toExpr walk, φ]
+    let f := N ++ Lean.Name.mkSimple r.name
+    let env ← getEnv
+    let some φ := scopedStatement? env f
+      | throwError "#solkey_scan: {f} has no scoped statement (`solc_scoped_problems {N}`)"
+    let e := mkAppN (mkConst ``Core.Seq.scanLeaves) #[C, toExpr walk, φ]
     let t0 ← IO.monoMsNow
     let k ← liftTermElabM <| unsafe evalExpr (Option (Nat × Nat)) (mkApp (mkConst ``Option [0])
       (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Nat) (mkConst ``Nat))) e

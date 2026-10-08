@@ -1,5 +1,5 @@
 import Solidity.FreshNames
-import Solidity.Calculus.Chains
+import Solidity.Calculus.RewriteChains
 import Solidity.Examples.Chains.Storage
 import Solidity.Calculus.Core.ChainGen
 import Solidity.Calculus.Core.Surface

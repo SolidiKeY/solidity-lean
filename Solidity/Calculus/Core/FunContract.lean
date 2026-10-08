@@ -5,7 +5,7 @@ import Solidity.Calculus.CloseHavoc
 /-!
 # Function contracts over the typed call run
 
-`Calculus/Contracts.lean`'s `useContract` (KeY's `useOperationContract` at
+Today's `Calculus/Contracts` `useContract` (deleted at W4 `calc-del`) (KeY's `useOperationContract` at
 the box, with the goals `"pre"` and `"post"`) on the scoped calculus: a
 call proved by its callee's contract instead of its inlined body.
 

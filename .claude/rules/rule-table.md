@@ -11,7 +11,7 @@ paths:
 
 # The rule table
 
-A taclet is one constructor of `Taclet C k m s p` (`Calculus/Rules.lean`),
+A taclet is one constructor of `Taclet C k m s p` (`Calculus/Core/Rules.lean`),
 named as solkey names it, its type written in `dl{ ⟨[ s; ]⟩ ⇝ p }`. Schema
 variables are bound implicitly and their kind is read off their name
 (`RuleSyntax.lean`'s table: `sp`/`nsp`, `se`/`nse`, `fld`, `lhs`, …), and so
@@ -19,7 +19,7 @@ are the rule's side conditions (`RuleSyntax.sideConds`: `nsp` is not simple,
 `sp` is, a value written to storage is not a conditional, …), hidden
 `autoParam` hypotheses. Which rule fires is `Stmt.step` (`Completeness.lean`),
 a total function over the typed syntax, and it is the only rule that can:
-`Taclet.eq_step` (`Uniqueness.lean`).
+`Taclet.step_eq` (`Calculus/Core/Taclet.lean`).
 
 ## Invariants
 
@@ -60,12 +60,12 @@ a total function over the typed syntax, and it is the only rule that can:
    coverage proof, so a statement form without an arm fails the build. The
    arm must bring the side conditions into scope for `side_cond`: `if h :`
    rather than `if`, constructor patterns rather than a `_` after a
-   `.simple` arm. `Taclet.eq_step` (`Uniqueness.lean`) fails if a condition
+   `.simple` arm. `Taclet.step_eq` (`Calculus/Core/Taclet.lean`) fails if a condition
    is weaker than the arm (two rules for one statement) and `Stmt.step`
    fails to elaborate if it is stronger (no rule).
-3. Its case of `Taclet.sound`: `Calculus/SoundUpdate.lean` for an update
-   premise, `Calculus/SoundUnfold.lean` for statements,
-   `Calculus/RuleSoundness.lean` for a branch or a closed goal
+3. Its case of `Taclet.sound`: `Calculus/Core/SoundArms.lean` for an update
+   premise, `Calculus/Core/SoundStep.lean` for statements,
+   `Calculus/Core/Sound.lean` for a branch or a closed goal
    (`.claude/rules/soundness.md`).
 4. Its row in `RuleShapes.tacletOrigins` (the solkey taclets it transcribes)
    and in `PrintedRules.printedOrigins`. `#check_constructor_table` fails the

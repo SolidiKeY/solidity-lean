@@ -1066,7 +1066,7 @@ theorem run_induct {P : α → Prop} {Q : TRes α → Prop} {σ : α} (h0 : P σ
 is defined and the condition is read, the loop ends well (`G`) where it is
 false, and where it is true the body runs to a head in `H` where, if the
 condition holds again, the variant is smaller and not negative
-(`Calculus/SoundLoop.lean`'s `Loop.run_variant`, the condition a
+(today's `Calculus/SoundLoop`'s `Loop.run_variant`, the condition a
 `Bool`). -/
 theorem run_variant {H G : α → Prop} {D : α → TRes Int}
     (hstep : ∀ τ, H τ → ∃ d, D τ = .ok d ∧

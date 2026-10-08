@@ -40,16 +40,19 @@ open scoped Solidity.Core.Surface
 /-! ## The taclets -/
 
 /--
-info: @Taclet.binopAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {v : Var} {p : PrimTy} {op : BinOp} {x : PrimTy}
-  {hq : op.ret p = x} {se₁ se₂ : Simple C p}, dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
+info: @Core.Taclet.binopAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : PrimTy}
+  {v : Core.Idx Γ (Core.LTy.val x)} {p : PrimTy} {op : BinOp} {hq : op.ret p = x} {se₁ se₂ : Core.Simple C Γ p},
+  dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.binopAssignment
+#guard_msgs in #check @Core.Taclet.binopAssignment
 
 /--
-info: @Taclet.logicalAndShortCircuitRhs : ∀ {C : Contract} {k : Nat} {m : Modality} {v : Var} {se : Simple C PrimTy.bool}
-  {nse : Val C PrimTy.bool}, dl{ ⟨[ v = se && nse; ]⟩ ⇝ ⟨[ if (se) {v = nse;v = v && true;} else {v = false;}; ]⟩ }
+info: @Core.Taclet.logicalAndShortCircuitRhs : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+  {v : Core.Idx Γ (Core.LTy.val (BinOp.and.ret PrimTy.bool))} {se : Core.Simple C Γ PrimTy.bool}
+  {nse : Core.Val C Γ PrimTy.bool},
+  dl{ ⟨[ v = se && nse; ]⟩ ⇝ ⟨[ if (se) {v = nse;v = v && true;} else {v = false;}; ]⟩ }
 -/
-#guard_msgs in #check @Taclet.logicalAndShortCircuitRhs
+#guard_msgs in #check @Core.Taclet.logicalAndShortCircuitRhs
 
 /-! ## Arithmetic -/
 

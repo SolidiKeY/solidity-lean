@@ -259,7 +259,7 @@ which is wrong. Runner: `solc --ir` with `test/tools/yulInterpreter/`, or evmone
 Mutate `Semantics.lean` one decision at a time (RHS after target, a `checkArith`
 dropped, `pop` not clearing, `delete` resetting mappings, a push not reusing its slot,
 an unbounded alias bind, `**` unchecked, `transfer` not debiting) and require the suite
-to kill each. Mutate `Calculus/Rules.lean` too (drop a guard, swap a capture order): if
+to kill each. Mutate `Calculus/Core/Rules.lean` too (drop a guard, swap a capture order): if
 `Taclet.sound` still builds, the semantics does not constrain that detail (a freedom or
 a hole in `Stmt.run`); if G misses it, G is too weak. A survivor is a decision no test
 observes. Proofs do not build on a mutant, hence `solcases` must not import them.

@@ -1,13 +1,13 @@
 import Solidity.Calculus.Core.ChainGen
-import Solidity.Calculus.LastLine
+import Solidity.Calculus.RewriteChainGen
 
 /-!
 # `#last_line` on a scoped chain
 
-`Calculus/LastLine.lean`'s check, for a chain whose first line is a scoped
+`#last_line`'s check, for a chain whose first line is a scoped
 formula: its last line is read in names — the last line past the program
 as it is, a last scoped line by its erasure (`erasedLine`) — and checked as
-`Calculus/LastLine.lean` checks one: no program left, one parallel update
+`Calculus/RewriteChainGen.lean` checks one: no program left, one parallel update
 in front of each goal, and no rewrite a chain takes still applying, under
 either modality when the chain is over a modality variable.
 -/

@@ -370,8 +370,8 @@ off, in thousands, the unit of `maxHeartbeats`), at the commit before M3a
 
 | Theorem | Override | before M3a | after M3a | after the fixes |
 |---|---|---|---|---|
-| `Taclet.sound_unfold` (`Calculus/SoundUnfold.lean`) | 1000000 | 551392 | 641806 (+16%) | 631932 |
-| `Taclet.sound_update` (`Calculus/SoundUpdate.lean`) | 1000000, now none | 109127 | 119744 (+10%) | 121185 |
+| `Taclet.sound_unfold` (`Calculus/SoundUnfold`) | 1000000 | 551392 | 641806 (+16%) | 631932 |
+| `Taclet.sound_update` (`Calculus/SoundUpdate`) | 1000000, now none | 109127 | 119744 (+10%) | 121185 |
 
 The growth is the panic cases: `res_split`'s `no_panic_iff` on every
 split, and the new `pushAt` and short-circuit cases of `sound_unfold`.
@@ -1923,7 +1923,7 @@ pays, are all faster than the baseline.
 - **Sorts.**  Four `net` rows for the `send` rules, one ledger read each:
   119 rows, `solkeycheck` at zero against `1b4341a303` (`parsed 323 taclets,
   119 read-bearing, table covers 119`).
-- **Rebuild.**  `Calculus/Rules.lean` imports `KeyTaclets` (for the reader's
+- **Rebuild.**  `Calculus/Rules` imports `KeyTaclets` (for the reader's
   dependency surface), so the re-pin rebuilds everything above `Rules`, not
   only `RuleShapes`/`SortCheck`.  The output does not change: `Derived1` and
   `Derived12` check clean, 415 of 420 still derived.
@@ -2091,7 +2091,7 @@ numbers recorded above:
 | `Examples/Tactics/Calls.lean` | 81 s | 121 s (+49%); 121 s alone through the server |
 | `Examples/Tactics/CrossDomain.lean` | 77 s | 97 s (+26%) |
 | `Examples/Tactics/Memory.lean` | 78 s | 88 s (+13%) |
-| `Calculus/Uniqueness.lean` | ~150 s | 198 s (+32%) |
+| `Calculus/Uniqueness` | ~150 s | 198 s (+32%) |
 
 These were not measured against master under the same load.  The
 re-measurement of the review (below) puts `Calls` and `Uniqueness` within
@@ -2174,7 +2174,7 @@ timed by `IO.monoMsNow` at its first and last command, load average 1–2.7
 | File | master | `ctor` | change |
 |---|---:|---:|---:|
 | `Examples/Tactics/Calls.lean` | 130.3 s, 120.9 s | 129.7 s, 129.6 s | +3% |
-| `Calculus/Uniqueness.lean` | 151.6 s, 151.6 s | 151.5 s, 153.4 s | +1% |
+| `Calculus/Uniqueness` | 151.6 s, 151.6 s | 151.5 s, 153.4 s | +1% |
 
 Both within 10%: the S1–S5 warnings were the other lanes' load.  After
 the `UpdElem` change, `Derived1`, `Derived12`, `Derived14` and
@@ -2313,7 +2313,7 @@ The W7 review's follow-up, in `Derive.residue`.
   FALSE goal `Γ ⟹ false, φ` the premise weakened, which the closer proves.
   Since solkey's rules derive it, both rule sets have it, so
   `Proves.toSolkey` keeps it, and `Proves.solkey_not_call`
-  (`Calculus/SolkeyFragment.lean`) now says that solkey's rules derive
+  (`Calculus/SolkeyFragment`) now says that solkey's rules derive
   nothing about a call with an argument that is not simple *except behind a
   context that refutes itself*: its conclusion is `Valid (Hyp.wrap Γ .ff)`,
   and `Proves.solkey_lt_calculus` reads it at the empty context.  Sound by
@@ -2401,7 +2401,7 @@ A finder and a skeptic over the pruning; what the skeptic confirmed, fixed:
   clock is only informative; the past-maxHeartbeats message is recorded as
   unpinned again.
 - **Checked.**  The default target (`lake build`, 181 jobs, through the
-  server's build: `Calculus/SolkeyFragment.lean`, `Theorems.lean`,
+  server's build: `Calculus/SolkeyFragment`, `Theorems.lean`,
   `Examples/Notation.lean` and the `sol_prove` users in
   `Examples/Benchmark/` included), then `Derived1`, `Derived12`,
   `Derived14` and `SolkeyTestSuite.lean` (every `Derived` module,

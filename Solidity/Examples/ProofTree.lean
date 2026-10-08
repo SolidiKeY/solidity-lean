@@ -1,5 +1,3 @@
--- first: the scoped `sol_derive?`/`sol_chain?` (`Core.Derive`) are tried before today's
-import Solidity.Calculus.ProofTree
 import Solidity.Tools.ProofTree
 import Solidity.Tools.Inspect
 import Solidity.Calculus.Core.Derive
@@ -9,7 +7,7 @@ import Solidity.Calculus.Derive
 /-!
 # The proof tree, pinned
 
-solkey's view of a proof, a tree of sequents (`Calculus/ProofTree.lean`), and
+solkey's view of a proof, a tree of sequents (`Calculus/Core/ProofTree.lean`), and
 the tactics that write a proof out, as `#guard_msgs` tests:
 
 * `#proof_tree`, `#proof_node` and `#proof_tree_json` (`Tools/ProofTree.lean`)
@@ -36,7 +34,7 @@ may end in).  `sol_prove?`
 is the scoped one (`Calculus/Core/Closers.lean`), its replay today's
 text.  The chains the tactics write (`sol_chain?`, `#chain`, `sol_rws?`)
 are pinned in `Examples/Tactics/CoreChains.lean`.  What stays today's: the
-guards on today's residue and closer (the closer's input).
+guards on today's closer (the closer's input, the leaves' erasure).
 -/
 
 namespace Solidity.Examples.ProofTree
@@ -128,7 +126,7 @@ info: {"stats": {"nodes": 6, "branches": 2},
 #proof_tree_json dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
 
 /-! The labels are the ones the rules write (`"if s#se true": …`, dropped by
-the macro), `Taclet.branchLabels`; this reads `Calculus/Rules.lean` and fails
+the macro), `Taclet.branchLabels`; this reads `Calculus/Core/Rules.lean` and fails
 where the two disagree.  A label names what its schema variable stands for
 at the node, as KeY's `NodeInfo.setBranchLabel` does: `if true true` above,
 the condition's fresh local below. -/
@@ -142,7 +140,7 @@ where
 
 #guard_msgs in
 #eval show IO Unit from do
-  let src ← IO.FS.readFile "Solidity/Calculus/Rules.lean"
+  let src ← IO.FS.readFile "Solidity/Calculus/Core/Rules.lean"
   for (r, ls) in Taclet.branchLabels do
     let some rest := (src.splitOn s!"  | {r} ")[1]? | throw (IO.userError s!"no rule {r}")
     -- the rule's text: up to the next constructor, docstring, comment or blank line
@@ -607,9 +605,8 @@ example : ⊢ dl!{ x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
 
 end Scoped
 
-/-! The rest of this section reads today's residue and closer, the input
-the scoped `sol_prove` hands its leaves to (`Seq.leafRes`), so it is read
-without the switch.
+/-! The rest of this section reads today's closer, the input the scoped
+`sol_prove` hands its leaves to (`Seq.leafRes`).
 
 A replay must fit one declaration's `maxHeartbeats` (`Derive.replayFits`,
 which `#solkey_derive?` reports as pending and `sol_prove?` warns of).  A
@@ -624,16 +621,20 @@ heartbeats. -/
     withTheReader Lean.Core.Context ({ · with maxHeartbeats := max }) (Derive.replayFits hb)
   return [← at_ 1000 2000, ← at_ 1000 1000, ← at_ 0 2000]
 
+section Scoped
+open scoped Solidity.Core.Surface
+
 /-! The reduction's compiled code reads a pushed array's old length and
 value only where the read needs them (`CaseTree.toTermLazy`).  Run
 strictly, the work doubled with each push (twelve onto one array: 23 ms;
 twelve onto each of two, interleaved: 106 s), and `sol_prove?`'s size test
 (`Derive.leafFits`) builds the reduction before it counts it.  Here the leaf
 is within `closeSize` and its reduction past `elimSize`: refused in
-milliseconds. -/
+milliseconds.  The leaves are the scoped strategy's, erased
+(`Core.Derive.residueOf`). -/
 
 /-- Twenty-two pushes onto one array. -/
-def pushes22 : Fml StandardExample :=
+def pushes22 : Core.Fml StandardExample [] :=
   dl!{ [
     values.push(0); values.push(1); values.push(2); values.push(3); values.push(4);
     values.push(5); values.push(6); values.push(7); values.push(8); values.push(9);
@@ -642,7 +643,7 @@ def pushes22 : Fml StandardExample :=
     values.push(20); values.push(21); ]
     values.length > 0 }
 
-#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] pushes22).map
+#guard (Core.Derive.residueOf pushes22).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
@@ -653,16 +654,16 @@ residue; six leave one leaf past the bound, which neither the closer nor
 `sol_prove?`'s reducing steps attempt (`Derive.leafFits`). -/
 
 /-- Four writes of `total` from its own read. -/
-def writes4 : Fml StandardExample :=
+def writes4 : Core.Fml StandardExample [] :=
   dl!{ [ total = 0; total += 1; total += 1; total += 1; total += 1; ] total == 4 }
 
 /-- Six writes of `total` from its own read. -/
-def writes6 : Fml StandardExample :=
+def writes6 : Core.Fml StandardExample [] :=
   dl!{ [ total = 0; total += 1; total += 1; total += 1; total += 1; total += 1;
     total += 1; ] total == 6 }
 
-#guard Derive.proves [] writes4
-#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] writes6).map
+#guard Core.Derive.proves writes4
+#guard (Core.Derive.residueOf writes6).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
     Derive.leafFits l.1 l.2) == some [false]
 
@@ -671,15 +672,17 @@ def writes6 : Fml StandardExample :=
 330 nodes, within `closeSize`, whose reduction has 79587. -/
 
 /-- Ten deletes of `wallet`, then a read of its mapping member. -/
-def deletes10 : Fml StandardExample :=
+def deletes10 : Core.Fml StandardExample [] :=
   dl!{ [ delete wallet; delete wallet; delete wallet; delete wallet; delete wallet;
     delete wallet; delete wallet; delete wallet; delete wallet; delete wallet; ]
     wallet.stash[owner] == 0 }
 
-#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] deletes10).map
+#guard (Core.Derive.residueOf deletes10).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+
+end Scoped
 
 /-! A power is folded only up to the exponent `256` (`Decide.powBig`):
 `Int.pow` recurses once per unit of it, heeding no heartbeats. -/

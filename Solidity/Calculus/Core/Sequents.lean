@@ -6,7 +6,7 @@ import Solidity.Calculus.Core.Delab
 /-!
 # Checked sequent lines on scoped goals: `show sequent!{ Γ ⟹ φ }`
 
-`Calculus/Sequents.lean`'s `show sequent!{ Γ ⟹ φ }`, for a scoped goal
+Today's `show sequent!{ Γ ⟹ φ }` (`Calculus/Sequents`, deleted at W4 `calc-del`), for a scoped goal
 `H ⊢ φ` (`Core.Proves`).  A scoped goal is not its text: its program
 carries the frames the rules left (`pop`, `seq`, a hidden binder), which a
 flat program read back does not have, so `show` cannot compare it by

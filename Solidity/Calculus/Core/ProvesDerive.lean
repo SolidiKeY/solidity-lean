@@ -294,6 +294,16 @@ def residue (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ) (φ : 
     Option (List (Solidity.Derive.Leaf C)) :=
   (run (leafRes np full) (refutes (leafRes np false)) fuel H φ fuel).map (·.1)
 
+/-- `#solkey_scan`'s view of `⊢ φ` (`Frontend/Problems.lean`): how many
+leaves the walk leaves, closed by `synClose` or (`walk`) not, and the most
+storage writes in one leaf's context (`Derive.storageWrites`); `none` when
+the walk runs out or a step has no rule. -/
+def scanLeaves (walk : Bool) (φ : Fml C []) : Option (Nat × Nat) :=
+  let r := Solidity.Derive.residue Solidity.Derive.budget
+    (if walk then fun _ _ => false else Solidity.Derive.synClose) Solidity.Derive.budget []
+  (run (leafWith false none r) (refutes (leafRes none false)) fuel .nil φ fuel).map fun (ls, _) =>
+    (ls.length, ls.foldl (fun m l => max m (Solidity.Derive.storageWrites l.1)) 0)
+
 /-- `residue`, the leaves quoted, each walk leaf marked by the residue that
 closed it (`leafQuoteI`). -/
 def residueQuote (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :

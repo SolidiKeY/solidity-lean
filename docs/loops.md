@@ -98,7 +98,7 @@ Rejected:
 |---|---|
 | Fuel everywhere (`Stmt.run n σ s`) | A `Nat` through every theorem that recurses on `Stmt.run`; box becomes `∀ n`, diamond `∃ n`, and monotonicity in `n` a lemma every proof needs. |
 | A constant bound inside the loop only (fuel `2^257`) | Unwinding is not exact at the bound: a loop stopping at iteration `B + 1` is `diverge` while its unwinding is not, so `whileUnwind` is unsound for the diamond. |
-| An inductive `Exec` beside `Stmt.run` | Two denotations. Every taclet's `Premise.Correct`/`SameOk` (`Calculus/SoundKit.lean`) is over `Prog.run`, the corpus is decided by kernel evaluation of it (`corpus_decide`), and the callback relation anchors to it (`ExecS.det`). `Stmt.run` is the only semantics. |
+| An inductive `Exec` beside `Stmt.run` | Two denotations. Every taclet's `Premise.Correct`/`SameOk` (`Calculus/Core/SoundKit.lean`) is over `Prog.run`, the corpus is decided by kernel evaluation of it (`corpus_decide`), and the callback relation anchors to it (`ExecS.det`). `Stmt.run` is the only semantics. |
 | `partial_fixpoint` | `Res = Except Halt` is not a CCPO, and the kernel cannot unfold the result. |
 
 **Cost: computability.** The existential makes `Loop.run` classical, but
@@ -183,10 +183,10 @@ with `break` must say what holds when `brk` is set.
 
 Unwinding and the invariant rule both apply to one loop. To keep "one rule
 per statement" (`Stmt.complete`, `Rule.eq_step`, `Rule.premise_unique` in
-`Calculus/Uniqueness.lean`), the choice is syntax. `LoopAnn C` is either
+`Calculus/Core/Taclet.lean`), the choice is syntax. `LoopAnn C` is either
 `.inv (I : Val C .bool) (dec : Option (Val C .uint))` (an invariant and an
 optional variant) or `.unwind (k : Nat)`. `Stmt.step`
-(`Calculus/Completeness.lean`) dispatches:
+(`Calculus/Core/Completeness.lean`) dispatches:
 
 | Annotation | Box | Diamond |
 |---|---|---|
@@ -214,7 +214,7 @@ no quantifier: Ballot's `∀ q < p. proposals[q].voteCount ≤ winningVoteCount`
 needs `Fml.all` (`docs/function-specs.md`) and a table of formulas outside
 `Stmt` that the loop names by index.
 
-**Termination** (`Calculus/Termination.lean`). `.unwind k` weighs
+**Termination** (`Calculus/Termination`). `.unwind k` weighs
 `(k + 1) · (c.cost + c.pen + Prog.weight body + 3)`, so `whileUnwind` gets
 smaller; `.inv I _` weighs `c.cost + c.pen + Prog.weight body + I.cost + 2`,
 and its premise (`body` alone, `ω` alone) is lighter than `loop :: ω` under
@@ -224,7 +224,7 @@ could decrease.
 
 ## Decision 4: the invariant rule and its soundness (built)
 
-solkey's two goals, as `whileInvariantBox` writes them (`Calculus/Rules.lean`),
+solkey's two goals, as `whileInvariantBox` writes them (`Calculus/Core/Rules.lean`),
 in the context's update `{U}`:
 
 ```
@@ -261,7 +261,7 @@ turns it into the premise at every loop head.
 conjoins `f || !f` (defined exactly when `f` is a `bool`) to an invariant for
 each flag the condition tests, which KeY's `boolean` type gives.
 
-**Soundness** (`Calculus/SoundLoop.lean`). Box (`Stmt.loop_inv_box`): by
+**Soundness** (`Calculus/Core/SoundLoops.lean`). Box (`Stmt.loop_inv_box`): by
 `Loop.run_induct`, every loop head is in the frame of the first and
 satisfies the invariant; where the condition is `TRUE` the body's box keeps
 it (and rules out a panic), where it is `FALSE` the rest's goal holds.
@@ -270,7 +270,7 @@ by the variant's value after the first, which is a `uint` below the one
 before wherever the loop goes on; neither the condition (the cover) nor the
 body (a diamond) can halt.
 
-**In Lean.** `Premise.inv`, read by `Premise.invFml` (`Calculus/SoundKit.lean`),
+**In Lean.** `Premise.inv`, read by `Premise.invFml` (`Calculus/Core/SoundKit.lean`),
 so `sol_symex` steps it as any premise; `Proves.invLean` for a walk, its
 goals `init` ("invariant initially valid") and `thn`, `els`, `cov` past
 `Hyp.loopAnon` ("invariant preserved and used"), which the proof tree labels
@@ -331,8 +331,8 @@ EVM stage is worth doing once, for all.
 |---|---|---|
 | **L1 Syntax and semantics** (built) | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Core/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/Quote.lean`, `Calculus/Notation.lean`. | Done: `Stmt.run` stays structural (the loop arm calls the body's run under a binder), `#eval` runs `Loop.runImpl`. |
 | **L2 Typing** (built) | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Done. |
-| **L3 Unwinding** (built) | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
-| **L4 Invariant rule** (built) | `Update.lean` (`Fml.anon`, `State.anon`), `Semantics/Mutability.lean` (`Prog.loopFrame`, `Fml.loopAnon`, `Prog.loopFrame_run`: the frame is `Stmt.within`'s, no new run lemma), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic` (`Hyp.anon`, `Proves.invLean`), `Termination`, `Close` (`holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
+| **L3 Unwinding** (built) | `Calculus/Core/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
+| **L4 Invariant rule** (built) | `Update.lean` (`Fml.anon`, `State.anon`), `Semantics/Mutability.lean` (`Prog.loopFrame`, `Fml.loopAnon`, `Prog.loopFrame_run`: the frame is `Stmt.within`'s, no new run lemma), `Calculus/Core/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic` (`Hyp.anon`, `Proves.invLean`), `Termination`, `Close` (`holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
 | **L6 Callbacks** | `Calculus/Core/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
 | **L7 EVM** | `Evm/{Machine,Compile,Correctness}.lean`, as above. | High: the largest stage. |
@@ -383,8 +383,8 @@ A finder and a skeptic per area; what the skeptic confirmed, fixed:
   restriction is written above (Typing and declarations) and in the rule
   map.
 - **`invBox`**: under the box the invariant rule has solkey's two goals past
-  `init` in the walk and the proof tree (`Calculus/Symex.lean`,
-  `Calculus/ProofTree.lean`), `cov` proved by `closeTrue`, as `splitBox`.
+  `init` in the walk and the proof tree (`Calculus/Core/Symex.lean`,
+  `Calculus/Core/ProofTree.lean`), `cov` proved by `closeTrue`, as `splitBox`.
 - **Pins.** `#taclet whileNoVariantDiamond`, `#step` pins of `whileClose`
   and `whileNoVariantDiamond` firing, the `sol_derive?` walks of an unwound
   loop and an invariant loop (`Examples/ProofTree.lean`), a loop inside a
@@ -409,7 +409,7 @@ the same method (`docs/testsuite-proofs.md`, "Constructors review"):
 | File | master `2979bb8` | `loops` | change |
 |---|---:|---:|---:|
 | `Examples/Tactics/Calls.lean` | 130.3 s, 120.9 s | 120.8 s | −4% |
-| `Calculus/Uniqueness.lean` | 151.6 s, 151.6 s | 154.7 s | +2% |
+| `Calculus/Core/Taclet.lean` | 151.6 s, 151.6 s | 154.7 s | +2% |
 | `TestSuite/Derived14.lean` | — | 75.3 s | — |
 
 Both within 10%.  `Derived14` has no master time under this method (W7's

@@ -1,4 +1,3 @@
-import Solidity.Calculus.Symex
 import Solidity.Calculus.Core.Step
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.Print
@@ -7,15 +6,13 @@ import Solidity.Calculus.Close
 /-!
 # Every statement's rule, on scoped formulas
 
-`Calculus/Core/Step.lean`'s `Stmt.step` against `Completeness.lean`'s, arm
-by arm: each program below is read into the scoped syntax
-(`Prog.resolve`), run to its end by `Core.symex`, and its erasure compared
-with what today's `symex` leaves of the same formula, each branch's cover
-goal dropped (today's third goal, `Premise.coverFml`; a scoped split has
-KeY's two goals, `bool` locals being typed).  So
-each premise erases to the one today's rule leaves, with the same fresh names.  The result is also
-quoted and added as a theorem `Core.symex n φ = ψ` by `Eq.refl`, so the
-kernel evaluates every arm too (a call's `Prog.wk`, a loop's frame).
+`Calculus/Core/Step.lean`'s `Stmt.step`, arm by arm: each program below is
+read into the scoped syntax (`Prog.resolve`), run to its end by
+`Core.symex`, quoted and added as a theorem `Core.symex n φ = ψ` by
+`Eq.refl`, so the kernel evaluates every arm (a call's `Prog.wk`, a loop's
+frame).  Until W4 `calc-del` each result's erasure was also compared with
+what today's strategy left (each branch's cover goal dropped, the same
+fresh names); that strategy is deleted with today's rule table.
 
 `Examples/Tactics/CoreSymex.lean` prints three results; here a program only
 has to agree.  A loop body's own locals are left out of the invariant
@@ -27,27 +24,11 @@ namespace Solidity.Examples.Tactics.CoreStep
 
 open Solidity Lean Meta
 
-/-- Today's formula with each branch's cover goal dropped. -/
-private partial def dropCover {C : Contract} (c : Expr) : Solidity.Fml C → Solidity.Fml C
-  | .and (.imp a x) (.and (.imp a' y) z) =>
-    let q := Solidity.Fml.quote c
-    if q z == q (Premise.coverFml .box a a') || q z == q (Premise.coverFml .diamond a a') then
-      .and (.imp a (dropCover c x)) (.imp a' (dropCover c y))
-    else .and (.imp a (dropCover c x)) (.and (.imp a' (dropCover c y)) (dropCover c z))
-  | .and a b => .and (dropCover c a) (dropCover c b)
-  | .imp a b => .imp a (dropCover c b)
-  | .upd m U φ => .upd m U (dropCover c φ)
-  | .not φ => .not (dropCover c φ)
-  | .havoc φ => .havoc (dropCover c φ)
-  | .all x p φ => .all x p (dropCover c φ)
-  | .anon xs φ => .anon xs (dropCover c φ)
-  | φ => φ
-
 /-- The fuel: enough for every program below. -/
 private def fuel : Nat := 2000
 
 /-- Run `Core.symex` on the program of `φ` (a modality) read into the
-scoped syntax, check that its erasure is today's result, and add
+scoped syntax and add
 `name : Core.symex fuel φ' = ψ`, checked by the kernel. -/
 private def agree (c : Expr) {C : Contract} (name : Lean.Name) (φ : Solidity.Fml C) :
     MetaM Unit := do
@@ -55,10 +36,6 @@ private def agree (c : Expr) {C : Contract} (name : Lean.Name) (φ : Solidity.Fm
   let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) [] P | throwError "the program does not resolve"
   let φc : Core.Fml C [] := .modal m Pc .nil .tt
   let ψ := Core.symex fuel φc
-  let today := dropCover c (symex fuel (.modal m P .tt))
-  unless Solidity.Fml.quote c (ψ.erase []) == Solidity.Fml.quote c today do
-    throwError "the erasure is not today's result:\n{← Core.legacyShow c (ψ.erase [])}\n\
-      today:\n{← Core.legacyShow c today}"
   let lhs := mkAppN (mkConst ``Core.symex) #[c, Core.Quote.qCtxRaw [], toExpr fuel, Core.Fml.quote c φc]
   let rhs := Core.Fml.quote c ψ
   addDecl (.thmDecl { name, levelParams := [], type := ← mkEq lhs rhs, value := ← mkEqRefl rhs })

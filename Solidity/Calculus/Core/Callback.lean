@@ -6,7 +6,7 @@ import Solidity.Semantics.Core.Callback
 /-!
 # The callback taclets on scoped statements
 
-`Calculus/Rules.lean`'s `CallbackTaclet` (solkey's `…WithCallbackBox`), its
+Today's `Calculus/Rules` `CallbackTaclet` (solkey's `…WithCallbackBox`), its
 lines read under `open scoped Solidity.Core.Schema` as `Calculus/Core/Rules.lean`
 reads the table.  Each premise is the one its no-callback twin leaves, and
 so the one `Stmt.step` builds (`CallbackTaclet.toStep`): what a callback

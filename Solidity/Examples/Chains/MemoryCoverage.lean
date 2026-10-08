@@ -1,5 +1,5 @@
-import Solidity.Calculus.Chains
-import Solidity.Calculus.LastLine
+import Solidity.Calculus.RewriteChains
+import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
@@ -8,7 +8,7 @@ import Solidity.Calculus.Core.Surface
 # Memory rule coverage: one chain per rule
 
 The paper's coverage table (`sections/memory-coverage.tex`), one row per rule: a statement, run as a chain
-term (`Calculus/Chains.lean`, `.claude/rules/derivations.md`) over any modality `m` and postcondition `φ`.
+term (`Calculus/Core/Chains.lean`, `.claude/rules/derivations.md`) over any modality `m` and postcondition `φ`.
 Each theorem is named after the row's rule as the paper prints it (with a suffix where two rows share one);
 where Lean's rule has another name, a comment says so.  The row's rule is the chain's one printed `⇝`: its
 own `~[r]~>` link, or, where it ends the program, one `~*>` with the `emptyModality` after it (the paper never

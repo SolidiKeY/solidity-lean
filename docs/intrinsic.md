@@ -962,7 +962,7 @@ elaborates with every module (no name clash).
   `storage…Read_unfold_right{Fst,SndResult}` 0.5–0.8 s each, the rest
   under 0.3 s.  `Taclet.step_eq` stays
   as an alias (`Calculus/Core/Proves.lean` uses it).
-- **Printing** (`Calculus/Core/RuleText.lean`, `#check_rule_text`, pinned):
+- **Printing** (`Calculus/Core/RuleText`, `#check_rule_text`, pinned):
   140 of 158 `Taclet` lines and 6 of 9 `LeanTaclet` lines print as today's
   (`Calculus/Core/DelabLean.lean` adds the printer for `Core.LeanTaclet`).
   The others need `Calculus/Core/Delab.lean`, which no W1 lane owns, **for
@@ -981,7 +981,7 @@ elaborates with every module (no name clash).
   - `progPieces` reduces a block before it looks for `up`, so `Prog.up body`
     inside a premise's program prints as an escape — `whileInvariantDiamond`;
   - `functionCallArgCapture` has no line to print.
-- **Shapes** (`Calculus/Core/RuleShapes.lean`, `Calculus/Core/PrintedRules.lean`):
+- **Shapes** (`Calculus/Core/RuleShapes`, `Calculus/Core/PrintedRules`):
   today's rows by name; `blockEmpty` and `functionFrameEmpty` claimed
   (308 claimed, 15 excused); printed rules partitioned as today's.  The
   callback rows stay today's until the callback taclets are scoped (W2
@@ -1270,11 +1270,11 @@ arms close:
 **Uniqueness** is `Core.Stmt.step` being a function, with the rules lane's
 `Taclet.toStep` and `Rule.premise_unique` (`Calculus/Core/Taclet.lean`; `ruleOf?` in
 `Calculus/Core/Completeness.lean`).
-**Termination is retired**, not restated: `Calculus/Termination.lean`'s
+**Termination is retired**, not restated: `Calculus/Termination`'s
 weights are 1,300 lines over the untyped syntax, and the scoped strategy is
 fuelled (`Core.symex n`), so a program it does not finish fails `sol_prove`
 (the leaf keeps a modality, which `posB` rejects) rather than looping.
-`Termination.lean` goes with the old calculus at W4.
+`Termination` goes with the old calculus at W4.
 
 **Early gate: passes.**  `sol_prove` over Derived9–11's 91 obligations in
 the `Core*` twins (`TestSuite/CoreDerived9` … `11`, deleted at the flip, over
@@ -1320,8 +1320,8 @@ running into a block's end is written `⟨[ s; } ω ]⟩ φ` (and `⟨ … } …
 **The commands**: `#derivation`, `#chain`, `#chain_rest`
 (`Calculus/Core/ChainGen.lean`) and `#last_line`
 (`Calculus/Core/LastLine.lean`) dispatch on a scoped first line and reuse
-`Calculus/ChainGen.lean`'s grouping and rewrite search and
-`Calculus/LastLine.lean`'s check on the erasure.  `#chain` writes each line
+`Calculus/ChainGen`'s grouping and rewrite search and
+`Calculus/LastLine`'s check on the erasure.  `#chain` writes each line
 in the first of `cdl![m]{}`, `cdl!{}`, `cdl![.box]{}`, `cdl![.diamond]{}`
 that reads back as it; a generated scoped chain is one declaration (no
 segments).  `Examples/Tactics/CoreChains.lean` pins them, with three
@@ -1345,7 +1345,7 @@ Left:
 ### W2 lane `tree` (`w2-tree`, 2026-10-08)
 
 - **The proof tree** (`Calculus/Core/ProofTree.lean`): `Core.ProofTree.build`
-  and `ofFormula` grow `Calculus/ProofTree.lean`'s `Tree` (rows, labels,
+  and `ofFormula` grow `Calculus/ProofTree`'s `Tree` (rows, labels,
   JSON and display reused) on a scoped goal `H ⊢ φ`.  The rule at a
   statement is the one `ruleOf?` names, applied as
   `apply update (Taclet.toStep .r)` (`LeanTaclet.toStep` for Lean's rules,
@@ -1943,11 +1943,11 @@ chain on both.  The lane's first estimate (13.2–15.7 s against 10.5–12.3 s,
   the scoped strategy fires `memoryIndexWriteCaptureAllComplexRecv` on
   `b.items[i] = val;`, but `Core.ruleOf?` names nothing (`#derivation` prints
   `~[?]~>`), so the named link does not elaborate.
-- `ChainNotation`, `ChainRewrites`: they test `Calculus/Chains.lean`'s notation
+- `ChainNotation`, `ChainRewrites`: they test `Calculus/Chains`'s notation
   and rewrites (`calc`, `~~>`, segments, rewrites before the program's end,
   `Fml.Steps.ofSymex`, `Fml.StepBy.unique`), which scoped chains do not have;
   `Examples/Tactics/CoreChains.lean` pins the scoped notation.  W4's
-  `calc-del` deletes `Calculus/Chains.lean`: both files are rewritten or
+  `calc-del` deletes `Calculus/Chains`: both files are rewritten or
   retired then.
 
 **Found, not this lane's:**
@@ -1998,7 +1998,7 @@ changed).
 **Flipped**: every declaration of `Examples/Chains/` (the 33 left on
 `Update.lean`'s calculus, `EvaluationOrder` included; no file keeps a *Left
 on* part), `Examples/ChainNotation.lean` and `Examples/ChainRewrites.lean`.
-Nothing of `Examples/` reads `Calculus/Chains.lean`'s chains any more; its
+Nothing of `Examples/` reads `Calculus/Chains`'s chains any more; its
 rewrites (`Calculus/ChainRewrites.lean`) still run on the erasure past the
 program.
 
@@ -2033,7 +2033,7 @@ program.
   scoped line `Z`, whose erasure leads to `L`); `Leads.via`, `Leads.viaE`,
   `ViaE.leads`, `LeadsE.via`, `LeadsE.viaE` compose segments;
   `LeadsE.valid`/`valid_close` prove the first line.  `calc`: `Trans`
-  instances and `SoundRel` as `Calculus/Chains.lean`'s, and in
+  instances and `SoundRel` as `Calculus/Chains`'s, and in
   `Calculus/Core/Chains.lean` a step `_ R B` whose line is computed when its
   step is proved (`pendingLines`, checked against the text then).
   `Steps.length`, `Steps.eq_of_length`, `Steps.ofSymex`, `StepBy.unique`
@@ -3580,10 +3580,10 @@ green, 302 jobs, every `sol_derive?` pin (`ProofTree`, `CoreProofTree`,
   8. *Contracts through the erasure:* `Tactics/Contracts` reaches today's
      `FunContract`/`useContract` by `sol_erase`, with its arguments in today's
      formulas.  There is no scoped `FunContract` yet, so
-     `Calculus/Contracts.lean` stays.
+     `Calculus/Contracts` stays.
   9. *Chains past the program:* rewrites after the program
      (`~[sequentialToParallel]~>`, `~[findOnSave]~>`, …) run
-     `Calculus/ChainRewrites.lean` on the erasure. `Calculus/Chains.lean`
+     `Calculus/ChainRewrites.lean` on the erasure. `Calculus/Chains`
      is still imported for that machinery and for its notation's syntax
      (every `Examples/Chains/*` file but `Payment`, `ChainNotation`, `ChainRewrites`,
      `ExampleNames`, `CallOperands`, `Checked`).  `Core/Merge.lean`'s
@@ -3712,7 +3712,7 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `SoundLoop` (through `Logic`), `Symex`, `Completeness` (through
     `Derive`'s `Proves.closeTrue`), and today's `Rules` body; `ProofTree`,
     `Sequents`, `Chains` are cut from it.  See "W4 lane `moves`".
-35. *Proposed (W4 `moves`), the lead's call:* `Calculus/Core/RuleText.lean`
+35. *Proposed (W4 `moves`), the lead's call:* `Calculus/Core/RuleText`
     (the scoped rule lines against today's) goes with today's rule table.
 36. *Proposed (W4 `theorems`), the lead's call:* the scoped `Core.Proves`'
     step rules read the rule set, so that under `.solkey` the step's rule
@@ -3758,6 +3758,47 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `TypedRunErase`), the builder over the typed run, `Faithfulness` over
     `TState`.  M3's `State C Γ`/`Env` stay regardless: they are the erased
     state the closer's untyped terms read (`TState.erase`), until M6c.
+41. *Proposed (W4 `calc-del`), the lead's call; amends 34:* `Calculus/Logic.lean`
+    and `Calculus/Derive.lean` are trimmed in `calc-del`, not deleted and
+    not left whole: today's `Proves` keeps its connective, update, rewrite
+    and close rules (the closer's sequent calculus on a leaf's erasure) and
+    loses its program rules (`update` … `invLean`, their soundness
+    `RuleSoundness`/`Sound*`, `Proves.unfoldRule`); `Derive.residue` keeps
+    moving the connectives in front into the context and loses the program
+    step (a program left in a leaf stays a leaf).  So today's strategy
+    (`Symex`, `Completeness`, today's `Rules`) and the program rules'
+    soundness go now, with nothing of `Core` reading them.  `RuleSet` is
+    still the index (now a parameter: no rule restricts it).
+42. *Proposed (W4 `calc-del`), the lead's call:* today's chains split
+    (blocker 9): the rewrite half, on `Update.lean`'s lines, is
+    `Calculus/RewriteChains.lean` (`Link` with `rw`/`rwAny` only, `Fml.Via`,
+    `Fml.Leads`, `Post`, the chain notation and `sol_chain` on rewrites)
+    and `Calculus/RewriteChainGen.lean` (`#last_line` on rewrites, the
+    rewrite search, `groupSteps`, `sol_chain?` on `~~>`, `sol_rws`); a step
+    of the strategy (`~>`, `~*>`, `~[rule]~>`) on today's formulas is an
+    error that names the scoped chains, and `#chain`/`#chain_rest`/
+    `#derivation` are syntax only here, elaborated by the scoped chains.
+43. *Proposed (W4 `calc-del`), the lead's call:* the rule tables
+    (`RuleShapes`, `PrintedRules`) are keyed by the scoped constructors
+    (`` ``Core.Taclet.r ``) and hold the scoped claims (`blockEmpty`, and
+    `functionFrameEmpty` merged into the two call expansions); their scoped
+    twins (`Core/RuleShapes`, `Core/PrintedRules`) are deleted, and with
+    `Rules.lean` gone `scripts/check-rule-text.sh` checks that every
+    constructor of `Calculus/Core/Rules.lean` is a `dl{ … }` line but the
+    two stated by hand (`scripts/core-rules.mjs` and the copy markers are
+    deleted).
+44. *Proposed (W4 `calc-del`), the lead's call:* `SortCheck/Faithfulness`
+    reads the scoped taclets: a read is a `CRead` over the statement's
+    context, erased under any names to today's `Read` (so `Read.sortOk` and
+    the semantic half are unchanged), and the 36 `faithful_<ctor>`
+    theorems are stated by `faithful_theorem r dom cls`, which reads the
+    binders and the statement off `Core.Taclet.r`'s type (the hygienic
+    binder names of the schema macros cannot be written in the file); the
+    domain and class of each are today's.
+45. *Proposed (W4 `calc-del`), the lead's call:* `#solkey_scan` reads the
+    scoped statement (`N.f.problem.core`, or `N.f.problem` under `main`;
+    `Core.Seq.scanLeaves`, the scoped walk with today's residue at the
+    leaves), since today's walk on the legacy statement is gone.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
@@ -3803,7 +3844,7 @@ CORE 2's items 1 and 2 are done; the W3b blockers 2 (callbacks, below) and
   memory local erases to `Binding.unset` (`LTy.enc`, `TDenote.bind`), and
   `Binding.unset` read as memory reverts where it was `.stuck`
   (`Semantics.lean`'s `MPath.mval`, `Update.lean`'s `Tm.eval .pvI`,
-  `Calculus/SoundKit.lean`'s `bindingRef`).  No untyped program binds a
+  `Calculus/SoundKit`'s `bindingRef`).  No untyped program binds a
   memory name to `.unset`, so no untyped proof changed.
 - *The readings* (`Calculus/Core/Fml.lean`): `Modality.forallB` is universal
   under both modalities.  Decision 12's diamond inhabitant clause was
@@ -4415,7 +4456,7 @@ rewrite, the paths already lowered); `withdrawSafe`, `callToKeepsInv` and `pingK
    `TRun.callLeave`), the mutability frame on typed runs (`Prog.within`'s
    `view`/`pure` facts), and the parameters' binding as a scoped premise;
    `Contracts` still reaches today's `useContract` by `sol_erase`, so
-   `Calculus/Contracts.lean` stays.
+   `Calculus/Contracts` stays.
 2. *`Callback`'s closing block*: the counterexample
    `withdrawUnsafe_withCallback` is a run over today's states (a typed one
    needs a typed `Vault` storage and its `ExecS` steps, each a typed run
@@ -4446,7 +4487,7 @@ after the leaf change.
 - **`ProofTree`'s `sol_chain?`, `#chain` and `sol_rws?` sections flipped**
   (W3b blocker 7): the scoped twins (`Calculus/Core/ChainGen.lean`), which
   `Examples/ProofTree.lean` now imports in place of today's
-  `Calculus/ChainGen.lean`.  `sol_chain?` is pinned on `~~>`, where the
+  `Calculus/ChainGen`.  `sol_chain?` is pinned on `~~>`, where the
   scoped one writes the chain term out (on `~*>` it suggests `sol_chain`
   alone); the postconditions are `Core.Post StandardExample Γ` at the
   context they stand in.
@@ -4735,9 +4776,9 @@ after the leaf change.
      (it needs the contract over the typed call run, `CallRet.enterT`/
      `TRun.callLeave`, the mutability frame on typed runs, the parameters
      bound as a scoped premise); `Tactics/Contracts` reaches today's
-     `useContract` by `sol_erase`, so `Calculus/Contracts.lean` stays.
+     `useContract` by `sol_erase`, so `Calculus/Contracts` stays.
   9. *Chains past the program* (unchanged): the rewrite links run
-     `Calculus/ChainRewrites.lean` on the erasure; `Calculus/Chains.lean`
+     `Calculus/ChainRewrites.lean` on the erasure; `Calculus/Chains`
      is imported for that and its notation (`Core/ChainKit`).  A chain's
      merge (`Fml.merge2`) keeps today's behaviour on purpose (`w3c-tactics`).
   10. *Whole modules on today's reading*: `Examples/Verify` and
@@ -5018,7 +5059,7 @@ git-excluded `Scratch/` modules only).
   by the scoped rule (`callDeposit`'s "post" by hand past `{havoc}`, which
   today's closer does not read, as before), the mutability checks on the
   scoped calls (`calleeWithin`, `decide`), the `view` frame fact on the
-  typed run.  It no longer imports `Calculus/Contracts.lean` or
+  typed run.  It no longer imports `Calculus/Contracts` or
   `Calculus/Core/Contracts` (`sol_erase`, now used by nothing but
   kept).  Proposed decision 31 records what the scoped rule reads
   differently.
@@ -5193,14 +5234,14 @@ git-excluded `Scratch/` modules only).
      `∀`s, `Seq.paramCount`/`Symex.paramCount`, `Fml.stripN`; marks lost
      where a formula is rebuilt fall back to stripping every leading `∀`).
   7. done.
-  8. *Contracts*: the scoped rule is done; `Calculus/Contracts.lean` and
+  8. *Contracts*: the scoped rule is done; `Calculus/Contracts` and
      `Calculus/Core/Contracts` (`sol_erase`) are used by nothing but
      `Solidity.lean` (delete in `calc-del`).  Left: `\old` in a scoped
      contract, calls with several results or a memory return (goal
      `false`), `callDeposit`'s "post" by hand until the closer reads
      `{havoc}` (decision 31).
   9. *Chains past the program* (unchanged): the rewrite links on the
-     erasure, `Calculus/Chains.lean` for that and its notation.
+     erasure, `Calculus/Chains` for that and its notation.
   10. *Whole modules on today's reading*: `Corpus/Basic` and
       `Corpus/Imported` are on the typed run; `Tools/Inspect` and
       `Tools/ProofTree` on Core; `Theorems.lean` on Core but for
@@ -5397,7 +5438,7 @@ them were checked before it.
   memory return), and today's `FunContract` coverage is matched.
 - **`Calculus/Core/Contracts` deleted** (`sol_erase`, used by
   nothing); its citations in the `Closable` and `SoundKit` docstrings and
-  in this file reworded.  Today's `Calculus/Contracts.lean` stays for
+  in this file reworded.  Today's `Calculus/Contracts` stays for
   `calc-del`.
 - **Proposed decision 38** (this lane, the lead's call; recorded as the
   option most faithful to solkey's rule text): `ensures` always stands at
@@ -5427,7 +5468,7 @@ them were checked before it.
   file (*moved, no text change*, approved); `Tactics/Contracts` has no
   pin.  The fresh names are unchanged.
 - **Left**: today's rule-map rows for `useContract` (W5's docs);
-  `Calculus/Contracts.lean` (W4 `calc-del`).
+  `Calculus/Contracts` (W4 `calc-del`).
 
 ### W4 prep integration (2026-10-08)
 
@@ -5538,7 +5579,7 @@ them were checked before it.
   8. *Contracts*: done (scoped `\old`, several results, memory return,
      `sol_close` reads `{havoc}`; `Core.Contracts` (`sol_erase`) deleted;
      decision 31's `callDeposit` "post" by `sol_close`).  Left: today's
-     `Calculus/Contracts.lean` (`calc-del`); the `useContract` rows of
+     `Calculus/Contracts` (`calc-del`); the `useContract` rows of
      `docs/lean-key-rule-map.md` (W5's docs); the `{havoc}` lemmas reach
      only importers of `Calculus/CloseHavoc.lean` (move them into `Close`
      if another havoc user needs them); proposed decision 38.
@@ -5555,7 +5596,7 @@ them were checked before it.
       `rule_exists`, `rule_of_step`, `solkey_rule_exists`,
       `solkey_lt_calculus`; `solkey_eq_calculus` and termination dropped)
       and `Examples/Notation`'s kept pins.  Left: today's
-      `Calculus/SolkeyFragment.lean` and `Termination.lean`, now imported
+      `Calculus/SolkeyFragment` and `Termination`, now imported
       only by `Solidity.lean` (`calc-del`); proposed decision 36 (a
       low-module edit to `Calculus/Core/Proves.lean`, then the
       judgement-level `solkey_eq_calculus`/`solkey_lt_calculus` and
@@ -5718,7 +5759,7 @@ targets (298 jobs, green); `check-doc-paths` OK, `check-orphans` (only
   `ExecS.transferResume` for `CbResume`), `Evm.compile_*` →
   `Evm.Core.compile_*` and `Evm.Sim.netSelf` → `Evm.Core.Sim.netSelf`
   (rule map, `solc-alignment.md`, and the docstrings of `Semantics.lean`,
-  `Calculus/Rules.lean`, `Calculus/Core/Rules.lean`, `Examples/Tactics/{Net,
+  `Calculus/Rules`, `Calculus/Core/Rules.lean`, `Examples/Tactics/{Net,
   Payment,Revert}.lean`, `Examples/Benchmark/EtherWallet.lean`),
   `Evm.wtStmt` → `Evm.Core.inFrag`, `ProvesC.sound` →
   `Core.ProvesC.sound_of` (`solc-validation.md`, `CallbackSound`'s
@@ -5755,6 +5796,99 @@ targets (298 jobs, green); `check-doc-paths` OK, `check-orphans` (only
 
 **Pins changed** (review fixes): two restored (`Evm/CoreExamples`), none
 moved.
+
+### W4 lane `calc-del` (2026-10-08, on `intrinsic`): the old calculus deleted
+
+Directly on `intrinsic` from `7d40c76`.  Built by `lean_build` of
+`Solidity`, `solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (the last
+two in `defaultTargets` for the run only, reverted after): 312 jobs, green
+(two failing rounds before, fixed below; no OOM kill).  `check-orphans`
+(298 reachable; only the git-excluded `Scratch/`), `check-doc-paths` (OK),
+`check-rule-text` (empty, its new meaning: decision 43), `dups.py` (only the
+known `Evm/Repr`/`Examples/Verify` `as` line), `check-testsuite.sh` against
+solkey `1b4341a303` (ok: 438 = 435 derived + 1 pending + 1 divergent + 1
+excluded; 2 skip).  No new `sorry`, `axiom` or `maxHeartbeats` (the
+textual counts fell with the deleted files).  Not run: `check-corpus.sh`
+and running `solkeycheck` (they need `lake`; `solkeycheck` was built, its
+annotations and parser untouched), the M0 re-timing, the review pass.
+
+**Deleted** (each with no user left but the root, or its users moved):
+`Symex`, `Completeness`, `Uniqueness`, `Progress`, `Termination`,
+`SolkeyFragment`, `RuleSoundness`, `SoundKit`, `SoundUpdate`, `SoundUnfold`,
+`SoundLoop`, `Sequents`, `ProofTree`, `Chains`, `ChainGen`, `LastLine`,
+`Contracts` and today's `Rules` (all of it: `Taclet`, `LeanTaclet`, `Rule`,
+`CallbackTaclet` and their printers), with `Calculus/Core/RuleText`
+(decision 35), `Calculus/Core/RuleShapes`, `Calculus/Core/PrintedRules`
+(decision 43) and `scripts/core-rules.mjs`.  `Callback` had gone at
+`sem-del`.  **Kept**: `Notation`, `Spec` (decision 33), `Quote` (the plan
+correction); `Logic` and `Derive` trimmed (decision 41).
+
+**New**: `Calculus/RewriteChains.lean`, `Calculus/RewriteChainGen.lean`
+(decision 42), the rewrite half of today's `Chains`/`ChainGen`/`LastLine`
+(and `ProofTree.writeLine`), which `Core.ChainKit`, `Core.ChainGen`,
+`Core.LastLine` and the chain examples now import.
+
+**Changed**:
+- `Logic`: `Proves` without program rules; `Proves.sound`/`toAll` follow;
+  `RuleSet` became a parameter (the `empty` arm binds one name fewer).
+  `Derive`: the residue's program step, `splitRes`/`premiseRes`/`allRes`/
+  `casesGoals`/`coverFree` and their soundness gone; `groundCond` kept
+  (the scoped walk's ground splits); `Derive.scanLeaves` →
+  `Core.Seq.scanLeaves` (`Calculus/Core/ProvesDerive.lean`, decision 45).
+- `Core.WalkSyntax`: the fallbacks to today's program rules dropped (the
+  first-order ones stay).
+- `RuleShapes`, `PrintedRules`: rekeyed on `Core.*` (decision 43); the
+  counts are the scoped ones (`claimedTaclets` 308, `unclaimedTaclets` 15,
+  `leanOnly .keyTier` 43).  `Tools/Taclet`, `Core.ProofTree.keyName` read
+  them directly.
+- `SortCheck/Faithfulness`: over `Core.Taclet` (decision 44).  The two
+  counterexamples (`PreFixSortAnnotations`, `WellTypedNecessity`) state
+  their statements as scoped taclets' (`Core.Stmt People [] []`,
+  `Core.Stmt Flags [.val .bool] …`), the proofs unchanged but one argument
+  (the `Typed` witness, now built in).
+- `Calculus/CloseTests.lean`: read scoped (`open scoped
+  Solidity.Core.Surface`); each leaf `refine close ?_; sol_symex;
+  sol_close`, the split's `cov` case gone (the scoped split has KeY's two).
+- `Solkey/Constructors.lean`: flipped (`solc_problems … legacy`,
+  `solc_scoped_problems … main`); `constructor.proved` states the scoped
+  `⊢`, its leaf closed as before; the erasure `#guard` dropped
+  (`solc_scoped_problems` checks it).
+- `Examples/Tactics/CoreStep`, `CoreSymex`: the comparison with today's
+  `symex` dropped (the kernel's `Core.symex n φ = ψ` stays).
+  `Examples/ProofTree`: the closer's size guards run on the scoped
+  strategy's leaves (`Core.Derive.residueOf`, `Core.Derive.proves`; same
+  results), the branch-label check reads `Calculus/Core/Rules.lean`.
+  `Examples/Tactics/CoreDerive`: today's `sol_derive` example dropped.
+- Docs: every citation of a deleted module repointed to its twin
+  (`AGENTS.md`, `.claude/rules`, the `lean-verify` skill, `kernel-port`,
+  the rule map, `loops`, `solkey-feedback`, `solc-validation`), or written
+  without `.lean` where it is history (this file, `testsuite-proofs`);
+  `module-map` rows removed, rewritten (`Logic`, `Derive`, `RuleShapes`,
+  `PrintedRules`, `Core/Rules`, `Faithfulness`, `CloseTests`) and added.
+
+**Pins changed** (reason: today's rule table deleted; the scoped names and
+binders, W5's qualified-name reason):
+- the 18 `#check @Taclet.r` pins of `Examples/Tactics/{Branch, Calls,
+  Payment, Revert, TryCatch, Values}` are `#check @Core.Taclet.r` (or
+  `Core.LeanTaclet`): binders scoped, rule lines unchanged but for the four
+  the scoped printer does not write as lines (`functionBodyExpand`,
+  `internalCallExpand`, `tryCallNoCallbackBox`, `tryCallDiamond`, item 14),
+  which print as the constructors' types (a note in each file);
+- `Examples/Tools`' `#taclet ifTrue`: ``(`RuleShapes.unclaimedTaclets` says
+  why)`` (was `Core.RuleShapes`).
+- The fresh names (`se1`, `sp1`) are unchanged; every other pin unchanged.
+
+**Left**:
+- With `modal` (decision 39): `Update.lean`'s `.modal` and today's
+  `Stmt.run`; the `⟹ᶜ` macro of `RuleSyntax` (names today's deleted
+  `ProvesC`); `Semantics/Mutability.lean` (its `Stmt.within`/
+  `Prog.loopFrame` side conditions had no user but today's `Rules`).
+- Item 14: the scoped printer's five rules (the pins above show four).
+- M7 docs: the prose around the repointed citations (rule map, `loops`,
+  `kernel-port`, `.claude/rules/soundness.md`: `Taclet.sound` by case is
+  now `toStep` and `Stmt.Sound`) still describes today's development in
+  places.
+- Lead decisions: proposed 41–45 (this lane), and 33–40.
 
 ## Baselines (M0)
 
@@ -6310,7 +6444,7 @@ the program n times.
 
 The cutover (after M4) re-targets `Taclet` at `Core.Stmt C Γ Γ'`
 (`Taclet C k m : Stmt C Γ Γ' → Premise C Γ Γ' → Prop`) without touching the
-rule lines of `Calculus/Rules.lean`: the macro (`RuleSyntax.lean`,
+rule lines of `Calculus/Rules`: the macro (`RuleSyntax.lean`,
 `schemaAt`/`declVar`) inserts what scoping needs, and the printer hides it.
 
 1. **Schema variables are positions or parts read in the `\find`'s context

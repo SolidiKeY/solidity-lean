@@ -1,6 +1,5 @@
-import Solidity.Calculus.LastLine
+import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.Close
-import Solidity.Calculus.Sequents
 import Solidity.FreshNames
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
@@ -9,7 +8,7 @@ import Solidity.Calculus.Core.Surface
 # Payment: `transfer`, as chains
 
 The calculus's worked examples of `transfer` (the paper's payment section), each one chain term under the
-box, the only modality with a transfer rule (`Calculus/Chains.lean`, `.claude/rules/derivations.md`).
+box, the only modality with a transfer rule (`Calculus/Core/Chains.lean`, `.claude/rules/derivations.md`).
 `transferNoCallbackBox` books the payment on the ledger and nothing else: the update
 `{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) }`, `sadr`'s entry down by
 the amount unless `sadr` is the contract itself, which books nothing.  The receiver's capture is a

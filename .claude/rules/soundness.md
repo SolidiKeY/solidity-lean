@@ -19,7 +19,7 @@ new hypothesis.
 
 ## Proving a new case
 
-- **Update premise** (`SoundUpdate.lean`): state a generic lemma
+- **Update premise** (`Calculus/Core/SoundArms.lean`): state a generic lemma
   `SameOk [] (Upd.apply [..] σ) (Stmt.run σ ..)` over the syntax pieces and
   close the case with `exact`. The update reads every right-hand side in the
   pre-state and the statement runs left to right; `upd_unfold` puts both into
@@ -30,7 +30,7 @@ new hypothesis.
   the `@[simp]` `*_noPanic` lemmas (`Semantics/NoPanicOps.lean`,
   `Calculus/NoPanic.lean`, `envVal_noPanic`). A new read needs its own
   `_noPanic` lemma, or that goal is left over.
-- **Unfold premise** (`SoundUnfold.lean`): the captured part is evaluated
+- **Unfold premise** (`Calculus/Core/SoundStep.lean`): the captured part is evaluated
   first, the fresh binding moves outward past every later read (the
   `*_setEnv` lemmas), and `agree_tac` closes the agreement off the fresh
   names. `SameOk` asks both runs to halt, and to agree only on whether the

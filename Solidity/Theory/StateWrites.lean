@@ -12,10 +12,10 @@ with the rest of the state kept (`State.writeStorage_eq`, `writeAddr_eq`,
 component (`State.saveStorage_with`, `pushAt_with`, `popAt_with`), an
 operator's evaluation unfolded (`evalBinop_compound`, `evalBinop_bump`),
 and what a binding holds (`Close.bindingVal`, …).  Today's taclet soundness
-(`Calculus/SoundKit.lean`, `Calculus/SoundUpdate.lean`), the scoped one
+(`Calculus/Core/SoundKit.lean`, `Calculus/Core/SoundArms.lean`), the scoped one
 (`Calculus/Core/SoundArms.lean`) and the closer (`Calculus/Close.lean`,
 `Calculus/Decide.lean`) share them.  Moved out of `SoundKit.lean` and
-`SoundUpdate.lean` (`docs/intrinsic.md`, W4 item 11).
+`Calculus/Core/SoundArms.lean` (`docs/intrinsic.md`, W4 item 11).
 -/
 
 namespace Solidity

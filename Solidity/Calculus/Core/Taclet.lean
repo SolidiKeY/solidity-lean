@@ -14,7 +14,7 @@ The proof is one lemma per constructor (`Taclet.<rule>.toStep`), each its
 own declaration, so that a rule added checks alone.  Most are written by
 `to_step_tac`: the hole a rule writes through is taken apart, the side
 conditions that compute are settled, the parts a side condition speaks of
-taken apart until it does (`core_cases_part`, as `Uniqueness.lean`'s
+taken apart until it does (`core_cases_part`, as today's `Uniqueness`'s
 `cases_part`), and what is left closes by `rfl`, or after taking apart a
 path, a location or a value the dispatcher reads (`core_brute`, which
 searches).  The search runs once, under `#derive_toStep?`, which offers the

@@ -1,54 +1,33 @@
 import Solidity.Calculus.Hyp
-import Solidity.Calculus.RuleSoundness
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.TermTaclets
 
 /-!
-# The calculus as a judgement: `Γ ⊢ φ`
+# The closer's sequent calculus: `Γ ⊢ φ`
 
-A taclet rewrites one statement (`Rules.lean`); this module puts the taclets
-to work on formulas (mini-solkey's `Ch06_Taclets`, its last part).  A rule's
-premise is read as a formula in front of the rest of the program
-(`Premise.fml`), `Premise.sound` says that formula implies the one the rule
-fired on, and `Proves Γ φ` is the calculus as an inductive judgement, in the
-style of PLFA's `Γ ⊢ M ⦂ A`: a theorem is stated as `⊢ φ` and proved by a
-derivation built with `apply`.  Each constructor is written as KeY writes a
-sequent rule, its premises above its conclusion:
-`dl{ ..Γ, c ⟹[R] ⟨[ P; ..ω ]⟩ φ }` is `Proves R (Γ ++ [.pre c]) (.modal m (P ++ ω) φ)`
+`Proves Γ φ` is the sequent calculus the closer runs on a leaf the scoped
+strategy leaves (`Calculus/Core/Logic.lean` is the calculus on programs):
+the context `Γ` holds what sits in front of the current formula — the
+preconditions, the updates, the quantified locals — and the rules move a
+connective into it (`impRight`, `allRight`, `{U}` by `updIntro`), merge and
+simplify its updates (`sequentialToParallel`, `simplifyUpdate`), apply them
+to a first-order goal (`applyOnRigidFormula`), rewrite by a term taclet
+(`rewrite`, `updRw`), and leave the calculus where no modality is left
+(`close`) or the context refutes itself (`closeFalse`).  Each constructor is
+written as KeY writes a sequent rule, its premises above its conclusion,
+`dl{ ..Γ, c ⟹[R] φ }` being `Proves R (Γ ++ [.pre c]) φ`
 (`RuleSyntax.lean`), and the rules KeY names otherwise have its names too
-(`Proves.impRight` for `intro`).
+(`Proves.impRight` for `intro`).  `Proves.sound` says once and for all that
+a derivation is a proof.
 
-The context `Γ` holds what sits in front of the current formula: the
-preconditions and the updates generated so far.  A rule that produces an
-update moves it into the context, so the next rule sees the statement at the
-front again, with nothing to look through.  `Proves.sound` says once and for
-all that a derivation is a proof.
+The judgement is indexed by a rule set (`RuleSet`, `Hyp.lean`) as the
+scoped one is; none of these rules is a program rule, so the index is read
+by none.  The program rules and their soundness went with today's rule
+table (W4 `calc-del`, `docs/intrinsic.md`); the update in front of a
+`⟨⟩ φ` still goes (`emptyModality`).
 
-The judgement is indexed by the rules it may use (`RuleSet`): every
-constructor takes solkey's `Taclet`s, and `unfoldLean`, `doneLean`,
-`checkLean` and `invLean` alone the rules solkey lacks (`LeanTaclet`), at `.all`.  `Γ ⊢ φ` is the whole calculus, `Γ ⊢ₖ φ`
-solkey's; `Calculus/SolkeyFragment.lean` says when the two agree.
-
-Fresh names are numbered above every index in sight (`Hyp.fresh`), which is
-what discharges the freshness hypothesis of `Taclet.sound`: no rule of a
-derivation carries a side condition.
-
-A branch (`ifElseSplit`, `requireSimple`) has two goals, one
-per condition.  A condition can be stuck (a local read before it is bound),
-so the two conditions need not cover every state: a box goal is true of a
-stuck run anyway, and a diamond goal owes that one of them holds
-(`Premise.cover`, the third goal of `Proves.split`).  The premise formula
-says the same without looking at the modality, `⟨[ revert(); ]⟩ false ∨ c ∨ c'`
-(`Premise.coverFml`): so every premise but a revert's is one formula under
-either modality, and a line of a derivation at a
-modality `m` goes on through a branch.
-
-A check (`assertSimple`) has two goals too, KeY's: the rest with the
-condition assumed, and the condition itself.  A failed `assert` panics, and a
-panic satisfies neither modality (`Modality.afterRun`), so the condition is
-owed under the box as well.  An update never panics (`Upd.apply_ne_panic`),
-which is what lets an update rule's premise read a halt as the box reads a
-revert.
+An update never panics (`Upd.apply_ne_panic`), which is what lets an update
+rule's premise read a halt as the box reads a revert.
 -/
 
 namespace Solidity
@@ -57,226 +36,12 @@ open Semantics
 
 variable {C : Contract}
 
-/-! ## A premise as a formula -/
-
-/-- The premise as one formula, under the modality `m` the rule found, in
-front of the rest `ω` of the program and the postcondition `φ`. -/
-def Premise.fml (m : Modality) : Premise C → Prog C → Fml C → Fml C
-  | .update U, ω, φ => dl_schema{ {U} ⟨[ ..ω ]⟩ φ }
-  | .unfold P, ω, φ => dl_schema{ ⟨[ P; ..ω ]⟩ φ }
-  | .split c c' P Q, ω, φ =>
-    dl_schema{ (c → ⟨[ P; ..ω ]⟩ φ) ∧ (c' → ⟨[ Q; ..ω ]⟩ φ) ∧ ‹Premise.coverFml m c c'› }
-  | .check c P, ω, φ => dl_schema{ (c → ⟨[ P; ..ω ]⟩ φ) ∧ c }
-  | .done true, _, _ => dl_schema{ true }
-  | .done false, _, _ => .ff
-  | .branches bs, ω, φ => .conj (bs.map fun b => .alls b.1 (.modal m (b.2 ++ ω) φ))
-  | .cases fs us, ω, φ => .conj (fs ++ us.map fun U => .upd m U (.modal m ω φ))
-  | .inv I U c c' P post, ω, φ => Premise.invFml m I U c c' P post (.modal m ω φ)
-
-/-- Two runs that end alike off `ns` satisfy the same modal formula, when
-neither the rest of the program nor the postcondition mentions `ns`. -/
-theorem Modality.after_sameOk (m : Modality) {ns : List Var} {r r' : Res State}
-    (hr : SameOk ns r r') {ω : Prog C} {φ : Fml C} (hω : Avoids (Prog.vars ω ++ φ.vars) ns) :
-    m.afterRun (holds · φ) (do Prog.run (← r) ω) ↔ m.afterRun (holds · φ) (do Prog.run (← r') ω) := by
-  match r, r', hr with
-  | .error a, .error b, h =>
-    simp only [bind, Except.bind, Modality.afterRun, Modality.after, ne_eq, Except.error.injEq]
-    exact and_congr_right' (not_congr h)
-  | .ok a, .ok b, h =>
-    exact m.afterRun_frame (Prog.run_frame h ω hω.left) fun _ _ h' => holds_frame φ hω.right h'
-
-/-- A run that halts, not in a panic, satisfies what its modality says of a
-revert: every box formula. -/
-theorem Modality.afterRun_error {m : Modality} {p : State → Prop} {e : Halt} (he : e ≠ .panic) :
-    m.afterRun p (.error e) ↔ m.onHalt := by
-  simp only [Modality.afterRun, Modality.after, ne_eq, Except.error.injEq, he, not_false_eq_true,
-    and_true]
-
-/-- An update that runs as the statement does, off no name: its goal gives
-the statement's. -/
-theorem Premise.sound_upd {m : Modality} {s : Stmt C} {U : Upd C} {σ : State}
-    (hs : SameOk [] (U.apply σ) (s.run σ)) (ω : Prog C) (φ : Fml C) :
-    holds σ (.upd m U (.modal m ω φ)) → holds σ (.modal m (s :: ω) φ) := by
-  have h₀ : Avoids (Prog.vars ω ++ φ.vars) [] := fun _ _ h => by simp only [List.not_mem_nil] at h
-  simp only [holds]
-  intro hU
-  cases hu : U.apply σ with
-  | error e =>
-    have hp : e ≠ .panic := NoPanic.ne_of_eq (Upd.apply_ne_panic U σ) hu
-    rw [hu] at hs
-    cases hr : s.run σ with
-    | ok _ => rw [hr] at hs; exact hs.elim
-    | error e' =>
-      rw [hr] at hs
-      have hp' : e' ≠ .panic := fun hp' => hp (hs.2 hp')
-      rw [hu] at hU
-      simp only [Prog.run, hr, bind, Except.bind, Modality.afterRun_error hp']
-      exact hU
-  | ok τ =>
-    rw [hu] at hU hs
-    have hk := (m.after_sameOk (r := .ok τ) (r' := s.run σ) hs h₀ (ω := ω) (φ := φ)).1 hU
-    simpa only [Prog.run, bind, Except.bind] using hk
-
-/-- **A premise implies its rule's conclusion**: in front of any rest `ω` and
-postcondition `φ` that do not mention the rule's fresh names.
-
-Example: `storageFieldWrite_unfold_leftFst` turns
-`⟨ people[i].age = 10; ⟩ x == 10` into
-`⟨ uint se1 = 10; Person storage sp1 = people[i]; sp1.age = se1; ⟩ x == 10`,
-whose run differs from the statement's only on `se1` and `sp1`; neither the
-rest of the program nor `x == 10` mentions them. -/
-theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
-    (h : pr.Correct k m s) (ω : Prog C) (φ : Fml C)
-    (hω : Avoids (Prog.vars ω ++ φ.vars) (freshVars k)) (σ : State) :
-    holds σ (pr.fml m ω φ) → holds σ (.modal m (s :: ω) φ) := by
-  have h₀ : Avoids (Prog.vars ω ++ φ.vars) [] := fun _ _ h => by simp at h
-  cases pr with
-  | update U => exact Premise.sound_upd (h σ) ω φ
-  | unfold P =>
-    simp only [Premise.fml, holds, Prog.run, SemanticsProperties.Prog.run_append]
-    exact (m.after_sameOk (h σ) hω).1
-  | split c c' P Q =>
-    simp only [Premise.fml, holds, SemanticsProperties.Prog.run_append]
-    intro ⟨hP, hQ, hcov⟩
-    by_cases hc : holds σ c
-    · exact (m.after_sameOk ((h σ).1 hc) hω).1 (hP hc)
-    by_cases hc' : holds σ c'
-    · exact (m.after_sameOk ((h σ).2.1 hc') hω).1 (hQ hc')
-    obtain ⟨e, he, hp⟩ := (h σ).2.2 hc hc'
-    cases m with
-    | box => simp only [Prog.run, he, bind, Except.bind, Modality.afterRun_error hp, Modality.onHalt]
-    | diamond =>
-      rw [Premise.coverFml_holds] at hcov
-      simp only [Premise.cover, holds, not_and, Classical.not_not] at hcov
-      exact absurd (hcov hc) hc'
-  | check c P =>
-    simp only [Premise.fml, holds, SemanticsProperties.Prog.run_append]
-    intro ⟨hP, hc⟩
-    exact (m.after_sameOk (h σ hc) hω).1 (hP hc)
-  | done b =>
-    cases b with
-    | true =>
-      obtain ⟨rfl, hb⟩ := h rfl
-      obtain ⟨e, he, hp⟩ := hb σ
-      simp only [holds, Prog.run, he, bind, Except.bind]
-      exact fun _ => by simp [Modality.afterRun_error hp, Modality.onHalt]
-    | false => exact fun hf => absurd trivial (by simp [Premise.fml, holds] at hf)
-  | branches bs =>
-    simp only [Premise.fml, holds_conj, List.mem_map]
-    intro hb
-    rcases h σ with ⟨rfl, e, he, hp⟩ | ⟨b, hmem, σ', hbind, hrun⟩
-    · simp only [holds, Prog.run, he, bind, Except.bind, Modality.afterRun_error hp,
-        Modality.onHalt]
-    · have hφ := holds_alls.1 (hb _ ⟨b, hmem, rfl⟩) σ' hbind
-      simp only [holds, SemanticsProperties.Prog.run_append, hrun] at hφ
-      simpa only [holds, Prog.run] using hφ
-  | cases fs us =>
-    simp only [Premise.fml, holds_conj, List.mem_append, List.mem_map]
-    intro hall
-    obtain ⟨U, hU, hs⟩ := h σ
-    exact Premise.sound_upd hs ω φ (hall _ (.inr ⟨U, hU, rfl⟩))
-  | inv I U c c' P post => exact h ω φ hω σ
-
-/-- Indices above every index in sight give fresh names.
-
-Example: in `alice.account.balance = x;` every variable has index `0` (`x` is
-a user variable), so `k = 1` will do: `se1`, `sp1`, `ie1`, `mv1` cannot clash
-with `x`. -/
-theorem freshVars_avoid {vs : List Var} {k : Nat} (hk : maxIdx vs < k) :
-    Avoids vs (freshVars k) := by
-  intro x hx hF
-  have := le_maxIdx hx
-  simp only [freshVars, List.mem_cons, List.not_mem_nil] at hF
-  rcases hF with rfl | rfl | rfl | rfl | hF <;> simp_all [Var.idx] <;> omega
-
-/-- An index `k` above every variable of `vs`, among them those of
-`⟨[ s; ω ]⟩ φ`, gives names that the statement, the rest of the program and
-the postcondition all avoid: what `Taclet.sound` and `Premise.sound` ask. -/
-theorem freshVars_avoid_modal {k : Nat} {vs : List Var} {m : Modality} {s : Stmt C}
-    {ω : Prog C} {φ : Fml C} (hk : maxIdx vs < k)
-    (hsub : ∀ y ∈ (Fml.modal m (s :: ω) φ).vars, y ∈ vs) :
-    Avoids s.vars (freshVars k) ∧ Avoids (Prog.vars ω ++ φ.vars) (freshVars k) := by
-  have hv := freshVars_avoid hk
-  constructor <;> intro y hy <;> exact hv y (hsub y (by simp [Fml.vars, Prog.vars, hy]))
-
-/-- A rule fired on `⟨[ s; ω ]⟩ φ` with its fresh names above every index in
-sight is sound: its premise, in front of `ω` and `φ`, implies the formula.
-
-Example: `localValueAssign` fired on `⟨ x = a; ⟩ x == 1` at index `1`. -/
-theorem Premise.sound_above {k : Nat} {vs : List Var} {m : Modality} {s : Stmt C} {ω : Prog C}
-    {φ : Fml C} {p : Premise C} (hc : Avoids s.vars (freshVars k) → p.Correct k m s)
-    (hk : maxIdx vs < k) (hsub : ∀ y ∈ (Fml.modal m (s :: ω) φ).vars, y ∈ vs) (σ : State) :
-    holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) :=
-  let h := freshVars_avoid_modal hk hsub
-  Premise.sound (hc h.1) ω φ h.2 σ
-
-/-! ## The judgement -/
-
-/-- The context the invariant rule's second goal is judged in: past
-`{anon(P)}` (and `{havoc}`, when the body writes storage or pays), the
-invariant `I` assumed, and the variant's update `U` (none under the box). -/
-def Hyp.loopAnon (m : Modality) (P : Prog C) (I : Fml C) (U : Upd C) : List (Hyp C) :=
-  (match Prog.loopFrame P with
-    | some (xs, false) => [.anon xs]
-    | some (xs, true) => [.anon xs, .havoc]
-    | none => []) ++
-  .pre I :: (match U with
-    | [] => []
-    | U => [.upd m U])
-
 /-- `Γ ⊢ φ`: the calculus proves `φ` in the context `Γ`; `Γ ⊢ₖ φ`: solkey's
 rules alone do. -/
 inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   /-- `impRight`: the precondition moves into the context. -/
   | intro {R : RuleSet} {Γ : List (Hyp C)} {a φ : Fml C} (h : dl{ ..Γ, a ⟹[R] φ }) :
       dl{ ..Γ ⟹[R] a → φ }
-  /-- A taclet that produces an update: the update joins the context. -/
-  | update {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {U : Upd C}
-      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.update U))
-      (h : dl{ ..Γ, {U} ⟹[R] ⟨[ ..ω ]⟩ φ }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
-  /-- A taclet that produces statements: they replace the first one. -/
-  | unfold {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {P : Prog C}
-      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.unfold P))
-      (h : dl{ ..Γ ⟹[R] ⟨[ P; ..ω ]⟩ φ }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
-  /-- A taclet that branches: two goals, one per condition, and under the
-  diamond the fact that one of the conditions holds. -/
-  | split {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {c c' : Fml C} {P Q : Prog C}
-      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.split c c' P Q))
-      (thn : dl{ ..Γ, c ⟹[R] ⟨[ P; ..ω ]⟩ φ })
-      (els : dl{ ..Γ, c' ⟹[R] ⟨[ Q; ..ω ]⟩ φ })
-      (cov : dl{ ..Γ ⟹[R] ‹Premise.cover m c c'› }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
-  /-- A taclet that checks (`assertSimple`): the goal with the condition
-  assumed, and the condition — KeY's "Holds" and "Violated". -/
-  | check {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {c : Fml C} {P : Prog C}
-      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.check c P))
-      (thn : dl{ ..Γ, c ⟹[R] ⟨[ P; ..ω ]⟩ φ })
-      (els : dl{ ..Γ ⟹[R] c }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
-  /-- A taclet that closes the modality (`revertBox`, `revertDiamond`): what
-  is left is `true` or `false`. -/
-  | done {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {b : Bool}
-      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.done b))
-      (h : dl{ ..Γ ⟹[R] ‹(Premise.done b).fml m ω φ› }) : dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
-  /-- A taclet with a goal per way an external call may end
-  (`tryCallNoCallbackBox`): each clause's block in the statement's place, for
-  every value of the locals the outcome binds. -/
-  | branches {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
-      {φ : Fml C} {bs : List (List (PrimTy × Var) × Prog C)}
-      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.branches bs))
-      (h : ∀ b ∈ bs, dl{ ..Γ ⟹[R] ‹.alls b.1 (.modal m (b.2 ++ ω) φ)› }) :
-      dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
-  /-- A taclet with labelled goals (`sendNoCallbackBox`): each formula, and the
-  rest after each update. -/
-  | cases {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
-      {φ : Fml C} {fs : List (Fml C)} {us : List (Upd C)}
-      (d : Taclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.cases fs us))
-      (fml : ∀ f ∈ fs, dl{ ..Γ ⟹[R] f })
-      (upd : ∀ U ∈ us, dl{ ..Γ, {U} ⟹[R] ⟨[ ..ω ]⟩ φ }) :
-      dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ }
   /-- `allRight`: a quantified local joins the context, holding any value of
   its type. -/
   | allIntro {R : RuleSet} {Γ : List (Hyp C)} {x : Var} {p : PrimTy} {φ : Fml C}
@@ -287,35 +52,6 @@ inductive Proves : RuleSet → List (Hyp C) → Fml C → Prop
   enters the derivation so. -/
   | updIntro {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C} {φ : Fml C}
       (h : dl{ ..Γ, {U} ⟹[R] φ }) : dl{ ..Γ ⟹[R] {U} φ }
-  /-- A rule solkey does not have, closing the modality (`tryCallDiamond`). -/
-  | doneLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C} {b : Bool}
-      (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.done b))
-      (h : dl{ ..Γ ⟹ ‹(Premise.done b).fml m ω φ› }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
-  /-- A rule solkey does not have, producing statements. -/
-  | unfoldLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {P : Prog C} (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.unfold P))
-      (h : dl{ ..Γ ⟹ ⟨[ P; ..ω ]⟩ φ }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
-  /-- A rule solkey does not have, checking (`loopExit`): the goal with the
-  condition assumed, and the condition. -/
-  | checkLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {c : Fml C} {P : Prog C}
-      (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.check c P))
-      (thn : dl{ ..Γ, c ⟹ ⟨[ P; ..ω ]⟩ φ })
-      (els : dl{ ..Γ ⟹ c }) : dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
-  /-- A loop's invariant (`whileInvariantBox`, `whileInvariantDiamond`, solkey's
-  past the pinned checkout): the invariant now ("invariant initially
-  valid"), and past the loop's anonymising update (`Hyp.loopAnon`) the body
-  to its postcondition where the condition holds, the rest where it does
-  not, and under the diamond that one of them holds ("invariant preserved
-  and used", as `split` has its goals). -/
-  | invLean {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-      {I c c' post : Fml C} {U : Upd C} {P : Prog C}
-      (d : LeanTaclet C (Hyp.fresh Γ dl_schema{ ⟨[ s; ..ω ]⟩ φ }) m s (.inv I U c c' P post))
-      (init : dl{ ..Γ ⟹ I })
-      (thn : Proves .all (Γ ++ Hyp.loopAnon m P I U ++ [.pre c]) (.modal m P post))
-      (els : Proves .all (Γ ++ Hyp.loopAnon m P I U ++ [.pre c']) (.modal m ω φ))
-      (cov : Proves .all (Γ ++ Hyp.loopAnon m P I U) (Premise.cover m c c')) :
-      dl{ ..Γ ⟹ ⟨[ s; ..ω ]⟩ φ }
   /-- `emptyModality`: `⟨⟩ φ` and `[] φ` are `φ`. -/
   | empty {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {φ : Fml C} (h : dl{ ..Γ ⟹[R] φ }) :
       dl{ ..Γ ⟹[R] ⟨[ ]⟩ φ }
@@ -568,23 +304,6 @@ theorem Hyp.vars_wrap {x : Var} {φ : Fml C} :
   | .pre _ :: Γ, h | .upd _ _ :: Γ, h | .havoc :: Γ, h | .all _ _ :: Γ, h | .anon _ :: Γ, h => by
     simp [Hyp.wrap, Fml.vars, Hyp.vars_wrap Γ h]
 
-/-- A taclet applied in a context is sound: its fresh names are fresh.
-
-Example: `apply Proves.update .storageFieldWriteSave` on
-`{ se1 := 10 }, { sp1 := alice.account } ⟹ ⟨ sp1.balance = se1; ⟩ φ` is sound:
-the taclet's index is `Hyp.fresh` of the whole sequent, so the names it could
-introduce avoid `se1`, `sp1` and every other name in sight. -/
-theorem Taclet.sound_in {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C} {φ : Fml C}
-    {p : Premise C} (d : Taclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s p) :
-    ∀ σ, holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) :=
-  Premise.sound_above d.sound (Nat.lt_succ_self _) fun _ => Hyp.vars_wrap Γ
-
-/-- `Taclet.sound_in` for a rule solkey does not have. -/
-theorem LeanTaclet.sound_in {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
-    {φ : Fml C} {p : Premise C} (d : LeanTaclet C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s p) :
-    ∀ σ, holds σ (p.fml m ω φ) → holds σ (.modal m (s :: ω) φ) :=
-  Premise.sound_above d.sound (Nat.lt_succ_self _) fun _ => Hyp.vars_wrap Γ
-
 /-! ### The Theory rewrite -/
 
 /-- Rewriting the context and the goal is rewriting the sequent. -/
@@ -662,78 +381,18 @@ theorem Proves.applyStorageBox_sound {Γ : List (Hyp C)} {s : STerm C} {φ : Fml
   rw [Hyp.wrap_append]
   exact Hyp.wrap_mono (fun τ hτ => Fml.withSt_box hr he τ hτ) Γ σ (d σ)
 
-open Proves in
-/-- An invariant rule fires only on a body with a frame. -/
-theorem LeanTaclet.inv_frame {k : Nat} {m : Modality} {s : Stmt C} {I c c' post : Fml C}
-    {U : Upd C} {P : Prog C} (d : LeanTaclet C k m s (.inv I U c c' P post)) :
-    (Prog.loopFrame P).isSome = true := by
-  cases d with
-  | whileInvariantBox hf => exact hf
-  | whileInvariantDiamond hf => exact hf
-
-/-- The invariant rule's context, put back, is its anonymising update. -/
-theorem Hyp.wrap_loopAnon {m : Modality} {P : Prog C} {I : Fml C} {U : Upd C}
-    (hf : (Prog.loopFrame P).isSome = true) (X : Fml C) :
-    Hyp.wrap (Hyp.loopAnon m P I U) X = Fml.loopAnon P (.imp I (Fml.updIf m U X)) := by
-  obtain ⟨⟨xs, hv⟩, hfe⟩ := Option.isSome_iff_exists.1 hf
-  cases hv <;> cases U <;>
-    simp only [Hyp.loopAnon, hfe, Fml.loopAnon, Fml.updIf, Hyp.wrap, List.cons_append,
-      List.nil_append]
-
 /-- **Soundness of the calculus**: a derivation of `Γ ⊢ φ` proves `φ`
 wrapped in its context `Γ`.
 
-Example: from the derivation of `a == 1 ⟹ ⟨ x = a; ⟩ x == 1` (one
-`localValueAssign`, `empty`, then `close`) follows
-`⊨ a == 1 → ⟨ x = a; ⟩ x == 1`. -/
+Example: from the derivation of `a == 1, {x := a} ⟹ ⟨⟩ x == 1`
+(`empty`, then `close`) follows `⊨ a == 1 → {x := a} ⟨⟩ x == 1`. -/
 theorem Proves.sound {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves R Γ φ) :
     Valid (Hyp.wrap Γ φ) := by
   induction h with
   | intro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
-  | update d _ ih =>
-    rw [Hyp.wrap_append] at ih
-    exact fun σ => Hyp.wrap_mono d.sound_in _ σ (ih σ)
-  | unfold d _ ih | done d _ ih => exact fun σ => Hyp.wrap_mono d.sound_in _ σ (ih σ)
-  | unfoldLean d _ ih | doneLean d _ ih => exact fun σ => Hyp.wrap_mono d.sound_in _ σ (ih σ)
-  | @branches _ Γ m s ω φ bs d _ ih =>
-    have hne : bs ≠ [] := by cases d; simp
-    exact fun σ => Hyp.wrap_mono d.sound_in _ σ (Hyp.wrap_conj _ _
-      (fun ψ hψ => by
-        obtain ⟨b, hb, rfl⟩ := List.mem_map.1 hψ
-        exact ih b hb) (by simpa using hne) σ)
-  | @cases _ Γ m s ω φ fs us d _ _ ih₁ ih₂ =>
-    have hne : fs ++ us.map (fun U => Fml.upd m U (.modal m ω φ)) ≠ [] := by
-      cases d <;> simp only [List.map_cons, List.map_nil, List.cons_append, List.nil_append,
-        ne_eq, reduceCtorEq, not_false_eq_true]
-    exact fun σ => Hyp.wrap_mono d.sound_in _ σ (Hyp.wrap_conj _ _
-      (fun ψ hψ => by
-        rcases List.mem_append.1 hψ with hf | hu
-        · exact ih₁ ψ hf
-        · obtain ⟨U, hU, rfl⟩ := List.mem_map.1 hu
-          have := ih₂ U hU
-          rw [Hyp.wrap_append] at this
-          exact this) hne σ)
   | allIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
   | updIntro _ ih => simpa [Hyp.wrap_append, Hyp.wrap] using ih
-  | split d _ _ _ ih₁ ih₂ ih₃ =>
-    rw [Hyp.wrap_append] at ih₁ ih₂
-    exact fun σ => Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => d.sound_in τ ⟨h₁, h₂, (Premise.coverFml_holds _ _ _ τ).2 h₃⟩) _ σ
-      (ih₁ σ) (ih₂ σ) (ih₃ σ)
-  | check d _ _ ih₁ ih₂ | checkLean d _ _ ih₁ ih₂ =>
-    rw [Hyp.wrap_append] at ih₁
-    exact fun σ => Hyp.wrap_mono₂ (fun τ h₁ h₂ => d.sound_in τ ⟨h₁, h₂⟩) _ σ (ih₁ σ) (ih₂ σ)
-  | @invLean Γ m s ω φ I c c' post U P d _ _ _ _ ih₀ ih₁ ih₂ ih₃ =>
-    have hf := d.inv_frame
-    rw [Hyp.wrap_append, Hyp.wrap_append] at ih₁ ih₂
-    rw [Hyp.wrap_append] at ih₃
-    exact fun σ => Hyp.wrap_mono₂
-      (fun τ h₀ h => d.sound_in τ ⟨h₀, by rw [← Hyp.wrap_loopAnon hf]; exact h⟩) _ σ (ih₀ σ)
-      (Hyp.wrap_mono₃ (fun τ h₁ h₂ h₃ => Hyp.wrap_mono₃
-        (φ := .and (.imp c (.modal m P post)) (.and (.imp c' (.modal m ω φ))
-          (Premise.coverFml m c c')))
-        (fun ρ a b k => ⟨a, b, (Premise.coverFml_holds _ _ _ ρ).2 k⟩) _ τ h₁ h₂ h₃)
-        _ σ (ih₁ σ) (ih₂ σ) (ih₃ σ))
-  | @empty _ Γ m φ _ ih =>
+  | @empty Γ m φ _ ih =>
     exact fun σ => Hyp.wrap_mono (ψ := φ) (φ := .modal m [] φ)
       (fun _ h => ⟨by cases m <;> exact h, nofun⟩) Γ σ (ih σ)
   | rewrite r _ ih => exact Proves.rewrite_sound r.sound ih
@@ -751,33 +410,13 @@ open Proves in
 /-- A derivation from the empty context proves validity: `⊢ φ` gives `⊨ φ`. -/
 theorem Proves.valid {φ : Fml C} (h : ⊢ φ) : Valid φ := h.sound
 
-/-- `unfold` by whichever rule `Rule` names: `apply unfoldRule
-(Stmt.step _ _ _).rule` takes the strategy's rule without naming it. -/
-theorem Proves.unfoldRule {Γ : List (Hyp C)} {m : Modality} {s : Stmt C} {ω : Prog C}
-    {φ : Fml C} {P : Prog C} (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) φ)) m s (.unfold P))
-    (h : Proves .all Γ (.modal m (P ++ ω) φ)) : Proves .all Γ (.modal m (s :: ω) φ) := by
-  cases d with
-  | key d => exact .unfold d h
-  | lean d => exact .unfoldLean d h
-
 /-- solkey's rules are some of the rules: `Γ ⊢ₖ φ` gives `Γ ⊢ φ`. -/
 theorem Proves.toAll {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C} (h : Proves R Γ φ) :
     Proves .all Γ φ := by
   induction h with
   | intro _ ih => exact .intro ih
-  | update d _ ih => exact .update d ih
-  | unfold d _ ih => exact .unfold d ih
-  | unfoldLean d h _ => exact .unfoldLean d h
-  | doneLean d h _ => exact .doneLean d h
-  | checkLean d h₁ h₂ _ _ => exact .checkLean d h₁ h₂
-  | invLean d h₀ h₁ h₂ h₃ _ _ _ _ => exact .invLean d h₀ h₁ h₂ h₃
-  | branches d _ ih => exact .branches d ih
-  | cases d _ _ ih₁ ih₂ => exact .cases d ih₁ ih₂
   | allIntro _ ih => exact .allIntro ih
   | updIntro _ ih => exact .updIntro ih
-  | split d _ _ _ ih₁ ih₂ ih₃ => exact .split d ih₁ ih₂ ih₃
-  | check d _ _ ih₁ ih₂ => exact .check d ih₁ ih₂
-  | done d _ ih => exact .done d ih
   | empty _ ih => exact .empty ih
   | rewrite r _ ih => exact .rewrite r ih
   | updRw r ht _ ih => exact .updRw r ht ih

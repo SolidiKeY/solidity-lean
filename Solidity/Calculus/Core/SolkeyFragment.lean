@@ -3,7 +3,7 @@ import Solidity.Calculus.Core.RuleExists
 /-!
 # solkey's rules on the scoped syntax
 
-`Calculus/SolkeyFragment.lean` on scoped statements, at the level of the
+Today's `Calculus/SolkeyFragment` (deleted at W4 `calc-del`) on scoped statements, at the level of the
 rule table.  The table is two lists (`Calculus/Core/Rules.lean`): `Taclet`,
 the rules that transcribe a taclet of solkey, and `LeanTaclet`, the rules
 solkey does not have.  A statement is **in solkey's fragment** under a

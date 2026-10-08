@@ -1,4 +1,4 @@
-import Solidity.Calculus.Chains
+import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers

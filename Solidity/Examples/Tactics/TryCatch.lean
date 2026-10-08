@@ -36,24 +36,34 @@ local instance : InContract := ⟨Pinger⟩
 
 open scoped Solidity.Core.Surface
 
-/-! ## The rules -/
+/-! ## The rules
+
+The scoped printer (`Calculus/Core/Delab.lean`) does not yet write these two
+as rule lines (`docs/intrinsic.md`, W4 inventory item 14): the pins show
+the constructors' types until it does. -/
 
 /--
-info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {call : ExtCall C} {rets : List (PrimTy × Var)}
-  {body errorBody : List (Stmt C)} {code : Option Var} {panicBody otherBody : List (Stmt C)},
-  dl{ [ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody; ] ⇝
-    "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ] ; "Panic caught": ∀ code. [ panicBody ] ;
-      "other failure caught": [ otherBody ] }
+info: @Core.Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx} {call : Core.ExtCall C Γ} {x : Core.Ctx}
+  {rets : Core.Binders x} {x_1 : Core.Ctx} {body : Core.Prog C (x ++ Γ) x_1} {x_2 : Core.Ctx}
+  {errorBody : Core.Prog C Γ x_2} {x_3 : Core.Ctx} {code : Core.CodeBinder x_3} {x_4 : Core.Ctx}
+  {panicBody : Core.Prog C (x_3 ++ Γ) x_4} {x_5 : Core.Ctx} {otherBody : Core.Prog C Γ x_5},
+  Core.Taclet C k Modality.box (Core.Stmt.tryCall call rets body errorBody code panicBody otherBody)
+    (Core.Premise.branches
+      [{ ρ := x, Γ₁ := x_1, bs := rets, P := body }, { ρ := [], Γ₁ := x_2, bs := Core.Binders.nil, P := errorBody },
+        { ρ := x_3, Γ₁ := x_4, bs := code.binders, P := panicBody },
+        { ρ := [], Γ₁ := x_5, bs := Core.Binders.nil, P := otherBody }])
 -/
-#guard_msgs in #check @Taclet.tryCallNoCallbackBox
+#guard_msgs in #check @Core.Taclet.tryCallNoCallbackBox
 
 /--
-info: @LeanTaclet.tryCallDiamond : ∀ {C : Contract} {k : Nat} {call : ExtCall C} {rets : List (PrimTy × Var)}
-  {body errorBody : List (Stmt C)} {code : Option Var} {panicBody otherBody : List (Stmt C)},
-  dl[LeanTaclet C k]{ ⟨ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody;
-    ⟩ ⇝ false }
+info: @Core.LeanTaclet.tryCallDiamond : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx} {call : Core.ExtCall C Γ} {x : Core.Ctx}
+  {rets : Core.Binders x} {x_1 : Core.Ctx} {body : Core.Prog C (x ++ Γ) x_1} {x_2 : Core.Ctx}
+  {errorBody : Core.Prog C Γ x_2} {x_3 : Core.Ctx} {code : Core.CodeBinder x_3} {x_4 : Core.Ctx}
+  {panicBody : Core.Prog C (x_3 ++ Γ) x_4} {x_5 : Core.Ctx} {otherBody : Core.Prog C Γ x_5},
+  Core.LeanTaclet C k Modality.diamond (Core.Stmt.tryCall call rets body errorBody code panicBody otherBody)
+    (dl{ false })
 -/
-#guard_msgs in #check @LeanTaclet.tryCallDiamond
+#guard_msgs in #check @Core.LeanTaclet.tryCallDiamond
 
 /--
 info: dl{

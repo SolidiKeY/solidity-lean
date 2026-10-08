@@ -1,5 +1,5 @@
 import Solidity.Calculus.Rewrite
-import Solidity.Calculus.Chains
+import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.RewriteSyntax
@@ -62,7 +62,7 @@ split and the rewrite of `ageWriteReadKeY` are the scoped sequent's
 `Calculus/Core/RewriteSyntax.lean`), and the read `x` is a hidden binder of
 its context, which prints as nothing.
 
-The same lines as one chain (`Calculus/Chains.lean`) are
+The same lines as one chain (`Calculus/Core/Chains.lean`) are
 `ChainRewrites.ageWriteReadKeYValue`; `ChainRewrites.ageReadMembers` goes on past
 `find(save(storage, alice.age, 42), alice.age)` to solkey's read of the write, a
 member at a time.

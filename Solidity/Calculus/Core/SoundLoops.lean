@@ -34,7 +34,7 @@ open Solidity (Modality Mutability)
 variable {C : Contract}
 
 /-- `a < b`, `a <= b` between `uint`s true: both sides are numbers, so
-ordered (`Calculus/SoundLoop.lean`'s `Term.cmp_true`, on values). -/
+ordered (today's `Calculus/SoundLoop`'s `Term.cmp_true`, on values). -/
 theorem evalBinop_cmp_true {op : BinOp} (hop : op = .lt ∨ op = .le) {a : Value} {rb : Res Value}
     (h : evalBinop op .uint a rb = .ok (.bool true)) :
     ∃ x y : Int, a = .int x ∧ rb = .ok (.int y) ∧ (op = .lt → x < y) ∧ (op = .le → x ≤ y) := by

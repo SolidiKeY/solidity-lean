@@ -229,7 +229,7 @@ sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.So
 
 /--
 info: solkey: ifTrue (concrete_solidity)
-no Lean rule claims it (`Core.RuleShapes.unclaimedTaclets` says why)
+no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 -/
 #guard_msgs in #taclet ifTrue
 

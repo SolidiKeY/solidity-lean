@@ -1,5 +1,6 @@
 import Solidity.Frontend.Problems
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Closers
 
 /-!
 # Constructors, imported from solc's AST
@@ -25,6 +26,7 @@ Lean books the payment there too (`docs/solkey-feedback.md`).
 -/
 
 open Solidity Proves
+open scoped Solidity.Core.Surface
 
 solc_import "../../tests/solc/Counter.ast.json" hash 0x2d54a4ea32c96108 as Solkey.Counter
 
@@ -38,7 +40,8 @@ warning: solc_import: the initializers are left out: an initializer calls `cap`,
 #guard_msgs in
 solc_import "../../tests/solc/InitGap.ast.json" hash 0x83328c56fa8af038 as Solkey.InitGap
 
-solc_problems Solkey.EtherWallet
+-- the legacy statement, `N.f.problem.legacy`, declared and not compiled
+solc_problems Solkey.EtherWallet legacy
 
 /-! Each import's programs, scoped (`solc_scoped`): the lint of the scoped
 syntax, `N.f.core` checked by the kernel. -/
@@ -55,17 +58,12 @@ syntax, `N.f.core` checked by the kernel. -/
 /-- info: 1 program declared scoped -/
 #guard_msgs in solc_scoped Solkey.InitGap
 
-/-! `EtherWallet`'s obligations, scoped (`solc_scoped_problems`): each
-program resolved in its parameters' context, `N.f.problem.core`, checked to
-erase to today's. -/
+/-! `EtherWallet`'s obligations, scoped (`solc_scoped_problems … main`): each
+program resolved in its parameters' context, `N.f.problem`, checked to
+erase to the legacy statement `N.f.problem.legacy`. -/
 
 /-- info: 1 obligation declared scoped -/
-#guard_msgs in solc_scoped_problems Solkey.EtherWallet
-
--- the scoped obligation erases to today's
-#guard Fml.quote (Lean.mkConst ``Solkey.EtherWallet)
-    (Solkey.EtherWallet.constructor.problem.core.erase []) ==
-  Fml.quote (Lean.mkConst ``Solkey.EtherWallet) Solkey.EtherWallet.constructor.problem
+#guard_msgs in solc_scoped_problems Solkey.EtherWallet main
 
 
 /-! ## `Counter.sol`
@@ -121,7 +119,8 @@ info: \problem {
 
 /-- The deployment obligation, derived.  `sol_prove`'s closer refuses a
 context that holds `mtSt` (`Decide` has no clause for it yet), even with
-`true` to prove, so its one leaf is closed by `sol_close_mt`. -/
+`true` to prove, so its one leaf, today's sequent of its erasure, is
+closed by `sol_close_mt`. -/
 theorem Solkey.EtherWallet.constructor.proved : ⊢ Solkey.EtherWallet.constructor.problem := by
   sol_prove
   refine Proves.close ?_

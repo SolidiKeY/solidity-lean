@@ -3,12 +3,12 @@ import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.Sound
 import Solidity.Calculus.Core.Merge
-import Solidity.Calculus.Chains
+import Solidity.Calculus.RewriteChains
 
 /-!
 # Chains on scoped formulas: the relations
 
-`Calculus/Chains.lean`'s relations on the scoped formulas of
+The chains' relations on the scoped formulas of
 `Calculus/Core/Fml.lean` (W2 of `docs/intrinsic.md`): a step `φ ~> ψ`
 (`Fml.OneStep`, `Core.Fml.step`), a named step `φ ~[r]~> ψ` (`Fml.StepBy`),
 several `φ ~*> ψ` (`Fml.Steps`), and a chain of them (`Fml.Via`).

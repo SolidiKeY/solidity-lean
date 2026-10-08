@@ -6,11 +6,11 @@ import Solidity.Calculus.Core.Delab
 /-!
 # Chains on scoped formulas: `φ ~> ψ`, `φ ~[r]~> ψ`, `φ ~*> ψ`
 
-`Calculus/Chains.lean`'s chains for the scoped formulas of
+The chains of `.claude/rules/derivations.md` on the scoped formulas of
 `Calculus/Core/Fml.lean` (W2 of `docs/intrinsic.md`); the relations are
 `Calculus/Core/ChainKit.lean`'s.  The notation is the same: a chain whose
 first line is a scoped formula (`cdl![m]{ … }`) is read here, any other by
-`Calculus/Chains.lean` (`elabChainAny`), and `sol_chain` and `#derivation`
+`Calculus/RewriteChains.lean` (`elabChainAny`), and `sol_chain` and `#derivation`
 dispatch on the goal's head constant the same way.
 
 **The lines are computed.**  A scoped line keeps what its print does not
@@ -36,7 +36,7 @@ one with its spine merged), else as `Update.lean`'s line past the program
 `~[findOnSave]~>`, `~=>`) goes on from the erasure of the line before it
 (`Fml.ViaE`): `Update.lean`'s line, its postcondition `φ : Post C Γ` read
 as `Update.lean`'s `φ.erase ns` (`Post.erase`), and from there
-`Calculus/Chains.lean`'s rewrite links, elaborated and proved by its
+`Calculus/RewriteChains.lean`'s rewrite links, elaborated and proved by its
 machinery (`rwLabel`, `solveChain`).
 
 **Proving a link** is the kernel's: `sol_chain` runs the strategy as
@@ -295,7 +295,7 @@ structure Run where
   stuck : Bool
 
 /-- The runs of this declaration, by every line they pass (as
-`Calculus/Chains.lean`'s `runCache`). -/
+today's chains' `runCache` did). -/
 initialize runCache : EnvExtension (Std.HashMap Expr (Run × Nat)) ←
   registerEnvExtension (pure {}) (asyncMode := .local)
 
@@ -401,7 +401,7 @@ def runChain (φ : Expr) : MetaM Run := do
 
 /-! ## Proofs of the steps -/
 
-/-- `a ≡ b` by the kernel's definitional equality (`Calculus/Chains.lean`'s
+/-- `a ≡ b` by the kernel's definitional equality (`Calculus/RewriteChains.lean`'s
 `kernelDefEq`). -/
 def kernelDefEq (a b : Expr) : MetaM Bool := do
   let a ← instantiateMVars a
@@ -924,7 +924,7 @@ def showLines (φ : Expr) (lines : List Line) : MetaM MessageData := do
   return out
 
 /-- The computed lines, shown for an error as today's `sol_chain` shows them
-(`Calculus/Chains.lean`'s `notReached`): every line with the rule that
+(as today's chains' `notReached` did): every line with the rule that
 reached it. -/
 def showLinesErr (φ : Expr) (lines : List Line) : MetaM MessageData := do
   let mut out := m!"    {← showLine φ}"
@@ -1013,7 +1013,7 @@ def legacyWritten (C : Expr) (m? : Option Expr) (L : Expr) : Written → TermEla
 
 /-- `Update.lean`'s postconditions of the lines `es`, `↑(φ.erase ns)`
 (`Post.erase`), as local postconditions `φ : Post C` while `k` runs on the
-lines with them in place, so that `Calculus/Chains.lean`'s rewrites see and
+lines with them in place, so that `Calculus/RewriteChains.lean`'s rewrites see and
 print them as their own; put back in what `k` returns. -/
 def withErasedPosts (es : Array Expr) (k : Array Expr → TermElabM (Array Expr)) :
     TermElabM (Array Expr) := do
@@ -1047,7 +1047,7 @@ def linkTy (C : Expr) : Expr := mkApp (mkConst ``Core.Link) C
 
 /-- A written chain whose first line `A` is a scoped formula: every line
 after it computed, checked against its text (`matchWritten`), past the
-program by `Calculus/Chains.lean`'s rewrites on the erasure. -/
+program by `Calculus/RewriteChains.lean`'s rewrites on the erasure. -/
 def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
   let (C, Γ) ← lineType A
   let fml := mkApp2 (mkConst ``Core.Fml) C Γ
@@ -1210,7 +1210,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
     return mkAppN (mkConst ``Core.Fml.Via) #[C, Γ, A, ← mkListLit pairTy ws.toList]
 
 /-- A chain, read here when its first line is a scoped formula, and by
-`Calculus/Chains.lean` otherwise. -/
+`Calculus/RewriteChains.lean` otherwise. -/
 syntax (name := chainAnyStx) "chain_any% " term : term
 
 /-- Every chain goes through `elabChainAny`, which reads its first line once
@@ -1355,7 +1355,7 @@ partial def isCoreGoal (ty : Expr) : MetaM Bool := do
 
 /-- `sol_chain` on a scoped goal: each link by the kernel (`oneStepProof`,
 `stepByProof`, `stepsProof`), the erasure by `rfl`, and the links past it
-by `Calculus/Chains.lean`'s `solveChain`. -/
+by `Calculus/RewriteChains.lean`'s `solveChain`. -/
 partial def solveCore (g : MVarId) : TermElabM Unit := do
   let ty ← instantiateMVars (← g.getType)
   -- a `calc` step: its line after computed from the line before, and checked

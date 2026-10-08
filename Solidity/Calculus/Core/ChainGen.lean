@@ -1,15 +1,15 @@
 import Solidity.Calculus.Core.Chains
-import Solidity.Calculus.ChainGen
+import Solidity.Calculus.RewriteChainGen
 
 /-!
 # Writing a scoped chain out: `#chain` and `#chain_rest`
 
-`Calculus/ChainGen.lean`'s generator for a chain whose first line is a
+The chain generator for a chain whose first line is a
 scoped formula (`cdl![m]{ … }`): the strategy's steps, grouped as the worked chains
 print them (`groupSteps`), each named by the rule `Stmt.step` fires
 (`labelOfFocus?`); past the program, from the erasure of the last scoped
 line, the rewrites to a last line, searched as `#chain` searches them
-(`searchRewritesUsing`).  The commands are `Calculus/ChainGen.lean`'s, read
+(`searchRewritesUsing`).  The commands are `Calculus/RewriteChainGen.lean`'s, read
 here when their formula (or chain) is scoped.
 
 Each line is written as the text that reads back as it: `cdl![m]{ … }` over
@@ -210,7 +210,7 @@ A goal `A ~~> B` on scoped lines (`Core.Fml.Leads`) is the derivation from `A`
 to `B`, which `sol_chain` proves.  Past the program (`Core.Fml.LeadsE A Z L`)
 it is the derivation to `Z`, then rewrites from `Z`'s erasure to `L`: the
 file names them (`sol_rws [..]`), and only the `?` twins search for them
-(`Calculus/ChainGen.lean`'s `searchRewrites`), so a re-check does not
+(`Calculus/RewriteChainGen.lean`'s `searchRewrites`), so a re-check does not
 search; `sol_chain` refuses such a goal and points to them. -/
 
 /-- The merges, one per name, from `A` to `B`: the first sequence of merge
@@ -283,7 +283,7 @@ elab_rules : tactic
     let ty ← instantiateMVars (← g.getType)
     unless ty.isAppOf ``Core.Fml.Leads || ty.isAppOf ``Core.Fml.LeadsE do throwUnsupportedSyntax
     if ty.isAppOf ``Core.Fml.LeadsE then
-      -- logged, not thrown: a throw falls through to `Calculus/Chains.lean`'s
+      -- logged, not thrown: a throw falls through to `Calculus/RewriteChains.lean`'s
       -- `sol_chain`, whose error would be the one shown
       logError "sol_chain: past the program the rewrites are named, so that a re-check does \
         not search: `sol_rws [r₁, …]` (`sol_rws?` finds them), or the chain written out \
@@ -364,7 +364,7 @@ elab_rules : tactic
 /-! `sol_rws [r₁, …, rₙ]` on `A ~~> B`: scoped, each `sequentialToParallel`
 merges the line's update spine (`Fml.MergeBy`, the merge that leads on to
 `B`); past the program, the derivation to `Z`, then `Update.lean`'s rewrites
-from its erasure (`Calculus/ChainGen.lean`'s `sol_rws`). -/
+from its erasure (`Calculus/RewriteChainGen.lean`'s `sol_rws`). -/
 
 /-- Prove `A ~~> B` by the rewrites `ns`. -/
 def proveCoreRws (g : MVarId) (ns : Array Lean.Name) : TermElabM Unit := do

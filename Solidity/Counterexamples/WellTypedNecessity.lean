@@ -38,8 +38,8 @@ def Total : Contract := contract!{ uint total; }
 def badStore : State := { storage := [("total", .bool true)] }
 
 /-- `x = total;`, as `storageRootReadSelect` matches it. -/
-def totalRead : Stmt Total :=
-  stmtOf (@Taclet.storageRootReadSelect Total 0 .box (.user "x") "total" .uint rfl)
+def totalRead : Core.Stmt Total [.val .uint] [.val .uint] :=
+  stmtOf (@Core.Taclet.storageRootReadSelect Total 0 .box [.val .uint] .uint .here "total" rfl)
 
 /-- The row is the live table's: one value read, `\hasSort`-generic. -/
 theorem readSelect_row :

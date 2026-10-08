@@ -168,7 +168,7 @@ end Print
 /-! ## Reading a sequent
 
 The arrow and the keywords of `sequent[C]{ Γ ⟹ φ }` (moved out of
-`Calculus/Sequents.lean`, which elaborates them as today's `Proves`;
+`Calculus/Core/Sequents.lean`, which reads them;
 `Calculus/Core/Sequents.lean` reads them on a scoped goal), the sequent's
 formula written (`sequentFml`), and a quoted formula's first layers as
 context entries (`peelHyps`). -/

@@ -31,7 +31,7 @@ Two directories, by proof style:
   3. **To the last step.** Past the program the stack merges
      (`~[sequentialToParallel]~>`) and every read is resolved by its laws,
      until no rewrite but `simplifyUpdate` applies. `#last_line chain`
-     (`Calculus/LastLine.lean`) follows every chain and is silent exactly
+     (`Calculus/Core/LastLine.lean`) follows every chain and is silent exactly
      there; otherwise it says which rewrite still applies and what it gives.
   4. **One link per rewrite**: `~[findMemberCons]~>`,
      `~[selectOnSaveMember]~>`, `~[selectOnDelAtMember]~>`,
@@ -80,7 +80,7 @@ A tactic example is over a named contract
   one `apply` per taclet (`unfold r`, `update r`, `split r`, `Proves.check r`,
   `done r`, `empty`, `intro`), and `apply close; sol_close` at the end. Each rule the
   walk takes is named in the proof, so renaming a rule breaks the example.
-  `sol_derive?` writes the walk out (`Calculus/ProofTree.lean`), as
+  `sol_derive?` writes the walk out (`Calculus/Core/ProofTree.lean`), as
   `#chain` writes a chain.
 
 Every theorem has a docstring with its Solidity. Every file has its own

@@ -8,7 +8,7 @@ import Solidity.SortCheck.Annotations
 
 The table ↔ semantics edge of the conformance loop: every read-sort
 annotation in `TacletAnnotations.tacletReadAnns` is *faithful* — the sort a
-taclet's value read declares agrees with the value `Stmt.run` actually finds
+taclet's value read declares agrees with the value the interpreter finds
 there, in every state that agrees (`Agree`, `Semantics/Core/StateErase.lean`) with a
 scoped state the invariant `RunWT` (`Typing/Soundness.lean`) holds of.
 `solkeycheck` keeps the table equal to the `.key` text; this module keeps it
@@ -27,7 +27,8 @@ What a declared sort claims about the value found (`SortOkS`, `SortOkM`):
 **Which read.**  Every read-bearing taclet is a Step-3 rule, whose statement
 is all simple and reads storage or memory in exactly one place: the source
 of a copy, the local a read binds, the target of `⊕=` and `++`
-(`Stmt.read?`).  That is the read the row annotates (a row's other reads are
+(`Stmt.read?`, on the scoped statement, a `CRead` that erases to a `Read`
+under any names of its locals).  That is the read the row annotates (a row's other reads are
 `size` cells, the `net` ledger and `delete` defaults, which the Lean model
 has no cell for: `solkeycheck` checks their tokens).  The typed syntax makes
 the fixed claims *static*: an `⊕=` target is at a numeric type by its
@@ -36,11 +37,12 @@ once its constructors read at a type of the right class (`ReadClass`), and
 `Read.sortOk` does the rest from the typing of the evaluators.
 
 **Which statements.**  A row names a KeY taclet; `RuleShapes.tacletOrigins`
-names the `Taclet` constructors that transcribe it (`ctorsOf`).  For each of
-the 36 read-bearing constructors, `faithful_<ctor>` quantifies over the
-constructor's schema variables and takes the statement from the
+names the scoped `Core.Taclet` constructors that transcribe it (`ctorsOf`).
+For each of the 36 read-bearing constructors, `faithful_<ctor>` quantifies
+over the constructor's schema variables and takes the statement from the
 constructor's own type (`stmtOf`), so the statement is the rule's `\find`,
-not a restatement of it.  `rows_covered` checks that every row with a value
+not a restatement of it; `faithful_theorem` states it from the type, the
+binders being the ones the rule's schema variables bind (`Calculus/Core/Rules.lean`).  `rows_covered` checks that every row with a value
 read is claimed by constructors in `faithfulCtors`, each of which carries its
 theorem.
 -/
@@ -84,9 +86,46 @@ def Read.Typed (ns : List Var) (Γ : Core.Ctx) : Read C → Prop
   | @Read.slen _ E p => ∃ p' : Core.SPath C Γ (.array E), p'.erase ns = p
   | @Read.mlen _ E p => ∃ p' : Core.MPath C Γ (.array E), p'.erase ns = p
 
+/-- A read of the scoped syntax over `Γ`: a storage or memory path at its
+type, or a length.  It erases, under the names `ns`, to a `Read` its locals
+are used as declared in (`CRead.erase_typed`). -/
+inductive CRead (C : Contract) (Γ : Core.Ctx) where
+  | storage (T : Ty) (p : Core.SPath C Γ T)
+  | memory (T : Ty) (p : Core.MPath C Γ T)
+  | slen {E : Ty} (p : Core.SPath C Γ (.array E))
+  | mlen {E : Ty} (p : Core.MPath C Γ (.array E))
+
+/-- The read under the names `ns`. -/
+def CRead.erase {Γ : Core.Ctx} (ns : List Var) : CRead C Γ → Read C
+  | .storage T p => .storage T (p.erase ns)
+  | .memory T p => .memory T (p.erase ns)
+  | .slen p => .slen (p.erase ns)
+  | .mlen p => .mlen (p.erase ns)
+
+/-- `alice.age` is read from storage, `m.age` from memory. -/
+def CRead.domain {Γ : Core.Ctx} : CRead C Γ → ReadDomain
+  | .storage .. | .slen _ => .storage
+  | .memory .. | .mlen _ => .memory
+
+/-- `alice.age` is read at `uint`, and so is a length. -/
+def CRead.ty {Γ : Core.Ctx} : CRead C Γ → Ty
+  | .storage T _ | .memory T _ => T
+  | .slen _ | .mlen _ => .uint
+
+theorem CRead.erase_typed {Γ : Core.Ctx} (ns : List Var) :
+    (R : CRead C Γ) → (R.erase ns).Typed ns Γ
+  | .storage _ p | .memory _ p | .slen p | .mlen p => ⟨p, rfl⟩
+
+theorem CRead.erase_domain {Γ : Core.Ctx} (ns : List Var) :
+    (R : CRead C Γ) → (R.erase ns).domain = R.domain
+  | .storage .. | .memory .. | .slen _ | .mlen _ => rfl
+
+theorem CRead.erase_ty {Γ : Core.Ctx} (ns : List Var) : (R : CRead C Γ) → (R.erase ns).ty = R.ty
+  | .storage .. | .memory .. | .slen _ | .mlen _ => rfl
+
 /-- The place `x ⊕= e` and `x++` read: `alice.age` in storage, `m.age` in
 memory; a stack local is not read from a state component. -/
-def OpLoc.read? : {p : PrimTy} → OpLoc C p → Option (Read C)
+def OpLoc.read? {Γ : Core.Ctx} : {p : PrimTy} → Core.OpLoc C Γ p → Option (CRead C Γ)
   | _, .local _ => none
   | p, .root r h => some (.storage (.prim p) (.loc (.root r h)))
   | p, .field b f h => some (.storage (.prim p) (.loc (.field b f h)))
@@ -97,16 +136,16 @@ def OpLoc.read? : {p : PrimTy} → OpLoc C p → Option (Read C)
 /-- The value read a statement performs: `x = alice.age;` reads `alice.age`,
 `alice = bob;` reads `bob`, `m = alice;` reads `alice`, `alice.age += 1;`
 reads `alice.age`. -/
-def Stmt.read? : Stmt C → Option (Read C)
-  | @Stmt.assignLocal _ p _ (.read l) => some (.storage (.prim p) (.loc l))
-  | @Stmt.assignLocal _ p _ (.readMem l) => some (.memory (.prim p) (.loc l))
-  | @Stmt.assignLocal _ _ _ (.len b _) => some (.slen b)
-  | @Stmt.assignLocal _ _ _ (.mlen b _) => some (.mlen b)
-  | @Stmt.assign _ _ _ (@Src.copy _ R sp _) => some (.storage (.ref R) sp)
-  | @Stmt.push _ _ _ (some (@Src.copy _ R sp _)) _ => some (.storage (.ref R) sp)
-  | @Stmt.rebindMem _ R _ (.copy sp _) => some (.storage (.ref R) sp)
-  | @Stmt.rebindMem _ R _ (.alias mp) => some (.memory (.ref R) mp)
-  | @Stmt.assignFromMem _ R _ mp => some (.memory (.ref R) mp)
+def Stmt.read? {Γ Γ' : Core.Ctx} : Core.Stmt C Γ Γ' → Option (CRead C Γ)
+  | @Core.Stmt.assignLocal _ _ p _ (.read l) => some (.storage (.prim p) (.loc l))
+  | @Core.Stmt.assignLocal _ _ p _ (.readMem l) => some (.memory (.prim p) (.loc l))
+  | @Core.Stmt.assignLocal _ _ _ _ (.len b _) => some (.slen b)
+  | @Core.Stmt.assignLocal _ _ _ _ (.mlen b _) => some (.mlen b)
+  | @Core.Stmt.assign _ _ _ _ (@Core.Src.copy _ _ R sp _) => some (.storage (.ref R) sp)
+  | @Core.Stmt.push _ _ _ _ (some (@Core.Src.copy _ _ R sp _)) _ => some (.storage (.ref R) sp)
+  | @Core.Stmt.rebindMem _ _ R _ (.copy sp _) => some (.storage (.ref R) sp)
+  | @Core.Stmt.rebindMem _ _ R _ (.alias mp) => some (.memory (.ref R) mp)
+  | @Core.Stmt.assignFromMem _ _ R _ mp => some (.memory (.ref R) mp)
   | .opAssign _ _ _ l _ => OpLoc.read? l
   | .incDec _ _ l => OpLoc.read? l
   | .assignIncDec _ _ _ l _ => OpLoc.read? l
@@ -274,19 +313,22 @@ theorem Read.sortOk_after_run {Γ Γ₁ : Core.Ctx} {ns : List Var} {H : HeapTy}
 
 /-! ## Rows, constructors, statements -/
 
-/-- A constructor's type, `Taclet C k m s p` under its side conditions
-(`Rules.lean`): the statement `s` it is about. -/
-class TacletAbout (α : Prop) (C : outParam Contract) (s : outParam (Stmt C)) : Prop where
+/-- A constructor's type, `Core.Taclet C k m s p` under its side conditions
+(`Calculus/Core/Rules.lean`): the statement `s` it is about. -/
+class TacletAbout (α : Prop) (C : outParam Contract) (Γ Γ' : outParam Core.Ctx)
+    (s : outParam (Core.Stmt C Γ Γ')) : Prop where
 
-instance {k : Nat} {m : Modality} {s : Stmt C} {p : Premise C} :
-    TacletAbout (Taclet C k m s p) C s := ⟨⟩
+instance {k : Nat} {m : Modality} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'}
+    {p : Core.Premise C Γ Γ'} : TacletAbout (Core.Taclet C k m s p) C Γ Γ' s := ⟨⟩
 
-instance {P α : Prop} {s : Stmt C} [TacletAbout α C s] : TacletAbout (P → α) C s := ⟨⟩
+instance {P α : Prop} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'} [TacletAbout α C Γ Γ' s] :
+    TacletAbout (P → α) C Γ Γ' s := ⟨⟩
 
 /-- The statement a taclet constructor is about: the rule's `\find`, read off
 its type (past its side conditions, which a faithfulness statement does not
 need: it holds of the statement whichever rule fires). -/
-def stmtOf {α : Prop} {s : Stmt C} [TacletAbout α C s] (_ : α) : Stmt C := s
+def stmtOf {α : Prop} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'} [TacletAbout α C Γ Γ' s] (_ : α) :
+    Core.Stmt C Γ Γ' := s
 
 /-- The KeY taclets constructor `n` transcribes (`RuleShapes.tacletOrigins`),
 by name. -/
@@ -313,370 +355,120 @@ and supported by a read of class `cls`. -/
 def rowsSupported (n : Lean.Name) (dom : ReadDomain) (cls : ReadClass) : Bool :=
   (rowsOf n).all fun row => (valueReads row).all fun r => r.domain == dom && cls.supports dom r.sort
 
-/-- A row is faithful at a statement: each value read it declares is the
-statement's read, and wherever the read's locals are used as declared, in
-every state that agrees with a `RunWT` state, the declared sort holds of
+/-- A row is faithful at a statement over `Γ`: each value read it declares
+is the statement's read, and under any names of `Γ`'s locals, in every
+state that agrees with a `RunWT` state over `Γ`, the declared sort holds of
 what the read finds. -/
-def RowFaithful (row : TacletReadAnn) (s : Stmt C) : Prop :=
+def RowFaithful (row : TacletReadAnn) {Γ Γ' : Core.Ctx} (s : Core.Stmt C Γ Γ') : Prop :=
   ∀ r ∈ valueReads row, ∃ R, Stmt.read? s = some R ∧ R.domain = r.domain ∧
-    ∀ (Γ : Core.Ctx) (ns : List Var) (H : HeapTy) (σ : Core.State C Γ) (τ : State),
-      Core.RunWT C H σ → Core.Agree ns σ τ → R.Typed ns Γ → R.SortOk τ H r.sort
+    ∀ (ns : List Var) (H : HeapTy) (σ : Core.State C Γ) (τ : State),
+      Core.RunWT C H σ → Core.Agree ns σ τ → (R.erase ns).SortOk τ H r.sort
 
 /-- Every row constructor `n` transcribes is faithful at `s`. -/
-def CtorFaithful (n : Lean.Name) (s : Stmt C) : Prop :=
+def CtorFaithful (n : Lean.Name) {Γ Γ' : Core.Ctx} (s : Core.Stmt C Γ Γ') : Prop :=
   ∀ row ∈ rowsOf n, RowFaithful row s
 
 /-- A row is faithful at a statement whose read is of a class the row's
 declared sorts are all supported by: `find<[int]>` at `total += 1;`. -/
-theorem rowFaithful_of {row : TacletReadAnn} {s : Stmt C} {R : Read C} {dom : ReadDomain}
-    {cls : ReadClass} (hR : Stmt.read? s = some R) (hdom : R.domain = dom)
-    (hfit : cls.fits R.ty = true)
+theorem rowFaithful_of {row : TacletReadAnn} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'}
+    {R : CRead C Γ} {dom : ReadDomain} {cls : ReadClass} (hR : Stmt.read? s = some R)
+    (hdom : R.domain = dom) (hfit : cls.fits R.ty = true)
     (hrow : (valueReads row).all (fun r => r.domain == dom && cls.supports dom r.sort) = true) :
     RowFaithful row s := by
   intro r hr
   have h := List.all_eq_true.mp hrow r hr
   simp only [Bool.and_eq_true, beq_iff_eq] at h
-  refine ⟨R, hR, hdom.trans h.1.symm, fun Γ ns H σ τ hwt hag hw => ?_⟩
-  exact Read.sortOk hwt hag hw hfit (hdom ▸ h.2)
+  refine ⟨R, hR, hdom.trans h.1.symm, fun ns H σ τ hwt hag => ?_⟩
+  exact Read.sortOk hwt hag (R.erase_typed ns) (R.erase_ty ns ▸ hfit)
+    (R.erase_domain ns ▸ hdom ▸ h.2)
 
 /-- A constructor is faithful at a statement whose read is of a class every
 row's declared sorts are supported by. -/
-theorem ctorFaithful_of {n : Lean.Name} {s : Stmt C} {R : Read C} {dom : ReadDomain}
-    {cls : ReadClass} (hR : Stmt.read? s = some R) (hdom : R.domain = dom)
+theorem ctorFaithful_of {n : Lean.Name} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'} {R : CRead C Γ}
+    {dom : ReadDomain} {cls : ReadClass} (hR : Stmt.read? s = some R) (hdom : R.domain = dom)
     (hfit : cls.fits R.ty = true) (hrows : rowsSupported n dom cls = true) :
     CtorFaithful n s := fun row hrow =>
   rowFaithful_of hR hdom hfit (List.all_eq_true.mp hrows row hrow)
 
 /-! ## The read-bearing constructors
 
-One theorem per constructor with a value read, in `Rules.lean`'s order of
-the rows: the statement is the constructor's own, its schema variables
-universally quantified, so each theorem covers every statement the rule
-fires on.  The class is what the constructor's schema fixes: an `⊕=` target
-is `numeric` by `hp`, a copy source a `reference` by its index. -/
+One theorem per constructor with a value read, `faithful_<ctor>`, stated by
+`faithful_theorem r dom cls` in `Calculus/Core/Rules.lean`'s order of the
+rows: it quantifies over the constructor's schema variables (its binders,
+read off its type) and states `CtorFaithful ``Core.Taclet.r (stmtOf
+(@Core.Taclet.r …))`, so the statement is the rule's `\find`, not a
+restatement of it, and each theorem covers every statement the rule fires
+on; the proof is `ctorFaithful_of` at the domain `dom` and the class `cls`,
+what the constructor's schema fixes (an `⊕=` target is `numeric` by `hp`, a
+copy source a `reference` by its index).  `#check @faithful_<ctor>` prints
+the statement. -/
 
-/-- `alice = bob;` reads `bob`, a `Person`: the copy source is a reference, and
-the row's `find<[StValue]>` claims no more than a storage value. -/
-theorem faithful_storageRootWriteCopySource {C : Contract} {k : Nat} {m : Modality} {gsp : Name}
-    {x : RefTy} {hgsp : Eq (Contract.rootType C gsp) (some (Ty.ref x))} {sp : SPath C (Ty.ref x)}
-    {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
-    CtorFaithful ``Taclet.storageRootWriteCopySource
-      (stmtOf (@Taclet.storageRootWriteCopySource C k m gsp x hgsp sp hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
+section Gen
+open Lean Elab Command Term Meta
 
-/-- `x = total;` reads a number, `total`'s declared `uint`:
-`select<[alphaPrim]>` with `\hasSort` resolves to it. -/
-theorem faithful_storageRootReadSelect {C : Contract} {k : Nat} {m : Modality} {v : Var}
-    {gsp : Name} {x : PrimTy} {hgsp : Eq (Contract.rootType C gsp) (some (Ty.prim x))} :
-    CtorFaithful ``Taclet.storageRootReadSelect
-      (stmtOf (@Taclet.storageRootReadSelect C k m v gsp x hgsp)) :=
-  ctorFaithful_of (dom := .storage) (cls := .any) rfl rfl rfl (by decide +kernel)
+/-- `faithful_theorem r dom cls`: the theorem `faithful_r`, that the scoped
+taclet `Core.Taclet.r` is faithful (`CtorFaithful`) at its own statement,
+for all its schema variables, by `ctorFaithful_of` at `dom` and `cls`. -/
+elab "faithful_theorem " r:ident dom:term:max cls:term:max : command => do
+  let ctor := `Solidity.Core.Taclet ++ r.getId
+  let thm := (← getCurrNamespace) ++ (`faithful).appendAfter ("_" ++ r.getId.toString)
+  let (ty, pf) ← liftTermElabM do
+    let info ← getConstInfo ctor
+    forallTelescope info.type fun xs _ => do
+      let d ← exprToSyntax (mkAppN (mkConst ctor (info.levelParams.map mkLevelParam)) xs)
+      let stmt ← elabType (← `(CtorFaithful $(quote ctor) (stmtOf $d)))
+      let pf ← elabTermEnsuringType
+        (← `(ctorFaithful_of (dom := $dom) (cls := $cls) rfl rfl (by first | rfl | assumption)
+          (by decide +kernel))) stmt
+      synthesizeSyntheticMVarsNoPostponing
+      let stmt ← instantiateMVars stmt
+      let pf ← instantiateMVars pf
+      if pf.hasExprMVar then throwError "faithful_theorem: the proof of {ctor} is not closed"
+      return (← mkForallFVars xs stmt, ← mkLambdaFVars xs pf)
+  liftCoreM <| addDecl (.thmDecl { name := thm, levelParams := [], type := ty, value := pf })
 
-/-- `alice.account = a;` (`a : Account storage`) reads `a`'s `Account` node
-under `find<[StValue]>`. -/
-theorem faithful_storageFieldWriteCopySource {C : Contract} {k : Nat} {m : Modality} {x : Name}
-    {sp : SPath C (Ty.struct x)} {fld : Name} {x_1 : RefTy}
-    {hfld : Eq (Contract.fieldType C x fld) (some (Ty.ref x_1))} {sp2 : SPath C (Ty.ref x_1)}
-    {hm : Eq (Ty.mapFree (Ty.ref x_1)) true} :
-    CtorFaithful ``Taclet.storageFieldWriteCopySource
-      (stmtOf (@Taclet.storageFieldWriteCopySource C k m x sp fld x_1 hfld sp2 hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
+end Gen
 
-/-- `x = alice.age;` reads a number, `age`'s declared `uint` (`\hasFieldSort`). -/
-theorem faithful_storageFieldReadFind {C : Contract} {k : Nat} {m : Modality} {v : Var} {x : Name}
-    {sp : SPath C (Ty.struct x)} {fld : Name} {x_1 : PrimTy}
-    {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim x_1))} :
-    CtorFaithful ``Taclet.storageFieldReadFind
-      (stmtOf (@Taclet.storageFieldReadFind C k m v x sp fld x_1 hfld)) :=
-  ctorFaithful_of (dom := .storage) (cls := .any) rfl rfl rfl (by decide +kernel)
+-- `alice = bob;` reads `bob`, a `Person`: the copy source is a reference, and
+-- the row's `find<[StValue]>` claims no more than a storage value.
+faithful_theorem storageRootWriteCopySource .storage .reference
+-- `x = total;` reads a number, `total`'s declared `uint`.
+faithful_theorem storageRootReadSelect .storage .any
+faithful_theorem storageFieldWriteCopySource .storage .reference
+faithful_theorem storageFieldReadFind .storage .any
+faithful_theorem storageLengthRead .storage .any
+faithful_theorem memoryLengthRead .memory .any
+faithful_theorem storageFieldReadStoreRoot .storage .reference
+faithful_theorem storageIndexReadMappingFind .storage .any
+faithful_theorem storageIndexReadMappingStoreRoot .storage .reference
+faithful_theorem storageIndexWriteMappingCopySource .storage .reference
+faithful_theorem storageIndexReadArrayFind .storage .any
+faithful_theorem storageIndexReadArrayStoreRoot .storage .reference
+faithful_theorem storageIndexWriteArrayCopySource .storage .reference
+faithful_theorem storagePushValueCopySource .storage .reference
+faithful_theorem memoryStorageCopy .storage .reference
+faithful_theorem storageRootOpAssign .storage .numeric
+faithful_theorem storageFieldOpAssign .storage .numeric
+faithful_theorem storageIndexMappingOpAssign .storage .numeric
+faithful_theorem storageIndexArrayOpAssign .storage .numeric
+faithful_theorem storageRootIncrement .storage .numeric
+faithful_theorem storageFieldIncrement .storage .numeric
+faithful_theorem storageIndexIncrement .storage .numeric
+faithful_theorem storageRootIncrementAssignment .storage .numeric
+faithful_theorem storageFieldIncrementAssignment .storage .numeric
+faithful_theorem storageIndexIncrementAssignment .storage .numeric
+faithful_theorem memoryToStorageFieldCopyRoot .memory .reference
+faithful_theorem memoryFieldRead .memory .any
+faithful_theorem memoryFieldReadAliasRoot .memory .any
+faithful_theorem memoryIndexReadArrayValue .memory .any
+faithful_theorem memoryIndexReadArrayMemory .memory .reference
+faithful_theorem memoryFieldOpAssign .memory .numeric
+faithful_theorem memoryIndexArrayOpAssign .memory .numeric
+faithful_theorem memoryFieldIncrement .memory .numeric
+faithful_theorem memoryIndexArrayIncrement .memory .numeric
+faithful_theorem memoryFieldIncrementAssignment .memory .numeric
+faithful_theorem memoryIndexArrayIncrementAssignment .memory .numeric
 
-/-- `n = values.length;` reads a number: KeY's member read at `length`, a
-`uint` cell. -/
-theorem faithful_storageLengthRead {C : Contract} {k : Nat} {m : Modality} {v : Var} {E : Ty}
-    {sp : SPath C E.array} {p : PrimTy} {hlen : p = PrimTy.uint} {hsp : sp.isSimple = true} :
-    CtorFaithful ``Taclet.storageLengthRead
-      (stmtOf (@Taclet.storageLengthRead C k m v E sp p hlen hsp)) :=
-  ctorFaithful_of (dom := .storage) (cls := .any) rfl rfl rfl (by decide +kernel)
-
-/-- `n = xs.length;` reads a number from a memory array. -/
-theorem faithful_memoryLengthRead {C : Contract} {k : Nat} {m : Modality} {v : Var} {E : Ty}
-    {mv : Var} {hmv : Eq (Ty.mapFree (Ty.ref (RefTy.array E))) true} {p : PrimTy}
-    {hlen : p = PrimTy.uint} :
-    CtorFaithful ``Taclet.memoryLengthRead
-      (stmtOf (@Taclet.memoryLengthRead C k m v E mv hmv p hlen)) :=
-  ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
-
-/-- `tok = a.token;` reads the `Token` member under `find<[StValue]>`. -/
-theorem faithful_storageFieldReadStoreRoot {C : Contract} {k : Nat} {m : Modality} {gsp : Name}
-    {x : RefTy} {hgsp : Eq (Contract.rootType C gsp) (some (Ty.ref x))} {x_1 : Name}
-    {sp : SPath C (Ty.struct x_1)} {fr : Name}
-    {hfr : Eq (Contract.fieldType C x_1 fr) (some (Ty.ref x))}
-    {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
-    CtorFaithful ``Taclet.storageFieldReadStoreRoot
-      (stmtOf (@Taclet.storageFieldReadStoreRoot C k m gsp x hgsp x_1 sp fr hfr hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `x = balances[i];` reads a number, the mapping's value type (`\hasElementSort`). -/
-theorem faithful_storageIndexReadMappingFind {C : Contract} {k : Nat} {m : Modality} {v : Var}
-    {x x_1 : PrimTy} {map : SPath C (Ty.ref (RefTy.mapping (Ty.prim x) (Ty.prim x_1)))}
-    {ie : Simple C x} :
-    CtorFaithful ``Taclet.storageIndexReadMappingFind
-      (stmtOf (@Taclet.storageIndexReadMappingFind C k m v x x_1 map ie)) :=
-  ctorFaithful_of (dom := .storage) (cls := .any) rfl rfl rfl (by decide +kernel)
-
-/-- `alice = folks[i];` reads the `Person` entry under `find<[StValue]>`. -/
-theorem faithful_storageIndexReadMappingStoreRoot {C : Contract} {k : Nat} {m : Modality}
-    {gsp : Name} {x : RefTy} {hgsp : Eq (Contract.rootType C gsp) (some (Ty.ref x))}
-    {x_1 : PrimTy} {map : SPath C (Ty.ref (RefTy.mapping (Ty.prim x_1) (Ty.ref x)))}
-    {ie : Simple C x_1} {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
-    CtorFaithful ``Taclet.storageIndexReadMappingStoreRoot
-      (stmtOf (@Taclet.storageIndexReadMappingStoreRoot C k m gsp x hgsp x_1 map ie hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `folks[i] = p;` reads `p`'s `Person` node under `find<[StValue]>`. -/
-theorem faithful_storageIndexWriteMappingCopySource {C : Contract} {k : Nat} {m : Modality}
-    {x : PrimTy} {x_1 : RefTy} {map : SPath C (Ty.ref (RefTy.mapping (Ty.prim x) (Ty.ref x_1)))}
-    {ie : Simple C x} {sp2 : SPath C (Ty.ref x_1)} {hm : Eq (Ty.mapFree (Ty.ref x_1)) true} :
-    CtorFaithful ``Taclet.storageIndexWriteMappingCopySource
-      (stmtOf (@Taclet.storageIndexWriteMappingCopySource C k m x x_1 map ie sp2 hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `x = values[i];` reads a number, the array's element type (`\hasElementSort`). -/
-theorem faithful_storageIndexReadArrayFind {C : Contract} {k : Nat} {m : Modality} {v : Var}
-    {R : RefTy} {x : PrimTy} {ak : ArrTy R (Ty.prim x)} {arr : SPath C (Ty.ref R)}
-    {ie : Simple C PrimTy.uint} :
-    CtorFaithful ``Taclet.storageIndexReadArrayFind
-      (stmtOf (@Taclet.storageIndexReadArrayFind C k m v R x ak arr ie)) :=
-  ctorFaithful_of (dom := .storage) (cls := .any) rfl rfl rfl (by decide +kernel)
-
-/-- `alice = persons[i];` reads the `Person` element under `find<[StValue]>`. -/
-theorem faithful_storageIndexReadArrayStoreRoot {C : Contract} {k : Nat} {m : Modality}
-    {gsp : Name} {x : RefTy} {hgsp : Eq (Contract.rootType C gsp) (some (Ty.ref x))}
-    {R : RefTy} {ak : ArrTy R (Ty.ref x)} {arr : SPath C (Ty.ref R)} {ie : Simple C PrimTy.uint}
-    {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
-    CtorFaithful ``Taclet.storageIndexReadArrayStoreRoot
-      (stmtOf (@Taclet.storageIndexReadArrayStoreRoot C k m gsp x hgsp R ak arr ie hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `persons[i] = p;` reads `p`'s `Person` node under `find<[StValue]>`. -/
-theorem faithful_storageIndexWriteArrayCopySource {C : Contract} {k : Nat} {m : Modality}
-    {R x : RefTy} {ak : ArrTy R (Ty.ref x)} {arr : SPath C (Ty.ref R)} {ie : Simple C PrimTy.uint}
-    {sp2 : SPath C (Ty.ref x)} {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
-    CtorFaithful ``Taclet.storageIndexWriteArrayCopySource
-      (stmtOf (@Taclet.storageIndexWriteArrayCopySource C k m R x ak arr ie sp2 hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `persons.push(p);` reads `p`'s `Person` node under `find<[StValue]>`. -/
-theorem faithful_storagePushValueCopySource {C : Contract} {k : Nat} {m : Modality} {x : RefTy}
-    {sp : SPath C (Ty.array (Ty.ref x))} {sp2 : SPath C (Ty.ref x)}
-    {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
-    CtorFaithful ``Taclet.storagePushValueCopySource
-      (stmtOf (@Taclet.storagePushValueCopySource C k m x sp sp2 hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `m = alice;` reads `alice` under `find<[Struct]>`: a copy source is a
-reference, so what it finds is a tree node. -/
-theorem faithful_memoryStorageCopy {C : Contract} {k : Nat} {m : Modality} {mv : Var} {x : RefTy}
-    {sp : SPath C (Ty.ref x)} {hm : Eq (Ty.mapFree (Ty.ref x)) true} :
-    CtorFaithful ``Taclet.memoryStorageCopy (stmtOf (@Taclet.memoryStorageCopy C k m mv x sp hm)) :=
-  ctorFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `total += x;` reads `total` under `find<[int]>`: the target of `⊕=` is
-numeric, so what it finds is an `int`. -/
-theorem faithful_storageRootOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : BinOp} {hop : Eq (BinOp.hasCompoundAssign op) true} {hp : Eq (PrimTy.isNumeric p) true}
-    {gsp : Name} {hgsp : Eq (Contract.rootType C gsp) (some (Ty.prim p))} {se : Simple C p} :
-    CtorFaithful ``Taclet.storageRootOpAssign
-      (stmtOf (@Taclet.storageRootOpAssign C k m p op hop hp gsp hgsp se)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `alice.age += x;` reads `alice.age` under `find<[int]>`. -/
-theorem faithful_storageFieldOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : BinOp} {hop : Eq (BinOp.hasCompoundAssign op) true} {hp : Eq (PrimTy.isNumeric p) true}
-    {x : Name} {sp : SPath C (Ty.struct x)} {fld : Name}
-    {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim p))} {se : Simple C p} :
-    CtorFaithful ``Taclet.storageFieldOpAssign
-      (stmtOf (@Taclet.storageFieldOpAssign C k m p op hop hp x sp fld hfld se)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `balances[i] += x;` reads the entry under `find<[int]>`. -/
-theorem faithful_storageIndexMappingOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : BinOp} {hop : Eq (BinOp.hasCompoundAssign op) true} {hp : Eq (PrimTy.isNumeric p) true}
-    {x : PrimTy} {map : SPath C (Ty.ref (RefTy.mapping (Ty.prim x) (Ty.prim p)))}
-    {ie : Simple C x} {se : Simple C p} :
-    CtorFaithful ``Taclet.storageIndexMappingOpAssign
-      (stmtOf (@Taclet.storageIndexMappingOpAssign C k m p op hop hp x map ie se)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `values[i] += x;` reads the element under `find<[int]>`. -/
-theorem faithful_storageIndexArrayOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : BinOp} {hop : Eq (BinOp.hasCompoundAssign op) true} {hp : Eq (PrimTy.isNumeric p) true}
-    {R : RefTy} {ak : ArrTy R (Ty.prim p)} {arr : SPath C (Ty.ref R)} {ie : Simple C PrimTy.uint}
-    {se : Simple C p} :
-    CtorFaithful ``Taclet.storageIndexArrayOpAssign
-      (stmtOf (@Taclet.storageIndexArrayOpAssign C k m p op hop hp R ak arr ie se)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `total++;` reads `total` under `find<[int]>`. -/
-theorem faithful_storageRootIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {gsp : Name}
-    {hgsp : Eq (Contract.rootType C gsp) (some (Ty.prim p))} :
-    CtorFaithful ``Taclet.storageRootIncrement
-      (stmtOf (@Taclet.storageRootIncrement C k m p op hp gsp hgsp)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `alice.age++;` reads `alice.age` under `find<[int]>`. -/
-theorem faithful_storageFieldIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {x : Name} {sp : SPath C (Ty.struct x)}
-    {fld : Name} {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim p))} :
-    CtorFaithful ``Taclet.storageFieldIncrement
-      (stmtOf (@Taclet.storageFieldIncrement C k m p op hp x sp fld hfld)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `balances[i]++;` and `values[i]--;` read the entry under `find<[int]>`. -/
-theorem faithful_storageIndexIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {x : RefTy} {x_1 : PrimTy}
-    {it : IndexTy x x_1 (Ty.prim p)} {sp : SPath C (Ty.ref x)} {ie : Simple C x_1} :
-    CtorFaithful ``Taclet.storageIndexIncrement
-      (stmtOf (@Taclet.storageIndexIncrement C k m p op hp x x_1 it sp ie)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `x = total++;` reads `total` under `find<[int]>`, twice. -/
-theorem faithful_storageRootIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
-    {p : PrimTy} {v : Var} {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {gsp : Name}
-    {hgsp : Eq (Contract.rootType C gsp) (some (Ty.prim p))}
-    {hs : Eq (OpLoc.recvSimple (OpLoc.root gsp hgsp)) true} :
-    CtorFaithful ``Taclet.storageRootIncrementAssignment
-      (stmtOf (@Taclet.storageRootIncrementAssignment C k m p v op hp gsp hgsp hs)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `x = alice.age++;` reads `alice.age` under `find<[int]>`. -/
-theorem faithful_storageFieldIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
-    {p : PrimTy} {v : Var} {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {x : Name}
-    {sp : SPath C (Ty.struct x)} {fld : Name}
-    {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim p))}
-    {hs : Eq (OpLoc.recvSimple (OpLoc.field sp fld hfld)) true} :
-    CtorFaithful ``Taclet.storageFieldIncrementAssignment
-      (stmtOf (@Taclet.storageFieldIncrementAssignment C k m p v op hp x sp fld hfld hs)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `x = values[i]++;` reads the element under `find<[int]>`. -/
-theorem faithful_storageIndexIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
-    {p : PrimTy} {v : Var} {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {x : RefTy}
-    {x_1 : PrimTy} {it : IndexTy x x_1 (Ty.prim p)} {sp : SPath C (Ty.ref x)} {ie : Simple C x_1}
-    {hs : Eq (OpLoc.recvSimple (OpLoc.index it sp ie)) true} :
-    CtorFaithful ``Taclet.storageIndexIncrementAssignment
-      (stmtOf (@Taclet.storageIndexIncrementAssignment C k m p v op hp x x_1 it sp ie hs)) :=
-  ctorFaithful_of (dom := .storage) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `alice.account = m;` (`m : Account memory`) reads `m` under
-`read<[Identity]>`: a memory reference. -/
-theorem faithful_memoryToStorageFieldCopyRoot {C : Contract} {k : Nat} {m : Modality} {x : Name}
-    {sp : SPath C (Ty.struct x)} {fld : Name} {x_1 : RefTy}
-    {hfld : Eq (Contract.fieldType C x fld) (some (Ty.ref x_1))} {mpath : MPath C (Ty.ref x_1)} :
-    CtorFaithful ``Taclet.memoryToStorageFieldCopyRoot
-      (stmtOf (@Taclet.memoryToStorageFieldCopyRoot C k m x sp fld x_1 hfld mpath)) :=
-  ctorFaithful_of (dom := .memory) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `x = m.age;` reads a number, `age`'s declared `uint` (`\hasMemoryFieldSort`). -/
-theorem faithful_memoryFieldRead {C : Contract} {k : Nat} {m : Modality} {v mv : Var}
-    {fld x : Name} {hmv : Eq (Ty.mapFree (Ty.ref (RefTy.struct x))) true} {x_1 : PrimTy}
-    {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim x_1))} :
-    CtorFaithful ``Taclet.memoryFieldRead
-      (stmtOf (@Taclet.memoryFieldRead C k m v mv x hmv fld x_1 hfld)) :=
-  ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
-
-/-- `n = m.account;` reads a reference the store typing claims at `Account`
-(`\hasMemoryFieldSort`). -/
-theorem faithful_memoryFieldReadAliasRoot {C : Contract} {k : Nat} {m : Modality} {mv₁ mv₂ : Var}
-    {fr x : Name} {hmv₂ : Eq (Ty.mapFree (Ty.ref (RefTy.struct x))) true} {x_1 : RefTy}
-    {hfr : Eq (Contract.fieldType C x fr) (some (Ty.ref x_1))} :
-    CtorFaithful ``Taclet.memoryFieldReadAliasRoot
-      (stmtOf (@Taclet.memoryFieldReadAliasRoot C k m mv₁ mv₂ x hmv₂ fr x_1 hfr)) :=
-  ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
-
-/-- `x = ns[i];` (`ns : uint[] memory`) reads a number (`\hasMemoryElementSort`). -/
-theorem faithful_memoryIndexReadArrayValue {C : Contract} {k : Nat} {x : PrimTy} {m : Modality}
-    {v mv : Var} {R : RefTy} {mk : ArrTy R (Ty.prim x)} {hmv : Eq (Ty.mapFree (Ty.ref R)) true} {ie : Simple C PrimTy.uint} :
-    CtorFaithful ``Taclet.memoryIndexReadArrayValue
-      (stmtOf (@Taclet.memoryIndexReadArrayValue C k m v R x mk mv hmv ie)) :=
-  ctorFaithful_of (dom := .memory) (cls := .any) rfl rfl rfl (by decide +kernel)
-
-/-- `p = ps[i];` (`ps : Person[] memory`) reads an `Identity`. -/
-theorem faithful_memoryIndexReadArrayMemory {C : Contract} {k : Nat} {x : RefTy} {m : Modality}
-    {mv₁ mv₂ : Var} {R : RefTy} {mk : ArrTy R (Ty.ref x)} {hmv₂ : Eq (Ty.mapFree (Ty.ref R)) true}
-    {ie : Simple C PrimTy.uint} :
-    CtorFaithful ``Taclet.memoryIndexReadArrayMemory
-      (stmtOf (@Taclet.memoryIndexReadArrayMemory C k m mv₁ R x mk mv₂ hmv₂ ie)) :=
-  ctorFaithful_of (dom := .memory) (cls := .reference) rfl rfl rfl (by decide +kernel)
-
-/-- `m.age += x;` reads `m.age` under `read<[int]>`. -/
-theorem faithful_memoryFieldOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : BinOp} {hop : Eq (BinOp.hasCompoundAssign op) true} {hp : Eq (PrimTy.isNumeric p) true}
-    {mv : Var} {fld x : Name} {hmv : Eq (Ty.mapFree (Ty.ref (RefTy.struct x))) true} {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim p))}
-    {se : Simple C p} :
-    CtorFaithful ``Taclet.memoryFieldOpAssign
-      (stmtOf (@Taclet.memoryFieldOpAssign C k m p op hop hp mv x hmv fld hfld se)) :=
-  ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `ns[i] += x;` reads the element under `read<[int]>`. -/
-theorem faithful_memoryIndexArrayOpAssign {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : BinOp} {hop : Eq (BinOp.hasCompoundAssign op) true} {hp : Eq (PrimTy.isNumeric p) true}
-    {R : RefTy} {mk : ArrTy R (Ty.prim p)} {mv : Var} {hmv : Eq (Ty.mapFree (Ty.ref R)) true} {ie : Simple C PrimTy.uint}
-    {se : Simple C p} :
-    CtorFaithful ``Taclet.memoryIndexArrayOpAssign
-      (stmtOf (@Taclet.memoryIndexArrayOpAssign C k m p op hop hp R mk mv hmv ie se)) :=
-  ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `m.age++;` reads `m.age` under `read<[int]>`. -/
-theorem faithful_memoryFieldIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {mv : Var} {fld x : Name} {hmv : Eq (Ty.mapFree (Ty.ref (RefTy.struct x))) true}
-    {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim p))} :
-    CtorFaithful ``Taclet.memoryFieldIncrement
-      (stmtOf (@Taclet.memoryFieldIncrement C k m p op hp mv x hmv fld hfld)) :=
-  ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `ns[i]++;` reads the element under `read<[int]>`. -/
-theorem faithful_memoryIndexArrayIncrement {C : Contract} {k : Nat} {m : Modality} {p : PrimTy}
-    {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {R : RefTy} {mk : ArrTy R (Ty.prim p)}
-    {mv : Var} {hmv : Eq (Ty.mapFree (Ty.ref R)) true} {ie : Simple C PrimTy.uint} :
-    CtorFaithful ``Taclet.memoryIndexArrayIncrement
-      (stmtOf (@Taclet.memoryIndexArrayIncrement C k m p op hp R mk mv hmv ie)) :=
-  ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `x = m.age++;` reads `m.age` under `read<[int]>`, twice. -/
-theorem faithful_memoryFieldIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
-    {p : PrimTy} {v : Var} {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {mv : Var}
-    {fld x : Name} {hmv : Eq (Ty.mapFree (Ty.ref (RefTy.struct x))) true} {hfld : Eq (Contract.fieldType C x fld) (some (Ty.prim p))}
-    {hs : Eq (OpLoc.recvSimple (OpLoc.mfield (MPath.var mv hmv) fld hfld)) true} :
-    CtorFaithful ``Taclet.memoryFieldIncrementAssignment
-      (stmtOf (@Taclet.memoryFieldIncrementAssignment C k m p v op hp mv x hmv fld hfld hs)) :=
-  ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
-
-/-- `x = ns[i]++;` reads the element under `read<[int]>`, twice. -/
-theorem faithful_memoryIndexArrayIncrementAssignment {C : Contract} {k : Nat} {m : Modality}
-    {p : PrimTy} {v : Var} {op : IncDec} {hp : Eq (PrimTy.isNumeric p) true} {R : RefTy}
-    {mk : ArrTy R (Ty.prim p)} {mv : Var} {hmv : Eq (Ty.mapFree (Ty.ref R)) true} {ie : Simple C PrimTy.uint}
-    {hs : Eq (OpLoc.recvSimple (OpLoc.mindex mk (MPath.var mv hmv) ie)) true} :
-    CtorFaithful ``Taclet.memoryIndexArrayIncrementAssignment
-      (stmtOf (@Taclet.memoryIndexArrayIncrementAssignment C k m p v op hp R mk mv hmv ie hs)) :=
-  ctorFaithful_of (dom := .memory) (cls := .numeric)
-    rfl rfl hp (by decide +kernel)
 
 /-- A constructor with the theorem that it is faithful. -/
 structure Proved where
@@ -686,42 +478,42 @@ structure Proved where
 
 /-- The read-bearing constructors, each with its faithfulness theorem. -/
 def faithfulCtors : List Proved := [
-  ⟨``Taclet.storageRootWriteCopySource, _, @faithful_storageRootWriteCopySource⟩,
-  ⟨``Taclet.storageRootReadSelect, _, @faithful_storageRootReadSelect⟩,
-  ⟨``Taclet.storageFieldWriteCopySource, _, @faithful_storageFieldWriteCopySource⟩,
-  ⟨``Taclet.storageFieldReadFind, _, @faithful_storageFieldReadFind⟩,
-  ⟨``Taclet.storageLengthRead, _, @faithful_storageLengthRead⟩,
-  ⟨``Taclet.memoryLengthRead, _, @faithful_memoryLengthRead⟩,
-  ⟨``Taclet.storageFieldReadStoreRoot, _, @faithful_storageFieldReadStoreRoot⟩,
-  ⟨``Taclet.storageIndexReadMappingFind, _, @faithful_storageIndexReadMappingFind⟩,
-  ⟨``Taclet.storageIndexReadMappingStoreRoot, _, @faithful_storageIndexReadMappingStoreRoot⟩,
-  ⟨``Taclet.storageIndexWriteMappingCopySource, _, @faithful_storageIndexWriteMappingCopySource⟩,
-  ⟨``Taclet.storageIndexReadArrayFind, _, @faithful_storageIndexReadArrayFind⟩,
-  ⟨``Taclet.storageIndexReadArrayStoreRoot, _, @faithful_storageIndexReadArrayStoreRoot⟩,
-  ⟨``Taclet.storageIndexWriteArrayCopySource, _, @faithful_storageIndexWriteArrayCopySource⟩,
-  ⟨``Taclet.storagePushValueCopySource, _, @faithful_storagePushValueCopySource⟩,
-  ⟨``Taclet.memoryStorageCopy, _, @faithful_memoryStorageCopy⟩,
-  ⟨``Taclet.storageRootOpAssign, _, @faithful_storageRootOpAssign⟩,
-  ⟨``Taclet.storageFieldOpAssign, _, @faithful_storageFieldOpAssign⟩,
-  ⟨``Taclet.storageIndexMappingOpAssign, _, @faithful_storageIndexMappingOpAssign⟩,
-  ⟨``Taclet.storageIndexArrayOpAssign, _, @faithful_storageIndexArrayOpAssign⟩,
-  ⟨``Taclet.storageRootIncrement, _, @faithful_storageRootIncrement⟩,
-  ⟨``Taclet.storageFieldIncrement, _, @faithful_storageFieldIncrement⟩,
-  ⟨``Taclet.storageIndexIncrement, _, @faithful_storageIndexIncrement⟩,
-  ⟨``Taclet.storageRootIncrementAssignment, _, @faithful_storageRootIncrementAssignment⟩,
-  ⟨``Taclet.storageFieldIncrementAssignment, _, @faithful_storageFieldIncrementAssignment⟩,
-  ⟨``Taclet.storageIndexIncrementAssignment, _, @faithful_storageIndexIncrementAssignment⟩,
-  ⟨``Taclet.memoryToStorageFieldCopyRoot, _, @faithful_memoryToStorageFieldCopyRoot⟩,
-  ⟨``Taclet.memoryFieldRead, _, @faithful_memoryFieldRead⟩,
-  ⟨``Taclet.memoryFieldReadAliasRoot, _, @faithful_memoryFieldReadAliasRoot⟩,
-  ⟨``Taclet.memoryIndexReadArrayValue, _, @faithful_memoryIndexReadArrayValue⟩,
-  ⟨``Taclet.memoryIndexReadArrayMemory, _, @faithful_memoryIndexReadArrayMemory⟩,
-  ⟨``Taclet.memoryFieldOpAssign, _, @faithful_memoryFieldOpAssign⟩,
-  ⟨``Taclet.memoryIndexArrayOpAssign, _, @faithful_memoryIndexArrayOpAssign⟩,
-  ⟨``Taclet.memoryFieldIncrement, _, @faithful_memoryFieldIncrement⟩,
-  ⟨``Taclet.memoryIndexArrayIncrement, _, @faithful_memoryIndexArrayIncrement⟩,
-  ⟨``Taclet.memoryFieldIncrementAssignment, _, @faithful_memoryFieldIncrementAssignment⟩,
-  ⟨``Taclet.memoryIndexArrayIncrementAssignment, _, @faithful_memoryIndexArrayIncrementAssignment⟩ ]
+  ⟨``Core.Taclet.storageRootWriteCopySource, _, @faithful_storageRootWriteCopySource⟩,
+  ⟨``Core.Taclet.storageRootReadSelect, _, @faithful_storageRootReadSelect⟩,
+  ⟨``Core.Taclet.storageFieldWriteCopySource, _, @faithful_storageFieldWriteCopySource⟩,
+  ⟨``Core.Taclet.storageFieldReadFind, _, @faithful_storageFieldReadFind⟩,
+  ⟨``Core.Taclet.storageLengthRead, _, @faithful_storageLengthRead⟩,
+  ⟨``Core.Taclet.memoryLengthRead, _, @faithful_memoryLengthRead⟩,
+  ⟨``Core.Taclet.storageFieldReadStoreRoot, _, @faithful_storageFieldReadStoreRoot⟩,
+  ⟨``Core.Taclet.storageIndexReadMappingFind, _, @faithful_storageIndexReadMappingFind⟩,
+  ⟨``Core.Taclet.storageIndexReadMappingStoreRoot, _, @faithful_storageIndexReadMappingStoreRoot⟩,
+  ⟨``Core.Taclet.storageIndexWriteMappingCopySource, _, @faithful_storageIndexWriteMappingCopySource⟩,
+  ⟨``Core.Taclet.storageIndexReadArrayFind, _, @faithful_storageIndexReadArrayFind⟩,
+  ⟨``Core.Taclet.storageIndexReadArrayStoreRoot, _, @faithful_storageIndexReadArrayStoreRoot⟩,
+  ⟨``Core.Taclet.storageIndexWriteArrayCopySource, _, @faithful_storageIndexWriteArrayCopySource⟩,
+  ⟨``Core.Taclet.storagePushValueCopySource, _, @faithful_storagePushValueCopySource⟩,
+  ⟨``Core.Taclet.memoryStorageCopy, _, @faithful_memoryStorageCopy⟩,
+  ⟨``Core.Taclet.storageRootOpAssign, _, @faithful_storageRootOpAssign⟩,
+  ⟨``Core.Taclet.storageFieldOpAssign, _, @faithful_storageFieldOpAssign⟩,
+  ⟨``Core.Taclet.storageIndexMappingOpAssign, _, @faithful_storageIndexMappingOpAssign⟩,
+  ⟨``Core.Taclet.storageIndexArrayOpAssign, _, @faithful_storageIndexArrayOpAssign⟩,
+  ⟨``Core.Taclet.storageRootIncrement, _, @faithful_storageRootIncrement⟩,
+  ⟨``Core.Taclet.storageFieldIncrement, _, @faithful_storageFieldIncrement⟩,
+  ⟨``Core.Taclet.storageIndexIncrement, _, @faithful_storageIndexIncrement⟩,
+  ⟨``Core.Taclet.storageRootIncrementAssignment, _, @faithful_storageRootIncrementAssignment⟩,
+  ⟨``Core.Taclet.storageFieldIncrementAssignment, _, @faithful_storageFieldIncrementAssignment⟩,
+  ⟨``Core.Taclet.storageIndexIncrementAssignment, _, @faithful_storageIndexIncrementAssignment⟩,
+  ⟨``Core.Taclet.memoryToStorageFieldCopyRoot, _, @faithful_memoryToStorageFieldCopyRoot⟩,
+  ⟨``Core.Taclet.memoryFieldRead, _, @faithful_memoryFieldRead⟩,
+  ⟨``Core.Taclet.memoryFieldReadAliasRoot, _, @faithful_memoryFieldReadAliasRoot⟩,
+  ⟨``Core.Taclet.memoryIndexReadArrayValue, _, @faithful_memoryIndexReadArrayValue⟩,
+  ⟨``Core.Taclet.memoryIndexReadArrayMemory, _, @faithful_memoryIndexReadArrayMemory⟩,
+  ⟨``Core.Taclet.memoryFieldOpAssign, _, @faithful_memoryFieldOpAssign⟩,
+  ⟨``Core.Taclet.memoryIndexArrayOpAssign, _, @faithful_memoryIndexArrayOpAssign⟩,
+  ⟨``Core.Taclet.memoryFieldIncrement, _, @faithful_memoryFieldIncrement⟩,
+  ⟨``Core.Taclet.memoryIndexArrayIncrement, _, @faithful_memoryIndexArrayIncrement⟩,
+  ⟨``Core.Taclet.memoryFieldIncrementAssignment, _, @faithful_memoryFieldIncrementAssignment⟩,
+  ⟨``Core.Taclet.memoryIndexArrayIncrementAssignment, _, @faithful_memoryIndexArrayIncrementAssignment⟩ ]
 
 /-- **Every row is covered.**  Each annotation row with a value read names a
 KeY taclet some `Taclet` constructor transcribes, and every constructor

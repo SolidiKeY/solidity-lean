@@ -1,5 +1,5 @@
-import Solidity.Calculus.Chains
-import Solidity.Calculus.LastLine
+import Solidity.Calculus.RewriteChains
+import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface

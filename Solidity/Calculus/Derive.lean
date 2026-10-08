@@ -3,30 +3,21 @@ import Solidity.Calculus.Closer
 import Solidity.Calculus.TheoryRewrite
 import Solidity.Calculus.Spec
 import Solidity.Calculus.TreeData
-import Solidity.Calculus.Symex
 
 /-!
-# The strategy as one kernel evaluation: `sol_prove`
+# The closer's walk as one kernel evaluation: `sol_prove` on a leaf
 
-`sol_derive` (`Symex.lean`) builds a `⊢` derivation one `apply` at a time,
-each an elaborator unification over the whole sequent.  `Derive.residue`
-runs the same walk as a function: on a sequent `Γ ⟹ φ` it drops an empty
-modality, fires the rule `Stmt.step` picks (as `update`, `unfold`, `split`,
-`check`, `done`, `branches` with any number of outcomes, `cases`, or `inv`,
-the invariant then a split's goals past `Hyp.loopAnon`), or moves a precondition,
-a quantified local or an update into the context, in `sol_derive`'s order;
-a sequent none of these fits is a leaf, dropped when the closer accepts it.
-One step `sol_derive` does not take: a split whose condition is ground under
-its updates keeps only the branch it takes, the other closed by
-`Proves.closeFalse` (`Derive.splitRes`), so a callee run on literals is one
-path, not one per exit.  What is left is the residue.  `Proves.of_residue` says once that a residue
-whose leaves are proved proves the sequent, so a derivation is one
-evaluation the kernel checks, not hundreds of elaborated steps.
-
-The fresh names are numbered per goal, above every index of the goal's own
-sequent (`Hyp.fresh Γ φ`), as the `Proves` constructors ask; `symex`
-numbers them over the whole formula, sibling branches included, so the two
-part ways after the first branch.
+A leaf the scoped strategy leaves (`Calculus/Core/Derive.lean`,
+`Calculus/Core/ProvesDerive.lean`) is erased to a sequent of
+`Logic.lean`'s calculus and handed here.  `Derive.residue` runs that
+calculus's walk as a function: on a sequent `Γ ⟹ φ` it drops an empty
+modality, moves a precondition, a quantified local or an update into the
+context, and leaves what none of these fits as a leaf, dropped when the
+closer accepts it.  What is left is the residue.  `Proves.of_residue` says
+once that a residue whose leaves are proved proves the sequent, so a leaf
+is one evaluation the kernel checks.  The program rules went with today's
+rule table (W4 `calc-del`, `docs/intrinsic.md`): a program left in a leaf
+stays a leaf.
 
 The default closer (`Derive.synClose`) is `LFml.close` on the reduction
 (`Calculus/Closer.lean`): it closes a leaf inside the `Bool`, reading an
@@ -38,9 +29,7 @@ reducing steps.  A leaf it does not close is left for a
 tactic.
 
 Neither the compiled run nor the kernel check heeds `maxHeartbeats`, so
-the walk carries its own budget, the steps of the whole derivation
-(`Derive.budget`), handed from each goal to its next sibling: a program
-whose `if`s double its paths stops there, with an error.
+the walk carries its own budget (`Derive.budget`).
 
 * `sol_prove` computes the residue by compiled code, checks it in the
   kernel (`Derive.proves` when nothing is left,
@@ -68,52 +57,13 @@ namespace Derive
 /-- A goal left over: a context and a formula. -/
 abbrev Leaf (C : Contract) := List (Hyp C) × Fml C
 
-/-- Every goal of `gs` by `r`, the leaves in order, the budget `b` handed
-from one goal to the next; `none` when one fails. -/
-def allRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)) :
-    Nat → List (Leaf C) → Option (List (Leaf C) × Nat)
-  | b, [] => some ([], b)
-  | b, g :: gs =>
-    match r b g.1 g.2 with
-    | some (a, b') =>
-      match allRes r b' gs with
-      | some (c, b'') => some (a ++ c, b'')
-      | none => none
-    | none => none
-
-/-- The goals of `Premise.cases`: each formula in `Γ`, then the rest after
-each update.  Built by recursion on the formulas, with no `List.append` for
-`decide +kernel` to unfold. -/
-def casesGoals (Γ : List (Hyp C)) (m : Modality) (ω : Prog C) (ψ : Fml C) :
-    List (Fml C) → List (Upd C) → List (Leaf C)
-  | f :: fs, us => (Γ, f) :: casesGoals Γ m ω ψ fs us
-  | [], us => us.map fun U => (Γ ++ [.upd m U], .modal m ω ψ)
-
-theorem casesGoals_mem_fml {Γ : List (Hyp C)} {m : Modality} {ω : Prog C} {ψ : Fml C}
-    {us : List (Upd C)} {f : Fml C} : {fs : List (Fml C)} → f ∈ fs →
-      (Γ, f) ∈ casesGoals Γ m ω ψ fs us
-  | _ :: _, .head _ => .head _
-  | _ :: _, .tail _ h => .tail _ (casesGoals_mem_fml h)
-
-theorem casesGoals_mem_upd {Γ : List (Hyp C)} {m : Modality} {ω : Prog C} {ψ : Fml C}
-    {us : List (Upd C)} {U : Upd C} (hU : U ∈ us) : {fs : List (Fml C)} →
-      (Γ ++ [.upd m U], .modal m ω ψ) ∈ casesGoals Γ m ω ψ fs us
-  | [] => List.mem_map_of_mem hU
-  | _ :: _ => .tail _ (casesGoals_mem_upd hU)
-
-/-- Whether a split's third goal, `Γ ⟹ true` under the box, is left out:
-where `Proves.closeTrue` proves it, as `Proves.splitBox` leaves it out. -/
-def coverFree (m : Modality) (Γ : List (Hyp C)) : Bool :=
-  match m with
-  | .box => Hyp.boxOnly Γ && (Hyp.wrap Γ .tt).modalFree
-  | .diamond => false
-
 /-! ### A split whose condition is ground
 
 `if (v < 0)` after `int v = -3;` takes one branch only.  KeY splits, applies
 the update to the condition in each branch's antecedent, simplifies it, and
-closes the branch it became `false` in (`closeFalse`).  The strategy does
-the same at the split: where the condition reads only locals the context
+closes the branch it became `false` in (`closeFalse`).  The scoped walk
+(`Seq.ground`, `Calculus/Core/ProvesDerive.lean`) does
+the same at the split, on the erasure: where the condition reads only locals the context
 binds, through its updates, to terms of literals and value operators
 (`groundCond`, a cheap syntactic test), it asks the closer to refute each
 branch's context (`Γ, c ⟹ false`), and a refuted branch is closed there by
@@ -196,66 +146,15 @@ def groundCond (Γ : List (Hyp C)) (c : Fml C) : Bool :=
   | some xs => groundIn Γ.reverse xs
   | none => false
 
-/-- The goals of a split (`Proves.split`): `thn`, `els`, and `cov` unless
-`coverFree` (KeY's two goals under the box, `splitBoxRule`); a branch whose
-context the closer refutes, when the condition is ground (`groundCond`),
-left out (`Proves.closeFalse`). -/
-def splitRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat))
-    (close : List (Hyp C) → Fml C → Bool) (b : Nat) (Γ : List (Hyp C)) (m : Modality)
-    (ω : Prog C) (ψ : Fml C) (c c' : Fml C) (P Q : Prog C) : Option (List (Leaf C) × Nat) :=
-  -- a literal list either way: no `List.append` for `decide +kernel` to unfold
-  bif groundCond Γ c && close (Γ ++ [.pre c]) .ff then
-    bif coverFree m Γ then allRes r b [(Γ ++ [.pre c'], .modal m (Q ++ ω) ψ)]
-    else allRes r b [(Γ ++ [.pre c'], .modal m (Q ++ ω) ψ), (Γ, Premise.cover m c c')]
-  else bif groundCond Γ c && close (Γ ++ [.pre c']) .ff then
-    bif coverFree m Γ then allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ)]
-    else allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ, Premise.cover m c c')]
-  else bif coverFree m Γ then
-    allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ)]
-  else
-    allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ ++ [.pre c'], .modal m (Q ++ ω) ψ),
-      (Γ, Premise.cover m c c')]
-
-/-- The goals of a rule's premise, fired on `⟨[ s; ω ]⟩ ψ` in the context `Γ`,
-handed to `r` with the budget `b`: the goals of `Proves.updateRule`,
-`unfoldRule`, `splitRule` (`splitRes`), `checkRule` (`thn`, `els`),
-`doneRule`, `branchesRule` (one per outcome), `casesRule` (`casesGoals`),
-`invRule` (the invariant, then a split's goals past `Hyp.loopAnon`). -/
-def premiseRes (r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat))
-    (close : List (Hyp C) → Fml C → Bool) (b : Nat)
-    (Γ : List (Hyp C)) (m : Modality) (ω : Prog C) (ψ : Fml C) :
-    Premise C → Option (List (Leaf C) × Nat)
-  | .update U => r b (Γ ++ [.upd m U]) (.modal m ω ψ)
-  | .unfold P => r b Γ (.modal m (P ++ ω) ψ)
-  | .split c c' P Q => splitRes r close b Γ m ω ψ c c' P Q
-  | .check c P => allRes r b [(Γ ++ [.pre c], .modal m (P ++ ω) ψ), (Γ, c)]
-  | .done d => r b Γ ((Premise.done d).fml m ω ψ)
-  | .branches bs => allRes r b (bs.map fun o => (Γ, .alls o.1 (.modal m (o.2 ++ ω) ψ)))
-  | .cases fs us => allRes r b (casesGoals Γ m ω ψ fs us)
-  | .inv I U c c' P post =>
-    -- the invariant now, then past `{anon(P)}` the goals of a split
-    bif coverFree m (Γ ++ Hyp.loopAnon m P I U) then
-      allRes r b [(Γ, I), (Γ ++ Hyp.loopAnon m P I U ++ [.pre c], .modal m P post),
-        (Γ ++ Hyp.loopAnon m P I U ++ [.pre c'], .modal m ω ψ)]
-    else
-      allRes r b [(Γ, I), (Γ ++ Hyp.loopAnon m P I U ++ [.pre c], .modal m P post),
-        (Γ ++ Hyp.loopAnon m P I U ++ [.pre c'], .modal m ω ψ),
-        (Γ ++ Hyp.loopAnon m P I U, Premise.cover m c c')]
-
-/-- **The residue** of `Γ ⟹ φ`: the strategy run as `sol_derive` runs it,
-except that a split on a ground condition is pruned (`splitRes`), the leaves
-`close` accepts dropped, and the budget left.  `n` bounds the
-steps down any one path, so that the recursion is structural; `b` bounds
-the steps of the whole derivation, every branch included, and is handed
-from a goal to its next sibling.  `none` when either runs out. -/
+/-- **The residue** of `Γ ⟹ φ`: the connectives in front of the goal moved
+into the context, the leaves `close` accepts dropped, and the budget left.
+`n` bounds the steps, so that the recursion is structural; `b` bounds the
+steps of the whole walk.  `none` when either runs out. -/
 def residue : Nat → (List (Hyp C) → Fml C → Bool) → Nat → List (Hyp C) → Fml C →
     Option (List (Leaf C) × Nat)
   | 0, _, _, _, _ => none
   | _ + 1, _, 0, _, _ => none
   | n + 1, close, b + 1, Γ, .modal _ [] ψ => residue n close b Γ ψ
-  | n + 1, close, b + 1, Γ, .modal m (s :: ω) ψ =>
-    premiseRes (residue n close) close b Γ m ω ψ
-      (s.step (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m).premise
   | n + 1, close, b + 1, Γ, .imp a ψ => residue n close b (Γ ++ [.pre a]) ψ
   | n + 1, close, b + 1, Γ, .all x p ψ => residue n close b (Γ ++ [.all x p]) ψ
   | n + 1, close, b + 1, Γ, .upd m U ψ => residue n close b (Γ ++ [.upd m U]) ψ
@@ -832,107 +731,6 @@ theorem synClose_sound {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = tr
   rw [Decide.Fml.toL_holds _ (Decide.Rel.empty σ) hf, ← Decide.LFml.elim_holds σ]
   exact Decide.LFml.close_holds hL hs
 
-/-- The third goal a split leaves out (`coverFree`) is `Proves.closeTrue`'s. -/
-theorem cover_of_coverFree {m : Modality} {Γ : List (Hyp C)} {c c' : Fml C}
-    (h : coverFree m Γ = true) : Proves .all Γ (Premise.cover m c c') := by
-  cases m with
-  | box =>
-    simp only [coverFree, Bool.and_eq_true] at h
-    exact Proves.closeTrue h.1 h.2
-  | diamond => cases h
-
-theorem and_right {a b : Bool} (h : (a && b) = true) : b = true := by
-  revert h; cases a <;> cases b <;> decide
-
-section
-variable {r : Nat → List (Hyp C) → Fml C → Option (List (Leaf C) × Nat)}
-  (hr : ∀ b Γ φ ls b', r b Γ φ = some (ls, b') → (∀ l ∈ ls, Proves .all l.1 l.2) →
-    Proves .all Γ φ)
-include hr
-
-theorem allRes_sound : ∀ {b : Nat} {gs ls : List (Leaf C)} {b' : Nat},
-    allRes r b gs = some (ls, b') → (∀ l ∈ ls, Proves .all l.1 l.2) →
-    ∀ g ∈ gs, Proves .all g.1 g.2
-  | _, [], _, _, _, _, _, hg => nomatch hg
-  | b, g :: gs, ls, b', h, hl, g', hg' => by
-    simp only [allRes] at h
-    split at h
-    · rename_i a b₁ ha
-      split at h
-      · rename_i c b₂ hc
-        cases h
-        rcases List.mem_cons.1 hg' with rfl | hg'
-        · exact hr _ _ _ _ _ ha fun l hl' => hl l (List.mem_append_left _ hl')
-        · exact allRes_sound hc (fun l hl' => hl l (List.mem_append_right _ hl')) g' hg'
-      · cases h
-    · cases h
-
-variable {close : List (Hyp C) → Fml C → Bool}
-  (hclose : ∀ Γ φ, close Γ φ = true → Proves .all Γ φ)
-include hclose
-
-/-- A split's goals: each branch the closer refutes by `Proves.closeFalse`. -/
-theorem splitRes_sound {b : Nat} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C}
-    {ω : Prog C} {ψ : Fml C} {c c' : Fml C} {P Q : Prog C} {ls : List (Leaf C)} {b' : Nat}
-    (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m s (.split c c' P Q))
-    (h : splitRes r close b Γ m ω ψ c c' P Q = some (ls, b'))
-    (hl : ∀ l ∈ ls, Proves .all l.1 l.2) :
-    Proves .all Γ (.modal m (s :: ω) ψ) := by
-  simp only [splitRes] at h
-  cases hc : coverFree m Γ <;>
-    cases h1 : (groundCond Γ c && close (Γ ++ [.pre c]) .ff) <;>
-    cases h2 : (groundCond Γ c && close (Γ ++ [.pre c']) .ff) <;>
-    simp only [hc, h1, h2, cond_true, cond_false] at h <;>
-    have hg := allRes_sound hr h hl <;>
-    first
-    | exact Proves.splitRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
-        (cover_of_coverFree hc)
-    | exact Proves.splitRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
-        (hg _ (.tail _ (.tail _ (.head _))))
-    | exact Proves.splitRule d (.closeFalse (hclose _ _ (and_right h1))) (hg _ (.head _))
-        (cover_of_coverFree hc)
-    | exact Proves.splitRule d (.closeFalse (hclose _ _ (and_right h1))) (hg _ (.head _))
-        (hg _ (.tail _ (.head _)))
-    | exact Proves.splitRule d (hg _ (.head _)) (.closeFalse (hclose _ _ (and_right h2)))
-        (cover_of_coverFree hc)
-    | exact Proves.splitRule d (hg _ (.head _)) (.closeFalse (hclose _ _ (and_right h2)))
-        (hg _ (.tail _ (.head _)))
-
-theorem premiseRes_sound {b : Nat} {Γ : List (Hyp C)} {m : Modality} {s : Stmt C}
-    {ω : Prog C} {ψ : Fml C} {pr : Premise C} {ls : List (Leaf C)} {b' : Nat}
-    (d : Rule C (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m s pr)
-    (h : premiseRes r close b Γ m ω ψ pr = some (ls, b')) (hl : ∀ l ∈ ls, Proves .all l.1 l.2) :
-    Proves .all Γ (.modal m (s :: ω) ψ) := by
-  cases pr with
-  | update U => exact Proves.updateRule d (hr _ _ _ _ _ h hl)
-  | unfold P => exact Proves.unfoldRule d (hr _ _ _ _ _ h hl)
-  | split c c' P Q => exact splitRes_sound hr hclose d h hl
-  | check c P =>
-    have hg := allRes_sound hr h hl
-    exact Proves.checkRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
-  | done e => exact Proves.doneRule d (hr _ _ _ _ _ h hl)
-  | branches bs =>
-    have hg := allRes_sound hr h hl
-    exact Proves.branchesRule d fun o ho => hg (Γ, _) (List.mem_map_of_mem ho)
-  | cases fs us =>
-    have hg := allRes_sound hr h hl
-    exact Proves.casesRule d (fun _ hf => hg _ (casesGoals_mem_fml hf))
-      (fun _ hU => hg _ (casesGoals_mem_upd hU))
-  | inv I U c c' P post =>
-    cases hc : coverFree m (Γ ++ Hyp.loopAnon m P I U) with
-    | true =>
-      simp only [premiseRes, hc, cond_true] at h
-      have hg := allRes_sound hr h hl
-      exact Proves.invRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
-        (hg _ (.tail _ (.tail _ (.head _)))) (cover_of_coverFree hc)
-    | false =>
-      simp only [premiseRes, hc, cond_false] at h
-      have hg := allRes_sound hr h hl
-      exact Proves.invRule d (hg _ (.head _)) (hg _ (.tail _ (.head _)))
-        (hg _ (.tail _ (.tail _ (.head _)))) (hg _ (.tail _ (.tail _ (.tail _ (.head _)))))
-
-end
-
 end Derive
 
 open Derive in
@@ -950,12 +748,11 @@ theorem Proves.of_residue {close : List (Hyp C) → Fml C → Bool}
       fun _ _ _ _ _ h' hl' => Proves.of_residue hclose h' hl'
     match φ, h with
     | .modal _ [] ψ, h => exact .empty (ih _ _ _ _ _ h hl)
-    | .modal m (s :: ω) ψ, h =>
-      exact premiseRes_sound ih hclose (s.step (Hyp.fresh Γ (.modal m (s :: ω) ψ)) m).rule h hl
     | .imp a ψ, h => exact .intro (ih _ _ _ _ _ h hl)
     | .all x p ψ, h => exact .allIntro (ih _ _ _ _ _ h hl)
     | .upd m U ψ, h => exact .updIntro (ih _ _ _ _ _ h hl)
-    | .tt, h | .eq _ _, h | .defined _, h | .not _, h | .and _ _, h | .havoc _, h | .anon _ _, h =>
+    | .tt, h | .eq _ _, h | .defined _, h | .not _, h | .and _ _, h | .havoc _, h | .anon _ _, h
+    | .modal _ (_ :: _) _, h =>
       simp only [residue] at h
       split at h
       · exact hclose _ _ ‹_›
@@ -1195,20 +992,12 @@ elab_rules : tactic
     setGoals (s.open_ ++ rest.erase g)
     ProofTree.suggest tk (Derive.replayLines s.found)
 
-/-! ## The walk's leaves, counted (`#solkey_scan`, moved from `Problem.lean`) -/
+/-! ## The leaves' storage writes, counted (`#solkey_scan`, `Core.Seq.scanLeaves`) -/
 
 /-- How many storage writes the context's updates hold. -/
 def Derive.storageWrites (Γ : List (Hyp C)) : Nat :=
   Γ.foldl (fun n h => match h with
     | .upd _ U => n + (U.filter fun | .storage _ => true | _ => false).length
     | _ => n) 0
-
-/-- `#solkey_scan`'s view of `⊢ φ`: how many leaves `sol_prove`'s walk
-leaves, closed by `synClose` or (`walk`) not, and the most storage writes
-in one leaf's context; `none` past `Derive.budget`. -/
-def Derive.scanLeaves (walk : Bool) (φ : Fml C) : Option (Nat × Nat) :=
-  (Derive.residue Derive.budget (if walk then fun _ _ => false else Derive.synClose)
-    Derive.budget [] φ).map fun (ls, _) =>
-      (ls.length, ls.foldl (fun m l => max m (Derive.storageWrites l.1)) 0)
 
 end Solidity

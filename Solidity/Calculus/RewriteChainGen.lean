@@ -1,45 +1,42 @@
-import Solidity.Calculus.LastLine
-import Solidity.Calculus.ProofTree
+import Solidity.Calculus.RewriteChains
 
 /-!
-# Writing a whole chain out: `#chain`, `sol_chain?` on `~~>`, `sol_rws`
+# Chains past the program, written out: `#last_line`, `sol_rws`, the search
 
-`#derivation` and `sol_chain?` on `φ ~*> ψ` stop where the program ends.
-Past it, a worked chain goes on by rewrites (`Calculus/ChainRewrites.lean`):
-the stack merges and each read is resolved, a rewrite a line, to the last
-line (`#last_line`).  This module runs both halves and writes the result out
-as one chain term (`Fml.Via`), every line written, so a chain is generated
-once and pasted — its fresh variables renamed by a `FreshNames` table —
-never searched for again on every check:
+The rewrite half of a worked chain (`Calculus/RewriteChains.lean`): what the
+scoped chains' commands (`Calculus/Core/ChainGen.lean`,
+`Calculus/Core/LastLine.lean`) run past the program, on the erasure of the
+strategy's last line.
 
-* `#chain φ` prints `theorem chain : φ ~[r]~> φ₁ ~*> φ₂ … ~[findOnSave]~> ψ :=
-  by sol_chain`: the strategy's steps grouped as the paper prints them
-  (`groupSteps`), then one link per rewrite, picked by
-  `LastLine.stillApplies` until none applies; a chain of more than
-  `segLinks` links as segments composed by `Fml.Leads.via`; and the fresh
-  variables the lines write, as the rows of a `FreshNames` table to fill in;
-* `#chain_rest c` does the same from the last line of the chain `c`, as the
-  links to append to its statement;
-* `sol_chain?` on a goal `φ ~~> ψ` checks that this chain ends at `ψ`,
-  proves the goal with it and suggests it; on a chain `φ ~[r]~> … ~> ψ` it
-  proves it as `sol_chain` does and says how it goes on, if `ψ` is not a last
-  line;
-* `sol_rws [r₁, …, rₙ]` proves a link `φ ~~> ψ` by the named rewrites in turn,
-  each at the first place it applies but a read of the state as the program
-  found it (the places `#last_line` and `#chain` look at).  `sol_rws?` finds
-  the names (the order `#chain` uses) and suggests them.  A worked chain
-  writes each rewrite as its own link instead.
+* `#last_line chain` checks that a chain of rewrites (`Fml.Via`, one link,
+  or `~~>`) ends at a last line — no program left, one parallel update in
+  front of each goal (the shape), and no rewrite a chain takes still
+  applies (`stillApplies`: every one `~=>` tries but `simplifyUpdate`,
+  under either modality when the chain is over a modality variable).
+  "Applies" is what `~=>` accepts (`Chain.rwSelect`): a rewrite that
+  computes a line over an opaque postcondition but cannot be proved of it
+  does not count.  `simplifyUpdate` is not among them: it drops bindings,
+  and a chain keeps them all (`chainRewrite`).  The check runs on the
+  chain's statement with its binders opened (a modality `m`,
+  postconditions `φ : Post C`, a premise of the chain).
+* `searchRewrites` runs the rewrites from a line to a last line or to a
+  given line.  The rewrites are not confluent — the same line may leave by
+  several — so the search fixes an order: `sequentialToParallel` first, the
+  rest as `~=>` tries them (`rwAnyArrows`), depth first, each line once, at
+  most `genNodes` of them, and the smallest last line wins (the first path
+  to a given line).  `#chain`, `#chain_rest` and `sol_chain?` write the
+  links it finds; `groupSteps` groups the scoped strategy's steps before
+  them as the worked examples print them.
+* `sol_rws [r₁, …, rₙ]` proves a link `φ ~~> ψ` by the named rewrites in
+  turn, each at the first place it applies but a read of the state as the
+  program found it.  `sol_rws?` finds the names and suggests them.
+* `sol_chain?` on `φ ~~> ψ` writes the rewrites from `φ` to `ψ` as one
+  chain term and proves the goal with it; on a chain of rewrites it proves
+  it as `sol_chain` does and prints what goes on to a last line.
 
-The rewrites are not confluent — the same line may leave by several — so the
-generator fixes an order: `sequentialToParallel` first, the rest as `~=>`
-tries them (`rwAnyArrows`).  To a last line (`#chain`, `#chain_rest`) it never
-takes `simplifyUpdate` (`chainRewrite`: a chain keeps every binding); to a
-given line (`sol_chain?` and `sol_rws?` on `φ ~~> ψ`) it may, where `ψ` has
-dropped a binding.  It does not commit to that order: a greedy run can
-end early, at a line no rewrite applies to that a later choice would have
-resolved, so the rewrites are searched depth first in that order
-(`searchRewrites`), each line once, at most `genNodes` of them, and the
-smallest last line wins (`sol_rws?`: the first path to its goal).
+Today's strategy's steps before the rewrites (`#chain`, `#chain_rest` on
+`Update.lean`'s formulas with a program) went with today's rule table (W4
+`calc-del`, `docs/intrinsic.md`): the scoped commands take those.
 -/
 
 namespace Solidity
@@ -47,6 +44,106 @@ namespace Solidity
 namespace Chain
 
 open Lean Elab Term Meta
+
+/-- The goals of a line, each with the number of updates on the path to it:
+through `{U}`, both sides of `∧`, the consequent of `→`, `¬` (so the parts of
+a branch's cover, `⟨[ revert(); ]⟩ false ∨ …`), `havoc` and `∀`. -/
+partial def goalsOf (e : Expr) (n : Nat) : MetaM (Array (Nat × Expr)) := do
+  let e ← instantiateMVars e
+  match e.getAppFnArgs with
+  | (``Fml.upd, #[_, _, _, ψ]) => goalsOf ψ (n + 1)
+  | (``Fml.and, #[_, φ, ψ]) => return (← goalsOf φ n) ++ (← goalsOf ψ n)
+  | (``Fml.imp, #[_, _, ψ]) => goalsOf ψ n
+  | (``Fml.not, #[_, ψ]) => goalsOf ψ n
+  | (``Fml.havoc, #[_, ψ]) => goalsOf ψ n
+  | (``Fml.anon, #[_, _, ψ]) => goalsOf ψ n
+  | (``Fml.all, #[_, _, _, ψ]) => goalsOf ψ n
+  | _ => return #[(n, e)]
+
+/-- What is wrong with the shape of the line, if anything. -/
+def shapeProblems (B : Expr) : MetaM (Array MessageData) := do
+  let mut out := #[]
+  for (n, g) in ← goalsOf B 0 do
+    if g.isAppOf ``Fml.modal then
+      out := out.push m!"a program is left in front of{indentExpr g}"
+    if n ≥ 2 then
+      out := out.push m!"{n} updates stand in front of{indentExpr g}\n\
+        (one parallel update does: `~[sequentialToParallel]~>`)"
+  return out
+
+/-- A storage term holding no write: the state variable, a storage variable, or
+a member of one. -/
+partial def plainStorage (s : Expr) : Bool :=
+  match s.getAppFnArgs with
+  | (``STerm.storage, _) | (``STerm.pv, _) => true
+  | (``STerm.select, #[_, s, _]) => plainStorage s
+  | _ => false
+
+/-- A read of the state as the program found it, `find(storage, p)` or
+`find(select(storage, r), p)`: nothing resolves it, and the member-wise laws
+that apply to it (`findMemberCons`) only respell it. -/
+def plainRead (t : Expr) : Bool :=
+  match t.getAppFnArgs with
+  | (``Term.find, #[_, s, _]) => plainStorage s
+  | _ => false
+
+/-- A rewrite a chain takes past the program: every one `~=>` tries but
+`simplifyUpdate`, which drops the bindings nothing reads.  A chain keeps every
+binding to its last line, the fresh captures (`se1`, `sp1`) included, so a
+reader sees where each value went. -/
+def chainRewrite (n : String) : Bool := n != "simplifyUpdate"
+
+/-- The rewrites a chain takes (`chainRewrite`; with `all`, every one `~=>`
+tries, `simplifyUpdate` too) that `~=>` would accept on the line `L`, each
+with the line it gives and the hypotheses of the chain its side conditions
+use: the ones `rwSelect` selects with the line after left open, a law at
+every instance but a read of the state as found. -/
+def stillAppliesUsing (C L : Expr) (all : Bool := false) :
+    TermElabM (Array (String × Expr × Array FVarId)) := do
+  let mut out := #[]
+  for (n, a) in (← rwAnyArrows).filter (all || chainRewrite ·.1) do
+    let st ← saveState
+    try
+      let (rs, failed) ← rwCandidatesWith (fun t => !plainRead t) C L a
+      if rs.isEmpty then
+        st.restore
+        continue
+      let ψ ← mkFreshExprMVar (mkApp (mkConst ``Fml) C)
+      let (r, q, pf) ← rwSelect C L ψ n rs failed
+      let q ← instantiateMVars q
+      let uses ← (collectFVars (collectFVars {} (← instantiateMVars r))
+        (← instantiateMVars (pf.getD r))).fvarIds.filterM fun x => do isProp (← x.getType)
+      st.restore
+      out := out.push (n, q, uses)
+    catch _ =>
+      st.restore
+  return out
+
+/-- `stillAppliesUsing`, the lines alone. -/
+def stillApplies (C L : Expr) : TermElabM (Array (String × Expr)) := do
+  return (← stillAppliesUsing C L).map fun (n, q, _) => (n, q)
+
+/-- The contract and the two ends of a chain's statement: one link (`~[n]~>`,
+`~=>`), `~~>`, or a chain of links (`Fml.Via`), whose end is its last line. -/
+def chainEnds? (ty : Expr) : MetaM (Option (Expr × Expr × Expr)) := do
+  let ty ← instantiateMVars ty
+  match ty.getAppFnArgs with
+  | (``Fml.Leads, #[C, A, B]) | (``Fml.RwAny, #[C, A, B]) | (``Fml.RwBy, #[C, _, _, A, B]) =>
+    return some (C, A, B)
+  | (``Fml.Via, #[C, A, ws]) =>
+    let some ws ← listElems? ws | return none
+    let some w := ws.back? | return some (C, A, A)
+    let w ← whnfR w
+    unless w.isAppOfArity ``Prod.mk 4 do return none
+    return some (C, A, w.getArg! 3)
+  | _ => return none
+
+/-- The modality variables of a line. -/
+def modalityVars (e : Expr) : MetaM (Array FVarId) := do
+  let mut out := #[]
+  for x in (collectFVars {} e).fvarIds do
+    if (← instantiateMVars (← x.getType)).isConstOf ``Modality then out := out.push x
+  return out
 
 /-- Where a rewrite comes in the generator's order: the merge first, then
 the rest.  `simplifyUpdate` is not among them (`chainRewrite`). -/
@@ -132,11 +229,18 @@ def searchRewrites (C L : Expr) (goal? : Option Expr := none) :
   let (p, note, _) ← searchRewritesUsing C L goal?
   return (p, note)
 
-/-- A generated chain: the lines of the strategy with the rule that reached
-each, the rewrites after with theirs, and why it stopped early, if it did. -/
+/-- The line `φ`'s Lean terms (`punch`) and its modality, when it is a
+variable. -/
+def spliceOf (C φ : Expr) : MetaM Splice := do
+  let (φ', sp) ← (punch C (← instantiateMVars φ)).run {}
+  return { sp with modality := ← modalityOf? φ' }
+
+/-- A generated chain: the steps of the strategy before it with the rule that
+reached each (the scoped chains' commands fill them; none here), the
+rewrites after with theirs, and why it stopped early, if it did. -/
 structure Gen where
   splice : Splice
-  steps : Array (String × Expr)
+  steps : Array (String × Expr) := #[]
   rewrites : Array (String × Expr)
   /-- the hypotheses of the chain each rewrite's side conditions use -/
   rwUses : Array (Array FVarId) := #[]
@@ -146,28 +250,11 @@ structure Gen where
 def Gen.last (g : Gen) (φ : Expr) : Expr :=
   (g.rewrites.back?.map (·.2)).getD ((g.steps.back?.map (·.2)).getD φ)
 
-/-- Run the strategy from `φ`, then the rewrites from its last line: to a
-last line, or, with a goal, to the goal. -/
+/-- The rewrites from `φ`: to a last line, or, with a goal, to the goal. -/
 def generate (C φ : Expr) (goal? : Option Expr := none) : TermElabM Gen := do
-  let run ← runChain C φ
-  let mut steps := #[]
-  let mut prev := φ
-  for l in run.lines do
-    let n ← try
-        match ← withCurrHeartbeats (ruleOfLine prev) with
-        | some (_, n) => pure (if n == `taclet then "" else n.toString)
-        | none => pure ""
-      catch _ => pure ""
-    steps := steps.push (n, l.fml)
-    prev := l.fml
-  if run.stuck then
-    return { splice := run.splice, steps, rewrites := #[], stop := some (stuckNote run) }
-  if steps.size ≥ runFuel then
-    return { splice := run.splice, steps, rewrites := #[],
-             stop := some m!"the strategy ran {runFuel} steps: go on from the last line" }
-  let (rws, stop, uses) ← searchRewritesUsing C prev goal?
+  let (rws, stop, uses) ← searchRewritesUsing C φ goal?
   let rws := rws.getD #[]
-  return { splice := run.splice, steps, rewrites := rws, stop,
+  return { splice := ← spliceOf C φ, rewrites := rws, stop,
            rwUses := rws.map fun (_, q) => uses.getD q #[] }
 
 /-- The fresh variables written in `e`, by their default spellings (`se1`):
@@ -190,19 +277,18 @@ partial def freshSpellings (e : Expr) : Array String :=
     | _ => acc
   go e #[]
 
-/-! ## The links, as the paper prints them
+/-! ## The links, as the worked examples print them
 
-The paper (`Pre-licenciate-paper/sections/*-examples*.tex`) prints a trace
+The worked examples print a trace
 with two arrows: `⇝` for a rule, `⇝*` for a run of steps it does not dwell
 on — a declaration with the binding it leaves (`uint pv = 10; Account
 storage acc = alice.account;` to `{pv := 10}{acc := alice.account}`), and
-`uint v = total;` to `{v := find(storage, total)}`.  It never prints the
-`⟨[ ]⟩` line `emptyModality` leaves.  `groupSteps` follows it: `⇝` is
-`~[r]~>`, `⇝*` is `~*>`.  The paper is not uniform (a declaration and its
-binding are sometimes one `⇝`); a run the generator leaves as several links
-can be joined by hand into one `~*>`, which `sol_chain` proves alike. -/
+`uint v = total;` to `{v := find(storage, total)}`.  They never print the
+`⟨[ ]⟩` line `emptyModality` leaves.  `groupSteps` follows them: `⇝` is
+`~[r]~>`, `⇝*` is `~*>`.  A run the generator leaves as several links can
+be joined by hand into one `~*>`, which `sol_chain` proves alike. -/
 
-/-- How the paper prints a step of the strategy, by the rule that took it. -/
+/-- How a worked example prints a step of the strategy, by the rule that took it. -/
 inductive StepKind where
   /-- a declaration dropped to its assignment, or one with no initialiser -/
   | decl
@@ -210,7 +296,7 @@ inductive StepKind where
   | bind
   /-- a read into a local, one rule: part of the declaration it follows -/
   | read
-  /-- `emptyModality`: the `⟨[ ]⟩` the paper never prints -/
+  /-- `emptyModality`: the `⟨[ ]⟩` is never printed -/
   | empty
   /-- every other rule: an unfold, a capture, a write, a split -/
   | other
@@ -246,13 +332,13 @@ def stepKind (n : String) : StepKind :=
 /-- The strategy's steps as the links of a chain, each with its arrow and the
 line it ends at:
 
-* a run of declarations and bindings is one `~*>` (the paper's `⇝*`): a
+* a run of declarations and bindings is one `~*>` (`⇝*`): a
   declaration dropped (`StepKind.decl`), a local bound (`.bind`), and a read
   straight after a declaration, which is that declaration's initialiser
   (`.read`);
 * `emptyModality` joins the link before it, so a rule and the `⟨[ ]⟩` it
   leaves are one `~*>`;
-* every other step is its own `~[r]~>` (the paper's `⇝`), as is a run of one
+* every other step is its own `~[r]~>` (`⇝`), as is a run of one
   step. -/
 def groupSteps (steps : Array (String × Expr)) : Array (String × Expr) := Id.run do
   -- each group: its rules, its last line, and whether it is a run of
@@ -301,9 +387,35 @@ def cutEven (xs : Array α) (n : Nat) : Array (Array α) := Id.run do
     i := i + len
   return out
 
+/-- The line `e : Fml C` as a calc line is written: `dl!{ φ }`, or at a
+modality `dl![m]{ φ }` (`m` the line's modality variable, or `.box` for a
+box's update with no modality under it) — the first of these that reads
+back as `e`; Lean's own printing where the notation escapes. -/
+def writeLine (C e : Expr) (m? : Option Expr) : TermElabM Lean.Term := do
+  let φ ← ppFml e
+  if isEscape φ then return ← escapeTerm e
+  let φ ← withDecls e φ
+  let mods : Array (Option Lean.Term) ← match m? with
+    | some m => pure #[some ⟨mkIdent (← m.fvarId!.getUserName)⟩]
+    | none => pure #[none, some (ProofTree.dotIdent `box), some (ProofTree.dotIdent `diamond)]
+  let cands : Array Lean.Term ← mods.mapM fun
+    | none => `(dl!{ $φ:dl_fml })
+    | some m => `(dl![$m]{ $φ:dl_fml })
+  for t in cands do
+    let ok ← withoutModifyingState do
+      try
+        let e' ← Term.withoutErrToSorry do
+          let e' ← Term.elabTermEnsuringType t (mkApp (mkConst ``Fml) C)
+          Term.synthesizeSyntheticMVarsNoPostponing
+          instantiateMVars e'
+        pure (!e'.hasExprMVar && (← isDefEq e' e))
+      catch _ => pure false
+    if ok then return t
+  return cands[0]!
+
 /-- A line as text, at the line's modality. -/
 def lineText (C : Expr) (m? : Option Expr) (l : Expr) : TermElabM (Array String) := do
-  ProofTree.termLines (← withCurrHeartbeats (ProofTree.writeLine C l m?))
+  ProofTree.termLines (← withCurrHeartbeats (writeLine C l m?))
 
 /-- The chain term from `φ` through `links`, as lines of text: the first line,
 then one line per link, `{arrow} {line}`, every line written. -/
@@ -391,62 +503,73 @@ end Chain
 namespace Chain
 open Lean Elab Command Term Meta
 
-/-- `#chain φ`: the chain from `φ` to its last line — the strategy's links as
-the paper groups them (`groupSteps`), then the rewrites, one per link — as
-one chain term to paste, `theorem chain : φ ~[r]~> … := by sol_chain` (in
-segments past `segLinks` links), and the rows of a `FreshNames` table for the
-fresh variables it writes.  The section's variables are in scope
-(`variable (m : Modality) (φ : Post C)`). -/
-elab "#chain " t:term : command => runTermElabM fun _ => do
-  let φ ← instantiateMVars (← elabTerm t none)
-  synthesizeSyntheticMVarsNoPostponing
-  let φ ← instantiateMVars φ
-  let ty ← whnf (← inferType φ)
-  unless ty.isAppOfArity ``Fml 1 do throwError "#chain: not a formula{indentExpr φ}"
-  let C := ty.appArg!
-  let g ← generate C φ
-  if g.links.isEmpty then
-    logInfo (m!"{φ}\nis a last line: no step and no rewrite applies" ++ g.stopNote)
-    return
-  let rows := g.tableRows φ
-  let table := if rows.isEmpty then m!"" else
-    m!"\n\nfresh variables (a `FreshNames` table renames them):\n  [{", ".intercalate rows.toList}]"
-  logInfo (m!"{"\n".intercalate (← g.decls C φ).toList}" ++ table ++ g.stopNote)
-
-/-- `#chain_rest c`: what the chain `c` still lacks — from the last line of its
-statement (a chain `A ~[r]~> … ~> B`, one link, or `A ~~> B`), the
-strategy's steps and then the rewrites to a last line, as the lines to
-append to the statement, every one written.  The statement's binders (a
-modality `m`, postconditions `φ : Post C`) are opened, as `#last_line` opens
-them. -/
-elab "#chain_rest " c:ident : command => runTermElabM fun _ => do
+/-- `#last_line c`: the chain `c` ends at a last line — no program left, one
+parallel update in front of each goal, and no rewrite a chain takes
+(`chainRewrite`) still applies to it (under either modality, for a chain
+over a modality variable).  Silent when it does; one error listing what is
+left otherwise. -/
+elab "#last_line " c:ident : command => Command.runTermElabM fun _ => do
   let n ← realizeGlobalConstNoOverloadWithInfo c
   let info ← getConstInfo n
   forallTelescope info.type fun _ ty => do
+    let ty ← instantiateMVars ty
     let some (C, _, B) ← chainEnds? ty
-      | throwError "#chain_rest: {c} is no chain: its statement is not a chain \
+      | throwError "#last_line: {c} is no chain: its statement is not a chain \
           `A ~[r]~> B ~*> …` or `A ~~> B`{indentExpr ty}"
     let B ← instantiateMVars B
-    let g ← generate C B
-    if g.links.isEmpty then
-      logInfo m!"{c} ends at a last line"
-      return
-    let lines ← viaLines C g.splice.modality B g.links
-    -- the links alone: the first line, `B`, is already the statement's last
-    let start := (← lineText C g.splice.modality B).size
-    logInfo (m!"lines to append to the statement of {c}:\n\
-      {"\n".intercalate (lines.extract start lines.size |>.map ("    " ++ ·)).toList}" ++ g.stopNote)
+    let mut problems ← shapeProblems B
+    let ms ← modalityVars B
+    if ms.size ≥ 2 then
+      throwError "#last_line: the last line of {c} is under two modalities{indentExpr B}"
+    let lines : List (Option String × Expr) := match ms[0]? with
+      | some m => [(some "under the box", B.replaceFVar (.fvar m) (mkConst ``Modality.box)),
+                   (some "under the diamond", B.replaceFVar (.fvar m) (mkConst ``Modality.diamond))]
+      | none => [(none, B)]
+    -- a line computed at a fixed modality, with `m` put back where it was
+    let hasConst (e : Expr) (n : Lean.Name) : Bool := (e.find? (·.isConstOf n)).isSome
+    let back (q : Expr) : Expr := match ms[0]? with
+      | some m =>
+        if hasConst B ``Modality.box || hasConst B ``Modality.diamond then q else
+          q.replace fun e =>
+            if e.isConstOf ``Modality.box || e.isConstOf ``Modality.diamond then some (.fvar m)
+            else none
+      | none => q
+    let mut found : Array (String × Expr × Array String) := #[]
+    for (where?, L) in lines do
+      for (r, q) in ← stillApplies C L do
+        let q := back q
+        let tag := where?.getD ""
+        if let some i := found.findIdx? fun (r', q', _) => r' == r && q' == q then
+          found := found.modify i fun (r', q', ws) => (r', q', ws.push tag)
+        else
+          found := found.push (r, q, #[tag])
+    for (r, q, ws) in found do
+      let note := if ms.isEmpty then m!"" else
+        if ws.size == 2 then m!" (under either modality)" else m!" ({ws[0]!})"
+      problems := problems.push m!"{r} still applies{note}, and gives{indentExpr q}"
+    unless problems.isEmpty do
+      throwError "#last_line: {c} does not end at a last line:{indentExpr B}\n\
+        {MessageData.joinSep problems.toList "\n"}"
+
+/-- `#chain φ`: the chain from `φ` to its last line, as one chain term to
+paste; the scoped chains' (`Calculus/Core/ChainGen.lean`). -/
+syntax "#chain " term : command
+
+/-- `#chain_rest c`: what the chain `c` still lacks to a last line; the
+scoped chains' (`Calculus/Core/ChainGen.lean`). -/
+syntax "#chain_rest " ident : command
 
 end Chain
 
 namespace ProofTree
 open Lean Elab Tactic Meta
 
-/-- `sol_chain?` on `φ ~~> ψ`: generate the chain from `φ` (`Chain.generate`),
-check it ends at `ψ`, prove the goal with it, written as one chain term
-(`Fml.Via.leads`), and suggest that.  On a chain `φ ~[r]~> … ~> ψ`: prove it
-as `sol_chain` does, suggest `sol_chain`, and print the lines that go on to a
-last line if `ψ` is not one. -/
+/-- `sol_chain?` on `φ ~~> ψ` past the program: the rewrites from `φ` to `ψ`
+(`Chain.generate`), written as one chain term (`Fml.Via.leads`), the goal
+proved with it, and suggested.  On a chain of rewrites: prove it as
+`sol_chain` does, suggest `sol_chain`, and print the lines that go on to a
+last line if its last line is not one. -/
+
 elab_rules : tactic
   | `(tactic| sol_chain?%$tk) => withMainContext do
     let g ← getMainGoal

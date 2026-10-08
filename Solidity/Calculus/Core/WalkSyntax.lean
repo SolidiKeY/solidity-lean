@@ -10,7 +10,9 @@ Under `open scoped Solidity.Core.Surface` a walk keeps today's text: one
 .storageFieldWriteSave`, `apply unfold .localValueDeclInitDrop`, `apply
 empty`, `refine close ?_`, …).  On a scoped goal (`Core.Proves`) each line
 is the scoped rule of the same kind, its premise the named taclet's
-(`Taclet.step_eq`, `LeanTaclet.toStep`); on today's goal it is today's.
+(`Taclet.step_eq`, `LeanTaclet.toStep`); on today's goal (a leaf's
+erasure) only the rules today's calculus kept are read today's way (`intro`,
+`allIntro`, `updIntro`, `empty`, `close`: `Calculus/Logic.lean`).
 
 Where the scoped calculus takes a step today's names otherwise:
 
@@ -39,8 +41,9 @@ Where the scoped calculus takes a step today's names otherwise:
   `apply allRight`.
 
 Each reading is a `scoped macro_rules` of the namespace `Solidity.Core.Surface`,
-tried before today's `apply`: the scoped rule first, today's last, for
-today's goals a file still meets (a leaf today's `sol_prove` leaves).
+tried before today's `apply`: the scoped rule first, today's last where
+today's calculus has it, for today's goals a file still meets (a leaf
+today's `sol_prove` leaves).
 -/
 
 namespace Solidity.Core
@@ -185,70 +188,56 @@ namespace Surface
 scoped macro_rules
   | `(tactic| apply update $r:term) =>
     `(tactic| first
-      | core_rule Solidity.Core.Proves.update $r
-      | apply _root_.Solidity.Proves.update $r)
+      | core_rule Solidity.Core.Proves.update $r)
   | `(tactic| apply unfold $r:term) =>
     `(tactic| first
       | core_rule Solidity.Core.Proves.unfold $r
       | core_rule Solidity.Core.Proves.bind $r
-      | core_rule Solidity.Core.Proves.inline $r
-      | apply _root_.Solidity.Proves.unfold $r)
+      | core_rule Solidity.Core.Proves.inline $r)
   | `(tactic| apply unfoldLean $r:term) =>
     `(tactic| first
       | core_rule Solidity.Core.Proves.unfold $r
       | core_rule Solidity.Core.Proves.bind $r
-      | core_rule Solidity.Core.Proves.inline $r
-      | apply _root_.Solidity.Proves.unfoldLean $r)
+      | core_rule Solidity.Core.Proves.inline $r)
   | `(tactic| apply doneLean $r:term) =>
     `(tactic| first
-      | core_rule Solidity.Core.Proves.done $r
-      | apply _root_.Solidity.Proves.doneLean $r)
+      | core_rule Solidity.Core.Proves.done $r)
   | `(tactic| apply checkLean $r:term) =>
     `(tactic| first
-      | core_rule2 Solidity.Core.Proves.check $r
-      | apply _root_.Solidity.Proves.checkLean $r)
+      | core_rule2 Solidity.Core.Proves.check $r)
   | `(tactic| apply unfoldRule $r:term) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.unfold rfl) <;> core_silent
       | (core_silent; apply Solidity.Core.Proves.bind rfl) <;> core_silent
-      | (core_silent; apply Solidity.Core.Proves.inline rfl) <;> core_silent
-      | apply _root_.Solidity.Proves.unfoldRule $r)
+      | (core_silent; apply Solidity.Core.Proves.inline rfl) <;> core_silent)
   | `(tactic| apply split $r:term) =>
     `(tactic| first
-      | core_rule2 Solidity.Core.Proves.split $r
-      | apply _root_.Solidity.Proves.split $r)
+      | core_rule2 Solidity.Core.Proves.split $r)
   | `(tactic| apply splitBox $r:term) =>
     `(tactic| first
-      | core_rule2 Solidity.Core.Proves.split $r
-      | apply _root_.Solidity.Proves.splitBox $r)
+      | core_rule2 Solidity.Core.Proves.split $r)
   | `(tactic| apply done $r:term) =>
     `(tactic| first
-      | core_rule Solidity.Core.Proves.done $r
-      | apply _root_.Solidity.Proves.done $r)
+      | core_rule Solidity.Core.Proves.done $r)
   | `(tactic| apply Proves.check $r:term) =>
     `(tactic| first
-      | core_rule2 Solidity.Core.Proves.check $r
-      | apply _root_.Solidity.Proves.check $r)
+      | core_rule2 Solidity.Core.Proves.check $r)
   | `(tactic| apply cases $r:term) =>
     `(tactic| first
       | (core_silent; refine Solidity.Core.Proves.cases (by exact Solidity.Core.Taclet.step_eq $r) rfl ?_ ?_)
-      | (core_silent; refine Solidity.Core.Proves.cases (by exact Solidity.Core.LeanTaclet.toStep $r) rfl ?_ ?_)
-      | apply _root_.Solidity.Proves.cases $r)
+      | (core_silent; refine Solidity.Core.Proves.cases (by exact Solidity.Core.LeanTaclet.toStep $r) rfl ?_ ?_))
   | `(tactic| apply branches $r:term) =>
     `(tactic| first
       | (core_silent; refine Solidity.Core.Proves.branches (by exact Solidity.Core.Taclet.step_eq $r) rfl ?_)
-      | (core_silent; refine Solidity.Core.Proves.branches (by exact Solidity.Core.LeanTaclet.toStep $r) rfl ?_)
-      | apply _root_.Solidity.Proves.branches $r)
+      | (core_silent; refine Solidity.Core.Proves.branches (by exact Solidity.Core.LeanTaclet.toStep $r) rfl ?_))
   | `(tactic| apply invBox $r:term) =>
     `(tactic| first
       | (core_silent; core_inv (Solidity.Core.Taclet.step_eq $r))
-      | (core_silent; core_inv (Solidity.Core.LeanTaclet.toStep $r))
-      | apply _root_.Solidity.Proves.invBox $r)
+      | (core_silent; core_inv (Solidity.Core.LeanTaclet.toStep $r)))
   | `(tactic| apply invLean $r:term) =>
     `(tactic| first
       | (core_silent; core_inv (Solidity.Core.Taclet.step_eq $r))
-      | (core_silent; core_inv (Solidity.Core.LeanTaclet.toStep $r))
-      | apply _root_.Solidity.Proves.invLean $r)
+      | (core_silent; core_inv (Solidity.Core.LeanTaclet.toStep $r)))
   | `(tactic| apply updIntro) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.updIntro) <;> core_silent

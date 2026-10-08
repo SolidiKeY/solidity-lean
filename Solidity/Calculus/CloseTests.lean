@@ -1,11 +1,13 @@
-import Solidity.Calculus.Symex
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
 
 /-!
 # Tests of `sol_close`
 
-Goals `sol_close` is expected to close (`Close.lean`).  Nothing imports this
-file; it is checked on its own.
+Goals `sol_close` is expected to close (`Close.lean`), each a leaf the
+scoped strategy leaves (`open scoped Solidity.Core.Surface`), erased to
+today's formulas.
 -/
 
 namespace Solidity.CloseTests
@@ -13,6 +15,8 @@ namespace Solidity.CloseTests
 open Proves
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## Boolean connectives on literals -/
 
@@ -77,15 +81,17 @@ example : ⊨ dl!{ [ age = amount; ] age == amount } := by
 example : ⊢ dl!{ a == 1 → a == 1 } := by
   apply intro
   refine close ?_
+  sol_symex
   sol_close
 
 example : ⊢ dl!{ [ x = 1; ] x == 1 } := by
   apply update .localValueAssign
   apply empty
   refine close ?_
+  sol_symex
   sol_close
 
-/-- Each goal of a split, closed with no `sol_symex`. -/
+/-- Each goal of a split (the scoped split has KeY's two). -/
 example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x == 2 } := by
   apply intro
   apply unfold .ifElseUnfold
@@ -96,14 +102,13 @@ example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x 
     apply update .localValueAssign
     apply empty
     refine close ?_
+    sol_symex
     sol_close
   case els =>
     apply update .localValueAssign
     apply empty
     refine close ?_
-    sol_close
-  case cov =>
-    refine close ?_
+    sol_symex
     sol_close
 
 /-- With no goal left, `sol_close` does nothing. -/

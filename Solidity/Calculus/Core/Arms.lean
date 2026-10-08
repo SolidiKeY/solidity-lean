@@ -5,7 +5,7 @@ import Solidity.Calculus.Core.Shift
 
 `Completeness.lean`'s arms of `Stmt.step` over the scoped syntax
 (`docs/intrinsic.md`, M6a): for each statement, the premise of the one
-taclet of `Calculus/Rules.lean` whose side conditions hold, in the order
+taclet of `Calculus/Core/Rules.lean` whose side conditions hold, in the order
 `Completeness.lean` tries them (Step 1 unfolds a read, Step 2 decomposes a
 write, Step 3 is an update).  Each arm names the taclet it fires; the
 premise's erasure is what that taclet leaves (`Examples/Tactics/CoreStep.lean`

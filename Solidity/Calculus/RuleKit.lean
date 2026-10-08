@@ -4,7 +4,7 @@ import Solidity.Calculus.KeyTaclets
 /-!
 # What a rule is made of
 
-The parts of a taclet that outlive today's rule table (`Calculus/Rules.lean`):
+The parts of a taclet that outlive today's rule table (`Calculus/Rules`, deleted at W4 `calc-del`):
 where a read or a value lands (`Hole`, `MHole`, `VHole`, `NewLhs` and
 their `fill`), the side conditions a taclet states and `side_cond` proves,
 what a taclet leaves (`Premise`, the printers' target for the scoped

@@ -6,7 +6,7 @@ import Solidity.Calculus.Core.Sequents
 `Calculus/Core/Sequents.lean`: under `open scoped Solidity.Core.Surface`,
 `show sequent!{ Γ ⟹ φ }` checks that a scoped goal prints as the line
 (its erasure against the line read as today's), as a walk over today's
-goals states them (`Calculus/Sequents.lean`).  A block's `}` is not
+goals states them (today's `Calculus/Sequents`).  A block's `}` is not
 written; a hidden binder is no entry.
 -/
 

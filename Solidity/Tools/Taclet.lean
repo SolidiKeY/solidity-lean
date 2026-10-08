@@ -1,4 +1,4 @@
-import Solidity.Calculus.Core.PrintedRules
+import Solidity.Calculus.PrintedRules
 import Solidity.Calculus.Core.Callback
 import Solidity.Calculus.Core.DelabLean
 import Solidity.Tools.Common
@@ -16,8 +16,8 @@ import Solidity.Tools.Common
 transcribes and their `\heuristics`, the printed rule, and what makes it
 sound.  `r` is a constructor of the scoped `Core.Taclet`, `Core.LeanTaclet`
 or `Core.CallbackTaclet`, or a KeY taclet's name (an identifier or a
-string), looked up backwards in the scoped table
-(`Core.RuleShapes.tacletOrigins`, `Calculus/Core/RuleShapes.lean`).  A
+string), looked up backwards in the table
+(`RuleShapes.tacletOrigins`, `Calculus/RuleShapes.lean`).  A
 scoped taclet is sound as its premise is the one `Stmt.step` builds
 (`Core.Taclet.toStep`), which `Core.Stmt.Sound` makes sound.
 -/
@@ -40,14 +40,9 @@ def Heuristic.keyName : Heuristic → String
 /-- A KeY taclet with its rule set: `storageFieldWriteSave (simplify_prog)`. -/
 def KeyTaclet.fmt (t : KeyTaclet) : String := s!"{t.name} ({Heuristic.keyName t.heuristic})"
 
-/-- The scoped callback rows: today's (`RuleShapes.callbackOrigins`,
-`PrintedRules.callbackPrintedOrigins`) under the scoped names. -/
-def callbackRows {α : Type} (rows : List (Lean.Name × α)) : List (Lean.Name × α) :=
-  rows.map fun (n, o) => (Core.RuleShapes.scopedName n, o)
-
 /-- The KeY taclets of a constructor, one line. -/
 def keyLine (n : Lean.Name) : String :=
-  match lookupBy n (Core.RuleShapes.tacletOrigins ++ callbackRows RuleShapes.callbackOrigins) with
+  match lookupBy n (RuleShapes.tacletOrigins ++ RuleShapes.callbackOrigins) with
   | some (.taclet t) => s!"solkey: {KeyTaclet.fmt t}"
   | some (.merged ts) => "solkey (merged): " ++ ", ".intercalate (ts.map KeyTaclet.fmt)
   | none =>
@@ -61,8 +56,8 @@ def keyLine (n : Lean.Name) : String :=
 
 /-- The printed rule of a constructor, one line. -/
 def texLine (n : Lean.Name) : String :=
-  let rows := Core.PrintedRules.printedOrigins ++ Core.PrintedRules.leanPrintedOrigins ++
-    callbackRows PrintedRules.callbackPrintedOrigins
+  let rows := PrintedRules.printedOrigins ++ PrintedRules.leanPrintedOrigins ++
+    PrintedRules.callbackPrintedOrigins
   match lookupBy n rows with
   | some (.printed p) => s!"printed: {p.name}"
   | some (.merged ps) => "printed (merged): " ++ ", ".intercalate (ps.map PrintedRule.name)
@@ -99,14 +94,14 @@ def resolveRule (id : Lean.Name) : MetaM (Option Lean.Name) := do
 
 /-- `#taclet r`, for a KeY taclet's name: the constructors that transcribe it. -/
 def keyTacletInfo (s : String) : MetaM MessageData := do
-  let rows := (Core.RuleShapes.tacletOrigins ++ callbackRows RuleShapes.callbackOrigins).filter
+  let rows := (RuleShapes.tacletOrigins ++ RuleShapes.callbackOrigins).filter
     fun r => r.2.taclets.any (·.name == s)
   match KeyTaclet.all.find? (·.name == s) with
   | none => throwError "#taclet: {s} is neither a rule of the calculus nor a solkey taclet"
   | some t =>
     if rows.isEmpty then
       return m!"solkey: {KeyTaclet.fmt t}\nno Lean rule claims it \
-        (`Core.RuleShapes.unclaimedTaclets` says why)"
+        (`RuleShapes.unclaimedTaclets` says why)"
     let mut out := m!"solkey: {KeyTaclet.fmt t}, transcribed by"
     for (n, _) in rows do
       out := out ++ m!"\n\n" ++ (← tacletInfo n)

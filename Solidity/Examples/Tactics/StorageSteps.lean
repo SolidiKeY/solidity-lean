@@ -1,4 +1,3 @@
-import Solidity.Calculus.Sequents
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.Sequents
@@ -20,7 +19,7 @@ is a theorem `⊨ dl!{ … }`, proved one of two ways:
   `unfold r` for Steps 1 and 2, `update r` for Step 3, `empty` for
   `emptyModality`, `intro` for a precondition.  Put the cursor after an `apply`
   to see the next line as a sequent `dl{ Γ ⟹ φ }`, which the headline states
-  as a checked line, `show sequent!{ Γ ⟹ φ }` (`Calculus/Sequents.lean`).
+  as a checked line, `show sequent!{ Γ ⟹ φ }` (`Calculus/Core/Sequents.lean`).
   `refine close ?_` leaves the
   calculus; the `sol_symex` after it runs nothing, it only normalises the goal
   for `sol_close`.  The headline is proved both ways.
@@ -33,7 +32,7 @@ rule the derivation draws.
 The three steps: Step 1 unfolds a read whose receiver or index
 is not simple, Step 2 decomposes a write (source, receiver, index, in that
 order), Step 3 turns a statement whose parts are simple into an update.  The
-rule names are solkey's (`Calculus/Rules.lean`).
+rule names are solkey's (`Calculus/Core/Rules.lean`).
 
 Writes are under the box: `⊨` quantifies over every state, including those
 without `alice`, where `alice.age = 1;` is stuck, so the diamond of a write is

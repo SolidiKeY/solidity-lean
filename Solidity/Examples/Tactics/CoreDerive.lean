@@ -143,15 +143,6 @@ example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1;
     sol_symex
     sol_close
 
-/-! Today's `sol_derive` on today's goal, the scoped one beside it. -/
-
-example : ⊨ dl!{ [ x = 2; ] x == 2 } := by
-  apply Proves.valid
-  sol_derive
-  refine Proves.close ?_
-  sol_symex
-  sol_close
-
 /-! ## Today's short walk
 
 Under `open scoped Solidity.Core.Surface` `sol_derive?` writes today's walk

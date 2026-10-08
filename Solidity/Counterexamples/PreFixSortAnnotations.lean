@@ -77,9 +77,9 @@ theorem flagStore_agree : Core.Agree [.user "x"] flagCore flagStore :=
 /-! ## The copy rule -/
 
 /-- `alice = bob;`, as `storageRootWriteCopySource` matches it. -/
-def aliceCopy : Stmt People :=
-  stmtOf (@Taclet.storageRootWriteCopySource People 0 .box "alice" (.struct "Person") rfl
-    (.loc (.root "bob" rfl)) rfl)
+def aliceCopy : Core.Stmt People [] [] :=
+  stmtOf (@Core.Taclet.storageRootWriteCopySource People 0 .box [] "alice" (.struct "Person") rfl
+    (.loc (.root "bob" rfl)) rfl rfl)
 
 /-- The pre-fix `storageRootWriteCopySource` row is not faithful: at
 `alice = bob;` from a well-typed store the copy source is a `Person` node,
@@ -89,30 +89,30 @@ theorem preFix_rootCopy_not_faithful :
   intro h
   obtain ⟨R, hR, _, hall⟩ := h ⟨.storage, .value, .fixed .int⟩ (by decide)
   cases hR
-  have := hall [] [] [] peopleCore peopleStore peopleStore_wt peopleStore_agree
-    ⟨.loc (.root "bob" rfl), rfl⟩ "bob" [] person0 rfl rfl
+  have := hall [] [] peopleCore peopleStore peopleStore_wt peopleStore_agree
+    "bob" [] person0 rfl rfl
   exact absurd this (by decide)
 
 /-- The fixed row (sort-free `find<[StValue]>`) is faithful there, as
 `faithful_storageRootWriteCopySource` says of every instance. -/
 theorem current_rootCopy_faithful :
-    CtorFaithful ``Taclet.storageRootWriteCopySource aliceCopy :=
+    CtorFaithful ``Core.Taclet.storageRootWriteCopySource aliceCopy :=
   faithful_storageRootWriteCopySource
 
 /-- The pre-fix struct twin (`find<[Struct]>`) is faithful at every statement
 the copy rule fires on: `alice = bob;` copies a reference, never a `bool`. -/
-theorem preFix_rootCopyStruct_faithful {C : Contract} {k : Nat} {m : Modality} {gsp : Name}
-    {R : RefTy} {hgsp : C.rootType gsp = some (.ref R)} {sp : SPath C (.ref R)}
-    {hm : (Ty.ref R).mapFree = true} :
+theorem preFix_rootCopyStruct_faithful {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+    {gsp : Name} {R : RefTy} {hgsp : C.rootType gsp = some (.ref R)}
+    {sp : Core.SPath C Γ (.ref R)} {hm : (Ty.ref R).mapFree = true} {hsp : sp.isSimple = true} :
     RowFaithful preFixStorageRootWriteCopySourceStruct
-      (stmtOf (@Taclet.storageRootWriteCopySource C k m gsp R hgsp sp hm)) :=
+      (stmtOf (@Core.Taclet.storageRootWriteCopySource C k m Γ gsp R hgsp sp hm hsp)) :=
   rowFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide)
 
 /-! ## The read rule -/
 
 /-- `x = flag;`, as `storageRootReadSelect` matches it. -/
-def flagRead : Stmt Flags :=
-  stmtOf (@Taclet.storageRootReadSelect Flags 0 .box (.user "x") "flag" .bool rfl)
+def flagRead : Core.Stmt Flags [.val .bool] [.val .bool] :=
+  stmtOf (@Core.Taclet.storageRootReadSelect Flags 0 .box [.val .bool] .bool .here "flag" rfl)
 
 /-- The pre-fix `storageRootReadSelect` row (`find<[int]>`, no varcond) is not
 faithful: `x = flag;` reads a `bool`. -/
@@ -121,13 +121,13 @@ theorem preFix_readSelect_not_faithful :
   intro h
   obtain ⟨R, hR, _, hall⟩ := h ⟨.storage, .value, .fixed .int⟩ (by decide)
   cases hR
-  have := hall [.val .bool] [.user "x"] [] flagCore flagStore flagStore_wt flagStore_agree
-    ⟨.loc (.root "flag" rfl), rfl⟩ "flag" [] (.bool false) rfl rfl
+  have := hall [.user "x"] [] flagCore flagStore flagStore_wt flagStore_agree
+    "flag" [] (.bool false) rfl rfl
   exact absurd this (by decide)
 
 /-- The current row (`\hasSort`) is faithful there. -/
 theorem current_readSelect_faithful :
-    CtorFaithful ``Taclet.storageRootReadSelect flagRead :=
+    CtorFaithful ``Core.Taclet.storageRootReadSelect flagRead :=
   faithful_storageRootReadSelect
 
 end PreFixSortAnnotations

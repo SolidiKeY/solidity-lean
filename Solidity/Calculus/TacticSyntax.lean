@@ -4,7 +4,7 @@ import Solidity.Calculus.Quote
 # The strategy's tactics: their syntax, and the formula goal they work on
 
 The tactics both calculi elaborate, declared once so that today's
-(`Calculus/Symex.lean`, `Calculus/ProofTree.lean`, `Calculus/Derive.lean`)
+(`Calculus/Core/Symex.lean`, `Calculus/Core/ProofTree.lean`, `Calculus/Core/Derive.lean`)
 and the scoped one (`Calculus/Core/Symex.lean`, `Calculus/Core/Derive.lean`,
 `Calculus/Core/Closers.lean`) each add an elaborator to the same syntax:
 `sol_step`, `sol_symex`, `sol_derive`, `sol_derive?`, `sol_chain?`,

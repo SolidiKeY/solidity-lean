@@ -4,22 +4,20 @@ import Solidity.Calculus.RuleSyntax
 /-!
 # The taclets on scoped statements
 
-`Calculus/Rules.lean`'s rule table over the scoped syntax
-(`docs/intrinsic.md`, W1 "rules"): the constructor lines are `Rules.lean`'s,
-copied verbatim by `scripts/core-rules.mjs` between the markers below, and
-`scripts/check-rule-text.sh` diffs the two copies.  Under
-`open scoped Solidity.Core.Schema` the same `dl{ ⟨[ s; ]⟩ ⇝ p }` writes the
-scoped taclet (`RuleSyntax.schemaTacletCore`): the `\find` read in its
-context `Γ`, a fresh local a position, the `\find`'s schema variables
-weakened past the fresh locals before them (`.there`, `up`), the premise's
-fresh locals popped after it (`Premise.unfold P (Ext.push^d .refl)`), a
-declaration's own local bound (`Premise.bind`) or declared (`Upd.decl`), a
-branch of an `if` a block.  `Calculus/Core/Delab.lean` prints each line as
-today's, all but the rules `#check_rule_text` lists
-(`Calculus/Core/RuleText.lean`, deferred to W2's Delab).
+The rule table over the scoped syntax (`docs/intrinsic.md`, W1 "rules";
+today's `Calculus/Rules`, whose lines these were copied from, went at
+W4 `calc-del`).  Under `open scoped Solidity.Core.Schema` a line
+`dl{ ⟨[ s; ]⟩ ⇝ p }` writes the scoped taclet
+(`RuleSyntax.schemaTacletCore`): the `\find` read in its context `Γ`, a
+fresh local a position, the `\find`'s schema variables weakened past the
+fresh locals before them (`.there`, `up`), the premise's fresh locals popped
+after it (`Premise.unfold P (Ext.push^d .refl)`), a declaration's own local
+bound (`Premise.bind`) or declared (`Upd.decl`), a branch of an `if` a
+block.  `Calculus/Core/Delab.lean` prints each line back;
+`scripts/check-rule-text.sh` checks that every constructor is such a line,
+but the two stated by hand (`blockEmpty`, `functionCallArgCapture`).
 
-What a line needs that `Rules.lean` has under another shape is stated here
-first: the term symbols the lines write (`Tms`, the scoped `Term.find`,
+What a line needs is stated here first: the term symbols the lines write (`Tms`, the scoped `Term.find`,
 `STerm.save`, …), the side conditions (`Loc.isTarget`, `Val.notTernary`,
 the holes' `isTarget`), and a call's inlining (`Premise.expandCall`, the
 premise `callStep` builds).
@@ -224,7 +222,6 @@ end Prelude
 
 open scoped Solidity.Core.Schema
 
--- BEGIN scripts/core-rules.mjs: Taclet
 inductive Taclet (C : Contract) (k : Nat) :
     Modality → {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
   -- Step 1: unfold a storage read ----------------------------------------
@@ -634,17 +631,15 @@ inductive Taclet (C : Contract) (k : Nat) :
               catch Panic (code) panicBody catch otherBody; ] ⇝
           "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ]
           ; "Panic caught": ∀ code. [ panicBody ] ; "other failure caught": [ otherBody ] }
--- END scripts/core-rules.mjs: Taclet
   /-- solkey's `blockEmpty`, scoped only: a block is its statements, its
   locals popped where it ends (`Premise.unfold`'s `Ext`); when they are done,
-  the end goes (`Frames.exit`), KeY's `{} ⇝`.  Today's programs have no
-  nested block, so `Rules.lean` has no line for it. -/
+  the end goes (`Frames.exit`), KeY's `{} ⇝`.  Today's programs had no
+  nested block, so today's table had no line for it. -/
   | blockEmpty {Γ Γ₁ : Ctx} {body : Prog C Γ Γ₁} :
       Taclet C k m (.block body) (.unfold body body.ext)
 
 /-! ## The rules solkey does not have -/
 
--- BEGIN scripts/core-rules.mjs: LeanTaclet
 inductive LeanTaclet (C : Contract) (k : Nat) :
     Modality → {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
 
@@ -734,7 +729,6 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
       (hd : dec.isNone = true := by side_cond) :
       dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv
           while (cond) body; ⟩ ⇝ false }
--- END scripts/core-rules.mjs: LeanTaclet
   /-- An argument that is not simple is captured into a fresh local first,
   the leftmost first (`Args.capture`, the `unfoldArgument` rule): the call is
   closed over its frame, so the capture is the call's own premise. -/

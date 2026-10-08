@@ -1,4 +1,4 @@
-import Solidity.Calculus.Chains
+import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.Rewrite
 import Solidity.Examples.Chains.Storage
 import Solidity.Calculus.Core.LastLine

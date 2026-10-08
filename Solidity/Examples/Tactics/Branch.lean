@@ -56,19 +56,19 @@ open scoped Solidity.Core.Surface
 `thn` and `els` are schema variables for whole blocks (KeY's `#s0`). -/
 
 /--
-info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {nse : Val C PrimTy.bool}
-  {thenStm elseStm : List (Stmt C)},
+info: @Core.Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {nse : Core.Val C Γ PrimTy.bool}
+  {x : Core.Ctx} {thenStm : Core.Prog C Γ x} {x_1 : Core.Ctx} {elseStm : Core.Prog C Γ x_1},
   dl{ ⟨[ if (nse) thenStm else elseStm; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thenStm else elseStm; ]⟩ }
 -/
-#guard_msgs in #check @Taclet.ifElseUnfold
+#guard_msgs in #check @Core.Taclet.ifElseUnfold
 
 /--
-info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool}
-  {thenStm elseStm : List (Stmt C)},
+info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {se : Core.Simple C Γ PrimTy.bool}
+  {x : Core.Ctx} {thenStm : Core.Prog C Γ x} {x_1 : Core.Ctx} {elseStm : Core.Prog C Γ x_1},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
     "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
 -/
-#guard_msgs in #check @Taclet.ifElseSplit
+#guard_msgs in #check @Core.Taclet.ifElseSplit
 
 /-! ## Example: a branch on two locals
 

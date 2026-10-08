@@ -71,23 +71,28 @@ open scoped Solidity.Core.Surface
 
 /-! ## The taclets -/
 
-/-- info: @Taclet.revertBox : ∀ {C : Contract} {k : Nat}, dl{ [ revert(); ] ⇝ true } -/
-#guard_msgs in #check @Taclet.revertBox
-
-/-- info: @Taclet.revertDiamond : ∀ {C : Contract} {k : Nat}, dl{ ⟨ revert(); ⟩ ⇝ false } -/
-#guard_msgs in #check @Taclet.revertDiamond
+/--
+info: @Core.Taclet.revertBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}, dl{ [ revert(); ] ⇝ true }
+-/
+#guard_msgs in #check @Core.Taclet.revertBox
 
 /--
-info: @Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool},
+info: @Core.Taclet.revertDiamond : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}, dl{ ⟨ revert(); ⟩ ⇝ false }
+-/
+#guard_msgs in #check @Core.Taclet.revertDiamond
+
+/--
+info: @Core.Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+  {se : Core.Simple C Γ PrimTy.bool},
   dl{ ⟨[ require(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Reverts": se ≐ false ⟹ ⟨[ revert(); ]⟩ }
 -/
-#guard_msgs in #check @Taclet.requireSimple
+#guard_msgs in #check @Core.Taclet.requireSimple
 
 /--
-info: @Taclet.requireConditionCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {nse : Val C PrimTy.bool},
-  dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
+info: @Core.Taclet.requireConditionCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+  {nse : Core.Val C Γ PrimTy.bool}, dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
 -/
-#guard_msgs in #check @Taclet.requireConditionCapture
+#guard_msgs in #check @Core.Taclet.requireConditionCapture
 
 /-! ## The box: a guard that fails proves anything
 
@@ -152,10 +157,10 @@ assertSimple {
 -/
 
 /--
-info: @Taclet.assertSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Simple C PrimTy.bool},
+info: @Core.Taclet.assertSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {se : Core.Simple C Γ PrimTy.bool},
   dl{ ⟨[ assert(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Violated": se ≐ true }
 -/
-#guard_msgs in #check @Taclet.assertSimple
+#guard_msgs in #check @Core.Taclet.assertSimple
 
 /-- `a == b → [ assert(a == b); x = a; ] x == b`: the box owes the assertion
 too, so it needs the precondition the diamond needs. -/

@@ -7,7 +7,7 @@ import Solidity.Calculus.Core.Delab
 /-!
 # The proof tree of a scoped goal
 
-`Calculus/ProofTree.lean`'s tree, grown on a scoped goal `H ⊢ φ`
+solkey's proof tree (`Calculus/TreeData.lean`), grown on a scoped goal `H ⊢ φ`
 (`Core.Proves`, `Calculus/Core/Proves.lean`): the same nodes, rows, labels
 and printers (`ProofTree.Tree`), the moves the scoped calculus makes.  At a
 goal `⟨[ s; ..ω ]⟩ φ` the rule is the one `Stmt.step` fires, by name
@@ -31,7 +31,7 @@ today's `sol_symex; sol_close` closes (`closeTacs`), then by the tactics
 either modality (`Fml.closableB`).
 
 A rule of an operator family prints as KeY's taclet at its operator
-(`RuleShapes.keyTacletAt`, at today's name of the constructor).
+(`RuleShapes.keyTacletAt`).
 -/
 
 namespace Solidity.Core
@@ -98,15 +98,15 @@ def operatorOf? (env : Environment) (s : Expr) : Option Lean.Name :=
     | none => false).bind (·.constName?)
 
 /-- The name a node prints for the scoped constructor `c` fired on `s`:
-KeY's taclet at the operator, for a row of an operator family (by today's
-name of the constructor); else `c`'s own. -/
+KeY's taclet at the operator, for a row of an operator family; else `c`'s
+own. -/
 def keyName (c : Lean.Name) (s : Expr) : MetaM Lean.Name := do
   let own := Chain.lastName c
-  let today := (`Solidity.Taclet).append own
-  if (RuleShapes.operatorOrder.lookup today).isNone then return own
+  let row := (`Solidity.Core.Taclet).append own
+  if (RuleShapes.operatorOrder.lookup row).isNone then return own
   let s ← instantiateMVars s
   let some op := operatorOf? (← getEnv) s | return own
-  match RuleShapes.keyTacletAt today op with
+  match RuleShapes.keyTacletAt row op with
   | some t => return Lean.Name.mkSimple t.name
   | none => return own
 

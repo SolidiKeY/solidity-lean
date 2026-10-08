@@ -1,6 +1,6 @@
-import Solidity.Calculus.Chains
+import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.ChainRewrites
-import Solidity.Calculus.LastLine
+import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.Close
 import Solidity.FreshNames
 import Solidity.Calculus.Core.LastLine
@@ -10,7 +10,7 @@ import Solidity.Calculus.Core.Surface
 # The storage worked examples as chains
 
 The calculus's storage examples, in order, each one chain term over any modality `m` (the box where a step
-needs it) and postcondition `φ` (`Calculus/Chains.lean`, `.claude/rules/derivations.md`), in the printed
+needs it) and postcondition `φ` (`Calculus/Core/Chains.lean`, `.claude/rules/derivations.md`), in the printed
 names (`FreshNames` tables).  Stand-ins are named at the declaration: `total`, `basketA.items`, `tokens`,
 `bucket.tokens` for `pVal`, `alice.accounts`, `alice.account.tokens`.  Not drawn: the bounds branches (an
 out-of-range index reverts in the path's own check).

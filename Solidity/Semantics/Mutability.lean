@@ -21,7 +21,7 @@ for every body the check accepts (`Prog.frame_of_within`): the run changes
 only the locals the body writes (`Prog.writes`) and, for `nonpayable`, the
 storage and the ledger, which is what `State.havoc` replaces (the state a
 callback leaves, `Semantics/Core/Callback.lean`).  The two facts a contract rule
-reads (`Calculus/Contracts.lean`): a `view` callee leaves storage and, paying
+reads (`Calculus/Core/FunContract.lean`): a `view` callee leaves storage and, paying
 nothing, the ledger as they were (`Prog.view_frame`), and so does a `pure`
 one (`Prog.pure_frame`), whose restriction on reads adds nothing to the
 frame: a contract's `ensures` may read the state anyway.
