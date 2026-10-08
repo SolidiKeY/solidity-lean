@@ -13,8 +13,9 @@ trees differ from today's:
 * a rule that leaves no statement goes on into the rest of the program, or
   past the frames to the postcondition, in one step (`Fml.modalK`, Gate G0's
   condition 6), so there is no `emptyModality` after it;
-* a leaf is closed by `closeTrue` alone until a closer of scoped leaves is
-  given (`Config.closers`).
+* a leaf with a formula left closes as today's does (`Proves.close` on its
+  erasure, then `sol_symex; sol_close`), behind box updates only: under the
+  diamond the leaves stay open (`Core.Proves.close` takes box contexts).
 -/
 
 namespace Solidity.Examples.Tactics.CoreProofTree

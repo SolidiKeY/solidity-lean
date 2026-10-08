@@ -22,9 +22,9 @@ What the scoped calculus adds is not a node:
   tactics of that node: KeY has no step there.
 
 A leaf is closed by `closeTrue` (`true` behind a context of scope ends and
-box updates), else by the tactics `Config.closers` lists; the default list
-is `closeTrue`'s alone, so a leaf with a formula left is open until a
-closer on scoped leaves is given.
+box updates), else by the tactics `Config.closers` lists, else as today's
+tree closes one (`closeTacs`): `Proves.close` on its erasure (a leaf of the
+whole goal's scope, behind box updates), then `sol_symex; sol_close`.
 
 A rule of an operator family prints as KeY's taclet at its operator
 (`RuleShapes.keyTacletAt`, at today's name of the constructor).
@@ -61,6 +61,15 @@ open Solidity.ProofTree (Tree Act short dotIdent runOn)
 structure Config where
   closers : Array (Array (TSyntax `tactic)) := #[]
   maxNodes : Nat := 10000
+
+/-- The closer every tree tries last, as today's tree closes a leaf:
+`Proves.close` at the root's scope, then today's `sol_symex; sol_close` on
+the erasure. -/
+def closeTacs : MetaM (Array (TSyntax `tactic)) := do
+  let rfl' := mkIdent `rfl
+  let nd := mkIdent ``List.nodup_nil
+  return #[← `(tactic| refine $(← short ``Proves.close) [] $rfl' $nd ?_),
+    ← `(tactic| sol_symex), ← `(tactic| sol_close)]
 
 /-- `closeTrue`, the closer every tree tries first. -/
 def closeTrueTacs : MetaM (Array (TSyntax `tactic)) := do
@@ -259,7 +268,7 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
       cs := cs.push (if pre.isEmpty then t else prefixTacs pre t)
     return .node g sequent label (.rule mv.name tacs mv.se) cs
   -- a leaf
-  for tacs in #[← closeTrueTacs] ++ cfg.closers do
+  for tacs in #[← closeTrueTacs] ++ cfg.closers ++ #[← closeTacs] do
     let s ← saveState
     try
       if (← runOn g tacs).isEmpty then return .node g sequent label (.closed tacs) #[]
