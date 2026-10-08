@@ -222,6 +222,36 @@ info:
 
 end
 
+/-! ## A scoped line with a parameter
+
+The rewrites past the program are searched on the erasure with its outer
+`∀ uint ageVal;` dropped, the line `Fml.ViaE` checks (`Examples/Chains/Storage.lean`'s
+`AgeWrite.chain`). -/
+
+section
+variable (m : Modality) (φ : Core.Post StandardExample [.val .uint])
+
+/--
+info: theorem chain :
+    cdl![m]{ ∀ uint ageVal; { ageVal := 42 } ⟨[ alice.age = ageVal; ]⟩ φ }
+    ~[storageFieldWriteSave]~> cdl![m]{ ∀ uint ageVal; { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }
+    ~[sequentialToParallel]~> cdl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
+  sol_chain
+-/
+#guard_msgs in
+#chain cdl![m]{ { ageVal := 42 } ⟨[ alice.age = ageVal; ]⟩ φ }
+
+/-- What `#chain` wrote, pasted. -/
+theorem ageWriteChain :
+    cdl![m]{ ∀ uint ageVal; { ageVal := 42 } ⟨[ alice.age = ageVal; ]⟩ φ }
+    ~[storageFieldWriteSave]~> cdl![m]{ ∀ uint ageVal; { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }
+    ~[sequentialToParallel]~> cdl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
+  sol_chain
+
+#last_line ageWriteChain
+
+end
+
 /-! ## Under the box -/
 
 section
