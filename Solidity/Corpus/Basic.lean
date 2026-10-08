@@ -62,7 +62,8 @@ abbrev Runs {Γ' : Core.Ctx} (m : Modality) (σ : Core.TState C []) (Q : Core.Pr
   Core.holds σ (.modal m Q .nil .tt)
 
 /-- solkey's `\<{ f(); }\>(true)` at the typed state `σ`: the program `P`
-resolves to the scoped syntax, and its typed run from `σ` ends. -/
+resolves to the scoped syntax, and its typed run from `σ` ends normally,
+or is exhausted (`Runs`, decision 15). -/
 def Diamond [FreshNames] (σ : Core.TState C []) (P : Prog C) : Prop :=
   match Core.Prog.resolve [] P with
   | .ok ⟨_, Q⟩ => Runs .diamond σ Q

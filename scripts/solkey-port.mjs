@@ -60,8 +60,10 @@
  *   - `evaluated`: the typed run ends normally, pinned by `#eval` (reason:
  *     the kernel does not decide it);
  *   - `open`: the typed run reverts, panics (a failed `assert`), diverges
- *     or is exhausted — solkey proves it, the interpreter disagrees
- *     (reason: how the run ends), pinned by `#eval`;
+ *     or is exhausted — solkey proves it, the kernel does not (reason: how
+ *     the run ends), pinned by `#eval`.  An exhausted run still satisfies
+ *     `Corpus.Diamond` (decision 15), but `corpus_decide` proves only a run
+ *     that ends normally, so it is `open` too;
  *   - `unsupported`: no obligation is emitted; the reason is the
  *     translator's (a construct the typed syntax lacks) or Lean's (the
  *     elaboration error, verbatim);
@@ -1002,7 +1004,7 @@ async function probe(jobs) {
       child.on("error", reject);
       child.on("close", () => {
         const outcomes = new Map();
-        for (const m of output.matchAll(/^@@PROBE (\S+) (\S+)$/gm)) outcomes.set(m[1], m[2]);
+        for (const m of output.matchAll(/^@@PROBE (\S+) (.+)$/gm)) outcomes.set(m[1], m[2]);
         const errors = new Map();
         let current = null;
         for (const line of output.split("\n")) {
@@ -1030,7 +1032,7 @@ async function probe(jobs) {
           const elab = errs.find((e) => !/^Tactic `decide`/.test(e));
           if (elab) {
             results.set(key, { status: "unsupported", reason: leanString(elab.split("\n")[0]) });
-          } else if (outcome === "unresolved") {
+          } else if (outcome !== undefined && outcome.startsWith("unresolved")) {
             results.set(key, { status: "unsupported", reason: UNRESOLVED_REASON });
           } else if (outcome === undefined) {
             reject(new Error(`probe ${contract}: no outcome for ${fn}:\n${errs.join("\n")}`));

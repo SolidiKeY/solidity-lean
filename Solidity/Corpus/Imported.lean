@@ -70,7 +70,8 @@ The `TestSuite` obligations are derived by the scoped `⊢`
 program resolved (`Core.Prog`).  Its corollary at the initial storage is
 stated over the typed run of that program, as every other corpus row is
 (`Corpus/Basic.lean`): `N.f.problem` is `wt(storage) → ⟨ Q ⟩ true`, and
-`Q`'s typed run from the initial state ends (`Runs`).  It is the scoped
+`Q`'s typed run from the initial state ends normally, or is exhausted
+(`Runs`, decision 15).  It is the scoped
 `⊢`'s soundness (`Core.Proves.valid`) at that state, whose storage is
 well-formed (`initState_wt`); nothing is left to evaluate. -/
 
@@ -80,7 +81,8 @@ variable {C : Contract}
 
 /-- solkey's `\<{ f(); }\>(true)` at `σ`, for an obligation `φ` of no
 parameters: `φ` is `wt(storage) → ⟨ Q ⟩ true` (`Core.Problem.fml`) and
-`Q`'s typed run from `σ` ends. -/
+`Q`'s typed run from `σ` ends normally, or is exhausted (`Runs`,
+decision 15). -/
 def Obligation.Diamond (σ : Core.TState C []) (φ : Core.Fml C []) : Prop :=
   ∃ (Γ' : Core.Ctx) (Q : Core.Prog C [] Γ'), φ = Core.Problem.fml .diamond [] Q ∧ Runs .diamond σ Q
 

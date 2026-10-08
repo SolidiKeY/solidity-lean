@@ -14,9 +14,9 @@ so that it reads as it would in print; the proof is the original's name.
 calculus's (`Calculus/Core/`), over the typed state and its run
 (`Semantics/Core/TypedRun.lean`): a formula `φ : Core.Fml C Γ` is read in a
 typed state `σ : Core.TState C Γ`, and a program `P : Core.Prog C Γ Γ'` runs
-from it by `Core.Prog.trun`.  Three of today's theorems have no scoped twin
-yet; the last section keeps them, over today's calculus, until they are
-ported (`docs/intrinsic.md`, W4).
+from it by `Core.Prog.trun`.  Five of today's theorems, from three modules,
+have no scoped twin yet; the last section keeps them, over today's
+calculus, until they are ported (`docs/intrinsic.md`, W4).
 
 | Notation | Reads | Is |
 |---|---|---|
@@ -210,7 +210,7 @@ theorem compiler_net {P : Core.Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ 
       o.st.sem.getNet mc'.self = 0 :=
   compile_net hP hm hL hrun
 
-/-! ## Their axioms: Lean's three -/
+/-! ## Their axioms: Lean's three at most -/
 
 /-- info: 'Solidity.Main.rule_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms rule_sound
@@ -218,11 +218,17 @@ theorem compiler_net {P : Core.Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ 
 /-- info: 'Solidity.Main.rule_unique' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms rule_unique
 
+/-- info: 'Solidity.Main.rule_is_step' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms rule_is_step
+
 /-- info: 'Solidity.Main.soundness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms soundness
 
 /-- info: 'Solidity.Main.soundness'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms soundness'
+
+/-- info: 'Solidity.Main.solkey_soundness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms solkey_soundness
 
 /-- info: 'Solidity.Main.callback_soundness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms callback_soundness
@@ -238,10 +244,10 @@ theorem compiler_net {P : Core.Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ 
 
 /-! ## Not yet scoped: today's calculus
 
-Three of today's headline results have no scoped twin: that every statement
-has a rule (`Completeness.lean`'s dispatcher), the fragment where solkey's
-rules are the calculus (`SolkeyFragment.lean`), and that symbolic execution
-terminates (`Termination.lean`).  They are stated here over today's `Fml`,
+Five of today's headline theorems, from three modules, have no scoped
+twin: that every statement has a rule (`Completeness.lean`'s dispatcher),
+the fragment where solkey's rules are the calculus (`SolkeyFragment.lean`),
+and that symbolic execution terminates (`Termination.lean`).  They are stated here over today's `Fml`,
 `Stmt` and `Proves` until they are ported; W4 `calc-del` deletes their
 modules, so it ports them or drops them here first (`docs/intrinsic.md`,
 W4). -/
@@ -276,6 +282,23 @@ theorem solkey_rule_exists (h : s.inSolkey m = true) : Taclet C k m s (s.step k 
 no modality. -/
 theorem symex_terminates (n : Nat) (h : φ.measure ≤ n) : (Solidity.symex n φ).active = false :=
   symex_normalizes n φ h
+
+/-! Their axioms: Lean's three at most -/
+
+/-- info: 'Solidity.Main.Today.rule_exists' depends on axioms: [propext] -/
+#guard_msgs in #print axioms rule_exists
+
+/-- info: 'Solidity.Main.Today.solkey_eq_calculus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms solkey_eq_calculus
+
+/-- info: 'Solidity.Main.Today.solkey_lt_calculus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms solkey_lt_calculus
+
+/-- info: 'Solidity.Main.Today.solkey_rule_exists' depends on axioms: [propext] -/
+#guard_msgs in #print axioms solkey_rule_exists
+
+/-- info: 'Solidity.Main.Today.symex_terminates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms symex_terminates
 
 end Today
 

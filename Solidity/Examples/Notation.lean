@@ -176,8 +176,8 @@ set_option pp.sol.dl false in
 #guard_msgs in #check (Core.Premise.done true : Core.Premise StandardExample [] [])
 
 /-! A block of statements, resolved (`Core.Prog.resolve`), its locals left
-in scope after it, quoted (`Core.Premise.quote`) and checked by the
-kernel's type checker. -/
+in scope after it, quoted (`Core.Premise.quote`) and type-checked
+(`Meta.check`, the elaborator's checker). -/
 
 /--
 info: dl{ ⟨[ uint x = 1; alice.age = x; ]⟩ } : Core.Premise StandardExample [] [Core.LTy.val PrimTy.uint]
@@ -272,12 +272,13 @@ end Scoped
 
 /-! ## The rules of `⊢` are sequents
 
-A constructor of `Proves` is written as KeY writes its rule: a sequent over
-the rest `..Γ` of the context, the premises above the conclusion.  `{U} [ ]`
-is an update produced under the box.  `impRight`, `allRight`,
-`emptyModality`, `sequentialToParallel`, `simplifyUpdate` and
-`applyOnRigidFormula` are the constructors' aliases by solkey's names
-(theorems, `Calculus/Logic.lean`). -/
+A rule of the scoped `Core.Proves` (`Calculus/Core/Proves.lean`) is
+written as KeY writes its rule: a sequent over the rest `..H` of the
+context, the premises above the conclusion.  `{U} [ ]` is an update produced
+under the box.  `Core.Proves.impRight`, `allRight` and `emptyModality` are
+the constructors `intro`, `allIntro` and `empty` by solkey's names (theorems,
+`Calculus/Core/ProofTree.lean`); `sequentialToParallel` is the constructor
+`merge`. -/
 
 /--
 info: @Core.Proves.impRight : ∀ {C : Contract} {R : RuleSet} {Γ₀ Γ : Core.Ctx} {H : Core.Hyps C Γ₀ Γ} {a φ : Core.Fml C Γ},
@@ -287,10 +288,13 @@ info: @Core.Proves.impRight : ∀ {C : Contract} {R : RuleSet} {Γ₀ Γ : Core.
 
 /-! ### Today's, until W4
 
-Today's `merge`, which the scoped sequent states otherwise (`Core.Proves.merge`
-merges past hidden binders, its side conditions computed), and today's
-sequent macros, which have no scoped input form: the scoped goals print as
-sequents (above) but are written as `Core.Proves` terms. -/
+Today's `merge`, which the scoped sequent states otherwise
+(`Core.Proves.merge` merges past hidden binders, its side conditions
+computed), and today's sequent macros, which have no scoped input form: the
+scoped goals print as sequents (above) but are written as `Core.Proves`
+terms.  Today's `Proves` has its own aliases by solkey's names
+(`sequentialToParallel`, `simplifyUpdate`, `applyOnRigidFormula`, …:
+theorems, `Calculus/Logic.lean`), over the rest `..Γ` of its context. -/
 
 /--
 info: @merge : ∀ {C : Contract} {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C},
