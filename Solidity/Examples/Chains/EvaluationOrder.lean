@@ -1,6 +1,8 @@
 import Solidity.FreshNames
 import Solidity.Calculus.Chains
 import Solidity.Calculus.LastLine
+import Solidity.Calculus.Core.LastLine
+import Solidity.Calculus.Core.Surface
 
 /-!
 # Evaluation order of indexed writes
@@ -13,15 +15,15 @@ of the printed lines), from `i` 7.  The elaborator captures the value first
 not taken.  The chain is one term, grouped as the paper prints it, every
 capture kept, and ends with the write folded to literals.
 
-It reads `Update.lean`'s calculus, not the scoped one (`open scoped
-Solidity.Core.Surface`): the elaborator writes the captures (`a`, `b`) in
-front of the write, so the scoped reading leaves them, fresh variables, in
-scope at the postcondition, whose erasure is then no postcondition
-(`Core.Post.erase`), until the elaborator puts a statement's captures in a
-block of their own.
+It reads the scoped calculus (`open scoped Solidity.Core.Surface`): the
+elaborator writes the captures (`a`, `b`) in front of the write, and the
+postcondition `φ` stands where they are out of scope (`Core/Notation.lean`'s
+`NCtx.dropFresh`), at the context of `i` alone.
 -/
 
 namespace Solidity.Examples.Chains.EvaluationOrder
+
+open scoped Solidity.Core.Surface
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -43,12 +45,12 @@ local instance : FreshNames := .ofTable names
 
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
-variable (m : Modality) (φ : Post StandardExample)
+variable (m : Modality)
 
 -- The paper's first `⇝`, the program split into its captures, is the elaborator's: the printed line
 -- `uint a = i; uint b = i++; m[b] = a;` is the same formula as the source (Lean declares `b`, then
 -- assigns it).
-example : dl![m]{ { i := 7 } ⟨[ balances[i++] = i; ]⟩ φ }
+example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { i := 7 } ⟨[ balances[i++] = i; ]⟩ φ }
     = dl![m]{ { i := 7 } ⟨[ uint a = i; uint b; b = i++; balances[b] = a; ]⟩ φ } := rfl
 
 /-- `balances[i++] = i;` with `i` 7, as `uint a = i; uint b = i++; balances[b] = a;`: the
@@ -57,7 +59,7 @@ Lean declares `b` and then assigns it, where the printed lines initialise it, so
 `b := 0` and then `{ i := i + 1 ‖ b := i }`.  The write by the captured index (`balances[b]`) with the
 empty program after it is the paper's `⇝`; the merge resolves it to `balances[7]` and the value to `7`,
 and `i + 1` folds to `8`. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ { i := 7 } ⟨[ balances[i++] = i; ]⟩ φ }
     ~*> dl![m]{ { i := 7 } { a := i } { b := 0 } { i := i + 1 ‖ b := i } ⟨[ balances[b] = a; ]⟩ φ }
     ~*> dl![m]{ { i := 7 } { a := i } { b := 0 } { i := i + 1 ‖ b := i }

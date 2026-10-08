@@ -353,18 +353,10 @@ theorem chain (φ : Core.Post TestSuite [.val .uint, .val .uint, .val .uint]) :
 end MappingDelete
 
 end
-end Solidity.Examples.Chains.StorageDelete
 
-/-! ## Left on `Update.lean`'s calculus
-
-`IndexDelete`, whose program the elaborator writes with the index captured in front (`uint idx; idx = ++i;`, solc's evaluation order): the scoped reading leaves the capture, a fresh variable, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`).  It reads as today's chain until the elaborator puts a statement's captures in a block of their own. -/
-
-namespace Solidity.Examples.Chains.StorageDelete
-
-local instance : InContract := ⟨TestSuite⟩
 
 section
-variable (m : Modality) (φ : Post TestSuite)
+variable (m : Modality)
 
 namespace IndexDelete
 def names : FreshTable := [("toks", "sp1"), ("idx", "se2"), ("arr", "sp3")]
@@ -375,7 +367,7 @@ before the statement (`uint idx; idx = ++i; delete toks[idx];`, the paper's firs
 `toks`, `idx` and `i`; `storageIndexArrayDelete` writing `delAt` at the element (the in-bounds branch
 only); the length read through `arr`; the merge, which resolves the element to `bucket.tokens[2 + 1]`; the
 delete does not touch the length (`lenOnDelAtFrame`), and the index folds to `3`. -/
-theorem chain :
+theorem chain (φ : Core.Post TestSuite [.val .uint, .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
     ~*> dl![m]{ { i := 2 } { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
           ⟨[ delete toks[idx]; len = bucket.tokens.length; ]⟩ φ }

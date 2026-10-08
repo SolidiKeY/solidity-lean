@@ -374,20 +374,13 @@ end FieldDeleteRef
 
 end
 
-end Solidity.Examples.Chains.MemoryDelete
-
-/-! ## Left on `Update.lean`'s calculus
-
-`IndexedDelete`, whose program the elaborator writes with the receiver and the index captured in front (`toks = b.tokens; uint idx; idx = ++i;`): the scoped reading leaves the captures, fresh variables, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`).  It reads as today's chain until the elaborator puts a statement's captures in a block of their own. -/
-
-namespace Solidity.Examples.Chains.MemoryDelete
 
 section
 
 namespace IndexedDelete
 
 local instance : InContract := ⟨TestSuite⟩
-variable (m : Modality) (φ : Post TestSuite)
+variable (m : Modality)
 
 /-- `toks` and `idx`, the receiver and the captured index. -/
 def names : FreshTable := [("toks", "mv1"), ("idx", "se2")]
@@ -395,14 +388,18 @@ local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes TestSuite names).isEmpty
 
 /-- `Token memory tk = b.tokens[++i]; tk.value = 9; delete b.tokens[i]; oldValue = tk.value;
-newValue = b.tokens[i].value;` with `i` 1, run.  The elaborator captures the receiver and the index
+newValue = b.tokens[i].value;` with `i` 1.  The elaborator captures the receiver and the index
 before the statement (`toks = b.tokens; uint idx; idx = ++i; tk = toks[idx];`, the paper's first `⇝`
 and `⇝*`); the run binding `toks`, `idx`, `i` and `tk` and writing `tk.value`, to the delete (`⇝*`);
 `delete` writing a fresh default `Token` at the element (`⇝`); the two reads (`⇝*`); the merge, which
 resolves the element to `toks[1 + 1]`; then the references: the array read again (`mv3`, `mv5`) is
 `toks`'s, past `tk.value`'s write and the delete's write and allocation, and the element `mv4` the fresh
-object the delete wrote (`readOnWriteIdentity`). -/
-theorem run :
+object the delete wrote (`readOnWriteIdentity`).  Then the reads: `oldValue` past the delete's write and
+allocation to the write through `tk`, `9`; `newValue`, `mv4`'s `value`, past the delete's write to the
+fresh object's default, `0`; `i`, `idx` and the element `[1 + 1]` fold to `2` (`add_literals`, inside
+the memory terms too).  The element position is overwritten with a fresh default object, and `tk` keeps
+the old one. -/
+theorem chain (φ : Core.Post TestSuite [.mem (.struct "Token"), .mem (.struct "TokenBucket"), .val .uint, .val .uint, .val .uint]) :
     dl![m]{
       { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
         ⟨[ Token memory tk = b.tokens[++i]; tk.value = 9; delete b.tokens[i];
@@ -995,72 +992,7 @@ theorem run :
                             read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                         9),
                       Token)).value) }
-          φ } := by
-  sol_chain
-
-/-- The rest of `IndexedDelete.run`: `oldValue` read past the delete's write and allocation to the write
-through `tk`, `9`; `newValue`, `mv4`'s `value`, past the delete's write to the fresh object's default,
-`0`; `i`, `idx` and the element `[1 + 1]` fold to `2` (`add_literals`, inside the memory terms too). -/
-theorem reads :
-    dl![m]{
-      { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
-          toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
-          idx := 1 + 1 ‖
-          tk :=
-            read(addM(memory, TokenBucket),
-              read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]) ‖
-          mv3 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-          memory :=
-            write(addM(write(addM(memory, TokenBucket),
-                  read(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                  9),
-                Token),
-              read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1],
-              freshId(addM(write(addM(memory, TokenBucket),
-                    read(addM(memory, TokenBucket),
-                        read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                    9),
-                  Token))) ‖
-          oldValue :=
-            read(write(addM(write(addM(memory, TokenBucket),
-                    read(addM(memory, TokenBucket),
-                        read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                    9),
-                  Token),
-                read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1],
-                freshId(addM(write(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket),
-                          read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                      9),
-                    Token))),
-              read(addM(memory, TokenBucket),
-                  read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-          mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-          mv4 :=
-            freshId(addM(write(addM(memory, TokenBucket),
-                  read(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                  9),
-                Token)) ‖
-          newValue :=
-            read(write(addM(write(addM(memory, TokenBucket),
-                    read(addM(memory, TokenBucket),
-                        read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                    9),
-                  Token),
-                read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1],
-                freshId(addM(write(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket),
-                          read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                      9),
-                    Token))),
-              freshId(addM(write(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket),
-                          read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                      9),
-                    Token)).value) }
-        φ }
+          φ }
     ~[readWriteDifferent]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
@@ -1308,45 +1240,6 @@ theorem reads :
             newValue := 0 }
           φ } := by
   sol_chain
-
-/-- `Token memory tk = b.tokens[++i]; tk.value = 9; delete b.tokens[i]; oldValue = tk.value;
-newValue = b.tokens[i].value;` with `i` 1: `run` then `reads`.  The element position is overwritten
-with a fresh default object, and `tk` keeps the old one: `9` through `tk`, the default `0` at the
-overwritten position. -/
-theorem chain :
-    dl![m]{
-      { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
-        ⟨[ Token memory tk = b.tokens[++i]; tk.value = 9; delete b.tokens[i];
-          oldValue = tk.value; newValue = b.tokens[i].value; ]⟩ φ }
-    ~~> dl![m]{
-      { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
-          toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 2 ‖
-          idx := 2 ‖
-          tk :=
-            read(addM(memory, TokenBucket), read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]) ‖
-          mv3 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-          memory :=
-            write(addM(write(addM(memory, TokenBucket),
-                  read(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]).value,
-                  9),
-                Token),
-              read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2],
-              freshId(addM(write(addM(memory, TokenBucket),
-                    read(addM(memory, TokenBucket),
-                        read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]).value,
-                    9),
-                  Token))) ‖
-          oldValue := 9 ‖ mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-          mv4 :=
-            freshId(addM(write(addM(memory, TokenBucket),
-                  read(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]).value,
-                  9),
-                Token)) ‖
-          newValue := 0 }
-        φ } :=
-  (run ..).leads.via (reads ..)
 #last_line chain
 
 end IndexedDelete

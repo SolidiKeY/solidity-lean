@@ -236,18 +236,10 @@ theorem field (φ : Core.Post Pushes [.alias (.struct "Token"), .val .uint, .val
 end BucketPushField
 
 end
-end Solidity.Examples.Chains.StorageArrays
 
-/-! ## Left on `Update.lean`'s calculus
-
-`PushCall` and `EmptyPush.lvalue`, whose program the elaborator writes with the argument captured in front (`uint pv = makeValue(); values.push(pv);`): the scoped reading leaves the capture, a fresh variable, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`).  They read as today's chains until the elaborator puts a statement's captures in a block of their own. -/
-
-namespace Solidity.Examples.Chains.StorageArrays
-
-local instance : InContract := ⟨Pushes⟩
 
 section
-variable (m : Modality) (φ : Post Pushes)
+variable (m : Modality)
 
 namespace PushCall
 def names : FreshTable := [("pv", "se1")]
@@ -256,7 +248,7 @@ local instance : FreshNames := .ofTable names
 /-- `values.push(makeValue());` with `seed` 7: the argument captured (`pv`, the elaborator's), the call
 inlined and run (its local `se2` is the printed `makeValue()`), then the value pushed, the paper's one `⇝*`;
 the merge, and the read of `seed` resolved (`findOnSave`).  The length is `values.length`. -/
-theorem chain :
+theorem chain (φ : Core.Post Pushes []) :
     dl![m]{ { storage := save(storage, seed, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
     ~*> dl![m]{
         { storage := save(storage, seed, 7) }
@@ -284,7 +276,7 @@ local instance : FreshNames := .ofTable [("pv", "se1")]
 /-- `values.push() = makeValue();` with `seed` 7: a push used as a target is the push of its right-hand side
 (the paper's `⇝`, the elaborator's), then as for `values.push(makeValue())`, whose chain this is: the program
 is the same once elaborated.  The element is written before the length. -/
-theorem lvalue :
+theorem lvalue (φ : Core.Post Pushes []) :
     dl![m]{ { storage := save(storage, seed, 7) } ⟨[ values.push() = makeValue(); ]⟩ φ }
     ~*> dl![m]{
         { storage := save(storage, seed, 7) }
