@@ -1100,7 +1100,16 @@ docstring still names `Premise.cover` (not this lane's file).
   the `chains` lane's; it reads scoped once its elaborator takes a
   `Core.Fml` line, since its lines are `dl!{}`.
 
-Pins (`Examples/Tactics/CoreProofTree.lean`, `CoreSurface.lean`,
+- **Checked sequent lines** (`Calculus/Core/Sequents.lean`): a scoped
+  goal carries frames (`pop`, `seq`, hidden binders) that a flat program
+  read back does not, so `show` cannot compare it by unfolding.
+  `show_sequent!{ Γ ⟹ φ }` (and, under the switch, `show sequent!{ … }`)
+  compares the goal's erasure, as it prints, with the line read as
+  today's sequent, by unification: the line is written as the goal prints
+  (today's spellings), without a block's `}`, a hidden binder no entry,
+  a `∀ T x` entry read (`readSequent`).
+
+Pins (`Examples/Tactics/CoreProofTree.lean`, `CoreSurface.lean`, `CoreSequents.lean`,
 `CoreCallback.lean`) differ from today's `Examples/ProofTree.lean` where
 the scoped calculus does, each for a reason W3's list should carry:
 a parameter is bound by `∀` (`cdl!`), so a tree starts with `allRight`;
