@@ -68,4 +68,9 @@ private def iteLt : Core.Stmt SE [.val .uint] [.val .uint] :=
 /-- info: Solidity.Core.LeanTaclet.whileUnwind -/
 #guard_msgs in #rule_of .box (Core.Stmt.loop (C := SE) (Γ := []) (.unwind 2) (.simple (.bool true)) .nil)
 
+/-! The axioms `Rule.premise_unique` (and so every `toStep` lemma) uses. -/
+
+/-- info: 'Solidity.Core.Rule.premise_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Core.Rule.premise_unique
+
 end Solidity.Examples.Tactics.CoreRules

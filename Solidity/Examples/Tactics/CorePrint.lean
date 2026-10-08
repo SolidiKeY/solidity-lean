@@ -48,10 +48,7 @@ info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ
 
 /-! `#taclet` on a scoped taclet: its line, today's solkey taclets.  The
 rule is one that prints as today's (`storageFieldRead_unfold_rightFst`, a
-read through a hole, is on `#check_rule_text`'s list until W2's Delab).
-The `sound:` line is `Tools/Inspect.lean`'s, which still names the deleted
-`Core.Taclet.erase`: pinned as it prints until that file's owner makes it
-name `Taclet.toStep` (`docs/intrinsic.md`, W1 lane `rules`, "Left"). -/
+read through a hole, is on `#check_rule_text`'s list until W2's Delab). -/
 
 /--
 info: Solidity.Core.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
@@ -59,7 +56,7 @@ info: Solidity.Core.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract
   dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete sp.fld; ]⟩ }
 solkey: storageFieldDelete_unfold_leftFst (simplify_prog)
 printed: storageFieldDelete_unfold_leftFst
-sound: pending (the scoped run, M3 of docs/intrinsic.md); Solidity.Core.Taclet.erase: an instance of today's rule
+sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet Core.Taclet.storageFieldDelete_unfold_leftFst
 
