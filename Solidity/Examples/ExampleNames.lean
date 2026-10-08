@@ -25,8 +25,7 @@ as they do in the default spelling.
 
 The formulas read the scoped calculus (`open scoped Solidity.Core.Surface`,
 sections `Scoped`), a table changing the scoped lines' spellings as it does
-today's.  The error of `sol_chain` is today's: the scoped chain's error does
-not print the line it does not reach.
+today's, `sol_chain`'s error included.
 -/
 
 namespace Solidity.Examples.ExampleNames
@@ -84,8 +83,6 @@ example : dl!{ { se1 := 10 } true } = dl!{ { pv := 10 } true } := rfl
 -- a capture is numbered past `pv`
 example : dl!{ ⟨ values[total + 1] += 2; ⟩ pv == 0 } = capturedDl := rfl
 
-end Scoped
-
 -- an error prints the table's names too
 /--
 error: sol_chain: the derivation of
@@ -104,6 +101,8 @@ example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
     ~> dl!{ ⟨ uint pv = 11; Account storage acc = alice.account; acc.balance = pv; ⟩
             alice.account.balance == 10 } := by
   sol_chain
+
+end Scoped
 
 end Headline
 

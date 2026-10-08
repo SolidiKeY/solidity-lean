@@ -1,5 +1,6 @@
 import Solidity.Semantics.Core.Callback
 import Solidity.Calculus.Core.Callback
+import Solidity.Calculus.Core.CallbackHolds
 import Solidity.Calculus.Core.Notation
 
 /-!
@@ -11,9 +12,16 @@ callback runs, the deterministic one, unless the invariant breaks on the way
 one, so a fact of every callback run is decided by running it
 (`ExecP.forall_iff`).
 
+The reading with callbacks over the typed state (`holdsC`, `ValidC`,
+`Calculus/Core/CallbackHolds.lean`): a formula with no payment reads as
+without callbacks, and `pre → [ P ] post` true with callbacks is true
+without, when only `P` pays.
+
 The calculus with callbacks (`ProvesC`, `Calculus/Core/Callback.lean`) on a
 send: solkey's three goals of `sendWithCallbackBox`, each closed in the
-plain calculus, the invariant `true`.
+plain calculus, the invariant `true`.  Its soundness against `ValidC`
+waits on `Stmt.TSound` (`docs/intrinsic.md`, decision 17), so the
+derivation is pinned, not read as `ValidC`.
 -/
 
 namespace Solidity.Examples.Tactics.CoreCallback
@@ -45,9 +53,30 @@ example (J : StateInv StandardExample) :
       o.halt? = some .revert :=
   (ExecP.forall_iff rfl (fun o => o.halt? = some .revert)).2 (by decide +kernel)
 
-/-! ## The calculus with callbacks -/
-
 local instance : InContract := ⟨StandardExample⟩
+
+/-! ## The reading with callbacks -/
+
+/-- With no payment the two readings agree (`holdsC_iff_holds`), whatever
+the invariant. -/
+example (I : Invariant StandardExample) :
+    ValidC I cdl!{ [ uint x = 1; ] x == 1 } ↔ TValid cdl!{ [ uint x = 1; ] x == 1 } :=
+  ⟨fun h σ => (holdsC_iff_holds _ rfl σ).1 (h σ), fun h σ => (holdsC_iff_holds _ rfl σ).2 (h σ)⟩
+
+/-- KeY's `transferSemantics` option: `noCallback` is the typed reading
+(`validT_noCallback`), `withCallback I` the one with callbacks. -/
+example (I : Invariant StandardExample) (φ : Core.Fml StandardExample []) :
+    (ValidT .noCallback φ ↔ TValid φ) ∧ (ValidT (.withCallback I) φ ↔ ValidC I φ) :=
+  ⟨validT_noCallback, validT_withCallback⟩
+
+/-- A payment true with callbacks is true without: the deterministic run
+is a callback run (`valid_of_validC`, from `Prog.exec_run`). -/
+example (I : Invariant StandardExample) (a : Core.Fml StandardExample []) (P : Core.Prog StandardExample [] [])
+    (H : ValidC I (.imp a (.modal .box P .nil .tt))) (ha : a.hasTransfer = false) :
+    TValid (.imp a (.modal .box P .nil .tt)) :=
+  valid_of_validC H ha rfl
+
+/-! ## The calculus with callbacks -/
 
 /--
 trace: case h.h.exit

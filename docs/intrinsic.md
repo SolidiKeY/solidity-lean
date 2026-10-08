@@ -3008,6 +3008,134 @@ The scoped `TestSuite` shapes of `Calls` check in about 1.3× today's kernel
 time (four of them, 3.3 s against 2.6 s); the gate modules were not
 re-timed.
 
+### W3b lane `tree` (`w3b-tree`, 2026-10-08)
+
+Merged `w3b-chains` at c214204 (its scoped error printer, `indentLine`,
+under the change below) and `w3b-tactics` at 1fb3e60, which had made the
+same change to `Proves.close` (d30bb95) and the same scoped `sol_prove?`
+(ac8d23f): their versions of `Calculus/Core/{Closable,Close,CloseErase,Proves}.lean`
+and `Closers.lean`'s `sol_prove?` are kept, this lane's copies dropped
+(its module, `ProvesSearch`, deleted).  No new `sorry`, `axiom` or `maxHeartbeats`.
+Before that merge (3859a2a): `lean_build` (default targets) green, 301
+jobs; `TestSuite/CoreSeq`, `CoreDerived11`, `Examples/Chains/StorageCoverage`,
+`Tactics/CoreChains` checked one by one.
+
+Then merged `w3b-tactics` through 1e71cb1: `Tactics/Dangling`'s diamond walk
+flipped (its docstrings fixed), `Tactics/Contracts` flipped through
+`sol_erase` (`Calculus/Core/Contracts.lean`), the module-map rows of
+`Close`/`Closable`/`CloseErase` corrected.  `Core.Walk.walk`'s tag rule
+stays this lane's (below); 0209193's last component past macro scopes and
+`h` is not taken (erasing the macro scopes before the prefix test turns
+the invariant walk's `checkLean .loopExit` case `thn` into `h` in
+`ProofTree`'s pin).
+On top of it, from the review: `Decide.deleteWithoutWriteUntyped`, the
+refutation over today's untyped storage (`¬ ⊨`, no `wt(storage)`), restored
+in `Tactics/Decide`'s closing block, which `Calculus/Decide.lean` and
+`Benchmark/Mapping` now cite; two regression pins in
+`Tactics/CoreProofTree` for `operatorOf?` (`lessEqualAssignment` before an
+`if` and in its branch).  `lean_build` of the merged tree (default targets):
+green, 302 jobs, every `sol_derive?` pin (`ProofTree`, `CoreProofTree`,
+`Loops`, `CoreDerive`) among them.
+
+- **A diamond leaf closes where its updates keep the `bool` locals
+  `bool`s** (done by both lanes, `w3b-tactics`' kept; for the lead to confirm: a change to `Proves.close`'s side
+  condition, not a new rule).  `Fml.Closable`'s update arm is `(m = .box ∨
+  U.boolB = true) ∧ …` and `Fml.closableB`'s `(decide (m = .box) ||
+  U.boolB) && …`; `holds_of_erase_valid` (`Calculus/Core/CloseErase.lean`)
+  proves the diamond arm by `Upd.apply_boolOK`, exactly as the `Core.Valid`
+  route's `Fml.posB` already did (`holds_of_erase_pos`); this lane's
+  copy checked the same way.  So it is sound
+  over M3's states with no hypothesis: `Proves.valid` and
+  `#print axioms` are unchanged, and CORE 2's switch to `Fml.tclosableB`
+  subsumes it (`Closable.tclosable` needed no change).  What it does not
+  take: a diamond update that sets a `bool` local from a storage or memory
+  read (`Tm.boolB` is false there), the case CORE 2 is about.
+- **Scoped `sol_prove?`**: `w3b-tactics`' (`Calculus/Core/Closers.lean`),
+  which `Examples/ProofTree.lean` now imports; with it come the walk
+  macros (`WalkSyntax.lean`), so the scoped `sol_derive?` writes today's
+  short walk there (`Walk.surfaceOn`).
+- **Tool fixes.**  `Core.ProofTree.operatorOf?` takes a constructor of
+  `BinOp`/`UnOp`/`IncDec`, not a function of the namespace: an `if`
+  branch's statement carries `BinOp.ret` in a value's type, and its node
+  printed `binopAssignment` for `lessEqualAssignment` (pinned since, in
+  `Tactics/CoreProofTree`).
+  `Core.Walk.walk` cites a step's goals by name only when every goal has
+  one, else bullets in order, as today's walk takes `cases` apart (the
+  diamond send's first goal is tagged `fml`, the others not); the name is
+  the first component of the tag past the stepped goal's (`w3b-tactics`
+  cc371e9 took the first component of the whole tag, right past a silent
+  step's `thn.h` but `thn` for an invariant's `thn.els` inside a branch).  The scoped chain error
+  (`Calculus/Core/Chains.lean`) is today's: the line not reached, printed
+  as a line where it elaborates alone (lazily, `MessageData.ofLazyM`: done
+  eagerly, a search that catches the error re-elaborated it at every try
+  and `Chains/StorageCoverage` crashed), and its lines in today's layout
+  (`showLinesErr`; `#derivation`'s `showLines` unchanged).
+- **Flipped**: `Examples/ProofTree.lean`'s diamond trees and walks (the
+  first tree, `sendNoCallbackDiamond`'s tree and walk, `guardedCopy`, the
+  two call trees, the unwound loop), its `sol_prove?` section (box and
+  diamond, `wtStd` now `Core.Fml.wt`), the `assert` `sol_prove?`;
+  `Examples/ExampleNames.lean`'s chain error.
+  `Examples/Tactics/CoreCallback.lean` pins the typed reading with
+  callbacks (`ValidC ↔ TValid` with no payment, `validT_*`,
+  `valid_of_validC`); `ProvesC`'s derivation stays pinned, not read as
+  `ValidC` (decision 17).
+- **Pins changed, with reasons** (W3's numbers; "W2 `tree`" is the
+  parameters' `∀`):
+  - `ProofTree`, the first tree: `allRight` first (W2 `tree`), no `cov`
+    (1), no `emptyModality` after the last statement and serials shifted
+    (3): 11 nodes, 2 branches for 12 and 3.
+  - `ProofTree`, `sendNoCallbackDiamond`'s tree: no `emptyModality` (3), 6
+    nodes for 8.
+  - `ProofTree`, the two diamond call trees: the callee's body ends by
+    `blockEmpty` (the reason the tactics lane left for the lead, W3
+    `tactics` Left 7(b): the scoped inlining keeps the body a block), no
+    `emptyModality` (3).
+  - `ProofTree`, every `sol_derive?` suggestion: today's walk text again
+    (`w3b-tactics`' short walk, which `Closers.lean` brings in), in place
+    of the W3 tree lane's `Core.Proves` constructors: the diamond send's
+    and `guardedCopy`'s are today's but for `cov` (1) and `emptyModality`
+    (3); the unwound loop's also takes `blockEmpty` on the body (7(b));
+    the box walks (the send, `ifElseSplit`, `transferFrameStorage`, the
+    `assert`, the invariant) have no `allRight` line (the parameters' `∀`
+    is not written), `splitBox`/`Proves.check`/`invBox` as today's, and a
+    `true` leaf closed by `refine close ?_; sol_symex; sol_close` (today's,
+    where the W3 tree lane's had `exact Core.Proves.closeTrue rfl`).
+  - `Tactics/CoreProofTree`, the diamond send's tree: its three leaves
+    close (they were `OPEN GOAL`): the change to `Proves.close` above
+    (`w3b-tactics`' version of the pin).
+  - Unchanged: every `sol_prove?` suggestion (the scoped one suggests
+    today's replay), `ExampleNames`' error text, `#proof_node`,
+    `#proof_tree_json`, the fresh names.
+- **Gate** (`Examples/ProofTree`, 12.1 s): from its first command to its
+  last (timestamps in a scratch copy, imports cached; not the M0 method,
+  other agents running), 11.4 s before the `w3b-tactics` merge and 12.0 s
+  after it (the short walks re-run each line through the scope's macros):
+  at the limit.
+- **Left.**
+  1. `Examples/Verify.lean` whole.  `#verify` would elaborate `⊨
+     spec[C]{f}` in the caller's scope (a one-line change), but its
+     refutation certifies today's `¬ ⊨ spec[C]{f}`, not the scoped
+     statement, and a typed-run `#counterexample` would refute `TValid`,
+     while the scoped `⊨` is M3's `Core.Valid` until CORE 2.  Both wait on
+     decision 17; the certificate over the scoped formula would then be a
+     typed `eval3` (`Fml.eval3` over `TState` and `Prog.trun`).
+  2. `ProofTree`'s `sol_chain?`, `#chain` and `sol_rws?` sections: no
+     scoped twin on `w3b-chains` yet.
+  3. `ProofTree`'s two interval examples (`∀ uint x; x <= 100 → …`): the
+     scoped leaf's erasure has its leading `∀`s stripped
+     (`Fml.stripAlls`, `Seq.leafRes`), the explicit one with the
+     parameters', so today's closer loses `x`'s `uint` range: the diamond
+     one leaves its leaf, the box one needs `sol_decide_cons`.  Keeping an
+     explicit `∀` needs telling it from a parameter's, which `cdl!`'s
+     output does not.
+  4. The testsuite's diamond obligations where every diamond update keeps
+     the `bool` locals `bool`s.  The tactics lane's diamond walks
+     (`Payment`, `Branch`, `Revert`, `ApplySteps.guardedCopy`, `Loops`,
+     `Calls`, `Dangling`) are flipped on this branch, through the two
+     `w3b-tactics` merges; no `Examples/Tactics` closing block holds a
+     diamond walk any more.
+  5. The read-only review pass was not run.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean

@@ -462,21 +462,28 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   match gs with
   | [g'] => return head ++ (← walk fuel leaves g' close short)
   | gs =>
+    -- a goal's name is its tag's first part past the step's goal's (`els`
+    -- under `thn`, past a silent step's `els.h`); `and_intros`' goals
+    -- (`refine_1`, …) have none to cite
+    let parent := (← g.getTag).components
+    let tags ← gs.mapM fun g' => do
+      let cs := (← g'.getTag).components
+      let cs := if parent.isPrefixOf cs then cs.drop parent.length else cs
+      match cs.head? with
+      | some (.str _ l) => return if l.startsWith "refine_" then none else some l
+      | _ => return none
+    -- cited by name when every goal of the step has one (`thn`, `els`); else
+    -- bullets, in order, as today's walk takes a rule's goals apart (`cases`'
+    -- formula goal is `fml`, its updates' goals have no name)
+    let cite := tags.all Option.isSome
     let mut out := head
-    for g' in gs do
+    for g' in gs, tag in tags do
       let body ← walk fuel leaves g' close short
-      -- a goal's name is its tag's last part, past the macro scopes and the
-      -- binder a silent step adds (`thn.h`, under the scope's lines)
-      let comps := ((← g'.getTag).eraseMacroScopes.components.reverse.dropWhile (· == `h)).reverse
-      match comps.getLast?.getD .anonymous with
-      -- `and_intros`' goals (`refine_1`, …) have no name to cite: bullets
-      | .str _ l =>
-        if l.startsWith "refine_" then
-          out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
-          continue
+      match cite, tag with
+      | true, some l =>
         out := out.push s!"case {l} =>"
         out := out ++ body.map ("  " ++ ·)
-      | _ => out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
+      | _, _ => out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
     return out
 
 /-- The walk from the goal `g` (`Core.Valid φ` starts with `Proves.valid`):
