@@ -290,7 +290,7 @@ TestSuite rows without Lean; `docs/corpus-parity.md` is the scoreboard.
 | Module | What it defines |
 |---|---|
 | `Corpus/Basic.lean` | The corpus's obligation `Diamond σ P`, `corpus_decide` (resolved, run typed: `trunOk`), the stores as typed starts. |
-| `Corpus/Imported.lean` | `testSuite_agrees` (the hand-written `TestSuite`'s roots are the imported one's), `Box`, `diamond_of_proved`, `box_of_proved`. |
+| `Corpus/Imported.lean` | `testSuite_agrees` (the hand-written `TestSuite`'s roots are the imported one's), `Box`; a scoped `⊢` obligation of no parameters at the initial storage, over the untyped run of its program's erasure (`Core.modal_of_proved`, `diamond_of_proved`, `box_of_proved`), given `Core.scopedRunsB` (the program fresh, `Prog.freshB`; its typed run from there ends, `TRes.endsB`), which the kernel evaluates. |
 | `Corpus/TestSuite.lean` | Generated: each derived `TestSuite` obligation with no parameters at `Solkey.TestSuite.initState`. |
 
 ## The solc front end

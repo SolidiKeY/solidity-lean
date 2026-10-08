@@ -3366,6 +3366,18 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     after the program (`eqDSplit`, `applyOnRigidBox`, `simplify`, the goal's
     `rewrite`, `assumeInv`, `openInv`) are derived from it, as today's are
     from its `close`, and only `merge` and `updRw` are rules of their own.
+26. *Proposed (W3c `testsuite`), the lead's call:* `Core.Proves.closeFalse`
+    (today's rule) and the scoped walk's pruning of a ground split whose
+    branch the closer refutes (`Seq.ground`, `Seq.refutes`).
+27. *Proposed (W3c `testsuite`), the lead's call:* a leaf's leading `∀`s
+    (parameters and explicit ones alike) are kept, with their ranges, only
+    where stripping them leaves the leaf open and keeping them closes it
+    (`Seq.pick`).
+28. *Proposed (W3c `tree`), the lead's call:* mark the parameters in
+    `cdl!`'s output, so an explicit `∀` always keeps its range and gets its
+    `allRight` line in the short walk.
+29. *Proposed (W3c `tree`), the lead's call:* `#verify` is scoped whatever
+    the caller's scope, and a witness's after-line drops `\result`.
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
@@ -3682,7 +3694,7 @@ unchanged.
 `Calculus/Core/{Proves,ProvesSound,ProvesDerive}.lean`; proposed, the lead's
 call):
 
-24. *Proposed: `Core.Proves.closeFalse` and ground splits pruned.*  The
+26. *Proposed: `Core.Proves.closeFalse` and ground splits pruned.*  The
     scoped walk ran every branch of every split: `returnEarly` (three calls of
     `returnSign`, 27 paths) and `tupleReturnDiscardsComponents` (32) went past
     9 GB each (`Suggestions`' worker reached 19 GB and was killed by the
@@ -3696,7 +3708,7 @@ call):
     of the two now takes 3.7 s of kernel time.  KeY's rule is `closeFalse` after its
     simplification; the shape is today's (a `cut` on `false`), a deviation
     already recorded at today's rule.
-25. *Proposed: a leaf's parameters are bound where only that closes it.*
+27. *Proposed: a leaf's parameters are bound where only that closes it.*
     `Seq.leafRes` stripped the parameters' `∀` (`Fml.stripAlls`, as
     today's `dl!{}` leaves have them free).  For a diamond that reads a
     parameter (`assert(fixedByKey[k].length == 3)` in
@@ -3781,7 +3793,8 @@ only by `Proves.sound_of`.  The read-only review pass was not run.
 **Left.**
 1. Derived9–11's gate: still over after the review fixes (below), the
    lead's call.  **Do not merge `w3c-testsuite` on the gate as it stands.**
-2. Decisions 24 and 25 await the lead's approval.
+2. Decisions 26 and 27 await the lead's approval (the lane numbered
+   them 24 and 25; renumbered at the W3c integration).
 3. `Calculus/Core/Derive.lean`'s `Fml.stripAlls` route (`⊨`, `sol_close`
    on a scoped leaf) still strips with no fallback; `ProofTree`'s interval
    examples are still read without the switch (W3b blocker 6).
@@ -4051,7 +4064,9 @@ after the leaf change.
   its leading quantifiers stripped, the parameters free as today's leaves
   have them, and where that leaves a leaf open, the erasure itself, every
   leading `∀` into today's context with its range, taken when that closes
-  (`Derive.leafPick` quotes the same choice).  `cdl!` binds a parameter and
+  (`Derive.leafPick` quotes the same choice; at the W3c integration both
+  went for `w3c-testsuite`'s `Seq.pick`, which makes the same choice,
+  below).  `cdl!` binds a parameter and
   an explicit leading `∀` alike (`Fml.all`), so "keep the explicit ones"
   is "keep them all where only that closes": the leaves that stayed open
   before stay as they were, a leaf closes that did not.  `ProofTree`'s
@@ -4122,14 +4137,14 @@ after the leaf change.
   leaf change's cost): 190.7 s against 201.2 s on `intrinsic`, the same
   method.
 - **Proposed decisions** (the lead's call):
-  24. *Parameters marked in `cdl!`'s output*: an explicit leading `∀` and
+  28. *Parameters marked in `cdl!`'s output*: an explicit leading `∀` and
       a parameter's are both `Fml.all`, so a leaf keeps an explicit one's
       range only where stripping leaves it open (`Derive.leafResidue`),
       and the short walk writes no `apply allRight` for it.  Marking the
       parameters (their count beside the formula, or a binder kind) would
       keep every explicit `∀` and write its `allRight`, as today's walk
       does; taken here: the reading above, which changes no pin.
-  25. *`#verify` is scoped whatever the caller's scope* (`cspec`), and a
+  29. *`#verify` is scoped whatever the caller's scope* (`cspec`), and a
       witness's after-line no longer prints `\result` (the typed end
       state names no local); no pin has one.
 - **Review fixes** (2026-10-08):
@@ -4167,8 +4182,206 @@ after the leaf change.
      starting storage and transaction: a constructor's obligation
      (`storage := mtSt`) or an update that allocates is `unknown` there,
      so such a witness is tested, not certified.
-  2. `\result` in a witness's after-line (25).
+  2. `\result` in a witness's after-line (29).
   3. The read-only finder/skeptic review pass was not run.
+
+### W3c integration (2026-10-08)
+
+- **Merged** into `intrinsic`, in order: `w3c-perf` (a fast-forward),
+  `w3c-testsuite`, `w3c-tactics`, `w3c-tree`.  Text conflicts, each kept
+  both ways: this file (every lane section kept, in merge order) and
+  `docs/module-map.md`'s `Core/Proves.lean` row (`w3c-tactics`' wording
+  with `w3c-testsuite`'s `closeFalse`).  One code conflict,
+  `Calculus/Core/ProvesDerive.lean`: `w3c-testsuite` (`Seq.pick`, generic in
+  the residue) and `w3c-tree` (`Derive.leafResidue`/`leafPick`/
+  `valid_of_leafResidue` in `Calculus/Core/Derive.lean`) solved the same
+  problem, a leaf that closes only with its parameters' ranges.  Kept one:
+  `Seq.pick`, with `w3c-tree`'s test that the erasure starts with a `∀`
+  before the second residue is run (where it does not, `stripAlls` is the
+  identity and the second run repeats the first: kernel time saved at
+  every leaf that stays open); the three `w3c-tree` definitions are gone
+  and `ProofTree`'s prose cites `Seq.pick`.  Same choice, same pins.  No
+  duplicate import or module-map row; `dups.py` clean but the known
+  `Evm/Repr`/`Examples/Verify` `as` false positive.
+- **Build**: `lean_build` over `Solidity`, `solkeycheck`, `SolidityCorpus`
+  and `SolkeyTestSuite` (the last two in `defaultTargets` for the run only,
+  325 jobs, no OOM kill).  Green at the third run.  Fixes:
+  1. *A name clash*: `w3c-testsuite`'s `Fml.binds` (the closable test,
+     `Calculus/Core/Closable.lean`) and `w3c-tactics`' `Fml.binds` (hidden
+     binders in front of a formula, `Calculus/Core/Graft.lean`).  The
+     closable test's is now `Fml.bindsB` (`Fml.bindsBM`,
+     `Fml.bindsB_sound`), as its siblings `Upd.freshB`/`Fml.foFreshB`; its
+     lane section and module-map row follow.
+  2. *`Seq.pick_valid`*, re-proved for the `∀` test above.
+  3. *`SolidityCorpus`* (`w3c-testsuite` Left 5): `Corpus/TestSuite.lean`'s
+     415 corollaries took today's `Proves` of `f.problem`, now the scoped
+     `⊢`.  They are corollaries of it again, stated as before (today's
+     `Diamond`/`Box` at `Solkey.TestSuite.initState`, the untyped run of
+     the program): `Corpus/Imported.lean`'s `Core.modal_of_proved` takes
+     `⊢ Core.Problem.fml m [] Q` (the program `Q` read off `f.proved`'s
+     type) and concludes the untyped modality of `Q.erase []`, which the
+     statement's `Solkey.TestSuite.f` is by definition.  The typed reading
+     accepts a run that diverges or is exhausted (decision 15) and the
+     erasure is read by `Prog.run_erase` only of a fresh program, so it
+     also asks `Core.scopedRunsB Q` (new: `Prog.freshB`/`Stmt.freshB` with
+     `Prog.fresh_of_freshB`, `TRes.endsB`), proved by `decide +kernel`, as
+     `corpus_decide` runs the other rows (the same shape as decision 23's
+     `hX`).  `scripts/solkey-port.mjs` writes the extra argument; the
+     generated file was edited to match (one line added per corollary).
+     The axiom pins (`Corpus/Imported`'s two, `Corpus/TestSuite`'s first
+     corollary) are unchanged: Lean's three.  `Corpus/TestSuite` builds in
+     26 s.  `check-corpus.sh` was not run (it needs `lake` and the pinned
+     solkey checkout); the generator's template and the file were changed
+     by the same edit.
+  No new `sorry` (21, as at 9ec2b48), `axiom` (1) or `maxHeartbeats`
+  override (35, one fewer).
+- `check-orphans`: 311 reachable, none orphaned but the git-excluded
+  `Solidity/Scratch/`.  `check-doc-paths`: OK (47 ambiguous citations, all
+  resolving).  `check-rule-text`: empty.  `solkeycheck` built (no rule name
+  or annotation changed); `check-testsuite.sh` not re-run (no TestSuite row
+  changed since the lane ran it).
+- **W3 gates**, re-timed fresh, one worker at a time, load under 2, by the
+  W3b integration's method (the real file in a fresh worker, `/proc`
+  sampled every 20 ms, wall from the worker's start to its CPU's end); the
+  last column is on the integration's scale (each row times W3b's ratio
+  of its scale to its raw figure):
+
+  | Module | M0 | Limit | W3b, raw | merged, raw | merged, on the integration's scale |
+  |---|---|---|---|---|---|
+  | Derived9–11 | 19.1 s | 22.9 s | 21.9 s (today's text) | 26.77 s (8.82 + 13.71 + 4.24) | 24.3 s, **over** (6%) |
+  | `TestSuite/Problems` (`legacy`) | 1.2 s | 1.44 s | 1.82 s | 1.43 s (CPU 0.67) | 1.0 s |
+  | `TestSuite/CoreProblems` | — | 1.44 s | 1.99 s | 2.01 s (CPU 1.21) | 1.40 s |
+  | `Examples/ProofTree` | 10.1 s | 12.1 s | 12.85–13.24 s | 17.11, 17.21, 17.21 s | 16.5 s, **over** (37%) |
+  | `Examples/Chains/Storage` | 7.5 s | 9.0 s | 10.39–11.07 s | 8.03 s | 7.5 s |
+  | `Solkey/TestSuite` | 10.4 s | 12.5 s | 11.50 s | 11.52 s | 10.8 s |
+  | `Examples/Benchmark/Syntax` | 1.2 s | 1.44 s | 2.03 s (CPU 1.53) | 2.06 s (CPU 1.52) | 1.44 s, at the limit |
+
+  Under Decision 9 the aggregate is about 61.6 s against 59.4 s of limits
+  (63.0 against 60.8 with `CoreProblems`): **over by about 2.3 s (4%)**,
+  where W3b was 3.5 s under.  `Chains/Storage` is back within (the perf
+  lane).  Derived9–11 is 2.4 s lower than the testsuite lane's flip as
+  landed (28.7 s raw there), still over; its causes and remedies are that
+  lane's (the closable test and today's residue of each leaf's whole
+  erasure).  **`ProofTree` is the new outlier**, attributed by timing its
+  text on each lane's head, copies in fresh workers, the same minutes:
+  `9ec2b48` 12.82, 12.82 s; `w3c-perf` 12.50; `w3c-testsuite` 12.65;
+  `w3c-tactics` 16.39, 16.53; `w3c-tree` 14.42; merged 17.21, 17.21.  So
+  `w3c-tactics` +3.6 s, about 2 s of it its new pinned example and its
+  replay (`deleteReadDeepWalk`, each a walk and a `sol_close` of about 1 s
+  by the profiler) and the rest the library under the file's other walks;
+  `w3c-tree` +1.6 s (its scoped `#chain`/`sol_chain?` sections, the lane
+  measured +9%).  Proposed, the lead's call: move `deleteReadDeepWalk` and
+  its replay to `Tactics/StorageDelete` (whose formula it is), which takes
+  `ProofTree` back to about 15 s raw; the rest needs the scoped calculus's
+  own costs down (the perf lane's list: the typed strategy's kernel run,
+  `Proves.close`'s two `decide +kernel`, `sol_symex`, today's `sol_close`).
+- **Pins changed, union of the lanes** (each lane's section has the
+  detail):
+  - *Decision 21*: `TestSuite/Derived7` `testStorageNestedPushReturnAlias`
+    (`case leaf2` and the `case leaf1 =>` wrapper gone) and its
+    `#solkey_derive?` pin in `TestSuite/Suggestions` (`w3c-testsuite`).
+  - *Decision 19*: `Chains/Memory.CallWrite`, two links
+    `~[internalCallExpand]~>` for `~[functionBodyExpand]~>` (`w3c-tactics`).
+  - *W2 `tree` (parameters bound by `∀`), reasons 3 and 7*: `ProofTree`'s
+    `sol_chain?` (chain term over `~~>`, `cdl!{ ∀ uint x; ∀ uint v; … }`,
+    no `emptyModality` link), `sol_chain?` at modality `m`
+    (`Core.Fml.SoundRel.leads`), the first `#chain` (`cdl![m]{…}`, the
+    group `~*>` one `~[localValueAssign]~>`), the second `#chain` (`cdl!`
+    for `dl!`); `Verify`'s bounded-loop `#counterexample` (`i = 0, `
+    dropped: `i` is the program's own local) (`w3c-tree`).
+  - New pins, none changed: `CallbackSound`'s `#print axioms
+    ProvesC.valid`; `ProofTree`'s `deleteReadDeepWalk` and its replay
+    (`w3c-tactics`).
+  - This integration: none.  `Corpus/TestSuite`'s corollaries changed
+    their proof text (generated), not a pin.  The fresh names (`se1`,
+    `sp1`) are unchanged.
+- **Proposed decisions renumbered**: the three lanes each proposed a 24 and
+  a 25.  `w3c-tactics`' keep 24 and 25 (already in the list after 23);
+  `w3c-testsuite`'s are 26 (`closeFalse`, ground splits pruned) and 27
+  (`Seq.pick`); `w3c-tree`'s 28 (parameters marked in `cdl!`) and 29
+  (`#verify` scoped, `\result` dropped).  The lane sections carry the new
+  numbers; all six await the lead.
+- **Still on today's calculus or today's run: the W4 blockers** (W3b's
+  list, updated):
+  1. *TestSuite*: flipped (`w3c-testsuite`); the twins `CoreDerived9–11`
+     and `CoreSeq` are deleted.  Left on today's: the legacy statements
+     (`Problems.lean`'s `N.f.problem.legacy`, not compiled, which
+     `#solkey_problem`/`#solkey_scan` read and the scoped table is checked
+     against, in meta code only) and `Report.lean`'s count, which reads
+     either `⊢`.  The corpus corollaries (`Corpus/Imported`) conclude
+     today's `Diamond`/`Box` over the untyped run, from the scoped `⊢`:
+     W4 `sem-del` must restate them over the typed run.  Gate: Derived9–11
+     over (above); decisions 26, 27 open.
+  2. *Callbacks*: `ProvesC` is sound against `ValidC` for a first-order
+     invariant (`w3c-tactics`, decision 24 open); `Tactics/Callback` and
+     `TryCatch`'s callback proofs are flipped.  Left: `Callback`'s closing
+     block, the counterexample `withdrawUnsafe_withCallback` (a run over
+     today's states; a typed one needs a typed `Vault` storage and its
+     `ExecS` steps on `TState`) and the two `#check` pins of today's
+     `CallbackTaclet`, so `Calculus/Callback.lean` stays.  `Proves.openInv`
+     applies at a leaf only.
+  3. *Today's sequent rules on updates*: `Core.Proves.merge`, `updRw`,
+     `closeHolds` and `Calculus/Core/UpdateRules.lean` (decision 25 open);
+     `SelectOnSaveConsr`, `StorageDelete`'s `_theory` derivations,
+     `UpdateRules.deepFieldWriteMerged` flipped.  Left:
+     `Tactics/TermTaclets` (today's sequents of today's terms over any
+     contract, and a pinned `sol_rw` side-condition error; `core_rw`
+     rewrites closed terms of a contract's sequent only).
+  4. *`CallRet.isRets`*: done (decision 19); `CallOperands` flipped.
+  5. *The closer's input, kept until M6c* (unchanged): `Tactics/Decide`'s
+     closing block and fragment pins, `ProofTree`'s guards on today's
+     residue and closer; `Proves.close` and `Seq.leafRes` hand every scoped
+     leaf to today's closer on the erasure.  W4 `modal`'s `NFml`.
+  6. *Explicit `∀` at a leaf*: the `⊢` route keeps a leaf's leading `∀`s
+     where only that closes (`Seq.pick`, decision 27), and `ProofTree`'s
+     interval examples are scoped (`w3c-tree`).  Left: `sol_close` on a
+     scoped `⊨` leaf (`Calculus/Core/Derive.lean`'s meta `stripAlls`)
+     strips with no fallback; the short walk writes no `allRight` for an
+     explicit leading `∀` (decision 28 would fix both).
+  7. *`ProofTree`'s chain sections*: flipped (`w3c-tree`).  Done.
+  8. *Contracts through the erasure* (unchanged): no scoped `FunContract`
+     (it needs the contract over the typed call run, `CallRet.enterT`/
+     `TRun.callLeave`, the mutability frame on typed runs, the parameters
+     bound as a scoped premise); `Tactics/Contracts` reaches today's
+     `useContract` by `sol_erase`, so `Calculus/Contracts.lean` stays.
+  9. *Chains past the program* (unchanged): the rewrite links run
+     `Calculus/ChainRewrites.lean` on the erasure; `Calculus/Chains.lean`
+     is imported for that and its notation (`Core/ChainKit`).  A chain's
+     merge (`Fml.merge2`) keeps today's behaviour on purpose (`w3c-tactics`).
+  10. *Whole modules on today's reading*: `Examples/Verify` and
+      `Tools/{Verify,Counterexample}` are on Core (`Core.Fml.eval3` over
+      `TState`, the typed run with fuel, `w3c-tree`); today's
+      `Fml.eval3`/`Prog.runFuel`/`Loop.runFuel`/`Fml.runOf` are deleted.
+      Left: `Tools/Common`'s untyped candidate generation (read into typed
+      states after), `TState.lift?` (an update's end over an empty heap
+      only: a constructor's or an allocating witness is tested, not
+      certified).  Unchanged: `Corpus/Basic` (`corpus_decide`'s `Diamond`
+      over today's run, through `Semantics/RunErase`) and now
+      `Corpus/Imported` (item 1); `Tools/{Inspect,ProofTree}` (today's
+      `Chains`, `Callback`, `ProofTree`); `Theorems.lean`
+      (`SolkeyFragment`, `Uniqueness`, `Callback`); `Examples/Notation`'s
+      sections outside `Scoped`.
+  11. *Core modules importing today's for notation, printers,
+      elaborators and the closer*: `Core/{ChainGen,ChainKit,Close,Closers,
+      Graft,LastLine,Notation,PrintedRules,Print,ProofTree,Proves,Quote,
+      RewriteSyntax,RuleShapes,Rules,Sequents,SolSpec,SoundArms,SoundKit,
+      Spec,Surface,Symex,Taclet,WalkSyntax}` import `Calculus/{ChainGen,
+      Chains,Derive,DecideComplete,Rewrite,UpdateRules,LastLine,Notation,
+      PrintedRules,RuleSyntax,Quote,ProofTree,Logic,RuleShapes,Sequents,
+      Spec,Problem,Symex,Rules,SoundUpdate,NoPanic}`.  New since W3b:
+      `Graft` (today's `UpdateRules`), `RewriteSyntax` (today's `Rewrite`),
+      `Closers` (`DecideComplete`, `Rewrite`).
+  12. *M3's reading*: gone (CORE B).  Done.
+  13. *Files with no scoped formula, kept as recorded*: `Tactics/Theory`,
+      `Benchmark/Syntax`, and the `Core*` example twins
+      (`Tactics/Core{Callback,Chains,Notation,Print,ProofTree,Rules,Spec,
+      Step,Symex}`), which name `Core` explicitly; W5's rename.
+- **W3 is not done**: the flip is complete but for items 2 (`Callback`'s
+  counterexample), 3 (`TermTaclets`) and 8 (`Contracts`), and the gate
+  aggregate is over (Derived9–11, `ProofTree`).
+- **Lane worktrees removed** (`w3c-perf`, `w3c-testsuite`, `w3c-tactics`,
+  `w3c-tree`; the branches stay) and their Lean workers stopped.  The
+  read-only finder/skeptic review pass was not run at the integration.
 
 ## Baselines (M0)
 
