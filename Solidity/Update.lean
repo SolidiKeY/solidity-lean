@@ -701,6 +701,12 @@ def IntOp.apply : IntOp → Int → Int → Int
   | .add, a, b => a + b
   | .sub, a, b => a - b
 
+/-- The operator as a Lean term, for the quoters (`Calculus/Quote.lean`,
+`Calculus/Core/Quote.lean`). -/
+def IntOp.quote : IntOp → Lean.Expr
+  | .add => Lean.mkConst ``IntOp.add
+  | .sub => Lean.mkConst ``IntOp.sub
+
 /-- One elementary update. -/
 inductive UpdElem (C : Contract) where
   /-- `v := t` -/

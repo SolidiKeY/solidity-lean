@@ -1,5 +1,5 @@
 import Solidity.Typing.CanonTest
-import Solidity.Calculus.Derive
+import Solidity.Calculus.Spec
 import Solidity.Semantics.RunErase
 
 /-!
@@ -356,20 +356,6 @@ def Problem.parts : Fml C → Option (List (PrimTy × Var) × Bool × Modality �
       .setBalance (.env .msgValue)] (.modal m' P .tt) =>
     if m = m' then some ([], true, m, P) else none
   | _ => none
-
-/-- How many storage writes the context's updates hold. -/
-def Derive.storageWrites (Γ : List (Hyp C)) : Nat :=
-  Γ.foldl (fun n h => match h with
-    | .upd _ U => n + (U.filter fun | .storage _ => true | _ => false).length
-    | _ => n) 0
-
-/-- `#solkey_scan`'s view of `⊢ φ`: how many leaves `sol_prove`'s walk
-leaves, closed by `synClose` or (`walk`) not, and the most storage writes
-in one leaf's context; `none` past `Derive.budget`. -/
-def Derive.scanLeaves (walk : Bool) (φ : Fml C) : Option (Nat × Nat) :=
-  (Derive.residue Derive.budget (if walk then fun _ _ => false else Derive.synClose)
-    Derive.budget [] φ).map fun (ls, _) =>
-      (ls.length, ls.foldl (fun m l => max m (Derive.storageWrites l.1)) 0)
 
 /-- KeY's sort of a parameter, as solkey declares it: `int` for every
 integer type. -/

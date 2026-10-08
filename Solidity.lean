@@ -15,6 +15,7 @@ import Solidity.Semantics.DecEq
 import Solidity.Semantics.Properties
 import Solidity.Semantics.Agree
 import Solidity.Semantics.WellFormed
+import Solidity.Semantics.NoPanicOps
 import Solidity.Semantics.Callback
 import Solidity.Semantics.Mutability
 import Solidity.Semantics.Core.Value
@@ -99,6 +100,7 @@ import Solidity.Calculus.Core.SolSpec
 import Solidity.Semantics.Core.Callback
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.RuleShapes
+import Solidity.Calculus.RuleKit
 import Solidity.Calculus.PrintedRules
 import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundUpdate
@@ -108,8 +110,10 @@ import Solidity.Calculus.RuleSoundness
 import Solidity.Calculus.TermRules
 import Solidity.Calculus.TheoryRewrite
 import Solidity.Calculus.Logic
+import Solidity.Calculus.Hyp
 import Solidity.Calculus.Callback
 import Solidity.Calculus.Symex
+import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.SolkeyFragment
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
@@ -135,6 +139,7 @@ import Solidity.Calculus.LastLine
 import Solidity.Calculus.ChainGen
 import Solidity.Calculus.Sequents
 import Solidity.Calculus.ProofTree
+import Solidity.Calculus.TreeData
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.ChainBranches
@@ -231,6 +236,7 @@ import Solidity.Theory.Bridge.Delete
 import Solidity.Theory.Bridge.Copy
 import Solidity.Theory.Bridge.Push
 import Solidity.Theory.Bridge.Denote
+import Solidity.Theory.StateWrites
 import Solidity.Theory.Memory
 import Solidity.Theory.CrossDomain
 import Solidity.Theory.Rewrite
@@ -256,7 +262,6 @@ import Solidity.Tools.Run
 import Solidity.Tools.Inspect
 import Solidity.Tools.Taclet
 import Solidity.Tools.InspectToday
-import Solidity.Tools.CoreInspect
 import Solidity.Tools.DiffTest
 import Solidity.Tools.Counterexample
 import Solidity.Tools.Verify

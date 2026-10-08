@@ -1,5 +1,5 @@
 import Solidity.Update
-import Solidity.Semantics.NoPanic
+import Solidity.Semantics.NoPanicOps
 
 /-!
 # A term never panics

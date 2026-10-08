@@ -1,3 +1,4 @@
+import Solidity.Calculus.Hyp
 import Solidity.Calculus.RuleSoundness
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.TermTaclets
@@ -176,38 +177,6 @@ theorem Premise.sound {k : Nat} {m : Modality} {s : Stmt C} {pr : Premise C}
     exact Premise.sound_upd hs ω φ (hall _ (.inr ⟨U, hU, rfl⟩))
   | inv I U c c' P post => exact h ω φ hω σ
 
-/-! ## Fresh names -/
-
-/-- The largest index of a list of variables. -/
-def maxIdx : List Var → Nat
-  | [] => 0
-  | x :: xs => max x.idx (maxIdx xs)
-
-/-- Every variable's index is at most the largest index in the list.
-
-Example: after Step 2 on `alice.account.balance = 10; uint x = alice.account.balance;`
-the formula mentions `sp1`, so `maxIdx` is at least `1`, and the read's
-receiver is captured as `sp2`, not as `sp1` again. -/
-theorem le_maxIdx {x : Var} : ∀ {xs : List Var}, x ∈ xs → x.idx ≤ maxIdx xs
-  | _ :: _, .head _ => Nat.le_max_left _ _
-  | _ :: _, .tail _ h => Nat.le_trans (le_maxIdx h) (Nat.le_max_right _ _)
-
-/-- A list whose variables all occur in another has no larger `maxIdx`. -/
-theorem maxIdx_le {xs ys : List Var} (h : ∀ x ∈ ys, x ∈ xs) : maxIdx ys ≤ maxIdx xs := by
-  induction ys with
-  | nil => exact Nat.zero_le _
-  | cons y ys ih =>
-    simp only [maxIdx]
-    exact Nat.max_le.2 ⟨le_maxIdx (h y (.head _)), ih (fun x hx => h x (.tail _ hx))⟩
-
-/-- The largest index of two lists is the larger of theirs: `[x, se1] ++ [sp2]`
-has `2`.  With it the fresh index of a line whose postcondition `φ` names no
-fresh variable is computed without knowing `φ` (`Chains.lean`). -/
-theorem maxIdx_append (xs ys : List Var) : maxIdx (xs ++ ys) = max (maxIdx xs) (maxIdx ys) := by
-  induction xs with
-  | nil => exact (Nat.zero_max _).symm
-  | cons x xs ih => simp only [List.cons_append, maxIdx, ih, Nat.max_assoc]
-
 /-- Indices above every index in sight give fresh names.
 
 Example: in `alice.account.balance = x;` every variable has index `0` (`x` is
@@ -219,9 +188,6 @@ theorem freshVars_avoid {vs : List Var} {k : Nat} (hk : maxIdx vs < k) :
   have := le_maxIdx hx
   simp only [freshVars, List.mem_cons, List.not_mem_nil] at hF
   rcases hF with rfl | rfl | rfl | rfl | hF <;> simp_all [Var.idx] <;> omega
-
-/-- Fresh names are numbered one above every index in the formula. -/
-abbrev Fml.fresh (φ : Fml C) : Nat := maxIdx φ.vars + 1
 
 /-- An index `k` above every variable of `vs`, among them those of
 `⟨[ s; ω ]⟩ φ`, gives names that the statement, the rest of the program and
@@ -246,55 +212,6 @@ theorem Premise.sound_above {k : Nat} {vs : List Var} {m : Modality} {s : Stmt C
 
 /-! ## The judgement -/
 
-/-- One entry of the context. -/
-inductive Hyp (C : Contract) where
-  /-- `a → …` -/
-  | pre (a : Fml C)
-  /-- `{U} …`, produced under the modality `m` -/
-  | upd (m : Modality) (U : Upd C)
-  /-- `{havoc} …`: any storage and ledger a callee may leave, as
-  KeY's anonymising update with fresh skolem symbols. -/
-  | havoc
-  /-- `∀ p x. …`: the local `x` holds any value of the type `p`, as KeY's
-  skolem constant for a quantified variable (a `try`'s return values). -/
-  | all (x : Var) (p : PrimTy)
-  /-- `{anon(xs)} …`: the locals `xs` hold anything, bound or not, as KeY's
-  anonymising update of a loop's frame (`#loopAnon`). -/
-  | anon (xs : List Var)
-
-/-- Put the context back in front of a formula. -/
-def Hyp.wrap : List (Hyp C) → Fml C → Fml C
-  | [], φ => φ
-  | .pre a :: Γ, φ => dl_schema{ a → ‹Hyp.wrap Γ φ› }
-  | .upd m U :: Γ, φ => dl_schema{ {U} ‹Hyp.wrap Γ φ› }
-  | .havoc :: Γ, φ => dl_schema{ { havoc } ‹Hyp.wrap Γ φ› }
-  | .all x p :: Γ, φ => .all x p (Hyp.wrap Γ φ)
-  | .anon xs :: Γ, φ => .anon xs (Hyp.wrap Γ φ)
-
-/-- A Theory rewrite of the context (`Fml.rwEq`): in every precondition; an
-update or a `havoc` stays as it is, since its right-hand sides run in the
-interpreter. -/
-def Hyp.rwEq (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
-  | [] => []
-  | .pre a :: Γ => .pre (a.rwEq q) :: Hyp.rwEq q Γ
-  | .upd m U :: Γ => .upd m U :: Hyp.rwEq q Γ
-  | .havoc :: Γ => .havoc :: Hyp.rwEq q Γ
-  | .all x p :: Γ => .all x p :: Hyp.rwEq q Γ
-  | .anon xs :: Γ => .anon xs :: Hyp.rwEq q Γ
-
-/-- An update rewrite of the context (`Upd.rw`): in the right-hand sides of
-every box update.  A precondition, a diamond update or a `havoc` stays as it
-is: a rewritten diamond update would also have to return where the old one
-does, which `Term.EvalRefines` does not say. -/
-def Hyp.rwUpd (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
-  | [] => []
-  | .pre a :: Γ => .pre a :: Hyp.rwUpd q Γ
-  | .upd .box U :: Γ => .upd .box (U.rw q) :: Hyp.rwUpd q Γ
-  | .upd .diamond U :: Γ => .upd .diamond U :: Hyp.rwUpd q Γ
-  | .havoc :: Γ => .havoc :: Hyp.rwUpd q Γ
-  | .all x p :: Γ => .all x p :: Hyp.rwUpd q Γ
-  | .anon xs :: Γ => .anon xs :: Hyp.rwUpd q Γ
-
 /-- The context the invariant rule's second goal is judged in: past
 `{anon(P)}` (and `{havoc}`, when the body writes storage or pays), the
 invariant `I` assumed, and the variant's update `U` (none under the box). -/
@@ -306,16 +223,6 @@ def Hyp.loopAnon (m : Modality) (P : Prog C) (I : Fml C) (U : Upd C) : List (Hyp
   .pre I :: (match U with
     | [] => []
     | U => [.upd m U])
-
-/-- Fresh names are numbered one above every index in the whole sequent. -/
-def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := (Hyp.wrap Γ φ).fresh
-
-/-- Which rules a derivation may use: solkey's (`Taclet`), or all of them
-(`LeanTaclet` too). -/
-inductive RuleSet where
-  | solkey
-  | all
-  deriving DecidableEq, Repr
 
 /-- `Γ ⊢ φ`: the calculus proves `φ` in the context `Γ`; `Γ ⊢ₖ φ`: solkey's
 rules alone do. -/
@@ -892,45 +799,6 @@ of `⊢ₖ`, solkey's rules alone, prints as `dl{ Γ ⟹ₖ φ }`; both read bac
 section Print
 open Lean Meta PrettyPrinter Delaborator SubExpr
 set_option hygiene false
-
-def ppHyp? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_hyp)) := do
-  match_expr (← whnf (← instantiateMVars e)) with
-  | Hyp.pre _ a => return some (← `(dl_hyp| $(← ppFml a):dl_fml))
-  | Hyp.upd _ m U =>
-    let u ← ppUpd U
-    -- an escaped update would read back as a precondition
-    if isEscape u then return none
-    -- a rule's update, at a fixed modality: `{U} [ ]`, `{U} ⟨ ⟩`
-    if (← instantiateMVars U).hasFVar then
-      match_expr (← whnf m) with
-      | Modality.box => return some (← `(dl_hyp| $u:dl_upd [ ]))
-      | Modality.diamond => return some (← `(dl_hyp| $u:dl_upd ⟨ ⟩))
-      | _ => pure ()
-    return some (← `(dl_hyp| $u:dl_upd))
-  | Hyp.havoc _ => return some (← `(dl_hyp| { havoc }))
-  | Hyp.anon _ xs =>
-    let some xs ← listElems? xs | return none
-    let ids ← xs.mapM ppVar?
-    if ids.any Option.isNone then return none
-    let ids : Array Ident := ids.filterMap id
-    return some (← `(dl_hyp| { anon($ids,*) }))
-  | Hyp.all _ x p =>
-    let some x ← ppVar? x | return none
-    let some T ← (do pure ((← primName? p) <|> (← fvarName? p))) | return none
-    return some (← `(dl_hyp| ∀ $(mkIdent (Name.mkSimple T)):ident $x:ident))
-  | _ => return none
-
-/-- A context: the rest `..Γ` when it is a variable, then its entries, read
-off the spine `Γ ++ [h₁] ++ …` the rules write. -/
-partial def hypSpine? (e : Lean.Expr) : MetaM (Option (Option Ident × Array Lean.Expr)) := do
-  let e ← instantiateMVars e
-  if let some n ← fvarName? e then return some (some (nameIdent n), #[])
-  if e.isAppOfArity ``HAppend.hAppend 6 then
-    let some (Γ, hs) ← hypSpine? (e.getArg! 4) | return none
-    let some hs' ← listElems? (e.getArg! 5) | return none
-    return some (Γ, hs ++ hs')
-  let some hs ← listElems? e | return none
-  return some (none, hs)
 
 /-- `Proves .all Γ φ`: `dl{ Γ ⟹ φ }`; `Proves .solkey Γ φ`: `dl{ Γ ⟹ₖ φ }`;
 over a rule set `R` that is a variable, `dl{ Γ ⟹[R] φ }`.  A context `Γ ++ […]`

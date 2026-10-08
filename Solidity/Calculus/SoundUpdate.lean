@@ -271,53 +271,6 @@ theorem upd_memoryIndexWriteCopy_var {R R' : RefTy} (a : ArrTy R' (Ty.ref R)) (m
       (Stmt.run σ (Stmt.assignMem (MLoc.index a (MPath.var mv hmv) (Val.simple ie)) (MSrc.ref (MPath.var y hy)))) := by
   mem_unfold; res_split
 
-/-! ### Copies and allocations: a new heap and counter, the rest kept -/
-
-theorem res_frame_eq {α : Type} {σ : State} {x : Res (State × α)} (hx : FramePreserving σ x) :
-    x = ((x.map fun p => (p.1.heap, p.1.nextId, p.2)) >>= fun q =>
-      pure ({ σ with heap := q.1, nextId := q.2.1 }, q.2.2)) := by
-  cases h : x with
-  | error _ => rfl
-  | ok p =>
-    obtain ⟨τ, a⟩ := p
-    obtain ⟨h1, h2, h3, h4, h5⟩ := hx τ a h
-    cases τ; cases σ
-    simp_all [Except.map, bind, Except.bind, pure, Except.pure]
-
-/-- What a copy into memory leaves: the heap, the counter, the value. -/
-def copyHN (σ : State) (sv : SVal) : Res (List (Nat × MObj) × Nat × MVal) :=
-  (copyStToM σ sv).map fun p => (p.1.heap, p.1.nextId, p.2)
-
-theorem copyStToM_eq (σ : State) (sv : SVal) :
-    copyStToM σ sv = (copyHN σ sv >>= fun q => pure ({ σ with heap := q.1, nextId := q.2.1 }, q.2.2)) :=
-  res_frame_eq (SemanticsProperties.copyStToM_frame σ sv)
-
-theorem allocDefault_frame (σ : State) (R : RefTy) : FramePreserving σ (allocDefault σ R) := by
-  intro t a h
-  unfold allocDefault at h
-  have hf := copyStToM_frame σ (defaultForRef R)
-  split at h
-  · rename_i s id heq
-    cases h
-    exact hf _ _ heq
-  · cases h
-  · cases h
-
-/-- What a default allocation leaves: the heap, the counter, the identity. -/
-def allocHN (σ : State) (R : RefTy) : Res (List (Nat × MObj) × Nat × Nat) :=
-  (allocDefault σ R).map fun p => (p.1.heap, p.1.nextId, p.2)
-
-@[no_panic_simp] theorem allocHN_noPanic (σ : State) (R : RefTy) : NoPanic (allocHN σ R) := by
-  simp only [allocHN]
-  cases h : allocDefault σ R with
-  | error e =>
-    exact fun hp => NoPanic.ne_of_eq (allocDefault_noPanic σ R) h (Except.error.inj hp)
-  | ok _ => simp only [Except.map, ne_eq, reduceCtorEq, not_false_eq_true]
-
-theorem allocDefault_eq (σ : State) (R : RefTy) :
-    allocDefault σ R = (allocHN σ R >>= fun q => pure ({ σ with heap := q.1, nextId := q.2.1 }, q.2.2)) :=
-  res_frame_eq (allocDefault_frame σ R)
-
 theorem upd_memoryReferenceDeclFreshAlloc (R : RefTy) (mv : Var)
     (hd : ((none : Option (MRhs C R)).isSome || (Ty.ref R).defaultOkS) = true)
     {hm : (Ty.ref R).mapFree = true} (σ : State) :
@@ -443,51 +396,10 @@ theorem upd_memoryToStorageIndexCopyRoot {R R' : RefTy} {q : PrimTy} (it : Index
 
 /-- A push whose value ignores the slot does not depend on the element type:
 `pushSlot` hands back the same recycled slots whatever `E` is. -/
-theorem pushAt_const (σ : State) (E E' : Ty) (r : Name) (segs : List Seg) (f : Res SVal) :
-    pushAt σ E r segs (fun _ => f) = pushAt σ E' r segs (fun _ => f) := by
-  unfold pushAt
-  cases σ.findStorage r segs with
-  | error _ => rfl
-  | ok v =>
-    cases v with
-    | array elems shadow => cases shadow <;> rfl
-    | _ => rfl
-
 theorem pushAt_pushVal_some (σ σ' : State) (E : Ty) (r : Name) (segs : List Seg) {T : Ty} (s : Src C T) :
     pushAt σ E r segs (Src.pushVal σ' (some s)) =
       pushAt σ .uint r segs (fun _ => do pure (← s.value σ').strip) :=
   pushAt_const σ E .uint r segs _
-
-theorem pushAt_with (σ : State) (E : Ty) (r : Name) (segs : List Seg) (f : SVal → Res SVal) :
-    (pushAt σ E r segs f >>= fun τ => pure { σ with storage := τ.storage }) = pushAt σ E r segs f := by
-  unfold pushAt
-  simp only [bind, Except.bind]
-  cases σ.findStorage r segs with
-  | error _ => rfl
-  | ok v =>
-    cases v with
-    | array elems shadow =>
-      simp only
-      cases f (pushSlot E shadow).1 with
-      | error _ => rfl
-      | ok w => exact State.saveStorage_with σ r segs _
-    | _ => rfl
-
-theorem popAt_with (σ : State) (keep : Bool) (r : Name) (segs : List Seg) :
-    (popAt σ keep r segs >>= fun τ => pure { σ with storage := τ.storage }) =
-      popAt σ keep r segs := by
-  unfold popAt
-  simp only [bind, Except.bind]
-  cases σ.findStorage r segs with
-  | error _ => rfl
-  | ok v =>
-    cases v with
-    | array elems shadow =>
-      simp only
-      cases elems.reverse with
-      | nil => rfl
-      | cons last rest => exact State.saveStorage_with σ r segs _
-    | _ => rfl
 
 theorem upd_storagePushValueSave {q : PrimTy} (sp : SPath C (Ty.prim q).array) (se : Simple C q)
     (σ : State) :

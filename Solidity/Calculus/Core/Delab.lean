@@ -803,7 +803,10 @@ sight, as `Rules.lean`'s `delabTacletSide`. -/
 def delabTacletSide : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
-  unless e.getForallBody.isAppOf ``Core.Taclet do failure
+  let b := e.getForallBody
+  -- `Core.CallbackTaclet` is declared by a module importing this one (`Core/Callback.lean`)
+  unless b.isAppOf ``Core.Taclet || b.isAppOf ``Core.LeanTaclet ||
+      b.isAppOf `Solidity.Core.CallbackTaclet do failure
   withTheReader SubExpr (fun s => { s with expr := Solidity.dropSide e })
     (Solidity.delabTacletBinders #[] #[])
 

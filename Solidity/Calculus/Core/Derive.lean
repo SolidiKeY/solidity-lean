@@ -2,6 +2,7 @@ import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.Close
 import Solidity.Calculus.Core.Completeness
 import Solidity.Calculus.Core.ProofTree
+import Solidity.Calculus.Derive
 
 /-!
 # The scoped strategy as one kernel evaluation: `sol_prove`

@@ -1,3 +1,4 @@
+import Solidity.Theory.StateWrites
 import Solidity.Calculus.Rules
 import Solidity.Calculus.NoPanic
 
@@ -70,14 +71,6 @@ variable {σ : State} {x : Var} {b : Binding}
     r.value (σ.setEnv x b) = r.value σ := r.value_frame (agree_setEnv σ x b) (avoids_single h)
 @[simp] theorem MSrc.mval_setEnv {T : Ty} {r : MSrc C T} (h : x ∉ r.vars) :
     r.mval (σ.setEnv x b) = r.mval σ := r.mval_frame (agree_setEnv σ x b) (avoids_single h)
-@[simp] theorem State.findStorage_setEnv (r : Name) (segs : List Seg) :
-    (σ.setEnv x b).findStorage r segs = σ.findStorage r segs := rfl
-@[simp] theorem State.checkIndex_setEnv (r : Name) (segs : List Seg) (i : Int) :
-    (σ.setEnv x b).checkIndex r segs i = σ.checkIndex r segs i := rfl
-@[simp] theorem State.getObj_setEnv (id : Nat) : (σ.setEnv x b).getObj id = σ.getObj id := rfl
-@[simp] theorem arrayLen_setEnv (r : Name) (segs : List Seg) :
-    arrayLen (σ.setEnv x b) r segs = arrayLen σ r segs := rfl
-@[simp] theorem memArrayLen_setEnv (id : Nat) : memArrayLen (σ.setEnv x b) id = memArrayLen σ id := rfl
 @[simp] theorem MLoc.addr_setEnv {T : Ty} {l : MLoc C T} (h : x ∉ l.vars) :
     l.addr (σ.setEnv x b) = l.addr σ := l.addr_frame (agree_setEnv σ x b) (avoids_single h)
 end
@@ -140,79 +133,9 @@ def Premise.Correct (k : Nat) (m : Modality) (s : Stmt C) : Premise C → Prop
       Avoids (Prog.vars ω ++ φ.vars) (freshVars k) → ∀ σ,
         holds σ (Premise.invFml m I U c c' P post (.modal m ω φ)) → holds σ (.modal m (s :: ω) φ)
 
-/-! ### Writes as a new storage or heap, the rest of the state kept -/
-
-/-- The storage a successful `writeStorage` leaves: a word saved, or a copy
-over what is there. -/
-def Semantics.State.writeRes (σ : State) (r : Name) (segs : List Seg) (x : SVal) :
-    Res (List (Name × SVal)) :=
-  match x with
-  | .prim p => σ.storeRes r segs (.prim p)
-  | .struct _ | .array .. | .map .. => do
-    let cur ← σ.findStorage r segs
-    σ.storeRes r segs (cur.overlay x)
-
-@[simp] theorem State.writeRes_toSVal (σ : State) (r segs) (v : Value) :
-    σ.writeRes r segs v.toSVal = σ.storeRes r segs v.toSVal := by
-  cases v <;> rfl
-
-theorem State.writeStorage_eq (σ : State) (r segs x) :
-    σ.writeStorage r segs x = (do let s ← σ.writeRes r segs x; pure { σ with storage := s }) := by
-  unfold State.writeStorage State.writeRes
-  cases x <;> simp only [State.saveStorage_eq, bind_assoc]
-
-/-- The heap a successful `writeAddr` leaves. -/
-def heapRes (σ : State) (mv : MVal) : Addr → Res (List (Nat × MObj))
-  | .memoryField id f => do
-    match ← σ.getObj id with
-    | .struct fields => pure (setBy id (.struct (setBy f mv fields)) σ.heap)
-    | .array _ _ => .error .stuck
-  | .memoryIndex id i => do
-    match ← σ.getObj id with
-    | .array elems fx =>
-      if 0 ≤ i ∧ i.toNat < elems.length then pure (setBy id (.array (elems.set i.toNat mv) fx) σ.heap)
-      else .error .revert
-    | .struct _ => .error .stuck
-
-theorem writeAddr_eq (σ : State) (mv : MVal) (a : Addr) :
-    writeAddr σ mv a = (do let h ← heapRes σ mv a; pure { σ with heap := h }) := by
-  cases a with
-  | memoryField id f =>
-    simp only [writeAddr, heapRes, memWriteField, bind, Except.bind]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o => cases o <;> rfl
-  | memoryIndex id i =>
-    simp only [writeAddr, heapRes, memWriteIndex, bind, Except.bind]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o =>
-      cases o with
-      | struct _ => rfl
-      | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh] <;> rfl
-
-theorem State.saveStorage_with (σ : State) (r segs v) :
-    (σ.saveStorage r segs v >>= fun τ => pure { σ with storage := τ.storage }) =
-      σ.saveStorage r segs v := by
-  rw [State.saveStorage_eq]; cases σ.storeRes r segs v <;> rfl
-
-theorem State.writeStorage_with (σ : State) (r segs v) :
-    (σ.writeStorage r segs v >>= fun τ => pure { σ with storage := τ.storage }) =
-      σ.writeStorage r segs v := by
-  rw [State.writeStorage_eq]; cases σ.writeRes r segs v <;> rfl
-
-theorem writeAddr_with (σ : State) (mv : MVal) (a : Addr) :
-    (writeAddr σ mv a >>= fun μ => pure { σ with heap := μ.heap, nextId := μ.nextId }) =
-      writeAddr σ mv a := by
-  rw [writeAddr_eq]; cases heapRes σ mv a <;> rfl
-
 @[simp] theorem Upd.apply_single (e : UpdElem C) (σ : State) :
     Upd.apply [e] σ = e.write σ σ := by
   simp [Upd.apply]
-
-theorem evalBinop_compound {op : BinOp} (hop : op.hasCompoundAssign = true) (p : PrimTy) (lv : Value)
-    (b : Res Value) : evalBinop op p lv b = (do checkArith (.prim p) (← applyBinOp op lv (← b))) := by
-  cases op <;> simp [BinOp.hasCompoundAssign] at hop <;> rfl
 
 @[simp] theorem SameOk.self (ns : List Var) (x : Res State) : SameOk ns x x := by
   cases x <;> simp [SameOk, EnvAgreeExcept.refl]
@@ -239,54 +162,10 @@ macro "res_split" : tactic => `(tactic| (
   all_goals (try simp_all [EnvAgreeExcept.refl])
   all_goals (try no_panic_iff)))
 
-theorem evalBinop_bump (op : IncDec) (p : PrimTy) (lv : Value) (b : Res Value) :
-    evalBinop op.binOp p lv b = (do
-      checkArith (.prim p) (← applyBinOp op.binOp lv (← b))) := by
-  cases op <;> rfl
-
-theorem applyBinOp_bump (op : IncDec) (lv : Value) :
-    applyBinOp op.binOp lv (.int 1) =
-      (do let n ← lv.asInt; pure (.int (if op.isIncrement then n + 1 else n - 1))) := by
-  cases op <;> cases lv <;> rfl
-
 /-! ### Shared reads
 
 The update and the statement read the same things through differently shaped
 code; these name the reads, so both sides split on the same atoms. -/
-
-namespace Close
-
-/-- The value a local holds: `x` after `uint x = 10;` is `10`; an alias or
-a memory local has none. -/
-def bindingVal : Binding → Res Value
-  | .val v => .ok v
-  | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
-
-/-- The path an alias holds: `p` after `Person storage p = alice;` is
-`alice`. -/
-def bindingPath : Binding → Res (Name × List Seg)
-  | .spath r segs => .ok (r, segs)
-  | .unset => .error .revert
-  | .val _ | .mref _ | .store _ | .ledger _ => .error .stuck
-
-/-- The object a memory local holds: `m` after `Person memory m;`; an unset
-one reverts, as `MPath.mval` does. -/
-def bindingRef : Binding → Res Nat
-  | .mref id => .ok id
-  | .unset => .error .revert
-  | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
-
-/-- The storage a storage variable holds: `old` after `{old := storage}`. -/
-def bindingStore : Binding → Res (List (Name × SVal))
-  | .store st => .ok st
-  | .val _ | .spath .. | .mref _ | .ledger _ | .unset => .error .stuck
-
-/-- The ledger a ledger variable holds: `oldNet` after `{oldNet := net}`. -/
-def bindingLedger : Binding → Res (List (Int × Int))
-  | .ledger l => .ok l
-  | .val _ | .spath .. | .mref _ | .store _ | .unset => .error .stuck
-
-end Close
 
 /-- A stack local's value. -/
 def envVal (σ : State) (x : Var) : Res Value := σ.getEnv x >>= Close.bindingVal
@@ -330,25 +209,6 @@ def envRef (σ : State) (x : Var) : Res Nat := σ.getEnv x >>= Close.bindingRef
   simp only [opLocal, envVal, Close.bindingVal, bind, Except.bind, pure, Except.pure]
   repeat' split
   all_goals simp_all
-
-@[simp] theorem readLoc_eq (σ : State) (a : Addr) : readLoc σ a = (do (← readAddr σ a).asValue) := by
-  cases a with
-  | memoryField id f =>
-    simp only [readLoc, readAddr, bind, Except.bind, pure, Except.pure]
-    repeat' split
-    all_goals simp_all
-  | memoryIndex id i =>
-    simp only [readLoc, readAddr, bind, Except.bind, pure, Except.pure]
-    cases σ.getObj id with
-    | error _ => rfl
-    | ok o =>
-      cases o with
-      | struct _ => rfl
-      | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh]
-
-@[simp] theorem writeLoc_eq (σ : State) (a : Addr) (v : Value) :
-    writeLoc σ a v = writeAddr σ v.toMVal a := by
-  cases a <;> rfl
 
 @[simp] theorem MLoc.read_field (σ : State) {s f : Name} {T : Ty} (b : MPath C (.struct s))
     (h : C.fieldType s f = some T) :

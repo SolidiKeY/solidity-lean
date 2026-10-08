@@ -1,6 +1,7 @@
 import Solidity.Calculus.Progress
 import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Notation
+import Solidity.Calculus.Symex
 
 /-!
 # Termination: symbolic execution always ends

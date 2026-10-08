@@ -1,6 +1,6 @@
 import Solidity.Calculus.Core.Sound
 import Solidity.Calculus.Core.Quote
-import Solidity.Calculus.Symex
+import Solidity.Calculus.TacticSyntax
 
 /-!
 # Symbolic execution on scoped formulas

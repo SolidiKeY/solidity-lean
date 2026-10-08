@@ -1,6 +1,8 @@
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.Quote
+import Solidity.Calculus.TacticSyntax
+import Solidity.Calculus.Notation
 
 /-!
 # Symbolic execution
@@ -28,13 +30,6 @@ namespace Solidity
 open Semantics
 
 variable {C : Contract}
-
-/-- A modality is left: a statement to run, or a `⟨⟩` (or `[]`) to drop. -/
-def Fml.active : Fml C → Bool
-  | .upd _ _ φ | .imp _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.active
-  | .and φ ψ => φ.active || ψ.active
-  | .modal .. => true
-  | _ => false
 
 /-- Fire the rule of the first active statement, looking through updates, a
 precondition and the goals of a branch; fresh names get index `k`. -/
@@ -147,51 +142,18 @@ theorem symex_valid (n : Nat) {φ : Fml C} (h : Valid (symex n φ)) : Valid φ :
   fun σ => symex_sound n φ σ (h σ)
 
 open Lean Elab Tactic Meta in
-/-- Compute the formula inside a `⊨ _` goal, so the goal shows the result of
-the rule rather than the call; the kernel re-checks it (`replaceTargetDefEq`).
-
-A closed formula of a named contract — what `dl[C]{ … }` gives — is run by
-the compiled code and quoted back (`Fml.quote`), as mini-solkey's
-`normValid` does: `Meta.reduce` would unfold `symex 200 φ` by the
-interpreter of `whnf`, which takes a minute on three storage writes.  Any
-other formula (a variable in it, or an anonymous contract) falls back to
-`Meta.reduce`. -/
-def normValid (g : MVarId) : TacticM MVarId := do
-  let ty ← instantiateMVars (← g.getType)
-  let_expr Valid C φ := ty | throwError "expected a goal `Valid φ`"
-  let φ ← instantiateMVars φ
-  let φ' ← match C.constName?, φ.hasFVar || φ.hasMVar with
-    | some n, false =>
-      unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)
-        (mkApp3 (mkConst ``Fml.quote) C (quoteConstName n) φ)
-    | _, _ => withTransparency .all <| Meta.reduce φ (skipTypes := true) (skipProofs := true)
-  g.replaceTargetDefEq (mkApp2 (mkConst ``Valid) C φ')
-
-open Lean Elab Tactic Meta in
-/-- The shape of the formula tactics: apply `lem`, a lemma `Valid ψ → Valid φ`
-with `ψ` computed from `φ`, to the main goal, and compute `ψ` (`normValid`).
-With `unchanged` given, a goal left as it was is an error, `tac: unchanged`. -/
-def applyValid (tac : String) (lem : Lean.Term) (unchanged : Option MessageData := none) :
-    TacticM Unit := do
-  let g ← getMainGoal
-  let before ← instantiateMVars (← g.getType)
-  let [g'] ← g.apply (← elabTerm lem none) | throwError "{tac}: unexpected goals"
-  let g'' ← normValid g'
-  if let some msg := unchanged then
-    if (← instantiateMVars (← g''.getType)) == before then throwError "{tac}: {msg}"
-  replaceMainGoal [g'']
-
-open Lean Elab Tactic Meta in
 /-- `sol_step`: fire the rule of the first active statement. -/
-elab "sol_step" : tactic => do
-  applyValid "sol_step" (← `(Fml.step_valid)) (some m!"no modality left")
+elab_rules : tactic
+  | `(tactic| sol_step) => do
+    applyValid "sol_step" (← `(Fml.step_valid)) (some m!"no modality left")
 
 open Lean Elab Tactic Meta in
 /-- `sol_symex`: run the strategy until no modality is left.  With no goal
 left it does nothing, as `sol_close` does. -/
-elab "sol_symex" : tactic => do
-  if (← getUnsolvedGoals).isEmpty then return
-  applyValid "sol_symex" (← `(symex_valid 200))
+elab_rules : tactic
+  | `(tactic| sol_symex) => do
+    if (← getUnsolvedGoals).isEmpty then return
+    applyValid "sol_symex" (← `(symex_valid 200))
 
 
 /-! ## The strategy as a derivation
@@ -343,24 +305,90 @@ an empty modality, fires the rule `Stmt.step` picks (as `update`, `unfold`,
 `splitBox`, with KeY's two goals, where it applies), or moves a precondition, a quantified local
 or an update in front of the formula into the context, until no goal has a modality left; what
 is left is for `close`. -/
-macro "sol_derive" : tactic => `(tactic| repeat' (first
-  | apply Proves.empty
-  | apply Proves.updateRule (Stmt.step _ _ _).rule
-  | apply Proves.unfoldRule (Stmt.step _ _ _).rule
-  | apply Proves.splitBoxRule (Stmt.step _ _ _).rule
-  | apply Proves.splitRule (Stmt.step _ _ _).rule
-  | apply Proves.checkRule (Stmt.step _ _ _).rule
-  | apply Proves.doneRule (Stmt.step _ _ _).rule
-  | (apply Proves.branchesRule (Stmt.step _ _ _).rule
-     simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true,
-       Fml.alls, codeBinders, Option.toList, List.map]
-     refine ⟨?_, ?_, ?_, ?_⟩)
-  | (apply Proves.casesRule (Stmt.step _ _ _).rule
-     all_goals (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies,
-       implies_true, and_true])
-     all_goals (try and_intros))
-  | apply Proves.intro
-  | apply Proves.allIntro
-  | apply Proves.updIntro))
+macro_rules
+  | `(tactic| sol_derive) => `(tactic| repeat' (first
+    | apply Proves.empty
+    | apply Proves.updateRule (Stmt.step _ _ _).rule
+    | apply Proves.unfoldRule (Stmt.step _ _ _).rule
+    | apply Proves.splitBoxRule (Stmt.step _ _ _).rule
+    | apply Proves.splitRule (Stmt.step _ _ _).rule
+    | apply Proves.checkRule (Stmt.step _ _ _).rule
+    | apply Proves.doneRule (Stmt.step _ _ _).rule
+    | (apply Proves.branchesRule (Stmt.step _ _ _).rule
+       simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true,
+         Fml.alls, codeBinders, Option.toList, List.map]
+       refine ⟨?_, ?_, ?_, ?_⟩)
+    | (apply Proves.casesRule (Stmt.step _ _ _).rule
+       all_goals (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies,
+         implies_true, and_true])
+       all_goals (try and_intros))
+    | apply Proves.intro
+    | apply Proves.allIntro
+    | apply Proves.updIntro))
+
+/-! ## What a rule leaves reads back
+
+`dl!{ … }` (`Notation.lean`) on what the strategy leaves: each step's
+result is a formula the reader reads back as it. -/
+
+section ReadBack
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-- What a rule leaves prints as a formula that reads back as it. -/
+example : (dl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }).step =
+    some dl!{ { storage := save(storage, alice.age, 10) } [ uint y = alice.age; ] y = 10 } := rfl
+
+/-- `p = alice;` is what is left of a declaration: `p` is read as an alias. -/
+example : (dl!{ ⟨ Person storage p = alice; p.age = 3; ⟩ p.age == 3 }).step =
+    some dl!{ ⟨ p = alice; p.age = 3; ⟩ find(storage, p.age) = 3 } := rfl
+
+/-- What `Person memory carol;` leaves reads back, and binds `carol` as a
+`Person` in memory under it. -/
+example : (dl!{ ⟨ Person memory carol; carol.age = 5; ⟩ true }).step =
+    some dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+      ⟨ carol.age = 5; ⟩ true } := rfl
+
+/-- A state variable is no memory local: `alice = carol;` copies to storage. -/
+example : (dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+    ⟨ alice = carol; ⟩ true }).step =
+    some dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+      { storage := save(storage, alice, copyMem(mtSt, memory, carol)) } ⟨⟩ true } := rfl
+
+/-- An array's allocation carries its type, as a struct's does. -/
+example : (dl!{ ⟨ uint[] memory xs; xs[0] = 5; ⟩ true }).step =
+    some dl!{ { xs := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) }
+      ⟨ xs[0] = 5; ⟩ true } := rfl
+
+/-- `new` says what it allocates, so its local is a memory array
+(`scopeHints`), and the copy it leaves says so too. -/
+example : (dl!{ ⟨ uint[] memory xs = new uint[](3); ⟩ true }).step =
+    some dl!{ ⟨ xs = new uint[](3); ⟩ true } := rfl
+example : symex 3 dl!{ ⟨ uint[] memory xs = new uint[](3); ⟩ true } =
+    dl!{ { xs := freshId(copySt(memory, newArr(uint[], 3))) ‖ memory := copySt(memory, newArr(uint[], 3)) }
+      true } := rfl
+
+/-- `carol = alice;` is a memory copy only by `carol`'s declaration, which a
+line that dropped it carries after `where`. -/
+example : (dl!{ ⟨ Person memory carol = alice; carol.age = 1; ⟩ true }).step =
+    some dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } := rfl
+example : (dl!{ ⟨ Person storage carol = alice; carol.age = 1; ⟩ true }).step =
+    some dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true } := rfl
+
+/-- An update with no modality under it is judged at the formula's: the last
+line of a box derivation, which `dl!{ … }` reads at the diamond. -/
+example : symex 2 dl!{ [ x = 1; ] x == 1 } = dl![.box]{ { x := 1 } x == 1 } := rfl
+example : dl![.box]{ { x := 1 } x == 1 } ≠ dl!{ { x := 1 } x == 1 } := by intro h; cases h
+
+/-- At a modality `m` the rules reduce: none but a revert looks at it. -/
+example (m : Modality) :
+    (dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }).step = some dl![m]{ { x := 1 } ⟨[ ]⟩ x == 1 } := rfl
+example (m : Modality) : symex 2 dl![m]{ ⟨[ x = 1; ]⟩ x == 1 } = dl![m]{ { x := 1 } x == 1 } := rfl
+
+/-- Both at once: `m` and `φ` are put back by one walk. -/
+example (m : Modality) (φ : Fml StandardExample) :
+    (dl![m]{ ⟨[ x = 1; ]⟩ φ }).step = some dl![m]{ { x := 1 } ⟨[ ]⟩ φ } := rfl
+
+end ReadBack
 
 end Solidity

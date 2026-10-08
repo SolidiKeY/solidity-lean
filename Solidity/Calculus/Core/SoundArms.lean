@@ -1,5 +1,5 @@
 import Solidity.Calculus.Core.SoundKit
-import Solidity.Calculus.SoundUpdate
+import Solidity.Theory.StateWrites
 
 /-!
 # Soundness of the update arms

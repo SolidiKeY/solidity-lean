@@ -1460,7 +1460,7 @@ elab_rules : tactic
 with the scope's switch off (`core_surface%`, `Calculus/Core/Surface.lean`):
 it reads as `Update.lean`'s formula, so a command on scoped formulas steps
 aside without elaborating it, which today's command does again
-(`Tools/CoreInspect.lean`'s `elabCoreFormula?` does the same). -/
+(`Tools/ProofTree.lean`'s `elabCoreFormula?` does the same). -/
 def todaysNotation (t : Syntax) : TermElabM Bool := do
   let some (.atom _ v) := t.getHead? | return false
   unless v.startsWith "dl" do return false
