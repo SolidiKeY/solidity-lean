@@ -26,6 +26,10 @@ under solkey's names where solkey has the rule:
   (`Frames.exit`), a scope end a popping update, which `updIntro` takes;
 * `closeTrue`, behind a context with no diamond update but scope ends
   (`Hyps.boxOnly`);
+* `closeFalse`: a context that refutes itself closes any goal, as today's
+  `Proves.closeFalse` (`Calculus/Logic.lean`), the shape of KeY's `cut` on
+  `false` and `closeFalse`; `sol_prove` closes a split's branch so when its
+  condition is ground under the context (`Calculus/Core/ProvesDerive.lean`);
 * `close`: a leaf whose erasure is valid (`Calculus/Core/CloseErase.lean`),
   as today's `Proves.close`, behind any context of updates, under either
   modality, hidden binders and `∀`s.
@@ -223,6 +227,12 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (h : Proves C R Γ₀ H (κ.exit m φ)) : Proves C R Γ₀ H (.modal m .nil κ φ)
   /-- `closeTrue`, behind a context with no diamond update. -/
   | closeTrue {Γ : Ctx} {H : Hyps C Γ₀ Γ} (h : H.boxOnly = true) : Proves C R Γ₀ H .tt
+  /-- `closeFalse`: a context that refutes itself closes any goal.  As
+  today's `Proves.closeFalse`, KeY's `cut` on `false` followed by
+  `closeFalse` on the TRUE goal; the FALSE goal, the context refuted, is the
+  premise, which the closer proves.  A deviation in shape. -/
+  | closeFalse {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : Proves C R Γ₀ H .ff) :
+      Proves C R Γ₀ H φ
   /-- Leave the calculus: the sequent, its context in front, erased
   (`Fml.erase`, the outer locals named `ns`) and proved in the logic, where
   its erasure gives it, with no modality left (`Fml.closableB`, as today's
