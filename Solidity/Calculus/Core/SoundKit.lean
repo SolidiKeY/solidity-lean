@@ -754,6 +754,14 @@ theorem TRes.eq_of_map_st {H : HTy} {Δ : Ctx} {r r' : TRes (Out C H Δ)}
     | ok => cases h
     | error e' => rw [show e = e' from Except.error.inj h]
 
+/-- A statement that runs no other by a choice and pays nothing has one
+callback run, its typed run. -/
+theorem ExecS.det_inv {Γ Γ' : Ctx} {σ : TState C Γ} {J : StateInv C} {s : Stmt C Γ Γ'}
+    {o : COut C σ.H Γ'} (h : ExecS J σ s o) (hs : s.forks = false) : o = .ofRes (s.trun σ) := by
+  cases h with
+  | det _ => rfl
+  | _ => simp_all only [Stmt.forks, Bool.true_eq_false]
+
 /-- **A statement that runs no other by a choice runs with callbacks as a
 branch that pays nothing**, where it runs so without. -/
 theorem ExecS.split_det {s : Stmt C Γ Γ} {Δ : Ctx} {P : Prog C Γ Δ} (σ : TState C Γ)
@@ -766,10 +774,7 @@ theorem ExecS.split_det {s : Stmt C Γ Γ} {Δ : Ctx} {P : Prog C Γ Δ} (σ : T
     have h' : ((Prog.trun σ P).map (·.st)).map (TState.drop P.ext) = (s.trun σ).map (·.st) := h
     rw [← h']
     cases Prog.trun σ P <;> rfl
-  have ho : o = .ofRes (s.trun σ) := by
-    cases he with
-    | det _ => rfl
-    | _ => simp_all [Stmt.forks]
+  have ho : o = .ofRes (s.trun σ) := ExecS.det_inv he hs
   refine ⟨.ofRes (Prog.trun σ P), ?_, by rw [ho, ← e, COut.map_ofRes]⟩
   rcases Prog.exec_run J P σ with hx | hx
   · exact hx

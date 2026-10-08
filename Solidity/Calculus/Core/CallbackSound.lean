@@ -176,14 +176,6 @@ section Rules
 variable {I : Fml C []} {m : Modality} {Γ Γ' Γ₁ Γ₀ : Ctx} {σ : TState C Γ}
   {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
 
-/-- A statement that runs no other by a choice and pays nothing has one
-callback run, its typed run. -/
-theorem ExecS.det_inv {J : StateInv C} {s : Stmt C Γ Γ'} {o : COut C σ.H Γ'}
-    (h : ExecS J σ s o) (hs : s.forks = false) : o = .ofRes (s.trun σ) := by
-  cases h with
-  | det _ => rfl
-  | _ => simp_all [Stmt.forks]
-
 /-- A sequence that pays nothing runs with callbacks as it runs. -/
 theorem ExecP.of_trun {J : StateInv C} {Δ : Ctx} {τ : TState C Δ} {P : Prog C Δ Γ'}
     (hP : Prog.hasTransfer P = false) : ExecP J τ P (.ofRes (Prog.trun τ P)) := by
