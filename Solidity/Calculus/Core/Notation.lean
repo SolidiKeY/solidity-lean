@@ -282,6 +282,14 @@ syntax (name := cdlSeq) "cdl[" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " 
 @[inherit_doc cdlSeq] syntax "cdl![" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
 
 open Lean Elab Term Meta in
+/-- `elabAgainst` with no kernel check of the throwaway definition it
+evaluates (`debug.skipKernelTC`), as `Calculus/Core/Chains.lean`'s
+`evalQuoted`: it returns a quoted formula, which the kernel checks where it
+is used.  The check cost about 7 ms a formula. -/
+def elabAgainstQ (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermElabM Lean.Expr :=
+  withOptions (debug.skipKernelTC.set · true) (elabAgainst c f)
+
+open Lean Elab Term Meta in
 /-- `cdl[C, m]{ φ }`, `m` optional, as `elabDlAt` reads `dl[C, m]{ φ }`: a
 modality that is no constructor is read twice, at the diamond and at the
 box, and `fillSlotsC` puts it and the Lean formulas back. -/
@@ -303,7 +311,7 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
-    elabAgainst c fun q => `((elabDlC $c $raw $pastAll).map (Core.Fml.quote $q))
+    elabAgainstQ c fun q => `((elabDlC $c $raw $pastAll).map (Core.Fml.quote $q))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
     | some m =>
@@ -313,7 +321,7 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
       else
         let rd ← read ``Modality.diamond
         let rb ← read ``Modality.box
-        let e ← elabAgainst c fun q =>
+        let e ← elabAgainstQ c fun q =>
           `((do pure (Core.Fml.and (← elabDlC $c $rd $pastAll) (← elabDlC $c $rb $pastAll))).map
               (Core.Fml.quote $q))
         let #[_, _, d, b] := e.getAppArgs | throwError "cdl[C, m]: not two readings{indentExpr e}"
