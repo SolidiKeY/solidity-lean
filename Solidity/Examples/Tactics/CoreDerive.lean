@@ -1,6 +1,7 @@
 import Solidity.Calculus.Core.Derive
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Delab
+import Solidity.Calculus.Core.WalkSyntax
 
 /-!
 # The scoped strategy tools
@@ -150,5 +151,137 @@ example : ⊨ dl!{ [ x = 2; ] x == 2 } := by
   refine Proves.close ?_
   sol_symex
   sol_close
+
+/-! ## Today's short walk
+
+Under `open scoped Solidity.Core.Surface` `sol_derive?` writes today's walk
+text, which the scope's macros read (`Calculus/Core/WalkSyntax.lean`):
+solkey's aliases, one `apply` per rule, `refine close ?_` at a leaf, the
+steps KeY does not show left unwritten. -/
+
+section Surface
+
+open scoped Solidity.Core.Surface
+
+open Proves
+
+/--
+info: Try this:
+  apply Proves.valid
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply unfold .ifElseUnfold
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply splitBox .ifElseSplit
+    case thn =>
+      apply update .storageRootWriteStore
+      refine close ?_
+      sol_symex
+      sol_close
+    case els =>
+      apply update .storageRootWriteStore
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊨ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+  sol_derive?
+
+/-- The suggestion replayed. -/
+example : ⊨ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+  apply Proves.valid
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply unfold .ifElseUnfold
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply splitBox .ifElseSplit
+  case thn =>
+    apply update .storageRootWriteStore
+    refine close ?_
+    sol_symex
+    sol_close
+  case els =>
+    apply update .storageRootWriteStore
+    refine close ?_
+    sol_symex
+    sol_close
+
+/--
+info: Try this:
+  apply impRight
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply unfold .requireConditionCapture
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply splitBox .requireSimple
+    case thn =>
+      refine close ?_
+      sol_symex
+      sol_close
+    case els =>
+      apply done .revertBox
+      refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊢ dl!{ a == 1 → [ uint x = a; require(x == 1); ] x == 1 } := by
+  sol_derive?
+
+/-- The suggestion replayed. -/
+example : ⊢ dl!{ a == 1 → [ uint x = a; require(x == 1); ] x == 1 } := by
+  apply impRight
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  apply unfold .requireConditionCapture
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply splitBox .requireSimple
+  case thn =>
+    refine close ?_
+    sol_symex
+    sol_close
+  case els =>
+    apply done .revertBox
+    refine close ?_
+    sol_symex
+    sol_close
+
+/--
+info: Try this:
+  apply Proves.valid
+    apply cases .sendNoCallbackBox <;>
+        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
+      (try and_intros)
+    · refine close ?_
+      sol_symex
+      sol_close
+    · refine close ?_
+      sol_symex
+      sol_close
+-/
+#guard_msgs in
+example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
+  sol_derive?
+
+/-- The suggestion replayed. -/
+example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
+  apply Proves.valid
+  apply cases .sendNoCallbackBox <;>
+      (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
+        and_true]) <;>
+    (try and_intros)
+  · refine close ?_
+    sol_symex
+    sol_close
+  · refine close ?_
+    sol_symex
+    sol_close
+
+end Surface
 
 end Solidity.Examples.Tactics.CoreDerive

@@ -25,8 +25,9 @@ Where the scoped calculus takes a step today's names otherwise:
 * the steps KeY does not show are taken before and after each rule,
   silently (`core_silent`): a scope's end (an update that only pops) and a hidden
   binder join the context;
-* `apply invBox r` is the scoped `inv`, its goals `init`, `thn` and `els`
-  (solkey's two goals under the box, no third);
+* `apply invBox r` (`apply invLean r` under the diamond) is the scoped
+  `inv`, its goals `init`, `thn` and `els` (solkey's two goals under the
+  box, no third); `apply updIntro` takes an update into the context;
 * `apply empty` (`emptyModality`) is a step only where a modality is left
   with no statement: a rule that leaves none goes on into the rest or past
   the frames (Gate G0, condition 6), so after a last statement it does
@@ -223,6 +224,15 @@ scoped macro_rules
       | (core_silent; core_inv (Solidity.Core.Taclet.step_eq $r))
       | (core_silent; core_inv (Solidity.Core.LeanTaclet.toStep $r))
       | apply _root_.Solidity.Proves.invBox $r)
+  | `(tactic| apply invLean $r:term) =>
+    `(tactic| first
+      | (core_silent; core_inv (Solidity.Core.Taclet.step_eq $r))
+      | (core_silent; core_inv (Solidity.Core.LeanTaclet.toStep $r))
+      | apply _root_.Solidity.Proves.invLean $r)
+  | `(tactic| apply updIntro) =>
+    `(tactic| first
+      | (core_silent; apply Solidity.Core.Proves.updIntro) <;> core_silent
+      | apply _root_.Solidity.Proves.updIntro)
   | `(tactic| apply impRight) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.intro) <;> core_silent
