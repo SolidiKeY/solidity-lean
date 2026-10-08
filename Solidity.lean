@@ -63,6 +63,8 @@ import Solidity.Calculus.Core.SoundStore
 import Solidity.Calculus.Core.SoundMem
 import Solidity.Calculus.Core.SoundStep
 import Solidity.Calculus.Core.HoldsErase
+import Solidity.Calculus.Core.Closable
+import Solidity.Calculus.Core.CloseErase
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound

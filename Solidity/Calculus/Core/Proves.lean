@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.Taclet
+import Solidity.Calculus.Core.Closable
 import Solidity.Calculus.Logic
 
 /-!
@@ -24,7 +25,9 @@ under solkey's names where solkey has the rule:
 * `empty` (`emptyModality`): a finished program goes through its frames
   (`Frames.exit`), a scope end a popping update, which `updIntro` takes;
 * `closeTrue`, behind a context with no diamond update but scope ends
-  (`Hyps.boxOnly`).
+  (`Hyps.boxOnly`);
+* `close`: a leaf whose erasure is valid (`Calculus/Core/CloseErase.lean`),
+  as today's `Proves.close`.
 
 A program rule fires the rule the strategy fires (`Stmt.step`, one per
 statement): its premise is `s.step k m = some p`, which `rfl` proves and
@@ -216,6 +219,13 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (h : Proves C R Γ₀ H (κ.exit m φ)) : Proves C R Γ₀ H (.modal m .nil κ φ)
   /-- `closeTrue`, behind a context with no diamond update. -/
   | closeTrue {Γ : Ctx} {H : Hyps C Γ₀ Γ} (h : H.boxOnly = true) : Proves C R Γ₀ H .tt
+  /-- Leave the calculus: the sequent, its context in front, erased
+  (`Fml.erase`, the outer locals named `ns`) and proved in the logic, where
+  its erasure gives it (`Fml.Closable`). -/
+  | close {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (ns : List Var)
+      (hlen : ns.length = Γ₀.length) (hnd : ns.Nodup) (hc : (H.wrap φ).Closable ns)
+      (hB : Solidity.Avoids (H.wrap φ).bindNames ns) (h : Solidity.Valid ((H.wrap φ).erase ns)) :
+      Proves C R Γ₀ H φ
 
 /-! ## A derivation
 

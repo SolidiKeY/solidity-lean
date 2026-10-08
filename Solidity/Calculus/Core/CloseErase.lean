@@ -66,7 +66,7 @@ theorem agreeExcept_overlay (B : List Var) (s t : Semantics.State) :
 theorem agreeExcept_setEnv (s : Semantics.State) (x : Var) (b : Binding) :
     EnvAgreeExcept [x] (s.setEnv x b) s :=
   ⟨rfl, rfl, rfl, rfl,
-    fun _ hn => SemanticsProperties.lookupBy_setBy_ne (fun h => hn (h ▸ List.mem_singleton_self _)) _ _,
+    fun _ hn => SemanticsProperties.lookupBy_setBy_ne (fun h => hn (List.mem_singleton.mpr h)) _ _,
     rfl, rfl⟩
 
 /-- States that agree everywhere satisfy the same formulas. -/
@@ -87,7 +87,7 @@ theorem UpdElem.write_keep (σ₀ : Semantics.State) (e : Solidity.UpdElem C)
     obtain ⟨_, _, h⟩ := Semantics.bind_ok_inv h; cases h
     exact SemanticsProperties.lookupBy_setBy_ne (hne hy) _ _
   | unset x =>
-    cases h; exact SemanticsProperties.lookupBy_setBy_ne (fun hx => hy (hx ▸ List.mem_singleton_self _)) _ _
+    cases h; exact SemanticsProperties.lookupBy_setBy_ne (fun hx => hy (List.mem_singleton.mpr hx)) _ _
   | mref x i =>
     obtain ⟨_, _, h⟩ := Semantics.bind_ok_inv h; cases h
     exact SemanticsProperties.lookupBy_setBy_ne (hne hy) _ _
@@ -112,8 +112,8 @@ theorem UpdElem.write_keep (σ₀ : Semantics.State) (e : Solidity.UpdElem C)
     split at h
     · exact nomatch h
     · cases h; rfl
-  | saveNet x => cases h; exact SemanticsProperties.lookupBy_setBy_ne (fun hx => hy (hx ▸ List.mem_singleton_self _)) _ _
-  | saveNetMt x => cases h; exact SemanticsProperties.lookupBy_setBy_ne (fun hx => hy (hx ▸ List.mem_singleton_self _)) _ _
+  | saveNet x => cases h; exact SemanticsProperties.lookupBy_setBy_ne (fun hx => hy (List.mem_singleton.mpr hx)) _ _
+  | saveNetMt x => cases h; exact SemanticsProperties.lookupBy_setBy_ne (fun hx => hy (List.mem_singleton.mpr hx)) _ _
   | netMt r a =>
     obtain ⟨_, _, h⟩ := Semantics.bind_ok_inv h
     obtain ⟨_, _, h⟩ := Semantics.bind_ok_inv h
@@ -137,5 +137,148 @@ theorem Upd.apply_keep (σ₀ : Semantics.State) :
     exact (Upd.apply_keep σ₀ U h y hy'.2).trans (UpdElem.write_keep σ₀ e h₁ hy'.1)
 
 end Untyped
+
+/-! ## The formulas -/
+
+/-- Agreement survives a change of the untyped state off the scope's names. -/
+theorem Agree.congrExcept {Γ : Ctx} {ns B : List Var} {σ : State C Γ} {τ₀ τ : Semantics.State}
+    (hag : Agree ns σ τ₀) (h : EnvAgreeExcept B τ τ₀) (hB : Avoids B ns) : Agree ns σ τ where
+  len := hag.len
+  nodup := hag.nodup
+  glob := by
+    show withLocals (withLocals σ.glob τ₀.env) τ.env = τ
+    rw [hag.glob]
+    obtain ⟨hs, hh, hn, hnet, -, hsb, htx⟩ := h
+    cases τ; cases τ₀
+    simp only at hs hh hn hnet hsb htx
+    subst hs hh hn hnet hsb htx
+    rfl
+  env := fun ⟨x, b⟩ hm => by
+    rw [h.env x fun hx => hB x hx (Env.mem_erase_key hm)]
+    exact hag.env _ hm
+
+/-- **A goal closed by its erasure's validity**: a `Fml.Closable` formula
+holds in `σ` when its erasure holds in every untyped state that agrees with
+one agreeing with `σ` off the names its hidden binders bind. -/
+theorem holds_of_erase_valid : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.Closable ns →
+    Avoids φ.bindNames ns → {σ : State C Γ} → {τ₀ : Semantics.State} → Agree ns σ τ₀ →
+    (∀ τ, EnvAgreeExcept φ.bindNames τ τ₀ → Solidity.holds τ (φ.erase ns)) → holds σ φ
+  | _, .tt, _, _, _, _, _, _, _ => trivial
+  | _, .eq a b, _, _, _, _, τ₀, hag, h =>
+    (holds_erase (.eq a b) trivial hag).2 (h τ₀ (agreeExcept_refl _ τ₀))
+  | _, .defined t, _, _, _, _, τ₀, hag, h =>
+    (holds_erase (.defined t) trivial hag).2 (h τ₀ (agreeExcept_refl _ τ₀))
+  | _, .not φ, _, hφ, _, _, τ₀, hag, h =>
+    (holds_erase (.not φ) hφ hag).2 (h τ₀ (agreeExcept_refl _ τ₀))
+  | _, .modal m P κ φ, _, hφ, _, _, τ₀, hag, h =>
+    (holds_erase (.modal m P κ φ) hφ hag).2 (h τ₀ (agreeExcept_refl _ τ₀))
+  | _, .and φ ψ, _, hφ, hB, _, _, hag, h =>
+    ⟨holds_of_erase_valid φ hφ.1 (Avoids.left hB) hag fun τ hτ =>
+        (h τ (agreeExcept_mono hτ fun _ hy => List.mem_append_left _ hy)).1,
+      holds_of_erase_valid ψ hφ.2 (Avoids.right hB) hag fun τ hτ =>
+        (h τ (agreeExcept_mono hτ fun _ hy => List.mem_append_right _ hy)).2⟩
+  | _, .imp φ ψ, _, hφ, hB, _, _, hag, h => fun ha =>
+    holds_of_erase_valid ψ hφ.2 hB hag fun τ hτ =>
+      h τ hτ ((holds_erase φ hφ.1 (hag.congrExcept hτ hB)).1 ha)
+  | _, .upd m U φ, ns, hφ, _, σ, τ₀, hag, h => by
+    obtain ⟨rfl, hU, hUB, hBU, hφ⟩ := hφ
+    have hE : ∀ τ, EnvAgreeExcept φ.bindNames τ τ₀ →
+        Solidity.holds τ (.upd .box (U.erase ns) (φ.erase (U.names ns))) := fun τ hτ => by
+      have h' := h τ hτ
+      simp only [Fml.erase] at h'
+      split at h'
+      · rename_i hnil
+        rw [hnil]
+        exact h'
+      · exact h'
+    have hR := Upd.apply_erase hag U hU
+    show Modality.afterC .box (holds · φ) (U.apply σ)
+    cases hσ : U.apply σ with
+    | error => trivial
+    | ok σ' =>
+      rw [hσ] at hR
+      cases hτ₀ : Solidity.Upd.apply (U.erase ns) τ₀ with
+      | error => rw [hτ₀] at hR; exact hR.elim
+      | ok τ₀' =>
+        rw [hτ₀] at hR
+        refine holds_of_erase_valid φ hφ hBU hR fun τ' hτ' => ?_
+        have h1 : Modality.after .box (Solidity.holds · (φ.erase (U.names ns)))
+            (Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀)) :=
+          hE (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _)
+        have hfr := Upd.apply_frame (agreeExcept_overlay φ.bindNames τ' τ₀) (U.erase ns) hUB
+        rw [hτ₀] at hfr
+        revert h1 hfr
+        cases hτ : Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀) with
+        | error => intro _ hfr; exact hfr.elim
+        | ok τ'' =>
+          intro h1 hfr
+          refine (holds_congr_full (agreeExcept_full (agreeExcept_trans hfr (agreeExcept_symm hτ'))
+            fun y hy => ?_) _).1 h1
+          rw [Upd.apply_keep _ (U.erase ns) hτ y (fun hm => hUB y hm hy), lookupBy_overlay, if_pos hy]
+  | _, .havoc φ, _, hφ, hB, σ, τ₀, hag, h => fun st nt => by
+    have hag' := hag.withGlob (σ.glob.havoc st nt)
+    have e : withLocals (σ.glob.havoc st nt) τ₀.env = τ₀.havoc st nt := by
+      have hw := hag.wl
+      generalize τ₀.env = env at hw ⊢
+      subst hw
+      rfl
+    rw [e] at hag'
+    refine holds_of_erase_valid φ hφ hB hag' fun τ' hτ' => ?_
+    have h1 := h (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _) st nt
+    refine (holds_congr_full (agreeExcept_full (agreeExcept_trans
+      ((agreeExcept_overlay _ τ' τ₀).havoc st nt) (agreeExcept_symm hτ')) fun y hy => ?_) _).1 h1
+    show lookupBy y (overlay _ τ' τ₀).env = _
+    rw [lookupBy_overlay, if_pos hy]
+  | _, .all x p φ, _, hφ, hB, _, τ₀, hag, h => fun v hv => by
+    obtain ⟨hx, hxB, hφ⟩ := hφ
+    refine holds_of_erase_valid φ hφ (fun y hy hm => ?_) (hag.push (t := .val p) hx v)
+      fun τ' hτ' => ?_
+    · rcases List.mem_cons.1 hm with rfl | hm
+      · exact hxB hy
+      · exact hB y hy hm
+    · have h1 := h (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _) v hv
+      refine (holds_congr_full (agreeExcept_full (agreeExcept_trans
+        ((agreeExcept_overlay _ τ' τ₀).setEnv_both x _) (agreeExcept_symm hτ')) fun y hy => ?_) _).1 h1
+      have hne : y ≠ x := fun e => by subst e; exact hxB hy
+      show lookupBy y (setBy x _ (overlay _ τ' τ₀).env) = _
+      rw [SemanticsProperties.lookupBy_setBy_ne hne, lookupBy_overlay, if_pos hy]
+  | _, .bind x t φ, _, hφ, hB, _, τ₀, hag, h => fun v => by
+    obtain ⟨hx, hxB, hφ⟩ := hφ
+    refine holds_of_erase_valid φ hφ (fun y hy hm => ?_) (hag.push hx v) fun τ' hτ' => ?_
+    · rcases List.mem_cons.1 hm with rfl | hm
+      · exact hxB hy
+      · exact hB y (List.mem_cons_of_mem _ hy) hm
+    · exact h τ' (agreeExcept_trans (agreeExcept_mono hτ' fun _ hy => List.mem_cons_of_mem _ hy)
+        (agreeExcept_mono (agreeExcept_setEnv τ₀ x _) fun _ hy => by
+          rw [List.mem_singleton.1 hy]; exact List.mem_cons_self))
+  | _, .anon xs φ, ns, hφ, hB, σ, τ₀, hag, h => fun b => by
+    obtain ⟨τ₁, h₁, h₂⟩ := Agree.anon b xs hag
+    have hag' : Agree ns (σ.anon xs b) (overlay (xs.map fun x => x.2.name ns) τ₁ τ₀) := by
+      refine h₁.congrEnv ?_ fun y => ?_
+      · rw [State.glob_anon b xs σ]
+        have hw := hag.wl
+        generalize τ₀.env = env at hw ⊢
+        subst hw
+        rfl
+      · rw [lookupBy_overlay]
+        split
+        · rfl
+        · exact (h₂ y ‹_›).symm
+    refine holds_of_erase_valid φ hφ hB hag' fun τ' hτ' => ?_
+    have h1 := h (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _) (fun y => lookupBy y τ'.env)
+    have hys : ∀ y ∈ xs.map (fun x => x.2.name ns), y ∈ (xs.map fun x => x.2.name ns) ++ φ.bindNames :=
+      fun _ hy => List.mem_append_left _ hy
+    have hbs : ∀ y ∈ φ.bindNames, y ∈ (xs.map fun x => x.2.name ns) ++ φ.bindNames :=
+      fun _ hy => List.mem_append_right _ hy
+    refine (holds_congr_full (agreeExcept_full
+      (agreeExcept_trans (agreeExcept_mono (agreeExcept_overlay _ τ' _) hys)
+        (agreeExcept_trans (agreeExcept_mono (agreeExcept_overlay _ τ' τ₀) hbs)
+          (agreeExcept_trans (agreeExcept_mono (agreeExcept_symm (agreeExcept_overlay _ τ₁ τ₀)) hys)
+            (agreeExcept_mono (agreeExcept_symm hτ') hbs)))) fun y hy => ?_) _).1 h1
+    show lookupBy y (overlay _ τ' (overlay _ τ' τ₀)).env = _
+    rw [lookupBy_overlay, lookupBy_overlay]
+    by_cases hy₁ : y ∈ xs.map (fun x => x.2.name ns)
+    · rw [if_pos hy₁]
+    · rw [if_neg hy₁, if_pos ((List.mem_append.1 hy).resolve_left hy₁)]
 
 end Solidity.Core
