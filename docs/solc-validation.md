@@ -145,7 +145,7 @@ lemma set for I.
   and `send` the right reading is no callback, the recipient free to revert.
   `a.call{value: v}("")` forwards all gas; the front end lowers
   `(bool ok, ) = a.call{value: v}("")` to `bool ok = a.send(v)`, as solkey does,
-  so only `Semantics/Callback.lean`'s havoc (`holdsC`) reads it faithfully
+  so only `Semantics/Core/Callback.lean`'s havoc (`holdsC`) reads it faithfully
   (`docs/solc-alignment.md`).
 
 ## Deterministic checks
@@ -176,7 +176,7 @@ citations when re-pinning.
   machine with EVM.
 - `compileStmt` against `solc --ir` statement by statement (compiled `transfer` as
   `send`, with an interpreter that did not revert, and the theorem would still hold).
-  Name `Evm/Compile.lean`'s pieces after the helpers they mirror; where shapes cannot
+  Name `Evm/CoreCompile.lean`'s pieces after the helpers they mirror; where shapes cannot
   match are the documented deltas.
 
 ## Differential testing on an EVM

@@ -31,7 +31,7 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 
 Beyond mini-solkey: type soundness and reachability (`Typing/`), sort
 faithfulness (`SortCheck/Faithfulness.lean`), the callback semantics
-(`Semantics/Callback.lean`, `Calculus/Callback.lean`), function
+(`Semantics/Core/Callback.lean`, `Calculus/Core/Callback.lean`), function
 specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
 `docs/corpus-parity.md`), and the `SolKey` reader's correspondence against
 `Taclet` (`~/projects/side-projects/lean/solkey`).

@@ -27,7 +27,7 @@ new hypothesis.
   splits both runs on them. Two halts must agree on whether they are a
   panic (`SameOk`): where the two sides halt through different reads,
   `res_split` closes `e₁ = .panic ↔ e₂ = .panic` with `no_panic_iff`, from
-  the `@[simp]` `*_noPanic` lemmas (`Semantics/NoPanic.lean`,
+  the `@[simp]` `*_noPanic` lemmas (`Semantics/NoPanicOps.lean`,
   `Calculus/NoPanic.lean`, `envVal_noPanic`). A new read needs its own
   `_noPanic` lemma, or that goal is left over.
 - **Unfold premise** (`SoundUnfold.lean`): the captured part is evaluated

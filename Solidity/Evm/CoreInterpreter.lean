@@ -4,7 +4,7 @@ import Solidity.Evm.CoreCorrect
 /-!
 # The typed run, read off the machine
 
-`Evm/Examples.lean`'s interpreter theorems over the scoped syntax
+The compiler's interpreter theorems over the scoped syntax
 (`docs/intrinsic.md`, M5, W1): a machine run of `Evm/CoreExamples.lean`,
 through `Evm/CoreCorrect.lean`'s headline, is a fact about `Core.Prog.trun`
 from a fresh contract, without running the interpreter.  The programs are

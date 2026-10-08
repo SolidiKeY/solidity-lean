@@ -253,10 +253,10 @@ const KEY_SUITES = [
     reason: (name) =>
       name === "net-call-withcallback-simple"
         ? "`(bool ok, ) = a.call{value: v}(\"\")` is the send `bool ok = a.send(v)`, as solkey " +
-          "lowers it, and its callback reading is ported (`Calculus/Callback.lean`, `ProvesC.send`), " +
+          "lowers it, and its callback reading is ported (`Calculus/Core/Callback.lean`, `ProvesC.send`), " +
           "but the problem's invariant `CInv` reads the ledger `net`, which no term reads"
       : name.includes("withcallback")
-        ? "the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), " +
+        ? "the callback semantics is ported (`Semantics/Core/Callback.lean`, `ExecS.transferResume`), " +
           "but the problem's invariant `CInv` reads the ledger `net`, which no term reads"
         : name === "net-msg-value"
           ? "`msg.value` is not a program expression"

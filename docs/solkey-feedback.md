@@ -38,8 +38,8 @@ redundant there and load-bearing in solkey.
 
 **Lean evidence.** `Semantics.checkArith` (`Semantics.lean`); the EVM compiler
 proves the guard: `checkArith_uint`, `checkArith_int`, `tail_sim`
-(`Evm/Correctness.lean`), `overflow_run`/`overflow_interpreter`
-(`Evm/Examples.lean`).
+(`Evm/SimLemmas.lean`), `overflow_run`/`overflow_interpreter`
+(`Evm/CoreExamples.lean`, `Evm/CoreInterpreter.lean`).
 
 **Fix.** Either split each arithmetic taclet on the range (revert branch under
 `\diamond`, closed branch under `\box`, as Java KeY's `inInt`/`expandInInt`), or
@@ -70,10 +70,8 @@ canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
 `no_hidden_invariant` (`Typing/Constructibility.lean`) prove canonical and tight
 is exactly reachable (for words, keys and slots in range, `SVal.fits`), so no
 hidden invariant is missing. Reachable is by the typed run
-(`Reachable`, a subset of the scoped run's `ReachableS`); a storage the
-untyped run the calculus reads reaches from a block the locals check accepts
-is `ReachableS` (`ReachableU.reachableS`), and `Reachable` when its words,
-keys and slots are in range (`ReachableU.reachable`, `FitsStorage`). `uint` range is not yet proved an invariant of the
+(`Reachable`, a subset of the scoped run's `ReachableS`; `ReachableS.reachable`
+when its words, keys and slots are in range, `FitsStorage`). `uint` range is not yet proved an invariant of the
 model (literals are in range since 2026-10-07, `Simple.lit`, but no theorem says
 a run keeps every word in range), which is why item 1 owns it.
 

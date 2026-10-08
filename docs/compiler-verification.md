@@ -60,7 +60,7 @@ theorem compile_net (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m)
       σ'.getNet m'.self = 0
 ```
 
-`Evm/Examples.lean` runs `owner = 5; owner.transfer(30);` on a contract
+`Evm/CoreExamples.lean` runs `owner = 5; owner.transfer(30);` on a contract
 holding `100` (`payOwner_run`: `70` left, `30` in `5`'s account) and reads the
 interpreter's `net(5) = -30` and `net(this) = 0` off it
 (`payOwner_interpreter`).
@@ -202,8 +202,7 @@ they do, so the proof needs no argument about it.
 
 ## Build cost
 
-`lake build Solidity.Evm.Examples` builds the seven modules. `Correctness` is
-the slow one (`stmt_sim` is one mutual declaration, over the default
-heartbeats since the third outcome, most of it compiling and checking the
-match itself; the payment itself is `transfer_sim`); `Examples` runs the
-unrolled `**` code under `decide` with a raised `maxRecDepth`.
+`lake build Solidity.Evm.CoreInterpreter` builds the modules. `CoreCorrect`
+is the slow one (`stmt_sim` dispatches one lemma per family, within
+`maxHeartbeats 10000`); `CoreExamples` runs the unrolled `**` code under
+`decide +kernel` with a raised `maxRecDepth`.

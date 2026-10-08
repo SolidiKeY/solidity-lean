@@ -84,7 +84,7 @@ None.
 | assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.* | 15 | Net 15 |
 | `.length` is not a program expression | 8 | SolcStructs 1, SolcArrays 6, SolcMappings 1 |
 | KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state | 7 | Rules 7 |
-| the callback semantics is ported (`Semantics/Callback.lean`, `transferWithCallback`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads | 6 | Net 6 |
+| the callback semantics is ported (`Semantics/Core/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads | 6 | Net 6 |
 | exponentiation `**` is not in the sol_expr grammar | 5 | SolcExpressions 5 |
 | decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x` | 2 | SolcExpressions 2 |
 | `new T[](n)` array allocation is not in the fragment | 2 | SolcMemory 2 |
@@ -92,6 +92,6 @@ None.
 | field-name overloading: Depth0.recursive and Depth1.recursive have different types, and Semantics.structDef is one global name->fields table | 1 | SolcStructs 1 |
 | field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint) | 1 | SolcStructs 1 |
 | `b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet | 1 | SolcArrays 1 |
-| `(bool ok, ) = a.call{value: v}("")` is the send `bool ok = a.send(v)`, as solkey lowers it, and its callback reading is ported (`Calculus/Callback.lean`, `ProvesC.send`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads | 1 | Net 1 |
+| `(bool ok, ) = a.call{value: v}("")` is the send `bool ok = a.send(v)`, as solkey lowers it, and its callback reading is ported (`Calculus/Core/Callback.lean`, `ProvesC.send`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads | 1 | Net 1 |
 | `msg.value` is not a program expression | 1 | Net 1 |
 | storage-theory problem over a `MapField`: a copy of a mapping-carrying type, which no program writes (solc ≥ 0.7 and solkey's parser reject it); `Theory/Copy.lean` states the rule it exercises (`selectOnCopyMap`), and the corpus's obligations are programs' (`⟨ f() ⟩ true`) | 1 | Rules 1 |

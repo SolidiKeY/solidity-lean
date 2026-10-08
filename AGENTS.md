@@ -26,8 +26,8 @@ carries its callee's body with every local renamed fresh — KeY's
 `InternalCall`, which `internalCallExpand` inlines (`functionBodyExpand` for
 a call with targets, `CallRet.rets`: a tuple assignment's, a spec
 obligation's).  **Callbacks** are
-a second reading of the modalities (`Semantics/Callback.lean`, `holdsC`, the
-`CallbackTaclet`s and `ProvesC` of `Calculus/Callback.lean`), not a change
+a second reading of the modalities (`Semantics/Core/Callback.lean`, `holdsC`, the
+`CallbackTaclet`s and `ProvesC` of `Calculus/Core/Callback.lean`), not a change
 to `Stmt.run`.
 
 **`sol{ … }` is Solidity, with two spellings of its own** (`Syntax.lean`):

@@ -105,7 +105,7 @@ Rejected:
 `@[implemented_by Loop.runImpl]` (a `partial def` that iterates until done,
 which the kernel never sees) keeps `Stmt.run` compiled: `#eval` and `#run`
 run loops (and do not return from one that never ends). Kernel reduction of a
-loop-free program is unaffected, so `corpus_decide` and `Evm/Examples.lean`
+loop-free program is unaffected, so `corpus_decide` and `Evm/CoreExamples.lean`
 keep working. A concrete loop is decided by `Loop.run_of_iterN : iterN n σ =
 .inr r → Loop.run … σ = r` (`Prog.run_loop_of_iterN` for a block), with `n`
 found by `#eval` and the iteration computed by `rfl`.
@@ -125,7 +125,7 @@ the loop head is the invariant), `Core.Prog.run_canon` and
 `Core.Prog.run_tight` (`Typing/Reachability.lean`,
 `Typing/Constructibility.lean`; `reachable_iff` stays true, since a loop
 reaches nothing a finite sequence of body runs does not), and
-`Stmt.exec_run`/`ExecS` (`Semantics/Callback.lean`: a loop whose body has no
+`Stmt.exec_run`/`ExecS` (`Semantics/Core/Callback.lean`: a loop whose body has no
 transfer is `det`). Set `Stmt.forks (.loop …) := Prog.hasTransfer body`, not
 `true`: a forking statement with no `ExecS` constructor has no runs, so every
 modality over it would hold vacuously. `Stmt.run_call_expand` is unaffected;
@@ -133,7 +133,7 @@ modality over it would hold vacuously. `Stmt.run_call_expand` is unaffected;
 `none`; `Stmt.weight` is Decision 3.
 
 **A loop that transfers, with callbacks**, has `ExecS` constructors
-(`Semantics/Callback.lean`): the condition halts or is stuck, the loop
+(`Semantics/Core/Callback.lean`): the condition halts or is stuck, the loop
 exits, iterates (`loopIter`), stops in its body, or diverges
 (`loopDiverge`). An inductive relation has no derivation of an infinite run,
 so `loopDiverge` over-approximates: a loop whose body pays may always
@@ -315,12 +315,12 @@ is structural; the one loop solc emits for the current fragment
 Backward jumps need absolute `JUMP`/`JUMPDEST` with a program counter and
 fuel; a "code at offset `o` is `compile s`" invariant in place of
 `exec_append` and the skip-count lemmas that every case of `stmt_sim` uses;
-a third arm in `ValOut`/`StmtOut` (`Evm/Correctness.lean`) for "out of fuel
+a third arm in `ValOut`/`StmtOut` (`Evm/CoreStmt.lean`) for "out of fuel
 at every fuel"; and a new bound on a loop's pushes, since
 `L + pushesP P ≤ 2^64` no longer holds (the interpreter's `push` would revert
 at `2^64` as solc does, or the bound becomes a run-time invariant of `Sim`).
-That is comparable to rewriting `Evm/Correctness.lean` (about 2,300 lines).
-**Decision:** `wtStmt` (`Evm/Compile.lean`) refuses a loop, as it refuses
+That is comparable to rewriting the compiler's correctness proof (about 2,300 lines).
+**Decision:** `inFrag` (`Evm/CoreCompile.lean`) refuses a loop, as it refuses
 memory, and `docs/compiler-verification.md` lists it. Loops also unblock its
 gaps "storage copies of a dynamic array" and "`push()` of a struct", so the
 EVM stage is worth doing once, for all.
@@ -329,12 +329,12 @@ EVM stage is worth doing once, for all.
 
 | Stage | Scope (files) | Risk |
 |---|---|---|
-| **L1 Syntax and semantics** (built) | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/Quote.lean`, `Calculus/Notation.lean`. | Done: `Stmt.run` stays structural (the loop arm calls the body's run under a binder), `#eval` runs `Loop.runImpl`. |
+| **L1 Syntax and semantics** (built) | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Core/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/Quote.lean`, `Calculus/Notation.lean`. | Done: `Stmt.run` stays structural (the loop arm calls the body's run under a binder), `#eval` runs `Loop.runImpl`. |
 | **L2 Typing** (built) | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Done. |
 | **L3 Unwinding** (built) | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
 | **L4 Invariant rule** (built) | `Update.lean` (`Fml.anon`, `State.anon`), `Semantics/Mutability.lean` (`Prog.loopFrame`, `Fml.loopAnon`, `Prog.loopFrame_run`: the frame is `Stmt.within`'s, no new run lemma), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic` (`Hyp.anon`, `Proves.invLean`), `Termination`, `Close` (`holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
-| **L6 Callbacks** | `Calculus/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
+| **L6 Callbacks** | `Calculus/Core/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
 | **L7 EVM** | `Evm/{Machine,Compile,Correctness}.lean`, as above. | High: the largest stage. |
 
 L1 to L4 make loops provable. L5 is what Ballot and BlindAuction need once

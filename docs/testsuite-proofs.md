@@ -334,8 +334,9 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   `Calculus/Close.lean`, the modal case of `Fml.toL_holds` in
   `Calculus/Decide.lean`), whose `simp only` now unfolds
   `Modality.afterRun`.  Only an `assert` panics
-  (`Semantics/NoPanic.lean`: `Prog.run_noPanic` for a program with no
-  `assert`, by a lemma per operation and the `no_panic` tactic).
+  (today's `Semantics/NoPanic`, deleted at W4 `sem-del`: `Prog.run_noPanic`
+  for a program with no `assert`, by a lemma per operation, now
+  `Semantics/NoPanicOps.lean`, and the `no_panic` tactic).
 - **The taclet.** `Taclet.assertSimple` is KeY's: `⟨[ assert(se); ]⟩ ⇝
   se = true ⟹ ⟨[ ]⟩ ; se = true`, "Holds" and "Violated" (the new premise
   `Premise.check`, `Proves.check` with goals `thn` and `els`, `checkRule`,
@@ -386,7 +387,7 @@ reduction, not `holds` of a modality.
 
 Second review fixes: the `*_noPanic` lemmas are in the simp set
 `no_panic_simp` (`Semantics/NoPanicSimp.lean`), not the default one, and
-`Semantics/NoPanic.lean` closes with `simp only`; `no_panic`,
+`Semantics/NoPanicOps.lean` closes with `simp only`; `no_panic`,
 `no_panic_iff` and `sound_unfold`'s panic cases use `simp only` /
 `simp_all only`.  `NoPanic.ne_of_eq` is the one proof that a halt of a
 computation that does not panic is not a panic.  `#verify` runs the
@@ -420,11 +421,8 @@ one.
   storage is any state of the interpreter, so the premise says it is one
   the contract can be in: the model's own Solidity-reachability assumption,
   not KeY's.  Reachable is by the typed run (`Reachable`,
-  since W1; the scoped run's is `ReachableS`); `holds` reads the untyped
-  one, and a storage it reaches from a block the locals check accepts is
-  `ReachableS` (`ReachableU.reachableS`), and `Reachable` when its words,
-  keys and slots are in range (`ReachableU.reachable`,
-  `Calculus/Problem.lean`).  Both modalities carry it (M3b review): a box over every
+  since W1; the scoped run's is `ReachableS`, and `Reachable` when its
+  words, keys and slots are in range, `ReachableS.reachable`).  Both modalities carry it (M3b review): a box over every
   storage is false of some functions Solidity runs safely (below).  So a
   derived obligation need not imply solkey's: `assert(total >= 0)` on a
   `uint total` holds under `wt`, where solkey's free `total` can be

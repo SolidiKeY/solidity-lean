@@ -299,7 +299,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     | `values[++i] = ++i` | 18.9 ms | 16.5 ms | 21.7 ms |
     | `addTwo(3)`, `larger(y, 7)` | 22.3 ms | 11.7 ms | 18.0 ms |
 
-- M3.2 (2026-10-07): `Semantics/RunErase.lean`, the bridge theorem.
+- M3.2 (2026-10-07): `Semantics/RunErase`, the bridge theorem.
   - `Prog.run_erase P hP hnd hlen σ : ResultsAgree (P.popped ns)
     (Solidity.Prog.run (σ.erase ns) (P.erase ns)) ((P.run σ).map (State.erase
     (P.outNames ns)))`, and `Stmt.run_erase` for a statement (its erasure a
@@ -376,7 +376,7 @@ calculus and closer over typed formulas. Trimmed to a module-map entry at M7.
     run lemmas carry `σ'.env = σ.env`.  A shadow slot's alias is a block
     holding its `pop` and the nested fill; `Prog.append`, `Prog.rep`,
     `Prog.run_append` are local to it.
-  - Faithfulness reads `Agree` (`RunErase.lean`): a row is faithful when its
+  - Faithfulness reads `Agree` (`RunErase`): a row is faithful when its
     read, the erasure of a scoped read (`Read.Typed ns Γ`), finds what the
     sort claims in every state agreeing with a `RunWT` state.  The
     counterexamples give the scoped state and its agreement.  The example
@@ -415,7 +415,7 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
   after a raw block, a `for` init or a modifier's `_`, which `elabBranch`
   pops from `ECtx` but emits flat), so `run_erase` does not cover them and
   "`resolve`'s output is `Fresh`" is false, not unproved.  Docs corrected
-  (`RunErase.lean`'s docstring, M3.2 above, `solc-validation.md`).  Open:
+  (`RunErase`'s docstring, M3.2 above, `solc-validation.md`).  Open:
   make the output `Fresh`, by a per-function set of every name declared so
   far that `checkFresh` reads (refuse, or rename to a fresh capture), or by
   a scope marker `resolve` turns into `Core.Stmt.block`.
@@ -441,7 +441,7 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
     a `cdl!{}` one.  Shadowing a local in scope is still refused, with the
     elaborator's message.
   - **`resolve` checks `Fresh`** (`Syntax/Resolve.lean`; `Prog.Fresh` moved
-    there from `RunErase.lean`): a binder of a name in scope or of an
+    there from `RunErase`): a binder of a name in scope or of an
     enclosing frame is refused, and `resolveStmt`/`resolveProg` return
     `Fresh` with the erasure, so `Prog.resolve_fresh` holds by construction.
     `strict := false` skips it for a formula's program (`cdl!{}`,
@@ -479,7 +479,7 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
 ### M5 notes
 
 - M5.1 (lane `intrinsic-evm`, 2026-10-07): `Evm/CoreCompile.lean` compiles
-  `Core.Stmt`/`Core.Prog`, total, beside `Evm/Compile.lean`.
+  `Core.Stmt`/`Core.Prog`, total, beside `Evm/Compile`.
   - A local of `Γ` at position `i` lives at level `b + (Γ.length - 1 - i)`;
     `b` is the frame base, `0` for the program, the caller's next free level
     for a call's body (closed over `rs ++ ps`: parameters from the base, then
@@ -516,7 +516,7 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
     `Stmt.pushes`/`Stmt.pays` are `Evm.pushesP`/`Evm.paysP` of the erasure
     for every statement (`pushes_erase`).
   - `Evm/CoreExamples.lean` ports the 45 compile `decide` examples of
-    `Evm/Examples.lean` (not the four interpreter theorems, which need the M5
+    `Evm/Examples` (not the four interpreter theorems, which need the M5
     `compile_correct` and are in `Evm/CoreInterpreter.lean`, M5.3), plus a scoped-branch run, a `pop` in a branch
     forgetting an outer fragile alias, and `sameCode` on 14 programs.
     Programs come from `sol{}` through `Prog.resolve`, which the
@@ -627,7 +627,7 @@ proof over `Core` is done, with no `sorry` and the axioms `propext`,
     payment), `compile_exact`, `compile_box`, `compile_net`, `Sim.init`
     and `compile_storage`.
   - `Evm/CoreInterpreter.lean`: the four interpreter theorems of
-    `Evm/Examples.lean` (`setAge_interpreter`, `overflow_interpreter`,
+    `Evm/Examples` (`setAge_interpreter`, `overflow_interpreter`,
     `payOwner_interpreter`, `callTwice_interpreter`) over
     `Core.Prog.run (State.ofSem (State.fresh C 0)) (scopedOf P).2`, from
     `Evm/CoreExamples.lean`'s runs; fragment checks, bounds, `pays` and
@@ -636,7 +636,7 @@ proof over `Core` is done, with no `sorry` and the axioms `propext`,
     excludes the panic.
   - `not_stuck`/`never_stuck`: none on the Core path.  `compile_correct`
     lists every outcome and none is `stuck`; the untyped `not_stuck`
-    (`Evm/Correctness.lean`) and `never_stuck` (`Theorems.lean`) stay with
+    (`Evm/Correctness`) and `never_stuck` (`Theorems.lean`) stay with
     the untyped compiler until M4 retires it.
   - Timing against the M0 baselines (same method: wall time of
     `lean_diagnostic_messages` after an edit at the top of the file, a
@@ -648,15 +648,15 @@ proof over `Core` is done, with no `sorry` and the axioms `propext`,
     `simp` 0.05 s, pre-definitions 0.03 s).  Whole files:
     `Evm/CoreSim.lean` 7.1 s, `Evm/CoreExpr.lean` 5.9 s,
     `Evm/CoreStmt.lean` 4.8 s, `Evm/CoreCorrect.lean` 4.9 s (the four
-    add 22.7 s after `Evm/Correctness.lean` (25.6 s), which they import
+    add 22.7 s after `Evm/Correctness` (25.6 s), which they import
     and do not replace; each elaborates in its own worker, so in a build they run in
-    a chain).  `Evm/CoreExamples.lean` 10.7 s against `Evm/Examples.lean`'s
+    a chain).  `Evm/CoreExamples.lean` 10.7 s against `Evm/Examples`'s
     9.5 s (+13%, within the 20% gate), and `Evm/CoreInterpreter.lean`
     4.9 s.
 - Left: timing the compiler on a quoter-built program (M2.3);
-  `Machine.mem : Nat → Word` (with `cell = id`) once `Evm/Compile.lean`
+  `Machine.mem : Nat → Word` (with `cell = id`) once `Evm/Compile`
   retires at M4; at M4, moving the machine-level lemmas the Core path uses
-  out of `Evm/Correctness.lean` into a module of their own
+  out of `Evm/Correctness` into a module of their own
   (`ValOut`/`LocOut`/`EnvSim`, the `*_run` code lemmas, `State.fresh`,
   `Evm.Sim.init`), then deleting `wtStmt`, the untyped
   `stmt_sim`/`compile_*`/`not_stuck`/`never_stuck` with the untyped
@@ -847,7 +847,7 @@ elaborates with every module (no name clash).
     `Evm/CoreCorrect.lean`.
   - `Evm/CoreExamples.lean` 7.9 s (two runs, both 7.9 s) against the 11.4 s
     gate.  Method: a fresh worker, wall time from its start until its CPU
-    stays idle (header load included, no MCP round trip); `Evm/Examples.lean`
+    stays idle (header load included, no MCP round trip); `Evm/Examples`
     measured the same way takes 10.0 s.
   - Corpus: the lane changes only `Corpus/Basic.lean`; the generated modules
     and `tests/solkey/expected.tsv` are untouched, and the six `Corpus/Solc*`
@@ -898,8 +898,8 @@ elaborates with every module (no name clash).
       for the equation lemmas).
 - Not done, moved:
   - `Machine.mem : Nat → Word` is deferred to W4 (`sem-del`): `Machine.lean`
-    is outside this lane, and its untyped users (`Evm/Compile.lean`,
-    `Evm/Correctness.lean`) go there; until then a level is the cell
+    is outside this lane, and its untyped users (`Evm/Compile`,
+    `Evm/Correctness`) go there; until then a level is the cell
     `cell l` (M5.1).
   - `ReprV` keeps its `∃ v` in `ValOutT`.
   - `Tools/Counterexample.lean` stays on the untyped `Prog.runFuel` (its
@@ -2401,7 +2401,7 @@ Before the lanes branch, the lead makes `Surface` the default and removes the `o
 
 **Carried from W2 `tree`:** the callback reading over `TState` (`holdsC`,
 `ValidC`, their theorems), `ProvesC.sound` and `ProvesC.close`, unless a
-W3 lane has landed them.  `Calculus/Callback.lean` is not deleted
+W3 lane has landed them.  `Calculus/Callback` is not deleted
 (`calc-del`) before they are, so no `ProvesC` rule is left unverified.
 
 **Checks:**
@@ -3553,7 +3553,7 @@ green, 302 jobs, every `sol_derive?` pin (`ProofTree`, `CoreProofTree`,
   2. *Callbacks, Decision 17:* `Tactics/Callback`, `Tactics/TryCatch`'s
      closing block (`ValidC`, `Invariant`): `ProvesC.sound` against
      `ValidC` needs `Stmt.TSound C`, which `Stmt.not_tsound` refutes.
-     `Calculus/Callback.lean` cannot be deleted before they move.
+     `Calculus/Callback` cannot be deleted before they move.
   3. *Today's sequent rules on updates, no `Core.Proves` twin:*
      `Proves.merge`, `mergeStorage`, `eqDSplit`, `definedWritten`,
      `eqClose`, `rewrite` and `sol_rw`'s Theory rewrites:
@@ -3772,7 +3772,7 @@ CORE 2's items 1 and 2 are done; the W3b blockers 2 (callbacks, below) and
   local and the term `Tm.pvI` (`Calculus/Core/Logic.lean`) use; `Rhs.mref`
   sets `some`; M3's `LTy.WT (.mem R)` asks only of a set local
   (`LTy.WT.mem_some`, `Typing/Soundness.lean`).
-- *The untyped run*, for the same reason one level down (`RunErase.lean`'s
+- *The untyped run*, for the same reason one level down (`RunErase`'s
   `RunRel` and `HoldsErase.lean`'s `Tm.eval_erase` ask equal halts): an unset
   memory local erases to `Binding.unset` (`LTy.enc`, `TDenote.bind`), and
   `Binding.unset` read as memory reverts where it was `.stuck`
@@ -4684,7 +4684,7 @@ after the leaf change.
      block, the counterexample `withdrawUnsafe_withCallback` (a run over
      today's states; a typed one needs a typed `Vault` storage and its
      `ExecS` steps on `TState`) and the two `#check` pins of today's
-     `CallbackTaclet`, so `Calculus/Callback.lean` stays.  `Proves.openInv`
+     `CallbackTaclet`, so `Calculus/Callback` stays.  `Proves.openInv`
      applies at a leaf only.
   3. *Today's sequent rules on updates*: `Core.Proves.merge`, `updRw`,
      `closeHolds` and `Calculus/Core/UpdateRules.lean` (decision 25 open);
@@ -4966,7 +4966,7 @@ git-excluded `Scratch/` modules only).
   `with_unfolding_all` (the typed storage's folds are irreducible to the
   elaborator).  The two rule pins print `Core.CallbackTaclet`.  Neither
   `Tactics/Callback` nor `Tactics/TryCatch` imports
-  `Calculus/Callback.lean` now; `Tools/Inspect` and `Theorems.lean` still
+  `Calculus/Callback` now; `Tools/Inspect` and `Theorems.lean` still
   do (W4 `calc-del`).
 - **`Tactics/TermTaclets` stays on today's sequents**, recorded in its
   docstring: its sequents hold terms only, no local, no update, no
@@ -5139,7 +5139,7 @@ git-excluded `Scratch/` modules only).
 - **W3 status: done, pending the lead's calls.**  The three items the W3c
   integration left are closed: callbacks (`Tactics/Callback`'s
   counterexample is a typed run; neither callback example imports
-  `Calculus/Callback.lean`), `Tactics/TermTaclets` (recorded as the
+  `Calculus/Callback`), `Tactics/TermTaclets` (recorded as the
   closer's input, which moves with M6c), contracts (a scoped
   `FunContract` over the typed call run; `Tactics/Contracts` flipped).
   Decision 28 is implemented.  The gate aggregate is within under
@@ -5153,7 +5153,7 @@ git-excluded `Scratch/` modules only).
      `sem-del` has nothing to restate there.  Left: the legacy statements
      (`N.f.problem.legacy`, meta only) and `Report.lean`'s count, which
      reads either `⊢`.
-  2. *Callbacks*: done.  `Calculus/Callback.lean` is imported only by
+  2. *Callbacks*: done.  `Calculus/Callback` is imported only by
      `Tools/Taclet.lean` (today's tables, below) and `Solidity.lean`.
   3. *Today's sequent rules on updates*: `Tactics/TermTaclets` stays on
      today's term sequents until M6c (the closer's input); decision 25 was
@@ -5968,7 +5968,7 @@ No block reads a `.length`, so the change of `lenT` to a `Nat` comparison
     discharge it (it is the cover goal today's split proves).
   - Left: soundness of the other arms (the shapes are there; each needs
     its statement's run equation), `holds_erase` against today's `holds`
-    (with M3's `Agree`, `Semantics/RunErase.lean`), and a
+    (with M3's `Agree`, `Semantics/RunErase`), and a
     `Premise.sound` over `Stmt.step` once every arm is proved.
 
 ### M6a lane: soundness, part A (`intrinsic-calculus`, 2026-10-07)
@@ -6011,12 +6011,12 @@ No block reads a `.length`, so the change of `lenT` to a `Nat` comparison
   `Prog.Fresh [] ns` and `Frames.Fresh`), no hidden binder and no `anon`.
   A term reads as its erasure up to the locals a storage carries
   (`Tm.eval_erase`, `Srt.wl`: every symbol is natural in the locals, the
-  `*_nat` lemmas of `RunErase.lean`), denotes the same (`Tm.denote_erase`);
+  `*_nat` lemmas of `RunErase`), denotes the same (`Tm.denote_erase`);
   an update ends in agreeing states (`Upd.apply_erase`), a pop by
   `Agree.dropNames`, a frame dropped by `Agree.thin`; a modality is
   `run_erase`'s `Prog.erasesAt` and its frames (`Frames.run_erase`).
 - `Prog.outNames` was defined twice (`Calculus/Core/Fml.lean`,
-  `Semantics/RunErase.lean`), so the two could not be imported together: it
+  `Semantics/RunErase`), so the two could not be imported together: it
   is `Syntax/Core.lean`'s now, beside `Stmt.outNames` (as lane `sound2`
   moves it, the same hunk).
 - Left:
@@ -6160,7 +6160,7 @@ with no freshness premise: the fresh locals are positions pushed and popped
 by the premise itself.  Until then `Taclet.erase` carries it over from
 `Taclet.sound`, given `holds_erase`.
 
-- Left for M6a: `holds_erase` (M3's `Agree`, `Semantics/RunErase.lean`), the
+- Left for M6a: `holds_erase` (M3's `Agree`, `Semantics/RunErase`), the
   soundness of the arms not proved in `Calculus/Core/Logic.lean`;
   the remaining taclets of `Core.Taclet` (by the macro, at the cutover);
   `Hyps`/`Proves`; a `sol_symex` on `Core` (`normValid` with
@@ -6332,7 +6332,7 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   hypothesis.  The box keeps KeY's two goals.  (This lane first put the
   cover inside `Premise.fml`, `Fml.invCases`; at the integration it is the
   calctools lane's `Premise.cover`, a goal apart, as for `split`.)
-- `Prog.outNames` was declared both in `Semantics/RunErase.lean` (M3) and
+- `Prog.outNames` was declared both in `Semantics/RunErase` (M3) and
   `Calculus/Core/Fml.lean`, which broke the root `Solidity.lean`; it is now
   one definition, in `Syntax/Core.lean` beside `Stmt.outNames`.
 
@@ -6393,7 +6393,7 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   `havoc` still ranges over untyped storages (`List (Name × SVal)`): typed
   `Storage C` is the values lane's.
 - **Left**: the callback taclets and `ProvesC` on `Core`
-  (`Calculus/Callback.lean`'s, at M6c or the cutover); `sol_spec` and `sol_symex` on a
+  (`Calculus/Callback`'s, at M6c or the cutover); `sol_spec` and `sol_symex` on a
   `cspec!` obligation (the closer is M6c's); `UpdElem.target?` of
   `Derive.lean` and the reader's `UpdElem.setsLocal?` are two names for two
   questions (the split's two kinds, every local an element sets).
@@ -6684,7 +6684,7 @@ M0 (risk first, 3-5 days, nothing merged except a doc row). Record the baselines
 - `TestSuite/Derived9-11` (20.2 s, docs/testsuite-proofs.md:1400) and the whole `SolkeyTestSuite`;
 - `Examples/ProofTree.lean` (50 `#guard_msgs`) and `Examples/Chains` (188 theorems, 623 links);
 - `./scripts/check-corpus.sh`;
-- `Evm/Correctness.lean` (stmt_sim at `maxHeartbeats 470000`, :1996) and `Evm/Examples.lean` (21 decide/rfl).
+- `Evm/Correctness` (stmt_sim at `maxHeartbeats 470000`, :1996) and `Evm/Examples` (21 decide/rfl).
 
 Then build a spike in `Solidity/Scratch/` (never committed): `Idx`/`Thin`/`Env`, six `Stmt C Γ Γ'` constructors, `Frames`, one capture taclet (`storageFieldRead_unfold_rightFst` with `pop .capture`), `ifElseSplit` with `pop .block`, a compiled `symex` with a hand quoter, and kernel `rfl` on a 40-statement program, against the same toy without indices.
 
@@ -6758,7 +6758,7 @@ M6b (formula-level frontends, 2-3 weeks).
 - `Post C Γ₀`, so no weakening of φ is ever needed.
 - Problem.fml/Spec.lean:478/Frontend/Problems.lean bind parameters as the context.
 - spec `old`/`oldNet` get `LTy.old`/`.oldNet`.
-- Callbacks: `ExecS I : State C Γ → Stmt C Γ Γ' → COut Γ'`. `iteStuck`/`loopStuck` (Semantics/Callback.lean:168, 224) and the `hI : I.vars = []` hypotheses are deleted, replaced by `Invariant.fml : Fml C []`. `havoc` ranges over typed `Storage C`.
+- Callbacks: `ExecS I : State C Γ → Stmt C Γ Γ' → COut Γ'`. `iteStuck`/`loopStuck` (Semantics/Callback:168, 224) and the `hI : I.vars = []` hypotheses are deleted, replaced by `Invariant.fml : Fml C []`. `havoc` ranges over typed `Storage C`.
 M6c (closer port, optional, behind a gate, 4-8 weeks). Move Close/ReadWrite/UpdateRules/StateParts/Decide*/Closer/ChainRewrites (about 25k lines, about 650 env-API references) from `Legacy.Fml` to typed `Fml C Γ`, module by module, keeping `Fml.erase` until the last module.
 
 If any module is more than 20% slower, it stays on the erased form permanently, and the reflection is documented as the decision procedure's IR.
