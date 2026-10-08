@@ -1,5 +1,6 @@
 import Solidity.Tools.Run
 import Solidity.Tools.Inspect
+import Solidity.Tools.CoreInspect
 import Solidity.Tools.DiffTest
 import Solidity.Examples.Benchmark.Coin
 
@@ -95,6 +96,12 @@ section Inspect
 
 local instance : InContract := ⟨StandardExample⟩
 
+/-! The formulas read the scoped calculus (`open scoped
+Solidity.Core.Surface`, `Tools/CoreInspect.lean`): a parameter is bound by
+`∀`, and `#step` names the rule `Stmt.step` fires. -/
+
+open scoped Solidity.Core.Surface
+
 /-! What symbolic execution leaves is a formula of updates; reduced, it
 reads the initial state alone: it holds wherever `alice.age` is a location
 (`has`), where the write returns and the read gives `42`.  `(d; a)` is `a`
@@ -129,11 +136,13 @@ update-free:
 /--
 info: symbolic execution leaves:
     dl{
-  { xs := freshId(copySt(memory, newArr(uint[], n))) ‖ memory := copySt(memory, newArr(uint[], n)) }
-    { memory := write(memory, xs[i], 7) }
-      { storage := save(storage, values, copyMem(mtSt, memory, xs)) } find(storage, values[i]) = 7 }
+  ∀ uint i;
+    ∀ uint n;
+      { xs := freshId(copySt(memory, newArr(uint[], n))) ‖ memory := copySt(memory, newArr(uint[], n)) }
+        { memory := write(memory, xs[i], 7) }
+          { storage := save(storage, values, copyMem(mtSt, memory, xs)) } find(storage, values[i]) = 7 }
 update-free:
-    (if(n = n) then true else true) = (if(n = n) then true else true) → ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) = ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) = ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err), has(storage, values), ok(values[i]); if(orElse((err; true), false)) then find(save(storage, values, copyMem(mtSt, write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, n), idC(idp0, nil), at(i), 7), idC(idp0, nil))), values[i]) else if(i = i) then 7 else ((if((0 <= i) && (i < n)) then true else err); 0)) = 7
+    ∀ uint i; ∀ uint n; (if(n = n) then true else true) = (if(n = n) then true else true) → ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) = ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) = ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err), has(storage, values), ok(values[i]); if(orElse((err; true), false)) then find(save(storage, values, copyMem(mtSt, write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, n), idC(idp0, nil), at(i), 7), idC(idp0, nil))), values[i]) else if(i = i) then 7 else ((if((0 <= i) && (i < n)) then true else err); 0)) = 7
 -/
 #guard_msgs in
 #wp dl!{ [ uint[] memory xs = new uint[](n); xs[i] = 7; values = xs; ] values[i] == 7 }

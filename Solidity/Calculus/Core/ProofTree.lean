@@ -22,9 +22,11 @@ What the scoped calculus adds is not a node:
   tactics of that node: KeY has no step there.
 
 A leaf is closed by `closeTrue` (`true` behind a context of scope ends and
-box updates), else by the tactics `Config.closers` lists, else as today's
-tree closes one (`closeTacs`): `Proves.close` on its erasure (a leaf of the
-whole goal's scope, behind box updates), then `sol_symex; sol_close`.
+box updates), else as a walk ends: `Proves.close` takes the sequent, its
+context in front, to its erasure (`Calculus/Core/CloseErase.lean`), which
+today's `sol_symex; sol_close` closes (`closeTacs`), then by the tactics
+`Config.closers` lists.  `Proves.close` is box-only (`Fml.closableB`), so a
+leaf behind a diamond update stays open.
 
 A rule of an operator family prints as KeY's taclet at its operator
 (`RuleShapes.keyTacletAt`, at today's name of the constructor).
@@ -56,9 +58,11 @@ namespace ProofTree
 open Lean Meta Elab Tactic
 open Solidity.ProofTree (Tree Act short dotIdent runOn)
 
-/-- How the tree is grown: the tactics a leaf is closed by, tried in order
-(each list a closing script), and at most how many nodes. -/
+/-- How the tree is grown: whether a leaf is closed by its erasure
+(`closeTacs`), the tactics tried after it (each list a closing script), and
+at most how many nodes. -/
 structure Config where
+  erased : Bool := true
   closers : Array (Array (TSyntax `tactic)) := #[]
   maxNodes : Nat := 10000
 
@@ -74,6 +78,14 @@ def closeTacs : MetaM (Array (TSyntax `tactic)) := do
 /-- `closeTrue`, the closer every tree tries first. -/
 def closeTrueTacs : MetaM (Array (TSyntax `tactic)) := do
   return #[← `(tactic| exact $(← short ``Proves.closeTrue) rfl)]
+
+/-- The tactics a leaf is closed by, as a walk ends: `Proves.close` at the
+empty outer scope (a tree's goal is `[] ⊢ φ`), then today's closer on the
+erasure. -/
+def closeTacs : MetaM (Array (TSyntax `tactic)) := do
+  return #[← `(tactic| refine $(← short ``Proves.close) [] $(mkIdent `rfl)
+      $(← short ``List.nodup_nil) ?_),
+    ← `(tactic| sol_symex), ← `(tactic| sol_close)]
 
 /-- The `Proves` constructor of a premise kind. -/
 def provesCtor (premise : Lean.Name) : Option Lean.Name :=
@@ -174,7 +186,9 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let s := P.getArg! (P.getAppNumArgs - 2)
     let k ← mkAppM ``Hyps.fresh #[H, φ0]
     let some (c, p) ← ruleOf? k m s | return #[]
-    let some premise := p.getAppFn.constName? | return #[]
+    -- a premise built by a function (`Premise.expandCall`) is its constructor's
+    -- (the call trees over `Callees`, `Examples/ProofTree.lean`)
+    let some premise := (← whnf p).getAppFn.constName? | return #[]
     let some ctor := provesCtor premise | return #[]
     let toStep := if (`Solidity.Core.LeanTaclet).isPrefixOf c then ``LeanTaclet.toStep
       else ``Taclet.toStep
@@ -268,7 +282,8 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
       cs := cs.push (if pre.isEmpty then t else prefixTacs pre t)
     return .node g sequent label (.rule mv.name tacs mv.se) cs
   -- a leaf
-  for tacs in #[← closeTrueTacs] ++ cfg.closers ++ #[← closeTacs] do
+  let erased ← if cfg.erased then pure #[← closeTacs] else pure #[]
+  for tacs in #[← closeTrueTacs] ++ erased ++ cfg.closers do
     let s ← saveState
     try
       if (← runOn g tacs).isEmpty then return .node g sequent label (.closed tacs) #[]

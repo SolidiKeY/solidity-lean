@@ -13,9 +13,9 @@ trees differ from today's:
 * a rule that leaves no statement goes on into the rest of the program, or
   past the frames to the postcondition, in one step (`Fml.modalK`, Gate G0's
   condition 6), so there is no `emptyModality` after it;
-* a leaf with a formula left closes as today's does (`Proves.close` on its
-  erasure, then `sol_symex; sol_close`), behind box updates only: under the
-  diamond the leaves stay open (`Core.Proves.close` takes box contexts).
+* a leaf is closed by `closeTrue`, else by `Proves.close` and today's closer
+  on its erasure, which is box-only: a leaf behind a diamond update stays
+  open.
 -/
 
 namespace Solidity.Examples.Tactics.CoreProofTree
@@ -137,6 +137,37 @@ info: {"stats": {"nodes": 6, "branches": 2},
 -/
 #guard_msgs in
 #proof_tree_json cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] true }
+
+/-! A leaf with a formula left closes as a walk ends: `Proves.close` and
+today's closer on the erasure. -/
+
+/--
+info: 0: allRight
+1: ifElseSplit
+  [if true true]
+    2: localValueAssign
+    3: Closed goal
+  [if true false]
+    4: localValueAssign
+    5: Closed goal
+closed: 0 open goal(s), 6 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
+
+/--
+info: node: 3
+sequent:
+  dl{ ∀ uint x, true ≐ true, { x := 2 } ⟹ ¬x = 0 }
+rule: Closed goal
+state: closed
+branch: -
+parent: 2
+children: []
+tactics: refine Core.Proves.close [] rfl List.nodup_nil ?_; sol_symex; sol_close
+-/
+#guard_msgs in
+#proof_node 3 cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
 
 /-! `#step` names the rule as the tree does: KeY's taclet at the operator. -/
 

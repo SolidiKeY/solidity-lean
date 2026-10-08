@@ -1,6 +1,8 @@
 import Solidity.FreshNames
 import Solidity.Calculus.Chains
 import Solidity.Examples.Chains.Storage
+import Solidity.Calculus.Core.ChainGen
+import Solidity.Calculus.Core.Surface
 
 /-!
 # Printed names for the rules' fresh variables
@@ -20,19 +22,29 @@ printed names:
 A table changes spellings only: each line is the term its default spelling
 gives (`headlineLast`, `captured`), so the chains of `Examples/Chains/` check
 as they do in the default spelling.
+
+The formulas read the scoped calculus (`open scoped Solidity.Core.Surface`,
+sections `Scoped`), a table changing the scoped lines' spellings as it does
+today's.  The error of `sol_chain` is today's: the scoped chain's error does
+not print the line it does not reach.
 -/
 
 namespace Solidity.Examples.ExampleNames
 
 local instance : InContract := ⟨StandardExample⟩
 
+section Scoped
+open scoped Solidity.Core.Surface
+
 /-- The headline's last line, in the default spelling. -/
-def headlineLast : Fml StandardExample :=
+def headlineLast : Core.Fml StandardExample [] :=
   dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
         alice.account.balance == 10 }
 
 /-- A capture in a formula, numbered past the parameter `se1`. -/
-def capturedDl : Fml StandardExample := dl!{ ⟨ values[total + 1] += 2; ⟩ se1 == 0 }
+def capturedDl : Core.Fml StandardExample [] := dl!{ ⟨ values[total + 1] += 2; ⟩ se1 == 0 }
+
+end Scoped
 
 /-- A capture in a block, numbered past the local `ie1`. -/
 def captured : Prog StandardExample := sol{ uint ie1 = 1; values[total + 1] += 2; }
@@ -58,6 +70,9 @@ namespace Headline
 
 local instance : FreshNames := .ofTable Chains.Storage.BalanceWrite.names
 
+section Scoped
+open scoped Solidity.Core.Surface
+
 -- `acc` reads as `sp1`, and `se1` prints as `pv`
 #guard Var.ofName "acc" == .fresh "sp" 1 && toString (Var.fresh "se" 1) == "pv"
 
@@ -68,6 +83,8 @@ example : dl!{ { se1 := 10 } true } = dl!{ { pv := 10 } true } := rfl
 
 -- a capture is numbered past `pv`
 example : dl!{ ⟨ values[total + 1] += 2; ⟩ pv == 0 } = capturedDl := rfl
+
+end Scoped
 
 -- an error prints the table's names too
 /--

@@ -1715,6 +1715,98 @@ time: all fourteen at once went past 30 GB beside the other lanes);
 3. `#solkey_derive?` still searches today's calculus; its suggestions read
    the same text, but the leaves it names are today's.
 
+### W3 lane `tree` (`w25-tree`, 2026-10-08)
+
+- **Flipped** (`open scoped Solidity.Core.Surface`, in `section Scoped`
+  blocks): `Examples/ProofTree.lean` (every box tree, `#proof_node`,
+  `#proof_tree_json`, the `sol_derive?` walks and their replays),
+  `Examples/Tools.lean` (`#wp`, `#step`), `Examples/Notation.lean` (the
+  formulas, `#step`, the `twoKeys` walk), `Examples/ExampleNames.lean` (the
+  formulas and fresh-name tables).
+- **Kept today's**, each said in its file: the diamond trees and walks
+  whose leaves sit behind a diamond update (`Proves.close` is box-only,
+  `Fml.closableB`: the first tree, `sendNoCallbackDiamond`, `guardedCopy`,
+  the two call trees, the unwound loop); `sol_prove?`, `sol_chain?`,
+  `#chain`, `sol_rws?` (no scoped `sol_prove?`/`sol_chain?`/`sol_rws?`,
+  and Core `sol_prove` takes `Core.Valid`, not `⊢`); `ExampleNames`'
+  `sol_chain` error (the scoped chain's error does not print the line it
+  does not reach); `Examples/Verify.lean` whole (`#verify` elaborates
+  `spec[C]{f}` in the caller's scope; `#counterexample` is over
+  `Prog.runFuel`, W4); `Notation`'s rule lines and `⊢` rules (W5 names).
+- **W2 leftovers done.**  `Core.ProofTree.Config` closes a leaf by
+  `closeTrue`, then `refine Core.Proves.close [] rfl List.nodup_nil ?_;
+  sol_symex; sol_close` (`closeTacs`, `Config.erased`), then `closers`;
+  `movesAt` whnfs a premise built by a function (`Premise.expandCall`), so
+  `internalCallExpand`/`functionBodyExpand` are nodes (they were open
+  goals).  `CoreProofTree` pins a leaf closed by its erasure.  The callback
+  reading over `TState` is `Calculus/Core/CallbackHolds.lean`: `holdsC`
+  (`StateInv := Fml.stateInv I = ⟨fun σ => tholds σ I⟩`), `Invariant`,
+  `ValidC`, `TransferSem`, `holdsT`, `ValidT`, `validT_*`,
+  `after_frames_iff`, `holdsC_iff_holds`, `holds_of_holdsC_modal`,
+  `holds_of_holdsC_imp`, `valid_of_validC` (axioms: `propext`,
+  `Classical.choice`, `Quot.sound`).
+- **Outside the lane's files, needed by the flip**
+  (`Calculus/Core/Derive.lean`, `symex`'s): `sol_derive?` closes a leaf as
+  the tree does (`Walk.closeLeaf`, at the empty outer scope; `sol_derive`
+  still leaves it), and a rule of labelled goals (`cases`, `branches`) is
+  written `apply … <;> (try simp only […]) <;> (try and_intros)` with
+  bullets, as today's walk is (it left `case fml`/`case upd` goals open).
+  `CoreDerive`'s pins do not move.
+- **Pins changed, with reasons** (numbers are the W3 list's):
+  - `ProofTree`, every scoped tree: `allRight` first (a parameter is bound
+    by `∀`, W2 `tree`); no `emptyModality` after a last statement
+    (`Fml.modalK`, G0 condition 6, W2 `tree`); serials shift (3); the
+    storage-write tree loses its `emptyModality`.
+  - `ProofTree`, `#proof_node`: node 2 instead of 1 (the same node,
+    `allRight` before it), its sequent prints `}` (2) and a `∀ uint x`
+    entry, its tactics `apply Core.Proves.update (Core.Taclet.toStep …);
+    apply Core.Proves.updIntro` (the scope end is silent, W2 `tree`).
+  - `ProofTree`, `#proof_tree_json`: the same, 6 nodes for 7.
+  - `ProofTree`, the walks: the scoped calculus's constructors
+    (`Core.Proves.update (Core.Taclet.step_eq .r)`, `refine
+    Core.Proves.valid (R := RuleSet.all) ?_`, `bindIntro` for a
+    hidden binder, `updIntro` for a scope end), `split` for `splitBox`
+    and no `cov` (1), a leaf `refine Core.Proves.close [] rfl
+    List.nodup_nil ?_`; the replays rewritten to them.  A precondition,
+    a quantifier and an empty modality keep solkey's names
+    (`Core.Proves.impRight`/`allRight`/`emptyModality`, review fix:
+    `Calculus/Core/Derive.lean`'s `Walk.movesAt` emits the aliases of
+    `Calculus/Core/ProofTree.lean`, which it now imports); `allRight`
+    first is W2 `tree`'s reason above.  `CoreDerive`'s walk re-pinned
+    for the same alias.
+  - `ProofTree`, new pins (review fix, the regression example for
+    `movesAt`'s whnf of a premise built by a function): the box trees of
+    an internal call and a tuple call over `Callees`, scoped, show
+    `internalCallExpand`/`functionBodyExpand` as nodes, the body's
+    `blockEmpty`, and a closed leaf (the diamond trees beside them stay
+    today's).
+  - `Tools`, `#wp` of a formula with parameters: `∀ uint i; ∀ uint n;` in
+    front (W2 `tree`).
+  - `Notation`: `#check dl!{…}` is `Core.Fml StandardExample []`, with its
+    parameters bound; the `step = some …` `rfl` stays, its line read
+    back as `dl![.box]{ … }` (the box's update; the default `dl!{ … }`
+    reads an update at the diamond), with a `#step` pin of its printed
+    form beside it (review fix: the pin alone checked only the printer);
+    the `twoKeys` traces start `∀ uint b, ∀ uint a`
+    and have no `[ ]` line.
+- **Gate** (`Examples/ProofTree`, 12.1 s): 11 s in the default-target
+  `lean_build` (286 jobs, under that build's load); by the M0 method, a
+  fresh open, 14.6 s against 14.2 s for today's file timed the same way in
+  the same minute (1.03×, four Lean agents on the machine).
+- `lean_build` (default targets): green.  `check-orphans`: 308 reachable.
+  `check-doc-paths`: OK.  No new `sorry`, `axiom` or `maxHeartbeats`.
+  `CoreDerived11`, `CoreDerive`, `CoreCallback`, `CoreSurface`,
+  `CoreProofTree` checked after the tool changes.
+- **Left.**  (a) The diamond trees close only once `Proves.close` takes a
+  leaf behind a diamond update (`Fml.TClosable`, over the typed state, at
+  the flip of `Proves`' soundness to `Proves.tsound`): a lead decision, as
+  `Proves.sound` over M3 would lose it.  (b) A scoped `sol_prove?`,
+  `sol_chain?` and `sol_rws?`, and `sol_prove` on a `⊢` goal (`Core.Proves`
+  from `Valid` needs a reflective `Proves` lemma).  (c) The scoped chain
+  error should print the line it does not reach.  (d) `ProvesC.sound`
+  against `ValidC`, waiting on `Stmt.TSound`; `Examples/Tactics/CoreCallback.lean`
+  (the `tactics` lane's file) not re-pinned to `holdsC`.
+
 ## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
 Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.
 

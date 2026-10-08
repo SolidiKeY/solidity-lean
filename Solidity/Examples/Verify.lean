@@ -10,6 +10,12 @@ counterexample (the kernel checked `¬ ⊨ spec[C]{f}`), one refuted by its
 premise of a mapping is a `\forall` over a `uint`, which the certificate
 cannot evaluate), one refuted by a failed `assert`, and one stuck: true,
 but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula.
+
+Both read today's calculus, and this file does not open
+`Solidity.Core.Surface`: `#verify` elaborates `spec[C]{f}` in the scope it
+runs in (`Tools/Verify.lean`), and `#counterexample` evaluates today's
+formulas over `Prog.runFuel` (`Tools/Counterexample.lean`), which W4 ports
+to the typed run.
 -/
 
 namespace Solidity.Examples.Verify
