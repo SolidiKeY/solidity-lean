@@ -2085,6 +2085,97 @@ changed).
   annotation changed).
 - The six lane worktrees are removed (the branches stay).
 
+### W3b lane `testsuite` (`w3b-testsuite`, 2026-10-08)
+
+**The flip still does not land.**  It needs diamond leaves to close, and at
+`be64b9b` they do not: `Fml.closableB` asks `m = .box` of an update, and
+`Proves.close`/`closeTrue` ask `H.boxOnly` (`Calculus/Core/Closable.lean`,
+`Calculus/Core/Proves.lean`).  The switch to `Fml.tclosableB` is CORE 2's
+item 5, which waits on decision 17 (CORE 2 section above).  Every `Derived`
+module holds diamond obligations, so none can flip with its text unchanged;
+in a scratch module with the flipped layout, `#solkey_derive?` on the
+diamond `boolIsTrueOrFalse` reports the walk's error ("a leaf
+`Proves.close` does not take").  What landed is the rest of the flip, ready
+for it:
+
+* **The erase guard was the cost, not the kernel.**  Of the 4.25 s the
+  command elaborated in, 4.1 s was `evalConst` of each legacy statement:
+  the interpreter evaluates the contract again for each of the 437 (9 ms
+  each).  The guard now computes the legacy statement from the program it
+  already holds (`Problem.fml m xs P`), and checks that the legacy
+  declaration's value is that application, as an expression.  It checks the
+  same thing as before.
+* **One table.**  `solc_scoped_problems` declares the statements as one
+  list, `N.problems.core` (`N.problems` with `main`), quoted and hash-consed
+  together.  The kernel checks it once, in 0.40 s; checking 437
+  declarations took 3.44 s, the contract's types, contexts and side
+  conditions re-checked in each.  `N.f.problem[.core]` is the entry
+  `List.getD N.problems i tt`.  `Core.Symex.evaluable` reads an entry of a
+  codeless table back from its list literal (`listLitGet?`).  That is the
+  lane's one edit outside its files (`Calculus/Core/Symex.lean`); it only
+  adds a case.  The scoped command now elaborates in 0.38–0.43 s: resolve
+  0.05 s, guard about 0.15 s, quoting 0.32 s (interpreted).
+* **`solc_problems … legacy` does not compile.**  No tactic proves a
+  legacy statement.  `#solkey_problem` and `#solkey_scan` read its value
+  (`legacyStatement`), which is `Problem.fml N m xs N.f`, all of it
+  compiled.  This saves the 0.34 s of LCNF/IR.
+* **`#solkey_derive?` on the scoped calculus.**  Once `N.f.problem.legacy`
+  exists, the goal is the scoped `⊢ N.f.problem` and the search is
+  `scopedSearch`: `Core.Seq.prove`, then `Derive.searchLeaf` on each leaf of
+  today's calculus.  The replay text is unchanged.  `Frontend/Problems.lean`
+  now imports `Calculus.Core.ProvesDerive`.  In a scratch with the flipped
+  layout it derives `additionStorageWrite`,
+  `storageIndexArrayAddAssignOutOfBoundsReverts` (with its leaf lines) and
+  `testStorageNestedPushReturnAlias`.  The last one prints a single leaf
+  where `Suggestions.lean` pins `case leaf1`/`case leaf2`: this is the
+  `Derived7` deviation already left for the lead (W3 lane `testsuite`), and
+  it moves that pin at the flip.  `#solkey_obligations` counted the scoped
+  theorem.
+
+**Gates** (wall clock of one `lean_diagnostic_messages` call on a fresh
+worker, the MCP round trip included, other sessions running):
+
+| Module | Limit | Now |
+|---|---|---|
+| `TestSuite/Problems` as it is (not flipped) | 1.44 s | 1.24 s |
+| flipped `Problems` (`solc_problems … legacy` and its pins) | 1.44 s | 0.85 s |
+| flipped `Problems` with `solc_scoped_problems … main decl` in the same module | 1.44 s | 1.62 s |
+| Derived9–11, today's text (not flipped) | 22.9 s | 20.1 s (7.2 + 10.0 + 2.9) |
+| CoreDerived9–11, the scoped twins over the table | 22.9 s | 22.3 s (8.6 + 10.5 + 3.2) |
+
+The scoped statements in `Problems` cost 1.62 s against 1.44 s, over by
+12%, down from 4.6 s.  What remains is new work: quoting 437 programs, the
+guard, and one kernel check.  Under Decision 9 the gate is the aggregate,
+so this is recorded rather than worked around.  The flip as planned keeps
+them in `CoreProblems` (`main decl`), which leaves `Problems` at 0.85 s.
+Flipped Derived9–11 cannot be timed until diamond leaves close.
+
+**Pins changed:** none.  `CoreProblems`' info line, `Suggestions`,
+`Problems` and Derived1–14 are unchanged, and so are the fresh names.
+
+**Checks.**  `lean_build` of the default targets is green (300 jobs, the
+`Symex` edit rebuilding its importers).  The following were checked file by
+file: `TestSuite/{Problems,CoreProblems,CoreSeq,Suggestions}`, Derived9–11,
+CoreDerived9–11 and `Solkey/Constructors`.  `SolkeyTestSuite` was not built
+whole: fourteen `Derived` workers at once exceed the memory cap.
+`check-orphans` (apart from the git-excluded `Scratch/`) and
+`check-doc-paths` pass.  No new `sorry`, `axiom` or `maxHeartbeats`.
+
+**Left (the flip itself, once diamond leaves close):**
+1. `Problems.lean` → `solc_problems Solkey.TestSuite legacy`;
+   `CoreProblems.lean` → `solc_scoped_problems Solkey.TestSuite main decl`
+   (its import of `Calculus.Core.Derive` can go: `Frontend/Problems.lean`
+   brings `ProvesDerive`), plus `import Solidity.Calculus.Core.Surface`.
+2. Each `Derived1`–`14` imports `CoreProblems` instead of `Problems` and
+   adds `open scoped Solidity.Core.Surface` after `open Solidity Proves`.
+   The theorem text stays the same, except `Derived7`'s `case leaf2` if the
+   lead approves the deviation.  `Suggestions.lean` imports `CoreProblems`;
+   its `testStorageNestedPushReturnAlias` pin then loses `case leaf1`/`case
+   leaf2` (the same deviation).
+3. Delete `CoreDerived9`–`11` and `CoreSeq` (their `Solidity.lean`/lakefile
+   roots and module-map rows).  Check `Report.lean`'s 437 and
+   `check-testsuite.sh`.  Time flipped Derived9–11 against 22.9 s.
+
 ## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
 Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.
 
