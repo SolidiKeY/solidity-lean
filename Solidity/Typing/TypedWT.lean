@@ -232,13 +232,6 @@ theorem MObj.erase_hasTyH {H : HTy} : (R : RefTy) → (o : MObj H R) →
     exact MVal.erase_hasTyHElems E l
   | .mapping _ _, o, _ => (o : Empty).elim
 
-theorem Objs.lookupBy_erase_lt {H : HTy} {start k : Nat} (hk : k < start) :
-    (Rs : List RefTy) → (os : Objs H Rs) → lookupBy k (Objs.erase start Rs os) = none
-  | [], _ => rfl
-  | _ :: Rs, os => by
-    simp only [Objs.erase, lookupBy, Nat.ne_of_lt hk, ↓reduceIte]
-    exact Objs.lookupBy_erase_lt (Nat.lt_succ_of_lt hk) Rs os.2
-
 /-- Every object of a typed heap is of the type its typing lists. -/
 theorem Objs.erase_typed {H : HTy} (start : Nat) : (Rs : List RefTy) → (os : Objs H Rs) →
     (∀ R ∈ Rs, (Ty.ref R).nodupDeep = true) →

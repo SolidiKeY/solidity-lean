@@ -216,8 +216,10 @@ def toStepType (c : Lean.Name) : MetaM Expr := do
   return ty.replace fun e => if e.isAppOfArity ``autoParam 2 then some (e.getArg! 0) else none
 
 /-- Add `c.toStep`, proved by `tac`, in its own heartbeat budget; what `tac`
-returned, or an error logged. -/
-def addToStep {α} (c : Lean.Name) (tac : TacticM α) : Command.CommandElabM (Option α) :=
+returned.  A failure is logged; `strict` then throws, otherwise it is `none`
+and the caller goes on with the next constructor. -/
+def addToStep {α} (c : Lean.Name) (tac : TacticM α) (strict : Bool := true) :
+    Command.CommandElabM (Option α) :=
   Command.liftTermElabM <| withCurrHeartbeats do
     let ty ← toStepType c
     let mvar ← mkFreshExprMVar ty
@@ -228,7 +230,8 @@ def addToStep {α} (c : Lean.Name) (tac : TacticM α) : Command.CommandElabM (Op
         let a ← out.get
         pure (if gs.isEmpty && !(← instantiateMVars mvar).hasSorry then a else none))
       (fun ex => do logError m!"{c}: {ex.toMessageData}"; pure none)
-    let some a := r | throwError "no proof that `{c}` is `Stmt.step`'s rule"
+    let some a := r | if strict then throwError "no proof that `{c}` is `Stmt.step`'s rule"
+                      else pure none
     addDecl (Declaration.thmDecl
       { name := c ++ `toStep, levelParams := [], type := ty, value := ← instantiateMVars mvar })
     return some a
@@ -248,7 +251,7 @@ elab tk:"#derive_toStep? " j:ident : command => do
   let t0 ← IO.monoMsNow
   let mut rows : Array String := #[]
   for c in ← missingToStep J do
-    let some plan ← addToStep c toStepSearch | pure ()
+    let some plan ← addToStep c toStepSearch (strict := false) | pure ()
     rows := rows.push s!"\n  {c.replacePrefix J .anonymous} \"{plan}\""
   let text := s!"#replay_toStep {j.getId}" ++ String.join rows.toList
   Command.liftTermElabM do
