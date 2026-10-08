@@ -3,6 +3,8 @@ import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.FreshNames
+import Solidity.Calculus.Core.LastLine
+import Solidity.Calculus.Core.Surface
 
 /-!
 # The storage worked examples as chains
@@ -23,17 +25,19 @@ box) the declaration says what is missing; a starting length has no spelling at 
 
 namespace Solidity.Examples.Chains.Storage
 
+open scoped Solidity.Core.Surface
+
 local instance : InContract := ⟨StandardExample⟩
 
 section
-variable (m : Modality) (φ : Post StandardExample)
+variable (m : Modality) (φ : Core.Post StandardExample [])
 
 /-! ## Example: Symbolic Execution of `alice.age = ageVal` -/
 
 namespace AgeWrite
 /-- `alice.age = ageVal;` with `ageVal` 42: the field write, then the empty program; the merge puts the
 value in the write. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ { ageVal := 42 } ⟨[ alice.age = ageVal; ]⟩ φ }
     ~*> dl![m]{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }
     ~[sequentialToParallel]~> dl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
@@ -48,7 +52,7 @@ namespace AccountCopy
 10: the write stores the value found at the alias's path (`find(storage, acc)`), not the alias path.  The
 paper's one `⇝*`; the merge substitutes the alias and reads `bob.account` in the starting storage.  A
 struct read has no literal: no law reads `bob.account` through the write below it. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.alias (.struct "Account")]) :
     dl![m]{ { storage := save(storage, bob.account.balance, 10) }
         ⟨[ Account storage acc = bob.account; alice.account = acc; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, bob.account.balance, 10) }
@@ -88,7 +92,7 @@ local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 /-- `v = alice.account.balance;` from a storage where it is 10: the receiver is aliased (`acc`), the alias
 bound, the field read into `v`, the updates merged, and the read of the write resolved (`findOnSave`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ { storage := save(storage, alice.account.balance, 10) } ⟨[ v = alice.account.balance; ]⟩ φ }
     ~[storageFieldRead_unfold_rightFst]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) }
         ⟨[ Account storage acc = alice.account; v = acc.balance; ]⟩ φ }
@@ -134,7 +138,7 @@ namespace AgeWriteRead
 /-- `alice.age = 42; uint x = alice.age;`: the write, the read, merged; then the read of the write resolved as
 solkey reads a path, from its head (`findMemberCons`), the write seen from `alice` (`selectOnSaveMember`),
 and the word read back at the member (`findOnSave`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
     ~[storageFieldWriteSave]~> dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
@@ -153,9 +157,11 @@ namespace BalanceWriteRead
 def names : FreshTable := [("pv", "se1"), ("acc", "sp1"), ("acc2", "sp2")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
-/-- `alice.account.balance = 10; uint x = alice.account.balance;` run: the write through its alias `acc`, the
-read through its alias `acc2`, and the merge. -/
-theorem run :
+/-- `alice.account.balance = 10; uint x = alice.account.balance;`: the write through its alias `acc`, the
+read through its alias `acc2`, and the merge; then the read resolved a member at a time, as solkey reads a
+path: from its head (`findMemberCons`), the write seen from `alice` (`selectOnSaveMember`), again from
+`account`, and the word read back at the member (`findOnSave`). -/
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ ⟨[ alice.account.balance = 10; uint x = alice.account.balance; ]⟩ φ }
     ~[storageFieldWrite_unfold_leftFst]~> dl![m]{
         ⟨[ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; uint x = alice.account.balance; ]⟩ φ }
@@ -177,15 +183,6 @@ theorem run :
           { x := find(storage, acc2.balance) } φ }
     ~[sequentialToParallel]~> dl![m]{
         { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
-            x := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ } := by
-  sol_chain
-
-/-- The read of the merged line resolved a member at a time, as solkey reads a path: from its head
-(`findMemberCons`), the write seen from `alice` (`selectOnSaveMember`), again from `account`, and the word read
-back at the member (`findOnSave`). -/
-theorem reads :
-    dl![m]{
-        { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
             x := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ }
     ~[findMemberCons]~> dl![m]{
         { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
@@ -203,13 +200,6 @@ theorem reads :
         { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖ acc2 := alice.account ‖
             x := 10 } φ } := by
   sol_chain
-
-/-- `alice.account.balance = 10; uint x = alice.account.balance;`: `run` then `reads`. -/
-theorem chain :
-    dl![m]{ ⟨[ alice.account.balance = 10; uint x = alice.account.balance; ]⟩ φ }
-    ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-          acc2 := alice.account ‖ x := 10 } φ } :=
-  (run ..).leads.via (reads ..)
 #last_line chain
 end BalanceWriteRead
 
@@ -218,7 +208,7 @@ end BalanceWriteRead
 namespace RootRead
 /-- `uint v = total;` from a storage where `total` is 10: the paper's one `⇝*` (the declaration dropped, the
 root read with `select`), the merge, and the read of the write resolved (`findOnSave`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ { storage := save(storage, total, 10) } ⟨[ uint v = total; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, total, 10) } { v := find(storage, total) } φ }
     ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, total, 10) ‖ v := find(save(storage, total, 10), total) } φ }
@@ -233,7 +223,7 @@ namespace RootWrite
 /-- `total = pVal;` with `pVal` 7: a value written to a state variable, then the merge.  Stand-in: the printed
 `alice = pVal;` has a struct-valued `pVal`, which has no spelling here (a memory struct fires
 `memoryToStorageStoreRoot`); a `uint` root fires the same `storageRootWriteStore`. -/
-theorem store :
+theorem store (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ { pVal := 7 } ⟨[ total = pVal; ]⟩ φ }
     ~*> dl![m]{ { pVal := 7 } { storage := save(storage, total, pVal) } φ }
     ~[sequentialToParallel]~> dl![m]{ { pVal := 7 ‖ storage := save(storage, total, 7) } φ } := by
@@ -261,13 +251,13 @@ def Roots : Contract := contract!{ Account account; Person alice; Person bob; }
 
 section
 local instance : InContract := ⟨Roots⟩
-variable (m : Modality) (φ : Post Roots)
+variable (m : Modality) (φ : Core.Post Roots [])
 
 namespace Rebind
 /-- `Account storage acc = alice.account; acc = bob.account; acc.balance = 10;`: `acc = bob.account` rebinds the
 alias.  The paper's one `⇝*` to the stack, then the merge, which writes at `bob.account.balance`; both
 bindings of `acc` stay, the later one the one that counts. -/
-theorem chain :
+theorem chain (φ : Core.Post Roots [.alias (.struct "Account")]) :
     dl![m]{ ⟨[ Account storage acc = alice.account; acc = bob.account; acc.balance = 10; ]⟩ φ }
     ~*> dl![m]{ { acc := alice.account } { acc := bob.account } { storage := save(storage, acc.balance, 10) } φ }
     ~[sequentialToParallel]~>
@@ -295,7 +285,7 @@ end
 /-! ## Example: Index Read and Write on a Storage Array -/
 
 section
-variable (m : Modality) (φ : Post StandardExample)
+variable (m : Modality) (φ : Core.Post StandardExample [])
 
 namespace IndexRead
 /-- `v = values[i];` with `i` 1, from a storage where `values[1]` is 10, at the box.  One normal branch: the
@@ -304,7 +294,7 @@ and there is no `i < 0 ∨ i ≥ ℓ` sequent.  `findOnSave` reads the write bac
 where a check that fails makes the line true.  Under any modality `m` the chain stops at the check: no law
 decides it, which needs the length in `S`, and a starting length has no spelling (the notation writes a length
 by a push or a pop only). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint, .val .uint]) :
     dl![.box]{ { i := 1 ‖ storage := save(storage, values[1], 10) } ⟨[ v = values[i]; ]⟩ φ }
     ~*> dl![.box]{ { i := 1 ‖ storage := save(storage, values[1], 10) } { v := find(storage, values[i]) } φ }
     ~[sequentialToParallel]~> dl![.box]{
@@ -317,7 +307,7 @@ end IndexRead
 
 namespace IndexWrite
 /-- `values[i] = 100;` with `i` 1.  One normal branch, as for the read. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ { i := 1 } ⟨[ values[i] = 100; ]⟩ φ }
     ~*> dl![m]{ { i := 1 } { storage := save(storage, values[i], 100) } φ }
     ~[sequentialToParallel]~> dl![m]{ { i := 1 ‖ storage := save(storage, values[1], 100) } φ } := by
@@ -330,7 +320,7 @@ namespace MappingRead
 length check.  The path records the key's check all the same (`balances[3]@S`), and `findOnSave` reads the
 write back past it under the box only.  Under any modality `m` the chain stops there: no law yet drops the
 check of a mapping key, which cannot fail. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint, .val .uint]) :
     dl![.box]{ { a := 3 ‖ storage := save(storage, balances[3], 10) } ⟨[ v = balances[a]; ]⟩ φ }
     ~*> dl![.box]{ { a := 3 ‖ storage := save(storage, balances[3], 10) } { v := find(storage, balances[a]) } φ }
     ~[sequentialToParallel]~> dl![.box]{
@@ -344,7 +334,7 @@ end
 
 section
 local instance : InContract := ⟨TestSuite⟩
-variable (m : Modality) (φ : Post TestSuite)
+variable (m : Modality) (φ : Core.Post TestSuite [])
 
 namespace IndexWriteStruct
 def names : FreshTable := [("bobAcc", "sp1")]
@@ -355,7 +345,7 @@ where `bob.account.token.value` is 10: the element written is the value found at
 one `⇝*`: the nested initialiser aliased one member at a time (`bobAcc`, then `tokRef` through it), then the
 write; the merge binds `tokRef` to `bob.account.token`, as printed.  A struct read has no literal: no law
 reads `bob.account.token` through the write below it. -/
-theorem chain :
+theorem chain (φ : Core.Post TestSuite [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 1 ‖ storage := save(storage, bob.account.token.value, 10) }
         ⟨[ Token storage tokRef = bob.account.token; tokens[i] = tokRef; ]⟩ φ }
     ~*> dl![m]{ { i := 1 ‖ storage := save(storage, bob.account.token.value, 10) }
@@ -402,7 +392,7 @@ Stand-in: the printed `tokens.push().value` is a member of a call, which is refu
 seven updates merge into one; the explicit-check paths record the storage term in which each index was
 checked.  The paper's `i == 0` is not reached: the indices are the symbolic length (`tokens[tokens.length]`),
 and the read laws read literal indices only. -/
-theorem chain :
+theorem chain (φ : Core.Post TestSuite [.val .uint, .alias (.struct "Token")]) :
     dl![m]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~[storagePushLengthSaveReferenceElement]~> dl![m]{
         { storage := save(storage, tokens.length, tokens.length + 1) }
@@ -511,6 +501,25 @@ theorem chain :
   sol_chain
 #last_line chain
 end AccountsWrite
+
+end
+
+end Solidity.Examples.Chains.Storage
+
+/-! ## Left on `Update.lean`'s calculus
+
+The two examples whose program the elaborator writes with captures in front (`uint idx; idx = ++i;`, solc's
+evaluation order): the scoped reading leaves the captures, fresh variables, in scope at the postcondition,
+whose erasure is then no postcondition (`Core.Post.erase`).  They read as today's chains until the elaborator
+puts a statement's captures in a block of their own. -/
+
+namespace Solidity.Examples.Chains.Storage
+
+local instance : InContract := ⟨StandardExample⟩
+
+section
+local instance : InContract := ⟨TestSuite⟩
+variable (m : Modality) (φ : Post TestSuite)
 
 /-! ## Example: Nonsimple Path and Index Write -/
 
