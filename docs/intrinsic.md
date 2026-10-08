@@ -6196,6 +6196,109 @@ scratch module).
   (decision 53); `keycheck` itself was not run (its `--map`/`--parse` were
   run from a scratch copy of its source).
 
+### W4b lane `rules36` (`w4b-rules36`, 2026-10-09): decisions 36 and 53
+
+Three commits on `w4b-rules36` (from `intrinsic` at `78182e5`), checked
+file by file and then every module above `Core.Proves` through scratch
+import modules (the `Solidity`, `SolkeyTestSuite` and `SolidityCorpus`
+libraries: 143 modules rebuilt, no error).  No new `sorry`, `axiom` or
+`maxHeartbeats`; `check-orphans` and `check-doc-paths` clean.  The fresh
+names (`se1`, `sp1`) are unchanged.
+
+1. **The step rules read the rule set** (decision 36,
+   `Calculus/Core/Proves.lean`).  Each of the ten step rules (`update` …
+   `inline`) keeps its premise `d : s.step k m = some p` and takes, last,
+   `hR : R.admits m s = true`, proved by default (`rule_admits`: `rfl`, or
+   `decide`).  `RuleSet.admits .all` is `true`; `RuleSet.admits .solkey` is
+   `Stmt.keyStep m s`, read off the statement alone: false for a call with
+   an argument to capture, a payment or a `try` under the diamond, and a
+   loop, the statements a `LeanTaclet` rewrites (`LeanTaclet.keyStep`).  So
+   a step of `⊢ₖ` fires a `Taclet` (`Stmt.taclet_of_admits`,
+   `Calculus/Core/SolkeyFragment.lean`).  The walk of `sol_prove`
+   (`Calculus/Core/ProvesDerive.lean`) takes `R` and steps by
+   `Stmt.stepIn R` (`Stmt.step` where `R` admits the statement, `none`
+   elsewhere), so on `⊢ₖ` it fires solkey's rules only; `Seq.residue`,
+   `Seq.residueQuote` and `Seq.run` take `R` (`#solkey_scan` walks `.all`).
+   `sol_derive?`'s `refine` lines skip the default-proved argument
+   (`Walk.ctorArgs`), so no suggestion changes.  A first try put `R` in the
+   premise (`d : s.stepIn R k m = some p`): `apply Proves.update
+   (Taclet.step_eq .r)`, which every walk writes, then elaborates the
+   argument before the goal fixes `R`, and `Stmt.stepIn ?R` does not unify
+   with `Stmt.step` (proposal 55).
+2. **`Taclet.premise_inSolkey`, ported** (`Calculus/Core/SolkeyFragment.lean`):
+   `Frames.inSolkey`, `Fml.inSolkey` (a modality's program, its frames and
+   its postcondition), `Premise.inSolkey`, and solkey's rules keep a
+   statement of the fragment in it (one `cases d` with the holes taken
+   apart, as `Taclet.not_loop`; the weakening of `ifElseUnfold`'s blocks by
+   `Prog.inSolkey_wk`, the calls by `Premise.expandCall_inSolkey`).
+   `Stmt.keyStep_of_inSolkey`: on the fragment the step is admitted.
+3. **The judgement level** (`Calculus/Core/SolkeyProves.lean`, new):
+   `Proves.toAll` (a derivation of `⊢ₖ` is one of `⊢`), `Proves.toSolkey`
+   (on the fragment, the converse), `Proves.solkey_iff` (today's);
+   `Proves.solkey_stuck` (a derivation of `⊢ₖ` of a modality whose first
+   statement it does not admit is a refutation of its context: the step
+   rules ask `hR`, `close` and `closeHolds` no modality, the context's rules
+   carry over) and `Proves.solkey_lt_calculus`: `⊢` derives
+   `[ while (false) { } ] true` (unwound `0` times: `loopExit`, then
+   `closeTrue` and `closeHolds`), `⊢ₖ` does not (its soundness refutes the
+   refutation at `TState.init C`).  Axioms: Lean's three.
+4. **`Theorems.lean`**: `solkey_eq_calculus` (`(H ⊢ₖ φ) ↔ (H ⊢ φ)` where
+   `φ.inSolkey`) and the judgement-level `solkey_lt_calculus`
+   (`∃ φ, (⊢ φ) ∧ ¬ (⊢ₖ φ)`) restated; the rule-level one renamed
+   `solkey_rule_lt_calculus`; `solkey_step_taclet` new;
+   `solkey_soundness` is `Proves.valid` of `Proves.toAll`.
+5. **Decision 53's move**: `Delab.tr`, `Delab.withTwins`, `withErased` and
+   the translation's helpers (`legacyName?` … `updList`, `twinsFrom`,
+   `blockEndName`) are `Calculus/Core/DelabErase.lean`, over
+   `Calculus/Core/Rules` and `Calculus/RuleKit` only (31 sibling modules
+   with `KeyTaclets`, against `Core.Delab`'s 69).  Same namespace
+   (`Solidity.Core.Delab`), so the reader changes its import only;
+   `Core.Delab` imports the new module and keeps the printing, `core_item`
+   and the delaborators.
+
+**Pins changed** (the task's item, decision 36): `Theorems.lean`'s
+`#print axioms` rows: `solkey_lt_calculus` is now the judgement-level
+statement (`[propext]` → `[propext, Classical.choice, Quot.sound]`, through
+soundness), the rule-level row is `solkey_rule_lt_calculus` (`[propext]`),
+and two rows are new: `solkey_step_taclet` (`[propext]`) and
+`solkey_eq_calculus` (`[propext, Classical.choice, Quot.sound]`).  No other
+pin moved.
+
+**Speed.**  A step of a derivation carries one more argument, `rfl` of
+`RuleSet.admits .all m s` (one `casesOn` on a constructor), and the walk
+matches `R` once per step.  Not timed against the base: the TestSuite
+(`Derived1`–`14`) rebuilt within about two minutes of wall time.  `git log` shows no
+earlier change of this shape made for speed.
+
+**Proposed decisions** (the lead's call):
+
+55. *Proposed (W4b `rules36`):* the rule set is read by a last,
+    default-proved argument of each step rule (`hR : R.admits m s = true`,
+    `rule_admits`), not by its premise (`Stmt.stepIn R`): the walks'
+    `apply Proves.update (Taclet.step_eq .r)` stays as written, and `hR` is
+    read off the statement alone (`Stmt.keyStep`), which the kernel
+    decides.  Under `.solkey` a statement whose rule could be a
+    `LeanTaclet` (a call with an argument to capture, a `try` or a payment
+    under the diamond, a loop) is not admitted.
+56. *Proposed (W4b `rules36`):* the judgement-level `solkey_lt_calculus`
+    is witnessed by a loop (`[ while (false) { } ] true`) rather than
+    today's call with an argument to capture (`[ f(x + 1); ] true`): a
+    scoped call needs a function body over its frame, and the loop is the
+    statement the rule-level row already names.  `Premise.inSolkey` is
+    `false` for `branches` and `inv` (neither `try` nor a loop is in the
+    fragment), where today's read a `try`'s blocks.
+57. *Proposed (W4b `rules36`):* `sol_prove` on `⊢ₖ` walks solkey's rules
+    only (`Seq.run R`, `Stmt.stepIn`), and fails where a statement is not
+    admitted, rather than proving `⊢` and failing in the kernel.
+
+**Left**:
+- The SolKey reader (side-projects `lean/solkey`, branch `intrinsic`)
+  still imports `Calculus/Core/Delab`; switching it to
+  `Calculus/Core/DelabErase` (and checking it builds) is the reader's
+  lane, not done here.
+- `docs/testsuite-proofs.md` (line 2319) still cites today's
+  `Proves.solkey_lt_calculus`: M7's docs pass.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
