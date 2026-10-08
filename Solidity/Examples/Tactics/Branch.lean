@@ -78,25 +78,13 @@ the state the `if` runs in. -/
 
 /--
 trace: case thn
-⊢ dl{
-    {
-        se1 :=
-          ‹Term.binop BinOp.eqB PrimTy.uint (Simple.local (Var.user "a")).lower (Simple.local (Var.user "b")).lower› },
-    se1 ≐ true ⟹ [ x = 2; ] ¬x = 0 }
+⊢ dl{ { se1 := a == b }, se1 ≐ true ⟹ [ x = 2; ] ¬x = 0 }
 
 case els
-⊢ dl{
-    {
-        se1 :=
-          ‹Term.binop BinOp.eqB PrimTy.uint (Simple.local (Var.user "a")).lower (Simple.local (Var.user "b")).lower› },
-    se1 ≐ false ⟹ [ x = 1; ] ¬x = 0 }
+⊢ dl{ { se1 := a == b }, se1 ≐ false ⟹ [ x = 1; ] ¬x = 0 }
 
 case cov
-⊢ dl{
-    {
-        se1 :=
-          ‹Term.binop BinOp.eqB PrimTy.uint (Simple.local (Var.user "a")).lower (Simple.local (Var.user "b")).lower› } ⟹
-    true }
+⊢ dl{ { se1 := a == b } ⟹ true }
 -/
 #guard_msgs in
 /-- `if (a == b) { x = 2; } else { x = 1; }` ends with `x != 0`. -/

@@ -124,6 +124,8 @@ syntax:max dl_term:max "⊕⊕" : dl_term
 syntax:65 dl_term:65 " - " dl_term:66 : dl_term
 /-- `a / b`: a quotion, truncated, as Solidity divides. -/
 syntax:70 dl_term:70 " / " dl_term:71 : dl_term
+/-- `a * b`: a product (KeY's `mul`), checked as Solidity multiplies. -/
+syntax:70 dl_term:70 " * " dl_term:71 : dl_term
 /-- `at(r)`: the ledger's key for the address `r` (`net := store(net, at(r), …)`). -/
 syntax:max "at" noWs "(" dl_term ")" : dl_term
 /-- `if(r = this) then net else …`: KeY's `\if … \then … \else`, the form of a
@@ -145,6 +147,10 @@ syntax dl_term " := " dl_term:56 " <= " dl_term:56 : dl_upd_elem
 syntax dl_term " := " dl_term:56 " < " dl_term:56 : dl_upd_elem
 syntax dl_term " := " dl_term:56 " > " dl_term:56 : dl_upd_elem
 syntax dl_term " := " dl_term:56 " >= " dl_term:56 : dl_upd_elem
+/-- `x := a == b`, `x := a != b`: an equality of two `uint`s captured, as the
+comparisons are. -/
+syntax dl_term " := " dl_term:56 " == " dl_term:56 : dl_upd_elem
+syntax dl_term " := " dl_term:56 " != " dl_term:56 : dl_upd_elem
 /-- `u`: an update schema variable, its elements in place (KeY's `{u}`). -/
 syntax ident : dl_upd_elem
 /-- `{u}u2`: the update `u2` with `u` applied to its right-hand sides
@@ -1355,6 +1361,8 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     `(Term.binop BinOp.sub PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term / $b:dl_term) => do
     `(Term.binop BinOp.div PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term * $b:dl_term) => do
+    `(Term.binop BinOp.mul PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| ( $t:dl_term )) => schemaTerm Γ pos t
   | `(dl_term| ‹ $t:term ›) => pure t
   | stx@`(dl_term| $f:ident($args,*)) => do
@@ -2938,11 +2946,12 @@ def loweredExpr? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
 def mkBinTerm (sym : String) (a b : TSyntax `dl_term) : MetaM (TSyntax `dl_term) :=
   match sym with
   | "+" => `(dl_term| $a + $b) | "-" => `(dl_term| $a - $b) | "/" => `(dl_term| $a / $b)
+  | "*" => `(dl_term| $a * $b)
   | "±" => `(dl_term| $a ± $b)
   | _ => `(dl_term| $a ⊕ $b)
 
-/-- The term of `t ⊕ u` with a concrete operator: `+`, `-` have term syntax;
-the others print as the program operator, read back through `‹…›`. -/
+/-- The term of `t ⊕ u` with a concrete operator: `+`, `-`, `*`, `/` have
+term syntax; the others escape (`‹…›`). -/
 def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   if (← fvarName? op).isSome then return some "⊕"
   if op.isAppOfArity ``IncDec.binOp 1 then
@@ -2951,6 +2960,7 @@ def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   | BinOp.add => return "+"
   | BinOp.sub => return "-"
   | BinOp.div => return "/"
+  | BinOp.mul => return "*"
   | _ => return none
 
 /-- A term's head symbol folded back to its constructor's name:
@@ -3307,6 +3317,12 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
       | BinOp.lt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term < $b:dl_term))
       | BinOp.gt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term > $b:dl_term))
       | BinOp.ge => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term >= $b:dl_term))
+      | BinOp.eqB =>
+        if (← whnf (t'.getArg! 2)).isConstOf ``PrimTy.uint then
+          return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term == $b:dl_term))
+      | BinOp.neB =>
+        if (← whnf (t'.getArg! 2)).isConstOf ``PrimTy.uint then
+          return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term != $b:dl_term))
       | _ => pure ()
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppTerm t):dl_term))
   | UpdElem.path _ x p =>
