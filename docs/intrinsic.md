@@ -3661,7 +3661,11 @@ corollaries, `withdrawUnsafe_valid`, `withdrawUnsafe_noCallback`), and
   calls' links `~[functionBodyExpand]~>` read `~[internalCallExpand]~>`
   (decision 19, the lead's; not one of reasons 1–8).
 - New pins without a changed one: `CallbackSound`'s `#print axioms
-  ProvesC.valid`.  Unchanged: `UpdateRules.deepFieldWriteMerged`'s three
+  ProvesC.valid`; `Examples/ProofTree.lean`'s `deleteReadDeepWalk`
+  (`sol_derive?` on `StorageDelete.deleteReadDeep_theory`'s formula, with
+  its replay): the walk's last-resort line, a premise by `rfl`, now carries
+  the taclet's solkey name as a comment
+  (`refine Core.Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst`).  Unchanged: `UpdateRules.deepFieldWriteMerged`'s three
   traces (now the scoped sequent's), every other pin, the fresh names.
 
 **Proof text changed** (no pin): a scoped `refine close ?_` leaves today's
