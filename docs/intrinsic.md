@@ -3077,7 +3077,7 @@ silent steps unwritten), the walk running those very lines; without the
 scope, the explicit `Core.Proves` text as before.  New scoped readings:
 `apply invLean r`, `apply updIntro` (`WalkSyntax.lean`), `sol_prove?` on a
 scoped goal and `sol_upd` on a scoped leaf (`Closers.lean`), `sol_erase`
-and `Valid.of_erase_plain` (`Calculus/Core/Contracts.lean`, a plain
+and `Valid.of_erase_plain` (`Calculus/Core/Contracts`, a plain
 formula proved on its erasure), `Core.Problem.text` and
 `Core.Problem.deploy_of_valid_nil` (`Calculus/Core/Deploy.lean`).
 
@@ -3176,7 +3176,7 @@ jobs; `TestSuite/CoreSeq`, `CoreDerived11`, `Examples/Chains/StorageCoverage`,
 
 Then merged `w3b-tactics` through 1e71cb1: `Tactics/Dangling`'s diamond walk
 flipped (its docstrings fixed), `Tactics/Contracts` flipped through
-`sol_erase` (`Calculus/Core/Contracts.lean`), the module-map rows of
+`sol_erase` (`Calculus/Core/Contracts`), the module-map rows of
 `Close`/`Closable`/`CloseErase` corrected.  `Core.Walk.walk`'s tag rule
 stays this lane's (below); 0209193's last component past macro scopes and
 `h` is not taken (erasing the macro scopes before the prefix test turns
@@ -4819,7 +4819,7 @@ git-excluded `Scratch/` modules only).
   today's closer does not read, as before), the mutability checks on the
   scoped calls (`calleeWithin`, `decide`), the `view` frame fact on the
   typed run.  It no longer imports `Calculus/Contracts.lean` or
-  `Calculus/Core/Contracts.lean` (`sol_erase`, now used by nothing but
+  `Calculus/Core/Contracts` (`sol_erase`, now used by nothing but
   kept).  Proposed decision 31 records what the scoped rule reads
   differently.
 - **Pins changed**:
@@ -4994,7 +4994,7 @@ git-excluded `Scratch/` modules only).
      where a formula is rebuilt fall back to stripping every leading `∀`).
   7. done.
   8. *Contracts*: the scoped rule is done; `Calculus/Contracts.lean` and
-     `Calculus/Core/Contracts.lean` (`sol_erase`) are used by nothing but
+     `Calculus/Core/Contracts` (`sol_erase`) are used by nothing but
      `Solidity.lean` (delete in `calc-del`).  Left: `\old` in a scoped
      contract, calls with several results or a memory return (goal
      `false`), `callDeposit`'s "post" by hand until the closer reads
