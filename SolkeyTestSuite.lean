@@ -5,3 +5,6 @@ import Solidity.Solkey.TestSuite
 import Solidity.Solkey.TestSuiteScoped
 import Solidity.TestSuite.Report
 import Solidity.TestSuite.Suggestions
+import Solidity.TestSuite.CoreDerived9
+import Solidity.TestSuite.CoreDerived10
+import Solidity.TestSuite.CoreDerived11
