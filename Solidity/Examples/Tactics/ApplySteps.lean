@@ -1,4 +1,7 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Derivations with `apply`
@@ -42,43 +45,12 @@ open Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
+open scoped Solidity.Core.Surface
+
 /-! ## Every constructor once
 
 `uint x = a; require(x == 1);` under the diamond, from `a == 1`. -/
 
-/-- `a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1`. -/
-theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
-  apply intro
-  -- dl{ a = 1 ⟹ ⟨ uint x = a; require(x == 1); ⟩ x = 1 }
-  apply unfold .localValueDeclInitDrop
-  apply update .localValueAssign
-  -- dl{ a = 1, { x := a } ⟹ ⟨ require(x == 1); ⟩ x = 1 }
-  apply unfold .requireConditionCapture
-  apply unfold .localValueDeclInitDrop
-  apply update .binopAssignment
-  -- dl{ a = 1, { x := a }, { se1 := x == 1 } ⟹ ⟨ require(se1); ⟩ x = 1 }
-  apply split .requireSimple
-  case thn =>
-    -- dl{ …, se1 = true ⟹ ⟨ ⟩ x = 1 }
-    apply empty
-    refine close ?_
-    sol_symex
-    sol_close
-  case els =>
-    -- dl{ …, se1 = false ⟹ ⟨ revert(); ⟩ x = 1 }
-    apply done .revertDiamond
-    -- dl{ …, se1 = false ⟹ false }: `a = 1` and `x == 1` false contradict
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
-    -- dl{ a = 1, { x := a }, { se1 := x == 1 } ⟹ ¬(¬se1 = true ∧ ¬se1 = false) }
-    refine close ?_
-    sol_symex
-    sol_close
-
-/-- A derivation is a proof of validity. -/
-example : ⊨ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := guardedCopy.valid
 
 /-! ## Wrong rules are refused
 
@@ -119,5 +91,51 @@ theorem deepFieldWriteStep2 :
   refine close ?_
   sol_symex
   sol_close
+
+end Solidity.Examples.Tactics.ApplySteps
+
+/-! ## Read without the switch
+
+Under the diamond a walk's leaves are not closed by their erasure yet (`Core.Proves.close` takes box contexts). -/
+
+namespace Solidity.Examples.Tactics.ApplySteps
+
+open Proves
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-- `a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1`. -/
+theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
+  apply intro
+  -- dl{ a = 1 ⟹ ⟨ uint x = a; require(x == 1); ⟩ x = 1 }
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  -- dl{ a = 1, { x := a } ⟹ ⟨ require(x == 1); ⟩ x = 1 }
+  apply unfold .requireConditionCapture
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  -- dl{ a = 1, { x := a }, { se1 := x == 1 } ⟹ ⟨ require(se1); ⟩ x = 1 }
+  apply split .requireSimple
+  case thn =>
+    -- dl{ …, se1 = true ⟹ ⟨ ⟩ x = 1 }
+    apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  case els =>
+    -- dl{ …, se1 = false ⟹ ⟨ revert(); ⟩ x = 1 }
+    apply done .revertDiamond
+    -- dl{ …, se1 = false ⟹ false }: `a = 1` and `x == 1` false contradict
+    refine close ?_
+    sol_symex
+    sol_close
+  case cov =>
+    -- dl{ a = 1, { x := a }, { se1 := x == 1 } ⟹ ¬(¬se1 = true ∧ ¬se1 = false) }
+    refine close ?_
+    sol_symex
+    sol_close
+
+/-- A derivation is a proof of validity. -/
+example : ⊨ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := guardedCopy.valid
 
 end Solidity.Examples.Tactics.ApplySteps
