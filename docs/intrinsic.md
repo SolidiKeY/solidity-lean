@@ -3380,6 +3380,12 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `allRight` line in the short walk.
 29. *Proposed (W3c `tree`), the lead's call:* `#verify` is scoped whatever
     the caller's scope, and a witness's after-line drops `\result`.
+30. *Proposed (captures by provenance), the lead's call:* `captureExpr`
+    skips a fresh name only outside the inlined ranges (`ElabScope.inlined`);
+    a program's own fresh-shaped local is still read as a written-out
+    capture (`uint se1 = 0; y = se1++ + se1;` stays as before), since a pure
+    provenance set would re-capture every written line's captures.  See
+    "Captures by provenance" below.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
@@ -4413,8 +4419,9 @@ scratch module proved `⟨ uint y = bumpRead(1); ⟩ y == 3` and failed `y == 2`
   written-out capture (`uint se1 = makeValue(); carolValues[++i] = se1;`,
   which `CallOperands.lean` reads back by `rfl`).  A callee's local is then
   captured as a caller's is.
-- **Proposed decision 30** (taken as the option faithful to solc and to
-  the written lines): captures by the elaborator's provenance for the
+- **Proposed decision 30** (item 30 of the numbered decisions, for the
+  lead's call; taken as the option faithful to solc and to the written
+  lines): captures by the elaborator's provenance for the
   inliner's names, by the convention of written lines for fresh names in a
   program's own text.  A program that itself declares a fresh-shaped local
   and writes it in the expression that reads it (`uint se1 = 0;

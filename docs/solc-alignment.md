@@ -68,6 +68,11 @@ A callee's parameters and locals, inlined under fresh names, are captured as
 a caller's are: `return a++ + a;` reads the right `a` first
 (`ElabScope.inlined`; before 2026-10-08 a fresh name was taken for a capture
 holding its value, and `bumpRead(1)` of `Tactics/Calls.lean` was `1 + 2`).
+A program's own fresh-shaped local (`se1`, `sp1`, `ie1`, `mv1`, `brk1`, …,
+as `FreshNames.parse` reads it) is still taken for a written-out capture and
+is not captured again: `uint se1 = 0; y = se1++ + se1;` reads the right
+`se1` after the `++` (`1`, where solc gives `0`), by the convention of
+written lines (proposed decision 30 of `docs/intrinsic.md`).
 
 `Semantics.lean`'s examples pin three of them. An effect under the right
 operand of `&&`/`||`, or in a branch of a conditional, would run where solc
