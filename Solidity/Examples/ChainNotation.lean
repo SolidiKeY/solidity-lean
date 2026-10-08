@@ -545,6 +545,31 @@ theorem composed :
 #guard_msgs in
 #last_line resolveSeg
 
+/-! `sol_chain?` writes a `~~>` out as the chain it is, and `sol_rws?` names the rewrites
+from one line to another (`Calculus/Core/ChainGen.lean`). -/
+
+/--
+info: Try this:
+  exact Solidity.Core.Fml.ViaE.leads (show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+        ~*> cdl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
+        ~[sequentialToParallel]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
+        ~[findOnSave]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } by sol_chain)
+-/
+#guard_msgs in
+example : dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+    ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
+  sol_chain?
+
+/--
+info: Try this:
+  sol_rws [findOnSave]
+-/
+#guard_msgs in
+example : dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := find(save(storage, alice.age, 42), alice.age) } φ }
+    ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
+  sol_rws?
+
 end Ends
 
 end Solidity.Examples.ChainNotation
