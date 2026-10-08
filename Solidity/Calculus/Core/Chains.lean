@@ -966,17 +966,20 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       throwError "~>: past a rewrite the program is done: only rewrites go on"
     let run ← runChain cur
     -- the line written, as a line prints where it elaborates alone (no
-    -- hole, no postcondition of the line before), else its text
+    -- hole, no postcondition of the line before), else its text; lazily, so
+    -- that an error a search catches costs nothing
     let written : TermElabM MessageData := do
-      let shown? ← withoutModifyingState <| Term.withoutErrToSorry do
-        try
-          let e ← elabTerm l[1] none
-          synthesizeSyntheticMVarsNoPostponing
-          let e ← instantiateMVars e
-          if e.hasMVar then return none
-          return some (← showLine e)
-        catch _ => return none
-      return indentD (shown?.getD (.ofSyntax l[1]))
+      let stx := l[1]
+      return indentD <| .ofLazyM do
+        let shown? ← (Term.withoutErrToSorry do
+          try
+            let e ← elabTerm stx none
+            synthesizeSyntheticMVarsNoPostponing
+            let e ← instantiateMVars e
+            if e.hasMVar then return none
+            return some (← showLine e)
+          catch _ => return none : TermElabM _).run'
+        return shown?.getD (.ofSyntax stx)
     let notReached (ls : List Line) : TermElabM Unit := do
       throwError "sol_chain: the derivation of{← indentLine cur}\ndoes not reach{← written}\n\
         Its lines:\n{← showLinesErr cur ls}{stuckNote run}"
