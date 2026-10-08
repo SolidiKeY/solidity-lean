@@ -346,20 +346,18 @@ info: Try this:
 example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
   sol_derive?
 
-/-- The suggestion replayed. -/
+/-- The suggestion replayed: today's walk text, which the scope's macros
+read (`Calculus/Core/WalkSyntax.lean`). -/
 example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
-  refine Core.Proves.allRight ?_
-  apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
+  apply splitBox .ifElseSplit
   case thn =>
-    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.close [] rfl List.nodup_nil ?_
+    apply update .localValueAssign
+    refine close ?_
     sol_symex
     sol_close
   case els =>
-    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.close [] rfl List.nodup_nil ?_
+    apply update .localValueAssign
+    refine close ?_
     sol_symex
     sol_close
 
