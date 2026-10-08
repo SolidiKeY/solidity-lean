@@ -819,6 +819,13 @@ theorem Fml.LeadsE.via {φ Z : Fml C []} {L : Solidity.Fml C}
     Fml.LeadsE φ Z (Solidity.Fml.Via.last L rs) :=
   ⟨h.1, Solidity.Fml.Leads.comp h.2 (Solidity.Fml.Via.leads v)⟩
 
+/-- Past the program, a segment written from a line with no program left
+(its erasure `L`, the line the chain so far ends at). -/
+theorem Fml.LeadsE.viaE {φ Z B : Fml C []} {L : Solidity.Fml C}
+    {rs : List (Solidity.Link C × Solidity.Fml C)} (h : Fml.LeadsE φ Z L) (v : Fml.ViaE B [] L rs) :
+    Fml.LeadsE φ Z (Solidity.Fml.Via.last L rs) :=
+  h.via v.2.2
+
 /-- **`~~>` past the program is a proof**, given the bridge at its last
 scoped line (`Fml.ViaE.valid`'s). -/
 theorem Fml.LeadsE.valid {φ Z : Fml C []} {L : Solidity.Fml C} (h : Fml.LeadsE φ Z L)

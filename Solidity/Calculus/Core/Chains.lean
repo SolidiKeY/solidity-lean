@@ -1015,6 +1015,13 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         Its lines:\n{← showLines cur ls}{stuckNote run}"
     match arrow with
     | `(chain_arrow| ~*>) =>
+      -- a line given as a term is the relation's, unchecked here (`∃ ψ, φ ~*> ψ`)
+      if let .term t := w then
+        let B ← elabTermEnsuringType t fml
+        ws := ws.push (mk (mkApp (mkConst ``Core.Link.many) C) B)
+        if links.size == 1 then single := some (mkAppN (mkConst ``Core.Fml.Steps) #[C, Γ, cur, B])
+        cur := B
+        continue
       let cands : List (Expr × Array Expr) := (cur, run.erased) :: run.lines.map fun l => (l.fml, l.erased)
       let pick ← match w with
         | .hole => pure (cands.getLast?.map (·.1))
@@ -1024,6 +1031,22 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       ws := ws.push (mk (mkApp (mkConst ``Core.Link.many) C) B)
       if links.size == 1 then single := some (mkAppN (mkConst ``Core.Fml.Steps) #[C, Γ, cur, B])
       cur := B
+    | `(chain_arrow| ~>) =>
+      -- a line given as a term is the relation's, unchecked here (`∃ ψ, φ ~> ψ`)
+      if let .term t := w then
+        let B ← elabTermEnsuringType t fml
+        ws := ws.push (mk (mkApp (mkConst ``Core.Link.one) C) B)
+        if links.size == 1 then single := some (mkAppN (mkConst ``Core.Fml.OneStep) #[C, Γ, cur, B])
+        cur := B
+        continue
+      let some B := run.lines.head? |
+        match run.stuck, run.splice.modality with
+        | true, some m => throwError "sol_chain: the line after{← indentLine cur}\n{modalityStop m}"
+        | _, _ => throwError "sol_chain: no rule applies to{← indentLine cur}"
+      unless ← matchWritten run.splice C w B.fml B.erased do notReached [B]
+      ws := ws.push (mk (mkApp (mkConst ``Core.Link.one) C) B.fml)
+      if links.size == 1 then single := some (mkAppN (mkConst ``Core.Fml.OneStep) #[C, Γ, cur, B.fml])
+      cur := B.fml
     | _ =>
       let some B := run.lines.head? |
         match run.stuck, run.splice.modality with
@@ -1173,6 +1196,9 @@ def unexpandLeads : PrettyPrinter.Unexpander
 def nextLine (A B : Expr) : MetaM (Run × Line) := do
   let run ← runChain A
   let some q := run.lines.head? | throwError "sol_chain: no rule applies to{← indentLine A}"
+  if B.isMVar then
+    unless ← isDefEq B q.fml do throwError "sol_chain: the line after is not{indentExpr B}"
+    return (run, q)
   unless q.fml == B do
     throwError "sol_chain: the line after{← indentLine A}\nis{← indentLine q.fml}\nnot{← indentLine B}"
   return (run, q)
@@ -1240,6 +1266,11 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
     g.assign (← stepByProof run.splice r A q)
   | Core.Fml.Steps _ _ A B =>
     let run ← runChain A
+    -- a line left unknown (`∃ ψ, φ ~*> ψ`): the derivation's last
+    if B.isMVar then
+      let Z := (run.lines.getLast?.map (·.fml)).getD A
+      unless ← isDefEq B Z do throwError "sol_chain: the last line is not{indentExpr B}"
+      return ← solveCore g
     let i ← if A == B then pure 0 else
       match run.lines.findIdx? (·.fml == B) with
       | some i => pure (i + 1)
