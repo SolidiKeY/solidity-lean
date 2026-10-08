@@ -499,23 +499,6 @@ theorem _root_.Solidity.Modality.afterC_rel (m : Modality) {α : Type} {p : α �
     | ok => exact h.elim
     | error e' => exact Iff.rfl
 
-theorem _root_.Solidity.Modality.afterRunC_rel (m : Modality) {α : Type} {p : α → Prop} {q : Semantics.State → Prop}
-    {R : α → Semantics.State → Prop} {x : Res α} {y : Res Semantics.State} (h : Res.Rel R x y)
-    (hpq : ∀ a b, R a b → (p a ↔ q b)) : m.afterRunC p x ↔ m.afterRun q y := by
-  cases x with
-  | ok a => cases y with
-    | ok b =>
-      show m.afterC p (.ok a) ∧ _ ↔ m.after q (.ok b) ∧ _
-      simp only [ne_eq, reduceCtorEq, not_false_eq_true, and_true]
-      exact hpq a b h
-    | error => exact h.elim
-  | error e => cases y with
-    | ok => exact h.elim
-    | error e' =>
-      cases (h : e = e')
-      simp only [Modality.afterRunC, Modality.afterRun, Modality.afterC, Modality.after, ne_eq,
-        Except.error.injEq]
-
 /-! ## A first-order formula reads as its erasure
 
 Over the typed state: the terms read the erasure (`holds`), and a `∀`

@@ -172,10 +172,6 @@ def _root_.Solidity.Modality.afterC {α : Type} (m : Modality) (p : α → Prop)
   | .ok τ => p τ
   | .error _ => m.onHalt
 
-/-- `p` after a run under `m`: as `afterC`, and the run did not panic. -/
-def _root_.Solidity.Modality.afterRunC {α : Type} (m : Modality) (p : α → Prop) (r : Res α) : Prop :=
-  m.afterC p r ∧ r ≠ .error .panic
-
 /-- What the frames do after the program: the rest run, a scope's locals
 popped or dropped. -/
 def Frames.run {Γ₀ : Ctx} : {Γ : Ctx} → State C Γ → Frames C Γ Γ₀ → Res (State C Γ₀)
@@ -188,39 +184,6 @@ def Frames.run {Γ₀ : Ctx} : {Γ : Ctx} → State C Γ → Frames C Γ Γ₀ �
 def State.anon {Γ : Ctx} (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
     (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) : State C Γ :=
   xs.foldl (fun τ x => τ.setLocal x.2 (b x)) σ
-
-/-! ## Runs with their frames -/
-
-section Shapes
-
-variable {Γ Γ' Γ₁ Γ₀ : Ctx} {m : Modality}
-
-/-- The outcome of `s` and then the rest: the run of `s; ω` and the frames. -/
-theorem run_cons_frames (s : Stmt C Γ Γ') (ω : Prog C Γ' Γ₁) (κ : Frames C Γ₁ Γ₀) (σ : State C Γ) :
-    (do Frames.run (← Prog.run σ (.cons s ω)) κ) =
-      (do let τ ← s.run σ; Frames.run (← Prog.run τ ω) κ) := by
-  rw [Prog.run_cons]
-  cases s.run σ <;> rfl
-
-/-- An outcome that is the same after `r` as after `r'`, `r` not a panic,
-satisfies the same: the step every shape ends with. -/
-theorem afterRunC_bind {α β : Type} {p : β → Prop} {r r' : Res α} (f : α → Res β)
-    (hr : r = r') (hp : r' ≠ .error .panic) :
-    m.afterC (fun a => m.afterRunC p (f a)) r → m.afterRunC p (r'.bind f) := by
-  subst hr
-  cases r with
-  | ok a => exact id
-  | error e => exact fun h => ⟨h, fun h' => hp (congrArg Except.error (Except.error.inj h'))⟩
-
-/-- A block's run, its locals popped, then the rest and the frames: the
-frame a branch ends with (`pop b P.ext`). -/
-theorem run_block_frames {Δ : Ctx} (b : BlockKind) (P : Prog C Γ Δ) (ω : Prog C Γ Γ₁)
-    (κ : Frames C Γ₁ Γ₀) (σ : State C Γ) :
-    (do Frames.run (← Prog.run σ P) (.pop b P.ext (.seq ω κ))) =
-      (do let τ ← (Prog.run σ P).map (State.drop P.ext); Frames.run (← Prog.run τ ω) κ) := by
-  cases Prog.run σ P <;> rfl
-
-end Shapes
 
 /-! ## A shifted part reads as it did
 
@@ -236,9 +199,6 @@ theorem State.glob_push (σ : State C Γ) (w : t.Denote C) : (σ.push w).glob = 
 theorem Simple.eval_up {p : PrimTy} (s : Simple C Γ p) (σ : State C Γ) (w : t.Denote C) :
     (s.up (t := t)).eval (σ.push w) = s.eval σ := by
   cases s <;> rfl
-
-theorem aliasPath_there {R : RefTy} (i : Idx Γ (.alias R)) (σ : State C Γ) (w : t.Denote C) :
-    aliasPath (σ.push w) i.there = aliasPath σ i := rfl
 
 mutual
 
@@ -342,9 +302,9 @@ end Rules
 
 /-! ## Formulas -/
 
-/-- `p` after a typed run under `m` (`Modality.afterRunC`): `p` of the state
-it ends in, `m.onTHalt` on a halt (both modalities accept `exhausted`,
-decision 15), and no panic. -/
+/-- `p` after a typed run under `m`: `p` of the state it ends in,
+`m.onTHalt` on a halt (both modalities accept `exhausted`, decision 15), and
+no panic. -/
 def _root_.Solidity.Modality.afterRunTR {α : Type} (m : Modality) (p : α → Prop) (r : TRes α) :
     Prop :=
   (match r with

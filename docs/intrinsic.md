@@ -3533,6 +3533,13 @@ fresh name changed.  The W3 gates were not re-timed.
 proposal); the W3 gate timings; the flip of the `TestSuite/Derived` modules
 (W3b blocker 1) is no longer blocked by the diamond leaves.
 
+**Review fixes**: `eraseLeaf`'s and `sol_prove`'s refusal messages name
+`Fml.posB`/`Fml.closableB` as they now read (no `bool`-update test; a
+negated or assumed part must be first-order); M3's dead run helpers
+deleted (`Modality.afterRunC`, `afterRunC_rel`, `Res.Sim.afterRunC`,
+`run_cons_frames`, `afterRunC_bind`, `run_block_frames`, `aliasPath_there`).
+No pin moved.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean

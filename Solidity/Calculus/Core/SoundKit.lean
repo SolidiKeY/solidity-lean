@@ -174,7 +174,7 @@ end Lower
 A rule that captures a part evaluates it first, where the statement may read
 another part first (`sp[e]` with `sp` an alias: the alias first, then `e`).
 The two runs then halt alike but maybe not with the same halt; a modality
-tells a halt only from a panic (`Modality.afterRunC`), and an expression
+tells a halt only from a panic (`Modality.afterRunTR`), and an expression
 never panics (`Val.eval_noPanic`), so the two are alike (`Res.Sim`, today's
 `SameOk` with no fresh names). -/
 
@@ -202,17 +202,6 @@ theorem Res.Sim.bind {r r' : Res α} (h : Res.Sim r r') (f : α → Res β) :
   | error e => cases r' with
     | ok => exact h.elim
     | error e' => exact h
-
-theorem Res.Sim.afterRunC {m : Modality} {p : α → Prop} {r r' : Res α} (h : Res.Sim r r') :
-    m.afterRunC p r → m.afterRunC p r' := by
-  cases r with
-  | ok a => cases r' with
-    | ok b => cases (h : a = b); exact id
-    | error => exact h.elim
-  | error e => cases r' with
-    | ok => exact h.elim
-    | error e' =>
-      exact fun ⟨h₁, h₂⟩ => ⟨h₁, fun h' => h₂ (congrArg Except.error (h.2 (Except.error.inj h')))⟩
 
 end Sim
 

@@ -325,8 +325,9 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
   let some leaves ← unsafe evalExpr (Option (List (Expr × Expr))) qTy
       (mkAppN (mkConst ``residueQuote) #[C, quoteConstName n, Γ, H, ← Symex.evaluable φ])
     | throwError "sol_prove: the walk does not reach the end of the sequent: a step with no \
-        rule, a leaf `Proves.close` does not take (`Fml.closableB`: a leaf behind a diamond \
-        update), or more than {fuel} steps"
+        rule, a leaf `Proves.close` does not take (`Fml.closableB`: a modality left, a negated \
+        or assumed part not first-order, or a hidden binder's name reused), or more than \
+        {fuel} steps"
   if leaves.isEmpty then
     let h ← try lemmaFor nil
       catch e => throwError "sol_prove: the kernel rejects the walk:{indentD e.toMessageData}"

@@ -216,8 +216,8 @@ def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
       (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
   let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
     catch _ => throwError "{tac}: the leaf is not one its erasure closes (`Fml.posB`): a \
-      hidden binder under a negation, a precondition or a modality, or named twice, or a \
-      diamond update that may set a `bool` local to what is not a `bool`"
+      hidden binder under a negation, a precondition or a modality, or named twice, or what \
+      is negated or assumed is not first-order (an update, a modality or a `havoc` there)"
   let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
   let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
   g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
