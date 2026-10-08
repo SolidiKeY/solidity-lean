@@ -188,6 +188,58 @@ theorem _root_.Solidity.Valid.of_stripAlls : {φ : Solidity.Fml C} →
   | .tt, h | .eq _ _, h | .not _, h | .and _ _, h | .imp _ _, h
   | .modal _ _ _, h | .upd _ _ _, h | .havoc _, h | .anon _ _, h | .defined _, h => h
 
+/-- **Today's residue of a scoped leaf's erasure** `e`: its leading
+quantifiers stripped (`Fml.stripAlls`), the parameters free as today's
+leaves have them; where that leaves a leaf, `e` itself, each leading `∀`
+into today's context with its type's range (`Derive.residue`'s `.all`),
+when that closes.  An explicit `∀ uint x;` in front of the formula is
+bound as a parameter is (`cdl!` binds both by `Fml.all`), so this is where
+it keeps its range: `x <= 100 → ⟨ uint y = x + 1; ⟩ …` needs `x`'s. -/
+def _root_.Solidity.Derive.leafResidue (e : Solidity.Fml C) :
+    Option (List (Solidity.Derive.Leaf C) × Nat) :=
+  match Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+      Solidity.Derive.budget [] e.stripAlls with
+  | some ([], b) => some ([], b)
+  | r => match e with
+    | .all .. =>
+      match Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+          Solidity.Derive.budget [] e with
+      | some ([], b) => some ([], b)
+      | _ => r
+    | _ => r
+
+/-- The formula `leafResidue` reads: `e`'s leading quantifiers stripped
+unless only `e` itself closes.  Compiled only, to quote the leaves of the
+residue the kernel checks (`leafResidue`), which then runs it once. -/
+def _root_.Solidity.Derive.leafPick (e : Solidity.Fml C) : Solidity.Fml C :=
+  match Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+      Solidity.Derive.budget [] e.stripAlls with
+  | some ([], _) => e.stripAlls
+  | _ => match e with
+    | .all .. =>
+      match Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+          Solidity.Derive.budget [] e with
+      | some ([], _) => e
+      | _ => e.stripAlls
+    | _ => e.stripAlls
+
+/-- A leaf `leafResidue` takes is valid once today's leaves are. -/
+theorem _root_.Solidity.Derive.valid_of_leafResidue {e : Solidity.Fml C}
+    {ls : List (Solidity.Derive.Leaf C)} {b : Nat}
+    (h : Solidity.Derive.leafResidue e = some (ls, b))
+    (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Solidity.Valid e := by
+  unfold Solidity.Derive.leafResidue at h
+  split at h
+  · rename_i hr
+    exact Solidity.Valid.of_stripAlls (Solidity.Proves.valid (Solidity.Proves.of_synResidue hr
+      (fun _ h => nomatch h)))
+  · split at h
+    · split at h
+      · rename_i hr
+        exact Solidity.Proves.valid (Solidity.Proves.of_synResidue hr (fun _ h => nomatch h))
+      · exact Solidity.Valid.of_stripAlls (Solidity.Proves.valid (Solidity.Proves.of_synResidue h hl))
+    · exact Solidity.Valid.of_stripAlls (Solidity.Proves.valid (Solidity.Proves.of_synResidue h hl))
+
 namespace Derive
 
 open Lean Elab Tactic Meta

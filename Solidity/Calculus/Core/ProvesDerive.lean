@@ -114,19 +114,20 @@ def run (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α)) :
       (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) H
 
 /-- A leaf for the kernel: `Proves.close`'s side condition, and today's
-residue of its erasure, the parameters' quantifiers stripped
-(`Fml.stripAlls`: today's leaf has them free). -/
+residue of its erasure (`Derive.leafResidue`): the leading quantifiers
+stripped, as today's leaf has the parameters free, or kept, each with its
+range, where only that closes (an explicit `∀` in front of the formula). -/
 def leafRes {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (Solidity.Derive.Leaf C)) :=
   cond ((H.wrap φ).closableB [])
-    ((Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-      Solidity.Derive.budget [] ((H.wrap φ).erase []).stripAlls).map (·.1)) none
+    ((Solidity.Derive.leafResidue ((H.wrap φ).erase [])).map (·.1)) none
 
 /-- The same leaf quoted, for the tactic (`Derive.residueQuote`), the
 contract named by `c`. -/
 def leafQuote (c : Lean.Expr) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
     Option (List (Lean.Expr × Lean.Expr)) :=
   cond ((H.wrap φ).closableB [])
-    ((Solidity.Derive.residueQuote c [] ((H.wrap φ).erase []).stripAlls).map (·.1)) none
+    ((Solidity.Derive.residueQuote c [] (Solidity.Derive.leafPick ((H.wrap φ).erase []))).map
+      (·.1)) none
 
 /-- The steps the walk is given, down a path and in all (today's
 `Derive.budget`). -/
@@ -277,8 +278,7 @@ theorem leafRes_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ
     simp only [hc, cond_true] at h
     obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
     cases he
-    exact Proves.close [] rfl List.nodup_nil
-      (Solidity.Valid.of_stripAlls (Solidity.Proves.valid (Solidity.Proves.of_synResidue hr hl))) hc
+    exact Proves.close [] rfl List.nodup_nil (Solidity.Derive.valid_of_leafResidue hr hl) hc
       (fun _ _ h => nomatch h)
 
 end Seq
