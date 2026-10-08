@@ -1516,6 +1516,101 @@ The fresh names (`se1`, `sp1`) must not change. Any other pin change is a bug. E
 
 Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
 
+### W3 lane `testsuite` (`w25-testsuite`, 2026-10-08)
+
+**The flip does not land: it waits on the diamond.**  Under
+`open scoped Solidity.Core.Surface`, `⊢ φ` is `Core.Proves C .all [] .nil φ`,
+and `Proves.close` takes no leaf behind a diamond update (`Fml.closableB`
+asks `m = .box`; W2 `sound`, "Also left, at the flip").  330 of the 437
+obligations are diamonds, and every `Derived` module holds some (box ones per
+module: 7, 3, 21, 12, 0, 8, 29, 14, 1, 0, 0, 7, 0, 5; Derived9–11: 1 of 91),
+so no `Derived` module can flip with its text unchanged.  What landed is
+everything the flip needs but that:
+
+* **`sol_prove` on `⊢`** (`Calculus/Core/ProvesDerive.lean`; **out of
+  lane, for the lead**: this module, its `Solidity.lean` import and its
+  `docs/module-map.md` row are outside `TestSuite/**`, `Solkey/**` and
+  `Frontend/Problems.lean`, and its `@[tactic Solidity.tacticSol_prove]`
+  elaborator reaches every `Core.Proves C R [] H φ` goal in the library,
+  the `tactics` lane's `Examples/Tactics` among them.  The lead lands it as
+  its own commit on `intrinsic`, or merges it ahead of `w25-testsuite`, so
+  that `tactics` rebases onto it rather than meeting it at the merge): nobody had
+  built it (W2 `symex`'s `sol_prove` proves `Core.Valid`, and `Valid` does
+  not give `Proves`).  `Seq.run` walks the sequent as `Proves` has its rules
+  (fresh index `Hyps.fresh`, so a split's branches number their fresh names
+  apart, where `symex` numbers over the whole `and`), a leaf goes to
+  `Proves.close` with today's residue of its erasure, and `Proves.of_residue`
+  reads the walk back as the derivation, checked as one kernel evaluation;
+  `leafᵢ` goals as before.  Lean's three axioms.  When `close` takes a
+  diamond leaf (a Bool twin of `Fml.TClosable`), the side condition changes
+  in one place (`Seq.leafRes`/`Seq.leafQuote`).
+* **All 107 box obligations** are proved this way, with the `Derived`
+  modules' text (scratch; ten pinned in `TestSuite/CoreSeq.lean`,
+  `proved_seq`), serially 111 s against 144 s for today's `sol_prove` on
+  the same 107 (one session, other lanes running).  One text difference:
+  `testStorageNestedPushReturnAlias` leaves one goal of today's calculus,
+  where `Derived7` has `case leaf1`/`case leaf2`; at the flip its
+  `case leaf2` goes, because the walk splits the sequent before the closer
+  does.  **A deviation, for the lead to approve**: it is none of the
+  allowed kinds 1–6 (kind 3 is fewer steps where branches share a frame,
+  not one fewer residual leaf), and it breaks W3's "`Derived1`–`14` text
+  unchanged".  The alternative is to give the scoped walk today's leaf
+  numbering for that obligation, so `Derived7` keeps both cases.
+* **The flip switches** (`Frontend/Problems.lean`): `solc_problems N legacy`
+  declares `N.f.problem.legacy`, `solc_scoped_problems N main` declares
+  `N.f.problem`, `decl` skips compiling; `#solkey_problem`, `#solkey_scan`
+  and `#solkey_derive?` read the legacy statement wherever it is
+  (`legacyProblem`); `#solkey_obligations` counts a theorem of either `⊢`
+  (`provesScoped`), so `Report.lean`'s 437 holds across the flip.
+* **The erase guard** is in `solc_scoped_problems`: each scoped obligation's
+  `Fml.erase []` is its legacy statement, compared as quoted expressions
+  (`Fml` has no `DecidableEq`).  437 of 437, in 0.36 s.  A mismatch, or a
+  missing legacy statement (with `main`, no `N.f.problem.legacy`), is an
+  error; the info line is unchanged.
+  `TestSuite/CoreProblems.lean` now uses it (`… decl`), its local command
+  gone.
+
+**Gates.**
+* Derived9–11 flipped: not measurable (90 of 91 are diamonds).  The
+  `Core.Valid` twins, serially (`Elab.async false`, `IO.monoMsNow`): 18.8 s
+  ≤ 22.9 s.
+* `TestSuite/Problems`: **fails** as the plan places it.  Today's body
+  0.7 s; with `solc_problems … legacy` and `solc_scoped_problems … main
+  decl` 4.6 s (limit 1.44 s).  The time is the kernel's check of the 437
+  scoped declarations, 3.5 s (8 ms each; resolve 16 ms, quoting shared
+  already); compiled (no `decl`), the command runs out of the default
+  200000 heartbeats after 20 s.  Proposal: at the flip `Problems.lean`
+  keeps `solc_problems Solkey.TestSuite legacy` alone (0.7 s), and
+  `CoreProblems.lean` holds `solc_scoped_problems Solkey.TestSuite main
+  decl`, which the `Derived` modules import.
+
+**Pins changed:** none.  (A first version added the erase guard's count
+to the info line, moving `Solkey/Constructors.lean`'s and
+`TestSuite/CoreProblems.lean`'s pins, a change of none of the allowed
+kinds; review put them back, the guard reporting by error alone.)
+`Derived1`–`14`, `Report.lean` and `Problems.lean`'s pins are unchanged.
+
+**Checks.**  `lake build Solidity solkeycheck SolkeyTestSuite
+SolidityCorpus` green (323 jobs; the `Derived` modules built a few at a
+time: all fourteen at once went past 30 GB beside the other lanes);
+`check-orphans` (but `Scratch/`), `check-doc-paths`, and
+`check-testsuite.sh` (against solkey `1b4341a303`: 435 derived) ok.  No new
+`sorry`, `axiom` or `maxHeartbeats`.  The read-only review pass was not run.
+
+**Left.**
+1. *The diamond leaf* (lead / `sound`): `Proves.close` on a Bool twin of
+   `Fml.TClosable`, over the typed reading; then `ProvesDerive`'s leaf check
+   follows.  The push at the bound (Decisions 12–14, "Left for the lead",
+   item 1) then bites the diamond obligations whose functions push.
+2. *The flip itself*, once 1 lands: `Problems.lean` →
+   `solc_problems Solkey.TestSuite legacy`; `CoreProblems.lean` →
+   `solc_scoped_problems Solkey.TestSuite main decl`; each `Derived`
+   module imports `CoreProblems`, `Calculus.Core.ProvesDerive` and
+   `Calculus.Core.Surface` and opens the scope; `Derived7` drops one
+   `case leaf2` (the deviation above, if the lead approves it); `CoreDerived9`–`11` and `CoreSeq` are deleted.
+3. `#solkey_derive?` still searches today's calculus; its suggestions read
+   the same text, but the leaves it names are today's.
+
 ## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
 Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.
 
