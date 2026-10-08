@@ -2385,7 +2385,8 @@ Before the lanes branch, the lead makes `Surface` the default and removes the `o
    - Then `Machine.mem : Nat → Word` (`cell = id`), deferred from W1 `evm`.
    - `Halt` loses `stuck`. The term model's error for ill-sorted terms becomes `Res.undef`, because the closer's terms stay untyped.
 2. **`calc-del`**
-   - Delete every old calculus module that has a Core twin: `Logic`, `Symex`, `Quote`, `Derive`, `SoundKit`, `SoundUpdate`, `SoundUnfold`, `SoundLoop`, `RuleSoundness`, `Completeness`, `Uniqueness`, `Progress`, `SolkeyFragment`, `Sequents`, `ProofTree`, `Chains`, `ChainGen`, `LastLine`, `Notation`, `Spec`, `Contracts`, `Callback`, and the old body of `Rules.lean`.
+   - Delete every old calculus module that has a Core twin: `Logic`, `Symex`, `Derive`, `SoundKit`, `SoundUpdate`, `SoundUnfold`, `SoundLoop`, `RuleSoundness`, `Completeness`, `Uniqueness`, `Progress`, `SolkeyFragment`, `Sequents`, `ProofTree`, `Chains`, `ChainGen`, `LastLine`, `Notation`, `Spec`, `Contracts`, `Callback`, and the old body of `Rules.lean`.
+   - Not `Quote` (W3d integration's correction): it is `NFml`'s quoter, which `Core.Print` prints erasures with; `IntOp.quote` moves beside `IntOp`.
 3. **`modal`**
    - `Update.lean`'s `Fml` loses `.modal` and becomes `NFml`.
    - Delete the modal arms in `Close`, `UpdateRules`, `ChainRewrites` and `Decide`.
@@ -4857,6 +4858,170 @@ git-excluded `Scratch/` modules only).
 - **Left**: decision 31 (the lead's call); `\old` in a scoped contract and
   the calls with several results or a memory return; `callDeposit`'s
   "post" closes by hand until the closer reads `{havoc}`.
+
+### W3d integration (2026-10-08)
+
+- **Merged** into `intrinsic`, in order: `w3d-gates`, `w3d-w3rest`,
+  `w3d-w4prep` (merge commits, no fast-forward).  Text conflicts, each kept
+  both ways: this file (every lane section kept, in merge order; the
+  decisions list's two 31s: `w3d-w3rest`'s keeps 31, `w3d-w4prep`'s is
+  **32**, its section's two citations renumbered) and
+  `docs/module-map.md` (`Core/Derive.lean`: `w3d-w3rest`'s row;
+  `Core/ProvesDerive.lean`: one row with both lanes' content).  One code
+  conflict, `Calculus/Core/ProvesDerive.lean`, the one both lane notes
+  foresaw: `w3d-gates` (`Seq.pickH full`, `Seq.leafWith` over
+  `Fml.closeErase`, `Seq.leafQuoteI`, `Seq.run`'s refutation test `rf`) and
+  `w3d-w3rest` (the parameter count `np`, `Fml.stripN`) changed the same
+  definitions.  Kept both: every leaf function takes `np` and `full`
+  (`Seq.pick np`, `pickH full np`, `leafWith full np`, `leafRes np full`,
+  `leafQuote c np`, `leafQuoteI c np`, `residue np full`,
+  `residueQuote c np`, `Proves.of_residue {np} … {full}`), `leafQuoteI`
+  marks a leaf "closed only with its parameters" by `stripN np` and never
+  where `np = some 0` (as `pick` reads it), and `pickH_eq` is re-proved
+  for the `np` arms (where `np = some 0`, `stripN` is the identity, so the
+  quantified residue `pickH` tries first is `pick`'s first).  No other
+  file conflicted.  `dups.py`: only the known `Evm/Repr`/`Examples/Verify`
+  `as` false positive.
+- **Build**: `lean_build` over `Solidity`, `solkeycheck`, `SolidityCorpus`
+  and `SolkeyTestSuite` (the last two in `defaultTargets` for the run
+  only, reverted after): 328 jobs, **green at the first run**, no OOM
+  kill, no fix needed beyond the conflict's.  No new `sorry` (21), `axiom`
+  (1) or `maxHeartbeats` override (35), as at `d56343c`.
+  `check-orphans`: 314 reachable, only the git-excluded `Scratch/`
+  modules orphaned.  `check-doc-paths`: OK (47 ambiguous citations, all
+  resolving).  `check-rule-text`: empty.  `solkeycheck` built (no rule
+  name or annotation changed).  Not run: `check-corpus.sh` and
+  `check-testsuite.sh` (they need `lake` and the pinned solkey checkout;
+  `w3d-w4prep` ran `check-testsuite.sh` against an extracted
+  `1b4341a303`), and the read-only finder/skeptic review pass.
+- **W3 gates**, re-timed fresh by the integration's method (each file
+  copied under `Solidity/Scratch/` and opened in a fresh worker, `/proc`
+  sampled every 20 ms, wall from the worker's start to its last CPU, the
+  worker stopped after), the merged state (`2ed98fa`) and the W3c state
+  (`d56343c`, a detached worktree) alternated in the same minutes.  The
+  machine was not quiet (another session's `java` at one core throughout,
+  load 1.4–9.7), so each row is the minimum of 2–6 runs a tree and the
+  ratio of the two minima; the small rows (where the worker's wall is
+  mostly waiting) by CPU.  The last column is the ratio times the W3c
+  integration's figure for `d56343c` on its scale:
+
+  | Module | Limit | `d56343c`, raw (min) | merged, raw (min) | ratio | merged, on the integration's scale |
+  |---|---|---|---|---|---|
+  | Derived9–11 | 22.9 s | 27.40 s (9.01 + 13.87 + 4.52; 6 runs) | 25.31 s (8.20 + 13.14 + 3.97; 6 runs) | 0.92 (CPU 0.92; one same-minute run 0.875, as `w3d-gates`) | about 22.4 s, within |
+  | `TestSuite/Problems` (`legacy`) | 1.44 s | CPU 0.66 s | CPU 0.71 s | 1.07 | 1.07 s |
+  | `TestSuite/CoreProblems` | 1.44 s | CPU 1.34 s | CPU 1.28 s | 0.96 | 1.34 s |
+  | `Examples/ProofTree` | 12.1 s | 17.55 s (median 18.56) | 13.67 s (median 15.03) | 0.78 | about 12.9 s, **over** by 0.8 s (6%) |
+  | `Examples/Chains/Storage` | 9.0 s | 8.22 s | 8.33 s | 1.01 | 7.6 s |
+  | `Solkey/TestSuite` | 12.5 s | 12.68 s | 11.98 s | 0.94 | 10.2 s |
+  | `Examples/Benchmark/Syntax` | 1.44 s | CPU 1.54 s | CPU 1.58 s | 1.03 | 1.48 s, at the limit (file and imports unchanged by these lanes: noise) |
+
+  Under Decision 9 the aggregate is about 55.7 s against 59.4 s of limits
+  (57.0 against 60.8 with `CoreProblems`): **under by about 3.7 s**,
+  where the W3c integration was 2.3 s over.  `ProofTree` stays the one
+  outlier.  Its text timed on each lane's tip in the same minutes (min
+  wall): `w3d-gates` 13.35–14.76 s, the merged state 13.67 s,
+  `w3d-w3rest` 18.79 s, `w3d-w4prep` 22.33 s, `d56343c` 17.55 s: the
+  merged state is `w3d-gates`' (the other two lanes' slowdowns, on their
+  own tips, do not survive the merge with `w3d-gates`' leaf), and the
+  remaining 0.8 s are the costs that lane attributed (today's `sol_close`
+  at the walks' leaves, today's residue in the kernel, the tree lane's
+  chain sections).  `w3d-gates`' proposal stands for the lead: move the
+  chain examples (about 0.9 s) to `Examples/Tactics/CoreChains`, or read
+  the gate under Decision 9.
+- **Pins changed, union of the lanes** (each lane's section has the
+  detail):
+  - *Moved, no text change* (`w3d-gates`, the lead's approval of
+    2026-10-09): `deleteReadDeepWalk`'s `sol_derive?` pin and replay,
+    `Examples/ProofTree` → `Examples/Tactics/StorageDelete`.
+  - *Decision 28* (`w3d-w3rest`): `Tactics/CoreDerive`'s short-walk
+    `sol_derive?` on `⊨ dl!{ ∀ uint a; [ … ] total != 0 }` gains `apply
+    allRight` after `apply Proves.valid`, and its replay.
+  - *Reason 7* (`w3d-w3rest`): `Tactics/Callback`'s two `#check` pins print
+    `@Core.CallbackTaclet.transferWithCallbackBox`/`sendWithCallbackBox`
+    with their scoped types.
+  - *Reason 7* (`w3d-w4prep`), `Examples/Notation`: the nine taclet
+    `#check` pins (`@Core.Taclet.*`, `{Γ : Core.Ctx}`; rule lines
+    unchanged), the notation-off `#check` of `storageFieldWriteSave`,
+    `Premise.done`, the unfold premise (a `run_meta` of the resolved
+    block), `Core.Proves.impRight`.
+  - *Proposed decision 32* (`w3d-w4prep`, none of reasons 1–8): the 16
+    solc-corpus `#eval outcome` pins replaced by `corpus_decide` theorems
+    (`expected.tsv` rows `evaluated` → `proved`, `corpus-parity.md`
+    regenerated); the 415 `Corpus/TestSuite` corollary statements
+    (`Obligation.Diamond`/`Box (Core.TState.init …) ….problem`).  The
+    axiom pins are unchanged.
+  - New pins, none changed: `ProofTree`'s `Scoped` regression example
+    (`apply intro; sol_prove`, its count `some (1)`, `w3d-w3rest`'s
+    review); `Corpus/Basic`'s `outcome` of a failed `assert` (`"panic"`);
+    `Theorems.lean`'s fifteen `#print axioms`.
+  - This integration: none.  The fresh names (`se1`, `sp1`) are
+    unchanged.
+- **W3 status: done, pending the lead's calls.**  The three items the W3c
+  integration left are closed: callbacks (`Tactics/Callback`'s
+  counterexample is a typed run; neither callback example imports
+  `Calculus/Callback.lean`), `Tactics/TermTaclets` (recorded as the
+  closer's input, which moves with M6c), contracts (a scoped
+  `FunContract` over the typed call run; `Tactics/Contracts` flipped).
+  Decision 28 is implemented.  The gate aggregate is within under
+  Decision 9, `ProofTree` the explained outlier.  Awaiting the lead:
+  proposed decisions 30 (captures by provenance), 31 (the scoped
+  contract's reading) and 32 (the corpus over the typed run), and the
+  `ProofTree` chain move.
+- **The W4 inventory, updated** (the W3c list's numbering):
+  1. *TestSuite*: the corpus corollaries read the typed run
+     (`Obligation.Diamond`/`Box` of `N.f.problem`, decision 32), so
+     `sem-del` has nothing to restate there.  Left: the legacy statements
+     (`N.f.problem.legacy`, meta only) and `Report.lean`'s count, which
+     reads either `⊢`.
+  2. *Callbacks*: done.  `Calculus/Callback.lean` is imported only by
+     `Tools/Taclet.lean` (today's tables, below) and `Solidity.lean`.
+  3. *Today's sequent rules on updates*: `Tactics/TermTaclets` stays on
+     today's term sequents until M6c (the closer's input); decision 25 was
+     approved with 22–29.
+  4. *`CallRet.isRets`*: done.
+  5. *The closer's input* (unchanged, until M6c): `NFml`, `Tactics/Decide`'s
+     closing block and fragment pins, `ProofTree`'s guards on today's
+     residue; `Proves.close`/`Seq.leafRes` hand every scoped leaf to
+     today's closer on the erasure.
+  6. *Explicit `∀` at a leaf*: done (decision 28: `cdl!` marks the explicit
+     `∀`s, `Seq.paramCount`/`Symex.paramCount`, `Fml.stripN`; marks lost
+     where a formula is rebuilt fall back to stripping every leading `∀`).
+  7. done.
+  8. *Contracts*: the scoped rule is done; `Calculus/Contracts.lean` and
+     `Calculus/Core/Contracts.lean` (`sol_erase`) are used by nothing but
+     `Solidity.lean` (delete in `calc-del`).  Left: `\old` in a scoped
+     contract, calls with several results or a memory return (goal
+     `false`), `callDeposit`'s "post" by hand until the closer reads
+     `{havoc}` (decision 31).
+  9. *Chains past the program* (unchanged): the rewrite links on the
+     erasure, `Calculus/Chains.lean` for that and its notation.
+  10. *Whole modules on today's reading*: `Corpus/Basic` and
+      `Corpus/Imported` are on the typed run; `Tools/Inspect` and
+      `Tools/ProofTree` on Core; `Theorems.lean` on Core but for
+      `Main.Today` (`rule_exists`, the solkey fragment, termination: a
+      scoped `rule_exists`, the fragment and termination over `Core.symex`,
+      or the section dropped); `Examples/Notation` on Core but for its kept
+      pins (`Core.Delab` of holes, `NewLhs`, `storageFieldIncrementAssignment`,
+      a scoped sequent input notation).  New on today's, to go in W4:
+      `Tools/Taclet.lean` (`#taclet` on today's tables; its switch moves
+      pins, W5) and `Tools/InspectToday.lean` with its two users
+      (`Examples/Tools`' `InspectToday` section, `Tactics/CoreNotation`'s
+      last pin); the 35 importers of `Tools/CoreInspect` to point at
+      `Tools/Inspect`/`Tools/ProofTree`.  Unchanged: `Tools/Common`'s
+      untyped candidate generation, `TState.lift?`.
+  11. *Core modules importing today's*: none cut yet; `w3d-w4prep`'s table
+      ("Item 11, the inventory", in its section) says what each takes and
+      where it must move before `calc-del`.  **Plan correction**:
+      `Calculus/Quote.lean` leaves `calc-del`'s list (it is `NFml`'s quoter,
+      which `Core.Print` prints erasures with); `IntOp.quote` moves beside
+      `IntOp`.
+  12. done.
+  13. *Files with no scoped formula* (unchanged): `Tactics/Theory`,
+      `Benchmark/Syntax`, the `Core*` twins (W5's rename).
+- **Lane worktrees removed** (`w3d-gates`, `w3d-w3rest`, `w3d-w4prep`, and
+  the timing worktree of `d56343c`; the branches stay) and their Lean
+  servers and workers stopped (with three idle servers of the gates lane's
+  deleted timing copies).
 
 ## Baselines (M0)
 
