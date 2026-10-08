@@ -6196,6 +6196,62 @@ scratch module).
   (decision 53); `keycheck` itself was not run (its `--map`/`--parse` were
   run from a scratch copy of its source).
 
+### W4 lane `printers` (`w4b-printers`, 2026-10-09): item 14
+
+From `intrinsic` at `78182e5`.  Checked by `lean_build` of `Solidity`
+(278 jobs, green: every `#guard_msgs` pin), per-file diagnostics of the
+touched modules, `check-doc-paths` (OK), `check-orphans` (297 reachable;
+only the git-excluded `Scratch/`), `check-rule-text.sh` (empty).  No
+`sorry`, `axiom` or `maxHeartbeats` added.  Not run: `SolidityCorpus`,
+`SolkeyTestSuite`, `solkeycheck` (no rule, name or annotation changed),
+the review pass.
+
+- **Every rule prints as a rule line.**  `Core.Delab`'s rule delaborators
+  (`Core.Taclet`, `Core.LeanTaclet`, and `Core.CallbackTaclet`'s in
+  `Core/Callback.lean`, one argument) run the translation with
+  `Env.schema`: a call's or a `try`'s schema variables get twins of their
+  erasures' types (`Args` → `List (Arg C)`, `Binders` → `List (PrimTy ×
+  Var)`, `CodeBinder` → `Option Var`), so a call of schema variables is
+  today's `Surface.Stmt.call` of the twins (`fbs`, `ic` by the scoped
+  `CallRet.isRets` side condition, `pp.sol.ic` as today's
+  `delabTacletSide` set it), `Premise.expandCall` today's
+  `expand_function_body(fbs)`, and a `try` of schema variables
+  `try call returns (rets) body catch …` with its branches `∀ rets.`,
+  `∀ code.` (`codeBinders`).  Without `schema` (formulas, sequents, the
+  SolKey reader's `withTwins`/`tr`) nothing changed.
+  `functionCallArgCapture` prints as today's table printed it, its calls
+  today's terms of the twins: `⟨[ ‹Surface.Stmt.call f args hsep ret body›;
+  ]⟩ ⇝ ⟨[ T se = v; ‹Surface.Stmt.call f as' ⋯ ret body›; ]⟩` (a call whose
+  arguments are not all simple is neither `fbs` nor `ic`; `v`, `as'` are the
+  scoped binders where today's had `‹a.e›`, `Arg.captureFirst …`).
+  `blockEmpty`, which today's table had no line for, prints
+  `dl{ ⟨[ {body;}; ]⟩ ⇝ ⟨[ body; ]⟩ }` (its pop, `Premise.unfold`'s `Ext`,
+  invisible as erasure has it).  `whileInvariantDiamond`'s weakened body
+  already printed `body` (`wkUp?`, `w4-moves`); its pin is unchanged.
+- **`#check_rule_text`** is back, in `Tools/Taclet.lean`: today's table
+  being gone (decision 35), it checks that every constructor of the three
+  families prints as a rule line (its judgement's delaborator, no scoped
+  term escaped), pinned in `Examples/Tools`: all 159 `Core.Taclet`, all 9
+  `Core.LeanTaclet`, all 3 `Core.CallbackTaclet`.
+- **`sol_decide`'s refusal** (`Calculus/DecideComplete.lean`) no longer
+  lists "a modality": `NFml` has none since `modal`.  No pin printed it.
+
+**Pins changed** (item 14: today's text restored; the scoped names and
+binders, W5's qualified-name reason):
+- `Examples/Tactics/Calls`: `#check @Core.Taclet.functionBodyExpand`,
+  `internalCallExpand`: `dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }`,
+  `dl{ ⟨[ ic; ]⟩ ⇝ ⟨[ expand_function_body(ic); ]⟩ }` (were the
+  constructors' types), and the section's note that they were not lines
+  removed.
+- `Examples/Tactics/TryCatch`: `tryCallNoCallbackBox` and `tryCallDiamond`:
+  today's lines and labels (`tryCallDiamond` wraps after `⟨`, its judgement
+  `Core.LeanTaclet` being longer than today's `LeanTaclet`); the note
+  removed.
+- `Examples/Tools`: `#taclet functionCallArgCapture`, the line above (was
+  `‹Core.Stmt.call f args ret body›` ⇝ `⟨[ T se = v; ‹Core.Stmt.call f as'
+  ret body›; ]⟩`); new pin `#check_rule_text`.
+- The fresh names (`se1`, `sp1`) are unchanged; every other pin unchanged.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean

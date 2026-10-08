@@ -36,26 +36,19 @@ local instance : InContract := ⟨CallsExample⟩
 
 open scoped Solidity.Core.Surface
 
-/-! ## The rules
-
-The scoped printer (`Calculus/Core/Delab.lean`) does not yet write these two
-as rule lines (`docs/intrinsic.md`, W4 inventory item 14): their premise is
-built by a function (`Premise.expandCall`), and the pins show the
-constructors' types until it does. -/
+/-! ## The rules -/
 
 /--
 info: @Core.Taclet.functionBodyExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {f : Name} {x : Core.Ctx}
   {args : Core.Args C Γ x} {x_1 x_2 : Core.Ctx} {ret : Core.CallRet Γ x_1 x_2} {x_3 : Core.Ctx}
-  {body : Core.Prog C (x_1 ++ x) x_3},
-  Core.Taclet C k m (Core.Stmt.call f args ret body) (Core.Premise.expandCall k args ret body)
+  {body : Core.Prog C (x_1 ++ x) x_3}, dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }
 -/
 #guard_msgs in #check @Core.Taclet.functionBodyExpand
 
 /--
 info: @Core.Taclet.internalCallExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {f : Name} {x : Core.Ctx}
   {args : Core.Args C Γ x} {x_1 x_2 : Core.Ctx} {ret : Core.CallRet Γ x_1 x_2} {x_3 : Core.Ctx}
-  {body : Core.Prog C (x_1 ++ x) x_3},
-  Core.Taclet C k m (Core.Stmt.call f args ret body) (Core.Premise.expandCall k args ret body)
+  {body : Core.Prog C (x_1 ++ x) x_3}, dl{ ⟨[ ic; ]⟩ ⇝ ⟨[ expand_function_body(ic); ]⟩ }
 -/
 #guard_msgs in #check @Core.Taclet.internalCallExpand
 
