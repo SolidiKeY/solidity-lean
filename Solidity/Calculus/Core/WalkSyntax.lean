@@ -25,6 +25,8 @@ Where the scoped calculus takes a step today's names otherwise:
 * the steps KeY does not show are taken before and after each rule,
   silently (`core_silent`): a scope's end (an update that only pops) and a hidden
   binder join the context;
+* `apply invBox r` is the scoped `inv`, its goals `init`, `thn` and `els`
+  (solkey's two goals under the box, no third);
 * `apply empty` (`emptyModality`) is a step only where a modality is left
   with no statement: a rule that leaves none goes on into the rest or past
   the frames (Gate G0, condition 6), so after a last statement it does
@@ -71,6 +73,16 @@ def evalCoreSilent : Tactic := fun _ => do
     let some gs ← Walk.silentStep g | return
     replaceMainGoal gs
 
+/-- `core_tag a b …`: name the first goals `a`, `b`, …, for `case` (a rule's
+goals named as its premises are, today's names). -/
+syntax (name := coreTag) "core_tag" (ppSpace ident)+ : tactic
+
+@[tactic coreTag]
+def evalCoreTag : Tactic := fun stx => do
+  let names := stx[1].getArgs.map (·.getId)
+  let gs ← getUnsolvedGoals
+  for g in gs, n in names do g.setTag n
+
 /-- `core_rule c r`: the scoped rule `c` (`Core.Proves.update`, …) by the
 taclet `r`, solkey's or Lean's, then the silent steps on each goal it leaves.
 The taclet is elaborated last (`by exact`), so that its side conditions are
@@ -85,13 +97,21 @@ macro_rules
     `(tactic| core_silent; first
       | (refine $c (by exact Solidity.Core.Taclet.step_eq $r) ?_) <;> core_silent
       | (refine $c (by exact Solidity.Core.LeanTaclet.toStep $r) ?_) <;> core_silent)
-  | `(tactic| core_rule2 $c $r) => do
-    -- the goals named as the rule's premises are, unhygienically, for `case`
-    let thn := mkIdent `thn
-    let els := mkIdent `els
+  | `(tactic| core_rule2 $c $r) =>
     `(tactic| core_silent; first
-      | (refine $c (by exact Solidity.Core.Taclet.step_eq $r) ?$thn ?$els) <;> core_silent
-      | (refine $c (by exact Solidity.Core.LeanTaclet.toStep $r) ?$thn ?$els) <;> core_silent)
+      | ((refine $c (by exact Solidity.Core.Taclet.step_eq $r) ?_ ?_; core_tag thn els)
+          <;> core_silent)
+      | ((refine $c (by exact Solidity.Core.LeanTaclet.toStep $r) ?_ ?_; core_tag thn els)
+          <;> core_silent))
+
+/-- `core_inv d`: the scoped invariant rule by the premise `d`, its goals
+`init`, `thn` and `els`. -/
+syntax (name := coreInv) "core_inv " term:max : tactic
+
+macro_rules
+  | `(tactic| core_inv $d) =>
+    `(tactic| (refine Solidity.Core.Proves.inv (by exact $d) ?_ ?_ ?_; core_tag init thn els)
+      <;> core_silent)
 
 namespace Surface
 
@@ -152,6 +172,24 @@ scoped macro_rules
       | apply _root_.Solidity.Proves.branches $r
       | (core_silent; refine Solidity.Core.Proves.branches (by exact Solidity.Core.Taclet.step_eq $r) rfl ?_)
       | (core_silent; refine Solidity.Core.Proves.branches (by exact Solidity.Core.LeanTaclet.toStep $r) rfl ?_))
+  | `(tactic| apply invBox $r:term) =>
+    `(tactic| first
+      | apply _root_.Solidity.Proves.invBox $r
+      | (core_silent; core_inv (Solidity.Core.Taclet.step_eq $r))
+      | (core_silent; core_inv (Solidity.Core.LeanTaclet.toStep $r)))
+  | `(tactic| apply impRight) =>
+    `(tactic| first
+      | apply _root_.Solidity.Proves.impRight
+      | (core_silent; apply Solidity.Core.Proves.intro) <;> core_silent)
+  | `(tactic| apply allRight) =>
+    `(tactic| first
+      | apply _root_.Solidity.Proves.allRight
+      | (core_silent; apply Solidity.Core.Proves.allIntro) <;> core_silent)
+  | `(tactic| apply emptyModality) =>
+    `(tactic| first
+      | apply _root_.Solidity.Proves.emptyModality
+      | (core_silent; apply Solidity.Core.Proves.empty) <;> core_silent
+      | core_silent)
   | `(tactic| apply empty) =>
     `(tactic| first
       | apply _root_.Solidity.Proves.empty
