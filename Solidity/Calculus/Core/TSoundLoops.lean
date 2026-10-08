@@ -23,6 +23,9 @@ over `TState`.
   is `true` or `false` wherever it is read; what the rule's terms read on
   the erasure is the typed value (`tholds_isBoolD_lower`, from
   `Val.evalT_erase` and `Val.evalT_nd`).
+* A block (`Stmt.tsound_block`) is its body unfolded, its locals popped
+  after it (`Stmt.trunSt_block`); it sits here beside `Stmt.trunSt_ite`,
+  which the loop's turn reads through.
 -/
 
 namespace Solidity.Core

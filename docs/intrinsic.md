@@ -1721,14 +1721,20 @@ diamond, from the type under the box.  Printers drop `m` (`Delab`,
   `Val.evalT_erase` and `Val.evalT_nd`), the invariant rules by
   `TLoop.run_induct`/`run_variant` with `tholds_anonHavoc` (from
   `TState.eq_anonHavoc`).  No condition: a typed `bool` is `true` or
-  `false`, and the diamond needs no `BoolOK`.
+  `false`, and the diamond needs no `BoolOK`.  The block arm is here too:
+  `Stmt.tsound_block`, by `Stmt.trunSt_block`.
 * **`Fml.tclosableB`** (`Calculus/Core/Closable.lean`): the Bool twin of
   `Fml.TClosable`, with `Fml.tclosableB_sound`, ready for the switch of
-  `Proves.close`.
+  `Proves.close`; not used yet (`Proves.close` still asks `closableB`, and
+  `Proves.tsound` goes through `Fml.closableB_tclosable`) until the
+  assembly of `Stmt.TSound C`.
 * Uses from M3 modules that the flip must keep or restate:
-  `Args.capture_snoc` (`SoundCalls.lean`), `holds_isBoolD`
-  (`SoundBlocks.lean`), `evalBinop_cmp_true` (`SoundLoops.lean`),
-  `Val.eval_lower` (`SoundKit.lean`).
+  `Args.capture_snoc` (`Calculus/Core/SoundCalls.lean`), `holds_isBoolD`
+  (`Calculus/Core/SoundBlocks.lean`), `evalBinop_cmp_true`
+  (`Calculus/Core/SoundLoops.lean`), `Val.eval_lower`
+  (`Calculus/Core/SoundKit.lean`), `Val.evalT_erase` and
+  `Val.evalT_noPanic` (`Semantics/Core/TypedRunErase.lean`, deleted at W4
+  `sem-del`).
 
 ## Baselines (M0)
 

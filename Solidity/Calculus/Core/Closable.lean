@@ -283,9 +283,10 @@ theorem Fml.closableB_tclosable {Γ : Ctx} {φ : Fml C Γ} {ns : List Var}
     (h : φ.closableB ns = true) : φ.TClosable ns :=
   Fml.Closable.tclosable φ (Fml.closableB_sound φ h).1 (Fml.closableB_sound φ h).2
 
-/-- `Fml.TClosable`, decided: what `Proves.close` asks of the leaf over the
-typed state (a diamond update allowed in a positive position), its context
-in front. -/
+/-- `Fml.TClosable`, decided (a diamond update allowed in a positive
+position), its context in front: the Bool twin `Proves.close` will ask of
+the leaf over the typed state once it switches from `Fml.closableB` (the
+W2.5 assembly of `Stmt.TSound`). -/
 def Fml.tclosableB : {Γ : Ctx} → List Var → Fml C Γ → Bool
   | _, ns, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
     (tt := true) (eq := fun _ _ => true) (defined := fun _ => true)
