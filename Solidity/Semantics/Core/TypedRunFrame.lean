@@ -1,5 +1,5 @@
 import Solidity.Semantics.Core.TypedRunWk
-import Solidity.Calculus.Core.RunFrame
+import Solidity.Calculus.Core.WkOver
 
 /-!
 # A loop body runs within its frame, typed

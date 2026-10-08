@@ -1,5 +1,5 @@
 import Solidity.Semantics.Core.TypedRun
-import Solidity.Calculus.Core.RunWk
+import Solidity.Calculus.Core.WkOver
 
 /-!
 # A weakened program runs as the program, typed
@@ -16,7 +16,7 @@ does not touch come out weakened along the heap's extension (`TEnv.wk`): a
 memory reference keeps its identity and only its proof moves, so the
 relation of two outcomes (`TWkRel`) asks for what the dropped positions hold
 weakened (`offWk`).  The syntax of a scope's end on both sides (`Thin.Over`,
-`Prog.wk_over`) is `Calculus/Core/RunWk.lean`'s.
+`Prog.wk_over`) is `Calculus/Core/WkOver.lean`'s.
 
 The loop lemmas the soundness of the loop rules reads are here too, on
 `TLoop`: a loop every turn of which is lifted runs lifted (`TLoop.run_map`),

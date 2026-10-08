@@ -40,6 +40,7 @@ import Solidity.Calculus.Core.Print
 import Solidity.Calculus.Core.Shift
 import Solidity.Calculus.Core.Arms
 import Solidity.Calculus.Core.Blocks
+import Solidity.Calculus.Core.WkOver
 import Solidity.Calculus.Core.Step
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.Rules
@@ -76,6 +77,8 @@ import Solidity.Calculus.Core.TSoundMem
 import Solidity.Calculus.Core.TSoundLocal
 import Solidity.Calculus.Core.TSoundControl
 import Solidity.Calculus.Core.TSoundStep
+import Solidity.Calculus.Core.TSoundCalls
+import Solidity.Calculus.Core.TSoundLoops
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound

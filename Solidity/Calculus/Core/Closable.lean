@@ -283,4 +283,57 @@ theorem Fml.closableB_tclosable {Γ : Ctx} {φ : Fml C Γ} {ns : List Var}
     (h : φ.closableB ns = true) : φ.TClosable ns :=
   Fml.Closable.tclosable φ (Fml.closableB_sound φ h).1 (Fml.closableB_sound φ h).2
 
+/-- `Fml.TClosable`, decided (a diamond update allowed in a positive
+position), its context in front: the Bool twin `Proves.close` will ask of
+the leaf over the typed state once it switches from `Fml.closableB` (the
+W2.5 assembly of `Stmt.TSound`). -/
+def Fml.tclosableB : {Γ : Ctx} → List Var → Fml C Γ → Bool
+  | _, ns, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
+    (tt := true) (eq := fun _ _ => true) (defined := fun _ => true)
+    (not := fun φ => Fml.foFreshB ns φ)
+    (and := fun φ ψ => Fml.tclosableB ns φ && Fml.tclosableB ns ψ)
+    (imp := fun φ ψ => Fml.foFreshB ns φ && Fml.tclosableB ns ψ)
+    (upd := fun _ U φ => U.freshB ns &&
+      decide (Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames) &&
+      decide (Avoids φ.bindNames (U.names ns)) && Fml.tclosableB (U.names ns) φ)
+    (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.tclosableB ns φ)
+    (all := fun x _ φ => decide (x ∉ ns) && decide (x ∉ φ.bindNames) && Fml.tclosableB (x :: ns) φ)
+    (bind := fun m x t φ => (m == .box || t.inhabited) && decide (x ∉ ns) &&
+      decide (x ∉ φ.bindNames) && Fml.tclosableB (x :: ns) φ)
+    (anon := fun _ φ => Fml.tclosableB ns φ)
+  termination_by structural _ _ φ => φ
+
+theorem Fml.tclosableB_sound : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} →
+    φ.tclosableB ns = true → φ.TClosable ns
+  | _, .tt, _, _ | _, .eq .., _, _ | _, .defined _, _, _ => trivial
+  | _, .not φ, _, h => Fml.foFreshB_sound φ h
+  | _, .and φ ψ, ns, h => by
+    have h' : φ.tclosableB ns = true ∧ ψ.tclosableB ns = true := Bool.and_eq_true_iff.mp h
+    exact ⟨Fml.tclosableB_sound φ h'.1, Fml.tclosableB_sound ψ h'.2⟩
+  | _, .imp φ ψ, ns, h => by
+    have h' : φ.foFreshB ns = true ∧ ψ.tclosableB ns = true := Bool.and_eq_true_iff.mp h
+    exact ⟨Fml.foFreshB_sound φ h'.1, Fml.tclosableB_sound ψ h'.2⟩
+  | _, .upd _ U φ, ns, h => by
+    have h' : (U.freshB ns && decide (Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames) &&
+        decide (Avoids φ.bindNames (U.names ns)) && φ.tclosableB (U.names ns)) = true := h
+    simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
+    obtain ⟨⟨⟨hU, h₁⟩, h₂⟩, hφ⟩ := h'
+    exact ⟨Upd.freshB_sound U hU, h₁, h₂, Fml.tclosableB_sound φ hφ⟩
+  | _, .modal .., _, h => nomatch h
+  | _, .havoc φ, _, h => Fml.tclosableB_sound φ h
+  | _, .all x _ φ, ns, h => by
+    have h' : (decide (x ∉ ns) && decide (x ∉ φ.bindNames) && φ.tclosableB (x :: ns)) = true := h
+    simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
+    obtain ⟨⟨hx, hxB⟩, hφ⟩ := h'
+    exact ⟨hx, hxB, Fml.tclosableB_sound φ hφ⟩
+  | _, .bind m x t φ, ns, h => by
+    have h' : ((m == .box || t.inhabited) && decide (x ∉ ns) && decide (x ∉ φ.bindNames) &&
+        φ.tclosableB (x :: ns)) = true := h
+    simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
+    obtain ⟨⟨⟨hm, hx⟩, hxB⟩, hφ⟩ := h'
+    refine ⟨fun hd => ?_, hx, hxB, Fml.tclosableB_sound φ hφ⟩
+    subst hd
+    simpa only [reduceCtorEq, decide_false, Bool.false_or] using hm
+  | _, .anon _ φ, _, h => Fml.tclosableB_sound φ h
+
 end Solidity.Core

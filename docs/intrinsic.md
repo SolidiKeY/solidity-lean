@@ -1781,6 +1781,47 @@ property of the program (`Prog.bridgeOk`), if `Stmt.TSound` takes it.
 review pass (finder and skeptic) was not run: this session cannot spawn
 subagents.
 
+### W2.5 lane `tsoundB` (`w25-tsoundB`, 2026-10-08): typed soundness of the block arms
+
+* **Syntax out of the M3 runs.**  `Thin.Over` (with `trans`, `append`),
+  `CallRet.wk_over`, `Stmt.wk_over`, `Prog.wk_over`, `frameMut` and
+  `Prog.frame_some` moved to the syntax-only `Calculus/Core/WkOver.lean`;
+  `TypedRunWk.lean`/`TypedRunFrame.lean` import it instead of
+  `RunWk`/`RunFrame`, so W4 can delete those two.  `RunWk` keeps only the M3
+  reading `Thin.Over.env`.
+* **`Calculus/Core/TSoundCalls.lean`**: `Stmt.tsound_call` (every
+  `callStep` premise: the four `expand_function_body` shapes, the four
+  `functionCallArgCapture` shapes) and `Stmt.tsound_tryCall`, as equations
+  between typed runs read at their states (`Premise.tsound_unfold`/`inline`).
+  The inlined body is the body run in its frame, lifted
+  (`Stmt.trun_block_wk`, from `Prog.trun_wk`); the caller's locals come out
+  weakened along the heap the body grew, which `TRun.call` gives back
+  (`TEnv.drop_put_atop_wk`, `thin_put_keepAllAtop`, `thin_keep_put_atop`).
+  A capture runs the call from the caller with the value on top
+  (`TRun.callFrom_capture`).  `try`'s clauses bind typed values, so no
+  `Fits` is needed (`tholds_binders_all`); decoding never panics.
+* **`Calculus/Core/TSoundLoops.lean`**: `Stmt.tsound_loop`.  One turn
+  (`Stmt.trunSt_loop_unfold`, via `TLoop.run_map`: the extension a loop
+  head carries plays no part), `loopExit` by `tholds_isBoolD_lower` (a
+  lowered condition read on the erasure is its typed value:
+  `Val.evalT_erase` and `Val.evalT_nd`), the invariant rules by
+  `TLoop.run_induct`/`run_variant` with `tholds_anonHavoc` (from
+  `TState.eq_anonHavoc`).  No condition: a typed `bool` is `true` or
+  `false`, and the diamond needs no `BoolOK`.  The block arm is here too:
+  `Stmt.tsound_block`, by `Stmt.trunSt_block`.
+* **`Fml.tclosableB`** (`Calculus/Core/Closable.lean`): the Bool twin of
+  `Fml.TClosable`, with `Fml.tclosableB_sound`, ready for the switch of
+  `Proves.close`; not used yet (`Proves.close` still asks `closableB`, and
+  `Proves.tsound` goes through `Fml.closableB_tclosable`) until the
+  assembly of `Stmt.TSound C`.
+* Uses from M3 modules that the flip must keep or restate:
+  `Args.capture_snoc` (`Calculus/Core/SoundCalls.lean`), `holds_isBoolD`
+  (`Calculus/Core/SoundBlocks.lean`), `evalBinop_cmp_true`
+  (`Calculus/Core/SoundLoops.lean`), `Val.eval_lower`
+  (`Calculus/Core/SoundKit.lean`), `Val.evalT_erase` and
+  `Val.evalT_noPanic` (`Semantics/Core/TypedRunErase.lean`, deleted at W4
+  `sem-del`).
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
