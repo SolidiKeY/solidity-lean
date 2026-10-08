@@ -1009,6 +1009,14 @@ elaborates with every module (no name clash).
   section kept); `Solidity.lean` and `docs/module-map.md` merged clean, no
   duplicate import or row.  No fully-qualified declaration is declared twice
   across modules.
+- **Second round**: three lanes committed their review passes after the
+  first merge (`w1-typing` 7f8526b drops a dead lemma; `w1-evm` 4e63fb2
+  corpus verdict wording and `solkey-port.mjs`; `w1-rules` 0258373 `toStep`
+  counts, `#taclet`'s sound line in `Tools/Inspect.lean`, an axioms pin).
+  Merged in the same order, no conflict; the duplicate check is still empty
+  (but the known `Evm/Repr`/`Examples/Verify` `as` false positive).  The
+  same four-target `lean_build` (294 jobs): green, about 8 s wall, all of
+  it Lake-cache fetches but the modules those commits touched.
 - **Full build: green on the first try**, no fix needed.  `lean_build` over
   `Solidity`, `solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (294
   jobs; the last two in `defaultTargets` for the run only): 168 s wall,
