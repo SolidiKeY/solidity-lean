@@ -2619,7 +2619,7 @@ under the change below) and `w3b-tactics` at 1fb3e60, which had made the
 same change to `Proves.close` (d30bb95) and the same scoped `sol_prove?`
 (ac8d23f): their versions of `Calculus/Core/{Closable,Close,CloseErase,Proves}.lean`
 and `Closers.lean`'s `sol_prove?` are kept, this lane's copies dropped
-(`Calculus/Core/ProvesSearch.lean` deleted).  No new `sorry`, `axiom` or `maxHeartbeats`.
+(its module, `ProvesSearch`, deleted).  No new `sorry`, `axiom` or `maxHeartbeats`.
 `lean_build` (default targets): green, 301 jobs.  `TestSuite/CoreSeq`,
 `CoreDerived11`, `Examples/Chains/StorageCoverage`, `Tactics/CoreChains`
 checked one by one.
