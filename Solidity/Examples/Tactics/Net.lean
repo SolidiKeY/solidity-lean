@@ -1,4 +1,7 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Payment: what a `transfer` changes
@@ -26,6 +29,8 @@ namespace Solidity.Examples.Tactics.Net
 open Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## 1 · The frame -/
 

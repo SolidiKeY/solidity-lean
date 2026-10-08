@@ -1,4 +1,7 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Storage and memory: the copies between them
@@ -25,6 +28,8 @@ namespace Solidity.Examples.Tactics.CrossDomain
 open Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## 1 · Storage to memory -/
 
