@@ -138,14 +138,28 @@ def validGoal? (g : MVarId) : MetaM (Option (Expr × Expr)) := do
   let_expr Core.Valid C φ := ty | return none
   return some (C, ← instantiateMVars φ)
 
+/-- The element `i` of a list literal. -/
+def listLitGet? (l : Expr) : Nat → Option Expr
+  | 0 => if l.isAppOfArity ``List.cons 3 then some l.appFn!.appArg! else none
+  | i + 1 => if l.isAppOfArity ``List.cons 3 then listLitGet? l.appArg! i else none
+
 /-- The closed formula `φ` of the contract `C`, unfolded to a term the
 compiled code can evaluate: a constant with no code (an obligation
-`solc_scoped_problems` declared) by its value. -/
+`solc_scoped_problems` declared) by its value, and an entry of a table
+with no code (`List.getD T i _`, how `solc_scoped_problems` declares an
+obligation) by the element of `T`'s list literal. -/
 partial def evaluable (φ : Expr) : MetaM Expr := do
   let φ ← instantiateMVars φ
+  let codeless (n : Lean.Name) : MetaM (Option Expr) := do
+    if (IR.findEnvDecl (← getEnv) n).isSome then return none
+    let some (.defnInfo d) := (← getEnv).find? n | return none
+    return some d.value
   if let .const n _ := φ then
-    if (IR.findEnvDecl (← getEnv) n).isNone then
-      if let some (.defnInfo d) := (← getEnv).find? n then return ← evaluable d.value
+    if let some v ← codeless n then return ← evaluable v
+  if φ.isAppOfArity ``List.getD 4 then
+    if let (.const t _, some i) := (φ.getArg! 1, (φ.getArg! 2).rawNatLit?) then
+      if let some l ← codeless t then
+        if let some x := listLitGet? l i then return ← evaluable x
   return φ
 
 /-- Compute the formula of a goal `Core.Valid φ` (`Solidity.normValid` for
