@@ -113,7 +113,7 @@ found by `#eval` and the iteration computed by `rfl`.
 **Proofs that recurse on `Stmt.run`** take a loop's case from two lemmas:
 `Loop.run_rel` (two loops whose iterations go in step from related states
 run alike: `Prog.run_frame`) and `Loop.run_induct` (an invariant of the loop
-head: `run_noPanic`, `frame_of_within`); `Loop.run_unfold` is the
+head: `frame_of_within`); `Loop.run_unfold` is the
 unwinding. The typing proofs recurse on the scoped run (`Semantics/Core.lean`)
 and take a loop's case from `Core.Loop.run_induct`, once for every invariant
 (`Invariant.keeps_loop`: the invariant at the loop head, the body's locals
@@ -133,7 +133,7 @@ modality over it would hold vacuously. `Stmt.run_call_expand` is unaffected;
 `none`; `Stmt.weight` is Decision 3.
 
 **A loop that transfers, with callbacks**, has `ExecS` constructors
-(`Semantics/Core/Callback.lean`): the condition halts or is stuck, the loop
+(`Semantics/Core/Callback.lean`): the condition halts, the loop
 exits, iterates (`loopIter`), stops in its body, or diverges
 (`loopDiverge`). An inductive relation has no derivation of an infinite run,
 so `loopDiverge` over-approximates: a loop whose body pays may always
@@ -141,7 +141,7 @@ diverge. A box accepts a divergence, and the callback reading is box-only
 (solkey's), so nothing is lost; a diamond over such a loop is never valid.
 Each constructor requires `Prog.hasTransfer body`, so a loop that pays
 nothing has only its deterministic run (`ExecS.det`), and
-`Stmt.exec_run`, `ExecS.eq_run` and `ExecS.frame` keep their statements.
+`Stmt.exec_run` and `Stmt.eq_run` keep their statements.
 
 ## Decision 2: `break`, `continue`, `for`, `do … while` are lowered
 

@@ -33,7 +33,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Arrays past their end | `pop`, `delete`, `push` and copies keep the slots past the length; an index is checked when the path is taken | `SVal.array`, `State.checkIndex`, `SVal.overlay` | `testDanglingReferenceSurvivesPush` and three more |
 | Array lengths | a dynamic array holds fewer than `2^256` elements: its length is a `uint` (decision 13, `docs/intrinsic.md`).  The typed storage and heap carry the bound (`SVal.array`, `MObj`), so a typed length read is in range (`Storage.len`, `Heap.lenU`), and so are an erasure's lengths.  A push onto `2^256 - 1` elements exhausts the resources: the typed run halts with `exhausted` there (`Storage.full`, `TRun.push`; decision 15), and both modalities accept it (`Modality.onTHalt`), as KeY, which models no gas, reads every run (solkey's arrays are unbounded, so its diamond obligations with a push stay provable).  solc panics (`0x41`) on a storage array past `2^64` elements and its code runs out of gas long before; Lean's bound is `2^256`, and an exhausted run proves any modality.  The untyped interpreters have no bound and go on; the bridge reads the typed `exhausted` as any outcome (`TRes.Agrees`), and a straight program's typed run ends where its scoped one does when its pushes stay below the bound (`Prog.pushesShort`).  Decision 13 said the push reverts: a typed revert needs the untyped push to revert too, and the untyped calculus's diamond obligations with a push (most of solkey's TestSuite is diamonds) could then not be discharged, since a storage with `2^256 - 1` elements is reachable | `SVal.array`, `MObj`, `Storage.full`, `lenU` | `Typing/StraightRun.lean` |
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
-| `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `transferAt`; `Evm.compile_correct` | `Semantics.lean` |
+| `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `transferAt`; `Evm.Core.compile_correct` | `Semantics.lean` |
 | `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `sendAt`, `TxEnv.ext` | `Examples/Tactics/Net.lean` |
 | Call arguments | all read, left to right, before the callee runs | `Arg.bindSeq`, `Arg.separatedFrom` | |
 | `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is imported as `bool ok = a.send(v)`, as solkey's `SolJSONParser.isValueCall` reads it; solc forwards all gas there, so the callee can re-enter and write storage, which `holds` ignores (the no-callback reading) and only `holdsC` covers (`Semantics/Core/Callback.lean`). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`) | |
@@ -252,12 +252,12 @@ recipient is the contract itself (`State.pay`; `this` is `address(this)`,
 (`333cc7b353`), and the diamond has no rule here. The interpreter thus
 assumes the world pays, and the compiler theorem says what that costs: in
 code that pays, the machine may revert where the interpreter succeeds
-(`Evm.compile_correct`'s third outcome), so what the interpreter proves
-under the box holds of every run the machine completes (`Evm.compile_box`),
-and there `net(a)` is what `a`'s account lost (`Evm.compile_net`), at every
+(`Evm.Core.compile_correct`'s third outcome), so what the interpreter proves
+under the box holds of every run the machine completes (`Evm.Core.compile_box`),
+and there `net(a)` is what `a`'s account lost (`Evm.Core.compile_net`), at every
 address but the contract's own, whose entry stays `0`: without the `if` in
 `State.pay`, a payment to itself would move that entry and the simulation
-(`Evm.Sim.netSelf`) would fail.
+(`Evm.Core.Sim.netSelf`) would fail.
 
 The callback semantics (`Semantics/Core/Callback.lean`) is a relation over this
 one: after the debit `State.havoc` replaces storage, ledger and balance, so
@@ -289,7 +289,7 @@ machine). Two consequences of the table being fixed per transaction:
   funds is one of the oracle's refusals, and a taken one is booked whatever
   `State.selfBalance` holds (which it does not debit).
 
-A send is outside the compiled fragment (`Evm.wtStmt` has no case for it).
+A send is outside the compiled fragment (`Evm.Core.inFrag` refuses it).
 `(bool ok, ) = a.call{value: v}("")`, which solkey lowers to
 `bool ok = a.send(v);` (its `SolJSONParser.isValueCall`), is not written in
 `sol{}` on this branch: it needs tuple syntax. Under solc that call forwards
@@ -378,12 +378,12 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   allocates an object nothing reaches (the table above).
 - **Fragment width.** Loops run (`Loop.run`, `docs/loops.md`) and are
   proved by unwinding to a bound or by an invariant, but the EVM compiler
-  refuses them (`wtStmt`); `uintN`/`intN`
+  refuses them (`Evm.Core.inFrag`); `uintN`/`intN`
   for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond
   `transfer`, `send`, the `net` ledger and `try` (whose callee is not run), no gas. These constructs do not occur
   rather than silently diverge.
 - **`transfer` assumes the world pays.** It never reverts for funds or a
-  refusing recipient; the EVM may, which `Evm.compile_correct` states as the
+  refusing recipient; the EVM may, which `Evm.Core.compile_correct` states as the
   machine reverting alone (`docs/compiler-verification.md`).
 - **`push` over a recycled slot.** `arr.push(v)` of a struct or array value
   lays it on fresh slots (`SVal.strip`), not over the recycled slot it lands

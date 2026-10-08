@@ -105,7 +105,7 @@ theorem withdrawRunNet :
 
 /-- More than the funds: the ledger books it all the same.  That the contract
 can pay is not the ledger's to check; on the EVM the payment is refused and
-the call reverts (`Evm.compile_correct`). -/
+the call reverts (`Evm.Core.compile_correct`). -/
 theorem withdrawRunOverdrawn :
     (do let σ ← Prog.run (← deployed) (sol{ withdraw(130); } : Prog EtherWallet)
         pure (σ.getNet 7)) = .ok (-130) := by

@@ -517,7 +517,7 @@ inductive LeanTaclet (C : Contract) (k : Nat) : Modality → Stmt C → Premise 
 
   /-- A payment under the diamond closes to `false`.  solkey books a payment
   under the box only (`transferNoCallbackBox`): whether the world pays is not
-  the calculus's (`Evm.compile_correct`, where a refused payment reverts the
+  the calculus's (`Evm.Core.compile_correct`, where a refused payment reverts the
   machine alone), so no diamond over a payment is derived. -/
   | transferDiamond :
       dl[LeanTaclet C k]{ ⟨ sadr.transfer(se); ⟩ ⇝ false }

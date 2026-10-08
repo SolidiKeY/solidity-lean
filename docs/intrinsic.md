@@ -5666,7 +5666,8 @@ level (`Nat`), and `cell l = l` (`Evm/CoreCompile.lean`; was
 moved.  `Core.memAt_upd` lost its `cell_inj` case.
 
 **Theorems restated or dropped** (none of the headline's): `Core.Sim.init`
-(same statement, new proof); dropped `Core.Problem.deploy_of_valid_nil`,
+(same statement, new proof); dropped `Core.Problem.deploy_of_valid_nil`
+(restated over the typed deployment by the review fixes, below),
 `ReachableU.reachable(S)`, `wt_of_reachableU`, `compileStmt_erase`,
 `compileProg_resolve`, `pushes_erase`, `Prog.run_erase` (each about the
 untyped run or compiler).
@@ -5699,6 +5700,61 @@ untyped run or compiler).
 - Docs, M7: `docs/compiler-verification.md` still describes the untyped
   compiler's proof (`wtStmt`, `Sim C L Γ`), and `docs/solc-validation.md`
   its `compileStmt`; the paths are fixed, the prose is not.
+- Docs, M7 (found by the sem-del review): `docs/solc-validation.md`'s
+  summary and check C still cite `wtProg`, `not_stuck` and "never stuck"
+  (lines 26–27, 335), `docs/compiler-verification.md` `wtProg`/`wtStmt`
+  throughout; the scoped compiler's names are `inFragP`/`inFrag`, and it
+  has no `not_stuck` (`Evm/CoreCorrect.lean`'s docstring says why).
+  Today's `CallbackTaclet` rows of `docs/lean-key-rule-map.md` now cite the
+  scoped soundness (`Core.holdsC_*Cb`), which reads `Core.CallbackTaclet`,
+  not today's constructors, until `modal` deletes today's.
+
+**Review fixes** (2026-10-08, on `intrinsic`; a read-only review of
+sem-del, five confirmed findings).  Built by `lean_build` of the default
+targets (298 jobs, green); `check-doc-paths` OK, `check-orphans` (only
+`Scratch/`).
+- Stale citations repointed: the rule map's callback rows
+  (`Core.holdsC_transferCb`/`holdsC_sendCb`/`holdsC_tryCb`,
+  `ExecS.transferResume` for `CbResume`), `Evm.compile_*` →
+  `Evm.Core.compile_*` and `Evm.Sim.netSelf` → `Evm.Core.Sim.netSelf`
+  (rule map, `solc-alignment.md`, and the docstrings of `Semantics.lean`,
+  `Calculus/Rules.lean`, `Calculus/Core/Rules.lean`, `Examples/Tactics/{Net,
+  Payment,Revert}.lean`, `Examples/Benchmark/EtherWallet.lean`),
+  `Evm.wtStmt` → `Evm.Core.inFrag`, `ProvesC.sound` →
+  `Core.ProvesC.sound_of` (`solc-validation.md`, `CallbackSound`'s
+  docstring), `CallbackTaclet.sound_send` → `Core.holdsC_sendCb`
+  (`kernel-port.md`); `loops.md` drops `ExecS.frame`, "or is stuck" and
+  `run_noPanic`, and names `Stmt.eq_run`.
+- `Evm/CoreExamples.lean`: `alice_slot`, `person_layout`, `fixed_layout`
+  restored unchanged in `Evm.Examples`, and the two code pins
+  (`total = total + age;`'s checked add, `folks[7].age = 3;`'s
+  `KECCAK256`) restored in `Evm.Core.Examples` over the scoped compiler,
+  with the expected text unchanged: the scoped compiler emits the same
+  code.  (sem-del had dropped them unrecorded.)
+- `Calculus/Core/Deploy.lean`: `Core.Contract.deployT`, the typed
+  deployment with `Contract.deploy`'s guard (value sent to a constructor
+  that is not `payable` reverts, `Contract.deployT_refuses`), and
+  `Core.Problem.deploy_of_valid_nil` restated over it: no `hX`, no
+  freshness, the `hpay` disjunction kept.  `Examples/Tactics/Constructors`'
+  example states its type (the obligation's program, its reading at
+  `deployT`) and takes `hv : tx.msgValue.1 = 0` again.
+- `Evm/CoreCorrect.lean`'s `Core.Sim.init`: the two bare `simp`s are
+  `simp only`.
+- `Semantics/Core/StateErase.lean`: the run bridge's leftovers deleted
+  (≈470 lines): `RunRel`/`RunRelA` and their lemmas, the effects'
+  erasure (`MLoc.write_erase`, `OpLoc.store_erase`/`bump_erase`,
+  `ARhs`/`MRhs.bind_erase`), `Src.value_erase`/`pushVal_erase`,
+  `MSrc.mval_erase`, `MLoc.addr_erase`, `ExtCall.key_erase`,
+  `frame_setEnv`, the unused `*_nat`/`*_wl` (`opStore`, `opMem`,
+  `bumpStore`, `bumpMem`, `transferAt`, `memClear`, `writeLoc`, `readLoc`,
+  `pay`, `setObj`, `allocDefault_wl`, `envVal_wl`), `Agree.op`/`opA`/`tx`,
+  `Env.get_here`/`get_there`/`erase_append`/`mem_erase_take`,
+  `Idx.name_here`.  What is left is what `HoldsErase`, `CloseErase`,
+  `Closable`, `TypedToSem`, `Faithfulness` and `Problem` read; the module
+  docstring and its module-map row say so.
+
+**Pins changed** (review fixes): two restored (`Evm/CoreExamples`), none
+moved.
 
 ## Baselines (M0)
 

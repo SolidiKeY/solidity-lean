@@ -146,11 +146,18 @@ theorem miniDeploy : ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.se
   sol_symex
   sol_close_mt
 
-/-- A derived obligation of no parameters is a theorem about the typed run
-of its program from the typed deployment state
-(`Core.Problem.deploy_of_valid_typed`): `constructor(7);` runs for every
-transaction (`TTx`, its fields `uint`s), and does not panic. -/
-example (tx : Core.TTx) := Core.Problem.deploy_of_valid_typed miniDeploy tx
+/-- A derived obligation of no parameters is a theorem about the typed
+deployment (`Core.Problem.deploy_of_valid_nil`, `Core.Contract.deployT`):
+the obligation's program, `constructor(7);`, runs for every deployer
+sending no value, and does not panic.  The transaction is typed (`TTx`, its
+fields `uint`s). -/
+example (tx : Core.TTx) (hv : tx.msgValue.1 = 0) :
+    ∃ (Γ' : Core.Ctx) (P : Core.Prog Mini [] Γ'),
+      Core.Problem.ctorFml .diamond [] P = dl!{ { storage := mtSt ‖
+        net := store(mtSt, at(msg.sender), msg.value) ‖ selfBalance := msg.value }
+        ⟨ constructor(7); ⟩ true } ∧
+      Modality.diamond.afterRunTR (fun _ => True) (Core.Contract.deployT Mini P tx) :=
+  ⟨_, _, rfl, Core.Problem.deploy_of_valid_nil miniDeploy tx (.inr hv)⟩
 
 /-! ## What a deployment runs first
 

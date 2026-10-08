@@ -9,7 +9,7 @@ import Solidity.Calculus.Core.UpdateRules
 `ProvesC I H φ` (`Calculus/Core/Callback.lean`) proves `φ` with callbacks:
 what it derives holds, its context in front, when every payment may call
 back into the contract and the callee leaves the invariant as it found it
-(`holdsC`, `ValidC`, `Calculus/Core/CallbackHolds.lean`).  `ProvesC.sound`
+(`holdsC`, `ValidC`, `Calculus/Core/CallbackHolds.lean`).  `ProvesC.sound_of`
 and `ProvesC.valid` take the invariant first-order (`Fml.FO`, a contract
 invariant of the storage and the ledger): "the invariant holds" is then a
 fact of the state's erasure, which the callee's run and the updates read.

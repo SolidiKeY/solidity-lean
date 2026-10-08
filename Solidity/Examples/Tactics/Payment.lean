@@ -14,7 +14,7 @@ which books the payment on the ledger and nothing else: the update
 which books nothing (solkey's `\if(sadr = self)`).  Under the diamond a
 payment has no rule (`LeanTaclet.transferDiamond` closes it to `false`).
 Whether the world pays is not the rule's: on the EVM a refused payment
-reverts, which the box does not see (`Evm.compile_box`).  The worked
+reverts, which the box does not see (`Evm.Core.compile_box`).  The worked
 examples' traces are `Examples/Chains/Payment.lean`'s; here the sequents
 themselves, each with its whole context, are the goals of a walk, each a
 checked line `show sequent!{ Γ ⟹ ψ }` (`Calculus/Sequents.lean`).

@@ -22,7 +22,7 @@ Solidity source ──(1) sol{…} / contract!{…}──▶ Stmt C ──(2) St
 ```
 
 Proved: the rules are sound for (2) (`Rule.sound`, `Proves.sound`,
-`ProvesC.sound`); the repository's compiler agrees with (2) (`compile_correct`),
+`Core.ProvesC.sound_of`/`ProvesC.valid`); the repository's compiler agrees with (2) (`compile_correct`),
 and on the programs it compiles (`wtProg`: no memory, loops or `try`) from a
 state it simulates, (2) is never stuck (`not_stuck`); a run keeps the state
 well-typed (`Stmt.run_wt`, over the scoped syntax, `Typing/Soundness.lean`;
@@ -151,7 +151,7 @@ lemma set for I.
 ## Deterministic checks
 
 **A. The trusted base, in CI.** `#print axioms` on `Rule.sound`, `Proves.sound`,
-`ProvesC.sound`, `symex_sound`, `compile_correct`; fail on anything beyond `propext`,
+`Core.ProvesC.sound_of`, `symex_sound`, `Evm.Core.compile_correct`; fail on anything beyond `propext`,
 `Quot.sound`, `Classical.choice`, or on `sorry`, `native_decide`, `implemented_by` in
 the closure (`Calculus/RuleShapes.lean:44` and `Typing/State.lean` use them; the
 closure decides). A day; every other check assumes it (L4).

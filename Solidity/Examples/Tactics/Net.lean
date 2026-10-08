@@ -19,7 +19,7 @@ interpreter from `State.exampleStore`, checked by `rfl` (solkey's
 `net-*.key` files; `net-manual-update.key`, a raw update with no program,
 has no counterpart).  `net-msg-value.key` reads `msg.value` and
 `msg.sender`, the transaction's values (`Simple.env`), into storage (§4).
-On the EVM the ledger is the money that moved (`Evm.compile_net`).
+On the EVM the ledger is the money that moved (`Evm.Core.compile_net`).
 `ok = a.send(v);` books the same payment or none, as the transaction's
 oracle says, and its claims hold of both (§5, `net-send-simple.key`).
 -/

@@ -536,7 +536,7 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
 path's resolution does (`State.checkIndex` in `Loc.resolve`) before the slot
 is read: on a path a program resolved it is `find`, and past the end it
 reverts where `find` would read the slot.  The EVM compiler states what its
-storage holds with it (`Evm.compile_storage`), and `sol_decide` reads with it
+storage holds with it (`Evm.Core.compile_storage`), and `sol_decide` reads with it
 (`Calculus/Decide.lean`). -/
 def SVal.findLive : SVal -> List Seg -> Res SVal
   | v, [] => .ok v

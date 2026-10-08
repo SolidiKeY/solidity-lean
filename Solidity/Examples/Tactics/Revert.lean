@@ -54,7 +54,7 @@ does (`Branch.lean`), a non-simple condition captured first
 program, the second reverts.  Under `⊢` the revert rules are
 `apply done .revertBox` and `apply done .revertDiamond` (`Proves.done`).
 A `transfer` the contract cannot fund is the EVM's to refuse, which the box
-does not see (`Evm.compile_box`); the rule books it (`transferNoCallbackBox`,
+does not see (`Evm.Core.compile_box`); the rule books it (`transferNoCallbackBox`,
 `Payment.lean`).
 
 The same programs as chains, at every modality and postcondition, are in
