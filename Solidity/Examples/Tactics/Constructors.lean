@@ -54,9 +54,24 @@ open scoped Solidity.Core.Surface
 
 /-! ## Deploying it in the interpreter -/
 
-/- `constructor(7);`: the initializer, then the body, from the empty storage. -/
-#guard (Mini.deployRun sol{ constructor(7); } {}).map (·.storage) =
-      .ok [("x", .prim (.int 5)), ("y", .prim (.int 7)), ("z", .prim (.int 0))]
+private def deploySevenP : Surface.Prog Mini := sol{ constructor(7); }
+
+open Lean Elab Command in
+run_cmd liftCoreM do
+  if let some e ← Core.Prog.defineCore `Solidity.Examples.Tactics.Constructors.deploySevenCore
+      ``Mini [] deploySevenP then
+    throwError "deploySevenCore: {e}"
+
+/-- What `constructor(7);` stores: `x = 5`, `y = 7`, `z = 0`. -/
+private def sevenStorage : Core.Storage Mini :=
+  .cons (.prim ⟨5, rfl⟩) (.cons (.prim ⟨7, rfl⟩) (.cons (.prim ⟨0, rfl⟩) .nil))
+
+/-- `constructor(7);`: the initializer, then the body, from the empty storage
+(the typed deployment, `Core.Contract.deployT`, by the kernel). -/
+theorem deploySeven :
+    (Core.Contract.deployT Mini deploySevenCore {}).toOption.map (·.storage.beq sevenStorage) =
+      some true := by
+  decide +kernel
 
 /--
 info: ok

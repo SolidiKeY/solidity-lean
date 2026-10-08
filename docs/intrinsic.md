@@ -3831,11 +3831,20 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     typed run: `Surface.Prog.runT`/`localAfterT`/`Contract.deployRun`
     (`Tools/Run.lean`: resolved, read at the contract's types
     (`typedState?`), `Core.Prog.trun`, the end named back by
-    `TState.toSem`).  The `#eval` pins are unchanged; the 28 kernel checks
-    (`rfl`, `simp …; rfl`) of today's run are `#guard`s, since the typed run
-    behind `Prog.resolve` does not reduce in the kernel (`decide +kernel`
-    is stuck at the resolution; `Mini.deployRun … = .error .revert := rfl`
-    stays a theorem).
+    `TState.toSem`).  The `#eval` pins are unchanged.  *Amended (W4
+    review):* the 28 kernel checks (`rfl`, `simp …; rfl`) of today's run
+    stay theorems, over the typed run itself: each block is resolved and
+    declared at elaboration (`Core.Prog.defineCore`), so the kernel never
+    meets `Prog.resolve`, and each claim is `Core.Prog.trun (TState.ofStorage
+    …)`/`TState.init C` or `Core.Contract.deployT`, by `decide +kernel`
+    (`Mini.deployRun … = .error .revert := rfl` stays as it was).  Where the
+    kernel is stuck the claim is restated, not dropped to a `#guard`: the
+    erasure of a typed storage (`SFields.erase`) and `Semantics.SVal`'s
+    `DecidableEq` do not reduce, so a storage claim compares typed values
+    (`SFields.beq` against the expected storage, `SVal.find` for a mapping
+    entry: `Coin`, both `Constructors`); a loop (`TLoop.run`, classical)
+    runs with fuel (`Core.Prog.trunF_approx`: `Loops.countTo3Run`).  No
+    `#guard` of the list is kept.
 49. *Proposed (W4 `modal`), the lead's call:* a rewrite link on a line
     whose program is still open (`Examples/ChainRewrites`' §Literals,
     `⟨[ revert(); ]⟩ φ` in a check's branch) is gone: the rewrites run on
@@ -6002,11 +6011,13 @@ W5's qualified-name reason):
 - The examples' `#eval`s of today's run (`Values`, `Memory`,
   `StorageSuite`, `StorageDelete`, `LedgerDelete`, `CrossDomain`, `Calls`,
   `TryCatch`) run `Surface.Prog.runT`: every output unchanged, so the typed
-  run agrees with today's on all of them.  28 kernel checks of today's run
-  are `#guard`s (decision 48): `Constructors.deploySeven`,
-  `Solkey/Constructors.counterDeploy`, `Coin`'s four, `EtherWallet`'s
-  three, `Net`'s eight, `StorageSuite`'s eight, `CallOperands.pushLvalueRun`
-  (from `Operands`' own storage), `TryCatch`'s and `Loops`' examples.
+  run agrees with today's on all of them.  The 28 kernel checks of today's
+  run are kernel checks of the typed run again (decision 48 as amended):
+  `Constructors.deploySeven`, `Solkey/Constructors.counterDeploy`, `Coin`'s
+  four, `EtherWallet`'s three, `Net`'s eight, `StorageSuite`'s eight,
+  `CallOperands.pushLvalueRun` (from `Operands`' own storage),
+  `TryCatch.pingNoCode` and `Loops.countTo3Run`, each block declared by
+  `Core.Prog.defineCore` and its theorem proved by `decide +kernel`.
 - `Tactics/Decide`: `deleteWithoutWriteUntyped` (a refutation over today's
   untyped run) and the pin of `sol_decide` refusing a modality, deleted.
 - `Examples/ChainRewrites` §Literals: four chains stand `ψ` for
@@ -6060,6 +6071,32 @@ soundness bridge and `Typing/`'s builder read them.  That lane, then
 - `sol_decide`'s refusal message still lists "a modality" among what is
   outside the fragment.
 - Lead decisions: proposed 46–50, and 33–45.
+
+**Review fixes** (the lane's review pass, confirmed findings):
+- The rename script's artifacts reverted: the 36 walk lines `apply
+  unfoldRule (Stmt.step _ _ _).rule` (`Tour`, `StorageSteps`, `Memory`,
+  `LedgerDelete`, `CrossDomain`), which had become `Surface.Stmt.step`, a
+  name that does not exist; `RuleKit`'s side-condition message now names
+  `Core.Stmt.step`; `Notation`'s `{ havoc }` error names the typed run
+  (`Core.Prog.trun`), not `Surface.Stmt.run`.
+- Citations of deleted names pointed at their scoped replacements:
+  `docs/loops.md` (`Core.Fml.anonHavoc`, `Core.Prog.frame`,
+  `Core.Prog.within`, `TState.eq_anonHavoc`, `Core.holds_anonHavoc`),
+  `Calculus/Core/Fml.lean`, `RuleKit.lean`, the rule map's rows
+  `assertSimple` (`Modality.afterRunTR`), `whileInvariantBox` and
+  `whileClose`; `docs/module-map.md`'s rows of `Core/SoundKit`,
+  `TacticSyntax`, `Hyp`, `DecideComplete`, `RewriteChains`,
+  `ChainBranches`, `TermRules` (the closer's `NFml.*`), `NotationResolve`
+  (`Fml.active`) and `Examples/Tactics/Constructors` (`Contract.deployRun`,
+  `Core.Contract.deployT`, also in its docstring); `Frontend/Problems`'
+  docstring (`Surface.Fml N`, `Fml.eraseS`).
+- The 28 run pins are kernel theorems again (decision 48, amended): no
+  `#guard` of the list is kept.  The pins' names are the ones they had
+  before the lane, but `TryCatch`'s and `Loops`' unnamed examples
+  (`pingNoCode`, `countTo3Run`).
+- Not done: the `unfoldRule` macro still ignores its argument (making it
+  elaborate `$r` would reject every walk line, whose `.rule` is not a
+  field of `Core.Stmt.step`'s `Option Premise`).
 
 ## Baselines (M0)
 

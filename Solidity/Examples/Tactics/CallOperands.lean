@@ -84,12 +84,21 @@ example : dl!{ ⟨ values.push() = makeValue(); ⟩ true } =
 example : dl!{ ⟨ values .push() = makeValue(); ⟩ true } =
     dl!{ ⟨ values.push(makeValue()); ⟩ true } := rfl
 
-/- `values.push() = 42; uint result = values[0];` from `Operands`' initial
+private def pushLvalueP : Surface.Prog Operands := sol{ values.push() = 42; uint result = values[0]; }
+
+open Lean Elab Command in
+run_cmd liftCoreM do
+  if let some e ← Core.Prog.defineCore `Solidity.Examples.Tactics.CallOperands.pushLvalueCore
+      ``Operands [] pushLvalueP then
+    throwError "pushLvalueCore: {e}"
+
+/-- `values.push() = 42; uint result = values[0];` from `Operands`' initial
 storage, whose `values` is empty: the push used as a target appends `42`
-(run typed, `Surface.Prog.runT`, from a state of `Operands`' types). -/
-#guard Surface.Prog.localAfterT ({ storage := Operands.initStorage } : Semantics.State)
-      sol{ values.push() = 42; uint result = values[0]; } "result" =
-      .ok (.val (.int 42))
+(the typed run from `Operands`' initial state, by the kernel). -/
+theorem pushLvalueRun :
+    ((Core.Prog.trun (Core.TState.init Operands) pushLvalueCore).toOption.map
+      fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 42 := by
+  decide +kernel
 
 /-! ## 3 · A push used as a target, with a storage source (`TestSuite`)
 

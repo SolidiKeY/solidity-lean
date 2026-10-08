@@ -126,9 +126,19 @@ def pingPanic : State where
     try I(a).ping() { pings += 1; } catch Panic(uint c) { last = c; } catch { fails += 1; } })
   σ.findStorage "last" []
 
-/- With no entry, the address has no code: the caller reverts. -/
-#guard Surface.Prog.runT { storage := Pinger.initStorage } (sol{ uint a = 7;
-    try I(a).ping() { pings += 1; } catch { fails += 1; } }) = .error .revert
+private def pingNoCodeP : Surface.Prog Pinger := sol{ uint a = 7;
+  try I(a).ping() { pings += 1; } catch { fails += 1; } }
+
+open Lean Elab Command in
+run_cmd liftCoreM do
+  if let some e ← Core.Prog.defineCore `Solidity.Examples.Tactics.TryCatch.pingNoCodeCore
+      ``Pinger [] pingNoCodeP then
+    throwError "pingNoCodeCore: {e}"
+
+/-- With no entry, the address has no code: the caller reverts (the typed
+run from `Pinger`'s initial state, by the kernel). -/
+theorem pingNoCode : (Core.Prog.trun (Core.TState.init Pinger) pingNoCodeCore).halt? = some .revert := by
+  decide +kernel
 
 /-! ## Proving, without callbacks -/
 

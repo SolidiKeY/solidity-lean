@@ -5,6 +5,7 @@ import Solidity.Calculus.Derive
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.Chains
+import Solidity.Semantics.Core.TypedRunFuel
 
 /-!
 # Loops
@@ -274,15 +275,29 @@ n = 0
 
 /-! ## A loop decided
 
-The kernel does not reduce `Loop.run` (it is classical), but a loop done at
-its `n`-th iteration runs as that iteration, which it does compute:
-`while (i < 3) { i++; }` from `i = 0` is done at the fourth (three bodies,
-then the condition false). -/
+The kernel does not reduce `TLoop.run` (it is classical), but the run with
+fuel (`Core.Prog.trunF`, each loop entered at most `n` iterations), which it
+does compute, is the typed run wherever it does not run out
+(`Core.Prog.trunF_approx`): `while (i < 3) { i++; }` from `i = 0` is done at
+the fourth iteration (three bodies, then the condition false). -/
 
 def countTo3 : Surface.Prog StandardExample := sol{ uint i = 0; while (i < 3) { i++; } }
 
-#guard (Surface.Prog.runT State.exampleStore countTo3 >>= fun σ => σ.getEnv (.user "i")) =
-    .ok (.val (.int 3))
+open Lean Elab Command in
+run_cmd liftCoreM do
+  if let some e ← Core.Prog.defineCore `Solidity.Examples.Loops.countTo3Core ``StandardExample []
+      countTo3 then
+    throwError "countTo3Core: {e}"
+
+/-- `i` is `3` where the loop ends, from the initial store. -/
+theorem countTo3Run :
+    ((Core.Prog.trun (Core.TState.ofStorage Core.Storage.standardExample) countTo3Core).toOption.map
+      fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 3 := by
+  rcases Core.Prog.trunF_approx 4 countTo3Core (Core.TState.ofStorage Core.Storage.standardExample)
+    with h | h
+  · exact absurd (congrArg Core.TRes.halt? h) (by decide +kernel)
+  · rw [Core.Prog.trun, ← h]
+    decide +kernel
 
 /-! ## Unwinding
 

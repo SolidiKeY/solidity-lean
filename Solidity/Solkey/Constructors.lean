@@ -2,6 +2,7 @@ import Solidity.Tools.Run
 import Solidity.Frontend.Problems
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.Deploy
 
 /-!
 # Constructors, imported from solc's AST
@@ -88,9 +89,23 @@ info: 2 functions (0 diamond, 0 box, 0 skip, 2 specified): 2 elaborated, 0 skipp
 #guard_msgs in
 #eval IO.println (Solkey.Counter.inits.map fun (x, e) => (x, e.toStr))
 
-/- A deployment with `7`: the initializer, then the body. -/
-#guard (Solkey.Counter.deployRun sol[Solkey.Counter]{ constructor(7); } {}).map (·.storage) =
-      .ok [("limit", .prim (.int 5)), ("count", .prim (.int 7))]
+private def counterDeployP : Surface.Prog Solkey.Counter := sol[Solkey.Counter]{ constructor(7); }
+
+open Lean Elab Command in
+run_cmd liftCoreM do
+  if let some e ← Core.Prog.defineCore `counterDeployCore ``Solkey.Counter [] counterDeployP then
+    throwError "counterDeployCore: {e}"
+
+/-- What the deployment with `7` stores: `limit = 5`, `count = 7`. -/
+private def counterStorage : Core.Storage Solkey.Counter :=
+  .cons (.prim ⟨5, rfl⟩) (.cons (.prim ⟨7, rfl⟩) .nil)
+
+/-- A deployment with `7`: the initializer, then the body (the typed
+deployment, `Core.Contract.deployT`, by the kernel). -/
+theorem counterDeploy :
+    (Core.Contract.deployT Solkey.Counter counterDeployCore {}).toOption.map
+      (·.storage.beq counterStorage) = some true := by
+  decide +kernel
 
 /-! ## `EtherWallet.sol`
 
