@@ -365,7 +365,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/CoreRules.lean` | `#rule_of` pinned: the scoped rule a statement fires (an update, a hole's unfolding, a write, a branch, `revert`, a block, a loop's unwinding and exit). |
 | `Examples/Tactics/CorePrint.lean` | The scoped taclets printed as their rule lines, a block's `}`, and the strategy's formulas printed from their `Expr` as `Core.Fml.show` prints them (calls, `try`, `send`, a loop invariant); the `branches`/`cases`/`inv`/`inline` premises; `Core.Proves` goals as sequents. |
 | `Examples/Tactics/CoreNotation.lean` | `cdl!{}` pinned: parameters, updates' targets, branch scopes, errors; `#wp`/`#step` on scoped formulas. |
-| `Examples/Tactics/CoreChains.lean` | Scoped chains pinned: a step, a named step, several, a rewrite past the program, a branch run into its `}`, the box; `#derivation`, `#chain` (pasted back and checked), `#chain_rest`, `#last_line`, a `FreshNames` table, and a chain proving `Core.Valid`. |
+| `Examples/Tactics/CoreChains.lean` | Scoped chains pinned: a step, a named step, several, a rewrite past the program, a branch run into its `}`, the box; `#derivation`, `#chain` (pasted back and checked), `#chain_rest`, `#last_line`, a `FreshNames` table, a chain proving `Core.Valid`, and the chains the tactics write on `dl!{ … }` read scoped (`sol_chain?`, `#chain`, `sol_rws?`). |
 | `Examples/Tactics/CoreSpec.lean` | `cspec!{f}` and `cproblem!{constructor}` pinned on a contract with snapshots and a result; each erases to today's. |
 | `Examples/Tactics/CoreCallback.lean` | The typed callback reading used: the deterministic run of a program that pays is a callback run (`Prog.exec_run`), and every callback run of one that does not is its deterministic run, decided by the kernel (`ExecP.forall_iff`); a send's three goals under `ProvesC`. |
 | `Examples/Tactics/CoreDerive.lean` | The scoped strategy tools pinned: `sol_prove`, `sol_symex`/`sol_close`, `sol_derive?`'s walk (replayed) and `sol_derive` on `Core.Valid` goals, today's `sol_derive` beside them. |
@@ -381,5 +381,5 @@ At the root, the notation's own tests:
 | `Examples/ChainNotation.lean`, `ChainRewrites.lean`, `ExampleNames.lean` | How a chain is written and checked, its rewrite links, the printed names of fresh variables. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/Verify.lean`, `Tools.lean` | `#verify`, `#counterexample` and the other commands, pinned. |
-| `Examples/ProofTree.lean` | The proof tree's commands, `sol_derive?`, `sol_chain?` and `sol_prove?`, pinned. |
+| `Examples/ProofTree.lean` | The proof tree's commands, `sol_derive?` and `sol_prove?`, pinned. |
 | `Examples/Benchmark/*.lean` | solkey's benchmark contracts with their `@custom:key` clauses proved (`Counter`, `SimpleStorage`, `Mapping`, `Purchase`, `Coin`, `EtherWallet`, `ERC20`), and `Syntax`, which pins what elaborates away (units, casts, events, errors, enums, struct constructors, modifiers). |

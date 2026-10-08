@@ -5029,6 +5029,93 @@ git-excluded `Scratch/` modules only).
   servers and workers stopped (with three idle servers of the gates lane's
   deleted timing copies).
 
+### W4 lane `contracts` (`w4-contracts`, 2026-10-08): scoped contracts after decision 31
+
+On `intrinsic` at `31951be`.  Checked file by file through the MCP
+(`Calculus/Core/FunContract.lean`, `Examples/Tactics/Contracts.lean`,
+`Examples/Tactics/CoreChains.lean`, `Examples/ProofTree.lean`,
+`Calculus/Core/Closable.lean`, `Calculus/Core/SoundKit.lean`); no `lake
+build`.  No new `sorry`, `axiom` or `maxHeartbeats`; `#print axioms` of
+`callDeposit`, `callDepositOld`, `callPair`, `callFresh`, `callAddOneWalk`:
+Lean's three.  `check-orphans` (314 reachable) and `check-doc-paths` clean.
+The last commit edits two docstrings only (`Closable`, `SoundKit`, the
+deleted module's citations), checked in their own files; the modules above
+them were checked before it.
+
+- **Decision 31's interim parts, done** (`Calculus/Core/FunContract.lean`):
+  - *`\old`*: "post" is today's text again, `[ params := args ] {old :=
+    storage ‖ oldNet := net} {havoc} …` (`snapOld`, the snapshots declared
+    at `LTy.old`/`LTy.oldNet`, named `old`/`oldNet` as solkey's).  `ensures`
+    is a formula of `rs ++ Olds ++ ps` (the return variables, the
+    snapshots, the parameters); the contract reads it at the body's end
+    with the snapshots of its entry (`TState.withOlds`).  The obligation is
+    `requires → {old := storage ‖ oldNet := net} [ T r; { body } ] ensures`:
+    the body read under the snapshots (`thinOlds`, a `Thin` keeping the
+    returns and parameters), as a block, which the inlined call does too
+    (`Stmt.trun_block_wk`).  `cdlIn![uint se1, old, oldNet, uint se2]{ … }`
+    lists the snapshots (`old` read as the reader's storage variable,
+    `oldNet` by name).
+  - *Several results* (`CallRet.rets`): "post" binds each (`Binders.all`,
+    `∀ T r₁ … T rₙ`), and drops the frame from under them
+    (`Frames.drop`, as `Premise.inline`), the tuple's targets read after.
+  - *A memory return* (`CallRet.mem`): "post" declares the object the
+    callee is entered with, `[ T memory r; ] (ensures → …)`, after
+    `{havoc}` (an allocation reads only the heap, which `{havoc}` keeps).
+    The body may write none of its frame's locals (`CallRet.nVals = 0`), so
+    the object is the one it was entered with; a callee within a
+    mutability cannot write memory (`Stmt.within`).  `cdlIn` reads a
+    struct's memory local (`Person memory p`).
+  - The soundness is one theorem per shape (`holds_callNone`, `…Val`,
+    `…Rets`, `…Mem`; `holds_callPost` opens "post" once for all), and
+    `FunContract.ofValid` covers every shape (no `noMem` hypothesis).
+  - `core_contract` elaborates `req` and `ens` after the call has fixed
+    the frame they stand in (`?req`/`?ens`, then `exact`), which a call of
+    several results needs.
+- **`{havoc}` read by today's closer** (`Calculus/CloseHavoc.lean`, new):
+  `Close.holds_havoc` and `Close.State.havoc_eq_mk` in `close_rw`, so
+  `sol_close` names the storage and ledger a callee may leave as variables
+  and reads the locals and heap as before (`getEnv_mk`, `readAddr_mk`);
+  `find(old, …)` reads the snapshot.  Imported by `FunContract` (the
+  attribute applies where the module is imported, not in `Close.lean`
+  itself, so nothing below it rebuilds).  `callDeposit`'s "post" is
+  `sol_symex; sol_close` now; `Tactics/Contracts` gains `callDepositOld`
+  (an `ensures` over `find(old, total)`), `callPair` (two results; the
+  tuple's declarations are two `sol_step`s first) and `callFresh` (a
+  memory return), and today's `FunContract` coverage is matched.
+- **`Calculus/Core/Contracts` deleted** (`sol_erase`, used by
+  nothing); its citations in the `Closable` and `SoundKit` docstrings and
+  in this file reworded.  Today's `Calculus/Contracts.lean` stays for
+  `calc-del`.
+- **Proposed decision 33** (this lane, the lead's call; recorded as the
+  option most faithful to solkey's rule text): `ensures` always stands at
+  the snapshots (`rs ++ Olds ++ ps`), as today's rule always took them, so
+  a contract that reads no `\old` still lists `old, oldNet` in its
+  `cdlIn`; the obligation prints the body as a block (`}`); a memory
+  return is declared in "post" rather than bound by `∀` (no binder ranges
+  over an object not yet in the heap).
+- **`ProofTree`'s chain examples moved** (the lead's approval of
+  2026-10-09): the `sol_chain?`, `#chain` and `sol_rws` sections, text
+  unchanged, to `Examples/Tactics/CoreChains.lean`'s last section (`open
+  scoped Solidity.Core.Surface`); `ProofTree` no longer imports
+  `Calculus/Core/ChainGen`.  Re-timed by the W3d integration's method
+  (each copy under `Solidity/Scratch/` in a fresh worker, `/proc` sampled
+  every 20 ms, wall to the worker's last CPU), `intrinsic` and this branch
+  alternated, another lane's agent building beside (load 3–15):
+
+  | Module | Limit | `intrinsic`, raw (min of 5) | this branch, raw (min of 4) | ratio |
+  |---|---|---|---|---|
+  | `Examples/ProofTree` | 12.1 s | 13.64 s (13.64, 13.94, 20.4, 20.4, 36.4) | 10.24 s (10.24, 10.34, 10.97, 14.04) | 0.75 |
+  | `Examples/Tactics/CoreChains` | — | 6.11 s (1 run) | 7.05 s (7.05, 12.02) | 1.15 |
+
+  On the integration's scale (its `ProofTree` 13.67 s raw read as 12.9 s)
+  `ProofTree` is about 9.7 s, **within its 12.1 s limit**; the chain
+  sections cost `CoreChains` about 0.9 s, as `w3d-gates` estimated.
+- **Pins changed**: none.  The moved pins are byte-identical in their new
+  file (*moved, no text change*, approved); `Tactics/Contracts` has no
+  pin.  The fresh names are unchanged.
+- **Left**: today's rule-map rows for `useContract` (W5's docs);
+  `Calculus/Contracts.lean` (W4 `calc-del`).
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
