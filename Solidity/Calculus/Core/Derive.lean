@@ -465,9 +465,10 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     let mut out := head
     for g' in gs do
       let body ← walk fuel leaves g' close short
-      -- a goal's name is its tag's first part (`thn`, past a silent step's `thn.h`)
-      let tag := (← g'.getTag).components.head?.getD .anonymous
-      match tag with
+      -- a goal's name is its tag's last part, past the macro scopes and the
+      -- binder a silent step adds (`thn.h`, under the scope's lines)
+      let comps := ((← g'.getTag).eraseMacroScopes.components.reverse.dropWhile (· == `h)).reverse
+      match comps.getLast?.getD .anonymous with
       -- `and_intros`' goals (`refine_1`, …) have no name to cite: bullets
       | .str _ l =>
         if l.startsWith "refine_" then
