@@ -41,12 +41,17 @@ is the same on every run).  A witness found is shrunk before it is shown
 (Shrinking, below).
 
 A witness is **certified** when the kernel checks `¬ ⊨ φ` of the scoped
-formula from it: `Fml.not_valid_of_eval3` applied to
-`φ.eval3 dom σ₀ = .ff`, which the kernel decides by evaluating `eval3`, the
-typed run and the decoding of the candidate's storage on closed terms
-(`certifyRefl`).  That needs every premise to evaluate to `tt` in `σ₀`, and
-so fails when one is quantified over a `uint`, as the layout premise of a
-mapping is; the witness is then only **tested**.
+formula from it: `Fml.not_valid_of_eval3Peel` applied to
+`Fml.eval3Peel dom vals σ₀ φ = .ff`, `φ` with its leading parameters bound
+to the witness's arguments `vals` (`Fml.peel`), which the kernel decides by
+evaluating `peel`, `eval3`, the typed run and the decoding of the
+candidate's storage on closed terms (`certifyRefl`).  That needs every
+premise to evaluate to `tt` in `σ₀`, and so fails when one is quantified
+over a `uint`, as the layout premise of a mapping is; the witness is then
+only **tested**.  What the kernel runs is written by the recursor
+(`Fml.eval3`, `Fml.peel`, `Prog.trunF`; Gate G0 conditions 1 and 2), each
+with a compiled `match` twin the search runs (`Fml.eval3C`, `Fml.peelC`,
+`Prog.trunFC`) and a theorem that they agree.
 -/
 
 namespace Solidity.Tools
@@ -404,9 +409,9 @@ theorem Prog.trunFramesF_approx {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : TState C 
     (κ : Frames C Γ₁ Γ₀) : TRes.Approx (Prog.trunFramesF n σ P κ) (Prog.trunFrames σ P κ) :=
   (Prog.trunF_approx n P σ).bind fun o => (Frames.trunF_approx n o.st κ).bind fun _ => .refl _
 
-/-- **`holds`, evaluated**: `dom p` is the finite domain a quantifier over
-`p` is tried on. -/
-def Fml.eval3 (dom : TDom) : {Γ : Ctx} → TState C Γ → Fml C Γ → Tri
+/-- **`holds`, evaluated**, compiled: `dom p` is the finite domain a
+quantifier over `p` is tried on.  The twin of `Fml.eval3` (`Fml.eval3_eq`). -/
+def Fml.eval3C (dom : TDom) : {Γ : Ctx} → TState C Γ → Fml C Γ → Tri
   | _, _, .tt => .tt
   | _, σ, .eq a b =>
     match a.eval σ.erase, b.eval σ.erase with
@@ -416,32 +421,32 @@ def Fml.eval3 (dom : TDom) : {Γ : Ctx} → TState C Γ → Fml C Γ → Tri
     match t.eval σ.erase with
     | .ok _ => .tt
     | .error _ => .ff
-  | _, σ, .not φ => (φ.eval3 dom σ).not
-  | _, σ, .and φ ψ => (φ.eval3 dom σ).and (ψ.eval3 dom σ)
-  | _, σ, .imp φ ψ => (φ.eval3 dom σ).imp (ψ.eval3 dom σ)
+  | _, σ, .not φ => (φ.eval3C dom σ).not
+  | _, σ, .and φ ψ => (φ.eval3C dom σ).and (ψ.eval3C dom σ)
+  | _, σ, .imp φ ψ => (φ.eval3C dom σ).imp (ψ.eval3C dom σ)
   | _, σ, .upd m U φ =>
     match U.apply σ.erase with
     | .error _ => match m with
       | .box => .tt
       | .diamond => .ff
     | .ok τ => match σ.lift? τ with
-      | some σ' => if φ.eval3 dom σ' = .ff then .ff else .unknown
+      | some σ' => if φ.eval3C dom σ' = .ff then .ff else .unknown
       | none => .unknown
-  | _, σ, .modal m P κ φ => Tri.afterT m (fun τ => φ.eval3 dom τ) (Prog.trunFramesF loopFuel σ P κ)
+  | _, σ, .modal m P κ φ => Tri.afterT m (fun τ => φ.eval3C dom τ) (Prog.trunFramesF loopFuel σ P κ)
   | _, σ, .havoc φ =>
-    if φ.eval3 dom σ = .ff || φ.eval3 dom (σ.havoc σ.storage []) = .ff then .ff else .unknown
+    if φ.eval3C dom σ = .ff || φ.eval3C dom (σ.havoc σ.storage []) = .ff then .ff else .unknown
   | _, σ, .all _ p φ =>
-    if (dom p).any fun v => φ.eval3 dom (σ.push (t := .val p) v) = .ff then .ff else .unknown
+    if (dom p).any fun v => φ.eval3C dom (σ.push (t := .val p) v) = .ff then .ff else .unknown
   | _, σ, .bind _ _ t φ =>
-    if (dom.bind σ t).any fun v => φ.eval3 dom (σ.push v) = .ff then .ff else .unknown
+    if (dom.bind σ t).any fun v => φ.eval3C dom (σ.push v) = .ff then .ff else .unknown
   | _, σ, .anon xs φ =>
-    if φ.eval3 dom (σ.anon xs fun x => TEnv.get x.2 σ.env) = .ff then .ff else .unknown
+    if φ.eval3C dom (σ.anon xs fun x => TEnv.get x.2 σ.env) = .ff then .ff else .unknown
 
-theorem Fml.eval3_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : TState C Γ,
-    (φ.eval3 dom σ = .tt → holds σ φ) ∧ (φ.eval3 dom σ = .ff → ¬ holds σ φ)
+theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : TState C Γ,
+    (φ.eval3C dom σ = .tt → holds σ φ) ∧ (φ.eval3C dom σ = .ff → ¬ holds σ φ)
   | _, .tt, _ => ⟨fun _ => trivial, nofun⟩
   | _, .eq a b, σ => by
-    simp only [Fml.eval3, holds]
+    simp only [Fml.eval3C, holds]
     split
     · rename_i x y ha hb
       have hda := Tm.denote_eval σ.erase a x ha
@@ -455,31 +460,31 @@ theorem Fml.eval3_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ
         exact fun _ h => hxy (Theory.StValue.prim.inj h)
     · simp only [reduceCtorEq, false_implies, and_self]
   | _, .defined t, σ => by
-    simp only [Fml.eval3, holds]
+    simp only [Fml.eval3C, holds]
     split <;> rename_i h <;> simp only [h, Except.ok.injEq, exists_eq', exists_false, imp_self,
       reduceCtorEq, not_true_eq_false, not_false_eq_true, and_self]
   | _, .not φ, σ => by
-    have ih := Fml.eval3_sound dom φ σ
-    simp only [Fml.eval3, holds]
-    cases h : φ.eval3 dom σ <;> simp_all only [Tri.not, reduceCtorEq, false_implies, forall_const,
+    have ih := Fml.eval3C_sound dom φ σ
+    simp only [Fml.eval3C, holds]
+    cases h : φ.eval3C dom σ <;> simp_all only [Tri.not, reduceCtorEq, false_implies, forall_const,
       true_and, and_true, and_self, implies_true, not_true_eq_false, not_false_eq_true,
       Classical.not_not]
   | _, .and φ ψ, σ => by
-    have ih₁ := Fml.eval3_sound dom φ σ
-    have ih₂ := Fml.eval3_sound dom ψ σ
-    simp only [Fml.eval3, holds]
-    cases h₁ : φ.eval3 dom σ <;> cases h₂ : ψ.eval3 dom σ <;>
+    have ih₁ := Fml.eval3C_sound dom φ σ
+    have ih₂ := Fml.eval3C_sound dom ψ σ
+    simp only [Fml.eval3C, holds]
+    cases h₁ : φ.eval3C dom σ <;> cases h₂ : ψ.eval3C dom σ <;>
       simp_all only [Tri.and, reduceCtorEq, false_implies, forall_const, true_and, and_true,
         and_false, false_and, and_self, implies_true, not_true_eq_false, not_false_eq_true, not_and]
   | _, .imp φ ψ, σ => by
-    have ih₁ := Fml.eval3_sound dom φ σ
-    have ih₂ := Fml.eval3_sound dom ψ σ
-    simp only [Fml.eval3, holds]
-    cases h₁ : φ.eval3 dom σ <;> cases h₂ : ψ.eval3 dom σ <;>
+    have ih₁ := Fml.eval3C_sound dom φ σ
+    have ih₂ := Fml.eval3C_sound dom ψ σ
+    simp only [Fml.eval3C, holds]
+    cases h₁ : φ.eval3C dom σ <;> cases h₂ : ψ.eval3C dom σ <;>
       simp_all only [Tri.imp, reduceCtorEq, false_implies, forall_const, true_and, and_true,
         and_self, implies_true, not_true_eq_false, not_false_eq_true, not_imp]
   | _, .upd m U φ, σ => by
-    simp only [Fml.eval3, holds]
+    simp only [Fml.eval3C, holds]
     cases hU : U.apply σ.erase with
     | error e => cases m <;> simp only [Modality.afterC, Modality.onHalt, reduceCtorEq,
         imp_self, not_true_eq_false, not_false_eq_true, and_self]
@@ -492,16 +497,16 @@ theorem Fml.eval3_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ
         split
         · rename_i hff
           obtain ⟨he, hp⟩ := TState.lift?_spec hl
-          exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ σ').2 hff (hall σ' he hp)⟩
+          exact ⟨nofun, fun _ hall => (Fml.eval3C_sound dom φ σ').2 hff (hall σ' he hp)⟩
         · exact ⟨nofun, nofun⟩
   | _, .modal m P κ φ, σ => by
-    simp only [Fml.eval3, holds]
+    simp only [Fml.eval3C, holds]
     have happ := Prog.trunFramesF_approx loopFuel σ P κ
     cases hr : Prog.trunFramesF loopFuel σ P κ with
     | ok τ =>
       rw [hr] at happ
       rw [← happ.eq nofun]
-      have ih := Fml.eval3_sound dom φ τ
+      have ih := Fml.eval3C_sound dom φ τ
       simp only [Tri.afterT, Modality.afterRunTR]
       exact ⟨fun h => ⟨ih.1 h, nofun⟩, fun h hh => ih.2 h hh.1⟩
     | error e =>
@@ -523,36 +528,85 @@ theorem Fml.eval3_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ
           Except.error.injEq, reduceCtorEq, not_false_eq_true, and_self, implies_true,
           and_true, not_true_eq_false, imp_self]
   | _, .havoc φ, σ => by
-    simp only [Fml.eval3, holds]
+    simp only [Fml.eval3C, holds]
     split
     · rename_i h
       simp only [Bool.or_eq_true, decide_eq_true_eq] at h
       refine ⟨nofun, fun _ hall => ?_⟩
       rcases h with h | h
-      · exact (Fml.eval3_sound dom φ σ).2 h
+      · exact (Fml.eval3C_sound dom φ σ).2 h
           (by simpa only [TState.havoc_self] using hall σ.storage σ.net)
-      · exact (Fml.eval3_sound dom φ _).2 h (hall _ _)
+      · exact (Fml.eval3C_sound dom φ _).2 h (hall _ _)
     · exact ⟨nofun, nofun⟩
   | _, .all _ p φ, σ => by
-    simp only [Fml.eval3, holds]
+    simp only [Fml.eval3C, holds]
     split
     · rename_i h
       obtain ⟨v, _, hff⟩ := List.any_eq_true.mp h
-      exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ _).2 (of_decide_eq_true hff) (hall v)⟩
+      exact ⟨nofun, fun _ hall => (Fml.eval3C_sound dom φ _).2 (of_decide_eq_true hff) (hall v)⟩
     · exact ⟨nofun, nofun⟩
   | _, .bind m _ t φ, σ => by
-    simp only [Fml.eval3, holds]
+    simp only [Fml.eval3C, holds]
     split
     · rename_i h
       obtain ⟨v, _, hff⟩ := List.any_eq_true.mp h
-      exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ _).2 (of_decide_eq_true hff) (hall v)⟩
+      exact ⟨nofun, fun _ hall => (Fml.eval3C_sound dom φ _).2 (of_decide_eq_true hff) (hall v)⟩
     · exact ⟨nofun, nofun⟩
   | _, .anon xs φ, σ => by
-    simp only [Fml.eval3, holds]
+    simp only [Fml.eval3C, holds]
     split
     · rename_i h
-      exact ⟨nofun, fun _ hall => (Fml.eval3_sound dom φ _).2 h (hall _)⟩
+      exact ⟨nofun, fun _ hall => (Fml.eval3C_sound dom φ _).2 h (hall _)⟩
     · exact ⟨nofun, nofun⟩
+
+/-- **`holds`, evaluated**, by its recursor (Gate G0 conditions 1 and 2):
+what the kernel runs in a certificate.  Compiled as `Fml.eval3C`. -/
+@[implemented_by Fml.eval3C]
+def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : TState C Γ) (φ : Fml C Γ) : Tri :=
+  Fml.rec (motive := fun Γ _ => TState C Γ → Tri)
+    (fun _ => .tt)
+    (fun a b σ => match a.eval σ.erase, b.eval σ.erase with
+      | .ok x, .ok y => if x = y then .tt else .ff
+      | _, _ => .unknown)
+    (fun t σ => match t.eval σ.erase with
+      | .ok _ => .tt
+      | .error _ => .ff)
+    (fun _ ih σ => (ih σ).not)
+    (fun _ _ ih₁ ih₂ σ => (ih₁ σ).and (ih₂ σ))
+    (fun _ _ ih₁ ih₂ σ => (ih₁ σ).imp (ih₂ σ))
+    (fun m U _ ih σ => match U.apply σ.erase with
+      | .error _ => match m with
+        | .box => .tt
+        | .diamond => .ff
+      | .ok τ => match σ.lift? τ with
+        | some σ' => if ih σ' = .ff then .ff else .unknown
+        | none => .unknown)
+    (fun m P κ _ ih σ => Tri.afterT m (fun τ => ih τ) (Prog.trunFramesF loopFuel σ P κ))
+    (fun _ ih σ => if ih σ = .ff || ih (σ.havoc σ.storage []) = .ff then .ff else .unknown)
+    (fun _ p _ ih σ =>
+      if (dom p).any fun v => ih (σ.push (t := .val p) v) = .ff then .ff else .unknown)
+    (fun _ _ t _ ih σ => if (dom.bind σ t).any fun v => ih (σ.push v) = .ff then .ff else .unknown)
+    (fun xs _ ih σ =>
+      if ih (σ.anon xs fun x => TEnv.get x.2 σ.env) = .ff then .ff else .unknown)
+    φ σ
+
+theorem Fml.eval3_eq (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : TState C Γ,
+    φ.eval3 dom σ = φ.eval3C dom σ
+  | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => rfl
+  | _, .not φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
+  | _, .and φ ψ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ, ← Fml.eval3_eq dom ψ]; rfl
+  | _, .imp φ ψ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ, ← Fml.eval3_eq dom ψ]; rfl
+  | _, .upd _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
+  | _, .modal _ _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
+  | _, .havoc φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
+  | _, .all _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
+  | _, .bind _ _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
+  | _, .anon _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
+
+theorem Fml.eval3_sound (dom : TDom) {Γ : Ctx} (φ : Fml C Γ) (σ : TState C Γ) :
+    (φ.eval3 dom σ = .tt → holds σ φ) ∧ (φ.eval3 dom σ = .ff → ¬ holds σ φ) := by
+  rw [Fml.eval3_eq]
+  exact Fml.eval3C_sound dom φ σ
 
 /-- **A `tt` is a truth**: `φ` holds in `σ`. -/
 theorem Fml.eval3_tt {dom : TDom} {Γ : Ctx} {σ : TState C Γ} {φ : Fml C Γ}
@@ -759,17 +813,92 @@ def Fml.params : {Γ : Ctx} → Fml C Γ → List (Var × PrimTy)
   | _, .bind _ x (.val p) φ => (x, p) :: Fml.params φ
   | _, _ => []
 
+/-- A state and a formula under it, at some context. -/
+abbrev Peeled (C : Contract) := (Δ : Ctx) × TState C Δ × Fml C Δ
+
 /-- The leading parameters bound to `vals`, by name, as far as each is
-given: the state and the formula under them. -/
-def Fml.peel (vals : List (Var × Value)) : {Γ : Ctx} → TState C Γ →
-    Fml C Γ → (Δ : Ctx) × TState C Δ × Fml C Δ
+given: the state and the formula under them.  Compiled; the twin of
+`Fml.peel` (`Fml.peel_eq`). -/
+def Fml.peelC (vals : List (Var × Value)) : {Γ : Ctx} → TState C Γ → Fml C Γ → Peeled C
   | _, σ, .all x p φ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
-    | some w => Fml.peel vals (σ.push (t := .val p) w) φ
+    | some w => Fml.peelC vals (σ.push (t := .val p) w) φ
     | none => ⟨_, σ, .all x p φ⟩
   | _, σ, .bind m x (.val p) φ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
-    | some w => Fml.peel vals (σ.push (t := .val p) w) φ
+    | some w => Fml.peelC vals (σ.push (t := .val p) w) φ
     | none => ⟨_, σ, .bind m x (.val p) φ⟩
   | _, σ, φ => ⟨_, σ, φ⟩
+
+/-- The leading parameters bound to `vals`, by the recursor (Gate G0
+conditions 1 and 2): what a certificate peels in the kernel.  Compiled as
+`Fml.peelC`. -/
+@[implemented_by Fml.peelC]
+def Fml.peel (vals : List (Var × Value)) {Γ : Ctx} (σ : TState C Γ) (φ : Fml C Γ) :
+    Peeled C :=
+  Fml.rec (motive := fun Γ _ => TState C Γ → Peeled C)
+    (fun σ => ⟨_, σ, .tt⟩) (fun a b σ => ⟨_, σ, .eq a b⟩) (fun t σ => ⟨_, σ, .defined t⟩)
+    (fun φ _ σ => ⟨_, σ, .not φ⟩) (fun φ ψ _ _ σ => ⟨_, σ, .and φ ψ⟩)
+    (fun φ ψ _ _ σ => ⟨_, σ, .imp φ ψ⟩) (fun m U φ _ σ => ⟨_, σ, .upd m U φ⟩)
+    (fun m P κ φ _ σ => ⟨_, σ, .modal m P κ φ⟩) (fun φ _ σ => ⟨_, σ, .havoc φ⟩)
+    (fun x p φ ih σ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
+      | some w => ih (σ.push (t := .val p) w)
+      | none => ⟨_, σ, .all x p φ⟩)
+    (fun {Γ} m x t φ ih σ =>
+      LTy.casesOn (motive := fun t => Fml C (t :: Γ) → (TState C (t :: Γ) → Peeled C) → Peeled C) t
+        (fun p φ ih => match (vals.lookup x).bind (PrimTy.ofValue? p) with
+          | some w => ih (σ.push (t := .val p) w)
+          | none => ⟨_, σ, .bind m x (.val p) φ⟩)
+        (fun r φ _ => ⟨_, σ, .bind m x (.alias r) φ⟩) (fun r φ _ => ⟨_, σ, .bind m x (.mem r) φ⟩)
+        (fun φ _ => ⟨_, σ, .bind m x .old φ⟩) (fun φ _ => ⟨_, σ, .bind m x .oldNet φ⟩) φ ih)
+    (fun xs φ _ σ => ⟨_, σ, .anon xs φ⟩)
+    φ σ
+
+theorem Fml.peel_eq (vals : List (Var × Value)) : {Γ : Ctx} → (φ : Fml C Γ) →
+    ∀ σ : TState C Γ, Fml.peel vals σ φ = Fml.peelC vals σ φ
+  | _, .all _ _ φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
+  | _, .bind _ _ (.val _) φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
+  | _, .bind _ _ (.alias _) _, _ | _, .bind _ _ (.mem _) _, _ | _, .bind _ _ .old _, _
+  | _, .bind _ _ .oldNet _, _ | _, .tt, _ | _, .eq .., _ | _, .defined _, _ | _, .not _, _
+  | _, .and .., _ | _, .imp .., _ | _, .upd .., _ | _, .modal .., _ | _, .havoc _, _
+  | _, .anon .., _ => rfl
+
+/-- What fails under the peeled binders fails under the binders: each is a
+`∀` (or a hidden binder, read as one) of the values it is peeled at. -/
+theorem Fml.not_holds_of_peelC (vals : List (Var × Value)) : {Γ : Ctx} → (σ : TState C Γ) →
+    (φ : Fml C Γ) → ¬ holds (Fml.peelC vals σ φ).2.1 (Fml.peelC vals σ φ).2.2 → ¬ holds σ φ
+  | _, σ, .all x p φ, h => by
+    cases hw : (vals.lookup x).bind (PrimTy.ofValue? p) with
+    | none => rw [Fml.peelC, hw] at h; exact h
+    | some w =>
+      rw [Fml.peelC, hw] at h
+      exact fun hall => Fml.not_holds_of_peelC vals _ φ h (hall w)
+  | _, σ, .bind m x (.val p) φ, h => by
+    cases hw : (vals.lookup x).bind (PrimTy.ofValue? p) with
+    | none => rw [Fml.peelC, hw] at h; exact h
+    | some w =>
+      rw [Fml.peelC, hw] at h
+      exact fun hall => Fml.not_holds_of_peelC vals _ φ h (hall w)
+  | _, _, .bind _ _ (.alias _) _, h | _, _, .bind _ _ (.mem _) _, h | _, _, .bind _ _ .old _, h
+  | _, _, .bind _ _ .oldNet _, h | _, _, .tt, h | _, _, .eq .., h | _, _, .defined _, h
+  | _, _, .not _, h | _, _, .and .., h | _, _, .imp .., h | _, _, .upd .., h
+  | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h => h
+
+/-- `φ` read under its leading parameters bound to `vals` (`Fml.peel`). -/
+def Fml.eval3Peel (dom : TDom) (vals : List (Var × Value)) {Γ : Ctx} (σ : TState C Γ)
+    (φ : Fml C Γ) : Tri :=
+  match Fml.peel vals σ φ with
+  | ⟨_, σ', ψ⟩ => ψ.eval3 dom σ'
+
+/-- **A certificate**: a typed state where `φ`, its leading parameters bound
+to `vals`, evaluates to `ff` refutes `⊨ φ`. -/
+theorem Fml.not_valid_of_eval3Peel {dom : TDom} (vals : List (Var × Value)) (σ : TState C [])
+    {φ : Fml C []} (h : Fml.eval3Peel dom vals σ φ = .ff) : ¬ Valid φ := by
+  intro hv
+  have key := Fml.not_holds_of_peelC vals σ φ
+  rw [← Fml.peel_eq] at key
+  unfold Fml.eval3Peel at h
+  generalize Fml.peel vals σ φ = q at h key
+  obtain ⟨_, σ', ψ⟩ := q
+  exact key (Fml.eval3_ff h) (hv σ)
 
 /-- The first `n` conjuncts of `φ₁ ∧ (φ₂ ∧ …)`, the last one the rest
 (`Fml.conj`'s shape). -/
@@ -977,8 +1106,7 @@ def searchFml (C : Contract) (φ : Core.Fml C []) (budget : Nat := 2000) : Searc
     | .fresh .. => none
   -- the candidate's arguments bound, so that the witness is what refutes
   let refutes (c : Cand) : Bool :=
-    let ⟨_, σ, ψ⟩ := Core.Fml.peel c.vals (c.tstate C) φ
-    ψ.eval3 (poolDom c.argInts) σ = Tri.ff
+    Core.Fml.eval3Peel (poolDom c.argInts) c.vals (c.tstate C) φ = .ff
   let combos := products (ps.map fun (_, p) => poolVals [] p)
   let combos := if combos.length * 2 ≤ budget then combos else []
   let mut tried := 0
@@ -1031,20 +1159,23 @@ deriving instance ToExpr for Semantics.TxEnv
 deriving instance ToExpr for Semantics.State
 
 /-- **The certificate**: the kernel checks `¬ ⊨ φ` of the scoped `φ` as
-`Core.Fml.not_valid_of_eval3` at the typed state of `σ`
-(`TState.ofSemD`), deciding `φ.eval3 (poolDom lits) _ = .ff` by evaluation:
-the decoding of `σ`'s storage, the typed run and the formula.  The kernel
-runs under `heartbeats` (thousands), below the default, and the declaration
-is checked, never added. -/
-def certifyRefl (cE φE : Expr) (lits : List Int) (σ : Semantics.State)
-    (heartbeats : Nat := 200000) : MetaM Bool := do
+`Core.Fml.not_valid_of_eval3Peel` at the typed state of `σ`
+(`TState.ofSemD`), its leading parameters bound to the witness's arguments
+`vals` (`Fml.peel`, as the search read it), deciding
+`Fml.eval3Peel (poolDom lits) vals _ φ = .ff` by evaluation: the decoding
+of `σ`'s storage, the typed run and the formula under the parameters.  The
+kernel runs under `heartbeats` (thousands), half the default, and the
+declaration is checked, never added. -/
+def certifyRefl (cE φE : Expr) (lits : List Int) (vals : List (Var × Value))
+    (σ : Semantics.State) (heartbeats : Nat := 100000) : MetaM Bool := do
   let domE := mkApp (mkConst ``poolDom) (toExpr lits)
   let σE := mkApp2 (mkConst ``Core.TState.ofSemD) cE (toExpr σ)
-  let ev ← mkAppM ``Core.Fml.eval3 #[domE, σE, φE]
+  let valsE := toExpr vals
+  let ev ← mkAppM ``Core.Fml.eval3Peel #[domE, valsE, σE, φE]
   let eq ← mkEq ev (mkConst ``Tri.ff)
   let h ← mkDecideProof eq
   let type := mkNot (← mkAppM ``Core.Valid #[φE])
-  let value ← mkAppM ``Core.Fml.not_valid_of_eval3 #[σE, h]
+  let value ← mkAppM ``Core.Fml.not_valid_of_eval3Peel #[valsE, σE, h]
   let decl := Declaration.thmDecl {
     name := `_counterexample_certificate, levelParams := [], type, value }
   let opts := maxHeartbeats.set (← getOptions) heartbeats
@@ -1083,8 +1214,8 @@ def refuteSpec (n : Lean.Name) (C : Contract) (f : String) (budget : Nat := 2000
     let c : Cand := { st := w.state.storage, args := w.args }
     let lits := P.domLits c
     -- the kernel is asked only what the evaluator already answered
-    let certified ← if P.fml.eval3 (poolDom lits) (Core.TState.ofSemD C w.state) = .ff then
-        certifyRefl cE (Core.Fml.quote cE P.fml) lits w.state
+    let certified ← if Core.Fml.eval3Peel (poolDom lits) c.vals (Core.TState.ofSemD C w.state)
+        P.fml = .ff then certifyRefl cE (Core.Fml.quote cE P.fml) lits c.vals w.state
       else pure false
     let fails := w.failing.map fun i => postLabel C P.decl cE i (P.posts.getD i Fml.tt)
     pure (.ok (s, some { witness := w, certified, fails }))
@@ -1151,9 +1282,9 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
     let s := searchFml C φ
     let some w := s.witness
       | logInfo m!"no counterexample found in {s.tried} candidates"
-    let lits := Cand.argInts { st := w.state.storage, args := w.args }
-    let certified ← if φ.eval3 (poolDom lits) (Core.TState.ofSemD C w.state) = .ff then
-        certifyRefl cE φE lits w.state
+    let c : Cand := { st := w.state.storage, args := w.args }
+    let certified ← if Core.Fml.eval3Peel (poolDom c.argInts) c.vals
+        (Core.TState.ofSemD C w.state) φ = .ff then certifyRefl cE φE c.argInts c.vals w.state
       else pure false
     logReport m!"counterexample ({if certified then "certified" else "tested"}):"
       ((w.lines C).map toMessageData)

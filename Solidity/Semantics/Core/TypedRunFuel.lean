@@ -9,7 +9,7 @@ kernel nor a search can run a loop bounded by an argument at `2^256 - 1`.
 `Stmt.trunF n` is the typed run with each loop entered at most `n`
 iterations (`TLoop.iterN`); a loop not done by then is `diverge`, which
 no statement catches, so the run's outcome is the typed run's wherever it
-is not `diverge` (`Prog.trunF_sound`, by `TRes.Approx`).  It is the typed
+is not `diverge` (`Prog.trunF_approx`, by `TRes.Approx`).  It is the typed
 run's recursor form (`Stmt.trunR`), only the loop changed, with its
 compiled twin (`Stmt.trunFC`).
 -/
@@ -252,6 +252,45 @@ def Prog.trunF (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
       TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
     (fun _ c body ih => TRun.loopF n c body.ext ih) (fun body ih => TRun.block body.ext ih)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) P
+
+mutual
+
+theorem Stmt.trunF_eq (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
+    Stmt.trunF n s = Stmt.trunFC n s
+  | _, _, .ite c thn els => by
+    show TRun.ite c thn.ext (thn.trunF n) els.ext (els.trunF n) =
+      TRun.ite c thn.ext (thn.trunFC n) els.ext (els.trunFC n)
+    rw [Prog.trunF_eq n thn, Prog.trunF_eq n els]
+  | _, _, .call f args ret body => by
+    show TRun.call args ret body.ext (body.trunF n) = TRun.call args ret body.ext (body.trunFC n)
+    rw [Prog.trunF_eq n body]
+  | _, _, .tryCall call rets ok err code pnc other => by
+    show TRun.tryCall call rets ok.ext (ok.trunF n) err.ext (err.trunF n) code pnc.ext
+        (pnc.trunF n) other.ext (other.trunF n) =
+      TRun.tryCall call rets ok.ext (ok.trunFC n) err.ext (err.trunFC n) code pnc.ext
+        (pnc.trunFC n) other.ext (other.trunFC n)
+    rw [Prog.trunF_eq n ok, Prog.trunF_eq n err, Prog.trunF_eq n pnc, Prog.trunF_eq n other]
+  | _, _, .loop a c body => by
+    show TRun.loopF n c body.ext (body.trunF n) = TRun.loopF n c body.ext (body.trunFC n)
+    rw [Prog.trunF_eq n body]
+  | _, _, .block body => by
+    show TRun.block body.ext (body.trunF n) = TRun.block body.ext (body.trunFC n)
+    rw [Prog.trunF_eq n body]
+  | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
+  | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
+  | _, _, .push .. | _, _, .pop .. | _, _, .transfer .. | _, _, .send .. | _, _, .declMem ..
+  | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
+  | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
+  | _, _, .revert => rfl
+
+theorem Prog.trunF_eq (n : Nat) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
+    Prog.trunF n P = Prog.trunFC n P
+  | _, _, .nil => rfl
+  | _, _, .cons s P => by
+    show TRun.seq (s.trunF n) (P.trunF n) = TRun.seq (s.trunFC n) (P.trunFC n)
+    rw [Stmt.trunF_eq n s, Prog.trunF_eq n P]
+
+end
 
 mutual
 

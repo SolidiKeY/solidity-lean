@@ -3574,7 +3574,8 @@ after the leaf change.
   - `#verify C.f` states `Core.Valid` of the scoped obligation
     (`cspec[C]{f}`, whatever the caller's scope) and runs `sol_spec_try`
     on it; the suggestion `⊨ spec[C]{f}` reads scoped under the switch,
-    which the file opens (`inc_spec`, the suggestion pasted, checks it).
+    which the file opens (`inc_spec`, the suggestion pasted, checks it),
+    and is `valid% cspec[C]{f}` outside it (review fixes, below).
   - `Tools/Counterexample.lean` ported in place: `Core.Fml.eval3`, a
     scoped formula evaluated over `TState` (terms and updates on the
     erasure; an update in the one typed state its end lifts to,
@@ -3643,6 +3644,36 @@ after the leaf change.
   25. *`#verify` is scoped whatever the caller's scope* (`cspec`), and a
       witness's after-line no longer prints `\result` (the typed end
       state names no local); no pin has one.
+- **Review fixes** (2026-10-08):
+  - `certifyRefl`'s kernel budget is back at 100000 heartbeats (it had
+    been doubled, unrecorded).  The certificate is now of the peeled
+    formula, as the search reads it: `Fml.not_valid_of_eval3Peel`
+    (`Fml.eval3Peel dom vals σ φ = .ff`, the leading parameters bound to
+    the witness's arguments by `Fml.peel`, `Fml.not_holds_of_peelC`), so
+    the kernel no longer tries every pooled value of each parameter.
+    Kernel time of a certificate (`certifyRefl` alone, `IO.monoNanosNow`,
+    a scratch module): `Counter.incTwice` 16–19 ms, `Counter.incBoth`
+    21–23 ms (also certified at 20000), `Guarded.check` 10 ms peeled
+    against 15 ms unpeeled (also certified at 10000).  Every certified pin
+    of `Examples/Verify` stays certified.
+  - G0 conditions 1 and 2 for what the kernel runs in a certificate:
+    `Fml.eval3` and `Fml.peel` are written by `Fml.rec` (the motive
+    generalising Γ; `.bind`'s type by `LTy.casesOn`), with the `match`
+    twins `Fml.eval3C`/`Fml.peelC` as `@[implemented_by]` and
+    `Fml.eval3_eq`/`Fml.peel_eq`; the soundness proof is `eval3C`'s
+    (`Fml.eval3C_sound`), carried over by `eval3_eq`.  `Stmt.trunF_eq`/
+    `Prog.trunF_eq` link the run with fuel to its twin `trunFC`.  Still
+    `match` on an indexed family and kernel-run, not touched here:
+    `Frames.trunF`, and what `eval3` calls on terms and updates
+    (`Tm.eval`, `Upd.apply`, `Calculus/Core/Logic.lean`), measured above
+    as part of the whole certificate.
+  - `#verify`'s suggestion follows the caller's scope: `⊨ spec[C]{f}` under
+    `open scoped Solidity.Core.Surface`, `valid% cspec[C]{f}` elsewhere
+    (checked by pasting it in a scratch module outside the scope); the
+    `Examples/Verify` pin is unchanged (the file opens the scope).
+  - `TypedRunFuel`'s docstring names `Prog.trunF_approx`;
+    `Examples/ProofTree`'s `#chain` prose no longer claims an
+    `emptyModality` grouping.
 - **Left.**
   1. `TState.lift?` reads an update's end only over an empty heap and the
      starting storage and transaction: a constructor's obligation
