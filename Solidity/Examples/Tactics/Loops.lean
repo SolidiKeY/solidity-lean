@@ -426,6 +426,25 @@ theorem sumClosedForm :
   sol_symex
   sol_close
 
+/-- `countToN` under the diamond: `n - i` decreases while the loop goes on, so
+it ends.  The invariant says `0 <= i`: the anonymised `i` is any number. -/
+theorem countToNDiamond :
+    ⊨ dl!{ n >= 0 && n <= 1000 → ⟨ uint i = 0;
+             /// @custom:key invariant 0 <= i && i <= n
+             /// @custom:key decreases n - i
+             while (i < n) { i = i + 1; }; ⟩ i == n } := by
+  sol_symex
+  sol_close
+
+/-- A loop left by `break` keeps its bound: `i <= 10` holds at every head,
+the one after the `break` included. -/
+theorem breakKeepsBound :
+    ⊨ dl!{ [ uint i = 0;
+             /// @custom:key invariant i <= 10
+             while (i < 10) { if (i == n) { break; } i = i + 1; }; ] i <= 10 } := by
+  sol_symex
+  sol_close
+
 /-! A loop with `break`: the invariant moves to the `while` the lowering
 leaves, so it holds at the head of the iteration the `break` ends too.  Lean
 adds that the flag the condition tests is a `bool` (`brk1 || !brk1`), which
@@ -556,9 +575,7 @@ end Solidity.Examples.Loops
 /-! ## Read without the switch
 
 What the scoped calculus does not close yet: a walk under the diamond
-(`Core.Proves.close` takes box contexts) and leaves the scoped closer's
-erasure does not take (`Fml.posB`: a loop's anonymised flag and hidden
-binders, `docs/intrinsic.md` W2 `symex`). -/
+(`Core.Proves.close` takes box contexts). -/
 
 namespace Solidity.Examples.Loops
 
@@ -599,25 +616,6 @@ theorem countTo1Walk : ⊢ dl!{ ⟨ uint i = 0;
     refine close ?_
     sol_symex
     sol_close
-
-/-- The same under the diamond: `n - i` decreases while the loop goes on, so
-it ends.  The invariant says `0 <= i`: the anonymised `i` is any number. -/
-theorem countToNDiamond :
-    ⊨ dl!{ n >= 0 && n <= 1000 → ⟨ uint i = 0;
-             /// @custom:key invariant 0 <= i && i <= n
-             /// @custom:key decreases n - i
-             while (i < n) { i = i + 1; }; ⟩ i == n } := by
-  sol_symex
-  sol_close
-
-/-- A loop left by `break` keeps its bound: `i <= 10` holds at every head,
-the one after the `break` included. -/
-theorem breakKeepsBound :
-    ⊨ dl!{ [ uint i = 0;
-             /// @custom:key invariant i <= 10
-             while (i < 10) { if (i == n) { break; } i = i + 1; }; ] i <= 10 } := by
-  sol_symex
-  sol_close
 
 /-! The proof tree labels `loopExit`'s goals. -/
 

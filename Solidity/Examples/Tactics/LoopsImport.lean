@@ -1,5 +1,8 @@
 import Solidity.Frontend.Import
+import Solidity.Frontend.Problems
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Show
 
 /-!
@@ -24,6 +27,11 @@ which rewrites the hash below.  A function's loops are lowered before its
 `return` inside a loop is a flag (`loopNestedReturn`), and a body with one
 is renamed fresh first, so that a sibling `for (uint i …)` declares a name
 of its own (`returnBeforeSiblingLoop`).
+
+Each function's obligation is solkey's, scoped (`solc_scoped_problems …
+main`, `Frontend/Problems.lean`): `Solc.Loops.f.problem`, its parameters
+bound by `∀`, `wt(storage)` assumed, each checked to erase to today's
+(`Solc.Loops.f.problem.legacy`), proved by `sol_prove`.
 -/
 
 solc_import "../../../tests/solc/Loops.ast.json" hash 0x499c9a4ed86a4b11 as Solc.Loops
@@ -31,7 +39,14 @@ solc_import "../../../tests/solc/Loops.ast.json" hash 0x499c9a4ed86a4b11 as Solc
 /-- info: 9 programs declared scoped -/
 #guard_msgs in solc_scoped Solc.Loops
 
+solc_problems Solc.Loops legacy
+
+/-- info: 7 obligations declared scoped -/
+#guard_msgs in solc_scoped_problems Solc.Loops main
+
 namespace Solidity.Examples.LoopsImport
+
+open scoped Solidity.Core.Surface
 
 /-- info: 9 functions (4 diamond, 3 box, 0 skip, 2 internal): 9 elaborated, 0 skipped, 0 excluded, 0 unsupported -/
 #guard_msgs in
@@ -46,38 +61,35 @@ assert(i == n); -/
 
 /-- solkey's `invariantCountsToBound`, its `box` obligation: the loop's
 invariant proves the `assert` after it. -/
-theorem invariantCountsToBound :
-    Valid (Fml.modal .box Solc.Loops.invariantCountsToBound .tt) := by
-  unfold Solc.Loops.invariantCountsToBound
+theorem invariantCountsToBound : ⊨ Solc.Loops.invariantCountsToBound.problem := by
+  sol_prove
+  refine Proves.close_dropWt ?_
   sol_symex
   sol_close
 
 /-- `invariantBreak`: the invariant holds at the head the `break` leaves
 from too. -/
-theorem invariantBreak : Valid (Fml.modal .box Solc.Loops.invariantBreak .tt) := by
-  unfold Solc.Loops.invariantBreak
+theorem invariantBreak : ⊨ Solc.Loops.invariantBreak.problem := by
+  sol_prove
+  refine Proves.close_dropWt ?_
   sol_symex
   sol_close
 
 /-- `whileCountsUp`, under the diamond, unwound three times (`unwind 3`, a
 clause only Lean reads). -/
-theorem whileCountsUp : Valid (Fml.modal .diamond Solc.Loops.whileCountsUp .tt) := by
-  unfold Solc.Loops.whileCountsUp
-  sol_symex
-  sol_close
+theorem whileCountsUp : ⊨ Solc.Loops.whileCountsUp.problem := by
+  sol_prove
 
 /-- `doWhileRunsBodyFirst`, under the diamond: the body runs once, though the
 condition is false from the start (`unwind 1`, the one iteration). -/
-theorem doWhileRunsBodyFirst :
-    Valid (Fml.modal .diamond Solc.Loops.doWhileRunsBodyFirst .tt) := by
-  unfold Solc.Loops.doWhileRunsBodyFirst
-  sol_symex
-  sol_close
+theorem doWhileRunsBodyFirst : ⊨ Solc.Loops.doWhileRunsBodyFirst.problem := by
+  sol_prove
 
 /-- `invariantTwoLines`: the invariant read over its two `///` lines, as
 solkey's `KeyNatspec` joins them. -/
-theorem invariantTwoLines : Valid (Fml.modal .box Solc.Loops.invariantTwoLines .tt) := by
-  unfold Solc.Loops.invariantTwoLines
+theorem invariantTwoLines : ⊨ Solc.Loops.invariantTwoLines.problem := by
+  sol_prove
+  refine Proves.close_dropWt ?_
   sol_symex
   sol_close
 
