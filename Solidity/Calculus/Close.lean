@@ -1,4 +1,6 @@
 import Solidity.Calculus.Notation
+import Solidity.Calculus.TacticSyntax
+import Solidity.Theory.StateWrites
 import Solidity.Calculus.ReadWrite
 import Solidity.Theory.Bridge.Denote
 

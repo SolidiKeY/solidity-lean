@@ -1,4 +1,5 @@
-import Solidity.Calculus.Sequents
+import Solidity.Calculus.Hyp
+import Solidity.Calculus.Notation
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Delab
 

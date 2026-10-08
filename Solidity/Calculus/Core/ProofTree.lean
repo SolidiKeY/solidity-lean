@@ -1,4 +1,6 @@
-import Solidity.Calculus.ProofTree
+import Solidity.Calculus.TreeData
+import Solidity.Calculus.RuleShapes
+import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Completeness
 import Solidity.Calculus.Core.Delab
 

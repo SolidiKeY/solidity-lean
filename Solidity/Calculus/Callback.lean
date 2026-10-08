@@ -1,5 +1,6 @@
 import Solidity.Calculus.Logic
 import Solidity.Semantics.Callback
+import Solidity.Semantics.NoPanic
 
 /-!
 # The calculus with callbacks

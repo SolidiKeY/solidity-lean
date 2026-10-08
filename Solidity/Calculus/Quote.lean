@@ -92,10 +92,6 @@ def Tm.quote : Tm C s → Lean.Expr
   | .app2 o x y => o.quote c (x.quote) (y.quote)
   | .app3 o x y z => o.quote c (x.quote) (y.quote) (z.quote)
 
-def IntOp.quote : IntOp → Lean.Expr
-  | .add => mkConst ``IntOp.add
-  | .sub => mkConst ``IntOp.sub
-
 def UpdElem.quote : UpdElem C → Lean.Expr
   | .val x t => mkAppN (mkConst ``UpdElem.val) #[c, toExpr x, Tm.quote c t]
   | .path x p => mkAppN (mkConst ``UpdElem.path) #[c, toExpr x, Tm.quote c p]

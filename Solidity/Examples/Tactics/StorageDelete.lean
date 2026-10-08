@@ -3,7 +3,7 @@ import Solidity.Calculus.Rewrite
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.RewriteSyntax
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # `delete`, rule by rule

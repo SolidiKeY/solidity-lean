@@ -13,7 +13,27 @@ printers, a loop's invariant rule with solkey's branch labels.
 namespace Solidity.Core.Delab
 
 open Lean Meta PrettyPrinter Delaborator SubExpr
-open Solidity (ppStmt ppPremise? ppOn isEscape)
+open Solidity (ppStmt ppPremise? ppOn isEscape escapeTerm)
+
+/-- `functionCallArgCapture`'s premise (`Premise.argCapture`, stuck on its
+schema variable `ret`): `⟨[ T se = v; ‹Core.Stmt.call f as' ret body›; ]⟩`,
+the capture as `Syntax.lean` writes it and the call with the captured
+arguments as a term, as `Rules.lean` prints today's rule. -/
+def argCapturePremise? (p : Expr) : MetaM (Option (TSyntax `dl_premise)) := do
+  let p ← instantiateMVars p
+  unless p.isAppOfArity ``Solidity.Core.Premise.argCapture 13 do return none
+  let a := p.getAppArgs
+  let c := a[0]!
+  withTwins p false fun env => do
+    let v ← (tr [] a[9]!).run env
+    let x := mkApp2 (mkConst ``Solidity.Var.fresh) (toExpr "se") a[2]!
+    let init := mkApp2 (mkConst ``Option.some [levelZero]) (mkApp2 (mkConst ``Solidity.Val) c a[8]!) v
+    let decl ← ppStmt (mkApp4 (mkConst ``Solidity.Stmt.declLocal) c a[8]! x init)
+    let call := mkIdent (← unresolveNameGlobal ``Solidity.Core.Stmt.call)
+    let t ← `($call $(← escapeTerm a[3]!) $(← escapeTerm a[10]!) $(← escapeTerm a[11]!)
+      $(← escapeTerm a[12]!))
+    let call ← `(sol_stmt| ‹$t:term›)
+    return some (← `(dl_premise| ⟨[ $decl:sol_stmt; $call:sol_stmt; ]⟩))
 
 /-- `Core.LeanTaclet C k m s p`: `dl[LeanTaclet C k]{ ⟨[ s; ]⟩ ⇝ p }`, as
 `Rules.lean`'s `delabTaclet` prints today's. -/
@@ -23,6 +43,12 @@ def delabLeanTaclet : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 7)
   let m ← whnf (e.getArg! 2)
+  let J ← `($(mkIdent (← unresolveNameGlobal ``LeanTaclet))
+    $((← (List.range 2).toArray.mapM fun i => withNaryArg i delab))*)
+  if let some p ← argCapturePremise? (e.getArg! 6) then
+    -- the call, its arguments a schema variable, as a term (`‹…›`)
+    let s ← `(sol_stmt| ‹$(← escapeTerm (e.getArg! 5)):term›)
+    return ← `(dl[ $J ]{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
   let out? ← withTwins e false fun env => do
     let st ← (tr [] (e.getArg! 5)).run env
     let p ← (tr [] (e.getArg! 6)).run env
@@ -36,8 +62,6 @@ def delabLeanTaclet : Delab := do
     return some (← ppStmt st, p)
   let some (s, p) := out? | failure
   if isEscape s then failure
-  let args ← (List.range 2).toArray.mapM fun i => withNaryArg i delab
-  let J ← `($(mkIdent (← unresolveNameGlobal ``LeanTaclet)) $args*)
   match_expr m with
   | Modality.box => `(dl[ $J ]{ [ $s:sol_stmt; ] ⇝ $p })
   | Modality.diamond => `(dl[ $J ]{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })

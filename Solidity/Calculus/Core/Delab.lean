@@ -228,6 +228,25 @@ def stmtOutNames (ns : List Expr) (s : Expr) : MetaM (List Expr) := do
   | some ``Stmt.call => callOutNames ns (s.getArg! 8)
   | _ => return ns
 
+/-- `(Prog.wk up P).2.2`, the unfolding of `Prog.up P` (a block read with
+one local more on top), as a projection or an application: `P`. -/
+def wkUp? (e : Expr) : Option Expr :=
+  let snd? (e : Expr) (s : Lean.Name) (f : Lean.Name) : Option Expr :=
+    match e.consumeMData with
+    | .proj n 1 x => if n == s then some x.consumeMData else none
+    | e => if e.isAppOfArity f 3 then some e.appArg!.consumeMData else none
+  match snd? e ``Prod ``Prod.snd with
+  | none => none
+  | some x => match snd? x ``Sigma ``Sigma.snd with
+    | none => none
+    | some w =>
+      let args := w.getAppArgs
+      if w.isAppOf ``Prog.wk && args.size ≥ 3 then
+        match args[args.size - 3]?.bind (·.getAppFn.constName?) with
+        | some n => if isUp n then args.back? else none
+        | none => none
+      else none
+
 mutual
 
 /-- The erasure of a scoped term `e`, read where the term declared the
@@ -236,6 +255,7 @@ prints as `‹…›`. -/
 partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
   let e := (← instantiateMVars e).consumeMData
   if let .fvar fv := e then return (← read).twins.getD fv e
+  if let some P := wkUp? e then return ← tr ns.tail P
   let .const n _ := e.getAppFn | return e
   let args := e.getAppArgs
   if isUp n && args.size > 0 then return ← tr ns.tail args.back!
@@ -477,7 +497,10 @@ partial def trArg (ns : List Expr) (a : Expr) : TrM Expr := do
 partial def progPieces (ns : List Expr) (P : Expr) : TrM (Array Piece × List Expr) := do
   let P := (← instantiateMVars P).consumeMData
   if let .fvar fv := P then return (#[.many ((← read).twins.getD fv P)], ns)
+  -- a block read under one local more (`Prog.up`, unfolded): the block
+  if let some P' := wkUp? P then return ((← progPieces ns.tail P').1, ns)
   let P ← whnf P
+  if let some P' := wkUp? P then return ((← progPieces ns.tail P').1, ns)
   if P.isAppOf ``Prog.cons then
     let args := P.getAppArgs
     let s := args[4]!
@@ -730,7 +753,7 @@ attribute [delab app.Solidity.Core.Fml.eq, delab app.Solidity.Core.Fml.defined,
 /-! ## Sequents -/
 
 /-- A sequent's context, erased: the rest `..H` when it is a variable, the
-entries as `Logic.lean`'s `Hyp`s, and the names of the last scope.  What
+entries as `Calculus/Hyp.lean`'s `Hyp`s, and the names of the last scope.  What
 erasure loses prints as nothing: an update of pops only, and the hidden
 binder (it only names the local it puts in scope). -/
 partial def hypsParts (c H : Expr) : TrM (Option Lean.Name × Array Expr × List Expr) := do
@@ -803,7 +826,10 @@ sight, as `Rules.lean`'s `delabTacletSide`. -/
 def delabTacletSide : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
-  unless e.getForallBody.isAppOf ``Core.Taclet do failure
+  let b := e.getForallBody
+  -- `Core.CallbackTaclet` is declared by a module importing this one (`Core/Callback.lean`)
+  unless b.isAppOf ``Core.Taclet || b.isAppOf ``Core.LeanTaclet ||
+      b.isAppOf `Solidity.Core.CallbackTaclet do failure
   withTheReader SubExpr (fun s => { s with expr := Solidity.dropSide e })
     (Solidity.delabTacletBinders #[] #[])
 

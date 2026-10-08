@@ -1,3 +1,4 @@
+import Solidity.Calculus.Rules
 import Solidity.Calculus.Core.DelabLean
 
 /-!
@@ -93,10 +94,9 @@ functionBodyExpand
 internalCallExpand
 tryCallNoCallbackBox
 ---
-info: 6 of 9 rules of `LeanTaclet` print as their scoped twins; not these:
+info: 7 of 9 rules of `LeanTaclet` print as their scoped twins; not these:
 functionCallArgCapture
 tryCallDiamond
-whileInvariantDiamond
 -/
 #guard_msgs in
 #check_rule_text

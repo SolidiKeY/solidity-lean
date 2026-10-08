@@ -1,4 +1,6 @@
 import Solidity.Calculus.Notation
+import Solidity.Calculus.Symex
+import Solidity.Calculus.TreeData
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.ChainBranches
 import Solidity.Calculus.Literals
@@ -326,11 +328,6 @@ or `by sol_chain`, which run after it. -/
 namespace Chain
 section Elab
 open Lean Meta Elab Term
-
-/-- The last component of a constructor's name, as `~[r]~>` shows it. -/
-def lastName : Lean.Name → Lean.Name
-  | .str _ s => .mkSimple s
-  | n => n
 
 /-- Whether a constant is a rule's constructor, solkey's or Lean's. -/
 def isRuleCtor (c : Lean.Name) : Bool :=

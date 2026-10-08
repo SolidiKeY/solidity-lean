@@ -1,6 +1,6 @@
 import Solidity.Calculus.Core.Derive
 import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Symex
+import Solidity.Calculus.TacticSyntax
 
 /-!
 # Today's walk on a scoped goal

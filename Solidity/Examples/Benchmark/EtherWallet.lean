@@ -2,7 +2,7 @@ import Solidity.Calculus.Derive
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # Benchmark: `EtherWallet`

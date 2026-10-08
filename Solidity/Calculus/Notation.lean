@@ -1,4 +1,5 @@
-import Solidity.Calculus.Symex
+import Solidity.Calculus.Hyp
+import Solidity.Calculus.Quote
 
 /-!
 # Reading concrete formulas: `dl[C]{ φ }`
@@ -1338,14 +1339,6 @@ info: dl{ { x := 10 ‖ storage := save(storage, alice.age, 10) } find(storage, 
 #guard_msgs in
 #check dl!{ { x := 10 ‖ storage := save(storage, alice.age, 10) } find(storage, alice.age) = x }
 
-/-- What a rule leaves prints as a formula that reads back as it. -/
-example : (dl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }).step =
-    some dl!{ { storage := save(storage, alice.age, 10) } [ uint y = alice.age; ] y = 10 } := rfl
-
-/-- `p = alice;` is what is left of a declaration: `p` is read as an alias. -/
-example : (dl!{ ⟨ Person storage p = alice; p.age = 3; ⟩ p.age == 3 }).step =
-    some dl!{ ⟨ p = alice; p.age = 3; ⟩ find(storage, p.age) = 3 } := rfl
-
 /-- A capture takes the least index the formula's fresh variables leave. -/
 example : dl!{ ⟨ values[total + 1] += 2; ⟩ ie1 == 0 } =
     dl!{ ⟨ uint ie2 = total + 1; values[ie2] += 2; ⟩ ie1 == 0 } := rfl
@@ -1381,12 +1374,6 @@ example : dl!{ a ≐ 1 } = Fml.eq (.pv (.user "a")) (.lit (.int 1)) := rfl
 
 /-! ### Memory objects -/
 
-/-- What `Person memory carol;` leaves reads back, and binds `carol` as a
-`Person` in memory under it. -/
-example : (dl!{ ⟨ Person memory carol; carol.age = 5; ⟩ true }).step =
-    some dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-      ⟨ carol.age = 5; ⟩ true } := rfl
-
 /--
 info: dl{
   { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -1410,33 +1397,14 @@ example : Fml StandardExample :=
   dl!{ ⟨ Person memory d; if (a == 1) { acc = d.account; } else { acc = d.account; }; acc.balance = 1; ⟩
        true }
 
-/-- A state variable is no memory local: `alice = carol;` copies to storage. -/
-example : (dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-    ⟨ alice = carol; ⟩ true }).step =
-    some dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-      { storage := save(storage, alice, copyMem(mtSt, memory, carol)) } ⟨⟩ true } := rfl
-
 /-- A name the program declares is left to its declaration. -/
 example : Fml StandardExample :=
   dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
        ⟨ Person memory d; d = carol; ⟩ true }
 
-/-- An array's allocation carries its type, as a struct's does. -/
-example : (dl!{ ⟨ uint[] memory xs; xs[0] = 5; ⟩ true }).step =
-    some dl!{ { xs := freshId(addM(memory, uint[])) ‖ memory := addM(memory, uint[]) }
-      ⟨ xs[0] = 5; ⟩ true } := rfl
-
 /-- info: dl{ { ts := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) } true } : Fml StandardExample -/
 #guard_msgs in
 #check dl!{ { ts := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) } true }
-
-/-- `new` says what it allocates, so its local is a memory array
-(`scopeHints`), and the copy it leaves says so too. -/
-example : (dl!{ ⟨ uint[] memory xs = new uint[](3); ⟩ true }).step =
-    some dl!{ ⟨ xs = new uint[](3); ⟩ true } := rfl
-example : symex 3 dl!{ ⟨ uint[] memory xs = new uint[](3); ⟩ true } =
-    dl!{ { xs := freshId(copySt(memory, newArr(uint[], 3))) ‖ memory := copySt(memory, newArr(uint[], 3)) }
-      true } := rfl
 
 /--
 info: dl{
@@ -1446,13 +1414,6 @@ info: dl{
 #guard_msgs in
 #check dl!{ { xs := freshId(copySt(memory, newArr(uint[], 3))) ‖ memory := copySt(memory, newArr(uint[], 3)) }
   true }
-
-/-- `carol = alice;` is a memory copy only by `carol`'s declaration, which a
-line that dropped it carries after `where`. -/
-example : (dl!{ ⟨ Person memory carol = alice; carol.age = 1; ⟩ true }).step =
-    some dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } := rfl
-example : (dl!{ ⟨ Person storage carol = alice; carol.age = 1; ⟩ true }).step =
-    some dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true } := rfl
 
 /-- info: dl{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } : Fml StandardExample -/
 #guard_msgs in #check dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol }
@@ -1480,18 +1441,8 @@ example : dl![.box]{ ⟨[ alice.age = 10; ]⟩ alice.age == 10 } =
     dl!{ [ alice.age = 10; ] alice.age == 10 } := rfl
 example : dl[StandardExample, .diamond]{ ⟨[ x = 1; ]⟩ x == 1 } = dl!{ ⟨ x = 1; ⟩ x == 1 } := rfl
 
-/-- An update with no modality under it is judged at the formula's: the last
-line of a box derivation, which `dl!{ … }` reads at the diamond. -/
-example : symex 2 dl!{ [ x = 1; ] x == 1 } = dl![.box]{ { x := 1 } x == 1 } := rfl
-example : dl![.box]{ { x := 1 } x == 1 } ≠ dl!{ { x := 1 } x == 1 } := by intro h; cases h
-
 /-- A modality under the update still decides. -/
 example : dl![.diamond]{ { x := 1 } [ x = 2; ] x == 2 } = dl!{ { x := 1 } [ x = 2; ] x == 2 } := rfl
-
-/-- At a modality `m` the rules reduce: none but a revert looks at it. -/
-example (m : Modality) :
-    (dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }).step = some dl![m]{ { x := 1 } ⟨[ ]⟩ x == 1 } := rfl
-example (m : Modality) : symex 2 dl![m]{ ⟨[ x = 1; ]⟩ x == 1 } = dl![m]{ { x := 1 } x == 1 } := rfl
 
 /-- info: dl{ ⟨[ x = 1; ]⟩ x = 1 } : Fml StandardExample -/
 #guard_msgs in
@@ -1517,10 +1468,6 @@ example (φ ψ : Fml StandardExample) : dl!{ ‹φ› ∧ ψ ∧ true } = Fml.an
 /-- error: a name where a formula stands is a Lean formula (φ : Post C): unknown `ture` -/
 #guard_msgs in
 example : dl!{ ⟨ x = 1; ⟩ ture } = dl!{ ⟨ x = 1; ⟩ true } := rfl
-
-/-- Both at once: `m` and `φ` are put back by one walk. -/
-example (m : Modality) (φ : Fml StandardExample) :
-    (dl![m]{ ⟨[ x = 1; ]⟩ φ }).step = some dl![m]{ { x := 1 } ⟨[ ]⟩ φ } := rfl
 
 /-- info: fun m φ => dl{ ⟨[ x = 1; ]⟩ φ } : Modality → Fml StandardExample → Fml StandardExample -/
 #guard_msgs in #check fun (m : Modality) (φ : Fml StandardExample) => dl![m]{ ⟨[ x = 1; ]⟩ φ }

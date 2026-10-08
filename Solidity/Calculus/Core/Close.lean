@@ -1,6 +1,6 @@
 import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.CloseErase
-import Solidity.Calculus.Derive
+import Solidity.Calculus.Close
 
 /-!
 # Closing a scoped leaf by its erasure
@@ -350,7 +350,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
             refine ⟨h₁ρ.storage, h₁ρ.heap, h₁ρ.nextId, h₁ρ.net, fun y _ => ?_, h₁ρ.selfBalance,
               h₁ρ.tx⟩
             by_cases hy : y ∈ B
-            · rw [Derive.Upd.foldl_lookup (U.erase ns) (fun hv => hav y hv hy) hρ₁]
+            · rw [Solidity.Upd.foldl_lookup (U.erase ns) (fun hv => hav y hv hy) hρ₁]
               exact lookupBy_mergeOn hy
             · exact h₁ρ.env y hy
     · cases h

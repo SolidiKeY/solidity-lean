@@ -2,7 +2,7 @@ import Solidity.Calculus.Spec
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.SolSpec
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # Specifications: clauses as obligations

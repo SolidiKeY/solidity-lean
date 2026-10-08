@@ -1075,7 +1075,7 @@ elaborates with every module (no name clash).
      - Rewrite links taken over from `ChainRewrites` on erasures (`Via.ofErase`). Only the direction from the erasure is needed.
      - `#chain` and `#derivation` on Core.
 4. **`tree`**
-   - Owns: new `Calculus/Core/{ProofTree,Sequents,Callback,Contracts}.lean`, `Tools/CoreInspect.lean`, `Calculus/Core/{Spec,Notation}.lean`, `Semantics/Core/Callback.lean`.
+   - Owns: new `Calculus/Core/{ProofTree,Sequents,Callback,Contracts}.lean`, `Tools/CoreInspect`, `Calculus/Core/{Spec,Notation}.lean`, `Semantics/Core/Callback.lean`.
    - Work:
      - ProofTree, `#proof_tree`, `#wp`, `#step`.
      - `sol_spec` on `cspec!`.
@@ -1358,7 +1358,7 @@ Left:
   by `closeTrue` and then `Config.closers` (empty: a closer of scoped
   leaves, `Proves.close` from `sound` and the erased closer from `symex`,
   is to be plugged in once merged).
-- **The commands** (`Tools/CoreInspect.lean`): `#proof_tree`, `#proof_node`,
+- **The commands** (`Tools/CoreInspect`): `#proof_tree`, `#proof_node`,
   `#proof_tree_json` on a scoped formula, second elaborators of today's
   syntax; `#step` names the rule the scoped strategy fires (`ruleAtC?`, at
   the statement `Fml.stepAt` looks at), no longer through the erasure.
@@ -1522,7 +1522,7 @@ Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
 
 **Flipped** (`open scoped Solidity.Core.Surface` after each `local instance`,
 imports `Calculus/Core/{Surface,Closers}.lean`, `Calculus/Core/Sequents.lean` where a
-walk checks `show sequent!{…}`, `Tools/CoreInspect.lean` where a command is
+walk checks `show sequent!{…}`, `Tools/CoreInspect` where a command is
 pinned): `Examples/Benchmark/{Coin,Counter,ERC20,EtherWallet,Mapping,Purchase,SimpleStorage}`;
 `Examples/Tactics/{ApplySteps,Branch,CallOperands,Calls,Checked,CrossDomain,Decide,LedgerDelete,Loops,Memory,Net,Operators,Payment,Revert,Specs,StorageDelete,StorageSteps,StorageSuite,Tour,TryCatch,Values}`.
 Every file checks with no error or warning.  What the scoped calculus
@@ -2460,9 +2460,9 @@ reachable, only the git-excluded `Scratch/`), `check-doc-paths` and
    term that is not a closed scoped formula is an error naming the switch.
    New: `Tools/Taclet.lean` (`#taclet`, unchanged, on today's tables: its
    output names today's constructors, so the switch is W4/W5's) and
-   `Tools/InspectToday.lean` (the five commands on today's `dl…{ … }`
+   `Tools/InspectToday` (the five commands on today's `dl…{ … }`
    read without the switch, declared later so tried first, and leaving
-   every other term to the scoped ones).  `Tools/CoreInspect.lean` imports
+   every other term to the scoped ones).  `Tools/CoreInspect` imports
    the four, so its 35 importers are unchanged; `CorePrint` imports
    `Tools/Taclet` for its `#taclet`.
 3. **`Theorems.lean` on Core**: `rule_sound` (`Premise.Sound`, no
@@ -2544,7 +2544,7 @@ reachable, only the git-excluded `Scratch/`), `check-doc-paths` and
 **Left for W4** (beside its lanes):
 - `Tools/Taclet.lean` on the scoped families (`Core.RuleShapes`,
   `Core.PrintedRules`, `Core.Taclet.toStep`), its pins moving as W5 allows;
-  `Tools/InspectToday.lean` deleted with today's calculus, with its two
+  `Tools/InspectToday` deleted with today's calculus, with its two
   users (`Examples/Tools`' `InspectToday`, `Tactics/CoreNotation`'s last
   pin); the importers of `Tools/CoreInspect` pointed at `Tools/Inspect` and
   `Tools/ProofTree`.
@@ -2556,6 +2556,144 @@ reachable, only the git-excluded `Scratch/`), `check-doc-paths` and
 - Item 11's moves (the table above), before `calc-del`.
 - Item 1's legacy statements and item 10's `Tools/Common` candidate
   generation are unchanged.
+
+### W4 lane `moves` (`w4-moves`, 2026-10-08): item 11 and the tools
+
+From `intrinsic` at `31951be`, two commits.  Checked by `lean_build` of
+`Solidity`, `solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (the last
+two in `defaultTargets` for the run only, reverted after): 332 jobs, green.
+`check-orphans` (318 reachable; only the git-excluded `Scratch/`),
+`check-doc-paths` clean.  No new `sorry`, `axiom` or `maxHeartbeats`.  Not
+run: `check-corpus.sh`, `check-testsuite.sh`, `solkeycheck` (built, not run:
+no rule name or annotation changed), the review pass, the M0 re-timing.
+
+**What moved** (names unchanged unless said; each source module imports its
+new home, so today's users are unchanged):
+
+| New module | From | What |
+|---|---|---|
+| `Update.lean` | `Quote` | `IntOp.quote`, beside `IntOp` |
+| `Calculus/Hyp.lean` | `Logic`, `Sequents` | `Hyp`, `Hyp.wrap`/`rwEq`/`rwUpd`/`fresh`, `RuleSet`, `maxIdx` and its lemmas, `Fml.fresh`, `ppHyp?`/`hypSpine?`; the arrow `seq_arrow` and the four `sequent…{ }` keywords, `sequentFml`, `peelHyps`, `headModality?` |
+| `Calculus/TacticSyntax.lean` | `Symex`, `ProofTree`, `Derive` | the syntax of `sol_step`, `sol_symex`, `sol_derive`, `sol_prove`, `sol_prove?`, `ProofTree.sol_derive?`, `ProofTree.sol_chain?` (kinds unchanged: today's `elab "…"` became `elab_rules`/`macro_rules`); `Fml.active`, `normValid`, `applyValid`, `Derive.kernelLemma` |
+| `Calculus/RuleKit.lean` | `Rules` | the holes and their fills, the side conditions and `side_cond`/`clear_side`, `Premise`, `Taclet.branchLabels`/`labelledBy`, `ppPremise?`, `delabPremise`, `dropSide`, `callSide`, `delabTacletBinders` |
+| `Calculus/TreeData.lean` | `ProofTree`, `Chains` | `Act`, `Tree` and its rows, JSON, display and script; `dotIdent`, `short`, `qualified`, `runOn`, `tacLines`, `suggest`, `termLines`; `Chain.lastName` |
+| `Theory/StateWrites.lean` | `SoundKit`, `SoundUpdate`, `Derive` | the writes reshaped (`State.writeRes`, `writeStorage_eq`, `heapRes`, `writeAddr_eq`, the `*_with` lemmas, `copyHN`/`allocHN` and their `_eq`s, `pushAt_const`), the operator unfoldings, `Close.binding*`, the five `State.*_setEnv` rfl lemmas, `readLoc_eq`/`writeLoc_eq`; `UpdElem.write_lookup` and `Upd.foldl_lookup` (were `Derive.…`) |
+| `Semantics/NoPanicOps.lean` | `Semantics/NoPanic` | every operation's `*_noPanic` and `no_panic`; `NoPanic` keeps `Stmt.mayPanic`, `Prog.run_noPanic`, `Stmt.run_transfer_noPanic` (sem-del's) |
+
+Also moved, no text change: `Notation.lean`'s fourteen examples that run today's
+`Fml.step`/`symex` → `Symex.lean` (section `ReadBack`; `Notation` no longer
+imports `Symex`); `Problem.lean`'s `Derive.storageWrites`/`scanLeaves` →
+`Derive.lean`.  `Problem` now imports `Spec` (not `Derive`), `Close`
+imports `TacticSyntax` and `StateWrites`, `Calculus/NoPanic` imports
+`NoPanicOps`.  Today's modules that had reached `Symex` through `Notation`
+import it (`Chains`, `Progress`, `Termination`, `CloseTests`, `Contracts`,
+`Examples/Tactics/CoreSymex`, `CoreStep`); `Calculus/Callback` imports
+`Semantics/NoPanic`.
+
+**Core imports cut**: `Core.Proves` (`Logic` → `Hyp`), `Core.Symex` and
+`Core.WalkSyntax` (`Symex` → `TacticSyntax`), `Core.Sequents` (`Sequents` →
+`Hyp`, `Notation`), `Core.SoundArms` (`SoundUpdate` → `StateWrites`),
+`Core.Taclet` (`Rules` → `RuleKit`), `Core.ProofTree` (`ProofTree` →
+`TreeData`, `RuleShapes`, `Close`), `Core.Close` (`Derive` → `Close`),
+`Core.Spec` (through `Problem`, now clean of `Derive`), `Core.SoundKit`
+(`Calculus/NoPanic`, now over `NoPanicOps`).  `Core.Derive` imports
+`Derive` itself (it had it through `Core.Close`).  `Derive` imports
+`TreeData` and `Symex` (not `ProofTree`: its tree helper `suggest` is
+`TreeData`'s, `Proves.closeTrue` is `Symex`'s), so `ProofTree`,
+`Sequents`, `Chains`, `ChainRewrites`, `ChainBranches` and `Literals` leave
+the closure of every `Core.Derive` importer (review fix).
+`Examples/ProofTree` imports today's `ProofTree` itself, first: the scoped
+`sol_derive?`/`sol_chain?` must be registered after today's, which they
+fall back to, so that they are tried first.
+
+**New behaviour, one**: `sol_symex` on a goal `Valid φ` with no modality left
+is `normValid` (`TacticSyntax`, tried after today's and the scoped
+elaborators): exactly what `symex 200` leaves.  The scoped walk's leaf
+(`refine Core.Proves.close …; sol_symex; sol_close`) runs it on today's
+erasure, so it no longer needs today's `Symex` (without it,
+`Tactics/CoreProofTree`'s leaves stayed open).
+
+**Tools.**  `Tools/InspectToday` and `Tools/CoreInspect` deleted
+(with `Examples/Tools`' `InspectToday` section and `Tactics/CoreNotation`'s
+last pin); the 35 importers of `CoreInspect` import `Tools/Inspect.lean`,
+which now imports `Tools/ProofTree.lean` and `Tools/Taclet.lean`
+(`elabCoreFormula?` and `notScoped` moved down into `Tools/ProofTree`).
+`Tools/Taclet.lean` reads the scoped families and tables
+(`Core.RuleShapes.tacletOrigins`, `Core.PrintedRules`, today's callback rows
+under `scopedName`), prints with `Core.Delab`/`Core.DelabLean`, and names
+`toStep` as the soundness; `Core.Delab.delabTacletSide` hides the side
+conditions of `Core.LeanTaclet` and `Core.CallbackTaclet` too (as
+`Rules.lean`'s does for today's three).
+
+**Pins changed** (all `#taclet`, W5's qualified-name reason unless said):
+- `Examples/Tools`: `storageFieldWriteSave`, `"storageFieldWriteCaptureSrc"`,
+  `sendNoCallbackBox`, `sendWithCallbackBox`: `Solidity.Core.*` names, the
+  scoped binders (`{Γ : Core.Ctx}`, `Core.SPath C Γ …`, `pv : Core.Idx Γ …`),
+  `dl[Core.CallbackTaclet C k]`, `sound: ….toStep (…)`; rule lines unchanged.
+  `ifTrue`: `` `Core.RuleShapes.unclaimedTaclets` says why ``.
+- `Examples/Tactics/Loops`: `whileUnwind`, `loopExit`, `whileInvariantBox`,
+  `whileClose`, `whileNoVariantDiamond`: as above, `dl[Core.LeanTaclet C k]`;
+  `whileInvariantBox` keeps the binders `xs`, `hv` of its frame.
+- `functionCallArgCapture`, `whileInvariantDiamond`: the rule lines are
+  back (review fix; only qualified names and binders differ).  `Core.Delab`
+  reads `(Prog.wk up P).2.2`, `Prog.up` unfolded, as `P` (`wkUp?`), so the
+  diamond's weakened body prints `body`, as `{anon(body)}` and `⟨[ body ]⟩`;
+  `Core.DelabLean` prints `Core.Premise.argCapture`, stuck on `ret`, as
+  `⟨[ T se = v; ‹Core.Stmt.call f as' ret body›; ]⟩` (today's
+  `⟨[ T se = ‹a.e›; ‹Stmt.call f (Arg.captureFirst …) ⋯ ret body›; ]⟩`), the
+  conclusion `⟨[ ‹Core.Stmt.call f args ret body›; ]⟩` as today's.
+  `Core/RuleText`'s `#check_rule_text` pin follows: 7 of 9 `LeanTaclet`
+  rules print as their twins (`whileInvariantDiamond` now does), not
+  `functionCallArgCapture` (the escapes' text) and `tryCallDiamond`.
+- Deleted with `InspectToday`: `Examples/Tools`' `#wp` of today's `int`
+  product, `Tactics/CoreNotation`'s today's `#wp`.
+- The fresh names are unchanged; `Tactics/CoreProofTree`'s pins unchanged
+  (the leaves close again, by the fallback above).
+
+**Proposed decisions** (none of reasons 1–8):
+- **33.** `Calculus/Notation.lean` and `Calculus/Spec.lean` stay (the
+  inventory's "stays with `Surface`"): neither uses a module W4 deletes now,
+  they are the elaborator's frontends (`dl!{ … }`, `spec[C]{f}`), which
+  `Core.Notation`, `Core.Surface`, `Core.SolSpec` and `Core.Spec` read; the
+  `modal` lane gives their output a type of its own when `Fml` loses
+  `.modal`.  `calc-del`'s list loses them.
+- **34.** The closer's sequent calculus is today's `Proves`: `Rewrite`
+  (`Proves.close`, `Proves.sound`, the rewrite and update rules),
+  `TheoryRewrite` (`normProves`), and the driver `Derive.residue`/
+  `Proves.of_residue` that `Core.Derive`/`Core.ProvesDerive` hand every
+  leaf to.  So `Logic` and `Derive` cannot go in `calc-del` while the
+  closer runs on the erasure: `Logic`'s program constructors (and with them
+  `RuleSoundness`, `SoundKit`, …) go with the `modal` lane, what stays is
+  `NFml`'s first-order `Proves` until M6c.  Proposed: `calc-del` deletes
+  neither; `modal` trims both.  **What keeping them keeps** (9 of
+  `calc-del`'s 21 modules, and today's body of `Rules`):
+  `Logic` imports `RuleSoundness` (the program rules' soundness), and
+  through it `SoundUpdate`, `SoundKit`, `SoundUnfold`, `SoundLoop`;
+  `Derive` imports `Symex` (`Proves.closeTrue`, the box's cover) and through
+  it `Completeness` (`Stmt.step`, `.rule`, the walk's fallback), which
+  imports today's `Rules`.  `ProofTree`, `Sequents` and `Chains` are no
+  longer reached from `Derive` (review fix above).  All nine leave with the
+  `modal` lane's trim (the program constructors, their soundness, the
+  program strategy), not before.
+- **35.** `Core.RuleText` (`#check_rule_text`, the scoped lines against
+  today's) imports `Rules` and goes with today's body.
+
+**Left** (the frontier after this lane; `calc-del`'s modules only, the
+`sem-del` edges being that lane's: `Core.Arms` → `Mutability`,
+`Core.HoldsErase` and `Problem` → `RunErase`, `Evm.CoreCompile` →
+`Evm.Compile`, `Typing.StraightRun` → `TypedRunErase`):
+
+| Kept module | imports | why it is not cut |
+|---|---|---|
+| `Core.ChainKit`, `Core.ChainGen`, `Core.LastLine` (and `Core.Chains` through them) | `Chains`, `ChainGen`, `LastLine` | blocker 9: the rewrite links run on the erasure as today's `Fml.Via`, whose `Link` carries today's program steps (`StepRule`, `Taclet`); today's chain elaborator (`elabChain`, `solveChain`, `rwLabel`, `rwAnyFind`) builds them.  Splitting `Link` into a rewrite-only half (and its `Via.valid`) is the cut |
+| `Core.Derive` (`Core.ProvesDerive`, `Core.Closers`, `Core.SolSpec`, `Core.WalkSyntax`, `Core.RewriteSyntax`, `Core.Contracts`, `Tools/Counterexample`, `Tools/Verify` through it) | `Derive` (so `Logic`, `RuleSoundness`, `SoundUpdate`, `SoundKit`, `SoundUnfold`, `SoundLoop` through `TheoryRewrite`; `Symex`, `Completeness`, `Rules` through `Proves.closeTrue`) | decision 34; no longer `ProofTree`, `Sequents`, `Chains` |
+| `TheoryRewrite` (so `Rewrite`, `Core.RewriteSyntax`, `Core.Closers`) | `Logic` | decision 34 |
+| `RuleShapes` (so `PrintedRules`, `Core.RuleShapes`, `Core.PrintedRules`, `Core.ProofTree`, `Tools/Taclet`) | `Rules` | its rows are keyed by today's constructors (`` ``Taclet.x ``, `#check_constructor_table Taclet`); re-key on plain names (or at W5, when `Core.Taclet` becomes `Taclet`) and move today's checks to `Rules` |
+| `Core.RuleText` | `Rules` | decision 35 |
+
+Not done from the inventory, with the reasons above: the `Chains`,
+`ChainGen`, `LastLine` helper moves (the light ones would not cut an import
+while the heavy ones stay), the closer's driver split out of `Derive`.
 
 ## W5 — final rename (the lead alone)
 - One scripted commit (`git mv` plus `rg`/`sed`, no hand edits):
@@ -3558,6 +3696,23 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `DecidableEq`); and the 16 `evaluated` rows, which `corpus_decide`
     proves since W1 `evm` made it typed, are `proved` (their `#eval` pins
     replaced by theorems).  See "W4 preparation" above.
+33. *Proposed (W4 `moves`), the lead's call:* `Calculus/Notation.lean` and
+    `Calculus/Spec.lean` leave `calc-del`'s list: the elaborator's frontends
+    (`dl!{ … }`, `spec[C]{f}`), which use no deleted module and which the
+    scoped reader reads; the `modal` lane types their output.  See "W4 lane
+    `moves`".
+34. *Proposed (W4 `moves`), the lead's call:* `Calculus/Logic.lean` and
+    `Calculus/Derive.lean` leave `calc-del`'s list: today's `Proves` is the
+    closer's sequent calculus on the erasure (`Rewrite`, `TheoryRewrite`,
+    `Derive.residue`, `Proves.of_residue`) until M6c; the `modal` lane trims
+    their program rules (and the program-rule soundness modules with them).
+    Keeping them keeps 9 of `calc-del`'s 21 modules reachable: `Logic`,
+    `Derive`, `RuleSoundness`, `SoundUpdate`, `SoundKit`, `SoundUnfold`,
+    `SoundLoop` (through `Logic`), `Symex`, `Completeness` (through
+    `Derive`'s `Proves.closeTrue`), and today's `Rules` body; `ProofTree`,
+    `Sequents`, `Chains` are cut from it.  See "W4 lane `moves`".
+35. *Proposed (W4 `moves`), the lead's call:* `Calculus/Core/RuleText.lean`
+    (the scoped rule lines against today's) goes with today's rule table.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
@@ -3798,7 +3953,7 @@ benched apart: the first line, `runChain`, each written line's `readings`):
 4. *Scoped `#chain` and `#derivation` elaborated today's notation twice*:
    they elaborated a `dl!{ … }` with the switch off, then stepped aside and
    today's command elaborated it again; they now step aside on the syntax
-   (`todaysNotation`), as `Tools/CoreInspect.lean`'s `elabCoreFormula?`
+   (`todaysNotation`), as `Tools/CoreInspect`'s `elabCoreFormula?`
    does.
 5. *The scoped `dl!`/`cdl` evaluation kernel-checked its throwaway
    definition* (`Core/Notation.lean`'s `elabCdlAt`): about 5–8 ms a formula
@@ -5010,7 +5165,7 @@ git-excluded `Scratch/` modules only).
       pins (`Core.Delab` of holes, `NewLhs`, `storageFieldIncrementAssignment`,
       a scoped sequent input notation).  New on today's, to go in W4:
       `Tools/Taclet.lean` (`#taclet` on today's tables; its switch moves
-      pins, W5) and `Tools/InspectToday.lean` with its two users
+      pins, W5) and `Tools/InspectToday` with its two users
       (`Examples/Tools`' `InspectToday` section, `Tactics/CoreNotation`'s
       last pin); the 35 importers of `Tools/CoreInspect` to point at
       `Tools/Inspect`/`Tools/ProofTree`.  Unchanged: `Tools/Common`'s
@@ -5824,7 +5979,7 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   uint x = 2; ⟩ x = 2` binds `∀ uint x;`.  A Lean
   formula is elaborated at `Core.Fml C Γ` for the `Γ` of its place, so a
   `Core.Post C Γ` needs no weakening.  At the cutover `dl!` becomes `cdl!`.
-- **`#wp`/`#step`** (`Tools/CoreInspect.lean`): a second elaborator of the
+- **`#wp`/`#step`** (`Tools/CoreInspect`): a second elaborator of the
   commands that takes a closed `Core.Fml`, runs `Core.symex`/`Fml.step`
   compiled, and prints the quoted result by `Core.Delab`; the rule name is
   today's strategy's on the erasure.  `Core.Delab` now prints a closed call

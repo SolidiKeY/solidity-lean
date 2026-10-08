@@ -1,4 +1,4 @@
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 import Solidity.Calculus.Core.Notation
 
 /-!

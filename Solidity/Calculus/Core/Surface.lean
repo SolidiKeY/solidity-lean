@@ -18,7 +18,7 @@ With the scope open, today's notation reads the scoped calculus
 * `⊨ φ` is `Core.Valid φ` for a scoped `φ`, and today's `Valid φ` for any
   other (`valid% φ`); `⊢ φ` is the scoped sequent with nothing assumed,
   `Core.Proves C .all [] .nil φ`;
-* the commands of `Tools/CoreInspect.lean` (`#wp`, `#step`, `#proof_tree`,
+* the commands of `Tools/Inspect.lean` (`#wp`, `#step`, `#proof_tree`,
   `#proof_node`, `#proof_tree_json`) read `dl!{ … }` as scoped
   (`surfaceOn`).
 

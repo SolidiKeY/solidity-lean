@@ -3,7 +3,7 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Spec
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # Benchmark: `Counter`

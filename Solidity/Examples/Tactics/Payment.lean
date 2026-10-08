@@ -2,7 +2,7 @@ import Solidity.Calculus.Sequents
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.Sequents
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # Payment: `transfer` and `send`, as `⊢` walks

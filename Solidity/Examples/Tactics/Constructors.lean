@@ -4,7 +4,6 @@ import Solidity.Tools.Inspect
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.Deploy
-import Solidity.Tools.CoreInspect
 
 /-!
 # Constructors: a deployment from the empty storage

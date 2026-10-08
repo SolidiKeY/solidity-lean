@@ -1,6 +1,6 @@
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Delab
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # Concrete formulas read scoped: `cdl!{ … }`
@@ -8,7 +8,7 @@ import Solidity.Tools.CoreInspect
 `Calculus/Core/Notation.lean`'s reader pinned: the context each name is read
 in (a parameter bound outermost by `∀`, an update's target declared, a
 branch's local out of scope after it), and `#wp`/`#step` on the result
-(`Tools/CoreInspect.lean`).
+(`Tools/Inspect.lean`).
 -/
 
 namespace Solidity.Examples.Tactics.CoreNotation
@@ -109,15 +109,5 @@ info:   ~[storageFieldWriteSave]~>
     dl{ { storage := save(storage, alice.age, 10) } [ uint y = alice.age; ] y = 10 }
 -/
 #guard_msgs in #step cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }
-
-/-! Today's formula is still today's `#wp`'s. -/
-
-/--
-info: symbolic execution leaves:
-    dl{ { x := 10 } x = 10 }
-update-free:
-    10 = 10 ∧ 10 = 10
--/
-#guard_msgs in #wp dl!{ ⟨ uint x = 10; ⟩ x == 10 }
 
 end Solidity.Examples.Tactics.CoreNotation

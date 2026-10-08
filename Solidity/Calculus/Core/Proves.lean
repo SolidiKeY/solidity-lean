@@ -1,7 +1,7 @@
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.Closable
 import Solidity.Calculus.Core.Graft
-import Solidity.Calculus.Logic
+import Solidity.Calculus.Hyp
 
 /-!
 # Sequents on scoped formulas: the skeleton

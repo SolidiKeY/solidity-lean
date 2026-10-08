@@ -2,7 +2,8 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Closer
 import Solidity.Calculus.TheoryRewrite
 import Solidity.Calculus.Spec
-import Solidity.Calculus.ProofTree
+import Solidity.Calculus.TreeData
+import Solidity.Calculus.Symex
 
 /-!
 # The strategy as one kernel evaluation: `sol_prove`
@@ -500,36 +501,6 @@ def _root_.Solidity.Fml.seqUpd : Fml C → Fml C
   | .all x p φ => .all x p φ.seqUpd
   | φ => φ
 
-theorem UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
-    (e : UpdElem C) → x ∉ e.vars → e.write σ₀ τ = .ok τ' → lookupBy x τ'.env = lookupBy x τ.env
-  | .val y t, hx, h | .path y t, hx, h | .mref y t, hx, h | .store y t, hx, h => by
-    have hy : x ≠ y := fun e => hx (by simp only [UpdElem.vars, e, List.mem_cons, true_or])
-    simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
-    repeat' split at h
-    all_goals first
-      | (cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy])
-      | cases h
-  | .saveNet y, hx, h | .saveNetMt y, hx, h | .unset y, hx, h => by
-    have hy : x ≠ y := fun e => hx (by simp only [UpdElem.vars, e, List.mem_cons,
-      List.not_mem_nil, or_false])
-    simp only [UpdElem.write, pure, Except.pure] at h
-    cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy]
-  | .storage s, _, h | .memory s, _, h | .selfBalance _ s, _, h | .net _ _ s, _, h
-  | .pay _ s, _, h | .netMt _ s, _, h | .setBalance s, _, h => by
-    simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
-    repeat' split at h
-    all_goals first | (cases h; rfl) | cases h
-
-theorem Upd.foldl_lookup {σ₀ : State} {x : Var} :
-    (U : Upd C) → x ∉ Upd.vars U → ∀ {τ ρ : State},
-      U.foldlM (fun τ e => e.write σ₀ τ) τ = .ok ρ → lookupBy x ρ.env = lookupBy x τ.env
-  | [], _, _, _, h => by cases h; rfl
-  | e :: U, hx, τ, ρ, h => by
-    simp only [Upd.vars, List.mem_append, not_or] at hx
-    simp only [List.foldlM_cons] at h
-    obtain ⟨τ', h₁, h₂⟩ := SemanticsProperties.Res.bind_eq_ok.1 h
-    rw [Upd.foldl_lookup U hx.2 h₂, UpdElem.write_lookup e hx.1 h₁]
-
 theorem afterImp {m : Modality} {p q : State → Prop} {r : Res State} (h : ∀ τ, p τ → q τ) :
     m.after p r → m.after q r := by
   cases r with
@@ -1018,12 +989,6 @@ namespace Derive
 
 open Lean Elab Tactic Meta
 
-/-- A lemma `type` proved by `value`, checked by the kernel now, as
-`decide +kernel` checks one. -/
-def kernelLemma (type value : Expr) : MetaM Expr := do
-  let n ← withOptions (Elab.async.set · false) <| mkAuxLemma [] type value
-  return mkConst n
-
 /-- `⊢ φ` over the contract `C` as `⊢` elaborates it, `Proves C .all [] φ`:
 the one builder of it, for `sol_prove` and the commands that state or
 compare an obligation (`Frontend/Problems.lean`). -/
@@ -1123,11 +1088,12 @@ end Derive
 open Lean Elab Tactic Meta in
 /-- `sol_prove`: the strategy as one kernel evaluation (`Proves.of_residue`),
 on a goal `Γ ⊢ φ` or `⊨ φ`; one goal `leafᵢ` per leaf the closer leaves. -/
-elab "sol_prove" : tactic => withMainContext do
-  let g ← getMainGoal
-  let rest ← getUnsolvedGoals
-  let leaves ← Derive.prove g
-  setGoals (leaves ++ rest.erase g)
+elab_rules : tactic
+  | `(tactic| sol_prove) => withMainContext do
+    let g ← getMainGoal
+    let rest ← getUnsolvedGoals
+    let leaves ← Derive.prove g
+    setGoals (leaves ++ rest.erase g)
 
 namespace Derive
 
@@ -1216,16 +1182,33 @@ open Lean Elab Tactic Meta in
 replay.  A leaf none closes stays a goal, and the first is reported; a
 replay past `maxHeartbeats` as one declaration (`Derive.replayFits`) is
 warned of. -/
-elab tk:"sol_prove?" : tactic => withMainContext do
-  let g ← getMainGoal
-  let rest ← getUnsolvedGoals
-  let s ← Derive.proveSearch g
-  if let some l := s.open_.head? then
-    logInfo m!"sol_prove?: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
-  else unless ← Derive.replayFits s.heartbeats do
-    logWarning m!"sol_prove?: the replay needs about {s.heartbeats / 1000} heartbeats in one \
-      declaration, past `maxHeartbeats`"
-  setGoals (s.open_ ++ rest.erase g)
-  ProofTree.suggest tk (Derive.replayLines s.found)
+elab_rules : tactic
+  | `(tactic| sol_prove?%$tk) => withMainContext do
+    let g ← getMainGoal
+    let rest ← getUnsolvedGoals
+    let s ← Derive.proveSearch g
+    if let some l := s.open_.head? then
+      logInfo m!"sol_prove?: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
+    else unless ← Derive.replayFits s.heartbeats do
+      logWarning m!"sol_prove?: the replay needs about {s.heartbeats / 1000} heartbeats in one \
+        declaration, past `maxHeartbeats`"
+    setGoals (s.open_ ++ rest.erase g)
+    ProofTree.suggest tk (Derive.replayLines s.found)
+
+/-! ## The walk's leaves, counted (`#solkey_scan`, moved from `Problem.lean`) -/
+
+/-- How many storage writes the context's updates hold. -/
+def Derive.storageWrites (Γ : List (Hyp C)) : Nat :=
+  Γ.foldl (fun n h => match h with
+    | .upd _ U => n + (U.filter fun | .storage _ => true | _ => false).length
+    | _ => n) 0
+
+/-- `#solkey_scan`'s view of `⊢ φ`: how many leaves `sol_prove`'s walk
+leaves, closed by `synClose` or (`walk`) not, and the most storage writes
+in one leaf's context; `none` past `Derive.budget`. -/
+def Derive.scanLeaves (walk : Bool) (φ : Fml C) : Option (Nat × Nat) :=
+  (Derive.residue Derive.budget (if walk then fun _ _ => false else Derive.synClose)
+    Derive.budget [] φ).map fun (ls, _) =>
+      (ls.length, ls.foldl (fun m l => max m (Derive.storageWrites l.1)) 0)
 
 end Solidity

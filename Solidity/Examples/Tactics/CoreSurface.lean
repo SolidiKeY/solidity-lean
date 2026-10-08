@@ -1,6 +1,6 @@
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Callback
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # The flip switch, pinned
