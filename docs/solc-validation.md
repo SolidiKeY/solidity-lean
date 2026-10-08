@@ -43,7 +43,7 @@ about Solidity only through one of four links:
 - **L2. The elaborator misreads `sol{…}`** (`Syntax.lean`, `hoist`): evaluation
   order, what it captures, what it accepts.
 - **L3. The rule is sound but too strong**: its premise asks for more than the
-  program needs. `Stmt.complete` is coverage, not logical completeness. The
+  program needs. `Stmt.rule_exists` is coverage, not logical completeness. The
   `assert` rule was the known case the other way round: it mirrored `require`,
   so a failed `assert` satisfied every box formula and a box obligation proved
   nothing. A failed `assert` now panics (`Halt.panic`, solc's `Panic(0x01)`),
@@ -217,7 +217,7 @@ so a changed verdict fails CI.
   reduced by symmetry, sized by `#eval`. The small-scope hypothesis; it would have
   found the operand-order issue mechanically.
 - *Coverage targets*: every `Taclet`/`LeanTaclet` constructor under both modalities in
-  at least *k* agreeing cases, a succeeding and a reverting one per guard (`Rule.eq_step`
+  at least *k* agreeing cases, a succeeding and a reverting one per guard (`Rule.iff_step`
   makes it a function of the program); every `.error .revert` site in `Semantics.lean`
   on both sides; the union of `solc --ir` helper names against the
   `YulUtilFunctions.cpp` families reachable from the fragment. Rule × helper exposes a
