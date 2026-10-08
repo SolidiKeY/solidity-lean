@@ -763,25 +763,18 @@ theorem ifElseSplit (φ : Core.Post Coverage [.val .bool, .val .uint, .val .uint
 #last_line ifElseSplit
 
 end
-end Solidity.Examples.Chains.StorageCoverage
 
-/-! ## Left on `Update.lean`'s calculus
-
-The rows whose program the elaborator writes with captures in front (`uint se2; se2 = ++i;`, a call's result, a condition's call): the scoped reading leaves the captures, fresh variables, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`).  They read as today's chains until the elaborator puts a statement's captures in a block of their own. -/
-
-namespace Solidity.Examples.Chains.StorageCoverage
-
-local instance : InContract := ⟨Coverage⟩
 
 section
-variable (m : Modality) (φ : Post Coverage)
+variable (m : Modality)
 
--- The `++i` is the elaborator's: captured before the statement.
+-- The `++i` is the elaborator's: captured before the statement.  The parameters are bound in the order
+-- the source reads them (`val`, then `i`), written out on the right, which reads `val` first.
 example : dl!{ ⟨ values[++i] = val; ⟩ true }
-    = dl!{ ⟨ uint se1 = val; uint se2; se2 = ++i; values[se2] = se1; ⟩ true } := rfl
+    = dl!{ ∀ uint val; ∀ uint i; ⟨ uint se1 = val; uint se2; se2 = ++i; values[se2] = se1; ⟩ true } := rfl
 
 /-- `values[++i] = val;` with `i` 2 and `val` 7: the captures, the increment, the write at `3`. -/
-theorem storageIndexWriteCaptureAllNonSimpleIndex :
+theorem storageIndexWriteCaptureAllNonSimpleIndex (φ : Core.Post Coverage [.val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ val := 7 } ⟨[ values[++i] = val; ]⟩ φ }
     ~*> dl![m]{ { i := 2 ‖ val := 7 } { se1 := val } { se2 := 0 } ⟨[ se2 = ++i; values[se2] = se1; ]⟩ φ }
     ~[localAssignIncrement]~> dl![m]{ { i := 2 ‖ val := 7 } { se1 := val } { se2 := 0 } { i := i + 1 ‖ se2 := i + 1 }
@@ -800,7 +793,7 @@ example : dl!{ ⟨ tokens[++i] = tokRef; ⟩ true where Token storage tokRef }
     = dl!{ ⟨ uint se1; se1 = ++i; tokens[se1] = tokRef; ⟩ true where Token storage tokRef } := rfl
 
 /-- `tokens[++i] = tokRef;` with `i` 2 and `tokRef` bound to `bob.account.token`. -/
-theorem storageIndexWriteStorageRefCaptureAllNonSimpleIndex :
+theorem storageIndexWriteStorageRefCaptureAllNonSimpleIndex (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 2 ‖ tokRef := bob.account.token } ⟨[ tokens[++i] = tokRef; ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ tokRef := bob.account.token } { se1 := 0 }
         ⟨[ se1 = ++i; tokens[se1] = tokRef; ]⟩ φ }
@@ -821,7 +814,7 @@ example : dl!{ ⟨ values[i] = makeValue(); ⟩ true }
 
 /-- `values[i] = makeValue();` with `i` 2, from a storage where `total` is 7: the call's body inlined
 (`internalCallExpand`), its result written. -/
-theorem indexWriteValueRhsCapture :
+theorem indexWriteValueRhsCapture (φ : Core.Post Coverage [.val .uint]) :
     dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } ⟨[ values[i] = makeValue(); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); values[i] = se1; ]⟩ φ }
@@ -848,7 +841,7 @@ example : dl!{ ⟨ total = makeValue(); ⟩ true }
     = dl!{ ⟨ uint se1; se1 = makeValue(); total = se1; ⟩ true } := rfl
 
 /-- `total = makeValue();` from a storage where `total` is 7. -/
-theorem storageRootWriteValueRhsCapture :
+theorem storageRootWriteValueRhsCapture (φ : Core.Post Coverage []) :
     dl![m]{ { storage := save(storage, total, 7) } ⟨[ total = makeValue(); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); total = se1; ]⟩ φ }
@@ -872,7 +865,7 @@ example : dl!{ ⟨ tok = tokens[++i]; ⟩ true where Token storage tok }
     = dl!{ ⟨ uint se1; se1 = ++i; tok = tokens[se1]; ⟩ true where Token storage tok } := rfl
 
 /-- `tok = tokens[++i];` with `i` 2: `tok` bound to `tokens[3]`. -/
-theorem storageIndexRead_unfold_rightSndIndex :
+theorem storageIndexRead_unfold_rightSndIndex (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ tok = tokens[++i]; ]⟩ φ where Token storage tok }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 } { se1 := 0 } ⟨[ se1 = ++i; tok = tokens[se1]; ]⟩ φ where Token storage tok }
     ~[localAssignIncrement]~> dl![m]{ { i := 2 } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 }
@@ -887,7 +880,7 @@ example : dl!{ ⟨ values.push(makeValue()); ⟩ true }
     = dl!{ ⟨ uint se1; se1 = makeValue(); values.push(se1); ⟩ true } := rfl
 
 /-- `values.push(makeValue());` from a storage where `total` is 7. -/
-theorem storagePushValue_unfold_rightSndArgument :
+theorem storagePushValue_unfold_rightSndArgument (φ : Core.Post Coverage []) :
     dl![m]{ { storage := save(storage, total, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); values.push(se1); ]⟩ φ }
@@ -917,22 +910,20 @@ example : dl!{ ⟨ require(checkBalance()); ⟩ true }
     = dl!{ ⟨ bool se1; se1 = checkBalance(); require(se1); ⟩ true } := rfl
 
 /-- `require(checkBalance());`: the call inlined, its `true` required. -/
-theorem requireConditionCapture_call :
+theorem requireConditionCapture_call (φ : Core.Post Coverage []) :
     dl![.box]{ ⟨[ require(checkBalance()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![.box]{ { se1 := false } ⟨[ se1 = checkBalance(); require(se1); ]⟩ φ }
     ~[internalCallExpand]~> dl![.box]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; require(se1); ]⟩ φ }
     ~*> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 } ⟨[ require(se1); ]⟩ φ }
     ~*> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
+        ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
     ~[revertBox]~> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
+        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
     ~[sequentialToParallel]~> dl![.box]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true) ∧ (⟨[ revert(); ]⟩ false ∨ se1 ≐ true ∨ se1 ≐ false)) }
+        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
     ~[applyOnRigid]~> dl![.box]{
         (true ≐ true → { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ) ∧
-          (true ≐ false → true) ∧
-            ({ se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } ⟨[ revert(); ]⟩ false ∨ true ≐ true ∨
-              true ≐ false) }
+          (true ≐ false → true) }
     ~[concrete]~> dl![.box]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ } := by
   sol_chain
 #last_line requireConditionCapture_call
@@ -943,7 +934,7 @@ example : dl!{ ⟨ assert(checkInvariant()); ⟩ true }
 /-- `assert(checkInvariant());`: the call inlined, its `true` asserted.  An
 `assert` checks rather than branches (`assertSimple`): no revert, so the chain
 runs under any `m`. -/
-theorem assertConditionCapture_call :
+theorem assertConditionCapture_call (φ : Core.Post Coverage []) :
     dl![m]{ ⟨[ assert(checkInvariant()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { se1 := false } ⟨[ se1 = checkInvariant(); assert(se1); ]⟩ φ }
     ~[internalCallExpand]~> dl![m]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; assert(se1); ]⟩ φ }

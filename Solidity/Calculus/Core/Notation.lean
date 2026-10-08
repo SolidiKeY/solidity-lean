@@ -78,6 +78,16 @@ def withBinds (k : (Γ : NCtx) → ElabM (Fml C Γ.ctx)) : NCtx → (Γ : NCtx) 
   | [], Γ => k Γ
   | (x, t) :: B, Γ => do pure (.bind .box x t (← withBinds k B ((x, t) :: Γ)))
 
+/-- The program's own locals among the `n` newest of `Γ`, the fresh ones
+(an elaborator's capture: `uint idx; idx = ++i;`) dropped: the context a
+postcondition stands at, and the thinning into the program's end. -/
+def _root_.Solidity.Core.NCtx.dropFresh : Nat → (Γ : NCtx) → (Δ : NCtx) × Thin Δ.ctx Γ.ctx
+  | 0, Γ => ⟨Γ, .refl⟩
+  | _ + 1, [] => ⟨[], .refl⟩
+  | n + 1, (x, t) :: Γ =>
+    let ⟨Δ, h⟩ := NCtx.dropFresh n Γ
+    if x.idx > 0 then ⟨Δ, .drop h⟩ else ⟨(x, t) :: Δ, .keep h⟩
+
 /-- A program of the formula, statement by statement as `elabFml` reads it:
 a capture takes the least index the formula's written fresh variables
 leave. -/
@@ -114,22 +124,26 @@ def whereLocals (ds : List RawStmt) : ElabM (List (String × LocalTy)) :=
 /-- **A formula read in the named context `Γ`**, as `elabFml` reads it, the
 reader's scope (`ECtx`) and `Γ` binding the same names: a quantifier, an
 update, a program's hints and a `where` push on both.  An atom is read by
-`elabFml` and its names resolved in `Γ`. -/
-def elabFmlC (taken : List Nat) : RawFml → (Γ : NCtx) → ElabM (Fml C Γ.ctx)
+`elabFml` and its names resolved in `Γ`.  With `posts`, a Lean postcondition
+right after a program stands where the program's captures are out of scope
+(`NCtx.dropFresh`, a `Frames.drop` that prints as nothing), as a rule's own
+fresh locals are (`Frames.pop .capture`): the elaborator writes a statement's
+captures in front of it, at the program's top level. -/
+def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx) → ElabM (Fml C Γ.ctx)
   | .all p x φ, Γ => inScope do
     modify fun (Γe, k) => (setBy x (.val p) Γe, k)
-    pure (.all (Var.ofName x) p (← elabFmlC taken φ ((Var.ofName x, .val p) :: Γ)))
-  | .not φ, Γ => do pure (.not (← inScope (elabFmlC taken φ Γ)))
+    pure (.all (Var.ofName x) p (← elabFmlC taken posts φ ((Var.ofName x, .val p) :: Γ)))
+  | .not φ, Γ => do pure (.not (← inScope (elabFmlC taken posts φ Γ)))
   | .and φ ψ, Γ => do
-    pure (.and (← inScope (elabFmlC taken φ Γ)) (← inScope (elabFmlC taken ψ Γ)))
+    pure (.and (← inScope (elabFmlC taken posts φ Γ)) (← inScope (elabFmlC taken posts ψ Γ)))
   | .imp φ ψ, Γ => do
-    pure (.imp (← inScope (elabFmlC taken φ Γ)) (← inScope (elabFmlC taken ψ Γ)))
+    pure (.imp (← inScope (elabFmlC taken posts φ Γ)) (← inScope (elabFmlC taken posts ψ Γ)))
   | .upd m U φ, Γ => inScope do
     let (Γe, k) ← get
     let (U', Γe') ← ElabM.lift (elabUpd C Γe U)
     set (Γe', k)
     let ⟨Δ, U''⟩ ← ElabM.lift (Upd.resolveN (hintOf Γe') Γ Γ .nil U')
-    pure (.upd m U'' (← elabFmlC taken φ Δ))
+    pure (.upd m U'' (← elabFmlC taken posts φ Δ))
   | .modal m P φ, Γ => inScope do
     let (Γe, _) ← get
     let Γh := scopeHints C Γe P
@@ -137,13 +151,17 @@ def elabFmlC (taken : List Nat) : RawFml → (Γ : NCtx) → ElabM (Fml C Γ.ctx
     withBinds C (fun Γb => do
       let P' ← elabModalProg C taken P
       let ⟨Γ', Q⟩ ← ElabM.lift (Prog.resolve Γb P' (strict := false))
-      pure (.modal m Q .nil (← elabFmlC taken φ Γ'))) (newBinders Γe Γh) Γ
+      if posts && φ matches .lean _ then
+        let ⟨Γ₀, h⟩ := NCtx.dropFresh (Γ'.length - Γb.length) Γ'
+        if Γ₀.length < Γ'.length then
+          return .modal m Q (.drop h .nil) (← elabFmlC taken posts φ Γ₀)
+      pure (.modal m Q .nil (← elabFmlC taken posts φ Γ'))) (newBinders Γe Γh) Γ
   | .lean i, _ => pure (Fml.slotC i)
   | .decl ds φ, Γ => inScope do
     let ls ← whereLocals C ds
     for (x, t) in ls do
       modify fun (Γe, k) => (setBy x t Γe, k)
-    withBinds C (elabFmlC taken φ) (ls.map fun (x, t) => (Var.ofName x, t.toLTy)) Γ
+    withBinds C (elabFmlC taken posts φ) (ls.map fun (x, t) => (Var.ofName x, t.toLTy)) Γ
   | φ, Γ => do
     let ψ ← elabFml C taken φ
     ElabM.lift (Fml.resolveN (fun _ => none) Γ ψ)
@@ -171,7 +189,8 @@ def elabDlC (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C []) :
     -- a declared name's parameter is not in the program's scope, which may
     -- declare it (as `dl!` reads it free, a `pv`)
     let scope := ps.filter fun (x, _) => !declared.contains x
-    (((elabFmlC C taken φ Γ).run { funs := C.funs }).run' (scope, 1)).map (Fml.closeN true Γ)
+    (((elabFmlC C taken (!pastAll) φ Γ).run { funs := C.funs }).run' (scope, 1)).map
+      (Fml.closeN true Γ)
   let mut ps := params
   for p in params do
     let ps' := ps.erase p

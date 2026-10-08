@@ -186,6 +186,44 @@ partial def mergeModality (m d b : Expr) : Option Expr :=
     | .mdata k x, .mdata _ y => do pure (.mdata k (← mergeModality m x y))
     | _, _ => none
 
+/-! ## Printing a line -/
+
+/-- `⟨[ … ]⟩ φ` with a block's end among its statements, as `Core.Delab`'s
+`fixBlockEnds` prints `⟨ … ⟩ φ` and `[ … ] φ`. -/
+partial def fixEitherBlockEnds (stx : Syntax) : MetaM Syntax := do
+  let .node info k args := stx | return stx
+  let args ← args.mapM fixEitherBlockEnds
+  let stx := Syntax.node info k args
+  unless args.size == 6 && args[0]!.isToken "⟨" && args[1]!.isToken "[" do return stx
+  let ss := Delab.stmtItems args[2]!
+  let some i := ss.findIdx? Delab.isBlockEnd | return stx
+  let pre : Array (TSyntax `sol_stmt) := (ss.extract 0 i).map (⟨·⟩)
+  let rest ← (ss.extract (i + 1) ss.size).mapM fun s =>
+    if Delab.isBlockEnd s then `(core_item| } ) else `(core_item| $(⟨s⟩):sol_stmt ; )
+  let φ : TSyntax `dl_fml := ⟨args[5]!⟩
+  return (← `(dl_fml| ⟨[ $[$pre;]* } $rest* ]⟩ $φ)).raw
+
+/-- A scoped line: `dl{ φ }`, a postcondition `↑φ` printed as `φ` (a local
+of its name stands for it, which `Core.Delab` prints as a formula variable). -/
+def ppCoreLine (e : Expr) : MetaM Lean.Term := do
+  let sp ← collectPosts e {}
+  let rec go (i : Nat) (e : Expr) : MetaM Lean.Term := do
+    if h : i < sp.posts.size then
+      let p := sp.posts[i]
+      let n ← match p.appArg! with
+        | .fvar fv => fv.getUserName
+        | _ => pure `φ
+      withLocalDeclD n (mkApp2 (mkConst ``Core.Fml) (p.getArg! 0) (p.getArg! 1)) fun x =>
+        go (i + 1) (e.replace fun y => if y == p then some x else none)
+    else
+      let φ : TSyntax `dl_fml := ⟨← fixEitherBlockEnds (← Delab.ppFmlE e)⟩
+      if Solidity.isEscape φ then Solidity.escapeTerm e else `(dl{ $φ:dl_fml })
+  go 0 e
+
+/-- A scoped line in a message, indented. -/
+def indentLine (e : Expr) : MetaM MessageData := do
+  try return indentD m!"{← ppCoreLine e}" catch _ => return indentExpr e
+
 /-! ## Running the strategy -/
 
 /-- A line of a derivation: the line and the statement the step that reached
@@ -454,7 +492,7 @@ partial def focusProof (m? : Option Expr) (K : Nat) (A f B : Expr) : MetaM Expr 
   if same ``Core.Fml.and then
     if a[2]! == b[2]! then
       let some h ← inactiveProof a[2]! |
-        throwError "sol_chain: the step after{indentExpr A}\nasks whether a goal is done, \
+        throwError "sol_chain: the step after{← indentLine A}\nasks whether a goal is done, \
           which the kernel does not compute"
       let h₀ := mkAppN (mkConst ``Fml.stepFocusR_eq_none) #[C, kE, Γ, a[2]!, h]
       return mkAppN (mkConst ``Fml.stepFocusR_and_right)
@@ -484,7 +522,7 @@ partial def focusProof (m? : Option Expr) (K : Nat) (A f B : Expr) : MetaM Expr 
 /-- `A.fresh = K`. -/
 def freshProof (A : Expr) (K : Nat) : MetaM Expr := do
   let (n, h) ← maxIdxProof A
-  unless n + 1 = K do throwError "sol_chain: the fresh index of{indentExpr A}\nis {n + 1}, not {K}"
+  unless n + 1 = K do throwError "sol_chain: the fresh index of{← indentLine A}\nis {n + 1}, not {K}"
   let C := A.getArg! 0
   let Γ := A.getArg! 1
   return mkAppN (mkConst ``Fml.fresh_eq) #[C, Γ, A, toExpr n, h]
@@ -553,9 +591,19 @@ def labelAs? (c : Lean.Name) (k m s : Expr) : MetaM (Option Expr) := do
           x.mvarId!.assign (← mkEqRefl a)
         else if ← isProp t then
           x.mvarId!.assign (← mkDecideProof t)
+    -- a local's type that only a side condition's proof mentions (a rule's
+    -- `MRhs.mapFree` under a pushed local): no unification sets it, and any
+    -- type will do there
+    let mut defaulted := false
+    for x in xs do
+      if (← instantiateMVars x).isMVar then
+        if (← whnfR (← instantiateMVars (← inferType x))).isConstOf ``LTy then
+          x.mvarId!.assign (mkApp (mkConst ``LTy.val) (mkConst ``PrimTy.uint))
+          defaulted := true
     let d ← instantiateMVars (mkAppN ctor xs)
     let p ← instantiateMVars args[6]!
     if d.hasMVar || p.hasMVar then failure
+    if defaulted then Meta.check d
     let wrap := if (`Solidity.Core.Taclet).isPrefixOf c then ``Rule.key else ``Rule.lean
     let rule ← mkAppM wrap #[d]
     mkAppM ``StepRule.taclet #[k, m, s, p, rule]
@@ -588,18 +636,19 @@ def labelOfFocus? (f : Expr) : MetaM (Option (Lean.Name × Expr)) := do
 
 /-- The label of `~[r]~>` on the focus `f`: the constructor `r` must derive it. -/
 def labelFor (r : Lean.Name) (f : Expr) (where_ : Expr) : MetaM Expr := do
+  let at_ ← indentLine where_
   if r == `emptyModality then
     unless f.isAppOf ``Focus.empty do
-      throwError "~[{r}]~>: the program of{indentExpr where_}\nis not done"
+      throwError "~[{r}]~>: the program of{at_}\nis not done"
     return mkApp (mkConst ``StepRule.emptyModality) (f.getArg! 0)
   let a := f.getAppArgs
-  unless a.size == 6 do throwError "~[{r}]~>: the step on{indentExpr where_}\nends a program"
+  unless a.size == 6 do throwError "~[{r}]~>: the step on{at_}\nends a program"
   for c in ← ruleCtors r do
     if let some l ← labelAs? c a[1]! a[2]! a[5]! then return l
   let found := match ← labelOfFocus? f with
     | some (n, _) => m!"{n}"
     | none => m!"no rule of the table"
-  throwError "~[{r}]~>: the rule for{indentExpr where_}\nis {found}, not {r}"
+  throwError "~[{r}]~>: the rule for{at_}\nis {found}, not {r}"
 
 /-- A derivation, with the auxiliary lemmas the elaborator abstracted it into
 unfolded, down to a constructor. -/
@@ -749,42 +798,6 @@ def matchWritten (sp : Splice) (C : Expr) (w : Written) (B : Expr) (erased : Arr
     -- a constant modality read once against both runs: the run's own
     return es'.any (same rs[0]! ·)
 
-/-- `⟨[ … ]⟩ φ` with a block's end among its statements, as `Core.Delab`'s
-`fixBlockEnds` prints `⟨ … ⟩ φ` and `[ … ] φ`. -/
-partial def fixEitherBlockEnds (stx : Syntax) : MetaM Syntax := do
-  let .node info k args := stx | return stx
-  let args ← args.mapM fixEitherBlockEnds
-  let stx := Syntax.node info k args
-  unless args.size == 6 && args[0]!.isToken "⟨" && args[1]!.isToken "[" do return stx
-  let ss := Delab.stmtItems args[2]!
-  let some i := ss.findIdx? Delab.isBlockEnd | return stx
-  let pre : Array (TSyntax `sol_stmt) := (ss.extract 0 i).map (⟨·⟩)
-  let rest ← (ss.extract (i + 1) ss.size).mapM fun s =>
-    if Delab.isBlockEnd s then `(core_item| } ) else `(core_item| $(⟨s⟩):sol_stmt ; )
-  let φ : TSyntax `dl_fml := ⟨args[5]!⟩
-  return (← `(dl_fml| ⟨[ $[$pre;]* } $rest* ]⟩ $φ)).raw
-
-/-- A scoped line: `dl{ φ }`, a postcondition `↑φ` printed as `φ` (a local
-of its name stands for it, which `Core.Delab` prints as a formula variable). -/
-def ppCoreLine (e : Expr) : MetaM Lean.Term := do
-  let sp ← collectPosts e {}
-  let rec go (i : Nat) (e : Expr) : MetaM Lean.Term := do
-    if h : i < sp.posts.size then
-      let p := sp.posts[i]
-      let n ← match p.appArg! with
-        | .fvar fv => fv.getUserName
-        | _ => pure `φ
-      withLocalDeclD n (mkApp2 (mkConst ``Core.Fml) (p.getArg! 0) (p.getArg! 1)) fun x =>
-        go (i + 1) (e.replace fun y => if y == p then some x else none)
-    else
-      let φ : TSyntax `dl_fml := ⟨← fixEitherBlockEnds (← Delab.ppFmlE e)⟩
-      if Solidity.isEscape φ then Solidity.escapeTerm e else `(dl{ $φ:dl_fml })
-  go 0 e
-
-/-- A scoped line in a message, indented. -/
-def indentLine (e : Expr) : MetaM MessageData := do
-  try return indentD m!"{← ppCoreLine e}" catch _ => return indentExpr e
-
 /-- The computed line, shown for an error. -/
 def showLines (φ : Expr) (lines : List Line) : MetaM MessageData := do
   let mut out := m!"{← indentLine φ}"
@@ -899,7 +912,8 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
     let arrow : TSyntax `chain_arrow := ⟨l[0]⟩
     let rw? ← match arrow with
       | `(chain_arrow| ~[ $r:ident ]~>) => do
-        pure ((← Solidity.Chain.rwArrow? r).map fun a => (some (r, a)))
+        if !(← ruleCtors r.getId).isEmpty then pure none
+        else pure ((← Solidity.Chain.rwArrow? r).map fun a => (some (r, a)))
       | `(chain_arrow| ~=>) => pure (some none)
       | _ => pure none
     if let some rw := rw? then
@@ -935,7 +949,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       throwError "~>: past a rewrite the program is done: only rewrites go on"
     let run ← runChain cur
     let notReached (ls : List Line) : TermElabM Unit := do
-      throwError "sol_chain: the derivation of{← indentLine cur}\ndoes not reach the line written\n\
+      throwError "sol_chain: the derivation of{← indentLine cur}\ndoes not reach{indentD (.ofSyntax l[1])}\n\
         Its lines:\n{← showLines cur ls}{stuckNote run}"
     match arrow with
     | `(chain_arrow| ~*>) =>
@@ -951,8 +965,8 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
     | _ =>
       let some B := run.lines.head? |
         match run.stuck, run.splice.modality with
-        | true, some m => throwError "sol_chain: the line after{indentExpr cur}\n{modalityStop m}"
-        | _, _ => throwError "sol_chain: no rule applies to{indentExpr cur}"
+        | true, some m => throwError "sol_chain: the line after{← indentLine cur}\n{modalityStop m}"
+        | _, _ => throwError "sol_chain: no rule applies to{← indentLine cur}"
       unless ← matchWritten run.splice C w B.fml B.erased do notReached [B]
       match arrow with
       | `(chain_arrow| ~[ $r:ident ]~>) =>
@@ -998,9 +1012,9 @@ to pick the reader. -/
 /-- The computed line `B` after `A`, its run. -/
 def nextLine (A B : Expr) : MetaM (Run × Line) := do
   let run ← runChain A
-  let some q := run.lines.head? | throwError "sol_chain: no rule applies to{indentExpr A}"
+  let some q := run.lines.head? | throwError "sol_chain: no rule applies to{← indentLine A}"
   unless q.fml == B do
-    throwError "sol_chain: the line after{indentExpr A}\nis{indentExpr q.fml}\nnot{indentExpr B}"
+    throwError "sol_chain: the line after{← indentLine A}\nis{← indentLine q.fml}\nnot{← indentLine B}"
   return (run, q)
 
 /-- Whether a goal is a scoped chain's. -/
@@ -1028,7 +1042,7 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
     let i ← if A == B then pure 0 else
       match run.lines.findIdx? (·.fml == B) with
       | some i => pure (i + 1)
-      | none => throwError "sol_chain: the derivation of{indentExpr A}\ndoes not reach{indentExpr B}"
+      | none => throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}"
     g.assign (← stepsProof run.splice A (run.lines.take i))
   | Nonempty T =>
     let t ← mkFreshExprMVar T
