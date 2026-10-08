@@ -109,7 +109,8 @@ def evalCoreSkip : Tactic := fun stx => do
   unless ty.isAppOf ``Core.Proves do throwError "core_skip: not a scoped sequent"
   let φ ← whnf ty.appArg!
   let H := ty.appFn!.appArg!
-  match stx[1].getId with
+  -- the macros below write the kind under their own scopes
+  match stx[1].getId.eraseMacroScopes with
   | `empty =>
     if φ.isAppOf ``Fml.modal then
       throwError "apply empty: a modality is left, with a statement to run"

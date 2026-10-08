@@ -138,12 +138,6 @@ theorem getStores :
   sol_symex
   sol_close
 
-/-! ## Proving, with callbacks
-
-`fails <= pings` is the pinger's invariant: it holds where control leaves the
-contract, and the success block may assume it of whatever state the callee
-leaves. -/
-
 end Solidity.Examples.Tactics.TryCatch
 
 /-! ## Read without the switch
@@ -173,6 +167,12 @@ theorem getWalk :
       refine close ?_
       sol_symex
       sol_close
+
+/-! ## Proving, with callbacks
+
+`fails <= pings` is the pinger's invariant: it holds where control leaves the
+contract, and the success block may assume it of whatever state the callee
+leaves. -/
 
 /-- `fails <= pings`. -/
 def pingInv : Invariant Pinger := ⟨dl!{ fails <= pings }, rfl, rfl⟩

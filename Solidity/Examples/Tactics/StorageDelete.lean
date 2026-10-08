@@ -137,21 +137,6 @@ theorem deleteBoolThenRead :
   sol_symex
   sol_close
 
-/-! ## Reading after a delete, in the sequent
-
-The same reads, closed as mini-solkey closes them: the calculus steps
-(`sol_derive`), the updates merged into one parallel update (`Proves.merge`
-for the locals, `Proves.mergeStorage` for a storage write), and the read the
-last element binds rewritten by the Theory's own lemmas — `find_delAt_same`,
-`find_copyTo_same`, `find_delAt_frame` of `Theory/Storage.lean` and
-`Theory/Copy.lean`, named directly (`sol_rw`, `Calculus/TheoryRewrite.lean`).
-The read sits in an update's right-hand side, `{ x := find(…) }`, which the
-rewrite reaches because its result is a literal and the update is under the
-box (`Proves.updRw`).  Then the update is applied to the goal and dropped
-(`sol_apply_upd`) and `v = v` closes (`Proves.eqDClose`).  Every step is a
-rule of the calculus, so none of them waits for the program to be gone
-(`deleteFrameMid_theory`). -/
-
 /-- `alice.account.balance = 7; alice.age = 30; delete alice.account;
 uint a = alice.age;` — `alice.age` parts ways with `alice.account` (at `age`
 against `account`), so it keeps `30`. -/
@@ -274,7 +259,22 @@ end Solidity.Examples.Tactics.StorageDelete
 Today's sequent rules on updates (`merge`, `mergeStorage`, the Theory's
 laws), which the scoped sequent does not have (`Calculus/Core/Proves.lean`:
 the program rules, `close` on the erasure), and a storage holding a `bool`
-where a `uint` is declared, which only today's untyped storage holds. -/
+where a `uint` is declared, which only today's untyped storage holds.
+
+### Reading after a delete, in the sequent
+
+The same reads, closed as mini-solkey closes them: the calculus steps
+(`sol_derive`), the updates merged into one parallel update (`Proves.merge`
+for the locals, `Proves.mergeStorage` for a storage write), and the read the
+last element binds rewritten by the Theory's own lemmas — `find_delAt_same`,
+`find_copyTo_same`, `find_delAt_frame` of `Theory/Storage.lean` and
+`Theory/Copy.lean`, named directly (`sol_rw`, `Calculus/TheoryRewrite.lean`).
+The read sits in an update's right-hand side, `{ x := find(…) }`, which the
+rewrite reaches because its result is a literal and the update is under the
+box (`Proves.updRw`).  Then the update is applied to the goal and dropped
+(`sol_apply_upd`) and `v = v` closes (`Proves.eqDClose`).  Every step is a
+rule of the calculus, so none of them waits for the program to be gone
+(`deleteFrameMid_theory`). -/
 
 namespace Solidity.Examples.Tactics.StorageDelete
 

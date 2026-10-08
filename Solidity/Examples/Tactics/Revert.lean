@@ -119,9 +119,7 @@ theorem requireBox : ⊢ dl!{ [ require(a == b); x = a; ] x == b } := by
 /-! ## The diamond: a guard that fails proves nothing
 
 The same program under the diamond needs `a == b`: where it does not hold
-the program reverts, and `revertDiamond` leaves `false`.  With the
-precondition, the second goal has both `a = b` and `se1 ≐ false` in its
-context. -/
+the program reverts. -/
 
 /-- Without the precondition the diamond is not valid: where `a` is `0` and
 `b` is `1` the `require` reverts. -/
@@ -287,7 +285,9 @@ open Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-/-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`. -/
+/-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`: with the precondition,
+`revertDiamond` leaves `false`, and the second goal has both `a = b` and
+`se1 ≐ false` in its context. -/
 theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x == b } := by
   apply intro
   apply unfold .requireConditionCapture

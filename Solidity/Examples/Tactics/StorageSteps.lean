@@ -264,7 +264,7 @@ theorem arrayIndexRead : ⊨ dl!{ [ uint v = values[i]; ] v == values[i] } := by
   sol_close
 
 /-- `uint v = values[i];` under the diamond is not valid: in `StandardExample`'s
-initial store `values` is empty (and `i` unbound), so the read halts. -/
+initial store `values` is empty, so at `i = 0` the read halts. -/
 theorem arrayIndexReadDiamond : ¬ (⊨ dl!{ ⟨ uint v = values[i]; ⟩ true }) :=
   fun h => Modality.afterRunC_diamond_halt
     (h (Core.State.ofSem State.exampleStore) (.int 0) (by unfold PrimTy.admits; decide)

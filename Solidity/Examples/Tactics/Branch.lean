@@ -82,14 +82,10 @@ the state the `if` runs in. -/
 
 /--
 trace: case thn
-⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a,
-    { se1 := ‹Tm.app2 (Op2.binop BinOp.eqB PrimTy.uint) (Tm.pvV (Var.user "a")) (Tm.pvV (Var.user "b"))› }, se1 ≐ true ⟹
-    [ x = 2; } ] ¬x = 0 }
+⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ true ⟹ [ x = 2; } ] ¬x = 0 }
 
 case els
-⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a,
-    { se1 := ‹Tm.app2 (Op2.binop BinOp.eqB PrimTy.uint) (Tm.pvV (Var.user "a")) (Tm.pvV (Var.user "b"))› },
-    se1 ≐ false ⟹ [ x = 1; } ] ¬x = 0 }
+⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ [ x = 1; } ] ¬x = 0 }
 -/
 #guard_msgs in
 /-- `if (a == b) { x = 2; } else { x = 1; }` ends with `x != 0`. -/
