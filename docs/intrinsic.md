@@ -2528,6 +2528,90 @@ the fallback can be met; recorded, not implemented.**
   premise keeps, which a loop's invariant and postcondition (any formula,
   boxes included) do not give for free.
 
+### CORE 2, the typed reading as the reading: blocked on decision 17 (2026-10-08)
+
+CORE 2 was meant to fold the `T*` modules into their original names, so
+that `tholds` becomes `holds`, `Proves.tvalid` becomes `Proves.valid`, and
+M3's reading is deleted with its arm proofs, `RunWk.lean` and
+`RunFrame.lean`.  `Proves.close` would then ask `Fml.tclosableB`, so that a
+leaf behind a diamond update can close.  **It has not landed.**  The
+reason is CORE 1's open decision 17, not missing work.  Nothing was
+changed in Lean.  This section records why and what the lead has to
+decide.
+
+- *The fold makes soundness vacuous.*  `Proves.tsound` and
+  `Proves.tvalid` (`Calculus/Core/TProvesSound.lean`) take `Stmt.TSound C`
+  as a hypothesis, and `Stmt.not_tsound C` (`Calculus/Core/TSound.lean`)
+  proves that hypothesis false at every contract.  Once the fold makes
+  them `Proves.sound`/`Proves.valid`, no derivation proves a `Valid` goal.
+  That breaks everything that uses M3's unconditional `Proves.valid` today:
+  - `Solidity/Theorems.lean`'s `soundness'`
+  - the `refine Core.Proves.valid` walks in `Examples/ProofTree.lean` and
+    `Examples/Tactics/TryCatch.lean`
+  - `Examples/ChainNotation.lean`
+  - every `proved_core` in `TestSuite/CoreDerived9–11`
+  - the replays of `sol_prove` and `sol_derive`
+  - the pinned `#print axioms Proves.valid` in
+    `Calculus/Core/ProvesSound.lean`
+
+  Deleting M3's reading would remove the only soundness theorem that has no
+  hypothesis.
+- *The close switch has no sound justification without the fold.*
+  - The Bool twin exists already: `Fml.tclosableB` and
+    `Fml.tclosableB_sound` (`Calculus/Core/Closable.lean`, from `tsoundB`).
+    Only the switch is missing.
+  - The switch cannot be justified over M3's states.  There a diamond
+    update asks `State.BoolOK` of the state it ends in, and an erasure's
+    validity does not give it: an untyped storage read at a `bool` type may
+    hold a non-`bool`.
+  - Over the typed state, the switch is justified by
+    `tholds_of_erase_valid` under `Fml.TClosable`
+    (`Calculus/Core/TCloseErase.lean`).  But the typed `Proves.tsound` it
+    would feed is the conditional one above.
+  - So `Proves.close` keeps `closableB`.  No diamond leaf of
+    `TestSuite/Problems` closes by `Proves.close` yet, and no Core example
+    shows one.
+- *`RunWk.lean`/`RunFrame.lean` stay.*  M3's `Sound*` arms import them.
+  `Calculus/Core/WkOver.lean` already holds the syntax, so they can be
+  deleted together with M3's reading.
+- *The residual cannot be proved away inside the calculus.*  The only false
+  arm is the box `memoryLocalDeclInitDrop` at an allocating initializer,
+  over a heap with no object of the local's type.  The premise's run from
+  any existing reference `v` allocates a second object.  Its end state
+  then differs from the conclusion's by one unreachable object, and every
+  later id shifts.  This holds for any reading that keeps `v` an existing
+  reference: the grown heap, any heap extension, or a Kripke reading over
+  extensions.  The two states can be related only by a
+  garbage-and-renaming invariance of `tholds` (decision 17's option (c)).
+  That invariance does not hold while a term can observe ids or a whole
+  memory.  A derivation-level route through M3 (option (d)) keeps M3's
+  reading as the proof vehicle, which CORE 2 deletes.  It also still
+  cannot close a diamond leaf, for the `State.BoolOK` reason above.
+- *The smallest typed change found*, offered to the lead and not
+  implemented: option (b), with `LTy.TDenote (.mem R) := Option (HRef H R)`.
+  - The binder then ranges over `none` too.  The premise's instance at
+    `none` runs `mv = r` to exactly the conclusion's state, because nothing
+    reads `mv` before that assignment.
+  - Every diamond binder becomes inhabited, so the `LTy.inhabited` side
+    conditions go away.
+  - `none` must erase to something stable under heap growth
+    (`TDenote.erase_wk`).  A read of `none` needs a halt that `TRes.Agrees`
+    accepts against the untyped run.
+  - It reverses decision 12's "memory locals stay non-dangling".  It is a
+    low change (`Semantics/Core/{TypedState,TypedRun,TypedRunErase,TypedRunWk,HeapErase}.lean`,
+    the memory arms in `TSound{Mem,Local}`, the `Evm/Core*` simulation,
+    `Typing/` reachability) that runs before CORE 2.
+- **Left, all of CORE 2**, in this order once decision 17 is settled:
+  1. the change to the typed reading;
+  2. `Stmt.TSound C` unconditional, and `Stmt.not_tsound` deleted;
+  3. the fold and the renames;
+  4. deleting M3's `holds`, `State.BoolOK`, `Modality.afterT`, its
+     `Sound*` arms, `RunWk.lean` and `RunFrame.lean`;
+  5. the `Proves.close` switch to `Fml.tclosableB`, and a Core example
+     that closes a diamond obligation of `TestSuite/Problems`;
+  6. the build with `SolidityCorpus` and `SolkeyTestSuite`, and the
+     scripts.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
