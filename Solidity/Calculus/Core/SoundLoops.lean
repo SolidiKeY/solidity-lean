@@ -13,7 +13,8 @@ today's.  Every loop head is a state the body's frame allows from the first
 iterations (`Loop.run_induct`).  Under the diamond the body is read under the
 variant's local (`Prog.wk up`), which it therefore keeps (`Prog.run_wk`), and
 the variant bounds the iterations left (`Loop.run_variant`), and the
-rule's cover (`Premise.cover`) that the condition reads as a `bool`.
+condition reads as a `bool`: the diamond's update of it ends in a state whose
+`bool` locals hold `bool`s (`State.BoolOK`), and so does the body's run.
 
 The body's own locals are popped at the end of every iteration, so the
 frame need not list them (`Calculus/Core/Blocks.lean`): the anonymised
@@ -46,7 +47,7 @@ theorem Premise.Sound.whileInvBox (k : Nat) (I c : Val C Γ .bool) (dec : Option
       (.inv (.isBoolD I.lower true) xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
         (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
         .refl (.push .refl) body (.isBoolD I.lower true)) σ := by
-  intro _ _ ω κ φ hp _
+  intro _ _ ω κ φ hp
   obtain ⟨hI0, hA⟩ := hp
   obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
   show Modality.afterRunC .box _ _
@@ -79,9 +80,9 @@ theorem Premise.Sound.whileInvBox (k : Nat) (I c : Val C Γ .bool) (dec : Option
     rcases v with n | (_ | _)
     · dsimp only; exact ⟨trivial, nofun⟩
     · dsimp only
-      exact (holds_modalK .box ω κ φ τ).1 (hF ((holds_isBoolD _ _ _).2 rfl))
+      exact (holds_modalK .box ω κ φ τ nofun).1 (hF ((holds_isBoolD _ _ _).2 rfl))
     · dsimp only
-      have h' := (holds_modalK .box body (.pop .block body.ext .nil) _ τ).1
+      have h' := (holds_modalK .box body (.pop .block body.ext .nil) _ τ nofun).1
         (hT ((holds_isBoolD _ _ _).2 rfl))
       rw [frames_pop_nil] at h'
       cases hb : (Prog.run τ body).map (State.drop body.ext) with
@@ -179,8 +180,8 @@ section Diamond
 
 variable {Γ Γ₁ : Ctx}
 
-/-- **`whileInvariantDiamond` is sound**: the cover (`Premise.cover`) says the
-condition reads as a `bool` at every head. -/
+/-- **`whileInvariantDiamond` is sound**: at every head the state's `bool`
+locals hold `bool`s, so the condition's update reads a `bool`. -/
 theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
     (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
     (hf : body.frame = some (xs, hv)) (σ : State C Γ) {p : Premise C Γ Γ}
@@ -190,28 +191,26 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   rw [hf] at hp
   dsimp only at hp
   cases hp
-  intro _ _ ω κ φ hp hcv
+  intro _ _ ω κ φ hp
+  refine holds_modal_intro fun hσ => ?_
   obtain ⟨hI0, hA⟩ := hp
   obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
   have key := Loop.run_variant (body := fun τ => (Prog.run τ body).map (State.drop body.ext))
     (c := fun τ => c.eval τ)
     (H := fun τ => GFrame (frameMut hv) σ τ ∧ LocAgree 0 (Prog.writesAt 0 body) σ.env τ.env ∧
-      holds τ (Fml.isBoolD I.lower true))
-    (G := fun τ => holds τ (Fml.modalK .diamond ω κ φ)) (D := fun τ => d.eval τ) ?_
-    ⟨GFrame.refl σ, LocAgree.refl _, hI0⟩
-  · obtain ⟨τf, hrun, hG⟩ := key
-    show Modality.afterRunC .diamond _ _
+      holds τ (Fml.isBoolD I.lower true) ∧ τ.BoolOK)
+    (G := fun τ => τ.BoolOK ∧ holds τ (Fml.modalK .diamond ω κ φ)) (D := fun τ => d.eval τ) ?_
+    ⟨GFrame.refl σ, LocAgree.refl _, hI0, hσ rfl⟩
+  · obtain ⟨τf, hrun, hok, hG⟩ := key
     rw [run_cons_frames]
-    show Modality.afterRunC .diamond (holds · φ)
+    show Modality.afterRunC .diamond (Modality.okP .diamond State.BoolOK (holds · φ))
       (do let τ ← Loop.run (fun τ => (Prog.run τ body).map (State.drop body.ext))
             (fun τ => c.eval τ) σ
           Frames.run (← Prog.run τ ω) κ)
     rw [hrun]
-    exact (holds_modalK .diamond ω κ φ τf).1 hG
-  intro τ ⟨hg, ha, hI⟩
-  have hX := holds_anonHavoc hxs hg ha hA hI
-  have hC := holds_anonHavoc hxs hg ha hcv hI
-  change Modality.afterC .diamond _ (Upd.apply τ _) at hX hC
+    exact (holds_modalK .diamond ω κ φ τf fun _ => hok).1 hG
+  intro τ ⟨hg, ha, hI, hτ⟩
+  have hX := (holds_upd _ _ fun _ => hτ).1 (holds_anonHavoc hxs hg ha hA hI)
   have hU : ((Upd.nil.decl (fie k) (Rhs.val (p := .uint) d.lower)).decl (fse k)
       (Rhs.val (p := .bool) c.lower)).apply τ =
       (d.eval τ >>= fun dv => c.eval τ >>= fun cv =>
@@ -221,21 +220,16 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       pure (τ₁.push (t := .val .bool) (← c.lower.eval τ))) = _
     rw [Val.eval_lower, Val.eval_lower]
     cases d.eval τ <;> cases c.eval τ <;> rfl
-  rw [hU] at hX hC
+  rw [hU] at hX
   cases hd : d.eval τ with
   | error e => rw [hd] at hX; exact False.elim hX
   | ok dv =>
   cases hc : c.eval τ with
   | error e => rw [hd, hc] at hX; exact False.elim hX
   | ok cv =>
-  rw [hd, hc] at hX hC
-  obtain ⟨hT, hF⟩ := hX
-  have hcov := hC
-  have hcb : ∃ b : Bool, cv = .bool b :=
-    Classical.byContradiction fun hn => hcov
-      ⟨fun h => hn ⟨true, Except.ok.inj ((holds_isBoolD _ _ _).1 h)⟩,
-        fun h => hn ⟨false, Except.ok.inj ((holds_isBoolD _ _ _).1 h)⟩⟩
-  obtain ⟨b, rfl⟩ := hcb
+  rw [hd, hc] at hX
+  obtain ⟨hok, hT, hF⟩ := hX
+  obtain ⟨b, rfl⟩ : ∃ b : Bool, cv = .bool b := hok.1
   refine ⟨dv, hd, ?_, fun hc' => ?_, fun hc' => ?_⟩
   · cases b
     · exact .inr hc
@@ -244,13 +238,13 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       have := hc.symm.trans hc'
       cases this; rfl
     subst hb
-    exact hF ((holds_isBoolD _ _ _).2 rfl)
+    exact (holds_upd _ _ fun _ => hok).1 (hF ((holds_isBoolD _ _ _).2 rfl))
   · have hb : b = true := by
       have := hc.symm.trans hc'
       cases this; rfl
     subst hb
-    have h := (holds_modalK .diamond _ _ _ (τ.push (t := .val .uint) dv)).1
-      (hT ((holds_isBoolD _ _ _).2 rfl))
+    obtain ⟨hok₁, hA₁⟩ := (holds_upd _ _ fun _ => hok).1 (hT ((holds_isBoolD _ _ _).2 rfl))
+    have h := (holds_modalK .diamond _ _ _ (τ.push (t := .val .uint) dv) fun _ => hok₁).1 hA₁
     rw [frames_pop_nil] at h
     let e₁ : Env C (.val .uint :: Γ) := (dv, τ.env)
     have hw := WkRel.eq_lifted (WkRel.drop (Prog.wk_over body up) (Prog.run_wk body up e₁ τ))
@@ -259,15 +253,15 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     | error e => rw [hb] at h; exact False.elim h.1
     | ok τ₁ =>
       rw [hb] at h
-      obtain ⟨hI₁, hdec⟩ := h.1
+      obtain ⟨hok₂, hI₁, hdec⟩ := h.1
       obtain ⟨τ₀, hb', rfl⟩ := map_ok_inv' hb
       obtain ⟨hg', ha'⟩ := Prog.run_frame body hwμ 0 hb'
       change holds ((State.drop body.ext τ₀).push (t := .val .uint) dv) _ at hI₁ hdec
-      refine ⟨_, hb, ⟨hg.trans (hg'.withEnv _), ha.trans ha', ?_⟩, fun hc₁ => ?_⟩
+      refine ⟨_, hb, ⟨hg.trans (hg'.withEnv _), ha.trans ha', ?_, State.BoolOK.pop hok₂⟩,
+        fun hc₁ => ?_⟩
       · rw [holds_isBoolD_lower, Val.eval_up] at hI₁
         exact (holds_isBoolD_lower _ _ _).2 hI₁
       · change c.eval (State.drop body.ext τ₀) = _ at hc₁
-        change Modality.afterC .diamond _ (Upd.apply _ _) at hdec
         have hU₁ : (Upd.nil.decl (fse k) (Rhs.val (p := .bool) c.up.lower)).apply
             ((State.drop body.ext τ₀).push (t := .val .uint) dv) =
             .ok (((State.drop body.ext τ₀).push (t := .val .uint) dv).push (t := .val .bool)
@@ -277,8 +271,10 @@ theorem Premise.Sound.whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
             pure (υ.push (t := .val .bool)
               (← c.up.lower.eval ((State.drop body.ext τ₀).push (t := .val .uint) dv)))) = _
           rw [Val.eval_lower, Val.eval_up, hc₁]; rfl
-        rw [hU₁] at hdec
-        obtain ⟨hle, hlt⟩ := hdec ((holds_isBoolD _ _ _).2 rfl)
+        have hdec' := (holds_upd (σ := (State.drop body.ext τ₀).push (t := .val .uint) dv) _ _
+          fun _ => hok₂).1 hdec
+        rw [hU₁] at hdec'
+        obtain ⟨hle, hlt⟩ := hdec'.2 ((holds_isBoolD _ _ _).2 rfl)
         rw [holds_isBoolD] at hle hlt
         change evalBinop .le .uint (.int 0) (d.up.up.lower.eval _) = _ at hle
         rw [Val.eval_lower, Val.eval_up, Val.eval_up] at hle

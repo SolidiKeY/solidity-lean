@@ -1024,6 +1024,40 @@ elaborates with every module (no name clash).
 
 **Merge order:** sound → symex → chains → tree. Each later lane merges `intrinsic` and re-checks its own files.
 
+### W2 lane `sound` (`w2-sound`, 2026-10-08)
+
+**The cover is gone** (first commit): `Proves.split` and `Proves.inv` have
+KeY's goals only, `Calculus/Core/Cover.lean` (`Premise.cover`, `Fml.or`) is
+deleted, and `Premise.Sound` takes no cover.  Over M3's untyped states a
+`bool` local can still hold a number, so the diamond is read only from and
+into states whose `bool` locals hold `bool`s (`State.BoolOK`,
+`Calculus/Core/Logic.lean`): `holds` of a diamond update or modality is
+`Modality.afterT`/`afterRunT`, `σ.BoolOK → …` with `BoolOK` asked of the
+state it ends in.  The box is unchanged.  Where it is used:
+
+* a split on a simple condition: the condition reads a `bool`
+  (`Simple.eval_bool`), so one of `c`, `c'` holds; the stuck case is the
+  box's alone (`Premise.Sound.splitStuck`);
+* `whileInvariantDiamond`: the condition's update ends in a `BoolOK`
+  state, so it pushed a `bool`, and the body's run ends in one, so every head
+  is one (`Premise.Sound.whileInvDiamond`);
+* the hidden binder (`Premise.sound_bind`) needs a witness that is `BoolOK`
+  at its type: `false` for a `bool`, anything for an alias or a memory local.
+
+Why not "the state is typed" (`RunWT`, every local of its type) as the
+guard: a memory local's type can be uninhabited (no object of its type in
+the heap), and then `memoryLocalDeclInitDrop`'s hidden binder ranges over no
+typed value: under the diamond, with an initializer that reverts, its
+premise holds vacuously and its conclusion fails.  **The same holds of the
+typed state** (`LTy.TDenote (.mem R) = HRef H R`, empty when `H` has no
+`R`): `holds` over `TState` needs a decision there (a binder over the heap
+grown by a default object, or a diamond rule without the binder).
+
+`holds_erase` is now for box updates and modalities only (`Fml.Plain`): the
+erasure asks nothing of `bool` locals.  `Examples/Tactics/CorePrint.lean`
+lost its `nofun` cover goal; `Calculus/Core/Fml.lean`'s `Premise.inv`
+docstring still names `Premise.cover` (not this lane's file).
+
 ### W2 lane `tree` (`w2-tree`, 2026-10-08)
 
 - **The proof tree** (`Calculus/Core/ProofTree.lean`): `Core.ProofTree.build`

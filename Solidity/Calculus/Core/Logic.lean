@@ -2,6 +2,7 @@ import Solidity.Calculus.Core.Step
 import Solidity.Semantics.Core
 import Solidity.Update
 import Solidity.Theory.Observe
+import Solidity.Typing.Soundness
 
 /-!
 # What a scoped formula means
@@ -168,7 +169,55 @@ def State.anon {Γ : Ctx} (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
     (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) : State C Γ :=
   xs.foldl (fun τ x => τ.setLocal x.2 (b x)) σ
 
-/-- **Whether `φ` holds in `σ`** (`Update.lean`'s `holds`). -/
+/-- A local holds what a branch reads it as: a `bool` local a `bool`. -/
+def LTy.BoolOK : (t : LTy) → t.Denote C → Prop
+  | .val .bool, v => ∃ b, v = .bool b
+  | _, _ => True
+
+/-- Every `bool` local of the state holds a `bool`.  M3's values are untyped,
+so a `bool` local may hold a number (a binder's value, a storage read), and a
+branch on it is stuck; the diamond is read from and into such states only
+(`Modality.afterT`), what the typed run (M4) has by construction. -/
+def State.BoolOK {Γ : Ctx} (σ : State C Γ) : Prop := Env.All LTy.BoolOK σ.env
+
+/-- `p`, and under the diamond `ok` too, of the state an outcome ends in. -/
+def _root_.Solidity.Modality.okP {α : Type} (m : Modality) (ok p : α → Prop) : α → Prop :=
+  match m with
+  | .box => p
+  | .diamond => fun τ => ok τ ∧ p τ
+
+/-- What an update says from a state `T` describes: the box as `afterC`;
+the diamond from a state with its `bool` locals `bool`s (`T`), into one
+(`ok`). -/
+def _root_.Solidity.Modality.afterT {α : Type} (m : Modality) (T : Prop) (ok p : α → Prop)
+    (r : Res α) : Prop :=
+  match m with
+  | .box => Modality.afterC .box p r
+  | .diamond => T → Modality.afterC .diamond (fun τ => ok τ ∧ p τ) r
+
+/-- What a modality says of a run, as `afterT` (and no panic). -/
+def _root_.Solidity.Modality.afterRunT {α : Type} (m : Modality) (T : Prop) (ok p : α → Prop)
+    (r : Res α) : Prop :=
+  match m with
+  | .box => Modality.afterRunC .box p r
+  | .diamond => T → Modality.afterRunC .diamond (fun τ => ok τ ∧ p τ) r
+
+theorem _root_.Solidity.Modality.afterT_iff {α : Type} {m : Modality} {T : Prop}
+    {ok p : α → Prop} {r : Res α} :
+    m.afterT T ok p r ↔ ((m = .diamond → T) → m.afterC (m.okP ok p) r) := by
+  cases m with
+  | box => exact ⟨fun h _ => h, fun h => h nofun⟩
+  | diamond => exact ⟨fun h hT => h (hT rfl), fun h hT => h fun _ => hT⟩
+
+theorem _root_.Solidity.Modality.afterRunT_iff {α : Type} {m : Modality} {T : Prop}
+    {ok p : α → Prop} {r : Res α} :
+    m.afterRunT T ok p r ↔ ((m = .diamond → T) → m.afterRunC (m.okP ok p) r) := by
+  cases m with
+  | box => exact ⟨fun h _ => h, fun h => h nofun⟩
+  | diamond => exact ⟨fun h hT => h (hT rfl), fun h hT => h fun _ => hT⟩
+
+/-- **Whether `φ` holds in `σ`** (`Update.lean`'s `holds`; the diamond from
+and into states whose `bool` locals hold `bool`s, `Modality.afterT`). -/
 def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, _, .tt => True
   | _, σ, .eq a b => Theory.StValue.Equiv (a.denote σ) (b.denote σ)
@@ -176,8 +225,9 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .not φ => ¬ holds σ φ
   | _, σ, .and φ ψ => holds σ φ ∧ holds σ ψ
   | _, σ, .imp φ ψ => holds σ φ → holds σ ψ
-  | _, σ, .upd m U φ => m.afterC (holds · φ) (U.apply σ)
-  | _, σ, .modal m P κ φ => m.afterRunC (holds · φ) (do Frames.run (← Prog.run σ P) κ)
+  | _, σ, .upd m U φ => m.afterT σ.BoolOK State.BoolOK (holds · φ) (U.apply σ)
+  | _, σ, .modal m P κ φ =>
+    m.afterRunT σ.BoolOK State.BoolOK (holds · φ) (do Frames.run (← Prog.run σ P) κ)
   | _, σ, .havoc φ => ∀ st nt, holds (σ.withGlob (σ.glob.havoc st nt)) φ
   | _, σ, .all _ p φ => ∀ v, p.admits v → holds (σ.push (t := .val p) v) φ
   | _, σ, .bind _ _ φ => ∀ v, holds (σ.push v) φ
@@ -186,37 +236,139 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
 /-- Valid: true in every state of the empty context. -/
 def Valid (φ : Fml C []) : Prop := ∀ σ, holds σ φ
 
+/-! ## States whose `bool` locals hold `bool`s -/
+
+section BoolOK
+
+variable {Γ : Ctx}
+
+theorem Env.All.thin {P : (t : LTy) → t.Denote C → Prop} :
+    {Γ Δ : Ctx} → (h : Thin Γ Δ) → {e : Env C Δ} → Env.All P e → Env.All P (Env.thin h e)
+  | _, _, .refl, _, he => he
+  | _, _, .keep h, _, he => ⟨he.1, Env.All.thin h he.2⟩
+  | _, _, .drop h, _, he => Env.All.thin h he.2
+
+theorem State.BoolOK.drop {Δ : Ctx} {σ : State C Δ} (hT : σ.BoolOK) (h : Ext Γ Δ) :
+    (σ.drop h).BoolOK :=
+  Env.All.drop h hT
+
+theorem State.BoolOK.thin {Δ : Ctx} {σ : State C Δ} (hT : σ.BoolOK) (h : Thin Γ Δ) :
+    (σ.thin h).BoolOK :=
+  Env.All.thin h hT
+
+theorem State.BoolOK.push {t : LTy} {σ : State C Γ} {v : t.Denote C} (hT : σ.BoolOK)
+    (hv : LTy.BoolOK t v) : (σ.push v).BoolOK :=
+  ⟨hv, hT⟩
+
+theorem State.BoolOK.pop {t : LTy} {σ : State C Γ} {v : t.Denote C} (hT : (σ.push v).BoolOK) :
+    σ.BoolOK :=
+  hT.2
+
+theorem State.BoolOK.setLocal {t : LTy} {σ : State C Γ} (hT : σ.BoolOK) (i : Idx Γ t)
+    {v : t.Denote C} (hv : LTy.BoolOK t v) : (σ.setLocal i v).BoolOK :=
+  Env.All.set i hT hv
+
+theorem State.BoolOK.withGlob {σ : State C Γ} (hT : σ.BoolOK) (g : Semantics.State) :
+    (σ.withGlob g).BoolOK :=
+  hT
+
+theorem State.BoolOK.get {t : LTy} {σ : State C Γ} (hT : σ.BoolOK) (i : Idx Γ t) :
+    LTy.BoolOK t (Env.get i σ.env) :=
+  Env.All.get i hT
+
+/-- A value of a type that is not `bool`, or a `bool`, is one a local holds. -/
+theorem LTy.BoolOK.default (p : PrimTy) : LTy.BoolOK (C := C) (.val p) (PrimTy.default p) := by
+  cases p <;> first | trivial | exact ⟨false, rfl⟩
+
+end BoolOK
+
 /-! ## The program after a rule -/
 
 section After
 
 variable {Γ Γ₁ Γ₀ : Ctx} (m : Modality)
 
+/-- A modality from a state the diamond reads from: what running says. -/
+theorem holds_modal {m : Modality} {Γ Γ' : Ctx} (P : Prog C Γ Γ') (κ : Frames C Γ' Γ₀)
+    (φ : Fml C Γ₀) {σ : State C Γ} (hT : m = .diamond → σ.BoolOK) :
+    holds σ (.modal m P κ φ) ↔
+      m.afterRunC (m.okP State.BoolOK (holds · φ)) (do Frames.run (← Prog.run σ P) κ) :=
+  Modality.afterRunT_iff.trans ⟨fun h => h hT, fun h _ => h⟩
+
+/-- A modality holds when running says so from a state the diamond reads
+from. -/
+theorem holds_modal_intro {m : Modality} {Γ Γ' : Ctx} {P : Prog C Γ Γ'} {κ : Frames C Γ' Γ₀}
+    {φ : Fml C Γ₀} {σ : State C Γ}
+    (h : (m = .diamond → σ.BoolOK) →
+      m.afterRunC (m.okP State.BoolOK (holds · φ)) (do Frames.run (← Prog.run σ P) κ)) :
+    holds σ (.modal m P κ φ) :=
+  Modality.afterRunT_iff.2 h
+
+/-- An update from a state the diamond reads from: what applying it says. -/
+theorem holds_upd {m : Modality} {Γ Δ : Ctx} (U : Upd C Γ Δ) (φ : Fml C Δ) {σ : State C Γ}
+    (hT : m = .diamond → σ.BoolOK) :
+    holds σ (.upd m U φ) ↔ m.afterC (m.okP State.BoolOK (holds · φ)) (U.apply σ) :=
+  Modality.afterT_iff.trans ⟨fun h => h hT, fun h _ => h⟩
+
+theorem holds_upd_intro {m : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ}
+    {σ : State C Γ}
+    (h : (m = .diamond → σ.BoolOK) → m.afterC (m.okP State.BoolOK (holds · φ)) (U.apply σ)) :
+    holds σ (.upd m U φ) :=
+  Modality.afterT_iff.2 h
+
+/-- `okP` of a state the diamond reads from is `p`. -/
+theorem _root_.Solidity.Modality.okP_iff {α : Type} {m : Modality} {ok p : α → Prop} {a : α}
+    (hT : m = .diamond → ok a) : m.okP ok p a ↔ p a := by
+  cases m with
+  | box => exact Iff.rfl
+  | diamond => exact ⟨fun h => h.2, fun h => ⟨hT rfl, h⟩⟩
+
+/-- The state `okP` holds of is one the diamond reads from. -/
+theorem _root_.Solidity.Modality.okP_ok {α : Type} {m : Modality} {ok p : α → Prop} {a : α}
+    (h : m.okP ok p a) : m = .diamond → ok a := by
+  cases m with
+  | box => nofun
+  | diamond => exact fun _ => h.1
+
 /-- The frames exited: what running them says. -/
 theorem holds_exit {Γ : Ctx} (κ : Frames C Γ Γ₀) : ∀ (φ : Fml C Γ₀) (σ : State C Γ),
-    (holds σ (κ.exit m φ) ↔ m.afterRunC (holds · φ) (κ.run σ)) := by
+    (m = .diamond → σ.BoolOK) →
+    (holds σ (κ.exit m φ) ↔ m.afterRunC (m.okP State.BoolOK (holds · φ)) (κ.run σ)) := by
   induction κ with
   | nil =>
-    intro φ σ
-    show holds σ φ ↔ holds σ φ ∧ (Except.ok σ : Res _) ≠ .error .panic
+    intro φ σ hT
+    show holds σ φ ↔ m.okP State.BoolOK (holds · φ) σ ∧ (Except.ok σ : Res _) ≠ .error .panic
+    rw [Modality.okP_iff hT]
     simp only [ne_eq, reduceCtorEq, not_false_eq_true, and_true]
   | seq ω κ ih =>
-    intro φ σ
+    intro φ σ hT
     rw [Frames.exit_seq]
     cases ω with
-    | nil => exact ih φ σ
-    | cons s ω => rfl
-  | pop _ h κ ih => intro φ σ; exact ih φ (σ.drop h)
-  | drop h κ ih => intro φ σ; exact ih φ (σ.thin h)
+    | nil => exact ih φ σ hT
+    | cons s ω => exact holds_modal (.cons s ω) κ φ hT
+  | pop _ h κ ih =>
+    intro φ σ hT
+    rw [Frames.exit_pop, holds_upd _ _ hT]
+    show m.okP State.BoolOK _ (σ.drop h) ↔ _
+    rw [Modality.okP_iff fun e => (hT e).drop h]
+    exact ih φ (σ.drop h) fun e => (hT e).drop h
+  | drop h κ ih =>
+    intro φ σ hT
+    show holds σ (.upd m (Upd.nil.drop h) (κ.exit m φ)) ↔ _
+    rw [holds_upd _ _ hT]
+    show m.okP State.BoolOK _ (σ.thin h) ↔ _
+    rw [Modality.okP_iff fun e => (hT e).thin h]
+    exact ih φ (σ.thin h) fun e => (hT e).thin h
 
 /-- The rest of the program from a state, gone into the frames when it is
 empty. -/
-theorem holds_modalK (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (σ : State C Γ) :
+theorem holds_modalK (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (σ : State C Γ)
+    (hT : m = .diamond → σ.BoolOK) :
     holds σ (Fml.modalK m ω κ φ) ↔
-      m.afterRunC (holds · φ) (do Frames.run (← Prog.run σ ω) κ) := by
+      m.afterRunC (m.okP State.BoolOK (holds · φ)) (do Frames.run (← Prog.run σ ω) κ) := by
   cases ω with
-  | nil => exact holds_exit m κ φ σ
-  | cons s ω => rfl
+  | nil => exact holds_exit m κ φ σ hT
+  | cons s ω => exact holds_modal (.cons s ω) κ φ hT
 
 end After
 
@@ -252,14 +404,16 @@ theorem Premise.sound_update {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State 
     (hs : U.apply σ = s.run σ) (hp : s.run σ ≠ .error .panic) (ω : Prog C Γ' Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
     holds σ ((Premise.update U).fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ) := by
-  show m.afterC (holds · (Fml.modalK m ω κ φ)) (U.apply σ) → _
   intro h
-  show m.afterRunC _ _
+  refine holds_modal_intro fun hT => ?_
+  have h' := (holds_upd U _ hT).1 h
   rw [run_cons_frames]
   refine afterRunC_bind (fun τ => do Frames.run (← Prog.run τ ω) κ) hs hp ?_
   cases hU : U.apply σ with
-  | ok τ => rw [hU] at h; exact (holds_modalK m ω κ φ τ).1 h
-  | error e => rw [hU] at h; exact h
+  | ok τ =>
+    rw [hU] at h'
+    exact (holds_modalK m ω κ φ τ (Modality.okP_ok h')).1 ((Modality.okP_iff (Modality.okP_ok h')).1 h')
+  | error e => rw [hU] at h'; exact h'
 
 /-- **A block**: `⟨ P (pop) ω κ ⟩ φ` gives `⟨ s; ω κ ⟩ φ` when `P`, its
 fresh locals popped, runs as `s`. -/
@@ -267,9 +421,11 @@ theorem Premise.sound_unfold {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Ext Γ' Γ''
     (σ : State C Γ) (hs : (Prog.run σ P).map (State.drop h) = s.run σ) (ω : Prog C Γ' Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
     holds σ ((Premise.unfold P h).fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ) := by
-  show m.afterRunC (holds · φ) (do Frames.run (← Prog.run σ P) (.pop .capture h (.seq ω κ))) → _
-  show _ → m.afterRunC _ _
+  intro hp
+  refine holds_modal_intro fun hT => ?_
+  have h' := (holds_modal P (.pop .capture h (.seq ω κ)) φ hT).1 hp
   rw [run_cons_frames, ← hs]
+  revert h'
   cases Prog.run σ P <;> exact id
 
 /-- **A block dropping a frame from under what it keeps**
@@ -278,23 +434,25 @@ theorem Premise.sound_inline {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Thin Γ' Γ'
     (σ : State C Γ) (hs : (Prog.run σ P).map (State.thin h) = s.run σ) (ω : Prog C Γ' Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
     holds σ ((Premise.inline P h).fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ) := by
-  show m.afterRunC (holds · φ) (do Frames.run (← Prog.run σ P) (.drop h (.seq ω κ))) → _
-  show _ → m.afterRunC _ _
+  intro hp
+  refine holds_modal_intro fun hT => ?_
+  have h' := (holds_modal P (.drop h (.seq ω κ)) φ hT).1 hp
   rw [run_cons_frames, ← hs]
+  revert h'
   cases Prog.run σ P <;> exact id
 
 /-- **A hidden binder**: `∀ v. ⟨ P ω κ ⟩ φ` from `σ` with `v` pushed gives
-`⟨ s; ω κ ⟩ φ` when, for some `v`, `P` runs from there as `s` from `σ`. -/
+`⟨ s; ω κ ⟩ φ` when, for some `v` of its type, `P` runs from there as `s`
+from `σ`. -/
 theorem Premise.sound_bind {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : Stmt C Γ Γ'}
-    (σ : State C Γ) (hs : ∃ v, Prog.run (σ.push v) P = s.run σ) (ω : Prog C Γ' Γ₁)
-    (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
+    (σ : State C Γ) (hs : ∃ v, LTy.BoolOK t v ∧ Prog.run (σ.push v) P = s.run σ)
+    (ω : Prog C Γ' Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
     holds σ ((Premise.bind x t P).fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ) := by
   intro h
-  obtain ⟨v, hv⟩ := hs
-  have h' := h v
-  show m.afterRunC _ _
+  obtain ⟨v, hvT, hv⟩ := hs
+  refine holds_modal_intro fun hT => ?_
+  have h' := (holds_modal P (.seq ω κ) φ fun e => (hT e).push hvT).1 (h v)
   rw [run_cons_frames, ← hv]
-  show m.afterRunC _ (do Frames.run (← Prog.run (σ.push v) P) (.seq ω κ))
   exact h'
 
 /-- **A capture**: `T se = e; s'`, `se` popped after `s'`, runs as `s` when
@@ -328,9 +486,9 @@ theorem run_block_frames {Δ : Ctx} (b : BlockKind) (P : Prog C Γ Δ) (ω : Pro
 
 /-- **Two goals**: `(c → ⟨ P } ω κ ⟩ φ) ∧ (c' → ⟨ Q } ω κ ⟩ φ)` gives
 `⟨ s; ω κ ⟩ φ` when one of `c`, `c'` holds, and the branch it guards, its
-locals popped, runs as `s`.  That one holds is the diamond's cover goal
-(`Premise.cover`); `Calculus/Core/SoundLocal.lean`'s `Premise.Sound.split`
-takes it, the box's stuck case apart. -/
+locals popped, runs as `s`.  `Calculus/Core/SoundLocal.lean`'s
+`Premise.Sound.split` gives one from a typed state (a `bool` condition), the
+box's stuck case apart. -/
 theorem Premise.sound_split {b : BlockKind} {Δ₁ Δ₂ : Ctx} {c c' : Fml C Γ} {P : Prog C Γ Δ₁}
     {Q : Prog C Γ Δ₂} {s : Stmt C Γ Γ} (σ : State C Γ)
     (hc : holds σ c → (Prog.run σ P).map (State.drop P.ext) = s.run σ)
@@ -338,13 +496,13 @@ theorem Premise.sound_split {b : BlockKind} {Δ₁ Δ₂ : Ctx} {c c' : Fml C Γ
     (hcov : holds σ c ∨ holds σ c') (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
     holds σ ((Premise.split b c c' P Q).fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ) := by
   rintro ⟨h₁, h₂⟩
-  show m.afterRunC _ _
+  refine holds_modal_intro fun hT => ?_
   rw [run_cons_frames]
   rcases hcov with h | h
-  · have := (holds_modalK m P _ φ σ).1 (h₁ h)
+  · have := (holds_modalK m P _ φ σ hT).1 (h₁ h)
     rw [run_block_frames, hc h] at this
     exact this
-  · have := (holds_modalK m Q _ φ σ).1 (h₂ h)
+  · have := (holds_modalK m Q _ φ σ hT).1 (h₂ h)
     rw [run_block_frames, hc' h] at this
     exact this
 
@@ -354,9 +512,9 @@ theorem Premise.sound_check {c : Fml C Γ} {s : Stmt C Γ Γ} (σ : State C Γ)
     (hc : holds σ c → s.run σ = .ok σ) (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
     holds σ ((Premise.check c).fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ) := by
   rintro ⟨h₁, h₂⟩
-  show m.afterRunC _ _
+  refine holds_modal_intro fun hT => ?_
   rw [run_cons_frames, hc h₂]
-  exact (holds_modalK m ω κ φ σ).1 (h₁ h₂)
+  exact (holds_modalK m ω κ φ σ hT).1 (h₁ h₂)
 
 /-- **A closed goal**: `true` gives a box over a statement that halts, not in
 a panic, from every state. -/
@@ -525,7 +683,8 @@ theorem Stmt.step_sound_localValueDeclInitDrop {p : PrimTy} (x : Var) (e : Val C
     (σ : State C Γ) (ω : Prog C (.val p :: Γ) Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
     holds σ ((Premise.bind x (.val p) (.cons (.assignLocal .here e.up) .nil)).fml m ω κ φ) →
       holds σ (.modal m (.cons (.declLocal p x (some e)) ω) κ φ) := by
-  refine Premise.sound_bind σ ⟨PrimTy.default p, ?_⟩ ω κ φ
+  refine Premise.sound_bind σ ⟨PrimTy.default p, LTy.BoolOK.default p, ?_⟩
+    ω κ φ
   rw [Prog.run_cons]
   show Except.bind (Run.assignLocal (Γ := .val p :: Γ) .here e.up (σ.push (PrimTy.default p)))
       (fun τ => Prog.run τ .nil) = Run.declLocal p (some e) σ

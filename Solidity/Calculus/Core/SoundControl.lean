@@ -156,8 +156,11 @@ theorem iteStep_sound (k : Nat) (hwk : WkRuns σ (.val .bool)) {Γ₁ Γ₂ : Ct
         · exact (h₂ ((holds_isBool se σ hv false).2 rfl)).elim
         · exact (h₁ ((holds_isBool se σ hv true).2 rfl)).elim
       | int n =>
-        rw [Stmt.run_ite]
-        simp only [Run.ite, Val.eval, hv, Res.bind_ok]
+        refine ⟨?_, fun hT => ?_⟩
+        · rw [Stmt.run_ite]
+          simp only [Run.ite, Val.eval, hv, Res.bind_ok]
+        · obtain ⟨_, h⟩ := Simple.eval_bool σ hT hv
+          cases h
   | _ => cases hs; exact sound_iteCapture σ _ thn els _ hwk
 
 /-- **A `require`** (`requireStep`). -/
@@ -180,16 +183,19 @@ theorem requireStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
         · exact (h₂ ((holds_isBool se σ hv false).2 rfl)).elim
         · exact (h₁ ((holds_isBool se σ hv true).2 rfl)).elim
       | int n =>
-        rw [Stmt.run_require]
-        simp only [Val.eval, hv, Res.bind_ok, guardOk]
-  | _ => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_requireConditionCapture k _ σ ω κ φ h
+        refine ⟨?_, fun hT => ?_⟩
+        · rw [Stmt.run_require]
+          simp only [Val.eval, hv, Res.bind_ok, guardOk]
+        · obtain ⟨_, h⟩ := Simple.eval_bool σ hT hv
+          cases h
+  | _ => cases hs; exact fun ω κ φ h => Stmt.step_sound_requireConditionCapture k _ σ ω κ φ h
 
 /-- **An `assert`** (`assertStep`). -/
 theorem assertStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
     (hs : assertStep k c = some q) : Premise.Sound m (.assert c) q σ := by
   cases c with
-  | simple se => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_assertSimple se σ ω κ φ h
-  | _ => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_assertConditionCapture k _ σ ω κ φ h
+  | simple se => cases hs; exact fun ω κ φ h => Stmt.step_sound_assertSimple se σ ω κ φ h
+  | _ => cases hs; exact fun ω κ φ h => Stmt.step_sound_assertConditionCapture k _ σ ω κ φ h
 
 /-! ### Declarations, `revert`, blocks -/
 
@@ -197,7 +203,7 @@ theorem assertStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
 theorem sound_declStorageInit {R : RefTy} (x : Var) (r : ARhs C Γ R) :
     Premise.Sound m (.declStorage R x (some r)) (.bind x (.alias R) (.cons (.rebind .here r.up) .nil))
       σ := by
-  refine Premise.Sound.bind ⟨none, ?_⟩
+  refine Premise.Sound.bind (t := .alias R) ⟨none, trivial, ?_⟩
   rw [Prog.run_single, Stmt.run_rebind, Stmt.run_declStorage]
   simp only [Run.rebind, Run.declStorage, ARhs.eval_up]
   cases r.eval σ <;> rfl
@@ -207,7 +213,7 @@ theorem sound_declMemInit {R : RefTy} (x : Var) (r : MRhs C Γ R)
     (hd : ((some r).isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
     Premise.Sound m (.declMem R x (some r) hd hm) (.bind x (.mem R) (.cons (.rebindMem .here r.up) .nil))
       σ := by
-  refine Premise.Sound.bind ⟨0, ?_⟩
+  refine Premise.Sound.bind (t := .mem R) ⟨0, trivial, ?_⟩
   rw [Prog.run_single, Stmt.run_rebindMem, Stmt.run_declMem]
   simp only [Run.rebindMem, Run.declMem, MRhs.eval_up]
   cases r.eval σ <;> rfl

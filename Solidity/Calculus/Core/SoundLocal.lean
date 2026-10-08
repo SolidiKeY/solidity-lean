@@ -22,36 +22,46 @@ section Local
 
 variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
 
+/-- A `bool` simple value reads as a `bool` in a state whose `bool` locals
+hold `bool`s. -/
+theorem Simple.eval_bool {se : Simple C Γ .bool} (hT : σ.BoolOK) {v : Value}
+    (hv : se.eval σ = .ok v) : ∃ b, v = .bool b := by
+  cases se with
+  | lit n hn => exact absurd (PrimTy.isNumeric_of_inRange hn) (by decide)
+  | bool b => cases hv; exact ⟨b, rfl⟩
+  | «local» i => cases hv; exact hT.get i
+  | env k hp => cases hp
+
 /-- **A split whose statement is stuck** (a condition that reads as no
 `bool`), neither condition holding: the box holds of a stuck run, and the
-diamond's cover (`Premise.cover`) excludes it. -/
+diamond reads from no such state (its `bool` locals hold `bool`s). -/
 theorem Premise.Sound.splitStuck {b : BlockKind} {Δ₁ Δ₂ : Ctx} {c c' : Fml C Γ}
-    {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂} {s : Stmt C Γ Γ} (hn : ¬ holds σ c) (hn' : ¬ holds σ c')
-    (hst : s.run σ = .error .stuck) : Premise.Sound m s (.split b c c' P Q) σ := by
-  intro _ _ ω κ φ _ hcov
+    {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂} {s : Stmt C Γ Γ}
+    (hst : s.run σ = .error .stuck ∧ ¬ σ.BoolOK) : Premise.Sound m s (.split b c c' P Q) σ := by
+  intro _ _ ω κ φ _
+  refine holds_modal_intro fun hT => ?_
   cases m with
   | box =>
-    show Modality.afterRunC .box _ _
-    rw [run_cons_frames, hst]
+    rw [run_cons_frames, hst.1]
     exact ⟨trivial, fun h => nomatch h⟩
-  | diamond => exact (hcov ⟨hn, hn'⟩).elim
+  | diamond => exact (hst.2 (hT rfl)).elim
 
 /-- **A split is sound** when the branch each condition guards, its locals
-popped, runs as `s`, and the statement is stuck where neither holds: one of
-them holds, or the box holds of the stuck run, and under the diamond the
-cover (`Premise.cover`) says one holds. -/
+popped, runs as `s`, and where neither holds the statement is stuck and the
+state has a `bool` local holding no `bool`: one of them holds, or the box
+holds of the stuck run, and the diamond does not read from that state. -/
 theorem Premise.Sound.split {b : BlockKind} {Δ₁ Δ₂ : Ctx} {c c' : Fml C Γ}
     {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂} {s : Stmt C Γ Γ}
     (hc : holds σ c → (Prog.run σ P).map (State.drop P.ext) = s.run σ)
     (hc' : holds σ c' → (Prog.run σ Q).map (State.drop Q.ext) = s.run σ)
-    (hst : ¬ holds σ c → ¬ holds σ c' → s.run σ = .error .stuck) :
+    (hst : ¬ holds σ c → ¬ holds σ c' → s.run σ = .error .stuck ∧ ¬ σ.BoolOK) :
     Premise.Sound m s (.split b c c' P Q) σ := by
-  intro _ _ ω κ φ h hcov
+  intro _ _ ω κ φ h
   by_cases h₁ : holds σ c
   · exact Premise.sound_split σ hc hc' (.inl h₁) ω κ φ h
   by_cases h₂ : holds σ c'
   · exact Premise.sound_split σ hc hc' (.inr h₂) ω κ φ h
-  · exact Premise.Sound.splitStuck σ h₁ h₂ (hst h₁ h₂) ω κ φ h hcov
+  · exact Premise.Sound.splitStuck σ (hst h₁ h₂) ω κ φ h
 
 theorem evalBinop_error {op : BinOp} (hsc : op.shortCircuits = false) (p : PrimTy) (lv : Value)
     (h : Halt) : evalBinop op p lv (.error h) = .error h := by
@@ -239,11 +249,11 @@ theorem localStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C 
       cases b with
       | simple b => cases hs; exact sound_setLocal σ i _
       | _ => exact binopRight_sound σ k i op ha hq a _ q hs
-    | _ => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_binopUnfoldLeft k i op ha hq _ b σ ω κ φ h
+    | _ => cases hs; exact fun ω κ φ h => Stmt.step_sound_binopUnfoldLeft k i op ha hq _ b σ ω κ φ h
   | unop op ha hq a =>
     cases a with
     | simple a => cases hs; exact sound_setLocal σ i _
-    | _ => cases hs; exact fun ω κ φ h _ => Stmt.step_sound_unopCapture k i op ha hq _ σ ω κ φ h
+    | _ => cases hs; exact fun ω κ φ h => Stmt.step_sound_unopCapture k i op ha hq _ σ ω κ φ h
   | ternary c a b => exact ternaryStep_sound σ k (.local i) c a b q hs
   | readMem l =>
     exact MHole.readStep_sound σ k (.local i) (fun _ _ _ _ _ h => by cases h; exact sound_setLocal σ i _)
