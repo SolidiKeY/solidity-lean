@@ -12,7 +12,8 @@ over any modality `m` and postcondition `φ` (`Examples/Chains/Storage.lean` say
 printed names (`FreshNames` tables).  The root `r` the copy allocates is `freshId(copySt(memory, …))`.
 
 Where the worked example prints the updates merged before the copy (the alias `sp`, `aliceTok`), the chain merges
-there too (`~[sequentialToParallel]~>` under the open modality), and again past the program.  The read of the
+there too (`~[sequentialToParallel]~>` under the open modality, `Calculus/Core/Merge.lean`; in `FieldCopy` all but
+`sp`, which a hidden binder separates from the stack), and again past the program.  The read of the
 copy is then resolved one law a link (`Calculus/ChainRewrites.lean`): `readCopySt` reads the copy out of the
 storage it copied, `findOnSave` the write.  Every capture stays to the last line, which `#last_line` checks.
 The copied struct itself (`find(S, alice)`) is a struct read and has no literal: no law reads a struct
@@ -68,21 +69,6 @@ theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .val .ui
 #last_line chain
 end RootCopy
 
-end
-
-end Solidity.Examples.Chains.StorageToMemory
-
-/-! ## Left on `Update.lean`'s calculus
-
-`FieldCopy` and `TokenCopy` merge the stack under the open modality (`~[sequentialToParallel]~>` before the copy) and run the program on from the merged line, as the worked examples print them; a scoped chain goes past a rewrite only with rewrites, so they read as today's chains. -/
-
-namespace Solidity.Examples.Chains.StorageToMemory
-
-local instance : InContract := ⟨StandardExample⟩
-
-section
-variable (m : Modality) (φ : Post StandardExample)
-
 /-! ## Example: Symbolic Execution of Storage-to-Memory Field Copy with Lazy Read -/
 
 namespace FieldCopy
@@ -92,11 +78,15 @@ def names : FreshTable := [("pv", "se1"), ("aliceAcc", "sp1"), ("sp", "sp2")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
-/-- `alice.account.balance = 10; Account memory acc = alice.account;` up to the copy: the write unfolded
+/-- `alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance;`: the write unfolded
 through the alias `aliceAcc` and saved, the declaration dropped, the member source captured in a second alias
-`sp` (the worked example's `⇝*` binds it), and the updates merged, as the example prints them before the
-copy. -/
-theorem source :
+`sp` (the worked example's `⇝*` binds it), and the updates merged before the copy, as the example prints them,
+but for `sp`: the declaration's hidden binder (`memoryLocalDeclInitDrop`) stands between the stack and `sp`'s
+update, and a merge does not move a stack that declares locals (`pv`, `aliceAcc`) under a binder
+(`Calculus/Core/Merge.lean`), so `sp` joins the rest past the program.  Then `acc` a copy of the object `sp`
+names, and `v = acc.balance;` a read of the copy: the updates merged, the read of the copy a read of the
+storage copied (`readCopySt`), which the write answers (`findOnSave`). -/
+theorem chain (φ : Core.Post StandardExample [.mem (.struct "Account"), .val .uint]) :
     dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     ~[storageFieldWrite_unfold_leftFst]~> dl![m]{
         ⟨[ uint pv = 10; Account storage aliceAcc = alice.account; aliceAcc.balance = pv;
@@ -116,25 +106,16 @@ theorem source :
         { pv := 10 } { aliceAcc := alice.account } { storage := save(storage, aliceAcc.balance, pv) }
           { sp := alice.account } ⟨[ acc = sp; v = acc.balance; ]⟩ φ where Account memory acc }
     ~[sequentialToParallel]~> dl![m]{
-        { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-            sp := alice.account } ⟨[ acc = sp; v = acc.balance; ]⟩ φ where Account memory acc } := by
-  sol_chain
-
-/-- … then `acc` a copy of the object `sp` names, and `v = acc.balance;` a read of the copy: the updates
-merged, the read of the copy a read of the storage copied (`readCopySt`), which the write answers
-(`findOnSave`). -/
-theorem copy :
-    dl![m]{
-      { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-          sp := alice.account } ⟨[ acc = sp; v = acc.balance; ]⟩ φ where Account memory acc }
+        { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+          { sp := alice.account } ⟨[ acc = sp; v = acc.balance; ]⟩ φ where Account memory acc }
     ~[memoryStorageCopy]~> dl![m]{
-        { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-            sp := alice.account }
+        { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+          { sp := alice.account }
           { acc := freshId(copySt(memory, find(storage, sp))) ‖ memory := copySt(memory, find(storage, sp)) }
           ⟨[ v = acc.balance; ]⟩ φ }
     ~*> dl![m]{
-        { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-            sp := alice.account }
+        { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+          { sp := alice.account }
           { acc := freshId(copySt(memory, find(storage, sp))) ‖ memory := copySt(memory, find(storage, sp)) }
           { v := read(memory, acc.balance) } φ }
     ~[sequentialToParallel]~> dl![m]{
@@ -157,18 +138,6 @@ theorem copy :
             memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
             v := 10 } φ } := by
   sol_chain
-
-/-- `alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance;`: `source` then
-`copy`. -/
-theorem chain :
-    dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
-    ~~> dl![m]{
-        { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-            sp := alice.account ‖
-            acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
-            memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
-            v := 10 } φ } :=
-  (source ..).leads.via (copy ..)
 #last_line chain
 end FieldCopy
 
@@ -185,7 +154,7 @@ local instance : FreshNames := .ofTable names
 declaration dropped, the source captured in `aliceTok`, bound through `aliceAcc` (the example's `⇝*`), the
 updates merged, which binds `aliceTok` to `alice.account.token`, and the copy installed.  The copy holds the
 token read in the starting storage; a struct read has no literal. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.struct "Token")]) :
     dl![m]{ { storage := save(storage, alice.account.token.value, 5) } ⟨[ Token memory t = alice.account.token; ]⟩ φ }
     ~[memoryLocalDeclInitDrop]~> dl![m]{
         { storage := save(storage, alice.account.token.value, 5) } ⟨[ t = alice.account.token; ]⟩ φ

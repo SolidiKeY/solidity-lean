@@ -365,13 +365,6 @@ end Rebind
 
 end
 
-end Solidity.Examples.Chains.Memory
-
-/-! ## Left on `Update.lean`'s calculus
-
-`CallWrite`, whose program the elaborator writes with the right-hand side and the receiver captured in front (`Account memory pv = makeAccount(); Person memory mv = choosePersonMem();`): the scoped reading leaves the captures, fresh variables, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`).  It reads as today's chain until the elaborator puts a statement's captures in a block of their own. -/
-
-namespace Solidity.Examples.Chains.Memory
 
 section
 
@@ -399,19 +392,25 @@ example : Prog.toStr (sol[Calls]{ choosePersonMem().account = makeAccount(); } :
 
 /-- `choosePersonMem().account = makeAccount();` from a storage where `alice.age`
 is 10, to its last line.  The program is the elaborator's capture (above), the
-paper's only printed step.  Past it each call is inlined (`internalCallExpand`):
-`makeAccount`'s object allocated (`mv2`) and written, its result bound
+paper's only printed step.  Past it each call is inlined (`functionBodyExpand`, a
+call with a target):
+`makeAccount`'s object allocated (`mv2`), the call's body block entered
+(`blockEmpty`, which prints as nothing) and written, its result bound
 (`pv := mv2`); `choosePersonMem`'s object allocated (`mv4`) and overwritten by
 a copy of `alice` (`memoryStorageCopy`), bound (`mv := mv4`); and the member
 written.  The copy reads `alice` as a struct, which has no literal: nothing
 reads a member of it in the last line. -/
-theorem chain (m : Modality) (φ : Post Calls) :
+theorem chain (m : Modality) (φ : Core.Post Calls []) :
     dl![m]{ { storage := save(storage, alice.age, 10) } ⟨[ choosePersonMem().account = makeAccount(); ]⟩ φ }
-    ~[internalCallExpand]~> dl![m]{
+    ~[functionBodyExpand]~> dl![m]{
         { storage := save(storage, alice.age, 10) }
           ⟨[ Account memory mv2; mv2.balance = 100; Account memory pv = mv2; Person memory mv = choosePersonMem();
             mv.account = pv; ]⟩ φ }
     ~[memoryReferenceDeclFreshAlloc]~> dl![m]{
+        { storage := save(storage, alice.age, 10) }
+          { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+            ⟨[ mv2.balance = 100; Account memory pv = mv2; Person memory mv = choosePersonMem(); mv.account = pv; ]⟩ φ }
+    ~[blockEmpty]~> dl![m]{
         { storage := save(storage, alice.age, 10) }
           { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             ⟨[ mv2.balance = 100; Account memory pv = mv2; Person memory mv = choosePersonMem(); mv.account = pv; ]⟩ φ }
@@ -425,12 +424,19 @@ theorem chain (m : Modality) (φ : Post Calls) :
           { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             { memory := write(memory, mv2.balance, 100) }
               { pv := mv2 } ⟨[ Person memory mv = choosePersonMem(); mv.account = pv; ]⟩ φ }
-    ~[internalCallExpand]~> dl![m]{
+    ~[functionBodyExpand]~> dl![m]{
         { storage := save(storage, alice.age, 10) }
           { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             { memory := write(memory, mv2.balance, 100) }
               { pv := mv2 } ⟨[ Person memory mv4; mv4 = alice; Person memory mv = mv4; mv.account = pv; ]⟩ φ }
     ~[memoryReferenceDeclFreshAlloc]~> dl![m]{
+        { storage := save(storage, alice.age, 10) }
+          { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
+            { memory := write(memory, mv2.balance, 100) }
+              { pv := mv2 }
+                { mv4 := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+                  ⟨[ mv4 = alice; Person memory mv = mv4; mv.account = pv; ]⟩ φ }
+    ~[blockEmpty]~> dl![m]{
         { storage := save(storage, alice.age, 10) }
           { mv2 := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
             { memory := write(memory, mv2.balance, 100) }

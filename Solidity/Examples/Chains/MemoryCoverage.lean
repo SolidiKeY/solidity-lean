@@ -556,28 +556,20 @@ theorem memoryIndexArrayOpAssign (φ : Core.Post MemCoverage [.mem (.array (.pri
 #last_line memoryIndexArrayOpAssign
 
 end
-end Solidity.Examples.Chains.MemoryCoverage
 
-/-! ## Left on `Update.lean`'s calculus
-
-The rows whose program the elaborator writes with captures in front (`uint se2; se2 = ++i;`, a receiver's or a right-hand side's capture): the scoped reading leaves the captures, fresh variables, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`).  They read as today's chains until the elaborator puts a statement's captures in a block of their own. -/
-
-namespace Solidity.Examples.Chains.MemoryCoverage
-
-local instance : InContract := ⟨MemCoverage⟩
 
 section
-variable (m : Modality) (φ : Post MemCoverage)
+variable (m : Modality)
 
 -- The receiver and the `++i` are captured by the elaborator; `basket.items` for
 -- `carol.account.values`.
 example : dl!{ ⟨ basket.items[++i] = val; ⟩ true where Basket memory basket }
-    = dl!{ ⟨ uint se1 = val; uint[] memory mv2 = basket.items; uint se3; se3 = ++i; mv2[se3] = se1; ⟩ true
-        where Basket memory basket } := rfl
+    = dl!{ ∀ uint val; ∀ uint i; (⟨ uint se1 = val; uint[] memory mv2 = basket.items; uint se3; se3 = ++i; mv2[se3] = se1; ⟩ true
+        where Basket memory basket) } := rfl
 
 /-- `basket.items[++i] = val;` with `i` 2 and `val` 7: the captures, the increment, the write at `2 + 1`,
 folded to `3`. -/
-theorem memoryIndexWriteCaptureAllComplexRecv :
+theorem memoryIndexWriteCaptureAllComplexRecv (φ : Core.Post MemCoverage [.mem (.struct "Basket"), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ val := 7 } ⟨[ basket.items[++i] = val; ]⟩ φ where Basket memory basket }
     ~*> dl![m]{ { i := 2 ‖ val := 7 } { se1 := val } { mv2 := read(memory, basket.items) } { se3 := 0 }
         ⟨[ se3 = ++i; mv2[se3] = se1; ]⟩ φ where Basket memory basket }
@@ -597,11 +589,11 @@ theorem memoryIndexWriteCaptureAllComplexRecv :
 #last_line memoryIndexWriteCaptureAllComplexRecv
 
 example : dl!{ ⟨ carolValues[++i] = val; ⟩ true where uint[] memory carolValues }
-    = dl!{ ⟨ uint se1 = val; uint se2; se2 = ++i; carolValues[se2] = se1; ⟩ true
-        where uint[] memory carolValues } := rfl
+    = dl!{ ∀ uint val; ∀ uint i; (⟨ uint se1 = val; uint se2; se2 = ++i; carolValues[se2] = se1; ⟩ true
+        where uint[] memory carolValues) } := rfl
 
 /-- `carolValues[++i] = val;` with `i` 2 and `val` 7: the write at `2 + 1`, folded to `3`. -/
-theorem memoryIndexWriteCaptureAllNonSimpleIndex :
+theorem memoryIndexWriteCaptureAllNonSimpleIndex (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ val := 7 } ⟨[ carolValues[++i] = val; ]⟩ φ where uint[] memory carolValues }
     ~*> dl![m]{ { i := 2 ‖ val := 7 } { se1 := val } { se2 := 0 } ⟨[ se2 = ++i; carolValues[se2] = se1; ]⟩ φ
         where uint[] memory carolValues }
@@ -620,7 +612,7 @@ example : dl!{ ⟨ carolTokens[++i] = carolToken; ⟩ true where Token[] memory 
         where Token[] memory carolTokens, Token memory carolToken } := rfl
 
 /-- `carolTokens[++i] = carolToken;` with `i` 2: the write at `2 + 1`, folded to `3`. -/
-theorem memoryIndexWriteMemRefCaptureAllNonSimpleIndex :
+theorem memoryIndexWriteMemRefCaptureAllNonSimpleIndex (φ : Core.Post MemCoverage [.mem (.struct "Token"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ carolTokens[++i] = carolToken; ]⟩ φ
         where Token[] memory carolTokens, Token memory carolToken }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 } { se1 := 0 } ⟨[ se1 = ++i; carolTokens[se1] = carolToken; ]⟩ φ
@@ -644,7 +636,7 @@ example : dl!{ ⟨ carolValues[i] = makeValue(); ⟩ true where uint[] memory ca
 
 /-- `carolValues[i] = makeValue();` with `i` 2, from a storage where `total` is 7: the call's body inlined
 (`internalCallExpand`), its result written.  The captures and the value written resolve to 7. -/
-theorem memoryIndexWriteUnfoldSource :
+theorem memoryIndexWriteUnfoldSource (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint]) :
     dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } ⟨[ carolValues[i] = makeValue(); ]⟩ φ
         where uint[] memory carolValues }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
@@ -669,11 +661,12 @@ theorem memoryIndexWriteUnfoldSource :
 #last_line memoryIndexWriteUnfoldSource
 
 example : dl!{ ⟨ v = carolValues[++i]; ⟩ true where uint[] memory carolValues }
-    = dl!{ ⟨ uint se1; se1 = ++i; v = carolValues[se1]; ⟩ true where uint[] memory carolValues } := rfl
+    = dl!{ ∀ uint i; ∀ uint v; (⟨ uint se1; se1 = ++i; v = carolValues[se1]; ⟩ true
+        where uint[] memory carolValues) } := rfl
 
 /-- `v = carolValues[++i];` with `i` 2, from a memory where `carolValues[3]` is 7: the index folds to `3`,
 and the read resolves to `7` (`readOnWrite`). -/
-theorem memoryIndexRead_unfold_rightSndIndex :
+theorem memoryIndexRead_unfold_rightSndIndex (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[3], 7) } ⟨[ v = carolValues[++i]; ]⟩ φ
         where uint[] memory carolValues }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[3], 7) } { se1 := 0 }

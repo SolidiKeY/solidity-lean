@@ -504,22 +504,9 @@ end AccountsWrite
 
 end
 
-end Solidity.Examples.Chains.Storage
-
-/-! ## Left on `Update.lean`'s calculus
-
-The two examples whose program the elaborator writes with captures in front (`uint idx; idx = ++i;`, solc's
-evaluation order): the scoped reading leaves the captures, fresh variables, in scope at the postcondition,
-whose erasure is then no postcondition (`Core.Post.erase`).  They read as today's chains until the elaborator
-puts a statement's captures in a block of their own. -/
-
-namespace Solidity.Examples.Chains.Storage
-
-local instance : InContract := ⟨StandardExample⟩
-
 section
 local instance : InContract := ⟨TestSuite⟩
-variable (m : Modality) (φ : Post TestSuite)
+variable (m : Modality)
 
 /-! ## Example: Nonsimple Path and Index Write -/
 
@@ -532,7 +519,7 @@ local instance : FreshNames := .ofTable names
 the elaborator's: the program is `uint pv = valueVal; uint[] storage sp = basketA.items; uint idx;
 idx = ++i; sp[idx] = pv;`.  Then one `⇝*` binding the captures (`idx` declared, then assigned `++i`), the
 write, the merge, which resolves the element to `basketA.items[2 + 1]`, and the index folded to `3`. -/
-theorem chain :
+theorem chain (φ : Core.Post TestSuite [.val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ valueVal := 42 } ⟨[ basketA.items[++i] = valueVal; ]⟩ φ }
     ~*> dl![m]{
         { i := 2 ‖ valueVal := 42 } { pv := valueVal } { sp := basketA.items } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
@@ -553,9 +540,6 @@ end
 
 /-! ## Example: Side Effects in the Receiver and in the Index -/
 
-section
-variable (φ : Post StandardExample)
-
 namespace MatrixRow
 def names : FreshTable := [("idx1", "se1"), ("sp", "sp2"), ("idx2", "se3")]
 local instance : FreshNames := .ofTable names
@@ -565,7 +549,7 @@ captures both increments before the write (`uint idx1; idx1 = i++; uint[] storag
 uint idx2; idx2 = i++; sp[idx2] = 77;`; `77` is a value, so `pv` is not declared).  Then the paper's second
 `⇝*`, to the stack of captures, the write, the merge, which resolves the captures, and the two additions
 folded: the write lands at `matrix[0][1]` and `i` ends at `2`, as printed. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![.box]{ { i := 0 } ⟨[ matrix[i++][i++] = 77; ]⟩ φ }
     ~*> dl![.box]{
         { i := 0 } { idx1 := 0 } { i := i + 1 ‖ idx1 := i } { sp := matrix[idx1] } { idx2 := 0 } { i := i + 1 ‖ idx2 := i }
@@ -585,6 +569,5 @@ theorem chain :
   sol_chain
 #last_line chain
 end MatrixRow
-end
 
 end Solidity.Examples.Chains.Storage

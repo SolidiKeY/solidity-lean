@@ -120,6 +120,14 @@ def ruleOf? (k m s : Expr) : MetaM (Option (Lean.Name × Expr)) := do
           let t := if t.isAppOfArity ``autoParam 2 then t.getArg! 0 else t
           if let some (_, a, b) := t.eq? then
             unless ← isDefEq a b do return none
+        -- a local's type that only a side condition's proof mentions (a
+        -- rule's `MRhs.mapFree` under a pushed local, as in
+        -- `memoryIndexWriteCaptureAllComplexRecv`): no unification sets it,
+        -- and any type will do there
+        for x in xs do
+          if (← instantiateMVars x).isMVar then
+            if (← whnfR (← instantiateMVars (← inferType x))).isConstOf ``Solidity.Core.LTy then
+              x.mvarId!.assign (mkApp (mkConst ``Solidity.Core.LTy.val) (mkConst ``Solidity.PrimTy.uint))
         let p ← instantiateMVars args[6]!
         if p.hasMVar then return none
         return some (c, p)

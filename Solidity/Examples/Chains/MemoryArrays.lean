@@ -240,18 +240,11 @@ end
 
 end ElementOfField
 
-end Solidity.Examples.Chains.MemoryArrays
-
-/-! ## Left on `Update.lean`'s calculus
-
-`IndexReadCaptured`, `IndexWriteCaptured`, `ElementAlias` and `CallValue`, whose programs the elaborator writes with captures in front (`uint idx; idx = ++i;`, a call's result): the scoped reading leaves the captures, fresh variables, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`); they read as today's chains until the elaborator puts a statement's captures in a block of their own.  And `ElementOfField.valueWrite`: the scoped strategy fires `memoryIndexWriteCaptureAllComplexRecv` on `b.items[i] = val;`, but the rule finder (`Core.ruleOf?`) names no rule there (`#derivation` prints `~[?]~>`), so its named link does not elaborate. -/
-
-namespace Solidity.Examples.Chains.MemoryArrays
 
 local instance : InContract := ⟨StandardExample⟩
 
 section
-variable (m : Modality) (φ : Post StandardExample)
+variable (m : Modality)
 
 /-! ## Example: Additional Memory Array Cases -/
 
@@ -266,7 +259,7 @@ local instance : FreshNames := .ofTable names
 then read at (the paper's `⇝*`); the merge resolves the index to `1 + 1`, which folds to `2` in `i`, `idx`
 and the read (`add_literals`, inside a memory term too), and the read of the write resolves to `10`
 (`readOnWrite`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
     dl![m]{
       { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
         { memory := write(memory, carolValues[2], 10) } ⟨[ v = carolValues[++i]; ]⟩ φ }
@@ -308,7 +301,7 @@ local instance : FreshNames := .ofTable names
 /-- `carolValues[++i] = val;` with `i` 1 and `val` 7: the right-hand side is snapshot before the index
 runs, then the element written by the captured index (the paper's `⇝*`); the merge resolves the index to
 `1 + 1` and the value to `7`, and the index folds to `2` in `i`, `idx` and the write. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
     dl![m]{
       { i := 1 ‖ val := 7 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
         ⟨[ carolValues[++i] = val; ]⟩ φ }
@@ -339,7 +332,7 @@ local instance : FreshNames := .ofTable names
 dropped (the paper's first `⇝`, which here comes after the capture), and `tok` bound to the element's
 identity; the merge resolves the index to `1 + 1`, which folds to `2` in `i`, `idx` and the read.  The read
 of the element stays: it is an identity of the fresh `carolTokens`, which no law reads. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.struct "Token"), .mem (.fixed (.ref (.struct "Token")) 3), .val .uint]) :
     dl![m]{
       { i := 1 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
         ⟨[ Token memory tok = carolTokens[++i]; ]⟩ φ }
@@ -381,7 +374,7 @@ local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes Calls names).isEmpty
 
 section
-variable (m : Modality) (φ : Post Calls)
+variable (m : Modality)
 
 /-- `carolValues[++i] = makeValue();` with `i` 1, from a storage where `seed` is 7: the call is captured
 before the index (solc's order; the paper prints only that capture, which is the program as written
@@ -391,7 +384,7 @@ merge `seed` is read in the starting storage (`findOnSave`, in the write too) an
 starting storage is an update of its
 own: `sequentialToParallel` merges an update that writes memory only where its other elements bind
 locals (`Upd.merge`). -/
-theorem incrementIndex :
+theorem incrementIndex (φ : Core.Post Calls [.mem (.fixed (.prim .uint) 3), .val .uint]) :
     dl![m]{
       { storage := save(storage, seed, 7) }
         { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
@@ -442,7 +435,7 @@ theorem incrementIndex :
 /-- `carolValues[i] = makeValue();` with `i` 2, from a storage where `seed` is 7: the call captured,
 inlined, and written (the paper's `⇝*`); past the merge `seed` is read in the starting storage
 (`findOnSave`), in the captures and in the write. -/
-theorem simpleIndex :
+theorem simpleIndex (φ : Core.Post Calls [.mem (.fixed (.prim .uint) 3), .val .uint]) :
     dl![m]{
       { storage := save(storage, seed, 7) }
         { i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
@@ -475,13 +468,13 @@ local instance : InContract := ⟨TestSuite⟩
 local instance : FreshNames := .ofTable names
 
 section
-variable (m : Modality) (φ : Post TestSuite)
+variable (m : Modality)
 
 /-- `b.items[i] = val;` with `i` 2 and `val` 7, for the printed `carol.account.values[i] = val;`
 (`Basket memory b` for `carol.account`): the right-hand side, the receiver and the index are each bound
 (the paper's `⇝`), and the element is written (its `⇝*`); the merge resolves the receiver to `mv`'s read.
 That read stays: no law reads a member of a fresh object to its identity. -/
-theorem valueWrite :
+theorem valueWrite (φ : Core.Post TestSuite [.mem (.struct "Basket"), .val .uint, .val .uint]) :
     dl![m]{
       { i := 2 ‖ val := 7 ‖ b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) }
         ⟨[ b.items[i] = val; ]⟩ φ }

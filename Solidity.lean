@@ -85,6 +85,7 @@ import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
 import Solidity.Calculus.Core.DelabLean
 import Solidity.Calculus.Core.RuleText
+import Solidity.Calculus.Core.Merge
 import Solidity.Calculus.Core.ChainKit
 import Solidity.Calculus.Core.Chains
 import Solidity.Calculus.Core.ChainGen

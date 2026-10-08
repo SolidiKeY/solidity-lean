@@ -2,6 +2,7 @@ import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.ProvesSound
+import Solidity.Calculus.Core.Merge
 import Solidity.Calculus.Chains
 
 /-!
@@ -521,12 +522,16 @@ inductive Link (C : Contract) : Type where
   | many
   /-- `~[r]~>`, a rule of the strategy. -/
   | rule (r : StepRule C)
+  /-- `~[sequentialToParallel]~>` while the program is open: the `n + 1`
+  updates from position `k` of the spine merged (`Calculus/Core/Merge.lean`). -/
+  | merge (k n : Nat)
 
 /-- The relation an arrow stands for. -/
 @[reducible] def Link.Rel : Link C → Fml C Γ → Fml C Γ → Prop
   | .one => Fml.OneStep
   | .many => fun φ ψ => Nonempty (Fml.Steps φ ψ)
   | .rule r => Fml.StepBy r
+  | .merge k n => Fml.MergeBy k n
 
 /-- `φ ~> φ₁ ~*> φ₂ …`: every link of a chain that starts at `φ` holds. -/
 @[reducible] def Fml.Via : Fml C Γ → List (Link C × Fml C Γ) → Prop
@@ -725,6 +730,7 @@ theorem Link.Rel.sound : {l : Link C} → l.Rel φ ψ → Fml.Leads φ ψ
   | .one, h => Fml.OneStep.sound h
   | .many, ⟨c⟩ => c.sound
   | .rule _, h => Fml.StepBy.sound h
+  | .merge k n, h => Fml.mergeRun_leads k n _ h
 
 /-- **A chain leads from its first line to its last.** -/
 theorem Fml.Via.leads : {φ : Fml C Γ} → {ws : List (Link C × Fml C Γ)} → Fml.Via φ ws →
@@ -759,15 +765,165 @@ theorem Fml.ViaE.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Sol
 
 /-- **A chain past the program, closed**: the bridge of `Fml.ViaE.valid` is
 `Proves.close` at the last scoped line, whose side conditions the kernel
-decides (`Fml.closableB`: no modality left, box updates only, a hidden
-binder's name avoided). -/
+decides (`Fml.closableB`: no modality left, box updates only; a hidden
+binder's name avoids the empty context's). -/
 theorem Fml.ViaE.valid_close {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.Fml C}
     {rs : List (Solidity.Link C × Solidity.Fml C)} (v : Fml.ViaE φ ws L rs)
     (h : ∀ τ, Solidity.holds τ (Solidity.Fml.Via.last L rs))
-    (hc : (Fml.Via.last φ ws).closableB [] = true := by first | rfl | decide)
-    (hB : Solidity.Avoids (Fml.Via.last φ ws).bindNames [] := by decide) : Valid φ :=
+    (hc : (Fml.Via.last φ ws).closableB [] = true := by first | rfl | decide) : Valid φ :=
   v.valid (fun he => Proves.valid (R := .all) (Proves.close (Γ₀ := []) (H := .nil) [] rfl
-    List.nodup_nil he hc hB)) h
+    List.nodup_nil he hc fun _ _ h => nomatch h)) h
+
+/-! ## Composing: `~~>`, segments, `calc`
+
+`φ ~~> ψ` on scoped lines is `Fml.Leads` (wherever `ψ` holds, `φ` does):
+what a chain composes to, and a segment's link to the next
+(`(seg₁ ..).leads.via (seg₂ ..)`).  Past the program a chain's last line is
+`Update.lean`'s, its erasure's: `Fml.LeadsE φ Z L` is `φ ~~> Z` for the last
+scoped line `Z` and `L`'s rewrite chain from `Z`'s erasure, which `φ ~~> L`
+elaborates to (`Calculus/Core/Chains.lean`, `Z` the strategy's last line). -/
+
+theorem Fml.Leads.self (φ : Fml C Γ) : Fml.Leads φ φ := fun _ h => h
+
+/-- A chain goes on with a segment that starts where it ends. -/
+theorem Fml.Leads.via {ψ : Fml C Γ} {ws : List (Link C × Fml C Γ)} (h : Fml.Leads φ ψ)
+    (v : Fml.Via ψ ws) : Fml.Leads φ (Fml.Via.last ψ ws) :=
+  h.comp v.leads
+
+theorem Fml.Leads.valid {φ ψ : Fml C []} (h : Fml.Leads φ ψ) (hψ : Valid ψ) : Valid φ :=
+  fun σ => h σ (hψ σ)
+
+/-- `φ ~~> L` past the program: `φ` leads to the last scoped line `Z`, and
+`Z`'s erasure, its parameters free, to `L` (`Update.lean`'s `~~>`). -/
+def Fml.LeadsE (φ Z : Fml C []) (L : Solidity.Fml C) : Prop :=
+  Fml.Leads φ Z ∧ Solidity.Fml.Leads ((Z.erase []).dropAlls) L
+
+/-- A chain past the program, as `~~>`. -/
+theorem Fml.ViaE.leads {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.Fml C}
+    {rs : List (Solidity.Link C × Solidity.Fml C)} (v : Fml.ViaE φ ws L rs) :
+    Fml.LeadsE φ (Fml.Via.last φ ws) (Solidity.Fml.Via.last L rs) := by
+  obtain ⟨h₁, rfl, h₃⟩ := v
+  exact ⟨h₁.leads, Solidity.Fml.Via.leads h₃⟩
+
+/-- A scoped segment, then one past the program. -/
+theorem Fml.Leads.viaE {φ ψ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.Fml C}
+    {rs : List (Solidity.Link C × Solidity.Fml C)} (h : Fml.Leads φ ψ) (v : Fml.ViaE ψ ws L rs) :
+    Fml.LeadsE φ (Fml.Via.last ψ ws) (Solidity.Fml.Via.last L rs) := by
+  obtain ⟨h₁, rfl, h₃⟩ := v
+  exact ⟨h.comp h₁.leads, Solidity.Fml.Via.leads h₃⟩
+
+/-- Past the program, a segment of `Update.lean`'s rewrites. -/
+theorem Fml.LeadsE.via {φ Z : Fml C []} {L : Solidity.Fml C}
+    {rs : List (Solidity.Link C × Solidity.Fml C)} (h : Fml.LeadsE φ Z L) (v : Solidity.Fml.Via L rs) :
+    Fml.LeadsE φ Z (Solidity.Fml.Via.last L rs) :=
+  ⟨h.1, Solidity.Fml.Leads.comp h.2 (Solidity.Fml.Via.leads v)⟩
+
+/-- Past the program, a segment written from a line with no program left
+(its erasure `L`, the line the chain so far ends at). -/
+theorem Fml.LeadsE.viaE {φ Z B : Fml C []} {L : Solidity.Fml C}
+    {rs : List (Solidity.Link C × Solidity.Fml C)} (h : Fml.LeadsE φ Z L) (v : Fml.ViaE B [] L rs) :
+    Fml.LeadsE φ Z (Solidity.Fml.Via.last L rs) :=
+  h.via v.2.2
+
+/-- **`~~>` past the program is a proof**, given the bridge at its last
+scoped line (`Fml.ViaE.valid`'s). -/
+theorem Fml.LeadsE.valid {φ Z : Fml C []} {L : Solidity.Fml C} (h : Fml.LeadsE φ Z L)
+    (bridge : (∀ τ, Solidity.holds τ (Z.erase [])) → Valid Z) (hL : ∀ τ, Solidity.holds τ L) :
+    Valid φ :=
+  h.1.valid (bridge (Solidity.Fml.holds_of_dropAlls _ (fun τ => h.2 τ (hL τ))))
+
+/-- `~~>` past the program, the bridge `Proves.close` at its last scoped line
+(`Fml.ViaE.valid_close`'s). -/
+theorem Fml.LeadsE.valid_close {φ Z : Fml C []} {L : Solidity.Fml C} (h : Fml.LeadsE φ Z L)
+    (hL : ∀ τ, Solidity.holds τ L) (hc : Z.closableB [] = true := by first | rfl | decide) :
+    Valid φ :=
+  h.valid (fun he => Proves.valid (R := .all) (Proves.close (Γ₀ := []) (H := .nil) [] rfl
+    List.nodup_nil he hc fun _ _ h => nomatch h)) hL
+
+/-! `calc` chains `~>`, `~*>`, `~[r]~>` and the scoped merges; the result is
+a derivation `~*>` where every link is a step, `~~>` otherwise. -/
+
+/-- Two derivations, one after the other. -/
+def Fml.Steps.trans : {φ ψ χ : Fml C Γ} → Fml.Steps φ ψ → Fml.Steps ψ χ → Fml.Steps φ χ
+  | _, _, _, .refl _, d => d
+  | _, _, _, .cons s c, d => .cons s (Fml.Steps.trans c d)
+
+/-- One step as a derivation. -/
+def Fml.Steps.single {φ ψ : Fml C Γ} (s : Fml.OneStep φ ψ) : Fml.Steps φ ψ := .cons s (.refl ψ)
+
+/-- A named step as a derivation, its label dropped. -/
+def Fml.StepBy.steps {r : StepRule C} {φ ψ : Fml C Γ} (h : Fml.StepBy r φ ψ) : Fml.Steps φ ψ :=
+  .single h.oneStep
+
+/-- The number of steps. -/
+def Fml.Steps.length : {φ ψ : Fml C Γ} → Fml.Steps φ ψ → Nat
+  | _, _, .refl _ => 0
+  | _, _, .cons _ c => c.length + 1
+
+instance : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) Fml.Steps Fml.Steps Fml.Steps := ⟨Fml.Steps.trans⟩
+instance : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) Fml.OneStep Fml.Steps Fml.Steps := ⟨.cons⟩
+instance : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) Fml.Steps Fml.OneStep Fml.Steps :=
+  ⟨fun c s => c.trans (.single s)⟩
+instance : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) Fml.OneStep Fml.OneStep Fml.Steps :=
+  ⟨fun s t => .cons s (.single t)⟩
+instance {r : StepRule C} : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) (Fml.StepBy r) Fml.Steps Fml.Steps :=
+  ⟨fun h c => .cons h.oneStep c⟩
+instance {r : StepRule C} : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) Fml.Steps (Fml.StepBy r) Fml.Steps :=
+  ⟨fun c h => c.trans h.steps⟩
+instance {r : StepRule C} : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) (Fml.StepBy r) Fml.OneStep Fml.Steps :=
+  ⟨fun h s => .cons h.oneStep (.single s)⟩
+instance {r : StepRule C} : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) Fml.OneStep (Fml.StepBy r) Fml.Steps :=
+  ⟨fun s h => .cons s h.steps⟩
+instance {r r' : StepRule C} :
+    @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) (Fml.StepBy r) (Fml.StepBy r') Fml.Steps :=
+  ⟨fun h h' => .cons h.oneStep h'.steps⟩
+
+universe u v
+
+/-- A relation between scoped lines whose evidence carries the second line's
+truth back to the first: every arrow of a chain, and `~~>` itself. -/
+class Fml.SoundRel (R : Fml C Γ → Fml C Γ → Sort u) : Prop where
+  leads : ∀ {φ ψ : Fml C Γ}, R φ ψ → Fml.Leads φ ψ
+
+instance : Fml.SoundRel (@Fml.OneStep C Γ) := ⟨Fml.OneStep.sound⟩
+instance : Fml.SoundRel (@Fml.Steps C Γ) := ⟨Fml.Steps.sound⟩
+instance {r : StepRule C} : Fml.SoundRel (@Fml.StepBy C Γ r) := ⟨Fml.StepBy.sound⟩
+instance {k n : Nat} : Fml.SoundRel (@Fml.MergeBy C Γ k n) := ⟨fun h => Fml.mergeRun_leads k n _ h⟩
+instance : Fml.SoundRel (@Fml.Leads C Γ) := ⟨id⟩
+
+/-- A `calc` with a merge in it composes to `~~>`; one of steps alone still
+composes to `~*>`, whose instances come first. -/
+instance (priority := low) {R : Fml C Γ → Fml C Γ → Sort u} {S : Fml C Γ → Fml C Γ → Sort v}
+    [Fml.SoundRel R] [Fml.SoundRel S] : @Trans (Fml C Γ) (Fml C Γ) (Fml C Γ) R S Fml.Leads :=
+  ⟨fun a b => (Fml.SoundRel.leads a).comp (Fml.SoundRel.leads b)⟩
+
+/-! ## The evidence is unique -/
+
+/-- A step fires one statement, and leaves one line. -/
+theorem Fml.StepBy.unique {r r' : StepRule C} {χ : Fml C Γ} (h : Fml.StepBy r φ ψ)
+    (h' : Fml.StepBy r' φ χ) : r.focus = r'.focus ∧ ψ = χ := by
+  have := h.symm.trans h'
+  simp only [Option.some.injEq, Prod.mk.injEq] at this
+  exact this
+
+/-- Two derivations of the same length between the same ends are one. -/
+theorem Fml.Steps.eq_of_length : {φ ψ : Fml C Γ} → (c d : Fml.Steps φ ψ) → c.length = d.length → c = d
+  | _, _, .refl _, .refl _, _ => rfl
+  | _, _, .refl _, .cons _ _, h | _, _, .cons _ _, .refl _, h => by
+    simp only [Fml.Steps.length] at h
+    omega
+  | _, _, .cons (ψ := ψ₁) s c, .cons (ψ := ψ₂) s' c', h => by
+    obtain rfl : ψ₁ = ψ₂ := s.unique s'
+    have : c.length = c'.length := by simp only [Fml.Steps.length] at h; omega
+    rw [Fml.Steps.eq_of_length c c' this]
+
+/-- The strategy run `n` steps, as a derivation. -/
+def Fml.Steps.ofSymex : (n : Nat) → (φ : Fml C Γ) → Fml.Steps φ (symex n φ)
+  | 0, φ => .refl φ
+  | n + 1, φ =>
+    match hs : φ.step with
+    | some ψ => (congrArg (Fml.Steps φ) (by simp only [symex, hs])).mpr (.cons hs (Fml.Steps.ofSymex n ψ))
+    | none => (congrArg (Fml.Steps φ) (by simp only [symex, hs])).mpr (.refl φ)
 
 end Sound
 
