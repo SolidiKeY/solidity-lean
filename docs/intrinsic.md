@@ -1135,8 +1135,9 @@ docstring still names `Premise.cover` (not this lane's file).
 * `sol_prove`: one kernel evaluation of `Derive.proves φ = true`: the
   strategy, `posB` and today's `Derive.proves` on the erasure
   (`Valid.of_proves`); where the closer leaves goals, one `leafᵢ` per leaf
-  of today's residue (`Valid.of_residue`).  No search, so it is its own
-  replay.
+  of today's residue (`Valid.of_residue`), checked as one more kernel
+  evaluation of the strategy, its leaf's `posB` and the residue together
+  (`Derive.residueOf`).  No search, so it is its own replay.
 * `sol_derive`/`sol_derive?` on `Core.Valid`/`Core.Proves`: one `apply`
   per rule, cited by its taclet (`Taclet.step_eq .rule`, the rule named by
   `ruleOf?`), `case thn`/`case els` on a split.  Today's `sol_derive` is a
@@ -1153,7 +1154,8 @@ docstring still names `Premise.cover` (not this lane's file).
   `refine close ?_; sol_symex; sol_close`, as `ProofTree.closeTacs` does.
 
 **Uniqueness** is `Core.Stmt.step` being a function, with the rules lane's
-`Taclet.toStep` and `Rule.premise_unique` (`Calculus/Core/Completeness.lean`).
+`Taclet.toStep` and `Rule.premise_unique` (`Calculus/Core/Taclet.lean`; `ruleOf?` in
+`Calculus/Core/Completeness.lean`).
 **Termination is retired**, not restated: `Calculus/Termination.lean`'s
 weights are 1,300 lines over the untyped syntax, and the scoped strategy is
 fuelled (`Core.symex n`), so a program it does not finish fails `sol_prove`

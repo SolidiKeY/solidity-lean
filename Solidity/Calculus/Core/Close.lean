@@ -24,7 +24,9 @@ update, precondition or quantifier names them.  A leaf with a modality is
 not taken.
 
 `posB` is evaluated by the kernel inside `sol_prove`'s check, so it is
-written by `Fml.rec` (Gate G0, condition 1), as the strategy is.
+written by `Fml.rec`, and the checks it calls by a recursor or by `casesOn`
+with the motive generalising the index (Gate G0, condition 1), as the
+strategy is.
 -/
 
 namespace Solidity.Core
@@ -51,20 +53,55 @@ theorem _root_.Solidity.Modality.eq_box_of_isBox {m : Modality} (h : m.isBox = t
   | box => rfl
   | diamond => cases h
 
-/-- A value term each outcome of which is a `bool`, read in a state whose
-`bool` locals hold `bool`s: a comparison or a connective, a negation, a
-`bool` literal, a `bool` local. -/
-def Tm.boolB {Γ : Ctx} : Tm C Γ .val → Bool
+/-- A `bool` literal (`Tm.boolB`). -/
+def _root_.Solidity.Op0.boolLitB {s : Srt} (o : Op0 s) : Bool :=
+  Op0.casesOn (motive := fun _ _ => Bool) o
+    (fun v => match v with | .bool _ => true | _ => false)
+    (fun _ => false) (fun _ => false) false false (fun _ => false)
+
+/-- A negation (`Tm.boolB`). -/
+def _root_.Solidity.Op1.notB {a s : Srt} (o : Op1 a s) : Bool :=
+  Op1.casesOn (motive := fun _ _ _ => Bool) o
+    (fun op _ => match op with | .not => true | _ => false)
+    false (fun _ => false) false (fun _ => false) false (fun _ => false) false (fun _ => false)
+    (fun _ => false) (fun _ => false) (fun _ => false) false false (fun _ => false)
+
+/-- A comparison or a connective (`Tm.boolB`). -/
+def _root_.Solidity.Op2.boolB {a b s : Srt} (o : Op2 a b s) : Bool :=
+  Op2.casesOn (motive := fun _ _ _ _ => Bool) o (fun op _ => !op.isArith)
+    false false false false false false false (fun _ => false) false false (fun _ => false)
+    false false false false false false
+
+/-- `Tm.boolB`'s compiled twin. -/
+def Tm.boolM {Γ : Ctx} : Tm C Γ .val → Bool
   | .app2 (.binop op _) _ _ => !op.isArith
   | .app1 (.unop .not _) _ _ => true
   | .app0 (.lit (.bool _)) => true
   | .pvV (p := .bool) _ => true
   | _ => false
 
-/-- A right-hand side that keeps a `bool` local a `bool`. -/
-def Rhs.boolB {Γ : Ctx} : {t : LTy} → Rhs C Γ t → Bool
+/-- A value term each outcome of which is a `bool`, read in a state whose
+`bool` locals hold `bool`s: a comparison or a connective, a negation, a
+`bool` literal, a `bool` local.  By `casesOn`, the motive generalising the
+sort, as the operators' checks are (Gate G0, condition 1). -/
+@[implemented_by Tm.boolM]
+def Tm.boolB {Γ : Ctx} (t : Tm C Γ .val) : Bool :=
+  Tm.casesOn (motive := fun _ _ => Bool) t
+    (fun {p} _ => match p with | .bool => true | _ => false)
+    (fun _ => false) (fun _ => false) (fun _ => false) (fun _ _ => false)
+    (fun o => o.boolLitB) (fun o _ _ => o.notB) (fun o _ _ => o.boolB) (fun _ _ _ _ => false)
+
+/-- `Rhs.boolB`'s compiled twin. -/
+def Rhs.boolM {Γ : Ctx} : {t : LTy} → Rhs C Γ t → Bool
   | _, .val (p := .bool) t => t.boolB
   | _, _ => true
+
+/-- A right-hand side that keeps a `bool` local a `bool`. -/
+@[implemented_by Rhs.boolM]
+def Rhs.boolB {Γ : Ctx} {t : LTy} (r : Rhs C Γ t) : Bool :=
+  Rhs.casesOn (motive := fun _ _ => Bool) r
+    (fun {p} t => match p with | .bool => t.boolB | _ => true)
+    (fun _ => true) true (fun _ => true) (fun _ => true) true true
 
 /-- An element that keeps the `bool` locals `bool`s. -/
 def UpdElem.boolB {Γ Δ : Ctx} : UpdElem C Γ Δ → Bool
@@ -179,7 +216,8 @@ def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
 theorem Tm.boolB_eval {Γ : Ctx} {σ : State C Γ} (hT : σ.BoolOK) :
     (t : Tm C Γ .val) → t.boolB = true → ∀ {v : Semantics.Value}, t.eval σ = .ok v → ∃ b, v = .bool b
   | .app2 (.binop op p) a b, hb, v, h => by
-    have hop : op.isArith = false := by simpa only [Tm.boolB, Bool.not_eq_eq_eq_not, Bool.not_true] using hb
+    have hb' : (!op.isArith) = true := hb
+    have hop : op.isArith = false := by simpa only [Bool.not_eq_eq_eq_not, Bool.not_true] using hb'
     change (do Solidity.evalBinop op p (← a.eval σ) (b.eval σ)) = .ok v at h
     obtain ⟨lv, -, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
     unfold Solidity.evalBinop at h
@@ -302,7 +340,7 @@ theorem Fml.plain_of_plainB {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns : List Var}, φ
 theorem disjointB_avoids {B vs : List Var} (h : disjointB B vs = true) : Solidity.Avoids vs B := by
   intro x hx hB
   simp only [disjointB, Bool.not_eq_eq_eq_not, Bool.not_true, List.any_eq_false] at h
-  exact absurd (List.contains_iff_mem.2 hB) (by simpa using h x hx)
+  exact h x hx (List.contains_iff_mem.2 hB)
 
 /-! ## Untyped states alike off some names -/
 

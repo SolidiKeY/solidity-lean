@@ -14,7 +14,9 @@ The kernel checks it as one evaluation, `Derive.proves φ = true`
 quoted back.
 
 Where the closer leaves goals, `sol_prove` computes today's residue of the
-erasure (`Derive.residue`) and leaves one goal per leaf, `leaf1`, `leaf2`,
+erasure (`Derive.residue`), checked with the strategy and the leaf's
+`Fml.posB` as one more kernel evaluation (`Derive.residueOf`), and leaves one
+goal per leaf, `leaf1`, `leaf2`,
 … , each a sequent of today's calculus, closed by today's tactics
 (`Valid.of_residue`).
 
@@ -43,6 +45,18 @@ def closes (ψ : Fml C []) : Bool :=
 closed. -/
 def proves (φ : Fml C []) : Bool := closes (symex fuel φ)
 
+/-- Today's residue of the erasure of a leaf `Fml.posB` takes. -/
+def residueAt (ψ : Fml C []) : Option (List (Solidity.Derive.Leaf C) × Nat) :=
+  if (ψ.posB []).isSome then
+    Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+      Solidity.Derive.budget [] (ψ.erase [])
+  else none
+
+/-- **`sol_prove`'s check when leaves are left**: the strategy run once, its
+leaf checked and its erasure's residue computed, in one kernel evaluation. -/
+def residueOf (φ : Fml C []) : Option (List (Solidity.Derive.Leaf C) × Nat) :=
+  residueAt (symex fuel φ)
+
 end Derive
 
 /-- What `Derive.closes` accepts is valid. -/
@@ -58,13 +72,13 @@ theorem Valid.of_proves (hS : Stmt.Sound C) {φ : Fml C []} (h : Derive.proves �
 /-- **`sol_prove`'s proof when leaves are left**: today's residue of the
 erasure, each leaf proved. -/
 theorem Valid.of_residue (hS : Stmt.Sound C) {φ : Fml C []}
-    (hp : ((symex Derive.fuel φ).posB []).isSome = true)
-    {ls : List (Solidity.Derive.Leaf C)} {b' : Nat}
-    (h : Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-      Solidity.Derive.budget [] ((symex Derive.fuel φ).erase []) = some (ls, b'))
-    (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Valid φ :=
-  symex_valid hS Derive.fuel
-    (Valid.of_erase hp (Solidity.Proves.valid (Solidity.Proves.of_synResidue h hl)))
+    {ls : List (Solidity.Derive.Leaf C)} {b' : Nat} (h : Derive.residueOf φ = some (ls, b'))
+    (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Valid φ := by
+  unfold Derive.residueOf Derive.residueAt at h
+  split at h
+  · exact symex_valid hS Derive.fuel
+      (Valid.of_erase ‹_› (Solidity.Proves.valid (Solidity.Proves.of_synResidue h hl)))
+  · cases h
 
 /-! ## The tactic -/
 
@@ -103,15 +117,6 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
       (mkAppN (mkConst ``residueQuoteC) #[C, quoteConstName n, φe])
     | throwError "sol_prove: the strategy leaves a formula the erasure does not close \
         (`Fml.posB`), or today's closer takes more than {Solidity.Derive.budget} steps"
-  let ψ := mkAppN (mkConst ``symex) #[C, mkApp (mkConst ``List.nil [0]) (mkConst ``LTy),
-    mkConst ``fuel, φ]
-  let hpTy := mkApp3 (mkConst ``Eq [1]) bool
-    (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
-      (mkAppN (mkConst ``Fml.posB) #[C, mkApp (mkConst ``List.nil [0]) (mkConst ``LTy), ψ,
-        mkApp (mkConst ``List.nil [0]) (mkConst ``Var)]))
-    (mkConst ``Bool.true)
-  let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
-    catch e => throwError "sol_prove: the kernel rejects the check of the leaf:{indentD e.toMessageData}"
   let hyp := mkApp (mkConst ``Solidity.Hyp) C
   let leafTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) hyp)
     (mkApp (mkConst ``Solidity.Fml) C)
@@ -123,12 +128,10 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
   let someLs := mkApp2 (mkConst ``Option.some [0]) pairTy
     (mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) leafTy, mkConst ``Nat, ls,
       mkRawNatLit left])
-  let erased := mkAppN (mkConst ``Fml.erase) #[C, mkApp (mkConst ``List.nil [0]) (mkConst ``LTy),
-    mkApp (mkConst ``List.nil [0]) (mkConst ``Var), ψ]
+  -- one lemma: the strategy, the check of its leaf and the residue, so the
+  -- kernel runs the strategy once more, not twice
   let type := mkApp3 (mkConst ``Eq [1]) (mkApp (mkConst ``Option [0]) pairTy)
-    (mkAppN (mkConst ``Solidity.Derive.residue) #[C, mkConst ``Solidity.Derive.budget,
-      mkApp (mkConst ``Solidity.Derive.synClose) C, mkConst ``Solidity.Derive.budget,
-      mkApp (mkConst ``List.nil [0]) hyp, erased]) someLs
+    (mkApp2 (mkConst ``residueOf) C φ) someLs
   let rfl' := mkApp2 (mkConst ``Eq.refl [1]) (mkApp (mkConst ``Option [0]) pairTy) someLs
   let h ← try Solidity.Derive.kernelLemma type rfl'
     catch e => throwError "sol_prove: the kernel rejects the residue:{indentD e.toMessageData}"
@@ -145,7 +148,7 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
   for (Γ', φ') in leaves.reverse, p in proofs.reverse do
     hl := mkAppN (mkConst ``Solidity.Derive.leaves_cons) #[C, Γ', φ', rest, p, hl]
     rest := mkAppN (mkConst ``List.cons [0]) #[leafTy, mkLeaf Γ' φ', rest]
-  g.assign (mkAppN (mkConst ``Valid.of_residue) #[C, sound, φ, hp, ls, mkRawNatLit left, h, hl])
+  g.assign (mkAppN (mkConst ``Valid.of_residue) #[C, sound, φ, ls, mkRawNatLit left, h, hl])
   return goals.toList
 
 end Derive
