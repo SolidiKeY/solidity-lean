@@ -556,7 +556,10 @@ end Solidity.Examples.Loops
 
 /-! ## Read without the switch
 
-What the scoped calculus does not close yet: a walk under the diamond (`Core.Proves.close` takes box contexts) and leaves the scoped closer's erasure does not take (`Fml.posB`: a loop's anonymised flag and hidden binders, `docs/intrinsic.md` W2 `symex`). -/
+What the scoped calculus does not close yet: a walk under the diamond
+(`Core.Proves.close` takes box contexts) and leaves the scoped closer's
+erasure does not take (`Fml.posB`: a loop's anonymised flag and hidden
+binders, `docs/intrinsic.md` W2 `symex`). -/
 
 namespace Solidity.Examples.Loops
 

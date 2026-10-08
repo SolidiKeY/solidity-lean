@@ -1,4 +1,7 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # A branch: `ifElseUnfold` and `ifElseSplit`
@@ -29,13 +32,10 @@ ifElseSplit {
 
 It is a rule with *two* premises: one goal per branch, the condition (or its
 negation) added to the left of `⟹`, the rest of the program `#c` after the
-branch in both.  Under `⊢` it is `apply split .ifElseSplit`, which leaves the
-goals `thn` and `els`, and a third, `cov`: a condition can be stuck (a local
-read before it is bound), so under the diamond the two conditions owe that
-one of them holds (`Premise.cover`); under the box `cov` is `true`.  The
-formula the strategy steps to (`sol_step`, a chain) carries the cover as one
-formula under either modality, `⟨[ revert(); ]⟩ false ∨ c ∨ c'`
-(`Premise.coverFml`): a reverting run satisfies the box, and no diamond.
+branch in both.  Under `⊢` it is `apply split .ifElseSplit`, which leaves
+KeY's two goals `thn` and `els`: the locals are typed, so a `bool`
+condition is never stuck and no third goal covers it.  Each branch is a
+block, whose end prints as `}`.
 
 The old table's condition-directed rewrites (`ifElseTrue`, `ifElseFalse`,
 `ifElseNegated`) are gone: a literal is simple, so `if (true)` splits like any
@@ -48,6 +48,8 @@ namespace Solidity.Examples.Tactics.Branch
 open Proves
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## The taclets
 
@@ -72,35 +74,28 @@ info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Si
 
 `if (a == b) { x = 2; } else { x = 1; }` leaves `x` nonzero either way.  The
 condition is captured into `se1`, the capture's declaration dropped, and its
-value bound by `binopAssignment`; then the split.  The three goals are pinned:
+value bound by `binopAssignment`; then the split.  The two goals are pinned
+(the parameters `a`, `b`, `x` bound by `∀`, taken by `allRight` first):
 the condition is added *after* the updates of the context, since it is read in
 the state the `if` runs in. -/
 
 /--
 trace: case thn
-⊢ dl{
-    {
-        se1 :=
-          ‹Term.binop BinOp.eqB PrimTy.uint (Simple.local (Var.user "a")).lower (Simple.local (Var.user "b")).lower› },
-    se1 ≐ true ⟹ [ x = 2; ] ¬x = 0 }
+⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a,
+    { se1 := ‹Tm.app2 (Op2.binop BinOp.eqB PrimTy.uint) (Tm.pvV (Var.user "a")) (Tm.pvV (Var.user "b"))› }, se1 ≐ true ⟹
+    [ x = 2; } ] ¬x = 0 }
 
 case els
-⊢ dl{
-    {
-        se1 :=
-          ‹Term.binop BinOp.eqB PrimTy.uint (Simple.local (Var.user "a")).lower (Simple.local (Var.user "b")).lower› },
-    se1 ≐ false ⟹ [ x = 1; ] ¬x = 0 }
-
-case cov
-⊢ dl{
-    {
-        se1 :=
-          ‹Term.binop BinOp.eqB PrimTy.uint (Simple.local (Var.user "a")).lower (Simple.local (Var.user "b")).lower› } ⟹
-    true }
+⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a,
+    { se1 := ‹Tm.app2 (Op2.binop BinOp.eqB PrimTy.uint) (Tm.pvV (Var.user "a")) (Tm.pvV (Var.user "b"))› },
+    se1 ≐ false ⟹ [ x = 1; } ] ¬x = 0 }
 -/
 #guard_msgs in
 /-- `if (a == b) { x = 2; } else { x = 1; }` ends with `x != 0`. -/
 theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x != 0 } := by
+  apply allIntro
+  apply allIntro
+  apply allIntro
   apply unfold .ifElseUnfold
   -- dl{ ⟹ [ bool se1 = a == b; if (se1) { x = 2; } else { x = 1; }; ] ¬x = 0 }
   apply unfold .localValueDeclInitDrop
@@ -122,49 +117,6 @@ theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x !=
     refine close ?_
     sol_symex
     sol_close
-  case cov =>
-    -- dl{ { se1 := a == b } ⟹ true }: the box owes nothing
-    refine close ?_
-    sol_symex
-    sol_close
-
-/-! ## Under the diamond: the condition decides
-
-With the precondition `a == b` the `else` goal has both `a = b` and
-`se1 ≐ false` in its context, a contradiction; and the precondition binds
-`a` and `b`, so the condition is not stuck and `cov` holds. -/
-
-/-- `a == b → ⟨ if (a == b) { x = 2; } else { x = 1; } ⟩ x == 2`. -/
-theorem branchDiamond :
-    ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x == 2 } := by
-  apply intro
-  apply unfold .ifElseUnfold
-  apply unfold .localValueDeclInitDrop
-  apply update .binopAssignment
-  apply split .ifElseSplit
-  case thn =>
-    apply update .localValueAssign
-    apply empty
-    refine close ?_
-    sol_symex
-    sol_close
-  case els =>
-    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ x = 1; ⟩ x = 2 }
-    apply update .localValueAssign
-    apply empty
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
-    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 ≐ true ∧ ¬se1 ≐ false) }
-    refine close ?_
-    sol_symex
-    sol_close
-
-/-- Without the precondition the diamond is not valid: in a state that does
-not bind `a`, the condition is stuck and the program never ends. -/
-example : ¬ (⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 }) :=
-  fun h => (h Semantics.State.exampleStore).1
 
 /-! ## A literal condition
 
@@ -172,10 +124,7 @@ example : ¬ (⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 })
 `true ≐ false`.  (The old `ifElseTrue` collapsed this in one rewrite.) -/
 
 /--
-trace: ⊢ ⊨
-    dl{
-      (true ≐ true → [ age = 1; ] find(storage, age) = 1) ∧
-        (true ≐ false → [ age = 2; ] find(storage, age) = 1) ∧ ([ revert(); ] false ∨ true ≐ true ∨ true ≐ false) }
+trace: ⊢ ⊨ dl{ (true ≐ true → [ age = 1; } ] find(storage, age) = 1) ∧ (true ≐ false → [ age = 2; } ] find(storage, age) = 1) }
 -/
 #guard_msgs in
 /-- `if (true) { age = 1; } else { age = 2; }` writes `1`. -/
@@ -289,5 +238,58 @@ info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0;
 /- Declared alike in both branches, then at another type in a later one. -/
 #guard (Core.Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
     if (c) { bool t = true; } } : Prog StandardExample)).toBool
+
+end Solidity.Examples.Tactics.Branch
+
+/-! ## Read without the switch
+
+Under the diamond a walk's leaves are not closed by their erasure yet
+(`Core.Proves.close` takes box contexts), and the stuck condition of the
+refutation is today's: scoped, `a` and `b` are bound by `∀` and the diamond
+holds. -/
+
+namespace Solidity.Examples.Tactics.Branch
+
+open Proves
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-! ## Under the diamond: the condition decides
+
+With the precondition `a == b` the `else` goal has both `a = b` and
+`se1 ≐ false` in its context, a contradiction; and the precondition binds
+`a` and `b`, so the condition is not stuck and `cov` holds. -/
+
+/-- `a == b → ⟨ if (a == b) { x = 2; } else { x = 1; } ⟩ x == 2`. -/
+theorem branchDiamond :
+    ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x == 2 } := by
+  apply intro
+  apply unfold .ifElseUnfold
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply split .ifElseSplit
+  case thn =>
+    apply update .localValueAssign
+    apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  case els =>
+    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ x = 1; ⟩ x = 2 }
+    apply update .localValueAssign
+    apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  case cov =>
+    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 ≐ true ∧ ¬se1 ≐ false) }
+    refine close ?_
+    sol_symex
+    sol_close
+
+/-- Without the precondition the diamond is not valid: in a state that does
+not bind `a`, the condition is stuck and the program never ends. -/
+example : ¬ (⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 }) :=
+  fun h => (h Semantics.State.exampleStore).1
 
 end Solidity.Examples.Tactics.Branch
