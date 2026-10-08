@@ -304,13 +304,9 @@ partial def go (plan : Option (List Tok)) (depth : Nat := 0) :
   if e'.isAppOfArity ``Option.some 2 then return ← withCurrHeartbeats (atLeaf plan depth)
   if e'.isAppOfArity ``Option.none 1 then
     -- a branch with no rule: its hypotheses rule it out
-    let st ← saveState
     try evalTactic (← `(tactic| contradiction))
     catch _ =>
-      st.restore
-      evalTactic (← `(tactic| simp_all))
-      unless (← getGoals).isEmpty do
-        throwError "rule_exists: a branch with no rule is not ruled out{indentExpr (← g.getType)}"
+      throwError "rule_exists: a branch with no rule is not ruled out{indentExpr (← g.getType)}"
     return (#[], plan)
   let some (e'', s) ← stuckOf e' | throwError "rule_exists: the step is stuck on nothing to split{indentExpr e'}"
   let g ← g.replaceTargetDefEq (← replaceStep (← g.getType) e'')

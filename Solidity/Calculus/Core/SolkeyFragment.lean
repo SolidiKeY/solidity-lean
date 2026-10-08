@@ -86,9 +86,21 @@ theorem Stmt.solkey_rule_exists (k : Nat) {m : Modality} {Γ Γ' : Ctx} {s : Stm
   ⟨p, hs, Stmt.step_taclet h hs⟩
 
 /-- Whether a statement is a loop. -/
-def Stmt.isLoop {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
-  | .loop .. => true
-  | _ => false
+def Stmt.isLoop : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
+  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := fun _ _ => false) (rebind := fun _ _ => false)
+    (assignLocal := fun _ _ => false) (declLocal := fun _ _ _ => false)
+    (declStorage := fun _ _ _ => false) (opAssign := fun _ _ _ _ _ => false)
+    (incDec := fun _ _ _ => false) (assignIncDec := fun _ _ _ _ _ => false)
+    (push := fun _ _ _ => false) (pop := fun _ => false) (transfer := fun _ _ => false)
+    (send := fun _ _ _ => false) (declMem := fun _ _ _ _ _ => false)
+    (rebindMem := fun _ _ => false) (assignFromMem := fun _ _ => false)
+    (assignMem := fun _ _ => false) (delete := fun _ => false)
+    (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
+    (ite := fun _ _ _ => false) (require := fun _ => false) (assert := fun _ => false)
+    (revert := false) (call := fun _ _ _ _ => false)
+    (tryCall := fun _ _ _ _ _ _ _ => false) (loop := fun _ _ _ => true)
+    (block := fun _ => false)
 
 /-- **No taclet of solkey's runs a loop**: its rules here are Lean's
 (`whileUnwind`, `loopExit`, the invariant rules), at the pinned checkout. -/

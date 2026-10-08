@@ -13,11 +13,16 @@ so that it reads as it would in print; the proof is the original's name.
 calculus's (`Calculus/Core/`), over the typed state and its run
 (`Semantics/Core/TypedRun.lean`): a formula `φ : Core.Fml C Γ` is read in a
 typed state `σ : Core.TState C Γ`, and a program `P : Core.Prog C Γ Γ'` runs
-from it by `Core.Prog.trun`.  Two of today's headline theorems have no
-scoped statement: that solkey's rules alone derive what the calculus
-derives on the fragment (the scoped `⊢ₖ` restricts no rule yet), and that
-symbolic execution terminates (the scoped strategy is fuelled);
-`docs/intrinsic.md` (W4 `theorems`) says why.
+from it by `Core.Prog.trun`.  Three of today's statements are not restated
+over the judgement.  Two wait for `⊢ₖ` to restrict its rules (proposed
+decision 33; the scoped `Core.Proves` never reads its rule set): that
+solkey's rules alone derive what the calculus derives on the fragment
+(`solkey_eq_calculus`), and that they derive less off it (the
+judgement-level `solkey_lt_calculus`, `∃ φ, ⊢ φ ∧ ¬ ⊢ₖ φ`, false until
+then).  `solkey_lt_calculus` below replaces the latter at the rule level: a
+loop has a rule and no taclet.  The third, that symbolic execution
+terminates (`symex_terminates`), was retired at W2: the scoped strategy is
+fuelled.  `docs/intrinsic.md` (W4 `theorems`) says why.
 
 | Notation | Reads | Is |
 |---|---|---|
