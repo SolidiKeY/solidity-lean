@@ -1340,6 +1340,97 @@ Left:
 * the chain notation reads `cdl!`; reading `dl!` is W2 `tree`'s flip
   switch, and the 14 worked-chain files move in W3 `chains`.
 
+### W2 lane `tree` (`w2-tree`, 2026-10-08)
+
+- **The proof tree** (`Calculus/Core/ProofTree.lean`): `Core.ProofTree.build`
+  and `ofFormula` grow `Calculus/ProofTree.lean`'s `Tree` (rows, labels,
+  JSON and display reused) on a scoped goal `H ⊢ φ`.  The rule at a
+  statement is the one `ruleOf?` names, applied as
+  `apply update (Taclet.toStep .r)` (`LeanTaclet.toStep` for Lean's rules,
+  `rfl` for the non-emptiness of `branches`/`cases`); an operator family's
+  rule prints as KeY's taclet at the operator (`keyName`, by today's
+  constructor name).  `Proves.impRight`/`allRight`/`emptyModality` are the
+  aliases a walk names.  **Silent moves**: a scope end (an update of pops,
+  `updIntro`) and a hidden binder (`bindIntro`) are folded into the node
+  before them, and at the root, since KeY has no step there.  Leaves close
+  by `closeTrue` and then `Config.closers` (empty: a closer of scoped
+  leaves, `Proves.close` from `sound` and the erased closer from `symex`,
+  is to be plugged in once merged).
+- **The commands** (`Tools/CoreInspect.lean`): `#proof_tree`, `#proof_node`,
+  `#proof_tree_json` on a scoped formula, second elaborators of today's
+  syntax; `#step` names the rule the scoped strategy fires (`ruleAtC?`, at
+  the statement `Fml.stepAt` looks at), no longer through the erasure.
+- **Callbacks** (`Calculus/Core/Callback.lean`): `Core.CallbackTaclet`, the
+  three lines read under `Core.Schema`, each its no-callback twin
+  (`toTaclet`) and so `Stmt.step`'s premise (`toStep`); a printer for it
+  (the `try` line still escapes, as `tryCallNoCallbackBox`'s does, the W1
+  Delab item).  `ProvesC I H φ` stated with solkey's goals: `plain`,
+  `intro`, `allIntro`, `updIntro`, `bindIntro`, `update`, `unfold`, `bind`
+  (statements that do not fork, `Rule`s), `split`, `empty`, `callback`,
+  `send`, `tryCall`.  The invariant is a closed `Fml C []`, read in any
+  scope past an update that drops every local (`Fml.closedAt`, invisible
+  when printed), so no formula weakening is needed; a rule's fresh index is
+  past it (`Hyps.freshC`).  Printer `dl{ ..H ⟹ᶜ[I] φ }`.
+- **The flip switch** (`Calculus/Core/Surface.lean`):
+  `open scoped Solidity.Core.Surface` makes `dl!{}`, `dl![m]{}`, `dl[C]{}`,
+  `dl[C, m]{}` and their sequent lines `cdl…`, `spec!`/`problem!` `cspec…`/
+  `cproblem…`, `⊨ φ` `valid% φ` (scoped validity for a scoped formula,
+  today's otherwise; `Core.Valid` prints as `⊨`), and `⊢ φ` the scoped
+  sequent with nothing assumed.  Each is a `scoped macro_rules`, tried
+  before today's elaborator.  The commands read `dl!{}` scoped when the
+  switch is on (`surfaceOn`, the macro `core_surface%`).  Chain notation is
+  the `chains` lane's; it reads scoped once its elaborator takes a
+  `Core.Fml` line, since its lines are `dl!{}`.
+
+- **Checked sequent lines** (`Calculus/Core/Sequents.lean`): a scoped
+  goal carries frames (`pop`, `seq`, hidden binders) that a flat program
+  read back does not, so `show` cannot compare it by unfolding.
+  `show_sequent!{ Γ ⟹ φ }` (and, under the switch, `show sequent!{ … }`)
+  compares the goal's erasure, as it prints, with the line read as
+  today's sequent, by unification: the line is written as the goal prints
+  (today's spellings), without a block's `}`, a hidden binder no entry,
+  a `∀ T x` entry read (`readSequent`).
+
+- **`sol_spec` on `cspec!`** (`Calculus/Core/SolSpec.lean`): a second
+  elaborator of `sol_spec_prep`, so `sol_spec` (`sol_symex; sol_spec_close`)
+  runs the scoped strategy and then erases each leaf (`Valid.of_erase`, the
+  kernel checking `Fml.posB`) into today's `sol_spec_prep`/`sol_spec_finish`.
+  `Examples/Tactics/CoreSolSpec.lean` proves all seven of
+  `Examples/Tactics/Specs.lean`'s obligations scoped, `_mint` under 700000
+  heartbeats (today's needs 1000000).
+
+- **Left for the integration**: `ProofTree.Config.closers` stays empty
+  until `w2-sound`'s `Proves.close` (w2-sound's Calculus/Core/CloseErase.lean) is
+  merged; then a leaf with a formula left closes by
+  `apply Proves.close` and the erased closer.
+- **Left: the callback reading over `TState`**, this lane's Work item not
+  done: `holdsC`/`ValidC`/`TransferSem`/`holdsT`/`ValidT` and their
+  theorems (`validT_*`, `after_frames_iff`, `holdsC_iff_holds`,
+  `holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC`),
+  `ProvesC.sound : ProvesC I Γ₀ H φ → ValidC I (H.wrap φ)` and
+  `ProvesC.close`, then the re-pin of `Examples/Tactics/CoreCallback.lean`.
+  Blocked on `holds` over `TState` from `sound` (that lane leaves the
+  uninhabited-memory-type decision open).  Until then `ProvesC` is a
+  stated judgement with no soundness theorem
+  (`Calculus/Core/Callback.lean` says so), and the callback-taclet rows
+  stay today's.  Carried into W3/W4: nothing may rely on a `ProvesC` rule
+  before `ProvesC.sound` is proved.
+
+Pins (`Examples/Tactics/CoreProofTree.lean`, `CoreSurface.lean`, `CoreSequents.lean`,
+`CoreCallback.lean`) differ from today's `Examples/ProofTree.lean` where
+the scoped calculus does, each for a reason W3's list should carry:
+a parameter is bound by `∀` (`cdl!`), so a tree starts with `allRight`;
+a rule that leaves no statement goes on into the rest or past the frames
+(`Fml.modalK`, G0 condition 6), so **no `emptyModality` node** follows it
+(a new pin reason for W3: today's trees have one after every last
+statement); the branch's `}` prints in a split's goals; no `cov` goal
+(merged `w2-sound`'s first commit: a split has KeY's two goals).
+
+Found, not this lane's: `Core.Proves.valid` leaves its `R` open on a
+`⊨` goal (`apply Proves.valid` needs `(R := .all)`); an update of a
+comparison (`se1 := x == 1`) escapes in today's printer too (the `dl_term`
+grammar has no `==`).
+
 ## W3 — the flip, file by file (4 lanes)
 Each lane adds the `open scoped` line to the files it owns and re-pins them.
 
@@ -1409,6 +1500,11 @@ Before the lanes branch, the lead makes `Surface` the default and removes the `o
    - `expectedPins` may move only on the rows for the newly claimed `blockEmpty`, `functionFrameEmpty` and `functionBodyExpand`.
 
 **Merge order:** sem-del → calc-del → modal.
+
+**Carried from W2 `tree`:** the callback reading over `TState` (`holdsC`,
+`ValidC`, their theorems), `ProvesC.sound` and `ProvesC.close`, unless a
+W3 lane has landed them.  `Calculus/Callback.lean` is not deleted
+(`calc-del`) before they are, so no `ProvesC` rule is left unverified.
 
 **Checks:**
 - All three libraries build; `check-orphans`, `check-doc-paths`, `check-corpus`, `check-testsuite`; `solkeycheck` at zero.
@@ -2267,7 +2363,8 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   `Examples/Tactics/CoreSpec.lean`).
 - **Callbacks** (`Semantics/Core/Callback.lean`; superseded by W1
   `runlemmas` (2026-10-08): `StateInv` over `TState`; `holdsC` and its
-  theorems removed until W2 `tree`): `Invariant.fml :
+  theorems removed until W2 `tree`, which left them undone: see its
+  "Left" bullet, carried into W3/W4): `Invariant.fml :
   Core.Fml C []`, read on a state's global part (`Invariant.at`), so no
   `I.vars = []` premise and no frame lemmas; `ExecS I : State C Γ →
   Stmt C Γ Γ' → COut C Γ' → Prop`, `ExecP`, and `ExecF` for a modality's

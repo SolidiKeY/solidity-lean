@@ -135,6 +135,11 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Core/Symex.lean` | `sol_step`/`sol_symex` on a scoped goal `Core.Valid φ`: one step sound (`Fml.stepR_sound`, from `Stmt.sound`, the rules' soundness), `symex_sound`, `symex_valid`; `Core.Symex.normValid` (the compiled strategy quoted back), `evaluable` (an obligation with no code read by its value). |
 | `Calculus/Core/Close.lean` | A scoped leaf closed by its erasure (`Valid.of_erase`): hidden binders where `Fml.posB` takes them (outside negations, preconditions and `{anon}`, named by no update, precondition or quantifier), `holds_of_erase_pos` (the erasure valid off the binders' names gives the leaf); `Fml.plainB`, `Upd.freshB` (each with a compiled twin). |
 | `Calculus/Core/Derive.lean` | `sol_prove` on a scoped goal `Core.Valid φ`: the scoped strategy, its leaf erased and closed by today's `Derive.proves`, one kernel evaluation (`Derive.proves`, `Valid.of_proves`); where the closer leaves goals, one per leaf of today's residue of the erasure (`Valid.of_residue`); `sol_close` on a scoped leaf (`Valid.of_erase`, then today's); `sol_derive`/`sol_derive?` on `Core.Proves`, one `apply` per rule cited by its taclet (`Taclet.step_eq .rule`, `ruleOf?`). |
+| `Calculus/Core/ProofTree.lean` | The proof tree of a scoped goal `H ⊢ φ` (`Core.ProofTree.build`, `ofFormula`), as `Calculus/ProofTree.lean`'s `Tree`: each rule the one `ruleOf?` names, applied as `apply update (Taclet.toStep .r)`; scope ends and hidden binders folded into the node before them; leaves closed by `closeTrue` and `Config.closers`; `Proves.impRight`/`allRight`/`emptyModality`. |
+| `Calculus/Core/Callback.lean` | The callback taclets on scoped statements (`Core.CallbackTaclet`: `transferWithCallbackBox`, `sendWithCallbackBox`, `tryCallWithCallbackBox`, `Rules.lean`'s lines read under `Core.Schema`), each its no-callback twin (`toTaclet`) and so `Stmt.step`'s (`toStep`); `ProvesC` (sequents `dl{ ..H ⟹ᶜ[I] φ }`, the invariant a closed formula read past a dropping update, `Fml.closedAt`); their printers. |
+| `Calculus/Core/Surface.lean` | The flip switch, `open scoped Solidity.Core.Surface`: `dl!{}`/`dl[C]{}` read as `cdl…`, `spec!`/`problem!` as `cspec…`/`cproblem…`, `⊨` by the formula's type (`valid%`), `⊢` the scoped sequent; `surfaceOn` for the commands. |
+| `Calculus/Core/Sequents.lean` | Checked sequent lines on scoped goals: `show_sequent!{ Γ ⟹ φ }` (and `show sequent!{ … }` under `Core.Surface`) compares the goal's erasure (`Delab.hypsParts`, `Delab.tr`, block ends dropped) with the line read as today's sequent (`readSequent`, `∀ T x` entries too), by unification. |
+| `Calculus/Core/SolSpec.lean` | `sol_spec` on a scoped obligation (`cspec!{f}`): the scoped strategy, then each leaf erased (`Valid.of_erase`) and closed by today's `sol_spec_prep`/`sol_spec_finish`. |
 | `Semantics/Core/Callback.lean` | The callback semantics over the typed run (W1): `COut C H Γ` (over `Out`, the heap's growth carried), an invariant read on the global part (`StateInv`, `StateInv.at`), `ExecS`/`ExecP`/`ExecF` (no stuck arms, no failed entries; `TState.havoc` over typed storage; a call's locals given back by `TRun.callLeave`); the deterministic run is a callback run (`Prog.exec_run`, `Frames.exec_run`), the only one with no payment (`ExecP.eq_run`, `ExecP.forall_iff`). `holdsC` waits for `holds` on typed states (W2). |
 | `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
@@ -260,7 +265,7 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Tools/Common.lean` | Shared plumbing: resolving `C` / `C.f`, evaluating terms, report layout. |
 | `Tools/Run.lean` | `#run C.f(args) [from σ] [with msg.sender := n, …]`: the typed run from a fresh state; `#deploy C(args) [with …]`, a deployment (`Contract.deploy`). |
 | `Tools/Inspect.lean` | `#wp φ`, `#step φ`, `#taclet r`. |
-| `Tools/CoreInspect.lean` | `#wp φ`, `#step φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`. |
+| `Tools/CoreInspect.lean` | `#wp φ`, `#step φ`, `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`; the tree by `Core.ProofTree.ofFormula`. |
 | `Tools/DiffTest.lean` | `#difftest C[.f]`: the typed run against `Evm/CoreCompile.lean`'s code on random storages. |
 | `Tools/Counterexample.lean` | `Fml.eval3`, witness search and shrinking, `#counterexample`. |
 | `Tools/Verify.lean` | `#verify C[.f]`: each spec'd function proved, refuted or stuck. |
@@ -352,8 +357,12 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/CoreNotation.lean` | `cdl!{}` pinned: parameters, updates' targets, branch scopes, errors; `#wp`/`#step` on scoped formulas. |
 | `Examples/Tactics/CoreChains.lean` | Scoped chains pinned: a step, a named step, several, a rewrite past the program, a branch run into its `}`, the box; `#derivation`, `#chain` (pasted back and checked), `#chain_rest`, `#last_line`, a `FreshNames` table, and a chain proving `Core.Valid`. |
 | `Examples/Tactics/CoreSpec.lean` | `cspec!{f}` and `cproblem!{constructor}` pinned on a contract with snapshots and a result; each erases to today's. |
-| `Examples/Tactics/CoreCallback.lean` | The typed callback reading used: the deterministic run of a program that pays is a callback run (`Prog.exec_run`), and every callback run of one that does not is its deterministic run, decided by the kernel (`ExecP.forall_iff`). |
+| `Examples/Tactics/CoreCallback.lean` | The typed callback reading used: the deterministic run of a program that pays is a callback run (`Prog.exec_run`), and every callback run of one that does not is its deterministic run, decided by the kernel (`ExecP.forall_iff`); a send's three goals under `ProvesC`. |
 | `Examples/Tactics/CoreDerive.lean` | The scoped strategy tools pinned: `sol_prove`, `sol_symex`/`sol_close`, `sol_derive?`'s walk (replayed) and `sol_derive` on `Core.Valid` goals, today's `sol_derive` beside them. |
+| `Examples/Tactics/CoreProofTree.lean` | The proof tree of a scoped goal pinned: `#proof_tree`, `#proof_node`, `#proof_tree_json` on `cdl!{}`. |
+| `Examples/Tactics/CoreSurface.lean` | The flip switch pinned: the same text read today's and scoped; the callback taclets printed. |
+| `Examples/Tactics/CoreSequents.lean` | Scoped walks with checked `show sequent!{ … }` lines. |
+| `Examples/Tactics/CoreSolSpec.lean` | `Examples/Tactics/Specs.lean`'s obligations scoped and proved by the same `sol_spec`. |
 
 At the root, the notation's own tests:
 
