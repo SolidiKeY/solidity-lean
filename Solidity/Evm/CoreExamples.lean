@@ -35,6 +35,17 @@ every other account empty. -/
 abbrev fresh (balance : Nat := 0) : Machine :=
   Machine.init (fun a => if a = 0 then balance else 0) 0
 
+/-! ## Layout -/
+
+/-- `alice` is the twelfth slot: after four `uint`s and seven one-slot
+arrays and mappings. -/
+theorem alice_slot : rootSlot StandardExample "alice" = .root 11 := rfl
+
+/-- `Person` is an `Account` (`balance`, and a `Token` of one `value`) and an
+`age`: three slots, `age` the third. -/
+theorem person_layout : size (.ref (.struct "Person")) = 3 ∧ offset "Person" "age" = 2 := by
+  decide
+
 /-! ## The programs
 
 The layout of `StandardExample`: `total`, `age`, `owner`, `balance` are slots
@@ -100,6 +111,14 @@ local instance : InContract := ⟨TestSuite⟩
 /-- `int x = -5; int y = 3; signedTotal = x * y + 2;` -/
 def signed : Prog TestSuite := sol{ int x = -5; int y = 3; signedTotal = x * y + 2; }
 
+/-- `uint[3]` takes three slots; `Token[2]` two; a `FixedTriple`
+(`uint[3] items; uint tag;`) four, `tag` the fourth.  solc lays a
+fixed-size array out inline, from its own slot, with no length slot. -/
+theorem fixed_layout :
+    size (.ref (.fixed .uint 3)) = 3 ∧ size (.ref (.fixed (.ref (.struct "Token")) 2)) = 2 ∧
+      size (.ref (.struct "FixedTriple")) = 4 ∧ offset "FixedTriple" "tag" = 3 := by
+  decide
+
 /-- `fixedValues[2] = 7;` -/
 def fixedWrite : Prog TestSuite := sol{ fixedValues[2] = 7; }
 
@@ -141,6 +160,22 @@ abbrev compiles {C : Contract} (P : Solidity.Prog C) : Bool :=
 #guard_msgs in #eval IO.println (code setAge)
 
 theorem setAge_run : slotAfter setAge (.root 13) = some 10 := by decide +kernel
+
+-- `total = total + age;`: both reads, then `ADD` and solc's overflow check
+-- (the sum wrapping below `total` reverts), then the write.
+/--
+info: PUSH @0; SLOAD; PUSH @1; SLOAD;
+DUP2; ADD; DUP1; DUP3; GT; ISZERO; JUMPI +1; REVERT; SWAP1; POP;
+PUSH @0; SSTORE
+-/
+#guard_msgs in #eval do
+  let c := (codeOf (sol{ total = total + age; } : Solidity.Prog StandardExample)).map toString
+  IO.println ("; ".intercalate (c.take 4) ++ ";")
+  IO.println ("; ".intercalate ((c.drop 4).take 10) ++ ";")
+  IO.println ("; ".intercalate (c.drop 14))
+
+/-- info: PUSH 3; PUSH @7; PUSH 7; KECCAK256; PUSH 2; ADD; SSTORE -/
+#guard_msgs in #eval IO.println (code sol{ folks[7].age = 3; })
 
 theorem mappings_run :
     slotAfter mappings (.hash 7 (.root 5) 0) = some 5 ∧ slotAfter mappings (.root 0) = some 5 ∧

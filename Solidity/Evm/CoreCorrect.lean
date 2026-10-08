@@ -904,8 +904,9 @@ theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) (bal : Nat �
       (Look.ofTEnv (freshT C balance hb self hs).env) (Machine.init bal self) := by
   rw [freshT_sem C balance hb self hs]
   exact ⟨initStorage_repr C Nat.one_pos, (fun i => nomatch i), (fun i => nomatch i),
-    fun _ _ _ => by simp [State.getNet, State.fresh, lookupBy, Machine.init],
-    by simp [State.getNet, State.fresh, lookupBy, Machine.init],
+    fun _ _ _ => by
+      simp only [State.getNet, State.fresh, lookupBy, Option.getD_none, Machine.init, Int.sub_self],
+    by simp only [State.getNet, Machine.init, State.fresh, lookupBy, Option.getD_none],
     by unfold Lmax; decide, (fun i => nomatch i), ⟨rfl, rfl, rfl, rfl, W_pos, W_pos, W_pos, hs⟩⟩
 
 /-- **The EVM agrees with the typed run's storage.**  From a fresh contract,
