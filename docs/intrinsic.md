@@ -1117,6 +1117,66 @@ erasure asks nothing of `bool` locals.  `Examples/Tactics/CorePrint.lean`
 lost its `nofun` cover goal; `Calculus/Core/Fml.lean`'s `Premise.inv`
 docstring still names `Premise.cover` (not this lane's file).
 
+**`Proves.close`** (resumed after the usage limit): a leaf closes when its
+erasure, the context in front and the outer locals named `ns`, is valid
+(`Solidity.Valid`), under `Fml.Closable` (`Calculus/Core/Closable.lean`:
+`Fml.Plain`, but hidden binders and `{anon(…)}` allowed in positive
+positions, each name a hidden binder binds out of scope and left alone by
+the updates above it), `Avoids bindNames ns`, and `Fml.Leaf` (no modality,
+first-order where assumed: today's `close` asks `modalFree`).
+`holds_of_erase_valid` (`Calculus/Core/CloseErase.lean`) is the one-way
+reading: the erasure holds in every untyped state that differs from one
+agreeing with `σ` only at the hidden binders' names, which an update above
+them leaves alone (`Upd.apply_keep`), so its validity covers every value
+they take.  `Taclet.sound`, `LeanTaclet.sound`, `Rule.sound`:
+`Stmt.sound` at `toStep`.
+
+**`holds` over `TState`** (`Calculus/Core/TLogic.lean`, `tholds`, beside
+M3's `holds` until the flip): terms read on the erasure (their symbols are
+`Update.lean`'s, untyped until M6c), modalities run by the typed run
+(`Prog.trunFrames`: the program, then the frames), binders over typed
+values.  **An update** is applied to the erasure, and its rest is read in
+*every typed state that erases to* the state it ends in.  No decoder of
+untyped values back to typed ones is needed (a storage, a heap and its
+typing, a path), and a rule's premise reaches its conclusion in the state
+the typed run ends in, one of them.  The cost: `tholds` is not a function of
+the erasure (two heap typings may erase alike: an empty array of any
+element type), so only "premise gives conclusion" holds of a scope end's
+update, which is all `Proves.tsound` uses (`tholds_exit`).
+`Calculus/Core/TCloseErase.lean`: a `Fml.Leaf` holds over a typed state
+where it holds over its erasure (`tholds_of_holds`; `tholds_iff_holds` for
+`Fml.FO`), so `Proves.close` is sound there too (`tholds_of_erase_valid`).
+`Calculus/Core/TProvesSound.lean`: `Proves.tsound`/`Proves.tvalid` with the
+structural part proved and the arms' part a hypothesis, `Stmt.TSound C`
+(`Premise.TSound`, `Premise.Sound` over `TState`).
+
+**Left (the arms over `TState`, `Stmt.TSound C`)**, the bulk of the lane:
+every arm of `Stmt.step` re-proved against `Stmt.trun`, through
+`StorageErase`/`HeapErase`'s `_erase` lemmas into `Update.lean`'s symbols
+(the shape lemmas of `Logic.lean`'s "Premise shapes" and the kit of
+`SoundKit.lean` over `TState` first, then `SoundArms` … `SoundLoops` one
+family at a time).  Then the old `RunWk`/`RunFrame` are deleted, after
+`Thin.Over`/`Stmt.wk_over`/`Prog.wk_over` and `Prog.frame_some`/`frameMut`
+move out of them (`TypedRunWk.lean`/`TypedRunFrame.lean` import them for
+these, not this lane's files).  **Two decisions for the lead** before the
+arms close:
+
+1. *The hidden binder at a memory type* (above): `tholds` reads it as a
+   universal over `HRef H R`, vacuous when the heap holds no `R`.  Under the
+   diamond, `T memory mv = a[i];` with `a` empty and no `R` object in the
+   heap reverts, while `memoryLocalDeclInitDrop`'s premise holds
+   vacuously.  Options: (a) the diamond twin without the binder, a Lean-only
+   rule (`T memory mv = mrhs;` read by `rebindMem`'s rules with a declaring
+   update); (b) a memory local's typed value may be dangling
+   (`LTy.TDenote (.mem R)` inhabited, a W1 typing change); (c) the binder
+   asks for an inhabitant only under the diamond (`Fml.bind` taking the
+   modality), printed as today.  Every other arm is unaffected.
+2. *A length past `uint`'s range under the diamond*: the typed run
+   diverges where it reads one (`lenT`), the untyped `len(…)` goes on, so
+   `{v := len(storage, p)} ⟨ω⟩φ` holds where `⟨ v = p.length; ω ⟩φ` fails.
+   Options: the diamond read from states whose arrays are within range (as
+   M3's `BoolOK`), or `Update.lean`'s `len` diverging there too.
+
 ## W3 — the flip, file by file (4 lanes)
 Each lane adds the `open scoped` line to the files it owns and re-pins them.
 
