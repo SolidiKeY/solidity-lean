@@ -1565,19 +1565,30 @@ Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
   - `ProofTree`, `#proof_tree_json`: the same, 6 nodes for 7.
   - `ProofTree`, the walks: the scoped calculus's constructors
     (`Core.Proves.update (Core.Taclet.step_eq .r)`, `refine
-    Core.Proves.valid (R := RuleSet.all) ?_`, `allIntro`, `bindIntro` for a
+    Core.Proves.valid (R := RuleSet.all) ?_`, `bindIntro` for a
     hidden binder, `updIntro` for a scope end), `split` for `splitBox`
     and no `cov` (1), a leaf `refine Core.Proves.close [] rfl
-    List.nodup_nil ?_`; the replays rewritten to them.  New reason: the
-    walk is `Core.Proves`'s, which writes `intro`/`allIntro`/`empty`, not
-    solkey's aliases `impRight`/`allRight`/`emptyModality` (today's walk
-    does: `symex`'s `Walk.movesAt` to align).
+    List.nodup_nil ?_`; the replays rewritten to them.  A precondition,
+    a quantifier and an empty modality keep solkey's names
+    (`Core.Proves.impRight`/`allRight`/`emptyModality`, review fix:
+    `Calculus/Core/Derive.lean`'s `Walk.movesAt` emits the aliases of
+    `Calculus/Core/ProofTree.lean`, which it now imports); `allRight`
+    first is W2 `tree`'s reason above.  `CoreDerive`'s walk re-pinned
+    for the same alias.
+  - `ProofTree`, new pins (review fix, the regression example for
+    `movesAt`'s whnf of a premise built by a function): the box trees of
+    an internal call and a tuple call over `Callees`, scoped, show
+    `internalCallExpand`/`functionBodyExpand` as nodes, the body's
+    `blockEmpty`, and a closed leaf (the diamond trees beside them stay
+    today's).
   - `Tools`, `#wp` of a formula with parameters: `∀ uint i; ∀ uint n;` in
     front (W2 `tree`).
   - `Notation`: `#check dl!{…}` is `Core.Fml StandardExample []`, with its
-    parameters bound; the `step = some …` `rfl` is now a `#step` pin (the
-    scoped term carries scope ends the printer hides, so `rfl` against the
-    line read back fails); the `twoKeys` traces start `∀ uint b, ∀ uint a`
+    parameters bound; the `step = some …` `rfl` stays, its line read
+    back as `dl![.box]{ … }` (the box's update; the default `dl!{ … }`
+    reads an update at the diamond), with a `#step` pin of its printed
+    form beside it (review fix: the pin alone checked only the printer);
+    the `twoKeys` traces start `∀ uint b, ∀ uint a`
     and have no `[ ]` line.
 - **Gate** (`Examples/ProofTree`, 12.1 s): 11 s in the default-target
   `lean_build` (286 jobs, under that build's load); by the M0 method, a
@@ -1595,8 +1606,7 @@ Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
   from `Valid` needs a reflective `Proves` lemma).  (c) The scoped chain
   error should print the line it does not reach.  (d) `ProvesC.sound`
   against `ValidC`, waiting on `Stmt.TSound`; `Examples/Tactics/CoreCallback.lean`
-  (the `tactics` lane's file) not re-pinned to `holdsC`.  (e) The walk's
-  solkey aliases (above).
+  (the `tactics` lane's file) not re-pinned to `holdsC`.
 
 ## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
 Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.

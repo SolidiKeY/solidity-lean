@@ -1,6 +1,7 @@
 import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.Close
 import Solidity.Calculus.Core.Completeness
+import Solidity.Calculus.Core.ProofTree
 
 /-!
 # The scoped strategy as one kernel evaluation: `sol_prove`
@@ -199,7 +200,9 @@ def evalSolCloseCore : Tactic := fun _ => withMainContext do
 
 On a scoped sequent `H ⊢ φ` (`Core.Proves`), one `refine` per step: a
 precondition, a quantifier, an update or a hidden binder into the context,
-an empty modality through its frames, `closeTrue`, or the rule the
+an empty modality through its frames (the first, the second and this by
+solkey's names, `impRight`, `allRight`, `emptyModality`,
+`Calculus/Core/ProofTree.lean`), `closeTrue`, or the rule the
 statement fires, named as solkey names it (`ruleOf?`,
 `Calculus/Core/Completeness.lean`) and cited by its taclet
 (`Taclet.step_eq .rule`, `LeanTaclet.toStep .rule`).  A goal with no
@@ -273,8 +276,8 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   let one (c : Lean.Name) : MetaM (Array (Array (TSyntax `tactic))) := do
     return #[#[← `(tactic| refine $(← ProofTree.short c) ?_)]]
   match φ.getAppFn.constName? with
-  | some ``Fml.imp => one ``Proves.intro
-  | some ``Fml.all => one ``Proves.allIntro
+  | some ``Fml.imp => one ``Proves.impRight
+  | some ``Fml.all => one ``Proves.allRight
   | some ``Fml.upd => one ``Proves.updIntro
   | some ``Fml.bind => one ``Proves.bindIntro
   | some ``Fml.tt =>
@@ -283,7 +286,7 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
     let args := φ.getAppArgs
     let m := args[args.size - 4]!
     let P ← whnf args[args.size - 3]!
-    if P.isAppOf ``Prog.nil then return ← one ``Proves.empty
+    if P.isAppOf ``Prog.nil then return ← one ``Proves.emptyModality
     unless P.isAppOf ``Prog.cons do return #[]
     let s := P.getArg! (P.getAppNumArgs - 2)
     let k := mkAppN (mkConst ``Hyps.fresh) #[C, Γ₀, Γ, H, φ]

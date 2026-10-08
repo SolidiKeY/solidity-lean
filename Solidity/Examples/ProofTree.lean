@@ -210,7 +210,7 @@ replayed walk touches only them. -/
 /--
 info: Try this:
   refine Core.Proves.valid (R := RuleSet.all) ?_
-    refine Core.Proves.allIntro ?_
+    refine Core.Proves.allRight ?_
     refine Core.Proves.bindIntro ?_
     apply Core.Proves.cases (Core.Taclet.step_eq .sendNoCallbackBox) rfl <;>
         (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
@@ -229,7 +229,7 @@ the hidden binder of `ok`, which the program assigns without declaring, is
 example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
   refine ⟨?_, ?_⟩
   refine Core.Proves.valid (R := RuleSet.all) ?_
-  refine Core.Proves.allIntro ?_
+  refine Core.Proves.allRight ?_
   refine Core.Proves.bindIntro ?_
   apply Core.Proves.cases (Core.Taclet.step_eq .sendNoCallbackBox) rfl <;>
       (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
@@ -331,7 +331,7 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 
 /--
 info: Try this:
-  refine Core.Proves.allIntro ?_
+  refine Core.Proves.allRight ?_
     apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
     case thn =>
       apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
@@ -352,7 +352,7 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
 
 /-- The suggestion replayed. -/
 example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
-  refine Core.Proves.allIntro ?_
+  refine Core.Proves.allRight ?_
   apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
   case thn =>
     apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
@@ -410,8 +410,8 @@ open scoped Solidity.Core.Surface
 /--
 info: Try this:
   refine Core.Proves.valid (R := RuleSet.all) ?_
-    refine Core.Proves.allIntro ?_
-    refine Core.Proves.allIntro ?_
+    refine Core.Proves.allRight ?_
+    refine Core.Proves.allRight ?_
     apply Core.Proves.update (Core.Taclet.step_eq .storageFieldWriteSave)
     apply Core.Proves.unfold (Core.Taclet.step_eq .transfer_unfold_rightSndArgument)
     apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
@@ -719,8 +719,8 @@ closed: 0 open goal(s), 10 node(s), 2 branch(es)
 
 /--
 info: Try this:
-  refine Core.Proves.allIntro ?_
-    refine Core.Proves.intro ?_
+  refine Core.Proves.allRight ?_
+    refine Core.Proves.impRight ?_
     apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
     apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
     apply Core.Proves.unfold (Core.Taclet.step_eq .assertConditionCapture)
@@ -864,7 +864,8 @@ A call in a body is KeY's `InternalCall`, inlined by `internalCallExpand`;
 a tuple assignment's call returns to its targets, a `FunctionBodyStatement`
 inlined by `functionBodyExpand`, the targets assigned after it.  Both are
 diamonds, so today's: the scoped tree adds the body's `blockEmpty` and
-leaves its leaf open behind the diamond's updates. -/
+leaves its leaf open behind the diamond's updates; the box trees below are
+scoped. -/
 
 /-- Two functions, of one return and of two. -/
 def Callees : Contract := contract!{
@@ -906,6 +907,50 @@ closed: 0 open goal(s), 13 node(s), 1 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl[Callees]{ ⟨ (uint a, uint b) = pair(1); ⟩ b == 2 }
+
+section Scoped
+open scoped Solidity.Core.Surface
+
+/-! Under the box the scoped trees close: the call is a node
+(`internalCallExpand`, `functionBodyExpand`, the premise its function
+builds whnf'd to its constructor, `Calculus/Core/ProofTree.lean`), the
+body's block ends by `blockEmpty`, and the leaf closes. -/
+
+/--
+info: 0: valueDeclSkip
+1: internalCallExpand
+2: localValueDeclInitDrop
+3: localValueAssign
+4: valueDeclSkip
+5: blockEmpty
+6: additionAssignment
+7: localValueAssign
+8: Closed goal
+closed: 0 open goal(s), 9 node(s), 1 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl[Callees]{ [ uint y = inc(1); ] y == 2 }
+
+/--
+info: 0: valueDeclSkip
+1: valueDeclSkip
+2: functionBodyExpand
+3: localValueDeclInitDrop
+4: localValueAssign
+5: valueDeclSkip
+6: valueDeclSkip
+7: blockEmpty
+8: localValueAssign
+9: additionAssignment
+10: localValueAssign
+11: localValueAssign
+12: Closed goal
+closed: 0 open goal(s), 13 node(s), 1 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl[Callees]{ [ (uint a, uint b) = pair(1); ] b == 2 }
+
+end Scoped
 
 /-! ## Loops (`Examples/Tactics/Loops.lean`)
 
@@ -956,7 +1001,7 @@ open scoped Solidity.Core.Surface
 
 /--
 info: Try this:
-  refine Core.Proves.allIntro ?_
+  refine Core.Proves.allRight ?_
     apply Core.Proves.unfold (Core.Taclet.step_eq .requireConditionCapture)
     apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
     apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)

@@ -183,10 +183,14 @@ info: dl{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 ‖ se2 := 1 < 2 } true } :
 #guard_msgs in #check dl!{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 ‖ se2 := 1 < 2 } true }
 
 /-! What a rule leaves prints as `dl!{ … }` reads it; the last statement's
-rule goes on to the postcondition (no `[ ]` left).  The scoped term carries
-the scope ends the printer hides, so the line is compared as printed
-(`#step`, `Tools/CoreInspect.lean`) or by a chain (`sol_chain`), not by
-`rfl` against the line read back. -/
+rule goes on to the postcondition (no `[ ]` left), and its update is the
+box's (`dl![.box]{ … }`, as a box chain's last line is).  `#step`
+(`Tools/CoreInspect.lean`) prints it. -/
+
+/-- What a rule leaves reads back through `dl![.box]{ … }` as the term it is. -/
+example : (dl!{ [ balances[a] = 1; ] balances[a] == 1 }).step =
+    some dl![.box]{ { storage := save(storage, balances[a], 1) } find(storage, balances[a]) = 1 } :=
+  rfl
 
 /--
 info:   ~[storageIndexWriteMappingSave]~>

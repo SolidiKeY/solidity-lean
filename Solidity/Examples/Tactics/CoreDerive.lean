@@ -30,7 +30,7 @@ example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1;
 /--
 info: Try this:
   refine Core.Proves.valid (R := RuleSet.all) ?_
-    refine Core.Proves.allIntro ?_
+    refine Core.Proves.allRight ?_
     apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
     apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
     apply Core.Proves.unfold (Core.Taclet.step_eq .ifElseUnfold)
@@ -55,7 +55,7 @@ example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1;
 /-- The suggestion replayed. -/
 example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
   refine Core.Proves.valid (R := RuleSet.all) ?_
-  refine Core.Proves.allIntro ?_
+  refine Core.Proves.allRight ?_
   apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
   apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
   apply Core.Proves.unfold (Core.Taclet.step_eq .ifElseUnfold)
