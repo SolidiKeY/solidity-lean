@@ -466,14 +466,16 @@ one.
   storage, and its words are defaults — with its two side conditions (`nodupKeysB`, `okDeep` of the
   roots) by `decide +kernel`.
 
-**The statements.**  `solc_problems Solkey.TestSuite`
-(`Frontend/Problems.lean`) defines `Solkey.TestSuite.f.problem : Fml _` for
-each of the 417 programs, compiled for `sol_prove`.  `#solkey_problem`
-prints one in solkey's `--print-problem` syntax (same modality, same
-parameters as program variables of their KeY sort, plus `wt(storage) ->`);
-two are pinned in `TestSuite/Problems.lean`; the `#solkey_derive?`
-suggestions are pinned in `TestSuite/Suggestions.lean` (two leaves under
-`wt`).
+**The statements.**  `solc_problems Solkey.TestSuite legacy`
+(`Frontend/Problems.lean`) defines `Solkey.TestSuite.f.problem.legacy : Fml _`
+for each program, not compiled, and `solc_scoped_problems Solkey.TestSuite
+main decl` (`TestSuite/CoreProblems.lean`) the statement proved,
+`Solkey.TestSuite.f.problem : Core.Fml _ []`, checked to erase to it; the
+`Derived` modules state `⊢` scoped (`open scoped Solidity.Core.Surface`).
+`#solkey_problem` prints one in solkey's `--print-problem` syntax (same
+modality, same parameters as program variables of their KeY sort, plus
+`wt(storage) ->`); two are pinned in `TestSuite/Problems.lean`; the
+`#solkey_derive?` suggestions are pinned in `TestSuite/Suggestions.lean`.
 
 **The theorems.**  `#solkey_derive? N from i count k` runs `sol_prove?` on
 each statement and prints, for those whose leaves all close, the theorem

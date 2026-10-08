@@ -30,6 +30,16 @@ walk, handed from a goal to the next.
 A leaf behind updates of either modality is `closableB`: an update's
 reading asks only of the typed states it may end in, as the `Core.Valid`
 route's `Fml.posB` takes it too.
+
+Two steps follow today's `sol_prove` (`Calculus/Derive.lean`).  A split
+whose condition is ground under the context (`ground`, today's
+`Derive.groundCond` on the erasure) and whose branch the closer refutes
+keeps only the other branch, the refuted one closed by `Proves.closeFalse`
+(`refutes`, today's `Derive.splitRes`): `returnEarly` runs one path of its
+callee, not 27.  A leaf's erasure goes to today's residue with the
+parameters free, as today's leaves have them (`Fml.stripAlls`); where that
+leaves goals and the leaf with its parameters bound by `∀` closes, that one
+(`pick`): a diamond that reads a parameter's range closes only so.
 -/
 
 namespace Solidity.Core
@@ -144,21 +154,32 @@ def run (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α)) :
       (bind := fun m x t ψ H => run leaf n (H.bind m x t) ψ b)
       (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) H
 
+/-- Today's residue `r` of an erased leaf `e`, with the parameters'
+quantifiers stripped (`Fml.stripAlls`), as today's leaves have them free;
+where that leaves goals but the quantified leaf, its parameters in the
+context (`.all`), leaves none, nothing: a diamond's leaf that reads a
+parameter's range (a mapping's key, an interval) closes only so. -/
+def pick {β : Type} (r : Solidity.Fml C → Option (List β × Nat)) (e : Solidity.Fml C) :
+    Option (List β) :=
+  match r e.stripAlls with
+  | some ([], _) => some []
+  | r₁ => match r e with
+    | some ([], _) => some []
+    | _ => r₁.map (·.1)
+
 /-- A leaf for the kernel: `Proves.close`'s side condition, and today's
-residue of its erasure.  The parameters' quantifiers are kept, as today's
-residue takes them into the context (`.all`), so a diamond's leaf still
-reads a parameter's range (a mapping's key, an interval). -/
+residue of its erasure (`pick`). -/
 def leafRes {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (Solidity.Derive.Leaf C)) :=
   cond ((H.wrap φ).closableB [])
-    ((Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-      Solidity.Derive.budget [] ((H.wrap φ).erase [])).map (·.1)) none
+    (pick (Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+      Solidity.Derive.budget []) ((H.wrap φ).erase [])) none
 
 /-- The same leaf quoted, for the tactic (`Derive.residueQuote`), the
 contract named by `c`. -/
 def leafQuote (c : Lean.Expr) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
     Option (List (Lean.Expr × Lean.Expr)) :=
   cond ((H.wrap φ).closableB [])
-    ((Solidity.Derive.residueQuote c [] ((H.wrap φ).erase [])).map (·.1)) none
+    (pick (Solidity.Derive.residueQuote c []) ((H.wrap φ).erase [])) none
 
 /-- The steps the walk is given, down a path and in all (today's
 `Derive.budget`). -/
@@ -317,6 +338,28 @@ theorem run_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) 
 
 end Sound
 
+/-- What `pick` leaves of today's residue is valid once its leaves are
+proved. -/
+theorem pick_valid {e : Solidity.Fml C} {ls : List (Solidity.Derive.Leaf C)}
+    (h : pick (Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+      Solidity.Derive.budget []) e = some ls)
+    (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Solidity.Valid e := by
+  have hv : ∀ {e' : Solidity.Fml C} {ls' : List (Solidity.Derive.Leaf C)} {b : Nat},
+      Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+        Solidity.Derive.budget [] e' = some (ls', b) →
+      (∀ l ∈ ls', Solidity.Proves .all l.1 l.2) → Solidity.Valid e' :=
+    fun hr hl' => Solidity.Proves.valid (Solidity.Proves.of_synResidue hr hl')
+  unfold pick at h
+  split at h
+  · rename_i b h1
+    exact Solidity.Valid.of_stripAlls (hv h1 Solidity.Derive.leaves_nil)
+  · split at h
+    · rename_i b h2
+      exact hv h2 Solidity.Derive.leaves_nil
+    · obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
+      cases he
+      exact Solidity.Valid.of_stripAlls (hv hr hl)
+
 /-- A leaf `leafRes` takes is proved once today's leaves are. -/
 theorem leafRes_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ)
     (ls : List (Solidity.Derive.Leaf C)) (h : leafRes H φ = some ls)
@@ -326,11 +369,7 @@ theorem leafRes_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ
   | false => simp only [hc, cond_false, reduceCtorEq] at h
   | true =>
     simp only [hc, cond_true] at h
-    obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
-    cases he
-    exact Proves.close [] rfl List.nodup_nil
-      (Solidity.Proves.valid (Solidity.Proves.of_synResidue hr hl)) hc
-      (fun _ _ h => nomatch h)
+    exact Proves.close [] rfl List.nodup_nil (pick_valid h hl) hc (fun _ _ h => nomatch h)
 
 end Seq
 
