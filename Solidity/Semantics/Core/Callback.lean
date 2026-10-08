@@ -34,7 +34,7 @@ invariant breaks (`Prog.exec_run`, `Frames.exec_run`); with no payment in a
 program, its only callback run is the deterministic one (`ExecP.eq_run`),
 so a property of every callback run is one of the deterministic run
 (`ExecP.forall_iff`, `ExecF.forall_iff`).  The modalities read over these
-runs (`holdsC`) wait for the formulas' reading on typed states.
+runs are `holdsC` (`Calculus/Core/CallbackHolds.lean`).
 -/
 
 namespace Solidity.Core

@@ -26,7 +26,9 @@ past an update that drops every local (`Fml.closedAt`, invisible when
 printed), so it needs no weakening.
 
 `ProvesC` has no soundness theorem yet: its `ValidC` (the callback reading
-over `TState`) is still to port, so no rule here is checked against it.
+over `TState`, `Calculus/Core/CallbackHolds.lean`) is stated, but
+`ProvesC.sound` waits on the arms' `Stmt.TSound`, so no rule here is
+checked against it.
 -/
 
 namespace Solidity.Core
