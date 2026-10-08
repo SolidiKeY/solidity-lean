@@ -96,7 +96,8 @@ end Solidity.Examples.Tactics.ApplySteps
 
 /-! ## Read without the switch
 
-Under the diamond a walk's leaves are not closed by their erasure yet (`Core.Proves.close` takes box contexts). -/
+Under the diamond a walk's leaves are not closed by their erasure yet
+(`Core.Proves.close` takes box contexts). -/
 
 namespace Solidity.Examples.Tactics.ApplySteps
 

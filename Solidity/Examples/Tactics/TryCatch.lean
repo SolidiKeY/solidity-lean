@@ -148,7 +148,10 @@ end Solidity.Examples.Tactics.TryCatch
 
 /-! ## Read without the switch
 
-The walk through `tryCallNoCallbackBox`'s goals (today's `Fml.alls` of each clause's binders) and the callback reading (`ValidC`, `Invariant`: `Calculus/Core/Callback.lean`'s `ProvesC` has no soundness yet, `docs/intrinsic.md` W2 `tree`). -/
+The walk through `tryCallNoCallbackBox`'s goals (today's `Fml.alls` of each
+clause's binders) and the callback reading (`ValidC`, `Invariant`:
+`Calculus/Core/Callback.lean`'s `ProvesC` has no soundness yet,
+`docs/intrinsic.md` W2 `tree`). -/
 
 namespace Solidity.Examples.Tactics.TryCatch
 

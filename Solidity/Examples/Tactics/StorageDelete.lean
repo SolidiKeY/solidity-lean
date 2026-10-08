@@ -271,7 +271,10 @@ end Solidity.Examples.Tactics.StorageDelete
 
 /-! ## Read without the switch
 
-Today's sequent rules on updates (`merge`, `mergeStorage`, the Theory's laws), which the scoped sequent does not have (`Calculus/Core/Proves.lean`: the program rules, `close` on the erasure), and a storage holding a `bool` where a `uint` is declared, which only today's untyped storage holds. -/
+Today's sequent rules on updates (`merge`, `mergeStorage`, the Theory's
+laws), which the scoped sequent does not have (`Calculus/Core/Proves.lean`:
+the program rules, `close` on the erasure), and a storage holding a `bool`
+where a `uint` is declared, which only today's untyped storage holds. -/
 
 namespace Solidity.Examples.Tactics.StorageDelete
 
