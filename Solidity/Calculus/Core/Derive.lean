@@ -223,12 +223,13 @@ def onErased (tac : String) (stx : Syntax) : Tactic := fun _ => withMainContext 
 end Derive
 
 open Lean Elab Tactic Meta in
-/-- `sol_close` on a scoped goal `Core.Valid ψ` with no modality left (after
-`sol_symex`): the leaf taken by `Fml.posB` (checked by the kernel), its
-erasure computed (`Solidity.normValid`) and closed by today's `sol_close`
-(`Valid.of_erase`). -/
-@[tactic Solidity.tacticSol_close]
-def evalSolCloseCore : Tactic := fun stx => Derive.onErased "sol_close" stx stx
+/-- `sol_close_unwrap` on a scoped goal `Core.Valid ψ` with no modality left
+(after `sol_symex`): the leaf erased (`Derive.eraseLeaf`), then today's.
+It is the first step of today's `sol_close`, `sol_close_mt` and
+`sol_spec_close`, so each of them runs on a scoped leaf as on today's, its
+erasure. -/
+@[tactic Solidity.tacticSol_close_unwrap]
+def evalSolCloseUnwrapCore : Tactic := fun stx => Derive.onErased "sol_close" stx stx
 
 /-! ## `sol_derive`: the strategy as a walk
 

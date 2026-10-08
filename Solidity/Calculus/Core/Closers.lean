@@ -7,8 +7,9 @@ import Solidity.Calculus.Rewrite
 
 After `sol_symex` on a scoped goal (`Core.Valid ψ`, `⊨ dl!{ … }` under
 `open scoped Solidity.Core.Surface`), a leaf is closed by today's closers on
-its erasure, as `sol_close` is (`Calculus/Core/Derive.lean`): each tactic
-below has a second elaborator that erases the leaf (`Derive.eraseLeaf`:
+its erasure, as `sol_close` and `sol_close_mt` are through their first
+step, `sol_close_unwrap` (`Calculus/Core/Derive.lean`): each tactic below
+has a second elaborator that erases the leaf (`Derive.eraseLeaf`:
 `Fml.posB`, checked by the kernel, then `Valid.of_erase`) and runs the same
 tactic on today's goal.  Today's macro is tried first and fails on a scoped
 goal; on today's goal the second elaborator steps aside.  `sol_spec_prep`'s
@@ -19,14 +20,8 @@ namespace Solidity.Core
 
 open Lean Elab Tactic
 
-@[tactic Solidity.tacticSol_close_mt]
-def evalSolCloseMtCore : Tactic := fun stx => Derive.onErased "sol_close_mt" stx stx
-
 @[tactic Solidity.tacticSol_close_eval]
 def evalSolCloseEvalCore : Tactic := fun stx => Derive.onErased "sol_close_eval" stx stx
-
-@[tactic Solidity.tacticSol_close_unwrap]
-def evalSolCloseUnwrapCore : Tactic := fun stx => Derive.onErased "sol_close_unwrap" stx stx
 
 @[tactic Solidity.Decide.tacticSol_decide]
 def evalSolDecideCore : Tactic := fun stx => Derive.onErased "sol_decide" stx stx
