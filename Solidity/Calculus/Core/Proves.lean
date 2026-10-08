@@ -221,11 +221,12 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | closeTrue {Γ : Ctx} {H : Hyps C Γ₀ Γ} (h : H.boxOnly = true) : Proves C R Γ₀ H .tt
   /-- Leave the calculus: the sequent, its context in front, erased
   (`Fml.erase`, the outer locals named `ns`) and proved in the logic, where
-  its erasure gives it (`Fml.Closable`). -/
+  its erasure gives it (`Fml.Closable`), with no modality left (`Fml.Leaf`,
+  as today's `close` asks `modalFree`). -/
   | close {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (ns : List Var)
       (hlen : ns.length = Γ₀.length) (hnd : ns.Nodup) (hc : (H.wrap φ).Closable ns)
-      (hB : Solidity.Avoids (H.wrap φ).bindNames ns) (h : Solidity.Valid ((H.wrap φ).erase ns)) :
-      Proves C R Γ₀ H φ
+      (hB : Solidity.Avoids (H.wrap φ).bindNames ns) (hl : (H.wrap φ).Leaf = true)
+      (h : Solidity.Valid ((H.wrap φ).erase ns)) : Proves C R Γ₀ H φ
 
 /-! ## A derivation
 

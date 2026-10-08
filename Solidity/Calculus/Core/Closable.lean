@@ -87,4 +87,24 @@ def Fml.Closable : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, ns, .bind x _ φ => x ∉ ns ∧ x ∉ φ.bindNames ∧ φ.Closable (x :: ns)
   | _, ns, .anon _ φ => φ.Closable ns
 
+/-- A first-order formula: no update, modality or binder but `∀`.  It reads
+the same over the typed state as over its erasure (`Calculus/Core/TCloseErase.lean`). -/
+def Fml.FO : {Γ : Ctx} → Fml C Γ → Bool
+  | _, .tt | _, .eq .. | _, .defined _ => true
+  | _, .not φ => φ.FO
+  | _, .and φ ψ | _, .imp φ ψ => φ.FO && ψ.FO
+  | _, .all _ _ φ => φ.FO
+  | _, _ => false
+
+/-- A leaf of the strategy: no modality, and first-order where it is
+assumed.  What its erasure gives over M3's states it gives over the typed
+ones (`Calculus/Core/TCloseErase.lean`). -/
+def Fml.Leaf : {Γ : Ctx} → Fml C Γ → Bool
+  | _, .tt | _, .eq .. | _, .defined _ => true
+  | _, .not φ => φ.FO
+  | _, .and φ ψ => φ.Leaf && ψ.Leaf
+  | _, .imp φ ψ => φ.FO && ψ.Leaf
+  | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ φ | _, .anon _ φ => φ.Leaf
+  | _, .modal .. => false
+
 end Solidity.Core
