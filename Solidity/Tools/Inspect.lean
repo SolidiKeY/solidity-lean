@@ -299,10 +299,9 @@ a `Taclet` by its premise's kind; with the per-rule update lemma
 def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
   let env ← getEnv
   let family := n.getPrefix
-  -- a scoped taclet: its soundness waits for the scoped interpreter
-  if family == `Solidity.Core.Taclet then
-    return "sound: pending (the scoped run, M3 of docs/intrinsic.md); \
-      Solidity.Core.Taclet.erase: an instance of today's rule"
+  -- a scoped taclet: its premise is `Stmt.step`'s, which `Core.Stmt.Sound` makes sound
+  if family == `Solidity.Core.Taclet || family == `Solidity.Core.LeanTaclet then
+    return s!"sound: {family}.toStep (the premise is Stmt.step's; Core.Stmt.Sound)"
   let thm ← if n == ``CallbackTaclet.tryCallWithCallbackBox then pure ``CallbackTaclet.sound_branches
     else if n == ``CallbackTaclet.sendWithCallbackBox then pure ``CallbackTaclet.sound_send
     else if family == ``CallbackTaclet then pure ``CallbackTaclet.sound
