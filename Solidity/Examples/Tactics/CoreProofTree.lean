@@ -23,8 +23,8 @@ open Solidity
 
 local instance : InContract := ⟨StandardExample⟩
 
-/-! `ifElseSplit`'s labels name the condition at the node; the cover goal
-under the box closes in the node's tactics. -/
+/-! `ifElseSplit`'s labels name the condition at the node; a split has
+KeY's two goals under either modality. -/
 
 /--
 info: 0: allRight
@@ -53,7 +53,7 @@ state: inner
 branch: -
 parent: 0
 children: [2, 4]
-tactics: apply Core.Proves.split (Core.Taclet.toStep .ifElseSplit); case cov => exact nofun
+tactics: apply Core.Proves.split (Core.Taclet.toStep .ifElseSplit)
 -/
 #guard_msgs in
 #proof_node 1 cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }

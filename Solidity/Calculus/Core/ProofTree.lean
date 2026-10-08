@@ -18,10 +18,8 @@ What the scoped calculus adds is not a node:
 
 * a scope's end (`}` of a block, the fresh locals of a rule) is a popping
   update that the next node's `updIntro` takes, and a declaration's hidden
-  binder (`bindIntro`), are folded into the node before them, as tactics of
-  that node: KeY has no step there;
-* the cover goal under the box (`Proves.split`'s `cov`, which closes by
-  `nofun`) is closed in the node's tactics.
+  binder (`bindIntro`); both are folded into the node before them, as
+  tactics of that node: KeY has no step there.
 
 A leaf is closed by `closeTrue` (`true` behind a context of scope ends and
 box updates), else by the tactics `Config.closers` lists; the default list
@@ -214,30 +212,6 @@ def applyCases (g : MVarId) (tacs : Array (TSyntax `tactic)) :
   let tacs := tacs.pop.push t
   return (tacs, ← runOn g tacs)
 
-/-- The goals of a rule, the box's cover closed (`.box = .diamond → …`, by
-`nofun`): the tactics that closed it, and the goals left with their case
-names. -/
-def dropBoxCover (gs : List MVarId) : TacticM (Array (TSyntax `tactic) × List MVarId) := do
-  let mut tacs := #[]
-  let mut out := []
-  for c in gs do
-    let t ← c.getTag
-    let ty ← whnfR (← instantiateMVars (← c.getType))
-    let isBoxCov ← if ty.isForall then
-        let a ← whnfR ty.bindingDomain!
-        pure (a.isAppOfArity ``Eq 3 && (← whnf (a.getArg! 1)).isConstOf ``Modality.box)
-      else pure false
-    if isBoxCov then
-      let close ← `(tactic| exact nofun)
-      let tac ← match t with
-        | .str _ l => `(tactic| case $(mkIdent (.mkSimple l)):ident => $close:tactic)
-        | _ => pure close
-      if (← runOn c #[close]).isEmpty then
-        tacs := tacs.push tac
-        continue
-    out := out ++ [c]
-  return (tacs, out)
-
 /-- The silent moves at a goal, as long as there is one: their tactics and the
 goal left. -/
 partial def silent (g : MVarId) : TacticM (Array (TSyntax `tactic) × MVarId) := do
@@ -269,8 +243,6 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
           else pure (some (mv.tacs, gs))
       catch _ => s.restore; pure none
     let some (tacs, gs) := applied | continue
-    let (covTacs, gs) ← dropBoxCover gs
-    let tacs := tacs ++ covTacs
     -- a single goal goes on through the silent moves, in this node
     let (tacs, gs) ← match gs with
       | [g'] => do let (more, g'') ← silent g'; pure (tacs ++ more, [g''])

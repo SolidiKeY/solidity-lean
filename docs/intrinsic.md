@@ -1107,7 +1107,8 @@ a parameter is bound by `∀` (`cdl!`), so a tree starts with `allRight`;
 a rule that leaves no statement goes on into the rest or past the frames
 (`Fml.modalK`, G0 condition 6), so **no `emptyModality` node** follows it
 (a new pin reason for W3: today's trees have one after every last
-statement); the branch's `}` prints in a split's goals.
+statement); the branch's `}` prints in a split's goals; no `cov` goal
+(merged `w2-sound`'s first commit: a split has KeY's two goals).
 
 Found, not this lane's: `Core.Proves.valid` leaves its `R` open on a
 `⊨` goal (`apply Proves.valid` needs `(R := .all)`); an update of a
