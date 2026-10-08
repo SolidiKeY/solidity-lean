@@ -1048,7 +1048,7 @@ elaborates with every module (no name clash).
 
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)
 1. **`sound`** (the critical path)
-   - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`.
+   - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`, and the modules it added: `Calculus/Core/{Closable,CloseErase,TLogic,TCloseErase,TProvesSound,TSoundKit}.lean`.
    - First commit, pushed on day one: `split`/`inv` lose `cov`, and the module `Calculus/Core/Cover` is deleted (`bool` locals are typed now). The other three lanes merge this commit at once.
    - Then:
      - `holds` over `TState`. Arms are re-proved through `StorageErase`/`HeapErase`'s `_erase` lemmas into `Update.lean`'s symbols.
@@ -1114,8 +1114,12 @@ grown by a default object, or a diamond rule without the binder).
 
 `holds_erase` is now for box updates and modalities only (`Fml.Plain`): the
 erasure asks nothing of `bool` locals.  `Examples/Tactics/CorePrint.lean`
-lost its `nofun` cover goal; `Calculus/Core/Fml.lean`'s `Premise.inv`
-docstring still names `Premise.cover` (not this lane's file).
+lost its `nofun` cover goal.  Two docstrings outside this lane still name
+the deleted cover, for their owners: `Calculus/Core/Fml.lean`'s
+`Premise.inv` ("under the diamond one of them, its cover: `Premise.cover`",
+to drop) and `Examples/Tactics/CoreStep.lean`'s module docstring ("the
+scoped calculus keeps it apart, `Premise.cover`": it has no cover goal, the
+diamond reads `BoolOK` states), W3's `tactics` lane.
 
 **`Proves.close`** (resumed after the usage limit): a leaf closes when its
 erasure, the context in front and the outer locals named `ns`, is valid
@@ -1123,7 +1127,15 @@ erasure, the context in front and the outer locals named `ns`, is valid
 `Fml.Plain`, but hidden binders and `{anon(…)}` allowed in positive
 positions, each name a hidden binder binds out of scope and left alone by
 the updates above it), `Avoids bindNames ns`, and `Fml.Leaf` (no modality,
-first-order where assumed: today's `close` asks `modalFree`).
+first-order where assumed: today's `close` asks `modalFree`).  The rule
+asks the Bool twin `Fml.closableB` (`Closable` and `Leaf`, with
+`Upd.freshB`, `Fml.foFreshB`) and `Avoids` as autoParams the kernel decides
+(`rfl`, `decide`); `Fml.FO`, `Fml.Leaf`, `Fml.bindNames` and the twins are
+written with `casesOn` (Gate G0, condition 1).  `Proves.lean` closes a
+leaf behind a box update and a hidden binder this way.  **Box contexts
+only**: over M3's states the erasure's diamond does not give `State.BoolOK`
+of the state it ends in, so `close` does not fire behind a diamond update
+(`⟨ x = 1; ⟩ x ≐ 1` has no derivation yet).
 `holds_of_erase_valid` (`Calculus/Core/CloseErase.lean`) is the one-way
 reading: the erasure holds in every untyped state that differs from one
 agreeing with `σ` only at the hidden binders' names, which an update above
@@ -1143,12 +1155,21 @@ the typed run ends in, one of them.  The cost: `tholds` is not a function of
 the erasure (two heap typings may erase alike: an empty array of any
 element type), so only "premise gives conclusion" holds of a scope end's
 update, which is all `Proves.tsound` uses (`tholds_exit`).
-`Calculus/Core/TCloseErase.lean`: a `Fml.Leaf` holds over a typed state
-where it holds over its erasure (`tholds_of_holds`; `tholds_iff_holds` for
-`Fml.FO`), so `Proves.close` is sound there too (`tholds_of_erase_valid`).
+`Calculus/Core/TCloseErase.lean`: `tholds_of_erase_valid`, the induction of
+`holds_of_erase_valid` read over the typed state, for `Fml.TClosable`
+(`Closable` and `Leaf`, a diamond update allowed in a positive position:
+the typed reading asks only of the typed states that erase to the state the
+update ends in, so no `BoolOK` is needed), so `Proves.close` is sound there
+too, and the flipped `close` covers diamond leaves (`tholds_of_holds`,
+`tholds_iff_holds` for `Fml.FO`, for the atoms).
 `Calculus/Core/TProvesSound.lean`: `Proves.tsound`/`Proves.tvalid` with the
 structural part proved and the arms' part a hypothesis, `Stmt.TSound C`
-(`Premise.TSound`, `Premise.Sound` over `TState`).
+(`Premise.TSound`, `Premise.Sound` over `TState`).  Not provable as stated
+until decisions 2 and 3 below are taken: `Stmt.TSound` is false for a
+contract with a `bool` mapping key, and under the diamond on a length past
+`uint`'s range, and `Proves.tvalid` is vacuous there.  The decision taken
+goes into `Stmt.TSound` (a `Prog.bridgeOk` premise, or a fixed key read in
+`Update.lean`), not left a false hypothesis.
 
 `Calculus/Core/TSoundKit.lean`: the premise shapes over `TState`
 (`Premise.tsound_update` … `tsound_done`), each an equation between typed
@@ -1193,6 +1214,20 @@ arms close:
    The first arm tried, `localValueAssign` (`sound_setLocal`), meets 2 and
    3 at once: `Val.evalT_erase` needs `bridgeOk`, and a typed `len` read
    diverges where the erased one does not.
+
+**Also left, at the flip:**
+
+- `Proves.close` behind a diamond update: switch its side condition to a
+  Bool twin of `Fml.TClosable` once `Proves` is read over `TState` (M3's
+  `Proves.sound` cannot have it, above).  Until then W2 `symex`'s
+  `sol_prove` (each leaf through `close_of_erase`) does not reach a diamond
+  obligation's leaves (the diamond statement of `TestSuite/Problems.lean`).
+- Fold the `T*` modules back under the original names, in place:
+  `TLogic`/`TSoundKit`/`TProvesSound`/`TCloseErase` into
+  `Logic`/`SoundKit`/`ProvesSound`/`CloseErase` (`tholds` as `holds`,
+  `Premise.TSound` as `Premise.Sound`, `Proves.tsound` as `Proves.sound`),
+  and delete M3's `holds`, `State.BoolOK` and the `Modality.afterT`
+  machinery.
 
 ## W3 — the flip, file by file (4 lanes)
 Each lane adds the `open scoped` line to the files it owns and re-pins them.
