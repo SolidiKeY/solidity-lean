@@ -42,8 +42,9 @@ against `ValidC` for a first-order invariant (`ProvesC.valid`,
 `Calculus/Core/CallbackSound.lean`); a rule takes its taclet as a `Rule`
 (`.key`), `localValueDeclInitDrop` is a hidden binder's rule
 (`ProvesC.bind`), and "resume after callback" closes by the invariant
-assumed (`Proves.assumeInv`).  The counterexample run, the send and the
-rules' pins are read without the switch, at the end.
+assumed (`Proves.assumeInv`), or by the invariant opened at its scope
+(`Proves.openInv`) and the closer.  The counterexample run and the rules'
+pins are read without the switch, at the end.
 -/
 
 namespace Solidity.Examples.Tactics.Callback
@@ -119,6 +120,62 @@ theorem withdrawUnsafe_valid : ⊨ dl!{ balance + paidOut == deposited →
 theorem withdrawUnsafe_noCallback : Core.ValidT .noCallback withdrawUnsafe :=
   Core.validT_noCallback.2 withdrawUnsafe_valid
 
+/-! ## `send`: a callee that may refuse
+
+`PiggyBankNet`'s `callTo` is `(bool ok, ) = a.call{value: 5}(""); sent = ok;`,
+which solkey's parser lowers to `bool ok = a.send(5); sent = ok;`, and so do
+we here (the lowering needs tuples, which this calculus does not read yet).
+With callbacks, `sendWithCallbackBox` owes the invariant after the booking,
+the rest after a callback that keeps it (`ok` true), and the rest with
+nothing booked (`ok` false): the callee may refuse and revert whatever it
+did.  solkey's `net-call-withcallback-simple.key` states an invariant of the
+ledger (`net(to) <= 0`); `Invariant` is one of the storage here. -/
+
+/-- The vault with a flag for the last payment's outcome. -/
+def SendVault : Contract :=
+  contract!{ uint balance; uint paidOut; uint deposited; bool sent; }
+
+/-- `balance + paidOut == deposited`, of `SendVault`. -/
+def sendVaultInv : Core.Invariant SendVault := ⟨dl[SendVault]{ balance + paidOut == deposited }, rfl⟩
+
+/-- `callTo` keeps the invariant with callbacks: the booking touches no
+storage ("invariant on exit"), a callee that keeps the invariant leaves it
+for `sent = ok;` ("send succeeded", `ok` true), and a refused send books
+nothing ("send failed", `ok` false). -/
+theorem callToKeepsInv :
+    Core.ValidC sendVaultInv dl[SendVault]{ balance + paidOut == deposited →
+      [ bool ok = to.send(5); sent = ok; ] balance + paidOut == deposited } := by
+  apply Core.ProvesC.valid rfl
+  apply Core.ProvesC.allIntro
+  apply Core.ProvesC.intro
+  apply Core.ProvesC.update (.key .valueDeclSkip) rfl
+  apply Core.ProvesC.send .sendWithCallbackBox
+  · -- invariant on exit: `{net := …} I`, the booking touching no storage
+    apply Core.ProvesC.plain _ rfl
+    refine close ?_
+    sol_symex
+    sol_close
+  · -- send succeeded: `ok` true, from any state the callee leaves keeping `I`
+    apply Core.ProvesC.plain _ rfl
+    sol_derive
+    refine Core.Proves.openInv ?_
+    refine close ?_
+    sol_symex
+    refine Hyp.valid_after_havoc (Γ := [.all _ _, .pre _, .upd .box _, .upd .box _]) (Δ := []) rfl ?_
+    sol_close
+  · -- send failed: `ok` false, nothing booked
+    apply Core.ProvesC.plain _ rfl
+    sol_derive
+    refine close ?_
+    sol_symex
+    sol_close
+
+/-- What holds with callbacks holds without. -/
+theorem callToKeepsInv_noCallback :
+    ⊨ dl[SendVault]{ balance + paidOut == deposited →
+      [ bool ok = to.send(5); sent = ok; ] balance + paidOut == deposited } :=
+  fun σ v => Core.holds_of_holdsC_imp (callToKeepsInv σ v) rfl rfl
+
 end Solidity.Examples.Tactics.Callback
 
 /-! ## Read without the switch
@@ -126,10 +183,8 @@ end Solidity.Examples.Tactics.Callback
 The counterexample is a run with callbacks over today's states
 (`Semantics/Callback.lean`'s `ExecS`), built step by step from a storage
 written out; the typed run's would need a typed storage of `Vault`
-(`TState`) and its `ExecS` steps.  The send's "send succeeded" goal reads
-the invariant past `sent = ok;`, a storage write in front of a goal that
-reads the storage, which the scoped sequent applies by no rule yet
-(today's `applyStorageBox`).  The rules are pinned as today's prints them. -/
+(`TState`) and its `ExecS` steps.  The rules are pinned as today's prints
+them. -/
 
 namespace Solidity.Examples.Tactics.Callback.Untyped
 
@@ -177,59 +232,6 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
   -- `0 + 10 == 5` fails
   obtain ⟨x, hx, hy⟩ := holds_eqD_iff.1 H
   cases hx; cases hy
-
-/-! ## `send`: a callee that may refuse
-
-`PiggyBankNet`'s `callTo` is `(bool ok, ) = a.call{value: 5}(""); sent = ok;`,
-which solkey's parser lowers to `bool ok = a.send(5); sent = ok;`, and so do
-we here (the lowering needs tuples, which this calculus does not read yet).
-With callbacks, `sendWithCallbackBox` owes the invariant after the booking,
-the rest after a callback that keeps it (`ok` true), and the rest with
-nothing booked (`ok` false): the callee may refuse and revert whatever it
-did.  solkey's `net-call-withcallback-simple.key` states an invariant of the
-ledger (`net(to) <= 0`); `Invariant` is one of the storage here. -/
-
-/-- The vault with a flag for the last payment's outcome. -/
-def SendVault : Contract :=
-  contract!{ uint balance; uint paidOut; uint deposited; bool sent; }
-
-/-- `balance + paidOut == deposited`, of `SendVault`. -/
-def sendVaultInv : Invariant SendVault := ⟨dl[SendVault]{ balance + paidOut == deposited }, rfl, rfl⟩
-
-/-- `callTo` keeps the invariant with callbacks: the booking touches no
-storage ("invariant on exit"), a callee that keeps the invariant leaves it
-for `sent = ok;` ("send succeeded", `ok` true), and a refused send books
-nothing ("send failed", `ok` false). -/
-theorem callToKeepsInv :
-    ValidC sendVaultInv dl[SendVault]{ balance + paidOut == deposited →
-      [ bool ok = to.send(5); sent = ok; ] balance + paidOut == deposited } := by
-  apply ProvesC.valid
-  apply ProvesC.intro
-  apply ProvesC.update .valueDeclSkip rfl
-  apply ProvesC.send .sendWithCallbackBox
-  · -- invariant on exit: `{net := …} I`, the booking touching no storage
-    apply ProvesC.plain _ rfl
-    refine close ?_
-    sol_symex
-    sol_close
-  · -- send succeeded: `ok` true, from any state the callee leaves keeping `I`
-    apply ProvesC.plain _ rfl
-    sol_derive
-    refine close (Hyp.valid_after_havoc (Γ := [_, _, _]) rfl ?_)
-    sol_symex
-    sol_close
-  · -- send failed: `ok` false, nothing booked
-    apply ProvesC.plain _ rfl
-    sol_derive
-    refine close ?_
-    sol_symex
-    sol_close
-
-/-- What holds with callbacks holds without. -/
-theorem callToKeepsInv_noCallback :
-    ⊨ dl[SendVault]{ balance + paidOut == deposited →
-      [ bool ok = to.send(5); sent = ok; ] balance + paidOut == deposited } :=
-  valid_of_validC callToKeepsInv rfl rfl
 
 /-! ## The rules -/
 

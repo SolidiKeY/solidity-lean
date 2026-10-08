@@ -2,6 +2,7 @@ import Solidity.Calculus.Callback
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.CallbackSound
 import Solidity.Tools.CoreInspect
 
 /-!
@@ -158,52 +159,45 @@ theorem getWalk :
     sol_symex
     sol_close
 
-end Solidity.Examples.Tactics.TryCatch
-
-/-! ## Read without the switch
-
-The callback reading (`ValidC`, `Invariant`: `Calculus/Core/Callback.lean`'s
-`ProvesC` has no soundness yet, `docs/intrinsic.md` W2 `tree` and CORE 2). -/
-
-namespace Solidity.Examples.Tactics.TryCatch
-
-open Proves Semantics
-
-local instance : InContract := ⟨Pinger⟩
-
 /-! ## Proving, with callbacks
 
 `fails <= pings` is the pinger's invariant: it holds where control leaves the
 contract, and the success block may assume it of whatever state the callee
-leaves. -/
+leaves.  The calculus with callbacks is `Calculus/Core/Callback.lean`'s
+`ProvesC`, sound against `ValidC` for a first-order invariant
+(`ProvesC.valid`, `Calculus/Core/CallbackSound.lean`); the success block's
+goal reads the invariant assumed at its scope (`Proves.openInv`), past the
+callee's `{havoc}`. -/
 
 /-- `fails <= pings`. -/
-def pingInv : Invariant Pinger := ⟨dl!{ fails <= pings }, rfl, rfl⟩
+def pingInv : Core.Invariant Pinger := ⟨dl!{ fails <= pings }, rfl⟩
 
 /-- A ping keeps the invariant with callbacks: it holds at the call, the
 success block counts a ping in a state where it holds, and a failed call
 changes nothing. -/
 theorem pingKeepsInv :
-    ValidC pingInv dl!{ fails <= pings →
+    Core.ValidC pingInv dl!{ fails <= pings →
       [ try I(7).ping() { pings += 1; } catch { }; ] fails <= pings } := by
-  apply ProvesC.valid
-  apply ProvesC.intro
-  apply ProvesC.tryCall .tryCallWithCallbackBox
+  apply Core.ProvesC.valid rfl
+  apply Core.ProvesC.intro
+  apply Core.ProvesC.tryCall .tryCallWithCallbackBox
   · -- invariant on exit
-    apply ProvesC.plain _ rfl
-    exact close (Hyp.wrap_assumption [] rfl)
-  · -- call succeeded: from any state the callee leaves in which `I` holds
-    apply ProvesC.plain _ rfl
-    simp only [Fml.alls]
-    sol_derive
-    refine close (Hyp.valid_after_havoc (Γ := [_]) rfl ?_)
+    apply Core.ProvesC.plain _ rfl
+    refine close ?_
     sol_symex
     sol_close
+  · -- call succeeded: from any state the callee leaves in which `I` holds
+    apply Core.ProvesC.plain _ rfl
+    sol_derive
+    refine Core.Proves.openInv ?_
+    refine close ?_
+    sol_symex
+    refine Hyp.valid_after_havoc (Γ := [.pre _]) (Δ := []) rfl ?_
+    sol_close
   · -- each `catch` block, from where the call was made
-    simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true,
-      Fml.alls, codeBinders, Option.toList, List.map]
+    simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]
     refine ⟨?_, ?_, ?_⟩ <;>
-    · apply ProvesC.plain _ rfl
+    · apply Core.ProvesC.plain _ rfl
       sol_derive
       all_goals
         refine close ?_
@@ -215,6 +209,6 @@ the runs with callbacks. -/
 theorem pingKeepsInv_noCallback :
     ⊨ dl!{ fails <= pings →
       [ try I(7).ping() { pings += 1; } catch { }; ] fails <= pings } :=
-  valid_of_validC pingKeepsInv rfl rfl
+  Core.valid_of_validC pingKeepsInv rfl rfl
 
 end Solidity.Examples.Tactics.TryCatch

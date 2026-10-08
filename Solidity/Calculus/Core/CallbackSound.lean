@@ -620,6 +620,145 @@ theorem Proves.assumeInv {R : RuleSet} {Γ₀ Γ Δ : Ctx} {H : Hyps C Γ₀ Γ}
   rw [← he] at h₁
   exact holds_exit_closed hφ h₁ κ hκ τ rfl
 
+/-! ## The invariant assumed, opened at its scope
+
+Past a frame end that drops every local, the invariant assumed reads the
+global part only; where it is a closed first-order formula it is that
+formula read at the scope it is assumed in (`Fml.reclose?`), first-order,
+which the closer reads (`Proves.openInv`, at a leaf). -/
+
+/-- A closed term, read at another scope. -/
+def Tm.reclose? {Γ Γ' : Ctx} {s : Srt} (t : Tm C Γ s) : Option (Tm C Γ' s) :=
+  if t.toNil?.isSome then Tm.ofClosed? (t.erase []) else none
+
+/-- A closed first-order formula, read at another scope. -/
+def Fml.reclose? {Γ Γ' : Ctx} : Fml C Γ → Option (Fml C Γ')
+  | .tt => some .tt
+  | .eq a b => do pure (.eq (← a.reclose?) (← b.reclose?))
+  | .defined t => (t.reclose?).map .defined
+  | .not φ => (Fml.reclose? φ).map .not
+  | .and φ ψ => do pure (.and (← Fml.reclose? φ) (← Fml.reclose? ψ))
+  | .imp φ ψ => do pure (.imp (← Fml.reclose? φ) (← Fml.reclose? ψ))
+  | _ => none
+
+/-- An assumption opened: the invariant past a frame end that drops every
+local, read at the scope. -/
+def Fml.openInv {Γ : Ctx} : Fml C Γ → Fml C Γ
+  | .upd .box (.drop .nil h) φ => match Fml.reclose? (Γ' := Γ) φ with
+    | some φ' => φ'
+    | none => .upd .box (.drop .nil h) φ
+  | φ => φ
+
+/-- The context with each assumed invariant opened. -/
+def Hyps.openInv {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Hyps C Γ₀ Γ
+  | _, .nil => .nil
+  | _, .pre H a => .pre (Hyps.openInv H) a.openInv
+  | _, .upd H m U => .upd (Hyps.openInv H) m U
+  | _, .havoc H => .havoc (Hyps.openInv H)
+  | _, .all H x p => .all (Hyps.openInv H) x p
+  | _, .bind H m x t => .bind (Hyps.openInv H) m x t
+  | _, .anon H xs => .anon (Hyps.openInv H) xs
+
+theorem Tm.reclose_eval {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
+    (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.glob = τ.glob) :
+    t'.eval τ = t.eval σ := by
+  unfold Tm.reclose? at h
+  split at h
+  · rename_i hs
+    obtain ⟨t₀, ht₀⟩ := Option.isSome_iff_exists.1 hs
+    rw [Tm.eval_ofClosed τ _ h, Tm.eval_toNil σ t ht₀, hg]
+  · cases h
+
+theorem Tm.reclose_denote {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
+    (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.glob = τ.glob) :
+    t'.denote τ = t.denote σ := by
+  unfold Tm.reclose? at h
+  split at h
+  · rename_i hs
+    obtain ⟨t₀, ht₀⟩ := Option.isSome_iff_exists.1 hs
+    rw [Tm.denote_ofClosed τ _ h, Tm.denote_toNil σ t ht₀, hg]
+  · cases h
+
+/-- **A closed formula reads alike at another scope**, over the same global
+part. -/
+theorem holds_reclose {Γ Γ' : Ctx} : (φ : Fml C Γ) → {φ' : Fml C Γ'} → φ.reclose? = some φ' →
+    (σ : TState C Γ) → (τ : TState C Γ') → σ.erase.glob = τ.erase.glob →
+      (holds τ φ' ↔ holds σ φ)
+  | .tt, _, h, _, _, _ => by cases h; exact Iff.rfl
+  | .eq a b, _, h, σ, τ, hg => by
+    obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    show Theory.StValue.Equiv _ _ ↔ Theory.StValue.Equiv _ _
+    rw [Tm.reclose_denote ha _ _ hg, Tm.reclose_denote hb _ _ hg]
+  | .defined t, _, h, σ, τ, hg => by
+    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
+    show (∃ x, _) ↔ (∃ x, _)
+    rw [Tm.reclose_eval ht _ _ hg]
+  | .not φ, _, h, σ, τ, hg => by
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact not_congr (holds_reclose φ hφ σ τ hg)
+  | .and φ ψ, _, h, σ, τ, hg => by
+    obtain ⟨φ', hφ, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨ψ', hψ, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact and_congr (holds_reclose φ hφ σ τ hg) (holds_reclose ψ hψ σ τ hg)
+  | .imp φ ψ, _, h, σ, τ, hg => by
+    obtain ⟨φ', hφ, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨ψ', hψ, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact imp_congr (holds_reclose φ hφ σ τ hg) (holds_reclose ψ hψ σ τ hg)
+  | .upd .., _, h, _, _, _ | .modal .., _, h, _, _, _ | .havoc _, _, h, _, _, _
+  | .all .., _, h, _, _, _ | .bind .., _, h, _, _, _ | .anon .., _, h, _, _, _ => nomatch h
+
+/-- An assumption gives it opened. -/
+theorem holds_openInv {Γ : Ctx} (a : Fml C Γ) (τ : TState C Γ) (h : holds τ a) :
+    holds τ a.openInv := by
+  unfold Fml.openInv
+  split
+  · rename_i Δ e φ
+    split
+    · rename_i φ' hφ
+      have h : Modality.afterC .box _ ((Upd.nil.drop e).apply τ.erase) := h
+      exact (holds_reclose φ hφ (τ.thin e) τ rfl).2 (h (τ.thin e) (TState.thin_erase e τ)
+        (List.prefix_refl _))
+    · exact h
+  · exact h
+
+/-- The context with its assumed invariants opened gives the context. -/
+theorem Hyps.wrap_openInv {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) :
+    ∀ {φ ψ : Fml C Γ}, (∀ τ, holds τ φ → holds τ ψ) →
+      ∀ σ, holds σ (H.openInv.wrap φ) → holds σ (H.wrap ψ) := by
+  induction H with
+  | nil => intro φ ψ h σ; exact h σ
+  | pre H a ih =>
+    intro φ ψ h
+    exact ih (φ := .imp a.openInv φ) (ψ := .imp a ψ) fun τ f ha => h τ (f (holds_openInv a τ ha))
+  | upd H m U ih =>
+    intro φ ψ h
+    exact ih (φ := .upd m U φ) (ψ := .upd m U ψ) fun τ f =>
+      Modality.afterC_imp f fun _ x σ' e hx => h σ' (x σ' e hx)
+  | havoc H ih =>
+    intro φ ψ h
+    exact ih (φ := .havoc φ) (ψ := .havoc ψ) fun τ f st nt => h _ (f st nt)
+  | all H x p ih =>
+    intro φ ψ h
+    exact ih (φ := .all x p φ) (ψ := .all x p ψ) fun τ f v => h _ (f v)
+  | bind H m x t ih =>
+    intro φ ψ h
+    exact ih (φ := .bind m x t φ) (ψ := .bind m x t ψ) fun τ f =>
+      Modality.forallB_imp (fun _ a => h _ a) f
+  | anon H xs ih =>
+    intro φ ψ h
+    exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) fun τ f b => h _ (f b)
+
+/-- **The invariant assumed, opened**: at a leaf, each assumed invariant read
+at its scope, a closed first-order formula the closer reads. -/
+theorem Proves.openInv {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ}
+    (h : Proves C R Γ₀ H.openInv φ)
+    (hm : (H.wrap φ).modalFree = true := by first | rfl | decide) : Proves C R Γ₀ H φ :=
+  .closeHolds (fun σ => H.wrap_openInv (fun _ h => h) σ (Proves.sound h σ)) hm
+
 /-- info: 'Solidity.Core.ProvesC.valid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms ProvesC.valid
 

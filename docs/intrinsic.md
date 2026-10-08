@@ -3540,6 +3540,118 @@ deleted (`Modality.afterRunC`, `afterRunC_rel`, `Res.Sim.afterRunC`,
 `run_cons_frames`, `afterRunC_bind`, `run_block_frames`, `aliasPath_there`).
 No pin moved.
 
+### W3c lane `tactics` (`w3c-tactics`, 2026-10-08): the tactics leftovers
+
+**Result.**  The scoped sequent has today's rules on updates, with
+soundness over `Core.Upd`; `ProvesC` is sound against `ValidC`; a memory
+return is an `InternalCall` (decision 19).  Flipped: `Tactics/SelectOnSaveConsr`
+(both theorems), `StorageDelete`'s three `_theory` derivations (its closing
+block is gone), `UpdateRules.deepFieldWriteMerged` (pins unchanged),
+`CallOperands`' memory call, `Callback` but its counterexample
+(`withdrawSafe` and `callToKeepsInv` with callbacks, their no-callback
+corollaries, `withdrawUnsafe_valid`, `withdrawUnsafe_noCallback`), and
+`TryCatch`'s callback proofs (`pingKeepsInv`; its closing block is gone).  `#print axioms` of `Proves.valid`,
+`Stmt.sound` and the new `ProvesC.valid`: Lean's three.  No new `sorry`,
+`axiom` or `maxHeartbeats`.
+
+**Low changes** (no rule name, branch label or fresh name changed):
+- *Decision 19*: `CallRet.isRets` (`Calculus/Core/Rules.lean`) counts a
+  memory return as `false`, so `Person memory p = f();` steps by
+  `internalCallExpand` (rule-map row 55 says so).
+- *`Calculus/Core/Graft.lean`* (new; `Merge.lean`'s update machinery moved
+  below `Proves`): `Upd.seqPar`, `sequentialToParallel` with `storage`
+  substituted by the storage the first update last wrote (`Upd.lastSt`),
+  sound because a storage term changes only the storage of the state it is
+  read in (`Tm.eval_st_glob`); an update moved under hidden binders, scope
+  ends included (`Upd.liftG?`, `Upd.liftBinds?`, `holds_liftBinds`); a term
+  taclet in an update's right-hand sides on closed terms read on their
+  erasure (`Upd.rwC`, `holds_upd_rwC`).  A chain's merge
+  (`Fml.merge2`) keeps today's behaviour (no storage, `Upd.lift?`), so no
+  chain pin can move.
+- *`Core.Proves`* gains three constructors: `merge` (KeY's
+  `sequentialToParallel`, today's `merge` and `mergeStorage`, past the
+  hidden binders between the two updates: `Hyps.binds`), `updRw` (today's
+  `updRw` on the last box update), `closeHolds` (today's semantic `close`
+  over the typed reading, modal-free: `Fml.modalFree`); soundness cases in
+  `ProvesSound.lean`.
+- *`Calculus/Core/UpdateRules.lean`* (new): today's steps after the program
+  derived from `closeHolds`, as today's are from its `close`: `andSplit`,
+  `eqDSplit`, `definedWritten` (a typed local always holds a value, so no
+  update is asked), `definedLit`, `eqRefl`, `eqClose`, `eqDClose`,
+  `applyOnRigidBox` (`Fml.substU`, `Tm.denote_substH`), `simplify` (the
+  elements an update pops later dropped, `Upd.simp`, box only),
+  `rewrite` (a closed side of an equation, `Fml.rwEqC`).
+- *`Premise.Runs`* (`SoundKit.lean`): what a premise asks of its
+  statement's typed run, by kind (update, block, hidden binder, split; any
+  other kind its formula reading), is the arms' statement now
+  (`Stmt.StepSound`), giving `Premise.Sound` (`Premise.Runs.sound`) and the
+  reading with callbacks.  The shape lemmas keep their names and produce
+  `Runs`; their formula proofs are the `…H` lemmas.  A split's clause also
+  carries the branch's runs with callbacks (the `if` arm proves it of
+  `ExecS`'s `ite` runs, `require` by `ExecS.split_det`) and that its
+  conditions pay nothing.  Arms of the other kinds (`done`, `cases`,
+  `check`, `branches`, `inv`, `inline`) are unchanged.
+- *`Calculus/Core/CallbackSound.lean`* (new): `ProvesC.sound_of`,
+  `ProvesC.valid` for a first-order invariant (`Fml.FO`; "the invariant
+  holds" is then a fact of the erasure, `holds_FO_erase`,
+  `holdsC_closedAt_iff`); `Proves.assumeInv` (KeY's `close` on
+  `I ⟹ I` past a frame end) and `Proves.openInv` (at a leaf, the invariant
+  assumed past its frame end read at its scope, `Fml.reclose?`, a closed
+  first-order formula the closer reads).
+- *`Calculus/Core/Derive.lean`*: the scoped walk's last try at a rule is
+  the premise `Stmt.step` computes, by `rfl`, where the named taclet's side
+  conditions are decided before its schema variables are read off the goal
+  (`x = alice.account.balance` after a hidden binder); `sol_derive` reached
+  a leaf there before.
+- *`Calculus/Core/RewriteSyntax.lean`* (new): today's lines read on a
+  scoped goal: `refine merge rfl ?_`, `Proves.mergeStorage` (`core_merge`:
+  scope ends merged silently, then one merge past the binders),
+  `refine simplify ?_`, `Proves.eqDSplit`, `exact Proves.definedWritten`/
+  `definedLit`/`eqRefl`/`eqClose`/`eqDClose`, `sol_apply_upd`,
+  `rw`/`sol_rw` (`core_rw`); what a step computes is evaluated and quoted
+  back (`Upd.quote`, `Fml.quote`).
+
+**Pins changed:**
+- `Examples/Chains/Memory.lean` `CallWrite`: the two memory-returning
+  calls' links `~[functionBodyExpand]~>` read `~[internalCallExpand]~>`
+  (decision 19, the lead's; not one of reasons 1–8).
+- New pins without a changed one: `CallbackSound`'s `#print axioms
+  ProvesC.valid`.  Unchanged: `UpdateRules.deepFieldWriteMerged`'s three
+  traces (now the scoped sequent's), every other pin, the fresh names.
+
+**Proof text changed** (no pin): a scoped `refine close ?_` leaves today's
+`⊨` of the erasure, so `sol_close` follows `sol_symex` (`UpdateRules`,
+`StorageDelete.deleteFrameMid_theory`); `ageWriteRead` starts its
+interpreter proof from the erasure `sol_symex` computes (no `Hyp.wrap`
+rewrite, the paths already lowered); `withdrawSafe`, `callToKeepsInv` and `pingKeepsInv` walk `Core.ProvesC`
+(a rule as `.key .r`, `ProvesC.bind` for `localValueDeclInitDrop`,
+`Proves.assumeInv`, `Proves.openInv`; past the callee's `{havoc}` today's
+`Hyp.valid_after_havoc` on the erasure, its context's shape written).
+
+**Left:**
+1. *A scoped `FunContract`* (`Tactics/Contracts`): not built.  It needs the
+   contract over the typed call run (the callee's frame, `CallRet.enterT`,
+   `TRun.callLeave`), the mutability frame on typed runs (`Prog.within`'s
+   `view`/`pure` facts), and the parameters' binding as a scoped premise;
+   `Contracts` still reaches today's `useContract` by `sol_erase`, so
+   `Calculus/Contracts.lean` stays.
+2. *`Callback`'s closing block*: the counterexample
+   `withdrawUnsafe_withCallback` is a run over today's states (a typed one
+   needs a typed `Vault` storage and its `ExecS` steps, each a typed run
+   computed); the rules' `#check` pins are today's.
+3. *`Proves.openInv` works at a leaf only* (it is derived from
+   `closeHolds`); a goal that keeps a modality past an assumed invariant
+   is walked first (`sol_derive`).
+4. *`Tactics/TermTaclets`*: today's sequents of today's terms over any
+   contract, and a pinned `sol_rw` side-condition error; the scoped
+   `core_rw` rewrites closed terms of a contract's sequent.  `Theory`,
+   `Benchmark/Syntax` (no formula) and the `Core*` twins stay as recorded.
+5. *`Decide`*'s fragment pins stay (the closer's input until M6c).
+6. Not run: `lake build` of the targets; every touched module and the
+   example files that pin what changed (`Chains/Memory`, `CoreStep`,
+   `ProofTree`, `CoreDerive`, `Chains/StorageToMemory`, the five flipped
+   files, `CoreCallback`) checked one by one through the server.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
