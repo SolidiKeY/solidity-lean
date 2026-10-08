@@ -3325,6 +3325,27 @@ green, 302 jobs, every `sol_derive?` pin (`ProofTree`, `CoreProofTree`,
   stopped.  The read-only finder/skeptic review pass was not run at the
   integration.
 
+
+Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
+(`Stmt.not_tsound`) and the W3b lanes' questions:
+
+17'. *Memory locals may be unset*, as storage aliases already are (M1e):
+    `LTy.TDenote (.mem R)` is `Option (HRef H R)`; a read of an unset memory
+    local reverts; the typed run's `declMem` always binds `some`. The hidden
+    binder then has an inhabitant at every type, so Decision 12's diamond
+    inhabitant clause and `LTy.inhabited` go, `Stmt.TSound C` becomes
+    provable unconditionally and `Proves.tvalid` loses its hypothesis.
+    solc-alignment/rule-map rows as for `unset` aliases.
+18. `Proves.close` on diamond updates that keep `bool` locals (`Upd.boolB`)
+    is approved as the interim M3 closer; the typed reading replaces it.
+19. `CallRet.isRets` follows solkey's rule map (rows 54/55): a memory
+    return steps by `internalCallExpand`, not `functionBodyExpand`.
+20. Two more pin reasons are allowed: (7) a `#check` printing the flip's
+    type (`Fml C` → `Core.Fml C []`); (8) `blockEmpty` on an inlined
+    callee's body (solkey's `blockEmpty`, now claimed).
+21. `Derived7`'s `case leaf2` may go (one fewer residual leaf), recorded as
+    the one deviation from "Derived1–14 text unchanged".
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
