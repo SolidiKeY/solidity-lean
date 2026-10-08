@@ -277,6 +277,8 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
     exact fun σ => H.wrap_mono (φ := κ.exit m φ) (ψ := .modal m .nil κ φ)
       (fun τ h => holds_exit m κ φ τ h) σ (ih σ)
   | @closeTrue Γ H h => exact H.wrap_valid (φ := .tt) h fun _ => trivial
+  | @closeFalse Γ H φ _ ih =>
+    exact fun σ => H.wrap_mono (φ := .ff) (fun _ h => (h trivial).elim) σ (ih σ)
   | close ns hlen hnd h hc hB =>
     exact fun σ => holds_of_erase_valid _ hlen hnd (Fml.closableB_sound _ hc) hB h σ
 

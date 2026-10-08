@@ -1,4 +1,4 @@
-import Solidity.TestSuite.Problems
+import Solidity.TestSuite.CoreProblems
 
 /-!
 # solkey's `TestSuite`, derived (7 of 12)
@@ -12,6 +12,7 @@ order of the source; the replays are what `#solkey_derive? … pending`
 -/
 
 open Solidity Proves
+open scoped Solidity.Core.Surface
 
 theorem Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.proved : ⊢ Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.problem := by
   sol_prove
@@ -132,11 +133,6 @@ theorem Solkey.TestSuite.testStorageMapStructCopy.proved : ⊢ Solkey.TestSuite.
 
 theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
   sol_prove
-  case leaf1 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
-  case leaf2 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
+  refine Proves.close_dropWt ?_
+  sol_symex
+  sol_close

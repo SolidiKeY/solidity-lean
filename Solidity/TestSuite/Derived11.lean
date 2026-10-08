@@ -1,4 +1,4 @@
-import Solidity.TestSuite.Problems
+import Solidity.TestSuite.CoreProblems
 
 /-!
 # solkey's `TestSuite`, derived (11 of 12)
@@ -11,6 +11,7 @@ order of the source; the replays are what `#solkey_derive? … pending`
 -/
 
 open Solidity Proves
+open scoped Solidity.Core.Surface
 
 theorem Solkey.TestSuite.memoryIndexArrayMulAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryIndexArrayMulAssignUnfold.problem := by
   sol_prove

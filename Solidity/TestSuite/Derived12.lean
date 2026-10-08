@@ -1,4 +1,4 @@
-import Solidity.TestSuite.Problems
+import Solidity.TestSuite.CoreProblems
 
 /-!
 # solkey's `TestSuite`, derived (12 of 12)
@@ -15,6 +15,7 @@ memory is not seen), from `storageNewIntoField` to
 -/
 
 open Solidity Proves
+open scoped Solidity.Core.Surface
 
 theorem Solkey.TestSuite.storageToMemory.proved : ⊢ Solkey.TestSuite.storageToMemory.problem := by
   sol_prove

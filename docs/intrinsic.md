@@ -1275,7 +1275,7 @@ fuelled (`Core.symex n`), so a program it does not finish fails `sol_prove`
 `Termination.lean` goes with the old calculus at W4.
 
 **Early gate: passes.**  `sol_prove` over Derived9–11's 91 obligations in
-the `Core*` twins (`TestSuite/CoreDerived9.lean` … `11`, over
+the `Core*` twins (`TestSuite/CoreDerived9` … `11`, deleted at the flip, over
 `TestSuite/CoreProblems.lean`), elaborated serially in one scratch module
 (`Elab.async false`, `IO.monoMsNow` stamps; imports loaded): **19.4 s**
 against the limit 22.9 s.  Today's `sol_prove` on the same 91, measured the
@@ -1676,7 +1676,7 @@ everything the flip needs but that:
   diamond leaf (a Bool twin of `Fml.TClosable`), the side condition changes
   in one place (`Seq.leafRes`/`Seq.leafQuote`).
 * **All 107 box obligations** are proved this way, with the `Derived`
-  modules' text (scratch; ten pinned in `TestSuite/CoreSeq.lean`,
+  modules' text (scratch; ten pinned in `TestSuite/CoreSeq`,
   `proved_seq`), serially 111 s against 144 s for today's `sol_prove` on
   the same 107 (one session, other lanes running).  One text difference:
   `testStorageNestedPushReturnAlias` leaves one goal of today's calculus,
@@ -3438,7 +3438,7 @@ hypothesis; `#print axioms Proves.valid` and `Stmt.sound`: `propext`,
 `Classical.choice`, `Quot.sound`.  `Proves.close` asks `Fml.closableB`, the
 Bool twin of the typed `Fml.Closable` (the former `Fml.TClosable`), so a
 leaf behind a diamond update closes; shown on two diamond obligations of
-`TestSuite/Problems` in `TestSuite/CoreSeq.lean`
+`TestSuite/Problems` in `TestSuite/CoreSeq`
 (`storageBoolRootReadWrite`, `storageBoolFieldRead`: `bool r = flag;`, a
 `bool` local set from storage, which decision 18's `Upd.boolB` refused),
 each by `sol_prove` on `⊢`.
@@ -3646,6 +3646,226 @@ label, fresh name or message text moved (the lazy messages are the same
 text).  `SolidityCorpus` and the rest of `SolkeyTestSuite` were not
 rebuilt (their text does not reach the changed functions but through
 `ruleOf?`, whose answers are unchanged).
+
+### W3c lane `testsuite` (`w3c-testsuite`, 2026-10-08): the TestSuite flip
+
+**Result.**  The TestSuite is on the scoped calculus.
+`TestSuite/Problems.lean` is `solc_problems Solkey.TestSuite legacy`
+(`N.f.problem.legacy`, not compiled), `TestSuite/CoreProblems.lean` is
+`solc_scoped_problems Solkey.TestSuite main decl` (the one-table form,
+`N.f.problem` an entry of `N.problems`, each checked to erase to its legacy
+statement; its import of `Calculus.Core.Derive` replaced by
+`Calculus.Core.Surface`).  Each `Derived1`–`14` imports `CoreProblems` and
+adds `open scoped Solidity.Core.Surface`; the theorem text is unchanged but
+`Derived7`'s `testStorageNestedPushReturnAlias` (decision 21, below).
+`Suggestions.lean` imports `CoreProblems`, so `#solkey_derive?` searches the
+scoped `⊢` (`scopedSearch`).  `CoreDerived9`–`11` and `CoreSeq` are deleted
+(the `SolkeyTestSuite` root, the module-map rows).  `Report.lean`'s pin
+(452 functions: 435 derived, 2 pending, 15 other) and `check-testsuite.sh`
+(against solkey `1b4341a303`, extracted with `git archive`: 435 derived) are
+unchanged.
+
+**Two calculus changes the flip needed** (outside the lane's files:
+`Calculus/Core/{Proves,ProvesSound,ProvesDerive}.lean`; proposed, the lead's
+call):
+
+24. *Proposed: `Core.Proves.closeFalse` and ground splits pruned.*  The
+    scoped walk ran every branch of every split: `returnEarly` (three calls of
+    `returnSign`, 27 paths) and `tupleReturnDiscardsComponents` (32) went past
+    9 GB each (`Suggestions`' worker reached 19 GB and was killed by the
+    memory cap).  Today's `sol_prove` prunes a split whose condition is ground
+    under its updates and whose branch the closer refutes, closing it by
+    `Proves.closeFalse` (`Derive.splitRes`).  The scoped sequent had no
+    `closeFalse`; it now has today's rule, `(h : H ⊢ false) : H ⊢ φ`
+    (soundness: `Hyps.wrap_mono`), and the walk prunes as today does
+    (`Seq.ground`, today's `Derive.groundCond` on the erasure of
+    `H, c ⟹ false`; `Seq.refutes`, the leaf check with nothing left).  Each
+    of the two now takes 3.7 s of kernel time.  KeY's rule is `closeFalse` after its
+    simplification; the shape is today's (a `cut` on `false`), a deviation
+    already recorded at today's rule.
+25. *Proposed: a leaf's parameters are bound where only that closes it.*
+    `Seq.leafRes` stripped the parameters' `∀` (`Fml.stripAlls`, as
+    today's `dl!{}` leaves have them free).  For a diamond that reads a
+    parameter (`assert(fixedByKey[k].length == 3)` in
+    `testMappingOfFixedArrayLength`, `Derived4`), the stripped leaf leaves
+    `k` unbound in the untyped state, the diamond's index check fails, and
+    two goals stay open; today's TestSuite statement binds `k` (`Problem.fml`
+    is `∀`), so today's leaf had `k` in its context.  `Seq.pick` tries the
+    stripped leaf first and, where it leaves goals, the leaf with its
+    parameters bound; it hands back the stripped goals when neither closes,
+    so the leaf tactics written for today's leaves still apply
+    (`Benchmark/Mapping`'s `remove_spec` failed when every leaf kept its
+    `∀`).  This also covers W3b blocker 6 (`ProofTree`'s two interval
+    examples) for the `⊢` route; they were not flipped here.
+
+**Pins changed** (each with its reason):
+- `TestSuite/Derived7.lean`, `testStorageNestedPushReturnAlias`: decision 21,
+  one fewer residual leaf.  With one leaf `#solkey_derive?` prints the leaf
+  tactics with no `case` (`Core.Walk` names a goal only when there are
+  several), so `case leaf2` goes and so does the `case leaf1 =>` wrapper,
+  the three tactics dedented: the replay is what the tool prints.
+- `TestSuite/Suggestions.lean`, the same theorem's `#solkey_derive?` pin:
+  the same change (decision 21).
+- Nothing else: `Problems.lean`'s two `#solkey_problem` pins, the
+  `CoreProblems` info line (`437 obligations declared scoped`),
+  `Report.lean`, `Solkey/ScopedFlip.lean`, and the four `Suggestions` pins
+  but that one (`returnEarly` and `tupleReturnDiscardsComponents` stay a
+  bare `sol_prove`, through the pruning), and every example checked below.
+  No fresh name changed.
+
+**Gates** (the integration's method: the real text in a fresh worker,
+`/proc` sampled every 20 ms, wall from the worker's first sample until its
+CPU is within 0.15 s of its total; the `Derived` files timed as copies under
+`Solidity/Scratch/`, because the server would not restart a killed
+`Derived9` worker; other sessions running, load 3–4):
+
+| Module | M0 | Limit | W3b integration, same method | flipped |
+|---|---|---|---|---|
+| Derived9–11 | 19.1 s | 22.9 s | 21.9 s (7.75 + 10.64 + 3.50), today's text | **28.7 s** (9.10 + 15.51 + 4.07; CPU 10.7 + 17.4 + 4.5) |
+| `TestSuite/Problems` (`legacy`) | 1.2 s | 1.44 s | 1.82 s (not flipped) | 0.95 s (CPU 0.96) |
+| `TestSuite/CoreProblems` (`main decl`) | — | 1.44 s (W3b's) | 1.99 s | 1.93 s (CPU 1.90) |
+
+Derived9–11 are **over**, by 25% (31% over today's text by the same
+method), Derived10 most (15.5 s against 10.6 s).  Where it goes, on
+`indexWriteBothImpureMemoryValue` (`Elab.async false`, the profiler's
+kernel time): the walk alone (a leaf that returns nothing) is under 0.1 s;
+the walk with each leaf's `Fml.closableB` 0.36 s; the whole check 0.88 s,
+against 0.52 s for the `Core.Valid` route on the same obligation.  So the
+excess is `Proves.close`'s side condition, evaluated by the kernel at each
+leaf over the whole context: name lists (`Upd.names`, `x ∉ ns`,
+`bindNames`) compared as `String`s.  A variant that skips the update's
+`Avoids` checks when no hidden binder follows did not help (0.37 s); one
+without the update checks took 0.23 s, one without any name test under
+0.1 s.  Pruning costs nothing here (15.8 s of kernel time on Derived10 with
+it, 15.2 s without); binding the parameters at every leaf cost 2.6 s more,
+hence `pick`.  Proposal, for the lead: the closable test incremental along
+the walk (a context's names and checks carried in `Seq.run`, the leaf
+testing only its goal), or `Var` names compared by a key the kernel
+evaluates cheaply.  `TestSuite/Problems` is within its limit.  Under
+Decision 9 the aggregate on the integration's scale is about 62 s against
+59.4 s of limits, over by the Derived rows; with `CoreProblems` counted
+(W3b gave it 1.44 s, and the scoped table is now on every `Derived`
+module's import path), about 63.6 s against 60.8 s.  The review fixes
+below re-time all of it.
+
+**Checks.**  File by file (`lean_diagnostic_messages`, errors): the
+changed `Core` modules, `TestSuite/{Problems,CoreProblems,Derived1–14,
+Suggestions,Report}` (`Report` over the fourteen `Derived` oleans, built two
+at a time through scratch imports), `Solkey/{ScopedFlip,Constructors}`,
+`Calculus/Core/Closers`, `Examples/ProofTree`, `Examples/Benchmark/*`
+(Mapping, Purchase, Counter, Coin, ERC20, EtherWallet, SimpleStorage),
+`Examples/Tactics/{StorageDelete,Branch,Constructors,CoreDerive,
+LoopsImport,Loops,Decide,Calls,Dangling,CoreCallback}`: every file that runs
+the scoped `sol_prove`.  `#print axioms Proves.of_residue`: Lean's three.
+`check-orphans` (but the git-excluded `Scratch/`), `check-doc-paths` (this
+file's two citations of the deleted modules now written without `.lean`),
+`check-testsuite.sh`: ok.  No new `sorry`, `axiom` or `maxHeartbeats`.  A
+whole `lean_build` was not run (the session's memory was near 20 GB from
+other sessions); the files above are every importer of the walk that states
+a scoped `⊢`, and `Calculus/Core/Proves.lean`'s new constructor is matched
+only by `Proves.sound_of`.  The read-only review pass was not run.
+
+**Left.**
+1. Derived9–11's gate: still over after the review fixes (below), the
+   lead's call.  **Do not merge `w3c-testsuite` on the gate as it stands.**
+2. Decisions 24 and 25 await the lead's approval.
+3. `Calculus/Core/Derive.lean`'s `Fml.stripAlls` route (`⊨`, `sol_close`
+   on a scoped leaf) still strips with no fallback; `ProofTree`'s interval
+   examples are still read without the switch (W3b blocker 6).
+4. A full `lake build Solidity SolkeyTestSuite SolidityCorpus` at the
+   integration.
+5. `SolidityCorpus` does not build since the flip:
+   `Corpus/TestSuite.lean` (generated by `scripts/solkey-port.mjs`) states
+   each obligation as `diamond_of_proved Solkey.TestSuite.f.proved …`, which
+   takes today's `Proves` of `f.problem`; `f.proved` is now the scoped
+   `⊢`, so its 416 corollaries fail with a type mismatch (found while
+   building the library roots for the review fixes; not caused by them).
+   The generator should state them through `Core.Proves.valid` and the
+   table's erasure check (`f.problem` erases to `f.problem.legacy`), or
+   keep a legacy theorem beside each scoped one.  `check-corpus.sh` fails
+   until then.
+
+**Review fixes (2026-10-08).**  Two confirmed findings.
+
+*The closable test, rewritten* (`Calculus/Core/Closable.lean`).
+`Fml.closableB` keeps its meaning (`Proves.close`'s side condition and
+`Fml.closableB_sound` are unchanged in statement) and is now
+`(φ.binds ns).isSome`: `Fml.binds` collects the hidden binders' names from
+the leaf up (`some φ.bindNames`, `Fml.binds_sound`), so an update or a `∀`
+tests only the binders below it, most often none, instead of asking
+`bindNames` of the whole rest at each update and binder (quadratic in the
+leaf's context).  `Fml.binds`, `Upd.freshB` and `Fml.foFreshB` are written
+by the recursor with compiled twins by `match` (`Fml.bindsM`,
+`Upd.freshBM`, `Fml.foFreshBM`; Gate G0, condition 2, as `Fml.posB`), and
+names are compared by `Var.memB`, whose `Var.eqB` compares a fresh
+variable's index (a `Nat`, one kernel step) before its base: the review's
+option (b), and (a) in the form the measurements below favour.  No rule,
+printer, pin or fresh name changed.
+
+Measured first, in a scratch module, as the kernel's own time for the 91
+obligations of Derived9–11, each `Seq.run` with a given leaf checked by
+`addDecl` one after the other (load under 3; seconds, the sum over the 91):
+
+| Leaf | kernel |
+|---|---|
+| the walk alone (every leaf `some []`) | 2.4–2.8 s |
+| the flip as landed (`closableB` by `casesOn`, `decide (x ∉ ns)`) | 27.2–30.4 s |
+| a one-pass top-down variant (the names taken above carried down) | 27.1–28.9 s |
+| the same with `Var.memB` | 26.2 s |
+| `Fml.binds` (landed) | 22.0–24.5 s |
+| no closable test at all (`pick` alone) | 20.3–24.0 s |
+| the `Core.Valid` route (`Derive.residueOf`: symex and one residue) | 20.2–20.4 s |
+| the review's (a) as stated: the context's checks carried in a `Hyps.rec` state, so that a prefix is checked once and the leaf tests only its goal | 23.4 s, no gain over `Fml.binds` (the kernel does not share a prefix's evaluation between leaves) |
+
+With `Fml.binds` the closable test costs about 1.7 s of the 91
+obligations' kernel time, against about 5 s before; what remains over the
+`Core.Valid` route is the residue of each leaf's whole erasure
+(`Seq.leafRes` erases `H.wrap φ` and today's residue peels it again at
+every leaf) and the walk (`Hyps.fresh` re-wraps the sequent at every step).
+
+Then the gate, by the lane's method (fresh copies under
+`Solidity/Scratch/`, `/proc` sampled every 20 ms), every row in one session
+at load under 1, so that today's text is re-timed beside the flip (the
+pre-flip `Problems.lean` and `Derived9`–`11` of `223e6a2`, as scratch
+copies):
+
+| Module | Limit | today's text (`223e6a2`) | flip as landed (`b07a002`) | with `Fml.binds` | with `Fml.binds`, on the integration's scale |
+|---|---|---|---|---|---|
+| Derived9–11 | 22.9 s | 19.34 s (6.86 + 9.82 + 2.66) | 27.21 s (8.89 + 14.49 + 3.83) | **24.33 s** (8.04 + 12.82 + 3.47; CPU 9.6 + 14.6 + 3.8) | about 25.0 s, **over** by 9% |
+| `TestSuite/Problems` | 1.44 s | 1.09 s | 0.66 s (`legacy`) | 0.66 s | about 0.77 s |
+| `TestSuite/CoreProblems` | 1.44 s | — | 1.21–1.25 s | 1.21–1.25 s | about 1.43 s, within |
+
+The scale is W3b's: today's text there read 19.9 s for Derived9–11 and
+1.27 s for `Problems` on the integration's scale, so the factors are
+19.9/19.34 and 1.27/1.09.  At load 3, two earlier rounds read 25.4 and
+26.7 s with `Fml.binds`, against 28.2 and 31.0 s for the flip as landed.
+Under Decision 9, W3b's 55.9 s with the Derived row at 25.0 s, `Problems`
+at 0.77 s and `CoreProblems` added at 1.43 s is about 61.9 s against
+60.8 s of limits: **over by about 1.1 s** (2%), where the flip as landed
+was over by about 4 s.  The rows over their limits are Derived9–11 and,
+from W3b, `ProofTree` and `Chains/Storage`.
+
+What would close the rest, for the lead (none tried here past the
+measurements above): the leaf's residue run on the erased context once per
+prefix rather than on the whole erasure at every leaf (the residue's own
+`peel` of `H.wrap φ` is the excess over `Core.Valid`); `Fml.erase`,
+`Upd.erase` and `Upd.names` are `match` on indexed families (Gate G0,
+condition 1) and run at every leaf; `Hyps.fresh` wraps the sequent at
+every step.  The first changes the leaf the walk hands today's calculus
+(`Proves.close`'s premise), the second `Calculus/Core/Fml.lean` under
+every proof that unfolds those definitions.
+
+*Stale citations.*  `TestSuite/Suggestions.lean`, `TestSuite/Derived14.lean`'s
+docstring and the `Derived14` row of `docs/module-map.md` cited
+`Derive.splitRes`, which the scoped walk no longer runs; they now cite
+`Core.Seq.refutes`, closed by `Core.Proves.closeFalse`.
+`docs/lean-key-rule-map.md`'s `closeFalse` row names `Core.Proves.closeFalse`
+and `Core.Seq.ground`/`Core.Seq.refutes` beside today's.
+
+Checks: every `Calculus/Core` module, every `Examples` module, `Solkey`,
+`TestSuite/Derived1`–`14`, `Suggestions` and `Report`, and the `Solidity`
+and `SolkeyTestSuite` roots, built through scratch imports with no error.
+`SolidityCorpus`: Left 5.
 
 ## Baselines (M0)
 

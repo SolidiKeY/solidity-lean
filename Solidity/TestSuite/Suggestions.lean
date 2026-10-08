@@ -1,4 +1,4 @@
-import Solidity.TestSuite.Problems
+import Solidity.TestSuite.CoreProblems
 
 /-!
 # The suggestions `#solkey_derive?` prints, pinned
@@ -26,14 +26,9 @@ additionStorageWrite: derived
 /--
 info: theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
   sol_prove
-  case leaf1 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
-  case leaf2 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
+  refine Proves.close_dropWt ?_
+  sol_symex
+  sol_close
 
 testStorageNestedPushReturnAlias: derived
 -/
@@ -43,7 +38,8 @@ testStorageNestedPushReturnAlias: derived
 /-! `returnEarly` calls `returnSign` (three exits) three times, and
 `tupleReturnDiscardsComponents` runs `returnStats` (four conditionals and an
 `&&`) on literals: a split whose condition is ground under its updates keeps
-only the branch it takes (`Derive.splitRes`), so each replay fits one
+only the branch it takes (`Core.Seq.refutes`, closed by
+`Core.Proves.closeFalse`), so each replay fits one
 declaration (`Derive.replayFits`). -/
 
 /--

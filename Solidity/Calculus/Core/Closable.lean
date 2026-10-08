@@ -13,9 +13,9 @@ one-way one a goal closed by its erasure's validity needs
 updates in positive positions, as a leaf's context puts them, an update
 under either modality, each name a hidden binder binds left alone by the
 updates above it (`Fml.bindNames`).  `Proves.close` asks the Bool twin
-(`Fml.closableB`), which the kernel decides at a closed leaf: it, and the
-Bool functions it calls here, are written with `casesOn` (Gate G0,
-condition 1).
+(`Fml.closableB`), which the kernel decides at every closed leaf: it, and
+the Bool functions it calls here, are written by the recursor with a
+compiled twin (Gate G0, condition 2).
 -/
 
 namespace Solidity.Core
@@ -110,109 +110,247 @@ def Fml.Closable : {Γ : Ctx} → List Var → Fml C Γ → Prop
 /-! ## Decided
 
 The Bool twins `Proves.close` asks, which the kernel evaluates (`rfl`,
-`decide`) at a closed leaf: written with `casesOn`, as `Fml.maxIdx`
-(`Calculus/Core/Step.lean`). -/
+`decide`) at every leaf of `sol_prove`'s walk: written by the recursor, which
+the kernel unfolds with no `brecOn`, each with a compiled twin by `match`
+(`implemented_by`) for the walk the tactic runs (Gate G0, condition 2), as
+`Calculus/Core/Close.lean`'s `Fml.posB`.  A name is looked up by
+`Var.memB`, which compares a fresh variable's index (a `Nat`, which the
+kernel compares in one step) before its base, and `Fml.binds` collects a
+leaf's hidden binders once, from the leaf up, so each update and binder
+asks only of the binders below it, most often none. -/
 
 instance {vs ns : List Var} : Decidable (Avoids vs ns) :=
   inferInstanceAs (Decidable (∀ x ∈ vs, x ∉ ns))
 
-/-- `Upd.Fresh`, decided. -/
-def Upd.freshB {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Bool
-  | _, U => Upd.casesOn (motive := fun _ _ => Bool) U true (fun U _ => Upd.freshB ns U)
-      (fun U x _ => Upd.freshB ns U && decide (x ∉ U.names ns)) (fun U _ => Upd.freshB ns U)
-      (fun U _ => Upd.freshB ns U)
-  termination_by structural _ U => U
+/-- Equality of names, a fresh variable's index first. -/
+def _root_.Solidity.Var.eqB (x y : Var) : Bool :=
+  match x, y with
+  | .fresh b k, .fresh b' k' => Nat.beq k k' && decide (b = b')
+  | .user s, .user t => decide (s = t)
+  | _, _ => false
 
-theorem Upd.freshB_sound {Γ : Ctx} {ns : List Var} :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → U.freshB ns = true → U.Fresh ns
-  | _, .nil, _ => trivial
-  | _, .snoc U _, h => Upd.freshB_sound U h
-  | _, .decl U x _, h => by
-    have h' : U.freshB ns = true ∧ decide (x ∉ U.names ns) = true := Bool.and_eq_true_iff.mp h
-    exact ⟨Upd.freshB_sound U h'.1, of_decide_eq_true h'.2⟩
-  | _, .pop U _, h => Upd.freshB_sound U h
-  | _, .drop U _, h => Upd.freshB_sound U h
+/-- `x ∈ ns`, by `Var.eqB`. -/
+def _root_.Solidity.Var.memB (x : Var) : List Var → Bool
+  | [] => false
+  | y :: ys => x.eqB y || Var.memB x ys
+
+theorem _root_.Solidity.Var.eqB_eq {x y : Var} (h : x.eqB y = true) : x = y := by
+  cases x <;> cases y <;>
+    simp_all only [Var.eqB, Bool.and_eq_true, Nat.beq_eq, decide_eq_true_eq, reduceCtorEq]
+
+theorem _root_.Solidity.Var.not_mem_of_memB {x : Var} :
+    {ns : List Var} → x.memB ns = false → x ∉ ns
+  | [], _ => List.not_mem_nil
+  | y :: ys, h => by
+    simp only [Var.memB, Bool.or_eq_false_iff] at h
+    intro hm
+    rcases List.mem_cons.1 hm with rfl | hm
+    · cases hx : x.eqB x
+      · cases x <;> simp only [Var.eqB, Nat.beq_refl, decide_true, Bool.and_self,
+          reduceCtorEq] at hx
+      · rw [hx] at h; cases h.1
+    · exact Var.not_mem_of_memB h.2 hm
+
+/-- Whether some name of `B` is in `vs`. -/
+def meetsB (B vs : List Var) : Bool := B.any fun y => y.memB vs
+
+theorem avoids_of_meetsB {B vs : List Var} (h : meetsB B vs = false) :
+    Avoids vs B ∧ Avoids B vs := by
+  simp only [meetsB, List.any_eq_false, Bool.not_eq_true] at h
+  exact ⟨fun x hx hB => Var.not_mem_of_memB (h x hB) hx,
+    fun x hB hx => Var.not_mem_of_memB (h x hB) hx⟩
+
+/-- `Upd.freshB`'s compiled twin. -/
+def Upd.freshBM {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Bool
+  | _, .nil => true
+  | _, .snoc U _ => U.freshBM ns
+  | _, .decl U x _ => U.freshBM ns && !x.memB (U.names ns)
+  | _, .pop U _ => U.freshBM ns
+  | _, .drop U _ => U.freshBM ns
+
+/-- `Upd.Fresh`, decided. -/
+@[implemented_by Upd.freshBM]
+def Upd.freshB {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
+  Upd.rec (motive := fun _ _ => Bool) true (fun _ _ ih => ih)
+    (fun U x _ ih => ih && !x.memB (U.names ns)) (fun _ _ ih => ih) (fun _ _ ih => ih) U
+
+theorem Upd.freshB_sound {Γ : Ctx} {ns : List Var} {Δ : Ctx} (U : Upd C Γ Δ)
+    (h : U.freshB ns = true) : U.Fresh ns := by
+  induction U with
+  | nil => trivial
+  | snoc U _ ih => exact ih h
+  | decl U x _ ih =>
+    have h' : U.freshB ns = true ∧ x.memB (U.names ns) = false := by
+      simpa only [Upd.freshB, Bool.and_eq_true, Bool.not_eq_eq_eq_not, Bool.not_true] using h
+    exact ⟨ih h'.1, Var.not_mem_of_memB h'.2⟩
+  | pop U _ ih => exact ih h
+  | drop U _ ih => exact ih h
+
+/-- `Fml.foFreshB`'s compiled twin. -/
+def Fml.foFreshBM : {Γ : Ctx} → List Var → Fml C Γ → Bool
+  | _, _, .tt | _, _, .eq .. | _, _, .defined _ => true
+  | _, ns, .not φ => φ.foFreshBM ns
+  | _, ns, .and φ ψ | _, ns, .imp φ ψ => φ.foFreshBM ns && ψ.foFreshBM ns
+  | _, ns, .all x _ φ => !x.memB ns && φ.foFreshBM (x :: ns)
+  | _, _, .upd .. | _, _, .modal .. | _, _, .havoc _ | _, _, .bind .. | _, _, .anon .. => false
 
 /-- A first-order formula whose `∀`s bind fresh names: `Fml.Plain` and
 `Fml.FO`, decided. -/
-def Fml.foFreshB : {Γ : Ctx} → List Var → Fml C Γ → Bool
-  | _, ns, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
-    (tt := true) (eq := fun _ _ => true) (defined := fun _ => true)
-    (not := fun φ => Fml.foFreshB ns φ)
-    (and := fun φ ψ => Fml.foFreshB ns φ && Fml.foFreshB ns ψ)
-    (imp := fun φ ψ => Fml.foFreshB ns φ && Fml.foFreshB ns ψ)
-    (upd := fun _ _ _ => false) (modal := fun _ _ _ _ => false) (havoc := fun _ => false)
-    (all := fun x _ φ => decide (x ∉ ns) && Fml.foFreshB (x :: ns) φ)
-    (bind := fun _ _ _ _ => false) (anon := fun _ _ => false)
-  termination_by structural _ _ φ => φ
+@[implemented_by Fml.foFreshBM]
+def Fml.foFreshB {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Bool :=
+  Fml.rec (motive := fun _ _ => List Var → Bool)
+    (tt := fun _ => true) (eq := fun _ _ _ => true) (defined := fun _ _ => true)
+    (not := fun _ ih ns => ih ns)
+    (and := fun _ _ ihφ ihψ ns => ihφ ns && ihψ ns)
+    (imp := fun _ _ iha ihφ ns => iha ns && ihφ ns)
+    (upd := fun _ _ _ _ _ => false) (modal := fun _ _ _ _ _ _ => false)
+    (havoc := fun _ _ _ => false)
+    (all := fun x _ _ ih ns => !x.memB ns && ih (x :: ns))
+    (bind := fun _ _ _ _ _ _ => false) (anon := fun _ _ _ _ => false) φ ns
 
-theorem Fml.foFreshB_sound : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} →
-    φ.foFreshB ns = true → φ.Plain ns ∧ φ.FO = true
-  | _, .tt, _, _ | _, .eq .., _, _ | _, .defined _, _, _ => ⟨trivial, rfl⟩
-  | _, .not φ, _, h => Fml.foFreshB_sound φ h
-  | _, .and φ ψ, ns, h => by
-    have h' : φ.foFreshB ns = true ∧ ψ.foFreshB ns = true := Bool.and_eq_true_iff.mp h
-    have a := Fml.foFreshB_sound φ h'.1
-    have b := Fml.foFreshB_sound ψ h'.2
-    exact ⟨⟨a.1, b.1⟩, Bool.and_eq_true_iff.mpr ⟨a.2, b.2⟩⟩
-  | _, .imp φ ψ, ns, h => by
-    have h' : φ.foFreshB ns = true ∧ ψ.foFreshB ns = true := Bool.and_eq_true_iff.mp h
-    have a := Fml.foFreshB_sound φ h'.1
-    have b := Fml.foFreshB_sound ψ h'.2
-    exact ⟨⟨a.1, b.1⟩, Bool.and_eq_true_iff.mpr ⟨a.2, b.2⟩⟩
-  | _, .all x _ φ, ns, h => by
-    have h' : decide (x ∉ ns) = true ∧ φ.foFreshB (x :: ns) = true := Bool.and_eq_true_iff.mp h
-    have a := Fml.foFreshB_sound φ h'.2
-    exact ⟨⟨of_decide_eq_true h'.1, a.1⟩, a.2⟩
-  | _, .upd .., _, h | _, .modal .., _, h | _, .havoc _, _, h | _, .bind .., _, h
-  | _, .anon .., _, h => nomatch h
+theorem Fml.foFreshB_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns : List Var},
+    φ.foFreshB ns = true → φ.Plain ns ∧ φ.FO = true := by
+  induction φ with
+  | tt | eq | defined => intro _ _; exact ⟨trivial, rfl⟩
+  | not φ ih => intro ns h; exact ih h
+  | and φ ψ ihφ ihψ =>
+    intro ns h
+    have h' : φ.foFreshB ns = true ∧ ψ.foFreshB ns = true := Bool.and_eq_true _ _ ▸ h
+    exact ⟨⟨(ihφ h'.1).1, (ihψ h'.2).1⟩, Bool.and_eq_true_iff.mpr ⟨(ihφ h'.1).2, (ihψ h'.2).2⟩⟩
+  | imp a φ iha ihφ =>
+    intro ns h
+    have h' : a.foFreshB ns = true ∧ φ.foFreshB ns = true := Bool.and_eq_true _ _ ▸ h
+    exact ⟨⟨(iha h'.1).1, (ihφ h'.2).1⟩, Bool.and_eq_true_iff.mpr ⟨(iha h'.1).2, (ihφ h'.2).2⟩⟩
+  | upd | modal | havoc | bind | anon => intro _ h; cases h
+  | all x p φ ih =>
+    intro ns h
+    have h' : (!x.memB ns) = true ∧ φ.foFreshB (x :: ns) = true := Bool.and_eq_true _ _ ▸ h
+    simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at h'
+    exact ⟨⟨Var.not_mem_of_memB h'.1, (ih h'.2).1⟩, (ih h'.2).2⟩
+
+/-- `Fml.binds`'s compiled twin. -/
+def Fml.bindsM : {Γ : Ctx} → List Var → Fml C Γ → Option (List Var)
+  | _, _, .tt | _, _, .eq .. | _, _, .defined _ => some []
+  | _, ns, .not φ => bif φ.foFreshB ns then some [] else none
+  | _, ns, .and φ ψ => (φ.bindsM ns).bind fun B₁ => (ψ.bindsM ns).map (B₁ ++ ·)
+  | _, ns, .imp a φ => bif a.foFreshB ns then φ.bindsM ns else none
+  | _, ns, .upd _ U φ =>
+    bif U.freshB ns then (φ.bindsM (U.names ns)).bind fun B =>
+      bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
+      else some B
+    else none
+  | _, _, .modal .. => none
+  | _, ns, .havoc φ | _, ns, .anon _ φ => φ.bindsM ns
+  | _, ns, .all x _ φ =>
+    bif x.memB ns then none
+    else (φ.bindsM (x :: ns)).bind fun B => bif x.memB B then none else some B
+  | _, ns, .bind _ x _ φ =>
+    bif x.memB ns then none
+    else (φ.bindsM (x :: ns)).bind fun B => bif x.memB B then none else some (x :: B)
+
+/-- `Fml.Closable`, decided: `some` of the names the hidden binders bind
+(`Fml.bindNames`) when the leaf is closable, collected from the leaf up, so
+that an update or a `∀` tests only the binders below it. -/
+@[implemented_by Fml.bindsM]
+def Fml.binds {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var) :=
+  Fml.rec (motive := fun _ _ => List Var → Option (List Var))
+    (tt := fun _ => some []) (eq := fun _ _ _ => some []) (defined := fun _ _ => some [])
+    (not := fun φ _ ns => bif φ.foFreshB ns then some [] else none)
+    (and := fun _ _ ihφ ihψ ns => (ihφ ns).bind fun B₁ => (ihψ ns).map (B₁ ++ ·))
+    (imp := fun a _ _ ih ns => bif a.foFreshB ns then ih ns else none)
+    (upd := fun _ U _ ih ns =>
+      bif U.freshB ns then (ih (U.names ns)).bind fun B =>
+        bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
+        else some B
+      else none)
+    (modal := fun _ _ _ _ _ _ => none)
+    (havoc := fun _ ih ns => ih ns)
+    (all := fun x _ _ ih ns =>
+      bif x.memB ns then none
+      else (ih (x :: ns)).bind fun B => bif x.memB B then none else some B)
+    (bind := fun _ x _ _ ih ns =>
+      bif x.memB ns then none
+      else (ih (x :: ns)).bind fun B => bif x.memB B then none else some (x :: B))
+    (anon := fun _ _ ih ns => ih ns) φ ns
 
 /-- `Fml.Closable`, decided: what `Proves.close` asks of the leaf, its
 context in front. -/
-def Fml.closableB : {Γ : Ctx} → List Var → Fml C Γ → Bool
-  | _, ns, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
-    (tt := true) (eq := fun _ _ => true) (defined := fun _ => true)
-    (not := fun φ => Fml.foFreshB ns φ)
-    (and := fun φ ψ => Fml.closableB ns φ && Fml.closableB ns ψ)
-    (imp := fun φ ψ => Fml.foFreshB ns φ && Fml.closableB ns ψ)
-    (upd := fun _ U φ => U.freshB ns &&
-      decide (Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames) &&
-      decide (Avoids φ.bindNames (U.names ns)) && Fml.closableB (U.names ns) φ)
-    (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.closableB ns φ)
-    (all := fun x _ φ => decide (x ∉ ns) && decide (x ∉ φ.bindNames) && Fml.closableB (x :: ns) φ)
-    (bind := fun _ x _ φ => decide (x ∉ ns) && decide (x ∉ φ.bindNames) &&
-      Fml.closableB (x :: ns) φ)
-    (anon := fun _ φ => Fml.closableB ns φ)
-  termination_by structural _ _ φ => φ
+def Fml.closableB {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Bool := (φ.binds ns).isSome
 
-theorem Fml.closableB_sound : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} →
-    φ.closableB ns = true → φ.Closable ns
-  | _, .tt, _, _ | _, .eq .., _, _ | _, .defined _, _, _ => trivial
-  | _, .not φ, _, h => Fml.foFreshB_sound φ h
-  | _, .and φ ψ, ns, h => by
-    have h' : φ.closableB ns = true ∧ ψ.closableB ns = true := Bool.and_eq_true_iff.mp h
-    exact ⟨Fml.closableB_sound φ h'.1, Fml.closableB_sound ψ h'.2⟩
-  | _, .imp φ ψ, ns, h => by
-    have h' : φ.foFreshB ns = true ∧ ψ.closableB ns = true := Bool.and_eq_true_iff.mp h
-    exact ⟨Fml.foFreshB_sound φ h'.1, Fml.closableB_sound ψ h'.2⟩
-  | _, .upd _ U φ, ns, h => by
-    have h' : (U.freshB ns && decide (Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames) &&
-        decide (Avoids φ.bindNames (U.names ns)) && φ.closableB (U.names ns)) = true := h
-    simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
-    obtain ⟨⟨⟨hU, h₁⟩, h₂⟩, hφ⟩ := h'
-    exact ⟨Upd.freshB_sound U hU, h₁, h₂, Fml.closableB_sound φ hφ⟩
-  | _, .modal .., _, h => nomatch h
-  | _, .havoc φ, _, h => Fml.closableB_sound φ h
-  | _, .all x _ φ, ns, h => by
-    have h' : (decide (x ∉ ns) && decide (x ∉ φ.bindNames) && φ.closableB (x :: ns)) = true := h
-    simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
-    obtain ⟨⟨hx, hxB⟩, hφ⟩ := h'
-    exact ⟨hx, hxB, Fml.closableB_sound φ hφ⟩
-  | _, .bind _ x _ φ, ns, h => by
-    have h' : (decide (x ∉ ns) && decide (x ∉ φ.bindNames) && φ.closableB (x :: ns)) = true := h
-    simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
-    obtain ⟨⟨hx, hxB⟩, hφ⟩ := h'
-    exact ⟨hx, hxB, Fml.closableB_sound φ hφ⟩
-  | _, .anon _ φ, _, h => Fml.closableB_sound φ h
+theorem Fml.binds_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var},
+    φ.binds ns = some B → φ.Closable ns ∧ B = φ.bindNames := by
+  induction φ with
+  | tt | eq | defined => intro _ _ h; cases h; exact ⟨trivial, rfl⟩
+  | not φ _ =>
+    intro ns B h
+    cases hp : φ.foFreshB ns
+    · simp only [Fml.binds, hp, cond_false, reduceCtorEq] at h
+    · simp only [Fml.binds, hp, cond_true, Option.some.injEq] at h
+      exact ⟨Fml.foFreshB_sound φ hp, h.symm⟩
+  | and φ ψ ihφ ihψ =>
+    intro ns B h
+    obtain ⟨B₁, h₁, h⟩ := Option.bind_eq_some_iff.1 (h : (φ.binds ns).bind
+      (fun B₁ => (ψ.binds ns).map (B₁ ++ ·)) = some B)
+    obtain ⟨B₂, h₂, rfl⟩ := Option.map_eq_some_iff.1 h
+    obtain ⟨c₁, rfl⟩ := ihφ h₁
+    obtain ⟨c₂, rfl⟩ := ihψ h₂
+    exact ⟨⟨c₁, c₂⟩, rfl⟩
+  | imp a φ _ ih =>
+    intro ns B h
+    cases hp : a.foFreshB ns
+    · simp only [Fml.binds, hp, cond_false, reduceCtorEq] at h
+    · have h' : φ.binds ns = some B := by simpa only [Fml.binds, hp, cond_true] using h
+      obtain ⟨c, rfl⟩ := ih h'
+      exact ⟨⟨Fml.foFreshB_sound a hp, c⟩, rfl⟩
+  | upd m U φ ih =>
+    intro ns B h
+    cases hU : U.freshB ns
+    · simp only [Fml.binds, hU, cond_false, reduceCtorEq] at h
+    · have h' : (φ.binds (U.names ns)).bind (fun B =>
+          bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
+          else some B) = some B := by simpa only [Fml.binds, hU, cond_true] using h
+      obtain ⟨B', h₁, h₂⟩ := Option.bind_eq_some_iff.1 h'
+      cases hm : (meetsB B' (Solidity.Upd.vars (U.erase ns)) || meetsB B' (U.names ns))
+      · simp only [hm, cond_false, Option.some.injEq] at h₂
+        subst h₂
+        obtain ⟨c, rfl⟩ := ih h₁
+        simp only [Bool.or_eq_false_iff] at hm
+        exact ⟨⟨Upd.freshB_sound U hU, (avoids_of_meetsB hm.1).1, (avoids_of_meetsB hm.2).2, c⟩,
+          rfl⟩
+      · simp only [hm, cond_true, reduceCtorEq] at h₂
+  | modal => intro _ _ h; cases h
+  | havoc φ ih => intro ns B h; exact ih h
+  | anon xs φ ih => intro ns B h; exact ih h
+  | all x p φ ih =>
+    intro ns B h
+    cases hx : x.memB ns
+    · have h' : (φ.binds (x :: ns)).bind (fun B => bif x.memB B then none else some B) =
+          some B := by simpa only [Fml.binds, hx, cond_false] using h
+      obtain ⟨B', h₁, h₂⟩ := Option.bind_eq_some_iff.1 h'
+      cases hB : x.memB B'
+      · simp only [hB, cond_false, Option.some.injEq] at h₂
+        subst h₂
+        obtain ⟨c, rfl⟩ := ih h₁
+        exact ⟨⟨Var.not_mem_of_memB hx, Var.not_mem_of_memB hB, c⟩, rfl⟩
+      · simp only [hB, cond_true, reduceCtorEq] at h₂
+    · simp only [Fml.binds, hx, cond_true, reduceCtorEq] at h
+  | bind m x t φ ih =>
+    intro ns B h
+    cases hx : x.memB ns
+    · have h' : (φ.binds (x :: ns)).bind (fun B => bif x.memB B then none else some (x :: B)) =
+          some B := by simpa only [Fml.binds, hx, cond_false] using h
+      obtain ⟨B', h₁, h₂⟩ := Option.bind_eq_some_iff.1 h'
+      cases hB : x.memB B'
+      · simp only [hB, cond_false, Option.some.injEq] at h₂
+        subst h₂
+        obtain ⟨c, rfl⟩ := ih h₁
+        exact ⟨⟨Var.not_mem_of_memB hx, Var.not_mem_of_memB hB, c⟩, rfl⟩
+      · simp only [hB, cond_true, reduceCtorEq] at h₂
+    · simp only [Fml.binds, hx, cond_true, reduceCtorEq] at h
+
+theorem Fml.closableB_sound {Γ : Ctx} (φ : Fml C Γ) {ns : List Var}
+    (h : φ.closableB ns = true) : φ.Closable ns := by
+  obtain ⟨B, hB⟩ := Option.isSome_iff_exists.1 h
+  exact (Fml.binds_sound φ hB).1
 
 end Solidity.Core

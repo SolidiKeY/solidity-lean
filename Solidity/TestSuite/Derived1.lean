@@ -1,4 +1,4 @@
-import Solidity.TestSuite.Problems
+import Solidity.TestSuite.CoreProblems
 
 /-!
 # solkey's `TestSuite`, derived (1 of 12)
@@ -11,6 +11,7 @@ sets the premise aside (`Proves.close_dropWt`).
 -/
 
 open Solidity Proves
+open scoped Solidity.Core.Surface
 
 theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by
   sol_prove

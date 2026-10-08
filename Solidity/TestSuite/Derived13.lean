@@ -1,4 +1,4 @@
-import Solidity.TestSuite.Problems
+import Solidity.TestSuite.CoreProblems
 
 /-!
 # solkey's `TestSuite`, derived: dangling aliases
@@ -17,6 +17,7 @@ slot readers count (`LStor.slotLenU`, `findDefinitionSize`).
 -/
 
 open Solidity Proves
+open scoped Solidity.Core.Surface
 
 theorem Solkey.TestSuite.testDanglingReferenceSurvivesPush.proved :
     ⊢ Solkey.TestSuite.testDanglingReferenceSurvivesPush.problem := by
