@@ -930,6 +930,35 @@ def legacyWritten (C : Expr) (m? : Option Expr) (L : Expr) : Written → TermEla
     | .ok e => pure e
     | .error msg => throwError "dl[C, m]: {msg}"
 
+/-- `Update.lean`'s postconditions of the lines `es`, `↑(φ.erase ns)`
+(`Post.erase`), as local postconditions `φ : Post C` while `k` runs on the
+lines with them in place, so that `Calculus/Chains.lean`'s rewrites see and
+print them as their own; put back in what `k` returns. -/
+def withErasedPosts (es : Array Expr) (k : Array Expr → TermElabM (Array Expr)) :
+    TermElabM (Array Expr) := do
+  let es ← es.mapM instantiateMVars
+  let ref ← IO.mkRef (#[] : Array Expr)
+  for e in es do
+    forEachExpr' e fun x => do
+      if x.isAppOfArity ``Solidity.Post.fml 2 && x.appArg!.isAppOfArity ``Core.Post.erase 5 then
+        ref.modify fun ps => if ps.contains x.appArg! then ps else ps.push x.appArg!
+        return false
+      return true
+  let ps ← ref.get
+  let rec go (i : Nat) (xs : Array Expr) : TermElabM (Array Expr) := do
+    if h : i < ps.size then
+      let p := ps[i]
+      let n ← match p.getArg! 2 with
+        | .fvar fv => fv.getUserName
+        | _ => pure `φ
+      withLocalDeclD n (mkApp (mkConst ``Solidity.Post) (p.getArg! 0)) fun x => go (i + 1) (xs.push x)
+    else
+      let sub (e : Expr) : Expr := e.replace fun y => (ps.idxOf? y).map (xs[·]!)
+      let rs ← k (es.map sub)
+      let rs ← rs.mapM instantiateMVars
+      return rs.map (·.replaceFVars xs ps)
+  go 0 #[]
+
 /-! ## The chain, elaborated -/
 
 /-- `Link.one`, `Link.many`, `Link.rule r` and the pair type of a chain. -/
@@ -967,6 +996,8 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         -- the program is still open: the merge on the scoped line
         let (sp, cands) ← mergeCands cur
         let pick ← cands.findM? fun c => matchWritten sp C w c.fml c.erased
+        if cands.isEmpty then
+          throwError "~[{r}]~>: {r} does not apply to{← indentLine cur}"
         let some c := pick |
           throwError "~[{r}]~>: no merge of the update spine of{← indentLine cur}\n\
             is the line written{indentD (.ofSyntax l[1])}\n\
@@ -994,13 +1025,22 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
           legacy := some (L, L, run.splice.modality)
           pure (L, run.splice.modality)
       let b ← legacyWritten C m? L₀ w
+      -- the rewrites see `↑(φ.erase ns)` as a postcondition of their own
+      let bHole := (← instantiateMVars b).isMVar
       let (lnk, q) ← match rw with
         | some (r, a) =>
-          let (lbl, q, _) ← Solidity.Chain.rwLabel C L₀ b r a
+          let #[lbl, q] ← withErasedPosts #[L₀, b] fun es => do
+              let b' ← if bHole then mkFreshExprMVar lfml else pure es[1]!
+              let (lbl, q, _) ← Solidity.Chain.rwLabel C es[0]! b' r a
+              pure #[lbl, q]
+            | throwError "~>: no rewrite"
           pure (mkApp3 (mkConst ``Solidity.Link.rw) C (toExpr r.getId.toString) lbl, q)
         | none =>
-          if b.isMVar then throwError "~=>: write the line after, it is what picks the rewrite"
-          let (_, q, _) ← Solidity.Chain.rwAnyFind C L₀ b
+          if bHole then throwError "~=>: write the line after, it is what picks the rewrite"
+          let #[q] ← withErasedPosts #[L₀, b] fun es => do
+              let (_, q, _) ← Solidity.Chain.rwAnyFind C es[0]! es[1]!
+              pure #[q]
+            | throwError "~>: no rewrite"
           pure (mkApp (mkConst ``Solidity.Link.rwAny) C, q)
       unless ← isDefEq b q do throwError "~>: the line after is not{indentExpr q}"
       rs := rs.push (mkAppN (mkConst ``Prod.mk [0, 0])
@@ -1256,7 +1296,11 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
         let some r := rule? | throwError "sol_chain: no rule named"
         let lbl ← labelFor r q.focus A
         unless ← isDefEq args[2]! lbl do throwError "sol_chain: the label does not fit"
-    return ← solveCore (← g.replaceTargetDefEq (← instantiateMVars ty))
+    let ty' ← instantiateMVars ty
+    if let some key := key? then
+      if (← instantiateMVars key).isMVar then
+        throwError "sol_chain: the `calc` step's line after is still unknown"
+    return ← solveCore (← g.replaceTargetDefEq ty')
   match_expr ty with
   | Core.Fml.OneStep _ _ A B =>
     let (run, q) ← nextLine A B
@@ -1270,6 +1314,7 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
     if B.isMVar then
       let Z := (run.lines.getLast?.map (·.fml)).getD A
       unless ← isDefEq B Z do throwError "sol_chain: the last line is not{indentExpr B}"
+      if (← instantiateMVars B).isMVar then throwError "sol_chain: the last line is unknown"
       return ← solveCore g
     let i ← if A == B then pure 0 else
       match run.lines.findIdx? (·.fml == B) with

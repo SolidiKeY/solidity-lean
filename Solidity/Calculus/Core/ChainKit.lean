@@ -765,15 +765,14 @@ theorem Fml.ViaE.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Sol
 
 /-- **A chain past the program, closed**: the bridge of `Fml.ViaE.valid` is
 `Proves.close` at the last scoped line, whose side conditions the kernel
-decides (`Fml.closableB`: no modality left, box updates only, a hidden
-binder's name avoided). -/
+decides (`Fml.closableB`: no modality left, box updates only; a hidden
+binder's name avoids the empty context's). -/
 theorem Fml.ViaE.valid_close {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.Fml C}
     {rs : List (Solidity.Link C × Solidity.Fml C)} (v : Fml.ViaE φ ws L rs)
     (h : ∀ τ, Solidity.holds τ (Solidity.Fml.Via.last L rs))
-    (hc : (Fml.Via.last φ ws).closableB [] = true := by first | rfl | decide)
-    (hB : Solidity.Avoids (Fml.Via.last φ ws).bindNames [] := by decide) : Valid φ :=
+    (hc : (Fml.Via.last φ ws).closableB [] = true := by first | rfl | decide) : Valid φ :=
   v.valid (fun he => Proves.valid (R := .all) (Proves.close (Γ₀ := []) (H := .nil) [] rfl
-    List.nodup_nil he hc hB)) h
+    List.nodup_nil he hc fun _ _ h => nomatch h)) h
 
 /-! ## Composing: `~~>`, segments, `calc`
 
@@ -836,10 +835,10 @@ theorem Fml.LeadsE.valid {φ Z : Fml C []} {L : Solidity.Fml C} (h : Fml.LeadsE 
 /-- `~~>` past the program, the bridge `Proves.close` at its last scoped line
 (`Fml.ViaE.valid_close`'s). -/
 theorem Fml.LeadsE.valid_close {φ Z : Fml C []} {L : Solidity.Fml C} (h : Fml.LeadsE φ Z L)
-    (hL : ∀ τ, Solidity.holds τ L) (hc : Z.closableB [] = true := by first | rfl | decide)
-    (hB : Solidity.Avoids Z.bindNames [] := by decide) : Valid φ :=
+    (hL : ∀ τ, Solidity.holds τ L) (hc : Z.closableB [] = true := by first | rfl | decide) :
+    Valid φ :=
   h.valid (fun he => Proves.valid (R := .all) (Proves.close (Γ₀ := []) (H := .nil) [] rfl
-    List.nodup_nil he hc hB)) hL
+    List.nodup_nil he hc fun _ _ h => nomatch h)) hL
 
 /-! `calc` chains `~>`, `~*>`, `~[r]~>` and the scoped merges; the result is
 a derivation `~*>` where every link is a step, `~~>` otherwise. -/

@@ -162,7 +162,13 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
         if Γ₀.length < Γ'.length then
           return .modal m Q (.drop h .nil) (← elabFmlC taken posts φ Γ₀)
       pure (.modal m Q .nil (← elabFmlC taken posts φ Γ'))) (newBinders Γe Γh) Γ
-  | .lean i, _ => pure (Fml.slotC i)
+  | .lean i, Γ => do
+    -- a postcondition under a connective: the fresh locals dropped in front of it
+    if posts then
+      let ⟨Γ₀, h⟩ := NCtx.dropFresh Γ.length Γ
+      if Γ₀.length < Γ.length then
+        return .upd .box (Upd.nil.drop h) (Fml.slotC i)
+    pure (Fml.slotC i)
   | .decl ds φ, Γ => inScope do
     let ls ← whereLocals C ds
     for (x, t) in ls do
