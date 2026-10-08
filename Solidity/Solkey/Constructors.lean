@@ -56,9 +56,10 @@ syntax, `N.f.core` checked by the kernel. -/
 #guard_msgs in solc_scoped Solkey.InitGap
 
 /-! `EtherWallet`'s obligations, scoped (`solc_scoped_problems`): each
-program resolved in its parameters' context, `N.f.problem.core`. -/
+program resolved in its parameters' context, `N.f.problem.core`, checked to
+erase to today's. -/
 
-/-- info: 1 obligation declared scoped -/
+/-- info: 1 obligation declared scoped, 1 erasing to its legacy statement -/
 #guard_msgs in solc_scoped_problems Solkey.EtherWallet
 
 -- the scoped obligation erases to today's
