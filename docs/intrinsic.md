@@ -1117,6 +1117,60 @@ erasure asks nothing of `bool` locals.  `Examples/Tactics/CorePrint.lean`
 lost its `nofun` cover goal; `Calculus/Core/Fml.lean`'s `Premise.inv`
 docstring still names `Premise.cover` (not this lane's file).
 
+### W2 lane `chains` (`w2-chains`, 2026-10-08)
+
+**The relations** (`Calculus/Core/ChainKit.lean`): `φ ~> ψ` is
+`φ.step = some ψ` (`Fml.OneStep`), `φ ~*> ψ` a list of them (`Fml.Steps`,
+a `Type`, so a chain ending `~*> _` is a `def`), and `φ ~[r]~> ψ`
+(`Fml.StepBy`) the step with the statement it fires on
+(`Fml.stepFocusR`, the recursor, whose line is `Fml.stepR`'s), labelled by
+a `Rule` derivation of the constructor `r` on that statement
+(`StepRule`).  Each is sound as `Fml.Leads φ ψ` (`ψ` holds ⇒ `φ` holds), and
+a chain (`Fml.Via`) gives `Valid φ` from `Valid` of its last line.
+
+**Past the program** a chain goes on from the erasure of its last scoped
+line (`Fml.ViaE`: the scoped links, `(last).erase [] = L`, then
+`Update.lean`'s `Fml.Via L rs`), so every rewrite of
+`Calculus/ChainRewrites.lean` is a link unchanged; a postcondition
+`φ : Core.Post C Γ` reads there as `↑(φ.erase ns)` (`Post.erase`, its names
+checked to name no fresh variable).  `Fml.ViaE.valid` takes the bridge
+(erasure valid ⇒ scoped line valid) as a premise: that direction is
+`sound`'s `holds_of_erase`/`Proves.close`, not this lane's.
+
+**`sol_chain`** (`Calculus/Core/Chains.lean`) runs the strategy as
+compiled code (`Fml.chainLines`: postconditions in slots, a variable
+modality run as both), checks each written line against the computed one by
+its erasure (`matchWritten`: the computed line keeps the scope ends and the
+hidden binder its print does not show), and proves each step by kernel
+`rfl`, along the line's connectives where a postcondition stands in the way,
+by `Modality.casesOn` where a rule reads a variable modality.  A program
+running into a block's end is written `⟨[ s; } ω ]⟩ φ` (and `⟨ … } … ⟩`,
+`[ … } … ]`, `Core.Delab`'s `core_item`), read without the `}`.
+
+**The commands**: `#derivation`, `#chain`, `#chain_rest`
+(`Calculus/Core/ChainGen.lean`) and `#last_line`
+(`Calculus/Core/LastLine.lean`) dispatch on a scoped first line and reuse
+`Calculus/ChainGen.lean`'s grouping and rewrite search and
+`Calculus/LastLine.lean`'s check on the erasure.  `#chain` writes each line
+in the first of `cdl![m]{}`, `cdl!{}`, `cdl![.box]{}`, `cdl![.diamond]{}`
+that reads back as it; a generated scoped chain is one declaration (no
+segments).  `Examples/Tactics/CoreChains.lean` pins them, with three
+generated chains pasted back and checked, and a chain proving `Core.Valid`.
+
+**Speed**: on a branch (`if … else …`, ten steps) and a struct copy, a
+scoped `sol_chain` costs about what today's does (47 ms tactic + ~130 ms
+kernel against 72 ms + ~150 ms).
+
+Left:
+* an update of `a == b` (or `!=`, `*`, …) prints as an escape
+  (`‹Tm.app2 …›`): `RuleSyntax.lean`'s `ppUpdElem?`/`termOpSym?` write
+  `+ - /` and the four comparisons only, today's printer too (not this
+  lane's file); a generated chain through one cannot be pasted;
+* the bridge for `Fml.ViaE.valid` (`sound`), and a `Valid` proof of a
+  scoped formula through a chain past the program, waits for it;
+* the chain notation reads `cdl!`; reading `dl!` is W2 `tree`'s flip
+  switch, and the 14 worked-chain files move in W3 `chains`.
+
 ## W3 — the flip, file by file (4 lanes)
 Each lane adds the `open scoped` line to the files it owns and re-pins them.
 

@@ -28,6 +28,8 @@ open Lean Elab Term Meta
 stopped early, if it did. -/
 structure Gen where
   splice : Splice
+  /-- The erasures of the first line. -/
+  erased : Array Expr
   steps : Array (String × Expr × Array Expr)
   rewrites : Array (String × Expr)
   stop : Option MessageData
@@ -46,17 +48,18 @@ def generate (φ : Expr) : TermElabM Gen := do
       catch _ => pure ""
     steps := steps.push (n, l.fml, l.erased)
   if run.stuck then
-    return { splice := run.splice, steps, rewrites := #[], stop := some (stuckNote run) }
+    return { splice := run.splice, erased := run.erased, steps, rewrites := #[],
+             stop := some (stuckNote run) }
   if steps.size ≥ runFuel then
-    return { splice := run.splice, steps, rewrites := #[],
+    return { splice := run.splice, erased := run.erased, steps, rewrites := #[],
              stop := some m!"the strategy ran {runFuel} steps: go on from the last line" }
   unless (← whnfR Γ).isAppOf ``List.nil do
-    return { splice := run.splice, steps, rewrites := #[], stop := none }
+    return { splice := run.splice, erased := run.erased, steps, rewrites := #[], stop := none }
   let erased := (steps.back?.map (·.2.2)).getD run.erased
   let L ← erasedLine run.splice erased
   let C := (← lineType φ).1
   let (rws, stop, _) ← Solidity.Chain.searchRewritesUsing C L none
-  return { splice := run.splice, steps, rewrites := rws.getD #[], stop }
+  return { splice := run.splice, erased := run.erased, steps, rewrites := rws.getD #[], stop }
 
 /-- The links of a generated chain: the strategy's steps grouped
 (`groupSteps`), then one `~[r]~>` per rewrite; each with its line, and
@@ -105,11 +108,10 @@ def lineText (sp : Splice) (C e : Expr) (isScoped : Bool) (erased : Array Expr) 
 /-- The declaration stating a generated chain from `φ`. -/
 def Gen.decl (g : Gen) (φ : Expr) (name : String := "chain") : TermElabM (Array String) := do
   let (C, _) ← lineType φ
-  let run ← runChain φ
   let erasedOf (l : Expr) : Array Expr :=
     ((g.steps.find? (·.2.1 == l)).map (·.2.2)).getD #[]
   let ind (ls : Array String) : Array String := ls.map ("    " ++ ·)
-  let mut out := ind (← lineText g.splice C φ true run.erased)
+  let mut out := ind (← lineText g.splice C φ true g.erased)
   for (arrow, l, isScoped) in g.links do
     let line ← lineText g.splice C l isScoped (erasedOf l)
     out := out ++ ind (#[s!"{arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("  " ++ ·))
