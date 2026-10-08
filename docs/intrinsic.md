@@ -3900,6 +3900,13 @@ recorded deviation (a program's own fresh-shaped local); 31 is interim:
 work. ProofTree's gate: the tree lane's chain examples move to
 `Tactics/CoreChains`, so the file meets its own limit.
 
+**Lead, 2026-10-09 (3):** proposals 33–53 are approved. 36 is to be
+implemented (the scoped step rules read the rule set; `solkey_eq_calculus`
+and `solkey_lt_calculus` restated). 40 and 50 get their own lane next
+(M3's scoped run, `TypedRunErase` and `Halt.stuck` deleted, the update arms
+proved against the typed run directly). 53's move of `tr`/`withTwins`
+below the delaborators is done before W5's rename.
+
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
 **Result.**  `Stmt.tsound C : Stmt.TSound C` at every contract, and
