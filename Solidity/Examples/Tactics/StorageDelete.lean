@@ -1,5 +1,8 @@
 import Solidity.Calculus.Close
 import Solidity.Calculus.Rewrite
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # `delete`, rule by rule
@@ -37,6 +40,8 @@ namespace Solidity.Examples.Tactics.StorageDelete
 open Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## Example 15: `delete alice.account;` — a simple receiver
 
@@ -147,69 +152,6 @@ box (`Proves.updRw`).  Then the update is applied to the goal and dropped
 rule of the calculus, so none of them waits for the program to be gone
 (`deleteFrameMid_theory`). -/
 
-open Theory Theory.StValue in
-/-- `alice.account.balance = 5; delete alice.account.balance;` read two
-members down: `find_delAt_same` reads the delete, `find_copyTo_same` and
-`copyVal` the write under it, and `delValueDefault`/`primDefault` reset the
-word, in one step, since `delValue (findSt …)` alone is no term. -/
-theorem deleteReadDeep_theory :
-    ⊢ dl!{ [ alice.account.balance = 5; delete alice.account.balance;
-      uint x = alice.account.balance; ] x == 0 } := by
-  sol_derive
-  -- dl{ { se1 := 5 }, { sp1 := alice.account }, { storage := save(storage, sp1.balance, se1) },
-  --     { sp2 := alice.account }, { storage := delAt(storage, sp2.balance) },
-  --     { sp3 := alice.account }, { x := find(storage, sp3.balance) } ⟹ x = 0 }
-  refine Proves.merge rfl ?_
-  refine Proves.mergeStorage ?_
-  refine Proves.merge rfl ?_
-  refine Proves.mergeStorage ?_
-  refine Proves.merge rfl ?_
-  refine Proves.merge rfl ?_
-  -- dl{ { se1 := 5 ‖ … ‖ x := find(delAt(save(storage, alice.account.balance, 5),
-  --       alice.account.balance), alice.account.balance) } ⟹ x = 0 }
-  sol_rw [find_delAt_same, find_copyTo_same, copyVal, delValueDefault, primDefault]
-  -- dl{ { se1 := 5 ‖ … ‖ x := 0 } ⟹ x = 0 }
-  sol_apply_upd
-  -- dl{ ⟹ 0 = 0 }
-  exact Proves.eqDClose
-
-open Theory Theory.StValue in
-/-- `bob.age = 7; delete alice;` read at `bob.age`: the delete is off the
-path (`find_delAt_frame`, its `diverges` decided on the two literal paths),
-and the write is read back (`find_copyTo_same`, `copyVal`). -/
-theorem deleteFrame_theory :
-    ⊢ dl!{ [ bob.age = 7; delete alice; uint x = bob.age; ] x == 7 } := by
-  sol_derive
-  -- dl{ { storage := save(storage, bob.age, 7) }, { storage := delAt(storage, alice) },
-  --     { x := find(storage, bob.age) } ⟹ x = 7 }
-  refine Proves.mergeStorage ?_
-  refine Proves.mergeStorage ?_
-  sol_rw [find_delAt_frame, find_copyTo_same, copyVal]
-  -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹ x = 7 }
-  sol_apply_upd
-  exact Proves.eqDClose
-
-open Theory Theory.StValue in
-/-- The same read, rewritten while `x = x + 1;` is still to run: the merge
-and the rewrite are rules of the calculus, not steps after it. -/
-theorem deleteFrameMid_theory :
-    ⊢ dl!{ [ bob.age = 7; delete alice; uint x = bob.age; x = x + 1; ] x == 8 } := by
-  apply update .storageFieldWriteSave
-  apply update .storageRootDelete
-  apply unfold .localValueDeclInitDrop
-  apply update .storageFieldReadFind
-  refine Proves.mergeStorage ?_
-  refine Proves.mergeStorage ?_
-  sol_rw [find_delAt_frame, find_copyTo_same, copyVal]
-  -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹
-  --     [ x = x + 1; ] x = 8 }
-  sol_derive
-  sol_apply_upd
-  sol_apply_upd
-  -- dl{ ⟹ 7 + 1 = 8 }
-  refine close ?_
-  sol_close
-
 /-- `alice.account.balance = 7; alice.age = 30; delete alice.account;
 uint a = alice.age;` — `alice.age` parts ways with `alice.account` (at `age`
 against `account`), so it keeps `30`. -/
@@ -231,15 +173,6 @@ theorem deleteThenReadBeside :
   refine close ?_
   sol_symex
   sol_close
-
-/-- The storage in which `total` holds a `bool`. -/
-def boolTotal : State := { State.exampleStore with storage := [("total", .bool true)] }
-
-/-- `delete total;` then `total == 0` is **not** valid: `⊨` ranges over every
-state, and where `total` holds a `bool` the delete resets it to `false`.  A
-write first fixes what is there (`deleteThenRead`). -/
-theorem deleteRootUnknown : ¬ (⊨ dl!{ [ delete total; ] total == 0 }) :=
-  fun h => by obtain ⟨x, hx, hy⟩ := holds_eqD_iff.1 (h boolTotal).1; cases hx; cases hy
 
 /-! ### Below a deleted struct, from the initial store
 
@@ -309,6 +242,8 @@ section Fixed
 
 local instance : InContract := ⟨TestSuite⟩
 
+open scoped Solidity.Core.Surface
+
 /-! From the initial store, solkey's `testFixedArrayDeleteKeepsLength`,
 `testFixedStructArrayDeleteResetsElements`,
 `testStructWithFixedArrayDeleteKeepsLength`, `testStructWithFixedArrayCopy`
@@ -331,5 +266,89 @@ and `testFixedMappingArrayDeleteKeepsEntries`: each run ends normally. -/
     delete fixedMaps; assert(fixedMaps[1][2] == 5); })).isOk]
 
 end Fixed
+
+end Solidity.Examples.Tactics.StorageDelete
+
+/-! ## Read without the switch
+
+Today's sequent rules on updates (`merge`, `mergeStorage`, the Theory's laws), which the scoped sequent does not have (`Calculus/Core/Proves.lean`: the program rules, `close` on the erasure), and a storage holding a `bool` where a `uint` is declared, which only today's untyped storage holds. -/
+
+namespace Solidity.Examples.Tactics.StorageDelete
+
+open Proves Semantics
+
+local instance : InContract := ⟨StandardExample⟩
+
+open Theory Theory.StValue in
+/-- `alice.account.balance = 5; delete alice.account.balance;` read two
+members down: `find_delAt_same` reads the delete, `find_copyTo_same` and
+`copyVal` the write under it, and `delValueDefault`/`primDefault` reset the
+word, in one step, since `delValue (findSt …)` alone is no term. -/
+theorem deleteReadDeep_theory :
+    ⊢ dl!{ [ alice.account.balance = 5; delete alice.account.balance;
+      uint x = alice.account.balance; ] x == 0 } := by
+  sol_derive
+  -- dl{ { se1 := 5 }, { sp1 := alice.account }, { storage := save(storage, sp1.balance, se1) },
+  --     { sp2 := alice.account }, { storage := delAt(storage, sp2.balance) },
+  --     { sp3 := alice.account }, { x := find(storage, sp3.balance) } ⟹ x = 0 }
+  refine Proves.merge rfl ?_
+  refine Proves.mergeStorage ?_
+  refine Proves.merge rfl ?_
+  refine Proves.mergeStorage ?_
+  refine Proves.merge rfl ?_
+  refine Proves.merge rfl ?_
+  -- dl{ { se1 := 5 ‖ … ‖ x := find(delAt(save(storage, alice.account.balance, 5),
+  --       alice.account.balance), alice.account.balance) } ⟹ x = 0 }
+  sol_rw [find_delAt_same, find_copyTo_same, copyVal, delValueDefault, primDefault]
+  -- dl{ { se1 := 5 ‖ … ‖ x := 0 } ⟹ x = 0 }
+  sol_apply_upd
+  -- dl{ ⟹ 0 = 0 }
+  exact Proves.eqDClose
+
+open Theory Theory.StValue in
+/-- `bob.age = 7; delete alice;` read at `bob.age`: the delete is off the
+path (`find_delAt_frame`, its `diverges` decided on the two literal paths),
+and the write is read back (`find_copyTo_same`, `copyVal`). -/
+theorem deleteFrame_theory :
+    ⊢ dl!{ [ bob.age = 7; delete alice; uint x = bob.age; ] x == 7 } := by
+  sol_derive
+  -- dl{ { storage := save(storage, bob.age, 7) }, { storage := delAt(storage, alice) },
+  --     { x := find(storage, bob.age) } ⟹ x = 7 }
+  refine Proves.mergeStorage ?_
+  refine Proves.mergeStorage ?_
+  sol_rw [find_delAt_frame, find_copyTo_same, copyVal]
+  -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹ x = 7 }
+  sol_apply_upd
+  exact Proves.eqDClose
+
+open Theory Theory.StValue in
+/-- The same read, rewritten while `x = x + 1;` is still to run: the merge
+and the rewrite are rules of the calculus, not steps after it. -/
+theorem deleteFrameMid_theory :
+    ⊢ dl!{ [ bob.age = 7; delete alice; uint x = bob.age; x = x + 1; ] x == 8 } := by
+  apply update .storageFieldWriteSave
+  apply update .storageRootDelete
+  apply unfold .localValueDeclInitDrop
+  apply update .storageFieldReadFind
+  refine Proves.mergeStorage ?_
+  refine Proves.mergeStorage ?_
+  sol_rw [find_delAt_frame, find_copyTo_same, copyVal]
+  -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹
+  --     [ x = x + 1; ] x = 8 }
+  sol_derive
+  sol_apply_upd
+  sol_apply_upd
+  -- dl{ ⟹ 7 + 1 = 8 }
+  refine close ?_
+  sol_close
+
+/-- The storage in which `total` holds a `bool`. -/
+def boolTotal : State := { State.exampleStore with storage := [("total", .bool true)] }
+
+/-- `delete total;` then `total == 0` is **not** valid: `⊨` ranges over every
+state, and where `total` holds a `bool` the delete resets it to `false`.  A
+write first fixes what is there (`deleteThenRead`). -/
+theorem deleteRootUnknown : ¬ (⊨ dl!{ [ delete total; ] total == 0 }) :=
+  fun h => by obtain ⟨x, hx, hy⟩ := holds_eqD_iff.1 (h boolTotal).1; cases hx; cases hy
 
 end Solidity.Examples.Tactics.StorageDelete
