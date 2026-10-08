@@ -552,7 +552,7 @@ not.
 - **Words in range.**  `wt` now asks `SVal.wordsB` too (see above); a
   diamond such as `total = total + 0` from `total = -1` reverted, which made
   its obligation false where solkey's holds.
-- **One copy each.**  `nodupKeysB` and `Ty.numericKey` moved to `AST.lean`,
+- **One copy each.**  `nodupKeysB` and `Ty.numericKey` (now `Ty.isKey`) moved to `AST.lean`,
   below both the typing modules and `Semantics/WellFormed.lean`, which
   had copies; `Frontend/Import.lean`'s `paramTy?` is the one reading of a
   parameter type, for `paramCtx` and for `solc_problems`, which now warns

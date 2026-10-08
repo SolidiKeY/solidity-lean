@@ -1607,6 +1607,94 @@ questions (W2 section):
     `bool` as 0/1, as solc and the typed run do; `bridgeOk` drops its
     bool-key exclusion.
 
+### Decisions 12–14, implemented (2026-10-08, on `intrinsic`)
+
+Three commits, low modules first (14, 13, 12).  The four-target build
+(`Solidity`, `solkeycheck`, `SolidityCorpus`, `SolkeyTestSuite`, the last two
+in `defaultTargets` for the run only): green, 321 jobs, no pin moved.  No new
+`sorry`, `axiom` or `maxHeartbeats`; `dups.py` (but the known `as`
+false positive), `check-orphans` (but the git-excluded `Scratch/`),
+`check-doc-paths` and `check-rule-text` clean.
+
+**14, a `bool` mapping key** (`901684c`).  The hash is in the lowering, not
+in `Update.lean`'s `at`.  The interpreters read an index at its key type
+(`Value.keyAt k`: a `bool` as `0`/`1`, a number as itself, a value of the
+other kind stuck), in `Semantics.lean`'s and M3's `Loc.resolve`; the typed
+run already hashed it (`PrimTy.key`).  A rule's term writes the hash:
+`m[b]` lowers to `at(m, b ? 1 : 0)` (`Term.keyAt`, `Tm.keyAt`, both
+`Loc.lower`s), and the rule table names it `Simple.keyLower`/`Val.keyLower`
+(`RuleSyntax.lean`'s `schemaKey`), which prints as the index, so no rule
+text or pin moved.  So `at` still reads a number (`Value.asInt`), as the
+solc frontend already wrote a `bool` key (`b ? 1 : 0`).
+*Why not in `at` itself, as the decision's text has it*: the untyped
+closer reads formulas over untyped states, where a `uint` local may hold a
+`bool`.  With `at` hashing a `bool`, `a != b → [ m[a] = 1; m[b] = 2; ]
+m[a] == 1` is no longer valid there (`a = true`, `b = 1` hit one slot), and
+`sol_close` failed on every such leaf (`CloseTests`, `Notation.twoKeys`,
+`Tour`, and the TestSuite's distinct-key proofs would follow).
+`Prog.bridgeOk` keeps only the copy at a `BadDup` type (`Src`, `NewLhs`,
+`assignFromMem`); the path and value `bridgeOk`s and their hypotheses are
+gone from `TypedRunErase.lean`, `StraightRun.lean`, `Constructibility.lean`.
+`PrimTy.keyAt_erase_key` replaces `asInt_erase_key`.  A storage keeps
+entries at a `bool` key: `Ty.numericKey` is `Ty.isKey` (a reference key
+alone has none), `SVal.fits` takes a `bool` key `0`/`1` (`PrimTy.keyFits`),
+the builder writes it (`keyLit`), `Ty.keyFitsB` (`wt(storage)`) likewise,
+and `bool_key_reachable` replaces `bool_key_not_reachable`.
+
+**13, array lengths** (`9dcc754`).  `SVal.array {n} (elems : SVec E n)
+(shadow : SList E) (hn : n < 2 ^ 256)`: the live elements are a vector of
+their length, the bound a field (a mutual inductive cannot state it of an
+`SList`, and a `Prop` family cannot join the block).  The functions stay
+folds over the families (`Fold.array` takes `SVec`, `ArrView` is the
+array's `Shape`); `overlay` takes the old elements as a list
+(`SVec.overlayOn`), `beq` compares a vector with a list (`SVec.beqL`),
+`pop` keeps `dropLast`.  A memory array is `{l // l.length < 2 ^ 256}`
+(`MObj`), so `Storage.len` and `Heap.lenU` return a `uint` (`lenU`) and
+`lenT` is gone: a length read never diverges.  `newArrT` takes the `uint`.
+*A push at the bound diverges, not reverts* (`Storage.full`,
+`TRun.push`, `ARhs.evalT`): a typed revert must be the untyped one's
+(`TRes.Agrees`), and the untyped push has no bound; making it revert breaks
+the untyped calculus's diamond obligations with a push (331 of the
+TestSuite's 452 functions are diamonds), since a storage with `2^256 - 1`
+elements is reachable.  `diverge` agrees with any untyped outcome, so the
+bridge needs nothing; `docs/solc-alignment.md`, "Array lengths", says so.
+The straight programs' bridge (`StraightRun.lean`) now asks that every push
+of the scoped run land below the bound (`Prog.pushesShort`), and the
+builder proves it of its own pushes (`pushes_short`, the run lemmas' fourth
+conjunct), with `SVal.fits` strict for a dynamic array (`elems + shadow <
+2^256`).  The compiler's `push_ok` takes the bound from `Lmax`.
+
+**12, the hidden binder** (`daf67a5`).  `Fml.bind m x t φ`, and
+`Hyps.bind H m x t`: `holds`/`tholds` read it as `m.forallB` (universal
+under the box; under the diamond a value of the type first, then
+universal).  `Premise.fml` passes the rule's modality; the binders the
+notation and the specs put in front (`withBinds`, `Fml.closeN`) are box
+binders, universal as before.  M3's types are all inhabited
+(`LTy.denote_nonempty`, `holds_bind_intro`), so M3's soundness is
+unchanged.  Over the typed state a memory type may be empty: `Hyps.boxOnly`
+and `Fml.Leaf` (so `closableB`, `TClosable`) accept a diamond binder only
+at an inhabited type (`LTy.inhabited`, `LTy.tdenote_nonempty`).
+`Premise.tsound_bind_all` is the arm's shape: a statement that runs as `P`
+from every value pushed is sound, the value from the premise under the
+diamond, from the type under the box.  Printers drop `m` (`Delab`,
+`Print`, `Quote` carry it), so no pin moved.
+
+**Left for the lead.**
+1. *A push at the bound under the typed diamond.*  `⟨ b.push(x); ⟩ true`
+   is false over the typed state when `b` holds `2^256 - 1` elements, and
+   `wt(storage)` allows that storage.  After the W3 flip a TestSuite
+   diamond obligation whose function pushes is then false as stated, where
+   solkey (unbounded arrays) proves it.
+   Options: a diamond that reads out of gas as KeY does (no bound), a `wt`
+   with a smaller length bound, or a precondition on the obligations.
+2. *`Stmt.TSound` of the push rules at the bound.*  The rule's update
+   (`Update.lean`'s unbounded `pushAt`) ends in a storage of `2^256`
+   elements, which no typed state erases to, so `tholds` reads the update
+   vacuously true while the typed run diverges.  Under the diamond the arm
+   is false there unless the update term fails at the bound too (which
+   brings back item 1 in the untyped world) or `tholds`' update reading
+   asks for a typed state the update ends in.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
