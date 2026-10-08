@@ -399,10 +399,9 @@ info: Solidity.Core.LeanTaclet.whileInvariantDiamond : ∀ {C : Contract} {k : N
   {xs : List ((t : Core.LTy) × Core.Idx Γ t)} {hv : Bool} {cond inv : Core.Val C Γ PrimTy.bool}
   {dec : Core.Val C Γ PrimTy.uint},
   dl[Core.LeanTaclet C k]{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
-    "invariant initially valid": inv = true ; "invariant preserved and used": {
-      anon(‹(Core.Prog.wk Core.up body).snd.2›) } (inv = true → { ie := dec ‖ se := cond } (se = true ⟹ ⟨[
-      ‹(Core.Prog.wk Core.up body).snd.2› ]⟩ (inv = true ∧ { se := cond } (se = true → 0 <= dec ∧ dec < ie)) ;
-      se = false ⟹ ⟨[ ]⟩)) }
+    "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
+      { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
+      (inv = true ∧ { se := cond } (se = true → 0 <= dec ∧ dec < ie)) ; se = false ⟹ ⟨[ ]⟩)) }
 solkey: whileInvariantDiamond (loop_inv), past the pin
 printed: none (a solkey taclet not printed)
 sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)

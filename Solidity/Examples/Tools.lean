@@ -220,7 +220,7 @@ nor `ic` (calls whose arguments are all simple, `functionBodyExpand`'s and
 info: Solidity.Core.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {f : Name}
   {ps : Core.Ctx} {args : Core.Args C Γ ps} {rs Γ' : Core.Ctx} {ret : Core.CallRet Γ rs Γ'} {Γf : Core.Ctx}
   {body : Core.Prog C (rs ++ ps) Γf} {p : PrimTy} {v : Core.Val C Γ p} {as' : Core.Args C (Core.LTy.val p :: Γ) ps},
-  Core.LeanTaclet C k m (Core.Stmt.call f args ret body) (Core.Premise.argCapture k f p v as' ret body)
+  dl[Core.LeanTaclet C k]{ ⟨[ ‹Core.Stmt.call f args ret body›; ]⟩ ⇝ ⟨[ T se = v; ‹Core.Stmt.call f as' ret body›; ]⟩ }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
