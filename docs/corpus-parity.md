@@ -51,11 +51,10 @@ the contract's initial store) and their statuses are explained in
 their verdicts:
 
 - **proved**: a theorem, decided by the kernel;
-- **evaluated**: the run ends normally, but it needs a well-founded
-  definition the kernel does not unfold (a struct or `push()` default,
-  the memory-to-storage copy), so it is pinned by `#eval`;
-- **open**: solkey proves it, the interpreter's run from the initial
-  store does not end normally (pinned by `#eval`);
+- **evaluated**: the typed run ends normally, but the kernel does not
+  decide it, so it is pinned by `#eval`;
+- **open**: solkey proves it, the typed run from the initial state does
+  not end normally (pinned by `#eval`);
 - **unsupported**: no obligation, for the reason below;
 - **unported**: a `.key` problem the removed untyped layer had
   hand-written, not yet re-derived.
@@ -65,14 +64,14 @@ their verdicts:
 | Contract | proved | evaluated | open | unsupported | unported |
 |---|---:|---:|---:|---:|---:|
 | SolcExpressions | 13 | 0 | 0 | 7 | 0 |
-| SolcStructs | 5 | 3 | 0 | 3 | 0 |
-| SolcArrays | 1 | 4 | 0 | 7 | 0 |
-| SolcMemory | 3 | 6 | 0 | 2 | 0 |
-| SolcMappings | 7 | 1 | 0 | 1 | 0 |
-| SolcControlFlow | 6 | 2 | 0 | 2 | 0 |
+| SolcStructs | 8 | 0 | 0 | 3 | 0 |
+| SolcArrays | 5 | 0 | 0 | 7 | 0 |
+| SolcMemory | 9 | 0 | 0 | 2 | 0 |
+| SolcMappings | 8 | 0 | 0 | 1 | 0 |
+| SolcControlFlow | 8 | 0 | 0 | 2 | 0 |
 | Net | 4 | 0 | 0 | 23 | 0 |
 | Rules | 0 | 0 | 0 | 8 | 34 |
-| **all** | **39** | **16** | **0** | **53** | **34** |
+| **all** | **55** | **0** | **0** | **53** | **34** |
 
 ### Open
 

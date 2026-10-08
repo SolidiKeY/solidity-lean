@@ -465,30 +465,30 @@ solc	SolcStructs	deleteStructInMapping	proved
 solc	SolcStructs	deleteEntryKeepsOtherKeys	proved		
 solc	SolcStructs	recursiveStructThroughAliases	unsupported		field-name overloading: Depth0.recursive and Depth1.recursive have different types, and Semantics.structDef is one global name->fields table
 solc	SolcStructs	nestedRecursiveStructSetAndCheck	unsupported		field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint)
-solc	SolcStructs	structCopyViaMemoryLocal	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcStructs	structCopyViaMemoryLocal	proved		
 solc	SolcStructs	structCopyFromStorageIsDeep	proved		
-solc	SolcStructs	structArrayElementCopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-solc	SolcStructs	structArrayElementCopyMemberwise	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcStructs	structArrayElementCopy	proved		
+solc	SolcStructs	structArrayElementCopyMemberwise	proved		
 solc	SolcArrays	pushLvalueAssignsAndGrows	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
 solc	SolcArrays	pushWithArgument	unsupported		`.length` is not a program expression
 solc	SolcArrays	pushThenPopRestoresLength	unsupported		`.length` is not a program expression
 solc	SolcArrays	pushEmptyGrowsLength	unsupported		`.length` is not a program expression
-solc	SolcArrays	popThenPushSlotIsZeroed	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-solc	SolcArrays	pushedSlotIsZeroed	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcArrays	popThenPushSlotIsZeroed	proved		
+solc	SolcArrays	pushedSlotIsZeroed	proved		
 solc	SolcArrays	storageIndexReadWrite	proved		
 solc	SolcArrays	storageArrayAliasWritesThrough	unsupported		`.length` is not a program expression
 solc	SolcArrays	storageStructArrayAliasWritesThrough	unsupported		`.length` is not a program expression
-solc	SolcArrays	deleteArrayElementOfStructs	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-solc	SolcArrays	matrixElementWriteRead	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcArrays	deleteArrayElementOfStructs	proved		
+solc	SolcArrays	matrixElementWriteRead	proved		
 solc	SolcArrays	lengthTracksPushAndPop	unsupported		`.length` is not a program expression
-solc	SolcMemory	memoryStructDefaultsToZero	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-solc	SolcMemory	memoryStructWriteRead	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-solc	SolcMemory	storageArrayElementCopiedIntoMemory	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMemory	memoryStructDefaultsToZero	proved		
+solc	SolcMemory	memoryStructWriteRead	proved		
+solc	SolcMemory	storageArrayElementCopiedIntoMemory	proved		
 solc	SolcMemory	nestedStorageStructToMemory	proved		
-solc	SolcMemory	memoryStructToStorage	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMemory	memoryStructToStorage	proved		
 solc	SolcMemory	storageToMemoryCopyIsDeep	proved		
-solc	SolcMemory	memoryToStorageCopyIsDeep	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
-solc	SolcMemory	memoryAliasIsNotACopy	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMemory	memoryToStorageCopyIsDeep	proved		
+solc	SolcMemory	memoryAliasIsNotACopy	proved		
 solc	SolcMemory	memoryArrayInStruct	unsupported		`new T[](n)` array allocation is not in the fragment
 solc	SolcMemory	deleteMemoryArrayElement	unsupported		`new T[](n)` array allocation is not in the fragment
 solc	SolcMemory	storageArrayCopiedIntoMemory	proved		
@@ -499,15 +499,15 @@ solc	SolcMappings	copySubstructureIntoMapping	proved
 solc	SolcMappings	copySubstructureFromMapping	proved		
 solc	SolcMappings	mappingKeysAreIndependent	proved		
 solc	SolcMappings	deleteStructKeepsMappingMember	proved		
-solc	SolcMappings	arrayElementsToMapping	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcMappings	arrayElementsToMapping	proved		
 solc	SolcMappings	arrayElementsToMappingElementwise	unsupported		`.length` is not a program expression
 solc	SolcControlFlow	doWhileFalseRunsBodyOnce	proved		
 solc	SolcControlFlow	forLoopUnrolledOverArray	proved		
 solc	SolcControlFlow	sequentialAssignmentDoesNotSwap	proved		
-solc	SolcControlFlow	swapViaTemporary	evaluated		the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcControlFlow	swapViaTemporary	proved		
 solc	SolcControlFlow	ternarySelectsFirstMemorySource	unsupported	concretized: solkey proves this for all parameters; ported at cond = 1	Solidity elaboration failed: a conditional of reference type
 solc	SolcControlFlow	ternaryIntoMemoryTarget	unsupported	concretized: solkey proves this for all parameters; ported at cond = 1	Solidity elaboration failed: a conditional of reference type
-solc	SolcControlFlow	ifElseSelectsMemorySource	evaluated	concretized: solkey proves this for all parameters; ported at cond = 0	the run needs a well-founded definition the kernel does not unfold (a struct default: `defaultForTy`, or the memory-to-storage copy `copyMToSt`); pinned by `#eval`
+solc	SolcControlFlow	ifElseSelectsMemorySource	proved	concretized: solkey proves this for all parameters; ported at cond = 0	
 solc	SolcControlFlow	ternarySelectsValueByFlag	proved	concretized: solkey proves this for all parameters; ported at cond = 0	
 solc	SolcControlFlow	chainedIfsSelectLastMatch	proved		
 solc	SolcControlFlow	nestedIfElseSelectsBranch	proved	concretized: solkey proves this for all parameters; ported at x = 500	
