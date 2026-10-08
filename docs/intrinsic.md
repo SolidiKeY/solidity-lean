@@ -1523,7 +1523,7 @@ Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
 and `Proves.close` takes no leaf behind a diamond update (`Fml.closableB`
 asks `m = .box`; W2 `sound`, "Also left, at the flip").  330 of the 437
 obligations are diamonds, and every `Derived` module holds some (box ones per
-module: 7, 3, 21, 12, 0, 8, 29, 14, 1, 0, —, 7, 0, 5; Derived9–11: 1 of 91),
+module: 7, 3, 21, 12, 0, 8, 29, 14, 1, 0, 0, 7, 0, 5; Derived9–11: 1 of 91),
 so no `Derived` module can flip with its text unchanged.  What landed is
 everything the flip needs but that:
 
