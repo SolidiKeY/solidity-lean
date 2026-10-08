@@ -2620,9 +2620,26 @@ same change to `Proves.close` (d30bb95) and the same scoped `sol_prove?`
 (ac8d23f): their versions of `Calculus/Core/{Closable,Close,CloseErase,Proves}.lean`
 and `Closers.lean`'s `sol_prove?` are kept, this lane's copies dropped
 (its module, `ProvesSearch`, deleted).  No new `sorry`, `axiom` or `maxHeartbeats`.
-`lean_build` (default targets): green, 301 jobs.  `TestSuite/CoreSeq`,
-`CoreDerived11`, `Examples/Chains/StorageCoverage`, `Tactics/CoreChains`
-checked one by one.
+Before that merge (3859a2a): `lean_build` (default targets) green, 301
+jobs; `TestSuite/CoreSeq`, `CoreDerived11`, `Examples/Chains/StorageCoverage`,
+`Tactics/CoreChains` checked one by one.
+
+Then merged `w3b-tactics` through 1e71cb1: `Tactics/Dangling`'s diamond walk
+flipped (its docstrings fixed), `Tactics/Contracts` flipped through
+`sol_erase` (`Calculus/Core/Contracts.lean`), the module-map rows of
+`Close`/`Closable`/`CloseErase` corrected.  `Core.Walk.walk`'s tag rule
+stays this lane's (below); 0209193's last component past macro scopes and
+`h` is not taken (erasing the macro scopes before the prefix test turns
+the invariant walk's `checkLean .loopExit` case `thn` into `h` in
+`ProofTree`'s pin).
+On top of it, from the review: `Decide.deleteWithoutWriteUntyped`, the
+refutation over today's untyped storage (`¬ ⊨`, no `wt(storage)`), restored
+in `Tactics/Decide`'s closing block, which `Calculus/Decide.lean` and
+`Benchmark/Mapping` now cite; two regression pins in
+`Tactics/CoreProofTree` for `operatorOf?` (`lessEqualAssignment` before an
+`if` and in its branch).  `lean_build` of the merged tree (default targets):
+green, 302 jobs, every `sol_derive?` pin (`ProofTree`, `CoreProofTree`,
+`Loops`, `CoreDerive`) among them.
 
 - **A diamond leaf closes where its updates keep the `bool` locals
   `bool`s** (done by both lanes, `w3b-tactics`' kept; for the lead to confirm: a change to `Proves.close`'s side
@@ -2644,7 +2661,8 @@ checked one by one.
 - **Tool fixes.**  `Core.ProofTree.operatorOf?` takes a constructor of
   `BinOp`/`UnOp`/`IncDec`, not a function of the namespace: an `if`
   branch's statement carries `BinOp.ret` in a value's type, and its node
-  printed `binopAssignment` for `lessEqualAssignment` (no pin had one).
+  printed `binopAssignment` for `lessEqualAssignment` (pinned since, in
+  `Tactics/CoreProofTree`).
   `Core.Walk.walk` cites a step's goals by name only when every goal has
   one, else bullets in order, as today's walk takes `cases` apart (the
   diamond send's first goal is tagged `fml`, the others not); the name is
@@ -2714,11 +2732,12 @@ checked one by one.
      one leaves its leaf, the box one needs `sol_decide_cons`.  Keeping an
      explicit `∀` needs telling it from a parameter's, which `cdl!`'s
      output does not.
-  4. Now possible, in other lanes' files: the tactics lane's diamond walks
-     and trees moved to closing blocks for `Proves.close` (`Payment`,
-     `Branch`, `Revert`, `ApplySteps.guardedCopy`, `Loops`, `Calls`), and
-     the testsuite's diamond obligations, where every diamond update keeps
-     the `bool` locals `bool`s.
+  4. The testsuite's diamond obligations where every diamond update keeps
+     the `bool` locals `bool`s.  The tactics lane's diamond walks
+     (`Payment`, `Branch`, `Revert`, `ApplySteps.guardedCopy`, `Loops`,
+     `Calls`, `Dangling`) are flipped on this branch, through the two
+     `w3b-tactics` merges; no `Examples/Tactics` closing block holds a
+     diamond walk any more.
   5. The read-only review pass was not run.
 
 ## Baselines (M0)

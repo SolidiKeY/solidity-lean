@@ -120,7 +120,7 @@ theorem set_frame : ⊢ dl!{ b != a && v == myMap[b] → [ set(a, i); ] myMap[b]
 /-- `remove(a)`: `ensures myMap[_addr] == 0`, where `myMap[a]` held a
 `uint` (`myMap[a] + 0` evaluates).  A `delete` leaves the default of the old
 value, and what `⊢` proves holds in every storage, `myMap[a]` holding a `bool` too
-(`Decide.deleteWithoutWrite`): the premise is the typing every storage of
+(`Decide.deleteWithoutWriteUntyped`): the premise is the typing every storage of
 this contract has. -/
 theorem remove_spec : ⊢ dl!{ myMap[a] + 0 == myMap[a] → [ remove(a); ] myMap[a] == 0 } := by
   sol_prove

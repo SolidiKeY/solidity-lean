@@ -45,6 +45,50 @@ closed: 0 open goal(s), 10 node(s), 2 branch(es)
 #guard_msgs in
 #proof_tree cdl!{ [ if (a == 1) { x = 2; } else { x = 1; }; ] true }
 
+/-! A comparison before an `if`, or in its branch, prints as KeY's taclet at
+its operator (`lessEqualAssignment`), not as the family's
+`binopAssignment`: the operator is the statement's first `BinOp`
+constructor, not `BinOp.ret` in the branches' value types (a regression
+pin). -/
+
+/--
+info: 0: allRight
+1: allRight
+2: allRight
+3: ifElseUnfold
+4: localValueDeclInitDrop
+5: lessEqualAssignment
+6: ifElseSplit
+  [if se1 true]
+    7: localValueAssign
+    8: Closed goal
+  [if se1 false]
+    9: localValueAssign
+    10: Closed goal
+closed: 0 open goal(s), 11 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree cdl!{ [ if (a <= b) { x = 1; } else { x = 2; }; ] true }
+
+/--
+info: 0: allRight
+1: allRight
+2: ifElseUnfold
+3: localValueDeclInitDrop
+4: boolEqualityAssignment
+5: ifElseSplit
+  [if se1 true]
+    6: localValueDeclInitDrop
+    7: lessEqualAssignment
+    8: Closed goal
+  [if se1 false]
+    9: localValueAssign
+    10: Closed goal
+closed: 0 open goal(s), 11 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree cdl!{ [ if (a == 1) { bool c = x <= 1; } else { x = 2; }; ] true }
+
 /--
 info: node: 1
 sequent:

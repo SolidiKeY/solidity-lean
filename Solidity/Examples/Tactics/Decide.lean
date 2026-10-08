@@ -22,7 +22,8 @@ Every goal is stated with `⊨`, over **every** state: one whose `balances`
 is an array, whose `alice.account.balance` holds a `bool`, or that has no
 `alice` at all.  Under the box a write that halts proves the formula, so
 the programs below may write anywhere; a read of the initial storage is
-another matter: it owes `wt(storage)` (`deleteWithoutWrite`).
+another matter: it owes `wt(storage)` (`deleteWithoutWrite`; without it,
+`deleteWithoutWriteUntyped`).
 -/
 
 namespace Solidity.Examples.Tactics.Decide
@@ -605,15 +606,28 @@ end Solidity.Examples.Tactics.Decide
 /-! ## On today's formulas
 
 Read without `open scoped Solidity.Core.Surface`: today's fragment
-(`Fml.inL`), the closer's input.  The two refutations over today's untyped
-storage that stood here (`deleteWithoutWrite`, `survivesMappingOnly`) are
-positive theorems above, under `wt(storage)`. -/
+(`Fml.inL`), the closer's input, and what `⊨` cannot rule out over today's
+untyped storage without `wt(storage)` (`deleteWithoutWriteUntyped`; the
+theorems above assume it). -/
 
 namespace Solidity.Examples.Tactics.Decide
 
 open Proves Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
+
+/-- A storage in which `alice.account.balance` holds a `bool`. -/
+def boolBalance : State :=
+  { storage := [("alice", .struct [("account", .struct [("balance", .bool true)])])] }
+
+/-- **`delete` without a write before it, and without `wt(storage)`, is not
+valid**: where the old member was a `bool`, the delete leaves `false`, not
+`0`.  What a read below a delete returns is the default of the old *value*;
+`deleteWithoutWrite` assumes `wt(storage)`, `deleteBelow` writes first. -/
+theorem deleteWithoutWriteUntyped :
+    ¬ (⊨ dl!{ [ delete alice.account; ] alice.account.balance == 0 }) :=
+  fun h => match (h boolBalance).1 with
+    | ⟨_, _, he⟩ => nomatch Theory.StValue.Equiv.prim_iff.1 he
 
 /-- info: false -/
 #guard_msgs in -- a copy from storage outside its pair is outside the fragment

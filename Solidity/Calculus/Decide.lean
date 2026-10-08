@@ -57,7 +57,8 @@ What the storage adds to mini-solkey's words:
 equivalence: it holds of every state, which is what `⊨` quantifies over.
 The price is that a goal true only of well-typed storage is not valid:
 `[ delete alice.account; ] alice.account.balance == 0` fails where the old
-balance is a `bool` (`Examples/Tactics/Decide.lean`, `deleteWithoutWrite`), while the
+balance is a `bool` (`Examples/Tactics/Decide.lean`, `deleteWithoutWriteUntyped`;
+`deleteWithoutWrite` proves it under `wt(storage)`), while the
 same goal after a write of a `uint` is decided.
 
 **Completeness.**  The reduction loses nothing, so `sol_decide` fails on an
