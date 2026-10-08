@@ -137,4 +137,13 @@ info: {"stats": {"nodes": 6, "branches": 2},
 #guard_msgs in
 #proof_tree_json cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] true }
 
+/-! `#step` names the rule as the tree does: KeY's taclet at the operator. -/
+
+/--
+info:   ~[additionAssignment]~>
+    dl{ ∀ uint a; ∀ uint y; { y := a + 1 } true }
+-/
+#guard_msgs in
+#step cdl!{ [ y = a + 1; ] true }
+
 end Solidity.Examples.Tactics.CoreProofTree

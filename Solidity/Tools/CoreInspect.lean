@@ -13,9 +13,8 @@ import Solidity.Calculus.Core.Surface
 (`Core.symex`, `Core.Fml.step`) runs as compiled code, its result is quoted
 (`Core.Fml.quote`) and printed by `Core.Delab`'s printer, as today's are.
 `#wp` also prints the reduction of the result's erasure (`Core.Fml.erase`)
-when it is in `sol_decide`'s fragment, and `#step` the rule today's strategy
-fires on the erasure, which is the rule the scoped strategy fires
-(`docs/intrinsic.md`, M6a).
+when it is in `sol_decide`'s fragment, and `#step` the rule the scoped strategy
+fires, by name (`ruleAtC?`, `Core.ruleOf?`).
 
 `#proof_tree φ`, `#proof_node n φ` and `#proof_tree_json φ`
 (`Tools/ProofTree.lean`) on a scoped formula show the tree of `⊢ φ` that
@@ -65,6 +64,32 @@ def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr
   return some (φ, mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
     (mkApp (mkConst ``List.nil [0]) (mkConst ``Lean.Level)))
 
+/-- The rule one step fires on the scoped formula `φ`, by name: at the first
+statement with a rule, looking through updates, a precondition, binders and
+a conjunction's left goal first, as `Core.Fml.stepAt` looks (`ruleOf?`);
+`emptyModality` where the first modality's program is done. -/
+partial def ruleAtC? (φ : Lean.Expr) : MetaM (Option Lean.Name) := do
+  let k ← mkAppM ``Core.Fml.fresh #[φ]
+  let rec go (e : Lean.Expr) : MetaM (Option Lean.Name) := do
+    let e ← whnf e
+    let args := e.getAppArgs
+    match e.getAppFn.constName? with
+    | some ``Core.Fml.and => return (← go args[2]!) <|> (← go args[3]!)
+    | some ``Core.Fml.imp => go args[3]!
+    | some ``Core.Fml.upd => go args[5]!
+    | some ``Core.Fml.havoc => go args[2]!
+    | some ``Core.Fml.all | some ``Core.Fml.bind => go args[4]!
+    | some ``Core.Fml.anon => go args[3]!
+    | some ``Core.Fml.modal =>
+      let P ← whnf args[5]!
+      if P.isAppOf ``Core.Prog.nil then return some `emptyModality
+      unless P.isAppOf ``Core.Prog.cons do return none
+      let s := P.getArg! (P.getAppNumArgs - 2)
+      let some (c, _) ← Core.ruleOf? k args[4]! s | return none
+      return some (← Core.ProofTree.keyName c s)
+    | _ => return none
+  go φ
+
 /-- `#wp φ` for a scoped formula. -/
 @[command_elab Solidity.Tools.«command#wp_»]
 def elabWpCore : CommandElab := fun stx => liftTermElabM do
@@ -85,8 +110,9 @@ def elabStepCore : CommandElab := fun stx => liftTermElabM do
   match ψ? with
   | none => logInfo "no modality left: `close`"
   | some ψ =>
-    let r := match ← Chain.ruleOfLine φ' with
-      | some (_, n) => toString n
+    let _ := φ'
+    let r := match ← ruleAtC? φ with
+      | some n => toString n
       | none => "?"
     logInfo m!"  ~[{r}]~>\n    {ψ}"
 
