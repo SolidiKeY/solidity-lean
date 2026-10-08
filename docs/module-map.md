@@ -78,7 +78,7 @@ lemma (`TermTaclet.sound`).
 | `Semantics/RunErase.lean` | The bridge (`docs/intrinsic.md` M3): `Prog.run_erase`/`Stmt.run_erase`, a fresh scoped block's run against `Semantics.lean`'s run of its erasure, up to the popped locals (`ResultsAgree`); `Agree`, `RunRel`, `Stmt.binders`, and each global operation natural in the locals (`*_nat`). |
 | `TermSimp.lean` | The simp sets `tm_eval` and `tm_denote` of the generic term functions. |
 | `Update.lean` | Terms as one signature (`Srt`, `Op0`…`Op3`, `Tm`; `Term`, `STerm`, … are its sorts, the old constructors abbreviations), their reading (`Tm.eval`, `Tm.denote`) and frame lemmas, parallel updates (`UpdElem`; a deployment's `.netMt` for `net := storeSt(mtSt, at(r), a)`, `.setBalance` for `selfBalance := a`, `.saveNetMt`), formulas with both modalities (`Fml`, `holds`, `Valid`), lowering of program expressions to terms. |
-| `Theorems.lean` | The headline theorems in notation. |
+| `Theorems.lean` | The headline theorems in notation, over the scoped calculus and the typed run, their axioms pinned; three of today's (completeness, the solkey fragment, termination) until scoped. |
 
 ## The calculus
 
