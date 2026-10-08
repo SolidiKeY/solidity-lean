@@ -432,14 +432,17 @@ open Lean Elab Tactic Meta
 leading `∀`s and then the formula's (`Symex.paramCount`), up to the first
 one `cdl!` marked explicit; `none` where they are not written out. -/
 partial def paramCount (H φ : Expr) : MetaM (Option Nat) := do
-  -- the context's entries, outermost first
+  -- the context's entries, outermost first, down to `Hyps.nil`: a
+  -- precondition or an update is kept as the counting loop's stop
   let rec entries (H : Expr) (acc : List Expr) : MetaM (Option (List Expr)) := do
     let H ← whnfR (← instantiateMVars H)
     if H.isAppOf ``Hyps.nil then return some acc
-    if H.isAppOfArity ``Hyps.all 6 || H.isAppOfArity ``Hyps.bind 7 then
+    if H.isAppOfArity ``Hyps.all 6 || H.isAppOfArity ``Hyps.bind 7
+        || H.isAppOfArity ``Hyps.pre 5 || H.isAppOfArity ``Hyps.havoc 4
+        || H.isAppOfArity ``Hyps.anon 5 then
       return ← entries (H.getArg! 3) (H :: acc)
-    if (H.getAppFn.constName?.map (·.getPrefix == ``Hyps)).getD false then
-      return some (H :: acc)
+    if H.isAppOfArity ``Hyps.upd 7 then
+      return ← entries (H.getArg! 4) (H :: acc)
     return none
   let some es ← entries H [] | return none
   let mut n := 0

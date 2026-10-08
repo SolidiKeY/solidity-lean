@@ -645,6 +645,20 @@ info: Try this:
 example : ⊢ dl!{ ∀ uint x; [ require(x >= 1 && x <= 100); uint y = x - 1; ] y < 100 } := by
   sol_prove?
 
+/-! After a walk's prefix the parameters are the context's: `apply intro`
+binds `x`'s `∀` and takes the premise, and `sol_prove` counts the
+parameters from the context's outermost entry down to the first
+precondition (`Seq.paramCount`): one. -/
+
+/-- info: some (1) -/
+#guard_msgs in
+example : ⊢ dl!{ x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
+  apply intro
+  run_tac do
+    let ty ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
+    Lean.logInfo m!"{← Core.Seq.paramCount ty.appFn!.appArg! (← Core.Symex.evaluable ty.appArg!)}"
+  sol_prove
+
 end Scoped
 
 /-! The rest of this section reads today's residue and closer, the input
