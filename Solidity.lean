@@ -70,6 +70,7 @@ import Solidity.Calculus.Core.TCloseErase
 import Solidity.Calculus.Core.TProvesSound
 import Solidity.Calculus.Core.TSoundKit
 import Solidity.Calculus.Core.TSoundArms
+import Solidity.Calculus.Core.TSoundCapture
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound

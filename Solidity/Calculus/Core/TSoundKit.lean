@@ -687,4 +687,28 @@ theorem Premise.tsound_of_halt {Γ' : Ctx} {s : Stmt C Γ Γ'} {p : Premise C Γ
 
 end CaptureSim
 
+/-! ## A scope end that pops nothing -/
+
+theorem Ext.length_le {Γ : Ctx} : {Δ : Ctx} → Ext Γ Δ → Γ.length ≤ Δ.length
+  | _, .refl => Nat.le_refl _
+  | _, .push h => Nat.le_succ_of_le (Ext.length_le h)
+
+theorem Ext.eq_refl_of {Γ : Ctx} : {Δ : Ctx} → (e : Ext Γ Δ) → (h : Δ = Γ) → h ▸ e = .refl
+  | _, .refl, _ => rfl
+  | _, .push e, h => by
+    have := Ext.length_le e
+    have := congrArg List.length h
+    simp only [List.length_cons] at this
+    omega
+
+/-- A scope end from a context to itself pops nothing. -/
+theorem Ext.self_eq_refl {Γ : Ctx} (e : Ext Γ Γ) : e = .refl := Ext.eq_refl_of e rfl
+
+theorem TState.drop_self {Γ : Ctx} (e : Ext Γ Γ) (σ : TState C Γ) : σ.drop e = σ := by
+  rw [Ext.self_eq_refl e]; rfl
+
+theorem TRes.map_drop_self {Γ : Ctx} (e : Ext Γ Γ) (r : TRes (TState C Γ)) :
+    r.map (TState.drop e) = r := by
+  rw [Ext.self_eq_refl e]; cases r <;> rfl
+
 end Solidity.Core
