@@ -23,6 +23,15 @@ postcondition `φ` where the line has it.  A line printed with a block's end
 (`}`, `Core.Delab`'s `core_item`) reads without it.  The statement holds
 the computed lines, which `Core.Delab` prints as written.
 
+**While the program is open**, `~[sequentialToParallel]~>` merges the
+scoped line's update spine (`Fml.MergeBy`, `Calculus/Core/Merge.lean`).
+
+**`~~>` and `calc`**: `A ~~> B` reads `B` as a line of `A`'s derivation (or
+one with its spine merged), else as `Update.lean`'s line past the program
+(`Core.Fml.LeadsE`); a `calc` step `_ R B` leaves `B` a metavariable that
+`sol_chain` computes from the line before and checks against the text
+(`pendingLines`).
+
 **Past the program**, a rewrite arrow (`~[sequentialToParallel]~>`,
 `~[findOnSave]~>`, `~=>`) goes on from the erasure of the line before it
 (`Fml.ViaE`): `Update.lean`'s line, its postcondition `φ : Post C Γ` read

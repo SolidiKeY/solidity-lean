@@ -1,6 +1,6 @@
 ---
 name: chain-authoring
-description: Write or extend a worked chain in Examples/Chains/ (one chain term `A ~[r]~> B ~*> … := by sol_chain`, every line written, ending at one parallel update with every binding kept). Use when a chain must be created, finished to its last line, split into segments, or renamed to the printed fresh names.
+description: Write or extend a worked chain in Examples/Chains/ (one chain term `A ~[r]~> B ~*> … := by sol_chain`, every line written, ending at one parallel update with every binding kept). Use when a chain must be created, finished to its last line, or renamed to the printed fresh names.
 ---
 
 # Writing a chain
@@ -13,14 +13,14 @@ Generate, then paste. Never search for a chain line by line.
    `dl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 10) } ⟨[ … ]⟩ φ }`.
 2. **Generate.** In the example's namespace, with its `InContract` and
    `FreshNames` in scope, `variable (m : Modality) (φ : Core.Post C Γ)` (`Γ`
-   the first line's parameters, `[.val .uint]` for `ageVal`) and any
+   the first line's parameters and the user locals its program declares,
+   `[.val .uint]` for `ageVal`; a capture is never in it) and any
    premise a law needs as a `variable (hk : …)`, write `#chain <first line>`
    and read the info message (`lean_diagnostic_messages` on that file, that
    line): `theorem chain : … := by sol_chain`, every line written, one
-   declaration however long (a scoped chain, `Core.Fml.Via`/`Core.Fml.ViaE`,
-   has no `~~>` and no segments; only a chain left on `Update.lean`'s calculus
-   is cut past ten links into `chain1`, `chain2`, … composed by
-   `Fml.Leads.via`), and the fresh variables as table rows.
+   declaration however long (`Core.Fml.Via`/`Core.Fml.ViaE`), and the fresh
+   variables as table rows.  A wrong `Γ` is the elaborator's type mismatch
+   on `φ`, which names the context it stands at.
    A chain `c` that stops short: `#chain_rest c` prints the lines to append
    to its statement. On a statement `A ~~> Z`, `by sol_chain?` offers the
    chain term; on a chain term, it says how it goes on.
@@ -40,8 +40,7 @@ Generate, then paste. Never search for a chain line by line.
    lines in the new names.
 6. **Check** the one file with `lean_diagnostic_messages` (`severity=error`),
    then remove the `#chain` command. No `set_option maxHeartbeats`: a chain
-   that needs more is made cheaper (on `Update.lean`'s calculus, split into
-   more segments).
+   that needs more is made cheaper.
 
 The convention (rules 1–7) is in `.claude/rules/derivations.md`. One agent
 at a time: the machine has no RAM for parallel Lean checks.

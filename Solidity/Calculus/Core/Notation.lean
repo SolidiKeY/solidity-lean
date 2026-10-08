@@ -29,7 +29,10 @@ somewhere in the formula, at the type the reading gave it:
 * `φ where Person memory carol` binds `carol` by a hidden binder;
 * **a Lean formula** where a formula stands (`φ`, `‹t›`) is a `Core.Post C Γ`
   (or a `Core.Fml C Γ`) at the context `Γ` of the place it stands in, which
-  the reading computes: no weakening.
+  the reading computes; for a postcondition, `Γ` without its fresh locals (a
+  rule's `se1`, the elaborator's captures), dropped in front of it by an
+  update or a frame that prints as nothing (`NCtx.dropFresh`), as
+  `Update.lean`'s `Post` names no fresh variable.
 
 The output is quoted (`Core.Fml.quote`) and printed by `Core.Delab`'s
 printer, as `dl{ … }` (a hidden binder printing as nothing).  `cdl[C]{ φ }`,
