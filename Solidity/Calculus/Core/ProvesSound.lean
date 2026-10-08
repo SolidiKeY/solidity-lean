@@ -56,6 +56,23 @@ theorem Stmt.Sound.of_stepSound
 theorem Stmt.sound : Stmt.Sound C :=
   Stmt.Sound.of_stepSound Stmt.stepSound
 
+/-- **Every taclet is sound**: the scoped table's rules are the ones the
+strategy fires (`Taclet.toStep`), so `Stmt.sound` covers them with no proof
+per rule. -/
+theorem Taclet.sound {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    {p : Premise C Γ Γ'} (t : Taclet C k m s p) (σ : State C Γ) : Premise.Sound m s p σ :=
+  Stmt.sound k m s p t.toStep σ
+
+/-- Every Lean-only rule is sound, as `Taclet.sound`. -/
+theorem LeanTaclet.sound {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    {p : Premise C Γ Γ'} (t : LeanTaclet C k m s p) (σ : State C Γ) : Premise.Sound m s p σ :=
+  Stmt.sound k m s p t.toStep σ
+
+/-- Every rule of the table is sound. -/
+theorem Rule.sound {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    {p : Premise C Γ Γ'} (r : Rule C k m s p) (σ : State C Γ) : Premise.Sound m s p σ :=
+  Stmt.sound k m s p r.toStep σ
+
 /-! ## Outcomes -/
 
 theorem _root_.Solidity.Modality.afterC_and {α : Type} {m : Modality} {p q r : α → Prop} {x : Semantics.Res α}
