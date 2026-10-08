@@ -37,14 +37,12 @@ the program is resolved to the scoped syntax (`Core.Prog.resolve`), and its
 typed run from the store, typed (`Core.Storage.*`, a fold the kernel builds),
 is evaluated by `decide +kernel` (`trunOk`).  The typed run ending is the
 untyped one ending (`diamond_of_trunOk`: `Prog.run_of_trun`, then
-`Prog.run_erase` back to the program resolved from), on programs off the two
-place where the typed and the untyped runs part (`Prog.bridgeOk`: a copy
-at a struct with a repeated member name).  The typed run has no
+`Prog.run_erase` back to the program resolved from).  The typed run has no
 well-founded definition in the kernel's way: a default is the structural
 `SVal.dflt`, a memory copy a fold.  `*Store_eq` states each store as the
 erasure of its typed start.  A run that ends normally but that `trunOk`
-cannot decide (the program does not resolve, or it is off the bridge: a
-copy at a struct whose members share a name, like `BadDup`) is pinned by `#eval` of `outcome` (the untyped run) under
+cannot decide (the program does not resolve) is pinned by `#eval` of
+`outcome` (the untyped run) under
 `#guard_msgs`, and the verdict table (`tests/solkey/expected.tsv`) says
 `evaluated`; a run that does not end normally is pinned the same way and
 is `open`.
@@ -136,11 +134,11 @@ def outcome {C : Contract} (σ : State) (P : Prog C) : String :=
   | .error .stuck => "stuck"
   | .error .diverge => "diverge"
 
-/-- The check `corpus_decide` evaluates: `P` resolves from no locals, is on
-the bridge, and its typed run from `σ` ends. -/
+/-- The check `corpus_decide` evaluates: `P` resolves from no locals, and its
+typed run from `σ` ends. -/
 def trunOk [FreshNames] {C : Contract} (σ : Core.TState C []) (P : Prog C) : Bool :=
   match Core.Prog.resolve [] P with
-  | .ok ⟨_, Q⟩ => Q.bridgeOk && (Q.trun σ).isOk
+  | .ok ⟨_, Q⟩ => (Q.trun σ).isOk
   | .error _ => false
 
 /-- A typed run that ends proves the diamond at its start, erased. -/
@@ -149,14 +147,12 @@ theorem diamond_of_trunOk [FreshNames] {C : Contract} (σ : Core.TState C []) {P
   unfold trunOk at h
   split at h
   · rename_i Γ' Q hres
-    simp only [Bool.and_eq_true] at h
-    obtain ⟨hb, hok⟩ := h
     apply diamond_of_isOk
     cases ht : Q.trun σ with
-    | error e => rw [ht] at hok; cases hok
+    | error e => rw [ht] at h; cases h
     | ok o =>
       have h2 := Core.Prog.run_erase Q (Core.Prog.resolve_fresh hres) List.nodup_nil rfl σ.erase
-      rw [Core.Prog.run_of_trun hb ht, Core.Prog.resolve_erase hres] at h2
+      rw [Core.Prog.run_of_trun ht, Core.Prog.resolve_erase hres] at h2
       change ResultsAgree _ (Prog.run (σ.erase.erase []) P) _ at h2
       cases hr : Prog.run (σ.erase.erase []) P with
       | ok _ => rfl

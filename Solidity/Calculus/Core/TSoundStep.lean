@@ -13,27 +13,20 @@ state (`Premise.TSound`): each statement's rule by its arm's theorem in
 `Calculus/Core/Blocks.lean` (calls, `try`, loops: `Stmt.isBlockArm`) are the
 `tsoundB` lane's.
 
-**Three conditions** (`Stmt.TArmOk`, `Calculus/Core/TSoundKit.lean`), each
-where the typed reading of a rule fails, for the lead (`docs/intrinsic.md`,
-"Left for the lead" and the W2.5 `tsoundA` section):
-
-* a storage copy (`l = sp;`, `l = mp;`) is on the bridge only at a type
-  whose members have distinct names (`Src.bridgeOk`, `Ty.nodupS`): the
-  update is `Update.lean`'s, which copies by name, and the typed run copies
-  by position;
-* a push (`b.push(v);`, `lsv = b.push();`) does not diverge under the
-  diamond: at `2^256 - 1` elements the typed run diverges
-  (`Storage.full`), and the rule's update, `Update.lean`'s unbounded
-  `pushAt`, ends in a storage no typed state erases to, read vacuously;
-* `T memory mv = r;` under the box has a reference of its type in the
-  heap: its hidden binder is universal there (decision 12), vacuous over
-  a heap typing with no object of the type, while `r` may allocate one.
-  An alias `T memory mv = mp;` needs none (`tsound_declMemAlias`): the
-  object `mp` names is one, and a halt reading it closes the box.
+**One condition** (`Stmt.TArmOk`, `Calculus/Core/TSoundKit.lean`), where
+the typed reading of a rule fails: `T memory mv = r;` under the box has a
+reference of its type in the heap.  Its hidden binder is universal there
+(decision 12), vacuous over a heap typing with no object of the type, while
+`r` may allocate one.  An alias `T memory mv = mp;` needs none
+(`tsound_declMemAlias`): the object `mp` names is one, and a halt reading
+it closes the box.  Decisions 15 and 16 took the other two away: a push at
+the bound is exhausted, which both modalities accept, and no struct repeats
+a member name, so every copy is on the bridge.  `Calculus/Core/TSound.lean`
+assembles the blocks' arms with these.
 
 A `new` meets no condition of its own (`tsound_assignNew` compares typed
-runs): it unfolds to `T memory mv = new T(n); l = mv;`, and the conditions
-fall on those two steps (into storage, the second is an `l = mp;`).
+runs): it unfolds to `T memory mv = new T(n); l = mv;`, and the condition
+falls on the first step.
 -/
 
 namespace Solidity.Core
@@ -54,8 +47,8 @@ theorem Stmt.tstepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C
     (hb : s.isBlockArm = false) : Stmt.TStepSound k m s := by
   intro σ p hp hok
   cases s with
-  | assign l r => exact assignStep_tsound σ k l r hok p hp
-  | rebind i r => exact rebindStep_tsound σ k i r hok p hp
+  | assign l r => exact assignStep_tsound σ k l r p hp
+  | rebind i r => exact rebindStep_tsound σ k i r p hp
   | assignLocal i v => exact localStep_tsound σ k i v p hp
   | declLocal q x init =>
     cases init with
@@ -68,7 +61,7 @@ theorem Stmt.tstepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C
   | opAssign op hop hp' l r => exact opStep_tsound σ k op hop hp' l r p hp
   | incDec op hp' l => exact incStep_tsound σ k op hp' l p hp
   | assignIncDec i op hp' l hs => cases hp; exact tsound_assignIncDec σ i op hp' l hs
-  | push b v hd => exact pushStep_tsound σ k b v hd hok p hp
+  | push b v hd => exact pushStep_tsound σ k b v hd p hp
   | pop b => exact popStep_tsound σ k b p hp
   | transfer r a => exact transferStep_tsound σ k r a p hp
   | send pv r a => exact sendStep_tsound σ k pv r a p hp
@@ -81,7 +74,7 @@ theorem Stmt.tstepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C
       | copy q hm' => cases hp; exact tsound_declMemInit σ x (.copy q hm') hd hm hok
       | newArr n h => cases hp; exact tsound_declMemInit σ x (.newArr n h) hd hm hok
   | rebindMem i r => exact rebindMemStep_tsound σ k i r p hp
-  | assignFromMem l q => exact assignFromMemStep_tsound σ k l q hok p hp
+  | assignFromMem l q => exact assignFromMemStep_tsound σ k l q p hp
   | assignMem l r => exact assignMemStep_tsound σ k l r p hp
   | delete l => exact deleteStep_tsound σ k l p hp
   | deleteMem q hd => exact deleteMemStep_tsound σ k q hd p hp

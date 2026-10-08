@@ -298,6 +298,11 @@ example : Prog.toStr (sol{ address payable a = owner; }) = "uint a = owner;" := 
 /-- error: Solidity elaboration failed: unknown type Foo -/
 #guard_msgs in #check sol{ Foo x; }
 
+-- A struct that repeats a member name is refused, as solc refuses its
+-- declaration ("Identifier already declared", `refusedStructs`, decision 16).
+/-- error: Solidity elaboration failed: struct BadDup: identifier already declared: member a -/
+#guard_msgs in #check sol{ BadDup memory x; }
+
 /-- A `uint8` is a `uint` whose arithmetic is checked at 8 bits (`narrowPost`);
 `Examples/Tactics/Checked.lean` has the rest. -/
 example : Prog.toStr (sol{ uint8 x = 250; x += 10; }) =

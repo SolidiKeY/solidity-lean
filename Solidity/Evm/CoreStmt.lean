@@ -757,7 +757,7 @@ theorem assignBumpStore_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) (i : I
 target resolved, the words stored at the target's slots. -/
 theorem copy_sim {R : RefTy} (l : Solidity.Core.Loc C Γ (.ref R))
     (q : Solidity.Core.SPath C Γ (.ref R)) (hq : (Ty.ref R).mapFree = true)
-    (hst : static (.ref R) = true) (hnd : (Ty.ref R).nodupS = true)
+    (hst : static (.ref R) = true)
     (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
     (hwq : spathIn F false q = true) (hwl : locIn F false l = true) :
     StmtOut C L b F false false false (Solidity.Core.TRun.assign l (.copy q hq) σ)
@@ -790,8 +790,7 @@ theorem copy_sim {R : RefTy} (l : Solidity.Core.Loc C Γ (.ref R))
         (fun x hx => storeAt_other fun o ho hxo =>
           hx (hxo ▸ leavesF_occ _ _ d o (List.mem_reverse.1 ho)))
       rw [← writeStorage_static hr hst (State.findStorage_of_findLive hold),
-        Solidity.Core.Storage.writeStorage_erase (σ := σ.sem) rfl
-          (Solidity.Core.TyNodup.of_nodupS hnd)] at hsave
+        Solidity.Core.Storage.writeStorage_erase (σ := σ.sem) rfl] at hsave
       obtain ⟨st', hst', hsem⟩ := into_ok hsave
       refine .inl ⟨⟨σ.withStorage st', List.prefix_refl _⟩, _, ?_, rfl, rfl,
         Keeps.store (storeAt_len hpl hst _),

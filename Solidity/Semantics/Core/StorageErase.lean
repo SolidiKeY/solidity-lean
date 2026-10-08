@@ -10,9 +10,10 @@ x)`, and `toRes` has no `stuck`.  This is the storage half of `run_erase`
 (`docs/intrinsic.md`, M4b), the bridge until the typed interpreter replaces
 `Stmt.run`.
 
-One copy needs a hypothesis: a struct is copied member by member in order
-(solc), and the untyped `overlay` looks each member up by name, which agrees
-when a struct's members have distinct names (`TyNodup`; `BadDup` does not).
+A struct is copied member by member in order (solc), and the untyped
+`overlay` looks each member up by name, which agrees because a struct's
+members have distinct names (`TyNodup.all`: solc refuses a struct that
+repeats one, and so does the elaborator, decision 16).
 
 `copyStToM` is never stuck on a type without mappings (`SVal.copyStToM_ok`),
 and `SVal.ofU` reads an untyped value back at its type.  The typed copies
@@ -538,24 +539,12 @@ inductive TyNodup : Ty → Prop where
   | fixed {E : Ty} {n : Nat} (h : TyNodup E) : TyNodup (.ref (.fixed E n))
   | mapping {K V : Ty} : TyNodup (.ref (.mapping K V))
 
-/-- The structs whose members have distinct names: all but `BadDup`. -/
-def nodupStructs : List Name :=
-  ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
-   "Toggle", "FixedTriple", "Pair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
-   "WithArray", "Triple"]
-
-/-- `TyNodup`, structurally: the structs `T` reaches are in `nodupStructs`
-(`TyNodup.of_nodupS`), so a proof of it is `rfl`. -/
-def _root_.Solidity.Ty.nodupS : Ty → Bool
-  | .prim _ => true
-  | .ref (.struct s) => s ∈ nodupStructs
-  | .ref (.array e) => e.nodupS
-  | .ref (.fixed e _) => e.nodupS
-  | .ref (.mapping _ _) => true
-
-theorem nodupStructs_ok : ∀ s ∈ nodupStructs,
-    Semantics.nodupKeysB (structDef s) = true ∧ ∀ fT ∈ structDef s, fT.2.nodupS = true := by
-  decide
+/-- **Every struct of the table has distinct member names**: solc refuses
+a struct that repeats one (`refusedStructs`, decision 16), and so does the
+elaborator, so none is in `structDef`. -/
+theorem structDef_nodup (s : Name) : Semantics.nodupKeysB (structDef s) = true := by
+  unfold structDef
+  split <;> rfl
 
 theorem tyRank_le_fieldsRank : {fs : List (Name × Ty)} → {fT : Name × Ty} → fT ∈ fs →
     tyRank fT.2 ≤ fieldsRank fs
@@ -563,35 +552,30 @@ theorem tyRank_le_fieldsRank : {fs : List (Name × Ty)} → {fT : Name × Ty} �
   | _ :: _, _, .tail _ h => Nat.le_trans (tyRank_le_fieldsRank h) (Nat.le_max_right _ _)
 
 mutual
-theorem TyNodup.of_nodupS_at (k : Nat) (ih : ∀ T : Ty, tyRank T < k → T.nodupS = true → TyNodup T) :
-    (T : Ty) → tyRank T < k + 1 → T.nodupS = true → TyNodup T
-  | .prim _, _, _ => .prim
-  | .ref R, h, hn => TyNodup.of_nodupS_ref k ih R h hn
+theorem TyNodup.all_at (k : Nat) (ih : ∀ T : Ty, tyRank T < k → TyNodup T) :
+    (T : Ty) → tyRank T < k + 1 → TyNodup T
+  | .prim _, _ => .prim
+  | .ref R, h => TyNodup.all_ref k ih R h
 
-theorem TyNodup.of_nodupS_ref (k : Nat)
-    (ih : ∀ T : Ty, tyRank T < k → T.nodupS = true → TyNodup T) :
-    (R : RefTy) → tyRank (.ref R) < k + 1 → (Ty.ref R).nodupS = true → TyNodup (.ref R)
-  | .struct s, h, hn => by
-    have hs := nodupStructs_ok s (by simpa only [Ty.nodupS, decide_eq_true_eq] using hn)
-    exact .struct hs.1 fun fT hm => ih fT.2
+theorem TyNodup.all_ref (k : Nat) (ih : ∀ T : Ty, tyRank T < k → TyNodup T) :
+    (R : RefTy) → tyRank (.ref R) < k + 1 → TyNodup (.ref R)
+  | .struct s, h =>
+    .struct (structDef_nodup s) fun fT hm => ih fT.2
       (Nat.lt_of_le_of_lt (tyRank_le_fieldsRank hm)
         (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (Nat.le_of_lt_succ h)))
-      (hs.2 fT hm)
-  | .array E, h, hn => .array (TyNodup.of_nodupS_at k ih E (by simpa only [tyRank] using h)
-      (by simpa only [Ty.nodupS] using hn))
-  | .fixed E _, h, hn => .fixed (TyNodup.of_nodupS_at k ih E
-      (Nat.lt_of_succ_lt (by simpa only [tyRank] using h)) (by simpa only [Ty.nodupS] using hn))
-  | .mapping _ _, _, _ => .mapping
+  | .array E, h => .array (TyNodup.all_at k ih E (by simpa only [tyRank] using h))
+  | .fixed E _, h => .fixed (TyNodup.all_at k ih E (Nat.lt_of_succ_lt (by simpa only [tyRank] using h)))
+  | .mapping _ _, _ => .mapping
 end
 
-theorem TyNodup.of_nodupS_lt : (k : Nat) → (T : Ty) → tyRank T < k → T.nodupS = true → TyNodup T
-  | 0, _, h, _ => absurd h (Nat.not_lt_zero _)
-  | k + 1, T, h, hn => TyNodup.of_nodupS_at k (TyNodup.of_nodupS_lt k) T h hn
+theorem TyNodup.all_lt : (k : Nat) → (T : Ty) → tyRank T < k → TyNodup T
+  | 0, _, h => absurd h (Nat.not_lt_zero _)
+  | k + 1, T, h => TyNodup.all_at k (TyNodup.all_lt k) T h
 
-/-- A type whose structs are in `nodupStructs` has no struct with two members
-of one name. -/
-theorem TyNodup.of_nodupS {T : Ty} (h : T.nodupS = true) : TyNodup T :=
-  TyNodup.of_nodupS_lt _ T (Nat.lt_succ_self _) h
+/-- No type reaches a struct with two members of one name
+(`structDef_nodup`). -/
+theorem TyNodup.all (T : Ty) : TyNodup T :=
+  TyNodup.all_lt _ T (Nat.lt_succ_self _)
 
 theorem lookupBy_append_of_none {κ α : Type} [DecidableEq κ] {k : κ} :
     (l₁ l₂ : List (κ × α)) → lookupBy k l₁ = none → lookupBy k (l₁ ++ l₂) = lookupBy k l₂
@@ -860,12 +844,12 @@ theorem delete_erase (hs : σ.storage = st.erase) {T : Ty} (r : SRef C T) :
     simp only [toRes, bind, Except.bind, Option.bind, ← SVal.defaultOf_erase]
     exact saveStorage_erase hs r v.defaultOf
 
-theorem writeStorage_erase (hs : σ.storage = st.erase) {T : Ty} (hT : TyNodup T)
+theorem writeStorage_erase (hs : σ.storage = st.erase) {T : Ty}
     (r : SRef C T) (new : SVal T) :
     σ.writeStorage r.root r.path.erase new.erase = toRes (into σ) (st.write r new) := by
   have key : ∀ cur : SVal T, σ.saveStorage r.root r.path.erase (cur.erase.overlay new.erase) =
       toRes (into σ) (st.save r (cur.overlay new)) := fun cur => by
-    rw [← SVal.overlay_erase hT, saveStorage_erase hs]
+    rw [← SVal.overlay_erase (TyNodup.all T), saveStorage_erase hs]
   cases new with
   | prim v =>
     simp only [Semantics.State.writeStorage, SVal.erase, Storage.write, SVal.isPrim,

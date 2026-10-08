@@ -16,12 +16,11 @@ behind a context with no diamond update but scope ends
 (`tholds_exit`), and `close` is `tholds_of_erase_valid`
 (`Calculus/Core/TCloseErase.lean`).
 
-**Not provable as stated until decisions 2 and 3** (`docs/intrinsic.md`,
-W2 `sound`): `Stmt.TSound C` is false for a contract with a `bool` mapping
-key (`close` proves `[ v = m[true]; ] false`) and under the diamond on a
-length past `uint`'s range, and `Proves.tvalid` is vacuous there.  The
-decision taken goes into `Stmt.TSound`, as a restriction, not a false
-hypothesis.
+**`Stmt.TSound C` is false** (`Stmt.not_tsound`,
+`Calculus/Core/TSound.lean`): every arm is sound but the box
+`memoryLocalDeclInitDrop` at an allocating initializer over a heap with no
+object of the local's type, whose premise is vacuous there (decision 17,
+open).  Decisions 10 and 13–16 took the other failures away.
 
 An update's typed reading asks of every typed state that erases to the one
 it ends in, so a rule's premise gives its conclusion in the state the typed

@@ -7,8 +7,10 @@ import Solidity.Typing.Reachability
 converse needs four more facts, which every run keeps and `SVal.canon` does
 not say; `SVal.tight` is exactly them:
 
-- an array whose element type has no well-formed default (`BadDup[]`) has
-  no slots at all: `push()` needs the default, and nothing else makes one;
+- an array whose element type has no well-formed default has no slots at
+  all: `push()` needs the default, and nothing else makes one (no struct of
+  the table lacks one since decision 16 refused a repeated member name,
+  `refusedStructs`; the clause stays for a type `defaultOkS` refuses);
 - the slots past the end of an array of words are cleared: `pop`, `delete`
   and a shorter copy clear what they leave, and past an end only a reference
   reaches, never a word;
@@ -42,8 +44,8 @@ a word is written only into a live slot (`IdxLive`, from
 word type (`Ty.isKey`).  Under `Ty.okDeep` the first clause
 of `SVal.tight` is vacuous, so no memory object needs tracking: a copy out
 of memory has no mapping and nothing past its ends (`SVal.plain`).  Whether
-that clause is also necessary for a contract with, say, a `BadDup[]` root is
-not proved here: it would need the store typing to claim memory objects only
+that clause is also necessary for a contract with a root `defaultOkS`
+refuses is not proved here: it would need the store typing to claim memory objects only
 at types with well-formed defaults, threaded through every allocation.
 -/
 
@@ -1544,8 +1546,7 @@ theorem canon_reachable (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2
   rw [show Core.State.ofSem C.initState = (Core.TState.init C).erase from
     (Core.TState.init_erase C).symm] at hrun hp
   obtain ⟨o, ho, he⟩ := Core.Prog.trun_of_run hs (Core.TState.init C) hrun hp
-  exact ⟨[], Core.Build.rootsProg C st, o, Core.Prog.bridgeOk_of_straight _ hs, ho,
-    (congrArg (·.storage) he).trans hst⟩
+  exact ⟨[], Core.Build.rootsProg C st, o, ho, (congrArg (·.storage) he).trans hst⟩
 
 /-- **Nothing inferable is missing**: a property of storage that holds
 initially and that every program keeps, from any well-typed canonical state,
@@ -1565,7 +1566,7 @@ theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true)
 
 The converse direction: every storage a program reaches is tight,
 for a contract whose types have well-formed defaults all the way down
-(`Ty.okDeep`: no array of a struct `defaultOkS` refuses, like `BadDup[]`).
+(`Ty.okDeep`: no array of a struct `defaultOkS` refuses).
 Then the first clause of `SVal.tight` is vacuous, no memory object matters,
 and what is left is kept by every write: a word is written into a live slot
 (`State.checkIndex`, `IdxLive`), a mapping is indexed only at a number

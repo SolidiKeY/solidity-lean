@@ -10,13 +10,15 @@ heap and its typing, the locals typed over it), a storage path resolves to
 an `SRef` (an index by `SRef.atKey`, a mapping's key as it is hashed), a
 memory path to a heap reference read through `Heap.field`/`Heap.index`, and
 an operator is `BinOp.evalT`/`UnOp.evalT`.  A run ends in a state or halts
-with `THalt`: `revert`, `panic` or `diverge`; there is no `stuck`.
+with `THalt`: `revert`, `panic`, `diverge` or `exhausted`; there is no
+`stuck`.
 
 A dynamic array holds fewer than `2^256` elements (`SVal.array`, `MObj`), so
 a length is a `uint` (`Storage.len`, `Heap.lenU`).  A push onto `2^256 - 1`
-elements is out of gas: the run halts with `diverge` (`Storage.full`), as
-it does on a loop with no last iteration, and the untyped run, which has no
-bound, may go on (`docs/solc-alignment.md`, "Array lengths").
+elements exhausts the resources: the run halts with `exhausted`
+(`Storage.full`, decision 15), which both modalities accept, as KeY, which
+models no gas, reads every run that runs out of it; the untyped run, which
+has no bound, may go on (`docs/solc-alignment.md`, "Array lengths").
 
 The heap only grows, and a call sets its caller's locals aside while the body
 runs, so each step returns its state with the extension of the heap typing
@@ -50,11 +52,14 @@ variable {C : Contract}
 
 /-! ## Results -/
 
-/-- How a typed run halts: no `stuck`. -/
+/-- How a typed run halts: no `stuck`.  `exhausted` is a push past the
+bound (`Storage.full`): resource exhaustion, which both modalities accept
+(`Modality.onTHalt`, decision 15). -/
 inductive THalt where
   | revert
   | panic
   | diverge
+  | exhausted
   deriving Repr, DecidableEq, Inhabited
 
 abbrev TRes (α : Type) := Except THalt α
@@ -63,6 +68,7 @@ def THalt.erase : THalt → Halt
   | .revert => .revert
   | .panic => .panic
   | .diverge => .diverge
+  | .exhausted => .diverge
 
 /-- A typed result as an untyped one. -/
 def TRes.erase {α β : Type} (f : α → β) : TRes α → Res β
@@ -315,7 +321,7 @@ def ARhs.evalT (σ : TState C Γ) {R : RefTy} : ARhs C Γ R → TRes (Storage C 
   | .path p => do pure (σ.storage, ← p.resolveT σ)
   | .push b _ => do
     let r ← b.resolveT σ
-    if σ.storage.full r then .error .diverge else
+    if σ.storage.full r then .error .exhausted else
     let (st, n) ← TRes.ofOpt (σ.storage.pushPlace r)
     pure (st, r.index (.arr .dyn) n)
 
@@ -596,7 +602,7 @@ def push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)) : TStep 
   let x ← match v with
     | none => pure none
     | some r => do pure (some (← r.valueT σ).strip)
-  if σ.storage.full ref then .error .diverge else
+  if σ.storage.full ref then .error .exhausted else
   let st ← TRes.ofOpt (σ.storage.push ref fun slot => some (x.getD slot))
   pure ⟨σ.withStorage st, List.prefix_refl _⟩
 

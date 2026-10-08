@@ -5,14 +5,14 @@ import Solidity.Semantics.Core.TypedRunErase
 
 `Prog.trun_erase` reads one way: a typed run that ends, ends the scoped run
 in its erasure.  The other way fails in general, since the typed run diverges
-on a loop with no last iteration and on a push onto `2^256 - 1` elements
-(out of gas, `Storage.full`), where the scoped run may end.  A *straight*
-program (`Prog.straight`) has no loop: it assigns simple values, binds
-aliases to paths, pushes defaults, pops, deletes and opens blocks, at paths
-whose indices are simple.  Its typed run does not diverge when every push of
-its scoped run lands below the bound (`Prog.pushesShort`, `Prog.trun_noDiv`),
-and it is on the bridge (`Prog.bridgeOk_of_straight`), so it ends exactly
-where the scoped run does (`Prog.trun_of_run`).  The storage builder
+on a loop with no last iteration and is exhausted on a push onto
+`2^256 - 1` elements (`Storage.full`), where the scoped run may end.  A
+*straight* program (`Prog.straight`) has no loop: it assigns simple values,
+binds aliases to paths, pushes defaults, pops, deletes and opens blocks, at
+paths whose indices are simple.  Its typed run neither diverges nor is
+exhausted when every push of its scoped run lands below the bound
+(`Prog.pushesShort`, `Prog.trun_ends`), so it ends exactly where the scoped
+run does (`Prog.trun_of_run`).  The storage builder
 (`Core.Build.rootsProg`, `Typing/Constructibility.lean`) is straight and its
 pushes are short, which is how a storage the builder reaches is reached by
 the typed run.
@@ -44,6 +44,30 @@ theorem TRes.NoDiv.ofOpt {α : Type} (x : Option α) : (TRes.ofOpt x).NoDiv := b
 
 theorem TRes.NoDiv.ok {α : Type} (a : α) : TRes.NoDiv (Except.ok a : TRes α) :=
   fun h => nomatch h
+
+/-- A typed result that neither diverges nor is exhausted: it ends, reverts
+or panics, as the scoped run does. -/
+def TRes.Ends {α : Type} (t : TRes α) : Prop := t ≠ .error .diverge ∧ t ≠ .error .exhausted
+
+theorem TRes.Ends.bind {α γ : Type} {t : TRes α} (h : t.Ends) {k : α → TRes γ}
+    (hk : ∀ a, (k a).Ends) : (t >>= k).Ends := by
+  match t with
+  | .ok a => exact hk a
+  | .error e => exact ⟨fun h' => h.1 (by cases h'; rfl), fun h' => h.2 (by cases h'; rfl)⟩
+
+theorem TRes.Ends.map {α γ : Type} {t : TRes α} (h : t.Ends) (k : α → γ) :
+    TRes.Ends (t.map k) := by
+  match t with
+  | .ok _ => exact ⟨nofun, nofun⟩
+  | .error e =>
+    exact ⟨fun h' => h.1 (by cases (h' : Except.error e = .error .diverge); rfl),
+      fun h' => h.2 (by cases (h' : Except.error e = .error .exhausted); rfl)⟩
+
+theorem TRes.Ends.ofOpt {α : Type} (x : Option α) : (TRes.ofOpt x).Ends := by
+  cases x <;> exact ⟨nofun, nofun⟩
+
+theorem TRes.Ends.ok {α : Type} (a : α) : TRes.Ends (Except.ok a : TRes α) :=
+  ⟨nofun, nofun⟩
 
 /-! ## Straight programs -/
 
@@ -102,9 +126,7 @@ def Prog.straight : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
 
 end
 
-/-! ## Straight programs are on the bridge -/
-
-section Bridge
+section Simple
 
 variable {Γ : Ctx}
 
@@ -112,38 +134,7 @@ theorem Val.eq_simple_of_isSimple {p : PrimTy} : {v : Val C Γ p} → v.isSimple
     ∃ s, v = .simple s
   | .simple s, _ => ⟨s, rfl⟩
 
-theorem Src.bridgeOk_of_straight {T : Ty} : {r : Src C Γ T} → r.straight = true →
-    r.bridgeOk = true
-  | .val _, _ => rfl
-
-end Bridge
-
-mutual
-
-theorem Stmt.bridgeOk_of_straight : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.straight = true →
-    s.bridgeOk = true
-  | _, _, .assign _ _, h => by
-    simp only [Stmt.straight, Bool.and_eq_true] at h
-    exact Src.bridgeOk_of_straight h.2
-  | _, _, .declStorage .., _ | _, _, .push .., _ | _, _, .pop _, _ | _, _, .delete _, _ => rfl
-  | _, _, .block body, h => Prog.bridgeOk_of_straight body h
-  | _, _, .rebind .., h | _, _, .assignLocal .., h | _, _, .declLocal .., h
-  | _, _, .opAssign .., h | _, _, .incDec .., h | _, _, .assignIncDec .., h
-  | _, _, .transfer .., h | _, _, .send .., h | _, _, .declMem .., h | _, _, .rebindMem .., h
-  | _, _, .assignFromMem .., h | _, _, .assignMem .., h | _, _, .deleteMem .., h
-  | _, _, .assignNew .., h | _, _, .ite .., h | _, _, .require .., h | _, _, .assert .., h
-  | _, _, .revert, h | _, _, .call .., h | _, _, .tryCall .., h | _, _, .loop .., h =>
-    absurd h Bool.false_ne_true
-
-theorem Prog.bridgeOk_of_straight : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → P.straight = true →
-    P.bridgeOk = true
-  | _, _, .nil, _ => rfl
-  | _, _, .cons s P, h => by
-    simp only [Prog.straight, Bool.and_eq_true] at h
-    simp only [Prog.bridgeOk, Stmt.bridgeOk_of_straight s h.1, Prog.bridgeOk_of_straight P h.2,
-      Bool.and_self]
-
-end
+end Simple
 
 /-! ## Pushes below the bound
 
@@ -169,89 +160,169 @@ def Prog.pushesShort : {Γ Γ' : Ctx} → Prog C Γ Γ' → State C Γ → Prop
 
 end
 
-/-! ## Straight programs do not diverge -/
+/-! ## Evaluators end
 
-section NoDiv
+Every evaluator, and every write but a push, neither diverges nor is
+exhausted (`TRes.Ends`): a failed read, a bad index, an overflow revert
+(`TRes.ofOpt`). -/
 
-variable {Γ : Ctx}
+section Ends
 
-theorem Val.evalT_noDiv_of_isSimple (σ : TState C Γ) {p : PrimTy} {v : Val C Γ p}
-    (h : v.isSimple = true) : (v.evalT σ).NoDiv := by
-  obtain ⟨s, rfl⟩ := Val.eq_simple_of_isSimple h
-  exact TRes.NoDiv.ok _
+variable {Γ : Ctx} (σ : TState C Γ)
 
 mutual
 
-theorem SPath.resolveT_noDiv (σ : TState C Γ) : {T : Ty} → (b : SPath C Γ T) → b.straight = true →
-    (b.resolveT σ).NoDiv
-  | _, .alias i, _ => by
+theorem SPath.resolveT_ends : {T : Ty} → (b : SPath C Γ T) → (b.resolveT σ).Ends
+  | _, .alias i => by
     show (match (TEnv.get i σ.env : Option (SRef C _)) with
       | some r => .ok r
-      | none => .error .revert : TRes _).NoDiv
-    cases (TEnv.get i σ.env : Option (SRef C _)) <;> exact fun h => nomatch h
-  | _, .loc l, h => Loc.resolveT_noDiv σ l h
+      | none => .error .revert : TRes _).Ends
+    cases (TEnv.get i σ.env : Option (SRef C _)) <;> exact ⟨nofun, nofun⟩
+  | _, .loc l => Loc.resolveT_ends l
 
-theorem Loc.resolveT_noDiv (σ : TState C Γ) : {T : Ty} → (l : Loc C Γ T) → l.straight = true →
-    (l.resolveT σ).NoDiv
-  | _, .root .., _ => TRes.NoDiv.ok _
-  | _, .field b _ _, h => (SPath.resolveT_noDiv σ b h).bind fun _ => TRes.NoDiv.ok _
-  | _, .index _ b i, h => by
-    simp only [Loc.straight, Bool.and_eq_true] at h
-    exact (SPath.resolveT_noDiv σ b h.1).bind fun _ =>
-      (Val.evalT_noDiv_of_isSimple σ h.2).bind fun _ =>
-        (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+theorem Loc.resolveT_ends : {T : Ty} → (l : Loc C Γ T) → (l.resolveT σ).Ends
+  | _, .root .. => TRes.Ends.ok _
+  | _, .field b _ _ => (SPath.resolveT_ends b).bind fun _ => TRes.Ends.ok _
+  | _, .index _ b i => (SPath.resolveT_ends b).bind fun _ => (Val.evalT_ends i).bind fun _ =>
+      (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+
+theorem MPath.mvalT_ends : {T : Ty} → (b : MPath C Γ T) → (b.mvalT σ).Ends
+  | _, .var .. => TRes.Ends.ok _
+  | _, .loc l => (MLoc.addrT_ends l).bind fun _ => TRes.Ends.ofOpt _
+
+theorem MLoc.addrT_ends : {T : Ty} → (l : MLoc C Γ T) → (l.addrT σ).Ends
+  | _, .field b _ _ => (MPath.mvalT_ends b).bind fun _ => TRes.Ends.ok _
+  | _, .index _ b i => (MPath.mvalT_ends b).bind fun _ => (Val.evalT_ends i).bind fun _ =>
+      TRes.Ends.ok _
+
+theorem Val.evalT_ends : {p : PrimTy} → (v : Val C Γ p) → (v.evalT σ).Ends
+  | _, .simple _ => TRes.Ends.ok _
+  | _, .read l => (Loc.resolveT_ends l).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ =>
+      TRes.Ends.ok _
+  | _, .binop op _ hq a b => by
+    subst hq
+    refine (Val.evalT_ends a).bind fun x => ?_
+    show (match op.shortT x with
+      | some y => pure y
+      | none => do
+        let y ← b.evalT σ
+        TRes.ofOpt (op.evalT x y) : TRes _).Ends
+    cases op.shortT x with
+    | some _ => exact TRes.Ends.ok _
+    | none => exact (Val.evalT_ends b).bind fun _ => TRes.Ends.ofOpt _
+  | _, .unop op _ hq a => by
+    subst hq
+    exact (Val.evalT_ends a).bind fun _ => TRes.Ends.ofOpt _
+  | _, .ternary c a b => (Val.evalT_ends c).bind fun x => by
+    cases x
+    · exact Val.evalT_ends b
+    · exact Val.evalT_ends a
+  | _, .readMem l => (MLoc.addrT_ends l).bind fun _ => TRes.Ends.ofOpt _
+  | _, .len b hp => by
+    subst hp
+    exact (SPath.resolveT_ends b).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+  | _, .mlen b hp => by
+    subst hp
+    exact (MPath.mvalT_ends b).bind fun _ => TRes.Ends.ok _
 
 end
 
-theorem Src.valueT_noDiv (σ : TState C Γ) {T : Ty} : {r : Src C Γ T} → r.straight = true →
-    (r.valueT σ).NoDiv
-  | .val _, h => (Val.evalT_noDiv_of_isSimple σ h).bind fun _ => TRes.NoDiv.ok _
+theorem Src.valueT_ends {T : Ty} : (r : Src C Γ T) → (r.valueT σ).Ends
+  | .val v => (Val.evalT_ends σ v).bind fun _ => TRes.Ends.ok _
+  | .copy p _ => (SPath.resolveT_ends σ p).bind fun _ => TRes.Ends.ofOpt _
 
-theorem ARhs.evalT_noDiv (σ : TState C Γ) {R : RefTy} : {r : ARhs C Γ R} → r.straight = true →
-    (r.evalT σ).NoDiv
-  | .path p, h => (SPath.resolveT_noDiv σ p h).bind fun _ => TRes.NoDiv.ok _
+theorem MSrc.mvalT_ends {T : Ty} : (r : MSrc C Γ T) → (r.mvalT σ).Ends
+  | .val v => Val.evalT_ends σ v
+  | .ref p => MPath.mvalT_ends σ p
 
-end NoDiv
+theorem MRhs.evalT_ends {R : RefTy} : (r : MRhs C Γ R) → (r.evalT σ).Ends
+  | .alias p => (MPath.mvalT_ends σ p).bind fun _ => TRes.Ends.ok _
+  | .copy p _ => (SPath.resolveT_ends σ p).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ =>
+      TRes.Ends.ok _
+  | .newArr .. => TRes.Ends.ok _
+
+theorem opStoreT_ends (op : BinOp) {p : PrimTy} (r : SRef C (.prim p)) (v : p.Denote) :
+    (opStoreT σ op r v).Ends :=
+  (TRes.Ends.ofOpt _).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ =>
+    (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+
+theorem opMemT_ends (op : BinOp) {p : PrimTy} (a : MAddr σ.H (.prim p)) (v : p.Denote) :
+    (opMemT σ op a v).Ends :=
+  (TRes.Ends.ofOpt _).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ =>
+    (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+
+theorem OpLoc.storeT_ends (op : BinOp) {p : PrimTy} : (l : OpLoc C Γ p) → (v : p.Denote) →
+    (l.storeT σ op v).Ends
+  | .local _, _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+  | .root .., _ => opStoreT_ends σ op _ _
+  | .field .., _ => (Loc.resolveT_ends σ _).bind fun _ => opStoreT_ends σ op _ _
+  | .index .., _ => (Loc.resolveT_ends σ _).bind fun _ => opStoreT_ends σ op _ _
+  | .mfield .., _ => (MLoc.addrT_ends σ _).bind fun _ => opMemT_ends σ op _ _
+  | .mindex .., _ => (MLoc.addrT_ends σ _).bind fun _ => opMemT_ends σ op _ _
+
+theorem bumpStoreT_ends (op : IncDec) {p : PrimTy} (r : SRef C (.prim p)) :
+    (bumpStoreT σ op r).Ends :=
+  (TRes.Ends.ofOpt _).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ =>
+    (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+
+theorem bumpMemT_ends (op : IncDec) {p : PrimTy} (a : MAddr σ.H (.prim p)) :
+    (bumpMemT σ op a).Ends :=
+  (TRes.Ends.ofOpt _).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ =>
+    (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+
+theorem OpLoc.bumpT_ends (op : IncDec) {p : PrimTy} : (l : OpLoc C Γ p) → (l.bumpT σ op).Ends
+  | .local _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+  | .root .. => bumpStoreT_ends σ op _
+  | .field .. => (Loc.resolveT_ends σ _).bind fun _ => bumpStoreT_ends σ op _
+  | .index .. => (Loc.resolveT_ends σ _).bind fun _ => bumpStoreT_ends σ op _
+  | .mfield .. => (MLoc.addrT_ends σ _).bind fun _ => bumpMemT_ends σ op _
+  | .mindex .. => (MLoc.addrT_ends σ _).bind fun _ => bumpMemT_ends σ op _
+
+end Ends
+
+/-! ## Straight programs end -/
 
 mutual
 
-/-- **A straight statement's typed run does not diverge**, its pushes below
-the bound. -/
-theorem Stmt.trun_noDiv : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.straight = true →
-    ∀ σ : TState C Γ, s.pushesShort σ.erase → (s.trun σ).NoDiv
-  | _, _, .assign l r, h, σ, _ => by
-    simp only [Stmt.straight, Bool.and_eq_true] at h
-    exact (Src.valueT_noDiv σ h.2).bind fun _ => (Loc.resolveT_noDiv σ l h.1).bind fun _ =>
-      (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+/-- **A straight statement's typed run neither diverges nor is exhausted**,
+its pushes below the bound. -/
+theorem Stmt.trun_ends : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.straight = true →
+    ∀ σ : TState C Γ, s.pushesShort σ.erase → (s.trun σ).Ends
+  | _, _, .assign l r, _, σ, _ =>
+    (Src.valueT_ends σ r).bind fun _ => (Loc.resolveT_ends σ l).bind fun _ =>
+      (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
   | _, _, .declStorage _ _ init, h, σ, _ => by
     cases init with
-    | none => exact TRes.NoDiv.ok _
+    | none => exact TRes.Ends.ok _
     | some r =>
       simp only [Stmt.straight, Option.all_some] at h
-      exact (ARhs.evalT_noDiv σ h).bind fun _ => TRes.NoDiv.ok _
+      cases r with
+      | path p =>
+        exact ((SPath.resolveT_ends σ p).bind fun _ => TRes.Ends.ok _).bind fun _ => TRes.Ends.ok _
+      | push _ _ => exact absurd h Bool.false_ne_true
   | _, _, .push b v _, h, σ, hp => by
     simp only [Stmt.straight, Bool.and_eq_true, Option.isNone_iff_eq_none] at h
-    obtain ⟨hb, rfl⟩ := h
-    show (TRun.push b none σ).NoDiv
+    obtain ⟨_, rfl⟩ := h
+    show (TRun.push b none σ).Ends
     unfold TRun.push
     have hres := b.resolveT_erase σ
-    have hnd := SPath.resolveT_noDiv σ b hb
+    have hnd := SPath.resolveT_ends σ b
     cases hr : b.resolveT σ with
     | error e =>
       rw [hr] at hnd
       simp only [bind, Except.bind]
-      exact fun h' => hnd (by cases (h' : Except.error e = .error .diverge); rfl)
+      exact ⟨fun h' => hnd.1 (by cases h'; rfl), fun h' => hnd.2 (by cases h'; rfl)⟩
     | ok ref =>
       rw [hr] at hres
       have hfull : σ.storage.full ref = false :=
         Storage.full_eq_false rfl ref fun elems sh fx hf => hp _ _ elems sh fx hres hf
       simp only [bind, Except.bind, pure, Except.pure, hfull, Bool.false_eq_true, ↓reduceIte]
-      exact (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
-  | _, _, .pop b, h, σ, _ => (SPath.resolveT_noDiv σ b h).bind fun _ =>
-      (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
-  | _, _, .delete l, h, σ, _ => (Loc.resolveT_noDiv σ l h).bind fun _ =>
-      (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
-  | _, _, .block body, h, σ, hp => (Prog.trun_noDiv body h σ hp).map _
+      exact (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+  | _, _, .pop b, _, σ, _ => (SPath.resolveT_ends σ b).bind fun _ =>
+      (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+  | _, _, .delete l, _, σ, _ => (Loc.resolveT_ends σ l).bind fun _ =>
+      (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+  | _, _, .block body, h, σ, hp => (Prog.trun_ends body h σ hp).map _
   | _, _, .rebind .., h, _, _ | _, _, .assignLocal .., h, _, _ | _, _, .declLocal .., h, _, _
   | _, _, .opAssign .., h, _, _ | _, _, .incDec .., h, _, _ | _, _, .assignIncDec .., h, _, _
   | _, _, .transfer .., h, _, _ | _, _, .send .., h, _, _ | _, _, .declMem .., h, _, _
@@ -262,26 +333,26 @@ theorem Stmt.trun_noDiv : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.straight 
   | _, _, .loop .., h, _, _ =>
     absurd h Bool.false_ne_true
 
-/-- **A straight program's typed run does not diverge**, its pushes below
-the bound. -/
-theorem Prog.trun_noDiv : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → P.straight = true →
-    ∀ σ : TState C Γ, P.pushesShort σ.erase → (P.trun σ).NoDiv
-  | _, _, .nil, _, _, _ => TRes.NoDiv.ok _
+/-- **A straight program's typed run neither diverges nor is exhausted**,
+its pushes below the bound. -/
+theorem Prog.trun_ends : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → P.straight = true →
+    ∀ σ : TState C Γ, P.pushesShort σ.erase → (P.trun σ).Ends
+  | _, _, .nil, _, _, _ => TRes.Ends.ok _
   | _, _, .cons s P, h, σ, hp => by
     simp only [Prog.straight, Bool.and_eq_true] at h
-    show (TRun.seq s.trunR P.trunR σ).NoDiv
+    show (TRun.seq s.trunR P.trunR σ).Ends
     unfold TRun.seq
     cases hs : s.trunR σ with
     | ok o =>
       have hr : s.run σ.erase = .ok o.st.erase := by
-        have := Stmt.trun_erase σ s (Stmt.bridgeOk_of_straight s h.1)
+        have := Stmt.trun_erase σ s
         simp only [Stmt.trun, hs] at this
         exact this
-      exact (Prog.trun_noDiv P h.2 o.st (hp.2 _ hr)).map _
+      exact (Prog.trun_ends P h.2 o.st (hp.2 _ hr)).map _
     | error e =>
-      have := Stmt.trun_noDiv s h.1 σ hp.1
+      have := Stmt.trun_ends s h.1 σ hp.1
       simp only [Stmt.trun, hs] at this
-      exact fun h' => this (by cases (h' : Except.error e = .error .diverge); rfl)
+      exact ⟨fun h' => this.1 (by cases h'; rfl), fun h' => this.2 (by cases h'; rfl)⟩
 
 end
 
@@ -291,8 +362,8 @@ theorem Prog.trun_of_run {Γ Γ' : Ctx} {P : Prog C Γ Γ'} (h : P.straight = tr
     (σ : TState C Γ) {τ : State C Γ'} (hr : P.run σ.erase = .ok τ)
     (hp : P.pushesShort σ.erase) :
     ∃ o : Out C σ.H Γ', P.trun σ = .ok o ∧ o.st.erase = τ := by
-  have ha := Prog.trun_erase σ P (Prog.bridgeOk_of_straight P h)
-  have hn := Prog.trun_noDiv P h σ hp
+  have ha := Prog.trun_erase σ P
+  have hn := Prog.trun_ends P h σ hp
   cases hq : P.trun σ with
   | ok o =>
     rw [hq] at ha
@@ -308,6 +379,7 @@ theorem Prog.trun_of_run {Γ Γ' : Ctx} {P : Prog C Γ Γ'} (h : P.straight = tr
     | panic =>
       have he : P.run σ.erase = .error .panic := ha
       rw [hr] at he; exact nomatch he
-    | diverge => exact absurd rfl hn
+    | diverge => exact absurd rfl hn.1
+    | exhausted => exact absurd rfl hn.2
 
 end Solidity.Core

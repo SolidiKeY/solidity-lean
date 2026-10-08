@@ -30,12 +30,12 @@ variable {C : Contract}
 def Fml.stateInv (I : Fml C []) : StateInv C := ⟨fun σ => tholds σ I⟩
 
 /-- `p` after a callback run of a program `o`, then of its frames `κ`: of the
-state the frames end in, `m.onHalt` of a halt that is not a panic, and
+state the frames end in, `m.onTHalt` of a halt that is not a panic, and
 never of a broken invariant. -/
 def COut.thenF (J : StateInv C) {H : HTy} {Γ₁ Γ₀ : Ctx} (κ : Frames C Γ₁ Γ₀) (m : Modality)
     (p : TState C Γ₀ → Prop) : COut C H Γ₁ → Prop
   | .ok o => ∀ o', ExecF J o.st κ o' → o'.after m p
-  | .halt e => m.onHalt ∧ e ≠ .panic
+  | .halt e => m.onTHalt e ∧ e ≠ .panic
   | .violated => False
 
 /-- **Whether `φ` holds in the typed state `σ` when every payment may call
@@ -106,7 +106,7 @@ theorem Prog.trunFrames_error {σ : TState C Γ} {P : Prog C Γ Γ₁} {e : THal
   rfl
 
 theorem afterRunTR_error {α : Type} (m : Modality) (p : α → Prop) (e : THalt) :
-    m.afterRunTR p (.error e : TRes α) ↔ m.onHalt ∧ e ≠ .panic := by
+    m.afterRunTR p (.error e : TRes α) ↔ m.onTHalt e ∧ e ≠ .panic := by
   simp only [Modality.afterRunTR, ne_eq, Except.error.injEq]
 
 theorem afterRunTR_ok {α : Type} (m : Modality) (p : α → Prop) (a : α) :

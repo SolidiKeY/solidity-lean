@@ -239,7 +239,7 @@ it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) : holds C.initState (Fml.wt C) :=
   holds_wt.2 (wt_of_reachable hnd hdeep
-    ⟨[], .nil, ⟨Core.TState.init C, List.prefix_refl _⟩, rfl, rfl, Core.Storage.init_erase C⟩
+    ⟨[], .nil, ⟨Core.TState.init C, List.prefix_refl _⟩, rfl, Core.Storage.init_erase C⟩
     (storageWordsB_init hnd))
 
 /-! ## The obligations -/

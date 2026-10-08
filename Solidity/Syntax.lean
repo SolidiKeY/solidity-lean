@@ -398,7 +398,7 @@ macro_rules
         -- a struct of the table; an enum never reaches here (`expandMemberTy`),
         -- nor does a narrow type where one may stand (`expandMemberTyW`)
         if (narrowTy? s).isSome then Lean.Macro.throwErrorAt x (narrowNestedMsg s)
-        else if (structDef s).isEmpty then Lean.Macro.throwErrorAt x (unknownTyMsg s)
+        else if (structDef s).isEmpty then Lean.Macro.throwErrorAt x (unknownStructMsg s)
         else `(Ty.struct $(Lean.quote s))
   | `(ty!(address payable)) => `(Ty.uint)
   | `(ty!(mapping($K => $V))) => `(Ty.mapping ty!($K) ty!($V))
@@ -2185,7 +2185,8 @@ abbrev ECtx := List (Name × LocalTy)
 
 /-- A type as read, against the contract: a primitive type (`PrimTy.ofName?`),
 an enum of `C` (a `uint`, as a state variable of it is), a struct of
-`structDef`.  Any other name is refused (`unknownTyMsg`). -/
+`structDef`.  Any other name is refused (`unknownStructMsg`: a struct
+solc refuses, `refusedStructs`, or an unknown type). -/
 def elabTy (C : Contract) : RawTy → Except String Ty
   | .named s =>
     match PrimTy.ofName? s with
@@ -2193,7 +2194,7 @@ def elabTy (C : Contract) : RawTy → Except String Ty
     | none =>
       if (lookupBy s C.enums).isSome then pure .uint
       else if (narrowTy? s).isSome then throw (narrowNestedMsg s)
-      else if (structDef s).isEmpty then throw (unknownTyMsg s)
+      else if (structDef s).isEmpty then throw (unknownStructMsg s)
       else pure (.struct s)
   | .mapping k v => do pure (.mapping (← elabTy C k) (← elabTy C v))
   | .array t => do pure (.array (← elabTy C t))

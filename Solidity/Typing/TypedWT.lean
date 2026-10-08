@@ -12,38 +12,11 @@ typing its heap typing lists (`HTy.toHeapTy`), with no run to follow
 (`TState.erase_wt`).  `Stmt.run_wt`, which follows the scoped run, is then
 what the typed run needs no proof of.
 
-"Mostly": the untyped typing (`SVal.hasTy`, `MObj.hasTyH`) reads a struct's
-members by name, the typed value by position, so the two agree when no
-struct has two members of one name (`Ty.nodupDeep`: every struct the type
-reaches, through members, elements and mapping values, is one of
-`Core.nodupStructs`, all but `BadDup`).  The theorem takes that of the
-contract's state variables and of the heap typing, and the layout's keys
-distinct.
+The untyped typing (`SVal.hasTy`, `MObj.hasTyH`) reads a struct's members
+by name, the typed value by position; the two agree since no struct has two
+members of one name (`Core.structDef_nodup`, decision 16).  The theorem
+takes the layout's keys distinct.
 -/
-
-namespace Solidity
-
-open Semantics (structDef lookupBy nodupKeysB)
-
-/-- No struct `T` reaches, through members, elements or mapping values, has
-two members of one name: each is one of `Core.nodupStructs`.  Decided by
-`rfl`, as `Ty.nodupS`, which does not look into a mapping. -/
-def Ty.nodupDeep : Ty → Bool
-  | .prim _ => true
-  | .ref (.struct s) => s ∈ Core.nodupStructs
-  | .ref (.array e) => e.nodupDeep
-  | .ref (.fixed e _) => e.nodupDeep
-  | .ref (.mapping _ v) => v.nodupDeep
-
-theorem nodupStructs_deep : ∀ s ∈ Core.nodupStructs,
-    nodupKeysB (structDef s) = true ∧ ∀ fT ∈ structDef s, fT.2.nodupDeep = true := by
-  decide
-
-theorem Ty.nodupDeep_struct {s : Name} (h : (Ty.ref (.struct s)).nodupDeep = true) :
-    nodupKeysB (structDef s) = true ∧ ∀ fT ∈ structDef s, fT.2.nodupDeep = true :=
-  nodupStructs_deep s (by simpa only [Ty.nodupDeep, decide_eq_true_eq] using h)
-
-end Solidity
 
 namespace Solidity.Core
 
@@ -57,69 +30,65 @@ variable {C : Contract}
 
 mutual
 
-theorem SVal.erase_hasTy : {T : Ty} → (v : SVal T) → T.nodupDeep = true →
-    v.erase.hasTy T = true
-  | _, .prim (p := p) x, _ => by
+theorem SVal.erase_hasTy : {T : Ty} → (v : SVal T) → v.erase.hasTy T = true
+  | _, .prim (p := p) x => by
     rw [SVal.erase_prim]
     cases p <;> rfl
-  | _, .struct (s := s) fs, h => by
+  | _, .struct (s := s) fs => by
     rw [SVal.erase_struct]
-    have hs := Ty.nodupDeep_struct h
-    exact SFields.erase_hasTy s fs (fun _ hm => lookupBy_eq_of_nodup hs.1 hm) hs.2
-  | _, .array e sh _, h => by
+    exact SFields.erase_hasTy s fs fun _ hm => lookupBy_eq_of_nodup (structDef_nodup s) hm
+  | _, .array e sh _ => by
     rw [SVal.erase_array]
     simp only [Semantics.SVal.hasTy, Bool.not_false, Bool.true_and, Bool.and_eq_true]
-    exact ⟨SVec.erase_hasTy e h, SList.erase_hasTy sh h⟩
-  | _, .fixed (n := n) e, h => by
+    exact ⟨SVec.erase_hasTy e, SList.erase_hasTy sh⟩
+  | _, .fixed (n := n) e => by
     rw [SVal.erase_fixed]
     simp only [Semantics.SVal.hasTy, SVec.length_erase, beq_self_eq_true, Bool.true_and,
       Bool.and_eq_true]
-    exact ⟨SVec.erase_hasTy e h, rfl⟩
-  | _, .map m d, h => by
+    exact ⟨SVec.erase_hasTy e, rfl⟩
+  | _, .map m d => by
     rw [SVal.erase_map]
     simp only [Semantics.SVal.hasTy, Bool.and_eq_true]
-    exact ⟨SMap.erase_hasTy m h, SVal.erase_hasTy d h⟩
+    exact ⟨SMap.erase_hasTy m, SVal.erase_hasTy d⟩
 
 theorem SFields.erase_hasTy (s : Name) : {fs : List (Name × Ty)} → (x : SFields fs) →
-    (∀ fT ∈ fs, lookupBy fT.1 (structDef s) = some fT.2) → (∀ fT ∈ fs, fT.2.nodupDeep = true) →
+    (∀ fT ∈ fs, lookupBy fT.1 (structDef s) = some fT.2) →
     Semantics.SVal.hasTy.hasTyFields s x.erase = true
-  | _, .nil, _, _ => by rw [SFields.erase_nil]; rfl
-  | _, .cons (f := f) (T := T) v rest, hl, hn => by
+  | _, .nil, _ => by rw [SFields.erase_nil]; rfl
+  | _, .cons (f := f) (T := T) v rest, hl => by
     rw [SFields.erase_cons]
     simp only [Semantics.SVal.hasTy.hasTyFields, hl (f, T) List.mem_cons_self,
-      SVal.erase_hasTy v (hn (f, T) List.mem_cons_self), Bool.true_and]
-    exact SFields.erase_hasTy s rest (fun fT hm => hl fT (List.mem_cons_of_mem _ hm))
-      (fun fT hm => hn fT (List.mem_cons_of_mem _ hm))
+      SVal.erase_hasTy v, Bool.true_and]
+    exact SFields.erase_hasTy s rest fun fT hm => hl fT (List.mem_cons_of_mem _ hm)
 
-theorem SList.erase_hasTy : {E : Ty} → (l : SList E) → E.nodupDeep = true →
+theorem SList.erase_hasTy : {E : Ty} → (l : SList E) →
     Semantics.SVal.hasTy.hasTyElems E l.erase = true
-  | _, .nil, _ => by rw [SList.erase_nil]; rfl
-  | _, .cons v rest, h => by
+  | _, .nil => by rw [SList.erase_nil]; rfl
+  | _, .cons v rest => by
     rw [SList.erase_cons]
-    simp only [Semantics.SVal.hasTy.hasTyElems, SVal.erase_hasTy v h, SList.erase_hasTy rest h,
+    simp only [Semantics.SVal.hasTy.hasTyElems, SVal.erase_hasTy v, SList.erase_hasTy rest,
       Bool.and_self]
 
-theorem SVec.erase_hasTy : {E : Ty} → {n : Nat} → (l : SVec E n) → E.nodupDeep = true →
+theorem SVec.erase_hasTy : {E : Ty} → {n : Nat} → (l : SVec E n) →
     Semantics.SVal.hasTy.hasTyElems E l.erase = true
-  | _, _, .nil, _ => by rw [SVec.erase_nil]; rfl
-  | _, _, .cons v rest, h => by
+  | _, _, .nil => by rw [SVec.erase_nil]; rfl
+  | _, _, .cons v rest => by
     rw [SVec.erase_cons]
-    simp only [Semantics.SVal.hasTy.hasTyElems, SVal.erase_hasTy v h, SVec.erase_hasTy rest h,
+    simp only [Semantics.SVal.hasTy.hasTyElems, SVal.erase_hasTy v, SVec.erase_hasTy rest,
       Bool.and_self]
 
-theorem SMap.erase_hasTy : {V : Ty} → (m : SMap V) → V.nodupDeep = true →
+theorem SMap.erase_hasTy : {V : Ty} → (m : SMap V) →
     Semantics.SVal.hasTy.hasTyEntries V m.erase = true
-  | _, .nil, _ => by rw [SMap.erase_nil]; rfl
-  | _, .cons _ v rest, h => by
+  | _, .nil => by rw [SMap.erase_nil]; rfl
+  | _, .cons _ v rest => by
     rw [SMap.erase_cons]
-    simp only [Semantics.SVal.hasTy.hasTyEntries, SVal.erase_hasTy v h, SMap.erase_hasTy rest h,
+    simp only [Semantics.SVal.hasTy.hasTyEntries, SVal.erase_hasTy v, SMap.erase_hasTy rest,
       Bool.and_self]
 
 end
 
 /-- A typed storage erases to a well-typed one. -/
-theorem Storage.erase_wt (hnd : nodupKeysB C.vars = true)
-    (hC : ∀ g ∈ C.vars, g.2.nodupDeep = true) (st : Storage C) :
+theorem Storage.erase_wt (hnd : nodupKeysB C.vars = true) (st : Storage C) :
     wellTypedStorageB C.layout st.erase = true := by
   refine List.all_eq_true.mpr fun g hg => ?_
   have hl : lookupBy g.1 C.vars = some g.2 := lookupBy_eq_of_nodup hnd hg
@@ -127,7 +96,7 @@ theorem Storage.erase_wt (hnd : nodupKeysB C.vars = true)
     | some v => v.hasTy g.2
     | none => false) = true
   rw [SFields.lookupBy_erase st hl]
-  exact SVal.erase_hasTy _ (hC g hg)
+  exact SVal.erase_hasTy _
 
 /-! ## Paths -/
 
@@ -218,31 +187,29 @@ theorem MVal.erase_hasTyHElems {H : HTy} (E : Ty) : (l : List (MVal H E)) →
       MVal.erase_hasTyHElems E l, Bool.and_self]
 
 theorem MObj.erase_hasTyH {H : HTy} : (R : RefTy) → (o : MObj H R) →
-    (Ty.ref R).nodupDeep = true →
     Semantics.MObj.hasTyH (HTy.toHeapTy 0 H) (MObj.erase R o) (.ref R) = true
-  | .struct s, o, h =>
-    MFields.erase_hasTyH s (structDef s) o fun _ hm => lookupBy_eq_of_nodup (Ty.nodupDeep_struct h).1 hm
-  | .array E, o, _ => by
+  | .struct s, o =>
+    MFields.erase_hasTyH s (structDef s) o fun _ hm => lookupBy_eq_of_nodup (structDef_nodup s) hm
+  | .array E, o => by
     simp only [MObj.erase, Semantics.MObj.hasTyH, Bool.not_false, Bool.true_and]
     exact MVal.erase_hasTyHElems E (o : {l : List (MVal H E) // l.length < 2 ^ 256}).1
-  | .fixed E n, o, _ => by
+  | .fixed E n, o => by
     obtain ⟨l, hl⟩ := (o : {l : List (MVal H E) // l.length = n})
     simp only [MObj.erase, Semantics.MObj.hasTyH, List.length_map, hl, beq_self_eq_true,
       Bool.true_and]
     exact MVal.erase_hasTyHElems E l
-  | .mapping _ _, o, _ => (o : Empty).elim
+  | .mapping _ _, o => (o : Empty).elim
 
 /-- Every object of a typed heap is of the type its typing lists. -/
 theorem Objs.erase_typed {H : HTy} (start : Nat) : (Rs : List RefTy) → (os : Objs H Rs) →
-    (∀ R ∈ Rs, (Ty.ref R).nodupDeep = true) →
     (HTy.toHeapTy start Rs).all (fun r => match lookupBy r.1 (Objs.erase start Rs os) with
       | some obj => obj.hasTyH (HTy.toHeapTy 0 H) r.2
       | none => false) = true
-  | [], _, _ => rfl
-  | R :: Rs, os, hR => by
+  | [], _ => rfl
+  | R :: Rs, os => by
     simp only [HTy.toHeapTy, List.all_cons, Objs.erase, lookupBy, ↓reduceIte,
-      MObj.erase_hasTyH R os.1 (hR R List.mem_cons_self), Bool.true_and]
-    have ih := Objs.erase_typed (start + 1) Rs os.2 fun R' hm => hR R' (List.mem_cons_of_mem _ hm)
+      MObj.erase_hasTyH R os.1, Bool.true_and]
+    have ih := Objs.erase_typed (start + 1) Rs os.2
     refine List.all_eq_true.mpr fun e he => ?_
     have hne : e.1 ≠ start := Nat.ne_of_gt (HTy.mem_toHeapTy he)
     simp only [if_neg hne]
@@ -285,19 +252,16 @@ theorem TEnv.erase_wt {H : HTy} : (Γ : Ctx) → (e : TEnv C H Γ) →
 
 /-- **A typed state erases to a well-typed one**, under the store typing its
 heap typing lists: `RunWT` by construction, for a contract whose state
-variables, and a heap whose objects, reach no struct with two members of one
-name. -/
-theorem TState.erase_wt {Γ : Ctx} (hnd : nodupKeysB C.vars = true)
-    (hC : ∀ g ∈ C.vars, g.2.nodupDeep = true) (σ : TState C Γ)
-    (hH : ∀ R ∈ σ.H, (Ty.ref R).nodupDeep = true) :
+variables have distinct names. -/
+theorem TState.erase_wt {Γ : Ctx} (hnd : nodupKeysB C.vars = true) (σ : TState C Γ) :
     RunWT C (HTy.toHeapTy 0 σ.H) σ.erase :=
-  ⟨⟨hnd, HTy.nodup_toHeapTy _, Storage.erase_wt hnd hC σ.storage,
-      Objs.erase_typed 0 σ.H σ.heap hH,
+  ⟨⟨hnd, HTy.nodup_toHeapTy _, Storage.erase_wt hnd σ.storage,
+      Objs.erase_typed 0 σ.H σ.heap,
       fun _ hid => Objs.lookupBy_erase_ge σ.H σ.heap (by simpa only [Nat.zero_add] using hid)⟩,
     TEnv.erase_wt Γ σ.env⟩
 
 /-- The initial state of `StandardExample` erases to a well-typed one. -/
 example : RunWT StandardExample [] (TState.init StandardExample).erase :=
-  TState.erase_wt (by decide) (by decide) (TState.init StandardExample) (fun _ h => nomatch h)
+  TState.erase_wt (by decide) (TState.init StandardExample)
 
 end Solidity.Core

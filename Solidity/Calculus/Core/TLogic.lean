@@ -38,12 +38,13 @@ open Solidity (Modality)
 variable {C : Contract}
 
 /-- `p` after a typed run under `m` (`Modality.afterRunC`): `p` of the state
-it ends in, `m.onHalt` on a halt, and no panic. -/
+it ends in, `m.onTHalt` on a halt (both modalities accept `exhausted`,
+decision 15), and no panic. -/
 def _root_.Solidity.Modality.afterRunTR {α : Type} (m : Modality) (p : α → Prop) (r : TRes α) :
     Prop :=
   (match r with
     | .ok a => p a
-    | .error _ => m.onHalt) ∧ r ≠ .error .panic
+    | .error e => m.onTHalt e) ∧ r ≠ .error .panic
 
 /-- The state a modality's program, then its frames, end in. -/
 def Prog.trunFrames {Γ Γ₁ Γ₀ : Ctx} (σ : TState C Γ) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) :

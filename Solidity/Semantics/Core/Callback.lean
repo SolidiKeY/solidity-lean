@@ -78,11 +78,11 @@ def map (f : Out C H Γ → Out C H' Δ) : COut C H Γ → COut C H' Δ
   | .halt e => .halt e
   | .violated => .violated
 
-/-- `p` after a run under `m`: of the state it ends in, `m.onHalt` of a halt
+/-- `p` after a run under `m`: of the state it ends in, `m.onTHalt` of a halt
 that is not a panic, and never of a panic or of a broken invariant. -/
 def after (m : Modality) (p : TState C Γ → Prop) : COut C H Γ → Prop
   | .ok o => p o.st
-  | .halt e => m.onHalt ∧ e ≠ .panic
+  | .halt e => m.onTHalt e ∧ e ≠ .panic
   | .violated => False
 
 theorem map_ofRes (f : Out C H Γ → Out C H' Δ) (r : TRes (Out C H Γ)) :
@@ -96,7 +96,7 @@ theorem after_ofRes_ok (m : Modality) (p : TState C Γ → Prop) (o : Out C H Γ
     (ofRes (.ok o)).after m p ↔ p o.st := Iff.rfl
 
 theorem after_ofRes_error (m : Modality) (p : TState C Γ → Prop) (e : THalt) :
-    (ofRes (.error e : TRes (Out C H Γ))).after m p ↔ m.onHalt ∧ e ≠ .panic := Iff.rfl
+    (ofRes (.error e : TRes (Out C H Γ))).after m p ↔ m.onTHalt e ∧ e ≠ .panic := Iff.rfl
 
 end COut
 

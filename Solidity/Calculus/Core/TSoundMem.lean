@@ -228,7 +228,7 @@ theorem tsound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref
   show TRes.Sim _ ((TRun.assignMem (.index a (.loc l) i) (.ref src) σ).map _)
   cases hb : (MPath.loc l).mvalT σ with
   | error h' =>
-    have hp : h' ≠ .panic := fun e => MPath.mvalT_noPanic σ (.loc l) (e ▸ hb)
+    have hp : h' = .revert := MPath.mvalT_revert σ (.loc l) hb
     simp only [TRun.assignMem, TRes.map_bind]
     refine TRes.Sim.err_bind (MSrc.mvalT_noPanic σ _) hp fun _ _ => ?_
     simp only [MLoc.addrT, hb]
@@ -238,7 +238,7 @@ theorem tsound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref
     rw [Prog.trunSt_declLocal_cons, TRes.map_bind', Val.evalT_up]
     cases hi : i.evalT σ with
     | error h' =>
-      have hp : h' ≠ .panic := fun e => Val.evalT_noPanic σ i (e ▸ hi)
+      have hp : h' = .revert := Val.evalT_revert σ i hi
       simp only [TRun.assignMem, TRes.map_bind]
       refine TRes.Sim.err_bind (MSrc.mvalT_noPanic σ _) hp fun _ _ => ?_
       simp only [MLoc.addrT, hb, hi, ok_bind]

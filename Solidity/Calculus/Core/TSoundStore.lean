@@ -10,10 +10,9 @@ captures several parts runs them as a block (`Prog.trunSt_declLocal_cons`
 and its kin), its statement read on the pushed states by the typed push
 lemmas (`Calculus/Core/TSoundCapture.lean`), one push at a time.
 
-Two arms carry a condition (`Calculus/Core/TSoundArms.lean`): a storage copy
-is on the bridge only at a type whose members have distinct names
-(`Src.bridgeOk`, `Ty.nodupS`), and a push, at a simple receiver, does not
-diverge under the diamond (`Storage.full`).
+No arm carries a condition: a storage copy is on the bridge (no struct
+repeats a member name, decision 16), and a push at the bound is exhausted,
+which both modalities accept (`TRun.push_nd`, decision 15).
 -/
 
 namespace Solidity.Core
@@ -67,8 +66,8 @@ theorem pushedT3_drop {t u y : LTy} (v : t.TDenote C σ.H) (w : u.TDenote C σ.H
       (TState.drop (.push (.push (.push .refl)))) = r.map (·.st) := by
   cases r <;> rfl
 
-/-- A halt alike to `h` from a run that does not panic and does not end. -/
-theorem TRes.Sim.err_of_not_ok {α : Type} {h : THalt} (hh : h ≠ .panic) {r : TRes α}
+/-- A revert alike to a halt from a run that does not panic and does not end. -/
+theorem TRes.Sim.err_of_not_ok {α : Type} {h : THalt} (hh : h = .revert) {r : TRes α}
     (hr : r.NoPanic) (hn : ∀ a, r ≠ .ok a) : TRes.Sim (.error h) r :=
   TRes.Sim.err hh hr hn
 
@@ -94,16 +93,16 @@ theorem tsound_copyCapture {R : RefTy} (l : Loc C Γ (.ref R)) (p : SPath C Γ (
     show (TRun.assign l (.copy p hm) σ).map _ = _
     simp only [TRun.assign, Src.valueT, hh]; rfl
 
-/-- **A copy into a target of simple parts** (`copyStep`), on the bridge. -/
+/-- **A copy into a target of simple parts** (`copyStep`). -/
 theorem copyStep_tsound (k : Nat) {R : RefTy} (l : Loc C Γ (.ref R))
-    (hm : (Ty.ref R).mapFree = true) (hb : (Ty.ref R).nodupS = true) (p : SPath C Γ (.ref R))
+    (hm : (Ty.ref R).mapFree = true) (p : SPath C Γ (.ref R))
     (q : Premise C Γ Γ) (hs : copyStep k l hm p = some q) :
     Premise.TSound m (.assign l (.copy p hm)) q σ := by
   cases p with
-  | alias y => cases hs; exact tsound_save σ l _ (by exact hb)
+  | alias y => cases hs; exact tsound_save σ l _
   | loc l' =>
     exact SHole.readStep_tsound σ k (.copy l hm) l'
-      (fun _ _ _ e hq => by cases hq; subst e; exact tsound_save σ l _ (by exact hb))
+      (fun _ _ _ e hq => by cases hq; subst e; exact tsound_save σ l _)
       (fun _ _ _ _ _ hq => by cases hq; exact tsound_copyCapture σ l _ hm _)
       (fun _ _ _ _ _ hq => by cases hq; exact tsound_copyCapture σ l _ hm _) q hs
 
@@ -210,7 +209,7 @@ theorem tsound_indexRefCaptureAll (k : Nat) {R R' : RefTy} {kp : PrimTy}
   show TRes.Sim _ ((TRun.assign (.index it b i) (.copy p hm) σ).map _)
   cases hb : b.resolveT σ with
   | error h' =>
-    have hp : h' ≠ .panic := fun e => SPath.resolveT_noPanic σ b (e ▸ hb)
+    have hp : h' = .revert := SPath.resolveT_revert σ b hb
     simp only [TRun.assign, TRes.map_bind]
     refine TRes.Sim.err_bind (Src.valueT_noPanic σ _) hp fun _ _ => ?_
     simp only [Loc.resolveT, hb]
@@ -220,7 +219,7 @@ theorem tsound_indexRefCaptureAll (k : Nat) {R R' : RefTy} {kp : PrimTy}
     rw [Prog.trunSt_declLocal_cons, TRes.map_bind', Val.evalT_up]
     cases hi : i.evalT σ with
     | error h' =>
-      have hp : h' ≠ .panic := fun e => Val.evalT_noPanic σ i (e ▸ hi)
+      have hp : h' = .revert := Val.evalT_revert σ i hi
       simp only [TRun.assign, TRes.map_bind]
       refine TRes.Sim.err_bind (Src.valueT_noPanic σ _) hp fun _ _ => ?_
       simp only [Loc.resolveT, hb, hi, ok_bind]
@@ -240,37 +239,37 @@ theorem tsound_indexRefCaptureAll (k : Nat) {R R' : RefTy} {kp : PrimTy}
       rw [h₁, h₂]
       exact pushedT2_drop σ (t := .alias R) (u := .val kp) (some q) n _
 
-/-- **A storage write** (`assignStep`), a copy on the bridge. -/
+/-- **A storage write** (`assignStep`). -/
 theorem assignStep_tsound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
-    (hbr : r.bridgeOk = true) (q : Premise C Γ Γ) (hs : assignStep k l r = some q) :
+    (q : Premise C Γ Γ) (hs : assignStep k l r = some q) :
     Premise.TSound m (.assign l r) q σ := by
   cases l with
   | root rn h =>
     cases r with
     | val e =>
       exact VHole.step_tsound σ k (.store (.root rn h))
-        (fun _ _ hq => by cases hq; exact tsound_save σ _ _ rfl) e q hs
+        (fun _ _ hq => by cases hq; exact tsound_save σ _ _) e q hs
     | copy p hm =>
       cases p with
-      | alias j => cases hs; exact tsound_save σ _ _ (by exact hbr)
+      | alias j => cases hs; exact tsound_save σ _ _
       | loc l' =>
         exact SHole.readStep_tsound σ k (.copy (.root rn h) hm) l'
-          (fun _ _ _ e hq => by cases hq; subst e; exact tsound_save σ _ _ (by exact hbr))
-          (fun _ _ _ _ e hq => by cases hq; subst e; exact tsound_save σ _ _ (by exact hbr))
-          (fun _ _ _ _ e hq => by cases hq; subst e; exact tsound_save σ _ _ (by exact hbr)) q hs
+          (fun _ _ _ e hq => by cases hq; subst e; exact tsound_save σ _ _)
+          (fun _ _ _ _ e hq => by cases hq; subst e; exact tsound_save σ _ _)
+          (fun _ _ _ _ e hq => by cases hq; subst e; exact tsound_save σ _ _) q hs
   | field b f h =>
     cases r with
     | val e =>
       simp only [assignStep] at hs
       split at hs
       · exact VHole.step_tsound σ k (.store (.field b f h))
-          (fun _ _ hq => by cases hq; exact tsound_save σ _ _ rfl) e q hs
+          (fun _ _ hq => by cases hq; exact tsound_save σ _ _) e q hs
       · exact VHole.lower_tsound σ k (.store (.field b f h)) e
           (fun _ hq => by cases hq; exact tsound_fieldWriteUnfold σ k b f h e) q hs
     | copy p hm =>
       simp only [assignStep] at hs
       split at hs
-      · exact copyStep_tsound σ k (.field b f h) hm hbr p q hs
+      · exact copyStep_tsound σ k (.field b f h) hm p q hs
       · cases hs; exact tsound_fieldWriteRefUnfold σ b f h p hm _
   | index it b i =>
     cases r with
@@ -280,7 +279,7 @@ theorem assignStep_tsound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
       · cases i with
         | simple ie =>
           exact VHole.step_tsound σ k (.store (.index it b (.simple ie)))
-            (fun _ _ hq => by cases hq; exact tsound_save σ _ _ rfl) e q hs
+            (fun _ _ hq => by cases hq; exact tsound_save σ _ _) e q hs
         | _ =>
           exact VHole.lower_tsound σ k (.store (.index it b _)) e
             (fun _ hq => by cases hq; exact tsound_indexCaptureAll σ k it b _ e) q hs
@@ -290,7 +289,7 @@ theorem assignStep_tsound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
       simp only [assignStep] at hs
       split at hs
       · cases i with
-        | simple ie => exact copyStep_tsound σ k (.index it b (.simple ie)) hm hbr p q hs
+        | simple ie => exact copyStep_tsound σ k (.index it b (.simple ie)) hm p q hs
         | _ => cases hs; exact tsound_indexRefCaptureAll σ k it b _ p hm
       · cases hs; exact tsound_indexRefCaptureAll σ k it b i p hm
 
@@ -327,7 +326,7 @@ theorem tsound_fromMemIndexUnfold (k : Nat) {R R' : RefTy} {kp : PrimTy}
   show TRes.Sim _ ((TRun.assignFromMem (.index it b i) p σ).map _)
   cases hb : b.resolveT σ with
   | error h' =>
-    have hp : h' ≠ .panic := fun e => SPath.resolveT_noPanic σ b (e ▸ hb)
+    have hp : h' = .revert := SPath.resolveT_revert σ b hb
     simp only [TRun.assignFromMem, TRes.map_bind]
     refine TRes.Sim.err_bind (MPath.mvalT_noPanic σ p) hp fun _ _ => ?_
     simp only [Loc.resolveT, hb]
@@ -337,7 +336,7 @@ theorem tsound_fromMemIndexUnfold (k : Nat) {R R' : RefTy} {kp : PrimTy}
     rw [Prog.trunSt_declLocal_cons, TRes.map_bind', Val.evalT_up]
     cases hi : i.evalT σ with
     | error h' =>
-      have hp : h' ≠ .panic := fun e => Val.evalT_noPanic σ i (e ▸ hi)
+      have hp : h' = .revert := Val.evalT_revert σ i hi
       simp only [TRun.assignFromMem, TRes.map_bind]
       refine TRes.Sim.err_bind (MPath.mvalT_noPanic σ p) hp fun _ _ => ?_
       simp only [Loc.resolveT, hb, hi, ok_bind]
@@ -357,23 +356,22 @@ theorem tsound_fromMemIndexUnfold (k : Nat) {R R' : RefTy} {kp : PrimTy}
       rw [h₁, h₂]
       exact pushedT2_drop σ (t := .alias R) (u := .val kp) (some q) n _
 
-/-- **A storage location written from memory** (`assignFromMemStep`), on the
-bridge. -/
+/-- **A storage location written from memory** (`assignFromMemStep`). -/
 theorem assignFromMemStep_tsound (k : Nat) {R : RefTy} (l : Loc C Γ (.ref R))
-    (p : MPath C Γ (.ref R)) (hb : (Ty.ref R).nodupS = true) (q : Premise C Γ Γ)
+    (p : MPath C Γ (.ref R)) (q : Premise C Γ Γ)
     (hs : assignFromMemStep k l p = some q) : Premise.TSound m (.assignFromMem l p) q σ := by
   cases l with
-  | root rn h => cases hs; exact tsound_saveMem σ _ p hb
+  | root rn h => cases hs; exact tsound_saveMem σ _ p
   | field b f h =>
     simp only [assignFromMemStep] at hs
     split at hs
-    · cases hs; exact tsound_saveMem σ _ p hb
+    · cases hs; exact tsound_saveMem σ _ p
     · cases hs; exact tsound_fromMemFieldUnfold σ b f h p _
   | index it b i =>
     simp only [assignFromMemStep] at hs
     split at hs
     · cases i with
-      | simple ie => cases hs; exact tsound_saveMem σ _ p hb
+      | simple ie => cases hs; exact tsound_saveMem σ _ p
       | _ => cases hs; exact tsound_fromMemIndexUnfold σ k it b _ p
     · cases hs; exact tsound_fromMemIndexUnfold σ k it b i p
 
@@ -470,11 +468,9 @@ theorem tsound_pushRecvCapture {E : Ty} (b : SPath C Γ (.array E)) (v : Option 
     show (TRun.push b v σ).map _ = _
     simp only [TRun.push, hh]; rfl
 
-/-- **`b.push(v);`** (`pushStep`), where a push at a simple receiver does not
-diverge under the diamond. -/
+/-- **`b.push(v);`** (`pushStep`). -/
 theorem pushStep_tsound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
-    (hd : (v.isSome || E.defaultOkS) = true)
-    (hnd : m = .diamond → (Stmt.trun σ (.push b v hd)).NoDiv) (q : Premise C Γ Γ)
+    (hd : (v.isSome || E.defaultOkS) = true) (q : Premise C Γ Γ)
     (hs : pushStep k b v hd = some q) : Premise.TSound m (.push b v hd) q σ := by
   simp only [pushStep] at hs
   split at hs
@@ -482,15 +478,15 @@ theorem pushStep_tsound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (v : Opti
     | none =>
       simp only at hs
       split at hs
-      · cases hs; exact tsound_pushSlot σ b hd hnd
-      · cases hs; exact tsound_extend σ b hd hnd
+      · cases hs; exact tsound_pushSlot σ b hd
+      · cases hs; exact tsound_extend σ b hd
     | some r =>
       cases r with
       | val e =>
         cases e with
-        | simple se => cases hs; exact tsound_pushSome σ b _ hd hnd
+        | simple se => cases hs; exact tsound_pushSome σ b _ hd
         | _ => cases hs; exact tsound_pushCapture σ b _ hd _
-      | copy p hm => cases hs; exact tsound_pushSome σ b _ hd hnd
+      | copy p hm => cases hs; exact tsound_pushSome σ b _ hd
   · cases hs; exact tsound_pushRecvCapture σ b v hd _ _
 
 /-- `storagePop_unfold_leftFstReceiver`: the receiver bound first. -/

@@ -438,7 +438,7 @@ theorem assign_family {T : Ty} (l : Solidity.Core.Loc C Γ T) (r : Solidity.Core
     exact assign_sim l v hm hok.1 hok.2
   | copy q hq =>
     simp only [assignIn, Bool.and_eq_true] at hok
-    exact copy_sim l q hq hok.1.1.1 hok.1.1.2 hm hok.1.2 hok.2
+    exact copy_sim l q hq hok.1.1 hm hok.1.2 hok.2
 
 theorem rebind_family {R : RefTy} (i : Idx Γ (.alias R)) (r : Solidity.Core.ARhs C Γ R)
     {F' : Frag Γ} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)

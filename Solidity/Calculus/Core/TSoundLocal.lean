@@ -244,10 +244,8 @@ theorem tsound_rebindPushCapture {R : RefTy} (i : Idx Γ (.alias R))
     show (TRun.rebind i (.push b hd) σ).map _ = _
     simp only [TRun.rebind, ARhs.evalT, hh]; rfl
 
-/-- **An alias bound** (`rebindStep`), where a push at a simple receiver
-does not diverge under the diamond. -/
+/-- **An alias bound** (`rebindStep`). -/
 theorem rebindStep_tsound (k : Nat) {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R)
-    (hnd : m = .diamond → (Stmt.trun σ (.rebind i r)).NoDiv)
     (q : Premise C Γ Γ) (hs : rebindStep k i r = some q) : Premise.TSound m (.rebind i r) q σ := by
   cases r with
   | path p =>
@@ -264,7 +262,7 @@ theorem rebindStep_tsound (k : Nat) {R : RefTy} (i : Idx Γ (.alias R)) (r : ARh
   | push b hd =>
     simp only [rebindStep] at hs
     split at hs
-    · cases hs; exact tsound_rebindPush σ i b hd hnd
+    · cases hs; exact tsound_rebindPush σ i b hd
     · cases hs; exact tsound_rebindPushCapture σ i b hd _
 
 /-! ### Compound assignment and `++`/`--` -/

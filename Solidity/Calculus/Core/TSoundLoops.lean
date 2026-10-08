@@ -22,7 +22,7 @@ over `TState`.
   (`TLoop.run_variant`).  A condition is a `bool` of the typed state, so it
   is `true` or `false` wherever it is read; what the rule's terms read on
   the erasure is the typed value (`tholds_isBoolD_lower`, from
-  `Val.evalT_erase` and `Val.evalT_nd`).
+  `Val.evalT_erase` and `Val.evalT_ends`).
 * A block (`Stmt.tsound_block`) is its body unfolded, its locals popped
   after it (`Stmt.trunSt_block`); it sits here beside `Stmt.trunSt_ite`,
   which the loop's turn reads through.
@@ -60,12 +60,13 @@ halt too, for it never diverges. -/
 theorem Val.eval_erase_error {p : PrimTy} (v : Val C Γ p) (σ : TState C Γ) {e : THalt}
     (h : v.evalT σ = .error e) : ∃ e', v.eval σ.erase = .error e' := by
   have ha := Val.evalT_erase σ v
-  have hnd := Val.evalT_nd σ v
+  have hnd := Val.evalT_ends σ v
   rw [h] at ha hnd
   cases e with
   | revert => exact ⟨_, ha⟩
   | panic => exact ⟨_, ha⟩
-  | diverge => exact absurd rfl hnd
+  | diverge => exact absurd rfl hnd.1
+  | exhausted => exact absurd rfl hnd.2
 
 /-- **A lowered condition** holds `b` over the typed state where it
 evaluates to `b`. -/
@@ -301,6 +302,61 @@ theorem frames_pop_nil_trun {H : HTy} {Γ' : Ctx} (b : BlockKind) (X : TRes (Out
     (X.map (·.st)).bind (Frames.trunSt · (.pop b h .nil)) = (X.map (Out.drop h)).map (·.st) := by
   cases X <;> rfl
 
+/-- `TLoop.run_variant`, where the body may also halt with a halt of `X`
+(`exhausted`, which both modalities accept, decision 15): the loop ends well
+or halts so. -/
+theorem TLoop.run_variant_or {α : Type} {body : α → TRes α} {c : α → TRes Bool}
+    {H G : α → Prop} {X : THalt → Prop} {D : α → TRes Int}
+    (hstep : ∀ τ, H τ → ∃ d, D τ = .ok d ∧
+      (c τ = .ok true ∨ c τ = .ok false) ∧
+      (c τ = .ok false → G τ) ∧
+      (c τ = .ok true → (∃ e, body τ = .error e ∧ X e) ∨ ∃ τ₁, body τ = .ok τ₁ ∧ H τ₁ ∧
+        (c τ₁ = .ok true → ∃ a : Int, D τ₁ = .ok a ∧ 0 ≤ a ∧ a < d)))
+    {σ : α} (h0 : H σ) :
+    (∃ τ, TLoop.run body c σ = .ok τ ∧ G τ) ∨ ∃ e, TLoop.run body c σ = .error e ∧ X e := by
+  have exit : ∀ τ, c τ = .ok false → TLoop.run body c τ = .ok τ := fun τ hc => by
+    rw [TLoop.run_unfold]; simp only [TLoop.step, hc]
+  have next : ∀ τ τ₁, c τ = .ok true → body τ = .ok τ₁ →
+      TLoop.run body c τ = TLoop.run body c τ₁ := fun τ τ₁ hc hb => by
+    rw [TLoop.run_unfold (σ := τ)]; simp only [TLoop.step, hc, hb]
+  have halt : ∀ τ e, c τ = .ok true → body τ = .error e → TLoop.run body c τ = .error e :=
+    fun τ e hc hb => by rw [TLoop.run_unfold (σ := τ)]; simp only [TLoop.step, hc, hb]
+  have T : ∀ n : Nat, ∀ τ, H τ →
+      (c τ = .ok true → ∃ a : Int, D τ = .ok a ∧ 0 ≤ a ∧ a < n) →
+      (∃ τf, TLoop.run body c τ = .ok τf ∧ G τf) ∨ ∃ e, TLoop.run body c τ = .error e ∧ X e := by
+    intro n
+    induction n with
+    | zero =>
+      intro τ hH hb
+      obtain ⟨_, _, hcov, hex, _⟩ := hstep τ hH
+      rcases hcov with hc | hc
+      · obtain ⟨a, _, h₁, h₂⟩ := hb hc
+        omega
+      · exact .inl ⟨τ, exit τ hc, hex hc⟩
+    | succ n ih =>
+      intro τ hH hb
+      obtain ⟨d, hd, hcov, hex, hbody⟩ := hstep τ hH
+      rcases hcov with hc | hc
+      · obtain ⟨a, hda, h₁, h₂⟩ := hb hc
+        rcases hbody hc with ⟨e, hbe, hX⟩ | ⟨τ₁, hb₁, hH₁, hdec⟩
+        · exact .inr ⟨e, halt τ e hc hbe, hX⟩
+        rw [next τ τ₁ hc hb₁]
+        refine ih τ₁ hH₁ fun hc₁ => ?_
+        obtain ⟨a₁, hd₁, h₃, h₄⟩ := hdec hc₁
+        rw [hda] at hd
+        cases hd
+        exact ⟨a₁, hd₁, h₃, by omega⟩
+      · exact .inl ⟨τ, exit τ hc, hex hc⟩
+  obtain ⟨d, _, hcov, hex, hbody⟩ := hstep σ h0
+  rcases hcov with hc | hc
+  · rcases hbody hc with ⟨e, hbe, hX⟩ | ⟨τ₁, hb₁, hH₁, hdec⟩
+    · exact .inr ⟨e, halt σ e hc hbe, hX⟩
+    rw [next σ τ₁ hc hb₁]
+    refine T d.toNat τ₁ hH₁ fun hc₁ => ?_
+    obtain ⟨a₁, hd₁, h₃, h₄⟩ := hdec hc₁
+    exact ⟨a₁, hd₁, h₃, by omega⟩
+  · exact .inl ⟨σ, exit σ hc, hex hc⟩
+
 /-- **`whileInvariantDiamond` is sound** over the typed state: the variant
 bounds the iterations left. -/
 theorem Premise.tsound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
@@ -320,15 +376,20 @@ theorem Premise.tsound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val
     (fun o : Out C σ.H Γ => (Prog.trun o.st body).map
       fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩)
     (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩))
-  suffices key : ∃ τ, TLoop.run
+  suffices key : (∃ τ, TLoop.run
       (fun o : Out C σ.H Γ => (Prog.trun o.st body).map
         fun o' => (⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩ : Out C σ.H Γ))
       (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩ = .ok τ ∧
-        tholds τ.st (Fml.modalK .diamond ω κ φ) by
-    obtain ⟨τf, hrun, hG⟩ := key
-    rw [hrun]
-    exact (tholds_modal_iff τf.st ω κ φ).1 (tholds_modalK τf.st ω κ φ hG)
-  refine TLoop.run_variant
+        tholds τ.st (Fml.modalK .diamond ω κ φ)) ∨ ∃ e, TLoop.run
+      (fun o : Out C σ.H Γ => (Prog.trun o.st body).map
+        fun o' => (⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩ : Out C σ.H Γ))
+      (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩ = .error e ∧ e = .exhausted by
+    rcases key with ⟨τf, hrun, hG⟩ | ⟨e, hrun, rfl⟩
+    · rw [hrun]
+      exact (tholds_modal_iff τf.st ω κ φ).1 (tholds_modalK τf.st ω κ φ hG)
+    · rw [hrun]
+      exact ⟨rfl, nofun⟩
+  refine TLoop.run_variant_or (X := fun e => e = .exhausted)
     (H := fun a : Out C σ.H Γ => TGFrame (frameMut hv) σ a.st ∧
       TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧ tholds a.st (Fml.isBoolD I.lower true))
     (D := fun a : Out C σ.H Γ => (d.evalT a.st).map (·.1)) ?_
@@ -382,14 +443,14 @@ theorem Premise.tsound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val
     cases hb : Prog.trun a.st body with
     | error e =>
       rw [hb] at h'
-      exact h'.1.elim
+      exact .inl ⟨e, rfl, h'.1⟩
     | ok o =>
       rw [hb] at h'
       obtain ⟨hg', ha'⟩ := Prog.trun_frame body hwμ 0 hb
       obtain ⟨hI₁, hdec⟩ := h'.1
       let τ₀ : TState C Γ := o.st.drop body.ext
       change tholds (τ₀.push (t := .val .uint) dv) _ at hI₁ hdec
-      refine ⟨⟨τ₀, a.ext.trans o.ext⟩, rfl, ⟨hg.trans (hg'.withEnv _), hag.trans ha', ?_⟩,
+      refine .inr ⟨⟨τ₀, a.ext.trans o.ext⟩, rfl, ⟨hg.trans (hg'.withEnv _), hag.trans ha', ?_⟩,
         fun hc₁ => ?_⟩
       · have hI' := (tholds_isBoolD_lower I.up (τ₀.push (t := .val .uint) dv) true).1 hI₁
         rw [Val.evalT_up] at hI'

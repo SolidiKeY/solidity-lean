@@ -249,13 +249,27 @@ def structDef : Name -> List (Name × Ty)
   | "WithArray" =>
       [("n", Ty.uint), ("items", Ty.ref (RefTy.array Ty.uint))]
   | "Triple" => [("x", Ty.uint), ("y", Ty.uint), ("z", Ty.uint)]
-  -- Not a ported contract: two rows for one field name, which no solc
-  -- program can declare. It exists so `Counterexamples/`'s R3 can show
-  -- that `defaultOk`'s no-duplicate-row condition is load-bearing —
-  -- `defaultForTy` builds both rows, and the second has the wrong type
-  -- for what the field name looks up to.
-  | "BadDup" => [("a", Ty.uint), ("a", Ty.bool)]
   | _ => []
+
+/-- Struct declarations solc refuses ("Identifier already declared"): two
+members of one name.  None is in `structDef`, so every struct of the table
+has distinct member names (`structDef_nodup`,
+`Semantics/Core/StorageErase.lean`); a type that names one is an
+elaboration error (`unknownStructMsg`), pinned on `BadDup`. -/
+def refusedStructs : List (Name × List (Name × Ty)) :=
+  [("BadDup", [("a", Ty.uint), ("a", Ty.bool)])]
+
+/-- The first member name `fs` declares twice. -/
+def dupKey? : List (Name × Ty) → Option Name
+  | [] => none
+  | (k, _) :: rest => if rest.any (·.1 == k) then some k else dupKey? rest
+
+/-- Why the type name `s`, not a struct of `structDef`, is refused: its
+declaration repeats a member (`refusedStructs`), or it names nothing. -/
+def unknownStructMsg (s : String) : String :=
+  match (refusedStructs.find? (·.1 == s)).bind (dupKey? ·.2) with
+  | some f => s!"struct {s}: identifier already declared: member {f}"
+  | none => unknownTyMsg s
 
 /-! ### The `structDef` termination certificate
 
@@ -291,7 +305,6 @@ def structRank : Name -> Nat
   | "Simple" => 1
   | "WithArray" => 1
   | "Triple" => 1
-  | "BadDup" => 1
   | _ => 1
 
 /-- A type's rank: primitives 0, a struct its `structRank`, a dynamic array
@@ -584,7 +597,7 @@ their proofs are `Eq.refl`, from a list of the structs checked once
 /-- The structs of `structDef` that hold no mapping. -/
 def mapFreeStructs : List Name :=
   ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "FixedTriple", "Pair", "S",
-   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "BadDup"]
+   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple"]
 
 /-- `T` holds no mapping: `Person[]` does not, `mapping(uint => uint)` does. -/
 def Ty.mapFree : Ty → Bool
@@ -612,8 +625,10 @@ theorem Ty.mapFree_field {s f : Name} {T : Ty} (hs : (Ty.ref (.struct s)).mapFre
   simp only [Ty.mapFree, decide_eq_true_eq] at hs
   exact hall s hs (f, T) (Semantics.lookupBy_mem h)
 
-/-- The structs whose fresh default is well-formed: all but `BadDup`, whose
-second `a` row is the counterexample the condition exists for. -/
+/-- The structs whose fresh default is well-formed: every struct of the
+table.  A struct with a repeated member name would not be (its second row
+has the wrong type for what the name looks up to), and solc refuses one
+(`refusedStructs`). -/
 def defaultOkStructs : List Name :=
   ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
    "Toggle", "FixedTriple", "Pair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",

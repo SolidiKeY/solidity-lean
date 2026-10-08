@@ -1886,27 +1886,26 @@ def ReachableS (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (σ : Core.State C Γ'),
     P.run (Core.State.ofSem C.initState) = .ok σ ∧ σ.storage = st
 
-/-- A storage is reachable when a scoped program on the bridge runs, by the
-typed interpreter (`Core.Prog.trun`, `Semantics/Core/TypedRun.lean`), from
-the contract's initial state to a state whose storage erases to it.  The
+/-- A storage is reachable when a scoped program runs, by the typed
+interpreter (`Core.Prog.trun`, `Semantics/Core/TypedRun.lean`), from the
+contract's initial state to a state whose storage erases to it.  The
 program's locals are used as declared, and its values are of their types, by
-construction.  On the bridge (`Core.Prog.bridgeOk`: no storage copy at a
-type with a repeated member name) the scoped run ends in the erased state
-(`Reachable.reachableS`), so what that run keeps holds of a reachable
-storage; a `bool` mapping key is on it, hashed as `0`/`1` by both runs
-(decisions 10 and 14).
+construction.  The scoped run ends in the erased state
+(`Reachable.reachableS`; no struct repeats a member name, decision 16), so
+what that run keeps holds of a reachable storage; a `bool` mapping key is
+hashed as `0`/`1` by both runs (decisions 10 and 14).
 The calculus's `holds` reads the untyped interpreter; a storage it reaches
 from a block the locals check accepts, with its words, keys and slots in
 range, is `Reachable` (`ReachableU.reachable`, `Calculus/Problem.lean`). -/
 def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (o : Core.Out C (Core.TState.init C).H Γ'),
-    P.bridgeOk = true ∧ P.trun (Core.TState.init C) = .ok o ∧ o.st.storage.erase = st
+    P.trun (Core.TState.init C) = .ok o ∧ o.st.storage.erase = st
 
 /-- **Reachable by the typed run ⇒ reachable by the scoped one**, in the
 erased state (`Core.Prog.run_of_trun`). -/
 theorem Reachable.reachableS {st : List (Name × SVal)} (h : Reachable C st) : ReachableS C st := by
-  obtain ⟨Γ', P, o, hb, hrun, rfl⟩ := h
-  have hr := Core.Prog.run_of_trun hb hrun
+  obtain ⟨Γ', P, o, hrun, rfl⟩ := h
+  have hr := Core.Prog.run_of_trun hrun
   rw [Core.TState.init_erase] at hr
   exact ⟨Γ', P, o.st.erase, hr, rfl⟩
 

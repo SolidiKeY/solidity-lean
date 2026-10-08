@@ -27,6 +27,14 @@ open Solidity (Mutability)
 
 variable {C : Contract}
 
+/-- **What a modality says of a typed halt**: the box accepts every halt
+(but a panic, which the readings exclude apart); the diamond only
+`exhausted`, a push past the bound, which KeY, modelling no gas, never
+sees (decision 15). -/
+def _root_.Solidity.Modality.onTHalt : Modality → THalt → Prop
+  | .box, _ => True
+  | .diamond, e => e = .exhausted
+
 theorem tbind_ok_inv {α β : Type} {x : TRes α} {f : α → TRes β} {b : β} (h : (x >>= f) = .ok b) :
     ∃ a, x = .ok a ∧ f a = .ok b := by
   cases x with

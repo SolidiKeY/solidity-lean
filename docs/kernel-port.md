@@ -75,7 +75,9 @@ specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
   (`Calculus/MemRead.lean`; `docs/lean-key-rule-map.md`, "The closer's
   memory clauses"), copies between memory and storage included; a `push`
   of a memory object is outside the fragment.
-- **Reachability of an ill-defaulted root** (a `BadDup[]`): that such an array
+- **Reachability of an ill-defaulted root** (an array of a struct
+  `defaultOkS` refuses; the table has none since `BadDup` was refused,
+  `refusedStructs`): that such an array
   stays empty is unproved, so `reachable_iff` asks `Ty.okDeep` of every root
   (`Typing/Constructibility.lean`).
 - **The EVM fragment**: memory, copies of dynamic arrays, `push()` of a struct,
