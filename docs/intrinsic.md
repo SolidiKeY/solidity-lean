@@ -3540,6 +3540,117 @@ deleted (`Modality.afterRunC`, `afterRunC_rel`, `Res.Sim.afterRunC`,
 `run_cons_frames`, `afterRunC_bind`, `run_block_frames`, `aliasPath_there`).
 No pin moved.
 
+### W3c lane `tree` (`w3c-tree`, 2026-10-08): the tree's leftovers
+
+On `intrinsic` at 9ec2b48 (CORE B).  No new `sorry`, `axiom` or
+`maxHeartbeats`; `#print axioms` of `Core.Fml.not_valid_of_eval3`,
+`Core.Prog.trunF_approx` and `Derive.valid_of_leafResidue`: `propext`,
+`Classical.choice`, `Quot.sound`.  `lean_build` (default targets): green,
+288 jobs (a first run lost five `Tactics` modules to the session's OOM
+killer, exit 135; the second built them).  `TestSuite/CoreSeq` checked
+after the leaf change.
+
+- **`ProofTree`'s `sol_chain?`, `#chain` and `sol_rws?` sections flipped**
+  (W3b blocker 7): the scoped twins (`Calculus/Core/ChainGen.lean`), which
+  `Examples/ProofTree.lean` now imports in place of today's
+  `Calculus/ChainGen.lean`.  `sol_chain?` is pinned on `~~>`, where the
+  scoped one writes the chain term out (on `~*>` it suggests `sol_chain`
+  alone); the postconditions are `Core.Post StandardExample Γ` at the
+  context they stand in.
+- **An explicit `∀` keeps its range at a leaf** (W3b blocker 6):
+  `Seq.leafRes`/`leafQuote` (`Calculus/Core/ProvesDerive.lean`) read a
+  leaf's erasure by `Derive.leafResidue` (`Calculus/Core/Derive.lean`):
+  its leading quantifiers stripped, the parameters free as today's leaves
+  have them, and where that leaves a leaf open, the erasure itself, every
+  leading `∀` into today's context with its range, taken when that closes
+  (`Derive.leafPick` quotes the same choice).  `cdl!` binds a parameter and
+  an explicit leading `∀` alike (`Fml.all`), so "keep the explicit ones"
+  is "keep them all where only that closes": the leaves that stayed open
+  before stay as they were, a leaf closes that did not.  `ProofTree`'s
+  two interval examples moved into the scoped section; their pins
+  (`sol_prove`) are unchanged.  The `Core.Valid` route (`Derive.residueAt`)
+  never stripped.
+- **`Examples/Verify.lean` on Core** (W3b blocker 10, W3b tree Left 1):
+  - `#verify C.f` states `Core.Valid` of the scoped obligation
+    (`cspec[C]{f}`, whatever the caller's scope) and runs `sol_spec_try`
+    on it; the suggestion `⊨ spec[C]{f}` reads scoped under the switch,
+    which the file opens (`inc_spec`, the suggestion pasted, checks it).
+  - `Tools/Counterexample.lean` ported in place: `Core.Fml.eval3`, a
+    scoped formula evaluated over `TState` (terms and updates on the
+    erasure; an update in the one typed state its end lifts to,
+    `TState.lift?`: the heap empty, the storage and the transaction its
+    own; a binder tried on a domain; the program by the typed run with
+    fuel), sound against `Core.holds` (`Fml.eval3_sound`); a certificate
+    is the kernel's `¬ Core.Valid φ` of the scoped formula
+    (`Fml.not_valid_of_eval3`) at `TState.ofSemD C σ`, the candidate's
+    untyped state with its storage decoded at the contract's types
+    (`Storage.decode`, kernel-reducible).  Today's `Fml.eval3`,
+    `Prog.runFuel`, `Loop.runFuel` and `Fml.runOf` are deleted.
+  - The typed run with fuel: `Semantics/Core/TypedRunFuel.lean`
+    (`Stmt.trunF`, `Prog.trunF`, `Frames.trunF`: `Stmt.trunR`'s recursor
+    form with `TRun.loopF` on `TLoop.iterN`, its compiled twin), equal to
+    the typed run wherever it does not say `diverge` (`TRes.Approx`,
+    `Prog.trunF_approx`; no typed step catches a halt).
+  - `Semantics.SVal`'s hand-written `DecidableEq` does not reduce in the
+    kernel; `SVal.beqK` (structural, `SVal.eq_of_beqK`) compares the
+    untyped storages a lift reads.
+  - The search keeps today's candidates (untyped, pooled, shrunk); a
+    formula's candidate is read with its arguments bound first
+    (`Core.Fml.peel`), so the witness is the assignment that refutes.
+- **`sol_derive?`'s short walk**: already today's text with solkey's
+  aliases (`apply impRight`, `apply allRight` for a `∀` after a rule or a
+  premise, `apply emptyModality` where a modality is left empty; checked
+  on scratch formulas).  `ProofTree`'s replay of the `ifElseSplit`
+  suggestion is now the suggestion's text (it replayed the `Core.Proves`
+  constructors).  What it does not write: `apply allRight` for an explicit
+  leading `∀`, which `core_silent` takes with the parameters'
+  (`Walk.paramsOnly`), the same indistinguishability as above.
+- **Pins changed, with reasons** (W3's numbers; "W2 `tree`" is the
+  parameters' `∀`):
+  - `ProofTree`, `sol_chain?`: the `calc` of `~*>` is now the chain term of
+    `~~>` (`Core.Fml.Via.leads`, `SoundRel.leads`), its lines
+    `cdl!{ ∀ uint x; ∀ uint v; … }` (W2 `tree`; the scoped printer's
+    spelling, reason 7), no `~[emptyModality]~>` after the last statement
+    (3).
+  - `ProofTree`, `#chain`: `cdl![m]{ ∀ uint x; ∀ uint v; … }` (W2 `tree`,
+    7); the strategy's group `~*>` is `~[localValueAssign]~>`, one step,
+    since no `emptyModality` follows (3); the line past the program is
+    the erasure, with no `∀` (it was so before).  The second `#chain`:
+    `cdl!` for `dl!` only (7).
+  - `ProofTree`, `sol_rws?` and the three `sol_chain?` on `~~>`: text
+    unchanged (the statements are scoped: `φ : Core.Post`).
+  - `ProofTree`, the interval examples: unchanged (`sol_prove`).
+  - `Verify`, `#counterexample` of the bounded loop: `i = 0, ` is gone
+    from the witness line (W2 `tree`: `i` is the program's local; today's
+    search bound every free name, the scoped formula has no free `i`).
+    Every other `#verify`/`#counterexample` pin is unchanged, the
+    certified ones certified against the scoped statement.
+- **Gate** (`Examples/ProofTree`, 12.1 s): a fresh worker, wall to its
+  diagnostics, load about 5: 17.0 s, against 15.5 s for `intrinsic`'s
+  file timed the same way in the same minutes (+9%: the scoped `#chain`
+  and `sol_chain?`).  Over the limit as at the W3b integration; Decision
+  9's aggregate.  `Tactics/Calls` (the most `⊢ sol_prove` leaves, the
+  leaf change's cost): 190.7 s against 201.2 s on `intrinsic`, the same
+  method.
+- **Proposed decisions** (the lead's call):
+  24. *Parameters marked in `cdl!`'s output*: an explicit leading `∀` and
+      a parameter's are both `Fml.all`, so a leaf keeps an explicit one's
+      range only where stripping leaves it open (`Derive.leafResidue`),
+      and the short walk writes no `apply allRight` for it.  Marking the
+      parameters (their count beside the formula, or a binder kind) would
+      keep every explicit `∀` and write its `allRight`, as today's walk
+      does; taken here: the reading above, which changes no pin.
+  25. *`#verify` is scoped whatever the caller's scope* (`cspec`), and a
+      witness's after-line no longer prints `\result` (the typed end
+      state names no local); no pin has one.
+- **Left.**
+  1. `TState.lift?` reads an update's end only over an empty heap and the
+     starting storage and transaction: a constructor's obligation
+     (`storage := mtSt`) or an update that allocates is `unknown` there,
+     so such a witness is tested, not certified.
+  2. `\result` in a witness's after-line (25).
+  3. The read-only finder/skeptic review pass was not run.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
