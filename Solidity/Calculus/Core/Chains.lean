@@ -816,6 +816,10 @@ def erasedLine (sp : Splice) (erased : Array Expr) : MetaM Expr := do
     return d
   | _, _ => throwError "sol_chain: no erasure"
 
+/-- `Solidity.Fml.dropAlls` on the term: the line's outer `∀`s dropped. -/
+partial def dropAllsE (e : Expr) : Expr :=
+  if e.isAppOfArity ``Solidity.Fml.all 4 then dropAllsE e.appArg! else e
+
 /-- The `Update.lean` postcondition standing for the Lean term `e` (a hole
 of a written line) in the line `L`. -/
 def postIn (L e : Expr) : Option Expr :=
@@ -886,7 +890,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
             match (← runChain A).lines.find? (·.fml == cur) with
             | some line => pure line.erased
             | none => pure run.erased
-          let L ← erasedLine run.splice erased
+          let L := dropAllsE (← erasedLine run.splice erased)
           legacy := some (L, L, run.splice.modality)
           pure (L, run.splice.modality)
       let b ← legacyWritten C m? L₀ w
