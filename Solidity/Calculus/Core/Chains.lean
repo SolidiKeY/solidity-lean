@@ -1056,8 +1056,56 @@ to pick the reader. -/
 @[macro Solidity.chainStx] def expandChainAny : Macro := fun stx =>
   return mkNode ``chainAnyStx #[mkAtom "chain_any% ", stx]
 
+/-- The written lines of `calc` steps, by the metavariable that stands for the
+line until `sol_chain` computes it from the line before: the text and the
+rule `~[r]~>` names. -/
+initialize pendingLines : EnvExtension (Std.HashMap MVarId (Syntax × Option Lean.Name)) ←
+  registerEnvExtension (pure {}) (asyncMode := .local)
+
+/-- A `calc` step `_ R B` on scoped lines: `_` the line before, which `calc`
+fills in, and `B` a line computed from it, a metavariable for now that
+`sol_chain` assigns (`pendingLines`), the text checked then. -/
+def elabCalcStep (inner : Syntax) : TermElabM (Option Expr) := do
+  let links := inner[1].getArgs
+  unless links.size == 1 do return none
+  let l := links[0]!
+  let some b ← observing? (do
+      let b ← elabTerm l[1] none
+      synthesizeSyntheticMVarsNoPostponing
+      instantiateMVars b) | return none
+  unless ← isCoreLine b do return none
+  let (C, Γ) ← lineType b
+  let fml := mkApp2 (mkConst ``Core.Fml) C Γ
+  let A ← mkFreshExprMVar fml
+  let B ← mkFreshExprMVar fml
+  let arrow : TSyntax `chain_arrow := ⟨l[0]⟩
+  let rule? : Option Lean.Name := match arrow with
+    | `(chain_arrow| ~[ $r:ident ]~>) => some r.getId
+    | _ => none
+  let pend (key : Expr) : TermElabM Unit :=
+    modifyEnv fun env => pendingLines.modifyState env (·.insert key.mvarId! (l[1], rule?))
+  match arrow with
+  | `(chain_arrow| ~>) => pend B; return some (mkAppN (mkConst ``Core.Fml.OneStep) #[C, Γ, A, B])
+  | `(chain_arrow| ~*>) => pend B; return some (mkAppN (mkConst ``Core.Fml.Steps) #[C, Γ, A, B])
+  | `(chain_arrow| ~[ $r:ident ]~>) =>
+    if r.getId == `sequentialToParallel then
+      let k ← mkFreshExprMVar (mkConst ``Nat)
+      pend k
+      return some (mkAppN (mkConst ``Core.Fml.MergeBy)
+        #[C, Γ, k, ← mkFreshExprMVar (mkConst ``Nat), A, B])
+    if (← ruleCtors r.getId).isEmpty && r.getId != `emptyModality then return none
+    let lbl ← mkFreshExprMVar (mkApp (mkConst ``Core.StepRule) C)
+    pend lbl
+    return some (mkAppN (mkConst ``Core.Fml.StepBy) #[C, Γ, lbl, A, B])
+  | _ => return none
+
 @[term_elab chainAnyStx] def elabChainAny : TermElab := fun stx expectedType? => do
   let inner := stx[1]
+  -- `calc` writes the step's `_` as `(_ : T)`, `T` the type of the line before
+  let isHole (s : Syntax) : Bool := s.isOfKind ``Lean.Parser.Term.hole ||
+    (s.isOfKind ``Lean.Parser.Term.typeAscription && s[1].isOfKind ``Lean.Parser.Term.hole)
+  if isHole inner[0] then
+    if let some e ← elabCalcStep inner then return e
   let st ← saveState
   let first? ← observing? do
     let a ← elabTerm inner[0] none
@@ -1068,6 +1116,56 @@ to pick the reader. -/
   st.restore
   if Solidity.chainWritten inner then Solidity.Chain.elabChain inner expectedType?
   else elabTerm (← liftMacroM (Solidity.expandChainStx inner)) expectedType?
+
+/-! ## `φ ~~> ψ` on scoped lines
+
+With `open scoped Solidity.Core.Surface`, `A ~~> B` whose first line is scoped
+reads `B` as the line of `A`'s derivation it is written as (`Core.Fml.Leads`),
+else as a scoped line with a program still open (a merged line,
+`Core.Fml.Leads`), else past the program, `Update.lean`'s, from the erasure
+of the strategy's last line `Z` (`Core.Fml.LeadsE A Z B`). -/
+
+/-- `leads% A B`: `A ~~> B`, read by the first line's kind. -/
+syntax (name := leadsAnyStx) "leads% " term:max term:max : term
+
+@[term_elab leadsAnyStx] def elabLeadsAny : TermElab := fun stx _ => do
+  let st ← saveState
+  let first? ← observing? do
+    let a ← elabTerm stx[1] none
+    synthesizeSyntheticMVarsNoPostponing
+    instantiateMVars a
+  let some A := first? | st.restore; elabTerm (← `(Solidity.Fml.Leads $(⟨stx[1]⟩) $(⟨stx[2]⟩))) none
+  unless !A.hasMVar && (← isCoreLine A) do
+    st.restore
+    return ← elabTerm (← `(Solidity.Fml.Leads $(⟨stx[1]⟩) $(⟨stx[2]⟩))) none
+  let (C, Γ) ← lineType A
+  let bStx := if stx[2].isOfKind ``Lean.Parser.Term.paren then stx[2][1] else stx[2]
+  let w := Written.of bStx
+  let run ← runChain A
+  let cands : List (Expr × Array Expr) := (A, run.erased) :: run.lines.map fun l => (l.fml, l.erased)
+  if let some B ← cands.findSomeM? (fun (B, er) => do
+      if ← matchWritten run.splice C w B er then pure (some B) else pure none) then
+    return mkApp4 (mkConst ``Core.Fml.Leads) C Γ A B
+  -- a line of the derivation with its update spine merged (the program open)
+  for (L, _) in cands do
+    if (← runChain L).lines.isEmpty then continue
+    let (sp, ms) ← mergeCands L
+    if let some c ← ms.findM? (fun c => matchWritten sp C w c.fml c.erased) then
+      return mkApp4 (mkConst ``Core.Fml.Leads) C Γ A c.fml
+  unless (← whnfR Γ).isAppOf ``List.nil do
+    throwError "~~>: the line after is no line of the derivation of{← indentLine A}"
+  let (Z, erased) := match run.lines.getLast? with
+    | some l => (l.fml, l.erased)
+    | none => (A, run.erased)
+  let L := dropAllsE (← erasedLine run.splice erased)
+  let b ← legacyWritten C run.splice.modality L w
+  return mkAppN (mkConst ``Core.Fml.LeadsE) #[C, A, Z, b]
+
+/-- `A ~~> B` on scoped lines prints as written. -/
+@[app_unexpander Core.Fml.Leads]
+def unexpandLeads : PrettyPrinter.Unexpander
+  | `($_ $a:term $b:term) => `($a:term ~~> $b:term)
+  | _ => throw ()
 
 /-! ## `sol_chain` on scoped chains -/
 
@@ -1093,6 +1191,46 @@ partial def isCoreGoal (ty : Expr) : MetaM Bool := do
 by `Calculus/Chains.lean`'s `solveChain`. -/
 partial def solveCore (g : MVarId) : TermElabM Unit := do
   let ty ← instantiateMVars (← g.getType)
+  -- a `calc` step: its line after computed from the line before, and checked
+  -- against the text while it is a metavariable (`pendingLines`, keyed by the
+  -- step's label, or by its line after for `~>`, `~*>`)
+  let args := ty.getAppArgs
+  let key? : Option Expr :=
+    if ty.isAppOf ``Core.Fml.StepBy || ty.isAppOf ``Core.Fml.MergeBy then args[2]? else args.back?
+  let pending := pendingLines.getState (← getEnv)
+  let pend? : Option (Syntax × Option Lean.Name) := do
+    let key ← key?
+    guard key.isMVar
+    pending[key.mvarId!]?
+  if let some (wStx, rule?) := pend? then
+    let A := args[args.size - 2]!
+    let B := args.back!
+    let C := ty.getArg! 0
+    let w := Written.of wStx
+    -- the line after: the text, while unknown; the line `calc` gave it, else
+    let fits (B' : Expr) (sp : Splice) (er : Array Expr) : TermElabM Bool := do
+      if B.isMVar then matchWritten sp C w B' er else isDefEq B B'
+    if ty.isAppOf ``Core.Fml.MergeBy then
+      let (sp, cands) ← mergeCands A
+      let some c ← cands.findM? fun c => fits c.fml sp c.erased
+        | throwError "~[sequentialToParallel]~>: no merge of{← indentLine A}\nis the line written"
+      unless ← isDefEq B c.fml <&&> isDefEq args[2]! (toExpr c.k) <&&> isDefEq args[3]! (toExpr c.n) do
+        throwError "sol_chain: the merge is not the next one"
+    else
+      let run ← runChain A
+      let cands : List (Expr × Array Expr) := if ty.isAppOf ``Core.Fml.Steps then
+          (A, run.erased) :: run.lines.map fun l => (l.fml, l.erased)
+        else (run.lines.head?.map fun l => (l.fml, l.erased)).toList
+      let some (B', _) ← cands.findM? fun (B', er) => fits B' run.splice er
+        | throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{indentD (.ofSyntax wStx)}\n\
+            Its lines:\n{← showLines A run.lines}{stuckNote run}"
+      unless ← isDefEq B B' do throwError "sol_chain: the computed line is not the next one"
+      if ty.isAppOf ``Core.Fml.StepBy then
+        let some q := run.lines.head? | throwError "sol_chain: no rule applies to{← indentLine A}"
+        let some r := rule? | throwError "sol_chain: no rule named"
+        let lbl ← labelFor r q.focus A
+        unless ← isDefEq args[2]! lbl do throwError "sol_chain: the label does not fit"
+    return ← solveCore (← g.replaceTargetDefEq (← instantiateMVars ty))
   match_expr ty with
   | Core.Fml.OneStep _ _ A B =>
     let (run, q) ← nextLine A B
@@ -1240,5 +1378,12 @@ def delabViaE : Delab := do
 end Print
 
 end Chain
+
+namespace Surface
+
+scoped macro_rules
+  | `($a:term ~~> $b:term) => `(leads% $a $b)
+
+end Surface
 
 end Solidity.Core
