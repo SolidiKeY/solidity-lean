@@ -170,9 +170,16 @@ def modalityOf? (φ : Expr) : MetaM (Option Expr) := do
         postconditions `φ : Core.Post C Γ` may be{indentExpr φ}"
   throwError "sol_chain: the line is under two modalities: take `cases` on one{indentExpr φ}"
 
-/-- `e` with the modality constant `μ` read as the variable `m`. -/
-def unModality (μ : Lean.Name) (m e : Expr) : Expr :=
-  e.replace fun x => if x.isConstOf μ then some m else none
+/-- The line whose readings at the diamond and at the box are `d` and `b`:
+the variable `m` where `d` has the diamond and `b` the box, the rest shared
+(a modality a line fixes, a hidden binder's `.box`, stays). -/
+partial def mergeModality (m d b : Expr) : Option Expr :=
+  if d == b then some d
+  else if d.isConstOf ``Modality.diamond && b.isConstOf ``Modality.box then some m
+  else match d, b with
+    | .app f x, .app g y => do pure (.app (← mergeModality m f g) (← mergeModality m x y))
+    | .mdata k x, .mdata _ y => do pure (.mdata k (← mergeModality m x y))
+    | _, _ => none
 
 /-! ## Running the strategy -/
 
@@ -254,10 +261,8 @@ def runChain (φ : Expr) : MetaM Run := do
       let bs ← closedLines n C Γ φb
       let rec shared : List LineQ → List LineQ → List Line × Bool
         | d :: ds, b :: bs =>
-          let pd := unModality ``Modality.diamond m d.pair
-          let pb := unModality ``Modality.box m b.pair
-          if pd == pb && d.fresh == b.fresh then
-            let (f, ψ) := unpair pd
+          if let (some p, true) := (mergeModality m d.pair b.pair, d.fresh == b.fresh) then
+            let (f, ψ) := unpair p
             let (ls, s) := shared ds bs
             ({ fml := unpunch sp ψ, focus := unpunch sp f, fresh := d.fresh,
                erased := #[d.erased, b.erased] } :: ls, s)
@@ -809,11 +814,9 @@ def erasedLine (sp : Splice) (erased : Array Expr) : MetaM Expr := do
   match erased, sp.modality with
   | #[d], _ => fill d
   | #[d, b], some m =>
-    let d ← fill (unModality ``Modality.diamond m d)
-    let b ← fill (unModality ``Modality.box m b)
-    unless d == b do
+    let some e := mergeModality m d b |
       throwError "sol_chain: the erasure of the line {modalityStop m}"
-    return d
+    fill e
   | _, _ => throwError "sol_chain: no erasure"
 
 /-- `Solidity.Fml.dropAlls` on the term: the line's outer `∀`s dropped. -/
