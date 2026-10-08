@@ -3,6 +3,7 @@ import Solidity.Tools.ProofTree
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.ProofTree
+import Solidity.Calculus.Core.Surface
 
 /-!
 # `#wp`, `#step` and the proof tree on scoped formulas
@@ -50,9 +51,10 @@ def stepQuotedC (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) :
 contract's name quoted. -/
 def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr)) := do
   -- today's notation (`dl!{ … }`, `dl[C]{ … }`) is today's elaborator's,
-  -- left unread so that it is not elaborated twice
+  -- left unread so that it is not elaborated twice, unless the switch
+  -- (`open scoped Solidity.Core.Surface`) makes it scoped
   if let some (.atom _ v) := t.raw.getHead? then
-    if v.startsWith "dl" then return none
+    if v.startsWith "dl" && !(← Core.surfaceOn) then return none
   let φ ← try elabTerm t none catch _ => return none
   synthesizeSyntheticMVarsNoPostponing
   let φ ← instantiateMVars φ
