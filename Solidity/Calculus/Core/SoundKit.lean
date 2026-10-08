@@ -769,8 +769,9 @@ end ShapesSim
 
 An update rule's update is a term of `Update.lean`, read on the erasure, so
 what it needs of the typed run (`Premise.sound_update`) follows from the
-equation with M3's run (`U.apply σ.erase = s.run σ.erase`) by the bridge (`Stmt.trun_erase`), where the typed run does not diverge: a
-typed `diverge` agrees with any untyped outcome, so under the diamond the
+equation with M3's run (`U.apply σ.erase = s.run σ.erase`) by the bridge
+(`Stmt.trun_erase`), where the typed run does not diverge: a typed
+`diverge` agrees with any untyped outcome, so under the diamond the
 arm shows that it does not happen (no update arm's statement loops; a push
 at the bound is exhausted, `TRun.push_nd`, which agrees with anything too
 and which both modalities accept). -/
