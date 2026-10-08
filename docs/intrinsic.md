@@ -1431,6 +1431,51 @@ Found, not this lane's: `Core.Proves.valid` leaves its `R` open on a
 comparison (`se1 := x == 1`) escapes in today's printer too (the `dl_term`
 grammar has no `==`).
 
+### W2 integration (2026-10-08)
+
+- **Merged** into `intrinsic`, in order: `w2-sound` (its tip, past the
+  cover removal: `Taclet.sound`, `Proves.close`, the typed reading),
+  `w2-symex`, `w2-chains`, `w2-tree`.  One text conflict, in
+  `docs/module-map.md` (the `Examples/Tactics/Core*` rows of `chains` and
+  `tree`): kept as a union, one row per module, `CoreCallback`'s row with
+  `tree`'s `ProvesC` clause.  `Solidity.lean` merged clean, no duplicate
+  import or row.
+- **One clash** of fully-qualified names: `Upd.freshB` in both
+  `Calculus/Core/Closable.lean` (`sound`) and `Calculus/Core/Close.lean`
+  (`symex`), which imports the first through `HoldsErase`.  `Close.lean`'s
+  is renamed `Upd.freshK` (with `Upd.fresh_of_freshK`): it decides the
+  same `Upd.Fresh` by `List.contains`, which the gate's kernel evaluation
+  was measured with, and keeps its compiled twin `Upd.freshM`.  The
+  duplicate check is otherwise empty (but the known `Evm/Repr`/
+  `Examples/Verify` `as` false positive).
+- **Full build: green after that rename, no other fix.**  `lean_build` over
+  `Solidity`, `solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (321
+  jobs; the last two in `defaultTargets` for the run only): **95 s wall**,
+  rebuilding from the Lake cache what W2 changed.  The slowest modules
+  under the build's load: `TestSuite/Derived7` 84 s, `TestSuite/Derived8`
+  46 s, `Examples/Tactics/CoreSolSpec` 40 s.  No new `sorry` or `axiom`;
+  one new override, `CoreSolSpec`'s `erc_mint` at `700000`, below its
+  twin's `1000000` in `Examples/Tactics/Specs.lean`.
+- **Gates.**  `symex`'s early gate passes (19.4 s serial against 22.9 s,
+  above), so W3 may start.  Under the parallel build the twins took
+  `CoreDerived9` 14 s, `CoreDerived10` 15 s, `CoreDerived11` 5.6 s,
+  against today's `Derived9` 14 s, `Derived10` 18 s, `Derived11` 4.2 s.
+  `sound`'s gate (`Stmt.TSound C`) does not pass yet: it waits on the
+  three decisions in its section.
+- `scripts/check-orphans.mjs`: 307 reachable, none orphaned but the
+  git-excluded `Solidity/Scratch/`.  `scripts/check-doc-paths.sh`: OK (the
+  deleted-cover and spike citations `symex` reported were fixed by
+  `sound`); `Close.lean` is now an ambiguous citation (two files), which
+  the script allows.
+- **Left over, across lanes**, now unblocked by the merge: `Proves.close`
+  is on `intrinsic`, so `tree`'s `ProofTree.Config.closers` and `symex`'s
+  `Walk.movesAt` can end a leaf with `refine close ?_; sol_symex;
+  sol_close` (re-pin `CoreProofTree` and `CoreDerive`), and `chains`'
+  `Fml.ViaE.valid` premise can come from it.  The `==`/`!=`/`*` update
+  printer gap is `Calculus/RuleSyntax.lean`'s.  The read-only review pass
+  was not run for `symex` and `chains`.
+- The four lane worktrees are removed (the branches stay).
+
 ## W3 — the flip, file by file (4 lanes)
 Each lane adds the `open scoped` line to the files it owns and re-pins them.
 
