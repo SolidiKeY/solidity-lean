@@ -1,4 +1,7 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Derive
+import Solidity.Tools.CoreInspect
 
 /-!
 # The notation, pinned
@@ -8,6 +11,12 @@ What the printers show, as `#guard_msgs` tests: a taclet as its rule line
 by `dl!{ … }` and printed back (`Notation.lean`), and the goals of an `apply`
 derivation as sequents `dl{ Γ ⟹ φ }` (`Logic.lean`).  If a printer changes,
 these fail.
+
+The formulas and the derivation read the scoped calculus (`open scoped
+Solidity.Core.Surface`, section `Scoped`): a parameter is bound by `∀`, a
+formula is a `Core.Fml C []`, and the walk is `Core.Proves`'s.  The rule
+lines and the rules of `⊢` are today's (`Taclet`, `Proves`) until W5 names
+the scoped ones so.
 -/
 
 namespace Solidity.Examples.Notation
@@ -148,6 +157,9 @@ set_option pp.sol.dl false in
 /-- info: dl{ ⟨[ uint x = 1; alice.age = x; ]⟩ } : Premise StandardExample -/
 #guard_msgs in #check (Premise.unfold sol{ uint x = 1; alice.age = x; } : Premise StandardExample)
 
+section Scoped
+open scoped Solidity.Core.Surface
+
 /-! ## A formula prints as it reads
 
 `a != b` is `¬a = b`, and `balances[a] == 1` on a storage read is
@@ -155,7 +167,10 @@ set_option pp.sol.dl false in
 prints as the equation of their lowerings. -/
 
 /--
-info: dl{ ¬a = b → [ balances[a] = 1; balances[b] = 2; ] find(storage, balances[a]) = 1 } : Fml StandardExample
+info: dl{
+  ∀ uint b;
+    ∀ uint a;
+      ¬a = b → [ balances[a] = 1; balances[b] = 2; ] find(storage, balances[a]) = 1 } : Core.Fml StandardExample []
 -/
 #guard_msgs in #check dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 }
 
@@ -163,48 +178,60 @@ info: dl{ ¬a = b → [ balances[a] = 1; balances[b] = 2; ] find(storage, balanc
 spelling of its own: the update element carries it, and prints as it reads. -/
 
 /--
-info: dl{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 ‖ se2 := 1 < 2 } true } : Fml StandardExample
+info: dl{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 ‖ se2 := 1 < 2 } true } : Core.Fml StandardExample []
 -/
 #guard_msgs in #check dl!{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 ‖ se2 := 1 < 2 } true }
 
-/-- What a rule leaves reads back through `dl!{ … }` as the term it is. -/
-example : (dl!{ [ balances[a] = 1; ] balances[a] == 1 }).step =
-    some dl!{ { storage := save(storage, balances[a], 1) } [ ] find(storage, balances[a]) = 1 } :=
-  rfl
+/-! What a rule leaves prints as `dl!{ … }` reads it; the last statement's
+rule goes on to the postcondition (no `[ ]` left).  The scoped term carries
+the scope ends the printer hides, so the line is compared as printed
+(`#step`, `Tools/CoreInspect.lean`) or by a chain (`sol_chain`), not by
+`rfl` against the line read back. -/
+
+/--
+info:   ~[storageIndexWriteMappingSave]~>
+    dl{ ∀ uint a; { storage := save(storage, balances[a], 1) } find(storage, balances[a]) = 1 }
+-/
+#guard_msgs in
+#step dl!{ [ balances[a] = 1; ] balances[a] == 1 }
 
 /-! ## The goals of a derivation are sequents
 
-`Γ` is the context (preconditions and updates, in order), right of `⟹` the
-formula still to prove. -/
+`Γ` is the context (parameters, preconditions and updates, in order), right
+of `⟹` the formula still to prove. -/
 
 /--
-trace: ⊢ dl{ ⟹ ¬a = b → [ balances[a] = 1; balances[b] = 2; ] find(storage, balances[a]) = 1 }
+trace: ⊢ dl{ ⟹ ∀ uint b; ∀ uint a; ¬a = b → [ balances[a] = 1; balances[b] = 2; ] find(storage, balances[a]) = 1 }
 ---
-trace: case h
-⊢ dl{ ¬a = b ⟹ [ balances[a] = 1; balances[b] = 2; ] find(storage, balances[a]) = 1 }
+trace: case h.h.h
+⊢ dl{ ∀ uint b, ∀ uint a, ¬a = b ⟹ [ balances[a] = 1; balances[b] = 2; ] find(storage, balances[a]) = 1 }
 ---
-trace: case h
-⊢ dl{ ¬a = b, { storage := save(storage, balances[a], 1) } ⟹ [ balances[b] = 2; ] find(storage, balances[a]) = 1 }
+trace: case h.h.h
+⊢ dl{ ∀ uint b, ∀ uint a, ¬a = b, { storage := save(storage, balances[a], 1) } ⟹
+    [ balances[b] = 2; ] find(storage, balances[a]) = 1 }
 ---
-trace: case h.h
-⊢ dl{ ¬a = b, { storage := save(storage, balances[a], 1) }, { storage := save(storage, balances[b], 2) } ⟹
-    find(storage, balances[a]) = 1 }
+trace: case h.h.h
+⊢ dl{ ∀ uint b, ∀ uint a, ¬a = b, { storage := save(storage, balances[a], 1) },
+    { storage := save(storage, balances[b], 2) } ⟹ find(storage, balances[a]) = 1 }
 -/
 #guard_msgs in
 /-- Two keys the precondition tells apart:
 `a != b → [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1`. -/
 theorem twoKeys : ⊢ dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 } := by
   trace_state
-  apply intro
+  apply Core.Proves.allRight
+  apply Core.Proves.allRight
+  apply Core.Proves.impRight
   trace_state
-  apply update .storageIndexWriteMappingSave
+  apply Core.Proves.update (Core.Taclet.toStep .storageIndexWriteMappingSave)
   trace_state
-  apply update .storageIndexWriteMappingSave
-  apply empty
+  apply Core.Proves.update (Core.Taclet.toStep .storageIndexWriteMappingSave)
   trace_state
-  refine close ?_
+  refine Core.Proves.close [] rfl List.nodup_nil ?_
   sol_symex
   sol_close
+
+end Scoped
 
 /-! ## The rules of `⊢` are sequents
 
