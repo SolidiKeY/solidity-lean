@@ -20,11 +20,13 @@ the sequent, and today's residue of its erasure (`Derive.residue`,
 The kernel walks the leaf's context once for both (`Fml.closeErase`,
 `Calculus/Core/Closable.lean`).
 `Seq.run_sound` reads the walk back as the derivation; the kernel checks
-it as one evaluation (`Seq.residue H φ = some ls`), and the tactic leaves
-one goal `leafᵢ` per leaf, as `sol_prove` on `Core.Valid` does.
+it as one evaluation (`Seq.residue full H φ = some ls`, where `full` only
+orders `pick`'s two residues: `Seq.pickH`, `pickH_eq`), and the tactic
+leaves one goal `leafᵢ` per leaf, as `sol_prove` on `Core.Valid` does.
 
 The walk is generic in what a leaf is (`α`), so the compiled run that
-quotes the leaves for the tactic (`Seq.leafQuote`) and the kernel's
+quotes the leaves for the tactic (`Seq.leafQuoteI`, which marks the residue
+that closed each leaf) and the kernel's
 (`Seq.leafRes`) are one function.  It is written with `casesOn` (Gate G0,
 condition 1); `n` bounds the steps down a path, `b` the steps of the whole
 walk, handed from a goal to the next.

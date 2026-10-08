@@ -4458,6 +4458,7 @@ not move); in millions of heartbeats (kHB/1000) over the 91:
 | no closable test, the erasure by the recursors | 236.3 | 18.8–19.5 |
 | the walk alone (every leaf `some []`) | 31.5 | 2.3 |
 | landed: one pass (`Fml.closeErase`), `Var.memB` by `List.rec`, `ground` by `Fml.eraseR` | 249.3 | 19.6 |
+| review fix: the `upd` arm skips `hit` when no binder is below it | 248.7 (249.4 for the above, same run) | 19.7–21.7 |
 
 So the excess was in two places of equal size: the closable test (about 25M
 heartbeats) and the erasure itself (another 25M), which `Fml.erase`,
@@ -4478,7 +4479,7 @@ kernel-evaluated code only, every result equal to the old one by a theorem):
    the `Avoids` test of an update reads its terms' variables in place
    (`Tm.anyE`, `meetsB_eq_any`) instead of collecting `Upd.vars`.
    `Seq.ground` erases by `Fml.eraseR`.  `Var.memB` is by `List.rec`
-   (`Var.memBM` its twin).
+   (`Var.memBM` its twin, `Var.memB_eq_memBM`).
 2. *`pick`'s order as a hint* (`Seq.pickH`, `pickH_eq`): `Seq.residue full`
    tries the quantified leaf first when `full` is set, the same leaves in
    every case; `Seq.prove` sets it from the compiled walk (`leafQuoteI` marks
@@ -4546,6 +4547,20 @@ and `SolidityCorpus` (the last two in `defaultTargets` for the run only):
 325 jobs, green; `Closable`, `ProvesDerive`, `ProofTree`, `StorageDelete`
 clean by diagnostics, as are copies of Derived9–11.  No new `sorry`,
 `axiom` or `maxHeartbeats`; no new module.
+
+**Review fixes** (the read-only pass): (a) `Fml.closeErase`'s `upd` arm
+applied the update's `hit` closure to the binders below it even when there
+were none, the common case, so the kernel walked the update's terms with
+`Tm.anyE` a second time; it now matches on the binders first and asks `hit`
+only of a non-empty list (`Fml.closeErase_eq` splits on them).  Re-timed by
+the same scratch command, both variants in one run, interleaved: 249.4M →
+248.7M heartbeats over the 91, wall within noise (19.9 → 19.7 s, 21.8 →
+21.7 s on a second pass).  The `[]` case is cheap in the kernel (`Var.memB x
+[]` is one step), so the walk was small; the gap to the 236.3M of the
+recursor-only variant is not here.  (b) `Var.memB_eq_memBM` links
+`Var.memB` to its compiled twin, as G0 condition 2 asks.  (c)
+`ProvesDerive`'s docstring names `Seq.residue full H φ` and
+`Seq.leafQuoteI`.  No pin, rule or message changed.
 
 ## Baselines (M0)
 

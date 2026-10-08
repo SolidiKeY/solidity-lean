@@ -140,6 +140,11 @@ def _root_.Solidity.Var.memBM (x : Var) : List Var → Bool
 def _root_.Solidity.Var.memB (x : Var) (ns : List Var) : Bool :=
   List.rec (motive := fun _ => Bool) false (fun y _ ih => x.eqB y || ih) ns
 
+theorem _root_.Solidity.Var.memB_eq_memBM (x : Var) (ns : List Var) : x.memB ns = x.memBM ns := by
+  induction ns with
+  | nil => rfl
+  | cons y ys ih => exact congrArg (x.eqB y || ·) ih
+
 theorem _root_.Solidity.Var.eqB_eq {x y : Var} (h : x.eqB y = true) : x = y := by
   cases x <;> cases y <;>
     simp_all only [Var.eqB, Bool.and_eq_true, Nat.beq_eq, decide_eq_true_eq, reduceCtorEq]
@@ -694,10 +699,14 @@ def Fml.closeErase {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var
     (imp := fun a _ _ ih ns =>
       bif a.foFreshB ns then (ih ns).map fun r => (r.1, .imp (a.eraseR ns) r.2) else none)
     (upd := fun m U _ ih ns => (U.closeErase ns).bind fun u => (ih u.names).bind fun r =>
-      bif u.hit r.1 || meetsB r.1 u.names then none
-      else some (r.1, match u.upd with
+      match r.1 with
+      | [] => some ([], match u.upd with
         | [] => r.2
-        | U' => .upd m U' r.2))
+        | U' => .upd m U' r.2)
+      | B => bif u.hit B || meetsB B u.names then none
+        else some (B, match u.upd with
+          | [] => r.2
+          | U' => .upd m U' r.2))
     (modal := fun _ _ _ _ _ _ => none)
     (havoc := fun _ ih ns => (ih ns).map fun r => (r.1, .havoc r.2))
     (all := fun x p _ ih ns =>
@@ -747,10 +756,14 @@ theorem Fml.closeErase_eq {Γ : Ctx} (φ : Fml C Γ) :
   | upd m U φ ih =>
     intro ns
     change ((U.closeErase ns).bind fun u => (φ.closeErase u.names).bind fun r =>
-      bif u.hit r.1 || meetsB r.1 u.names then none
-      else some (r.1, match u.upd with
+      match r.1 with
+      | [] => some ([], match u.upd with
         | [] => r.2
-        | U' => .upd m U' r.2)) =
+        | U' => .upd m U' r.2)
+      | B => bif u.hit B || meetsB B u.names then none
+        else some (B, match u.upd with
+          | [] => r.2
+          | U' => .upd m U' r.2)) =
       (bif U.freshB ns then (φ.bindsB (U.names ns)).bind (fun B =>
         bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
         else some B) else none).map _
@@ -764,11 +777,19 @@ theorem Fml.closeErase_eq {Γ : Ctx} (φ : Fml C Γ) :
       | none => rfl
       | some B =>
         simp only [Option.map_some, Option.bind_some, ← meetsB_eq_any]
-        cases meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns)
-        · simp only [cond_false, Option.map_some, Fml.erase]
+        cases B with
+        | nil =>
+          simp only [Fml.erase]
           generalize U.erase ns = U'
           cases U' <;> rfl
-        · rfl
+        | cons y ys =>
+          dsimp only
+          cases meetsB (y :: ys) (Solidity.Upd.vars (U.erase ns)) ||
+              meetsB (y :: ys) (U.names ns)
+          · simp only [cond_false, Option.map_some, Fml.erase]
+            generalize U.erase ns = U'
+            cases U' <;> rfl
+          · rfl
   | modal => intro _; rfl
   | havoc φ ih =>
     intro ns
