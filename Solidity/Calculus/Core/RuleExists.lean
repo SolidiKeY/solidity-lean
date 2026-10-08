@@ -168,8 +168,8 @@ inductive Try where
   | no
 
 /-- Close the rule goal `R` (`Rule C k m s P`) with the constructor `c` of
-`J` (`Taclet`, or `LeanTaclet`), wrapped by `wrap` (`Rule.key`,
-`Rule.lean`). -/
+`J` (`Taclet`, or `LeanTaclet`), wrapped by `wrap` (`Rule`'s constructor
+`key`, or `lean`). -/
 def tryCtor (R : Expr) (c wrap : Lean.Name) (cands : List (Expr × Expr)) : TacticM Try := do
   let st ← saveState
   let r ← (do
