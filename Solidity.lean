@@ -254,6 +254,8 @@ import Solidity.Tools.Show
 import Solidity.Tools.Common
 import Solidity.Tools.Run
 import Solidity.Tools.Inspect
+import Solidity.Tools.Taclet
+import Solidity.Tools.InspectToday
 import Solidity.Tools.CoreInspect
 import Solidity.Tools.DiffTest
 import Solidity.Tools.Counterexample

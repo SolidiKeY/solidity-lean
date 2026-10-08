@@ -1,39 +1,36 @@
-import Solidity.Calculus.Chains
 import Solidity.Calculus.Decide
-import Solidity.Calculus.Callback
-import Solidity.Calculus.PrintedRules
+import Solidity.Calculus.Core.Delab
+import Solidity.Calculus.Core.Quote
+import Solidity.Calculus.Core.ProofTree
+import Solidity.Calculus.Core.Surface
 import Solidity.Tools.Common
 
 /-!
-# `#wp`, `#step`, `#taclet`: looking inside the calculus
+# `#wp`, `#step`: looking inside the calculus
 
 ```
-#wp dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
-#step dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
-#taclet storageFieldWriteSave
-#taclet "storageFieldWriteCaptureSrc"
+#wp cdl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
+#step cdl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
 ```
 
-* `#wp φ` runs the strategy to the end (`symex 200`, what `sol_symex` does)
-  and prints what is left, the first-order formula whose validity is `φ`'s.
-  When that formula is in `sol_decide`'s fragment (`Fml.inL`) it also prints
-  its reduction (`Fml.reduce`): the updates pushed in and every read of a
-  write eliminated, a formula over the initial state alone, printed by
-  `LFml.fmt` in KeY's spelling (`find(storage, alice.age)`, `save(s, p, w)`,
+* `#wp φ` runs the scoped strategy to the end (`Core.symex 200`, what
+  `sol_symex` does) and prints what is left, the first-order formula whose
+  validity is `φ`'s.  When its erasure (`Core.Fml.erase`) is in
+  `sol_decide`'s fragment (`Fml.inL`) it also prints its reduction
+  (`Fml.reduce`): the updates pushed in and every read of a write
+  eliminated, a formula over the initial state alone, printed by `LFml.fmt`
+  in KeY's spelling (`find(storage, alice.age)`, `save(s, p, w)`,
   `delAt(s, p)`, `if(i = j) then a else b`, `write(m, idC(idp0, nil), at(i),
   v)`, `=`, `∧`, `→`, `¬`, `∀ uint x; φ`).
-* `#step φ` takes one step and names the rule, as a line of `#derivation`.
-* `#taclet r` prints a rule: its statement (the delaborator shows it as
-  `dl{ ⟨[ s; ]⟩ ⇝ p }`), the solkey taclets it transcribes and their
-  `\heuristics`, the printed rule, and the theorem that makes it sound.  `r` is a
-  constructor of `Taclet`, `LeanTaclet` or `CallbackTaclet` (or of the scoped
-  `Core.Taclet`, printed where `Calculus/Core/Delab.lean` is imported), or a KeY taclet's
-  name (an identifier or a string), looked up backwards in
-  `RuleShapes.tacletOrigins`.
+* `#step φ` takes one step and names the rule the scoped strategy fires
+  (`ruleAtC?`, `Core.ruleOf?`), as a line of `#derivation`.
 
-`φ` must be a closed formula of a named contract (`elabFormula`), as for
-`#derivation`: the strategy runs as compiled code (`unsafe evalExpr`) and
-its result is quoted back against the contract's name.
+`φ` is a closed scoped formula of a named contract, `φ : Core.Fml C Γ`
+(`cdl!{ … }`, or `dl!{ … }` under `open scoped Solidity.Core.Surface`): the
+strategy runs as compiled code (`unsafe evalExpr`), its result is quoted
+(`Core.Fml.quote`) against the contract's name and printed by `Core.Delab`'s
+printer.  Today's formulas, read without the switch, are
+`Tools/InspectToday.lean`'s; `#taclet` is `Tools/Taclet.lean`'s.
 -/
 
 namespace Solidity.Tools
@@ -208,170 +205,110 @@ where
     | φ@(.imp ..) | φ@(.all ..) => s!"({LFml.fmt φ})"
     | φ => LFml.fmt φ
 
-/-! ## What the commands evaluate -/
+
+/-! ## The commands -/
 
 variable {C : Contract}
-
-/-- What `#wp` shows of `φ`: the formula symbolic execution leaves, quoted
-against the contract `c`, and its reduction when it is in the fragment. -/
-def wpQuoted [FreshNames] (c : Lean.Expr) (φ : Fml C) : Lean.Expr × Option String :=
-  let ψ := symex 200 φ
-  (ψ.quote c, if ψ.inL Sym.empty then some (LFml.fmt ψ.reduce) else none)
-
-/-- What `#step` shows of `φ`: the formula one step leaves, quoted. -/
-def stepQuoted (c : Lean.Expr) (φ : Fml C) : Option Lean.Expr :=
-  φ.step.map (·.quote c)
 
 open Lean Elab Command Term Meta
 
 /-- `#wp φ`: what symbolic execution leaves of `φ`, and, in `sol_decide`'s
 fragment, its reduction to the initial state. -/
-elab "#wp " t:term : command => liftTermElabM do
-  let (φ, _, c) ← elabFormula "#wp" t
-  let e ← mkAppM ``wpQuoted #[c, φ]
-  let ty ← inferType e
-  let (ψ, red) ← unsafe evalExpr (Lean.Expr × Option String) ty e
+syntax "#wp " term : command
+
+/-- `#step φ`: one step of the strategy on `φ`, and the rule it fires. -/
+syntax "#step " term : command
+
+/-- What `#wp` shows of a scoped `φ`: the formula the scoped strategy leaves,
+quoted, and the reduction of its erasure when it is in the fragment. -/
+def wpQuotedC [FreshNames] (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) :
+    Lean.Expr × Option String :=
+  let ψ := Core.symex 200 φ
+  let ψ' := ψ.erase []
+  (ψ.quote c, if ψ'.inL Sym.empty then some (LFml.fmt ψ'.reduce) else none)
+
+/-- What `#step` shows of a scoped `φ`: the formula one step leaves, quoted. -/
+def stepQuotedC (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) : Option Lean.Expr :=
+  φ.step.map (·.quote c)
+
+/-- A closed scoped formula of a named contract: the formula, and the
+contract's name quoted; none for today's formula (`dl!{ … }` read without
+the switch) or any other term. -/
+def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr)) := do
+  -- today's notation (`dl!{ … }`, `dl[C]{ … }`) is today's elaborator's,
+  -- left unread so that it is not elaborated twice, unless the switch
+  -- (`open scoped Solidity.Core.Surface`) makes it scoped
+  if let some (.atom _ v) := t.raw.getHead? then
+    if v.startsWith "dl" && !(← Core.surfaceOn) then return none
+  let φ ← try elabTerm t none catch _ => return none
+  synthesizeSyntheticMVarsNoPostponing
+  let φ ← instantiateMVars φ
+  let ty ← whnf (← inferType φ)
+  unless ty.isAppOfArity ``Core.Fml 2 do return none
+  let some n := (← whnfR ty.appFn!.appArg!).constName? | return none
+  if φ.hasFVar || φ.hasMVar then throwError "the formula is not closed{indentExpr φ}"
+  return some (φ, mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
+    (mkApp (mkConst ``List.nil [0]) (mkConst ``Lean.Level)))
+
+/-- What a command says of a term that is not a closed scoped formula. -/
+def notScoped {α : Type} (cmd : String) : MetaM α :=
+  throwError "{cmd}: not a closed scoped formula `Core.Fml C Γ` (`cdl!\{ … }`, or `dl!\{ … }` \
+    under `open scoped Solidity.Core.Surface`)"
+
+
+/-- The rule one step fires on the scoped formula `φ`, by name: at the first
+statement with a rule, looking through updates, a precondition, binders and
+a conjunction's left goal first, as `Core.Fml.stepAt` looks (`ruleOf?`);
+`emptyModality` where the first modality's program is done. -/
+partial def ruleAtC? (φ : Lean.Expr) : MetaM (Option Lean.Name) := do
+  let k ← mkAppM ``Core.Fml.fresh #[φ]
+  let rec go (e : Lean.Expr) : MetaM (Option Lean.Name) := do
+    let e ← whnf e
+    let args := e.getAppArgs
+    match e.getAppFn.constName? with
+    | some ``Core.Fml.and =>
+      match ← go args[2]! with
+      | some n => return some n
+      | none => go args[3]!
+    | some ``Core.Fml.imp => go args[3]!
+    | some ``Core.Fml.upd => go args[5]!
+    | some ``Core.Fml.havoc => go args[2]!
+    | some ``Core.Fml.all => go args[4]!
+    | some ``Core.Fml.bind => go args[5]!
+    | some ``Core.Fml.anon => go args[3]!
+    | some ``Core.Fml.modal =>
+      let P ← whnf args[5]!
+      if P.isAppOf ``Core.Prog.nil then return some `emptyModality
+      unless P.isAppOf ``Core.Prog.cons do return none
+      let s := P.getArg! (P.getAppNumArgs - 2)
+      let some (c, _) ← Core.ruleOf? k args[4]! s | return none
+      return some (← Core.ProofTree.keyName c s)
+    | _ => return none
+  go φ
+
+/-- `#wp φ`. -/
+@[command_elab Solidity.Tools.«command#wp_»]
+def elabWpCore : CommandElab := fun stx => liftTermElabM do
+  let some (φ, c) ← elabCoreFormula? ⟨stx[1]⟩ | notScoped "#wp"
+  let e ← mkAppM ``wpQuotedC #[c, φ]
+  let (ψ, red) ← unsafe evalExpr (Lean.Expr × Option String) (← inferType e) e
   let tail := match red with
     | some r => m!"\nupdate-free:\n    {r}"
     | none => m!"\noutside `sol_decide`'s fragment (`Fml.inL`): no reduction"
   logInfo (m!"symbolic execution leaves:\n    {ψ}" ++ tail)
 
-/-- `#step φ`: one step of the strategy on `φ`, and the rule it fires. -/
-elab "#step " t:term : command => liftTermElabM do
-  let (φ, _, c) ← elabFormula "#step" t
-  let e ← mkAppM ``stepQuoted #[c, φ]
-  let ty ← inferType e
-  match ← unsafe evalExpr (Option Lean.Expr) ty e with
+/-- `#step φ`. -/
+@[command_elab Solidity.Tools.«command#step_»]
+def elabStepCore : CommandElab := fun stx => liftTermElabM do
+  let some (φ, c) ← elabCoreFormula? ⟨stx[1]⟩ | notScoped "#step"
+  let e ← mkAppM ``stepQuotedC #[c, φ]
+  let ψ? ← unsafe evalExpr (Option Lean.Expr) (← inferType e) e
+  match ψ? with
   | none => logInfo "no modality left: `close`"
   | some ψ =>
-    let r := match ← Chain.ruleOfLine φ with
-      | some (_, n) => toString n
+    let r := match ← ruleAtC? φ with
+      | some n => toString n
       | none => "?"
     logInfo m!"  ~[{r}]~>\n    {ψ}"
 
-/-! ## `#taclet` -/
-
-/-- A `\heuristics` rule set as the `.key` files spell it. -/
-def Heuristic.keyName : Heuristic → String
-  | .simplifyProg => "simplify_prog"
-  | .simplifyExpression => "simplify_expression"
-  | .concreteSolidity => "concrete_solidity"
-  | .simplifyProgExpensive => "simplify_prog_expensive"
-
-/-- A KeY taclet with its rule set: `storageFieldWriteSave (simplify_prog)`. -/
-def KeyTaclet.fmt (t : KeyTaclet) : String := s!"{t.name} ({Heuristic.keyName t.heuristic})"
-
-/-- A scoped taclet (`Calculus/Core/Taclet.lean`) is looked up as today's
-of the same name: it transcribes the same solkey taclets. -/
-def coreTwin (n : Lean.Name) : Lean.Name :=
-  if (`Solidity.Core.Taclet).isPrefixOf n then n.replacePrefix `Solidity.Core `Solidity else n
-
-/-- The KeY taclets of a constructor, one line. -/
-def keyLine (n : Lean.Name) : String :=
-  let n := coreTwin n
-  match lookupBy n (RuleShapes.tacletOrigins ++ RuleShapes.callbackOrigins) with
-  | some (.taclet t) => s!"solkey: {KeyTaclet.fmt t}"
-  | some (.merged ts) => "solkey (merged): " ++ ", ".intercalate (ts.map KeyTaclet.fmt)
-  | none =>
-    -- solkey's taclets past the pinned checkout (`ed7849d5b6`), unwinding bounded here
-    if n == ``LeanTaclet.whileUnwind then "solkey: whileUnwind (loop_expand), past the pin"
-    else if n == ``LeanTaclet.whileInvariantBox then
-      "solkey: whileInvariantBox (loop_inv), past the pin"
-    else if n == ``LeanTaclet.whileInvariantDiamond then
-      "solkey: whileInvariantDiamond (loop_inv), past the pin"
-    else "solkey: none (a rule solkey does not have)"
-
-/-- The printed rule of a constructor, one line. -/
-def texLine (n : Lean.Name) : String :=
-  let n := coreTwin n
-  let rows := PrintedRules.printedOrigins ++ PrintedRules.leanPrintedOrigins ++
-    PrintedRules.callbackPrintedOrigins
-  match lookupBy n rows with
-  | some (.printed p) => s!"printed: {p.name}"
-  | some (.merged ps) => "printed (merged): " ++ ", ".intercalate (ps.map PrintedRule.name)
-  | some (.leanOnly .keyTier) => "printed: none (a solkey taclet not printed)"
-  | some (.leanOnly .calculus) => "printed: none (theory only Lean has)"
-  | none => "printed: not tabled"
-
-/-- The theorem that makes the constructor `n` sound: by its family, and for
-a `Taclet` by its premise's kind; with the per-rule update lemma
-`Solidity.upd_<n>` when there is one (`upd_send_cases` for a send's). -/
-def soundLine (n : Lean.Name) (ty : Lean.Expr) : MetaM String := do
-  let env ← getEnv
-  let family := n.getPrefix
-  -- a scoped taclet: its premise is `Stmt.step`'s, which `Core.Stmt.Sound` makes sound
-  if family == `Solidity.Core.Taclet || family == `Solidity.Core.LeanTaclet then
-    return s!"sound: {family}.toStep (the premise is Stmt.step's; Core.Stmt.Sound)"
-  let thm ← if n == ``CallbackTaclet.tryCallWithCallbackBox then pure ``CallbackTaclet.sound_branches
-    else if n == ``CallbackTaclet.sendWithCallbackBox then pure ``CallbackTaclet.sound_send
-    else if family == ``CallbackTaclet then pure ``CallbackTaclet.sound
-    else if family == ``LeanTaclet then pure ``LeanTaclet.sound
-    else forallTelescopeReducing ty fun _ concl => do
-      let p := concl.getAppArgs.back?.getD concl
-      pure <| match p.getAppFn.constName? with
-        | some ``Premise.update => ``Taclet.sound_update
-        | some ``Premise.unfold => ``Taclet.sound_unfold
-        | some ``Premise.split => ``Taclet.sound_split
-        | some ``Premise.check => ``Taclet.sound_check
-        | some ``Premise.done => ``Taclet.sound_done
-        | some ``Premise.branches => ``Taclet.sound_branches
-        | some ``Premise.cases => ``Taclet.sound_cases
-        | _ => ``Taclet.sound
-  let upd := Name.mkStr `Solidity ("upd_" ++ n.getString!)
-  -- a send's two outcomes are one lemma for both modalities
-  let upd := if thm == ``Taclet.sound_cases then ``upd_send_cases else upd
-  let extra := if env.contains upd then s!", {upd}" else ""
-  return s!"sound: {thm}{extra}"
-
-/-- Everything `#taclet` says of the constructor `n`. -/
-def tacletInfo (n : Lean.Name) : MetaM MessageData := do
-  let info ← getConstInfo n
-  let snd ← soundLine n info.type
-  return m!"{n} : {info.type}\n{keyLine n}\n{texLine n}\n{snd}"
-
-/-- The rule families, in the order a bare name is looked up. -/
-def ruleFamilies : List Lean.Name :=
-  [``Taclet, ``LeanTaclet, ``CallbackTaclet, `Solidity.Core.Taclet]
-
-/-- The constructor a name denotes: `storageFieldWriteSave`,
-`Taclet.storageFieldWriteSave`, or a full name. -/
-def resolveRule (id : Lean.Name) : MetaM (Option Lean.Name) := do
-  let env ← getEnv
-  let cands := id :: (`Solidity ++ id) :: ruleFamilies.map (· ++ id)
-  return cands.find? fun c => env.contains c && ruleFamilies.contains c.getPrefix &&
-    (env.find? c).any (·.isCtor)
-
-/-- `#taclet r`, for a KeY taclet's name: the constructors that transcribe it. -/
-def keyTacletInfo (s : String) : MetaM MessageData := do
-  let rows := (RuleShapes.tacletOrigins ++ RuleShapes.callbackOrigins).filter fun r =>
-    r.2.taclets.any (·.name == s)
-  match KeyTaclet.all.find? (·.name == s) with
-  | none => throwError "#taclet: {s} is neither a rule of the calculus nor a solkey taclet"
-  | some t =>
-    if rows.isEmpty then
-      return m!"solkey: {KeyTaclet.fmt t}\nno Lean rule claims it \
-        (`RuleShapes.unclaimedTaclets` says why)"
-    let mut out := m!"solkey: {KeyTaclet.fmt t}, transcribed by"
-    for (n, _) in rows do
-      out := out ++ m!"\n\n" ++ (← tacletInfo n)
-    return out
-
-/-- `#taclet r`: a rule of the calculus, or a solkey taclet by its `.key`
-name (as an identifier or a string). -/
-syntax (name := tacletCmd) "#taclet " (ident <|> str) : command
-
-/-- `#taclet` prints a rule in KeY's long forms (`pp.sol.key`): `consr(sp, fld)`,
-`find(storage, consr(sp, size))`. -/
-def withKeyForms {α : Type} (x : TermElabM α) : TermElabM α :=
-  withOptions (fun o => pp.sol.key.set o true) x
-
-@[command_elab tacletCmd] def elabTaclet : CommandElab
-  | `(#taclet $s:str) => liftTermElabM <| withKeyForms do logInfo (← keyTacletInfo s.getString)
-  | `(#taclet $id:ident) => liftTermElabM <| withKeyForms do
-    match ← resolveRule id.getId with
-    | some n => logInfo (← tacletInfo n)
-    | none => logInfo (← keyTacletInfo id.getId.toString)
-  | _ => throwUnsupportedSyntax
-
 end Solidity.Tools
-

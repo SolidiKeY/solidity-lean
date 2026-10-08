@@ -25,31 +25,29 @@
  *
  * ## The obligation
  *
- * Each function becomes `Corpus.Diamond σ sol[C]{ body }` — the formula
- * `holds σ dl{ ⟨ body ⟩ true }` at the store `σ = State.<contract>Store`
- * the ported contract `C` starts in (`Solidity/Corpus/Basic.lean`). That
- * is solkey's diamond read in the contract's initial state, and it is the
- * one reading that is both faithful and decidable here:
+ * Each function becomes `Corpus.Diamond (Core.TState.init C) sol[C]{ body }`
+ * — the body resolved to the scoped syntax and `⟨ body ⟩ true` read over its
+ * typed run from the typed state the ported contract `C` starts in
+ * (`Solidity/Corpus/Basic.lean`). That is solkey's diamond read in the
+ * contract's initial state, and it is the one reading that is both faithful
+ * and decidable here:
  *
  *   - `⊨ dl[C]{ ⟨ body ⟩ true }` quantifies over every state, including
- *     those without the contract's roots, where the first storage write is
- *     stuck: it is invalid for any body that touches storage;
+ *     those whose storage is not one the contract can be in, which solkey's
+ *     obligation excludes by `wt(storage)`;
  *   - `⊨ dl[C]{ [ body ] true }` says that no `assert` fails, from any
  *     state: a failed `assert` panics, which the box does not accept, while
- *     a failed `require` reverts and a stuck write stops, which it does
- *     (solkey's `assertSimple`): it does not say that the body runs to its
- *     end, which the diamond asks, and over every state it asks more of
- *     `assert` than a run from the contract's store does;
+ *     a failed `require` reverts, which it does (solkey's `assertSimple`):
+ *     it does not say that the body runs to its end, which the diamond asks;
  *   - `⊨ dl[C]{ pre → ⟨ body ⟩ true }` with `pre` describing the store
- *     would be the faithful validity, but `sol_close` does not close a
- *     storage write under the diamond (`Calculus/Close.lean`), so it would
- *     leave nearly every obligation open while proving nothing more.
+ *     would be the faithful validity, but the closer does not close a
+ *     storage write under the diamond, so it would leave nearly every
+ *     obligation open while proving nothing more.
  *
  * The diamond at the store is a closed term, and the kernel decides it
  * (`corpus_decide`, i.e. `decide +kernel` on the typed run, `Corpus.trunOk`).
- * Where the typed route does not apply — the program does not resolve to
- * the scoped syntax — the run is instead pinned by `#eval` of
- * `Corpus.outcome` under `#guard_msgs`.
+ * Where the kernel does not decide it, the typed run is instead pinned by
+ * `#eval` of `Corpus.outcome` under `#guard_msgs`.
  *
  * ## Verdicts
  *
@@ -59,12 +57,13 @@
  * The status is one of
  *
  *   - `proved`: a theorem, kernel-checked;
- *   - `evaluated`: the run ends normally, pinned by `#eval` (reason: the
- *     typed route does not apply: the program does not resolve to the
- *     scoped syntax);
- *   - `open`: the run reverts, panics (a failed `assert`) or is stuck —
- *     solkey proves it, the interpreter disagrees (reason: how the run
- *     ends), pinned by `#eval`;
+ *   - `evaluated`: the typed run ends normally, pinned by `#eval` (reason:
+ *     the kernel does not decide it);
+ *   - `open`: the typed run reverts, panics (a failed `assert`), diverges
+ *     or is exhausted — solkey proves it, the kernel does not (reason: how
+ *     the run ends), pinned by `#eval`.  An exhausted run still satisfies
+ *     `Corpus.Diamond` (decision 15), but `corpus_decide` proves only a run
+ *     that ends normally, so it is `open` too;
  *   - `unsupported`: no obligation is emitted; the reason is the
  *     translator's (a construct the typed syntax lacks) or Lean's (the
  *     elaboration error, verbatim);
@@ -159,16 +158,16 @@ const OUT = optionOf("--out", ROOT);
 const PROBE = args.includes("--probe");
 
 /**
- * The contracts to port, in report order: the `.sol` file, the ported
- * `Contract` constant (`Syntax.lean`), and the store it starts in.
+ * The contracts to port, in report order: the `.sol` file, whose name is
+ * the ported `Contract` constant's (`Syntax.lean`).
  */
 const CONTRACTS = [
-  { file: "solc/SolcExpressions.sol", suite: "solc", store: "solcExpressionsStore" },
-  { file: "solc/SolcStructs.sol", suite: "solc", store: "solcStructsStore" },
-  { file: "solc/SolcArrays.sol", suite: "solc", store: "solcArraysStore" },
-  { file: "solc/SolcMemory.sol", suite: "solc", store: "solcMemoryStore" },
-  { file: "solc/SolcMappings.sol", suite: "solc", store: "solcMappingsStore" },
-  { file: "solc/SolcControlFlow.sol", suite: "solc", store: "solcControlFlowStore" },
+  { file: "solc/SolcExpressions.sol", suite: "solc" },
+  { file: "solc/SolcStructs.sol", suite: "solc" },
+  { file: "solc/SolcArrays.sol", suite: "solc" },
+  { file: "solc/SolcMemory.sol", suite: "solc" },
+  { file: "solc/SolcMappings.sol", suite: "solc" },
+  { file: "solc/SolcControlFlow.sol", suite: "solc" },
 ];
 
 /**
@@ -304,10 +303,12 @@ const UNPORTED_REASON =
   "hand-written in the removed untyped layer (its Corpus/Wp/Rules module); " +
   "not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)";
 
-/** `corpus_decide`'s typed route does not apply; the run is `#eval`-pinned. */
+/** The typed run ends normally, but `corpus_decide` fails; the run is `#eval`-pinned. */
 const EVALUATED_REASON =
-  "the typed run does not apply: the program does not resolve to the " +
-  "scoped syntax; pinned by `#eval`";
+  "the typed run ends normally, but the kernel does not decide it; pinned by `#eval`";
+
+/** The program does not resolve to the scoped syntax: no typed run. */
+const UNRESOLVED_REASON = "the program does not resolve to the scoped syntax";
 
 /** Lean keywords a Solidity local may be named. */
 const LEAN_KEYWORDS = new Set([
@@ -973,7 +974,7 @@ async function probe(jobs) {
   mkdirSync(dir, { recursive: true });
   const results = new Map();
 
-  await Promise.all(jobs.map(({ contract, store, obligations }) => {
+  await Promise.all(jobs.map(({ contract, obligations }) => {
     const lines = [
       "import Solidity.Corpus.Basic",
       "open Solidity Solidity.Corpus Semantics",
@@ -984,8 +985,8 @@ async function probe(jobs) {
     for (const { fn, statements } of obligations) {
       const prog = program(contract, statements, "  ");
       const text = [
-        `example : Diamond State.${store}`, `    ${prog} := by`, `  corpus_decide ${store}_eq`,
-        `#eval IO.println ("@@PROBE ${fn} " ++ outcome State.${store}`, `  ${prog})`, "",
+        `example : Diamond (Core.TState.init ${contract})`, `    ${prog} := by`, `  corpus_decide`,
+        `#eval IO.println ("@@PROBE ${fn} " ++ outcome (Core.TState.init ${contract})`, `  ${prog})`, "",
       ].join("\n");
       const height = text.split("\n").length;
       ranges.push({ fn, start: count + 1, end: count + 1 + height });
@@ -1003,7 +1004,7 @@ async function probe(jobs) {
       child.on("error", reject);
       child.on("close", () => {
         const outcomes = new Map();
-        for (const m of output.matchAll(/^@@PROBE (\S+) (\S+)$/gm)) outcomes.set(m[1], m[2]);
+        for (const m of output.matchAll(/^@@PROBE (\S+) (.+)$/gm)) outcomes.set(m[1], m[2]);
         const errors = new Map();
         let current = null;
         for (const line of output.split("\n")) {
@@ -1031,6 +1032,8 @@ async function probe(jobs) {
           const elab = errs.find((e) => !/^Tactic `decide`/.test(e));
           if (elab) {
             results.set(key, { status: "unsupported", reason: leanString(elab.split("\n")[0]) });
+          } else if (outcome !== undefined && outcome.startsWith("unresolved")) {
+            results.set(key, { status: "unsupported", reason: UNRESOLVED_REASON });
           } else if (outcome === undefined) {
             reject(new Error(`probe ${contract}: no outcome for ${fn}:\n${errs.join("\n")}`));
             return;
@@ -1039,7 +1042,7 @@ async function probe(jobs) {
           } else if (outcome === "ok") {
             results.set(key, { status: "evaluated", reason: EVALUATED_REASON });
           } else {
-            results.set(key, { status: "open", reason: `the run from the initial store ends in \`${outcome}\`` });
+            results.set(key, { status: "open", reason: `the typed run from the initial state ends in \`${outcome}\`` });
           }
         }
         resolve();
@@ -1188,8 +1191,8 @@ function importedModule(corollaries, rows, internal, commit) {
     const [Form, lemma] = modality === "box" ? ["Box", "box_of_proved"] : ["Diamond", "diamond_of_proved"];
     const f = `${IMPORTED.ns}.${declName(fn.name)}`;
     return `/-- ${doc.join("\n")} -/\ntheorem ${declName(fn.name)} :\n` +
-      `    ${Form} ${IMPORTED.ns}.initState ${f} :=\n` +
-      `  ${lemma} ${f}.proved ${IMPORTED.ns}.initState_wt\n    (by decide +kernel)`;
+      `    Obligation.${Form} (Core.TState.init ${IMPORTED.ns}) ${f}.problem :=\n` +
+      `  ${lemma} ${f}.proved ${IMPORTED.ns}.initState_wt`;
   });
   // One corollary's axioms, so that `initState_wt`'s are pinned too
   // (`Corpus/Imported.lean` pins the two lemmas', `Report.lean` each theorem's).
@@ -1220,8 +1223,9 @@ function importedModule(corollaries, rows, internal, commit) {
     "Generated by `scripts/solkey-port.mjs`; do not edit by hand.  The",
     "obligations are the imported contract's (`Solidity/Solkey/TestSuite.lean`),",
     "derived by `⊢` in `Solidity/TestSuite/`; each one with no parameters is",
-    "stated here at the contract's initial storage, the corpus's form, as a",
-    "corollary of its theorem (`Corpus/Imported.lean` says why that store).",
+    "stated here at the contract's initial state, over its typed run, the",
+    "corpus's form, as a corollary of its theorem (`Corpus/Imported.lean`",
+    "says why that state).",
     "The other functions, and why, are the `TestSuite` rows of",
     "`tests/solkey/expected.tsv`; `docs/corpus-parity.md` is the scoreboard.",
     "-/",
@@ -1383,11 +1387,10 @@ function parityDoc(allRows, internal, commit) {
     "their verdicts:",
     "",
     "- **proved**: a theorem, decided by the kernel;",
-    "- **evaluated**: the run ends normally, but the typed run does not",
-    "  apply (the program does not resolve to the scoped syntax), so it is",
-    "  pinned by `#eval`;",
-    "- **open**: solkey proves it, the interpreter's run from the initial",
-    "  store does not end normally (pinned by `#eval`);",
+    "- **evaluated**: the typed run ends normally, but the kernel does not",
+    "  decide it, so it is pinned by `#eval`;",
+    "- **open**: solkey proves it, the typed run from the initial state does",
+    "  not end normally (pinned by `#eval`);",
     "- **unsupported**: no obligation, for the reason below;",
     "- **unported**: a `.key` problem the removed untyped layer had",
     "  hand-written, not yet re-derived.",
@@ -1417,7 +1420,7 @@ async function main() {
   // TestSuite: read off Lean's pins, not translated; checked first, as it is cheap.
   const imported = importedRows(parseContract(importedSource()), readImported());
 
-  for (const { file, suite, store } of CONTRACTS) {
+  for (const { file, suite } of CONTRACTS) {
     const contract = basename(file, ".sol");
     const sol = parseContract(readFileSync(join(SOLKEY, file), "utf8"));
     const { functions, stateVars } = sol;
@@ -1443,14 +1446,13 @@ async function main() {
         entries.push({ fn, status: "unsupported", note: "", reason: error.message });
       }
     }
-    perContract.push({ file, suite, store, contract, entries });
+    perContract.push({ file, suite, contract, entries });
   }
 
   let verdicts;
   if (PROBE) {
-    verdicts = await probe(perContract.map(({ contract, store, entries }) => ({
+    verdicts = await probe(perContract.map(({ contract, entries }) => ({
       contract,
-      store,
       obligations: entries.filter((e) => e.statements).map((e) => ({
         fn: e.fn.name, statements: e.statements,
       })),
@@ -1465,7 +1467,7 @@ async function main() {
   writeFileSync(join(corpusDir, `${IMPORTED.contract}.lean`),
     importedModule(imported.corollaries, imported.rows, imported.internal, commit));
 
-  for (const { file, suite, store, contract, entries } of perContract) {
+  for (const { file, suite, contract, entries } of perContract) {
     const blocks = [];
     const tally = {};
     for (const e of entries) {
@@ -1493,16 +1495,16 @@ async function main() {
       if (e.status === "proved") {
         blocks.push(
           `/-- ${doc.join("\n")} -/\ntheorem ${declName(e.fn.name)} :\n` +
-            `    Diamond State.${store}\n    ${prog} := by\n  corpus_decide ${store}_eq`,
+            `    Diamond (Core.TState.init ${contract})\n    ${prog} := by\n  corpus_decide`,
         );
       } else {
         const why = e.status === "evaluated"
-          ? "The typed run does not apply (the program does not resolve to the scoped syntax); the run is pinned instead."
-          : "solkey proves this; the run from the initial store does not end normally.";
+          ? "The typed run ends normally, but the kernel does not decide it; the run is pinned instead."
+          : "solkey proves this; the typed run from the initial state does not end normally.";
         blocks.push(
           `/-! ${doc.join("\n")}\n\n${why} -/\n\n` +
             `/-- info: "${e.status === "evaluated" ? "ok" : e.reason.match(/`(\w+)`/)[1]}" -/\n` +
-            `#guard_msgs in\n#eval outcome State.${store}\n  ${program(contract, e.statements, "  ")}`,
+            `#guard_msgs in\n#eval outcome (Core.TState.init ${contract})\n  ${program(contract, e.statements, "  ")}`,
         );
       }
     }
@@ -1521,10 +1523,11 @@ async function main() {
         `solkey \`${commit}\`: ${entries.length} functions — ${summary}.`,
         "",
         "Generated by `scripts/solkey-port.mjs`; do not edit by hand. Each",
-        "function is `Diamond σ sol[C]{ body }`, solkey's `⟨ f() ⟩ true` at the",
-        "contract's initial store (`Corpus/Basic.lean` says why this form):",
-        "a theorem where the kernel decides it, an `#eval` pin where the typed",
-        "run does not apply or the run does not end normally.  The",
+        "function is `Diamond (Core.TState.init C) sol[C]{ body }`, solkey's",
+        "`⟨ f() ⟩ true` over the typed run from the contract's initial state",
+        "(`Corpus/Basic.lean` says why this form):",
+        "a theorem where the kernel decides it, an `#eval` pin where it does",
+        "not or the typed run does not end normally.  The",
         "functions with no obligation, and why, are the `unsupported` rows of",
         "`tests/solkey/expected.tsv`; `docs/corpus-parity.md` is the scoreboard.",
         "-/",

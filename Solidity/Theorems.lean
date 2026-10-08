@@ -1,35 +1,39 @@
+import Solidity.Calculus.Core.Sound
+import Solidity.Calculus.Core.Symex
+import Solidity.Calculus.Core.CallbackSound
+import Solidity.Evm.CoreCorrect
 import Solidity.Calculus.SolkeyFragment
-import Solidity.Calculus.Uniqueness
 import Solidity.Calculus.Termination
-import Solidity.Calculus.Callback
-import Solidity.Evm.Correctness
 
 /-!
 # The main theorems, in one page
 
 Each theorem below is one the package proves elsewhere, restated in notation
 so that it reads as it would in print; the proof is the original's name.
-`open Solidity.Main` brings the notation into scope.
+`open Solidity.Main` brings the notation into scope.  They are the scoped
+calculus's (`Calculus/Core/`), over the typed state and its run
+(`Semantics/Core/TypedRun.lean`): a formula `φ : Core.Fml C Γ` is read in a
+typed state `σ : Core.TState C Γ`, and a program `P : Core.Prog C Γ Γ'` runs
+from it by `Core.Prog.trun`.  Five of today's theorems, from three modules,
+have no scoped twin yet; the last section keeps them, over today's
+calculus, until they are ported (`docs/intrinsic.md`, W4).
 
 | Notation | Reads | Is |
 |---|---|---|
-| `⊨ φ` | `φ` is valid | `Valid φ`: `φ` holds in every state |
-| `σ ⊧ φ` | `φ` holds in `σ` | `holds σ φ` |
-| `Γ ⊨ φ` | `φ` is valid under the context `Γ` | `Valid (Hyp.wrap Γ φ)` |
-| `Γ ⊢ φ`, `⊢ φ` | the calculus derives `φ` | `Proves .all Γ φ` |
-| `Γ ⊢ₖ φ`, `⊢ₖ φ` | solkey's rules alone derive `φ` | `Proves .solkey Γ φ` |
-| `s ⇝[k, m] p` | a rule rewrites `s` to `p` | `Rule C k m s p` |
-| `s ⇝ₖ[k, m] p` | a rule of solkey's does | `Taclet C k m s p` |
-| `p ≃[k, m] s` | the premise `p` does what `s` does | `Premise.Correct k m s p` |
-| `k ♯ s` | the names a rule numbers `k` are fresh for `s` | `Avoids s.vars (freshVars k)` |
-| `φ ∈ SolKey`, `s ∈ SolKey[m]` | the calls take simple arguments, there is no `try`, and a payment is under the box | `Fml.inSolkey`, `Stmt.inSolkey m` |
-| `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer` may call back into a contract with invariant `I` | `ProvesC`, `ValidC` |
-| `(P, σ) ⇓ σ'` | `P` run from `σ` ends in `σ'` | `Prog.run σ P = .ok σ'` |
-| `(P, σ) ↯` | `P` run from `σ` reverts, or panics (a failed `assert`) | `Prog.run σ P = .error .revert ∨ … .panic` |
-| `⟦P⟧` | `P` compiled | `Evm.compileProg P` |
+| `⊨ φ` | `φ` is valid | `Core.Valid φ`: `φ` holds in every typed state |
+| `σ ⊧ φ` | `φ` holds in `σ` | `Core.holds σ φ` |
+| `H ⊨ φ` | `φ` is valid under the context `H` | `∀ σ, Core.holds σ (H.wrap φ)` |
+| `H ⊢ φ`, `⊢ φ` | the calculus derives `φ` | `Core.Proves C .all Γ₀ H φ` |
+| `H ⊢ₖ φ`, `⊢ₖ φ` | solkey's rules alone derive `φ` | `Core.Proves C .solkey Γ₀ H φ` |
+| `s ⇝[k, m] p` | a rule rewrites `s` to `p` | `Core.Rule C k m s p` |
+| `s ⇝ₖ[k, m] p` | a rule of solkey's does | `Core.Taclet C k m s p` |
+| `p ≃[m, σ] s` | from `σ`, the premise `p` does what `s` does | `Core.Premise.Sound m s p σ` |
+| `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer` may call back into a contract with invariant `I` | `Core.ProvesC`, `Core.ValidC` |
+| `(P, σ) ⇓ o` | `P` run from `σ` ends in `o` | `Core.Prog.trun σ P = .ok o` |
+| `⟦P⟧b` | `P` compiled, its frame at `b` | `Evm.Core.compileProg b P` |
 | `(c, m) ⇓ₘ m'`, `(c, m) ↯ₘ` | the machine runs `c` from `m` to `m'`, or reverts | `Evm.run c m` |
-| `Γ ⊩ P ⊣ Γ'` | `P` is in the compiled fragment, locals typed `Γ` then `Γ'` | `Evm.wtProg Γ P = some Γ'` |
-| `σ ≈[C, L, Γ] m` | the machine `m` represents the state `σ` | `Evm.Sim C L Γ σ m` |
+| `F ⊩ P ⊣ F'` | `P` is in the compiled fragment, its locals laid out by `F` then `F'` | `Evm.Core.inFragP F P = some F'` |
+| `σ ≈[C, L, b, F] m` | the machine `m` represents the typed state `σ` | `Evm.Core.Sim C L b F σ.sem (Look.ofTEnv σ.env) m` |
 -/
 
 namespace Solidity
@@ -43,57 +47,40 @@ namespace Main
 Each symbol is a name for what it abbreviates, so that the statements below
 print back in it. -/
 
-/-- `Γ ⊨ φ`: valid under the context `Γ`. -/
-abbrev ValidUnder {C : Contract} (Γ : List (Hyp C)) (φ : Fml C) : Prop := Valid (Hyp.wrap Γ φ)
+/-- `H ⊨ φ`: valid under the context `H`, in every typed state of its outer
+scope. -/
+abbrev ValidUnder {C : Contract} {Γ₀ Γ : Core.Ctx} (H : Core.Hyps C Γ₀ Γ) (φ : Core.Fml C Γ) :
+    Prop :=
+  ∀ σ : Core.TState C Γ₀, Core.holds σ (H.wrap φ)
 
-/-- `Γ ⊢ φ`: the calculus derives `φ`. -/
-abbrev Derives {C : Contract} (Γ : List (Hyp C)) (φ : Fml C) : Prop := Proves .all Γ φ
+/-- `H ⊢ φ`: the calculus derives `φ`. -/
+abbrev Derives {C : Contract} {Γ₀ Γ : Core.Ctx} (H : Core.Hyps C Γ₀ Γ) (φ : Core.Fml C Γ) : Prop :=
+  Core.Proves C .all Γ₀ H φ
 
-/-- `Γ ⊢ₖ φ`: solkey's rules alone derive `φ`. -/
-abbrev DerivesK {C : Contract} (Γ : List (Hyp C)) (φ : Fml C) : Prop := Proves .solkey Γ φ
+/-- `H ⊢ₖ φ`: solkey's rules alone derive `φ`. -/
+abbrev DerivesK {C : Contract} {Γ₀ Γ : Core.Ctx} (H : Core.Hyps C Γ₀ Γ) (φ : Core.Fml C Γ) :
+    Prop :=
+  Core.Proves C .solkey Γ₀ H φ
 
 /-- `s ⇝[k, m] p`: a rule rewrites `s` to `p`. -/
-abbrev Rewrites {C : Contract} (s : Stmt C) (k : Nat) (m : Modality) (p : Premise C) : Prop :=
-  Rule C k m s p
+abbrev Rewrites {C : Contract} {Γ Γ' : Core.Ctx} (s : Core.Stmt C Γ Γ') (k : Nat) (m : Modality)
+    (p : Core.Premise C Γ Γ') : Prop :=
+  Core.Rule C k m s p
 
 /-- `s ⇝ₖ[k, m] p`: a rule of solkey's rewrites `s` to `p`. -/
-abbrev RewritesK {C : Contract} (s : Stmt C) (k : Nat) (m : Modality) (p : Premise C) : Prop :=
-  Taclet C k m s p
+abbrev RewritesK {C : Contract} {Γ Γ' : Core.Ctx} (s : Core.Stmt C Γ Γ') (k : Nat) (m : Modality)
+    (p : Core.Premise C Γ Γ') : Prop :=
+  Core.Taclet C k m s p
 
-/-- `p ≃[k, m] s`: the premise does what the statement does. -/
-abbrev DoesAs {C : Contract} (p : Premise C) (k : Nat) (m : Modality) (s : Stmt C) : Prop :=
-  Premise.Correct k m s p
+/-- `p ≃[m, σ] s`: from `σ`, the premise does what the statement does. -/
+abbrev DoesAs {C : Contract} {Γ Γ' : Core.Ctx} (p : Core.Premise C Γ Γ') (m : Modality)
+    (σ : Core.TState C Γ) (s : Core.Stmt C Γ Γ') : Prop :=
+  Core.Premise.Sound m s p σ
 
-/-- `k ♯ s`: the names a rule numbers `k` are fresh for `s`. -/
-abbrev FreshFor {C : Contract} (k : Nat) (s : Stmt C) : Prop := Avoids s.vars (freshVars k)
-
-/-- No modality left to run: what symbolic execution ends in.  The strategy
-runs modalities in positive positions only, so one under `¬` or left of `→`
-may remain (`Fml.active`). -/
-abbrev FirstOrder {C : Contract} (φ : Fml C) : Prop := φ.active = false
-
-/-- Membership in solkey's fragment, for formulas (each program under its
-own modality). -/
-class InSolkey (α : Type) where
-  inSolkey : α → Bool
-
-instance {C : Contract} : InSolkey (Fml C) := ⟨Fml.inSolkey⟩
-
-/-- `x ∈ SolKey`: every call of `x` takes simple arguments, `x` has no `try`,
-and it pays no one under the diamond. -/
-abbrev InFragment {α : Type} [InSolkey α] (x : α) : Prop := InSolkey.inSolkey x = true
-
-/-- `s ∈ SolKey[m]`: the same of a statement under the modality `m`. -/
-abbrev InFragmentAt {C : Contract} (m : Modality) (s : Stmt C) : Prop := s.inSolkey m = true
-
-/-- `(P, σ) ⇓ σ'`: `P` run from `σ` ends normally in `σ'`. -/
-abbrev Runs {C : Contract} (c : Prog C × State) (σ' : State) : Prop :=
-  Prog.run c.2 c.1 = .ok σ'
-
-/-- `(P, σ) ↯`: `P` run from `σ` reverts, or panics: a failed `assert` is a
-revert with `Panic(0x01)` data on the EVM. -/
-abbrev Reverts {C : Contract} (c : Prog C × State) : Prop :=
-  Prog.run c.2 c.1 = .error .revert ∨ Prog.run c.2 c.1 = .error .panic
+/-- `(P, σ) ⇓ o`: `P` run typed from `σ` ends normally in `o`. -/
+abbrev Runs {C : Contract} {Γ Γ' : Core.Ctx} (c : Core.Prog C Γ Γ' × Core.TState C Γ)
+    (o : Core.Out C c.2.H Γ') : Prop :=
+  Core.Prog.trun c.2 c.1 = .ok o
 
 /-- `(c, m) ⇓ₘ m'`: the machine runs the code `c` from `m` to the end, in `m'`. -/
 abbrev MRuns (c : List Evm.Instr × Evm.Machine) (m' : Evm.Machine) : Prop :=
@@ -103,144 +90,217 @@ abbrev MRuns (c : List Evm.Instr × Evm.Machine) (m' : Evm.Machine) : Prop :=
 abbrev MReverts (c : List Evm.Instr × Evm.Machine) : Prop :=
   Evm.run c.1 c.2 = .revert
 
-/-- `Γ ⊩ P ⊣ Γ'`: `P` is in the compiled fragment, its locals typed `Γ` before
-and `Γ'` after. -/
-abbrev Compiles {C : Contract} (Γ : Evm.TyCtx) (P : Prog C) (Γ' : Evm.TyCtx) : Prop :=
-  Evm.wtProg Γ P = some Γ'
+/-- `F ⊩ P ⊣ F'`: `P` is in the compiled fragment, its locals laid out by
+`F` before and `F'` after. -/
+abbrev Compiles {C : Contract} {Γ Γ' : Core.Ctx} (F : Evm.Core.Frag Γ) (P : Core.Prog C Γ Γ')
+    (F' : Evm.Core.Frag Γ') : Prop :=
+  Evm.Core.inFragP F P = some F'
 
-scoped notation:25 Γ:26 " ⊨ " φ:26 => ValidUnder Γ φ
-scoped notation:25 Γ:26 " ⊢ " φ:26 => Derives Γ φ
-scoped notation:25 "⊢ " φ:26 => Derives [] φ
-scoped notation:25 Γ:26 " ⊢ₖ " φ:26 => DerivesK Γ φ
-scoped notation:25 "⊢ₖ " φ:26 => DerivesK [] φ
+/-- `σ ≈[C, L, b, F] m`: the machine `m` represents the typed state `σ`. -/
+abbrev Represents (C : Contract) (L b : Nat) {Γ : Core.Ctx} (F : Evm.Core.Frag Γ)
+    (σ : Core.TState C Γ) (m : Evm.Machine) : Prop :=
+  Evm.Core.Sim C L b F σ.sem (Evm.Core.Look.ofTEnv σ.env) m
+
+scoped notation:25 "⊨ " φ:26 => Core.Valid φ
+scoped notation:50 σ:51 " ⊧ " φ:51 => Core.holds σ φ
+scoped notation:25 H:26 " ⊨ " φ:26 => ValidUnder H φ
+scoped notation:25 H:26 " ⊢ " φ:26 => Derives H φ
+scoped notation:25 "⊢ " φ:26 => Derives Core.Hyps.nil φ
+scoped notation:25 H:26 " ⊢ₖ " φ:26 => DerivesK H φ
+scoped notation:25 "⊢ₖ " φ:26 => DerivesK Core.Hyps.nil φ
 scoped notation:50 s:51 " ⇝[" k ", " m "] " p:51 => Rewrites s k m p
 scoped notation:50 s:51 " ⇝ₖ[" k ", " m "] " p:51 => RewritesK s k m p
-scoped notation:50 p:51 " ≃[" k ", " m "] " s:51 => DoesAs p k m s
-scoped notation:50 k:51 " ♯ " s:51 => FreshFor k s
-scoped notation:50 x:51 " ∈ " "SolKey" => InFragment x
-scoped notation:50 s:51 " ∈ " "SolKey[" m "]" => InFragmentAt m s
-scoped notation:25 "⊢[" I "] " φ:26 => ProvesC I [] φ
-scoped notation:25 "⊨[" I "] " φ:26 => ValidC I φ
-scoped notation:50 c:51 " ⇓ " σ':51 => Runs c σ'
-scoped notation:50 c:51 " ↯" => Reverts c
-scoped notation:max "⟦" P "⟧" => Evm.compileProg P
+scoped notation:50 p:51 " ≃[" m ", " σ "] " s:51 => DoesAs p m σ s
+scoped notation:25 "⊢[" I "] " φ:26 => Core.ProvesC (Core.Invariant.fml I) [] Core.Hyps.nil φ
+scoped notation:25 "⊨[" I "] " φ:26 => Core.ValidC I φ
+scoped notation:50 c:51 " ⇓ " o:51 => Runs c o
+scoped notation:max "⟦" P "⟧" b:max => Evm.Core.compileProg b P
 scoped notation:50 c:51 " ⇓ₘ " m':51 => MRuns c m'
 scoped notation:50 c:51 " ↯ₘ" => MReverts c
-scoped notation:50 Γ:51 " ⊩ " P " ⊣ " Γ':51 => Compiles Γ P Γ'
-scoped notation:50 σ:51 " ≈[" C ", " L ", " Γ "] " m:51 => Evm.Sim C L Γ σ m
+scoped notation:50 F:51 " ⊩ " P " ⊣ " F':51 => Compiles F P F'
+scoped notation:50 σ:51 " ≈[" C ", " L ", " b ", " F "] " m:51 => Represents C L b F σ m
 
-/-- `Valid φ` prints as `⊨ φ`, the prefix `RuleSyntax.lean` reads. -/
-@[scoped app_unexpander Valid]
+/-- `Core.Valid φ` prints as `⊨ φ`. -/
+@[scoped app_unexpander Core.Valid]
 def unexpandValid : Lean.PrettyPrinter.Unexpander
   | `($_ $φ) => `(⊨ $φ)
   | _ => throw ()
 
-variable {C : Contract} {k : Nat} {m : Modality} {s : Stmt C} {p p' : Premise C}
-  {Γ : List (Hyp C)} {φ : Fml C}
+variable {C : Contract} {k : Nat} {m : Modality} {Γ Γ' Γ₀ : Core.Ctx} {s : Core.Stmt C Γ Γ'}
+  {p p' : Core.Premise C Γ Γ'} {H : Core.Hyps C Γ₀ Γ} {φ : Core.Fml C Γ}
 
 /-! ## The rules -/
 
-/-- **Every rule is sound**: its premise does what its statement does, from
-every state, once its fresh names are fresh. -/
-theorem rule_sound (d : s ⇝[k, m] p) (fresh : k ♯ s) : p ≃[k, m] s :=
-  d.sound fresh
-
-/-- **Every statement has a rule**, under either modality. -/
-theorem rule_exists (k : Nat) (m : Modality) (s : Stmt C) : ∃ p, s ⇝[k, m] p :=
-  Stmt.complete k m s
+/-- **Every rule is sound**: from every typed state, its premise does what
+its statement does.  Its fresh names need no side condition: a rule's fresh
+locals are scoped to it (`Premise.unfold`, `Premise.bind`). -/
+theorem rule_sound (d : s ⇝[k, m] p) (σ : Core.TState C Γ) : p ≃[m, σ] s :=
+  Core.Stmt.sound k m s p d.toStep σ
 
 /-- **At most one rule**: two rules for `s` leave the same premise. -/
 theorem rule_unique (d : s ⇝[k, m] p) (d' : s ⇝[k, m] p') : p = p' :=
-  Rule.premise_unique d d'
+  Core.Rule.premise_unique d d'
+
+/-- **Every rule is the strategy's**: a rule's premise is the one the
+strategy (`Core.Stmt.step`) computes. -/
+theorem rule_is_step (d : s ⇝[k, m] p) : s.step k m = some p :=
+  d.toStep
 
 /-! ## The calculus -/
 
 /-- **Soundness**: what the calculus derives is valid.  A derivation leaves
 for the logic (`close`) only once no modality is left in its sequent. -/
-theorem soundness : Γ ⊢ φ → Γ ⊨ φ :=
-  Proves.sound
+theorem soundness : H ⊢ φ → H ⊨ φ :=
+  Core.Proves.sound
 
 /-- **Soundness**, from no assumptions. -/
-theorem soundness' : ⊢ φ → ⊨ φ :=
-  Proves.valid
+theorem soundness' {φ : Core.Fml C []} : ⊢ φ → ⊨ φ :=
+  Core.Proves.valid
 
 /-- **solkey's rules are sound**: what they derive alone is valid. -/
-theorem solkey_soundness : ⊢ₖ φ → ⊨ φ :=
-  Proves.solkey_valid
-
-/-- **On the fragment, solkey's rules are the calculus**: a formula whose
-calls take simple arguments is derived by solkey's rules exactly when it is
-derived at all. -/
-theorem solkey_eq_calculus (h : φ ∈ SolKey) : (⊢ₖ φ) ↔ (⊢ φ) :=
-  Proves.solkey_iff h
-
-/-- **Off the fragment they differ**: `[ f(x + 1); ] true` is derived by the
-calculus and not by solkey's rules, so `solkey_eq_calculus` needs its
-hypothesis. -/
-theorem solkey_lt_calculus : ∃ φ : Fml C, (⊢ φ) ∧ ¬ (⊢ₖ φ) :=
-  Proves.solkey_lt_calculus
-
-/-- **On the fragment, solkey has the rule**: the rule the strategy fires is
-one of solkey's. -/
-theorem solkey_rule_exists (h : s ∈ SolKey[m]) : s ⇝ₖ[k, m] (s.step k m).premise :=
-  Stmt.step_taclet h
+theorem solkey_soundness {φ : Core.Fml C []} : ⊢ₖ φ → ⊨ φ :=
+  Core.Proves.valid
 
 /-- **With callbacks**: when every `transfer`, `send` or `try` may call back
-into a contract with invariant `I`, what that calculus derives is valid for
-that reading.  Its transfer rule has two sequents as premises, the second
-after a `{havoc}`; its send rule a third, the send refused. -/
-theorem callback_soundness {I : Invariant C} : ⊢[I] φ → ⊨[I] φ :=
-  ProvesC.valid
+into a contract with a first-order invariant `I` (KeY's `CInv`, of the
+storage and the ledger), what that calculus derives is valid for that
+reading.  Its transfer rule has two sequents as premises, the second after a
+`{havoc}`; its send rule a third, the send refused. -/
+theorem callback_soundness {I : Core.Invariant C} (hI : I.fml.FO = true) {φ : Core.Fml C []} :
+    ⊢[I] φ → ⊨[I] φ :=
+  Core.ProvesC.valid hI
 
 /-! ## Symbolic execution -/
 
 /-- **Symbolic execution is sound**: where what it leaves holds, the formula
 holds. -/
-theorem symex_sound (n : Nat) (σ : State) : σ ⊧ symex n φ → σ ⊧ φ :=
-  Solidity.symex_sound n φ σ
-
-/-- **Symbolic execution terminates**: given its measure in steps, it leaves
-no modality. -/
-theorem symex_terminates (n : Nat) (h : φ.measure ≤ n) : FirstOrder (symex n φ) :=
-  symex_normalizes n φ h
+theorem symex_sound (n : Nat) (σ : Core.TState C Γ) : σ ⊧ Core.symex n φ → σ ⊧ φ :=
+  Core.symex_sound Core.Stmt.sound n φ σ
 
 /-! ## The compiler -/
 
-open Evm in
-/-- **The compiler is correct**: from a machine that represents the state,
-the program and its compiled code both end, in states the machine still
-represents, or both revert, or the world refuses a payment the program makes
-and the machine alone reverts.  `L` bounds every array's length, which solc
-caps at `2^64`. -/
-theorem compiler_correct {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc : Machine} {L : Nat}
-    (hP : Γ ⊩ P ⊣ Γ') (hm : σ ≈[C, L, Γ] mc) (hL : L + pushesP P ≤ Lmax) :
-    (∃ σ' mc', (P, σ) ⇓ σ' ∧ (⟦P⟧, mc) ⇓ₘ mc' ∧ σ' ≈[C, L + pushesP P, Γ'] mc') ∨
-      ((P, σ) ↯ ∧ (⟦P⟧, mc) ↯ₘ) ∨
-      (paysP P = true ∧ (⟦P⟧, mc) ↯ₘ ∧ ∃ σ', (P, σ) ⇓ σ') :=
-  (compile_correct hP hm hL).imp (fun ⟨σ', mc', h, h', _, hs⟩ => ⟨σ', mc', h, h', hs⟩)
-    (Or.imp id fun ⟨hp, h, σ', _, h', _⟩ => ⟨hp, h, σ', h'⟩)
+open Evm Evm.Core in
+/-- **The compiler is correct**: from a machine that represents the typed
+state, the typed run and the compiled code both end, in states the machine
+still represents, or both revert (a panic, a failed `assert`, is solc's
+revert with `Panic(0x01)` data), or the world refuses a payment the program
+makes and the machine alone reverts.  `L` bounds every array's length, which
+solc caps at `2^64`.  There is no fourth case: on the fragment the typed run
+neither diverges nor is exhausted, and the typed run has no stuck state. -/
+theorem compiler_correct {P : Core.Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : Core.TState C Γ}
+    {mc : Machine} {L b : Nat}
+    (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax) :
+    (∃ o mc', (P, σ) ⇓ o ∧ (⟦P⟧b, mc) ⇓ₘ mc' ∧ o.st ≈[C, L + Prog.pushes P, b, F'] mc') ∨
+      ((Core.Prog.trun σ P = .error .revert ∨
+          (Prog.asserts P = true ∧ Core.Prog.trun σ P = .error .panic)) ∧ (⟦P⟧b, mc) ↯ₘ) ∨
+      (Prog.pays P = true ∧ (⟦P⟧b, mc) ↯ₘ ∧ ∃ o, (P, σ) ⇓ o) :=
+  (compile_correct hP hm hL).imp (fun ⟨o, mc', h, h', _, hs⟩ => ⟨o, mc', h, h', hs⟩)
+    (Or.imp id fun ⟨hp, h, o, _, h', _⟩ => ⟨hp, h, o, h'⟩)
 
-open Evm in
-/-- **The box reaches the EVM**: where the compiled code succeeds, the
-interpreter did too, and `net(a)` is what `a`'s account lost, at every
-address but the contract's own, whose entry stays `0`. -/
-theorem compiler_net {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc mc' : Machine} {L : Nat}
-    (hP : Γ ⊩ P ⊣ Γ') (hm : σ ≈[C, L, Γ] mc) (hL : L + pushesP P ≤ Lmax)
-    (hrun : (⟦P⟧, mc) ⇓ₘ mc') :
-    ∃ σ', (P, σ) ⇓ σ' ∧
-      (∀ a : Nat, a < W → a ≠ mc'.self → σ'.getNet a = (mc'.bal₀ a : Int) - mc'.bal a) ∧
-      σ'.getNet mc'.self = 0 :=
+open Evm Evm.Core in
+/-- **The box reaches the EVM**: where the compiled code succeeds, the typed
+run did too, and `net(a)` is what `a`'s account lost, at every address but
+the contract's own, whose entry stays `0`. -/
+theorem compiler_net {P : Core.Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : Core.TState C Γ}
+    {mc mc' : Machine} {L b : Nat}
+    (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax)
+    (hrun : (⟦P⟧b, mc) ⇓ₘ mc') :
+    ∃ o, (P, σ) ⇓ o ∧
+      (∀ a : Nat, a < W → a ≠ mc'.self → o.st.sem.getNet a = (mc'.bal₀ a : Int) - mc'.bal a) ∧
+      o.st.sem.getNet mc'.self = 0 :=
   compile_net hP hm hL hrun
 
-open Evm in
-/-- **The fragment never gets stuck**: a program the compiler takes ends or
-reverts. -/
-theorem never_stuck {P : Prog C} {Γ Γ' : TyCtx} {σ : State} {mc : Machine} {L : Nat}
-    (hP : Γ ⊩ P ⊣ Γ') (hm : σ ≈[C, L, Γ] mc) (hL : L + pushesP P ≤ Lmax) :
-    Prog.run σ P ≠ .error .stuck :=
-  not_stuck hP hm hL
+/-! ## Their axioms: Lean's three at most -/
+
+/-- info: 'Solidity.Main.rule_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms rule_sound
+
+/-- info: 'Solidity.Main.rule_unique' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms rule_unique
+
+/-- info: 'Solidity.Main.rule_is_step' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms rule_is_step
+
+/-- info: 'Solidity.Main.soundness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms soundness
+
+/-- info: 'Solidity.Main.soundness'' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms soundness'
+
+/-- info: 'Solidity.Main.solkey_soundness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms solkey_soundness
+
+/-- info: 'Solidity.Main.callback_soundness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms callback_soundness
+
+/-- info: 'Solidity.Main.symex_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms symex_sound
+
+/-- info: 'Solidity.Main.compiler_correct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms compiler_correct
+
+/-- info: 'Solidity.Main.compiler_net' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms compiler_net
+
+/-! ## Not yet scoped: today's calculus
+
+Five of today's headline theorems, from three modules, have no scoped
+twin: that every statement has a rule (`Completeness.lean`'s dispatcher),
+the fragment where solkey's rules are the calculus (`SolkeyFragment.lean`),
+and that symbolic execution terminates (`Termination.lean`).  They are stated here over today's `Fml`,
+`Stmt` and `Proves` until they are ported; W4 `calc-del` deletes their
+modules, so it ports them or drops them here first (`docs/intrinsic.md`,
+W4). -/
+
+namespace Today
+
+variable {C : Contract} {k : Nat} {m : Modality} {s : Solidity.Stmt C}
+  {Γ : List (Hyp C)} {φ : Solidity.Fml C}
+
+/-- **Every statement has a rule**, under either modality. -/
+theorem rule_exists (k : Nat) (m : Modality) (s : Solidity.Stmt C) : ∃ p, Rule C k m s p :=
+  Stmt.complete k m s
+
+/-- **On the fragment, solkey's rules are the calculus**: a formula whose
+calls take simple arguments is derived by solkey's rules exactly when it is
+derived at all. -/
+theorem solkey_eq_calculus (h : φ.inSolkey = true) : Proves .solkey Γ φ ↔ Proves .all Γ φ :=
+  Proves.solkey_iff h
+
+/-- **Off the fragment they differ**: `[ f(x + 1); ] true` is derived by the
+calculus and not by solkey's rules. -/
+theorem solkey_lt_calculus :
+    ∃ φ : Solidity.Fml C, Proves .all [] φ ∧ ¬ Proves .solkey [] φ :=
+  Proves.solkey_lt_calculus
+
+/-- **On the fragment, solkey has the rule**: the rule the strategy fires is
+one of solkey's. -/
+theorem solkey_rule_exists (h : s.inSolkey m = true) : Taclet C k m s (s.step k m).premise :=
+  Stmt.step_taclet h
+
+/-- **Symbolic execution terminates**: given its measure in steps, it leaves
+no modality. -/
+theorem symex_terminates (n : Nat) (h : φ.measure ≤ n) : (Solidity.symex n φ).active = false :=
+  symex_normalizes n φ h
+
+/-! Their axioms: Lean's three at most -/
+
+/-- info: 'Solidity.Main.Today.rule_exists' depends on axioms: [propext] -/
+#guard_msgs in #print axioms rule_exists
+
+/-- info: 'Solidity.Main.Today.solkey_eq_calculus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms solkey_eq_calculus
+
+/-- info: 'Solidity.Main.Today.solkey_lt_calculus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms solkey_lt_calculus
+
+/-- info: 'Solidity.Main.Today.solkey_rule_exists' depends on axioms: [propext] -/
+#guard_msgs in #print axioms solkey_rule_exists
+
+/-- info: 'Solidity.Main.Today.symex_terminates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms symex_terminates
+
+end Today
 
 end Main
 end Solidity
-
-

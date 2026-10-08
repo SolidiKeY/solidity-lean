@@ -78,7 +78,7 @@ lemma (`TermTaclet.sound`).
 | `Semantics/RunErase.lean` | The bridge (`docs/intrinsic.md` M3): `Prog.run_erase`/`Stmt.run_erase`, a fresh scoped block's run against `Semantics.lean`'s run of its erasure, up to the popped locals (`ResultsAgree`); `Agree`, `RunRel`, `Stmt.binders`, and each global operation natural in the locals (`*_nat`). |
 | `TermSimp.lean` | The simp sets `tm_eval` and `tm_denote` of the generic term functions. |
 | `Update.lean` | Terms as one signature (`Srt`, `Op0`…`Op3`, `Tm`; `Term`, `STerm`, … are its sorts, the old constructors abbreviations), their reading (`Tm.eval`, `Tm.denote`) and frame lemmas, parallel updates (`UpdElem`; a deployment's `.netMt` for `net := storeSt(mtSt, at(r), a)`, `.setBalance` for `selfBalance := a`, `.saveNetMt`), formulas with both modalities (`Fml`, `holds`, `Valid`), lowering of program expressions to terms. |
-| `Theorems.lean` | The headline theorems in notation. |
+| `Theorems.lean` | The headline theorems in notation, over the scoped calculus and the typed run, their axioms pinned; three of today's (completeness, the solkey fragment, termination) until scoped. |
 
 ## The calculus
 
@@ -271,12 +271,14 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Tools/Show.lean` | Printers for storage values, states, transactions, clauses. |
 | `Tools/Common.lean` | Shared plumbing: resolving `C` / `C.f`, evaluating terms, report layout. |
 | `Tools/Run.lean` | `#run C.f(args) [from σ] [with msg.sender := n, …]`: the typed run from a fresh state; `#deploy C(args) [with …]`, a deployment (`Contract.deploy`). |
-| `Tools/Inspect.lean` | `#wp φ`, `#step φ`, `#taclet r`. |
-| `Tools/CoreInspect.lean` | `#wp φ`, `#step φ`, `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`; the tree by `Core.ProofTree.ofFormula`. |
+| `Tools/Inspect.lean` | `#wp φ`, `#step φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`; the reduction's printer (`LFml.fmt`); `elabCoreFormula?`. |
+| `Tools/Taclet.lean` | `#taclet r`: a rule, its solkey taclets, printed rule and soundness theorem, from today's tables (W4 moves it to the scoped families). |
+| `Tools/InspectToday.lean` | `#wp`, `#step`, `#proof_tree`, `#proof_node`, `#proof_tree_json` on today's formula read without the switch: today's strategy and tree, tried before the scoped elaborators (W4 deletes it). |
+| `Tools/CoreInspect.lean` | Imports the inspection commands, scoped and today's (`Inspect`, `ProofTree`, `Taclet`, `InspectToday`), for the examples that use both. |
 | `Tools/DiffTest.lean` | `#difftest C[.f]`: the typed run against `Evm/CoreCompile.lean`'s code on random storages. |
 | `Tools/Counterexample.lean` | `Core.Fml.eval3`, a scoped formula evaluated over the typed state and the typed run with fuel (`eval3_sound` against `Core.holds`; by the recursor, its compiled twin `eval3C`), its leading parameters bound to a witness's arguments (`Fml.peel`), an untyped candidate read as a typed state (`TState.ofSem?`, `Storage.decode`), an update's end lifted (`TState.lift?`), witness search and shrinking, certificates of `¬ ⊨` of the scoped formula, `#counterexample`. |
 | `Tools/Verify.lean` | `#verify C[.f]`: each spec'd function proved, refuted or stuck. |
-| `Tools/ProofTree.lean` | `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ`: solkey's view of the tree of `⊢ φ`. |
+| `Tools/ProofTree.lean` | `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ` on a scoped formula: solkey's view of the tree of `⊢ φ` (`Core.ProofTree.ofFormula`). |
 
 ## The solkey corpus
 
@@ -290,8 +292,8 @@ TestSuite rows without Lean; `docs/corpus-parity.md` is the scoreboard.
 
 | Module | What it defines |
 |---|---|
-| `Corpus/Basic.lean` | The corpus's obligation `Diamond σ P`, `corpus_decide` (resolved, run typed: `trunOk`), the stores as typed starts. |
-| `Corpus/Imported.lean` | `testSuite_agrees` (the hand-written `TestSuite`'s roots are the imported one's), `Box`; a scoped `⊢` obligation of no parameters at the initial storage, over the untyped run of its program's erasure (`Core.modal_of_proved`, `diamond_of_proved`, `box_of_proved`), given `Core.scopedRunsB` (the program fresh, `Prog.freshB`; its typed run from there ends, `TRes.endsB`), which the kernel evaluates. |
+| `Corpus/Basic.lean` | The corpus's obligation `Diamond σ P` over the typed run (`P` resolved, `Runs`: the typed reading of `⟨ Q ⟩ true` at `σ`), `corpus_decide` (`trunOk`), `outcome` (how the typed run ends). |
+| `Corpus/Imported.lean` | `testSuite_agrees` (the hand-written `TestSuite`'s roots are the imported one's); a scoped `⊢` obligation of no parameters at the initial state, over its program's typed run (`Obligation.Diamond`/`Box`, `runs_of_proved`, `diamond_of_proved`, `box_of_proved`). |
 | `Corpus/TestSuite.lean` | Generated: each derived `TestSuite` obligation with no parameters at `Solkey.TestSuite.initState`. |
 
 ## The solc front end

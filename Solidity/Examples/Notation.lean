@@ -12,11 +12,14 @@ by `dl!{ … }` and printed back (`Notation.lean`), and the goals of an `apply`
 derivation as sequents `dl{ Γ ⟹ φ }` (`Logic.lean`).  If a printer changes,
 these fail.
 
-The formulas and the derivation read the scoped calculus (`open scoped
-Solidity.Core.Surface`, section `Scoped`): a parameter is bound by `∀`, a
-formula is a `Core.Fml C []`, and the walk is `Core.Proves`'s.  The rule
-lines and the rules of `⊢` are today's (`Taclet`, `Proves`) until W5 names
-the scoped ones so.
+Everything here is the scoped calculus's: the rule lines are
+`Core.Taclet`'s, printed by `Core.Delab` as today's print, the premises
+`Core.Premise`'s, the rules of `⊢` `Core.Proves`'s, and the formulas and
+the derivation read scoped (`open scoped Solidity.Core.Surface`, section
+`Scoped`): a parameter is bound by `∀`, a formula is a `Core.Fml C []`.
+Three rule lines `Core.Delab` does not print yet, today's `merge` and
+today's sequent macros stay today's, each in a section that says so, until
+W4 (`docs/intrinsic.md`).
 -/
 
 namespace Solidity.Examples.Notation
@@ -35,6 +38,9 @@ per family. -/
 
 /-! ### Step 1: a read whose receiver is not simple -/
 
+/-! Today's rule: `Core.Delab` prints the scoped twin's hole (`SHole.fill`)
+as its `match` (`#check_rule_text`'s list), until W4. -/
+
 /--
 info: @Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Ty} {lhs : Hole C x}
   {x_1 : Name} {nsp : SPath C (Ty.struct x_1)} {fld : Name},
@@ -45,29 +51,34 @@ info: @Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m
 /-! ### Step 2: a write, source, receiver and index captured in that order -/
 
 /--
-info: @Taclet.storageIndexWriteCaptureAllComplexRecv : ∀ {C : Contract} {k : Nat} {m : Modality} {x : RefTy}
-  {x_1 x_2 : PrimTy} {it : IndexTy x x_1 (Ty.prim x_2)} {nsp : SPath C (Ty.ref x)} {e₁ : Val C x_1} {e₂ : Val C x_2},
+info: @Core.Taclet.storageIndexWriteCaptureAllComplexRecv : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+  {x : RefTy} {x_1 x_2 : PrimTy} {it : IndexTy x x_1 (Ty.prim x_2)} {nsp : Core.SPath C Γ (Ty.ref x)}
+  {e₁ : Core.Val C Γ x_1} {e₂ : Core.Val C Γ x_2},
   dl{ ⟨[ nsp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se; ]⟩ }
 -/
-#guard_msgs in #check @Taclet.storageIndexWriteCaptureAllComplexRecv
+#guard_msgs in #check @Core.Taclet.storageIndexWriteCaptureAllComplexRecv
 
 /-! ### Step 3: a statement with simple parts is an update -/
 
 /--
-info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Name} {sp : SPath C (Ty.struct x)}
-  {fld : Name} {x_1 : PrimTy} {se : Simple C x_1},
+info: @Core.Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : Name}
+  {sp : Core.SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : PrimTy} {se : Core.Simple C Γ x_1},
   dl{ ⟨[ sp.fld = se; ]⟩ ⇝ { storage := save(storage, sp.fld, se) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.storageFieldWriteSave
+#guard_msgs in #check @Core.Taclet.storageFieldWriteSave
 
 /-! ### Memory `delete`, `new T[](n)`, `.length` -/
 
 /--
-info: @Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Modality} {R : RefTy} {mv : Var} {x : Name}
-  {hmv : (Ty.ref (RefTy.struct x)).mapFree = true} {rfld : Name} {hd : (Ty.ref R).defaultOkS = true},
+info: @Core.Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {R : RefTy}
+  {x : Name} {mv : Core.Idx Γ (Core.LTy.mem (RefTy.struct x))} {hmv : (Ty.ref (RefTy.struct x)).mapFree = true}
+  {rfld : Name} {hd : (Ty.ref R).defaultOkS = true},
   dl{ ⟨[ delete mv.rfld; ]⟩ ⇝ { memory := write(addM(memory), mv.rfld, freshId(addM(memory))) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.memoryFieldDeleteReference
+#guard_msgs in #check @Core.Taclet.memoryFieldDeleteReference
+
+/-! Today's rule: the scoped twin's target (`NewLhs`) prints as its `match`,
+until W4. -/
 
 /--
 info: @Taclet.newArrayCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {R : RefTy} {tgt : NewLhs C R}
@@ -77,26 +88,31 @@ info: @Taclet.newArrayCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {R :
 #guard_msgs in #check @Taclet.newArrayCapture
 
 /--
-info: @Taclet.storageLengthRead : ∀ {C : Contract} {k : Nat} {m : Modality} {v : Var} {E : Ty} {sp : SPath C E.array}
-  {x : PrimTy} {hlen : x = PrimTy.uint}, dl{ ⟨[ v = sp.length; ]⟩ ⇝ { v := sp.length } ⟨[ ]⟩ }
+info: @Core.Taclet.storageLengthRead : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : PrimTy}
+  {v : Core.Idx Γ (Core.LTy.val x)} {E : Ty} {sp : Core.SPath C Γ E.array} {hlen : x = PrimTy.uint},
+  dl{ ⟨[ v = sp.length; ]⟩ ⇝ { v := sp.length } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.storageLengthRead
+#guard_msgs in #check @Core.Taclet.storageLengthRead
 
 /-! ### Declarations -/
 
 /--
-info: @Taclet.valueDeclSkip : ∀ {C : Contract} {k : Nat} {m : Modality} {p : PrimTy} {v : Var},
+info: @Core.Taclet.valueDeclSkip : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {p : PrimTy} {v : Var},
   dl{ ⟨[ T v; ]⟩ ⇝ { v := defVal(T) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.valueDeclSkip
+#guard_msgs in #check @Core.Taclet.valueDeclSkip
 
 /-! ### Compound assignment and `++`: `⊕` and `⊕⊕` are operator schema variables -/
 
 /--
-info: @Taclet.storageRootOpAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {p : PrimTy} {op : BinOp} {gsp : Name}
-  {se : Simple C p}, dl{ ⟨[ gsp ⊕= se; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, gsp) ⊕ se) } ⟨[ ]⟩ }
+info: @Core.Taclet.storageRootOpAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {p : PrimTy} {op : BinOp}
+  {gsp : Name} {se : Core.Simple C Γ p},
+  dl{ ⟨[ gsp ⊕= se; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, gsp) ⊕ se) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.storageRootOpAssign
+#guard_msgs in #check @Core.Taclet.storageRootOpAssign
+
+/-! Today's rule: `Core.Delab` fails on the scoped twin's statement, until
+W4. -/
 
 /--
 info: @Taclet.storageFieldIncrementAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {p : PrimTy} {v : Var} {op : IncDec}
@@ -110,28 +126,28 @@ info: @Taclet.storageFieldIncrementAssignment : ∀ {C : Contract} {k : Nat} {m 
 /-! ### Arrays: a push is two nested writes over the length -/
 
 /--
-info: @Taclet.storagePushValueSave : ∀ {C : Contract} {k : Nat} {m : Modality} {x : PrimTy} {sp : SPath C (Ty.prim x).array}
-  {se : Simple C x},
+info: @Core.Taclet.storagePushValueSave : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : PrimTy}
+  {sp : Core.SPath C Γ (Ty.prim x).array} {se : Core.Simple C Γ x},
   dl{ ⟨[ sp .push(se); ]⟩ ⇝ { storage := save(save(storage, sp[sp.length], se), sp.length, sp.length + 1) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.storagePushValueSave
+#guard_msgs in #check @Core.Taclet.storagePushValueSave
 
 /-! ### Memory, and a copy from storage: an allocation is two elements -/
 
 /--
-info: @Taclet.memoryFieldWrite : ∀ {C : Contract} {k : Nat} {m : Modality} {mv : Var} {x : Name}
-  {hmv : (Ty.ref (RefTy.struct x)).mapFree = true} {fld : Name} {x_1 : PrimTy} {se : Simple C x_1},
-  dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
+info: @Core.Taclet.memoryFieldWrite : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : Name}
+  {mv : Core.Idx Γ (Core.LTy.mem (RefTy.struct x))} {hmv : (Ty.ref (RefTy.struct x)).mapFree = true} {fld : Name}
+  {x_1 : PrimTy} {se : Core.Simple C Γ x_1}, dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.memoryFieldWrite
+#guard_msgs in #check @Core.Taclet.memoryFieldWrite
 
 /--
-info: @Taclet.memoryStorageCopy : ∀ {C : Contract} {k : Nat} {m : Modality} {mv : Var} {x : RefTy} {sp : SPath C (Ty.ref x)}
-  {hm : (Ty.ref x).mapFree = true},
+info: @Core.Taclet.memoryStorageCopy : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : RefTy}
+  {mv : Core.Idx Γ (Core.LTy.mem x)} {sp : Core.SPath C Γ (Ty.ref x)} {hm : (Ty.ref x).mapFree = true},
   dl{ ⟨[ mv = sp; ]⟩ ⇝
     { mv := freshId(copySt(memory, find(storage, sp))) ‖ memory := copySt(memory, find(storage, sp)) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.memoryStorageCopy
+#guard_msgs in #check @Core.Taclet.memoryStorageCopy
 
 /-! ### With the notation off: the constructors it stands for
 
@@ -139,23 +155,40 @@ and the side condition the line leaves out: `sp` is simple (`Rules.lean`,
 "Side conditions"), filled by `side_cond` wherever the rule is applied. -/
 
 /--
-info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Name} {sp : SPath C (Ty.struct x)}
-  {fld : Name} {x_1 : PrimTy} {hfld : C.fieldType x fld = some (Ty.prim x_1)} {se : Simple C x_1},
+info: @Core.Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : Name}
+  {sp : Core.SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : PrimTy} {hfld : C.fieldType x fld = some (Ty.prim x_1)}
+  {se : Core.Simple C Γ x_1},
   autoParam (sp.isSimple = true) sideCond →
-    Taclet C k m (Stmt.assign (Loc.field sp fld hfld) (Src.val (Val.simple se)))
-      (Premise.update [UpdElem.storage (STerm.storage.save (sp.lower.field fld) (SValT.val se.lower))])
+    Core.Taclet C k m (Core.Stmt.assign (Core.Loc.field sp fld hfld) (Core.Src.val (Core.Val.simple se)))
+      (Core.Premise.update
+        (Core.Upd.nil.snoc
+          (Core.UpdElem.storage
+            (Core.Tms.STerm.save Core.Tms.STerm.storage (Core.Tms.PTerm.field sp.lower fld)
+              (Core.Tms.SValT.val se.lower)))))
 -/
 #guard_msgs in
 set_option pp.sol.dl false in
-#check @Taclet.storageFieldWriteSave
+#check @Core.Taclet.storageFieldWriteSave
 
 /-! ## A premise standing alone -/
 
-/-- info: dl{ true } : Premise StandardExample -/
-#guard_msgs in #check (Premise.done true : Premise StandardExample)
+/-- info: dl{ true } : Core.Premise StandardExample [] [] -/
+#guard_msgs in #check (Core.Premise.done true : Core.Premise StandardExample [] [])
 
-/-- info: dl{ ⟨[ uint x = 1; alice.age = x; ]⟩ } : Premise StandardExample -/
-#guard_msgs in #check (Premise.unfold sol{ uint x = 1; alice.age = x; } : Premise StandardExample)
+/-! A block of statements, resolved (`Core.Prog.resolve`), its locals left
+in scope after it, quoted (`Core.Premise.quote`) and type-checked
+(`Meta.check`, the elaborator's checker). -/
+
+/--
+info: dl{ ⟨[ uint x = 1; alice.age = x; ]⟩ } : Core.Premise StandardExample [] [Core.LTy.val PrimTy.uint]
+-/
+#guard_msgs in
+run_meta do
+  let .ok ⟨_, P⟩ := Core.Prog.resolve (C := StandardExample) [] sol{ uint x = 1; alice.age = x; }
+    | throwError "the block does not resolve"
+  let e := Core.Premise.quote (Lean.mkConst ``StandardExample) (.unfold P .refl)
+  Lean.Meta.check e
+  Lean.logInfo m!"{e} : {← Lean.Meta.inferType e}"
 
 section Scoped
 open scoped Solidity.Core.Surface
@@ -239,17 +272,29 @@ end Scoped
 
 /-! ## The rules of `⊢` are sequents
 
-A constructor of `Proves` is written as KeY writes its rule: a sequent over
-the rest `..Γ` of the context, the premises above the conclusion.  `{U} [ ]`
-is an update produced under the box.  `impRight`, `allRight`,
-`emptyModality`, `sequentialToParallel`, `simplifyUpdate` and
-`applyOnRigidFormula` are the constructors' aliases by solkey's names
-(theorems, `Calculus/Logic.lean`). -/
+A rule of the scoped `Core.Proves` (`Calculus/Core/Proves.lean`) is
+written as KeY writes its rule: a sequent over the rest `..H` of the
+context, the premises above the conclusion.  `{U} [ ]` is an update produced
+under the box.  `Core.Proves.impRight`, `allRight` and `emptyModality` are
+the constructors `intro`, `allIntro` and `empty` by solkey's names (theorems,
+`Calculus/Core/ProofTree.lean`); `sequentialToParallel` is the constructor
+`merge`. -/
 
 /--
-info: @impRight : ∀ {C : Contract} {R : RuleSet} {Γ : List (Hyp C)} {a φ : Fml C}, dl{ ..Γ, a ⟹[R] φ } → dl{ ..Γ ⟹[R] a → φ }
+info: @Core.Proves.impRight : ∀ {C : Contract} {R : RuleSet} {Γ₀ Γ : Core.Ctx} {H : Core.Hyps C Γ₀ Γ} {a φ : Core.Fml C Γ},
+  dl{ ..H, a ⟹[R] φ } → dl{ ..H ⟹[R] a → φ }
 -/
-#guard_msgs in #check @Proves.impRight
+#guard_msgs in #check @Core.Proves.impRight
+
+/-! ### Today's, until W4
+
+Today's `merge`, which the scoped sequent states otherwise
+(`Core.Proves.merge` merges past hidden binders, its side conditions
+computed), and today's sequent macros, which have no scoped input form: the
+scoped goals print as sequents (above) but are written as `Core.Proves`
+terms.  Today's `Proves` has its own aliases by solkey's names
+(`sequentialToParallel`, `simplifyUpdate`, `applyOnRigidFormula`, …:
+theorems, `Calculus/Logic.lean`), over the rest `..Γ` of its context. -/
 
 /--
 info: @merge : ∀ {C : Contract} {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C},
