@@ -123,7 +123,7 @@ def Upd.boolB {Γ : Ctx} {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
   Upd.rec (motive := fun _ _ => Bool) true (fun _ e ih => ih && e.boolB)
     (fun _ _ r ih => ih && r.boolB) (fun _ _ ih => ih) (fun _ _ ih => ih) U
 
-/-- `Upd.freshB`'s compiled twin. -/
+/-- `Upd.freshK`'s compiled twin. -/
 def Upd.freshM {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .nil => true
   | _, .snoc U _ => U.freshM ns
@@ -131,9 +131,11 @@ def Upd.freshM {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .pop U _ => U.freshM ns
   | _, .drop U _ => U.freshM ns
 
-/-- Every local an update declares takes a name not in scope (`Upd.Fresh`). -/
+/-- Every local an update declares takes a name not in scope (`Upd.Fresh`):
+`Closable.lean`'s `Upd.freshB` by `List.contains`, which the kernel evaluates
+faster, with a compiled twin. -/
 @[implemented_by Upd.freshM]
-def Upd.freshB {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
+def Upd.freshK {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
   Upd.rec (motive := fun _ _ => Bool) true (fun _ _ ih => ih)
     (fun U x _ ih => ih && !(U.names ns).contains x) (fun _ _ ih => ih) (fun _ _ ih => ih) U
 
@@ -142,7 +144,7 @@ def Fml.plainM : {Γ : Ctx} → Fml C Γ → List Var → Bool
   | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => true
   | _, .not φ, ns | _, .havoc φ, ns => φ.plainM ns
   | _, .and φ ψ, ns | _, .imp φ ψ, ns => φ.plainM ns && ψ.plainM ns
-  | _, .upd m U φ, ns => m.isBox && U.freshB ns && φ.plainM (U.names ns)
+  | _, .upd m U φ, ns => m.isBox && U.freshK ns && φ.plainM (U.names ns)
   | _, .all x _ φ, ns => !ns.contains x && φ.plainM (x :: ns)
   | _, .modal .., _ | _, .bind .., _ | _, .anon .., _ => false
 
@@ -154,7 +156,7 @@ def Fml.plainB {Γ : Ctx} (φ : Fml C Γ) : List Var → Bool :=
     (not := fun _ ih ns => ih ns)
     (and := fun _ _ ihφ ihψ ns => ihφ ns && ihψ ns)
     (imp := fun _ _ iha ihφ ns => iha ns && ihφ ns)
-    (upd := fun m U _ ih ns => m.isBox && U.freshB ns && ih (U.names ns))
+    (upd := fun m U _ ih ns => m.isBox && U.freshK ns && ih (U.names ns))
     (modal := fun _ _ _ _ _ _ => false)
     (havoc := fun _ ih ns => ih ns)
     (all := fun x _ _ ih ns => !ns.contains x && ih (x :: ns))
@@ -173,7 +175,7 @@ def Fml.posM : {Γ : Ctx} → Fml C Γ → List Var → Option (List Var)
       if disjointB B (a.erase ns).vars then some B else none
     else none
   | _, .upd m U φ, ns =>
-    if (m.isBox || U.boolB) && U.freshB ns then (φ.posM (U.names ns)).bind fun B =>
+    if (m.isBox || U.boolB) && U.freshK ns then (φ.posM (U.names ns)).bind fun B =>
       if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none
     else none
   | _, .modal .., _ => none
@@ -200,7 +202,7 @@ def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
         if disjointB B (a.erase ns).vars then some B else none
       else none)
     (upd := fun m U _ ih ns =>
-      if (m.isBox || U.boolB) && U.freshB ns then (ih (U.names ns)).bind fun B =>
+      if (m.isBox || U.boolB) && U.freshK ns then (ih (U.names ns)).bind fun B =>
         if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none
       else none)
     (modal := fun _ _ _ _ _ _ => none)
@@ -295,14 +297,14 @@ theorem Upd.apply_boolOK {Γ : Ctx} {σ₀ : State C Γ} (h₀ : σ₀.BoolOK) :
       rw [h₁] at h; cases h
       exact (Upd.apply_boolOK h₀ U hb h₁).thin e
 
-theorem Upd.fresh_of_freshB {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ)
-    (h : U.freshB ns = true) : U.Fresh ns := by
+theorem Upd.fresh_of_freshK {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ)
+    (h : U.freshK ns = true) : U.Fresh ns := by
   induction U with
   | nil => trivial
   | snoc U _ ih => exact ih h
   | decl U x _ ih =>
-    have h' : U.freshB ns = true ∧ (U.names ns).contains x = false := by
-      simpa only [Upd.freshB, Bool.and_eq_true, Bool.not_eq_eq_eq_not, Bool.not_true] using h
+    have h' : U.freshK ns = true ∧ (U.names ns).contains x = false := by
+      simpa only [Upd.freshK, Bool.and_eq_true, Bool.not_eq_eq_eq_not, Bool.not_true] using h
     exact ⟨ih h'.1, fun hx => by rw [List.contains_iff_mem.2 hx] at h'; cases h'.2⟩
   | pop U _ ih => exact ih h
   | drop U _ ih => exact ih h
@@ -322,10 +324,10 @@ theorem Fml.plain_of_plainB {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns : List Var}, φ
     exact ⟨iha h'.1, ihφ h'.2⟩
   | upd m U φ ih =>
     intro ns h
-    have h' : (m.isBox && U.freshB ns) = true ∧ φ.plainB (U.names ns) = true :=
+    have h' : (m.isBox && U.freshK ns) = true ∧ φ.plainB (U.names ns) = true :=
       Bool.and_eq_true _ _ ▸ h
-    have h'' : m.isBox = true ∧ U.freshB ns = true := Bool.and_eq_true _ _ ▸ h'.1
-    exact ⟨Modality.eq_box_of_isBox h''.1, Upd.fresh_of_freshB ns U h''.2, ih h'.2⟩
+    have h'' : m.isBox = true ∧ U.freshK ns = true := Bool.and_eq_true _ _ ▸ h'.1
+    exact ⟨Modality.eq_box_of_isBox h''.1, Upd.fresh_of_freshK ns U h''.2, ih h'.2⟩
   | modal => intro _ h; cases h
   | havoc φ ih => intro ns h; exact ih h
   | all x p φ ih =>
@@ -444,21 +446,21 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
     · cases h
   | upd m U φ ih =>
     intro ns B h σ τ hag H
-    change (if ((m.isBox || U.boolB) && U.freshB ns) then (φ.posB (U.names ns)).bind fun B =>
+    change (if ((m.isBox || U.boolB) && U.freshK ns) then (φ.posB (U.names ns)).bind fun B =>
         if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none else none) =
       some B at h
-    have hU : ((m.isBox || U.boolB) && U.freshB ns) = true := by
-      cases hn : ((m.isBox || U.boolB) && U.freshB ns)
+    have hU : ((m.isBox || U.boolB) && U.freshK ns) = true := by
+      cases hn : ((m.isBox || U.boolB) && U.freshK ns)
       · rw [hn] at h; cases h
       · rfl
-    have hU' : (m.isBox || U.boolB) = true ∧ U.freshB ns = true := Bool.and_eq_true _ _ ▸ hU
+    have hU' : (m.isBox || U.boolB) = true ∧ U.freshK ns = true := Bool.and_eq_true _ _ ▸ hU
     rw [if_pos hU] at h
     obtain ⟨B', h₁, h⟩ := Option.bind_eq_some_iff.1 h
     split at h
     · cases h
       rename_i hd
       have hav := disjointB_avoids hd
-      have hrel := Upd.apply_erase hag U (Upd.fresh_of_freshB ns U hU'.2)
+      have hrel := Upd.apply_erase hag U (Upd.fresh_of_freshK ns U hU'.2)
       have H₀ := erase_upd_holds.1 (H τ (Semantics.EnvAgreeExcept.refl _ _))
       have core : m.afterC (holds · φ) (U.apply σ) := by
         revert hrel H₀
