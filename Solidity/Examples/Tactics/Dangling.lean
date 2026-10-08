@@ -22,8 +22,7 @@ These are solkey `TestSuite`'s dangling-alias functions over
 `sol_prove`.  If a clause stops applying, or the strategy picks another
 rule, they fail.  They read scoped (`open scoped Solidity.Core.Surface`):
 the scoped strategy, its leaves' erasures closed by today's closer, with
-today's budgets (`Core.Derive.residueOf`).  The diamond's `⊢` walk is read
-without the switch at the end: `Core.Proves.close` takes box contexts.
+today's budgets (`Core.Derive.residueOf`).
 -/
 
 namespace Solidity.Examples.Tactics.Dangling
@@ -50,9 +49,8 @@ example : ⊢ dl!{ defined(wt(storage)) → [
   sol_prove?
 
 /-- The diamond: the write through the alias returns, since the slot past
-the end is there (`staleOk`, `slotHasU`); valid by the strategy (the `⊢`
-walk is at the end). -/
-example : ⊨ dl!{ defined(wt(storage)) → ⟨
+the end is there (`staleOk`, `slotHasU`). -/
+example : ⊢ dl!{ defined(wt(storage)) → ⟨
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; persons.push(); ⟩ persons[0].age == 5 } := by
   sol_prove
@@ -147,27 +145,5 @@ def rounds6 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
-
-end Solidity.Examples.Tactics.Dangling
-
-/-! ## Read without the switch
-
-The diamond as a `⊢` walk: its leaves sit behind a diamond update, which
-`Core.Proves.close` does not take yet (box contexts only). -/
-
-namespace Solidity.Examples.Tactics.Dangling
-
-open Proves
-
-local instance : InContract := ⟨StandardExample⟩
-
-/-- `wt(storage)`, the premise every TestSuite obligation carries. -/
-def wtStd : Fml StandardExample := .defined (.wt StandardExample.vars .storage)
-
-/-- The diamond, by today's `⊢`. -/
-example : ⊢ .imp wtStd dl!{ ⟨
-    delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
-    r.age = 5; persons.push(); ⟩ persons[0].age == 5 } := by
-  sol_prove
 
 end Solidity.Examples.Tactics.Dangling
