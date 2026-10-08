@@ -1,5 +1,9 @@
 import Solidity.Calculus.Callback
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.CallbackSound
+import Solidity.Calculus.Core.WalkSyntax
 
 /-!
 # Callbacks: re-entrancy-safe and unsafe withdrawals
@@ -31,6 +35,15 @@ with the invariant `balance + paidOut == deposited`.  Two withdrawals:
 A `send` (`PiggyBankNet`'s `callTo`) is read so too, with a third outcome:
 the callee refuses, and the send returns `false` with nothing booked
 (`sendWithCallbackBox`, `ProvesC.send`).
+
+The withdrawals read scoped (`open scoped Solidity.Core.Surface`): the
+calculus with callbacks is `Calculus/Core/Callback.lean`'s `ProvesC`, sound
+against `ValidC` for a first-order invariant (`ProvesC.valid`,
+`Calculus/Core/CallbackSound.lean`); a rule takes its taclet as a `Rule`
+(`.key`), `localValueDeclInitDrop` is a hidden binder's rule
+(`ProvesC.bind`), and "resume after callback" closes by the invariant
+assumed (`Proves.assumeInv`).  The counterexample run, the send and the
+rules' pins are read without the switch, at the end.
 -/
 
 namespace Solidity.Examples.Tactics.Callback
@@ -43,39 +56,39 @@ def Vault : Contract := contract!{ uint balance; uint paidOut; uint deposited; }
 
 local instance : InContract := ⟨Vault⟩
 
+open scoped Solidity.Core.Surface
+
 /-- `balance + paidOut == deposited`: what the vault owes whenever control
 leaves it, and may assume whenever it comes back. -/
-def vaultInv : Invariant Vault := ⟨dl!{ balance + paidOut == deposited }, rfl, rfl⟩
+def vaultInv : Core.Invariant Vault := ⟨dl!{ balance + paidOut == deposited }, rfl⟩
 
 /-! ## Checks, effects, interactions: safe -/
 
-set_option maxHeartbeats 2000000 in
 /-- `uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt);` keeps
 the invariant with callbacks: the ordinary rules run the effects, and
 `transferWithCallbackBox` owes the invariant at the exit (booked already)
 and resumes into `[ ]`, which a callee that keeps the invariant cannot
 break. -/
 theorem withdrawSafe :
-    ValidC vaultInv dl!{ balance + paidOut == deposited →
+    Core.ValidC vaultInv dl!{ balance + paidOut == deposited →
       [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
         balance + paidOut == deposited } := by
-  apply ProvesC.valid
-  apply ProvesC.intro
-  apply ProvesC.unfold .localValueDeclInitDrop rfl rfl
-  apply ProvesC.update .storageRootReadSelect rfl
-  apply ProvesC.update .storageRootWriteStore rfl
-  apply ProvesC.update .storageRootOpAssign rfl
-  apply ProvesC.callback .transferWithCallbackBox
+  apply Core.ProvesC.valid rfl
+  apply Core.ProvesC.allIntro
+  apply Core.ProvesC.intro
+  apply Core.ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
+  apply Core.ProvesC.update (.key .storageRootReadSelect) rfl
+  apply Core.ProvesC.update (.key .storageRootWriteStore) rfl
+  apply Core.ProvesC.update (.key .storageRootOpAssign) rfl
+  apply Core.ProvesC.callback .transferWithCallbackBox
   · -- invariant on exit: `{U} I`
-    apply ProvesC.plain _ rfl
+    apply Core.ProvesC.plain _ rfl
     refine close ?_
     sol_symex
     sol_close
   · -- resume after callback: `{U} {havoc} (I → [ ] I)`
-    apply ProvesC.plain _ rfl
-    apply empty
-    rw [show ∀ (Γ : List (Hyp Vault)) a b c, Γ ++ [a, b, c] = (Γ ++ [a, b]) ++ [c] by simp]
-    exact close (Hyp.wrap_assumption _ rfl)
+    apply Core.ProvesC.plain _ rfl
+    exact Core.Proves.assumeInv
 
 /-- What is safe with callbacks is safe without: the deterministic run is one
 of the runs with callbacks. -/
@@ -83,13 +96,13 @@ theorem withdrawSafe_noCallback :
     ⊨ dl!{ balance + paidOut == deposited →
       [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
         balance + paidOut == deposited } :=
-  valid_of_validC withdrawSafe rfl rfl
+  fun σ v => Core.holds_of_holdsC_imp (withdrawSafe σ v) rfl rfl
 
 /-! ## Interaction first: unsafe -/
 
 /-- `uint amt = balance; to.transfer(amt); balance = 0; paidOut += amt;`, with
 the invariant before and after. -/
-def withdrawUnsafe : Fml Vault := dl!{ balance + paidOut == deposited →
+def withdrawUnsafe : Core.Fml Vault [] := dl!{ balance + paidOut == deposited →
   [ uint amt = balance; to.transfer(amt); balance = 0; paidOut += amt; ]
     balance + paidOut == deposited }
 
@@ -103,8 +116,35 @@ theorem withdrawUnsafe_valid : ⊨ dl!{ balance + paidOut == deposited →
   sol_close
 
 /-- The same, as the no-callback semantics. -/
-theorem withdrawUnsafe_noCallback : ValidT .noCallback withdrawUnsafe :=
-  validT_noCallback.2 withdrawUnsafe_valid
+theorem withdrawUnsafe_noCallback : Core.ValidT .noCallback withdrawUnsafe :=
+  Core.validT_noCallback.2 withdrawUnsafe_valid
+
+end Solidity.Examples.Tactics.Callback
+
+/-! ## Read without the switch
+
+The counterexample is a run with callbacks over today's states
+(`Semantics/Callback.lean`'s `ExecS`), built step by step from a storage
+written out; the typed run's would need a typed storage of `Vault`
+(`TState`) and its `ExecS` steps.  The send's "send succeeded" goal reads
+the invariant past `sent = ok;`, a storage write in front of a goal that
+reads the storage, which the scoped sequent applies by no rule yet
+(today's `applyStorageBox`).  The rules are pinned as today's prints them. -/
+
+namespace Solidity.Examples.Tactics.Callback.Untyped
+
+open Proves Semantics
+
+local instance : InContract := ⟨Vault⟩
+
+/-- `balance + paidOut == deposited`, today's. -/
+def vaultInv : Invariant Vault := ⟨dl!{ balance + paidOut == deposited }, rfl, rfl⟩
+
+/-- `uint amt = balance; to.transfer(amt); balance = 0; paidOut += amt;`, with
+the invariant before and after. -/
+def withdrawUnsafe : Fml Vault := dl!{ balance + paidOut == deposited →
+  [ uint amt = balance; to.transfer(amt); balance = 0; paidOut += amt; ]
+    balance + paidOut == deposited }
 
 /-- A vault holding `5` for its customer, nothing paid out, `to` the
 customer's address. -/
@@ -208,4 +248,4 @@ info: @CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {pv : Var} {sadr 
 -/
 #guard_msgs in #check @CallbackTaclet.sendWithCallbackBox
 
-end Solidity.Examples.Tactics.Callback
+end Solidity.Examples.Tactics.Callback.Untyped

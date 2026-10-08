@@ -1,6 +1,7 @@
 import Solidity.Calculus.Core.Callback
 import Solidity.Calculus.Core.CallbackHolds
 import Solidity.Calculus.Core.Sound
+import Solidity.Calculus.Core.UpdateRules
 
 /-!
 # The calculus with callbacks is sound
@@ -535,6 +536,89 @@ for a first-order invariant. -/
 theorem ProvesC.valid {I : Invariant C} (hI : I.fml.FO = true) {φ : Fml C []}
     (d : ProvesC I.fml [] .nil φ) : ValidC I φ :=
   ProvesC.sound_of hI I.noTransfer d
+
+/-! ## The invariant assumed, at the end of a resumed program
+
+"Resume after callback" assumes the invariant past a frame end that drops
+every local (`Fml.closedAt`), and a goal past a program that ends where
+it is resumed is the postcondition past the frames' scope ends
+(`Frames.exit`).  Where both are the same closed first-order formula (no
+local in it, read on the erasure), the assumption is the goal:
+`Proves.assumeInv`, KeY's `close` on `I ⟹ I`. -/
+
+/-- A first-order formula with no local and no `∀`: it reads the global
+part only. -/
+def Fml.closedB {Γ : Ctx} : Fml C Γ → Bool
+  | .tt => true
+  | .eq a b => a.toNil?.isSome && b.toNil?.isSome
+  | .defined t => t.toNil?.isSome
+  | .not φ => Fml.closedB φ
+  | .and φ ψ | .imp φ ψ => Fml.closedB φ && Fml.closedB ψ
+  | _ => false
+
+/-- **A closed formula reads as its erasure, in the global part.** -/
+theorem holds_closedB {Γ : Ctx} : (φ : Fml C Γ) → φ.closedB = true → (σ : TState C Γ) →
+    (holds σ φ ↔ Solidity.holds σ.erase.glob (φ.erase []))
+  | .tt, _, _ => Iff.rfl
+  | .eq a b, h, σ => by
+    have h' : a.toNil?.isSome = true ∧ b.toNil?.isSome = true := Bool.and_eq_true_iff.mp h
+    obtain ⟨a₀, ha⟩ := Option.isSome_iff_exists.1 h'.1
+    obtain ⟨b₀, hb⟩ := Option.isSome_iff_exists.1 h'.2
+    show Theory.StValue.Equiv _ _ ↔ Theory.StValue.Equiv _ _
+    rw [Tm.denote_toNil σ.erase a ha, Tm.denote_toNil σ.erase b hb]
+  | .defined t, h, σ => by
+    obtain ⟨t₀, ht⟩ := Option.isSome_iff_exists.1 h
+    show (∃ x, _) ↔ (∃ x, _)
+    rw [Tm.eval_toNil σ.erase t ht]
+  | .not φ, h, σ => not_congr (holds_closedB φ h σ)
+  | .and φ ψ, h, σ => by
+    have h' : φ.closedB = true ∧ ψ.closedB = true := Bool.and_eq_true_iff.mp h
+    exact and_congr (holds_closedB φ h'.1 σ) (holds_closedB ψ h'.2 σ)
+  | .imp φ ψ, h, σ => by
+    have h' : φ.closedB = true ∧ ψ.closedB = true := Bool.and_eq_true_iff.mp h
+    exact imp_congr (holds_closedB φ h'.1 σ) (holds_closedB ψ h'.2 σ)
+  | .upd .., h, _ | .modal .., h, _ | .havoc _, h, _ | .all .., h, _ | .bind .., h, _
+  | .anon .., h, _ => nomatch h
+
+/-- Frames that only end scopes. -/
+def Frames.popsOnly {Γ Γ₀ : Ctx} : Frames C Γ Γ₀ → Bool
+  | .nil => true
+  | .seq .nil κ => Frames.popsOnly κ
+  | .seq (.cons ..) _ => false
+  | .pop _ _ κ | .drop _ κ => Frames.popsOnly κ
+
+/-- Past scope ends, a closed formula holds where it holds before them. -/
+theorem holds_exit_closed {Γ₀ : Ctx} {φ : Fml C Γ₀} {g : Semantics.State}
+    (hφ : φ.closedB = true) (h : Solidity.holds g (φ.erase [])) :
+    {Γ : Ctx} → (κ : Frames C Γ Γ₀) → κ.popsOnly = true → ∀ σ : TState C Γ, σ.erase.glob = g →
+      holds σ (κ.exit .box φ)
+  | _, .nil, _, σ, e => (holds_closedB φ hφ σ).2 (e ▸ h)
+  | _, .seq .nil κ, hκ, σ, e => holds_exit_closed hφ h κ hκ σ e
+  | _, .pop _ e' κ, hκ, σ, e => by
+    show Modality.afterC .box _ ((Upd.nil.pop e').apply σ.erase)
+    intro σ' he _
+    exact holds_exit_closed hφ h κ hκ σ' (by rw [he]; exact e)
+  | _, .drop e' κ, hκ, σ, e => by
+    show Modality.afterC .box _ ((Upd.nil.drop e').apply σ.erase)
+    intro σ' he _
+    exact holds_exit_closed hφ h κ hκ σ' (by rw [he]; exact e)
+
+/-- **The invariant assumed is the goal**: `…, {havoc}, I ⟹ I`, the
+assumption past a frame end that drops every local, the goal past the
+program's scope ends, the two the same closed first-order formula. -/
+theorem Proves.assumeInv {R : RuleSet} {Γ₀ Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {I : Fml C []}
+    {κ : Frames C Γ Δ} {φ : Fml C Δ} (hκ : κ.popsOnly = true := by rfl)
+    (hI : I.closedB = true := by rfl) (hφ : φ.closedB = true := by rfl)
+    (he : φ.erase [] = I.erase [] := by rfl) (hb : H.boxOnly = true := by rfl)
+    (hm : ((H.pre (Fml.closedAt I)).wrap (κ.exit .box φ)).modalFree = true := by
+      first | rfl | decide) :
+    Proves C R Γ₀ (H.pre (Fml.closedAt I)) (κ.exit .box φ) := by
+  refine .closeHolds (fun σ => H.wrap_valid (φ := .imp (Fml.closedAt I) (κ.exit .box φ)) hb
+    (fun τ hτ => ?_) σ) hm
+  have hτ : Modality.afterC .box _ ((Upd.nil.drop (Thin.nilTo Γ)).apply τ.erase) := hτ
+  have h₁ := (holds_closedB I hI _).1 (hτ (τ.withEnv (Δ := []) ()) rfl (List.prefix_refl _))
+  rw [← he] at h₁
+  exact holds_exit_closed hφ h₁ κ hκ τ rfl
 
 /-- info: 'Solidity.Core.ProvesC.valid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms ProvesC.valid
