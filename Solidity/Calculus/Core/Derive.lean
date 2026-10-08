@@ -368,9 +368,12 @@ def shortTac (c : Lean.Name) (r : Lean.Name) (lean box : Bool) :
 
 /-- The steps that may apply at the goal `g`, each as tactics, in the order
 tried; none at a leaf.  `short`: today's walk line first (`shortTac`), the
-explicit `refine` after it; `true` is then a leaf, closed as today's. -/
+explicit `refine` after it; `true` is then a leaf, closed as today's.  A
+step's note, where it has one, is the solkey name of a rule its lines do not
+write (`-- storageFieldReadFind` after a premise proved by `rfl`). -/
 def movesAt (g : MVarId) (short : Bool := false) :
-    MetaM (Array (Array (TSyntax `tactic))) := g.withContext do
+    MetaM (Array (Array (TSyntax `tactic) × Option String)) := g.withContext do
+  let plain (ms : Array (Array (TSyntax `tactic))) := ms.map (·, (none : Option String))
   let ty ← instantiateMVars (← g.getType)
   let_expr Proves C _ Γ₀ Γ H φ0 := ty | return #[]
   let φ ← whnf φ0
@@ -380,18 +383,19 @@ def movesAt (g : MVarId) (short : Bool := false) :
     if short then return #[#[← `(tactic| apply $(mkIdent n))]] ++ (← one c)
     one c
   match φ.getAppFn.constName? with
-  | some ``Fml.imp => alias `impRight ``Proves.impRight
-  | some ``Fml.all => alias `allRight ``Proves.allRight
-  | some ``Fml.upd => alias `updIntro ``Proves.updIntro
-  | some ``Fml.bind => one ``Proves.bindIntro
+  | some ``Fml.imp => plain <$> alias `impRight ``Proves.impRight
+  | some ``Fml.all => plain <$> alias `allRight ``Proves.allRight
+  | some ``Fml.upd => plain <$> alias `updIntro ``Proves.updIntro
+  | some ``Fml.bind => plain <$> one ``Proves.bindIntro
   | some ``Fml.tt =>
     if short then return #[]
-    return #[#[← `(tactic| exact $(← ProofTree.short ``Proves.closeTrue) $(mkIdent `rfl):ident)]]
+    return plain
+      #[#[← `(tactic| exact $(← ProofTree.short ``Proves.closeTrue) $(mkIdent `rfl):ident)]]
   | some ``Fml.modal =>
     let args := φ.getAppArgs
     let m := args[args.size - 4]!
     let P ← whnf args[args.size - 3]!
-    if P.isAppOf ``Prog.nil then return ← alias `emptyModality ``Proves.emptyModality
+    if P.isAppOf ``Prog.nil then return plain (← alias `emptyModality ``Proves.emptyModality)
     unless P.isAppOf ``Prog.cons do return #[]
     let s := P.getArg! (P.getAppNumArgs - 2)
     let k := mkAppN (mkConst ``Hyps.fresh) #[C, Γ₀, Γ, H, φ]
@@ -409,13 +413,14 @@ def movesAt (g : MVarId) (short : Bool := false) :
     let late ← ctorTacs c (← `(term| (by exact $d)))
     -- and where the taclet's side conditions are decided before its schema
     -- variables are read off the goal (a read into a hole after a hidden
-    -- binder), the premise `Stmt.step` computes, by `rfl`
+    -- binder), the premise `Stmt.step` computes, by `rfl`; the line names
+    -- no rule, so the rule's solkey name follows it as a comment
     let byStep ← ctorTacs c (← `(term| $(mkIdent `rfl):ident))
-    let explicit := (← ctorTacs c d) ++ late.extract (late.size - 1) late.size ++
-      byStep.extract (byStep.size - 1) byStep.size
+    let explicit := plain ((← ctorTacs c d) ++ late.extract (late.size - 1) late.size) ++
+      (byStep.extract (byStep.size - 1) byStep.size).map (·, some rName.toString)
     if short then
       let box := (← whnf m).isConstOf ``Modality.box
-      if let some t ← shortTac c rName lean box then return #[#[t]] ++ explicit
+      if let some t ← shortTac c rName lean box then return plain #[#[t]] ++ explicit
     return explicit
   | _ => return #[]
 
@@ -451,19 +456,22 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
       | _ => pure g
     else pure g
   let mut step := none
-  for tacs in ← movesAt g short do
+  for (tacs, note) in ← movesAt g short do
     let s ← saveState
     -- each try with its own heartbeats, a timeout a failed try
     let r ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (ProofTree.runOn g tacs))
       fun _ => do s.restore; pure none
     if let some gs := r then
-      step := some (tacs, gs)
+      step := some (tacs, note, gs)
       break
-  let some (tacs, gs) := step
+  let some (tacs, note, gs) := step
     | if close then
         if let some lines ← closeLeaf g short then return lines
       leaves.modify (·.push g); return #["sorry"]
   let head := (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
+  let head := match note with
+    | some n => head.modify (head.size - 1) (· ++ s!" -- {n}")
+    | none => head
   match gs with
   | [g'] => return head ++ (← walk fuel leaves g' close short)
   | gs =>

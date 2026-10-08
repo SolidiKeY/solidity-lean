@@ -416,6 +416,60 @@ theorem transferFrameStorage :
     ⊨ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
   sol_derive?
 
+/--
+info: Try this:
+  apply unfold .storageFieldWrite_unfold_leftFst
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply unfold .storageLocalDeclInitDrop
+    apply update .storageFieldReadBindLocalRoot
+    apply update .storageFieldWriteSave
+    apply unfold .storageFieldDelete_unfold_leftFst
+    apply unfold .storageLocalDeclInitDrop
+    apply update .storageFieldReadBindLocalRoot
+    apply update .storageFieldDelete
+    apply unfold .localValueDeclInitDrop
+    refine Core.Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst
+    apply unfold .storageLocalDeclInitDrop
+    apply update .storageFieldReadBindLocalRoot
+    apply update .storageFieldReadFind
+    refine close ?_
+    sol_symex
+    sol_close
+-/
+#guard_msgs in
+/-- `StorageDelete.deleteReadDeep_theory`'s formula: the read into a hole
+after a hidden binder has no line `apply` matches, so its premise is
+`Stmt.step`'s, by `rfl`, and the line keeps the taclet's solkey name as a
+comment (`Walk.movesAt`). -/
+theorem deleteReadDeepWalk :
+    ⊢ dl!{ [ alice.account.balance = 5; delete alice.account.balance;
+      uint x = alice.account.balance; ] x == 0 } := by
+  sol_derive?
+
+/-- The suggestion above, replayed. -/
+example :
+    ⊢ dl!{ [ alice.account.balance = 5; delete alice.account.balance;
+      uint x = alice.account.balance; ] x == 0 } := by
+  apply unfold .storageFieldWrite_unfold_leftFst
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageFieldReadBindLocalRoot
+  apply update .storageFieldWriteSave
+  apply unfold .storageFieldDelete_unfold_leftFst
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageFieldReadBindLocalRoot
+  apply update .storageFieldDelete
+  apply unfold .localValueDeclInitDrop
+  refine Core.Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageFieldReadBindLocalRoot
+  apply update .storageFieldReadFind
+  refine close ?_
+  sol_symex
+  sol_close
+
 /-! ## `sol_prove?`: the walk in one evaluation
 
 A write read back: the leaf closes by the closer (`LFml.close`) inside the
