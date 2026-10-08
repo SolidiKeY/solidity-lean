@@ -1574,16 +1574,35 @@ Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
   chain through them, a scoped `valid_close`.
 - No fresh name, `~*>` span or rule name of a flipped chain moved.
 
-**Gate**, `Examples/Chains/Storage` (M0 7.5 s, limit 9.0 s): this session,
-fresh opens of a copy, `date` around the call: flipped 13.2, 13.8, 15.7 s;
-today's file 10.5, 12.3 s in the same conditions (the M0 method gives
-today's 7.5 s on a quiet machine).  So the flip costs ×1.27–1.31, about
-9.5–9.8 s at M0's scale: **over the gate by about 6%**.  Of it, the header
-(the Core modules) is +0.9 s (4.5 s against 3.6 s for the imports alone);
-the rest is `sol_chain` on the scoped links (`BalanceWriteRead.chain`:
-tactic 273 ms, kernel 203 ms) and the merged chains' `#last_line`.
-Not tuned; the run's `evalExpr` per line (`closedLines`) is the first
-place to look.
+**Gate**, `Examples/Chains/Storage` (M0 7.5 s, limit 9.0 s): **passed,
+8.7–8.8 s** after the review fixes, by the M0/M3.3 method (a copy under
+`Solidity/Scratch/` with `Elab.async false`, `#clock` reading
+`/proc/self/stat` and `/proc/uptime`, wall time from the worker's start to
+the end, imports built, load average under 2): flipped 8.84, 8.69 s;
+today's file (`e61996b^`) 7.48, 7.40 s in the same session, so the flip
+still costs ×1.17, which `.claude/rules/derivations.md` rule 7 ("in the
+time it did before or faster") does not allow: an explained cost, not an
+outlier past the gate.  Where it went, per chain (CPU ticks between
+`#clock`s, flipped against today's): every chain ×1.3–2 before the fixes,
+the header (both calculi's imports) +0.1 s, `#last_line` 0.04–0.1 s per
+chain on both.  The lane's first estimate (13.2–15.7 s against 10.5–12.3 s,
+×1.27–1.31) was under load; on a quiet machine the flip measured 10.06,
+10.12 s against 7.37, 7.40 s (×1.37) before the fixes below.
+- The cost was the run's evaluation (`closedLines`/`closedErased`): four
+  `evalExpr`s a run (lines and erasure, at the diamond and at the box), each
+  a definition the kernel type-checked (12 ms each, the formula inside it),
+  and every run done twice for a chain whose `φ` is a binder of the theorem
+  (`(φ : Core.Post C [.alias …])`): the proof sees the binder as a new
+  variable, so `runCache` missed in `sol_chain`.  Now one evaluation a
+  modality (`Fml.chainRunQ`, lines and erasure together), not
+  kernel-checked (`evalQuoted`, `debug.skipKernelTC`: the value is a quoted
+  term that the kernel checks where it is used), and cached by the closed
+  formula, postconditions in slots (`closedCache`), which is the same under
+  the theorem's new variables.  `AccountCopy`: 0.40 s → 0.27 s (today's
+  0.20 s).
+- Left: the scoped statement's elaboration (102 ms against 71 ms on
+  `AccountCopy`) and `sol_chain`'s meta-level `Kernel.isDefEq` before the
+  kernel's own check (59 ms against 24 ms).
 
 **Left on `Update.lean`'s calculus, with the reason** (the lead's call):
 - *Captures in the postcondition's scope* (`EvaluationOrder`, and the tails of
@@ -1623,6 +1642,29 @@ place to look.
   does not have.
 - `~[r]~>`'s "the rule for … is …" error fails to print the scoped statement
   ("failed to pretty print expression").
+
+**Review fixes** (2026-10-08):
+- `#chain`/`sol_chain?` (`Core/ChainGen.lean`) and `#last_line`
+  (`Core/LastLine.lean`) take the erasure with its outer `∀`s dropped
+  (`dropAllsE`), as `elabCoreChain` does: a parameterised scoped line
+  (`{ ageVal := 42 } ⟨[ … ]⟩ φ`) now gets its rewrites past the program,
+  computed from the `L` `Fml.ViaE` checks.  Pinned: `#chain` of
+  `AgeWrite`'s first line and the pasted chain
+  (`Examples/Tactics/CoreChains.lean`).
+- The printer (`ppTerm`) writes `+ - * /` only at `uint`, the type they read
+  back at; an `int` (or unchecked `bool`) one escapes.  Pinned:
+  `Examples/Tools.lean`'s `#wp` of `int f = e * 7;`.  No other pin moved
+  (`ChainNotation`, `ProofTree`, `PrintedRules`, `Tactics/Values` checked).
+- The gate above (`evalQuoted`, `closedCache`).
+- Docs: `.claude/rules/derivations.md` rules 1 and 7 and the
+  `chain-authoring` skill say a scoped chain is one declaration
+  (`Core.Fml.Via`/`ViaE`), segments only on `Update.lean`'s calculus; the
+  docstrings of `Fml.Via.valid`, `Fml.Steps.eq_of_length`/`eq_of_measure`,
+  `StorageCoverage.requireSimple` and `CheckedArithmetic`'s module no longer
+  cite what the flip changed.
+- Checked after the `Core/Chains.lean` edit: all 14 `Examples/Chains/` files,
+  `Examples/{ChainNotation,Tactics/CoreChains,Tactics/CoreSurface,Tactics/CoreSequents,Tactics/CoreSolSpec}`,
+  `Tools/CoreInspect`, clean.
 
 **Checks:** every touched file's diagnostics clean (the seven files checked
 before `mergeModality` re-checked after it), `Examples/Tactics/CoreChains`
