@@ -16,7 +16,7 @@ The rule and its single-statement walk are `Payment.lean`'s.
 What a transfer changes is the ledger, `net(to)` `5` less after
 `to.transfer(5);` (§2), and nothing else: its **frame**, storage, locals and
 memory as they were (§1).  Both are theorems for every state.  §3 runs the
-interpreter from `State.exampleStore`, checked by `rfl` (solkey's
+typed interpreter from the example store, checked by the kernel (solkey's
 `net-*.key` files; `net-manual-update.key`, a raw update with no program,
 has no counterpart).  `net-msg-value.key` reads `msg.value` and
 `msg.sender`, the transaction's values (`Simple.env`), into storage (§4).
@@ -138,34 +138,58 @@ theorem netTransfersAccumulate :
   sol_symex
   sol_close
 
-/-! ## 3 · The ledger, run -/
+/-! ## 3 · The ledger, run
 
-/-- The ledger at `a` after `P` runs from the store `σ`. -/
-def netAfter {C : Contract} (σ : State) (P : Surface.Prog C) (a : Int) : Res Int := do
-  return (← Surface.Prog.runT σ P).getNet a
+Each block is resolved, quoted and declared (`Core.Prog.defineCore`), then
+run typed (`Core.Prog.trun`) from `Storage.standardExample`, the storage of
+`State.exampleStore`, by the kernel (`decide +kernel`). -/
 
-/- `uint to = 9; to.transfer(5);` debits `9` by `5` (`net-transfer-simple.key`). -/
-#guard netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 9 = .ok (-5)
+private def payNineP : Surface.Prog StandardExample := sol{ uint to = 9; to.transfer(5); }
+private def payOwnerP : Surface.Prog StandardExample := sol{ owner = 7; owner.transfer(5); }
+private def paySelfP : Surface.Prog StandardExample := sol{ uint to = 0; to.transfer(5); }
+private def sendNineP : Surface.Prog StandardExample := sol{ uint to = 9; bool ok = to.send(5); }
 
-/- `owner = 7; owner.transfer(5);` — a storage receiver
+open Lean Elab Command in
+run_cmd liftCoreM do
+  let ns := `Solidity.Examples.Tactics.Net
+  for (n, P) in [(`payNineCore, payNineP), (`payOwnerCore, payOwnerP), (`paySelfCore, paySelfP),
+      (`sendNineCore, sendNineP)] do
+    if let some e ← Core.Prog.defineCore (ns ++ n) ``StandardExample [] P then
+      throwError "{n}: {e}"
+
+/-- The initial store, typed. -/
+private abbrev start : Core.TState StandardExample [] :=
+  Core.TState.ofStorage Core.Storage.standardExample
+
+/-- The ledger at `a` (`State.getNet`) after `P` runs from `σ`; `none` on a
+halt. -/
+def netAfter {Γ' : Core.Ctx} (σ : Core.TState StandardExample []) (P : Core.Prog StandardExample [] Γ')
+    (a : Int) : Option Int :=
+  (Core.Prog.trun σ P).toOption.map fun o => (lookupBy a o.st.net).getD 0
+
+/-- `uint to = 9; to.transfer(5);` debits `9` by `5` (`net-transfer-simple.key`). -/
+theorem netTransferSimple : netAfter start payNineCore 9 = some (-5) := by decide +kernel
+
+/-- `owner = 7; owner.transfer(5);` — a storage receiver
 (`net-transfer-capture-receiver.key`, its `owner = 7` premise inlined). -/
-#guard netAfter State.exampleStore sol{ owner = 7; owner.transfer(5); } 7 = .ok (-5)
+theorem netTransferStorageReceiverRun : netAfter start payOwnerCore 7 = some (-5) := by
+  decide +kernel
 
-/- An address nobody paid stays at zero… -/
-#guard netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 2 = .ok 0
+/-- An address nobody paid stays at zero… -/
+theorem netUntouched : netAfter start payNineCore 2 = some 0 := by decide +kernel
 
-/- …and so does the contract's own entry, at `0` in `State.exampleStore`. -/
-#guard netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 0 = .ok 0
+/-- …and so does the contract's own entry, at `0` in `State.exampleStore`. -/
+theorem netThis : netAfter start payNineCore 0 = some 0 := by decide +kernel
 
-/- A payment to the contract itself books nothing. -/
-#guard netAfter State.exampleStore sol{ uint to = 0; to.transfer(5); } 0 = .ok 0
+/-- A payment to the contract itself books nothing. -/
+theorem netSelfRun : netAfter start paySelfCore 0 = some 0 := by decide +kernel
 
-/- The funds are not the transfer's: `address(this).balance` reads `3`
+/-- The funds are not the transfer's: `address(this).balance` reads `3`
 after a payment of `5` from `3`. -/
-#guard
-    (do let σ ← Surface.Prog.runT { State.exampleStore with selfBalance := 3 }
-          (sol{ uint to = 9; to.transfer(5); } : Surface.Prog StandardExample)
-        pure (σ.getNet 9, σ.selfBalance)) = .ok (-5, 3)
+theorem transferLeavesFunds :
+    ((Core.Prog.trun { start with selfBalance := ⟨3, rfl⟩ } payNineCore).toOption.map
+      fun o => ((lookupBy 9 o.st.net).getD 0, o.st.selfBalance.1)) = some (-5, 3) := by
+  decide +kernel
 
 /-! ## 4 · `msg.value`, `msg.sender`
 
@@ -222,13 +246,14 @@ theorem netTransferThenStore :
   sol_symex
   sol_close
 
-/- With no entry for it, the send is taken: `9`'s entry is `-5`. -/
-#guard netAfter State.exampleStore sol{ uint to = 9; bool ok = to.send(5); } 9 = .ok (-5)
+/-- With no entry for it, the send is taken: `9`'s entry is `-5`. -/
+theorem netSendRun : netAfter start sendNineCore 9 = some (-5) := by decide +kernel
 
-/- With the recipient refusing, nothing is booked and `ok` is `false`. -/
-#guard
-    (do let σ ← Surface.Prog.runT { State.exampleStore with tx := { ext := [(sendKey 9 5, .error)] } }
-          (sol{ uint to = 9; bool ok = to.send(5); } : Surface.Prog StandardExample)
-        pure (σ.getNet 9, σ.getEnv (.user "ok"))) = .ok (0, .ok (.val (.bool false)))
+/-- With the recipient refusing, nothing is booked and `ok` is `false`. -/
+theorem netSendRefusedRun :
+    ((Core.Prog.trun { start with tx := { ext := [(sendKey 9 5, .error)] } } sendNineCore).toOption.map
+      fun o => ((lookupBy 9 o.st.net).getD 0, (Core.TEnv.get .here o.st.env : PrimTy.bool.Denote))) =
+      some (0, false) := by
+  decide +kernel
 
 end Solidity.Examples.Tactics.Net

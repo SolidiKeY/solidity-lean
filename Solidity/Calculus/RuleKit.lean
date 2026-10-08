@@ -177,7 +177,7 @@ macro_rules
           MLoc.isTarget, MPath.isBindable, Val.notTernary, Hole.isTarget, MHole.isTarget,
           VHole.isTarget, SPath.elemMapping, SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
           Ty.isMapping, Ty.isPrimitive]; done)
-      | fail "the rule's side condition does not hold: `Surface.Stmt.step` fires another rule here")
+      | fail "the rule's side condition does not hold: `Core.Stmt.step` fires another rule here")
 
 /-- The predicates a side condition is stated with. -/
 def sidePreds : List Lean.Name :=
@@ -226,7 +226,7 @@ inductive Premise (C : Contract) where
   | cases (fs : List (NFml C)) (us : List (Upd C))
   /-- A loop's invariant rule (`whileInvariantBox`, `whileInvariantDiamond`):
   the invariant `I` now ("invariant initially valid"), and, whatever the
-  body's frame holds (`{anon(P)}`, `Fml.loopAnon`), from where `I` holds and
+  body's frame holds (`{anon(P)}`, `Core.Fml.anonHavoc`), from where `I` holds and
   after `U` (the variant's value, under the diamond), the body `P` to `post`
   where the condition `c` holds, the rest where `c'` does, and under the
   diamond one of them ("invariant preserved and used"). -/

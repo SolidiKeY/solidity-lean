@@ -248,17 +248,18 @@ variant is checked only when the condition holds again**, as solkey checks
 it. Lean reads `dec` where KeY compares it with a skolem (`dec = variant`),
 so under the diamond `dec` must be defined wherever the invariant holds.
 
-**The anonymising update `{anon(body)}`** is `Fml.loopAnon`
+**The anonymising update `{anon(body)}`** is `Core.Fml.anonHavoc`
 (`Calculus/Core/Fml.lean`; today's, in `Semantics/Mutability`, went at W4
-`modal`), solkey's `#loopAnon`: `Fml.anon xs`, where
-`xs = Prog.writes body` (the locals the body assigns or declares, the
-lowering's flags included), each bound to anything or to nothing
-(`State.anon`), and `{havoc}` inside it when the body writes storage or pays
-(`Prog.within .nonpayable`, storage and ledger together). A body outside
+`modal`), solkey's `#loopAnon`: `{anon(xs)}`, where `xs` is the body's
+frame, `Core.Prog.frame` (`Calculus/Core/Blocks.lean`: the locals of the
+loop's context the body writes, the lowering's flags included), and
+`{havoc}` inside it when the body writes storage or pays
+(`Core.Prog.within .nonpayable`, storage and ledger together). A body outside
 `nonpayable` (memory, a push or a pop, an alias, an external call) has no
 frame, and its loop closes to `false` (`whileClose`). The frame lemma is
-`Prog.loopFrame_run`, from `Prog.frame_of_within`; `Fml.loopAnon_holds`
-turns it into the premise at every loop head.
+`TState.eq_anonHavoc` (`Semantics/Core/TypedRunFrame.lean`);
+`Core.holds_anonHavoc` (`Calculus/Core/SoundLoops.lean`) turns it into the
+premise at every loop head.
 
 **The flags are typed by the invariant.** An anonymised `brk`, `ret` or
 `first` may hold anything, but the condition reads it; `lowerLoops`

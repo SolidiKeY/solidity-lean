@@ -2,6 +2,7 @@ import Solidity.Tools.Run
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Deploy
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
 
@@ -17,7 +18,7 @@ Changes from the published text, as solkey's benchmark file makes them: the
 written without the conversion (stream A's `payable(x)`); the `payable`
 `receive()` is dropped, since nothing here calls it.  The constructor is
 the contract's (`Contract.ctor`), and the runs deploy the wallet with it
-(`Contract.deploy`).  `getBalance()`, which
+(`Core.Contract.deployT`, checked by the kernel).  `getBalance()`, which
 solkey's copy drops because `address(this).balance` crashed its parser, is
 back (`getBalance`).
 
@@ -89,27 +90,42 @@ theorem getBalanceFunds :
 
 `7` deploys the wallet, sends it `100` wei, and withdraws `30`. -/
 
-/-- The wallet `7` deploys, then holding `100` (what the dropped
-`receive()` would take). -/
-def deployed : Semantics.Res Semantics.State := do
-  let σ ← EtherWallet.deployRun sol{ constructor(); } { msgSender := 7 }
-  pure { σ with selfBalance := 100 }
+private def ctorP : Surface.Prog EtherWallet := sol{ constructor(); }
+private def withdrawP : Surface.Prog EtherWallet := sol{ withdraw(30); }
+private def overdrawP : Surface.Prog EtherWallet := sol{ withdraw(130); }
 
-/- `ensures net(owner) == \old(net(owner)) - _amount`: `7`'s entry is `30`
+open Lean Elab Command in
+run_cmd liftCoreM do
+  let ns := `Solidity.Examples.Benchmark.EtherWallet
+  for (n, P) in [(`ctorCore, ctorP), (`withdrawCore, withdrawP), (`overdrawCore, overdrawP)] do
+    if let some e ← Core.Prog.defineCore (ns ++ n) (ns ++ `EtherWallet) [] P then
+      throwError "{n}: {e}"
+
+/-- The wallet `7` deploys (`Core.Contract.deployT`), then holding `100`
+(what the dropped `receive()` would take). -/
+noncomputable def deployed : Option (Core.TState EtherWallet []) :=
+  (Core.Contract.deployT EtherWallet ctorCore { msgSender := ⟨7, rfl⟩ }).toOption.map
+    fun σ => { σ with selfBalance := ⟨100, rfl⟩ }
+
+/-- `ensures net(owner) == \old(net(owner)) - _amount`: `7`'s entry is `30`
 less, and the funds as the transaction found them. -/
-#guard
-    (do let σ ← Surface.Prog.runT (← deployed) (sol{ withdraw(30); } : Surface.Prog EtherWallet)
-        pure (σ.getNet 7, σ.selfBalance)) = .ok (-30, 100)
+theorem withdrawRunNet :
+    (deployed.bind fun σ => (Core.Prog.trun σ withdrawCore).toOption.map
+      fun o => ((Semantics.lookupBy 7 o.st.net).getD 0, o.st.selfBalance.1)) = some (-30, 100) := by
+  decide +kernel
 
-/- More than the funds: the ledger books it all the same.  That the contract
+/-- More than the funds: the ledger books it all the same.  That the contract
 can pay is not the ledger's to check; on the EVM the payment is refused and
 the call reverts (`Evm.Core.compile_correct`). -/
-#guard
-    (do let σ ← Surface.Prog.runT (← deployed) (sol{ withdraw(130); } : Surface.Prog EtherWallet)
-        pure (σ.getNet 7)) = .ok (-130)
+theorem withdrawRunOverdrawn :
+    (deployed.bind fun σ => (Core.Prog.trun σ overdrawCore).toOption.map
+      fun o => (Semantics.lookupBy 7 o.st.net).getD 0) = some (-130) := by
+  decide +kernel
 
-/- Anyone but the owner: `withdraw` reverts. -/
-#guard (do Surface.Prog.runT { (← deployed) with tx := { msgSender := 3 } } (sol{ withdraw(30); } : Surface.Prog EtherWallet)) =
-      .error .revert
+/-- Anyone but the owner: `withdraw` reverts. -/
+theorem withdrawRunOther :
+    (deployed.map fun σ => (Core.Prog.trun { σ with tx := { msgSender := ⟨3, rfl⟩ } }
+      withdrawCore).halt?) = some (some .revert) := by
+  decide +kernel
 
 end Solidity.Examples.Benchmark.EtherWallet

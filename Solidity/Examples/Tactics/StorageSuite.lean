@@ -15,10 +15,10 @@ programs, deduplicated: one example per program the forms there do not already
 state, and one per operator family where solkey has a file per operator.
 
 A `.key` file states its claim in the contract's initial store, where every
-array is empty; a claim that is only about that store is a run of the
-interpreter from `State.exampleStore` (`Prog.localAfter`), checked by `rfl`, or
-printed by `#eval` where `rfl` cannot unfold a struct's default (`defaultForTy`
-is well-founded).  A length premise (`1 < values.length`) is dropped instead:
+array is empty; a claim that is only about that store is a typed run
+(`Core.Prog.trun`) from `Storage.standardExample`, checked by
+`decide +kernel`, or printed by `#eval` (`Surface.Prog.localAfterT`) where it
+reads a struct's default or runs a loop.  A length premise (`1 < values.length`) is dropped instead:
 under the box a write out of bounds reverts, which satisfies the formula, so
 `values[1] = 42; … result == 42` holds in every state.
 -/
@@ -145,14 +145,51 @@ theorem localDeclSkip :
   sol_symex
   sol_close
 
-/- A write through an alias bound to no path reverts (`aliasPath`); solc
-rejects the program statically. -/
-#guard Surface.Prog.runT State.exampleStore (sol{ Person storage p; p.age = 1; } : Surface.Prog StandardExample) =
-      .error .revert
+/-! ### Runs, checked by the kernel
 
-/- So does a read through it. -/
-#guard Surface.Prog.runT State.exampleStore
-      (sol{ Person storage p; uint r = p.age; } : Surface.Prog StandardExample) = .error .revert
+The claims about the initial store alone: each block resolved, quoted and
+declared (`Core.Prog.defineCore`), then run typed (`Core.Prog.trun`) from
+`Storage.standardExample`, whose erasure is `State.exampleStore`'s storage,
+by `decide +kernel`. -/
+
+private def unsetAliasWriteP : Surface.Prog StandardExample := sol{ Person storage p; p.age = 1; }
+private def unsetAliasReadP : Surface.Prog StandardExample := sol{ Person storage p; uint r = p.age; }
+private def arrayOutOfBoundsP : Surface.Prog StandardExample := sol{ values[1] = 7; }
+private def pushValueP : Surface.Prog StandardExample :=
+  sol{ values.push(); values.push(); values.push(42); uint result = values[2]; }
+private def pushNonsimpleArgP : Surface.Prog StandardExample :=
+  sol{ uint x = 40; uint y = 2; values.push(x + y); uint result = values[0]; }
+private def popNonemptyGoneP : Surface.Prog StandardExample :=
+  sol{ values.push(); values.push(); values.pop(); uint result = values[1]; }
+private def popEmptyP : Surface.Prog StandardExample := sol{ values.pop(); }
+private def popAfterPushReadP : Surface.Prog StandardExample :=
+  sol{ values.push(); values.pop(); uint result = values[0]; }
+
+open Lean Elab Command in
+run_cmd liftCoreM do
+  let ns := `Solidity.Examples.Tactics.StorageSuite
+  for (n, P) in [(`unsetAliasWriteCore, unsetAliasWriteP), (`unsetAliasReadCore, unsetAliasReadP),
+      (`arrayOutOfBoundsCore, arrayOutOfBoundsP), (`pushValueCore, pushValueP),
+      (`pushNonsimpleArgCore, pushNonsimpleArgP), (`popNonemptyGoneCore, popNonemptyGoneP),
+      (`popEmptyCore, popEmptyP), (`popAfterPushReadCore, popAfterPushReadP)] do
+    if let some e ← Core.Prog.defineCore (ns ++ n) ``StandardExample [] P then
+      throwError "{n}: {e}"
+
+/-- The typed run from the initial store. -/
+private abbrev runEx {Γ' : Core.Ctx} (P : Core.Prog StandardExample [] Γ') :=
+  Core.Prog.trun (Core.TState.ofStorage Core.Storage.standardExample) P
+
+/-- The innermost local, a `uint`, where the run from the initial store ends. -/
+private def resultEx {Γ : Core.Ctx} (P : Core.Prog StandardExample [] (.val .uint :: Γ)) :
+    Option Int :=
+  (runEx P).toOption.map fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1
+
+/-- A write through an alias bound to no path reverts (`aliasPath`); solc
+rejects the program statically. -/
+theorem unsetAliasWrite : (runEx unsetAliasWriteCore).halt? = some .revert := by decide +kernel
+
+/-- So does a read through it. -/
+theorem unsetAliasRead : (runEx unsetAliasReadCore).halt? = some .revert := by decide +kernel
 
 /-! `unsetAliasLoop`: in a loop, `Person storage p;` unbinds what the last
 iteration bound: the first iteration writes through `alice`, the second
@@ -187,9 +224,9 @@ theorem matrixWriteRead :
   sol_symex
   sol_close
 
-/- `values[1] = 7;` from the initial store, where `values` is empty: out of
+/-- `values[1] = 7;` from the initial store, where `values` is empty: out of
 bounds, the write reverts (`storage-index-array-out-of-bounds-box.key`). -/
-#guard Surface.Prog.runT State.exampleStore (sol{ values[1] = 7; } : Surface.Prog StandardExample) = .error .revert
+theorem arrayOutOfBounds : (runEx arrayOutOfBoundsCore).halt? = some .revert := by decide +kernel
 
 /-- `balances[1] = 42; uint result = balances[1];` (`storage-index-root-mapping.key`). -/
 theorem mappingWriteRead :
@@ -217,17 +254,13 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 #eval Surface.Prog.localAfterT State.exampleStore
   sol{ values.push(); values.push(); values.push(); uint result = values[2]; } "result"
 
-/- `values.push(); values.push(); values.push(42); uint result = values[2];`
+/-- `values.push(); values.push(); values.push(42); uint result = values[2];`
 (`storage-push-value.key`). -/
-#guard Surface.Prog.localAfterT State.exampleStore
-      sol{ values.push(); values.push(); values.push(42); uint result = values[2]; } "result" =
-      .ok (.val (.int 42))
+theorem pushValue : resultEx pushValueCore = some 42 := by decide +kernel
 
-/- `uint x = 40; uint y = 2; values.push(x + y); uint result = values[0];` — the
+/-- `uint x = 40; uint y = 2; values.push(x + y); uint result = values[0];` — the
 argument is captured first (`storage-push-nonsimple-arg.key`). -/
-#guard Surface.Prog.localAfterT State.exampleStore
-      sol{ uint x = 40; uint y = 2; values.push(x + y); uint result = values[0]; } "result" =
-      .ok (.val (.int 42))
+theorem pushNonsimpleArg : resultEx pushNonsimpleArgCore = some 42 := by decide +kernel
 
 /-! `values.push(); values.push(); values.pop(); uint result = values[0];`
 (`storage-pop-nonempty.key`). -/
@@ -239,20 +272,16 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 #eval Surface.Prog.localAfterT State.exampleStore
   sol{ values.push(); values.push(); values.pop(); uint result = values[0]; } "result"
 
-/- `values.push(); values.push(); values.pop(); uint result = values[1];` — the
+/-- `values.push(); values.push(); values.pop(); uint result = values[1];` — the
 popped slot is gone: reading it reverts. -/
-#guard Surface.Prog.runT State.exampleStore
-      (sol{ values.push(); values.push(); values.pop(); uint result = values[1]; } :
-        Surface.Prog StandardExample) = .error .revert
+theorem popNonemptyGone : (runEx popNonemptyGoneCore).halt? = some .revert := by decide +kernel
 
-/- `values.pop();` on the empty array reverts (`storage-pop-empty-box.key`). -/
-#guard Surface.Prog.runT State.exampleStore (sol{ values.pop(); } : Surface.Prog StandardExample) = .error .revert
+/-- `values.pop();` on the empty array reverts (`storage-pop-empty-box.key`). -/
+theorem popEmpty : (runEx popEmptyCore).halt? = some .revert := by decide +kernel
 
-/- `values.push(); values.pop(); uint result = values[0];` reverts
+/-- `values.push(); values.pop(); uint result = values[0];` reverts
 (`storage-pop-after-push.key`). -/
-#guard Surface.Prog.runT State.exampleStore
-      (sol{ values.push(); values.pop(); uint result = values[0]; } : Surface.Prog StandardExample) =
-      .error .revert
+theorem popAfterPushRead : (runEx popAfterPushReadCore).halt? = some .revert := by decide +kernel
 
 /-! `tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage t = tokens.push();
 uint r = t.value;` — the push-after-pop example (`sec:push-pop-example`):

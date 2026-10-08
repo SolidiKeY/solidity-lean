@@ -20,8 +20,8 @@ It starts where solkey's constructor obligation starts:
 `{storage := mtSt ‖ net := storeSt(mtSt, at(msgSender), msgValue) ‖
 selfBalance := msgValue}`, the empty storage, a ledger holding the
 deployer's payment, and the value sent as the contract's funds.  In the
-interpreter that is `Contract.deployState`, and `Contract.deploy` runs the
-elaborated program from it.
+interpreter that is `Contract.deployState`, and `Contract.deployRun` runs the
+elaborated program from it (`Core.Contract.deployT`'s reading).
 
 Its obligation is `problem!{constructor}` with no specification
 (`Problem.ctor`), `spec!{constructor}` with one, which owes the invariant
@@ -35,7 +35,7 @@ only the empty storage says what it holds.
 
 The formulas read scoped (`open scoped Solidity.Core.Surface`): a
 parameter is bound by `∀`, an obligation is `Core.Fml C []`, its problem
-file and its reading at `Contract.deploy` are `Calculus/Core/Deploy.lean`'s.
+file and its reading at `Core.Contract.deployT` are `Calculus/Core/Deploy.lean`'s.
 -/
 
 namespace Solidity.Examples.Tactics.Constructors

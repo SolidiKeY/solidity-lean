@@ -386,7 +386,7 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
       `(RawFml.and (RawFml.imp $φ $ψ) (RawFml.imp $ψ $φ))
   | stx@`(dl_fml| { havoc } $_:dl_fml) =>
       Macro.throwErrorAt stx "`{ havoc }` is what a callback rule leaves, not a formula to write: \
-        `dl[C]{ … }` reads formulas of `Surface.Stmt.run`"
+        `dl[C]{ … }` is read scoped, over the typed run (`Core.Prog.trun`)"
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
       -- judged as the modality under it, else as the formula's (the diamond in `dl!{ … }`)
       let dflt ← match r.either with

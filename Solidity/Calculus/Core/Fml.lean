@@ -387,7 +387,7 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   | inline {Γ' Γ'' : Ctx} (P : Prog C Γ Γ'') (h : Thin Γ' Γ'') : Premise C Γ Γ'
 
 /-- `{anon(xs)} φ`, and `{anon(xs)} {havoc} φ` when the frame writes the
-storage too (`hv`): today's `Fml.loopAnon`. -/
+storage too (`hv`): solkey's `#loopAnon`. -/
 def Fml.anonHavoc {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool) (φ : Fml C Γ) :
     Fml C Γ :=
   if hv then .anon xs (.havoc φ) else .anon xs φ

@@ -3,6 +3,7 @@ import Solidity.Calculus.Derive
 import Solidity.Calculus.Spec
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Deploy
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
 
@@ -160,25 +161,52 @@ the credit of `send` when the two differ (`sendMovesSender`,
 `sendMovesReceiver`), on one state. -/
 
 /-- `7`, deploying and calling. -/
-def tx : Semantics.TxEnv := { msgSender := 7 }
+def tx : Core.TTx := { msgSender := ⟨7, rfl⟩ }
 
-/-- `balances[a]` after `P` deploys and runs, `7` calling. -/
-def balanceAfter (P : Surface.Prog Coin) (a : Int) : Semantics.Res Semantics.SVal := do
-  (← Coin.deployRun P tx).findStorage "balances" [.at a]
+/-! Each block is resolved, quoted and declared (`Core.Prog.defineCore`) and
+deployed in the typed run (`Core.Contract.deployT`), by the kernel
+(`decide +kernel`). -/
 
-/- The deployer is the minter, and no one holds a coin. -/
-#guard (Coin.deployRun sol{ constructor(); } tx).map (·.storage) =
-      .ok [("minter", .prim (.int 7)), ("balances", .map [] (.int 0))]
+private def ctorP : Surface.Prog Coin := sol{ constructor(); }
+private def mintSendP : Surface.Prog Coin := sol{ constructor(); mint(7, 10); send(9, 4); }
+private def mintP : Surface.Prog Coin := sol{ mint(7, 10); }
 
-/- The sender is debited. -/
-#guard balanceAfter sol{ constructor(); mint(7, 10); send(9, 4); } 7 = .ok (.int 6)
+open Lean Elab Command in
+run_cmd liftCoreM do
+  let ns := `Solidity.Examples.Benchmark.Coin
+  for (n, P) in [(`ctorCore, ctorP), (`mintSendCore, mintSendP), (`mintCore, mintP)] do
+    if let some e ← Core.Prog.defineCore (ns ++ n) (ns ++ `Coin) [] P then
+      throwError "{n}: {e}"
 
-/- The receiver is credited. -/
-#guard balanceAfter sol{ constructor(); mint(7, 10); send(9, 4); } 9 = .ok (.int 4)
+/-- `balances[a]` after `P` deploys and runs, `7` calling: read typed (an
+entry, else the mapping's default, `SVal.find`), since the erasure of a
+typed storage does not reduce in the kernel. -/
+def balanceAfter {Γ' : Core.Ctx} (P : Core.Prog Coin [] Γ') (a : Int) : Option Int :=
+  (Core.Contract.deployT Coin P tx).toOption.bind fun σ =>
+    ((σ.storage.get (f := "balances") (T := .ref (.mapping (.prim .uint) (.prim .uint))) rfl).find
+      (.key a .nil)).map fun v => v.view.1
 
-/- Anyone but the minter: deployed by `3`, a `mint` by `7` reverts. -/
-#guard (do
-      let σ ← Coin.deployRun sol{ constructor(); } { msgSender := 3 }
-      Surface.Prog.runT { σ with tx := tx } (sol{ mint(7, 10); } : Surface.Prog Coin)) = .error .revert
+/-- What a deployment by `7` stores: `minter` is `7`, `balances` has no
+entry and `0` at every key. -/
+private def deployedStorage : Core.Storage Coin :=
+  .cons (.prim ⟨7, rfl⟩) (.cons (.map .nil (.prim ⟨0, rfl⟩)) .nil)
+
+/-- The deployer is the minter, and no one holds a coin. -/
+theorem deployRun :
+    (Core.Contract.deployT Coin ctorCore tx).toOption.map (·.storage.beq deployedStorage) =
+      some true := by
+  decide +kernel
+
+/-- The sender is debited. -/
+theorem sendRunSender : balanceAfter mintSendCore 7 = some 6 := by decide +kernel
+
+/-- The receiver is credited. -/
+theorem sendRunReceiver : balanceAfter mintSendCore 9 = some 4 := by decide +kernel
+
+/-- Anyone but the minter: deployed by `3`, a `mint` by `7` reverts. -/
+theorem mintRunOther :
+    (Core.Contract.deployT Coin ctorCore { msgSender := ⟨3, rfl⟩ }).toOption.map
+      (fun σ => (Core.Prog.trun { σ with tx := tx } mintCore).halt?) = some (some .revert) := by
+  decide +kernel
 
 end Solidity.Examples.Benchmark.Coin

@@ -8,7 +8,7 @@ import Solidity.Calculus.Core.ProvesDerive
 
 `solc_problems N`, after `solc_import … as N`, defines for each function
 `f` that elaborated its obligation as solkey states it,
-`N.f.problem : NFml N` (`Problem.fml`, `Calculus/Problem.lean`): the
+`N.f.problem : Surface.Fml N` (`Problem.fml`, `Calculus/Problem.lean`): the
 modality is the function's tag, the binders its parameters, the program
 `N.f`.  The constructor's, `N.constructor.problem`, is a deployment's
 (`Problem.ctorFml`): the program `constructor(x̄);` from solkey's
@@ -38,7 +38,7 @@ the context of its parameters, which `∀` binds.  They are one declaration,
 the list `N.problems.core`, which the kernel checks once, and each
 `N.f.problem.core` is its entry (`List.getD`, read back by
 `Core.Symex.evaluable`); each is checked to erase to its legacy statement
-(`Fml.erase`, compared as quoted expressions).  The flip
+(`Fml.eraseS`, compared as quoted expressions).  The flip
 (`docs/intrinsic.md`, W3) is `solc_problems N legacy`
 (`N.f.problem.legacy`, not compiled) then `solc_scoped_problems N main`
 (`N.f.problem`, the table `N.problems`); `#solkey_problem` reads the
