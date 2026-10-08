@@ -260,7 +260,8 @@ def ctorTacs (c : Lean.Name) (d : Lean.Term) : MetaM (Array (Array (TSyntax `tac
       ``and_true]
     let lemmas ← names.mapM fun n => do
       `(Lean.Parser.Tactic.simpLemma| $(← ProofTree.short n):ident)
-    return #[#[← `(tactic| $app <;> (try simp only [$lemmas,*]) <;> (try and_intros))]]
+    return #[#[← `(tactic| $app <;> (try simp only [$lemmas,*]) <;> (try and_intros))],
+      #[← `(tactic| refine $f $d $args*)]]
   return #[#[app], #[← `(tactic| refine $f $d $args*)]]
 
 /-- The steps that may apply at the goal `g`, each as tactics, in the order
