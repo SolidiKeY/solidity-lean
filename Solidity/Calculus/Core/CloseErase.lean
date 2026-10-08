@@ -242,7 +242,7 @@ theorem holds_of_erase_valid : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var
       have hne : y ≠ x := fun e => by subst e; exact hxB hy
       show lookupBy y (setBy x _ (overlay _ τ' τ₀).env) = _
       rw [SemanticsProperties.lookupBy_setBy_ne hne, lookupBy_overlay, if_pos hy]
-  | _, .bind x t φ, _, hφ, hB, _, τ₀, hag, h => fun v => by
+  | _, .bind _ x t φ, _, hφ, hB, _, τ₀, hag, h => holds_bind_intro fun v => by
     obtain ⟨hx, hxB, hφ⟩ := hφ
     refine holds_of_erase_valid φ hφ (fun y hy hm => ?_) (hag.push hx v) fun τ' hτ' => ?_
     · rcases List.mem_cons.1 hm with rfl | hm

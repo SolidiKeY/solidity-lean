@@ -47,7 +47,7 @@ def Fml.active : {Γ : Ctx} → Fml C Γ → Bool
     (not := fun φ => Fml.active φ) (and := fun φ ψ => Fml.active φ || Fml.active ψ)
     (imp := fun φ ψ => Fml.active φ || Fml.active ψ) (upd := fun _ _ φ => Fml.active φ)
     (modal := fun _ _ _ _ => true) (havoc := fun φ => Fml.active φ)
-    (all := fun _ _ φ => Fml.active φ) (bind := fun _ _ φ => Fml.active φ)
+    (all := fun _ _ φ => Fml.active φ) (bind := fun _ _ _ φ => Fml.active φ)
     (anon := fun _ φ => Fml.active φ)
   termination_by structural _ φ => φ
 
@@ -229,10 +229,11 @@ end Resolve
 /-- The locals of `Γ` closed over, the outermost first bound outermost: a
 value local by `∀` over its type's range (`Fml.all`) when `useAll`, any
 other local, or every local when not `useAll`, by a hidden binder over
-every value (`Fml.bind`). -/
+every value (`Fml.bind` read as the box reads it: universal). -/
 def Fml.closeN (useAll : Bool) : (Γ : NCtx) → Fml C Γ.ctx → Fml C []
   | [], φ => φ
-  | (x, .val p) :: Γ, φ => Fml.closeN useAll Γ (if useAll then .all x p φ else .bind x (.val p) φ)
-  | (x, t) :: Γ, φ => Fml.closeN useAll Γ (.bind x t φ)
+  | (x, .val p) :: Γ, φ =>
+    Fml.closeN useAll Γ (if useAll then .all x p φ else .bind .box x (.val p) φ)
+  | (x, t) :: Γ, φ => Fml.closeN useAll Γ (.bind .box x t φ)
 
 end Solidity.Core

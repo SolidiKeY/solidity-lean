@@ -624,16 +624,16 @@ theorem Agree.anon {Γ : Ctx} {ns : List Var} (b : (x : (t : LTy) × Idx Γ t) �
 
 /-- **A hidden binder, scoped to erased**: in an untyped state that binds
 `x` to a value of `t`. -/
-theorem holds_erase_bind {Γ : Ctx} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} {ns : List Var}
-    (hx : x ∉ ns) (hφ : φ.Plain (x :: ns)) {σ : State C Γ} {τ : Semantics.State}
+theorem holds_erase_bind {Γ : Ctx} {m : Modality} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)}
+    {ns : List Var} (hx : x ∉ ns) (hφ : φ.Plain (x :: ns)) {σ : State C Γ} {τ : Semantics.State}
     (hag : Agree ns σ τ) {v : t.Denote C} (hv : lookupBy x τ.env = some (t.enc C v)) :
-    holds σ (.bind x t φ) → Solidity.holds τ ((Fml.bind x t φ).erase ns) := fun h =>
+    holds σ (.bind m x t φ) → Solidity.holds τ ((Fml.bind m x t φ).erase ns) := fun h =>
   (holds_erase φ hφ ((hag.push hx v).congrEnv hag.glob fun y => by
     by_cases hy : y = x
     · subst hy
       rw [hv]
       exact (SemanticsProperties.lookupBy_setBy_self _ _ _).symm
-    · exact (SemanticsProperties.lookupBy_setBy_ne hy _ _).symm)).1 (h v)
+    · exact (SemanticsProperties.lookupBy_setBy_ne hy _ _).symm)).1 (Modality.forallB_all h v)
 
 /-- **An anonymising update, erased to scoped**: the untyped `{anon(…)}`
 ranges over the scoped one's states and more. -/

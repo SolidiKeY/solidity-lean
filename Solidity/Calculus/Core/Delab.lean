@@ -263,7 +263,7 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     return ← mkAppM ``Solidity.Fml.modal #[args[4]!, P, ← tr ms args[7]!]
   if n == ``Fml.all && args.size == 5 then
     return ← mkAppM ``Solidity.Fml.all #[args[2]!, args[3]!, ← tr (args[2]! :: ns) args[4]!]
-  if n == ``Fml.bind && args.size == 5 then return ← tr (args[2]! :: ns) args[4]!
+  if n == ``Fml.bind && args.size == 6 then return ← tr (args[3]! :: ns) args[5]!
   if n == ``Fml.anon && args.size == 4 then
     let some xs ← Solidity.listElems? args[2]! | return e
     let xs ← xs.mapM fun x => do
@@ -759,7 +759,7 @@ partial def hypsParts (c H : Expr) : TrM (Option Lean.Name × Array Expr × List
     return (r, hs.push (mkApp3 (mkConst ``Solidity.Hyp.all) c args[4]! args[5]!), args[4]! :: ns)
   | some ``Hyps.bind =>
     let (r, hs, ns) ← hypsParts c args[3]!
-    return (r, hs, args[4]! :: ns)
+    return (r, hs, args[5]! :: ns)
   | some ``Hyps.anon =>
     let (r, hs, ns) ← hypsParts c args[3]!
     let some xs ← Solidity.listElems? args[4]! | throwError "anon"

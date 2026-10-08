@@ -52,7 +52,7 @@ def Frames.items (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Me
 (only pops) or under a hidden binder. -/
 def Fml.visible : {Γ : Ctx} → Fml C Γ → (Δ : Ctx) × Fml C Δ
   | Γ, φ@(.upd _ U ψ) => if (U.erase []).isEmpty then Fml.visible ψ else ⟨Γ, φ⟩
-  | _, .bind _ _ φ => Fml.visible φ
+  | _, .bind _ _ _ φ => Fml.visible φ
   | Γ, φ => ⟨Γ, φ⟩
 
 /-- `a = b` as `Fml.eqD` writes it: `defined(a) ∧ defined(b) ∧ a ≐ b`. -/
@@ -130,7 +130,7 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
   | .anon xs ψ =>
     return (s!"\{ anon({", ".intercalate (xs.map fun x => toString (x.2.name ns))}) } {← arg ns ψ 50}",
       1024)
-  | .bind x _ ψ => Fml.showP (x :: ns) ψ
+  | .bind _ x _ ψ => Fml.showP (x :: ns) ψ
   | .modal m P κ ψ =>
     let items := (← showStmts c (P.erase ns)) ++ (← κ.items c (P.outNames ns))
     let body ← arg (κ.outNames (P.outNames ns)) ψ 50

@@ -72,10 +72,11 @@ what a program binds without declaring them (`scopeHints`). -/
 def newBinders (Γe Γe' : ECtx) : NCtx :=
   Γe'.filterMap fun (x, t) => if lookupBy x Γe == some t then none else some (Var.ofName x, t.toLTy)
 
-/-- `k` under hidden binders for the locals `B`, the first outermost. -/
+/-- `k` under hidden binders for the locals `B`, the first outermost, read
+as the box reads them: universal. -/
 def withBinds (k : (Γ : NCtx) → ElabM (Fml C Γ.ctx)) : NCtx → (Γ : NCtx) → ElabM (Fml C Γ.ctx)
   | [], Γ => k Γ
-  | (x, t) :: B, Γ => do pure (.bind x t (← withBinds k B ((x, t) :: Γ)))
+  | (x, t) :: B, Γ => do pure (.bind .box x t (← withBinds k B ((x, t) :: Γ)))
 
 /-- A program of the formula, statement by statement as `elabFml` reads it:
 a capture takes the least index the formula's written fresh variables

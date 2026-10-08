@@ -116,9 +116,10 @@ theorem Hyps.twrap_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
   | all H x p ih =>
     intro φ ψ χ h
     exact ih (φ := .all x p φ) (ψ := .all x p ψ) (χ := .all x p χ) fun τ f g v => h _ (f v) (g v)
-  | bind H x t ih =>
+  | bind H m x t ih =>
     intro φ ψ χ h
-    exact ih (φ := .bind x t φ) (ψ := .bind x t ψ) (χ := .bind x t χ) fun τ f g v => h _ (f v) (g v)
+    exact ih (φ := .bind m x t φ) (ψ := .bind m x t ψ) (χ := .bind m x t χ) fun τ f g =>
+      Modality.forallB_and (fun _ a b => h _ a b) f g
   | anon H xs ih =>
     intro φ ψ χ h
     exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) (χ := .anon xs χ) fun τ f g b => h _ (f b) (g b)
@@ -165,7 +166,14 @@ theorem Hyps.twrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
       exact fun σ' _ => h σ'
   | havoc H ih => intro φ hb h; exact ih (φ := .havoc φ) hb fun τ _ _ => h _
   | all H x p ih => intro φ hb h; exact ih (φ := .all x p φ) hb fun τ _ => h _
-  | bind H x t ih => intro φ hb h; exact ih (φ := .bind x t φ) hb fun τ _ => h _
+  | bind H m x t ih =>
+    intro φ hb h
+    cases m with
+    | box => exact ih (φ := .bind .box x t φ) hb fun τ v => h _
+    | diamond =>
+      have hb' := Bool.and_eq_true_iff.mp hb
+      exact ih (φ := .bind .diamond x t φ) hb'.2 fun τ =>
+        Modality.forallB_intro (fun _ => LTy.tdenote_nonempty t hb'.1) fun _ => h _
   | anon H xs ih => intro φ hb h; exact ih (φ := .anon xs φ) hb fun τ _ => h _
 
 end Wrap

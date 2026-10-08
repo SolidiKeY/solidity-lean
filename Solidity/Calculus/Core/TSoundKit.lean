@@ -180,7 +180,7 @@ theorem Premise.tsound_bind {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : 
     Premise.TSound m s (.bind x t P) σ := by
   intro _ _ ω κ φ h
   obtain ⟨v, hv⟩ := hs
-  have h' := (tholds_modal_iff (σ.push v) P (.seq ω κ) φ).1 (h v)
+  have h' := (tholds_modal_iff (σ.push v) P (.seq ω κ) φ).1 (Modality.forallB_all h v)
   rw [tholds_modal_iff, trunSt_cons_frames, ← hv]
   revert h'
   cases Prog.trunSt (σ.push v) P with
@@ -190,6 +190,21 @@ theorem Premise.tsound_bind {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : 
     change m.afterRunTR _ (Frames.trunSt τ (.seq ω κ)) at h'
     rw [Frames.trunSt_seq] at h'
     exact h'
+
+/-- **A hidden binder, every value**: a statement that runs as `P` from
+`σ` with any value of its type pushed.  Under the diamond the premise gives
+the value; under the box the type must have one. -/
+theorem Premise.tsound_bind_all {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : Stmt C Γ Γ'}
+    (σ : TState C Γ) (hs : ∀ v : t.TDenote C σ.H, Prog.trunSt (σ.push v) P = Stmt.trunSt σ s)
+    (hbox : m = .box → Nonempty (t.TDenote C σ.H)) :
+    Premise.TSound m s (.bind x t P) σ := by
+  intro _ _ ω κ φ h
+  have hne : Nonempty (t.TDenote C σ.H) := by
+    cases m
+    · exact h.1
+    · exact hbox rfl
+  obtain ⟨v⟩ := hne
+  exact Premise.tsound_bind σ ⟨v, hs v⟩ ω κ φ h
 
 /-- A block's run, its locals popped, then the rest and the frames: the
 frame a branch ends with (`pop b P.ext`). -/

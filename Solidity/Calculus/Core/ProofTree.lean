@@ -133,7 +133,7 @@ def silentAt (g : MVarId) : MetaM (Option (TSyntax `tactic)) := g.withContext do
   let some (_, _, φ) := goalParts? ty | return none
   let φ ← whnf φ
   match_expr φ with
-  | Fml.bind _ _ _ _ _ => return some (← `(tactic| apply $(← short ``Proves.bindIntro)))
+  | Fml.bind _ _ _ _ _ _ => return some (← `(tactic| apply $(← short ``Proves.bindIntro)))
   | Fml.upd _ _ _ _ U _ =>
     let pops ← whnfD (← mkAppM ``Upd.popsOnly #[U])
     if pops.isConstOf ``Bool.true then
@@ -154,7 +154,7 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     return #[{ name := `allRight, tacs := #[← `(tactic| apply $(← short ``Proves.allRight))] }]
   | Fml.upd _ _ _ _ _ _ =>
     return #[{ name := `updIntro, tacs := #[← `(tactic| apply $(← short ``Proves.updIntro))] }]
-  | Fml.bind _ _ _ _ _ =>
+  | Fml.bind _ _ _ _ _ _ =>
     return #[{ name := `bindIntro, tacs := #[← `(tactic| apply $(← short ``Proves.bindIntro))] }]
   | Fml.modal _ _ _ _ m P _ _ =>
     let P ← whnf P

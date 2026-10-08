@@ -196,7 +196,7 @@ def Fml.hasTransfer : {Γ : Ctx} → Fml C Γ → Bool
     (upd := fun _ _ φ => Fml.hasTransfer φ)
     (modal := fun _ P κ φ => Prog.hasTransfer P || κ.hasTransfer || Fml.hasTransfer φ)
     (havoc := fun φ => Fml.hasTransfer φ) (all := fun _ _ φ => Fml.hasTransfer φ)
-    (bind := fun _ _ φ => Fml.hasTransfer φ) (anon := fun _ φ => Fml.hasTransfer φ)
+    (bind := fun _ _ _ φ => Fml.hasTransfer φ) (anon := fun _ φ => Fml.hasTransfer φ)
   termination_by structural _ φ => φ
 
 theorem Prog.hasTransfer_cons {Γ Γ₁ Γ' : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ') :

@@ -230,11 +230,25 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
     m.afterRunT σ.BoolOK State.BoolOK (holds · φ) (do Frames.run (← Prog.run σ P) κ)
   | _, σ, .havoc φ => ∀ st nt, holds (σ.withGlob (σ.glob.havoc st nt)) φ
   | _, σ, .all _ p φ => ∀ v, p.admits v → holds (σ.push (t := .val p) v) φ
-  | _, σ, .bind _ _ φ => ∀ v, holds (σ.push v) φ
+  | _, σ, .bind m _ _ φ => m.forallB fun v => holds (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, holds (σ.anon xs b) φ
 
 /-- Valid: true in every state of the empty context. -/
 def Valid (φ : Fml C []) : Prop := ∀ σ, holds σ φ
+
+/-- Every local's type has a value in M3's untyped states. -/
+theorem LTy.denote_nonempty : (t : LTy) → Nonempty (t.Denote C)
+  | .val _ => ⟨.int 0⟩
+  | .alias _ => ⟨none⟩
+  | .mem _ => ⟨0⟩
+  | .old => ⟨[]⟩
+  | .oldNet => ⟨[]⟩
+
+/-- A hidden binder holds where its body holds for every value: M3's types
+all have one, so the diamond's asks nothing more. -/
+theorem holds_bind_intro {m : Modality} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} {σ : State C Γ}
+    (h : ∀ v, holds (σ.push v) φ) : holds σ (.bind m x t φ) :=
+  Modality.forallB_intro (fun _ => LTy.denote_nonempty t) h
 
 /-! ## States whose `bool` locals hold `bool`s -/
 
@@ -451,7 +465,7 @@ theorem Premise.sound_bind {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : S
   intro h
   obtain ⟨v, hvT, hv⟩ := hs
   refine holds_modal_intro fun hT => ?_
-  have h' := (holds_modal P (.seq ω κ) φ fun e => (hT e).push hvT).1 (h v)
+  have h' := (holds_modal P (.seq ω κ) φ fun e => (hT e).push hvT).1 (Modality.forallB_all h v)
   rw [run_cons_frames, ← hv]
   exact h'
 

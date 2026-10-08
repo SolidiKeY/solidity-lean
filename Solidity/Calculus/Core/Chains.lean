@@ -71,7 +71,7 @@ def Fml.stepFocusAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Focus C × F
     (modal := fun m P κ φ => Fml.modalFocus k m P κ φ)
     (havoc := fun φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .havoc φ'))
     (all := fun x p φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .all x p φ'))
-    (bind := fun x t φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .bind x t φ'))
+    (bind := fun m x t φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .bind m x t φ'))
     (anon := fun xs φ => (Fml.stepFocusAt k φ).map fun (f, φ') => (f, .anon xs φ'))
   termination_by structural _ φ => φ
 
@@ -336,11 +336,16 @@ partial def maxIdxProof (A : Expr) : MetaM (Nat × Expr) := do
     let (n₂, h₂) ← maxIdxProof a[7]!
     return (max n₁ n₂, mkAppN (mkConst ``Fml.maxIdx_modal_eq)
       #[C, Γ, a[2]!, a[3]!, a[4]!, a[5]!, a[6]!, a[7]!, toExpr n₁, toExpr n₂, h₁, h₂])
-  | some ``Core.Fml.all | some ``Core.Fml.bind =>
-    let lem := if A.isAppOf ``Core.Fml.all then ``Fml.maxIdx_all_eq else ``Fml.maxIdx_bind_eq
+  | some ``Core.Fml.all =>
     let (n, h) ← maxIdxProof a[4]!
     let x ← kernelNat (mkApp (mkConst ``Var.idx) a[2]!)
-    return (max x n, mkAppN (mkConst lem) #[C, Γ, a[2]!, a[3]!, a[4]!, toExpr n, h])
+    return (max x n, mkAppN (mkConst ``Fml.maxIdx_all_eq) #[C, Γ, a[2]!, a[3]!, a[4]!, toExpr n, h])
+  | some ``Core.Fml.bind =>
+    -- `bind {C Γ} m x t φ`
+    let (n, h) ← maxIdxProof a[5]!
+    let x ← kernelNat (mkApp (mkConst ``Var.idx) a[3]!)
+    return (max x n,
+      mkAppN (mkConst ``Fml.maxIdx_bind_eq) #[C, Γ, a[2]!, a[3]!, a[4]!, a[5]!, toExpr n, h])
   | _ => throwError "sol_chain: cannot compute the fresh index of{indentExpr A}"
 
 /-- `A.active = false`: the postconditions' `Post.inactive`, put together
@@ -365,7 +370,7 @@ partial def inactiveProof (A : Expr) : MetaM (Option Expr) := do
   | some ``Core.Fml.anon => one ``Fml.active_anon_false #[C, Γ, a[2]!] a[3]!
   | some ``Core.Fml.upd => one ``Fml.active_upd_false #[C, Γ, a[2]!, a[3]!, a[4]!] a[5]!
   | some ``Core.Fml.all => one ``Fml.active_all_false #[C, Γ, a[2]!, a[3]!] a[4]!
-  | some ``Core.Fml.bind => one ``Fml.active_bind_false #[C, Γ, a[2]!, a[3]!] a[4]!
+  | some ``Core.Fml.bind => one ``Fml.active_bind_false #[C, Γ, a[2]!, a[3]!, a[4]!] a[5]!
   | some ``Core.Fml.and | some ``Core.Fml.imp =>
     let lem := if A.isAppOf ``Core.Fml.and then ``Fml.active_and_false else ``Fml.active_imp_false
     let some h₁ ← inactiveProof a[2]! | return none
@@ -444,7 +449,7 @@ partial def focusProof (m? : Option Expr) (K : Nat) (A f B : Expr) : MetaM Expr 
       #[C, kE, Γ, a[2]!, a[3]!, a[4]!, b[4]!, f, ← focusProof m? K a[4]! f b[4]!]
   if same ``Core.Fml.bind then
     return mkAppN (mkConst ``Fml.stepFocusR_bind)
-      #[C, kE, Γ, a[2]!, a[3]!, a[4]!, b[4]!, f, ← focusProof m? K a[4]! f b[4]!]
+      #[C, kE, Γ, a[2]!, a[3]!, a[4]!, a[5]!, b[5]!, f, ← focusProof m? K a[5]! f b[5]!]
   if same ``Core.Fml.anon then
     return mkAppN (mkConst ``Fml.stepFocusR_anon)
       #[C, kE, Γ, a[2]!, a[3]!, b[3]!, f, ← focusProof m? K a[3]! f b[3]!]

@@ -456,7 +456,7 @@ partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
       ← qFml Γ₀ φ]
   | .havoc φ => sctor ``Fml.havoc #[Γe, ← qFml Γ φ]
   | .all x p φ => sctor ``Fml.all #[Γe, toExpr x, toExpr p, ← qFml (.val p :: Γ) φ]
-  | .bind x t φ => sctor ``Fml.bind #[Γe, toExpr x, qLTy t, ← qFml (t :: Γ) φ]
+  | .bind m x t φ => sctor ``Fml.bind #[Γe, toExpr m, toExpr x, qLTy t, ← qFml (t :: Γ) φ]
   | .anon xs φ => do sctor ``Fml.anon #[Γe, ← qIdxList Γ xs, ← qFml Γ φ]
 
 def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do

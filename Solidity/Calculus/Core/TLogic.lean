@@ -26,7 +26,9 @@ W2 lane `sound`):
 
 A hidden binder at a memory type ranges over the references the heap
 typing gives that type, which may be none (`docs/intrinsic.md`, W2 lane
-`sound`, "the hidden binder").
+`sound`, "the hidden binder"): under the diamond it asks for one
+(`Modality.forallB`, decision 12), so a premise over an empty type is not
+vacuously true there; under the box it is universal.
 -/
 
 namespace Solidity.Core
@@ -63,8 +65,17 @@ def tholds : {Γ : Ctx} → TState C Γ → Fml C Γ → Prop
   | _, σ, .modal m P κ φ => m.afterRunTR (tholds · φ) (Prog.trunFrames σ P κ)
   | _, σ, .havoc φ => ∀ st nt, tholds (σ.havoc st nt) φ
   | _, σ, .all _ p φ => ∀ v : p.Denote, tholds (σ.push (t := .val p) v) φ
-  | _, σ, .bind _ t φ => ∀ v : t.TDenote C σ.H, tholds (σ.push v) φ
+  | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => tholds (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, tholds (σ.anon xs b) φ
+
+/-- A type `LTy.inhabited` names has a value in every typed state. -/
+theorem LTy.tdenote_nonempty {H : HTy} : (t : LTy) → t.inhabited = true →
+    Nonempty (t.TDenote C H)
+  | .val p, _ => ⟨PrimTy.dflt p⟩
+  | .alias _, _ => ⟨none⟩
+  | .mem _, h => nomatch h
+  | .old, _ => ⟨Storage.init C⟩
+  | .oldNet, _ => ⟨[]⟩
 
 /-- Valid over the typed states: true in every typed state of the empty
 context. -/

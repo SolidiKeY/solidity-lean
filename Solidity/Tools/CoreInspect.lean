@@ -79,7 +79,8 @@ partial def ruleAtC? (φ : Lean.Expr) : MetaM (Option Lean.Name) := do
     | some ``Core.Fml.imp => go args[3]!
     | some ``Core.Fml.upd => go args[5]!
     | some ``Core.Fml.havoc => go args[2]!
-    | some ``Core.Fml.all | some ``Core.Fml.bind => go args[4]!
+    | some ``Core.Fml.all => go args[4]!
+    | some ``Core.Fml.bind => go args[5]!
     | some ``Core.Fml.anon => go args[3]!
     | some ``Core.Fml.modal =>
       let P ← whnf args[5]!

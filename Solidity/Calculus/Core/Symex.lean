@@ -88,11 +88,11 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     change (Fml.stepR k φ).map (Fml.all x p) = some χ at h
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact fun v hv => ih hφ _ (hχ v hv)
-  | bind x t φ ih =>
+  | bind m x t φ ih =>
     intro χ h σ hχ
-    change (Fml.stepR k φ).map (Fml.bind x t) = some χ at h
+    change (Fml.stepR k φ).map (Fml.bind m x t) = some χ at h
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun v => ih hφ _ (hχ v)
+    exact Modality.forallB_imp (fun v => ih hφ _) hχ
   | anon xs φ ih =>
     intro χ h σ hχ
     change (Fml.stepR k φ).map (Fml.anon xs) = some χ at h

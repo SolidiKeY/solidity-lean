@@ -131,9 +131,10 @@ theorem Hyps.wrap_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     intro φ ψ χ h
     exact ih (φ := .all x p φ) (ψ := .all x p ψ) (χ := .all x p χ) fun τ f g v hv =>
       h _ (f v hv) (g v hv)
-  | bind H x t ih =>
+  | bind H m x t ih =>
     intro φ ψ χ h
-    exact ih (φ := .bind x t φ) (ψ := .bind x t ψ) (χ := .bind x t χ) fun τ f g v => h _ (f v) (g v)
+    exact ih (φ := .bind m x t φ) (ψ := .bind m x t ψ) (χ := .bind m x t χ) fun τ f g =>
+      Modality.forallB_and (fun _ a b => h _ a b) f g
   | anon H xs ih =>
     intro φ ψ χ h
     exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) (χ := .anon xs χ) fun τ f g b => h _ (f b) (g b)
@@ -181,7 +182,13 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
       exact ⟨hok hτ, h a⟩
   | havoc H ih => intro φ hb h; exact ih (φ := .havoc φ) hb fun τ _ _ => h _
   | all H x p ih => intro φ hb h; exact ih (φ := .all x p φ) hb fun τ _ _ => h _
-  | bind H x t ih => intro φ hb h; exact ih (φ := .bind x t φ) hb fun τ _ => h _
+  | bind H m x t ih =>
+    intro φ hb h
+    have hb' : H.boxOnly = true := by
+      cases m with
+      | box => exact hb
+      | diamond => exact (Bool.and_eq_true_iff.mp hb).2
+    exact ih (φ := .bind m x t φ) hb' fun τ => holds_bind_intro fun _ => h _
   | anon H xs ih => intro φ hb h; exact ih (φ := .anon xs φ) hb fun τ _ => h _
 
 theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t))

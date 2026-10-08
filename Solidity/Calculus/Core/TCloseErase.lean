@@ -142,7 +142,13 @@ theorem tholds_of_holds : {Γ : Ctx} → (φ : Fml C Γ) → φ.Leaf = true → 
     exact h st.erase nt
   | _, .all _ p φ, hl, σ, h => fun w =>
     tholds_of_holds φ hl (σ.push (t := .val p) w) (h _ (PrimTy.admits_erase w))
-  | _, .bind _ t φ, hl, σ, h => fun v => tholds_of_holds φ hl (σ.push v) (h _)
+  | _, .bind m _ t φ, hl, σ, h => by
+    have hl' : (m == .box || t.inhabited) = true ∧ φ.Leaf = true := Bool.and_eq_true_iff.mp hl
+    refine Modality.forallB_intro (fun hm => ?_) fun v =>
+      tholds_of_holds φ hl'.2 (σ.push v) (Modality.forallB_all h _)
+    subst hm
+    exact LTy.tdenote_nonempty t (by simpa only [reduceCtorEq, decide_false, Bool.false_or]
+      using hl'.1)
   | _, .anon xs φ, hl, σ, h => fun b => by
     refine tholds_of_holds φ hl (σ.anon xs b) ?_
     rw [TState.anon_erase]
@@ -256,8 +262,9 @@ theorem tholds_of_erase_valid_agree : {Γ : Ctx} → (φ : Fml C Γ) → {ns : L
       have hne : y ≠ x := fun e => by subst e; exact hxB hy
       show lookupBy y (setBy x _ (overlay _ τ' τ₀).env) = _
       rw [SemanticsProperties.lookupBy_setBy_ne hne, lookupBy_overlay, if_pos hy]
-  | _, .bind x t φ, _, hφ, hB, σ, τ₀, hag, h => fun v => by
-    obtain ⟨hx, hxB, hφ⟩ := hφ
+  | _, .bind _ x t φ, _, hφ, hB, σ, τ₀, hag, h =>
+    Modality.forallB_intro (fun hm => LTy.tdenote_nonempty t (hφ.1 hm)) fun v => by
+    obtain ⟨-, hx, hxB, hφ⟩ := hφ
     refine tholds_of_erase_valid_agree φ hφ (fun y hy hm => ?_) (σ := σ.push v)
       (hag.push hx (LTy.TDenote.erase t v)) fun τ' hτ' => ?_
     · rcases List.mem_cons.1 hm with rfl | hm

@@ -160,7 +160,7 @@ def Fml.plainB {Γ : Ctx} (φ : Fml C Γ) : List Var → Bool :=
     (modal := fun _ _ _ _ _ _ => false)
     (havoc := fun _ ih ns => ih ns)
     (all := fun x _ _ ih ns => !ns.contains x && ih (x :: ns))
-    (bind := fun _ _ _ _ _ => false) (anon := fun _ _ _ _ => false) φ
+    (bind := fun _ _ _ _ _ _ => false) (anon := fun _ _ _ _ => false) φ
 
 /-- No name of `vs` is in `B`. -/
 def disjointB (B vs : List Var) : Bool := !vs.any B.contains
@@ -183,7 +183,7 @@ def Fml.posM : {Γ : Ctx} → Fml C Γ → List Var → Option (List Var)
   | _, .all x _ φ, ns =>
     if ns.contains x then none
     else (φ.posM (x :: ns)).bind fun B => if B.contains x then none else some B
-  | _, .bind x _ φ, ns => if ns.contains x then none else (φ.posM (x :: ns)).map (x :: ·)
+  | _, .bind _ x _ φ, ns => if ns.contains x then none else (φ.posM (x :: ns)).map (x :: ·)
 
 /-- **A leaf closable by its erasure**: `some B`, `B` the names its hidden
 binders declare, when they sit where `holds_of_erase_pos` takes them (no
@@ -210,7 +210,7 @@ def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
     (all := fun x _ _ ih ns =>
       if ns.contains x then none
       else (ih (x :: ns)).bind fun B => if B.contains x then none else some B)
-    (bind := fun x _ _ ih ns => if ns.contains x then none else (ih (x :: ns)).map (x :: ·))
+    (bind := fun _ x _ _ ih ns => if ns.contains x then none else (ih (x :: ns)).map (x :: ·))
     (anon := fun _ φ _ ns => if φ.plainB ns then some [] else none) φ
 
 /-! ## The checks are sound -/
@@ -548,7 +548,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
           rfl
         · simp only [Semantics.State.setEnv, SemanticsProperties.lookupBy_setBy_ne hyx]
           exact ((mergeOn_agree B τ ρ).env y hy).symm
-  | bind x t φ ih =>
+  | bind m x t φ ih =>
     intro ns B h σ τ hag H
     have hx : ns.contains x = false := by
       cases hn : ns.contains x
@@ -558,7 +558,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
     rw [if_neg (by simp only [hx]; decide)] at h
     obtain ⟨B', h₁, rfl⟩ := Option.map_eq_some_iff.1 h
     have hxn : x ∉ ns := fun hm => by simp only [List.contains_iff_mem.2 hm] at hx; cases hx
-    intro v
+    refine holds_bind_intro fun v => ?_
     refine ih h₁ (hag.push hxn v) fun ρ hρ => H ρ ?_
     exact Solidity.Mutability.agree_trans
       (Solidity.Mutability.agree_setEnv List.mem_cons_self τ _)

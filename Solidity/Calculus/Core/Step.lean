@@ -164,7 +164,7 @@ def Fml.maxIdx : {Γ : Ctx} → Fml C Γ → Nat
     (upd := fun _ U φ => max U.maxIdx (Fml.maxIdx φ))
     (modal := fun _ P κ φ => max (max P.maxIdx κ.maxIdx) (Fml.maxIdx φ))
     (havoc := fun φ => Fml.maxIdx φ) (all := fun x _ φ => max x.idx (Fml.maxIdx φ))
-    (bind := fun x _ φ => max x.idx (Fml.maxIdx φ)) (anon := fun _ φ => Fml.maxIdx φ)
+    (bind := fun _ x _ φ => max x.idx (Fml.maxIdx φ)) (anon := fun _ φ => Fml.maxIdx φ)
   termination_by structural _ φ => φ
 
 /-- The index of the next fresh names. -/
@@ -197,7 +197,7 @@ def Fml.stepAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
     (modal := fun m P κ φ => Fml.modalStep k m P κ φ)
     (havoc := fun φ => (Fml.stepAt k φ).map .havoc)
     (all := fun x p φ => (Fml.stepAt k φ).map (.all x p))
-    (bind := fun x t φ => (Fml.stepAt k φ).map (.bind x t))
+    (bind := fun m x t φ => (Fml.stepAt k φ).map (.bind m x t))
     (anon := fun xs φ => (Fml.stepAt k φ).map (.anon xs))
   termination_by structural _ φ => φ
 
@@ -215,7 +215,7 @@ def Fml.stepR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=
     (modal := fun m P κ φ _ => Fml.modalStep k m P κ φ)
     (havoc := fun _ ih => ih.map .havoc)
     (all := fun x p _ ih => ih.map (.all x p))
-    (bind := fun x t _ ih => ih.map (.bind x t))
+    (bind := fun m x t _ ih => ih.map (.bind m x t))
     (anon := fun xs _ ih => ih.map (.anon xs)) φ
 
 /-- The recursor's stepper is the compiled one. -/
@@ -231,7 +231,7 @@ theorem Fml.stepR_eq (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Fml.stepR k φ = Fml
   | upd m U φ ih => show (Fml.stepR k φ).map (Fml.upd m U) = _; rw [ih]; rfl
   | havoc φ ih => show (Fml.stepR k φ).map Fml.havoc = _; rw [ih]; rfl
   | all x p φ ih => show (Fml.stepR k φ).map (Fml.all x p) = _; rw [ih]; rfl
-  | bind x t φ ih => show (Fml.stepR k φ).map (Fml.bind x t) = _; rw [ih]; rfl
+  | bind m x t φ ih => show (Fml.stepR k φ).map (Fml.bind m x t) = _; rw [ih]; rfl
   | anon xs φ ih => show (Fml.stepR k φ).map (Fml.anon xs) = _; rw [ih]; rfl
 
 /-- One step, its fresh names above every index in the formula. -/

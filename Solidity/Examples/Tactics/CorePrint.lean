@@ -340,7 +340,7 @@ info: fun H => dl{ ..H ⟹ₖ _ = 1 } : Core.Hyps SE [] [Core.LTy.val PrimTy.uin
 -/
 #guard_msgs in
 #check fun (H : Core.Hyps SE [] [.val .uint]) =>
-  Core.Proves SE .solkey [] (H.bind (.user "z") (.val .bool)) (.eqD (.pvV (.there .here)) (.app0 (.lit (.int 1))))
+  Core.Proves SE .solkey [] (H.bind .box (.user "z") (.val .bool)) (.eqD (.pvV (.there .here)) (.app0 (.lit (.int 1))))
 
 -- A goal of a walk prints as the line it is.
 /--

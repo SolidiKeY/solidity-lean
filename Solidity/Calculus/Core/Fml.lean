@@ -24,10 +24,13 @@ never re-typed.  A scope end is `pop .block` (a branch, a block: printed `}`,
 KeY's block end) or `pop .capture` (the fresh `se`/`sp`/`ie` a rule declared:
 invisible, their scope is Lean's only).
 
-**A hidden binder** (`Fml.bind x t φ`) declares the local `x` for every value
+**A hidden binder** (`Fml.bind m x t φ`) declares the local `x` for every value
 of its type, printed as `φ` alone: `T v = e;` drops its initializer
 (`localValueDeclInitDrop`) to `v = e;`, which the binder puts in scope, as
-solkey's `⟨[ v = e; ]⟩`.
+solkey's `⟨[ v = e; ]⟩`.  It carries the modality it was produced under
+(decision 12): under the diamond it also asks that its type have a value
+(`Modality.forallB`), which a memory type over a heap with no object of it
+has not; under the box it is universal.
 
 `Premise C Γ Γ'` is what a rule on a statement `Stmt C Γ Γ'` leaves, and
 `Premise.fml` puts it in front of the rest `ω` and the frames `κ`.  A split
@@ -223,6 +226,43 @@ def Frames.erase (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Li
 
 /-! ## Formulas -/
 
+/-- A hidden binder's reading under `m`: `p` of every value, and under the
+diamond a value to begin with (decision 12). -/
+def _root_.Solidity.Modality.forallB (m : Modality) {α : Sort _} (p : α → Prop) : Prop :=
+  match m with
+  | .box => ∀ v, p v
+  | .diamond => Nonempty α ∧ ∀ v, p v
+
+theorem _root_.Solidity.Modality.forallB_all {m : Modality} {α : Sort _} {p : α → Prop}
+    (h : m.forallB p) (v : α) : p v := by
+  cases m
+  · exact h.2 v
+  · exact h v
+
+theorem _root_.Solidity.Modality.forallB_imp {m : Modality} {α : Sort _} {p q : α → Prop}
+    (h : ∀ v, p v → q v) (hp : m.forallB p) : m.forallB q := by
+  cases m
+  · exact ⟨hp.1, fun v => h v (hp.2 v)⟩
+  · exact fun v => h v (hp v)
+
+theorem _root_.Solidity.Modality.forallB_and {m : Modality} {α : Sort _} {p q r : α → Prop}
+    (h : ∀ v, p v → q v → r v) (hp : m.forallB p) (hq : m.forallB q) : m.forallB r := by
+  cases m
+  · exact ⟨hp.1, fun v => h v (hp.2 v) (hq.2 v)⟩
+  · exact fun v => h v (hp v) (hq v)
+
+theorem _root_.Solidity.Modality.forallB_intro {m : Modality} {α : Sort _} {p : α → Prop}
+    (hne : m = .diamond → Nonempty α) (h : ∀ v, p v) : m.forallB p := by
+  cases m
+  · exact ⟨hne rfl, h⟩
+  · exact h
+
+/-- A local's type has a value in every typed state: all but a memory
+reference, whose heap may hold no object of its type. -/
+def LTy.inhabited : LTy → Bool
+  | .mem _ => false
+  | _ => true
+
 /-- A formula about programs of `C`, read in `Γ`. -/
 inductive Fml (C : Contract) : Ctx → Type where
   | tt {Γ : Ctx} : Fml C Γ
@@ -242,9 +282,9 @@ inductive Fml (C : Contract) : Ctx → Type where
   | havoc {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ
   /-- `∀ p x; φ`, KeY's `\forall`. -/
   | all {Γ : Ctx} (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) : Fml C Γ
-  /-- `φ` for every value of a local `x : t` declared in front of it: a
-  binder that prints as nothing (`Premise.bind`). -/
-  | bind {Γ : Ctx} (x : Var) (t : LTy) (φ : Fml C (t :: Γ)) : Fml C Γ
+  /-- `φ` for every value of a local `x : t` declared in front of it, produced
+  under `m`: a binder that prints as nothing (`Premise.bind`). -/
+  | bind {Γ : Ctx} (m : Modality) (x : Var) (t : LTy) (φ : Fml C (t :: Γ)) : Fml C Γ
   /-- `{anon(xs)} φ` -/
   | anon {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) : Fml C Γ
 
@@ -273,7 +313,7 @@ def Fml.erase : {Γ : Ctx} → List Var → Fml C Γ → Solidity.Fml C
     .modal m (P.erase ns ++ κ.erase (P.outNames ns)) (φ.erase (κ.outNames (P.outNames ns)))
   | _, ns, .havoc φ => .havoc (φ.erase ns)
   | _, ns, .all x p φ => .all x p (φ.erase (x :: ns))
-  | _, ns, .bind x _ φ => φ.erase (x :: ns)
+  | _, ns, .bind _ x _ φ => φ.erase (x :: ns)
   | _, ns, .anon xs φ => .anon (xs.map fun x => x.2.name ns) (φ.erase ns)
 
 /-! ## Premises -/
@@ -377,7 +417,7 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
   Premise.casesOn (motive := fun Γ' _ => Prog C Γ' Γ₁ → Fml C Γ) p
     (fun U ω => .upd m U (.modalK m ω κ φ))
     (fun P h ω => .modal m P (.pop .capture h (.seq ω κ)) φ)
-    (fun x t P ω => .bind x t (.modal m P (.seq ω κ) φ))
+    (fun x t P ω => .bind m x t (.modal m P (.seq ω κ) φ))
     (fun b c c' P Q ω =>
       .and (.imp c (.modalK m P (.pop b P.ext (.seq ω κ)) φ))
         (.imp c' (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ)))
@@ -408,7 +448,7 @@ theorem Premise.fml_unfold {Γ'' : Ctx} (P : Prog C Γ Γ'') (h : Ext Γ' Γ'') 
     (Premise.unfold P h).fml m ω κ φ = .modal m P (.pop .capture h (.seq ω κ)) φ := rfl
 
 theorem Premise.fml_bind (x : Var) (t : LTy) (P : Prog C (t :: Γ) Γ') :
-    (Premise.bind x t P).fml m ω κ φ = .bind x t (.modal m P (.seq ω κ) φ) := rfl
+    (Premise.bind x t P).fml m ω κ φ = .bind m x t (.modal m P (.seq ω κ) φ) := rfl
 
 theorem Premise.fml_done (b : Bool) :
     (Premise.done (C := C) (Γ := Γ) (Γ' := Γ') b).fml m ω κ φ = if b then .tt else .ff := rfl

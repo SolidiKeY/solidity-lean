@@ -66,7 +66,7 @@ noncomputable def Fml.stepFocusR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     (modal := fun m P κ φ _ => Fml.modalFocus k m P κ φ)
     (havoc := fun _ ih => ih.map fun (f, φ') => (f, .havoc φ'))
     (all := fun x p _ ih => ih.map fun (f, φ') => (f, .all x p φ'))
-    (bind := fun x t _ ih => ih.map fun (f, φ') => (f, .bind x t φ'))
+    (bind := fun m x t _ ih => ih.map fun (f, φ') => (f, .bind m x t φ'))
     (anon := fun xs _ ih => ih.map fun (f, φ') => (f, .anon xs φ')) φ
 
 section Equations
@@ -116,9 +116,10 @@ theorem Fml.stepFocusR_all {x : Var} {p : PrimTy} {φ φ' : Fml C (.val p :: Γ)
   rw [h]
   rfl
 
-theorem Fml.stepFocusR_bind {x : Var} {t : LTy} {φ φ' : Fml C (t :: Γ)} {f : Focus C}
-    (h : φ.stepFocusR k = some (f, φ')) : (Fml.bind x t φ).stepFocusR k = some (f, .bind x t φ') := by
-  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind x t φ')) = _
+theorem Fml.stepFocusR_bind {m : Modality} {x : Var} {t : LTy} {φ φ' : Fml C (t :: Γ)} {f : Focus C}
+    (h : φ.stepFocusR k = some (f, φ')) :
+    (Fml.bind m x t φ).stepFocusR k = some (f, .bind m x t φ') := by
+  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind m x t φ')) = _
   rw [h]
   rfl
 
@@ -156,8 +157,8 @@ theorem Fml.stepFocusR_eq_none : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = 
   | _, .all x p φ, h => by
     show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.all x p φ')) = _
     rw [Fml.stepFocusR_eq_none φ h]; rfl
-  | _, .bind x t φ, h => by
-    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind x t φ')) = _
+  | _, .bind m x t φ, h => by
+    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind m x t φ')) = _
     rw [Fml.stepFocusR_eq_none φ h]; rfl
   | _, .anon xs φ, h => by
     show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.anon xs φ')) = _
@@ -203,9 +204,9 @@ theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
     show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.all x p φ')).map Prod.snd =
       (Fml.stepR k φ).map (Fml.all x p)
     rw [← ih]; cases φ.stepFocusR k <;> rfl
-  | bind x t φ ih =>
-    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.bind x t φ')).map Prod.snd =
-      (Fml.stepR k φ).map (Fml.bind x t)
+  | bind m x t φ ih =>
+    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.bind m x t φ')).map Prod.snd =
+      (Fml.stepR k φ).map (Fml.bind m x t)
     rw [← ih]; cases φ.stepFocusR k <;> rfl
   | anon xs φ ih =>
     show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.anon xs φ')).map Prod.snd =
@@ -239,8 +240,8 @@ theorem Fml.active_havoc_false {φ : Fml C Γ} (h : φ.active = false) :
 theorem Fml.active_all_false {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
     (h : φ.active = false) : (Fml.all x p φ).active = false := h
 
-theorem Fml.active_bind_false {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} (h : φ.active = false) :
-    (Fml.bind x t φ).active = false := h
+theorem Fml.active_bind_false {m : Modality} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)}
+    (h : φ.active = false) : (Fml.bind m x t φ).active = false := h
 
 theorem Fml.active_anon_false {xs : List ((t : LTy) × Idx Γ t)} {φ : Fml C Γ}
     (h : φ.active = false) : (Fml.anon xs φ).active = false := h
@@ -276,8 +277,8 @@ theorem Fml.maxIdx_all_eq {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)} {a 
   show max x.idx φ.maxIdx = _
   rw [h]
 
-theorem Fml.maxIdx_bind_eq {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} {a : Nat}
-    (h : φ.maxIdx = a) : (Fml.bind x t φ).maxIdx = max x.idx a := by
+theorem Fml.maxIdx_bind_eq {m : Modality} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} {a : Nat}
+    (h : φ.maxIdx = a) : (Fml.bind m x t φ).maxIdx = max x.idx a := by
   show max x.idx φ.maxIdx = _
   rw [h]
 
@@ -438,7 +439,7 @@ theorem Fml.erase_idxLe : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false �
     refine IdxLe.cons (by omega) ((Fml.erase_idxLe φ h (x :: ns)).mono ?_)
     show max (max x.idx (Solidity.maxIdx ns)) _ ≤ _
     omega
-  | _, .bind x _ φ, h, ns => by
+  | _, .bind _ x _ φ, h, ns => by
     show IdxLe (max _ (max x.idx φ.maxIdx)) (φ.erase (x :: ns)).vars
     refine (Fml.erase_idxLe φ h (x :: ns)).mono ?_
     show max (max x.idx (Solidity.maxIdx ns)) _ ≤ _
@@ -467,7 +468,7 @@ theorem Fml.erase_active : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false 
   | _, .modal .., h, _ => nomatch h
   | _, .havoc φ, h, ns => Fml.erase_active φ h ns
   | _, .all _ _ φ, h, _ => Fml.erase_active φ h _
-  | _, .bind _ _ φ, h, _ => Fml.erase_active φ h _
+  | _, .bind _ _ _ φ, h, _ => Fml.erase_active φ h _
   | _, .anon _ φ, h, ns => Fml.erase_active φ h ns
 
 /-- `Update.lean`'s postcondition, the context's locals named by `ns`, which
@@ -661,15 +662,15 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
       obtain ⟨f', φ'⟩ := q
       cases h
       exact fun v hv => Fml.stepFocusR_sound φ h₁ _ (hψ v hv)
-  | _, .bind x t φ, f, ψ, h, σ, hψ => by
-    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind x t φ')) = some (f, ψ) := h
+  | _, .bind m x t φ, f, ψ, h, σ, hψ => by
+    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind m x t φ')) = some (f, ψ) := h
     cases h₁ : φ.stepFocusR k with
     | none => rw [h₁] at h; cases h
     | some q =>
       rw [h₁] at h
       obtain ⟨f', φ'⟩ := q
       cases h
-      exact fun v => Fml.stepFocusR_sound φ h₁ _ (hψ v)
+      exact Modality.forallB_imp (fun v => Fml.stepFocusR_sound φ h₁ _) hψ
   | _, .anon xs φ, f, ψ, h, σ, hψ => by
     have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.anon xs φ')) = some (f, ψ) := h
     cases h₁ : φ.stepFocusR k with

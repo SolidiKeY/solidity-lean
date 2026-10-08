@@ -98,8 +98,8 @@ inductive ProvesC (I : Fml C []) (Γ₀ : Ctx) : {Γ : Ctx} → Hyps C Γ₀ Γ 
   | updIntro {Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
       (h : ProvesC I Γ₀ (H.upd m U) φ) : ProvesC I Γ₀ H (.upd m U φ)
   /-- The hidden binder joins the context (Lean only). -/
-  | bindIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)}
-      (h : ProvesC I Γ₀ (H.bind x t) φ) : ProvesC I Γ₀ H (.bind x t φ)
+  | bindIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {x : Var} {t : LTy}
+      {φ : Fml C (t :: Γ)} (h : ProvesC I Γ₀ (H.bind m x t) φ) : ProvesC I Γ₀ H (.bind m x t φ)
   /-- A rule that produces an update, on a statement that runs no other and
   pays nothing. -/
   | update {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
@@ -122,7 +122,7 @@ inductive ProvesC (I : Fml C []) (Γ₀ : Ctx) : {Γ : Ctx} → Hyps C Γ₀ Γ 
       {P : Prog C (t :: Γ) Γ'}
       (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.bind x t P)) (hs : s.forks = false)
       (hP : P.hasTransfer = false)
-      (h : ProvesC I Γ₀ (H.bind x t) (.modal m P (.seq ω κ) φ)) :
+      (h : ProvesC I Γ₀ (H.bind m x t) (.modal m P (.seq ω κ) φ)) :
       ProvesC I Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A rule that branches (`ifElseSplit`, `requireSimple`): KeY's two goals,
   each branch a block ended as the premise says, whatever its branches pay. -/

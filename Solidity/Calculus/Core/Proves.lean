@@ -59,9 +59,9 @@ inductive Hyps (C : Contract) (Γ₀ : Ctx) : Ctx → Type where
   | havoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) : Hyps C Γ₀ Γ
   /-- `∀ p x. …`, KeY's skolem constant for `x`. -/
   | all {Γ : Ctx} (H : Hyps C Γ₀ Γ) (x : Var) (p : PrimTy) : Hyps C Γ₀ (.val p :: Γ)
-  /-- The hidden binder: the local `x` a declaration put in scope, any value
-  of its type. -/
-  | bind {Γ : Ctx} (H : Hyps C Γ₀ Γ) (x : Var) (t : LTy) : Hyps C Γ₀ (t :: Γ)
+  /-- The hidden binder: the local `x` a declaration put in scope under `m`,
+  any value of its type. -/
+  | bind {Γ : Ctx} (H : Hyps C Γ₀ Γ) (m : Modality) (x : Var) (t : LTy) : Hyps C Γ₀ (t :: Γ)
   /-- `{anon(xs)} …` -/
   | anon {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t)) : Hyps C Γ₀ Γ
 
@@ -73,7 +73,7 @@ def Hyps.wrap {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Fml C Γ → Fm
       (fun H m U φ => Hyps.wrap H (.upd m U φ))
       (fun H φ => Hyps.wrap H (.havoc φ))
       (fun H x p φ => Hyps.wrap H (.all x p φ))
-      (fun H x t φ => Hyps.wrap H (.bind x t φ))
+      (fun H m x t φ => Hyps.wrap H (.bind m x t φ))
       (fun H xs φ => Hyps.wrap H (.anon xs φ)) φ
   termination_by structural _ H => H
 
@@ -89,14 +89,19 @@ def Upd.popsOnly {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   termination_by structural _ U => U
 
 /-- No update of the context was produced under the diamond, but scope
-ends (`Upd.popsOnly`). -/
+ends (`Upd.popsOnly`), and no hidden binder under the diamond but at a type
+that always has a value (`LTy.inhabited`: the diamond's binder asks for one,
+`Modality.forallB`). -/
 def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
   | _, H => Hyps.casesOn (motive := fun _ _ => Bool) H true
       (fun H _ => Hyps.boxOnly H)
       (fun H m U => match m with
         | .diamond => U.popsOnly && Hyps.boxOnly H
         | .box => Hyps.boxOnly H)
-      (fun H => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
+      (fun H => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
+      (fun H m _ t => match m with
+        | .diamond => t.inhabited && Hyps.boxOnly H
+        | .box => Hyps.boxOnly H)
       (fun H _ => Hyps.boxOnly H)
   termination_by structural _ H => H
 
@@ -120,8 +125,8 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | updIntro {Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
       (h : Proves C R Γ₀ (H.upd m U) φ) : Proves C R Γ₀ H (.upd m U φ)
   /-- The hidden binder joins the context (Lean only). -/
-  | bindIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)}
-      (h : Proves C R Γ₀ (H.bind x t) φ) : Proves C R Γ₀ H (.bind x t φ)
+  | bindIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {x : Var} {t : LTy}
+      {φ : Fml C (t :: Γ)} (h : Proves C R Γ₀ (H.bind m x t) φ) : Proves C R Γ₀ H (.bind m x t φ)
   /-- A taclet that produces an update: the update joins the context, the
   rest of the program goes on. -/
   | update {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
@@ -142,7 +147,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {x : Var} {t : LTy}
       {P : Prog C (t :: Γ) Γ'}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.bind x t P))
-      (h : Proves C R Γ₀ (H.bind x t) (.modal m P (.seq ω κ) φ)) :
+      (h : Proves C R Γ₀ (H.bind m x t) (.modal m P (.seq ω κ) φ)) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that branches: two goals, KeY's, each branch a block ended
   as the premise says (`}` for an `if`). -/
@@ -253,7 +258,7 @@ example : Proves StandardExample .all [.val .bool] .nil
 `x = x` after `x := 1` with `x` any `uint`: the kernel decides
 `Fml.closableB` and the binder's `Avoids` (the defaults), and the erasure
 `{x := 1} x = x` is valid by `rfl`. -/
-example : Proves StandardExample .all [] (((Hyps.nil.bind (.user "x") (.val .uint)).upd .box
+example : Proves StandardExample .all [] (((Hyps.nil.bind .box (.user "x") (.val .uint)).upd .box
       (Upd.nil.snoc (.local .here (.val (.app0 (.lit (.int 1))))))))
     (.eq (.pvV .here) (.pvV .here)) :=
   .close [] rfl List.nodup_nil fun _ _ => rfl
