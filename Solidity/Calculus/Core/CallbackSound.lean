@@ -28,6 +28,11 @@ fact of the state's erasure, which the callee's run and the updates read.
   leave, the invariant holding (the premise "resume after callback", "send
   succeeded", "call succeeded"); a send that fails and a `try` whose call
   reverts run their clause from where they were made.
+
+`Fml.closedB`, `Frames.popsOnly`, `Fml.reclose?` and the `openInv`s use
+`match` on the indexed families, against Gate G0's first condition: an
+exemption, timed (`docs/intrinsic.md`, W3c `tactics`), since they run once
+a rule.
 -/
 
 namespace Solidity.Core

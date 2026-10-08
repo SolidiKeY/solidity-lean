@@ -27,6 +27,10 @@ diamond in it (`Hyps.boxOnly`):
 * `rewrite` (`Proves.rewrite` on the goal): a side of an equation that is a
   closed term reading `t`, made `t'`, by a Theory equation
   (`Term.Theq`, `Fml.rwEqC`).
+
+`Upd.simp`, `Fml.substU` and `Fml.rwEqC` use `match` on the indexed
+families, against Gate G0's first condition: an exemption, timed
+(`docs/intrinsic.md`, W3c `tactics`), since they run once a rule.
 -/
 
 namespace Solidity.Core

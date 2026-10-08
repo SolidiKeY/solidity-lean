@@ -2129,7 +2129,10 @@ is.  The first measurement of this section
 to the integration's 8.6 s) could not show this: both of its runs carried
 the library cost.
 
-**G0 exemption: the merge** (`Calculus/Core/Merge.lean`).  `Fml.mergeRun`
+**G0 exemption: the merge** (`Calculus/Core/Merge.lean`; since W3c
+`Upd.held`, `Upd.graft`, `Upd.lift?`, `Tm.substH` and `Subst.cons` live in
+`Calculus/Core/Graft.lean`, and the exemption is extended to the
+sequent's update rules there: W3c `tactics`).  `Fml.mergeRun`
 and what it calls (`Upd.held`, `Upd.graft`, `Upd.lift?`, `Tm.substH`,
 `Fml.merge2`, `Fml.mergeAt`, `Subst.cons`) are written with `match` on
 the indexed families, against condition 1, and the kernel evaluates them
@@ -3620,6 +3623,38 @@ corollaries, `withdrawUnsafe_valid`, `withdrawUnsafe_noCallback`), and
   `definedLit`/`eqRefl`/`eqClose`/`eqDClose`, `sol_apply_upd`,
   `rw`/`sol_rw` (`core_rw`); what a step computes is evaluated and quoted
   back (`Upd.quote`, `Fml.quote`).
+- *G0 exemption: the sequent's update rules* (condition 1; the W3b merge
+  exemption, extended).  Written with `match` on the indexed families
+  `Upd`, `Fml`, `Tm`, `Frames` and evaluated by the kernel each time the
+  rule fires (a `rfl` premise or a `by rfl` default): in
+  `Calculus/Core/Graft.lean` `Upd.lastSt`, `Upd.stOnly`, `Upd.liftG?`,
+  `Upd.liftBinds?`, `Upd.seqPar` (with W3b's `Upd.held`, `Upd.graft`,
+  `Tm.substH`, `Subst.cons`), `Upd.rwC`/`Tm.rwC`/`Rhs.rwC`/`UpdElem.rwC`,
+  `Tm.toNil?`, `Tm.ofClosed?`, `Tm.pickC` (`merge`, `updRw`); in
+  `Calculus/Core/UpdateRules.lean` `Upd.simp` (`simplify'`'s `rfl`),
+  `Fml.substU` (`applyOnRigidBox`), `Fml.rwEqC` (`rewrite'`); in
+  `Calculus/Core/CallbackSound.lean` `Fml.closedB` and `Frames.popsOnly`
+  (`assumeInv`'s `by rfl` defaults), `Fml.reclose?`, `Fml.openInv`,
+  `Hyps.openInv` (`openInv`).  Kept, as for the merge: each runs once a
+  rule line, not once a symbolic-execution step.  Timed with
+  `set_option profiler true` on copies in a scratch module (this
+  worktree), the kernel's "type checking" of the whole declaration, a
+  prefix ending in `sorry` the baseline:
+  `StorageDelete.deleteReadDeep_theory` 158 ms, of which `sol_derive`
+  24–27 ms, the six merge lines (`merge`, `mergeStorage`, i.e.
+  `Upd.liftBinds?`, `Upd.seqPar`, `Upd.lastSt`) +102–105 ms (about 17 ms a
+  merge), `sol_rw` (`Upd.rwC`) +19 ms, `sol_apply_upd` (`Fml.substU`) and
+  `eqDClose` +10 ms; at elaboration the six merge lines take about 220 ms
+  and `sol_rw` 72 ms.  `UpdateRules.deepFieldWriteMerged`'s
+  `refine simplify ?_` (`Upd.simp`): +2 ms kernel (27.6 → 29.5 ms), 5 ms
+  elaboration.  `Callback.withdrawSafe`'s `exact Core.Proves.assumeInv`
+  (`Fml.closedB`, `Frames.popsOnly`, the erasures' `rfl`): no measurable
+  difference (89 ms for the whole declaration, 101 ms with that goal left
+  as `sorry`; its 4.1 s are `sol_close`'s `simp`).  So about 20 ms of
+  kernel a rule line, the W3b merge's 18–24 ms: small, no `casesOn`
+  rewrite.  The fix, if a proof ever fires these per step (a merge per
+  loop iteration), is the `casesOn` form `Fml.modalFree` already has, for
+  `Upd.seqPar`/`Upd.lastSt`, `Upd.simp` and `Fml.substU` first.
 
 **Pins changed:**
 - `Examples/Chains/Memory.lean` `CallWrite`: the two memory-returning

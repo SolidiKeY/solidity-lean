@@ -31,7 +31,8 @@ of `t`, read on its erasure, becomes `t'` (`Tm.rwC`), and where the update
 returns, the rewritten one returns the same state (`Upd.rwC_apply`).
 
 The functions use `match` on the indexed families, against Gate G0's first
-condition: an exemption (`docs/intrinsic.md`, W3b), since they run once a
+condition: an exemption (`docs/intrinsic.md`, W3b's merge, extended to the
+sequent's update rules in W3c `tactics`, both timed), since they run once a
 rule and not once a step.
 -/
 
