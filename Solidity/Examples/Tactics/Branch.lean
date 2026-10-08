@@ -196,7 +196,7 @@ another type: Solidity scopes the first to its block.  The untyped program
 has no blocks, so the elaborator writes the block flat and renames its local
 apart (`x_1`, `freshenBlocks`): the locals check (`resolve`,
 `Syntax/Resolve.lean`) reads a branch as a scope and refuses a binder of a
-name in scope, so the program is `Fresh` and `Prog.run_erase` covers it.
+name in scope, so the program is `Fresh`.
 The same holds for a `for` loop's init. -/
 
 /-- info: bool c = true; bool x_1 = true; if (c) { uint x = 1; } else { } -/

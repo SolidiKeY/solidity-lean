@@ -20,7 +20,7 @@ What each guarantees is `Mutability.Frame`, proved once from `Stmt.run`
 for every body the check accepts (`Prog.frame_of_within`): the run changes
 only the locals the body writes (`Prog.writes`) and, for `nonpayable`, the
 storage and the ledger, which is what `State.havoc` replaces (the state a
-callback leaves, `Semantics/Callback.lean`).  The two facts a contract rule
+callback leaves, `Semantics/Core/Callback.lean`).  The two facts a contract rule
 reads (`Calculus/Contracts.lean`): a `view` callee leaves storage and, paying
 nothing, the ledger as they were (`Prog.view_frame`), and so does a `pure`
 one (`Prog.pure_frame`), whose restriction on reads adds nothing to the
@@ -32,14 +32,6 @@ namespace Solidity
 open Semantics
 
 variable {C : Contract}
-
-/-- solc's mutabilities, the most restrictive first.  `payable` is
-`nonpayable` here: a callee's booking of `msg.value` is its caller's. -/
-inductive Mutability where
-  | pure
-  | view
-  | nonpayable
-  deriving DecidableEq, Repr
 
 /-! ## The check -/
 
@@ -142,17 +134,6 @@ def Mutability.Frame (μ : Mutability) (W : List Var) (σ τ : State) : Prop :=
 
 namespace Mutability
 
-theorem agree_trans {W : List Var} {σ τ ρ : State} (h₁ : EnvAgreeExcept W σ τ)
-    (h₂ : EnvAgreeExcept W τ ρ) : EnvAgreeExcept W σ ρ :=
-  ⟨h₁.storage.trans h₂.storage, h₁.heap.trans h₂.heap, h₁.nextId.trans h₂.nextId,
-    h₁.net.trans h₂.net, fun n hn => (h₁.env n hn).trans (h₂.env n hn),
-    h₁.selfBalance.trans h₂.selfBalance, h₁.tx.trans h₂.tx⟩
-
-theorem agree_mono {W W' : List Var} (hW : ∀ x ∈ W, x ∈ W') {σ τ : State}
-    (h : EnvAgreeExcept W σ τ) : EnvAgreeExcept W' σ τ :=
-  ⟨h.storage, h.heap, h.nextId, h.net, fun n hn => h.env n fun hw => hn (hW n hw),
-    h.selfBalance, h.tx⟩
-
 theorem agree_setEnv {W : List Var} {x : Var} (hx : x ∈ W) (σ : State) (b : Binding) :
     EnvAgreeExcept W σ (σ.setEnv x b) :=
   (EnvAgreeExcept.refl W σ).setEnv_right hx b
@@ -174,8 +155,8 @@ theorem Frame.ofAgree (μ : Mutability) {W : List Var} {σ τ : State} (h : EnvA
 theorem Frame.trans {μ : Mutability} {W : List Var} {σ τ ρ : State} (h₁ : μ.Frame W σ τ)
     (h₂ : μ.Frame W τ ρ) : μ.Frame W σ ρ := by
   cases μ
-  · exact agree_trans h₁ h₂
-  · exact agree_trans h₁ h₂
+  · exact EnvAgreeExcept.trans h₁ h₂
+  · exact EnvAgreeExcept.trans h₁ h₂
   · exact ⟨rfl, h₁.heap.trans h₂.heap, h₁.nextId.trans h₂.nextId, rfl,
       fun n hn => (h₁.env n hn).trans (h₂.env n hn), h₁.selfBalance.trans h₂.selfBalance,
       h₁.tx.trans h₂.tx⟩
@@ -183,9 +164,9 @@ theorem Frame.trans {μ : Mutability} {W : List Var} {σ τ ρ : State} (h₁ : 
 theorem Frame.mono {μ : Mutability} {W W' : List Var} (hW : ∀ x ∈ W, x ∈ W') {σ τ : State}
     (h : μ.Frame W σ τ) : μ.Frame W' σ τ := by
   cases μ
-  · exact agree_mono hW h
-  · exact agree_mono hW h
-  · exact agree_mono hW h
+  · exact EnvAgreeExcept.of_sub hW h
+  · exact EnvAgreeExcept.of_sub hW h
+  · exact EnvAgreeExcept.of_sub hW h
 
 /-- A write of storage alone is `nonpayable`'s. -/
 theorem Frame.storage (W : List Var) (σ : State) (st : List (Name × SVal)) :
@@ -275,15 +256,15 @@ theorem bindSeq_agree : (args : List (Arg C)) → ∀ {σ τ : State},
   | a :: as, σ, τ, h => by
     simp only [Arg.bindSeq] at h
     obtain ⟨v, _, h⟩ := bind_ok_inv h
-    exact agree_trans (agree_setEnv (List.mem_cons_self ..) σ _)
-      (agree_mono (fun _ hy => List.mem_cons_of_mem _ hy) (bindSeq_agree as h))
+    exact EnvAgreeExcept.trans (agree_setEnv (List.mem_cons_self ..) σ _)
+      (EnvAgreeExcept.of_sub (fun _ hy => List.mem_cons_of_mem _ hy) (bindSeq_agree as h))
 
 theorem enterAll_agree : (rs : List (PrimTy × Var)) → (σ : State) →
     EnvAgreeExcept (rs.map (·.2)) σ (CallRet.enterAll rs σ)
   | [], σ => EnvAgreeExcept.refl _ σ
   | _ :: rs, σ =>
-    agree_trans (agree_setEnv (List.mem_cons_self ..) σ _)
-      (agree_mono (fun _ hy => List.mem_cons_of_mem _ hy) (enterAll_agree rs _))
+    EnvAgreeExcept.trans (agree_setEnv (List.mem_cons_self ..) σ _)
+      (EnvAgreeExcept.of_sub (fun _ hy => List.mem_cons_of_mem _ hy) (enterAll_agree rs _))
 
 theorem enter_agree (ret : CallRet) (σ : State) : EnvAgreeExcept ret.vars σ (ret.enter σ) := by
   cases ret with

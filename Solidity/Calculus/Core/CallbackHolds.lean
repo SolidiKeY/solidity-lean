@@ -4,7 +4,7 @@ import Solidity.Semantics.Core.Callback
 /-!
 # Formulas read with callbacks, over the typed state
 
-`Semantics/Callback.lean`'s `holdsC` on scoped formulas and typed states
+The callback reading `holdsC` on scoped formulas and typed states
 (`docs/intrinsic.md`, W2 lane `tree`, carried into W3): `holds`
 (`Calculus/Core/Logic.lean`), but a modality ranges over every run with
 callbacks (`ExecP`, then `ExecF` for its frames,

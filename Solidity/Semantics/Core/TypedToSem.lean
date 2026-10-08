@@ -1,5 +1,5 @@
 import Solidity.Semantics.Core.TypedRunFrame
-import Solidity.Semantics.RunErase
+import Solidity.Semantics.Core.StateErase
 
 /-!
 # A typed state, named
@@ -8,8 +8,8 @@ import Solidity.Semantics.RunErase
 and heap erased, its locals bound under the names `ns` (innermost first),
 each as `Semantics.lean` binds it (`LTy.TDenote.bind`)
 (`docs/intrinsic.md`, W1 lane `runlemmas`).  It is what `State.erase ns`
-(`Semantics/RunErase.lean`) is for the scoped run, read straight off the
-typed parts, so it outlives the scoped run.
+(`Semantics/Core/StateErase.lean`) is for the scoped state, read straight
+off the typed parts.
 
 The lemmas say how it moves with the typed state's operations: a local
 declared conses its binding, a local set replaces it in place
@@ -215,7 +215,7 @@ theorem _root_.Solidity.Core.TEnv.toSem_eq {H : HTy} : {Γ : Ctx} → (ns : List
 theorem toSem_eq (ns : List Var) (σ : TState C Γ) : σ.toSem ns = σ.erase.erase ns := by
   simp only [toSem, erase, State.erase, State.glob, TEnv.toSem_eq]
 
-/-- **A typed state agrees with its named reading** (`Agree`, `Semantics/RunErase.lean`). -/
+/-- **A typed state agrees with its named reading** (`Agree`, `Semantics/Core/StateErase.lean`). -/
 theorem agree_toSem (ns : List Var) (σ : TState C Γ) (hnd : ns.Nodup)
     (hlen : ns.length = Γ.length) : Agree ns σ.erase (σ.toSem ns) := by
   rw [toSem_eq]

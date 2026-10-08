@@ -6,9 +6,8 @@ import Solidity.Semantics.Core.Storage
 Every typed storage operation (`Semantics/Core/Storage.lean`) erases to its
 untyped namesake in `Semantics.lean`, which is therefore never stuck on an
 erased input: each lemma reads `untyped op (erase x) = toRes erase (typed op
-x)`, and `toRes` has no `stuck`.  This is the storage half of `run_erase`
-(`docs/intrinsic.md`, M4b), the bridge until the typed interpreter replaces
-`Stmt.run`.
+x)`, and `toRes` has no `stuck`.  This is the storage half of the typed
+run's bridge to the scoped one (`docs/intrinsic.md`, M4b).
 
 A struct is copied member by member in order (solc), and the untyped
 `overlay` looks each member up by name, which agrees because a struct's

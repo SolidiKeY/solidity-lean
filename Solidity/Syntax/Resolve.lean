@@ -269,8 +269,8 @@ mutual
 
 /-- No binder of the statement reuses a name in scope (`ns`) or of an
 enclosing frame (`out`), and a call's arguments are separated: what makes
-the untyped run, one map from names to bindings, follow the scoped one
-(`Semantics/RunErase.lean`).  What `resolve` returns (`Prog.resolve_fresh`). -/
+the erasure, one map from names to bindings, read as the scoped state
+(`Agree`, `Semantics/Core/StateErase.lean`).  What `resolve` returns (`Prog.resolve_fresh`). -/
 def Stmt.Fresh (out : List Var) : {Γ Γ' : Ctx} → List Var → Stmt C Γ Γ' → Prop
   | _, _, ns, .declLocal _ x _ => x ∉ ns ∧ x ∉ out
   | _, _, ns, .declStorage _ x _ => x ∉ ns ∧ x ∉ out
@@ -911,7 +911,7 @@ theorem Prog.resolve_erase {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidity.
       (strict = true → r.2.Fresh [] Γ.names)) h).1
 
 /-- **`resolve`'s output is `Fresh`**: no binder reuses a name in scope, so
-`Prog.run_erase` applies to it. -/
+its erasure names every local apart. -/
 theorem Stmt.resolve_fresh {Γ Γ' : NCtx} {u : Solidity.Stmt C} {s : Stmt C Γ.ctx Γ'.ctx}
     (h : Stmt.resolve Γ u = .ok ⟨Γ', s⟩) : s.Fresh [] Γ.names :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx =>

@@ -1897,10 +1897,7 @@ program's locals are used as declared, and its values are of their types, by
 construction.  The scoped run ends in the erased state
 (`Reachable.reachableS`; no struct repeats a member name, decision 16), so
 what that run keeps holds of a reachable storage; a `bool` mapping key is
-hashed as `0`/`1` by both runs (decisions 10 and 14).
-The calculus's `holds` reads the untyped interpreter; a storage it reaches
-from a block the locals check accepts, with its words, keys and slots in
-range, is `Reachable` (`ReachableU.reachable`, `Calculus/Problem.lean`). -/
+hashed as `0`/`1` by both runs (decisions 10 and 14). -/
 def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (o : Core.Out C (Core.TState.init C).H Γ'),
     P.trun (Core.TState.init C) = .ok o ∧ o.st.storage.erase = st

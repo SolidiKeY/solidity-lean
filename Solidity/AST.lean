@@ -740,4 +740,12 @@ def Var.idx : Var → Nat
   | .user _ => 0
   | .fresh _ k => k
 
+/-- solc's mutabilities, the most restrictive first.  `payable` is
+`nonpayable` here: a callee's booking of `msg.value` is its caller's. -/
+inductive Mutability where
+  | pure
+  | view
+  | nonpayable
+  deriving DecidableEq, Repr
+
 end Solidity

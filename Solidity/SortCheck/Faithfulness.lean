@@ -1,5 +1,5 @@
 import Solidity.Typing.Soundness
-import Solidity.Semantics.RunErase
+import Solidity.Semantics.Core.StateErase
 import Solidity.Calculus.RuleShapes
 import Solidity.SortCheck.Annotations
 
@@ -9,7 +9,7 @@ import Solidity.SortCheck.Annotations
 The table ↔ semantics edge of the conformance loop: every read-sort
 annotation in `TacletAnnotations.tacletReadAnns` is *faithful* — the sort a
 taclet's value read declares agrees with the value `Stmt.run` actually finds
-there, in every state that agrees (`Agree`, `Semantics/RunErase.lean`) with a
+there, in every state that agrees (`Agree`, `Semantics/Core/StateErase.lean`) with a
 scoped state the invariant `RunWT` (`Typing/Soundness.lean`) holds of.
 `solkeycheck` keeps the table equal to the `.key` text; this module keeps it
 true of the interpreter, so a table updated to match a buggy

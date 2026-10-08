@@ -16,7 +16,6 @@ import Solidity.Semantics.Properties
 import Solidity.Semantics.Agree
 import Solidity.Semantics.WellFormed
 import Solidity.Semantics.NoPanicOps
-import Solidity.Semantics.Callback
 import Solidity.Semantics.Mutability
 import Solidity.Semantics.Core.Value
 import Solidity.Semantics.Core.Ops
@@ -32,7 +31,7 @@ import Solidity.Semantics.Core.TypedRunWk
 import Solidity.Semantics.Core.TypedRunFrame
 import Solidity.Semantics.Core.TypedRunFuel
 import Solidity.Semantics.Core.TypedToSem
-import Solidity.Semantics.RunErase
+import Solidity.Semantics.Core.StateErase
 import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Rules
@@ -113,7 +112,6 @@ import Solidity.Calculus.TermRules
 import Solidity.Calculus.TheoryRewrite
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Hyp
-import Solidity.Calculus.Callback
 import Solidity.Calculus.Symex
 import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.SolkeyFragment

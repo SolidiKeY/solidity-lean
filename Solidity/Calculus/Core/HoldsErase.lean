@@ -1,25 +1,22 @@
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.Closable
-import Solidity.Semantics.RunErase
+import Solidity.Semantics.Core.StateErase
 
 /-!
 # A scoped formula read as its erasure
 
 A scoped formula against its erasure (`Fml.erase`, `Calculus/Core/Fml.lean`),
 `Update.lean`'s formula, in any untyped state that agrees with the typed
-state's erasure on the locals named `ns` (`Agree`, `Semantics/RunErase.lean`).
+state's erasure on the locals named `ns` (`Agree`, `Semantics/Core/StateErase.lean`).
 The pieces:
 
 * a term reads alike (`Tm.eval_erase`): a value, a path, an identity the
   same, a storage or memory read with the untyped state's locals put back
   (`Srt.wl`), since every symbol reads the global part only (the
-  `*_nat`/`*_wl` lemmas of `Semantics/RunErase.lean`); it denotes the same
+  `*_nat`/`*_wl` lemmas of `Semantics/Core/StateErase.lean`); it denotes the same
   (`Tm.denote_erase`);
 * an update ends in agreeing states (`Upd.apply_erase`), a declaration under
   a fresh name;
-* a program runs as its erasure (`Prog.erasesAt`), its frames as the
-  statements they hold, a scope's end nothing (the untyped state keeps the
-  popped locals, which `Agree` allows);
 * a first-order formula whose `∀`s bind fresh names (`Fml.Plain`,
   `Fml.FO`, `Calculus/Core/Closable.lean`) holds exactly where its erasure
   does (`holds_erase_fo`).  The other formulas go one way only
@@ -456,48 +453,6 @@ theorem Upd.apply_erase (hag : Agree ns σ₀ τ₀) : {Δ : Ctx} → (U : Upd C
     exact (Upd.apply_erase hag U hU).map_left fun _ _ h' => h'.thin h
 
 end Updates
-
-/-! ## A modality runs as its erasure -/
-
-section Runs
-
-theorem RunRel.toRel {Γ : Ctx} {ns B : List Var} {τ₀ : Semantics.State} :
-    {x : Res (State C Γ)} → {y : Res Semantics.State} → RunRel ns B τ₀ x y → Res.Rel (Agree ns) x y
-  | .error _, .error _, h => h
-  | .ok _, .ok _, h => h.1
-
-/-- A block runs as its erasure (`run_erase`, from any agreeing state). -/
-theorem Prog.run_rel {Γ Γ' : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
-    (hag : Agree ns σ τ) (P : Prog C Γ Γ') (hP : P.Fresh [] ns) :
-    Res.Rel (Agree (P.outNames ns)) (P.run σ) (Solidity.Prog.run τ (P.erase ns)) :=
-  (Prog.erasesAt P hP hag).toRel
-
-/-- The frames run as the statements they hold, a scope's end nothing. -/
-theorem Frames.run_erase {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C Γ Γ₀) → {ns : List Var} →
-    κ.Fresh ns → {σ : State C Γ} → {τ : Semantics.State} → Agree ns σ τ →
-    Res.Rel (Agree (κ.outNames ns)) (Frames.run σ κ) (Solidity.Prog.run τ (κ.erase ns))
-  | _, .nil, _, _, _, _, hag => hag
-  | _, .seq ω κ, _, hκ, _, _, hag => by
-    show Res.Rel _ (do Frames.run (← Prog.run _ ω) κ) (Solidity.Prog.run _ (ω.erase _ ++ κ.erase _))
-    rw [Solidity.SemanticsProperties.Prog.run_append]
-    exact Res.Rel.bind (Prog.run_rel hag ω hκ.1) fun _ _ h => Frames.run_erase κ hκ.2 h
-  | _, .pop _ h κ, _, hκ, _, _, hag => Frames.run_erase κ hκ (hag.dropNames h)
-  | _, .drop h κ, _, hκ, _, _, hag => Frames.run_erase κ hκ (hag.thin h)
-
-end Runs
-
-/-! ## The formulas -/
-
-theorem _root_.Solidity.Modality.afterC_rel (m : Modality) {α : Type} {p : α → Prop} {q : Semantics.State → Prop}
-    {R : α → Semantics.State → Prop} {x : Res α} {y : Res Semantics.State} (h : Res.Rel R x y)
-    (hpq : ∀ a b, R a b → (p a ↔ q b)) : m.afterC p x ↔ m.after q y := by
-  cases x with
-  | ok a => cases y with
-    | ok b => exact hpq a b h
-    | error => exact h.elim
-  | error e => cases y with
-    | ok => exact h.elim
-    | error e' => exact Iff.rfl
 
 /-! ## A first-order formula reads as its erasure
 

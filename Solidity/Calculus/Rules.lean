@@ -605,7 +605,7 @@ inductive Rule (C : Contract) (k : Nat) (m : Modality) (s : Stmt C) (p : Premise
 `transferSemantics:withCallback`: `sadr.transfer(se);` when the recipient may
 call back into the contract.  Its premise is `transferNoCallbackBox`'s, the
 booking `{net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se)}`,
-read differently (`Calculus/Callback.lean`): the contract invariant after
+read differently (`Calculus/Core/Callback.lean`): the contract invariant after
 the booking ("invariant on exit"), and the rest of the program resumed from
 any state the callee may leave in which the invariant holds ("resume after
 callback").  The box only, as solkey's calculus of payments is.
@@ -616,7 +616,7 @@ books a transfer and returns, and these are sound for the callback reading
 
 /-- The callback taclets: the statement they fire on, under the modality
 they are for, and their premise: a transfer's booking, a
-`try`'s blocks (read in `Calculus/Callback.lean` with the invariant on exit,
+`try`'s blocks (read in `Calculus/Core/Callback.lean` with the invariant on exit,
 and the call's success resumed from any state the callee may leave in which
 it holds). -/
 inductive CallbackTaclet (C : Contract) : Modality → Stmt C → Premise C → Prop where

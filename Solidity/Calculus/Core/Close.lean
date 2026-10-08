@@ -258,9 +258,9 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
       exact ⟨rfl, rfl, rfl, rfl, fun y hy => (h₂ y hy).symm, rfl, rfl⟩
     refine ih h h₁ fun ρ hρ => ?_
     -- `ρ` is `τ` with `B` as `ρ` has them, then the anonymised names as `ρ` has them
-    have hτρ := Solidity.Mutability.agree_trans
-      (Solidity.Mutability.agree_mono (fun _ hy => List.mem_append_left B hy) hττ₁)
-      (Solidity.Mutability.agree_mono (fun _ hy => List.mem_append_right _ hy) hρ)
+    have hτρ := Solidity.Semantics.EnvAgreeExcept.trans
+      (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_append_left B hy) hττ₁)
+      (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_append_right _ hy) hρ)
     have Hρ₀ : Solidity.holds ((mergeOn B τ ρ).anon (xs.map fun x => x.2.name ns)
         fun y => Semantics.lookupBy y ρ.env) (φ.erase ns) :=
       H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) _
@@ -282,9 +282,9 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
     obtain ⟨B₁, h₁, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨B₂, h₂, rfl⟩ := Option.map_eq_some_iff.1 h
     exact ⟨ihφ h₁ hag fun ρ hρ =>
-        (H ρ (Solidity.Mutability.agree_mono (fun _ hx => List.mem_append_left _ hx) hρ)).1,
+        (H ρ (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hx => List.mem_append_left _ hx) hρ)).1,
       ihψ h₂ hag fun ρ hρ =>
-        (H ρ (Solidity.Mutability.agree_mono (fun _ hx => List.mem_append_right _ hx) hρ)).2⟩
+        (H ρ (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hx => List.mem_append_right _ hx) hρ)).2⟩
   | imp a φ _ ihφ =>
     intro ns B h σ τ hag H
     have ha : a.plainB ns = true := by
@@ -346,7 +346,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
           | ok ρ₁ =>
             intro hfr Hρ₁
             refine holds_of_envAgree_nil ?_ Hρ₁
-            have h₁ρ := Solidity.Mutability.agree_trans (envAgree_symm hfr) hρ
+            have h₁ρ := Solidity.Semantics.EnvAgreeExcept.trans (envAgree_symm hfr) hρ
             refine ⟨h₁ρ.storage, h₁ρ.heap, h₁ρ.nextId, h₁ρ.net, fun y _ => ?_, h₁ρ.selfBalance,
               h₁ρ.tx⟩
             by_cases hy : y ∈ B
@@ -415,9 +415,9 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
     have hxn : x ∉ ns := fun hm => by simp only [List.contains_iff_mem.2 hm] at hx; cases hx
     refine Modality.forallB_intro fun v => ?_
     refine ih h₁ (σ := σ.push v) (hag.push hxn (LTy.TDenote.erase t v)) fun ρ hρ => H ρ ?_
-    exact Solidity.Mutability.agree_trans
-      (Solidity.Mutability.agree_setEnv List.mem_cons_self τ _)
-      (Solidity.Mutability.agree_mono (fun _ hy => List.mem_cons_of_mem _ hy) hρ)
+    exact Solidity.Semantics.EnvAgreeExcept.trans
+      ((Solidity.Semantics.EnvAgreeExcept.refl _ τ).setEnv_right List.mem_cons_self _)
+      (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_cons_of_mem _ hy) hρ)
 
 /-- The empty context agrees with the global part alone. -/
 theorem Agree.nil (σ : State C []) : Agree [] σ (withLocals σ.glob []) where

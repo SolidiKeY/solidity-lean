@@ -9,12 +9,12 @@ it in one place, a failed `assert` (`assertOk`).  Every other operation halts
 with `revert` or `stuck`: the state's reads and writes, the evaluation of a
 program expression, the copies and allocations.  A term or an update reads
 the state through these operations, so neither panics (`Calculus/NoPanic.lean`);
-a statement with no `assert` in it never does (`Semantics/NoPanic.lean`).
+a statement with no `assert` in it never does.
 
 Each lemma follows its operation's definition, the recursive ones by the same
 recursion; `no_panic` discharges an unfolded definition.  Split out of
-`Semantics/NoPanic.lean` (`docs/intrinsic.md`, W4 item 11): the term model
-keeps these when the statements' run goes.
+today's `Semantics/NoPanic`, deleted at W4 `sem-del` (`docs/intrinsic.md`):
+the term model keeps these.
 -/
 
 namespace Solidity

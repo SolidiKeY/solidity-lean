@@ -21,10 +21,9 @@ Semantic conventions mirrored from KeY:
   panics (below);
 - `a.transfer(v)` books `net(a) := net(a) - v` unless `a` is the contract
   itself, which books nothing (solkey's `\if(a = self)`), with no callback
-  (the callback reading is `Semantics/Callback.lean`'s, a relation over this
-  one), and nothing else: the contract is assumed able to pay, and its funds
+  (the callback reading is the typed run's, `Semantics/Core/Callback.lean`), and nothing else: the contract is assumed able to pay, and its funds
   (`State.selfBalance`) are not the transfer's to change.  Whether the EVM
-  pays is the compiler theorem's business (`Evm/Correctness.lean`, where a
+  pays is the compiler theorem's business (`Evm/CoreCorrect.lean`, where a
   refused payment is a revert of the machine alone);
 - `pv = a.send(v);` books as `transfer` does and sets `pv` to `true` when the
   recipient takes the payment, and books nothing and sets `pv` to `false`

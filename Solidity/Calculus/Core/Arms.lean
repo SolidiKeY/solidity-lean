@@ -1,5 +1,4 @@
 import Solidity.Calculus.Core.Shift
-import Solidity.Semantics.Mutability
 
 /-!
 # The rule of each statement, on scoped statements

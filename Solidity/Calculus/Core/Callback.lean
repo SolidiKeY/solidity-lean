@@ -16,7 +16,7 @@ callee's `{havoc}` (`ProvesC`), not what the rule leaves.
 The rules print as today's (`dl[CallbackTaclet C k]{ … }`, `delabCallbackTaclet`),
 their goals labelled by their no-callback twins' labels.
 
-`ProvesC I H φ` is `Calculus/Callback.lean`'s judgement on scoped sequents:
+`ProvesC I H φ` is the callback judgement on scoped sequents:
 the ordinary rules on a statement that runs no other and pays nothing
 (`Stmt.forks`), a split, the callback taclets with solkey's goals
 ("invariant on exit", the rest resumed under `{havoc}` with the invariant
@@ -207,9 +207,8 @@ def delabCallbackTaclet : Delab := do
   | Modality.diamond => `(dl[ $J ]{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
   | _ => `(dl[ $J ]{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
 
-/-- `Core.ProvesC I Γ₀ H φ`: the sequent `dl{ ..H, h₁, … ⟹ᶜ[I] φ }`, as
-`Calculus/Callback.lean` prints today's, the context erased as
-`delabProves` erases it. -/
+/-- `Core.ProvesC I Γ₀ H φ`: the sequent `dl{ ..H, h₁, … ⟹ᶜ[I] φ }`, the
+context erased as `delabProves` erases it. -/
 @[delab app.Solidity.Core.ProvesC]
 def delabProvesC : Delab := do
   unless ← ppOn do failure

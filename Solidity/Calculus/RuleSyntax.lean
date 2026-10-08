@@ -314,8 +314,9 @@ syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ₖ " dl_fml " }" : term
 /-- A sequent `Γ ⟹[R] φ` over the rule set `R` (`Proves R Γ φ`). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹[" term "] " dl_fml " }" : term
 /-- A sequent `Γ ⟹ᶜ[I] φ` of the calculus with callbacks, every `transfer`
-calling back into a contract with the invariant `I` (`ProvesC I Γ φ`,
-`Calculus/Callback.lean`). -/
+calling back into a contract with the invariant `I` (`ProvesC I Γ φ`;
+today's judgement was deleted at W4 `sem-del`, the scoped one is
+`Calculus/Core/Callback.lean`'s). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ᶜ[" term "] " dl_fml " }" : term
 /-- A term of the logic (`Tm`), its sort read off its head (`find(…)` a
 value, `save(…)` a storage, `write(…)` a memory, `consr(…)` a path).  Every

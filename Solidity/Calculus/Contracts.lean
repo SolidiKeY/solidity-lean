@@ -8,7 +8,7 @@ import Solidity.Semantics.Mutability
 A call can be proved by its callee's contract instead of its body: prove the
 callee's `requires`, forget what the callee may change, assume its
 `ensures`.  This is KeY's `useOperationContract` at the box, in the shape of
-`transferWithCallbackBox` (`Calculus/Callback.lean`), with the goals
+`transferWithCallbackBox` (`Calculus/Core/Callback.lean`), with the goals
 `"pre"` and `"post"` of solkey's planned contract taclet (KeY's Java rule
 labels them `Pre (f)` and `Post (f)`) and the parameters bound as the
 inlining binds them (`uint x' = a;`, KeY's `{params := args}`):
@@ -225,7 +225,7 @@ locals alone. -/
 theorem binds_of_fits {τ : State} : (xs : List (PrimTy × Var)) → ∀ {W : List Var} {σ : State},
     (∀ b ∈ xs, ∃ v, τ.getEnv b.2 = .ok (.val v) ∧ b.1.admits v) → EnvAgreeExcept W σ τ →
       ∃ σ', Binds xs σ σ' ∧ EnvAgreeExcept (W.filter fun x => !(xs.map (·.2)).contains x) σ' τ
-  | [], W, σ, _, h => ⟨σ, ⟨[], rfl⟩, agree_mono (fun x hx => by
+  | [], W, σ, _, h => ⟨σ, ⟨[], rfl⟩, EnvAgreeExcept.of_sub (fun x hx => by
     simp only [List.map_nil, List.contains_eq_mem, List.not_mem_nil, decide_false, Bool.not_false,
       List.mem_filter, hx, and_self]) h⟩
   | (p, x) :: xs, W, σ, hfit, h => by
@@ -244,7 +244,7 @@ theorem binds_of_fits {τ : State} : (xs : List (PrimTy × Var)) → ∀ {W : Li
               List.mem_filter, hw, hnx, decide_false, Bool.not_false, and_self]),
         h.selfBalance, h.tx⟩
     obtain ⟨σ', ⟨vs, hb⟩, h'⟩ := binds_of_fits xs (fun b hb => hfit b (List.mem_cons_of_mem _ hb)) h₁
-    refine ⟨σ', ⟨v :: vs, ?_⟩, agree_mono (fun y hy => ?_) h'⟩
+    refine ⟨σ', ⟨v :: vs, ?_⟩, EnvAgreeExcept.of_sub (fun y hy => ?_) h'⟩
     · have hf : v.fits p = true := (PrimTy.admits_iff_fits p v).1 hadm
       simp only [bindData, hf, if_true]
       exact hb
@@ -292,7 +292,7 @@ theorem FunContract.sound {μ : Mutability} {f : Name} {args : List (Arg C)}
     have hsnap : holds σ₁.snapOld
         (μ.anon (.alls ret.binders (.imp ens (.modal .box (ret.result ++ ω) φ)))) := hpost.1
     have hag0 : EnvAgreeExcept [oldLocal, oldNetLocal] σ₁ σ₁.snapOld :=
-      Mutability.agree_trans (Mutability.agree_setEnv (List.mem_cons_self ..) σ₁ _)
+      EnvAgreeExcept.trans (Mutability.agree_setEnv (List.mem_cons_self ..) σ₁ _)
         (Mutability.agree_setEnv (List.mem_cons_of_mem _ (List.mem_singleton_self _)) _ _)
     have hra : ResultsAgree [oldLocal, oldNetLocal] (Prog.run σ₁ (ret.decl ++ body))
         (Prog.run σ₁.snapOld (ret.decl ++ body)) := Prog.run_frame hag0 _ hO.left.left

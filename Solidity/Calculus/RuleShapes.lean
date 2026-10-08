@@ -472,7 +472,7 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   diamond closes to `false` (`LeanTaclet.transferDiamond`): whether the world
   pays is the compiler theorem's, not the calculus's.
 * `sendWithCallbackDiamond` — a send that may call back, under the diamond:
-  the callback reading is the box's only (`Calculus/Callback.lean`).  A send
+  the callback reading is the box's only (`Calculus/Core/Callback.lean`).  A send
   with no callback has its diamond (`sendNoCallbackDiamond`): a refused send
   is an outcome of the run (`Semantics.sendAt`), not the world's.
 

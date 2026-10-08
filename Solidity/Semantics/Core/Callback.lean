@@ -3,8 +3,9 @@ import Solidity.Semantics.Core.TypedRunFrame
 /-!
 # The callback semantics of `transfer`, typed
 
-`Semantics/Callback.lean`'s relational layer over the typed run
-(`docs/intrinsic.md`, W1 lane `runlemmas`): `ExecS J σ s o` runs
+The relational layer of the callbacks over the typed run
+(`docs/intrinsic.md`, W1 lane `runlemmas`; the untyped one was deleted at W4
+`sem-del`): `ExecS J σ s o` runs
 `s : Stmt C Γ Γ'` from `σ : TState C Γ` exactly as `Stmt.trun` does,
 except where control leaves the contract (a `transfer`, a `send`, a `try`),
 where the run either leaves it with the invariant `J` broken (`violated`)

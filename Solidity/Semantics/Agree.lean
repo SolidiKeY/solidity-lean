@@ -47,6 +47,18 @@ namespace EnvAgreeExcept
 theorem refl (ns : List Var) (s : State) : EnvAgreeExcept ns s s :=
   ⟨rfl, rfl, rfl, rfl, fun _ _ => rfl, rfl, rfl⟩
 
+theorem trans {W : List Var} {σ τ ρ : State} (h₁ : EnvAgreeExcept W σ τ)
+    (h₂ : EnvAgreeExcept W τ ρ) : EnvAgreeExcept W σ ρ :=
+  ⟨h₁.storage.trans h₂.storage, h₁.heap.trans h₂.heap, h₁.nextId.trans h₂.nextId,
+    h₁.net.trans h₂.net, fun n hn => (h₁.env n hn).trans (h₂.env n hn),
+    h₁.selfBalance.trans h₂.selfBalance, h₁.tx.trans h₂.tx⟩
+
+/-- Agreement off fewer names is agreement off more. -/
+theorem of_sub {W W' : List Var} (hW : ∀ x ∈ W, x ∈ W') {σ τ : State}
+    (h : EnvAgreeExcept W σ τ) : EnvAgreeExcept W' σ τ :=
+  ⟨h.storage, h.heap, h.nextId, h.net, fun n hn => h.env n fun hw => hn (hW n hw),
+    h.selfBalance, h.tx⟩
+
 end EnvAgreeExcept
 
 /-- Agreeing states have one environment: `msg.sender` reads alike. -/

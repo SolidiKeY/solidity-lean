@@ -1,6 +1,6 @@
 import Solidity.Typing.CanonTest
 import Solidity.Calculus.Spec
-import Solidity.Semantics.RunErase
+import Solidity.Semantics.Core.StateErase
 
 /-!
 # Obligations, as solkey states them
@@ -26,11 +26,7 @@ guarantees of a deployed contract's storage: every root there, in order,
 canonical and tight, which is exactly reachable (`shape_iff_reachable`,
 for every word, key and slot in range), and every word in its type's range
 (`storageWtB`, `wt_iff_reachable`).  Reachable is by the typed interpreter,
-for a program on the bridge (`Reachable`); a storage the untyped one `holds`
-reads reaches, from a block the locals check accepts (`ReachableU`), is
-reached by the scoped one (`ReachableU.reachableS`, by `Prog.run_erase`), so
-`wt` holds of it when its words fit (`wt_of_reachableU`), and it is reachable
-when its words, keys and slots are in range (`ReachableU.reachable`).
+for a program on the bridge (`Reachable`).
 It does not bound a dynamic array's length, which solc keeps at most
 `2^64` (`push` panics, 0x41, on an array already that long), and the
 model's `push` (`pushOn`) never panics.  The delta cuts both ways.  A
@@ -161,56 +157,6 @@ theorem wt_of_reachable (hnd : nodupKeysB C.vars = true)
     (hw : storageWordsB C.vars st = true) : storageWtB C.vars st = true := by
   rw [storageWtB, Bool.and_eq_true]
   exact ⟨shape_of_reachable hnd hdeep h, hw⟩
-
-/-- A storage the untyped interpreter reaches: a block the locals check
-accepts (`resolveCheck`, run by the elaborator's entry points on everything
-they produce) runs from the initial state to it, by the interpreter `holds`
-reads. -/
-def ReachableU (C : Contract) (st : List (Name × SVal)) : Prop :=
-  ∃ (us : Solidity.Prog C) (Γ' : Core.NCtx) (σ : Semantics.State),
-    Core.Prog.resolveCheck [] us = .ok Γ' ∧ Solidity.Prog.run C.initState us = .ok σ ∧
-      σ.storage = st
-
-/-- **Reachable by the untyped run ⇒ reachable by the scoped run.**  The
-block resolved is `Fresh` (`Prog.resolve_fresh`) and erases to the one run
-(`Prog.resolve_erase`), so its scoped run ends where the untyped one does,
-with the same storage (`Prog.run_erase`). -/
-theorem ReachableU.reachableS {st : List (Name × SVal)} (h : ReachableU C st) :
-    ReachableS C st := by
-  obtain ⟨us, Γ', σ, hc, hrun, rfl⟩ := h
-  obtain ⟨P, hP⟩ := Core.Prog.resolve_of_resolveCheck hc
-  have hr := Core.Prog.run_erase (ns := []) P (Core.Prog.resolve_fresh hP) List.nodup_nil rfl
-    (Core.State.ofSem C.initState)
-  have hinit : (Core.State.ofSem C.initState : Core.State C []).erase [] = C.initState := rfl
-  have he : P.erase [] = us := Core.Prog.resolve_erase hP
-  rw [hinit, he, hrun] at hr
-  cases hq : P.run (Core.State.ofSem C.initState) with
-  | error e =>
-    rw [hq] at hr
-    exact hr.elim
-  | ok σc =>
-    rw [hq] at hr
-    have hag : Semantics.EnvAgreeExcept _ σ (Core.State.erase (P.outNames []) σc) := hr
-    exact ⟨Γ'.ctx, P, σc, hq, hag.storage.symm⟩
-
-/-- **Reachable by the untyped run ⇒ reachable**, by the typed run, for a
-storage whose words, keys and slots are in range: what the scoped run
-reaches is canonical and tight, which the builder reaches by the typed run
-(`ReachableS.reachable`).  The range is a premise, not a consequence: the
-untyped run reads an array of `2^256` elements, which no typed value holds. -/
-theorem ReachableU.reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} (hf : FitsStorage C st)
-    (h : ReachableU C st) : Reachable C st :=
-  h.reachableS.reachable hnd hdeep hf
-
-/-- A storage the untyped interpreter reaches, whose words fit, is
-well-formed: `wt(storage)` holds of it. -/
-theorem wt_of_reachableU (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} (h : ReachableU C st)
-    (hw : storageWordsB C.vars st = true) : storageWtB C.vars st = true := by
-  rw [storageWtB, Bool.and_eq_true]
-  let ⟨hc, ht⟩ := reachableS_shape hnd hdeep h.reachableS
-  exact ⟨storageShapeB_complete hnd hc ht, hw⟩
 
 /-- A fresh contract's root holds its type's default. -/
 theorem lookupBy_initStorage_vars (r : Name) :

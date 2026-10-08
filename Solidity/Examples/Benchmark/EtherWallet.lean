@@ -25,7 +25,7 @@ back (`getBalance`).
 The payment runs with `transferNoCallbackBox`, as solkey's net rules do, which
 books the ledger and leaves `address(this).balance`; with callbacks the
 recipient could change the ledger before control returns
-(`Semantics/Callback.lean`).
+(`Semantics/Core/Callback.lean`).
 -/
 
 namespace Solidity.Examples.Benchmark.EtherWallet

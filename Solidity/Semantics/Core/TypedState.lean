@@ -16,9 +16,8 @@ a memory local's proof: the identities stay, so the erasure does too.
 
 `TState.erase` is `Core.State` of the same run, so each operation's
 agreement is one lemma here (`TState.adopt_erase`, `TState.copyStToM_erase`,
-…), the steps of `run_erase` once the run is typed.  The run itself is the
-rest of the wiring: until then this sits beside `Core.State`, which it
-replaces.
+…), the steps of the typed run's bridge to the scoped one
+(`Semantics/Core/TypedRunErase.lean`).
 -/
 
 namespace Solidity.Core
