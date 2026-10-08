@@ -1695,6 +1695,89 @@ diamond, from the type under the box.  Printers drop `m` (`Delab`,
    brings back item 1 in the untyped world) or `tholds`' update reading
    asks for a typed state the update ends in.
 
+### W2.5 lane `tsoundA` (`w25-tsoundA`, 2026-10-08)
+
+Typed soundness, part A: every arm of `Calculus/Core/Arms.lean` and
+`Step.lean` (all of `Stmt.step` but `Calculus/Core/Blocks.lean`'s calls,
+`try` and loops) proved `Premise.TSound` against `Stmt.trun`, in new modules
+beside M3's (`Calculus/Core/TSound{Arms,Capture,Store,Mem,Local,Control,Step}.lean`);
+no M3 `Sound*` file is edited.  `Stmt.tstepSound_arms` dispatches them.
+Build green (`lean_build`, 292 jobs, the new modules only rebuilt); no
+`sorry`, `axiom` or `maxHeartbeats`; `check-orphans`, `check-doc-paths`
+clean.
+
+**The per-arm statement** (`Calculus/Core/TSoundKit.lean`, committed first
+for `tsoundB`): an arm's theorem is M3's name with `tsound` for `sound`
+(`localStep_tsound`, `tsound_setLocal`), takes the typed state `σ` first,
+then the arm's arguments, the premise `q` and `hq : …Step k … = some q`, and
+concludes `Premise.TSound m s q σ`; `Stmt.TStepSound` is `Stmt.StepSound`
+over `TState`.  The kit adds, besides the shapes W2 left:
+
+* `TRes.Sim` and the shapes up to the halt (`tsound_unfoldSim`,
+  `tsound_capture{,SP,MV}K`, `tsound_capture{,SP,MV}Sim`, `TRes.Sim.err_bind`),
+  and `Premise.tsound_of_halt` (a box over a statement that halts);
+* **an update through the bridge** (`Premise.tsound_update_run`,
+  `tsound_updateSim_run`, `tsound_cases_run`): an update rule's update is a
+  term of `Update.lean`, read on the erasure, so M3's equation
+  `U.apply σ = s.run σ` (or `Res.Sim`), stated over any untyped state,
+  gives the typed arm by `Stmt.trun_erase`, where the statement is on the
+  bridge and the typed run does not diverge under the diamond.  Every update
+  arm is proved this way (`TSoundArms.lean`: M3's arm proofs as `*_run`
+  lemmas, and `Val.evalT_nd` and its kin: an evaluator only reverts);
+* the typed shift lemmas (`Val.evalT_up` and kin, `TState.push_lift`: a
+  pushed state is the state lifted along `up`, so each is
+  `TypedRunWk.lean`'s `*_wk`), `liftedT_up_drop`, `Ext.self_eq_refl`.
+
+A capture compares typed runs exactly (no bridge): a statement read with a
+local pushed runs lifted (`TRun.*_pushT`, `OpLoc.AgreeT`, `pushedT` in
+`TSoundCapture.lean`, from `TypedRunWk.lean`'s `*_lift`), a hole's typed
+continuation (`SHole.contT`, `MHole.contT`, `VHole.contT`), blocks of
+captures by `Prog.trunSt_declLocal_cons` and kin.  A `bool` is a `bool`, so
+the splits cover every state (`tholds_isBool`) and the short circuits run
+as their unfolded `if` exactly; a captured `if` condition's weakened
+branches run lifted by `Prog.trun_wk` (`Prog.trun_wk_up`).
+
+**`Stmt.TSound C` is not provable as stated**: three arms are sound only
+under a condition on the statement (`Stmt.TArmOk`, a hypothesis of
+`Stmt.tstepSound_arms`):
+
+1. *A storage copy off the bridge* (`l = sp;`, `l = mp;` at a type with a
+   repeated member name, `Ty.nodupS`): the rule's `save`/`copyMem` copy by
+   name, the typed run by position.  `tsound_save`, `tsound_saveMem`,
+   `assignStep_tsound`, `copyStep_tsound`, `assignFromMemStep_tsound` take
+   `bridgeOk`.  A well-formedness condition on contracts would discharge it.
+2. *A push at the bound under the diamond* (the lead's item 2 above):
+   `tsound_pushSlot`, `tsound_extend`, `tsound_pushSome`,
+   `tsound_rebindPush`, `pushStep_tsound`, `rebindStep_tsound` take
+   `m = .diamond → (Stmt.trun σ s).NoDiv`.  Only the update arms use it; a
+   capture compares typed runs and needs nothing.
+3. **New: `memoryLocalDeclInitDrop` under the box.**  Decision 12 keeps the
+   box binder universal; over a heap typing with no object of the local's
+   type the premise `∀ mv. [mv = r; ω] φ` is vacuous, while
+   `T memory mv = new T[](n);` (or a copy out of storage) allocates one and
+   runs: `[T memory mv = new T[](1);] false` is false, its premise true in
+   such a state.  `tsound_declMemInit` takes
+   `m = .box → Nonempty ((LTy.mem R).TDenote C σ.H)`.  A derivation cannot
+   exploit it (the binder's erasure is universal over inhabited untyped
+   values, so no leaf under it closes vacuously), but the per-state arm is
+   false, so `Proves.tsound`'s shape (`Stmt.TSound`, per premise, in every
+   state) cannot be met.  Options: the box binder at a memory type reads
+   "every reference of the heap grown by the rest's allocations" (a typed
+   reading change), or the binder asks an inhabitant under the box too
+   (the diamond's reading: the arm is then sound, its premise false over
+   such a heap, but a box derivation through the binder must show one), or
+   `Proves.tsound` threads `Stmt.TArmOk` as an invariant of the states it
+   reaches.  For the lead.
+
+Since `Proves.tsound` applies the arms in arbitrary states, conditions 2 and
+3 cannot be threaded through it as they stand; condition 1 can, as a
+property of the program (`Prog.bridgeOk`), if `Stmt.TSound` takes it.
+
+**Left (outside this lane):** the block arms (`tsoundB`); assembling
+`Stmt.TSound C` once the lead decides the three conditions; the read-only
+review pass (finder and skeptic) was not run: this session cannot spawn
+subagents.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
