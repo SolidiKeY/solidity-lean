@@ -20,7 +20,7 @@ extent, a struct its mapping members).  Reading it back:
 | read at | closes by | example |
 |---|---|---|
 | `p` itself, after a write to `p` | `sol_close` | `deleteThenRead` |
-| `p` itself, in the sequent | the Theory's lemmas (`sol_rw`) | `deleteReadDeep_theory` |
+| `p` itself, in the sequent | the Theory's lemmas (`sol_rw`) | `deleteReadDeep_theory`; its walk, `deleteReadDeepWalk` |
 | a path apart from `p` | `sol_close` | `deleteThenReadBeside` |
 | a path apart from `p`, in the sequent | the Theory's lemmas (`sol_rw`) | `deleteFrame_theory` |
 | a path apart from `p`, mid-program | the same, with the program still to run | `deleteFrameMid_theory` |
@@ -318,6 +318,60 @@ theorem deleteReadDeep_theory :
   sol_apply_upd
   -- dl{ ⟹ 0 = 0 }
   exact Proves.eqDClose
+
+/--
+info: Try this:
+  apply unfold .storageFieldWrite_unfold_leftFst
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply unfold .storageLocalDeclInitDrop
+    apply update .storageFieldReadBindLocalRoot
+    apply update .storageFieldWriteSave
+    apply unfold .storageFieldDelete_unfold_leftFst
+    apply unfold .storageLocalDeclInitDrop
+    apply update .storageFieldReadBindLocalRoot
+    apply update .storageFieldDelete
+    apply unfold .localValueDeclInitDrop
+    refine Core.Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst
+    apply unfold .storageLocalDeclInitDrop
+    apply update .storageFieldReadBindLocalRoot
+    apply update .storageFieldReadFind
+    refine close ?_
+    sol_symex
+    sol_close
+-/
+#guard_msgs in
+/-- `deleteReadDeep_theory`'s formula, walked: the read into a hole
+after a hidden binder has no line `apply` matches, so its premise is
+`Stmt.step`'s, by `rfl`, and the line keeps the taclet's solkey name as a
+comment (`Walk.movesAt`). -/
+theorem deleteReadDeepWalk :
+    ⊢ dl!{ [ alice.account.balance = 5; delete alice.account.balance;
+      uint x = alice.account.balance; ] x == 0 } := by
+  sol_derive?
+
+/-- The suggestion above, replayed. -/
+example :
+    ⊢ dl!{ [ alice.account.balance = 5; delete alice.account.balance;
+      uint x = alice.account.balance; ] x == 0 } := by
+  apply unfold .storageFieldWrite_unfold_leftFst
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageFieldReadBindLocalRoot
+  apply update .storageFieldWriteSave
+  apply unfold .storageFieldDelete_unfold_leftFst
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageFieldReadBindLocalRoot
+  apply update .storageFieldDelete
+  apply unfold .localValueDeclInitDrop
+  refine Core.Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst
+  apply unfold .storageLocalDeclInitDrop
+  apply update .storageFieldReadBindLocalRoot
+  apply update .storageFieldReadFind
+  refine close ?_
+  sol_symex
+  sol_close
 
 open Theory Theory.StValue in
 /-- `bob.age = 7; delete alice;` read at `bob.age`: the delete is off the
