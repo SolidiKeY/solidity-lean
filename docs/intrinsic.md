@@ -3136,6 +3136,195 @@ green, 302 jobs, every `sol_derive?` pin (`ProofTree`, `CoreProofTree`,
      diamond walk any more.
   5. The read-only review pass was not run.
 
+### W3b integration (2026-10-08)
+
+- **Merged** into `intrinsic`, in order: `w3b-testsuite` (a fast-forward),
+  `w3b-tactics` and `w3b-chains` (no conflict), `w3b-tree` (which had
+  already merged `w3b-chains` at c214204 and `w3b-tactics` through
+  1e71cb1).  Conflicts, each resolved to the later intent:
+  `Calculus/Decide.lean` and `Benchmark/Mapping.lean` docstrings take
+  `w3b-tree`'s (it restored `Decide.deleteWithoutWriteUntyped` beside the
+  `wt(storage)` theorem, so both names exist); `Examples/ProofTree.lean`
+  takes `w3b-tree`'s (the later `w3b-tactics` commits changed only its
+  prose there); `docs/module-map.md`'s `ProvesDerive`/`ProofTree` rows take
+  `w3b-tree`'s wording; this file keeps all four lane sections.  `Core.Walk.walk`'s goal
+  naming is `w3b-tree`'s (relative names, `case` only when every goal has
+  one), as that lane said.  No duplicate import, module-map row or
+  fully-qualified declaration (`dups.py`: only the known
+  `Evm/Repr`/`Examples/Verify` `as` false positive).
+- **Build**: `lean_build` over `Solidity`, `solkeycheck`, `SolidityCorpus`
+  and `SolkeyTestSuite` (the last two in `defaultTargets` for the run only,
+  341 jobs, no OOM kill).  One semantic conflict failed:
+  `Examples/ChainNotation.lean`'s two "does not reach" pins.
+  `w3b-chains` printed the written line as its source text; `w3b-tree`'s
+  `Core/Chains.lean` (merged cleanly over it) elaborates the line alone
+  and prints it scoped, its free names bound by `∀`, with the lines laid out
+  as today's `sol_chain` shows them (`showLinesErr`).  `w3b-tree`'s printer is
+  kept, as `ExampleNames` pins it, and the two `ChainNotation` pins were
+  re-pinned to it (ded8273).  Second build green.  No new `sorry`, `axiom`
+  or `maxHeartbeats` override.
+- `check-orphans`: 327 reachable, none orphaned but the git-excluded
+  `Solidity/Scratch/`.  `check-doc-paths`: OK (47 ambiguous citations, all
+  resolving).  `check-rule-text`: empty.  `check-corpus.sh`,
+  `check-testsuite.sh` and `solkeycheck` were not run (no rule name,
+  annotation or TestSuite row changed); `Report.lean` built at 437.
+- **W3 gates**, re-timed fresh, one worker at a time, load under 1,
+  imports from the cache.  The method is the chains lane's: the real
+  file in a fresh worker, `/proc` sampled every 20 ms, wall from the
+  worker's start until its CPU reaches its total.  It reads 0.4–0.6 s above the
+  W2.5/W3 integration's numbers (worker start, import mapping).  So each row
+  is also timed on `be64b9b` (a detached worktree, since removed) with the
+  same method, and the last column scales the merged time by that ratio
+  onto the W2.5/W3 integration's figure:
+
+  | Module | M0 | Limit | `be64b9b`, same method | merged | merged, on the integration's scale |
+  |---|---|---|---|---|---|
+  | Derived9–11 (today's text) | 19.1 s | 22.9 s | 21.65 s (7.62 + 10.63 + 3.40) | 21.9 s (7.75 + 10.64 + 3.50) | 19.9 s |
+  | CoreDerived9–11 | — | 22.9 s | — | 23.4 s (9.18 + 10.84 + 3.4) | about 21.3 s |
+  | `TestSuite/Problems` (not flipped) | 1.2 s | 1.44 s | 1.79 s (CPU 1.03) | 1.82 s (CPU 1.07) | 1.27 s |
+  | `TestSuite/CoreProblems` | — | 1.44 s | — | 1.99 s (CPU 1.20) | — |
+  | `Examples/ProofTree` | 10.1 s | 12.1 s | 11.64 s | 12.85, 13.24 s | 12.4–12.7 s, **over** |
+  | `Examples/Chains/Storage` | 7.5 s | 9.0 s | 9.24 s | 10.39, 11.07 s | 9.7–10.3 s, **over** |
+  | `Solkey/TestSuite` | 10.4 s | 12.5 s | 11.50 s | 11.50 s | 10.8 s |
+  | `Examples/Benchmark/Syntax` | 1.2 s | 1.44 s | 2.06 s (CPU 1.51) | 2.03 s (CPU 1.53) | 1.42 s |
+
+  Two rows are over their limits, both from the W3b lanes' own changes:
+  `Chains/Storage` (+12–20% on `be64b9b`; the chains lane measured +0.9 s
+  from its library changes, cause not identified, and +0.3 s from its two
+  newly flipped chains), and `ProofTree` (+10–14%: the tree lane's flipped
+  diamond trees and short `sol_derive?` walks, each line re-run through the
+  scope's macros; that lane measured 12.0 s with its own method).  Under
+  Decision 9 the gate is the aggregate: 55.9 s on the integration's scale
+  against 59.4 s of limits, within.  CoreDerived11's first two samples read
+  8.8 and 10.8 s with 3.0 s of CPU, because a later request woke the
+  worker; its CPU timeline ends at 3.4 s.
+- **Pins changed, union of the lanes** (each lane's section has the detail):
+  - *W3 reason 1, `cov` gone:* `Tactics/Revert`, `Branch`, `ApplySteps`
+    (`case cov` deleted), `Loops` `countTo1Walk`,
+    `Chains/StorageCoverage` `requireConditionCapture_call`,
+    `ChainNotation` §5, §8, §9, `ProofTree`'s first tree and diamond walks.
+  - *Reason 2, a branch's `}`:* `Tactics` goal comments, `ChainNotation`
+    §5, §8, §9.
+  - *Reason 3, fewer steps:* `Tactics/Payment.sendDiamond` (`⟹ true`),
+    `Tactics/Loops`' diamond `#proof_tree` (5 nodes for 6) and
+    `countTo1Walk`, `ChainNotation` (no `⟨[ ]⟩` line before
+    `emptyModality`; `ageWrite` 1 step, `ofSymex` 6), `ProofTree`'s
+    first tree (11 nodes and 2 branches, was 12 and 3), `sendNoCallbackDiamond`
+    (6 nodes, was 8) and the diamond call trees.
+  - *Parameters bound by `∀` (W2 tree):* `Tactics` goal comments,
+    `Constructors`' deployment formula, `UpdateRules.copyLocal_merge`,
+    `ChainNotation` texts, `StorageCoverage`/`MemoryCoverage` reading
+    examples, `ChainRewrites`' refused-`sequentialToParallel` pin,
+    `ProofTree`'s first tree (`allRight` first).
+  - *Scoped types printed (W3 lane 7b):* `Tactics/Constructors` `#check`s
+    (`Core.Fml C []`).
+  - *The walk is `Core.Proves`'s:* `Chains/Memory.CallWrite`
+    (`functionBodyExpand` and two `~[blockEmpty]~>` links),
+    `Tactics/TryCatch.getWalk`, and `blockEmpty` on an inlined callee's
+    body in `Tactics/Loops` and `ProofTree`'s diamond call trees (W3
+    tactics Left 7(b), **pending the lead's approval**).
+  - *`sol_derive?` writes today's short walk under the scope:*
+    `Tactics/CoreDerive` (three new pins), every `ProofTree`
+    `sol_derive?` suggestion (today's text again, replacing the W3 tree
+    lane's `Core.Proves` constructors).
+  - *`Proves.close` takes a bool-keeping diamond update (`Upd.boolB`):*
+    `Tactics/CoreProofTree`'s diamond send tree (three OPEN GOAL leaves
+    close).  This lead decision is still open: both `w3b-tactics` and `w3b-tree`
+    depend on it; it is sound over M3 with no new axiom, and CORE 2's
+    `tclosableB` covers it.
+  - *Statement shape of scoped chains:* `φ : Core.Post C Γ` binders in
+    every newly flipped chain; `MemoryDelete.IndexedDelete` and
+    `StorageToMemory.FieldCopy` merged into one chain each;
+    `ChainNotation`/`ChainRewrites` `:= rfl` → `by sol_chain`, `calc`
+    proofs → one chain each, two postconditions for the merge under a
+    branch.  New reasons: `FieldCopy`'s line before the copy keeps
+    `{ sp := alice.account }` separate (a hidden binder, Decision 12);
+    `ChainRewrites` MemoryReads gain `where Person memory carol`.
+  - *New scoped messages and tactics:* `ChainNotation`'s scoped errors and
+    the `sol_chain?`/`sol_rws?` suggestions; **this integration**: the two
+    "does not reach" pins print the written line as it elaborates alone
+    (`w3b-tree`'s printer, above).
+  - New pins without a changed one: `Tactics/LoopsImport` (`7 obligations
+    declared scoped`), `Tactics/CoreCallback` (declarations only).
+  - Unchanged: Derived1–14 text, `Report.lean`'s 437, `Problems.lean`'s
+    and `Suggestions.lean`'s pins, every `sol_prove?` suggestion,
+    `#proof_node`, `#proof_tree_json`, the fresh names (`se1`, `sp1`).
+- **Still on today's calculus or today's run: the W4 blockers.**
+  1. *TestSuite, waiting on diamond leaves (CORE 2 item 5, Decision 17):*
+     `TestSuite/Derived1–14`, `Problems`, `Suggestions`, `Report` (330 of
+     437 obligations are diamonds; `Proves.close` takes only bool-keeping
+     diamond updates, and a bool local set from storage is refused).  The
+     flip itself is mechanical (testsuite lane, Left).  The twins
+     `CoreDerived9–11`, `CoreSeq` and the legacy statements
+     (`Frontend/Problems.lean`'s `legacy`) go at the flip.  The
+     `Derived7` `case leaf2` deviation needs the lead's approval.
+  2. *Callbacks, Decision 17:* `Tactics/Callback`, `Tactics/TryCatch`'s
+     closing block (`ValidC`, `Invariant`): `ProvesC.sound` against
+     `ValidC` needs `Stmt.TSound C`, which `Stmt.not_tsound` refutes.
+     `Calculus/Callback.lean` cannot be deleted before they move.
+  3. *Today's sequent rules on updates, no `Core.Proves` twin:*
+     `Proves.merge`, `mergeStorage`, `eqDSplit`, `definedWritten`,
+     `eqClose`, `rewrite` and `sol_rw`'s Theory rewrites:
+     `Tactics/SelectOnSaveConsr`, `Tactics/TermTaclets`, the closing
+     blocks of `Tactics/StorageDelete` (the `_theory` derivations) and
+     `Tactics/UpdateRules` (`deepFieldWriteMerged`, `merge`/`simplify`).
+     A twin needs a change to `Core/Proves.lean`.
+  4. *`CallRet.isRets`, the lead's decision (W3 lane item 7a):* the closing
+     block of `Tactics/CallOperands` (a memory-returning call's
+     `internalCallExpand`).
+  5. *The closer's input, kept until M6c:* `Tactics/Decide`'s closing block
+     (`Fml.inL`, `sol_decide` on a modality, the untyped refutations
+     `deleteWithoutWriteUntyped`, `survivesMappingOnly`) and `ProofTree`'s
+     guards on today's residue and closer; `Proves.close` and
+     `Seq.leafRes` hand every scoped leaf to today's closer on the erasure.
+     These need W4 `modal`'s `NFml`, not today's `.modal`; the modality
+     pins in `Decide` must move or go when `.modal` does.
+  6. *`Fml.stripAlls` drops an explicit `∀` with the parameters':*
+     `ProofTree`'s two interval examples (`∀ uint x; x <= 100 → …`).
+  7. *Now unblocked, not flipped:* `ProofTree`'s `sol_chain?`, `#chain` and
+     `sol_rws?` sections stayed today's because `w3b-chains` had no scoped twin
+     when the tree lane ran.  The twins are merged now, so this is a
+     mechanical flip (pins move to `cdl![m]{…}`).
+  8. *Contracts through the erasure:* `Tactics/Contracts` reaches today's
+     `FunContract`/`useContract` by `sol_erase`, with its arguments in today's
+     formulas.  There is no scoped `FunContract` yet, so
+     `Calculus/Contracts.lean` stays.
+  9. *Chains past the program:* rewrites after the program
+     (`~[sequentialToParallel]~>`, `~[findOnSave]~>`, …) run
+     `Calculus/ChainRewrites.lean` on the erasure. `Calculus/Chains.lean`
+     is still imported for that machinery and for its notation's syntax
+     (every `Examples/Chains/*` file but `Payment`, `ChainNotation`, `ChainRewrites`,
+     `ExampleNames`, `CallOperands`, `Checked`).  `Core/Merge.lean`'s
+     soundness is over M3's `holds` and moves to `tholds` in CORE 2's
+     fold.  So W4 `calc-del` must keep or port `ChainRewrites`.
+  10. *Whole modules on today's reading:* `Examples/Verify` and
+      `Tools/{Verify,Counterexample}` (`Fml.eval3` over `Prog.runFuel`
+      and `Stmt.run`: W4 `sem-del`'s first item, and Decision 17 for a
+      typed refutation); `Corpus/Basic` (`corpus_decide` through
+      `Semantics/RunErase` and today's `Calculus/Notation`);
+      `Tools/{Inspect,ProofTree}` (today's `Chains`, `Callback`,
+      `ProofTree`); `Theorems.lean` (`SolkeyFragment`, `Uniqueness`,
+      `Callback`); `Examples/Notation`'s sections outside `Scoped`
+      (today's `Proves` constructors as sequents, `Premise` printing).
+  11. *Core modules importing today's for notation, printers and
+      elaborators*, which W4's `Surface` default must take over before
+      `calc-del`: `Core/{Notation,Quote,Print,Symex,WalkSyntax,Sequents,
+      ProofTree,ChainKit,ChainGen,LastLine,SolSpec,Surface,Taclet,Close,
+      Proves,SoundArms}` import `Calculus/{Notation,Quote,Symex,Sequents,
+      ProofTree,Chains,ChainGen,LastLine,Spec,Rules,Derive,Logic,
+      SoundUpdate}`.  The `Benchmark/*`, `Tactics/{Calls,Dangling,Loops,
+      Payment,StorageSteps,Specs}` and `ProofTree` examples import
+      `Calculus/{Derive,Spec,Sequents}` for today's commands under the
+      switch.
+  12. *M3's reading under every scoped `⊨`:* `Core.Valid` is M3's `holds`
+      until CORE 2's change to the typed reading (Decision 17), so
+      `RunWk.lean`, `RunFrame.lean`, `State.BoolOK` and M3's `Sound*` arms
+      stay.
+- **Lane worktrees removed** (`w3b-testsuite`, `w3b-tactics`,
+  `w3b-chains`, `w3b-tree`; the branches stay) and their Lean workers
+  stopped.  The read-only finder/skeptic review pass was not run at the
+  integration.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
