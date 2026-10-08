@@ -95,6 +95,7 @@ import Solidity.Calculus.Core.CallbackHolds
 import Solidity.Calculus.Core.CallbackSound
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Sequents
+import Solidity.Calculus.Core.SequentNotation
 import Solidity.Calculus.Core.SolSpec
 import Solidity.Semantics.Core.Callback
 import Solidity.Calculus.Completeness

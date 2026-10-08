@@ -64,39 +64,22 @@ elab "#rule_text " J:ident r:ident : command => liftTermElabM do
   | none => throwError "no rule `{J.getId}.{r.getId}` in both tables"
 
 /-! The lines the scoped printer does not render yet (`docs/intrinsic.md`,
-W1 "rules"): a hole's statement (`lhs = …`, `tgt = mv`: `SHole.fill` and
-its kin), `⊕⊕`'s value (`Tms.Term.bumped`), a call's inlining
-(`Premise.expandCall`), a `try` with schema binders (`rets`, `code`), and a
-block weakened inside a premise's program (`Prog.up`, which
-`Calculus/Core/Delab.lean`'s `progPieces` unfolds before it looks for `up`).
-`functionCallArgCapture` is stated without a line: today's escapes to the
-untyped call (`‹.call f args hsep ret body›`). -/
+W1 "rules"): a call's inlining (`Premise.expandCall`) and a `try` with
+schema binders (`rets`, `code`).  `functionCallArgCapture` is stated
+without a line: today's escapes to the untyped call
+(`‹.call f args hsep ret body›`).  A hole's statement (`lhs = …`,
+`tgt = mv`), `⊕⊕`'s value and a block read under a fresh local
+(`Prog.up`) print since W4 (`docs/intrinsic.md`, W4 `theorems`). -/
 
 /--
-info: 140 of 158 rules of `Taclet` print as their scoped twins; not these:
-storageFieldRead_unfold_rightFst
-storageIndexRead_unfold_rightFst
-storageIndexRead_unfold_rightSndIndex
-ternaryToIf
-ternaryCaptureCond
-localAssignIncrement
-storageRootIncrementAssignment
-storageFieldIncrementAssignment
-storageIndexIncrementAssignment
-memoryFieldIncrementAssignment
-memoryIndexArrayIncrementAssignment
-memoryFieldRead_unfold_rightFst
-memoryIndexRead_unfold_rightFst
-memoryIndexRead_unfold_rightSndIndex
-newArrayCapture
+info: 155 of 158 rules of `Taclet` print as their scoped twins; not these:
 functionBodyExpand
 internalCallExpand
 tryCallNoCallbackBox
 ---
-info: 6 of 9 rules of `LeanTaclet` print as their scoped twins; not these:
+info: 7 of 9 rules of `LeanTaclet` print as their scoped twins; not these:
 functionCallArgCapture
 tryCallDiamond
-whileInvariantDiamond
 -/
 #guard_msgs in
 #check_rule_text

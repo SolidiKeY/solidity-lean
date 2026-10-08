@@ -48,8 +48,8 @@ info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ
 #guard_msgs in #check @Core.Taclet.ifElseSplit
 
 /-! `#taclet` on a scoped taclet: its line, today's solkey taclets.  The
-rule is one that prints as today's (`storageFieldRead_unfold_rightFst`, a
-read through a hole, is on `#check_rule_text`'s list until W2's Delab). -/
+rule is one that prints as today's (all but the few on `#check_rule_text`'s
+list do). -/
 
 /--
 info: Solidity.Core.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}

@@ -2,6 +2,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Derive
 import Solidity.Tools.CoreInspect
+import Solidity.Calculus.Core.SequentNotation
 
 /-!
 # The notation, pinned
@@ -17,14 +18,11 @@ Everything here is the scoped calculus's: the rule lines are
 `Core.Premise`'s, the rules of `⊢` `Core.Proves`'s, and the formulas and
 the derivation read scoped (`open scoped Solidity.Core.Surface`, section
 `Scoped`): a parameter is bound by `∀`, a formula is a `Core.Fml C []`.
-Three rule lines `Core.Delab` does not print yet, today's `merge` and
-today's sequent macros stay today's, each in a section that says so, until
-W4 (`docs/intrinsic.md`).
+A sequent is read as it prints under `open scoped Solidity.Core.Sequent`
+(section `Sequents`).
 -/
 
 namespace Solidity.Examples.Notation
-
-open Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -38,15 +36,15 @@ per family. -/
 
 /-! ### Step 1: a read whose receiver is not simple -/
 
-/-! Today's rule: `Core.Delab` prints the scoped twin's hole (`SHole.fill`)
-as its `match` (`#check_rule_text`'s list), until W4. -/
+/-! `lhs` is a hole: the statement a read lands in (`v = □`, `lsv = □`,
+`loc = □`), one rule for the three. -/
 
 /--
-info: @Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Ty} {lhs : Hole C x}
-  {x_1 : Name} {nsp : SPath C (Ty.struct x_1)} {fld : Name},
+info: @Core.Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : Ty}
+  {lhs : Core.SHole C Γ x} {x_1 : Name} {nsp : Core.SPath C Γ (Ty.struct x_1)} {fld : Name},
   dl{ ⟨[ lhs = nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; lhs = sp.fld; ]⟩ }
 -/
-#guard_msgs in #check @Taclet.storageFieldRead_unfold_rightFst
+#guard_msgs in #check @Core.Taclet.storageFieldRead_unfold_rightFst
 
 /-! ### Step 2: a write, source, receiver and index captured in that order -/
 
@@ -77,15 +75,15 @@ info: @Core.Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m 
 -/
 #guard_msgs in #check @Core.Taclet.memoryFieldDeleteReference
 
-/-! Today's rule: the scoped twin's target (`NewLhs`) prints as its `match`,
-until W4. -/
+/-! `tgt` is where the fresh array lands (`NewLhs`): a storage or a memory
+location. -/
 
 /--
-info: @Taclet.newArrayCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {R : RefTy} {tgt : NewLhs C R}
-  {se : Simple C PrimTy.uint} {hn : R.newArrOk = true},
+info: @Core.Taclet.newArrayCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {R : RefTy}
+  {tgt : Core.NewLhs C Γ R} {se : Core.Simple C Γ PrimTy.uint} {hn : R.newArrOk = true},
   dl{ ⟨[ tgt = new T(se); ]⟩ ⇝ ⟨[ T memory mv = new T(se); tgt = mv; ]⟩ }
 -/
-#guard_msgs in #check @Taclet.newArrayCapture
+#guard_msgs in #check @Core.Taclet.newArrayCapture
 
 /--
 info: @Core.Taclet.storageLengthRead : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : PrimTy}
@@ -111,17 +109,14 @@ info: @Core.Taclet.storageRootOpAssign : ∀ {C : Contract} {k : Nat} {m : Modal
 -/
 #guard_msgs in #check @Core.Taclet.storageRootOpAssign
 
-/-! Today's rule: `Core.Delab` fails on the scoped twin's statement, until
-W4. -/
-
 /--
-info: @Taclet.storageFieldIncrementAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {p : PrimTy} {v : Var} {op : IncDec}
-  {x : Name} {sp : SPath C (Ty.struct x)} {fld : Name} {hfld : C.fieldType x fld = some (Ty.prim p)}
-  {hs : (OpLoc.field sp fld hfld).recvSimple = true},
+info: @Core.Taclet.storageFieldIncrementAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {p : PrimTy}
+  {v : Core.Idx Γ (Core.LTy.val p)} {op : IncDec} {x : Name} {sp : Core.SPath C Γ (Ty.struct x)} {fld : Name}
+  {hfld : C.fieldType x fld = some (Ty.prim p)} {hs : (Core.OpLoc.field sp fld hfld).recvSimple = true},
   dl{ ⟨[ v = sp.fld⊕⊕; ]⟩ ⇝
     { storage := save(storage, sp.fld, find(storage, sp.fld) ± 1) ‖ v := find(storage, sp.fld)⊕⊕ } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Taclet.storageFieldIncrementAssignment
+#guard_msgs in #check @Core.Taclet.storageFieldIncrementAssignment
 
 /-! ### Arrays: a push is two nested writes over the length -/
 
@@ -286,37 +281,52 @@ info: @Core.Proves.impRight : ∀ {C : Contract} {R : RuleSet} {Γ₀ Γ : Core.
 -/
 #guard_msgs in #check @Core.Proves.impRight
 
-/-! ### Today's, until W4
+/-! ### Sequents as input
 
-Today's `merge`, which the scoped sequent states otherwise
-(`Core.Proves.merge` merges past hidden binders, its side conditions
-computed), and today's sequent macros, which have no scoped input form: the
-scoped goals print as sequents (above) but are written as `Core.Proves`
-terms.  Today's `Proves` has its own aliases by solkey's names
-(`sequentialToParallel`, `simplifyUpdate`, `applyOnRigidFormula`, …:
-theorems, `Calculus/Logic.lean`), over the rest `..Γ` of its context. -/
+Under `open scoped Solidity.Core.Sequent` (`Calculus/Core/SequentNotation.lean`)
+a sequent is read as it prints: `dl{ ..H, a ⟹[R] φ }` is the scoped
+judgement `Core.Proves C R Γ₀ (H.pre a) φ`, its context a telescope
+(`Core.Hyps`) built from the left.  `sequentialToParallel` is the
+constructor `merge`, past the hidden binders `bs` between the two updates
+(Lean only), its side conditions computed. -/
+
+section Sequents
+open scoped Solidity.Core.Sequent
+
+/-- `sequentialToParallel` with no hidden binder between the two updates:
+`{U}, {V}` become the one parallel update `W` (`Upd.seqPar`). -/
+theorem sequentialToParallelNil {C : Contract} {R : RuleSet} {m : Modality} {Γ₀ Γ Δ Ε : Core.Ctx}
+    {H : Core.Hyps C Γ₀ Γ} {U : Core.Upd C Γ Δ} {V : Core.Upd C Δ Ε} {W : Core.Upd C Γ Ε}
+    {φ : Core.Fml C Ε} (hW : U.seqPar V = some W) :
+    dl{ ..H, {W} ⟹[R] φ } → dl{ ..H, {U}, {V} ⟹[R] φ } :=
+  Core.Proves.merge (bs := []) rfl hW
 
 /--
-info: @merge : ∀ {C : Contract} {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U V : Upd C} {φ : Fml C},
-  U.envOnly = true → dl{ ..Γ, { U ‖ {U}V } ⟹[R] φ } → dl{ ..Γ, { U }, { V } ⟹[R] φ }
+info: @sequentialToParallelNil : ∀ {C : Contract} {R : RuleSet} {m : Modality} {Γ₀ Γ Δ Ε : Core.Ctx} {H : Core.Hyps C Γ₀ Γ}
+  {U : Core.Upd C Γ Δ} {V : Core.Upd C Δ Ε} {W : Core.Upd C Γ Ε} {φ : Core.Fml C Ε},
+  U.seqPar V = some W → dl{ ..H, { W } ⟹[R] φ } → dl{ ..H, { U }, { V } ⟹[R] φ }
 -/
-#guard_msgs in #check @Proves.merge
+#guard_msgs in #check @sequentialToParallelNil
 
-/-- The sequent macros build exactly the spines the reflective checks expect
-(`Γ ++ [h]` nested to the left, `s :: ω`, `P ++ ω`): the same `Expr`
-(`=ₛ`), which `rfl` would not tell from a `[s] ++ ω` spine. -/
-example {C : Contract} (R : RuleSet) (Γ : List (Hyp C)) (a φ : Fml C) (U V : Upd C)
-    (m : Modality) (s : Stmt C) (ω P : Prog C) (x : Var) (p : PrimTy) : True := by
-  guard_expr dl{ ..Γ, a ⟹[R] φ } =ₛ Proves R (Γ ++ [Hyp.pre a]) φ
-  guard_expr dl{ ..Γ, {U}, {V} ⟹[R] φ } =ₛ Proves R (Γ ++ [Hyp.upd m U] ++ [Hyp.upd m V]) φ
-  guard_expr dl{ ..Γ, ∀ p x ⟹[R] φ } =ₛ Proves R (Γ ++ [Hyp.all x p]) φ
-  guard_expr dl{ ..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ } =ₛ Proves R Γ (Fml.modal m (s :: ω) φ)
-  guard_expr dl{ ..Γ ⟹[R] ⟨[ P; ..ω ]⟩ φ } =ₛ Proves R Γ (Fml.modal m (P ++ ω) φ)
+set_option linter.unusedVariables false in
+/-- The sequents build the context from the left (`(H.pre a).upd .box U`),
+the program as `Core.Prog.cons`, the frames empty: the same `Expr` (`=ₛ`). -/
+example {C : Contract} (R : RuleSet) {Γ₀ Γ Δ Γ' Γ₁ : Core.Ctx} (H : Core.Hyps C Γ₀ Γ)
+    (a φ : Core.Fml C Γ) (U : Core.Upd C Γ Δ) (ψ : Core.Fml C Δ) (m : Modality) (x : Var)
+    (p : PrimTy) (χ : Core.Fml C (.val p :: Γ)) (s : Core.Stmt C Γ Γ') (ω : Core.Prog C Γ' Γ₁)
+    (θ : Core.Fml C Γ₁) : True := by
+  guard_expr dl{ ..H, a ⟹[R] φ } =ₛ Core.Proves C R Γ₀ (H.pre a) φ
+  guard_expr dl{ ..H, a, {U} [ ] ⟹[R] ψ } =ₛ Core.Proves C R Γ₀ ((H.pre a).upd .box U) ψ
+  guard_expr dl{ ..H, {U} ⟹[R] ψ } =ₛ Core.Proves C R Γ₀ (H.upd m U) ψ
+  guard_expr dl{ ..H, ∀ p x ⟹[R] χ } =ₛ Core.Proves C R Γ₀ (H.all x p) χ
+  guard_expr dl{ ..H ⟹[R] ⟨[ s; ..ω ]⟩ θ } =ₛ Core.Proves C R Γ₀ H (.modal m (.cons s ω) .nil θ)
   trivial
 
-/-- The sequents read back as the terms they print. -/
-example {C : Contract} (R : RuleSet) (Γ : List (Hyp C)) (x : Var) (p : PrimTy) (U : Upd C)
-    (φ : Fml C) :
-    dl{ ..Γ, ∀ p x, {U} [ ] ⟹[R] φ } = Proves R (Γ ++ [.all x p] ++ [.upd .box U]) φ := rfl
+/-- A rule reads back as it prints (`Core.Proves.impRight`, above). -/
+example {C : Contract} {R : RuleSet} {Γ₀ Γ : Core.Ctx} {H : Core.Hyps C Γ₀ Γ} {a φ : Core.Fml C Γ} :
+    dl{ ..H, a ⟹[R] φ } → dl{ ..H ⟹[R] a → φ } :=
+  Core.Proves.impRight
+
+end Sequents
 
 end Solidity.Examples.Notation
