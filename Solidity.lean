@@ -78,6 +78,7 @@ import Solidity.Calculus.Core.ProofTree
 import Solidity.Calculus.Core.Callback
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Sequents
+import Solidity.Calculus.Core.SolSpec
 import Solidity.Semantics.Core.Callback
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.RuleShapes
@@ -180,6 +181,7 @@ import Solidity.Examples.Tactics.CoreSpec
 import Solidity.Examples.Tactics.CoreProofTree
 import Solidity.Examples.Tactics.CoreSurface
 import Solidity.Examples.Tactics.CoreSequents
+import Solidity.Examples.Tactics.CoreSolSpec
 import Solidity.Examples.Tactics.CoreCallback
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Counter

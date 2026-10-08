@@ -129,6 +129,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Core/Callback.lean` | The callback taclets on scoped statements (`Core.CallbackTaclet`: `transferWithCallbackBox`, `sendWithCallbackBox`, `tryCallWithCallbackBox`, `Rules.lean`'s lines read under `Core.Schema`), each its no-callback twin (`toTaclet`) and so `Stmt.step`'s (`toStep`); `ProvesC` (sequents `dl{ ..H ⟹ᶜ[I] φ }`, the invariant a closed formula read past a dropping update, `Fml.closedAt`); their printers. |
 | `Calculus/Core/Surface.lean` | The flip switch, `open scoped Solidity.Core.Surface`: `dl!{}`/`dl[C]{}` read as `cdl…`, `spec!`/`problem!` as `cspec…`/`cproblem…`, `⊨` by the formula's type (`valid%`), `⊢` the scoped sequent; `surfaceOn` for the commands. |
 | `Calculus/Core/Sequents.lean` | Checked sequent lines on scoped goals: `show_sequent!{ Γ ⟹ φ }` (and `show sequent!{ … }` under `Core.Surface`) compares the goal's erasure (`Delab.hypsParts`, `Delab.tr`, block ends dropped) with the line read as today's sequent (`readSequent`, `∀ T x` entries too), by unification. |
+| `Calculus/Core/SolSpec.lean` | `sol_spec` on a scoped obligation (`cspec!{f}`): the scoped strategy, then each leaf erased (`Valid.of_erase`) and closed by today's `sol_spec_prep`/`sol_spec_finish`. |
 | `Semantics/Core/Callback.lean` | The callback semantics over the typed run (W1): `COut C H Γ` (over `Out`, the heap's growth carried), an invariant read on the global part (`StateInv`, `StateInv.at`), `ExecS`/`ExecP`/`ExecF` (no stuck arms, no failed entries; `TState.havoc` over typed storage; a call's locals given back by `TRun.callLeave`); the deterministic run is a callback run (`Prog.exec_run`, `Frames.exec_run`), the only one with no payment (`ExecP.eq_run`, `ExecP.forall_iff`). `holdsC` waits for `holds` on typed states (W2). |
 | `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each constructor transcribes, checked (`taclets_partitioned`); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
@@ -347,6 +348,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/CoreProofTree.lean` | The proof tree of a scoped goal pinned: `#proof_tree`, `#proof_node`, `#proof_tree_json` on `cdl!{}`. |
 | `Examples/Tactics/CoreSurface.lean` | The flip switch pinned: the same text read today's and scoped; the callback taclets printed. |
 | `Examples/Tactics/CoreSequents.lean` | Scoped walks with checked `show sequent!{ … }` lines. |
+| `Examples/Tactics/CoreSolSpec.lean` | `Examples/Tactics/Specs.lean`'s obligations scoped and proved by the same `sol_spec`. |
 | `Examples/Tactics/CoreSpec.lean` | `cspec!{f}` and `cproblem!{constructor}` pinned on a contract with snapshots and a result; each erases to today's. |
 | `Examples/Tactics/CoreCallback.lean` | The typed callback reading used: the deterministic run of a program that pays is a callback run (`Prog.exec_run`), and every callback run of one that does not is its deterministic run, decided by the kernel (`ExecP.forall_iff`).; a send's three goals under `ProvesC`. |
 
