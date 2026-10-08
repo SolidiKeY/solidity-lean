@@ -1991,6 +1991,100 @@ clean.  Not run: the full build (the printer edit rebuilds everything above
 memory), `check-corpus.sh`, `solkeycheck` (no rule name or annotation
 changed).
 
+### W2.5/W3 integration (2026-10-08)
+
+- **Merged** into `intrinsic`, in order: `w25-tsoundA` (a fast-forward), `w25-tsoundB` (conflicts in `Solidity.lean`,
+  `docs/module-map.md` and this file only, each a union of both sides: the
+  `TSound{Capture,Store,Mem,Local,Control,Step}` and `TSound{Calls,Loops}`
+  imports and rows, both lane sections), `w25-testsuite`, `w25-tactics`
+  (which had already merged `w25-tsoundA`, `w25-testsuite`, `w25-tree`
+  and `w25-chains`, with its own fixes across them: `sol_prove` on `⊢` by
+  `ProvesDerive`, the `Branch.lean` `==` pin, the `Tools` int-product pin),
+  so `w25-chains` and `w25-tree` were already in.  No duplicate import, module-map
+  row or fully-qualified declaration (`dups.py`: only the known
+  `Evm/Repr`/`Examples/Verify` `as` false positive).
+- **Full build: green, no fix needed.**  `lean_build` over `Solidity`,
+  `solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (336 jobs; the last
+  two in `defaultTargets` for the run only).  The first run (1724 s wall)
+  overlapped other sessions under the 32 GiB cap: `TestSuite/Derived2` and
+  `SortCheck/Faithfulness` were OOM-killed (exit 137, not a code error), and
+  every module's time in that log is contention (Derived* about 1500 s).
+  The second run rebuilt those two (Derived2 9.3 s, Faithfulness 25 s) and
+  finished in 31 s.  No new `sorry`, `axiom` or `maxHeartbeats` override;
+  five `erw`s in `TSoundCalls` (the lane's note).
+- `scripts/check-orphans.mjs`: 322 reachable, none orphaned but the
+  git-excluded `Solidity/Scratch/`.  `scripts/check-doc-paths.sh`: OK (50
+  ambiguous citations, all resolving).  `scripts/check-rule-text.sh`: empty.
+- **W3 gates**, re-timed fresh, one worker at a time with nothing else
+  elaborating (wall from the worker's start to its last CPU, imports from
+  the cache):
+
+  | Module | M0 | Limit | Now |
+  |---|---|---|---|
+  | Derived9–11 (today's text, not flipped) | 19.1 s | 22.9 s | 19.7 s (7.0 + 9.9 + 2.8) |
+  | CoreDerived9–11 (the scoped twins) | — | 22.9 s | 20.9 s (8.3 + 9.6 + 3.0) |
+  | `TestSuite/Problems` (legacy only, not flipped) | 1.2 s | 1.44 s | 1.25 s |
+  | `Examples/ProofTree` | 10.1 s | 12.1 s | 11.2 s |
+  | `Examples/Chains/Storage` | 7.5 s | 9.0 s | 8.6 s |
+  | `Solkey/TestSuite` | 10.4 s | 12.5 s | 10.8 s |
+  | `Examples/Benchmark/Syntax` | 1.2 s | 1.44 s | 1.44 s (at the limit) |
+
+  All within their limits as measured here.  Two are not the gate the plan
+  means: Derived9–11 and Problems are still today's (the flip is blocked on
+  diamond leaves, `testsuite` above), and the testsuite lane's own
+  measurement of Problems with the scoped `main decl` is 4.6 s, over the
+  limit, with its proposal (scoped statements in `CoreProblems`) left for
+  the lead.  The chains lane measured `Chains/Storage` at 9.5–9.8 s before
+  its cache commit (2086fa4); 8.6 s here.
+- **Pins changed, union of the lanes** (each lane's section has the
+  detail):
+  - *W3 reason 1, `cov` gone:* `Chains/CheckedArithmetic`
+    `OverflowReverts`, `Chains/StorageCoverage` (requireConditionCapture,
+    requireSimple, ifElseUnfold, ifElseSplit), `Tactics/Revert` (`case cov`
+    deleted), `Tactics/Branch`, `Tactics/Loops` docstring, `ProofTree`
+    `sol_derive?` walks (`split` for `splitBox`).
+  - *Reason 2, a branch's `}`:* `StorageCoverage` branch goals,
+    `Tactics/Branch`, `ProofTree` `#proof_node` and JSON.
+  - *Reason 3, fewer steps:* `ProofTree` serial numbers and JSON (6 nodes
+    for 7), `Tactics/Loops` `#proof_tree`, `Tactics/Payment` (`⟹ true`, no
+    `emptyModality` after a last statement).
+  - *New, parameters bound by `∀` (W2 tree):* the `allRight` first node of
+    the scoped trees, `#proof_node 2` for 1, `Tools` `#wp` prefixes,
+    `Notation`'s `#check dl!{…}`, `Tactics/Payment`, `Loops` `#step`,
+    `Branch`.
+  - *New, scoped types printed:* `Benchmark/Counter` and `Tactics/Specs`
+    `#check spec!{…}` (`Core.Fml C []`), `Tactics/TryCatch`, `Notation`.
+  - *New, the walk is `Core.Proves`'s:* `ProofTree` and `Tactics/CoreDerive`
+    `sol_derive?` text (Core constructors, `bindIntro`, `updIntro`,
+    `Proves.close` leaves); `Tactics/Calls` gains a `blockEmpty` step;
+    `Tactics/CallOperands` names `functionBodyExpand` for
+    `internalCallExpand`.
+  - *New, statement shape of scoped chains:* `φ : Core.Post C Γ` binders,
+    segments merged into one chain (Storage.BalanceWriteRead,
+    StorageDelete.SubtreeDelete, MemoryDelete.FieldDeleteRef,
+    StorageCoverage ifElseUnfold), `rfl` → `by sol_chain`;
+    `ChainNotation`/`ChainRewrites` use local today's copies.
+  - *New, printer:* the `==`/`!=`/`*` update escape prints as source
+    (`Tactics/Branch` `{ se1 := a == b }`, `ChainNotation` round trips).
+  - *New, erase guard in the command:* `Solkey/Constructors` and
+    `TestSuite/CoreProblems` info lines add "erasing to its legacy
+    statement".
+  - Moved unchanged into "Read without the switch" blocks: `Decide`,
+    `StorageDelete`, and the diamond walks and trees.
+  - Unchanged: Derived1–14 text, `Report.lean`'s 437, `Problems.lean`'s
+    pins, the fresh names (`se1`, `sp1`).
+- **Left, across lanes** (from the lanes' lists): `Stmt.TSound C` and an
+  unconditional `Proves.tvalid` wait on the `Stmt.TArmOk` conditions (copy
+  off the bridge, push at the bound under the diamond, empty memory type
+  under the box binder); `Proves.close` is box-only, which blocks the
+  Derived1–14 flip (330 of 437 obligations are diamonds) and the diamond
+  walks and trees; no scoped `sol_prove?`/`sol_chain?`/`sol_rws?`; the
+  statement-level captures in φ's scope keep about 25 chains on today's
+  calculus; the read-only review pass was not run by any lane.
+  `check-corpus.sh` and `solkeycheck` were not run (no rule name or
+  annotation changed).
+- The six lane worktrees are removed (the branches stay).
+
 ## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
 Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.
 
