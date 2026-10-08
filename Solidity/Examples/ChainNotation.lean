@@ -67,17 +67,17 @@ example : dl!{ ⟨ alice.age = v; ⟩ alice.age == v }
     ~[storageRootWriteStore]~> dl!{ { storage := save(storage, alice.age, v) } alice.age == v } := by
   sol_chain
 
--- So is the line: `sol_chain` shows the line written and the derivation it computed instead.
+-- So is the line: `sol_chain` shows the line written, as it elaborates alone (its free
+-- names bound by `∀`), and the derivation it computed instead.
 /--
 error: sol_chain: the derivation of
   dl{ ∀ uint v; ⟨ alice.age = v; ⟩ find(storage, alice.age) = v }
 does not reach
-  dl!{ { storage := save(storage, alice.age, w) } alice.age == v }
+  dl{ ∀ uint v; ∀ uint w; { storage := save(storage, alice.age, w) } find(storage, alice.age) = v }
 Its lines:
-
-  dl{ ∀ uint v; ⟨ alice.age = v; ⟩ find(storage, alice.age) = v }
+    dl{ ∀ uint v; ⟨ alice.age = v; ⟩ find(storage, alice.age) = v }
   ~[storageFieldWriteSave]~>
-  dl{ ∀ uint v; { storage := save(storage, alice.age, v) } find(storage, alice.age) = v }
+    dl{ ∀ uint v; { storage := save(storage, alice.age, v) } find(storage, alice.age) = v }
 -/
 #guard_msgs in
 example : dl!{ ⟨ alice.age = v; ⟩ alice.age == v }
@@ -453,21 +453,20 @@ def ifRevertTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { revert(); }; ]�
 error: sol_chain: the derivation of
   dl{ ∀ uint y; ∀ uint a; ⟨[ if (flags[a]) {revert();} else {y = 1;}; ]⟩ φ }
 does not reach
-  dl![m]{ { se1 := find(storage, flags[a]) } ((se1 ≐ true → true) ∧ (se1 ≐ false → { y := 1 } φ)) }
+  dl{ ∀ uint a; { se1 := find(storage, flags[a]) } ((se1 ≐ true → true) ∧ (se1 ≐ false → { y := 1 } φ)) }
 Its lines:
-
-  dl{ ∀ uint y; ∀ uint a; ⟨[ if (flags[a]) {revert();} else {y = 1;}; ]⟩ φ }
+    dl{ ∀ uint y; ∀ uint a; ⟨[ if (flags[a]) {revert();} else {y = 1;}; ]⟩ φ }
   ~[ifElseUnfold]~>
-  dl{ ∀ uint y; ∀ uint a; ⟨[ bool se1 = flags[a]; if (se1) {revert();} else {y = 1;}; ]⟩ φ }
+    dl{ ∀ uint y; ∀ uint a; ⟨[ bool se1 = flags[a]; if (se1) {revert();} else {y = 1;}; ]⟩ φ }
   ~[localValueDeclInitDrop]~>
-  dl{ ∀ uint y; ∀ uint a; ⟨[ se1 = flags[a]; if (se1) {revert();} else {y = 1;}; ]⟩ φ }
+    dl{ ∀ uint y; ∀ uint a; ⟨[ se1 = flags[a]; if (se1) {revert();} else {y = 1;}; ]⟩ φ }
   ~[storageIndexReadMappingFind]~>
-  dl{ ∀ uint y; ∀ uint a; { se1 := find(storage, flags[a]) } ⟨[ if (se1) {revert();} else {y = 1;}; ]⟩ φ }
+    dl{ ∀ uint y; ∀ uint a; { se1 := find(storage, flags[a]) } ⟨[ if (se1) {revert();} else {y = 1;}; ]⟩ φ }
   ~[ifElseSplit]~>
-  dl{
-    ∀ uint y;
-      ∀ uint a;
-        { se1 := find(storage, flags[a]) } ((se1 ≐ true → ⟨[ revert(); } ]⟩ φ) ∧ (se1 ≐ false → ⟨[ y = 1; } ]⟩ φ)) }
+    dl{
+  ∀ uint y;
+    ∀ uint a;
+      { se1 := find(storage, flags[a]) } ((se1 ≐ true → ⟨[ revert(); } ]⟩ φ) ∧ (se1 ≐ false → ⟨[ y = 1; } ]⟩ φ)) }
   (the line after depends on the modality m, through a rule that reads it (`revertBox`, `revertDiamond`, a loop's invariant rule): go on after `cases m`)
 -/
 #guard_msgs in
