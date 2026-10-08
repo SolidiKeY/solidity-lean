@@ -5967,7 +5967,7 @@ pass.
   read (`Arg.bindSeq`, `CallRet.enter`/`enterAll`/`leave`, `ARhs.bind`,
   `MRhs.bind`), their `NoPanic` and frame lemmas (`NoPanicOps`, `Agree`'s
   `run_frame`, `Stmt.vars`/`Prog.vars`, `*.bind_frame`), `Properties`'
-  `Prog.run_append`/`run_cons`/`localAfter`, and `Semantics/Mutability.lean`
+  `Prog.run_append`/`run_cons`/`localAfter`, and `Semantics/Mutability`
   whole (decision 39).  `Calculus/Problem.lean`'s `Problem.deploy_of_valid`
   and `_nil` (the typed ones are `Calculus/Core/Deploy.lean`'s).  The
   untyped `Stmt` is `Surface.Stmt` and `Prog` is `Surface.Prog` (decision
