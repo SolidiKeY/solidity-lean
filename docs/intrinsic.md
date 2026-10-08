@@ -3565,6 +3565,12 @@ and `allRight` line (28); `Seq.pick` (27) applies to the parameters only.
 `deleteReadDeepWalk` moves to `Tactics/StorageDelete` (W3c integration
 proposal).
 
+**Lead, 2026-10-09 (2):** proposals 30, 31 and 32 are approved. 30 stays a
+recorded deviation (a program's own fresh-shaped local); 31 is interim:
+`\old`, several results and a memory return in scoped contracts are W4
+work. ProofTree's gate: the tree lane's chain examples move to
+`Tactics/CoreChains`, so the file meets its own limit.
+
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
 **Result.**  `Stmt.tsound C : Stmt.TSound C` at every contract, and
