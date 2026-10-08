@@ -84,7 +84,7 @@ import Solidity.Calculus.Core.Spec
 import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.Close
 import Solidity.Calculus.Core.Derive
-import Solidity.Calculus.Core.ProveSeq
+import Solidity.Calculus.Core.ProvesDerive
 import Solidity.Calculus.Core.WalkSyntax
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.ProofTree
