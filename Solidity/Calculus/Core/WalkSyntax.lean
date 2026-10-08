@@ -48,8 +48,21 @@ def Walk.popsOnly (U : Expr) : MetaM Bool := do
   return b.isConstOf ``Bool.true
 
 /-- `core_silent`: on a scoped goal, the steps KeY does not show: a scope's
-end (an update that only pops) and a hidden binder join the context. -/
+end (an update that only pops) and a hidden binder join the context; before
+any rule, so do the formula's parameters (`allRight`: today's walk reads
+them free). -/
 syntax (name := coreSilent) "core_silent" : tactic
+
+/-- The context holds the formula's parameters only (`∀` and hidden
+binders over nothing): no rule has fired yet. -/
+partial def Walk.paramsOnly (H : Expr) : MetaM Bool := do
+  let H ← whnf H
+  if H.isAppOf ``Hyps.nil then return true
+  if H.isAppOf ``Hyps.all || H.isAppOf ``Hyps.bind then
+    let args := H.getAppArgs
+    -- `all H x p` and `bind H m x t`: `H` follows the contract and the scopes
+    return ← Walk.paramsOnly args[3]!
+  return false
 
 /-- One silent step on the goal `g`: the goals it leaves, `none` where there
 is none to take. -/
@@ -57,8 +70,10 @@ def Walk.silentStep (g : MVarId) : MetaM (Option (List MVarId)) := do
   let ty ← instantiateMVars (← g.getType)
   unless ty.isAppOf ``Core.Proves do return none
   let φ ← whnf ty.appArg!
+  let H := ty.appFn!.appArg!
   let step : Option Lean.Name ←
     if φ.isAppOf ``Fml.bind then pure (some ``Proves.bindIntro)
+    else if φ.isAppOf ``Fml.all && (← Walk.paramsOnly H) then pure (some ``Proves.allIntro)
     else if φ.isAppOf ``Fml.upd then
       let args := φ.getAppArgs
       if ← Walk.popsOnly args[args.size - 2]! then pure (some ``Proves.updIntro) else pure none
@@ -202,7 +217,8 @@ scoped macro_rules
   | `(tactic| apply allIntro) =>
     `(tactic| first
       | apply _root_.Solidity.Proves.allIntro
-      | (core_silent; apply Solidity.Core.Proves.allIntro) <;> core_silent)
+      | (core_silent; apply Solidity.Core.Proves.allIntro) <;> core_silent
+      | core_silent)
   | `(tactic| apply Proves.valid) =>
     `(tactic| first
       | apply _root_.Solidity.Proves.valid

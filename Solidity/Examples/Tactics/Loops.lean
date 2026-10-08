@@ -443,11 +443,10 @@ bool brk1 = false;
 (`Examples/ProofTree.lean`): the invariant rule is `invBox`, `invLean` with
 solkey's two goals under the box, `init` ("invariant initially valid") and,
 past the anonymising update, `thn` and `els` ("invariant preserved and
-used").  The parameter `n` is bound by `∀`, `allRight` first. -/
+used"). -/
 theorem countToNWalk : ⊢ dl!{ [ require(n >= 0); uint i = 0;
     /// @custom:key invariant i <= n
     while (i < n) { i = i + 1; }; ] i == n } := by
-  apply allIntro
   apply unfold .requireConditionCapture
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment

@@ -53,7 +53,6 @@ info: @Taclet.transferNoCallbackBox : ∀ {C : Contract} {k : Nat} {sadr se : Si
 sequent (`Calculus/Sequents.lean`); the chain, from the receiver `3`, is
 `Chains.Payment.Transfer5.chain`. -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
-  apply allIntro
   apply update .transferNoCallbackBox
   show sequent!{ ∀ uint to,
       { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } ⟹ true }
@@ -103,7 +102,6 @@ info: @Taclet.sendNoCallbackDiamond : ∀ {C : Contract} {k : Nat} {pv : Var} {s
 goals, `"send succeeded"` and `"send failed"`, each a checked sequent; it
 has no formula goal. -/
 theorem sendBox : ⊢ dl!{ [ ok = to.send(5); ] true } := by
-  apply allIntro
   apply cases .sendNoCallbackBox
   · simp only [List.not_mem_nil, false_implies, implies_true]
   simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]

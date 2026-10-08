@@ -75,7 +75,8 @@ info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {se : Si
 `if (a == b) { x = 2; } else { x = 1; }` leaves `x` nonzero either way.  The
 condition is captured into `se1`, the capture's declaration dropped, and its
 value bound by `binopAssignment`; then the split.  The two goals are pinned
-(the parameters `a`, `b`, `x` bound by `∀`, taken by `allRight` first):
+(the parameters `a`, `b`, `x` bound by `∀`, taken by `allRight` first, as
+the walk does before its first rule):
 the condition is added *after* the updates of the context, since it is read in
 the state the `if` runs in. -/
 
@@ -93,9 +94,6 @@ case els
 #guard_msgs in
 /-- `if (a == b) { x = 2; } else { x = 1; }` ends with `x != 0`. -/
 theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x != 0 } := by
-  apply allIntro
-  apply allIntro
-  apply allIntro
   apply unfold .ifElseUnfold
   -- dl{ ⟹ [ bool se1 = a == b; if (se1) { x = 2; } else { x = 1; }; ] ¬x = 0 }
   apply unfold .localValueDeclInitDrop

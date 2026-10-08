@@ -1,4 +1,7 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # The two modalities: `revert();`, `require`, `assert`
@@ -64,6 +67,8 @@ open Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
+open scoped Solidity.Core.Surface
+
 /-! ## The taclets -/
 
 /-- info: @Taclet.revertBox : ∀ {C : Contract} {k : Nat}, dl{ [ revert(); ] ⇝ true } -/
@@ -110,10 +115,6 @@ theorem requireBox : ⊢ dl!{ [ require(a == b); x = a; ] x == b } := by
     refine close ?_
     sol_symex
     sol_close
-  case cov =>
-    refine close ?_
-    sol_symex
-    sol_close
 
 /-! ## The diamond: a guard that fails proves nothing
 
@@ -122,35 +123,12 @@ the program reverts, and `revertDiamond` leaves `false`.  With the
 precondition, the second goal has both `a = b` and `se1 ≐ false` in its
 context. -/
 
-/-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`. -/
-theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x == b } := by
-  apply intro
-  apply unfold .requireConditionCapture
-  apply unfold .localValueDeclInitDrop
-  apply update .binopAssignment
-  apply split .requireSimple
-  case thn =>
-    apply update .localValueAssign
-    apply empty
-    refine close ?_
-    sol_symex
-    sol_close
-  case els =>
-    apply done .revertDiamond
-    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ false }: the context is contradictory
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
-    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 ≐ true ∧ ¬se1 ≐ false) }
-    refine close ?_
-    sol_symex
-    sol_close
-
-/-- Without the precondition the diamond is not valid: in `exampleStore`
-nothing binds `a`, so the condition is stuck. -/
+/-- Without the precondition the diamond is not valid: where `a` is `0` and
+`b` is `1` the `require` reverts. -/
 example : ¬ (⊨ dl!{ ⟨ require(a == b); x = a; ⟩ x == b }) :=
-  fun h => (h Semantics.State.exampleStore).1
+  fun h => Modality.afterRunC_diamond_halt
+    (h (Core.State.ofSem Semantics.State.exampleStore) (.int 0) (by unfold PrimTy.admits; decide) (.int 1) (by unfold PrimTy.admits; decide)
+      (.int 0) (by unfold PrimTy.admits; decide) (by constructor <;> trivial)) (by decide +kernel)
 
 /-! ## `assert`: a check, under both modalities
 
@@ -210,14 +188,17 @@ def aNeB : Semantics.State :=
 /-- Without the precondition the box is not valid: where `a != b` the
 assertion fails, and a panic satisfies no box formula. -/
 example : ¬ (⊨ dl!{ [ assert(a == b); x = a; ] x == b }) :=
-  fun h => (h aNeB).2 rfl
+  fun h => Modality.afterRunC_not_panic
+    (h (Core.State.ofSem aNeB) (.int 0) (by unfold PrimTy.admits; decide) (.int 1) (by unfold PrimTy.admits; decide) (.int 0) (by unfold PrimTy.admits; decide))
+    (by decide +kernel)
 
 /-! The regression the obligation forms rest on: `[ assert(false); ] true`
 is neither valid nor derivable, `[ require(false); ] true` is both. -/
 
 /-- A failed `assert` is no box formula's: `[ assert(false); ] true` is not valid. -/
 theorem assertFalse_box_not_valid : ¬ (⊨ dl!{ [ assert(false); ] true }) :=
-  fun h => (h Semantics.State.exampleStore).2 rfl
+  fun h => Modality.afterRunC_not_panic (h (Core.State.ofSem Semantics.State.exampleStore))
+    (by decide +kernel)
 
 /-- ... and so not derivable (`Proves.valid`). -/
 theorem assertFalse_box_not_derivable : ¬ (⊢ dl!{ [ assert(false); ] true }) :=
@@ -233,10 +214,6 @@ theorem requireFalse_box : ⊢ dl!{ [ require(false); ] true } := by
     sol_close
   case els =>
     apply done .revertBox
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
     refine close ?_
     sol_symex
     sol_close
@@ -263,7 +240,8 @@ theorem revertDropsRest : ⊢ dl!{ [ revert(); total = 5; ] total == 7 } := by
   exact fun _ => trivial
 
 /-- The diamond of a revert is never true, whatever the postcondition. -/
-example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => (h Semantics.State.exampleStore).1
+example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => Modality.afterRunC_diamond_halt
+  (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
 
 /-- Only the rule for the goal's modality fires. -/
 example : ⊢ dl!{ [ revert(); ] true } := by
@@ -295,7 +273,40 @@ theorem branchBox : ⊢ dl!{ [ if (a == b) { x = 1; } else { revert(); }; ] x ==
     refine close ?_
     sol_symex
     sol_close
+
+end Solidity.Examples.Tactics.Revert
+
+/-! ## Read without the switch
+
+Under the diamond a walk's leaves are not closed by their erasure yet (`Core.Proves.close` takes box contexts). -/
+
+namespace Solidity.Examples.Tactics.Revert
+
+open Proves
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`. -/
+theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x == b } := by
+  apply intro
+  apply unfold .requireConditionCapture
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply split .requireSimple
+  case thn =>
+    apply update .localValueAssign
+    apply empty
+    refine close ?_
+    sol_symex
+    sol_close
+  case els =>
+    apply done .revertDiamond
+    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ false }: the context is contradictory
+    refine close ?_
+    sol_symex
+    sol_close
   case cov =>
+    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 ≐ true ∧ ¬se1 ≐ false) }
     refine close ?_
     sol_symex
     sol_close
