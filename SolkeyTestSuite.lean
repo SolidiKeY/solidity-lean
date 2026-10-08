@@ -5,3 +5,4 @@ import Solidity.Solkey.TestSuite
 import Solidity.Solkey.TestSuiteScoped
 import Solidity.TestSuite.Report
 import Solidity.TestSuite.Suggestions
+import Solidity.TestSuite.CoreProblems
