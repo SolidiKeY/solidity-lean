@@ -461,14 +461,16 @@ section Bridge
 
 variable {Γ Γ' : Ctx} {m : Modality}
 
-/-- **An update, through the bridge**: an update that ends as the scoped run
-of the statement does from the erasure is sound over the typed state, on the
-bridge (`Stmt.bridgeOk`), where the typed run does not diverge under the
+/-- **An update, through the bridge, up to the halt**: an update that ends
+as the scoped run of the statement does from the erasure, up to the halt
+(`Res.Sim`), is sound over the typed state, on the bridge
+(`Stmt.bridgeOk`), where the typed run does not diverge under the
 diamond. -/
-theorem Premise.tsound_update_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
-    (hb : s.bridgeOk = true) (hs : U.apply σ.erase = s.run σ.erase)
+theorem Premise.tsound_updateSim_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
+    (hb : s.bridgeOk = true) (hs : Res.Sim (U.apply σ.erase) (s.run σ.erase))
     (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.TSound m s (.update U) σ := by
   have ha := Stmt.trun_erase σ s hb
+  have hU := Upd.apply_noPanic σ.erase U
   apply Premise.tsound_update σ
   · intro τ hτ
     simp only [Stmt.trunSt] at hτ
@@ -477,7 +479,12 @@ theorem Premise.tsound_update_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : T
     | ok o =>
       rw [ht] at hτ ha
       obtain rfl : o.st = τ := Except.ok.inj hτ
-      exact hs.trans ha
+      have ha' : s.run σ.erase = .ok o.st.erase := ha
+      rw [ha'] at hs
+      revert hs
+      cases U.apply σ.erase with
+      | ok a => intro hs; exact congrArg Except.ok hs
+      | error => intro hs; exact hs.elim
   · intro e he
     simp only [Stmt.trunSt] at he
     cases ht : s.trun σ with
@@ -486,9 +493,51 @@ theorem Premise.tsound_update_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : T
       rw [ht] at he ha
       obtain rfl : e' = e := Except.error.inj he
       cases e' with
-      | revert => exact ⟨nofun, fun _ => ⟨_, hs.trans ha⟩⟩
-      | panic => exact absurd (hs.trans ha) (Upd.apply_noPanic σ.erase U)
+      | revert =>
+        have ha' : s.run σ.erase = .error .revert := ha
+        rw [ha'] at hs
+        revert hs
+        cases U.apply σ.erase with
+        | ok => intro hs; exact hs.elim
+        | error e'' => exact fun _ => ⟨nofun, fun _ => ⟨e'', rfl⟩⟩
+      | panic =>
+        have ha' : s.run σ.erase = .error .panic := ha
+        rw [ha'] at hs
+        revert hs hU
+        cases U.apply σ.erase with
+        | ok => intro hs _; exact hs.elim
+        | error e'' => exact fun hs hU => absurd (congrArg Except.error (hs.2 rfl)) hU
       | diverge => exact ⟨nofun, fun hm => absurd ht (hd hm)⟩
+
+/-- **An update, through the bridge**: an update that ends as the scoped run
+of the statement does from the erasure (M3's `Premise.Sound.update`'s
+equation). -/
+theorem Premise.tsound_update_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
+    (hb : s.bridgeOk = true) (hs : U.apply σ.erase = s.run σ.erase)
+    (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.TSound m s (.update U) σ :=
+  Premise.tsound_updateSim_run σ hb (hs ▸ Res.Sim.refl _) hd
+
+theorem tholds_conj {σ : TState C Γ} :
+    (l : List (Fml C Γ)) → (tholds σ (Fml.conj l) ↔ ∀ ψ ∈ l, tholds σ ψ)
+  | [] => by simp only [Fml.conj, tholds, List.not_mem_nil, false_implies, implies_true]
+  | [φ] => by simp only [Fml.conj, List.mem_singleton, forall_eq]
+  | φ :: ψ :: l => by
+    show tholds σ φ ∧ tholds σ (Fml.conj (ψ :: l)) ↔ _
+    rw [tholds_conj (ψ :: l)]
+    simp only [List.mem_cons, forall_eq_or_imp]
+
+/-- **Labelled goals, through the bridge**: the formulas `fs`, then the rest
+after each update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas holding,
+the statement runs as one of the updates up to the halt from the erasure. -/
+theorem Premise.tsound_cases_run {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
+    (σ : TState C Γ) (hb : s.bridgeOk = true)
+    (h : (∀ f ∈ fs, tholds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ.erase) (s.run σ.erase))
+    (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.TSound m s (.cases fs us) σ := by
+  intro Γ₁ Γ₀ ω κ φ hp
+  have hp' := (tholds_conj _).1 hp
+  obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
+  exact Premise.tsound_updateSim_run σ hb hs hd ω κ φ
+    (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
 
 end Bridge
 
