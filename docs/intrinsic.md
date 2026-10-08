@@ -2414,6 +2414,108 @@ and "Left for the lead":
     infeasible, `Proves.tsound` threads `Stmt.TArmOk` as an invariant of
     reachable states instead; record which.
 
+### Decisions 15–17, implemented (2026-10-08, CORE 1, on `intrinsic`)
+
+Build (`lean_build`, `Solidity`, `solkeycheck`, `SolidityCorpus`,
+`SolkeyTestSuite`, the last two in `defaultTargets` for the run only): green,
+337 jobs; one fix on the way (`Calculus/Problem.lean`, a `Reachable` tuple
+that lost its bridge field).  No new `sorry`, `axiom` or `maxHeartbeats`;
+`dups.py` (but the known `as` false positive), `check-orphans` (but the
+git-excluded `Scratch/`), `check-doc-paths` and `check-rule-text` clean.
+No pin moved but the new `BadDup` one; no rule name, branch label or fresh
+name changed.
+
+**15, a push at the bound is exhausted.**  `THalt.exhausted`
+(`Semantics/Core/TypedRun.lean`): `TRun.push` and `ARhs.evalT`'s push halt
+with it at `Storage.full`, not with `diverge`.  Both modalities accept it:
+`Modality.onTHalt` (`Semantics/Core/TypedRunFrame.lean`: the box any halt,
+the diamond only `exhausted`) is the halt clause of `Modality.afterRunTR`
+(`tholds`), of `COut.after` (`Semantics/Core/Callback.lean`) and of
+`CallbackHolds`' `thenF`; the panic stays excluded apart.  The untyped
+readings (`holds`, `Modality.after`, `afterC`) are unchanged: an untyped run
+has no bound and never sees it (`THalt.erase` maps it to `diverge`, and
+`TRes.Agrees` matches it with anything).  Consequences:
+- the push arms lose their `NoDiv` hypotheses: `TRun.push_nd` and
+  `ARhs.evalT_nd` (`TSoundKit.lean`) prove a push never diverges;
+- `TRes.Sim` also asks that the second halt is exhausted where the first
+  is, so an evaluator's halt is a revert (`Val.evalT_revert`,
+  `SPath.resolveT_revert`, `MPath.mvalT_revert`, from `TRes.Ends`: the
+  evaluators neither diverge nor are exhausted, `Val.evalT_ends` and kin,
+  moved to `Typing/StraightRun.lean`, replacing its straight-only copies);
+  the capture shapes hand their `herr` a revert;
+- `Premise.tsound_update`'s halt clause skips an exhausted run under the
+  diamond; the diamond invariant loop runs by `TLoop.run_variant_or` (a body
+  may end exhausted, `TSoundLoops.lean`);
+- `Typing/StraightRun.lean`: `TRes.Ends` (no `diverge`, no `exhausted`)
+  for straight programs, `Prog.trun_ends`; `Prog.run_halt_of_trun` asks
+  both; `docs/solc-alignment.md`, "Array lengths", has the row (solc panics
+  `0x41` past `2^64`; Lean's bound is `2^256`, and an exhausted run proves
+  any modality).
+
+**16, no struct repeats a member name.**  `BadDup` left `structDef` (and
+`structRank`, `mapFreeStructs`) for `refusedStructs` (`AST.lean`): the
+elaborator refuses a type that names one with solc's message
+(`unknownStructMsg`, both `ty!` and `elabTy`), pinned in
+`Syntax/Splice.lean` (`struct BadDup: identifier already declared: member
+a`).  `structDef_nodup` (every struct of the table, `split <;> rfl`) and
+`TyNodup.all` (`Semantics/Core/StorageErase.lean`) replace `nodupStructs`,
+`Ty.nodupS` and `TyNodup.of_nodupS*`; `Storage.writeStorage_erase` lost its
+`TyNodup` argument.  Deleted with them: `Src`/`NewLhs`/`Stmt`/`Prog.bridgeOk`,
+`Src.nodup`, the bridge hypotheses of `Stmt.trun_erase`, `Prog.trun_erase`,
+`Prog.run_of_trun`, `Prog.run_halt_of_trun`, `Prog.trun_init_erase` and
+every `TRun.*_erase`, `Prog.bridgeOk_of_straight` and kin, `Reachable`'s
+bridge conjunct, `corpus_decide`'s `bridgeOk` test, `Ty.nodupDeep` and the
+`nodupDeep` hypotheses of `Typing/TypedWT.lean` (`TState.erase_wt` takes
+only the layout's keys distinct), the EVM's `nodupS` check in `assignIn`
+and `copy_sim`'s hypothesis, and the arms' `bridgeOk`/`nodupS` hypotheses
+(`tsound_save`, `tsound_saveMem`, `assignStep_tsound`, `copyStep_tsound`,
+`assignFromMemStep_tsound`, `Premise.tsound_{update,updateSim,cases}_run`).
+`Ty.defaultOkS` is unchanged (`defaultOkStructs` is now every struct).
+
+**17, the hidden binder at a memory type: neither the reading change nor
+the fallback can be met; recorded, not implemented.**
+- *The reading change.*  Under the box, `memoryLocalDeclInitDrop`'s premise
+  `∀ mv. [mv = r; ω] φ` at an allocating `r` says what the conclusion needs
+  at one instance only: `mv` naming the object `r` is about to allocate.
+  The premise's run then allocates it at that very id and overwrites `mv`
+  with it, ending in the conclusion's state.  That is how M3's untyped
+  binder (any id) is sound.  A typed state cannot hold that instance: a
+  memory local is an `HRef` into the heap typing, and the object does not
+  exist yet.  Any typed binder value instead needs a heap that already has
+  an object of the type ("the heap grown", "any heap extension"); from it
+  the premise's run allocates *another* object, at the next id, so its end
+  state differs from the conclusion's by one object and every later id.
+  Relating the two needs `tholds` to be invariant under adding unreachable
+  objects and renaming ids, which the terms do not give (`defined` and
+  heap reads observe ids).  A compositional reading that looks at what
+  follows the binder breaks `Hyps.twrap_mono`.
+- *The fallback* (thread `Stmt.TArmOk` as an invariant of reachable
+  states): the condition fails at the start of most obligations, whose heap
+  is empty (`T memory m = new T(..)` as a first statement), so it is not an
+  invariant of reachable states either.
+- *What is proved instead* (`Calculus/Core/TSound.lean`, new):
+  `Stmt.tstepSound`, every rule (arms and blocks) sound wherever its
+  statement meets `Stmt.TArmOk`, which is now only that arm's condition;
+  `Stmt.tsound_diamond`, every rule sound under the diamond in every state;
+  `Stmt.tsound_iff_residual`, `Stmt.TSound C` is exactly the arm in the
+  states failing the condition (`Stmt.TResidual`), and
+  `Proves.tvalid_of_residual`.  And the residual is false:
+  `Stmt.not_tresidual` (`[uint[] memory m = new uint[](1);] false` from an
+  empty heap: the premise holds, its binder having no value; the conclusion
+  fails), hence `Stmt.not_tsound`.  So **`Proves.tvalid` with no
+  hypothesis is not proved**: the per-rule route cannot give it while a
+  memory local must name an existing object.
+- *Options for the lead*: (a) a typed state whose locals may name objects
+  not yet allocated (an env over a heap typing that extends the heap's,
+  allocation checked against it), the binder ranging over that extension;
+  (b) memory locals with an unset value, as storage aliases have (`.mem R`
+  as `Option (HRef H R)`, a read of unset reverting), reversing decision
+  12's "memory locals stay non-dangling"; (c) a garbage-and-renaming
+  invariance of `tholds` (ids made unobservable to terms); (d) a typed
+  soundness through M3's (`Proves.valid`, unconditional) and a bridge
+  `holds σ.erase φ → tholds σ φ` on the formulas the strategy reaches.
+  Each is a low change (the typed state or the terms), for W4 or before.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean

@@ -79,6 +79,7 @@ import Solidity.Calculus.Core.TSoundControl
 import Solidity.Calculus.Core.TSoundStep
 import Solidity.Calculus.Core.TSoundCalls
 import Solidity.Calculus.Core.TSoundLoops
+import Solidity.Calculus.Core.TSound
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
