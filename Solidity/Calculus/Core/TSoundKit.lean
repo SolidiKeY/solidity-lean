@@ -541,4 +541,71 @@ theorem Premise.tsound_cases_run {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)
 
 end Bridge
 
+/-! ## A shifted part reads as it did, typed
+
+`Calculus/Core/Logic.lean`'s "A shifted part reads as it did" over the
+typed state: a rule reads the parts of its `\find` under its fresh local
+(`Val.up` and its kin, `Calculus/Core/Shift.lean`), and the state with a
+local pushed is the state lifted along `up` (`TState.push_lift`), so each
+is `Semantics/Core/TypedRunWk.lean`'s `*_wk` at `up`. -/
+
+section Shift
+
+variable {Γ : Ctx} {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H)
+
+theorem TState.push_lift : σ.push w = σ.lift Core.up (w, σ.env) := rfl
+
+theorem Simple.evalT_up {p : PrimTy} (s : Simple C Γ p) :
+    (s.up (t := t)).evalT (σ.push w) = s.evalT σ := by
+  rw [Simple.up_eq]; exact Simple.evalT_wk Core.up σ (w, σ.env) s
+
+theorem SPath.resolveT_up {T : Ty} (b : SPath C Γ T) :
+    (b.up (t := t)).resolveT (σ.push w) = b.resolveT σ := by
+  rw [SPath.up_eq]; exact SPath.resolveT_wk Core.up σ (w, σ.env) b
+
+theorem Loc.resolveT_up {T : Ty} (l : Loc C Γ T) :
+    (l.up (t := t)).resolveT (σ.push w) = l.resolveT σ := by
+  rw [Loc.up_eq]; exact Loc.resolveT_wk Core.up σ (w, σ.env) l
+
+theorem MPath.mvalT_up {T : Ty} (b : MPath C Γ T) :
+    (b.up (t := t)).mvalT (σ.push w) = b.mvalT σ := by
+  rw [MPath.up_eq]; exact MPath.mvalT_wk Core.up σ (w, σ.env) b
+
+theorem MLoc.addrT_up {T : Ty} (l : MLoc C Γ T) :
+    (l.up (t := t)).addrT (σ.push w) = l.addrT σ := by
+  rw [MLoc.up_eq]; exact MLoc.addrT_wk Core.up σ (w, σ.env) l
+
+theorem Val.evalT_up {p : PrimTy} (v : Val C Γ p) :
+    (v.up (t := t)).evalT (σ.push w) = v.evalT σ := by
+  rw [Val.up_eq]; exact Val.evalT_wk Core.up σ (w, σ.env) v
+
+theorem Src.valueT_up {T : Ty} (r : Src C Γ T) :
+    (r.up (t := t)).valueT (σ.push w) = r.valueT σ := by
+  rw [Src.up_eq]; exact Src.valueT_wk Core.up σ (w, σ.env) r
+
+theorem MSrc.mvalT_up {T : Ty} (r : MSrc C Γ T) :
+    (r.up (t := t)).mvalT (σ.push w) = r.mvalT σ := by
+  rw [MSrc.up_eq]; exact MSrc.mvalT_wk Core.up σ (w, σ.env) r
+
+theorem ARhs.evalT_up {R : RefTy} (r : ARhs C Γ R) :
+    (r.up (t := t)).evalT (σ.push w) = r.evalT σ := by
+  rw [ARhs.up_eq]; exact ARhs.evalT_wk Core.up σ (w, σ.env) r
+
+theorem TState.get_push_here : (TEnv.get .here (σ.push w).env : t.TDenote C σ.H) = w := rfl
+
+theorem TState.get_push_there {u : LTy} (i : Idx Γ u) :
+    (TEnv.get i.there (σ.push w).env : u.TDenote C σ.H) = TEnv.get i σ.env := rfl
+
+theorem TState.push_setLocal {u : LTy} (i : Idx Γ u) (x : u.TDenote C σ.H) :
+    (σ.push w).setLocal i.there x = (σ.setLocal i x).push w := rfl
+
+theorem TState.drop_push : (σ.push w).drop (.push .refl) = σ := rfl
+
+/-- An outcome lifted along `up`, its top local popped: the outcome. -/
+theorem liftedT_up_drop (r : TRes (Out C σ.H Γ)) :
+    ((liftedT Core.up (w, σ.env) r).map (·.st)).map (TState.drop (.push .refl)) = r.map (·.st) := by
+  cases r <;> rfl
+
+end Shift
+
 end Solidity.Core
