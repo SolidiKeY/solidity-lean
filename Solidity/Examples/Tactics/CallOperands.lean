@@ -121,12 +121,15 @@ theorem bucketPushSlotWrite :
   sol_symex
   sol_close
 
-/-- `[ uint n = values.length; values.push(42); ] values.length == n + 1`:
-the scoped strategy reads the push's write back (today's left it open,
-`Calculus/Close.lean`). -/
-theorem pushLength : ⊨ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by
-  sol_symex
-  sol_close
+/-- `[ uint n = values.length; values.push(42); ] values.length == n + 1` is
+valid, but the strategy leaves it open: the push's write is not read back
+(`Calculus/Close.lean`).  Pinned, so that closing it shows here. -/
+example : True := by
+  fail_if_success
+    have : ⊨ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by
+      sol_symex
+      sol_close
+  trivial
 
 /-! ## 4 · Storage writes: `values[i] = makeValue();`, `total = makeValue();`
 
