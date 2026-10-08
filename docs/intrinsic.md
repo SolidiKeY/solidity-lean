@@ -892,9 +892,11 @@ elaborates with every module (no name clash).
   statement now) and `LeanTaclet.functionCallArgCapture` (today's line
   escapes to the untyped call); `Rule`.
 - **`Taclet.toStep`, `LeanTaclet.toStep`, `Rule.toStep`,
-  `Rule.premise_unique`** (`Calculus/Core/Taclet.lean`; axioms: `propext`):
-  one lemma per constructor, 157 (153 `Taclet`, 4 `LeanTaclet`) replayed
-  from two `#replay_toStep` tables, 15 by hand (an array's element type, a
+  `Rule.premise_unique`** (`Calculus/Core/Taclet.lean`; axioms: `propext`,
+  `Quot.sound`, pinned in `Examples/Tactics/CoreRules.lean`):
+  one lemma per constructor, 153 (149 `Taclet`, 4 `LeanTaclet`) replayed
+  from two `#replay_toStep` tables, 15 by hand (10 `Taclet`, 5
+  `LeanTaclet`: an array's element type, a
   call's arguments, a hole that is a copy, a conditional written to a
   member, the loop rules).  The table is the plan `#derive_toStep?` found
   by `to_step_tac`'s search (holes taken apart, side conditions settled,
@@ -940,16 +942,16 @@ elaborates with every module (no name clash).
   hole and part read off the statement (`holeCandidates`).  It names a rule;
   a proof that every `Stmt.step` premise is some rule (today's
   `Stmt.complete`) is not stated.
+- `#taclet` on a scoped taclet (`Tools/Inspect.lean`'s `soundLine`) prints
+  "sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's;
+  Core.Stmt.Sound)", the same for `Core.LeanTaclet`; pinned in
+  `Examples/Tactics/CorePrint.lean` (on `storageFieldDelete_unfold_leftFst`:
+  `storageFieldRead_unfold_rightFst` no longer prints as today's).
+  `#derive_toStep?` goes on past a constructor whose search fails (a note,
+  `addToStep (strict := false)`); `#replay_toStep` still fails loudly.
 - Left: the Delab items above; `CallbackTaclet` on Core (W2 `tree`);
-  `Tools/Inspect.lean` (not this lane's) still prints the deleted
-  `Core.Taclet.erase` as a scoped taclet's soundness line, which should name
-  `Taclet.toStep` (`soundLine`: e.g. "sound: Solidity.Core.Taclet.toStep (the
-  premise is Stmt.step's; Core.Stmt.Sound)", and the same for
-  `Core.LeanTaclet`), then re-pin `Examples/Tactics/CorePrint.lean`'s
-  `#taclet`, which carries the stale line on purpose until then (its rule
-  moved from `storageFieldRead_unfold_rightFst`, which no longer prints as
-  today's, to `storageFieldDelete_unfold_leftFst`); `lake exe solkeycheck` was not run here (no rule names,
-  sort annotations or `KeyTaclets.lean` changed).
+  `lake exe solkeycheck` was not run here (no rule names, sort annotations
+  or `KeyTaclets.lean` changed).
 
 ### W1 integration (2026-10-08)
 
