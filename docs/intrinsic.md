@@ -1695,6 +1695,41 @@ diamond, from the type under the box.  Printers drop `m` (`Delab`,
    brings back item 1 in the untyped world) or `tholds`' update reading
    asks for a typed state the update ends in.
 
+### W2.5 lane `tsoundB` (`w25-tsoundB`, 2026-10-08): typed soundness of the block arms
+
+* **Syntax out of the M3 runs.**  `Thin.Over` (with `trans`, `append`),
+  `CallRet.wk_over`, `Stmt.wk_over`, `Prog.wk_over`, `frameMut` and
+  `Prog.frame_some` moved to the syntax-only `Calculus/Core/WkOver.lean`;
+  `TypedRunWk.lean`/`TypedRunFrame.lean` import it instead of
+  `RunWk`/`RunFrame`, so W4 can delete those two.  `RunWk` keeps only the M3
+  reading `Thin.Over.env`.
+* **`Calculus/Core/TSoundCalls.lean`**: `Stmt.tsound_call` (every
+  `callStep` premise: the four `expand_function_body` shapes, the four
+  `functionCallArgCapture` shapes) and `Stmt.tsound_tryCall`, as equations
+  between typed runs read at their states (`Premise.tsound_unfold`/`inline`).
+  The inlined body is the body run in its frame, lifted
+  (`Stmt.trun_block_wk`, from `Prog.trun_wk`); the caller's locals come out
+  weakened along the heap the body grew, which `TRun.call` gives back
+  (`TEnv.drop_put_atop_wk`, `thin_put_keepAllAtop`, `thin_keep_put_atop`).
+  A capture runs the call from the caller with the value on top
+  (`TRun.callFrom_capture`).  `try`'s clauses bind typed values, so no
+  `Fits` is needed (`tholds_binders_all`); decoding never panics.
+* **`Calculus/Core/TSoundLoops.lean`**: `Stmt.tsound_loop`.  One turn
+  (`Stmt.trunSt_loop_unfold`, via `TLoop.run_map`: the extension a loop
+  head carries plays no part), `loopExit` by `tholds_isBoolD_lower` (a
+  lowered condition read on the erasure is its typed value:
+  `Val.evalT_erase` and `Val.evalT_nd`), the invariant rules by
+  `TLoop.run_induct`/`run_variant` with `tholds_anonHavoc` (from
+  `TState.eq_anonHavoc`).  No condition: a typed `bool` is `true` or
+  `false`, and the diamond needs no `BoolOK`.
+* **`Fml.tclosableB`** (`Calculus/Core/Closable.lean`): the Bool twin of
+  `Fml.TClosable`, with `Fml.tclosableB_sound`, ready for the switch of
+  `Proves.close`.
+* Uses from M3 modules that the flip must keep or restate:
+  `Args.capture_snoc` (`SoundCalls.lean`), `holds_isBoolD`
+  (`SoundBlocks.lean`), `evalBinop_cmp_true` (`SoundLoops.lean`),
+  `Val.eval_lower` (`SoundKit.lean`).
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
