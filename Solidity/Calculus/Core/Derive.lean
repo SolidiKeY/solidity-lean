@@ -51,13 +51,13 @@ theorem Valid.of_closes {ψ : Fml C []} (h : Derive.closes ψ = true) : Valid ψ
   exact Valid.of_erase h.1 (Solidity.Proves.valid (Solidity.Proves.of_proves h.2))
 
 /-- **`sol_prove`'s proof when nothing is left.** -/
-theorem Valid.of_proves (hS : Stmt.SoundNC C) {φ : Fml C []} (h : Derive.proves φ = true) :
+theorem Valid.of_proves (hS : Stmt.Sound C) {φ : Fml C []} (h : Derive.proves φ = true) :
     Valid φ :=
   symex_valid hS Derive.fuel (Valid.of_closes h)
 
 /-- **`sol_prove`'s proof when leaves are left**: today's residue of the
 erasure, each leaf proved. -/
-theorem Valid.of_residue (hS : Stmt.SoundNC C) {φ : Fml C []}
+theorem Valid.of_residue (hS : Stmt.Sound C) {φ : Fml C []}
     (hp : ((symex Derive.fuel φ).posB []).isSome = true)
     {ls : List (Solidity.Derive.Leaf C)} {b' : Nat}
     (h : Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
@@ -159,8 +159,9 @@ def evalSolProveCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let some (C, φ) ← Symex.validGoal? g | throwUnsupportedSyntax
   let rest := (← getUnsolvedGoals).erase g
-  let leaves ← Derive.prove g C φ
-  setGoals (leaves ++ rest)
+  Symex.reporting g do
+    let leaves ← Derive.prove g C φ
+    setGoals (leaves ++ rest)
 
 /-! ## `sol_close` on a scoped leaf -/
 
@@ -173,21 +174,23 @@ erasure computed (`Solidity.normValid`) and closed by today's `sol_close`
 def evalSolCloseCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
-  let bool := mkConst ``Bool
-  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-  let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
-  let hpTy := mkApp3 (mkConst ``Eq [1]) bool
-    (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
-      (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
-  let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
-    catch _ => throwError "sol_close: the leaf is not one its erasure closes (`Fml.posB`): a \
-      hidden binder under a negation, a precondition or a modality, or named twice"
-  let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
-  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
-  g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
-  let g'' ← Solidity.normValid g'.mvarId!
-  replaceMainGoal [g'']
-  evalTactic (← `(tactic| sol_close))
+  Symex.reporting g do
+    let bool := mkConst ``Bool
+    let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+    let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
+    let hpTy := mkApp3 (mkConst ``Eq [1]) bool
+      (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
+        (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
+    let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
+      catch _ => throwError "sol_close: the leaf is not one its erasure closes (`Fml.posB`): a \
+        hidden binder under a negation, a precondition or a modality, or named twice, or a \
+        diamond update that may set a `bool` local to what is not a `bool`"
+    let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
+    let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
+    g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
+    let g'' ← Solidity.normValid g'.mvarId!
+    replaceMainGoal [g'']
+    evalTactic (← `(tactic| sol_close))
 
 /-! ## `sol_derive`: the strategy as a walk
 
@@ -341,8 +344,9 @@ def evalSolDeriveCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   unless ← Walk.isCoreGoal g do throwUnsupportedSyntax
   let rest := (← getUnsolvedGoals).erase g
-  let (_, leaves) ← Walk.run g
-  setGoals (leaves ++ rest)
+  Symex.reporting g do
+    let (_, leaves) ← Walk.run g
+    setGoals (leaves ++ rest)
 
 open Lean Elab Tactic Meta in
 /-- `sol_derive?` on a scoped goal: the walk, offered as its script, one
@@ -352,8 +356,9 @@ def evalSolDeriveQCore : Tactic := fun stx => withMainContext do
   let g ← getMainGoal
   unless ← Walk.isCoreGoal g do throwUnsupportedSyntax
   let rest := (← getUnsolvedGoals).erase g
-  let (lines, leaves) ← Walk.run g
-  setGoals (leaves ++ rest)
-  ProofTree.suggest stx[0] lines
+  Symex.reporting g do
+    let (lines, leaves) ← Walk.run g
+    setGoals (leaves ++ rest)
+    ProofTree.suggest stx[0] lines
 
 end Solidity.Core

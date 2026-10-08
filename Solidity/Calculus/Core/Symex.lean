@@ -9,7 +9,7 @@ import Solidity.Calculus.Symex
 strategy (`Core.Fml.step`, `Core.symex`, `Calculus/Core/Step.lean`) fires
 the rule of the first statement until no modality is left.  Every step is
 sound (`Fml.stepR_sound`), from the soundness of each rule
-(`Stmt.SoundNC`, which is `Stmt.Sound` with no cover goal), so the result
+(`Stmt.sound`), so the result
 of `symex n φ` valid makes `φ` valid (`symex_valid`).
 
 The result is computed by the compiled strategy and quoted back
@@ -23,24 +23,19 @@ open Solidity (Modality)
 
 variable {C : Contract}
 
-/-- **Every rule the strategy fires is sound**, with no cover goal: the
-premise `p` of `s.step k m = some p`, in front of any rest, frames and
-postcondition, gives the modality over `s`.  `Stmt.Sound` once a branch's
-condition cannot be stuck (`docs/intrinsic.md`, W2 `sound`). -/
-def Stmt.SoundNC (C : Contract) : Prop :=
-  ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ'),
-    s.step k m = some p → ∀ (σ : State C Γ) {Γ₁ Γ₀ : Ctx} (ω : Prog C Γ' Γ₁)
-      (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀),
-      holds σ (p.fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ)
-
-theorem _root_.Solidity.Modality.afterC_mono {α : Type} {m : Modality} {p q : α → Prop}
-    (h : ∀ a, p a → q a) : {x : Semantics.Res α} → m.afterC p x → m.afterC q x
-  | .ok a, hp => h a hp
-  | .error _, hp => hp
+theorem _root_.Solidity.Modality.afterT_mono {α : Type} {m : Modality} {T : Prop} {ok p q : α → Prop}
+    (h : ∀ a, p a → q a) {x : Semantics.Res α} : m.afterT T ok p x → m.afterT T ok q x := by
+  cases m with
+  | box => cases x with
+    | ok a => exact h a
+    | error _ => exact id
+  | diamond => cases x with
+    | ok a => exact fun hx hT => ⟨(hx hT).1, h a (hx hT).2⟩
+    | error _ => exact id
 
 section Sound
 
-variable (hS : Stmt.SoundNC C)
+variable (hS : Stmt.Sound C)
 include hS
 
 /-- One modality one step on is sound. -/
@@ -50,7 +45,7 @@ theorem Fml.modalStep_sound (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P :
   cases P with
   | nil =>
     cases h
-    exact (holds_exit m κ φ σ).1 hψ
+    exact holds_modal_intro fun hT => (holds_exit m κ φ σ hT).1 hψ
   | cons s ω =>
     change (s.step k m).map (fun p => p.fml m ω κ φ) = some ψ at h
     obtain ⟨p, hp, rfl⟩ := Option.map_eq_some_iff.1 h
@@ -81,7 +76,7 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     intro χ h σ hχ
     change (Fml.stepR k φ).map (Fml.upd m U) = some χ at h
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact Modality.afterC_mono (fun τ => ih hφ τ) hχ
+    exact Modality.afterT_mono (fun τ => ih hφ τ) hχ
   | modal m P κ φ => intro χ h σ hχ; exact Fml.modalStep_sound hS k m P κ φ h σ hχ
   | havoc φ ih =>
     intro χ h σ hχ
@@ -135,7 +130,7 @@ namespace Symex
 open Lean Elab Tactic Meta
 
 /-- The soundness of the rules, as the tactics cite it. -/
-def soundName : Lean.Name := `Solidity.Core.Stmt.soundNC
+def soundName : Lean.Name := ``Stmt.sound
 
 /-- The goal `Core.Valid φ`, its contract and formula; `none` on any other goal. -/
 def validGoal? (g : MVarId) : MetaM (Option (Expr × Expr)) := do
@@ -181,6 +176,19 @@ def applyValid (tac : String) (g : MVarId) (lem : Expr) (unchanged : Option Mess
 /-- The fuel `sol_symex` gives the strategy. -/
 def fuel : Nat := 5000
 
+/-- Run a scoped tactic `k` on its goal `g`, an error logged where the
+tactic is and the goal closed by `sorry`: today's elaborator of the same
+syntax is tried after this one, does not read scoped goals, and would
+report its own error in place of this one's. -/
+def reporting (g : MVarId) (k : TacticM Unit) : TacticM Unit := do
+  let rest := (← getUnsolvedGoals).erase g
+  let s ← saveState
+  tryCatchRuntimeEx k fun e => do
+    s.restore (restoreInfo := true)
+    logException e
+    g.admit
+    setGoals rest
+
 end Symex
 
 open Lean Elab Tactic Meta in
@@ -191,7 +199,8 @@ def evalSolStepCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
   let lem := mkApp2 (mkConst ``Fml.step_valid) C (mkApp (mkConst Symex.soundName) C)
-  replaceMainGoal [← Symex.applyValid "sol_step" g lem (some m!"no modality left")]
+  Symex.reporting g do
+    replaceMainGoal [← Symex.applyValid "sol_step" g lem (some m!"no modality left")]
 
 open Lean Elab Tactic Meta in
 /-- `sol_symex` on a scoped goal `Core.Valid φ`: run the strategy until no
@@ -203,6 +212,6 @@ def evalSolSymexCore : Tactic := fun _ => withMainContext do
   let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
   let lem := mkApp3 (mkConst ``symex_valid) C (mkApp (mkConst Symex.soundName) C)
     (mkRawNatLit Symex.fuel)
-  replaceMainGoal [← Symex.applyValid "sol_symex" g lem]
+  Symex.reporting g do replaceMainGoal [← Symex.applyValid "sol_symex" g lem]
 
 end Solidity.Core
