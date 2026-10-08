@@ -364,13 +364,12 @@ theorem pick_valid {e : Solidity.Fml C} {ls : List (Solidity.Derive.Leaf C)}
   split at h
   · rename_i b h1
     exact Solidity.Valid.of_stripAlls (hv h1 Solidity.Derive.leaves_nil)
-  · rename_i r₁ _ h1
-    split at h
+  · split at h
     · split at h
       · rename_i b h2
         exact hv h2 Solidity.Derive.leaves_nil
-      · exact hs h1 h
-    · exact hs h1 h
+      · exact hs rfl h
+    · exact hs rfl h
 
 /-- A leaf `leafRes` takes is proved once today's leaves are. -/
 theorem leafRes_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ)

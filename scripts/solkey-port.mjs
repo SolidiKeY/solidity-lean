@@ -1189,7 +1189,7 @@ function importedModule(corollaries, rows, internal, commit) {
     const f = `${IMPORTED.ns}.${declName(fn.name)}`;
     return `/-- ${doc.join("\n")} -/\ntheorem ${declName(fn.name)} :\n` +
       `    ${Form} ${IMPORTED.ns}.initState ${f} :=\n` +
-      `  ${lemma} ${f}.proved ${IMPORTED.ns}.initState_wt`;
+      `  ${lemma} ${f}.proved ${IMPORTED.ns}.initState_wt\n    (by decide +kernel)`;
   });
   // One corollary's axioms, so that `initState_wt`'s are pinned too
   // (`Corpus/Imported.lean` pins the two lemmas', `Report.lean` each theorem's).

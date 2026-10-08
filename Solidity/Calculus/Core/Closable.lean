@@ -115,7 +115,7 @@ the kernel unfolds with no `brecOn`, each with a compiled twin by `match`
 (`implemented_by`) for the walk the tactic runs (Gate G0, condition 2), as
 `Calculus/Core/Close.lean`'s `Fml.posB`.  A name is looked up by
 `Var.memB`, which compares a fresh variable's index (a `Nat`, which the
-kernel compares in one step) before its base, and `Fml.binds` collects a
+kernel compares in one step) before its base, and `Fml.bindsB` collects a
 leaf's hidden binders once, from the leaf up, so each update and binder
 asks only of the binders below it, most often none. -/
 
@@ -228,31 +228,31 @@ theorem Fml.foFreshB_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns : List Var},
     simp only [Bool.not_eq_eq_eq_not, Bool.not_true] at h'
     exact ⟨⟨Var.not_mem_of_memB h'.1, (ih h'.2).1⟩, (ih h'.2).2⟩
 
-/-- `Fml.binds`'s compiled twin. -/
-def Fml.bindsM : {Γ : Ctx} → List Var → Fml C Γ → Option (List Var)
+/-- `Fml.bindsB`'s compiled twin. -/
+def Fml.bindsBM : {Γ : Ctx} → List Var → Fml C Γ → Option (List Var)
   | _, _, .tt | _, _, .eq .. | _, _, .defined _ => some []
   | _, ns, .not φ => bif φ.foFreshB ns then some [] else none
-  | _, ns, .and φ ψ => (φ.bindsM ns).bind fun B₁ => (ψ.bindsM ns).map (B₁ ++ ·)
-  | _, ns, .imp a φ => bif a.foFreshB ns then φ.bindsM ns else none
+  | _, ns, .and φ ψ => (φ.bindsBM ns).bind fun B₁ => (ψ.bindsBM ns).map (B₁ ++ ·)
+  | _, ns, .imp a φ => bif a.foFreshB ns then φ.bindsBM ns else none
   | _, ns, .upd _ U φ =>
-    bif U.freshB ns then (φ.bindsM (U.names ns)).bind fun B =>
+    bif U.freshB ns then (φ.bindsBM (U.names ns)).bind fun B =>
       bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
       else some B
     else none
   | _, _, .modal .. => none
-  | _, ns, .havoc φ | _, ns, .anon _ φ => φ.bindsM ns
+  | _, ns, .havoc φ | _, ns, .anon _ φ => φ.bindsBM ns
   | _, ns, .all x _ φ =>
     bif x.memB ns then none
-    else (φ.bindsM (x :: ns)).bind fun B => bif x.memB B then none else some B
+    else (φ.bindsBM (x :: ns)).bind fun B => bif x.memB B then none else some B
   | _, ns, .bind _ x _ φ =>
     bif x.memB ns then none
-    else (φ.bindsM (x :: ns)).bind fun B => bif x.memB B then none else some (x :: B)
+    else (φ.bindsBM (x :: ns)).bind fun B => bif x.memB B then none else some (x :: B)
 
 /-- `Fml.Closable`, decided: `some` of the names the hidden binders bind
 (`Fml.bindNames`) when the leaf is closable, collected from the leaf up, so
 that an update or a `∀` tests only the binders below it. -/
-@[implemented_by Fml.bindsM]
-def Fml.binds {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var) :=
+@[implemented_by Fml.bindsBM]
+def Fml.bindsB {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var) :=
   Fml.rec (motive := fun _ _ => List Var → Option (List Var))
     (tt := fun _ => some []) (eq := fun _ _ _ => some []) (defined := fun _ _ => some [])
     (not := fun φ _ ns => bif φ.foFreshB ns then some [] else none)
@@ -275,22 +275,22 @@ def Fml.binds {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var) :=
 
 /-- `Fml.Closable`, decided: what `Proves.close` asks of the leaf, its
 context in front. -/
-def Fml.closableB {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Bool := (φ.binds ns).isSome
+def Fml.closableB {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Bool := (φ.bindsB ns).isSome
 
-theorem Fml.binds_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var},
-    φ.binds ns = some B → φ.Closable ns ∧ B = φ.bindNames := by
+theorem Fml.bindsB_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var},
+    φ.bindsB ns = some B → φ.Closable ns ∧ B = φ.bindNames := by
   induction φ with
   | tt | eq | defined => intro _ _ h; cases h; exact ⟨trivial, rfl⟩
   | not φ _ =>
     intro ns B h
     cases hp : φ.foFreshB ns
-    · simp only [Fml.binds, hp, cond_false, reduceCtorEq] at h
-    · simp only [Fml.binds, hp, cond_true, Option.some.injEq] at h
+    · simp only [Fml.bindsB, hp, cond_false, reduceCtorEq] at h
+    · simp only [Fml.bindsB, hp, cond_true, Option.some.injEq] at h
       exact ⟨Fml.foFreshB_sound φ hp, h.symm⟩
   | and φ ψ ihφ ihψ =>
     intro ns B h
-    obtain ⟨B₁, h₁, h⟩ := Option.bind_eq_some_iff.1 (h : (φ.binds ns).bind
-      (fun B₁ => (ψ.binds ns).map (B₁ ++ ·)) = some B)
+    obtain ⟨B₁, h₁, h⟩ := Option.bind_eq_some_iff.1 (h : (φ.bindsB ns).bind
+      (fun B₁ => (ψ.bindsB ns).map (B₁ ++ ·)) = some B)
     obtain ⟨B₂, h₂, rfl⟩ := Option.map_eq_some_iff.1 h
     obtain ⟨c₁, rfl⟩ := ihφ h₁
     obtain ⟨c₂, rfl⟩ := ihψ h₂
@@ -298,17 +298,17 @@ theorem Fml.binds_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var},
   | imp a φ _ ih =>
     intro ns B h
     cases hp : a.foFreshB ns
-    · simp only [Fml.binds, hp, cond_false, reduceCtorEq] at h
-    · have h' : φ.binds ns = some B := by simpa only [Fml.binds, hp, cond_true] using h
+    · simp only [Fml.bindsB, hp, cond_false, reduceCtorEq] at h
+    · have h' : φ.bindsB ns = some B := by simpa only [Fml.bindsB, hp, cond_true] using h
       obtain ⟨c, rfl⟩ := ih h'
       exact ⟨⟨Fml.foFreshB_sound a hp, c⟩, rfl⟩
   | upd m U φ ih =>
     intro ns B h
     cases hU : U.freshB ns
-    · simp only [Fml.binds, hU, cond_false, reduceCtorEq] at h
-    · have h' : (φ.binds (U.names ns)).bind (fun B =>
+    · simp only [Fml.bindsB, hU, cond_false, reduceCtorEq] at h
+    · have h' : (φ.bindsB (U.names ns)).bind (fun B =>
           bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
-          else some B) = some B := by simpa only [Fml.binds, hU, cond_true] using h
+          else some B) = some B := by simpa only [Fml.bindsB, hU, cond_true] using h
       obtain ⟨B', h₁, h₂⟩ := Option.bind_eq_some_iff.1 h'
       cases hm : (meetsB B' (Solidity.Upd.vars (U.erase ns)) || meetsB B' (U.names ns))
       · simp only [hm, cond_false, Option.some.injEq] at h₂
@@ -324,8 +324,8 @@ theorem Fml.binds_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var},
   | all x p φ ih =>
     intro ns B h
     cases hx : x.memB ns
-    · have h' : (φ.binds (x :: ns)).bind (fun B => bif x.memB B then none else some B) =
-          some B := by simpa only [Fml.binds, hx, cond_false] using h
+    · have h' : (φ.bindsB (x :: ns)).bind (fun B => bif x.memB B then none else some B) =
+          some B := by simpa only [Fml.bindsB, hx, cond_false] using h
       obtain ⟨B', h₁, h₂⟩ := Option.bind_eq_some_iff.1 h'
       cases hB : x.memB B'
       · simp only [hB, cond_false, Option.some.injEq] at h₂
@@ -333,12 +333,12 @@ theorem Fml.binds_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var},
         obtain ⟨c, rfl⟩ := ih h₁
         exact ⟨⟨Var.not_mem_of_memB hx, Var.not_mem_of_memB hB, c⟩, rfl⟩
       · simp only [hB, cond_true, reduceCtorEq] at h₂
-    · simp only [Fml.binds, hx, cond_true, reduceCtorEq] at h
+    · simp only [Fml.bindsB, hx, cond_true, reduceCtorEq] at h
   | bind m x t φ ih =>
     intro ns B h
     cases hx : x.memB ns
-    · have h' : (φ.binds (x :: ns)).bind (fun B => bif x.memB B then none else some (x :: B)) =
-          some B := by simpa only [Fml.binds, hx, cond_false] using h
+    · have h' : (φ.bindsB (x :: ns)).bind (fun B => bif x.memB B then none else some (x :: B)) =
+          some B := by simpa only [Fml.bindsB, hx, cond_false] using h
       obtain ⟨B', h₁, h₂⟩ := Option.bind_eq_some_iff.1 h'
       cases hB : x.memB B'
       · simp only [hB, cond_false, Option.some.injEq] at h₂
@@ -346,11 +346,11 @@ theorem Fml.binds_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var},
         obtain ⟨c, rfl⟩ := ih h₁
         exact ⟨⟨Var.not_mem_of_memB hx, Var.not_mem_of_memB hB, c⟩, rfl⟩
       · simp only [hB, cond_true, reduceCtorEq] at h₂
-    · simp only [Fml.binds, hx, cond_true, reduceCtorEq] at h
+    · simp only [Fml.bindsB, hx, cond_true, reduceCtorEq] at h
 
 theorem Fml.closableB_sound {Γ : Ctx} (φ : Fml C Γ) {ns : List Var}
     (h : φ.closableB ns = true) : φ.Closable ns := by
   obtain ⟨B, hB⟩ := Option.isSome_iff_exists.1 h
-  exact (Fml.binds_sound φ hB).1
+  exact (Fml.bindsB_sound φ hB).1
 
 end Solidity.Core

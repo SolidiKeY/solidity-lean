@@ -3803,12 +3803,12 @@ only by `Proves.sound_of`.  The read-only review pass was not run.
 *The closable test, rewritten* (`Calculus/Core/Closable.lean`).
 `Fml.closableB` keeps its meaning (`Proves.close`'s side condition and
 `Fml.closableB_sound` are unchanged in statement) and is now
-`(φ.binds ns).isSome`: `Fml.binds` collects the hidden binders' names from
-the leaf up (`some φ.bindNames`, `Fml.binds_sound`), so an update or a `∀`
+`(φ.bindsB ns).isSome`: `Fml.bindsB` collects the hidden binders' names from
+the leaf up (`some φ.bindNames`, `Fml.bindsB_sound`), so an update or a `∀`
 tests only the binders below it, most often none, instead of asking
 `bindNames` of the whole rest at each update and binder (quadratic in the
-leaf's context).  `Fml.binds`, `Upd.freshB` and `Fml.foFreshB` are written
-by the recursor with compiled twins by `match` (`Fml.bindsM`,
+leaf's context).  `Fml.bindsB`, `Upd.freshB` and `Fml.foFreshB` are written
+by the recursor with compiled twins by `match` (`Fml.bindsBM`,
 `Upd.freshBM`, `Fml.foFreshBM`; Gate G0, condition 2, as `Fml.posB`), and
 names are compared by `Var.memB`, whose `Var.eqB` compares a fresh
 variable's index (a `Nat`, one kernel step) before its base: the review's
@@ -3825,12 +3825,12 @@ obligations of Derived9–11, each `Seq.run` with a given leaf checked by
 | the flip as landed (`closableB` by `casesOn`, `decide (x ∉ ns)`) | 27.2–30.4 s |
 | a one-pass top-down variant (the names taken above carried down) | 27.1–28.9 s |
 | the same with `Var.memB` | 26.2 s |
-| `Fml.binds` (landed) | 22.0–24.5 s |
+| `Fml.bindsB` (landed) | 22.0–24.5 s |
 | no closable test at all (`pick` alone) | 20.3–24.0 s |
 | the `Core.Valid` route (`Derive.residueOf`: symex and one residue) | 20.2–20.4 s |
-| the review's (a) as stated: the context's checks carried in a `Hyps.rec` state, so that a prefix is checked once and the leaf tests only its goal | 23.4 s, no gain over `Fml.binds` (the kernel does not share a prefix's evaluation between leaves) |
+| the review's (a) as stated: the context's checks carried in a `Hyps.rec` state, so that a prefix is checked once and the leaf tests only its goal | 23.4 s, no gain over `Fml.bindsB` (the kernel does not share a prefix's evaluation between leaves) |
 
-With `Fml.binds` the closable test costs about 1.7 s of the 91
+With `Fml.bindsB` the closable test costs about 1.7 s of the 91
 obligations' kernel time, against about 5 s before; what remains over the
 `Core.Valid` route is the residue of each leaf's whole erasure
 (`Seq.leafRes` erases `H.wrap φ` and today's residue peels it again at
@@ -3842,7 +3842,7 @@ at load under 1, so that today's text is re-timed beside the flip (the
 pre-flip `Problems.lean` and `Derived9`–`11` of `223e6a2`, as scratch
 copies):
 
-| Module | Limit | today's text (`223e6a2`) | flip as landed (`b07a002`) | with `Fml.binds` | with `Fml.binds`, on the integration's scale |
+| Module | Limit | today's text (`223e6a2`) | flip as landed (`b07a002`) | with `Fml.bindsB` | with `Fml.bindsB`, on the integration's scale |
 |---|---|---|---|---|---|
 | Derived9–11 | 22.9 s | 19.34 s (6.86 + 9.82 + 2.66) | 27.21 s (8.89 + 14.49 + 3.83) | **24.33 s** (8.04 + 12.82 + 3.47; CPU 9.6 + 14.6 + 3.8) | about 25.0 s, **over** by 9% |
 | `TestSuite/Problems` | 1.44 s | 1.09 s | 0.66 s (`legacy`) | 0.66 s | about 0.77 s |
@@ -3851,7 +3851,7 @@ copies):
 The scale is W3b's: today's text there read 19.9 s for Derived9–11 and
 1.27 s for `Problems` on the integration's scale, so the factors are
 19.9/19.34 and 1.27/1.09.  At load 3, two earlier rounds read 25.4 and
-26.7 s with `Fml.binds`, against 28.2 and 31.0 s for the flip as landed.
+26.7 s with `Fml.bindsB`, against 28.2 and 31.0 s for the flip as landed.
 Under Decision 9, W3b's 55.9 s with the Derived row at 25.0 s, `Problems`
 at 0.77 s and `CoreProblems` added at 1.43 s is about 61.9 s against
 60.8 s of limits: **over by about 1.1 s** (2%), where the flip as landed
