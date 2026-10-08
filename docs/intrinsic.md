@@ -3545,7 +3545,8 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     that is not first-order weakens to `true` (`Fml.wkD`).  Today's rule
     read the parameters at their values after the body, with a freshness
     side condition (`CallRet.freshFor`), and took `\old` and every return
-    shape.
+    shape.  These interim limits are lifted by W4 `contracts`
+    (`Calculus/Core/FunContract.lean`; proposal 33).
 32. *Proposed (W4 preparation), renumbered from 31 at the W3d integration, the lead's call:* the corpus reads the typed
     run.  An obligation is `Corpus.Diamond (Core.TState.init C) P`, the
     program resolved and `⟨ Q ⟩ true` read by `Core.holds` (`Runs`), so an
@@ -3558,6 +3559,14 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `DecidableEq`); and the 16 `evaluated` rows, which `corpus_decide`
     proves since W1 `evm` made it typed, are `proved` (their `#eval` pins
     replaced by theorems).  See "W4 preparation" above.
+33. *Proposed (W4 `contracts`), the lead's call:* `ensures` always
+    stands at the snapshots (`rs ++ Olds ++ ps`), as today's rule always
+    took them, so a contract with no `\old` still lists `old, oldNet` in
+    its `cdlIn`; the obligation is
+    `requires → {old := storage ‖ oldNet := net} [ T r; { body } ] ensures`,
+    the body printed as a block; a memory return is declared in "post"
+    (`[ T memory r; ]`) rather than bound by `∀` (no binder ranges over an
+    object not yet in the heap).  See "W4 lane `contracts`" below.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
