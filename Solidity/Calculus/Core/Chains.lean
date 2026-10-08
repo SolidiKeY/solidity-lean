@@ -110,6 +110,11 @@ def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
       ⟨pair, k, ψ.erasedQuoted c⟩ :: Fml.chainLines c n ψ
     | none => []
 
+/-- The lines of the derivation of `φ` and its erasure, quoted: one
+evaluation. -/
+def Fml.chainRunQ (c : Lean.Expr) {Γ : Ctx} (n : Nat) (φ : Fml C Γ) : List LineQ × Lean.Expr :=
+  (Fml.chainLines c n φ, φ.erasedQuoted c)
+
 /-- `⟨[ s; … } ω ]⟩ φ`: a modality `m` that is a variable, its program
 running into the end of a block (`Core.Delab`'s `core_item`). -/
 syntax:max "⟨" "[ " (sol_stmt "; ")* "} " core_item* "]" "⟩ " dl_fml:50 : dl_fml
@@ -196,15 +201,29 @@ structure Line where
 /-- The most lines a run computes. -/
 def runFuel : Nat := 200
 
-/-- The lines of the derivation of the closed formula `φ : Fml C Γ`. -/
-def closedLines (n : Lean.Name) (C Γ φ : Expr) : MetaM (List LineQ) := do
-  unsafe evalExpr (List LineQ) (mkApp (mkConst ``List [0]) (mkConst ``LineQ))
-    (mkAppN (mkConst ``Fml.chainLines) #[C, quoteConstName n, Γ, toExpr runFuel, φ])
+/-- `evalExpr` without the kernel's check of the throwaway definition it
+compiles (`debug.skipKernelTC`): the value is a quoted term, and every line
+or proof built from it is checked by the kernel where it is used.  The check
+was a third of a short chain's time (`docs/intrinsic.md`, W3 `chains`). -/
+unsafe def evalQuoted (α) (ty e : Expr) : MetaM α :=
+  withOptions (debug.skipKernelTC.set · true) (evalExpr α ty e)
 
-/-- The erasure of the closed formula `φ`, quoted. -/
-def closedErased (n : Lean.Name) (C Γ φ : Expr) : MetaM Expr := do
-  unsafe evalExpr Expr (mkConst ``Expr)
-    (mkAppN (mkConst ``Fml.erasedQuoted) #[C, quoteConstName n, Γ, φ])
+/-- The evaluated runs of this declaration, by their closed formula: a
+theorem's proof sees its binders as new variables, so `runCache` misses
+there, but the formula with its postconditions in slots is the same. -/
+initialize closedCache : EnvExtension (Std.HashMap Expr (List LineQ × Expr)) ←
+  registerEnvExtension (pure {}) (asyncMode := .local)
+
+/-- The lines of the derivation of the closed formula `φ : Fml C Γ`, and
+its erasure, quoted. -/
+def closedRun (n : Lean.Name) (C Γ φ : Expr) : MetaM (List LineQ × Expr) := do
+  if let some r := (closedCache.getState (← getEnv))[φ]? then return r
+  let ty := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) (mkConst ``LineQ))
+    (mkConst ``Expr)
+  let r ← unsafe evalQuoted (List LineQ × Expr) ty
+    (mkAppN (mkConst ``Fml.chainRunQ) #[C, quoteConstName n, Γ, toExpr runFuel, φ])
+  modifyEnv fun env => closedCache.modifyState env (·.insert φ r)
+  return r
 
 /-- A derivation: the Lean terms of its first line, the erasure of that line
 (once per modality), its lines, and whether they stop because the next rule
@@ -253,12 +272,14 @@ def runChain (φ : Expr) : MetaM Run := do
     let (f, ψ) := unpair q.pair
     { fml := unpunch sp ψ, focus := unpunch sp f, fresh := q.fresh, erased := #[q.erased] }
   let (erased, ls, stuck) ← match m? with
-    | none => pure (#[← closedErased n C Γ φ'], (← closedLines n C Γ φ').map line, false)
+    | none =>
+      let (ls, e) ← closedRun n C Γ φ'
+      pure (#[e], ls.map line, false)
     | some m =>
       let φd := φ'.replaceFVar m (mkConst ``Modality.diamond)
       let φb := φ'.replaceFVar m (mkConst ``Modality.box)
-      let ds ← closedLines n C Γ φd
-      let bs ← closedLines n C Γ φb
+      let (ds, ed) ← closedRun n C Γ φd
+      let (bs, eb) ← closedRun n C Γ φb
       let rec shared : List LineQ → List LineQ → List Line × Bool
         | d :: ds, b :: bs =>
           if let (some p, true) := (mergeModality m d.pair b.pair, d.fresh == b.fresh) then
@@ -270,7 +291,7 @@ def runChain (φ : Expr) : MetaM Run := do
         | [], [] => ([], false)
         | _, _ => ([], true)
       let (ls, s) := shared ds bs
-      pure (#[← closedErased n C Γ φd, ← closedErased n C Γ φb], ls, s)
+      pure (#[ed, eb], ls, s)
   let r : Run := { splice := sp, erased, lines := ls, stuck }
   modifyEnv fun env => runCache.modifyState env fun c => Id.run do
     let mut c := c.insert φ (r, 0)
