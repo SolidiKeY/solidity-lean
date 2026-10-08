@@ -93,6 +93,7 @@ import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Spec
 import Solidity.Calculus.Core.Deploy
+import Solidity.Calculus.Core.Contracts
 import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.Close
 import Solidity.Calculus.Core.Derive
