@@ -1,4 +1,4 @@
-import Solidity.Calculus.Core.Blocks
+import Solidity.Calculus.Core.WkOver
 import Solidity.Calculus.Core.Logic
 import Solidity.Semantics.Mutability
 import Solidity.Typing.Soundness
@@ -530,30 +530,6 @@ theorem State.anon_get (xs : List ((t : LTy) × Idx Γ t))
     · have hx : (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∉ xs := fun h => hm (List.mem_cons_of_mem _ h)
       rw [(ih _).2 hx]
       exact Env.get_set_ne x.2 i _ σ.env (hne fun h => hm (h ▸ List.mem_cons_self ..))
-
-/-- The mutability a loop frame's flag stands for. -/
-def frameMut (hv : Bool) : Mutability := if hv then .nonpayable else .view
-
-/-- **A body with a frame** is within its mutability, and its frame lists
-every local of the loop's context it may write. -/
-theorem Prog.frame_some {Γ₁ : Ctx} {P : Prog C Γ Γ₁} {xs : List ((t : LTy) × Idx Γ t)}
-    {hv : Bool} (h : P.frame = some (xs, hv)) :
-    Prog.within (frameMut hv) P = true ∧
-      ∀ t (i : Idx Γ t), (t, i.toNat) ∈ Prog.writesAt 0 P → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ xs := by
-  unfold Prog.frame at h
-  have hxs : ∀ ys : List ((t : LTy) × Idx Γ t),
-      ys = (Prog.writesAt 0 P).filterMap (fun (tn : LTy × Nat) => (Γ.idx? tn.2 tn.1).map (⟨tn.1, ·⟩)) →
-      ∀ t (i : Idx Γ t), (t, i.toNat) ∈ Prog.writesAt 0 P → (⟨t, i⟩ : (t : LTy) × Idx Γ t) ∈ ys := by
-    intro ys hys t i hm
-    rw [hys, List.mem_filterMap]
-    exact ⟨(t, i.toNat), hm, by simp only [Ctx.idx?_toNat, Option.map_some]⟩
-  split at h
-  · cases h
-    exact ⟨by assumption, hxs _ rfl⟩
-  · split at h
-    · cases h
-      exact ⟨by assumption, hxs _ rfl⟩
-    · cases h
 
 /-- **A state in a loop body's frame is one its anonymised premise covers**:
 `{anon(xs)}` (`{havoc}` when `hv`) of the loop's first state reaches every

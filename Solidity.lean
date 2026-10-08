@@ -40,6 +40,7 @@ import Solidity.Calculus.Core.Print
 import Solidity.Calculus.Core.Shift
 import Solidity.Calculus.Core.Arms
 import Solidity.Calculus.Core.Blocks
+import Solidity.Calculus.Core.WkOver
 import Solidity.Calculus.Core.Step
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.Rules
