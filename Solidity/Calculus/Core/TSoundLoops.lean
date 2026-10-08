@@ -286,6 +286,195 @@ theorem Premise.tsound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
         obtain ⟨hg', ha'⟩ := Prog.trun_frame body hwμ 0 hb
         exact ⟨hg.trans (hg'.withEnv _), hag.trans ha', h'.1⟩
 
+/-- A block's run, its frame popped with nothing after it, read through
+its states. -/
+theorem frames_pop_nil_trun {H : HTy} {Γ' : Ctx} (b : BlockKind) (X : TRes (Out C H Γ₁))
+    (h : Ext Γ' Γ₁) :
+    (X.map (·.st)).bind (Frames.trunSt · (.pop b h .nil)) = (X.map (Out.drop h)).map (·.st) := by
+  cases X <;> rfl
+
+/-- **`whileInvariantDiamond` is sound** over the typed state: the variant
+bounds the iterations left. -/
+theorem Premise.tsound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
+    (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
+    (hf : body.frame = some (xs, hv)) (σ : TState C Γ) {p : Premise C Γ Γ}
+    (hp : loopStep k .diamond (.inv I (some d)) c body = some p) :
+    Premise.TSound .diamond (.loop (.inv I (some d)) c body) p σ := by
+  unfold loopStep at hp
+  rw [hf] at hp
+  dsimp only at hp
+  cases hp
+  intro _ _ ω κ φ hp
+  obtain ⟨hI0, hA⟩ := hp
+  obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
+  rw [tholds_modal_iff, trunSt_cons_frames]
+  show Modality.afterRunTR .diamond _ (loopThen σ ω κ (TLoop.run
+    (fun o : Out C σ.H Γ => (Prog.trun o.st body).map
+      fun o' => ⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩)
+    (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩))
+  suffices key : ∃ τ, TLoop.run
+      (fun o : Out C σ.H Γ => (Prog.trun o.st body).map
+        fun o' => (⟨o'.st.drop body.ext, o.ext.trans o'.ext⟩ : Out C σ.H Γ))
+      (fun o => c.evalT o.st) ⟨σ, List.prefix_refl _⟩ = .ok τ ∧
+        tholds τ.st (Fml.modalK .diamond ω κ φ) by
+    obtain ⟨τf, hrun, hG⟩ := key
+    rw [hrun]
+    exact (tholds_modal_iff τf.st ω κ φ).1 (tholds_modalK τf.st ω κ φ hG)
+  refine TLoop.run_variant
+    (H := fun a : Out C σ.H Γ => TGFrame (frameMut hv) σ a.st ∧
+      TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧ tholds a.st (Fml.isBoolD I.lower true))
+    (D := fun a : Out C σ.H Γ => (d.evalT a.st).map (·.1)) ?_
+    ⟨TGFrame.refl σ, TLocAgree.refl _, hI0⟩
+  rintro a ⟨hg, hag, hI⟩
+  have hY := tholds_anonHavoc hxs hg hag hA hI
+  change Modality.afterC .diamond _ (Upd.apply _ _) at hY
+  have hUe : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
+      (.val (p := .bool) c.lower)).apply a.st.erase =
+      (d.eval a.st.erase >>= fun dv => c.eval a.st.erase >>= fun cv =>
+        pure ((a.st.erase.push (t := .val .uint) dv).push (t := .val .bool) cv)) := by
+    show (do
+      let τ₁ ← (do
+        let τ₀ ← pure a.st.erase
+        pure (τ₀.push (t := .val .uint) (← d.lower.eval a.st.erase)))
+      pure (τ₁.push (t := .val .bool) (← c.lower.eval a.st.erase))) = _
+    rw [Val.eval_lower, Val.eval_lower]
+    cases d.eval a.st.erase <;> cases c.eval a.st.erase <;> rfl
+  rw [hUe] at hY
+  cases hd : d.evalT a.st with
+  | error e =>
+    obtain ⟨e', he'⟩ := Val.eval_erase_error d a.st hd
+    rw [he'] at hY
+    exact hY.elim
+  | ok dv =>
+  cases hc : c.evalT a.st with
+  | error e =>
+    obtain ⟨e', he'⟩ := Val.eval_erase_error c a.st hc
+    rw [Val.eval_erase_ok d a.st hd, he'] at hY
+    exact hY.elim
+  | ok cv =>
+  rw [Val.eval_erase_ok d a.st hd, Val.eval_erase_ok c a.st hc] at hY
+  obtain ⟨hT, hF⟩ := hY ((a.st.push (t := .val .uint) dv).push (t := .val .bool) cv) rfl
+  refine ⟨dv.1, by show (d.evalT a.st).map _ = _; rw [hd]; rfl, ?_, fun hc' => ?_, fun hc' => ?_⟩
+  · cases cv
+    · exact .inr rfl
+    · exact .inl rfl
+  · have hcv : cv = false := Except.ok.inj hc'
+    subst hcv
+    have hF' := hF ((tholds_isBoolD _ _ _).2 rfl) a.st rfl
+    exact hF'
+  · have hcv : cv = true := Except.ok.inj hc'
+    subst hcv
+    have hT' := hT ((tholds_isBoolD _ _ _).2 rfl) (a.st.push (t := .val .uint) dv) rfl
+    have h' := (tholds_modal_iff _ _ _ _).1 (tholds_modalK _ _ _ _ hT')
+    unfold Prog.trunSt at h'
+    rw [frames_pop_nil_trun, TState.push_lift,
+      (TWkRel.drop (Prog.wk_over body Core.up)
+        (Prog.trun_wk body Core.up a.st
+          ((dv, a.st.env) : TEnv C a.st.H (.val .uint :: Γ)))).eq_lifted] at h'
+    cases hb : Prog.trun a.st body with
+    | error e =>
+      rw [hb] at h'
+      exact h'.1.elim
+    | ok o =>
+      rw [hb] at h'
+      obtain ⟨hg', ha'⟩ := Prog.trun_frame body hwμ 0 hb
+      obtain ⟨hI₁, hdec⟩ := h'.1
+      let τ₀ : TState C Γ := o.st.drop body.ext
+      change tholds (τ₀.push (t := .val .uint) dv) _ at hI₁ hdec
+      refine ⟨⟨τ₀, a.ext.trans o.ext⟩, rfl, ⟨hg.trans (hg'.withEnv _), hag.trans ha', ?_⟩,
+        fun hc₁ => ?_⟩
+      · have hI' := (tholds_isBoolD_lower I.up (τ₀.push (t := .val .uint) dv) true).1 hI₁
+        rw [Val.evalT_up] at hI'
+        exact (tholds_isBoolD_lower I τ₀ true).2 hI'
+      · change c.evalT τ₀ = _ at hc₁
+        have hcu : c.up.evalT (τ₀.push (t := .val .uint) dv) = .ok true := by
+          rw [Val.evalT_up]; exact hc₁
+        change Modality.afterC .diamond _ (Upd.apply _ _) at hdec
+        have hU₁ : (Upd.nil.decl (fse k) (.val (p := .bool) c.up.lower)).apply
+            (τ₀.push (t := .val .uint) dv).erase =
+            .ok ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true).erase := by
+          show (do
+            let υ ← pure (τ₀.push (t := .val .uint) dv).erase
+            pure (υ.push (t := .val .bool)
+              (← c.up.lower.eval (τ₀.push (t := .val .uint) dv).erase))) = _
+          rw [Val.eval_lower, Val.eval_erase_ok _ _ hcu]
+          rfl
+        rw [hU₁] at hdec
+        obtain ⟨hle, hlt⟩ := hdec _ rfl ((tholds_isBoolD _ _ _).2 rfl)
+        rw [tholds_isBoolD] at hle hlt
+        change evalBinop .le .uint (.int 0) (d.up.up.lower.eval _) = _ at hle
+        change (d.up.up.lower.eval _ >>= fun a => evalBinop .lt .uint a (pure (.int dv.1))) = _
+          at hlt
+        rw [Val.eval_lower] at hle hlt
+        cases hdx : d.evalT τ₀ with
+        | error e =>
+          have hd₂ : (d.up.up (t := .val .bool)).evalT
+              ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .error e := by
+            rw [Val.evalT_up, Val.evalT_up]; exact hdx
+          obtain ⟨e', he'⟩ := Val.eval_erase_error _ _ hd₂
+          rw [he'] at hle
+          obtain ⟨_, _, -, hy, -, -⟩ := evalBinop_cmp_true (.inr rfl) hle
+          cases hy
+        | ok x =>
+          have hd₂ : (d.up.up (t := .val .bool)).evalT
+              ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .ok x := by
+            rw [Val.evalT_up, Val.evalT_up]; exact hdx
+          rw [Val.eval_erase_ok _ _ hd₂] at hle hlt
+          obtain ⟨_, y, hx0, hy, -, hle'⟩ := evalBinop_cmp_true (.inr rfl) hle
+          cases hx0
+          cases hy
+          change evalBinop .lt .uint (.int x.1) (pure (.int dv.1)) = _ at hlt
+          obtain ⟨x', z, hx', hz, hlt', -⟩ := evalBinop_cmp_true (.inl rfl) hlt
+          cases hx'
+          cases hz
+          exact ⟨x.1, by show (d.evalT τ₀).map _ = _; rw [hdx]; rfl, hle' rfl, hlt' rfl⟩
+
 end Inv
+
+/-! ## The rule of a loop -/
+
+/-- **The rule of a loop is sound** over the typed state: unwound, ended, by
+its invariant, or closed to `false`. -/
+theorem Stmt.tsound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ)
+    (c : Val C Γ .bool) (body : Prog C Γ Γ₁) (σ : TState C Γ) (p : Premise C Γ Γ)
+    (hp : Stmt.step k m (.loop a c body) = some p) :
+    Premise.TSound m (.loop a c body) p σ := by
+  change loopStep k m a c body = some p at hp
+  cases a with
+  | unwind n =>
+    cases n with
+    | zero =>
+      unfold loopStep at hp
+      cases hp
+      exact Premise.tsound_loopExit c body σ
+    | succ n =>
+      unfold loopStep at hp
+      cases hp
+      exact Premise.tsound_whileUnwind n c body σ
+  | inv I dec =>
+    cases hf : body.frame with
+    | none =>
+      unfold loopStep at hp
+      rw [hf] at hp
+      cases hp
+      exact Premise.tsound_done σ false nofun
+    | some f =>
+      obtain ⟨xs, hv⟩ := f
+      cases m with
+      | box =>
+        unfold loopStep at hp
+        rw [hf] at hp
+        dsimp only at hp
+        cases hp
+        exact Premise.tsound_whileInvBox k I c dec body hf σ
+      | diamond =>
+        cases dec with
+        | none =>
+          unfold loopStep at hp
+          rw [hf] at hp
+          dsimp only at hp
+          cases hp
+          exact Premise.tsound_done σ false nofun
+        | some d => exact Premise.tsound_whileInvDiamond k I c d body hf σ hp
 
 end Solidity.Core
