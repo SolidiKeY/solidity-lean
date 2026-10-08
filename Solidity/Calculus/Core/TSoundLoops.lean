@@ -157,6 +157,11 @@ theorem Stmt.trunSt_ite {Γ₂ : Ctx} (σ : TState C Γ) (c : Val C Γ .bool) (t
   | error => rfl
   | ok v => cases v <;> exact TRes.map_st _ _ _ fun _ => rfl
 
+/-- **A block** is its statements, its locals popped after it. -/
+theorem Stmt.tsound_block {m : Modality} (body : Prog C Γ Γ₁) (σ : TState C Γ) :
+    Premise.TSound m (.block body) (.unfold body body.ext) σ :=
+  Premise.tsound_unfold σ (Stmt.trunSt_block σ body).symm
+
 /-- The loop's annotation plays no part in its run. -/
 theorem Stmt.trunSt_loop_ann (σ : TState C Γ) (a a' : LoopAnn C Γ) (c : Val C Γ .bool)
     (body : Prog C Γ Γ₁) : Stmt.trunSt σ (.loop a c body) = Stmt.trunSt σ (.loop a' c body) :=
