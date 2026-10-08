@@ -3379,6 +3379,12 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
 29. *Proposed (W3c `tree`), the lead's call:* `#verify` is scoped whatever
     the caller's scope, and a witness's after-line drops `\result`.
 
+**Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
+28 together: explicit `∀`s are marked by `cdl!` and always keep their range
+and `allRight` line (28); `Seq.pick` (27) applies to the parameters only.
+`deleteReadDeepWalk` moves to `Tactics/StorageDelete` (W3c integration
+proposal).
+
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
 **Result.**  `Stmt.tsound C : Stmt.TSound C` at every contract, and
