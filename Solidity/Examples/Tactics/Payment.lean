@@ -1,4 +1,8 @@
 import Solidity.Calculus.Sequents
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.Sequents
+import Solidity.Tools.CoreInspect
 
 /-!
 # Payment: `transfer` and `send`, as `⊢` walks
@@ -33,6 +37,8 @@ open Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
+open scoped Solidity.Core.Surface
+
 /-! ## 1 · The rule -/
 
 /--
@@ -47,12 +53,13 @@ info: @Taclet.transferNoCallbackBox : ∀ {C : Contract} {k : Nat} {sadr se : Si
 sequent (`Calculus/Sequents.lean`); the chain, from the receiver `3`, is
 `Chains.Payment.Transfer5.chain`. -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
+  apply allIntro
   apply update .transferNoCallbackBox
-  show sequent!{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) }
-      ⟹ [ ] true }
+  show sequent!{ ∀ uint to,
+      { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } ⟹ true }
   apply empty
-  show sequent!{ { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) }
-      ⟹ true }
+  show sequent!{ ∀ uint to,
+      { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } ⟹ true }
   refine close ?_
   sol_symex
   sol_close
@@ -96,21 +103,56 @@ info: @Taclet.sendNoCallbackDiamond : ∀ {C : Contract} {k : Nat} {pv : Var} {s
 goals, `"send succeeded"` and `"send failed"`, each a checked sequent; it
 has no formula goal. -/
 theorem sendBox : ⊢ dl!{ [ ok = to.send(5); ] true } := by
+  apply allIntro
   apply cases .sendNoCallbackBox
   · simp only [List.not_mem_nil, false_implies, implies_true]
   simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]
   refine ⟨?_, ?_⟩
-  · show sequent!{ { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true }
-        ⟹ [ ] true }
+  · show sequent!{ ∀ uint to,
+        { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true } ⟹ true }
     apply empty
     refine close ?_
     sol_symex
     sol_close
-  · show sequent!{ { ok := false } ⟹ [ ] true }
+  · show sequent!{ ∀ uint to, { ok := false } ⟹ true }
     apply empty
     refine close ?_
     sol_symex
     sol_close
+
+/-- `[ ok = owner.send(x + 2); ] true`: a storage receiver and an amount
+that is not simple, both captured first (`send_unfold_leftFstReceiver`,
+`send_unfold_rightSndArgument`). -/
+theorem sendCapturedValid : ⊨ dl!{ [ ok = owner.send(x + 2); ] true } := by
+  sol_symex
+  sol_close
+
+/--
+info: @Taclet.send_unfold_leftFstReceiver : ∀ {C : Contract} {k : Nat} {m : Modality} {pv : Var} {nadr e : Val C PrimTy.uint},
+  dl{ ⟨[ pv = nadr .send(e); ]⟩ ⇝ ⟨[ uint se = nadr; pv = se .send(e); ]⟩ }
+-/
+#guard_msgs in #check @Taclet.send_unfold_leftFstReceiver
+
+/--
+info: @Taclet.send_unfold_rightSndArgument : ∀ {C : Contract} {k : Nat} {m : Modality} {pv : Var}
+  {sadr : Simple C PrimTy.uint} {nse : Val C PrimTy.uint},
+  dl{ ⟨[ pv = sadr .send(nse); ]⟩ ⇝ ⟨[ uint se = nse; pv = sadr .send(se); ]⟩ }
+-/
+#guard_msgs in #check @Taclet.send_unfold_rightSndArgument
+
+end Solidity.Examples.Tactics.Payment
+
+/-! ## Under the diamond, today's
+
+A scoped leaf behind a diamond update is not closed by its erasure yet
+(`Core.Proves.close` takes box contexts: `docs/intrinsic.md`, W2 `sound`),
+so this walk reads today's calculus, without the switch. -/
+
+namespace Solidity.Examples.Tactics.Payment
+
+open Proves
+
+local instance : InContract := ⟨StandardExample⟩
 
 /-- `⟨ uint to = 9; ok = to.send(5); ⟩ true`: under the diamond the amount's
 sign first (`"non-negative amount"`), then the two outcomes.  The receiver is
@@ -139,25 +181,5 @@ theorem sendDiamond : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := b
     refine close ?_
     sol_symex
     sol_close
-
-/-- `[ ok = owner.send(x + 2); ] true`: a storage receiver and an amount
-that is not simple, both captured first (`send_unfold_leftFstReceiver`,
-`send_unfold_rightSndArgument`). -/
-theorem sendCapturedValid : ⊨ dl!{ [ ok = owner.send(x + 2); ] true } := by
-  sol_symex
-  sol_close
-
-/--
-info: @Taclet.send_unfold_leftFstReceiver : ∀ {C : Contract} {k : Nat} {m : Modality} {pv : Var} {nadr e : Val C PrimTy.uint},
-  dl{ ⟨[ pv = nadr .send(e); ]⟩ ⇝ ⟨[ uint se = nadr; pv = se .send(e); ]⟩ }
--/
-#guard_msgs in #check @Taclet.send_unfold_leftFstReceiver
-
-/--
-info: @Taclet.send_unfold_rightSndArgument : ∀ {C : Contract} {k : Nat} {m : Modality} {pv : Var}
-  {sadr : Simple C PrimTy.uint} {nse : Val C PrimTy.uint},
-  dl{ ⟨[ pv = sadr .send(nse); ]⟩ ⇝ ⟨[ uint se = nse; pv = sadr .send(se); ]⟩ }
--/
-#guard_msgs in #check @Taclet.send_unfold_rightSndArgument
 
 end Solidity.Examples.Tactics.Payment
