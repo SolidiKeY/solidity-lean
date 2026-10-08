@@ -1,6 +1,9 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Spec
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Benchmark: `Mapping` and `NestedMapping`
@@ -104,6 +107,8 @@ section Mapping
 
 local instance : InContract := ⟨Mapping⟩
 
+open scoped Solidity.Core.Surface
+
 /-- `set(a, i)`: `ensures myMap[_addr] == _i`. -/
 theorem set_spec : ⊢ dl!{ [ set(a, i); ] myMap[a] == i } := by
   sol_prove
@@ -158,6 +163,8 @@ end Mapping
 section NestedMapping
 
 local instance : InContract := ⟨NestedMapping⟩
+
+open scoped Solidity.Core.Surface
 
 /-- `set(a, i, true)`: `ensures nested[_addr1][_i] == _boo`. -/
 theorem nested_set_spec_true : ⊢ dl!{ [ set(a, i, true); ] nested[a][i] == true } := by

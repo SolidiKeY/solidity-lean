@@ -10,7 +10,8 @@ import Solidity.Calculus.Close
 by arm: each program below is read into the scoped syntax
 (`Prog.resolve`), run to its end by `Core.symex`, and its erasure compared
 with what today's `symex` leaves of the same formula, each branch's cover
-goal dropped (the scoped calculus keeps it apart, `Premise.cover`).  So
+goal dropped (today's third goal, `Premise.coverFml`; a scoped split has
+KeY's two goals, `bool` locals being typed).  So
 each premise erases to the one today's rule leaves, with the same fresh names.  The result is also
 quoted and added as a theorem `Core.symex n φ = ψ` by `Eq.refl`, so the
 kernel evaluates every arm too (a call's `Prog.wk`, a loop's frame).

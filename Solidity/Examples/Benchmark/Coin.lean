@@ -1,6 +1,9 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Spec
 import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Benchmark: `Coin`
@@ -59,6 +62,8 @@ def Coin : Contract := contract!{
 }
 
 local instance : InContract := ⟨Coin⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## The constructor -/
 

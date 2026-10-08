@@ -1,5 +1,8 @@
 import Solidity.Calculus.Close
 import Solidity.Calculus.Derive
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Calls: a function's body, inlined
@@ -29,6 +32,8 @@ namespace Solidity.Examples.Tactics.Calls
 open Proves
 
 local instance : InContract := ⟨CallsExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## The rules -/
 
@@ -61,6 +66,7 @@ theorem callAddOneWalk : ⊨ dl!{ [ uint y = addOne(4); ] y == 5 } := by
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign     -- uint x' = 4;
   apply update .valueDeclSkip        -- uint r';
+  apply unfold .blockEmpty           -- the body's block
   apply update .binopAssignment      -- r' = x' + 1;
   apply update .localValueAssign     -- y = r';
   apply empty
@@ -107,6 +113,7 @@ theorem callCaptureWalk : ⊨ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply update .valueDeclSkip
+  apply unfold .blockEmpty
   apply update .binopAssignment
   apply update .localValueAssign
   apply empty
@@ -394,6 +401,19 @@ example : Prog.toStr (sol[Tuples]{ uint lo; uint sum; (lo, , sum, ) = returnStat
 
 /-- error: Solidity elaboration failed: a tuple assignment to two targets that are not stack locals -/
 #guard_msgs in #check sol[Tuples]{ (total, total) = (1, 2); }
+
+end Solidity.Examples.Tactics.Calls
+
+/-! The `TestSuite` shapes below are `⊢` obligations under the diamond, read
+without `open scoped Solidity.Core.Surface`: a scoped leaf behind a diamond
+update is not closed by its erasure yet (`Core.Proves.close` takes box
+contexts, `docs/intrinsic.md` W2 `sound`). -/
+
+namespace Solidity.Examples.Tactics.Calls
+
+open Proves
+
+local instance : InContract := ⟨CallsExample⟩
 
 /-! ## solkey's `TestSuite` shapes, derived
 

@@ -1,5 +1,8 @@
 import Solidity.Calculus.Close
 import Solidity.Theory.Storage
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # A struct with a mapping, written and deleted — both layers
@@ -39,6 +42,8 @@ namespace Solidity.Examples.Tactics.LedgerDelete
 open Proves Semantics
 
 local instance : InContract := ⟨TestSuite⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## Part 1 · The calculus -/
 

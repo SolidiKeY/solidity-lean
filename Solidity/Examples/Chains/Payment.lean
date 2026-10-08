@@ -2,6 +2,8 @@ import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.Calculus.Sequents
 import Solidity.FreshNames
+import Solidity.Calculus.Core.LastLine
+import Solidity.Calculus.Core.Surface
 
 /-!
 # Payment: `transfer`, as chains
@@ -26,6 +28,8 @@ for every receiver and amount, is `Examples/Tactics/Payment.lean`'s.
 
 namespace Solidity.Examples.Chains.Payment
 
+open scoped Solidity.Core.Surface
+
 local instance : InContract := ⟨StandardExample⟩
 
 /-- The printed name of the captured amount or receiver. -/
@@ -33,7 +37,7 @@ def names : FreshTable := [("pv", "se1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
-variable (φ : Post StandardExample)
+variable (φ : Core.Post StandardExample [])
 
 /-! ## Example: Symbolic Execution of `to.transfer(5)` -/
 
@@ -41,7 +45,7 @@ namespace Transfer5
 
 /-- `to.transfer(5);` with `to` 3: the booking and its `⟨[ ]⟩`, the paper's one step; the merge puts the
 receiver in it. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint]) :
     dl![.box]{ { to := 3 } ⟨[ to.transfer(5); ]⟩ φ }
     ~*> dl![.box]{ { to := 3 } { net := if(to = this) then net else store(net, at(to), net(to) - 5) } φ }
     ~[sequentialToParallel]~>
@@ -58,7 +62,7 @@ namespace TransferSum
 /-- `to.transfer(x + 2);` with `to` 3 and `x` 7: the amount is nonsimple, so it is captured first
 (`transfer_unfold_rightSndArgument`) and its declaration dropped with the binding it leaves; the booking
 reads the capture.  The merge puts `7 + 2` for `pv`, which folds to 9. -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.val .uint, .val .uint]) :
     dl![.box]{ { to := 3 ‖ x := 7 } ⟨[ to.transfer(x + 2); ]⟩ φ }
     ~[transfer_unfold_rightSndArgument]~>
       dl![.box]{ { to := 3 ‖ x := 7 } ⟨[ uint pv = x + 2; to.transfer(pv); ]⟩ φ }

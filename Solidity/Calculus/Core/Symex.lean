@@ -167,8 +167,11 @@ def normValid (g : MVarId) : TacticM MVarId := do
 def applyValid (tac : String) (g : MVarId) (lem : Expr) (unchanged : Option MessageData := none) :
     TacticM MVarId := do
   let before ← instantiateMVars (← g.getType)
+  let tag ← g.getTag
   let [g'] ← g.apply lem | throwError "{tac}: unexpected goals"
   let g'' ← normValid g'
+  -- the goal keeps its name, as today's (`apply` names it by the premise)
+  g''.setTag tag
   if let some msg := unchanged then
     if (← instantiateMVars (← g''.getType)) == before then throwError "{tac}: {msg}"
   return g''
@@ -179,11 +182,19 @@ def fuel : Nat := 5000
 /-- Run a scoped tactic `k` on its goal `g`, an error logged where the
 tactic is and the goal closed by `sorry`: today's elaborator of the same
 syntax is tried after this one, does not read scoped goals, and would
-report its own error in place of this one's. -/
+report its own error in place of this one's.  Where errors are not
+recovered from (`fail_if_success`, `first`'s alternatives), the error is
+thrown instead, so that the tactic fails there; an abort keeps the errors
+it logged. -/
 def reporting (g : MVarId) (k : TacticM Unit) : TacticM Unit := do
   let rest := (← getUnsolvedGoals).erase g
   let s ← saveState
   tryCatchRuntimeEx k fun e => do
+    unless (← read).recover do throw e
+    -- an abort comes with its errors logged and its goals admitted
+    -- (`all_goals` in today's closers): keep them
+    if let .internal id _ := e then
+      if id == abortTacticExceptionId then setGoals rest; return
     s.restore (restoreInfo := true)
     logException e
     g.admit

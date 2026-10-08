@@ -1,5 +1,8 @@
 import Solidity.Calculus.Callback
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # `try`/`catch`: an external call and a block per way it ends
@@ -31,6 +34,8 @@ def Pinger : Contract := contract!{ uint pings; uint fails; uint last; }
 
 local instance : InContract := ⟨Pinger⟩
 
+open scoped Solidity.Core.Surface
+
 /-! ## The rules -/
 
 /--
@@ -55,11 +60,11 @@ info: dl{
   [
     try address(7).get() returns (uint v) {last = v;} catch Error(string memory) {} catch Panic(uint c) {last = c;}
       catch {};
-    ] true } : Fml Pinger
+    ] true } : Core.Fml Pinger []
 -/
 #guard_msgs in
 #check (dl!{ [ try I(7).get() returns (uint v) { last = v; } catch Panic(uint c) { last = c; }
-  catch { }; ] true } : Fml Pinger)
+  catch { }; ] true } : Core.Fml Pinger [])
 
 /-! ## Reading and printing -/
 
@@ -132,6 +137,21 @@ theorem getStores :
         last == pings } := by
   sol_symex
   sol_close
+
+end Solidity.Examples.Tactics.TryCatch
+
+/-! ## Read without the switch
+
+The walk through `tryCallNoCallbackBox`'s goals (today's `Fml.alls` of each
+clause's binders) and the callback reading (`ValidC`, `Invariant`:
+`Calculus/Core/Callback.lean`'s `ProvesC` has no soundness yet,
+`docs/intrinsic.md` W2 `tree`). -/
+
+namespace Solidity.Examples.Tactics.TryCatch
+
+open Proves Semantics
+
+local instance : InContract := ⟨Pinger⟩
 
 /-- One rule at a time: `tryCallNoCallbackBox` leaves a goal per clause, the
 success block's for every value of `v`. -/

@@ -1,5 +1,8 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Call-valued operands: `values.push(makeValue());`
@@ -51,6 +54,8 @@ def Operands : Contract := contract!{
 }
 
 local instance : InContract := ⟨Operands⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## 1 · `values.push(makeValue());`
 
@@ -252,12 +257,6 @@ example : Prog.toStr (sol[MemCalls]{ Person memory p; p = choosePersonMem(); } :
 #eval IO.println (Prog.toStr (Prog.inlined (sol[MemCalls]{ Person memory p = choosePersonMem(); } :
     Prog MemCalls)))
 
-/-- The call's first step, `internalCallExpand`. -/
-example : dl[MemCalls]{ ⟨ Person memory p = choosePersonMem(); ⟩ true }
-    ~[internalCallExpand]~>
-      dl[MemCalls]{ ⟨ Person memory mv1; mv1 = alice; Person memory p = mv1; ⟩ true } :=
-  rfl
-
 /-- A declaration from a memory-returning call: the copy of `alice`. -/
 theorem memCallDecl :
     ⊨ dl[MemCalls]{ [ alice.age = 34; Person memory p = choosePersonMem(); uint v = p.age; ]
@@ -304,5 +303,23 @@ error: a call's callee is a function's name
 error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors
 -/
 #guard_msgs in #check sol[TestSuite]{ bucket.tokens.push().value = 1; }
+
+end Solidity.Examples.Tactics.CallOperands
+
+/-! ## Read without the switch
+
+A declaration from a memory-returning call steps by `internalCallExpand`
+(`docs/lean-key-rule-map.md`: `functionBodyExpand` is a tuple assignment's
+and a spec obligation's); the scoped strategy fires `functionBodyExpand`
+here (`CallRet.isRets` counts a memory return), which is with the lead
+(`docs/intrinsic.md`, W3 lane `tactics`). -/
+
+namespace Solidity.Examples.Tactics.CallOperands
+
+/-- The call's first step, `internalCallExpand`. -/
+example : dl[MemCalls]{ ⟨ Person memory p = choosePersonMem(); ⟩ true }
+    ~[internalCallExpand]~>
+      dl[MemCalls]{ ⟨ Person memory mv1; mv1 = alice; Person memory p = mv1; ⟩ true } :=
+  rfl
 
 end Solidity.Examples.Tactics.CallOperands

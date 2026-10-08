@@ -1,4 +1,6 @@
 import Solidity.Tools.ProofTree
+import Solidity.Tools.CoreInspect
+import Solidity.Calculus.Core.Derive
 import Solidity.Calculus.ChainGen
 import Solidity.Calculus.Derive
 
@@ -16,6 +18,18 @@ the tactics that write a proof out, as `#guard_msgs` tests:
   as one kernel evaluation, and a tactic per leaf its closer leaves.
 
 If the strategy picks another rule, or a printer changes, these fail.
+
+The sections `Scoped` read the scoped calculus (`open scoped
+Solidity.Core.Surface`, `docs/intrinsic.md`, W3): a tree of `⊢ φ` over
+`Core.Proves` (`Calculus/Core/ProofTree.lean`), a walk of its rules
+(`Calculus/Core/Derive.lean`).  There a parameter is bound by `∀`, so a tree
+starts with `allRight`; a rule that leaves no statement goes on into the
+rest of the program, so no `emptyModality` follows it; a split has KeY's two
+goals under either modality, its branch's `}` printed; a leaf closes by
+`Proves.close` and today's closer on its erasure.  What stays today's: a
+diamond whose leaves sit behind a diamond update (`Proves.close` is
+box-only), and the tools with no scoped twin yet (`sol_prove?`,
+`sol_chain?`, `sol_rws?`).
 -/
 
 namespace Solidity.Examples.ProofTree
@@ -53,14 +67,16 @@ closed: 0 open goal(s), 12 node(s), 3 branch(es)
 #guard_msgs in
 #proof_tree dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 }
 
+section Scoped
+open scoped Solidity.Core.Surface
+
 /-! A write under the diamond is not valid (`alice` may be missing): the leaf
 stays open, and shows its sequent. -/
 /--
 info: 0: storageFieldWriteSave
-1: emptyModality
-2: OPEN GOAL
+1: OPEN GOAL
     dl{ { storage := save(storage, alice.age, 1) } ⟹ true }
-open: 1 open goal(s), 3 node(s), 1 branch(es)
+open: 1 open goal(s), 2 node(s), 1 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ ⟨ alice.age = 1; ⟩ true }
@@ -71,38 +87,36 @@ open: 1 open goal(s), 3 node(s), 1 branch(es)
 request, the rows `[serial, parent, name, branchLabel, state]`. -/
 
 /--
-info: node: 1
+info: node: 2
 sequent:
-  dl{ true ≐ true ⟹ [ x = 2; ] ¬x = 0 }
+  dl{ ∀ uint x, true ≐ true ⟹ [ x = 2; } ] ¬x = 0 }
 rule: localValueAssign
 state: inner
 branch: if true true
-parent: 0
-children: [2]
-tactics: apply update .localValueAssign
+parent: 1
+children: [3]
+tactics: apply Core.Proves.update (Core.Taclet.toStep .localValueAssign); apply Core.Proves.updIntro
 -/
 #guard_msgs in
-#proof_node 1 dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
+#proof_node 2 dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
 
 /--
-info: {"stats": {"nodes": 7, "branches": 2},
+info: {"stats": {"nodes": 6, "branches": 2},
  "sequents":
- ["dl{ ⟹ [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }",
-  "dl{ true ≐ true ⟹ [ x = 2; ] ¬x = 0 }",
-  "dl{ true ≐ true, { x := 2 } ⟹ [ ] ¬x = 0 }",
-  "dl{ true ≐ true, { x := 2 } ⟹ ¬x = 0 }",
-  "dl{ true ≐ false ⟹ [ x = 1; ] ¬x = 0 }",
-  "dl{ true ≐ false, { x := 1 } ⟹ [ ] ¬x = 0 }",
-  "dl{ true ≐ false, { x := 1 } ⟹ ¬x = 0 }"],
+ ["dl{ ⟹ ∀ uint x; [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }",
+  "dl{ ∀ uint x ⟹ [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }",
+  "dl{ ∀ uint x, true ≐ true ⟹ [ x = 2; } ] ¬x = 0 }",
+  "dl{ ∀ uint x, true ≐ true, { x := 2 } ⟹ ¬x = 0 }",
+  "dl{ ∀ uint x, true ≐ false ⟹ [ x = 1; } ] ¬x = 0 }",
+  "dl{ ∀ uint x, true ≐ false, { x := 1 } ⟹ ¬x = 0 }"],
  "openGoalCount": 0,
  "nodes":
- [[0, -1, "ifElseSplit", null, "inner"],
-  [1, 0, "localValueAssign", "if true true", "inner"],
-  [2, 1, "emptyModality", null, "inner"],
+ [[0, -1, "allRight", null, "inner"],
+  [1, 0, "ifElseSplit", null, "inner"],
+  [2, 1, "localValueAssign", "if true true", "inner"],
   [3, 2, "Closed goal", null, "closed"],
-  [4, 0, "localValueAssign", "if true false", "inner"],
-  [5, 4, "emptyModality", null, "inner"],
-  [6, 5, "Closed goal", null, "closed"]],
+  [4, 1, "localValueAssign", "if true false", "inner"],
+  [5, 4, "Closed goal", null, "closed"]],
  "closed": true}
 -/
 #guard_msgs in
@@ -133,17 +147,17 @@ where
       throw (IO.userError s!"{r} writes the labels {written}, Taclet.branchLabels {ls}")
 
 /--
-info: 0: ifElseUnfold
-1: localValueDeclInitDrop
-2: boolEqualityAssignment
-3: ifElseSplit
+info: 0: allRight
+1: allRight
+2: ifElseUnfold
+3: localValueDeclInitDrop
+4: boolEqualityAssignment
+5: ifElseSplit
   [if se1 true]
-    4: localValueAssign
-    5: emptyModality
-    6: Closed goal
+    6: localValueAssign
+    7: Closed goal
   [if se1 false]
-    7: localValueAssign
-    8: emptyModality
+    8: localValueAssign
     9: Closed goal
 closed: 0 open goal(s), 10 node(s), 2 branch(es)
 -/
@@ -154,25 +168,22 @@ closed: 0 open goal(s), 10 node(s), 2 branch(es)
 `tryCallNoCallbackBox` labels them. -/
 
 /--
-info: 0: tryCallNoCallbackBox
+info: 0: allRight
+1: tryCallNoCallbackBox
   [call succeeded]
-    1: allRight
-    2: localValueAssign
-    3: emptyModality
+    2: allRight
+    3: localValueAssign
     4: Closed goal
   [Error caught]
     5: localValueAssign
-    6: emptyModality
-    7: Closed goal
+    6: Closed goal
   [Panic caught]
-    8: localValueAssign
-    9: emptyModality
-    10: Closed goal
+    7: localValueAssign
+    8: Closed goal
   [other failure caught]
-    11: localValueAssign
-    12: emptyModality
-    13: Closed goal
-closed: 0 open goal(s), 14 node(s), 4 branch(es)
+    9: localValueAssign
+    10: Closed goal
+closed: 0 open goal(s), 11 node(s), 4 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ [ try I(7).get() returns (uint v) { x = v; } catch { x = 0; }; ] true }
@@ -182,17 +193,57 @@ labels them; under the diamond the amount's sign is owed first
 (`sendNoCallbackDiamond`). -/
 
 /--
-info: 0: sendNoCallbackBox
+info: 0: allRight
+1: sendNoCallbackBox
   [send succeeded]
-    1: emptyModality
     2: Closed goal
   [send failed]
-    3: emptyModality
-    4: Closed goal
-closed: 0 open goal(s), 5 node(s), 2 branch(es)
+    3: Closed goal
+closed: 0 open goal(s), 4 node(s), 2 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ [ ok = to.send(5); ] true }
+
+/-! A send's walk takes the rule's goals apart on its `apply` line, so a
+replayed walk touches only them. -/
+
+/--
+info: Try this:
+  refine Core.Proves.valid (R := RuleSet.all) ?_
+    refine Core.Proves.allRight ?_
+    refine Core.Proves.bindIntro ?_
+    apply Core.Proves.cases (Core.Taclet.step_eq .sendNoCallbackBox) rfl <;>
+        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
+      (try and_intros)
+    · exact Core.Proves.closeTrue rfl
+    · exact Core.Proves.closeTrue rfl
+-/
+#guard_msgs in
+example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
+  sol_derive?
+
+/-! The box walk replayed beside another open goal, which it leaves alone;
+the hidden binder of `ok`, which the program assigns without declaring, is
+`bindIntro`. -/
+
+example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
+  refine ⟨?_, ?_⟩
+  refine Core.Proves.valid (R := RuleSet.all) ?_
+  refine Core.Proves.allRight ?_
+  refine Core.Proves.bindIntro ?_
+  apply Core.Proves.cases (Core.Taclet.step_eq .sendNoCallbackBox) rfl <;>
+      (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
+        and_true]) <;>
+    (try and_intros)
+  · exact Core.Proves.closeTrue rfl
+  · exact Core.Proves.closeTrue rfl
+  exact ⟨rfl, rfl⟩
+
+end Scoped
+
+/-! Under the diamond, the scoped calculus's leaves stay behind a diamond
+update, which `Proves.close` does not take (box contexts only, `Fml.closableB`):
+the diamond trees and walks are today's until the typed reading closes them. -/
 
 /--
 info: 0: localValueDeclInitDrop
@@ -210,28 +261,6 @@ closed: 0 open goal(s), 8 node(s), 3 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true }
-
-/-! A send's walk takes the rule's goals apart on its `apply` line, so a
-replayed walk touches only them. -/
-
-/--
-info: Try this:
-  apply Proves.valid
-    apply cases .sendNoCallbackBox <;>
-        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
-      (try and_intros)
-    · apply emptyModality
-      refine close ?_
-      sol_symex
-      sol_close
-    · apply emptyModality
-      refine close ?_
-      sol_symex
-      sol_close
--/
-#guard_msgs in
-example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
-  sol_derive?
 
 /--
 info: Try this:
@@ -257,25 +286,6 @@ info: Try this:
 example : ⊨ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
   sol_derive?
 
-/-! The box walk replayed beside another open goal, which it leaves alone. -/
-
-example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
-  refine ⟨?_, ?_⟩
-  apply Proves.valid
-  apply cases .sendNoCallbackBox <;>
-      (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
-        and_true]) <;>
-    (try and_intros)
-  · apply emptyModality
-    refine close ?_
-    sol_symex
-    sol_close
-  · apply emptyModality
-    refine close ?_
-    sol_symex
-    sol_close
-  exact ⟨rfl, rfl⟩
-
 /-! The same two by the reflective driver (`Derive.residue`, its
 `Premise.cases` arm). -/
 
@@ -295,18 +305,21 @@ info: Try this:
 example : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
   sol_prove?
 
-/-! Under the box a split has KeY's two goals (`Proves.splitBox`): no `cov`. -/
+section Scoped
+open scoped Solidity.Core.Surface
+
+/-! A split has KeY's two goals (`Core.Proves.split`): no `cov`. -/
 
 /--
-info: 0: impRight
-1: localValueDeclInitDrop
-2: localValueAssign
-3: requireConditionCapture
-4: localValueDeclInitDrop
-5: boolEqualityAssignment
-6: requireSimple
+info: 0: allRight
+1: impRight
+2: localValueDeclInitDrop
+3: localValueAssign
+4: requireConditionCapture
+5: localValueDeclInitDrop
+6: boolEqualityAssignment
+7: requireSimple
   [Holds]
-    7: emptyModality
     8: Closed goal
   [Reverts]
     9: revertBox
@@ -318,17 +331,18 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 
 /--
 info: Try this:
-  apply splitBox .ifElseSplit
+  refine Core.Proves.allRight ?_
+    apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
     case thn =>
-      apply update .localValueAssign
-      apply emptyModality
-      refine close ?_
+      apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
+      refine Core.Proves.updIntro ?_
+      refine Core.Proves.close [] rfl List.nodup_nil ?_
       sol_symex
       sol_close
     case els =>
-      apply update .localValueAssign
-      apply emptyModality
-      refine close ?_
+      apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
+      refine Core.Proves.updIntro ?_
+      refine Core.Proves.close [] rfl List.nodup_nil ?_
       sol_symex
       sol_close
 -/
@@ -338,17 +352,18 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
 
 /-- The suggestion replayed. -/
 example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
-  apply splitBox .ifElseSplit
+  refine Core.Proves.allRight ?_
+  apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
   case thn =>
-    apply update .localValueAssign
-    apply emptyModality
-    refine close ?_
+    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
+    refine Core.Proves.updIntro ?_
+    refine Core.Proves.close [] rfl List.nodup_nil ?_
     sol_symex
     sol_close
   case els =>
-    apply update .localValueAssign
-    apply emptyModality
-    refine close ?_
+    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
+    refine Core.Proves.updIntro ?_
+    refine Core.Proves.close [] rfl List.nodup_nil ?_
     sol_symex
     sol_close
 
@@ -357,6 +372,8 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
 The suggestion is the walk `ApplySteps.guardedCopy` writes by hand, with
 two constructors under their solkey aliases: `impRight` for `intro`,
 `emptyModality` for `empty`. -/
+
+end Scoped
 
 /--
 info: Try this:
@@ -387,28 +404,35 @@ info: Try this:
 theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
   sol_derive?
 
+section Scoped
+open scoped Solidity.Core.Surface
+
 /--
 info: Try this:
-  apply Proves.valid
-    apply update .storageFieldWriteSave
-    apply unfold .transfer_unfold_rightSndArgument
-    apply unfold .localValueDeclInitDrop
-    apply update .binopAssignment
-    apply update .transferNoCallbackBox
-    apply unfold .localValueDeclInitDrop
-    apply update .storageFieldReadFind
-    apply emptyModality
-    refine close ?_
+  refine Core.Proves.valid (R := RuleSet.all) ?_
+    refine Core.Proves.allRight ?_
+    refine Core.Proves.allRight ?_
+    apply Core.Proves.update (Core.Taclet.step_eq .storageFieldWriteSave)
+    apply Core.Proves.unfold (Core.Taclet.step_eq .transfer_unfold_rightSndArgument)
+    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
+    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
+    apply Core.Proves.update (Core.Taclet.step_eq .transferNoCallbackBox)
+    refine Core.Proves.updIntro ?_
+    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
+    apply Core.Proves.update (Core.Taclet.step_eq .storageFieldReadFind)
+    refine Core.Proves.close [] rfl List.nodup_nil ?_
     sol_symex
     sol_close
 -/
 #guard_msgs in
 /-- `alice.age = 1; to.transfer(x + 2); uint y = alice.age;`: on `⊨ φ` the
-walk starts with `apply Proves.valid`; the payment, once its amount is
+walk starts with `refine Core.Proves.valid`; the payment, once its amount is
 captured, is one update (`transferNoCallbackBox`). -/
 theorem transferFrameStorage :
     ⊨ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
   sol_derive?
+
+end Scoped
 
 /-! ## `sol_prove?`: the walk in one evaluation
 
@@ -665,6 +689,9 @@ def deletes10 : Fml StandardExample :=
   | .lit (.int v) => v == 2 ^ 255
   | _ => false
 
+section Scoped
+open scoped Solidity.Core.Surface
+
 /-! ## A failed `assert`
 
 `assertSimple` checks its condition: two goals, `thn` (the run goes on) and
@@ -673,15 +700,15 @@ goal has nothing to close but the condition).  The tree, the walk
 (`Proves.check`) and `sol_prove`'s residue each go through it once. -/
 
 /--
-info: 0: impRight
-1: localValueDeclInitDrop
-2: localValueAssign
-3: assertConditionCapture
-4: localValueDeclInitDrop
-5: boolEqualityAssignment
-6: assertSimple
+info: 0: allRight
+1: impRight
+2: localValueDeclInitDrop
+3: localValueAssign
+4: assertConditionCapture
+5: localValueDeclInitDrop
+6: boolEqualityAssignment
+7: assertSimple
   [Holds]
-    7: emptyModality
     8: Closed goal
   [Violated]
     9: Closed goal
@@ -692,26 +719,29 @@ closed: 0 open goal(s), 10 node(s), 2 branch(es)
 
 /--
 info: Try this:
-  apply impRight
-    apply unfold .localValueDeclInitDrop
-    apply update .localValueAssign
-    apply unfold .assertConditionCapture
-    apply unfold .localValueDeclInitDrop
-    apply update .binopAssignment
-    apply Proves.check .assertSimple
+  refine Core.Proves.allRight ?_
+    refine Core.Proves.impRight ?_
+    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
+    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
+    apply Core.Proves.unfold (Core.Taclet.step_eq .assertConditionCapture)
+    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
+    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
+    apply Core.Proves.check (Core.Taclet.step_eq .assertSimple)
     case thn =>
-      apply emptyModality
-      refine close ?_
+      refine Core.Proves.updIntro ?_
+      refine Core.Proves.close [] rfl List.nodup_nil ?_
       sol_symex
       sol_close
     case els =>
-      refine close ?_
+      refine Core.Proves.close [] rfl List.nodup_nil ?_
       sol_symex
       sol_close
 -/
 #guard_msgs in
 example : ⊢ dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 } := by
   sol_derive?
+
+end Scoped
 
 /--
 info: Try this:
@@ -832,7 +862,10 @@ end
 
 A call in a body is KeY's `InternalCall`, inlined by `internalCallExpand`;
 a tuple assignment's call returns to its targets, a `FunctionBodyStatement`
-inlined by `functionBodyExpand`, the targets assigned after it. -/
+inlined by `functionBodyExpand`, the targets assigned after it.  Both are
+diamonds, so today's: the scoped tree adds the body's `blockEmpty` and
+leaves its leaf open behind the diamond's updates; the box trees below are
+scoped. -/
 
 /-- Two functions, of one return and of two. -/
 def Callees : Contract := contract!{
@@ -875,10 +908,56 @@ closed: 0 open goal(s), 13 node(s), 1 branch(es)
 #guard_msgs in
 #proof_tree dl[Callees]{ ⟨ (uint a, uint b) = pair(1); ⟩ b == 2 }
 
+section Scoped
+open scoped Solidity.Core.Surface
+
+/-! Under the box the scoped trees close: the call is a node
+(`internalCallExpand`, `functionBodyExpand`, the premise its function
+builds whnf'd to its constructor, `Calculus/Core/ProofTree.lean`), the
+body's block ends by `blockEmpty`, and the leaf closes. -/
+
+/--
+info: 0: valueDeclSkip
+1: internalCallExpand
+2: localValueDeclInitDrop
+3: localValueAssign
+4: valueDeclSkip
+5: blockEmpty
+6: additionAssignment
+7: localValueAssign
+8: Closed goal
+closed: 0 open goal(s), 9 node(s), 1 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl[Callees]{ [ uint y = inc(1); ] y == 2 }
+
+/--
+info: 0: valueDeclSkip
+1: valueDeclSkip
+2: functionBodyExpand
+3: localValueDeclInitDrop
+4: localValueAssign
+5: valueDeclSkip
+6: valueDeclSkip
+7: blockEmpty
+8: localValueAssign
+9: additionAssignment
+10: localValueAssign
+11: localValueAssign
+12: Closed goal
+closed: 0 open goal(s), 13 node(s), 1 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl[Callees]{ [ (uint a, uint b) = pair(1); ] b == 2 }
+
+end Scoped
+
 /-! ## Loops (`Examples/Tactics/Loops.lean`)
 
 `whileUnwind` is `unfoldLean`, `loopExit` is `checkLean`; under the box the
-invariant rule is `invBox`, solkey's two goals past `init`. -/
+invariant rule is `invBox`, solkey's two goals past `init`.  The unwound
+loop is a diamond, today's; the invariant's walk is scoped
+(`Core.Proves.inv`). -/
 
 /--
 info: Try this:
@@ -917,41 +996,48 @@ example : ⊢ dl!{ ⟨ uint i = 0;
     while (i < 1) { i++; }; ⟩ i == 1 } := by
   sol_derive?
 
+section Scoped
+open scoped Solidity.Core.Surface
+
 /--
 info: Try this:
-  apply unfold .requireConditionCapture
-    apply unfold .localValueDeclInitDrop
-    apply update .binopAssignment
-    apply splitBox .requireSimple
+  refine Core.Proves.allRight ?_
+    apply Core.Proves.unfold (Core.Taclet.step_eq .requireConditionCapture)
+    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
+    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
+    apply Core.Proves.split (Core.Taclet.step_eq .requireSimple)
     case thn =>
-      apply unfold .localValueDeclInitDrop
-      apply update .localValueAssign
-      apply invBox .whileInvariantBox
+      refine Core.Proves.updIntro ?_
+      refine Core.Proves.updIntro ?_
+      apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
+      apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
+      apply Core.Proves.inv (Core.LeanTaclet.toStep .whileInvariantBox)
       case init =>
-        refine close ?_
+        refine Core.Proves.close [] rfl List.nodup_nil ?_
         sol_symex
         sol_close
       case thn =>
-        apply update .binopAssignment
-        apply emptyModality
-        refine close ?_
+        refine Core.Proves.updIntro ?_
+        apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
+        refine Core.Proves.updIntro ?_
+        refine Core.Proves.close [] rfl List.nodup_nil ?_
         sol_symex
         sol_close
       case els =>
-        apply emptyModality
-        refine close ?_
+        refine Core.Proves.updIntro ?_
+        refine Core.Proves.close [] rfl List.nodup_nil ?_
         sol_symex
         sol_close
     case els =>
-      apply done .revertBox
-      refine close ?_
-      sol_symex
-      sol_close
+      apply Core.Proves.done (Core.Taclet.step_eq .revertBox)
+      exact Core.Proves.closeTrue rfl
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ require(n >= 0); uint i = 0;
     /// @custom:key invariant i <= n
     while (i < n) { i = i + 1; }; ] i == n } := by
   sol_derive?
+
+end Scoped
 
 end Solidity.Examples.ProofTree

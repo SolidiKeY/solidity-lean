@@ -840,8 +840,8 @@ theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C} (h : Fml.StepBy r φ �
 
 /-- A chain is a proof: to prove its first line, prove its last.
 
-Example: the chain `⟨ alice.age = ageVal; ⟩ … ~[storageFieldWriteSave]~> … ~[emptyModality]~> …`
-of `Examples/Chains/Storage.lean`'s `AgeWrite.chain` proves its first line from its last. -/
+Example: the chain `⟨[ alice.account.balance = 10; ]⟩ φ ~[storageFieldWrite_unfold_leftFst]~> … ~[sequentialToParallel]~> …`
+of `Examples/ChainRewrites.lean`'s `balanceWrite` proves its first line from its last. -/
 theorem Fml.Via.valid {φ : Fml C} {ws : List (Link C × Fml C)} (v : Fml.Via φ ws)
     (h : ⊨ Fml.Via.last φ ws) : ⊨ φ :=
   fun σ => v.sound σ (h σ)
@@ -918,7 +918,7 @@ theorem Fml.StepBy.unique {r r' : StepRule C} {φ ψ χ : Fml C} (h : Fml.StepBy
 step is determined.
 
 Example: any two two-step derivations of `alice.age = ageVal;`
-are `AgeWrite.chain` of `Examples/Chains/Storage.lean`. -/
+are `ageWrite` of `Examples/ChainNotation.lean`. -/
 theorem Fml.Steps.eq_of_length {φ ψ : Fml C} :
     (c d : φ ~*> ψ) → c.length = d.length → c = d
   | .refl _, .refl _, _ => rfl
@@ -942,7 +942,7 @@ decreases: it cannot come back to where it started.  (The termination
 measure is such a `μ`; with it this is `Subsingleton (φ ~*> ψ)`.)
 
 Example: every derivation from `⟨ alice.age = ageVal; ⟩ …` to its
-line with its write is `AgeWrite.chain` of `Examples/Chains/Storage.lean`. -/
+line with its write is `ageWrite` of `Examples/ChainNotation.lean`. -/
 theorem Fml.Steps.eq_of_measure (μ : Fml C → Nat) (hμ : ∀ {φ ψ : Fml C}, φ ~> ψ → μ ψ < μ φ) :
     {φ ψ : Fml C} → (c d : φ ~*> ψ) → c = d
   | _, _, .refl _, .refl _ => rfl

@@ -1,6 +1,7 @@
 import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.Close
 import Solidity.Calculus.Core.Completeness
+import Solidity.Calculus.Core.ProofTree
 
 /-!
 # The scoped strategy as one kernel evaluation: `sol_prove`
@@ -168,42 +169,95 @@ def evalSolProveCore : Tactic := fun _ => withMainContext do
 
 /-! ## `sol_close` on a scoped leaf -/
 
-open Lean Elab Tactic Meta in
-/-- `sol_close` on a scoped goal `Core.Valid ψ` with no modality left (after
-`sol_symex`): the leaf taken by `Fml.posB` (checked by the kernel), its
-erasure computed (`Solidity.normValid`) and closed by today's `sol_close`
-(`Valid.of_erase`). -/
-@[tactic Solidity.tacticSol_close]
-def evalSolCloseCore : Tactic := fun _ => withMainContext do
+/-- A formula valid with `x` free is valid under `∀ p x`: the erasure of a
+scoped leaf binds the parameters by `∀` (`cdl!`), today's leaf has them free. -/
+theorem _root_.Solidity.Valid.all_of_free {φ : Solidity.Fml C} (x : Var) (p : PrimTy)
+    (h : Solidity.Valid φ) : Solidity.Valid (.all x p φ) :=
+  fun _ _ _ => h _
+
+/-- Today's formula without its leading quantifiers: a scoped leaf's
+erasure with its parameters free, as today's leaves have them. -/
+def _root_.Solidity.Fml.stripAlls : Solidity.Fml C → Solidity.Fml C
+  | .all _ _ φ => φ.stripAlls
+  | φ => φ
+
+/-- A formula is valid where it is with its leading quantifiers' locals free. -/
+theorem _root_.Solidity.Valid.of_stripAlls : {φ : Solidity.Fml C} →
+    Solidity.Valid φ.stripAlls → Solidity.Valid φ
+  | .all x p φ, h => Solidity.Valid.all_of_free x p (Solidity.Valid.of_stripAlls (φ := φ) h)
+  | .tt, h | .eq _ _, h | .not _, h | .and _ _, h | .imp _ _, h
+  | .modal _ _ _, h | .upd _ _ _, h | .havoc _, h | .anon _ _, h | .defined _, h => h
+
+namespace Derive
+
+open Lean Elab Tactic Meta
+
+/-- Today's goal `Valid (∀ p x. … φ)` as `Valid φ`, its leading quantifiers'
+locals free, as today's leaves have them (`Valid.all_of_free`). -/
+partial def stripAlls (g : MVarId) : MetaM MVarId := do
+  let ty ← instantiateMVars (← g.getType)
+  let_expr Solidity.Valid C φ := ty | return g
+  let_expr Solidity.Fml.all _ x p φ' := φ | return g
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C φ') (← g.getTag)
+  g.assign (mkAppN (mkConst ``Solidity.Valid.all_of_free) #[C, φ', x, p, g'])
+  stripAlls g'.mvarId!
+
+/-- A scoped leaf `Core.Valid ψ` with no modality left, as today's goal: the
+leaf taken by `Fml.posB` (checked by the kernel), its erasure computed
+(`Solidity.normValid`), the goal `Solidity.Valid` of it (`Valid.of_erase`),
+the parameters' quantifiers stripped (`stripAlls`).  `tac` names the tactic
+in the error. -/
+def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
+  let bool := mkConst ``Bool
+  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
+  let hpTy := mkApp3 (mkConst ``Eq [1]) bool
+    (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
+      (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
+  let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
+    catch _ => throwError "{tac}: the leaf is not one its erasure closes (`Fml.posB`): a \
+      hidden binder under a negation, a precondition or a modality, or named twice, or a \
+      diamond update that may set a `bool` local to what is not a `bool`"
+  let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
+  g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
+  stripAlls (← Solidity.normValid g'.mvarId!)
+
+/-- Run today's closer `stx` on a scoped leaf: the leaf erased
+(`eraseLeaf`), then `stx` itself on today's goal, where today's tactic
+takes it.  Throws `unsupportedSyntax` on a goal that is not scoped, so
+today's tactic runs there. -/
+def onErased (tac : String) (stx : Syntax) : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
   Symex.reporting g do
-    let bool := mkConst ``Bool
-    let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-    let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
-    let hpTy := mkApp3 (mkConst ``Eq [1]) bool
-      (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
-        (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
-    let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
-      catch _ => throwError "sol_close: the leaf is not one its erasure closes (`Fml.posB`): a \
-        hidden binder under a negation, a precondition or a modality, or named twice, or a \
-        diamond update that may set a `bool` local to what is not a `bool`"
-    let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
-    let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
-    g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
-    let g'' ← Solidity.normValid g'.mvarId!
-    replaceMainGoal [g'']
-    evalTactic (← `(tactic| sol_close))
+    replaceMainGoal [← eraseLeaf tac g C ψ]
+    evalTactic stx
+
+end Derive
+
+open Lean Elab Tactic Meta in
+/-- `sol_close_unwrap` on a scoped goal `Core.Valid ψ` with no modality left
+(after `sol_symex`): the leaf erased (`Derive.eraseLeaf`), then today's.
+It is the first step of today's `sol_close`, `sol_close_mt` and
+`sol_spec_close`, so each of them runs on a scoped leaf as on today's, its
+erasure. -/
+@[tactic Solidity.tacticSol_close_unwrap]
+def evalSolCloseUnwrapCore : Tactic := fun stx => Derive.onErased "sol_close" stx stx
 
 /-! ## `sol_derive`: the strategy as a walk
 
 On a scoped sequent `H ⊢ φ` (`Core.Proves`), one `refine` per step: a
 precondition, a quantifier, an update or a hidden binder into the context,
-an empty modality through its frames, `closeTrue`, or the rule the
+an empty modality through its frames (the first, the second and this by
+solkey's names, `impRight`, `allRight`, `emptyModality`,
+`Calculus/Core/ProofTree.lean`), `closeTrue`, or the rule the
 statement fires, named as solkey names it (`ruleOf?`,
 `Calculus/Core/Completeness.lean`) and cited by its taclet
 (`Taclet.step_eq .rule`, `LeanTaclet.toStep .rule`).  A goal with no
-modality is a leaf, left to the closer. -/
+modality is a leaf: `sol_derive` leaves it, `sol_derive?` closes it as
+today's suggestion does where it can (`Proves.close`, then today's
+`sol_symex; sol_close` on the erasure, as the tree's leaves close). -/
 
 namespace Walk
 
@@ -240,7 +294,8 @@ def ctorArgs (c : Lean.Name) : MetaM (Array Lean.Name) := do
 /-- The rule `d` by the constructor `c`, two ways: `apply c d`, its goals
 tagged by the constructor's arguments (`thn`, `els`), with `rfl` for a
 non-emptiness check (`hne`); and `refine c d ?_ … ?_`, where a side
-condition of the rule needs the goal to be elaborated. -/
+condition of the rule needs the goal to be elaborated.  A rule of labelled
+goals (`cases`, `branches`) is the `apply` with its goals taken apart. -/
 def ctorTacs (c : Lean.Name) (d : Lean.Term) : MetaM (Array (Array (TSyntax `tactic))) := do
   let names ← ctorArgs c
   let f ← ProofTree.short c
@@ -249,7 +304,17 @@ def ctorTacs (c : Lean.Name) (d : Lean.Term) : MetaM (Array (Array (TSyntax `tac
   let rfls : Array Lean.Term := (List.replicate pre (⟨rflId⟩ : Lean.Term)).toArray
   let args ← names.mapM fun n => do
     if n == `hne then `(term| $rflId:ident) else `(term| ?_)
-  return #[#[← `(tactic| apply $f $d $rfls*)], #[← `(tactic| refine $f $d $args*)]]
+  let app ← `(tactic| apply $f $d $rfls*)
+  -- a rule of labelled goals (`∀ f ∈ fs, …`): taken apart on its `apply`
+  -- line, one goal per outcome, as today's walk writes it
+  if c == ``Proves.cases || c == ``Proves.branches then
+    let names := #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
+      ``and_true]
+    let lemmas ← names.mapM fun n => do
+      `(Lean.Parser.Tactic.simpLemma| $(← ProofTree.short n):ident)
+    return #[#[← `(tactic| $app <;> (try simp only [$lemmas,*]) <;> (try and_intros))],
+      #[← `(tactic| refine $f $d $args*)]]
+  return #[#[app], #[← `(tactic| refine $f $d $args*)]]
 
 /-- The steps that may apply at the goal `g`, each as tactics, in the order
 tried; none at a leaf. -/
@@ -260,8 +325,8 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   let one (c : Lean.Name) : MetaM (Array (Array (TSyntax `tactic))) := do
     return #[#[← `(tactic| refine $(← ProofTree.short c) ?_)]]
   match φ.getAppFn.constName? with
-  | some ``Fml.imp => one ``Proves.intro
-  | some ``Fml.all => one ``Proves.allIntro
+  | some ``Fml.imp => one ``Proves.impRight
+  | some ``Fml.all => one ``Proves.allRight
   | some ``Fml.upd => one ``Proves.updIntro
   | some ``Fml.bind => one ``Proves.bindIntro
   | some ``Fml.tt =>
@@ -270,7 +335,7 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
     let args := φ.getAppArgs
     let m := args[args.size - 4]!
     let P ← whnf args[args.size - 3]!
-    if P.isAppOf ``Prog.nil then return ← one ``Proves.empty
+    if P.isAppOf ``Prog.nil then return ← one ``Proves.emptyModality
     unless P.isAppOf ``Prog.cons do return #[]
     let s := P.getArg! (P.getAppNumArgs - 2)
     let k := mkAppN (mkConst ``Hyps.fresh) #[C, Γ₀, Γ, H, φ]
@@ -280,14 +345,32 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
     let d ← if r.getPrefix == ``Taclet then
         `(term| ($(← ProofTree.short ``Taclet.step_eq) .$rule:ident))
       else `(term| ($(← ProofTree.short ``LeanTaclet.toStep) .$rule:ident))
-    ctorTacs c d
+    -- a rule whose line `apply` cannot match (a read into a hole, whose
+    -- `fill` does not reduce while unifying): the taclet elaborated after
+    -- the goal (`by exact`), as `core_rule` does, so the line keeps its name
+    let late ← ctorTacs c (← `(term| (by exact $d)))
+    return (← ctorTacs c d) ++ late.extract (late.size - 1) late.size
   | _ => return #[]
+
+/-- A leaf closed as a walk ends, at the empty outer scope: its lines, or
+none where the closer does not close it (the state rolled back). -/
+def closeLeaf (g : MVarId) : TacticM (Option (Array String)) := do
+  let ty ← instantiateMVars (← g.getType)
+  let_expr Proves _ _ Γ₀ _ _ _ := ty | return none
+  unless (← whnfR Γ₀).isAppOf ``List.nil do return none
+  let tacs := #[← `(tactic| refine $(← ProofTree.short ``Proves.close) [] $(mkIdent `rfl)
+      $(← ProofTree.short ``List.nodup_nil) ?_), ← `(tactic| sol_symex), ← `(tactic| sol_close)]
+  let s ← saveState
+  let ok ← tryCatchRuntimeEx
+    (withCurrHeartbeats do return (← ProofTree.runOn g tacs).isEmpty) fun _ => pure false
+  unless ok do s.restore; return none
+  return some (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
 
 /-- The walk from `g`: its script, lines indented relative to the first, a
 `case` per goal of a step with several, `sorry` for a leaf; the leaves are
 collected in `open`. -/
-partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarId) :
-    TacticM (Array String) := do
+partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarId)
+    (close : Bool := false) : TacticM (Array String) := do
   let n ← fuel.get
   if n == 0 then throwError "sol_derive: more than {Derive.fuel} steps"
   fuel.set (n - 1)
@@ -300,16 +383,23 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     if let some gs := r then
       step := some (tacs, gs)
       break
-  let some (tacs, gs) := step | leaves.modify (·.push g); return #["sorry"]
+  let some (tacs, gs) := step
+    | if close then
+        if let some lines ← closeLeaf g then return lines
+      leaves.modify (·.push g); return #["sorry"]
   let head := (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
   match gs with
-  | [g'] => return head ++ (← walk fuel leaves g')
+  | [g'] => return head ++ (← walk fuel leaves g' close)
   | gs =>
     let mut out := head
     for g' in gs do
-      let body ← walk fuel leaves g'
+      let body ← walk fuel leaves g' close
       match ← g'.getTag with
+      -- `and_intros`' goals (`refine_1`, …) have no name to cite: bullets
       | .str _ l =>
+        if l.startsWith "refine_" then
+          out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
+          continue
         out := out.push s!"case {l} =>"
         out := out ++ body.map ("  " ++ ·)
       | _ => out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
@@ -317,7 +407,7 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
 
 /-- The walk from the goal `g` (`Core.Valid φ` starts with `Proves.valid`):
 its lines, and the leaves it leaves. -/
-def run (g : MVarId) : TacticM (Array String × List MVarId) := do
+def run (g : MVarId) (close : Bool := false) : TacticM (Array String × List MVarId) := do
   let (pre, g) ← match ← Symex.validGoal? g with
     | some _ =>
       let t ← `(tactic| refine $(← ProofTree.short ``Proves.valid)
@@ -327,7 +417,7 @@ def run (g : MVarId) : TacticM (Array String × List MVarId) := do
     | none => pure (#[], g)
   let fuel ← IO.mkRef Derive.fuel
   let leaves ← IO.mkRef #[]
-  let lines ← walk fuel leaves g
+  let lines ← walk fuel leaves g close
   return (pre ++ lines, (← leaves.get).toList)
 
 /-- A scoped goal: `Core.Valid φ` or `H ⊢ φ` over `Core.Proves`. -/
@@ -360,14 +450,15 @@ def evalSolDeriveCore : Tactic := fun _ => withMainContext do
 
 open Lean Elab Tactic Meta in
 /-- `sol_derive?` on a scoped goal: the walk, offered as its script, one
-`refine` per rule; a leaf is left as a goal (`sorry` in the script). -/
+`refine` per rule; a leaf closed by its erasure where it can be
+(`Walk.closeLeaf`), else left as a goal (`sorry` in the script). -/
 @[tactic Solidity.ProofTree.tacticSol_derive?]
 def evalSolDeriveQCore : Tactic := fun stx => withMainContext do
   let g ← getMainGoal
   unless ← Walk.isCoreGoal g do throwUnsupportedSyntax
   let rest := (← getUnsolvedGoals).erase g
   Symex.reporting g do
-    let (lines, leaves) ← Walk.run g
+    let (lines, leaves) ← Walk.run g (close := true)
     setGoals (leaves ++ rest)
     ProofTree.suggest stx[0] lines
 

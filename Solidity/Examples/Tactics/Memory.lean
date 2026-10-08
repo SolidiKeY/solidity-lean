@@ -1,4 +1,7 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Memory
@@ -43,6 +46,8 @@ namespace Solidity.Examples.Tactics.Memory
 open Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## 1 · Declarations -/
 

@@ -1,4 +1,7 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # A tour: everything on a few programs
@@ -29,6 +32,8 @@ namespace Solidity.Examples.Tactics.Tour
 open Proves
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## 1. The running example -/
 

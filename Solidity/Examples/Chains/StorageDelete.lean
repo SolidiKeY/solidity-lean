@@ -3,6 +3,8 @@ import Solidity.Calculus.LastLine
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.Close
 import Solidity.FreshNames
+import Solidity.Calculus.Core.LastLine
+import Solidity.Calculus.Core.Surface
 
 /-!
 # The storage `delete` examples as chains
@@ -20,19 +22,26 @@ short of the printed `10`, `0`, `0`.
 
 namespace Solidity.Examples.Chains.StorageDelete
 
+open scoped Solidity.Core.Surface
+
 /-! ## Example: Storage Delete Cases -/
 
 local instance : InContract := ⟨TestSuite⟩
 section
-variable (m : Modality) (φ : Post TestSuite)
+variable (m : Modality) (φ : Core.Post TestSuite [])
 
 namespace SubtreeDelete
 variable (hk : STerm.KindFreeAt st!{ save(save(select(storage, alice), account.balance, 100), account.token.value, 7) } pt!{ account })
 
+include hk in
 /-- `alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;
-b = alice.account.balance; v = alice.account.token.value;` run: the paper's `⇝*` through the two nested
-writes (`S₁`), the delete (`S₂`), the two reads, each through the aliases it binds, and the merge. -/
-theorem run :
+b = alice.account.balance; v = alice.account.token.value;`: the paper's `⇝*` through the two nested writes
+(`S₁`), the delete (`S₂`), the two reads, each through the aliases it binds, and the merge; then the reads
+resolved as solkey reads a path, a member at a time: from its head (`findMemberCons`), the delete and the
+writes seen from `alice` (`selectOnDelAtMember`, `selectOnSaveMemberIn`, the writes under the delete), and
+the word below the deleted node read back to its default (`findOnDelAtBelow`), under `hk`: the `account`
+node of `alice`, after the writes, is no mapping. -/
+theorem chain (φ : Core.Post TestSuite [.val .uint, .val .uint]) :
     dl![m]{ ⟨[ alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;
         b = alice.account.balance; v = alice.account.token.value; ]⟩ φ }
     ~*> dl![m]{ { se1 := 100 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
@@ -51,26 +60,6 @@ theorem run :
           { storage := delAt(storage, alice.account) } { sp4 := alice.account } { b := find(storage, sp4.balance) }
           { sp6 := alice.account } { sp5 := sp6.token } { v := find(storage, sp5.value) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
-            storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-            sp4 := alice.account ‖
-            b :=
-              find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
-                alice.account.balance) ‖
-            sp6 := alice.account ‖ sp5 := alice.account.token ‖
-            v :=
-              find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
-                alice.account.token.value) }
-          φ } := by
-  sol_chain
-
-include hk in
-/-- The reads of the merged line resolved as solkey reads a path, a member at a time: from its head
-(`findMemberCons`), the delete and the writes seen from `alice` (`selectOnDelAtMember`,
-`selectOnSaveMemberIn`, the writes under the delete), and the word below the deleted node read back to its
-default (`findOnDelAtBelow`), under `hk`: the `account` node of `alice`, after the writes, is no mapping. -/
-theorem reads :
-    dl![m]{
         { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
             sp4 := alice.account ‖
@@ -180,53 +169,8 @@ theorem reads :
             sp4 := alice.account ‖ b := 0 ‖ sp6 := alice.account ‖ sp5 := alice.account.token ‖ v := 0 }
           φ } := by
   sol_chain
-
-include hk in
-/-- `alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;
-b = alice.account.balance; v = alice.account.token.value;`: `run` then `reads`. -/
-theorem chain :
-    dl![m]{ ⟨[ alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;
-        b = alice.account.balance; v = alice.account.token.value; ]⟩ φ }
-    ~~> dl![m]{ { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
-        storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-        sp4 := alice.account ‖ b := 0 ‖ sp6 := alice.account ‖ sp5 := alice.account.token ‖ v := 0 } φ } :=
-  (run ..).leads.via (reads (hk := hk) ..)
 #last_line chain
 end SubtreeDelete
-
-namespace IndexDelete
-def names : FreshTable := [("toks", "sp1"), ("idx", "se2"), ("arr", "sp3")]
-local instance : FreshNames := .ofTable names
-#guard (FreshNames.clashes TestSuite names).isEmpty
-/-- `delete bucket.tokens[++i]; len = bucket.tokens.length;` with `i` 2.  The elaborator captures the index
-before the statement (`uint idx; idx = ++i; delete toks[idx];`, the paper's first `⇝*`); the run binding
-`toks`, `idx` and `i`; `storageIndexArrayDelete` writing `delAt` at the element (the in-bounds branch
-only); the length read through `arr`; the merge, which resolves the element to `bucket.tokens[2 + 1]`; the
-delete does not touch the length (`lenOnDelAtFrame`), and the index folds to `3`. -/
-theorem chain :
-    dl![m]{ { i := 2 } ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
-    ~*> dl![m]{ { i := 2 } { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
-          ⟨[ delete toks[idx]; len = bucket.tokens.length; ]⟩ φ }
-    ~[storageIndexArrayDelete]~> dl![m]{ { i := 2 } { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
-          { storage := delAt(storage, toks[idx]) } ⟨[ len = bucket.tokens.length; ]⟩ φ }
-    ~*> dl![m]{ { i := 2 } { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
-          { storage := delAt(storage, toks[idx]) } { arr := bucket.tokens } { len := arr.length } φ }
-    ~[sequentialToParallel]~> dl![m]{
-        { i := 2 ‖ toks := bucket.tokens ‖ idx := 0 ‖ i := 2 + 1 ‖ idx := 2 + 1 ‖
-            storage := delAt(storage, bucket.tokens[2 + 1]) ‖ arr := bucket.tokens ‖
-            len := find(delAt(storage, bucket.tokens[2 + 1]), bucket.tokens.length) }
-          φ }
-    ~[lenOnDelAtFrame]~> dl![m]{
-        { i := 2 ‖ toks := bucket.tokens ‖ idx := 0 ‖ i := 2 + 1 ‖ idx := 2 + 1 ‖
-            storage := delAt(storage, bucket.tokens[2 + 1]) ‖ arr := bucket.tokens ‖ len := bucket.tokens.length }
-          φ }
-    ~[add_literals]~> dl![m]{
-        { i := 2 ‖ toks := bucket.tokens ‖ idx := 0 ‖ i := 3 ‖ idx := 3 ‖ storage := delAt(storage, bucket.tokens[3]) ‖
-            arr := bucket.tokens ‖ len := bucket.tokens.length }
-          φ } := by
-  sol_chain
-#last_line chain
-end IndexDelete
 
 namespace MappingDelete
 /-- `ledger.nonce = 5; ledger.balances[1] = 10; delete ledger; kept = ledger.balances[1];
@@ -235,7 +179,7 @@ delete ledger.balances[1]; nonce = ledger.nonce; gone = ledger.balances[1];`: th
 (`storageIndexDelete`, no bounds branch, `S₆`), then `nonce` and `gone`; the merge, the value deleted at
 `gone`'s key read as its default (`findOnDelAtValue`), the keyed delete framed out of `nonce`
 (`findOnDelAtFrame`), and `nonce` read from its head (`findMemberCons`). -/
-theorem chain :
+theorem chain (φ : Core.Post TestSuite [.val .uint, .val .uint, .val .uint]) :
     dl![m]{ ⟨[ ledger.nonce = 5; ledger.balances[1] = 10; delete ledger; kept = ledger.balances[1];
         delete ledger.balances[1]; nonce = ledger.nonce; gone = ledger.balances[1]; ]⟩ φ }
     ~*> dl![m]{
@@ -409,4 +353,53 @@ theorem chain :
 end MappingDelete
 
 end
+end Solidity.Examples.Chains.StorageDelete
+
+/-! ## Left on `Update.lean`'s calculus
+
+`IndexDelete`, whose program the elaborator writes with the index captured in front (`uint idx; idx = ++i;`, solc's evaluation order): the scoped reading leaves the capture, a fresh variable, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`).  It reads as today's chain until the elaborator puts a statement's captures in a block of their own. -/
+
+namespace Solidity.Examples.Chains.StorageDelete
+
+local instance : InContract := ⟨TestSuite⟩
+
+section
+variable (m : Modality) (φ : Post TestSuite)
+
+namespace IndexDelete
+def names : FreshTable := [("toks", "sp1"), ("idx", "se2"), ("arr", "sp3")]
+local instance : FreshNames := .ofTable names
+#guard (FreshNames.clashes TestSuite names).isEmpty
+/-- `delete bucket.tokens[++i]; len = bucket.tokens.length;` with `i` 2.  The elaborator captures the index
+before the statement (`uint idx; idx = ++i; delete toks[idx];`, the paper's first `⇝*`); the run binding
+`toks`, `idx` and `i`; `storageIndexArrayDelete` writing `delAt` at the element (the in-bounds branch
+only); the length read through `arr`; the merge, which resolves the element to `bucket.tokens[2 + 1]`; the
+delete does not touch the length (`lenOnDelAtFrame`), and the index folds to `3`. -/
+theorem chain :
+    dl![m]{ { i := 2 } ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
+    ~*> dl![m]{ { i := 2 } { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
+          ⟨[ delete toks[idx]; len = bucket.tokens.length; ]⟩ φ }
+    ~[storageIndexArrayDelete]~> dl![m]{ { i := 2 } { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
+          { storage := delAt(storage, toks[idx]) } ⟨[ len = bucket.tokens.length; ]⟩ φ }
+    ~*> dl![m]{ { i := 2 } { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
+          { storage := delAt(storage, toks[idx]) } { arr := bucket.tokens } { len := arr.length } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { i := 2 ‖ toks := bucket.tokens ‖ idx := 0 ‖ i := 2 + 1 ‖ idx := 2 + 1 ‖
+            storage := delAt(storage, bucket.tokens[2 + 1]) ‖ arr := bucket.tokens ‖
+            len := find(delAt(storage, bucket.tokens[2 + 1]), bucket.tokens.length) }
+          φ }
+    ~[lenOnDelAtFrame]~> dl![m]{
+        { i := 2 ‖ toks := bucket.tokens ‖ idx := 0 ‖ i := 2 + 1 ‖ idx := 2 + 1 ‖
+            storage := delAt(storage, bucket.tokens[2 + 1]) ‖ arr := bucket.tokens ‖ len := bucket.tokens.length }
+          φ }
+    ~[add_literals]~> dl![m]{
+        { i := 2 ‖ toks := bucket.tokens ‖ idx := 0 ‖ i := 3 ‖ idx := 3 ‖ storage := delAt(storage, bucket.tokens[3]) ‖
+            arr := bucket.tokens ‖ len := bucket.tokens.length }
+          φ } := by
+  sol_chain
+#last_line chain
+end IndexDelete
+
+end
+
 end Solidity.Examples.Chains.StorageDelete

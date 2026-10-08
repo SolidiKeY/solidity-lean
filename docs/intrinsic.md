@@ -1516,6 +1516,137 @@ The fresh names (`se1`, `sp1`) must not change. Any other pin change is a bug. E
 
 Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
 
+### W3 lane `tactics` (`w25-tactics`, 2026-10-08)
+
+**Flipped** (`open scoped Solidity.Core.Surface` after each `local instance`,
+imports `Calculus/Core/{Surface,Closers}.lean`, `Calculus/Core/Sequents.lean` where a
+walk checks `show sequent!{…}`, `Tools/CoreInspect.lean` where a command is
+pinned): `Examples/Benchmark/{Coin,Counter,ERC20,EtherWallet,Mapping,Purchase,SimpleStorage}`;
+`Examples/Tactics/{ApplySteps,Branch,CallOperands,Calls,Checked,CrossDomain,Decide,LedgerDelete,Loops,Memory,Net,Operators,Payment,Revert,Specs,StorageDelete,StorageSteps,StorageSuite,Tour,TryCatch,Values}`.
+Every file checks with no error or warning.  What the scoped calculus
+cannot state or close yet sits in a closing block of the same file, read
+without the switch (`## Read without the switch`, or a named section), each
+with its reason.
+
+**Not flipped**, each for a reason outside this lane:
+* `Benchmark/Syntax`, `Tactics/{Theory,TermTaclets}`: no formula; the gate
+  module (`Benchmark/Syntax`, 1.2 s) keeps its imports.
+* `Tactics/LoopsImport`: states today's `Valid (Fml.modal …)` of solc-imported
+  programs; moves with the testsuite lane's scoped problems.
+* `Tactics/{Contracts,Constructors,Dangling}`: today's `FunContract`,
+  `Problem.text`/`Problem.deploy_of_valid`, and the closer's budgets
+  (`Derive.residue` on today's `wtStd → dl!{…}`) have no scoped twin.
+* `Tactics/{UpdateRules,SelectOnSaveConsr}`: today's update rewrites
+  (`Fml.updAt`, `merge`, `mergeStorage`) and the interpreter's own lemmas;
+  the scoped sequent has the program rules and `close` only.
+* `Tactics/Callback`: `ProvesC` has no soundness yet (W2 `tree`).
+* `Tactics/Core*`: the twins state `cdl!` themselves; `CoreSurface` contrasts
+  the two readings on purpose.
+
+**Built** (no rule, name or soundness theorem changed):
+* `sol_prove` on `⊢ φ` is the testsuite lane's
+  `Calculus/Core/ProvesDerive.lean` (merged here; this lane's `ProveSeq`,
+  a `match` on `Fml C Γ`/`Premise` run in the kernel, is dropped, G0
+  condition 1).  Two changes to it: a leaf's erasure has its parameters'
+  `∀` stripped (`Fml.stripAlls`, `Valid.of_stripAlls`, in
+  `Calculus/Core/Derive.lean`; the identity on the testsuite's obligations,
+  which have none), and the compiled walk runs before one kernel check, as
+  today's `Derive.prove` (the kernel try at no leaves cost a second
+  evaluation where leaves are left: `Purchase.ctor_spec` ran out of the
+  declaration's heartbeats).
+* `Calculus/Core/Closers.lean`: today's closers on a scoped leaf (`sol_decide`
+  and its parts, `sol_reduce`, `sol_reads`, `sol_close_eval`,
+  `sol_apply_upd`, `sol_merge`, `sol_fold_terms`) through the erasure
+  (`Derive.eraseLeaf`, `onErased`); refutations by a run's outcome
+  (`Modality.afterRunC_not_panic`, `afterRunC_diamond_halt`, `decide +kernel`).
+* `Calculus/Core/WalkSyntax.lean`: today's walk lines on a scoped goal, scoped
+  rule first, today's last (`apply update r`, `unfold r` as `unfold`/`bind`/
+  `inline`, `split`, `splitBox`, `done`, `Proves.check`, `cases`,
+  `branches`, `invBox`, the `…Lean` forms, `unfoldRule`, `empty`,
+  `emptyModality`, `intro`, `allIntro`, `impRight`, `allRight`,
+  `Proves.valid`, `refine close ?_`), the taclet elaborated last
+  (`by exact`) so that side conditions read the goal; `core_silent`, the
+  steps KeY does not show (a scope's end, a hidden binder, and before any
+  rule the parameters' `∀`); `core_skip`, the no-op of `apply empty`
+  where no modality is left and of `apply allIntro` where the parameters
+  are already bound, refused anywhere else.  The walks' text is today's.
+* `Calculus/Core/Derive.lean` (W2 leftover): `sol_derive?`'s leaves close
+  by the tree lane's `Walk.closeLeaf` (merged; this lane's copy dropped);
+  a rule whose line `apply` cannot match (a read into a hole) by
+  `refine Core.Proves.c (by exact Core.Taclet.step_eq .r) ?_`, the taclet
+  elaborated after the goal, its name kept; `sol_close` runs today's macro through a scoped
+  `sol_close_unwrap` (`eraseLeaf`, the parameters' `∀` stripped), so
+  `sol_close_mt` and `sol_spec_close` read scoped leaves too and a failing
+  close is not run twice.  `Examples/Tactics/CoreDerive.lean` pins a
+  postcondition that is not `true`.
+* `Calculus/Core/Symex.lean`: a failing scoped tactic throws where errors
+  are not recovered from (`fail_if_success`, `first`), keeps an abort's
+  logged errors (today's `all_goals`), and `sol_step` keeps the goal's
+  tag.
+* `Calculus/Core/ProofTree.lean`: the tree lane's `closeTacs`/`Config.erased`
+  kept, this lane's copy reverted.
+* `Examples/Tactics/CoreStep.lean`: the stale `Premise.cover` docstring.
+
+**Pins changed** (each with its reason; the listed reasons are W3's 1–6,
+"the parameter's `∀`" is W2 `tree`'s: `cdl!` binds a read-before-bound
+name by `∀`, so a tree starts with `allRight`):
+- Benchmark/Counter `#check spec!{ dec }`: type `Fml Counter` -> `Core.Fml Counter []` (the flip itself: the term is scoped).
+- Tactics/Specs `#check spec!{ pay }`, `spec!{ order }`: same type change; `order`'s line wraps.
+- Tactics/CallOperands: no pin changed; the memory call's step (`~[internalCallExpand]~>`) moved to a closing block read without the switch (Left, 7).
+- Tactics/CoreDerive: new pin, `sol_derive?` with leaves closed (`Proves.close` + `sol_symex; sol_close`), `allRight` as the tree lane names it.
+- Tactics/Decide: no pin changed; the two refutations over an untyped storage (`deleteWithoutWrite`, `survivesMappingOnly`) and the three fragment pins (`Fml.inL`, `sol_decide` on a modality) moved to a closing block read without the switch (they are about today's untyped storage and the closer's input).
+- Tactics/Payment: `transferBox`, `sendBox`: the parameter `to` is bound by `∀` (W2 tree reason; the walk takes it before its first rule); their checked lines carry `∀ uint to,` and end `⟹ true` where today's had `⟹ [ ] true` (no `emptyModality` after a last statement: reason 3); `sendDiamond` (⊢ under the diamond) moved to a closing block read without the switch: `Core.Proves.close` takes box contexts only.
+- Tactics/StorageSteps, Memory, CrossDomain, Net, Tour, LedgerDelete: walks unchanged in text (today's walk lines read scoped, `Calculus/Core/WalkSyntax.lean`); refutations re-proved by the run's outcome.
+- Tactics/Calls: the two call walks take solkey's `blockEmpty` on the callee's body (the scoped inlining keeps the body a block; one step more, a solkey taclet); the `TestSuite` shapes (`⊢ wt → ⟨…⟩`, diamond) moved to a closing block read without the switch.
+- Tactics/Loops: `#proof_tree` of `countToNWalk`'s formula starts with `allRight` (parameter `n` bound by `∀`), has no `emptyModality` nodes (reason 3), serials shift by those; `#step` pins of `whileClose`/`whileNoVariantDiamond` print `dl{ ∀ uint i; false }` (the parameter's `∀`); `countToNWalk`'s docstring loses the `cov` goal (reason 1); `countTo1Walk` (diamond walk), `countToNDiamond`, `breakKeepsBound` (leaves `Fml.posB` refuses) and the diamond `#proof_tree` of `notEntered` moved to a closing block read without the switch.
+- Tactics/Branch: `branchLocals`'s goals pin: two goals (no `cov`, reason 1), each branch's `}` (reason 2), the parameters' `∀` entries (taken before the first rule), `{ se1 := a == b }` (the chains lane's `==` printer, merged); `ifTrue`'s `sol_step` pin: no cover conjunct (reason 1), `}` (reason 2); `branchDiamond` and the stuck-condition refutation (valid when scoped: `a`, `b` are bound) moved to a closing block read without the switch.
+- Tactics/Revert: `case cov` blocks of the box walks deleted (reason 1); refutations re-proved by the run's outcome, the `require` one at `a = 0`, `b = 1` (scoped, the parameters are bound, so "nothing binds `a`" became "the `require` reverts"); `requireDiamond`, `branchDiamond` (⊢ under the diamond) moved to a closing block read without the switch.
+- Tactics/StorageDelete: no pin changed; the three `_theory` derivations (today's sequent rules on updates and the Theory's laws) and the refutation over a `bool`-holding root moved to a closing block read without the switch.
+- Tactics/TryCatch: the `#check` of a `try` formula ascribed `Core.Fml Pinger []` (the flip's type); `getWalk` (today's `Fml.alls` goal shape) and the callback proofs (`ValidC`, no `ProvesC` soundness yet) moved to a closing block read without the switch.
+
+**Left** (for the lead or a later lane):
+1. *Diamond leaves.* `Core.Proves.close` takes box contexts only, so no
+   `⊢` walk or `sol_prove` on `⊢` closes a leaf behind a diamond update;
+   `Payment.sendDiamond`, `Branch/Revert.branchDiamond`,
+   `Revert.requireDiamond`, `ApplySteps.guardedCopy`, `Loops.countTo1Walk`,
+   the `Calls` `TestSuite` shapes and the diamond `#proof_tree`s stay
+   today's.  Needs `TClosable` at the flip (W2 `sound`).
+2. *Leaves `Fml.posB` refuses* under the `Valid` path:
+   `Loops.countToNDiamond` (an anonymised loop flag), `Loops.breakKeepsBound`.
+3. *Refutations over an untyped storage* (`Decide.deleteWithoutWrite`,
+   `survivesMappingOnly`, `StorageDelete.deleteRootUnknown`) and the stuck
+   `if` of `Branch` (valid when scoped) say what only today's storage and
+   unbound locals allow: at the typed-state flip they are false as stated
+   and should become positive theorems.
+4. `apply empty` is a no-op where the scoped strategy already went past
+   the frames (reason 3); the walks keep the line, and it is refused
+   before a statement (`ApplySteps`).
+5. `sol_prove?` on a scoped sequent, and `sol_derive?`'s suggestion in
+   today's short walk text (`apply update .r`), are not written.
+6. Not run: `lake build` of the targets (Bash `lake` is denied); every
+   touched file, the `Core*` example twins, `TestSuite/CoreSeq`, and the
+   merged lanes' `Examples/{ProofTree,Tools,Notation,Verify,ExampleNames}`
+   checked one by one through the server.
+7. *For the lead* (review, 2026-10-08): (a) `Person memory p =
+   choosePersonMem();` steps by `functionBodyExpand` scoped, because
+   `CallRet.isRets` (`Calculus/Core/Rules.lean`) counts a memory return;
+   rule-map rows 54/55 give it `internalCallExpand`.  Either `isRets`
+   follows today's or the rows name the memory return; the pin waits in
+   `CallOperands`' closing block.  (b) Two pin reasons outside W3's 1–6
+   to approve, or to remove at the source: the flip's own type change in
+   `#check` pins (`Fml C` → `Core.Fml C []`: Counter, Specs, TryCatch), and
+   `apply unfold .blockEmpty` on an inlined callee's body (Calls; the
+   scoped inlining keeps the body a block, one step more).
+
+**Review fixes** (2026-10-08): `w25-testsuite`, `w25-tree` and `w25-chains`
+merged into this branch, their conflicts resolved toward the owning lane
+(`ProvesDerive`, `closeLeaf`/`closeTacs`, the `==` printer); Coin and
+Mapping keep today's `refine close ?_`; the chains lane's `int` product
+pin of `Examples/Tools.lean` moved out of the tree lane's scoped section
+(the two merged would print the scoped escape); stale headers and
+docstrings moved with their proofs (ApplySteps, TryCatch, StorageDelete,
+Revert, StorageSteps).
+
 ### W3 lane `testsuite` (`w25-testsuite`, 2026-10-08)
 
 **The flip does not land: it waits on the diamond.**  Under
@@ -1610,6 +1741,255 @@ time: all fourteen at once went past 30 GB beside the other lanes);
    `case leaf2` (the deviation above, if the lead approves it); `CoreDerived9`–`11` and `CoreSeq` are deleted.
 3. `#solkey_derive?` still searches today's calculus; its suggestions read
    the same text, but the leaves it names are today's.
+
+### W3 lane `tree` (`w25-tree`, 2026-10-08)
+
+- **Flipped** (`open scoped Solidity.Core.Surface`, in `section Scoped`
+  blocks): `Examples/ProofTree.lean` (every box tree, `#proof_node`,
+  `#proof_tree_json`, the `sol_derive?` walks and their replays),
+  `Examples/Tools.lean` (`#wp`, `#step`), `Examples/Notation.lean` (the
+  formulas, `#step`, the `twoKeys` walk), `Examples/ExampleNames.lean` (the
+  formulas and fresh-name tables).
+- **Kept today's**, each said in its file: the diamond trees and walks
+  whose leaves sit behind a diamond update (`Proves.close` is box-only,
+  `Fml.closableB`: the first tree, `sendNoCallbackDiamond`, `guardedCopy`,
+  the two call trees, the unwound loop); `sol_prove?`, `sol_chain?`,
+  `#chain`, `sol_rws?` (no scoped `sol_prove?`/`sol_chain?`/`sol_rws?`,
+  and Core `sol_prove` takes `Core.Valid`, not `⊢`); `ExampleNames`'
+  `sol_chain` error (the scoped chain's error does not print the line it
+  does not reach); `Examples/Verify.lean` whole (`#verify` elaborates
+  `spec[C]{f}` in the caller's scope; `#counterexample` is over
+  `Prog.runFuel`, W4); `Notation`'s rule lines and `⊢` rules (W5 names).
+- **W2 leftovers done.**  `Core.ProofTree.Config` closes a leaf by
+  `closeTrue`, then `refine Core.Proves.close [] rfl List.nodup_nil ?_;
+  sol_symex; sol_close` (`closeTacs`, `Config.erased`), then `closers`;
+  `movesAt` whnfs a premise built by a function (`Premise.expandCall`), so
+  `internalCallExpand`/`functionBodyExpand` are nodes (they were open
+  goals).  `CoreProofTree` pins a leaf closed by its erasure.  The callback
+  reading over `TState` is `Calculus/Core/CallbackHolds.lean`: `holdsC`
+  (`StateInv := Fml.stateInv I = ⟨fun σ => tholds σ I⟩`), `Invariant`,
+  `ValidC`, `TransferSem`, `holdsT`, `ValidT`, `validT_*`,
+  `after_frames_iff`, `holdsC_iff_holds`, `holds_of_holdsC_modal`,
+  `holds_of_holdsC_imp`, `valid_of_validC` (axioms: `propext`,
+  `Classical.choice`, `Quot.sound`).
+- **Outside the lane's files, needed by the flip**
+  (`Calculus/Core/Derive.lean`, `symex`'s): `sol_derive?` closes a leaf as
+  the tree does (`Walk.closeLeaf`, at the empty outer scope; `sol_derive`
+  still leaves it), and a rule of labelled goals (`cases`, `branches`) is
+  written `apply … <;> (try simp only […]) <;> (try and_intros)` with
+  bullets, as today's walk is (it left `case fml`/`case upd` goals open).
+  `CoreDerive`'s pins do not move.
+- **Pins changed, with reasons** (numbers are the W3 list's):
+  - `ProofTree`, every scoped tree: `allRight` first (a parameter is bound
+    by `∀`, W2 `tree`); no `emptyModality` after a last statement
+    (`Fml.modalK`, G0 condition 6, W2 `tree`); serials shift (3); the
+    storage-write tree loses its `emptyModality`.
+  - `ProofTree`, `#proof_node`: node 2 instead of 1 (the same node,
+    `allRight` before it), its sequent prints `}` (2) and a `∀ uint x`
+    entry, its tactics `apply Core.Proves.update (Core.Taclet.toStep …);
+    apply Core.Proves.updIntro` (the scope end is silent, W2 `tree`).
+  - `ProofTree`, `#proof_tree_json`: the same, 6 nodes for 7.
+  - `ProofTree`, the walks: the scoped calculus's constructors
+    (`Core.Proves.update (Core.Taclet.step_eq .r)`, `refine
+    Core.Proves.valid (R := RuleSet.all) ?_`, `bindIntro` for a
+    hidden binder, `updIntro` for a scope end), `split` for `splitBox`
+    and no `cov` (1), a leaf `refine Core.Proves.close [] rfl
+    List.nodup_nil ?_`; the replays rewritten to them.  A precondition,
+    a quantifier and an empty modality keep solkey's names
+    (`Core.Proves.impRight`/`allRight`/`emptyModality`, review fix:
+    `Calculus/Core/Derive.lean`'s `Walk.movesAt` emits the aliases of
+    `Calculus/Core/ProofTree.lean`, which it now imports); `allRight`
+    first is W2 `tree`'s reason above.  `CoreDerive`'s walk re-pinned
+    for the same alias.
+  - `ProofTree`, new pins (review fix, the regression example for
+    `movesAt`'s whnf of a premise built by a function): the box trees of
+    an internal call and a tuple call over `Callees`, scoped, show
+    `internalCallExpand`/`functionBodyExpand` as nodes, the body's
+    `blockEmpty`, and a closed leaf (the diamond trees beside them stay
+    today's).
+  - `Tools`, `#wp` of a formula with parameters: `∀ uint i; ∀ uint n;` in
+    front (W2 `tree`).
+  - `Notation`: `#check dl!{…}` is `Core.Fml StandardExample []`, with its
+    parameters bound; the `step = some …` `rfl` stays, its line read
+    back as `dl![.box]{ … }` (the box's update; the default `dl!{ … }`
+    reads an update at the diamond), with a `#step` pin of its printed
+    form beside it (review fix: the pin alone checked only the printer);
+    the `twoKeys` traces start `∀ uint b, ∀ uint a`
+    and have no `[ ]` line.
+- **Gate** (`Examples/ProofTree`, 12.1 s): 11 s in the default-target
+  `lean_build` (286 jobs, under that build's load); by the M0 method, a
+  fresh open, 14.6 s against 14.2 s for today's file timed the same way in
+  the same minute (1.03×, four Lean agents on the machine).
+- `lean_build` (default targets): green.  `check-orphans`: 308 reachable.
+  `check-doc-paths`: OK.  No new `sorry`, `axiom` or `maxHeartbeats`.
+  `CoreDerived11`, `CoreDerive`, `CoreCallback`, `CoreSurface`,
+  `CoreProofTree` checked after the tool changes.
+- **Left.**  (a) The diamond trees close only once `Proves.close` takes a
+  leaf behind a diamond update (`Fml.TClosable`, over the typed state, at
+  the flip of `Proves`' soundness to `Proves.tsound`): a lead decision, as
+  `Proves.sound` over M3 would lose it.  (b) A scoped `sol_prove?`,
+  `sol_chain?` and `sol_rws?`, and `sol_prove` on a `⊢` goal (`Core.Proves`
+  from `Valid` needs a reflective `Proves` lemma).  (c) The scoped chain
+  error should print the line it does not reach.  (d) `ProvesC.sound`
+  against `ValidC`, waiting on `Stmt.TSound`; `Examples/Tactics/CoreCallback.lean`
+  (the `tactics` lane's file) not re-pinned to `holdsC`.
+
+### W3 lane `chains` (`w25-chains`, 2026-10-08)
+
+**Flipped** (`open scoped Solidity.Core.Surface`, the Core imports): all of
+`Examples/Chains/` but `EvaluationOrder`, 144 chain declarations; 33 declarations stay on
+`Update.lean`'s calculus, in a trailing part of their file headed *Left on
+`Update.lean`'s calculus* that says why (below).  `ChainNotation` and
+`ChainRewrites` stay on today's calculus (below).
+
+**What the flip needs besides the line:**
+- *A postcondition at its context.*  `Core.Post C Γ` stands where it is, with
+  no weakening, so a chain whose first line declares locals before `φ` (an
+  update `{ ageVal := 42 }`, a parameter `v` bound `∀ uint v;`, a program's
+  top-level `uint x`) takes `φ` at that context, as a binder of the
+  declaration: `theorem chain (φ : Core.Post StandardExample [.val .uint]) :`.
+  The section variable stays `Core.Post C []` for the others.  A hole
+  (`Core.Post C _`) does not work: the coercion to `Core.Fml C Γ` does not
+  unify the context.
+- *No segments.*  Scoped chains have no `~~>`: the four chains composed of
+  two segments (`Storage.BalanceWriteRead`, `StorageDelete.SubtreeDelete`,
+  `MemoryDelete.FieldDeleteRef`, `StorageCoverage.ifElseUnfold`) are one
+  chain each, every line kept; `run`/`reads`/`ifElseUnfold1`/`ifElseUnfold2`
+  are gone.
+- *Parameters past the program* (`Calculus/Core/ChainKit.lean`,
+  `Chains.lean`): the erasure of a line whose parameters the reader binds
+  outermost starts with `∀ uint v;`, which no rewrite goes under; `Fml.ViaE`
+  now takes the erasure with its outer quantifiers dropped
+  (`Solidity.Fml.dropAlls`, sound by `holds_of_dropAlls`: validity is closed
+  under generalisation).
+- *A fixed modality in a line over `m`* (`Chains.lean`): the diamond and box
+  runs were compared with every `Modality` constant abstracted, so a hidden
+  binder's `.box` (Decision 12) made a line over `m` stop ("depends on the
+  modality").  `mergeModality` puts `m` back only where the two runs differ
+  (`Memory.RootAlias`).
+- `Fml.ViaE.valid_close`: the bridge of `Fml.ViaE.valid` is `Proves.close` at
+  the last scoped line, its side conditions decided by the kernel
+  (`ChainNotation`, §4, closes `[ alice.account.balance = 10; ] …` that way).
+- The printer (`Calculus/RuleSyntax.lean`, `Calculus/Notation.lean`):
+  `x := a == b`, `x := a != b` (a `uint` equality captured) and `a * b` have
+  KeY's text and read back (`ChainNotation` §7 pins both readings).
+
+**Pins and statements changed, each with its reason:**
+- W3 reason 1 (`cov` gone): `CheckedArithmetic.OverflowReverts.{box,diamond}`,
+  `StorageCoverage.{requireConditionCapture,requireSimple,ifElseUnfold,ifElseSplit}`:
+  the third conjunct `(⟨ revert(); ⟩ false ∨ c ≐ true ∨ c ≐ false)` dropped
+  from every line after the split.
+- W3 reason 2 (a branch's `}`): `StorageCoverage.{ifElseUnfold,ifElseSplit}`.
+- New, statements: the `φ` binders and the merged segments above;
+  `StorageCoverage.{revertDiamond,revertBox}` proved `by sol_chain` (a
+  scoped step over `φ` is not `rfl`).
+- New, printer: `Examples/Tactics/Branch.lean` (the `tactics` lane's file),
+  `branchLocals`' three goals print `{ se1 := a == b }` where they printed
+  the `‹Term.binop BinOp.eqB …›` escape.
+- `ChainNotation`: `headline_valid` and `ChainRewrites.headlineWrite` use a
+  local copy of the headline (today's), the "It is that link" example
+  (`AgeWrite.chain .diamond φ`) is gone; new pins: `==`/`!=`/`*`, a scoped
+  chain through them, a scoped `valid_close`.
+- No fresh name, `~*>` span or rule name of a flipped chain moved.
+
+**Gate**, `Examples/Chains/Storage` (M0 7.5 s, limit 9.0 s): **passed,
+8.7–8.8 s** after the review fixes, by the M0/M3.3 method (a copy under
+`Solidity/Scratch/` with `Elab.async false`, `#clock` reading
+`/proc/self/stat` and `/proc/uptime`, wall time from the worker's start to
+the end, imports built, load average under 2): flipped 8.84, 8.69 s;
+today's file (`e61996b^`) 7.48, 7.40 s in the same session, so the flip
+still costs ×1.17, which `.claude/rules/derivations.md` rule 7 ("in the
+time it did before or faster") does not allow: an explained cost, not an
+outlier past the gate.  Where it went, per chain (CPU ticks between
+`#clock`s, flipped against today's): every chain ×1.3–2 before the fixes,
+the header (both calculi's imports) +0.1 s, `#last_line` 0.04–0.1 s per
+chain on both.  The lane's first estimate (13.2–15.7 s against 10.5–12.3 s,
+×1.27–1.31) was under load; on a quiet machine the flip measured 10.06,
+10.12 s against 7.37, 7.40 s (×1.37) before the fixes below.
+- The cost was the run's evaluation (`closedLines`/`closedErased`): four
+  `evalExpr`s a run (lines and erasure, at the diamond and at the box), each
+  a definition the kernel type-checked (12 ms each, the formula inside it),
+  and every run done twice for a chain whose `φ` is a binder of the theorem
+  (`(φ : Core.Post C [.alias …])`): the proof sees the binder as a new
+  variable, so `runCache` missed in `sol_chain`.  Now one evaluation a
+  modality (`Fml.chainRunQ`, lines and erasure together), not
+  kernel-checked (`evalQuoted`, `debug.skipKernelTC`: the value is a quoted
+  term that the kernel checks where it is used), and cached by the closed
+  formula, postconditions in slots (`closedCache`), which is the same under
+  the theorem's new variables.  `AccountCopy`: 0.40 s → 0.27 s (today's
+  0.20 s).
+- Left: the scoped statement's elaboration (102 ms against 71 ms on
+  `AccountCopy`) and `sol_chain`'s meta-level `Kernel.isDefEq` before the
+  kernel's own check (59 ms against 24 ms).
+
+**Left on `Update.lean`'s calculus, with the reason** (the lead's call):
+- *Captures in the postcondition's scope* (`EvaluationOrder`, and the tails of
+  `Storage` (2), `StorageDelete` (1), `StorageArrays` (2), `Memory` (1),
+  `MemoryArrays` (5), `MemoryDelete` (1), `StorageCoverage` (8),
+  `MemoryCoverage` (5)): the elaborator writes a statement's captures
+  (`uint idx; idx = ++i;`, a call's result, a receiver) in front of it at the
+  top level, so the scoped program ends with them in scope, the postcondition
+  stands at a context with fresh names, and its erasure is no `Post`
+  (`Core.Post.erase`'s `maxIdx ns = 0`).  Fix: the elaborator puts a
+  statement and its captures in a block of their own (as W0 did for raw
+  blocks) — a low-module change whose pins are other lanes' too.
+- *A rewrite under the open modality, then more program*
+  (`StorageToMemory.{FieldCopy,TokenCopy}`): a scoped chain goes past a
+  rewrite only with rewrites.  Fix: a scoped `sequentialToParallel` on
+  `Core.Upd`, or chains re-pinned with the merge at the end.
+- *A rule the finder does not name* (`MemoryArrays.ElementOfField.valueWrite`):
+  the scoped strategy fires `memoryIndexWriteCaptureAllComplexRecv` on
+  `b.items[i] = val;`, but `Core.ruleOf?` names nothing (`#derivation` prints
+  `~[?]~>`), so the named link does not elaborate.
+- `ChainNotation`, `ChainRewrites`: they test `Calculus/Chains.lean`'s notation
+  and rewrites (`calc`, `~~>`, segments, rewrites before the program's end,
+  `Fml.Steps.ofSymex`, `Fml.StepBy.unique`), which scoped chains do not have;
+  `Examples/Tactics/CoreChains.lean` pins the scoped notation.  W4's
+  `calc-del` deletes `Calculus/Chains.lean`: both files are rewritten or
+  retired then.
+
+**Found, not this lane's:**
+- `Core/Notation.lean` says an update over a name nothing declares declares
+  it (`{ x := 10 } x == 10`); it binds `∀ uint x;` outermost instead (the
+  `.upd` case of `elabFmlC` does not put the update's new locals in the
+  reader's scope, so the reading without the parameter fails).  Harmless for
+  chains since `dropAlls`.
+- When `Memory.CallWrite` flips, its two inlined calls name
+  `functionBodyExpand` where today's chain names `internalCallExpand`
+  (`Account memory pv = makeAccount();`): a re-pin with a reason the W3 list
+  does not have.
+- `~[r]~>`'s "the rule for … is …" error fails to print the scoped statement
+  ("failed to pretty print expression").
+
+**Review fixes** (2026-10-08):
+- `#chain`/`sol_chain?` (`Core/ChainGen.lean`) and `#last_line`
+  (`Core/LastLine.lean`) take the erasure with its outer `∀`s dropped
+  (`dropAllsE`), as `elabCoreChain` does: a parameterised scoped line
+  (`{ ageVal := 42 } ⟨[ … ]⟩ φ`) now gets its rewrites past the program,
+  computed from the `L` `Fml.ViaE` checks.  Pinned: `#chain` of
+  `AgeWrite`'s first line and the pasted chain
+  (`Examples/Tactics/CoreChains.lean`).
+- The printer (`ppTerm`) writes `+ - * /` only at `uint`, the type they read
+  back at; an `int` (or unchecked `bool`) one escapes.  Pinned:
+  `Examples/Tools.lean`'s `#wp` of `int f = e * 7;`.  No other pin moved
+  (`ChainNotation`, `ProofTree`, `PrintedRules`, `Tactics/Values` checked).
+- The gate above (`evalQuoted`, `closedCache`).
+- Docs: `.claude/rules/derivations.md` rules 1 and 7 and the
+  `chain-authoring` skill say a scoped chain is one declaration
+  (`Core.Fml.Via`/`ViaE`), segments only on `Update.lean`'s calculus; the
+  docstrings of `Fml.Via.valid`, `Fml.Steps.eq_of_length`/`eq_of_measure`,
+  `StorageCoverage.requireSimple` and `CheckedArithmetic`'s module no longer
+  cite what the flip changed.
+- Checked after the `Core/Chains.lean` edit: all 14 `Examples/Chains/` files,
+  `Examples/{ChainNotation,Tactics/CoreChains,Tactics/CoreSurface,Tactics/CoreSequents,Tactics/CoreSolSpec}`,
+  `Tools/CoreInspect`, clean.
+
+**Checks:** every touched file's diagnostics clean (the seven files checked
+before `mergeModality` re-checked after it), `Examples/Tactics/CoreChains`
+clean.  Not run: the full build (the printer edit rebuilds everything above
+`RuleSyntax`; this session keeps Lake's parallel build off the shared
+memory), `check-corpus.sh`, `solkeycheck` (no rule name or annotation
+changed).
 
 ## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
 Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.

@@ -2,6 +2,10 @@ import Solidity.Tools.Run
 import Solidity.Tools.Inspect
 import Solidity.Tools.ProofTree
 import Solidity.Calculus.Derive
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.Chains
+import Solidity.Tools.CoreInspect
 
 /-!
 # Loops
@@ -24,6 +28,8 @@ namespace Solidity.Examples.Loops
 open Semantics Proves
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## The lowering
 
@@ -329,55 +335,6 @@ theorem notEntered : ⊨ dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5
   sol_symex
   sol_close
 
-/-- The same proved by the walk `sol_derive?` writes: `whileUnwind` is
-`unfoldLean`, `loopExit` is `checkLean` with its goals `thn` and `els`. -/
-theorem countTo1Walk : ⊢ dl!{ ⟨ uint i = 0;
-    /// @custom:key unwind 1
-    while (i < 1) { i++; }; ⟩ i == 1 } := by
-  apply unfold .localValueDeclInitDrop
-  apply update .localValueAssign
-  apply unfoldLean .whileUnwind
-  apply unfold .ifElseUnfold
-  apply unfold .localValueDeclInitDrop
-  apply update .binopAssignment
-  apply split .ifElseSplit
-  case thn =>
-    apply update .localIncrement
-    apply checkLean .loopExit
-    case thn =>
-      apply emptyModality
-      refine close ?_
-      sol_symex
-      sol_close
-    case els =>
-      refine close ?_
-      sol_symex
-      sol_close
-  case els =>
-    apply emptyModality
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
-    refine close ?_
-    sol_symex
-    sol_close
-
-/-! The proof tree labels `loopExit`'s goals. -/
-
-/--
-info: 0: localValueDeclInitDrop
-1: localValueAssign
-2: loopExit
-  [loop exited]
-    3: emptyModality
-    4: Closed goal
-  [unwound to the end]
-    5: Closed goal
-closed: 0 open goal(s), 6 node(s), 2 branch(es)
--/
-#guard_msgs in
-#proof_tree dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5 }
 
 /-! ## solkey's solc ports, as loops
 
@@ -388,6 +345,8 @@ loops solkey now writes, each unwound as often as it runs. -/
 
 section
 local instance : InContract := ⟨SolcControlFlow⟩
+
+open scoped Solidity.Core.Surface
 
 /-- `doWhileFalseRunsBodyOnce` (solc `statements/do_while_loop_continue.sol`):
 `do { … } while (false)` runs its body once, and the `continue` it skips
@@ -458,16 +417,6 @@ theorem countToN :
   sol_symex
   sol_close
 
-/-- The same under the diamond: `n - i` decreases while the loop goes on, so
-it ends.  The invariant says `0 <= i`: the anonymised `i` is any number. -/
-theorem countToNDiamond :
-    ⊨ dl!{ n >= 0 && n <= 1000 → ⟨ uint i = 0;
-             /// @custom:key invariant 0 <= i && i <= n
-             /// @custom:key decreases n - i
-             while (i < n) { i = i + 1; }; ⟩ i == n } := by
-  sol_symex
-  sol_close
-
 /-- A sum with a closed form, solkey's `invariantClosedFormSum`: adding `2`
 `n` times leaves `2 * n`. -/
 theorem sumClosedForm :
@@ -490,20 +439,11 @@ bool brk1 = false;
   /// @custom:key invariant i <= 10
   while (i < 10) { if (i == 5) { break; } i++; } }))
 
-/-- A loop left by `break` keeps its bound: `i <= 10` holds at every head,
-the one after the `break` included. -/
-theorem breakKeepsBound :
-    ⊨ dl!{ [ uint i = 0;
-             /// @custom:key invariant i <= 10
-             while (i < 10) { if (i == n) { break; } i = i + 1; }; ] i <= 10 } := by
-  sol_symex
-  sol_close
-
 /-- The counting loop by the walk `sol_derive?` writes
 (`Examples/ProofTree.lean`): the invariant rule is `invBox`, `invLean` with
 solkey's two goals under the box, `init` ("invariant initially valid") and,
 past the anonymising update, `thn` and `els` ("invariant preserved and
-used"); the third, `cov`, is `true`, which `closeTrue` proves. -/
+used"). -/
 theorem countToNWalk : ⊢ dl!{ [ require(n >= 0); uint i = 0;
     /// @custom:key invariant i <= n
     while (i < n) { i = i + 1; }; ] i == n } := by
@@ -539,27 +479,26 @@ theorem countToNWalk : ⊢ dl!{ [ require(n >= 0); uint i = 0;
 /-! The proof tree labels the invariant rule's goals as solkey does. -/
 
 /--
-info: 0: requireConditionCapture
-1: localValueDeclInitDrop
-2: greaterEqualAssignment
-3: requireSimple
+info: 0: allRight
+1: requireConditionCapture
+2: localValueDeclInitDrop
+3: greaterEqualAssignment
+4: requireSimple
   [Holds]
-    4: localValueDeclInitDrop
-    5: localValueAssign
-    6: whileInvariantBox
+    5: localValueDeclInitDrop
+    6: localValueAssign
+    7: whileInvariantBox
       [invariant initially valid]
-        7: Closed goal
+        8: Closed goal
       [invariant preserved and used]
-        8: additionAssignment
-        9: emptyModality
+        9: additionAssignment
         10: Closed goal
       [invariant preserved and used]
-        11: emptyModality
-        12: Closed goal
+        11: Closed goal
   [Reverts]
-    13: revertBox
-    14: Closed goal
-closed: 0 open goal(s), 15 node(s), 4 branch(es)
+    12: revertBox
+    13: Closed goal
+closed: 0 open goal(s), 14 node(s), 4 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ [ require(n >= 0); uint i = 0;
@@ -595,7 +534,7 @@ sound: Solidity.LeanTaclet.sound
 
 /--
 info:   ~[whileClose]~>
-    dl{ false }
+    dl{ ∀ uint i; false }
 -/
 #guard_msgs in
 #step dl!{ [ /// @custom:key invariant i <= 3
@@ -606,10 +545,94 @@ info:   ~[whileClose]~>
 
 /--
 info:   ~[whileNoVariantDiamond]~>
-    dl{ false }
+    dl{ ∀ uint i; false }
 -/
 #guard_msgs in
 #step dl!{ ⟨ /// @custom:key invariant i <= 3
              while (i < 3) { i = i + 1; }; ⟩ true }
+
+end Solidity.Examples.Loops
+
+/-! ## Read without the switch
+
+What the scoped calculus does not close yet: a walk under the diamond
+(`Core.Proves.close` takes box contexts) and leaves the scoped closer's
+erasure does not take (`Fml.posB`: a loop's anonymised flag and hidden
+binders, `docs/intrinsic.md` W2 `symex`). -/
+
+namespace Solidity.Examples.Loops
+
+open Semantics Proves
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-- The same proved by the walk `sol_derive?` writes: `whileUnwind` is
+`unfoldLean`, `loopExit` is `checkLean` with its goals `thn` and `els`. -/
+theorem countTo1Walk : ⊢ dl!{ ⟨ uint i = 0;
+    /// @custom:key unwind 1
+    while (i < 1) { i++; }; ⟩ i == 1 } := by
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  apply unfoldLean .whileUnwind
+  apply unfold .ifElseUnfold
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply split .ifElseSplit
+  case thn =>
+    apply update .localIncrement
+    apply checkLean .loopExit
+    case thn =>
+      apply emptyModality
+      refine close ?_
+      sol_symex
+      sol_close
+    case els =>
+      refine close ?_
+      sol_symex
+      sol_close
+  case els =>
+    apply emptyModality
+    refine close ?_
+    sol_symex
+    sol_close
+  case cov =>
+    refine close ?_
+    sol_symex
+    sol_close
+
+/-- The same under the diamond: `n - i` decreases while the loop goes on, so
+it ends.  The invariant says `0 <= i`: the anonymised `i` is any number. -/
+theorem countToNDiamond :
+    ⊨ dl!{ n >= 0 && n <= 1000 → ⟨ uint i = 0;
+             /// @custom:key invariant 0 <= i && i <= n
+             /// @custom:key decreases n - i
+             while (i < n) { i = i + 1; }; ⟩ i == n } := by
+  sol_symex
+  sol_close
+
+/-- A loop left by `break` keeps its bound: `i <= 10` holds at every head,
+the one after the `break` included. -/
+theorem breakKeepsBound :
+    ⊨ dl!{ [ uint i = 0;
+             /// @custom:key invariant i <= 10
+             while (i < 10) { if (i == n) { break; } i = i + 1; }; ] i <= 10 } := by
+  sol_symex
+  sol_close
+
+/-! The proof tree labels `loopExit`'s goals. -/
+
+/--
+info: 0: localValueDeclInitDrop
+1: localValueAssign
+2: loopExit
+  [loop exited]
+    3: emptyModality
+    4: Closed goal
+  [unwound to the end]
+    5: Closed goal
+closed: 0 open goal(s), 6 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5 }
 
 end Solidity.Examples.Loops
