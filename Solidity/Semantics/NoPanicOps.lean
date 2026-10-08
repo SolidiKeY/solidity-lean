@@ -352,13 +352,6 @@ theorem MSrc.mval_noPanic (σ : State) {T : Ty} (r : MSrc C T) : NoPanic (r.mval
 theorem MLoc.addr_noPanic (σ : State) {T : Ty} (l : MLoc C T) : NoPanic (l.addr σ) := by
   cases l <;> simp only [MLoc.addr] <;> no_panic
 
-@[no_panic_simp] theorem Arg.bindSeq_noPanic : (args : List (Arg C)) → (σ : State) →
-    NoPanic (Arg.bindSeq args σ)
-  | [], σ => by simp only [bindSeq, ne_eq, NoPanic.pure, not_false_eq_true]
-  | a :: as, σ => by
-    simp only [Arg.bindSeq]
-    exact NoPanic.bind (Val.eval_noPanic σ a.e) fun _ _ => Arg.bindSeq_noPanic as _
-
 theorem NoPanic.mapM {α β : Type} {f : α → Res β} (hf : ∀ a, NoPanic (f a)) :
     (l : List α) → NoPanic (l.mapM f)
   | [] => by simp only [List.mapM_nil, ne_eq, NoPanic.pure, not_false_eq_true]
@@ -417,14 +410,6 @@ theorem memClear_noPanic (σ : State) (a : Addr) (T : Ty) : NoPanic (memClear σ
     NoPanic (l.bump σ op) := by
   cases l <;> simp only [OpLoc.bump, bumpLocal, bumpStore, bumpMem] <;> no_panic
 
-@[no_panic_simp] theorem ARhs.bind_noPanic (σ : State) (x : Var) {R : RefTy} (r : ARhs C R) :
-    NoPanic (r.bind σ x) := by
-  cases r <;> simp only [ARhs.bind] <;> no_panic
-
-@[no_panic_simp] theorem MRhs.bind_noPanic (σ : State) (x : Var) {R : RefTy} (r : MRhs C R) :
-    NoPanic (r.bind σ x) := by
-  cases r <;> simp only [MRhs.bind] <;> no_panic
-
 @[no_panic_simp] theorem MLoc.write_noPanic (σ : State) (mv : MVal) {T : Ty} (l : MLoc C T) :
     NoPanic (l.write σ mv) := by
   cases l <;> simp only [MLoc.write, memWriteField, memWriteIndex] <;> no_panic
@@ -433,9 +418,5 @@ theorem memClear_noPanic (σ : State) (a : Addr) (T : Ty) : NoPanic (memClear σ
 theorem Src.pushVal_noPanic (σ : State) {T : Ty} (o : Option (Src C T)) (slot : SVal) :
     NoPanic (Src.pushVal σ o slot) := by
   cases o <;> simp only [Src.pushVal] <;> no_panic
-
-@[no_panic_simp] theorem CallRet.leave_noPanic (σ : State) (ret : CallRet) :
-    NoPanic (CallRet.leave (C := C) σ ret) := by
-  unfold CallRet.leave; no_panic
 
 end Solidity

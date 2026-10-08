@@ -229,7 +229,8 @@ def wpQuotedC [FreshNames] (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) 
     Lean.Expr × Option String :=
   let ψ := Core.symex 200 φ
   let ψ' := ψ.erase []
-  (ψ.quote c, if ψ'.inL Sym.empty then some (LFml.fmt ψ'.reduce) else none)
+  -- a modality left has no erasure the closer reads (`Core.Fml.erase`)
+  (ψ.quote c, if !ψ.active && ψ'.inL Sym.empty then some (LFml.fmt ψ'.reduce) else none)
 
 /-- What `#step` shows of a scoped `φ`: the formula one step leaves, quoted. -/
 def stepQuotedC (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) : Option Lean.Expr :=

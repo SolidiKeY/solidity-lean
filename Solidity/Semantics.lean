@@ -1278,24 +1278,6 @@ def newArrVal : RefTy → Int → SVal
   | .array E, n => .array (List.replicate n.toNat (defaultForTy E)) [] false
   | R, _ => defaultForRef R
 
-/-- `x` bound to the object a memory right-hand side names: `n`'s by
-identity, a fresh deep copy of a storage object, or a fresh array. -/
-def MRhs.bind (σ : State) (x : Var) {R : RefTy} : MRhs C R → Res State
-  | .alias p => do
-    let id ← (← p.mval σ).asRef
-    pure (σ.setEnv x (.mref id))
-  | .copy p _ => do
-    let (root, segs) ← p.resolve σ
-    let sv ← σ.findStorage root segs
-    let (σ', mv) ← copyStToM σ sv
-    let id ← mv.asRef
-    pure (σ'.setEnv x (.mref id))
-  | .newArr n _ => do
-    let sv := newArrVal R (← (← n.eval σ).asInt)
-    let (σ', mv) ← copyStToM σ sv
-    let id ← mv.asRef
-    pure (σ'.setEnv x (.mref id))
-
 /-- A write at a memory address. -/
 def writeAddr (σ : State) (mv : MVal) : Addr → Res State
   | .memoryField id f => memWriteField σ id f mv
@@ -1481,61 +1463,6 @@ def sendAt (σ : State) (pv : Var) (addr amt : Int) : Res State :=
   else match lookupBy (sendKey addr amt) σ.tx.ext with
     | none | some (.ok _) => .ok ((σ.pay addr amt).setEnv pv (.val (.bool true)))
     | some _ => .ok (σ.setEnv pv (.val (.bool false)))
-
-/-- An alias bound to what `r` names: a path, or the slot a push appends. -/
-def ARhs.bind (σ : State) (x : Var) {R : RefTy} : ARhs C R → Res State
-  | .path p => do
-    let (root, segs) ← p.resolve σ
-    pure (σ.setEnv x (.spath root segs))
-  | .push b _ => do
-    let (root, segs) ← b.resolve σ
-    let (σ', n) ← pushPlaceAt σ (.ref R) root segs
-    pure (σ'.setEnv x (.spath root (segs ++ [.at n])))
-
-/-- A call's arguments bound to its parameters, one after another, as its
-inlining declares them.  The parameters are fresh at the call and no argument
-that is not simple reads one (`Arg.separatedFrom`), so this is solc's
-reading of every argument before the callee runs. -/
-def Arg.bindSeq : List (Arg C) → State → Res State
-  | [], σ => pure σ
-  | a :: as, σ => do Arg.bindSeq as (σ.setEnv a.x (.val (← a.e.eval σ)))
-
-/-- Return variables declared at their defaults, one after another. -/
-def CallRet.enterAll : List (PrimTy × Var) → State → State
-  | [], σ => σ
-  | (p, r) :: rs, σ => CallRet.enterAll rs (σ.setEnv r (.val (PrimTy.default p)))
-
-/-- Entering a call: its return variables declared at their defaults, as
-solc zeroes them. -/
-def CallRet.enter (σ : State) : CallRet → State
-  | .none => σ
-  | .val p r _ => σ.setEnv r (.val (PrimTy.default p))
-  | .rets rs => CallRet.enterAll rs σ
-
-/-- Entering a call binds only its return variables, each to a value: what
-holds of two states alike and survives binding a local to a value on both
-holds after entering. -/
-theorem CallRet.enter_induct₂ {R : State → State → Prop}
-    (hset : ∀ σ τ x w, R σ τ → R (σ.setEnv x (.val w)) (τ.setEnv x (.val w))) :
-    (ret : CallRet) → {σ τ : State} → R σ τ → R (ret.enter σ) (ret.enter τ)
-  | .none, _, _, h => h
-  | .val _ _ _, _, _, h => hset _ _ _ _ h
-  | .rets rs, _, _, h => go rs h
-where
-  go : (rs : List (PrimTy × Var)) → {σ τ : State} → R σ τ →
-      R (CallRet.enterAll rs σ) (CallRet.enterAll rs τ)
-    | [], _, _, h => h
-    | (_, _) :: rs, _, _, h => go rs (hset _ _ _ _ h)
-
-/-- `CallRet.enter_induct₂` for one state. -/
-theorem CallRet.enter_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w)))
-    (ret : CallRet) {σ : State} (h : P σ) : P (ret.enter σ) :=
-  CallRet.enter_induct₂ (R := fun σ _ => P σ) (fun _ _ x w h => hset _ x w h) ret (τ := σ) h
-
-/-- Leaving a call: the returned value assigned where the call is. -/
-def CallRet.leave (σ : State) : CallRet → Res State
-  | .val p r (some res) => do pure (σ.setEnv res (.val (← (Simple.local r : Simple C p).eval σ)))
-  | _ => pure σ
 
 /-- Whether `v` is a value of the type `p`: what decoding a word of returned
 data at `p` accepts. -/

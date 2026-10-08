@@ -766,33 +766,6 @@ theorem sendAt_agree (hag : EnvAgreeExcept ns σ τ) (pv : Var) (addr amt : Int)
   · exact EnvAgreeExcept.setEnv_both (pay_agree hag addr amt) _ _
   · exact EnvAgreeExcept.setEnv_both hag _ _
 
-theorem ARhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
-    (r : ARhs C R) → Avoids r.vars ns → ResultsAgree ns (r.bind σ x) (r.bind τ x)
-  | .path p, h => by
-    simp only [ARhs.bind, p.resolve_frame hag h]
-    agree_run hag
-  | .push b _, h => by
-    simp only [ARhs.bind, b.resolve_frame hag h]
-    refine bindPureResults_agree _ fun _ => ?_
-    refine ResAgree.bindState (pushPlaceAt_agree hag _ _ _) fun _ _ _ h' => ?_
-    exact EnvAgreeExcept.setEnv_both h' _ _
-
-theorem MRhs.bind_frame (hag : EnvAgreeExcept ns σ τ) (x : Var) {R : RefTy} :
-    (r : MRhs C R) → Avoids r.vars ns → ResultsAgree ns (r.bind σ x) (r.bind τ x)
-  | .alias p, h => by
-    simp only [MRhs.bind, p.mval_frame hag h]
-    agree_run hag
-  | .copy p _, h => by
-    simp only [MRhs.bind, p.resolve_frame hag h, findStorage_congr hag]
-    refine bindPureResults_agree _ fun _ => bindPureResults_agree _ fun sv => ?_
-    refine ResAgree.bindState (copyStToM_agree hag sv) fun _ _ _ h' => ?_
-    agree_run h'
-  | .newArr n _, h => by
-    simp only [MRhs.bind, n.eval_frame hag h]
-    refine bindPureResults_agree _ fun _ => bindPureResults_agree _ fun _ => ?_
-    refine ResAgree.bindState (copyStToM_agree hag _) fun _ _ _ h' => ?_
-    agree_run h'
-
 theorem writeAddr_agree (hag : EnvAgreeExcept ns σ τ) (mv : MVal) (a : Addr) :
     ResultsAgree ns (writeAddr σ mv a) (writeAddr τ mv a) := by
   cases a
@@ -813,18 +786,6 @@ theorem allocDefault_bind_agree (hag : EnvAgreeExcept ns σ τ) (R : RefTy) (x :
     ResultsAgree ns (do let (σ', id) ← allocDefault σ R; pure (σ'.setEnv x (.mref id)))
       (do let (σ', id) ← allocDefault τ R; pure (σ'.setEnv x (.mref id))) :=
   ResAgree.bindState (allocDefault_agree hag R) fun _ _ _ h' => EnvAgreeExcept.setEnv_both h' _ _
-
-/-- A call's arguments, read from two states that agree off `ns`, bind alike
-into two states that agree off `ns`. -/
-theorem Arg.bindSeq_frame :
-    (args : List (Arg C)) → Avoids (Arg.vars args) ns → ∀ {σ τ : State}, EnvAgreeExcept ns σ τ →
-      ResultsAgree ns (Arg.bindSeq args σ) (Arg.bindSeq args τ)
-  | [], _, _, _, hag => hag
-  | a :: as, h, _, _, hag => by
-    simp only [Arg.bindSeq, a.e.eval_frame hag (fun x hx => h x (by simp [Arg.vars, hx]))]
-    refine bindPureResults_agree _ fun v => ?_
-    exact Arg.bindSeq_frame as (fun x hx => h x (by simp [Arg.vars, hx]))
-      (EnvAgreeExcept.setEnv_both hag _ _)
 
 /-- An external call is made alike from two states that agree off what it
 reads. -/
@@ -853,22 +814,6 @@ theorem bindData_frame :
     split
     · exact bindData_frame xs vs (EnvAgreeExcept.setEnv_both hag _ _)
     · rfl
-
-theorem CallRet.enter_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (ret : CallRet) :
-    EnvAgreeExcept ns (ret.enter σ) (ret.enter τ) := by
-  exact CallRet.enter_induct₂ (R := EnvAgreeExcept ns)
-    (fun _ _ _ _ h => EnvAgreeExcept.setEnv_both h _ _) ret hag
-
-theorem CallRet.leave_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (ret : CallRet) → Avoids ret.vars ns →
-      ResultsAgree ns (CallRet.leave (C := C) σ ret) (CallRet.leave (C := C) τ ret)
-  | .none, _ => hag
-  | .val _ _ Option.none, _ => hag
-  | .rets _, _ => hag
-  | .val p r (some y), h => by
-    simp only [CallRet.leave,
-      (Simple.local r : Simple C p).eval_frame hag (fun x hx => h x (by simp_all [Simple.vars, CallRet.vars]))]
-    agree_run hag
 
 
 end Frame
