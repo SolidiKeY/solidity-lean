@@ -220,9 +220,14 @@ def ppCoreLine (e : Expr) : MetaM Lean.Term := do
       if Solidity.isEscape φ then Solidity.escapeTerm e else `(dl{ $φ:dl_fml })
   go 0 e
 
+/-- A scoped line in a message. -/
+def showLine (e : Expr) : MetaM MessageData := do
+  let e ← instantiateMVars e
+  try return m!"{← ppCoreLine e}" catch _ => return m!"{e}"
+
 /-- A scoped line in a message, indented. -/
 def indentLine (e : Expr) : MetaM MessageData := do
-  try return indentD m!"{← ppCoreLine e}" catch _ => return indentExpr e
+  return indentD (← showLine e)
 
 /-! ## Running the strategy -/
 
@@ -798,14 +803,15 @@ def matchWritten (sp : Splice) (C : Expr) (w : Written) (B : Expr) (erased : Arr
     -- a constant modality read once against both runs: the run's own
     return es'.any (same rs[0]! ·)
 
-/-- The computed line, shown for an error. -/
+/-- The computed line, shown for an error as today's `showLines` shows it
+(`Calculus/Chains.lean`): every line with the rule that reached it. -/
 def showLines (φ : Expr) (lines : List Line) : MetaM MessageData := do
-  let mut out := m!"{← indentLine φ}"
+  let mut out := m!"    {← showLine φ}"
   for l in lines do
     let r := match ← labelOfFocus? l.focus with
       | some (n, _) => toString n
       | none => "?"
-    out := out ++ m!"\n  ~[{r}]~>{← indentLine l.fml}"
+    out := out ++ m!"\n  ~[{r}]~>\n    {← showLine l.fml}"
   return out
 
 def stuckNote (run : Run) : MessageData :=
@@ -948,8 +954,20 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
     if legacy.isSome then
       throwError "~>: past a rewrite the program is done: only rewrites go on"
     let run ← runChain cur
+    -- the line written, as a line prints where it elaborates alone (no
+    -- hole, no postcondition of the line before), else its text
+    let written : TermElabM MessageData := do
+      let shown? ← withoutModifyingState <| Term.withoutErrToSorry do
+        try
+          let e ← elabTerm l[1] none
+          synthesizeSyntheticMVarsNoPostponing
+          let e ← instantiateMVars e
+          if e.hasMVar then return none
+          return some (← showLine e)
+        catch _ => return none
+      return indentD (shown?.getD (.ofSyntax l[1]))
     let notReached (ls : List Line) : TermElabM Unit := do
-      throwError "sol_chain: the derivation of{← indentLine cur}\ndoes not reach{indentD (.ofSyntax l[1])}\n\
+      throwError "sol_chain: the derivation of{← indentLine cur}\ndoes not reach{← written}\n\
         Its lines:\n{← showLines cur ls}{stuckNote run}"
     match arrow with
     | `(chain_arrow| ~*>) =>
@@ -1014,7 +1032,8 @@ def nextLine (A B : Expr) : MetaM (Run × Line) := do
   let run ← runChain A
   let some q := run.lines.head? | throwError "sol_chain: no rule applies to{← indentLine A}"
   unless q.fml == B do
-    throwError "sol_chain: the line after{← indentLine A}\nis{← indentLine q.fml}\nnot{← indentLine B}"
+    throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}\n\
+      Its lines:\n{← showLines A [q]}{stuckNote run}"
   return (run, q)
 
 /-- Whether a goal is a scoped chain's. -/
