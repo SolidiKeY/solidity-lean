@@ -1,9 +1,11 @@
 import Solidity.Tools.Inspect
+import Solidity.Tools.ProofTree
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Quote
+import Solidity.Calculus.Core.ProofTree
 
 /-!
-# `#wp` and `#step` on scoped formulas
+# `#wp`, `#step` and the proof tree on scoped formulas
 
 `Tools/Inspect.lean`'s `#wp φ` and `#step φ`, for a formula `φ : Core.Fml C Γ`
 (`cdl!{ … }`, `Calculus/Core/Notation.lean`): the scoped strategy
@@ -13,6 +15,11 @@ import Solidity.Calculus.Core.Quote
 when it is in `sol_decide`'s fragment, and `#step` the rule today's strategy
 fires on the erasure, which is the rule the scoped strategy fires
 (`docs/intrinsic.md`, M6a).
+
+`#proof_tree φ`, `#proof_node n φ` and `#proof_tree_json φ`
+(`Tools/ProofTree.lean`) on a scoped formula show the tree of `⊢ φ` that
+`Core.ProofTree.ofFormula` grows (`Calculus/Core/ProofTree.lean`), in the
+same layout.
 
 Each command is a second elaborator of today's syntax: it takes a scoped
 formula and leaves any other term to today's.
@@ -80,5 +87,52 @@ def elabStepCore : CommandElab := fun stx => liftTermElabM do
       | some (_, n) => toString n
       | none => "?"
     logInfo m!"  ~[{r}]~>\n    {ψ}"
+
+/-! ## The proof tree -/
+
+/-- The tree of `⊢ φ` for a scoped `φ`, or none for any other term. -/
+def coreProofTree? (t : Lean.Term) : TermElabM (Option ProofTree.Tree) := do
+  let some (φ, _) ← elabCoreFormula? t | return none
+  let ty ← whnf (← inferType φ)
+  return some (← Core.ProofTree.ofFormula ty.appFn!.appArg! φ)
+
+/-- What `#proof_node n φ` shows of the node `n` of `tree`, as
+`Tools/ProofTree.lean` shows it. -/
+def proofNodeMsg (cmd : String) (tree : ProofTree.Tree) (n : Nat) : MetaM MessageData := do
+  let rows := tree.rows
+  let some r := rows[n]?
+    | throwError "{cmd}: no node {n}; the tree has {rows.size} (0 to {rows.size - 1})"
+  let children := (rows.filter (·.parent == some r.serial)).map (·.serial)
+  let tacs ← match r.node.act with
+    | .rule _ ts _ | .closed ts => ts.mapM fun s => return m!"{s}"
+    | .opened => pure #[]
+  let field (k : String) (v : MessageData) : MessageData := m!"{k}: {v}"
+  return MessageData.joinSep [
+    field "node" m!"{r.serial}",
+    m!"sequent:" ++ .nest 2 m!"\n{← r.node.ppSequent}",
+    field "rule" m!"{r.name}",
+    field "state" m!"{r.state}",
+    field "branch" m!"{r.branchLabel.getD "-"}",
+    field "parent" m!"{(r.parent.map toString).getD "-"}",
+    field "children" m!"{children.toList}",
+    field "tactics" (MessageData.joinSep tacs.toList "; ")] "\n"
+
+/-- `#proof_tree φ` for a scoped formula. -/
+@[command_elab Solidity.Tools.«command#proof_tree_»]
+def elabProofTreeCore : CommandElab := fun stx => liftTermElabM do
+  let some tree ← coreProofTree? ⟨stx[1]⟩ | throwUnsupportedSyntax
+  logInfo (← tree.display)
+
+/-- `#proof_node n φ` for a scoped formula. -/
+@[command_elab Solidity.Tools.«command#proof_node__»]
+def elabProofNodeCore : CommandElab := fun stx => liftTermElabM do
+  let some tree ← coreProofTree? ⟨stx[2]⟩ | throwUnsupportedSyntax
+  logInfo (← proofNodeMsg "#proof_node" tree (stx[1].isNatLit?.getD 0))
+
+/-- `#proof_tree_json φ` for a scoped formula. -/
+@[command_elab Solidity.Tools.«command#proof_tree_json_»]
+def elabProofTreeJsonCore : CommandElab := fun stx => liftTermElabM do
+  let some tree ← coreProofTree? ⟨stx[1]⟩ | throwUnsupportedSyntax
+  logInfo (← tree.toJson).pretty
 
 end Solidity.Tools
