@@ -5038,8 +5038,8 @@ checked file by file through the MCP (no `lake build`): `Calculus/Core/
 `Theorems.lean`, `Examples/Notation.lean`, and the printers' other pin
 files (`Examples/Tools`, `Tactics/{CorePrint,CoreSequents,StorageSteps,
 Loops,Payment,CallOperands,Values}`).  No new `sorry`, `axiom` or
-`maxHeartbeats`; `check-orphans` (319 reachable once the scratch modules
-are gone) and `check-doc-paths` clean.
+`maxHeartbeats`; `check-orphans` (317 reachable, none orphaned) and `check-doc-paths`
+clean.
 
 1. **A scoped `rule_exists`** (`Calculus/Core/RuleExists.lean`): for every
    statement and modality, `Stmt.step` leaves a premise and a rule of the
