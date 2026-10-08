@@ -1,4 +1,3 @@
-import Solidity.Calculus.Callback
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
