@@ -4452,8 +4452,14 @@ scratch module proved `⟨ uint y = bumpRead(1); ⟩ y == 3` and failed `y == 2`
 ### W3d lane `w3rest` (`w3d-w3rest`, 2026-10-08): the rest of W3
 
 On `intrinsic` at d56343c.  `w3d-gates` had no commit when this lane
-finished, so nothing of it is merged here; `ProvesDerive`/`Derive` changed
-by a few lines each (below), for that lane to merge.  No new `sorry`,
+finished, so nothing of it is merged here.  For that lane's merge, the
+files it owns changed here: `Calculus/Core/ProvesDerive.lean` by about 130
+lines (+92/−35 against d56343c): new `Fml.stripN`, `Valid.of_stripN`,
+`Seq.paramCount`, and a parameter count `np : Option Nat` threaded through
+`Seq.pick`, `Seq.leafRes`, `Seq.residue`, `Seq.residueQuote`,
+`Seq.pick_valid`, `Seq.leafRes_sound` and `Proves.of_residue` (each takes
+`np` now); `Calculus/Core/Derive.lean` by 13 lines (`Derive.stripAlls g n`,
+an optional count, and `eraseLeaf` passing `Symex.paramCount ψ`).  No new `sorry`,
 `axiom` or `maxHeartbeats`; `#print axioms` of `Core.useContract`,
 `Core.useContract_of_valid`, `Tactics/Callback.withdrawUnsafe_withCallback`,
 `Tactics/Contracts.callDeposit`/`callAddOneWalk`: Lean's three.
@@ -4543,10 +4549,30 @@ git-excluded `Scratch/` modules only).
   (Core modules importing today's for notation and printers), all planned
   for W4; and the gate aggregate (Derived9–11, `ProofTree`), which is
   `w3d-gates`'.
+- **Review fixes** (the confirmed findings of the read-only review):
+  - `Seq.paramCount` walked the context only through its leading binders
+    and stopped at the innermost precondition or update, so after `apply
+    intro` (`H = pre (all nil x) A`) it counted no parameter and `x` was
+    not stripped.  It now walks the whole context down to `Hyps.nil`, a
+    precondition, update, `havoc` or `anon` kept as the counting loop's
+    stop.  New pin, `ProofTree`'s `Scoped` section: `⊢ dl!{ x <= 100 → ⟨
+    uint y = x + 1; ⟩ y == x + 1 }` walked by `apply intro; sol_prove`,
+    its count `some (1)` printed (reason: a regression example a review
+    found broken).
+  - Gate G0, condition 1: `Fml.callPost` (on `CallRet`), `Fml.allArgs`
+    (`Args`), `Fml.wkFO` (`Fml`) and `Tm.wk` (`Tm`'s sort index) matched
+    on indexed families and the kernel unfolds them in `core_contract`'s
+    goals.  Rewritten with `casesOn` and the motive over the indices, as
+    `CallRet.declsThen` and `Hyps.wrap` are (structural recursion); the
+    soundness lemmas read them through constructor equations proved by
+    `rfl` (`Tm.wk_pvV` …, `Fml.wkFO_not` …).  No exemption is needed.
+  - The docs: this section's account of the `ProvesDerive`/`Derive`
+    change, the `docs/module-map.md` rows of `ProvesDerive`, `Derive`,
+    `WalkSyntax`, `Quote`, and `Tactics/Callback`'s docstring
+    (`Semantics/Core/Callback.lean`).
 - **Left**: decision 31 (the lead's call); `\old` in a scoped contract and
   the calls with several results or a memory return; `callDeposit`'s
-  "post" closes by hand until the closer reads `{havoc}`; the read-only
-  finder/skeptic review pass was not run.
+  "post" closes by hand until the closer reads `{havoc}`.
 
 ## Baselines (M0)
 

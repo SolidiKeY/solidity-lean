@@ -7,7 +7,7 @@ import Solidity.Calculus.Core.WalkSyntax
 /-!
 # Callbacks: re-entrancy-safe and unsafe withdrawals
 
-The callback semantics of `transfer` (`Semantics/Callback.lean`): the
+The callback semantics of `transfer` (`Semantics/Core/Callback.lean`): the
 recipient may call back into the contract, and all that is known of the
 state it leaves is the contract invariant.  A vault keeps
 
