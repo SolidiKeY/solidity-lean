@@ -852,8 +852,48 @@ elaborates with every module (no name clash).
     modules, which re-check every pinned `corpus_decide` verdict, check clean
     (per-file diagnostics), as do `Evm/CoreInterpreter.lean`,
     `Tools/{Run,DiffTest}.lean` and `Examples/Tools.lean`.
-    `./scripts/check-corpus.sh` itself runs `lake`, which a lane may not:
-    the lead runs it at the W1 merge build.
+  - **`check-corpus.sh unchanged`: fails, by design.**  The typed
+    `corpus_decide` proves every one of the 16 `evaluated` rows (a scratch
+    module stating each `#eval`-pinned program as a `corpus_decide` theorem
+    checks clean), so the probe will report 16 `evaluated → proved`:
+    `SolcStructs.{structCopyViaMemoryLocal, structArrayElementCopy,
+    structArrayElementCopyMemberwise}`, `SolcArrays.{popThenPushSlotIsZeroed,
+    pushedSlotIsZeroed, deleteArrayElementOfStructs, matrixElementWriteRead}`,
+    `SolcMemory.{memoryStructDefaultsToZero, memoryStructWriteRead,
+    storageArrayElementCopiedIntoMemory, memoryStructToStorage,
+    memoryToStorageCopyIsDeep, memoryAliasIsNotACopy}`,
+    `SolcMappings.arrayElementsToMapping`, `SolcControlFlow.{swapViaTemporary,
+    ifElseSelectsMemorySource}`.  The reason: the typed run has no
+    well-founded definition in the kernel's way (`SVal.dflt`, a fold for the
+    memory copy).  `evaluated` now means the typed route does not apply (no
+    resolution, or off `Prog.bridgeOk`); `scripts/solkey-port.mjs`'s
+    `EVALUATED_REASON`, its header, the scoreboard legend and the generated
+    docstrings say so, which is drift in the generated text too.  At the W1
+    merge the lead runs `scripts/check-corpus.sh --update` (a pin change:
+    reason, the typed `corpus_decide`); the lane may not run `lake`.
+    `Corpus/Basic.lean`'s memory-default example is now a `corpus_decide`
+    theorem, no longer an `#eval` pin.
+  - **G0 condition 1: `corpus_decide` is exempt.**  Through `decide +kernel`,
+    `trunOk` evaluates `Core.Prog.resolve` (a `match` on the untyped syntax,
+    which G0 had counted as elaboration-time only) and `Prog.bridgeOk` (a
+    mutual `match` on `Stmt C Γ Γ'`/`Prog C Γ Γ'`, and on the index-typed
+    paths) in the kernel.  Timing (scratch modules, `Elab.async false`,
+    `profiler`, the 35 `proved` obligations of the six `Corpus/Solc*`):
+    - whole tactic, summed: old `corpus_decide` (untyped run over the
+      `dflt`-spelt store) 1.81 s, new 2.84 s (1.6×); kernel only 0.73 s old,
+      1.72 s new; the slowest new obligation 0.20 s.
+    - the new kernel cost by part, all 35 programs as one conjunction:
+      `resolve` alone 0.78 s, `resolve` + `bridgeOk` 1.04 s,
+      `resolve` + `trun` 1.14 s, `trunOk` 1.39 s.  So `bridgeOk` is about
+      0.26 s (19%), `resolve` 56%, the typed run 26%.
+    - `Corpus/Basic.lean`'s storage example: kernel 1.12 s old (TestSuite's
+      store, spelt by `dflt`), 35 ms new; its memory example 27 ms new.
+    - Kept as `match`: the whole corpus is under 3 s and no speed gate
+      covers it; a `Stmt.rec`/`Prog.rec` twin of `bridgeOk` would save at
+      most its 0.26 s, and `resolve` is the larger part.  If the corpus
+      joins a gate, the fix is condition 1's for both (`rec` forms with the
+      motive over the indices, the `match` versions as `implemented_by` and
+      for the equation lemmas).
 - Not done, moved:
   - `Machine.mem : Nat → Word` is deferred to W4 (`sem-del`): `Machine.lean`
     is outside this lane, and its untyped users (`Evm/Compile.lean`,
@@ -863,6 +903,15 @@ elaborates with every module (no name clash).
   - `Tools/Counterexample.lean` stays on the untyped `Prog.runFuel` (its
     `Fml.eval3` evaluates the old `Fml`'s modalities, `.stuck` included);
     its port is listed under W4 `sem-del`.
+  - Stale since this lane, outside its files (for the lead or W4
+    `sem-del`): `Examples/Tactics/Loops.lean` (line 13, "`#run` runs it";
+    line 194, "`Loop.runImpl`, which the kernel never sees") and
+    `docs/loops.md` (line 106) say `#run` iterates loops by `Loop.runImpl`
+    over `Stmt.run` (and the sentence after ties `corpus_decide` to
+    `Stmt.run`'s kernel reduction).  `#run` now resolves and runs
+    `Core.Prog.trun`, whose
+    loops iterate by `TLoop.runImpl'` (`Semantics/Core/TypedRun.lean`), as
+    `Tools/Run.lean`'s docstring says.
 
 ### W1 lane: rules (`w1-rules`, 2026-10-08)
 
@@ -892,9 +941,11 @@ elaborates with every module (no name clash).
   statement now) and `LeanTaclet.functionCallArgCapture` (today's line
   escapes to the untyped call); `Rule`.
 - **`Taclet.toStep`, `LeanTaclet.toStep`, `Rule.toStep`,
-  `Rule.premise_unique`** (`Calculus/Core/Taclet.lean`; axioms: `propext`):
-  one lemma per constructor, 157 (153 `Taclet`, 4 `LeanTaclet`) replayed
-  from two `#replay_toStep` tables, 15 by hand (an array's element type, a
+  `Rule.premise_unique`** (`Calculus/Core/Taclet.lean`; axioms: `propext`,
+  `Quot.sound`, pinned in `Examples/Tactics/CoreRules.lean`):
+  one lemma per constructor, 153 (149 `Taclet`, 4 `LeanTaclet`) replayed
+  from two `#replay_toStep` tables, 15 by hand (10 `Taclet`, 5
+  `LeanTaclet`: an array's element type, a
   call's arguments, a hole that is a copy, a conditional written to a
   member, the loop rules).  The table is the plan `#derive_toStep?` found
   by `to_step_tac`'s search (holes taken apart, side conditions settled,
@@ -940,16 +991,16 @@ elaborates with every module (no name clash).
   hole and part read off the statement (`holeCandidates`).  It names a rule;
   a proof that every `Stmt.step` premise is some rule (today's
   `Stmt.complete`) is not stated.
+- `#taclet` on a scoped taclet (`Tools/Inspect.lean`'s `soundLine`) prints
+  "sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's;
+  Core.Stmt.Sound)", the same for `Core.LeanTaclet`; pinned in
+  `Examples/Tactics/CorePrint.lean` (on `storageFieldDelete_unfold_leftFst`:
+  `storageFieldRead_unfold_rightFst` no longer prints as today's).
+  `#derive_toStep?` goes on past a constructor whose search fails (a note,
+  `addToStep (strict := false)`); `#replay_toStep` still fails loudly.
 - Left: the Delab items above; `CallbackTaclet` on Core (W2 `tree`);
-  `Tools/Inspect.lean` (not this lane's) still prints the deleted
-  `Core.Taclet.erase` as a scoped taclet's soundness line, which should name
-  `Taclet.toStep` (`soundLine`: e.g. "sound: Solidity.Core.Taclet.toStep (the
-  premise is Stmt.step's; Core.Stmt.Sound)", and the same for
-  `Core.LeanTaclet`), then re-pin `Examples/Tactics/CorePrint.lean`'s
-  `#taclet`, which carries the stale line on purpose until then (its rule
-  moved from `storageFieldRead_unfold_rightFst`, which no longer prints as
-  today's, to `storageFieldDelete_unfold_leftFst`); `lake exe solkeycheck` was not run here (no rule names,
-  sort annotations or `KeyTaclets.lean` changed).
+  `lake exe solkeycheck` was not run here (no rule names, sort annotations
+  or `KeyTaclets.lean` changed).
 
 ### W1 integration (2026-10-08)
 
@@ -958,6 +1009,14 @@ elaborates with every module (no name clash).
   section kept); `Solidity.lean` and `docs/module-map.md` merged clean, no
   duplicate import or row.  No fully-qualified declaration is declared twice
   across modules.
+- **Second round**: three lanes committed their review passes after the
+  first merge (`w1-typing` 7f8526b drops a dead lemma; `w1-evm` 4e63fb2
+  corpus verdict wording and `solkey-port.mjs`; `w1-rules` 0258373 `toStep`
+  counts, `#taclet`'s sound line in `Tools/Inspect.lean`, an axioms pin).
+  Merged in the same order, no conflict; the duplicate check is still empty
+  (but the known `Evm/Repr`/`Examples/Verify` `as` false positive).  The
+  same four-target `lean_build` (294 jobs): green, about 8 s wall, all of
+  it Lake-cache fetches but the modules those commits touched.
 - **Full build: green on the first try**, no fix needed.  `lean_build` over
   `Solidity`, `solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (294
   jobs; the last two in `defaultTargets` for the run only): 168 s wall,

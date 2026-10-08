@@ -42,10 +42,13 @@ places where the typed and the untyped runs part (`Prog.bridgeOk`: a `bool`
 mapping key, a struct with a repeated member name).  The typed run has no
 well-founded definition in the kernel's way: a default is the structural
 `SVal.dflt`, a memory copy a fold.  `*Store_eq` states each store as the
-erasure of its typed start.  A run that does not end normally is checked by
-`#eval` of `outcome` (the untyped run) under `#guard_msgs` instead, and the
-verdict table (`tests/solkey/expected.tsv`) says `evaluated` rather than
-`proved`.
+erasure of its typed start.  A run that ends normally but that `trunOk`
+cannot decide (the program does not resolve, or it is off the bridge: a
+`bool` mapping key, or a copy at a struct whose members share a name, like
+`BadDup`) is pinned by `#eval` of `outcome` (the untyped run) under
+`#guard_msgs`, and the verdict table (`tests/solkey/expected.tsv`) says
+`evaluated`; a run that does not end normally is pinned the same way and
+is `open`.
 
 `TestSuite.sol` is the exception: its obligations are stated as solkey
 states them and derived by `⊢` (`Solidity/TestSuite/`), so its corpus rows
@@ -174,11 +177,10 @@ example : Diamond State.testSuiteStore
                     assert(alice.account.balance == 100); } := by
   corpus_decide testSuiteStore_eq
 
-/-! A fresh `Person` in memory needs its default: the kernel stops there. -/
-
-/-- info: "ok" -/
-#guard_msgs in
-#eval outcome State.testSuiteStore sol[TestSuite]{ Person memory m; m.age = 3; assert(m.age == 3); }
+/-- A fresh `Person` in memory starts at its default, the structural `SVal.dflt`. -/
+example : Diamond State.testSuiteStore
+    sol[TestSuite]{ Person memory m; m.age = 3; assert(m.age == 3); } := by
+  corpus_decide testSuiteStore_eq
 
 end Examples
 
