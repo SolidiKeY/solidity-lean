@@ -3,7 +3,8 @@ import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.ProofTree
 import Solidity.Calculus.Core.Surface
-import Solidity.Tools.Common
+import Solidity.Tools.ProofTree
+import Solidity.Tools.Taclet
 
 /-!
 # `#wp`, `#step`: looking inside the calculus
@@ -29,8 +30,11 @@ import Solidity.Tools.Common
 (`cdl!{ … }`, or `dl!{ … }` under `open scoped Solidity.Core.Surface`): the
 strategy runs as compiled code (`unsafe evalExpr`), its result is quoted
 (`Core.Fml.quote`) against the contract's name and printed by `Core.Delab`'s
-printer.  Today's formulas, read without the switch, are
-`Tools/InspectToday.lean`'s; `#taclet` is `Tools/Taclet.lean`'s.
+printer (`elabCoreFormula?`, `Tools/ProofTree.lean`).
+
+A file that inspects the calculus imports this module alone: it brings the
+proof tree's commands (`#proof_tree`, `#proof_node`, `#proof_tree_json`,
+`Tools/ProofTree.lean`) and `#taclet` (`Tools/Taclet.lean`) with it.
 -/
 
 namespace Solidity.Tools
@@ -230,30 +234,6 @@ def wpQuotedC [FreshNames] (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) 
 /-- What `#step` shows of a scoped `φ`: the formula one step leaves, quoted. -/
 def stepQuotedC (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) : Option Lean.Expr :=
   φ.step.map (·.quote c)
-
-/-- A closed scoped formula of a named contract: the formula, and the
-contract's name quoted; none for today's formula (`dl!{ … }` read without
-the switch) or any other term. -/
-def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr)) := do
-  -- today's notation (`dl!{ … }`, `dl[C]{ … }`) is today's elaborator's,
-  -- left unread so that it is not elaborated twice, unless the switch
-  -- (`open scoped Solidity.Core.Surface`) makes it scoped
-  if let some (.atom _ v) := t.raw.getHead? then
-    if v.startsWith "dl" && !(← Core.surfaceOn) then return none
-  let φ ← try elabTerm t none catch _ => return none
-  synthesizeSyntheticMVarsNoPostponing
-  let φ ← instantiateMVars φ
-  let ty ← whnf (← inferType φ)
-  unless ty.isAppOfArity ``Core.Fml 2 do return none
-  let some n := (← whnfR ty.appFn!.appArg!).constName? | return none
-  if φ.hasFVar || φ.hasMVar then throwError "the formula is not closed{indentExpr φ}"
-  return some (φ, mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
-    (mkApp (mkConst ``List.nil [0]) (mkConst ``Lean.Level)))
-
-/-- What a command says of a term that is not a closed scoped formula. -/
-def notScoped {α : Type} (cmd : String) : MetaM α :=
-  throwError "{cmd}: not a closed scoped formula `Core.Fml C Γ` (`cdl!\{ … }`, or `dl!\{ … }` \
-    under `open scoped Solidity.Core.Surface`)"
 
 
 /-- The rule one step fires on the scoped formula `φ`, by name: at the first

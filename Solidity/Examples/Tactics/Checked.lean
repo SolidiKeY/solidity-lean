@@ -2,7 +2,7 @@ import Solidity.Calculus.Chains
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # Checked arithmetic at the narrow widths

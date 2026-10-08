@@ -1075,7 +1075,7 @@ elaborates with every module (no name clash).
      - Rewrite links taken over from `ChainRewrites` on erasures (`Via.ofErase`). Only the direction from the erasure is needed.
      - `#chain` and `#derivation` on Core.
 4. **`tree`**
-   - Owns: new `Calculus/Core/{ProofTree,Sequents,Callback,Contracts}.lean`, `Tools/CoreInspect.lean`, `Calculus/Core/{Spec,Notation}.lean`, `Semantics/Core/Callback.lean`.
+   - Owns: new `Calculus/Core/{ProofTree,Sequents,Callback,Contracts}.lean`, `Tools/CoreInspect`, `Calculus/Core/{Spec,Notation}.lean`, `Semantics/Core/Callback.lean`.
    - Work:
      - ProofTree, `#proof_tree`, `#wp`, `#step`.
      - `sol_spec` on `cspec!`.
@@ -1358,7 +1358,7 @@ Left:
   by `closeTrue` and then `Config.closers` (empty: a closer of scoped
   leaves, `Proves.close` from `sound` and the erased closer from `symex`,
   is to be plugged in once merged).
-- **The commands** (`Tools/CoreInspect.lean`): `#proof_tree`, `#proof_node`,
+- **The commands** (`Tools/CoreInspect`): `#proof_tree`, `#proof_node`,
   `#proof_tree_json` on a scoped formula, second elaborators of today's
   syntax; `#step` names the rule the scoped strategy fires (`ruleAtC?`, at
   the statement `Fml.stepAt` looks at), no longer through the erasure.
@@ -1522,7 +1522,7 @@ Per Decision 9 the gate is the aggregate; each outlier is explained in the docs.
 
 **Flipped** (`open scoped Solidity.Core.Surface` after each `local instance`,
 imports `Calculus/Core/{Surface,Closers}.lean`, `Calculus/Core/Sequents.lean` where a
-walk checks `show sequent!{…}`, `Tools/CoreInspect.lean` where a command is
+walk checks `show sequent!{…}`, `Tools/CoreInspect` where a command is
 pinned): `Examples/Benchmark/{Coin,Counter,ERC20,EtherWallet,Mapping,Purchase,SimpleStorage}`;
 `Examples/Tactics/{ApplySteps,Branch,CallOperands,Calls,Checked,CrossDomain,Decide,LedgerDelete,Loops,Memory,Net,Operators,Payment,Revert,Specs,StorageDelete,StorageSteps,StorageSuite,Tour,TryCatch,Values}`.
 Every file checks with no error or warning.  What the scoped calculus
@@ -2460,9 +2460,9 @@ reachable, only the git-excluded `Scratch/`), `check-doc-paths` and
    term that is not a closed scoped formula is an error naming the switch.
    New: `Tools/Taclet.lean` (`#taclet`, unchanged, on today's tables: its
    output names today's constructors, so the switch is W4/W5's) and
-   `Tools/InspectToday.lean` (the five commands on today's `dl…{ … }`
+   `Tools/InspectToday` (the five commands on today's `dl…{ … }`
    read without the switch, declared later so tried first, and leaving
-   every other term to the scoped ones).  `Tools/CoreInspect.lean` imports
+   every other term to the scoped ones).  `Tools/CoreInspect` imports
    the four, so its 35 importers are unchanged; `CorePrint` imports
    `Tools/Taclet` for its `#taclet`.
 3. **`Theorems.lean` on Core**: `rule_sound` (`Premise.Sound`, no
@@ -2544,7 +2544,7 @@ reachable, only the git-excluded `Scratch/`), `check-doc-paths` and
 **Left for W4** (beside its lanes):
 - `Tools/Taclet.lean` on the scoped families (`Core.RuleShapes`,
   `Core.PrintedRules`, `Core.Taclet.toStep`), its pins moving as W5 allows;
-  `Tools/InspectToday.lean` deleted with today's calculus, with its two
+  `Tools/InspectToday` deleted with today's calculus, with its two
   users (`Examples/Tools`' `InspectToday`, `Tactics/CoreNotation`'s last
   pin); the importers of `Tools/CoreInspect` pointed at `Tools/Inspect` and
   `Tools/ProofTree`.
@@ -3798,7 +3798,7 @@ benched apart: the first line, `runChain`, each written line's `readings`):
 4. *Scoped `#chain` and `#derivation` elaborated today's notation twice*:
    they elaborated a `dl!{ … }` with the switch off, then stepped aside and
    today's command elaborated it again; they now step aside on the syntax
-   (`todaysNotation`), as `Tools/CoreInspect.lean`'s `elabCoreFormula?`
+   (`todaysNotation`), as `Tools/CoreInspect`'s `elabCoreFormula?`
    does.
 5. *The scoped `dl!`/`cdl` evaluation kernel-checked its throwaway
    definition* (`Core/Notation.lean`'s `elabCdlAt`): about 5–8 ms a formula
@@ -5010,7 +5010,7 @@ git-excluded `Scratch/` modules only).
       pins (`Core.Delab` of holes, `NewLhs`, `storageFieldIncrementAssignment`,
       a scoped sequent input notation).  New on today's, to go in W4:
       `Tools/Taclet.lean` (`#taclet` on today's tables; its switch moves
-      pins, W5) and `Tools/InspectToday.lean` with its two users
+      pins, W5) and `Tools/InspectToday` with its two users
       (`Examples/Tools`' `InspectToday` section, `Tactics/CoreNotation`'s
       last pin); the 35 importers of `Tools/CoreInspect` to point at
       `Tools/Inspect`/`Tools/ProofTree`.  Unchanged: `Tools/Common`'s
@@ -5824,7 +5824,7 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   uint x = 2; ⟩ x = 2` binds `∀ uint x;`.  A Lean
   formula is elaborated at `Core.Fml C Γ` for the `Γ` of its place, so a
   `Core.Post C Γ` needs no weakening.  At the cutover `dl!` becomes `cdl!`.
-- **`#wp`/`#step`** (`Tools/CoreInspect.lean`): a second elaborator of the
+- **`#wp`/`#step`** (`Tools/CoreInspect`): a second elaborator of the
   commands that takes a closed `Core.Fml`, runs `Core.symex`/`Fml.step`
   compiled, and prints the quoted result by `Core.Delab`; the rule name is
   today's strategy's on the erasure.  `Core.Delab` now prints a closed call

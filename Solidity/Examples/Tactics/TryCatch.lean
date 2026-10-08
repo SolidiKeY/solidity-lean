@@ -2,7 +2,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.CallbackSound
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # `try`/`catch`: an external call and a block per way it ends

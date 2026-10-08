@@ -5,7 +5,6 @@ import Solidity.Calculus.Derive
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.Chains
-import Solidity.Tools.CoreInspect
 
 /-!
 # Loops
@@ -298,24 +297,24 @@ false, which fails where the loop runs longer than its bound.  A loop with no
 clause is `unwind 0`. -/
 
 /--
-info: Solidity.LeanTaclet.whileUnwind : ∀ {C : Contract} {k : Nat} {m : Modality} {n : Nat} {body : List (Stmt C)}
-  {cond : Val C PrimTy.bool},
-  dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1 while (cond) body; ]⟩ ⇝
+info: Solidity.Core.LeanTaclet.whileUnwind : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx} {m : Modality} {n : Nat} {x : Core.Ctx}
+  {body : Core.Prog C Γ x} {cond : Core.Val C Γ PrimTy.bool},
+  dl[Core.LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1 while (cond) body; ]⟩ ⇝
     ⟨[ if (cond) {body;/// @custom:key unwind n while (cond) body;}; ]⟩ }
 solkey: whileUnwind (loop_expand), past the pin
 printed: none (a solkey taclet not printed)
-sound: Solidity.LeanTaclet.sound
+sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet whileUnwind
 
 /--
-info: Solidity.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {m : Modality} {body : List (Stmt C)}
-  {cond : Val C PrimTy.bool},
-  dl[LeanTaclet C k]{ ⟨[ while (cond) body; ]⟩ ⇝
+info: Solidity.Core.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx} {m : Modality} {x : Core.Ctx}
+  {body : Core.Prog C Γ x} {cond : Core.Val C Γ PrimTy.bool},
+  dl[Core.LeanTaclet C k]{ ⟨[ while (cond) body; ]⟩ ⇝
     "loop exited": cond = false ⟹ ⟨[ ]⟩ ; "unwound to the end": cond = false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
-sound: Solidity.LeanTaclet.sound
+sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet loopExit
 
@@ -383,27 +382,30 @@ checked after it only where the condition holds again.  The fresh `b` and
 `variant` print as `se` and `ie`, the fresh names they are. -/
 
 /--
-info: Solidity.LeanTaclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {body : Prog C} {dec : Option (Val C PrimTy.uint)}
-  {cond inv : Val C PrimTy.bool},
-  dl[LeanTaclet C k]{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
+info: Solidity.Core.LeanTaclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Core.Ctx} {body : Core.Prog C Γ x}
+  {xs : List ((t : Core.LTy) × Core.Idx Γ t)} {hv : Bool} {dec : Option (Core.Val C Γ PrimTy.uint)}
+  {cond inv : Core.Val C Γ PrimTy.bool},
+  dl[Core.LeanTaclet C k]{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { se := cond } (se = true ⟹ ⟨[ body ]⟩ inv = true ; se = false ⟹ ⟨[ ]⟩)) }
 solkey: whileInvariantBox (loop_inv), past the pin
 printed: none (a solkey taclet not printed)
-sound: Solidity.LeanTaclet.sound
+sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet whileInvariantBox
 
 /--
-info: Solidity.LeanTaclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {body : Prog C} {cond inv : Val C PrimTy.bool}
-  {dec : Val C PrimTy.uint},
-  dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
-    "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
-      { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
-      (inv = true ∧ { se := cond } (se = true → 0 <= dec ∧ dec < ie)) ; se = false ⟹ ⟨[ ]⟩)) }
+info: Solidity.Core.LeanTaclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Core.Ctx} {body : Core.Prog C Γ x}
+  {xs : List ((t : Core.LTy) × Core.Idx Γ t)} {hv : Bool} {cond inv : Core.Val C Γ PrimTy.bool}
+  {dec : Core.Val C Γ PrimTy.uint},
+  dl[Core.LeanTaclet C k]{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
+    "invariant initially valid": inv = true ; "invariant preserved and used": {
+      anon(‹(Core.Prog.wk Core.up body).snd.2›) } (inv = true → { ie := dec ‖ se := cond } (se = true ⟹ ⟨[
+      ‹(Core.Prog.wk Core.up body).snd.2› ]⟩ (inv = true ∧ { se := cond } (se = true → 0 <= dec ∧ dec < ie)) ;
+      se = false ⟹ ⟨[ ]⟩)) }
 solkey: whileInvariantDiamond (loop_inv), past the pin
 printed: none (a solkey taclet not printed)
-sound: Solidity.LeanTaclet.sound
+sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet whileInvariantDiamond
 
@@ -576,21 +578,23 @@ the ledger.  Such a loop closes to `false` (`whileClose`), as one under the
 diamond with no variant does (`whileNoVariantDiamond`). -/
 
 /--
-info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {body : Prog C} {m : Modality} {inv : Val C PrimTy.bool}
-  {dec : Option (Val C PrimTy.uint)} {cond : Val C PrimTy.bool},
-  dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
+info: Solidity.Core.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {Γ x : Core.Ctx} {body : Core.Prog C Γ x}
+  {m : Modality} {inv : Core.Val C Γ PrimTy.bool} {dec : Option (Core.Val C Γ PrimTy.uint)}
+  {cond : Core.Val C Γ PrimTy.bool},
+  dl[Core.LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
-sound: Solidity.LeanTaclet.sound
+sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet whileClose
 
 /--
-info: Solidity.LeanTaclet.whileNoVariantDiamond : ∀ {C : Contract} {k : Nat} {body : Prog C} {inv cond : Val C PrimTy.bool}
-  {dec : Option (Val C PrimTy.uint)}, dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv while (cond) body; ⟩ ⇝ false }
+info: Solidity.Core.LeanTaclet.whileNoVariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Core.Ctx} {body : Core.Prog C Γ x}
+  {inv cond : Core.Val C Γ PrimTy.bool} {dec : Option (Core.Val C Γ PrimTy.uint)},
+  dl[Core.LeanTaclet C k]{ ⟨ /// @custom:key invariant inv while (cond) body; ⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
-sound: Solidity.LeanTaclet.sound
+sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet whileNoVariantDiamond
 

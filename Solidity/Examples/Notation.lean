@@ -1,7 +1,7 @@
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Derive
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # The notation, pinned
@@ -218,7 +218,7 @@ info: dl{ { x := 250 + 10 ‖ se1 := 250 + 10 <= 255 ‖ se2 := 1 < 2 } true } :
 /-! What a rule leaves prints as `dl!{ … }` reads it; the last statement's
 rule goes on to the postcondition (no `[ ]` left), and its update is the
 box's (`dl![.box]{ … }`, as a box chain's last line is).  `#step`
-(`Tools/CoreInspect.lean`) prints it. -/
+(`Tools/Inspect.lean`) prints it. -/
 
 /-- What a rule leaves reads back through `dl![.box]{ … }` as the term it is. -/
 example : (dl!{ [ balances[a] = 1; ] balances[a] == 1 }).step =

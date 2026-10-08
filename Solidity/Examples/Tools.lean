@@ -1,6 +1,5 @@
 import Solidity.Tools.Run
 import Solidity.Tools.Inspect
-import Solidity.Tools.CoreInspect
 import Solidity.Tools.DiffTest
 import Solidity.Examples.Benchmark.Coin
 
@@ -97,7 +96,7 @@ section Inspect
 local instance : InContract := ⟨StandardExample⟩
 
 /-! The formulas read the scoped calculus (`open scoped
-Solidity.Core.Surface`, `Tools/CoreInspect.lean`): a parameter is bound by
+Solidity.Core.Surface`, `Tools/Inspect.lean`): a parameter is bound by
 `∀`, and `#step` names the rule `Stmt.step` fires. -/
 
 open scoped Solidity.Core.Surface
@@ -182,25 +181,6 @@ info:   ~[functionBodyExpand]~>
 
 end Inspect
 
-/-! Today's printer, read without the switch: an `int` product escapes, `*`
-reads back only as a `uint` one. -/
-
-section InspectToday
-
-local instance : InContract := ⟨StandardExample⟩
-
-/--
-info: symbolic execution leaves:
-    dl{
-  { e := -5 }
-    { f := ‹Term.binop BinOp.mul PrimTy.int (Term.pv (Var.user "e")) (Term.lit (Semantics.PrimVal.int 7))› } f = 0 }
-update-free:
-    -5 = -5 → -35 = -35 → -35 = 0
--/
-#guard_msgs in #wp dl!{ [ int e = -5; int f = e * 7; ] f == 0 }
-
-end InspectToday
-
 /-! ## `#taclet`
 
 A rule of the calculus by its constructor, and a solkey taclet by its `.key`
@@ -210,24 +190,24 @@ forms (`consr(sp, fld)`, `pp.sol.key`), and a fresh name beside the schema
 variable it copies is primed (`sp'`). -/
 
 /--
-info: Solidity.Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {x : Name}
-  {sp : SPath C (Ty.struct x)} {fld : Name} {x_1 : PrimTy} {se : Simple C x_1},
+info: Solidity.Core.Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : Name}
+  {sp : Core.SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : PrimTy} {se : Core.Simple C Γ x_1},
   dl{ ⟨[ sp.fld = se; ]⟩ ⇝ { storage := save(storage, consr(sp, fld), se) } ⟨[ ]⟩ }
 solkey: storageFieldWriteSave (simplify_prog)
 printed: storageFieldWriteSave
-sound: Solidity.Taclet.sound_update
+sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet storageFieldWriteSave
 
 /--
 info: solkey: storageFieldWriteCaptureSrc (simplify_prog), transcribed by
 
-Solidity.Taclet.storageFieldRead_unfold_rightSndResult : ∀ {C : Contract} {k : Nat} {m : Modality} {x : RefTy}
-  {loc : Loc C (Ty.ref x)} {x_1 : Name} {sp : SPath C (Ty.struct x_1)} {fld : Name} {hm : (Ty.ref x).mapFree = true},
-  dl{ ⟨[ loc = sp.fld; ]⟩ ⇝ ⟨[ T storage sp' = sp.fld; loc = sp'; ]⟩ }
+Solidity.Core.Taclet.storageFieldRead_unfold_rightSndResult : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+  {x : RefTy} {loc : Core.Loc C Γ (Ty.ref x)} {x_1 : Name} {sp : Core.SPath C Γ (Ty.struct x_1)} {fld : Name}
+  {hm : (Ty.ref x).mapFree = true}, dl{ ⟨[ loc = sp.fld; ]⟩ ⇝ ⟨[ T storage sp' = sp.fld; loc = sp'; ]⟩ }
 solkey (merged): storageFieldRead_unfold_rightSndResult (simplify_prog), storageFieldWriteCaptureSrc (simplify_prog)
 printed (merged): storageFieldRead_unfold_rightSndResult, storageFieldWriteCaptureSrc
-sound: Solidity.Taclet.sound_unfold
+sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet "storageFieldWriteCaptureSrc"
 
@@ -237,27 +217,28 @@ nor `ic` (calls whose arguments are all simple, `functionBodyExpand`'s and
 `internalCallExpand`'s). -/
 
 /--
-info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {f : Name} {args : List (Arg C)}
-  {ret : CallRet} {body : List (Stmt C)} {a : Arg C},
-  dl[LeanTaclet C k]{ ⟨[ ‹Stmt.call f args hsep ret body›; ]⟩ ⇝
-    ⟨[ T se = ‹a.e›; ‹Stmt.call f (Arg.captureFirst (Var.fresh "se" k) args) ⋯ ret body›; ]⟩ }
+info: Solidity.Core.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {f : Name}
+  {ps : Core.Ctx} {args : Core.Args C Γ ps} {rs Γ' : Core.Ctx} {ret : Core.CallRet Γ rs Γ'} {Γf : Core.Ctx}
+  {body : Core.Prog C (rs ++ ps) Γf} {p : PrimTy} {v : Core.Val C Γ p} {as' : Core.Args C (Core.LTy.val p :: Γ) ps},
+  Core.LeanTaclet C k m (Core.Stmt.call f args ret body) (Core.Premise.argCapture k f p v as' ret body)
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
-sound: Solidity.LeanTaclet.sound
+sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet functionCallArgCapture
 
 /--
 info: solkey: ifTrue (concrete_solidity)
-no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
+no Lean rule claims it (`Core.RuleShapes.unclaimedTaclets` says why)
 -/
 #guard_msgs in #taclet ifTrue
 
-/-! A send's labelled goals (`Premise.cases`), sound by one update lemma for
-both modalities; its callback rule, by `CallbackTaclet.sound_send`. -/
+/-! A send's labelled goals (`Premise.cases`), and its callback rule; each is
+sound as its premise is the one `Stmt.step` builds (`toStep`). -/
 
 /--
-info: Solidity.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {pv : Var} {sadr se : Simple C PrimTy.uint},
+info: Solidity.Core.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}
+  {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)} {sadr se : Core.Simple C Γ PrimTy.uint},
   dl{ [ pv = sadr .send(se); ] ⇝
     "send succeeded":
         { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[
@@ -265,20 +246,21 @@ info: Solidity.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {pv : Var
       "send failed": { pv := false } ⟨[ ]⟩ }
 solkey: sendNoCallbackBox (simplify_prog)
 printed: none (a solkey taclet not printed)
-sound: Solidity.Taclet.sound_cases, Solidity.upd_send_cases
+sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
 -/
 #guard_msgs in #taclet sendNoCallbackBox
 
 /--
-info: Solidity.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {pv : Var} {sadr se : Simple C PrimTy.uint},
-  dl[CallbackTaclet C]{ [ pv = sadr .send(se); ] ⇝
+info: Solidity.Core.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}
+  {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)} {sadr se : Core.Simple C Γ PrimTy.uint},
+  dl[Core.CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
     "send succeeded":
         { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[
         ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }
 solkey: sendWithCallbackBox (simplify_prog)
 printed: none (a solkey taclet not printed)
-sound: Solidity.CallbackTaclet.sound_send
+sound: Solidity.Core.CallbackTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound, Core.ProvesC.sound_of)
 -/
 #guard_msgs in #taclet sendWithCallbackBox
 

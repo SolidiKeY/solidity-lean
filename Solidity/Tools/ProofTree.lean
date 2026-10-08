@@ -1,4 +1,6 @@
-import Solidity.Tools.Inspect
+import Solidity.Calculus.Core.ProofTree
+import Solidity.Calculus.Core.Surface
+import Solidity.Tools.Common
 
 /-!
 # `#proof_tree`, `#proof_node`, `#proof_tree_json`: solkey's proof tree
@@ -26,10 +28,9 @@ tree `Core.ProofTree.ofFormula` grows for `⊢ φ` (`Calculus/Core/ProofTree.lea
   `closed`, `openGoalCount` and `stats`.
 
 `φ` is a closed scoped formula of a named contract at the empty context
-(`elabCoreFormula?`, `Tools/Inspect.lean`).  The tree is the one
+(`elabCoreFormula?`).  The tree is the one
 `sol_derive?` suggests as a walk: each node an elaborated `apply`, each leaf
-closed where the scoped closer closes it.  Today's formulas, read without
-the switch, are `Tools/InspectToday.lean`'s.
+closed where the scoped closer closes it.
 -/
 
 namespace Solidity.Tools
@@ -45,6 +46,32 @@ syntax "#proof_node " num term : command
 /-- `#proof_tree_json φ`: the proof tree of `⊢ φ` as solkey's web prover
 hands it out. -/
 syntax "#proof_tree_json " term : command
+
+/-! ## The formula a command reads -/
+
+/-- A closed scoped formula of a named contract: the formula, and the
+contract's name quoted; none for today's formula (`dl!{ … }` read without
+the switch) or any other term. -/
+def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr)) := do
+  -- today's notation (`dl!{ … }`, `dl[C]{ … }`) is today's elaborator's,
+  -- left unread so that it is not elaborated twice, unless the switch
+  -- (`open scoped Solidity.Core.Surface`) makes it scoped
+  if let some (.atom _ v) := t.raw.getHead? then
+    if v.startsWith "dl" && !(← Core.surfaceOn) then return none
+  let φ ← try elabTerm t none catch _ => return none
+  synthesizeSyntheticMVarsNoPostponing
+  let φ ← instantiateMVars φ
+  let ty ← whnf (← inferType φ)
+  unless ty.isAppOfArity ``Core.Fml 2 do return none
+  let some n := (← whnfR ty.appFn!.appArg!).constName? | return none
+  if φ.hasFVar || φ.hasMVar then throwError "the formula is not closed{indentExpr φ}"
+  return some (φ, mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
+    (mkApp (mkConst ``List.nil [0]) (mkConst ``Lean.Level)))
+
+/-- What a command says of a term that is not a closed scoped formula. -/
+def notScoped {α : Type} (cmd : String) : MetaM α :=
+  throwError "{cmd}: not a closed scoped formula `Core.Fml C Γ` (`cdl!\{ … }`, or `dl!\{ … }` \
+    under `open scoped Solidity.Core.Surface`)"
 
 /-! ## The proof tree -/
 

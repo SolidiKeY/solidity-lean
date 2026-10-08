@@ -58,7 +58,8 @@ lemma (`TermTaclet.sound`).
 | `Semantics/WellFormed.lean` | `storageWtB`: well-formed storage (the shape `SVal.canon ∧ SVal.tight`, and words in range, `SVal.wordsB`) as a test the term `wt(storage)` runs; `SVal.isDfltB`, a default the kernel can recognise. |
 | `Semantics/DecEq.lean` | `DecidableEq SVal`. |
 | `Semantics/NoPanicSimp.lean` | The simp set `no_panic_simp` of the `*_noPanic` lemmas. |
-| `Semantics/NoPanic.lean` | Only an `assert` panics: `NoPanic` of every operation, `Stmt.mayPanic`, `Prog.run_noPanic`; the `no_panic` tactic. |
+| `Semantics/NoPanicOps.lean` | No operation of the interpreter panics: `NoPanic` of the state reads and writes, the evaluation of program expressions, copies and allocations; the `no_panic` tactic (what the term model keeps). |
+| `Semantics/NoPanic.lean` | Only an `assert` panics: `Stmt.mayPanic`, `Prog.run_noPanic` over `Semantics/NoPanicOps.lean`. |
 | `Semantics/Callback.lean` | The callback reading of `transfer`, `send` and `try`: `ExecS`/`ExecP`, `holdsC`, `TransferSem`. |
 | `Semantics/Mutability.lean` | A callee's mutability (`pure`, `view`, `nonpayable`) read off its inlined body (`Stmt.within`, `Prog.writes`), and its frame from `Stmt.run` (`Mutability.Frame`, `Prog.frame_of_within`, `Prog.pure_frame`, `Prog.view_frame`); a loop's frame, from the same `Stmt.within` (`Prog.loopFrame`, `Fml.loopAnon`, `Prog.loopFrame_run`: solkey's `#loopAnon`). |
 | `Semantics/Core/Value.lean` | `PrimTy.Denote`: a typed primitive value (a `uint` an `Int` in range); its erasure `PrimTy.erase` and reading back `PrimTy.ofValue?`; `Core.toRes`, a revert as `none` (`docs/intrinsic.md`, M4a); `PrimTy.key`, a mapping key as the integer solc hashes (a `bool` as `0`/`1`). |
@@ -85,7 +86,8 @@ lemma (`TermTaclet.sound`).
 | Module | What it defines |
 |---|---|
 | `Calculus/RuleSyntax.lean` | The `dl{ … }` notation: schemas (taclets, sequents `..Γ ⟹[R] ⟨[ s; ..ω ]⟩ φ`, update schemas `{u ‖ {u}u2}`), `tm{ … }` for terms, and the printers for taclets, premises, goals, terms (`pp.sol.key`: KeY's long forms). |
-| `Calculus/Rules.lean` | `Taclet` (solkey's rules), `LeanTaclet` (rules solkey lacks), `Rule`, `CallbackTaclet`. |
+| `Calculus/Rules.lean` | `Taclet` (solkey's rules), `LeanTaclet` (rules solkey lacks), `Rule`, `CallbackTaclet`, and their delaborators; the parts that outlive the table are `Calculus/RuleKit.lean`'s. |
+| `Calculus/RuleKit.lean` | What a rule is made of: the holes (`Hole`, `MHole`, `VHole`, `NewLhs`, `fill`), the side conditions and `side_cond`, `Premise` (also the printers' target for the scoped premises), solkey's branch labels (`Taclet.branchLabels`, `labelledBy`), `ppPremise?` and `delabTacletBinders`. |
 | `Calculus/Core/Fml.lean` | Scoped terms, updates and formulas (`Solidity.Core`, M6a of `docs/intrinsic.md`): `Tm C Γ s`, `Upd C Γ Δ` (assign, declare, pop), `Frames` (`seq`, `pop .block`/`.capture`, `drop` by a `Thin`), `Fml C Γ` with `modal m P κ φ` and the hidden binder `bind`, `Premise C Γ Γ'` (no cover goal; `branches`, `cases`, `inv`, `inline`) and `Premise.fml`, `Frames.exit`, and `Fml.erase` to `Update.lean`'s. |
 | `Calculus/Core/Lower.lean` | Scoped program expressions lowered to `Core.Tm` (`Val.lower`, …), and `lower_erase`: the old lowering of the erasure. |
 | `Calculus/Core/Print.lean` | `Core.Fml.show`: a scoped formula printed as `RuleSyntax.lean` prints its erasure (`}` at a block's end, pops and hidden binders unprinted), pinned against it. |
@@ -156,15 +158,17 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Progress.lean` | A formula with a modality always steps. |
 | `Calculus/Termination.lean` | Weights, `Fml.measure`, `symex_normalizes`.  Not restated on Core: the scoped strategy is fuelled, and this goes with the old calculus at W4 (`docs/intrinsic.md`, W2 `symex`). |
 | `Calculus/NoPanic.lean` | A term never panics: `Tm.eval_noPanic`, `Upd.apply_ne_panic`. |
-| `Calculus/SoundKit.lean` | `SameOk`, `Premise.Correct` and the tactics the soundness proofs use. |
+| `Calculus/SoundKit.lean` | `SameOk`, `Premise.Correct` and the tactics the soundness proofs use (the interpreter's writes reshaped are `Theory/StateWrites.lean`'s). |
 | `Calculus/SoundUpdate.lean` | Every taclet with an update premise has the statement's effect. |
 | `Calculus/SoundUnfold.lean` | Every unfolding taclet runs like its statement off the fresh names. |
 | `Calculus/SoundLoop.lean` | The loop invariant rules sound: `Stmt.loop_inv_box`, `Stmt.loop_inv_diamond`, `Loop.run_variant`. |
 | `Calculus/RuleSoundness.lean` | `Taclet.sound`, `LeanTaclet.sound`, `Rule.sound`. |
-| `Calculus/Logic.lean` | The sequent calculus `Proves` (`⊢` all rules, `⊢ₖ` solkey's), its rules written as sequents `dl{ ..Γ, c ⟹[R] φ }`, solkey's names for them (`impRight`, `allRight`, …) and `Proves.sound`; the update, rewrite and close rules (`close`, `closeFalse`). |
+| `Calculus/Logic.lean` | The sequent calculus `Proves` (`⊢` all rules, `⊢ₖ` solkey's) over `Calculus/Hyp.lean`'s context, its rules written as sequents `dl{ ..Γ, c ⟹[R] φ }`, solkey's names for them (`impRight`, `allRight`, …) and `Proves.sound`; the update, rewrite and close rules (`close`, `closeFalse`). |
+| `Calculus/Hyp.lean` | What today's and the scoped sequents share: the context `Hyp` and `Hyp.wrap`, `RuleSet`, the fresh index (`maxIdx`, `Fml.fresh`, `Hyp.fresh`), `ppHyp?`; the arrow and keywords of `sequent[C]{ Γ ⟹ φ }`, `sequentFml`, `peelHyps`. |
 | `Calculus/Callback.lean` | `CallbackTaclet.sound`, `CallbackTaclet.sound_send`, `ProvesC` (sequents `dl{ ..Γ ⟹ᶜ[I] φ }`) and `ProvesC.sound`. |
 | `Calculus/SolkeyFragment.lean` | `Stmt.inSolkey m`, where solkey's rules alone are the calculus under a modality; and where they fall short. |
-| `Calculus/Symex.lean` | `Fml.step`, `symex`, `symex_sound`; `sol_step`, `sol_symex`, `sol_derive`; `Proves.closeTrue` and `Proves.splitBox`, a box split with KeY's two goals. |
+| `Calculus/Symex.lean` | `Fml.step`, `symex`, `symex_sound`; today's elaborators of `sol_step`, `sol_symex`, `sol_derive`; `Proves.closeTrue` and `Proves.splitBox`, a box split with KeY's two goals; what a rule leaves read back by `dl!{ … }`. |
+| `Calculus/TacticSyntax.lean` | The strategy's tactics both calculi elaborate, declared once (`sol_step`, `sol_symex`, `sol_derive`, `sol_prove`, `sol_prove?`, `sol_derive?`, `sol_chain?`); `Fml.active`, `normValid`, `applyValid`, `Derive.kernelLemma`; `sol_symex` on a goal with no modality left. |
 | `Calculus/Close.lean` | `sol_close`: first-order goals by weakest preconditions, and `sol_close_mt` from a deployment's empty storage. Its docstring lists what it does not close. |
 | `Calculus/CloseTests.lean` | What `sol_close` closes, pinned. |
 | `Calculus/ReadWrite.lean` | Reads after writes: the four-way path comparison; the simp sets `close_rw`, `decide_eval`. |
@@ -186,7 +190,8 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Quote.lean` | Quoters from formulas back to terms, so the kernel re-checks a computed goal. |
 | `Calculus/Chains.lean` | Derivations as values: `~>`, `~*>`, chain terms `A ~[r]~> B ~*> C …` (`Fml.Via`), `sol_chain`, `#derivation`; lines at a modality `m` over a postcondition `φ : Post C`; rewrite links (`~[sequentialToParallel]~>`, `~[findOnSave]~>`), proved over `m` by `cases m` where a merge compares modalities. |
 | `Calculus/Sequents.lean` | `sequent!{ Γ ⟹ φ }`: the goals of a `⊢` walk (`Proves`) read back, for checked `show` lines; a chain under a context (`Fml.Steps.valid_in`). |
-| `Calculus/ProofTree.lean` | solkey's proof tree of a goal `Γ ⊢ φ` (`ProofTree.build`, `Tree.rows`, `Tree.toJson`), with KeY's rule names and branch labels (`branchLabels`); `sol_derive?`, the walk it is, and `sol_chain?`, a derivation as its `calc`. |
+| `Calculus/ProofTree.lean` | solkey's proof tree grown on a goal `Γ ⊢ φ` (`ProofTree.build`), with KeY's rule names; `sol_derive?`, the walk it is, and `sol_chain?`, a derivation as its `calc`. |
+| `Calculus/TreeData.lean` | The proof tree as data (`Act`, `Tree`), solkey's rows and branch labels (`Tree.rows`, `branchLabel`), `Tree.toJson`, `Tree.display`, the walk it writes (`Tree.script`, `suggest`) and the helpers of a tactic writing a proof out (`runOn`, `short`, `qualified`, `tacLines`, `termLines`, `Chain.lastName`). |
 | `Calculus/UpdateRules.lean` | KeY's update simplification as `UpdRule`s (`dl_schema{ {u}{u2}φ }`), and the semantics of the update constructors. |
 | `Calculus/StateParts.lean` | Readings compared where a write looks (`Srt.AgreePart`: a storage by its storage, a memory by its heap): `{memory := M}` and `{L ‖ storage := s}` substituted into an update's right-hand sides, memory reads included (`Tm.withMem`, `Tm.substSt`: an index check or push slot becomes `p[i]@s`, `p[p.length]@s`), and the two merges' soundness. |
 | `Calculus/LastLine.lean` | `#last_line chain`: the chain ends at a last line — no program left, one parallel update in front of each goal, no rewrite a chain takes still applies (every one `~=>` tries but `simplifyUpdate`, under either modality); silent when it does, else one error with what is left and the rewrite that goes on. |
@@ -219,6 +224,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Theory/Bridge/Copy.lean`, `CopyArray.lean` | `overlay`, `strip` and assignment against `copyVal`, `stripVal`, `copyTo`. |
 | `Theory/Bridge/Push.lean` | `push`/`pop` against `pushT`/`shrinkT`/`popT`. |
 | `Theory/Bridge/Denote.lean` | `Term.denote_eval`, `holds_eqD_iff`. The one Theory module that imports `Update`. |
+| `Theory/StateWrites.lean` | The interpreter's writes reshaped for the soundness proofs and the closer: a write as a new storage or heap (`State.writeStorage_eq`, `writeAddr_eq`, `copyStToM_eq`, `allocDefault_eq`), a write keeping its component (`*_with`), `evalBinop_bump`, what a binding holds (`Close.bindingVal`, …), `Upd.foldl_lookup`. |
 | `Theory/Rewrite.lean` | `TheoryRule`: a constructor per printed rewrite rule, and the lemma behind each. |
 
 ## Typing and sort faithfulness
@@ -271,14 +277,12 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Tools/Show.lean` | Printers for storage values, states, transactions, clauses. |
 | `Tools/Common.lean` | Shared plumbing: resolving `C` / `C.f`, evaluating terms, report layout. |
 | `Tools/Run.lean` | `#run C.f(args) [from σ] [with msg.sender := n, …]`: the typed run from a fresh state; `#deploy C(args) [with …]`, a deployment (`Contract.deploy`). |
-| `Tools/Inspect.lean` | `#wp φ`, `#step φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`; the reduction's printer (`LFml.fmt`); `elabCoreFormula?`. |
-| `Tools/Taclet.lean` | `#taclet r`: a rule, its solkey taclets, printed rule and soundness theorem, from today's tables (W4 moves it to the scoped families). |
-| `Tools/InspectToday.lean` | `#wp`, `#step`, `#proof_tree`, `#proof_node`, `#proof_tree_json` on today's formula read without the switch: today's strategy and tree, tried before the scoped elaborators (W4 deletes it). |
-| `Tools/CoreInspect.lean` | Imports the inspection commands, scoped and today's (`Inspect`, `ProofTree`, `Taclet`, `InspectToday`), for the examples that use both. |
+| `Tools/Inspect.lean` | `#wp φ`, `#step φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`; the reduction's printer (`LFml.fmt`).  The module a file inspecting the calculus imports: it brings `Tools/ProofTree.lean` and `Tools/Taclet.lean`. |
+| `Tools/Taclet.lean` | `#taclet r`: a scoped rule (`Core.Taclet`, `Core.LeanTaclet`, `Core.CallbackTaclet`), its solkey taclets, printed rule and soundness (`toStep`), from the scoped tables (`Core.RuleShapes`, `Core.PrintedRules`). |
 | `Tools/DiffTest.lean` | `#difftest C[.f]`: the typed run against `Evm/CoreCompile.lean`'s code on random storages. |
 | `Tools/Counterexample.lean` | `Core.Fml.eval3`, a scoped formula evaluated over the typed state and the typed run with fuel (`eval3_sound` against `Core.holds`; by the recursor, its compiled twin `eval3C`), its leading parameters bound to a witness's arguments (`Fml.peel`), an untyped candidate read as a typed state (`TState.ofSem?`, `Storage.decode`), an update's end lifted (`TState.lift?`), witness search and shrinking, certificates of `¬ ⊨` of the scoped formula, `#counterexample`. |
 | `Tools/Verify.lean` | `#verify C[.f]`: each spec'd function proved, refuted or stuck. |
-| `Tools/ProofTree.lean` | `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ` on a scoped formula: solkey's view of the tree of `⊢ φ` (`Core.ProofTree.ofFormula`). |
+| `Tools/ProofTree.lean` | `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ` on a scoped formula: solkey's view of the tree of `⊢ φ` (`Core.ProofTree.ofFormula`); `elabCoreFormula?`, the formula a command reads. |
 
 ## The solkey corpus
 

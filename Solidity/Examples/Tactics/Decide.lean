@@ -2,7 +2,7 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Closer
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # `sol_decide`: the storage goals, decided

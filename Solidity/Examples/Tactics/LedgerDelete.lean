@@ -2,7 +2,7 @@ import Solidity.Calculus.Close
 import Solidity.Theory.Storage
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
-import Solidity.Tools.CoreInspect
+import Solidity.Tools.Inspect
 
 /-!
 # A struct with a mapping, written and deleted — both layers
