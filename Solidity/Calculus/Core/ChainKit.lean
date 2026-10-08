@@ -1,6 +1,7 @@
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.HoldsErase
+import Solidity.Calculus.Core.ProvesSound
 import Solidity.Calculus.Chains
 
 /-!
@@ -576,5 +577,170 @@ theorem Fml.OneStep.unique {χ : Fml C Γ} (s : Fml.OneStep φ ψ) (t : Fml.OneS
   Option.some.inj (s.symm.trans t)
 
 end Build
+
+/-! ## Soundness
+
+A step is sound: the line it leaves gives the line it came from, in every
+state (`Fml.stepFocusR_sound`), from `Stmt.sound` at the statement it fires
+on and `holds_exit` for a finished program, through the connectives the
+strategy looks through. -/
+
+section Sound
+
+/-- The connectives the strategy looks through keep a step sound. -/
+theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ {f : Focus C} {ψ : Fml C Γ},
+    φ.stepFocusR k = some (f, ψ) → ∀ σ, holds σ ψ → holds σ φ
+  | _, .tt, _, _, h, _, _ | _, .eq .., _, _, h, _, _ | _, .defined _, _, _, h, _, _
+  | _, .not _, _, _, h, _, _ => nomatch h
+  | _, .modal m P κ φ, f, ψ, h, σ, hψ => by
+    have h : Fml.modalFocus k m P κ φ = some (f, ψ) := h
+    cases P with
+    | nil =>
+      cases h
+      exact holds_modal_intro fun hT => (holds_exit m κ φ σ hT).1 hψ
+    | cons s ω =>
+      have h : ((s.step k m).map fun p => (Focus.stmt k m s, p.fml m ω κ φ)) = some (f, ψ) := h
+      cases hp : s.step k m with
+      | none => rw [hp] at h; cases h
+      | some p =>
+        rw [hp] at h
+        cases h
+        exact Stmt.sound k m s p hp σ ω κ φ hψ
+  | _, .and φ₁ φ₂, f, ψ, h, σ, hψ => by
+    have h : (match φ₁.stepFocusR k with
+      | some (f, φ') => some (f, Fml.and φ' φ₂)
+      | none => (φ₂.stepFocusR k).map fun (f, ψ') => (f, Fml.and φ₁ ψ')) = some (f, ψ) := h
+    cases h₁ : φ₁.stepFocusR k with
+    | some q =>
+      rw [h₁] at h
+      obtain ⟨f', φ'⟩ := q
+      cases h
+      exact ⟨Fml.stepFocusR_sound φ₁ h₁ σ hψ.1, hψ.2⟩
+    | none =>
+      rw [h₁] at h
+      cases h₂ : φ₂.stepFocusR k with
+      | none => rw [h₂] at h; cases h
+      | some q =>
+        rw [h₂] at h
+        obtain ⟨f', φ'⟩ := q
+        cases h
+        exact ⟨hψ.1, Fml.stepFocusR_sound φ₂ h₂ σ hψ.2⟩
+  | _, .imp a φ, f, ψ, h, σ, hψ => by
+    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.imp a φ')) = some (f, ψ) := h
+    cases h₁ : φ.stepFocusR k with
+    | none => rw [h₁] at h; cases h
+    | some q =>
+      rw [h₁] at h
+      obtain ⟨f', φ'⟩ := q
+      cases h
+      exact fun ha => Fml.stepFocusR_sound φ h₁ σ (hψ ha)
+  | _, .upd m U φ, f, ψ, h, σ, hψ => by
+    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.upd m U φ')) = some (f, ψ) := h
+    cases h₁ : φ.stepFocusR k with
+    | none => rw [h₁] at h; cases h
+    | some q =>
+      rw [h₁] at h
+      obtain ⟨f', φ'⟩ := q
+      cases h
+      exact Modality.afterT_and hψ hψ fun τ a _ => Fml.stepFocusR_sound φ h₁ τ a
+  | _, .havoc φ, f, ψ, h, σ, hψ => by
+    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.havoc φ')) = some (f, ψ) := h
+    cases h₁ : φ.stepFocusR k with
+    | none => rw [h₁] at h; cases h
+    | some q =>
+      rw [h₁] at h
+      obtain ⟨f', φ'⟩ := q
+      cases h
+      exact fun st nt => Fml.stepFocusR_sound φ h₁ _ (hψ st nt)
+  | _, .all x p φ, f, ψ, h, σ, hψ => by
+    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.all x p φ')) = some (f, ψ) := h
+    cases h₁ : φ.stepFocusR k with
+    | none => rw [h₁] at h; cases h
+    | some q =>
+      rw [h₁] at h
+      obtain ⟨f', φ'⟩ := q
+      cases h
+      exact fun v hv => Fml.stepFocusR_sound φ h₁ _ (hψ v hv)
+  | _, .bind x t φ, f, ψ, h, σ, hψ => by
+    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind x t φ')) = some (f, ψ) := h
+    cases h₁ : φ.stepFocusR k with
+    | none => rw [h₁] at h; cases h
+    | some q =>
+      rw [h₁] at h
+      obtain ⟨f', φ'⟩ := q
+      cases h
+      exact fun v => Fml.stepFocusR_sound φ h₁ _ (hψ v)
+  | _, .anon xs φ, f, ψ, h, σ, hψ => by
+    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.anon xs φ')) = some (f, ψ) := h
+    cases h₁ : φ.stepFocusR k with
+    | none => rw [h₁] at h; cases h
+    | some q =>
+      rw [h₁] at h
+      obtain ⟨f', φ'⟩ := q
+      cases h
+      exact fun b => Fml.stepFocusR_sound φ h₁ _ (hψ b)
+
+variable {Γ : Ctx} {φ ψ : Fml C Γ}
+
+/-- Wherever `ψ` holds, `φ` does: what a chain composes to (`φ ~~> ψ`). -/
+def Fml.Leads (φ ψ : Fml C Γ) : Prop := ∀ σ, holds σ ψ → holds σ φ
+
+theorem Fml.OneStep.sound (s : Fml.OneStep φ ψ) : Fml.Leads φ ψ := by
+  have h : φ.stepR φ.fresh = some ψ := s
+  rw [← Fml.stepFocusR_snd] at h
+  cases h₁ : φ.stepFocusR φ.fresh with
+  | none => rw [h₁] at h; cases h
+  | some q =>
+    rw [h₁] at h
+    cases h
+    exact Fml.stepFocusR_sound φ h₁
+
+theorem Fml.StepBy.sound {r : StepRule C} (h : Fml.StepBy r φ ψ) : Fml.Leads φ ψ :=
+  h.oneStep.sound
+
+theorem Fml.Steps.sound : {φ ψ : Fml C Γ} → Fml.Steps φ ψ → Fml.Leads φ ψ
+  | _, _, .refl _ => fun _ h => h
+  | _, _, .cons s c => fun σ h => s.sound σ (Fml.Steps.sound c σ h)
+
+theorem Fml.Leads.comp {χ : Fml C Γ} (h₁ : Fml.Leads φ ψ) (h₂ : Fml.Leads ψ χ) : Fml.Leads φ χ :=
+  fun σ h => h₁ σ (h₂ σ h)
+
+theorem Link.Rel.sound : {l : Link C} → l.Rel φ ψ → Fml.Leads φ ψ
+  | .one, h => Fml.OneStep.sound h
+  | .many, ⟨c⟩ => c.sound
+  | .rule _, h => Fml.StepBy.sound h
+
+/-- **A chain leads from its first line to its last.** -/
+theorem Fml.Via.leads : {φ : Fml C Γ} → {ws : List (Link C × Fml C Γ)} → Fml.Via φ ws →
+    Fml.Leads φ (Fml.Via.last φ ws)
+  | _, [], _ => fun _ h => h
+  | _, [(_, _)], v => Link.Rel.sound v
+  | _, (_, _) :: _ :: _, v => (Link.Rel.sound v.1).comp (Fml.Via.leads v.2)
+
+/-- A chain whose last line is valid has a valid first line. -/
+theorem Fml.Via.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} (v : Fml.Via φ ws)
+    (h : Valid (Fml.Via.last φ ws)) : Valid φ :=
+  fun σ => v.leads σ (h σ)
+
+theorem Fml.Steps.valid {φ ψ : Fml C []} (c : Fml.Steps φ ψ) (h : Valid ψ) : Valid φ :=
+  fun σ => c.sound σ (h σ)
+
+theorem Fml.OneStep.valid {φ ψ : Fml C []} (s : Fml.OneStep φ ψ) (h : Valid ψ) : Valid φ :=
+  fun σ => s.sound σ (h σ)
+
+theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C []} (s : Fml.StepBy r φ ψ) (h : Valid ψ) :
+    Valid φ :=
+  fun σ => s.sound σ (h σ)
+
+/-- **A chain past the program** proves its first line from its last, given
+that the last scoped line is valid where its erasure is (the bridge, for a
+leaf with no modality `Calculus/Core/Close.lean`'s `Valid.of_erase`). -/
+theorem Fml.ViaE.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.Fml C}
+    {rs : List (Solidity.Link C × Solidity.Fml C)} (v : Fml.ViaE φ ws L rs)
+    (bridge : (∀ τ, Solidity.holds τ ((Fml.Via.last φ ws).erase [])) → Valid (Fml.Via.last φ ws))
+    (h : ∀ τ, Solidity.holds τ (Solidity.Fml.Via.last L rs)) : Valid φ :=
+  v.1.valid (bridge (v.2.1 ▸ v.2.2.valid h))
+
+end Sound
 
 end Solidity.Core
