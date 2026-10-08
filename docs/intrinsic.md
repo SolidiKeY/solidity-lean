@@ -1117,6 +1117,58 @@ erasure asks nothing of `bool` locals.  `Examples/Tactics/CorePrint.lean`
 lost its `nofun` cover goal; `Calculus/Core/Fml.lean`'s `Premise.inv`
 docstring still names `Premise.cover` (not this lane's file).
 
+### W2 lane `symex` (`w2-symex`, 2026-10-08)
+
+**Built** (`Calculus/Core/{Symex,Close,Derive}.lean`, pins in
+`Examples/Tactics/CoreDerive.lean`):
+
+* `sol_step`/`sol_symex` on `Core.Valid φ`: `symex_valid` from
+  `Stmt.sound` (W0's unconditional soundness), the result computed by the
+  compiled strategy and quoted back (`Core.Symex.normValid`,
+  `Core.Fml.quote`); an obligation with no code is read by its value
+  (`evaluable`).
+* `sol_close` on a scoped leaf: `Valid.of_erase` (the leaf's hidden binders
+  where `Fml.posB` takes them, checked by the kernel), then today's
+  `sol_close` on the erasure.  A diamond update is taken only where it
+  cannot set a `bool` local to a non-`bool` (`Tm.boolB`), since the diamond
+  reads `BoolOK` states (the `sound` lane's cover removal).
+* `sol_prove`: one kernel evaluation of `Derive.proves φ = true`: the
+  strategy, `posB` and today's `Derive.proves` on the erasure
+  (`Valid.of_proves`); where the closer leaves goals, one `leafᵢ` per leaf
+  of today's residue (`Valid.of_residue`).  No search, so it is its own
+  replay.
+* `sol_derive`/`sol_derive?` on `Core.Valid`/`Core.Proves`: one `apply`
+  per rule, cited by its taclet (`Taclet.step_eq .rule`, the rule named by
+  `ruleOf?`), `case thn`/`case els` on a split.  Today's `sol_derive` is a
+  macro that never fails, and Lean expands macros before it tries
+  elaborators, so the scoped one is a `macro_rules` (newest first) into
+  `sol_derive_scoped`, which fails on an unscoped goal and lets today's
+  macro run.  The other four are elaborators that throw
+  `unsupportedSyntax` on an unscoped goal (`sol_close`'s macro fails on a
+  scoped goal first).
+* **Leaves of the walk:** `Core.Proves` has no `close` yet (the `sound`
+  lane's `Proves.close`), so `sol_derive` closes `closeTrue` leaves and
+  leaves the others as `Core.Proves` goals, printed `sorry` by
+  `sol_derive?`.  When `Proves.close` lands, `Walk.movesAt` ends a leaf with
+  `refine close ?_; sol_symex; sol_close`, as `ProofTree.closeTacs` does.
+
+**Uniqueness** is `Core.Stmt.step` being a function, with the rules lane's
+`Taclet.toStep` and `Rule.premise_unique` (`Calculus/Core/Completeness.lean`).
+**Termination is retired**, not restated: `Calculus/Termination.lean`'s
+weights are 1,300 lines over the untyped syntax, and the scoped strategy is
+fuelled (`Core.symex n`), so a program it does not finish fails `sol_prove`
+(the leaf keeps a modality, which `posB` rejects) rather than looping.
+`Termination.lean` goes with the old calculus at W4.
+
+**Early gate: passes.**  `sol_prove` over Derived9–11's 91 obligations in
+the `Core*` twins (`TestSuite/CoreDerived9.lean` … `11`, over
+`TestSuite/CoreProblems.lean`), elaborated serially in one scratch module
+(`Elab.async false`, `IO.monoMsNow` stamps; imports loaded): **19.4 s**
+against the limit 22.9 s.  Today's `sol_prove` on the same 91, measured the
+same way right after: 19.0 s (2% apart).  M0's 19.1 s is the wall time of
+the three modules, so the serial sum is the stricter reading.  No fix of
+the list (a Boolean equality on `Core.Fml`, `Idx` as a number) was needed.
+
 ## W3 — the flip, file by file (4 lanes)
 Each lane adds the `open scoped` line to the files it owns and re-pins them.
 

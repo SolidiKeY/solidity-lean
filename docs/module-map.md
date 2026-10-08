@@ -132,7 +132,7 @@ lemma (`TermTaclet.sound`).
 | `Calculus/Completeness.lean` | `Stmt.step`, the rule for every statement, and `Stmt.complete`. |
 | `Calculus/Uniqueness.lean` | One rule per statement: every derivation's premise is `Stmt.step`'s. |
 | `Calculus/Progress.lean` | A formula with a modality always steps. |
-| `Calculus/Termination.lean` | Weights, `Fml.measure`, `symex_normalizes`. |
+| `Calculus/Termination.lean` | Weights, `Fml.measure`, `symex_normalizes`.  Not restated on Core: the scoped strategy is fuelled, and this goes with the old calculus at W4 (`docs/intrinsic.md`, W2 `symex`). |
 | `Calculus/NoPanic.lean` | A term never panics: `Tm.eval_noPanic`, `Upd.apply_ne_panic`. |
 | `Calculus/SoundKit.lean` | `SameOk`, `Premise.Correct` and the tactics the soundness proofs use. |
 | `Calculus/SoundUpdate.lean` | Every taclet with an update premise has the statement's effect. |
