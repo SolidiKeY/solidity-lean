@@ -396,7 +396,8 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     -- rule's goals apart (`cases`' formula goal is `fml`, its updates'
     -- goals, and `and_intros`' `refine_1`, … have none)
     let tags ← gs.mapM fun g' => do
-      match ← g'.getTag with
+      -- a goal's name is its tag's first part (`thn`, past a silent step's `thn.h`)
+      match (← g'.getTag).components.head?.getD .anonymous with
       | .str _ l => return if l.startsWith "refine_" then none else some l
       | _ => return none
     let cite := tags.all Option.isSome
