@@ -5184,6 +5184,119 @@ git-excluded `Scratch/` modules only).
   servers and workers stopped (with three idle servers of the gates lane's
   deleted timing copies).
 
+### W4 lane `theorems` (`w4-theorems`, 2026-10-08)
+
+The W3d inventory's `Theorems.lean` `Main.Today` and `Examples/Notation`
+kept pins.  Two commits on `w4-theorems` (from `intrinsic` at `31951be`),
+checked file by file through the MCP (no `lake build`): `Calculus/Core/
+{Delab,RuleText,SequentNotation,RuleExists,SolkeyFragment}.lean`,
+`Theorems.lean`, `Examples/Notation.lean`, and the printers' other pin
+files (`Examples/Tools`, `Tactics/{CorePrint,CoreSequents,StorageSteps,
+Loops,Payment,CallOperands,Values}`).  No new `sorry`, `axiom` or
+`maxHeartbeats`; `check-orphans` (317 reachable, none orphaned) and `check-doc-paths`
+clean.
+
+1. **A scoped `rule_exists`** (`Calculus/Core/RuleExists.lean`): for every
+   statement and modality, `Stmt.step` leaves a premise and a rule of the
+   table rewrites the statement to it (`Stmt.rule_exists`), so the
+   strategy fires only rules (`Rule.ofStep`, the converse of
+   `Rule.toStep`; `Rule.iff_step`).  Stronger than asked: the step is
+   total, as today's dispatcher was.  One lemma per `Stmt` constructor
+   (`Stmt.<c>.ruleExists`), proved by taking `Stmt.step` apart where it is
+   stuck (a part of the statement by `cases`; a computed test such as
+   `b.isSimple`, `args.capture`, `body.frame` split in place, its value a
+   hypothesis), then each leaf by its rule (`ruleOf?`'s matching:
+   `holeCandidates`, `mayFind`), splitting a leaf further where the rules
+   tell apart what the step does not (`/IndexTy`: a mapping's entry or an
+   array's; `?rule`: an array's element a mapping or not; `!`: a carried
+   proof the split contradicts).  `#derive_ruleExists?` searched once
+   (`assign` 69 s, the other 25 constructors about 6 s); the file keeps the
+   `#replay_ruleExists` table, whose replay names the rule of every leaf
+   (the whole file re-checks in about 15 s of CPU, imports included).
+   Axioms: `propext`.
+2. **The solkey fragment, scoped** (`Calculus/Core/SolkeyFragment.lean`):
+   `Stmt.inSolkey m` (today's, plus `block` as its body), `LeanTaclet.
+   not_inSolkey`, on the fragment the fired rule is solkey's
+   (`Stmt.step_taclet`, `Stmt.solkey_rule_exists`), and off it a loop has
+   a rule of the calculus and no taclet of solkey's (`Taclet.not_loop`,
+   `Stmt.solkey_lt_calculus`).
+3. **`Theorems.lean`**: `Main.Today` is gone.  The scoped rows, each
+   `#print axioms` pinned (`propext` only): `rule_exists`, `rule_of_step`,
+   `solkey_rule_exists`, `solkey_lt_calculus`.  Today's five, one row each:
+
+   | Today's theorem | Scoped | Why |
+   |---|---|---|
+   | `rule_exists` (`Stmt.complete`) | `rule_exists`, `rule_of_step` | the step is a function to `Option`; the rule is found after the fact |
+   | `solkey_rule_exists` (`Stmt.step_taclet`) | `solkey_rule_exists` | as today's, the premise the step's |
+   | `solkey_lt_calculus` | `solkey_lt_calculus`, at the rule level | a loop: a rule, no taclet of solkey's |
+   | `solkey_eq_calculus` (`Proves.solkey_iff`) | **dropped** | `Core.Proves` takes the rule set `R` as an index no rule reads: `⊢ₖ` and `⊢` have the same derivations, so the statement holds of every formula and says nothing (proposed decision 33) |
+   | `symex_terminates` (`symex_normalizes`) | **dropped** | the scoped strategy is fuelled (`Core.symex n`); W2 `symex` retired termination (a program it does not finish fails `sol_prove`, `posB`) |
+
+   `solkey_soundness`'s docstring says that it is `soundness'` until
+   decision 33.
+4. **`Core.Delab`** prints a hole a schema variable fills (`SHole.fill`,
+   `MHole.fill`, `VHole.fill`, `NewLhs.fill`: today's `Hole`/`MHole`/
+   `VHole`/`NewLhs` twin, filled; a statement piece read before `whnf`
+   unfolds the `fill`), `⊕⊕`'s value on a schema operator (`Tm.bumped` as
+   today's `Term.bumped`), a block read under a fresh local (`Prog.up` of a
+   schema block, `whileInvariantDiamond`'s body), and a constructor whose
+   carried proof is about scoped parts (`assignIncDec`'s `hs`: a
+   placeholder of the erased type, `withProofHoles`, printing only).  The
+   `storageFieldIncrementAssignment` failure was that last one and the
+   `Tm.bumped` conditional.  `#check_rule_text`: 155 of 158 `Taclet`s, 7
+   of 9 `LeanTaclet`s print as today's (were 140, 6); left: the call
+   expansions and the two `try` rules.
+5. **A scoped sequent input notation** (`Calculus/Core/SequentNotation.
+   lean`): under `open scoped Solidity.Core.Sequent`, `dl{ ..H, a ⟹[R] φ }`
+   reads as `Core.Proves C R Γ₀ (H.pre a) φ`, the context a `Core.Hyps`
+   telescope built from the left, entries and formulas schema variables
+   and connectives (proposed decision 34 for the scope).
+
+**Pins changed** (none of W3's reasons 1–8; each the W4 inventory's item,
+the task's):
+- `Examples/Notation`: `storageFieldRead_unfold_rightFst`,
+  `newArrayCapture`, `storageFieldIncrementAssignment` print the scoped
+  taclets (`@Core.Taclet.*`, `{Γ : Core.Ctx}`, `Core.SHole C Γ x`,
+  `Core.NewLhs C Γ R`, `Core.Idx Γ (Core.LTy.val p)`; the rule lines
+  unchanged).  Today's `#check @Proves.merge` is replaced by the scoped
+  `sequentialToParallelNil` (`Core.Proves.merge` with no binder between
+  the updates: `U.seqPar V = some W → dl{ ..H, { W } ⟹[R] φ } → dl{ ..H,
+  { U }, { V } ⟹[R] φ }`), and today's sequent-spine `guard_expr`s by the
+  scoped ones (`Core.Hyps.pre`/`upd`/`all`, `Core.Prog.cons`, frames
+  `.nil`), with `Core.Proves.impRight` read back in notation.
+- `Calculus/Core/RuleText`: `#check_rule_text`'s pin, 140 → 155 of 158
+  and 6 → 7 of 9 (the rules item 4 prints), its docstring with it.
+- `Theorems.lean`: the five `Main.Today` axiom pins gone; four new
+  (`propext`).
+- `Tactics/CorePrint`: a docstring only (the hole rules print now).
+- The fresh names (`se1`, `sp1`) are unchanged.
+
+**Proposed decisions** (the lead's call):
+
+33. *The scoped `⊢ₖ` restricts its rules.*  Today `Core.Proves C R` reads
+    `R` nowhere, so `⊢ₖ φ ↔ ⊢ φ` for every `φ`.  Most faithful to solkey's
+    rule text: the step rules of `Core.Proves` (`update`, `unfold`,
+    `bind`, `split`, `check`, `done`, `branches`, `cases`, `inv`,
+    `inline`) ask, under `.solkey`, that the step's rule be a `Taclet`
+    (`R.admits s p`, by `Stmt.step_taclet`'s `Rule` case), so that the
+    judgement-level `solkey_eq_calculus` (on the fragment) and
+    `solkey_lt_calculus` (off it) can be stated again, with
+    `Taclet.premise_inSolkey` ported.  A low-module change
+    (`Calculus/Core/Proves.lean`), so not this lane's.
+34. *The sequent input is its own scope* (`Solidity.Core.Sequent`), not
+    `Core.Surface`: `Surface` switches how the program text reads, and
+    files under it still write today's sequents nowhere but in pins; a
+    separate scope changes no existing file's reading.  W5 may fold it into
+    `Surface` (or make it the default) when today's sequent macros go.
+
+**Left for W4/W5**:
+- `docs/solc-validation.md` (`symex_terminates`) and `docs/loops.md`
+  (`symex_normalizes`) still cite today's termination: M7's docs pass.
+- `#check_rule_text`'s last five (`functionBodyExpand`,
+  `internalCallExpand`, `tryCallNoCallbackBox`, `functionCallArgCapture`,
+  `tryCallDiamond`).
+- Decisions 33 and 34.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean

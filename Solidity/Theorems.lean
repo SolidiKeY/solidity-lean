@@ -2,8 +2,7 @@ import Solidity.Calculus.Core.Sound
 import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.CallbackSound
 import Solidity.Evm.CoreCorrect
-import Solidity.Calculus.SolkeyFragment
-import Solidity.Calculus.Termination
+import Solidity.Calculus.Core.SolkeyFragment
 
 /-!
 # The main theorems, in one page
@@ -14,9 +13,16 @@ so that it reads as it would in print; the proof is the original's name.
 calculus's (`Calculus/Core/`), over the typed state and its run
 (`Semantics/Core/TypedRun.lean`): a formula `φ : Core.Fml C Γ` is read in a
 typed state `σ : Core.TState C Γ`, and a program `P : Core.Prog C Γ Γ'` runs
-from it by `Core.Prog.trun`.  Five of today's theorems, from three modules,
-have no scoped twin yet; the last section keeps them, over today's
-calculus, until they are ported (`docs/intrinsic.md`, W4).
+from it by `Core.Prog.trun`.  Three of today's statements are not restated
+over the judgement.  Two wait for `⊢ₖ` to restrict its rules (proposed
+decision 33; the scoped `Core.Proves` never reads its rule set): that
+solkey's rules alone derive what the calculus derives on the fragment
+(`solkey_eq_calculus`), and that they derive less off it (the
+judgement-level `solkey_lt_calculus`, `∃ φ, ⊢ φ ∧ ¬ ⊢ₖ φ`, false until
+then).  `solkey_lt_calculus` below replaces the latter at the rule level: a
+loop has a rule and no taclet.  The third, that symbolic execution
+terminates (`symex_terminates`), was retired at W2: the scoped strategy is
+fuelled.  `docs/intrinsic.md` (W4 `theorems`) says why.
 
 | Notation | Reads | Is |
 |---|---|---|
@@ -24,7 +30,7 @@ calculus, until they are ported (`docs/intrinsic.md`, W4).
 | `σ ⊧ φ` | `φ` holds in `σ` | `Core.holds σ φ` |
 | `H ⊨ φ` | `φ` is valid under the context `H` | `∀ σ, Core.holds σ (H.wrap φ)` |
 | `H ⊢ φ`, `⊢ φ` | the calculus derives `φ` | `Core.Proves C .all Γ₀ H φ` |
-| `H ⊢ₖ φ`, `⊢ₖ φ` | solkey's rules alone derive `φ` | `Core.Proves C .solkey Γ₀ H φ` |
+| `H ⊢ₖ φ`, `⊢ₖ φ` | solkey's rules alone derive `φ` (no rule reads the set yet) | `Core.Proves C .solkey Γ₀ H φ` |
 | `s ⇝[k, m] p` | a rule rewrites `s` to `p` | `Core.Rule C k m s p` |
 | `s ⇝ₖ[k, m] p` | a rule of solkey's does | `Core.Taclet C k m s p` |
 | `p ≃[m, σ] s` | from `σ`, the premise `p` does what `s` does | `Core.Premise.Sound m s p σ` |
@@ -146,6 +152,32 @@ strategy (`Core.Stmt.step`) computes. -/
 theorem rule_is_step (d : s ⇝[k, m] p) : s.step k m = some p :=
   d.toStep
 
+/-- **Every statement has a rule**, under either modality: the strategy
+leaves a premise, and a rule rewrites the statement to it. -/
+theorem rule_exists (k : Nat) (m : Modality) (s : Core.Stmt C Γ Γ') :
+    ∃ p, s.step k m = some p ∧ s ⇝[k, m] p :=
+  Core.Stmt.rule_exists k m s
+
+/-- **The strategy fires only rules**: what it leaves is a rule's premise
+(the converse of `rule_is_step`). -/
+theorem rule_of_step (h : s.step k m = some p) : s ⇝[k, m] p :=
+  Core.Rule.ofStep h
+
+/-! ## solkey's rules -/
+
+/-- **On the fragment, solkey has the rule**: a statement whose calls take
+simple arguments, with no loop or `try` and no payment under the diamond,
+is rewritten by one of solkey's taclets. -/
+theorem solkey_rule_exists (h : s.inSolkey m = true) (hs : s.step k m = some p) : s ⇝ₖ[k, m] p :=
+  Core.Stmt.step_taclet h hs
+
+/-- **Off the fragment they differ**: a loop has a rule of the calculus,
+and none of solkey's. -/
+theorem solkey_lt_calculus (k : Nat) (m : Modality) {Γ₁ : Core.Ctx} (a : Core.LoopAnn C Γ)
+    (c : Core.Val C Γ .bool) (body : Core.Prog C Γ Γ₁) :
+    (∃ p, Core.Stmt.loop a c body ⇝[k, m] p) ∧ ∀ p, ¬ Core.Stmt.loop a c body ⇝ₖ[k, m] p :=
+  Core.Stmt.solkey_lt_calculus k m a c body
+
 /-! ## The calculus -/
 
 /-- **Soundness**: what the calculus derives is valid.  A derivation leaves
@@ -157,7 +189,9 @@ theorem soundness : H ⊢ φ → H ⊨ φ :=
 theorem soundness' {φ : Core.Fml C []} : ⊢ φ → ⊨ φ :=
   Core.Proves.valid
 
-/-- **solkey's rules are sound**: what they derive alone is valid. -/
+/-- **solkey's rules are sound**: what they derive alone is valid.  (The
+scoped judgement takes the rule set as an index no rule reads yet, so this
+is `soundness'` itself: `docs/intrinsic.md`, proposed decision 33.) -/
 theorem solkey_soundness {φ : Core.Fml C []} : ⊢ₖ φ → ⊨ φ :=
   Core.Proves.valid
 
@@ -221,6 +255,18 @@ theorem compiler_net {P : Core.Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ 
 /-- info: 'Solidity.Main.rule_is_step' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms rule_is_step
 
+/-- info: 'Solidity.Main.rule_exists' depends on axioms: [propext] -/
+#guard_msgs in #print axioms rule_exists
+
+/-- info: 'Solidity.Main.rule_of_step' depends on axioms: [propext] -/
+#guard_msgs in #print axioms rule_of_step
+
+/-- info: 'Solidity.Main.solkey_rule_exists' depends on axioms: [propext] -/
+#guard_msgs in #print axioms solkey_rule_exists
+
+/-- info: 'Solidity.Main.solkey_lt_calculus' depends on axioms: [propext] -/
+#guard_msgs in #print axioms solkey_lt_calculus
+
 /-- info: 'Solidity.Main.soundness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms soundness
 
@@ -241,66 +287,6 @@ theorem compiler_net {P : Core.Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ 
 
 /-- info: 'Solidity.Main.compiler_net' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms compiler_net
-
-/-! ## Not yet scoped: today's calculus
-
-Five of today's headline theorems, from three modules, have no scoped
-twin: that every statement has a rule (`Completeness.lean`'s dispatcher),
-the fragment where solkey's rules are the calculus (`SolkeyFragment.lean`),
-and that symbolic execution terminates (`Termination.lean`).  They are stated here over today's `Fml`,
-`Stmt` and `Proves` until they are ported; W4 `calc-del` deletes their
-modules, so it ports them or drops them here first (`docs/intrinsic.md`,
-W4). -/
-
-namespace Today
-
-variable {C : Contract} {k : Nat} {m : Modality} {s : Solidity.Stmt C}
-  {Γ : List (Hyp C)} {φ : Solidity.Fml C}
-
-/-- **Every statement has a rule**, under either modality. -/
-theorem rule_exists (k : Nat) (m : Modality) (s : Solidity.Stmt C) : ∃ p, Rule C k m s p :=
-  Stmt.complete k m s
-
-/-- **On the fragment, solkey's rules are the calculus**: a formula whose
-calls take simple arguments is derived by solkey's rules exactly when it is
-derived at all. -/
-theorem solkey_eq_calculus (h : φ.inSolkey = true) : Proves .solkey Γ φ ↔ Proves .all Γ φ :=
-  Proves.solkey_iff h
-
-/-- **Off the fragment they differ**: `[ f(x + 1); ] true` is derived by the
-calculus and not by solkey's rules. -/
-theorem solkey_lt_calculus :
-    ∃ φ : Solidity.Fml C, Proves .all [] φ ∧ ¬ Proves .solkey [] φ :=
-  Proves.solkey_lt_calculus
-
-/-- **On the fragment, solkey has the rule**: the rule the strategy fires is
-one of solkey's. -/
-theorem solkey_rule_exists (h : s.inSolkey m = true) : Taclet C k m s (s.step k m).premise :=
-  Stmt.step_taclet h
-
-/-- **Symbolic execution terminates**: given its measure in steps, it leaves
-no modality. -/
-theorem symex_terminates (n : Nat) (h : φ.measure ≤ n) : (Solidity.symex n φ).active = false :=
-  symex_normalizes n φ h
-
-/-! Their axioms: Lean's three at most -/
-
-/-- info: 'Solidity.Main.Today.rule_exists' depends on axioms: [propext] -/
-#guard_msgs in #print axioms rule_exists
-
-/-- info: 'Solidity.Main.Today.solkey_eq_calculus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms solkey_eq_calculus
-
-/-- info: 'Solidity.Main.Today.solkey_lt_calculus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms solkey_lt_calculus
-
-/-- info: 'Solidity.Main.Today.solkey_rule_exists' depends on axioms: [propext] -/
-#guard_msgs in #print axioms solkey_rule_exists
-
-/-- info: 'Solidity.Main.Today.symex_terminates' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms symex_terminates
-
-end Today
 
 end Main
 end Solidity

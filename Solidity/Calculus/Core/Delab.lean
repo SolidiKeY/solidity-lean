@@ -76,6 +76,9 @@ def legacyType? (ty : Expr) : MetaM (Option Expr) := do
   let .const n _ := ty.getAppFn | return none
   let args := ty.getAppArgs
   if n == ``Idx then return some (mkConst ``Solidity.Var)
+  -- the storage hole is today's `Hole`
+  if n == ``SHole then
+    return some (mkAppN (mkConst ``Solidity.Hole) #[args[0]!, args[2]!])
   if n == ``Prog || n == ``Frames then return some (mkApp (mkConst ``Solidity.Prog) args[0]!)
   let some n' := legacyName? n | return none
   unless (← getEnv).contains n' do return none
@@ -134,6 +137,18 @@ def lowerFns : List Lean.Name :=
 /-- A part of the program or a term, read with one local more on top:
 `Val.up` and its kin. -/
 def isUp (n : Lean.Name) : Bool := (`Solidity.Core).isPrefixOf n && n.getString! == "up"
+
+/-- The `fill` of a scoped hole, and today's of the same hole. -/
+def holeFills : List (Lean.Name × Lean.Name) :=
+  [(``SHole.fill, ``Solidity.Hole.fill), (``MHole.fill, ``Solidity.MHole.fill),
+    (``VHole.fill, ``Solidity.VHole.fill), (``NewLhs.fill, ``Solidity.NewLhs.fill)]
+
+/-- A hole under any number of `up`s: the hole itself. -/
+partial def stripUps (e : Expr) : MetaM Expr := do
+  let e := (← instantiateMVars e).consumeMData
+  match e.getAppFn.constName? with
+  | some n => if isUp n && e.getAppNumArgs > 0 then stripUps e.appArg! else return e
+  | none => return e
 
 /-- A piece of a program: one statement, or a program variable spliced in. -/
 inductive Piece where
@@ -247,6 +262,23 @@ def wkUp? (e : Expr) : Option Expr :=
         | none => none
       else none
 
+/-- `n' xs`, each argument that is a proof of the wrong type replaced by a
+placeholder of the type `n'` asks (`mkSorry`): printing only, never added
+to the environment. -/
+def withProofHoles (n' : Lean.Name) (xs : Array Expr) : MetaM (Option Expr) := do
+  let mut f := mkConst n'
+  let mut ty ← inferType f
+  for a in xs do
+    let .forallE _ d b _ ← whnf ty | return none
+    let a' ← if ← isProp d then
+        if ← (try isDefEq (← inferType a) d catch _ => pure false) then pure a
+        else mkSorry d false
+      else pure a
+    f := mkApp f a'
+    ty := b.instantiate1 a'
+  if ← (try Meta.check f; pure true catch _ => pure false) then return some f
+  return none
+
 mutual
 
 /-- The erasure of a scoped term `e`, read where the term declared the
@@ -268,6 +300,17 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
   if n == ``Tm.netOf && args.size == 4 then
     return ← mkAppM ``Solidity.Tm.app1
       #[mkApp (mkConst ``Solidity.Op1.netOf) (← trIdx ns args[2]!), ← tr ns args[3]!]
+  -- a hole that is a schema variable, filled: today's `fill` of its twin,
+  -- which `ppStmt` prints as the rule line writes it (`lhs = nsp.fld`)
+  if let some (_, n') := holeFills.find? (·.1 == n) then
+    if args.size == 5 then
+      if let .fvar fv ← stripUps args[3]! then
+        if let some h := (← read).twins.get? fv then
+          return ← mkAppM n' #[h, ← trArg ns args[4]!]
+  -- `t⊕⊕`, the value of an increment on a schema operator: today's
+  -- `Term.bumped`, which the conditional on the operator would unfold
+  if (n == ``Tm.bumped || n == ``Tms.Term.bumped) && args.size == 5 && args[2]!.isFVar then
+    return ← mkAppM ``Solidity.Term.bumped #[args[2]!, args[3]!, ← tr ns args[4]!]
   if n == ``Tm.app1 && args.size == 7 then
     return ← mkAppM ``Solidity.Tm.app1 #[args[4]!, ← tr ns args[6]!]
   if n == ``Fml.upd && args.size == 6 then
@@ -370,8 +413,13 @@ partial def generic (ns : List Expr) (e : Expr) (n : Lean.Name) : TrM (Option Ex
   let kept ← args.filterM fun a => return !(← isCtx (← inferType a))
   let arity ← forallTelescopeReducing (← getConstInfo n').type fun xs _ => pure xs.size
   if arity == kept.size then
-    let r := mkAppN (mkConst n') (← kept.mapM (trArg ns))
+    let kept' ← kept.mapM (trArg ns)
+    let r := mkAppN (mkConst n') kept'
     if ← (try Meta.check r; pure true catch _ => pure false) then return some r
+    -- a carried proof about the scoped parts (`hs : l.recvSimple = true`)
+    -- does not erase; it prints as nothing, so a placeholder of the erased
+    -- type stands for it
+    if let some r ← withProofHoles n' kept' then return some r
   -- else by the explicit arguments, the implicit ones inferred
   let finfo ← getFunInfoNArgs e.getAppFn args.size
   let mut xs : Array Expr := #[]
@@ -497,6 +545,9 @@ partial def trArg (ns : List Expr) (a : Expr) : TrM Expr := do
 partial def progPieces (ns : List Expr) (P : Expr) : TrM (Array Piece × List Expr) := do
   let P := (← instantiateMVars P).consumeMData
   if let .fvar fv := P then return (#[.many ((← read).twins.getD fv P)], ns)
+  -- a block read under one local more (`Prog.up`): itself
+  if let some n := P.getAppFn.constName? then
+    if isUp n && P.getAppNumArgs > 0 && P.appArg!.isFVar then return ← progPieces ns P.appArg!
   -- a block read under one local more (`Prog.up`, unfolded): the block
   if let some P' := wkUp? P then return ((← progPieces ns.tail P').1, ns)
   let P ← whnf P
@@ -515,6 +566,8 @@ leaves. -/
 partial def stmtPieces (ns : List Expr) (s : Expr) : TrM (Array Piece × List Expr) := do
   let s := (← instantiateMVars s).consumeMData
   if let .fvar fv := s then return (#[.one ((← read).twins.getD fv s)], ns)
+  -- a hole filled declares nothing; read before `whnf` unfolds its `fill`
+  if holeFills.any (s.isAppOf ·.1) then return (#[.one (← tr ns s)], ns)
   let s ← whnf s
   if s.isAppOf ``Stmt.block then
     let (ps, _) ← progPieces ns s.appArg!

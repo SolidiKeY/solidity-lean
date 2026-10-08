@@ -49,6 +49,8 @@ import Solidity.Calculus.Core.Rules
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.RuleShapes
 import Solidity.Calculus.Core.Completeness
+import Solidity.Calculus.Core.RuleExists
+import Solidity.Calculus.Core.SolkeyFragment
 import Solidity.Calculus.Core.PrintedRules
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.SoundKit
@@ -96,6 +98,7 @@ import Solidity.Calculus.Core.CallbackHolds
 import Solidity.Calculus.Core.CallbackSound
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Sequents
+import Solidity.Calculus.Core.SequentNotation
 import Solidity.Calculus.Core.SolSpec
 import Solidity.Semantics.Core.Callback
 import Solidity.Calculus.Completeness
