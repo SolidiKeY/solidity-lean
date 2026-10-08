@@ -270,12 +270,14 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Tools/Show.lean` | Printers for storage values, states, transactions, clauses. |
 | `Tools/Common.lean` | Shared plumbing: resolving `C` / `C.f`, evaluating terms, report layout. |
 | `Tools/Run.lean` | `#run C.f(args) [from σ] [with msg.sender := n, …]`: the typed run from a fresh state; `#deploy C(args) [with …]`, a deployment (`Contract.deploy`). |
-| `Tools/Inspect.lean` | `#wp φ`, `#step φ`, `#taclet r`. |
-| `Tools/CoreInspect.lean` | `#wp φ`, `#step φ`, `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`; the tree by `Core.ProofTree.ofFormula`. |
+| `Tools/Inspect.lean` | `#wp φ`, `#step φ` on a scoped formula (`Core.Fml C Γ`): the scoped strategy compiled, its result quoted and printed by `Core.Delab`; the reduction's printer (`LFml.fmt`); `elabCoreFormula?`. |
+| `Tools/Taclet.lean` | `#taclet r`: a rule, its solkey taclets, printed rule and soundness theorem, from today's tables (W4 moves it to the scoped families). |
+| `Tools/InspectToday.lean` | `#wp`, `#step`, `#proof_tree`, `#proof_node`, `#proof_tree_json` on today's formula read without the switch: today's strategy and tree, tried before the scoped elaborators (W4 deletes it). |
+| `Tools/CoreInspect.lean` | Imports the inspection commands, scoped and today's (`Inspect`, `ProofTree`, `Taclet`, `InspectToday`), for the examples that use both. |
 | `Tools/DiffTest.lean` | `#difftest C[.f]`: the typed run against `Evm/CoreCompile.lean`'s code on random storages. |
 | `Tools/Counterexample.lean` | `Core.Fml.eval3`, a scoped formula evaluated over the typed state and the typed run with fuel (`eval3_sound` against `Core.holds`; by the recursor, its compiled twin `eval3C`), its leading parameters bound to a witness's arguments (`Fml.peel`), an untyped candidate read as a typed state (`TState.ofSem?`, `Storage.decode`), an update's end lifted (`TState.lift?`), witness search and shrinking, certificates of `¬ ⊨` of the scoped formula, `#counterexample`. |
 | `Tools/Verify.lean` | `#verify C[.f]`: each spec'd function proved, refuted or stuck. |
-| `Tools/ProofTree.lean` | `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ`: solkey's view of the tree of `⊢ φ`. |
+| `Tools/ProofTree.lean` | `#proof_tree φ`, `#proof_node n φ`, `#proof_tree_json φ` on a scoped formula: solkey's view of the tree of `⊢ φ` (`Core.ProofTree.ofFormula`). |
 
 ## The solkey corpus
 

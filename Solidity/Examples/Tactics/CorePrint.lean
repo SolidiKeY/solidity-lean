@@ -1,6 +1,7 @@
 import Solidity.Calculus.Core.Delab
 import Solidity.Examples.Tactics.CoreSymex
 import Solidity.Tools.Inspect
+import Solidity.Tools.Taclet
 
 /-!
 # Scoped taclets and formulas, printed
