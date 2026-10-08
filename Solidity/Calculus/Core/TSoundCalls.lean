@@ -111,11 +111,6 @@ variable {Γ : Ctx}
 
 theorem TState.withEnv_self (σ : TState C Γ) : σ.withEnv σ.env = σ := rfl
 
-theorem Val.evalT_up {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {p : PrimTy}
-    (v : Val C Γ p) : (v.up (t := t)).evalT (σ.push w) = v.evalT σ := by
-  rw [Val.up_eq]
-  exact Val.evalT_wk Core.up σ (w, σ.env) v
-
 theorem Val.evalT_unders {p : PrimTy} (v : Val C Γ p) (σ : TState C Γ) :
     (ρ : Ctx) → (r : TEnv C σ.H ρ) →
       (v.unders ρ).evalT (σ.withEnv (TEnv.append ρ r σ.env)) = v.evalT σ
@@ -123,12 +118,6 @@ theorem Val.evalT_unders {p : PrimTy} (v : Val C Γ p) (σ : TState C Γ) :
   | _ :: ρ, r => by
     show ((v.unders ρ).up).evalT ((σ.withEnv (TEnv.append ρ r.2 σ.env)).push r.1) = _
     rw [Val.evalT_up, Val.evalT_unders v σ ρ r.2]
-
-theorem Stmt.trunSt_declLocal_some {p : PrimTy} (x : Var) (e : Val C Γ p) (σ : TState C Γ) :
-    Stmt.trunSt σ (.declLocal p x (some e)) = (e.evalT σ).map fun v => σ.push (t := .val p) v := by
-  show (TRun.declLocal p (some e) σ).map _ = _
-  simp only [TRun.declLocal]
-  cases e.evalT σ <;> rfl
 
 theorem Stmt.trunSt_declLocal_none (p : PrimTy) (x : Var) (σ : TState C Γ) :
     Stmt.trunSt σ (.declLocal p x none) = .ok (σ.push (t := .val p) (PrimTy.dflt p)) := rfl
@@ -217,7 +206,7 @@ theorem Args.trunSt_declsThen {Δ : Ctx} (σ : TState C Γ) : {ps : Ctx} → (as
     | error => rfl
     | ok a =>
       show Prog.trunSt _ (.cons _ rest) = (e.evalT σ >>= fun v => pure (v, a)).bind _
-      rw [Prog.trunSt_cons, Stmt.trunSt_declLocal_some, Val.evalT_unders]
+      rw [Prog.trunSt_cons, Stmt.trunSt_declLocal, Val.evalT_unders]
       cases e.evalT σ <;> rfl
 
 /-- **The return variables declared** at their defaults. -/
@@ -238,11 +227,6 @@ theorem Stmt.trun_block_wk {ρ Δ Γf : Ctx} (body : Prog C ρ Γf) (h : Thin ρ
     Stmt.trun (τ.lift h d) (.block (body.wk h).2.2) =
       liftedT h d ((Prog.trun τ body).map (Out.drop body.ext)) :=
   (TWkRel.drop (Prog.wk_over body h) (Prog.trun_wk body h τ d)).eq_lifted
-
-theorem Prog.trunSt_single {Γ' : Ctx} (σ : TState C Γ) (s : Stmt C Γ Γ') :
-    Prog.trunSt σ (.cons s .nil) = Stmt.trunSt σ s := by
-  rw [Prog.trunSt_cons]
-  cases Stmt.trunSt σ s <;> rfl
 
 /-- The caller's state with a frame's locals pushed, read as the frame's state
 lifted (`Thin.atop`). -/
@@ -432,7 +416,7 @@ theorem Premise.tsound_callCaptureNone {ps Γf : Ctx} (k : Nat) (f : Name) (args
     Premise.TSound m (.call f args .none body)
       (.capture p (fse k) v (.call f as' .none body)) σ := by
   refine Premise.tsound_unfold σ ?_
-  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal_some]
+  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
   show _ = (TRun.call args .none body.ext body.trunR σ).map (·.st)
   rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
   cases v.evalT σ with
@@ -458,7 +442,7 @@ theorem Premise.tsound_callCaptureVal {ps Γf : Ctx} (k : Nat) (f : Name) (args 
     Premise.TSound m (.call f args (.val q r res) body)
       (.capture p (fse k) v (.call f as' (.val q r (res.map .there)) body)) σ := by
   refine Premise.tsound_unfold σ ?_
-  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal_some]
+  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
   show _ = (TRun.call args (.val q r res) body.ext body.trunR σ).map (·.st)
   rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
   cases v.evalT σ with
@@ -486,7 +470,7 @@ theorem Premise.tsound_callCaptureRets {ps rs Γf : Ctx} (k : Nat) (f : Name) (a
       (.inline (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.rets bs) body) .nil))
         (Thin.keepAll rs (.drop .refl))) σ := by
   refine Premise.tsound_inline σ ?_
-  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal_some]
+  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
   show _ = (TRun.call args (.rets bs) body.ext body.trunR σ).map (·.st)
   rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
   cases v.evalT σ with
@@ -518,7 +502,7 @@ theorem Premise.tsound_callCaptureMem {ps Γf : Ctx} (k : Nat) (f : Name) (args 
           (.cons (.call f as' (.mem R r hd hm) body) .nil))
         (.keep (.drop .refl))) σ := by
   refine Premise.tsound_inline σ ?_
-  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal_some]
+  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
   show _ = (TRun.call args (.mem R r hd hm) body.ext body.trunR σ).map (·.st)
   rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
   cases v.evalT σ with

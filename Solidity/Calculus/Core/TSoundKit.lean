@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.TProvesSound
+import Solidity.Typing.StraightRun
 
 /-!
 # Premise shapes over the typed state
@@ -260,5 +261,430 @@ theorem Premise.tsound_done {s : Stmt C Γ Γ'} (σ : TState C Γ) (b : Bool)
     exact ⟨trivial, fun h => hp (Except.error.inj h)⟩
 
 end Shapes
+
+/-! ## The per-arm statement
+
+Each arm of `Stmt.step` proves, for its statement, that the premise it
+gives is sound in a typed state `σ` (`Premise.TSound`): its theorem is named
+as M3's with `tsound` for `sound` (`localStep_sound` → `localStep_tsound`)
+and takes `σ` first, then the arm's arguments, the premise `q` and
+`hq : …Step k … = some q`.  An arm that is sound only under a condition (a
+push at the bound under the diamond) takes it as a hypothesis. -/
+
+/-- **The rule of `s` is sound over the typed state**, in every typed state
+(`Stmt.StepSound`, over `TState`). -/
+def Stmt.TStepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
+  ∀ σ : TState C Γ, ∀ p, s.step k m = some p → Premise.TSound m s p σ
+
+/-! ## Runs that halt alike
+
+A rule that captures a part evaluates it first, where the statement may read
+another part first; the two runs then halt alike but maybe not with the same
+halt, which a modality does not tell apart but for a panic
+(`Modality.afterRunTR`): `Res.Sim`, over the typed run. -/
+
+section Sim
+
+variable {α β : Type}
+
+/-- The same state, or two halts that are both panics or both not. -/
+def TRes.Sim : TRes α → TRes α → Prop
+  | .ok a, .ok b => a = b
+  | .error e, .error e' => (e = .panic ↔ e' = .panic)
+  | _, _ => False
+
+theorem TRes.Sim.refl (r : TRes α) : TRes.Sim r r := by
+  cases r <;> simp only [TRes.Sim, iff_self]
+
+theorem TRes.Sim.of_eq {r r' : TRes α} (h : r = r') : TRes.Sim r r' := h ▸ TRes.Sim.refl r
+
+theorem TRes.Sim.bind {r r' : TRes α} (h : TRes.Sim r r') (f : α → TRes β) :
+    TRes.Sim (r.bind f) (r'.bind f) := by
+  match r, r', h with
+  | .ok a, .ok b, h => cases h; exact TRes.Sim.refl _
+  | .error _, .error _, h => exact h
+
+theorem TRes.Sim.afterRunTR {m : Modality} {p : α → Prop} {r r' : TRes α} (h : TRes.Sim r r') :
+    m.afterRunTR p r → m.afterRunTR p r' := by
+  match r, r', h with
+  | .ok a, .ok b, h => cases h; exact id
+  | .error e, .error e', h =>
+    rintro ⟨h₁, h₂⟩
+    exact ⟨h₁, fun he => h₂ (by rw [h.2 (Except.error.inj he)])⟩
+
+/-- An error, its halt not a panic, against a run that does not panic and
+does not end. -/
+theorem TRes.Sim.err {r : TRes α} {e : THalt} (he : e ≠ .panic) (hr : r ≠ .error .panic)
+    (hok : ∀ a, r ≠ .ok a) : TRes.Sim (.error e) r := by
+  match r with
+  | .ok a => exact absurd rfl (hok a)
+  | .error e' => exact ⟨fun h => absurd h he, fun h => absurd (h ▸ rfl) hr⟩
+
+end Sim
+
+/-! ## The premise shapes, up to the halt -/
+
+section ShapesSim
+
+variable {Γ Γ' : Ctx} {m : Modality}
+
+/-- **A block** is sound when it runs as the statement up to the halt, its
+fresh locals popped. -/
+theorem Premise.tsound_unfoldSim {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Ext Γ' Γ''}
+    {s : Stmt C Γ Γ'} (σ : TState C Γ)
+    (hs : TRes.Sim ((Prog.trunSt σ P).map (TState.drop h)) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.unfold P h) σ := by
+  intro _ _ ω κ φ hp
+  have h' := (tholds_modal_iff σ P (.pop .capture h (.seq ω κ)) φ).1 hp
+  rw [tholds_modal_iff, trunSt_cons_frames]
+  have e : (Prog.trunSt σ P).bind (Frames.trunSt · (.pop .capture h (.seq ω κ))) =
+      ((Prog.trunSt σ P).map (TState.drop h)).bind fun τ =>
+        (Prog.trunSt τ ω).bind (Frames.trunSt · κ) := by
+    cases Prog.trunSt σ P with
+    | error => rfl
+    | ok τ =>
+      show Frames.trunSt τ (.pop .capture h (.seq ω κ)) = _
+      rw [Frames.trunSt_pop, Frames.trunSt_seq]
+      rfl
+  rw [e] at h'
+  exact (hs.bind _).afterRunTR h'
+
+/-- A one-statement sequence runs as its statement. -/
+theorem Prog.trunSt_single {Γ' : Ctx} (σ : TState C Γ) (s : Stmt C Γ Γ') :
+    Prog.trunSt σ (.cons s .nil) = Stmt.trunSt σ s := by
+  rw [Prog.trunSt_cons]
+  cases Stmt.trunSt σ s <;> rfl
+
+/-- `T se = nse;`, typed: the value read, then pushed. -/
+theorem Stmt.trunSt_declLocal (σ : TState C Γ) (p : PrimTy) (x : Var) (e : Val C Γ p) :
+    Stmt.trunSt σ (.declLocal p x (some e)) = (e.evalT σ).map fun v => σ.push (t := .val p) v := by
+  show (TRun.declLocal p (some e) σ).map _ = _
+  simp only [TRun.declLocal]
+  cases e.evalT σ <;> rfl
+
+/-- `T storage sp = nsp;`, typed: the path resolved, then pushed. -/
+theorem Stmt.trunSt_declStorage (σ : TState C Γ) (R : RefTy) (x : Var) (b : SPath C Γ (.ref R)) :
+    Stmt.trunSt σ (.declStorage R x (some (.path b))) =
+      (b.resolveT σ).map fun q => σ.push (t := .alias R) (some q) := by
+  show (TRun.declStorage R (some (.path b)) σ).map _ = _
+  simp only [TRun.declStorage, ARhs.evalT]
+  cases b.resolveT σ <;> rfl
+
+/-- `T memory mv = nmp;`, typed: the object read, then pushed. -/
+theorem Stmt.trunSt_declMem (σ : TState C Γ) (R : RefTy) (x : Var) (b : MPath C Γ (.ref R)) :
+    Stmt.trunSt σ (.declMem R x (some (.alias b)) rfl b.mapFree) =
+      (b.mvalT σ).map fun r => σ.push (t := .mem R) r := by
+  show (TRun.declMem R (some (.alias b)) b.mapFree σ).map _ = _
+  simp only [TRun.declMem, MRhs.evalT]
+  cases b.mvalT σ <;> rfl
+
+/-- A declaration, then a statement on top of it, its local popped: the
+declaration's outcome, then the statement's. -/
+theorem trunSt_declThen {t : LTy} (σ : TState C Γ) (d : Stmt C Γ (t :: Γ))
+    (s' : Stmt C (t :: Γ) (t :: Γ)) :
+    (Prog.trunSt σ (.cons d (.cons s' .nil))).map (TState.drop (.push .refl)) =
+      (Stmt.trunSt σ d).bind fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl)) := by
+  rw [Prog.trunSt_cons]
+  cases Stmt.trunSt σ d with
+  | error => rfl
+  | ok τ =>
+    show (Prog.trunSt τ (.cons s' .nil)).map _ = _
+    rw [Prog.trunSt_single]
+    rfl
+
+/-- **A value captured**, by what the statement does with the value (`G`):
+the statement on top of the local runs as `G`, and the statement is the value
+read, then `G`, up to the halt. -/
+theorem Premise.tsound_captureK {p : PrimTy} {x : Var} {e : Val C Γ p}
+    {s' : Stmt C (.val p :: Γ) (.val p :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (G : p.Denote → TRes (TState C Γ))
+    (hs' : ∀ v, (Stmt.trunSt (σ.push (t := .val p) v) s').map (TState.drop (.push .refl)) = G v)
+    (hs : TRes.Sim ((e.evalT σ).bind G) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.capture p x e s') σ := by
+  refine Premise.tsound_unfoldSim σ ?_
+  rw [trunSt_declThen, Stmt.trunSt_declLocal]
+  have : ((e.evalT σ).map fun v => σ.push (t := .val p) v).bind
+      (fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl))) = (e.evalT σ).bind G := by
+    cases e.evalT σ with
+    | error => rfl
+    | ok v => exact hs' v
+  rw [this]; exact hs
+
+/-- **A storage path captured**, by what the statement does with the
+reference. -/
+theorem Premise.tsound_captureSPK {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
+    {s' : Stmt C (.alias R :: Γ) (.alias R :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (G : SRef C (.ref R) → TRes (TState C Γ))
+    (hs' : ∀ q, (Stmt.trunSt (σ.push (t := .alias R) (some q)) s').map
+      (TState.drop (.push .refl)) = G q)
+    (hs : TRes.Sim ((b.resolveT σ).bind G) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.captureSP x b s') σ := by
+  refine Premise.tsound_unfoldSim σ ?_
+  rw [trunSt_declThen, Stmt.trunSt_declStorage]
+  have : ((b.resolveT σ).map fun q => σ.push (t := .alias R) (some q)).bind
+      (fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl))) = (b.resolveT σ).bind G := by
+    cases b.resolveT σ with
+    | error => rfl
+    | ok q => exact hs' q
+  rw [this]; exact hs
+
+/-- **A memory path captured**, by what the statement does with the
+object. -/
+theorem Premise.tsound_captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
+    {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (G : MVal σ.H (.ref R) → TRes (TState C Γ))
+    (hs' : ∀ r, (Stmt.trunSt (σ.push (t := .mem R) r) s').map
+      (TState.drop (.push .refl)) = G r)
+    (hs : TRes.Sim ((b.mvalT σ).bind G) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.captureMV x b s') σ := by
+  refine Premise.tsound_unfoldSim σ ?_
+  rw [trunSt_declThen, Stmt.trunSt_declMem]
+  have : ((b.mvalT σ).map fun r => σ.push (t := .mem R) r).bind
+      (fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl))) = (b.mvalT σ).bind G := by
+    cases b.mvalT σ with
+    | error => rfl
+    | ok r => exact hs' r
+  rw [this]; exact hs
+
+end ShapesSim
+
+/-! ## An update, through the bridge
+
+An update rule's update is a term of `Update.lean`, read on the erasure, so
+what it needs of the typed run (`Premise.tsound_update`) follows from M3's
+equation with the scoped run (`Premise.Sound.update`'s `U.apply σ = s.run σ`)
+by the bridge (`Stmt.trun_erase`), where the typed run does not diverge: a
+typed `diverge` agrees with any untyped outcome, so under the diamond the
+arm asks that it does not happen (a push at the bound). -/
+
+section Bridge
+
+variable {Γ Γ' : Ctx} {m : Modality}
+
+/-- **An update, through the bridge, up to the halt**: an update that ends
+as the scoped run of the statement does from the erasure, up to the halt
+(`Res.Sim`), is sound over the typed state, on the bridge
+(`Stmt.bridgeOk`), where the typed run does not diverge under the
+diamond. -/
+theorem Premise.tsound_updateSim_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
+    (hb : s.bridgeOk = true) (hs : Res.Sim (U.apply σ.erase) (s.run σ.erase))
+    (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.TSound m s (.update U) σ := by
+  have ha := Stmt.trun_erase σ s hb
+  have hU := Upd.apply_noPanic σ.erase U
+  apply Premise.tsound_update σ
+  · intro τ hτ
+    simp only [Stmt.trunSt] at hτ
+    cases ht : s.trun σ with
+    | error => rw [ht] at hτ; cases hτ
+    | ok o =>
+      rw [ht] at hτ ha
+      obtain rfl : o.st = τ := Except.ok.inj hτ
+      have ha' : s.run σ.erase = .ok o.st.erase := ha
+      rw [ha'] at hs
+      revert hs
+      cases U.apply σ.erase with
+      | ok a => intro hs; exact congrArg Except.ok hs
+      | error => intro hs; exact hs.elim
+  · intro e he
+    simp only [Stmt.trunSt] at he
+    cases ht : s.trun σ with
+    | ok o => rw [ht] at he; cases he
+    | error e' =>
+      rw [ht] at he ha
+      obtain rfl : e' = e := Except.error.inj he
+      cases e' with
+      | revert =>
+        have ha' : s.run σ.erase = .error .revert := ha
+        rw [ha'] at hs
+        revert hs
+        cases U.apply σ.erase with
+        | ok => intro hs; exact hs.elim
+        | error e'' => exact fun _ => ⟨nofun, fun _ => ⟨e'', rfl⟩⟩
+      | panic =>
+        have ha' : s.run σ.erase = .error .panic := ha
+        rw [ha'] at hs
+        revert hs hU
+        cases U.apply σ.erase with
+        | ok => intro hs _; exact hs.elim
+        | error e'' => exact fun hs hU => absurd (congrArg Except.error (hs.2 rfl)) hU
+      | diverge => exact ⟨nofun, fun hm => absurd ht (hd hm)⟩
+
+/-- **An update, through the bridge**: an update that ends as the scoped run
+of the statement does from the erasure (M3's `Premise.Sound.update`'s
+equation). -/
+theorem Premise.tsound_update_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
+    (hb : s.bridgeOk = true) (hs : U.apply σ.erase = s.run σ.erase)
+    (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.TSound m s (.update U) σ :=
+  Premise.tsound_updateSim_run σ hb (hs ▸ Res.Sim.refl _) hd
+
+theorem tholds_conj {σ : TState C Γ} :
+    (l : List (Fml C Γ)) → (tholds σ (Fml.conj l) ↔ ∀ ψ ∈ l, tholds σ ψ)
+  | [] => by simp only [Fml.conj, tholds, List.not_mem_nil, false_implies, implies_true]
+  | [φ] => by simp only [Fml.conj, List.mem_singleton, forall_eq]
+  | φ :: ψ :: l => by
+    show tholds σ φ ∧ tholds σ (Fml.conj (ψ :: l)) ↔ _
+    rw [tholds_conj (ψ :: l)]
+    simp only [List.mem_cons, forall_eq_or_imp]
+
+/-- **Labelled goals, through the bridge**: the formulas `fs`, then the rest
+after each update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas holding,
+the statement runs as one of the updates up to the halt from the erasure. -/
+theorem Premise.tsound_cases_run {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
+    (σ : TState C Γ) (hb : s.bridgeOk = true)
+    (h : (∀ f ∈ fs, tholds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ.erase) (s.run σ.erase))
+    (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.TSound m s (.cases fs us) σ := by
+  intro Γ₁ Γ₀ ω κ φ hp
+  have hp' := (tholds_conj _).1 hp
+  obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
+  exact Premise.tsound_updateSim_run σ hb hs hd ω κ φ
+    (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
+
+end Bridge
+
+/-! ## A shifted part reads as it did, typed
+
+`Calculus/Core/Logic.lean`'s "A shifted part reads as it did" over the
+typed state: a rule reads the parts of its `\find` under its fresh local
+(`Val.up` and its kin, `Calculus/Core/Shift.lean`), and the state with a
+local pushed is the state lifted along `up` (`TState.push_lift`), so each
+is `Semantics/Core/TypedRunWk.lean`'s `*_wk` at `up`. -/
+
+section Shift
+
+variable {Γ : Ctx} {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H)
+
+theorem TState.push_lift : σ.push w = σ.lift Core.up (w, σ.env) := rfl
+
+theorem Simple.evalT_up {p : PrimTy} (s : Simple C Γ p) :
+    (s.up (t := t)).evalT (σ.push w) = s.evalT σ := by
+  rw [Simple.up_eq]; exact Simple.evalT_wk Core.up σ (w, σ.env) s
+
+theorem SPath.resolveT_up {T : Ty} (b : SPath C Γ T) :
+    (b.up (t := t)).resolveT (σ.push w) = b.resolveT σ := by
+  rw [SPath.up_eq]; exact SPath.resolveT_wk Core.up σ (w, σ.env) b
+
+theorem Loc.resolveT_up {T : Ty} (l : Loc C Γ T) :
+    (l.up (t := t)).resolveT (σ.push w) = l.resolveT σ := by
+  rw [Loc.up_eq]; exact Loc.resolveT_wk Core.up σ (w, σ.env) l
+
+theorem MPath.mvalT_up {T : Ty} (b : MPath C Γ T) :
+    (b.up (t := t)).mvalT (σ.push w) = b.mvalT σ := by
+  rw [MPath.up_eq]; exact MPath.mvalT_wk Core.up σ (w, σ.env) b
+
+theorem MLoc.addrT_up {T : Ty} (l : MLoc C Γ T) :
+    (l.up (t := t)).addrT (σ.push w) = l.addrT σ := by
+  rw [MLoc.up_eq]; exact MLoc.addrT_wk Core.up σ (w, σ.env) l
+
+theorem Val.evalT_up {p : PrimTy} (v : Val C Γ p) :
+    (v.up (t := t)).evalT (σ.push w) = v.evalT σ := by
+  rw [Val.up_eq]; exact Val.evalT_wk Core.up σ (w, σ.env) v
+
+theorem Src.valueT_up {T : Ty} (r : Src C Γ T) :
+    (r.up (t := t)).valueT (σ.push w) = r.valueT σ := by
+  rw [Src.up_eq]; exact Src.valueT_wk Core.up σ (w, σ.env) r
+
+theorem MSrc.mvalT_up {T : Ty} (r : MSrc C Γ T) :
+    (r.up (t := t)).mvalT (σ.push w) = r.mvalT σ := by
+  rw [MSrc.up_eq]; exact MSrc.mvalT_wk Core.up σ (w, σ.env) r
+
+theorem ARhs.evalT_up {R : RefTy} (r : ARhs C Γ R) :
+    (r.up (t := t)).evalT (σ.push w) = r.evalT σ := by
+  rw [ARhs.up_eq]; exact ARhs.evalT_wk Core.up σ (w, σ.env) r
+
+theorem TState.get_push_here : (TEnv.get .here (σ.push w).env : t.TDenote C σ.H) = w := rfl
+
+theorem TState.get_push_there {u : LTy} (i : Idx Γ u) :
+    (TEnv.get i.there (σ.push w).env : u.TDenote C σ.H) = TEnv.get i σ.env := rfl
+
+theorem TState.push_setLocal {u : LTy} (i : Idx Γ u) (x : u.TDenote C σ.H) :
+    (σ.push w).setLocal i.there x = (σ.setLocal i x).push w := rfl
+
+theorem TState.drop_push : (σ.push w).drop (.push .refl) = σ := rfl
+
+/-- An outcome lifted along `up`, its top local popped: the outcome. -/
+theorem liftedT_up_drop (r : TRes (Out C σ.H Γ)) :
+    ((liftedT Core.up (w, σ.env) r).map (·.st)).map (TState.drop (.push .refl)) = r.map (·.st) := by
+  cases r <;> rfl
+
+end Shift
+
+/-! ## Captures, up to the halt
+
+`Calculus/Core/SoundCapture.lean`'s capture shapes over the typed run: the
+statement on top of the captured part runs as the statement, and where the
+part halts the statement halts alike (`TRes.Sim`; no expression panics,
+`Val.evalT_noPanic`). -/
+
+section CaptureSim
+
+variable {Γ : Ctx} {m : Modality}
+
+/-- A run that reads a part that does not panic first halts alike to `h`
+when what follows does. -/
+theorem TRes.Sim.err_bind {α β : Type} {X : TRes α} (hX : X.NoPanic) {h : THalt}
+    (hh : h ≠ .panic) {f : α → TRes β} (hf : ∀ a, X = .ok a → TRes.Sim (.error h) (f a)) :
+    TRes.Sim (.error h) (X.bind f) := by
+  cases hx : X with
+  | ok a => exact hf a hx
+  | error h' =>
+    rw [hx] at hX
+    exact ⟨fun e => absurd e hh, fun e => absurd (congrArg Except.error e) hX⟩
+
+theorem TRes.Sim.err_refl {α : Type} {h : THalt} {r : TRes α} (hr : r = .error h) :
+    TRes.Sim (.error h) r := hr ▸ TRes.Sim.refl _
+
+/-- **A value captured**: `T se = nse; s'` gives `s`, `s'` running as `s`
+with the value on top, and `s` halting alike where `nse` halts. -/
+theorem Premise.tsound_captureSim {p : PrimTy} {x : Var} {e : Val C Γ p}
+    {s' : Stmt C (.val p :: Γ) (.val p :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (hok : ∀ v, e.evalT σ = .ok v →
+      (Stmt.trunSt (σ.push (t := .val p) v) s').map (TState.drop (.push .refl)) = Stmt.trunSt σ s)
+    (herr : ∀ h, e.evalT σ = .error h → h ≠ .panic → TRes.Sim (.error h) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.capture p x e s') σ := by
+  refine Premise.tsound_captureK σ
+    (fun v => (Stmt.trunSt (σ.push (t := .val p) v) s').map (TState.drop (.push .refl)))
+    (fun _ => rfl) ?_
+  cases he : e.evalT σ with
+  | ok v => exact TRes.Sim.of_eq (hok v he)
+  | error h => exact herr h he fun hp => Val.evalT_noPanic σ e (hp ▸ he)
+
+/-- **A storage path captured**: `T storage sp = nsp; s'`. -/
+theorem Premise.tsound_captureSPSim {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
+    {s' : Stmt C (.alias R :: Γ) (.alias R :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (hok : ∀ q, b.resolveT σ = .ok q →
+      (Stmt.trunSt (σ.push (t := .alias R) (some q)) s').map (TState.drop (.push .refl)) =
+        Stmt.trunSt σ s)
+    (herr : ∀ h, b.resolveT σ = .error h → h ≠ .panic → TRes.Sim (.error h) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.captureSP x b s') σ := by
+  refine Premise.tsound_captureSPK σ
+    (fun q => (Stmt.trunSt (σ.push (t := .alias R) (some q)) s').map (TState.drop (.push .refl)))
+    (fun _ => rfl) ?_
+  cases hb : b.resolveT σ with
+  | ok q => exact TRes.Sim.of_eq (hok q hb)
+  | error h => exact herr h hb fun hp => SPath.resolveT_noPanic σ b (hp ▸ hb)
+
+/-- **A memory path captured**: `T memory mv = nmp; s'`. -/
+theorem Premise.tsound_captureMVSim {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
+    {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (hok : ∀ r, b.mvalT σ = .ok r →
+      (Stmt.trunSt (σ.push (t := .mem R) r) s').map (TState.drop (.push .refl)) = Stmt.trunSt σ s)
+    (herr : ∀ h, b.mvalT σ = .error h → h ≠ .panic → TRes.Sim (.error h) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.captureMV x b s') σ := by
+  refine Premise.tsound_captureMVK σ
+    (fun r => (Stmt.trunSt (σ.push (t := .mem R) r) s').map (TState.drop (.push .refl)))
+    (fun _ => rfl) ?_
+  cases hb : b.mvalT σ with
+  | ok r => exact TRes.Sim.of_eq (hok r hb)
+  | error h => exact herr h hb fun hp => MPath.mvalT_noPanic σ b (hp ▸ hb)
+
+/-- When the box's statement halts, not in a panic, any premise gives it. -/
+theorem Premise.tsound_of_halt {Γ' : Ctx} {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'}
+    (σ : TState C Γ) {e : THalt} (he : Stmt.trunSt σ s = .error e) (hp : e ≠ .panic) :
+    Premise.TSound .box s p σ := by
+  intro _ _ ω κ φ _
+  rw [tholds_modal_iff, trunSt_cons_frames, he]
+  exact ⟨trivial, fun h => hp (Except.error.inj h)⟩
+
+end CaptureSim
 
 end Solidity.Core
