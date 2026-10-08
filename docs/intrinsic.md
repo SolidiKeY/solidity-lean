@@ -1590,6 +1590,23 @@ the printers' target, with no run, no taclet and no `wt`; every semantics is
 on Core. W0 is done: `Core.Proves.valid` is unconditional, and the
 elaborator's output is `Fresh` (`ReachableU → Reachable`).
 
+
+Decisions 12–14 (lead, 2026-10-08), answering the `sound` lane's three
+questions (W2 section):
+
+12. *Hidden binder at a memory type*: option (c). `Fml.bind` takes the
+    modality; under the diamond it asks for an inhabitant of the binder's
+    typed domain, under the box it stays universal. Printed as today; memory
+    locals stay non-dangling.
+13. *Array length past `uint`'s range*: bounded by the type. A dynamic
+    array's typed value carries `length < 2^256` (push at the bound
+    reverts, as an out-of-gas stand-in, with a solc-alignment row), so the
+    typed run never diverges on a length read and `len` on an erasure is in
+    range.
+14. *`bool` mapping key*: `Update.lean`'s key read (and M3's run) hash a
+    `bool` as 0/1, as solc and the typed run do; `bridgeOk` drops its
+    bool-key exclusion.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
