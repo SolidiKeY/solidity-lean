@@ -138,35 +138,38 @@ theorem getStores :
   sol_symex
   sol_close
 
+/-- One rule at a time: `tryCallNoCallbackBox` leaves a goal per clause, the
+success block's for every value of `v` (`allRight`). -/
+theorem getWalk :
+    ⊨ dl!{ [ try I(7).get() returns (uint v) { last = v; } catch { last = 0; }; ] true } := by
+  apply Proves.valid
+  apply branches .tryCallNoCallbackBox <;>
+      (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
+        and_true]) <;>
+    (try and_intros)
+  · apply allRight
+    apply update .storageRootWriteStore
+    refine close ?_
+    sol_symex
+    sol_close
+  all_goals
+    apply update .storageRootWriteStore
+    refine close ?_
+    sol_symex
+    sol_close
+
 end Solidity.Examples.Tactics.TryCatch
 
 /-! ## Read without the switch
 
-The walk through `tryCallNoCallbackBox`'s goals (today's `Fml.alls` of each
-clause's binders) and the callback reading (`ValidC`, `Invariant`:
-`Calculus/Core/Callback.lean`'s `ProvesC` has no soundness yet,
-`docs/intrinsic.md` W2 `tree`). -/
+The callback reading (`ValidC`, `Invariant`: `Calculus/Core/Callback.lean`'s
+`ProvesC` has no soundness yet, `docs/intrinsic.md` W2 `tree` and CORE 2). -/
 
 namespace Solidity.Examples.Tactics.TryCatch
 
 open Proves Semantics
 
 local instance : InContract := ⟨Pinger⟩
-
-/-- One rule at a time: `tryCallNoCallbackBox` leaves a goal per clause, the
-success block's for every value of `v`. -/
-theorem getWalk :
-    ⊨ dl!{ [ try I(7).get() returns (uint v) { last = v; } catch { last = 0; }; ] true } := by
-  apply Proves.valid
-  apply branches .tryCallNoCallbackBox
-  simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true,
-    Fml.alls, codeBinders, Option.toList, List.map]
-  refine ⟨allIntro ?_, ?_, ?_, ?_⟩ <;>
-  · sol_derive
-    all_goals
-      refine close ?_
-      sol_symex
-      sol_close
 
 /-! ## Proving, with callbacks
 

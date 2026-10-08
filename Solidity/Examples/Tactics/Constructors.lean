@@ -1,6 +1,10 @@
 import Solidity.Calculus.Problem
 import Solidity.Tools.Run
 import Solidity.Tools.Inspect
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.Deploy
+import Solidity.Tools.CoreInspect
 
 /-!
 # Constructors: a deployment from the empty storage
@@ -29,6 +33,10 @@ unspecified one writes `{storage := mtSt || net := mtSt}`, an empty ledger
 
 `z == 0` below is what needs `mtSt`: the constructor never writes `z`, so
 only the empty storage says what it holds.
+
+The formulas read scoped (`open scoped Solidity.Core.Surface`): a
+parameter is bound by `∀`, an obligation is `Core.Fml C []`, its problem
+file and its reading at `Contract.deploy` are `Calculus/Core/Deploy.lean`'s.
 -/
 
 namespace Solidity.Examples.Tactics.Constructors
@@ -42,6 +50,8 @@ def Mini : Contract := contract!{
 }
 
 local instance : InContract := ⟨Mini⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## Deploying it in the interpreter -/
 
@@ -74,14 +84,17 @@ theorem deployMini :
       { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
         selfBalance := msg.value }
       ⟨ constructor(a); ⟩ (x == 5 ∧ y == a ∧ z == 0) } := by
+  sol_prove
+  refine Proves.close ?_
   sol_symex
   sol_close_mt
 
 -- the update prints as solkey writes it
 /--
 info: dl{
-  { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖ selfBalance := msg.value }
-    ⟨ constructor(a); ⟩ find(storage, z) = 0 } : Fml Mini
+  ∀ uint a;
+    { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖ selfBalance := msg.value }
+      ⟨ constructor(a); ⟩ find(storage, z) = 0 } : Core.Fml Mini []
 -/
 #guard_msgs in #check dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
   selfBalance := msg.value } ⟨ constructor(a); ⟩ z == 0 }
@@ -103,7 +116,7 @@ specified problem's update, which books the payment. -/
 info: dl{
   ∀ uint a;
     { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖ selfBalance := msg.value }
-      ⟨ constructor(a); ⟩ true } : Fml Mini
+      ⟨ constructor(a); ⟩ true } : Core.Fml Mini []
 -/
 #guard_msgs in #check problem!{ constructor }
 
@@ -116,24 +129,31 @@ info: \programVariables {
     {storage := mtSt || net := storeSt(mtSt, at(msgSender), msgValue) || selfBalance := msgValue} \<{ constructor(a)@Mini; }\>(true)
 }
 -/
-#guard_msgs in #eval IO.println (Problem.text "Mini" "constructor" problem!{ constructor })
+#guard_msgs in #eval IO.println (Core.Problem.text "Mini" "constructor" problem!{ constructor })
 
-/-- The obligation, derived: every argument deploys
-(`Problem.deploy_of_valid` reads it at `Contract.deployState`). -/
+/-- The obligation, derived: every argument deploys. -/
 theorem miniProblem : ⊨ problem!{ constructor } := by
+  sol_prove
+  refine Proves.close ?_
   sol_symex
   sol_close_mt
 
 /-- A derived obligation of no parameters is a theorem about
-`Contract.deploy` (`Problem.deploy_of_valid_nil`): `constructor(7);` runs
-for every deployer sending no value. -/
+`Contract.deploy` (`Core.Problem.deploy_of_valid_nil`, the erasure of its
+program run from `Contract.deployState`): `constructor(7);` runs for every
+deployer sending no value. -/
 example (tx : Semantics.TxEnv) (hv : tx.msgValue = 0) :
-    Modality.diamond.afterRun (fun _ => True) (Mini.deploy sol{ constructor(7); } tx) :=
-  Problem.deploy_of_valid_nil (by
-    show ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
-      selfBalance := msg.value } ⟨ constructor(7); ⟩ true }
+    Modality.diamond.afterRun (fun _ => True) (Mini.deploy sol{ constructor(7); } tx) := by
+  have h : ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+      selfBalance := msg.value } ⟨ constructor(7); ⟩ true } := by
+    sol_prove
+    refine Proves.close ?_
     sol_symex
-    sol_close_mt) tx (.inr hv)
+    sol_close_mt
+  refine Core.Problem.deploy_of_valid_nil h ?_ tx (.inr hv)
+  simp only [Core.Prog.Fresh, Core.Stmt.Fresh, List.mem_append, List.not_mem_nil,
+    not_false_eq_true, and_self, implies_true, and_true, true_and]
+  decide
 
 /-! ## What a deployment runs first
 
@@ -279,12 +299,14 @@ def Counter : Contract := contract!{
 
 local instance : InContract := ⟨Counter⟩
 
+open scoped Solidity.Core.Surface
+
 /--
 info: dl{
   ((0 <= start ∧ start <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
         msg.value = 0) →
     { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖ selfBalance := msg.value }
-      [ constructor(start); ] (find(storage, limit) = 5 ∧ find(storage, count) = start) } : Fml Counter
+      [ constructor(start); ] (find(storage, limit) = 5 ∧ find(storage, count) = start) } : Core.Fml Counter []
 -/
 #guard_msgs in #check spec!{ constructor }
 
@@ -372,13 +394,14 @@ info: dl{
   (msg.value >= 0 ∧ msg.value < 1000) →
     { storage := mtSt ‖ old := mtSt ‖ oldNet := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
         selfBalance := msg.value }
-      [ constructor(); ] net(msg.sender) = net(oldNet, msg.sender) + msg.value } : Fml Booked
+      [ constructor(); ] net(msg.sender) = net(oldNet, msg.sender) + msg.value } : Core.Fml Booked []
 -/
 #guard_msgs in #check spec[Booked]{ constructor }
 
--- `oldNet := mtSt` reads back as the ledger snapshot, not a storage variable
-example : (match (dl[Booked]{ { oldNet := mtSt } true } : Fml Booked) with
-    | .upd _ [.saveNetMt _] _ => true
+-- `oldNet := mtSt` reads back as the ledger snapshot, declared at its own
+-- type (`LTy.oldNet`), not a storage variable
+example : (match (dl[Booked]{ { oldNet := mtSt } true } : Core.Fml Booked []) with
+    | .upd _ (.decl (t := .oldNet) .nil _ .saveNetMt) _ => true
     | _ => false) = true := rfl
 
 theorem booked_constructor : ⊨ spec[Booked]{ constructor } := by

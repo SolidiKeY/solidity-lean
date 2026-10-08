@@ -24,7 +24,7 @@ extent, a struct its mapping members).  Reading it back:
 | a path apart from `p`, in the sequent | the Theory's lemmas (`sol_rw`) | `deleteFrame_theory` |
 | a path apart from `p`, mid-program | the same, with the program still to run | `deleteFrameMid_theory` |
 | a member below `p` | a run from the initial store | the `#eval`s at the end |
-| `p`, with nothing known of it | not valid | `deleteRootUnknown` |
+| `p`, with nothing known of it | `wt(storage)`, `sol_prove` | `deleteRootUnknown` |
 
 A read *below* a deleted struct reads the default of a member of a value
 `sol_close` does not know (`Close.lean`), so those claims are checked on a run
@@ -159,6 +159,14 @@ theorem deleteThenReadBeside :
   sol_symex
   sol_close
 
+/-- `delete total;` then `total == 0`, with nothing written first: valid in
+a well-typed storage, where `total` holds the `uint` it is declared as.
+Over today's untyped storage it was refuted (a `bool` there resets to
+`false`); `wt(storage)` describes the typed states. -/
+theorem deleteRootUnknown :
+    ⊨ dl!{ defined(wt(storage)) → [ delete total; ] total == 0 } := by
+  sol_prove
+
 /-! ### Below a deleted struct, from the initial store
 
 `alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;`
@@ -258,8 +266,7 @@ end Solidity.Examples.Tactics.StorageDelete
 
 Today's sequent rules on updates (`merge`, `mergeStorage`, the Theory's
 laws), which the scoped sequent does not have (`Calculus/Core/Proves.lean`:
-the program rules, `close` on the erasure), and a storage holding a `bool`
-where a `uint` is declared, which only today's untyped storage holds.
+the program rules, `close` on the erasure).
 
 ### Reading after a delete, in the sequent
 
@@ -344,14 +351,5 @@ theorem deleteFrameMid_theory :
   -- dl{ ⟹ 7 + 1 = 8 }
   refine close ?_
   sol_close
-
-/-- The storage in which `total` holds a `bool`. -/
-def boolTotal : State := { State.exampleStore with storage := [("total", .bool true)] }
-
-/-- `delete total;` then `total == 0` is **not** valid: `⊨` ranges over every
-state, and where `total` holds a `bool` the delete resets it to `false`.  A
-write first fixes what is there (`deleteThenRead`). -/
-theorem deleteRootUnknown : ¬ (⊨ dl!{ [ delete total; ] total == 0 }) :=
-  fun h => by obtain ⟨x, hx, hy⟩ := holds_eqD_iff.1 (h boolTotal).1; cases hx; cases hy
 
 end Solidity.Examples.Tactics.StorageDelete

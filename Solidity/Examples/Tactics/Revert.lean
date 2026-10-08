@@ -99,19 +99,19 @@ theorem requireBox : ⊢ dl!{ [ require(a == b); x = a; ] x == b } := by
   apply unfold .requireConditionCapture
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  -- dl{ { se1 := a == b } ⟹ [ require(se1); x = a; ] x = b }
+  -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b } ⟹ [ require(se1); x = a; ] x = b }
   apply split .requireSimple
   case thn =>
-    -- dl{ { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
     apply update .localValueAssign
     apply empty
     refine close ?_
     sol_symex
     sol_close
   case els =>
-    -- dl{ { se1 := a == b }, se1 ≐ false ⟹ [ revert(); x = a; ] x = b }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ [ revert(); x = a; ] x = b }
     apply done .revertBox
-    -- dl{ { se1 := a == b }, se1 ≐ false ⟹ true }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ true }
     refine close ?_
     sol_symex
     sol_close
@@ -164,17 +164,17 @@ theorem assertBox : ⊢ dl!{ a == b → [ assert(a == b); x = a; ] x == b } := b
   apply unfold .assertConditionCapture
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
-  -- dl{ a = b, { se1 := a == b } ⟹ [ assert(se1); x = a; ] x = b }
+  -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b } ⟹ [ assert(se1); x = a; ] x = b }
   apply Proves.check .assertSimple
   case thn =>
-    -- dl{ a = b, { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
     apply update .localValueAssign
     apply empty
     refine close ?_
     sol_symex
     sol_close
   case els =>
-    -- dl{ a = b, { se1 := a == b } ⟹ se1 ≐ true }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b } ⟹ se1 ≐ true }
     refine close ?_
     sol_symex
     sol_close
@@ -266,24 +266,11 @@ theorem branchBox : ⊢ dl!{ [ if (a == b) { x = 1; } else { revert(); }; ] x ==
     sol_symex
     sol_close
   case els =>
-    -- dl{ { se1 := a == b }, se1 ≐ false ⟹ [ revert(); ] x = 1 }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ [ revert(); } ] x = 1 }
     apply done .revertBox
     refine close ?_
     sol_symex
     sol_close
-
-end Solidity.Examples.Tactics.Revert
-
-/-! ## Read without the switch
-
-Under the diamond a walk's leaves are not closed by their erasure yet
-(`Core.Proves.close` takes box contexts). -/
-
-namespace Solidity.Examples.Tactics.Revert
-
-open Proves
-
-local instance : InContract := ⟨StandardExample⟩
 
 /-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`: with the precondition,
 `revertDiamond` leaves `false`, and the second goal has both `a = b` and
@@ -302,12 +289,7 @@ theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x =
     sol_close
   case els =>
     apply done .revertDiamond
-    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ false }: the context is contradictory
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
-    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 ≐ true ∧ ¬se1 ≐ false) }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ false ⟹ false }: the context is contradictory
     refine close ?_
     sol_symex
     sol_close
@@ -327,12 +309,8 @@ theorem branchDiamond :
     sol_symex
     sol_close
   case els =>
-    -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ revert(); ⟩ x = 1 }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ revert(); } ⟩ x = 1 }
     apply done .revertDiamond
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
     refine close ?_
     sol_symex
     sol_close

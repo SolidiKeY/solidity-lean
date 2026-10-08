@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.HoldsErase
+import Solidity.Typing.Soundness
 
 /-!
 # A goal closed by its erasure's validity
@@ -157,6 +158,97 @@ theorem Agree.congrExcept {Γ : Ctx} {ns B : List Var} {σ : State C Γ} {τ₀ 
     rw [h.env x fun hx => hB x hx (Env.mem_erase_key hm)]
     exact hag.env _ hm
 
+/-! ## Updates that keep `bool` locals `bool`s, read -/
+
+theorem Tm.boolB_eval {Γ : Ctx} {σ : State C Γ} (hT : σ.BoolOK) :
+    (t : Tm C Γ .val) → t.boolB = true → ∀ {v : Semantics.Value}, t.eval σ = .ok v → ∃ b, v = .bool b
+  | .app2 (.binop op p) a b, hb, v, h => by
+    have hb' : (!op.isArith) = true := hb
+    have hop : op.isArith = false := by simpa only [Bool.not_eq_eq_eq_not, Bool.not_true] using hb'
+    change (do Solidity.evalBinop op p (← a.eval σ) (b.eval σ)) = .ok v at h
+    obtain ⟨lv, -, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    unfold Solidity.evalBinop at h
+    split at h
+    · cases h; exact ⟨_, rfl⟩
+    · cases h; exact ⟨_, rfl⟩
+    · obtain ⟨rv, -, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+      obtain ⟨w, hw, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+      obtain ⟨c, rfl⟩ := applyBinOp_nonarith_bool hop hw
+      cases h
+      exact ⟨c, rfl⟩
+  | .app1 (.unop .not p) _ a, _, v, h => by
+    change (do Solidity.unopCheck .not p (← Semantics.applyUnOp .not (← a.eval σ))) = .ok v at h
+    obtain ⟨x, -, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨w, hw, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    simp only [Semantics.applyUnOp, bind, Except.bind] at hw
+    split at hw
+    · cases hw
+    · cases hw
+      cases h
+      exact ⟨_, rfl⟩
+  | .app0 (.lit (.bool c)), _, v, h => by cases h; exact ⟨c, rfl⟩
+  | .pvV (p := .bool) i, _, v, h => by cases h; exact hT.get i
+
+theorem Rhs.boolB_eval {Γ : Ctx} {σ : State C Γ} (hT : σ.BoolOK) :
+    {t : LTy} → (r : Rhs C Γ t) → r.boolB = true → ∀ {v : t.Denote C}, r.eval σ = .ok v →
+      LTy.BoolOK t v
+  | _, .val (p := .bool) t, hb, _, h => Tm.boolB_eval hT t hb h
+  | _, .val (p := .uint) _, _, _, _ | _, .val (p := .int) _, _, _, _ => trivial
+  | _, .path _, _, _, _ | _, .unset, _, _, _ | _, .mref _, _, _, _ | _, .store _, _, _, _
+  | _, .saveNet, _, _, _ | _, .saveNetMt, _, _, _ => trivial
+
+theorem UpdElem.write_boolOK {Γ Δ : Ctx} {σ₀ : State C Γ} (h₀ : σ₀.BoolOK) (e : UpdElem C Γ Δ)
+    (he : e.boolB = true) {τ τ' : State C Δ} (hτ : τ.BoolOK) (h : e.write σ₀ τ = .ok τ') :
+    τ'.BoolOK := by
+  cases e with
+  | «local» i r =>
+    change (do pure (τ.setLocal i (← r.eval σ₀))) = .ok τ' at h
+    obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    cases h
+    exact hτ.setLocal i (Rhs.boolB_eval h₀ r he hv)
+  | _ =>
+    simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
+    repeat' split at h
+    all_goals first | (cases h; exact hτ.withGlob _) | cases h
+
+theorem Upd.apply_boolOK {Γ : Ctx} {σ₀ : State C Γ} (h₀ : σ₀.BoolOK) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → U.boolB = true → ∀ {τ : State C Δ}, U.apply σ₀ = .ok τ →
+      τ.BoolOK
+  | _, .nil, _, _, h => by cases h; exact h₀
+  | _, .snoc U e, hb, _, h => by
+    have hb' : U.boolB = true ∧ e.boolB = true := Bool.and_eq_true _ _ ▸ hb
+    change (do e.write σ₀ (← U.apply σ₀)) = .ok _ at h
+    obtain ⟨τ₁, h₁, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    exact UpdElem.write_boolOK h₀ e hb'.2 (Upd.apply_boolOK h₀ U hb'.1 h₁) h
+  | _, .decl U _ r, hb, _, h => by
+    have hb' : U.boolB = true ∧ r.boolB = true := Bool.and_eq_true _ _ ▸ hb
+    change (do let τ ← U.apply σ₀; pure (τ.push (← r.eval σ₀))) = .ok _ at h
+    obtain ⟨τ₁, h₁, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    cases h
+    exact (Upd.apply_boolOK h₀ U hb'.1 h₁).push (Rhs.boolB_eval h₀ r hb'.2 hv)
+  | _, .pop U e, hb, _, h => by
+    change (U.apply σ₀).map (State.drop e) = .ok _ at h
+    cases h₁ : U.apply σ₀ with
+    | error => rw [h₁] at h; cases h
+    | ok τ₁ =>
+      rw [h₁] at h; cases h
+      exact (Upd.apply_boolOK h₀ U hb h₁).drop e
+  | _, .drop U e, hb, _, h => by
+    change (U.apply σ₀).map (State.thin e) = .ok _ at h
+    cases h₁ : U.apply σ₀ with
+    | error => rw [h₁] at h; cases h
+    | ok τ₁ =>
+      rw [h₁] at h; cases h
+      exact (Upd.apply_boolOK h₀ U hb h₁).thin e
+
+/-- `p` after an update under the diamond, so under the box. -/
+theorem _root_.Solidity.Modality.after_box_of {m : Modality} {p : Semantics.State → Prop}
+    {r : Semantics.Res Semantics.State} (h : m.after p r) : Modality.box.after p r := by
+  cases r with
+  | ok _ => exact h
+  | error _ => trivial
+
 /-- **A goal closed by its erasure's validity**: a `Fml.Closable` formula
 holds in `σ` when its erasure holds in every untyped state that agrees with
 one agreeing with `σ` off the names its hidden binders bind. -/
@@ -181,7 +273,7 @@ theorem holds_of_erase_valid : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var
     holds_of_erase_valid ψ hφ.2 hB hag fun τ hτ =>
       h τ hτ ((holds_erase φ hφ.1 (hag.congrExcept hτ hB)).1 ha)
   | _, .upd m U φ, ns, hφ, _, σ, τ₀, hag, h => by
-    obtain ⟨rfl, hU, hUB, hBU, hφ⟩ := hφ
+    obtain ⟨hm, hU, hUB, hBU, hφ⟩ := hφ
     have hE : ∀ τ, EnvAgreeExcept φ.bindNames τ τ₀ →
         Solidity.holds τ (.upd .box (U.erase ns) (φ.erase (U.names ns))) := fun τ hτ => by
       have h' := h τ hτ
@@ -190,31 +282,57 @@ theorem holds_of_erase_valid : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var
       · rename_i hnil
         rw [hnil]
         exact h'
-      · exact h'
+      · exact Modality.after_box_of h'
     have hR := Upd.apply_erase hag U hU
-    show Modality.afterC .box (holds · φ) (U.apply σ)
-    cases hσ : U.apply σ with
-    | error => trivial
-    | ok σ' =>
-      rw [hσ] at hR
-      cases hτ₀ : Solidity.Upd.apply (U.erase ns) τ₀ with
-      | error => rw [hτ₀] at hR; exact hR.elim
-      | ok τ₀' =>
-        rw [hτ₀] at hR
-        refine holds_of_erase_valid φ hφ hBU hR fun τ' hτ' => ?_
-        have h1 : Modality.after .box (Solidity.holds · (φ.erase (U.names ns)))
-            (Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀)) :=
-          hE (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _)
-        have hfr := Upd.apply_frame (agreeExcept_overlay φ.bindNames τ' τ₀) (U.erase ns) hUB
-        rw [hτ₀] at hfr
-        revert h1 hfr
-        cases hτ : Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀) with
-        | error => intro _ hfr; exact hfr.elim
-        | ok τ'' =>
-          intro h1 hfr
-          refine (holds_congr_full (agreeExcept_full (agreeExcept_trans hfr (agreeExcept_symm hτ'))
-            fun y hy => ?_) _).1 h1
-          rw [Upd.apply_keep _ (U.erase ns) hτ y (fun hm => hUB y hm hy), lookupBy_overlay, if_pos hy]
+    have core : Modality.afterC .box (holds · φ) (U.apply σ) := by
+      cases hσ : U.apply σ with
+      | error => trivial
+      | ok σ' =>
+        rw [hσ] at hR
+        cases hτ₀ : Solidity.Upd.apply (U.erase ns) τ₀ with
+        | error => rw [hτ₀] at hR; exact hR.elim
+        | ok τ₀' =>
+          rw [hτ₀] at hR
+          refine holds_of_erase_valid φ hφ hBU hR fun τ' hτ' => ?_
+          have h1 : Modality.after .box (Solidity.holds · (φ.erase (U.names ns)))
+              (Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀)) :=
+            hE (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _)
+          have hfr := Upd.apply_frame (agreeExcept_overlay φ.bindNames τ' τ₀) (U.erase ns) hUB
+          rw [hτ₀] at hfr
+          revert h1 hfr
+          cases hτ : Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀) with
+          | error => intro _ hfr; exact hfr.elim
+          | ok τ'' =>
+            intro h1 hfr
+            refine (holds_congr_full (agreeExcept_full (agreeExcept_trans hfr (agreeExcept_symm hτ'))
+              fun y hy => ?_) _).1 h1
+            rw [Upd.apply_keep _ (U.erase ns) hτ y (fun hm => hUB y hm hy), lookupBy_overlay, if_pos hy]
+    cases m with
+    | box => exact core
+    | diamond =>
+      -- a diamond update keeps the `bool` locals `bool`s, and the erasure
+      -- says it does not halt
+      have hb : U.boolB = true := hm.resolve_left nofun
+      show σ.BoolOK → Modality.afterC .diamond (fun τ => τ.BoolOK ∧ holds τ φ) (U.apply σ)
+      intro hT
+      have hok : ∃ τ', Solidity.Upd.apply (U.erase ns) τ₀ = .ok τ' := by
+        have h' := h τ₀ (agreeExcept_refl _ τ₀)
+        simp only [Fml.erase] at h'
+        split at h'
+        · rename_i hnil
+          rw [hnil]
+          exact ⟨τ₀, rfl⟩
+        · change Modality.diamond.after _ (Solidity.Upd.apply (U.erase ns) τ₀) at h'
+          revert h'
+          cases Solidity.Upd.apply (U.erase ns) τ₀ with
+          | ok τ' => exact fun _ => ⟨τ', rfl⟩
+          | error _ => exact fun h => False.elim h
+      obtain ⟨τ', hτ'⟩ := hok
+      rw [hτ'] at hR
+      revert core hR
+      cases hσ : U.apply σ with
+      | error => intro _ hR; exact hR.elim
+      | ok σ' => intro hc _; exact ⟨Upd.apply_boolOK hT U hb hσ, hc⟩
   | _, .havoc φ, _, hφ, hB, σ, τ₀, hag, h => fun st nt => by
     have hag' := hag.withGlob (σ.glob.havoc st nt)
     have e : withLocals (σ.glob.havoc st nt) τ₀.env = τ₀.havoc st nt := by

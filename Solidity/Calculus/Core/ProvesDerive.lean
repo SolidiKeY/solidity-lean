@@ -27,10 +27,10 @@ quotes the leaves for the tactic (`Seq.leafQuote`) and the kernel's
 condition 1); `n` bounds the steps down a path, `b` the steps of the whole
 walk, handed from a goal to the next.
 
-**Box contexts only**, as `Proves.close` is: a leaf behind a diamond
-update is not `closableB` until `close` reads the typed state
-(`docs/intrinsic.md`, W2 `sound`, "Also left, at the flip"), so a diamond
-obligation fails here where the `Core.Valid` route proves it.
+A leaf behind a diamond update closes where `Proves.close` takes it: the
+update keeps the `bool` locals `bool`s (`Upd.boolB`, `Fml.closableB`);
+elsewhere a diamond obligation fails here where the `Core.Valid` route
+proves it.
 -/
 
 namespace Solidity.Core

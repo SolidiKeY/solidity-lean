@@ -404,16 +404,13 @@ example : Prog.toStr (sol[Tuples]{ uint lo; uint sum; (lo, , sum, ) = returnStat
 
 end Solidity.Examples.Tactics.Calls
 
-/-! The `TestSuite` shapes below are `⊢` obligations under the diamond, read
-without `open scoped Solidity.Core.Surface`: a scoped leaf behind a diamond
-update is not closed by its erasure yet (`Core.Proves.close` takes box
-contexts, `docs/intrinsic.md` W2 `sound`). -/
-
 namespace Solidity.Examples.Tactics.Calls
 
 open Proves
 
 local instance : InContract := ⟨CallsExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## solkey's `TestSuite` shapes, derived
 
@@ -483,28 +480,25 @@ def Suite : Contract := contract!{
   }
 }
 
-/-- `wt(storage)`, the premise every `TestSuite` obligation carries. -/
-def wtSuite : Fml Suite := .defined (.wt Suite.vars .storage)
-
 /--
 info: Try this:
   sol_prove
 -/
 #guard_msgs in
 theorem internalCallDeclaration :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint r = returnOne(); assert(r == 1); ⟩ true } := by
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint r = returnOne(); assert(r == 1); ⟩ true } := by
   sol_prove?
 
 theorem internalCallInExpression :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint r = returnOne() + returnOne(); assert(r == 2); ⟩ true } := by
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint r = returnOne() + returnOne(); assert(r == 2); ⟩ true } := by
   sol_prove
 
 theorem internalCallToStorage :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ total = returnOne(); assert(total == 1); ⟩ true } := by
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ total = returnOne(); assert(total == 1); ⟩ true } := by
   sol_prove
 
 theorem returnEarly :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ int negative = returnSign(-3); int zero = returnSign(0);
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ int negative = returnSign(-3); int zero = returnSign(0);
       int positive = returnSign(4); assert(negative < 0 && zero == 0 && positive > 0); ⟩ true } := by
   sol_prove
 
@@ -514,74 +508,74 @@ info: Try this:
 -/
 #guard_msgs in
 theorem tupleReturnPairDerived :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ (uint lo, uint hi) = returnOrdered(5, 2); assert(lo == 2 && hi == 5); ⟩
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ (uint lo, uint hi) = returnOrdered(5, 2); assert(lo == 2 && hi == 5); ⟩
       true } := by
   sol_prove?
 
 theorem tupleReturnReadsReturnVariablesDerived :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ (uint x, uint y) = returnSwapped(); assert(x == 2 && y == 1); ⟩ true } := by
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ (uint x, uint y) = returnSwapped(); assert(x == 2 && y == 1); ⟩ true } := by
   sol_prove
 
 theorem tupleReturnDiscardsComponentsDerived :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1, 2);
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1, 2);
       assert(lo == 1 && sum == 6 && !same); ⟩ true } := by
   sol_prove
 
 theorem tupleReturnAssignsExistingDerived :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint hi; (total, hi) = returnOrdered(9, 4);
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint hi; (total, hi) = returnOrdered(9, 4);
       assert(total == 4 && hi == 9); ⟩ true } := by
   sol_prove
 
 theorem tupleAssignmentRotatesDerived :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint first = 1; uint second = 2; uint third = 3;
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint first = 1; uint second = 2; uint third = 3;
       (first, second, third) = (second, third, first);
       assert(first == 2 && second == 3 && third == 1); ⟩ true } := by
   sol_prove
 
 theorem tupleDeclarationDerived :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ (uint first, , bool third) = (4, 5, true);
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ (uint first, , bool third) = (4, 5, true);
       assert(first == 4 && third); ⟩ true } := by
   sol_prove
 
 theorem returnLeavesNestedBlocksDerived :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0);
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0);
       assert(one == 1 && five == 5); ⟩ true } := by
   sol_prove
 
 theorem returnOrFallThroughNamedDerived :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint stopped = returnOrFallThrough(true);
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint stopped = returnOrFallThrough(true);
       uint finished = returnOrFallThrough(false); assert(stopped == 5 && finished == 6); ⟩ true } := by
   sol_prove
 
 theorem returnFromNestedCall :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint r = returnAddTwo(1); assert(r == 3); ⟩ true } := by
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint r = returnAddTwo(1); assert(r == 3); ⟩ true } := by
   sol_prove
 
 theorem returnAfterRevertGuard :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ uint r = returnRevertsOnZero(3); assert(r == 3); ⟩ true } := by
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint r = returnRevertsOnZero(3); assert(r == 3); ⟩ true } := by
   sol_prove
 
 theorem returnFromTryBranches :
-    ⊢ .imp wtSuite dl[Suite]{ [ uint r = returnInsideTry(); assert(r == 7 || r == 8); ] true } := by
+    ⊢ dl[Suite]{ defined(wt(storage)) → [ uint r = returnInsideTry(); assert(r == 7 || r == 8); ] true } := by
   sol_prove
 
 theorem returnFromVoidFunction :
-    ⊢ .imp wtSuite dl[Suite]{ ⟨ total = 4; returnVoidEarly(9); assert(total == 4);
+    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ total = 4; returnVoidEarly(9); assert(total == 4);
       total = 0; returnVoidEarly(9); assert(total == 9); ⟩ true } := by
   sol_prove
 
 /-- A bare call of a function of several returns is an `InternalCall`: it
 declares the returns in its body and returns nothing (`CallRet.none`), so
 `internalCallExpand` inlines it. -/
-example : ⊢ .imp wtSuite dl[Suite]{ ⟨ returnOrdered(1, 2); ⟩ true } := by
-  apply Proves.intro
+example : ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ returnOrdered(1, 2); ⟩ true } := by
+  apply intro
   apply unfold .internalCallExpand
   sol_prove
 
 /-- A tuple assignment's call returns to its targets (`CallRet.rets`):
 `functionBodyExpand`'s. -/
-example : ⊢ .imp wtSuite dl[Suite]{ ⟨ uint a; uint b; (a, b) = returnOrdered(1, 2); ⟩ true } := by
-  apply Proves.intro
+example : ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint a; uint b; (a, b) = returnOrdered(1, 2); ⟩ true } := by
+  apply intro
   apply update .valueDeclSkip
   apply update .valueDeclSkip
   apply unfold .functionBodyExpand
