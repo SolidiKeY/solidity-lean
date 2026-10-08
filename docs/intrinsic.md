@@ -2391,6 +2391,29 @@ subagents.
   `Val.evalT_noPanic` (`Semantics/Core/TypedRunErase.lean`, deleted at W4
   `sem-del`).
 
+
+Decisions 15–17 (lead, 2026-10-08), answering the `Stmt.TArmOk` conditions
+and "Left for the lead":
+
+15. *Push at the bound*: resource exhaustion, read as KeY reads gas (not at
+    all). The typed run's push at the bound ends in a new halt `exhausted`
+    that both modalities accept, like solkey, which models no gas; the
+    TestSuite's pushing diamond obligations stay provable. solc-alignment
+    row: solc panics (0x41) on a storage array past 2^64 elements; Lean's
+    bound is 2^256 and an exhausted run proves any modality. The `NoDiv`
+    hypotheses of the push arms go.
+16. *Copy off the bridge*: the elaborator rejects a struct with a repeated
+    member name, as solc does ("Identifier already declared"); `BadDup`
+    becomes a pinned elaboration error; `bridgeOk` and `Ty.nodupS`
+    hypotheses go.
+17. *`memoryLocalDeclInitDrop` under the box*: change the typed reading, not
+    the rule text: the hidden binder at a memory type ranges over the
+    references of the heap grown by the initializer's allocations (or any
+    heap extension), so the premise is not vacuous where the conclusion
+    allocates. Existing box derivations must keep closing. If that proves
+    infeasible, `Proves.tsound` threads `Stmt.TArmOk` as an invariant of
+    reachable states instead; record which.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
