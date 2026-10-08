@@ -2,7 +2,8 @@ import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Closer
 import Solidity.Calculus.TheoryRewrite
 import Solidity.Calculus.Spec
-import Solidity.Calculus.ProofTree
+import Solidity.Calculus.TreeData
+import Solidity.Calculus.Symex
 
 /-!
 # The strategy as one kernel evaluation: `sol_prove`

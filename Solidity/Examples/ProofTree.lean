@@ -1,3 +1,5 @@
+-- first: the scoped `sol_derive?`/`sol_chain?` (`Core.Derive`) are tried before today's
+import Solidity.Calculus.ProofTree
 import Solidity.Tools.ProofTree
 import Solidity.Tools.Inspect
 import Solidity.Calculus.Core.Derive

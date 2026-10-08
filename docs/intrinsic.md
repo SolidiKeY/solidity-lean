@@ -2597,7 +2597,14 @@ import it (`Chains`, `Progress`, `Termination`, `CloseTests`, `Contracts`,
 `TreeData`, `RuleShapes`, `Close`), `Core.Close` (`Derive` → `Close`),
 `Core.Spec` (through `Problem`, now clean of `Derive`), `Core.SoundKit`
 (`Calculus/NoPanic`, now over `NoPanicOps`).  `Core.Derive` imports
-`Derive` itself (it had it through `Core.Close`).
+`Derive` itself (it had it through `Core.Close`).  `Derive` imports
+`TreeData` and `Symex` (not `ProofTree`: its tree helper `suggest` is
+`TreeData`'s, `Proves.closeTrue` is `Symex`'s), so `ProofTree`,
+`Sequents`, `Chains`, `ChainRewrites`, `ChainBranches` and `Literals` leave
+the closure of every `Core.Derive` importer (review fix).
+`Examples/ProofTree` imports today's `ProofTree` itself, first: the scoped
+`sol_derive?`/`sol_chain?` must be registered after today's, which they
+fall back to, so that they are tried first.
 
 **New behaviour, one**: `sol_symex` on a goal `Valid φ` with no modality left
 is `normValid` (`TacticSyntax`, tried after today's and the scoped
@@ -2627,11 +2634,17 @@ conditions of `Core.LeanTaclet` and `Core.CallbackTaclet` too (as
 - `Examples/Tactics/Loops`: `whileUnwind`, `loopExit`, `whileInvariantBox`,
   `whileClose`, `whileNoVariantDiamond`: as above, `dl[Core.LeanTaclet C k]`;
   `whileInvariantBox` keeps the binders `xs`, `hv` of its frame.
-- **Not a qualified name, a `Core.Delab` gap** (to fix with
-  `Examples/Notation`'s kept pins): `functionCallArgCapture` prints its
-  constructor (`Core.Premise.argCapture …`: no printer for the scoped
-  argument capture); `whileInvariantDiamond` prints the weakened body as
-  `‹(Core.Prog.wk Core.up body).snd.2›`.
+- `functionCallArgCapture`, `whileInvariantDiamond`: the rule lines are
+  back (review fix; only qualified names and binders differ).  `Core.Delab`
+  reads `(Prog.wk up P).2.2`, `Prog.up` unfolded, as `P` (`wkUp?`), so the
+  diamond's weakened body prints `body`, as `{anon(body)}` and `⟨[ body ]⟩`;
+  `Core.DelabLean` prints `Core.Premise.argCapture`, stuck on `ret`, as
+  `⟨[ T se = v; ‹Core.Stmt.call f as' ret body›; ]⟩` (today's
+  `⟨[ T se = ‹a.e›; ‹Stmt.call f (Arg.captureFirst …) ⋯ ret body›; ]⟩`), the
+  conclusion `⟨[ ‹Core.Stmt.call f args ret body›; ]⟩` as today's.
+  `Core/RuleText`'s `#check_rule_text` pin follows: 7 of 9 `LeanTaclet`
+  rules print as their twins (`whileInvariantDiamond` now does), not
+  `functionCallArgCapture` (the escapes' text) and `tryCallDiamond`.
 - Deleted with `InspectToday`: `Examples/Tools`' `#wp` of today's `int`
   product, `Tactics/CoreNotation`'s today's `#wp`.
 - The fresh names are unchanged; `Tactics/CoreProofTree`'s pins unchanged
@@ -2652,7 +2665,16 @@ conditions of `Core.LeanTaclet` and `Core.CallbackTaclet` too (as
   closer runs on the erasure: `Logic`'s program constructors (and with them
   `RuleSoundness`, `SoundKit`, …) go with the `modal` lane, what stays is
   `NFml`'s first-order `Proves` until M6c.  Proposed: `calc-del` deletes
-  neither; `modal` trims both.
+  neither; `modal` trims both.  **What keeping them keeps** (9 of
+  `calc-del`'s 21 modules, and today's body of `Rules`):
+  `Logic` imports `RuleSoundness` (the program rules' soundness), and
+  through it `SoundUpdate`, `SoundKit`, `SoundUnfold`, `SoundLoop`;
+  `Derive` imports `Symex` (`Proves.closeTrue`, the box's cover) and through
+  it `Completeness` (`Stmt.step`, `.rule`, the walk's fallback), which
+  imports today's `Rules`.  `ProofTree`, `Sequents` and `Chains` are no
+  longer reached from `Derive` (review fix above).  All nine leave with the
+  `modal` lane's trim (the program constructors, their soundness, the
+  program strategy), not before.
 - **35.** `Core.RuleText` (`#check_rule_text`, the scoped lines against
   today's) imports `Rules` and goes with today's body.
 
@@ -2664,7 +2686,7 @@ conditions of `Core.LeanTaclet` and `Core.CallbackTaclet` too (as
 | Kept module | imports | why it is not cut |
 |---|---|---|
 | `Core.ChainKit`, `Core.ChainGen`, `Core.LastLine` (and `Core.Chains` through them) | `Chains`, `ChainGen`, `LastLine` | blocker 9: the rewrite links run on the erasure as today's `Fml.Via`, whose `Link` carries today's program steps (`StepRule`, `Taclet`); today's chain elaborator (`elabChain`, `solveChain`, `rwLabel`, `rwAnyFind`) builds them.  Splitting `Link` into a rewrite-only half (and its `Via.valid`) is the cut |
-| `Core.Derive` (`Core.ProvesDerive`, `Core.Closers`, `Core.SolSpec`, `Core.Contracts` through it) | `Derive` | decision 34 |
+| `Core.Derive` (`Core.ProvesDerive`, `Core.Closers`, `Core.SolSpec`, `Core.WalkSyntax`, `Core.RewriteSyntax`, `Core.Contracts`, `Tools/Counterexample`, `Tools/Verify` through it) | `Derive` (so `Logic`, `RuleSoundness`, `SoundUpdate`, `SoundKit`, `SoundUnfold`, `SoundLoop` through `TheoryRewrite`; `Symex`, `Completeness`, `Rules` through `Proves.closeTrue`) | decision 34; no longer `ProofTree`, `Sequents`, `Chains` |
 | `TheoryRewrite` (so `Rewrite`, `Core.RewriteSyntax`, `Core.Closers`) | `Logic` | decision 34 |
 | `RuleShapes` (so `PrintedRules`, `Core.RuleShapes`, `Core.PrintedRules`, `Core.ProofTree`, `Tools/Taclet`) | `Rules` | its rows are keyed by today's constructors (`` ``Taclet.x ``, `#check_constructor_table Taclet`); re-key on plain names (or at W5, when `Core.Taclet` becomes `Taclet`) and move today's checks to `Rules` |
 | `Core.RuleText` | `Rules` | decision 35 |
@@ -3684,6 +3706,11 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     closer's sequent calculus on the erasure (`Rewrite`, `TheoryRewrite`,
     `Derive.residue`, `Proves.of_residue`) until M6c; the `modal` lane trims
     their program rules (and the program-rule soundness modules with them).
+    Keeping them keeps 9 of `calc-del`'s 21 modules reachable: `Logic`,
+    `Derive`, `RuleSoundness`, `SoundUpdate`, `SoundKit`, `SoundUnfold`,
+    `SoundLoop` (through `Logic`), `Symex`, `Completeness` (through
+    `Derive`'s `Proves.closeTrue`), and today's `Rules` body; `ProofTree`,
+    `Sequents`, `Chains` are cut from it.  See "W4 lane `moves`".
 35. *Proposed (W4 `moves`), the lead's call:* `Calculus/Core/RuleText.lean`
     (the scoped rule lines against today's) goes with today's rule table.
 
