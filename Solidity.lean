@@ -74,6 +74,10 @@ import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
 import Solidity.Calculus.Core.DelabLean
 import Solidity.Calculus.Core.RuleText
+import Solidity.Calculus.Core.ChainKit
+import Solidity.Calculus.Core.Chains
+import Solidity.Calculus.Core.ChainGen
+import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Spec
@@ -178,6 +182,7 @@ import Solidity.Examples.Tactics.CoreStep
 import Solidity.Examples.Tactics.CorePrint
 import Solidity.Examples.Tactics.CoreRules
 import Solidity.Examples.Tactics.CoreNotation
+import Solidity.Examples.Tactics.CoreChains
 import Solidity.Examples.Tactics.CoreSpec
 import Solidity.Examples.Tactics.CoreCallback
 import Solidity.Examples.Tactics.CoreDerive
