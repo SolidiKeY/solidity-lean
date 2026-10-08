@@ -78,9 +78,10 @@ def withBinds (k : (Γ : NCtx) → ElabM (Fml C Γ.ctx)) : NCtx → (Γ : NCtx) 
   | [], Γ => k Γ
   | (x, t) :: B, Γ => do pure (.bind .box x t (← withBinds k B ((x, t) :: Γ)))
 
-/-- The program's own locals among the `n` newest of `Γ`, the fresh ones
-(an elaborator's capture: `uint idx; idx = ++i;`) dropped: the context a
-postcondition stands at, and the thinning into the program's end. -/
+/-- The locals among the `n` newest of `Γ`, the fresh ones (an elaborator's
+capture, `uint idx; idx = ++i;`, or a rule's, `se1`) dropped: the context a
+postcondition stands at, which names no fresh variable (`Post.noFresh`), and
+the thinning into the context it is read in. -/
 def _root_.Solidity.Core.NCtx.dropFresh : Nat → (Γ : NCtx) → (Δ : NCtx) × Thin Δ.ctx Γ.ctx
   | 0, Γ => ⟨Γ, .refl⟩
   | _ + 1, [] => ⟨[], .refl⟩
@@ -125,10 +126,11 @@ def whereLocals (ds : List RawStmt) : ElabM (List (String × LocalTy)) :=
 reader's scope (`ECtx`) and `Γ` binding the same names: a quantifier, an
 update, a program's hints and a `where` push on both.  An atom is read by
 `elabFml` and its names resolved in `Γ`.  With `posts`, a Lean postcondition
-right after a program stands where the program's captures are out of scope
-(`NCtx.dropFresh`, a `Frames.drop` that prints as nothing), as a rule's own
-fresh locals are (`Frames.pop .capture`): the elaborator writes a statement's
-captures in front of it, at the program's top level. -/
+right after a program or an update stands where the fresh locals are out of
+scope (`NCtx.dropFresh`, a `Frames.drop` or an update `Upd.drop`, which print
+as nothing), as a rule's own fresh locals are (`Frames.pop .capture`): the
+elaborator writes a statement's captures in front of it, at the program's top
+level, and a line may bind a rule's fresh locals (`{ se1 := 10 } φ`). -/
 def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx) → ElabM (Fml C Γ.ctx)
   | .all p x φ, Γ => inScope do
     modify fun (Γe, k) => (setBy x (.val p) Γe, k)
@@ -143,6 +145,10 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
     let (U', Γe') ← ElabM.lift (elabUpd C Γe U)
     set (Γe', k)
     let ⟨Δ, U''⟩ ← ElabM.lift (Upd.resolveN (hintOf Γe') Γ Γ .nil U')
+    if posts && φ matches .lean _ then
+      let ⟨Δ₀, h⟩ := NCtx.dropFresh Δ.length Δ
+      if Δ₀.length < Δ.length then
+        return .upd m U'' (.upd m (Upd.nil.drop h) (← elabFmlC taken posts φ Δ₀))
     pure (.upd m U'' (← elabFmlC taken posts φ Δ))
   | .modal m P φ, Γ => inScope do
     let (Γe, _) ← get
@@ -152,7 +158,7 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
       let P' ← elabModalProg C taken P
       let ⟨Γ', Q⟩ ← ElabM.lift (Prog.resolve Γb P' (strict := false))
       if posts && φ matches .lean _ then
-        let ⟨Γ₀, h⟩ := NCtx.dropFresh (Γ'.length - Γb.length) Γ'
+        let ⟨Γ₀, h⟩ := NCtx.dropFresh Γ'.length Γ'
         if Γ₀.length < Γ'.length then
           return .modal m Q (.drop h .nil) (← elabFmlC taken posts φ Γ₀)
       pure (.modal m Q .nil (← elabFmlC taken posts φ Γ'))) (newBinders Γe Γh) Γ

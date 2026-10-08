@@ -2,6 +2,7 @@ import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.ProvesSound
+import Solidity.Calculus.Core.Merge
 import Solidity.Calculus.Chains
 
 /-!
@@ -521,12 +522,16 @@ inductive Link (C : Contract) : Type where
   | many
   /-- `~[r]~>`, a rule of the strategy. -/
   | rule (r : StepRule C)
+  /-- `~[sequentialToParallel]~>` while the program is open: the `n + 1`
+  updates from position `k` of the spine merged (`Calculus/Core/Merge.lean`). -/
+  | merge (k n : Nat)
 
 /-- The relation an arrow stands for. -/
 @[reducible] def Link.Rel : Link C → Fml C Γ → Fml C Γ → Prop
   | .one => Fml.OneStep
   | .many => fun φ ψ => Nonempty (Fml.Steps φ ψ)
   | .rule r => Fml.StepBy r
+  | .merge k n => Fml.MergeBy k n
 
 /-- `φ ~> φ₁ ~*> φ₂ …`: every link of a chain that starts at `φ` holds. -/
 @[reducible] def Fml.Via : Fml C Γ → List (Link C × Fml C Γ) → Prop
@@ -725,6 +730,7 @@ theorem Link.Rel.sound : {l : Link C} → l.Rel φ ψ → Fml.Leads φ ψ
   | .one, h => Fml.OneStep.sound h
   | .many, ⟨c⟩ => c.sound
   | .rule _, h => Fml.StepBy.sound h
+  | .merge k n, h => Fml.mergeRun_leads k n _ h
 
 /-- **A chain leads from its first line to its last.** -/
 theorem Fml.Via.leads : {φ : Fml C Γ} → {ws : List (Link C × Fml C Γ)} → Fml.Via φ ws →

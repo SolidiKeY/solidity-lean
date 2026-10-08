@@ -115,6 +115,14 @@ evaluation. -/
 def Fml.chainRunQ (c : Lean.Expr) {Γ : Ctx} (n : Nat) (φ : Fml C Γ) : List LineQ × Lean.Expr :=
   (Fml.chainLines c n φ, φ.erasedQuoted c)
 
+/-- The merges of `φ`'s update spine (`Fml.mergeRun`), quoted: for each
+position `k` and count `n`, the longest first, that merges, the line and its
+erasure. -/
+def Fml.mergeCandsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) :
+    List (Nat × Nat × Lean.Expr × Lean.Expr) :=
+  (List.range 8).flatMap fun k => (List.range 8).reverse.filterMap fun n =>
+    (φ.mergeRun k (n + 1)).map fun ψ => (k, n + 1, (Quote.qFml Γ ψ).run c, ψ.erasedQuoted c)
+
 /-- `⟨[ s; … } ω ]⟩ φ`: a modality `m` that is a variable, its program
 running into the end of a block (`Core.Delab`'s `core_item`). -/
 syntax:max "⟨" "[ " (sol_stmt "; ")* "} " core_item* "]" "⟩ " dl_fml:50 : dl_fml
@@ -290,6 +298,44 @@ def isCoreLine (e : Expr) : MetaM Bool := do
 
 /-- The pair `(f, ψ)` of a quoted line. -/
 def unpair (e : Expr) : Expr × Expr := (e.appFn!.appArg!, e.appArg!)
+
+/-- A merge of a line's update spine: the position, the count, the line it
+leaves, and that line's erasures (once per modality it was computed under). -/
+structure MergeCand where
+  k : Nat
+  n : Nat
+  fml : Expr
+  erased : Array Expr
+
+/-- The merges of the scoped line `φ` (`Fml.mergeCandsQ`), its postconditions
+in slots and a modality `m` computed as the diamond and as the box. -/
+def mergeCands (φ : Expr) : MetaM (Splice × List MergeCand) := do
+  let φ ← instantiateMVars φ
+  let (C, Γ) ← lineType φ
+  let some nm := (← whnfR C).constName?
+    | throwError "sol_chain: the contract is not a named constant: {C}"
+  let sp ← collectPosts φ {}
+  let φ' := punch C sp φ
+  let m? ← modalityOf? φ'
+  let sp := { sp with modality := m? }
+  let ty := mkApp (mkConst ``List [0]) (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Nat)
+    (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Nat)
+      (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Expr) (mkConst ``Expr))))
+  let eval (ψ : Expr) : MetaM (List (Nat × Nat × Expr × Expr)) :=
+    unsafe evalQuoted (List (Nat × Nat × Expr × Expr)) ty
+      (mkAppN (mkConst ``Fml.mergeCandsQ) #[C, quoteConstName nm, Γ, ψ])
+  match m? with
+  | none =>
+    let cs ← eval φ'
+    return (sp, cs.map fun (k, n, f, e) => { k, n, fml := unpunch sp f, erased := #[e] })
+  | some m =>
+    let ds ← eval (φ'.replaceFVar m (mkConst ``Modality.diamond))
+    let bs ← eval (φ'.replaceFVar m (mkConst ``Modality.box))
+    let out := ds.filterMap fun (k, n, f, e) => do
+      let (_, _, f', e') ← bs.find? fun (k', n', _, _) => k' == k && n' == n
+      let g ← mergeModality m f f'
+      pure { k, n, fml := unpunch sp g, erased := #[e, e'] }
+    return (sp, out)
 
 /-- The derivation of `φ`: its postconditions in slots, and, under a
 modality `m`, run as the diamond and as the box, whose shared lines (read
@@ -916,6 +962,22 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         else pure ((← Solidity.Chain.rwArrow? r).map fun a => (some (r, a)))
       | `(chain_arrow| ~=>) => pure (some none)
       | _ => pure none
+    if let some (some (r, .table `sequentialToParallel)) := rw? then
+      if legacy.isNone && !(← runChain cur).lines.isEmpty then
+        -- the program is still open: the merge on the scoped line
+        let (sp, cands) ← mergeCands cur
+        let pick ← cands.findM? fun c => matchWritten sp C w c.fml c.erased
+        let some c := pick |
+          throwError "~[{r}]~>: no merge of the update spine of{← indentLine cur}\n\
+            is the line written{indentD (.ofSyntax l[1])}\n\
+            The merges:{← cands.foldlM (fun acc c => do
+              pure (acc ++ m!"\n  ~[sequentialToParallel]~>{← indentLine c.fml}")) m!""}"
+        let lnk := mkApp3 (mkConst ``Core.Link.merge) C (toExpr c.k) (toExpr c.n)
+        ws := ws.push (mk lnk c.fml)
+        if links.size == 1 then
+          single := some (mkAppN (mkConst ``Core.Fml.MergeBy) #[C, Γ, toExpr c.k, toExpr c.n, cur, c.fml])
+        cur := c.fml
+        continue
     if let some rw := rw? then
       -- a rewrite: from the erasure of the scoped line, `Update.lean`'s
       let (L₀, m?) ← match legacy with
@@ -1021,6 +1083,7 @@ def nextLine (A B : Expr) : MetaM (Run × Line) := do
 partial def isCoreGoal (ty : Expr) : MetaM Bool := do
   let ty ← instantiateMVars ty
   if ty.isAppOf ``Core.Fml.OneStep || ty.isAppOf ``Core.Fml.StepBy || ty.isAppOf ``Core.Fml.Steps ||
+      ty.isAppOf ``Core.Fml.MergeBy ||
       ty.isAppOf ``Core.Fml.Via || ty.isAppOf ``Core.Fml.ViaE then return true
   if ty.isAppOfArity ``Nonempty 1 then return ← isCoreGoal ty.appArg!
   return false
@@ -1044,6 +1107,12 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
       | some i => pure (i + 1)
       | none => throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}"
     g.assign (← stepsProof run.splice A (run.lines.take i))
+  | Core.Fml.MergeBy C Γ k n A B =>
+    let sp ← collectPosts A {}
+    let m? ← modalityOf? (punch C sp A)
+    let lhs := mkAppN (mkConst ``Core.Fml.mergeRun) #[C, Γ, k, n, A]
+    let rhs := mkApp2 (mkConst ``Option.some [0]) (mkApp2 (mkConst ``Core.Fml) C Γ) B
+    g.assign (← kernelReflOrCases m? lhs rhs)
   | Nonempty T =>
     let t ← mkFreshExprMVar T
     solveCore t.mvarId!
@@ -1092,6 +1161,7 @@ def arrowOf (l : Expr) : MetaM (TSyntax `chain_arrow) := do
   let l ← whnfR (← instantiateMVars l)
   if l.isAppOf ``Core.Link.one then `(chain_arrow| ~>)
   else if l.isAppOf ``Core.Link.many then `(chain_arrow| ~*>)
+  else if l.isAppOf ``Core.Link.merge then `(chain_arrow| ~[sequentialToParallel]~>)
   else if l.isAppOf ``Core.Link.rule then
     let some n ← ruleName? l.appArg! | failure
     `(chain_arrow| ~[$(mkIdent n):ident]~>)
