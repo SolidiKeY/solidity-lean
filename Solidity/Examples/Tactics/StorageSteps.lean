@@ -1,4 +1,8 @@
 import Solidity.Calculus.Sequents
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.Sequents
+import Solidity.Tools.CoreInspect
 
 /-!
 # Storage, one statement form at a time
@@ -49,6 +53,8 @@ namespace Solidity.Examples.Tactics.StorageSteps
 open Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## 0 · The headline: `alice.account.balance = 10;` -/
 
@@ -260,7 +266,9 @@ theorem arrayIndexRead : ⊨ dl!{ [ uint v = values[i]; ] v == values[i] } := by
 /-- `uint v = values[i];` under the diamond is not valid: in `StandardExample`'s
 initial store `values` is empty (and `i` unbound), so the read halts. -/
 theorem arrayIndexReadDiamond : ¬ (⊨ dl!{ ⟨ uint v = values[i]; ⟩ true }) :=
-  fun h => (h State.exampleStore).1
+  fun h => Modality.afterRunC_diamond_halt
+    (h (Core.State.ofSem State.exampleStore) (.int 0) (by unfold PrimTy.admits; decide)
+      (by constructor <;> trivial)) (by decide +kernel)
 
 /-- `values[i] = 100;` -/
 theorem arrayIndexWrite : ⊨ dl!{ [ values[i] = 100; ] values[i] == 100 } := by
@@ -411,7 +419,8 @@ theorem arrayPop : ⊨ dl!{ [ people.pop(); ] true } := by
 /-- `people.pop();` under the diamond is not valid: `people` starts empty, and
 a `pop` of an empty array reverts. -/
 theorem arrayPopDiamond : ¬ (⊨ dl!{ ⟨ people.pop(); ⟩ true }) :=
-  fun h => (h State.exampleStore).1
+  fun h => Modality.afterRunC_diamond_halt
+    (h (Core.State.ofSem State.exampleStore) trivial) (by decide +kernel)
 
 /-- `Person storage p = bob; people.push(p);` — the pushed element is a copy of
 what the alias finds (`storagePushValueCopySource`). -/

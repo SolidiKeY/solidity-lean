@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.ProveSeq
+import Solidity.Calculus.Core.WalkSyntax
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Rewrite
 
