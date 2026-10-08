@@ -33,7 +33,13 @@ is elaborated at the width (`paramCtx`).
 `solc_scoped_problems N` (`docs/intrinsic.md`, M6b) states each of them
 scoped, `N.f.problem.core : Core.Fml N []` (`Core.Problem.fml`,
 `Core.Problem.ctorFml`, `Calculus/Core/Spec.lean`): the program resolved in
-the context of its parameters, which `∀` binds; the kernel checks each.
+the context of its parameters, which `∀` binds; the kernel checks each, and
+each is checked to erase to its legacy statement (`Fml.erase`, compared as
+quoted expressions).  The flip (`docs/intrinsic.md`, W3) is
+`solc_problems N legacy` (`N.f.problem.legacy`) then
+`solc_scoped_problems N main` (`N.f.problem`); the commands below read the
+legacy statement wherever it is (`legacyProblem`), and `#solkey_obligations`
+counts a theorem of either `⊢`.
 
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
   (`Problem.text`), to compare with `--print-problem`.
@@ -59,11 +65,20 @@ def Tag.modality? : Tag → Option Modality
   | .box => some .box
   | .skip | .specified | .internal | .malformed => none
 
-syntax (name := solcProblems) "solc_problems " ident : command
+/-- The name of `N.f`'s statement in `Update.lean`'s formulas: `N.f.problem.legacy`
+once the scoped one is `N.f.problem` (`solc_scoped_problems N main`),
+`N.f.problem` before. -/
+def legacyProblem (env : Environment) (f : Lean.Name) : Lean.Name :=
+  if env.contains (f ++ `problem ++ `legacy) then f ++ `problem ++ `legacy else f ++ `problem
+
+/-- `solc_problems N`, or `solc_problems N legacy` to declare each as
+`N.f.problem.legacy`, beside a scoped `N.f.problem`. -/
+syntax (name := solcProblems) "solc_problems " ident (&" legacy")? : command
 
 @[command_elab solcProblems]
 def elabSolcProblems : CommandElab := fun stx => do
   let N := stx[1].getId
+  let suffix := if stx[2].isNone then `problem else `problem ++ `legacy
   let rows ← reportRows N
   let fmlTy := mkApp (mkConst ``Fml) (mkConst N)
   let mut defined : Array Lean.Name := #[]
@@ -75,7 +90,7 @@ def elabSolcProblems : CommandElab := fun stx => do
       | logWarning m!"solc_problems: {r.name} has a parameter of no value type, so no \
           statement"
         continue
-    let n := N ++ Lean.Name.mkSimple r.name ++ `problem
+    let n := N ++ Lean.Name.mkSimple r.name ++ suffix
     -- the constructor's is a deployment's, from the empty storage
     let stmt := if r.name == "constructor" then ``Problem.ctorFml else ``Problem.fml
     let value := mkAppN (mkConst stmt) #[mkConst N, toExpr m, toExpr xs,
@@ -86,18 +101,26 @@ def elabSolcProblems : CommandElab := fun stx => do
   liftCoreM <| compileDecls defined
 
 /-- `solc_scoped_problems N`: each obligation `solc_problems` states,
-scoped, `N.f.problem.core`; an info names how many. -/
-syntax (name := solcScopedProblems) "solc_scoped_problems " ident : command
+scoped, `N.f.problem.core`, compiled; with `main`, `N.f.problem` (the flip:
+`solc_problems N legacy` first); with `decl`, not compiled (the scoped
+`sol_prove` reads an obligation by its value, `Core.Symex.evaluable`).
+Each is checked to erase to its legacy statement (`legacyProblem`), as
+expressions; an info names how many. -/
+syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" main")? (&" decl")? :
+  command
 
 @[command_elab solcScopedProblems]
 def elabSolcScopedProblems : CommandElab := fun stx => do
   let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
+  let suffix := if stx[2].isNone then `problem ++ `core else `problem
+  let compile := stx[3].isNone
   let rows ← reportRows N
   let fmlTy := mkApp2 (mkConst ``Core.Fml) (mkConst N) (mkApp (mkConst ``List.nil [0]) (mkConst ``Core.LTy))
   let errs ← liftTermElabM do
     let C ← unsafe evalConst Contract N
     let mut errs : Array String := #[]
     let mut defined : Array Lean.Name := #[]
+    let mut erased : Nat := 0
     for r in rows do
       unless r.status == .elaborated do continue
       let some m := r.tag.modality? | continue
@@ -108,7 +131,14 @@ def elabSolcScopedProblems : CommandElab := fun stx => do
       match Core.Problem.resolve (r.name == "constructor") m xs P with
       | .error e => errs := errs.push s!"{r.name}: {e}"
       | .ok φ =>
-        let dn := n ++ `problem ++ `core
+        -- the guard: the scoped statement erases to the legacy one
+        let ln := legacyProblem (← getEnv) n
+        if (← getEnv).contains ln then
+          let legacy ← unsafe evalConst (Solidity.Fml C) ln
+          if Solidity.Fml.quote (mkConst N) (φ.erase []) == Solidity.Fml.quote (mkConst N) legacy then
+            erased := erased + 1
+          else errs := errs.push s!"{r.name}: it does not erase to {ln}"
+        let dn := n ++ suffix
         let decl := Declaration.defnDecl {
           name := dn, levelParams := [], type := fmlTy,
           value := φ.quote (mkConst N), hints := .abbrev, safety := .safe }
@@ -117,10 +147,11 @@ def elabSolcScopedProblems : CommandElab := fun stx => do
           defined := defined.push dn
         catch ex => errs := errs.push s!"{r.name}: the kernel rejects it: {← ex.toMessageData.toString}"
     -- compiled, as `N.f.problem` is, for compiled consumers
-    compileDecls defined
+    if compile then compileDecls defined
     if errs.isEmpty then
       let k := defined.size
-      logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped"
+      logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped, {erased} \
+        erasing to {if erased == 1 then "its" else "their"} legacy statement"
     pure errs
   unless errs.isEmpty do
     throwError "solc_scoped_problems: {errs.size} obligations are not scoped:\n{"\n".intercalate errs.toList}"
@@ -134,7 +165,7 @@ def elabSolkeyProblem : CommandElab := fun stx => do
   let f := stx[1].getId
   let N := f.getPrefix
   let e := mkAppN (mkConst ``Problem.text) #[mkConst N, toExpr N.getString!,
-    toExpr f.getString!, mkConst (f ++ `problem)]
+    toExpr f.getString!, mkConst (legacyProblem (← getEnv) f)]
   let s ← liftTermElabM <| unsafe evalExpr String (mkConst ``String) e
   logInfo s
 
@@ -151,7 +182,7 @@ def elabSolkeyScan : CommandElab := fun stx => do
   let mut out : Array String := #[]
   for r in rows do
     unless r.status == .elaborated do continue
-    let φ := mkConst (N ++ Lean.Name.mkSimple r.name ++ `problem)
+    let φ := mkConst (legacyProblem (← getEnv) (N ++ Lean.Name.mkSimple r.name))
     let e := mkAppN (mkConst ``Derive.scanLeaves) #[C, toExpr walk, φ]
     let t0 ← IO.monoMsNow
     let k ← liftTermElabM <| unsafe evalExpr (Option (Nat × Nat)) (mkApp (mkConst ``Option [0])
@@ -199,7 +230,7 @@ def elabSolkeyDerive : CommandElab := fun stx => do
     -- the tactics' names (`Proves.close_dropWt`) resolve as in a `Derived` module
     let res : Except String (Array String) ← withScope (fun sc =>
         { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <| liftTermElabM do
-      let g ← mkFreshExprSyntheticOpaqueMVar (Derive.provesNil C (mkConst (f ++ `problem)))
+      let g ← mkFreshExprSyntheticOpaqueMVar (Derive.provesNil C (mkConst (legacyProblem env f)))
       tryCatchRuntimeEx (do
           let out ← IO.mkRef (none : Option Derive.Search)
           let _ ← Tactic.run g.mvarId! do
@@ -227,10 +258,21 @@ def standardAxioms : List Lean.Name := [``propext, ``Classical.choice, ``Quot.so
 
 syntax (name := solkeyObligations) "#solkey_obligations " ident : command
 
+/-- Whether `ty` is the scoped `⊢ φ`, `Core.Proves C .all [] .nil φ`
+(`Calculus/Core/Surface.lean`). -/
+def provesScoped (C φ ty : Expr) : Bool :=
+  match ty.consumeMData.getAppFnArgs with
+  | (`Solidity.Core.Proves, #[C', R, Γ₀, _, H, φ']) =>
+    C' == C && R.isConstOf ``RuleSet.all && Γ₀.isAppOfArity ``List.nil 1 &&
+      H.isAppOf `Solidity.Core.Hyps.nil && φ' == φ
+  | _ => false
+
 /-- `#solkey_obligations N`: each function derived, pending, or what the
 import made of it, counted; the pending ones named.  Derived means a
 theorem `N.f.proved` whose type is `⊢ N.f.problem` as `⊢` writes it
-(`Derive.provesNil`), compared as an expression, and whose proof uses no
+(`Derive.provesNil`, or the scoped `Core.Proves N .all [] .nil N.f.problem`
+once `N.f.problem` is scoped: `provesScoped`), compared as an expression, and
+whose proof uses no
 axiom but Lean's three (`standardAxioms`): a theorem of another statement,
 or of a sequent with hypotheses, is "mismatched"; one that uses `sorry` or
 `native_decide` is "unsound".  The axioms are collected once for all the
@@ -254,7 +296,7 @@ def elabSolkeyObligations : CommandElab := fun stx => do
       let want := Derive.provesNil C (mkConst (f ++ `problem))
       match env.find? (f ++ `proved) with
       | some (.thmInfo t) =>
-        if t.type.consumeMData == want then matched := matched.push (r.name, f ++ `proved)
+        if t.type.consumeMData == want || provesScoped C (mkConst (f ++ `problem)) t.type then matched := matched.push (r.name, f ++ `proved)
         else other := other.push s!"mismatched {r.name}"
       | some _ => other := other.push s!"mismatched {r.name}"
       | none => pending := pending.push r.name

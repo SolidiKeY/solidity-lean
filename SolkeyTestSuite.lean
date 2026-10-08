@@ -8,3 +8,4 @@ import Solidity.TestSuite.Suggestions
 import Solidity.TestSuite.CoreDerived9
 import Solidity.TestSuite.CoreDerived10
 import Solidity.TestSuite.CoreDerived11
+import Solidity.TestSuite.CoreSeq
