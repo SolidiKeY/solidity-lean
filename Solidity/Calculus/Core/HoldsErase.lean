@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.Logic
+import Solidity.Calculus.Core.Closable
 import Solidity.Semantics.RunErase
 
 /-!
@@ -20,7 +21,7 @@ locals named `ns` (`Agree`, `Semantics/RunErase.lean`).  The pieces:
   statements they hold, a scope's end nothing (the untyped state keeps the
   popped locals, which `Agree` allows).
 
-The formulas are `Fml.Plain`: every binder fresh (a declaration, a `∀`, a
+The formulas are `Fml.Plain` (`Calculus/Core/Closable.lean`): every binder fresh (a declaration, a `∀`, a
 block's locals: `Prog.Fresh`), and no hidden binder or anonymising update,
 whose untyped readings range over more than the typed ones (the untyped
 `anon` over every binding, the erased hidden binder over whatever the name
@@ -355,14 +356,6 @@ end Thin
 
 /-! ## An update ends in agreeing states -/
 
-/-- Every local an update declares takes a name not in scope. -/
-def Upd.Fresh {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Prop
-  | _, .nil => True
-  | _, .snoc U _ => U.Fresh ns
-  | _, .decl U x _ => U.Fresh ns ∧ x ∉ U.names ns
-  | _, .pop U _ => U.Fresh ns
-  | _, .drop U _ => U.Fresh ns
-
 section Updates
 
 variable {Γ : Ctx} {ns : List Var} {σ₀ : State C Γ} {τ₀ : Semantics.State}
@@ -469,13 +462,6 @@ end Updates
 
 /-! ## A modality runs as its erasure -/
 
-/-- Every block the frames hold binds fresh names. -/
-def Frames.Fresh : {Γ Γ₀ : Ctx} → List Var → Frames C Γ Γ₀ → Prop
-  | _, _, _, .nil => True
-  | _, _, ns, .seq ω κ => ω.Fresh [] ns ∧ κ.Fresh (ω.outNames ns)
-  | _, _, ns, .pop _ h κ => κ.Fresh (ns.drop h.depth)
-  | _, _, ns, .drop h κ => κ.Fresh (h.names ns)
-
 section Runs
 
 theorem RunRel.toRel {Γ : Ctx} {ns B : List Var} {τ₀ : Semantics.State} :
@@ -504,27 +490,6 @@ theorem Frames.run_erase {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C Γ Γ₀)
 end Runs
 
 /-! ## The formulas -/
-
-/-- A formula whose binders are all fresh, and with no hidden binder nor an
-anonymising update: their untyped readings range over more states than the
-typed ones (the untyped `anon` over any binding, the erased hidden binder
-over whatever the name held).  Its updates and modalities are boxes: the
-diamond reads only from and into states whose `bool` locals hold `bool`s
-(`State.BoolOK`), which the erasure does not ask. -/
-def Fml.Plain : {Γ : Ctx} → List Var → Fml C Γ → Prop
-  | _, _, .tt => True
-  | _, _, .eq _ _ => True
-  | _, _, .defined _ => True
-  | _, ns, .not φ => φ.Plain ns
-  | _, ns, .and φ ψ => φ.Plain ns ∧ ψ.Plain ns
-  | _, ns, .imp φ ψ => φ.Plain ns ∧ ψ.Plain ns
-  | _, ns, .upd m U φ => m = .box ∧ U.Fresh ns ∧ φ.Plain (U.names ns)
-  | _, ns, .modal m P κ φ =>
-    m = .box ∧ P.Fresh [] ns ∧ κ.Fresh (P.outNames ns) ∧ φ.Plain (κ.outNames (P.outNames ns))
-  | _, ns, .havoc φ => φ.Plain ns
-  | _, ns, .all x _ φ => x ∉ ns ∧ φ.Plain (x :: ns)
-  | _, _, .bind .. => False
-  | _, _, .anon .. => False
 
 theorem _root_.Solidity.Modality.afterC_rel (m : Modality) {α : Type} {p : α → Prop} {q : Semantics.State → Prop}
     {R : α → Semantics.State → Prop} {x : Res α} {y : Res Semantics.State} (h : Res.Rel R x y)
