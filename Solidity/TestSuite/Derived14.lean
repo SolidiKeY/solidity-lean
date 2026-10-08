@@ -17,7 +17,8 @@ declaration or assignment writes its components in order.
 `tupleReturnDiscardsComponents` (`returnStats`' four conditionals and its
 `&&`) run their callees on literals: each split's condition is ground under
 its updates, and the strategy keeps only the branch it takes
-(`Derive.splitRes`), so one path each is run, not 27 and 32.
+(`Core.Seq.refutes`, closed by `Core.Proves.closeFalse`), so one path each
+is run, not 27 and 32.
 -/
 
 open Solidity Proves
