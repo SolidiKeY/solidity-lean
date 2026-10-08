@@ -106,6 +106,20 @@ scoped macro_rules
       | core_rule Solidity.Core.Proves.unfold $r
       | core_rule Solidity.Core.Proves.bind $r
       | core_rule Solidity.Core.Proves.inline $r)
+  | `(tactic| apply unfoldLean $r:term) =>
+    `(tactic| first
+      | apply _root_.Solidity.Proves.unfoldLean $r
+      | core_rule Solidity.Core.Proves.unfold $r
+      | core_rule Solidity.Core.Proves.bind $r
+      | core_rule Solidity.Core.Proves.inline $r)
+  | `(tactic| apply doneLean $r:term) =>
+    `(tactic| first
+      | apply _root_.Solidity.Proves.doneLean $r
+      | core_rule Solidity.Core.Proves.done $r)
+  | `(tactic| apply checkLean $r:term) =>
+    `(tactic| first
+      | apply _root_.Solidity.Proves.checkLean $r
+      | core_rule2 Solidity.Core.Proves.check $r)
   | `(tactic| apply unfoldRule $r:term) =>
     `(tactic| first
       | apply _root_.Solidity.Proves.unfoldRule $r
