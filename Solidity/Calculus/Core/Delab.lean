@@ -244,7 +244,7 @@ def stmtOutNames (ns : List Expr) (s : Expr) : MetaM (List Expr) := do
   | _ => return ns
 
 /-- `n' xs`, each argument that is a proof of the wrong type replaced by a
-placeholder of the type `n'` asks (`sorryAx`): printing only, never added
+placeholder of the type `n'` asks (`mkSorry`): printing only, never added
 to the environment. -/
 def withProofHoles (n' : Lean.Name) (xs : Array Expr) : MetaM (Option Expr) := do
   let mut f := mkConst n'
