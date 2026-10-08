@@ -268,13 +268,32 @@ Each arm of `Stmt.step` proves, for its statement, that the premise it
 gives is sound in a typed state `σ` (`Premise.TSound`): its theorem is named
 as M3's with `tsound` for `sound` (`localStep_sound` → `localStep_tsound`)
 and takes `σ` first, then the arm's arguments, the premise `q` and
-`hq : …Step k … = some q`.  An arm that is sound only under a condition (a
-push at the bound under the diamond) takes it as a hypothesis. -/
+`hq : …Step k … = some q`.  An arm that is sound only under a condition
+takes it as a hypothesis, and `Stmt.TArmOk` collects them
+(`Calculus/Core/TSoundStep.lean`'s module docstring says why each holds):
 
-/-- **The rule of `s` is sound over the typed state**, in every typed state
-(`Stmt.StepSound`, over `TState`). -/
+* a storage copy (`l = sp;`, `l = mp;`) is on the bridge only at a type
+  whose members have distinct names;
+* a push does not diverge under the diamond;
+* `T memory mv = r;` at an allocating `r` has, under the box, a reference
+  of its type in the heap (decision 12); an alias `T memory mv = mp;` needs
+  none. -/
+
+/-- **What an arm asks of the statement** for its rule to be sound over the
+typed state in `σ` under `m`; `True` for every other statement. -/
+def Stmt.TArmOk (m : Modality) : {Γ Γ' : Ctx} → TState C Γ → Stmt C Γ Γ' → Prop
+  | _, _, _, .assign _ r => r.bridgeOk = true
+  | _, _, _, .assignFromMem (R := R) _ _ => (Ty.ref R).nodupS = true
+  | _, _, σ, .push b v hd => m = .diamond → (Stmt.trun σ (.push b v hd)).NoDiv
+  | _, _, σ, .rebind i r => m = .diamond → (Stmt.trun σ (.rebind i r)).NoDiv
+  | _, _, _, .declMem _ _ (some (.alias _)) _ _ => True
+  | _, _, σ, .declMem R _ (some _) _ _ => m = .box → Nonempty ((LTy.mem R).TDenote C σ.H)
+  | _, _, _, _ => True
+
+/-- **The rule of `s` is sound over the typed state** (`Stmt.StepSound`,
+over `TState`), in every typed state where `s` meets its arm's condition. -/
 def Stmt.TStepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
-  ∀ σ : TState C Γ, ∀ p, s.step k m = some p → Premise.TSound m s p σ
+  ∀ σ : TState C Γ, ∀ p, s.step k m = some p → s.TArmOk m σ → Premise.TSound m s p σ
 
 /-! ## Runs that halt alike
 

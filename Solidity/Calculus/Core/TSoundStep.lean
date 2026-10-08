@@ -13,14 +13,14 @@ state (`Premise.TSound`): each statement's rule by its arm's theorem in
 `Calculus/Core/Blocks.lean` (calls, `try`, loops: `Stmt.isBlockArm`) are the
 `tsoundB` lane's.
 
-**Three conditions** (`Stmt.TArmOk`), each where the typed reading of a rule
-fails, for the lead (`docs/intrinsic.md`, "Left for the lead" and the W2.5
-`tsoundA` section):
+**Three conditions** (`Stmt.TArmOk`, `Calculus/Core/TSoundKit.lean`), each
+where the typed reading of a rule fails, for the lead (`docs/intrinsic.md`,
+"Left for the lead" and the W2.5 `tsoundA` section):
 
-* a storage copy (`l = sp;`, `l = mp;`, `new` into storage) is on the
-  bridge only at a type whose members have distinct names (`Src.bridgeOk`,
-  `Ty.nodupS`): the update is `Update.lean`'s, which copies by name, and
-  the typed run copies by position;
+* a storage copy (`l = sp;`, `l = mp;`) is on the bridge only at a type
+  whose members have distinct names (`Src.bridgeOk`, `Ty.nodupS`): the
+  update is `Update.lean`'s, which copies by name, and the typed run copies
+  by position;
 * a push (`b.push(v);`, `lsv = b.push();`) does not diverge under the
   diamond: at `2^256 - 1` elements the typed run diverges
   (`Storage.full`), and the rule's update, `Update.lean`'s unbounded
@@ -28,6 +28,12 @@ fails, for the lead (`docs/intrinsic.md`, "Left for the lead" and the W2.5
 * `T memory mv = r;` under the box has a reference of its type in the
   heap: its hidden binder is universal there (decision 12), vacuous over
   a heap typing with no object of the type, while `r` may allocate one.
+  An alias `T memory mv = mp;` needs none (`tsound_declMemAlias`): the
+  object `mp` names is one, and a halt reading it closes the box.
+
+A `new` meets no condition of its own (`tsound_assignNew` compares typed
+runs): it unfolds to `T memory mv = new T(n); l = mv;`, and the conditions
+fall on those two steps (into storage, the second is an `l = mp;`).
 -/
 
 namespace Solidity.Core
@@ -42,22 +48,11 @@ def Stmt.isBlockArm : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
   | _, _, .call .. | _, _, .tryCall .. | _, _, .loop .. => true
   | _, _, _ => false
 
-/-- **What an arm asks of the statement** for its rule to be sound over the
-typed state in `σ` under `m` (the module docstring's three conditions);
-`True` for every other statement. -/
-def Stmt.TArmOk (m : Modality) : {Γ Γ' : Ctx} → TState C Γ → Stmt C Γ Γ' → Prop
-  | _, _, _, .assign _ r => r.bridgeOk = true
-  | _, _, _, .assignFromMem (R := R) _ _ => (Ty.ref R).nodupS = true
-  | _, _, σ, .push b v hd => m = .diamond → (Stmt.trun σ (.push b v hd)).NoDiv
-  | _, _, σ, .rebind i r => m = .diamond → (Stmt.trun σ (.rebind i r)).NoDiv
-  | _, _, σ, .declMem R _ (some _) _ _ => m = .box → Nonempty ((LTy.mem R).TDenote C σ.H)
-  | _, _, _, _ => True
-
 /-- **The rule of every statement but a block's is sound over the typed
 state**, where the statement meets its arm's condition. -/
 theorem Stmt.tstepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ')
-    (hb : s.isBlockArm = false) (σ : TState C Γ) (p : Premise C Γ Γ')
-    (hp : s.step k m = some p) (hok : s.TArmOk m σ) : Premise.TSound m s p σ := by
+    (hb : s.isBlockArm = false) : Stmt.TStepSound k m s := by
+  intro σ p hp hok
   cases s with
   | assign l r => exact assignStep_tsound σ k l r hok p hp
   | rebind i r => exact rebindStep_tsound σ k i r hok p hp
@@ -80,7 +75,11 @@ theorem Stmt.tstepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C
   | declMem R x init hd hm =>
     cases init with
     | none => cases hp; exact tsound_declMemFresh σ R x hd hm
-    | some r => cases hp; exact tsound_declMemInit σ x r hd hm hok
+    | some r =>
+      cases r with
+      | alias b => cases hp; exact tsound_declMemAlias σ x b hd hm
+      | copy q hm' => cases hp; exact tsound_declMemInit σ x (.copy q hm') hd hm hok
+      | newArr n h => cases hp; exact tsound_declMemInit σ x (.newArr n h) hd hm hok
   | rebindMem i r => exact rebindMemStep_tsound σ k i r p hp
   | assignFromMem l q => exact assignFromMemStep_tsound σ k l q hok p hp
   | assignMem l r => exact assignMemStep_tsound σ k l r p hp

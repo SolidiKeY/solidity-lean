@@ -1711,7 +1711,7 @@ for `tsoundB`): an arm's theorem is M3's name with `tsound` for `sound`
 (`localStep_tsound`, `tsound_setLocal`), takes the typed state `σ` first,
 then the arm's arguments, the premise `q` and `hq : …Step k … = some q`, and
 concludes `Premise.TSound m s q σ`; `Stmt.TStepSound` is `Stmt.StepSound`
-over `TState`.  The kit adds, besides the shapes W2 left:
+over `TState`, in the states where the statement meets `Stmt.TArmOk`.  The kit adds, besides the shapes W2 left:
 
 * `TRes.Sim` and the shapes up to the halt (`tsound_unfoldSim`,
   `tsound_capture{,SP,MV}K`, `tsound_capture{,SP,MV}Sim`, `TRes.Sim.err_bind`),
@@ -1738,8 +1738,8 @@ as their unfolded `if` exactly; a captured `if` condition's weakened
 branches run lifted by `Prog.trun_wk` (`Prog.trun_wk_up`).
 
 **`Stmt.TSound C` is not provable as stated**: three arms are sound only
-under a condition on the statement (`Stmt.TArmOk`, a hypothesis of
-`Stmt.tstepSound_arms`):
+under a condition on the statement (`Stmt.TArmOk`, `TSoundKit.lean`, a
+hypothesis of `Stmt.TStepSound`, which `Stmt.tstepSound_arms` concludes):
 
 1. *A storage copy off the bridge* (`l = sp;`, `l = mp;` at a type with a
    repeated member name, `Ty.nodupS`): the rule's `save`/`copyMem` copy by
@@ -1757,7 +1757,10 @@ under a condition on the statement (`Stmt.TArmOk`, a hypothesis of
    `T memory mv = new T[](n);` (or a copy out of storage) allocates one and
    runs: `[T memory mv = new T[](1);] false` is false, its premise true in
    such a state.  `tsound_declMemInit` takes
-   `m = .box → Nonempty ((LTy.mem R).TDenote C σ.H)`.  A derivation cannot
+   `m = .box → Nonempty ((LTy.mem R).TDenote C σ.H)`, at an allocating
+   initializer only: an alias `T memory mv = mp;` needs none
+   (`tsound_declMemAlias`), since the object `mp` names is one and a halt
+   reading it is a revert, which closes the box.  A derivation cannot
    exploit it (the binder's erasure is universal over inhabited untyped
    values, so no leaf under it closes vacuously), but the per-state arm is
    false, so `Proves.tsound`'s shape (`Stmt.TSound`, per premise, in every
