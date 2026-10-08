@@ -4438,6 +4438,130 @@ scratch module proved `⟨ uint y = bumpRead(1); ⟩ y == 3` and failed `y == 2`
   (only the git-excluded `Scratch/` modules), `check-doc-paths.sh`,
   `check-rule-text.sh` clean.
 
+### W3 gates (`w3d-gates`, 2026-10-08): Derived9–11 and `ProofTree` back down
+
+**Task**: the two rows over their limits at the W3c integration
+(Derived9–11 ≈24.3 s against 22.9 s, `Examples/ProofTree` ≈16.5 s against
+12.1 s), fixed without a behaviour or pin change; `deleteReadDeepWalk`
+moved to `Tactics/StorageDelete` (the lead's approval).
+
+**Where Derived9–11's kernel time goes**, measured first: a scratch command
+adds `Seq.residue H φ = some []` for the 91 obligations as theorems
+(`addDecl`, `Elab.async` off), one variant of the leaf at a time, interleaved,
+and reports the wall time and the heartbeats (allocations, which load does
+not move); in millions of heartbeats (kHB/1000) over the 91:
+
+| Variant | M heartbeats | s |
+|---|---|---|
+| as merged (`cond closableB (pick … erase)`) | 286.4 | 22.8 |
+| no closable test (`pick` of `Fml.erase`) | 261.3 | 20.8 |
+| no closable test, the erasure by the recursors | 236.3 | 18.8–19.5 |
+| the walk alone (every leaf `some []`) | 31.5 | 2.3 |
+| landed: one pass (`Fml.closeErase`), `Var.memB` by `List.rec`, `ground` by `Fml.eraseR` | 249.3 | 19.6 |
+| review fix: the `upd` arm skips `hit` when no binder is below it | 248.7 (249.4 for the above, same run) | 19.7–21.7 |
+
+So the excess was in two places of equal size: the closable test (about 25M
+heartbeats) and the erasure itself (another 25M), which `Fml.erase`,
+`Upd.erase`, `Tm.erase` and `Idx.name` compute by `match` on indexed
+families (Gate G0, condition 1) at every leaf.  Today's residue of the
+erased leaf is the rest (about 190M of the 236M), outside this lane.
+
+**Changes** (`Calculus/Core/{Closable,ProvesDerive}.lean`; meta and
+kernel-evaluated code only, every result equal to the old one by a theorem):
+1. *The leaf decided and erased in one pass*: `Fml.closeErase ns φ`, by
+   `Fml.rec`, is `(φ.bindsB ns).map (·, φ.erase ns)` (`Fml.closeErase_eq`),
+   so `Seq.leafWith` walks the leaf's context once for `Proves.close`'s side
+   condition and for the erasure it hands today's residue.  The erasure is by
+   the recursors (`Idx.nameR`, `Tm.eraseR`, `Rhs.eraseR`, `UpdElem.eraseR`,
+   `Thin.namesR`, `Upd.eraseNR`, `Fml.eraseR`, each `_eq` to the original,
+   which is its compiled twin); an update's freshness, erasure, names and
+   variables in one `Upd.rec` pass (`Upd.closeErase`, `Upd.closeErase_eq`);
+   the `Avoids` test of an update reads its terms' variables in place
+   (`Tm.anyE`, `meetsB_eq_any`) instead of collecting `Upd.vars`.
+   `Seq.ground` erases by `Fml.eraseR`.  `Var.memB` is by `List.rec`
+   (`Var.memBM` its twin, `Var.memB_eq_memBM`).
+2. *`pick`'s order as a hint* (`Seq.pickH`, `pickH_eq`): `Seq.residue full`
+   tries the quantified leaf first when `full` is set, the same leaves in
+   every case; `Seq.prove` sets it from the compiled walk (`leafQuoteI` marks
+   the leaves that closed only with their parameters) when most leaves did.
+   On `ProofTree`'s `∀ uint x; [ require(x >= 1 && x <= 100); … ]` the
+   kernel's 435 ms become 248 ms, `∀ uint x; x <= 100 → …` 107 → 72 ms; no
+   change on Derived9–11, whose leaves close stripped.  `Seq.run` takes the
+   refutation test as an argument (`rf`), so the compiled walk's leaves can
+   carry the mark while splits are refuted as the kernel's are.
+
+Tried and dropped (each measured on the 91): `Var.eqB` comparing strings by
+their characters (257.1 against 257.6M: string comparisons are not the
+cost), a maximum-index filter in front of `meetsB` (258.8M), the recursor
+form of `Hyps.fresh` (3% on the full run, none on the walk alone: not worth
+a new definition under every rule), walking without pruning (254.9M, more),
+and `Proves.close`'s defaults as `decide +kernel` first (each `#proof_tree`
+10–20 ms slower: an auxiliary lemma and a `Decidable` search per leaf;
+reverted).
+
+**Gate timings**, the integration's method (the real file copied under
+`Solidity/Scratch/` and opened in a fresh worker, `/proc` sampled every
+20 ms, wall from the worker's start to its last CPU), the merged state
+(`d56343c`, a detached worktree of `intrinsic`) and this branch alternated
+in the same minutes, load under 1:
+
+| Module | Limit (integration's scale) | `d56343c`, raw | this branch, raw | ratio | on the integration's scale |
+|---|---|---|---|---|---|
+| Derived9–11 | 22.9 s | 24.88 s (8.11 + 13.14 + 3.63) | 21.68 s (7.14 + 11.33 + 3.21), 21.86 s (7.20 + 11.39 + 3.27) | 0.875 | about 21.3 s, **within** |
+| `Examples/ProofTree` | 12.1 s | 16.49, 16.51, 16.55 s | 12.53, 12.57, 12.59 s | 0.761 | about 12.55 s, **over** by 0.45 s (4%) |
+
+(The scale is the integration's: its merged state read 26.77 s and
+17.11–17.21 s raw for 24.3 s and 16.5 s.)  Under Decision 9 the aggregate
+is about 54.7 s against 59.4 s of limits (56.1 against 60.8 with
+`CoreProblems`): **under by about 4.7 s**, where the integration was over by
+2.3 s.
+
+**What is left in `ProofTree`**, by `set_option profiler true` over the
+whole file (threshold 0, summed by command) against `w3c-perf`'s text
+(the state before the tactics and tree lanes, a detached worktree): 12.1 s
+of profiled time against 11.2 s.  The tactics lane's library adds about
+0.6 s spread over every command (10–30 ms each, elaboration and tactic
+time of the tree builder and the walks), none of it in one function; the
+tree lane's new chain examples add about 1.07 s (`sol_chain?` and `#chain`
+compile and tactic time, `Calculus/Core/{ChainGen,Chains}.lean`); the
+scoped `sol_prove` examples' kernel time, 0.42 s above `w3c-perf` with
+change 1 alone, is back at it with change 2 (the file's type checking
+3.4 s either way).  The remaining large costs are
+outside this lane's files: today's `sol_close` at the walks' leaves (2.6 s
+of `simp`, with 0.39 s of `Nonempty` instance searches inside it) and
+today's residue in the kernel (most of the 3.4 s of type checking).
+*Proposed, the lead's call*: the tree lane's chain examples in
+`ProofTree` (`dl!{ [ alice.age = v; x = 1; ] alice.age == v } ~~> …`, the
+`dl![m]{ ⟨[ alice.age = v; ]⟩ φ }` chain and the memory chain, about 0.9 s)
+move to `Examples/Tactics/CoreChains`, as `deleteReadDeepWalk` moved; or
+the gate is read under Decision 9.
+
+**Pins**: none changed.  `deleteReadDeepWalk`'s `sol_derive?` pin and its
+replay moved verbatim from `Examples/ProofTree.lean` to
+`Examples/Tactics/StorageDelete.lean`, after `deleteReadDeep_theory`, whose
+formula it walks (the file's table row names it), the lead's approval; no rule name, branch label, fresh name or message text
+moved.
+
+**Checks**: `lean_build` of `Solidity`, `solkeycheck`, `SolkeyTestSuite`
+and `SolidityCorpus` (the last two in `defaultTargets` for the run only):
+325 jobs, green; `Closable`, `ProvesDerive`, `ProofTree`, `StorageDelete`
+clean by diagnostics, as are copies of Derived9–11.  No new `sorry`,
+`axiom` or `maxHeartbeats`; no new module.
+
+**Review fixes** (the read-only pass): (a) `Fml.closeErase`'s `upd` arm
+applied the update's `hit` closure to the binders below it even when there
+were none, the common case, so the kernel walked the update's terms with
+`Tm.anyE` a second time; it now matches on the binders first and asks `hit`
+only of a non-empty list (`Fml.closeErase_eq` splits on them).  Re-timed by
+the same scratch command, both variants in one run, interleaved: 249.4M →
+248.7M heartbeats over the 91, wall within noise (19.9 → 19.7 s, 21.8 →
+21.7 s on a second pass).  The `[]` case is cheap in the kernel (`Var.memB x
+[]` is one step), so the walk was small; the gap to the 236.3M of the
+recursor-only variant is not here.  (b) `Var.memB_eq_memBM` links
+`Var.memB` to its compiled twin, as G0 condition 2 asks.  (c)
+`ProvesDerive`'s docstring names `Seq.residue full H φ` and
+`Seq.leafQuoteI`.  No pin, rule or message changed.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
