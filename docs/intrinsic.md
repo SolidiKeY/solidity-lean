@@ -1049,7 +1049,7 @@ elaborates with every module (no name clash).
 ## W2 — soundness over the typed run; Core strategy tools (4 lanes)
 1. **`sound`** (the critical path)
    - Owns: `Calculus/Core/{Logic,SoundKit,Sound*,RunWk,RunFrame,Cover,Proves,ProvesSound,HoldsErase,Step,Arms,Blocks}.lean`.
-   - First commit, pushed on day one: `split`/`inv` lose `cov`, and `Cover.lean` is deleted (`bool` locals are typed now). The other three lanes merge this commit at once.
+   - First commit, pushed on day one: `split`/`inv` lose `cov`, and the module `Calculus/Core/Cover` is deleted (`bool` locals are typed now). The other three lanes merge this commit at once.
    - Then:
      - `holds` over `TState`. Arms are re-proved through `StorageErase`/`HeapErase`'s `_erase` lemmas into `Update.lean`'s symbols.
      - `holds_of_erase` (one direction) for the hidden binder and `anon`.
@@ -1086,7 +1086,7 @@ elaborates with every module (no name clash).
 ### W2 lane `sound` (`w2-sound`, 2026-10-08)
 
 **The cover is gone** (first commit): `Proves.split` and `Proves.inv` have
-KeY's goals only, `Calculus/Core/Cover.lean` (`Premise.cover`, `Fml.or`) is
+KeY's goals only, the module `Calculus/Core/Cover` (`Premise.cover`, `Fml.or`) is
 deleted, and `Premise.Sound` takes no cover.  Over M3's untyped states a
 `bool` local can still hold a number, so the diamond is read only from and
 into states whose `bool` locals hold `bool`s (`State.BoolOK`,
@@ -1150,6 +1150,11 @@ where it holds over its erasure (`tholds_of_holds`; `tholds_iff_holds` for
 structural part proved and the arms' part a hypothesis, `Stmt.TSound C`
 (`Premise.TSound`, `Premise.Sound` over `TState`).
 
+`Calculus/Core/TSoundKit.lean`: the premise shapes over `TState`
+(`Premise.tsound_update` … `tsound_done`), each an equation between typed
+runs read at the states they end in (`Stmt.trunSt`, `Prog.trunSt`,
+`Frames.trunSt`).
+
 **Left (the arms over `TState`, `Stmt.TSound C`)**, the bulk of the lane:
 every arm of `Stmt.step` re-proved against `Stmt.trun`, through
 `StorageErase`/`HeapErase`'s `_erase` lemmas into `Update.lean`'s symbols
@@ -1176,6 +1181,18 @@ arms close:
    `{v := len(storage, p)} ⟨ω⟩φ` holds where `⟨ v = p.length; ω ⟩φ` fails.
    Options: the diamond read from states whose arrays are within range (as
    M3's `BoolOK`), or `Update.lean`'s `len` diverging there too.
+3. *A `bool` mapping key* (`docs/solc-alignment.md`, Decision 10): the
+   typed run reads the slot `0`/`1`, `Update.lean`'s symbols are stuck on
+   it (`Value.asInt`), so `{v := find(storage, at(m, b))} ⟨ω⟩φ` holds under
+   the box (a stuck update says nothing) where `[ v = m[b]; ω ]φ` reads the
+   slot: `Stmt.TSound` is false there, and `close` then proves
+   `[ v = m[true]; ] false`.  Options: `Update.lean`'s key read hashing a
+   `bool` as `0`/`1` (a low-module change, with M3's run), or the typed
+   calculus restricted to `Prog.bridgeOk` programs (a premise of every
+   arm, as `TypedRunErase.lean`'s bridge has).
+   The first arm tried, `localValueAssign` (`sound_setLocal`), meets 2 and
+   3 at once: `Val.evalT_erase` needs `bridgeOk`, and a typed `len` read
+   diverges where the erased one does not.
 
 ## W3 — the flip, file by file (4 lanes)
 Each lane adds the `open scoped` line to the files it owns and re-pins them.
@@ -1992,7 +2009,7 @@ the cutover:
     `split`'s two goals proved `⟨ if (b) { } else { } ⟩ true` of every
     state.  `split` and `inv` now have today's third goal under the
     diamond, one of the two conditions (`cov : m = .diamond → …`, after the
-    frame's update for `inv`; `Calculus/Core/Cover.lean`'s
+    frame's update for `inv`; `Calculus/Core/Cover`, deleted at W2:
     `Premise.cover`), and `Premise.Sound` takes the cover as a premise.
     `State.Typed` went: the cover is what it gave.
   - **Review fix: `sound_opAssign`.**  Its five storage and memory cases
@@ -2138,7 +2155,7 @@ user).  What did not compile together, and how it was resolved:
   `Premise.Sound` over `State.Typed` states (a `bool` local holds a `bool`)
   with the loop cover inside `Premise.fml` (`Fml.invCases`); `calctools`
   dropped `State.Typed` for a cover goal apart (`Premise.cover`,
-  `Calculus/Core/Cover.lean`), which `Premise.Sound` takes as a premise and
+  `Calculus/Core/Cover`, deleted at W2), which `Premise.Sound` takes as a premise and
   `Proves.split`/`Proves.inv` prove under the diamond.  `calctools`' design
   is kept (a formula's binders and a capture of a `bool` storage word give
   a non-`bool` local, so `State.Typed` is not preserved by a derivation):
@@ -2218,7 +2235,7 @@ hypothesis) from `Stmt.stepSound` and the block arms (`stepSound_call`,
 
 ### Gate G0: passes, under conditions
 
-The spike (`Solidity/Scratch/IntrinsicSpike.lean`, not committed) has seven
+The spike (the scratch module `Solidity/Scratch/IntrinsicSpike`, not committed) has seven
 statements (`assignLocal`, `declLocal`, `declStorage`, `write`, scoped `ite`,
 `loop`, `call` over a closed frame), `Prog Γ Γ'` with a variable output
 index, `Frames` with `pop .capture`/`.block`, `storageFieldRead_unfold_rightFst`
