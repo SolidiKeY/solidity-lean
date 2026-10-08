@@ -115,18 +115,19 @@ def run (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α)) :
       (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) H
 
 /-- A leaf for the kernel: `Proves.close`'s side condition, and today's
-residue of its erasure. -/
+residue of its erasure, the parameters' quantifiers stripped
+(`Fml.stripAlls`: today's leaf has them free). -/
 def leafRes {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (Solidity.Derive.Leaf C)) :=
   cond ((H.wrap φ).closableB [])
     ((Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-      Solidity.Derive.budget [] ((H.wrap φ).erase [])).map (·.1)) none
+      Solidity.Derive.budget [] ((H.wrap φ).erase []).stripAlls).map (·.1)) none
 
 /-- The same leaf quoted, for the tactic (`Derive.residueQuote`), the
 contract named by `c`. -/
 def leafQuote (c : Lean.Expr) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
     Option (List (Lean.Expr × Lean.Expr)) :=
   cond ((H.wrap φ).closableB [])
-    ((Solidity.Derive.residueQuote c [] ((H.wrap φ).erase [])).map (·.1)) none
+    ((Solidity.Derive.residueQuote c [] ((H.wrap φ).erase []).stripAlls).map (·.1)) none
 
 /-- The steps the walk is given, down a path and in all (today's
 `Derive.budget`). -/
@@ -278,7 +279,7 @@ theorem leafRes_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ
     obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
     cases he
     exact Proves.close [] rfl List.nodup_nil
-      (Solidity.Proves.valid (Solidity.Proves.of_synResidue hr hl)) hc
+      (Solidity.Valid.of_stripAlls (Solidity.Proves.valid (Solidity.Proves.of_synResidue hr hl))) hc
       (fun _ _ h => nomatch h)
 
 end Seq
@@ -315,11 +316,11 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
     Solidity.Derive.kernelLemma type (mkApp2 (mkConst ``Eq.refl [1]) resTy someLs)
   let assignWith (ls h : Expr) (hl : Expr) : MetaM Unit :=
     g.assign (mkAppN (mkConst ``Proves.of_residue) #[C, R, Γ, H, φ, ls, h, hl])
-  -- the kernel first: most obligations leave nothing
   let nil := mkApp (mkConst ``List.nil [0]) leafTy
-  if let some h ← (some <$> lemmaFor nil) <|> pure none then
-    assignWith nil h (mkApp (mkConst ``Solidity.Derive.leaves_nil) C)
-    return []
+  -- the compiled walk first, then one kernel check of its leaves, as
+  -- today's `sol_prove` (`Derive.prove`): a kernel try at no leaves costs a
+  -- second evaluation where the closer leaves some, in the declaration's
+  -- heartbeats
   let qTy := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``List [0])
     (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Expr) (mkConst ``Expr)))
   let some leaves ← unsafe evalExpr (Option (List (Expr × Expr))) qTy
@@ -327,6 +328,11 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
     | throwError "sol_prove: the walk does not reach the end of the sequent: a step with no \
         rule, a leaf `Proves.close` does not take (`Fml.closableB`: a leaf behind a diamond \
         update), or more than {fuel} steps"
+  if leaves.isEmpty then
+    let h ← try lemmaFor nil
+      catch e => throwError "sol_prove: the kernel rejects the walk:{indentD e.toMessageData}"
+    assignWith nil h (mkApp (mkConst ``Solidity.Derive.leaves_nil) C)
+    return []
   let mkLeaf (Γ' φ' : Expr) : Expr :=
     mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) hyp,
       mkApp (mkConst ``Solidity.Fml) C, Γ', φ']

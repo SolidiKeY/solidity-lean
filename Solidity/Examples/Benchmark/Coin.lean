@@ -110,7 +110,7 @@ frame clause needs the layout premise instantiated at the quantified key. -/
 theorem spec_mint : ⊢ spec!{ mint } := by
   sol_derive
   all_goals
-    refine Core.Proves.close [] rfl List.nodup_nil ?_
+    refine close ?_
     sol_symex
     sol_close_unwrap
     intro σ

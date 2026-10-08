@@ -175,6 +175,19 @@ theorem _root_.Solidity.Valid.all_of_free {φ : Solidity.Fml C} (x : Var) (p : P
     (h : Solidity.Valid φ) : Solidity.Valid (.all x p φ) :=
   fun _ _ _ => h _
 
+/-- Today's formula without its leading quantifiers: a scoped leaf's
+erasure with its parameters free, as today's leaves have them. -/
+def _root_.Solidity.Fml.stripAlls : Solidity.Fml C → Solidity.Fml C
+  | .all _ _ φ => φ.stripAlls
+  | φ => φ
+
+/-- A formula is valid where it is with its leading quantifiers' locals free. -/
+theorem _root_.Solidity.Valid.of_stripAlls : {φ : Solidity.Fml C} →
+    Solidity.Valid φ.stripAlls → Solidity.Valid φ
+  | .all x p φ, h => Solidity.Valid.all_of_free x p (Solidity.Valid.of_stripAlls (φ := φ) h)
+  | .tt, h | .eq _ _, h | .not _, h | .and _ _, h | .imp _ _, h
+  | .modal _ _ _, h | .upd _ _ _, h | .havoc _, h | .anon _ _, h | .defined _, h => h
+
 namespace Derive
 
 open Lean Elab Tactic Meta
@@ -333,9 +346,10 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
         `(term| ($(← ProofTree.short ``Taclet.step_eq) .$rule:ident))
       else `(term| ($(← ProofTree.short ``LeanTaclet.toStep) .$rule:ident))
     -- a rule whose line `apply` cannot match (a read into a hole, whose
-    -- `fill` does not reduce while unifying): the premise by `rfl`, the
-    -- statement's own `Stmt.step`
-    return (← ctorTacs c d) ++ (← ctorTacs c (← `(term| $(mkIdent `rfl):ident)))
+    -- `fill` does not reduce while unifying): the taclet elaborated after
+    -- the goal (`by exact`), as `core_rule` does, so the line keeps its name
+    let late ← ctorTacs c (← `(term| (by exact $d)))
+    return (← ctorTacs c d) ++ late.extract (late.size - 1) late.size
   | _ => return #[]
 
 /-- A leaf closed as a walk ends, at the empty outer scope: its lines, or

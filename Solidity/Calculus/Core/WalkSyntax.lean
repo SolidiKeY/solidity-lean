@@ -30,7 +30,8 @@ Where the scoped calculus takes a step today's names otherwise:
 * `apply empty` (`emptyModality`) is a step only where a modality is left
   with no statement: a rule that leaves none goes on into the rest or past
   the frames (Gate G0, condition 6), so after a last statement it does
-  nothing;
+  nothing, and before a statement it is refused (`core_skip`); so is
+  `apply allIntro` on a parameter `Proves.valid` already bound;
 * `apply Proves.valid` binds the formula's parameters (`∀`, `cdl!`) with
   `allRight` at once, as today's walk leaves them free.
 
@@ -91,6 +92,31 @@ def evalCoreSilent : Tactic := fun _ => do
     let some g := (← getUnsolvedGoals).head? | return
     let some gs ← Walk.silentStep g | return
     replaceMainGoal gs
+
+/-- `core_skip empty`, `core_skip allIntro`: the line where the scoped
+strategy already took its step, after the silent steps: `empty` where no
+modality is left at the head (a rule that leaves no statement went past the
+frames), `allIntro` where the context holds the parameters only and no `∀`
+is left (`Proves.valid` and `core_silent` bound them).  It fails anywhere
+else, so the line is checked: `apply empty` before a statement is refused. -/
+syntax (name := coreSkip) "core_skip " ident : tactic
+
+@[tactic coreSkip]
+def evalCoreSkip : Tactic := fun stx => do
+  evalTactic (← `(tactic| core_silent))
+  let some g := (← getUnsolvedGoals).head? | throwError "no goals"
+  let ty ← instantiateMVars (← g.getType)
+  unless ty.isAppOf ``Core.Proves do throwError "core_skip: not a scoped sequent"
+  let φ ← whnf ty.appArg!
+  let H := ty.appFn!.appArg!
+  match stx[1].getId with
+  | `empty =>
+    if φ.isAppOf ``Fml.modal then
+      throwError "apply empty: a modality is left, with a statement to run"
+  | `allIntro =>
+    unless (← Walk.paramsOnly H) && !φ.isAppOf ``Fml.all do
+      throwError "apply allIntro: no quantifier at the head"
+  | _ => throwUnsupportedSyntax
 
 /-- `core_tag a b …`: name the first goals `a`, `b`, …, for `case` (a rule's
 goals named as its premises are, today's names). -/
@@ -207,12 +233,12 @@ scoped macro_rules
   | `(tactic| apply emptyModality) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.empty) <;> core_silent
-      | core_silent
+      | core_skip empty
       | apply _root_.Solidity.Proves.emptyModality)
   | `(tactic| apply empty) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.empty) <;> core_silent
-      | core_silent
+      | core_skip empty
       | apply _root_.Solidity.Proves.empty)
   | `(tactic| apply intro) =>
     `(tactic| first
@@ -221,7 +247,7 @@ scoped macro_rules
   | `(tactic| apply allIntro) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.allIntro) <;> core_silent
-      | core_silent
+      | core_skip allIntro
       | apply _root_.Solidity.Proves.allIntro)
   | `(tactic| apply Proves.valid) =>
     `(tactic| first

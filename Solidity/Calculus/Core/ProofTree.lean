@@ -66,15 +66,6 @@ structure Config where
   closers : Array (Array (TSyntax `tactic)) := #[]
   maxNodes : Nat := 10000
 
-/-- The closer every tree tries last, as today's tree closes a leaf:
-`Proves.close` at the root's scope, then today's `sol_symex; sol_close` on
-the erasure. -/
-def closeTacs : MetaM (Array (TSyntax `tactic)) := do
-  let rfl' := mkIdent `rfl
-  let nd := mkIdent ``List.nodup_nil
-  return #[← `(tactic| refine $(← short ``Proves.close) [] $rfl' $nd ?_),
-    ← `(tactic| sol_symex), ← `(tactic| sol_close)]
-
 /-- `closeTrue`, the closer every tree tries first. -/
 def closeTrueTacs : MetaM (Array (TSyntax `tactic)) := do
   return #[← `(tactic| exact $(← short ``Proves.closeTrue) rfl)]
