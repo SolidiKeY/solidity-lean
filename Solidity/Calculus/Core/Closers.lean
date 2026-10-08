@@ -57,4 +57,34 @@ def evalSolMergeCore : Tactic := fun stx => Derive.onErased "sol_merge" stx stx
 @[tactic Solidity.tacticSol_fold_terms]
 def evalSolFoldTermsCore : Tactic := fun stx => Derive.onErased "sol_fold_terms" stx stx
 
+/-! ## A scoped formula refuted at a state
+
+`¬ ⊨ dl!{ … }` by one state where the run panics, or halts under the
+diamond: the run's outcome read by the kernel (`decide +kernel` on
+`isPanic`/`isHalt`), as today's refutations read it by `rfl`. -/
+
+/-- The outcome is a panic. -/
+def _root_.Solidity.Semantics.Res.isPanic {α : Type} : Semantics.Res α → Bool
+  | .error .panic => true
+  | _ => false
+
+/-- The outcome is a halt (a revert or a panic). -/
+def _root_.Solidity.Semantics.Res.isHalt {α : Type} : Semantics.Res α → Bool
+  | .error _ => true
+  | .ok _ => false
+
+/-- No modality holds of a run that panics. -/
+theorem _root_.Solidity.Modality.afterRunC_not_panic {α : Type} {m : Modality} {p : α → Prop}
+    {r : Semantics.Res α} (h : m.afterRunC p r) (hp : r.isPanic = true) : False := by
+  cases r with
+  | ok _ => cases hp
+  | error e => cases e <;> first | exact h.2 rfl | cases hp
+
+/-- The diamond does not hold of a run that halts. -/
+theorem _root_.Solidity.Modality.afterRunC_diamond_halt {α : Type} {p : α → Prop}
+    {r : Semantics.Res α} (h : Modality.diamond.afterRunC p r) (hp : r.isHalt = true) : False := by
+  cases r with
+  | ok _ => cases hp
+  | error _ => exact h.1
+
 end Solidity.Core

@@ -1,5 +1,8 @@
 import Solidity.Calculus.Close
 import Solidity.Evm.Examples
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Operators: bitwise, shifts, `unchecked`
@@ -29,6 +32,8 @@ namespace Solidity.Examples.Tactics.Operators
 open Proves
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## Bitwise and shifts -/
 
@@ -107,7 +112,8 @@ theorem uncheckedWrap :
 
 /-- Division inside `unchecked` still reverts on a zero divisor. -/
 example : ¬ (⊨ dl!{ ⟨ uint x = 1; uint y = 0; unchecked { x = x / y; }; ⟩ true }) :=
-  fun h => (h Semantics.State.exampleStore).1
+  fun h => Modality.afterRunC_diamond_halt
+    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
 
 /-! ## What the elaborator writes -/
 
