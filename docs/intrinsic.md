@@ -1168,6 +1168,19 @@ docstring still names `Premise.cover` (not this lane's file).
   (today's spellings), without a block's `}`, a hidden binder no entry,
   a `∀ T x` entry read (`readSequent`).
 
+- **`sol_spec` on `cspec!`** (`Calculus/Core/SolSpec.lean`): a second
+  elaborator of `sol_spec_prep`, so `sol_spec` (`sol_symex; sol_spec_close`)
+  runs the scoped strategy and then erases each leaf (`Valid.of_erase`, the
+  kernel checking `Fml.posB`) into today's `sol_spec_prep`/`sol_spec_finish`.
+  `Examples/Tactics/CoreSolSpec.lean` proves all seven of
+  `Examples/Tactics/Specs.lean`'s obligations scoped, `_mint` under 700000
+  heartbeats (today's needs 1000000).
+
+- **Left for the integration**: `ProofTree.Config.closers` stays empty
+  until `w2-sound`'s `Proves.close` (`Calculus/Core/CloseErase.lean`) is
+  merged; then a leaf with a formula left closes by
+  `apply Proves.close` and the erased closer.
+
 Pins (`Examples/Tactics/CoreProofTree.lean`, `CoreSurface.lean`, `CoreSequents.lean`,
 `CoreCallback.lean`) differ from today's `Examples/ProofTree.lean` where
 the scoped calculus does, each for a reason W3's list should carry:
