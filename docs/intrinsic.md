@@ -3346,6 +3346,81 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
 21. `Derived7`'s `case leaf2` may go (one fewer residual leaf), recorded as
     the one deviation from "Derived1–14 text unchanged".
 
+### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
+
+**Result.**  `Stmt.tsound C : Stmt.TSound C` at every contract, and
+`Proves.tsound`/`Proves.tvalid` with no hypothesis
+(`Calculus/Core/TSound.lean`); `#print axioms Proves.tvalid` and
+`Stmt.tsound`: `propext`, `Classical.choice`, `Quot.sound`.  The
+hypothesised form is `Proves.tsound_of` (`Calculus/Core/TProvesSound.lean`).
+Deleted: `Stmt.TArmOk`, `Stmt.TResidual`, `Stmt.tsound_iff_residual`,
+`Stmt.not_tresidual`, `Stmt.not_tsound`, `Stmt.tsound_diamond`,
+`Stmt.tarmOk_diamond`, `tsound_declMemAlias` (an alias initializer is
+`tsound_declMemInit`'s case now), `LTy.inhabited`, `LTy.denote_nonempty`.
+CORE 2's items 1 and 2 are done; the W3b blockers 2 (callbacks, below) and
+12 (the fold) no longer wait on decision 17.
+
+**The change, low to high** (no rule, branch label, fresh name or pin moved):
+- *Typed state* (`Semantics/Core/TypedState.lean`): `LTy.TDenote (.mem R)` is
+  `Option (HRef H R)`; `TDenote.wk` maps, `TDenote.erase` maps to the id.
+  The typed run (`TypedRun.lean`): `MPath.mvalT` of an unset local
+  reverts; `declMem` (both arms), `rebindMem`, `deleteMem` of a local and
+  `CallRet.enterT`'s memory return bind `some`.
+- *M3's scoped state* has to follow, or the bridge (`Stmt.trun_erase`, which
+  every update arm's typed soundness goes through) fails at an unset local:
+  `LTy.Denote (.mem _)` is `Option Nat` (`Semantics/Core.lean`), read by
+  `memRef` (an unset one reverts, as `aliasPath`), which `MPath.mval`'s
+  local and the term `Tm.pvI` (`Calculus/Core/Logic.lean`) use; `Rhs.mref`
+  sets `some`; M3's `LTy.WT (.mem R)` asks only of a set local
+  (`LTy.WT.mem_some`, `Typing/Soundness.lean`).
+- *The untyped run*, for the same reason one level down (`RunErase.lean`'s
+  `RunRel` and `HoldsErase.lean`'s `Tm.eval_erase` ask equal halts): an unset
+  memory local erases to `Binding.unset` (`LTy.enc`, `TDenote.bind`), and
+  `Binding.unset` read as memory reverts where it was `.stuck`
+  (`Semantics.lean`'s `MPath.mval`, `Update.lean`'s `Tm.eval .pvI`,
+  `Calculus/SoundKit.lean`'s `bindingRef`).  No untyped program binds a
+  memory name to `.unset`, so no untyped proof changed.
+- *The readings* (`Calculus/Core/Fml.lean`): `Modality.forallB` is universal
+  under both modalities.  Decision 12's diamond inhabitant clause was
+  trivial once every type has a value (`LTy.tdenote_nonempty`, now
+  unconditional), so it went, with the clauses that guarded it:
+  `Hyps.boxOnly`'s, `Fml.Leaf`'s, `Fml.TClosable`'s, `Fml.closableB`'s and
+  `Fml.tclosableB`'s at a binder.  `Proves.close` therefore accepts a
+  diamond binder at a memory type in a leaf's context; no pin moved.
+- *Evaluation order*: `memoryIndexWriteCaptureAllNonSimpleIndex`,
+  `memoryIndexWriteMemRefCaptureAllNonSimpleIndex` and
+  `memoryIndexDeleteNonSimpleIndexCapture` read the index before the
+  receiver local, the statement the other way round; with an unset receiver
+  both revert, with different halts, so those arms (M3's in
+  `SoundMem.lean`, the typed ones in `TSoundMem.lean`) go up to the halt
+  (`Res.Sim`, `TRes.Sim`; helper `MPath.sim_err_ref`).  The rules are
+  unchanged.
+- *EVM*: the simulation reads nothing of a memory local (`Seen (.mem _) =
+  Unit`, `Evm/CoreSim.lean`; the fragment has none), so `Look`/`Sim` needed
+  no change; `CoreCorrect` and `CoreInterpreter` build as before.
+- *Callbacks*: `Semantics/Core/Callback.lean` builds unchanged.
+  `ProvesC.sound` is still not proved: the arms are now sound over `tholds`,
+  and `holdsC` reads a modality over the runs with callbacks, which needs
+  the arms again over those runs (W3b blocker 2, narrowed).
+- Rows: `docs/solc-alignment.md` ("Memory local without an object"),
+  `docs/lean-key-rule-map.md` (`memoryLocalDeclInitDrop`'s scoped row, which
+  still said "not yet in `Core.Stmt.step`").
+
+**Build**: `lean_build`, `Solidity`, `solkeycheck`, `SolidityCorpus`,
+`SolkeyTestSuite` (the last two in `defaultTargets` for the run only):
+green at the third run, 341 jobs, no OOM kill (fixes on the way:
+`Typing/TypedWT.lean`, `Typing/Reachability.lean`, `Calculus/Core/Merge.lean`).
+No new `sorry`, `axiom` or `maxHeartbeats`; `dups.py` (but the known `as`
+false positive), `check-orphans` (but the git-excluded `Scratch/`),
+`check-doc-paths` and `check-rule-text` clean.  The W3 gates were not
+re-timed (the change is a representation of one local type; no kernel
+`decide` runs over a memory local).
+
+**Proposed, not done** (lead's call): `Fml.bind`'s modality argument is
+read by nothing now (`Modality.forallB` ignores it); it can leave the syntax
+with `Premise.fml`'s, the printers already drop it.  Kept to leave this
+change below the printers and quoters.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
