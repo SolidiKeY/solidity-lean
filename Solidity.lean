@@ -63,6 +63,7 @@ import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.Closable
 import Solidity.Calculus.Core.CloseErase
 import Solidity.Calculus.Core.Sound
+import Solidity.Calculus.Core.DelabErase
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
