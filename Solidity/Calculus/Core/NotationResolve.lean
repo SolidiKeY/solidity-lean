@@ -201,11 +201,12 @@ def Upd.resolveN (hint : Var → Option LTy) (Γ : NCtx) :
 
 /-! ## Formulas -/
 
-/-- A formula of `Update.lean`, its locals read as positions in `Γ`: a
-quantifier pushes its local, an update the locals it declares, a program
-the ones it leaves (`Prog.resolve`).  `hint` types the locals an update
-binds (`elemTy`). -/
-def Fml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → Solidity.Fml C → Except String (Fml C Γ.ctx)
+/-- A formula as written (`Update.lean`'s `Surface.Fml`), its locals read
+as positions in `Γ`: a quantifier pushes its local, an update the locals it
+declares, a program the ones it leaves (`Prog.resolve`).  `hint` types the
+locals an update binds (`elemTy`). -/
+def Fml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → Solidity.Surface.Fml C →
+    Except String (Fml C Γ.ctx)
   | _, .tt => pure .tt
   | Γ, .eq a b => do pure (.eq (← Tm.resolveN Γ a) (← Tm.resolveN Γ b))
   | Γ, .defined t => do pure (.defined (← Tm.resolveN Γ t))

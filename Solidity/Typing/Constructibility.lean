@@ -53,7 +53,7 @@ namespace Solidity
 
 open Semantics
 open SemanticsProperties (lookupBy_eq_some_mem lookupBy_defaultForFields SVal.find_nil
-  SVal.save_nil SVal.find_append SVal.save_append Prog.run_append Prog.run_cons
+  SVal.save_nil SVal.find_append SVal.save_append
   State.findStorage_append State.saveStorage_append)
 open Semantics.SVal.canon (canonFields canonElems canonEntries)
 
@@ -1479,7 +1479,7 @@ open Semantics
 
 open Semantics
 open SemanticsProperties (lookupBy_eq_some_mem lookupBy_defaultForFields SVal.find_nil
-  SVal.save_nil SVal.find_append SVal.save_append Prog.run_append Prog.run_cons
+  SVal.save_nil SVal.find_append SVal.save_append
   State.findStorage_append State.saveStorage_append)
 open Semantics.SVal.canon (canonFields canonElems canonEntries)
 open Semantics.SVal.tight (tightFields tightElems tightEntries)

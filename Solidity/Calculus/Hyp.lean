@@ -53,13 +53,13 @@ theorem maxIdx_append (xs ys : List Var) : maxIdx (xs ++ ys) = max (maxIdx xs) (
 
 
 /-- Fresh names are numbered one above every index in the formula. -/
-abbrev Fml.fresh (φ : Fml C) : Nat := maxIdx φ.vars + 1
+abbrev NFml.fresh (φ : NFml C) : Nat := maxIdx φ.vars + 1
 
 
 /-- One entry of the context. -/
 inductive Hyp (C : Contract) where
   /-- `a → …` -/
-  | pre (a : Fml C)
+  | pre (a : NFml C)
   /-- `{U} …`, produced under the modality `m` -/
   | upd (m : Modality) (U : Upd C)
   /-- `{havoc} …`: any storage and ledger a callee may leave, as
@@ -73,7 +73,7 @@ inductive Hyp (C : Contract) where
   | anon (xs : List Var)
 
 /-- Put the context back in front of a formula. -/
-def Hyp.wrap : List (Hyp C) → Fml C → Fml C
+def Hyp.wrap : List (Hyp C) → NFml C → NFml C
   | [], φ => φ
   | .pre a :: Γ, φ => dl_schema{ a → ‹Hyp.wrap Γ φ› }
   | .upd m U :: Γ, φ => dl_schema{ {U} ‹Hyp.wrap Γ φ› }
@@ -81,7 +81,7 @@ def Hyp.wrap : List (Hyp C) → Fml C → Fml C
   | .all x p :: Γ, φ => .all x p (Hyp.wrap Γ φ)
   | .anon xs :: Γ, φ => .anon xs (Hyp.wrap Γ φ)
 
-/-- A Theory rewrite of the context (`Fml.rwEq`): in every precondition; an
+/-- A Theory rewrite of the context (`NFml.rwEq`): in every precondition; an
 update or a `havoc` stays as it is, since its right-hand sides run in the
 interpreter. -/
 def Hyp.rwEq (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
@@ -107,7 +107,7 @@ def Hyp.rwUpd (q : Term C × Term C) : List (Hyp C) → List (Hyp C)
 
 
 /-- Fresh names are numbered one above every index in the whole sequent. -/
-def Hyp.fresh (Γ : List (Hyp C)) (φ : Fml C) : Nat := (Hyp.wrap Γ φ).fresh
+def Hyp.fresh (Γ : List (Hyp C)) (φ : NFml C) : Nat := (Hyp.wrap Γ φ).fresh
 
 /-- Which rules a derivation may use: solkey's (`Taclet`), or all of them
 (`LeanTaclet` too). -/
@@ -211,24 +211,28 @@ end Expand
 section Elab
 open Elab Term Meta
 
+/-- A quoted formula as written with no modality in it (`Surface.Fml`) as
+the closer's (`Fml`): the constructors of the same names. -/
+partial def toFmlE (e : Expr) : Expr :=
+  if e.isAppOfArity ``NFml.toSurface 2 then e.appArg! else
+  match e.getAppFn with
+  | .const (.str pre c) us =>
+    if pre == ``Surface.Fml then mkAppN (.const (.str ``NFml c) us) (e.getAppArgs.map toFmlE) else e
+  | _ => e
+
 /-- The first `n` layers of a quoted formula as context entries: `Fml.imp a _`
 is `Hyp.pre a`, `Fml.upd m U _` is `Hyp.upd m U`. -/
 def peelHyps (C : Expr) : Nat → Expr → MetaM (List Expr × Expr)
   | 0, e => pure ([], e)
   | n + 1, e => do
-    if e.isAppOfArity ``Fml.imp 3 then
+    if e.isAppOfArity ``NFml.imp 3 || e.isAppOfArity ``Surface.Fml.imp 3 then
       let (hs, φ) ← peelHyps C n (e.getArg! 2)
-      return (mkApp2 (mkConst ``Hyp.pre) C (e.getArg! 1) :: hs, φ)
-    if e.isAppOfArity ``Fml.upd 4 then
+      return (mkApp2 (mkConst ``Hyp.pre) C (toFmlE (e.getArg! 1)) :: hs, φ)
+    if e.isAppOfArity ``NFml.upd 4 || e.isAppOfArity ``Surface.Fml.upd 4 then
       let (hs, φ) ← peelHyps C n (e.getArg! 3)
       return (mkApp3 (mkConst ``Hyp.upd) C (e.getArg! 1) (e.getArg! 2) :: hs, φ)
     throwError "sequent: not a context entry{indentExpr e}"
 
-/-- The modality at the head of a quoted formula, through its updates. -/
-partial def headModality? (e : Expr) : Option Expr :=
-  if e.isAppOfArity ``Fml.modal 4 then some (e.getArg! 1)
-  else if e.isAppOfArity ``Fml.upd 4 then headModality? (e.getArg! 3)
-  else none
 
 end Elab
 

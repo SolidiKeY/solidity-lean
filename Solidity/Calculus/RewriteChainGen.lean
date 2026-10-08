@@ -51,21 +51,19 @@ a branch's cover, `⟨[ revert(); ]⟩ false ∨ …`), `havoc` and `∀`. -/
 partial def goalsOf (e : Expr) (n : Nat) : MetaM (Array (Nat × Expr)) := do
   let e ← instantiateMVars e
   match e.getAppFnArgs with
-  | (``Fml.upd, #[_, _, _, ψ]) => goalsOf ψ (n + 1)
-  | (``Fml.and, #[_, φ, ψ]) => return (← goalsOf φ n) ++ (← goalsOf ψ n)
-  | (``Fml.imp, #[_, _, ψ]) => goalsOf ψ n
-  | (``Fml.not, #[_, ψ]) => goalsOf ψ n
-  | (``Fml.havoc, #[_, ψ]) => goalsOf ψ n
-  | (``Fml.anon, #[_, _, ψ]) => goalsOf ψ n
-  | (``Fml.all, #[_, _, _, ψ]) => goalsOf ψ n
+  | (``NFml.upd, #[_, _, _, ψ]) => goalsOf ψ (n + 1)
+  | (``NFml.and, #[_, φ, ψ]) => return (← goalsOf φ n) ++ (← goalsOf ψ n)
+  | (``NFml.imp, #[_, _, ψ]) => goalsOf ψ n
+  | (``NFml.not, #[_, ψ]) => goalsOf ψ n
+  | (``NFml.havoc, #[_, ψ]) => goalsOf ψ n
+  | (``NFml.anon, #[_, _, ψ]) => goalsOf ψ n
+  | (``NFml.all, #[_, _, _, ψ]) => goalsOf ψ n
   | _ => return #[(n, e)]
 
 /-- What is wrong with the shape of the line, if anything. -/
 def shapeProblems (B : Expr) : MetaM (Array MessageData) := do
   let mut out := #[]
   for (n, g) in ← goalsOf B 0 do
-    if g.isAppOf ``Fml.modal then
-      out := out.push m!"a program is left in front of{indentExpr g}"
     if n ≥ 2 then
       out := out.push m!"{n} updates stand in front of{indentExpr g}\n\
         (one parallel update does: `~[sequentialToParallel]~>`)"
@@ -108,7 +106,7 @@ def stillAppliesUsing (C L : Expr) (all : Bool := false) :
       if rs.isEmpty then
         st.restore
         continue
-      let ψ ← mkFreshExprMVar (mkApp (mkConst ``Fml) C)
+      let ψ ← mkFreshExprMVar (mkApp (mkConst ``NFml) C)
       let (r, q, pf) ← rwSelect C L ψ n rs failed
       let q ← instantiateMVars q
       let uses ← (collectFVars (collectFVars {} (← instantiateMVars r))
@@ -128,9 +126,9 @@ def stillApplies (C L : Expr) : TermElabM (Array (String × Expr)) := do
 def chainEnds? (ty : Expr) : MetaM (Option (Expr × Expr × Expr)) := do
   let ty ← instantiateMVars ty
   match ty.getAppFnArgs with
-  | (``Fml.Leads, #[C, A, B]) | (``Fml.RwAny, #[C, A, B]) | (``Fml.RwBy, #[C, _, _, A, B]) =>
+  | (``NFml.Leads, #[C, A, B]) | (``NFml.RwAny, #[C, A, B]) | (``NFml.RwBy, #[C, _, _, A, B]) =>
     return some (C, A, B)
-  | (``Fml.Via, #[C, A, ws]) =>
+  | (``NFml.Via, #[C, A, ws]) =>
     let some ws ← listElems? ws | return none
     let some w := ws.back? | return some (C, A, A)
     let w ← whnfR w
@@ -387,7 +385,7 @@ def cutEven (xs : Array α) (n : Nat) : Array (Array α) := Id.run do
     i := i + len
   return out
 
-/-- The line `e : Fml C` as a calc line is written: `dl!{ φ }`, or at a
+/-- The line `e : NFml C` as a calc line is written: `dl!{ φ }`, or at a
 modality `dl![m]{ φ }` (`m` the line's modality variable, or `.box` for a
 box's update with no modality under it) — the first of these that reads
 back as `e`; Lean's own printing where the notation escapes. -/
@@ -405,7 +403,7 @@ def writeLine (C e : Expr) (m? : Option Expr) : TermElabM Lean.Term := do
     let ok ← withoutModifyingState do
       try
         let e' ← Term.withoutErrToSorry do
-          let e' ← Term.elabTermEnsuringType t (mkApp (mkConst ``Fml) C)
+          let e' ← Term.elabTermEnsuringType t (mkApp (mkConst ``NFml) C)
           Term.synthesizeSyntheticMVarsNoPostponing
           instantiateMVars e'
         pure (!e'.hasExprMVar && (← isDefEq e' e))
@@ -574,7 +572,7 @@ elab_rules : tactic
   | `(tactic| sol_chain?%$tk) => withMainContext do
     let g ← getMainGoal
     let ty ← instantiateMVars (← g.getType)
-    if ty.isAppOfArity ``Fml.Via 3 then
+    if ty.isAppOfArity ``NFml.Via 3 then
       let some (C, _, B) ← Chain.chainEnds? ty | throwUnsupportedSyntax
       Chain.solveChain g
       replaceMainGoal []
@@ -587,7 +585,7 @@ elab_rules : tactic
           {"\n".intercalate (lines.extract start lines.size |>.map ("    " ++ ·)).toList}" ++
           gen.stopNote)
       return
-    unless ty.isAppOfArity ``Fml.Leads 3 do throwUnsupportedSyntax
+    unless ty.isAppOfArity ``NFml.Leads 3 do throwUnsupportedSyntax
     let #[C, φ, ψ] := ty.getAppArgs | throwUnsupportedSyntax
     let gen ← Chain.generate C φ (some (← instantiateMVars ψ))
     let last := gen.last φ
@@ -596,11 +594,11 @@ elab_rules : tactic
     let links := gen.links
     -- one link is its own relation (`SoundRel.leads`), more are a `Fml.Via`
     let lines ← if links.isEmpty then
-        pure #["exact Solidity.Fml.Leads.self _"]
+        pure #["exact Solidity.NFml.Leads.self _"]
       else do
         let ls ← Chain.viaLines C gen.splice.modality φ links
-        let head := if links.size == 1 then "exact Solidity.Fml.SoundRel.leads (show "
-          else "exact Solidity.Fml.Via.leads (show "
+        let head := if links.size == 1 then "exact Solidity.NFml.SoundRel.leads (show "
+          else "exact Solidity.NFml.Via.leads (show "
         let body := #[head ++ ls[0]!] ++ (ls.extract 1 ls.size).map ("    " ++ ·)
         pure (body.modify (body.size - 1) (· ++ " by sol_chain)"))
     let text := "\n".intercalate lines.toList
@@ -619,19 +617,19 @@ open Lean Elab Tactic Meta
 after, and `A ~~> B`. -/
 def rwStep (C A : Expr) (n : Lean.Name) : TermElabM (Expr × Expr) := do
   let some arrow ← rwArrow? (mkIdent n) | throwError "sol_rws: {n} is no rewrite"
-  let ψ ← mkFreshExprMVar (mkApp (mkConst ``Fml) C)
+  let ψ ← mkFreshExprMVar (mkApp (mkConst ``NFml) C)
   -- the candidates `stillApplies` chose among, so the replay meets the same
   -- instance: never a read of the state as the program found it
   let (rs, failed) ← rwCandidatesWith (fun t => !plainRead t) C A arrow
   let (r, q, pf) ← rwSelect C A ψ n.toString rs failed
   let q ← instantiateMVars q
   let h := pf.getD (someRefl C q)
-  return (q, mkAppN (mkConst ``Fml.RwBy.sound) #[C, mkStrLit n.toString, r, A, q, h])
+  return (q, mkAppN (mkConst ``NFml.RwBy.sound) #[C, mkStrLit n.toString, r, A, q, h])
 
 /-- The goal `φ ~~> ψ`, its contract and ends. -/
 def leadsGoal (g : MVarId) : MetaM (Expr × Expr × Expr) := do
   let ty ← instantiateMVars (← g.getType)
-  unless ty.isAppOfArity ``Fml.Leads 3 do throwError "sol_rws: the goal is not `φ ~~> ψ`{indentExpr ty}"
+  unless ty.isAppOfArity ``NFml.Leads 3 do throwError "sol_rws: the goal is not `φ ~~> ψ`{indentExpr ty}"
   let #[C, φ, ψ] := ty.getAppArgs | unreachable!
   return (C, ← instantiateMVars φ, ← instantiateMVars ψ)
 
@@ -639,10 +637,10 @@ def leadsGoal (g : MVarId) : MetaM (Expr × Expr × Expr) := do
 def proveRws (g : MVarId) (ns : Array Lean.Name) : TermElabM Unit := do
   let (C, φ, ψ) ← leadsGoal g
   let mut cur := φ
-  let mut pf := mkApp2 (mkConst ``Fml.Leads.self) C φ
+  let mut pf := mkApp2 (mkConst ``NFml.Leads.self) C φ
   for n in ns do
     let (q, h) ← rwStep C cur n
-    pf := mkAppN (mkConst ``Fml.Leads.comp) #[C, φ, cur, q, pf, h]
+    pf := mkAppN (mkConst ``NFml.Leads.comp) #[C, φ, cur, q, pf, h]
     cur := q
   unless cur == ψ || (← withReducible (isDefEq cur ψ)) do
     throwError "sol_rws: the rewrites give{indentExpr cur}\nnot{indentExpr ψ}"

@@ -443,7 +443,7 @@ info: Try this:
   sol_prove
     refine Proves.close ?_
     sol_symex
-    refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+    refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
     sol_decide_cons
 -/
@@ -452,7 +452,7 @@ example : ⊢ dl!{ [ balances[k] = 5; balances[j] = 5; ] balances[k] == 5 } := b
   sol_prove?
 
 /-! A parallel update: `r = ++x;` leaves `{ x := x + 1 ‖ r := x + 1 }`,
-which the closer reads only once `Fml.seqUpd` has split it. -/
+which the closer reads only once `NFml.seqUpd` has split it. -/
 
 /--
 info: Try this:
@@ -487,7 +487,7 @@ example : ⊢ dl!{ [ uint y = 1; y = y * y; y = y * y; y = y * y; y = y * y; y =
 
 /-! Memory: `Person memory carol;` leaves the pair
 `{ carol := freshId(addM(memory)) ‖ memory := addM(memory) }`, which
-`Fml.seqUpd` keeps whole (`Derive.memAlloc?`); `alice = carol;` copies the
+`NFml.seqUpd` keeps whole (`Derive.memAlloc?`); `alice = carol;` copies the
 memory object into storage as its view.  Both leaves close inside the
 residue. -/
 
@@ -644,7 +644,7 @@ def pushes22 : Core.Fml StandardExample [] :=
     values.length > 0 }
 
 #guard (Core.Derive.residueOf pushes22).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
 
@@ -664,7 +664,7 @@ def writes6 : Core.Fml StandardExample [] :=
 
 #guard Core.Derive.proves writes4
 #guard (Core.Derive.residueOf writes6).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     Derive.leafFits l.1 l.2) == some [false]
 
 /-! The reduction is bounded apart (`Derive.elimSize`): a read below a
@@ -678,7 +678,7 @@ def deletes10 : Core.Fml StandardExample [] :=
     wallet.stash[owner] == 0 }
 
 #guard (Core.Derive.residueOf deletes10).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
 

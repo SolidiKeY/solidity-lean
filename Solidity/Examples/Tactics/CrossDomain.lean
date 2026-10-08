@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -86,7 +87,7 @@ theorem storageToMemoryNonsimplePath :
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
   apply unfold .storageLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -94,7 +95,7 @@ theorem storageToMemoryNonsimplePath :
   apply unfold .memoryLocalDeclInitDrop
   apply unfold .memoryStorageCopyUnfold
   apply unfold .storageLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -168,7 +169,7 @@ theorem memoryToStorageFromAlias :
   apply update .memoryToStorageFieldCopyRoot
   -- { storage := save(storage, alice.account, copyMem(mtSt, memory, acc)) }
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -192,7 +193,7 @@ theorem memoryToStorageFromMemberSource :
   apply update .memoryFieldWrite
   apply update .memoryToStorageFieldCopyRoot
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -211,7 +212,7 @@ theorem memoryToStorageNonsimplePath :
   apply unfold .memoryLocalDeclInitDrop
   apply unfold .memoryStorageCopyUnfold
   apply unfold .storageLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -222,9 +223,9 @@ theorem memoryToStorageNonsimplePath :
   apply update .storageFieldReadBindLocalRoot
   apply update .memoryToStorageFieldCopyRoot
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `storageFieldRead_unfold_rightFst`
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -271,7 +272,7 @@ copy member by member, one level down, so this one is a run from
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 8))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.exampleStore
+#eval Surface.Prog.localAfterT State.exampleStore
   sol{ Person memory carol; carol.account.balance = 8; alice = carol;
        carol.account.balance = 9; uint result = alice.account.balance; } "result"
 

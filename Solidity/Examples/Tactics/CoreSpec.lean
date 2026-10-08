@@ -70,16 +70,17 @@ def addObligation : Core.Fml Ledger [] := cspec!{ add }
 def ctorObligation : Core.Fml Ledger [] := cproblem!{ constructor }
 
 /-- The two formulas are the same term (their quotations equal). -/
-def sameAs (a b : Except String (Fml Ledger)) : Bool :=
+def sameAs (a b : Except String (Surface.Fml Ledger)) : Bool :=
   match a, b with
-  | .ok φ, .ok ψ => Fml.quote (Lean.mkConst ``Ledger) φ == Fml.quote (Lean.mkConst ``Ledger) ψ
+  | .ok φ, .ok ψ =>
+    Surface.Fml.quote (Lean.mkConst ``Ledger) φ == Surface.Fml.quote (Lean.mkConst ``Ledger) ψ
   | _, _ => false
 
 /-! Each scoped obligation erases to today's. -/
 
-#guard sameAs ((Core.specObligation Ledger "add").map (·.erase [])) (specObligation Ledger "add")
-#guard sameAs ((Core.specObligation Ledger "constructor").map (·.erase []))
+#guard sameAs ((Core.specObligation Ledger "add").map (·.eraseS [])) (specObligation Ledger "add")
+#guard sameAs ((Core.specObligation Ledger "constructor").map (·.eraseS []))
   (specObligation Ledger "constructor")
-#guard sameAs ((Core.Problem.ctor Ledger .diamond).map (·.erase [])) (Problem.ctor Ledger .diamond)
+#guard sameAs ((Core.Problem.ctor Ledger .diamond).map (·.eraseS [])) (Problem.ctor Ledger .diamond)
 
 end Solidity.Examples.Tactics.CoreSpec

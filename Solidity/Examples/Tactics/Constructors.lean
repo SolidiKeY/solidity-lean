@@ -54,13 +54,9 @@ open scoped Solidity.Core.Surface
 
 /-! ## Deploying it in the interpreter -/
 
-/-- `constructor(7);`: the initializer, then the body, from the empty storage. -/
-theorem deploySeven :
-    (Mini.deploy sol{ constructor(7); } {}).map (·.storage) =
-      .ok [("x", .prim (.int 5)), ("y", .prim (.int 7)), ("z", .prim (.int 0))] := by
-  simp only [Contract.deploy, Contract.deployState, Contract.initStorage, Mini, List.map,
-    Semantics.defaultForTy]
-  rfl
+/- `constructor(7);`: the initializer, then the body, from the empty storage. -/
+#guard (Mini.deployRun sol{ constructor(7); } {}).map (·.storage) =
+      .ok [("x", .prim (.int 5)), ("y", .prim (.int 7)), ("z", .prim (.int 0))]
 
 /--
 info: ok
@@ -72,7 +68,7 @@ z = 0
 #guard_msgs in #deploy Mini(7)
 
 /-- The constructor is not `payable`: a deployment with value reverts. -/
-theorem deployValue : Mini.deploy sol{ constructor(7); } { msgValue := 1 } = .error .revert := rfl
+theorem deployValue : Mini.deployRun sol{ constructor(7); } { msgValue := 1 } = .error .revert := rfl
 
 /-! ## Deploying it in the calculus -/
 

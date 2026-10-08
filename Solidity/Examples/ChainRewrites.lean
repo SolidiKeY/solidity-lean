@@ -492,7 +492,7 @@ A check leaves its goals behind one update, as a conjunction of implications
 over the captured condition.  The literals fold (`add_literals`, `leq_literals`,
 `Calculus/Literals.lean`: exact laws, so in an update's right-hand side under
 any modality and with no premise), the update is pushed through the
-connectives (`applyOnRigid`, `Fml.push`, `Calculus/ChainBranches.lean`), the
+connectives (`applyOnRigid`, `NFml.push`, `Calculus/ChainBranches.lean`), the
 literal connectives fold (`concrete`), and a merge finds the first spine
 under a branch (`sequentialToParallel`, `LineRw.mergeIn`).  Each rewrite
 under a branch reads the skeleton of the line the elaborator wrote for it, so
@@ -515,17 +515,20 @@ example : dl!{ defined(250 + 10) ∧ 250 + 10 ≐ 260 }
     ~[add_literals]~> dl!{ defined(260) ∧ 260 ≐ 260 } := by sol_chain
 
 /-- `applyOnRigid` through a conjunction under `m`: the update cannot halt,
-each rigid leaf is substituted, and the goals keep the update in front. -/
-example : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+each rigid leaf is substituted, and the goals keep the update in front.
+The second branch is a postcondition `ψ` where the check's trace has its
+reverting branch, `⟨[ revert(); ]⟩ φ`: a rewrite runs on a line's erasure,
+which has no modality since W4 `modal` (`docs/intrinsic.md`). -/
+example (ψ : Core.Post StandardExample []) : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
     ~[applyOnRigid]~>
       dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-        (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) } := by sol_chain
+        (false ≐ false → { se1 := false } ψ) } := by sol_chain
 
 /-- `concrete`: the literal equations close (`eqClose`), the connectives
 fold (`concrete_impl_2`, `concrete_impl_1`, `concrete_and_1`). -/
-example : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-      (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
-    ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by sol_chain
+example (ψ : Core.Post StandardExample []) : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+      (false ≐ false → { se1 := false } ψ) }
+    ~[concrete]~> dl![m]{ { se1 := false } ψ } := by sol_chain
 
 /-- `sequentialToParallel` under a branch: the first spine the skeleton finds. -/
 example (φ : Core.Post StandardExample [.val .uint, .val .uint]) (ψ : Core.Post StandardExample [.val .uint]) :
@@ -535,13 +538,13 @@ example (φ : Core.Post StandardExample [.val .uint, .val .uint]) (ψ : Core.Pos
 set_option maxHeartbeats 300000 in
 /-- The check's trace, folded: the captured comparison, the update pushed
 through, the branch closed, and the capture dropped. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
-    ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+example (φ ψ : Core.Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
+    ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
     ~[applyOnRigid]~>
       dl![m]{ (false ≐ true → { x := 260 ‖ se1 := false } φ) ∧
-        (false ≐ false → { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ) }
-    ~[concrete]~> dl![m]{ { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ }
-    ~[simplifyUpdate]~> dl![m]{ { x := 260 } ⟨[ revert(); ]⟩ φ } := by
+        (false ≐ false → { x := 260 ‖ se1 := false } ψ) }
+    ~[concrete]~> dl![m]{ { x := 260 ‖ se1 := false } ψ }
+    ~[simplifyUpdate]~> dl![m]{ { x := 260 } ψ } := by
   sol_chain
 
 -- `add_literals` out of range: the sum reverts, and is its own normal form.

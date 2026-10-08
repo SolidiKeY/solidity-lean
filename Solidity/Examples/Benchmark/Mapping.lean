@@ -126,7 +126,7 @@ theorem remove_spec : ⊢ dl!{ myMap[a] + 0 == myMap[a] → [ remove(a); ] myMap
   sol_prove
   refine close ?_
   sol_symex
-  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
   sol_decide_heuristic
 

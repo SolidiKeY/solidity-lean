@@ -54,62 +54,62 @@ The layout of `StandardExample`: `total`, `age`, `owner`, `balance` are slots
 `wallet` `[17, 19)`. -/
 
 /-- `alice.age = 10;` -/
-def setAge : Prog StandardExample := sol{ alice.age = 10; }
+def setAge : Surface.Prog StandardExample := sol{ alice.age = 10; }
 
 /-- `balances[7] = 5; total = balances[7] + balances[8]; folks[7].age = 3;` -/
-def mappings : Prog StandardExample :=
+def mappings : Surface.Prog StandardExample :=
   sol{ balances[7] = 5; total = balances[7] + balances[8]; folks[7].age = 3; }
 
 /-- `Person storage p = folks[7]; p.age = 9; total = folks[7].age;` -/
-def alias : Prog StandardExample := sol{
+def alias : Surface.Prog StandardExample := sol{
   Person storage p = folks[7]; p.age = 9; total = folks[7].age;
 }
 
 /-- `uint x = 3; x += 4; age = x > 5 ? x : 0;` -/
-def locals : Prog StandardExample := sol{ uint x = 3; x += 4; age = x > 5 ? x : 0; }
+def locals : Surface.Prog StandardExample := sol{ uint x = 3; x += 4; age = x > 5 ? x : 0; }
 
 /-- `total = 2^256 - 1; total += 1;` -/
-def overflow : Prog StandardExample := sol{
+def overflow : Surface.Prog StandardExample := sol{
   total = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
   total += 1;
 }
 
 /-- `owner = 5; owner.transfer(30);` -/
-def payOwner : Prog StandardExample := sol{ owner = 5; owner.transfer(30); }
+def payOwner : Surface.Prog StandardExample := sol{ owner = 5; owner.transfer(30); }
 
 /-- `owner = msg.sender; total = msg.value;`, called by `7` with `100`:
 `CALLER` and `CALLVALUE` push them. -/
-def envReads : Prog StandardExample := sol{ owner = msg.sender; total = msg.value; }
+def envReads : Surface.Prog StandardExample := sol{ owner = msg.sender; total = msg.value; }
 
 /-- `uint x = 5; uint y = x++; total = y; age = ++x;`: `x++` is the old value,
 `++x` the new one. -/
-def bumps : Prog StandardExample := sol{ uint x = 5; uint y = x++; total = y; y = ++x; age = y; }
+def bumps : Surface.Prog StandardExample := sol{ uint x = 5; uint y = x++; total = y; y = ++x; age = y; }
 
 /-- `alice.age = 7; alice.account.balance = 3; bob = alice;` copies `alice`'s
 three slots onto `bob`'s: `bob.age` is slot `16`, `bob.account.balance` `14`. -/
-def copyPerson : Prog StandardExample :=
+def copyPerson : Surface.Prog StandardExample :=
   sol{ alice.age = 7; alice.account.balance = 3; bob = alice; }
 
 /-- `values.push(7); values.push(); total = values.length;`: two elements, the
 first `7` at `keccak(4)`, the length `2`. -/
-def pushes2 : Prog StandardExample := sol{ values.push(7); values.push(); total = values.length; }
+def pushes2 : Surface.Prog StandardExample := sol{ values.push(7); values.push(); total = values.length; }
 
 /-- An alias bound through an array index: `persons[0]`'s slot, its index
 checked once, when it is bound.  With one person on the machine, writing
 `p.age` writes `keccak(9) + 2`, which `persons[0].age` reads back. -/
-def elemAlias : Prog StandardExample :=
+def elemAlias : Surface.Prog StandardExample :=
   sol{ Person storage p = persons[0]; p.age = 7; total = persons[0].age; }
 
 /-- `uint y = addTwo(3); total = y;` over `CallsExample`: `addTwo` calls
 `addOne` twice. -/
-def callTwice : Prog CallsExample := sol[CallsExample]{ uint y = addTwo(3); total = y; }
+def callTwice : Surface.Prog CallsExample := sol[CallsExample]{ uint y = addTwo(3); total = y; }
 
 section Signed
 
 local instance : InContract := ⟨TestSuite⟩
 
 /-- `int x = -5; int y = 3; signedTotal = x * y + 2;` -/
-def signed : Prog TestSuite := sol{ int x = -5; int y = 3; signedTotal = x * y + 2; }
+def signed : Surface.Prog TestSuite := sol{ int x = -5; int y = 3; signedTotal = x * y + 2; }
 
 /-- `uint[3]` takes three slots; `Token[2]` two; a `FixedTriple`
 (`uint[3] items; uint tag;`) four, `tag` the fourth.  solc lays a
@@ -120,7 +120,7 @@ theorem fixed_layout :
   decide
 
 /-- `fixedValues[2] = 7;` -/
-def fixedWrite : Prog TestSuite := sol{ fixedValues[2] = 7; }
+def fixedWrite : Surface.Prog TestSuite := sol{ fixedValues[2] = 7; }
 
 end Signed
 
@@ -133,25 +133,25 @@ open Solidity.Evm.Examples
 local instance : InContract := ⟨StandardExample⟩
 
 /-- `P` resolved from no locals, or the empty program if it does not resolve. -/
-def scopedOf {C : Contract} (P : Solidity.Prog C) : (Γ' : Solidity.Core.Ctx) × Solidity.Core.Prog C [] Γ' :=
+def scopedOf {C : Contract} (P : Solidity.Surface.Prog C) : (Γ' : Solidity.Core.Ctx) × Solidity.Core.Prog C [] Γ' :=
   match Solidity.Core.Prog.resolve [] P with
   | .ok ⟨Γ', P'⟩ => ⟨Γ'.ctx, P'⟩
   | .error _ => ⟨[], .nil⟩
 
 /-- The code of `P`, scoped. -/
-def codeOf {C : Contract} (P : Solidity.Prog C) : List Instr := compileProg 0 (scopedOf P).2
+def codeOf {C : Contract} (P : Solidity.Surface.Prog C) : List Instr := compileProg 0 (scopedOf P).2
 
-def code (P : Solidity.Prog StandardExample) : String := "; ".intercalate ((codeOf P).map toString)
+def code (P : Solidity.Surface.Prog StandardExample) : String := "; ".intercalate ((codeOf P).map toString)
 
-abbrev slotAfter {C : Contract} (P : Solidity.Prog C) (s : Slot) (m : Machine := fresh) :
+abbrev slotAfter {C : Contract} (P : Solidity.Surface.Prog C) (s : Slot) (m : Machine := fresh) :
     Option Nat :=
   Examples.storeAt (run (codeOf P) m) s
 
-abbrev reverts {C : Contract} (P : Solidity.Prog C) (m : Machine := fresh) : Bool :=
+abbrev reverts {C : Contract} (P : Solidity.Surface.Prog C) (m : Machine := fresh) : Bool :=
   reverted (run (codeOf P) m)
 
 /-- `P` resolves and is in the compiled fragment, from no locals. -/
-abbrev compiles {C : Contract} (P : Solidity.Prog C) : Bool :=
+abbrev compiles {C : Contract} (P : Solidity.Surface.Prog C) : Bool :=
   (Solidity.Core.Prog.resolve [] P).toBool && (inFragP (Frag.init []) (scopedOf P).2).isSome
 
 /-! ## Storage writes -/
@@ -169,7 +169,7 @@ DUP2; ADD; DUP1; DUP3; GT; ISZERO; JUMPI +1; REVERT; SWAP1; POP;
 PUSH @0; SSTORE
 -/
 #guard_msgs in #eval do
-  let c := (codeOf (sol{ total = total + age; } : Solidity.Prog StandardExample)).map toString
+  let c := (codeOf (sol{ total = total + age; } : Solidity.Surface.Prog StandardExample)).map toString
   IO.println ("; ".intercalate (c.take 4) ++ ";")
   IO.println ("; ".intercalate ((c.drop 4).take 10) ++ ";")
   IO.println ("; ".intercalate (c.drop 14))
@@ -186,7 +186,7 @@ theorem mappings_run :
 theorem alias_run : slotAfter alias (.root 0) = some 9 := by decide +kernel
 
 /-- info: PUSH 3; MSTORE %0; MLOAD %0; PUSH 4; DUP2; ADD; DUP1; DUP3; GT; ISZERO; JUMPI +1; REVERT; SWAP1; POP; MSTORE %0 -/
-#guard_msgs in #eval IO.println (code (sol{ uint x = 3; x += 4; } : Solidity.Prog StandardExample))
+#guard_msgs in #eval IO.println (code (sol{ uint x = 3; x += 4; } : Solidity.Surface.Prog StandardExample))
 
 theorem locals_run : slotAfter locals (.root 1) = some 7 := by decide +kernel
 
@@ -276,7 +276,7 @@ theorem envReads_run :
   decide +kernel
 
 theorem selfBalance_out :
-    compiles (sol{ total = address(this).balance; } : Solidity.Prog StandardExample) = false := by
+    compiles (sol{ total = address(this).balance; } : Solidity.Surface.Prog StandardExample) = false := by
   decide +kernel
 
 /-! ## Lengths, `v = x++`, copies, `push` -/
@@ -326,7 +326,7 @@ theorem pow_run :
     reverts sol{ total = 2 ** 256; } = true := by
   decide +kernel
 
-theorem pow_wt : compiles (sol{ total = 3 ** 5; } : Solidity.Prog StandardExample) := by
+theorem pow_wt : compiles (sol{ total = 3 ** 5; } : Solidity.Surface.Prog StandardExample) := by
   decide +kernel
 
 /-! ## What the fragment leaves out -/
@@ -342,14 +342,14 @@ theorem elemAlias_run :
 local, a copy of a struct holding a dynamic array, a fragile alias read after
 a `pop`; and, through a branch, an alias forgotten by a `pop` in it. -/
 theorem rejected :
-    compiles (sol{ persons.push(); } : Solidity.Prog StandardExample) = false ∧
-    compiles (sol{ Person memory m; } : Solidity.Prog StandardExample) = false ∧
-    compiles (sol[TestSuite]{ basketA = basketB; } : Solidity.Prog TestSuite) = false ∧
+    compiles (sol{ persons.push(); } : Solidity.Surface.Prog StandardExample) = false ∧
+    compiles (sol{ Person memory m; } : Solidity.Surface.Prog StandardExample) = false ∧
+    compiles (sol[TestSuite]{ basketA = basketB; } : Solidity.Surface.Prog TestSuite) = false ∧
     compiles (sol{ Person storage p = persons[0]; persons.pop(); p.age = 1; } :
-      Solidity.Prog StandardExample) = false ∧
+      Solidity.Surface.Prog StandardExample) = false ∧
     compiles (sol{ Person storage p = persons[0];
         if (total == 0) { persons.pop(); } else { }; p.age = 1; } :
-      Solidity.Prog StandardExample) = false := by
+      Solidity.Surface.Prog StandardExample) = false := by
   decide +kernel
 
 /-! ## Calls -/
@@ -433,7 +433,7 @@ theorem fixedWrite_run :
   decide +kernel
 
 theorem fixedOutOfBounds_run :
-    reverts (sol{ uint k = 3; fixedValues[k] = 1; } : Solidity.Prog TestSuite) = true := by
+    reverts (sol{ uint k = 3; fixedValues[k] = 1; } : Solidity.Surface.Prog TestSuite) = true := by
   decide +kernel
 
 end Signed

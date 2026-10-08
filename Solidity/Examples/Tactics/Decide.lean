@@ -10,9 +10,9 @@ import Solidity.Tools.Inspect
 `sol_close` (`Calculus/Close.lean`) finishes a goal with `simp` and `grind`
 on whatever facts the formula states; it cannot split on two keys being
 equal.  `sol_decide` (`Calculus/Decide.lean`) rewrites the goal by an
-equivalence, `Fml.valid_iff_reduce`, into a statement about the initial
+equivalence, `NFml.valid_iff_reduce`, into a statement about the initial
 state in which every read of a write is a case tree over key equalities;
-then by a second one, `Fml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
+then by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
 into a statement about free reads under the constraints a storage puts on
 them, and closes that.  Nothing is lost on the way, so a goal it does not
 close is either not valid, outside the fragment,
@@ -603,31 +603,18 @@ theorem memoryToStorageRead :
 
 end Solidity.Examples.Tactics.Decide
 
-/-! ## On today's formulas
+/-! ## On the closer's formulas
 
-Read without `open scoped Solidity.Core.Surface`: today's fragment
-(`Fml.inL`), the closer's input, and what `⊨` cannot rule out over today's
-untyped storage without `wt(storage)` (`deleteWithoutWriteUntyped`; the
-theorems above assume it). -/
+Read without `open scoped Solidity.Core.Surface`: the fragment (`NFml.inL`)
+of the closer's input.  (`deleteWithoutWriteUntyped`, a refutation over
+today's untyped run, and `sol_decide` refusing a modality went with the
+modality at W4 `modal`.) -/
 
 namespace Solidity.Examples.Tactics.Decide
 
 open Proves Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
-
-/-- A storage in which `alice.account.balance` holds a `bool`. -/
-def boolBalance : State :=
-  { storage := [("alice", .struct [("account", .struct [("balance", .bool true)])])] }
-
-/-- **`delete` without a write before it, and without `wt(storage)`, is not
-valid**: where the old member was a `bool`, the delete leaves `false`, not
-`0`.  What a read below a delete returns is the default of the old *value*;
-`deleteWithoutWrite` assumes `wt(storage)`, `deleteBelow` writes first. -/
-theorem deleteWithoutWriteUntyped :
-    ¬ (⊨ dl!{ [ delete alice.account; ] alice.account.balance == 0 }) :=
-  fun h => match (h boolBalance).1 with
-    | ⟨_, _, he⟩ => nomatch Theory.StValue.Equiv.prim_iff.1 he
 
 /-- info: false -/
 #guard_msgs in -- a copy from storage outside its pair is outside the fragment
@@ -636,13 +623,5 @@ theorem deleteWithoutWriteUntyped :
 /-- info: false -/
 #guard_msgs in -- a memory local no update bound is outside the fragment
 #eval (dl!{ { x := read(memory, carol.age) } x == 0 }).inL Decide.Sym.empty
-
-/--
-error: sol_decide: the formula is outside the fragment (a modality, a push of a memory object, a copy of memory whose guards are not literals, a copy from storage outside its allocation's pair, a memory past memSize, a read of the ledger, an alias no update binds, or one through an index used after a write)
-⊢ Fml.inL Decide.Sym.empty dl{ [ uint x = 1; ] x = 1 } = true
--/
-#guard_msgs in -- a modality is outside the fragment, and `sol_decide` says what is
-example : ⊨ dl!{ [ uint x = 1; ] x == 1 } := by
-  sol_decide
 
 end Solidity.Examples.Tactics.Decide

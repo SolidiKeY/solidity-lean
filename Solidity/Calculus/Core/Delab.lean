@@ -59,9 +59,31 @@ namespace Delab
 
 /-! ## The erased types -/
 
-/-- `Solidity.Core.X` ↦ `Solidity.X`. -/
+/-- `Solidity.Core.X` ↦ `Solidity.X`; a statement or a block ↦ the one as
+written (`Solidity.Surface.Stmt`, `Solidity.Surface.Prog`), a formula ↦ the
+closer's (`Solidity.NFml`; `trFml` makes it `Surface.Fml` under a
+modality). -/
 def legacyName? (n : Lean.Name) : Option Lean.Name :=
-  if (`Solidity.Core).isPrefixOf n then some (n.replacePrefix `Solidity.Core `Solidity) else none
+  if (`Solidity.Core.Stmt).isPrefixOf n then
+    some (n.replacePrefix `Solidity.Core.Stmt `Solidity.Surface.Stmt)
+  else if (`Solidity.Core.Prog).isPrefixOf n then
+    some (n.replacePrefix `Solidity.Core.Prog `Solidity.Surface.Prog)
+  else if (`Solidity.Core.Fml).isPrefixOf n then
+    some (n.replacePrefix `Solidity.Core.Fml `Solidity.NFml)
+  else if (`Solidity.Core).isPrefixOf n then some (n.replacePrefix `Solidity.Core `Solidity)
+  else none
+
+/-- Whether an erased formula is one as written: `Surface.Fml`, because a
+modality is in it. -/
+def isSurface (e : Expr) : Bool :=
+  match e.getAppFn with
+  | .const n _ => (`Solidity.Surface.Fml).isPrefixOf n || n == ``Solidity.NFml.toSurface
+  | _ => false
+
+/-- An erased formula as written (`Fml.toSurface` around one of the
+closer's): the parts of a formula with a modality. -/
+def asSurface (c e : Expr) : Expr :=
+  if isSurface e then e else mkApp2 (mkConst ``Solidity.NFml.toSurface) c e
 
 /-- Whether `ty` is a context. -/
 def isCtx (ty : Expr) : MetaM Bool := do
@@ -79,7 +101,7 @@ def legacyType? (ty : Expr) : MetaM (Option Expr) := do
   -- the storage hole is today's `Hole`
   if n == ``SHole then
     return some (mkAppN (mkConst ``Solidity.Hole) #[args[0]!, args[2]!])
-  if n == ``Prog || n == ``Frames then return some (mkApp (mkConst ``Solidity.Prog) args[0]!)
+  if n == ``Prog || n == ``Frames then return some (mkApp (mkConst ``Solidity.Surface.Prog) args[0]!)
   let some n' := legacyName? n | return none
   unless (← getEnv).contains n' do return none
   let keep ← args.filterM fun a => return !(← isCtx (← inferType a))
@@ -175,7 +197,7 @@ def Piece.buildOf (ty : Expr) (ps : Array Piece) : MetaM Expr := do
 
 /-- The program of the pieces: `s :: P ++ ω`, as `progTerm` writes it. -/
 def Piece.build (c : Expr) (ps : Array Piece) : MetaM Expr :=
-  Piece.buildOf (mkApp (mkConst ``Solidity.Stmt) c) ps
+  Piece.buildOf (mkApp (mkConst ``Solidity.Surface.Stmt) c) ps
 
 /-- The contract of a scoped term, its type's first argument. -/
 def contractOf (e : Expr) : MetaM Expr := do
@@ -198,7 +220,7 @@ def pairsTy : Expr :=
     (mkApp2 (mkConst ``Prod [levelZero, levelZero]) (mkConst ``PrimTy) (mkConst ``Solidity.Var))
 
 /-- `List (Stmt C)` -/
-def stmtsTy (c : Expr) : Expr := mkApp (mkConst ``List [levelZero]) (mkApp (mkConst ``Solidity.Stmt) c)
+def stmtsTy (c : Expr) : Expr := mkApp (mkConst ``List [levelZero]) (mkApp (mkConst ``Solidity.Surface.Stmt) c)
 
 /-- Binders as the list `Binders.toList` computes, in the order they are
 bound, and their names, innermost first, when they compute. -/
@@ -318,24 +340,37 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     let φ ← tr ms args[5]!
     if es.isEmpty then return φ
     -- built unchecked: a stuck update stays scoped, and prints as `‹…›`
-    return mkApp4 (mkConst ``Solidity.Fml.upd) args[0]! args[3]! (← updList args[0]! args[4]! es) φ
+    if isSurface φ then
+      return mkApp4 (mkConst ``Solidity.Surface.Fml.upd) args[0]! args[3]!
+        (← updList args[0]! args[4]! es) φ
+    return mkApp4 (mkConst ``Solidity.NFml.upd) args[0]! args[3]! (← updList args[0]! args[4]! es) φ
   if n == ``Fml.modal && args.size == 8 then
     let (ps, ms) ← progPieces ns args[5]!
     let (qs, ms) ← framePieces ms args[6]!
     let P ← Piece.build args[0]! (ps ++ qs)
-    return ← mkAppM ``Solidity.Fml.modal #[args[4]!, P, ← tr ms args[7]!]
+    return ← mkAppM ``Solidity.Surface.Fml.modal #[args[4]!, P, asSurface args[0]! (← tr ms args[7]!)]
   if n == ``Fml.all && args.size == 5 then
     -- an explicit `∀`'s mark (`Fml.markExplicit`) prints as nothing
     let x := args[2]!.consumeMData
-    return ← mkAppM ``Solidity.Fml.all #[x, args[3]!, ← tr (x :: ns) args[4]!]
+    let φ ← tr (x :: ns) args[4]!
+    if isSurface φ then return ← mkAppM ``Solidity.Surface.Fml.all #[x, args[3]!, φ]
+    return ← mkAppM ``Solidity.NFml.all #[x, args[3]!, φ]
   if n == ``Fml.bind && args.size == 6 then return ← tr (args[3]! :: ns) args[5]!
   if n == ``Fml.anon && args.size == 4 then
     let some xs ← Solidity.listElems? args[2]! | return e
     let xs ← xs.mapM fun x => do
       let x ← whnf x
       trIdx ns x.appArg!
-    return ← mkAppM ``Solidity.Fml.anon
-      #[← mkListLit (mkConst ``Solidity.Var) xs.toList, ← tr ns args[3]!]
+    let φ ← tr ns args[3]!
+    let xs ← mkListLit (mkConst ``Solidity.Var) xs.toList
+    if isSurface φ then return ← mkAppM ``Solidity.Surface.Fml.anon #[xs, φ]
+    return ← mkAppM ``Solidity.NFml.anon #[xs, φ]
+  -- a connective over a formula with a modality is one as written
+  if let some k := [(``Fml.not, "not"), (``Fml.and, "and"), (``Fml.imp, "imp"),
+      (``Fml.havoc, "havoc")].lookup n then
+    let φs ← (args.extract 2 args.size).mapM (tr ns)
+    if φs.any isSurface then
+      return ← mkAppM (.str `Solidity.Surface.Fml k) (φs.map (asSurface args[0]!))
   if n == ``Premise.update && args.size == 4 then
     let (es, _) ← updParts ns args[3]!
     return mkApp2 (mkConst ``Solidity.Premise.update) args[0]! (← updList args[0]! args[3]! es)
@@ -347,7 +382,7 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     return ← mkAppM ``Solidity.Premise.split
       #[← tr ns args[5]!, ← tr ns args[6]!, ← tr ns args[7]!, ← tr ns args[8]!]
   if n == ``Premise.check && args.size == 3 then
-    let nil ← mkListLit (mkApp (mkConst ``Solidity.Stmt) args[0]!) []
+    let nil ← mkListLit (mkApp (mkConst ``Solidity.Surface.Stmt) args[0]!) []
     return ← mkAppM ``Solidity.Premise.check #[← tr ns args[2]!, nil]
   if n == ``Premise.done && args.size == 4 then
     return mkApp2 (mkConst ``Solidity.Premise.done) args[0]! args[3]!
@@ -376,7 +411,7 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
       let (es, _) ← updParts ns U
       updList c U es
     return mkApp3 (mkConst ``Solidity.Premise.cases) c
-      (← mkListLit (mkApp (mkConst ``Solidity.Fml) c) fs.toList)
+      (← mkListLit (mkApp (mkConst ``Solidity.NFml) c) fs.toList)
       (← mkListLit (mkApp (mkConst ``Solidity.Upd) c) us.toList)
   if n == ``Premise.inv && args.size == 15 then
     let c := args[0]!
@@ -467,7 +502,7 @@ partial def callStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) :
       let r := ret.getArg! 2
       let none' ← mkAppOptM ``Option.none
         #[some (mkApp2 (mkConst ``Solidity.MRhs) c (ret.getArg! 1))]
-      let d := mkAppN (mkConst ``Solidity.Stmt.declMem)
+      let d := mkAppN (mkConst ``Solidity.Surface.Stmt.declMem)
         #[c, ret.getArg! 1, r, none', ret.getArg! 3, ret.getArg! 4]
       pure (mkConst ``Solidity.CallRet.none, [r], #[Piece.one d])
     | _ => return none
@@ -475,7 +510,7 @@ partial def callStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) :
   let body ← Piece.build c (pre ++ ps)
   let hsep := mkApp2 (mkConst ``Eq.refl [levelOne]) (mkConst ``Bool) (mkConst ``Bool.true)
   let argTy := mkApp (mkConst ``Solidity.Arg) c
-  return some (mkAppN (mkConst ``Solidity.Stmt.call)
+  return some (mkAppN (mkConst ``Solidity.Surface.Stmt.call)
     #[c, args[6]!, ← mkListLit argTy as.toList, hsep, ret', body])
 
 /-- `try a.f(e) returns (…) { ok } catch … { … }` as `Syntax.lean` writes
@@ -492,7 +527,7 @@ partial def tryStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) :=
   let blk (ms : List Expr) (P : Expr) : TrM Expr := do
     let (ps, _) ← progPieces ms P
     Piece.build c ps
-  return some (mkAppN (mkConst ``Solidity.Stmt.tryCall)
+  return some (mkAppN (mkConst ``Solidity.Surface.Stmt.tryCall)
     #[c, call, rets, ← blk (rNames ++ ns) args[10]!, ← blk ns args[11]!, code',
       ← blk (cNames ++ ns) args[13]!, ← blk ns args[14]!])
 
@@ -588,8 +623,8 @@ partial def closedErase? (ns : List Expr) (s : Expr) : TrM (Option Expr) := do
   try
     -- the contract is a phantom of the erased syntax: the value's
     -- representation does not depend on it
-    let P ← unsafe evalExpr (List (Solidity.Stmt Solidity.StandardExample)) (← inferType e) e
-    return some (Solidity.Prog.quote c P)
+    let P ← unsafe evalExpr (List (Solidity.Surface.Stmt Solidity.StandardExample)) (← inferType e) e
+    return some (Solidity.Surface.Prog.quote c P)
   catch _ => return none
 
 /-- The statements frames hold, `}` where a block ends when `blockEnd` is
@@ -701,7 +736,7 @@ def withTwins {α : Type} (e : Expr) (frames : Bool) (k : Env → MetaM α)
     | some c => pure (some c)
     | none => try some <$> contractOf e catch _ => pure none
   match c? with
-  | some c => withLocalDeclD blockEndName (mkApp (mkConst ``Solidity.Stmt) c) fun b =>
+  | some c => withLocalDeclD blockEndName (mkApp (mkConst ``Solidity.Surface.Stmt) c) fun b =>
       twinsFrom fvs 0 { blockEnd := some b } k
   | none => twinsFrom fvs 0 {} k
 

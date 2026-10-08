@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Spec
 import Solidity.Calculus.DecideComplete
@@ -162,38 +163,22 @@ the credit of `send` when the two differ (`sendMovesSender`,
 def tx : Semantics.TxEnv := { msgSender := 7 }
 
 /-- `balances[a]` after `P` deploys and runs, `7` calling. -/
-def balanceAfter (P : Prog Coin) (a : Int) : Semantics.Res Semantics.SVal := do
-  (← Coin.deploy P tx).findStorage "balances" [.at a]
+def balanceAfter (P : Surface.Prog Coin) (a : Int) : Semantics.Res Semantics.SVal := do
+  (← Coin.deployRun P tx).findStorage "balances" [.at a]
 
-/-- The deployer is the minter, and no one holds a coin. -/
-theorem deployRun :
-    (Coin.deploy sol{ constructor(); } tx).map (·.storage) =
-      .ok [("minter", .prim (.int 7)), ("balances", .map [] (.int 0))] := by
-  simp only [Contract.deploy, Contract.deployState, Contract.initStorage, Coin,
-    List.map, Semantics.defaultForTy]
-  rfl
+/- The deployer is the minter, and no one holds a coin. -/
+#guard (Coin.deployRun sol{ constructor(); } tx).map (·.storage) =
+      .ok [("minter", .prim (.int 7)), ("balances", .map [] (.int 0))]
 
-/-- The sender is debited. -/
-theorem sendRunSender :
-    balanceAfter sol{ constructor(); mint(7, 10); send(9, 4); } 7 = .ok (.int 6) := by
-  simp only [balanceAfter, Contract.deploy, Contract.deployState, Contract.initStorage, Coin,
-    List.map, Semantics.defaultForTy]
-  rfl
+/- The sender is debited. -/
+#guard balanceAfter sol{ constructor(); mint(7, 10); send(9, 4); } 7 = .ok (.int 6)
 
-/-- The receiver is credited. -/
-theorem sendRunReceiver :
-    balanceAfter sol{ constructor(); mint(7, 10); send(9, 4); } 9 = .ok (.int 4) := by
-  simp only [balanceAfter, Contract.deploy, Contract.deployState, Contract.initStorage, Coin,
-    List.map, Semantics.defaultForTy]
-  rfl
+/- The receiver is credited. -/
+#guard balanceAfter sol{ constructor(); mint(7, 10); send(9, 4); } 9 = .ok (.int 4)
 
-/-- Anyone but the minter: deployed by `3`, a `mint` by `7` reverts. -/
-theorem mintRunOther :
-    (do
-      let σ ← Coin.deploy sol{ constructor(); } { msgSender := 3 }
-      Prog.run { σ with tx := tx } (sol{ mint(7, 10); } : Prog Coin)) = .error .revert := by
-  simp only [Contract.deploy, Contract.deployState, Contract.initStorage, Coin,
-    List.map, Semantics.defaultForTy]
-  rfl
+/- Anyone but the minter: deployed by `3`, a `mint` by `7` reverts. -/
+#guard (do
+      let σ ← Coin.deployRun sol{ constructor(); } { msgSender := 3 }
+      Surface.Prog.runT { σ with tx := tx } (sol{ mint(7, 10); } : Surface.Prog Coin)) = .error .revert
 
 end Solidity.Examples.Benchmark.Coin

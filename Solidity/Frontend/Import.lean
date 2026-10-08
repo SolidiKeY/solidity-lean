@@ -312,7 +312,7 @@ def elabSolcImport : CommandElab := fun stx => do
     (mkApp (mkConst ``List [0]) rawTy) (mkConst N) (← liftTermElabM <| mkListLit rawTy (raws.map (·.2.2.2)).toList)
   let (C, bodies) ← liftTermElabM <| unsafe evalExpr (Contract × List (List RawStmt)) pairTy val
   -- the typed elaborator on each, the program quoted back and checked
-  let progTy := mkApp (mkConst ``Prog) (mkConst N)
+  let progTy := mkApp (mkConst ``Surface.Prog) (mkConst N)
   let mut defined : Array Lean.Name := #[]
   for ((k, f, ss, _), raw) in raws.toList.zip bodies do
     let fail (msg : String) : Array ImportRow :=
@@ -334,7 +334,7 @@ def elabSolcImport : CommandElab := fun stx => do
       | .ok P =>
         let n : Lean.Name := N ++ Lean.Name.mkSimple f.name
         let decl := Declaration.defnDecl {
-          name := n, levelParams := [], type := progTy, value := Prog.quote (mkConst N) P,
+          name := n, levelParams := [], type := progTy, value := Surface.Prog.quote (mkConst N) P,
           hints := .abbrev, safety := .safe }
         let ok ← liftCoreM <| tryCatchRuntimeEx (do addDecl decl; pure (Except.ok ()))
           fun ex => do pure (.error (← ex.toMessageData.toString))
@@ -357,7 +357,7 @@ def elabSolcImport : CommandElab := fun stx => do
         | .ok P =>
           let n : Lean.Name := N ++ Lean.Name.mkSimple f.name
           let decl := Declaration.defnDecl {
-            name := n, levelParams := [], type := progTy, value := Prog.quote (mkConst N) P,
+            name := n, levelParams := [], type := progTy, value := Surface.Prog.quote (mkConst N) P,
             hints := .abbrev, safety := .safe }
           let ok ← liftCoreM <| tryCatchRuntimeEx (do addDecl decl; pure (Except.ok ()))
             fun ex => do pure (.error (← ex.toMessageData.toString))
@@ -392,7 +392,7 @@ def elabSolcScoped : CommandElab := fun stx => do
     for r in rows do
       if r.status != .elaborated then continue
       let n := N ++ Lean.Name.mkSimple r.name
-      let P ← unsafe evalConst (Prog C) n
+      let P ← unsafe evalConst (Surface.Prog C) n
       let err ← match paramCtx r.params with
         | .error e => pure (some e)
         | .ok Γ => Core.Prog.defineCore (n ++ `core) N (ECtx.toNCtx Γ) P

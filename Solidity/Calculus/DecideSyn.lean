@@ -4,7 +4,7 @@ import Solidity.Calculus.Decide
 # Closing a reduction by its terms: `LFml.syn`
 
 KeY closes `select(store(h, o, f, v), o, f) = v` by rewriting and syntactic
-equality; it never evaluates the heap.  What `Fml.reduce` leaves is mostly of
+equality; it never evaluates the heap.  What `NFml.reduce` leaves is mostly of
 that kind: a chain of premises `t ≐ t`, one per term an update computed, each
 saying that the term returns, and a conclusion `a ≐ b` whose two sides compute
 the same thing under different guards (`seq d a`: `a`, once `d` returns).

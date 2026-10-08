@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Frontend.Problems
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Closers
@@ -87,13 +88,9 @@ info: 2 functions (0 diamond, 0 box, 0 skip, 2 specified): 2 elaborated, 0 skipp
 #guard_msgs in
 #eval IO.println (Solkey.Counter.inits.map fun (x, e) => (x, e.toStr))
 
-/-- A deployment with `7`: the initializer, then the body. -/
-theorem counterDeploy :
-    (Solkey.Counter.deploy sol[Solkey.Counter]{ constructor(7); } {}).map (·.storage) =
-      .ok [("limit", .prim (.int 5)), ("count", .prim (.int 7))] := by
-  simp only [Contract.deploy, Contract.deployState, Contract.initStorage, Solkey.Counter, List.map,
-    Semantics.defaultForTy]
-  rfl
+/- A deployment with `7`: the initializer, then the body. -/
+#guard (Solkey.Counter.deployRun sol[Solkey.Counter]{ constructor(7); } {}).map (·.storage) =
+      .ok [("limit", .prim (.int 5)), ("count", .prim (.int 7))]
 
 /-! ## `EtherWallet.sol`
 

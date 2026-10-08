@@ -25,19 +25,19 @@ nothing, so a link never repeats its line.
 | `LineRw` | computes | line before ⇝ line after | sound by | the rule on `⊢` |
 |---|---|---|---|---|
 | `mergeAt i` | `Fml.mergeAt` | `{U}{V} ⇝ {U ‖ {U}V}`, `U` at `i` | `Upd.merge_holds` (iff) | `merge`, `mergeStorage` |
-| `mergeSpine n` | `Fml.mergeSpine` | the first `n + 1` updates into one | `n` merges (iff) | — |
+| `mergeSpine n` | `NFml.mergeSpine` | the first `n + 1` updates into one | `n` merges (iff) | — |
 | `mergeRun i n` | `Fml.mergeRun` | the `n + 1` updates from `i` into one | `n` merges (iff) | — |
-| `updRule r i` | `Fml.updRuleAt` | `applySkip`, `applyOnRigid` | `UpdRule.sound` (iff) | `simplify` |
-| `simplify i` | `Fml.simplifyAt` | the elements `ψ` does not read, or a later one overwrites, go | `Upd.dropEffectless_holds_of` (iff) | `simplify` |
-| `simplifyFresh i` | `Fml.simplifyFreshAt` | the same, `ψ` asked its fresh variables only | `Upd.dropEffectless_holds_of` (iff) | — |
-| `applyOnRigidBox i` | `Fml.applyOnRigidBoxAt` | `[{U}] φ ⇝ φ[U]`, `φ` first-order; any modality if `U` cannot halt | `Fml.subst_box(_st)` | `applyOnRigidBox` |
-| `applyStorageBox i` | `Fml.applyStorageBoxAt` | `[{storage := s}] φ ⇝ φ[s/storage]` | `Fml.withSt_box` | `applyStorageBox` |
-| `law r` | `Fml.rwLaw` | `t ⇝ t'` in every equation | `Fml.rwEq_holds` (iff) | `rewrite` |
-| `lawUpd r ht i` | `Fml.rwUpdAt` | `t ⇝ t'` in `[{Uᵢ}]`'s right-hand sides | `Upd.rw_box` | `updRw` |
-| `lawUpdAny r ht i` | `Fml.rwUpdCoveredAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, memory terms included, `Uᵢ` holding the write `t` reads back | `Upd.rwEv_holds` (iff) | `updRw` |
-| `lawUpdRef r hr i` | `Fml.rwUpdRefAt` | a frame or delete-value law in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding its storage operation | `Upd.rw_holds`, `TermTaclet.RefLaw.evalRefines` (iff) | `updRw` |
-| `lawUpdEq r i` | `Fml.rwUpdEqAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, `t` and `t'` one read member-wise | `Upd.rw_holds`, `Term.base_eval` (iff) | `updRw` |
-| `lawUpdEval r i` | `Fml.rwUpdEvalAt` | a memory law `t ⇝ t'` (`EvalLaw`) in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding the write `t` reads back | `Upd.rw_holds`, `EvalLaw.sound` (iff) | `updRw` |
+| `updRule r i` | `NFml.updRuleAt` | `applySkip`, `applyOnRigid` | `UpdRule.sound` (iff) | `simplify` |
+| `simplify i` | `NFml.simplifyAt` | the elements `ψ` does not read, or a later one overwrites, go | `Upd.dropEffectless_holds_of` (iff) | `simplify` |
+| `simplifyFresh i` | `NFml.simplifyFreshAt` | the same, `ψ` asked its fresh variables only | `Upd.dropEffectless_holds_of` (iff) | — |
+| `applyOnRigidBox i` | `NFml.applyOnRigidBoxAt` | `[{U}] φ ⇝ φ[U]`, `φ` first-order; any modality if `U` cannot halt | `NFml.subst_box(_st)` | `applyOnRigidBox` |
+| `applyStorageBox i` | `NFml.applyStorageBoxAt` | `[{storage := s}] φ ⇝ φ[s/storage]` | `NFml.withSt_box` | `applyStorageBox` |
+| `law r` | `NFml.rwLaw` | `t ⇝ t'` in every equation | `NFml.rwEq_holds` (iff) | `rewrite` |
+| `lawUpd r ht i` | `NFml.rwUpdAt` | `t ⇝ t'` in `[{Uᵢ}]`'s right-hand sides | `Upd.rw_box` | `updRw` |
+| `lawUpdAny r ht i` | `NFml.rwUpdCoveredAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, memory terms included, `Uᵢ` holding the write `t` reads back | `Upd.rwEv_holds` (iff) | `updRw` |
+| `lawUpdRef r hr i` | `NFml.rwUpdRefAt` | a frame or delete-value law in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding its storage operation | `Upd.rw_holds`, `TermTaclet.RefLaw.evalRefines` (iff) | `updRw` |
+| `lawUpdEq r i` | `NFml.rwUpdEqAt` | `t ⇝ t'` in `{Uᵢ}`'s right-hand sides, `t` and `t'` one read member-wise | `Upd.rw_holds`, `Term.base_eval` (iff) | `updRw` |
+| `lawUpdEval r i` | `NFml.rwUpdEvalAt` | a memory law `t ⇝ t'` (`EvalLaw`) in `{Uᵢ}`'s right-hand sides, `Uᵢ` holding the write `t` reads back | `Upd.rw_holds`, `EvalLaw.sound` (iff) | `updRw` |
 
 KeY's names: the merges are `sequentialToParallel`, the two `simplify…` are
 `simplifyUpdate` (with `applySkip` when they empty the update), the two
@@ -48,11 +48,11 @@ update itself holds the write the law reads back (`Upd.covers`).
 **Where.**  A line is an update prefix, its *spine* `{U₀}{U₁}…{Uₙ} ψ`, over
 a body `ψ`: a program still to run, or the postcondition.  A chain rewrites
 the spine at a position, so the functions take one, `i` counted from the
-outside (`Fml.atSpine` walks there); the innermost pair of three updates is
+outside (`NFml.atSpine` walks there); the innermost pair of three updates is
 `mergeAt 1`.  The `⊢` rules act on the last update of the context; a chain's
 line has no context, and names the position instead.  An update under a
 connective (a branch's `c → {U} …`) is not reached: no worked trace merges
-there.  A law acts where `Fml.rwEq` does — every equation, never `defined(…)`,
+there.  A law acts where `NFml.rwEq` does — every equation, never `defined(…)`,
 an update's right-hand side or a program — and `lawUpd` in one box update's
 right-hand sides, where `t'` cannot halt (`Term.EvalRefines.of_theq`).
 
@@ -87,7 +87,7 @@ write substituted for `memory` in `V` and the locals after it
 (`Upd.mergeMem`), or is locals and a storage write, substituted into `V` in
 one pass (`Upd.mergeStL`, `Tm.substSt`), the write dropped where `V` writes
 the storage over it.  Inside out every merge of a stack the program leaves
-is one of the four.  `Fml.mergeSpine` merges that way.  It takes
+is one of the four.  `NFml.mergeSpine` merges that way.  It takes
 the count from the chain: whether the body is one more update is a question
 about the body.
 -/
@@ -106,12 +106,12 @@ the line before follows from it (`sound`).  A link `φ ⇝ ψ` by `r` is
 concrete. -/
 structure LineRw (C : Contract) where
   /-- The line after, or `none` where the rule does not fit. -/
-  apply : Fml C → Option (Fml C)
+  apply : NFml C → Option (NFml C)
   /-- Wherever the line after holds, the line before does. -/
-  sound : ∀ {φ ψ : Fml C}, apply φ = some ψ → ∀ σ, holds σ ψ → holds σ φ
+  sound : ∀ {φ ψ : NFml C}, apply φ = some ψ → ∀ σ, holds σ ψ → holds σ φ
 
 /-- A line rewritten to a valid one is valid. -/
-theorem LineRw.valid (r : LineRw C) {φ ψ : Fml C} (h : r.apply φ = some ψ) (hψ : Valid ψ) :
+theorem LineRw.valid (r : LineRw C) {φ ψ : NFml C} (h : r.apply φ = some ψ) (hψ : Valid ψ) :
     Valid φ :=
   fun σ => r.sound h σ (hψ σ)
 
@@ -127,15 +127,15 @@ theorem Modality.after_mono (m : Modality) {p q : State → Prop} (h : ∀ τ, p
 /-- `f` on the update at position `i` of the spine, `0` the outermost:
 `f m U φ` rewrites `{U}_m φ`.  The updates above it stay; nothing below
 `{U} φ` is looked at but what `f` looks at. -/
-def Fml.atSpine (f : Modality → Upd C → Fml C → Option (Fml C)) : Nat → Fml C → Option (Fml C)
+def NFml.atSpine (f : Modality → Upd C → NFml C → Option (NFml C)) : Nat → NFml C → Option (NFml C)
   | 0, .upd m U φ => f m U φ
   | i + 1, .upd m U φ => (φ.atSpine f i).map (.upd m U)
   | _, _ => none
 
 /-- A rewrite of one update, one direction, is one of the line. -/
-theorem Fml.atSpine_sound {f : Modality → Upd C → Fml C → Option (Fml C)}
+theorem NFml.atSpine_sound {f : Modality → Upd C → NFml C → Option (NFml C)}
     (hf : ∀ {m U φ ψ}, f m U φ = some ψ → ∀ σ, holds σ ψ → holds σ (.upd m U φ)) :
-    (i : Nat) → (φ : Fml C) → ∀ {ψ : Fml C}, φ.atSpine f i = some ψ → ∀ σ, holds σ ψ → holds σ φ
+    (i : Nat) → (φ : NFml C) → ∀ {ψ : NFml C}, φ.atSpine f i = some ψ → ∀ σ, holds σ ψ → holds σ φ
   | 0, φ, _, h, σ, hψ => by
     cases φ with
     | upd m U φ => exact hf h σ hψ
@@ -143,15 +143,15 @@ theorem Fml.atSpine_sound {f : Modality → Upd C → Fml C → Option (Fml C)}
   | i + 1, φ, _, h, σ, hψ => by
     cases φ with
     | upd m U φ =>
-      simp only [Fml.atSpine, Option.map_eq_some_iff] at h
+      simp only [NFml.atSpine, Option.map_eq_some_iff] at h
       obtain ⟨φ', h', rfl⟩ := h
-      exact m.after_mono (fun τ => Fml.atSpine_sound hf i φ h' τ) _ hψ
+      exact m.after_mono (fun τ => NFml.atSpine_sound hf i φ h' τ) _ hψ
     | _ => nomatch h
 
 /-- A rewrite of one update that is an equivalence is one of the line. -/
-theorem Fml.atSpine_holds {f : Modality → Upd C → Fml C → Option (Fml C)}
+theorem NFml.atSpine_holds {f : Modality → Upd C → NFml C → Option (NFml C)}
     (hf : ∀ {m U φ ψ}, f m U φ = some ψ → ∀ σ, (holds σ ψ ↔ holds σ (.upd m U φ))) :
-    (i : Nat) → (φ : Fml C) → ∀ {ψ : Fml C}, φ.atSpine f i = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
+    (i : Nat) → (φ : NFml C) → ∀ {ψ : NFml C}, φ.atSpine f i = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
   | 0, φ, _, h, σ => by
     cases φ with
     | upd m U φ => exact hf h σ
@@ -159,9 +159,9 @@ theorem Fml.atSpine_holds {f : Modality → Upd C → Fml C → Option (Fml C)}
   | i + 1, φ, _, h, σ => by
     cases φ with
     | upd m U φ =>
-      simp only [Fml.atSpine, Option.map_eq_some_iff] at h
+      simp only [NFml.atSpine, Option.map_eq_some_iff] at h
       obtain ⟨φ', h', rfl⟩ := h
-      exact m.after_congr (fun τ => Fml.atSpine_holds hf i φ h' τ) _
+      exact m.after_congr (fun τ => NFml.atSpine_holds hf i φ h' τ) _
     | _ => nomatch h
 
 /-! ## A storage write shadowed by one over it
@@ -403,7 +403,7 @@ theorem Upd.foldl_error_of_storage (σ₀ : State) {t : STerm C} {e : Halt} (ht 
 /-- **The shadowed storage write goes**: `{L ‖ storage := s ‖ W}` is
 `{L ‖ W}` where `W` writes the storage with a term on the spine of `s`. -/
 theorem Upd.dropStorage_holds {s : STerm C} {W : Upd C} (hW : W.any (·.onSpine s) = true)
-    (m : Modality) (L : Upd C) (ψ : Fml C) (σ : State) :
+    (m : Modality) (L : Upd C) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (L ++ W) ψ) ↔ holds σ (.upd m (L ++ .storage s :: W) ψ) := by
   obtain ⟨d, hd, hd'⟩ := List.any_eq_true.1 hW
   obtain ⟨t, rfl, ht⟩ := UpdElem.onSpine_eq d hd'
@@ -430,7 +430,7 @@ reads included), and the write itself unless `V` writes the storage over it
 def Upd.mergeSt (s : STerm C) (V : Upd C) : Upd C :=
   if (V.withStM s).any (·.onSpine s) then V.withStM s else .storage s :: V.withStM s
 
-theorem Upd.mergeSt_holds (s : STerm C) (V : Upd C) (m : Modality) (ψ : Fml C) (σ : State) :
+theorem Upd.mergeSt_holds (s : STerm C) (V : Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (Upd.mergeSt s V) ψ) ↔ holds σ (.upd m (.storage s :: V.withStM s) ψ) := by
   unfold Upd.mergeSt
   split
@@ -574,7 +574,7 @@ theorem Upd.foldl_error_of_memory (σ₀ : State) {t : MTerm C} {e : Halt} (ht :
 where `W` writes the memory with a term on the memory spine of `M`
 (`Upd.dropStorage_holds`'s mirror, with the elements before the write). -/
 theorem Upd.dropMemory_holds {M : MTerm C} {W : Upd C} (hW : W.any (·.onMemSpine M) = true)
-    (m : Modality) (L : Upd C) (ψ : Fml C) (σ : State) :
+    (m : Modality) (L : Upd C) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (L ++ W) ψ) ↔ holds σ (.upd m (L ++ .memory M :: W) ψ) := by
   obtain ⟨d, hd, hd'⟩ := List.any_eq_true.1 hW
   obtain ⟨N, rfl, hN⟩ := UpdElem.onMemSpine_eq d hd'
@@ -598,7 +598,7 @@ theorem Upd.dropMemory_holds {M : MTerm C} {W : Upd C} (hW : W.any (·.onMemSpin
 
 /-- An update that cannot halt reads alike under either modality:
 `{ se1 := 10 } φ` under the box is `{ se1 := 10 } φ` under the diamond. -/
-theorem Upd.holds_total {U : Upd C} (hU : U.total = true) (m m' : Modality) (φ : Fml C)
+theorem Upd.holds_total {U : Upd C} (hU : U.total = true) (m m' : Modality) (φ : NFml C)
     (σ : State) : holds σ (.upd m U φ) ↔ holds σ (.upd m' U φ) := by
   obtain ⟨τ, hτ⟩ := Upd.foldl_total σ U hU σ
   simp only [holds, Upd.apply, hτ, Modality.after]
@@ -615,7 +615,7 @@ def Upd.mergeMem (L : Upd C) (M : MTerm C) (V : Upd C) : Upd C :=
   else L ++ (.memory M :: Upd.subst (V.withMem M) L)
 
 theorem Upd.mergeMem_holds {L : Upd C} (hL : L.envOnly = true) {M : MTerm C} (hM : M.subst L = M)
-    (V : Upd C) (m : Modality) (ψ : Fml C) (σ : State) :
+    (V : Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (Upd.mergeMem L M V) ψ) ↔ holds σ (.upd m (L ++ [.memory M]) (.upd m V ψ)) := by
   have h1 : Upd.subst (UpdElem.memory M :: V.withMem M) L = .memory M :: Upd.subst (V.withMem M) L := by
     simp only [Upd.subst, List.map_cons, UpdElem.subst, hM]
@@ -668,7 +668,7 @@ theorem Upd.splitWrite_eq {L₁ L₂ : Upd C} {e : UpdElem C} :
 the pre-state and write no storage, so the run leaves the same state, or
 halts either way. -/
 theorem Upd.storage_perm_holds (m : Modality) (L₁ : Upd C) (S : STerm C) {L₂ : Upd C}
-    (hL : L₂.any (·.isStorage) = false) (W : Upd C) (ψ : Fml C) (σ : State) :
+    (hL : L₂.any (·.isStorage) = false) (W : Upd C) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (L₁ ++ .storage S :: (L₂ ++ W)) ψ) ↔
       holds σ (.upd m (L₁ ++ (L₂ ++ .storage S :: W)) ψ) := by
   simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, UpdElem.storage_write]
@@ -710,7 +710,7 @@ def Upd.mergeStL (L₁ : Upd C) (S : STerm C) (L₂ : Upd C) (V : Upd C) : Upd C
 substituted right-hand sides read there what `V`'s read after the two
 (`Tm.substSt_eval`). -/
 theorem Upd.mergeStL_core {L : Upd C} (hL : L.envOnly = true) (S : STerm C) (V : Upd C)
-    (m : Modality) (ψ : Fml C) (σ : State) :
+    (m : Modality) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (L ++ .storage S :: Upd.substSt L S V) ψ) ↔
       holds σ (.upd m (L ++ [.storage S]) (.upd m V ψ)) := by
   simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, List.foldlM_nil,
@@ -733,7 +733,7 @@ theorem Upd.mergeStL_core {L : Upd C} (hL : L.envOnly = true) (S : STerm C) (V :
 /-- `Upd.mergeStL_core` with the write between the locals, where
 `Upd.splitWrite` finds it. -/
 theorem Upd.mergeStL_keep_holds {L₁ L₂ : Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
-    (S : STerm C) (V : Upd C) (m : Modality) (ψ : Fml C) (σ : State) :
+    (S : STerm C) (V : Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (L₁ ++ .storage S :: (L₂ ++ Upd.substSt (L₁ ++ L₂) S V)) ψ) ↔
       holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
   have hL : (L₁ ++ L₂).envOnly = true := by simp only [Upd.envOnly, List.all_append] at *; simp [h₁, h₂]
@@ -745,7 +745,7 @@ theorem Upd.mergeStL_keep_holds {L₁ L₂ : Upd C} (h₁ : L₁.envOnly = true)
   exact Upd.mergeStL_core hL S V m ψ σ
 
 theorem Upd.mergeStL_holds {L₁ L₂ : Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
-    {S : STerm C} {V : Upd C} (m : Modality) (ψ : Fml C) (σ : State) :
+    {S : STerm C} {V : Upd C} (m : Modality) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (Upd.mergeStL L₁ S L₂ V) ψ) ↔
       holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
   rw [← Upd.mergeStL_keep_holds h₁ h₂ S V m ψ σ]
@@ -807,7 +807,7 @@ merges to `{ sp1 := alice.account ‖ storage := save(storage, alice.account.bal
 and `{ storage := save(storage, alice.age, 1) } { storage := save(storage, alice.age, 2) }`
 to `{ storage := save(save(storage, alice.age, 1), alice.age, 2) }`. -/
 theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
-    (h : Upd.merge m U m' V = some (m'', W)) (φ : Fml C) (σ : State) :
+    (h : Upd.merge m U m' V = some (m'', W)) (φ : NFml C) (σ : State) :
     holds σ (.upd m'' W φ) ↔ holds σ (.upd m U (.upd m' V φ)) := by
   unfold Upd.merge at h
   split at h
@@ -862,86 +862,86 @@ theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
         · nomatch h
 
 /-- `{U}_m φ` merged with the update at the head of `φ`. -/
-def Fml.mergeInto (m : Modality) (U : Upd C) : Fml C → Option (Fml C)
+def NFml.mergeInto (m : Modality) (U : Upd C) : NFml C → Option (NFml C)
   | .upd m' V φ => (Upd.merge m U m' V).map fun r => .upd r.1 r.2 φ
   | _ => none
 
-theorem Fml.mergeInto_holds {m : Modality} {U : Upd C} {φ ψ : Fml C}
-    (h : Fml.mergeInto m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
+theorem NFml.mergeInto_holds {m : Modality} {U : Upd C} {φ ψ : NFml C}
+    (h : NFml.mergeInto m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
   cases φ with
   | upd m' V χ =>
-    simp only [Fml.mergeInto, Option.map_eq_some_iff] at h
+    simp only [NFml.mergeInto, Option.map_eq_some_iff] at h
     obtain ⟨⟨m'', W⟩, hw, rfl⟩ := h
     exact Upd.merge_holds hw χ σ
   | _ => nomatch h
 
 /-- `sequentialToParallel` on the updates at positions `i` and `i + 1`. -/
-def Fml.mergeAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.mergeInto i
+def NFml.mergeAt (i : Nat) : NFml C → Option (NFml C) := NFml.atSpine NFml.mergeInto i
 
-theorem Fml.mergeAt_holds {i : Nat} {φ ψ : Fml C} (h : φ.mergeAt i = some ψ) (σ : State) :
+theorem NFml.mergeAt_holds {i : Nat} {φ ψ : NFml C} (h : φ.mergeAt i = some ψ) (σ : State) :
     holds σ ψ ↔ holds σ φ :=
-  Fml.atSpine_holds (fun h σ => Fml.mergeInto_holds h σ) i φ h σ
+  NFml.atSpine_holds (fun h σ => NFml.mergeInto_holds h σ) i φ h σ
 
 /-- The first `n + 1` updates of the spine merged into one, the innermost
 pair first: `sequentialToParallel` `n` times, as a chain's last line
 shows it.  `none` unless every pair merges, and for `n = 0`, which would
 merge nothing. -/
-def Fml.mergeSpine : Nat → Fml C → Option (Fml C)
-  | 1, .upd m U φ => Fml.mergeInto m U φ
-  | n + 2, .upd m U φ => (φ.mergeSpine (n + 1)).bind (Fml.mergeInto m U)
+def NFml.mergeSpine : Nat → NFml C → Option (NFml C)
+  | 1, .upd m U φ => NFml.mergeInto m U φ
+  | n + 2, .upd m U φ => (φ.mergeSpine (n + 1)).bind (NFml.mergeInto m U)
   | _, _ => none
 
-theorem Fml.mergeSpine_holds :
-    (n : Nat) → (φ : Fml C) → ∀ {ψ : Fml C}, φ.mergeSpine n = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
+theorem NFml.mergeSpine_holds :
+    (n : Nat) → (φ : NFml C) → ∀ {ψ : NFml C}, φ.mergeSpine n = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
   | 0, _, _, h, _ => nomatch h
   | 1, φ, _, h, σ => by
     cases φ with
-    | upd m U φ => exact Fml.mergeInto_holds h σ
+    | upd m U φ => exact NFml.mergeInto_holds h σ
     | _ => nomatch h
   | n + 2, φ, _, h, σ => by
     cases φ with
     | upd m U φ =>
-      simp only [Fml.mergeSpine, Option.bind_eq_some_iff] at h
+      simp only [NFml.mergeSpine, Option.bind_eq_some_iff] at h
       obtain ⟨χ, hχ, h⟩ := h
-      rw [Fml.mergeInto_holds h σ]
+      rw [NFml.mergeInto_holds h σ]
       simp only [holds]
-      exact m.after_congr (fun τ => Fml.mergeSpine_holds (n + 1) φ hχ τ) _
+      exact m.after_congr (fun τ => NFml.mergeSpine_holds (n + 1) φ hχ τ) _
     | _ => nomatch h
 
 /-- The `n + 1` updates from position `i` merged into one, the innermost pair
 first: `sequentialToParallel` `n` times on a run of the spine, where the
 updates above `i` do not merge (a memory write, a parallel update of locals
 and the storage).  `none` unless every pair merges, and for `n = 0`. -/
-def Fml.mergeRun (i : Nat) : Nat → Fml C → Option (Fml C)
+def NFml.mergeRun (i : Nat) : Nat → NFml C → Option (NFml C)
   | 1, φ => φ.mergeAt i
-  | n + 2, φ => (φ.mergeAt (i + n + 1)).bind (Fml.mergeRun i (n + 1))
+  | n + 2, φ => (φ.mergeAt (i + n + 1)).bind (NFml.mergeRun i (n + 1))
   | _, _ => none
 
-theorem Fml.mergeRun_holds (i : Nat) :
-    (n : Nat) → (φ : Fml C) → ∀ {ψ : Fml C}, φ.mergeRun i n = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
+theorem NFml.mergeRun_holds (i : Nat) :
+    (n : Nat) → (φ : NFml C) → ∀ {ψ : NFml C}, φ.mergeRun i n = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
   | 0, _, _, h, _ => nomatch h
-  | 1, φ, _, h, σ => Fml.mergeAt_holds h σ
+  | 1, φ, _, h, σ => NFml.mergeAt_holds h σ
   | n + 2, φ, _, h, σ => by
-    simp only [Fml.mergeRun, Option.bind_eq_some_iff] at h
+    simp only [NFml.mergeRun, Option.bind_eq_some_iff] at h
     obtain ⟨χ, hχ, h⟩ := h
-    rw [Fml.mergeRun_holds i (n + 1) χ h σ, Fml.mergeAt_holds hχ σ]
+    rw [NFml.mergeRun_holds i (n + 1) χ h σ, NFml.mergeAt_holds hχ σ]
 
 /-- An update rule (`UpdRuleName.top`) on the update at position `i`:
 `applySkip`, `applyOnRigid`, each an equivalence.  `sequentialToParallel`
 and `simplifyUpdate` give `none`: those rules are `Fml.mergeAt` (and
-`Fml.mergeSpine`), which also merges a storage write and compares no
-modality where an update cannot halt, and `Fml.simplifyAt` (and
-`Fml.simplifyFreshAt`), which also drops the update it empties, so a link
+`NFml.mergeSpine`), which also merges a storage write and compares no
+modality where an update cannot halt, and `NFml.simplifyAt` (and
+`NFml.simplifyFreshAt`), which also drops the update it empties, so a link
 labelled with one has one spelling. -/
-def Fml.updRuleAt : UpdRuleName → Nat → Fml C → Option (Fml C)
+def NFml.updRuleAt : UpdRuleName → Nat → NFml C → Option (NFml C)
   | .sequentialToParallel, _, _ | .simplifyUpdate, _, _ => none
-  | .applySkip, i, φ => Fml.atSpine UpdRuleName.applySkip.top i φ
-  | .applyOnRigid, i, φ => Fml.atSpine UpdRuleName.applyOnRigid.top i φ
+  | .applySkip, i, φ => NFml.atSpine UpdRuleName.applySkip.top i φ
+  | .applyOnRigid, i, φ => NFml.atSpine UpdRuleName.applyOnRigid.top i φ
 
-theorem Fml.updRuleAt_holds {r : UpdRuleName} {i : Nat} {φ ψ : Fml C} (h : φ.updRuleAt r i = some ψ)
+theorem NFml.updRuleAt_holds {r : UpdRuleName} {i : Nat} {φ ψ : NFml C} (h : φ.updRuleAt r i = some ψ)
     (σ : State) : holds σ ψ ↔ holds σ φ := by
   have top : ∀ (r : UpdRuleName), φ.atSpine r.top i = some ψ → (holds σ ψ ↔ holds σ φ) :=
-    fun _ h => Fml.atSpine_holds (fun h σ => (UpdRuleName.top_rule h).sound σ) i φ h σ
+    fun _ h => NFml.atSpine_holds (fun h σ => (UpdRuleName.top_rule h).sound σ) i φ h σ
   cases r with
   | sequentialToParallel | simplifyUpdate => nomatch h
   | applySkip => exact top _ h
@@ -956,9 +956,9 @@ for KeY's `skip`.  What the formula reads is asked of the update's own
 variables only (`Upd.dropEffectless_holds_of`): any list `F` that holds
 every one the formula reads will do, and the fewer it holds the more goes.
 
-* `Fml.simplifyAt` reads the formula's variables, as KeY's
+* `NFml.simplifyAt` reads the formula's variables, as KeY's
   `\dropEffectlessElementaries` does: `{ x := 10 ‖ y := 1 } y ≐ 1 ⇝ { y := 1 } y ≐ 1`.
-* `Fml.simplifyFreshAt` reads only its *fresh* variables (`Fml.freshVars`),
+* `NFml.simplifyFreshAt` reads only its *fresh* variables (`NFml.freshVars`),
   and counts every user variable the update writes as read.  A postcondition
   `φ : Post C` names no fresh variable, so over `φ` a capture of the rules
   (`se1`, `pv`) goes, and the rewrite computes from `Post.noFresh` rather than
@@ -970,33 +970,32 @@ every one the formula reads will do, and the fewer it holds the more goes.
 /-- The fresh variables a formula mentions (`Var.idx` not `0`), taken apart
 connective by connective, so that a postcondition's are asked of it alone
 (`Post.freshVars_eq_nil`). -/
-def Fml.freshVars : Fml C → List Var
+def NFml.freshVars : NFml C → List Var
   | .tt => []
   | .eq a b => (a.vars ++ b.vars).filter (·.idx != 0)
   | .defined t => t.vars.filter (·.idx != 0)
   | .not φ | .havoc φ => φ.freshVars
   | .and φ ψ | .imp φ ψ => φ.freshVars ++ ψ.freshVars
   | .upd _ U φ => U.vars.filter (·.idx != 0) ++ φ.freshVars
-  | .modal _ P φ => (Prog.vars P).filter (·.idx != 0) ++ φ.freshVars
   | .all x _ φ => [x].filter (·.idx != 0) ++ φ.freshVars
   | .anon xs φ => xs.filter (·.idx != 0) ++ φ.freshVars
 
-theorem Fml.freshVars_eq : (φ : Fml C) → φ.freshVars = φ.vars.filter (·.idx != 0)
+theorem NFml.freshVars_eq : (φ : NFml C) → φ.freshVars = φ.vars.filter (·.idx != 0)
   | .tt | .eq .. | .defined _ => rfl
-  | .not φ | .havoc φ => Fml.freshVars_eq φ
+  | .not φ | .havoc φ => NFml.freshVars_eq φ
   | .and φ ψ | .imp φ ψ => by
-    simp only [Fml.freshVars, Fml.vars, List.filter_append, Fml.freshVars_eq φ, Fml.freshVars_eq ψ]
-  | .upd _ _ φ | .modal _ _ φ => by
-    simp only [Fml.freshVars, Fml.vars, List.filter_append, Fml.freshVars_eq φ]
+    simp only [NFml.freshVars, NFml.vars, List.filter_append, NFml.freshVars_eq φ, NFml.freshVars_eq ψ]
+  | .upd _ _ φ => by
+    simp only [NFml.freshVars, NFml.vars, List.filter_append, NFml.freshVars_eq φ]
   | .all x _ φ => by
-    simp only [Fml.freshVars, Fml.vars, Fml.freshVars_eq φ, ← List.filter_append, List.singleton_append]
+    simp only [NFml.freshVars, NFml.vars, NFml.freshVars_eq φ, ← List.filter_append, List.singleton_append]
   | .anon _ φ => by
-    simp only [Fml.freshVars, Fml.vars, List.filter_append, Fml.freshVars_eq φ]
+    simp only [NFml.freshVars, NFml.vars, List.filter_append, NFml.freshVars_eq φ]
 
 /-- Dropping the effectless elements, reading `F` for what the formula
 reads, changes no binding the formula sees, if `F` holds every variable of
 the update the formula reads. -/
-theorem Upd.dropEffectless_holds_of {F : List Var} {U : Upd C} {φ : Fml C}
+theorem Upd.dropEffectless_holds_of {F : List Var} {U : Upd C} {φ : NFml C}
     (hF : ∀ x ∈ φ.vars, x ∈ U.targets → x ∈ F) (m : Modality) (σ : State) :
     holds σ (.upd m (U.dropEffectless F) φ) ↔ holds σ (.upd m U φ) :=
   m.after_frame (Upd.dropEffectless_apply F U σ) fun _ _ h =>
@@ -1007,17 +1006,17 @@ theorem Upd.dropEffectless_holds_of {F : List Var} {U : Upd C} {φ : Fml C}
 
 /-- `{U}_m φ` with its effectless elements dropped, `F` read for what `φ`
 reads, and the update with them if none is left; `none` if none goes. -/
-def Fml.simplifyWith (F : List Var) (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+def NFml.simplifyWith (F : List Var) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
   if (U.dropEffectless F).length < U.length then
     some (match U.dropEffectless F with
       | [] => φ
       | V => .upd m V φ)
   else none
 
-theorem Fml.simplifyWith_holds {F : List Var} {m : Modality} {U : Upd C} {φ ψ : Fml C}
-    (hF : ∀ x ∈ φ.vars, x ∈ U.targets → x ∈ F) (h : Fml.simplifyWith F m U φ = some ψ)
+theorem NFml.simplifyWith_holds {F : List Var} {m : Modality} {U : Upd C} {φ ψ : NFml C}
+    (hF : ∀ x ∈ φ.vars, x ∈ U.targets → x ∈ F) (h : NFml.simplifyWith F m U φ = some ψ)
     (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
-  unfold Fml.simplifyWith at h
+  unfold NFml.simplifyWith at h
   split at h
   · cases h
     rw [← Upd.dropEffectless_holds_of hF m σ]
@@ -1029,28 +1028,28 @@ theorem Fml.simplifyWith_holds {F : List Var} {m : Modality} {U : Upd C} {φ ψ 
   · nomatch h
 
 /-- `simplifyUpdate` on `{U}_m φ`, reading `φ`'s variables. -/
-def Fml.simplifyTop (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
-  Fml.simplifyWith φ.vars m U φ
+def NFml.simplifyTop (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+  NFml.simplifyWith φ.vars m U φ
 
 /-- `simplifyUpdate` on `{U}_m φ`, reading `φ`'s fresh variables, and every
 user variable `U` writes. -/
-def Fml.simplifyFreshTop (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
-  Fml.simplifyWith (φ.freshVars ++ U.targets.filter (·.idx == 0)) m U φ
+def NFml.simplifyFreshTop (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+  NFml.simplifyWith (φ.freshVars ++ U.targets.filter (·.idx == 0)) m U φ
 
-theorem Fml.simplifyFreshTop_holds {m : Modality} {U : Upd C} {φ ψ : Fml C}
-    (h : Fml.simplifyFreshTop m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) :=
-  Fml.simplifyWith_holds (fun x hx hU => by
-    rw [List.mem_append, Fml.freshVars_eq, List.mem_filter, List.mem_filter]
+theorem NFml.simplifyFreshTop_holds {m : Modality} {U : Upd C} {φ ψ : NFml C}
+    (h : NFml.simplifyFreshTop m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) :=
+  NFml.simplifyWith_holds (fun x hx hU => by
+    rw [List.mem_append, NFml.freshVars_eq, List.mem_filter, List.mem_filter]
     by_cases h0 : x.idx = 0
     · exact .inr ⟨hU, by simp only [h0, BEq.rfl]⟩
     · exact .inl ⟨hx, by simp only [h0, bne_iff_ne, ne_eq, not_false_eq_true]⟩) h σ
 
 /-- `simplifyUpdate` on the update at position `i`, reading the formula's variables. -/
-def Fml.simplifyAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.simplifyTop i
+def NFml.simplifyAt (i : Nat) : NFml C → Option (NFml C) := NFml.atSpine NFml.simplifyTop i
 
 /-- `simplifyUpdate` on the update at position `i`, reading the formula's
 fresh variables: it computes over a postcondition `φ : Post C`. -/
-def Fml.simplifyFreshAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.simplifyFreshTop i
+def NFml.simplifyFreshAt (i : Nat) : NFml C → Option (NFml C) := NFml.atSpine NFml.simplifyFreshTop i
 
 /-! ## An update applied to the body, under the box
 
@@ -1065,7 +1064,7 @@ rewrites (`find(save(…), p)` halts where `p` does not resolve), so
 
 /-- A line under the box gives it under `m` where `m` is the box or `U`
 cannot halt. -/
-theorem Fml.upd_of_box {m : Modality} {U : Upd C} {φ : Fml C} (hm : U.total = true ∨ m = .box)
+theorem NFml.upd_of_box {m : Modality} {U : Upd C} {φ : NFml C} (hm : U.total = true ∨ m = .box)
     {σ : State} (h : holds σ (.upd .box U φ)) : holds σ (.upd m U φ) := by
   rcases hm with hU | rfl
   · exact (Upd.holds_total hU .box m φ σ).1 h
@@ -1074,56 +1073,56 @@ theorem Fml.upd_of_box {m : Modality} {U : Upd C} {φ : Fml C} (hm : U.total = t
 /-- `applyOnRigidFormula` under the box (`Proves.applyOnRigidBox`): `[{U}] φ ⇝ φ[U]`
 for a first-order `φ`, `U` of locals, or of locals and storage writes under a
 `φ` that reads no storage; under any modality where `U` cannot halt. -/
-def Fml.applyOnRigidBoxTop (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+def NFml.applyOnRigidBoxTop (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
   if ((U.total || decide (m = .box)) && (U.envOnly || U.localsOrStorage && φ.stFree) &&
       φ.rigid && φ.sortedFor U) = true then
     some (φ.subst U)
   else none
 
-theorem Fml.applyOnRigidBoxTop_sound {m : Modality} {U : Upd C} {φ ψ : Fml C}
-    (h : Fml.applyOnRigidBoxTop m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
+theorem NFml.applyOnRigidBoxTop_sound {m : Modality} {U : Upd C} {φ ψ : NFml C}
+    (h : NFml.applyOnRigidBoxTop m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
     holds σ (.upd m U φ) := by
-  unfold Fml.applyOnRigidBoxTop at h
+  unfold NFml.applyOnRigidBoxTop at h
   split at h
   · rename_i hc
     cases h
     simp only [Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq] at hc
     obtain ⟨⟨⟨hm, hU⟩, hr⟩, hs⟩ := hc
-    refine Fml.upd_of_box hm ?_
+    refine NFml.upd_of_box hm ?_
     rcases hU with hU | hU
-    · exact Fml.subst_box hU hr hs σ hψ
-    · exact Fml.subst_box_st hU.1 hU.2 hs σ hψ
+    · exact NFml.subst_box hU hr hs σ hψ
+    · exact NFml.subst_box_st hU.1 hU.2 hs σ hψ
   · nomatch h
 
 /-- `applyOnRigidFormula` on the update at position `i`. -/
-def Fml.applyOnRigidBoxAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.applyOnRigidBoxTop i
+def NFml.applyOnRigidBoxAt (i : Nat) : NFml C → Option (NFml C) := NFml.atSpine NFml.applyOnRigidBoxTop i
 
 /-- `applyOnRigidFormula` for a storage write under the box
 (`Proves.applyStorageBox`): `[{storage := s}] φ ⇝ φ[s/storage]`.  The box
 only: the write halts where its path does not resolve. -/
-def Fml.applyStorageBoxTop : Modality → Upd C → Fml C → Option (Fml C)
+def NFml.applyStorageBoxTop : Modality → Upd C → NFml C → Option (NFml C)
   | .box, [.storage s], φ => if (φ.rigid && φ.stExplicit) = true then some (φ.withSt s) else none
   | _, _, _ => none
 
-theorem Fml.applyStorageBoxTop_sound {m : Modality} {U : Upd C} {φ ψ : Fml C}
-    (h : Fml.applyStorageBoxTop m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
+theorem NFml.applyStorageBoxTop_sound {m : Modality} {U : Upd C} {φ ψ : NFml C}
+    (h : NFml.applyStorageBoxTop m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
     holds σ (.upd m U φ) := by
-  unfold Fml.applyStorageBoxTop at h
+  unfold NFml.applyStorageBoxTop at h
   split at h
   · split at h
     · rename_i hc
       cases h
       simp only [Bool.and_eq_true] at hc
-      exact Fml.withSt_box hc.1 hc.2 σ hψ
+      exact NFml.withSt_box hc.1 hc.2 σ hψ
     · nomatch h
   · nomatch h
 
 /-- `applyOnRigidFormula` on the box storage write at position `i`. -/
-def Fml.applyStorageBoxAt (i : Nat) : Fml C → Option (Fml C) := Fml.atSpine Fml.applyStorageBoxTop i
+def NFml.applyStorageBoxAt (i : Nat) : NFml C → Option (NFml C) := NFml.atSpine NFml.applyStorageBoxTop i
 
 /-! ## Term taclets
 
-A term taclet `r : TermTaclet t t'` (`Calculus/TermTaclets.lean`) rewrites `t` to `t'` where `Fml.rwEq` does: in
+A term taclet `r : TermTaclet t t'` (`Calculus/TermTaclets.lean`) rewrites `t` to `t'` where `NFml.rwEq` does: in
 every equation, at any depth, never in `defined(…)`, an update's
 right-hand side or a program (`Calculus/TermRules.lean` says why).  In the
 right-hand sides of a box update it rewrites too when `t'` cannot halt
@@ -1131,21 +1130,21 @@ right-hand sides of a box update it rewrites too when `t'` cannot halt
 `{ … ‖ v := find(save(S, p, 10), p) } ⇝ { … ‖ v := 10 }`. -/
 
 /-- Some equation of the formula changes under the rewrite. -/
-def Fml.eqRewrites (q : Term C × Term C) : Fml C → Bool
+def NFml.eqRewrites (q : Term C × Term C) : NFml C → Bool
   | .eq a b => a.rw q != a || b.rw q != b
-  | .not φ | .upd _ _ φ | .modal _ _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.eqRewrites q
+  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.eqRewrites q
   | .and φ ψ | .imp φ ψ => φ.eqRewrites q || ψ.eqRewrites q
   | .tt | .defined _ => false
 
 /-- The law `q.1 ≐ q.2` on every equation of the line, if it rewrites one. -/
-def Fml.rwLaw (q : Term C × Term C) (φ : Fml C) : Option (Fml C) :=
+def NFml.rwLaw (q : Term C × Term C) (φ : NFml C) : Option (NFml C) :=
   if φ.eqRewrites q = true then some (φ.rwEq q) else none
 
-theorem Fml.rwLaw_holds {q : Term C × Term C} (h : Term.Theq q.1 q.2) {φ ψ : Fml C}
+theorem NFml.rwLaw_holds {q : Term C × Term C} (h : Term.Theq q.1 q.2) {φ ψ : NFml C}
     (hl : φ.rwLaw q = some ψ) (σ : State) : holds σ ψ ↔ holds σ φ := by
-  unfold Fml.rwLaw at hl
+  unfold NFml.rwLaw at hl
   split at hl
-  · cases hl; exact Fml.rwEq_holds h φ σ
+  · cases hl; exact NFml.rwEq_holds h φ σ
   · nomatch hl
 
 -- Here rather than on `UpdElem` (`Update.lean`) to spare a low edit; it moves
@@ -1155,24 +1154,24 @@ deriving instance DecidableEq for UpdElem
 /-- The law on the right-hand sides of `[{U}] φ` (`Proves.updRw`), if it
 rewrites one.  The box only: the rewritten update may run where `U` halts
 (`find(save(S, p, 10), p) ⇝ 10`), which the diamond would count against. -/
-def Fml.rwUpdTop (q : Term C × Term C) : Modality → Upd C → Fml C → Option (Fml C)
+def NFml.rwUpdTop (q : Term C × Term C) : Modality → Upd C → NFml C → Option (NFml C)
   | .box, U, φ => if (U.rw q != U) = true then some (.upd .box (U.rw q) φ) else none
   | .diamond, _, _ => none
 
-theorem Fml.rwUpdTop_sound {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {m : Modality}
-    {U : Upd C} {φ ψ : Fml C} (h : Fml.rwUpdTop q m U φ = some ψ) (σ : State)
+theorem NFml.rwUpdTop_sound {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {m : Modality}
+    {U : Upd C} {φ ψ : NFml C} (h : NFml.rwUpdTop q m U φ = some ψ) (σ : State)
     (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
   cases m with
   | diamond => nomatch h
   | box =>
-    simp only [Fml.rwUpdTop] at h
+    simp only [NFml.rwUpdTop] at h
     split at h
     · cases h; exact Upd.rw_box hq (fun _ h => h) σ hψ
     · nomatch h
 
 /-- The law on the right-hand sides of the box update at position `i`. -/
-def Fml.rwUpdAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
-  Fml.atSpine (Fml.rwUpdTop q) i
+def NFml.rwUpdAt (q : Term C × Term C) (i : Nat) : NFml C → Option (NFml C) :=
+  NFml.atSpine (NFml.rwUpdTop q) i
 
 /-! ### A law in an update's right-hand side, under any modality
 
@@ -2630,15 +2629,15 @@ theorem TermTaclet.RefLaw.back {r : TermTaclet t t'} (hr : RefLaw r) {U : Upd C}
 
 /-- A reference law in the right-hand sides of `{U}_m φ`, when the
 rewritten update holds its storage operation. -/
-def Fml.rwUpdRefTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) :
-    Option (Fml C) :=
+def NFml.rwUpdRefTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : NFml C) :
+    Option (NFml C) :=
   if (U.rw q != U && (U.rw q).coversRef q) = true then some (.upd m (U.rw q) φ) else none
 
-theorem Fml.rwUpdRefTop_sound {q : Term C × Term C} {r : TermTaclet q.1 q.2}
-    (hr : TermTaclet.RefLaw r) {m : Modality} {U : Upd C} {φ ψ : Fml C}
-    (h : Fml.rwUpdRefTop q m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
+theorem NFml.rwUpdRefTop_sound {q : Term C × Term C} {r : TermTaclet q.1 q.2}
+    (hr : TermTaclet.RefLaw r) {m : Modality} {U : Upd C} {φ ψ : NFml C}
+    (h : NFml.rwUpdRefTop q m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
     holds σ (.upd m U φ) := by
-  unfold Fml.rwUpdRefTop at h
+  unfold NFml.rwUpdRefTop at h
   split at h
   · rename_i hc
     cases h
@@ -2647,20 +2646,20 @@ theorem Fml.rwUpdRefTop_sound {q : Term C × Term C} {r : TermTaclet q.1 q.2}
   · nomatch h
 
 /-- A reference law in the update at position `i`. -/
-def Fml.rwUpdRefAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
-  Fml.atSpine (Fml.rwUpdRefTop q) i
+def NFml.rwUpdRefAt (q : Term C × Term C) (i : Nat) : NFml C → Option (NFml C) :=
+  NFml.atSpine (NFml.rwUpdRefTop q) i
 
 /-- The law on the right-hand sides of `{U}_m φ` under any `m`, if it rewrites
 one and both its terms read member-wise what one read is (`Term.base?`): the
 two return alike in every state (`Term.base_eval`). -/
-def Fml.rwUpdEqTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+def NFml.rwUpdEqTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
   if (U.rw q != U && (Term.base? q.1).isSome && (Term.base? q.1 == Term.base? q.2)) = true then
     some (.upd m (U.rw q) φ)
   else none
 
-theorem Fml.rwUpdEqTop_sound {q : Term C × Term C} {m : Modality} {U : Upd C} {φ ψ : Fml C}
-    (h : Fml.rwUpdEqTop q m U φ = some ψ) (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
-  unfold Fml.rwUpdEqTop at h
+theorem NFml.rwUpdEqTop_sound {q : Term C × Term C} {m : Modality} {U : Upd C} {φ ψ : NFml C}
+    (h : NFml.rwUpdEqTop q m U φ = some ψ) (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
+  unfold NFml.rwUpdEqTop at h
   split at h
   · rename_i hc
     cases h
@@ -2674,8 +2673,8 @@ theorem Fml.rwUpdEqTop_sound {q : Term C × Term C} {m : Modality} {U : Upd C} {
 
 /-- The law on the right-hand sides of the update at position `i`, under any
 modality, where its two terms are one read member-wise. -/
-def Fml.rwUpdEqAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
-  Fml.atSpine (Fml.rwUpdEqTop q) i
+def NFml.rwUpdEqAt (q : Term C × Term C) (i : Nat) : NFml C → Option (NFml C) :=
+  NFml.atSpine (NFml.rwUpdEqTop q) i
 
 /-! ## The laws of memory reads
 
@@ -2887,7 +2886,7 @@ theorem Upd.rwEv_apply_rev {σ : State} (hq : Srt.Le u (q.2.eval σ) (q.1.eval �
 wherever the rewritten update returns, `q.1` returns what `q.2` does. -/
 theorem Upd.rwEv_holds (hq : Tm.EvalRefinesAt q.1 q.2) {U : Upd C}
     (hb : ∀ σ τ, (U.rwEv q).apply σ = .ok τ → Srt.Le u (q.2.eval σ) (q.1.eval σ))
-    (m : Modality) (ψ : Fml C) (σ : State) :
+    (m : Modality) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (U.rwEv q) ψ) ↔ holds σ (.upd m U ψ) := by
   simp only [holds]
   cases hU : U.apply σ with
@@ -2904,14 +2903,14 @@ end RwEvUpd
 /-- The law on the right-hand sides of `{U}_m φ` under any `m`, inside a memory
 term too (`Upd.rwEv`), if it rewrites one and the rewritten update holds the
 write the law reads back. -/
-def Fml.rwUpdCoveredTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) :
-    Option (Fml C) :=
+def NFml.rwUpdCoveredTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : NFml C) :
+    Option (NFml C) :=
   if (U.rwEv q != U && (U.rwEv q).covers q) = true then some (.upd m (U.rwEv q) φ) else none
 
-theorem Fml.rwUpdCoveredTop_sound {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2)
-    {m : Modality} {U : Upd C} {φ ψ : Fml C} (h : Fml.rwUpdCoveredTop q m U φ = some ψ)
+theorem NFml.rwUpdCoveredTop_sound {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2)
+    {m : Modality} {U : Upd C} {φ ψ : NFml C} (h : NFml.rwUpdCoveredTop q m U φ = some ψ)
     (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
-  unfold Fml.rwUpdCoveredTop at h
+  unfold NFml.rwUpdCoveredTop at h
   split at h
   · rename_i hc
     cases h
@@ -2921,8 +2920,8 @@ theorem Fml.rwUpdCoveredTop_sound {q : Term C × Term C} (hq : Term.EvalRefines 
 
 /-- The law on the right-hand sides of the update at position `i`, under any
 modality, where that update holds the write the law reads back. -/
-def Fml.rwUpdCoveredAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
-  Fml.atSpine (Fml.rwUpdCoveredTop q) i
+def NFml.rwUpdCoveredAt (q : Term C × Term C) (i : Nat) : NFml C → Option (NFml C) :=
+  NFml.atSpine (NFml.rwUpdCoveredTop q) i
 
 /-! ### The side conditions of the memory laws
 
@@ -3710,14 +3709,14 @@ theorem EvalLaw.back {u : Srt} {t t' : Tm C u} (r : EvalLaw t t') {U : Upd C}
 
 /-- The memory law on the right-hand sides of `{U}_m φ` under any `m`, if it
 rewrites one and the rewritten update holds the write the law reads back. -/
-def Fml.rwUpdEvalTop {u : Srt} (q : Tm C u × Tm C u) (m : Modality) (U : Upd C) (φ : Fml C) :
-    Option (Fml C) :=
+def NFml.rwUpdEvalTop {u : Srt} (q : Tm C u × Tm C u) (m : Modality) (U : Upd C) (φ : NFml C) :
+    Option (NFml C) :=
   if (U.rwEv q != U && (U.rwEv q).coversEval q) = true then some (.upd m (U.rwEv q) φ) else none
 
-theorem Fml.rwUpdEvalTop_sound {u : Srt} {q : Tm C u × Tm C u} (r : EvalLaw q.1 q.2)
-    {m : Modality} {U : Upd C} {φ ψ : Fml C} (h : Fml.rwUpdEvalTop q m U φ = some ψ)
+theorem NFml.rwUpdEvalTop_sound {u : Srt} {q : Tm C u × Tm C u} (r : EvalLaw q.1 q.2)
+    {m : Modality} {U : Upd C} {φ ψ : NFml C} (h : NFml.rwUpdEvalTop q m U φ = some ψ)
     (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
-  unfold Fml.rwUpdEvalTop at h
+  unfold NFml.rwUpdEvalTop at h
   split at h
   · rename_i hc
     cases h
@@ -3727,69 +3726,69 @@ theorem Fml.rwUpdEvalTop_sound {u : Srt} {q : Tm C u × Tm C u} (r : EvalLaw q.1
 
 /-- The memory law on the right-hand sides of the update at position `i`,
 under any modality, where that update holds the write the law reads back. -/
-def Fml.rwUpdEvalAt {u : Srt} (q : Tm C u × Tm C u) (i : Nat) : Fml C → Option (Fml C) :=
-  Fml.atSpine (Fml.rwUpdEvalTop q) i
+def NFml.rwUpdEvalAt {u : Srt} (q : Tm C u × Tm C u) (i : Nat) : NFml C → Option (NFml C) :=
+  NFml.atSpine (NFml.rwUpdEvalTop q) i
 
 /-! ## The rewrites, bundled -/
 
 namespace LineRw
 
 /-- `sequentialToParallel` on the updates at positions `i` and `i + 1`. -/
-def mergeAt (i : Nat) : LineRw C := ⟨Fml.mergeAt i, fun h σ => (Fml.mergeAt_holds h σ).1⟩
+def mergeAt (i : Nat) : LineRw C := ⟨NFml.mergeAt i, fun h σ => (NFml.mergeAt_holds h σ).1⟩
 
 /-- `sequentialToParallel` on the first `n + 1` updates, the innermost pair first. -/
 def mergeSpine (n : Nat) : LineRw C :=
-  ⟨Fml.mergeSpine n, fun h σ => (Fml.mergeSpine_holds n _ h σ).1⟩
+  ⟨NFml.mergeSpine n, fun h σ => (NFml.mergeSpine_holds n _ h σ).1⟩
 
 /-- `sequentialToParallel` on the `n + 1` updates from position `i`, the innermost pair first. -/
 def mergeRun (i n : Nat) : LineRw C :=
-  ⟨Fml.mergeRun i n, fun h σ => (Fml.mergeRun_holds i n _ h σ).1⟩
+  ⟨NFml.mergeRun i n, fun h σ => (NFml.mergeRun_holds i n _ h σ).1⟩
 
 /-- An update rule at position `i`: `applySkip`, `applyOnRigid`.
 `sequentialToParallel` is `mergeAt`/`mergeSpine` and `simplifyUpdate` is
 `simplify`/`simplifyFresh`; here they give no line. -/
 def updRule (r : UpdRuleName) (i : Nat) : LineRw C :=
-  ⟨Fml.updRuleAt r i, fun h σ => (Fml.updRuleAt_holds h σ).1⟩
+  ⟨NFml.updRuleAt r i, fun h σ => (NFml.updRuleAt_holds h σ).1⟩
 
 /-- `simplifyUpdate` on the update at position `i`, reading the formula's variables. -/
 def simplify (i : Nat) : LineRw C :=
-  ⟨Fml.simplifyAt i, Fml.atSpine_sound (fun h σ => (Fml.simplifyWith_holds (fun _ h _ => h) h σ).1) i _⟩
+  ⟨NFml.simplifyAt i, NFml.atSpine_sound (fun h σ => (NFml.simplifyWith_holds (fun _ h _ => h) h σ).1) i _⟩
 
 /-- `simplifyUpdate` on the update at position `i`, reading the formula's
 fresh variables. -/
 def simplifyFresh (i : Nat) : LineRw C :=
-  ⟨Fml.simplifyFreshAt i, Fml.atSpine_sound (fun h σ => (Fml.simplifyFreshTop_holds h σ).1) i _⟩
+  ⟨NFml.simplifyFreshAt i, NFml.atSpine_sound (fun h σ => (NFml.simplifyFreshTop_holds h σ).1) i _⟩
 
 /-- `applyOnRigidFormula` on the update at position `i`, under the box or where it cannot halt. -/
 def applyOnRigidBox (i : Nat) : LineRw C :=
-  ⟨Fml.applyOnRigidBoxAt i, Fml.atSpine_sound Fml.applyOnRigidBoxTop_sound i _⟩
+  ⟨NFml.applyOnRigidBoxAt i, NFml.atSpine_sound NFml.applyOnRigidBoxTop_sound i _⟩
 
 /-- `applyOnRigidFormula` on the box storage write at position `i`. -/
 def applyStorageBox (i : Nat) : LineRw C :=
-  ⟨Fml.applyStorageBoxAt i, Fml.atSpine_sound Fml.applyStorageBoxTop_sound i _⟩
+  ⟨NFml.applyStorageBoxAt i, NFml.atSpine_sound NFml.applyStorageBoxTop_sound i _⟩
 
 /-- The term taclet `r` on every equation of the line. -/
 def law {t t' : Term C} (r : TermTaclet t t') : LineRw C :=
-  ⟨Fml.rwLaw (t, t'), fun hl σ => (Fml.rwLaw_holds r.sound hl σ).1⟩
+  ⟨NFml.rwLaw (t, t'), fun hl σ => (NFml.rwLaw_holds r.sound hl σ).1⟩
 
 /-- The term taclet `r`, onto a term that cannot halt, on the right-hand
 sides of the box update at position `i`. -/
 def lawUpd {t t' : Term C} (r : TermTaclet t t') (ht : t'.total = true) (i : Nat) : LineRw C :=
-  ⟨Fml.rwUpdAt (t, t') i,
-    Fml.atSpine_sound (Fml.rwUpdTop_sound (Term.EvalRefines.of_theq r.sound ht)) i _⟩
+  ⟨NFml.rwUpdAt (t, t') i,
+    NFml.atSpine_sound (NFml.rwUpdTop_sound (Term.EvalRefines.of_theq r.sound ht)) i _⟩
 
 /-- The term taclet `r`, onto a term that cannot halt, on the right-hand
 sides of the update at position `i` under any modality, where that update
 holds the write `r` reads back (`Upd.covers`). -/
 def lawUpdAny {t t' : Term C} (r : TermTaclet t t') (ht : t'.total = true) (i : Nat) : LineRw C :=
-  ⟨Fml.rwUpdCoveredAt (t, t') i,
-    Fml.atSpine_sound (Fml.rwUpdCoveredTop_sound (Term.EvalRefines.of_theq r.sound ht)) i _⟩
+  ⟨NFml.rwUpdCoveredAt (t, t') i,
+    NFml.atSpine_sound (NFml.rwUpdCoveredTop_sound (Term.EvalRefines.of_theq r.sound ht)) i _⟩
 
 /-- A reference law on the right-hand sides of the update at position `i`
 under any modality, where that update holds the storage operation. -/
 def lawUpdRef {t t' : Term C} (r : TermTaclet t t') (hr : TermTaclet.RefLaw r)
     (i : Nat) : LineRw C :=
-  ⟨Fml.rwUpdRefAt (t, t') i, Fml.atSpine_sound (Fml.rwUpdRefTop_sound hr) i _⟩
+  ⟨NFml.rwUpdRefAt (t, t') i, NFml.atSpine_sound (NFml.rwUpdRefTop_sound hr) i _⟩
 
 /-- The term taclet `r` on the right-hand sides of the update at position
 `i` under any modality, where its two terms are one read member-wise
@@ -3797,13 +3796,13 @@ def lawUpdRef {t t' : Term C} (r : TermTaclet t t') (hr : TermTaclet.RefLaw r)
 `selectOnDelAtMember`.  Sound by `Term.base_eval` alone: the two return
 alike, so the law is only the name of the step. -/
 def lawUpdEq {t t' : Term C} (_r : TermTaclet t t') (i : Nat) : LineRw C :=
-  ⟨Fml.rwUpdEqAt (t, t') i, Fml.atSpine_sound Fml.rwUpdEqTop_sound i _⟩
+  ⟨NFml.rwUpdEqAt (t, t') i, NFml.atSpine_sound NFml.rwUpdEqTop_sound i _⟩
 
 /-- The memory law `r` on the right-hand sides of the update at position `i`
 under any modality, where that update holds the write `r` reads back
 (`Upd.coversEval`). -/
 def lawUpdEval {u : Srt} {t t' : Tm C u} (r : EvalLaw t t') (i : Nat) : LineRw C :=
-  ⟨Fml.rwUpdEvalAt (t, t') i, Fml.atSpine_sound (Fml.rwUpdEvalTop_sound r) i _⟩
+  ⟨NFml.rwUpdEvalAt (t, t') i, NFml.atSpine_sound (NFml.rwUpdEvalTop_sound r) i _⟩
 
 end LineRw
 

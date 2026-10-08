@@ -491,51 +491,12 @@ def LoopAnn.vars : LoopAnn C → List Var
   | .unwind _ => []
   | .inv I dec => I.vars ++ optVars Val.vars dec
 
-mutual
-
-/-- The variables a statement mentions: `uint x = y + 1;` mentions `x` and
-`y`. -/
-def Stmt.vars : Stmt C → List Var
-  | .assign l r => l.vars ++ r.vars
-  | .rebind x r => x :: r.vars
-  | .assignLocal x r => x :: r.vars
-  | .declLocal _ x init => x :: optVars Val.vars init
-  | .declStorage _ x init => x :: optVars ARhs.vars init
-  | .opAssign _ _ _ l r => l.vars ++ r.vars
-  | .incDec _ _ l => l.vars
-  | .assignIncDec x _ _ l _ => x :: l.vars
-  | .push b v _ => b.vars ++ optVars Src.vars v
-  | .pop b => b.vars
-  | .transfer r a => r.vars ++ a.vars
-  | .send pv r a => pv :: (r.vars ++ a.vars)
-  | .declMem _ x init _ _ => x :: optVars MRhs.vars init
-  | .rebindMem x r => x :: r.vars
-  | .assignFromMem l p => l.vars ++ p.vars
-  | .assignMem l r => l.vars ++ r.vars
-  | .delete l => l.vars
-  | .deleteMem p _ => p.vars
-  | .assignNew l n _ => l.vars ++ n.vars
-  | .ite c thn els => c.vars ++ Prog.vars thn ++ Prog.vars els
-  | .require c => c.vars
-  | .assert c => c.vars
-  | .revert => []
-  | .call _ args _ ret body => Arg.vars args ++ ret.vars ++ Prog.vars body
-  | .tryCall c rets ok err code pnc other =>
-    c.vars ++ rets.map (·.2) ++ Prog.vars ok ++ Prog.vars err ++ code.toList ++ Prog.vars pnc ++
-      Prog.vars other
-  | .loop a c body => a.vars ++ c.vars ++ Prog.vars body
-
-def Prog.vars : List (Stmt C) → List Var
-  | [] => []
-  | s :: P => s.vars ++ Prog.vars P
-
-end
 
 /-! ## Frames
 
 What a piece of syntax does not mention, it does not see: two states that
-agree off `ns` evaluate a part that avoids `ns` alike, and run a statement
-that avoids `ns` to states that agree off `ns` again.  Binding a scratch
+agree off `ns` evaluate a part that avoids `ns` alike, and the state
+operations take them to states that agree off `ns` again.  Binding a scratch
 `sp1` changes nothing `alice.age = 10;` reads or writes. -/
 
 section Frame
@@ -909,142 +870,6 @@ theorem CallRet.leave_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
       (Simple.local r : Simple C p).eval_frame hag (fun x hx => h x (by simp_all [Simple.vars, CallRet.vars]))]
     agree_run hag
 
-mutual
-
-/-- **Frame, for statements**: a statement that avoids `ns` runs alike from
-two states that agree off `ns`, and they end agreeing off `ns`.  Binding a
-scratch `sp1` changes nothing `alice.age = 10;` reads or writes. -/
-theorem Stmt.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (s : Stmt C) → Avoids s.vars ns → ResultsAgree ns (s.run σ) (s.run τ)
-  | .assign l r, h => by
-    simp only [Stmt.run, r.value_frame hag h.right, l.resolve_frame hag h.left]
-    agree_run hag
-  | .rebind x r, h => r.bind_frame hag x h.tail
-  | .assignLocal x r, h => by
-    simp only [Stmt.run, r.eval_frame hag h.tail]
-    agree_run hag
-  | .declLocal p x init, h => by
-    cases init with
-    | none => exact EnvAgreeExcept.setEnv_both hag _ _
-    | some e =>
-      simp only [Stmt.run, e.eval_frame hag h.tail]
-      agree_run hag
-  | .declStorage _ x init, h => by
-    cases init with
-    | none => exact EnvAgreeExcept.setEnv_both hag _ _
-    | some r => exact r.bind_frame hag x h.tail
-  | .opAssign op _ _ l r, h => by
-    simp only [Stmt.run, r.eval_frame hag h.right]
-    exact bindPureResults_agree _ fun v => l.store_frame hag op h.left v
-  | .incDec op _ l, h => by
-    simp only [Stmt.run]
-    exact ResAgree.bindState (l.bump_frame hag op h) fun _ _ _ h' => h'
-  | .assignIncDec x op _ l _, h => by
-    simp only [Stmt.run]
-    exact ResAgree.bindState (l.bump_frame hag op h.tail) fun _ _ _ h' =>
-      EnvAgreeExcept.setEnv_both h' _ _
-  | .push (E := E) b v _, h => by
-    simp only [Stmt.run, b.resolve_frame hag h.left]
-    refine bindPureResults_agree _ fun _ => pushAt_agree hag _ _ _ fun sv => ?_
-    cases v with
-    | none => rfl
-    | some r => simp only [Src.pushVal, r.value_frame hag h.right]
-  | .pop b, h => by
-    simp only [Stmt.run, b.resolve_frame hag h]
-    agree_run hag
-  | .transfer r a, h => by
-    simp only [Stmt.run, r.eval_frame hag h.left, a.eval_frame hag h.right]
-    agree_run hag
-  | .send pv r a, h => by
-    simp only [Stmt.run, r.eval_frame hag h.tail.left, a.eval_frame hag h.tail.right]
-    agree_run hag
-  | .declMem R x init _ _, h => by
-    cases init with
-    | none => exact allocDefault_bind_agree hag R x
-    | some r => exact r.bind_frame hag x h.tail
-  | .rebindMem x r, h => r.bind_frame hag x h.tail
-  | .assignFromMem l p, h => by
-    simp only [Stmt.run, p.mval_frame hag h.right, l.resolve_frame hag h.left, copyMem_congr hag]
-    agree_run hag
-  | .assignMem l r, h => by
-    simp only [Stmt.run, r.mval_frame hag h.right]
-    exact bindPureResults_agree _ fun mv => l.write_frame hag mv h.left
-  | .delete l, h => by
-    simp only [Stmt.run, l.resolve_frame hag h, findStorage_congr hag]
-    agree_run hag
-  | .deleteMem p _, h => by
-    cases p with
-    | var x => exact allocDefault_bind_agree hag _ x
-    | loc l =>
-      simp only [Stmt.run, l.addr_frame hag h]
-      exact bindPureResults_agree _ fun a => memClear_agree hag a _
-  | .assignNew l n _, h => by
-    simp only [Stmt.run, n.eval_frame hag h.right]
-    refine bindPureResults_agree _ fun _ => bindPureResults_agree _ fun _ => ?_
-    refine ResAgree.bindState (copyStToM_agree hag _) fun _ _ _ h' => ?_
-    refine bindPureResults_agree _ fun id => ?_
-    cases l with
-    | store l =>
-      simp only [copyMem_congr h', l.resolve_frame h' h.left]
-      agree_run h'
-    | mem l => exact l.write_frame h' _ h.left
-  | .ite c thn els, h => by
-    simp only [Stmt.run, c.eval_frame hag h.left.left]
-    refine bindPureResults_agree _ fun v => ?_
-    cases v with
-    | bool b =>
-      cases b
-      · exact Prog.run_frame hag els h.right
-      · exact Prog.run_frame hag thn h.left.right
-    | int _ => rfl
-  | .require c, h | .assert c, h => by
-    simp only [Stmt.run, c.eval_frame hag h]
-    refine bindPureResults_agree _ fun v => ?_
-    cases v with
-    | bool b => cases b <;> first | rfl | exact hag
-    | int _ => rfl
-  | .revert, _ => rfl
-  | .call _ args _ ret body, h => by
-    simp only [Stmt.run]
-    refine ResultsAgree.bind (Arg.bindSeq_frame args h.left.left hag) fun _ _ h₁ => ?_
-    refine ResultsAgree.bind (Prog.run_frame (CallRet.enter_frame h₁ ret) body h.right)
-      fun _ _ h₂ => ?_
-    exact CallRet.leave_frame h₂ ret h.left.right
-  | .tryCall c rets ok err code pnc other, h => by
-    simp only [Stmt.run, c.key_frame hag h.left.left.left.left.left.left, hag.tx]
-    refine bindPureResults_agree _ fun k => ?_
-    rcases lookupBy k τ.tx.ext with _ | (vs | _ | v | _)
-    · rfl
-    · exact ResultsAgree.bind (bindData_frame rets vs hag) fun _ _ h' =>
-        Prog.run_frame h' ok h.left.left.left.left.right
-    · exact Prog.run_frame hag err h.left.left.left.right
-    · exact ResultsAgree.bind (bindData_frame _ [v] hag) fun _ _ h' =>
-        Prog.run_frame h' pnc h.left.right
-    · exact Prog.run_frame hag other h.right
-  | .loop _ c body, h => by
-    simp only [Stmt.run]
-    refine Loop.run_rel (R := EnvAgreeExcept ns) (Q := ResultsAgree ns) hag
-      (fun τ₁ τ₂ hτ => ?_) rfl
-    simp only [Loop.step, c.eval_frame hτ h.left.right]
-    rcases c.eval τ₂ with e | (_ | b)
-    · exact (rfl : e = e)
-    · exact (rfl : Halt.stuck = Halt.stuck)
-    · cases b
-      · exact hτ
-      · rcases (Prog.run_frame hτ body h.right).cases with ⟨e, h₁, h₂⟩ | ⟨s₁, s₂, h₁, h₂, hs⟩
-        · simp only [h₁, h₂]
-          exact (rfl : e = e)
-        · simp only [h₁, h₂]
-          exact hs
-
-theorem Prog.run_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (P : List (Stmt C)) → Avoids (Prog.vars P) ns → ResultsAgree ns (Prog.run σ P) (Prog.run τ P)
-  | [], _ => hag
-  | s :: P, h => by
-    simp only [Prog.run]
-    exact ResultsAgree.bind (Stmt.run_frame hag s h.left) fun _ _ h' => Prog.run_frame h' P h.right
-
-end
 
 end Frame
 

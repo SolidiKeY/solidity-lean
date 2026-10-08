@@ -301,7 +301,7 @@ open Lean in
 /-- Declare `n : Prog C Γ Γ'`, the block `P` of the contract the constant
 `cn` names resolved from `Γ` and quoted, checked by the kernel: `none`, or
 why it is rejected (by `resolve`, or by the kernel). -/
-def Prog.defineCore [FreshNames] (n cn : Lean.Name) (Γ : NCtx) (P : List (Solidity.Stmt C)) :
+def Prog.defineCore [FreshNames] (n cn : Lean.Name) (Γ : NCtx) (P : List (Solidity.Surface.Stmt C)) :
     CoreM (Option String) := do
   match Prog.resolve Γ P with
   | .error e => pure (some e)
@@ -321,7 +321,7 @@ kernel accepts both, and each erases back to the block it was resolved from. -/
 
 section Pins
 
-private def callsBlock : Solidity.Prog CallsExample :=
+private def callsBlock : Solidity.Surface.Prog CallsExample :=
   sol[CallsExample]{ uint y = addTwo(3); uint z = larger(y, 7); }
 
 open Lean Elab Command in

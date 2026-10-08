@@ -121,10 +121,10 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
         (`Fml.posB`), or today's closer takes more than {Solidity.Derive.budget} steps"
   let hyp := mkApp (mkConst ``Solidity.Hyp) C
   let leafTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) hyp)
-    (mkApp (mkConst ``Solidity.Fml) C)
+    (mkApp (mkConst ``Solidity.NFml) C)
   let mkLeaf (Γ' φ' : Expr) : Expr :=
     mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) hyp,
-      mkApp (mkConst ``Solidity.Fml) C, Γ', φ']
+      mkApp (mkConst ``Solidity.NFml) C, Γ', φ']
   let ls ← mkListLit leafTy (leaves.map fun (Γ', φ') => mkLeaf Γ' φ')
   let pairTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) leafTy) (mkConst ``Nat)
   let someLs := mkApp2 (mkConst ``Option.some [0]) pairTy
@@ -172,22 +172,22 @@ def evalSolProveCore : Tactic := fun _ => withMainContext do
 
 /-- A formula valid with `x` free is valid under `∀ p x`: the erasure of a
 scoped leaf binds the parameters by `∀` (`cdl!`), today's leaf has them free. -/
-theorem _root_.Solidity.Valid.all_of_free {φ : Solidity.Fml C} (x : Var) (p : PrimTy)
+theorem _root_.Solidity.Valid.all_of_free {φ : Solidity.NFml C} (x : Var) (p : PrimTy)
     (h : Solidity.Valid φ) : Solidity.Valid (.all x p φ) :=
   fun _ _ _ => h _
 
 /-- Today's formula without its leading quantifiers: a scoped leaf's
 erasure with its parameters free, as today's leaves have them. -/
-def _root_.Solidity.Fml.stripAlls : Solidity.Fml C → Solidity.Fml C
+def _root_.Solidity.NFml.stripAlls : Solidity.NFml C → Solidity.NFml C
   | .all _ _ φ => φ.stripAlls
   | φ => φ
 
 /-- A formula is valid where it is with its leading quantifiers' locals free. -/
-theorem _root_.Solidity.Valid.of_stripAlls : {φ : Solidity.Fml C} →
+theorem _root_.Solidity.Valid.of_stripAlls : {φ : Solidity.NFml C} →
     Solidity.Valid φ.stripAlls → Solidity.Valid φ
   | .all x p φ, h => Solidity.Valid.all_of_free x p (Solidity.Valid.of_stripAlls (φ := φ) h)
   | .tt, h | .eq _ _, h | .not _, h | .and _ _, h | .imp _ _, h
-  | .modal _ _ _, h | .upd _ _ _, h | .havoc _, h | .anon _ _, h | .defined _, h => h
+  | .upd _ _ _, h | .havoc _, h | .anon _ _, h | .defined _, h => h
 
 namespace Derive
 
@@ -200,7 +200,7 @@ partial def stripAlls (g : MVarId) (n : Option Nat := none) : MetaM MVarId := do
   if n == some 0 then return g
   let ty ← instantiateMVars (← g.getType)
   let_expr Solidity.Valid C φ := ty | return g
-  let_expr Solidity.Fml.all _ x p φ' := φ | return g
+  let_expr Solidity.NFml.all _ x p φ' := φ | return g
   let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C φ') (← g.getTag)
   g.assign (mkAppN (mkConst ``Solidity.Valid.all_of_free) #[C, φ', x, p, g'])
   stripAlls g'.mvarId! (n.map (· - 1))

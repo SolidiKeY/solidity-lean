@@ -103,9 +103,11 @@ structure LineQ where
 /-- The names a line's context gets in its erasure: none known. -/
 def Ctx.blankNames (Γ : Ctx) : List Var := List.replicate Γ.length (.user "_")
 
-/-- The erasure of `φ`, quoted. -/
+/-- The erasure of `φ`, quoted: the closer's formula when it has no
+modality, else as written (`Fml.eraseS`, `Surface.Fml.quoteAuto`), as a
+written line is read. -/
 def Fml.erasedQuoted (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) : Lean.Expr :=
-  Solidity.Fml.quote c (φ.erase Γ.blankNames)
+  Solidity.Surface.Fml.quoteAuto c (φ.eraseS Γ.blankNames)
 
 /-- The lines of the derivation of `φ`, at most `n` of them. -/
 def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
@@ -817,7 +819,7 @@ def readings (c : Lean.Term) (m? : Option Expr) (holes : Array Syntax) (φ : TSy
     let raw ← liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
     -- applications built directly: in a quotation `$a $b` reads `$b` as a chain arrow
     let rd : Lean.Term := Syntax.mkApp (mkCIdent ``elabDl) #[c, raw, mkCIdent ``Bool.false]
-    let qt : Lean.Term := Syntax.mkApp (mkCIdent ``Solidity.Fml.quote) #[q]
+    let qt : Lean.Term := Syntax.mkApp (mkCIdent ``Solidity.Surface.Fml.quoteAuto) #[q]
     pure (Syntax.mkApp (mkCIdent ``Except.map) #[qt, rd])
   let ty := mkApp (mkConst ``List [0]) (mkApp2 (mkConst ``Except [0, 0]) (mkConst ``String)
     (mkConst ``Lean.Expr))
@@ -832,9 +834,10 @@ def readings (c : Lean.Term) (m? : Option Expr) (holes : Array Syntax) (φ : TSy
 /-- The `i` of an erased slot (`Fml.chainSlot i`, erased: `{anon(ns)}` over
 `find(storage, ⟪i⟫)`) and its names `ns`, quoted. -/
 def erasedSlot? (e : Expr) : Option (Nat × Expr) := do
-  guard (e.isAppOfArity ``Solidity.Fml.anon 3)
+  guard (e.isAppOfArity ``Solidity.NFml.anon 3 || e.isAppOfArity ``Solidity.Surface.Fml.anon 3)
   let body := e.getArg! 2
-  guard (body.isAppOfArity ``Solidity.Fml.defined 2)
+  guard (body.isAppOfArity ``Solidity.NFml.defined 2 ||
+    body.isAppOfArity ``Solidity.Surface.Fml.defined 2)
   let isSlotLit (x : Expr) : Bool := match x with
     | .lit (.strVal s) => s.startsWith "⟪"
     | _ => false
@@ -850,11 +853,17 @@ def toWrittenSlots (c : Expr) (sp : Splice) (holes : Array Expr) (e : Expr) : Ex
     let (i, _) ← erasedSlot? x
     let p ← sp.posts[i]?
     let j ← holes.findIdx? fun h => h == p.appArg! || h == p
-    pure (slotExpr c j)
+    -- in a line as written, the slot as written
+    if x.isAppOfArity ``Solidity.Surface.Fml.anon 3 then
+      let s := slotExpr c j
+      pure (mkApp2 (mkConst ``Solidity.Surface.Fml.defined) c s.appArg!)
+    else pure (slotExpr c j)
 
 /-- An erased line and the lines under its leading `∀`s. -/
 partial def underAlls (e : Expr) : List Expr :=
-  if e.isAppOfArity ``Solidity.Fml.all 4 then e :: underAlls e.appArg! else [e]
+  if e.isAppOfArity ``Solidity.NFml.all 4 || e.isAppOfArity ``Solidity.Surface.Fml.all 4 then
+    e :: underAlls e.appArg!
+  else [e]
 
 /-- The written text `φ` read (`readings`), with its holes elaborated; none
 when its modality is not the chain's. -/
@@ -980,9 +989,9 @@ def erasedLine (sp : Splice) (erased : Array Expr) : MetaM Expr := do
     fill e
   | _, _ => throwError "sol_chain: no erasure"
 
-/-- `Solidity.Fml.dropAlls` on the term: the line's outer `∀`s dropped. -/
+/-- `Solidity.NFml.dropAlls` on the term: the line's outer `∀`s dropped. -/
 partial def dropAllsE (e : Expr) : Expr :=
-  if e.isAppOfArity ``Solidity.Fml.all 4 then dropAllsE e.appArg! else e
+  if e.isAppOfArity ``Solidity.NFml.all 4 then dropAllsE e.appArg! else e
 
 /-- The `Update.lean` postcondition standing for the Lean term `e` (a hole
 of a written line) in the line `L`. -/
@@ -993,9 +1002,9 @@ def postIn (L e : Expr) : Option Expr :=
 /-- A written line past the program, read as `Update.lean`'s, its
 postconditions the line before's. -/
 def legacyWritten (C : Expr) (m? : Option Expr) (L : Expr) : Written → TermElabM Expr
-  | .hole => mkFreshExprMVar (mkApp (mkConst ``Solidity.Fml) C)
+  | .hole => mkFreshExprMVar (mkApp (mkConst ``Solidity.NFml) C)
   | .term t => do
-    let e ← elabTermEnsuringType t (mkApp (mkConst ``Solidity.Fml) C)
+    let e ← elabTermEnsuringType t (mkApp (mkConst ``Solidity.NFml) C)
     synthesizeSyntheticMVarsNoPostponing
     instantiateMVars e
   | .text c m' φ => do
@@ -1052,7 +1061,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
   let (C, Γ) ← lineType A
   let fml := mkApp2 (mkConst ``Core.Fml) C Γ
   let pairTy := mkApp2 (mkConst ``Prod [0, 0]) (linkTy C) fml
-  let lfml := mkApp (mkConst ``Solidity.Fml) C
+  let lfml := mkApp (mkConst ``Solidity.NFml) C
   let lpairTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``Solidity.Link) C) lfml
   let mk (l B : Expr) : Expr := mkAppN (mkConst ``Prod.mk [0, 0]) #[linkTy C, fml, l, B]
   let mut cur := A
@@ -1296,10 +1305,10 @@ syntax (name := leadsAnyStx) "leads% " term:max term:max : term
     let a ← elabTerm stx[1] none
     synthesizeSyntheticMVarsNoPostponing
     instantiateMVars a
-  let some A := first? | st.restore; elabTerm (← `(Solidity.Fml.Leads $(⟨stx[1]⟩) $(⟨stx[2]⟩))) none
+  let some A := first? | st.restore; elabTerm (← `(Solidity.NFml.Leads $(⟨stx[1]⟩) $(⟨stx[2]⟩))) none
   unless !A.hasMVar && (← isCoreLine A) do
     st.restore
-    return ← elabTerm (← `(Solidity.Fml.Leads $(⟨stx[1]⟩) $(⟨stx[2]⟩))) none
+    return ← elabTerm (← `(Solidity.NFml.Leads $(⟨stx[1]⟩) $(⟨stx[2]⟩))) none
   let (C, Γ) ← lineType A
   let bStx := if stx[2].isOfKind ``Lean.Parser.Term.paren then stx[2][1] else stx[2]
   let w := Written.of bStx

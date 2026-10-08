@@ -30,7 +30,7 @@ private def fuel : Nat := 2000
 /-- Run `Core.symex` on the program of `φ` (a modality) read into the
 scoped syntax and add
 `name : Core.symex fuel φ' = ψ`, checked by the kernel. -/
-private def agree (c : Expr) {C : Contract} (name : Lean.Name) (φ : Solidity.Fml C) :
+private def agree (c : Expr) {C : Contract} (name : Lean.Name) (φ : Solidity.Surface.Fml C) :
     MetaM Unit := do
   let .modal m P _ := φ | throwError "not a modality"
   let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) [] P | throwError "the program does not resolve"
@@ -51,7 +51,7 @@ def se : Expr := mkConst ``StandardExample
 /-- `storageIndexReadMappingFind`, `storageIndexRead_unfold_rightSndIndex`,
 `storageIndexRead_unfold_rightFst`, `storageLengthRead`,
 `storageLengthRead_unfold_rightFst`. -/
-private def readsφ : Solidity.Fml StandardExample :=
+private def readsφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ uint x = balances[3]; uint y = balances[x + 1]; uint z = people[x].age;
          uint w = people[total + 1].account.balance; uint l = values.length;
          uint n = matrix[x].length; ] true }
@@ -61,7 +61,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.reads readsφ
 /-- `storageIndexWriteMappingSave`, `indexWriteValueRhsCapture`,
 `storageIndexWriteCaptureAllNonSimpleIndex`,
 `storageIndexWriteCaptureAllComplexRecv`, `storageFieldWrite_unfold_leftFst`. -/
-private def writesφ : Solidity.Fml StandardExample :=
+private def writesφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ balances[2] = 5; balances[2] = total + 1; balances[total + 1] = total;
          people[total].age = 3; values[total] = alice.age; matrix[total][1] = 4; ] true }
 
@@ -71,7 +71,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.writes writesφ
 `storageFieldWriteCopySource`, `storageFieldRead_unfold_rightSndResult`,
 `storageIndexWriteMappingCopySource`, `storageFieldWriteStorageRef_unfold_leftFst`,
 `storageIndexWriteStorageRefCaptureAllNonSimpleIndex`. -/
-private def copiesφ : Solidity.Fml StandardExample :=
+private def copiesφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ alice = bob; alice = folks[1]; alice.account = bob.account;
          folks[1].account = people[2].account; folks[1] = alice; people[1].account = bob.account;
          folks[total + 1] = bob; ] true }
@@ -81,7 +81,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.copies copiesφ
 /-- `storageRootDelete`, `storageFieldDelete`, `storageIndexDelete`,
 `storageIndexDeleteNonSimpleIndexCapture`, `storageFieldDelete_unfold_leftFst`,
 `storageIndexDelete_unfold_leftFst`. -/
-private def deletesφ : Solidity.Fml StandardExample :=
+private def deletesφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ delete alice; delete alice.age; delete balances[2]; delete balances[total + 1];
          delete people[1].account; delete matrix[1][2]; ] true }
 
@@ -89,7 +89,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.deletes deletesφ
 
 /-- `storageFieldReadBindLocalRoot`, `storageIndexReadMappingBindLocalRoot`,
 `storageLocalRootPushBind`, `storageLocalRootPush_unfold_leftFstReceiver`. -/
-private def aliasesφ : Solidity.Fml StandardExample :=
+private def aliasesφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ Account storage a = alice.account; Person storage p = folks[2];
          Person storage q = people.push(); p = people[1]; a = folks[3].account; ] true }
 
@@ -99,7 +99,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.aliases aliasesφ
 
 /-- `ternaryToIf`, `ternaryCaptureCond` into a local, a state variable and
 an entry; `logicalAndShortCircuitRhs`, `logicalOrShortCircuitRhs`. -/
-private def conditionalsφ : Solidity.Fml StandardExample :=
+private def conditionalsφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ uint x = total > 1 ? 2 : 3; bool b = true; uint y = b ? x : 1; total = b ? 1 : 2;
          balances[1] = total > 2 ? 1 : 0; bool c = b && flags[2]; bool d = b || total > 3;
          bool e = flags[1] && flags[2]; ] true }
@@ -108,7 +108,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.conditionals conditionals�
 
 /-- Compound assignments and `++`/`--`, at a local, a state variable, a
 member, an entry, with a source and a receiver to unfold. -/
-private def compoundφ : Solidity.Fml StandardExample :=
+private def compoundφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ uint x = 1; x += 2; total += x; alice.age -= 1; balances[2] *= 3;
          people[total].age += 1; total += x + 1; x++; total++; people[1].age++;
          uint y = x++; uint z = ++total; uint w = alice.age++; ] true }
@@ -121,7 +121,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.compound compoundφ
 `storagePushLengthSave`, `storagePushLengthSaveReferenceElement`,
 `storagePushValueCopySource`, `storagePushValue_unfold_leftFstReceiver`,
 `storagePopSave`, `storagePop_unfold_leftFstReceiver`. -/
-private def arraysφ : Solidity.Fml StandardExample :=
+private def arraysφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ values.push(3); values.push(total + 1); values.push(); people.push();
          persons.push(alice); matrix[total].push(2); values.pop(); matrix[total].pop(); ] true }
 
@@ -130,14 +130,14 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.arrays arraysφ
 /-- `transferNoCallbackBox`, `transfer_unfold_rightSndArgument`,
 `transfer_unfold_leftFstReceiver`, `sendNoCallbackBox`,
 `send_unfold_rightSndArgument`. -/
-private def paymentsφ : Solidity.Fml StandardExample :=
+private def paymentsφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ uint to = 9; to.transfer(5); to.transfer(total + 1); owner.transfer(2);
          bool ok; ok = to.send(3); ok = to.send(total); ] true }
 
 run_meta agree se `Solidity.Examples.Tactics.CoreStep.payments paymentsφ
 
 /-- Under the diamond: `transferDiamond`, `sendNoCallbackDiamond`. -/
-private def paymentsDiamondφ : Solidity.Fml StandardExample :=
+private def paymentsDiamondφ : Solidity.Surface.Fml StandardExample :=
   dl!{ ⟨ uint to = 9; bool ok; ok = to.send(3); to.transfer(5); ⟩ true }
 
 run_meta agree se `Solidity.Examples.Tactics.CoreStep.paymentsDiamond paymentsDiamondφ
@@ -146,7 +146,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.paymentsDiamond paymentsDi
 
 /-- The memory rules: declarations, rebinding, reads, writes, copies both
 ways, deletes, fresh arrays. -/
-private def memoryφ : Solidity.Fml StandardExample :=
+private def memoryφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ Person memory m = alice; Person memory n; m.age = 3; uint x = m.age;
          m.account.balance = 2; uint y = m.account.balance; Account memory a = m.account;
          m.account = a; n = m; n = folks[x]; alice = m; folks[2] = n; people[x].account = a;
@@ -164,7 +164,7 @@ section Loops
 local instance : InContract := ⟨StandardExample⟩
 
 /-- `whileUnwind` then `loopExit`. -/
-private def unwindφ : Solidity.Fml StandardExample :=
+private def unwindφ : Solidity.Surface.Fml StandardExample :=
   dl!{ ⟨ uint i = 0;
          /// @custom:key unwind 2
          while (i < 3) { i = i + 1; total = i; }; ⟩ true }
@@ -172,7 +172,7 @@ private def unwindφ : Solidity.Fml StandardExample :=
 run_meta agree se `Solidity.Examples.Tactics.CoreStep.unwind unwindφ
 
 /-- `whileInvariantBox`: a body writing a local and storage. -/
-private def invBoxφ : Solidity.Fml StandardExample :=
+private def invBoxφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ uint i = 0;
          /// @custom:key invariant i <= 3
          while (i < 3) { i = i + 1; total = i; }; ] true }
@@ -180,7 +180,7 @@ private def invBoxφ : Solidity.Fml StandardExample :=
 run_meta agree se `Solidity.Examples.Tactics.CoreStep.invBox invBoxφ
 
 /-- `whileInvariantDiamond`. -/
-private def invDiamondφ : Solidity.Fml StandardExample :=
+private def invDiamondφ : Solidity.Surface.Fml StandardExample :=
   dl!{ ⟨ uint i = 0;
          /// @custom:key invariant i <= 3
          /// @custom:key decreases 3 - i
@@ -189,7 +189,7 @@ private def invDiamondφ : Solidity.Fml StandardExample :=
 run_meta agree se `Solidity.Examples.Tactics.CoreStep.invDiamond invDiamondφ
 
 /-- `whileClose`: the body pushes, so it has no frame. -/
-private def invCloseφ : Solidity.Fml StandardExample :=
+private def invCloseφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ uint i = 0;
          /// @custom:key invariant i <= 3
          while (i < 3) { values.push(i); i = i + 1; }; ] true }
@@ -198,7 +198,7 @@ run_meta agree se `Solidity.Examples.Tactics.CoreStep.invClose invCloseφ
 
 /-- `whileNoVariantDiamond`: a framed body under the diamond, with no
 `decreases`. -/
-private def invNoVariantφ : Solidity.Fml StandardExample :=
+private def invNoVariantφ : Solidity.Surface.Fml StandardExample :=
   dl!{ ⟨ uint i = 0;
          /// @custom:key invariant i <= 3
          while (i < 3) { i = i + 1; }; ⟩ true }
@@ -222,7 +222,7 @@ private def ts : Expr := mkConst ``TestSuite
 `memoryIndexWriteMemRefCaptureAllComplexRecv`, `…NonSimpleIndex`, the
 index deletes, `memoryIndexOpAssign…`, `memoryIndexArrayIncrement`,
 `memoryFieldOpAssign…` and their `…UnfoldLeftFst`. -/
-private def memoryArraysφ : Solidity.Fml TestSuite :=
+private def memoryArraysφ : Solidity.Surface.Fml TestSuite :=
   dl!{ [ uint i = 1; uint x = 2; Basket memory m = basketA;
          m.items[i] = x + 1; uint y = m.items[i + 1]; m.items[x] += 2; m.items[1]++;
          delete m.items[i + 1]; uint l = m.items.length; m.items[i + 1] = x;
@@ -241,7 +241,7 @@ run_meta agree ts `Solidity.Examples.Tactics.CoreStep.memoryArrays memoryArrays�
 under a complex receiver (`storageIndexWriteStorageRefCaptureAllComplexRecv`)
 and from memory (`memoryToStorageIndexCaptureAllComplexRecv`,
 `…NonSimpleIndex`). -/
-private def suiteArraysφ : Solidity.Fml TestSuite :=
+private def suiteArraysφ : Solidity.Surface.Fml TestSuite :=
   dl!{ [ uint i = 1; uint x = 2; LedgerUse storage u = ledgerUses.push(); ledgerUses.pop();
          LedgerUse storage w = ledgerUses[i]; w = ledgerUses[x]; u = ledgerUses.push();
          buckets[x].tokens[i + 1] = tok;
@@ -262,7 +262,7 @@ private def ce : Expr := mkConst ``CallsExample
 
 /-- `internalCallExpand` with a result, a nested call, `functionCallArgCapture`,
 a call with no result. -/
-private def callsφ : Solidity.Fml CallsExample :=
+private def callsφ : Solidity.Surface.Fml CallsExample :=
   dl!{ [ uint y = addOne(4); uint z = addTwo(y); uint w = addOne(y + 1); credit(y, 5); bump();
          uint v = larger(z, w + 1); ] true }
 
@@ -288,7 +288,7 @@ private def re : Expr := mkConst ``Rets
 /-- `functionBodyExpand` (a tuple's call leaves its return variables), a
 memory return, each with an argument captured first; `newArrayCapture`
 into memory and into storage, `memoryArrayFreshAlloc`. -/
-private def retsφ : Solidity.Fml Rets :=
+private def retsφ : Solidity.Surface.Fml Rets :=
   dl!{ [ uint a; uint b; (a, b) = pair(3); (a, b) = pair(a + 1); Person memory m = mk(2);
          Person memory n = mk(total + 1); uint y = n.age; Basket memory k; k.items = new uint[](3);
          basket.items = new uint[](a); uint[] memory xs = new uint[](2); ] true }
@@ -309,14 +309,14 @@ local instance : InContract := ⟨Pinger⟩
 private def pe : Expr := mkConst ``Pinger
 
 /-- `tryCallNoCallbackBox`. -/
-private def tryBoxφ : Solidity.Fml Pinger :=
+private def tryBoxφ : Solidity.Surface.Fml Pinger :=
   dl!{ [ try I(7).get() returns (uint v) { last = v; } catch Panic(uint c) { last = c; }
          catch { last = 0; }; pings = 1; ] true }
 
 run_meta agree pe `Solidity.Examples.Tactics.CoreStep.tryBox tryBoxφ
 
 /-- `tryCallDiamond`. -/
-private def tryDiamondφ : Solidity.Fml Pinger :=
+private def tryDiamondφ : Solidity.Surface.Fml Pinger :=
   dl!{ ⟨ try I(7).get() returns (uint v) { last = v; } catch { last = 0; }; ⟩ true }
 
 run_meta agree pe `Solidity.Examples.Tactics.CoreStep.tryDiamond tryDiamondφ

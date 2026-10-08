@@ -1,61 +1,35 @@
 import Solidity.Syntax.Splice
 
 /-!
-# The interpreter
+# The untyped state and its operations
 
-What a program does, the reference every rule is proved sound against
-(mini-solkey's `Ch04_Semantics`).  The state is KeY's: a storage tree
+The state KeY's terms read (mini-solkey's `Ch04_Semantics`): a storage tree
 (`structRules.key`), an identity-indexed memory heap (`memoryRules.key`),
 the locals, the `net` payment ledger and the contract's funds
-(`netHeader.key`), and the transaction's environment (`msg.sender`, …).  `Stmt.run`
-runs a statement on it by structural recursion on the typed syntax, so
-every function here terminates and every branch on a type was already
-taken by the index.
+(`netHeader.key`), and the transaction's environment (`msg.sender`, …);
+the evaluators of program expressions, the storage and memory reads and
+writes, a call's binding and decoding.  The closer's terms read it
+(`Update.lean`'s `Tm.eval`), and the typed state erases to it
+(`Semantics/Core/StateErase.lean`).
 
-Semantic conventions mirrored from KeY:
-- storage assignment copies by value (`save`/`select`/`store`), memory
-  assignment aliases identities, cross-domain assignments deep-copy
-  (`copySt`/`copyMem`);
-- array reads and writes out of bounds revert; `pop()` on an empty array
-  reverts; `/` and `%` revert on a zero divisor; a failing `assert`
-  panics (below);
-- `a.transfer(v)` books `net(a) := net(a) - v` unless `a` is the contract
-  itself, which books nothing (solkey's `\if(a = self)`), with no callback
-  (the callback reading is the typed run's, `Semantics/Core/Callback.lean`), and nothing else: the contract is assumed able to pay, and its funds
-  (`State.selfBalance`) are not the transfer's to change.  Whether the EVM
-  pays is the compiler theorem's business (`Evm/CoreCorrect.lean`, where a
-  refused payment is a revert of the machine alone);
-- `pv = a.send(v);` books as `transfer` does and sets `pv` to `true` when the
-  recipient takes the payment, and books nothing and sets `pv` to `false`
-  when it refuses (`sendAt`): which, the transaction's oracle says
-  (`TxEnv.ext`), as it does for a `try`;
-- a call runs its inlined body (`Stmt.call`, KeY's `functionBodyExpand`):
-  its arguments read in the caller's state, bound to its parameters, its
-  return variable declared, the body run, the result assigned;
-- an external call (`try`) runs no callee: how it ends is the transaction's
-  (`TxEnv.ext`), and its clause's block runs in the caller's state, the
-  returned data or the `Panic` code bound first.
+Statements run in the typed interpreter (`Semantics/Core/TypedRun.lean`,
+`docs/intrinsic.md`); this module's statement run (`Stmt.run`, `Loop.run`,
+`Contract.deploy`) was deleted at W4 `modal`.  The conventions the
+operations follow are solc's where KeY is more liberal
+(`docs/solc-alignment.md`): arithmetic is **checked** (`checkArith`), an
+array read or write out of bounds reverts, as does `pop()` on an empty
+array and `/` or `%` by zero; `a.transfer(v)` books
+`net(a) := net(a) - v` unless `a` is the contract itself (solkey's
+`\if(a = self)`), and `pv = a.send(v);` books as `transfer` does when the
+recipient takes the payment (`sendAt`), which the transaction's oracle says
+(`TxEnv.ext`).
 
-Where solc and KeY differ on an external call, this follows solc: a call to an
-address with no code, and returned data that does not decode, revert in the
-caller, which no `catch` clause catches.
-
-Semantic conventions mirrored from solc, where KeY was more liberal
-(`docs/solc-alignment.md`):
-- arithmetic is **checked** (solc ≥ 0.8): a result outside its type's
-  range (`uint` = `uint256`, `int` = `int256`) reverts (`checkArith`);
-- an assignment evaluates its **right-hand side before resolving the
-  left-hand side**, and `++`/`--` and `op=` resolve their target exactly
-  once;
-
-A run ends in a state or halts: `revert` (the program reverted), `panic`
-(an `assert` failed: solc's `Panic(0x01)`, KeY's `assertSimple` "Violated"
-branch, which no modality accepts), `stuck` (a state that does not fit the
-program, e.g. a local read before it is bound), or `diverge` (a loop that
-never ends, `Loop.run`).  solc's other panics
-(overflow, a zero divisor, an index out of bounds, `pop()` on an empty array)
-are reverts here, as in KeY, where a box accepts them.  The copy from memory back to storage terminates on the visited-set
-complement `rem` (`copyMToSt`); everything else is structural.
+An operation ends in a value or halts: `revert`, `panic` (an `assert`
+failed: solc's `Panic(0x01)`), `stuck` (a state that does not fit the
+operation, e.g. a local read before it is bound: the closer's term model on
+an ill-sorted term), or `diverge`.  The copy from memory back to storage
+terminates on the visited-set complement `rem` (`copyMToSt`); everything
+else is structural.
 -/
 
 namespace Solidity
@@ -297,8 +271,8 @@ inductive Halt where
   | revert
   | stuck
   | panic
-  /-- A loop that never ends (`Loop.run`): a box accepts it, a diamond does
-  not, as they do a revert. -/
+  /-- A loop that never ends: a box accepts it, a diamond does not, as they
+  do a revert. -/
   | diverge
   deriving Repr, DecidableEq, Inhabited
 
@@ -1601,306 +1575,6 @@ def assertOk (v : Value) (σ : State) : Res State :=
   | .bool false => .error .panic
   | .int _ => .error .stuck
 
-/-! ## Loops
-
-A loop's run is the least fixed point of its unwinding (`docs/loops.md`,
-Decision 1), with no fuel: `Loop.iterN n` runs at most `n` iterations, and
-the loop ends as the iteration does at any `n` at which it is done (all such
-`n` agree: `Loop.iterN_done_unique`), or diverges when it is done at none.
-So `Stmt.run` stays total and structural: the loop arm calls the body's run
-under a binder. -/
-
-/-- One iteration from `σ`: the loop is done (`.inr`) when the condition is
-false (in `σ`), or when the condition or the body halts; it goes on
-(`.inl`) in the state the body leaves. -/
-def Loop.step (body : State → Res State) (c : State → Res Value) (σ : State) :
-    State ⊕ Res State :=
-  match c σ with
-  | .error h => .inr (.error h)
-  | .ok (.bool false) => .inr (.ok σ)
-  | .ok (.bool true) =>
-    match body σ with
-    | .error h => .inr (.error h)
-    | .ok τ => .inl τ
-  | .ok (.int _) => .inr (.error .stuck)
-
-/-- At most `n` iterations from `σ`: still running (`.inl`), or done. -/
-def Loop.iterN (body : State → Res State) (c : State → Res Value) : Nat → State → State ⊕ Res State
-  | 0, σ => .inl σ
-  | n + 1, σ =>
-    match Loop.step body c σ with
-    | .inl τ => Loop.iterN body c n τ
-    | .inr r => .inr r
-
-/-- The loop run by iterating until it is done, for `#eval`: the kernel never
-sees it (`Loop.run`'s `implemented_by`). -/
-partial def Loop.runImpl (body : State → Res State) (c : State → Res Value) (σ : State) :
-    Res State :=
-  match Loop.step body c σ with
-  | .inl τ => Loop.runImpl body c τ
-  | .inr r => r
-
-open Classical in
-/-- The loop's outcome: what the iteration is done with, or `diverge` when it
-is done at no `n`.  Classical, so the kernel does not reduce a loop; a
-concrete one is computed by `Loop.run_of_iterN`, and `#eval` runs
-`Loop.runImpl`. -/
-@[implemented_by Loop.runImpl]
-noncomputable def Loop.run (body : State → Res State) (c : State → Res Value) (σ : State) :
-    Res State :=
-  if h : ∃ r n, Loop.iterN body c n σ = .inr r then Classical.choose h else .error .diverge
-
-section LoopLemmas
-
-variable {body : State → Res State} {c : State → Res Value}
-
-/-- Done absorbs: an iteration done at `n` is done, alike, at every later `m`. -/
-theorem Loop.iterN_done_le {n m : Nat} {σ : State} {r : Res State} (hnm : n ≤ m)
-    (h : Loop.iterN body c n σ = .inr r) : Loop.iterN body c m σ = .inr r := by
-  induction n generalizing σ m with
-  | zero => simp only [Loop.iterN, reduceCtorEq] at h
-  | succ n ih =>
-    obtain ⟨m, rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
-    simp only [Loop.iterN] at h ⊢
-    cases hs : Loop.step body c σ with
-    | inl τ => rw [hs] at h; exact ih (by omega) h
-    | inr r' => rw [hs] at h; exact h
-
-/-- The iterations done at `n` and at `m` are done alike. -/
-theorem Loop.iterN_done_unique {n m : Nat} {σ : State} {r r' : Res State}
-    (h : Loop.iterN body c n σ = .inr r) (h' : Loop.iterN body c m σ = .inr r') : r = r' := by
-  rcases Nat.le_total n m with hnm | hmn
-  · rw [Loop.iterN_done_le hnm h] at h'
-    exact Sum.inr.inj h'
-  · rw [Loop.iterN_done_le hmn h'] at h
-    exact (Sum.inr.inj h).symm
-
-/-- A loop done at `n` ends as it is done there: how a concrete loop is
-decided, `n` found by `#eval`. -/
-theorem Loop.run_of_iterN {n : Nat} {σ : State} {r : Res State}
-    (h : Loop.iterN body c n σ = .inr r) : Loop.run body c σ = r := by
-  have hex : ∃ r n, Loop.iterN body c n σ = .inr r := ⟨r, n, h⟩
-  simp only [Loop.run, hex, dite_true]
-  obtain ⟨n', h'⟩ := Classical.choose_spec hex
-  exact Loop.iterN_done_unique h' h
-
-/-- A loop done at no `n` diverges. -/
-theorem Loop.run_of_forall {σ : State} (h : ∀ n r, Loop.iterN body c n σ ≠ .inr r) :
-    Loop.run body c σ = .error .diverge := by
-  have hex : ¬ ∃ r n, Loop.iterN body c n σ = .inr r := fun ⟨r, n, h'⟩ => h n r h'
-  simp only [Loop.run, hex, dite_false]
-
-/-- **Unwinding**: a loop is one iteration, then the loop again from the
-state it leaves (`whileUnwind`'s soundness). -/
-theorem Loop.run_unfold (σ : State) :
-    Loop.run body c σ =
-      match Loop.step body c σ with
-      | .inl τ => Loop.run body c τ
-      | .inr r => r := by
-  cases hs : Loop.step body c σ with
-  | inr r => exact Loop.run_of_iterN (n := 1) (by simp only [Loop.iterN, hs])
-  | inl τ =>
-    show Loop.run body c σ = Loop.run body c τ
-    have hshift : ∀ n, Loop.iterN body c (n + 1) σ = Loop.iterN body c n τ := fun n => by
-      simp only [Loop.iterN, hs]
-    by_cases hex : ∃ r n, Loop.iterN body c n τ = .inr r
-    · obtain ⟨r, n, h⟩ := hex
-      rw [Loop.run_of_iterN h, Loop.run_of_iterN (n := n + 1) (by rw [hshift]; exact h)]
-    · have hτ : ∀ n r, Loop.iterN body c n τ ≠ .inr r := fun n r h => hex ⟨r, n, h⟩
-      rw [Loop.run_of_forall hτ, Loop.run_of_forall]
-      intro n r h
-      cases n with
-      | zero => simp only [Loop.iterN, reduceCtorEq] at h
-      | succ n => rw [hshift] at h; exact hτ n r h
-
-/-- Two iterations in step: both still running, related by `R`, or both done,
-related by `Q`. -/
-def Loop.StepRel (R : State → State → Prop) (Q : Res State → Res State → Prop) :
-    State ⊕ Res State → State ⊕ Res State → Prop
-  | .inl τ, .inl τ' => R τ τ'
-  | .inr r, .inr r' => Q r r'
-  | _, _ => False
-
-/-- **Two loops run alike** when their iterations go in step: from states
-related by `R`, one iteration of each ends both running in states related
-by `R`, or both done with outcomes related by `Q`; and `Q` relates two
-divergences.  The proofs that recurse on `Stmt.run` take a loop's case from
-here (`Prog.run_frame`, typing). -/
-theorem Loop.run_rel {body' : State → Res State} {c' : State → Res Value}
-    {R : State → State → Prop} {Q : Res State → Res State → Prop} {σ σ' : State}
-    (h0 : R σ σ')
-    (hstep : ∀ τ τ', R τ τ' → Loop.StepRel R Q (Loop.step body c τ) (Loop.step body' c' τ'))
-    (hdiv : Q (.error .diverge) (.error .diverge)) :
-    Q (Loop.run body c σ) (Loop.run body' c' σ') := by
-  have hiter : ∀ n τ τ', R τ τ' →
-      Loop.StepRel R Q (Loop.iterN body c n τ) (Loop.iterN body' c' n τ') := by
-    intro n
-    induction n with
-    | zero => intro τ τ' h; exact h
-    | succ n ih =>
-      intro τ τ' h
-      have hs := hstep τ τ' h
-      simp only [Loop.iterN]
-      revert hs
-      cases Loop.step body c τ <;> cases Loop.step body' c' τ' <;>
-        simp only [Loop.StepRel, false_imp_iff, imp_self] <;> exact ih _ _
-  by_cases hex : ∃ r n, Loop.iterN body c n σ = .inr r
-  · obtain ⟨r, n, h⟩ := hex
-    have hn := hiter n σ σ' h0
-    rw [h] at hn
-    revert hn
-    cases h' : Loop.iterN body' c' n σ' with
-    | inl _ => simp only [Loop.StepRel, false_imp_iff]
-    | inr r' =>
-      intro hq
-      rw [Loop.run_of_iterN h, Loop.run_of_iterN h']
-      exact hq
-  · have hσ : ∀ n r, Loop.iterN body c n σ ≠ .inr r := fun n r h => hex ⟨r, n, h⟩
-    have hσ' : ∀ n r, Loop.iterN body' c' n σ' ≠ .inr r := by
-      intro n r h
-      have hn := hiter n σ σ' h0
-      rw [h] at hn
-      revert hn
-      cases h'' : Loop.iterN body c n σ with
-      | inl _ => simp only [Loop.StepRel, false_imp_iff]
-      | inr r'' => exact fun _ => hσ n r'' h''
-    rw [Loop.run_of_forall hσ, Loop.run_of_forall hσ']
-    exact hdiv
-
-/-- **A loop's invariant**: `P` holds at the head of every iteration from `σ`,
-and `Q` of every outcome an iteration from a state in `P` is done with, and
-of a divergence: then `Q` holds of the loop's run. -/
-theorem Loop.run_induct {P : State → Prop} {Q : Res State → Prop} {σ : State} (h0 : P σ)
-    (hstep : ∀ τ, P τ →
-      match Loop.step body c τ with
-      | .inl τ' => P τ'
-      | .inr r => Q r)
-    (hdiv : Q (.error .diverge)) : Q (Loop.run body c σ) := by
-  have h := Loop.run_rel (body' := body) (c' := c) (R := fun τ τ' => τ = τ' ∧ P τ)
-    (Q := fun r r' => r = r' ∧ Q r) (σ' := σ) ⟨rfl, h0⟩
-    (fun τ τ' ⟨he, hp⟩ => by
-      subst he
-      have hs := hstep τ hp
-      revert hs
-      cases Loop.step body c τ <;> simp only [Loop.StepRel, true_and, imp_self])
-    ⟨rfl, hdiv⟩
-  exact h.2
-
-end LoopLemmas
-
-mutual
-
-/-- The state a statement leaves, from `σ`: `alice.age = 10;` saves `10` at
-`alice.age`, `Person storage p = alice;` binds `p` to `alice`'s path. -/
-def Stmt.run (σ : State) : Stmt C → Res State
-  | .assign l r => do
-    let sv ← r.value σ
-    let (root, segs) ← l.resolve σ
-    σ.writeStorage root segs sv
-  | .rebind x r => r.bind σ x
-  | .assignLocal x r => do pure (σ.setEnv x (.val (← r.eval σ)))
-  | .declLocal p x init => do
-    let v ← match init with
-      | none => pure (PrimTy.default p)
-      | some e => e.eval σ
-    pure (σ.setEnv x (.val v))
-  | .declStorage _ x init =>
-    match init with
-    | none => pure (σ.setEnv x .unset)
-    | some r => r.bind σ x
-  | .declMem R x init _ _ => do
-    match init with
-    | none =>
-      let (σ', id) ← allocDefault σ R
-      pure (σ'.setEnv x (.mref id))
-    | some r => r.bind σ x
-  | .rebindMem x r => r.bind σ x
-  | .assignMem l r => do l.write σ (← r.mval σ)
-  | .assignFromMem l p => do
-    let sv ← copyMem σ (.ref (← (← p.mval σ).asRef))
-    let (root, segs) ← l.resolve σ
-    σ.writeStorage root segs sv
-  | .opAssign op _ _ l r => do l.store σ op (← r.eval σ)
-  | .incDec op _ l => do pure (← l.bump σ op).1
-  | .assignIncDec x op _ l _ => do
-    let (σ', v) ← l.bump σ op
-    pure (σ'.setEnv x (.val v))
-  | .push (E := E) b v _ => do
-    let (root, segs) ← b.resolve σ
-    pushAt σ E root segs (Src.pushVal σ v)
-  | .pop (E := E) b => do
-    let (root, segs) ← b.resolve σ
-    popAt σ E.isMapping root segs
-  | .transfer r a => do
-    let addr ← (← r.eval σ).asInt
-    let amt ← (← a.eval σ).asInt
-    transferAt σ addr amt
-  | .send pv r a => do
-    let addr ← (← r.eval σ).asInt
-    let amt ← (← a.eval σ).asInt
-    sendAt σ pv addr amt
-  | .delete l => do
-    let (root, segs) ← l.resolve σ
-    let cur ← σ.findStorage root segs
-    σ.saveStorage root segs cur.defaultOf
-  | .deleteMem (T := T) p _ =>
-    match p with
-    | @MPath.var _ R x _ => do
-      let (σ', id) ← allocDefault σ R
-      pure (σ'.setEnv x (.mref id))
-    | .loc l => do memClear σ (← l.addr σ) T
-  | .assignNew (R := R) l n _ => do
-    let sv := newArrVal R (← (← n.eval σ).asInt)
-    let (σ', mv) ← copyStToM σ sv
-    let id ← mv.asRef
-    match l with
-    | .store l => do
-      let sv' ← copyMem σ' (.ref id)
-      let (root, segs) ← l.resolve σ'
-      σ'.writeStorage root segs sv'
-    | .mem l => l.write σ' (.ref id)
-  | .ite c thn els => do
-    match ← c.eval σ with
-    | .bool true => Prog.run σ thn
-    | .bool false => Prog.run σ els
-    | .int _ => .error .stuck
-  | .require c => do guardOk (← c.eval σ) σ
-  | .assert c => do assertOk (← c.eval σ) σ
-  | .revert => .error .revert
-  | .call _ args _ ret body => do
-    let σ₁ ← Arg.bindSeq args σ
-    let σ₂ ← Prog.run (ret.enter σ₁) body
-    CallRet.leave (C := C) σ₂ ret
-  | .tryCall call rets ok err code pnc other => do
-    match lookupBy (← call.key σ) σ.tx.ext with
-    | none => .error .revert
-    | some (.ok vs) => Prog.run (← bindData rets vs σ) ok
-    | some .error => Prog.run σ err
-    | some (.panic c) => Prog.run (← bindData (codeBinders code) [c] σ) pnc
-    | some .other => Prog.run σ other
-  | .loop _ c body => Loop.run (fun τ => Prog.run τ body) (fun τ => c.eval τ) σ
-
-/-- The state a block leaves. -/
-def Prog.run (σ : State) : List (Stmt C) → Res State
-  | [] => pure σ
-  | s :: P => do Prog.run (← s.run σ) P
-
-end
-
-/-- A block whose first statement runs to `σ₁` runs the rest from `σ₁`. -/
-theorem Prog.run_cons_ok {σ σ₁ : State} {s : Stmt C} {P : List (Stmt C)}
-    (h : s.run σ = .ok σ₁) : Prog.run σ (s :: P) = Prog.run σ₁ P := by
-  simp only [Prog.run, h, bind, Except.bind]
-
-/-- **A concrete loop, run**: done at its `n`-th iteration with `r`, the
-loop and the rest of its block run as `r` and the rest (`Loop.run_of_iterN`;
-`n` found by `#eval`, the iteration then computed by `rfl`). -/
-theorem Prog.run_loop_of_iterN {σ : State} {a : LoopAnn C} {c : Val C .bool}
-    {body P : List (Stmt C)} {n : Nat} {r : Res State}
-    (h : Loop.iterN (fun τ => Prog.run τ body) (fun τ => c.eval τ) n σ = .inr r) :
-    Prog.run σ (.loop a c body :: P) = r >>= fun τ => Prog.run τ P := by
-  simp only [Prog.run, Stmt.run, Loop.run_of_iterN h]
-
 /-! ## Each contract starts in its store -/
 
 /-- The storage a contract starts with: each root at its type's default. -/
@@ -1918,24 +1592,6 @@ its own). -/
 def Contract.deployState (C : Contract) (tx : TxEnv) : State :=
   { storage := C.initStorage, net := [(tx.msgSender, tx.msgValue)],
     selfBalance := tx.msgValue, tx }
-
-/-- **A deployment**: the program `P`, `sol{ constructor(args); }`
-(`ctorProg`), run from `deployState tx`.  A constructor that is not
-`payable`, the implicit one too, refuses value, as solc's creation code
-does.  `P` is elaborated outside: the elaborator is `partial`, and a run is
-proved by computing it. -/
-def Contract.deploy (C : Contract) (P : Prog C) (tx : TxEnv) : Res State :=
-  if !((C.ctor.map (·.payable)).getD false) && tx.msgValue != 0 then .error .revert
-  else Prog.run (C.deployState tx) P
-
-/-- A contract with no constructor and no initializer deploys by running
-nothing: it starts in `deployState`. -/
-theorem Contract.deploy_noCtor [FreshNames] (C : Contract) (h₁ : C.ctor = none)
-    (h₂ : C.inits = []) :
-    ctorProg C [] = .ok [] ∧ C.deploy [] {} = .ok (C.deployState {}) := by
-  simp only [ctorProg, Contract.deploy, h₁, h₂, Option.isNone_none, List.isEmpty_nil,
-    Bool.and_self, if_true, Option.map_none, Option.getD_none, Bool.not_false]
-  exact ⟨trivial, rfl⟩
 
 section
 open Contract
@@ -1985,49 +1641,5 @@ theorem initStorage_solcControlFlow :
     defaultForTy]
 
 end
-
-/-! ## Examples
-
-A program run on `StandardExample`'s store. -/
-
-section Examples
-
-local instance : InContract := ⟨StandardExample⟩
-
-/-- `x = 10` through an alias. -/
-def aliasWrite : Prog StandardExample := sol{
-  Person storage p = alice; p.age = 10; uint x = alice.age; assert(x == 10);
-}
-
-/-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 10)) -/
-#guard_msgs in
-#eval (do (← Prog.run State.exampleStore aliasWrite).findStorage "alice" [.field "age"] : Res SVal)
-
-/-- A failing guard reverts. -/
-example : (Prog.run State.exampleStore (sol{ require(age > 3); } : Prog StandardExample)) =
-    .error .revert := rfl
-
-/-- A failing assertion panics. -/
-example : (Prog.run State.exampleStore (sol{ assert(age > 3); } : Prog StandardExample)) =
-    .error .panic := rfl
-
-/-! The order an `++` inside an expression is captured in is solc's, as
-solkey's `TestSuite.sol` pins it: a binary operator's right operand first
-(`i++ + i` is `1 + 1`), an assignment's right-hand side before its target
-(`a[++i] = ++i` writes `1` at `2`), an index's base before the index
-(`matrix[k][k++]` indexes `matrix[0]`). -/
-
-/-- info: (true, true, true) -/
-#guard_msgs in
-#eval
-  ((Prog.run State.testSuiteStore (sol[TestSuite]{ uint i = 1; uint x = i++ + i;
-      assert(x == 2); assert(i == 2); })).isOk,
-  (Prog.run State.testSuiteStore (sol[TestSuite]{ uint i = 0; values.push(100); values.push(100);
-      values.push(100); values[++i] = ++i; assert(values[2] == 1); })).isOk,
-  (Prog.run State.testSuiteStore (sol[TestSuite]{ matrix.push(); matrix.push();
-      matrix[0].push(0); matrix[1].push(0); uint k = 0; matrix[k][k++] = 77; assert(k == 1);
-      assert(matrix[0][0] == 77); assert(matrix[1][0] == 0); })).isOk)
-
-end Examples
 
 end Solidity

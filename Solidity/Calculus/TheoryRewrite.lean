@@ -191,7 +191,7 @@ variable {C : Contract} (c : Expr)
 
 /-- A context entry as the expression that builds it. -/
 def Hyp.quote : Hyp C → Expr
-  | .pre a => mkAppN (mkConst ``Hyp.pre) #[c, Fml.quote c a]
+  | .pre a => mkAppN (mkConst ``Hyp.pre) #[c, NFml.quote c a]
   | .upd m U => mkAppN (mkConst ``Hyp.upd) #[c, toExpr m, Upd.quote c U]
   | .havoc => mkAppN (mkConst ``Hyp.havoc) #[c]
   | .all x p => mkAppN (mkConst ``Hyp.all) #[c, toExpr x, toExpr p]
@@ -215,7 +215,7 @@ def normProves (g : MVarId) : MetaM MVarId := do
   let Γ' ← unsafe evalExpr Expr (mkConst ``Expr)
     (mkApp3 (mkConst ``Hyp.quoteList) C (quoteConstName n) Γ)
   let φ' ← unsafe evalExpr Expr (mkConst ``Expr)
-    (mkApp3 (mkConst ``Fml.quote) C (quoteConstName n) φ)
+    (mkApp3 (mkConst ``NFml.quote) C (quoteConstName n) φ)
   g.replaceTargetDefEq (mkAppN ty.getAppFn #[C, R, Γ', φ'])
 
 /-- The goal `[h₁, …, hₙ] ⟹ φ` as `[] ++ [h₁] ++ … ++ [hₙ] ⟹ φ`, the shape the

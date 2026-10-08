@@ -8,7 +8,7 @@ import Solidity.Calculus.Core.ProvesDerive
 
 `solc_problems N`, after `solc_import … as N`, defines for each function
 `f` that elaborated its obligation as solkey states it,
-`N.f.problem : Fml N` (`Problem.fml`, `Calculus/Problem.lean`): the
+`N.f.problem : NFml N` (`Problem.fml`, `Calculus/Problem.lean`): the
 modality is the function's tag, the binders its parameters, the program
 `N.f`.  The constructor's, `N.constructor.problem`, is a deployment's
 (`Problem.ctorFml`): the program `constructor(x̄);` from solkey's
@@ -97,7 +97,7 @@ def elabSolcProblems : CommandElab := fun stx => do
   let N := stx[1].getId
   let suffix := if stx[2].isNone then `problem else `problem ++ `legacy
   let rows ← reportRows N
-  let fmlTy := mkApp (mkConst ``Fml) (mkConst N)
+  let fmlTy := mkApp (mkConst ``Surface.Fml) (mkConst N)
   let mut defined : Array Lean.Name := #[]
   for r in rows do
     unless r.status == .elaborated do continue
@@ -147,7 +147,7 @@ def elabSolcScopedProblems : CommandElab := fun stx => do
       let some xs := r.params.mapM (fun (x, t) =>
         (paramTy? t).map fun (pn : PrimTy × Nat) => (pn.1, Var.ofName x)) | continue
       let n := N ++ Lean.Name.mkSimple r.name
-      let P ← unsafe evalConst (Prog C) n
+      let P ← unsafe evalConst (Surface.Prog C) n
       match Core.Problem.resolve (r.name == "constructor") m xs P with
       | .error e => errs := errs.push s!"{r.name}: {e}"
       | .ok φ =>
@@ -164,7 +164,8 @@ def elabSolcScopedProblems : CommandElab := fun stx => do
             #[mkConst N, toExpr m, toExpr xs, mkConst n]
           let legacy := if ctor then Problem.ctorFml m xs P else Problem.fml m xs P
           unless d.value == want &&
-              Solidity.Fml.quote (mkConst N) (φ.erase []) == Solidity.Fml.quote (mkConst N) legacy do
+              Solidity.Surface.Fml.quote (mkConst N) (φ.eraseS []) ==
+                Solidity.Surface.Fml.quote (mkConst N) legacy do
             errs := errs.push s!"{r.name}: it does not erase to {ln}"
         | _ => errs := errs.push s!"{r.name}: no legacy statement {ln}"
         -- written out here and shared once, across the statements, below

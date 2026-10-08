@@ -28,7 +28,7 @@ namespace Solidity.Examples.Tactics.CoreCallback
 
 open Solidity Core
 
-private def pays : Solidity.Prog StandardExample := sol[StandardExample]{
+private def pays : Solidity.Surface.Prog StandardExample := sol[StandardExample]{
   uint to = 9; to.transfer(2); }
 
 open Lean Elab Command in
@@ -80,14 +80,14 @@ example (I : Invariant StandardExample) (a : Core.Fml StandardExample []) (P : C
 
 /--
 trace: case h.h.exit
-⊢ dl{ ∀ uint to ⟹ᶜ[Core.Fml.tt] { net := if(to = this) then net else store(net, at(to), net(to) - 5) } true }
+⊢ dl{ ∀ uint to ⟹ᶜ[Fml.tt] { net := if(to = this) then net else store(net, at(to), net(to) - 5) } true }
 
 case h.h.ok
 ⊢ dl{ ∀ uint to, { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true }, { havoc },
-    true ⟹ᶜ[Core.Fml.tt] true }
+    true ⟹ᶜ[Fml.tt] true }
 
 case h.h.failed
-⊢ dl{ ∀ uint to, { ok := false } ⟹ᶜ[Core.Fml.tt] true }
+⊢ dl{ ∀ uint to, { ok := false } ⟹ᶜ[Fml.tt] true }
 -/
 #guard_msgs in
 example : ProvesC .tt [] .nil cdl!{ [ ok = to.send(5); ] true } := by

@@ -873,13 +873,13 @@ quoted and declared (`Prog.defineCore`), then run by the kernel. -/
 
 section Examples
 
-private def guardLow : Solidity.Prog StandardExample := sol[StandardExample]{ require(age > 3); }
-private def assertLow : Solidity.Prog StandardExample := sol[StandardExample]{ assert(age > 3); }
-private def incOrder : Solidity.Prog TestSuite := sol[TestSuite]{ uint i = 1; uint x = i++ + i;
+private def guardLow : Solidity.Surface.Prog StandardExample := sol[StandardExample]{ require(age > 3); }
+private def assertLow : Solidity.Surface.Prog StandardExample := sol[StandardExample]{ assert(age > 3); }
+private def incOrder : Solidity.Surface.Prog TestSuite := sol[TestSuite]{ uint i = 1; uint x = i++ + i;
   assert(x == 2); assert(i == 2); }
-private def indexOrder : Solidity.Prog TestSuite := sol[TestSuite]{ uint i = 0; values.push(100);
+private def indexOrder : Solidity.Surface.Prog TestSuite := sol[TestSuite]{ uint i = 0; values.push(100);
   values.push(100); values.push(100); values[++i] = ++i; assert(values[2] == 1); }
-private def countUp : Solidity.Prog StandardExample := sol[StandardExample]{
+private def countUp : Solidity.Surface.Prog StandardExample := sol[StandardExample]{
   uint i = 0; while (i < 3) { uint j = i + 1; i = j; } assert(i == 3); }
 
 open Lean Elab Command in
@@ -903,18 +903,19 @@ def State.ofSem (τ : Semantics.State) : State C [] := State.ofGlob τ ()
 
 /-- A block resolved from no locals and run, then read by `f`: compiled, for
 `#eval`. -/
-def runResolved {C : Contract} [FreshNames] (σ : Semantics.State) (P : Solidity.Prog C)
+def runResolved {C : Contract} [FreshNames] (σ : Semantics.State) (P : Solidity.Surface.Prog C)
     (f : {Γ : Ctx} → State C Γ → Res α) : Res α :=
   match Prog.resolve [] P with
   | .ok ⟨_, P'⟩ => do f (← Prog.run (State.ofSem σ) P')
   | .error _ => .error .stuck
 
-/-! `x = 10` through an alias (`Semantics.lean`'s `aliasWrite`), by `#eval`:
-its storage overlay does not reduce in the kernel, by either interpreter. -/
+/-! `x = 10` through an alias, by `#eval`: its storage overlay does not
+reduce in the kernel. -/
 
 /-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 10)) -/
 #guard_msgs in
-#eval runResolved Semantics.State.exampleStore aliasWrite fun τ =>
+#eval runResolved Semantics.State.exampleStore (sol[StandardExample]{
+    Person storage p = alice; p.age = 10; uint x = alice.age; assert(x == 10); }) fun τ =>
   τ.glob.findStorage "alice" [.field "age"]
 
 /-- A failing guard reverts. -/

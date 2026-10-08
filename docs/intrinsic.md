@@ -3745,7 +3745,7 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
 39. *Proposed (W4 `sem-del`), the lead's call:* today's interpreter
     (`Stmt.run`/`Prog.run`/`Loop` of `Semantics.lean`), `Halt.stuck`, the
     old run's frame lemmas (`Stmt.run_frame`/`Prog.run_frame`,
-    `Semantics/Agree.lean`) and `Semantics/Mutability.lean`'s frame lemmas
+    `Semantics/Agree.lean`) and `Semantics/Mutability`'s frame lemmas
     stay until the `modal` lane: they are the reading of today's
     `Fml.modal` (`Update.lean`'s `holds`, `holds_frame`) and of the program
     rules of today's `Proves`, which decision 34 keeps past `calc-del`
@@ -5707,7 +5707,7 @@ or annotation changed), the M0 re-timing, the review pass.
   erasure reads (`HoldsErase`, `CloseErase`, `Closable`, `TypedToSem`,
   `Faithfulness`, `Problem`).
 - `Mutability` (the type) → `AST.lean`, so `Core.Arms` no longer imports
-  `Semantics/Mutability.lean`; `Mutability.agree_trans`/`agree_mono` →
+  `Semantics/Mutability`; `Mutability.agree_trans`/`agree_mono` →
   `Semantics.EnvAgreeExcept.trans`/`of_sub` (`Semantics/Agree.lean`; read
   by `Core.Close` and today's `Contracts`).
 
@@ -5736,7 +5736,7 @@ untyped run or compiler).
 **Left** (for the lead, the `modal` lane, or a lane of decision 40):
 - With `modal`: delete `Stmt.run`, `Prog.run`, `Loop`, `Contract.deploy`
   and today's `Problem.deploy_of_valid`, `Agree`'s `Stmt.vars`/`run_frame`,
-  `Mutability.lean` (but its `Stmt.within`/`Prog.loopFrame` side conditions
+  `Mutability` (but its `Stmt.within`/`Prog.loopFrame` side conditions
   of today's rules go with `Rules`' body), `CallbackTaclet` and the `⟹ᶜ`
   macro; rename `Halt.stuck` to the term model's `undef` (the term model's
   own `.stuck`s: `UpdateRules`, `DecideLang`, `ReadWrite`, `Decide`).
@@ -5891,7 +5891,7 @@ binders, W5's qualified-name reason):
 **Left**:
 - With `modal` (decision 39): `Update.lean`'s `.modal` and today's
   `Stmt.run`; the `⟹ᶜ` macro of `RuleSyntax` (names today's deleted
-  `ProvesC`); `Semantics/Mutability.lean` (its `Stmt.within`/
+  `ProvesC`); `Semantics/Mutability` (its `Stmt.within`/
   `Prog.loopFrame` side conditions had no user but today's `Rules`).
 - Item 14: the scoped printer's five rules (the pins above show four).
 - M7 docs: the prose around the repointed citations (rule map, `loops`,
@@ -6647,7 +6647,7 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   dropped from under the returns by `Premise.inline`) or with an argument
   captured (`functionCallArgCapture`, `Args.eval_capture`: the arguments
   before it are simple, so read without effect).
-- `Calculus/Core/RunFrame`: `Mutability.lean`'s `frame_of_within`
+- `Calculus/Core/RunFrame`: `Mutability`'s `frame_of_within`
   on scoped syntax (`Stmt.run_frame`), positionally: of the locals at
   least `d` deep only the ones `writesAt d` lists change (`LocAgree`), the
   global part only in storage and ledger, and those only when

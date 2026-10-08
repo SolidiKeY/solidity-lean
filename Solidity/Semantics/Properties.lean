@@ -957,24 +957,6 @@ theorem lookupBy_defaultForFields (n : Name) : ∀ l : List (Name × Ty),
     · rfl
     · exact lookupBy_defaultForFields n l
 
-/-- A block of two parts runs the first, then the second. -/
-theorem Prog.run_append {C : Contract} (σ : State) :
-    (P Q : Prog C) → Prog.run σ (P ++ Q) = (do Prog.run (← Prog.run σ P) Q)
-  | [], Q => by simp [Prog.run]
-  | s :: P, Q => by
-    simp only [List.cons_append, Prog.run, bind_assoc]
-    cases s.run σ with
-    | error _ => rfl
-    | ok τ => exact Prog.run_append τ P Q
-
-theorem Prog.run_cons {C : Contract} (σ : State) (s : Stmt C) (P : Prog C) :
-    Prog.run σ (s :: P) = (do Prog.run (← s.run σ) P) := rfl
-
-/-- What the local `x` holds after `P` runs from the store `σ`. -/
-def _root_.Solidity.Prog.localAfter {C : Contract} (σ : State) (P : Prog C) (x : String) :
-    Res Binding := do
-  (← Prog.run σ P).getEnv (.user x)
-
 /-- A run that returned passes its value on. -/
 theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) :
     (Except.ok a >>= f : Res β) = f a := rfl

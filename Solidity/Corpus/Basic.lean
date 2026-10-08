@@ -64,7 +64,7 @@ abbrev Runs {Γ' : Core.Ctx} (m : Modality) (σ : Core.TState C []) (Q : Core.Pr
 /-- solkey's `\<{ f(); }\>(true)` at the typed state `σ`: the program `P`
 resolves to the scoped syntax, and its typed run from `σ` ends normally,
 or is exhausted (`Runs`, decision 15). -/
-def Diamond [FreshNames] (σ : Core.TState C []) (P : Prog C) : Prop :=
+def Diamond [FreshNames] (σ : Core.TState C []) (P : Surface.Prog C) : Prop :=
   match Core.Prog.resolve [] P with
   | .ok ⟨_, Q⟩ => Runs .diamond σ Q
   | .error _ => False
@@ -72,7 +72,7 @@ def Diamond [FreshNames] (σ : Core.TState C []) (P : Prog C) : Prop :=
 /-- How the typed run of `P` from `σ` ends: `"ok"`, `"revert"`, `"panic"`,
 `"diverge"` or `"exhausted"`, or why `P` does not resolve.  What `#eval`
 pins where the run does not end normally. -/
-def outcome [FreshNames] (σ : Core.TState C []) (P : Prog C) : String :=
+def outcome [FreshNames] (σ : Core.TState C []) (P : Surface.Prog C) : String :=
   match Core.Prog.resolve [] P with
   | .ok ⟨_, Q⟩ =>
     match Q.trun σ with
@@ -85,7 +85,7 @@ def outcome [FreshNames] (σ : Core.TState C []) (P : Prog C) : String :=
 
 /-- The check `corpus_decide` evaluates: `P` resolves from no locals, and its
 typed run from `σ` ends normally. -/
-def trunOk [FreshNames] (σ : Core.TState C []) (P : Prog C) : Bool :=
+def trunOk [FreshNames] (σ : Core.TState C []) (P : Surface.Prog C) : Bool :=
   match Core.Prog.resolve [] P with
   | .ok ⟨_, Q⟩ => (Q.trun σ).isOk
   | .error _ => false
@@ -97,7 +97,7 @@ theorem runs_of_trun {Γ' : Core.Ctx} {σ : Core.TState C []} {Q : Core.Prog C [
   exact ⟨trivial, nofun⟩
 
 /-- `trunOk` proves the diamond. -/
-theorem diamond_of_trunOk [FreshNames] (σ : Core.TState C []) {P : Prog C}
+theorem diamond_of_trunOk [FreshNames] (σ : Core.TState C []) {P : Surface.Prog C}
     (h : trunOk σ P = true) : Diamond σ P := by
   unfold trunOk at h
   unfold Diamond

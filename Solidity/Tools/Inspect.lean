@@ -17,8 +17,8 @@ import Solidity.Tools.Taclet
 * `#wp φ` runs the scoped strategy to the end (`Core.symex 200`, what
   `sol_symex` does) and prints what is left, the first-order formula whose
   validity is `φ`'s.  When its erasure (`Core.Fml.erase`) is in
-  `sol_decide`'s fragment (`Fml.inL`) it also prints its reduction
-  (`Fml.reduce`): the updates pushed in and every read of a write
+  `sol_decide`'s fragment (`NFml.inL`) it also prints its reduction
+  (`NFml.reduce`): the updates pushed in and every read of a write
   eliminated, a formula over the initial state alone, printed by `LFml.fmt`
   in KeY's spelling (`find(storage, alice.age)`, `save(s, p, w)`,
   `delAt(s, p)`, `if(i = j) then a else b`, `write(m, idC(idp0, nil), at(i),
@@ -274,7 +274,7 @@ def elabWpCore : CommandElab := fun stx => liftTermElabM do
   let (ψ, red) ← unsafe evalExpr (Lean.Expr × Option String) (← inferType e) e
   let tail := match red with
     | some r => m!"\nupdate-free:\n    {r}"
-    | none => m!"\noutside `sol_decide`'s fragment (`Fml.inL`): no reduction"
+    | none => m!"\noutside `sol_decide`'s fragment (`NFml.inL`): no reduction"
   logInfo (m!"symbolic execution leaves:\n    {ψ}" ++ tail)
 
 /-- `#step φ`. -/

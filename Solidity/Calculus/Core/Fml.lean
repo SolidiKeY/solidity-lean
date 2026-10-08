@@ -217,7 +217,7 @@ def Frames.outNames (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ →
 
 /-- The statements the frames hold, as `Update.lean`'s program goes on after
 the head: a scope end is nothing there. -/
-def Frames.erase (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → List (Solidity.Stmt C)
+def Frames.erase (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → List (Solidity.Surface.Stmt C)
   | _, _, .nil => []
   | _, _, .seq ω κ => ω.erase ns ++ κ.erase (ω.outNames ns)
   | _, _, .pop _ h κ => κ.erase (ns.drop h.depth)
@@ -274,14 +274,17 @@ inductive Fml (C : Contract) : Ctx → Type where
 /-- `false` is `¬true`. -/
 abbrev Fml.ff {Γ : Ctx} : Fml C Γ := .not .tt
 
-/-- `a = b` with both sides defined (`Solidity.Fml.eqD`). -/
+/-- `a = b` with both sides defined (`Solidity.NFml.eqD`). -/
 abbrev Fml.eqD {Γ : Ctx} (a b : Tm C Γ .val) : Fml C Γ :=
   .and (.defined a) (.and (.defined b) (.eq a b))
 
-/-- `Update.lean`'s formula, the positions named by `ns`: a frame is the
-statements it holds, a pop and a hidden binder nothing, and an update of
-pops only (`Frames.exit`) its formula. -/
-def Fml.erase : {Γ : Ctx} → List Var → Fml C Γ → Solidity.Fml C
+/-- `Update.lean`'s formula, the closer's input, the positions named by
+`ns`: a pop and a hidden binder are nothing, and an update of pops only
+(`Frames.exit`) its formula.  A modality has no erasure there (the closer's
+formulas have none): it erases to `false`, and nothing reads that, since
+the closer takes only a formula with none (`Fml.Closable`); `Fml.eraseS`
+keeps it, for the printers. -/
+def Fml.erase : {Γ : Ctx} → List Var → Fml C Γ → Solidity.NFml C
   | _, _, .tt => .tt
   | _, ns, .eq a b => .eq (a.erase ns) (b.erase ns)
   | _, ns, .defined t => .defined (t.erase ns)
@@ -292,12 +295,32 @@ def Fml.erase : {Γ : Ctx} → List Var → Fml C Γ → Solidity.Fml C
     match U.erase ns with
     | [] => φ.erase (U.names ns)
     | U' => .upd m U' (φ.erase (U.names ns))
-  | _, ns, .modal m P κ φ =>
-    .modal m (P.erase ns ++ κ.erase (P.outNames ns)) (φ.erase (κ.outNames (P.outNames ns)))
+  | _, _, .modal .. => .ff
   | _, ns, .havoc φ => .havoc (φ.erase ns)
   | _, ns, .all x p φ => .all x p (φ.erase (x :: ns))
   | _, ns, .bind _ x _ φ => φ.erase (x :: ns)
   | _, ns, .anon xs φ => .anon (xs.map fun x => x.2.name ns) (φ.erase ns)
+
+/-- The formula as written (`Update.lean`'s `Surface.Fml`), the positions
+named by `ns`: `Fml.erase` with the modality kept, its program the
+statements of `P` and of the frames.  What the printers print. -/
+def Fml.eraseS : {Γ : Ctx} → List Var → Fml C Γ → Solidity.Surface.Fml C
+  | _, _, .tt => .tt
+  | _, ns, .eq a b => .eq (a.erase ns) (b.erase ns)
+  | _, ns, .defined t => .defined (t.erase ns)
+  | _, ns, .not φ => .not (φ.eraseS ns)
+  | _, ns, .and φ ψ => .and (φ.eraseS ns) (ψ.eraseS ns)
+  | _, ns, .imp φ ψ => .imp (φ.eraseS ns) (ψ.eraseS ns)
+  | _, ns, .upd m U φ =>
+    match U.erase ns with
+    | [] => φ.eraseS (U.names ns)
+    | U' => .upd m U' (φ.eraseS (U.names ns))
+  | _, ns, .modal m P κ φ =>
+    .modal m (P.erase ns ++ κ.erase (P.outNames ns)) (φ.eraseS (κ.outNames (P.outNames ns)))
+  | _, ns, .havoc φ => .havoc (φ.eraseS ns)
+  | _, ns, .all x p φ => .all x p (φ.eraseS (x :: ns))
+  | _, ns, .bind _ x _ φ => φ.eraseS (x :: ns)
+  | _, ns, .anon xs φ => .anon (xs.map fun x => x.2.name ns) (φ.eraseS ns)
 
 /-! ## Premises -/
 
@@ -364,7 +387,7 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   | inline {Γ' Γ'' : Ctx} (P : Prog C Γ Γ'') (h : Thin Γ' Γ'') : Premise C Γ Γ'
 
 /-- `{anon(xs)} φ`, and `{anon(xs)} {havoc} φ` when the frame writes the
-storage too (`hv`): `Mutability.lean`'s `Fml.loopAnon`. -/
+storage too (`hv`): today's `Fml.loopAnon`. -/
 def Fml.anonHavoc {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool) (φ : Fml C Γ) :
     Fml C Γ :=
   if hv then .anon xs (.havoc φ) else .anon xs φ

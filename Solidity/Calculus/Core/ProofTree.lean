@@ -131,7 +131,7 @@ def condOf? (C H s : Expr) : MetaM (Option String) := do
     Delab.withTwins s false fun env => do
       let (_, _, ns) ← (Delab.hypsParts C H).run env
       let st ← whnf (← (Delab.tr ns s).run env)
-      unless st.isAppOf ``Solidity.Stmt.ite do return none
+      unless st.isAppOf ``Solidity.Surface.Stmt.ite do return none
       let c ← Solidity.ppExpr (st.getArg! 1)
       return some (toString (← PrettyPrinter.ppCategory `sol_expr c))
   catch _ => return none

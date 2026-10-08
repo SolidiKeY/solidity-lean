@@ -33,7 +33,7 @@ private def fuel : Nat := 1000
 
 /-- Run `Core.symex` on `φ` read into the scoped syntax, add `name : Core.symex fuel φ' = ψ` checked by
 the kernel, and print `ψ`. -/
-private def coreSymex (name : Lean.Name) (φ : Solidity.Fml SE) : MetaM Unit := do
+private def coreSymex (name : Lean.Name) (φ : Solidity.Surface.Fml SE) : MetaM Unit := do
   let c := mkConst ``StandardExample
   let .modal m P _ := φ | throwError "not a modality"
   let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := SE) [] P | throwError "the program does not resolve"
@@ -48,7 +48,7 @@ private def coreSymex (name : Lean.Name) (φ : Solidity.Fml SE) : MetaM Unit := 
 
 /-! ## A branch on a read, then a read -/
 
-private def branchφ : Solidity.Fml SE :=
+private def branchφ : Solidity.Surface.Fml SE :=
   dl!{ [ if (alice.age > 4) { total = 1; } else { total = 2; }; uint y = total; ] true }
 
 /--
@@ -59,7 +59,7 @@ run_meta coreSymex `Solidity.Examples.Tactics.CoreSymex.branch branchφ
 
 /-! ## Reads and writes of a member -/
 
-private def memberφ : Solidity.Fml SE := dl!{ [ uint x = alice.age; uint y = x + 1; alice.age = y; ] true }
+private def memberφ : Solidity.Surface.Fml SE := dl!{ [ uint x = alice.age; uint y = x + 1; alice.age = y; ] true }
 
 /-- info: { x := find(storage, alice.age) } { y := x + 1 } { storage := save(storage, alice.age, y) } true -/
 #guard_msgs in
@@ -67,7 +67,7 @@ run_meta coreSymex `Solidity.Examples.Tactics.CoreSymex.member memberφ
 
 /-! ## A default, a `require`, a write -/
 
-private def guardφ : Solidity.Fml SE :=
+private def guardφ : Solidity.Surface.Fml SE :=
   dl!{ [ uint x; x = 4; uint y = x + 1; require(y > 3); total = y; ] true }
 
 /--

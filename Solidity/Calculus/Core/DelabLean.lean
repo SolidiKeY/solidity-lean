@@ -28,7 +28,7 @@ def argCapturePremise? (p : Expr) : MetaM (Option (TSyntax `dl_premise)) := do
     let v ← (tr [] a[9]!).run env
     let x := mkApp2 (mkConst ``Solidity.Var.fresh) (toExpr "se") a[2]!
     let init := mkApp2 (mkConst ``Option.some [levelZero]) (mkApp2 (mkConst ``Solidity.Val) c a[8]!) v
-    let decl ← ppStmt (mkApp4 (mkConst ``Solidity.Stmt.declLocal) c a[8]! x init)
+    let decl ← ppStmt (mkApp4 (mkConst ``Solidity.Surface.Stmt.declLocal) c a[8]! x init)
     let call := mkIdent (← unresolveNameGlobal ``Solidity.Core.Stmt.call)
     let t ← `($call $(← escapeTerm a[3]!) $(← escapeTerm a[10]!) $(← escapeTerm a[11]!)
       $(← escapeTerm a[12]!))

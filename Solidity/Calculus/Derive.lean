@@ -22,7 +22,7 @@ stays a leaf.
 The default closer (`Derive.synClose`) is `LFml.close` on the reduction
 (`Calculus/Closer.lean`): it closes a leaf inside the `Bool`, reading an
 obligation's `wt(storage)` premise as the layout the storage holds
-(`Derive.topWt`).  A parallel update is split first (`Fml.seqUpd`), and a
+(`Derive.topWt`).  A parallel update is split first (`NFml.seqUpd`), and a
 leaf past `Derive.closeSize` nodes, or whose reduction is past
 `Derive.elimSize`, is not attempted, by the closer nor by `sol_prove?`'s
 reducing steps.  A leaf it does not close is left for a
@@ -55,7 +55,7 @@ variable {C : Contract}
 namespace Derive
 
 /-- A goal left over: a context and a formula. -/
-abbrev Leaf (C : Contract) := List (Hyp C) × Fml C
+abbrev Leaf (C : Contract) := List (Hyp C) × NFml C
 
 /-! ### A split whose condition is ground
 
@@ -83,7 +83,7 @@ def _root_.Solidity.Tm.litVars : {s : Srt} → Tm C s → Option (List Var)
   | _, _ => none
 
 /-- `Tm.litVars` of a first-order formula. -/
-def _root_.Solidity.Fml.litVars : Fml C → Option (List Var)
+def _root_.Solidity.NFml.litVars : NFml C → Option (List Var)
   | .tt => some []
   | .eq a b =>
     match a.litVars, b.litVars with
@@ -125,7 +125,7 @@ def _root_.Solidity.Upd.groundStep (U : Upd C) (xs : List Var) : Option (List Va
 /-- Whether every local of `xs` is bound by the context `Γ`, its entries
 last first, to a term of literals, transitively.  A local a loop
 anonymised (`.anon`) is not.  Under `synClose` that arm is never reached
-with a closer that accepts: `Fml.inL` is `false` on `anon`, as `UpdElem.inL`
+with a closer that accepts: `NFml.inL` is `false` on `anon`, as `UpdElem.inL`
 is on a deployment's `netMt`/`setBalance`, so no split is pruned past a
 loop's frame or in a constructor obligation; it is kept for a closer that
 reads them. -/
@@ -141,7 +141,7 @@ def groundIn : List (Hyp C) → List Var → Bool
   | .anon ys :: Γ, xs@(_ :: _) => !xs.any ys.contains && groundIn Γ xs
 
 /-- Whether a split's condition `c` is ground in the context `Γ`. -/
-def groundCond (Γ : List (Hyp C)) (c : Fml C) : Bool :=
+def groundCond (Γ : List (Hyp C)) (c : NFml C) : Bool :=
   match c.litVars with
   | some xs => groundIn Γ.reverse xs
   | none => false
@@ -150,19 +150,18 @@ def groundCond (Γ : List (Hyp C)) (c : Fml C) : Bool :=
 into the context, the leaves `close` accepts dropped, and the budget left.
 `n` bounds the steps, so that the recursion is structural; `b` bounds the
 steps of the whole walk.  `none` when either runs out. -/
-def residue : Nat → (List (Hyp C) → Fml C → Bool) → Nat → List (Hyp C) → Fml C →
+def residue : Nat → (List (Hyp C) → NFml C → Bool) → Nat → List (Hyp C) → NFml C →
     Option (List (Leaf C) × Nat)
   | 0, _, _, _, _ => none
   | _ + 1, _, 0, _, _ => none
-  | n + 1, close, b + 1, Γ, .modal _ [] ψ => residue n close b Γ ψ
   | n + 1, close, b + 1, Γ, .imp a ψ => residue n close b (Γ ++ [.pre a]) ψ
   | n + 1, close, b + 1, Γ, .all x p ψ => residue n close b (Γ ++ [.all x p]) ψ
   | n + 1, close, b + 1, Γ, .upd m U ψ => residue n close b (Γ ++ [.upd m U]) ψ
   | _ + 1, close, b + 1, Γ, ψ => if close Γ ψ then some ([], b) else some ([(Γ, ψ)], b)
 
 /-- Nothing is left. -/
-def closes (n : Nat) (close : List (Hyp C) → Fml C → Bool) (b : Nat) (Γ : List (Hyp C))
-    (φ : Fml C) : Bool :=
+def closes (n : Nat) (close : List (Hyp C) → NFml C → Bool) (b : Nat) (Γ : List (Hyp C))
+    (φ : NFml C) : Bool :=
   match residue n close b Γ φ with
   | some ([], _) => true
   | _ => false
@@ -181,10 +180,10 @@ def dropWt (Γ : List (Hyp C)) : List (Hyp C) := Γ.filter (!isWt ·)
 /-! ### Parallel updates, one element at a time
 
 A rule may leave a parallel update, `{ x := x + 1 ‖ r := x + 1 }` of
-`r = ++x;`, which `Fml.toL` does not read.  Where its last element binds a
+`r = ++x;`, which `NFml.toL` does not read.  Where its last element binds a
 local the others neither read nor write, it is the same as that element
 first and the others after it (KeY's `sequentialToParallel`, read
-backwards): `{ r := x + 1 }{ x := x + 1 }`.  `Fml.seqUpd` splits every such
+backwards): `{ r := x + 1 }{ x := x + 1 }`.  `NFml.seqUpd` splits every such
 update before the closer runs; it only has to imply the leaf. -/
 
 /-- The local an update element binds, for the two kinds the split moves. -/
@@ -195,7 +194,7 @@ def _root_.Solidity.UpdElem.target? : UpdElem C → Option Var
 /-- A parallel update, its elements reversed (`rs`), as one update per
 element from the last, while the last binds a local the rest does not
 mention; the rest as one parallel update. -/
-def seqRev (m : Modality) (ψ : Fml C) : List (UpdElem C) → Fml C
+def seqRev (m : Modality) (ψ : NFml C) : List (UpdElem C) → NFml C
   | [] => .upd m [] ψ
   | [e] => .upd m [e] ψ
   | e :: rest =>
@@ -330,7 +329,7 @@ def pushAlias? : Upd C → Option (STerm C × Var × PTerm C)
   | _ => none
 
 theorem pushAlias?_sound {U : Upd C} {s : STerm C} {x : Var} {Q : PTerm C}
-    (h : pushAlias? U = some (s, x, Q)) {m : Modality} {ψ : Fml C} {σ : State}
+    (h : pushAlias? U = some (s, x, Q)) {m : Modality} {ψ : NFml C} {σ : State}
     (hh : holds σ (.upd m [.storage s] (.upd m [.path x Q] ψ))) : holds σ (.upd m U ψ) := by
   unfold pushAlias? at h
   split at h
@@ -379,7 +378,7 @@ end PushAlias
 
 `T memory x;` leaves `{ x := freshId(addM(memory)) ‖ memory :=
 addM(memory) }`.  The object `x` names exists only in the memory after the
-allocation, so the pair stays one update: `Fml.toL` reads it as one
+allocation, so the pair stays one update: `NFml.toL` reads it as one
 (`Decide.pairL`), KeY's single Skolem `freshIdp`. -/
 
 /-- `{ x := i ‖ memory := m }`: an allocation's pair, which `seqUpd` keeps. -/
@@ -389,7 +388,7 @@ def memAlloc? : Upd C → Bool
 
 /-- Every parallel update split where `seqRev` can, in the positions a leaf
 proves (not in a premise). -/
-def _root_.Solidity.Fml.seqUpd : Fml C → Fml C
+def _root_.Solidity.NFml.seqUpd : NFml C → NFml C
   | .upd m U φ =>
     match pushAlias? U with
     | some (s, x, Q) => .upd m [.storage s] (.upd m [.path x Q] φ.seqUpd)
@@ -416,7 +415,7 @@ theorem Upd.apply_append_single (P : Upd C) (e : UpdElem C) (σ : State) :
 /-- **The last element first**: `{e}{P}ψ` implies `{P ‖ e}ψ` where `e`
 binds a local `P` does not mention. -/
 theorem peel_sound {m : Modality} {P : Upd C} {e : UpdElem C} {x : Var}
-    (he : e.target? = some x) (hx : x ∉ Upd.vars P) {ψ : Fml C} {σ : State}
+    (he : e.target? = some x) (hx : x ∉ Upd.vars P) {ψ : NFml C} {σ : State}
     (h : holds σ (.upd m [e] (.upd m P ψ))) : holds σ (.upd m (P ++ [e]) ψ) := by
   -- the element writes `x := b`, `b` read in the state it starts from
   obtain ⟨bnd, hw⟩ : ∃ bnd : State → Res Binding, ∀ σ₀ τ,
@@ -476,7 +475,7 @@ theorem peel_sound {m : Modality} {P : Upd C} {e : UpdElem C} {x : Var}
           hr.selfBalance.symm, hr.tx.symm⟩
       exact (holds_frame ψ (by intro _ _ hm; simp only [List.not_mem_nil] at hm) hag').1 h''
 
-theorem seqRev_sound {m : Modality} {ψ ψ' : Fml C} (hψ : ∀ σ, holds σ ψ' → holds σ ψ) :
+theorem seqRev_sound {m : Modality} {ψ ψ' : NFml C} (hψ : ∀ σ, holds σ ψ' → holds σ ψ) :
     (rs : List (UpdElem C)) → ∀ σ, holds σ (seqRev m ψ' rs) → holds σ (.upd m rs.reverse ψ)
   | [], σ, h => by
     simp only [seqRev, holds, Upd.apply, List.reverse_nil, List.foldlM_nil] at h ⊢
@@ -497,27 +496,27 @@ theorem seqRev_sound {m : Modality} {ψ ψ' : Fml C} (hψ : ∀ σ, holds σ ψ'
         exact afterImp (fun τ hτ => seqRev_sound hψ (e' :: rest) τ hτ) h
     · exact Hyp.wrap_mono hψ [.upd m _] σ h
 
-theorem Fml.seqUpd_sound : (φ : Fml C) → ∀ σ, holds σ φ.seqUpd → holds σ φ
+theorem NFml.seqUpd_sound : (φ : NFml C) → ∀ σ, holds σ φ.seqUpd → holds σ φ
   | .upd m U φ, σ, h => by
-    simp only [Fml.seqUpd] at h
+    simp only [NFml.seqUpd] at h
     split at h
     · rename_i s x Q hU
       refine pushAlias?_sound hU ?_
       simp only [holds] at h ⊢
-      exact afterImp (fun τ hτ => afterImp (fun ρ hρ => Fml.seqUpd_sound φ ρ hρ) hτ) h
+      exact afterImp (fun τ hτ => afterImp (fun ρ hρ => NFml.seqUpd_sound φ ρ hρ) hτ) h
     · split at h
       · simp only [holds] at h ⊢
-        exact afterImp (fun τ hτ => Fml.seqUpd_sound φ τ hτ) h
-      · have := seqRev_sound (m := m) (fun τ => Fml.seqUpd_sound φ τ) U.reverse σ h
+        exact afterImp (fun τ hτ => NFml.seqUpd_sound φ τ hτ) h
+      · have := seqRev_sound (m := m) (fun τ => NFml.seqUpd_sound φ τ) U.reverse σ h
         rwa [List.reverse_reverse] at this
-  | .imp a φ, σ, h => fun ha => Fml.seqUpd_sound φ σ (h ha)
-  | .and φ ψ, σ, h => ⟨Fml.seqUpd_sound φ σ h.1, Fml.seqUpd_sound ψ σ h.2⟩
-  | .all x p φ, σ, h => fun v hv => Fml.seqUpd_sound φ _ (h v hv)
-  | .tt, _, h | .eq .., _, h | .defined _, _, h | .not _, _, h | .modal .., _, h
+  | .imp a φ, σ, h => fun ha => NFml.seqUpd_sound φ σ (h ha)
+  | .and φ ψ, σ, h => ⟨NFml.seqUpd_sound φ σ h.1, NFml.seqUpd_sound ψ σ h.2⟩
+  | .all x p φ, σ, h => fun v hv => NFml.seqUpd_sound φ _ (h v hv)
+  | .tt, _, h | .eq .., _, h | .defined _, _, h | .not _, _, h
   | .havoc _, _, h | .anon .., _, h => h
 
 /-- The roots `wt(storage)` names. -/
-def wtRoots? : Fml C → Option (List (Name × Ty))
+def wtRoots? : NFml C → Option (List (Name × Ty))
   | .defined (.wt vs .storage) => some vs
   | _ => none
 
@@ -557,28 +556,28 @@ repeats, and the kernel builds only the nodes the count visits. -/
 def fitsClose (l : Decide.LFml) : Bool :=
   (l.fits closeSize).isSome && (l.elim.fits elimSize).isSome
 
-/-- The default closer: no modality left, in `sol_decide`'s fragment,
-parallel updates split (`Fml.seqUpd`), within `fitsClose`, and its
+/-- The default closer: in `sol_decide`'s fragment,
+parallel updates split (`NFml.seqUpd`), within `fitsClose`, and its
 reduction closed by `LFml.close` (`Calculus/Closer.lean`), the `wt`
 premises set aside as formulas and read as the layout their storage holds
 (`topWt`).  A leaf past the bounds is left open, not attempted. -/
-def synClose (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
+def synClose (Γ : List (Hyp C)) (φ : NFml C) : Bool :=
   let v := Hyp.wrap (dropWt Γ) φ
   let w := v.seqUpd
   let l := w.toL Decide.Sym.empty
-  v.modalFree && fitsClose l && w.inL Decide.Sym.empty && Decide.LFml.close (topWt Γ) l.elim
+  fitsClose l && w.inL Decide.Sym.empty && Decide.LFml.close (topWt Γ) l.elim
 
 /-- `synClose`'s bounds alone (`synClose_fits`): what `sol_prove?` asks
 before it tries a step that reduces the leaf, since the reduction, its
 quoting and its kernel check heed no heartbeats. -/
-def leafFits (Γ : List (Hyp C)) (φ : Fml C) : Bool :=
+def leafFits (Γ : List (Hyp C)) (φ : NFml C) : Bool :=
   fitsClose ((Hyp.wrap (dropWt Γ) φ).seqUpd.toL Decide.Sym.empty)
 
 /-- `leafFits` measures what `synClose` measures. -/
-theorem synClose_fits {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = true) :
+theorem synClose_fits {Γ : List (Hyp C)} {φ : NFml C} (h : synClose Γ φ = true) :
     leafFits Γ φ = true := by
   simp only [synClose, Bool.and_eq_true] at h
-  exact h.1.1.2
+  exact h.1.1
 
 /-- The steps `sol_prove` allows, over the whole derivation and so down any
 one path: a runaway (a program whose `if`s double the paths) stops here, in
@@ -586,75 +585,57 @@ compiled code, before the kernel sees it. -/
 def budget : Nat := 20000
 
 /-- `sol_prove`'s check when nothing is left. -/
-def proves (Γ : List (Hyp C)) (φ : Fml C) : Bool := closes budget synClose budget Γ φ
+def proves (Γ : List (Hyp C)) (φ : NFml C) : Bool := closes budget synClose budget Γ φ
 
 /-- The residue quoted, for the tactic: each leaf's context and formula as
 the expressions that build them, the contract named by `c`; and the budget
 left. -/
-def residueQuote (c : Lean.Expr) (Γ : List (Hyp C)) (φ : Fml C) :
+def residueQuote (c : Lean.Expr) (Γ : List (Hyp C)) (φ : NFml C) :
     Option (List (Lean.Expr × Lean.Expr) × Nat) :=
   (residue budget synClose budget Γ φ).map fun (ls, b) =>
-    (ls.map fun l => (Hyp.quoteList c l.1, Fml.quote c l.2), b)
+    (ls.map fun l => (Hyp.quoteList c l.1, NFml.quote c l.2), b)
 
 /-! ## Soundness -/
 
 theorem leaves_nil : ∀ l ∈ ([] : List (Leaf C)), Proves .all l.1 l.2 :=
   fun _ h => nomatch h
 
-theorem leaves_cons {Γ : List (Hyp C)} {φ : Fml C} {ls : List (Leaf C)} (h : Proves .all Γ φ)
+theorem leaves_cons {Γ : List (Hyp C)} {φ : NFml C} {ls : List (Leaf C)} (h : Proves .all Γ φ)
     (t : ∀ l ∈ ls, Proves .all l.1 l.2) : ∀ l ∈ (Γ, φ) :: ls, Proves .all l.1 l.2 := by
   intro l hl
   rcases List.mem_cons.1 hl with rfl | hl
   · exact h
   · exact t l hl
 
-/-- Setting the `wt` premises aside keeps a formula modal-free and only
-weakens it. -/
-theorem wrap_dropWt {φ : Fml C} : (Γ : List (Hyp C)) →
-    ((Hyp.wrap (dropWt Γ) φ).modalFree = true → (Hyp.wrap Γ φ).modalFree = true) ∧
-      ∀ σ, holds σ (Hyp.wrap (dropWt Γ) φ) → holds σ (Hyp.wrap Γ φ)
-  | [] => ⟨id, fun _ => id⟩
+/-- Setting the `wt` premises aside only weakens a formula. -/
+theorem wrap_dropWt {φ : NFml C} : (Γ : List (Hyp C)) →
+    ∀ σ, holds σ (Hyp.wrap (dropWt Γ) φ) → holds σ (Hyp.wrap Γ φ)
+  | [] => fun _ => id
   | h :: Γ => by
-    obtain ⟨ihm, ihh⟩ := wrap_dropWt (φ := φ) Γ
+    have ihh := wrap_dropWt (φ := φ) Γ
     cases hw : isWt h with
     | true =>
       have hd : dropWt (h :: Γ) = dropWt Γ := by
         simp only [dropWt, List.filter_cons, hw, Bool.not_true, Bool.false_eq_true, ↓reduceIte]
       rw [hd]
       match h, hw with
-      | .pre (.defined (.app1 (.wt _) _)), _ =>
-        exact ⟨fun hm => by simp only [Hyp.wrap, Fml.modalFree, ihm hm, Bool.and_self],
-          fun σ hs _ => ihh σ hs⟩
+      | .pre (.defined (.app1 (.wt _) _)), _ => exact fun σ hs _ => ihh σ hs
     | false =>
       have hd : dropWt (h :: Γ) = h :: dropWt Γ := by
         simp only [dropWt, List.filter_cons, hw, Bool.not_false, ↓reduceIte]
       rw [hd]
       cases h with
-      | pre a =>
-        exact ⟨fun hm => by
-            simp only [Hyp.wrap, Fml.modalFree, Bool.and_eq_true] at hm ⊢
-            exact ⟨hm.1, ihm hm.2⟩,
-          fun σ hs ha => ihh σ (hs ha)⟩
-      | upd m U =>
-        exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
-          fun σ hs => Hyp.wrap_mono ihh [.upd m U] σ hs⟩
-      | havoc =>
-        exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
-          fun σ hs => Hyp.wrap_mono ihh [.havoc] σ hs⟩
-      | all x p =>
-        exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
-          fun σ hs => Hyp.wrap_mono ihh [.all x p] σ hs⟩
-      | anon xs =>
-        exact ⟨fun hm => by simpa only [Hyp.wrap, Fml.modalFree] using ihm hm,
-          fun σ hs => Hyp.wrap_mono ihh [.anon xs] σ hs⟩
+      | pre a => exact fun σ hs ha => ihh σ (hs ha)
+      | upd m U => exact fun σ hs => Hyp.wrap_mono ihh [.upd m U] σ hs
+      | havoc => exact fun σ hs => Hyp.wrap_mono ihh [.havoc] σ hs
+      | all x p => exact fun σ hs => Hyp.wrap_mono ihh [.all x p] σ hs
+      | anon xs => exact fun σ hs => Hyp.wrap_mono ihh [.anon xs] σ hs
 
 /-- `Proves.close` with the `wt` premises set aside: a leaf of an
 obligation, closed by a tactic that does not read `wt`. -/
-theorem _root_.Solidity.Proves.close_dropWt {R : RuleSet} {Γ : List (Hyp C)} {φ : Fml C}
-    (h : Valid (Hyp.wrap (dropWt Γ) φ))
-    (hφ : (Hyp.wrap (dropWt Γ) φ).modalFree = true := by first | rfl | decide) :
-    Proves R Γ φ :=
-  Proves.close (fun σ => (wrap_dropWt Γ).2 σ (h σ)) ((wrap_dropWt Γ).1 hφ)
+theorem _root_.Solidity.Proves.close_dropWt {R : RuleSet} {Γ : List (Hyp C)} {φ : NFml C}
+    (h : Valid (Hyp.wrap (dropWt Γ) φ)) : Proves R Γ φ :=
+  Proves.close (fun σ => wrap_dropWt Γ σ (h σ))
 
 /-- A `wt(storage)` premise holds of a storage that holds its layout. -/
 theorem layoutOk_of_wt {σ : State} {vs : List (Name × Ty)}
@@ -675,14 +656,14 @@ theorem layoutOk_of_wt {σ : State} {vs : List (Name × Ty)}
     exact fun h => ⟨v, hv, h.1⟩
   · exact fun h => nomatch h
 
-theorem wtRoots?_isWt {a : Fml C} {vs : List (Name × Ty)} (h : wtRoots? a = some vs) :
+theorem wtRoots?_isWt {a : NFml C} {vs : List (Name × Ty)} (h : wtRoots? a = some vs) :
     isWt (C := C) (.pre a) = true := by
   unfold wtRoots? at h
   split at h
   · rfl
   · cases h
 
-theorem wtRoots?_layout {a : Fml C} {vs : List (Name × Ty)} (h : wtRoots? a = some vs) {σ : State}
+theorem wtRoots?_layout {a : NFml C} {vs : List (Name × Ty)} (h : wtRoots? a = some vs) {σ : State}
     (ha : holds σ a) : Decide.LayoutOk vs σ := by
   unfold wtRoots? at h
   split at h
@@ -691,7 +672,7 @@ theorem wtRoots?_layout {a : Fml C} {vs : List (Name × Ty)} (h : wtRoots? a = s
 
 /-- Reading the `wt` premise as a layout: a leaf whose context without them
 holds wherever the storage holds the layout holds. -/
-theorem wrap_topWt {φ : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
+theorem wrap_topWt {φ : NFml C} : (Γ : List (Hyp C)) → ∀ σ,
     (Decide.LayoutOk (topWt Γ) σ → holds σ (Hyp.wrap (dropWt Γ) φ)) → holds σ (Hyp.wrap Γ φ)
   | [], σ, h => h fun _ _ hT => nomatch hT
   | .pre a :: Γ, σ, h => by
@@ -702,7 +683,7 @@ theorem wrap_topWt {φ : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
         simp only [dropWt, List.filter_cons, wtRoots?_isWt hr, Bool.not_true,
           Bool.false_eq_true, ↓reduceIte]
       rw [hr, hd] at h
-      exact fun ha => (wrap_dropWt Γ).2 σ (h (wtRoots?_layout hr ha))
+      exact fun ha => wrap_dropWt Γ σ (h (wtRoots?_layout hr ha))
     | none =>
       rw [hr] at h
       cases hw : isWt (C := C) (.pre a) with
@@ -717,27 +698,26 @@ theorem wrap_topWt {φ : Fml C} : (Γ : List (Hyp C)) → ∀ σ,
         rw [hd] at h
         exact fun ha => wrap_topWt Γ σ fun hL => h hL ha
   | .all x p :: Γ, σ, h => fun v hv => wrap_topWt Γ _ fun hL => h hL v hv
-  | .upd m U :: Γ, σ, h => (wrap_dropWt (.upd m U :: Γ)).2 σ (h fun _ _ hT => nomatch hT)
-  | .havoc :: Γ, σ, h => (wrap_dropWt (.havoc :: Γ)).2 σ (h fun _ _ hT => nomatch hT)
-  | .anon xs :: Γ, σ, h => (wrap_dropWt (.anon xs :: Γ)).2 σ (h fun _ _ hT => nomatch hT)
+  | .upd m U :: Γ, σ, h => wrap_dropWt (.upd m U :: Γ) σ (h fun _ _ hT => nomatch hT)
+  | .havoc :: Γ, σ, h => wrap_dropWt (.havoc :: Γ) σ (h fun _ _ hT => nomatch hT)
+  | .anon xs :: Γ, σ, h => wrap_dropWt (.anon xs :: Γ) σ (h fun _ _ hT => nomatch hT)
 
 /-- The default closer is sound: what it accepts, `Proves.close` proves. -/
-theorem synClose_sound {Γ : List (Hyp C)} {φ : Fml C} (h : synClose Γ φ = true) :
+theorem synClose_sound {Γ : List (Hyp C)} {φ : NFml C} (h : synClose Γ φ = true) :
     Proves .all Γ φ := by
   simp only [synClose, Bool.and_eq_true] at h
-  obtain ⟨⟨⟨hm, -⟩, hf⟩, hs⟩ := h
-  refine Proves.close (fun σ => wrap_topWt Γ σ fun hL => Fml.seqUpd_sound _ σ ?_)
-    ((wrap_dropWt Γ).1 hm)
-  rw [Decide.Fml.toL_holds _ (Decide.Rel.empty σ) hf, ← Decide.LFml.elim_holds σ]
+  obtain ⟨⟨-, hf⟩, hs⟩ := h
+  refine Proves.close (fun σ => wrap_topWt Γ σ fun hL => NFml.seqUpd_sound _ σ ?_)
+  rw [Decide.NFml.toL_holds _ (Decide.Rel.empty σ) hf, ← Decide.LFml.elim_holds σ]
   exact Decide.LFml.close_holds hL hs
 
 end Derive
 
 open Derive in
 /-- **A residue whose leaves are proved proves the sequent.** -/
-theorem Proves.of_residue {close : List (Hyp C) → Fml C → Bool}
+theorem Proves.of_residue {close : List (Hyp C) → NFml C → Bool}
     (hclose : ∀ Γ φ, close Γ φ = true → Proves .all Γ φ) :
-    ∀ {n b : Nat} {Γ : List (Hyp C)} {φ : Fml C} {ls : List (Leaf C)} {b' : Nat},
+    ∀ {n b : Nat} {Γ : List (Hyp C)} {φ : NFml C} {ls : List (Leaf C)} {b' : Nat},
       residue n close b Γ φ = some (ls, b') → (∀ l ∈ ls, Proves .all l.1 l.2) →
       Proves .all Γ φ
   | 0, _, _, _, _, _, h, _ => nomatch h
@@ -747,12 +727,10 @@ theorem Proves.of_residue {close : List (Hyp C) → Fml C → Bool}
         (∀ l ∈ ls, Proves .all l.1 l.2) → Proves .all Γ φ :=
       fun _ _ _ _ _ h' hl' => Proves.of_residue hclose h' hl'
     match φ, h with
-    | .modal _ [] ψ, h => exact .empty (ih _ _ _ _ _ h hl)
     | .imp a ψ, h => exact .intro (ih _ _ _ _ _ h hl)
     | .all x p ψ, h => exact .allIntro (ih _ _ _ _ _ h hl)
     | .upd m U ψ, h => exact .updIntro (ih _ _ _ _ _ h hl)
-    | .tt, h | .eq _ _, h | .defined _, h | .not _, h | .and _ _, h | .havoc _, h | .anon _ _, h
-    | .modal _ (_ :: _) _, h =>
+    | .tt, h | .eq _ _, h | .defined _, h | .not _, h | .and _ _, h | .havoc _, h | .anon _ _, h =>
       simp only [residue] at h
       split at h
       · exact hclose _ _ ‹_›
@@ -761,21 +739,21 @@ theorem Proves.of_residue {close : List (Hyp C) → Fml C → Bool}
 
 open Derive in
 /-- Nothing left: the strategy and the closer prove the sequent. -/
-theorem Proves.of_closes {n : Nat} {close : List (Hyp C) → Fml C → Bool}
+theorem Proves.of_closes {n : Nat} {close : List (Hyp C) → NFml C → Bool}
     (hclose : ∀ Γ φ, close Γ φ = true → Proves .all Γ φ) {b : Nat} {Γ : List (Hyp C)}
-    {φ : Fml C} (h : closes n close b Γ φ = true) : Proves .all Γ φ := by
+    {φ : NFml C} (h : closes n close b Γ φ = true) : Proves .all Γ φ := by
   simp only [closes] at h
   split at h
   · exact Proves.of_residue hclose ‹_› leaves_nil
   · cases h
 
 /-- `sol_prove`'s proof when nothing is left. -/
-theorem Proves.of_proves {Γ : List (Hyp C)} {φ : Fml C} (h : Derive.proves Γ φ = true) :
+theorem Proves.of_proves {Γ : List (Hyp C)} {φ : NFml C} (h : Derive.proves Γ φ = true) :
     Proves .all Γ φ :=
   Proves.of_closes (fun _ _ => Derive.synClose_sound) h
 
 /-- `sol_prove`'s proof when leaves are left. -/
-theorem Proves.of_synResidue {Γ : List (Hyp C)} {φ : Fml C} {ls : List (Derive.Leaf C)}
+theorem Proves.of_synResidue {Γ : List (Hyp C)} {φ : NFml C} {ls : List (Derive.Leaf C)}
     {b' : Nat} (h : Derive.residue Derive.budget Derive.synClose Derive.budget Γ φ = some (ls, b'))
     (hl : ∀ l ∈ ls, Proves .all l.1 l.2) : Proves .all Γ φ :=
   Proves.of_residue (fun _ _ => Derive.synClose_sound) h hl
@@ -826,9 +804,9 @@ def prove (g : MVarId) : MetaM (List MVarId) := do
     return []
   let hyp := mkApp (mkConst ``Hyp) C
   let leafTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) hyp)
-    (mkApp (mkConst ``Fml) C)
+    (mkApp (mkConst ``NFml) C)
   let pairs := leaves.map fun (Γ', φ') =>
-    mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) hyp, mkApp (mkConst ``Fml) C,
+    mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) hyp, mkApp (mkConst ``NFml) C,
       Γ', φ']
   let ls ← mkListLit leafTy pairs
   let resTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) leafTy) (mkConst ``Nat)
@@ -853,7 +831,7 @@ def prove (g : MVarId) : MetaM (List MVarId) := do
   for (Γ', φ') in leaves.reverse, p in proofs.reverse do
     hl := mkAppN (mkConst ``leaves_cons) #[C, Γ', φ', rest, p, hl]
     rest := mkAppN (mkConst ``List.cons [0]) #[leafTy,
-      mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) hyp, mkApp (mkConst ``Fml) C,
+      mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) hyp, mkApp (mkConst ``NFml) C,
         Γ', φ'], rest]
   g.assign (mkAppN (mkConst ``Proves.of_synResidue) #[C, Γ, φ, ls, mkRawNatLit left, h, hl])
   return goals.toList
@@ -867,7 +845,7 @@ subsumes, each on its own so that the replay does not try the other; then
 def leafTacs (wt : Bool := false) (small : Bool := true) : Array (Array String) :=
   let pre := #[if wt then "refine Proves.close_dropWt ?_" else "refine Proves.close ?_",
     "sol_symex"]
-  let red := pre ++ #["refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_", "sol_reduce"]
+  let red := pre ++ #["refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_", "sol_reduce"]
   (if small then #[red.push "sol_decide_cons", red.push "sol_decide_heuristic"] else #[]) ++
     #[pre.push "sol_close", pre.push "sol_spec_close"]
 

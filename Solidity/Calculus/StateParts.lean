@@ -932,7 +932,7 @@ theorem UpdElem.memory_write (σ₀ τ : State) (M : MTerm C) : (UpdElem.memory 
 
 /-- **`sequentialToParallel`** over a memory write:
 `{memory := M}{V} ψ ⟺ {memory := M ‖ {memory := M}V} ψ`. -/
-theorem Upd.mergeMemory_holds (m : Modality) (M : MTerm C) (V : Upd C) (ψ : Fml C) (σ : State) :
+theorem Upd.mergeMemory_holds (m : Modality) (M : MTerm C) (V : Upd C) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (.memory M :: V.withMem M) ψ) ↔ holds σ (.upd m [.memory M] (.upd m V ψ)) := by
   simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.memory_write]
   cases hM : M.eval σ with
@@ -947,7 +947,7 @@ theorem Upd.mergeMemory_holds (m : Modality) (M : MTerm C) (V : Upd C) (ψ : Fml
 
 /-- **`sequentialToParallel`** over a storage write, memory reads included:
 `{storage := s}{V} ψ ⟺ {storage := s ‖ {storage := s}V} ψ`. -/
-theorem Upd.mergeStorageM_holds (m : Modality) (s : STerm C) (V : Upd C) (ψ : Fml C) (σ : State) :
+theorem Upd.mergeStorageM_holds (m : Modality) (s : STerm C) (V : Upd C) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (.storage s :: V.withStM s) ψ) ↔ holds σ (.upd m [.storage s] (.upd m V ψ)) := by
   simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.storage_write]
   cases hs : s.eval σ with

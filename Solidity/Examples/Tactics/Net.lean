@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -140,36 +141,31 @@ theorem netTransfersAccumulate :
 /-! ## 3 · The ledger, run -/
 
 /-- The ledger at `a` after `P` runs from the store `σ`. -/
-def netAfter {C : Contract} (σ : State) (P : Prog C) (a : Int) : Res Int := do
-  return (← Prog.run σ P).getNet a
+def netAfter {C : Contract} (σ : State) (P : Surface.Prog C) (a : Int) : Res Int := do
+  return (← Surface.Prog.runT σ P).getNet a
 
-/-- `uint to = 9; to.transfer(5);` debits `9` by `5` (`net-transfer-simple.key`). -/
-theorem netTransferSimple :
-    netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 9 = .ok (-5) := rfl
+/- `uint to = 9; to.transfer(5);` debits `9` by `5` (`net-transfer-simple.key`). -/
+#guard netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 9 = .ok (-5)
 
-/-- `owner = 7; owner.transfer(5);` — a storage receiver
+/- `owner = 7; owner.transfer(5);` — a storage receiver
 (`net-transfer-capture-receiver.key`, its `owner = 7` premise inlined). -/
-theorem netTransferStorageReceiverRun :
-    netAfter State.exampleStore sol{ owner = 7; owner.transfer(5); } 7 = .ok (-5) := rfl
+#guard netAfter State.exampleStore sol{ owner = 7; owner.transfer(5); } 7 = .ok (-5)
 
-/-- An address nobody paid stays at zero… -/
-theorem netUntouched :
-    netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 2 = .ok 0 := rfl
+/- An address nobody paid stays at zero… -/
+#guard netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 2 = .ok 0
 
-/-- …and so does the contract's own entry, at `0` in `State.exampleStore`. -/
-theorem netThis :
-    netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 0 = .ok 0 := rfl
+/- …and so does the contract's own entry, at `0` in `State.exampleStore`. -/
+#guard netAfter State.exampleStore sol{ uint to = 9; to.transfer(5); } 0 = .ok 0
 
-/-- A payment to the contract itself books nothing. -/
-theorem netSelfRun :
-    netAfter State.exampleStore sol{ uint to = 0; to.transfer(5); } 0 = .ok 0 := rfl
+/- A payment to the contract itself books nothing. -/
+#guard netAfter State.exampleStore sol{ uint to = 0; to.transfer(5); } 0 = .ok 0
 
-/-- The funds are not the transfer's: `address(this).balance` reads `3`
+/- The funds are not the transfer's: `address(this).balance` reads `3`
 after a payment of `5` from `3`. -/
-theorem transferLeavesFunds :
-    (do let σ ← Prog.run { State.exampleStore with selfBalance := 3 }
-          (sol{ uint to = 9; to.transfer(5); } : Prog StandardExample)
-        pure (σ.getNet 9, σ.selfBalance)) = .ok (-5, 3) := rfl
+#guard
+    (do let σ ← Surface.Prog.runT { State.exampleStore with selfBalance := 3 }
+          (sol{ uint to = 9; to.transfer(5); } : Surface.Prog StandardExample)
+        pure (σ.getNet 9, σ.selfBalance)) = .ok (-5, 3)
 
 /-! ## 4 · `msg.value`, `msg.sender`
 
@@ -226,14 +222,13 @@ theorem netTransferThenStore :
   sol_symex
   sol_close
 
-/-- With no entry for it, the send is taken: `9`'s entry is `-5`. -/
-theorem netSendRun :
-    netAfter State.exampleStore sol{ uint to = 9; bool ok = to.send(5); } 9 = .ok (-5) := rfl
+/- With no entry for it, the send is taken: `9`'s entry is `-5`. -/
+#guard netAfter State.exampleStore sol{ uint to = 9; bool ok = to.send(5); } 9 = .ok (-5)
 
-/-- With the recipient refusing, nothing is booked and `ok` is `false`. -/
-theorem netSendRefusedRun :
-    (do let σ ← Prog.run { State.exampleStore with tx := { ext := [(sendKey 9 5, .error)] } }
-          (sol{ uint to = 9; bool ok = to.send(5); } : Prog StandardExample)
-        pure (σ.getNet 9, σ.getEnv (.user "ok"))) = .ok (0, .ok (.val (.bool false))) := rfl
+/- With the recipient refusing, nothing is booked and `ok` is `false`. -/
+#guard
+    (do let σ ← Surface.Prog.runT { State.exampleStore with tx := { ext := [(sendKey 9 5, .error)] } }
+          (sol{ uint to = 9; bool ok = to.send(5); } : Surface.Prog StandardExample)
+        pure (σ.getNet 9, σ.getEnv (.user "ok"))) = .ok (0, .ok (.val (.bool false)))
 
 end Solidity.Examples.Tactics.Net

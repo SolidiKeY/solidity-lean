@@ -97,7 +97,7 @@ private def closeAll {C : Contract} : (Γ : Core.NCtx) → Core.Fml C Γ.ctx →
 /-- The scoped strategy's formula after `n` steps on `φ`, its program read
 under the value locals `Γ`, each bound by `∀`, printed from its quoted
 `Expr` and checked against `Core.Fml.show` on the value. -/
-private def stepsShowOf {C : Contract} (c : Expr) (φ : Solidity.Fml C) (n : Nat)
+private def stepsShowOf {C : Contract} (c : Expr) (φ : Solidity.Surface.Fml C) (n : Nat)
     (Γ : Core.NCtx := []) : MetaM Unit := do
   let .modal m P _ := φ | throwError "not a modality"
   let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
@@ -107,7 +107,7 @@ private def stepsShowOf {C : Contract} (c : Expr) (φ : Solidity.Fml C) (n : Nat
   unless a == b do throwError "from the Expr\n{a}\nbut the value prints\n{b}"
   logInfo a
 
-private def stepsShow (φ : Solidity.Fml SE) (n : Nat) : MetaM Unit :=
+private def stepsShow (φ : Solidity.Surface.Fml SE) (n : Nat) : MetaM Unit :=
   stepsShowOf (mkConst ``StandardExample) φ n
 
 /-- The premise of the rule on the first statement of a program, quoted. -/
@@ -120,7 +120,7 @@ private def headPremiseOf {C : Contract} (c : Expr) (m : Modality) :
 
 /-- The premise of the rule on the first statement of `φ`'s program, read in
 the context `Γ`, quoted, checked by the kernel's type checker and printed. -/
-private def headPremise {C : Contract} (c : Expr) (Γ : Core.NCtx) (φ : Solidity.Fml C) :
+private def headPremise {C : Contract} (c : Expr) (Γ : Core.NCtx) (φ : Solidity.Surface.Fml C) :
     MetaM Unit := do
   let .modal m P _ := φ | throwError "not a modality"
   let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
@@ -128,7 +128,7 @@ private def headPremise {C : Contract} (c : Expr) (Γ : Core.NCtx) (φ : Solidit
   Meta.check e
   logInfo m!"{e}"
 
-private def branchφ : Solidity.Fml SE :=
+private def branchφ : Solidity.Surface.Fml SE :=
   dl!{ [ if (alice.age > 4) { uint z = 1; total = z; } else { total = 2; }; uint y = total; ] true }
 
 /--
@@ -185,7 +185,7 @@ section Calls
 
 local instance : InContract := ⟨CallsExample⟩
 
-private def callsφ : Solidity.Fml CallsExample :=
+private def callsφ : Solidity.Surface.Fml CallsExample :=
   dl!{ [ uint y = addOne(4); credit(y, 5); bump(); ] true }
 
 /--
@@ -213,10 +213,10 @@ local instance : InContract := ⟨Rets⟩
 
 private def re : Expr := mkConst ``Solidity.Examples.Tactics.CorePrint.Rets
 
-private def retsCallφ : Solidity.Fml Rets :=
+private def retsCallφ : Solidity.Surface.Fml Rets :=
   dl!{ [ uint a; uint b; (a, b) = pair(3); Person memory m = mk(2); uint y = m.age; ] true }
 
-private def pairφ : Solidity.Fml Rets := dl!{ [ (a, b) = pair(3); ] true }
+private def pairφ : Solidity.Surface.Fml Rets := dl!{ [ (a, b) = pair(3); ] true }
 
 private def abΓ : Core.NCtx := [(.user "b", .val .uint), (.user "a", .val .uint)]
 
@@ -254,7 +254,7 @@ local instance : InContract := ⟨Pinger⟩
 
 private def pe : Expr := mkConst ``Solidity.Examples.Tactics.CorePrint.Pinger
 
-private def tryφ : Solidity.Fml Pinger :=
+private def tryφ : Solidity.Surface.Fml Pinger :=
   dl!{ [ try I(7).get() returns (uint v) { last = v; } catch Panic(uint c) { last = c; }
          catch { last = 0; }; pings = 1; ] true }
 
@@ -279,13 +279,13 @@ end Try
 
 /-! ## The other premises -/
 
-private def sendφ : Solidity.Fml SE := dl!{ [ ok = owner.send(3); ] true }
+private def sendφ : Solidity.Surface.Fml SE := dl!{ [ ok = owner.send(3); ] true }
 
-private def sendSimpleφ : Solidity.Fml SE := dl!{ [ ok = to.send(3); ] true }
+private def sendSimpleφ : Solidity.Surface.Fml SE := dl!{ [ ok = to.send(3); ] true }
 
 private def okToΓ : Core.NCtx := [(.user "ok", .val .bool), (.user "to", .val .uint)]
 
-private def loopφ : Solidity.Fml SE :=
+private def loopφ : Solidity.Surface.Fml SE :=
   dl!{ [ /// @custom:key invariant i <= 3
          while (i < 3) { i = i + 1; total = i; }; ] true }
 

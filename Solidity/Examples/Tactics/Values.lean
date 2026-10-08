@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -303,7 +304,7 @@ in range. -/
 
 /-- info: (Except.error (Solidity.Semantics.Halt.revert), true) -/
 #guard_msgs in
-#eval ((Prog.run Semantics.State.exampleStore (sol{ uint r = 2 ** 256; } : Prog StandardExample)).map
-    (fun _ => ()), (Prog.run Semantics.State.exampleStore (sol{ uint r = 2 ** 255; } : Prog StandardExample)).isOk)
+#eval ((Surface.Prog.runT Semantics.State.exampleStore (sol{ uint r = 2 ** 256; } : Surface.Prog StandardExample)).map
+    (fun _ => ()), (Surface.Prog.runT Semantics.State.exampleStore (sol{ uint r = 2 ** 255; } : Surface.Prog StandardExample)).isOk)
 
 end Solidity.Examples.Tactics.Values

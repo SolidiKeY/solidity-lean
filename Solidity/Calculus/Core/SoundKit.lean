@@ -1202,25 +1202,4 @@ theorem Prog.trunFrames_erase {Γ Γ₁ Γ₀ : Ctx} (σ : TState C Γ) (P : Pro
   | ok o' => intro hk; exact hk
   | error e => intro hk; cases e <;> exact hk
 
-/-- A box after a typed run, from the box after an untyped run it erases to
-(`TRes.Agrees`, then `Res.Rel`). -/
-theorem afterRunTR_box_of {α β : Type} {f : α → β} {R : β → Semantics.State → Prop}
-    {p : α → Prop} {q : Semantics.State → Prop} {r : TRes α} {r' : Semantics.Res β}
-    {u : Semantics.Res Semantics.State} (hA : TRes.Agrees f r r') (hR : Res.Rel R r' u)
-    (hpq : ∀ a c, R (f a) c → q c → p a) (h : Modality.box.afterRun q u) :
-    Modality.box.afterRunTR p r := by
-  cases r with
-  | ok a =>
-    cases (hA : r' = .ok (f a))
-    cases u with
-    | ok c => exact ⟨hpq a c hR h.1, nofun⟩
-    | error => exact hR.elim
-  | error e =>
-    refine ⟨trivial, fun he => ?_⟩
-    cases he
-    cases (hA : r' = .error .panic)
-    cases u with
-    | ok => exact hR.elim
-    | error e' => cases (hR : Semantics.Halt.panic = e'); exact h.2 rfl
-
 end Solidity.Core

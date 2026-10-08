@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -144,16 +145,14 @@ theorem localDeclSkip :
   sol_symex
   sol_close
 
-/-- A write through an alias bound to no path reverts (`aliasPath`); solc
+/- A write through an alias bound to no path reverts (`aliasPath`); solc
 rejects the program statically. -/
-theorem unsetAliasWrite :
-    Prog.run State.exampleStore (sol{ Person storage p; p.age = 1; } : Prog StandardExample) =
-      .error .revert := rfl
+#guard Surface.Prog.runT State.exampleStore (sol{ Person storage p; p.age = 1; } : Surface.Prog StandardExample) =
+      .error .revert
 
-/-- So does a read through it. -/
-theorem unsetAliasRead :
-    Prog.run State.exampleStore
-      (sol{ Person storage p; uint r = p.age; } : Prog StandardExample) = .error .revert := rfl
+/- So does a read through it. -/
+#guard Surface.Prog.runT State.exampleStore
+      (sol{ Person storage p; uint r = p.age; } : Surface.Prog StandardExample) = .error .revert
 
 /-! `unsetAliasLoop`: in a loop, `Person storage p;` unbinds what the last
 iteration bound: the first iteration writes through `alice`, the second
@@ -165,12 +164,12 @@ so the run is printed. -/
 #eval
   let halt (r : Res State) := match r with
     | .error .revert => "revert" | .ok _ => "ok" | .error _ => "another halt"
-  (halt (Prog.run State.exampleStore
+  (halt (Surface.Prog.runT State.exampleStore
       (sol{ uint i = 0; while (i < 1) { Person storage p; if (i == 0) { p = alice; }
-            p.age = 1; i++; } } : Prog StandardExample)),
-   halt (Prog.run State.exampleStore
+            p.age = 1; i++; } } : Surface.Prog StandardExample)),
+   halt (Surface.Prog.runT State.exampleStore
       (sol{ uint i = 0; while (i < 2) { Person storage p; if (i == 0) { p = alice; }
-            p.age = 1; i++; } } : Prog StandardExample)))
+            p.age = 1; i++; } } : Surface.Prog StandardExample)))
 
 /-! ## 3 · Arrays and mappings -/
 
@@ -188,11 +187,9 @@ theorem matrixWriteRead :
   sol_symex
   sol_close
 
-/-- `values[1] = 7;` from the initial store, where `values` is empty: out of
+/- `values[1] = 7;` from the initial store, where `values` is empty: out of
 bounds, the write reverts (`storage-index-array-out-of-bounds-box.key`). -/
-theorem arrayOutOfBounds :
-    Prog.run State.exampleStore (sol{ values[1] = 7; } : Prog StandardExample) = .error .revert :=
-  rfl
+#guard Surface.Prog.runT State.exampleStore (sol{ values[1] = 7; } : Surface.Prog StandardExample) = .error .revert
 
 /-- `balances[1] = 42; uint result = balances[1];` (`storage-index-root-mapping.key`). -/
 theorem mappingWriteRead :
@@ -217,22 +214,20 @@ bare push leaves the default (`storage-push-empty.key`). -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.exampleStore
+#eval Surface.Prog.localAfterT State.exampleStore
   sol{ values.push(); values.push(); values.push(); uint result = values[2]; } "result"
 
-/-- `values.push(); values.push(); values.push(42); uint result = values[2];`
+/- `values.push(); values.push(); values.push(42); uint result = values[2];`
 (`storage-push-value.key`). -/
-theorem pushValue :
-    Prog.localAfter State.exampleStore
+#guard Surface.Prog.localAfterT State.exampleStore
       sol{ values.push(); values.push(); values.push(42); uint result = values[2]; } "result" =
-      .ok (.val (.int 42)) := rfl
+      .ok (.val (.int 42))
 
-/-- `uint x = 40; uint y = 2; values.push(x + y); uint result = values[0];` — the
+/- `uint x = 40; uint y = 2; values.push(x + y); uint result = values[0];` — the
 argument is captured first (`storage-push-nonsimple-arg.key`). -/
-theorem pushNonsimpleArg :
-    Prog.localAfter State.exampleStore
+#guard Surface.Prog.localAfterT State.exampleStore
       sol{ uint x = 40; uint y = 2; values.push(x + y); uint result = values[0]; } "result" =
-      .ok (.val (.int 42)) := rfl
+      .ok (.val (.int 42))
 
 /-! `values.push(); values.push(); values.pop(); uint result = values[0];`
 (`storage-pop-nonempty.key`). -/
@@ -241,27 +236,23 @@ theorem pushNonsimpleArg :
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.exampleStore
+#eval Surface.Prog.localAfterT State.exampleStore
   sol{ values.push(); values.push(); values.pop(); uint result = values[0]; } "result"
 
-/-- `values.push(); values.push(); values.pop(); uint result = values[1];` — the
+/- `values.push(); values.push(); values.pop(); uint result = values[1];` — the
 popped slot is gone: reading it reverts. -/
-theorem popNonemptyGone :
-    Prog.run State.exampleStore
+#guard Surface.Prog.runT State.exampleStore
       (sol{ values.push(); values.push(); values.pop(); uint result = values[1]; } :
-        Prog StandardExample) = .error .revert := rfl
+        Surface.Prog StandardExample) = .error .revert
 
-/-- `values.pop();` on the empty array reverts (`storage-pop-empty-box.key`). -/
-theorem popEmpty :
-    Prog.run State.exampleStore (sol{ values.pop(); } : Prog StandardExample) = .error .revert :=
-  rfl
+/- `values.pop();` on the empty array reverts (`storage-pop-empty-box.key`). -/
+#guard Surface.Prog.runT State.exampleStore (sol{ values.pop(); } : Surface.Prog StandardExample) = .error .revert
 
-/-- `values.push(); values.pop(); uint result = values[0];` reverts
+/- `values.push(); values.pop(); uint result = values[0];` reverts
 (`storage-pop-after-push.key`). -/
-theorem popAfterPushRead :
-    Prog.run State.exampleStore
-      (sol{ values.push(); values.pop(); uint result = values[0]; } : Prog StandardExample) =
-      .error .revert := rfl
+#guard Surface.Prog.runT State.exampleStore
+      (sol{ values.push(); values.pop(); uint result = values[0]; } : Surface.Prog StandardExample) =
+      .error .revert
 
 /-! `tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage t = tokens.push();
 uint r = t.value;` — the push-after-pop example (`sec:push-pop-example`):
@@ -274,7 +265,7 @@ that has `tokens`; a `Token` default is not unfolded by `rfl`, so it is printed.
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.testSuiteStore
+#eval Surface.Prog.localAfterT State.testSuiteStore
   sol[TestSuite]{ tokens.push(); tokens[0].value = 7; tokens.pop();
                   Token storage t = tokens.push(); uint r = t.value; } "r"
 
@@ -286,7 +277,7 @@ a `Person` builds its default, which `rfl` cannot unfold, so the run is printed.
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 5))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.exampleStore
+#eval Surface.Prog.localAfterT State.exampleStore
   sol{ persons.push(); persons.push(); Person storage p; p = persons.push(); p.age = 5;
        uint result = persons[2].age; } "result"
 
@@ -298,7 +289,7 @@ m[0] = values; uint result = matrix[0][1];` — an array copied into a pushed ro
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 6))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.exampleStore
+#eval Surface.Prog.localAfterT State.exampleStore
   sol{ values.push(5); values.push(6); uint[][] storage m = matrix; m.push(); m[0] = values;
        uint result = matrix[0][1]; } "result"
 
@@ -311,7 +302,7 @@ reset. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 10))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.testSuiteStore
+#eval Surface.Prog.localAfterT State.testSuiteStore
   sol[TestSuite]{ ledgerUses.push(); Ledger storage l = ledgerUses[0].ledger; l.balances[1] = 10;
                   ledgerUses.pop(); ledgerUses.push(); Ledger storage l2 = ledgerUses[0].ledger;
                   uint result = l2.balances[1]; } "result"
@@ -320,7 +311,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.testSuiteStore
+#eval Surface.Prog.localAfterT State.testSuiteStore
   sol[TestSuite]{ ledgerUses.push(); Ledger storage l = ledgerUses[0].ledger; l.nonce = 7;
                   ledgerUses.pop(); ledgerUses.push(); Ledger storage l2 = ledgerUses[0].ledger;
                   uint result = l2.nonce; } "result"
@@ -458,14 +449,14 @@ theorem fixedElementLength : ⊨ dl!{ [ uint k = rows[0].length; ] k == 3 } := b
 
 /-- info: (Except.error (Solidity.Semantics.Halt.revert), Except.error (Solidity.Semantics.Halt.revert)) -/
 #guard_msgs in
-#eval (Prog.run State.testSuiteStore (sol{ uint k = 3; fixedValues[k] = 1; }),
-  Prog.run State.testSuiteStore (sol{ uint k = rows[0].length; }))
+#eval (Surface.Prog.runT State.testSuiteStore (sol{ uint k = 3; fixedValues[k] = 1; }),
+  Surface.Prog.runT State.testSuiteStore (sol{ uint k = rows[0].length; }))
 
 /-- A literal index past the end, and a `push` onto a fixed-size array, are
 solc's compile errors, and the elaborator's. -/
 example : True := by
-  fail_if_success have : Prog TestSuite := sol{ fixedValues[3] = 1; }
-  fail_if_success have : Prog TestSuite := sol{ fixedValues.push(1); }
+  fail_if_success have : Surface.Prog TestSuite := sol{ fixedValues[3] = 1; }
+  fail_if_success have : Surface.Prog TestSuite := sol{ fixedValues.push(1); }
   trivial
 
 end Fixed

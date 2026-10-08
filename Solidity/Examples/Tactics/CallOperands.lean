@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
@@ -63,7 +64,7 @@ open scoped Solidity.Core.Surface
 The call is captured, then inlined, then its value pushed
 (`storagePushValueSave`); the chain is `Chains.StorageArrays`'s. -/
 
-example : Prog.toStr (sol{ values.push(makeValue()); } : Prog Operands) =
+example : Surface.Prog.toStr (sol{ values.push(makeValue()); } : Surface.Prog Operands) =
     "uint se1; se1 = makeValue(); values.push(se1);" := rfl
 
 /-- The first step, `uint pv = makeValue(); values.push(pv);`, is the
@@ -83,12 +84,12 @@ example : dl!{ ⟨ values.push() = makeValue(); ⟩ true } =
 example : dl!{ ⟨ values .push() = makeValue(); ⟩ true } =
     dl!{ ⟨ values.push(makeValue()); ⟩ true } := rfl
 
-/-- `values.push() = 42; uint result = values[0];` from the example store,
-whose `values` is empty: the push used as a target appends `42`. -/
-theorem pushLvalueRun :
-    Prog.localAfter Semantics.State.exampleStore
+/- `values.push() = 42; uint result = values[0];` from `Operands`' initial
+storage, whose `values` is empty: the push used as a target appends `42`
+(run typed, `Surface.Prog.runT`, from a state of `Operands`' types). -/
+#guard Surface.Prog.localAfterT ({ storage := Operands.initStorage } : Semantics.State)
       sol{ values.push() = 42; uint result = values[0]; } "result" =
-      .ok (.val (.int 42)) := rfl
+      .ok (.val (.int 42))
 
 /-! ## 3 · A push used as a target, with a storage source (`TestSuite`)
 
@@ -97,18 +98,18 @@ theorem pushLvalueRun :
 receiver is aliased first (`storagePushValue_unfold_leftFstReceiver`); their
 chains are `Chains.StorageArrays`'s. -/
 
-example : Prog.toStr (sol[TestSuite]{ Token storage tokRef = bob.account.token;
-    bucket.tokens.push() = tokRef; } : Prog TestSuite) =
+example : Surface.Prog.toStr (sol[TestSuite]{ Token storage tokRef = bob.account.token;
+    bucket.tokens.push() = tokRef; } : Surface.Prog TestSuite) =
     "Token storage tokRef = bob.account.token; bucket.tokens.push(tokRef);" := rfl
 
 -- The member chain spelt with the `.push()` token: the same push.
-example : Prog.toStr (sol[TestSuite]{ Token storage tokRef = bob.account.token;
-    bucket .tokens.push() = tokRef; } : Prog TestSuite) =
+example : Surface.Prog.toStr (sol[TestSuite]{ Token storage tokRef = bob.account.token;
+    bucket .tokens.push() = tokRef; } : Surface.Prog TestSuite) =
     "Token storage tokRef = bob.account.token; bucket.tokens.push(tokRef);" := rfl
 
 -- A dotted push bound by an assignment, the alias rebound to the new slot.
-example : Prog.toStr (sol[TestSuite]{ Token storage t = bucket.tokens[0];
-    t = bucket.tokens.push(); } : Prog TestSuite) =
+example : Surface.Prog.toStr (sol[TestSuite]{ Token storage t = bucket.tokens[0];
+    t = bucket.tokens.push(); } : Surface.Prog TestSuite) =
     "Token storage t = bucket.tokens[0]; t = bucket.tokens.push();" := rfl
 
 /-- `Token storage t = bucket.tokens.push(); t.value = 11;` — the slot a push
@@ -137,10 +138,10 @@ These are the call-valued operands
 for the index and root writes' unfold rules; here the call is captured by the
 elaborator, and the write is the simple one. -/
 
-example : Prog.toStr (sol{ uint i = 1; values[i] = makeValue(); } : Prog Operands) =
+example : Surface.Prog.toStr (sol{ uint i = 1; values[i] = makeValue(); } : Surface.Prog Operands) =
     "uint i = 1; uint se1; se1 = makeValue(); values[i] = se1;" := rfl
 
-example : Prog.toStr (sol{ total = makeValue(); } : Prog Operands) =
+example : Surface.Prog.toStr (sol{ total = makeValue(); } : Surface.Prog Operands) =
     "uint se1; se1 = makeValue(); total = se1;" := rfl
 
 /-- `values[i] = makeValue();` — the element holds `makeValue()`'s value. -/
@@ -160,8 +161,8 @@ A memory array's element written with a call's value
 (`memoryIndexWriteArray`); `carolValues` is declared first, a copy of
 `values`: the box theorem that the element holds the value. -/
 
-example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
-    carolValues[i] = makeValue(); } : Prog Operands) =
+example : Surface.Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
+    carolValues[i] = makeValue(); } : Surface.Prog Operands) =
     "uint i = 0; uint[] memory carolValues = values; uint se1; se1 = makeValue(); carolValues[i] = se1;" :=
   rfl
 
@@ -185,8 +186,8 @@ index may rebind it; here no operand rebinds a local (an assignment is no
 expression, and a callee's locals are its own), so there is no re-alias
 (`captureExpr`). -/
 
-example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
-    carolValues[++i] = makeValue(); } : Prog Operands) =
+example : Surface.Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
+    carolValues[++i] = makeValue(); } : Surface.Prog Operands) =
     "uint i = 0; uint[] memory carolValues = values; uint se1; se1 = makeValue(); uint se3; se3 = ++i; carolValues[se3] = se1;" :=
   rfl
 
@@ -209,15 +210,15 @@ The right-hand side before the target, the right operand of a binary
 operator before the left (`docs/solc-alignment.md`); each call a capture of
 its own, its callee's return variable the next fresh index. -/
 
-example : Prog.toStr (sol{ values[makeValue()] = makeValue(); } : Prog Operands) =
+example : Surface.Prog.toStr (sol{ values[makeValue()] = makeValue(); } : Surface.Prog Operands) =
     "uint se1; se1 = makeValue(); uint se3; se3 = makeValue(); values[se3] = se1;" := rfl
 
-example : Prog.toStr (sol{ uint i = 0; values.push(makeValue() + i++); } : Prog Operands) =
+example : Surface.Prog.toStr (sol{ uint i = 0; values.push(makeValue() + i++); } : Surface.Prog Operands) =
     "uint i = 0; uint se1; se1 = i++; uint se2; se2 = makeValue(); values.push(se2 + se1);" :=
   rfl
 
-example : Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
-    carolValues[i++] = makeValue() + i; } : Prog Operands) =
+example : Surface.Prog.toStr (sol{ uint i = 0; uint[] memory carolValues = values;
+    carolValues[i++] = makeValue() + i; } : Surface.Prog Operands) =
     "uint i = 0; uint[] memory carolValues = values; uint se1 = i; uint se2; se2 = makeValue(); uint se4 = se2 + se1; uint se5; se5 = i++; carolValues[se5] = se4;" :=
   rfl
 
@@ -244,19 +245,19 @@ def MemCalls : Contract := contract!{
 
 /-- A declaration from a memory-returning call: one statement, printed as
 written. -/
-example : Prog.toStr (sol[MemCalls]{ Person memory p = choosePersonMem(); } : Prog MemCalls) =
+example : Surface.Prog.toStr (sol[MemCalls]{ Person memory p = choosePersonMem(); } : Surface.Prog MemCalls) =
     "Person memory p = choosePersonMem();" := rfl
 
 /-- An assignment to a memory local, the same. -/
-example : Prog.toStr (sol[MemCalls]{ Person memory p; p = choosePersonMem(); } : Prog MemCalls) =
+example : Surface.Prog.toStr (sol[MemCalls]{ Person memory p; p = choosePersonMem(); } : Surface.Prog MemCalls) =
     "Person memory p; p = choosePersonMem();" := rfl
 
--- The call inlined (`Prog.inlined`): the return variable `mv1` declared, the
+-- The call inlined (`Surface.Prog.inlined`): the return variable `mv1` declared, the
 -- body (`return alice;` a copy into it), `p` bound to it.
 /-- info: Person memory mv1; mv1 = alice; Person memory p = mv1; -/
 #guard_msgs in
-#eval IO.println (Prog.toStr (Prog.inlined (sol[MemCalls]{ Person memory p = choosePersonMem(); } :
-    Prog MemCalls)))
+#eval IO.println (Surface.Prog.toStr (Surface.Prog.inlined (sol[MemCalls]{ Person memory p = choosePersonMem(); } :
+    Surface.Prog MemCalls)))
 
 /-- A declaration from a memory-returning call: the copy of `alice`. -/
 theorem memCallDecl :

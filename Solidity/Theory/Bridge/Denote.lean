@@ -364,7 +364,7 @@ theorem Term.holdsEq_of_eval {σ : State} {a b : Term C} {x y : Value}
 /-- `eqD` is the interpreter's equation: both sides return, with one value.
 This is what `holds (a = b)` meant before it read `denote`. -/
 theorem holds_eqD_iff {σ : State} {a b : Term C} :
-    holds σ (Fml.eqD a b) ↔ ∃ x, a.eval σ = .ok x ∧ b.eval σ = .ok x := by
+    holds σ (NFml.eqD a b) ↔ ∃ x, a.eval σ = .ok x ∧ b.eval σ = .ok x := by
   simp only [holds]
   constructor
   · rintro ⟨⟨x, hx⟩, ⟨y, hy⟩, he⟩

@@ -28,7 +28,7 @@ variable {C : Contract}
 /-- solkey's problem file of a scoped obligation: its erasure's
 (`Solidity.Problem.text`). -/
 def Problem.text (contract fn : String) (φ : Fml C []) : String :=
-  Solidity.Problem.text contract fn (φ.erase [])
+  Solidity.Problem.text contract fn (φ.eraseS [])
 
 /-- The typed state a deployment starts in (`Contract.deployState`): the
 empty storage, no memory, a ledger holding the deployer's payment, and the

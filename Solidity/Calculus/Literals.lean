@@ -23,7 +23,7 @@ equivalences.
 
 A comparison folded in an update, `{ se1 := 260 <= 255 }`, writes a Boolean
 literal, `{ se1 := false }`; the branch it conditions folds by
-`Fml.concrete` once the update is pushed through it (`LineRw.applyOnRigidIn`).
+`NFml.concrete` once the update is pushed through it (`LineRw.applyOnRigidIn`).
 -/
 
 namespace Solidity
@@ -118,37 +118,37 @@ theorem LitLaw.theq {t t' : Term C} (r : LitLaw t t') : Term.Theq t t' := by
 
 /-- The literal law on the right-hand sides of `{U}_m φ`, if it rewrites
 one: under any modality, and with no premise on `U`, since the law is exact. -/
-def Fml.rwLitTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : Fml C) : Option (Fml C) :=
+def NFml.rwLitTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
   if (U.rwEv q != U) = true then some (.upd m (U.rwEv q) φ) else none
 
-theorem Fml.rwLitTop_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) {m : Modality} {U : Upd C}
-    {φ ψ : Fml C} (h : Fml.rwLitTop q m U φ = some ψ) (σ : State) :
+theorem NFml.rwLitTop_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) {m : Modality} {U : Upd C}
+    {φ ψ : NFml C} (h : NFml.rwLitTop q m U φ = some ψ) (σ : State) :
     holds σ ψ ↔ holds σ (.upd m U φ) := by
-  unfold Fml.rwLitTop at h
+  unfold NFml.rwLitTop at h
   split at h
   · cases h; exact Upd.rwEv_holds (u := .val) r.refines.at (fun σ _ _ => r.refines_rev σ) m φ σ
   · nomatch h
 
 /-- The literal law on the right-hand sides of the update at position `i`. -/
-def Fml.rwLitAt (q : Term C × Term C) (i : Nat) : Fml C → Option (Fml C) :=
-  Fml.atSpine (Fml.rwLitTop q) i
+def NFml.rwLitAt (q : Term C × Term C) (i : Nat) : NFml C → Option (NFml C) :=
+  NFml.atSpine (NFml.rwLitTop q) i
 
 /-! ## In the equations of the skeleton -/
 
 /-- The law in a literal leaf: in both sides of an equation and under
 `defined(…)`, which it may enter since it halts nowhere. -/
-def Fml.rwLit (q : Term C × Term C) : Fml C → Fml C
+def NFml.rwLit (q : Term C × Term C) : NFml C → NFml C
   | .eq a b => .eq (a.rw q) (b.rw q)
   | .defined t => .defined (t.rw q)
   | φ => φ
 
 /-- Whether the law rewrites something in a literal leaf. -/
-def Fml.litRewrites (q : Term C × Term C) : Fml C → Bool
+def NFml.litRewrites (q : Term C × Term C) : NFml C → Bool
   | .eq a b => a.rw q != a || b.rw q != b
   | .defined t => t.rw q != t
   | _ => false
 
-theorem Fml.rwLit_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) (φ : Fml C) (σ : State) :
+theorem NFml.rwLit_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) (φ : NFml C) (σ : State) :
     holds σ (φ.rwLit q) ↔ holds σ φ := by
   cases φ with
   | eq a b =>
@@ -161,7 +161,7 @@ theorem Fml.rwLit_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) (φ : Fml C)
   | _ => exact Iff.rfl
 
 /-- The law in every literal leaf along the skeleton `s`. -/
-def Fml.rwSkelAlong (q : Term C × Term C) : Skel → Fml C → Fml C
+def NFml.rwSkelAlong (q : Term C × Term C) : Skel → NFml C → NFml C
   | .and _ _ l r, .and φ ψ => .and (φ.rwSkelAlong q l) (ψ.rwSkelAlong q r)
   | .imp _ _ l r, .imp φ ψ => .imp (φ.rwSkelAlong q l) (ψ.rwSkelAlong q r)
   | .not _ s, .not φ => .not (φ.rwSkelAlong q s)
@@ -169,60 +169,60 @@ def Fml.rwSkelAlong (q : Term C × Term C) : Skel → Fml C → Fml C
   | _, φ => φ
 
 /-- Whether the law rewrites some literal leaf along `s`. -/
-def Fml.skelRewrites (q : Term C × Term C) : Skel → Fml C → Bool
+def NFml.skelRewrites (q : Term C × Term C) : Skel → NFml C → Bool
   | .and _ _ l r, .and φ ψ | .imp _ _ l r, .imp φ ψ => φ.skelRewrites q l || ψ.skelRewrites q r
   | .not _ s, .not φ => φ.skelRewrites q s
   | .lit, φ => φ.litRewrites q
   | _, _ => false
 
-theorem Fml.rwSkelAlong_holds {q : Term C × Term C} (hr : LitLaw q.1 q.2) (σ : State) :
-    (s : Skel) → (φ : Fml C) → (holds σ (φ.rwSkelAlong q s) ↔ holds σ φ)
+theorem NFml.rwSkelAlong_holds {q : Term C × Term C} (hr : LitLaw q.1 q.2) (σ : State) :
+    (s : Skel) → (φ : NFml C) → (holds σ (φ.rwSkelAlong q s) ↔ holds σ φ)
   | .opaque, _ | .upd _, _ => Iff.rfl
-  | .lit, φ => Fml.rwLit_holds hr φ σ
+  | .lit, φ => NFml.rwLit_holds hr φ σ
   | .and _ _ l r, φ => by
     cases φ with
     | and a b =>
       show holds σ (a.rwSkelAlong q l) ∧ holds σ (b.rwSkelAlong q r) ↔ holds σ a ∧ holds σ b
-      rw [Fml.rwSkelAlong_holds hr σ l a, Fml.rwSkelAlong_holds hr σ r b]
+      rw [NFml.rwSkelAlong_holds hr σ l a, NFml.rwSkelAlong_holds hr σ r b]
     | _ => exact Iff.rfl
   | .imp _ _ l r, φ => by
     cases φ with
     | imp a b =>
       show (holds σ (a.rwSkelAlong q l) → holds σ (b.rwSkelAlong q r)) ↔ (holds σ a → holds σ b)
-      rw [Fml.rwSkelAlong_holds hr σ l a, Fml.rwSkelAlong_holds hr σ r b]
+      rw [NFml.rwSkelAlong_holds hr σ l a, NFml.rwSkelAlong_holds hr σ r b]
     | _ => exact Iff.rfl
   | .not _ s, φ => by
     cases φ with
     | not a =>
       show ¬ holds σ (a.rwSkelAlong q s) ↔ ¬ holds σ a
-      rw [Fml.rwSkelAlong_holds hr σ s a]
+      rw [NFml.rwSkelAlong_holds hr σ s a]
     | _ => exact Iff.rfl
 
 /-- The law in every literal leaf of the whole skeleton of `φ`. -/
-def Fml.rwSkel (q : Term C × Term C) (φ : Fml C) : Fml C := φ.rwSkelAlong q φ.skel
+def NFml.rwSkel (q : Term C × Term C) (φ : NFml C) : NFml C := φ.rwSkelAlong q φ.skel
 
-theorem Fml.rwSkel_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) (φ : Fml C) (σ : State) :
+theorem NFml.rwSkel_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) (φ : NFml C) (σ : State) :
     holds σ (φ.rwSkel q) ↔ holds σ φ :=
-  Fml.rwSkelAlong_holds r σ φ.skel φ
+  NFml.rwSkelAlong_holds r σ φ.skel φ
 
 /-- The law along `s`, if it rewrites a leaf. -/
-def Fml.rwSkelOn (q : Term C × Term C) (s : Skel) (φ : Fml C) : Option (Fml C) :=
+def NFml.rwSkelOn (q : Term C × Term C) (s : Skel) (φ : NFml C) : Option (NFml C) :=
   if φ.skelRewrites q s then some (φ.rwSkelAlong q s) else none
 
-theorem Fml.rwSkelOn_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) {s : Skel} {φ ψ : Fml C}
+theorem NFml.rwSkelOn_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) {s : Skel} {φ ψ : NFml C}
     (h : φ.rwSkelOn q s = some ψ) (σ : State) : holds σ ψ ↔ holds σ φ := by
-  unfold Fml.rwSkelOn at h
+  unfold NFml.rwSkelOn at h
   split at h
-  · cases h; exact Fml.rwSkelAlong_holds r σ s φ
+  · cases h; exact NFml.rwSkelAlong_holds r σ s φ
   · nomatch h
 
 /-- The law along `s` below `n` updates, if it rewrites a leaf. -/
-def Fml.rwLitBelow (q : Term C × Term C) (n : Nat) (s : Skel) : Fml C → Option (Fml C) :=
-  Fml.belowSpine (Fml.rwSkelOn q s) n
+def NFml.rwLitBelow (q : Term C × Term C) (n : Nat) (s : Skel) : NFml C → Option (NFml C) :=
+  NFml.belowSpine (NFml.rwSkelOn q s) n
 
 /-- The law on the whole skeleton below `n` updates, if it rewrites a leaf. -/
-def Fml.rwLitSkelAt (q : Term C × Term C) (n : Nat) : Fml C → Option (Fml C) :=
-  Fml.belowSpine (fun φ => φ.rwSkelOn q φ.skel) n
+def NFml.rwLitSkelAt (q : Term C × Term C) (n : Nat) : NFml C → Option (NFml C) :=
+  NFml.belowSpine (fun φ => φ.rwSkelOn q φ.skel) n
 
 /-! ## The rewrites, bundled -/
 
@@ -231,13 +231,13 @@ namespace LineRw
 /-- The literal law `r` on the right-hand sides of the update at position
 `i`, under any modality. -/
 def lit {t t' : Term C} (r : LitLaw t t') (i : Nat) : LineRw C :=
-  ⟨Fml.rwLitAt (t, t') i, Fml.atSpine_sound (fun h σ => (Fml.rwLitTop_holds r h σ).1) i _⟩
+  ⟨NFml.rwLitAt (t, t') i, NFml.atSpine_sound (fun h σ => (NFml.rwLitTop_holds r h σ).1) i _⟩
 
 /-- The literal law `r` in the equations and `defined(…)`s of the skeleton
 `s` of the formula below `n` updates. -/
 def litEq {t t' : Term C} (r : LitLaw t t') (n : Nat) (s : Skel) : LineRw C :=
-  ⟨Fml.rwLitBelow (t, t') n s,
-    fun h σ => (Fml.belowSpine_holds (fun h σ => Fml.rwSkelOn_holds r h σ) n _ h σ).1⟩
+  ⟨NFml.rwLitBelow (t, t') n s,
+    fun h σ => (NFml.belowSpine_holds (fun h σ => NFml.rwSkelOn_holds r h σ) n _ h σ).1⟩
 
 end LineRw
 

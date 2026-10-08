@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -96,15 +97,15 @@ theorem memoryDeclDeepAlias :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
@@ -137,7 +138,7 @@ theorem memoryDeepFieldWrite :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
@@ -178,7 +179,7 @@ theorem memoryAliasWrite :
   apply update .memoryFieldReadAliasRoot  -- { carolAcc := read(memory, carol.account) }
   apply update .memoryFieldWrite     -- { memory := write(memory, carolAcc.balance, 100) }
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule   -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule   -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
@@ -245,7 +246,7 @@ theorem memoryRootRebind :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
@@ -298,15 +299,15 @@ theorem memoryNestedArrayWrite :
   apply update .memoryStorageCopy
   apply unfold .memoryFieldWrite_unfold_leftFst
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexReadArrayMemory
@@ -331,7 +332,7 @@ theorem memoryArrayWriteRefSource :
   apply update .memoryIndexWriteCopy
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldRead
@@ -362,9 +363,9 @@ theorem memoryFieldWriteFromArrayElem :
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
@@ -384,15 +385,15 @@ theorem memoryDeclFromNestedArrayElem :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexReadArrayMemory
@@ -417,7 +418,7 @@ type's default (`memory-decl-fresh.key`, `memory-decl-default.key`). -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.exampleStore
+#eval Surface.Prog.localAfterT State.exampleStore
   sol{ Person memory carol; uint result = carol.age; } "result"
 
 /-! `Person memory carol; Person memory david; Account memory mv = david.account;
@@ -430,7 +431,7 @@ same claim over copies of storage objects, for every state. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 60))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.exampleStore
+#eval Surface.Prog.localAfterT State.exampleStore
   sol{ Person memory carol; Person memory david; Account memory mv = david.account;
        carol.account = mv; carol.account.balance = 60; uint result = david.account.balance; }
   "result"
@@ -441,7 +442,7 @@ carries. -/
 
 /-- info: Except.error (Solidity.Semantics.Halt.revert) -/
 #guard_msgs in
-#eval Prog.run State.exampleStore (sol{ uint[] memory v; v[0] = 100; } : Prog StandardExample)
+#eval Surface.Prog.runT State.exampleStore (sol{ uint[] memory v; v[0] = 100; } : Surface.Prog StandardExample)
 
 /-! ## 6 · Memory `delete`
 
@@ -505,7 +506,7 @@ theorem memoryFieldDeleteRef :
   apply update .memoryFieldWrite
   apply update .memoryFieldDeleteReference
   apply update .memoryFieldRead
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
@@ -587,9 +588,9 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 -/
 #guard_msgs in
 #eval
-  let P : Prog StandardExample := sol{ Person memory carol; Person memory carolAlias = carol;
+  let P : Surface.Prog StandardExample := sol{ Person memory carol; Person memory carolAlias = carol;
     carol.age = 33; delete carol; uint oldAge = carolAlias.age; uint newAge = carol.age; }
-  (Prog.localAfter State.exampleStore P "oldAge", Prog.localAfter State.exampleStore P "newAge")
+  (Surface.Prog.localAfterT State.exampleStore P "oldAge", Surface.Prog.localAfterT State.exampleStore P "newAge")
 
 /-! `carolAcc.balance = 100; delete carol.account;` — the old account keeps
 `100`, the member reads the fresh default `0`. -/
@@ -600,10 +601,10 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 -/
 #guard_msgs in
 #eval
-  let P : Prog StandardExample := sol{ Person memory carol; Account memory carolAcc = carol.account;
+  let P : Surface.Prog StandardExample := sol{ Person memory carol; Account memory carolAcc = carol.account;
     carolAcc.balance = 100; delete carol.account; uint oldBal = carolAcc.balance;
     uint newBal = carol.account.balance; }
-  (Prog.localAfter State.exampleStore P "oldBal", Prog.localAfter State.exampleStore P "newBal")
+  (Surface.Prog.localAfterT State.exampleStore P "oldBal", Surface.Prog.localAfterT State.exampleStore P "newBal")
 
 /-! ## 7 · `new T[](n)` and `.length`
 
@@ -687,9 +688,9 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 -/
 #guard_msgs in
 #eval
-  let P : Prog StandardExample := sol{ uint[] memory xs = new uint[](3); uint len = xs.length;
+  let P : Surface.Prog StandardExample := sol{ uint[] memory xs = new uint[](3); uint len = xs.length;
     uint x = xs[2]; }
-  (Prog.localAfter State.exampleStore P "len", Prog.localAfter State.exampleStore P "x")
+  (Surface.Prog.localAfterT State.exampleStore P "len", Surface.Prog.localAfterT State.exampleStore P "x")
 
 /--
 info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 5)),
@@ -697,13 +698,13 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 -/
 #guard_msgs in
 #eval
-  let P : Prog TestSuite := sol[TestSuite]{ Token[] memory ts = new Token[](2);
+  let P : Surface.Prog TestSuite := sol[TestSuite]{ Token[] memory ts = new Token[](2);
     ts[0].value = 5; uint a = ts[0].value; uint b = ts[1].value; }
-  (Prog.localAfter State.testSuiteStore P "a", Prog.localAfter State.testSuiteStore P "b")
+  (Surface.Prog.localAfterT State.testSuiteStore P "a", Surface.Prog.localAfterT State.testSuiteStore P "b")
 
 /-- info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 2)) -/
 #guard_msgs in
-#eval Prog.localAfter State.testSuiteStore
+#eval Surface.Prog.localAfterT State.testSuiteStore
   (sol[TestSuite]{ basketA.items = new uint[](2); uint len = basketA.items.length; }) "len"
 
 /-! ## 8 · Fixed-size arrays in memory
@@ -726,13 +727,13 @@ theorem memoryFixedWriteRead :
 /-- info: [true, true, true, true] -/
 #guard_msgs in
 #eval [
-  (Prog.run State.testSuiteStore (sol[TestSuite]{ uint[3] memory x; assert(x.length == 3);
+  (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[3] memory x; assert(x.length == 3);
     x[1] = 5; assert(x[1] == 5); assert(x[0] == 0); })).isOk,
-  (Prog.run State.testSuiteStore (sol[TestSuite]{ uint[2][3] memory y; assert(y.length == 3);
+  (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[2][3] memory y; assert(y.length == 3);
     assert(y[0].length == 2); })).isOk,
-  (Prog.run State.testSuiteStore (sol[TestSuite]{ uint[2][] memory z = new uint[2][](4);
+  (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[2][] memory z = new uint[2][](4);
     assert(z.length == 4); assert(z[1].length == 2); })).isOk,
-  (Prog.run State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t;
+  (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t;
     assert(t.items.length == 3); t.items[1] = 5; assert(t.items[1] == 5);
     assert(t.items[0] == 0); })).isOk]
 
@@ -741,7 +742,7 @@ member fixed: `triple.items` is still three long, and `delete` keeps it so. -/
 
 /-- info: true -/
 #guard_msgs in
-#eval (Prog.run State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t = triple;
+#eval (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t = triple;
   t.items[0] = 9; triple = t; assert(triple.items[0] == 9);
   assert(triple.items.length == 3); delete triple; assert(triple.items[0] == 0); })).isOk
 

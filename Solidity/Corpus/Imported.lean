@@ -97,7 +97,7 @@ its program, run typed from there, under its modality.  `wt(storage)` there
 is `initState_wt`'s, read scoped (`Core.holds_erase_fo`). -/
 theorem runs_of_proved {m : Modality} {Γ' : Core.Ctx} {Q : Core.Prog C [] Γ'}
     (h : Core.Proves C .all [] .nil (Core.Problem.fml m [] Q))
-    (hw : holds C.initState (Fml.wt C)) : Runs m (Core.TState.init C) Q := by
+    (hw : holds C.initState (NFml.wt C)) : Runs m (Core.TState.init C) Q := by
   have hwt : Core.holds (Core.TState.init C) (Core.Fml.wt C) :=
     (Core.holds_erase_fo (ns := []) (Core.Fml.wt C) (by simp only [Core.Fml.wt, Core.Fml.Plain]) rfl
       (Core.Agree.nil (Core.TState.init C).erase)).2
@@ -109,7 +109,7 @@ theorem runs_of_proved {m : Modality} {Γ' : Core.Ctx} {Q : Core.Prog C [] Γ'}
 state (`runs_of_proved`). -/
 theorem diamond_of_proved {Γ' : Core.Ctx} {Q : Core.Prog C [] Γ'}
     (h : Core.Proves C .all [] .nil (Core.Problem.fml .diamond [] Q))
-    (hw : holds C.initState (Fml.wt C)) :
+    (hw : holds C.initState (NFml.wt C)) :
     Obligation.Diamond (Core.TState.init C) (Core.Problem.fml .diamond [] Q) :=
   ⟨_, Q, rfl, runs_of_proved h hw⟩
 
@@ -117,7 +117,7 @@ theorem diamond_of_proved {Γ' : Core.Ctx} {Q : Core.Prog C [] Γ'}
 (`runs_of_proved`). -/
 theorem box_of_proved {Γ' : Core.Ctx} {Q : Core.Prog C [] Γ'}
     (h : Core.Proves C .all [] .nil (Core.Problem.fml .box [] Q))
-    (hw : holds C.initState (Fml.wt C)) :
+    (hw : holds C.initState (NFml.wt C)) :
     Obligation.Box (Core.TState.init C) (Core.Problem.fml .box [] Q) :=
   ⟨_, Q, rfl, runs_of_proved h hw⟩
 

@@ -143,7 +143,7 @@ def CallRet.erase {Γ : Ctx} (ns : List Var) : {rs Γ' : Ctx} → CallRet Γ rs 
 
 /-- The statements a call's erased body starts with: a memory return's
 declaration, a fresh default object. -/
-def CallRet.pre {Γ : Ctx} : {rs Γ' : Ctx} → CallRet Γ rs Γ' → List (Solidity.Stmt C)
+def CallRet.pre {Γ : Ctx} : {rs Γ' : Ctx} → CallRet Γ rs Γ' → List (Solidity.Surface.Stmt C)
   | _, _, .mem R r hd hm => [.declMem R r Option.none hd hm]
   | _, _, _ => []
 
@@ -157,7 +157,7 @@ mutual
 context: a block is its statements.  A call whose arguments are not
 separated (`Arg.separatedFrom`), which `resolve` never returns, binds them
 at the head of its body instead. -/
-def Stmt.erase {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → List (Solidity.Stmt C)
+def Stmt.erase {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → List (Solidity.Surface.Stmt C)
   | .assign l r => [.assign (l.erase ns) (r.erase ns)]
   | .rebind i r => [.rebind (i.name ns) (r.erase ns)]
   | .assignLocal i r => [.assignLocal (i.name ns) (r.erase ns)]
@@ -197,7 +197,7 @@ def Stmt.erase {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → List (Solidity
 
 /-- A block as `Syntax.lean` writes it: each statement erased from the names
 the one before it leaves. -/
-def Prog.erase {Γ Γ' : Ctx} (ns : List Var) : Prog C Γ Γ' → List (Solidity.Stmt C)
+def Prog.erase {Γ Γ' : Ctx} (ns : List Var) : Prog C Γ Γ' → List (Solidity.Surface.Stmt C)
   | .nil => []
   | .cons s P => s.erase ns ++ P.erase (s.outNames ns)
 
@@ -611,12 +611,12 @@ def resolveArgs (Γ : NCtx) (l : List (Arg C)) :
   pure ⟨r, hr.trans (List.nil_append l), hn⟩
 
 /-- An error of statement `u`'s own parts, naming it. -/
-def rejects {α : Type} (u : Solidity.Stmt C) (x : Except String α) : Except String α :=
+def rejects {α : Type} (u : Solidity.Surface.Stmt C) (x : Except String α) : Except String α :=
   x.mapError fun why => s!"the locals check (`resolve`) rejects `{u.toStr}`: {why}"
 
 /-- What `resolveStmt` returns for `u` read in `Γ`: the statement, the
 context it leaves, and that it erases to `u` and leaves the names it binds. -/
-abbrev Resolved (strict : Bool) (out : List Var) (Γ : NCtx) (u : Solidity.Stmt C) :=
+abbrev Resolved (strict : Bool) (out : List Var) (Γ : NCtx) (u : Solidity.Surface.Stmt C) :=
   {r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx //
     r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true ∧
       (strict = true → r.2.Fresh out Γ.names)}
@@ -641,7 +641,7 @@ when a binder reuses a name in scope or of an enclosing frame, so that what
 it returns is `Fresh`; a formula's program may shadow what the formula binds
 (a `∀`, an update), and is read with `strict` off. -/
 def resolveStmt (strict : Bool) (out : List Var) (Γ : NCtx) :
-    (u : Solidity.Stmt C) → Except String (Resolved strict out Γ u)
+    (u : Solidity.Surface.Stmt C) → Except String (Resolved strict out Γ u)
   | .assign l r => rejects (.assign l r) do
     let ⟨l', hl⟩ ← resolveLoc Γ l
     let ⟨r', hr⟩ ← resolveSrc Γ r
@@ -852,7 +852,7 @@ def resolveStmt (strict : Bool) (out : List Var) (Γ : NCtx) :
     pure ⟨⟨Γ, .loop a' c' b⟩, by
       subst ha hc hb; exact ⟨rfl, rfl, by simp only [Stmt.sepArgs, hbs], hbf⟩⟩
 
-def resolveProg (strict : Bool) (out : List Var) (Γ : NCtx) : (us : List (Solidity.Stmt C)) →
+def resolveProg (strict : Bool) (out : List Var) (Γ : NCtx) : (us : List (Solidity.Surface.Stmt C)) →
     Except String {r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx //
       r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true ∧ (strict = true → r.2.Fresh out Γ.names)}
   | [] => pure ⟨⟨Γ, .nil⟩, rfl, rfl, fun _ => trivial⟩
@@ -871,18 +871,18 @@ end
 
 /-- **Resolution**: a statement's names read as positions in `Γ`, scopes
 explicit, and the context it leaves. -/
-def Stmt.resolve (Γ : NCtx) (u : Solidity.Stmt C) (strict : Bool := true) :
+def Stmt.resolve (Γ : NCtx) (u : Solidity.Surface.Stmt C) (strict : Bool := true) :
     Except String ((Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx) :=
   (resolveStmt strict [] Γ u).map (·.1)
 
 /-- A block resolved. -/
-def Prog.resolve (Γ : NCtx) (us : List (Solidity.Stmt C)) (strict : Bool := true) :
+def Prog.resolve (Γ : NCtx) (us : List (Solidity.Surface.Stmt C)) (strict : Bool := true) :
     Except String ((Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx) :=
   (resolveProg strict [] Γ us).map (·.1)
 
 /-- The locals check of the elaborator's entry points: the context a block
 leaves, or why it is rejected. -/
-def Prog.resolveCheck (Γ : NCtx) (us : List (Solidity.Stmt C)) : Except String NCtx :=
+def Prog.resolveCheck (Γ : NCtx) (us : List (Solidity.Surface.Stmt C)) : Except String NCtx :=
   (resolveProg true [] Γ us).map (·.1.1)
 
 omit [FreshNames] in
@@ -896,14 +896,14 @@ private theorem ok_of_map {ε α : Type} {P : α → Prop} {x : Except ε {a : �
 
 /-- **`resolve` inverts `erase`**: a resolved statement erases to the one it
 was resolved from. -/
-theorem Stmt.resolve_erase {strict : Bool} {Γ Γ' : NCtx} {u : Solidity.Stmt C}
+theorem Stmt.resolve_erase {strict : Bool} {Γ Γ' : NCtx} {u : Solidity.Surface.Stmt C}
     {s : Stmt C Γ.ctx Γ'.ctx}
     (h : Stmt.resolve Γ u strict = .ok ⟨Γ', s⟩) : s.erase Γ.names = [u] :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx =>
     r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true ∧
       (strict = true → r.2.Fresh [] Γ.names)) h).1
 
-theorem Prog.resolve_erase {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)}
+theorem Prog.resolve_erase {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidity.Surface.Stmt C)}
     {P : Prog C Γ.ctx Γ'.ctx}
     (h : Prog.resolve Γ us strict = .ok ⟨Γ', P⟩) : P.erase Γ.names = us :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx =>
@@ -912,20 +912,20 @@ theorem Prog.resolve_erase {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidity.
 
 /-- **`resolve`'s output is `Fresh`**: no binder reuses a name in scope, so
 its erasure names every local apart. -/
-theorem Stmt.resolve_fresh {Γ Γ' : NCtx} {u : Solidity.Stmt C} {s : Stmt C Γ.ctx Γ'.ctx}
+theorem Stmt.resolve_fresh {Γ Γ' : NCtx} {u : Solidity.Surface.Stmt C} {s : Stmt C Γ.ctx Γ'.ctx}
     (h : Stmt.resolve Γ u = .ok ⟨Γ', s⟩) : s.Fresh [] Γ.names :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx =>
     r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true ∧
       (true = true → r.2.Fresh [] Γ.names)) h).2.2.2 rfl
 
-theorem Prog.resolve_fresh {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)} {P : Prog C Γ.ctx Γ'.ctx}
+theorem Prog.resolve_fresh {Γ Γ' : NCtx} {us : List (Solidity.Surface.Stmt C)} {P : Prog C Γ.ctx Γ'.ctx}
     (h : Prog.resolve Γ us = .ok ⟨Γ', P⟩) : P.Fresh [] Γ.names :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx =>
     r.2.erase Γ.names = us ∧ r.2.sepArgs Γ.names = true ∧ (true = true → r.2.Fresh [] Γ.names)) h).2.2 rfl
 
 /-- `resolveCheck` accepts exactly what `resolve` resolves, to the context
 it returns (`Prog.resolveCheck_of_resolve` is the converse). -/
-theorem Prog.resolve_of_resolveCheck {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)}
+theorem Prog.resolve_of_resolveCheck {Γ Γ' : NCtx} {us : List (Solidity.Surface.Stmt C)}
     (h : Prog.resolveCheck Γ us = .ok Γ') : ∃ P : Prog C Γ.ctx Γ'.ctx, Prog.resolve Γ us = .ok ⟨Γ', P⟩ := by
   unfold Prog.resolveCheck at h
   unfold Prog.resolve
@@ -936,7 +936,7 @@ theorem Prog.resolve_of_resolveCheck {Γ Γ' : NCtx} {us : List (Solidity.Stmt C
     cases h
     exact ⟨r.1.2, rfl⟩
 
-theorem Prog.resolveCheck_of_resolve {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)}
+theorem Prog.resolveCheck_of_resolve {Γ Γ' : NCtx} {us : List (Solidity.Surface.Stmt C)}
     {P : Prog C Γ.ctx Γ'.ctx}
     (h : Prog.resolve Γ us = .ok ⟨Γ', P⟩) : Prog.resolveCheck Γ us = .ok Γ' := by
   unfold Prog.resolve at h
@@ -951,14 +951,14 @@ theorem Prog.resolveCheck_of_resolve {Γ Γ' : NCtx} {us : List (Solidity.Stmt C
 
 /-- **`resolve` separates every call's arguments**: the calls it returns
 erase to calls, not to their arguments bound in the body. -/
-theorem Stmt.resolve_sepArgs {strict : Bool} {Γ Γ' : NCtx} {u : Solidity.Stmt C}
+theorem Stmt.resolve_sepArgs {strict : Bool} {Γ Γ' : NCtx} {u : Solidity.Surface.Stmt C}
     {s : Stmt C Γ.ctx Γ'.ctx}
     (h : Stmt.resolve Γ u strict = .ok ⟨Γ', s⟩) : s.sepArgs Γ.names = true :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Stmt C Γ.ctx Γ'.ctx =>
     r.2.erase Γ.names = [u] ∧ r.1.names = r.2.outNames Γ.names ∧ r.2.sepArgs Γ.names = true ∧
       (strict = true → r.2.Fresh [] Γ.names)) h).2.2.1
 
-theorem Prog.resolve_sepArgs {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidity.Stmt C)}
+theorem Prog.resolve_sepArgs {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidity.Surface.Stmt C)}
     {P : Prog C Γ.ctx Γ'.ctx}
     (h : Prog.resolve Γ us strict = .ok ⟨Γ', P⟩) : P.sepArgs Γ.names = true :=
   (ok_of_map (P := fun r : (Γ' : NCtx) × Prog C Γ.ctx Γ'.ctx =>

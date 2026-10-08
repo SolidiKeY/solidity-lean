@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
@@ -91,34 +92,24 @@ theorem getBalanceFunds :
 /-- The wallet `7` deploys, then holding `100` (what the dropped
 `receive()` would take). -/
 def deployed : Semantics.Res Semantics.State := do
-  let σ ← EtherWallet.deploy sol{ constructor(); } { msgSender := 7 }
+  let σ ← EtherWallet.deployRun sol{ constructor(); } { msgSender := 7 }
   pure { σ with selfBalance := 100 }
 
-/-- `ensures net(owner) == \old(net(owner)) - _amount`: `7`'s entry is `30`
+/- `ensures net(owner) == \old(net(owner)) - _amount`: `7`'s entry is `30`
 less, and the funds as the transaction found them. -/
-theorem withdrawRunNet :
-    (do let σ ← Prog.run (← deployed) (sol{ withdraw(30); } : Prog EtherWallet)
-        pure (σ.getNet 7, σ.selfBalance)) = .ok (-30, 100) := by
-  simp only [deployed, Contract.deploy, Contract.deployState, Contract.initStorage, EtherWallet,
-    List.map, Semantics.defaultForTy]
-  rfl
+#guard
+    (do let σ ← Surface.Prog.runT (← deployed) (sol{ withdraw(30); } : Surface.Prog EtherWallet)
+        pure (σ.getNet 7, σ.selfBalance)) = .ok (-30, 100)
 
-/-- More than the funds: the ledger books it all the same.  That the contract
+/- More than the funds: the ledger books it all the same.  That the contract
 can pay is not the ledger's to check; on the EVM the payment is refused and
 the call reverts (`Evm.Core.compile_correct`). -/
-theorem withdrawRunOverdrawn :
-    (do let σ ← Prog.run (← deployed) (sol{ withdraw(130); } : Prog EtherWallet)
-        pure (σ.getNet 7)) = .ok (-130) := by
-  simp only [deployed, Contract.deploy, Contract.deployState, Contract.initStorage, EtherWallet,
-    List.map, Semantics.defaultForTy]
-  rfl
+#guard
+    (do let σ ← Surface.Prog.runT (← deployed) (sol{ withdraw(130); } : Surface.Prog EtherWallet)
+        pure (σ.getNet 7)) = .ok (-130)
 
-/-- Anyone but the owner: `withdraw` reverts. -/
-theorem withdrawRunOther :
-    (do Prog.run { (← deployed) with tx := { msgSender := 3 } } (sol{ withdraw(30); } : Prog EtherWallet)) =
-      .error .revert := by
-  simp only [deployed, Contract.deploy, Contract.deployState, Contract.initStorage, EtherWallet,
-    List.map, Semantics.defaultForTy]
-  rfl
+/- Anyone but the owner: `withdraw` reverts. -/
+#guard (do Surface.Prog.runT { (← deployed) with tx := { msgSender := 3 } } (sol{ withdraw(30); } : Surface.Prog EtherWallet)) =
+      .error .revert
 
 end Solidity.Examples.Benchmark.EtherWallet

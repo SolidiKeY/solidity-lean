@@ -15,13 +15,13 @@ stack merges into one parallel update, and a Theory law reads a term down
 to its value.  This module is that second half, on `Update.lean`'s formulas:
 
 * `φ ~[n]~> ψ` — the rewrite `n` (an update rule, KeY's name, or a law)
-  turns `φ` into `ψ` (`Fml.RwBy`), its label a rewrite of
+  turns `φ` into `ψ` (`NFml.RwBy`), its label a rewrite of
   `Calculus/ChainRewrites.lean` (`LineRw`): the elaborator finds, from the
   line before, the position on the update spine and the law's instance (as
   `rw` finds one) that give the line after, and the kernel checks
   `r.apply φ = some ψ`.  A name that is no rewrite, a rewrite that does not
   apply and a name that resolves twice are errors;
-* `φ ~=> ψ` — a rewrite the arrow does not name (`Fml.RwAny`): the line
+* `φ ~=> ψ` — a rewrite the arrow does not name (`NFml.RwAny`): the line
   after picks it, `sol_chain` trying the update rules and then the laws
   (`rwAnyArrows`) until one gives it;
 * `φ ~~> ψ` (`Fml.Leads`): wherever `ψ` holds, `φ` does, what a chain
@@ -60,28 +60,26 @@ which fresh variables it reads (`LineRw.simplifyFresh`) is proved from
 `Post.noFresh` (`proveRw`). -/
 
 /-- A postcondition `φ`: a formula that names no fresh variable
-(`se1`, `sp1`, …), so that the rules' fresh names avoid it whatever it is,
-and has no modality, so that the strategy never steps into it.
+(`se1`, `sp1`, …), so that the rules' fresh names avoid it whatever it is.
 
-Example: `⟨dl!{ alice.account.balance == 10 }, by decide, by decide⟩`, which
+Example: `⟨dl!{ alice.account.balance == 10 }, by decide⟩`, which
 `{ fml := dl!{ alice.account.balance == 10 } }` abbreviates. -/
 structure Post (C : Contract) where
-  fml : Fml C
+  fml : NFml C
   noFresh : maxIdx fml.vars = 0 := by decide
-  inactive : fml.active = false := by decide
 
 attribute [coe] Post.fml
 
 /-- A postcondition names no fresh variable: `simplifyUpdate` over it drops
 a capture of the rules (`LineRw.simplifyFresh`). -/
 theorem Post.freshVars_eq_nil (φ : Post C) : φ.fml.freshVars = [] := by
-  rw [Fml.freshVars_eq, List.filter_eq_nil_iff]
+  rw [NFml.freshVars_eq, List.filter_eq_nil_iff]
   intro x hx
   have : x.idx ≤ 0 := φ.noFresh ▸ le_maxIdx hx
   simp only [bne_iff_ne, ne_eq, Decidable.not_not]
   omega
 
-instance : Coe (Post C) (Fml C) := ⟨Post.fml⟩
+instance : Coe (Post C) (NFml C) := ⟨Post.fml⟩
 
 /-! ## Rewrites and chains of them -/
 
@@ -90,19 +88,19 @@ instance : Coe (Post C) (Fml C) := ⟨Post.fml⟩
 arrow names (`sequentialToParallel`, `findOnSave`, …).  The rewrite is the
 one the elaborator found for `n` on `φ`: its position on the update spine,
 and for a law its instance. -/
-def Fml.RwBy (_n : String) (r : LineRw C) (φ ψ : Fml C) : Prop := r.apply φ = some ψ
+def NFml.RwBy (_n : String) (r : LineRw C) (φ ψ : NFml C) : Prop := r.apply φ = some ψ
 
 /-- `φ ~~> ψ`: to prove `φ`, prove `ψ` — wherever `ψ` holds, `φ` does.  What
 a chain with a rewrite in it composes to (a rewrite and a step may commute,
 so it is no derivation `~*>`). -/
-def Fml.Leads (φ ψ : Fml C) : Prop := ∀ σ, holds σ ψ → holds σ φ
+def NFml.Leads (φ ψ : NFml C) : Prop := ∀ σ, holds σ ψ → holds σ φ
 
-@[inherit_doc] notation:50 φ:51 " ~~> " ψ:51 => Fml.Leads φ ψ
+@[inherit_doc] notation:50 φ:51 " ~~> " ψ:51 => NFml.Leads φ ψ
 
 /-- `φ ~=> ψ` past the strategy: some rewrite of `Calculus/ChainRewrites.lean`,
 an update rule or a Theory law, turns `φ` into `ψ`.  The arrow names none:
 the line after picks it (`sol_chain` searches for it). -/
-def Fml.RwAny (φ ψ : Fml C) : Prop := ∃ r : LineRw C, r.apply φ = some ψ
+def NFml.RwAny (φ ψ : NFml C) : Prop := ∃ r : LineRw C, r.apply φ = some ψ
 
 /-- The arrows of a chain past the program. -/
 inductive Link (C : Contract) : Type where
@@ -112,23 +110,23 @@ inductive Link (C : Contract) : Type where
   | rwAny
 
 /-- What an arrow says about the two lines it joins. -/
-@[reducible] def Link.Rel : Link C → Fml C → Fml C → Prop
-  | .rw n r => Fml.RwBy n r
-  | .rwAny => Fml.RwAny
+@[reducible] def Link.Rel : Link C → NFml C → NFml C → Prop
+  | .rw n r => NFml.RwBy n r
+  | .rwAny => NFml.RwAny
 
 /-- `φ ~> φ₁ ~*> φ₂ …`: every link of a chain that starts at `φ` holds (a
 conjunction, one part per arrow).  A proposition, so a chain is a `theorem`:
 a `def` of data would have its value, every line in it, searched for proofs
 to abstract when it is added. -/
-@[reducible] def Fml.Via : Fml C → List (Link C × Fml C) → Prop
+@[reducible] def NFml.Via : NFml C → List (Link C × NFml C) → Prop
   | _, [] => True
   | φ, [(l, ψ)] => l.Rel φ ψ
-  | φ, (l, ψ) :: w :: ws => l.Rel φ ψ ∧ Fml.Via ψ (w :: ws)
+  | φ, (l, ψ) :: w :: ws => l.Rel φ ψ ∧ NFml.Via ψ (w :: ws)
 
 /-- The last line of a chain. -/
-def Fml.Via.last : Fml C → List (Link C × Fml C) → Fml C
+def NFml.Via.last : NFml C → List (Link C × NFml C) → NFml C
   | φ, [] => φ
-  | _, (_, ψ) :: ws => Fml.Via.last ψ ws
+  | _, (_, ψ) :: ws => NFml.Via.last ψ ws
 
 /-! ## The notation
 
@@ -137,7 +135,7 @@ read a chain whose first line is scoped and hand any other here. -/
 
 
 /-- `stepBy% φ r ψ`: `φ ~[r]~> ψ`, with `φ` elaborated once: a rule of the
-strategy (`Fml.StepBy`) or a rewrite (`Fml.RwBy`).  Elaborated at the end of
+strategy (`Fml.StepBy`) or a rewrite (`NFml.RwBy`).  Elaborated at the end of
 the module, after `sol_chain`'s search. -/
 syntax "stepBy% " term:max ident term:max : term
 
@@ -176,7 +174,7 @@ def expandChainStx : Macro := fun stx => do
   for l in stx[1].getArgs do
     let b : Lean.Term := ⟨l[1]⟩
     let link ← match (⟨l[0]⟩ : TSyntax `chain_arrow) with
-      | `(chain_arrow| ~=>) => pure (← `(Link.rwAny), app ``Fml.RwAny #[prev, b])
+      | `(chain_arrow| ~=>) => pure (← `(Link.rwAny), app ``NFml.RwAny #[prev, b])
       | `(chain_arrow| ~[ $r:ident ]~>) =>
         pure (← `(link% ($prev) $r ($b)), ← `(stepBy% ($prev) $r ($b)))
       | _ => Macro.throwErrorAt l[0] "a step of the strategy (`~>`, `~*>`) is a scoped chain's: \
@@ -187,7 +185,7 @@ def expandChainStx : Macro := fun stx => do
   | #[(_, rel, _)] => pure rel
   | _ =>
     let ws ← links.mapM fun (l, _, b) => `((($l : Link _), $b:term))
-    pure (app ``Fml.Via #[a, ← `([$ws,*])])
+    pure (app ``NFml.Via #[a, ← `([$ws,*])])
 
 open Lean in
 /-- A chain with a line left to be found, or one link: `expandChainStx`.  A
@@ -217,8 +215,8 @@ def arrowOf (l : Lean.Expr) : MetaM (TSyntax `chain_arrow) := do
 def chainNode (a : Lean.Term) (arrows : Array (TSyntax `chain_arrow × Lean.Term)) : Lean.Term :=
   ⟨mkNode ``chainStx #[a, mkNullNode (arrows.map fun (l, b) => mkNode groupKind #[l, b])]⟩
 
-/-- `Fml.RwBy n r φ ψ`: `φ ~[n]~> ψ`. -/
-@[delab app.Solidity.Fml.RwBy]
+/-- `NFml.RwBy n r φ ψ`: `φ ~[n]~> ψ`. -/
+@[delab app.Solidity.NFml.RwBy]
 def delabRwBy : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 5)
@@ -226,15 +224,15 @@ def delabRwBy : Delab := do
   return chainNode (← withNaryArg 3 delab)
     #[(← `(chain_arrow| ~[$(mkIdent n.toName):ident]~>), ← withNaryArg 4 delab)]
 
-/-- `Fml.RwAny φ ψ`: `φ ~=> ψ`. -/
-@[delab app.Solidity.Fml.RwAny]
+/-- `NFml.RwAny φ ψ`: `φ ~=> ψ`. -/
+@[delab app.Solidity.NFml.RwAny]
 def delabRwAny : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 3)
   return chainNode (← withNaryArg 1 delab) #[(← `(chain_arrow| ~=>), ← withNaryArg 2 delab)]
 
 /-- `Fml.Via φ [(l₁, φ₁), …]`: `φ l₁ φ₁ …`. -/
-@[delab app.Solidity.Fml.Via]
+@[delab app.Solidity.NFml.Via]
 def delabVia : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 3)
@@ -255,31 +253,31 @@ end Chain
 
 Example: `{ se1 := 10 } { sp1 := alice.account } ⟨ sp1.balance = se1; ⟩ φ
 ~[sequentialToParallel]~> { se1 := 10 ‖ sp1 := alice.account } ⟨ sp1.balance = se1; ⟩ φ`. -/
-theorem Fml.RwBy.sound {n : String} {r : LineRw C} {φ ψ : Fml C} (h : Fml.RwBy n r φ ψ) :
+theorem NFml.RwBy.sound {n : String} {r : LineRw C} {φ ψ : NFml C} (h : NFml.RwBy n r φ ψ) :
     φ ~~> ψ :=
   r.sound h
 
 /-- Some rewrite is sound: whichever one the line after picked. -/
-theorem Fml.RwAny.sound {φ ψ : Fml C} (h : Fml.RwAny φ ψ) : φ ~~> ψ :=
+theorem NFml.RwAny.sound {φ ψ : NFml C} (h : NFml.RwAny φ ψ) : φ ~~> ψ :=
   let ⟨r, hr⟩ := h
   r.sound hr
 
 /-- A chain is sound state by state: where its last line holds, its first
 line holds, whatever its arrows. -/
-theorem Fml.Via.sound : {φ : Fml C} → {ws : List (Link C × Fml C)} → Fml.Via φ ws →
-    φ ~~> Fml.Via.last φ ws
+theorem NFml.Via.sound : {φ : NFml C} → {ws : List (Link C × NFml C)} → NFml.Via φ ws →
+    φ ~~> NFml.Via.last φ ws
   | _, [], _ => fun _ h => h
-  | _, [(.rw _ _, _)], h => Fml.RwBy.sound h
-  | _, [(.rwAny, _)], h => Fml.RwAny.sound h
-  | _, (.rw _ _, _) :: _ :: _, ⟨s, v⟩ => fun σ h => Fml.RwBy.sound s σ (Fml.Via.sound v σ h)
-  | _, (.rwAny, _) :: _ :: _, ⟨s, v⟩ => fun σ h => Fml.RwAny.sound s σ (Fml.Via.sound v σ h)
+  | _, [(.rw _ _, _)], h => NFml.RwBy.sound h
+  | _, [(.rwAny, _)], h => NFml.RwAny.sound h
+  | _, (.rw _ _, _) :: _ :: _, ⟨s, v⟩ => fun σ h => NFml.RwBy.sound s σ (NFml.Via.sound v σ h)
+  | _, (.rwAny, _) :: _ :: _, ⟨s, v⟩ => fun σ h => NFml.RwAny.sound s σ (NFml.Via.sound v σ h)
 
 /-- A chain is a proof: to prove its first line, prove its last.
 
 Example: `{ x := 1 } { y := x } φ ~[sequentialToParallel]~> { x := 1 ‖ y := 1 } φ`
 proves its first line from its last. -/
-theorem Fml.Via.valid {φ : Fml C} {ws : List (Link C × Fml C)} (v : Fml.Via φ ws)
-    (h : ⊨ Fml.Via.last φ ws) : ⊨ φ :=
+theorem NFml.Via.valid {φ : NFml C} {ws : List (Link C × NFml C)} (v : NFml.Via φ ws)
+    (h : ⊨ NFml.Via.last φ ws) : ⊨ φ :=
   fun σ => v.sound σ (h σ)
 
 /-- A chain with rewrites is a proof: to prove its first line, prove its last.
@@ -287,56 +285,56 @@ theorem Fml.Via.valid {φ : Fml C} {ws : List (Link C × Fml C)} (v : Fml.Via φ
 Example: `BalanceWrite.chain .box φ` of `Examples/Chains/Storage.lean`, down to the
 last line, proves `[ alice.account.balance = 10; ] φ` from
 `{ se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ`. -/
-theorem Fml.Leads.valid {φ ψ : Fml C} (h : φ ~~> ψ) (hψ : ⊨ ψ) : ⊨ φ :=
+theorem NFml.Leads.valid {φ ψ : NFml C} (h : φ ~~> ψ) (hψ : ⊨ ψ) : ⊨ φ :=
   fun σ => h σ (hψ σ)
 
 /-- `~~>` composes: to prove `φ`, prove `ψ`; to prove `ψ`, prove `χ`. -/
-theorem Fml.Leads.comp {φ ψ χ : Fml C} (h₁ : φ ~~> ψ) (h₂ : ψ ~~> χ) : φ ~~> χ :=
+theorem NFml.Leads.comp {φ ψ χ : NFml C} (h₁ : φ ~~> ψ) (h₂ : ψ ~~> χ) : φ ~~> χ :=
   fun σ h => h₁ σ (h₂ σ h)
 
 /-- A line leads to itself: the chain of no links. -/
-theorem Fml.Leads.self (φ : Fml C) : φ ~~> φ := fun _ h => h
+theorem NFml.Leads.self (φ : NFml C) : φ ~~> φ := fun _ h => h
 
 /-- A chain leads from its first line to its last: `Fml.Via.sound`, under the
 name a composition reads by.
 
 Example: `(AgeWriteRead.chain m φ).leads` is
 `⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ ~~> { storage := save(storage, alice.age, 42) ‖ x := 42 } φ`. -/
-theorem Fml.Via.leads {φ : Fml C} {ws : List (Link C × Fml C)} (v : Fml.Via φ ws) :
-    φ ~~> Fml.Via.last φ ws :=
-  Fml.Via.sound v
+theorem NFml.Via.leads {φ : NFml C} {ws : List (Link C × NFml C)} (v : NFml.Via φ ws) :
+    φ ~~> NFml.Via.last φ ws :=
+  NFml.Via.sound v
 
 /-- A chain goes on with a segment that starts where it ends: `h` reaches
 `ψ`, the segment `v` starts at `ψ`, and together they reach `v`'s last line.
 The segments of a long trace compose so, each a `theorem` with its own
 heartbeats: `(seg₁ ..).leads.via (seg₂ ..) |>.via (seg₃ ..)`. -/
-theorem Fml.Leads.via {φ ψ : Fml C} {ws : List (Link C × Fml C)} (h : φ ~~> ψ)
-    (v : Fml.Via ψ ws) : φ ~~> Fml.Via.last ψ ws :=
+theorem NFml.Leads.via {φ ψ : NFml C} {ws : List (Link C × NFml C)} (h : φ ~~> ψ)
+    (v : NFml.Via ψ ws) : φ ~~> NFml.Via.last ψ ws :=
   h.comp v.leads
 
 universe u v
 
 /-- A relation between lines whose evidence carries the second line's truth
 back to the first: every arrow of a chain, and `~~>` itself. -/
-class Fml.SoundRel (R : Fml C → Fml C → Sort u) : Prop where
-  leads : ∀ {φ ψ : Fml C}, R φ ψ → φ ~~> ψ
+class NFml.SoundRel (R : NFml C → NFml C → Sort u) : Prop where
+  leads : ∀ {φ ψ : NFml C}, R φ ψ → φ ~~> ψ
 
-instance {n : String} {r : LineRw C} : Fml.SoundRel (Fml.RwBy n r) := ⟨fun h => h.sound⟩
-instance : Fml.SoundRel (@Fml.RwAny C) := ⟨fun h => h.sound⟩
-instance : Fml.SoundRel (@Fml.Leads C) := ⟨id⟩
+instance {n : String} {r : LineRw C} : NFml.SoundRel (NFml.RwBy n r) := ⟨fun h => h.sound⟩
+instance : NFml.SoundRel (@NFml.RwAny C) := ⟨fun h => h.sound⟩
+instance : NFml.SoundRel (@NFml.Leads C) := ⟨id⟩
 
 /-- A `calc` with a rewrite in it composes to `~~>`; one of steps alone still
 composes to `~*>`, whose instances come first. -/
-instance (priority := low) {R : Fml C → Fml C → Sort u} {S : Fml C → Fml C → Sort v}
-    [Fml.SoundRel R] [Fml.SoundRel S] : @Trans (Fml C) (Fml C) (Fml C) R S Fml.Leads :=
-  ⟨fun a b σ h => Fml.SoundRel.leads a σ (Fml.SoundRel.leads b σ h)⟩
+instance (priority := low) {R : NFml C → NFml C → Sort u} {S : NFml C → NFml C → Sort v}
+    [NFml.SoundRel R] [NFml.SoundRel S] : @Trans (NFml C) (NFml C) (NFml C) R S NFml.Leads :=
+  ⟨fun a b σ h => NFml.SoundRel.leads a σ (NFml.SoundRel.leads b σ h)⟩
 
 /-! ## `sol_chain` on rewrites -/
 
 /-- Each rewrite of `rs` on `φ`: the line after, quoted, or `none`. -/
-def Fml.rwQuoted (c : Lean.Expr) (φ : Fml C) (rs : List (Fml C → Option (Fml C))) :
+def NFml.rwQuoted (c : Lean.Expr) (φ : NFml C) (rs : List (NFml C → Option (NFml C))) :
     List (Option Lean.Expr) :=
-  rs.map fun r => (r φ).map (Fml.quote c)
+  rs.map fun r => (r φ).map (NFml.quote c)
 
 namespace Chain
 section Tactic
@@ -371,7 +369,7 @@ def modalityOf? (φ : Lean.Expr) : MetaM (Option Lean.Expr) := do
   for x in fvs do
     let ty ← instantiateMVars (← x.getType)
     if ty.isConstOf ``Modality && fvs.size == 1 then return some (.fvar x)
-    if ty.isAppOfArity ``Fml 1 then
+    if ty.isAppOfArity ``NFml 1 then
       throwError "sol_chain: {mkFVar x} may name a fresh variable or have a modality: \
         take it as a postcondition, `{mkFVar x} : Post {ty.appArg!}`"
     unless ty.isConstOf ``Modality do
@@ -381,8 +379,8 @@ def modalityOf? (φ : Lean.Expr) : MetaM (Option Lean.Expr) := do
 
 /-- `some ψ = some ψ`, the proof of `φ.step = some ψ` and `φ.run n = some ψ`. -/
 def someRefl (C ψ : Lean.Expr) : Lean.Expr :=
-  let ty := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``Fml) C)
-  mkApp2 (mkConst ``Eq.refl [1]) ty (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) ψ)
+  let ty := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``NFml) C)
+  mkApp2 (mkConst ``Eq.refl [1]) ty (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``NFml) C) ψ)
 
 /-- `a ≡ b` by the kernel's definitional equality: the check a `rfl` meets
 when the declaration is added, made now instead of by the elaborator's
@@ -498,9 +496,9 @@ partial def bodyBelow (e : Lean.Expr) : Nat → MetaM Lean.Expr
   | 0 => pure e
   | n + 1 => do
     let e ← whnf e
-    if e.isAppOfArity ``Fml.upd 4 then bodyBelow e.appArg! n else pure e
+    if e.isAppOfArity ``NFml.upd 4 then bodyBelow e.appArg! n else pure e
 
-/-- What a part of a line folds to under `Fml.concrete`, as far as the
+/-- What a part of a line folds to under `NFml.concrete`, as far as the
 elaborator can tell: `true`, `false`, a formula it must not look at (a
 postcondition variable, or a fold that returns one), or anything else. -/
 inductive LitStatus where
@@ -511,21 +509,21 @@ inductive LitStatus where
 the literal leaves, the updates; a postcondition variable, a program, a
 quantifier and a `havoc` are opaque, and so is a connective's part whose
 fold may return an opaque formula (`LitStatus`), which the folds then do
-not test.  The status mirrors `Fml.concrete`'s folds so the flags are exact. -/
+not test.  The status mirrors `NFml.concrete`'s folds so the flags are exact. -/
 partial def skelOf (e : Lean.Expr) : MetaM (Skel × LitStatus) := do
   let e ← instantiateMVars e
   let isLit (t : Lean.Expr) : MetaM Bool := do
     return (← whnfTm t).isAppOfArity ``Term.lit 2
   match e.getAppFnArgs with
-  | (``Fml.tt, #[_]) => return (.lit, .tt)
-  | (``Fml.eq, #[_, a, b]) =>
+  | (``NFml.tt, #[_]) => return (.lit, .tt)
+  | (``NFml.eq, #[_, a, b]) =>
     if (← isLit a) && (← isLit b) then
       let va := (← whnfTm a).appArg!
       let vb := (← whnfTm b).appArg!
       return (.lit, if ← isDefEq va vb then .tt else .ff)
     return (.lit, .other)
-  | (``Fml.defined, #[_, t]) => return (.lit, if ← isLit t then .tt else .other)
-  | (``Fml.not, #[_, a]) =>
+  | (``NFml.defined, #[_, t]) => return (.lit, if ← isLit t then .tt else .other)
+  | (``NFml.not, #[_, a]) =>
     let (sa, ta) ← skelOf a
     let st := match ta with
       | .ff => .tt
@@ -533,20 +531,20 @@ partial def skelOf (e : Lean.Expr) : MetaM (Skel × LitStatus) := do
       | .opaque => .opaque
       | .other => .other
     return (.not (ta == .opaque) sa, st)
-  | (``Fml.and, #[_, a, b]) =>
+  | (``NFml.and, #[_, a, b]) =>
     let (sa, ta) ← skelOf a
     let (sb, tb) ← skelOf b
     let st := if ta == .tt then tb else if ta == .ff then .ff
       else if tb == .tt then ta else if tb == .ff then .ff else .other
     return (.and (ta == .opaque) (tb == .opaque) sa sb, st)
-  | (``Fml.imp, #[_, a, b]) =>
+  | (``NFml.imp, #[_, a, b]) =>
     let (sa, ta) ← skelOf a
     let (sb, tb) ← skelOf b
     let st := if ta == .tt then tb else if ta == .ff then .tt
       else if tb == .tt then .tt else if tb == .ff then (if ta == .opaque then .opaque else .other)
       else .other
     return (.imp (ta == .opaque) (tb == .opaque) sa sb, st)
-  | (``Fml.upd, #[_, _, _, ψ]) => return (.upd (← skelOf ψ).1, .opaque)
+  | (``NFml.upd, #[_, _, _, ψ]) => return (.upd (← skelOf ψ).1, .opaque)
   | _ => return (.opaque, .opaque)
 
 /-- The skeleton of the formula below `n` updates of the line `e`, quoted. -/
@@ -556,7 +554,7 @@ def skelBelow (e : Lean.Expr) (n : Nat) : MetaM Lean.Expr := do
 /-- The number of updates in front of a line. -/
 partial def spineLen (e : Lean.Expr) : MetaM Nat := do
   let e ← whnf e
-  if e.isAppOfArity ``Fml.upd 4 then return (← spineLen e.appArg!) + 1 else return 0
+  if e.isAppOfArity ``NFml.upd 4 then return (← spineLen e.appArg!) + 1 else return 0
 
 /-- The subterms of `e` with the head of `p`, outermost and leftmost first. -/
 partial def subtermsLike (p e : Lean.Expr) : Array Lean.Expr :=
@@ -787,11 +785,11 @@ def rwResults (C φ : Lean.Expr) (rs : Array Lean.Expr) :
   -- carries that variable in its proof, which a compiled evaluation cannot
   -- take, and the projection drops the proof
   let fs ← rs.mapM fun r => whnf (mkApp2 (mkConst ``LineRw.apply) C r)
-  let fml := mkApp (mkConst ``Fml) C
+  let fml := mkApp (mkConst ``NFml) C
   let list ← mkListLit (← mkArrow fml (mkApp (mkConst ``Option [0]) fml)) fs.toList
   let eval (φ : Lean.Expr) : MetaM (List (Option Lean.Expr)) :=
     unsafe evalExpr (List (Option Lean.Expr)) ty
-      (mkApp4 (mkConst ``Fml.rwQuoted) C (quoteConstName n) φ list)
+      (mkApp4 (mkConst ``NFml.rwQuoted) C (quoteConstName n) φ list)
   let fill (m? : Option Lean.Expr) (d b : Lean.Expr) : Option Lean.Expr :=
     (fillSlots m? sp.fmls d b).toOption
   match ← modalityOf? φ' with
@@ -815,9 +813,9 @@ updates that may halt compares the line's modalities (`Upd.merge`), which
 `cases m` decides, one `rfl` per modality.  `none` if that does not close it. -/
 def proveRw (C r A B : Lean.Expr) : TermElabM (Option Lean.Expr) := do
   let ty ← mkEq (mkApp2 (mkApp (mkConst ``LineRw.apply) C) r A)
-    (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B)
-  let simps ← `(tactic| simp only [LineRw.simplifyFresh, Fml.simplifyFreshAt, Fml.atSpine,
-    Option.map_some, Fml.simplifyFreshTop, Fml.freshVars, Post.freshVars_eq_nil, List.append_nil,
+    (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``NFml) C) B)
+  let simps ← `(tactic| simp only [LineRw.simplifyFresh, NFml.simplifyFreshAt, NFml.atSpine,
+    Option.map_some, NFml.simplifyFreshTop, NFml.freshVars, Post.freshVars_eq_nil, List.append_nil,
     List.nil_append])
   -- the line's modality variable, if any: a merge of two updates that may
   -- halt compares modalities, which `cases m` decides
@@ -891,7 +889,7 @@ def canonLink (r A B : Lean.Expr) : MetaM (Option Lean.Expr) := do
 /-- `r.apply A = some B` by `Modality.casesOn m`: one `Eq.refl` per
 modality, each checked by the kernel first when `check` is set. -/
 def rwCasesProof (C r A B m : Lean.Expr) (check : Bool) : MetaM (Option Lean.Expr) := do
-  let fml := mkApp (mkConst ``Fml) C
+  let fml := mkApp (mkConst ``NFml) C
   let ty := (← mkEq (mkApp2 (mkApp (mkConst ``LineRw.apply) C) r A)
     (mkApp2 (mkConst ``Option.some [0]) fml B)).abstract #[m]
   let pf (c : Lean.Name) : MetaM (Option Lean.Expr) := do
@@ -924,7 +922,7 @@ def rwProof (C r A B : Lean.Expr) : TermElabM (Option Lean.Expr) := do
     if let some p ← rwCasesProof C r A B m false then return some p
   | _, _ => pure ()
   let lhs := mkApp2 (mkApp (mkConst ``LineRw.apply) C) r A
-  let rhs := mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) B
+  let rhs := mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``NFml) C) B
   if ← kernelDefEq lhs rhs then
     record .refl
     return some (someRefl C B)
@@ -1037,7 +1035,7 @@ def rwAnyFind (C φ ψ : Lean.Expr) : TermElabM (Lean.Expr × Lean.Expr × Optio
 
 partial def solveChain (g : MVarId) : TermElabM Unit := do
   let ty ← instantiateMVars (← g.getType)
-  if ty.isAppOfArity ``Fml.RwAny 3 then
+  if ty.isAppOfArity ``NFml.RwAny 3 then
     let #[C, φ, ψ] := ty.getAppArgs | unreachable!
     let φ ← instantiateMVars φ
     let ψ ← instantiateMVars ψ
@@ -1048,9 +1046,9 @@ partial def solveChain (g : MVarId) : TermElabM Unit := do
     let lrw := mkApp (mkConst ``LineRw) C
     let motive ← withLocalDeclD `r lrw fun x => do
       mkLambdaFVars #[x] (← mkEq (mkApp2 (mkApp (mkConst ``LineRw.apply) C) x φ)
-        (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``Fml) C) ψ))
+        (mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``NFml) C) ψ))
     g.assign (mkApp4 (mkConst ``Exists.intro [1]) lrw motive r (pf.getD (someRefl C q)))
-  else if ty.isAppOfArity ``Fml.RwBy 5 then
+  else if ty.isAppOfArity ``NFml.RwBy 5 then
     let #[C, n, r, φ, ψ] := ty.getAppArgs | unreachable!
     let .lit (.strVal n) := n | throwError "sol_chain: the arrow's name is not known{indentExpr ty}"
     let φ ← instantiateMVars φ
@@ -1116,7 +1114,7 @@ elab "rwLabel% " l:term:max a:term:max r:ident b:term:max : term => do
       return l
     let some arrow ← rwArrow? r | throwError "~[{r}]~>: not a rewrite"
     let ty ← whnfR (← inferType a')
-    let_expr Fml C := ty | throwError "~[{r}]~>: not a formula{indentExpr a'}"
+    let_expr NFml C := ty | throwError "~[{r}]~>: not a formula{indentExpr a'}"
     let (lbl, _, _) ← rwLabel C a' (← elabTerm b none) r arrow
     unless ← isDefEq l lbl do throwError "~[{r}]~>: the rewrite on{indentExpr a'}\nis not {l}"
   return l
@@ -1134,28 +1132,28 @@ def rwLabelOf (C a b : Lean.Expr) (r : Ident) (arrow : RwArrow) : TermElabM Lean
 /-- The contract of a line, `Fml C`. -/
 def lineContract (a : Lean.Expr) (r : Ident) : TermElabM Lean.Expr := do
   let ty ← whnfR (← instantiateMVars (← inferType a))
-  if let some C := ty.app1? ``Fml then return C
+  if let some C := ty.app1? ``NFml then return C
   let C ← mkFreshExprMVar (mkConst ``Contract)
-  unless ← isDefEq ty (mkApp (mkConst ``Fml) C) do throwError "~[{r}]~>: not a formula{indentExpr a}"
+  unless ← isDefEq ty (mkApp (mkConst ``NFml) C) do throwError "~[{r}]~>: not a formula{indentExpr a}"
   return C
 
 elab_rules : term
   | `(stepBy% $a $r $b) => do
     let a ← elabTerm a none
     let C ← lineContract a r
-    let b ← elabTermEnsuringType b (mkApp (mkConst ``Fml) C)
+    let b ← elabTermEnsuringType b (mkApp (mkConst ``NFml) C)
     let some arrow ← rwArrow? r
       | throwError "~[{r}]~>: a rule of the strategy is a scoped chain's step: write the line \
           before it scoped (`open scoped Solidity.Core.Surface`)"
     let l ← rwLabelOf C a b r arrow
-    return mkAppN (mkConst ``Fml.RwBy) #[C, toExpr r.getId.toString, l, a, b]
+    return mkAppN (mkConst ``NFml.RwBy) #[C, toExpr r.getId.toString, l, a, b]
   | `(link% $a $r $b) => do
     let some arrow ← rwArrow? r
       | throwError "~[{r}]~>: a rule of the strategy is a scoped chain's step: write the line \
           before it scoped (`open scoped Solidity.Core.Surface`)"
     let a ← elabTerm a none
     let C ← lineContract a r
-    let b ← elabTermEnsuringType b (mkApp (mkConst ``Fml) C)
+    let b ← elabTermEnsuringType b (mkApp (mkConst ``NFml) C)
     let l ← rwLabelOf C a b r arrow
     return mkApp3 (mkConst ``Link.rw) C (toExpr r.getId.toString) l
 
@@ -1170,8 +1168,8 @@ link after it, `dl!{ … }` read three times. -/
     elabTerm (← liftMacroM (expandChainStx stx)) expectedType?
   let a ← elabTerm stx[0] none
   let ty ← whnfR (← instantiateMVars (← inferType a))
-  let some C := ty.app1? ``Fml | fallback
-  let fml := mkApp (mkConst ``Fml) C
+  let some C := ty.app1? ``NFml | fallback
+  let fml := mkApp (mkConst ``NFml) C
   let mut raw := #[a]
   for l in stx[1].getArgs do
     raw := raw.push (← elabTermEnsuringType l[1] fml)
@@ -1194,7 +1192,7 @@ link after it, `dl!{ … }` read three times. -/
       | _ => throwError "a step of the strategy (`~>`, `~*>`) is a scoped chain's: write the \
           first line scoped (`open scoped Solidity.Core.Surface`)"
     ws := ws.push (mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``Link) C, fml, link, b])
-  return mkApp3 (mkConst ``Fml.Via) C a (← mkListLit pairTy ws.toList)
+  return mkApp3 (mkConst ``NFml.Via) C a (← mkListLit pairTy ws.toList)
 
 end Elab
 end Chain

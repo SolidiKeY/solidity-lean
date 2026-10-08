@@ -44,7 +44,7 @@ theorem Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved : ‚
   sol_prove
   refine Proves.close_dropWt ?_
   sol_symex
-  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
   sol_decide_cons
 
@@ -52,7 +52,7 @@ theorem Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved : ‚ä¢ So
   sol_prove
   refine Proves.close_dropWt ?_
   sol_symex
-  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
   sol_decide_cons
 

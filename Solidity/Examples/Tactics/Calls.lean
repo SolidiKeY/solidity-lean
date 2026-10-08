@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Close
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Core.Surface
@@ -264,7 +265,7 @@ theorem callInReturn : ⊨ dl[Returns]{ ⟨ uint z = twiceIncr(3); ⟩ z == 8 } 
 
 /-- The elaborated form: the call captured into a fresh `se`, the
 statement reading it. -/
-example : Prog.toStr (sol[Returns]{ uint z = incr(4) + 1; } : Prog Returns) =
+example : Surface.Prog.toStr (sol[Returns]{ uint z = incr(4) + 1; } : Surface.Prog Returns) =
     "uint se1; se1 = incr(4); uint z = se1 + 1;" := rfl
 
 /-- error: Solidity elaboration failed: a call under a short-circuit operator -/
@@ -289,19 +290,19 @@ def Mutated : Contract := contract!{
 }
 
 /-- The body a call statement carries, printed. -/
-def calleeStr {C : Contract} (P : Prog C) : String :=
+def calleeStr {C : Contract} (P : Surface.Prog C) : String :=
   match P.getLast? with
-  | some (.call _ _ _ _ body) => Prog.toStr body
+  | some (.call _ _ _ _ body) => Surface.Prog.toStr body
   | _ => ""
 
 /-- info: uint a = 1; uint se1 = a; uint se2; se2 = a++; uint y = se2 + se1; -/
-#guard_msgs in #eval IO.println (Prog.toStr (sol[Mutated]{ uint a = 1; uint y = a++ + a; } : Prog Mutated))
+#guard_msgs in #eval IO.println (Surface.Prog.toStr (sol[Mutated]{ uint a = 1; uint y = a++ + a; } : Surface.Prog Mutated))
 
 /-- info: uint se3 = se1; uint se4; se4 = se1++; se2 = se4 + se3; -/
-#guard_msgs in #eval IO.println (calleeStr (sol[Mutated]{ uint y = bumpRead(1); } : Prog Mutated))
+#guard_msgs in #eval IO.println (calleeStr (sol[Mutated]{ uint y = bumpRead(1); } : Surface.Prog Mutated))
 
 /-- info: uint se3 = se1; uint se4 = se3; uint se5; se5 = se3++; se2 = se5 + se4; -/
-#guard_msgs in #eval IO.println (calleeStr (sol[Mutated]{ uint y = localRead(1); } : Prog Mutated))
+#guard_msgs in #eval IO.println (calleeStr (sol[Mutated]{ uint y = localRead(1); } : Surface.Prog Mutated))
 
 /-- `bumpRead(1)` is `1 + 1`, as the caller's `a++ + a` is. -/
 theorem callLocalReadBeforeEffect : ⊨ dl[Mutated]{ ⟨ uint y = bumpRead(1); ⟩ y == 2 } := by
@@ -408,13 +409,13 @@ theorem tupleDeclaration :
 printed as written. -/
 
 /-- info: (,) = returnOrdered(1, 2); -/
-#guard_msgs in #eval IO.println (Prog.toStr (C := Tuples) (sol[Tuples]{ (, ) = returnOrdered(1, 2); }))
+#guard_msgs in #eval IO.println (Surface.Prog.toStr (C := Tuples) (sol[Tuples]{ (, ) = returnOrdered(1, 2); }))
 
 /-! A component left out is evaluated when it may revert, as solc does
 (solkey's `tupleAssignment` drops it): `1 / total` divides by zero in a
 fresh contract, so the declaration halts (run, not proved: the interpreter
 does not reduce in the kernel here). -/
-#guard (Prog.run ({ storage := Tuples.initStorage } : Semantics.State)
+#guard (Surface.Prog.runT ({ storage := Tuples.initStorage } : Semantics.State)
     sol[Tuples]{ (uint x, ) = (1, 1 / total); }).toBool == false
 
 theorem returnLeavesNestedBlocks :
@@ -436,8 +437,8 @@ theorem blockScope : ⊨ dl[Tuples]{ [ { uint w = 1; total = w; }; uint w = 2; ]
 
 /-- The call and the assignments after it print as the tuple assignment
 they are elaborated from (`Stmt.tupleCallStr?`). -/
-example : Prog.toStr (sol[Tuples]{ uint lo; uint sum; (lo, , sum, ) = returnStats(3, 1); } :
-    Prog Tuples) = "uint lo; uint sum; (lo, , sum, ) = returnStats(3, 1);" := rfl
+example : Surface.Prog.toStr (sol[Tuples]{ uint lo; uint sum; (lo, , sum, ) = returnStats(3, 1); } :
+    Surface.Prog Tuples) = "uint lo; uint sum; (lo, , sum, ) = returnStats(3, 1);" := rfl
 
 /-- error: Solidity elaboration failed: returnOrdered returns 2 values, not 3 -/
 #guard_msgs in #check sol[Tuples]{ (uint a, uint b, uint c) = returnOrdered(1, 2); }

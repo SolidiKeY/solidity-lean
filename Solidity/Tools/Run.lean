@@ -1,5 +1,6 @@
 import Solidity.Tools.Common
 import Solidity.Semantics.Core.TypedRun
+import Solidity.Semantics.Core.TypedToSem
 
 /-!
 # `#run`: call a contract's function in the typed run
@@ -44,9 +45,9 @@ return.
 #deploy Mini(7) with msg.sender := 3
 ```
 
-`#deploy C(args)` deploys `C` (`Contract.deploy`): it runs
-`constructor(args);` (`ctorProg`, the initializers and the constructor's
-body) from `Contract.deployState`, whose ledger and funds hold what
+`#deploy C(args)` deploys `C` in the typed run (`Core.Contract.deployT`'s
+reading): it runs `constructor(args);` (`ctorProg`, the initializers and the
+constructor's body) from `Contract.deployState`, whose ledger and funds hold what
 `msg.value := n` sends; `with` takes the transaction's fields only.  The
 output is `ok`, the funds, and the storage; or how it halted.
 -/
@@ -87,7 +88,7 @@ def runStmt (C : Contract) (f : String) (args : List RawExpr) : Except String Ra
 
 /-- The call of `f`, elaborated: its body inlined. -/
 def callProg [FreshNames] (C : Contract) (f : String) (args : List RawExpr) :
-    Except String (Prog C) := do
+    Except String (Surface.Prog C) := do
   elabProg C [← callStmt C f args]
 
 /-- The state a contract starts in: every root at its default, no funds, the
@@ -126,6 +127,33 @@ def typedState? (C : Contract) (σ : State) : Option (Core.TState C []) := do
   let tx : Core.TTx :=
     { msgSender := snd, msgValue := val, timestamp := now, selfAddress := addr, ext := σ.tx.ext }
   pure (Core.TState.mk st [] Core.Heap.empty () σ.net bal tx)
+
+/-- **A block run from an untyped state**, in the typed run: `P` resolved
+from no locals (`Core.Prog.resolve`), run by `Core.Prog.trun` from `σ` read
+at the contract's types (`typedState?`), and its end state named back
+(`Core.TState.toSem`, under the block's names) or its halt erased
+(`THalt.erase`); `stuck` where `P` does not resolve or `σ` is not of the
+contract's types.  What the examples' `#eval`s run since today's
+`Stmt.run` was deleted (W4 `modal`, `docs/intrinsic.md`). -/
+def _root_.Solidity.Surface.Prog.runT {C : Contract} (σ : State) (P : Surface.Prog C) : Res State :=
+  match Core.Prog.resolve [] P, typedState? C σ with
+  | .ok ⟨Γ', Q⟩, some τ =>
+    match Core.Prog.trun τ Q with
+    | .ok o => .ok (o.st.toSem Γ'.names)
+    | .error h => .error h.erase
+  | _, _ => .error .stuck
+
+/-- What the local `x` holds after `P` runs from `σ` (`Surface.Prog.runT`). -/
+def _root_.Solidity.Surface.Prog.localAfterT {C : Contract} (σ : State) (P : Surface.Prog C)
+    (x : String) : Res Binding := do
+  (← Surface.Prog.runT σ P).getEnv (.user x)
+
+/-- A deployment in the typed run, its end state named back: `#deploy`'s
+(`deployReport`), as a value. -/
+def _root_.Solidity.Contract.deployRun (C : Contract) (P : Surface.Prog C)
+    (tx : TxEnv) : Res State :=
+  if !((C.ctor.map (·.payable)).getD false) && tx.msgValue != 0 then .error .revert
+  else Surface.Prog.runT (C.deployState tx) P
 
 /-- The locals of a typed environment, innermost first: each one's level at
 base `0` (`Evm.Core.lvl`), and its type and value if it is a value local. -/
@@ -207,14 +235,19 @@ open Lean Elab Command Term Meta in
     logInfo (String.intercalate "\n" (← evalLines "#run" t))
   | _ => throwUnsupportedSyntax
 
-/-- What `#deploy` prints: the deployment's outcome (`Contract.deploy`), the
+/-- What `#deploy` prints: the deployment's outcome in the typed run
+(`Core.Contract.deployT`'s: a constructor that is not `payable` refuses
+value, else `constructor(args);` runs from `Contract.deployState`), the
 contract's funds and its storage. -/
 def deployReport [FreshNames] (C : Contract) (args : List RawExpr) (tx : TxEnv) :
     Except String (List String) := do
   let P ← ctorProg C args
-  pure <| match C.deploy P tx with
-    | .error h => [fmtHalt h]
-    | .ok σ => ["ok", s!"balance {σ.selfBalance}"] ++ fmtStorage C σ.storage
+  let ⟨_, Q⟩ ← Core.Prog.resolve [] P
+  let some τ := typedState? C (C.deployState tx) | throw "the deployment's start is not of the contract's types"
+  if !((C.ctor.map (·.payable)).getD false) && tx.msgValue != 0 then return [fmtHalt .revert]
+  pure <| match Core.Prog.trun τ Q with
+    | .error h => [fmtHalt h.erase]
+    | .ok o => ["ok", s!"balance {o.st.selfBalance.1}"] ++ fmtStorage C o.st.storage.erase
 
 /-- `#deploy C(a, b) [with msg.sender := n, msg.value := m, …]`: deploy the
 contract `C` in the interpreter and print its outcome. -/

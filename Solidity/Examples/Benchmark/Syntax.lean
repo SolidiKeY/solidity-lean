@@ -51,15 +51,15 @@ local instance : InContract := ⟨Elaborates⟩
 /-! ## Units and casts -/
 
 /-- `2 ether` is `2 * 10^18`, `3 days` is `3 * 86400`, `1 gwei` is `10^9`. -/
-example : Prog.toStr (sol{ total = 2 ether + 3 days; total = 1 gwei; }) =
+example : Surface.Prog.toStr (sol{ total = 2 ether + 3 days; total = 1 gwei; }) =
     "total = 2000000000000000000 + 259200; total = 1000000000;" := rfl
 
 /-- `payable(e)` and `address(e)` are `e`. -/
-example : Prog.toStr (sol{ owner = payable(address(total)); owner = address(0); }) =
+example : Surface.Prog.toStr (sol{ owner = payable(address(total)); owner = address(0); }) =
     "owner = total; owner = 0;" := rfl
 
 /-- `address(this)` is the contract's own address, an environment value. -/
-example : Prog.toStr (sol{ owner = address(this); }) = "owner = address(this);" := rfl
+example : Surface.Prog.toStr (sol{ owner = address(this); }) = "owner = address(this);" := rfl
 
 /--
 error: a unit is one of wei gwei ether seconds minutes hours days weeks
@@ -72,47 +72,47 @@ error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains error
 
 /-- An event's arguments that cannot revert are not evaluated; one that may
 (an addition may overflow) is, into a local nothing reads. -/
-example : Prog.toStr (sol{ emit Paid(owner, total); emit Paid(owner, total + 1); }) =
+example : Surface.Prog.toStr (sol{ emit Paid(owner, total); emit Paid(owner, total + 1); }) =
     "uint se1 = total + 1;" := rfl
 
 /-- An `++` in an event's argument happens, after the arguments before it
 are read. -/
-example : Prog.toStr (sol{ emit Paid(owner, total++); }) =
+example : Surface.Prog.toStr (sol{ emit Paid(owner, total++); }) =
     "uint se1 = owner; uint se2; se2 = total++;" := rfl
 
 /-- `require` with a message or an error, `revert` with an error or a
 message. -/
-example : Prog.toStr (sol{ require(total > 0, "empty"); require(total > 0, TooLow(total, 2));
+example : Surface.Prog.toStr (sol{ require(total > 0, "empty"); require(total > 0, TooLow(total, 2));
     revert TooLow(1, 2); revert("no"); }) =
     "require(total > 0); require(total > 0); revert(); revert();" := rfl
 
 /-- An error's argument that may revert is evaluated when the condition
 holds, as solc evaluates it before the check. -/
-example : Prog.toStr (sol{ require(total > 0, TooLow(total + 1, 2)); }) =
+example : Surface.Prog.toStr (sol{ require(total > 0, TooLow(total + 1, 2)); }) =
     "if (total > 0) { uint se1 = total + 1; } else { revert(); }" := rfl
 
 /-! ## Enums -/
 
 /-- `Phase.Closed` is the second member: `1`. -/
-example : Prog.toStr (sol{ phase = Phase.Closed; }) = "phase = 1;" := rfl
+example : Surface.Prog.toStr (sol{ phase = Phase.Closed; }) = "phase = 1;" := rfl
 
 /-- A local of an enum type is a `uint`. -/
-example : Prog.toStr (sol{ Phase p = Phase.Closed; phase = p; }) = "uint p = 1; phase = p;" := rfl
+example : Surface.Prog.toStr (sol{ Phase p = Phase.Closed; phase = p; }) = "uint p = 1; phase = p;" := rfl
 
 /-! ## Struct constructors -/
 
 /-- A storage target is written from a fresh memory object (the arguments may
 read the target: `pair = Pair(pair.b, pair.a)` swaps). -/
-example : Prog.toStr (sol{ pair = Pair(total, 2); }) =
+example : Surface.Prog.toStr (sol{ pair = Pair(total, 2); }) =
     "Pair memory mv1; mv1.a = total; mv1.b = 2; pair = mv1;" := rfl
 
 /-- Named arguments are put in the members' order. -/
-example : Prog.toStr (sol{ pair = Pair({b: 2, a: total}); }) =
+example : Surface.Prog.toStr (sol{ pair = Pair({b: 2, a: total}); }) =
     "Pair memory mv1; mv1.a = total; mv1.b = 2; pair = mv1;" := rfl
 
 /-- A memory local names the fresh object; a push is a default slot written
 with its copy. -/
-example : Prog.toStr (sol{ Pair memory q = Pair(1, 2); pairs.push(Pair(1, 2)); }) =
+example : Surface.Prog.toStr (sol{ Pair memory q = Pair(1, 2); pairs.push(Pair(1, 2)); }) =
     "Pair memory mv1; mv1.a = 1; mv1.b = 2; Pair memory q = mv1; \
     Pair memory mv2; mv2.a = 1; mv2.b = 2; pairs.push(); pairs[pairs.length - 1] = mv2;" := rfl
 
@@ -131,7 +131,7 @@ parameter a fresh local bound when the modifier is entered. -/
 /--
 info: uint se1 = owner; uint se2 = 5; uint se4 = se1; require(se4 == owner); uint se3 = 0; if (phase != se3) { revert(); } else { } total += se2; total += 1;
 -/
-#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol{ pay(owner, 5); })))
+#guard_msgs in #eval IO.println (Surface.Prog.toStr (Surface.Prog.inlined (sol{ pay(owner, 5); })))
 
 /-- error: Solidity elaboration failed: `_;` outside a modifier's body -/
 #guard_msgs in #check sol{ _; }
@@ -163,7 +163,7 @@ def Twice : Contract := contract!{ uint x;
 /--
 info: uint se3 = 2; uint se4 = se3; uint se1 = 5; uint se2 = se1; x = se2; x = se4;
 -/
-#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol[Twice]{ h(); })))
+#guard_msgs in #eval IO.println (Surface.Prog.toStr (Surface.Prog.inlined (sol[Twice]{ h(); })))
 
 /-- A body run twice by `_; _;`: its local, written flat twice into one
 scope, is renamed apart in the first run (`se3_1`, `freshenBlocks`), so the
@@ -175,7 +175,7 @@ def TwiceLocal : Contract := contract!{ uint n;
 /--
 info: uint y; uint se1 = 0; uint se2; uint se3_1 = se1 + 1; se2 = se3_1; n += se3_1; uint se3 = se1 + 1; se2 = se3; n += se3; y = se2;
 -/
-#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol[TwiceLocal]{ uint y = f(0); })))
+#guard_msgs in #eval IO.println (Surface.Prog.toStr (Surface.Prog.inlined (sol[TwiceLocal]{ uint y = f(0); })))
 
 /-! ## Named arguments of a call
 
@@ -189,7 +189,7 @@ def NamedArgs : Contract := contract!{ uint r;
 /--
 info: uint se1; uint se2 = 1; uint se3 = 2; uint se4 = 3; uint se5; se5 = ((se2 * 100) + (se3 * 10)) + se4; se1 = se5; r = se1;
 -/
-#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol[NamedArgs]{ r = f({q: 2, s: 3, p: 1}); })))
+#guard_msgs in #eval IO.println (Surface.Prog.toStr (Surface.Prog.inlined (sol[NamedArgs]{ r = f({q: 2, s: 3, p: 1}); })))
 
 /-- error: Solidity elaboration failed: f({…}) names each parameter of f once: [p, q, s] -/
 #guard_msgs in #check sol[NamedArgs]{ r = f({q: 2, p: 1}); }
@@ -219,12 +219,12 @@ example : WithCtor.vars.map (·.1) = ["limit", "owner", "total"] := rfl
 
 /-- A deployment, `constructor(5);`: its body, an enum local and an `else if`
 in it, inlined after `limit = 10;`, as one call. -/
-example : Prog.toStr (C := WithCtor) (sol[WithCtor]{ constructor(5); }) = "constructor(5);" := rfl
+example : Surface.Prog.toStr (C := WithCtor) (sol[WithCtor]{ constructor(5); }) = "constructor(5);" := rfl
 
 /-- No `constructor`: the implicit one runs the initializers. -/
 def WithInits : Contract := contract!{ uint x = 5; uint y; }
 
-example : Prog.toStr (C := WithInits) (sol[WithInits]{ constructor(); }) = "constructor();" := rfl
+example : Surface.Prog.toStr (C := WithInits) (sol[WithInits]{ constructor(); }) = "constructor();" := rfl
 
 /-- A function that calls the constructor. -/
 def CallsCtor : Contract := contract!{ uint n; constructor() { n = 1; } function f() { constructor(); } }

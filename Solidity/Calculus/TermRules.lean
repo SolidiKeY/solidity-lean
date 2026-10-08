@@ -18,7 +18,7 @@ and `TermTaclet.sound` is where this module's `Term.Theq` comes in;
 `Term.Theq.of_eq` with the `denote_*` lemmas below is how `sol_rw` lifts a
 Theory lemma on the spot (`TermTaclet.theory`, `Calculus/TheoryRewrite.lean`).
 
-**Where a rewrite reaches** (`Fml.rwEq`): every total equation, at any depth
+**Where a rewrite reaches** (`NFml.rwEq`): every total equation, at any depth
 — under a connective, behind an update, inside a modality's postcondition,
 under a quantifier or `havoc`.  `Term.Theq` quantifies over every state, so
 the state a subformula is judged in does not matter.  It does not reach:
@@ -316,7 +316,7 @@ end Denote
 /-- Every occurrence of `q.1`, replaced by `q.2` in every total equation of
 the formula, at any depth; `defined`, update right-hand sides and programs
 are left alone (the module docstring says why). -/
-def Fml.rwEq (q : Term C × Term C) : Fml C → Fml C
+def NFml.rwEq (q : Term C × Term C) : NFml C → NFml C
   | .tt => .tt
   | .eq a b => .eq (a.rw q) (b.rw q)
   | .defined t => .defined t
@@ -324,24 +324,23 @@ def Fml.rwEq (q : Term C × Term C) : Fml C → Fml C
   | .and φ ψ => .and (φ.rwEq q) (ψ.rwEq q)
   | .imp φ ψ => .imp (φ.rwEq q) (ψ.rwEq q)
   | .upd m U φ => .upd m U (φ.rwEq q)
-  | .modal m P φ => .modal m P (φ.rwEq q)
   | .havoc φ => .havoc (φ.rwEq q)
   | .all x p φ => .all x p (φ.rwEq q)
   | .anon xs φ => .anon xs (φ.rwEq q)
 
 /-- **A Theory equation rewrites a formula into an equivalent one**, in every
 state: the payoff of reading equations in the Theory. -/
-theorem Fml.rwEq_holds {q : Term C × Term C} (h : Term.Theq q.1 q.2) :
-    (φ : Fml C) → ∀ σ, (holds σ (φ.rwEq q) ↔ holds σ φ)
+theorem NFml.rwEq_holds {q : Term C × Term C} (h : Term.Theq q.1 q.2) :
+    (φ : NFml C) → ∀ σ, (holds σ (φ.rwEq q) ↔ holds σ φ)
   | .tt, _ | .defined _, _ => Iff.rfl
   | .eq a b, σ => by
     have ha : StValue.Equiv ((a.rw q).denote σ) (a.denote σ) := a.rw_denote (h σ)
     have hb : StValue.Equiv ((b.rw q).denote σ) (b.denote σ) := b.rw_denote (h σ)
     exact ⟨fun e => ha.symm.trans (e.trans hb), fun e => ha.trans (e.trans hb.symm)⟩
-  | .not φ, σ => by simp only [Fml.rwEq, holds, φ.rwEq_holds h σ]
-  | .and φ ψ, σ => by simp only [Fml.rwEq, holds, φ.rwEq_holds h σ, ψ.rwEq_holds h σ]
-  | .imp φ ψ, σ => by simp only [Fml.rwEq, holds, φ.rwEq_holds h σ, ψ.rwEq_holds h σ]
-  | .upd _ _ φ, _ | .modal _ _ φ, _ | .havoc φ, _ | .all _ _ φ, _ | .anon _ φ, _ => by
-    simp only [Fml.rwEq, holds, φ.rwEq_holds h]
+  | .not φ, σ => by simp only [NFml.rwEq, holds, φ.rwEq_holds h σ]
+  | .and φ ψ, σ => by simp only [NFml.rwEq, holds, φ.rwEq_holds h σ, ψ.rwEq_holds h σ]
+  | .imp φ ψ, σ => by simp only [NFml.rwEq, holds, φ.rwEq_holds h σ, ψ.rwEq_holds h σ]
+  | .upd _ _ φ, _ | .havoc φ, _ | .all _ _ φ, _ | .anon _ φ, _ => by
+    simp only [NFml.rwEq, holds, φ.rwEq_holds h]
 
 end Solidity

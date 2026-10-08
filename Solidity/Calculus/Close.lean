@@ -681,16 +681,16 @@ theorem lookupBy_setBy_int (k k' v : Int) (l : List (Int × Int)) :
   · exact SemanticsProperties.lookupBy_setBy_ne ‹_› _ _
 
 /-- `true` holds. -/
-theorem holds_tt : holds σ (Fml.tt : Fml C) ↔ True := Iff.rfl
+theorem holds_tt : holds σ (NFml.tt : NFml C) ↔ True := Iff.rfl
 /-- `¬ φ`. -/
-theorem holds_not (φ : Fml C) : holds σ (.not φ) ↔ ¬ holds σ φ := Iff.rfl
+theorem holds_not (φ : NFml C) : holds σ (.not φ) ↔ ¬ holds σ φ := Iff.rfl
 /-- `φ ∧ ψ`. -/
-theorem holds_and (φ ψ : Fml C) : holds σ (.and φ ψ) ↔ holds σ φ ∧ holds σ ψ := Iff.rfl
+theorem holds_and (φ ψ : NFml C) : holds σ (.and φ ψ) ↔ holds σ φ ∧ holds σ ψ := Iff.rfl
 /-- `a == 1 → …`. -/
-theorem holds_imp (φ ψ : Fml C) : holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
+theorem holds_imp (φ ψ : NFml C) : holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
 /-- `y == 10` (`Fml.eqD`) holds when both sides are defined and equal: as a
 diamond on each side, since a side that halts makes it false. -/
-theorem holds_eqD (a b : Term C) : holds σ (Fml.eqD a b) ↔
+theorem holds_eqD (a b : Term C) : holds σ (NFml.eqD a b) ↔
     Modality.diamond.wp (a.eval σ) fun x => Modality.diamond.wp (b.eval σ) fun y => x = y := by
   rw [holds_eqD_iff]
   cases a.eval σ <;> cases b.eval σ <;>
@@ -720,19 +720,12 @@ theorem holds_defined (t : Term C) : holds σ (.defined t) ↔
   cases t.eval σ <;> simp [Modality.wp, Modality.onHalt]
 /-- `{y := alice.age} y == 10`: apply the update, under the modality it was
 produced in. -/
-theorem holds_upd (m : Modality) (U : Upd C) (φ : Fml C) :
+theorem holds_upd (m : Modality) (U : Upd C) (φ : NFml C) :
     holds σ (.upd m U φ) ↔ m.wp (U.apply σ) (holds · φ) := by
   simp only [holds, Modality.after_eq_wp]
 /-- `∀ uint a; φ`: `φ` for every `a` of the type. -/
-theorem holds_all (x : Var) (p : PrimTy) (φ : Fml C) :
+theorem holds_all (x : Var) (p : PrimTy) (φ : NFml C) :
     holds σ (.all x p φ) ↔ ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ := Iff.rfl
-/-- `⟨[ revert(); ]⟩ ψ`, the modality a branch's cover keeps (`Premise.coverFml`):
-the run halts, so it holds under the box and not under the diamond. -/
-theorem holds_revert (m : Modality) (ω : Prog C) (φ : Fml C) :
-    holds σ (.modal m (.revert :: ω) φ) ↔ m.onHalt := by
-  cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.afterRun,
-    Modality.after, Modality.onHalt, ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true,
-    and_true]
 
 /-! ### A loop's anonymising update
 
@@ -748,7 +741,7 @@ def anonRead (o : Option Binding) : Res Binding :=
   | none => .error .stuck
 
 /-- `{anon(i)} φ`: `φ` whatever `i` holds. -/
-theorem holds_anon (xs : List Var) (φ : Fml C) :
+theorem holds_anon (xs : List Var) (φ : NFml C) :
     holds σ (.anon xs φ) ↔ ∀ b, holds (σ.anon xs b) φ := Iff.rfl
 
 theorem State.anon_nil (σ : State) (b : Var → Option Binding) : σ.anon [] b = σ := by
@@ -808,7 +801,7 @@ attribute [close_rw high] Close.holds_eqD
 attribute [close_rw]
   -- formulas and updates
   Close.holds_tt Close.holds_not Close.holds_and Close.holds_imp Close.holds_upd
-  Close.holds_defined Close.holds_all Close.holds_revert
+  Close.holds_defined Close.holds_all
   Close.holds_eq Close.Term.denote_lit Close.Term.denote_pv Close.equiv_prim_left_iff
   Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
   Hyp.wrap Upd.apply List.foldlM_cons List.foldlM_nil

@@ -70,13 +70,13 @@ variable [FreshNames]
 /-- An obligation's program resolved in its parameters' context, and the
 obligation stated: a deployment's when `ctor`. -/
 def Problem.resolve (ctor : Bool) (m : Modality) (xs : List (PrimTy × Var))
-    (P : Solidity.Prog C) : Except String (Fml C []) := do
+    (P : Solidity.Surface.Prog C) : Except String (Fml C []) := do
   let ⟨_, P'⟩ ← Prog.resolve (paramsN xs) P
   pure (if ctor then Problem.ctorFml m xs P' else Problem.fml m xs P')
 
 /-- Today's obligation (`Solidity.Problem.fml`, `Solidity.Problem.ctorFml`)
 scoped: its parts read back (`Problem.parts`), its program resolved. -/
-def Problem.ofLegacy (φ : Solidity.Fml C) : Except String (Fml C []) :=
+def Problem.ofLegacy (φ : Solidity.Surface.Fml C) : Except String (Fml C []) :=
   match Solidity.Problem.parts φ with
   | some (xs, ctor, m, P) => Problem.resolve ctor m xs P
   | none => .error "not an obligation `∀x̄. wt(storage) → [ P ] true` or a deployment's"

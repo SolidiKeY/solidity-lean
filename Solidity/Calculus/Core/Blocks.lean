@@ -5,7 +5,7 @@ import Solidity.Calculus.Core.Arms
 
 `Completeness.lean`'s arms for calls, `try` and loops over the scoped
 syntax (`docs/intrinsic.md`, M6a), and the loop frame they need
-(`Mutability.lean`'s `Prog.loopFrame`).
+(today's `Prog.loopFrame`).
 
 * **A call** (`internalCallExpand`, `functionBodyExpand`) is inlined as
   KeY's `expand_function_body` writes it: the parameters declared with the
@@ -133,7 +133,7 @@ section Frame
 
 variable {Γ : Ctx}
 
-/-- `v` reads something other than locals (`Mutability.lean`'s `Val.readsState`). -/
+/-- `v` reads something other than locals (today's `Val.readsState`). -/
 def Val.readsState : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple (.env ..) => true
   | _, .simple _ => false
@@ -189,7 +189,7 @@ def OpLoc.writesAt (d : Nat) {p : PrimTy} : OpLoc C Γ p → List (LTy × Nat)
 
 mutual
 
-/-- **A statement a callee of mutability `μ` may run** (`Mutability.lean`'s
+/-- **A statement a callee of mutability `μ` may run** (today's
 `Stmt.within`): one writing locals only (`view`, reading no state if
 `pure`), or storage and the ledger (`nonpayable`). -/
 def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
@@ -226,7 +226,7 @@ end
 mutual
 
 /-- The locals of the context `d` locals below `s`'s that `s` may write,
-by type and position there (`Mutability.lean`'s `Stmt.writes`, less the
+by type and position there (today's `Stmt.writes`, less the
 locals `s`'s own scopes declare). -/
 def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × Nat)
   | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => List (LTy × Nat)) s
@@ -252,7 +252,7 @@ def Prog.writesAt (d : Nat) : {Γ Γ' : Ctx} → Prog C Γ Γ' → List (LTy × 
 
 end
 
-/-- **The frame of a loop body** (`Mutability.lean`'s `Prog.loopFrame`): the
+/-- **The frame of a loop body** (today's `Prog.loopFrame`): the
 locals of the loop's context it writes, and whether it writes the storage
 and the ledger too; `none` when it does more. -/
 def Prog.frame {Γ₁ : Ctx} (P : Prog C Γ Γ₁) : Option (List ((t : LTy) × Idx Γ t) × Bool) :=

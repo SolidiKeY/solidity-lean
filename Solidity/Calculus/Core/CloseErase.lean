@@ -80,7 +80,7 @@ theorem agreeExcept_setEnv (s : Semantics.State) (x : Var) (b : Binding) :
     rfl, rfl⟩
 
 /-- States that agree everywhere satisfy the same formulas. -/
-theorem holds_congr_full {s t : Semantics.State} (h : EnvAgreeExcept [] s t) (φ : Solidity.Fml C) :
+theorem holds_congr_full {s t : Semantics.State} (h : EnvAgreeExcept [] s t) (φ : Solidity.NFml C) :
     Solidity.holds s φ ↔ Solidity.holds t φ :=
   Solidity.holds_frame φ (fun _ _ => List.not_mem_nil) h
 

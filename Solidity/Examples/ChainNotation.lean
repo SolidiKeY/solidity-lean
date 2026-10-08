@@ -178,7 +178,7 @@ theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.
       ~[simplifyUpdate]~> dl![.box]{ { storage := save(storage, alice.account.balance, 10) }
         alice.account.balance == 10 } by sol_chain).valid_close ?_
   show Solidity.Valid _
-  dsimp only [Solidity.Fml.Via.last]
+  dsimp only [Solidity.NFml.Via.last]
   sol_close
 
 /-- A box derivation's last line, written: an update with no modality under

@@ -190,7 +190,7 @@ theorem envAgree_symm {ns : List Var} {σ τ : Semantics.State} (h : EnvAgreeExc
 
 /-- Two states alike but for their locals, whose lookups agree, satisfy the
 same formulas. -/
-theorem holds_of_envAgree_nil {φ : Solidity.Fml C} {σ τ : Semantics.State} (h : EnvAgreeExcept [] σ τ) :
+theorem holds_of_envAgree_nil {φ : Solidity.NFml C} {σ τ : Semantics.State} (h : EnvAgreeExcept [] σ τ) :
     Solidity.holds σ φ → Solidity.holds τ φ :=
   (Solidity.holds_frame φ (fun _ _ => List.not_mem_nil) h).1
 

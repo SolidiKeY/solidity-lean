@@ -37,7 +37,7 @@ the update that wrote `x` (`Proves.definedWritten`), `defined(42)` from
 nothing (`Proves.definedLit`).  The merged update is applied to the
 equation and dropped in one step (`Proves.applyOnRigidBox`, through
 `sol_apply_upd`); it writes the storage too, which it may because `x ≐ 42`
-reads no storage (`Fml.stFree`).  The one storage step, the read of the
+reads no storage (`NFml.stFree`).  The one storage step, the read of the
 write, is the term taclet `findOnSave` (`Calculus/TermTaclets.lean`),
 applied by `Proves.rewrite`; its soundness is the Theory's
 `find_copyTo_same` (`TermTaclet.sound`).  `42 ≐ 42` closes by `Proves.eqRefl`.

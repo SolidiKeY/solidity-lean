@@ -112,7 +112,7 @@ theorem deepFieldRead :
   apply Proves.valid
   apply unfold .localValueDeclInitDrop
   -- Step 1, `storageFieldRead_unfold_rightFst` (see the module docstring)
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -132,7 +132,7 @@ theorem deeperFieldWrite :
   apply unfold .storageLocalDeclInitDrop
   -- the alias's own right-hand side `alice.account.token` is a read with a
   -- non-simple receiver: Step 1 (`storageFieldRead_unfold_rightFst`) unfolds it
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -151,7 +151,7 @@ theorem fieldWriteFromAlias :
   apply Proves.valid
   apply unfold .localValueDeclInitDrop
   -- Step 1, `storageFieldRead_unfold_rightFst` (see the module docstring)
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -210,7 +210,7 @@ theorem globalRootCopy :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   -- Step 1, `storageFieldRead_unfold_rightFst`
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadStoreRoot
@@ -232,7 +232,7 @@ theorem localRebindThenWrite :
   apply Proves.valid
   apply unfold .localValueDeclInitDrop
   -- Step 1, `storageFieldRead_unfold_rightFst` (see the module docstring)
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -361,7 +361,7 @@ theorem receiverAndIndexCaptured :
   apply update .localValueAssign
   apply unfold .storageLocalDeclInitDrop
   -- Step 1, `storageIndexRead_unfold_rightSndIndex`
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   apply update .storageIndexReadArrayBindLocalRoot

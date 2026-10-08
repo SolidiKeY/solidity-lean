@@ -147,7 +147,7 @@ def SpecExpr.isNum : SpecExpr → Bool
 
 /-- `t` is a value of its type: `0 <= t <= 2^256 - 1` for a `uint`, `!t`
 defined for a `bool`. -/
-def rangeFml (t : Term C) : PrimTy → Fml C
+def rangeFml (t : Term C) : PrimTy → NFml C
   | .uint => .and (cmpFml .le .uint (.lit (.int 0)) t) (cmpFml .le .uint t (.lit (.int (uintBound - 1))))
   | .int => .and (cmpFml .le .int (.lit (.int (-intBound))) t) (cmpFml .le .int t (.lit (.int (intBound - 1))))
   | .bool => .eqD (.unop .not .bool t) (.unop .not .bool t)
@@ -159,7 +159,7 @@ storage the contract reaches has them; `⊨` ranges over every storage, where
 `balances` may be no mapping (`balances[a] == \old(balances[a])` is then
 false: a side is undefined) or hold a `bool` (which `delete` resets to
 `false`, not `0`).  solkey's reads are total and typed, and need none. -/
-partial def layoutAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (k : Nat) : List (Fml C) :=
+partial def layoutAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (k : Nat) : List (NFml C) :=
   match T with
   | .prim q =>
     [keys.foldl (fun φ (x, q) => .all x q φ) (rangeFml (.find .storage p) q)]
@@ -176,7 +176,7 @@ def SpecExpr.names : SpecExpr → List String :=
 /-- The layout premises of the state variables among `rs`: those the
 clauses read.  What only the body reads needs none: a read the program
 makes is guarded by the program, which reverts where it is undefined. -/
-def layoutFmls (C : Contract) (rs : List String) : List (Fml C) :=
+def layoutFmls (C : Contract) (rs : List String) : List (NFml C) :=
   (C.vars.filter fun (r, _) => rs.contains r).flatMap fun (r, T) => layoutAt T (.root r) [] 1
 
 section Compile
@@ -277,7 +277,7 @@ end
 /-- A clause as a formula: the connectives are the logic's, `\forall` is
 `Fml.all`, a comparison is `a ⊕ b = true`, and `==` between conditions is
 `<->`, as solkey writes it. -/
-partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (Fml C)
+partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NFml C)
   | .bool true => pure .tt
   | .bool false => pure .ff
   | .unop .not a => do pure (.not (← a.fml ctx))
@@ -295,18 +295,18 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (Fml C)
     if op = .eqB || op = .neB then
       let (pa, ta) ← a.term C ctx
       let (pb, tb) ← b.term C ctx
-      let eq ← if pa = .bool && pb = .bool then iff a b else pure (Fml.eqD ta tb)
+      let eq ← if pa = .bool && pb = .bool then iff a b else pure (NFml.eqD ta tb)
       return if op = .eqB then eq else .not eq
     cond (.binop op a b)
   | e => cond e
 where
   /-- `a <-> b`, and `==` between conditions. -/
-  iff (a b : SpecExpr) : Except String (Fml C) := do
+  iff (a b : SpecExpr) : Except String (NFml C) := do
     let φ ← a.fml ctx
     let ψ ← b.fml ctx
     pure (.and (.imp φ ψ) (.imp ψ φ))
   /-- A `bool` value as a condition, `t = true`. -/
-  cond (e : SpecExpr) : Except String (Fml C) := do
+  cond (e : SpecExpr) : Except String (NFml C) := do
     let (p, t) ← e.term C ctx
     unless p = .bool do throw s!"a {primName p} where a condition is expected"
     pure (boolFml t)
@@ -362,13 +362,13 @@ def SpecLoc.usesNet : SpecLoc → Bool
   | .index l e => l.usesNet || e.usesNet
 
 /-- `∀ keys. h₁ → … → φ`. -/
-def closeFml (keys : List (Var × PrimTy)) (hyps : List (Fml C)) (φ : Fml C) : Fml C :=
+def closeFml (keys : List (Var × PrimTy)) (hyps : List (NFml C)) (φ : NFml C) : NFml C :=
   keys.foldl (fun φ (x, q) => .all x q φ) (hyps.foldr .imp φ)
 
 /-- The locations below a node, entered at the key `x`: an entry `m[t]` goes
 on under the condition `x = t`, `m[*]` unconditionally. -/
-def enterKey (x : Var) (ls : List (List (Fml C) × List (SpecStep C))) :
-    List (List (Fml C) × List (SpecStep C)) :=
+def enterKey (x : Var) (ls : List (List (NFml C) × List (SpecStep C))) :
+    List (List (NFml C) × List (SpecStep C)) :=
   ls.filterMap fun
     | (cs, .key t :: rest) => some (cs ++ [.eqD (.pv x) t], rest)
     | (cs, .all :: rest) => some (cs, rest)
@@ -381,15 +381,15 @@ going down, each with the conditions on the keys it was entered at; a word
 one of them covers under conditions `c` is owed only where `¬c`
 (`k ≠ e` for `m[e]`).  A mapping entry is every key, `∀ k`; an array's
 element every index below its length. -/
-partial def frameAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (hyps : List (Fml C))
-    (ls : List (List (Fml C) × List (SpecStep C))) (k : Nat) : List (Fml C) :=
+partial def frameAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (hyps : List (NFml C))
+    (ls : List (List (NFml C) × List (SpecStep C))) (k : Nat) : List (NFml C) :=
   let here := ls.filter (·.2.isEmpty)
   if here.any (·.1.isEmpty) then [] else
-  let hyps := hyps ++ here.map fun (cs, _) => Fml.not (Fml.conj cs)
+  let hyps := hyps ++ here.map fun (cs, _) => NFml.not (NFml.conj cs)
   let ls := ls.filter (!·.2.isEmpty)
   -- owed where the word was there to begin with: `⊨` also ranges over
   -- storages without it, where both sides halt
-  let owe (a b : Term C) : Fml C := closeFml C keys hyps (.imp (.eqD b b) (.eqD a b))
+  let owe (a b : Term C) : NFml C := closeFml C keys hyps (.imp (.eqD b b) (.eqD a b))
   match T with
   | .prim _ => [owe (.find .storage p) (.find (.pv oldVar) p)]
   | .ref (.mapping (.prim K) V) =>
@@ -413,7 +413,7 @@ partial def frameAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (hyps :
 
 /-- The frame of an `assignable` clause over every state variable of the
 contract. -/
-def assignableFml (ctx : SpecCtx C) (locs : List SpecLoc) : Except String (List (Fml C)) := do
+def assignableFml (ctx : SpecCtx C) (locs : List SpecLoc) : Except String (List (NFml C)) := do
   let cs ← locs.mapM (SpecLoc.compile C ctx)
   pure <| C.vars.flatMap fun (r, T) =>
     frameAt C T (.root r) [] [] (cs.filterMap fun (r', _, ss) => if r' == r then some ([], ss) else none) 1
@@ -429,7 +429,7 @@ update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
 `A` one by one (a counterexample search names the one that fails).  For
 `constructor`, the deployment's (the module docstring). -/
 def specPieces (f : String) :
-    Except String (List (Fml C) × List (Fml C) × Upd C × Prog C × List (Fml C)) := do
+    Except String (List (NFml C) × List (NFml C) × Upd C × Surface.Prog C × List (NFml C)) := do
   -- `constructor` names the contract's constructor (`Contract.ctor`)
   let ctor := f == "constructor"
   let some d := if ctor then C.ctor else lookupBy f C.funs
@@ -498,7 +498,7 @@ def specPieces (f : String) :
     [.storage (.mtSt C.vars)] ++ snap ++ [.netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
   else snap ++ if d.payable then
     [.net (.env .msgSender) .add (.env .msgValue), .selfBalance .add (.env .msgValue)] else []
-  let msgValue : Fml C := if d.payable then cmpFml .ge .uint (.env .msgValue) (.lit (.int 0))
+  let msgValue : NFml C := if d.payable then cmpFml .ge .uint (.env .msgValue) (.lit (.int 0))
     else .eqD (.env .msgValue) (.lit (.int 0))
   let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names ++
     (d.spec.assignable.getD []).flatMap SpecLoc.names
@@ -510,23 +510,23 @@ def specPieces (f : String) :
 
 /-- The conclusion `{U} [ P ] (φ₁ ∧ … ∧ φₙ)`, the update left out when it
 is empty. -/
-def specBody (U : Upd C) (P : Prog C) (posts : List (Fml C)) : Fml C :=
-  let body : Fml C := .modal .box P (Fml.conj posts)
+def specBody (U : Upd C) (P : Surface.Prog C) (posts : List (NFml C)) : Surface.Fml C :=
+  let body : Surface.Fml C := .modal .box P (NFml.conj posts).toSurface
   if U.isEmpty then body else .upd .box U body
 
 /-- **The parts of the obligation of `f`**: the premises met by
 construction, the premises stated, and the conclusion
 `{old := storage ‖ oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`. -/
-def specParts (f : String) : Except String (List (Fml C) × List (Fml C) × Fml C) := do
+def specParts (f : String) : Except String (List (NFml C) × List (NFml C) × Surface.Fml C) := do
   let (a, b, U, P, posts) ← specPieces C f
   pure (a, b, specBody C U P posts)
 
 /-- **The obligation of `f`**: `R ∧ L ∧ M ∧ I ∧ requires → {old := storage ‖
 oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`,
 the parts of `specParts` put together. -/
-def specObligation (f : String) : Except String (Fml C) := do
+def specObligation (f : String) : Except String (Surface.Fml C) := do
   let (a, b, body) ← specParts C f
-  pure (.imp (Fml.conj (a ++ b)) body)
+  pure (.imp (NFml.conj (a ++ b)).toSurface body)
 
 end Compile
 
@@ -540,7 +540,7 @@ syntax "spec!{ " ident " }" : term
 open Lean Elab Term Meta in
 elab_rules : term
   | `(spec[ $c ]{ $f:ident }) =>
-    elabAgainst c fun q => `((specObligation $c $(quote f.getId.toString)).map (Fml.quote $q))
+    elabAgainst c fun q => `((specObligation $c $(quote f.getId.toString)).map (Surface.Fml.quote $q))
 
 macro_rules
   | `(spec!{ $f:ident }) => `(spec[InContract.contract]{ $f })

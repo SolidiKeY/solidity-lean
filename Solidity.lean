@@ -16,7 +16,6 @@ import Solidity.Semantics.Properties
 import Solidity.Semantics.Agree
 import Solidity.Semantics.WellFormed
 import Solidity.Semantics.NoPanicOps
-import Solidity.Semantics.Mutability
 import Solidity.Semantics.Core.Value
 import Solidity.Semantics.Core.Ops
 import Solidity.Semantics.Core.Storage

@@ -6,7 +6,7 @@ import Solidity.Calculus.Quote
 # Printing scoped formulas
 
 A formula of `Calculus/Core/Fml.lean` printed as the `dl{ … }` printers of
-`Calculus/RuleSyntax.lean` print its erasure (`Fml.erase`): the same KeY text.
+`Calculus/RuleSyntax.lean` print its erasure (`Fml.eraseS`): the same KeY text.
 Terms, updates and statements are printed by those printers themselves, on
 the erased part quoted (`Calculus/Quote.lean`); this module only walks the
 formula, with the names of its context beside it.
@@ -34,8 +34,8 @@ def Tm.show {Γ : Ctx} (ns : List Var) (t : Tm C Γ .val) : MetaM String := do
   fmtCat `dl_term (← ppTerm (Solidity.Tm.quote c (t.erase ns)))
 
 /-- The statements of an erased block, each with its `;`. -/
-def showStmts (ss : List (Solidity.Stmt C)) : MetaM (List String) := do
-  match ← ppProg? (Solidity.Prog.quote c ss) with
+def showStmts (ss : List (Solidity.Surface.Stmt C)) : MetaM (List String) := do
+  match ← ppProg? (Solidity.Surface.Prog.quote c ss) with
   | some out => out.toList.mapM fun s => return (← fmtCat `sol_stmt s.raw) ++ ";"
   | none => return ss.map fun _ => "‹stmt›;"
 
@@ -147,7 +147,7 @@ def Fml.show {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM String :=
 /-! ## Examples
 
 Each prints as its erasure does (`legacyShow`, the `dl{ … }` printer of
-`RuleSyntax.lean` on `Fml.erase`), except where erasure loses a block's end. -/
+`RuleSyntax.lean` on `Fml.eraseS`), except where erasure loses a block's end. -/
 
 section Example
 
@@ -156,14 +156,14 @@ open Solidity (ppFml)
 private abbrev SE := StandardExample
 private abbrev cSE : Lean.Expr := mkConst ``StandardExample
 
-/-- `Update.lean`'s formula, as `RuleSyntax.lean` prints it. -/
-def legacyShow (φ : Solidity.Fml C) : MetaM String := do
-  fmtCat `dl_fml (← ppFml (Solidity.Fml.quote c φ))
+/-- `Update.lean`'s formula as written, as `RuleSyntax.lean` prints it. -/
+def legacyShow (φ : Solidity.Surface.Fml C) : MetaM String := do
+  fmtCat `dl_fml (← ppFml (Solidity.Surface.Fml.quote c φ))
 
-/-- The formula, checked to print as its erasure. -/
+/-- The formula, checked to print as its erasure (`Fml.eraseS`). -/
 def showSame {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM Unit := do
   let a ← φ.show c ns
-  let b ← legacyShow c (φ.erase ns)
+  let b ← legacyShow c (φ.eraseS ns)
   unless a == b do throwError "prints\n{a}\nbut its erasure prints\n{b}"
   logInfo a
 
@@ -229,7 +229,7 @@ info: (x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1) ∧ (¬x > 0 → [ rever
 /--
 info: (x > 0 → [ uint y = x; x = y; x = 2; ] x = 1) ∧ (¬x > 0 → [ revert(); x = 2; ] x = 1)
 -/
-#guard_msgs in #eval do logInfo (← legacyShow cSE (split₁.erase [x]))
+#guard_msgs in #eval do logInfo (← legacyShow cSE (split₁.eraseS [x]))
 
 /-- `T storage sp1 = alice; x = sp1.age;` in place of `x = alice.age;`, its
 capture popped after it, invisibly; then the frames left: the pop is an

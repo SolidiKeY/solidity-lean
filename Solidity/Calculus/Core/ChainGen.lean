@@ -257,7 +257,7 @@ def lastErasure (A Z : Expr) : TermElabM Expr := do
 
 /-- `L₀ ~~> L` (`Update.lean`'s) by the rewrites `ns`. -/
 def legacyLeads (C L₀ L : Expr) (ns : Array Lean.Name) : TermElabM Expr := do
-  let g ← mkFreshExprMVar (mkApp3 (mkConst ``Solidity.Fml.Leads) C L₀ L)
+  let g ← mkFreshExprMVar (mkApp3 (mkConst ``Solidity.NFml.Leads) C L₀ L)
   Solidity.Chain.proveRws g.mvarId! ns
   instantiateMVars g
 
@@ -272,8 +272,8 @@ def solveLeads (g : MVarId) (ns : Array Lean.Name) : TermElabM Unit := do
     let L₀ ← lastErasure A Z
     let h₂ ← legacyLeads C L₀ L ns
     let er ← mkAppM ``Core.Fml.erase #[mkApp (mkConst ``List.nil [0]) (mkConst ``Solidity.Var), Z]
-    let h₂ ← mkExpectedTypeHint h₂ (mkApp3 (mkConst ``Solidity.Fml.Leads) C
-      (mkApp2 (mkConst ``Solidity.Fml.dropAlls) C er) L)
+    let h₂ ← mkExpectedTypeHint h₂ (mkApp3 (mkConst ``Solidity.NFml.Leads) C
+      (mkApp2 (mkConst ``Solidity.NFml.dropAlls) C er) L)
     g.assign (← mkAppM ``And.intro #[h₁, h₂])
   | _ => throwError "not a `~~>` goal"
 

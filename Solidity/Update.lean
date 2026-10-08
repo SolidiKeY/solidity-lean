@@ -22,11 +22,13 @@ program expressions (mini-solkey's `Ch05_Logic`).  The sorts are KeY's:
 of elementary updates, applied in parallel: every right-hand side is read in
 the state the update is applied in.  Nothing runs when a rule produces one.
 
-A formula is first-order (`=`, `¬`, `∧`, `→`, `∀`) plus `{U} φ` and the two
-modalities: the diamond `⟨ P ⟩ φ` ("`P` runs to the end and φ holds after",
-total correctness) and the box `[ P ] φ` ("if `P` runs to the end, φ holds
-after", partial correctness).  They differ on a run that halts: it satisfies
-every box formula and no diamond formula.
+A formula (`Fml`) is first-order (`=`, `¬`, `∧`, `→`, `∀`) plus `{U} φ`,
+`{havoc}` and `{anon(xs)}`: the closer's input, a leaf of the scoped
+calculus erased (`Core.Fml.erase`), with no modality and no program.  The
+modalities are the scoped calculus's (`Calculus/Core/Fml.lean`, read by the
+typed run).  A formula *as written*, with the diamond `⟨ P ⟩ φ` and the box
+`[ P ] φ` over the untyped statements, is `Surface.Fml`: the elaborator's
+output (`dl!{ … }`) and the printers' target, with no reading (decision 11).
 
 Unlike KeY's, these terms can halt: they are read by the interpreter's own
 functions, so `a + b` reverts on overflow and `values[i]` on an index out of
@@ -58,12 +60,6 @@ An update reads so: a term never panics (`Upd.apply_ne_panic`). -/
 def Modality.after (m : Modality) (p : State → Prop) : Res State → Prop
   | .ok τ => p τ
   | .error _ => m.onHalt
-
-/-- `p` after a program's run under `m`: as `after`, and the run did not
-panic.  A failed `assert` satisfies neither modality: KeY's `assertSimple`
-leaves its condition as a goal under both. -/
-def Modality.afterRun (m : Modality) (p : State → Prop) (r : Res State) : Prop :=
-  m.after p r ∧ r ≠ .error .panic
 
 /-! ## Terms
 
@@ -897,39 +893,37 @@ theorem Semantics.State.anon_agree {xs : List Var} {σ τ : State} (h : EnvAgree
 /-! ## Formulas -/
 
 /-- A formula about programs of the contract `C`. -/
-inductive Fml (C : Contract) where
+inductive NFml (C : Contract) where
   | tt
   /-- `a = b`, read in the Theory (`Tm.denote`): total, so it may hold
   of terms that halt. -/
   | eq (a b : Term C)
   /-- `t` returns: the interpreter's `eval` does not halt on it. -/
   | defined (t : Term C)
-  | not (φ : Fml C)
-  | and (φ ψ : Fml C)
-  | imp (φ ψ : Fml C)
+  | not (φ : NFml C)
+  | and (φ ψ : NFml C)
+  | imp (φ ψ : NFml C)
   /-- `{U} φ`, produced under the modality `m`. -/
-  | upd (m : Modality) (U : Upd C) (φ : Fml C)
-  /-- `⟨ P ⟩ φ` or `[ P ] φ`. -/
-  | modal (m : Modality) (P : Prog C) (φ : Fml C)
+  | upd (m : Modality) (U : Upd C) (φ : NFml C)
   /-- `{havoc} φ`: `φ` after any storage and ledger a callee may
   leave — KeY's anonymising update with fresh skolem symbols. -/
-  | havoc (φ : Fml C)
+  | havoc (φ : NFml C)
   /-- `∀ p x. φ`: `φ` for every value of the type `p` the local `x` may
   hold (a `uint` in `[0, 2^256)`), KeY's `\forall`. -/
-  | all (x : Var) (p : PrimTy) (φ : Fml C)
+  | all (x : Var) (p : PrimTy) (φ : NFml C)
   /-- `{anon(xs)} φ`: `φ` whatever the locals `xs` hold, bound or not —
   KeY's anonymising update of a loop's frame (`#loopAnon`), its fresh
   constants the locals' new bindings. -/
-  | anon (xs : List Var) (φ : Fml C)
+  | anon (xs : List Var) (φ : NFml C)
 
-instance : Inhabited (Fml C) := ⟨.tt⟩
+instance : Inhabited (NFml C) := ⟨.tt⟩
 
 /-- `false` is `¬true`. -/
-abbrev Fml.ff : Fml C := .not .tt
+abbrev NFml.ff : NFml C := .not .tt
 
 /-- `a = b` with both sides defined: the equation of the interpreter, which
 `holds_eqD_iff` (`Theory/Bridge/Denote.lean`) states. -/
-abbrev Fml.eqD (a b : Term C) : Fml C := .and (.defined a) (.and (.defined b) (.eq a b))
+abbrev NFml.eqD (a b : Term C) : NFml C := .and (.defined a) (.and (.defined b) (.eq a b))
 
 /-- The values of the primitive type `p`, which a quantifier ranges over. -/
 def PrimTy.admits : PrimTy → Value → Prop
@@ -940,7 +934,7 @@ def PrimTy.admits : PrimTy → Value → Prop
 
 /-- Whether `φ` holds in `σ`.  An equation compares the Theory values of its
 sides, up to `StValue.Equiv`; `defined` says a term returns. -/
-def holds (σ : State) : Fml C → Prop
+def holds (σ : State) : NFml C → Prop
   | .tt => True
   | .eq a b => Theory.StValue.Equiv (a.denote σ) (b.denote σ)
   | .defined t => ∃ x, t.eval σ = .ok x
@@ -948,13 +942,86 @@ def holds (σ : State) : Fml C → Prop
   | .and φ ψ => holds σ φ ∧ holds σ ψ
   | .imp φ ψ => holds σ φ → holds σ ψ
   | .upd m U φ => m.after (holds · φ) (U.apply σ)
-  | .modal m P φ => m.afterRun (holds · φ) (Prog.run σ P)
   | .havoc φ => ∀ st nt, holds (σ.havoc st nt) φ
   | .all x p φ => ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ
   | .anon xs φ => ∀ b, holds (σ.anon xs b) φ
 
 /-- Valid: true in every state. -/
-def Valid (φ : Fml C) : Prop := ∀ σ, holds σ φ
+def Valid (φ : NFml C) : Prop := ∀ σ, holds σ φ
+
+/-! ## Formulas as written
+
+`Surface.Fml` is `Fml` with the two modalities over the untyped statements
+(`Syntax.lean`): what `dl!{ … }` reads, a specification's obligation and a
+problem state (`Calculus/Spec.lean`, `Calculus/Problem.lean`), and what the
+printers print (`RuleSyntax.lean`'s `ppFml`, `Core.Fml.eraseS`).  It has no
+reading: `Core.Fml.resolveN` makes it a scoped formula, read by the typed
+run, and `Surface.Fml.toFml` the closer's `Fml` when it has no modality.
+The constructors are `Fml`'s, in the same order, with `modal` after
+`upd`. -/
+
+/-- A formula as written. -/
+inductive Surface.Fml (C : Contract) where
+  | tt
+  | eq (a b : Term C)
+  | defined (t : Term C)
+  | not (φ : Surface.Fml C)
+  | and (φ ψ : Surface.Fml C)
+  | imp (φ ψ : Surface.Fml C)
+  | upd (m : Modality) (U : Upd C) (φ : Surface.Fml C)
+  /-- `⟨ P ⟩ φ` or `[ P ] φ`. -/
+  | modal (m : Modality) (P : Surface.Prog C) (φ : Surface.Fml C)
+  | havoc (φ : Surface.Fml C)
+  | all (x : Var) (p : PrimTy) (φ : Surface.Fml C)
+  | anon (xs : List Var) (φ : Surface.Fml C)
+
+instance : Inhabited (Surface.Fml C) := ⟨.tt⟩
+
+/-- `false` is `¬true`. -/
+abbrev Surface.Fml.ff : Surface.Fml C := .not .tt
+
+/-- `a = b` with both sides defined (`Fml.eqD`). -/
+abbrev Surface.Fml.eqD (a b : Term C) : Surface.Fml C :=
+  .and (.defined a) (.and (.defined b) (.eq a b))
+
+/-- A formula with no modality, as written. -/
+def NFml.toSurface : NFml C → Surface.Fml C
+  | .tt => .tt
+  | .eq a b => .eq a b
+  | .defined t => .defined t
+  | .not φ => .not φ.toSurface
+  | .and φ ψ => .and φ.toSurface ψ.toSurface
+  | .imp φ ψ => .imp φ.toSurface ψ.toSurface
+  | .upd m U φ => .upd m U φ.toSurface
+  | .havoc φ => .havoc φ.toSurface
+  | .all x p φ => .all x p φ.toSurface
+  | .anon xs φ => .anon xs φ.toSurface
+
+/-- The closer's formula, when there is no modality. -/
+def Surface.Fml.toFml : Surface.Fml C → Except String (NFml C)
+  | .tt => pure .tt
+  | .eq a b => pure (.eq a b)
+  | .defined t => pure (.defined t)
+  | .not φ => return .not (← φ.toFml)
+  | .and φ ψ => return .and (← φ.toFml) (← ψ.toFml)
+  | .imp φ ψ => return .imp (← φ.toFml) (← ψ.toFml)
+  | .upd m U φ => return .upd m U (← φ.toFml)
+  | .modal .. => throw "a modality is read by the scoped calculus: `cdl!{ … }`, or \
+      `dl!{ … }` under `open scoped Solidity.Core.Surface`"
+  | .havoc φ => return .havoc (← φ.toFml)
+  | .all x p φ => return .all x p (← φ.toFml)
+  | .anon xs φ => return .anon xs (← φ.toFml)
+
+/-- `∀ p₁ x₁. … ∀ pₙ xₙ. φ`, as written. -/
+def Surface.Fml.alls : List (PrimTy × Var) → Surface.Fml C → Surface.Fml C
+  | [], φ => φ
+  | (p, x) :: xs, φ => .all x p (Surface.Fml.alls xs φ)
+
+/-- `φ₁ ∧ … ∧ φₙ`, `true` when there are none, as written. -/
+def Surface.Fml.conj : List (Surface.Fml C) → Surface.Fml C
+  | [] => .tt
+  | [φ] => φ
+  | φ :: ψs => .and φ (Surface.Fml.conj ψs)
 
 /-! ## Goals over bound locals
 
@@ -963,15 +1030,15 @@ locals the outcome binds (`Premise.branches`): `∀ xs. φ`, with `xs` bound
 as the run decodes them (`bindData`). -/
 
 /-- `∀ p₁ x₁. … ∀ pₙ xₙ. φ`. -/
-def Fml.alls : List (PrimTy × Var) → Fml C → Fml C
+def NFml.alls : List (PrimTy × Var) → NFml C → NFml C
   | [], φ => φ
-  | (p, x) :: xs, φ => .all x p (Fml.alls xs φ)
+  | (p, x) :: xs, φ => .all x p (NFml.alls xs φ)
 
 /-- `φ₁ ∧ … ∧ φₙ`, `true` when there are none. -/
-def Fml.conj : List (Fml C) → Fml C
+def NFml.conj : List (NFml C) → NFml C
   | [] => .tt
   | [φ] => φ
-  | φ :: ψs => .and φ (Fml.conj ψs)
+  | φ :: ψs => .and φ (NFml.conj ψs)
 
 /-- A value of the type is one decoding accepts. -/
 theorem PrimTy.admits_iff_fits (p : PrimTy) (v : Value) : p.admits v ↔ v.fits p = true := by
@@ -981,18 +1048,18 @@ theorem PrimTy.admits_iff_fits (p : PrimTy) (v : Value) : p.admits v ↔ v.fits 
 outcome's data binds them. -/
 def Binds (xs : List (PrimTy × Var)) (σ σ' : State) : Prop := ∃ vs, bindData xs vs σ = .ok σ'
 
-theorem holds_conj {σ : State} : {φs : List (Fml C)} → (holds σ (Fml.conj φs) ↔ ∀ φ ∈ φs, holds σ φ)
-  | [] => by simp [Fml.conj, holds]
-  | [φ] => by simp [Fml.conj]
-  | φ :: ψ :: φs => by simp [Fml.conj, holds, holds_conj (φs := ψ :: φs)]
+theorem holds_conj {σ : State} : {φs : List (NFml C)} → (holds σ (NFml.conj φs) ↔ ∀ φ ∈ φs, holds σ φ)
+  | [] => by simp [NFml.conj, holds]
+  | [φ] => by simp [NFml.conj]
+  | φ :: ψ :: φs => by simp [NFml.conj, holds, holds_conj (φs := ψ :: φs)]
 
-theorem holds_alls {φ : Fml C} : {xs : List (PrimTy × Var)} → {σ : State} →
-    (holds σ (Fml.alls xs φ) ↔ ∀ σ', Binds xs σ σ' → holds σ' φ)
+theorem holds_alls {φ : NFml C} : {xs : List (PrimTy × Var)} → {σ : State} →
+    (holds σ (NFml.alls xs φ) ↔ ∀ σ', Binds xs σ σ' → holds σ' φ)
   | [], σ => by
-    simp only [Fml.alls, Binds, bindData]
+    simp only [NFml.alls, Binds, bindData]
     exact ⟨fun h σ' ⟨_, he⟩ => by cases he; exact h, fun h => h σ ⟨[], rfl⟩⟩
   | (p, x) :: xs, σ => by
-    simp only [Fml.alls, holds, holds_alls (xs := xs), Binds, PrimTy.admits_iff_fits]
+    simp only [NFml.alls, holds, holds_alls (xs := xs), Binds, PrimTy.admits_iff_fits]
     constructor
     · rintro h σ' ⟨_ | ⟨v, vs⟩, he⟩
       · simp [bindData] at he
@@ -1002,14 +1069,6 @@ theorem holds_alls {φ : Fml C} : {xs : List (PrimTy × Var)} → {σ : State} �
         · cases he
     · intro h v hv σ' ⟨vs, he⟩
       exact h σ' ⟨v :: vs, by simp only [bindData, hv, if_true]; exact he⟩
-
-/-- No modality anywhere, under a negation and on the left of an implication
-included: a formula of the logic, which the calculus leaves to `Valid`. -/
-def Fml.modalFree : Fml C → Bool
-  | .tt | .eq .. | .defined _ => true
-  | .not φ | .upd _ _ φ | .havoc φ | .all _ _ φ | .anon _ φ => φ.modalFree
-  | .and φ ψ | .imp φ ψ => φ.modalFree && ψ.modalFree
-  | .modal .. => false
 
 
 /-! ## Frames
@@ -1046,16 +1105,14 @@ def Upd.vars : Upd C → List Var
   | [] => []
   | e :: U => e.vars ++ Upd.vars U
 
-/-- The variables a formula mentions, its programs' included, and a
-quantifier's own. -/
-def Fml.vars : Fml C → List Var
+/-- The variables a formula mentions, a quantifier's own included. -/
+def NFml.vars : NFml C → List Var
   | .tt => []
   | .eq a b => a.vars ++ b.vars
   | .defined t => t.vars
   | .not φ => φ.vars
   | .and φ ψ | .imp φ ψ => φ.vars ++ ψ.vars
   | .upd _ U φ => Upd.vars U ++ φ.vars
-  | .modal _ P φ => Prog.vars P ++ φ.vars
   | .havoc φ => φ.vars
   | .all x _ φ => x :: φ.vars
   | .anon xs φ => xs ++ φ.vars
@@ -1411,18 +1468,9 @@ theorem Modality.after_frame (m : Modality) {p q : State → Prop} {r r' : Res S
   | .error _, .error _, _ => exact Iff.rfl
   | .ok a, .ok b, h => exact hpq a b h
 
-theorem Modality.afterRun_frame (m : Modality) {p q : State → Prop} {r r' : Res State}
-    (hr : ResultsAgree ns r r') (hpq : ∀ a b, EnvAgreeExcept ns a b → (p a ↔ q b)) :
-    m.afterRun p r ↔ m.afterRun q r' := by
-  match r, r', hr with
-  | .error _, .error _, h => cases h; exact Iff.rfl
-  | .ok a, .ok b, h =>
-    simp only [Modality.afterRun, ne_eq, reduceCtorEq, not_false_eq_true, and_true]
-    exact hpq a b h
-
 /-- **Frame, for formulas**: two states that agree off `ns` satisfy a formula
 that avoids `ns` alike. -/
-theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State},
+theorem holds_frame : (φ : NFml C) → Avoids φ.vars ns → ∀ {σ τ : State},
     EnvAgreeExcept ns σ τ → (holds σ φ ↔ holds τ φ)
   | .tt, _, _, _, _ => Iff.rfl
   | .eq a b, h, _, _, hag => by
@@ -1436,9 +1484,6 @@ theorem holds_frame : (φ : Fml C) → Avoids φ.vars ns → ∀ {σ τ : State}
   | .upd m U φ, h, _, _, hag => by
     simp only [holds]
     exact m.after_frame (Upd.apply_frame hag U h.left) fun _ _ h' => holds_frame φ h.right h'
-  | .modal m P φ, h, _, _, hag => by
-    simp only [holds]
-    exact m.afterRun_frame (Prog.run_frame hag P h.left) fun _ _ h' => holds_frame φ h.right h'
   | .havoc φ, h, _, _, hag => by
     simp only [holds]
     exact forall_congr' fun st => forall_congr' fun nt =>

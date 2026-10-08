@@ -97,8 +97,8 @@ def _root_.Solidity.Core.NCtx.dropFresh : Nat → (Γ : NCtx) → (Δ : NCtx) ×
 /-- A program of the formula, statement by statement as `elabFml` reads it:
 a capture takes the least index the formula's written fresh variables
 leave. -/
-def elabModalProg (taken : List Nat) (P : List RawStmt) : ElabM (Solidity.Prog C) := do
-  let mut P' : Solidity.Prog C := []
+def elabModalProg (taken : List Nat) (P : List RawStmt) : ElabM (Solidity.Surface.Prog C) := do
+  let mut P' : Solidity.Surface.Prog C := []
   -- a block's locals renamed apart (`freshenBlocks`)
   let P ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) ((← get).1.map (·.1)) P)
   for s in P do

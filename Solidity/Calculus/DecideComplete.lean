@@ -3,7 +3,7 @@ import Solidity.Calculus.DecideSyn
 /-!
 # The reads are realizable: `sol_decide` decides
 
-`Fml.valid_iff_reduce` (`Decide.lean`) leaves `∀ σ, ψ.holds σ`, where `ψ`
+`NFml.valid_iff_reduce` (`Decide.lean`) leaves `∀ σ, ψ.holds σ`, where `ψ`
 reads the starting storage at finitely many paths, and a statement about
 `σ`'s storage is not something `omega` or `grind` can decide: two reads are
 unrelated atoms to them, while in a storage they are not.  This module is
@@ -25,7 +25,7 @@ them, and nothing is lost.
   what some storage shows (`realize`, built level by level).  The
   constraints are local — each read path against the one above it — because
   the read paths include every prefix (`LTerm.reads`).
-* **Completeness** (`LFml.valid_iff_cons`, `Fml.valid_iff_cons`): for a
+* **Completeness** (`LFml.valid_iff_cons`, `NFml.valid_iff_cons`): for a
   reduction that reads the starting storage only, and no value of the
   transaction (`LFml.initOnly`; `msg.sender` is decided by `LFml.syn` or the
   heuristic finish),
@@ -43,7 +43,7 @@ operators of the program.  `sol_decide` closes a valid goal exactly when
 (`grind` instantiates the quantifiers over values, and a product of two
 variables is outside linear arithmetic).
 
-**The fragment covered** is `Fml.inL`'s, all of it but a write or `delete`
+**The fragment covered** is `NFml.inL`'s, all of it but a write or `delete`
 through a member named `length` (`LStor.okE` keeps such a write whole, so
 the reduction reads a written storage there and `initOnly` fails), and the
 two reads the elimination keeps whole: the slot a `push()` of a struct or
@@ -949,11 +949,11 @@ in the fragment whose reduction reads the initial storage only.  Example:
 `[ uint y = x.a; uint z = x.a.b; ] false` is valid, since a word has
 nothing below it: the constraint of `x.a.b` says that where `x.a` shows a
 word, `x.a.b` shows nothing. -/
-theorem _root_.Solidity.Fml.valid_iff_cons {C : Contract} (φ : Fml C)
+theorem _root_.Solidity.NFml.valid_iff_cons {C : Contract} (φ : NFml C)
     (hf : φ.inL Sym.empty = true) (hi : φ.reduce.initOnly = true) :
     (⊨ φ) ↔ ∀ σ (o : List Seg → Obs),
       consAll (envOf σ) o φ.reduce.reads → φ.reduce.holdsA (envOf σ) o := by
-  rw [Fml.valid_iff_reduce φ hf]
+  rw [NFml.valid_iff_reduce φ hf]
   exact LFml.valid_iff_cons _ hi
 
 /-! ## The tactic, with the constraints -/
@@ -1159,13 +1159,13 @@ What `sol_decide` did before the reads were proved realizable; the examples
 use it to show a goal that needs the constraints. -/
 macro "sol_decide_unconstrained" : tactic => `(tactic|
   all_goals
-   (refine (Fml.valid_iff_reduce _ (by decide)).2 ?_
+   (refine (NFml.valid_iff_reduce _ (by decide)).2 ?_
     sol_reduce
     sol_decide_heuristic))
 
 /-- `sol_decide`: prove `⊨ φ` for a `φ` whose modalities are gone (run
-`sol_symex` first) and which is in the fragment (`Fml.inL`).  It rewrites
-the goal by `Fml.valid_iff_reduce`, computes the reduction, closes it by its terms where it can (`LFml.syn`,
+`sol_symex` first) and which is in the fragment (`NFml.inL`).  It rewrites
+the goal by `NFml.valid_iff_reduce`, computes the reduction, closes it by its terms where it can (`LFml.syn`,
 `Calculus/DecideSyn.lean`: KeY's syntactic closing), and otherwise, where the
 reduction reads the initial storage only, rewrites it once more by
 `LFml.valid_iff_cons`: a statement about free reads under the constraints
@@ -1178,7 +1178,7 @@ It says so when `φ` is outside the fragment; with no goal left it does
 nothing. -/
 macro "sol_decide" : tactic => `(tactic|
   all_goals
-   (refine (Fml.valid_iff_reduce _ (by
+   (refine (NFml.valid_iff_reduce _ (by
       first
       | decide +kernel
       | fail "sol_decide: the formula is outside the fragment (a modality, a push of a memory object, a copy of memory whose guards are not literals, a copy from storage outside its allocation's pair, a memory past memSize, a read of the ledger, an alias no update binds, or one through an index used after a write)")).2 ?_

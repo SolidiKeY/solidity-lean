@@ -482,10 +482,10 @@ theorem Upd.eraseNR_eq {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) :
   | drop U h ih =>
     change ((U.eraseNR ns).1, h.namesR (U.eraseNR ns).2) = _; rw [ih, Thin.namesR_eq]; rfl
 
-/-- `Fml.erase`, by the recursor (a modality's program by `Prog.erase`). -/
+/-- `Fml.erase`, by the recursor. -/
 @[implemented_by Fml.erase]
-def Fml.eraseR {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Solidity.Fml C :=
-  Fml.rec (motive := fun _ _ => List Var → Solidity.Fml C)
+def Fml.eraseR {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Solidity.NFml C :=
+  Fml.rec (motive := fun _ _ => List Var → Solidity.NFml C)
     (tt := fun _ => .tt) (eq := fun a b ns => .eq (a.eraseR ns) (b.eraseR ns))
     (defined := fun t ns => .defined (t.eraseR ns))
     (not := fun _ ih ns => .not (ih ns))
@@ -495,8 +495,7 @@ def Fml.eraseR {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Solidity.Fml C :=
       | (U', ms) => match U' with
         | [] => ih ms
         | U' => .upd m U' (ih ms))
-    (modal := fun m P κ _ ih ns =>
-      .modal m (P.erase ns ++ κ.erase (P.outNames ns)) (ih (κ.outNames (P.outNames ns))))
+    (modal := fun _ _ _ _ _ _ => .ff)
     (havoc := fun _ ih ns => .havoc (ih ns))
     (all := fun x p _ ih ns => .all x p (ih (x :: ns)))
     (bind := fun _ x _ _ ih ns => ih (x :: ns))
@@ -519,7 +518,7 @@ theorem Fml.eraseR_eq {Γ : Ctx} (φ : Fml C Γ) : ∀ ns : List Var, φ.eraseR 
     simp only [ih, Fml.erase]
     generalize U.erase ns = U'
     cases U' <;> rfl
-  | modal m P κ φ ih => intro ns; simp only [Fml.erase, ← ih]; rfl
+  | modal m P κ φ ih => intro ns; rfl
   | havoc φ ih => intro ns; simp only [Fml.erase, ← ih]; rfl
   | all x p φ ih => intro ns; simp only [Fml.erase, ← ih]; rfl
   | bind m x t φ ih => intro ns; simp only [Fml.erase, ← ih]; rfl
@@ -683,14 +682,14 @@ theorem Upd.closeErase_eq {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ
     · simp only [cond_true, Option.map_some, Thin.namesR_eq]; rfl
 
 /-- `Fml.closeErase`'s compiled twin. -/
-def Fml.closeEraseM {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var × Solidity.Fml C) :=
+def Fml.closeEraseM {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var × Solidity.NFml C) :=
   (φ.bindsB ns).map fun B => (B, φ.erase ns)
 
 /-- **A leaf, decided and erased**: `Fml.bindsB` and `Fml.erase` in one pass
 (`Fml.closeErase_eq`). -/
 @[implemented_by Fml.closeEraseM]
-def Fml.closeErase {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var × Solidity.Fml C) :=
-  Fml.rec (motive := fun _ _ => List Var → Option (List Var × Solidity.Fml C))
+def Fml.closeErase {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var × Solidity.NFml C) :=
+  Fml.rec (motive := fun _ _ => List Var → Option (List Var × Solidity.NFml C))
     (tt := fun _ => some ([], .tt))
     (eq := fun a b ns => some ([], .eq (a.eraseR ns) (b.eraseR ns)))
     (defined := fun t ns => some ([], .defined (t.eraseR ns)))
@@ -726,29 +725,29 @@ theorem Fml.closeErase_eq {Γ : Ctx} (φ : Fml C Γ) :
   | tt => intro _; rfl
   | eq a b =>
     intro ns
-    change some ([], Solidity.Fml.eq (a.eraseR ns) (b.eraseR ns)) = _
+    change some ([], Solidity.NFml.eq (a.eraseR ns) (b.eraseR ns)) = _
     rw [Tm.eraseR_eq, Tm.eraseR_eq]; rfl
   | defined t =>
     intro ns
-    change some ([], Solidity.Fml.defined (t.eraseR ns)) = _
+    change some ([], Solidity.NFml.defined (t.eraseR ns)) = _
     rw [Tm.eraseR_eq]; rfl
   | not φ _ =>
     intro ns
-    change (bif φ.foFreshB ns then some ([], Solidity.Fml.not (φ.eraseR ns)) else none) =
+    change (bif φ.foFreshB ns then some ([], Solidity.NFml.not (φ.eraseR ns)) else none) =
       (bif φ.foFreshB ns then some [] else none).map _
     rw [Fml.eraseR_eq]
     cases φ.foFreshB ns <;> rfl
   | and φ ψ ihφ ihψ =>
     intro ns
     change ((φ.closeErase ns).bind fun r₁ => (ψ.closeErase ns).map fun r₂ =>
-      (r₁.1 ++ r₂.1, Solidity.Fml.and r₁.2 r₂.2)) =
+      (r₁.1 ++ r₂.1, Solidity.NFml.and r₁.2 r₂.2)) =
       ((φ.bindsB ns).bind fun B₁ => (ψ.bindsB ns).map (B₁ ++ ·)).map _
     rw [ihφ, ihψ]
     cases φ.bindsB ns <;> cases ψ.bindsB ns <;> rfl
   | imp a φ _ ih =>
     intro ns
     change (bif a.foFreshB ns then (φ.closeErase ns).map
-        (fun r => (r.1, Solidity.Fml.imp (a.eraseR ns) r.2)) else none) =
+        (fun r => (r.1, Solidity.NFml.imp (a.eraseR ns) r.2)) else none) =
       (bif a.foFreshB ns then φ.bindsB ns else none).map _
     rw [ih, Fml.eraseR_eq]
     cases a.foFreshB ns
@@ -794,13 +793,13 @@ theorem Fml.closeErase_eq {Γ : Ctx} (φ : Fml C Γ) :
   | modal => intro _; rfl
   | havoc φ ih =>
     intro ns
-    change (φ.closeErase ns).map (fun r => (r.1, Solidity.Fml.havoc r.2)) = (φ.bindsB ns).map _
+    change (φ.closeErase ns).map (fun r => (r.1, Solidity.NFml.havoc r.2)) = (φ.bindsB ns).map _
     rw [ih]
     cases φ.bindsB ns <;> rfl
   | all x p φ ih =>
     intro ns
     change (bif x.memB ns then none else (φ.closeErase (x :: ns)).bind fun r =>
-        bif x.memB r.1 then none else some (r.1, Solidity.Fml.all x p r.2)) =
+        bif x.memB r.1 then none else some (r.1, Solidity.NFml.all x p r.2)) =
       (bif x.memB ns then none else (φ.bindsB (x :: ns)).bind fun B =>
         bif x.memB B then none else some B).map _
     rw [ih]
@@ -824,7 +823,7 @@ theorem Fml.closeErase_eq {Γ : Ctx} (φ : Fml C Γ) :
   | anon xs φ ih =>
     intro ns
     change (φ.closeErase ns).map
-        (fun r => (r.1, Solidity.Fml.anon (xs.map fun x => x.2.nameR ns) r.2)) =
+        (fun r => (r.1, Solidity.NFml.anon (xs.map fun x => x.2.nameR ns) r.2)) =
       (φ.bindsB ns).map _
     rw [ih]
     simp only [Idx.nameR_eq]

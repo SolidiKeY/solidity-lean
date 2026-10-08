@@ -6,13 +6,17 @@ import Solidity.SpecSyntax
 
 A program is written against a **contract**, the storage roots it declares,
 and every expression is indexed by its type: `Val C p` is a value of
-primitive type `p`, `SPath C T` a storage path of type `T`, `Stmt C` a
-statement (mini-solkey's `Ch02_Elab`).  A member access carries the proof
+primitive type `p`, `SPath C T` a storage path of type `T`, `Surface.Stmt C`
+a statement (mini-solkey's `Ch02_Elab`).  A statement here is the syntax as
+written (decision 11 of `docs/intrinsic.md`): the elaborator's output and
+the printers' target, with no run, no taclet and no `wt`; `resolve`
+(`Syntax/Resolve.lean`) makes it the scoped statement (`Syntax/Core.lean`)
+that the typed run runs and the calculus steps.  A member access carries the proof
 that the member exists, an operator the proof that it takes its operand
 type, a copy the proof that its type holds no mapping.  So a statement no
 rule can run cannot be written: `alice.balance = 1;` (no such member),
 `alice = 1;` (a `uint` for a `Person`) and `wallet = wallet;` (a copy of a
-mapping) are elaboration errors, not stuck runs.
+mapping) are elaboration errors.
 
 Locals are `Var`s (`AST.lean`), and the syntax does not track which are in
 scope: a stack local carries its `PrimTy`, an alias (`Person storage p`) and
@@ -728,8 +732,8 @@ inductive LoopAnn (C : Contract) where
 
 /-! ## Statements -/
 
-/-- A statement of contract `C`. -/
-inductive Stmt (C : Contract) where
+/-- A statement of contract `C`, as written. -/
+inductive Surface.Stmt (C : Contract) where
   /-- A storage write, `alice.age = 10;`, `alice = bob;`, `sp.age = 1;`. -/
   | assign {T : Ty} (l : Loc C T) (r : Src C T)
   /-- `lsv = sp;`, `lsv = sp.push();`: the alias now points there. -/
@@ -780,7 +784,7 @@ inductive Stmt (C : Contract) where
   array written to a location that is not a memory local. -/
   | assignNew {R : RefTy} (l : NewLhs C R) (n : Simple C .uint) (h : R.newArrOk = true)
   /-- `if (c) { … } else { … }` -/
-  | ite (c : Val C .bool) (thn els : List (Stmt C))
+  | ite (c : Val C .bool) (thn els : List (Surface.Stmt C))
   /-- `require(c);` -/
   | require (c : Val C .bool)
   /-- `assert(c);` -/
@@ -790,7 +794,7 @@ inductive Stmt (C : Contract) where
   /-- `f(e₁, …, eₙ);`, `y = f(e₁, …, eₙ);`: an internal call of `f`, its
   arguments bound to its parameters, its body inlined (see `Arg`). -/
   | call (f : Name) (args : List (Arg C)) (hsep : Arg.separatedFrom [] args = true) (ret : CallRet)
-      (body : List (Stmt C))
+      (body : List (Surface.Stmt C))
   /-- `try a.f(e) returns (uint v) { ok } catch Error(string memory) { err }
   catch Panic(uint c) { panic } catch { other }`: an external call, and a
   block per way it may end.  As solkey's `TryStatement.of` normalises it,
@@ -798,31 +802,31 @@ inductive Stmt (C : Contract) where
   catch-all's block, a missing catch-all `revert();`.  `rets` are the locals
   the call's return data binds in `ok`, `code` the `Panic` code's in `panic`;
   an `Error`'s message and a catch-all's data are not modelled. -/
-  | tryCall (call : ExtCall C) (rets : List (PrimTy × Var)) (ok err : List (Stmt C))
-      (code : Option Var) (panic other : List (Stmt C))
+  | tryCall (call : ExtCall C) (rets : List (PrimTy × Var)) (ok err : List (Surface.Stmt C))
+      (code : Option Var) (panic other : List (Surface.Stmt C))
   /-- `while (c) { … }`, solkey's lowered `while`: `for`, `do … while`,
   `break`, `continue` and a `return` inside a loop are lowered to it by the
   elaborator (`lowerLoops`), so its body ends only normally or by halting. -/
-  | loop (a : LoopAnn C) (c : Val C .bool) (body : List (Stmt C))
+  | loop (a : LoopAnn C) (c : Val C .bool) (body : List (Surface.Stmt C))
 
 /-- A block. -/
-abbrev Prog (C : Contract) := List (Stmt C)
+abbrev Surface.Prog (C : Contract) := List (Surface.Stmt C)
 
 /-- The locals the `Panic` code binds: `code`, a `uint`, if the clause names it. -/
 def codeBinders (code : Option Var) : List (PrimTy × Var) :=
   code.toList.map fun x => (.uint, x)
 
 /-- `T x = e;`: a parameter bound to its argument. -/
-def Arg.decl {C : Contract} (a : Arg C) : Stmt C := .declLocal a.p a.x (some a.e)
+def Arg.decl {C : Contract} (a : Arg C) : Surface.Stmt C := .declLocal a.p a.x (some a.e)
 
 /-- `T r;`: the return variable declared, at its default. -/
-def CallRet.decl {C : Contract} : CallRet → Prog C
+def CallRet.decl {C : Contract} : CallRet → Surface.Prog C
   | .none => []
   | .val p r _ => [.declLocal p r Option.none]
   | .rets rs => rs.map fun (p, r) => .declLocal p r Option.none
 
 /-- `res = r;`: the returned value assigned where the call is. -/
-def CallRet.result {C : Contract} : CallRet → Prog C
+def CallRet.result {C : Contract} : CallRet → Surface.Prog C
   | .val p r (some res) => [.assignLocal (p := p) res (.simple (.local r))]
   | _ => []
 
@@ -830,7 +834,7 @@ def CallRet.result {C : Contract} : CallRet → Prog C
 with the arguments, the return variable declared, the body, the result
 assigned.  `y = f(a);`, `f` being `function f(uint x) returns (uint r)
 { r = x + 1; }`, is `uint x' = a; uint r'; r' = x' + 1; y = r';`. -/
-def Stmt.expandBody {C : Contract} (args : List (Arg C)) (ret : CallRet) (body : Prog C) : Prog C :=
+def Surface.Stmt.expandBody {C : Contract} (args : List (Arg C)) (ret : CallRet) (body : Surface.Prog C) : Surface.Prog C :=
   args.map Arg.decl ++ ret.decl ++ body ++ ret.result
 
 /-! ## Printing
@@ -924,7 +928,7 @@ def IncDec.show (op : IncDec) (x : String) : String :=
 after it that binds its fresh return variable, the one the body declares
 first: `Person memory mv1 = choosePersonMem();`, `m = choosePersonMem();`,
 the statement they are elaborated from. -/
-def Stmt.memCallStr? : Stmt C → Stmt C → Option String
+def Surface.Stmt.memCallStr? : Surface.Stmt C → Surface.Stmt C → Option String
   | .call f args _ .none (.declMem _ r none _ _ :: _), .declMem R x (some (.alias (.var r' _))) _ _ =>
     if r' = r then
       some s!"{Ty.toStr (.ref R)} memory {x} = {f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
@@ -936,7 +940,7 @@ def Stmt.memCallStr? : Stmt C → Stmt C → Option String
 
 /-- The target a statement after a call of several returns assigns one of
 them to (`lo = se2;`): the return's position among `rs`, and the target. -/
-def Stmt.retTarget? (rs : List (PrimTy × Var)) : Stmt C → Option (Nat × String)
+def Surface.Stmt.retTarget? (rs : List (PrimTy × Var)) : Surface.Stmt C → Option (Nat × String)
   | .assignLocal x (.simple (.local r)) => (rs.findIdx? (·.2 == r)).map (·, toString x)
   | .assign l (.val (.simple (.local r))) => (rs.findIdx? (·.2 == r)).map (·, l.toStr)
   | .assignMem l (.val (.simple (.local r))) => (rs.findIdx? (·.2 == r)).map (·, l.toStr)
@@ -944,11 +948,11 @@ def Stmt.retTarget? (rs : List (PrimTy × Var)) : Stmt C → Option (Nat × Stri
 
 /-- The statements after a call of several returns that assign them, in
 their order, from the `start`-th return on. -/
-def Stmt.retTargets (rs : List (PrimTy × Var)) (start : Nat) : List (Stmt C) → List (Nat × String)
+def Surface.Stmt.retTargets (rs : List (PrimTy × Var)) (start : Nat) : List (Surface.Stmt C) → List (Nat × String)
   | [] => []
   | s :: P =>
     match s.retTarget? rs with
-    | some (i, t) => if start ≤ i then (i, t) :: Stmt.retTargets rs (i + 1) P else []
+    | some (i, t) => if start ≤ i then (i, t) :: Surface.Stmt.retTargets rs (i + 1) P else []
     | none => []
 
 /-- A call of several returns and the statements after it that assign them,
@@ -956,9 +960,9 @@ written as the tuple assignment they are elaborated from:
 `(lo, , sum) = returnStats(3, 1, 2);`, with the number of statements after
 the call it covers.  A call of one return with its target (a specification's
 obligation, `Calculus/Spec.lean`) is `result = f(x);`. -/
-def Stmt.tupleCallStr? : Stmt C → List (Stmt C) → Option (String × Nat)
+def Surface.Stmt.tupleCallStr? : Surface.Stmt C → List (Surface.Stmt C) → Option (String × Nat)
   | .call f args _ (.rets rs) _, P =>
-    let ts := Stmt.retTargets rs 0 P
+    let ts := Surface.Stmt.retTargets rs 0 P
     let call := s!"{f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
     if ts.isEmpty then
       -- every value discarded: `(, ) = f(x);`, a call with targets still
@@ -984,7 +988,7 @@ def braced (ss : List String) : String :=
 
 mutual
 
-def Stmt.toStr : Stmt C → String
+def Surface.Stmt.toStr : Surface.Stmt C → String
   | .assign l r => s!"{l.toStr} = {r.toStr};"
   | .rebind x r => s!"{x} = {r.toStr};"
   | .assignLocal x r => s!"{x} = {r.toStr true};"
@@ -1017,7 +1021,7 @@ def Stmt.toStr : Stmt C → String
   | .deleteMem p _ => s!"delete {p.toStr};"
   | .assignNew (R := R) l n _ => s!"{l.toStr} = new {Ty.toStr (.ref R)}({n.toStr});"
   | .ite c thn els =>
-    s!"if ({c.toStr true}) {braced (Prog.toStrs 0 thn)} else {braced (Prog.toStrs 0 els)}"
+    s!"if ({c.toStr true}) {braced (Surface.Prog.toStrs 0 thn)} else {braced (Surface.Prog.toStrs 0 els)}"
   | .require c => s!"require({c.toStr true});"
   | .assert c => s!"assert({c.toStr true});"
   | .revert => "revert();"
@@ -1033,40 +1037,40 @@ def Stmt.toStr : Stmt C → String
     let code := match code with
       | some x => s!"uint {x}"
       | none => "uint"
-    s!"try address({c.addr.toStr}).{c.fn}({args}){rets} {braced (Prog.toStrs 0 ok)} \
-      catch Error(string memory) {braced (Prog.toStrs 0 err)} \
-      catch Panic({code}) {braced (Prog.toStrs 0 pnc)} \
-      catch {braced (Prog.toStrs 0 other)}"
-  | .loop a c body => s!"{a.toStr}while ({c.toStr true}) {braced (Prog.toStrs 0 body)}"
+    s!"try address({c.addr.toStr}).{c.fn}({args}){rets} {braced (Surface.Prog.toStrs 0 ok)} \
+      catch Error(string memory) {braced (Surface.Prog.toStrs 0 err)} \
+      catch Panic({code}) {braced (Surface.Prog.toStrs 0 pnc)} \
+      catch {braced (Surface.Prog.toStrs 0 other)}"
+  | .loop a c body => s!"{a.toStr}while ({c.toStr true}) {braced (Surface.Prog.toStrs 0 body)}"
 
 /-- The statements of a block, one string each; a memory call and the
 statement binding its result are one (`Stmt.memCallStr?`), and so are a call
 of several returns and the statements assigning them (`Stmt.tupleCallStr?`),
 the statements after the first skipped (`skip` of them). -/
-def Prog.toStrs (skip : Nat) : List (Stmt C) → List String
+def Surface.Prog.toStrs (skip : Nat) : List (Surface.Stmt C) → List String
   | [] => []
   | s :: P =>
     match skip with
-    | k + 1 => Prog.toStrs k P
+    | k + 1 => Surface.Prog.toStrs k P
     | 0 =>
-      match Stmt.tupleCallStr? s P with
-      | some (c, k) => c :: Prog.toStrs k P
+      match Surface.Stmt.tupleCallStr? s P with
+      | some (c, k) => c :: Surface.Prog.toStrs k P
       | none =>
       match P with
       | t :: _ =>
-        match Stmt.memCallStr? s t with
-        | some c => c :: Prog.toStrs 1 P
-        | none => s.toStr :: Prog.toStrs 0 P
+        match Surface.Stmt.memCallStr? s t with
+        | some c => c :: Surface.Prog.toStrs 1 P
+        | none => s.toStr :: Surface.Prog.toStrs 0 P
       | [] => [s.toStr]
 
 end
 
 /-- A block, as the Solidity it came from. -/
-def Prog.toStr (P : List (Stmt C)) : String := " ".intercalate (Prog.toStrs 0 P)
+def Surface.Prog.toStr (P : List (Surface.Stmt C)) : String := " ".intercalate (Surface.Prog.toStrs 0 P)
 
 /-- One statement per line, for display. -/
-def Prog.show (P : List (Stmt C)) : String :=
-  "\n".intercalate (Prog.toStrs 0 P)
+def Surface.Prog.show (P : List (Surface.Stmt C)) : String :=
+  "\n".intercalate (Surface.Prog.toStrs 0 P)
 
 end Print
 
@@ -2890,7 +2894,7 @@ def captureAs (base : String) (t : LocalTy) : ElabM Var := do
 
 /-- A compound assignment's target, with a non-simple index captured into a
 fresh `ie` first: `values[i + 1] += 1;` is `uint ie1 = i + 1; values[ie1] += 1;`. -/
-def elabOpTarget (l : RawExpr) : ElabM (Prog C × (p : PrimTy) × OpLoc C p) := do
+def elabOpTarget (l : RawExpr) : ElabM (Surface.Prog C × (p : PrimTy) × OpLoc C p) := do
   match ← synthM C l with
   | .val p (.simple (.local x)) => pure ([], ⟨p, .local x⟩)
   | .path (.prim p) (.loc (.root r h)) => pure ([], ⟨p, .root r h⟩)
@@ -2914,7 +2918,7 @@ def elabOpTarget (l : RawExpr) : ElabM (Prog C × (p : PrimTy) × OpLoc C p) := 
 captured into a fresh `sp` or `mv` first: `y = folks[i].age++;` is
 `Person storage sp1 = folks[i]; y = sp1.age++;`. -/
 def elabIncTarget (l : RawExpr) :
-    ElabM (Prog C × (p : PrimTy) × (t : OpLoc C p) ×' t.recvSimple = true) := do
+    ElabM (Surface.Prog C × (p : PrimTy) × (t : OpLoc C p) ×' t.recvSimple = true) := do
   let (pre, ⟨p, t⟩) ← elabOpTarget C l
   match hs : t.recvSimple with
   | true => pure (pre, ⟨p, t, hs⟩)
@@ -2938,7 +2942,7 @@ def elabIncTarget (l : RawExpr) :
 /-- The size of `new T[](n)` as a simple value: a size that is not one is
 captured into a fresh `uint` first (KeY's `memoryArrayFreshAlloc` takes a
 `SimpleExpression`). -/
-def elabSize (n : RawExpr) : ElabM (Prog C × Simple C .uint) := do
+def elabSize (n : RawExpr) : ElabM (Surface.Prog C × Simple C .uint) := do
   let v ← checkM C .uint n
   match v.toSimple? with
   | some se => pure ([], se)
@@ -2948,7 +2952,7 @@ def elabSize (n : RawExpr) : ElabM (Prog C × Simple C .uint) := do
 
 /-- `e` as a simple value of type `p`, captured into a fresh local first
 when it is not one. -/
-def simpleOf (p : PrimTy) (e : RawExpr) : ElabM (Prog C × Simple C p) := do
+def simpleOf (p : PrimTy) (e : RawExpr) : ElabM (Surface.Prog C × Simple C p) := do
   let v ← checkM C p e
   match v.toSimple? with
   | some se => pure ([], se)
@@ -3066,7 +3070,7 @@ partial def narrowPure (Γ : ECtx) : RawExpr → Except String RawExpr
   | e => pure e
 
 /-- `require(inTy)` of `e` at `p`'s `n` bits, when `n` is narrow. -/
-def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (Prog C) := do
+def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (Surface.Prog C) := do
   if 256 ≤ n then return []
   pure [.require (← checkM C .bool (inTyCond p n e))]
 
@@ -3075,7 +3079,7 @@ operation, on `l` (`c = a + b;` at `uint8` is `c = a + b; require(c <= 255);`:
 a revert discards the write, so checking after it is checking before it); and,
 when `l` is narrow, `r` fitting it (`fitCheck`) and arithmetic on literals
 alone checked at `l`'s type (solc folds it at compile time). -/
-def narrowPost (l r : RawExpr) : ElabM (Prog C) := do
+def narrowPost (l r : RawExpr) : ElabM (Surface.Prog C) := do
   let Γ ← ctx
   let tl := intTyOf C Γ l
   if let some (p, n) := tl then ElabM.lift (fitCheck C Γ p n r)
@@ -3088,7 +3092,7 @@ def narrowPost (l r : RawExpr) : ElabM (Prog C) := do
 held in a fresh local and checked there, before the statement
 (`x = a + b > c;` at `uint8` is `uint se1 = a + b; require(se1 <= 255);
 x = se1 > c;`). -/
-def narrowCapture (e : RawExpr) : ElabM (Prog C × RawExpr) := do
+def narrowCapture (e : RawExpr) : ElabM (Surface.Prog C × RawExpr) := do
   let some (p, n) := checkedNarrow? C (← ctx) e | return ([], e)
   let v ← checkM C p e
   let x ← captureAs C "se" (.val p n)
@@ -3098,7 +3102,7 @@ def narrowCapture (e : RawExpr) : ElabM (Prog C × RawExpr) := do
 /-- A cast `T(e)`, `e`'s captures made: a fresh local of type `T` holding `e`.
 Narrowing a `uint` keeps the low bits (`e % 2^N`, as solc truncates); a cast
 between `uint` and `int`, and one narrowing an `int`, are refused. -/
-def castCapture (f : String) (e : RawExpr) : ElabM (Prog C × RawExpr) := do
+def castCapture (f : String) (e : RawExpr) : ElabM (Surface.Prog C × RawExpr) := do
   let some (p, n) := castTy? f | throw s!"{f} is not a type"
   let Γ ← ctx
   let r ← match intTyOf C Γ e, e.litVal? with
@@ -3126,7 +3130,7 @@ elaborator declared as one, or a line's written-out capture.  A fresh name
 the inliner gave a callee's local (`ElabScope.inlined`) is a local like any
 other, and is captured: in `function f(uint a) … { return a++ + a; }` the
 right `a` is read before the `++`. -/
-def captureExpr (e : RawExpr) : ElabM (Prog C × RawExpr) := do
+def captureExpr (e : RawExpr) : ElabM (Surface.Prog C × RawExpr) := do
   if e.isLit || e matches .bool _ then return ([], e)
   if let .name x := e then
     if let .fresh _ i := Var.ofName x then
@@ -3607,7 +3611,7 @@ both index, to a fresh default object (`Person memory mv1;`, an object
 nothing reaches), and rebound in each branch.  Under the right
 operand of `&&`/`||` or in a branch of a conditional an effect would be
 evaluated where the program does not evaluate it, so there it is an error. -/
-partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
+partial def hoist : RawExpr → ElabM (Surface.Prog C × RawExpr)
   | .field e f => do
     let (P, e) ← hoist e
     -- `rows[i].length` of a fixed-size `rows[i]`: the base is evaluated (and
@@ -3670,9 +3674,9 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
         -- revert (or, both indexing, to a fresh default object), then rebound
         -- in each branch to the one the condition takes
         let decl ← match (if pa.indexFree then some pa else if pb.indexFree then some pb else none) with
-          | some p => pure (Stmt.declMem R x (some (.alias p)) rfl pa.mapFree)
+          | some p => pure (Surface.Stmt.declMem R x (some (.alias p)) rfl pa.mapFree)
           | none => match hd : (Ty.ref R).defaultOkS with
-            | true => pure (Stmt.declMem R x none (by simp [hd]) pa.mapFree)
+            | true => pure (Surface.Stmt.declMem R x none (by simp [hd]) pa.mapFree)
             | false => throw s!"a conditional of two indexed memory {Ty.ref R}s, whose default is not well-formed"
         pure (P ++ [decl, .ite c [.rebindMem x (.alias pa)] [.rebindMem x (.alias pb)]],
           .name (toString x))
@@ -3742,7 +3746,7 @@ partial def hoist : RawExpr → ElabM (Prog C × RawExpr)
 /-- `a ⊕ b`'s captures: the right operand first (solc evaluates it first: `i++ +
 i` is `1 + 1`), the left one's after it, and the right one held before an
 effect of the left. -/
-partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (Prog C × RawExpr) := do
+partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (Surface.Prog C × RawExpr) := do
   let (Q, b) ← hoist b
   if a.hasIncDec then
     let (Qc, b) ← captureExpr C b
@@ -3756,7 +3760,7 @@ partial def hoistBinop (op : BinOp) (a b : RawExpr) : ElabM (Prog C × RawExpr) 
 
 /-- `hoist`, but an operation at the top is left to the statement, which
 checks its narrow width after the write (`narrowPost`). -/
-partial def hoistTop : RawExpr → ElabM (Prog C × RawExpr)
+partial def hoistTop : RawExpr → ElabM (Surface.Prog C × RawExpr)
   | .binop op a b => if op.shortCircuits then hoist (.binop op a b) else hoistBinop op a b
   | .unop op a => do
     let (P, a) ← hoist a
@@ -3765,7 +3769,7 @@ partial def hoistTop : RawExpr → ElabM (Prog C × RawExpr)
 
 /-- `l = r;`: the right-hand side's captures, then the target's; an operation at
 the top of `r` stays there when `l` is a variable (`hoistTop`). -/
-partial def hoistAssign (l r : RawExpr) : ElabM (Prog C × RawStmt) := do
+partial def hoistAssign (l r : RawExpr) : ElabM (Surface.Prog C × RawStmt) := do
   let (P, r) ← if l matches .name _ then hoistTop r else hoist r
   let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
   let (Q, l) ← hoist l
@@ -3773,7 +3777,7 @@ partial def hoistAssign (l r : RawExpr) : ElabM (Prog C × RawStmt) := do
 
 /-- A call's arguments, left to right: one read before a later argument's
 effect is captured first, as a binary operator's operand is. -/
-partial def hoistArgs : List RawExpr → ElabM (Prog C × List RawExpr)
+partial def hoistArgs : List RawExpr → ElabM (Surface.Prog C × List RawExpr)
   | [] => pure ([], [])
   | a :: as => do
     let (P, a) ← hoist a
@@ -3789,14 +3793,14 @@ renamed fresh (`renameStmts`), then its `return`s lowered (`lowerReturns`) — w
 the functions declared before `f`, so no call recurses.  `res` is the local
 the returned value lands in, with its type. -/
 partial def elabCall (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat := 256) : ElabM (Prog C) := do
+    (resW : Nat := 256) : ElabM (Surface.Prog C) := do
   pure (← elabCallRet f args res resW).1
 
 /-- A call of `f`, which returns a memory reference of type `R`, and `bind r`,
 the statement that binds the callee's return variable `r` where the call
 is: `Account memory mv1 = mv2;`, `m = mv2;` (the module docstring). -/
 partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
-    (bind : Var → (Ty.ref R).mapFree = true → Stmt C) : ElabM (Prog C) := do
+    (bind : Var → (Ty.ref R).mapFree = true → Surface.Stmt C) : ElabM (Surface.Prog C) := do
   let (P, r, _) ← elabCallRet f args none
   match r with
   | some ⟨R', r⟩ =>
@@ -3817,7 +3821,7 @@ as a statement (`f(a);`, KeY's `InternalCall`) declares them at the head of
 its body and returns nothing. -/
 partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) :
-    ElabM (Prog C × Option (RefTy × Var) × List (PrimTy × Var × Nat)) := do
+    ElabM (Surface.Prog C × Option (RefTy × Var) × List (PrimTy × Var × Nat)) := do
   let funs := (← read).funs
   -- the callee and the functions its body may call: the constructor (`elabCtor`)
   -- may call every function, a function those declared before it
@@ -3901,10 +3905,10 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     | some ⟨R, r⟩ =>
       let ⟨hm⟩ ← ElabM.lift (memOk R)
       match hd : (Ty.ref R).defaultOkS with
-      | true => pure (Stmt.declMem R r none (by simp [hd]) hm :: P)
+      | true => pure (Surface.Stmt.declMem R r none (by simp [hd]) hm :: P)
       | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
   -- several returns of a call that is a statement: declared on entry, at their defaults
-  let P := if targets then P else mrets.map (fun (p, r, _) => Stmt.declLocal p r none) ++ P
+  let P := if targets then P else mrets.map (fun (p, r, _) => Surface.Stmt.declLocal p r none) ++ P
   match hsep : Arg.separatedFrom [] targs with
   | true => pure ([.call f targs hsep ret P], mret, mrets)
   | false => throw s!"{f}: an argument reads a parameter"
@@ -3918,7 +3922,7 @@ one, of no parameters and no body.  It returns to no targets
 (`functionBodyExpand`).  Only a program's own statements deploy, never an
 inlined body (no function calls the constructor), and not a branch, a loop
 or a block (`elabBranch`), which would deploy again or only sometimes. -/
-partial def elabCtor (args : List RawExpr) : ElabM (Prog C) := do
+partial def elabCtor (args : List RawExpr) : ElabM (Surface.Prog C) := do
   unless (← read).top do
     throw "constructor(…) in a function's body or a block: only a program's own statements deploy"
   pure (← elabCallRet "constructor" args none (targets := true) (ctor := true)).1
@@ -3927,7 +3931,7 @@ partial def elabCtor (args : List RawExpr) : ElabM (Prog C) := do
 statement left: a right-hand side before the left-hand side, as the
 interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
 own. -/
-partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
+partial def hoistStmt : RawStmt → ElabM (Surface.Prog C × RawStmt)
   | .assign l r => do
     -- `m = f(a);` to a memory local: its arguments only (`elabStmt1`)
     if let .call f args := r then
@@ -3969,7 +3973,7 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
     let (s, P) ← (s.mapExprsM fun e => do
       let (Q, e) ← hoist e
       modify (· ++ Q)
-      pure e : StateT (Prog C) ElabM RawStmt).run []
+      pure e : StateT (Surface.Prog C) ElabM RawStmt).run []
     pure (P, s)
   | .opAssign op l r => do
     let (P, r) ← hoist r
@@ -4018,7 +4022,7 @@ partial def hoistStmt : RawStmt → ElabM (Prog C × RawStmt)
 /-- A statement, as a block: its narrow rewrites (`narrowPure`), its captures
 (`hoistStmt`), then the statement,
 whose compound target may need a capture of its own. -/
-partial def elabStmt (s : RawStmt) : ElabM (Prog C) := do
+partial def elabStmt (s : RawStmt) : ElabM (Surface.Prog C) := do
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
   -- a loop outside a function's body, lowered here (`lowerLoops`)
   if s matches .whileLoop .. | .forLoop .. | .doWhile .. then
@@ -4028,7 +4032,7 @@ partial def elabStmt (s : RawStmt) : ElabM (Prog C) := do
   pure (P ++ (← elabStmt1 s))
 
 /-- A statement whose expressions have no effect left. -/
-partial def elabStmt1 : RawStmt → ElabM (Prog C)
+partial def elabStmt1 : RawStmt → ElabM (Surface.Prog C)
   | .assign l (.newArr T n) => do
     let ⟨R, hR⟩ ← elabNewTy C T
     let (P, se) ← elabSize C n
@@ -4053,7 +4057,7 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
   | .assign l r => do
     let post ← narrowPost C l r
     let Γ ← ctx
-    let P : Prog C ← match ← synthM C l with
+    let P : Surface.Prog C ← match ← synthM C l with
       | .val p (.simple (.local x)) => do pure [.assignLocal x (← checkM C p r)]
       | .val p _ => throw s!"{l.toStr} is a {p.toStr} value, not a place to assign to"
       | .path (.prim p) (.loc l) => do pure [.assign l (.val (← checkM C p r))]
@@ -4119,11 +4123,11 @@ partial def elabStmt1 : RawStmt → ElabM (Prog C)
     let s ← match init with
       | some e =>
         let r ← elabMRhs C Γ R e
-        pure (Stmt.declMem R (Var.ofName x) (some r) rfl r.mapFree)
+        pure (Surface.Stmt.declMem R (Var.ofName x) (some r) rfl r.mapFree)
       | none =>
         let ⟨hm⟩ ← ElabM.lift (memOk R)
         match hd : (Ty.ref R).defaultOkS with
-        | true => pure (Stmt.declMem R (Var.ofName x) none (by simp [hd]) hm)
+        | true => pure (Surface.Stmt.declMem R (Var.ofName x) none (by simp [hd]) hm)
         | false => throw s!"{x}: a memory object whose default is not well-formed"
     declare C x (.mem R)
     pure [s]
@@ -4298,7 +4302,7 @@ partial def loopExpr (p : PrimTy) (e : RawExpr) (what : String) : ElabM (Val C p
   checkM C p e
 
 /-- A block. -/
-partial def elabStmts : List RawStmt → ElabM (Prog C)
+partial def elabStmts : List RawStmt → ElabM (Surface.Prog C)
   | [] => pure []
   | s :: ss => do
     let P ← elabStmt s
@@ -4307,7 +4311,7 @@ partial def elabStmts : List RawStmt → ElabM (Prog C)
 
 /-- A branch: its declarations stay inside it, and it does not deploy
 (`ElabScope.top`). -/
-partial def elabBranch (ss : List RawStmt) : ElabM (Prog C) := do
+partial def elabBranch (ss : List RawStmt) : ElabM (Surface.Prog C) := do
   let (Γ, _) ← get
   let P ← withReader (fun sc => { sc with top := false }) (elabStmts ss)
   let (_, k) ← get
@@ -4326,7 +4330,7 @@ twice, two that are not stack locals, one that reads another) are refused:
 solc's order of their writes is not KeY's.  The variables of a tuple
 declaration, which no component reads, are assigned directly (`direct`). -/
 partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Bool := false) :
-    ElabM (Prog C) := do
+    ElabM (Surface.Prog C) := do
   let tgts := ts.filterMap id
   let mut nonLocal := 0
   for t in tgts do
@@ -4535,63 +4539,63 @@ def LoopAnn.quote : LoopAnn C → Lean.Expr
 
 mutual
 
-def Stmt.quote : Stmt C → Lean.Expr
-  | @Stmt.assign _ T l r => mkAppN (mkConst ``Stmt.assign) #[c, toExpr T, Loc.quote c T l, Src.quote c T r]
-  | @Stmt.rebind _ R x r => mkAppN (mkConst ``Stmt.rebind) #[c, toExpr R, toExpr x, ARhs.quote c R r]
-  | @Stmt.assignLocal _ p x r =>
-    mkAppN (mkConst ``Stmt.assignLocal) #[c, toExpr p, toExpr x, Val.quote c p r]
+def Surface.Stmt.quote : Surface.Stmt C → Lean.Expr
+  | @Surface.Stmt.assign _ T l r => mkAppN (mkConst ``Surface.Stmt.assign) #[c, toExpr T, Loc.quote c T l, Src.quote c T r]
+  | @Surface.Stmt.rebind _ R x r => mkAppN (mkConst ``Surface.Stmt.rebind) #[c, toExpr R, toExpr x, ARhs.quote c R r]
+  | @Surface.Stmt.assignLocal _ p x r =>
+    mkAppN (mkConst ``Surface.Stmt.assignLocal) #[c, toExpr p, toExpr x, Val.quote c p r]
   | .declLocal p x init =>
-    mkAppN (mkConst ``Stmt.declLocal) #[c, toExpr p, toExpr x,
+    mkAppN (mkConst ``Surface.Stmt.declLocal) #[c, toExpr p, toExpr x,
       optE (mkAppN (mkConst ``Val) #[c, toExpr p]) (init.map (Val.quote c p))]
   | .declStorage R x init =>
-    mkAppN (mkConst ``Stmt.declStorage) #[c, toExpr R, toExpr x,
+    mkAppN (mkConst ``Surface.Stmt.declStorage) #[c, toExpr R, toExpr x,
       optE (mkAppN (mkConst ``ARhs) #[c, toExpr R]) (init.map (ARhs.quote c R))]
-  | @Stmt.opAssign _ p op _ _ l r =>
-    mkAppN (mkConst ``Stmt.opAssign) #[c, toExpr p, toExpr op, rflTrue, rflTrue,
+  | @Surface.Stmt.opAssign _ p op _ _ l r =>
+    mkAppN (mkConst ``Surface.Stmt.opAssign) #[c, toExpr p, toExpr op, rflTrue, rflTrue,
       OpLoc.quote c p l, Val.quote c p r]
-  | @Stmt.incDec _ p op _ l =>
-    mkAppN (mkConst ``Stmt.incDec) #[c, toExpr p, toExpr op, rflTrue, OpLoc.quote c p l]
-  | @Stmt.assignIncDec _ p x op _ l _ =>
-    mkAppN (mkConst ``Stmt.assignIncDec) #[c, toExpr p, toExpr x, toExpr op, rflTrue,
+  | @Surface.Stmt.incDec _ p op _ l =>
+    mkAppN (mkConst ``Surface.Stmt.incDec) #[c, toExpr p, toExpr op, rflTrue, OpLoc.quote c p l]
+  | @Surface.Stmt.assignIncDec _ p x op _ l _ =>
+    mkAppN (mkConst ``Surface.Stmt.assignIncDec) #[c, toExpr p, toExpr x, toExpr op, rflTrue,
       OpLoc.quote c p l, rflTrue]
-  | @Stmt.push _ E b v _ =>
-    mkAppN (mkConst ``Stmt.push) #[c, toExpr E, SPath.quote c _ b,
+  | @Surface.Stmt.push _ E b v _ =>
+    mkAppN (mkConst ``Surface.Stmt.push) #[c, toExpr E, SPath.quote c _ b,
       optE (mkAppN (mkConst ``Src) #[c, toExpr E]) (v.map (Src.quote c E)), rflTrue]
-  | @Stmt.pop _ E b => mkAppN (mkConst ``Stmt.pop) #[c, toExpr E, SPath.quote c _ b]
-  | .transfer r a => mkAppN (mkConst ``Stmt.transfer) #[c, Val.quote c .uint r, Val.quote c .uint a]
+  | @Surface.Stmt.pop _ E b => mkAppN (mkConst ``Surface.Stmt.pop) #[c, toExpr E, SPath.quote c _ b]
+  | .transfer r a => mkAppN (mkConst ``Surface.Stmt.transfer) #[c, Val.quote c .uint r, Val.quote c .uint a]
   | .send pv r a =>
-    mkAppN (mkConst ``Stmt.send) #[c, toExpr pv, Val.quote c .uint r, Val.quote c .uint a]
+    mkAppN (mkConst ``Surface.Stmt.send) #[c, toExpr pv, Val.quote c .uint r, Val.quote c .uint a]
   | .declMem R x init _ _ =>
-    mkAppN (mkConst ``Stmt.declMem) #[c, toExpr R, toExpr x,
+    mkAppN (mkConst ``Surface.Stmt.declMem) #[c, toExpr R, toExpr x,
       optE (mkAppN (mkConst ``MRhs) #[c, toExpr R]) (init.map (MRhs.quote c R)), rflTrue, rflTrue]
-  | @Stmt.rebindMem _ R x r => mkAppN (mkConst ``Stmt.rebindMem) #[c, toExpr R, toExpr x, MRhs.quote c R r]
-  | @Stmt.assignFromMem _ R l p =>
-    mkAppN (mkConst ``Stmt.assignFromMem) #[c, toExpr R, Loc.quote c _ l, MPath.quote c _ p]
-  | @Stmt.assignMem _ T l r => mkAppN (mkConst ``Stmt.assignMem) #[c, toExpr T, MLoc.quote c T l, MSrc.quote c T r]
-  | @Stmt.delete _ T l => mkAppN (mkConst ``Stmt.delete) #[c, toExpr T, Loc.quote c T l]
-  | @Stmt.deleteMem _ T p _ =>
-    mkAppN (mkConst ``Stmt.deleteMem) #[c, toExpr T, MPath.quote c T p, rflTrue]
-  | @Stmt.assignNew _ R l n _ =>
-    mkAppN (mkConst ``Stmt.assignNew) #[c, toExpr R, NewLhs.quote c R l, Simple.quote c .uint n,
+  | @Surface.Stmt.rebindMem _ R x r => mkAppN (mkConst ``Surface.Stmt.rebindMem) #[c, toExpr R, toExpr x, MRhs.quote c R r]
+  | @Surface.Stmt.assignFromMem _ R l p =>
+    mkAppN (mkConst ``Surface.Stmt.assignFromMem) #[c, toExpr R, Loc.quote c _ l, MPath.quote c _ p]
+  | @Surface.Stmt.assignMem _ T l r => mkAppN (mkConst ``Surface.Stmt.assignMem) #[c, toExpr T, MLoc.quote c T l, MSrc.quote c T r]
+  | @Surface.Stmt.delete _ T l => mkAppN (mkConst ``Surface.Stmt.delete) #[c, toExpr T, Loc.quote c T l]
+  | @Surface.Stmt.deleteMem _ T p _ =>
+    mkAppN (mkConst ``Surface.Stmt.deleteMem) #[c, toExpr T, MPath.quote c T p, rflTrue]
+  | @Surface.Stmt.assignNew _ R l n _ =>
+    mkAppN (mkConst ``Surface.Stmt.assignNew) #[c, toExpr R, NewLhs.quote c R l, Simple.quote c .uint n,
       rflTrue]
   | .ite cond thn els =>
-    mkAppN (mkConst ``Stmt.ite) #[c, Val.quote c .bool cond, Prog.quote thn, Prog.quote els]
-  | .require cond => mkAppN (mkConst ``Stmt.require) #[c, Val.quote c .bool cond]
-  | .assert cond => mkAppN (mkConst ``Stmt.assert) #[c, Val.quote c .bool cond]
-  | .revert => mkAppN (mkConst ``Stmt.revert) #[c]
+    mkAppN (mkConst ``Surface.Stmt.ite) #[c, Val.quote c .bool cond, Surface.Prog.quote thn, Surface.Prog.quote els]
+  | .require cond => mkAppN (mkConst ``Surface.Stmt.require) #[c, Val.quote c .bool cond]
+  | .assert cond => mkAppN (mkConst ``Surface.Stmt.assert) #[c, Val.quote c .bool cond]
+  | .revert => mkAppN (mkConst ``Surface.Stmt.revert) #[c]
   | .call f args _ ret body =>
-    mkAppN (mkConst ``Stmt.call)
-      #[c, toExpr f, Arg.quoteList c args, rflTrue, CallRet.quote ret, Prog.quote body]
+    mkAppN (mkConst ``Surface.Stmt.call)
+      #[c, toExpr f, Arg.quoteList c args, rflTrue, CallRet.quote ret, Surface.Prog.quote body]
   | .tryCall call rets ok err code pnc other =>
-    mkAppN (mkConst ``Stmt.tryCall)
-      #[c, ExtCall.quote c call, toExpr rets, Prog.quote ok, Prog.quote err, toExpr code,
-        Prog.quote pnc, Prog.quote other]
+    mkAppN (mkConst ``Surface.Stmt.tryCall)
+      #[c, ExtCall.quote c call, toExpr rets, Surface.Prog.quote ok, Surface.Prog.quote err, toExpr code,
+        Surface.Prog.quote pnc, Surface.Prog.quote other]
   | .loop a cond body =>
-    mkAppN (mkConst ``Stmt.loop) #[c, LoopAnn.quote c a, Val.quote c .bool cond, Prog.quote body]
+    mkAppN (mkConst ``Surface.Stmt.loop) #[c, LoopAnn.quote c a, Val.quote c .bool cond, Surface.Prog.quote body]
 
-def Prog.quote : List (Stmt C) → Lean.Expr
-  | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``Stmt) #[c]]
-  | s :: P => mkAppN (mkConst ``List.cons [0]) #[mkAppN (mkConst ``Stmt) #[c], Stmt.quote s, Prog.quote P]
+def Surface.Prog.quote : List (Surface.Stmt C) → Lean.Expr
+  | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``Surface.Stmt) #[c]]
+  | s :: P => mkAppN (mkConst ``List.cons [0]) #[mkAppN (mkConst ``Surface.Stmt) #[c], Surface.Stmt.quote s, Surface.Prog.quote P]
 
 end
 

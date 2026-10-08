@@ -18,7 +18,7 @@ open Solidity
 
 local instance : InContract := ⟨StandardExample⟩
 
-/-- info: dl{ a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Fml StandardExample -/
+/-- info: dl{ a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Surface.Fml StandardExample -/
 #guard_msgs in #check dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }
 
 section Scoped

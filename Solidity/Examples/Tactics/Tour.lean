@@ -52,7 +52,7 @@ theorem runningExample_byHand :
   apply update .storageFieldWriteSave  -- { storage := save(storage, sp1.balance, se1) }
   -- the read: Step 1 captures the receiver (`storageFieldRead_unfold_rightFst`) …
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   -- … and Step 3 reads with `find`
@@ -82,7 +82,7 @@ theorem aliasing :
   apply update .storageFieldWriteSave
   apply unfold .localValueDeclInitDrop
   -- Step 1, `storageFieldRead_unfold_rightFst`
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -123,16 +123,16 @@ theorem nested :
   apply update .storageRootReadSelect
   apply unfold .storageLocalDeclInitDrop
   -- Step 1 on the alias's target `folks[k].account` (`storageFieldRead_unfold_rightFst`)
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageIndexReadMappingBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldWriteSave
   apply unfold .localValueDeclInitDrop
   -- Step 1 twice on the read, `storageFieldRead_unfold_rightFst`
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageIndexReadMappingBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -148,14 +148,14 @@ A statement no rule can run cannot be written (`Syntax.lean`). -/
 
 /-- error: Solidity elaboration failed: a value where a storage reference is expected -/
 #guard_msgs in
-#check (sol{ alice = 1; } : Prog StandardExample)
+#check (sol{ alice = 1; } : Surface.Prog StandardExample)
 
 /-- error: Solidity elaboration failed: struct Person has no member salary -/
 #guard_msgs in
-#check (sol{ alice.salary = 1; } : Prog StandardExample)
+#check (sol{ alice.salary = 1; } : Surface.Prog StandardExample)
 
 /-- error: Solidity elaboration failed: a storage copy of a type that holds a mapping -/
 #guard_msgs in
-#check (sol{ wallet = wallet; } : Prog StandardExample)
+#check (sol{ wallet = wallet; } : Surface.Prog StandardExample)
 
 end Solidity.Examples.Tactics.Tour

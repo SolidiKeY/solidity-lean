@@ -41,14 +41,14 @@ end the loop, so that `continue` still runs it. -/
 /-- info: uint i = 0;
 while (i < 3) { i++; } -/
 #guard_msgs in
-#eval IO.println (Prog.show (sol{ uint i = 0; while (i < 3) { i++; } }))
+#eval IO.println (Surface.Prog.show (sol{ uint i = 0; while (i < 3) { i++; } }))
 
 /-- info: uint s = 0;
 uint i = 0;
 bool brk2 = false;
 while (!brk2 && (i < 9)) { bool cnt1 = false; if (i == 1) { cnt1 = true; } else { } if (!cnt1) { if (i == 5) { brk2 = true; } else { } if (!brk2) { s += i; } else { } } else { } if (!brk2) { i++; } else { } } -/
 #guard_msgs in
-#eval IO.println (Prog.show (sol{ uint s = 0;
+#eval IO.println (Surface.Prog.show (sol{ uint s = 0;
   for (uint i = 0; i < 9; i++) { if (i == 1) { continue; } if (i == 5) { break; } s += i; } }))
 
 /-! `do body while (c)` runs the body once before the condition, by a flag
@@ -58,7 +58,7 @@ while (!brk2 && (i < 9)) { bool cnt1 = false; if (i == 1) { cnt1 = true; } else 
 bool first1 = true;
 while (first1 || (i < 3)) { first1 = false; i++; } -/
 #guard_msgs in
-#eval IO.println (Prog.show (sol{ uint i = 5; do { i++; } while (i < 3); }))
+#eval IO.println (Surface.Prog.show (sol{ uint i = 5; do { i++; } while (i < 3); }))
 
 /-! A statement after a `break` in its block is dropped, as solkey drops it. -/
 
@@ -66,7 +66,7 @@ while (first1 || (i < 3)) { first1 = false; i++; } -/
 bool brk1 = false;
 while (!brk1 && (i < 3)) { i++; brk1 = true; } -/
 #guard_msgs in
-#eval IO.println (Prog.show (sol{ uint i = 0; while (i < 3) { i++; break; i++; } }))
+#eval IO.println (Surface.Prog.show (sol{ uint i = 0; while (i < 3) { i++; break; i++; } }))
 
 /-! The specification above a loop is its annotation (`LoopAnn`): solkey's
 `invariant` and `decreases` clauses, or Lean's bound on unwinding; a loop
@@ -75,7 +75,7 @@ with neither is unwound zero times. -/
 /-- info: uint i = 0;
 /// @custom:key invariant i <= 3 /// @custom:key decreases 3 - i while (i < 3) { i++; } -/
 #guard_msgs in
-#eval IO.println (Prog.show (sol{ uint i = 0;
+#eval IO.println (Surface.Prog.show (sol{ uint i = 0;
   /// @custom:key invariant i <= 3
   /// @custom:key decreases 3 - i
   while (i < 3) { i++; } }))
@@ -83,7 +83,7 @@ with neither is unwound zero times. -/
 /-- info: uint i = 0;
 /// @custom:key unwind 4 while (i < 3) { i++; } -/
 #guard_msgs in
-#eval IO.println (Prog.show (sol{ uint i = 0;
+#eval IO.println (Surface.Prog.show (sol{ uint i = 0;
   /// @custom:key unwind 4
   for (; i < 3; ) { i++; } }))
 
@@ -145,7 +145,7 @@ while (!ret4 && (se3 < values.length)) { if (values[se3] == se1) { se2 = se3; re
 if (ret4) { } else { se2 = 100; }
 y = se2; -/
 #guard_msgs in
-#eval IO.println (Prog.show (Prog.inlined (sol[Loops]{ uint y = find(3); })))
+#eval IO.println (Surface.Prog.show (Surface.Prog.inlined (sol[Loops]{ uint y = find(3); })))
 
 /-! Nested loops share `ret`: the inner loop's condition tests it, and so do
 the outer loop's condition and the rest of its body. -/
@@ -160,28 +160,28 @@ while (!ret6 && (se4 < se1)) { uint se5 = 0; while (!ret6 && (se5 < se1)) { if (
 if (ret6) { } else { se3 = 100; }
 y = se3; -/
 #guard_msgs in
-#eval IO.println (Prog.show (Prog.inlined (sol[Loops]{ uint y = pair(3, 4); })))
+#eval IO.println (Surface.Prog.show (Surface.Prog.inlined (sol[Loops]{ uint y = pair(3, 4); })))
 
 /-! ## Refused -/
 
 /-- error: Solidity elaboration failed: `break` outside a loop -/
 #guard_msgs in
-example : Prog StandardExample := sol{ break; }
+example : Surface.Prog StandardExample := sol{ break; }
 
 /-- error: Solidity elaboration failed: i++ < 3: a loop's condition needs a statement before it (an effect, a call, a cast, a narrow operation or a constructor), and is evaluated again each iteration -/
 #guard_msgs in
-example : Prog StandardExample := sol{ uint i = 0; while (i++ < 3) { } }
+example : Surface.Prog StandardExample := sol{ uint i = 0; while (i++ < 3) { } }
 
 /-- error: Solidity elaboration failed: a loop has an `invariant` or an `unwind` clause, not both -/
 #guard_msgs in
-example : Prog StandardExample := sol{ uint i = 0;
+example : Surface.Prog StandardExample := sol{ uint i = 0;
   /// @custom:key invariant i <= 3
   /// @custom:key unwind 3
   while (i < 3) { i++; } }
 
 /-- error: Solidity elaboration failed: `break`, `continue` or `return` inside `try` inside a loop -/
 #guard_msgs in
-example : Prog StandardExample := sol{ uint i = 0;
+example : Surface.Prog StandardExample := sol{ uint i = 0;
   while (i < 3) { try address(7).get() { break; } catch { } i++; } }
 
 /-! A loop inside a `try` clause, outside every loop, is lowered: its
@@ -191,7 +191,7 @@ example : Prog StandardExample := sol{ uint i = 0;
 /-- info: uint i = 0;
 try address(7).get() { bool brk1 = false; while (!brk1 && (i < 3)) { if (i == 1) { brk1 = true; } else { } if (!brk1) { i++; } else { } } } catch Error(string memory) { } catch Panic(uint) { } catch { } -/
 #guard_msgs in
-#eval IO.println (Prog.show (sol{ uint i = 0;
+#eval IO.println (Surface.Prog.show (sol{ uint i = 0;
   try address(7).get() { while (i < 3) { if (i == 1) { break; } i++; } } catch { } }))
 
 /-! ## Runs
@@ -270,7 +270,7 @@ n = 0
 
 /-- info: uint y; uint se1 = 0; uint se2; se2 = se1++; se2 = se1++; y = se2; -/
 #guard_msgs in
-#eval IO.println (Prog.toStr (Prog.inlined (sol[ModifierRuns]{ uint y = f(0); })))
+#eval IO.println (Surface.Prog.toStr (Surface.Prog.inlined (sol[ModifierRuns]{ uint y = f(0); })))
 
 /-! ## A loop decided
 
@@ -279,13 +279,10 @@ its `n`-th iteration runs as that iteration, which it does compute:
 `while (i < 3) { i++; }` from `i = 0` is done at the fourth (three bodies,
 then the condition false). -/
 
-def countTo3 : Prog StandardExample := sol{ uint i = 0; while (i < 3) { i++; } }
+def countTo3 : Surface.Prog StandardExample := sol{ uint i = 0; while (i < 3) { i++; } }
 
-example : (Prog.run State.exampleStore countTo3 >>= fun σ => σ.getEnv (.user "i")) =
-    .ok (.val (.int 3)) := by
-  unfold countTo3
-  rw [Prog.run_cons_ok rfl, Prog.run_loop_of_iterN (n := 4) rfl]
-  rfl
+#guard (Surface.Prog.runT State.exampleStore countTo3 >>= fun σ => σ.getEnv (.user "i")) =
+    .ok (.val (.int 3))
 
 /-! ## Unwinding
 
@@ -455,7 +452,7 @@ KeY's types say: an anonymised local holds anything. -/
 bool brk1 = false;
 /// @custom:key invariant (i <= 10) && (brk1 || !brk1) while (!brk1 && (i < 10)) { if (i == 5) { brk1 = true; } else { } if (!brk1) { i++; } else { } } -/
 #guard_msgs in
-#eval IO.println (Prog.show (sol{ uint i = 0;
+#eval IO.println (Surface.Prog.show (sol{ uint i = 0;
   /// @custom:key invariant i <= 10
   while (i < 10) { if (i == 5) { break; } i++; } }))
 

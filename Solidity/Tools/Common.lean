@@ -137,7 +137,7 @@ def elabFormula (cmd : String) (t : Lean.Term) :
   synthesizeSyntheticMVarsNoPostponing
   let φ ← instantiateMVars φ
   let ty ← whnf (← inferType φ)
-  unless ty.isAppOfArity ``Fml 1 do throwError "{cmd}: not a formula{indentExpr φ}"
+  unless ty.isAppOfArity ``NFml 1 do throwError "{cmd}: not a formula{indentExpr φ}"
   let C := ty.appArg!
   let some n := (← whnfR C).constName? | throwError "{cmd}: not a named contract: {C}"
   if φ.hasFVar || φ.hasMVar then throwError "{cmd}: the formula is not closed{indentExpr φ}"

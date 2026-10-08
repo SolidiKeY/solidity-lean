@@ -26,7 +26,7 @@ This module is those rules, each proved an equivalence over `holds`
 | `applyOnElementary`, `applyOnParallel`: `{u}(x := t)`, `{u}(u2 ‖ u3)` | `UpdElem.subst`, `Upd.subst` (functions) |
 | `simplifyUpdate1/2/3` (`\dropEffectlessElementaries`) | `UpdRule.simplifyUpdate`, `Upd.dropEffectless` |
 | `applySkip1/2/3`: `{skip}φ ⇝ φ` | `UpdRule.applySkip` |
-| `applyOnRigidFormula`, `applyOnPV`, `applyOnDifferentPV` | `UpdRule.applyOnRigid`, `Fml.subst` |
+| `applyOnRigidFormula`, `applyOnPV`, `applyOnDifferentPV` | `UpdRule.applyOnRigid`, `NFml.subst` |
 | `elimSelfUpdate` (commented out in solkey) | `UpdElem.elimSelf_box`, `UpdElem.elimSelf_diamond`: one direction each |
 | `parallelWithSkip1/2`: `skip ‖ u ⇝ u` | nothing: `‖` is `++`, `skip` is `[]` |
 
@@ -56,18 +56,17 @@ it.  So the local captures of a stack merge, and two storage writes stay
 two updates.  A variable read at another sort than `U` binds it
 (`x := 1`, then `p.age` for an alias `p`) becomes a term that halts
 (`Term.stuck`), as the read would.  `applyOnRigid` excludes that case
-(`Fml.sortedFor`): an equation reads its terms in the Theory, where a halt
+(`NFml.sortedFor`): an equation reads its terms in the Theory, where a halt
 still denotes something, and a storage or path variable of the wrong sort
 denotes something other than its substitution.
 
-The rules are used through `Fml.simpUpds` (merge every stack, drop what is
+The rules are used through `NFml.simpUpds` (merge every stack, drop what is
 dead) and the tactics `sol_merge` and `sol_upd r` (`Calculus/Rewrite.lean`)
 on `⊨` goals, and on `⊢` goals as constructors of `Proves`
 (`Calculus/Logic.lean`), which is why this module sits below it:
 `Proves.merge`, `Proves.mergeStorage`, `Proves.simplify`,
 `Proves.applyOnRigidBox`, `Proves.applyStorageBox`, and `Proves.updRw`, the
-rewrite inside an update's right-hand sides (the last section).  Being rules,
-they apply with a modality still in the goal, as mini-solkey's do.
+rewrite inside an update's right-hand sides (the last section).
 -/
 
 namespace Solidity
@@ -815,7 +814,7 @@ the update holds.
 Example: for `alice.account.balance = 10;`,
 `{ storage := save(storage, alice.account.balance, 10) } find(storage, alice.account.balance) = 10`
 holds exactly when the same formula under the three-element merged update does. -/
-theorem Upd.dropEffectless_holds (m : Modality) (U : Upd C) (φ : Fml C) (σ : State) :
+theorem Upd.dropEffectless_holds (m : Modality) (U : Upd C) (φ : NFml C) (σ : State) :
     holds σ (.upd m (U.dropEffectless φ.vars) φ) ↔ holds σ (.upd m U φ) :=
   m.after_frame (Upd.dropEffectless_apply φ.vars U σ) fun _ _ h =>
     holds_frame φ (fun x hx hG => by
@@ -858,7 +857,7 @@ theorem UpdElem.write_self {σ τ : State} :
 
 /-- `{x := x ‖ U} φ` is `{U} φ` when `x := x` does not halt. -/
 theorem UpdElem.elimSelf_holds {e : UpdElem C} (he : e.isSelf = true) {σ τ : State}
-    (hw : e.write σ σ = .ok τ) (m : Modality) (U : Upd C) (φ : Fml C) :
+    (hw : e.write σ σ = .ok τ) (m : Modality) (U : Upd C) (φ : NFml C) :
     holds σ (.upd m (e :: U) φ) ↔ holds σ (.upd m U φ) := by
   simp only [holds, Upd.apply, List.foldlM_cons, hw]
 
@@ -871,7 +870,7 @@ theorem UpdElem.elimSelf_holds {e : UpdElem C} (he : e.isSelf = true) {σ τ : S
 Example: `[ x = x; y = 3; ] y == 3` leaves `{ x := x ‖ y := 3 } y = 3`, which
 `{ y := 3 } y = 3` proves. -/
 theorem UpdElem.elimSelf_box {e : UpdElem C} (he : e.isSelf = true) {σ : State} {U : Upd C}
-    {φ : Fml C} (h : holds σ (.upd .box U φ)) : holds σ (.upd .box (e :: U) φ) := by
+    {φ : NFml C} (h : holds σ (.upd .box U φ)) : holds σ (.upd .box (e :: U) φ) := by
   cases hw : e.write σ σ with
   | error => simp only [holds, Modality.after, Upd.apply, List.foldlM_cons, bind, Except.bind, hw,
       Modality.onHalt]
@@ -883,7 +882,7 @@ gives `{U} φ`; the converse fails where `x` holds no value.
 Example: `⟨ x = x; y = 3; ⟩ y == 3` leaves `{ x := x ‖ y := 3 } y = 3`, from
 which `{ y := 3 } y = 3` follows. -/
 theorem UpdElem.elimSelf_diamond {e : UpdElem C} (he : e.isSelf = true) {σ : State}
-    {U : Upd C} {φ : Fml C} (h : holds σ (.upd .diamond (e :: U) φ)) :
+    {U : Upd C} {φ : NFml C} (h : holds σ (.upd .diamond (e :: U) φ)) :
     holds σ (.upd .diamond U φ) := by
   cases hw : e.write σ σ with
   | error => simp only [holds, Modality.after, Upd.apply, List.foldlM_cons, bind, Except.bind, hw,
@@ -1083,15 +1082,15 @@ end SubstDenote
 
 /-! ## An update on a first-order formula -/
 
-/-- No update and no modality in it: `applyOnRigidFormula` applies. -/
-def Fml.rigid : Fml C → Bool
+/-- No update in it: `applyOnRigidFormula` applies. -/
+def NFml.rigid : NFml C → Bool
   | .tt | .eq .. | .defined _ => true
   | .not φ => φ.rigid
   | .and φ ψ | .imp φ ψ => φ.rigid && ψ.rigid
   | _ => false
 
 /-- `{U} φ` for a first-order `φ`: `U` substituted into its terms. -/
-def Fml.subst (U : Upd C) : Fml C → Fml C
+def NFml.subst (U : Upd C) : NFml C → NFml C
   | .tt => .tt
   | .eq a b => .eq (a.subst U) (b.subst U)
   | .defined t => .defined (t.subst U)
@@ -1102,7 +1101,7 @@ def Fml.subst (U : Upd C) : Fml C → Fml C
 
 /-- Every equation of `φ` reads its variables at the sorts `U` writes them
 (`Tm.sortedFor`). -/
-def Fml.sortedFor (U : Upd C) : Fml C → Bool
+def NFml.sortedFor (U : Upd C) : NFml C → Bool
   | .eq a b => a.sortedFor U && b.sortedFor U
   | .not φ => φ.sortedFor U
   | .and φ ψ | .imp φ ψ => φ.sortedFor U && ψ.sortedFor U
@@ -1113,27 +1112,27 @@ does after it.
 
 Example: after `y = 3;`, `(y = 3).subst { y := 3 }` is `3 = 3`, true before
 the update as `y = 3` is after it. -/
-theorem Fml.subst_holds {U : Upd C} {ns : List Var} {σ τ : State} (h : SubstAgree U ns σ τ) :
-    (φ : Fml C) → φ.rigid = true → φ.sortedFor U = true → (holds σ (φ.subst U) ↔ holds τ φ)
+theorem NFml.subst_holds {U : Upd C} {ns : List Var} {σ τ : State} (h : SubstAgree U ns σ τ) :
+    (φ : NFml C) → φ.rigid = true → φ.sortedFor U = true → (holds σ (φ.subst U) ↔ holds τ φ)
   | .tt, _, _ => Iff.rfl
   | .eq a b, _, hs => by
-    simp only [Fml.sortedFor, Bool.and_eq_true] at hs
+    simp only [NFml.sortedFor, Bool.and_eq_true] at hs
     have ea : Theory.StValue.Equiv ((a.subst U).denote σ) (a.denote τ) :=
       Term.subst_denote h a hs.1
     have eb : Theory.StValue.Equiv ((b.subst U).denote σ) (b.denote τ) :=
       Term.subst_denote h b hs.2
-    simp only [Fml.subst, holds]
+    simp only [NFml.subst, holds]
     exact ⟨fun e => (ea.symm.trans e).trans eb, fun e => (ea.trans e).trans eb.symm⟩
-  | .defined t, _, _ => by simp only [Fml.subst, holds, t.subst_eval h]
-  | .not φ, hr, hs => by simp only [Fml.subst, holds, Fml.subst_holds h φ hr hs]
+  | .defined t, _, _ => by simp only [NFml.subst, holds, t.subst_eval h]
+  | .not φ, hr, hs => by simp only [NFml.subst, holds, NFml.subst_holds h φ hr hs]
   | .and φ ψ, hr, hs => by
-    simp only [Fml.rigid, Bool.and_eq_true] at hr
-    simp only [Fml.sortedFor, Bool.and_eq_true] at hs
-    simp only [Fml.subst, holds, Fml.subst_holds h φ hr.1 hs.1, Fml.subst_holds h ψ hr.2 hs.2]
+    simp only [NFml.rigid, Bool.and_eq_true] at hr
+    simp only [NFml.sortedFor, Bool.and_eq_true] at hs
+    simp only [NFml.subst, holds, NFml.subst_holds h φ hr.1 hs.1, NFml.subst_holds h ψ hr.2 hs.2]
   | .imp φ ψ, hr, hs => by
-    simp only [Fml.rigid, Bool.and_eq_true] at hr
-    simp only [Fml.sortedFor, Bool.and_eq_true] at hs
-    simp only [Fml.subst, holds, Fml.subst_holds h φ hr.1 hs.1, Fml.subst_holds h ψ hr.2 hs.2]
+    simp only [NFml.rigid, Bool.and_eq_true] at hr
+    simp only [NFml.sortedFor, Bool.and_eq_true] at hs
+    simp only [NFml.subst, holds, NFml.subst_holds h φ hr.1 hs.1, NFml.subst_holds h ψ hr.2 hs.2]
 
 /-- An update that cannot halt writes only locals: `{ se1 := 10 ‖ sp1 := alice.account }`. -/
 theorem Upd.total_envOnly : {U : Upd C} → U.total = true → U.envOnly = true
@@ -1166,23 +1165,23 @@ theorem Modality.after_bind (m : Modality) (p : State → Prop) (r : Res State)
 
 /-- The update rules, each a rewrite `φ ⇝ ψ` of a formula.  Hover a
 constructor for the KeY taclet it is. -/
-inductive UpdRule : Fml C → Fml C → Prop
+inductive UpdRule : NFml C → NFml C → Prop
   /-- `sequentialToParallel2 { \find({u}{u2}phi) \replacewith({u || {u}u2}phi) }`,
   for `u` an update of locals. -/
-  | sequentialToParallel {m : Modality} {u u2 : Upd C} {φ : Fml C} (hu : u.envOnly = true) :
+  | sequentialToParallel {m : Modality} {u u2 : Upd C} {φ : NFml C} (hu : u.envOnly = true) :
       UpdRule dl_schema{ {u}{u2}φ } dl_schema{ {u ‖ {u}u2}φ }
   /-- `simplifyUpdate2 { \find({u}phi)
   \varcond(\dropEffectlessElementaries(u, phi, result)) \replacewith(result) }` -/
-  | simplifyUpdate {m : Modality} {u : Upd C} {φ : Fml C} :
+  | simplifyUpdate {m : Modality} {u : Upd C} {φ : NFml C} :
       UpdRule dl_schema{ {u}φ } (.upd m (u.dropEffectless φ.vars) φ)
   /-- `applySkip2 { \find({skip}phi) \replacewith(phi) }` -/
-  | applySkip {m : Modality} {φ : Fml C} : UpdRule (.upd m [] φ) φ
+  | applySkip {m : Modality} {φ : NFml C} : UpdRule (.upd m [] φ) φ
   /-- `applyOnRigidFormula { \find({u}phi)
   \varcond(\applyUpdateOnRigid(u, phi, result)) \replacewith(result) }`, and
   `applyOnPV`/`applyOnDifferentPV` on the terms under it; for `u` that
   cannot halt, and `φ` reading no variable at another sort than `u` writes it
-  (`Fml.sortedFor`, which KeY's sorts give for free). -/
-  | applyOnRigid {m : Modality} {u : Upd C} {φ : Fml C} (hu : u.total = true)
+  (`NFml.sortedFor`, which KeY's sorts give for free). -/
+  | applyOnRigid {m : Modality} {u : Upd C} {φ : NFml C} (hu : u.total = true)
       (hφ : φ.rigid = true) (hs : φ.sortedFor u = true) : UpdRule dl_schema{ {u}φ } (φ.subst u)
 
 /-- **Soundness of the update rules**: each rewrites a formula to an
@@ -1191,7 +1190,7 @@ equivalent one.
 Example: `x = 1; y = x;` leaves `{ x := 1 } { y := x } y = 1`;
 `sequentialToParallel` rewrites it to `{ x := 1 ‖ y := 1 } y = 1`, and the two
 hold in the same states. -/
-theorem UpdRule.sound {φ ψ : Fml C} : UpdRule φ ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
+theorem UpdRule.sound {φ ψ : NFml C} : UpdRule φ ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
   | .sequentialToParallel hU, σ => by
     simp only [holds]
     rw [Upd.apply_seq hU, ← Modality.after_bind]
@@ -1200,11 +1199,11 @@ theorem UpdRule.sound {φ ψ : Fml C} : UpdRule φ ψ → ∀ σ, (holds σ ψ �
   | @UpdRule.applyOnRigid _ m U φ hU hφ hs, σ => by
     obtain ⟨τ, hτ⟩ := Upd.foldl_total σ U hU σ
     simp only [holds, Upd.apply, hτ]
-    exact Fml.subst_holds (Upd.substAgree (Upd.total_envOnly hU) hτ) φ hφ hs
+    exact NFml.subst_holds (Upd.substAgree (Upd.total_envOnly hU) hτ) φ hφ hs
 
 /-! ## One rule at a time: `sol_upd r`
 
-`Fml.updAt r φ` applies rule `r` at the first update in `φ` where it fits,
+`NFml.updAt r φ` applies rule `r` at the first update in `φ` where it fits,
 looking through every connective and into the postcondition of a
 modality.  The rules are equivalences, so every position is sound. -/
 
@@ -1216,7 +1215,7 @@ inductive UpdRuleName where
   deriving DecidableEq, Repr
 
 /-- Rule `r` on `{U} φ` under `m`, if it fits and changes something. -/
-def UpdRuleName.top : UpdRuleName → Modality → Upd C → Fml C → Option (Fml C)
+def UpdRuleName.top : UpdRuleName → Modality → Upd C → NFml C → Option (NFml C)
   | .sequentialToParallel, m, U, .upd m' V φ =>
     if m' = m ∧ U.envOnly = true then some (.upd m (U ++ V.subst U) φ) else none
   | .simplifyUpdate, m, U, φ =>
@@ -1232,7 +1231,7 @@ rewrite of `{U} φ`.
 
 Example: `sequentialToParallel` fits `{ x := 1 } { y := x } y = 1` (after
 `x = 1; y = x;`) and returns `{ x := 1 ‖ y := 1 } y = 1`. -/
-theorem UpdRuleName.top_rule {r : UpdRuleName} {m : Modality} {U : Upd C} {φ ψ : Fml C}
+theorem UpdRuleName.top_rule {r : UpdRuleName} {m : Modality} {U : Upd C} {φ ψ : NFml C}
     (h : r.top m U φ = some ψ) : UpdRule (.upd m U φ) ψ := by
   unfold UpdRuleName.top at h
   split at h
@@ -1249,7 +1248,7 @@ theorem UpdRuleName.top_rule {r : UpdRuleName} {m : Modality} {U : Upd C} {φ ψ
   · cases h
 
 /-- Rule `r` at the first update where it fits: outermost first, then left to right. -/
-def Fml.updAt (r : UpdRuleName) : Fml C → Option (Fml C)
+def NFml.updAt (r : UpdRuleName) : NFml C → Option (NFml C)
   | .upd m U φ => (r.top m U φ).orElse fun _ => (φ.updAt r).map (.upd m U)
   | .not φ => (φ.updAt r).map .not
   | .and φ ψ => match φ.updAt r with
@@ -1258,7 +1257,6 @@ def Fml.updAt (r : UpdRuleName) : Fml C → Option (Fml C)
   | .imp φ ψ => match φ.updAt r with
     | some φ' => some (.imp φ' ψ)
     | none => (ψ.updAt r).map (.imp φ)
-  | .modal m P φ => (φ.updAt r).map (.modal m P)
   | .havoc φ => (φ.updAt r).map .havoc
   | .all x p φ => (φ.updAt r).map (.all x p)
   | .anon xs φ => (φ.updAt r).map (.anon xs)
@@ -1271,20 +1269,16 @@ theorem Modality.after_congr (m : Modality) {p q : State → Prop} (h : ∀ τ, 
   | .ok τ => h τ
   | .error _ => Iff.rfl
 
-theorem Modality.afterRun_congr (m : Modality) {p q : State → Prop} (h : ∀ τ, p τ ↔ q τ)
-    (r : Res State) : m.afterRun p r ↔ m.afterRun q r :=
-  and_congr_left' (m.after_congr h r)
-
 /-- Applying an update rule wherever it fits first gives an equivalent formula.
 
 Example: for `alice.account.balance = 10;`, `sequentialToParallel` on
 `{ se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } φ`
 merges the first two updates, and the result holds exactly when the
 original does. -/
-theorem Fml.updAt_sound {r : UpdRuleName} :
-    (φ : Fml C) → ∀ {ψ}, φ.updAt r = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
+theorem NFml.updAt_sound {r : UpdRuleName} :
+    (φ : NFml C) → ∀ {ψ}, φ.updAt r = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
   | .upd m U φ, ψ, h, σ => by
-    simp only [Fml.updAt] at h
+    simp only [NFml.updAt] at h
     cases ht : r.top m U φ with
     | some χ =>
       simp only [ht, Option.orElse, Option.some.injEq] at h; subst h
@@ -1292,46 +1286,42 @@ theorem Fml.updAt_sound {r : UpdRuleName} :
     | none =>
       simp only [ht, Option.orElse, Option.map_eq_some_iff] at h
       obtain ⟨φ', h', rfl⟩ := h
-      exact m.after_congr (fun τ => Fml.updAt_sound φ h' τ) _
+      exact m.after_congr (fun τ => NFml.updAt_sound φ h' τ) _
   | .not φ, ψ, h, σ => by
-    simp only [Fml.updAt, Option.map_eq_some_iff] at h
+    simp only [NFml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
-    simp only [holds, Fml.updAt_sound φ h' σ]
+    simp only [holds, NFml.updAt_sound φ h' σ]
   | .and φ₁ φ₂, ψ, h, σ => by
-    simp only [Fml.updAt] at h
+    simp only [NFml.updAt] at h
     split at h
-    · cases h; simp only [holds, Fml.updAt_sound φ₁ (by assumption) σ]
+    · cases h; simp only [holds, NFml.updAt_sound φ₁ (by assumption) σ]
     · simp only [Option.map_eq_some_iff] at h
       obtain ⟨φ', h', rfl⟩ := h
-      simp only [holds, Fml.updAt_sound φ₂ h' σ]
+      simp only [holds, NFml.updAt_sound φ₂ h' σ]
   | .imp φ₁ φ₂, ψ, h, σ => by
-    simp only [Fml.updAt] at h
+    simp only [NFml.updAt] at h
     split at h
-    · cases h; simp only [holds, Fml.updAt_sound φ₁ (by assumption) σ]
+    · cases h; simp only [holds, NFml.updAt_sound φ₁ (by assumption) σ]
     · simp only [Option.map_eq_some_iff] at h
       obtain ⟨φ', h', rfl⟩ := h
-      simp only [holds, Fml.updAt_sound φ₂ h' σ]
-  | .modal m P φ, ψ, h, σ => by
-    simp only [Fml.updAt, Option.map_eq_some_iff] at h
-    obtain ⟨φ', h', rfl⟩ := h
-    exact m.afterRun_congr (fun τ => Fml.updAt_sound φ h' τ) _
+      simp only [holds, NFml.updAt_sound φ₂ h' σ]
   | .havoc φ, ψ, h, σ => by
-    simp only [Fml.updAt, Option.map_eq_some_iff] at h
+    simp only [NFml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
     exact forall_congr' fun _ => forall_congr' fun _ =>
-      Fml.updAt_sound φ h' _
+      NFml.updAt_sound φ h' _
   | .all _ _ φ, ψ, h, σ => by
-    simp only [Fml.updAt, Option.map_eq_some_iff] at h
+    simp only [NFml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
-    exact forall_congr' fun _ => imp_congr_right fun _ => Fml.updAt_sound φ h' _
+    exact forall_congr' fun _ => imp_congr_right fun _ => NFml.updAt_sound φ h' _
   | .anon _ φ, ψ, h, σ => by
-    simp only [Fml.updAt, Option.map_eq_some_iff] at h
+    simp only [NFml.updAt, Option.map_eq_some_iff] at h
     obtain ⟨φ', h', rfl⟩ := h
-    exact forall_congr' fun _ => Fml.updAt_sound φ h' _
+    exact forall_congr' fun _ => NFml.updAt_sound φ h' _
   | .tt, _, h, _ | .eq .., _, h, _ | .defined _, _, h, _ => by
     simp only [updAt, reduceCtorEq] at h
 
-/-! ## All of them: `Fml.simpUpds`
+/-! ## All of them: `NFml.simpUpds`
 
 Bottom-up, every stack `{U}{V}…` of one modality whose outer update writes
 only locals becomes one parallel update (`sequentialToParallel`), its
@@ -1339,85 +1329,81 @@ effectless elements go (`simplifyUpdate`), and an update left empty goes
 too (`applySkip`). -/
 
 /-- `{U} φ` without its effectless elements, and without the braces if none is left. -/
-def Fml.clean (m : Modality) (U : Upd C) (φ : Fml C) : Fml C :=
+def NFml.clean (m : Modality) (U : Upd C) (φ : NFml C) : NFml C :=
   if (U.dropEffectless φ.vars).isEmpty then φ else .upd m (U.dropEffectless φ.vars) φ
 
 /-- `{U} φ`, merged with an update at the head of `φ`, then cleaned. -/
-def Fml.mkUpd (m : Modality) (U : Upd C) : Fml C → Fml C
+def NFml.mkUpd (m : Modality) (U : Upd C) : NFml C → NFml C
   | .upd m' V φ =>
-    if m' = m ∧ U.envOnly = true then Fml.clean m (U ++ V.subst U) φ
-    else Fml.clean m U (.upd m' V φ)
-  | φ => Fml.clean m U φ
+    if m' = m ∧ U.envOnly = true then NFml.clean m (U ++ V.subst U) φ
+    else NFml.clean m U (.upd m' V φ)
+  | φ => NFml.clean m U φ
 
 /-- Merge every stack of updates and drop what is dead. -/
-def Fml.simpUpds : Fml C → Fml C
-  | .upd m U φ => Fml.mkUpd m U φ.simpUpds
+def NFml.simpUpds : NFml C → NFml C
+  | .upd m U φ => NFml.mkUpd m U φ.simpUpds
   | .not φ => .not φ.simpUpds
   | .and φ ψ => .and φ.simpUpds ψ.simpUpds
   | .imp φ ψ => .imp φ.simpUpds ψ.simpUpds
-  | .modal m P φ => .modal m P φ.simpUpds
   | .havoc φ => .havoc φ.simpUpds
   | .all x p φ => .all x p φ.simpUpds
   | .anon xs φ => .anon xs φ.simpUpds
   | φ => φ
 
-/-- `Fml.clean m U φ` holds exactly when `{U} φ` does.
+/-- `NFml.clean m U φ` holds exactly when `{U} φ` does.
 
-Example: after `x = 1;`, `Fml.clean m [x := 1] true` is `true` (its only
+Example: after `x = 1;`, `NFml.clean m [x := 1] true` is `true` (its only
 element is unused, and the braces go). -/
-theorem Fml.clean_holds (m : Modality) (U : Upd C) (φ : Fml C) (σ : State) :
-    holds σ (Fml.clean m U φ) ↔ holds σ (.upd m U φ) := by
+theorem NFml.clean_holds (m : Modality) (U : Upd C) (φ : NFml C) (σ : State) :
+    holds σ (NFml.clean m U φ) ↔ holds σ (.upd m U φ) := by
   rw [← Upd.dropEffectless_holds]
-  unfold Fml.clean
+  unfold NFml.clean
   split
   · rename_i h; simp only [List.isEmpty_iff] at h; rw [h]; exact Iff.rfl
   · exact Iff.rfl
 
-/-- `Fml.mkUpd m U φ` holds exactly when `{U} φ` does.
+/-- `NFml.mkUpd m U φ` holds exactly when `{U} φ` does.
 
 Example: after `x = 1; y = x;`, `mkUpd m [x := 1] ({ y := x } y = 1)` merges to
 `{ x := 1 ‖ y := 1 }` and cleans that to `{ y := 1 } y = 1`. -/
-theorem Fml.mkUpd_holds (m : Modality) (U : Upd C) (φ : Fml C) (σ : State) :
-    holds σ (Fml.mkUpd m U φ) ↔ holds σ (.upd m U φ) := by
+theorem NFml.mkUpd_holds (m : Modality) (U : Upd C) (φ : NFml C) (σ : State) :
+    holds σ (NFml.mkUpd m U φ) ↔ holds σ (.upd m U φ) := by
   cases φ with
   | upd m' V φ =>
-    simp only [Fml.mkUpd]
+    simp only [NFml.mkUpd]
     split
     · rename_i hc
       obtain ⟨rfl, hU⟩ := hc
-      rw [Fml.clean_holds]
+      rw [NFml.clean_holds]
       exact (UpdRule.sequentialToParallel (u2 := V) (φ := φ) hU).sound σ
-    · exact Fml.clean_holds _ _ _ σ
-  | _ => exact Fml.clean_holds _ _ _ σ
+    · exact NFml.clean_holds _ _ _ σ
+  | _ => exact NFml.clean_holds _ _ _ σ
 
-/-- `Fml.simpUpds` gives an equivalent formula: in every state it holds exactly
+/-- `NFml.simpUpds` gives an equivalent formula: in every state it holds exactly
 when the original does.
 
 Example: `x = 1; y = x;` leaves `{ x := 1 } { y := x } y = 1`, which
 `simpUpds` turns into `{ y := 1 } y = 1`: merged, then `x := 1` dropped as
 unused. -/
-theorem Fml.simpUpds_holds : (φ : Fml C) → ∀ σ, (holds σ φ.simpUpds ↔ holds σ φ)
+theorem NFml.simpUpds_holds : (φ : NFml C) → ∀ σ, (holds σ φ.simpUpds ↔ holds σ φ)
   | .upd m U φ, σ => by
-    simp only [Fml.simpUpds, Fml.mkUpd_holds, holds]
-    exact m.after_congr (fun τ => Fml.simpUpds_holds φ τ) _
-  | .not φ, σ => by simp only [Fml.simpUpds, holds, Fml.simpUpds_holds φ σ]
+    simp only [NFml.simpUpds, NFml.mkUpd_holds, holds]
+    exact m.after_congr (fun τ => NFml.simpUpds_holds φ τ) _
+  | .not φ, σ => by simp only [NFml.simpUpds, holds, NFml.simpUpds_holds φ σ]
   | .and φ ψ, σ => by
-    simp only [Fml.simpUpds, holds, Fml.simpUpds_holds φ σ, Fml.simpUpds_holds ψ σ]
+    simp only [NFml.simpUpds, holds, NFml.simpUpds_holds φ σ, NFml.simpUpds_holds ψ σ]
   | .imp φ ψ, σ => by
-    simp only [Fml.simpUpds, holds, Fml.simpUpds_holds φ σ, Fml.simpUpds_holds ψ σ]
-  | .modal m P φ, σ => by
-    simp only [Fml.simpUpds, holds]
-    exact m.afterRun_congr (fun τ => Fml.simpUpds_holds φ τ) _
+    simp only [NFml.simpUpds, holds, NFml.simpUpds_holds φ σ, NFml.simpUpds_holds ψ σ]
   | .havoc φ, σ => by
-    simp only [Fml.simpUpds, holds]
+    simp only [NFml.simpUpds, holds]
     exact forall_congr' fun _ => forall_congr' fun _ =>
-      Fml.simpUpds_holds φ _
+      NFml.simpUpds_holds φ _
   | .all _ _ φ, σ => by
-    simp only [Fml.simpUpds, holds]
-    exact forall_congr' fun _ => imp_congr_right fun _ => Fml.simpUpds_holds φ _
+    simp only [NFml.simpUpds, holds]
+    exact forall_congr' fun _ => imp_congr_right fun _ => NFml.simpUpds_holds φ _
   | .anon _ φ, σ => by
-    simp only [Fml.simpUpds, holds]
-    exact forall_congr' fun _ => Fml.simpUpds_holds φ _
+    simp only [NFml.simpUpds, holds]
+    exact forall_congr' fun _ => NFml.simpUpds_holds φ _
   | .tt, _ | .eq .., _ | .defined _, _ => Iff.rfl
 
 /-! ## Under the box: `applyOnRigid` without totality
@@ -1444,13 +1430,13 @@ locals gives the formula behind the update: where `U` runs, the run gives
 Example: `find(storage, alice.age) ≐ 42` gives
 `[{ x := find(storage, alice.age) }] x ≐ 42`, also where `alice.age` does not
 read and the update halts. -/
-theorem Fml.subst_box {U : Upd C} (hU : U.envOnly = true) {φ : Fml C} (hφ : φ.rigid = true)
+theorem NFml.subst_box {U : Upd C} (hU : U.envOnly = true) {φ : NFml C} (hφ : φ.rigid = true)
     (hs : φ.sortedFor U = true) (σ : State) (h : holds σ (φ.subst U)) :
     holds σ (.upd .box U φ) := by
   simp only [holds]
   cases hτ : U.apply σ with
   | error _ => trivial
-  | ok τ => exact (Fml.subst_holds (Upd.substAgree hU hτ) φ hφ hs).1 h
+  | ok τ => exact (NFml.subst_holds (Upd.substAgree hU hτ) φ hφ hs).1 h
 
 /-! ### Under the box, past a storage write
 
@@ -1460,7 +1446,7 @@ A parallel update reads every right-hand side in the pre-state
 binds are the ones its locals alone bind (`Upd.locals`, with the same
 `lastWrite`, so the same substitution), and the state it leaves differs from
 theirs in the storage only (`Upd.foldl_locals`).  A formula that reads no
-storage (`Fml.stFree`) cannot see that difference (`Fml.holds_withStorage`),
+storage (`NFml.stFree`) cannot see that difference (`NFml.holds_withStorage`),
 so substituting the locals is still the box direction of
 `applyOnRigidFormula`.
 
@@ -1493,7 +1479,7 @@ def Tm.stFree : Tm C s → Bool
   | _ => false
 
 /-- A first-order formula whose terms are `Tm.stFree`: `x ≐ 42`. -/
-def Fml.stFree : Fml C → Bool
+def NFml.stFree : NFml C → Bool
   | .tt => true
   | .eq a b => a.stFree && b.stFree
   | .defined t => t.stFree
@@ -1502,12 +1488,12 @@ def Fml.stFree : Fml C → Bool
   | _ => false
 
 /-- A storage-free formula is first-order. -/
-theorem Fml.stFree_rigid : {φ : Fml C} → φ.stFree = true → φ.rigid = true
+theorem NFml.stFree_rigid : {φ : NFml C} → φ.stFree = true → φ.rigid = true
   | .tt, _ | .eq .., _ | .defined _, _ => rfl
-  | .not φ, h => Fml.stFree_rigid (φ := φ) h
+  | .not φ, h => NFml.stFree_rigid (φ := φ) h
   | .and φ ψ, h | .imp φ ψ, h => by
-    simp only [Fml.stFree, Bool.and_eq_true] at h
-    simp only [Fml.rigid, Fml.stFree_rigid h.1, Fml.stFree_rigid h.2, Bool.and_self]
+    simp only [NFml.stFree, Bool.and_eq_true] at h
+    simp only [NFml.rigid, NFml.stFree_rigid h.1, NFml.stFree_rigid h.2, Bool.and_self]
 
 /-- The locals of an update are an update of locals. -/
 theorem Upd.locals_envOnly : (U : Upd C) → Upd.envOnly (Upd.locals U) = true
@@ -1642,17 +1628,17 @@ theorem Term.denote_withStorage (σ : State) (st : List (Name × SVal)) :
     simp only [tm_denote, Term.denote_withStorage σ st c h.1.1, Term.denote_withStorage σ st a h.1.2, Term.denote_withStorage σ st b h.2]
 
 /-- A storage-free formula holds alike in two states that differ in the storage. -/
-theorem Fml.holds_withStorage (σ : State) (st : List (Name × SVal)) :
-    (φ : Fml C) → φ.stFree = true → (holds { σ with storage := st } φ ↔ holds σ φ)
+theorem NFml.holds_withStorage (σ : State) (st : List (Name × SVal)) :
+    (φ : NFml C) → φ.stFree = true → (holds { σ with storage := st } φ ↔ holds σ φ)
   | .tt, _ => Iff.rfl
   | .eq a b, h => by
-    simp only [Fml.stFree, Bool.and_eq_true] at h
+    simp only [NFml.stFree, Bool.and_eq_true] at h
     simp only [holds, Term.denote_withStorage σ st a h.1, Term.denote_withStorage σ st b h.2]
   | .defined t, h => by simp only [holds, Term.eval_withStorage σ st t h]
-  | .not φ, h => by simp only [holds, Fml.holds_withStorage σ st φ h]
+  | .not φ, h => by simp only [holds, NFml.holds_withStorage σ st φ h]
   | .and φ ψ, h | .imp φ ψ, h => by
-    simp only [Fml.stFree, Bool.and_eq_true] at h
-    simp only [holds, Fml.holds_withStorage σ st φ h.1, Fml.holds_withStorage σ st ψ h.2]
+    simp only [NFml.stFree, Bool.and_eq_true] at h
+    simp only [holds, NFml.holds_withStorage σ st φ h.1, NFml.holds_withStorage σ st ψ h.2]
 
 /-- Under the box, a storage-free formula substituted with an update of
 locals and storage writes gives the formula behind the update: where `U`
@@ -1660,7 +1646,7 @@ runs, its locals ran to the same state up to the storage.
 
 Example: `x ≐ 42` substituted is `find(S, alice.age) ≐ 42`, which gives
 `[{ storage := S ‖ x := find(S, alice.age) }] x ≐ 42`. -/
-theorem Fml.subst_box_st {U : Upd C} (hU : U.localsOrStorage = true) {φ : Fml C}
+theorem NFml.subst_box_st {U : Upd C} (hU : U.localsOrStorage = true) {φ : NFml C}
     (hφ : φ.stFree = true) (hs : φ.sortedFor U = true) (σ : State) (h : holds σ (φ.subst U)) :
     holds σ (.upd .box U φ) := by
   simp only [holds]
@@ -1671,8 +1657,8 @@ theorem Fml.subst_box_st {U : Upd C} (hU : U.localsOrStorage = true) {φ : Fml C
     have hA : SubstAgree U U.locals.targets σ τ' :=
       (Upd.substAgree (Upd.locals_envOnly U) hτ').of_lastWrite
         fun x => (Upd.lastWrite_locals x U).symm
-    exact (Fml.holds_withStorage τ' st' φ hφ).2
-      ((Fml.subst_holds hA φ (Fml.stFree_rigid hφ) hs).1 h)
+    exact (NFml.holds_withStorage τ' st' φ hφ).2
+      ((NFml.subst_holds hA φ (NFml.stFree_rigid hφ) hs).1 h)
 
 /-! ### `defined` of a written local -/
 
@@ -1807,19 +1793,19 @@ unchanged, if it fits nowhere); `sol_upd r` applies this.
 
 Example: `sol_upd .applyOnRigid` turns `⊨ dl{ { y := 3 } y = 3 }` into
 `⊨ dl{ 3 = 3 }`. -/
-theorem Fml.updAt_valid (r : UpdRuleName) {φ : Fml C} (h : Valid ((φ.updAt r).getD φ)) :
+theorem NFml.updAt_valid (r : UpdRuleName) {φ : NFml C} (h : Valid ((φ.updAt r).getD φ)) :
     Valid φ := by
   intro σ
   cases hs : φ.updAt r with
   | none => simpa [hs] using h σ
-  | some ψ => exact (Fml.updAt_sound φ hs σ).1 (by simpa [hs] using h σ)
+  | some ψ => exact (NFml.updAt_sound φ hs σ).1 (by simpa [hs] using h σ)
 
 /-- To prove a formula, prove its `simpUpds`; `sol_merge` applies this.
 
 Example: after `sol_symex` on `[ alice.account.balance = 10; ] …`, `sol_merge` leaves
 `⊨ { storage := save(storage, alice.account.balance, 10) } find(storage, alice.account.balance) = 10`. -/
-theorem Fml.simpUpds_valid {φ : Fml C} (h : Valid φ.simpUpds) : Valid φ :=
-  fun σ => (Fml.simpUpds_holds φ σ).1 (h σ)
+theorem NFml.simpUpds_valid {φ : NFml C} (h : Valid φ.simpUpds) : Valid φ :=
+  fun σ => (NFml.simpUpds_holds φ σ).1 (h σ)
 
 section StorageWrite
 
@@ -2144,7 +2130,7 @@ theorem Upd.withSt_foldl {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ)
 /-- **`sequentialToParallel`** over a storage write:
 `{storage := s}{V} ψ ⟺ {storage := s ‖ {storage := s}V} ψ`. -/
 theorem Upd.mergeStorage_holds (m : Modality) (s : STerm C) (V : Upd C)
-    (hV : V.all (·.stExplicit) = true) (ψ : Fml C) (σ : State) :
+    (hV : V.all (·.stExplicit) = true) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (.storage s :: V.withSt s) ψ) ↔ holds σ (.upd m [.storage s] (.upd m V ψ)) := by
   simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.storage_write]
   cases hs : s.eval σ with
@@ -2228,7 +2214,7 @@ end WithStDenote
 
 /-- `{storage := s} φ` for a first-order `φ`: `s` for every `storage` in its
 terms. -/
-def Fml.withSt (s : STerm C) : Fml C → Fml C
+def NFml.withSt (s : STerm C) : NFml C → NFml C
   | .eq a b => .eq (a.withSt ⟨s⟩) (b.withSt ⟨s⟩)
   | .defined t => .defined (t.withSt ⟨s⟩)
   | .not φ => .not (φ.withSt s)
@@ -2238,7 +2224,7 @@ def Fml.withSt (s : STerm C) : Fml C → Fml C
 
 /-- Every storage read of the formula's terms is a `storage` term
 (`Tm.stExplicit`). -/
-def Fml.stExplicit : Fml C → Bool
+def NFml.stExplicit : NFml C → Bool
   | .eq a b => a.stExplicit && b.stExplicit
   | .defined t => t.stExplicit
   | .not φ => φ.stExplicit
@@ -2247,41 +2233,41 @@ def Fml.stExplicit : Fml C → Bool
 
 /-- A first-order formula with `s` substituted for `storage` holds before
 the write as the formula holds after it. -/
-theorem Fml.withSt_holds {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ) :
-    (φ : Fml C) → φ.rigid = true → φ.stExplicit = true → (holds σ (φ.withSt s) ↔ holds τ φ)
+theorem NFml.withSt_holds {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ) :
+    (φ : NFml C) → φ.rigid = true → φ.stExplicit = true → (holds σ (φ.withSt s) ↔ holds τ φ)
   | .tt, _, _ => Iff.rfl
   | .eq a b, _, he => by
-    simp only [Fml.stExplicit, Bool.and_eq_true] at he
+    simp only [NFml.stExplicit, Bool.and_eq_true] at he
     have hk : σ.Keeps τ := STerm.eval_keeps s hs
     have ea : Theory.StValue.Equiv ((a.withSt ⟨s⟩).denote σ) (a.denote τ) :=
       Term.withSt_denote (w := ⟨s⟩) hs hk a he.1
     have eb : Theory.StValue.Equiv ((b.withSt ⟨s⟩).denote σ) (b.denote τ) :=
       Term.withSt_denote (w := ⟨s⟩) hs hk b he.2
-    simp only [Fml.withSt, holds]
+    simp only [NFml.withSt, holds]
     exact ⟨fun e => (ea.symm.trans e).trans eb, fun e => (ea.trans e).trans eb.symm⟩
   | .defined t, _, he => by
-    simp only [Fml.stExplicit] at he
-    simp only [Fml.withSt, holds,
+    simp only [NFml.stExplicit] at he
+    simp only [NFml.withSt, holds,
       Tm.withSt_eval (w := ⟨s⟩) hs (STerm.eval_keeps s hs) t he]
   | .not φ, hr, he => by
-    simp only [Fml.rigid] at hr
-    simp only [Fml.stExplicit] at he
-    simp only [Fml.withSt, holds, Fml.withSt_holds hs φ hr he]
+    simp only [NFml.rigid] at hr
+    simp only [NFml.stExplicit] at he
+    simp only [NFml.withSt, holds, NFml.withSt_holds hs φ hr he]
   | .and φ ψ, hr, he => by
-    simp only [Fml.rigid, Bool.and_eq_true] at hr
-    simp only [Fml.stExplicit, Bool.and_eq_true] at he
-    simp only [Fml.withSt, holds, Fml.withSt_holds hs φ hr.1 he.1, Fml.withSt_holds hs ψ hr.2 he.2]
+    simp only [NFml.rigid, Bool.and_eq_true] at hr
+    simp only [NFml.stExplicit, Bool.and_eq_true] at he
+    simp only [NFml.withSt, holds, NFml.withSt_holds hs φ hr.1 he.1, NFml.withSt_holds hs ψ hr.2 he.2]
   | .imp φ ψ, hr, he => by
-    simp only [Fml.rigid, Bool.and_eq_true] at hr
-    simp only [Fml.stExplicit, Bool.and_eq_true] at he
-    simp only [Fml.withSt, holds, Fml.withSt_holds hs φ hr.1 he.1, Fml.withSt_holds hs ψ hr.2 he.2]
-  | .upd .., hr, _ | .modal .., hr, _ | .havoc _, hr, _ | .all .., hr, _ | .anon .., hr, _ => by
-    simp only [Fml.rigid, Bool.false_eq_true] at hr
+    simp only [NFml.rigid, Bool.and_eq_true] at hr
+    simp only [NFml.stExplicit, Bool.and_eq_true] at he
+    simp only [NFml.withSt, holds, NFml.withSt_holds hs φ hr.1 he.1, NFml.withSt_holds hs ψ hr.2 he.2]
+  | .upd .., hr, _ | .havoc _, hr, _ | .all .., hr, _ | .anon .., hr, _ => by
+    simp only [NFml.rigid, Bool.false_eq_true] at hr
 
 /-- Under the box, a first-order formula with `s` for `storage` gives the
-formula behind `{storage := s}`: where `s` runs, `Fml.withSt_holds`; where it
+formula behind `{storage := s}`: where `s` runs, `NFml.withSt_holds`; where it
 halts, the box holds. -/
-theorem Fml.withSt_box {s : STerm C} {φ : Fml C} (hr : φ.rigid = true)
+theorem NFml.withSt_box {s : STerm C} {φ : NFml C} (hr : φ.rigid = true)
     (he : φ.stExplicit = true) (σ : State) (h : holds σ (φ.withSt s)) :
     holds σ (.upd .box [.storage s] φ) := by
   simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.storage_write]
@@ -2291,13 +2277,13 @@ theorem Fml.withSt_box {s : STerm C} {φ : Fml C} (hr : φ.rigid = true)
     have hk : σ.Keeps τ := STerm.eval_keeps s hs
     simp only [Res.ok_bind]
     rw [hk]
-    exact (Fml.withSt_holds hs φ hr he).1 h
+    exact (NFml.withSt_holds hs φ hr he).1 h
 
 end StorageWrite
 
 /-! ## A rewrite inside an update's right-hand sides
 
-`Fml.rwEq` stops at an update: its right-hand sides run in the interpreter,
+`NFml.rwEq` stops at an update: its right-hand sides run in the interpreter,
 and a Theory equation (`Term.Theq`) says nothing about whether a term
 halts.  What does reach them is a rewrite that keeps every value a run
 returns: `t` becomes `t'` where, in every state in which `t` returns, `t'`
@@ -2512,7 +2498,7 @@ theorem Upd.rw_apply (hq : Term.EvalRefines q.1 q.2) (U : Upd C) (σ : State) :
 
 /-- **Under the box, a rewritten update gives the update**: where the update
 returns, the rewritten one returns the same state; where it halts, the box holds. -/
-theorem Upd.rw_box (hq : Term.EvalRefines q.1 q.2) {U : Upd C} {ψ ψ' : Fml C}
+theorem Upd.rw_box (hq : Term.EvalRefines q.1 q.2) {U : Upd C} {ψ ψ' : NFml C}
     (h : ∀ τ, holds τ ψ' → holds τ ψ) (σ : State) (hσ : holds σ (.upd .box (U.rw q) ψ')) :
     holds σ (.upd .box U ψ) := by
   simp only [holds] at hσ ⊢
@@ -2605,7 +2591,7 @@ does — so the two updates return the same state and halt in the same states,
 and a halt reads alike under a modality whatever it is (`Modality.after`). -/
 theorem Upd.rw_holds (hq : Term.EvalRefines q.1 q.2) {U : Upd C}
     (hb : ∀ σ τ, (U.rw q).apply σ = .ok τ → Res.Le (q.2.eval σ) (q.1.eval σ))
-    (m : Modality) (ψ : Fml C) (σ : State) :
+    (m : Modality) (ψ : NFml C) (σ : State) :
     holds σ (.upd m (U.rw q) ψ) ↔ holds σ (.upd m U ψ) := by
   simp only [holds]
   cases hU : U.apply σ with

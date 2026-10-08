@@ -274,7 +274,7 @@ parameter bound fresh, then the body; the event is gone. -/
 /--
 info: if (msgSender != seller) { revert(); } else { } uint se1 = 0; if (state != se1) { revert(); } else { } state = 3; seller.transfer(thisBalance);
 -/
-#guard_msgs in #eval IO.println (Prog.toStr (Prog.inlined (sol{ abort(); })))
+#guard_msgs in #eval IO.println (Surface.Prog.toStr (Surface.Prog.inlined (sol{ abort(); })))
 
 /-! ## The clauses -/
 
@@ -305,7 +305,7 @@ theorem abort_onlySeller : ⊢ dl!{ msgSender != seller → [ abort(); ] false }
   sol_prove
   refine close ?_
   sol_symex
-  refine (Fml.valid_iff_reduce _ (by decide +kernel)).2 ?_
+  refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
   sol_decide_cons
 

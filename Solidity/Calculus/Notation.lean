@@ -32,7 +32,7 @@ the diamond, and `⟨[ ]⟩` is refused.  A name where a formula stands, or
 `Chains.lean`), which prints back as its name.  The reader runs as compiled
 code, which no Lean variable can enter, so each of these stands in for
 something closed while the formula is read, and one walk (`fillSlots`) puts
-the Lean terms back: a formula is read as a slot (`Fml.slot`), and the
+the Lean terms back: a formula is read as a slot (`NFml.slot`), and the
 modality as the difference between two readings, one at the diamond and one
 at the box — the reading never looks at a modality, so they differ exactly
 where `m` goes.
@@ -179,7 +179,7 @@ inductive RawFml where
   | upd (m : Modality) (U : List RawUpdElem) (φ : RawFml)
   | modal (m : Modality) (P : List RawStmt) (φ : RawFml)
   /-- `φ` or `‹t›` where a formula stands: the formula's `i`th Lean formula,
-  read as `Fml.slot i` and put back after (`fillSlots`). -/
+  read as `NFml.slot i` and put back after (`fillSlots`). -/
   | lean (i : Nat)
   /-- `φ where Person memory carol`: the locals declared, in scope in `φ`. -/
   | decl (ds : List RawStmt) (φ : RawFml)
@@ -386,7 +386,7 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
       `(RawFml.and (RawFml.imp $φ $ψ) (RawFml.imp $ψ $φ))
   | stx@`(dl_fml| { havoc } $_:dl_fml) =>
       Macro.throwErrorAt stx "`{ havoc }` is what a callback rule leaves, not a formula to write: \
-        `dl[C]{ … }` reads formulas of `Stmt.run`"
+        `dl[C]{ … }` reads formulas of `Surface.Stmt.run`"
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
       -- judged as the modality under it, else as the formula's (the diamond in `dl!{ … }`)
       let dflt ← match r.either with
@@ -525,19 +525,19 @@ def RawFml.stmts : RawFml → List RawStmt
   | _ => []
 
 /-- `t = true`, both sides defined: a condition as a formula. -/
-def boolFml {C : Contract} (t : Term C) : Fml C := .eqD t (.lit (.bool true))
+def boolFml {C : Contract} (t : Term C) : NFml C := .eqD t (.lit (.bool true))
 
 /-- `a ⊕ b = true`, defined: a comparison as a formula (`a < b` and the like). -/
-def cmpFml {C : Contract} (op : BinOp) (p : PrimTy) (a b : Term C) : Fml C :=
+def cmpFml {C : Contract} (op : BinOp) (p : PrimTy) (a b : Term C) : NFml C :=
   boolFml (.binop op p a b)
 
 /-- The slot of a formula's `i`th Lean formula while it is read:
 `defined(⟪i⟫)`, a local no program can name, with index `0` and no modality,
 as the formula it stands for (`Post`, `Chains.lean`). -/
-def Fml.slot {C : Contract} (i : Nat) : Fml C := .defined (.pv (.user s!"⟪{i}⟫"))
+def NFml.slot {C : Contract} (i : Nat) : NFml C := .defined (.pv (.user s!"⟪{i}⟫"))
 
 /-- Whether a formula is a slot. -/
-def Fml.isSlot {C : Contract} : Fml C → Bool
+def NFml.isSlot {C : Contract} : NFml C → Bool
   | .defined (.pv (.user s)) => s.startsWith "⟪"
   | _ => false
 
@@ -1046,7 +1046,7 @@ the fresh variables the formula writes: a capture the program makes while it
 is read takes the least index above the last that none of them has
 (`nextFree`), statement by statement; a statement whose captures would run
 into a written index is numbered past them all. -/
-def elabFml (taken : List Nat) : RawFml → ElabM (Fml C)
+def elabFml (taken : List Nat) : RawFml → ElabM (Surface.Fml C)
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
@@ -1067,7 +1067,7 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Fml C)
     pure (.not (.eqD a b))
   | .cmp op a b => do
     let (Γ, _) ← get
-    pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b))
+    pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b)).toSurface
   | .all p x φ => inScope do
     modify fun (Γ, k) => (setBy x (.val p) Γ, k)
     pure (.all (Var.ofName x) p (← elabFml taken φ))
@@ -1081,7 +1081,7 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Fml C)
     pure (.upd m U' (← elabFml taken φ))
   | .modal m P φ => inScope do
     modify fun (Γ, k) => (scopeHints C Γ P, k)
-    let mut P' : Prog C := []
+    let mut P' : Surface.Prog C := []
     -- the locals check (`resolve`), from the locals in scope at the modality
     let mut Γw := ECtx.toNCtx (← get).1
     -- a block's locals renamed apart (`freshenBlocks`)
@@ -1099,7 +1099,7 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Fml C)
       Γw ← ElabM.lift (Core.Prog.resolveCheck Γw Q)
       P' := P' ++ Q
     pure (.modal m P' (← elabFml taken φ))
-  | .lean i => pure (Fml.slot i)
+  | .lean i => pure (NFml.slot i).toSurface
   | .decl ds φ => inScope do
     for d in ds do
       let (x, t) ← match d with
@@ -1124,7 +1124,7 @@ gap exactly where the elaborator numbered a capture it does not show, the
 locals of a callee its call statement carries.  With `pastAll`, a capture
 is numbered past every written index instead: a Lean formula in the formula
 (`‹…›`) may write fresh variables the reading does not see (`elabDlAt`). -/
-def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C) :=
+def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (Surface.Fml C) :=
   let (used, declared) := φ.names
   let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
   -- an enum's name (`State` in `State.Locked`) is no parameter
@@ -1147,14 +1147,14 @@ end Read
 section Fill
 open Lean (mkApp mkApp2 mkConst mkStrLit)
 
-/-- `Fml.slot i`, quoted, for the contract `c`. -/
+/-- `NFml.slot i`, quoted, for the contract `c`. -/
 def slotExpr (c : Lean.Expr) (i : Nat) : Lean.Expr :=
-  mkApp2 (mkConst ``Fml.defined) c
+  mkApp2 (mkConst ``NFml.defined) c
     (mkApp2 (mkConst ``Term.pv) c (mkApp (mkConst ``Var.user) (mkStrLit s!"⟪{i}⟫")))
 
-/-- The `i` of a quoted `Fml.slot i`. -/
+/-- The `i` of a quoted `NFml.slot i`, or of one as written. -/
 def slotIdx? (e : Lean.Expr) : Option Nat := do
-  guard (e.isAppOfArity ``Fml.defined 2)
+  guard (e.isAppOfArity ``NFml.defined 2 || e.isAppOfArity ``Surface.Fml.defined 2)
   let t := e.appArg!
   guard (t.isAppOfArity ``Term.pv 2)
   let x := t.appArg!
@@ -1166,19 +1166,30 @@ def slotIdx? (e : Lean.Expr) : Option Nat := do
 /-- The formula whose readings at the diamond (`d`) and at the box (`b`) are
 given, with its Lean terms back: `m` where `d` has the diamond and `b` the
 box, the formula `φs[i]` at the slot `i`.  Elsewhere the two agree.  A quoted
-formula has no binders, so a term is put back as it is. -/
+formula has no binders, so a term is put back as it is; in a formula as
+written (`Surface.Fml`), as `NFml.toSurface φ`. -/
 partial def fillSlots (m? : Option Lean.Expr) (φs : Array Lean.Expr) (d b : Lean.Expr) :
     Except String Lean.Expr := do
   if let some m := m? then
     if d.isConstOf ``Modality.diamond && b.isConstOf ``Modality.box then return m
   if let some i := slotIdx? d then
     if let some φ := φs[i]? then
-      if slotIdx? b == some i then return φ
+      if slotIdx? b == some i then
+        if d.isAppOfArity ``Surface.Fml.defined 2 then
+          return mkApp2 (mkConst ``NFml.toSurface) d.appFn!.appArg! φ
+        return φ
   match d, b with
   | .app f x, .app g y => return .app (← fillSlots m? φs f g) (← fillSlots m? φs x y)
   | _, _ => if d == b then pure d else throw "the readings at the diamond and at the box differ"
 
 end Fill
+
+/-- The formula read, quoted: the closer's `Fml` when it has no modality,
+else as written (`Surface.Fml`), which only the scoped calculus reads. -/
+def Surface.Fml.quoteAuto {C : Contract} (q : Lean.Expr) (φ : Surface.Fml C) : Lean.Expr :=
+  match φ.toFml with
+  | .ok ψ => NFml.quote q ψ
+  | .error _ => Surface.Fml.quote q φ
 
 /-! ## `dl[C]{ … }` and `dl!{ … }` -/
 
@@ -1228,7 +1239,7 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
-    elabAgainst c fun q => `((elabDl $c $raw $pastAll).map (Fml.quote $q))
+    elabAgainst c fun q => `((elabDl $c $raw $pastAll).map (Surface.Fml.quoteAuto $q))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
     | some m =>
@@ -1239,12 +1250,15 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
         let rd ← read ``Modality.diamond
         let rb ← read ``Modality.box
         let e ← elabAgainst c fun q =>
-          `((do pure (Fml.and (← elabDl $c $rd $pastAll) (← elabDl $c $rb $pastAll))).map
-              (Fml.quote $q))
+          `((do pure (Surface.Fml.and (← elabDl $c $rd $pastAll) (← elabDl $c $rb $pastAll))).map
+              (Surface.Fml.quoteAuto $q))
         let #[_, d, b] := e.getAppArgs | throwError "dl[C, m]: not two readings{indentExpr e}"
         pure (d, b)
   if holes.isEmpty && d == b then return d
-  let ty ← inferType d
+  -- a Lean formula is the closer's, put back as written under a modality
+  let ty ← do
+    let t ← whnfR (← inferType d)
+    pure (if t.isAppOfArity ``Surface.Fml 1 then mkApp (mkConst ``NFml) t.appArg! else t)
   let φs ← holes.mapM fun h => do
     let some t := fmlHole? h | throwError "dl[C]: not a formula hole"
     withRef h do
@@ -1297,27 +1311,27 @@ section Examples
 local instance : InContract := ⟨StandardExample⟩
 
 /-- A declaration's local is in scope in the postcondition. -/
-example : Fml StandardExample := dl[StandardExample]{ ⟨ uint x = 10; ⟩ x == 10 }
+example : Surface.Fml StandardExample := dl[StandardExample]{ ⟨ uint x = 10; ⟩ x == 10 }
 
 /-- A write, then a read of it into a local, under the box. -/
-example : Fml StandardExample := dl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }
+example : Surface.Fml StandardExample := dl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }
 
 /-- `a` and `x` are bound by nothing: parameters, `uint` locals. -/
-example : Fml StandardExample := dl!{ a == 1 → ⟨ x = a; ⟩ x == 1 }
+example : Surface.Fml StandardExample := dl!{ a == 1 → ⟨ x = a; ⟩ x == 1 }
 
 /-- `==` on program expressions is `=` on their lowerings. -/
 example : dl!{ alice.age == 10 } = dl!{ find(storage, alice.age) = 10 } := rfl
 
 /-- An update: a local and the storage, in parallel. -/
-example : Fml StandardExample :=
+example : NFml StandardExample :=
   dl!{ { x := 10 ‖ storage := save(storage, alice.age, 10) } find(storage, alice.age) = x }
 
 /-- An alias bound by an update is an alias under it, in a program too. -/
-example : Fml StandardExample := dl!{ { p := alice } ⟨ p.age = 3; ⟩ p.age == 3 }
+example : Surface.Fml StandardExample := dl!{ { p := alice } ⟨ p.age = 3; ⟩ p.age == 3 }
 
 /-- `x := unset` binds a storage alias to no path (`storageLocalDeclSkip`);
 a value local, a memory local or a state variable is refused. -/
-example : Fml StandardExample := dl!{ { p := unset } true }
+example : NFml StandardExample := dl!{ { p := unset } true }
 
 /-- error: Solidity elaboration failed: `v := unset` binds a storage alias; `v` is a value local -/
 #guard_msgs in #check dl!{ [ uint v = 1; ] { v := unset } v == 1 }
@@ -1328,13 +1342,13 @@ example : Fml StandardExample := dl!{ { p := unset } true }
 /-- A push, in nested `save`s, reads back as one. -/
 example : dl!{ { storage := save(save(storage, values[values.length], 7), values.length,
     values.length + 1) } true } =
-    Fml.upd .diamond [.storage (.push .storage (.root "values") (.val (.lit (.int 7))))] .tt := rfl
+    NFml.upd .diamond [.storage (.push .storage (.root "values") (.val (.lit (.int 7))))] .tt := rfl
 
-/-- info: dl{ ⟨ uint x = 10; ⟩ x = 10 } : Fml StandardExample -/
+/-- info: dl{ ⟨ uint x = 10; ⟩ x = 10 } : Surface.Fml StandardExample -/
 #guard_msgs in #check dl!{ ⟨ uint x = 10; ⟩ x == 10 }
 
 /--
-info: dl{ { x := 10 ‖ storage := save(storage, alice.age, 10) } find(storage, alice.age) = x } : Fml StandardExample
+info: dl{ { x := 10 ‖ storage := save(storage, alice.age, 10) } find(storage, alice.age) = x } : NFml StandardExample
 -/
 #guard_msgs in
 #check dl!{ { x := 10 ‖ storage := save(storage, alice.age, 10) } find(storage, alice.age) = x }
@@ -1350,23 +1364,23 @@ example : dl!{ a == 1 ∨ a == 2 } = dl!{ ¬(¬a == 1 ∧ ¬a == 2) } := rfl
 example : dl!{ a == 1 ↔ b == 1 } = dl!{ (a == 1 → b == 1) ∧ (b == 1 → a == 1) } := rfl
 example : dl!{ ∃ uint y; y == a } = dl!{ ¬(∀ uint y; ¬y == a) } := rfl
 
-/-- info: dl{ a = 1 ∨ a = 2 ↔ ¬b = 1 } : Fml StandardExample -/
+/-- info: dl{ a = 1 ∨ a = 2 ↔ ¬b = 1 } : NFml StandardExample -/
 #guard_msgs in #check dl!{ a == 1 ∨ a == 2 ↔ ¬b == 1 }
 
-/-- info: dl{ ∃ uint y; y = a } : Fml StandardExample -/
+/-- info: dl{ ∃ uint y; y = a } : NFml StandardExample -/
 #guard_msgs in #check dl!{ ∃ uint y; y == a }
 
 /-- `=` is `==`'s equation; `≐` the total one, and `defined` is its own atom. -/
-example : dl!{ a = 1 } = Fml.eqD (.pv (.user "a")) (.lit (.int 1)) := rfl
-example : dl!{ a ≐ 1 } = Fml.eq (.pv (.user "a")) (.lit (.int 1)) := rfl
+example : dl!{ a = 1 } = NFml.eqD (.pv (.user "a")) (.lit (.int 1)) := rfl
+example : dl!{ a ≐ 1 } = NFml.eq (.pv (.user "a")) (.lit (.int 1)) := rfl
 
-/-- info: dl{ (defined(a) ∧ a ≐ 1) → a = 1 } : Fml StandardExample -/
+/-- info: dl{ (defined(a) ∧ a ≐ 1) → a = 1 } : NFml StandardExample -/
 #guard_msgs in #check dl!{ defined(a) ∧ a ≐ 1 → a = 1 }
 
-/-- info: dl{ a = 1 } : Fml StandardExample -/
-#guard_msgs in #check (Fml.eqD (.pv (.user "a")) (.lit (.int 1)) : Fml StandardExample)
+/-- info: dl{ a = 1 } : NFml StandardExample -/
+#guard_msgs in #check (NFml.eqD (.pv (.user "a")) (.lit (.int 1)) : NFml StandardExample)
 
-/-- info: dl{ ¬a = 1 ∧ a < 2 } : Fml StandardExample -/
+/-- info: dl{ ¬a = 1 ∧ a < 2 } : NFml StandardExample -/
 #guard_msgs in #check dl!{ a != 1 ∧ a < 2 }
 
 /-- error: Solidity elaboration failed: unknown name y -/
@@ -1377,7 +1391,7 @@ example : dl!{ a ≐ 1 } = Fml.eq (.pv (.user "a")) (.lit (.int 1)) := rfl
 /--
 info: dl{
   { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-    ⟨ carol.age = 5; ⟩ true } : Fml StandardExample
+    ⟨ carol.age = 5; ⟩ true } : Surface.Fml StandardExample
 -/
 #guard_msgs in
 #check dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -1385,42 +1399,43 @@ info: dl{
 
 /-- A dropped memory declaration: `carolAcc` is typed from `carol.account`
 (`scopeHints`), and a read of a reference binds a memory local. -/
-example : Fml StandardExample :=
+example : Surface.Fml StandardExample :=
   dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
        ⟨ carolAcc = carol.account; carolAcc.balance = 1; ⟩ true }
-example : Fml StandardExample :=
+example : Surface.Fml StandardExample :=
   dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
        { carolAcc := read(memory, carol.account) } ⟨ carolAcc.balance = 1; ⟩ true }
 
 /-- … with the memory locals the program declares before it, in a branch too. -/
-example : Fml StandardExample :=
+example : Surface.Fml StandardExample :=
   dl!{ ⟨ Person memory d; if (a == 1) { acc = d.account; } else { acc = d.account; }; acc.balance = 1; ⟩
        true }
 
 /-- A name the program declares is left to its declaration. -/
-example : Fml StandardExample :=
+example : Surface.Fml StandardExample :=
   dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
        ⟨ Person memory d; d = carol; ⟩ true }
 
-/-- info: dl{ { ts := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) } true } : Fml StandardExample -/
+/-- info: dl{ { ts := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) } true } : NFml StandardExample -/
 #guard_msgs in
 #check dl!{ { ts := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) } true }
 
 /--
 info: dl{
   { xs := freshId(copySt(memory, newArr(uint[], 3))) ‖ memory := copySt(memory, newArr(uint[], 3)) }
-    true } : Fml StandardExample
+    true } : NFml StandardExample
 -/
 #guard_msgs in
 #check dl!{ { xs := freshId(copySt(memory, newArr(uint[], 3))) ‖ memory := copySt(memory, newArr(uint[], 3)) }
   true }
 
-/-- info: dl{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } : Fml StandardExample -/
+/-- info: dl{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } : Surface.Fml StandardExample -/
 #guard_msgs in #check dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol }
 
 /--
 info: dl{
-  { sp2 := alice.account } ⟨ acc = sp2; ⟩ read(memory, acc.balance) = 1 where Account memory acc } : Fml StandardExample
+  { sp2 := alice.account } ⟨ acc = sp2; ⟩ read(memory, acc.balance) = 1 where
+    Account memory acc } : Surface.Fml StandardExample
 -/
 #guard_msgs in #check dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ acc.balance == 1
   where Account memory acc }
@@ -1444,7 +1459,7 @@ example : dl[StandardExample, .diamond]{ ⟨[ x = 1; ]⟩ x == 1 } = dl!{ ⟨ x 
 /-- A modality under the update still decides. -/
 example : dl![.diamond]{ { x := 1 } [ x = 2; ] x == 2 } = dl!{ { x := 1 } [ x = 2; ] x == 2 } := rfl
 
-/-- info: dl{ ⟨[ x = 1; ]⟩ x = 1 } : Fml StandardExample -/
+/-- info: dl{ ⟨[ x = 1; ]⟩ x = 1 } : Surface.Fml StandardExample -/
 #guard_msgs in
 variable (m : Modality) in
 #check dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }
@@ -1457,11 +1472,11 @@ error: `⟨[ … ]⟩` is either modality: read the formula at one, `dl![m]{ …
 /-! ### A Lean formula where a formula stands -/
 
 /-- A name is a Lean formula: the postcondition `φ`. -/
-example (φ : Fml StandardExample) :
-    dl!{ { x := 1 } φ } = Fml.upd .diamond [.val (.user "x") (.lit (.int 1))] φ := rfl
+example (φ : NFml StandardExample) :
+    dl!{ { x := 1 } φ } = NFml.upd .diamond [.val (.user "x") (.lit (.int 1))] φ := rfl
 
 /-- So is `‹t›`; `true` stays the keyword. -/
-example (φ ψ : Fml StandardExample) : dl!{ ‹φ› ∧ ψ ∧ true } = Fml.and φ (Fml.and ψ .tt) := rfl
+example (φ ψ : NFml StandardExample) : dl!{ ‹φ› ∧ ψ ∧ true } = NFml.and φ (NFml.and ψ .tt) := rfl
 
 -- A name nothing binds is refused, not bound as a new variable of the
 -- signature (`autoImplicit`): here a misspelt `true`.
@@ -1469,23 +1484,23 @@ example (φ ψ : Fml StandardExample) : dl!{ ‹φ› ∧ ψ ∧ true } = Fml.an
 #guard_msgs in
 example : dl!{ ⟨ x = 1; ⟩ ture } = dl!{ ⟨ x = 1; ⟩ true } := rfl
 
-/-- info: fun m φ => dl{ ⟨[ x = 1; ]⟩ φ } : Modality → Fml StandardExample → Fml StandardExample -/
-#guard_msgs in #check fun (m : Modality) (φ : Fml StandardExample) => dl![m]{ ⟨[ x = 1; ]⟩ φ }
+/-- info: fun m φ => dl{ ⟨[ x = 1; ]⟩ φ } : Modality → NFml StandardExample → Surface.Fml StandardExample -/
+#guard_msgs in #check fun (m : Modality) (φ : NFml StandardExample) => dl![m]{ ⟨[ x = 1; ]⟩ φ }
 
 -- An inaccessible name prints escaped: bare, it would read back as another.
 /--
-trace: φ✝ : Fml StandardExample
+trace: φ✝ : NFml StandardExample
 ⊢ dl{ ⟨ x = 1; ⟩ ‹φ✝› } = dl{ ⟨ x = 1; ⟩ ‹φ✝› }
 -/
 #guard_msgs in
-example : ∀ φ : Fml StandardExample, dl!{ ⟨ x = 1; ⟩ φ } = dl!{ ⟨ x = 1; ⟩ φ } := by
+example : ∀ φ : NFml StandardExample, dl!{ ⟨ x = 1; ⟩ φ } = dl!{ ⟨ x = 1; ⟩ φ } := by
   intro
   trace_state
   rfl
 
 -- `⊨` and `⊧` of a name alone are Lean's to print.
-/-- info: fun φ => Valid φ ∧ ∀ (σ : State), holds σ φ : Fml StandardExample → Prop -/
-#guard_msgs in #check fun (φ : Fml StandardExample) => (⊨ φ) ∧ ∀ σ, holds σ φ
+/-- info: fun φ => Valid φ ∧ ∀ (σ : State), holds σ φ : NFml StandardExample → Prop -/
+#guard_msgs in #check fun (φ : NFml StandardExample) => (⊨ φ) ∧ ∀ σ, holds σ φ
 
 /-! ### Chain-only spellings -/
 
@@ -1501,7 +1516,7 @@ example (m : Modality) : dl![m]{ a == 1 ⟹ ⟨[ x = 1; ]⟩ true } =
     dl![m]{ a == 1 → ⟨[ x = 1; ]⟩ true } := rfl
 
 -- It prints as the formula it is.
-/-- info: dl{ 5 <= selfBalance → ⟨ to .transfer(5); ⟩ true } : Fml StandardExample -/
+/-- info: dl{ 5 <= selfBalance → ⟨ to .transfer(5); ⟩ true } : Surface.Fml StandardExample -/
 #guard_msgs in #check dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }
 
 /-- `0 <= se <= selfBalance`, and the read of the ledger. -/

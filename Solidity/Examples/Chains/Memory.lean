@@ -386,7 +386,7 @@ local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes Calls names).isEmpty
 
 /-- The printed first line: the right-hand side, then the receiver, captured. -/
-example : Prog.toStr (sol[Calls]{ choosePersonMem().account = makeAccount(); } : Prog Calls) =
+example : Surface.Prog.toStr (sol[Calls]{ choosePersonMem().account = makeAccount(); } : Surface.Prog Calls) =
     "Account memory pv = makeAccount(); Person memory mv = choosePersonMem(); mv.account = pv;" :=
   rfl
 

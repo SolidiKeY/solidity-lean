@@ -34,7 +34,7 @@ inductive Hole (C : Contract) : Ty → Type where
   | copy {R : RefTy} (l : Loc C (.ref R)) (h : (Ty.ref R).mapFree = true) : Hole C (.ref R)
 
 /-- The statement, with the path in the hole. -/
-def Hole.fill {T : Ty} : Hole C T → SPath C T → Stmt C
+def Hole.fill {T : Ty} : Hole C T → SPath C T → Surface.Stmt C
   | .local x, .loc l => .assignLocal x (.read l)
   | .rebind x, p => .rebind x (.path p)
   | .copy l h, p => .assign l (.copy p h)
@@ -46,7 +46,7 @@ inductive MHole (C : Contract) : Ty → Type where
   | rebind {R : RefTy} (x : Var) : MHole C (.ref R)
   | write {R : RefTy} (l : MLoc C (.ref R)) : MHole C (.ref R)
 
-def MHole.fill {T : Ty} : MHole C T → MLoc C T → Stmt C
+def MHole.fill {T : Ty} : MHole C T → MLoc C T → Surface.Stmt C
   | .local x, l => .assignLocal x (.readMem l)
   | .rebind x, l => .rebindMem x (.alias (.loc l))
   | .write l', l => .assignMem l' (.ref (.loc l))
@@ -57,14 +57,14 @@ inductive VHole (C : Contract) : PrimTy → Type where
   | store {p : PrimTy} (l : Loc C (.prim p)) : VHole C p
   | mem {p : PrimTy} (l : MLoc C (.prim p)) : VHole C p
 
-def VHole.fill {p : PrimTy} : VHole C p → Val C p → Stmt C
+def VHole.fill {p : PrimTy} : VHole C p → Val C p → Surface.Stmt C
   | .local x, v => .assignLocal x v
   | .store l, v => .assign l (.val v)
   | .mem l, v => .assignMem l (.val v)
 
 /-- A fresh array's target written with the memory local it was bound to:
 `tgt = mv`, a copy into storage or a reference written into memory. -/
-def NewLhs.fill {R : RefTy} : NewLhs C R → MPath C (.ref R) → Stmt C
+def NewLhs.fill {R : RefTy} : NewLhs C R → MPath C (.ref R) → Surface.Stmt C
   | .store l, p => .assignFromMem l p
   | .mem l, p => .assignMem l (.ref p)
 
@@ -177,7 +177,7 @@ macro_rules
           MLoc.isTarget, MPath.isBindable, Val.notTernary, Hole.isTarget, MHole.isTarget,
           VHole.isTarget, SPath.elemMapping, SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
           Ty.isMapping, Ty.isPrimitive]; done)
-      | fail "the rule's side condition does not hold: `Stmt.step` fires another rule here")
+      | fail "the rule's side condition does not hold: `Surface.Stmt.step` fires another rule here")
 
 /-- The predicates a side condition is stated with. -/
 def sidePreds : List Lean.Name :=
@@ -211,26 +211,26 @@ state: a box goal is true of a stuck run anyway, and a diamond goal owes
 that one of them holds (`Proves.split`). -/
 inductive Premise (C : Contract) where
   | update (U : Upd C)
-  | unfold (P : Prog C)
-  | split (c c' : Fml C) (P Q : Prog C)
+  | unfold (P : Surface.Prog C)
+  | split (c c' : NFml C) (P Q : Surface.Prog C)
   /-- `c ⟹ ⟨[ P ]⟩ ; c`: the goal with `c` assumed, and `c` to prove. -/
-  | check (c : Fml C) (P : Prog C)
+  | check (c : NFml C) (P : Surface.Prog C)
   | done (b : Bool)
   /-- One goal per block, each in the statement's place, for every value of
   the locals it binds: `∀ xs. ⟨[ P ]⟩` (KeY's `T v;` with no initializer,
   which leaves `v` unconstrained). -/
-  | branches (bs : List (List (PrimTy × Var) × Prog C))
+  | branches (bs : List (List (PrimTy × Var) × Surface.Prog C))
   /-- Goals labelled as KeY labels a taclet's (`"send failed": \replacewith(…)`):
   each formula of `fs` to prove, then for each update `U` of `us` the rest
   after it, `{U} ⟨[ ..ω ]⟩ φ`, one per way the statement may end. -/
-  | cases (fs : List (Fml C)) (us : List (Upd C))
+  | cases (fs : List (NFml C)) (us : List (Upd C))
   /-- A loop's invariant rule (`whileInvariantBox`, `whileInvariantDiamond`):
   the invariant `I` now ("invariant initially valid"), and, whatever the
   body's frame holds (`{anon(P)}`, `Fml.loopAnon`), from where `I` holds and
   after `U` (the variant's value, under the diamond), the body `P` to `post`
   where the condition `c` holds, the rest where `c'` does, and under the
   diamond one of them ("invariant preserved and used"). -/
-  | inv (I : Fml C) (U : Upd C) (c c' : Fml C) (P : Prog C) (post : Fml C)
+  | inv (I : NFml C) (U : Upd C) (c c' : NFml C) (P : Surface.Prog C) (post : NFml C)
 
 /-! ## solkey's branch labels -/
 
@@ -257,13 +257,13 @@ by `assertSimple`, a `try` by `tryCallNoCallbackBox` (and
 `sendNoCallbackBox`, or under the diamond (`diamond`) `sendNoCallbackDiamond`;
 a loop by `loopExit`, the one rule of a loop with goals to label. -/
 def Taclet.labelledBy (c : Lean.Name) (diamond : Bool := false) : Option String :=
-  if c == ``Stmt.ite then some "ifElseSplit"
-  else if c == ``Stmt.require then some "requireSimple"
-  else if c == ``Stmt.assert then some "assertSimple"
-  else if c == ``Stmt.tryCall then some "tryCallNoCallbackBox"
-  else if c == ``Stmt.send then
+  if c == ``Surface.Stmt.ite then some "ifElseSplit"
+  else if c == ``Surface.Stmt.require then some "requireSimple"
+  else if c == ``Surface.Stmt.assert then some "assertSimple"
+  else if c == ``Surface.Stmt.tryCall then some "tryCallNoCallbackBox"
+  else if c == ``Surface.Stmt.send then
     some (if diamond then "sendNoCallbackDiamond" else "sendNoCallbackBox")
-  else if c == ``Stmt.loop then some "loopExit"
+  else if c == ``Surface.Stmt.loop then some "loopExit"
   else none
 
 /-! ## Printing premises -/

@@ -50,18 +50,16 @@ variable {C : Contract}
 
 /-- **`eqClose`**: `v ≐ v`, behind a context with no diamond. -/
 theorem Proves.eqClose {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
-    (hb : Hyp.boxOnly Γ = true := by rfl)
-    (hφ : (Hyp.wrap Γ (.eq (.lit v) (.lit v))).modalFree = true := by first | rfl | decide) :
+    (hb : Hyp.boxOnly Γ = true := by rfl) :
     Proves R Γ (.eq (.lit v) (.lit v)) :=
-  .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => Theory.StValue.Equiv.refl _)) hφ
+  .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => Theory.StValue.Equiv.refl _))
 
 /-- **`eqDClose`**: `v = v` as a program comparison writes it (`Fml.eqD`),
 behind a context with no diamond: a literal is defined everywhere. -/
 theorem Proves.eqDClose {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
-    (hb : Hyp.boxOnly Γ = true := by rfl)
-    (hφ : (Hyp.wrap Γ (Fml.eqD (.lit v) (.lit v))).modalFree = true := by first | rfl | decide) :
-    Proves R Γ (Fml.eqD (.lit v) (.lit v)) :=
-  .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => holds_eqD_iff.2 ⟨v, rfl, rfl⟩)) hφ
+    (hb : Hyp.boxOnly Γ = true := by rfl) :
+    Proves R Γ (NFml.eqD (.lit v) (.lit v)) :=
+  .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => holds_eqD_iff.2 ⟨v, rfl, rfl⟩))
 
 /-! ## `rw` on a sequent
 
@@ -128,7 +126,7 @@ def solRwApply (pf : Expr) (h : MessageData) (upd : Bool := false) : TacticM Uni
     then `(tactic| refine Proves.updRw $pf rfl ?_)
     else `(tactic| refine Proves.rewrite $pf ?_)
   evalTactic (← `(tactic| simp (config := { decide := true }) only
-    [Hyp.rwEq, Fml.rwEq, Hyp.rwUpd, Upd.rw, UpdElem.rw, List.map_cons, List.map_nil, Tm.rw,
+    [Hyp.rwEq, NFml.rwEq, Hyp.rwUpd, Upd.rw, UpdElem.rw, List.map_cons, List.map_nil, Tm.rw,
       Tm.pickAt, Op2.opaque, Term.pick, ↓reduceIte, Bool.false_eq_true, reduceCtorEq, and_true,
       true_and, and_false, false_and, and_self, heq_eq_eq, Tm.pvV.injEq, Tm.pvP.injEq,
       Tm.pvS.injEq, Tm.pvI.injEq, Tm.app0.injEq, Tm.app1.injEq, Tm.app2.injEq, Tm.app3.injEq,
@@ -330,53 +328,49 @@ that the context has no diamond (`Hyp.boxOnly`), since behind a halting box
 update everything holds. -/
 
 /-- **`andRight`**: a conjunction from each conjunct, in the same context. -/
-theorem Proves.andSplit {R : RuleSet} {Γ : List (Hyp C)} {φ ψ : Fml C}
-    (h₁ : Proves R Γ φ) (h₂ : Proves R Γ ψ)
-    (hφ : (Hyp.wrap Γ (.and φ ψ)).modalFree = true := by first | rfl | decide) :
+theorem Proves.andSplit {R : RuleSet} {Γ : List (Hyp C)} {φ ψ : NFml C}
+    (h₁ : Proves R Γ φ) (h₂ : Proves R Γ ψ) :
     Proves R Γ (.and φ ψ) :=
   .close (fun σ => Hyp.wrap_mono₃ (ψ₁ := φ) (ψ₂ := ψ) (ψ₃ := φ) (φ := .and φ ψ)
     (fun _ a b _ => ⟨a, b⟩) Γ σ (h₁.sound σ) (h₂.sound σ)
-    (h₁.sound σ)) hφ
+    (h₁.sound σ))
 
 /-- A program comparison `a = b` (`Fml.eqD`) from its three parts: `a` and
 `b` return, and they are equal in the Theory.
 
 Example: `x = 42` from `defined(x)`, `defined(42)` and `x ≐ 42`. -/
 theorem Proves.eqDSplit {R : RuleSet} {Γ : List (Hyp C)} {a b : Term C}
-    (ha : Proves R Γ (.defined a)) (hb : Proves R Γ (.defined b)) (he : Proves R Γ (.eq a b))
-    (hφ : (Hyp.wrap Γ (Fml.eqD a b)).modalFree = true := by first | rfl | decide) :
-    Proves R Γ (Fml.eqD a b) :=
+    (ha : Proves R Γ (.defined a)) (hb : Proves R Γ (.defined b)) (he : Proves R Γ (.eq a b)) :
+    Proves R Γ (NFml.eqD a b) :=
   .close (fun σ => Hyp.wrap_mono₃ (ψ₁ := .defined a) (ψ₂ := .defined b) (ψ₃ := .eq a b)
-    (φ := Fml.eqD a b) (fun _ x y z => ⟨x, y, z⟩) Γ σ (ha.sound σ) (hb.sound σ)
-    (he.sound σ)) hφ
+    (φ := NFml.eqD a b) (fun _ x y z => ⟨x, y, z⟩) Γ σ (ha.sound σ) (hb.sound σ)
+    (he.sound σ))
 
 /-- **`eqClose`** for any term: `t ≐ t`, behind a context with no diamond.
 The Theory equation is total, so a term that halts is equal to itself too
 (`StValue.Equiv.refl`). -/
 theorem Proves.eqRefl {R : RuleSet} {Γ : List (Hyp C)} {t : Term C}
-    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide)
-    (hφ : (Hyp.wrap Γ (.eq t t)).modalFree = true := by first | rfl | decide) :
+    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide) :
     Proves R Γ (.eq t t) :=
-  .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => Theory.StValue.Equiv.refl _)) hφ
+  .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => Theory.StValue.Equiv.refl _))
 
 /-- A literal is defined, behind a context with no diamond. -/
 theorem Proves.definedLit {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
-    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide)
-    (hφ : (Hyp.wrap Γ (.defined (.lit v))).modalFree = true := by first | rfl | decide) :
+    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide) :
     Proves R Γ (.defined (.lit v)) :=
-  .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => ⟨v, rfl⟩)) hφ
+  .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => ⟨v, rfl⟩))
 
 /-- `sol_apply_upd`: apply the last update of the context to the first-order
 goal and drop it — `Proves.applyStorageBox` for `{storage := s}`,
 `Proves.applyOnRigidBox` for an update of locals, or the merged update of
 `mergeStorage` under a goal that reads no storage — then compute the
 substituted goal, so that the next `rw [h]` finds its terms (it matches
-syntactically, and `Fml.subst`/`Fml.withSt` left folded hide them). -/
+syntactically, and `NFml.subst`/`NFml.withSt` left folded hide them). -/
 macro "sol_apply_upd" : tactic => `(tactic| (
   first
     | refine Proves.applyStorageBox ?_
     | refine Proves.applyOnRigidBox ?_
-  simp (config := { decide := true }) only [Fml.withSt, Tm.withSt, Op2.opaque, Fml.subst,
+  simp (config := { decide := true }) only [NFml.withSt, Tm.withSt, Op2.opaque, NFml.subst,
     Tm.subst, Upd.valOf, Upd.pathOf, Upd.refOf, Upd.storOf, Upd.lastWrite, UpdElem.var?,
     Upd.withSt, UpdElem.withSt, List.map_cons, List.map_nil, ↓reduceIte, Bool.false_eq_true]
   sol_fold_terms))
@@ -388,13 +382,11 @@ what `Proves.applyOnRigidBox` forgets, that the update ran.
 Example: `{ storage := S }, { x := find(storage, alice.age) } ⟹ defined(x)`. -/
 theorem Proves.definedWritten {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {x : Var}
     (hw : U.bindsVal x = true := by first | rfl | decide)
-    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide)
-    (hφ : (Hyp.wrap (Γ ++ [.upd .box U]) (.defined (.pv x))).modalFree = true := by
-      first | rfl | decide) :
+    (hb : Hyp.boxOnly Γ = true := by first | rfl | decide) :
     Proves R (Γ ++ [.upd .box U]) (.defined (.pv x)) :=
   .close (fun σ => by
     rw [Hyp.wrap_append]
-    exact Hyp.wrap_of_reaches Γ hb σ (fun τ _ => Upd.defined_box hw τ)) hφ
+    exact Hyp.wrap_of_reaches Γ hb σ (fun τ _ => Upd.defined_box hw τ))
 
 /-- **`{U}(φ ∧ ψ)` from `{U}φ` and `{U}ψ`**, under either modality: where
 `U` runs both hold after it, where it halts both judge the halt alike.
@@ -402,24 +394,23 @@ theorem Proves.definedWritten {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {x :
 Example: `⟹ [{ x := t }](defined(x) ∧ x ≐ 42)` from
 `⟹ [{ x := t }] defined(x)` and `⟹ [{ x := t }] x ≐ 42`. -/
 theorem Proves.andSplitUpd {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C}
-    {φ ψ : Fml C} (h₁ : Proves R Γ (.upd m U φ)) (h₂ : Proves R Γ (.upd m U ψ))
-    (hφ : (Hyp.wrap Γ (.upd m U (.and φ ψ))).modalFree = true := by first | rfl | decide) :
+    {φ ψ : NFml C} (h₁ : Proves R Γ (.upd m U φ)) (h₂ : Proves R Γ (.upd m U ψ)) :
     Proves R Γ (.upd m U (.and φ ψ)) :=
   .close (fun σ => Hyp.wrap_mono₃ (fun τ a b _ => by
       simp only [holds] at a b ⊢
       cases hU : U.apply τ with
       | error _ => rw [hU] at a; exact a
-      | ok ρ => rw [hU] at a b; exact ⟨a, b⟩) Γ σ (h₁.sound σ) (h₂.sound σ) (h₁.sound σ)) hφ
+      | ok ρ => rw [hU] at a b; exact ⟨a, b⟩) Γ σ (h₁.sound σ) (h₂.sound σ) (h₁.sound σ))
 
 open Lean Elab Tactic Meta in
 /-- `sol_upd r`: apply the update rule `r` at the first update where it fits. -/
 elab "sol_upd " r:term : tactic => do
-  applyValid "sol_upd" (← `(Fml.updAt_valid $r)) (some m!"rule {r} does not apply here")
+  applyValid "sol_upd" (← `(NFml.updAt_valid $r)) (some m!"rule {r} does not apply here")
 
 open Lean Elab Tactic Meta in
 /-- `sol_merge`: merge every stack of updates into one and drop what is dead
-(`Fml.simpUpds`). -/
+(`NFml.simpUpds`). -/
 elab "sol_merge" : tactic => do
-  applyValid "sol_merge" (← `(Fml.simpUpds_valid))
+  applyValid "sol_merge" (← `(NFml.simpUpds_valid))
 
 end Solidity

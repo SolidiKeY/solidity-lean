@@ -144,37 +144,37 @@ theorem avgWidened : ⊨ dl[Narrow]{ ⟨ uint8 m = avg(255, 255); ⟩ m == 255 }
 /--
 info: "int y = -100; y -= 50; require((-128 <= y) && (y <= 127)); int z = -y; require((-128 <= z) && (z <= 127));"
 -/
-#guard_msgs in #eval Prog.toStr (sol{ int8 y = -100; y -= 50; int8 z = -y; })
+#guard_msgs in #eval Surface.Prog.toStr (sol{ int8 y = -100; y -= 50; int8 z = -y; })
 
 /-- Checked at the operation's type, which is its operands', not the target's. -/
-example : Prog.toStr (sol{ uint8 a = 200; uint8 b = 100; uint c = a + b; uint16 d = a; d = d * b; }) =
+example : Surface.Prog.toStr (sol{ uint8 a = 200; uint8 b = 100; uint c = a + b; uint16 d = a; d = d * b; }) =
     "uint a = 200; uint b = 100; uint c = a + b; require(c <= 255); uint d = a; d = d * b; " ++
     "require(d <= 65535);" := by decide
 
 /-- Inside an expression, captured with its check before the statement. -/
-example : Prog.toStr (sol{ uint8 a = 1; bool t = a + 1 > 3; if (a * 2 > a) { a = 0; } }) =
+example : Surface.Prog.toStr (sol{ uint8 a = 1; bool t = a + 1 > 3; if (a * 2 > a) { a = 0; } }) =
     "uint a = 1; uint se1 = a + 1; require(se1 <= 255); bool t = se1 > 3; uint se2 = a * 2; " ++
     "require(se2 <= 255); if (se2 > a) { a = 0; } else { }" := by decide
 
 /-- `++` and `−−`, as a statement and inside an expression. -/
-example : Prog.toStr (sol{ uint8 i = 0; i++; uint8 j = i++; uint k = ++i + 1; }) =
+example : Surface.Prog.toStr (sol{ uint8 i = 0; i++; uint8 j = i++; uint k = ++i + 1; }) =
     "uint i = 0; i++; require(i <= 255); uint se1; se1 = i++; require(i <= 255); uint j = se1; " ++
     "uint se2; se2 = ++i; require(i <= 255); uint k = se2 + 1; require(k <= 255);" := by decide
 
 /-- `unchecked`, `~` and `<<` at `uint8`: modulo `2^8`. -/
-example : Prog.toStr (sol{ uint8 x = 255; unchecked { x += 1; x = x * 3 - 7; x++; x = ~x; } x <<= 1; }) =
+example : Surface.Prog.toStr (sol{ uint8 x = 255; unchecked { x += 1; x = x * 3 - 7; x++; x = ~x; } x <<= 1; }) =
     "uint x = 255; x = (x +% 1) % 256; x = (((x *% 3) % 256) -% 7) % 256; x = (x +% 1) % 256; " ++
     "x = 255 -% x; x = (x << 1) % 256;" := by decide
 
 /-- A cast is a capture at its type: `% 2^N` narrowing a `uint`, the value as it
 is widening one. -/
-example : Prog.toStr (sol{ uint8 z = uint8(total); uint16 w = uint16(z) + 300; total = uint(z) + 1; }) =
+example : Surface.Prog.toStr (sol{ uint8 z = uint8(total); uint16 w = uint16(z) + 300; total = uint(z) + 1; }) =
     "uint se1 = total % 256; uint z = se1; uint se2 = z; uint w = se2 + 300; require(w <= 65535); " ++
     "uint se3 = z; total = se3 + 1;" := by decide
 
 /-- Arithmetic on literals alone, which solc folds and refuses, is checked at
 run time. -/
-example : Prog.toStr (sol{ uint8 z = 200 + 100; }) = "uint z = 200 + 100; require(z <= 255);" := by decide
+example : Surface.Prog.toStr (sol{ uint8 z = 200 + 100; }) = "uint z = 200 + 100; require(z <= 255);" := by decide
 
 /-- error: Solidity elaboration failed: a uint where a uint8 is expected: write uint8(…) -/
 #guard_msgs in #check sol{ uint8 x = total; }

@@ -137,12 +137,12 @@ def rounds6 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
 
 #guard Core.Derive.proves rounds2
 #guard (Core.Derive.residueOf rounds4).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
 
 #guard (Core.Derive.residueOf rounds6).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
+  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
 

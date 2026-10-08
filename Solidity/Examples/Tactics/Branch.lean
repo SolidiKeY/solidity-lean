@@ -201,13 +201,13 @@ The same holds for a `for` loop's init. -/
 
 /-- info: bool c = true; bool x_1 = true; if (c) { uint x = 1; } else { } -/
 #guard_msgs in
-#eval IO.println (Prog.toStr
-  (sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } } : Prog StandardExample))
+#eval IO.println (Surface.Prog.toStr
+  (sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } } : Surface.Prog StandardExample))
 
 /-- info: bool c = true; int i_1 = 0; while (i_1 < 1) { i_1++; } if (c) { uint i = 1; } else { } -/
 #guard_msgs in
-#eval IO.println (Prog.toStr
-  (sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } } : Prog StandardExample))
+#eval IO.println (Surface.Prog.toStr
+  (sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } } : Surface.Prog StandardExample))
 
 /-! Two loops of one index: the first's is renamed apart, the second keeps
 its name. -/
@@ -216,12 +216,12 @@ its name. -/
 info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0; while (i < 3) { n += i; i++; }
 -/
 #guard_msgs in
-#eval IO.println (Prog.toStr (sol{ uint n = 0; for (uint i = 0; i < 2; i++) { n += i; }
-    for (uint i = 0; i < 3; i++) { n += i; } } : Prog StandardExample))
+#eval IO.println (Surface.Prog.toStr (sol{ uint n = 0; for (uint i = 0; i < 2; i++) { n += i; }
+    for (uint i = 0; i < 3; i++) { n += i; } } : Surface.Prog StandardExample))
 
 -- a local declared again in its own scope is still refused
 /-- error: Solidity elaboration failed: x is already declared, or names a state variable -/
-#guard_msgs in #check (sol{ uint x = 2; { uint x = 3; } } : Prog StandardExample)
+#guard_msgs in #check (sol{ uint x = 2; { uint x = 3; } } : Surface.Prog StandardExample)
 
 -- a flat block's local declared twice in it: refused at the block's index
 #guard match elabProgAt StandardExample
@@ -231,7 +231,7 @@ info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0;
 
 /- Declared alike in both branches, then at another type in a later one. -/
 #guard (Core.Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
-    if (c) { bool t = true; } } : Prog StandardExample)).toBool
+    if (c) { bool t = true; } } : Surface.Prog StandardExample)).toBool
 
 /-! ## Under the diamond: the condition decides
 

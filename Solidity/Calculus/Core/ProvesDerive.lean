@@ -114,7 +114,7 @@ def modal (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List
 
 /-- Today's context and goal of an erased sequent: its implications, `∀`s
 and updates taken in, as today's residue takes them (`Derive.residue`). -/
-def peel : List (Solidity.Hyp C) → Solidity.Fml C → List (Solidity.Hyp C) × Solidity.Fml C
+def peel : List (Solidity.Hyp C) → Solidity.NFml C → List (Solidity.Hyp C) × Solidity.NFml C
   | Γ, .imp a ψ => peel (Γ ++ [.pre a]) ψ
   | Γ, .all x p ψ => peel (Γ ++ [.all x p]) ψ
   | Γ, .upd m U ψ => peel (Γ ++ [.upd m U]) ψ
@@ -165,22 +165,22 @@ def run (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
 
 /-- Today's formula without its first `n` leading quantifiers, every one
 where `n` is `none`. -/
-def _root_.Solidity.Fml.stripN : Option Nat → Solidity.Fml C → Solidity.Fml C
+def _root_.Solidity.NFml.stripN : Option Nat → Solidity.NFml C → Solidity.NFml C
   | none, φ => φ.stripAlls
   | some 0, φ => φ
-  | some (n + 1), .all _ _ φ => Solidity.Fml.stripN (some n) φ
+  | some (n + 1), .all _ _ φ => Solidity.NFml.stripN (some n) φ
   | some (_ + 1), φ => φ
 
 /-- A formula is valid where it is with its first leading quantifiers'
 locals free. -/
-theorem _root_.Solidity.Valid.of_stripN : {n : Option Nat} → {φ : Solidity.Fml C} →
+theorem _root_.Solidity.Valid.of_stripN : {n : Option Nat} → {φ : Solidity.NFml C} →
     Solidity.Valid (φ.stripN n) → Solidity.Valid φ
-  | none, _, h => Solidity.Valid.of_stripAlls (by rwa [Solidity.Fml.stripN] at h)
+  | none, _, h => Solidity.Valid.of_stripAlls (by rwa [Solidity.NFml.stripN] at h)
   | some (n + 1), .all x p φ, h =>
     Solidity.Valid.all_of_free x p (Solidity.Valid.of_stripN (n := some n) (φ := φ) h)
-  | some 0, _, h => by rwa [Solidity.Fml.stripN] at h
+  | some 0, _, h => by rwa [Solidity.NFml.stripN] at h
   | some (_ + 1), .tt, h | some (_ + 1), .eq _ _, h | some (_ + 1), .not _, h
-  | some (_ + 1), .and _ _, h | some (_ + 1), .imp _ _, h | some (_ + 1), .modal _ _ _, h
+  | some (_ + 1), .and _ _, h | some (_ + 1), .imp _ _, h
   | some (_ + 1), .upd _ _ _, h | some (_ + 1), .havoc _, h | some (_ + 1), .anon _ _, h
   | some (_ + 1), .defined _, h => h
 
@@ -190,8 +190,8 @@ where that leaves goals but the quantified leaf, its parameters in the
 context (`.all`), leaves none, nothing: a diamond's leaf that reads a
 parameter's range (a mapping's key, an interval) closes only so.  An
 explicit `∀` past the parameters is kept either way. -/
-def pick {β : Type} (np : Option Nat) (r : Solidity.Fml C → Option (List β × Nat))
-    (e : Solidity.Fml C) : Option (List β) :=
+def pick {β : Type} (np : Option Nat) (r : Solidity.NFml C → Option (List β × Nat))
+    (e : Solidity.NFml C) : Option (List β) :=
   match r (e.stripN np) with
   | some ([], _) => some []
   | r₁ => match np, e with
@@ -207,8 +207,8 @@ leaves (`pickH_eq`), with one residue where `pick` would run two.  The
 tactic sets `full` when the compiled walk's leaves close only with their
 parameters (`leafQuoteI`), so that the kernel does not run the stripped
 residue there first. -/
-def pickH {β : Type} (full : Bool) (np : Option Nat) (r : Solidity.Fml C → Option (List β × Nat))
-    (e : Solidity.Fml C) : Option (List β) :=
+def pickH {β : Type} (full : Bool) (np : Option Nat) (r : Solidity.NFml C → Option (List β × Nat))
+    (e : Solidity.NFml C) : Option (List β) :=
   bif full then
     (match e with
     | .all .. =>
@@ -219,7 +219,7 @@ def pickH {β : Type} (full : Bool) (np : Option Nat) (r : Solidity.Fml C → Op
   else pick np r e
 
 theorem pickH_eq {β : Type} (full : Bool) (np : Option Nat)
-    (r : Solidity.Fml C → Option (List β × Nat)) (e : Solidity.Fml C) :
+    (r : Solidity.NFml C → Option (List β × Nat)) (e : Solidity.NFml C) :
     pickH full np r e = pick np r e := by
   cases full
   · rfl
@@ -232,7 +232,7 @@ theorem pickH_eq {β : Type} (full : Bool) (np : Option Nat)
         · rfl
         · rename_i r₁ hr₁
           split
-          · exact absurd (by simpa only [Solidity.Fml.stripN] using h) (hr₁ b)
+          · exact absurd (by simpa only [Solidity.NFml.stripN] using h) (hr₁ b)
           · simp only [h]
           · rename_i hne; exact absurd rfl (hne _ _ _)
       · rfl
@@ -242,7 +242,7 @@ theorem pickH_eq {β : Type} (full : Bool) (np : Option Nat)
 (`Fml.closeErase`, which is `Fml.closableB` beside `Fml.erase`), and the
 residue `r` of the erasure (`pick`, by `pickH`). -/
 def leafWith {β : Type} (full : Bool) (np : Option Nat)
-    (r : Solidity.Fml C → Option (List β × Nat)) {Γ : Ctx}
+    (r : Solidity.NFml C → Option (List β × Nat)) {Γ : Ctx}
     (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List β) :=
   match (H.wrap φ).closeErase [] with
   | some e => pickH full np r e.2
@@ -458,11 +458,11 @@ end Sound
 
 /-- What `pick` leaves of today's residue is valid once its leaves are
 proved. -/
-theorem pick_valid {np : Option Nat} {e : Solidity.Fml C} {ls : List (Solidity.Derive.Leaf C)}
+theorem pick_valid {np : Option Nat} {e : Solidity.NFml C} {ls : List (Solidity.Derive.Leaf C)}
     (h : pick np (Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
       Solidity.Derive.budget []) e = some ls)
     (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Solidity.Valid e := by
-  have hv : ∀ {e' : Solidity.Fml C} {ls' : List (Solidity.Derive.Leaf C)} {b : Nat},
+  have hv : ∀ {e' : Solidity.NFml C} {ls' : List (Solidity.Derive.Leaf C)} {b : Nat},
       Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
         Solidity.Derive.budget [] e' = some (ls', b) →
       (∀ l ∈ ls', Solidity.Proves .all l.1 l.2) → Solidity.Valid e' :=
@@ -559,7 +559,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
   let np := toExpr (← paramCount H φe)
   let hyp := mkApp (mkConst ``Solidity.Hyp) C
   let leafTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) hyp)
-    (mkApp (mkConst ``Solidity.Fml) C)
+    (mkApp (mkConst ``Solidity.NFml) C)
   let resTy := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``List [0]) leafTy)
   let mut full := false
   let lemmaFor (full : Bool) (ls : Expr) : MetaM Expr := do
@@ -595,7 +595,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
     return []
   let mkLeaf (Γ' φ' : Expr) : Expr :=
     mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) hyp,
-      mkApp (mkConst ``Solidity.Fml) C, Γ', φ']
+      mkApp (mkConst ``Solidity.NFml) C, Γ', φ']
   let ls ← mkListLit leafTy (leaves.map fun (Γ', φ') => mkLeaf Γ' φ')
   let h ← try lemmaFor full ls
     catch e => throwError "sol_prove: the kernel rejects the residue:{indentD e.toMessageData}"

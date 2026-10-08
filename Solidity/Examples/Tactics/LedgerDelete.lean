@@ -1,3 +1,4 @@
+import Solidity.Tools.Run
 import Solidity.Calculus.Close
 import Solidity.Theory.Storage
 import Solidity.Calculus.Core.Surface
@@ -84,13 +85,13 @@ theorem ledgerWriteThenDelete :
   -- `uint gone = ledger.balances[1];`: Step 1 (`storageIndexRead_unfold_rightFst`,
   -- by the strategy: its conclusion is a `Hole.fill`, see `StorageSteps.lean`)
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageIndexReadMappingFind
   -- `uint kept = ledger.balances[2];`
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldRule (Surface.Stmt.step _ _ _).rule
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageIndexReadMappingFind
@@ -113,7 +114,7 @@ theorem deleteLedger : ⊨ dl!{ [ ledger.nonce = 42; delete ledger; ] true } := 
   sol_close
 
 /-- The whole program. -/
-def ledgerProgram : Prog TestSuite := sol{
+def ledgerProgram : Surface.Prog TestSuite := sol{
   ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
   delete ledger.balances[1];
   uint gone = ledger.balances[1]; uint kept = ledger.balances[2]; uint before = ledger.nonce;
@@ -127,7 +128,7 @@ def ledgerProgram : Prog TestSuite := sol{
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.testSuiteStore ledgerProgram "after"
+#eval Surface.Prog.localAfterT State.testSuiteStore ledgerProgram "after"
 
 /-! `survives`: the mapping entry is not. -/
 
@@ -135,7 +136,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 20))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.testSuiteStore ledgerProgram "survives"
+#eval Surface.Prog.localAfterT State.testSuiteStore ledgerProgram "survives"
 
 /-! `ledger.nonce = 5; ledger.balances[1] = 10; delete ledger;
 uint kept = ledger.balances[1]; delete ledger.balances[1]; uint nonce0 = ledger.nonce;
@@ -146,7 +147,7 @@ uint gone = ledger.balances[1];` — deleting the entry is what clears it:
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 1000))
 -/
 #guard_msgs in
-#eval Prog.localAfter State.testSuiteStore
+#eval Surface.Prog.localAfterT State.testSuiteStore
   sol{ ledger.nonce = 5; ledger.balances[1] = 10; delete ledger;
        uint kept = ledger.balances[1]; delete ledger.balances[1];
        uint nonce0 = ledger.nonce; uint gone = ledger.balances[1];

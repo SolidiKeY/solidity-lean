@@ -17,10 +17,10 @@ a deleted struct is the other.  This module is mini-solkey's Chapter 15
 (`Ch15_Decide`) for the storage fragment: the search replaced by a function,
 and a proof that the function loses nothing.
 
-* `Fml.toL` pushes the updates `sol_symex` leaves into the formula
+* `NFml.toL` pushes the updates `sol_symex` leaves into the formula
   (mini-solkey's `Fml.applyUpds`).  A term here halts, so a box update's
   term becomes a premise that it returns and a diamond update's a conjunct;
-  `Fml.toL_holds` is exact, halts included.
+  `NFml.toL_holds` is exact, halts included.
 * `LFml.elim` turns every read of a write into a case tree over key
   equalities whose leaves read the initial storage only.  At each write the
   written path and the read one are compared from the root (`cmpSegs`,
@@ -30,10 +30,10 @@ and a proof that the function loses nothing.
   `hasU`/`mapU` for whether a location, or a mapping, is there, `lenU` for
   an array's length: a `delete` empties a dynamic array and keeps a
   fixed-size one's length).
-* `Fml.valid_iff_reduce`: `⊨ φ` exactly when `φ.reduce`, the two steps
+* `NFml.valid_iff_reduce`: `⊨ φ` exactly when `φ.reduce`, the two steps
   composed, holds in every state.  Every step is an equivalence.
 * `sol_decide` (`DecideComplete.lean`) rewrites the goal by it, computes the
-  reduction, and rewrites once more by `Fml.valid_iff_cons`: the reads of the
+  reduction, and rewrites once more by `NFml.valid_iff_cons`: the reads of the
   starting storage free, under the constraints a storage puts on them.
   `sol_decide_heuristic`, here, is the finishing step without them.
 
@@ -82,12 +82,12 @@ or a push of a word through it is the slot-level node `LStor.stale`
 readers (`LStor.slotU`, `slotHasU`, `slotLenU`) see such a write where a
 later `push()` recycles the slot it lands in.
 
-**The fragment** (`Fml.inL`): no modality (run `sol_symex` first) but the
+**The fragment** (`NFml.inL`): no modality (run `sol_symex` first) but the
 `⟨[ revert(); ]⟩` a branch's cover keeps (`Premise.coverFml`: `true` under
 the box, `false` under the diamond), one
 element per update, a local, an alias or the storage updated; an equation
 as `eqD a b`, both sides defined (a bare `a ≐ b` compares the Theory
-values, and a term that halts still denotes one: `Fml.eqDView`), or a bare
+values, and a term that halts still denotes one: `NFml.eqDView`), or a bare
 `a ≐ b` of a literal (or `msg.sender`) and a literal or a local, where the
 two readings agree (`Term.eqLit`: the branch condition `se1 ≐ true` of an
 `if`); literals, values of the transaction (`msg.sender`, which no update
@@ -798,7 +798,7 @@ def _root_.Solidity.Tm.sameShape : Tm C s → Bool
     | _ => false
 
 /-- The same term of the fragment, as a `Bool` the kernel computes: how
-`Fml.inL` recognises `eqD a b` (`Fml.eqDView`).  Outside the fragment it is
+`NFml.inL` recognises `eqD a b` (`NFml.eqDView`).  Outside the fragment it is
 `false`, which only narrows the fragment. -/
 def _root_.Solidity.Tm.sameL (a b : Tm C s) : Bool := a.sameShape && decide (a = b)
 
@@ -806,7 +806,7 @@ def _root_.Solidity.Tm.sameL (a b : Tm C s) : Bool := a.sameShape && decide (a =
 its outer conjunction: the equation of the fragment.  A bare `a = b` reads
 the Theory (`holds`), where a term that halts still denotes something, so
 the fragment takes an equation only with both sides defined. -/
-def _root_.Solidity.Fml.eqDView : Fml C → Fml C → Option (Term C × Term C)
+def _root_.Solidity.NFml.eqDView : NFml C → NFml C → Option (Term C × Term C)
   | .defined a, .and (.defined b) (.eq a' b') =>
     if a.sameL a' && b.sameL b' then some (a, b) else none
   | _, _ => none
@@ -826,7 +826,7 @@ def _root_.Solidity.Term.isLitLike : Term C → Bool
 /-- A total equation `a ≐ b` the fragment takes: a literal (or `msg.sender`)
 against a literal or a local, `se1 ≐ true` of a symbolically executed `if`,
 `msg.sender ≐ r` of a precondition.  There the total reading is the partial
-one (`Fml.toL_holds`); `x ≐ y` of two unbound locals is not, since both
+one (`NFml.toL_holds`); `x ≐ y` of two unbound locals is not, since both
 denote the empty struct. -/
 def _root_.Solidity.Term.eqLit (a b : Term C) : Bool :=
   (a.isLitLike && b.isAtom) || (b.isLitLike && a.isAtom)
@@ -1004,26 +1004,14 @@ def guardM : Modality → LTerm → LFml → LFml
   | .box, g, φ => .imp (.eq g g) φ
   | .diamond, g, φ => .and (.eq g g) φ
 
-/-- A program that starts with `revert();`: it halts, whatever follows. -/
-def _root_.Solidity.Prog.reverts : Prog C → Bool
-  | .revert :: _ => true
-  | _ => false
-
-theorem _root_.Solidity.Prog.reverts_eq {P : Prog C} (h : P.reverts = true) :
-    ∃ ω, P = .revert :: ω := by
-  unfold Prog.reverts at h
-  split at h
-  · exact ⟨_, rfl⟩
-  · cases h
-
 /-- A formula with its updates pushed in. -/
-def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
+def _root_.Solidity.NFml.toL : Sym → NFml C → LFml
   | _, .tt => .tt
   | ρ, .eq a b => .eq (a.toL ρ) (b.toL ρ)
   | ρ, .defined t => .eq (t.toL ρ) (t.toL ρ)
   | ρ, .not φ => .not (φ.toL ρ)
   | ρ, .and φ ψ =>
-    match Fml.eqDView φ ψ with
+    match NFml.eqDView φ ψ with
     | some (a, b) => .eq (a.toL ρ) (b.toL ρ)
     | none => .and (φ.toL ρ) (ψ.toL ρ)
   | ρ, .imp φ ψ => .imp (φ.toL ρ) (ψ.toL ρ)
@@ -1036,20 +1024,18 @@ def _root_.Solidity.Fml.toL : Sym → Fml C → LFml
       | some (g, ρ') => guardM m g (φ.toL ρ')
       | none => .tt
     | none => .tt
-  | _, .modal .box _ _ => .tt
-  | _, .modal .diamond _ _ => .not .tt
   | ρ, .all x p φ => .all x p (φ.toL (ρ.free x))
   | _, .havoc _ | _, .anon .. => .tt
 
-/-- The fragment `Fml.toL` is exact on: no modality, one element per update
+/-- The fragment `NFml.toL` is exact on: one element per update
 but an allocation's pair (`pairL`), and every alias bound by an update. -/
-def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
+def _root_.Solidity.NFml.inL : Sym → NFml C → Bool
   | _, .tt => true
   | _, .eq a b => a.eqLit b
   | ρ, .defined t => t.inL ρ
   | ρ, .not φ => φ.inL ρ
   | ρ, .and φ ψ =>
-    match Fml.eqDView φ ψ with
+    match NFml.eqDView φ ψ with
     | some (a, b) => a.inL ρ && b.inL ρ
     | none => φ.inL ρ && ψ.inL ρ
   | ρ, .imp φ ψ => φ.inL ρ && ψ.inL ρ
@@ -1062,7 +1048,6 @@ def _root_.Solidity.Fml.inL : Sym → Fml C → Bool
       | some (_, ρ') => pairIn ρ mm && ρ'.mem.within memSize && φ.inL ρ'
       | none => false
     | none => false
-  | _, .modal _ P _ => P.reverts
   | ρ, .all x _ φ => !ρ.vars.contains x && φ.inL (ρ.free x)
   | _, .havoc _ | _, .anon .. => false
 
@@ -2893,10 +2878,10 @@ theorem Tm.sameL_eq {a b : Tm C s} (h : a.sameL b = true) : a = b := by
 theorem Term.sameL_eq (a b : Term C) (h : a.sameL b = true) : a = b := Tm.sameL_eq h
 theorem PTerm.sameL_eq (p q : PTerm C) (h : p.sameL q = true) : p = q := Tm.sameL_eq h
 
-/-- What `Fml.eqDView` recognises is `eqD a b`. -/
-theorem Fml.eqDView_some {φ ψ : Fml C} {a b : Term C} (h : Fml.eqDView φ ψ = some (a, b)) :
+/-- What `NFml.eqDView` recognises is `eqD a b`. -/
+theorem NFml.eqDView_some {φ ψ : NFml C} {a b : Term C} (h : NFml.eqDView φ ψ = some (a, b)) :
     φ = .defined a ∧ ψ = .and (.defined b) (.eq a b) := by
-  unfold Fml.eqDView at h
+  unfold NFml.eqDView at h
   split at h
   · rename_i a₀ b₀ a' b'
     split at h
@@ -3297,13 +3282,13 @@ Example: `{ storage := save(storage, balances[k], 5) } find(storage, balances[k]
 holds exactly when `sok(save(init, balances[k], 5)) = sok(…) → find(save(init,
 balances[k], 5), balances[k]) = 5` does, both read in the state before the
 write. -/
-theorem Fml.toL_holds :
-    (φ : Fml C) → ∀ {σ τ : State} {ρ : Sym}, Rel σ ρ τ → φ.inL ρ = true →
+theorem NFml.toL_holds :
+    (φ : NFml C) → ∀ {σ τ : State} {ρ : Sym}, Rel σ ρ τ → φ.inL ρ = true →
       (holds τ φ ↔ (φ.toL ρ).holds σ)
   | .tt, _, _, _, _, _ => Iff.rfl
   | .eq a b, _, τ, _, h, hf => by
-    simp only [Fml.inL] at hf
-    simp only [holds, Fml.toL]
+    simp only [NFml.inL] at hf
+    simp only [holds, NFml.toL]
     rw [LFml.holds_eq_iff]
     rcases Term.eqLit_cases hf with ⟨hla, hb⟩ | ⟨hlb, ha⟩
     · obtain ⟨w, hd, hl⟩ := Term.litLike_val h hla
@@ -3319,7 +3304,7 @@ theorem Fml.toL_holds :
       exact (hs w).symm
   | .defined t, _, _, _, h, hf => by
     have ht := Term.toL_eval h t hf
-    simp only [holds, Fml.toL, LFml.holds]
+    simp only [holds, NFml.toL, LFml.holds]
     cases hx : (t.toL _).eval _ with
     | ok x => exact ⟨fun _ => rfl, fun _ => ⟨x, (ht x).1 hx⟩⟩
     | error _ =>
@@ -3327,33 +3312,33 @@ theorem Fml.toL_holds :
       have := (ht v).2 hv
       simp_all only [reduceCtorEq]
   | .not φ, _, _, _, h, hf => by
-    simp only [Fml.inL] at hf
-    simp only [holds, Fml.toL, LFml.holds, Fml.toL_holds φ h hf]
+    simp only [NFml.inL] at hf
+    simp only [holds, NFml.toL, LFml.holds, NFml.toL_holds φ h hf]
   | .and φ ψ, _, _, _, h, hf => by
-    cases hv : Fml.eqDView φ ψ with
+    cases hv : NFml.eqDView φ ψ with
     | none =>
-      simp only [Fml.inL, hv, Bool.and_eq_true] at hf
-      simp only [holds, Fml.toL, hv, LFml.holds, Fml.toL_holds φ h hf.1, Fml.toL_holds ψ h hf.2]
+      simp only [NFml.inL, hv, Bool.and_eq_true] at hf
+      simp only [holds, NFml.toL, hv, LFml.holds, NFml.toL_holds φ h hf.1, NFml.toL_holds ψ h hf.2]
     | some ab =>
       obtain ⟨a, b⟩ := ab
-      simp only [Fml.inL, hv, Bool.and_eq_true] at hf
-      simp only [Fml.toL, hv]
-      obtain ⟨rfl, rfl⟩ := Fml.eqDView_some hv
+      simp only [NFml.inL, hv, Bool.and_eq_true] at hf
+      simp only [NFml.toL, hv]
+      obtain ⟨rfl, rfl⟩ := NFml.eqDView_some hv
       have ha : Sim ((a.toL _).eval _) (a.eval _) := Term.toL_eval h a hf.1
       have hb : Sim ((b.toL _).eval _) (b.eval _) := Term.toL_eval h b hf.2
       refine holds_eqD_iff.trans ?_
       rw [LFml.holds_eq_iff]
       exact exists_congr fun x => and_congr (ha x).symm (hb x).symm
   | .imp φ ψ, _, _, _, h, hf => by
-    simp only [Fml.inL, Bool.and_eq_true] at hf
-    simp only [holds, Fml.toL, LFml.holds, Fml.toL_holds φ h hf.1, Fml.toL_holds ψ h hf.2]
+    simp only [NFml.inL, Bool.and_eq_true] at hf
+    simp only [holds, NFml.toL, LFml.holds, NFml.toL_holds φ h hf.1, NFml.toL_holds ψ h hf.2]
   | .upd m [] φ, _, τ, _, h, hf => by
-    simp only [Fml.inL] at hf
-    simp only [holds, Fml.toL, Upd.apply, List.foldlM_nil]
-    exact Fml.toL_holds φ h hf
+    simp only [NFml.inL] at hf
+    simp only [holds, NFml.toL, Upd.apply, List.foldlM_nil]
+    exact NFml.toL_holds φ h hf
   | .upd m [e] φ, σ, τ, ρ, h, hf => by
-    simp only [Fml.inL, Bool.and_eq_true] at hf
-    simp only [holds, Fml.toL, Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure]
+    simp only [NFml.inL, Bool.and_eq_true] at hf
+    simp only [holds, NFml.toL, Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure]
     cases e with
     | val x t =>
       have ht := Term.toL_eval h t hf.1
@@ -3364,7 +3349,7 @@ theorem Fml.toL_holds :
         fun τ' hτ => ?_
       obtain ⟨v, hv, he⟩ := Res.bind_eq_ok.1 hτ
       cases he
-      refine Fml.toL_holds φ (h.bind x _ _ ?_) hf.2
+      refine NFml.toL_holds φ (h.bind x _ _ ?_) hf.2
       exact ⟨v, (ht v).2 hv, by simp only [State.getEnv_setEnv_self]⟩
     | path x p =>
       have hA := PTerm.toL_chk h p hf.1
@@ -3382,7 +3367,7 @@ theorem Fml.toL_holds :
           exact ⟨_, hq, hl⟩) fun τ' hτ => ?_
       obtain ⟨rs, hr, he⟩ := Res.bind_eq_ok.1 hτ
       cases he
-      refine Fml.toL_holds φ (h.bind x _ _ ?_) hf.2
+      refine NFml.toL_holds φ (h.bind x _ _ ?_) hf.2
       obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hr, rfl⟩
       exact ⟨rs.1, rs.2, hq, by simp only [State.getEnv_setEnv_self], hl⟩
     | storage s =>
@@ -3398,7 +3383,7 @@ theorem Fml.toL_holds :
           exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩) fun τ' hτ => ?_
       obtain ⟨τ₁, h₁, he⟩ := Res.bind_eq_ok.1 hτ
       cases he
-      refine Fml.toL_holds φ ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_,
+      refine NFml.toL_holds φ ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_,
         fun k => by rw [← h.tx k]; cases k <;> rfl, h.mem.of_heap rfl rfl⟩ hf.2
       simp only [UpdElem.toL, lookupBy_onWrite]
       exact (h.env y).onWrite rfl
@@ -3415,7 +3400,7 @@ theorem Fml.toL_holds :
           exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩) fun τ' hτ => ?_
       obtain ⟨τ₁, h₁, he⟩ := Res.bind_eq_ok.1 hτ
       cases he
-      refine Fml.toL_holds φ (h.bind x _ _ ?_) hf.2
+      refine NFml.toL_holds φ (h.bind x _ _ ?_) hf.2
       exact ⟨τ₁.storage, (hs _).2 (by rw [h₁]; rfl), by simp only [State.getEnv_setEnv_self]⟩
     | net r op a =>
       have hra : r.inL ρ = true ∧ a.inL ρ = true := by simpa only [UpdElem.inL,
@@ -3443,7 +3428,7 @@ theorem Fml.toL_holds :
       · obtain ⟨i, -, hτ⟩ := Res.bind_eq_ok.1 hτ
         obtain ⟨j, -, hτ⟩ := Res.bind_eq_ok.1 hτ
         cases hτ
-        exact Fml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k,
+        exact NFml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k,
           h.mem.of_heap rfl rfl⟩ hf.2
     | pay r a =>
       have hra : r.inL ρ = true ∧ a.inL ρ = true := by simpa only [UpdElem.inL,
@@ -3478,7 +3463,7 @@ theorem Fml.toL_holds :
         split at hτ
         · cases hτ
         · cases hτ
-          exact Fml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k,
+          exact NFml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k,
           h.mem.of_heap rfl rfl⟩ hf.2
     | mref x i =>
       obtain ⟨j, g, hI, hir, hie⟩ := ITerm.toL_eval h i hf.1
@@ -3495,7 +3480,7 @@ theorem Fml.toL_holds :
           exact (hie id hid).1
       · obtain ⟨id, hid, he⟩ := Res.bind_eq_ok.1 hτ
         cases he
-        refine Fml.toL_holds φ (h.bind x _ _ ?_) hf2
+        refine NFml.toL_holds φ (h.bind x _ _ ?_) hf2
         exact ⟨id, (hie id hid).2, by simp only [State.getEnv_setEnv_self]⟩
     | memory mm =>
       have hmm : mm.inL ρ = true ∧ memWithin (mm.toL ρ) = true := by
@@ -3516,47 +3501,42 @@ theorem Fml.toL_holds :
       · obtain ⟨μ', hμ', he⟩ := Res.bind_eq_ok.1 hτ
         cases he
         obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
-        exact Fml.toL_holds φ (h.setMem hrun hp hh) hf2
+        exact NFml.toL_holds φ (h.setMem hrun hp hh) hf2
     | unset x =>
       rw [Close.UpdElem.write_unset]
       refine after_guardM (by simp only [UpdElem.toL, LTerm.eval]; exact ⟨fun _ => ⟨_, rfl⟩,
         fun _ => ⟨_, rfl⟩⟩) fun τ' hτ => ?_
       cases hτ
-      exact Fml.toL_holds φ (h.bind x _ _ (by simp only [EnvRel, State.getEnv_setEnv_self])) hf.2
+      exact NFml.toL_holds φ (h.bind x _ _ (by simp only [EnvRel, State.getEnv_setEnv_self])) hf.2
     | selfBalance _ _ | saveNet _ | saveNetMt _ | netMt _ _ | setBalance _ =>
       simp only [UpdElem.inL, Bool.false_eq_true, false_and] at hf
-  | .modal m P φ, _, _, _, _, hf => by
-    obtain ⟨ω, rfl⟩ := Prog.reverts_eq hf
-    cases m <;> simp only [holds, Prog.run, Stmt.run, bind, Except.bind, Modality.afterRun,
-      Modality.after, Modality.onHalt, Fml.toL, LFml.holds, not_true_eq_false, ne_eq,
-      Except.error.injEq, reduceCtorEq, not_false_eq_true, and_true]
   | .all x p φ, σ, τ, ρ, h, hf => by
-    simp only [Fml.inL, Bool.and_eq_true, Bool.not_eq_true'] at hf
+    simp only [NFml.inL, Bool.and_eq_true, Bool.not_eq_true'] at hf
     have hx : x ∉ ρ.vars := by simpa only [List.contains_eq_mem, decide_eq_false_iff_not] using hf.1
-    simp only [holds, Fml.toL, LFml.holds]
-    exact forall_congr' fun v => imp_congr_right fun _ => Fml.toL_holds φ (h.free hx v) hf.2
+    simp only [holds, NFml.toL, LFml.holds]
+    exact forall_congr' fun v => imp_congr_right fun _ => NFml.toL_holds φ (h.free hx v) hf.2
   | .upd md (e₁ :: e₂ :: rest) φ, σ, τ, ρ, h, hf => by
     cases hv : pairView e₁ e₂ rest with
-    | none => simp only [Fml.inL, hv, Bool.false_eq_true] at hf
+    | none => simp only [NFml.inL, hv, Bool.false_eq_true] at hf
     | some p =>
       obtain ⟨x, i, mm⟩ := p
       cases hq : pairL ρ x i mm with
-      | none => simp only [Fml.inL, hv, hq, Bool.false_eq_true] at hf
+      | none => simp only [NFml.inL, hv, hq, Bool.false_eq_true] at hf
       | some q =>
         obtain ⟨g, ρ'⟩ := q
-        simp only [Fml.inL, hv, hq, Bool.and_eq_true] at hf
+        simp only [NFml.inL, hv, hq, Bool.and_eq_true] at hf
         obtain ⟨rfl, rfl, rfl⟩ := pairView_some hv
         have hs := pair_sound h hq hf.1.1
         show md.after (fun τ' => holds τ' φ) (Upd.apply [.mref x i, .memory mm] τ) ↔ _
-        simp only [Fml.toL, pairView, hq]
-        exact after_guardM hs.1 fun τ' hτ => Fml.toL_holds φ (hs.2 τ' hτ) hf.2
+        simp only [NFml.toL, pairView, hq]
+        exact after_guardM hs.1 fun τ' hτ => NFml.toL_holds φ (hs.2 τ' hτ) hf.2
   | .havoc _, _, _, _, _, hf | .anon .., _, _, _, _, hf => by
-    simp only [Fml.inL, Bool.false_eq_true] at hf
+    simp only [NFml.inL, Bool.false_eq_true] at hf
 
 /-- `⊨ φ` is the formula with its updates pushed in, true in every state. -/
-theorem Fml.valid_iff_toL (φ : Fml C) (hf : φ.inL Sym.empty = true) :
+theorem NFml.valid_iff_toL (φ : NFml C) (hf : φ.inL Sym.empty = true) :
     (⊨ φ) ↔ ∀ σ, (φ.toL Sym.empty).holds σ :=
-  forall_congr' fun σ => Fml.toL_holds φ (Rel.empty σ) hf
+  forall_congr' fun σ => NFml.toL_holds φ (Rel.empty σ) hf
 
 /-! ## What the storage reads after a write
 
@@ -9799,7 +9779,7 @@ theorem LFml.elim_holds (σ : State) : (φ : LFml) → (φ.elim.holds σ ↔ φ.
 /-- What `sol_decide` proves of `φ`: its updates pushed in, the reads of
 writes eliminated.  What is left reads the initial state only: its locals,
 and the words and locations of its storage. -/
-def _root_.Solidity.Fml.reduce (φ : Fml C) : LFml := (φ.toL Sym.empty).elim
+def _root_.Solidity.NFml.reduce (φ : NFml C) : LFml := (φ.toL Sym.empty).elim
 
 /-- **`⊨ φ` is exactly `φ.reduce` in every state**, for every `φ` in the
 fragment: nothing valid is lost, nothing invalid is gained.
@@ -9808,9 +9788,9 @@ Example: what symbolic execution leaves of
 `[ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ] (k == j → y == 6)`
 is valid exactly when its reduction, a statement about `k`, `j` and whether
 `balances[k]` and `balances[j]` are locations, holds in every state. -/
-theorem _root_.Solidity.Fml.valid_iff_reduce (φ : Fml C) (hf : φ.inL Sym.empty = true) :
+theorem _root_.Solidity.NFml.valid_iff_reduce (φ : NFml C) (hf : φ.inL Sym.empty = true) :
     (⊨ φ) ↔ ∀ σ, φ.reduce.holds σ := by
-  rw [Fml.valid_iff_toL φ hf]
+  rw [NFml.valid_iff_toL φ hf]
   exact forall_congr' fun σ => (LFml.elim_holds σ _).symm
 
 /-! ### Unfolding the reduced formula
@@ -9844,7 +9824,7 @@ theorem zeroV_bool (b : Bool) : zeroV (.bool b) = .bool false := rfl
 /-! ## The tactic -/
 
 open Lean Elab Tactic Meta in
-/-- Compute `φ.reduce` in a goal `∀ σ, (Fml.reduce φ).holds σ`: the formula
+/-- Compute `φ.reduce` in a goal `∀ σ, (NFml.reduce φ).holds σ`: the formula
 is closed after `sol_symex`, so it is run as compiled code and quoted back,
 and the kernel checks the result (`replaceTargetDefEq`), as mini-solkey's
 `reduceGoal` does. -/
@@ -9859,7 +9839,7 @@ def reduceGoal (g : MVarId) : MetaM MVarId := do
   g.replaceTargetDefEq (.forallE n d (mkApp2 (mkConst ``LFml.holds) (.bvar 0) r') bi)
 
 open Lean Elab Tactic in
-/-- Replace `Fml.reduce φ` by the formula it computes to. -/
+/-- Replace `NFml.reduce φ` by the formula it computes to. -/
 elab "sol_reduce" : tactic => do replaceMainGoal [← reduceGoal (← getMainGoal)]
 
 

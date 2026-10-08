@@ -58,12 +58,19 @@ entries: a precondition, an update, a quantified local. -/
 def peelHypsC (C : Expr) : Nat → Expr → MetaM (List Expr × Expr)
   | 0, e => pure ([], e)
   | n + 1, e => do
-    if e.isAppOfArity ``Solidity.Fml.all 4 then
+    if e.isAppOfArity ``Solidity.NFml.all 4 || e.isAppOfArity ``Solidity.Surface.Fml.all 4 then
       let (hs, φ) ← peelHypsC C n (e.getArg! 3)
       return (mkApp3 (mkConst ``Solidity.Hyp.all) C (e.getArg! 1) (e.getArg! 2) :: hs, φ)
     let (hs, φ) ← Solidity.peelHyps C 1 e
     let (hs', φ) ← peelHypsC C n φ
     return (hs ++ hs', φ)
+
+/-- The modality at the head of a quoted formula as written, through its
+updates. -/
+partial def headModality? (e : Expr) : Option Expr :=
+  if e.isAppOfArity ``Solidity.Surface.Fml.modal 4 then some (e.getArg! 1)
+  else if e.isAppOfArity ``Solidity.Surface.Fml.upd 4 then headModality? (e.getArg! 3)
+  else none
 
 /-- The sequent `dl{ hs ⟹ φ }` read against `c` as today's: its rule set,
 context entries and formula, the modality of the context's updates a
@@ -80,7 +87,7 @@ def readSequent (c : Lean.Term) (arrow : TSyntax `seq_arrow) (hs : Array (TSynta
     pure ((← Solidity.elabDlAt c (some (mkIdent n)) F).replaceFVar x m)
   let C := e.getAppArgs[0]!
   let (entries, φ') ← peelHypsC C hs.size e
-  if let some m' := Solidity.headModality? φ' then
+  if let some m' := headModality? φ' then
     if m'.isConstOf ``Modality.diamond || m'.isConstOf ``Modality.box then
       discard <| isDefEq m m'
   return (R, entries, φ')
