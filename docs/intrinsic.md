@@ -852,8 +852,48 @@ elaborates with every module (no name clash).
     modules, which re-check every pinned `corpus_decide` verdict, check clean
     (per-file diagnostics), as do `Evm/CoreInterpreter.lean`,
     `Tools/{Run,DiffTest}.lean` and `Examples/Tools.lean`.
-    `./scripts/check-corpus.sh` itself runs `lake`, which a lane may not:
-    the lead runs it at the W1 merge build.
+  - **`check-corpus.sh unchanged`: fails, by design.**  The typed
+    `corpus_decide` proves every one of the 16 `evaluated` rows (a scratch
+    module stating each `#eval`-pinned program as a `corpus_decide` theorem
+    checks clean), so the probe will report 16 `evaluated → proved`:
+    `SolcStructs.{structCopyViaMemoryLocal, structArrayElementCopy,
+    structArrayElementCopyMemberwise}`, `SolcArrays.{popThenPushSlotIsZeroed,
+    pushedSlotIsZeroed, deleteArrayElementOfStructs, matrixElementWriteRead}`,
+    `SolcMemory.{memoryStructDefaultsToZero, memoryStructWriteRead,
+    storageArrayElementCopiedIntoMemory, memoryStructToStorage,
+    memoryToStorageCopyIsDeep, memoryAliasIsNotACopy}`,
+    `SolcMappings.arrayElementsToMapping`, `SolcControlFlow.{swapViaTemporary,
+    ifElseSelectsMemorySource}`.  The reason: the typed run has no
+    well-founded definition in the kernel's way (`SVal.dflt`, a fold for the
+    memory copy).  `evaluated` now means the typed route does not apply (no
+    resolution, or off `Prog.bridgeOk`); `scripts/solkey-port.mjs`'s
+    `EVALUATED_REASON`, its header, the scoreboard legend and the generated
+    docstrings say so, which is drift in the generated text too.  At the W1
+    merge the lead runs `scripts/check-corpus.sh --update` (a pin change:
+    reason, the typed `corpus_decide`); the lane may not run `lake`.
+    `Corpus/Basic.lean`'s memory-default example is now a `corpus_decide`
+    theorem, no longer an `#eval` pin.
+  - **G0 condition 1: `corpus_decide` is exempt.**  Through `decide +kernel`,
+    `trunOk` evaluates `Core.Prog.resolve` (a `match` on the untyped syntax,
+    which G0 had counted as elaboration-time only) and `Prog.bridgeOk` (a
+    mutual `match` on `Stmt C Γ Γ'`/`Prog C Γ Γ'`, and on the index-typed
+    paths) in the kernel.  Timing (scratch modules, `Elab.async false`,
+    `profiler`, the 35 `proved` obligations of the six `Corpus/Solc*`):
+    - whole tactic, summed: old `corpus_decide` (untyped run over the
+      `dflt`-spelt store) 1.81 s, new 2.84 s (1.6×); kernel only 0.73 s old,
+      1.72 s new; the slowest new obligation 0.20 s.
+    - the new kernel cost by part, all 35 programs as one conjunction:
+      `resolve` alone 0.78 s, `resolve` + `bridgeOk` 1.04 s,
+      `resolve` + `trun` 1.14 s, `trunOk` 1.39 s.  So `bridgeOk` is about
+      0.26 s (19%), `resolve` 56%, the typed run 26%.
+    - `Corpus/Basic.lean`'s storage example: kernel 1.12 s old (TestSuite's
+      store, spelt by `dflt`), 35 ms new; its memory example 27 ms new.
+    - Kept as `match`: the whole corpus is under 3 s and no speed gate
+      covers it; a `Stmt.rec`/`Prog.rec` twin of `bridgeOk` would save at
+      most its 0.26 s, and `resolve` is the larger part.  If the corpus
+      joins a gate, the fix is condition 1's for both (`rec` forms with the
+      motive over the indices, the `match` versions as `implemented_by` and
+      for the equation lemmas).
 - Not done, moved:
   - `Machine.mem : Nat → Word` is deferred to W4 (`sem-del`): `Machine.lean`
     is outside this lane, and its untyped users (`Evm/Compile.lean`,
@@ -863,6 +903,15 @@ elaborates with every module (no name clash).
   - `Tools/Counterexample.lean` stays on the untyped `Prog.runFuel` (its
     `Fml.eval3` evaluates the old `Fml`'s modalities, `.stuck` included);
     its port is listed under W4 `sem-del`.
+  - Stale since this lane, outside its files (for the lead or W4
+    `sem-del`): `Examples/Tactics/Loops.lean` (line 13, "`#run` runs it";
+    line 194, "`Loop.runImpl`, which the kernel never sees") and
+    `docs/loops.md` (line 106) say `#run` iterates loops by `Loop.runImpl`
+    over `Stmt.run` (and the sentence after ties `corpus_decide` to
+    `Stmt.run`'s kernel reduction).  `#run` now resolves and runs
+    `Core.Prog.trun`, whose
+    loops iterate by `TLoop.runImpl'` (`Semantics/Core/TypedRun.lean`), as
+    `Tools/Run.lean`'s docstring says.
 
 ### W1 lane: rules (`w1-rules`, 2026-10-08)
 
