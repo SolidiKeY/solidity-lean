@@ -2612,6 +2612,109 @@ decide.
   6. the build with `SolidityCorpus` and `SolkeyTestSuite`, and the
      scripts.
 
+### W3b lane `tactics` (`w3b-tactics`, 2026-10-08)
+
+The W3 flip of `Examples/Tactics/**`, finished where the core allows it.
+CORE 2 did not land (decision 17), so the diamond is unblocked on M3's
+reading instead, by two contained closer changes that CORE 2 subsumes.
+
+**Low changes** (no rule, name, branch label or fresh name changed; no new
+`sorry`, `axiom` or `maxHeartbeats`):
+- *`Proves.close` behind a diamond update* (`Calculus/Core/{Closable,CloseErase,Proves}.lean`):
+  `Fml.Closable`/`closableB` take a diamond update that keeps the `bool`
+  locals `bool`s (`Upd.boolB`, moved with `Tm.boolB`, `Rhs.boolB` from
+  `Close.lean` to `Closable.lean`); `holds_of_erase_valid` reads it by
+  `Upd.apply_boolOK` (moved to `CloseErase.lean`), the erasure's diamond
+  giving the update's success.  This is the `State.BoolOK` obstacle of
+  CORE 2's "close switch" answered on the terms, over M3's states; a
+  diamond update that sets a `bool` local from storage is still refused
+  (the typed reading, CORE 2, takes it).  `Proves.valid` is unconditional
+  as before.
+- *`Fml.posB` under `{anon(…)}`* (`Calculus/Core/Close.lean`): hidden
+  binders under an anonymising update are taken (`holds_of_erase_pos`, the
+  `anon` case through `mergeOn`), so a loop's frame with the body's
+  binders under it closes (`Loops.countToNDiamond`, `breakKeepsBound`, the
+  `LoopsImport` invariants).
+
+**Tools**: `sol_derive?` under the scope writes today's short walk
+(`Walk.surfaceOn`, `shortTac`: `apply Proves.valid`, `apply impRight`,
+`apply allRight`, `apply emptyModality`, `apply update .r`, `unfold`,
+`splitBox`/`split`, `Proves.check`/`checkLean`, `done`/`doneLean`,
+`cases`, `branches`, `invBox`/`invLean`, `refine close ?_` at a leaf, the
+silent steps unwritten), the walk running those very lines; without the
+scope, the explicit `Core.Proves` text as before.  New scoped readings:
+`apply invLean r`, `apply updIntro` (`WalkSyntax.lean`), `sol_prove?` on a
+scoped goal and `sol_upd` on a scoped leaf (`Closers.lean`), `sol_erase`
+and `Valid.of_erase_plain` (`Calculus/Core/Contracts.lean`, a plain
+formula proved on its erasure), `Core.Problem.text` and
+`Core.Problem.deploy_of_valid_nil` (`Calculus/Core/Deploy.lean`).
+
+**Flipped**: the diamond walks (`Payment.sendDiamond`,
+`Branch/Revert.branchDiamond`, `Revert.requireDiamond`,
+`ApplySteps.guardedCopy`, `Loops.countTo1Walk` and its tree,
+`Dangling`'s diamond, `Calls`' `TestSuite` shapes, `TryCatch.getWalk`);
+`Loops.countToNDiamond`, `breakKeepsBound`; and the files that were not:
+`Constructors`, `Dangling`, `Contracts` (statements scoped, today's
+`useContract` reached by `sol_erase`), `UpdateRules` (its `⊨` part),
+`LoopsImport` (`solc_problems … legacy`, `solc_scoped_problems … main`,
+each function's obligation `⊨ Solc.Loops.f.problem`).
+
+**Refutations over an untyped storage, now theorems** (no docs row
+retired): `Decide.deleteWithoutWrite`, `Decide.survivesMappingOnly`,
+`StorageDelete.deleteRootUnknown` are `⊨ defined(wt(storage)) → …` by
+`sol_prove`, the positive statement the typed state makes valid; `Branch`'s
+stuck-condition refutation is `⊨ ⟨ if (a == b) … ⟩ x != 0` (its parameters
+bound).  Their counter-states (`boolBalance`, `fixedBalances`, `boolTotal`)
+are deleted.
+
+**Pins changed** (W3 reasons 1–6 by number):
+- `Tactics/Revert`, `Branch`, `ApplySteps`: `case cov` deleted (1); goal
+  comments rewritten to the scoped sequents (parameters' `∀`, a branch's
+  `}`: 2).
+- `Tactics/Payment.sendDiamond`: the outcome lines end `⟹ true` for
+  `⟹ ⟨ ⟩ true` (3).
+- `Tactics/Loops`: the diamond `#proof_tree` has no `emptyModality` node, 5
+  nodes for 6 (3); `countTo1Walk`'s text loses `emptyModality` (3) and
+  `case cov` (1), and gains `apply unfold .blockEmpty` on the unwound
+  branch (the scoped branch keeps its block: the reason the W3 lane put to
+  the lead, 7b).
+- `Tactics/TryCatch.getWalk`: the walk is the scoped one (`apply branches`
+  with today's `<;> simp only … <;> and_intros`, `apply allRight` on the
+  success clause's binder), statement unchanged.
+- `Tactics/Constructors`: `#check` of a formula and of `problem!`/`spec!`
+  print `Core.Fml C []` (the flip's type, W3 lane 7b), and the deployment
+  formula gains `∀ uint a;` (parameters bound by `∀`, W2 `tree`).
+- `Tactics/UpdateRules.copyLocal_merge`: the trace gains `∀ uint y; ∀ uint
+  x;` (W2 `tree`).
+- `Tactics/LoopsImport`: new pin `7 obligations declared scoped`.
+- `Tactics/CoreDerive`: new pins of the short walk (three, with replays).
+- `Tactics/CoreProofTree`: the diamond tree's three leaves close (new, the
+  diamond close above).
+- Unchanged: every `sol_prove?` pin (`Dangling`, `Calls`), `Problem.text`,
+  the refusal errors, the fresh names.
+
+**Left**:
+1. *`Tactics/Callback`*: `ProvesC.sound` against `ValidC` needs the plain
+   rules' typed soundness, `Stmt.TSound C`, which `Stmt.not_tsound`
+   refutes: blocked on decision 17 (CORE 2).
+2. *Today's sequent rules on updates* (`merge`, `mergeStorage`,
+   `eqDSplit`, `definedWritten`, the Theory rewrites `sol_rw`): no
+   `Core.Proves` twin, so `SelectOnSaveConsr` (its subject is today's
+   `consr` path besides), `StorageDelete`'s `_theory` derivations and
+   `UpdateRules.deepFieldWriteMerged` stay today's.  A twin is a
+   `Proves.lean` change (rules with soundness over `Core.Upd`).
+3. *`CallOperands`' memory call*: the lead's `CallRet.isRets` decision (W3
+   lane 7a).
+4. *`Decide`'s fragment pins* (`Fml.inL`, `sol_decide` on a modality): the
+   closer's input, today's until M6c.
+5. *`Examples/ProofTree.lean`'s diamond trees and walks* (tree lane) and
+   the `TestSuite` `Derived` diamonds (testsuite lane) can now flip where
+   their diamond updates keep `bool`s; not touched here.
+6. *A diamond update writing a `bool` local from storage* is still not
+   closed (`Upd.boolB`); the typed reading (CORE 2) takes it.
+7. `Contracts`' rule is today's (`FunContract` over today's run), reached
+   through the erasure; a scoped `FunContract` is not built.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
