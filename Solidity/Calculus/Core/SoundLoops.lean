@@ -227,7 +227,7 @@ theorem Stmt.trunSt_ite {Γ₂ : Ctx} (σ : TState C Γ) (c : Val C Γ .bool) (t
 
 /-- **A block** is its statements, its locals popped after it. -/
 theorem Stmt.sound_block {m : Modality} (body : Prog C Γ Γ₁) (σ : TState C Γ) :
-    Premise.Sound m (.block body) (.unfold body body.ext) σ :=
+    Premise.Runs m (.block body) (.unfold body body.ext) σ :=
   Premise.sound_unfold σ (Stmt.trunSt_block σ body).symm
 
 /-- The loop's annotation plays no part in its run. -/
@@ -238,7 +238,7 @@ theorem Stmt.trunSt_loop_ann (σ : TState C Γ) (a a' : LoopAnn C Γ) (c : Val C
 /-- `whileUnwind`: `⟨[ while (nse) body ]⟩ ⇝ ⟨[ if (nse) { { body } while (nse) body } ]⟩`. -/
 theorem Premise.sound_whileUnwind {m : Modality} (n : Nat) (c : Val C Γ .bool)
     (body : Prog C Γ Γ₁) (σ : TState C Γ) :
-    Premise.Sound m (.loop (.unwind (n + 1)) c body)
+    Premise.Runs m (.loop (.unwind (n + 1)) c body)
       (.unfold (.cons (.ite c (.cons (.block body) (.cons (.loop (.unwind n) c body) .nil)) .nil)
         .nil) .refl) σ := by
   refine Premise.sound_unfold σ ?_
@@ -263,7 +263,7 @@ theorem Premise.sound_whileUnwind {m : Modality} (n : Nat) (c : Val C Γ .bool)
 /-- `loopExit`: `⟨[ while (nse) body ]⟩ ⇝ nse = FALSE ⟹ ⟨[ ]⟩ ; nse = FALSE`. -/
 theorem Premise.sound_loopExit {m : Modality} (c : Val C Γ .bool) (body : Prog C Γ Γ₁)
     (σ : TState C Γ) :
-    Premise.Sound m (.loop (.unwind 0) c body) (.check (Fml.isBoolD c.lower false)) σ :=
+    Premise.Runs m (.loop (.unwind 0) c body) (.check (Fml.isBoolD c.lower false)) σ :=
   Premise.sound_check σ fun h => by
     rw [Stmt.trunSt_loop_unfold, (holds_isBoolD_lower c σ false).1 h]
     rfl
@@ -305,7 +305,7 @@ abbrev loopThen {Γ₂ Γ₀ : Ctx} (σ : TState C Γ) (ω : Prog C Γ Γ₂) (�
 theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
     (dec : Option (Val C Γ .uint)) (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)}
     {hv : Bool} (hf : body.frame = some (xs, hv)) (σ : TState C Γ) :
-    Premise.Sound .box (.loop (.inv I dec) c body)
+    Premise.Runs .box (.loop (.inv I dec) c body)
       (.inv (.isBoolD I.lower true) xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
         (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
         .refl (.push .refl) body (.isBoolD I.lower true)) σ := by
@@ -427,7 +427,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
     (hf : body.frame = some (xs, hv)) (σ : TState C Γ) {p : Premise C Γ Γ}
     (hp : loopStep k .diamond (.inv I (some d)) c body = some p) :
-    Premise.Sound .diamond (.loop (.inv I (some d)) c body) p σ := by
+    Premise.Runs .diamond (.loop (.inv I (some d)) c body) p σ := by
   unfold loopStep at hp
   rw [hf] at hp
   dsimp only at hp
@@ -573,7 +573,7 @@ its invariant, or closed to `false`. -/
 theorem Stmt.sound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ)
     (c : Val C Γ .bool) (body : Prog C Γ Γ₁) (σ : TState C Γ) (p : Premise C Γ Γ)
     (hp : Stmt.step k m (.loop a c body) = some p) :
-    Premise.Sound m (.loop a c body) p σ := by
+    Premise.Runs m (.loop a c body) p σ := by
   change loopStep k m a c body = some p at hp
   cases a with
   | unwind n =>

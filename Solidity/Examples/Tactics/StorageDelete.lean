@@ -2,6 +2,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.Rewrite
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.RewriteSyntax
 import Solidity.Tools.CoreInspect
 
 /-!
@@ -262,13 +263,7 @@ end Fixed
 
 end Solidity.Examples.Tactics.StorageDelete
 
-/-! ## Read without the switch
-
-Today's sequent rules on updates (`merge`, `mergeStorage`, the Theory's
-laws), which the scoped sequent does not have (`Calculus/Core/Proves.lean`:
-the program rules, `close` on the erasure).
-
-### Reading after a delete, in the sequent
+/-! ## Reading after a delete, in the sequent
 
 The same reads, closed as mini-solkey closes them: the calculus steps
 (`sol_derive`), the updates merged into one parallel update (`Proves.merge`
@@ -281,13 +276,22 @@ rewrite reaches because its result is a literal and the update is under the
 box (`Proves.updRw`).  Then the update is applied to the goal and dropped
 (`sol_apply_upd`) and `v = v` closes (`Proves.eqDClose`).  Every step is a
 rule of the calculus, so none of them waits for the program to be gone
-(`deleteFrameMid_theory`). -/
+(`deleteFrameMid_theory`).
+
+The sequent is the scoped one (`Calculus/Core/Proves.lean`'s `merge` and
+`updRw`, the steps after the program of `Calculus/Core/UpdateRules.lean`,
+read by today's lines, `Calculus/Core/RewriteSyntax.lean`): its context also
+holds the hidden binders of the declarations and the scope ends, which print
+as nothing, so a merge line takes the scope ends in and merges past the
+binders. -/
 
 namespace Solidity.Examples.Tactics.StorageDelete
 
 open Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 open Theory Theory.StValue in
 /-- `alice.account.balance = 5; delete alice.account.balance;` read two
@@ -350,6 +354,7 @@ theorem deleteFrameMid_theory :
   sol_apply_upd
   -- dl{ ⟹ 7 + 1 = 8 }
   refine close ?_
+  sol_symex
   sol_close
 
 end Solidity.Examples.Tactics.StorageDelete

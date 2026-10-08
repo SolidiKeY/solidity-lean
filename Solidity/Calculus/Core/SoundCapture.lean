@@ -357,7 +357,7 @@ variable {Γ : Ctx} {m : Modality} (σ : TState C Γ)
 /-- `storageFieldRead_unfold_rightFst`: the receiver bound first. -/
 theorem SHole.sound_fieldCapture {T : Ty} (lhs : SHole C Γ T) {s : Name}
     (b : SPath C Γ (.struct s)) (f : Name) (hf : C.fieldType s f = some T) (x : Var) :
-    Premise.Sound m (lhs.fill (.loc (.field b f hf)))
+    Premise.Runs m (lhs.fill (.loc (.field b f hf)))
       (.captureSP x b (lhs.up.fill (.loc (.field (.alias .here) f hf)))) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ _ (SHole.fill_pushT σ (t := .alias (.struct s)) (some q) lhs _ (.field b f hf) ?_)
@@ -370,7 +370,7 @@ theorem SHole.sound_fieldCapture {T : Ty} (lhs : SHole C Γ T) {s : Name}
 /-- `storageIndexRead_unfold_rightFst`: the receiver bound first. -/
 theorem SHole.sound_indexRecvCapture {T : Ty} (lhs : SHole C Γ T) {R : RefTy} {kp : PrimTy}
     (it : IndexTy R kp T) (b : SPath C Γ (.ref R)) (i : Val C Γ kp) (x : Var) :
-    Premise.Sound m (lhs.fill (.loc (.index it b i)))
+    Premise.Runs m (lhs.fill (.loc (.index it b i)))
       (.captureSP x b (lhs.up.fill (.loc (.index it (.alias .here) i.up)))) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ _ (SHole.fill_pushT σ (t := .alias R) (some q) lhs _ (.index it b i) ?_)
@@ -384,7 +384,7 @@ theorem SHole.sound_indexRecvCapture {T : Ty} (lhs : SHole C Γ T) {R : RefTy} {
 (simple) read after it. -/
 theorem SHole.sound_indexCapture {T : Ty} (lhs : SHole C Γ T) {R : RefTy} {kp : PrimTy}
     (it : IndexTy R kp T) (b : SPath C Γ (.ref R)) (i : Val C Γ kp) (x : Var) :
-    Premise.Sound m (lhs.fill (.loc (.index it b i)))
+    Premise.Runs m (lhs.fill (.loc (.index it b i)))
       (.capture kp x i (lhs.up.fill (.loc (.index it b.up (.simple (.local .here)))))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh hp => ?_)
   · refine trunSt_pushed σ _ (SHole.fill_pushT σ (t := .val kp) v lhs _ (.index it b i) ?_)
@@ -406,14 +406,14 @@ theorem SHole.readStep_sound (k : Nat) {T : Ty} (lhs : SHole C Γ T)
       Option (Premise C Γ Γ)}
     (l : Loc C Γ T)
     (hroot : ∀ r h p, l = .root r h → root r h = some p →
-      Premise.Sound m (lhs.fill (.loc (.root r h))) p σ)
+      Premise.Runs m (lhs.fill (.loc (.root r h))) p σ)
     (hfield : ∀ {s : Name} (b : SPath C Γ (.struct s)) f hf p, l = .field b f hf →
-      field b f hf = some p → Premise.Sound m (lhs.fill (.loc (.field b f hf))) p σ)
+      field b f hf = some p → Premise.Runs m (lhs.fill (.loc (.field b f hf))) p σ)
     (hindex : ∀ {R : RefTy} {kp : PrimTy} (it : IndexTy R kp T) b (ie : Simple C Γ kp) p,
       l = .index it b (.simple ie) → index it b ie = some p →
-      Premise.Sound m (lhs.fill (.loc (.index it b (.simple ie)))) p σ)
+      Premise.Runs m (lhs.fill (.loc (.index it b (.simple ie)))) p σ)
     (p : Premise C Γ Γ) (hp : lhs.readStep k root field index l = some p) :
-    Premise.Sound m (lhs.fill (.loc l)) p σ := by
+    Premise.Runs m (lhs.fill (.loc l)) p σ := by
   cases l with
   | root r h => exact hroot r h p rfl hp
   | field b f hf =>
@@ -433,7 +433,7 @@ theorem SHole.readStep_sound (k : Nat) {T : Ty} (lhs : SHole C Γ T)
 theorem MHole.sound_fieldCapture {T : Ty} (lhs : MHole C Γ T) {s : Name}
     (b : MPath C Γ (.struct s)) (hm : (Ty.ref (.struct s)).mapFree = true) (f : Name)
     (hf : C.fieldType s f = some T) (x : Var) :
-    Premise.Sound m (lhs.fill (.field b f hf))
+    Premise.Runs m (lhs.fill (.field b f hf))
       (.captureMV x b (lhs.up.fill (.field (.var .here hm) f hf))) σ := by
   refine Premise.sound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ _ (MHole.fill_pushT σ (t := .mem (.struct s)) (some r) lhs _
@@ -447,7 +447,7 @@ theorem MHole.sound_fieldCapture {T : Ty} (lhs : MHole C Γ T) {s : Name}
 /-- `memoryIndexRead_unfold_rightFst`: the receiver bound first. -/
 theorem MHole.sound_indexRecvCapture {T : Ty} (lhs : MHole C Γ T) {R : RefTy} (a : ArrTy R T)
     (b : MPath C Γ (.ref R)) (hm : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (x : Var) :
-    Premise.Sound m (lhs.fill (.index a b i))
+    Premise.Runs m (lhs.fill (.index a b i))
       (.captureMV x b (lhs.up.fill (.index a (.var .here hm) i.up))) σ := by
   refine Premise.sound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ _ (MHole.fill_pushT σ (t := .mem R) (some r) lhs _ (.index a b i) ?_)
@@ -460,7 +460,7 @@ theorem MHole.sound_indexRecvCapture {T : Ty} (lhs : MHole C Γ T) {R : RefTy} (
 /-- `memoryIndexRead_unfold_rightSndIndex`: the index captured. -/
 theorem MHole.sound_indexCapture {T : Ty} (lhs : MHole C Γ T) {R : RefTy} (a : ArrTy R T)
     (b : MPath C Γ (.ref R)) (i : Val C Γ .uint) (x : Var) :
-    Premise.Sound m (lhs.fill (.index a b i))
+    Premise.Runs m (lhs.fill (.index a b i))
       (.capture .uint x i (lhs.up.fill (.index a b.up (.simple (.local .here))))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh hp => ?_)
   · refine trunSt_pushed σ _ (MHole.fill_pushT σ (t := .val .uint) v lhs _ (.index a b i) ?_)
@@ -480,12 +480,12 @@ theorem MHole.readStep_sound (k : Nat) {T : Ty} (lhs : MHole C Γ T)
     {index : {R : RefTy} → ArrTy R T → (mv : Idx Γ (.mem R)) → (Ty.ref R).mapFree = true →
       Simple C Γ .uint → Option (Premise C Γ Γ)}
     (hfield : ∀ {s : Name} (mv : Idx Γ (.mem (.struct s))) hmv f hf p, field mv hmv f hf = some p →
-      Premise.Sound m (lhs.fill (.field (.var mv hmv) f hf)) p σ)
+      Premise.Runs m (lhs.fill (.field (.var mv hmv) f hf)) p σ)
     (hindex : ∀ {R : RefTy} (a : ArrTy R T) (mv : Idx Γ (.mem R)) hmv (ie : Simple C Γ .uint) p,
       index a mv hmv ie = some p →
-        Premise.Sound m (lhs.fill (.index a (.var mv hmv) (.simple ie))) p σ)
+        Premise.Runs m (lhs.fill (.index a (.var mv hmv) (.simple ie))) p σ)
     (l : MLoc C Γ T) (p : Premise C Γ Γ) (hp : lhs.readStep k field index l = some p) :
-    Premise.Sound m (lhs.fill l) p σ := by
+    Premise.Runs m (lhs.fill l) p σ := by
   cases l with
   | field b f hf =>
     cases b with
@@ -501,7 +501,7 @@ theorem MHole.readStep_sound (k : Nat) {T : Ty} (lhs : MHole C Γ T)
 
 /-- `…ValueRhsCapture`, `…UnfoldSource`: `T se = nse; lhs = se;`. -/
 theorem VHole.sound_capture {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) (x : Var) :
-    Premise.Sound m (lhs.fill e) (.capture p x e (lhs.up.fill (.simple (.local .here)))) σ := by
+    Premise.Runs m (lhs.fill e) (.capture p x e (lhs.up.fill (.simple (.local .here)))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ _ (VHole.fill_pushT σ (t := .val p) v lhs _ e (by rw [hv]; rfl))
   · refine TRes.Sim.err_refl ?_
@@ -511,7 +511,7 @@ theorem VHole.sound_capture {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) (
 /-- `ternaryCaptureCond`: the condition captured first. -/
 theorem VHole.sound_ternaryCapture {p : PrimTy} (lhs : VHole C Γ p) (c : Val C Γ .bool)
     (a b : Val C Γ p) (x : Var) :
-    Premise.Sound m (lhs.fill (.ternary c a b))
+    Premise.Runs m (lhs.fill (.ternary c a b))
       (.capture .bool x c (lhs.up.fill (.ternary (.simple (.local .here)) a.up b.up))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ _ (VHole.fill_pushT σ (t := .val .bool) v lhs _ (.ternary c a b) ?_)
@@ -545,7 +545,7 @@ theorem VHole.trunSt_fill {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) :
 /-- `ternaryToIf`: `lhs = se ? a : b;` is `if (se) lhs = a; else lhs = b;`. -/
 theorem VHole.sound_ternaryToIf {p : PrimTy} (lhs : VHole C Γ p) (se : Simple C Γ .bool)
     (a b : Val C Γ p) :
-    Premise.Sound m (lhs.fill (.ternary (.simple se) a b))
+    Premise.Runs m (lhs.fill (.ternary (.simple se) a b))
       (.unfold (.cons (.ite (.simple se) (.cons (lhs.fill a) .nil) (.cons (lhs.fill b) .nil)) .nil)
         .refl) σ := by
   refine Premise.sound_unfold σ ?_
@@ -557,7 +557,7 @@ theorem VHole.sound_ternaryToIf {p : PrimTy} (lhs : VHole C Γ p) (se : Simple C
 /-- **A conditional into a hole** (`ternaryStep`). -/
 theorem ternaryStep_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p) (c : Val C Γ .bool)
     (a b : Val C Γ p) (q : Premise C Γ Γ) (hq : ternaryStep k lhs c a b = some q) :
-    Premise.Sound m (lhs.fill (.ternary c a b)) q σ := by
+    Premise.Runs m (lhs.fill (.ternary c a b)) q σ := by
   cases c with
   | simple se => cases hq; exact VHole.sound_ternaryToIf σ lhs se a b
   | _ => cases hq; exact VHole.sound_ternaryCapture σ lhs _ a b _
@@ -565,9 +565,9 @@ theorem ternaryStep_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p) (c : Val C
 /-- **A value into a hole** (`VHole.step`): sound when the hole's own rule is. -/
 theorem VHole.step_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p)
     {simple : Simple C Γ p → Option (Premise C Γ Γ)}
-    (hsimple : ∀ se q, simple se = some q → Premise.Sound m (lhs.fill (.simple se)) q σ)
+    (hsimple : ∀ se q, simple se = some q → Premise.Runs m (lhs.fill (.simple se)) q σ)
     (e : Val C Γ p) (q : Premise C Γ Γ) (hq : lhs.step k simple e = some q) :
-    Premise.Sound m (lhs.fill e) q σ := by
+    Premise.Runs m (lhs.fill e) q σ := by
   cases e with
   | simple se => exact hsimple se q hq
   | ternary c a b => exact ternaryStep_sound σ k lhs c a b q hq
@@ -576,9 +576,9 @@ theorem VHole.step_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p)
 /-- **A value into a hole, lowered first** (`VHole.lower`). -/
 theorem VHole.lower_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p)
     {other : Option (Premise C Γ Γ)} (e : Val C Γ p)
-    (hother : ∀ q, other = some q → Premise.Sound m (lhs.fill e) q σ)
+    (hother : ∀ q, other = some q → Premise.Runs m (lhs.fill e) q σ)
     (q : Premise C Γ Γ) (hq : lhs.lower k other e = some q) :
-    Premise.Sound m (lhs.fill e) q σ := by
+    Premise.Runs m (lhs.fill e) q σ := by
   cases e with
   | ternary c a b => exact ternaryStep_sound σ k lhs c a b q hq
   | _ => exact hother q hq

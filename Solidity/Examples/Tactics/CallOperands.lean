@@ -2,6 +2,7 @@ import Solidity.Calculus.Chains
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.Chains
 import Solidity.Tools.CoreInspect
 
 /-!
@@ -287,6 +288,14 @@ error: Solidity elaboration failed: makeAccount: its return of reference type Ac
 /-- error: Solidity elaboration failed: makeAccount returns a memory Account, not a uint -/
 #guard_msgs in #check sol[MemCalls]{ uint x = makeAccount(); }
 
+/-- The call's first step: a memory return is an `InternalCall`, inlined by
+`internalCallExpand` (`docs/lean-key-rule-map.md`; `functionBodyExpand` is a
+tuple assignment's and a spec obligation's, decision 19). -/
+example : dl[MemCalls]{ ⟨ Person memory p = choosePersonMem(); ⟩ true }
+    ~[internalCallExpand]~>
+      dl[MemCalls]{ ⟨ Person memory mv1; mv1 = alice; Person memory p = mv1; ⟩ true } := by
+  sol_chain
+
 -- A push used as a target on an entry: its receiver is evaluated after the
 -- right-hand side, and `b.push(e)` evaluates it before.
 /--
@@ -303,23 +312,5 @@ error: a call's callee is a function's name
 error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors
 -/
 #guard_msgs in #check sol[TestSuite]{ bucket.tokens.push().value = 1; }
-
-end Solidity.Examples.Tactics.CallOperands
-
-/-! ## Read without the switch
-
-A declaration from a memory-returning call steps by `internalCallExpand`
-(`docs/lean-key-rule-map.md`: `functionBodyExpand` is a tuple assignment's
-and a spec obligation's); the scoped strategy fires `functionBodyExpand`
-here (`CallRet.isRets` counts a memory return), which is with the lead
-(`docs/intrinsic.md`, W3 lane `tactics`). -/
-
-namespace Solidity.Examples.Tactics.CallOperands
-
-/-- The call's first step, `internalCallExpand`. -/
-example : dl[MemCalls]{ ⟨ Person memory p = choosePersonMem(); ⟩ true }
-    ~[internalCallExpand]~>
-      dl[MemCalls]{ ⟨ Person memory mv1; mv1 = alice; Person memory p = mv1; ⟩ true } :=
-  rfl
 
 end Solidity.Examples.Tactics.CallOperands

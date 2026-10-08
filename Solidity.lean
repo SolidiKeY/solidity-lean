@@ -68,7 +68,10 @@ import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
 import Solidity.Calculus.Core.DelabLean
 import Solidity.Calculus.Core.RuleText
+import Solidity.Calculus.Core.Graft
 import Solidity.Calculus.Core.Merge
+import Solidity.Calculus.Core.UpdateRules
+import Solidity.Calculus.Core.RewriteSyntax
 import Solidity.Calculus.Core.ChainKit
 import Solidity.Calculus.Core.Chains
 import Solidity.Calculus.Core.ChainGen
@@ -87,6 +90,7 @@ import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.ProofTree
 import Solidity.Calculus.Core.Callback
 import Solidity.Calculus.Core.CallbackHolds
+import Solidity.Calculus.Core.CallbackSound
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Sequents
 import Solidity.Calculus.Core.SolSpec

@@ -1,5 +1,6 @@
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.Closable
+import Solidity.Calculus.Core.Graft
 import Solidity.Calculus.Logic
 
 /-!
@@ -31,8 +32,17 @@ under solkey's names where solkey has the rule:
   `false` and `closeFalse`; `sol_prove` closes a split's branch so when its
   condition is ground under the context (`Calculus/Core/ProvesDerive.lean`);
 * `close`: a leaf whose erasure is valid (`Calculus/Core/CloseErase.lean`),
-  as today's `Proves.close`, behind any context of updates, under either
-  modality, hidden binders and `∀`s.
+  as today's closer reads a leaf, behind any context of updates, under either
+  modality, hidden binders and `∀`s;
+* the rules on the context's updates, today's `Proves`'s: `merge`
+  (`sequentialToParallel`, over a storage write too, KeY's `mergeStorage`;
+  past the hidden binders between the two updates) and `updRw` (a term
+  taclet in the last box update's right-hand sides), both while a modality
+  may still be open (`Calculus/Core/Graft.lean`);
+* `closeHolds`: a sequent with no modality left, proved over the typed
+  reading, today's `Proves.close`; the steps after the program
+  (`Proves.eqDSplit`, `definedWritten`, `applyOnRigidBox`, `simplify`, the
+  rewrites of the goal) are derived from it (`Calculus/Core/UpdateRules.lean`).
 
 A program rule fires the rule the strategy fires (`Stmt.step`, one per
 statement): its premise is `s.step k m = some p`, which `rfl` proves and
@@ -70,6 +80,23 @@ inductive Hyps (C : Contract) (Γ₀ : Ctx) : Ctx → Type where
   | bind {Γ : Ctx} (H : Hyps C Γ₀ Γ) (m : Modality) (x : Var) (t : LTy) : Hyps C Γ₀ (t :: Γ)
   /-- `{anon(xs)} …` -/
   | anon {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t)) : Hyps C Γ₀ Γ
+
+/-- The hidden binders `bs` joined to the context, the first one first. -/
+def Hyps.binds {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → (bs : List (Modality × Var × LTy)) →
+    Hyps C Γ₀ (Binds.ctx bs Γ)
+  | _, H, [] => H
+  | _, H, (m, x, t) :: bs => Hyps.binds (H.bind m x t) bs
+
+/-- No modality: what `closeHolds` leaves the calculus with. -/
+def Fml.modalFree : {Γ : Ctx} → Fml C Γ → Bool
+  | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
+    (tt := true) (eq := fun _ _ => true) (defined := fun _ => true)
+    (not := fun φ => Fml.modalFree φ) (and := fun φ ψ => Fml.modalFree φ && Fml.modalFree ψ)
+    (imp := fun φ ψ => Fml.modalFree φ && Fml.modalFree ψ) (upd := fun _ _ φ => Fml.modalFree φ)
+    (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.modalFree φ)
+    (all := fun _ _ φ => Fml.modalFree φ) (bind := fun _ _ _ φ => Fml.modalFree φ)
+    (anon := fun _ φ => Fml.modalFree φ)
+  termination_by structural _ φ => φ
 
 /-- The context put back in front of a formula. -/
 def Hyps.wrap {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Fml C Γ → Fml C Γ₀
@@ -244,6 +271,30 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (h : Solidity.Valid ((H.wrap φ).erase ns))
       (hc : (H.wrap φ).closableB ns = true := by first | rfl | decide)
       (hB : Solidity.Avoids (H.wrap φ).bindNames ns := by decide) : Proves C R Γ₀ H φ
+  /-- **`sequentialToParallel`** (`merge`, and `mergeStorage` over a storage
+  write): the last update and the one before it, past the hidden binders `bs`
+  between them, as one parallel update, the later one read in the earlier
+  one's state (`Upd.seqPar`); the earlier one moved under the binders, which
+  print as nothing (`Upd.liftBinds?`, Lean only). -/
+  | merge {Γ Δ Ε : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {bs : List (Modality × Var × LTy)}
+      {U : Upd C Γ Δ} {U' : Upd C (Binds.ctx bs Γ) (Binds.ctx bs Δ)}
+      {V : Upd C (Binds.ctx bs Δ) Ε} {W : Upd C (Binds.ctx bs Γ) Ε} {φ : Fml C Ε}
+      (hU : U.liftBinds? bs = some U') (hW : U'.seqPar V = some W)
+      (h : Proves C R Γ₀ ((H.binds bs).upd m W) φ) :
+      Proves C R Γ₀ (((H.upd m U).binds bs).upd m V) φ
+  /-- A term taclet `t ⇝ t'` in the right-hand sides of the last update, under
+  the box, where `t'` returns wherever `t` does, the same value
+  (`Term.EvalRefines`; a Theory law onto a term that cannot halt): today's
+  `updRw`, its closed occurrences read on their erasure (`Upd.rwC`). -/
+  | updRw {Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {U : Upd C Γ Δ} {φ : Fml C Δ}
+      (q : Solidity.Term C × Solidity.Term C) (hq : Solidity.Term.EvalRefines q.1 q.2)
+      (h : Proves C R Γ₀ (H.upd .box (U.rwC q)) φ) : Proves C R Γ₀ (H.upd .box U) φ
+  /-- Leave the calculus: with no modality left anywhere in the sequent
+  (`Fml.modalFree`), what is left is proved over the typed reading, as
+  today's `Proves.close` proves it over today's.  The steps KeY takes after
+  the program are derived from it (`Calculus/Core/UpdateRules.lean`). -/
+  | closeHolds {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : ∀ σ, holds σ (H.wrap φ))
+      (hm : (H.wrap φ).modalFree = true := by first | rfl | decide) : Proves C R Γ₀ H φ
 
 /-! ## A derivation
 

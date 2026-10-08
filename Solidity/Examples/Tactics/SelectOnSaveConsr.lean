@@ -1,5 +1,8 @@
 import Solidity.Calculus.Rewrite
 import Solidity.Calculus.Chains
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.RewriteSyntax
 
 /-!
 # Select on save meets a `consr` path
@@ -48,9 +51,16 @@ The reassociation happens once, inside the proof of the law
 (`find_save_same` walks `p` from the left), never in a derivation.  What the
 derivation still sees of it is the side condition `p.hasSeg`, that a
 `consr`-built path is not empty; `sol_rw` closes it by `rfl` once the match
-has fixed `p`, so the law is named bare.  The context too is
-`consr`-shaped, `[] ++ [h₁] ++ [h₂]`; the rules take it as
-`Γ ++ [.upd .box U]`.
+has fixed `p`, so the law is named bare.
+
+The formulas and the sequent are the scoped ones (`open scoped
+Solidity.Core.Surface`): the leaf `ageWriteRead` reads by hand is its
+erasure, computed (`refine close ?_; sol_symex`), today's `Update.lean`
+terms over today's interpreter, where the `consr` path is; the merge, the
+split and the rewrite of `ageWriteReadKeY` are the scoped sequent's
+(`Calculus/Core/UpdateRules.lean`, read by today's lines in
+`Calculus/Core/RewriteSyntax.lean`), and the read `x` is a hidden binder of
+its context, which prints as nothing.
 
 The same lines as one chain (`Calculus/Chains.lean`) are
 `ChainRewrites.ageWriteReadKeYValue`; `ChainRewrites.ageReadMembers` goes on past
@@ -64,6 +74,8 @@ open Proves Semantics SemanticsProperties Close
 
 local instance : InContract := ⟨StandardExample⟩
 
+open scoped Solidity.Core.Surface
+
 /-- `alice.age = 42; uint x = alice.age;` leaves `x == 42`. -/
 theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 } := by
   apply update .storageFieldWriteSave
@@ -73,12 +85,12 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   apply empty
   -- dl{ { storage := save(storage, alice.age, 42) }, { x := find(storage, alice.age) } ⟹ x = 42 }
   refine close ?_
+  -- the leaf's erasure, computed
+  sol_symex
   unfold Valid
   intro σ
-  -- the context is `consr`-built too
-  rw [List.nil_append, List.singleton_append, Hyp.wrap, Hyp.wrap, Hyp.wrap]
   rw [holds_upd, Upd.apply, List.foldlM_cons, Modality.wp_bind, UpdElem.write_storage,
-    Modality.wp_bind, STerm.eval_save, Simple.lower, SPath.lower, Loc.lower, Term.eval_lit,
+    Modality.wp_bind, STerm.eval_save, Term.eval_lit,
     Modality.wp_bind, Modality.wp_ok, STerm.eval_storage, Modality.wp_bind, Modality.wp_ok,
     PTerm.eval_field, PTerm.eval_root, Modality.wp_bind, Modality.wp_bind, Modality.wp_ok,
     Modality.wp_ok]

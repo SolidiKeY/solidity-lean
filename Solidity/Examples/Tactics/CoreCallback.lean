@@ -1,6 +1,7 @@
 import Solidity.Semantics.Core.Callback
 import Solidity.Calculus.Core.Callback
 import Solidity.Calculus.Core.CallbackHolds
+import Solidity.Calculus.Core.CallbackSound
 import Solidity.Calculus.Core.Notation
 
 /-!
@@ -19,9 +20,8 @@ without, when only `P` pays.
 
 The calculus with callbacks (`ProvesC`, `Calculus/Core/Callback.lean`) on a
 send: solkey's three goals of `sendWithCallbackBox`, each closed in the
-plain calculus, the invariant `true`.  The arms are sound over `holds`
-(`Stmt.sound`, `Calculus/Core/Sound.lean`) but not yet over `holdsC`'s
-runs with callbacks, so the derivation is pinned, not read as `ValidC`.
+plain calculus, the invariant `true`, read as `ValidC` by `ProvesC.valid`
+(`Calculus/Core/CallbackSound.lean`).
 -/
 
 namespace Solidity.Examples.Tactics.CoreCallback
@@ -95,6 +95,16 @@ example : ProvesC .tt [] .nil cdl!{ [ ok = to.send(5); ] true } := by
   apply ProvesC.bindIntro
   apply ProvesC.send .sendWithCallbackBox
   trace_state
+  case exit => exact .plain (.updIntro (.updIntro (.closeTrue rfl))) rfl
+  all_goals exact .plain (.closeTrue rfl) rfl
+
+/-- The derivation proves the send valid with callbacks, whatever a callee
+that keeps the invariant does (`ProvesC.valid`). -/
+example : ValidC ⟨.tt, rfl⟩ cdl!{ [ ok = to.send(5); ] true } := by
+  apply ProvesC.valid rfl
+  apply ProvesC.allIntro
+  apply ProvesC.bindIntro
+  apply ProvesC.send .sendWithCallbackBox
   case exit => exact .plain (.updIntro (.updIntro (.closeTrue rfl))) rfl
   all_goals exact .plain (.closeTrue rfl) rfl
 

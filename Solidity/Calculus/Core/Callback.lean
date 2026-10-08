@@ -25,11 +25,9 @@ left.  The invariant is a closed formula `I : Fml C []`, read in any scope
 past an update that drops every local (`Fml.closedAt`, invisible when
 printed), so it needs no weakening.
 
-`ProvesC` has no soundness theorem yet: its `ValidC` (the callback reading
-over `TState`, `Calculus/Core/CallbackHolds.lean`) is stated, and the arms
-are sound over `holds` (`Stmt.sound`, `Calculus/Core/Sound.lean`), but
-not yet over `holdsC`'s runs with callbacks, so no rule here is checked
-against it.
+`ProvesC` is sound against `ValidC` (the callback reading over `TState`,
+`Calculus/Core/CallbackHolds.lean`) for a first-order invariant:
+`ProvesC.valid`, `Calculus/Core/CallbackSound.lean`.
 -/
 
 namespace Solidity.Core
