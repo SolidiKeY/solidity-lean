@@ -272,19 +272,6 @@ theorem branchBox : ⊢ dl!{ [ if (a == b) { x = 1; } else { revert(); }; ] x ==
     sol_symex
     sol_close
 
-end Solidity.Examples.Tactics.Revert
-
-/-! ## Read without the switch
-
-Under the diamond a walk's leaves are not closed by their erasure yet
-(`Core.Proves.close` takes box contexts). -/
-
-namespace Solidity.Examples.Tactics.Revert
-
-open Proves
-
-local instance : InContract := ⟨StandardExample⟩
-
 /-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`: with the precondition,
 `revertDiamond` leaves `false`, and the second goal has both `a = b` and
 `se1 ≐ false` in its context. -/
@@ -306,11 +293,6 @@ theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x =
     refine close ?_
     sol_symex
     sol_close
-  case cov =>
-    -- dl{ a = b, { se1 := a == b } ⟹ ¬(¬se1 ≐ true ∧ ¬se1 ≐ false) }
-    refine close ?_
-    sol_symex
-    sol_close
 
 /-- `a == b → ⟨ if (a == b) { x = 1; } else { revert(); } ⟩ x == 1`. -/
 theorem branchDiamond :
@@ -329,10 +311,6 @@ theorem branchDiamond :
   case els =>
     -- dl{ a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ revert(); ⟩ x = 1 }
     apply done .revertDiamond
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
     refine close ?_
     sol_symex
     sol_close

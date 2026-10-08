@@ -524,6 +524,51 @@ closed: 0 open goal(s), 14 node(s), 4 branch(es)
              /// @custom:key invariant i <= n
              while (i < n) { i = i + 1; }; ] i == n }
 
+/-- The same proved by the walk `sol_derive?` writes: `whileUnwind` is
+`unfoldLean`, `loopExit` is `checkLean` with its goals `thn` and `els`; the
+branch the unwinding leaves is a block (`blockEmpty`). -/
+theorem countTo1Walk : ⊢ dl!{ ⟨ uint i = 0;
+    /// @custom:key unwind 1
+    while (i < 1) { i++; }; ⟩ i == 1 } := by
+  apply unfold .localValueDeclInitDrop
+  apply update .localValueAssign
+  apply unfoldLean .whileUnwind
+  apply unfold .ifElseUnfold
+  apply unfold .localValueDeclInitDrop
+  apply update .binopAssignment
+  apply split .ifElseSplit
+  case thn =>
+    apply unfold .blockEmpty
+    apply update .localIncrement
+    apply checkLean .loopExit
+    case thn =>
+      refine close ?_
+      sol_symex
+      sol_close
+    case els =>
+      refine close ?_
+      sol_symex
+      sol_close
+  case els =>
+    refine close ?_
+    sol_symex
+    sol_close
+
+/-! The proof tree labels `loopExit`'s goals. -/
+
+/--
+info: 0: localValueDeclInitDrop
+1: localValueAssign
+2: loopExit
+  [loop exited]
+    3: Closed goal
+  [unwound to the end]
+    4: Closed goal
+closed: 0 open goal(s), 5 node(s), 2 branch(es)
+-/
+#guard_msgs in
+#proof_tree dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5 }
+
 /-! A body with no frame has no invariant rule: one that writes memory, as in
 solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,
 rebinds an alias or calls out, which solkey frames as writing storage and
@@ -569,68 +614,5 @@ info:   ~[whileNoVariantDiamond]~>
 #guard_msgs in
 #step dl!{ ⟨ /// @custom:key invariant i <= 3
              while (i < 3) { i = i + 1; }; ⟩ true }
-
-end Solidity.Examples.Loops
-
-/-! ## Read without the switch
-
-What the scoped calculus does not close yet: a walk under the diamond
-(`Core.Proves.close` takes box contexts). -/
-
-namespace Solidity.Examples.Loops
-
-open Semantics Proves
-
-local instance : InContract := ⟨StandardExample⟩
-
-/-- The same proved by the walk `sol_derive?` writes: `whileUnwind` is
-`unfoldLean`, `loopExit` is `checkLean` with its goals `thn` and `els`. -/
-theorem countTo1Walk : ⊢ dl!{ ⟨ uint i = 0;
-    /// @custom:key unwind 1
-    while (i < 1) { i++; }; ⟩ i == 1 } := by
-  apply unfold .localValueDeclInitDrop
-  apply update .localValueAssign
-  apply unfoldLean .whileUnwind
-  apply unfold .ifElseUnfold
-  apply unfold .localValueDeclInitDrop
-  apply update .binopAssignment
-  apply split .ifElseSplit
-  case thn =>
-    apply update .localIncrement
-    apply checkLean .loopExit
-    case thn =>
-      apply emptyModality
-      refine close ?_
-      sol_symex
-      sol_close
-    case els =>
-      refine close ?_
-      sol_symex
-      sol_close
-  case els =>
-    apply emptyModality
-    refine close ?_
-    sol_symex
-    sol_close
-  case cov =>
-    refine close ?_
-    sol_symex
-    sol_close
-
-/-! The proof tree labels `loopExit`'s goals. -/
-
-/--
-info: 0: localValueDeclInitDrop
-1: localValueAssign
-2: loopExit
-  [loop exited]
-    3: emptyModality
-    4: Closed goal
-  [unwound to the end]
-    5: Closed goal
-closed: 0 open goal(s), 6 node(s), 2 branch(es)
--/
-#guard_msgs in
-#proof_tree dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5 }
 
 end Solidity.Examples.Loops

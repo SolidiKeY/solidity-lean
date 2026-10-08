@@ -138,20 +138,6 @@ info: @Taclet.send_unfold_rightSndArgument : ∀ {C : Contract} {k : Nat} {m : M
 -/
 #guard_msgs in #check @Taclet.send_unfold_rightSndArgument
 
-end Solidity.Examples.Tactics.Payment
-
-/-! ## Under the diamond, today's
-
-A scoped leaf behind a diamond update is not closed by its erasure yet
-(`Core.Proves.close` takes box contexts: `docs/intrinsic.md`, W2 `sound`),
-so this walk reads today's calculus, without the switch. -/
-
-namespace Solidity.Examples.Tactics.Payment
-
-open Proves
-
-local instance : InContract := ⟨StandardExample⟩
-
 /-- `⟨ uint to = 9; ok = to.send(5); ⟩ true`: under the diamond the amount's
 sign first (`"non-negative amount"`), then the two outcomes.  The receiver is
 bound: a booking at a local that holds nothing is stuck, and the diamond
@@ -169,12 +155,12 @@ theorem sendDiamond : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := b
   refine ⟨?_, ?_⟩
   · show sequent!{ { to := 9 },
         { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true }
-        ⟹ ⟨ ⟩ true }
+        ⟹ true }
     apply empty
     refine close ?_
     sol_symex
     sol_close
-  · show sequent!{ { to := 9 }, { ok := false } ⟹ ⟨ ⟩ true }
+  · show sequent!{ { to := 9 }, { ok := false } ⟹ true }
     apply empty
     refine close ?_
     sol_symex
