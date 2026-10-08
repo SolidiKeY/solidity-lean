@@ -110,6 +110,10 @@ def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
       ⟨pair, k, ψ.erasedQuoted c⟩ :: Fml.chainLines c n ψ
     | none => []
 
+/-- `⟨[ s; … } ω ]⟩ φ`: a modality `m` that is a variable, its program
+running into the end of a block (`Core.Delab`'s `core_item`). -/
+syntax:max "⟨" "[ " (sol_stmt "; ")* "} " core_item* "]" "⟩ " dl_fml:50 : dl_fml
+
 namespace Chain
 
 open Lean Meta Elab Term
@@ -605,6 +609,11 @@ partial def dropBlockEnds (stx : Syntax) : Syntax :=
       | `(core_item| $s:sol_stmt ;) => some s
       | _ => none
     Unhygienic.run `(dl_fml| ⟨ $[$ss';]* ⟩ $φ) |>.raw
+  | `(dl_fml| ⟨[ $[$ss;]* } $items* ]⟩ $φ:dl_fml) =>
+    let ss' := ss ++ items.filterMap fun i => match i with
+      | `(core_item| $s:sol_stmt ;) => some s
+      | _ => none
+    Unhygienic.run `(dl_fml| ⟨[ $[$ss';]* ]⟩ $φ) |>.raw
   | `(dl_fml| [ $[$ss;]* } $items* ] $φ:dl_fml) =>
     let ss' := ss ++ items.filterMap fun i => match i with
       | `(core_item| $s:sol_stmt ;) => some s
@@ -709,6 +718,21 @@ def matchWritten (sp : Splice) (C : Expr) (w : Written) (B : Expr) (erased : Arr
     -- a constant modality read once against both runs: the run's own
     return es'.any (same rs[0]! ·)
 
+/-- `⟨[ … ]⟩ φ` with a block's end among its statements, as `Core.Delab`'s
+`fixBlockEnds` prints `⟨ … ⟩ φ` and `[ … ] φ`. -/
+partial def fixEitherBlockEnds (stx : Syntax) : MetaM Syntax := do
+  let .node info k args := stx | return stx
+  let args ← args.mapM fixEitherBlockEnds
+  let stx := Syntax.node info k args
+  unless args.size == 6 && args[0]!.isToken "⟨" && args[1]!.isToken "[" do return stx
+  let ss := Delab.stmtItems args[2]!
+  let some i := ss.findIdx? Delab.isBlockEnd | return stx
+  let pre : Array (TSyntax `sol_stmt) := (ss.extract 0 i).map (⟨·⟩)
+  let rest ← (ss.extract (i + 1) ss.size).mapM fun s =>
+    if Delab.isBlockEnd s then `(core_item| } ) else `(core_item| $(⟨s⟩):sol_stmt ; )
+  let φ : TSyntax `dl_fml := ⟨args[5]!⟩
+  return (← `(dl_fml| ⟨[ $[$pre;]* } $rest* ]⟩ $φ)).raw
+
 /-- A scoped line: `dl{ φ }`, a postcondition `↑φ` printed as `φ` (a local
 of its name stands for it, which `Core.Delab` prints as a formula variable). -/
 def ppCoreLine (e : Expr) : MetaM Lean.Term := do
@@ -722,7 +746,7 @@ def ppCoreLine (e : Expr) : MetaM Lean.Term := do
       withLocalDeclD n (mkApp2 (mkConst ``Core.Fml) (p.getArg! 0) (p.getArg! 1)) fun x =>
         go (i + 1) (e.replace fun y => if y == p then some x else none)
     else
-      let φ ← Delab.ppFmlE e
+      let φ : TSyntax `dl_fml := ⟨← fixEitherBlockEnds (← Delab.ppFmlE e)⟩
       if Solidity.isEscape φ then Solidity.escapeTerm e else `(dl{ $φ:dl_fml })
   go 0 e
 
