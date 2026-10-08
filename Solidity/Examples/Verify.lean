@@ -11,16 +11,17 @@ premise of a mapping is a `\forall` over a `uint`, which the certificate
 cannot evaluate), one refuted by a failed `assert`, and one stuck: true,
 but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula.
 
-Both read today's calculus, and this file does not open
-`Solidity.Core.Surface`: `#verify` elaborates `spec[C]{f}` in the scope it
-runs in (`Tools/Verify.lean`), and `#counterexample` evaluates today's
-formulas over `Prog.runFuel` (`Tools/Counterexample.lean`), which W4 ports
-to the typed run.
+Both read the scoped calculus (`open scoped Solidity.Core.Surface`,
+`docs/intrinsic.md`): `#verify` states `⊨ spec[C]{f}` of the scoped
+obligation (`Core.Valid`), and a certificate is the kernel's `¬ ⊨` of that
+statement; `#counterexample` evaluates scoped formulas over the typed state
+and the typed run with fuel (`Core.Fml.eval3`, `Tools/Counterexample.lean`).
 -/
 
 namespace Solidity.Examples.Verify
 
 open Solidity.Tools
+open scoped Solidity.Core.Surface
 
 def Counter : Contract := contract!{
   uint count;
@@ -53,6 +54,9 @@ info: Try this:
   theorem inc_spec : ⊨ spec[Counter]{inc} := by sol_spec
 -/
 #guard_msgs in #verify Counter.inc
+
+/-- The suggestion, pasted: the scoped obligation (`Core.Valid`). -/
+theorem inc_spec : ⊨ spec[Counter]{inc} := by sol_spec
 
 /--
 info: ✗ incTwice (certified):
@@ -120,7 +124,7 @@ info: ✗ check (certified):
 section
 local instance : InContract := ⟨Counter⟩
 
--- `a` is a free local: the search binds it, and `a = 1` passes the premise.
+-- `a` is a parameter, bound by `∀`: the search binds it, and `a = 1` passes the premise.
 /--
 info: counterexample (certified):
   a = 1, msg.sender = 1, msg.value = 0
@@ -132,17 +136,18 @@ info: counterexample (certified):
 /-- info: no counterexample found in 2000 candidates -/
 #guard_msgs in #counterexample dl!{ [ count = a; ] count == a }
 
-/-! A loop runs at most `loopFuel` iterations in the search
-(`Prog.runFuel`): bounded by `a`, which the pools draw at `2^256 - 1`, its
-run is `unknown` past them, not endless.  A loop that ends within them is
-run, and its counterexample certified. -/
+/-! A loop runs at most `loopFuel` iterations in the search (`Prog.trunF`,
+the typed run with fuel): bounded by `a`, which the pools draw at
+`2^256 - 1`, its run is `unknown` past them, not endless.  A loop that ends within them is
+run, and its counterexample certified; `i` is the program's local, not a
+parameter, so the witness binds nothing. -/
 
 /-- info: no counterexample found in 2000 candidates -/
 #guard_msgs in #counterexample dl!{ [ uint i = 0; while (i < a) { i++; }; ] i == a }
 
 /--
 info: counterexample (certified):
-  i = 0, msg.sender = 1, msg.value = 0
+  msg.sender = 1, msg.value = 0
   before: count = 0; total = 0
   after: count = 0; total = 0
 -/

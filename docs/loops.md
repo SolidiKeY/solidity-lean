@@ -357,11 +357,12 @@ A finder and a skeptic per area; what the skeptic confirmed, fixed:
   (solkey's) and `returnBeforeSiblingLoop` in `tests/solc/Loops.sol`.
 - **Unbounded runs in the counterexample search.** `Fml.eval3` ran programs
   through `Prog.run`, whose compiled `Loop.runImpl` heeds no heartbeats.  It
-  now runs `Prog.runFuel` (`Tools/Counterexample.lean`): each loop at most
-  `loopFuel` iterations, `unknown` past them, proved to agree with
-  `Prog.run` where it returns (`Prog.runFuel_sound`).  The kernel reduces
-  it, so a counterexample through a loop is certified
-  (`Examples/Verify.lean`).
+  now runs the typed run with fuel, `Prog.trunF`
+  (`Semantics/Core/TypedRunFuel.lean`, read by `Tools/Counterexample.lean`):
+  each loop at most `loopFuel` iterations, `unknown` past them, proved to
+  agree with `Prog.trun` wherever it does not say `diverge`
+  (`Prog.trunF_approx`).  The kernel reduces it, so a counterexample
+  through a loop is certified (`Examples/Verify.lean`).
 - **Loop specifications as solkey reads them.** `scripts/solc-ast.mjs`
   joins the `///` lines above a loop and splits them at a line that starts
   with a tag, as `KeyNatspec.of`: a clause over two lines is kept whole

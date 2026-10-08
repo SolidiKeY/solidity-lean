@@ -3,8 +3,10 @@ import Solidity.Tools.Counterexample
 /-!
 # `#verify`: prove a specification, or refute it
 
-`#verify C.f` states the obligation of the function `f` of the contract `C`
-(`spec[C]{f}`, `Calculus/Spec.lean`) and tries `sol_spec_try` on it.  With
+`#verify C.f` states the obligation of the function `f` of the contract `C`,
+scoped (`cspec[C]{f}`, `Calculus/Core/Spec.lean`: `spec[C]{f}` under `open
+scoped Solidity.Core.Surface`), and tries `sol_spec_try` on `⊨` of it
+(`Core.Valid`).  With
 no goal left the function is proved, and the command offers the theorem
 as a suggestion (`Try this:`; a click replaces the `#verify C.f` with it;
 `#verify C` prints it as text).  Otherwise it searches for a counterexample (`refuteSpec`,
@@ -16,9 +18,9 @@ the kernel checked it; none found leaves the function stuck, with the goals
 Each function runs under the ambient `maxHeartbeats`, counted from its own
 start; running out is reported as stuck, not as a failure of the command.
 A verdict is only as strong as its word: `✓` is a proof the kernel checked
-(and no `sorry` in it), `✗ (certified)` a kernel-checked `¬ ⊨ spec[C]{f}`,
-`✗ (tested)` a state in which the interpreter runs the call and a
-postcondition evaluates to false, with the premises that `eval3` cannot
+(and no `sorry` in it), `✗ (certified)` a kernel-checked `¬ ⊨ spec[C]{f}` of
+the scoped obligation, `✗ (tested)` a state in which the typed run runs the
+call and a postcondition evaluates to false, with the premises that `eval3` cannot
 decide (a `\forall` over a `uint`) true by the generator's construction.
 -/
 
@@ -41,13 +43,13 @@ def errText (e : Exception) : MetaM String := do
   let msg ← (← addMessageContext e.toMessageData).toString
   pure ((msg.splitOn "\n").headD msg)
 
-/-- **Verify `f`**: elaborate `spec[C]{f}`, run `sol_spec_try` on
-`⊨ spec[C]{f}`, and search for a counterexample where goals are left. -/
+/-- **Verify `f`**: elaborate the scoped `cspec[C]{f}`, run `sol_spec_try` on
+`Core.Valid` of it, and search for a counterexample where goals are left. -/
 def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrHeartbeats do
   let C ← unsafe evalConst Contract n
   let cE := Lean.mkConst n
   let φE? ← try
-      let stx ← `(spec[$(mkCIdent n)]{ $(mkIdent (.mkSimple f)) })
+      let stx ← `(cspec[$(mkCIdent n)]{ $(mkIdent (.mkSimple f)) })
       let e ← elabTerm stx none
       synthesizeSyntheticMVarsNoPostponing
       pure (Except.ok (← instantiateMVars e))
@@ -55,7 +57,7 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
   let φE ← match φE? with
     | .ok e => pure e
     | .error msg => return .error msg
-  let goal ← mkFreshExprMVar (mkApp2 (Lean.mkConst ``Valid) cE φE)
+  let goal ← mkFreshExprMVar (mkApp2 (Lean.mkConst ``Core.Valid) cE φE)
   let tac ← `(tactic| sol_spec_try)
   let run : TermElabM (Except String (List MVarId)) := do
     pure (.ok (← Tactic.run goal.mvarId! (Tactic.evalTactic tac)))
@@ -78,14 +80,19 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
     | .ok (_, some r) => return .refuted r
     | .ok (_, none) => return .stuck gs note
 
-/-- The theorem a proved `f` of the contract `c` is. -/
-def provedTheorem (c : Lean.Name) (f : String) : String :=
-  s!"theorem {f}_spec : ⊨ spec[{c}]\{{f}} := by sol_spec"
+/-- The theorem a proved `f` of the contract `c` is: the scoped obligation
+`#verify` proved, written `⊨ spec[C]{f}` where `open scoped
+Solidity.Core.Surface` is in effect (`inScope`; `spec[C]{f}` is then
+`cspec[C]{f}`), `valid% cspec[C]{f}` (`Core.Valid`) elsewhere. -/
+def provedTheorem (c : Lean.Name) (f : String) (inScope : Bool) : String :=
+  if inScope then s!"theorem {f}_spec : ⊨ spec[{c}]\{{f}} := by sol_spec"
+  else s!"theorem {f}_spec : valid% cspec[{c}]\{{f}} := by sol_spec"
 
 /-- The report of a verdict: one line, then the witness or the first goal
-left. -/
-def Verdict.report (C : Contract) (c : Lean.Name) (f : String) : Verdict → MetaM MessageData
-  | .proved => pure m!"✓ {f}\n{provedTheorem c f}"
+left (`inScope` as in `provedTheorem`). -/
+def Verdict.report (C : Contract) (c : Lean.Name) (f : String) (inScope : Bool) :
+    Verdict → MetaM MessageData
+  | .proved => pure m!"✓ {f}\n{provedTheorem c f inScope}"
   | .refuted r => pure (reportMsg (r.head f) (r.lines C))
   | .stuck [] note => pure m!"? {f}: gave up: {note}"
   | .stuck (g :: gs) _ =>
@@ -102,15 +109,16 @@ open Command in
 def elabVerify : Lean.Elab.Command.CommandElab := fun stx => liftTermElabM do
   let ns ← getCurrNamespace
   let short (c : Lean.Name) : Lean.Name := c.replacePrefix ns .anonymous
+  let inScope ← Core.surfaceOn
   let one (c : Lean.Name) (C : Contract) (f : String) (suggest : Bool) : TermElabM Unit := do
     match ← verifyFunction c f with
     | .proved =>
       if suggest then
         logInfo m!"✓ {f}"
         Lean.Meta.Tactic.TryThis.addSuggestion stx
-          { suggestion := .string (provedTheorem (short c) f) }
-      else logInfo (← Verdict.report C (short c) f .proved)
-    | v => logInfo (← v.report C (short c) f)
+          { suggestion := .string (provedTheorem (short c) f inScope) }
+      else logInfo (← Verdict.report C (short c) f inScope .proved)
+    | v => logInfo (← v.report C (short c) f inScope)
   match ← resolveTarget "#verify" stx[1].getId with
   | .function c C f => one c C f true
   | .contract c C =>
