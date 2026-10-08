@@ -182,11 +182,13 @@ with `break` must say what holds when `brk` is set.
 ## Decision 3: one rule per loop, chosen by an annotation
 
 Unwinding and the invariant rule both apply to one loop. To keep "one rule
-per statement" (`Stmt.complete`, `Rule.eq_step`, `Rule.premise_unique` in
+per statement" (`Stmt.rule_exists`, `Rule.iff_step` in
+`Calculus/Core/RuleExists.lean`; `Rule.premise_unique` in
 `Calculus/Core/Taclet.lean`), the choice is syntax. `LoopAnn C` is either
 `.inv (I : Val C .bool) (dec : Option (Val C .uint))` (an invariant and an
 optional variant) or `.unwind (k : Nat)`. `Stmt.step`
-(`Calculus/Core/Completeness.lean`) dispatches:
+(`Calculus/Core/Step.lean`, its loop arm `loopStep` in
+`Calculus/Core/Blocks.lean`) dispatches:
 
 | Annotation | Box | Diamond |
 |---|---|---|
@@ -214,12 +216,13 @@ no quantifier: Ballot's `∀ q < p. proposals[q].voteCount ≤ winningVoteCount`
 needs `Fml.all` (`docs/function-specs.md`) and a table of formulas outside
 `Stmt` that the loop names by index.
 
-**Termination** (`Calculus/Termination`). `.unwind k` weighs
+**Termination** (`Calculus/Termination`, retired with it at W4 `calc-del`
+of `docs/intrinsic.md`: the scoped strategy is fuelled). `.unwind k` weighs
 `(k + 1) · (c.cost + c.pen + Prog.weight body + 3)`, so `whileUnwind` gets
 smaller; `.inv I _` weighs `c.cost + c.pen + Prog.weight body + I.cost + 2`,
 and its premise (`body` alone, `ω` alone) is lighter than `loop :: ω` under
 `2 ^ weight · (measure φ + 1)`. `Fml.step_wellFounded` and `symex_normalizes`
-survive. Without the annotation, unwinding would copy the loop and no weight
+survived the loops lane. Without the annotation, unwinding would copy the loop and no weight
 could decrease.
 
 ## Decision 4: the invariant rule and its soundness (built)
@@ -261,20 +264,23 @@ turns it into the premise at every loop head.
 conjoins `f || !f` (defined exactly when `f` is a `bool`) to an invariant for
 each flag the condition tests, which KeY's `boolean` type gives.
 
-**Soundness** (`Calculus/Core/SoundLoops.lean`). Box (`Stmt.loop_inv_box`): by
-`Loop.run_induct`, every loop head is in the frame of the first and
+**Soundness** (`Calculus/Core/SoundLoops.lean`, `Stmt.sound_loop`). Box
+(`Premise.sound_whileInvBox`): by `TLoop.run_induct`, every loop head is in the frame of the first and
 satisfies the invariant; where the condition is `TRUE` the body's box keeps
 it (and rules out a panic), where it is `FALSE` the rest's goal holds.
-Diamond (`Stmt.loop_inv_diamond`): `Loop.run_variant` bounds the iterations
+Diamond (`Premise.sound_whileInvDiamond`): `TLoop.run_variant` bounds the iterations
 by the variant's value after the first, which is a `uint` below the one
 before wherever the loop goes on; neither the condition (the cover) nor the
 body (a diamond) can halt.
 
-**In Lean.** `Premise.inv`, read by `Premise.invFml` (`Calculus/Core/SoundKit.lean`),
-so `sol_symex` steps it as any premise; `Proves.invLean` for a walk, its
-goals `init` ("invariant initially valid") and `thn`, `els`, `cov` past
-`Hyp.loopAnon` ("invariant preserved and used"), which the proof tree labels
-as solkey does. `Hyp.anon` is the context's anonymising update.
+**In Lean.** `Premise.inv` (`Calculus/Core/Fml.lean`), read by
+`Premise.fml`, so `sol_symex` steps it as any premise; `Proves.inv`
+(`Calculus/Core/Proves.lean`, `apply invBox r`, `apply invLean r` under the
+diamond) for a walk, its goals `init` ("invariant initially valid") and
+`thn`, `els` past the context's anonymising update `Hyps.anonHavoc` ("body
+preserves invariant", "use case"), which the proof tree labels as solkey
+does. (Before the intrinsic refactor: `Premise.invFml`, `Proves.invLean`,
+`Hyp.loopAnon` and a third goal `cov`.)
 `sol_close` reads `{anon(…)}` (`Close.holds_anon`, `State.getEnv_anon_cons`:
 a read of an anonymised local is `anonRead (b x)`, a binding nobody knows);
 `sol_decide` and `sol_prove`'s closer do not (`Fml.inL` is `false` on `anon`,
@@ -283,9 +289,9 @@ diamond the closer is slow: a counting loop closes, a loop with a `break`
 (whose flag is read through the cover) and a sum do not within the default
 heartbeats; their box versions close (`Examples/Tactics/Loops.lean`).
 
-**Termination.** `.inv I _` weighs `c.cost + c.pen + Prog.weight body +
+**Termination** (retired at W4 `calc-del`). `.inv I _` weighed `c.cost + c.pen + Prog.weight body +
 I.cost + 2`, and the premise (`body` alone, `ω` alone, under modal-free
-`{anon}`, `{U}` and conditions) measures less than `loop :: ω`
+`{anon}`, `{U}` and conditions) measured less than `loop :: ω`
 (`Premise.measure_lt`, `Fml.loopAnon_measure`).
 
 **Typing and declarations.** In the scoped syntax (`Syntax/Core.lean`) a
@@ -409,7 +415,7 @@ the same method (`docs/testsuite-proofs.md`, "Constructors review"):
 | File | master `2979bb8` | `loops` | change |
 |---|---:|---:|---:|
 | `Examples/Tactics/Calls.lean` | 130.3 s, 120.9 s | 120.8 s | −4% |
-| `Calculus/Core/Taclet.lean` | 151.6 s, 151.6 s | 154.7 s | +2% |
+| `Calculus/Uniqueness` | 151.6 s, 151.6 s | 154.7 s | +2% |
 | `TestSuite/Derived14.lean` | — | 75.3 s | — |
 
 Both within 10%.  `Derived14` has no master time under this method (W7's

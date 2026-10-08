@@ -99,8 +99,9 @@ into a fresh local. It is on solkey's own backlog (`docs/net.md` §4 item 1;
 `docs/bugs.md`, "Internal calls are never inlined").
 
 **Lean evidence.** The rule of the Lean calculus solkey lacks here:
-`LeanTaclet.functionCallArgCapture` (`Calculus/Core/Rules.lean`), proved
-`LeanTaclet.sound` (`Calculus/Core/Sound.lean`). Its hypotheses are the
+`LeanTaclet.functionCallArgCapture` (`Calculus/Core/Rules.lean`), the
+strategy's step by `Core.LeanTaclet.toStep` (`Calculus/Core/Taclet.lean`) and
+so sound by `Core.Stmt.sound` (`Calculus/Core/Sound.lean`). Its hypotheses are the
 taclet's side conditions: the captured argument mentions no callee parameter,
 and the callee body and result are free of the fresh `pv`. On programs whose
 calls take simple arguments and, under the diamond, pay no one (`Stmt.inSolkey m`, `Calculus/Core/SolkeyFragment.lean`)
@@ -308,12 +309,11 @@ Found while porting solkey's constructor obligations (`Problem.ctorFml`,
 ## 10. Loops (`ed7849d5b6`, past the pin)
 
 - **Unwinding without a bound.** `whileUnwind` is sound (the loop and its
-  unwinding run alike: Lean's `Stmt.loop_unwind_run`, from
-  `Loop.run_unfold`), but the strategy applies it to every loop without a
+  unwinding run alike: Lean's `Premise.sound_whileUnwind`, from
+  `TLoop.run_unfold`), but the strategy applies it to every loop without a
   specification, so automatic proof search on a loop whose trip count is not
   a constant does not end. Lean bounds it by the loop's annotation
-  (`/// @custom:key unwind k`, counted down by each unwinding, so the weight
-  of `Calculus/Termination` decreases) and closes the loop at the bound
+  (`/// @custom:key unwind k`, counted down by each unwinding) and closes the loop at the bound
   with a check, `loopExit`: "loop exited", the rest with the condition false
   assumed, and "unwound to the end", the condition false. Its soundness side
   condition is that the condition *returns* false (`Fml.eqD`, defined and

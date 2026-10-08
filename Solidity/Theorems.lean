@@ -22,7 +22,10 @@ judgement-level `solkey_lt_calculus`, `∃ φ, ⊢ φ ∧ ¬ ⊢ₖ φ`, false u
 then).  `solkey_lt_calculus` below replaces the latter at the rule level: a
 loop has a rule and no taclet.  The third, that symbolic execution
 terminates (`symex_terminates`), was retired at W2: the scoped strategy is
-fuelled.  `docs/intrinsic.md` (W4 `theorems`) says why.
+fuelled.  Its progress, that it steps exactly while a modality is left
+(`Fml.active_iff_step`), was retired with the old calculus at W4
+`calc-del`; one direction holds (`Core.Fml.stepFocusR_eq_none`).
+`docs/intrinsic.md` (W2 `symex`, W4 `theorems`) says why.
 
 | Notation | Reads | Is |
 |---|---|---|

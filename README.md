@@ -3,7 +3,7 @@
 Lean 4 formalization of the Solidity-in-KeY calculus: a typed Solidity
 syntax, an executable semantics, the taclets as one inductive judgement in
 its own notation, each proved sound against the semantics, a sequent
-calculus with a soundness theorem, symbolic execution with its termination,
+calculus with a soundness theorem, symbolic execution,
 decision procedures for the first-order goals, type soundness, a verified
 compiler to an EVM-style machine (`docs/compiler-verification.md`), and
 worked examples. The design follows mini-solkey, a small readable copy of

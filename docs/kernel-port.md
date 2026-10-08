@@ -19,11 +19,11 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 | `Ch04_Semantics` | `Semantics.lean` (`Stmt.run`), `Semantics/Agree.lean` |
 | `Ch05_Logic` | `Update.lean` (terms, updates, `Fml`, both modalities) |
 | `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/Notation.lean` (`dl[C]{}`) |
-| `Ch06_Taclets` | `Calculus/Core/Rules.lean`, `Calculus/Sound*.lean`, `Calculus/Core/Sound.lean` (`Taclet.sound`), `Calculus/Logic.lean` (`Proves`), `Calculus/Core/Taclet.lean` |
+| `Ch06_Taclets` | `Calculus/Core/Rules.lean`, `Calculus/Core/Sound*.lean` (`Stmt.sound`), `Calculus/Core/Proves.lean` (`Proves`), `Calculus/Core/Taclet.lean` |
 | `Ch07_Symex` | `Calculus/Core/Symex.lean`, `Calculus/Close.lean` |
 | `Ch08_EVM`-`Ch10_Correctness` | `Evm/` (`docs/compiler-verification.md`) |
-| `Ch11_Completeness` | `Calculus/Core/Completeness.lean` (`Stmt.step`, `Stmt.complete`), `Calculus/Progress` |
-| `Ch12_Termination` | `Calculus/Termination` |
+| `Ch11_Completeness` | `Calculus/Core/Step.lean` (`Stmt.step`), `Calculus/Core/RuleExists.lean` (`Stmt.rule_exists`); progress (`Fml.active_iff_step`) retired at W4 `calc-del` of `docs/intrinsic.md` |
+| `Ch12_Termination` | retired at W4 `calc-del` (the scoped strategy is fuelled) |
 | `Ch13_Chains` | `Calculus/Core/Chains.lean` |
 | `Ch14_Updates` | `Calculus/UpdateRules.lean` |
 | `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `Fml.valid_iff_cons`) |
@@ -154,7 +154,7 @@ their names.
 
 | Question | Decision |
 |---|---|
-| One rule per statement | Rules carry solkey's taclet names (an operator family is one constructor, not one per operator).  `Taclet` is a `Prop`; uniqueness is stated through `Stmt.step` (`Stmt.complete`, `Rule.eq_step`, `Rule.premise_unique`).  A constructor carries as hypotheses exactly the facts its `Stmt.step` arm establishes, read off its schema variables by name and position (`RuleSyntax.sideConds`, `autoParam`ed with `side_cond`, hidden by the printers), so a taclet is still one `dl{ }` line.  Where solkey leaves two taclets open and its strategy picks, the side condition keeps the one `Stmt.step` picks (`Val.notTernary`, `Loc.isTarget`, `MPath.isBindable`). |
+| One rule per statement | Rules carry solkey's taclet names (an operator family is one constructor, not one per operator).  `Taclet` is a `Prop`; uniqueness is stated through `Stmt.step` (`Stmt.rule_exists`, `Rule.iff_step`, `Rule.premise_unique`).  A constructor carries as hypotheses exactly the facts its `Stmt.step` arm establishes, read off its schema variables by name and position (`RuleSyntax.sideConds`, `autoParam`ed with `side_cond`, hidden by the printers), so a taclet is still one `dl{ }` line.  Where solkey leaves two taclets open and its strategy picks, the side condition keeps the one `Stmt.step` picks (`Val.notTernary`, `Loc.isTarget`, `MPath.isBindable`). |
 | Where the kernel follows KeY over the old table | A state variable operand is captured (`binopUnfoldLeft`), since it is a path, not a `SimpleExpression`.  A compound target is an `OpLoc` at a simple index (`values[i + 1] += 1;` captures the index first; `Upd.opSave` reads the source first, as `Stmt.run` does).  A `y = nsp.f++;` receiver is captured by KeY's `storageLocalDeclInitDrop`, not a Lean-only alias rule.  A memory reference from a member is `memoryFieldWriteCopy` from any bindable source: solkey's `..._rightSndResult` captures first, which is incorrect where the slot holds a reference.  Per-rule detail is in `docs/lean-key-rule-map.md`. |
 
 ### Calls and callbacks

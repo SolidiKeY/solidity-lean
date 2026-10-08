@@ -320,9 +320,11 @@ of a struct over a recycled slot).
 
 ## Completeness and automation
 
-Proved: every statement has exactly one rule (`Stmt.complete`, `Rule.eq_step`,
-`Rule.premise_unique`); symbolic execution always steps and terminates
-(`Fml.active_iff_step`, `symex_terminates`). Not proved: `⊨ φ ↔ ⊨ symex n φ`
+Proved: every statement has exactly one rule, the strategy's (`Stmt.rule_exists`,
+`Rule.iff_step`, `Rule.premise_unique`). Symbolic execution is fuelled
+(`Core.symex n`): a program it does not finish leaves a modality, which
+`sol_prove` rejects; its progress and termination (`Fml.active_iff_step`,
+`symex_terminates`) were retired at W4 `calc-del` (`docs/intrinsic.md`). Not proved: `⊨ φ ↔ ⊨ symex n φ`
 (`symex_sound` is one direction). How much of Solidity the fragment covers is a
 measurement (F, `docs/corpus-parity.md`), not a theorem.
 

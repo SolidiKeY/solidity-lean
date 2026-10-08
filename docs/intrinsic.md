@@ -1275,6 +1275,15 @@ weights are 1,300 lines over the untyped syntax, and the scoped strategy is
 fuelled (`Core.symex n`), so a program it does not finish fails `sol_prove`
 (the leaf keeps a modality, which `posB` rejects) rather than looping.
 `Termination` goes with the old calculus at W4.
+**Progress is retired** too, at W4 `calc-del` (review fix): `Calculus/Progress`'s
+`Fml.active_iff_step` and `Fml.step_eq_none` (the strategy steps exactly
+while a modality is left) have no scoped twin, and the scoped `Fml.active`
+(`Calculus/Core/NotationResolve.lean`) counts a modality under `not` and in
+an implication's antecedent, where `Fml.stepFocusR` does not step, so the
+`↔` is false of it.  What holds is one direction,
+`Core.Fml.stepFocusR_eq_none` (`Calculus/Core/ChainKit.lean`: no modality, no
+step), and at statement level `Stmt.rule_exists` and `Rule.iff_step`
+(`Calculus/Core/RuleExists.lean`).
 
 **Early gate: passes.**  `sol_prove` over Derived9–11's 91 obligations in
 the `Core*` twins (`TestSuite/CoreDerived9` … `11`, deleted at the flip, over
@@ -2385,7 +2394,8 @@ Before the lanes branch, the lead makes `Surface` the default and removes the `o
    - Then `Machine.mem : Nat → Word` (`cell = id`), deferred from W1 `evm`.
    - `Halt` loses `stuck`. The term model's error for ill-sorted terms becomes `Res.undef`, because the closer's terms stay untyped.
 2. **`calc-del`**
-   - Delete every old calculus module that has a Core twin: `Logic`, `Symex`, `Derive`, `SoundKit`, `SoundUpdate`, `SoundUnfold`, `SoundLoop`, `RuleSoundness`, `Completeness`, `Uniqueness`, `Progress`, `SolkeyFragment`, `Sequents`, `ProofTree`, `Chains`, `ChainGen`, `LastLine`, `Notation`, `Spec`, `Contracts`, `Callback`, and the old body of `Rules.lean`.
+   - Delete every old calculus module that has a Core twin: `Logic`, `Symex`, `Derive`, `SoundKit`, `SoundUpdate`, `SoundUnfold`, `SoundLoop`, `RuleSoundness`, `Completeness`, `Uniqueness`, `SolkeyFragment`, `Sequents`, `ProofTree`, `Chains`, `ChainGen`, `LastLine`, `Notation`, `Spec`, `Contracts`, `Callback`, and the old body of `Rules.lean`.  `Progress` (no Core twin) and
+     `Termination` are deleted as retired (W2 `symex`).
    - Not `Quote` (W3d integration's correction): it is `NFml`'s quoter, which `Core.Print` prints erasures with; `IntOp.quote` moves beside `IntOp`.
 3. **`modal`**
    - `Update.lean`'s `Fml` loses `.modal` and becomes `NFml`.
