@@ -15,14 +15,14 @@ state in which every read of a write is a case tree over key equalities;
 then by a second one, `Fml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
 into a statement about free reads under the constraints a storage puts on
 them, and closes that.  Nothing is lost on the way, so a goal it does not
-close is either not valid (the examples at the end), outside the fragment,
+close is either not valid, outside the fragment,
 or beyond the final `omega`/`grind`.
 
 Every goal is stated with `⊨`, over **every** state: one whose `balances`
 is an array, whose `alice.account.balance` holds a `bool`, or that has no
 `alice` at all.  Under the box a write that halts proves the formula, so
 the programs below may write anywhere; a read of the initial storage is
-another matter (`deleteWithoutWrite`).
+another matter: it owes `wt(storage)` (`deleteWithoutWrite`).
 -/
 
 namespace Solidity.Examples.Tactics.Decide
@@ -133,6 +133,15 @@ theorem deleteBelowAndBeside :
              uint y = alice.account.balance; uint z = alice.age; ] (y == 0 && z == 30) } := by
   sol_symex
   sol_decide
+
+/-- **`delete` without a write before it, in a well-typed storage**: the
+member below reads the default of its declared type, `0`.  Over today's
+untyped storage it was refuted (a `bool` there leaves `false`); a typed
+state, which `wt(storage)` describes, holds the `uint` `StandardExample`
+declares. -/
+theorem deleteWithoutWrite :
+    ⊨ dl!{ defined(wt(storage)) → [ delete alice.account; ] alice.account.balance == 0 } := by
+  sol_prove
 
 /-- `people[a].age = 1; people[b].age = 2; delete people[a];` — the element
 deleted reads `0` below it, and the other keeps its value when the indices
@@ -341,6 +350,15 @@ theorem survives :
            (survives != 20 → survives == 0) } := by
   sol_symex
   sol_decide
+
+/-- **In a well-typed storage `survives` is `20`**: `ledger.balances` is the
+mapping `TestSuite` declares, whose entries a `delete` keeps.  Over today's
+untyped storage this was refuted (a fixed-size array there is reset). -/
+theorem survivesMappingOnly :
+    ⊨ dl!{ defined(wt(storage)) →
+      [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
+        survives == 20 } := by
+  sol_prove
 
 
 /-- `fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1];` — `x` is
@@ -586,38 +604,16 @@ end Solidity.Examples.Tactics.Decide
 
 /-! ## On today's formulas
 
-Read without `open scoped Solidity.Core.Surface`: what `⊨` cannot rule out
-over today's untyped storage (a `bool` where a `uint` is declared, a
-fixed-size array where a mapping is), and today's fragment (`Fml.inL`), the
-closer's input. -/
+Read without `open scoped Solidity.Core.Surface`: today's fragment
+(`Fml.inL`), the closer's input.  The two refutations over today's untyped
+storage that stood here (`deleteWithoutWrite`, `survivesMappingOnly`) are
+positive theorems above, under `wt(storage)`. -/
 
 namespace Solidity.Examples.Tactics.Decide
 
 open Proves Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
-
-/-- A storage in which `alice.account.balance` holds a `bool`. -/
-def boolBalance : State :=
-  { storage := [("alice", .struct [("account", .struct [("balance", .bool true)])])] }
-
-/-- **`delete` without a write before it is not valid**: where the old
-member was a `bool`, the delete leaves `false`, not `0`.  What a read below
-a delete returns is the default of the old *value*, and `⊨` does not know
-the old value's type; `deleteBelow` fixes it by writing first.  With a
-well-typed storage as a premise it would be valid — a hypothesis `⊨` cannot
-state. -/
-theorem deleteWithoutWrite :
-    ¬ (⊨ dl!{ [ delete alice.account; ] alice.account.balance == 0 }) :=
-  fun h => match (h boolBalance).1 with
-    | ⟨_, _, he⟩ => nomatch Theory.StValue.Equiv.prim_iff.1 he
-
-example : True := by
-  fail_if_success
-    have : ⊨ dl!{ [ delete alice.account; ] alice.account.balance == 0 } := by
-      sol_symex
-      sol_decide
-  trivial
 
 /-- info: false -/
 #guard_msgs in -- a copy from storage outside its pair is outside the fragment
@@ -634,25 +630,5 @@ error: sol_decide: the formula is outside the fragment (a modality, a push of a 
 #guard_msgs in -- a modality is outside the fragment, and `sol_decide` says what is
 example : ⊨ dl!{ [ uint x = 1; ] x == 1 } := by
   sol_decide
-
-section Ledger
-
-local instance : InContract := ⟨TestSuite⟩
-
-/-- A storage in which `ledger.balances` is a fixed-size array of three
-`uint`s. -/
-def fixedBalances : State :=
-  { storage := [("ledger", .struct [("nonce", .int 0),
-      ("balances", .array [.int 0, .int 0, .int 0] [] true)])] }
-
-/-- **`survives == 20` alone is not valid**: where `ledger.balances` is a
-fixed-size array, `delete ledger` resets its element `2` to `0`. -/
-theorem survivesMappingOnly :
-    ¬ (⊨ dl!{ [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
-              survives == 20 }) :=
-  fun h => match (h fixedBalances).1 with
-    | ⟨_, _, he⟩ => nomatch Theory.StValue.Equiv.prim_iff.1 he
-
-end Ledger
 
 end Solidity.Examples.Tactics.Decide

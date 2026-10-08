@@ -14,7 +14,7 @@ trees differ from today's:
   past the frames to the postcondition, in one step (`Fml.modalK`, Gate G0's
   condition 6), so there is no `emptyModality` after it;
 * a leaf is closed by `closeTrue`, else by `Proves.close` and today's closer
-  on its erasure, behind a diamond update only one that keeps the `bool`
+  on its erasure, behind a diamond update too where it keeps the `bool`
   locals `bool`s (`Upd.boolB`).
 -/
 
@@ -96,8 +96,7 @@ closed: 0 open goal(s), 4 node(s), 2 branch(es)
 #proof_tree cdl!{ [ ok = to.send(5); ] true }
 
 /-! The hidden binder of `ok`, which the program assigns without declaring,
-is no node; the leaves close behind the diamond's updates (`to := 9`,
-`ok := true`, `ok := false` keep the `bool` locals `bool`s). -/
+is no node. -/
 
 /--
 info: 0: localValueDeclInitDrop

@@ -139,7 +139,26 @@ theorem Upd.apply_keep (σ₀ : Semantics.State) :
 
 end Untyped
 
-/-! ## A diamond update that keeps the `bool` locals `bool`s -/
+/-! ## The formulas -/
+
+/-- Agreement survives a change of the untyped state off the scope's names. -/
+theorem Agree.congrExcept {Γ : Ctx} {ns B : List Var} {σ : State C Γ} {τ₀ τ : Semantics.State}
+    (hag : Agree ns σ τ₀) (h : EnvAgreeExcept B τ τ₀) (hB : Avoids B ns) : Agree ns σ τ where
+  len := hag.len
+  nodup := hag.nodup
+  glob := by
+    show withLocals (withLocals σ.glob τ₀.env) τ.env = τ
+    rw [hag.glob]
+    obtain ⟨hs, hh, hn, hnet, -, hsb, htx⟩ := h
+    cases τ; cases τ₀
+    simp only at hs hh hn hnet hsb htx
+    subst hs hh hn hnet hsb htx
+    rfl
+  env := fun ⟨x, b⟩ hm => by
+    rw [h.env x fun hx => hB x hx (Env.mem_erase_key hm)]
+    exact hag.env _ hm
+
+/-! ## Updates that keep `bool` locals `bool`s, read -/
 
 theorem Tm.boolB_eval {Γ : Ctx} {σ : State C Γ} (hT : σ.BoolOK) :
     (t : Tm C Γ .val) → t.boolB = true → ∀ {v : Semantics.Value}, t.eval σ = .ok v → ∃ b, v = .bool b
@@ -223,36 +242,12 @@ theorem Upd.apply_boolOK {Γ : Ctx} {σ₀ : State C Γ} (h₀ : σ₀.BoolOK) :
       rw [h₁] at h; cases h
       exact (Upd.apply_boolOK h₀ U hb h₁).thin e
 
-/-! ## The formulas -/
-
-theorem erase_upd_holds {Γ Δ : Ctx} {ns : List Var} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
-    {τ : Semantics.State} :
-    Solidity.holds τ (Fml.erase ns (.upd m U φ)) ↔
-      m.after (Solidity.holds · (φ.erase (U.names ns))) (Solidity.Upd.apply (U.erase ns) τ) := by
-  simp only [Fml.erase]
-  split
-  · rename_i h
-    rw [h]
-    rfl
-  · rfl
-
-
-/-- Agreement survives a change of the untyped state off the scope's names. -/
-theorem Agree.congrExcept {Γ : Ctx} {ns B : List Var} {σ : State C Γ} {τ₀ τ : Semantics.State}
-    (hag : Agree ns σ τ₀) (h : EnvAgreeExcept B τ τ₀) (hB : Avoids B ns) : Agree ns σ τ where
-  len := hag.len
-  nodup := hag.nodup
-  glob := by
-    show withLocals (withLocals σ.glob τ₀.env) τ.env = τ
-    rw [hag.glob]
-    obtain ⟨hs, hh, hn, hnet, -, hsb, htx⟩ := h
-    cases τ; cases τ₀
-    simp only at hs hh hn hnet hsb htx
-    subst hs hh hn hnet hsb htx
-    rfl
-  env := fun ⟨x, b⟩ hm => by
-    rw [h.env x fun hx => hB x hx (Env.mem_erase_key hm)]
-    exact hag.env _ hm
+/-- `p` after an update under the diamond, so under the box. -/
+theorem _root_.Solidity.Modality.after_box_of {m : Modality} {p : Semantics.State → Prop}
+    {r : Semantics.Res Semantics.State} (h : m.after p r) : Modality.box.after p r := by
+  cases r with
+  | ok _ => exact h
+  | error _ => trivial
 
 /-- **A goal closed by its erasure's validity**: a `Fml.Closable` formula
 holds in `σ` when its erasure holds in every untyped state that agrees with
@@ -280,24 +275,28 @@ theorem holds_of_erase_valid : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var
   | _, .upd m U φ, ns, hφ, _, σ, τ₀, hag, h => by
     obtain ⟨hm, hU, hUB, hBU, hφ⟩ := hφ
     have hE : ∀ τ, EnvAgreeExcept φ.bindNames τ τ₀ →
-        m.after (Solidity.holds · (φ.erase (U.names ns))) (Solidity.Upd.apply (U.erase ns) τ) :=
-      fun τ hτ => erase_upd_holds.1 (h τ hτ)
+        Solidity.holds τ (.upd .box (U.erase ns) (φ.erase (U.names ns))) := fun τ hτ => by
+      have h' := h τ hτ
+      simp only [Fml.erase] at h'
+      split at h'
+      · rename_i hnil
+        rw [hnil]
+        exact h'
+      · exact Modality.after_box_of h'
     have hR := Upd.apply_erase hag U hU
-    have core : m.afterC (holds · φ) (U.apply σ) := by
-      have H₀ := hE τ₀ (agreeExcept_refl _ τ₀)
-      revert hR H₀
-      cases U.apply σ with
-      | error =>
-        cases Solidity.Upd.apply (U.erase ns) τ₀ with
-        | error => intro _ H₀; exact H₀
-        | ok => intro hR; exact hR.elim
+    have core : Modality.afterC .box (holds · φ) (U.apply σ) := by
+      cases hσ : U.apply σ with
+      | error => trivial
       | ok σ' =>
+        rw [hσ] at hR
         cases hτ₀ : Solidity.Upd.apply (U.erase ns) τ₀ with
-        | error => intro hR; exact hR.elim
+        | error => rw [hτ₀] at hR; exact hR.elim
         | ok τ₀' =>
-          intro hR _
+          rw [hτ₀] at hR
           refine holds_of_erase_valid φ hφ hBU hR fun τ' hτ' => ?_
-          have h1 := hE (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _)
+          have h1 : Modality.after .box (Solidity.holds · (φ.erase (U.names ns)))
+              (Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀)) :=
+            hE (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _)
           have hfr := Upd.apply_frame (agreeExcept_overlay φ.bindNames τ' τ₀) (U.erase ns) hUB
           rw [hτ₀] at hfr
           revert h1 hfr
@@ -307,17 +306,33 @@ theorem holds_of_erase_valid : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var
             intro h1 hfr
             refine (holds_congr_full (agreeExcept_full (agreeExcept_trans hfr (agreeExcept_symm hτ'))
               fun y hy => ?_) _).1 h1
-            rw [Upd.apply_keep _ (U.erase ns) hτ y (fun hm => hUB y hm hy), lookupBy_overlay,
-              if_pos hy]
-    refine holds_upd_intro fun hT => ?_
+            rw [Upd.apply_keep _ (U.erase ns) hτ y (fun hm => hUB y hm hy), lookupBy_overlay, if_pos hy]
     cases m with
     | box => exact core
     | diamond =>
+      -- a diamond update keeps the `bool` locals `bool`s, and the erasure
+      -- says it does not halt
       have hb : U.boolB = true := hm.resolve_left nofun
-      revert core
+      show σ.BoolOK → Modality.afterC .diamond (fun τ => τ.BoolOK ∧ holds τ φ) (U.apply σ)
+      intro hT
+      have hok : ∃ τ', Solidity.Upd.apply (U.erase ns) τ₀ = .ok τ' := by
+        have h' := h τ₀ (agreeExcept_refl _ τ₀)
+        simp only [Fml.erase] at h'
+        split at h'
+        · rename_i hnil
+          rw [hnil]
+          exact ⟨τ₀, rfl⟩
+        · change Modality.diamond.after _ (Solidity.Upd.apply (U.erase ns) τ₀) at h'
+          revert h'
+          cases Solidity.Upd.apply (U.erase ns) τ₀ with
+          | ok τ' => exact fun _ => ⟨τ', rfl⟩
+          | error _ => exact fun h => False.elim h
+      obtain ⟨τ', hτ'⟩ := hok
+      rw [hτ'] at hR
+      revert core hR
       cases hσ : U.apply σ with
-      | error => exact id
-      | ok σ₁ => exact fun hc => ⟨Upd.apply_boolOK (hT rfl) U hb hσ, hc⟩
+      | error => intro _ hR; exact hR.elim
+      | ok σ' => intro hc _; exact ⟨Upd.apply_boolOK hT U hb hσ, hc⟩
   | _, .havoc φ, _, hφ, hB, σ, τ₀, hag, h => fun st nt => by
     have hag' := hag.withGlob (σ.glob.havoc st nt)
     have e : withLocals (σ.glob.havoc st nt) τ₀.env = τ₀.havoc st nt := by

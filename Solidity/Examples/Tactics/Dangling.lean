@@ -1,5 +1,7 @@
 import Solidity.Tools.ProofTree
 import Solidity.Calculus.Derive
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
 
 /-!
 # Dangling aliases, pinned
@@ -18,7 +20,10 @@ lands in the recycled array, whose length the slot readers count
 These are solkey `TestSuite`'s dangling-alias functions over
 `StandardExample` (`persons`, `people`, `matrix`), each a `sol_prove?` that suggests
 `sol_prove`.  If a clause stops applying, or the strategy picks another
-rule, they fail.
+rule, they fail.  They read scoped (`open scoped Solidity.Core.Surface`):
+the scoped strategy, its leaves' erasures closed by today's closer, with
+today's budgets (`Core.Derive.residueOf`).  The diamond's `⊢` walk is read
+without the switch at the end: `Core.Proves.close` takes box contexts.
 -/
 
 namespace Solidity.Examples.Tactics.Dangling
@@ -27,8 +32,7 @@ open Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-/-- `wt(storage)`, the premise every TestSuite obligation carries. -/
-def wtStd : Fml StandardExample := .defined (.wt StandardExample.vars .storage)
+open scoped Solidity.Core.Surface
 
 /-! ## A write past the end, made live by a `push()`
 
@@ -40,14 +44,15 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ [
+example : ⊢ dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; persons.push(); ] persons[0].age == 5 } := by
   sol_prove?
 
 /-- The diamond: the write through the alias returns, since the slot past
-the end is there (`staleOk`, `slotHasU`). -/
-example : ⊢ .imp wtStd dl!{ ⟨
+the end is there (`staleOk`, `slotHasU`); valid by the strategy (the `⊢`
+walk is at the end). -/
+example : ⊨ dl!{ defined(wt(storage)) → ⟨
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; persons.push(); ⟩ persons[0].age == 5 } := by
   sol_prove
@@ -63,7 +68,7 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ [
+example : ⊢ dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; delete persons; persons.push(); ] persons[0].age == 5 } := by
   sol_prove?
@@ -73,7 +78,7 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ [
+example : ⊢ dl!{ defined(wt(storage)) → [
     delete people; delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 5; persons = people; persons.push(); ]
     persons[0].age == 5 } := by
@@ -90,7 +95,7 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ [
+example : ⊢ dl!{ defined(wt(storage)) → [
     delete matrix; matrix.push(); uint[] storage ptr = matrix[0]; matrix.pop();
     ptr.push(66); matrix.push(); ] matrix[0].length == 1 && matrix[0][0] == 66 } := by
   sol_prove?
@@ -104,16 +109,18 @@ and the reduction by about 1.6 times a round.  Two rounds close; four
 `elimSize`, refused in milliseconds (`Derive.leafFits`), as `pushes22` in
 `Examples/ProofTree.lean`.  Six are the most whose leaf is within
 `closeSize` (1799 nodes, reduction 44719), so the largest reduction
-`leafFits` builds before refusing; seven are refused by the leaf's size. -/
+`leafFits` builds before refusing; seven are refused by the leaf's size.
+The leaves are the erasures of what the scoped strategy leaves
+(`Core.Derive.residueOf`), today's closer's input. -/
 
 /-- Two rounds through one alias. -/
-def rounds2 : Fml StandardExample := .imp wtStd dl!{ [
+def rounds2 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push(); ] persons[0].age == 2 }
 
 /-- Four rounds through one alias: twelve statements after the binding. -/
-def rounds4 : Fml StandardExample := .imp wtStd dl!{ [
+def rounds4 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();
@@ -121,7 +128,7 @@ def rounds4 : Fml StandardExample := .imp wtStd dl!{ [
     persons.pop(); r.age = 4; persons.push(); ] persons[0].age == 4 }
 
 /-- Six rounds: the most whose leaf is within `closeSize`. -/
-def rounds6 : Fml StandardExample := .imp wtStd dl!{ [
+def rounds6 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();
@@ -130,15 +137,37 @@ def rounds6 : Fml StandardExample := .imp wtStd dl!{ [
     persons.pop(); r.age = 5; persons.push();
     persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
 
-#guard Derive.proves [] rounds2
-#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] rounds4).map
+#guard Core.Derive.proves rounds2
+#guard (Core.Derive.residueOf rounds4).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
 
-#guard (Derive.residue Derive.budget Derive.synClose Derive.budget [] rounds6).map
+#guard (Core.Derive.residueOf rounds6).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × Fml StandardExample) =>
     (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+
+end Solidity.Examples.Tactics.Dangling
+
+/-! ## Read without the switch
+
+The diamond as a `⊢` walk: its leaves sit behind a diamond update, which
+`Core.Proves.close` does not take yet (box contexts only). -/
+
+namespace Solidity.Examples.Tactics.Dangling
+
+open Proves
+
+local instance : InContract := ⟨StandardExample⟩
+
+/-- `wt(storage)`, the premise every TestSuite obligation carries. -/
+def wtStd : Fml StandardExample := .defined (.wt StandardExample.vars .storage)
+
+/-- The diamond, by today's `⊢`. -/
+example : ⊢ .imp wtStd dl!{ ⟨
+    delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
+    r.age = 5; persons.push(); ⟩ persons[0].age == 5 } := by
+  sol_prove
 
 end Solidity.Examples.Tactics.Dangling

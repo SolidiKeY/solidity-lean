@@ -14,7 +14,8 @@ has a second elaborator that erases the leaf (`Derive.eraseLeaf`:
 `Fml.posB`, checked by the kernel, then `Valid.of_erase`) and runs the same
 tactic on today's goal.  Today's macro is tried first and fails on a scoped
 goal; on today's goal the second elaborator steps aside.  `sol_spec_prep`'s
-is `Calculus/Core/SolSpec.lean`'s.
+is `Calculus/Core/SolSpec.lean`'s.  `sol_prove?` runs the scoped `sol_prove`
+and today's leaf search after it.
 -/
 
 namespace Solidity.Core
@@ -52,6 +53,47 @@ def evalSolMergeCore : Tactic := fun stx => Derive.onErased "sol_merge" stx stx
 
 @[tactic Solidity.tacticSol_fold_terms]
 def evalSolFoldTermsCore : Tactic := fun stx => Derive.onErased "sol_fold_terms" stx stx
+
+@[tactic Solidity.tacticSol_upd_]
+def evalSolUpdCore : Tactic := fun stx => Derive.onErased "sol_upd" stx stx
+
+/-! ## `sol_prove?` on a scoped goal
+
+The scoped `sol_prove` (`Core.Valid φ`, `Calculus/Core/Derive.lean`; `⊢ φ`,
+`Calculus/Core/ProvesDerive.lean`), then each leaf it leaves, a sequent of
+today's calculus, closed by the first of today's leaf tactics
+(`Derive.searchLeaf`); the replay suggested as today's (`Derive.replayLines`). -/
+
+open Meta in
+/-- `sol_prove?` on a scoped goal; on today's goal it steps aside. -/
+@[tactic Solidity.tacticSol_prove?]
+def evalSolProveQCore : Tactic := fun stx => withMainContext do
+  let g ← getMainGoal
+  unless ← Walk.isCoreGoal g do throwUnsupportedSyntax
+  let rest := (← getUnsolvedGoals).erase g
+  let h0 ← IO.getNumHeartbeats
+  setGoals [g]
+  evalTactic (← `(tactic| sol_prove))
+  let leaves ← getUnsolvedGoals
+  let mut hb : Nat := (← IO.getNumHeartbeats) - h0
+  let mut found : List (Lean.Name × Array String) := []
+  let mut open_ : List MVarId := []
+  for l in leaves do
+    let name ← l.getTag
+    match ← Solidity.Derive.searchLeaf l with
+    | some (t, h) =>
+      found := found ++ [(name, t)]
+      hb := hb + h
+    | none =>
+      open_ := open_ ++ [l]
+      found := found ++ [(name, #["sorry"])]
+  if let some l := open_.head? then
+    logInfo m!"sol_prove?: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
+  else unless ← Solidity.Derive.replayFits hb do
+    logWarning m!"sol_prove?: the replay needs about {hb / 1000} heartbeats in one \
+      declaration, past `maxHeartbeats`"
+  setGoals (open_ ++ rest)
+  ProofTree.suggest stx[0] (Solidity.Derive.replayLines found)
 
 /-! ## A scoped formula refuted at a state
 

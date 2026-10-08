@@ -12,9 +12,7 @@ two-way condition (`Calculus/Core/HoldsErase.lean`'s `holds_erase`);
 `Fml.Closable` the one-way one a goal closed by its erasure's validity needs
 (`Calculus/Core/CloseErase.lean`): hidden binders and anonymising updates
 in positive positions, as a leaf's context puts them, each name a hidden
-binder binds left alone by the updates above it (`Fml.bindNames`), and an
-update under the diamond one that keeps the `bool` locals `bool`s
-(`Upd.boolB`, as `Fml.posB` asks, `Calculus/Core/Close.lean`).
+binder binds left alone by the updates above it (`Fml.bindNames`).
 `Fml.TClosable` is the condition over the typed state
 (`Calculus/Core/TCloseErase.lean`), where an update in a positive position
 may be a diamond.  `Proves.close` asks the Bool twins (`Fml.closableB`),
@@ -26,24 +24,11 @@ namespace Solidity.Core
 
 variable {C : Contract}
 
-/-! ## Updates that keep the `bool` locals `bool`s
+/-! ## Updates that keep `bool` locals `bool`s
 
-Each by the recursor, which the kernel unfolds with no `brecOn`, and a
-compiled twin by `match` (`implemented_by`) for the tactics' first look.
-`Fml.Closable` takes an update under the diamond that is one, as
-`Fml.posB` does (`Calculus/Core/Close.lean`). -/
-
-/-- The modality is the box: an update under the diamond reads into states
-whose `bool` locals hold `bool`s (`State.BoolOK`), which its erasure does
-not say. -/
-def _root_.Solidity.Modality.isBox : Modality → Bool
-  | .box => true
-  | .diamond => false
-
-theorem _root_.Solidity.Modality.eq_box_of_isBox {m : Modality} (h : m.isBox = true) : m = .box := by
-  cases m with
-  | box => rfl
-  | diamond => cases h
+What the diamond asks of the state an update leaves (`Modality.afterT`),
+decided on the terms; `Fml.posB` (`Calculus/Core/Close.lean`) and
+`Fml.closableB` ask it of a diamond update. -/
 
 /-- A `bool` literal (`Tm.boolB`). -/
 def _root_.Solidity.Op0.boolLitB {s : Srt} (o : Op0 s) : Bool :=
@@ -115,6 +100,8 @@ def Upd.boolB {Γ : Ctx} {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
   Upd.rec (motive := fun _ _ => Bool) true (fun _ e ih => ih && e.boolB)
     (fun _ _ r ih => ih && r.boolB) (fun _ _ ih => ih) (fun _ _ ih => ih) U
 
+/-! ## Fresh binders -/
+
 /-- Every local an update declares takes a name not in scope. -/
 def Upd.Fresh {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Prop
   | _, .nil => True
@@ -166,11 +153,10 @@ def Fml.bindNames : {Γ : Ctx} → Fml C Γ → List Var
   termination_by structural _ φ => φ
 
 /-- A formula whose erasure's validity gives it: as `Fml.Plain`, but a
-hidden binder and an anonymising update allowed in a positive position, out
-of a modality, every name a hidden binder binds out of scope and left
-alone by the updates above it, and an update in a positive position a
-diamond if it keeps the `bool` locals `bool`s (`Upd.boolB`: the diamond's
-reading asks `State.BoolOK` of the state it ends in). -/
+hidden binder, an anonymising update and a diamond update that keeps the
+`bool` locals `bool`s (`Upd.boolB`) allowed in a positive position, out of
+a modality, and every name a hidden binder binds out of scope and left
+alone by the updates above it. -/
 def Fml.Closable : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, _, .tt => True
   | _, _, .eq _ _ => True

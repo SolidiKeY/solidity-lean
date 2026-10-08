@@ -92,11 +92,11 @@ import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Spec
+import Solidity.Calculus.Core.Deploy
 import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.Close
 import Solidity.Calculus.Core.Derive
 import Solidity.Calculus.Core.ProvesDerive
-import Solidity.Calculus.Core.ProvesSearch
 import Solidity.Calculus.Core.WalkSyntax
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.ProofTree

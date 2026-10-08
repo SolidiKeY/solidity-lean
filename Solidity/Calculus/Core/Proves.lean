@@ -27,8 +27,8 @@ under solkey's names where solkey has the rule:
 * `closeTrue`, behind a context with no diamond update but scope ends
   (`Hyps.boxOnly`);
 * `close`: a leaf whose erasure is valid (`Calculus/Core/CloseErase.lean`),
-  as today's `Proves.close`, behind a context whose diamond updates keep
-  the `bool` locals `bool`s (`Upd.boolB`).
+  as today's `Proves.close`, behind a context whose diamond updates keep the
+  `bool` locals `bool`s (`Upd.boolB`).
 
 A program rule fires the rule the strategy fires (`Stmt.step`, one per
 statement): its premise is `s.step k m = some p`, which `rfl` proves and
@@ -230,11 +230,9 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   its erasure gives it, with no modality left (`Fml.closableB`: `Fml.Closable`
   and `Fml.Leaf`, as today's `close` asks `modalFree`).  The kernel decides
   both side conditions (`rfl`, `decide`).  A diamond update in the context
-  must keep the `bool` locals `bool`s (`Upd.boolB`): over M3's states the
+  sets its `bool` locals to `bool`s (`Upd.boolB`): over M3's states the
   erasure's diamond does not give `State.BoolOK` of the state it ends in,
-  which a `bool` local set from a storage read may break; any diamond
-  update closes only over the typed state (`Fml.TClosable`,
-  `Calculus/Core/TCloseErase.lean`), at the flip. -/
+  and the update's terms do (`Upd.apply_boolOK`). -/
   | close {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (ns : List Var)
       (hlen : ns.length = Γ₀.length) (hnd : ns.Nodup)
       (h : Solidity.Valid ((H.wrap φ).erase ns))

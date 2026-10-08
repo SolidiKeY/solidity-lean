@@ -1,7 +1,7 @@
 import Solidity.Tools.ProofTree
 import Solidity.Tools.CoreInspect
 import Solidity.Calculus.Core.Derive
-import Solidity.Calculus.Core.ProvesSearch
+import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.ChainGen
 import Solidity.Calculus.Derive
 
@@ -23,13 +23,16 @@ If the strategy picks another rule, or a printer changes, these fail.
 The sections `Scoped` read the scoped calculus (`open scoped
 Solidity.Core.Surface`, `docs/intrinsic.md`, W3): a tree of `⊢ φ` over
 `Core.Proves` (`Calculus/Core/ProofTree.lean`), a walk of its rules
-(`Calculus/Core/Derive.lean`).  There a parameter is bound by `∀`, so a tree
-starts with `allRight`; a rule that leaves no statement goes on into the
+(`Calculus/Core/Derive.lean`) written in today's walk text, which the
+scope's macros read (`Calculus/Core/WalkSyntax.lean`; the steps KeY does
+not show, a scope's end, a hidden binder and the parameters' `∀`, are not
+written).  There a parameter is bound by `∀`, so a tree starts with
+`allRight`; a rule that leaves no statement goes on into the
 rest of the program, so no `emptyModality` follows it; a split has KeY's two
 goals under either modality, its branch's `}` printed; a leaf closes by
 `Proves.close` and today's closer on its erasure, behind diamond updates
 too where they keep the `bool` locals `bool`s (`Upd.boolB`).  `sol_prove?`
-is the scoped one (`Calculus/Core/ProvesSearch.lean`), its replay today's
+is the scoped one (`Calculus/Core/Closers.lean`), its replay today's
 text.  What stays today's, each said where it is: the two interval examples
 (an explicit `∀` is stripped with the parameters'), the guards on today's
 residue and closer (the closer's input), `sol_chain?`, `#chain` and
@@ -212,22 +215,25 @@ replayed walk touches only them. -/
 
 /--
 info: Try this:
-  refine Core.Proves.valid (R := RuleSet.all) ?_
-    refine Core.Proves.allRight ?_
-    refine Core.Proves.bindIntro ?_
-    apply Core.Proves.cases (Core.Taclet.step_eq .sendNoCallbackBox) rfl <;>
+  apply Proves.valid
+    apply cases .sendNoCallbackBox <;>
         (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
       (try and_intros)
-    · exact Core.Proves.closeTrue rfl
-    · exact Core.Proves.closeTrue rfl
+    · refine close ?_
+      sol_symex
+      sol_close
+    · refine close ?_
+      sol_symex
+      sol_close
 -/
 #guard_msgs in
 example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
   sol_derive?
 
-/-! The box walk replayed beside another open goal, which it leaves alone;
-the hidden binder of `ok`, which the program assigns without declaring, is
-`bindIntro`. -/
+/-! The box walk replayed beside another open goal, which it leaves alone,
+in the scoped calculus's own constructors: the parameter's `∀` is
+`allRight`, the hidden binder of `ok`, which the program assigns without
+declaring, `bindIntro`. -/
 
 example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
   refine ⟨?_, ?_⟩
@@ -263,20 +269,19 @@ closed: 0 open goal(s), 6 node(s), 3 branch(es)
 
 /--
 info: Try this:
-  refine Core.Proves.valid (R := RuleSet.all) ?_
-    refine Core.Proves.bindIntro ?_
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-    apply Core.Proves.cases (Core.Taclet.step_eq .sendNoCallbackDiamond) rfl <;>
+  apply Proves.valid
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply cases .sendNoCallbackDiamond <;>
         (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
       (try and_intros)
-    · refine Core.Proves.close [] rfl List.nodup_nil ?_
+    · refine close ?_
       sol_symex
       sol_close
-    · refine Core.Proves.close [] rfl List.nodup_nil ?_
+    · refine close ?_
       sol_symex
       sol_close
-    · refine Core.Proves.close [] rfl List.nodup_nil ?_
+    · refine close ?_
       sol_symex
       sol_close
 -/
@@ -326,18 +331,15 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 
 /--
 info: Try this:
-  refine Core.Proves.allRight ?_
-    apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
+  apply splitBox .ifElseSplit
     case thn =>
-      apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      apply update .localValueAssign
+      refine close ?_
       sol_symex
       sol_close
     case els =>
-      apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      apply update .localValueAssign
+      refine close ?_
       sol_symex
       sol_close
 -/
@@ -364,30 +366,26 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
 
 /-! ## `sol_derive?`: the walk
 
-The suggestion is the walk `ApplySteps.guardedCopy` writes by hand, in the
-scoped calculus's constructors, a quantifier and a precondition under their
-solkey aliases (`allRight`, `impRight`); each leaf closes behind the
-diamond's updates (`Upd.boolB`), a scope's end taken by `updIntro`. -/
+The suggestion is the walk `ApplySteps.guardedCopy` writes by hand, today's
+text with no `cov` goal; each leaf closes behind the diamond's updates
+(`Upd.boolB`). -/
 
 /--
 info: Try this:
-  refine Core.Proves.allRight ?_
-    refine Core.Proves.impRight ?_
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-    apply Core.Proves.unfold (Core.Taclet.step_eq .requireConditionCapture)
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.split (Core.Taclet.step_eq .requireSimple)
+  apply impRight
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply unfold .requireConditionCapture
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply split .requireSimple
     case thn =>
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      refine close ?_
       sol_symex
       sol_close
     case els =>
-      apply Core.Proves.done (Core.Taclet.step_eq .revertDiamond)
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      apply done .revertDiamond
+      refine close ?_
       sol_symex
       sol_close
 -/
@@ -398,24 +396,21 @@ theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x
 
 /--
 info: Try this:
-  refine Core.Proves.valid (R := RuleSet.all) ?_
-    refine Core.Proves.allRight ?_
-    refine Core.Proves.allRight ?_
-    apply Core.Proves.update (Core.Taclet.step_eq .storageFieldWriteSave)
-    apply Core.Proves.unfold (Core.Taclet.step_eq .transfer_unfold_rightSndArgument)
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.update (Core.Taclet.step_eq .transferNoCallbackBox)
-    refine Core.Proves.updIntro ?_
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .storageFieldReadFind)
-    refine Core.Proves.close [] rfl List.nodup_nil ?_
+  apply Proves.valid
+    apply update .storageFieldWriteSave
+    apply unfold .transfer_unfold_rightSndArgument
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply update .transferNoCallbackBox
+    apply unfold .localValueDeclInitDrop
+    apply update .storageFieldReadFind
+    refine close ?_
     sol_symex
     sol_close
 -/
 #guard_msgs in
 /-- `alice.age = 1; to.transfer(x + 2); uint y = alice.age;`: on `⊨ φ` the
-walk starts with `refine Core.Proves.valid`; the payment, once its amount is
+walk starts with `apply Proves.valid`; the payment, once its amount is
 captured, is one update (`transferNoCallbackBox`). -/
 theorem transferFrameStorage :
     ⊨ dl!{ [ alice.age = 1; to.transfer(x + 2); uint y = alice.age; ] y == 1 } := by
@@ -716,21 +711,19 @@ closed: 0 open goal(s), 10 node(s), 2 branch(es)
 
 /--
 info: Try this:
-  refine Core.Proves.allRight ?_
-    refine Core.Proves.impRight ?_
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-    apply Core.Proves.unfold (Core.Taclet.step_eq .assertConditionCapture)
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.check (Core.Taclet.step_eq .assertSimple)
+  apply impRight
+    apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply unfold .assertConditionCapture
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply Proves.check .assertSimple
     case thn =>
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      refine close ?_
       sol_symex
       sol_close
     case els =>
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      refine close ?_
       sol_symex
       sol_close
 -/
@@ -952,34 +945,27 @@ invariant rule is `invBox` (`Core.Proves.inv`), solkey's two goals past
 
 /--
 info: Try this:
-  apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-    apply Core.Proves.unfold (Core.LeanTaclet.toStep .whileUnwind)
-    apply Core.Proves.unfold (Core.Taclet.step_eq .ifElseUnfold)
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
+  apply unfold .localValueDeclInitDrop
+    apply update .localValueAssign
+    apply unfoldLean .whileUnwind
+    apply unfold .ifElseUnfold
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply split .ifElseSplit
     case thn =>
-      apply Core.Proves.unfold (Core.Taclet.step_eq .blockEmpty)
-      apply Core.Proves.update (Core.Taclet.step_eq .localIncrement)
-      refine Core.Proves.updIntro ?_
-      apply Core.Proves.check (Core.LeanTaclet.toStep .loopExit)
+      apply unfold .blockEmpty
+      apply update .localIncrement
+      apply checkLean .loopExit
       case thn =>
-        refine Core.Proves.updIntro ?_
-        refine Core.Proves.updIntro ?_
-        refine Core.Proves.updIntro ?_
-        refine Core.Proves.close [] rfl List.nodup_nil ?_
+        refine close ?_
         sol_symex
         sol_close
       case els =>
-        refine Core.Proves.close [] rfl List.nodup_nil ?_
+        refine close ?_
         sol_symex
         sol_close
     case els =>
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      refine close ?_
       sol_symex
       sol_close
 -/
@@ -991,36 +977,32 @@ example : ⊢ dl!{ ⟨ uint i = 0;
 
 /--
 info: Try this:
-  refine Core.Proves.allRight ?_
-    apply Core.Proves.unfold (Core.Taclet.step_eq .requireConditionCapture)
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.split (Core.Taclet.step_eq .requireSimple)
+  apply unfold .requireConditionCapture
+    apply unfold .localValueDeclInitDrop
+    apply update .binopAssignment
+    apply splitBox .requireSimple
     case thn =>
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.updIntro ?_
-      apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-      apply Core.Proves.update (Core.Taclet.step_eq .localValueAssign)
-      apply Core.Proves.inv (Core.LeanTaclet.toStep .whileInvariantBox)
+      apply unfold .localValueDeclInitDrop
+      apply update .localValueAssign
+      apply invBox .whileInvariantBox
       case init =>
-        refine Core.Proves.close [] rfl List.nodup_nil ?_
+        refine close ?_
         sol_symex
         sol_close
       case thn =>
-        refine Core.Proves.updIntro ?_
-        apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-        refine Core.Proves.updIntro ?_
-        refine Core.Proves.close [] rfl List.nodup_nil ?_
+        apply update .binopAssignment
+        refine close ?_
         sol_symex
         sol_close
       case els =>
-        refine Core.Proves.updIntro ?_
-        refine Core.Proves.close [] rfl List.nodup_nil ?_
+        refine close ?_
         sol_symex
         sol_close
     case els =>
-      apply Core.Proves.done (Core.Taclet.step_eq .revertBox)
-      exact Core.Proves.closeTrue rfl
+      apply done .revertBox
+      refine close ?_
+      sol_symex
+      sol_close
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ require(n >= 0); uint i = 0;
