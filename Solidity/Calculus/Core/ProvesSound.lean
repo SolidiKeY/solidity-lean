@@ -265,8 +265,8 @@ theorem Proves.sound {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
     exact fun σ => H.wrap_mono (φ := κ.exit m φ) (ψ := .modal m .nil κ φ)
       (fun τ h => holds_modal_intro fun hT => (holds_exit m κ φ τ hT).1 h) σ (ih σ)
   | @closeTrue Γ H h => exact H.wrap_valid (φ := .tt) h fun _ => trivial
-  | close ns hlen hnd hc hB _ h =>
-    exact fun σ => holds_of_erase_valid _ hc hB (Agree.erase σ hnd hlen) fun τ _ => h τ
+  | close ns hlen hnd h hc hB =>
+    exact fun σ => holds_of_erase_valid _ (Fml.closableB_sound _ hc).1 hB (Agree.erase σ hnd hlen) fun τ _ => h τ
 
 /-- **A goal proved with an empty context is valid.** -/
 theorem Proves.valid {R : RuleSet} {φ : Fml C []}

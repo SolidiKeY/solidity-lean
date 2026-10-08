@@ -16,6 +16,13 @@ behind a context with no diamond update but scope ends
 (`tholds_exit`), and `close` is `tholds_of_erase_valid`
 (`Calculus/Core/TCloseErase.lean`).
 
+**Not provable as stated until decisions 2 and 3** (`docs/intrinsic.md`,
+W2 `sound`): `Stmt.TSound C` is false for a contract with a `bool` mapping
+key (`close` proves `[ v = m[true]; ] false`) and under the diamond on a
+length past `uint`'s range, and `Proves.tvalid` is vacuous there.  The
+decision taken goes into `Stmt.TSound`, as a restriction, not a false
+hypothesis.
+
 An update's typed reading asks of every typed state that erases to the one
 it ends in, so a rule's premise gives its conclusion in the state the typed
 run ends in, one of them: only that direction is needed here.
@@ -246,8 +253,8 @@ theorem Proves.tsound (hS : Stmt.TSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : H
     exact fun σ => H.twrap_mono (φ := κ.exit m φ) (ψ := .modal m .nil κ φ)
       (fun τ h => tholds_exit m κ φ τ h) σ (ih σ)
   | @closeTrue Γ H h => exact H.twrap_valid (φ := .tt) h fun _ => trivial
-  | close ns hlen hnd hc hB hl h =>
-    exact fun σ => tholds_of_erase_valid _ hlen hnd hc hB hl h σ
+  | close ns hlen hnd h hc hB =>
+    exact fun σ => tholds_of_erase_valid _ hlen hnd (Fml.closableB_tclosable hc) hB h σ
 
 /-- **A goal proved with an empty context is valid over the typed state**,
 given the arms'. -/

@@ -27,7 +27,7 @@ under solkey's names where solkey has the rule:
 * `closeTrue`, behind a context with no diamond update but scope ends
   (`Hyps.boxOnly`);
 * `close`: a leaf whose erasure is valid (`Calculus/Core/CloseErase.lean`),
-  as today's `Proves.close`.
+  as today's `Proves.close`, behind a context with no diamond update.
 
 A program rule fires the rule the strategy fires (`Stmt.step`, one per
 statement): its premise is `s.step k m = some p`, which `rfl` proves and
@@ -221,12 +221,17 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | closeTrue {Γ : Ctx} {H : Hyps C Γ₀ Γ} (h : H.boxOnly = true) : Proves C R Γ₀ H .tt
   /-- Leave the calculus: the sequent, its context in front, erased
   (`Fml.erase`, the outer locals named `ns`) and proved in the logic, where
-  its erasure gives it (`Fml.Closable`), with no modality left (`Fml.Leaf`,
-  as today's `close` asks `modalFree`). -/
+  its erasure gives it, with no modality left (`Fml.closableB`: `Fml.Closable`
+  and `Fml.Leaf`, as today's `close` asks `modalFree`).  The kernel decides
+  both side conditions (`rfl`, `decide`).  Box contexts only: over M3's
+  states the erasure's diamond does not give `State.BoolOK` of the state it
+  ends in, so a leaf behind a diamond update closes only over the typed
+  state (`Fml.TClosable`, `Calculus/Core/TCloseErase.lean`), at the flip. -/
   | close {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (ns : List Var)
-      (hlen : ns.length = Γ₀.length) (hnd : ns.Nodup) (hc : (H.wrap φ).Closable ns)
-      (hB : Solidity.Avoids (H.wrap φ).bindNames ns) (hl : (H.wrap φ).Leaf = true)
-      (h : Solidity.Valid ((H.wrap φ).erase ns)) : Proves C R Γ₀ H φ
+      (hlen : ns.length = Γ₀.length) (hnd : ns.Nodup)
+      (h : Solidity.Valid ((H.wrap φ).erase ns))
+      (hc : (H.wrap φ).closableB ns = true := by first | rfl | decide)
+      (hB : Solidity.Avoids (H.wrap φ).bindNames ns := by decide) : Proves C R Γ₀ H φ
 
 /-! ## A derivation
 
@@ -243,5 +248,14 @@ branches, and there is no third goal. -/
 example : Proves StandardExample .all [.val .bool] .nil
     (.modal .diamond (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
   .split rfl (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
+
+/-- `close` on a leaf behind a box update and a hidden binder,
+`x = x` after `x := 1` with `x` any `uint`: the kernel decides
+`Fml.closableB` and the binder's `Avoids` (the defaults), and the erasure
+`{x := 1} x = x` is valid by `rfl`. -/
+example : Proves StandardExample .all [] (((Hyps.nil.bind (.user "x") (.val .uint)).upd .box
+      (Upd.nil.snoc (.local .here (.val (.app0 (.lit (.int 1))))))))
+    (.eq (.pvV .here) (.pvV .here)) :=
+  .close [] rfl List.nodup_nil fun _ _ => rfl
 
 end Solidity.Core
