@@ -3386,6 +3386,17 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     capture (`uint se1 = 0; y = se1++ + se1;` stays as before), since a pure
     provenance set would re-capture every written line's captures.  See
     "Captures by provenance" below.
+31. *Proposed (W3d `w3rest`), the lead's call:* the scoped contract rule
+    (`Calculus/Core/FunContract.lean`) reads `requires`/`ensures` at the
+    callee's frame (the parameters, then the return variables), "post"
+    reads the parameters at the arguments' values, so the body may write
+    its return variables only (`writesRets`, by `rfl`); `\old` is not read
+    (no `old`/`oldNet` snapshot in the obligation); a call that leaves
+    several results or a memory return has the goal `false`; an `ensures`
+    that is not first-order weakens to `true` (`Fml.wkD`).  Today's rule
+    read the parameters at their values after the body, with a freshness
+    side condition (`CallRet.freshFor`), and took `\old` and every return
+    shape.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
@@ -4561,6 +4572,131 @@ recursor-only variant is not here.  (b) `Var.memB_eq_memBM` links
 `Var.memB` to its compiled twin, as G0 condition 2 asks.  (c)
 `ProvesDerive`'s docstring names `Seq.residue full H φ` and
 `Seq.leafQuoteI`.  No pin, rule or message changed.
+
+### W3d lane `w3rest` (`w3d-w3rest`, 2026-10-08): the rest of W3
+
+On `intrinsic` at d56343c.  `w3d-gates` had no commit when this lane
+finished, so nothing of it is merged here.  For that lane's merge, the
+files it owns changed here: `Calculus/Core/ProvesDerive.lean` by about 130
+lines (+92/−35 against d56343c): new `Fml.stripN`, `Valid.of_stripN`,
+`Seq.paramCount`, and a parameter count `np : Option Nat` threaded through
+`Seq.pick`, `Seq.leafRes`, `Seq.residue`, `Seq.residueQuote`,
+`Seq.pick_valid`, `Seq.leafRes_sound` and `Proves.of_residue` (each takes
+`np` now); `Calculus/Core/Derive.lean` by 13 lines (`Derive.stripAlls g n`,
+an optional count, and `eraseLeaf` passing `Symex.paramCount ψ`).  No new `sorry`,
+`axiom` or `maxHeartbeats`; `#print axioms` of `Core.useContract`,
+`Core.useContract_of_valid`, `Tactics/Callback.withdrawUnsafe_withCallback`,
+`Tactics/Contracts.callDeposit`/`callAddOneWalk`: Lean's three.
+`lean_build` (default targets): green, 293 jobs (a first run lost four
+modules to the OOM killer, exit 135; the second built them).
+`TestSuite/Derived7`, `Derived9` and `Suggestions` checked one at a time
+after the walk change.  `check-orphans`, `check-doc-paths`: clean (the
+git-excluded `Scratch/` modules only).
+
+- **Decision 28, as the lead approved it**: `cdl!` marks the *explicit*
+  leading `∀`s (the lead's text; the lane's proposal said "mark the
+  parameters", the same distinction from the other side).  A formula with
+  no mark (an obligation's constant, a term the strategy computed) reads
+  every leading `∀` as a parameter, today's behaviour, which is why the
+  explicit ones carry the mark.  The mark is an `Expr.mdata` on the quoted
+  variable of the `Fml.all` (`Fml.markExplicit`, `Calculus/Core/Quote.lean`),
+  which the kernel, the compiled code and unification do not see, so no
+  term changes and the printer is unchanged (`Core.Delab` drops it).
+  - The `⊢` route: the tactic counts the parameters, the leading `∀`s up to
+    the first marked one through hidden binders, the context's first
+    (`Seq.paramCount`, `Symex.paramCount`), and hands the count to the walk
+    (`Seq.residue np`, `leafRes np`, `pick np`): only those are stripped
+    (`Fml.stripN`, `Valid.of_stripN`), and `pick` keeps them where only that
+    closes (decision 27, parameters only).  An explicit `∀` is never
+    stripped.  `none` (a formula not written out) strips every leading `∀`.
+  - The `⊨` route: `sol_symex` re-marks the explicit `∀`s of the formula
+    it started from (`Symex.restoreMarks`, in `normValid`), and
+    `Derive.eraseLeaf` strips the parameters only (`stripAlls g n`).
+  - The short walk: `apply Proves.valid` binds the parameters only
+    (`core_params`), `core_silent` takes no marked `∀`, so an explicit one
+    gets its `apply allRight` line.
+  - `ProofTree`'s interval examples are unchanged (`sol_prove`), now by the
+    explicit `∀` kept rather than by `pick`'s second try; their prose says
+    so.
+- **Callbacks** (W3c blocker 2): `Tactics/Callback`'s counterexample is a
+  typed run with callbacks: a typed `Vault` storage (`vault`, `Storage
+  Vault`), `ExecS.det` steps over `TState` (`execOfRun`) and the callee's
+  `ExecS.transferResume`; the invariant and the refutation are read by
+  `with_unfolding_all` (the typed storage's folds are irreducible to the
+  elaborator).  The two rule pins print `Core.CallbackTaclet`.  Neither
+  `Tactics/Callback` nor `Tactics/TryCatch` imports
+  `Calculus/Callback.lean` now; `Tools/Inspect` and `Theorems.lean` still
+  do (W4 `calc-del`).
+- **`Tactics/TermTaclets` stays on today's sequents**, recorded in its
+  docstring: its sequents hold terms only, no local, no update, no
+  program, over any contract, which is the closer's input (`Seq.leafRes`
+  hands every scoped leaf to it as such a sequent), so it moves with M6c;
+  the scoped `rw [r]` already runs these term taclets on a scoped goal's
+  closed terms.
+- **A scoped `FunContract`** (W3c blocker 8,
+  `Calculus/Core/FunContract.lean`): the contract over the typed call run
+  (`CallRet.enterT`, `TRun.callFrom`), its obligation and `ofValid`; the
+  rule `useContract` (`holds_callContract`), the frame from the typed
+  mutability lemma (`Prog.trun_frame`, `TGFrame`: a `pure`/`view` callee
+  keeps storage and ledger) and the syntax (a callee's body is read in
+  its own frame, so it cannot touch the caller's locals); "pre" and "post"
+  are scoped formulas (`Fml.callPre`: the parameters declared, `requires`
+  read past a `Frames.drop`; `Fml.callPost`: `{havoc}` for a `nonpayable`
+  callee, `∀ T r`, `ensures` weakened, `res = r;`, the frame popped before
+  the rest).  First-order formulas weaken by a thinning (`Tm.wk`,
+  `Fml.wkFO`, `holds_wkFO`).  `cdlIn![uint x, uint r]{ φ }` reads a
+  contract's formula at the callee's frame; `core_contract μ req ens` (and
+  `core_contract_walk`) take the call at the head of a `⊨` goal's box,
+  behind its context.  `Tactics/Contracts` is flipped: its four theorems
+  by the scoped rule (`callDeposit`'s "post" by hand past `{havoc}`, which
+  today's closer does not read, as before), the mutability checks on the
+  scoped calls (`calleeWithin`, `decide`), the `view` frame fact on the
+  typed run.  It no longer imports `Calculus/Contracts.lean` or
+  `Calculus/Core/Contracts.lean` (`sol_erase`, now used by nothing but
+  kept).  Proposed decision 31 records what the scoped rule reads
+  differently.
+- **Pins changed**:
+  - `Tactics/CoreDerive`, the short walk's `sol_derive?` on
+    `⊨ dl!{ ∀ uint a; [ … ] total != 0 }`: `apply allRight` after `apply
+    Proves.valid`, and its replay (decision 28: the explicit `∀` gets its
+    line; not one of reasons 1–8, a decision's, as 19 and 21 were).
+  - `Tactics/Callback`, the two `#check` pins: `@Core.CallbackTaclet.…`
+    with its scoped type (`{k : Nat} {Γ : Core.Ctx}`, `Core.Idx`,
+    `Core.Simple`) for today's (reason 7).
+  - None other.  The fresh names are unchanged.
+- **W3 is not done.**  The four items of this lane are; left on today's
+  calculus, besides the closer's input (`NFml`, `Tactics/Decide`'s closing
+  block, `ProofTree`'s guards, `TermTaclets`): W3c's item 10 (`Corpus/Basic`
+  and `Corpus/Imported` over today's run, `Tools/{Inspect,ProofTree,
+  Common}`, `Theorems.lean`, `Examples/Notation`'s sections outside
+  `Scoped`), item 9 (the chains' rewrite links on the erasure) and item 11
+  (Core modules importing today's for notation and printers), all planned
+  for W4; and the gate aggregate (Derived9–11, `ProofTree`), which is
+  `w3d-gates`'.
+- **Review fixes** (the confirmed findings of the read-only review):
+  - `Seq.paramCount` walked the context only through its leading binders
+    and stopped at the innermost precondition or update, so after `apply
+    intro` (`H = pre (all nil x) A`) it counted no parameter and `x` was
+    not stripped.  It now walks the whole context down to `Hyps.nil`, a
+    precondition, update, `havoc` or `anon` kept as the counting loop's
+    stop.  New pin, `ProofTree`'s `Scoped` section: `⊢ dl!{ x <= 100 → ⟨
+    uint y = x + 1; ⟩ y == x + 1 }` walked by `apply intro; sol_prove`,
+    its count `some (1)` printed (reason: a regression example a review
+    found broken).
+  - Gate G0, condition 1: `Fml.callPost` (on `CallRet`), `Fml.allArgs`
+    (`Args`), `Fml.wkFO` (`Fml`) and `Tm.wk` (`Tm`'s sort index) matched
+    on indexed families and the kernel unfolds them in `core_contract`'s
+    goals.  Rewritten with `casesOn` and the motive over the indices, as
+    `CallRet.declsThen` and `Hyps.wrap` are (structural recursion); the
+    soundness lemmas read them through constructor equations proved by
+    `rfl` (`Tm.wk_pvV` …, `Fml.wkFO_not` …).  No exemption is needed.
+  - The docs: this section's account of the `ProvesDerive`/`Derive`
+    change, the `docs/module-map.md` rows of `ProvesDerive`, `Derive`,
+    `WalkSyntax`, `Quote`, and `Tactics/Callback`'s docstring
+    (`Semantics/Core/Callback.lean`).
+- **Left**: decision 31 (the lead's call); `\old` in a scoped contract and
+  the calls with several results or a memory return; `callDeposit`'s
+  "post" closes by hand until the closer reads `{havoc}`.
 
 ## Baselines (M0)
 

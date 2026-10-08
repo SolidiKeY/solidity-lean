@@ -34,7 +34,9 @@ Where the scoped calculus takes a step today's names otherwise:
   nothing, and before a statement it is refused (`core_skip`); so is
   `apply allIntro` on a parameter `Proves.valid` already bound;
 * `apply Proves.valid` binds the formula's parameters (`∀`, `cdl!`) with
-  `allRight` at once, as today's walk leaves them free.
+  `allRight` at once, as today's walk leaves them free (`core_params`); an
+  explicit `∀ uint x;` (`cdl!` marks it, decision 28) is left to its own
+  `apply allRight`.
 
 Each reading is a `scoped macro_rules` of the namespace `Solidity.Core.Surface`,
 tried before today's `apply`: the scoped rule first, today's last, for
@@ -76,7 +78,8 @@ def Walk.silentStep (g : MVarId) : MetaM (Option (List MVarId)) := do
   let H := ty.appFn!.appArg!
   let step : Option Lean.Name ←
     if φ.isAppOf ``Fml.bind then pure (some ``Proves.bindIntro)
-    else if φ.isAppOf ``Fml.all && (← Walk.paramsOnly H) then pure (some ``Proves.allIntro)
+    else if φ.isAppOf ``Fml.all && !Fml.isExplicitAll φ && (← Walk.paramsOnly H) then
+      pure (some ``Proves.allIntro)
     else if φ.isAppOf ``Fml.upd then
       let args := φ.getAppArgs
       if ← Walk.popsOnly args[args.size - 2]! then pure (some ``Proves.updIntro) else pure none
@@ -93,6 +96,23 @@ def evalCoreSilent : Tactic := fun _ => do
     let some g := (← getUnsolvedGoals).head? | return
     let some gs ← Walk.silentStep g | return
     replaceMainGoal gs
+
+/-- `core_params`: on a scoped goal, the formula's parameters into the
+context (`allIntro`, `bindIntro`), up to an explicit `∀` (`cdl!`'s mark,
+decision 28), whose line the walk writes (`apply allRight`). -/
+syntax (name := coreParams) "core_params" : tactic
+
+@[tactic coreParams]
+def evalCoreParams : Tactic := fun _ => do
+  for _ in [0:256] do
+    let some g := (← getUnsolvedGoals).head? | return
+    let ty ← instantiateMVars (← g.getType)
+    unless ty.isAppOf ``Core.Proves do return
+    let φ ← whnf ty.appArg!
+    let c ← if φ.isAppOf ``Fml.bind then pure ``Proves.bindIntro
+      else if φ.isAppOf ``Fml.all && !Fml.isExplicitAll φ then pure ``Proves.allIntro
+      else return
+    replaceMainGoal (← g.apply (← mkConstWithFreshMVarLevels c))
 
 /-- `core_skip empty`, `core_skip allIntro`: the line where the scoped
 strategy already took its step, after the silent steps: `empty` where no
@@ -262,7 +282,7 @@ scoped macro_rules
       | apply _root_.Solidity.Proves.allIntro)
   | `(tactic| apply Proves.valid) =>
     `(tactic| first
-      | (refine Solidity.Core.Proves.valid (R := RuleSet.all) ?_; repeat (first | refine Solidity.Core.Proves.allIntro ?_ | refine Solidity.Core.Proves.bindIntro ?_))
+      | (refine Solidity.Core.Proves.valid (R := RuleSet.all) ?_; core_params)
       | apply _root_.Solidity.Proves.valid)
   | `(tactic| refine close ?_) =>
     `(tactic| first

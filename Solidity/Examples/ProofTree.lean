@@ -571,8 +571,9 @@ example : ⊢ .imp wtStd dl!{ ⟨ Person storage p = persons.push(); p.age = 1; 
 /-! Intervals: a premise `x <= 100` bounds the `uint` local `x`, so the
 diamond's `x + 1` stays in range; under the box, `require(x >= 1 && …)`
 keeps `x - 1` in range and decides `y < 100`.  The explicit `∀` keeps `x`'s
-range at the leaf (`Seq.pick`: the leading quantifiers kept
-where stripping them, as the parameters' are, leaves the leaf open). -/
+range at the leaf: `cdl!` marks it, so it is not a parameter, and only the
+parameters' `∀`s are stripped (decision 28; `Seq.pick` keeps theirs where
+only that closes, decision 27). -/
 
 /--
 info: Try this:
@@ -589,6 +590,20 @@ info: Try this:
 #guard_msgs in
 example : ⊢ dl!{ ∀ uint x; [ require(x >= 1 && x <= 100); uint y = x - 1; ] y < 100 } := by
   sol_prove?
+
+/-! After a walk's prefix the parameters are the context's: `apply intro`
+binds `x`'s `∀` and takes the premise, and `sol_prove` counts the
+parameters from the context's outermost entry down to the first
+precondition (`Seq.paramCount`): one. -/
+
+/-- info: some (1) -/
+#guard_msgs in
+example : ⊢ dl!{ x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
+  apply intro
+  run_tac do
+    let ty ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
+    Lean.logInfo m!"{← Core.Seq.paramCount ty.appFn!.appArg! (← Core.Symex.evaluable ty.appArg!)}"
+  sol_prove
 
 end Scoped
 

@@ -529,4 +529,49 @@ def Premise.quote {C : Contract} (c : Expr) {Γ Γ' : Ctx} (p : Premise C Γ Γ'
 /-! A scoped block on its own is quoted by `Syntax/CoreQuote.lean`'s
 `Prog.quoteShared`. -/
 
+/-! ## Explicit quantifiers (decision 28)
+
+A parameter `cdl!` binds and a `∀ uint x;` written in the formula are the
+same term, `Fml.all`.  `cdl!` marks the written ones in its output, on the
+quoted variable (an `Expr.mdata` the kernel, the compiled code and
+unification do not see), so that the tactics can keep an explicit `∀` and
+its range at a leaf (`Seq.pick`, `Derive.eraseLeaf`) and write its
+`allRight` line in the short walk; a formula with no mark (a constant, a
+term the strategy computed) reads every leading `∀` as a parameter. -/
+
+/-- The annotation of an explicit `∀`'s variable. -/
+def Fml.explicitKey : Lean.Name := `Solidity.Core.explicitAll
+
+/-- A quoted variable marked as an explicit `∀`'s (`explicitKey`). -/
+def Fml.markExplicitVar (x : Expr) : Expr :=
+  .mdata (Lean.KVMap.empty.insert Fml.explicitKey (.ofBool true)) x
+
+/-- Whether a quoted formula is an explicit `∀` (`explicitKey`). -/
+def Fml.isExplicitAll (e : Expr) : Bool :=
+  e.isAppOfArity ``Fml.all 5 && match e.getArg! 2 with
+    | .mdata d _ => d.getBool Fml.explicitKey
+    | _ => false
+
+/-- The leading `∀`s of a quoted formula past its first `n` binders (the
+parameters `cdl!` bound, a `∀` or a hidden binder each), marked explicit;
+hidden binders between them are passed. -/
+partial def Fml.markExplicit (n : Nat) (e : Expr) : Expr :=
+  let isAll := e.isAppOfArity ``Fml.all 5
+  if isAll || e.isAppOfArity ``Fml.bind 6 then
+    let args := e.getAppArgs
+    let k := args.size - 1
+    let args := args.set! k (Fml.markExplicit (n - 1) args[k]!)
+    let args := if isAll && n == 0 then args.set! 2 (Fml.markExplicitVar args[2]!) else args
+    mkAppN e.getAppFn args
+  else e
+
+/-- `Fml.markExplicit` on both sides of a quoted `Fml.and` (the readings of
+`cdl[C, m]{ … }` at the diamond and at the box). -/
+def Fml.markExplicitAnd (n₁ n₂ : Nat) (e : Expr) : Expr :=
+  if e.isAppOfArity ``Fml.and 4 then
+    let args := e.getAppArgs
+    mkAppN e.getAppFn
+      (args.set! 2 (Fml.markExplicit n₁ args[2]!) |>.set! 3 (Fml.markExplicit n₂ args[3]!))
+  else e
+
 end Solidity.Core

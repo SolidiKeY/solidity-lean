@@ -157,7 +157,9 @@ example : ⊨ dl!{ [ x = 2; ] x == 2 } := by
 Under `open scoped Solidity.Core.Surface` `sol_derive?` writes today's walk
 text, which the scope's macros read (`Calculus/Core/WalkSyntax.lean`):
 solkey's aliases, one `apply` per rule, `refine close ?_` at a leaf, the
-steps KeY does not show left unwritten. -/
+steps KeY does not show left unwritten.  A `∀` written in the formula is
+not a parameter (`cdl!` marks it, decision 28): it gets its `apply
+allRight` line. -/
 
 section Surface
 
@@ -168,6 +170,7 @@ open Proves
 /--
 info: Try this:
   apply Proves.valid
+    apply allRight
     apply unfold .localValueDeclInitDrop
     apply update .binopAssignment
     apply unfold .ifElseUnfold
@@ -192,6 +195,7 @@ example : ⊨ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else 
 /-- The suggestion replayed. -/
 example : ⊨ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   apply Proves.valid
+  apply allRight
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   apply unfold .ifElseUnfold

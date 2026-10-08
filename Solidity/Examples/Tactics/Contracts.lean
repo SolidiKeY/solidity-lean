@@ -1,32 +1,29 @@
 import Solidity.Calculus.Close
-import Solidity.Calculus.Contracts
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.Contracts
+import Solidity.Calculus.Core.FunContract
+import Solidity.Calculus.Core.WalkSyntax
 
 /-!
 # Calls by contract
 
 A call proved by its callee's contract (`useContract`,
-`Calculus/Contracts.lean`) instead of its inlined body: the goal `"pre"`
-owes `requires` with the parameters bound to the arguments, the goal
+`Calculus/Core/FunContract.lean`) instead of its inlined body: the goal
+`"pre"` owes `requires` with the parameters bound to the arguments, the goal
 `"post"` assumes `ensures` of a result of the return type, after a
 `{havoc}` of storage and ledger for a `nonpayable` callee only.  Each
 contract is proved once, from its obligation
-`requires → {old := storage ‖ oldNet := net} [ T r; body ] (ensures ∧ typed(r))`, by the
-strategy.  The callee's locals are the call's fresh names: `se1` the
-parameter, `se2` the return variable (`addOne`), `se1` the return variable
-(`getTotal`).
+`∀ params. requires → [ T r; body ] ensures` (`hc`), by the strategy.  The
+callee's locals are the call's fresh names: `se1` the parameter, `se2` the
+return variable (`addOne`), `se1` the return variable (`getTotal`).  A
+contract's formulas are read at the callee's frame (`cdlIn![…]{ … }`, the
+locals outermost first).
 
-The mutability is read off the inlined body (`Prog.within`): `addOne` is
-`pure`, `getTotal` reads storage (`view`), `deposit` writes it
-(`nonpayable`).
-
-The statements read scoped (`open scoped Solidity.Core.Surface`); the
-contract rule is today's, a derived rule over today's run, and a statement
-reaches it through its erasure (`sol_erase`, `Calculus/Core/Contracts.lean`):
-the formula is plain, so its erasure's validity proves it.  The rule's
-arguments, today's formulas, are stated before the switch.
+`core_contract μ req ens` takes the call at the head of the goal's box,
+behind its parameters and preconditions; the mutability `μ` is checked on
+the callee's body (`Prog.within`, by `rfl`): `addOne` is `pure`,
+`getTotal` reads storage (`view`), `deposit` writes it (`nonpayable`).
+The statements read scoped (`open scoped Solidity.Core.Surface`).
 -/
 namespace Solidity.Examples.Tactics.Contracts
 
@@ -42,140 +39,122 @@ def ContractsExample : Contract := contract!{
 
 local instance : InContract := ⟨ContractsExample⟩
 
-/-! The contracts and preconditions, today's formulas: the rule's arguments. -/
-
-/-- `x == 4`. -/
-def preX4 : Fml ContractsExample := dl!{ x == 4 }
-/-- `total == 7`. -/
-def preTotal7 : Fml ContractsExample := dl!{ total == 7 }
-/-- `total == 3`. -/
-def preTotal3 : Fml ContractsExample := dl!{ total == 3 }
-/-- `addOne`'s `requires`. -/
-def reqAddOne : Fml ContractsExample := dl!{ se1 <= 100 }
-/-- `addOne`'s `ensures`. -/
-def ensAddOne : Fml ContractsExample := dl!{ se2 == se1 + 1 }
-/-- `getTotal`'s `ensures`. -/
-def ensGetTotal : Fml ContractsExample := dl!{ se1 == total }
-/-- `deposit`'s `requires`. -/
-def reqDeposit : Fml ContractsExample := dl!{ total == 3 ∧ se1 == 4 }
-/-- `deposit`'s `ensures`. -/
-def ensDeposit : Fml ContractsExample := dl!{ total == 7 }
-
 open scoped Solidity.Core.Surface
 
 /-- `y = addOne(x);` by `addOne`'s contract, a `pure` callee: nothing but
 the result is forgotten. -/
 theorem callAddOne : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
-  sol_erase
-  refine useContract_of_valid (Γ := [.pre preX4]) (μ := .pure)
-    (req := reqAddOne) (ens := ensAddOne) ?hc ?pre ?post
+  core_contract .pure cdlIn![uint se1]{ se1 <= 100 } cdlIn![uint se1, uint se2]{ se2 == se1 + 1 }
   case hc =>
-    apply FunContract.ofValid
-    simp only [FunContract.obligation, CallRet.typed, CallRet.binders, CallRet.decl, List.map,
-      Fml.conj, rangeFml, snapOld]
     sol_symex
     sol_close
   case pre =>
-    simp only [Hyp.wrap]
     sol_symex
     sol_close
   case post =>
-    simp only [Hyp.wrap, Mutability.anon, Fml.alls, CallRet.binders, CallRet.result, snapOld,
-      List.singleton_append]
     sol_symex
     sol_close
 
 /-- `y = getTotal();` by its contract, a `view` callee: `total` is still
 `7` after the call, so `ensures` gives `y`. -/
 theorem callGetTotal : ⊨ dl!{ total == 7 → [ y = getTotal(); ] y == 7 } := by
-  sol_erase
-  refine useContract_of_valid (Γ := [.pre preTotal7]) (μ := .view)
-    (req := preTotal7) (ens := ensGetTotal) ?hc ?pre ?post
+  core_contract .view cdlIn![]{ total == 7 } cdlIn![uint se1]{ se1 == total }
   case hc =>
-    apply FunContract.ofValid
-    simp only [FunContract.obligation, CallRet.typed, CallRet.binders, CallRet.decl, List.map,
-      Fml.conj, rangeFml, snapOld]
     sol_symex
     sol_close
   case pre =>
-    simp only [Hyp.wrap]
     sol_symex
     sol_close
   case post =>
-    simp only [Hyp.wrap, Mutability.anon, Fml.alls, CallRet.binders, CallRet.result, snapOld,
-      List.singleton_append]
     sol_symex
     sol_close
 
 /-- `deposit(4);` by its contract, a `nonpayable` callee: storage is
 forgotten (`{havoc}`), and `ensures` is all that is known of it. -/
 theorem callDeposit : ⊨ dl!{ total == 3 → [ deposit(4); ] total == 7 } := by
-  sol_erase
-  refine useContract_of_valid (Γ := [.pre preTotal3]) (μ := .nonpayable)
-    (req := reqDeposit) (ens := ensDeposit) ?hc ?pre ?post
+  core_contract .nonpayable cdlIn![uint se1]{ total == 3 ∧ se1 == 4 }
+    cdlIn![uint se1]{ total == 7 }
   case hc =>
-    apply FunContract.ofValid
-    simp only [FunContract.obligation, CallRet.typed, CallRet.binders, CallRet.decl, List.map,
-      Fml.conj, snapOld]
     sol_symex
     sol_close
   case pre =>
-    simp only [Hyp.wrap]
     sol_symex
     sol_close
   case post =>
-    -- `{havoc} (total == 7 → [ ] total == 7)`: what the callee leaves is forgotten, and
-    -- `ensures` is all that is known of it
-    exact fun _ _ => ⟨fun _ _ h => ⟨h, nofun⟩, nofun⟩
+    sol_symex
+    -- `{se1 := 4} {havoc} (total == 7 → total == 7)`, past the parameter's
+    -- hidden binder: what the callee leaves is forgotten, and `ensures` is
+    -- all that is known of it (today's closer does not read `{havoc}`)
+    intro σ _
+    simp only [Core.holds]
+    intro v
+    unfold Modality.afterC
+    split
+    · intro σ' _ _ st nt hA
+      split
+      · rename_i τ h
+        intro σ'' hσ'' _
+        have hg : σ''.erase.glob = (σ'.havoc st nt).erase.glob := by
+          rw [hσ'']
+          cases h
+          rfl
+        simp only [Core.Tm.eval, Core.Tm.denote, hg] at hA ⊢
+        exact hA
+      · trivial
+    · trivial
 
 /-- `callAddOne`, its two goals derived one rule at a time (`⊢`). -/
 theorem callAddOneWalk : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
-  sol_erase
-  refine useContract (R := .all) (Γ := [.pre preX4]) (μ := .pure)
-    (req := reqAddOne) (ens := ensAddOne) ?hc ?pre ?post
+  core_contract_walk .pure cdlIn![uint se1]{ se1 <= 100 }
+    cdlIn![uint se1, uint se2]{ se2 == se1 + 1 }
   case hc =>
-    apply FunContract.ofValid
-    simp only [FunContract.obligation, CallRet.typed, CallRet.binders, CallRet.decl, List.map,
-      Fml.conj, rangeFml, snapOld]
     sol_symex
     sol_close
   case pre =>
     apply unfold .localValueDeclInitDrop
     apply update .localValueAssign
-    apply empty
     refine close ?_
     sol_symex
     sol_close
   case post =>
     apply unfold .localValueDeclInitDrop
     apply update .localValueAssign
-    apply empty
-    apply updIntro
     apply allRight
     apply impRight
     apply update .localValueAssign
-    apply empty
     refine close ?_
     sol_symex
     sol_close
 
-/-- The block of a program's first call: its return variables declared,
-then its body. -/
-def calleeBlock {C : Contract} : Prog C → Prog C
-  | .call _ _ _ ret body :: _ => ret.decl ++ body
-  | _ :: P => calleeBlock P
-  | [] => []
+/-- Whether the first call of a formula's first program has a body within
+`μ` (`Prog.within`). -/
+def calleeWithin (μ : Mutability) : {Γ : Core.Ctx} → Core.Fml ContractsExample Γ → Option Bool
+  | _, .modal _ P _ _ => progWithin μ P
+  | _, .imp _ ψ | _, .all _ _ ψ | _, .bind _ _ _ ψ | _, .upd _ _ ψ => calleeWithin μ ψ
+  | _, _ => none
+where
+  progWithin (μ : Mutability) : {Γ Γ' : Core.Ctx} → Core.Prog ContractsExample Γ Γ' → Option Bool
+    | _, _, .nil => none
+    | _, _, .cons (.call _ _ _ body) _ => some (Core.Prog.within μ body)
+    | _, _, .cons _ P => progWithin μ P
 
 /-- `addOne` is `pure`, `getTotal` `view` only, `deposit` `nonpayable` only. -/
 example : [Mutability.pure, .view, .nonpayable].map
-    (Prog.within · (calleeBlock sol{ uint y = addOne(1); })) = [true, true, true] := rfl
+    (calleeWithin · dl!{ [ uint y = addOne(1); ] true }) = [some true, some true, some true] := by
+  decide
 example : [Mutability.pure, .view, .nonpayable].map
-    (Prog.within · (calleeBlock sol{ uint y = getTotal(); })) = [false, true, true] := rfl
+    (calleeWithin · dl!{ [ uint y = getTotal(); ] true }) = [some false, some true, some true] := by
+  decide
 example : [Mutability.pure, .view, .nonpayable].map
-    (Prog.within · (calleeBlock sol{ deposit(1); })) = [false, false, true] := rfl
+    (calleeWithin · dl!{ [ deposit(1); ] true }) = [some false, some false, some true] := by
+  decide
 
-/-- The frame fact of a `view` callee: its run leaves storage as it was. -/
-example (σ τ : Semantics.State) (h : Prog.run σ (calleeBlock sol{ uint y = getTotal(); }) = .ok τ) :
-    τ.storage = σ.storage := (Prog.view_frame rfl h).1
+/-- The frame fact of a `view` callee: its typed run leaves storage and
+ledger as they were (`Prog.trun_frame`). -/
+example {Γ Γ' : Core.Ctx} (P : Core.Prog ContractsExample Γ Γ')
+    (hw : Core.Prog.within .view P = true) (σ : Core.TState ContractsExample Γ)
+    (o : Core.Out ContractsExample σ.H Γ') (h : Core.Prog.trun σ P = .ok o) :
+    o.st.storage = σ.storage ∧ o.st.net = σ.net :=
+  (Core.Prog.trun_frame P hw 0 h).1.keeps (by decide)
 
 end Solidity.Examples.Tactics.Contracts

@@ -3,9 +3,8 @@ import Solidity.Calculus.Core.Derive
 /-!
 # A scoped formula proved on its erasure: `sol_erase`
 
-`Calculus/Contracts.lean`'s contract rule (`useContract`, `FunContract`)
-is a derived rule over today's run, which `Proves` does not extend; a
-scoped statement reaches it through its erasure.  A formula with no hidden
+A scoped statement proved through its erasure, by a derived rule over
+today's run (the scoped contract rule is `Calculus/Core/FunContract.lean`'s).  A formula with no hidden
 binder or anonymising update, whose updates and modalities are boxes and
 whose programs bind fresh names (`Fml.Plain`), and which is first-order
 where it is negated or assumed (`Fml.negFO`), holds where its erasure does

@@ -152,11 +152,45 @@ partial def evaluable (φ : Expr) : MetaM Expr := do
         if let some x := listLitGet? l i then return ← evaluable x
   return φ
 
+/-- Whether `e` is an application of a constructor of `Fml`. -/
+def isFmlCtor (e : Expr) : MetaM Bool := do
+  let some n := e.getAppFn.constName? | return false
+  let some (.ctorInfo i) := (← getEnv).find? n | return false
+  return i.induct == ``Fml
+
+/-- The parameters of a quoted formula (decision 28): its leading `∀`s up to
+the first explicit one (`Fml.isExplicitAll`), past hidden binders; `none`
+where its leading binders are not all written out (a constant), every
+leading `∀` then read as a parameter. -/
+partial def paramCount (e : Expr) (acc : Nat := 0) : MetaM (Option Nat) := do
+  let e := (← instantiateMVars e).consumeMData
+  if Fml.isExplicitAll e then return some acc
+  if e.isAppOfArity ``Fml.all 5 then return ← paramCount e.appArg! (acc + 1)
+  if e.isAppOfArity ``Fml.bind 6 then return ← paramCount e.appArg! acc
+  if ← isFmlCtor e then return some acc
+  return none
+
+/-- `out`, a formula the strategy computed from `src`, with `src`'s explicit
+`∀`s marked again where the two have the same leading binders. -/
+partial def restoreMarks (src out : Expr) : Expr :=
+  let src := src.consumeMData
+  let isAll := out.isAppOfArity ``Fml.all 5 && src.isAppOfArity ``Fml.all 5
+  if isAll || (out.isAppOfArity ``Fml.bind 6 && src.isAppOfArity ``Fml.bind 6) then
+    let args := out.getAppArgs
+    let k := args.size - 1
+    let args := args.set! k (restoreMarks src.appArg! args[k]!)
+    let args := if isAll && Fml.isExplicitAll src then args.set! 2 (Fml.markExplicitVar args[2]!)
+      else args
+    mkAppN out.getAppFn args
+  else out
+
 /-- Compute the formula of a goal `Core.Valid φ` (`Solidity.normValid` for
 scoped formulas): the compiled strategy's result quoted back
 (`Core.Fml.quote`); the kernel re-checks it.  A formula with a variable
-or of an anonymous contract falls back to `Meta.reduce`. -/
-def normValid (g : MVarId) : TacticM MVarId := do
+or of an anonymous contract falls back to `Meta.reduce`.  With `src`, the
+formula the step started from, its explicit `∀`s stay marked
+(`restoreMarks`). -/
+def normValid (g : MVarId) (src : Option Expr := none) : TacticM MVarId := do
   let some (C, φ) ← validGoal? g | throwError "expected a goal `Core.Valid φ`"
   let φ' ← match C.constName?, φ.hasFVar || φ.hasMVar with
     | some n, false =>
@@ -164,6 +198,9 @@ def normValid (g : MVarId) : TacticM MVarId := do
         (mkApp4 (mkConst ``Core.Fml.quote) C (quoteConstName n)
           (mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)) (← evaluable φ))
     | _, _ => withTransparency .all <| Meta.reduce φ (skipTypes := true) (skipProofs := true)
+  let φ' := match src with
+    | some src => restoreMarks src φ'
+    | none => φ'
   g.replaceTargetDefEq (mkApp2 (mkConst ``Core.Valid) C φ')
 
 /-- Apply `lem`, a lemma `Valid ψ → Valid φ`, to the goal `g`, and compute
@@ -173,7 +210,7 @@ def applyValid (tac : String) (g : MVarId) (lem : Expr) (unchanged : Option Mess
   let before ← instantiateMVars (← g.getType)
   let tag ← g.getTag
   let [g'] ← g.apply lem | throwError "{tac}: unexpected goals"
-  let g'' ← normValid g'
+  let g'' ← normValid g' (before.getAppArgs.back?)
   -- the goal keeps its name, as today's (`apply` names it by the premise)
   g''.setTag tag
   if let some msg := unchanged then

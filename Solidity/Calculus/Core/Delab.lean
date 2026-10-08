@@ -262,7 +262,9 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     let P ← Piece.build args[0]! (ps ++ qs)
     return ← mkAppM ``Solidity.Fml.modal #[args[4]!, P, ← tr ms args[7]!]
   if n == ``Fml.all && args.size == 5 then
-    return ← mkAppM ``Solidity.Fml.all #[args[2]!, args[3]!, ← tr (args[2]! :: ns) args[4]!]
+    -- an explicit `∀`'s mark (`Fml.markExplicit`) prints as nothing
+    let x := args[2]!.consumeMData
+    return ← mkAppM ``Solidity.Fml.all #[x, args[3]!, ← tr (x :: ns) args[4]!]
   if n == ``Fml.bind && args.size == 6 then return ← tr (args[3]! :: ns) args[5]!
   if n == ``Fml.anon && args.size == 4 then
     let some xs ← Solidity.listElems? args[2]! | return e

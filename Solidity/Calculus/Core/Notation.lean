@@ -35,7 +35,9 @@ somewhere in the formula, at the type the reading gave it:
   `Update.lean`'s `Post` names no fresh variable.
 
 The output is quoted (`Core.Fml.quote`) and printed by `Core.Delab`'s
-printer, as `dl{ … }` (a hidden binder printing as nothing).  `cdl[C]{ φ }`,
+printer, as `dl{ … }` (a hidden binder printing as nothing).  A `∀` written
+in the formula, past the parameters, is marked explicit on its variable
+(`Fml.markExplicit`, decision 28), which only the tactics read.  `cdl[C]{ φ }`,
 `cdl[C, m]{ φ }`, `cdl!{ φ }`, `cdl![m]{ φ }` are `dl[C]{ φ }`'s spellings.
 -/
 
@@ -185,8 +187,9 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
 read, a declared one included) bound outermost (`Fml.closeN`), each only if
 the formula reads it before anything binds it (tried without it, in order).
 A declared name's parameter is bound but not in the elaborator's scope, so
-the program's declaration shadows it, as `dl!` reads it. -/
-def elabDlC (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C []) := do
+the program's declaration shadows it, as `dl!` reads it.  With the number
+of parameters bound, the outermost binders (`Fml.markExplicit`). -/
+def elabDlCN (φ : RawFml) (pastAll : Bool := false) : Except String (Nat × Fml C []) := do
   let (used, declared) := φ.names
   let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
   let free := (used.filter fun x => (C.rootType x).isNone &&
@@ -210,7 +213,11 @@ def elabDlC (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C []) :
   for p in params do
     let ps' := ps.erase p
     if let .ok _ := run ps' then ps := ps'
-  run ps
+  return (ps.length, ← run ps)
+
+/-- `elabDlCN`'s formula. -/
+def elabDlC (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C []) :=
+  (elabDlCN C φ pastAll).map (·.2)
 
 end Read
 
@@ -311,7 +318,8 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
-    elabAgainstQ c fun q => `((elabDlC $c $raw $pastAll).map (Core.Fml.quote $q))
+    elabAgainstQ c fun q => `((elabDlCN $c $raw $pastAll).map fun r =>
+      Core.Fml.markExplicit r.1 (Core.Fml.quote $q r.2))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
     | some m =>
@@ -322,8 +330,11 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
         let rd ← read ``Modality.diamond
         let rb ← read ``Modality.box
         let e ← elabAgainstQ c fun q =>
-          `((do pure (Core.Fml.and (← elabDlC $c $rd $pastAll) (← elabDlC $c $rb $pastAll))).map
-              (Core.Fml.quote $q))
+          `(((do
+              let (n₁, d) ← elabDlCN $c $rd $pastAll
+              let (n₂, b) ← elabDlCN $c $rb $pastAll
+              pure (n₁, n₂, Core.Fml.and d b)) : Except String (Nat × Nat × Core.Fml $c [])).map
+                fun r => Core.Fml.markExplicitAnd r.1 r.2.1 (Core.Fml.quote $q r.2.2))
         let #[_, _, d, b] := e.getAppArgs | throwError "cdl[C, m]: not two readings{indentExpr e}"
         pure (d, b)
   if holes.isEmpty && d == b then return d
