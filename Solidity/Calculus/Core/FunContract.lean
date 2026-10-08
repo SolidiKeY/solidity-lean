@@ -56,66 +56,108 @@ section Wk
 
 /-- A term read with more locals around it (`Thin`). -/
 def Tm.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {s : Srt} → Tm C Γ s → Tm C Δ s
-  | _, .pvV i => .pvV (i.wk h)
-  | _, .pvP i => .pvP (i.wk h)
-  | _, .pvS i => .pvS (i.wk h)
-  | _, .pvI i => .pvI (i.wk h)
-  | _, .netOf i a => .netOf (i.wk h) (a.wk h)
-  | _, .app0 o => .app0 o
-  | _, .app1 o ho a => .app1 o ho (a.wk h)
-  | _, .app2 o a b => .app2 o (a.wk h) (b.wk h)
-  | _, .app3 o a b c => .app3 o (a.wk h) (b.wk h) (c.wk h)
+  | _, t => Tm.casesOn (motive := fun s _ => Tm C Δ s) t
+    (pvV := fun i => .pvV (i.wk h)) (pvP := fun i => .pvP (i.wk h))
+    (pvS := fun i => .pvS (i.wk h)) (pvI := fun i => .pvI (i.wk h))
+    (netOf := fun i a => .netOf (i.wk h) (Tm.wk h a)) (app0 := fun o => .app0 o)
+    (app1 := fun o ho a => .app1 o ho (Tm.wk h a))
+    (app2 := fun o a b => .app2 o (Tm.wk h a) (Tm.wk h b))
+    (app3 := fun o a b c => .app3 o (Tm.wk h a) (Tm.wk h b) (Tm.wk h c))
+  termination_by structural _ t => t
+
+/-! `Tm.wk`'s equations, one a constructor: its own equation unfolds to
+the `casesOn`, which `simp` would unfold again inside it. -/
+
+section WkEqns
+
+variable {Γ Δ : Ctx} (h : Thin Γ Δ)
+
+theorem Tm.wk_pvV {p : PrimTy} (i : Idx Γ (.val p)) : (Tm.pvV (C := C) i).wk h = .pvV (i.wk h) :=
+  rfl
+theorem Tm.wk_pvP {R : RefTy} (i : Idx Γ (.alias R)) :
+    (Tm.pvP (C := C) i).wk h = .pvP (i.wk h) := rfl
+theorem Tm.wk_pvS (i : Idx Γ .old) : (Tm.pvS (C := C) i).wk h = .pvS (i.wk h) := rfl
+theorem Tm.wk_pvI {R : RefTy} (i : Idx Γ (.mem R)) :
+    (Tm.pvI (C := C) i).wk h = .pvI (i.wk h) := rfl
+theorem Tm.wk_netOf (i : Idx Γ .oldNet) (a : Tm C Γ .val) :
+    (Tm.netOf i a).wk h = .netOf (i.wk h) (a.wk h) := rfl
+theorem Tm.wk_app0 {s : Srt} (o : Op0 s) : (Tm.app0 (C := C) (Γ := Γ) o).wk h = .app0 o := rfl
+theorem Tm.wk_app1 {a s : Srt} (o : Op1 a s) (ho : o.named = false) (x : Tm C Γ a) :
+    (Tm.app1 o ho x).wk h = .app1 o ho (x.wk h) := rfl
+theorem Tm.wk_app2 {a b s : Srt} (o : Op2 a b s) (x : Tm C Γ a) (y : Tm C Γ b) :
+    (Tm.app2 o x y).wk h = .app2 o (x.wk h) (y.wk h) := rfl
+theorem Tm.wk_app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C Γ a) (y : Tm C Γ b)
+    (z : Tm C Γ c) : (Tm.app3 o x y z).wk h = .app3 o (x.wk h) (y.wk h) (z.wk h) := rfl
+
+end WkEqns
 
 theorem State.thin_glob {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) : (σ.thin h).glob = σ.glob :=
   rfl
 
 theorem Tm.eval_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
     {s : Srt} → (t : Tm C Γ s) → (t.wk h).eval σ = t.eval (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk, Tm.eval, State.thin, State.withEnv, Env.get_thin]
-  | _, .pvP i => by simp only [Tm.wk, Tm.eval, aliasPath, State.thin, State.withEnv, Env.get_thin]
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.eval, State.thin, State.withEnv, Env.get_thin]
+  | _, .pvP i => by
+    simp only [Tm.wk_pvP, Tm.eval, aliasPath, State.thin, State.withEnv, Env.get_thin]
   | _, .pvS i => by
-    simp only [Tm.wk, Tm.eval, State.thin, State.withEnv, Env.get_thin]
+    simp only [Tm.wk_pvS, Tm.eval, State.thin, State.withEnv, Env.get_thin]
     rfl
-  | _, .pvI i => by simp only [Tm.wk, Tm.eval, memRef, State.thin, State.withEnv, Env.get_thin]
+  | _, .pvI i => by simp only [Tm.wk_pvI, Tm.eval, memRef, State.thin, State.withEnv, Env.get_thin]
   | _, .netOf i a => by
-    simp only [Tm.wk, Tm.eval, Tm.eval_wk h σ a]
+    simp only [Tm.wk_netOf, Tm.eval, Tm.eval_wk h σ a]
     simp only [State.thin, State.withEnv, Env.get_thin]
   | _, .app0 o => rfl
-  | _, .app1 o _ a => by simp only [Tm.wk, Tm.eval, Tm.eval_wk h σ a]; rfl
-  | _, .app2 o a b => by simp only [Tm.wk, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b]; rfl
+  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.eval, Tm.eval_wk h σ a]; rfl
+  | _, .app2 o a b => by simp only [Tm.wk_app2, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b]; rfl
   | _, .app3 o a b c => by
-    simp only [Tm.wk, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b, Tm.eval_wk h σ c]; rfl
+    simp only [Tm.wk_app3, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b, Tm.eval_wk h σ c]; rfl
 
 theorem Tm.denote_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
     {s : Srt} → (t : Tm C Γ s) → (t.wk h).denote σ = t.denote (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk, Tm.denote, State.thin, State.withEnv, Env.get_thin]
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denote, State.thin, State.withEnv, Env.get_thin]
   | _, .pvP i => by
-    simp only [Tm.wk, Tm.denote, aliasPath, State.thin, State.withEnv, Env.get_thin]
-  | _, .pvS i => by simp only [Tm.wk, Tm.denote, State.thin, State.withEnv, Env.get_thin]
+    simp only [Tm.wk_pvP, Tm.denote, aliasPath, State.thin, State.withEnv, Env.get_thin]
+  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denote, State.thin, State.withEnv, Env.get_thin]
   | _, .pvI i => rfl
   | _, .netOf i a => by
-    simp only [Tm.wk, Tm.denote, Tm.denote_wk h σ a]
+    simp only [Tm.wk_netOf, Tm.denote, Tm.denote_wk h σ a]
     simp only [State.thin, State.withEnv, Env.get_thin]
   | _, .app0 o => rfl
-  | _, .app1 o _ a => by simp only [Tm.wk, Tm.denote, Tm.denote_wk h σ a]; rfl
+  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.denote, Tm.denote_wk h σ a]; rfl
   | _, .app2 o a b => by
-    simp only [Tm.wk, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.eval_wk h σ a,
+    simp only [Tm.wk_app2, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.eval_wk h σ a,
       Tm.eval_wk h σ b]
     rfl
   | _, .app3 o a b c => by
-    simp only [Tm.wk, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.denote_wk h σ c]
+    simp only [Tm.wk_app3, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.denote_wk h σ c]
 
 /-- A first-order formula read with more locals around it; `none` on an
 update, a modality, a `havoc`, a hidden binder or an anonymising update. -/
-def Fml.wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) : Fml C Γ → Option (Fml C Δ)
-  | .tt => some .tt
-  | .eq a b => some (.eq (a.wk h) (b.wk h))
-  | .defined t => some (.defined (t.wk h))
-  | .not φ => (φ.wkFO h).map .not
-  | .and φ ψ => do pure (.and (← φ.wkFO h) (← ψ.wkFO h))
-  | .imp φ ψ => do pure (.imp (← φ.wkFO h) (← ψ.wkFO h))
-  | .all x p φ => (φ.wkFO h.keep).map (.all x p)
-  | _ => none
+def Fml.wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) (φ : Fml C Γ) : Option (Fml C Δ) :=
+  Fml.casesOn (motive := fun Γ _ => (Δ : Ctx) → Thin Γ Δ → Option (Fml C Δ)) φ
+    (tt := fun _ _ => some .tt) (eq := fun a b _ h => some (.eq (a.wk h) (b.wk h)))
+    (defined := fun t _ h => some (.defined (t.wk h)))
+    (not := fun φ _ h => (Fml.wkFO h φ).map .not)
+    (and := fun φ ψ _ h => do pure (.and (← Fml.wkFO h φ) (← Fml.wkFO h ψ)))
+    (imp := fun φ ψ _ h => do pure (.imp (← Fml.wkFO h φ) (← Fml.wkFO h ψ)))
+    (upd := fun _ _ _ _ _ => none) (modal := fun _ _ _ _ _ _ => none)
+    (havoc := fun _ _ _ => none) (all := fun x p φ _ h => (Fml.wkFO h.keep φ).map (.all x p))
+    (bind := fun _ _ _ _ _ _ => none) (anon := fun _ _ _ _ => none) Δ h
+  termination_by structural φ
+
+section WkFOEqns
+
+variable {Γ Δ : Ctx} (h : Thin Γ Δ)
+
+theorem Fml.wkFO_not (φ : Fml C Γ) : (Fml.not φ).wkFO h = (φ.wkFO h).map .not := rfl
+theorem Fml.wkFO_and (φ ψ : Fml C Γ) :
+    (Fml.and φ ψ).wkFO h = (do pure (.and (← φ.wkFO h) (← ψ.wkFO h))) := rfl
+theorem Fml.wkFO_imp (φ ψ : Fml C Γ) :
+    (Fml.imp φ ψ).wkFO h = (do pure (.imp (← φ.wkFO h) (← ψ.wkFO h))) := rfl
+theorem Fml.wkFO_all (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) :
+    (Fml.all x p φ).wkFO h = (φ.wkFO h.keep).map (.all x p) := rfl
+
+end WkFOEqns
 
 /-- `Fml.wkFO`, `true` where it is `none`. -/
 def Fml.wkD {Γ Δ : Ctx} (h : Thin Γ Δ) (φ : Fml C Γ) : Fml C Δ := (φ.wkFO h).getD .tt
@@ -138,46 +180,46 @@ theorem holds_wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) : (φ : Fml C Γ) → {φ' : F
     rw [Tm.eval_wk, TState.thin_erase]
   | .not φ, _, e, σ => by
     cases hφ : φ.wkFO h with
-    | none => simp only [Fml.wkFO, hφ, Option.map_none, reduceCtorEq] at e
+    | none => simp only [Fml.wkFO_not, hφ, Option.map_none, reduceCtorEq] at e
     | some φ' =>
-      simp only [Fml.wkFO, hφ, Option.map_some, Option.some.injEq] at e
+      simp only [Fml.wkFO_not, hφ, Option.map_some, Option.some.injEq] at e
       cases e
       exact not_congr (holds_wkFO h φ hφ σ)
   | .and φ ψ, _, e, σ => by
     cases hφ : φ.wkFO h with
-    | none => simp only [Fml.wkFO, hφ, Option.bind_none, Option.bind_eq_bind, reduceCtorEq] at e
+    | none => simp only [Fml.wkFO_and, hφ, Option.bind_none, Option.bind_eq_bind, reduceCtorEq] at e
     | some φ' =>
       cases hψ : ψ.wkFO h with
       | none =>
-        simp only [Fml.wkFO, hφ, hψ, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
+        simp only [Fml.wkFO_and, hφ, hψ, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
           reduceCtorEq] at e
       | some ψ' =>
-        simp only [Fml.wkFO, hφ, hψ, Option.bind_some, Option.bind_eq_bind, Option.pure_def,
+        simp only [Fml.wkFO_and, hφ, hψ, Option.bind_some, Option.bind_eq_bind, Option.pure_def,
           Option.some.injEq] at e
         cases e
         exact and_congr (holds_wkFO h φ hφ σ) (holds_wkFO h ψ hψ σ)
   | .imp φ ψ, _, e, σ => by
     cases hφ : φ.wkFO h with
-    | none => simp only [Fml.wkFO, hφ, Option.bind_none, Option.bind_eq_bind, reduceCtorEq] at e
+    | none => simp only [Fml.wkFO_imp, hφ, Option.bind_none, Option.bind_eq_bind, reduceCtorEq] at e
     | some φ' =>
       cases hψ : ψ.wkFO h with
       | none =>
-        simp only [Fml.wkFO, hφ, hψ, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
+        simp only [Fml.wkFO_imp, hφ, hψ, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
           reduceCtorEq] at e
       | some ψ' =>
-        simp only [Fml.wkFO, hφ, hψ, Option.bind_some, Option.bind_eq_bind, Option.pure_def,
+        simp only [Fml.wkFO_imp, hφ, hψ, Option.bind_some, Option.bind_eq_bind, Option.pure_def,
           Option.some.injEq] at e
         cases e
         exact imp_congr (holds_wkFO h φ hφ σ) (holds_wkFO h ψ hψ σ)
   | .all x p φ, _, e, σ => by
     cases hφ : φ.wkFO h.keep with
-    | none => simp only [Fml.wkFO, hφ, Option.map_none, reduceCtorEq] at e
+    | none => simp only [Fml.wkFO_all, hφ, Option.map_none, reduceCtorEq] at e
     | some φ' =>
-      simp only [Fml.wkFO, hφ, Option.map_some, Option.some.injEq] at e
+      simp only [Fml.wkFO_all, hφ, Option.map_some, Option.some.injEq] at e
       cases e
       exact forall_congr' fun v => holds_wkFO h.keep φ hφ (σ.push (t := .val p) v)
   | .upd .., _, e, _ | .modal .., _, e, _ | .havoc _, _, e, _ | .bind .., _, e, _
-  | .anon .., _, e, _ => by simp only [Fml.wkFO, reduceCtorEq] at e
+  | .anon .., _, e, _ => nomatch e
 
 /-- What a formula says on the thinned state, its weakening says (`true`
 where it does not weaken). -/
@@ -281,17 +323,17 @@ def CallRet.resultC {p : PrimTy} (res : Option (Idx Γ (.val p))) :
 `ensures` weakened to the caller's context (`Fml.wkD`), the frame popped
 before the rest; `false` for a call that leaves several results or a
 memory return. -/
-def Fml.callPost (μ : Mutability) (args : Args C Γ ps) : {rs Γ' : Ctx} → CallRet Γ rs Γ' →
-    Fml C (rs ++ ps) → Prog C Γ' Γ₂ → Frames C Γ₂ Γ₀ → Fml C Γ₀ → Fml C Γ
-  | _, _, .none, ens, ω, κ, φ => .modal .box (args.declsThen .nil) .nil
-    (Fml.anonC μ (.imp (ens.wkD (Thin.atop ps Γ))
-      (.modal .box .nil (.pop .block (Ext.append Γ ps) (.seq ω κ)) φ)))
-  | _, _, .val p r res, ens, ω, κ, φ => .modal .box (args.declsThen .nil) .nil
-    (Fml.anonC μ (.all r p (.imp (ens.wkD (Thin.atop (.val p :: ps) Γ))
-      (.modal .box (CallRet.resultC res) (.pop .block (Ext.append Γ (.val p :: ps)) (.seq ω κ))
-        φ))))
-  | _, _, .rets _, _, _, _, _ => .ff
-  | _, _, .mem .., _, _, _, _ => .ff
+def Fml.callPost (μ : Mutability) (args : Args C Γ ps) {rs Γ' : Ctx} (ret : CallRet Γ rs Γ')
+    (ens : Fml C (rs ++ ps)) (ω : Prog C Γ' Γ₂) (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀) : Fml C Γ :=
+  CallRet.casesOn (motive := fun rs Γ' _ => Fml C (rs ++ ps) → Prog C Γ' Γ₂ → Fml C Γ) ret
+    (fun ens ω => .modal .box (args.declsThen .nil) .nil
+      (Fml.anonC μ (.imp (ens.wkD (Thin.atop ps Γ))
+        (.modal .box .nil (.pop .block (Ext.append Γ ps) (.seq ω κ)) φ))))
+    (fun p r res ens ω => .modal .box (args.declsThen .nil) .nil
+      (Fml.anonC μ (.all r p (.imp (ens.wkD (Thin.atop (.val p :: ps) Γ))
+        (.modal .box (CallRet.resultC res)
+          (.pop .block (Ext.append Γ (.val p :: ps)) (.seq ω κ)) φ)))))
+    (fun _ _ _ => .ff) (fun _ _ _ _ _ _ => .ff) ens ω
 
 /-- The body writes its return variables only, so "post" reads the
 parameters at the arguments' values. -/
@@ -581,8 +623,9 @@ variable {Γ ps rs Γ' Γf Γ₂ Γ₀ : Ctx}
 /-- A formula of the parameters closed by `∀` over each, the first
 parameter outermost, named as the call names them. -/
 def Fml.allArgs : {ps : Ctx} → Args C Γ ps → Fml C ps → Fml C []
-  | _, .nil, φ => φ
-  | _, .snoc as p x _, φ => Fml.allArgs as (.all x p φ)
+  | _, args, φ => Args.casesOn (motive := fun ps _ => Fml C ps → Fml C []) args
+    (fun φ => φ) (fun as p x _ φ => Fml.allArgs as (.all x p φ)) φ
+  termination_by structural _ args => args
 
 theorem holds_allArgs : {ps : Ctx} → (args : Args C Γ ps) → {φ : Fml C ps} →
     Valid (Fml.allArgs args φ) → ∀ σ : TState C ps, holds σ φ
