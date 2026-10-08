@@ -24,6 +24,9 @@ assumed), and the plain calculus (`Proves`) on a goal with no `transfer`
 left.  The invariant is a closed formula `I : Fml C []`, read in any scope
 past an update that drops every local (`Fml.closedAt`, invisible when
 printed), so it needs no weakening.
+
+`ProvesC` has no soundness theorem yet: its `ValidC` (the callback reading
+over `TState`) is still to port, so no rule here is checked against it.
 -/
 
 namespace Solidity.Core

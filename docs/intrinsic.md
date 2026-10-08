@@ -1177,9 +1177,21 @@ docstring still names `Premise.cover` (not this lane's file).
   heartbeats (today's needs 1000000).
 
 - **Left for the integration**: `ProofTree.Config.closers` stays empty
-  until `w2-sound`'s `Proves.close` (`Calculus/Core/CloseErase.lean`) is
+  until `w2-sound`'s `Proves.close` (w2-sound's Calculus/Core/CloseErase.lean) is
   merged; then a leaf with a formula left closes by
   `apply Proves.close` and the erased closer.
+- **Left: the callback reading over `TState`**, this lane's Work item not
+  done: `holdsC`/`ValidC`/`TransferSem`/`holdsT`/`ValidT` and their
+  theorems (`validT_*`, `after_frames_iff`, `holdsC_iff_holds`,
+  `holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC`),
+  `ProvesC.sound : ProvesC I Γ₀ H φ → ValidC I (H.wrap φ)` and
+  `ProvesC.close`, then the re-pin of `Examples/Tactics/CoreCallback.lean`.
+  Blocked on `holds` over `TState` from `sound` (that lane leaves the
+  uninhabited-memory-type decision open).  Until then `ProvesC` is a
+  stated judgement with no soundness theorem
+  (`Calculus/Core/Callback.lean` says so), and the callback-taclet rows
+  stay today's.  Carried into W3/W4: nothing may rely on a `ProvesC` rule
+  before `ProvesC.sound` is proved.
 
 Pins (`Examples/Tactics/CoreProofTree.lean`, `CoreSurface.lean`, `CoreSequents.lean`,
 `CoreCallback.lean`) differ from today's `Examples/ProofTree.lean` where
@@ -1265,6 +1277,11 @@ Before the lanes branch, the lead makes `Surface` the default and removes the `o
    - `expectedPins` may move only on the rows for the newly claimed `blockEmpty`, `functionFrameEmpty` and `functionBodyExpand`.
 
 **Merge order:** sem-del → calc-del → modal.
+
+**Carried from W2 `tree`:** the callback reading over `TState` (`holdsC`,
+`ValidC`, their theorems), `ProvesC.sound` and `ProvesC.close`, unless a
+W3 lane has landed them.  `Calculus/Callback.lean` is not deleted
+(`calc-del`) before they are, so no `ProvesC` rule is left unverified.
 
 **Checks:**
 - All three libraries build; `check-orphans`, `check-doc-paths`, `check-corpus`, `check-testsuite`; `solkeycheck` at zero.
@@ -2123,7 +2140,8 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   `Examples/Tactics/CoreSpec.lean`).
 - **Callbacks** (`Semantics/Core/Callback.lean`; superseded by W1
   `runlemmas` (2026-10-08): `StateInv` over `TState`; `holdsC` and its
-  theorems removed until W2 `tree`): `Invariant.fml :
+  theorems removed until W2 `tree`, which left them undone: see its
+  "Left" bullet, carried into W3/W4): `Invariant.fml :
   Core.Fml C []`, read on a state's global part (`Invariant.at`), so no
   `I.vars = []` premise and no frame lemmas; `ExecS I : State C Γ →
   Stmt C Γ Γ' → COut C Γ' → Prop`, `ExecP`, and `ExecF` for a modality's

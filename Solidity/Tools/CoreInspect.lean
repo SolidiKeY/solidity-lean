@@ -40,11 +40,9 @@ def wpQuotedC [FreshNames] (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) 
   let ψ' := ψ.erase []
   (ψ.quote c, if ψ'.inL Sym.empty then some (LFml.fmt ψ'.reduce) else none)
 
-/-- What `#step` shows of a scoped `φ`: the formula one step leaves, quoted,
-and `φ`'s erasure quoted, whose rule names the step. -/
-def stepQuotedC (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) :
-    Option Lean.Expr × Lean.Expr :=
-  (φ.step.map (·.quote c), (φ.erase []).quote c)
+/-- What `#step` shows of a scoped `φ`: the formula one step leaves, quoted. -/
+def stepQuotedC (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) : Option Lean.Expr :=
+  φ.step.map (·.quote c)
 
 /-- A closed scoped formula of a named contract: the formula, and the
 contract's name quoted. -/
@@ -74,7 +72,10 @@ partial def ruleAtC? (φ : Lean.Expr) : MetaM (Option Lean.Name) := do
     let e ← whnf e
     let args := e.getAppArgs
     match e.getAppFn.constName? with
-    | some ``Core.Fml.and => return (← go args[2]!) <|> (← go args[3]!)
+    | some ``Core.Fml.and =>
+      match ← go args[2]! with
+      | some n => return some n
+      | none => go args[3]!
     | some ``Core.Fml.imp => go args[3]!
     | some ``Core.Fml.upd => go args[5]!
     | some ``Core.Fml.havoc => go args[2]!
@@ -106,11 +107,10 @@ def elabWpCore : CommandElab := fun stx => liftTermElabM do
 def elabStepCore : CommandElab := fun stx => liftTermElabM do
   let some (φ, c) ← elabCoreFormula? ⟨stx[1]⟩ | throwUnsupportedSyntax
   let e ← mkAppM ``stepQuotedC #[c, φ]
-  let (ψ?, φ') ← unsafe evalExpr (Option Lean.Expr × Lean.Expr) (← inferType e) e
+  let ψ? ← unsafe evalExpr (Option Lean.Expr) (← inferType e) e
   match ψ? with
   | none => logInfo "no modality left: `close`"
   | some ψ =>
-    let _ := φ'
     let r := match ← ruleAtC? φ with
       | some n => toString n
       | none => "?"
@@ -122,6 +122,8 @@ def elabStepCore : CommandElab := fun stx => liftTermElabM do
 def coreProofTree? (t : Lean.Term) : TermElabM (Option ProofTree.Tree) := do
   let some (φ, _) ← elabCoreFormula? t | return none
   let ty ← whnf (← inferType φ)
+  unless ← isDefEq (ty.getArg! 1) (mkApp (mkConst ``List.nil [0]) (mkConst ``Core.LTy)) do
+    throwError "#proof_tree: the formula is not closed at the empty context"
   return some (← Core.ProofTree.ofFormula ty.appFn!.appArg! φ)
 
 /-- What `#proof_node n φ` shows of the node `n` of `tree`, as

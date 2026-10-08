@@ -146,4 +146,11 @@ info:   ~[additionAssignment]~>
 #guard_msgs in
 #step cdl!{ [ y = a + 1; ] true }
 
+/-! A tree is of a goal at the empty context: a formula over locals is
+refused, not grown on an ill-typed goal. -/
+
+/-- error: #proof_tree: the formula is not closed at the empty context -/
+#guard_msgs in
+#proof_tree (Core.Fml.tt : Core.Fml StandardExample [.val .uint])
+
 end Solidity.Examples.Tactics.CoreProofTree
