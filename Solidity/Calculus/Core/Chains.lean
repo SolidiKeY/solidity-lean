@@ -630,10 +630,16 @@ def lastName : Lean.Name → Lean.Name
 schema variables by unification (a hole's statement by its candidates,
 `matchFind`), its side conditions by `rfl` or `decide`; the label
 `StepRule.taclet k m s p d`. -/
-def labelAs? (c : Lean.Name) (k m s : Expr) : MetaM (Option Expr) := do
+def labelAs? (c : Lean.Name) (k m s : Expr)
+    (pre : Option (List (Expr × Expr) × FindHeads) := none) : MetaM (Option Expr) := do
   let sTy ← whnfR (← inferType s)
   let C := sTy.getArg! 0
-  let cands ← holeCandidates s
+  let (cands, hs) ← match pre with
+    | some p => pure p
+    | none => do
+      let cands ← holeCandidates s
+      pure (cands, ← FindHeads.of s cands)
+  unless ← mayFind c hs do return none
   let st ← saveState
   let r ← observing? do
     let ctor ← mkConstWithFreshMVarLevels c
@@ -690,8 +696,10 @@ def labelOfFocus? (f : Expr) : MetaM (Option (Lean.Name × Expr)) := do
     return some (`emptyModality, mkApp (mkConst ``StepRule.emptyModality) (f.getArg! 0))
   let a := f.getAppArgs
   unless a.size == 6 do return none
+  let cands ← holeCandidates a[5]!
+  let pre := (cands, ← FindHeads.of a[5]! cands)
   for c in ← allRuleCtors do
-    if let some l ← labelAs? c a[1]! a[2]! a[5]! then return some (lastName c, l)
+    if let some l ← labelAs? c a[1]! a[2]! a[5]! pre then return some (lastName c, l)
   return none
 
 /-- The label of `~[r]~>` on the focus `f`: the constructor `r` must derive it. -/
@@ -1448,10 +1456,23 @@ elab_rules : tactic
     solveCore g
     Tactic.replaceMainGoal []
 
+/-- Whether the term `t` is today's notation (`dl!{ … }`, `dl[C]{ … }`)
+with the scope's switch off (`core_surface%`, `Calculus/Core/Surface.lean`):
+it reads as `Update.lean`'s formula, so a command on scoped formulas steps
+aside without elaborating it, which today's command does again
+(`Tools/CoreInspect.lean`'s `elabCoreFormula?` does the same). -/
+def todaysNotation (t : Syntax) : TermElabM Bool := do
+  let some (.atom _ v) := t.getHead? | return false
+  unless v.startsWith "dl" do return false
+  let flag := mkNode `Solidity.Core.coreSurfaceFlag #[mkAtom "core_surface%"]
+  let some out ← liftMacroM (expandMacro? flag) | return true
+  return !(out.isIdent && out.getId.eraseMacroScopes == `true)
+
 /-- `#derivation φ` for a scoped `φ`: the lines the strategy takes, each with
 the rule that reached it. -/
 elab_rules : command
   | `(command| #derivation $t) => Command.runTermElabM fun _ => do
+    if ← todaysNotation t then throwUnsupportedSyntax
     let φ ← instantiateMVars (← elabTerm t none)
     synthesizeSyntheticMVarsNoPostponing
     let φ ← instantiateMVars φ

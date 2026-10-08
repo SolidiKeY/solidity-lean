@@ -96,6 +96,52 @@ def matchFind (f s : Expr) (cands : List (Expr × Expr)) : MetaM Bool := do
     st.restore
   return false
 
+/-- The conclusion of a constructor's type, under its binders. -/
+private def conclusionOf : Expr → Expr
+  | .forallE _ _ b _ => conclusionOf b
+  | e => e
+
+/-- The head constructors that `matchFind` needs to have a chance on `s`:
+`s`'s own (whnf), and the holes of its candidates. -/
+structure FindHeads where
+  stmt : Option Lean.Name
+  holes : List Lean.Name
+  noCands : Bool
+
+/-- `FindHeads` of the statement `s` and its hole candidates `cands`. -/
+def FindHeads.of (s : Expr) (cands : List (Expr × Expr)) : MetaM FindHeads := do
+  let env ← getEnv
+  let ctor? (e : Expr) : Option Lean.Name := e.getAppFn.constName?.filter env.isConstructor
+  return { stmt := ctor? (← whnfD s), holes := cands.filterMap (fun (c, _) => ctor? c),
+           noCands := cands.isEmpty }
+
+/-- Whether the constructor `c` may match a statement of heads `hs`, read off
+its type with no unification: a `\find` whose head is a statement
+constructor other than the statement's, or a hole constructor none of the
+candidates has, does not; anything else may.  A cheap filter in front of
+`ruleOf?`'s unification, which tried every constructor of the table at
+every statement. -/
+def mayFind (c : Lean.Name) (hs : FindHeads) : MetaM Bool := do
+  let env ← getEnv
+  let some info := env.find? c | return true
+  let concl := conclusionOf info.type
+  let args := concl.getAppArgs
+  unless args.size == 7 do return true
+  let f := args[5]!
+  let ctor? (e : Expr) : Option Lean.Name := e.getAppFn.constName?.filter env.isConstructor
+  match f.getAppFn.constName? with
+  | some n =>
+    if fillFns.contains n then
+      if hs.noCands then return false
+      if f.getAppNumArgs < 2 then return true
+      match ctor? (f.getArg! (f.getAppNumArgs - 2)) with
+      | some h => return hs.holes.contains h
+      | none => return true
+    match ctor? f, hs.stmt with
+    | some a, some b => return a == b
+    | _, _ => return true
+  | none => return true
+
 /-- **The rule `Stmt.step` fires on `s` under `m`**, its fresh names at `k`
 (`s : Core.Stmt C Γ Γ'`): the constructor of `Core.Taclet` or
 `Core.LeanTaclet` it is, and its premise, which is `Stmt.step`'s. -/
@@ -104,9 +150,11 @@ def ruleOf? (k m s : Expr) : MetaM (Option (Lean.Name × Expr)) := do
   unless sTy.isAppOfArity ``Solidity.Core.Stmt 3 do throwError "not a scoped statement: {s}"
   let C := sTy.getArg! 0
   let cands ← holeCandidates s
+  let hs ← FindHeads.of s cands
   for J in [``Solidity.Core.Taclet, ``Solidity.Core.LeanTaclet] do
     let some (.inductInfo ii) := (← getEnv).find? J | continue
     for c in ii.ctors do
+      unless ← mayFind c hs do continue
       let st ← saveState
       let r ← withNewMCtxDepth do
         let (xs, _, ty) ← forallMetaTelescopeReducing (← inferType (← mkConstWithFreshMVarLevels c))

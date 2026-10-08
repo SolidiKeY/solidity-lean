@@ -136,6 +136,7 @@ def Gen.stopNote (g : Gen) : MessageData :=
 declaration to paste. -/
 elab_rules : command
   | `(command| #chain $t) => Command.runTermElabM fun _ => do
+    if ← todaysNotation t then throwUnsupportedSyntax
     let φ ← instantiateMVars (← elabTerm t none)
     synthesizeSyntheticMVarsNoPostponing
     let φ ← instantiateMVars φ
