@@ -407,7 +407,12 @@ def movesAt (g : MVarId) (short : Bool := false) :
     -- `fill` does not reduce while unifying): the taclet elaborated after
     -- the goal (`by exact`), as `core_rule` does, so the line keeps its name
     let late ← ctorTacs c (← `(term| (by exact $d)))
-    let explicit := (← ctorTacs c d) ++ late.extract (late.size - 1) late.size
+    -- and where the taclet's side conditions are decided before its schema
+    -- variables are read off the goal (a read into a hole after a hidden
+    -- binder), the premise `Stmt.step` computes, by `rfl`
+    let byStep ← ctorTacs c (← `(term| $(mkIdent `rfl):ident))
+    let explicit := (← ctorTacs c d) ++ late.extract (late.size - 1) late.size ++
+      byStep.extract (byStep.size - 1) byStep.size
     if short then
       let box := (← whnf m).isConstOf ``Modality.box
       if let some t ← shortTac c rName lean box then return #[#[t]] ++ explicit

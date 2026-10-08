@@ -187,6 +187,20 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     exact ih (φ := .bind m x t φ) hb fun τ v => h _
   | anon H xs ih => intro φ hb h; exact ih (φ := .anon xs φ) hb fun τ _ => h _
 
+theorem Hyps.wrap_binds {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
+    (bs : List (Modality × Var × LTy)) → (φ : Fml C (Binds.ctx bs Γ)) →
+      (H.binds bs).wrap φ = H.wrap (Fml.binds bs φ)
+  | [], _ => rfl
+  | (_, _, _) :: bs, φ => Hyps.wrap_binds _ bs φ
+
+/-- Hidden binders are monotone. -/
+theorem Fml.binds_mono : {Γ : Ctx} → (bs : List (Modality × Var × LTy)) →
+    {φ ψ : Fml C (Binds.ctx bs Γ)} → (∀ τ, holds τ φ → holds τ ψ) →
+      ∀ σ : TState C Γ, holds σ (Fml.binds bs φ) → holds σ (Fml.binds bs ψ)
+  | _, [], _, _, h, σ, hσ => h σ hσ
+  | _, (_, _, _) :: bs, _, _, h, _, hσ =>
+    Modality.forallB_imp (fun _ hv => Fml.binds_mono bs h _ hv) hσ
+
 theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t))
     (hv : Bool) (φ : Fml C Γ) : (H.anonHavoc xs hv).wrap φ = H.wrap (Fml.anonHavoc xs hv φ) := by
   cases hv <;> rfl
@@ -279,5 +293,21 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
   | @closeTrue Γ H h => exact H.wrap_valid (φ := .tt) h fun _ => trivial
   | close ns hlen hnd h hc hB =>
     exact fun σ => holds_of_erase_valid _ hlen hnd (Fml.closableB_sound _ hc) hB h σ
+  | @merge Γ Δ Ε H m bs U U' V W φ hU hW _ ih =>
+    intro σ
+    have h : holds σ (H.wrap (Fml.binds bs (.upd m W φ))) := by
+      have := ih σ
+      rwa [show ((H.binds bs).upd m W).wrap φ = (H.binds bs).wrap (.upd m W φ) from rfl,
+        Hyps.wrap_binds] at this
+    rw [show (((H.upd m U).binds bs).upd m V).wrap φ = ((H.upd m U).binds bs).wrap (.upd m V φ)
+      from rfl, Hyps.wrap_binds]
+    exact H.wrap_mono (φ := Fml.binds bs (.upd m W φ))
+      (ψ := .upd m U (Fml.binds bs (.upd m V φ)))
+      (fun τ hτ => holds_liftBinds bs hU τ
+        (Fml.binds_mono bs (fun ρ hρ => holds_upd_seqPar hW ρ hρ) τ hτ)) σ h
+  | @updRw Γ Δ H U φ q hq _ ih =>
+    exact fun σ => H.wrap_mono (φ := .upd .box (U.rwC q) φ) (ψ := .upd .box U φ)
+      (fun τ hτ => holds_upd_rwC hq τ hτ) σ (ih σ)
+  | closeHolds h _ => exact h
 
 end Solidity.Core

@@ -162,12 +162,14 @@ def VHole.isTarget {p : PrimTy} : VHole C Γ p → Bool
 
 /-! ## Calls -/
 
-/-- Whether a call leaves its return variables to its caller (`CallRet.rets`,
-and a memory return): KeY's `FunctionBodyStatement` (`fbs`,
-`functionBodyExpand`); any other call is an `InternalCall` (`ic`). -/
+/-- Whether a call returns its values to targets after it (`CallRet.rets`):
+KeY's `FunctionBodyStatement` (`fbs`, `functionBodyExpand`), the call of a
+tuple assignment or of a specification's obligation; any other call, a
+memory return among them (`Person memory p = f();`, decision 19, rule-map
+rows 54/55), is an `InternalCall` (`ic`, `internalCallExpand`). -/
 def CallRet.isRets {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : Bool :=
   CallRet.casesOn (motive := fun _ _ _ => Bool) r false (fun _ _ _ => false) (fun _ => true)
-    (fun _ _ _ _ => true)
+    (fun _ _ _ _ => false)
 
 /-- The first argument that is not simple, if any (`functionCallArgCapture`
 captures it). -/

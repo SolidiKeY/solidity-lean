@@ -1,6 +1,7 @@
 import Solidity.Calculus.Rewrite
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.RewriteSyntax
 
 /-!
 # Update simplification: one update instead of a stack
@@ -9,14 +10,14 @@ Symbolic execution leaves one update per terminal rule in front of the
 postcondition; KeY merges them as it goes (`Calculus/UpdateRules.lean`,
 mini-solkey's update examples).  Here the same derivation is shown
 rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨`, and with
-`apply merge`/`apply simplify` on `⊢`.  The goals are under the box: a
+`refine merge rfl ?_`/`refine simplify ?_` on `⊢`.  The goals are under the box: a
 write under the diamond is not valid (`Close.lean`).
 
 The formulas read scoped (`open scoped Solidity.Core.Surface`): the rules
 rewrite a leaf's erasure (`sol_upd`, `sol_merge`,
 `Calculus/Core/Closers.lean`), today's update.  The sequent rules `merge`
-and `simplify` are today's `⊢`'s (the scoped sequent has the program rules
-and `close`): that derivation is read without the switch, at the end.
+and `simplify` are the scoped sequent's (`Calculus/Core/RewriteSyntax.lean`
+reads today's lines).
 -/
 
 namespace Solidity.Examples.Tactics.UpdateRules
@@ -156,22 +157,15 @@ theorem twoWrites_merge : ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; ] true } 
   trace_state
   sol_close
 
-end Solidity.Examples.Tactics.UpdateRules
-
-/-! ## Read without the switch -/
-
-namespace Solidity.Examples.Tactics.UpdateRules
-
-open Proves
-
-local instance : InContract := ⟨StandardExample⟩
-
 /-! ## In a derivation: `merge`, `simplify`
 
 Under `⊢` the updates are in the context, the latest last.  `merge` joins
-the last two, when the first writes only locals (`rfl` checks it);
-`simplify` cleans the last one.  Both are rules of the calculus
-(`Calculus/Logic.lean`), so they need not wait for the modalities to be gone. -/
+the last two (`sequentialToParallel`, `rfl` checks the merge);
+`simplify` cleans the last one.  The sequent is the scoped one: `merge` is
+a rule of the calculus (`Calculus/Core/Proves.lean`), so it need not wait for
+the modalities to be gone, and `simplify` drops what the update pops after
+it (`Calculus/Core/UpdateRules.lean`); the context also holds the hidden
+binders of `se1` and `sp1` and their scope's end, which print as nothing. -/
 
 /--
 trace: case h
@@ -203,6 +197,7 @@ theorem deepFieldWriteMerged :
   refine simplify ?_
   trace_state
   refine close ?_
+  sol_symex
   sol_close
 
 end Solidity.Examples.Tactics.UpdateRules
