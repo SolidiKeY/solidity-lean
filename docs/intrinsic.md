@@ -2036,8 +2036,10 @@ program.
   step is proved (`pendingLines`, checked against the text then).
   `Steps.length`, `Steps.eq_of_length`, `Steps.ofSymex`, `StepBy.unique`
   (the focus and the line).
-- *Tactics*: `sol_chain` on `~~>` (steps, merges, then the rewrites
-  searched); `sol_chain?` on a scoped chain (proof, continuation) and on
+- *Tactics*: `sol_chain` on a scoped `~~>` (steps, then merges; past the
+  program it refuses, so that a re-check never searches: the rewrites are
+  named, `sol_rws [..]`, and found by `sol_rws?`/`sol_chain?`, AGENTS.md
+  "Writing or fixing a tactic" 1); `sol_chain?` on a scoped chain (proof, continuation) and on
   `~~>` (writes the chain); `sol_rws [..]`/`sol_rws?` on `~~>`
   (`Calculus/Core/ChainGen.lean`).  The scoped `sol_chain` error prints the
   line written it fails to reach, and a rule-mismatch error prints the
@@ -2079,15 +2081,70 @@ program.
   scoped line types `carol`), the two postconditions `φ`, `ψ` of the merge
   under a branch (they stand at two contexts), `:= rfl` → `by sol_chain`.
 - *New pins*: `ChainNotation`'s `sol_chain?` and `sol_rws?` suggestions.
+- *Review fixes* (second pass): `ChainNotation.unresolved` and
+  `ChainRewrites.headlineWrite` are proved by the replay
+  (`sol_rws [sequentialToParallel]`, `sol_rws [sequentialToParallel,
+  simplifyUpdate]`), not by `sol_chain`, which searched past the program on
+  every re-check; a new `ChainNotation` pin is `sol_chain`'s refusal there.
+  `#last_line` (and `#chain_rest`) now read a `~~>` statement
+  (`Core.Fml.Leads`, `Core.Fml.LeadsE`: `Core.Chain.chainEnd?`), so the two
+  `#last_line` pins the flip had dropped are back as they were:
+  `#last_line unresolved` (the unresolved read, its text unchanged) and
+  `#last_line composed` (silent); `#last_line readSeg` is new, the same
+  report at the end of a scoped chain.  The nested-branch `#derivation` of
+  §9, deleted by the flip, is re-pinned with its new output (W3 reasons 1–3:
+  no `cov` conjunct, a branch's `}`, no `⟨[ ]⟩` line before
+  `emptyModality`).  §4's `calc` lost its no-op `~*>` link from a line to
+  itself (it is one `~[storageFieldWriteSave]~>` step now), and a new
+  scoped `calc` composes a `~[sequentialToParallel]~>` while the program is
+  open and a `~>` to `~~>` (the `MergeBy` and `~>` arms of the calc step,
+  `pendingLines` keyed by the merge's position, and the low-priority
+  `Trans R S Fml.Leads`).
 - No fresh name, rule name or `~*>` span of a chain flipped before moved.
 
-**Gate** `Examples/Chains/Storage` (two chains more on the scoped calculus):
-the file's text against `be64b9b`'s, both on this branch's libraries, as
-copies under `Solidity/Scratch/` with `Elab.async false`, the worker's CPU
-time (load under 1): 9.54, 9.55 s against 9.80, 9.91 s, +0.26–0.36 s
-(+3%), which on the integration's 8.6 s is about 8.9 s, inside the 9.0 s
-limit.  (CPU time includes import loading; the integration's wall-time
-method was not repeated.)
+**Gate** `Examples/Chains/Storage` (M0 7.5 s, limit 9.0 s): **failed,
+9.7 s.**  The integration's method: the real file in a fresh worker, one
+worker at a time, imports built, load under 1, wall time from the worker's
+start to its last CPU (sampled from `/proc` every 20 ms), each run a fresh
+worker:
+
+| Run | Libraries | File text | Wall | CPU |
+|---|---|---|---|---|
+| `be64b9b` (a detached worktree of it) | `be64b9b` | `be64b9b` | 8.45, 8.54, 8.57 s | 8.96–9.06 s |
+| mixed (a copy under `Solidity/Scratch/`) | `w3b-chains` | `be64b9b` | 9.43, 9.38 s | 9.84–9.90 s |
+| `w3b-chains` (`cd85314`) | `w3b-chains` | `w3b-chains` | 9.73, 9.75, 9.71 s | 10.24–10.27 s |
+
+So the branch costs +1.2 s (×1.14) over `be64b9b`: +0.9 s from the
+libraries, +0.3 s from the file's two newly flipped chains.  The import
+loading is the same on both (a file of the imports alone: 0.43, 0.44 s
+CPU).  `profiler` on `be64b9b`'s text, its libraries against this
+branch's, puts the +0.8 s in the statement elaboration of seven chains
+(`BalanceWrite` +57 ms, `BalanceRead` +54, `TokenWrite` +126,
+`AgeWriteRead` +39, `BalanceWriteRead` +238, `PushAfterPop` +245,
+`AccountsWrite` +50 ms), with `sol_chain`'s tactic time and the kernel's
+unchanged (`AgeWrite`, `AccountCopy` and the rest within a few ms); not
+found yet which change of `Core/Notation.lean` or `Core/Chains.lean` it
+is.  The first measurement of this section
+(9.54–9.91 s CPU, both texts on this branch's libraries, the delta added
+to the integration's 8.6 s) could not show this: both of its runs carried
+the library cost.
+
+**G0 exemption: the merge** (`Calculus/Core/Merge.lean`).  `Fml.mergeRun`
+and what it calls (`Upd.held`, `Upd.graft`, `Upd.lift?`, `Tm.substH`,
+`Fml.merge2`, `Fml.mergeAt`, `Subst.cons`) are written with `match` on
+the indexed families, against condition 1, and the kernel evaluates them
+(`Fml.MergeBy` by `rfl`, `kernelReflOrCases`; `ChainGen.mergePath`).
+Kept, as measured: a merge runs once a link, not once a step, and only two
+chains merge while the program is open.  Timed by the kernel's
+`isDefEq` of each `mergeRun k n A = some B` hint of the proof terms (a
+scratch module, this worktree): `FieldCopy.chain` 2.5 ms with `m` free
+(the attempt that fails before `Modality.casesOn`), then 9.3 and 8.7 ms
+(diamond, box); `TokenCopy.chain` 6.6, 12.2, 11.9 ms.  So about 20–30 ms a
+merge link at elaboration and 18–24 ms again in the declaration's kernel
+check, whose whole is 170 ms (`FieldCopy.chain`) and 66 ms
+(`TokenCopy.chain`).  No chain of `Examples/Chains/Storage` merges while
+the program is open.  A `casesOn`/`rec` rewrite with an
+`@[implemented_by]` twin is the fix if a chain ever merges in a loop.
 
 **Checks**: `lean_build` of `Solidity`, `solkeycheck`, `SolidityCorpus`,
 `SolkeyTestSuite` (the last two in `defaultTargets` for the run only):
@@ -2098,8 +2155,11 @@ green, 338 jobs.  `check-orphans` (but the git-excluded `Scratch/`),
 `Classical.choice`, `Quot.sound`.
 
 **Left**:
-- `calc` over scoped lines takes program steps and open-program merges; a
-  step past the program (`Update.lean`'s line) has no `Trans` with a scoped
+- **The Storage gate** (above): 9.7 s against the 9.0 s limit, +0.9 s of it
+  from this branch's library changes, in the statement elaboration of seven
+  chains; the change responsible is not identified yet.
+- `calc` over scoped lines takes program steps and open-program merges
+  (tested: `ChainNotation` §4); a step past the program (`Update.lean`'s line) has no `Trans` with a scoped
   one, so such a trace is one chain term (`ChainRewrites` §2, §3 now are).
 - The merge crosses a hidden binder only for a stack that declares nothing.
 - `sol_chain?` writes its lines in `cdl![m]{ … }` (`Core/ChainGen.lean`'s
@@ -2107,7 +2167,9 @@ green, 338 jobs.  `check-orphans` (but the git-excluded `Scratch/`),
 - The merge's soundness is over M3's `holds`; CORE 2's fold redoes it over
   `tholds` with the rest of `ChainKit`.
 - The read-only review pass was done by this agent alone (no subagents in
-  this session).
+  this session); a second review's confirmed findings are applied (the
+  pins and the gate above, `simp only` in `Merge.lean`'s `globFree`
+  lemmas, now `cases h`).
 
 ### W2.5/W3 integration (2026-10-08)
 
