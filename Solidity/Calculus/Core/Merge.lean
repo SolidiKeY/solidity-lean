@@ -20,7 +20,9 @@ is refused (`none`), never wrong.  Under the diamond the state between the
 two updates must keep its `bool` locals `bool`s (`Upd.boolB`).
 
 The merge is a function the kernel evaluates (`Fml.mergeRun`), and its
-soundness one theorem: `Fml.mergeRun_leads`.
+soundness one theorem: `Fml.mergeRun_leads`.  It is written with `match` on
+the indexed families, against Gate G0's first condition: an exemption, timed
+in `docs/intrinsic.md` (W3b), since it runs once a link and not once a step.
 -/
 
 namespace Solidity.Core
@@ -49,15 +51,15 @@ def _root_.Solidity.Op2.globFree {a b s : Srt} : Op2 a b s → Bool
 
 theorem _root_.Solidity.Op0.eval_globFree {s : Srt} {o : Op0 s} (h : o.globFree = true)
     (g g' : Semantics.State) : o.eval g = o.eval g' := by
-  cases o <;> first | rfl | simp [Op0.globFree, Op1.globFree, Op2.globFree] at h
+  cases o <;> first | rfl | cases h
 
 theorem _root_.Solidity.Op1.eval_globFree {a s : Srt} {o : Op1 a s} (h : o.globFree = true)
     (g g' : Semantics.State) (x : a.Ev) : o.eval g x = o.eval g' x := by
-  cases o <;> first | rfl | simp [Op0.globFree, Op1.globFree, Op2.globFree] at h
+  cases o <;> first | rfl | cases h
 
 theorem _root_.Solidity.Op2.eval_globFree {a b s : Srt} {o : Op2 a b s} (h : o.globFree = true)
     (g g' : Semantics.State) (x : a.Ev) (y : b.Ev) : o.eval g x y = o.eval g' x y := by
-  cases o <;> first | rfl | simp [Op0.globFree, Op1.globFree, Op2.globFree] at h
+  cases o <;> first | rfl | cases h
 
 theorem _root_.Solidity.Op3.eval_any {a b c s : Srt} (o : Op3 a b c s) (g g' : Semantics.State)
     (x : a.Ev) (y : b.Ev) (z : c.Ev) : o.eval g x y z = o.eval g' x y z := by
@@ -84,7 +86,7 @@ theorem Idx.ty_eq_of_toNat {Γ : Ctx} {t u : LTy} {i : Idx Γ t} {j : Idx Γ u}
 /-- The local `i` holds `r`. -/
 def Subst.set {Γ Δ : Ctx} (s : Subst C Γ Δ) {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t) :
     Subst C Γ Δ :=
-  fun {u} j => if h : i.toNat = j.toNat then .rhs (Idx.ty_eq_of_toNat h ▸ r) else s j
+  fun j => if h : i.toNat = j.toNat then .rhs (Idx.ty_eq_of_toNat h ▸ r) else s j
 
 /-- A local pushed, holding `h`. -/
 def Subst.cons {Γ Δ : Ctx} {t : LTy} (s : Subst C Γ Δ) (h : Held C Γ t) : Subst C Γ (t :: Δ)
