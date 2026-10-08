@@ -5588,7 +5588,7 @@ them were checked before it.
 
 ### W4 lane `sem-del` (2026-10-08, on `intrinsic`): the old runs' typed-side edges
 
-Directly on `intrinsic` from `4494a53`, three commits.  Built by
+Directly on `intrinsic` from `4494a53`, four commits.  Built by
 `lean_build` of `Solidity`, `solkeycheck`, `SolidityCorpus` and
 `SolkeyTestSuite` (the last two in `defaultTargets` for the run only,
 reverted after): 331 jobs, green.  `check-orphans` (317 reachable; only the
