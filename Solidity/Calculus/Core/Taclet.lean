@@ -24,8 +24,9 @@ whose dispatcher branches on what no side condition decides by computing
 (an array's element type, a call's arguments, a read through a hole that
 is a copy, a conditional written to a member) are proved by hand first.
 
-`Rules.lean` is imported for the printers (`Calculus/Core/Delab.lean`) and
-`Premise.erase`, the premise's erasure to today's.
+`RuleKit.lean` is imported for today's `Premise` and holes, which the
+printers (`Calculus/Core/Delab.lean`) and `Premise.erase`, the premise's
+erasure to today's, use.
 -/
 
 namespace Solidity.Core

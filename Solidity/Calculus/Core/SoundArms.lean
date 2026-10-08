@@ -11,7 +11,7 @@ between the update and M3's run of the statement (`*_run`, stated over any
 untyped state), carried to the typed run by the bridge
 (`Premise.sound_update_run`, `Calculus/Core/SoundKit.lean`).  Before them,
 M3's run with a local pushed (`pushed`, `MLoc.Agree`, `OpLoc.Agree`) and
-the global operations' frame lemmas (`Calculus/SoundUpdate.lean`'s, on
+the global operations' frame lemmas (`Theory/StateWrites.lean`'s, on
 `σ.glob`).
 
 The bridge asks of the typed run that it does not diverge under the
@@ -253,7 +253,7 @@ end Push
 Step 3 of every family.  The update reads its right-hand sides in the state
 it is applied in, the statement left to right; both reach the same writes
 through the same reads, and a write of the storage (the heap) changes
-nothing else (`Calculus/SoundUpdate.lean`'s `*_with`). -/
+nothing else (`Theory/StateWrites.lean`'s `*_with`). -/
 
 section Updates
 

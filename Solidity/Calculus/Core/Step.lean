@@ -154,7 +154,7 @@ def Frames.maxIdx : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Nat
       (fun _ κ => Frames.maxIdx κ)
   termination_by structural _ _ κ => κ
 
-/-- The largest index of a name the formula binds (`Logic.lean`'s `maxIdx`
+/-- The largest index of a name the formula binds (`Calculus/Hyp.lean`'s `maxIdx`
 of its erasure's names). -/
 def Fml.maxIdx : {Γ : Ctx} → Fml C Γ → Nat
   | _, φ => Fml.casesOn (motive := fun _ _ => Nat) φ

@@ -5,7 +5,7 @@ import Solidity.Calculus.TacticSyntax
 /-!
 # Symbolic execution on scoped formulas
 
-`Symex.lean`'s `sol_step` and `sol_symex` on a goal `Core.Valid φ`: the
+`sol_step` and `sol_symex` (`Calculus/TacticSyntax.lean`) on a goal `Core.Valid φ`: the
 strategy (`Core.Fml.step`, `Core.symex`, `Calculus/Core/Step.lean`) fires
 the rule of the first statement until no modality is left.  Every step is
 sound (`Fml.stepR_sound`), from the soundness of each rule

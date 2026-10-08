@@ -182,7 +182,7 @@ def theoryRewrite (thms : SimpTheorems) (C u : Expr) : MetaM (Option (Expr × Ex
 A context that the steps before built (`Var.fresh`, `Upd.subst`, `withSt`)
 stands in the goal as the call that computes it, which only the `dl{ … }`
 printer evaluates.  `normProves` computes it, by the compiled code, and
-quotes it back, as `normValid` (`Calculus/Symex.lean`) does for a `⊨` goal,
+quotes it back, as `normValid` (`Calculus/TacticSyntax.lean`) does for a `⊨` goal,
 so that the terms of the sequent are there to be found.  The kernel re-checks
 it (`replaceTargetDefEq`). -/
 

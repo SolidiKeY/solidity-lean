@@ -2580,7 +2580,7 @@ new home, so today's users are unchanged):
 | `Theory/StateWrites.lean` | `SoundKit`, `SoundUpdate`, `Derive` | the writes reshaped (`State.writeRes`, `writeStorage_eq`, `heapRes`, `writeAddr_eq`, the `*_with` lemmas, `copyHN`/`allocHN` and their `_eq`s, `pushAt_const`), the operator unfoldings, `Close.binding*`, the five `State.*_setEnv` rfl lemmas, `readLoc_eq`/`writeLoc_eq`; `UpdElem.write_lookup` and `Upd.foldl_lookup` (were `Derive.…`) |
 | `Semantics/NoPanicOps.lean` | `Semantics/NoPanic` | every operation's `*_noPanic` and `no_panic`; `NoPanic` keeps `Stmt.mayPanic`, `Prog.run_noPanic`, `Stmt.run_transfer_noPanic` (sem-del's) |
 
-Also moved, no text change: `Notation.lean`'s ten examples that run today's
+Also moved, no text change: `Notation.lean`'s fourteen examples that run today's
 `Fml.step`/`symex` → `Symex.lean` (section `ReadBack`; `Notation` no longer
 imports `Symex`); `Problem.lean`'s `Derive.storageWrites`/`scanLeaves` →
 `Derive.lean`.  `Problem` now imports `Spec` (not `Derive`), `Close`

@@ -730,7 +730,7 @@ attribute [delab app.Solidity.Core.Fml.eq, delab app.Solidity.Core.Fml.defined,
 /-! ## Sequents -/
 
 /-- A sequent's context, erased: the rest `..H` when it is a variable, the
-entries as `Logic.lean`'s `Hyp`s, and the names of the last scope.  What
+entries as `Calculus/Hyp.lean`'s `Hyp`s, and the names of the last scope.  What
 erasure loses prints as nothing: an update of pops only, and the hidden
 binder (it only names the local it puts in scope). -/
 partial def hypsParts (c H : Expr) : TrM (Option Lean.Name × Array Expr × List Expr) := do

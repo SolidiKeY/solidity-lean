@@ -5,7 +5,7 @@ import Solidity.Semantics.NoPanicOps
 # A term never panics
 
 A term reads the state through the interpreter's operations, none of which
-panics (`Semantics/NoPanic.lean`), so neither does a term nor an update
+panics (`Semantics/NoPanicOps.lean`), so neither does a term nor an update
 (`Upd.apply_ne_panic`).  That is what lets a formula read an update as a box
 reads a revert (`Modality.after`) while it reads a program with
 `Modality.afterRun`: an update taclet's premise and its statement then agree
