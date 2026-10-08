@@ -11,11 +11,13 @@ of the `Derived` modules (`docs/intrinsic.md`, W2 `symex`, the early gate).
 Each is checked to erase to its statement in `Problems.lean`.  They are
 declared, not compiled (`decl`): compiling 437 obligations in one command
 takes more than the default heartbeats, and the scoped `sol_prove` reads an
-obligation by its value (`Core.Symex.evaluable`).  W3 `testsuite` moves
-them into `Problems.lean` as `Solkey.TestSuite.f.problem` (`main`), the
-legacy ones renamed `.problem.legacy`, once the flip can take every
-`Derived` module (`docs/intrinsic.md`, W3 lane `testsuite`).
+obligation by its value (`Core.Symex.evaluable`).  At the flip this file
+becomes `solc_scoped_problems Solkey.TestSuite main decl`, declaring
+`Solkey.TestSuite.f.problem`, while `Problems.lean` keeps
+`solc_problems Solkey.TestSuite legacy` (the `TestSuite/Problems` timing
+gate), and the `Derived` modules import this file (`docs/intrinsic.md`,
+W3 lane `testsuite`).
 -/
 
-/-- info: 437 obligations declared scoped, 437 erasing to their legacy statement -/
+/-- info: 437 obligations declared scoped -/
 #guard_msgs in solc_scoped_problems Solkey.TestSuite decl

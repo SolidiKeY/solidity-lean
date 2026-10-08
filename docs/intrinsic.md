@@ -1527,7 +1527,14 @@ module: 7, 3, 21, 12, 0, 8, 29, 14, 1, 0, 0, 7, 0, 5; Derived9–11: 1 of 91),
 so no `Derived` module can flip with its text unchanged.  What landed is
 everything the flip needs but that:
 
-* **`sol_prove` on `⊢`** (`Calculus/Core/ProvesDerive.lean`): nobody had
+* **`sol_prove` on `⊢`** (`Calculus/Core/ProvesDerive.lean`; **out of
+  lane, for the lead**: this module, its `Solidity.lean` import and its
+  `docs/module-map.md` row are outside `TestSuite/**`, `Solkey/**` and
+  `Frontend/Problems.lean`, and its `@[tactic Solidity.tacticSol_prove]`
+  elaborator reaches every `Core.Proves C R [] H φ` goal in the library,
+  the `tactics` lane's `Examples/Tactics` among them.  The lead lands it as
+  its own commit on `intrinsic`, or merges it ahead of `w25-testsuite`, so
+  that `tactics` rebases onto it rather than meeting it at the merge): nobody had
   built it (W2 `symex`'s `sol_prove` proves `Core.Valid`, and `Valid` does
   not give `Proves`).  `Seq.run` walks the sequent as `Proves` has its rules
   (fresh index `Hyps.fresh`, so a split's branches number their fresh names
@@ -1543,8 +1550,12 @@ everything the flip needs but that:
   the same 107 (one session, other lanes running).  One text difference:
   `testStorageNestedPushReturnAlias` leaves one goal of today's calculus,
   where `Derived7` has `case leaf1`/`case leaf2`; at the flip its
-  `case leaf2` goes (a pin of kind 3: the walk splits the sequent before the
-  closer does).
+  `case leaf2` goes, because the walk splits the sequent before the closer
+  does.  **A deviation, for the lead to approve**: it is none of the
+  allowed kinds 1–6 (kind 3 is fewer steps where branches share a frame,
+  not one fewer residual leaf), and it breaks W3's "`Derived1`–`14` text
+  unchanged".  The alternative is to give the scoped walk today's leaf
+  numbering for that obligation, so `Derived7` keeps both cases.
 * **The flip switches** (`Frontend/Problems.lean`): `solc_problems N legacy`
   declares `N.f.problem.legacy`, `solc_scoped_problems N main` declares
   `N.f.problem`, `decl` skips compiling; `#solkey_problem`, `#solkey_scan`
@@ -1553,7 +1564,9 @@ everything the flip needs but that:
   (`provesScoped`), so `Report.lean`'s 437 holds across the flip.
 * **The erase guard** is in `solc_scoped_problems`: each scoped obligation's
   `Fml.erase []` is its legacy statement, compared as quoted expressions
-  (`Fml` has no `DecidableEq`).  437 of 437, in 0.36 s.
+  (`Fml` has no `DecidableEq`).  437 of 437, in 0.36 s.  A mismatch, or a
+  missing legacy statement (with `main`, no `N.f.problem.legacy`), is an
+  error; the info line is unchanged.
   `TestSuite/CoreProblems.lean` now uses it (`… decl`), its local command
   gone.
 
@@ -1571,11 +1584,11 @@ everything the flip needs but that:
   `CoreProblems.lean` holds `solc_scoped_problems Solkey.TestSuite main
   decl`, which the `Derived` modules import.
 
-**Pins changed** (both the erase guard's count in the info line):
-`Solkey/Constructors.lean` (`1 obligation declared scoped, 1 erasing to
-its legacy statement`) and `TestSuite/CoreProblems.lean` (`437 …, 437
-erasing to their legacy statement`).  `Derived1`–`14`, `Report.lean` and
-`Problems.lean`'s pins are unchanged.
+**Pins changed:** none.  (A first version added the erase guard's count
+to the info line, moving `Solkey/Constructors.lean`'s and
+`TestSuite/CoreProblems.lean`'s pins, a change of none of the allowed
+kinds; review put them back, the guard reporting by error alone.)
+`Derived1`–`14`, `Report.lean` and `Problems.lean`'s pins are unchanged.
 
 **Checks.**  `lake build Solidity solkeycheck SolkeyTestSuite
 SolidityCorpus` green (323 jobs; the `Derived` modules built a few at a
@@ -1594,7 +1607,7 @@ time: all fourteen at once went past 30 GB beside the other lanes);
    `solc_scoped_problems Solkey.TestSuite main decl`; each `Derived`
    module imports `CoreProblems`, `Calculus.Core.ProvesDerive` and
    `Calculus.Core.Surface` and opens the scope; `Derived7` drops one
-   `case leaf2`; `CoreDerived9`–`11` and `CoreSeq` are deleted.
+   `case leaf2` (the deviation above, if the lead approves it); `CoreDerived9`–`11` and `CoreSeq` are deleted.
 3. `#solkey_derive?` still searches today's calculus; its suggestions read
    the same text, but the leaves it names are today's.
 

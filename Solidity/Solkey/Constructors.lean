@@ -59,7 +59,7 @@ syntax, `N.f.core` checked by the kernel. -/
 program resolved in its parameters' context, `N.f.problem.core`, checked to
 erase to today's. -/
 
-/-- info: 1 obligation declared scoped, 1 erasing to its legacy statement -/
+/-- info: 1 obligation declared scoped -/
 #guard_msgs in solc_scoped_problems Solkey.EtherWallet
 
 -- the scoped obligation erases to today's

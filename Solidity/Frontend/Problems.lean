@@ -104,8 +104,9 @@ def elabSolcProblems : CommandElab := fun stx => do
 scoped, `N.f.problem.core`, compiled; with `main`, `N.f.problem` (the flip:
 `solc_problems N legacy` first); with `decl`, not compiled (the scoped
 `sol_prove` reads an obligation by its value, `Core.Symex.evaluable`).
-Each is checked to erase to its legacy statement (`legacyProblem`), as
-expressions; an info names how many. -/
+Each is checked to erase to its legacy statement (`legacyProblem`;
+`N.f.problem.legacy` with `main`), as expressions; a missing legacy
+statement or a mismatch is an error. -/
 syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" main")? (&" decl")? :
   command
 
@@ -120,7 +121,6 @@ def elabSolcScopedProblems : CommandElab := fun stx => do
     let C ← unsafe evalConst Contract N
     let mut errs : Array String := #[]
     let mut defined : Array Lean.Name := #[]
-    let mut erased : Nat := 0
     for r in rows do
       unless r.status == .elaborated do continue
       let some m := r.tag.modality? | continue
@@ -132,12 +132,14 @@ def elabSolcScopedProblems : CommandElab := fun stx => do
       | .error e => errs := errs.push s!"{r.name}: {e}"
       | .ok φ =>
         -- the guard: the scoped statement erases to the legacy one
-        let ln := legacyProblem (← getEnv) n
-        if (← getEnv).contains ln then
+        let env ← getEnv
+        let ln := if stx[2].isNone then legacyProblem env n else n ++ `problem ++ `legacy
+        if !env.contains ln then
+          errs := errs.push s!"{r.name}: no legacy statement {ln}"
+        else
           let legacy ← unsafe evalConst (Solidity.Fml C) ln
-          if Solidity.Fml.quote (mkConst N) (φ.erase []) == Solidity.Fml.quote (mkConst N) legacy then
-            erased := erased + 1
-          else errs := errs.push s!"{r.name}: it does not erase to {ln}"
+          unless Solidity.Fml.quote (mkConst N) (φ.erase []) == Solidity.Fml.quote (mkConst N) legacy do
+            errs := errs.push s!"{r.name}: it does not erase to {ln}"
         let dn := n ++ suffix
         let decl := Declaration.defnDecl {
           name := dn, levelParams := [], type := fmlTy,
@@ -150,8 +152,7 @@ def elabSolcScopedProblems : CommandElab := fun stx => do
     if compile then compileDecls defined
     if errs.isEmpty then
       let k := defined.size
-      logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped, {erased} \
-        erasing to {if erased == 1 then "its" else "their"} legacy statement"
+      logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped"
     pure errs
   unless errs.isEmpty do
     throwError "solc_scoped_problems: {errs.size} obligations are not scoped:\n{"\n".intercalate errs.toList}"
