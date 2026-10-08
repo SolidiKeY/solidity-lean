@@ -1,5 +1,4 @@
 import Solidity.Calculus.Core.Taclet
-import Solidity.Calculus.Core.Cover
 import Solidity.Calculus.Logic
 
 /-!
@@ -19,10 +18,9 @@ under solkey's names where solkey has the rule:
 * `update`, `unfold`, `bind`, `split`, `check`, `done`, `branches`,
   `cases`, `inv`, `inline`: a taclet's premise in front of the rest `ω` and
   the frames `κ` (`Premise.fml`, its parts apart), one goal per conjunct.
-  `split` has KeY's two goals and, under the diamond, the cover goal
-  (`Calculus/Core/Cover.lean`): a condition can be stuck, so one of the two
-  conditions holding is a goal of its own; the invariant rule has it too,
-  after the frame's update;
+  `split` has KeY's two goals, under either modality: the diamond reads
+  from states whose `bool` locals hold `bool`s (`State.BoolOK`), where one
+  of a branch's conditions holds, so no third goal covers a stuck one;
 * `empty` (`emptyModality`): a finished program goes through its frames
   (`Frames.exit`), a scope end a popping update, which `updIntro` takes;
 * `closeTrue`, behind a context with no diamond update but scope ends
@@ -144,15 +142,13 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (h : Proves C R Γ₀ (H.bind x t) (.modal m P (.seq ω κ) φ)) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that branches: two goals, KeY's, each branch a block ended
-  as the premise says (`}` for an `if`), and under the diamond the cover:
-  one of the conditions holds (`Premise.cover`). -/
+  as the premise says (`}` for an `if`). -/
   | split {Γ Γ₁ Γ₂ Δ₁ Δ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : BlockKind} {c c' : Fml C Γ}
       {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.split b c c' P Q))
       (thn : Proves C R Γ₀ (H.pre c) (.modalK m P (.pop b P.ext (.seq ω κ)) φ))
-      (els : Proves C R Γ₀ (H.pre c') (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ))
-      (cov : m = .diamond → Proves C R Γ₀ H (.or c c')) :
+      (els : Proves C R Γ₀ (H.pre c') (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ)) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that checks (`assertSimple`): the goal with the condition
   assumed ("Holds"), and the condition ("Violated"). -/
@@ -193,8 +189,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   invariant now ("invariant initially valid"), and past the frame's
   anonymising update, the invariant and the condition's update, the body to
   its postcondition where the condition holds ("body preserves
-  invariant"), the rest where it does not ("use case"), and under the
-  diamond that one of the two conditions holds there (`Premise.cover`). -/
+  invariant"), the rest where it does not ("use case"). -/
   | inv {Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {I : Fml C Γ}
       {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {U : Upd C Γ Δ} {c c' : Fml C Δ}
@@ -205,8 +200,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (thn : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c)
         (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
       (els : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c')
-        (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)))
-      (cov : m = .diamond → Proves C R Γ₀ (((H.anonHavoc xs hv).pre I).upd m U) (.or c c')) :
+        (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ))) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that produces a block whose end drops a frame from under the
   locals it keeps (`expand_function_body` of a call that leaves its return
@@ -227,20 +221,16 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
 
 `[ if (b) { } else { } ] true`, `b` a `bool` local: `ifElseSplit`, then in
 each goal the block's end (an update that pops nothing, taken into the
-context) and `closeTrue`; under the box there is no cover goal. -/
+context) and `closeTrue`. -/
 
 example : Proves StandardExample .all [.val .bool] .nil
     (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
   .split (Taclet.step_eq .ifElseSplit) (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
-    nofun
 
 /-- The diamond twin: a scope end pops, so `closeTrue` still fires in the two
-branches, and the cover, `b ≐ true ∨ b ≐ false`, is a goal of its own: `b`
-may hold no `bool`, and then the run is stuck. -/
-example (cov : Proves StandardExample .all [.val .bool] .nil
-      (.or (Fml.isBool (.pvV .here) true) (Fml.isBool (.pvV .here) false))) :
-    Proves StandardExample .all [.val .bool] .nil
-      (.modal .diamond (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
-  .split rfl (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl)) fun _ => cov
+branches, and there is no third goal. -/
+example : Proves StandardExample .all [.val .bool] .nil
+    (.modal .diamond (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
+  .split rfl (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
 
 end Solidity.Core

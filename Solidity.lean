@@ -48,7 +48,6 @@ import Solidity.Calculus.Core.RuleShapes
 import Solidity.Calculus.Core.Completeness
 import Solidity.Calculus.Core.PrintedRules
 import Solidity.Calculus.Core.Logic
-import Solidity.Calculus.Core.Cover
 import Solidity.Calculus.Core.SoundKit
 import Solidity.Calculus.Core.SoundArms
 import Solidity.Calculus.Core.RunWk

@@ -508,7 +508,9 @@ end Runs
 /-- A formula whose binders are all fresh, and with no hidden binder nor an
 anonymising update: their untyped readings range over more states than the
 typed ones (the untyped `anon` over any binding, the erased hidden binder
-over whatever the name held). -/
+over whatever the name held).  Its updates and modalities are boxes: the
+diamond reads only from and into states whose `bool` locals hold `bool`s
+(`State.BoolOK`), which the erasure does not ask. -/
 def Fml.Plain : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, _, .tt => True
   | _, _, .eq _ _ => True
@@ -516,9 +518,9 @@ def Fml.Plain : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, ns, .not φ => φ.Plain ns
   | _, ns, .and φ ψ => φ.Plain ns ∧ ψ.Plain ns
   | _, ns, .imp φ ψ => φ.Plain ns ∧ ψ.Plain ns
-  | _, ns, .upd _ U φ => U.Fresh ns ∧ φ.Plain (U.names ns)
-  | _, ns, .modal _ P κ φ =>
-    P.Fresh [] ns ∧ κ.Fresh (P.outNames ns) ∧ φ.Plain (κ.outNames (P.outNames ns))
+  | _, ns, .upd m U φ => m = .box ∧ U.Fresh ns ∧ φ.Plain (U.names ns)
+  | _, ns, .modal m P κ φ =>
+    m = .box ∧ P.Fresh [] ns ∧ κ.Fresh (P.outNames ns) ∧ φ.Plain (κ.outNames (P.outNames ns))
   | _, ns, .havoc φ => φ.Plain ns
   | _, ns, .all x _ φ => x ∉ ns ∧ φ.Plain (x :: ns)
   | _, _, .bind .. => False
@@ -569,8 +571,10 @@ theorem holds_erase : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.
   | _, .and φ ψ, _, hφ, _, _, hag => and_congr (holds_erase φ hφ.1 hag) (holds_erase ψ hφ.2 hag)
   | _, .imp φ ψ, _, hφ, _, _, hag => imp_congr (holds_erase φ hφ.1 hag) (holds_erase ψ hφ.2 hag)
   | _, .upd m U φ, ns, hφ, σ, τ, hag => by
+    obtain ⟨rfl, hφ⟩ := hφ
     have hU := Upd.apply_erase hag U hφ.1
-    show m.afterC (holds · φ) (U.apply σ) ↔ Solidity.holds τ (Fml.erase ns (.upd m U φ))
+    show Modality.afterC .box (holds · φ) (U.apply σ) ↔
+      Solidity.holds τ (Fml.erase ns (.upd .box U φ))
     simp only [Fml.erase]
     split
     · rename_i hnil
@@ -580,12 +584,14 @@ theorem holds_erase : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.
       | error => exact False.elim
       | ok σ' => exact fun h => holds_erase φ hφ.2 h
     · rename_i U' hne
-      show _ ↔ m.after _ (Solidity.Upd.apply (U.erase ns) τ)
-      exact m.afterC_rel hU fun _ _ h => holds_erase φ hφ.2 h
+      show _ ↔ Modality.after .box _ (Solidity.Upd.apply (U.erase ns) τ)
+      exact Modality.afterC_rel .box hU fun _ _ h => holds_erase φ hφ.2 h
   | _, .modal m P κ φ, ns, hφ, σ, τ, hag => by
-    show _ ↔ m.afterRun _ (Solidity.Prog.run τ (P.erase ns ++ κ.erase (P.outNames ns)))
+    obtain ⟨rfl, hφ⟩ := hφ
+    show Modality.afterRunC .box _ _ ↔
+      Modality.afterRun .box _ (Solidity.Prog.run τ (P.erase ns ++ κ.erase (P.outNames ns)))
     rw [Solidity.SemanticsProperties.Prog.run_append]
-    exact m.afterRunC_rel (Res.Rel.bind (Prog.run_rel hag P hφ.1) fun _ _ h =>
+    exact Modality.afterRunC_rel .box (Res.Rel.bind (Prog.run_rel hag P hφ.1) fun _ _ h =>
       Frames.run_erase κ hφ.2.1 h) fun _ _ h => holds_erase φ hφ.2.2 h
   | _, .havoc φ, _, hφ, σ, τ, hag => by
     show (∀ st nt, holds (σ.withGlob (σ.glob.havoc st nt)) φ) ↔ ∀ st nt, Solidity.holds _ _
