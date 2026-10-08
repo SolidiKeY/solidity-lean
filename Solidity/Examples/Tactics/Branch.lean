@@ -233,14 +233,18 @@ info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0;
 #guard (Core.Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
     if (c) { bool t = true; } } : Prog StandardExample)).toBool
 
+/-- Without the precondition the diamond holds too: `a` and `b` are bound
+(the parameters' `∀`), so the condition is never stuck.  Today's reading
+refuted it, in a state that binds no `a`. -/
+example : ⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 } := by
+  sol_prove
+
 end Solidity.Examples.Tactics.Branch
 
 /-! ## Read without the switch
 
 Under the diamond a walk's leaves are not closed by their erasure yet
-(`Core.Proves.close` takes box contexts), and the stuck condition of the
-refutation is today's: scoped, `a` and `b` are bound by `∀` and the diamond
-holds. -/
+(`Core.Proves.close` takes box contexts). -/
 
 namespace Solidity.Examples.Tactics.Branch
 
@@ -280,10 +284,5 @@ theorem branchDiamond :
     refine close ?_
     sol_symex
     sol_close
-
-/-- Without the precondition the diamond is not valid: in a state that does
-not bind `a`, the condition is stuck and the program never ends. -/
-example : ¬ (⊨ dl!{ ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x != 0 }) :=
-  fun h => (h Semantics.State.exampleStore).1
 
 end Solidity.Examples.Tactics.Branch
