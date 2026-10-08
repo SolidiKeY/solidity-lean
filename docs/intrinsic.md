@@ -2692,9 +2692,11 @@ checked one by one.
   - Unchanged: every `sol_prove?` suggestion (the scoped one suggests
     today's replay), `ExampleNames`' error text, `#proof_node`,
     `#proof_tree_json`, the fresh names.
-- **Gate** (`Examples/ProofTree`, 12.1 s): 11.4 s from its first command
-  to its last (timestamps in a scratch copy, imports cached; not the M0
-  method, other agents running).
+- **Gate** (`Examples/ProofTree`, 12.1 s): from its first command to its
+  last (timestamps in a scratch copy, imports cached; not the M0 method,
+  other agents running), 11.4 s before the `w3b-tactics` merge and 12.0 s
+  after it (the short walks re-run each line through the scope's macros):
+  at the limit.
 - **Left.**
   1. `Examples/Verify.lean` whole.  `#verify` would elaborate `⊨
      spec[C]{f}` in the caller's scope (a one-line change), but its
