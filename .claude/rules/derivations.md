@@ -17,8 +17,13 @@ Two directories, by proof style:
   The convention:
   1. **One chain term, every line written.** A worked chain is
      `theorem chain : A ~[r]~> B ~*> C ~[findOnSave]~> D … := by sol_chain`
-     (`Fml.Via`, a proposition, `Calculus/Chains.lean`): no `calc`, no `_`
-     line, the statement shows the whole trace. `Fml.Via.leads` makes it
+     over a scoped line (`dl![m]{ … }` on `Core.Post`): `Core.Fml.Via`, and
+     `Core.Fml.ViaE` once rewrites go on past the program
+     (`Calculus/Core/ChainKit.lean`), propositions. No `calc`, no `_` line,
+     the statement shows the whole trace. A scoped chain has no `~~>`: it is
+     one declaration. The chains left on `Update.lean`'s calculus
+     (`Examples/Chains/EvaluationOrder.lean`, the notation's own tests) are
+     `Calculus/Chains.lean`'s `Fml.Via`, which `Fml.Via.leads` makes
      `A ~~> Z`. (A lone `~*>` is the derivation itself, data: a `def`.)
   2. **No binding is dropped.** No `~[simplifyUpdate]~>`: the fresh captures
      (`se1`, `sp1`, `pv`, `acc`, …) stay in the update to the last line.
@@ -50,14 +55,16 @@ Two directories, by proof style:
      `dl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.account.balance, 10) } ⟨[ … ]⟩ φ }`,
      so every read resolves to a literal and arithmetic folds at the last
      line.
-  7. **Fast.** A file checks in the time it did before or faster. A chain
-     over `ChainGen.segLinks` (ten) links is split into segments, each a
-     `theorem` of its own, composed into `theorem chain : A ~~> Z` by
-     `Fml.Leads.via` — never given a bigger `maxHeartbeats`.
+  7. **Fast.** A file checks in the time it did before or faster, and no
+     chain is given a bigger `maxHeartbeats`. A scoped chain is one
+     declaration however long (`Storage.BalanceWriteRead` has 13 links). A
+     chain left on `Update.lean`'s calculus over `ChainGen.segLinks` (ten)
+     links is split into segments, each a `theorem` of its own, composed into
+     `theorem chain : A ~~> Z` by `Fml.Leads.via`.
 
   Generate a chain with `#chain φ` (the `chain-authoring` skill) rather than
-  writing it line by line: it prints the statement in this form, segments
-  included. A read of the state as the program found it (`find(storage, p)`)
+  writing it line by line: it prints the statement in this form (segments
+  included, on `Update.lean`'s calculus). A read of the state as the program found it (`find(storage, p)`)
   is a last line.
 - `Examples/Tactics/` — formulas `⊨ dl!{ pre → [ program ] post }` proved by
   tactics, and interpreter runs.
