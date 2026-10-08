@@ -3353,6 +3353,16 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     takes a typed transaction and asks the typed run to end (`TRes.Ends`);
     `Problem.deploy_of_valid_typed` states the typed deployment with no
     hypothesis.
+24. *Proposed (W3c `tactics`), the lead's call:* `ProvesC.valid` asks the
+    invariant first-order (`Fml.FO`, KeY's `CInv` of the storage and the
+    ledger): "the invariant holds" is then a fact of the erasure, which the
+    callee's havocked state and the updates read; today's asks it closed.
+25. *Proposed (W3c `tactics`), the lead's call:* `Core.Proves.closeHolds`,
+    today's semantic `Proves.close` over the typed reading (modal-free), is
+    a rule of the scoped sequent beside the erasure's `close`; the steps
+    after the program (`eqDSplit`, `applyOnRigidBox`, `simplify`, the goal's
+    `rewrite`, `assumeInv`, `openInv`) are derived from it, as today's are
+    from its `close`, and only `merge` and `updRw` are rules of their own.
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
