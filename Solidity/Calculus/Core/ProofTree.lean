@@ -177,7 +177,8 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let s := P.getArg! (P.getAppNumArgs - 2)
     let k ← mkAppM ``Hyps.fresh #[H, φ0]
     let some (c, p) ← ruleOf? k m s | return #[]
-    let some premise := p.getAppFn.constName? | return #[]
+    -- a premise built by a function (`Premise.expandCall`) is its constructor's
+    let some premise := (← whnf p).getAppFn.constName? | return #[]
     let some ctor := provesCtor premise | return #[]
     let toStep := if (`Solidity.Core.LeanTaclet).isPrefixOf c then ``LeanTaclet.toStep
       else ``Taclet.toStep
