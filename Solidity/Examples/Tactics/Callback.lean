@@ -1,4 +1,3 @@
-import Solidity.Calculus.Callback
 import Solidity.Calculus.Close
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -43,8 +42,9 @@ against `ValidC` for a first-order invariant (`ProvesC.valid`,
 (`.key`), `localValueDeclInitDrop` is a hidden binder's rule
 (`ProvesC.bind`), and "resume after callback" closes by the invariant
 assumed (`Proves.assumeInv`), or by the invariant opened at its scope
-(`Proves.openInv`) and the closer.  The counterexample run and the rules'
-pins are read without the switch, at the end.
+(`Proves.openInv`) and the closer.  The counterexample is a typed run with
+callbacks (`Semantics/Core/Callback.lean`'s `ExecS` over `TState`), and the
+rules are pinned as the scoped calculus has them (`Core.CallbackTaclet`).
 -/
 
 namespace Solidity.Examples.Tactics.Callback
@@ -176,78 +176,78 @@ theorem callToKeepsInv_noCallback :
       [ bool ok = to.send(5); sent = ok; ] balance + paidOut == deposited } :=
   fun σ v => Core.holds_of_holdsC_imp (callToKeepsInv σ v) rfl rfl
 
-end Solidity.Examples.Tactics.Callback
+/-! ## The counterexample, a typed run with callbacks
 
-/-! ## Read without the switch
+From a vault holding `5` for its customer, the interaction-first withdrawal
+runs with callbacks (`ExecP`, `Semantics/Core/Callback.lean`) over typed
+states: the storage at `Vault`'s types (`Storage Vault`), each step the
+typed run's (`ExecS.det`) but the payment, where the callee calls back
+(`ExecS.transferResume`). -/
 
-The counterexample is a run with callbacks over today's states
-(`Semantics/Callback.lean`'s `ExecS`), built step by step from a storage
-written out; the typed run's would need a typed storage of `Vault`
-(`TState`) and its `ExecS` steps.  The rules are pinned as today's prints
-them. -/
+/-- A `uint`. -/
+def u (n : Int) (h : PrimTy.uint.inRange n = true := by decide) : PrimTy.uint.Denote := ⟨n, h⟩
 
-namespace Solidity.Examples.Tactics.Callback.Untyped
+/-- `Vault`'s storage: `balance`, `paidOut`, `deposited`. -/
+def vault (b p d : Int) (hb : PrimTy.uint.inRange b = true := by decide)
+    (hp : PrimTy.uint.inRange p = true := by decide)
+    (hd : PrimTy.uint.inRange d = true := by decide) : Core.Storage Vault :=
+  .cons (.prim (u b hb)) (.cons (.prim (u p hp)) (.cons (.prim (u d hd)) .nil))
 
-open Proves Semantics
+/-- A vault holding `5` for its customer, nothing paid out, `10` in funds. -/
+def before : Core.TState Vault [] :=
+  { storage := vault 5 0 5, H := [], heap := Core.Heap.empty, env := (), selfBalance := u 10 }
 
-local instance : InContract := ⟨Vault⟩
+/-- A statement that pays nothing runs as the typed run, to the state it ends in. -/
+theorem execOfRun {C : Contract} {J : Core.StateInv C} {Γ Γ' : Core.Ctx} {σ : Core.TState C Γ}
+    {s : Core.Stmt C Γ Γ'} {o : Core.Out C σ.H Γ'} (hf : s.forks = false)
+    (h : s.trun σ = .ok o) : Core.ExecS J σ s (.ok o) := by
+  have := Core.ExecS.det (J := J) (σ := σ) hf
+  rwa [h] at this
 
-/-- `balance + paidOut == deposited`, today's. -/
-def vaultInv : Invariant Vault := ⟨dl!{ balance + paidOut == deposited }, rfl, rfl⟩
-
-/-- `uint amt = balance; to.transfer(amt); balance = 0; paidOut += amt;`, with
-the invariant before and after. -/
-def withdrawUnsafe : Fml Vault := dl!{ balance + paidOut == deposited →
-  [ uint amt = balance; to.transfer(amt); balance = 0; paidOut += amt; ]
-    balance + paidOut == deposited }
-
-/-- A vault holding `5` for its customer, nothing paid out, `to` the
-customer's address. -/
-def before : State :=
-  { storage := [("balance", .int 5), ("paidOut", .int 0), ("deposited", .int 5)],
-    env := [(.user "to", .val (.int 7))], selfBalance := 10 }
-
-/-- What a re-entrant withdrawal leaves when the vault pays: the `5` booked
-as paid out, the invariant kept. -/
-def reentered : List (Name × SVal) :=
-  [("balance", .int 0), ("paidOut", .int 5), ("deposited", .int 5)]
-
-/-- **Interaction first is not safe with callbacks.**  From `before`, the
-customer is paid `5`, calls back to withdraw again (leaving `reentered`,
-which keeps the invariant), and the first withdrawal's booking then adds its
-`5` a second time: `paidOut` is `10` against `5` deposited. -/
-theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdrawUnsafe := by
+/-- **Interaction first is not safe with callbacks.**  From `before`, with
+`to` the address `7`, the customer is paid `5`, calls back to withdraw
+again (leaving `balance = 0`, `paidOut = 5`, which keeps the invariant), and
+the first withdrawal's booking then adds its `5` a second time: `paidOut`
+is `10` against `5` deposited. -/
+theorem withdrawUnsafe_withCallback : ¬ Core.ValidT (.withCallback vaultInv) withdrawUnsafe := by
   intro h
-  have h := h before
-  simp only [withdrawUnsafe, holdsT, holdsC] at h
-  have hI : holds before vaultInv.fml := holds_eqD_iff.2 ⟨_, rfl, rfl⟩
-  -- the run: `amt = 5`; pay `5`; the callee withdraws again (`reentered`);
-  -- `balance = 0`; `paidOut += 5`
-  have H := h hI _
-    (.cons (ExecS.of_run rfl rfl)
-      (.cons (ExecS.transferResume (st := reentered) (nt := []) rfl
-        (holds_eqD_iff.2 ⟨_, rfl, rfl⟩) (holds_eqD_iff.2 ⟨_, rfl, rfl⟩))
-        (.cons (ExecS.of_run rfl rfl)
-          (.cons (ExecS.of_run rfl rfl) .nil))))
+  -- the run: `amt = 5`; pay `5`; the callee withdraws again; `balance = 0`; `paidOut += 5`
+  have H := h before (u 7) ?inv _
+    (.cons (execOfRun rfl rfl)
+      (.cons (Core.ExecS.transferResume (st := vault 0 5 5) (nt := []) rfl ?exit ?resume)
+        (.cons (execOfRun rfl rfl)
+          (.cons (execOfRun rfl rfl) .nil))))
+  case inv =>
+    simp only [Core.holdsC, Core.holds]
+    refine ⟨?_, ?_, ?_⟩
+    · exact ⟨_, by with_unfolding_all rfl⟩
+    · exact ⟨_, by with_unfolding_all rfl⟩
+    · with_unfolding_all exact Theory.StValue.Equiv.refl _
+  case exit => with_unfolding_all exact ⟨⟨_, rfl⟩, ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩
+  case resume => with_unfolding_all exact ⟨⟨_, rfl⟩, ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩
+  have H2 := H _ Core.ExecF.nil
+  simp only [Core.COut.after, Core.holdsC, Core.holds] at H2
+  obtain ⟨-, -, hE⟩ := H2
   -- `0 + 10 == 5` fails
-  obtain ⟨x, hx, hy⟩ := holds_eqD_iff.1 H
-  cases hx; cases hy
+  exact absurd (hE []) (by with_unfolding_all decide)
 
 /-! ## The rules -/
 
 /--
-info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {sadr se : Simple C PrimTy.uint},
-  dl[CallbackTaclet C]{ [ sadr .transfer(se); ] ⇝
+info: @Core.CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}
+  {sadr se : Core.Simple C Γ PrimTy.uint},
+  dl[Core.CallbackTaclet C k]{ [ sadr .transfer(se); ] ⇝
     { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @CallbackTaclet.transferWithCallbackBox
+#guard_msgs in #check @Core.CallbackTaclet.transferWithCallbackBox
 
 /--
-info: @CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {pv : Var} {sadr se : Simple C PrimTy.uint},
-  dl[CallbackTaclet C]{ [ pv = sadr .send(se); ] ⇝
+info: @Core.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}
+  {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)} {sadr se : Core.Simple C Γ PrimTy.uint},
+  dl[Core.CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
     "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @CallbackTaclet.sendWithCallbackBox
+#guard_msgs in #check @Core.CallbackTaclet.sendWithCallbackBox
 
-end Solidity.Examples.Tactics.Callback.Untyped
+end Solidity.Examples.Tactics.Callback
