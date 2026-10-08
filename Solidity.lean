@@ -47,6 +47,7 @@ import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.Completeness
 import Solidity.Calculus.Core.RuleExists
 import Solidity.Calculus.Core.SolkeyFragment
+import Solidity.Calculus.Core.SolkeyProves
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.SoundKit
 import Solidity.Calculus.Core.SoundArms
