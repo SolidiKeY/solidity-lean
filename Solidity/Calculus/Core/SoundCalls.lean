@@ -270,7 +270,7 @@ variable {Γ : Ctx} {m : Modality}
 /-- `internalCallExpand` of a call with no result. -/
 theorem Premise.sound_callNone {ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
     (body : Prog C ([] ++ ps) Γf) (σ : TState C Γ) :
-    Premise.Sound m (.call f args .none body)
+    Premise.Runs m (.call f args .none body)
       (.unfold (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil))
         (Ext.append Γ ps)) σ := by
   refine Premise.sound_unfold σ ?_
@@ -302,7 +302,7 @@ theorem TRes.ok_bind' {α β : Type} (a : α) (f : α → TRes β) : (Except.ok 
 theorem Premise.sound_callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p : PrimTy)
     (r : Var) (res : Option (Idx Γ (.val p))) (body : Prog C ([.val p] ++ ps) Γf)
     (σ : TState C Γ) :
-    Premise.Sound m (.call f args (.val p r res) body)
+    Premise.Runs m (.call f args (.val p r res) body)
       (.unfold (args.declsThen (.cons (.declLocal p r none)
         (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (match res with
           | none => .nil
@@ -345,7 +345,7 @@ theorem Premise.sound_callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p
 (`CallRet.rets`): the frame dropped from under them. -/
 theorem Premise.sound_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
     (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) (σ : TState C Γ) :
-    Premise.Sound m (.call f args (.rets bs) body)
+    Premise.Runs m (.call f args (.rets bs) body)
       (.inline (args.declsThen (bs.declsThen
           (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
         (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))) σ := by
@@ -385,7 +385,7 @@ from under the object. -/
 theorem Premise.sound_callMem {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (R : RefTy)
     (r : Var) (hd : (Ty.ref R).defaultOkS = true) (hm : (Ty.ref R).mapFree = true)
     (body : Prog C ([.mem R] ++ ps) Γf) (σ : TState C Γ) :
-    Premise.Sound m (.call f args (.mem R r hd hm) body)
+    Premise.Runs m (.call f args (.mem R r hd hm) body)
       (.inline (args.declsThen (.cons (.declMem R r none hd hm)
           (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
         (.keep (Thin.ofExt (Ext.append Γ ps)))) σ := by
@@ -437,7 +437,7 @@ theorem TRun.callFrom_capture {Γ' Γ'' ps rs Γf : Ctx} {t : LTy} (ret : CallRe
 theorem Premise.sound_callCaptureNone {ps Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
     (body : Prog C ([] ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
     {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : TState C Γ) :
-    Premise.Sound m (.call f args .none body)
+    Premise.Runs m (.call f args .none body)
       (.capture p (fse k) v (.call f as' .none body)) σ := by
   refine Premise.sound_unfold σ ?_
   rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
@@ -463,7 +463,7 @@ theorem Premise.sound_callCaptureVal {ps Γf : Ctx} (k : Nat) (f : Name) (args :
     (q : PrimTy) (r : Var) (res : Option (Idx Γ (.val q)))
     (body : Prog C ([.val q] ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
     {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : TState C Γ) :
-    Premise.Sound m (.call f args (.val q r res) body)
+    Premise.Runs m (.call f args (.val q r res) body)
       (.capture p (fse k) v (.call f as' (.val q r (res.map .there)) body)) σ := by
   refine Premise.sound_unfold σ ?_
   rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
@@ -490,7 +490,7 @@ theorem Premise.sound_callCaptureVal {ps Γf : Ctx} (k : Nat) (f : Name) (args :
 theorem Premise.sound_callCaptureRets {ps rs Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
     (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
     {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : TState C Γ) :
-    Premise.Sound m (.call f args (.rets bs) body)
+    Premise.Runs m (.call f args (.rets bs) body)
       (.inline (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.rets bs) body) .nil))
         (Thin.keepAll rs (.drop .refl))) σ := by
   refine Premise.sound_inline σ ?_
@@ -521,7 +521,7 @@ theorem Premise.sound_callCaptureMem {ps Γf : Ctx} (k : Nat) (f : Name) (args :
     (hm : (Ty.ref R).mapFree = true) (body : Prog C ([.mem R] ++ ps) Γf) {p : PrimTy}
     {v : Val C Γ p}
     {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : TState C Γ) :
-    Premise.Sound m (.call f args (.mem R r hd hm) body)
+    Premise.Runs m (.call f args (.mem R r hd hm) body)
       (.inline (.cons (.declLocal p (fse k) (some v))
           (.cons (.call f as' (.mem R r hd hm) body) .nil))
         (.keep (.drop .refl))) σ := by
@@ -551,7 +551,7 @@ argument that is not simple captured, or its body inlined. -/
 theorem Stmt.sound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name)
     (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) (σ : TState C Γ)
     (pr : Premise C Γ Γ') (hp : Stmt.step k m (.call f args ret body) = some pr) :
-    Premise.Sound m (.call f args ret body) pr σ := by
+    Premise.Runs m (.call f args ret body) pr σ := by
   change callStep k f args ret body = some pr at hp
   unfold callStep at hp
   cases ret with
@@ -693,7 +693,7 @@ typed value its outcome binds. -/
 theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ)
     (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe) (code : CodeBinder κc)
     (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (σ : TState C Γ) :
-    Premise.Sound .box (.tryCall call rets ok err code pnc other)
+    Premise.Runs .box (.tryCall call rets ok err code pnc other)
       (.branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩])
       σ := by
   intro _ _ ω κ φ
@@ -743,7 +743,7 @@ theorem Stmt.sound_tryCall (k : Nat) (m : Modality) {ρ κc Γ₁ Γe Γ₃ Γ�
     (call : ExtCall C Γ) (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe)
     (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (σ : TState C Γ)
     (pr : Premise C Γ Γ) (hp : Stmt.step k m (.tryCall call rets ok err code pnc other) = some pr) :
-    Premise.Sound m (.tryCall call rets ok err code pnc other) pr σ := by
+    Premise.Runs m (.tryCall call rets ok err code pnc other) pr σ := by
   change tryStep m rets ok err code pnc other = some pr at hp
   cases m with
   | box => cases hp; exact Premise.sound_tryCallBox call rets ok err code pnc other σ

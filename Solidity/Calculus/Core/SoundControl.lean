@@ -34,7 +34,7 @@ variable {Γ : Ctx} {m : Modality} (σ : TState C Γ)
 
 /-- `transfer_unfold_rightSndArgument`: the amount captured. -/
 theorem sound_transferRight (sadr : Simple C Γ .uint) (a : Val C Γ .uint) (x : Var) :
-    Premise.Sound m (.transfer (.simple sadr) a)
+    Premise.Runs m (.transfer (.simple sadr) a)
       (.capture .uint x a (.transfer (.simple sadr.up) (.simple (.local .here)))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .val .uint) v (TRun.transfer_pushT σ (t := .val .uint) v
@@ -46,7 +46,7 @@ theorem sound_transferRight (sadr : Simple C Γ .uint) (a : Val C Γ .uint) (x :
 
 /-- `transfer_unfold_leftFstReceiver`: the receiver captured. -/
 theorem sound_transferLeft (r a : Val C Γ .uint) (x : Var) :
-    Premise.Sound m (.transfer r a)
+    Premise.Runs m (.transfer r a)
       (.capture .uint x r (.transfer (.simple (.local .here)) a.up)) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .val .uint) v (TRun.transfer_pushT σ (t := .val .uint) v
@@ -57,21 +57,21 @@ theorem sound_transferLeft (r a : Val C Γ .uint) (x : Var) :
 
 /-- **A transfer** (`transferStep`). -/
 theorem transferStep_sound (k : Nat) (r a : Val C Γ .uint) (q : Premise C Γ Γ)
-    (hs : transferStep k m r a = some q) : Premise.Sound m (.transfer r a) q σ := by
+    (hs : transferStep k m r a = some q) : Premise.Runs m (.transfer r a) q σ := by
   cases r with
   | simple sadr =>
     cases a with
     | simple se =>
       cases m with
       | box => cases hs; exact sound_transferBox σ sadr se
-      | diamond => cases hs; exact sound_done_false σ _
+      | diamond => cases hs; exact sound_done_false (m := .diamond) σ _
     | _ => cases hs; exact sound_transferRight σ sadr _ _
   | _ => cases hs; exact sound_transferLeft σ _ a _
 
 /-- `send_unfold_rightSndArgument`: the amount captured. -/
 theorem sound_sendRight (pv : Idx Γ (.val .bool)) (sadr : Simple C Γ .uint) (a : Val C Γ .uint)
     (x : Var) :
-    Premise.Sound m (.send pv (.simple sadr) a)
+    Premise.Runs m (.send pv (.simple sadr) a)
       (.capture .uint x a (.send pv.there (.simple sadr.up) (.simple (.local .here)))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .val .uint) v (TRun.send_pushT σ (t := .val .uint) v pv
@@ -83,7 +83,7 @@ theorem sound_sendRight (pv : Idx Γ (.val .bool)) (sadr : Simple C Γ .uint) (a
 
 /-- `send_unfold_leftFstReceiver`: the receiver captured. -/
 theorem sound_sendLeft (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (x : Var) :
-    Premise.Sound m (.send pv r a)
+    Premise.Runs m (.send pv r a)
       (.capture .uint x r (.send pv.there (.simple (.local .here)) a.up)) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .val .uint) v (TRun.send_pushT σ (t := .val .uint) v pv
@@ -95,14 +95,14 @@ theorem sound_sendLeft (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (x : Va
 /-- **A send** (`sendStep`). -/
 theorem sendStep_sound (k : Nat) (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint)
     (q : Premise C Γ Γ) (hs : sendStep k m pv r a = some q) :
-    Premise.Sound m (.send pv r a) q σ := by
+    Premise.Runs m (.send pv r a) q σ := by
   cases r with
   | simple sadr =>
     cases a with
     | simple se =>
       cases m with
-      | box => cases hs; exact sound_send σ pv sadr se _
-      | diamond => cases hs; exact sound_send σ pv sadr se _
+      | box => cases hs; exact sound_send (m := .box) σ pv sadr se _
+      | diamond => cases hs; exact sound_send (m := .diamond) σ pv sadr se _
     | _ => cases hs; exact sound_sendRight σ pv sadr _ _
   | _ => cases hs; exact sound_sendLeft σ pv _ a _
 
@@ -127,7 +127,7 @@ theorem Prog.trun_wk_up {t : LTy} {Δ : Ctx} (P : Prog C Γ Δ) (w : t.TDenote C
 /-- `ifElseUnfold`: the condition captured, the branches weakened under it. -/
 theorem sound_iteCapture {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) (x : Var) :
-    Premise.Sound m (.ite c thn els)
+    Premise.Runs m (.ite c thn els)
       (.capture .bool x c (.ite (.simple (.local .here)) (thn.wk up).2.2 (els.wk up).2.2)) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ (t := .val .bool) v ?_
@@ -144,21 +144,38 @@ theorem sound_iteCapture {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C 
 /-- **An `if`** (`iteStep`). -/
 theorem iteStep_sound (k : Nat) {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) (q : Premise C Γ Γ) (hs : iteStep k c thn els = some q) :
-    Premise.Sound m (.ite c thn els) q σ := by
+    Premise.Runs m (.ite c thn els) q σ := by
   cases c with
   | simple se =>
     cases hs
-    refine Premise.sound_split σ (fun h => ?_) (fun h => ?_) ?_
+    refine Premise.sound_split σ (fun h => ?_) (fun h => ?_) ?_ (fun h J o he => ?_)
+      (fun h J o he => ?_)
     · rw [Stmt.trunSt_ite_simple, (holds_isBool σ se true).1 h]; rfl
     · rw [Stmt.trunSt_ite_simple, (holds_isBool σ se false).1 h]; rfl
     · cases hv : se.evalT σ
       · exact .inr ((holds_isBool σ se false).2 hv)
       · exact .inl ((holds_isBool σ se true).2 hv)
+    · have hv := (holds_isBool σ se true).1 h
+      cases he with
+      | det hf => nomatch hf
+      | iteHalt hc => nomatch hc
+      | iteThen _ hP => exact ⟨_, hP, rfl⟩
+      | iteElse hc _ =>
+        have hc : se.evalT σ = false := Except.ok.inj hc
+        rw [hv] at hc; nomatch hc
+    · have hv := (holds_isBool σ se false).1 h
+      cases he with
+      | det hf => nomatch hf
+      | iteHalt hc => nomatch hc
+      | iteThen hc _ =>
+        have hc : se.evalT σ = true := Except.ok.inj hc
+        rw [hv] at hc; nomatch hc
+      | iteElse _ hP => exact ⟨_, hP, rfl⟩
   | _ => cases hs; exact sound_iteCapture σ _ thn els _
 
 /-- `requireConditionCapture`: `⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩`. -/
 theorem sound_requireCapture (c : Val C Γ .bool) (x : Var) :
-    Premise.Sound m (.require c) (.capture .bool x c (.require (.simple (.local .here)))) σ := by
+    Premise.Runs m (.require c) (.capture .bool x c (.require (.simple (.local .here)))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .val .bool) v
       (TRun.require_pushT σ (t := .val .bool) v _ c (by rw [hv]; rfl))
@@ -169,11 +186,12 @@ theorem sound_requireCapture (c : Val C Γ .bool) (x : Var) :
 /-- **A `require`** (`requireStep`): `requireSimple`, or the condition
 captured. -/
 theorem requireStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
-    (hs : requireStep k c = some q) : Premise.Sound m (.require c) q σ := by
+    (hs : requireStep k c = some q) : Premise.Runs m (.require c) q σ := by
   cases c with
   | simple se =>
     cases hs
     refine Premise.sound_split σ (fun h => ?_) (fun h => ?_) ?_
+      (fun h => ExecS.split_det σ rfl rfl ?_) (fun h => ExecS.split_det σ rfl rfl ?_)
     · show (Prog.trunSt σ .nil).map _ = (TRun.require (.simple se) σ).map _
       simp only [TRun.require, Val.evalT, ok_bind, (holds_isBool σ se true).1 h]; rfl
     · show (Prog.trunSt σ (.cons .revert .nil)).map _ = (TRun.require (.simple se) σ).map _
@@ -181,11 +199,15 @@ theorem requireStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
     · cases hv : se.evalT σ
       · exact .inr ((holds_isBool σ se false).2 hv)
       · exact .inl ((holds_isBool σ se true).2 hv)
+    · show (Prog.trunSt σ .nil).map _ = (TRun.require (.simple se) σ).map _
+      simp only [TRun.require, Val.evalT, ok_bind, (holds_isBool σ se true).1 h]; rfl
+    · show (Prog.trunSt σ (.cons .revert .nil)).map _ = (TRun.require (.simple se) σ).map _
+      simp only [TRun.require, Val.evalT, ok_bind, (holds_isBool σ se false).1 h]; rfl
   | _ => cases hs; exact sound_requireCapture σ _ _
 
 /-- `assertConditionCapture`: `⟨[ assert(nse); ]⟩ ⇝ ⟨[ bool se = nse; assert(se); ]⟩`. -/
 theorem sound_assertCapture (c : Val C Γ .bool) (x : Var) :
-    Premise.Sound m (.assert c) (.capture .bool x c (.assert (.simple (.local .here)))) σ := by
+    Premise.Runs m (.assert c) (.capture .bool x c (.assert (.simple (.local .here)))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .val .bool) v
       (TRun.assert_pushT σ (t := .val .bool) v _ c (by rw [hv]; rfl))
@@ -196,7 +218,7 @@ theorem sound_assertCapture (c : Val C Γ .bool) (x : Var) :
 /-- **An `assert`** (`assertStep`): `assertSimple`, or the condition
 captured. -/
 theorem assertStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
-    (hs : assertStep k c = some q) : Premise.Sound m (.assert c) q σ := by
+    (hs : assertStep k c = some q) : Premise.Runs m (.assert c) q σ := by
   cases c with
   | simple se =>
     cases hs
@@ -210,7 +232,7 @@ theorem assertStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
 /-- `localValueDeclInitDrop`: `⟨[ T v = e; ]⟩ ⇝ ⟨[ v = e; ]⟩`, `v` bound by
 the hidden binder. -/
 theorem sound_localValueDeclInitDrop {p : PrimTy} (x : Var) (e : Val C Γ p) :
-    Premise.Sound m (.declLocal p x (some e))
+    Premise.Runs m (.declLocal p x (some e))
       (.bind x (.val p) (.cons (.assignLocal .here e.up) .nil)) σ := by
   refine Premise.sound_bind_all σ fun v => ?_
   rw [Prog.trunSt_single, Stmt.trunSt_assignLocal, Stmt.trunSt_declLocal, Val.evalT_up]
@@ -218,7 +240,7 @@ theorem sound_localValueDeclInitDrop {p : PrimTy} (x : Var) (e : Val C Γ p) :
 
 /-- `storageLocalDeclInitDrop`: `⟨[ T storage lsv = r; ]⟩ ⇝ ⟨[ lsv = r; ]⟩`. -/
 theorem sound_declStorageInit {R : RefTy} (x : Var) (r : ARhs C Γ R) :
-    Premise.Sound m (.declStorage R x (some r))
+    Premise.Runs m (.declStorage R x (some r))
       (.bind x (.alias R) (.cons (.rebind .here r.up) .nil)) σ := by
   refine Premise.sound_bind_all σ fun v => ?_
   rw [Prog.trunSt_single]
@@ -232,7 +254,7 @@ premise's run from any value of `mv`, an unset one among them (decision
 An alias `T memory mv = mp;` is the same rule. -/
 theorem sound_declMemInit {R : RefTy} (x : Var) (r : MRhs C Γ R)
     (hd : ((some r).isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
-    Premise.Sound m (.declMem R x (some r) hd hm)
+    Premise.Runs m (.declMem R x (some r) hd hm)
       (.bind x (.mem R) (.cons (.rebindMem .here r.up) .nil)) σ := by
   refine Premise.sound_bind_all σ fun v => ?_
   rw [Prog.trunSt_single]
@@ -242,7 +264,7 @@ theorem sound_declMemInit {R : RefTy} (x : Var) (r : MRhs C Γ R)
 
 /-- A block, its locals popped after it: `⟨[ { body } ]⟩ ⇝ ⟨[ body ]⟩`. -/
 theorem sound_block {Γ₂ : Ctx} (body : Prog C Γ Γ₂) :
-    Premise.Sound m (.block body) (.unfold body body.ext) σ := by
+    Premise.Runs m (.block body) (.unfold body body.ext) σ := by
   refine Premise.sound_unfold σ ?_
   show _ = (TRun.block body.ext body.trunR σ).map _
   simp only [TRun.block]

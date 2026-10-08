@@ -124,7 +124,7 @@ variable {Γ : Ctx} {m : Modality} (σ : TState C Γ)
 the source bound to an alias first. -/
 theorem sound_copyCapture {R : RefTy} (l : Loc C Γ (.ref R)) (p : SPath C Γ (.ref R))
     (hm : (Ty.ref R).mapFree = true) (x : Var) :
-    Premise.Sound m (.assign l (.copy p hm))
+    Premise.Runs m (.assign l (.copy p hm))
       (.captureSP x p (.assign l.up (.copy (.alias .here) hm))) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ (t := .alias R) (some q) (TRun.assign_pushT σ (t := .alias R) (some q) l.up _ l
@@ -138,7 +138,7 @@ theorem sound_copyCapture {R : RefTy} (l : Loc C Γ (.ref R)) (p : SPath C Γ (.
 theorem copyStep_sound (k : Nat) {R : RefTy} (l : Loc C Γ (.ref R))
     (hm : (Ty.ref R).mapFree = true) (p : SPath C Γ (.ref R))
     (q : Premise C Γ Γ) (hs : copyStep k l hm p = some q) :
-    Premise.Sound m (.assign l (.copy p hm)) q σ := by
+    Premise.Runs m (.assign l (.copy p hm)) q σ := by
   cases p with
   | alias y => cases hs; exact sound_save σ l _
   | loc l' =>
@@ -150,7 +150,7 @@ theorem copyStep_sound (k : Nat) {R : RefTy} (l : Loc C Γ (.ref R))
 /-- `storageFieldWrite_unfold_leftFst`: `T se = e; T storage sp = b; sp.f = se;`. -/
 theorem sound_fieldWriteUnfold (k : Nat) {s : Name} {p : PrimTy} (b : SPath C Γ (.struct s))
     (f : Name) (h : C.fieldType s f = some (.prim p)) (e : Val C Γ p) :
-    Premise.Sound m (.assign (.field b f h) (.val e))
+    Premise.Runs m (.assign (.field b f h) (.val e))
       (.unfold (.cons (.declLocal _ (fse k) (some e))
         (.cons (.declStorage _ (fsp k) (some (.path b.up)))
           (.cons (.assign (.field (.alias .here) f h) (.val (.simple (.local (.there .here))))) .nil)))
@@ -185,7 +185,7 @@ the statement reads the source first. -/
 theorem sound_fieldWriteRefUnfold {s : Name} {R : RefTy} (b : SPath C Γ (.struct s)) (f : Name)
     (h : C.fieldType s f = some (.ref R)) (p : SPath C Γ (.ref R))
     (hm : (Ty.ref R).mapFree = true) (x : Var) :
-    Premise.Sound m (.assign (.field b f h) (.copy p hm))
+    Premise.Runs m (.assign (.field b f h) (.copy p hm))
       (.captureSP x b (.assign (.field (.alias .here) f h) (.copy p.up hm))) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h' hh hp => ?_)
   · refine trunSt_pushed σ (t := .alias (.struct s)) (some q) (TRun.assign_pushT σ (t := .alias _) (some q)
@@ -202,7 +202,7 @@ theorem sound_fieldWriteRefUnfold {s : Name} {R : RefTy} (b : SPath C Γ (.struc
 `T se = e; T storage sp = b; T ie = i; sp[ie] = se;`. -/
 theorem sound_indexCaptureAll (k : Nat) {R : RefTy} {kp p : PrimTy}
     (it : IndexTy R kp (.prim p)) (b : SPath C Γ (.ref R)) (i : Val C Γ kp) (e : Val C Γ p) :
-    Premise.Sound m (.assign (.index it b i) (.val e)) (indexCaptureAll k it b i e) σ := by
+    Premise.Runs m (.assign (.index it b i) (.val e)) (indexCaptureAll k it b i e) σ := by
   refine Premise.sound_unfoldSim σ (TRes.Sim.of_eq ?_)
   rw [Prog.trunSt_declLocal_cons, TRes.map_bind']
   show _ = (TRun.assign (.index it b i) (.val e) σ).map _
@@ -244,7 +244,7 @@ first. -/
 theorem sound_indexRefCaptureAll (k : Nat) {R R' : RefTy} {kp : PrimTy}
     (it : IndexTy R kp (.ref R')) (b : SPath C Γ (.ref R)) (i : Val C Γ kp)
     (p : SPath C Γ (.ref R')) (hm : (Ty.ref R').mapFree = true) :
-    Premise.Sound m (.assign (.index it b i) (.copy p hm)) (indexRefCaptureAll k it b i p hm) σ := by
+    Premise.Runs m (.assign (.index it b i) (.copy p hm)) (indexRefCaptureAll k it b i p hm) σ := by
   refine Premise.sound_unfoldSim σ ?_
   rw [Prog.trunSt_declStorage_cons, TRes.map_bind']
   show TRes.Sim _ ((TRun.assign (.index it b i) (.copy p hm) σ).map _)
@@ -283,7 +283,7 @@ theorem sound_indexRefCaptureAll (k : Nat) {R R' : RefTy} {kp : PrimTy}
 /-- **A storage write** (`assignStep`). -/
 theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
     (q : Premise C Γ Γ) (hs : assignStep k l r = some q) :
-    Premise.Sound m (.assign l r) q σ := by
+    Premise.Runs m (.assign l r) q σ := by
   cases l with
   | root rn h =>
     cases r with
@@ -338,7 +338,7 @@ theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
 statement reads the memory source first. -/
 theorem sound_fromMemFieldUnfold {s : Name} {R : RefTy} (b : SPath C Γ (.struct s)) (f : Name)
     (h : C.fieldType s f = some (.ref R)) (p : MPath C Γ (.ref R)) (x : Var) :
-    Premise.Sound m (.assignFromMem (.field b f h) p)
+    Premise.Runs m (.assignFromMem (.field b f h) p)
       (.captureSP x b (.assignFromMem (.field (.alias .here) f h) p.up)) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h' hh hp => ?_)
   · refine trunSt_pushed σ (t := .alias (.struct s)) (some q) (TRun.assignFromMem_pushT σ
@@ -357,7 +357,7 @@ memory source first. -/
 theorem sound_fromMemIndexUnfold (k : Nat) {R R' : RefTy} {kp : PrimTy}
     (it : IndexTy R kp (.ref R')) (b : SPath C Γ (.ref R)) (i : Val C Γ kp)
     (p : MPath C Γ (.ref R')) :
-    Premise.Sound m (.assignFromMem (.index it b i) p)
+    Premise.Runs m (.assignFromMem (.index it b i) p)
       (.unfold (.cons (.declStorage R (fsp k) (some (.path b)))
         (.cons (.declLocal kp (fie k) (some i.up))
         (.cons (.assignFromMem (.index it (.alias (.there .here)) (.simple (.local .here))) p.up.up)
@@ -400,7 +400,7 @@ theorem sound_fromMemIndexUnfold (k : Nat) {R R' : RefTy} {kp : PrimTy}
 /-- **A storage location written from memory** (`assignFromMemStep`). -/
 theorem assignFromMemStep_sound (k : Nat) {R : RefTy} (l : Loc C Γ (.ref R))
     (p : MPath C Γ (.ref R)) (q : Premise C Γ Γ)
-    (hs : assignFromMemStep k l p = some q) : Premise.Sound m (.assignFromMem l p) q σ := by
+    (hs : assignFromMemStep k l p = some q) : Premise.Runs m (.assignFromMem l p) q σ := by
   cases l with
   | root rn h => cases hs; exact sound_saveMem σ _ p
   | field b f h =>
@@ -425,7 +425,7 @@ theorem sound_deleteRecvCapture {R : RefTy} {T : Ty} (l' : Loc C (.alias R :: Γ
     (hl : ∀ q, b.resolveT σ = .ok q →
       l'.resolveT (σ.push (t := .alias R) (some q)) = l.resolveT σ)
     (herr : ∀ h, b.resolveT σ = .error h → l.resolveT σ = .error h) :
-    Premise.Sound m (.delete l) (.captureSP x b (.delete l')) σ := by
+    Premise.Runs m (.delete l) (.captureSP x b (.delete l')) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .alias R) (some q)
       (TRun.delete_pushT σ (t := .alias R) (some q) l' l (hl q hq))
@@ -437,7 +437,7 @@ theorem sound_deleteRecvCapture {R : RefTy} {T : Ty} (l' : Loc C (.alias R :: Γ
 statement reads the receiver first. -/
 theorem sound_deleteIndexCapture {R : RefTy} {kp : PrimTy} {T : Ty} (it : IndexTy R kp T)
     (b : SPath C Γ (.ref R)) (i : Val C Γ kp) (x : Var) :
-    Premise.Sound m (.delete (.index it b i))
+    Premise.Runs m (.delete (.index it b i))
       (.capture kp x i (.delete (.index it b.up (.simple (.local .here))))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh hp => ?_)
   · refine trunSt_pushed σ (t := .val kp) v (TRun.delete_pushT σ (t := .val kp) v
@@ -451,7 +451,7 @@ theorem sound_deleteIndexCapture {R : RefTy} {kp : PrimTy} {T : Ty} (it : IndexT
 
 /-- **`delete l;`** (`deleteStep`). -/
 theorem deleteStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (q : Premise C Γ Γ)
-    (hs : deleteStep k l = some q) : Premise.Sound m (.delete l) q σ := by
+    (hs : deleteStep k l = some q) : Premise.Runs m (.delete l) q σ := by
   cases l with
   | root rn h => cases hs; exact sound_delAt σ _
   | field b f h =>
@@ -479,7 +479,7 @@ theorem deleteStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (q : Premise C Γ �
 statement reads the receiver first. -/
 theorem sound_pushCapture {p : PrimTy} (b : SPath C Γ (.array (.prim p))) (e : Val C Γ p)
     (hd : ((some (Src.val e)).isSome || (Ty.prim p).defaultOkS) = true) (x : Var) :
-    Premise.Sound m (.push b (some (.val e)) hd)
+    Premise.Runs m (.push b (some (.val e)) hd)
       (.capture p x e (.push b.up (some (.val (.simple (.local .here)))) rfl)) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh hp => ?_)
   · refine trunSt_pushed σ (t := .val p) v (TRun.push_some_pushT σ (t := .val p) v b.up b _
@@ -496,7 +496,7 @@ the receiver bound first. -/
 theorem sound_pushRecvCapture {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     (hd : (v.isSome || E.defaultOkS) = true)
     (hd' : ((v.map Src.up).isSome || E.defaultOkS) = true) (x : Var) :
-    Premise.Sound m (.push b v hd) (.captureSP x b (.push (.alias .here) (v.map Src.up) hd')) σ := by
+    Premise.Runs m (.push b v hd) (.captureSP x b (.push (.alias .here) (v.map Src.up) hd')) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ (t := .alias (.array E)) (some q) ?_
     cases v with
@@ -512,7 +512,7 @@ theorem sound_pushRecvCapture {E : Ty} (b : SPath C Γ (.array E)) (v : Option (
 /-- **`b.push(v);`** (`pushStep`). -/
 theorem pushStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     (hd : (v.isSome || E.defaultOkS) = true) (q : Premise C Γ Γ)
-    (hs : pushStep k b v hd = some q) : Premise.Sound m (.push b v hd) q σ := by
+    (hs : pushStep k b v hd = some q) : Premise.Runs m (.push b v hd) q σ := by
   simp only [pushStep] at hs
   split at hs
   · cases v with
@@ -532,7 +532,7 @@ theorem pushStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (v : Optio
 
 /-- `storagePop_unfold_leftFstReceiver`: the receiver bound first. -/
 theorem sound_popCapture {E : Ty} (b : SPath C Γ (.array E)) (x : Var) :
-    Premise.Sound m (.pop b) (.captureSP x b (.pop (.alias .here))) σ := by
+    Premise.Runs m (.pop b) (.captureSP x b (.pop (.alias .here))) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .alias (.array E)) (some q)
       (TRun.pop_pushT σ (t := .alias _) (some q) (.alias .here) b (by rw [hq]; rfl))
@@ -542,10 +542,10 @@ theorem sound_popCapture {E : Ty} (b : SPath C Γ (.array E)) (x : Var) :
 
 /-- **`b.pop();`** (`popStep`). -/
 theorem popStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (q : Premise C Γ Γ)
-    (hs : popStep k b = some q) : Premise.Sound m (.pop b) q σ := by
+    (hs : popStep k b = some q) : Premise.Runs m (.pop b) q σ := by
   simp only [popStep] at hs
   split at hs
-  · have hp : Premise.Sound m (.pop b) (.upd1 (.storage (.app2
+  · have hp : Premise.Runs m (.pop b) (.upd1 (.storage (.app2
         (if E.isMapping then .shrink else .pop) .storage b.lower))) σ := sound_pop σ b
     split at hs
     · rename_i hE

@@ -89,7 +89,7 @@ theorem BinOp.shortT_none {op : BinOp} (hsc : op.shortCircuits = false) {p : Pri
 theorem sound_binopRight {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
     (ha : op.accepts p' = true) (hq : op.ret p' = p) (hsc : op.shortCircuits = false)
     (a : Simple C Γ p') (b : Val C Γ p') (x : Var) :
-    Premise.Sound m (.assignLocal i (.binop op ha hq (.simple a) b))
+    Premise.Runs m (.assignLocal i (.binop op ha hq (.simple a) b))
       (.capture p' x b
         (.assignLocal i.there (.binop op ha hq (.simple a.up) (.simple (.local .here))))) σ := by
   subst hq
@@ -104,7 +104,7 @@ theorem sound_binopRight {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
 /-- `storageLengthRead_unfold_rightFst`: the receiver bound first. -/
 theorem sound_lenCapture {p : PrimTy} (i : Idx Γ (.val p)) {E : Ty} (b : SPath C Γ (.array E))
     (hp : p = .uint) (x : Var) :
-    Premise.Sound m (.assignLocal i (.len b hp))
+    Premise.Runs m (.assignLocal i (.len b hp))
       (.captureSP x b (.assignLocal i.there (.len (.alias .here) hp))) σ := by
   subst hp
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
@@ -118,7 +118,7 @@ theorem sound_lenCapture {p : PrimTy} (i : Idx Γ (.val p)) {E : Ty} (b : SPath 
 /-- `memoryLengthRead_unfold_rightFst`: the receiver bound first. -/
 theorem sound_mlenCapture {p : PrimTy} (i : Idx Γ (.val p)) {E : Ty} (b : MPath C Γ (.array E))
     (hm : (Ty.ref (.array E)).mapFree = true) (hp : p = .uint) (x : Var) :
-    Premise.Sound m (.assignLocal i (.mlen b hp))
+    Premise.Runs m (.assignLocal i (.mlen b hp))
       (.captureMV x b (.assignLocal i.there (.mlen (.var .here hm) hp))) σ := by
   subst hp
   refine Premise.sound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
@@ -132,7 +132,7 @@ theorem sound_mlenCapture {p : PrimTy} (i : Idx Γ (.val p)) {E : Ty} (b : MPath
 /-- `binopUnfoldLeft`: `⟨[ v = nse ⊕ e; ]⟩ ⇝ ⟨[ T se = nse; v = se ⊕ e; ]⟩`. -/
 theorem sound_binopUnfoldLeft {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
     (ha : op.accepts p' = true) (hq : op.ret p' = p) (a b : Val C Γ p') (x : Var) :
-    Premise.Sound m (.assignLocal i (.binop op ha hq a b))
+    Premise.Runs m (.assignLocal i (.binop op ha hq a b))
       (.capture p' x a (.assignLocal i.there (.binop op ha hq (.simple (.local .here)) b.up))) σ := by
   subst hq
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
@@ -146,7 +146,7 @@ theorem sound_binopUnfoldLeft {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
 /-- `unopCapture`: `⟨[ v = ⊖nse; ]⟩ ⇝ ⟨[ T se = nse; v = ⊖se; ]⟩`. -/
 theorem sound_unopCapture {p p' : PrimTy} (i : Idx Γ (.val p)) (op : UnOp)
     (ha : op.accepts p' = true) (hq : op.ret p' = p) (a : Val C Γ p') (x : Var) :
-    Premise.Sound m (.assignLocal i (.unop op ha hq a))
+    Premise.Runs m (.assignLocal i (.unop op ha hq a))
       (.capture p' x a (.assignLocal i.there (.unop op ha hq (.simple (.local .here))))) σ := by
   subst hq
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
@@ -161,7 +161,7 @@ theorem sound_unopCapture {p p' : PrimTy} (i : Idx Γ (.val p)) (op : UnOp)
 `if (se) { v = nse; v = v && true; } else v = false;`. -/
 theorem sound_shortAnd (i : Idx Γ (.val .bool)) (ha : BinOp.and.accepts .bool = true)
     (hq : BinOp.and.ret .bool = .bool) (a : Simple C Γ .bool) (b : Val C Γ .bool) :
-    Premise.Sound m (.assignLocal i (.binop .and ha hq (.simple a) b))
+    Premise.Runs m (.assignLocal i (.binop .and ha hq (.simple a) b))
       (.unfold (.cons (.ite (.simple a)
         (.cons (.assignLocal i b)
           (.cons (.assignLocal i (.binop .and rfl rfl (.simple (.local i)) (.simple (.bool true))))
@@ -185,7 +185,7 @@ theorem sound_shortAnd (i : Idx Γ (.val .bool)) (ha : BinOp.and.accepts .bool =
 `if (se) v = true; else { v = nse; v = v || false; }`. -/
 theorem sound_shortOr (i : Idx Γ (.val .bool)) (ha : BinOp.or.accepts .bool = true)
     (hq : BinOp.or.ret .bool = .bool) (a : Simple C Γ .bool) (b : Val C Γ .bool) :
-    Premise.Sound m (.assignLocal i (.binop .or ha hq (.simple a) b))
+    Premise.Runs m (.assignLocal i (.binop .or ha hq (.simple a) b))
       (.unfold (.cons (.ite (.simple a)
         (.cons (.assignLocal i (.simple (.bool true))) .nil)
         (.cons (.assignLocal i b)
@@ -210,7 +210,7 @@ theorem sound_shortOr (i : Idx Γ (.val .bool)) (ha : BinOp.or.accepts .bool = t
 theorem shortStep_sound {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
     (ha : op.accepts p' = true) (hq : op.ret p' = p) (a : Simple C Γ p') (b : Val C Γ p')
     (q : Premise C Γ Γ) (hs : shortStep i op ha hq a b = some q) :
-    Premise.Sound m (.assignLocal i (.binop op ha hq (.simple a) b)) q σ := by
+    Premise.Runs m (.assignLocal i (.binop op ha hq (.simple a) b)) q σ := by
   cases op <;> cases p' <;> (try cases hs) <;> subst hq <;> cases hs
   · exact sound_shortAnd σ i ha rfl a b
   · exact sound_shortOr σ i ha rfl a b
@@ -222,7 +222,7 @@ theorem binopRight_sound (k : Nat) {p p' : PrimTy} (i : Idx Γ (.val p)) (op : B
     (hs : (if op.shortCircuits then shortStep i op ha hq a b
       else some (.capture p' (fse k) b
         (.assignLocal i.there (.binop op ha hq (.simple a.up) (.simple (.local .here)))))) = some q) :
-    Premise.Sound m (.assignLocal i (.binop op ha hq (.simple a) b)) q σ := by
+    Premise.Runs m (.assignLocal i (.binop op ha hq (.simple a) b)) q σ := by
   cases hsc : op.shortCircuits
   · rw [hsc] at hs; cases hs; exact sound_binopRight σ i op ha hq hsc a b _
   · rw [hsc] at hs; exact shortStep_sound σ i op ha hq a b q hs
@@ -230,7 +230,7 @@ theorem binopRight_sound (k : Nat) {p p' : PrimTy} (i : Idx Γ (.val p)) (op : B
 /-- **A local assigned** (`localStep`). -/
 theorem localStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p)
     (q : Premise C Γ Γ) (hs : localStep k i v = some q) :
-    Premise.Sound m (.assignLocal i v) q σ := by
+    Premise.Runs m (.assignLocal i v) q σ := by
   cases v with
   | simple s => cases hs; exact sound_setLocal σ i _
   | read l =>
@@ -269,7 +269,7 @@ theorem localStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C 
 /-- `storageLocalRootPush_unfold_leftFstReceiver`: the receiver bound first. -/
 theorem sound_rebindPushCapture {R : RefTy} (i : Idx Γ (.alias R))
     (b : SPath C Γ (.array (.ref R))) (hd : (Ty.ref R).defaultOkS = true) (x : Var) :
-    Premise.Sound m (.rebind i (.push b hd))
+    Premise.Runs m (.rebind i (.push b hd))
       (.captureSP x b (.rebind i.there (.push (.alias .here) hd))) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ (t := .alias _) (some q) (TRun.rebind_pushT σ (t := .alias _)
@@ -281,7 +281,7 @@ theorem sound_rebindPushCapture {R : RefTy} (i : Idx Γ (.alias R))
 
 /-- **An alias bound** (`rebindStep`). -/
 theorem rebindStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R)
-    (q : Premise C Γ Γ) (hs : rebindStep k i r = some q) : Premise.Sound m (.rebind i r) q σ := by
+    (q : Premise C Γ Γ) (hs : rebindStep k i r = some q) : Premise.Runs m (.rebind i r) q σ := by
   cases r with
   | path p =>
     cases p with
@@ -318,7 +318,7 @@ theorem OpLoc.unfoldRecv_sound (k : Nat) {p : PrimTy}
     (hmindex : ∀ {R : RefTy} (a : ArrTy R (.prim p)) b ie e, b.mvalT σ = .error e →
       Stmt.trunSt σ (S (.mindex a b ie)) = .error e)
     (l : OpLoc C Γ p) (q : Premise C Γ Γ) (hq : l.unfoldRecv k s = some q) :
-    Premise.Sound m (S l) q σ := by
+    Premise.Runs m (S l) q σ := by
   cases l with
   | field b f h =>
     simp only [OpLoc.unfoldRecv] at hq
@@ -363,7 +363,7 @@ theorem OpLoc.unfoldRecv_sound (k : Nat) {p : PrimTy}
 /-- `compoundAssignValueRhsCapture`: the source captured first. -/
 theorem sound_opCapture {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) (x : Var) :
-    Premise.Sound m (.opAssign op hop hp l r)
+    Premise.Runs m (.opAssign op hop hp l r)
       (.capture p x r (.opAssign op hop hp l.up (.simple (.local .here)))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · exact trunSt_pushed σ (t := .val p) v (TRun.opAssign_pushT σ (t := .val p) v op
@@ -375,7 +375,7 @@ theorem sound_opCapture {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = 
 /-- **A compound assignment** (`opStep`). -/
 theorem opStep_sound (k : Nat) {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) (q : Premise C Γ Γ)
-    (hs : opStep k op hop hp l r = some q) : Premise.Sound m (.opAssign op hop hp l r) q σ := by
+    (hs : opStep k op hop hp l r = some q) : Premise.Runs m (.opAssign op hop hp l r) q σ := by
   cases r with
   | simple se =>
     simp only [opStep] at hs
@@ -397,7 +397,7 @@ theorem opStep_sound (k : Nat) {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAs
 /-- **`l++;`** (`incStep`). -/
 theorem incStep_sound (k : Nat) {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
     (l : OpLoc C Γ p) (q : Premise C Γ Γ) (hs : incStep k op hp l = some q) :
-    Premise.Sound m (.incDec op hp l) q σ := by
+    Premise.Runs m (.incDec op hp l) q σ := by
   simp only [incStep] at hs
   split at hs
   · rename_i q' hq'

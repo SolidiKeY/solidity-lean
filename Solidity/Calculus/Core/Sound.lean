@@ -40,7 +40,14 @@ theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ
 /-- **Every rule the strategy fires is sound over the typed state**, in
 every typed state, at every contract. -/
 theorem Stmt.sound : Stmt.Sound C :=
-  fun k m _ _ s p hp σ => Stmt.stepSound k m s σ p hp
+  fun k m _ _ s p hp σ => (Stmt.stepSound k m s σ p hp).sound
+
+/-- **Every rule the strategy fires asks of the typed run what its premise
+says** (`Premise.Runs`): the arms' statement, which the reading with
+callbacks reads (`Calculus/Core/CallbackSound.lean`). -/
+theorem Stmt.runs (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ')
+    (hp : s.step k m = some p) (σ : TState C Γ) : Premise.Runs m s p σ :=
+  Stmt.stepSound k m s σ p hp
 
 /-- **Soundness of the scoped sequent over the typed state**: what `H ⊢ φ`
 proves holds, its context in front, in every typed state of the outer

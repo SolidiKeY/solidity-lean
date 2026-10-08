@@ -625,62 +625,62 @@ variable {Γ : Ctx} {m : Modality} (σ : TState C Γ)
 /-- `localValueAssign`, the reads, `binopAssignment`, `unopAssignment`, the
 length reads: `{v := e}` for `v = e;`. -/
 theorem sound_setLocal {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) :
-    Premise.Sound m (.assignLocal i v) (.setLocal i v) σ :=
+    Premise.Runs m (.assignLocal i v) (.setLocal i v) σ :=
   Premise.sound_update_run σ (setLocal_run σ.erase i v) fun _ =>
     ((Val.evalT_ends σ v).bind fun _ => TRes.Ends.ok _).1
 
 /-- `storageRootWriteStore`, `storageFieldWriteSave`, `storageIndexWrite*Save`,
 `…CopySource`: `{storage := save(storage, l, src)}`. -/
 theorem sound_save {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
-    Premise.Sound m (.assign l r) (.save l r) σ :=
+    Premise.Runs m (.assign l r) (.save l r) σ :=
   Premise.sound_update_run (s := .assign l r) σ (save_run σ.erase l r) fun _ =>
     ((Src.valueT_ends σ r).bind fun _ => (Loc.resolveT_ends σ l).bind fun _ =>
       (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _).1
 
 /-- `memoryToStorage*CopyRoot`: `{storage := save(storage, l, copyMem(memory, p))}`. -/
 theorem sound_saveMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
-    Premise.Sound m (.assignFromMem l p) (.saveMem l p) σ :=
+    Premise.Runs m (.assignFromMem l p) (.saveMem l p) σ :=
   Premise.sound_update_run (s := .assignFromMem l p) σ (saveMem_run σ.erase l p) fun _ =>
     ((MPath.mvalT_ends σ p).bind fun _ => (Loc.resolveT_ends σ l).bind fun _ =>
       (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _).1
 
 /-- `storageRootDelete`, `storageFieldDelete`, `storageIndexDelete`,
 `storageIndexArrayDelete`: `{storage := delAt(storage, l)}`. -/
-theorem sound_delAt {T : Ty} (l : Loc C Γ T) : Premise.Sound m (.delete l) (.delAt l) σ :=
+theorem sound_delAt {T : Ty} (l : Loc C Γ T) : Premise.Runs m (.delete l) (.delAt l) σ :=
   Premise.sound_update_run σ (delAt_run σ.erase l) fun _ =>
     ((Loc.resolveT_ends σ l).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _).1
 
 /-- `memoryFieldWrite`, `memoryIndexWriteArray`, `memoryFieldWriteCopy`,
 `memoryIndexWriteCopy`: `{memory := write(memory, l, src)}`. -/
 theorem sound_writeMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
-    Premise.Sound m (.assignMem l r) (.writeMem l r) σ :=
+    Premise.Runs m (.assignMem l r) (.writeMem l r) σ :=
   Premise.sound_update_run σ (writeMem_run σ.erase l r) fun _ =>
     ((MSrc.mvalT_ends σ r).bind fun _ => (MLoc.addrT_ends σ l).bind fun _ =>
       (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _).1
 
 /-- `storageLocalRootRebind`, `…BindLocalRoot`: `{lsv := p}`. -/
 theorem sound_rebindPath {R : RefTy} (i : Idx Γ (.alias R)) (p : SPath C Γ (.ref R)) :
-    Premise.Sound m (.rebind i (.path p)) (.upd1 (.local i (.path p.lower))) σ :=
+    Premise.Runs m (.rebind i (.path p)) (.upd1 (.local i (.path p.lower))) σ :=
   Premise.sound_update_run σ (rebindPath_run σ.erase i p) fun _ =>
     (((SPath.resolveT_ends σ p).bind fun _ => TRes.Ends.ok _).bind fun _ => TRes.Ends.ok _).1
 
 /-- `memoryRootRebind`, `memoryFieldReadAliasRoot`, `memoryIndexReadArrayMemory`:
 `{mv := p}`. -/
 theorem sound_rebindMemAlias {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (.ref R)) :
-    Premise.Sound m (.rebindMem i (.alias p)) (.upd1 (.local i (.mref p.lower))) σ :=
+    Premise.Runs m (.rebindMem i (.alias p)) (.upd1 (.local i (.mref p.lower))) σ :=
   Premise.sound_update_run σ (rebindMemAlias_run σ.erase i p) fun _ =>
     ((MRhs.evalT_ends σ (.alias p)).bind fun _ => TRes.Ends.ok _).1
 
 /-- `localOpAssign`, `storage*OpAssign`, `memory*OpAssign`: `{l := l ⊕ se}`. -/
 theorem sound_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (se : Simple C Γ p) :
-    Premise.Sound m (.opAssign op hop hp l (.simple se)) (.upd1 (l.set (l.op op se.lower))) σ :=
+    Premise.Runs m (.opAssign op hop hp l (.simple se)) (.upd1 (l.set (l.op op se.lower))) σ :=
   Premise.sound_update_run σ (opAssign_run σ.erase op hop hp l se) fun _ =>
     (TRes.Ends.bind (TRes.Ends.ok _) fun _ => OpLoc.storeT_ends σ op l _).1
 
 /-- `localIncrement`, `storage*Increment`, `memory*Increment`: `{l := l ± 1}`. -/
 theorem sound_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    Premise.Sound m (.incDec op hp l) (.upd1 (l.set (l.op op.binOp .one))) σ :=
+    Premise.Runs m (.incDec op hp l) (.upd1 (l.set (l.op op.binOp .one))) σ :=
   Premise.sound_update_run σ (incDec_run σ.erase op hp l) fun _ =>
     ((OpLoc.bumpT_ends σ op l).bind fun _ => TRes.Ends.ok _).1
 
@@ -688,7 +688,7 @@ theorem sound_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : O
 `{l := l ± 1 ‖ v := bumped(l)}`. -/
 theorem sound_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (hs : l.recvSimple = true) :
-    Premise.Sound m (.assignIncDec i op hp l hs) (.update ((Upd.nil.snoc
+    Premise.Runs m (.assignIncDec i op hp l hs) (.update ((Upd.nil.snoc
       (l.set (l.op op.binOp .one))).snoc (.local i (.val (Tm.bumped op p l.cur))))) σ :=
   Premise.sound_update_run σ (assignIncDec_run σ.erase i op hp l hs) fun _ =>
     ((OpLoc.bumpT_ends σ op l).bind fun _ => TRes.Ends.ok _).1
@@ -954,26 +954,26 @@ variable {Γ : Ctx} {m : Modality} (σ : TState C Γ)
 /-- `storagePushLengthSave`: `{storage := pushSlot(storage, b)}`. -/
 theorem sound_pushSlot {E : Ty} (b : SPath C Γ (.array E))
     (hd : (none.isSome || E.defaultOkS) = true) :
-    Premise.Sound m (.push b none hd) (.upd1 (.storage (.app2 (.pushSlot E) .storage b.lower))) σ :=
+    Premise.Runs m (.push b none hd) (.upd1 (.storage (.app2 (.pushSlot E) .storage b.lower))) σ :=
   Premise.sound_update_run σ (pushSlot_run σ.erase b hd) fun _ => TRun.push_nd σ b none
 
 /-- `storagePushLengthSaveReferenceElement`: `{storage := extend(storage, b)}`. -/
 theorem sound_extend {E : Ty} (b : SPath C Γ (.array E))
     (hd : (none.isSome || E.defaultOkS) = true) :
-    Premise.Sound m (.push b none hd) (.upd1 (.storage (.app2 (.extend E) .storage b.lower))) σ :=
+    Premise.Runs m (.push b none hd) (.upd1 (.storage (.app2 (.extend E) .storage b.lower))) σ :=
   Premise.sound_update_run σ (extend_run σ.erase b hd) fun _ => TRun.push_nd σ b none
 
 /-- `storagePushValueSave`, `storagePushValueCopySource`:
 `{storage := push(storage, b, src)}`. -/
 theorem sound_pushSome {E : Ty} (b : SPath C Γ (.array E)) (r : Src C Γ E)
     (hd : ((some r).isSome || E.defaultOkS) = true) :
-    Premise.Sound m (.push b (some r) hd)
+    Premise.Runs m (.push b (some r) hd)
       (.upd1 (.storage (.app3 .push .storage b.lower r.lower))) σ :=
   Premise.sound_update_run σ (pushSome_run σ.erase b r hd) fun _ => TRun.push_nd σ b (some r)
 
 /-- `storagePopSave`, `storagePopSaveMappingElement`. -/
 theorem sound_pop {E : Ty} (b : SPath C Γ (.array E)) :
-    Premise.Sound m (.pop b) (.upd1 (.storage (.app2 (if E.isMapping then .shrink else .pop)
+    Premise.Runs m (.pop b) (.upd1 (.storage (.app2 (if E.isMapping then .shrink else .pop)
       .storage b.lower))) σ :=
   Premise.sound_update_run σ (pop_run σ.erase b) fun _ =>
     ((SPath.resolveT_ends σ b).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _).1
@@ -982,7 +982,7 @@ theorem sound_pop {E : Ty} (b : SPath C Γ (.array E)) :
 `{storage := extend(storage, b) ‖ lsv := next(b)}`. -/
 theorem sound_rebindPush {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
     (hd : (Ty.ref R).defaultOkS = true) :
-    Premise.Sound m (.rebind i (.push b hd)) (.update ((Upd.nil.snoc
+    Premise.Runs m (.rebind i (.push b hd)) (.update ((Upd.nil.snoc
       (.storage (.app2 (.extend (.ref R)) .storage b.lower))).snoc
       (.local i (.path (.app1 .next rfl b.lower))))) σ :=
   Premise.sound_update_run σ (rebindPush_run σ.erase i b hd) fun _ =>
@@ -990,7 +990,7 @@ theorem sound_rebindPush {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.a
 
 /-- `transferNoCallbackBox`: `{net := …}`. -/
 theorem sound_transferBox (sadr se : Simple C Γ .uint) :
-    Premise.Sound m (.transfer (.simple sadr) (.simple se)) (.upd1 (.payTo sadr se)) σ :=
+    Premise.Runs m (.transfer (.simple sadr) (.simple se)) (.upd1 (.payTo sadr se)) σ :=
   Premise.sound_update_run σ (transferBox_run σ.erase sadr se) fun _ => TRes.NoDiv.ok _
 
 /-- `transferDiamond` (Lean): the goal fails. -/
@@ -1008,14 +1008,14 @@ theorem sound_send (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) (fs 
 /-- `memoryReferenceDeclFreshAlloc`. -/
 theorem sound_declMemFresh (R : RefTy) (x : Var)
     (hd : (none.isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
-    Premise.Sound m (.declMem R x none hd hm) (.update ((Upd.nil.decl x
+    Premise.Runs m (.declMem R x none hd hm) (.update ((Upd.nil.decl x
       (.mref (.app1 (.alloc R) rfl .memory))).snoc (.memory (.app1 (.addM R) rfl .memory)))) σ :=
   Premise.sound_update_run σ (declMemFresh_run σ.erase R x hd hm) fun _ => TRes.NoDiv.ok _
 
 /-- `memoryRootDeleteFreshRebind`. -/
 theorem sound_deleteMemVar {R : RefTy} (i : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (hd : (Ty.ref R).defaultOkS = true) :
-    Premise.Sound m (.deleteMem (.var i hm) hd) (.update ((Upd.nil.snoc
+    Premise.Runs m (.deleteMem (.var i hm) hd) (.update ((Upd.nil.snoc
       (.local i (.mref (.app1 (.alloc R) rfl .memory)))).snoc
       (.memory (.app1 (.addM R) rfl .memory)))) σ :=
   Premise.sound_update_run σ (deleteMemVar_run σ.erase i hm hd) fun _ => TRes.NoDiv.ok _
@@ -1026,7 +1026,7 @@ theorem sound_allocCopy {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) (v :
     (hr : r.eval σ.erase = (do
       let (τ, mv) ← Semantics.copyStToM σ.erase.glob (← v.eval σ.erase)
       pure (σ.erase.withGlob τ, ← mv.asRef))) :
-    Premise.Sound m (.rebindMem i r) (.allocCopy i v) σ :=
+    Premise.Runs m (.rebindMem i r) (.allocCopy i v) σ :=
   Premise.sound_update_run σ (allocCopy_run σ.erase i r v hr) fun _ =>
     ((MRhs.evalT_ends σ r).bind fun _ => TRes.Ends.ok _).1
 
@@ -1040,7 +1040,7 @@ theorem clearT_ends : {T : Ty} → (a : MAddr σ.H T) → (hm : T.mapFree = true
 /-- `memoryFieldDelete*`, `memoryIndexDelete*`: a slot reset to its default,
 or written a fresh default object. -/
 theorem sound_clearMem {T : Ty} (l : MLoc C Γ T) (hd : T.defaultOkS = true) :
-    Premise.Sound m (.deleteMem (.loc l) hd) (.clearMem l.lower T) σ := by
+    Premise.Runs m (.deleteMem (.loc l) hd) (.clearMem l.lower T) σ := by
   obtain ⟨U, hU, hs⟩ := clearMem_run σ.erase l hd
   rw [hU]
   exact Premise.sound_updateSim_run σ hs fun _ =>
@@ -1048,13 +1048,13 @@ theorem sound_clearMem {T : Ty} (l : MLoc C Γ T) (hd : T.defaultOkS = true) :
 
 /-- `valueDeclSkip`: `{v := defVal(T)}`. -/
 theorem sound_valueDeclSkip (p : PrimTy) (x : Var) :
-    Premise.Sound m (.declLocal p x none)
+    Premise.Runs m (.declLocal p x none)
       (.update (Upd.nil.decl x (.val (p := p) (.app0 (.lit p.default))))) σ :=
   Premise.sound_update_run (s := .declLocal p x none) σ rfl fun _ => TRes.NoDiv.ok _
 
 /-- `storageLocalDeclSkip`: `{lsv := unset}`. -/
 theorem sound_storageLocalDeclSkip (R : RefTy) (x : Var) :
-    Premise.Sound m (.declStorage R x none) (.update (Upd.nil.decl (t := .alias R) x .unset)) σ :=
+    Premise.Runs m (.declStorage R x none) (.update (Upd.nil.decl (t := .alias R) x .unset)) σ :=
   Premise.sound_update_run (s := .declStorage R x none) σ rfl fun _ => TRes.NoDiv.ok _
 
 /-- `revertBox`, `revertDiamond`. -/

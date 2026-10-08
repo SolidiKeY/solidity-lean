@@ -50,7 +50,7 @@ theorem TState.copyStToMG_push {t : LTy} (w : t.TDenote C σ.H) {T : Ty} (v : SV
 /-- `memoryStorageCopyUnfold`: the storage path bound first. -/
 theorem sound_memCopyCapture {R : RefTy} (i : Idx Γ (.mem R)) (sp : SPath C Γ (.ref R))
     (hm : (Ty.ref R).mapFree = true) (x : Var) :
-    Premise.Sound m (.rebindMem i (.copy sp hm))
+    Premise.Runs m (.rebindMem i (.copy sp hm))
       (.captureSP x sp (.rebindMem i.there (.copy (.alias .here) hm))) σ := by
   refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ (t := .alias R) (some q)
@@ -71,7 +71,7 @@ theorem sound_memCopyCapture {R : RefTy} (i : Idx Γ (.mem R)) (sp : SPath C Γ 
 /-- **A memory local bound** (`rebindMemStep`). -/
 theorem rebindMemStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R)
     (q : Premise C Γ Γ) (hs : rebindMemStep k i r = some q) :
-    Premise.Sound m (.rebindMem i r) q σ := by
+    Premise.Runs m (.rebindMem i r) q σ := by
   cases r with
   | alias p =>
     cases p with
@@ -99,7 +99,7 @@ theorem rebindMemStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.mem R)) (r : MRh
 /-- **A memory reference written** (`memRefStep`). -/
 theorem memRefStep_sound (k : Nat) {R : RefTy} (l : MLoc C Γ (.ref R))
     (src : MPath C Γ (.ref R)) (q : Premise C Γ Γ) (hs : memRefStep k l src = some q) :
-    Premise.Sound m (.assignMem l (.ref src)) q σ := by
+    Premise.Runs m (.assignMem l (.ref src)) q σ := by
   cases src with
   | var y hy => cases hs; exact sound_writeMem σ l _
   | loc sl =>
@@ -114,7 +114,7 @@ statement reads the source first. -/
 theorem sound_memFieldWriteRecv {s : Name} {T : Ty} (b : MPath C Γ (.struct s))
     (hm : (Ty.ref (.struct s)).mapFree = true) (f : Name) (hf : C.fieldType s f = some T)
     (r : MSrc C Γ T) (x : Var) :
-    Premise.Sound m (.assignMem (.field b f hf) r)
+    Premise.Runs m (.assignMem (.field b f hf) r)
       (.captureMV x b (.assignMem (.field (.var .here hm) f hf) r.up)) σ := by
   refine Premise.sound_captureMVSim σ (fun v hv => ?_) (fun h hh hp => ?_)
   · refine trunSt_pushed σ (t := .mem (.struct s)) (some v) (TRun.assignMem_pushT σ (t := .mem _) (some v)
@@ -129,7 +129,7 @@ theorem sound_memFieldWriteRecv {s : Name} {T : Ty} (b : MPath C Γ (.struct s))
 /-- `memoryIndexWriteCaptureAllNonSimpleIndex`: `T se = e; uint ie = i; mv[ie] = se;`. -/
 theorem sound_memIndexWriteUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : ArrTy R (.prim p))
     (mv : Idx Γ (.mem R)) (hmv : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (e : Val C Γ p) :
-    Premise.Sound m (.assignMem (.index a (.var mv hmv) i) (.val e))
+    Premise.Runs m (.assignMem (.index a (.var mv hmv) i) (.val e))
       (.unfold (.cons (.declLocal _ (fse k) (some e))
         (.cons (.declLocal .uint (fie k) (some i.up))
         (.cons (.assignMem (.index a (.var mv.there.there hmv) (.simple (.local .here)))
@@ -173,7 +173,7 @@ theorem sound_memIndexWriteUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : ArrTy 
 statement reads the source first. -/
 theorem sound_memIndexRefCapture {R R' : RefTy} (a : ArrTy R (.ref R')) (mv : Idx Γ (.mem R))
     (hmv : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (src : MPath C Γ (.ref R')) (x : Var) :
-    Premise.Sound m (.assignMem (.index a (.var mv hmv) i) (.ref src))
+    Premise.Runs m (.assignMem (.index a (.var mv hmv) i) (.ref src))
       (.capture .uint x i (.assignMem (.index a (.var mv.there hmv) (.simple (.local .here)))
         (.ref src.up))) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh hp => ?_)
@@ -192,7 +192,7 @@ theorem sound_memIndexRefCapture {R R' : RefTy} (a : ArrTy R (.ref R')) (mv : Id
 `T se = e; T memory mv = nmp; uint ie = i; mv[ie] = se;`. -/
 theorem sound_memIndexWriteRecvUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : ArrTy R (.prim p))
     (l : MLoc C Γ (.ref R)) (i : Val C Γ .uint) (e : Val C Γ p) :
-    Premise.Sound m (.assignMem (.index a (.loc l) i) (.val e))
+    Premise.Runs m (.assignMem (.index a (.loc l) i) (.val e))
       (.unfold (.cons (.declLocal _ (fse k) (some e))
         (.cons (.declMem R (fmv k) (some (.alias (MPath.loc l).up)) rfl (MPath.loc l).mapFree)
         (.cons (.declLocal .uint (fie k) (some i.up.up))
@@ -242,7 +242,7 @@ theorem sound_memIndexWriteRecvUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : Ar
 source first. -/
 theorem sound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref R'))
     (l : MLoc C Γ (.ref R)) (i : Val C Γ .uint) (src : MPath C Γ (.ref R')) :
-    Premise.Sound m (.assignMem (.index a (.loc l) i) (.ref src))
+    Premise.Runs m (.assignMem (.index a (.loc l) i) (.ref src))
       (.unfold (.cons (.declMem R (fmv k) (some (.alias (.loc l))) rfl (MPath.loc l).mapFree)
         (.cons (.declLocal .uint (fie k) (some i.up))
         (.cons (.assignMem (.index a (.var (.there .here) (MPath.loc l).mapFree)
@@ -287,7 +287,7 @@ theorem sound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref 
 /-- **A memory location written** (`assignMemStep`). -/
 theorem assignMemStep_sound (k : Nat) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
     (q : Premise C Γ Γ) (hs : assignMemStep k l r = some q) :
-    Premise.Sound m (.assignMem l r) q σ := by
+    Premise.Runs m (.assignMem l r) q σ := by
   cases l with
   | field b f hf =>
     cases b with
@@ -323,7 +323,7 @@ theorem assignMemStep_sound (k : Nat) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ 
 theorem sound_deleteMemFieldRecv {s : Name} {T : Ty} (b : MPath C Γ (.struct s))
     (hm : (Ty.ref (.struct s)).mapFree = true) (f : Name) (hf : C.fieldType s f = some T)
     (hd : T.defaultOkS = true) (x : Var) :
-    Premise.Sound m (.deleteMem (.loc (.field b f hf)) hd)
+    Premise.Runs m (.deleteMem (.loc (.field b f hf)) hd)
       (.captureMV x b (.deleteMem (.loc (.field (.var .here hm) f hf)) hd)) σ := by
   refine Premise.sound_captureMVSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ (t := .mem (.struct s)) (some v) (TRun.deleteMem_pushT σ (t := .mem _) (some v)
@@ -336,7 +336,7 @@ theorem sound_deleteMemFieldRecv {s : Name} {T : Ty} (b : MPath C Γ (.struct s)
 /-- `memoryIndexDeleteNonSimpleIndexCapture`: the index captured. -/
 theorem sound_deleteMemIndexCapture {R : RefTy} {T : Ty} (a : ArrTy R T) (mv : Idx Γ (.mem R))
     (hmv : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (hd : T.defaultOkS = true) (x : Var) :
-    Premise.Sound m (.deleteMem (.loc (.index a (.var mv hmv) i)) hd)
+    Premise.Runs m (.deleteMem (.loc (.index a (.var mv hmv) i)) hd)
       (.capture .uint x i
         (.deleteMem (.loc (.index a (.var mv.there hmv) (.simple (.local .here)))) hd)) σ := by
   refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
@@ -352,7 +352,7 @@ theorem sound_deleteMemIndexCapture {R : RefTy} {T : Ty} (a : ArrTy R T) (mv : I
 /-- `memoryIndexDelete_unfold_leftFst`: the receiver bound first. -/
 theorem sound_deleteMemIndexRecv {R : RefTy} {T : Ty} (a : ArrTy R T) (b : MPath C Γ (.ref R))
     (hm : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (hd : T.defaultOkS = true) (x : Var) :
-    Premise.Sound m (.deleteMem (.loc (.index a b i)) hd)
+    Premise.Runs m (.deleteMem (.loc (.index a b i)) hd)
       (.captureMV x b (.deleteMem (.loc (.index a (.var .here hm) i.up)) hd)) σ := by
   refine Premise.sound_captureMVSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ (t := .mem R) (some v) (TRun.deleteMem_pushT σ (t := .mem _) (some v)
@@ -365,7 +365,7 @@ theorem sound_deleteMemIndexRecv {R : RefTy} {T : Ty} (a : ArrTy R T) (b : MPath
 /-- **`delete p;` on memory** (`deleteMemStep`). -/
 theorem deleteMemStep_sound (k : Nat) {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true)
     (q : Premise C Γ Γ) (hs : deleteMemStep k p hd = some q) :
-    Premise.Sound m (.deleteMem p hd) q σ := by
+    Premise.Runs m (.deleteMem p hd) q σ := by
   cases p with
   | var i hm => cases hs; exact sound_deleteMemVar σ i hm hd
   | loc l =>
@@ -385,7 +385,7 @@ theorem deleteMemStep_sound (k : Nat) {T : Ty} (p : MPath C Γ T) (hd : T.defaul
 /-- `newArrayCapture`: `T memory mv = new T(se); tgt = mv;`. -/
 theorem sound_assignNew (k : Nat) {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
     (h : R.newArrOk = true) :
-    Premise.Sound m (.assignNew l n h)
+    Premise.Runs m (.assignNew l n h)
       (.unfold (.cons (.declMem R (fmv k) (some (.newArr n h)) rfl
           (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree)
         (.cons (l.up.fill (.var .here (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree)) .nil))
