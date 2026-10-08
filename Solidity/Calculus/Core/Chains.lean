@@ -696,19 +696,20 @@ def labelOfFocus? (f : Expr) : MetaM (Option (Lean.Name × Expr)) := do
 
 /-- The label of `~[r]~>` on the focus `f`: the constructor `r` must derive it. -/
 def labelFor (r : Lean.Name) (f : Expr) (where_ : Expr) : MetaM Expr := do
-  let at_ ← indentLine where_
+  -- printed only for an error: a line's print is a delaboration
+  let at_ : MetaM MessageData := indentLine where_
   if r == `emptyModality then
     unless f.isAppOf ``Focus.empty do
-      throwError "~[{r}]~>: the program of{at_}\nis not done"
+      throwError "~[{r}]~>: the program of{← at_}\nis not done"
     return mkApp (mkConst ``StepRule.emptyModality) (f.getArg! 0)
   let a := f.getAppArgs
-  unless a.size == 6 do throwError "~[{r}]~>: the step on{at_}\nends a program"
+  unless a.size == 6 do throwError "~[{r}]~>: the step on{← at_}\nends a program"
   for c in ← ruleCtors r do
     if let some l ← labelAs? c a[1]! a[2]! a[5]! then return l
   let found := match ← labelOfFocus? f with
     | some (n, _) => m!"{n}"
     | none => m!"no rule of the table"
-  throwError "~[{r}]~>: the rule for{at_}\nis {found}, not {r}"
+  throwError "~[{r}]~>: the rule for{← at_}\nis {found}, not {r}"
 
 /-- A derivation, with the auxiliary lemmas the elaborator abstracted it into
 unfolded, down to a constructor. -/
@@ -793,18 +794,32 @@ in slots (`Fml.slot i`, the `i`th hole), quoted: at the diamond and at the
 box when `m` is a variable, once otherwise. -/
 def readings (c : Lean.Term) (m? : Option Expr) (holes : Array Syntax) (φ : TSyntax `dl_fml) :
     TermElabM (Array Expr) := do
-  let read (μ : Option Lean.Name) : TermElabM Expr := do
+  let μs : Array (Option Lean.Name) := match m? with
+    | some m =>
+      if m.isConstOf ``Modality.diamond || m.isConstOf ``Modality.box then #[m.constName?]
+      else #[``Modality.diamond, ``Modality.box]
+    | none => #[none]
+  -- `elabAgainst`'s evaluation, both readings in one (each evaluation compiles
+  -- its term), with no kernel check of the throwaway definition
+  -- (`evalQuoted`): the readings are compared with the computed lines'
+  let C ← withTransparency .instances <| whnf (← elabTermAndSynthesize c (mkConst ``Contract))
+  let some n := C.constName? | throwError "not a named contract: {C}"
+  let q : Lean.Term ← `(Lean.mkConst $(quote n))
+  let reads ← μs.mapM fun μ => do
     let raw ← liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
     -- applications built directly: in a quotation `$a $b` reads `$b` as a chain arrow
-    elabAgainst c fun q => do
-      let rd : Lean.Term := Syntax.mkApp (mkCIdent ``elabDl) #[c, raw, mkCIdent ``Bool.false]
-      let qt : Lean.Term := Syntax.mkApp (mkCIdent ``Solidity.Fml.quote) #[q]
-      pure (Syntax.mkApp (mkCIdent ``Except.map) #[qt, rd])
-  match m? with
-  | some m =>
-    if m.isConstOf ``Modality.diamond || m.isConstOf ``Modality.box then return #[← read m.constName?]
-    return #[← read ``Modality.diamond, ← read ``Modality.box]
-  | none => return #[← read none]
+    let rd : Lean.Term := Syntax.mkApp (mkCIdent ``elabDl) #[c, raw, mkCIdent ``Bool.false]
+    let qt : Lean.Term := Syntax.mkApp (mkCIdent ``Solidity.Fml.quote) #[q]
+    pure (Syntax.mkApp (mkCIdent ``Except.map) #[qt, rd])
+  let ty := mkApp (mkConst ``List [0]) (mkApp2 (mkConst ``Except [0, 0]) (mkConst ``String)
+    (mkConst ``Lean.Expr))
+  let e ← elabTermEnsuringType (← `([$reads,*])) ty
+  synthesizeSyntheticMVarsNoPostponing
+  let e ← instantiateMVars e
+  let rs ← unsafe evalQuoted (List (Except String Lean.Expr)) ty e
+  rs.toArray.mapM fun
+    | .ok r => pure r
+    | .error msg => throwError "Solidity elaboration failed: {msg}"
 
 /-- The `i` of an erased slot (`Fml.chainSlot i`, erased: `{anon(ns)}` over
 `find(storage, ⟪i⟫)`) and its names `ns`, quoted. -/
@@ -833,6 +848,28 @@ def toWrittenSlots (c : Expr) (sp : Splice) (holes : Array Expr) (e : Expr) : Ex
 partial def underAlls (e : Expr) : List Expr :=
   if e.isAppOfArity ``Solidity.Fml.all 4 then e :: underAlls e.appArg! else [e]
 
+/-- The written text `φ` read (`readings`), with its holes elaborated; none
+when its modality is not the chain's. -/
+def readWritten (sp : Splice) (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
+    TermElabM (Option (Array Expr × Array Expr)) := do
+  let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
+  -- the written modality is the chain's
+  if let (some m, some m') := (m?, sp.modality) then
+    unless m == m' do return none
+  let (hs, es) ← holeTerms φ
+  let rs ← readings c (m?.orElse fun _ => sp.modality) hs φ
+  return some (es, rs)
+
+/-- Whether the readings `rs` of a written text, its holes `es`, are the
+computed line whose erasures are `erased` (once per modality run). -/
+def readingMatches (sp : Splice) (C : Expr) (es rs erased : Array Expr) : Bool :=
+  let es' := erased.map (toWrittenSlots C sp es)
+  -- the written text may leave out the parameters `cdl!` binds outermost
+  let same (r e : Expr) : Bool := (underAlls e).contains r
+  if rs.size == es'.size then (rs.zip es').all fun (r, e) => same r e
+  -- a constant modality read once against both runs: the run's own
+  else es'.any (same rs[0]! ·)
+
 /-- Whether the written line `w` is the computed line whose erasures are
 `erased` (once per modality run), the formulas of the computed lines `sp`. -/
 def matchWritten (sp : Splice) (C : Expr) (w : Written) (B : Expr) (erased : Array Expr) :
@@ -845,18 +882,28 @@ def matchWritten (sp : Splice) (C : Expr) (w : Written) (B : Expr) (erased : Arr
     let e ← instantiateMVars e
     return e == B || (← withReducible (isDefEq e B))
   | .text c m? φ =>
-    let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
-    -- the written modality is the chain's
-    if let (some m, some m') := (m?, sp.modality) then
-      unless m == m' do return false
-    let (hs, es) ← holeTerms φ
-    let rs ← readings c (m?.orElse fun _ => sp.modality) hs φ
-    let es' := erased.map (toWrittenSlots C sp es)
-    -- the written text may leave out the parameters `cdl!` binds outermost
-    let same (r e : Expr) : Bool := (underAlls e).contains r
-    if rs.size == es'.size then return (rs.zip es').all fun (r, e) => same r e
-    -- a constant modality read once against both runs: the run's own
-    return es'.any (same rs[0]! ·)
+    let some (es, rs) ← readWritten sp c m? φ | return false
+    return readingMatches sp C es rs erased
+
+/-- `matchWritten w` against many computed lines (a `~*>`'s, a `~~>`'s, the
+merges): the written text read once, on the first line it is checked
+against, since its reading (two evaluations under a modality variable) does
+not depend on the line. -/
+def writtenMatcher (C : Expr) (w : Written) :
+    TermElabM (Splice → Expr → Array Expr → TermElabM Bool) := do
+  match w with
+  | .text c m? φ =>
+    let memo ← IO.mkRef (none : Option (Option Expr × Option (Array Expr × Array Expr)))
+    return fun sp _ erased => do
+      let r ← match ← memo.get with
+        | some (μ, r) => if μ == sp.modality then pure r else readWritten sp c m? φ
+        | none =>
+          let r ← readWritten sp c m? φ
+          memo.set (some (sp.modality, r))
+          pure r
+      let some (es, rs) := r | return false
+      return readingMatches sp C es rs erased
+  | _ => return fun sp B erased => matchWritten sp C w B erased
 
 /-- The computed line, shown (`#derivation`). -/
 def showLines (φ : Expr) (lines : List Line) : MetaM MessageData := do
@@ -1021,7 +1068,8 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       if legacy.isNone && !(← runChain cur).lines.isEmpty then
         -- the program is still open: the merge on the scoped line
         let (sp, cands) ← mergeCands cur
-        let pick ← cands.findM? fun c => matchWritten sp C w c.fml c.erased
+        let fits ← writtenMatcher C w
+        let pick ← cands.findM? fun c => fits sp c.fml c.erased
         if cands.isEmpty then
           throwError "~[{r}]~>: {r} does not apply to{← indentLine cur}"
         let some c := pick |
@@ -1106,8 +1154,10 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       let cands : List (Expr × Array Expr) := (cur, run.erased) :: run.lines.map fun l => (l.fml, l.erased)
       let pick ← match w with
         | .hole => pure (cands.getLast?.map (·.1))
-        | _ => cands.findSomeM? fun (B, er) => do
-            if ← matchWritten run.splice C w B er then pure (some B) else pure none
+        | _ => do
+          let fits ← writtenMatcher C w
+          cands.findSomeM? fun (B, er) => do
+            if ← fits run.splice B er then pure (some B) else pure none
       let some B := pick | notReached run.lines
       ws := ws.push (mk (mkApp (mkConst ``Core.Link.many) C) B)
       if links.size == 1 then single := some (mkAppN (mkConst ``Core.Fml.Steps) #[C, Γ, cur, B])
@@ -1247,14 +1297,15 @@ syntax (name := leadsAnyStx) "leads% " term:max term:max : term
   let w := Written.of bStx
   let run ← runChain A
   let cands : List (Expr × Array Expr) := (A, run.erased) :: run.lines.map fun l => (l.fml, l.erased)
+  let fits ← writtenMatcher C w
   if let some B ← cands.findSomeM? (fun (B, er) => do
-      if ← matchWritten run.splice C w B er then pure (some B) else pure none) then
+      if ← fits run.splice B er then pure (some B) else pure none) then
     return mkApp4 (mkConst ``Core.Fml.Leads) C Γ A B
   -- a line of the derivation with its update spine merged (the program open)
   for (L, _) in cands do
     if (← runChain L).lines.isEmpty then continue
     let (sp, ms) ← mergeCands L
-    if let some c ← ms.findM? (fun c => matchWritten sp C w c.fml c.erased) then
+    if let some c ← ms.findM? (fun c => fits sp c.fml c.erased) then
       return mkApp4 (mkConst ``Core.Fml.Leads) C Γ A c.fml
   unless (← whnfR Γ).isAppOf ``List.nil do
     throwError "~~>: the line after is no line of the derivation of{← indentLine A}"
@@ -1316,8 +1367,9 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
     let C := ty.getArg! 0
     let w := Written.of wStx
     -- the line after: the text, while unknown; the line `calc` gave it, else
+    let written ← writtenMatcher C w
     let fits (B' : Expr) (sp : Splice) (er : Array Expr) : TermElabM Bool := do
-      if B.isMVar then matchWritten sp C w B' er else isDefEq B B'
+      if B.isMVar then written sp B' er else isDefEq B B'
     if ty.isAppOf ``Core.Fml.MergeBy then
       let (sp, cands) ← mergeCands A
       let some c ← cands.findM? fun c => fits c.fml sp c.erased
