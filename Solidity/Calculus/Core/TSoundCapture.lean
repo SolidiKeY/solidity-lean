@@ -426,4 +426,251 @@ theorem VHole.lower_tsound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p)
 
 end ReadSteps
 
+/-! ## A statement read with a local pushed runs as before
+
+`Calculus/Core/SoundArms.lean`'s push lemmas over the typed run: a
+capture's statement, read from the state with the fresh local pushed, runs
+as the statement it replaces, its outcome lifted along `up` (`pushedT`),
+given that its parts read as the replaced statement's do. -/
+
+section PushT
+
+variable {Γ : Ctx} {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H)
+
+/-- The outcome of a run from `σ`, the local `w` pushed on its state (over
+the heap it grew, `w` weakened along). -/
+abbrev pushedT (r : TRes (Out C σ.H Γ)) : TRes (Out C σ.H (t :: Γ)) :=
+  liftedT Core.up (w, σ.env) r
+
+/-- An outcome with a value, the local pushed. -/
+abbrev pushedT₂ {α : Type} (r : TRes (Out C σ.H Γ × α)) : TRes (Out C σ.H (t :: Γ) × α) :=
+  liftedT₂ Core.up (w, σ.env) r
+
+theorem opStoreT_push (op : BinOp) {p : PrimTy} (r : SRef C (.prim p)) (v : p.Denote) :
+    opStoreT (σ.push w) op r v = pushedT σ w (opStoreT σ op r v) :=
+  opStoreT_lift Core.up σ (w, σ.env) op r v
+
+theorem opMemT_push (op : BinOp) {p : PrimTy} (a : MAddr σ.H (.prim p)) (v : p.Denote) :
+    opMemT (σ.push w) op a v = pushedT σ w (opMemT σ op a v) :=
+  opMemT_lift Core.up σ (w, σ.env) op a v
+
+theorem bumpStoreT_push (op : IncDec) {p : PrimTy} (r : SRef C (.prim p)) :
+    bumpStoreT (σ.push w) op r = pushedT₂ σ w (bumpStoreT σ op r) :=
+  bumpStoreT_lift Core.up σ (w, σ.env) op r
+
+theorem bumpMemT_push (op : IncDec) {p : PrimTy} (a : MAddr σ.H (.prim p)) :
+    bumpMemT (σ.push w) op a = pushedT₂ σ w (bumpMemT σ op a) :=
+  bumpMemT_lift Core.up σ (w, σ.env) op a
+
+theorem clearT_push {T : Ty} (a : MAddr σ.H T) (hm : T.mapFree = true) :
+    TRun.clearT (σ.push w) a hm = pushedT σ w (TRun.clearT σ a hm) :=
+  clearT_lift Core.up σ (w, σ.env) a hm
+
+theorem sendT_push (pv : Idx Γ (.val .bool)) (addr amt : Int) :
+    sendT (σ.push w) pv.there addr amt = Out.lift Core.up (w, σ.env) (sendT σ pv addr amt) := by
+  rw [← Idx.up_eq pv]
+  exact sendT_lift Core.up σ (w, σ.env) pv addr amt
+
+theorem MRhs.evalT_up {R : RefTy} (r : MRhs C Γ R) :
+    (r.up (t := t)).evalT (σ.push w) = (r.evalT σ).map (Grew.lift Core.up (w, σ.env)) := by
+  rw [MRhs.up_eq]; exact MRhs.evalT_wk Core.up σ (w, σ.env) r
+
+/-- A compound target read with a local pushed as `l` reads (`OpLoc.Agree`,
+typed). -/
+inductive OpLoc.AgreeT : {p : PrimTy} → OpLoc C (t :: Γ) p → OpLoc C Γ p → Prop
+  | «local» {p : PrimTy} (i : Idx Γ (.val p)) : OpLoc.AgreeT (.local i.there) (.local i)
+  | root {p : PrimTy} (r : Name) (h : C.rootType r = some (.prim p)) :
+      OpLoc.AgreeT (.root r h) (.root r h)
+  | field {s : Name} {p : PrimTy} {b' : SPath C (t :: Γ) (.struct s)} {b : SPath C Γ (.struct s)}
+      (f : Name) (h : C.fieldType s f = some (.prim p))
+      (hb : b'.resolveT (σ.push w) = b.resolveT σ) :
+      OpLoc.AgreeT (.field b' f h) (.field b f h)
+  | index {R : RefTy} {k p : PrimTy} (it : IndexTy R k (.prim p)) {b' : SPath C (t :: Γ) (.ref R)}
+      {b : SPath C Γ (.ref R)} {i' : Simple C (t :: Γ) k} {i : Simple C Γ k}
+      (hb : b'.resolveT (σ.push w) = b.resolveT σ) (hi : i'.evalT (σ.push w) = i.evalT σ) :
+      OpLoc.AgreeT (.index it b' i') (.index it b i)
+  | mfield {s : Name} {p : PrimTy} {b' : MPath C (t :: Γ) (.struct s)} {b : MPath C Γ (.struct s)}
+      (f : Name) (h : C.fieldType s f = some (.prim p)) (hb : b'.mvalT (σ.push w) = b.mvalT σ) :
+      OpLoc.AgreeT (.mfield b' f h) (.mfield b f h)
+  | mindex {R : RefTy} {p : PrimTy} (a : ArrTy R (.prim p)) {b' : MPath C (t :: Γ) (.ref R)}
+      {b : MPath C Γ (.ref R)} {i' : Simple C (t :: Γ) .uint} {i : Simple C Γ .uint}
+      (hb : b'.mvalT (σ.push w) = b.mvalT σ) (hi : i'.evalT (σ.push w) = i.evalT σ) :
+      OpLoc.AgreeT (.mindex a b' i') (.mindex a b i)
+
+theorem OpLoc.AgreeT.of_up {p : PrimTy} (l : OpLoc C Γ p) : OpLoc.AgreeT σ w l.up l := by
+  cases l with
+  | «local» i => exact .local i
+  | root r h => exact .root r h
+  | field b f h => exact .field f h (SPath.resolveT_up σ w b)
+  | index it b i => exact .index it (SPath.resolveT_up σ w b) (Simple.evalT_up σ w i)
+  | mfield b f h => exact .mfield f h (MPath.mvalT_up σ w b)
+  | mindex a b i => exact .mindex a (MPath.mvalT_up σ w b) (Simple.evalT_up σ w i)
+
+variable {σ w} in
+theorem OpLoc.AgreeT.storeT {p : PrimTy} {l' : OpLoc C (t :: Γ) p} {l : OpLoc C Γ p}
+    (h : OpLoc.AgreeT σ w l' l) (op : BinOp) (v : p.Denote) :
+    l'.storeT (σ.push w) op v = pushedT σ w (l.storeT σ op v) := by
+  cases h with
+  | «local» i =>
+    simp only [OpLoc.storeT, liftedT_bind]
+    lift_fin
+  | root r h => exact opStoreT_push σ w op _ v
+  | field f h hb =>
+    simp only [OpLoc.storeT, Loc.resolveT, hb, liftedT_bind, opStoreT_push, bind_assoc] <;> rfl
+  | index it hb hi =>
+    simp only [OpLoc.storeT, Loc.resolveT, Val.evalT, hb, hi, liftedT_bind, opStoreT_push,
+      bind_assoc] <;> rfl
+  | mfield f h hb =>
+    simp only [OpLoc.storeT, MLoc.addrT, hb, liftedT_bind, opMemT_push, bind_assoc] <;> rfl
+  | mindex a hb hi =>
+    simp only [OpLoc.storeT, MLoc.addrT, Val.evalT, hb, hi, liftedT_bind, opMemT_push, bind_assoc] <;> rfl
+
+variable {σ w} in
+theorem OpLoc.AgreeT.bumpT {p : PrimTy} {l' : OpLoc C (t :: Γ) p} {l : OpLoc C Γ p}
+    (h : OpLoc.AgreeT σ w l' l) (op : IncDec) :
+    l'.bumpT (σ.push w) op = pushedT₂ σ w (l.bumpT σ op) := by
+  cases h with
+  | «local» i =>
+    simp only [OpLoc.bumpT, liftedT₂_bind]
+    lift_fin
+  | root r h => exact bumpStoreT_push σ w op _
+  | field f h hb =>
+    simp only [OpLoc.bumpT, Loc.resolveT, hb, liftedT₂_bind, bumpStoreT_push, bind_assoc] <;> rfl
+  | index it hb hi =>
+    simp only [OpLoc.bumpT, Loc.resolveT, Val.evalT, hb, hi, liftedT₂_bind, bumpStoreT_push,
+      bind_assoc] <;> rfl
+  | mfield f h hb =>
+    simp only [OpLoc.bumpT, MLoc.addrT, hb, liftedT₂_bind, bumpMemT_push, bind_assoc] <;> rfl
+  | mindex a hb hi =>
+    simp only [OpLoc.bumpT, MLoc.addrT, Val.evalT, hb, hi, liftedT₂_bind, bumpMemT_push,
+      bind_assoc] <;> rfl
+
+theorem TRun.assignLocal_pushT {p : PrimTy} (i : Idx Γ (.val p)) (v' : Val C (t :: Γ) p)
+    (v : Val C Γ p) (hv : v'.evalT (σ.push w) = v.evalT σ) :
+    TRun.assignLocal i.there v' (σ.push w) = pushedT σ w (TRun.assignLocal i v σ) := by
+  simp only [TRun.assignLocal, hv, liftedT_bind]
+  lift_fin
+
+theorem TRun.assign_pushT {T : Ty} (l' : Loc C (t :: Γ) T) (r' : Src C (t :: Γ) T)
+    (l : Loc C Γ T) (r : Src C Γ T) (hr : r'.valueT (σ.push w) = r.valueT σ)
+    (hl : l'.resolveT (σ.push w) = l.resolveT σ) :
+    TRun.assign l' r' (σ.push w) = pushedT σ w (TRun.assign l r σ) := by
+  simp only [TRun.assign, hr, hl, liftedT_bind]
+  lift_fin
+
+theorem TRun.rebind_pushT {R : RefTy} (i : Idx Γ (.alias R)) (r' : ARhs C (t :: Γ) R)
+    (r : ARhs C Γ R) (hr : r'.evalT (σ.push w) = r.evalT σ) :
+    TRun.rebind i.there r' (σ.push w) = pushedT σ w (TRun.rebind i r σ) := by
+  simp only [TRun.rebind, hr, liftedT_bind]
+  lift_fin
+
+theorem TRun.opAssign_pushT {p : PrimTy} (op : BinOp) {l' : OpLoc C (t :: Γ) p} {l : OpLoc C Γ p}
+    (hl : OpLoc.AgreeT σ w l' l) (v' : Val C (t :: Γ) p) (v : Val C Γ p)
+    (hv : v'.evalT (σ.push w) = v.evalT σ) :
+    TRun.opAssign op l' v' (σ.push w) = pushedT σ w (TRun.opAssign op l v σ) := by
+  simp only [TRun.opAssign, hv, hl.storeT, liftedT_bind]
+
+theorem TRun.incDec_pushT {p : PrimTy} (op : IncDec) {l' : OpLoc C (t :: Γ) p} {l : OpLoc C Γ p}
+    (hl : OpLoc.AgreeT σ w l' l) :
+    TRun.incDec op l' (σ.push w) = pushedT σ w (TRun.incDec op l σ) := by
+  simp only [TRun.incDec, hl.bumpT]
+  cases l.bumpT σ op <;> rfl
+
+theorem TRun.assignIncDec_pushT {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
+    {l' : OpLoc C (t :: Γ) p} {l : OpLoc C Γ p} (hl : OpLoc.AgreeT σ w l' l) :
+    TRun.assignIncDec i.there op l' (σ.push w) = pushedT σ w (TRun.assignIncDec i op l σ) := by
+  simp only [TRun.assignIncDec, hl.bumpT]
+  cases l.bumpT σ op with
+  | error => rfl
+  | ok x =>
+    show Except.ok (⟨(Out.lift Core.up (w, σ.env) x.1).st.setLocal i.there x.2, x.1.ext⟩ :
+        Out C σ.H (t :: Γ)) = Except.ok (Out.lift Core.up (w, σ.env) ⟨x.1.st.setLocal i x.2, x.1.ext⟩)
+    rw [← Idx.up_eq i]
+    simp only [Out.lift, TState.lift_setLocal]
+
+theorem TRun.push_none_pushT {E : Ty} (b' : SPath C (t :: Γ) (.array E)) (b : SPath C Γ (.array E))
+    (hb : b'.resolveT (σ.push w) = b.resolveT σ) :
+    TRun.push b' none (σ.push w) = pushedT σ w (TRun.push b none σ) := by
+  simp only [TRun.push, hb, liftedT_bind, liftedT_ite, liftedT_error]
+  lift_fin
+
+theorem TRun.push_some_pushT {E : Ty} (b' : SPath C (t :: Γ) (.array E)) (b : SPath C Γ (.array E))
+    (r' : Src C (t :: Γ) E) (r : Src C Γ E) (hb : b'.resolveT (σ.push w) = b.resolveT σ)
+    (hr : r'.valueT (σ.push w) = r.valueT σ) :
+    TRun.push b' (some r') (σ.push w) = pushedT σ w (TRun.push b (some r) σ) := by
+  simp only [TRun.push, hb, hr, liftedT_bind, liftedT_ite, liftedT_error]
+  lift_fin
+
+theorem TRun.pop_pushT {E : Ty} (b' : SPath C (t :: Γ) (.array E)) (b : SPath C Γ (.array E))
+    (hb : b'.resolveT (σ.push w) = b.resolveT σ) :
+    TRun.pop b' (σ.push w) = pushedT σ w (TRun.pop b σ) := by
+  simp only [TRun.pop, hb, liftedT_bind]
+  lift_fin
+
+theorem TRun.transfer_pushT (r' a' : Val C (t :: Γ) .uint) (r a : Val C Γ .uint)
+    (hr : r'.evalT (σ.push w) = r.evalT σ) (ha : a'.evalT (σ.push w) = a.evalT σ) :
+    TRun.transfer r' a' (σ.push w) = pushedT σ w (TRun.transfer r a σ) := by
+  simp only [TRun.transfer, hr, ha, liftedT_bind]
+  lift_fin
+
+theorem TRun.send_pushT (pv : Idx Γ (.val .bool)) (r' a' : Val C (t :: Γ) .uint)
+    (r a : Val C Γ .uint) (hr : r'.evalT (σ.push w) = r.evalT σ)
+    (ha : a'.evalT (σ.push w) = a.evalT σ) :
+    TRun.send pv.there r' a' (σ.push w) = pushedT σ w (TRun.send pv r a σ) := by
+  simp only [TRun.send, hr, ha, liftedT_bind, sendT_push, liftedT_pure]
+
+theorem TRun.rebindMem_pushT {R : RefTy} (i : Idx Γ (.mem R)) (r' : MRhs C (t :: Γ) R)
+    (r : MRhs C Γ R) (hr : r'.evalT (σ.push w) = (r.evalT σ).map (Grew.lift Core.up (w, σ.env))) :
+    TRun.rebindMem i.there r' (σ.push w) = pushedT σ w (TRun.rebindMem i r σ) := by
+  simp only [TRun.rebindMem, hr]
+  cases r.evalT σ with
+  | error => rfl
+  | ok g =>
+    show Except.ok (⟨(g.st.lift Core.up (TEnv.wk g.ext _ (w, σ.env))).setLocal i.there g.val,
+        g.ext⟩ : Out C σ.H (t :: Γ)) =
+      Except.ok ⟨(g.st.setLocal i g.val).lift Core.up (TEnv.wk g.ext _ (w, σ.env)), g.ext⟩
+    rw [← Idx.up_eq i]
+    simp only [TState.lift_setLocal]
+
+theorem TRun.assignFromMem_pushT {R : RefTy} (l' : Loc C (t :: Γ) (.ref R)) (l : Loc C Γ (.ref R))
+    (p' : MPath C (t :: Γ) (.ref R)) (p : MPath C Γ (.ref R))
+    (hp : p'.mvalT (σ.push w) = p.mvalT σ) (hl : l'.resolveT (σ.push w) = l.resolveT σ) :
+    TRun.assignFromMem l' p' (σ.push w) = pushedT σ w (TRun.assignFromMem l p σ) := by
+  simp only [TRun.assignFromMem, hp, hl, liftedT_bind]
+  lift_fin
+
+theorem TRun.assignMem_pushT {T : Ty} (l' : MLoc C (t :: Γ) T) (l : MLoc C Γ T)
+    (r' : MSrc C (t :: Γ) T) (r : MSrc C Γ T) (hl : l'.addrT (σ.push w) = l.addrT σ)
+    (hr : r'.mvalT (σ.push w) = r.mvalT σ) :
+    TRun.assignMem l' r' (σ.push w) = pushedT σ w (TRun.assignMem l r σ) := by
+  simp only [TRun.assignMem, hr, hl, liftedT_bind]
+  lift_fin
+
+theorem TRun.delete_pushT {T : Ty} (l' : Loc C (t :: Γ) T) (l : Loc C Γ T)
+    (hl : l'.resolveT (σ.push w) = l.resolveT σ) :
+    TRun.delete l' (σ.push w) = pushedT σ w (TRun.delete l σ) := by
+  simp only [TRun.delete, hl, liftedT_bind]
+  lift_fin
+
+theorem TRun.deleteMem_pushT {T : Ty} (l' : MLoc C (t :: Γ) T) (l : MLoc C Γ T)
+    (hl : l'.addrT (σ.push w) = l.addrT σ) :
+    TRun.deleteMem (.loc l') (σ.push w) = pushedT σ w (TRun.deleteMem (.loc l) σ) := by
+  simp only [TRun.deleteMem, hl, liftedT_bind]
+  congr 1; funext a
+  exact clearT_push σ w a _
+
+theorem TRun.require_pushT (c' : Val C (t :: Γ) .bool) (c : Val C Γ .bool)
+    (hc : c'.evalT (σ.push w) = c.evalT σ) :
+    TRun.require c' (σ.push w) = pushedT σ w (TRun.require c σ) := by
+  simp only [TRun.require, hc, liftedT_bind, liftedT_ite, liftedT_pure, liftedT_error]
+  lift_fin
+
+theorem TRun.assert_pushT (c' : Val C (t :: Γ) .bool) (c : Val C Γ .bool)
+    (hc : c'.evalT (σ.push w) = c.evalT σ) :
+    TRun.assert c' (σ.push w) = pushedT σ w (TRun.assert c σ) := by
+  simp only [TRun.assert, hc, liftedT_bind, liftedT_ite, liftedT_pure, liftedT_error]
+  lift_fin
+
+end PushT
+
 end Solidity.Core
