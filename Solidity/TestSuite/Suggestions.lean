@@ -1,4 +1,4 @@
-import Solidity.TestSuite.Problems
+import Solidity.TestSuite.CoreProblems
 
 /-!
 # The suggestions `#solkey_derive?` prints, pinned
@@ -26,14 +26,9 @@ additionStorageWrite: derived
 /--
 info: theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
   sol_prove
-  case leaf1 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
-  case leaf2 =>
-    refine Proves.close_dropWt ?_
-    sol_symex
-    sol_close
+  refine Proves.close_dropWt ?_
+  sol_symex
+  sol_close
 
 testStorageNestedPushReturnAlias: derived
 -/
