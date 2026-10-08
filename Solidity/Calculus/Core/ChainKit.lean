@@ -1,0 +1,580 @@
+import Solidity.Calculus.Core.NotationResolve
+import Solidity.Calculus.Core.Taclet
+import Solidity.Calculus.Core.HoldsErase
+import Solidity.Calculus.Chains
+
+/-!
+# Chains on scoped formulas: the relations
+
+`Calculus/Chains.lean`'s relations on the scoped formulas of
+`Calculus/Core/Fml.lean` (W2 of `docs/intrinsic.md`): a step `φ ~> ψ`
+(`Fml.OneStep`, `Core.Fml.step`), a named step `φ ~[r]~> ψ` (`Fml.StepBy`),
+several `φ ~*> ψ` (`Fml.Steps`), and a chain of them (`Fml.Via`).
+`Calculus/Core/Chains.lean` elaborates and proves them.
+
+**Naming a rule.**  The strategy is a function (`Core.Stmt.step`) and the
+rule table a relation over it, so a step does not carry its rule; the label
+of `φ ~[r]~> ψ` is a derivation `d : Rule C k m s p` of the constructor `r`
+on the statement `s` the step fires on (`StepRule.taclet`), or the empty
+modality going through its frames (`StepRule.emptyModality`).  What ties
+the label to the line is the statement it fires on: `Fml.stepFocusR`, the
+strategy's step with the statement it chose beside the line it leaves
+(`Focus`), whose line is `Fml.stepR`'s (`Fml.stepFocusR_snd`).
+
+**A step over a postcondition** `φ : Post C Γ`: `Fml.stepFocusR` and
+`Fml.maxIdx` are kernel recursions that cannot look into `φ`.  The lemmas
+below take a line apart along its connectives instead, each a `rfl` of the
+recursor: what the strategy does at a connective (`stepFocusR_upd` …), that a
+formula with no modality takes no step (`stepFocusR_eq_none`), and the fresh
+index of a line from its parts (`maxIdx_upd` …, `Post.noFresh`).
+-/
+
+namespace Solidity.Core
+
+open Solidity (Modality)
+
+variable {C : Contract}
+
+/-! ## The statement a step fires on -/
+
+/-- What a step fires on: a statement, at the fresh index `k` and under the
+modality `m`, or a finished program, which goes through its frames. -/
+inductive Focus (C : Contract) : Type where
+  | stmt (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ')
+  | empty
+
+/-- The modality `⟨ P κ ⟩ φ` one step on, with the statement it fires on
+(`Fml.modalStep`). -/
+def Fml.modalFocus (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P : Prog C Γ Γ₁)
+    (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) : Option (Focus C × Fml C Γ) :=
+  Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames C Γ₁ Γ₀ → Option (Focus C × Fml C Γ)) P
+    (fun κ => some (.empty, κ.exit m φ))
+    (fun s ω κ => (s.step k m).map fun p => (.stmt k m s, p.fml m ω κ φ)) κ
+
+/-- `Fml.stepR` with the statement it fires on: the recursor, which the
+kernel unfolds (Gate G0, condition 2).  Never run as compiled code. -/
+noncomputable def Fml.stepFocusR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
+    Option (Focus C × Fml C Γ) :=
+  Fml.rec (motive := fun Γ _ => Option (Focus C × Fml C Γ))
+    (tt := none) (eq := fun _ _ => none) (defined := fun _ => none) (not := fun _ _ => none)
+    (and := fun φ ψ ihφ ihψ => match ihφ with
+      | some (f, φ') => some (f, .and φ' ψ)
+      | none => ihψ.map fun (f, ψ') => (f, .and φ ψ'))
+    (imp := fun a _ _ ih => ih.map fun (f, φ') => (f, .imp a φ'))
+    (upd := fun m U _ ih => ih.map fun (f, φ') => (f, .upd m U φ'))
+    (modal := fun m P κ φ _ => Fml.modalFocus k m P κ φ)
+    (havoc := fun _ ih => ih.map fun (f, φ') => (f, .havoc φ'))
+    (all := fun x p _ ih => ih.map fun (f, φ') => (f, .all x p φ'))
+    (bind := fun x t _ ih => ih.map fun (f, φ') => (f, .bind x t φ'))
+    (anon := fun xs _ ih => ih.map fun (f, φ') => (f, .anon xs φ')) φ
+
+section Equations
+
+variable {k : Nat} {Γ : Ctx}
+
+theorem Fml.stepFocusR_modal {Γ₁ Γ₀ : Ctx} (m : Modality) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
+    (φ : Fml C Γ₀) : Fml.stepFocusR k (.modal m P κ φ) = Fml.modalFocus k m P κ φ := rfl
+
+theorem Fml.stepFocusR_and_left {φ ψ φ' : Fml C Γ} {f : Focus C}
+    (h : φ.stepFocusR k = some (f, φ')) : (Fml.and φ ψ).stepFocusR k = some (f, .and φ' ψ) := by
+  show (match φ.stepFocusR k with
+    | some (f, φ') => some (f, Fml.and φ' ψ)
+    | none => (ψ.stepFocusR k).map fun (f, ψ') => (f, Fml.and φ ψ')) = _
+  rw [h]
+
+theorem Fml.stepFocusR_and_right {φ ψ ψ' : Fml C Γ} {f : Focus C} (h : φ.stepFocusR k = none)
+    (h' : ψ.stepFocusR k = some (f, ψ')) : (Fml.and φ ψ).stepFocusR k = some (f, .and φ ψ') := by
+  show (match φ.stepFocusR k with
+    | some (f, φ') => some (f, Fml.and φ' ψ)
+    | none => (ψ.stepFocusR k).map fun (f, ψ') => (f, Fml.and φ ψ')) = _
+  rw [h, h']
+  rfl
+
+theorem Fml.stepFocusR_imp {a φ φ' : Fml C Γ} {f : Focus C} (h : φ.stepFocusR k = some (f, φ')) :
+    (Fml.imp a φ).stepFocusR k = some (f, .imp a φ') := by
+  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.imp a φ')) = _
+  rw [h]
+  rfl
+
+theorem Fml.stepFocusR_upd {Γ' : Ctx} {m : Modality} {U : Upd C Γ Γ'} {φ φ' : Fml C Γ'}
+    {f : Focus C} (h : φ.stepFocusR k = some (f, φ')) :
+    (Fml.upd m U φ).stepFocusR k = some (f, .upd m U φ') := by
+  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.upd m U φ')) = _
+  rw [h]
+  rfl
+
+theorem Fml.stepFocusR_havoc {φ φ' : Fml C Γ} {f : Focus C} (h : φ.stepFocusR k = some (f, φ')) :
+    (Fml.havoc φ).stepFocusR k = some (f, .havoc φ') := by
+  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.havoc φ')) = _
+  rw [h]
+  rfl
+
+theorem Fml.stepFocusR_all {x : Var} {p : PrimTy} {φ φ' : Fml C (.val p :: Γ)} {f : Focus C}
+    (h : φ.stepFocusR k = some (f, φ')) : (Fml.all x p φ).stepFocusR k = some (f, .all x p φ') := by
+  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.all x p φ')) = _
+  rw [h]
+  rfl
+
+theorem Fml.stepFocusR_bind {x : Var} {t : LTy} {φ φ' : Fml C (t :: Γ)} {f : Focus C}
+    (h : φ.stepFocusR k = some (f, φ')) : (Fml.bind x t φ).stepFocusR k = some (f, .bind x t φ') := by
+  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind x t φ')) = _
+  rw [h]
+  rfl
+
+theorem Fml.stepFocusR_anon {xs : List ((t : LTy) × Idx Γ t)} {φ φ' : Fml C Γ} {f : Focus C}
+    (h : φ.stepFocusR k = some (f, φ')) : (Fml.anon xs φ).stepFocusR k = some (f, .anon xs φ') := by
+  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.anon xs φ')) = _
+  rw [h]
+  rfl
+
+/-- A formula with no modality takes no step: a postcondition
+(`Post.inactive`). -/
+theorem Fml.stepFocusR_eq_none : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false →
+    φ.stepFocusR k = none
+  | _, .tt, _ | _, .eq .., _ | _, .defined _, _ | _, .not _, _ => rfl
+  | _, .modal .., h => nomatch h
+  | _, .and φ ψ, h => by
+    have h' : φ.active = false ∧ ψ.active = false := by
+      exact Bool.or_eq_false_iff.mp h
+    show (match φ.stepFocusR k with
+      | some (f, φ') => some (f, Fml.and φ' ψ)
+      | none => (ψ.stepFocusR k).map fun (f, ψ') => (f, Fml.and φ ψ')) = _
+    rw [Fml.stepFocusR_eq_none φ h'.1, Fml.stepFocusR_eq_none ψ h'.2]
+    rfl
+  | _, .imp a φ, h => by
+    have h' : a.active = false ∧ φ.active = false := by
+      exact Bool.or_eq_false_iff.mp h
+    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.imp a φ')) = _
+    rw [Fml.stepFocusR_eq_none φ h'.2]; rfl
+  | _, .upd m U φ, h => by
+    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.upd m U φ')) = _
+    rw [Fml.stepFocusR_eq_none φ h]; rfl
+  | _, .havoc φ, h => by
+    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.havoc φ')) = _
+    rw [Fml.stepFocusR_eq_none φ h]; rfl
+  | _, .all x p φ, h => by
+    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.all x p φ')) = _
+    rw [Fml.stepFocusR_eq_none φ h]; rfl
+  | _, .bind x t φ, h => by
+    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind x t φ')) = _
+    rw [Fml.stepFocusR_eq_none φ h]; rfl
+  | _, .anon xs φ, h => by
+    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.anon xs φ')) = _
+    rw [Fml.stepFocusR_eq_none φ h]; rfl
+
+/-- The strategy's step is the line `stepFocusR` leaves. -/
+theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
+    (φ.stepFocusR k).map Prod.snd = φ.stepR k := by
+  induction φ with
+  | tt | eq | defined | not => rfl
+  | modal m P κ φ =>
+    show (Fml.modalFocus k m P κ φ).map Prod.snd = Fml.modalStep k m P κ φ
+    cases P with
+    | nil => rfl
+    | cons s ω =>
+      show ((s.step k m).map fun p => (Focus.stmt k m s, p.fml m ω κ φ)).map Prod.snd =
+        (s.step k m).map fun p => p.fml m ω κ φ
+      cases s.step k m <;> rfl
+  | and φ ψ ihφ ihψ =>
+    show (match φ.stepFocusR k with
+      | some (f, φ') => some (f, Fml.and φ' ψ)
+      | none => (ψ.stepFocusR k).map fun (f, ψ') => (f, Fml.and φ ψ')).map Prod.snd =
+      (match Fml.stepR k φ with
+      | some φ' => some (Fml.and φ' ψ)
+      | none => (Fml.stepR k ψ).map (Fml.and φ))
+    rw [← ihφ, ← ihψ]
+    cases φ.stepFocusR k with
+    | some p => rfl
+    | none => cases ψ.stepFocusR k <;> rfl
+  | imp a φ _ ih =>
+    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.imp a φ')).map Prod.snd =
+      (Fml.stepR k φ).map (Fml.imp a)
+    rw [← ih]; cases φ.stepFocusR k <;> rfl
+  | upd m U φ ih =>
+    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.upd m U φ')).map Prod.snd =
+      (Fml.stepR k φ).map (Fml.upd m U)
+    rw [← ih]; cases φ.stepFocusR k <;> rfl
+  | havoc φ ih =>
+    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.havoc φ')).map Prod.snd =
+      (Fml.stepR k φ).map Fml.havoc
+    rw [← ih]; cases φ.stepFocusR k <;> rfl
+  | all x p φ ih =>
+    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.all x p φ')).map Prod.snd =
+      (Fml.stepR k φ).map (Fml.all x p)
+    rw [← ih]; cases φ.stepFocusR k <;> rfl
+  | bind x t φ ih =>
+    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.bind x t φ')).map Prod.snd =
+      (Fml.stepR k φ).map (Fml.bind x t)
+    rw [← ih]; cases φ.stepFocusR k <;> rfl
+  | anon xs φ ih =>
+    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.anon xs φ')).map Prod.snd =
+      (Fml.stepR k φ).map (Fml.anon xs)
+    rw [← ih]; cases φ.stepFocusR k <;> rfl
+
+/-! ### `Fml.active` and `Fml.maxIdx` along the connectives
+
+`Fml.active` and `Fml.maxIdx` are `casesOn` definitions, which have no
+equation lemmas: a proof over a line is put together from these, each the
+recursor's own unfolding, with the parts' values computed by the kernel. -/
+
+theorem Fml.active_and_false {φ ψ : Fml C Γ} (h : φ.active = false) (h' : ψ.active = false) :
+    (Fml.and φ ψ).active = false := by
+  show (φ.active || ψ.active) = false
+  rw [h, h']; rfl
+
+theorem Fml.active_imp_false {a φ : Fml C Γ} (h : a.active = false) (h' : φ.active = false) :
+    (Fml.imp a φ).active = false := by
+  show (a.active || φ.active) = false
+  rw [h, h']; rfl
+
+theorem Fml.active_not_false {φ : Fml C Γ} (h : φ.active = false) : (Fml.not φ).active = false := h
+
+theorem Fml.active_upd_false {Γ' : Ctx} {m : Modality} {U : Upd C Γ Γ'} {φ : Fml C Γ'}
+    (h : φ.active = false) : (Fml.upd m U φ).active = false := h
+
+theorem Fml.active_havoc_false {φ : Fml C Γ} (h : φ.active = false) :
+    (Fml.havoc φ).active = false := h
+
+theorem Fml.active_all_false {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
+    (h : φ.active = false) : (Fml.all x p φ).active = false := h
+
+theorem Fml.active_bind_false {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} (h : φ.active = false) :
+    (Fml.bind x t φ).active = false := h
+
+theorem Fml.active_anon_false {xs : List ((t : LTy) × Idx Γ t)} {φ : Fml C Γ}
+    (h : φ.active = false) : (Fml.anon xs φ).active = false := h
+
+theorem Fml.maxIdx_not_eq {φ : Fml C Γ} {a : Nat} (h : φ.maxIdx = a) : (Fml.not φ).maxIdx = a := h
+
+theorem Fml.maxIdx_and_eq {φ ψ : Fml C Γ} {a b : Nat} (h : φ.maxIdx = a) (h' : ψ.maxIdx = b) :
+    (Fml.and φ ψ).maxIdx = max a b := by
+  show max φ.maxIdx ψ.maxIdx = _
+  rw [h, h']
+
+theorem Fml.maxIdx_imp_eq {φ ψ : Fml C Γ} {a b : Nat} (h : φ.maxIdx = a) (h' : ψ.maxIdx = b) :
+    (Fml.imp φ ψ).maxIdx = max a b := by
+  show max φ.maxIdx ψ.maxIdx = _
+  rw [h, h']
+
+theorem Fml.maxIdx_upd_eq {Γ' : Ctx} {m : Modality} {U : Upd C Γ Γ'} {φ : Fml C Γ'} {a b : Nat}
+    (h : U.maxIdx = a) (h' : φ.maxIdx = b) : (Fml.upd m U φ).maxIdx = max a b := by
+  show max U.maxIdx φ.maxIdx = _
+  rw [h, h']
+
+theorem Fml.maxIdx_modal_eq {Γ₁ Γ₀ : Ctx} {m : Modality} {P : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀}
+    {φ : Fml C Γ₀} {a b : Nat} (h : max P.maxIdx κ.maxIdx = a) (h' : φ.maxIdx = b) :
+    (Fml.modal m P κ φ).maxIdx = max a b := by
+  show max (max P.maxIdx κ.maxIdx) φ.maxIdx = _
+  rw [h, h']
+
+theorem Fml.maxIdx_havoc_eq {φ : Fml C Γ} {a : Nat} (h : φ.maxIdx = a) :
+    (Fml.havoc φ).maxIdx = a := h
+
+theorem Fml.maxIdx_all_eq {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)} {a : Nat}
+    (h : φ.maxIdx = a) : (Fml.all x p φ).maxIdx = max x.idx a := by
+  show max x.idx φ.maxIdx = _
+  rw [h]
+
+theorem Fml.maxIdx_bind_eq {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} {a : Nat}
+    (h : φ.maxIdx = a) : (Fml.bind x t φ).maxIdx = max x.idx a := by
+  show max x.idx φ.maxIdx = _
+  rw [h]
+
+theorem Fml.maxIdx_anon_eq {xs : List ((t : LTy) × Idx Γ t)} {φ : Fml C Γ} {a : Nat}
+    (h : φ.maxIdx = a) : (Fml.anon xs φ).maxIdx = a := h
+
+end Equations
+
+/-! ## A postcondition, erased
+
+Past the program a chain goes on by `Calculus/ChainRewrites.lean`'s rewrites,
+on the erasure of its line (`Fml.erase`): its postcondition `φ : Post C Γ`
+is then `Update.lean`'s postcondition `φ.erase ns` (`Chains.lean`'s
+`Post`), which names no fresh variable when the names `ns` of its context
+do not (`Post.erase`). -/
+
+section Erase
+
+/-- Every variable of the list has an index at most `n`. -/
+def IdxLe (n : Nat) (xs : List Var) : Prop := ∀ x ∈ xs, x.idx ≤ n
+
+theorem IdxLe.mono {n n' : Nat} {xs : List Var} (h : IdxLe n xs) (hn : n ≤ n') : IdxLe n' xs :=
+  fun x hx => Nat.le_trans (h x hx) hn
+
+theorem IdxLe.append {n : Nat} {xs ys : List Var} (h : IdxLe n xs) (h' : IdxLe n ys) :
+    IdxLe n (xs ++ ys) := fun x hx => by
+  rcases List.mem_append.1 hx with hx | hx
+  · exact h x hx
+  · exact h' x hx
+
+theorem IdxLe.cons {n : Nat} {x : Var} {xs : List Var} (hx : x.idx ≤ n) (h : IdxLe n xs) :
+    IdxLe n (x :: xs) := fun y hy => by
+  rcases List.mem_cons.1 hy with rfl | hy
+  · exact hx
+  · exact h y hy
+
+theorem IdxLe.maxIdx (xs : List Var) : IdxLe (Solidity.maxIdx xs) xs := fun _ hx => le_maxIdx hx
+
+theorem IdxLe.maxIdx_le {n : Nat} {xs : List Var} (h : IdxLe n xs) : Solidity.maxIdx xs ≤ n := by
+  induction xs with
+  | nil => exact Nat.zero_le _
+  | cons x xs ih =>
+    exact Nat.max_le.2 ⟨h x List.mem_cons_self, ih fun y hy => h y (List.mem_cons_of_mem _ hy)⟩
+
+theorem Idx.name_idxLe {Γ : Ctx} {t : LTy} {n : Nat} {ns : List Var} (h : IdxLe n ns)
+    (i : Idx Γ t) : (i.name ns).idx ≤ n := by
+  unfold Idx.name
+  rw [List.getD_eq_getElem?_getD]
+  cases hg : ns[i.toNat]? with
+  | none => exact Nat.zero_le _
+  | some x => exact h x (List.mem_of_getElem? hg)
+
+theorem Tm.erase_idxLe {Γ : Ctx} {n : Nat} {ns : List Var} (h : IdxLe n ns) :
+    {s : Srt} → (t : Tm C Γ s) → IdxLe n (t.erase ns).vars
+  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i =>
+    IdxLe.cons (Idx.name_idxLe h i) fun _ hx => nomatch hx
+  | _, .netOf i a => IdxLe.cons (Idx.name_idxLe h i) (Tm.erase_idxLe h a)
+  | _, .app0 _ => fun _ hx => nomatch hx
+  | _, .app1 o ho a => by
+    have ih := Tm.erase_idxLe h a
+    show IdxLe n (Solidity.Tm.app1 o (a.erase ns)).vars
+    cases o <;> first
+      | exact ih
+      | cases ho
+  | _, .app2 _ a b => IdxLe.append (Tm.erase_idxLe h a) (Tm.erase_idxLe h b)
+  | _, .app3 _ a b c =>
+    IdxLe.append (IdxLe.append (Tm.erase_idxLe h a) (Tm.erase_idxLe h b)) (Tm.erase_idxLe h c)
+
+theorem Rhs.erase_idxLe {Γ : Ctx} {n : Nat} {ns : List Var} (h : IdxLe n ns) {x : Var}
+    (hx : x.idx ≤ n) : {t : LTy} → (r : Rhs C Γ t) → IdxLe n (r.erase ns x).vars
+  | _, .val t | _, .path t | _, .mref t | _, .store t => IdxLe.cons hx (Tm.erase_idxLe h t)
+  | _, .unset | _, .saveNet | _, .saveNetMt => IdxLe.cons hx fun _ hx => nomatch hx
+
+theorem UpdElem.erase_idxLe {Γ Δ : Ctx} {n : Nat} {ns ms : List Var} (h : IdxLe n ns)
+    (hm : IdxLe n ms) : (e : UpdElem C Γ Δ) → IdxLe n (e.erase ns ms).vars
+  | .local i r => Rhs.erase_idxLe h (Idx.name_idxLe hm i) r
+  | .storage s => Tm.erase_idxLe h s
+  | .memory m => Tm.erase_idxLe h m
+  | .selfBalance _ a | .setBalance a => Tm.erase_idxLe h a
+  | .net r _ a | .pay r a | .netMt r a => IdxLe.append (Tm.erase_idxLe h r) (Tm.erase_idxLe h a)
+
+theorem Thin.names_subset : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (ns : List Var) →
+    ∀ x ∈ h.names ns, x ∈ ns
+  | _, _, .refl, _, _, hx => hx
+  | _, _, .keep h, n :: ns, x, hx => by
+    rcases List.mem_cons.1 hx with rfl | hx
+    · exact List.mem_cons_self
+    · exact List.mem_cons_of_mem _ (Thin.names_subset h ns x hx)
+  | _, _, .keep h, [], x, hx => Thin.names_subset h [] x hx
+  | _, _, .drop h, ns, x, hx => List.mem_of_mem_tail (Thin.names_subset h ns.tail x hx)
+
+theorem Upd.names_idxLe {Γ : Ctx} {ns : List Var} :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → IdxLe (max (Solidity.maxIdx ns) U.maxIdx) (U.names ns)
+  | _, .nil => (IdxLe.maxIdx ns).mono (Nat.le_max_left _ _)
+  | _, .snoc U _ => Upd.names_idxLe U
+  | _, .decl U x _ => by
+    show IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx x.idx)) (x :: U.names ns)
+    refine IdxLe.cons (by omega) ((Upd.names_idxLe U).mono (by omega))
+  | _, .pop U _ => fun x hx => Upd.names_idxLe U x (List.mem_of_mem_drop hx)
+  | _, .drop U h => fun x hx => Upd.names_idxLe U x (Thin.names_subset h _ x hx)
+
+theorem _root_.Solidity.Upd.vars_append (U V : Solidity.Upd C) :
+    Solidity.Upd.vars (U ++ V) = Solidity.Upd.vars U ++ Solidity.Upd.vars V := by
+  induction U with
+  | nil => rfl
+  | cons e U ih => simp only [List.cons_append, Solidity.Upd.vars, ih, List.append_assoc]
+
+theorem Upd.erase_idxLe {Γ : Ctx} {ns : List Var} :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → IdxLe (max (Solidity.maxIdx ns) U.maxIdx) (Solidity.Upd.vars (U.erase ns))
+  | _, .nil => fun _ hx => nomatch hx
+  | _, .snoc U e => by
+    show IdxLe _ (Solidity.Upd.vars (U.erase ns ++ [e.erase ns (U.names ns)]))
+    rw [Solidity.Upd.vars_append]
+    exact IdxLe.append (Upd.erase_idxLe U)
+      (IdxLe.append (UpdElem.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _))
+        (Upd.names_idxLe U) e) fun _ hx => nomatch hx)
+  | _, .decl U x r => by
+    show IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx x.idx)) (Solidity.Upd.vars (U.erase ns ++ [r.erase ns x]))
+    rw [Solidity.Upd.vars_append]
+    exact IdxLe.append ((Upd.erase_idxLe U).mono (by omega))
+      (IdxLe.append (Rhs.erase_idxLe ((IdxLe.maxIdx ns).mono (by omega)) (by omega) r)
+        fun _ hx => nomatch hx)
+  | _, .pop U _ => Upd.erase_idxLe U
+  | _, .drop U _ => Upd.erase_idxLe U
+
+/-- The variables of a formula with no modality, erased: its context's names
+and the names its binders give. -/
+theorem Fml.erase_idxLe : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false → (ns : List Var) →
+    IdxLe (max (Solidity.maxIdx ns) φ.maxIdx) (φ.erase ns).vars
+  | _, .tt, _, _ => fun _ hx => nomatch hx
+  | _, .eq a b, _, ns => IdxLe.append (Tm.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _)) a)
+      (Tm.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _)) b)
+  | _, .defined t, _, ns => Tm.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _)) t
+  | _, .not φ, h, ns => Fml.erase_idxLe φ h ns
+  | _, .and φ ψ, h, ns => by
+    have h' := Bool.or_eq_false_iff.mp h
+    show IdxLe (max _ (max φ.maxIdx ψ.maxIdx)) ((φ.erase ns).vars ++ (ψ.erase ns).vars)
+    exact IdxLe.append ((Fml.erase_idxLe φ h'.1 ns).mono (by omega))
+      ((Fml.erase_idxLe ψ h'.2 ns).mono (by omega))
+  | _, .imp φ ψ, h, ns => by
+    have h' := Bool.or_eq_false_iff.mp h
+    show IdxLe (max _ (max φ.maxIdx ψ.maxIdx)) ((φ.erase ns).vars ++ (ψ.erase ns).vars)
+    exact IdxLe.append ((Fml.erase_idxLe φ h'.1 ns).mono (by omega))
+      ((Fml.erase_idxLe ψ h'.2 ns).mono (by omega))
+  | _, .upd m U φ, h, ns => by
+    show IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx φ.maxIdx)) (Fml.erase ns (.upd m U φ)).vars
+    have hφ : IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx φ.maxIdx)) (φ.erase (U.names ns)).vars :=
+      (Fml.erase_idxLe φ h (U.names ns)).mono
+        (Nat.max_le.2 ⟨Nat.le_trans (Upd.names_idxLe U).maxIdx_le (by omega), by omega⟩)
+    simp only [Fml.erase]
+    split
+    · exact hφ
+    · exact IdxLe.append ((Upd.erase_idxLe U).mono (by omega)) hφ
+  | _, .modal .., h, _ => nomatch h
+  | _, .havoc φ, h, ns => Fml.erase_idxLe φ h ns
+  | _, .all x p φ, h, ns => by
+    show IdxLe (max _ (max x.idx φ.maxIdx)) (x :: (φ.erase (x :: ns)).vars)
+    refine IdxLe.cons (by omega) ((Fml.erase_idxLe φ h (x :: ns)).mono ?_)
+    show max (max x.idx (Solidity.maxIdx ns)) _ ≤ _
+    omega
+  | _, .bind x _ φ, h, ns => by
+    show IdxLe (max _ (max x.idx φ.maxIdx)) (φ.erase (x :: ns)).vars
+    refine (Fml.erase_idxLe φ h (x :: ns)).mono ?_
+    show max (max x.idx (Solidity.maxIdx ns)) _ ≤ _
+    omega
+  | _, .anon xs φ, h, ns => by
+    show IdxLe _ ((xs.map fun x => x.2.name ns) ++ (φ.erase ns).vars)
+    refine IdxLe.append (fun y hy => ?_) (Fml.erase_idxLe φ h ns)
+    obtain ⟨x, _, rfl⟩ := List.mem_map.1 hy
+    exact Nat.le_trans (Idx.name_idxLe (IdxLe.maxIdx ns) x.2) (Nat.le_max_left _ _)
+
+/-- A formula with no modality has none erased. -/
+theorem Fml.erase_active : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false → (ns : List Var) →
+    (φ.erase ns).active = false
+  | _, .tt, _, _ | _, .eq .., _, _ | _, .defined _, _, _ | _, .not _, _, _ => rfl
+  | _, .and φ ψ, h, ns => by
+    have h' := Bool.or_eq_false_iff.mp h
+    show ((φ.erase ns).active || (ψ.erase ns).active) = false
+    rw [Fml.erase_active φ h'.1, Fml.erase_active ψ h'.2]; rfl
+  | _, .imp φ ψ, h, ns => Fml.erase_active ψ (Bool.or_eq_false_iff.mp h).2 ns
+  | _, .upd m U φ, h, ns => by
+    show (Fml.erase ns (.upd m U φ)).active = false
+    simp only [Fml.erase]
+    split
+    · exact Fml.erase_active φ h _
+    · exact Fml.erase_active φ h _
+  | _, .modal .., h, _ => nomatch h
+  | _, .havoc φ, h, ns => Fml.erase_active φ h ns
+  | _, .all _ _ φ, h, _ => Fml.erase_active φ h _
+  | _, .bind _ _ φ, h, _ => Fml.erase_active φ h _
+  | _, .anon _ φ, h, ns => Fml.erase_active φ h ns
+
+/-- `Update.lean`'s postcondition, the context's locals named by `ns`, which
+name no fresh variable. -/
+def Post.erase {Γ : Ctx} (φ : Post C Γ) (ns : List Var) (hns : Solidity.maxIdx ns = 0 := by decide) :
+    Solidity.Post C where
+  fml := φ.fml.erase ns
+  noFresh := Nat.le_zero.1 (Nat.le_trans (Fml.erase_idxLe φ.fml φ.inactive ns).maxIdx_le
+    (by rw [hns, φ.noFresh]; exact Nat.le_refl _))
+  inactive := Fml.erase_active φ.fml φ.inactive ns
+
+end Erase
+
+/-! ## The relations -/
+
+/-- A rule as a chain names it: a derivation of a taclet at the fresh index
+`k` under `m` on the statement `s`, or the empty modality going through its
+frames (`emptyModality`). -/
+inductive StepRule (C : Contract) : Type where
+  | taclet (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ')
+      (d : Rule C k m s p)
+  | emptyModality
+
+/-- The statement the rule fires on. -/
+def StepRule.focus : StepRule C → Focus C
+  | .taclet k m s _ _ => .stmt k m s
+  | .emptyModality => .empty
+
+section Relations
+
+variable {Γ : Ctx}
+
+/-- `φ ~> ψ`: the strategy's step turns `φ` into `ψ`. -/
+def Fml.OneStep (φ ψ : Fml C Γ) : Prop := φ.step = some ψ
+
+/-- `φ ~[r]~> ψ`: the step fires `r`'s statement, and leaves `ψ`. -/
+def Fml.StepBy (r : StepRule C) (φ ψ : Fml C Γ) : Prop :=
+  φ.stepFocusR φ.fresh = some (r.focus, ψ)
+
+/-- `φ ~*> ψ`: zero or more steps, the derivation as a value. -/
+inductive Fml.Steps : Fml C Γ → Fml C Γ → Type where
+  | refl (φ : Fml C Γ) : Fml.Steps φ φ
+  | cons {φ ψ χ : Fml C Γ} : Fml.OneStep φ ψ → Fml.Steps ψ χ → Fml.Steps φ χ
+
+/-- An arrow of a chain on scoped lines. -/
+inductive Link (C : Contract) : Type where
+  /-- `~>` -/
+  | one
+  /-- `~*>` -/
+  | many
+  /-- `~[r]~>`, a rule of the strategy. -/
+  | rule (r : StepRule C)
+
+/-- The relation an arrow stands for. -/
+@[reducible] def Link.Rel : Link C → Fml C Γ → Fml C Γ → Prop
+  | .one => Fml.OneStep
+  | .many => fun φ ψ => Nonempty (Fml.Steps φ ψ)
+  | .rule r => Fml.StepBy r
+
+/-- `φ ~> φ₁ ~*> φ₂ …`: every link of a chain that starts at `φ` holds. -/
+@[reducible] def Fml.Via : Fml C Γ → List (Link C × Fml C Γ) → Prop
+  | _, [] => True
+  | φ, [(l, ψ)] => l.Rel φ ψ
+  | φ, (l, ψ) :: w :: ws => l.Rel φ ψ ∧ Fml.Via ψ (w :: ws)
+
+/-- The last line of a chain. -/
+def Fml.Via.last : Fml C Γ → List (Link C × Fml C Γ) → Fml C Γ
+  | φ, [] => φ
+  | _, (_, ψ) :: ws => Fml.Via.last ψ ws
+
+end Relations
+
+/-- A chain that goes on past the program by `Calculus/ChainRewrites.lean`'s
+rewrites: its scoped links, then, from the erasure `L` of its last scoped
+line, `Update.lean`'s (`Solidity.Fml.Via`), the first a rewrite. -/
+@[reducible] def Fml.ViaE (φ : Fml C []) (ws : List (Link C × Fml C [])) (L : Solidity.Fml C)
+    (rs : List (Solidity.Link C × Solidity.Fml C)) : Prop :=
+  Fml.Via φ ws ∧ (Fml.Via.last φ ws).erase [] = L ∧ Solidity.Fml.Via L rs
+
+section Build
+
+variable {Γ : Ctx} {φ ψ : Fml C Γ} {k : Nat} {f : Focus C}
+
+/-- A step at the index its fresh names start from. -/
+theorem Fml.OneStep.ofFocus (hk : φ.fresh = k) (h : φ.stepFocusR k = some (f, ψ)) :
+    Fml.OneStep φ ψ := by
+  unfold Fml.OneStep Fml.step
+  rw [hk, ← Fml.stepFocusR_snd, h]
+  rfl
+
+/-- A named step at the index its fresh names start from. -/
+theorem Fml.StepBy.ofFocus {r : StepRule C} (hk : φ.fresh = k)
+    (h : φ.stepFocusR k = some (r.focus, ψ)) : Fml.StepBy r φ ψ := by
+  unfold Fml.StepBy
+  rw [hk]
+  exact h
+
+theorem Fml.StepBy.oneStep {r : StepRule C} (h : Fml.StepBy r φ ψ) : Fml.OneStep φ ψ :=
+  Fml.OneStep.ofFocus rfl h
+
+/-- The fresh index from the formula's largest. -/
+theorem Fml.fresh_eq {n : Nat} (h : φ.maxIdx = n) : φ.fresh = n + 1 := by
+  unfold Fml.fresh
+  rw [h]
+
+theorem Fml.OneStep.unique {χ : Fml C Γ} (s : Fml.OneStep φ ψ) (t : Fml.OneStep φ χ) : ψ = χ :=
+  Option.some.inj (s.symm.trans t)
+
+end Build
+
+end Solidity.Core
