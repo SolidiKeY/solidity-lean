@@ -2715,6 +2715,18 @@ are deleted.
 7. `Contracts`' rule is today's (`FunContract` over today's run), reached
    through the erasure; a scoped `FunContract` is not built.
 
+**Checks**: `lean_build` of `Solidity`, `solkeycheck`, `SolidityCorpus`,
+`SolkeyTestSuite` (the last two in `defaultTargets` for the run only):
+green, 339 jobs, after one fix (`sol_derive?`'s goal names past macro
+scopes, `Examples/ProofTree.lean`).  `check-orphans` (but the git-excluded
+`Scratch/`), `check-doc-paths`, `check-rule-text`: clean.  No new `sorry`
+(the one added match is `sol_prove?`'s suggestion string), `axiom` or
+`maxHeartbeats`; `#print axioms` of `Proves.valid`, `holds_of_erase_valid`,
+`holds_of_erase_pos`, `Core.Problem.deploy_of_valid_nil`: Lean's three.
+The scoped `TestSuite` shapes of `Calls` check in about 1.3× today's kernel
+time (four of them, 3.3 s against 2.6 s); the gate modules were not
+re-timed.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
