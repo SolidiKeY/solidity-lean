@@ -193,19 +193,22 @@ namespace Derive
 open Lean Elab Tactic Meta
 
 /-- Today's goal `Valid (∀ p x. … φ)` as `Valid φ`, its leading quantifiers'
-locals free, as today's leaves have them (`Valid.all_of_free`). -/
-partial def stripAlls (g : MVarId) : MetaM MVarId := do
+locals free, as today's leaves have them (`Valid.all_of_free`): the first
+`n` of them, every one where `n` is `none`. -/
+partial def stripAlls (g : MVarId) (n : Option Nat := none) : MetaM MVarId := do
+  if n == some 0 then return g
   let ty ← instantiateMVars (← g.getType)
   let_expr Solidity.Valid C φ := ty | return g
   let_expr Solidity.Fml.all _ x p φ' := φ | return g
   let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C φ') (← g.getTag)
   g.assign (mkAppN (mkConst ``Solidity.Valid.all_of_free) #[C, φ', x, p, g'])
-  stripAlls g'.mvarId!
+  stripAlls g'.mvarId! (n.map (· - 1))
 
 /-- A scoped leaf `Core.Valid ψ` with no modality left, as today's goal: the
 leaf taken by `Fml.posB` (checked by the kernel), its erasure computed
 (`Solidity.normValid`), the goal `Solidity.Valid` of it (`Valid.of_erase`),
-the parameters' quantifiers stripped (`stripAlls`).  `tac` names the tactic
+the parameters' quantifiers stripped (`stripAlls`), an explicit `∀` kept
+with its range (`Symex.paramCount`, decision 28).  `tac` names the tactic
 in the error. -/
 def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
   let bool := mkConst ``Bool
@@ -221,7 +224,7 @@ def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
   let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
   let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
   g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
-  stripAlls (← Solidity.normValid g'.mvarId!)
+  stripAlls (← Solidity.normValid g'.mvarId!) (← Symex.paramCount ψ)
 
 /-- Run today's closer `stx` on a scoped leaf: the leaf erased
 (`eraseLeaf`), then `stx` itself on today's goal, where today's tactic
