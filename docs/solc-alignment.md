@@ -64,6 +64,11 @@ local before its statement (`hoist`, `Syntax.lean`). An operand solc reads
 | `matrix[i++].push(i)` | the receiver, then the argument | `se1 = i++; matrix[se1].push(i);` |
 | `persons[i++].age += i` | the right-hand side, then the target | `uint se1 = i; se2 = i++; persons[se2].age += se1;` |
 
+A callee's parameters and locals, inlined under fresh names, are captured as
+a caller's are: `return a++ + a;` reads the right `a` first
+(`ElabScope.inlined`; before 2026-10-08 a fresh name was taken for a capture
+holding its value, and `bumpRead(1)` of `Tactics/Calls.lean` was `1 + 2`).
+
 `Semantics.lean`'s examples pin three of them. An effect under the right
 operand of `&&`/`||`, or in a branch of a conditional, would run where solc
 does not run it, so it is an elaboration error.

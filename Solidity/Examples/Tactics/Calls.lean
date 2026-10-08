@@ -264,6 +264,46 @@ example : Prog.toStr (sol[Returns]{ uint z = incr(4) + 1; } : Prog Returns) =
 /-- error: Solidity elaboration failed: a call in a conditional's branch -/
 #guard_msgs in #check sol[Returns]{ uint z = total > 0 ? incr(1) : 0; }
 
+/-! ## A callee's local, written where it is read
+
+The inliner names a callee's parameters and locals fresh (`renameStmts`), as
+a capture is named, but they are locals: an effect may write them.  So
+`return a++ + a;` reads the right `a` first, into a capture, before the `++`
+(solc's order), as `uint a = 1; uint y = a++ + a;` does in the caller
+(`captureExpr`, `ElabScope.inlined`).  Read as a capture by its name's
+shape, `se1` was read after the `++`, and `bumpRead(1)` was `1 + 2`. -/
+
+def Mutated : Contract := contract!{
+  uint total;
+  function bumpRead(uint a) returns (uint) { return a++ + a; }
+  function localRead(uint x) returns (uint) { uint b = x; return b++ + b; }
+}
+
+/-- The body a call statement carries, printed. -/
+def calleeStr {C : Contract} (P : Prog C) : String :=
+  match P.getLast? with
+  | some (.call _ _ _ _ body) => Prog.toStr body
+  | _ => ""
+
+/-- info: uint a = 1; uint se1 = a; uint se2; se2 = a++; uint y = se2 + se1; -/
+#guard_msgs in #eval IO.println (Prog.toStr (sol[Mutated]{ uint a = 1; uint y = a++ + a; } : Prog Mutated))
+
+/-- info: uint se3 = se1; uint se4; se4 = se1++; se2 = se4 + se3; -/
+#guard_msgs in #eval IO.println (calleeStr (sol[Mutated]{ uint y = bumpRead(1); } : Prog Mutated))
+
+/-- info: uint se3 = se1; uint se4 = se3; uint se5; se5 = se3++; se2 = se5 + se4; -/
+#guard_msgs in #eval IO.println (calleeStr (sol[Mutated]{ uint y = localRead(1); } : Prog Mutated))
+
+/-- `bumpRead(1)` is `1 + 1`, as the caller's `a++ + a` is. -/
+theorem callLocalReadBeforeEffect : ⊨ dl[Mutated]{ ⟨ uint y = bumpRead(1); ⟩ y == 2 } := by
+  sol_symex
+  sol_close
+
+/-- The same of a callee's declared local. -/
+theorem callDeclReadBeforeEffect : ⊨ dl[Mutated]{ ⟨ uint y = localRead(1); ⟩ y == 2 } := by
+  sol_symex
+  sol_close
+
 /-! ## Several returns, tuples and blocks
 
 A function may return several values (`returns (uint lo, uint hi)`; unnamed,

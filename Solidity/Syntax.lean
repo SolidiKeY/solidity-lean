@@ -2846,6 +2846,12 @@ rather than an inlined body or a branch, loop or block of the program. -/
 structure ElabScope where
   funs : List (Name × FunDecl)
   top : Bool := true
+  /-- The fresh indices each enclosing inlined call gave its callee's locals
+  (`elabCallRet`: its parameters, return variables, renamed locals, its
+  modifiers' parameters, its loops' flags), `[k₀, k₁)` per call.  A fresh
+  name in one is a local, which an effect may write, not a capture
+  (`captureExpr`). -/
+  inlined : List (Nat × Nat) := []
 
 /-- Elaboration threads the locals in scope and the index of the next
 variable a capture declares, and reads its scope (`ElabScope`). -/
@@ -3114,12 +3120,17 @@ def castCapture (f : String) (e : RawExpr) : ElabM (Prog C × RawExpr) := do
 later operand's effect: `x = i++ + i;` reads the right `i` first (solc
 evaluates a binary operator's right operand first), so it is
 `uint se1 = i; uint se2; se2 = i++; x = se2 + se1;`.  A literal needs no
-capture, nor does a name bound to a reference (an effect cannot rebind it). -/
+capture, nor does a name bound to a reference (an effect cannot rebind it).
+Nor does a capture already made, which holds its value: a fresh name the
+elaborator declared as one, or a line's written-out capture.  A fresh name
+the inliner gave a callee's local (`ElabScope.inlined`) is a local like any
+other, and is captured: in `function f(uint a) … { return a++ + a; }` the
+right `a` is read before the `++`. -/
 def captureExpr (e : RawExpr) : ElabM (Prog C × RawExpr) := do
   if e.isLit || e matches .bool _ then return ([], e)
-  -- a capture already made holds its value
   if let .name x := e then
-    if Var.ofName x matches .fresh .. then return ([], e)
+    if let .fresh _ i := Var.ofName x then
+      unless (← read).inlined.any fun (k₀, k₁) => k₀ ≤ i && i < k₁ do return ([], e)
   let t ← synthM C e
   match e, t with
   | .name _, .path (.ref _) _ | .name _, .mpath (.ref _) _ => return ([], e)
@@ -3816,6 +3827,8 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   unless d.params.length == args.length do
     throw s!"{f} takes {d.params.length} arguments, not {args.length}"
   let Γ ← ctx
+  -- the callee's locals are numbered from here to `k₁` (`ElabScope.inlined`)
+  let k₀ := (← get).2
   let mut targs : List (Arg C) := []
   let mut ρ : List (String × String) := []
   let mut Γf : ECtx := []
@@ -3877,8 +3890,10 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
   -- a block's locals renamed apart (a modifier's `_;` twice repeats the body's)
   let body ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) (Γf.map (·.1)) body)
+  let k₁ := (← get).2
   modify fun (_, k) => (Γf, k)
-  let P ← withReader (fun _ => { funs := scope, top := false }) (elabStmts body)
+  let P ← withReader (fun sc => { funs := scope, top := false, inlined := (k₀, k₁) :: sc.inlined })
+    (elabStmts body)
   modify fun (_, k) => (Γ, k)
   -- a memory return variable: declared on entry, a fresh default object
   let P ← match mret with

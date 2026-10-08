@@ -433,7 +433,9 @@ Read-only review of M2–M3, the confirmed findings (2026-10-07):
     in its block only: Solidity's scope ends there, so no later statement,
     postcondition or caller sees it, and a redeclaration keeps its name.  A
     user-style name, not a capture (`se4`): `captureExpr` skips a fresh name
-    as a capture holding its value, which a mutable local is not.  Applied
+    as a capture holding its value, which a mutable local is not (the
+    inliner's fresh locals were read so too: fixed in "Captures by
+    provenance" below).  Applied
     at every entry: `elabProg`, `elabProgAt.go` (and `solc_import`), each
     inlined body after its modifiers (`elabCallRet`), a `dl!{}` modality and
     a `cdl!{}` one.  Shadowing a local in scope is still refused, with the
@@ -4388,6 +4390,46 @@ after the leaf change.
 - **Lane worktrees removed** (`w3c-perf`, `w3c-testsuite`, `w3c-tactics`,
   `w3c-tree`; the branches stay) and their Lean workers stopped.  The
   read-only finder/skeptic review pass was not run at the integration.
+
+### Captures by provenance (2026-10-08, on `intrinsic`)
+
+The bug the freshness lane found: `captureExpr` (`Syntax.lean`) took any
+fresh-shaped name (`se1`, `sp1`, …) for a capture holding its value, but the
+inliner names a callee's parameters, return variables and locals the same
+way (`renameStmts`, `elabCallRet`, a modifier's parameters, a loop's
+flags).  So in `function bumpRead(uint a) returns (uint) { return a++ + a; }`
+the right `a` (`se1`) was not captured before the `++`, and `bumpRead(1)`
+was `1 + 2` where solc's legacy order, and the same statement in a caller
+(`uint a = 1; uint y = a++ + a;`), give `1 + 1`.  Reproduced first: a
+scratch module proved `⟨ uint y = bumpRead(1); ⟩ y == 3` and failed `y == 2`.
+**Master has the same bug**: its `captureExpr` has the same
+`Var.ofName x matches .fresh ..` skip and its inliner the same fresh names.
+
+- **Fix**: `ElabScope.inlined`, the fresh indices each enclosing inlined call
+  allocated for its callee's locals (`[k₀, k₁)`: the counter from before the
+  parameters are named to after the body is renamed, lowered and wrapped in
+  its modifiers; a nested call adds its own).  `captureExpr` skips a fresh
+  name only outside them: a capture the elaborator made, or a line's
+  written-out capture (`uint se1 = makeValue(); carolValues[++i] = se1;`,
+  which `CallOperands.lean` reads back by `rfl`).  A callee's local is then
+  captured as a caller's is.
+- **Proposed decision 30** (taken as the option faithful to solc and to
+  the written lines): captures by the elaborator's provenance for the
+  inliner's names, by the convention of written lines for fresh names in a
+  program's own text.  A program that itself declares a fresh-shaped local
+  and writes it in the expression that reads it (`uint se1 = 0;
+  y = se1++ + se1;`) is still read as a capture there; a pure provenance
+  test (a set of the captures made, in `ElabM`'s state) would break every
+  written line that reads a capture made by an earlier line.
+- **Pins**: none changed (the four targets build, the corpus and
+  `SolkeyTestSuite` included; `Derived10` was OOM-killed once and built on
+  the rerun).  New pins, `Tactics/Calls.lean`'s "A callee's local, written
+  where it is read": the caller's statement, `bumpRead`'s and `localRead`'s
+  bodies (`uint se3 = se1; uint se4; se4 = se1++; se2 = se4 + se3;`), and
+  `callLocalReadBeforeEffect`/`callDeclReadBeforeEffect` (`y == 2`).
+- Checks: `dups.py` (the known `as` false positive), `check-orphans.mjs`
+  (only the git-excluded `Scratch/` modules), `check-doc-paths.sh`,
+  `check-rule-text.sh` clean.
 
 ## Baselines (M0)
 
