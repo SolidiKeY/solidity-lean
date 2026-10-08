@@ -3855,6 +3855,38 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `undef`: M3's scoped run (decision 40) still produces it on an
     ill-typed state, so decision 39's condition ("when no run produces it")
     is not met; the rename goes with decision 40's lane.
+51. *Proposed (W4 `reader-dry`), the lead's call:* the reader's dry-run
+    branch starts from side-projects' unmerged
+    `solkey-reader-solidity-names` (`a4d4cb8`, the reader as it last built,
+    against `86f89d9`), not from `main` (`7a32e13`'s reader, against a
+    sibling of 2026-09-27), and re-vendors its corpus to solkey
+    `1b4341a303`, the sibling's pin: `Corpus.keyTaclets_eq_corpus` fails
+    otherwise (323 names against 313), and `functionFrameEmpty` has no row
+    without it.  The re-pin adds ten rows (`internalCallExpand`,
+    `blockReturn`, `functionFrameReturn`, `functionFrameEmpty`, the six
+    `send…` taclets), new rather than moved.
+52. *Proposed (W4 `reader-dry`), the lead's call:* one row moves beyond the
+    three the plan allows: `storageLocalDeclSkip`, from `agrees` to
+    `findOnly`.  The scoped rule binds the alias to `unset` (`{ lsv :=
+    unset }`, M1, the rule's own "Lean only" comment), where solkey binds
+    nothing; the reader reads that update as written rather than as
+    `⟨[ ]⟩`, which would claim an agreement the rule disowns.  Its theorem
+    becomes `storageLocalDeclSkip.find` (`FindAgrees`).
+53. *Proposed (W4 `reader-dry`), the lead's call:* the reader reads a
+    scoped constructor through `Core.Delab`'s erasure (`withTwins`, `tr`),
+    so it imports `Calculus/Core/Delab` beside `Core.Rules` and
+    `KeyTaclets`: 68 sibling modules instead of 29, among them
+    `Core.Taclet`, `Core.Proves` and part of `Typing/` (the delaborators'
+    imports).  Moving `tr`/`withTwins` into a module below the
+    delaborators (`Core/Rules` and `RuleKit` only) would take them off the
+    reader's path; a sibling refactor, left for W5 or the lead.
+54. *Proposed (W4 `reader-dry`), the lead's call:* a mapping key's lowering
+    (`Simple.keyLower`/`Val.keyLower`, decision 10's `bool` key hashed as
+    `0`/`1`) is read as a value's lowering (`lowerV`), as the sibling
+    prints it (as the index): the key's type is one of the type details the
+    common form leaves out.  Read as an unknown symbol, it moved the 18
+    mapping rows (`storageIndex…Mapping…`, the mapping `OpAssign` and
+    increment families) from `agrees`/`merged` to `findOnly`/`candidates`.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
@@ -6097,6 +6129,65 @@ soundness bridge and `Typing/`'s builder read them.  That lane, then
 - Not done: the `unfoldRule` macro still ignores its argument (making it
   elaborate `$r` would reject every walk line, whose `.rule` is not a
   field of `Core.Stmt.step`'s `Option Premise`).
+
+### W4 reader dry run (`reader-dry`, 2026-10-09, side-projects branch `intrinsic`)
+
+The SolKey reader (side-projects `lean/solkey`) built against this branch,
+on side-projects' branch `intrinsic` (worktree
+`~/projects/side-projects-intrinsic`, not pushed; `main` and the reader's
+own branch untouched): `59c6537` merges the reader as it last built
+(`solkey-reader-solidity-names`, decision 51), `67d6710` re-vendors the
+corpus to `1b4341a303`, `8c2bfc2` is the port and the regenerated
+`SolKey.Corresp.Proved`.  `lake build` (MCP `lean_build`) passes: 200
+correspondence theorems, all `decide +kernel`, none on `sorryAx`,
+`ofReduceBool` or `trustCompiler` (`check-axioms.sh`'s check, run from a
+scratch module).
+
+- **The require** is `../../../solidity-lean-intrinsic` (`lakefile.toml`,
+  `lake-manifest.json`), back to `../../../solidity-lean` at the merge
+  (W5).
+- **`SolKey.Corresp.LeanShape`** reads `Core.Taclet`'s constructors (159):
+  each type opened, its statement and premise erased by `Core.Delab`'s
+  `withTwins`/`tr` (twins for the schema variables, `.there`/`up`
+  transparent, `Premise.unfold`/`bind`/`inline` all today's
+  `Premise.unfold`), then walked by today's tables with `Surface.Stmt` for
+  `Stmt` and `NFml.eq` for `Fml.eq`.  What erasure leaves is read here: a
+  term `Tm.appN o xs` is folded back into `Update.lean`'s named symbol
+  (`refold?`, an operator table); a call of schema variables, which `tr`
+  cannot erase (`Args` has no erased twin), is read by its arguments, its
+  `Args`/`Binders` as `locals`; `Premise.expandCall` is
+  `Premise.other` (KeY's `expand_function_body` is a metaconstruct);
+  `Premise.cases` (the send rules) is `Premise.other`.  Side conditions are
+  matched by their erased names, with `CallRet.isRets` a new
+  `SideCond.callRets` (KeY's `FunctionBody`/`InternalCall` sort, not
+  compared, `SolKey.Shape`, `SolKey.Corresp.Agrees`).
+- **`SolKey.Corresp.Table`'s excuses:** `blockEmpty` and `functionBodyExpand`
+  claimed (no longer excused); the new `blockReturn`, `functionFrameReturn`
+  (returns lowered at elaboration) and `sendWithCallbackBox`/`Diamond`
+  (callbacks, as `transferWithCallback…`) excused.  The other excuses still
+  lag `RuleShapes.unclaimedTaclets` as they did before (the memory
+  `delete`s, `new T[](n)`): moving them would move their rows.
+- **`GenProved`** writes `open Solidity.Core` (`lean% Taclet.X` names
+  `Core.Taclet.X`); it was run from a scratch module (`lake env lean
+  --run` is denied here) with stdout sent to `SolKey.Corresp.Proved`.
+- **Pins that moved** (`expectedPins`): `blockEmpty` (excused → `named
+  findOnly`: the scoped `{ body }` ⇝ `body` covers KeY's `{}` ⇝ ε in the
+  `\find` only; new theorem `blockEmpty.find`), `functionBodyExpand`
+  (excused → `named differs`: KeY's `\find` is a `FunctionBody` schema
+  variable, the Lean one a call), and `storageLocalDeclSkip` (decision 52).
+  New rows: `internalCallExpand` and `functionFrameEmpty` undecoded (the
+  `InternalCall` sort; `function-frame { }` read as two statements),
+  `send_unfold_…`/`sendNoCallback…` `named differs` (the decoder has no
+  `send` head), the rest excused.  `--map`: 323 taclets, 164 agreed with
+  (66 namesakes, 98 found), 34 namesakes `findOnly`, 5 differing, 92 of 159
+  constructors agreed with.
+- **Left:** `functionFrameEmpty` is not claimed by the reader (the decoder
+  does not read `function-frame`, nor the `InternalCall`/`ExternalCall`
+  sorts or `send`); the reader's other docstrings still say
+  `Solidity.Taclet` (right again after W5's rename); `67d6710` alone does
+  not build (the corpus count changes in `8c2bfc2`); the import closure
+  (decision 53); `keycheck` itself was not run (its `--map`/`--parse` were
+  run from a scratch copy of its source).
 
 ## Baselines (M0)
 
