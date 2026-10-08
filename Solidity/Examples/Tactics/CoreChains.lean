@@ -130,6 +130,38 @@ theorem branch : cdl![m]{ ⟨[ if (alice.age > 4) { total = 1; } else { total = 
     ~*> _ := by
   sol_chain
 
+/--
+info: theorem chain :
+    cdl![m]{ ⟨[ if (alice.age > 4) {total = 1;} else {total = 2;}; ]⟩ φ }
+    ~[ifElseUnfold]~> cdl![m]{ ⟨[ bool se1 = alice.age > 4; if (se1) {total = 1;} else {total = 2;}; ]⟩ φ }
+    ~[localValueDeclInitDrop]~> cdl![m]{ ⟨[ se1 = alice.age > 4; if (se1) {total = 1;} else {total = 2;}; ]⟩ φ }
+    ~[binopUnfoldLeft]~> cdl![m]{ ⟨[ uint se2 = alice.age; se1 = se2 > 4; if (se1) {total = 1;} else {total = 2;}; ]⟩ φ }
+    ~*> cdl![m]{ { se2 := find(storage, alice.age) } ⟨[ se1 = se2 > 4; if (se1) {total = 1;} else {total = 2;}; ]⟩ φ }
+    ~[binopAssignment]~> cdl![m]{ { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ⟨[ if (se1) {total = 1;} else {total = 2;}; ]⟩ φ }
+    ~[ifElseSplit]~> cdl![m]{
+        { se2 := find(storage, alice.age) }
+          { se1 := se2 > 4 } ((se1 ≐ true → ⟨[ total = 1; } ]⟩ φ) ∧ (se1 ≐ false → ⟨[ total = 2; } ]⟩ φ)) }
+    ~[storageRootWriteStore]~> cdl![m]{
+        { se2 := find(storage, alice.age) }
+          { se1 := se2 > 4 }
+            ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧ (se1 ≐ false → ⟨[ total = 2; } ]⟩ φ)) }
+    ~[storageRootWriteStore]~> cdl![m]{
+        { se2 := find(storage, alice.age) }
+          { se1 := se2 > 4 }
+            ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧
+                (se1 ≐ false → { storage := save(storage, total, 2) } φ)) }
+    ~[sequentialToParallel]~> cdl![m]{
+        { se2 := find(storage, alice.age) ‖ se1 := find(storage, alice.age) > 4 }
+          ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧
+              (se1 ≐ false → { storage := save(storage, total, 2) } φ)) } := by
+  sol_chain
+
+fresh variables (a `FreshNames` table renames them):
+  [("?", "se1"), ("?", "se2")]
+-/
+#guard_msgs in
+#chain cdl![m]{ ⟨[ if (alice.age > 4) {total = 1;} else {total = 2;}; ]⟩ φ }
+
 /-- `#chain` on the branch, pasted: a goal's program runs into the `}` of
 its branch. -/
 theorem branchChain :
