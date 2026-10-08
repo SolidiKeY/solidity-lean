@@ -786,7 +786,7 @@ theorem pushAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.a
             (List.map SVal.erase (pushSlot E sh.toList).2) false =
             (SVal.array (SVec.ofList (e.toList ++ [x])) (.ofList (pushSlot E sh.toList).2)
               (SVec.snoc_lt_bound e x hb)).erase := by
-          simp only [SVal.erase, SVec.erase_ofList, SVec.erase_eq, SVec.toList_ofList,
+          simp only [SVal.erase, SVec.erase_eq, SVec.toList_ofList,
             SList.erase_eq, SList.toList_ofList, List.map_append, List.map_cons, List.map_nil]
         simp only [dif_pos hb]
         rw [hnew, saveStorage_erase hs]
@@ -809,7 +809,7 @@ theorem pushPlaceAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.re
           (List.map SVal.erase (pushSlot E sh.toList).2) false =
           (SVal.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
             (.ofList (pushSlot E sh.toList).2) (SVec.snoc_lt_bound e _ hb)).erase := by
-        simp only [SVal.erase, SVec.erase_ofList, SVec.erase_eq, SVec.toList_ofList,
+        simp only [SVal.erase, SVec.erase_eq, SVec.toList_ofList,
           SList.erase_eq, SList.toList_ofList, List.map_append, List.map_cons, List.map_nil]
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq sh,
         pushSlot_erase, SVal.view_array, dif_pos hb]
