@@ -25,10 +25,12 @@ W2 lane `sound`):
   storages.
 
 A hidden binder at a memory type ranges over the references the heap
-typing gives that type, which may be none (`docs/intrinsic.md`, W2 lane
-`sound`, "the hidden binder"): under the diamond it asks for one
-(`Modality.forallB`, decision 12), so a premise over an empty type is not
-vacuously true there; under the box it is universal.
+typing gives that type and over `none`, an unset local (decision 17'):
+`memoryLocalDeclInitDrop`'s premise needs its instance at `none`, from which
+`T memory mv = r;` runs as `mv = r;`, and which no typed reference gives
+when `r` allocates.  So every type has a value
+(`LTy.tdenote_nonempty`) and the binder is universal under both modalities
+(`Modality.forallB`; decision 12's diamond inhabitant is gone).
 -/
 
 namespace Solidity.Core
@@ -69,14 +71,14 @@ def tholds : {Γ : Ctx} → TState C Γ → Fml C Γ → Prop
   | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => tholds (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, tholds (σ.anon xs b) φ
 
-/-- A type `LTy.inhabited` names has a value in every typed state. -/
-theorem LTy.tdenote_nonempty {H : HTy} : (t : LTy) → t.inhabited = true →
-    Nonempty (t.TDenote C H)
-  | .val p, _ => ⟨PrimTy.dflt p⟩
-  | .alias _, _ => ⟨none⟩
-  | .mem _, h => nomatch h
-  | .old, _ => ⟨Storage.init C⟩
-  | .oldNet, _ => ⟨[]⟩
+/-- Every local's type has a value in every typed state: an alias and a
+memory local unset among them (decision 17'). -/
+theorem LTy.tdenote_nonempty {H : HTy} : (t : LTy) → Nonempty (t.TDenote C H)
+  | .val p => ⟨PrimTy.dflt p⟩
+  | .alias _ => ⟨none⟩
+  | .mem _ => ⟨none⟩
+  | .old => ⟨Storage.init C⟩
+  | .oldNet => ⟨[]⟩
 
 /-- Valid over the typed states: true in every typed state of the empty
 context. -/

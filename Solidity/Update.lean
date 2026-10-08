@@ -524,7 +524,8 @@ def Tm.eval (σ : State) : Tm C s → s.Ev
   | .pvI x => do
     match ← σ.getEnv x with
     | .mref id => pure id
-    | .val _ | .spath .. | .store _ | .ledger _ | .unset => .error .stuck
+    | .unset => .error .revert
+    | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
   | .app0 o => o.eval σ
   | .app1 o a => o.eval σ (a.eval σ)
   | .app2 o a b => o.eval σ (a.eval σ) (b.eval σ)

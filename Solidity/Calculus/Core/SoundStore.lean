@@ -44,7 +44,7 @@ theorem Prog.run_declStorage_cons {Γ' : Ctx} {R : RefTy} (x : Var) (b : SPath C
 theorem Prog.run_declMem_cons {Γ' : Ctx} {R : RefTy} (x : Var) (b : MPath C Γ (.ref R))
     (hm : (Ty.ref R).mapFree = true) (P : Prog C (.mem R :: Γ) Γ') :
     Prog.run σ (.cons (.declMem R x (some (.alias b)) rfl hm) P) =
-      (do (← b.mval σ).asRef) >>= fun id => Prog.run (σ.push (t := .mem R) id) P := by
+      (do (← b.mval σ).asRef) >>= fun id => Prog.run (σ.push (t := .mem R) (some id)) P := by
   rw [Prog.run_cons, Stmt.run_declMem]
   simp only [Run.declMem, MRhs.eval, bind_assoc, pure_bind]
   cases b.mval σ with
@@ -84,7 +84,9 @@ theorem Src.value_noPanic {T : Ty} (r : Src C Γ T) : NoPanic (r.value σ) := by
 
 theorem MPath.mval_noPanic {T : Ty} (b : MPath C Γ T) : NoPanic (b.mval σ) := by
   cases b with
-  | var => exact NoPanic.pure _
+  | var i _ =>
+    show NoPanic (memRef σ i >>= fun id => pure (MVal.ref id))
+    exact NoPanic.bind (Tm.eval_noPanic σ (.pvI i)) fun _ _ => NoPanic.pure _
   | loc l =>
     show NoPanic (l.read σ)
     rw [← MLoc.eval_lower σ l]

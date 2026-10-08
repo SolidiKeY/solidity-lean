@@ -31,6 +31,14 @@ theorem MSrc.mval_noPanic {T : Ty} (r : MSrc C Γ T) : NoPanic (r.mval σ) := by
     exact NoPanic.bind (MPath.mval_noPanic σ p) fun _ _ =>
       NoPanic.bind (Solidity.MVal.asRef_noPanic _) fun _ _ => NoPanic.pure _
 
+/-- A run that reads a memory path's object first halts alike to `h` when
+what follows does: the read does not panic (an unset local reverts). -/
+theorem MPath.sim_err_ref {β : Type} {T : Ty} (b : MPath C Γ T) {h : Halt} (hh : h ≠ .panic)
+    {f : Nat → Res β} (hf : ∀ id, Res.Sim (.error h) (f id)) :
+    Res.Sim (.error h) (b.mval σ >>= fun x => x.asRef >>= f) :=
+  Res.Sim.err_bind (MPath.mval_noPanic σ b) hh fun _ _ =>
+    Res.Sim.err_bind (Solidity.MVal.asRef_noPanic _) hh fun id _ => hf id
+
 /-- A memory path whose object is `id` holds the reference to `id`. -/
 theorem MPath.mval_of_ref {T : Ty} (b : MPath C Γ T) {id : Nat}
     (h : (do (← b.mval σ).asRef) = .ok id) : b.mval σ = .ok (.ref id) := by
@@ -120,18 +128,19 @@ theorem sound_memIndexWriteUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : ArrTy 
         (.cons (.declLocal .uint (fie k) (some i.up))
         (.cons (.assignMem (.index a (.var mv.there.there hmv) (.simple (.local .here)))
           (.val (.simple (.local (.there .here))))) .nil))) (.push (.push .refl))) σ := by
-  refine Premise.Sound.unfoldSim (Res.Sim.of_eq ?_)
+  refine Premise.Sound.unfoldSim ?_
   rw [Prog.run_declLocal_cons, Res.map_bind', Stmt.run_assignMem]
   cases he : e.eval σ with
-  | error h' => simp only [Run.assignMem, MSrc.mval, he]; rfl
+  | error h' => refine Res.Sim.of_eq ?_; simp only [Run.assignMem, MSrc.mval, he]; rfl
   | ok v =>
     simp only [Res.bind_ok]
     rw [Prog.run_declLocal_cons, Res.map_bind', Val.eval_up]
     cases hi : i.eval σ with
     | error h' =>
-      simp only [Run.assignMem, MSrc.mval, he, MLoc.write, MPath.mval, hi, Res.bind_ok, pure_bind]
-      rfl
+      simp only [Run.assignMem, MSrc.mval, he, MLoc.write, hi, Res.bind_ok, pure_bind]
+      exact MPath.sim_err_ref σ (.var mv hmv) (Val.eval_err_ne σ hi) fun _ => Res.Sim.refl _
     | ok n =>
+      refine Res.Sim.of_eq ?_
       simp only [Res.bind_ok]
       rw [Prog.run_single, Stmt.run_assignMem,
         Run.assignMem_push (σ.push (t := .val p) v) (t := .val .uint) n
@@ -160,8 +169,8 @@ theorem sound_memIndexRefCapture {R R' : RefTy} (a : ArrTy R (.ref R')) (mv : Id
   · rw [Stmt.run_assignMem]
     simp only [Run.assignMem]
     refine Res.Sim.err_bind (MSrc.mval_noPanic σ _) hp fun _ _ => ?_
-    simp only [MLoc.write, MPath.mval, hh, pure_bind]
-    exact Res.Sim.refl _
+    simp only [MLoc.write, hh]
+    exact MPath.sim_err_ref σ (.var mv hmv) hp fun _ => Res.Sim.refl _
 
 /-- `memoryIndexWriteCaptureAllComplexRecv`:
 `T se = e; T memory mv = nmp; uint ie = i; mv[ie] = se;`. -/
@@ -323,8 +332,8 @@ theorem sound_deleteMemIndexCapture {R : RefTy} {T : Ty} (a : ArrTy R T) (mv : I
           rfl (by rw [hv]; rfl)),
       pushed_drop]
   · rw [Stmt.run_deleteMem]
-    simp only [Run.deleteMem, MLoc.addr, MPath.mval, hh, pure_bind]
-    exact Res.Sim.refl _
+    simp only [Run.deleteMem, MLoc.addr, hh, bind_assoc]
+    exact MPath.sim_err_ref σ (.var mv hmv) (Val.eval_err_ne σ hh) fun _ => Res.Sim.refl _
 
 /-- `memoryIndexDelete_unfold_leftFst`: the receiver bound first. -/
 theorem sound_deleteMemIndexRecv {R : RefTy} {T : Ty} (a : ArrTy R T) (b : MPath C Γ (.ref R))
@@ -395,8 +404,8 @@ theorem sound_assignNew (k : Nat) {R : RefTy} (l : NewLhs C Γ R) (n : Simple C 
           rfl
         | mem l =>
           show Except.map _ (Run.assignMem l.up (.ref (.var .here _)) _) = _
-          simp only [Run.assignMem, MSrc.mval, MPath.mval, State.get_push_here, MVal.asRef,
-            pure_bind, (MLoc.Agree.of_up (t := .mem R) _ id l).write, pushed_drop]
+          simp only [Run.assignMem, MSrc.mval, MPath.mval, memRef, State.get_push_here, MVal.asRef,
+            pure_bind, (MLoc.Agree.of_up (t := .mem R) _ (some id) l).write, pushed_drop]
 
 end Mem
 

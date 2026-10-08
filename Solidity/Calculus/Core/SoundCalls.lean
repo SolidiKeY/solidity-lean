@@ -211,15 +211,18 @@ theorem Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) :
 
 theorem Run.declMem_none {Γ : Ctx} (R : RefTy) (σ : State C Γ) :
     Run.declMem R none σ =
-      (Semantics.allocDefault σ.glob R).map fun x => (σ.withGlob x.1).push (t := .mem R) x.2 := by
-  show (do let (τ, id) ← Semantics.allocDefault σ.glob R; pure ((σ.withGlob τ).push (t := .mem R) id)) = _
+      (Semantics.allocDefault σ.glob R).map fun x =>
+        (σ.withGlob x.1).push (t := .mem R) (some x.2) := by
+  show (do
+    let (τ, id) ← Semantics.allocDefault σ.glob R
+    pure ((σ.withGlob τ).push (t := .mem R) (some id))) = _
   cases Semantics.allocDefault σ.glob R <;> rfl
 
 theorem CallRet.enter_mem {Γ : Ctx} (R : RefTy) (r : Var) (hd : (Ty.ref R).defaultOkS = true)
     (hm : (Ty.ref R).mapFree = true) (g : Semantics.State) :
     CallRet.enter (C := C) g (CallRet.mem (Γ := Γ) R r hd hm) =
-      (Semantics.allocDefault g R).map fun x => (x.1, (x.2, ())) := by
-  show (do let (τ', id) ← Semantics.allocDefault g R; pure (τ', (id, ()))) = _
+      (Semantics.allocDefault g R).map fun x => (x.1, (some x.2, ())) := by
+  show (do let (τ', id) ← Semantics.allocDefault g R; pure (τ', (some id, ()))) = _
   cases Semantics.allocDefault g R <;> rfl
 
 section Body
@@ -394,13 +397,13 @@ theorem Premise.Sound.callMem {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (R
     | error => rfl
     | ok x =>
       obtain ⟨g, id⟩ := x
-      show (Prog.run ((σ.withGlob g).withEnv (Env.append (.mem R :: ps) (id, a) σ.env))
+      show (Prog.run ((σ.withGlob g).withEnv (Env.append (.mem R :: ps) (some id, a) σ.env))
           (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)).map _ =
-        (Prog.run (State.ofGlob (C := C) (Γ := .mem R :: ps) g (id, a)) body).bind fun υ =>
+        (Prog.run (State.ofGlob (C := C) (Γ := .mem R :: ps) g (some id, a)) body).bind fun υ =>
           pure (υ.withEnv (CallRet.leave σ.env (.mem R r hd hm)
             (Env.take [.mem R] (Env.drop body.ext υ.env))))
       rw [Prog.run_cons, Stmt.run_block, bind_run_nil, Prog.run_atop (ps := .mem R :: ps)]
-      cases Prog.run (State.ofGlob (C := C) (Γ := .mem R :: ps) g (id, a)) body with
+      cases Prog.run (State.ofGlob (C := C) (Γ := .mem R :: ps) g (some id, a)) body with
       | error => rfl
       | ok υ =>
         exact congrArg Except.ok (by
@@ -525,10 +528,10 @@ theorem Premise.Sound.callCaptureMem {ps Γf : Ctx} (k : Nat) (f : Name) (args :
       | error => rfl
       | ok x =>
         obtain ⟨g, id⟩ := x
-        show (Except.bind (Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g (id, a)) body)
-          _).map _ = Except.bind (Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g (id, a))
-            body) _
-        cases Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g (id, a)) body <;> rfl
+        show (Except.bind (Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g (some id, a))
+          body) _).map _ = Except.bind (Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g
+            (some id, a)) body) _
+        cases Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g (some id, a)) body <;> rfl
 
 /-- **The rule of a call is sound**: its leftmost argument that is not simple
 captured, or its body inlined. -/

@@ -87,7 +87,7 @@ theorem tsound_mlenCapture {p : PrimTy} (i : Idx Γ (.val p)) {E : Ty} (b : MPat
       (.captureMV x b (.assignLocal i.there (.mlen (.var .here hm) hp))) σ := by
   subst hp
   refine Premise.tsound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
-  · refine trunSt_pushed σ (t := .mem _) r (TRun.assignLocal_pushT σ (t := .mem _) r i _
+  · refine trunSt_pushed σ (t := .mem _) (some r) (TRun.assignLocal_pushT σ (t := .mem _) (some r) i _
       (.mlen b rfl) ?_)
     simp only [Val.evalT, hr]; rfl
   · refine TRes.Sim.err_refl ?_
@@ -309,7 +309,8 @@ theorem OpLoc.unfoldRecv_tsound (k : Nat) {p : PrimTy}
     | loc l =>
       cases hq
       refine Premise.tsound_captureMVSim σ (fun r hr => ?_) (fun e he _ => ?_)
-      · exact trunSt_pushed σ (t := .mem _) r (hpush r (.mfield (.var .here (MPath.loc l).mapFree) f h) (.mfield (.loc l) f h)
+      · exact trunSt_pushed σ (t := .mem _) (some r) (hpush (some r)
+          (.mfield (.var .here (MPath.loc l).mapFree) f h) (.mfield (.loc l) f h)
           (.mfield f h (by rw [hr]; rfl)))
       · exact TRes.Sim.err_refl (hmfield _ f h e he)
   | mindex a b ie =>
@@ -318,7 +319,8 @@ theorem OpLoc.unfoldRecv_tsound (k : Nat) {p : PrimTy}
     | loc l =>
       cases hq
       refine Premise.tsound_captureMVSim σ (fun r hr => ?_) (fun e he _ => ?_)
-      · exact trunSt_pushed σ (t := .mem _) r (hpush r (.mindex a (.var .here (MPath.loc l).mapFree) ie.up) (.mindex a (.loc l) ie)
+      · exact trunSt_pushed σ (t := .mem _) (some r) (hpush (some r)
+          (.mindex a (.var .here (MPath.loc l).mapFree) ie.up) (.mindex a (.loc l) ie)
           (.mindex a (by rw [hr]; rfl) (Simple.evalT_up σ _ ie)))
       · exact TRes.Sim.err_refl (hmindex a _ ie e he)
   | _ => cases hq

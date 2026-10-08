@@ -90,7 +90,8 @@ theorem rebindPath_run {R : RefTy} (i : Idx Γ (.alias R)) (p : SPath C Γ (.ref
 
 theorem rebindMemAlias_run {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (.ref R)) :
     (Upd.nil.snoc (.local i (.mref p.lower))).apply σ = Stmt.run σ (.rebindMem i (.alias p)) := by
-  show (do pure (σ.setLocal i (← p.lower.eval σ))) = Run.rebindMem i (.alias p) σ
+  show (do pure (σ.setLocal i (← do pure (some (← p.lower.eval σ))))) =
+    Run.rebindMem i (.alias p) σ
   simp only [MPath.eval_lower, Run.rebindMem, MRhs.eval, bind_assoc, pure_bind]
 
 theorem opAssign_run {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)

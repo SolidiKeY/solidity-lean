@@ -102,7 +102,7 @@ def MHole.contT : {T : Ty} → MHole C Γ T → (σ : TState C Γ) → MAddr σ.
     pure ⟨σ.setLocal i v, List.prefix_refl _⟩
   | _, .rebind i, σ, a => do
     let r ← TRes.ofOpt (σ.heap.readAddr a)
-    pure ⟨σ.setLocal i r, List.prefix_refl _⟩
+    pure ⟨σ.setLocal i (some r), List.prefix_refl _⟩
   | _, .write l, σ, a => do
     let mv ← TRes.ofOpt (σ.heap.readAddr a)
     let a' ← l.addrT σ
@@ -278,7 +278,8 @@ theorem MHole.tsound_fieldCapture {T : Ty} (lhs : MHole C Γ T) {s : Name}
     Premise.TSound m (lhs.fill (.field b f hf))
       (.captureMV x b (lhs.up.fill (.field (.var .here hm) f hf))) σ := by
   refine Premise.tsound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
-  · refine trunSt_pushed σ _ (MHole.fill_pushT σ (t := .mem (.struct s)) r lhs _ (.field b f hf) ?_)
+  · refine trunSt_pushed σ _ (MHole.fill_pushT σ (t := .mem (.struct s)) (some r) lhs _
+      (.field b f hf) ?_)
     simp only [MLoc.addrT, hr]; rfl
   · refine TRes.Sim.err_refl ?_
     show ((lhs.fill (.field b f hf)).trun σ).map _ = _
@@ -291,7 +292,7 @@ theorem MHole.tsound_indexRecvCapture {T : Ty} (lhs : MHole C Γ T) {R : RefTy} 
     Premise.TSound m (lhs.fill (.index a b i))
       (.captureMV x b (lhs.up.fill (.index a (.var .here hm) i.up))) σ := by
   refine Premise.tsound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
-  · refine trunSt_pushed σ _ (MHole.fill_pushT σ (t := .mem R) r lhs _ (.index a b i) ?_)
+  · refine trunSt_pushed σ _ (MHole.fill_pushT σ (t := .mem R) (some r) lhs _ (.index a b i) ?_)
     simp only [MLoc.addrT, Val.evalT_up, hr]; rfl
   · refine TRes.Sim.err_refl ?_
     show ((lhs.fill (.index a b i)).trun σ).map _ = _
@@ -626,9 +627,9 @@ theorem TRun.rebindMem_pushT {R : RefTy} (i : Idx Γ (.mem R)) (r' : MRhs C (t :
   cases r.evalT σ with
   | error => rfl
   | ok g =>
-    show Except.ok (⟨(g.st.lift Core.up (TEnv.wk g.ext _ (w, σ.env))).setLocal i.there g.val,
-        g.ext⟩ : Out C σ.H (t :: Γ)) =
-      Except.ok ⟨(g.st.setLocal i g.val).lift Core.up (TEnv.wk g.ext _ (w, σ.env)), g.ext⟩
+    show Except.ok (⟨(g.st.lift Core.up (TEnv.wk g.ext _ (w, σ.env))).setLocal i.there
+        (some g.val), g.ext⟩ : Out C σ.H (t :: Γ)) =
+      Except.ok ⟨(g.st.setLocal i (some g.val)).lift Core.up (TEnv.wk g.ext _ (w, σ.env)), g.ext⟩
     rw [← Idx.up_eq i]
     simp only [TState.lift_setLocal]
 

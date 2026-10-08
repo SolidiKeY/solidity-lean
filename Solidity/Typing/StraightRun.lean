@@ -187,7 +187,11 @@ theorem Loc.resolveT_ends : {T : Ty} → (l : Loc C Γ T) → (l.resolveT σ).En
       (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
 
 theorem MPath.mvalT_ends : {T : Ty} → (b : MPath C Γ T) → (b.mvalT σ).Ends
-  | _, .var .. => TRes.Ends.ok _
+  | _, .var i _ => by
+    show (match (TEnv.get i σ.env : Option (HRef σ.H _)) with
+      | some r => .ok r
+      | none => .error .revert : TRes _).Ends
+    cases (TEnv.get i σ.env : Option (HRef σ.H _)) <;> exact ⟨nofun, nofun⟩
   | _, .loc l => (MLoc.addrT_ends l).bind fun _ => TRes.Ends.ofOpt _
 
 theorem MLoc.addrT_ends : {T : Ty} → (l : MLoc C Γ T) → (l.addrT σ).Ends

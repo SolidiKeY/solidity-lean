@@ -269,10 +269,12 @@ def bindingPath : Binding → Res (Name × List Seg)
   | .unset => .error .revert
   | .val _ | .mref _ | .store _ | .ledger _ => .error .stuck
 
-/-- The object a memory local holds: `m` after `Person memory m;`. -/
+/-- The object a memory local holds: `m` after `Person memory m;`; an unset
+one reverts, as `MPath.mval` does. -/
 def bindingRef : Binding → Res Nat
   | .mref id => .ok id
-  | .val _ | .spath .. | .store _ | .ledger _ | .unset => .error .stuck
+  | .unset => .error .revert
+  | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
 
 /-- The storage a storage variable holds: `old` after `{old := storage}`. -/
 def bindingStore : Binding → Res (List (Name × SVal))

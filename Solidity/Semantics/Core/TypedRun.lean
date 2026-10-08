@@ -257,9 +257,13 @@ def Loc.resolveT (σ : TState C Γ) : {T : Ty} → Loc C Γ T → TRes (SRef C T
     TRes.ofOpt (σ.storage.checkIndex r it (PrimTy.key k))
     pure (r.atKey it k)
 
-/-- The slot a memory path holds. -/
+/-- The slot a memory path holds: an unset memory local reverts, as an
+unset alias does (decision 17'). -/
 def MPath.mvalT (σ : TState C Γ) : {T : Ty} → MPath C Γ T → TRes (MVal σ.H T)
-  | _, .var i _ => .ok (TEnv.get i σ.env)
+  | _, .var i _ =>
+    match (TEnv.get i σ.env : Option (HRef σ.H _)) with
+    | some r => .ok r
+    | none => .error .revert
   | _, .loc l => do TRes.ofOpt (σ.heap.readAddr (← l.addrT σ))
 
 /-- The address of a memory location: the object, then the index. -/
@@ -459,7 +463,7 @@ def CallRet.enterT {Γ : Ctx} {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {ps : Ctx
     (fun {rs} bs => ⟨τ.withEnv (TEnv.append rs (Binders.defaultsT bs) τ.env), List.prefix_refl _⟩)
     (fun R _ _ hm =>
       let g := τ.allocDefaultG R hm
-      ⟨g.st.push (t := .mem R) g.val, g.ext⟩)
+      ⟨g.st.push (t := .mem R) (some g.val), g.ext⟩)
 
 /-- Leaving a call: the caller's locals `e`, with what the call leaves them. -/
 def CallRet.leaveT {H : HTy} {Γ : Ctx} (e : TEnv C H Γ) {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') :
@@ -626,14 +630,14 @@ def declMem (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R).mapFree =
   match init with
   | none =>
     let g := σ.allocDefaultG R hm
-    pure ⟨g.st.push (t := .mem R) g.val, g.ext⟩
+    pure ⟨g.st.push (t := .mem R) (some g.val), g.ext⟩
   | some r => do
     let g ← r.evalT σ
-    pure ⟨g.st.push (t := .mem R) g.val, g.ext⟩
+    pure ⟨g.st.push (t := .mem R) (some g.val), g.ext⟩
 
 def rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) : TStep C Γ Γ := fun σ => do
   let g ← r.evalT σ
-  pure ⟨g.st.setLocal i g.val, g.ext⟩
+  pure ⟨g.st.setLocal i (some g.val), g.ext⟩
 
 def assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) : TStep C Γ Γ :=
   fun σ => do
@@ -669,7 +673,7 @@ def deleteMem {T : Ty} (p : MPath C Γ T) : TStep C Γ Γ := fun σ =>
   match p with
   | .var i hm =>
     let g := σ.allocDefaultG _ hm
-    pure ⟨g.st.setLocal i g.val, g.ext⟩
+    pure ⟨g.st.setLocal i (some g.val), g.ext⟩
   | .loc l => do clearT σ (← l.addrT σ) l.mapFree
 
 def assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint) (h : R.newArrOk = true) :

@@ -198,6 +198,10 @@ theorem aliasPath_wk {R : RefTy} (i : Idx Γ (.alias R)) :
     aliasPath (τ.lift h d) (i.wk h) = aliasPath τ i := by
   simp only [aliasPath, State.get_lift]
 
+theorem memRef_wk {R : RefTy} (i : Idx Γ (.mem R)) :
+    memRef (τ.lift h d) (i.wk h) = memRef τ i := by
+  simp only [memRef, State.get_lift]
+
 mutual
 
 theorem SPath.resolve_wk : {T : Ty} → (b : SPath C Γ T) → (b.wk h).resolve (τ.lift h d) = b.resolve τ
@@ -211,7 +215,7 @@ theorem Loc.resolve_wk : {T : Ty} → (l : Loc C Γ T) → (l.wk h).resolve (τ.
     simp only [Loc.wk, Loc.resolve, SPath.resolve_wk b, Val.eval_wk i, State.glob_lift]
 
 theorem MPath.mval_wk : {T : Ty} → (b : MPath C Γ T) → (b.wk h).mval (τ.lift h d) = b.mval τ
-  | _, .var i _ => by simp only [MPath.wk, MPath.mval, State.get_lift]
+  | _, .var i _ => by simp only [MPath.wk, MPath.mval, memRef_wk h d τ i]
   | _, .loc l => MLoc.read_wk l
 
 theorem MLoc.read_wk : {T : Ty} → (l : MLoc C Γ T) → (l.wk h).read (τ.lift h d) = l.read τ

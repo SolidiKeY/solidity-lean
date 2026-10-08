@@ -13,20 +13,13 @@ state (`Premise.TSound`): each statement's rule by its arm's theorem in
 `Calculus/Core/Blocks.lean` (calls, `try`, loops: `Stmt.isBlockArm`) are the
 `tsoundB` lane's.
 
-**One condition** (`Stmt.TArmOk`, `Calculus/Core/TSoundKit.lean`), where
-the typed reading of a rule fails: `T memory mv = r;` under the box has a
-reference of its type in the heap.  Its hidden binder is universal there
-(decision 12), vacuous over a heap typing with no object of the type, while
-`r` may allocate one.  An alias `T memory mv = mp;` needs none
-(`tsound_declMemAlias`): the object `mp` names is one, and a halt reading
-it closes the box.  Decisions 15 and 16 took the other two away: a push at
-the bound is exhausted, which both modalities accept, and no struct repeats
-a member name, so every copy is on the bridge.  `Calculus/Core/TSound.lean`
-assembles the blocks' arms with these.
-
-A `new` meets no condition of its own (`tsound_assignNew` compares typed
-runs): it unfolds to `T memory mv = new T(n); l = mv;`, and the condition
-falls on the first step.
+**No condition.**  Decisions 15 and 16 took two away (a push at the bound
+is exhausted, which both modalities accept; no struct repeats a member name,
+so every copy is on the bridge), and 17' the last: `T memory mv = r;`'s
+hidden binder ranges over an unset `mv` too, from which the premise's
+`mv = r;` runs as the declaration does, whatever `r` allocates
+(`tsound_declMemInit`).  `Calculus/Core/TSound.lean` assembles the blocks'
+arms with these.
 -/
 
 namespace Solidity.Core
@@ -42,10 +35,10 @@ def Stmt.isBlockArm : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
   | _, _, _ => false
 
 /-- **The rule of every statement but a block's is sound over the typed
-state**, where the statement meets its arm's condition. -/
+state.** -/
 theorem Stmt.tstepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ')
     (hb : s.isBlockArm = false) : Stmt.TStepSound k m s := by
-  intro σ p hp hok
+  intro σ p hp
   cases s with
   | assign l r => exact assignStep_tsound σ k l r p hp
   | rebind i r => exact rebindStep_tsound σ k i r p hp
@@ -68,11 +61,7 @@ theorem Stmt.tstepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C
   | declMem R x init hd hm =>
     cases init with
     | none => cases hp; exact tsound_declMemFresh σ R x hd hm
-    | some r =>
-      cases r with
-      | alias b => cases hp; exact tsound_declMemAlias σ x b hd hm
-      | copy q hm' => cases hp; exact tsound_declMemInit σ x (.copy q hm') hd hm hok
-      | newArr n h => cases hp; exact tsound_declMemInit σ x (.newArr n h) hd hm hok
+    | some r => cases hp; exact tsound_declMemInit σ x r hd hm
   | rebindMem i r => exact rebindMemStep_tsound σ k i r p hp
   | assignFromMem l q => exact assignFromMemStep_tsound σ k l q p hp
   | assignMem l r => exact assignMemStep_tsound σ k l r p hp

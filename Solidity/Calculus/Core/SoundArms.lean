@@ -493,7 +493,8 @@ theorem sound_rebindPath {R : RefTy} (i : Idx Γ (.alias R)) (p : SPath C Γ (.r
 theorem sound_rebindMemAlias {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (.ref R)) :
     Premise.Sound m (.rebindMem i (.alias p)) (.upd1 (.local i (.mref p.lower))) σ :=
   Premise.Sound.update (by
-    show (do pure (σ.setLocal i (← p.lower.eval σ))) = Run.rebindMem i (.alias p) σ
+    show (do pure (σ.setLocal i (← do pure (some (← p.lower.eval σ))))) =
+      Run.rebindMem i (.alias p) σ
     simp only [MPath.eval_lower, Run.rebindMem, MRhs.eval, bind_assoc, pure_bind])
 
 theorem Simple.eval_ok {p : PrimTy} (s : Simple C Γ p) : ∃ v, s.eval σ = .ok v := by

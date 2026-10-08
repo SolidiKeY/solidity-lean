@@ -213,7 +213,8 @@ theorem Tm.eval_erase (hag : Agree ns σ τ) : {s : Srt} → (t : Tm C Γ s) →
     simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i]
     rw [hag.wl]; rfl
   | _, .pvI i => by
-    simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i]; rfl
+    simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i, Tm.eval, memRef]
+    cases Env.get i σ.env <;> rfl
   | _, .netOf i a => by
     show Op1.eval τ (.netOf (i.name ns)) ((a.erase ns).eval τ) = _
     rw [Tm.eval_erase hag a]

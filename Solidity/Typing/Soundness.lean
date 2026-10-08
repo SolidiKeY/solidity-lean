@@ -969,15 +969,20 @@ identity the store typing claims at its type. -/
 def LTy.WT (C : Contract) (H : HeapTy) : (t : LTy) → t.Denote C → Prop
   | .val p, v => (Value.toSVal v).hasTy (.prim p) = true
   | .alias R, o => ∀ r segs, o = some (r, segs) → C.layout.tyAt r segs = some (.ref R)
-  | .mem R, id => MVal.hasTyH H (.ref id) (.ref R) = true
+  | .mem R, o => ∀ id, o = some id → MVal.hasTyH H (.ref id) (.ref R) = true
   | .old, _ => True
   | .oldNet, _ => True
+
+/-- A memory local set to an identity of its type. -/
+theorem LTy.WT.mem_some {H : HeapTy} {R : RefTy} {id : Nat}
+    (h : MVal.hasTyH H (.ref id) (.ref R) = true) : LTy.WT C H (.mem R) (some id) :=
+  fun _ e => Option.some.inj e ▸ h
 
 theorem LTy.WT.mono {H H' : HeapTy} (hext : H.Extends H') :
     {t : LTy} → {v : t.Denote C} → LTy.WT C H t v → LTy.WT C H' t v
   | .val _, _, h => h
   | .alias _, _, h => h
-  | .mem _, _, h => MVal.hasTyH_mono hext h
+  | .mem _, _, h => fun id hid => MVal.hasTyH_mono hext (h id hid)
   | .old, _, h => h
   | .oldNet, _, h => h
 
@@ -1096,7 +1101,11 @@ mutual
 an identity the store typing claims at `Person`. -/
 theorem MPath.mval_wt (hwt : RunWT C H σ) :
     ∀ {T : Ty} (p : MPath C Γ T) {mv : MVal}, p.mval σ = .ok mv → MVal.hasTyH H mv T = true
-  | _, .var i _, mv, h => by cases h; exact hwt.env.get i
+  | _, .var i _, mv, h => by
+    simp only [MPath.mval, memRef] at h
+    split at h
+    · cases h; exact hwt.env.get i _ ‹_›
+    · cases h
   | _, .loc l, mv, h => MLoc.read_wt hwt l h
 
 /-- `m.age` reads a slot the heap types `uint`. -/
@@ -1482,7 +1491,7 @@ theorem CallRet.enter_wt {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' : Sema
     cases h
     obtain ⟨H', hout, hid⟩ := allocDefault_typed hτ.heapTyNodup hτ.heap hτ.heapWf
       (defaultOk_of_defaultOkS hd) ha
-    exact ⟨H', hout.ext, hτ.ofCopyOut hout, hid, trivial⟩
+    exact ⟨H', hout.ext, hτ.ofCopyOut hout, LTy.WT.mem_some hid, trivial⟩
 
 end Effects
 
@@ -1628,12 +1637,13 @@ theorem keeps_declMem (R : RefTy) (init : Option (MRhs C Γ R))
     obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.glob.heapTyNodup hwt.glob.heap
       hwt.glob.heapWf (defaultOk_of_defaultOkS (by simpa using hd)) ha
     exact ⟨H', hout.ext,
-      RunWT.push (RunWT.withGlob hwt hout.ext (hwt.glob.ofCopyOut hout)) (t := .mem R) hid⟩
+      RunWT.push (RunWT.withGlob hwt hout.ext (hwt.glob.ofCopyOut hout)) (t := .mem R)
+        (LTy.WT.mem_some hid)⟩
   | some r =>
     obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
     cases h
     obtain ⟨H', hext, hwt₁, hid⟩ := MRhs.eval_wt hwt he
-    exact ⟨H', hext, RunWT.push hwt₁ (t := .mem R) hid⟩
+    exact ⟨H', hext, RunWT.push hwt₁ (t := .mem R) (LTy.WT.mem_some hid)⟩
 
 theorem keeps_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
     (wtInv C).Keeps (Run.rebindMem i r) := by
@@ -1642,7 +1652,7 @@ theorem keeps_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
   obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
   cases h
   obtain ⟨H', hext, hwt₁, hid⟩ := MRhs.eval_wt hwt he
-  exact ⟨H', hext, RunWT.setLocal hwt₁ i hid⟩
+  exact ⟨H', hext, RunWT.setLocal hwt₁ i (LTy.WT.mem_some hid)⟩
 
 theorem keeps_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
     (wtInv C).Keeps (Run.assignFromMem l p) := by
@@ -1686,7 +1696,8 @@ theorem keeps_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) :
     obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.glob.heapTyNodup hwt.glob.heap
       hwt.glob.heapWf (defaultOk_of_defaultOkS hd) ha
     exact ⟨H', hout.ext,
-      RunWT.setLocal (RunWT.withGlob hwt hout.ext (hwt.glob.ofCopyOut hout)) i hid⟩
+      RunWT.setLocal (RunWT.withGlob hwt hout.ext (hwt.glob.ofCopyOut hout)) i
+        (LTy.WT.mem_some hid)⟩
   | loc l =>
     obtain ⟨a, ha, h⟩ := bind_ok_inv h
     obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h

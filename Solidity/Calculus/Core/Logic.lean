@@ -47,7 +47,7 @@ def Tm.eval (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.Ev
   | _, .pvV i => pure (Env.get i σ.env)
   | _, .pvP i => aliasPath σ i
   | _, .pvS i => pure { σ.glob with storage := Env.get i σ.env }
-  | _, .pvI i => pure (Env.get i σ.env)
+  | _, .pvI i => memRef σ i
   | _, .netOf i a => do
     let l : List (Int × Int) := Env.get i σ.env
     pure (.int ((lookupBy (← (← a.eval σ).asInt) l).getD 0))
@@ -96,7 +96,7 @@ def Rhs.eval (σ₀ : State C Γ) : {t : LTy} → Rhs C Γ t → Res (t.Denote C
   | _, .val t => t.eval σ₀
   | _, .path p => do pure (some (← p.eval σ₀))
   | _, .unset => pure none
-  | _, .mref i => i.eval σ₀
+  | _, .mref i => do pure (some (← i.eval σ₀))
   | _, .store s => do pure (← s.eval σ₀).storage
   | _, .saveNet => pure σ₀.net
   | _, .saveNetMt => pure []
@@ -236,19 +236,11 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
 /-- Valid: true in every state of the empty context. -/
 def Valid (φ : Fml C []) : Prop := ∀ σ, holds σ φ
 
-/-- Every local's type has a value in M3's untyped states. -/
-theorem LTy.denote_nonempty : (t : LTy) → Nonempty (t.Denote C)
-  | .val _ => ⟨.int 0⟩
-  | .alias _ => ⟨none⟩
-  | .mem _ => ⟨0⟩
-  | .old => ⟨[]⟩
-  | .oldNet => ⟨[]⟩
-
-/-- A hidden binder holds where its body holds for every value: M3's types
-all have one, so the diamond's asks nothing more. -/
+/-- A hidden binder holds where its body holds for every value
+(`Modality.forallB`, universal under both modalities). -/
 theorem holds_bind_intro {m : Modality} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)} {σ : State C Γ}
     (h : ∀ v, holds (σ.push v) φ) : holds σ (.bind m x t φ) :=
-  Modality.forallB_intro (fun _ => LTy.denote_nonempty t) h
+  Modality.forallB_intro h
 
 /-! ## States whose `bool` locals hold `bool`s -/
 

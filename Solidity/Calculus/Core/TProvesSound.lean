@@ -7,20 +7,15 @@ import Solidity.Calculus.Core.TCloseErase
 `Calculus/Core/ProvesSound.lean`'s `Proves.sound`, read over the typed
 state (`tholds`, `Calculus/Core/TLogic.lean`): what `H ⊢ φ` proves holds,
 its context in front, in every typed state of the outer scope
-(`Proves.tsound`), given that every rule the strategy fires is sound there
-(`Stmt.TSound`, the arms' part, `Premise.TSound` per premise).  This module
+(`Proves.tsound_of`), given that every rule the strategy fires is sound
+there (`Stmt.TSound`, the arms' part, `Premise.TSound` per premise, proved
+in `Calculus/Core/TSound.lean`).  This module
 is the structural part, which does not depend on any arm: the context is
 monotone and keeps a conjunction (`Hyps.twrap_and`), `closeTrue` holds
 behind a context with no diamond update but scope ends
 (`Hyps.twrap_valid`), `emptyModality` goes into the frames
 (`tholds_exit`), and `close` is `tholds_of_erase_valid`
 (`Calculus/Core/TCloseErase.lean`).
-
-**`Stmt.TSound C` is false**, at every contract (`Stmt.not_tsound`,
-`Calculus/Core/TSound.lean`): every arm is sound but the box
-`memoryLocalDeclInitDrop` at an allocating initializer over a heap with no
-object of the local's type, whose premise is vacuous there (decision 17,
-open).  Decisions 10 and 13–16 took the other failures away.
 
 An update's typed reading asks of every typed state that erases to the one
 it ends in, so a rule's premise gives its conclusion in the state the typed
@@ -167,12 +162,7 @@ theorem Hyps.twrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
   | all H x p ih => intro φ hb h; exact ih (φ := .all x p φ) hb fun τ _ => h _
   | bind H m x t ih =>
     intro φ hb h
-    cases m with
-    | box => exact ih (φ := .bind .box x t φ) hb fun τ v => h _
-    | diamond =>
-      have hb' := Bool.and_eq_true_iff.mp hb
-      exact ih (φ := .bind .diamond x t φ) hb'.2 fun τ =>
-        Modality.forallB_intro (fun _ => LTy.tdenote_nonempty t hb'.1) fun _ => h _
+    exact ih (φ := .bind m x t φ) hb fun τ v => h _
   | anon H xs ih => intro φ hb h; exact ih (φ := .anon xs φ) hb fun τ _ => h _
 
 end Wrap
@@ -181,8 +171,9 @@ end Wrap
 
 /-- **Soundness of the scoped sequent over the typed state**, given the
 arms' (`Stmt.TSound`): what `H ⊢ φ` proves holds, its context in front, in
-every typed state of the outer scope. -/
-theorem Proves.tsound (hS : Stmt.TSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
+every typed state of the outer scope.  The arms' are proved in
+`Calculus/Core/TSound.lean` (`Stmt.tsound`, `Proves.tsound`). -/
+theorem Proves.tsound_of (hS : Stmt.TSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
     {φ : Fml C Γ} (d : Proves C R Γ₀ H φ) : ∀ σ, tholds σ (H.wrap φ) := by
   induction d with
   | intro _ ih => exact ih
@@ -262,12 +253,5 @@ theorem Proves.tsound (hS : Stmt.TSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : H
   | @closeTrue Γ H h => exact H.twrap_valid (φ := .tt) h fun _ => trivial
   | close ns hlen hnd h hc hB =>
     exact fun σ => tholds_of_erase_valid _ hlen hnd (Fml.closableB_tclosable hc) hB h σ
-
-/-- **A goal proved with an empty context is valid over the typed state**,
-given the arms'.  The hypothesis is false as stated (`Stmt.not_tsound`), so
-this is the shape of the result, not yet the result (decision 17). -/
-theorem Proves.tvalid (hS : Stmt.TSound C) {R : RuleSet} {φ : Fml C []}
-    (d : Proves C R [] .nil φ) : TValid φ :=
-  Proves.tsound hS d
 
 end Solidity.Core

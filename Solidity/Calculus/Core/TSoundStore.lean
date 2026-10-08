@@ -44,7 +44,7 @@ theorem Prog.trunSt_declStorage_cons {Γ' : Ctx} {R : RefTy} (x : Var) (b : SPat
 theorem Prog.trunSt_declMem_cons {Γ' : Ctx} {R : RefTy} (x : Var) (b : MPath C Γ (.ref R))
     (P : Prog C (.mem R :: Γ) Γ') :
     Prog.trunSt σ (.cons (.declMem R x (some (.alias b)) rfl b.mapFree) P) =
-      (b.mvalT σ).bind fun r => Prog.trunSt (σ.push (t := .mem R) r) P := by
+      (b.mvalT σ).bind fun r => Prog.trunSt (σ.push (t := .mem R) (some r)) P := by
   rw [Prog.trunSt_cons, Stmt.trunSt_declMem]
   cases b.mvalT σ <;> rfl
 

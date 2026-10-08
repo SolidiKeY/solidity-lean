@@ -28,9 +28,8 @@ invisible, their scope is Lean's only).
 of its type, printed as `φ` alone: `T v = e;` drops its initializer
 (`localValueDeclInitDrop`) to `v = e;`, which the binder puts in scope, as
 solkey's `⟨[ v = e; ]⟩`.  It carries the modality it was produced under
-(decision 12): under the diamond it also asks that its type have a value
-(`Modality.forallB`), which a memory type over a heap with no object of it
-has not; under the box it is universal.
+(decision 12); both read it universally (`Modality.forallB`), since every
+type has a value, an unset memory local among them (decision 17').
 
 `Premise C Γ Γ'` is what a rule on a statement `Stmt C Γ Γ'` leaves, and
 `Premise.fml` puts it in front of the rest `ω` and the frames `κ`.  A split
@@ -226,42 +225,26 @@ def Frames.erase (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Li
 
 /-! ## Formulas -/
 
-/-- A hidden binder's reading under `m`: `p` of every value, and under the
-diamond a value to begin with (decision 12). -/
-def _root_.Solidity.Modality.forallB (m : Modality) {α : Sort _} (p : α → Prop) : Prop :=
-  match m with
-  | .box => ∀ v, p v
-  | .diamond => Nonempty α ∧ ∀ v, p v
+/-- A hidden binder's reading under `m`: `p` of every value, under both
+modalities.  Decision 12 asked the diamond for a value first; since a memory
+local may be unset (decision 17'), every local's type has one in every
+state (`LTy.tdenote_nonempty`), so that clause is gone and `m` is only what
+the rule wrote. -/
+def _root_.Solidity.Modality.forallB (_m : Modality) {α : Sort _} (p : α → Prop) : Prop :=
+  ∀ v, p v
 
 theorem _root_.Solidity.Modality.forallB_all {m : Modality} {α : Sort _} {p : α → Prop}
-    (h : m.forallB p) (v : α) : p v := by
-  cases m
-  · exact h.2 v
-  · exact h v
+    (h : m.forallB p) (v : α) : p v := h v
 
 theorem _root_.Solidity.Modality.forallB_imp {m : Modality} {α : Sort _} {p q : α → Prop}
-    (h : ∀ v, p v → q v) (hp : m.forallB p) : m.forallB q := by
-  cases m
-  · exact ⟨hp.1, fun v => h v (hp.2 v)⟩
-  · exact fun v => h v (hp v)
+    (h : ∀ v, p v → q v) (hp : m.forallB p) : m.forallB q := fun v => h v (hp v)
 
 theorem _root_.Solidity.Modality.forallB_and {m : Modality} {α : Sort _} {p q r : α → Prop}
-    (h : ∀ v, p v → q v → r v) (hp : m.forallB p) (hq : m.forallB q) : m.forallB r := by
-  cases m
-  · exact ⟨hp.1, fun v => h v (hp.2 v) (hq.2 v)⟩
-  · exact fun v => h v (hp v) (hq v)
+    (h : ∀ v, p v → q v → r v) (hp : m.forallB p) (hq : m.forallB q) : m.forallB r :=
+  fun v => h v (hp v) (hq v)
 
 theorem _root_.Solidity.Modality.forallB_intro {m : Modality} {α : Sort _} {p : α → Prop}
-    (hne : m = .diamond → Nonempty α) (h : ∀ v, p v) : m.forallB p := by
-  cases m
-  · exact ⟨hne rfl, h⟩
-  · exact h
-
-/-- A local's type has a value in every typed state: all but a memory
-reference, whose heap may hold no object of its type. -/
-def LTy.inhabited : LTy → Bool
-  | .mem _ => false
-  | _ => true
+    (h : ∀ v, p v) : m.forallB p := h
 
 /-- A formula about programs of `C`, read in `Γ`. -/
 inductive Fml (C : Contract) : Ctx → Type where

@@ -347,8 +347,23 @@ theorem Tm.eval_substH_pvI {R : RefTy} {i : Idx Δ (.mem R)} {t' : Tm C Γ .iden
     (x : Held C Γ (.mem R)) → Held.OK σ₀ σ₁ i x →
       (match x with | .pos j => some (Tm.pvI j) | .rhs (.mref t) => some t) = some t' →
       t'.eval σ₀ = (Tm.pvI i).eval σ₁
-  | .pos j, hok, h => by cases h; show pure _ = pure _; rw [hok]
-  | .rhs (.mref t), hok, h => by cases h; exact hok
+  | .pos j, hok, h => by
+    cases h
+    have hok : Env.get i σ₁.env = Env.get j σ₀.env := hok
+    show memRef σ₀ j = memRef σ₁ i
+    simp only [memRef, hok]
+  | .rhs (.mref t), hok, h => by
+    cases h
+    have hok : (do pure (some (← t'.eval σ₀))) = Except.ok (Env.get i σ₁.env) := hok
+    show _ = memRef σ₁ i
+    unfold memRef
+    cases hp : t'.eval σ₀ with
+    | error e => rw [hp] at hok; cases hok
+    | ok q =>
+      rw [hp] at hok
+      injection hok with hq
+      rw [← hq]
+      rfl
 
 theorem Tm.eval_substH_pvS {g : Bool} (hg : g = true → σ₁.glob = σ₀.glob) {i : Idx Δ .old}
     {t' : Tm C Γ .st} :
@@ -447,7 +462,8 @@ theorem Rhs.eval_substH (hU : U.apply σ₀ = .ok σ₁) :
   | _, .unset, r', h => by cases h; rfl
   | _, .mref i, r', h => by
     obtain ⟨i', hi, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact Tm.eval_substH hU i hi
+    show (do pure (some (← i'.eval σ₀))) = (do pure (some (← i.eval σ₁)))
+    rw [Tm.eval_substH hU i hi]
   | _, .store x, r', h => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
     show (do pure (← x'.eval σ₀).storage) = (do pure (← x.eval σ₁).storage)
@@ -673,7 +689,7 @@ def Fml.merge2 (m : Modality) : {Γ Δ : Ctx} → Upd C Γ Δ → Fml C Δ → O
 theorem LTy.boolOK_exists : (t : LTy) → ∃ v : t.Denote C, LTy.BoolOK t v
   | .val p => ⟨PrimTy.default p, LTy.BoolOK.default p⟩
   | .alias _ => ⟨none, trivial⟩
-  | .mem _ => ⟨0, trivial⟩
+  | .mem _ => ⟨none, trivial⟩
   | .old => ⟨[], trivial⟩
   | .oldNet => ⟨[], trivial⟩
 

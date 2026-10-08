@@ -90,9 +90,8 @@ def Upd.popsOnly {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   termination_by structural _ U => U
 
 /-- No update of the context was produced under the diamond, but scope
-ends (`Upd.popsOnly`), and no hidden binder under the diamond but at a type
-that always has a value (`LTy.inhabited`: the diamond's binder asks for one,
-`Modality.forallB`). -/
+ends (`Upd.popsOnly`).  A hidden binder is universal under both modalities
+(`Modality.forallB`), so it asks nothing. -/
 def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
   | _, H => Hyps.casesOn (motive := fun _ _ => Bool) H true
       (fun H _ => Hyps.boxOnly H)
@@ -100,9 +99,7 @@ def Hyps.boxOnly {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Bool
         | .diamond => U.popsOnly && Hyps.boxOnly H
         | .box => Hyps.boxOnly H)
       (fun H => Hyps.boxOnly H) (fun H _ _ => Hyps.boxOnly H)
-      (fun H m _ t => match m with
-        | .diamond => t.inhabited && Hyps.boxOnly H
-        | .box => Hyps.boxOnly H)
+      (fun H _ _ _ => Hyps.boxOnly H)
       (fun H _ => Hyps.boxOnly H)
   termination_by structural _ H => H
 

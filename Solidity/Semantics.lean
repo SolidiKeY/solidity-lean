@@ -1208,13 +1208,14 @@ def Loc.resolve (σ : State) : {T : Ty} → Loc C T → Res (Name × List Seg)
     σ.checkIndex r segs i
     pure (r, segs ++ [.at i])
 
-/-- The slot a memory path holds in `σ`: a memory local's reference, or
-what a location holds. -/
+/-- The slot a memory path holds in `σ`: a memory local's reference (an
+unset one reverts, as an unset alias does), or what a location holds. -/
 def MPath.mval (σ : State) : {T : Ty} → MPath C T → Res MVal
   | _, .var x _ => do
     match ← σ.getEnv x with
     | .mref id => pure (.ref id)
-    | .val _ | .spath .. | .store _ | .ledger _ | .unset => .error .stuck
+    | .unset => .error .revert
+    | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
   | _, .loc l => l.read σ
 
 def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal

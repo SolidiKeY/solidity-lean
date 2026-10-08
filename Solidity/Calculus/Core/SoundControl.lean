@@ -213,7 +213,7 @@ theorem sound_declMemInit {R : RefTy} (x : Var) (r : MRhs C Γ R)
     (hd : ((some r).isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
     Premise.Sound m (.declMem R x (some r) hd hm) (.bind x (.mem R) (.cons (.rebindMem .here r.up) .nil))
       σ := by
-  refine Premise.Sound.bind (t := .mem R) ⟨0, trivial, ?_⟩
+  refine Premise.Sound.bind (t := .mem R) ⟨none, trivial, ?_⟩
   rw [Prog.run_single, Stmt.run_rebindMem, Stmt.run_declMem]
   simp only [Run.rebindMem, Run.declMem, MRhs.eval_up]
   cases r.eval σ <;> rfl

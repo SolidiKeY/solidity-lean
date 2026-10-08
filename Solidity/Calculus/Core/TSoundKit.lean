@@ -197,19 +197,13 @@ theorem Premise.tsound_bind {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : 
     exact h'
 
 /-- **A hidden binder, every value**: a statement that runs as `P` from
-`σ` with any value of its type pushed.  Under the diamond the premise gives
-the value; under the box the type must have one. -/
+`σ` with any value of its type pushed.  Every type has one
+(`LTy.tdenote_nonempty`: a memory local may be unset, decision 17'). -/
 theorem Premise.tsound_bind_all {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'} {s : Stmt C Γ Γ'}
-    (σ : TState C Γ) (hs : ∀ v : t.TDenote C σ.H, Prog.trunSt (σ.push v) P = Stmt.trunSt σ s)
-    (hbox : m = .box → Nonempty (t.TDenote C σ.H)) :
-    Premise.TSound m s (.bind x t P) σ := by
-  intro _ _ ω κ φ h
-  have hne : Nonempty (t.TDenote C σ.H) := by
-    cases m
-    · exact h.1
-    · exact hbox rfl
-  obtain ⟨v⟩ := hne
-  exact Premise.tsound_bind σ ⟨v, hs v⟩ ω κ φ h
+    (σ : TState C Γ) (hs : ∀ v : t.TDenote C σ.H, Prog.trunSt (σ.push v) P = Stmt.trunSt σ s) :
+    Premise.TSound m s (.bind x t P) σ :=
+  let ⟨v⟩ := LTy.tdenote_nonempty (C := C) (H := σ.H) t
+  Premise.tsound_bind σ ⟨v, hs v⟩
 
 /-- A block's run, its locals popped, then the rest and the frames: the
 frame a branch ends with (`pop b P.ext`). -/
@@ -272,27 +266,15 @@ Each arm of `Stmt.step` proves, for its statement, that the premise it
 gives is sound in a typed state `σ` (`Premise.TSound`): its theorem is named
 as M3's with `tsound` for `sound` (`localStep_sound` → `localStep_tsound`)
 and takes `σ` first, then the arm's arguments, the premise `q` and
-`hq : …Step k … = some q`.  An arm that is sound only under a condition
-takes it as a hypothesis, and `Stmt.TArmOk` collects them
-(`Calculus/Core/TSoundStep.lean`'s module docstring says why it holds).
-Decisions 15 and 16 took two away (a push at the bound is exhausted; no
-struct repeats a member name); one is left:
-
-* `T memory mv = r;` at an allocating `r` has, under the box, a reference
-  of its type in the heap (decision 12); an alias `T memory mv = mp;` needs
-  none. -/
-
-/-- **What an arm asks of the statement** for its rule to be sound over the
-typed state in `σ` under `m`; `True` for every other statement. -/
-def Stmt.TArmOk (m : Modality) : {Γ Γ' : Ctx} → TState C Γ → Stmt C Γ Γ' → Prop
-  | _, _, _, .declMem _ _ (some (.alias _)) _ _ => True
-  | _, _, σ, .declMem R _ (some _) _ _ => m = .box → Nonempty ((LTy.mem R).TDenote C σ.H)
-  | _, _, _, _ => True
+`hq : …Step k … = some q`.  No arm takes a condition: decisions 15 and 16
+took two away (a push at the bound is exhausted; no struct repeats a member
+name), and 17' the last (a memory local may be unset, so the box
+`memoryLocalDeclInitDrop`'s binder has the instance its premise needs). -/
 
 /-- **The rule of `s` is sound over the typed state** (`Stmt.StepSound`,
-over `TState`), in every typed state where `s` meets its arm's condition. -/
+over `TState`), in every typed state. -/
 def Stmt.TStepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
-  ∀ σ : TState C Γ, ∀ p, s.step k m = some p → s.TArmOk m σ → Premise.TSound m s p σ
+  ∀ σ : TState C Γ, ∀ p, s.step k m = some p → Premise.TSound m s p σ
 
 /-! ## Evaluators revert -/
 
@@ -459,7 +441,7 @@ theorem Stmt.trunSt_declStorage (σ : TState C Γ) (R : RefTy) (x : Var) (b : SP
 /-- `T memory mv = nmp;`, typed: the object read, then pushed. -/
 theorem Stmt.trunSt_declMem (σ : TState C Γ) (R : RefTy) (x : Var) (b : MPath C Γ (.ref R)) :
     Stmt.trunSt σ (.declMem R x (some (.alias b)) rfl b.mapFree) =
-      (b.mvalT σ).map fun r => σ.push (t := .mem R) r := by
+      (b.mvalT σ).map fun r => σ.push (t := .mem R) (some r) := by
   show (TRun.declMem R (some (.alias b)) b.mapFree σ).map _ = _
   simp only [TRun.declMem, MRhs.evalT]
   cases b.mvalT σ <;> rfl
@@ -519,13 +501,13 @@ object. -/
 theorem Premise.tsound_captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
     {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
     (G : MVal σ.H (.ref R) → TRes (TState C Γ))
-    (hs' : ∀ r, (Stmt.trunSt (σ.push (t := .mem R) r) s').map
+    (hs' : ∀ r, (Stmt.trunSt (σ.push (t := .mem R) (some r)) s').map
       (TState.drop (.push .refl)) = G r)
     (hs : TRes.Sim ((b.mvalT σ).bind G) (Stmt.trunSt σ s)) :
     Premise.TSound m s (.captureMV x b s') σ := by
   refine Premise.tsound_unfoldSim σ ?_
   rw [trunSt_declThen, Stmt.trunSt_declMem]
-  have : ((b.mvalT σ).map fun r => σ.push (t := .mem R) r).bind
+  have : ((b.mvalT σ).map fun r => σ.push (t := .mem R) (some r)).bind
       (fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl))) = (b.mvalT σ).bind G := by
     cases b.mvalT σ with
     | error => rfl
@@ -756,11 +738,13 @@ theorem Premise.tsound_captureSPSim {R : RefTy} {x : Var} {b : SPath C Γ (.ref 
 theorem Premise.tsound_captureMVSim {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
     {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
     (hok : ∀ r, b.mvalT σ = .ok r →
-      (Stmt.trunSt (σ.push (t := .mem R) r) s').map (TState.drop (.push .refl)) = Stmt.trunSt σ s)
+      (Stmt.trunSt (σ.push (t := .mem R) (some r)) s').map (TState.drop (.push .refl)) =
+        Stmt.trunSt σ s)
     (herr : ∀ h, b.mvalT σ = .error h → h = .revert → TRes.Sim (.error h) (Stmt.trunSt σ s)) :
     Premise.TSound m s (.captureMV x b s') σ := by
   refine Premise.tsound_captureMVK σ
-    (fun r => (Stmt.trunSt (σ.push (t := .mem R) r) s').map (TState.drop (.push .refl)))
+    (fun r => (Stmt.trunSt (σ.push (t := .mem R) (some r)) s').map
+      (TState.drop (.push .refl)))
     (fun _ => rfl) ?_
   cases hb : b.mvalT σ with
   | ok r => exact TRes.Sim.of_eq (hok r hb)

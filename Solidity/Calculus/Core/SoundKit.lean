@@ -75,7 +75,9 @@ theorem Tm.eval_noPanic (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → s.
     show NoPanic (aliasPath σ i)
     unfold aliasPath; split <;> no_panic
   | _, .pvS _ => NoPanic.pure _
-  | _, .pvI _ => NoPanic.pure _
+  | _, .pvI i => by
+    show NoPanic (memRef σ i)
+    unfold memRef; split <;> no_panic
   | _, .netOf i a => by
     have ha : NoPanic (a.eval σ) := Tm.eval_noPanic σ a
     simp only [Tm.eval, Srt.NoPanic]
@@ -91,7 +93,7 @@ theorem Rhs.eval_noPanic (σ : State C Γ) {t : LTy} (r : Rhs C Γ t) : NoPanic 
   | val t => exact Tm.eval_noPanic σ t
   | path p => have := Tm.eval_noPanic σ p; simp only [Rhs.eval]; no_panic
   | unset => exact NoPanic.pure _
-  | mref i => exact Tm.eval_noPanic σ i
+  | mref i => have := Tm.eval_noPanic σ i; simp only [Rhs.eval]; no_panic
   | store s => have := Tm.eval_noPanic σ s; simp only [Rhs.eval]; no_panic
   | saveNet => exact NoPanic.pure _
   | saveNetMt => exact NoPanic.pure _
@@ -158,7 +160,9 @@ theorem Loc.eval_lower : {T : Ty} → (l : Loc C Γ T) → l.lower.eval σ = l.r
 
 theorem MPath.eval_lower : {T : Ty} → (b : MPath C Γ T) →
     b.lower.eval σ = (do (← b.mval σ).asRef)
-  | _, .var .. => rfl
+  | _, .var i _ => by
+    simp only [MPath.lower, Tm.eval, MPath.mval, bind_assoc, pure_bind]
+    cases memRef σ i <;> rfl
   | _, .loc l => by
     simp only [MPath.lower, Tm.eval, Op2.eval, Op0.eval, MPath.mval, ← MLoc.eval_lower l,
       bind_assoc, pure_bind]
@@ -284,11 +288,11 @@ theorem Premise.Sound.captureSP {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
 theorem Premise.Sound.captureMV {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
     {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} {σ : State C Γ}
     (hok : ∀ id, (do (← b.mval σ).asRef) = .ok id →
-      (s'.run (σ.push (t := .mem R) id)).map (State.drop (.push .refl)) = s.run σ)
+      (s'.run (σ.push (t := .mem R) (some id))).map (State.drop (.push .refl)) = s.run σ)
     (herr : ∀ h, (do (← b.mval σ).asRef) = .error h → s.run σ = .error h) :
     Premise.Sound m s (.captureMV x b s') σ := by
   have hd : Stmt.run σ (.declMem R x (some (.alias b)) rfl b.mapFree) =
-      (do let id ← (do (← b.mval σ).asRef); pure (σ.push (t := .mem R) id)) := by
+      (do let id ← (do (← b.mval σ).asRef); pure (σ.push (t := .mem R) (some id))) := by
     show Run.declMem R (some (.alias b)) σ = _
     simp only [Run.declMem, MRhs.eval, bind_assoc, pure_bind]
   show Premise.Sound m s (.unfold (.cons (.declMem R x (some (.alias b)) rfl b.mapFree)
@@ -467,7 +471,8 @@ theorem Premise.Sound.captureSPK {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
 theorem Premise.Sound.captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
     {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} {σ : State C Γ}
     (G : Nat → Res (State C Γ))
-    (hs' : ∀ id, (s'.run (σ.push (t := .mem R) id)).map (State.drop (.push .refl)) = G id)
+    (hs' : ∀ id, (s'.run (σ.push (t := .mem R) (some id))).map (State.drop (.push .refl)) =
+      G id)
     (hs : Res.Sim ((do (← b.mval σ).asRef) >>= G) (s.run σ)) :
     Premise.Sound m s (.captureMV x b s') σ := by
   show Premise.Sound m s (.unfold (.cons (.declMem R x (some (.alias b)) rfl b.mapFree)
@@ -477,7 +482,7 @@ theorem Premise.Sound.captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
       (State.drop (.push .refl)) = (do (← b.mval σ).asRef) >>= G := by
     rw [Prog.run_cons]
     have hd : Run.declMem R (some (.alias b)) σ =
-        (do (← b.mval σ).asRef) >>= fun id => pure (σ.push (t := .mem R) id) := by
+        (do (← b.mval σ).asRef) >>= fun id => pure (σ.push (t := .mem R) (some id)) := by
       simp only [Run.declMem, MRhs.eval, bind_assoc, pure_bind]
     show (Except.bind (Run.declMem R (some (.alias b)) σ)
       fun τ => Prog.run τ (.cons s' .nil)).map _ = _
@@ -485,9 +490,9 @@ theorem Premise.Sound.captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
     cases (do (← b.mval σ).asRef : Res Nat) with
     | error h => rfl
     | ok id =>
-      show (Prog.run (σ.push (t := .mem R) id) (.cons s' .nil)).map _ = G id
+      show (Prog.run (σ.push (t := .mem R) (some id)) (.cons s' .nil)).map _ = G id
       rw [Prog.run_cons, ← hs' id]
-      cases s'.run (σ.push (t := .mem R) id) <;> rfl
+      cases s'.run (σ.push (t := .mem R) (some id)) <;> rfl
   rw [this]; exact hs
 
 end ShapesSim

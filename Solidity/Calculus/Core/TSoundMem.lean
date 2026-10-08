@@ -102,7 +102,7 @@ theorem tsound_memFieldWriteRecv {s : Name} {T : Ty} (b : MPath C Γ (.struct s)
     Premise.TSound m (.assignMem (.field b f hf) r)
       (.captureMV x b (.assignMem (.field (.var .here hm) f hf) r.up)) σ := by
   refine Premise.tsound_captureMVSim σ (fun v hv => ?_) (fun h hh hp => ?_)
-  · refine trunSt_pushed σ (t := .mem (.struct s)) v (TRun.assignMem_pushT σ (t := .mem _) v
+  · refine trunSt_pushed σ (t := .mem (.struct s)) (some v) (TRun.assignMem_pushT σ (t := .mem _) (some v)
       (.field (.var .here hm) f hf) (.field b f hf) r.up r ?_ (MSrc.mvalT_up σ _ r))
     simp only [MLoc.addrT, hv]; rfl
   · show TRes.Sim _ ((TRun.assignMem (.field b f hf) r σ).map _)
@@ -119,28 +119,36 @@ theorem tsound_memIndexWriteUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : ArrTy
         (.cons (.declLocal .uint (fie k) (some i.up))
         (.cons (.assignMem (.index a (.var mv.there.there hmv) (.simple (.local .here)))
           (.val (.simple (.local (.there .here))))) .nil))) (.push (.push .refl))) σ := by
-  refine Premise.tsound_unfoldSim σ (TRes.Sim.of_eq ?_)
+  refine Premise.tsound_unfoldSim σ ?_
   rw [Prog.trunSt_declLocal_cons, TRes.map_bind']
-  show _ = (TRun.assignMem (.index a (.var mv hmv) i) (.val e) σ).map _
+  show TRes.Sim _ ((TRun.assignMem (.index a (.var mv hmv) i) (.val e) σ).map _)
   cases he : e.evalT σ with
-  | error h' => simp only [TRun.assignMem, MSrc.mvalT, he]; rfl
+  | error h' => refine TRes.Sim.of_eq ?_; simp only [TRun.assignMem, MSrc.mvalT, he]; rfl
   | ok v =>
-    show (Prog.trunSt (σ.push (t := .val p) v) _).map _ = _
+    show TRes.Sim ((Prog.trunSt (σ.push (t := .val p) v) _).map _) _
     rw [Prog.trunSt_declLocal_cons, TRes.map_bind', Val.evalT_up]
     cases hi : i.evalT σ with
     | error h' =>
-      simp only [TRun.assignMem, MSrc.mvalT, he, MLoc.addrT, MPath.mvalT, hi, ok_bind]; rfl
+      simp only [TRun.assignMem, MSrc.mvalT, he, MLoc.addrT, hi, ok_bind, TRes.map_bind,
+        bind_assoc]
+      exact TRes.Sim.err_bind (MPath.mvalT_noPanic σ _) (Val.evalT_revert σ i hi)
+        fun _ _ => TRes.Sim.refl _
     | ok n =>
+      refine TRes.Sim.of_eq ?_
       show (Prog.trunSt _ (.cons _ .nil)).map _ = _
       rw [Prog.trunSt_single]
       have h₁ := TRun.assignMem_pushT (σ.push (t := .val p) v) (t := .val .uint) n
         (.index a (.var mv.there.there hmv) (.simple (.local .here)))
         (.index a (.var mv.there hmv) i.up)
         (.val (.simple (.local (.there .here)))) (.val (.simple (.local .here)))
-        (by simp only [MLoc.addrT, MPath.mvalT, Val.evalT_up, hi]; rfl) rfl
+        (by
+          simp only [MLoc.addrT, MPath.mvalT, Val.evalT_up, hi, TState.get_push_there]
+          cases (TEnv.get mv σ.env : Option (HRef σ.H R)) <;> rfl) rfl
       have h₂ := TRun.assignMem_pushT σ (t := .val p) v (.index a (.var mv.there hmv) i.up)
         (.index a (.var mv hmv) i) (.val (.simple (.local .here))) (.val e)
-        (by simp only [MLoc.addrT, MPath.mvalT, Val.evalT_up]; rfl)
+        (by
+          simp only [MLoc.addrT, MPath.mvalT, Val.evalT_up, TState.get_push_there]
+          cases (TEnv.get mv σ.env : Option (HRef σ.H R)) <;> rfl)
         (by simp only [MSrc.mvalT, Val.evalT, he]; rfl)
       show (((TRun.assignMem _ _ _).map (·.st)).map _) = _
       rw [h₁, h₂]
@@ -157,12 +165,13 @@ theorem tsound_memIndexRefCapture {R R' : RefTy} (a : ArrTy R (.ref R')) (mv : I
   · refine trunSt_pushed σ (t := .val .uint) v (TRun.assignMem_pushT σ (t := .val .uint) v
       (.index a (.var mv.there hmv) (.simple (.local .here))) (.index a (.var mv hmv) i)
       (.ref src.up) (.ref src) ?_ (MSrc.mvalT_up σ _ (.ref src)))
-    simp only [MLoc.addrT, MPath.mvalT, hv]; rfl
+    simp only [MLoc.addrT, MPath.mvalT, hv, TState.get_push_there]
+    cases (TEnv.get mv σ.env : Option (HRef σ.H R)) <;> rfl
   · show TRes.Sim _ ((TRun.assignMem (.index a (.var mv hmv) i) (.ref src) σ).map _)
     simp only [TRun.assignMem, TRes.map_bind]
     refine TRes.Sim.err_bind (MSrc.mvalT_noPanic σ _) hp fun _ _ => ?_
-    simp only [MLoc.addrT, MPath.mvalT, hh, ok_bind]
-    exact TRes.Sim.refl _
+    simp only [MLoc.addrT, hh, bind_assoc]
+    exact TRes.Sim.err_bind (MPath.mvalT_noPanic σ _) hp fun _ _ => TRes.Sim.refl _
 
 /-- `memoryIndexWriteCaptureAllComplexRecv`:
 `T se = e; T memory mv = nmp; uint ie = i; mv[ie] = se;`. -/
@@ -195,13 +204,13 @@ theorem tsound_memIndexWriteRecvUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : A
       | ok n =>
         show (Prog.trunSt _ (.cons _ .nil)).map _ = _
         rw [Prog.trunSt_single]
-        have h₁ := TRun.assignMem_pushT ((σ.push (t := .val p) v).push (t := .mem R) r)
+        have h₁ := TRun.assignMem_pushT ((σ.push (t := .val p) v).push (t := .mem R) (some r))
           (t := .val .uint) n
           (.index a (.var (.there .here) (MPath.loc l).mapFree) (.simple (.local .here)))
           (.index a (.var .here (MPath.loc l).mapFree) i.up.up)
           (.val (.simple (.local (.there (.there .here))))) (.val (.simple (.local (.there .here))))
           (by simp only [MLoc.addrT, MPath.mvalT, Val.evalT_up, hi]; rfl) rfl
-        have h₂ := TRun.assignMem_pushT (σ.push (t := .val p) v) (t := .mem R) r
+        have h₂ := TRun.assignMem_pushT (σ.push (t := .val p) v) (t := .mem R) (some r)
           (.index a (.var .here (MPath.loc l).mapFree) i.up.up) (.index a (MPath.loc l).up i.up)
           (.val (.simple (.local (.there .here)))) (.val (.simple (.local .here)))
           (by simp only [MLoc.addrT, MPath.mvalT_up, Val.evalT_up, hb]; rfl) rfl
@@ -211,7 +220,7 @@ theorem tsound_memIndexWriteRecvUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : A
           (by simp only [MSrc.mvalT, Val.evalT, he]; rfl)
         show (((TRun.assignMem _ _ _).map (·.st)).map _) = _
         rw [h₁, h₂, h₃]
-        exact pushedT3_drop σ (t := .val p) (u := .mem R) (y := .val .uint) v r n _
+        exact pushedT3_drop σ (t := .val p) (u := .mem R) (y := .val .uint) v (some r) n _
 
 /-- `memoryIndexWriteMemRefCaptureAllComplexRecv`:
 `T memory mv = nmp; uint ie = i; mv[ie] = src;`; the statement reads the
@@ -247,18 +256,18 @@ theorem tsound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref
       refine TRes.Sim.of_eq ?_
       show (Prog.trunSt _ (.cons _ .nil)).map _ = _
       rw [Prog.trunSt_single]
-      have h₁ := TRun.assignMem_pushT (σ.push (t := .mem R) r) (t := .val .uint) n
+      have h₁ := TRun.assignMem_pushT (σ.push (t := .mem R) (some r)) (t := .val .uint) n
         (.index a (.var (.there .here) (MPath.loc l).mapFree) (.simple (.local .here)))
         (.index a (.var .here (MPath.loc l).mapFree) i.up) (.ref src.up.up) (.ref src.up)
         (by simp only [MLoc.addrT, MPath.mvalT, Val.evalT_up, hi]; rfl)
         (MSrc.mvalT_up _ _ (.ref src.up))
-      have h₂ := TRun.assignMem_pushT σ (t := .mem R) r
+      have h₂ := TRun.assignMem_pushT σ (t := .mem R) (some r)
         (.index a (.var .here (MPath.loc l).mapFree) i.up) (.index a (.loc l) i)
         (.ref src.up) (.ref src) (by simp only [MLoc.addrT, Val.evalT_up, hb]; rfl)
         (MSrc.mvalT_up σ _ (.ref src))
       show (((TRun.assignMem _ _ _).map (·.st)).map _) = _
       rw [h₁, h₂]
-      exact pushedT2_drop σ (t := .mem R) (u := .val .uint) r n _
+      exact pushedT2_drop σ (t := .mem R) (u := .val .uint) (some r) n _
 
 /-- **A memory location written** (`assignMemStep`). -/
 theorem assignMemStep_tsound (k : Nat) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
@@ -302,7 +311,7 @@ theorem tsound_deleteMemFieldRecv {s : Name} {T : Ty} (b : MPath C Γ (.struct s
     Premise.TSound m (.deleteMem (.loc (.field b f hf)) hd)
       (.captureMV x b (.deleteMem (.loc (.field (.var .here hm) f hf)) hd)) σ := by
   refine Premise.tsound_captureMVSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · refine trunSt_pushed σ (t := .mem (.struct s)) v (TRun.deleteMem_pushT σ (t := .mem _) v
+  · refine trunSt_pushed σ (t := .mem (.struct s)) (some v) (TRun.deleteMem_pushT σ (t := .mem _) (some v)
       (.field (.var .here hm) f hf) (.field b f hf) ?_)
     simp only [MLoc.addrT, hv]; rfl
   · refine TRes.Sim.err_refl ?_
@@ -318,10 +327,12 @@ theorem tsound_deleteMemIndexCapture {R : RefTy} {T : Ty} (a : ArrTy R T) (mv : 
   refine Premise.tsound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
   · refine trunSt_pushed σ (t := .val .uint) v (TRun.deleteMem_pushT σ (t := .val .uint) v
       (.index a (.var mv.there hmv) (.simple (.local .here))) (.index a (.var mv hmv) i) ?_)
-    simp only [MLoc.addrT, MPath.mvalT, hv]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.deleteMem (.loc (.index a (.var mv hmv) i)) σ).map _ = _
-    simp only [TRun.deleteMem, MLoc.addrT, MPath.mvalT, hh, ok_bind]; rfl
+    simp only [MLoc.addrT, MPath.mvalT, hv, TState.get_push_there]
+    cases (TEnv.get mv σ.env : Option (HRef σ.H R)) <;> rfl
+  · show TRes.Sim _ ((TRun.deleteMem (.loc (.index a (.var mv hmv) i)) σ).map _)
+    simp only [TRun.deleteMem, MLoc.addrT, hh, bind_assoc, TRes.map_bind]
+    exact TRes.Sim.err_bind (MPath.mvalT_noPanic σ _) (Val.evalT_revert σ i hh)
+      fun _ _ => TRes.Sim.refl _
 
 /-- `memoryIndexDelete_unfold_leftFst`: the receiver bound first. -/
 theorem tsound_deleteMemIndexRecv {R : RefTy} {T : Ty} (a : ArrTy R T) (b : MPath C Γ (.ref R))
@@ -329,7 +340,7 @@ theorem tsound_deleteMemIndexRecv {R : RefTy} {T : Ty} (a : ArrTy R T) (b : MPat
     Premise.TSound m (.deleteMem (.loc (.index a b i)) hd)
       (.captureMV x b (.deleteMem (.loc (.index a (.var .here hm) i.up)) hd)) σ := by
   refine Premise.tsound_captureMVSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · refine trunSt_pushed σ (t := .mem R) v (TRun.deleteMem_pushT σ (t := .mem _) v
+  · refine trunSt_pushed σ (t := .mem R) (some v) (TRun.deleteMem_pushT σ (t := .mem _) (some v)
       (.index a (.var .here hm) i.up) (.index a b i) ?_)
     simp only [MLoc.addrT, Val.evalT_up, hv]; rfl
   · refine TRes.Sim.err_refl ?_
@@ -371,7 +382,8 @@ theorem tsound_assignNew (k : Nat) {R : RefTy} (l : NewLhs C Γ R) (n : Simple C
   have hd : Stmt.trunSt σ (.declMem R (fmv k) (some (.newArr n h)) rfl
       (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree) =
       .ok ((σ.copyStToMG (newArrT R (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h)).st.push
-        (t := .mem R) (σ.copyStToMG (newArrT R (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h)).val) :=
+        (t := .mem R)
+        (some (σ.copyStToMG (newArrT R (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h)).val)) :=
     rfl
   rw [hd]
   show (Prog.trunSt _ (.cons _ .nil)).map _ = _
@@ -379,27 +391,29 @@ theorem tsound_assignNew (k : Nat) {R : RefTy} (l : NewLhs C Γ R) (n : Simple C
   generalize σ.copyStToMG (newArrT R (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h) = g
   cases l with
   | store l =>
-    show ((TRun.assignFromMem l.up (.var .here _) (g.st.push (t := .mem R) g.val)).map (·.st)).map _ = _
-    simp only [TRun.assignFromMem, TRun.newWrite, MPath.mvalT, ok_bind, Loc.resolveT_up]
+    show ((TRun.assignFromMem l.up (.var .here _) (g.st.push (t := .mem R) (some g.val))).map (·.st)).map _ = _
+    simp only [TRun.assignFromMem, TRun.newWrite, MPath.mvalT, TState.get_push_here, ok_bind,
+      Loc.resolveT_up]
     cases l.resolveT g.st with
     | error => rfl
     | ok ref =>
       simp only [ok_bind]
-      have hw : (g.st.push (t := .mem R) g.val).storage.write ref (MVal.copyMToSt
-          (g.st.push (t := .mem R) g.val).heap (TEnv.get .here (g.st.push (t := .mem R) g.val).env)) =
+      have hw : (g.st.push (t := .mem R) (some g.val)).storage.write ref (MVal.copyMToSt
+          (g.st.push (t := .mem R) (some g.val)).heap g.val) =
           g.st.storage.write ref (MVal.copyMToSt g.st.heap g.val) := rfl
       rw [hw]
       cases g.st.storage.write ref (MVal.copyMToSt g.st.heap g.val) <;> rfl
   | mem l =>
-    show ((TRun.assignMem l.up (.ref (.var .here _)) (g.st.push (t := .mem R) g.val)).map
+    show ((TRun.assignMem l.up (.ref (.var .here _)) (g.st.push (t := .mem R) (some g.val))).map
       (·.st)).map _ = _
-    simp only [TRun.assignMem, TRun.newWrite, MSrc.mvalT, MPath.mvalT, ok_bind, MLoc.addrT_up]
+    simp only [TRun.assignMem, TRun.newWrite, MSrc.mvalT, MPath.mvalT, TState.get_push_here,
+      ok_bind, MLoc.addrT_up]
     cases l.addrT g.st with
     | error => rfl
     | ok a =>
       simp only [ok_bind]
-      have hw : (g.st.push (t := .mem R) g.val).heap.writeAddr a
-          (TEnv.get .here (g.st.push (t := .mem R) g.val).env) = g.st.heap.writeAddr a g.val := rfl
+      have hw : (g.st.push (t := .mem R) (some g.val)).heap.writeAddr a g.val =
+          g.st.heap.writeAddr a g.val := rfl
       rw [hw]
       cases g.st.heap.writeAddr a g.val <;> rfl
 

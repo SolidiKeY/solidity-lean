@@ -37,11 +37,11 @@ namespace LTy
 theorem TDenote.wk_trans {H₁ H₂ H₃ : HTy} (e₁ : H₁ <+: H₂) (e₂ : H₂ <+: H₃) :
     (t : LTy) → (v : t.TDenote C H₁) →
       TDenote.wk e₂ t (TDenote.wk e₁ t v) = TDenote.wk (e₁.trans e₂) t v
-  | .val _, _ | .alias _, _ | .mem _, _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ => rfl
 
 theorem TDenote.wk_self {H : HTy} (e : H <+: H) :
     (t : LTy) → (v : t.TDenote C H) → TDenote.wk e t v = v
-  | .val _, _ | .alias _, _ | .mem _, _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ => rfl
 
 /-- Over an equal heap typing, a weakened value is the value. -/
 theorem TDenote.wk_heq {H H' : HTy} (e : H <+: H') (hH : H' = H) (t : LTy)
@@ -404,7 +404,9 @@ theorem Loc.resolveT_wk : {T : Ty} → (l : Loc C Γ T) → (l.wk h).resolveT (�
     rfl
 
 theorem MPath.mvalT_wk : {T : Ty} → (b : MPath C Γ T) → (b.wk h).mvalT (τ.lift h d) = b.mvalT τ
-  | _, .var i _ => by simp only [MPath.wk, MPath.mvalT, TState.get_lift]
+  | _, .var i _ => by
+    simp only [MPath.wk, MPath.mvalT, TState.get_lift]
+    split <;> rfl
   | _, .loc l => by
     simp only [MPath.wk, MPath.mvalT, MLoc.addrT_wk l]
     rfl
@@ -763,8 +765,8 @@ theorem TRun.rebindMem_wk {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
   cases r.evalT τ with
   | error => rfl
   | ok g =>
-    show Except.ok (⟨(g.st.lift h (TEnv.wk g.ext Δ d)).setLocal (i.wk h) g.val, g.ext⟩ :
-        Out C τ.H Δ) = Except.ok ⟨(g.st.setLocal i g.val).lift h (TEnv.wk g.ext Δ d), g.ext⟩
+    show Except.ok (⟨(g.st.lift h (TEnv.wk g.ext Δ d)).setLocal (i.wk h) (some g.val), g.ext⟩ :
+        Out C τ.H Δ) = Except.ok ⟨(g.st.setLocal i (some g.val)).lift h (TEnv.wk g.ext Δ d), g.ext⟩
     simp only [TState.lift_setLocal]
 
 theorem TRun.deleteMem_wk {T : Ty} (q : MPath C Γ T) :

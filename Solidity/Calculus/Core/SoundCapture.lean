@@ -83,12 +83,12 @@ theorem Premise.Sound.captureSPSim {R : RefTy} {x : Var} {b : SPath C Γ (.ref R
 theorem Premise.Sound.captureMVSim {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
     {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ}
     (hok : ∀ id, (do (← b.mval σ).asRef) = .ok id →
-      (s'.run (σ.push (t := .mem R) id)).map (State.drop (.push .refl)) = s.run σ)
+      (s'.run (σ.push (t := .mem R) (some id))).map (State.drop (.push .refl)) = s.run σ)
     (herr : ∀ h, (do (← b.mval σ).asRef) = .error h → h ≠ .panic →
       Res.Sim (.error h) (s.run σ)) :
     Premise.Sound m s (.captureMV x b s') σ := by
   refine Premise.Sound.captureMVK
-    (fun id => (s'.run (σ.push (t := .mem R) id)).map (State.drop (.push .refl)))
+    (fun id => (s'.run (σ.push (t := .mem R) (some id))).map (State.drop (.push .refl)))
     (fun _ => rfl) ?_
   cases hb : (do (← b.mval σ).asRef : Res Nat) with
   | ok id => exact Res.Sim.of_eq (hok id hb)
@@ -104,7 +104,8 @@ theorem SPath.resolve_here {R : RefTy} (q : Name × List Seg) :
       pure q := rfl
 
 theorem MPath.mval_here {R : RefTy} (id : Nat) (hm : (Ty.ref R).mapFree = true) :
-    (MPath.var (C := C) (Γ := .mem R :: Γ) .here hm).mval (σ.push (t := .mem R) id) = pure (.ref id) := rfl
+    (MPath.var (C := C) (Γ := .mem R :: Γ) .here hm).mval (σ.push (t := .mem R) (some id)) =
+      pure (.ref id) := rfl
 
 end Capture
 

@@ -29,11 +29,12 @@ variable {C : Contract}
 
 /-- What a local of type `t` holds, typed: a value of its type, the storage
 reference an alias is bound to (`none` while unset), a memory reference the
-heap typing `H` types, a whole storage, a ledger. -/
+heap typing `H` types (`none` while unset: no statement leaves one so, only
+a hidden binder ranges over it, decision 17'), a whole storage, a ledger. -/
 @[reducible] def LTy.TDenote (C : Contract) (H : HTy) : LTy → Type
   | .val p => p.Denote
   | .alias R => Option (SRef C (.ref R))
-  | .mem R => HRef H R
+  | .mem R => Option (HRef H R)
   | .old => Storage C
   | .oldNet => List (Int × Int)
 
@@ -43,7 +44,7 @@ namespace LTy
 def TDenote.wk {H H' : HTy} (e : H <+: H') : (t : LTy) → t.TDenote C H → t.TDenote C H'
   | .val _, v => v
   | .alias _, a => a
-  | .mem _, r => HRef.wk e r
+  | .mem _, r => r.map (HRef.wk e)
   | .old, st => st
   | .oldNet, l => l
 
@@ -51,13 +52,13 @@ def TDenote.wk {H H' : HTy} (e : H <+: H') : (t : LTy) → t.TDenote C H → t.T
 def TDenote.erase {H : HTy} : (t : LTy) → t.TDenote C H → t.Denote C
   | .val p, v => PrimTy.erase (p := p) v
   | .alias _, a => a.map SRef.erase
-  | .mem _, r => (r : HRef H _).id
+  | .mem _, r => (r : Option (HRef H _)).map (·.id)
   | .old, st => Storage.erase (st : Storage C)
   | .oldNet, l => l
 
 theorem TDenote.erase_wk {H H' : HTy} (e : H <+: H') :
     (t : LTy) → (v : t.TDenote C H) → TDenote.erase t (TDenote.wk e t v) = TDenote.erase t v
-  | .val _, _ | .alias _, _ | .mem _, _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ => rfl
 
 end LTy
 

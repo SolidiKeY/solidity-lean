@@ -37,12 +37,13 @@ variable {C : Contract}
 /-! ## Locals -/
 
 /-- What a local of type `t` holds: a value, the storage path an alias is
-bound to (`none` while unset), a memory object's identity, a whole storage
+bound to (`none` while unset), a memory object's identity (`none` while
+unset: only a hidden binder leaves one so, decision 17'), a whole storage
 (`old`) or ledger (`oldNet`).  Reducible, so a local's value finds the instances of its type. -/
 @[reducible] def LTy.Denote (_C : Contract) : LTy → Type
   | .val _ => Value
   | .alias _ => Option (Name × List Seg)
-  | .mem _ => Nat
+  | .mem _ => Option Nat
   | .old => List (Name × SVal)
   | .oldNet => List (Int × Int)
 
@@ -168,6 +169,13 @@ def aliasPath (σ : State C Γ) {R : RefTy} (i : Idx Γ (.alias R)) : Res (Name 
   | some p => pure p
   | none => .error .revert
 
+/-- The object a memory local names; an unset one reverts, as an unset
+alias does (decision 17'). -/
+def memRef (σ : State C Γ) {R : RefTy} (i : Idx Γ (.mem R)) : Res Nat :=
+  match (Env.get i σ.env : Option Nat) with
+  | some id => pure id
+  | none => .error .revert
+
 mutual
 
 /-- The storage path a path denotes in `σ`. -/
@@ -188,7 +196,7 @@ def Loc.resolve (σ : State C Γ) : {T : Ty} → Loc C Γ T → Res (Name × Lis
 
 /-- The slot a memory path holds in `σ`. -/
 def MPath.mval (σ : State C Γ) : {T : Ty} → MPath C Γ T → Res MVal
-  | _, .var i _ => pure (.ref (Env.get i σ.env))
+  | _, .var i _ => do pure (.ref (← memRef σ i))
   | _, .loc l => l.read σ
 
 def MLoc.read (σ : State C Γ) : {T : Ty} → MLoc C Γ T → Res MVal
@@ -401,7 +409,7 @@ def CallRet.enter {Γ : Ctx} (τ : Semantics.State) {rs Γ' : Ctx} (ret : CallRe
     (fun bs => pure (τ, Binders.defaults bs))
     (fun R _ _ _ => do
       let (τ', id) ← allocDefault τ R
-      pure (τ', (id, ())))
+      pure (τ', (some id, ())))
 
 /-- Leaving a call: the caller's locals `e`, with what the call leaves them
 from its return variables `r`. -/
@@ -575,15 +583,15 @@ def declMem (R : RefTy) (init : Option (MRhs C Γ R)) (σ : State C Γ) :
   match init with
   | none => do
     let (τ, id) ← allocDefault σ.glob R
-    pure ((σ.withGlob τ).push (t := .mem R) id)
+    pure ((σ.withGlob τ).push (t := .mem R) (some id))
   | some r => do
     let (σ', id) ← r.eval σ
-    pure (σ'.push (t := .mem R) id)
+    pure (σ'.push (t := .mem R) (some id))
 
 def rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) (σ : State C Γ) :
     Res (State C Γ) := do
   let (σ', id) ← r.eval σ
-  pure (σ'.setLocal i id)
+  pure (σ'.setLocal i (some id))
 
 def assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) (σ : State C Γ) :
     Res (State C Γ) := do
@@ -603,7 +611,7 @@ def deleteMem {T : Ty} (p : MPath C Γ T) (σ : State C Γ) : Res (State C Γ) :
   match p with
   | @MPath.var _ _ R i _ => do
     let (τ, id) ← allocDefault σ.glob R
-    pure ((σ.withGlob τ).setLocal i id)
+    pure ((σ.withGlob τ).setLocal i (some id))
   | .loc l => do σ.withGlob <$> memClear σ.glob (← l.addr σ) T
 
 def assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint) (σ : State C Γ) :

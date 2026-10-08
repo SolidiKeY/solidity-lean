@@ -183,10 +183,8 @@ def Fml.FO : {Γ : Ctx} → Fml C Γ → Bool
     (all := fun _ _ φ => Fml.FO φ) (bind := fun _ _ _ _ => false) (anon := fun _ _ => false)
   termination_by structural _ φ => φ
 
-/-- A leaf of the strategy: no modality, first-order where it is assumed,
-and a hidden binder under the diamond only at a type that always has a value
-(`LTy.inhabited`, as the diamond's binder asks, `Modality.forallB`).  What
-its erasure gives over M3's states it gives over the typed ones
+/-- A leaf of the strategy: no modality, first-order where it is assumed.
+What its erasure gives over M3's states it gives over the typed ones
 (`Calculus/Core/TCloseErase.lean`). -/
 def Fml.Leaf : {Γ : Ctx} → Fml C Γ → Bool
   | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
@@ -194,7 +192,7 @@ def Fml.Leaf : {Γ : Ctx} → Fml C Γ → Bool
     (and := fun φ ψ => Fml.Leaf φ && Fml.Leaf ψ) (imp := fun φ ψ => Fml.FO φ && Fml.Leaf ψ)
     (upd := fun _ _ φ => Fml.Leaf φ) (modal := fun _ _ _ _ => false)
     (havoc := fun φ => Fml.Leaf φ) (all := fun _ _ φ => Fml.Leaf φ)
-    (bind := fun m _ t φ => (m == .box || t.inhabited) && Fml.Leaf φ)
+    (bind := fun _ _ _ φ => Fml.Leaf φ)
     (anon := fun _ φ => Fml.Leaf φ)
   termination_by structural _ φ => φ
 
@@ -216,8 +214,7 @@ def Fml.TClosable : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, _, .modal .. => False
   | _, ns, .havoc φ => φ.TClosable ns
   | _, ns, .all x _ φ => x ∉ ns ∧ x ∉ φ.bindNames ∧ φ.TClosable (x :: ns)
-  | _, ns, .bind m x t φ =>
-    (m = .diamond → t.inhabited = true) ∧ x ∉ ns ∧ x ∉ φ.bindNames ∧ φ.TClosable (x :: ns)
+  | _, ns, .bind _ x _ φ => x ∉ ns ∧ x ∉ φ.bindNames ∧ φ.TClosable (x :: ns)
   | _, ns, .anon _ φ => φ.TClosable ns
 
 theorem Fml.Closable.tclosable : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.Closable ns →
@@ -234,11 +231,7 @@ theorem Fml.Closable.tclosable : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List V
   | _, .modal .., _, _, hl => nomatch hl
   | _, .havoc φ, _, hc, hl => Fml.Closable.tclosable φ hc hl
   | _, .all _ _ φ, _, hc, hl => ⟨hc.1, hc.2.1, Fml.Closable.tclosable φ hc.2.2 hl⟩
-  | _, .bind m _ t φ, _, hc, hl => by
-    have hl' : (m == .box || t.inhabited) = true ∧ φ.Leaf = true := Bool.and_eq_true_iff.mp hl
-    refine ⟨fun hm => ?_, hc.1, hc.2.1, Fml.Closable.tclosable φ hc.2.2 hl'.2⟩
-    subst hm
-    simpa only [reduceCtorEq, decide_false, Bool.false_or] using hl'.1
+  | _, .bind _ _ _ φ, _, hc, hl => ⟨hc.1, hc.2.1, Fml.Closable.tclosable φ hc.2.2 hl⟩
   | _, .anon _ φ, _, hc, hl => Fml.Closable.tclosable φ hc hl
 
 /-! ## Decided
@@ -314,8 +307,8 @@ def Fml.closableB : {Γ : Ctx} → List Var → Fml C Γ → Bool
       decide (Avoids φ.bindNames (U.names ns)) && Fml.closableB (U.names ns) φ)
     (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.closableB ns φ)
     (all := fun x _ φ => decide (x ∉ ns) && decide (x ∉ φ.bindNames) && Fml.closableB (x :: ns) φ)
-    (bind := fun m x t φ => (m == .box || t.inhabited) && decide (x ∉ ns) &&
-      decide (x ∉ φ.bindNames) && Fml.closableB (x :: ns) φ)
+    (bind := fun _ x _ φ => decide (x ∉ ns) && decide (x ∉ φ.bindNames) &&
+      Fml.closableB (x :: ns) φ)
     (anon := fun _ φ => Fml.closableB ns φ)
   termination_by structural _ _ φ => φ
 
@@ -349,13 +342,12 @@ theorem Fml.closableB_sound : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var}
     obtain ⟨⟨hx, hxB⟩, hφ⟩ := h'
     have a := Fml.closableB_sound φ hφ
     exact ⟨⟨hx, hxB, a.1⟩, a.2⟩
-  | _, .bind m x t φ, ns, h => by
-    have h' : ((m == .box || t.inhabited) && decide (x ∉ ns) && decide (x ∉ φ.bindNames) &&
-        φ.closableB (x :: ns)) = true := h
+  | _, .bind _ x _ φ, ns, h => by
+    have h' : (decide (x ∉ ns) && decide (x ∉ φ.bindNames) && φ.closableB (x :: ns)) = true := h
     simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
-    obtain ⟨⟨⟨hm, hx⟩, hxB⟩, hφ⟩ := h'
+    obtain ⟨⟨hx, hxB⟩, hφ⟩ := h'
     have a := Fml.closableB_sound φ hφ
-    exact ⟨⟨hx, hxB, a.1⟩, Bool.and_eq_true_iff.mpr ⟨hm, a.2⟩⟩
+    exact ⟨⟨hx, hxB, a.1⟩, a.2⟩
   | _, .anon _ φ, _, h => Fml.closableB_sound φ h
 
 theorem Fml.closableB_tclosable {Γ : Ctx} {φ : Fml C Γ} {ns : List Var}
@@ -377,8 +369,8 @@ def Fml.tclosableB : {Γ : Ctx} → List Var → Fml C Γ → Bool
       decide (Avoids φ.bindNames (U.names ns)) && Fml.tclosableB (U.names ns) φ)
     (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.tclosableB ns φ)
     (all := fun x _ φ => decide (x ∉ ns) && decide (x ∉ φ.bindNames) && Fml.tclosableB (x :: ns) φ)
-    (bind := fun m x t φ => (m == .box || t.inhabited) && decide (x ∉ ns) &&
-      decide (x ∉ φ.bindNames) && Fml.tclosableB (x :: ns) φ)
+    (bind := fun _ x _ φ => decide (x ∉ ns) && decide (x ∉ φ.bindNames) &&
+      Fml.tclosableB (x :: ns) φ)
     (anon := fun _ φ => Fml.tclosableB ns φ)
   termination_by structural _ _ φ => φ
 
@@ -405,14 +397,11 @@ theorem Fml.tclosableB_sound : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var
     simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
     obtain ⟨⟨hx, hxB⟩, hφ⟩ := h'
     exact ⟨hx, hxB, Fml.tclosableB_sound φ hφ⟩
-  | _, .bind m x t φ, ns, h => by
-    have h' : ((m == .box || t.inhabited) && decide (x ∉ ns) && decide (x ∉ φ.bindNames) &&
-        φ.tclosableB (x :: ns)) = true := h
+  | _, .bind _ x _ φ, ns, h => by
+    have h' : (decide (x ∉ ns) && decide (x ∉ φ.bindNames) && φ.tclosableB (x :: ns)) = true := h
     simp only [Bool.and_eq_true, decide_eq_true_eq] at h'
-    obtain ⟨⟨⟨hm, hx⟩, hxB⟩, hφ⟩ := h'
-    refine ⟨fun hd => ?_, hx, hxB, Fml.tclosableB_sound φ hφ⟩
-    subst hd
-    simpa only [reduceCtorEq, decide_false, Bool.false_or] using hm
+    obtain ⟨⟨hx, hxB⟩, hφ⟩ := h'
+    exact ⟨hx, hxB, Fml.tclosableB_sound φ hφ⟩
   | _, .anon _ φ, _, h => Fml.tclosableB_sound φ h
 
 end Solidity.Core

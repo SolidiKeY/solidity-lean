@@ -12,12 +12,11 @@ case; a captured `if` condition reads its branches weakened under the
 captured local, which run as before by `Semantics/Core/TypedRunWk.lean`'s
 `Prog.trun_wk` (`Prog.trun_wk_up`).
 
-The hidden binder of `memoryLocalDeclInitDrop` ranges, under the box, over
-the references the heap typing gives the local's type, which may be none
-(`docs/intrinsic.md`, decision 12): its arm asks for one under the box
-(`tsound_declMemInit`'s `hbox`) where the initializer allocates.  At a
-memory alias the object it names is one, and a halt reading it closes the
-box (`tsound_declMemAlias`); a storage alias and a value always have one.
+Every hidden binder ranges over a type with a value (`LTy.tdenote_nonempty`):
+`memoryLocalDeclInitDrop`'s over the references the heap typing gives the
+local's type and an unset local (decision 17'), from which the premise's
+`mv = r;` runs as the declaration does, whatever `r` allocates
+(`tsound_declMemInit`, an alias initializer included).
 -/
 
 namespace Solidity.Core
@@ -210,7 +209,7 @@ the hidden binder. -/
 theorem tsound_localValueDeclInitDrop {p : PrimTy} (x : Var) (e : Val C Γ p) :
     Premise.TSound m (.declLocal p x (some e))
       (.bind x (.val p) (.cons (.assignLocal .here e.up) .nil)) σ := by
-  refine Premise.tsound_bind_all σ (fun v => ?_) fun _ => ⟨PrimTy.dflt p⟩
+  refine Premise.tsound_bind_all σ fun v => ?_
   rw [Prog.trunSt_single, Stmt.trunSt_assignLocal, Stmt.trunSt_declLocal, Val.evalT_up]
   cases e.evalT σ <;> rfl
 
@@ -218,54 +217,25 @@ theorem tsound_localValueDeclInitDrop {p : PrimTy} (x : Var) (e : Val C Γ p) :
 theorem tsound_declStorageInit {R : RefTy} (x : Var) (r : ARhs C Γ R) :
     Premise.TSound m (.declStorage R x (some r))
       (.bind x (.alias R) (.cons (.rebind .here r.up) .nil)) σ := by
-  refine Premise.tsound_bind_all σ (fun v => ?_) fun _ => ⟨none⟩
+  refine Premise.tsound_bind_all σ fun v => ?_
   rw [Prog.trunSt_single]
   show (TRun.rebind .here r.up (σ.push v)).map _ = (TRun.declStorage R (some r) σ).map _
   simp only [TRun.rebind, TRun.declStorage, ARhs.evalT_up]
   cases r.evalT σ <;> rfl
 
-/-- `memoryLocalDeclInitDrop`: `⟨[ T memory mv = r; ]⟩ ⇝ ⟨[ mv = r; ]⟩`.  Under
-the box the binder is universal, so the heap typing must give the local's
-type a reference (decision 12). -/
+/-- `memoryLocalDeclInitDrop`: `⟨[ T memory mv = r; ]⟩ ⇝ ⟨[ mv = r; ]⟩`.  The
+premise's run from any value of `mv`, an unset one among them (decision
+17'), is the statement's: `mv = r;` reads nothing of `mv` before it sets it.
+An alias `T memory mv = mp;` is the same rule. -/
 theorem tsound_declMemInit {R : RefTy} (x : Var) (r : MRhs C Γ R)
-    (hd : ((some r).isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true)
-    (hbox : m = .box → Nonempty ((LTy.mem R).TDenote C σ.H)) :
+    (hd : ((some r).isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
     Premise.TSound m (.declMem R x (some r) hd hm)
       (.bind x (.mem R) (.cons (.rebindMem .here r.up) .nil)) σ := by
-  refine Premise.tsound_bind_all σ (fun v => ?_) hbox
+  refine Premise.tsound_bind_all σ fun v => ?_
   rw [Prog.trunSt_single]
   show (TRun.rebindMem .here r.up (σ.push v)).map _ = (TRun.declMem R (some r) hm σ).map _
   simp only [TRun.rebindMem, TRun.declMem, MRhs.evalT_up]
   cases r.evalT σ <;> rfl
-
-/-- `memoryLocalDeclInitDrop` at an alias, `T memory mv = mp;`: no inhabitant
-needed under the box.  The object `mp` names is one; when `mp` halts, it is
-not in a panic (`MPath.mvalT_noPanic`), so the box holds. -/
-theorem tsound_declMemAlias {R : RefTy} (x : Var) (b : MPath C Γ (.ref R))
-    (hd : ((some (MRhs.alias b)).isSome || (Ty.ref R).defaultOkS) = true)
-    (hm : (Ty.ref R).mapFree = true) :
-    Premise.TSound m (.declMem R x (some (.alias b)) hd hm)
-      (.bind x (.mem R) (.cons (.rebindMem .here (MRhs.alias b).up) .nil)) σ := by
-  have hs : ∀ v : (LTy.mem R).TDenote C σ.H,
-      Prog.trunSt (σ.push v) (.cons (.rebindMem .here (MRhs.alias b).up) .nil) =
-        Stmt.trunSt σ (.declMem R x (some (.alias b)) hd hm) := fun v => by
-    rw [Prog.trunSt_single]
-    show (TRun.rebindMem .here (MRhs.alias b).up (σ.push v)).map _ =
-      (TRun.declMem R (some (.alias b)) hm σ).map _
-    simp only [TRun.rebindMem, TRun.declMem, MRhs.evalT_up]
-    cases (MRhs.alias b).evalT σ <;> rfl
-  intro _ _ ω κ φ h
-  cases hb : b.mvalT σ with
-  | ok r => exact Premise.tsound_bind σ ⟨r, hs r⟩ ω κ φ h
-  | error e =>
-    cases m with
-    | diamond => exact Premise.tsound_bind_all (m := .diamond) σ hs nofun ω κ φ h
-    | box =>
-      refine Premise.tsound_of_halt σ (e := e) ?_ (fun hp => MPath.mvalT_noPanic σ b (hp ▸ hb))
-        ω κ φ h
-      show (TRun.declMem R (some (.alias b)) hm σ).map _ = _
-      simp only [TRun.declMem, MRhs.evalT, hb]
-      rfl
 
 /-- A block, its locals popped after it: `⟨[ { body } ]⟩ ⇝ ⟨[ body ]⟩`. -/
 theorem tsound_block {Γ₂ : Ctx} (body : Prog C Γ Γ₂) :

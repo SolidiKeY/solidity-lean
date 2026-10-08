@@ -184,11 +184,7 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
   | all H x p ih => intro φ hb h; exact ih (φ := .all x p φ) hb fun τ _ _ => h _
   | bind H m x t ih =>
     intro φ hb h
-    have hb' : H.boxOnly = true := by
-      cases m with
-      | box => exact hb
-      | diamond => exact (Bool.and_eq_true_iff.mp hb).2
-    exact ih (φ := .bind m x t φ) hb' fun τ => holds_bind_intro fun _ => h _
+    exact ih (φ := .bind m x t φ) hb fun τ => holds_bind_intro fun _ => h _
   | anon H xs ih => intro φ hb h; exact ih (φ := .anon xs φ) hb fun τ _ => h _
 
 theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t))

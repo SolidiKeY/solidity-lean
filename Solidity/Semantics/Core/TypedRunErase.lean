@@ -204,10 +204,8 @@ theorem Loc.resolveT_erase (σ : TState C Γ) : {T : Ty} → (l : Loc C Γ T) �
 theorem MPath.mvalT_erase (σ : TState C Γ) : {T : Ty} → (b : MPath C Γ T) →
     TRes.Agrees (MVal.erase T) (b.mvalT σ) (b.mval σ.erase)
   | _, .var i _ => by
-    refine TRes.Agrees.of_eq ?_
-    show Except.ok (Semantics.MVal.ref (Env.get i (TEnv.erase Γ σ.env))) = _
-    rw [TEnv.get_erase]
-    rfl
+    simp only [MPath.mvalT, MPath.mval, memRef, TState.erase, TEnv.get_erase]
+    cases (TEnv.get i σ.env : Option (HRef σ.H _)) <;> rfl
   | _, .loc l => l.readT_erase σ
 
 theorem MLoc.readT_erase (σ : TState C Γ) : {T : Ty} → (l : MLoc C Γ T) →
@@ -314,7 +312,11 @@ theorem Loc.resolveT_noPanic (σ : TState C Γ) : {T : Ty} → (l : Loc C Γ T) 
 
 theorem MPath.mvalT_noPanic (σ : TState C Γ) : {T : Ty} → (b : MPath C Γ T) →
     (b.mvalT σ).NoPanic
-  | _, .var .. => fun h => nomatch h
+  | _, .var i _ => by
+    show (match (TEnv.get i σ.env : Option (HRef σ.H _)) with
+      | some r => .ok r
+      | none => .error .revert : TRes _).NoPanic
+    cases (TEnv.get i σ.env : Option (HRef σ.H _)) <;> exact fun h => nomatch h
   | _, .loc l => (l.addrT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
 
 theorem MLoc.addrT_noPanic (σ : TState C Γ) : {T : Ty} → (l : MLoc C Γ T) →
@@ -1090,10 +1092,10 @@ theorem declMem_erase (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R)
   | none =>
     show TRes.Agrees _ _ (do
       let (τ, id) ← Semantics.allocDefault σ.erase.glob R
-      pure ((σ.erase.withGlob τ).push (t := .mem R) id))
+      pure ((σ.erase.withGlob τ).push (t := .mem R) (some id)))
     rw [TState.allocDefault_erase σ R hm, ok_bind]
     refine TRes.Agrees.of_eq (congrArg Except.ok ?_)
-    show _ = ((σ.allocDefault R hm).1.push (t := .mem R) (σ.allocDefault R hm).2).erase
+    show _ = ((σ.allocDefault R hm).1.push (t := .mem R) (some (σ.allocDefault R hm).2)).erase
     rw [TState.push_erase, ← TState.allocDefault_glob]
     rfl
   | some r =>
@@ -1185,10 +1187,10 @@ theorem deleteMem_erase {T : Ty} (p : MPath C Γ T) :
   | var i hm =>
     show TRes.Agrees _ _ (do
       let (τ, id) ← Semantics.allocDefault σ.erase.glob _
-      pure ((σ.erase.withGlob τ).setLocal i id))
+      pure ((σ.erase.withGlob τ).setLocal i (some id)))
     rw [TState.allocDefault_erase σ _ hm, ok_bind]
     refine TRes.Agrees.of_eq (congrArg Except.ok ?_)
-    show _ = ((σ.allocDefault _ hm).1.setLocal i (σ.allocDefault _ hm).2).erase
+    show _ = ((σ.allocDefault _ hm).1.setLocal i (some (σ.allocDefault _ hm).2)).erase
     rw [TState.setLocal_erase, ← TState.allocDefault_glob]
     rfl
   | loc l =>

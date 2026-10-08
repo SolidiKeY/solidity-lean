@@ -238,9 +238,10 @@ theorem LTy.TDenote.erase_wt {H : HTy} : (t : LTy) → (v : t.TDenote C H) →
       have := SRef.tyAt_erase ref
       rw [h] at this
       exact this
-  | .mem _, r => by
-    simp only [LTy.WT, LTy.TDenote.erase, Semantics.MVal.hasTyH, HRef.lookupBy_toHeapTy,
-      beq_self_eq_true]
+  | .mem _, none => fun _ h => nomatch h
+  | .mem _, some r => fun _ h => by
+    cases h
+    simp only [Semantics.MVal.hasTyH, HRef.lookupBy_toHeapTy, beq_self_eq_true]
   | .old, _ | .oldNet, _ => trivial
 
 theorem TEnv.erase_wt {H : HTy} : (Γ : Ctx) → (e : TEnv C H Γ) →

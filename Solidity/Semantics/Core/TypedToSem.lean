@@ -32,13 +32,15 @@ def LTy.TDenote.bind {H : HTy} : (t : LTy) → t.TDenote C H → Binding
   | .val p, v => .val (PrimTy.erase (p := p) v)
   | .alias _, some r => .spath (SRef.erase r).1 (SRef.erase r).2
   | .alias _, none => .unset
-  | .mem _, r => .mref (r : HRef H _).id
+  | .mem _, some r => .mref (r : HRef H _).id
+  | .mem _, none => .unset
   | .old, st => .store (Storage.erase (st : Storage C))
   | .oldNet, l => .ledger l
 
 theorem LTy.TDenote.bind_wk {H H' : HTy} (e : H <+: H') :
     (t : LTy) → (v : t.TDenote C H) → bind t (wk e t v) = bind t v
-  | .val _, _ | .alias _, none | .alias _, some _ | .mem _, _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, none | .alias _, some _ | .mem _, none | .mem _, some _ | .old, _
+  | .oldNet, _ => rfl
 
 /-! ## Locals -/
 
@@ -197,7 +199,8 @@ theorem toSem_adopt {α : HTy → Type} (ns : List Var) (σ : TState C Γ) (g : 
 
 theorem _root_.Solidity.Core.LTy.TDenote.bind_eq_enc {H : HTy} :
     (t : LTy) → (v : t.TDenote C H) → LTy.TDenote.bind t v = t.enc C (LTy.TDenote.erase t v)
-  | .val _, _ | .alias _, none | .alias _, some _ | .mem _, _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, none | .alias _, some _ | .mem _, none | .mem _, some _ | .old, _
+  | .oldNet, _ => rfl
 
 theorem _root_.Solidity.Core.TEnv.toSem_eq {H : HTy} : {Γ : Ctx} → (ns : List Var) →
     (e : TEnv C H Γ) → TEnv.toSem ns e = Env.erase ns (TEnv.erase Γ e)

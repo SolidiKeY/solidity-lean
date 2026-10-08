@@ -354,7 +354,7 @@ theorem Premise.tsound_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ p
 theorem Stmt.trunSt_declMem_none {Γ : Ctx} (R : RefTy) (x : Var) (hd : (Ty.ref R).defaultOkS = true)
     (hm : (Ty.ref R).mapFree = true) (σ : TState C Γ) :
     Stmt.trunSt σ (.declMem R x none hd hm) =
-      .ok ((σ.allocDefaultG R hm).st.push (t := .mem R) (σ.allocDefaultG R hm).val) := rfl
+      .ok ((σ.allocDefaultG R hm).st.push (t := .mem R) (some (σ.allocDefaultG R hm).val)) := rfl
 
 /-- `internalCallExpand` of a call with a memory return: the frame dropped
 from under the object. -/
@@ -374,15 +374,15 @@ theorem Premise.tsound_callMem {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (
   | ok a =>
     let g := (σ.withEnv a).allocDefaultG R hm
     show (Prog.trunSt _ _).map _ = (TRun.callFrom (.mem R r hd hm) body.ext body.trunR σ
-      ⟨g.st.push (t := .mem R) g.val, g.ext⟩).map _
+      ⟨g.st.push (t := .mem R) (some g.val), g.ext⟩).map _
     rw [Prog.trunSt_cons, Stmt.trunSt_declMem_none, TRes.ok_bind, TState.withEnv_append_lift,
       TState.allocDefaultG_lift, Prog.trunSt_single]
-    show (Stmt.trunSt ((g.st.push (t := .mem R) g.val).lift (Thin.atop (.mem R :: ps) Γ)
-      (g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env))) _).map _ = _
+    show (Stmt.trunSt ((g.st.push (t := .mem R) (some g.val)).lift (Thin.atop (.mem R :: ps) Γ)
+      (some g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env))) _).map _ = _
     rw [Stmt.trunSt, Stmt.trun_block_wk]
     unfold TRun.callFrom Prog.trun
     dsimp only
-    cases Prog.trunR body (g.st.push (t := .mem R) g.val) with
+    cases Prog.trunR body (g.st.push (t := .mem R) (some g.val)) with
     | error => rfl
     | ok o =>
       exact congrArg Except.ok (by

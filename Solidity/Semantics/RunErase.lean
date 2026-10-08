@@ -53,7 +53,8 @@ def LTy.enc (C : Contract) : (t : LTy) → t.Denote C → Binding
   | .val _, v => .val v
   | .alias _, some (r, segs) => .spath r segs
   | .alias _, none => .unset
-  | .mem _, id => .mref id
+  | .mem _, some id => .mref id
+  | .mem _, none => .unset
   | .old, st => .store st
   | .oldNet, l => .ledger l
 
@@ -857,8 +858,8 @@ theorem Loc.resolve_erase (hag : Agree ns σ τ) :
 theorem MPath.mval_erase (hag : Agree ns σ τ) :
     {T : Ty} → (p : MPath C Γ T) → Solidity.MPath.mval τ (p.erase ns) = p.mval σ
   | _, .var i _ => by
-    simp only [MPath.erase, Solidity.MPath.mval, hag.getEnv i, MPath.mval]
-    rfl
+    simp only [MPath.erase, Solidity.MPath.mval, hag.getEnv i, MPath.mval, memRef]
+    cases Env.get i σ.env <;> rfl
   | _, .loc l => l.read_erase hag
 
 theorem MLoc.read_erase (hag : Agree ns σ τ) :

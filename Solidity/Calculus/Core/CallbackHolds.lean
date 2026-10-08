@@ -17,7 +17,9 @@ Proved: with no payment in a formula the two readings agree
 `pre → [ P ] post` true with callbacks is true without, when only `P` pays
 (`holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC`, from
 `Prog.exec_run` and `Frames.exec_run`).  `ProvesC`'s soundness against
-`ValidC` (`Calculus/Core/Callback.lean`) waits on `Stmt.TSound`.
+`ValidC` (`Calculus/Core/Callback.lean`) is not proved yet: the arms are
+sound over `tholds` (`Stmt.tsound`, `Calculus/Core/TSound.lean`), and
+`holdsC` reads a modality over the runs with callbacks.
 -/
 
 namespace Solidity.Core

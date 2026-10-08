@@ -1481,7 +1481,7 @@ theorem CallRet.enter_canon {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' : S
     cases h
     obtain ⟨H', hout, hid⟩ := allocDefault_canon hτ hc (defaultOk_of_defaultOkS hd) ha
     exact ⟨H', hout.out.ext, ⟨hτ.ofCopyOut hout.out, ⟨hout.out.storage ▸ hc.storage, hout.canon⟩⟩,
-      hid, trivial⟩
+      LTy.WT.mem_some hid, trivial⟩
 
 end Effects
 
@@ -1676,12 +1676,14 @@ theorem keepsC_declMem (R : RefTy) (init : Option (MRhs C Γ R))
     obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hcn.canon
       (defaultOk_of_defaultOkS (by simpa using hd)) ha
     have h₁ := RunCanon.ofCopyOutC hwt hcn.canon hout
-    exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.push (t := .mem R) hid) (h₁.canon.of_eq rfl rfl)⟩
+    exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.push (t := .mem R) (LTy.WT.mem_some hid))
+      (h₁.canon.of_eq rfl rfl)⟩
   | some r =>
     obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
     cases h
     obtain ⟨H', hext, h₁, hid⟩ := MRhs.eval_canon hwt hcn.canon he
-    exact ⟨H', hext, RunCanon.mk' (h₁.wt.push (t := .mem R) hid) (h₁.canon.of_eq rfl rfl)⟩
+    exact ⟨H', hext, RunCanon.mk' (h₁.wt.push (t := .mem R) (LTy.WT.mem_some hid))
+      (h₁.canon.of_eq rfl rfl)⟩
 
 theorem keepsC_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
     (canonInv C).Keeps (Run.rebindMem i r) := by
@@ -1691,7 +1693,8 @@ theorem keepsC_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
   obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
   cases h
   obtain ⟨H', hext, h₁, hid⟩ := MRhs.eval_canon hwt hcn.canon he
-  exact ⟨H', hext, RunCanon.mk' (h₁.wt.setLocal i hid) (h₁.canon.of_eq rfl rfl)⟩
+  exact ⟨H', hext, RunCanon.mk' (h₁.wt.setLocal i (LTy.WT.mem_some hid))
+    (h₁.canon.of_eq rfl rfl)⟩
 
 theorem keepsC_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
     (canonInv C).Keeps (Run.assignFromMem l p) := by
@@ -1745,7 +1748,8 @@ theorem keepsC_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) 
     cases h
     obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc (defaultOk_of_defaultOkS hd) ha
     have h₁ := RunCanon.ofCopyOutC hwt hc hout
-    exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.setLocal i hid) (h₁.canon.of_eq rfl rfl)⟩
+    exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.setLocal i (LTy.WT.mem_some hid))
+      (h₁.canon.of_eq rfl rfl)⟩
   | loc l =>
     obtain ⟨a, ha, h⟩ := bind_ok_inv h
     obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
