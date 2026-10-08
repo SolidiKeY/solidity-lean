@@ -1890,11 +1890,11 @@ def ReachableS (C : Contract) (st : List (Name × SVal)) : Prop :=
 typed interpreter (`Core.Prog.trun`, `Semantics/Core/TypedRun.lean`), from
 the contract's initial state to a state whose storage erases to it.  The
 program's locals are used as declared, and its values are of their types, by
-construction.  On the bridge (`Core.Prog.bridgeOk`: no `bool` mapping key, no
-storage copy at a type with a repeated member name) the scoped run ends in
-the erased state (`Reachable.reachableS`), so what that run keeps holds of a
-reachable storage; a `bool`-keyed entry, which solc writes and the typed run
-does too (decision 10), is outside it until the calculus reads the typed run.
+construction.  On the bridge (`Core.Prog.bridgeOk`: no storage copy at a
+type with a repeated member name) the scoped run ends in the erased state
+(`Reachable.reachableS`), so what that run keeps holds of a reachable
+storage; a `bool` mapping key is on it, hashed as `0`/`1` by both runs
+(decisions 10 and 14).
 The calculus's `holds` reads the untyped interpreter; a storage it reaches
 from a block the locals check accepts, with its words, keys and slots in
 range, is `Reachable` (`ReachableU.reachable`, `Calculus/Problem.lean`). -/

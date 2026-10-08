@@ -38,14 +38,13 @@ typed run from the store, typed (`Core.Storage.*`, a fold the kernel builds),
 is evaluated by `decide +kernel` (`trunOk`).  The typed run ending is the
 untyped one ending (`diamond_of_trunOk`: `Prog.run_of_trun`, then
 `Prog.run_erase` back to the program resolved from), on programs off the two
-places where the typed and the untyped runs part (`Prog.bridgeOk`: a `bool`
-mapping key, a struct with a repeated member name).  The typed run has no
+place where the typed and the untyped runs part (`Prog.bridgeOk`: a copy
+at a struct with a repeated member name).  The typed run has no
 well-founded definition in the kernel's way: a default is the structural
 `SVal.dflt`, a memory copy a fold.  `*Store_eq` states each store as the
 erasure of its typed start.  A run that ends normally but that `trunOk`
 cannot decide (the program does not resolve, or it is off the bridge: a
-`bool` mapping key, or a copy at a struct whose members share a name, like
-`BadDup`) is pinned by `#eval` of `outcome` (the untyped run) under
+copy at a struct whose members share a name, like `BadDup`) is pinned by `#eval` of `outcome` (the untyped run) under
 `#guard_msgs`, and the verdict table (`tests/solkey/expected.tsv`) says
 `evaluated`; a run that does not end normally is pinned the same way and
 is `open`.

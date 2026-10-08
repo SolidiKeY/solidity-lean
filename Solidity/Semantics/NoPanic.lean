@@ -194,6 +194,10 @@ attribute [no_panic_simp] copyStToM_noPanic copyMToSt_noPanic
   cases v <;> simp only [Value.asInt, ne_eq, NoPanic.ok, not_false_eq_true, Except.error.injEq,
       reduceCtorEq]
 
+@[no_panic_simp] theorem Value.keyAt_noPanic (k : PrimTy) (v : Value) : NoPanic (v.keyAt k) := by
+  cases k <;> cases v <;> simp only [Value.keyAt, Value.asInt, Value.asBool, bind, Except.bind,
+    pure, Except.pure, ne_eq, NoPanic.ok, not_false_eq_true, Except.error.injEq, reduceCtorEq]
+
 @[no_panic_simp] theorem Value.asBool_noPanic (v : Value) : NoPanic v.asBool := by
   cases v <;> simp only [Value.asBool, ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true,
       NoPanic.ok]

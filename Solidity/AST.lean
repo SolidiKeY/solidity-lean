@@ -140,11 +140,11 @@ theorem PrimTy.isNumeric_of_inRange {p : PrimTy} {n : Int} (h : p.inRange n = tr
     p.isNumeric = true := by
   cases p <;> simp only [PrimTy.inRange, Bool.false_eq_true] at h <;> rfl
 
-/-- A key type a program can index a mapping with: `uint` and `int` keys
-evaluate to an `Int`; a `bool` key does not (`Value.asInt`), and a reference
+/-- A key type a program can index a mapping with: a word, read as the
+integer it is hashed as (`Value.keyAt`, a `bool` as `0`/`1`); a reference
 type is no key (`IndexTy.map`). -/
-def Ty.numericKey : Ty → Bool
-  | .prim p => p.isNumeric
+def Ty.isKey : Ty → Bool
+  | .prim _ => true
   | .ref _ => false
 
 mutual

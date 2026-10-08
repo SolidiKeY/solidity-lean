@@ -13,8 +13,9 @@ not say; `SVal.tight` is exactly them:
   and a shorter copy clear what they leave, and past an end only a reference
   reaches, never a word;
 - a fixed-size array has nothing past its end;
-- a mapping keyed by anything but a number has no entries: a key is read
-  with `Value.asInt`, so a `bool` key is stuck.
+- a mapping keyed by a reference type has no entries: no program indexes
+  it (`IndexTy.map` takes a word key; a `bool` one is hashed as `0`/`1`,
+  `Value.keyAt`).
 
 Everything canonical and tight is reachable when its words, mapping keys
 and array slots are in range (`SVal.fits`: a literal is in its type's
@@ -37,7 +38,8 @@ contract whose types have well-formed
 defaults all the way down (`Ty.okDeep`).  It needs two facts about paths:
 a word is written only into a live slot (`IdxLive`, from
 `State.checkIndex`), and an alias is bound only along numeric keys
-(`KeysOK`, which every alias local keeps, `LTy.Keys`).  Under `Ty.okDeep` the first clause
+(`KeysOK`, which every alias local keeps, `LTy.Keys`), so along keys of
+word type (`Ty.isKey`).  Under `Ty.okDeep` the first clause
 of `SVal.tight` is vacuous, so no memory object needs tracking: a copy out
 of memory has no mapping and nothing past its ends (`SVal.plain`).  Whether
 that clause is also necessary for a contract with, say, a `BadDup[]` root is
@@ -60,7 +62,7 @@ variable {C : Contract}
 /-- What every reachable value satisfies beyond `SVal.canon`: an array whose
 elements have no well-formed default has no slots at all, the slots past the
 end of an array of words are cleared, a fixed-size array has no slots past
-its end, and a mapping that cannot be indexed has no entries. -/
+its end, and a mapping no program indexes (a reference key) has no entries. -/
 def Semantics.SVal.tight : SVal → Ty → Prop
   | SVal.struct fields, Ty.ref (RefTy.struct s) => tightFields s fields
   | SVal.array elems shadow _, Ty.ref (RefTy.array E) =>
@@ -69,7 +71,7 @@ def Semantics.SVal.tight : SVal → Ty → Prop
       tightElems E elems ∧ tightElems E shadow
   | SVal.array elems shadow _, Ty.ref (RefTy.fixed E _) => shadow = [] ∧ tightElems E elems
   | SVal.map entries _, Ty.ref (RefTy.mapping K V) =>
-      (K.numericKey = false → entries = []) ∧ tightEntries V entries
+      (K.isKey = false → entries = []) ∧ tightEntries V entries
   | _, _ => True
 where
   tightFields (s : Name) : List (Name × SVal) → Prop
@@ -90,6 +92,13 @@ open Semantics.SVal.tight (tightFields tightElems tightEntries)
 /-- Every root canonical and tight at its declared type. -/
 def TightStorage (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∀ r T v, lookupBy r C.vars = some T → lookupBy r st = some v → v.tight T
+
+/-- A mapping key a literal writes: a number in its type's range, a `bool`
+key `0` or `1` (`false`/`true`, as `Value.keyAt` hashes them). -/
+def PrimTy.keyFits : PrimTy → Int → Bool
+  | .bool, k => k == 0 || k == 1
+  | .uint, k => PrimTy.uint.inRange k
+  | .int, k => PrimTy.int.inRange k
 
 /-- What the builder needs to write `v` with literals (`Simple.lit`, which is
 in its type's range): every word and every mapping key in its type's range,
@@ -116,7 +125,7 @@ where
     | [] => True
     | (key, v) :: rest =>
         (match K with
-         | .prim k => k.inRange key = true
+         | .prim k => k.keyFits key = true
          | .ref _ => True) ∧ v.fits V ∧ fitsEntries K V rest
 
 open Semantics.SVal.fits (fitsFields fitsElems fitsEntries)
@@ -539,6 +548,13 @@ def numLit {Γ : Ctx} (p : PrimTy) (hp : p.isNumeric = true) (n : Int) : Simple 
 theorem numLit_eq {Γ : Ctx} {p : PrimTy} {hp : p.isNumeric = true} {n : Int}
     (h : p.inRange n = true) : numLit (C := C) (Γ := Γ) p hp n = .lit n h := dif_pos h
 
+/-- The key `n` at the key type `p`: a numeric literal, or `true` for `1` and
+`false` otherwise. -/
+def keyLit {Γ : Ctx} : (p : PrimTy) → Int → Simple C Γ p
+  | .bool, n => .bool (n == 1)
+  | .uint, n => numLit .uint rfl n
+  | .int, n => numLit .int rfl n
+
 /-- A word written at `l`: `alice.age = 3;`. -/
 def primProg {Γ : Ctx} : (p : PrimTy) → Loc C Γ (.prim p) → Semantics.SVal → Prog C Γ Γ
   | .bool, l, .bool b => .cons (.assign l (.val (.simple (.bool b)))) .nil
@@ -575,8 +591,7 @@ def fill {Γ : Ctx} (d : Nat) : (T : Ty) → SPath C Γ T → Semantics.SVal →
   | .ref (.fixed E n), q, .array elems _ _ =>
       bound d (.fixed E n) q (fillElems d (ArrTy.fixed (E := E) (n := n)) .here 0 elems)
   | .ref (.mapping (.prim k) V), q, .map entries _ =>
-      bound d (.mapping (.prim k) V) q
-        (if hk : k.isNumeric = true then fillEntries d k V hk .here entries else .nil)
+      bound d (.mapping (.prim k) V) q (fillEntries d k V .here entries)
   | _, _, _ => .nil
 
 /-- The members of a struct bound to `a`, one after another. -/
@@ -614,13 +629,13 @@ def fillElems {Γ : Ctx} {R : RefTy} {E : Ty} (d : Nat) (ak : ArrTy R E) (a : Id
 
 /-- The entries of the mapping bound to `a`: each created by `delete`, then
 filled. -/
-def fillEntries {Γ : Ctx} (d : Nat) (k : PrimTy) (V : Ty) (hk : k.isNumeric = true)
+def fillEntries {Γ : Ctx} (d : Nat) (k : PrimTy) (V : Ty)
     (a : Idx Γ (.alias (.mapping (.prim k) V))) : List (Int × Semantics.SVal) → Prog C Γ Γ
   | [] => .nil
   | (key, w) :: rest =>
-      .cons (.delete (.index .map (.alias a) (.simple (numLit k hk key)) : Loc C Γ V))
-        ((fill (d + 1) V (.loc (.index .map (.alias a) (.simple (numLit k hk key)))) w).append
-          (fillEntries d k V hk a rest))
+      .cons (.delete (.index .map (.alias a) (.simple (keyLit k key)) : Loc C Γ V))
+        ((fill (d + 1) V (.loc (.index .map (.alias a) (.simple (keyLit k key)))) w).append
+          (fillEntries d k V a rest))
 
 end
 
@@ -666,20 +681,34 @@ theorem resolve_index_arr {σ : State C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R E
         (Loc.index (.arr ak) (.alias a) (.simple (numLit .uint rfl (j : Int))))).resolve σ =
       .ok (r, segs ++ [.at (j : Int)]) := by
   rw [numLit_eq (inRange_of_lt hb)]
-  simp [SPath.resolve, Loc.resolve, aliasPath_bound h, Val.eval, Simple.eval, Value.asInt,
+  simp [SPath.resolve, Loc.resolve, aliasPath_bound h, Val.eval, Simple.eval, Value.keyAt, Value.asInt,
     Semantics.State.checkIndex, hf, hj, bind, Except.bind, pure, Except.pure]
 
+theorem keyLit_keyAt (σ : State C Γ) {k : PrimTy} {key : Int} (hr : k.keyFits key = true) :
+    ((Val.simple (keyLit (C := C) (Γ := Γ) k key)).eval σ >>= Value.keyAt k) = .ok key := by
+  cases k with
+  | bool =>
+    simp only [PrimTy.keyFits, Bool.or_eq_true, beq_iff_eq] at hr
+    rcases hr with rfl | rfl <;> rfl
+  | uint => rw [keyLit, numLit_eq (p := .uint) hr]; rfl
+  | int => rw [keyLit, numLit_eq (p := .int) hr]; rfl
+
 theorem resolve_index_map {σ : State C Γ} {k : PrimTy} {V : Ty} {key : Int}
-    (hk : k.isNumeric = true) (hr : k.inRange key = true)
+    (hr : k.keyFits key = true)
     {a : Idx Γ (.alias (.mapping (.prim k) V))}
     {r : Name} {segs : List Seg} {es : List (Int × Semantics.SVal)} {dflt : Semantics.SVal}
     (h : Bound σ a r segs) (hf : σ.glob.findStorage r segs = .ok (.map es dflt)) :
     (SPath.loc (C := C)
-        (Loc.index (V := V) .map (.alias a) (.simple (numLit k hk key)))).resolve σ =
+        (Loc.index (V := V) .map (.alias a) (.simple (keyLit k key)))).resolve σ =
       .ok (r, segs ++ [.at key]) := by
-  rw [numLit_eq hr]
-  simp [SPath.resolve, Loc.resolve, aliasPath_bound h, Val.eval, Simple.eval, Value.asInt,
-    Semantics.State.checkIndex, hf, bind, Except.bind, pure, Except.pure]
+  have hk := keyLit_keyAt (C := C) σ hr
+  simp only [bind, Except.bind] at hk
+  simp only [SPath.resolve, Loc.resolve, aliasPath_bound h, bind, Except.bind]
+  split at hk
+  · exact nomatch hk
+  · rename_i w hw
+    rw [hk]
+    simp [Semantics.State.checkIndex, hf, bind, Except.bind, pure, Except.pure]
 
 theorem run_push {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r : Name}
     {segs : List Seg} {es : List Semantics.SVal} {fx : Bool} (hd : (none.isSome || E.defaultOkS) = true)
@@ -956,26 +985,26 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
       rw [he₃]
       exact he₁
 
-theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty} (hk : k.isNumeric = true)
+theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty}
     {a : Idx Γ (.alias (.mapping (.prim k) V))} {r : Name} {segs : List Seg}
     (hV : V.defaultOkS = true) :
     ∀ (todo done : List (Int × Semantics.SVal)) (σ : State C Γ) (st₀ : List (Name × Semantics.SVal)),
       (∀ kw ∈ todo, FillOK C kw.2) → canonEntries V todo → tightEntries V todo →
       fitsEntries (.prim k) V todo → nodupKeysB (done ++ todo) = true → Bound σ a r segs →
       Wrote st₀ σ.storage r segs (.map done (defaultForTy V)) →
-      ∃ σ', Prog.run σ (fillEntries (C := C) d k V hk a todo) = .ok σ' ∧
+      ∃ σ', Prog.run σ (fillEntries (C := C) d k V a todo) = .ok σ' ∧
         Wrote st₀ σ'.storage r segs (.map (done ++ todo) (defaultForTy V)) ∧ σ'.env = σ.env
   | [], done, σ, st₀, _, _, _, _, _, _, hW => ⟨σ, rfl, by simpa using hW, rfl⟩
   | (key, w) :: todo, done, σ, st₀, hIH, hc, ht, hfit, hnd, hB, hW => by
     have hkey : lookupBy key done = none := nodupKeysB_mid hnd
     have hf := Wrote.findStorage (σ := σ.glob) hW
-    have hq := resolve_index_map (C := C) (V := V) (key := key) hk hfit.1 hB hf
+    have hq := resolve_index_map (C := C) (V := V) (key := key) hfit.1 hB hf
     -- `delete balances[key];` creates the entry at the default
     have hcur : σ.glob.findStorage r (segs ++ [.at key]) = .ok (defaultForTy V) := by
       rw [SemanticsProperties.State.findStorage_append, hf]
       simp only [bind, Except.bind, Semantics.SVal.find, hkey]
     have hdel := run_delete (C := C)
-      (l := Loc.index .map (.alias a) (.simple (numLit k hk key)))
+      (l := Loc.index .map (.alias a) (.simple (keyLit k key)))
       (by simpa only [SPath.resolve] using hq) hcur
     rw [defaultOf_default] at hdel
     have hmid : ∀ x y : Semantics.SVal, setBy key y (done ++ [(key, x)]) = done ++ [(key, y)] :=
@@ -988,17 +1017,17 @@ theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty} (hk : k.isNumeric = true
     obtain ⟨τ, hτ, hWτ⟩ :=
       Wrote.saveCore hW (.map (done ++ [(key, defaultForTy V)]) (defaultForTy V))
     have hdel' : Stmt.run σ (.delete (C := C)
-        (Loc.index .map (.alias a) (.simple (numLit k hk key)) : Loc C Γ V)) =
+        (Loc.index .map (.alias a) (.simple (keyLit k key)) : Loc C Γ V)) =
           .ok (σ.withGlob τ) := by
       rw [hdel, SemanticsProperties.State.saveStorage_append hf, hN₁]
       show σ.withGlob <$> σ.glob.saveStorage r segs _ = _
       rw [hτ]; rfl
     have hBτ : Bound (σ.withGlob τ) a r segs := hB
-    have hqτ := resolve_index_map (C := C) (V := V) (key := key) hk hfit.1 hBτ
+    have hqτ := resolve_index_map (C := C) (V := V) (key := key) hfit.1 hBτ
       (Wrote.findStorage (σ := (σ.withGlob τ).glob) hWτ)
     obtain ⟨σ₂, hrun₂, hW₂, he₂⟩ := child_step (d := d) (hIH (key, w) (List.mem_cons_self ..)) hc.1
       ht.1 hfit.2.1 hV hqτ hWτ (by rw [save_at_map, hmid]) (by rw [save_at_map, hmid])
-    obtain ⟨σ₃, hrun₃, hW₃, he₃⟩ := fillEntries_run hk hV todo (done ++ [(key, w)]) σ₂ st₀
+    obtain ⟨σ₃, hrun₃, hW₃, he₃⟩ := fillEntries_run hV todo (done ++ [(key, w)]) σ₂ st₀
       (fun kw hm => hIH kw (List.mem_cons_of_mem _ hm)) hc.2 ht.2 hfit.2.2 (by simpa using hnd)
       (hBτ.of_env he₂) hW₂
     refine ⟨σ₃, ?_, by simpa using hW₃, he₃.trans he₂⟩
@@ -1132,23 +1161,12 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
             σ.push (t := .alias (.mapping (.prim k) V)) (some (r, segs))
           have h0' : Wrote σ.storage σ₁.storage r segs (.map [] (defaultForTy V)) := by
             rw [defaultForTy] at h0; exact h0
-          by_cases hk : k.isNumeric = true
-          · obtain ⟨σ', hrun, hW, he⟩ := fillEntries_run (C := C) (d := d) (a := .here) hk hV
-              entries [] σ₁ σ.storage (fun kw _ => fill_ok kw.2) hce hte hf
-              (by simpa using hnd) rfl h0'
-            refine ⟨σ'.drop (.push .refl), ?_, by simpa using hW, ?_⟩
-            · show Prog.run σ (bound d (.mapping (.prim k) V) q
-                (if hk : k.isNumeric = true then _ else _)) = _
-              rw [dif_pos hk]
-              exact run_bound hq hrun
-            · show σ'.env.2 = σ.env
-              rw [he]; rfl
-          · obtain rfl := hkey (by simpa [Ty.numericKey] using hk)
-            refine ⟨σ₁.drop (.push .refl), ?_, h0', rfl⟩
-            show Prog.run σ (bound d (.mapping (.prim k) V) q
-              (if hk : k.isNumeric = true then _ else _)) = _
-            rw [dif_neg hk]
-            exact run_bound hq rfl
+          obtain ⟨σ', hrun, hW, he⟩ := fillEntries_run (C := C) (d := d) (a := .here) hV
+            entries [] σ₁ σ.storage (fun kw _ => fill_ok kw.2) hce hte hf
+            (by simpa using hnd) rfl h0'
+          refine ⟨σ'.drop (.push .refl), run_bound hq hrun, by simpa using hW, ?_⟩
+          show σ'.env.2 = σ.env
+          rw [he]; rfl
 termination_by v => sizeOf v
 decreasing_by
   all_goals first
@@ -1276,18 +1294,17 @@ theorem fillElems_straight {Γ : Ctx} {R : RefTy} {E : Ty} (d : Nat) (ak : ArrTy
     exact ⟨hw w List.mem_cons_self _ _ _ rfl,
       fillElems_straight d ak a (j + 1) rest fun w hm => hw w (List.mem_cons_of_mem _ hm)⟩
 
-theorem fillEntries_straight {Γ : Ctx} (d : Nat) (k : PrimTy) (V : Ty) (hk : k.isNumeric = true)
+theorem fillEntries_straight {Γ : Ctx} (d : Nat) (k : PrimTy) (V : Ty)
     (a : Idx Γ (.alias (.mapping (.prim k) V))) :
     (entries : List (Int × Semantics.SVal)) → (∀ kw ∈ entries, FillStraight C kw.2) →
-      (fillEntries (C := C) d k V hk a entries).straight = true
+      (fillEntries (C := C) d k V a entries).straight = true
   | [], _ => rfl
   | (key, w) :: rest, hw => by
-    have hkb : (k != .bool) = true := by cases k <;> first | rfl | exact absurd hk (by decide)
     simp only [fillEntries, Prog.straight, Stmt.straight, Prog.straight_append, Bool.and_eq_true]
     have hl : (Loc.index (C := C) IndexTy.map (SPath.alias a)
-        (Val.simple (numLit k hk key))).straight = true := by
-      simp only [Loc.straight, hkb, SPath.straight, Val.isSimple, Bool.and_self]
-    exact ⟨hl, hw (key, w) List.mem_cons_self _ _ _ hl, fillEntries_straight d k V hk a rest
+        (Val.simple (keyLit k key))).straight = true := by
+      simp only [Loc.straight, SPath.straight, Val.isSimple, Bool.and_self]
+    exact ⟨hl, hw (key, w) List.mem_cons_self _ _ _ hl, fillEntries_straight d k V a rest
       fun kw hm => hw kw (List.mem_cons_of_mem _ hm)⟩
 
 /-- **The builder is straight.** -/
@@ -1346,10 +1363,7 @@ theorem fill_straight : ∀ v : Semantics.SVal, FillStraight C v
         | ref _ => rfl
         | prim k =>
           simp only [fill, bound_straight, hq, Bool.true_and]
-          split
-          · rename_i hk
-            exact fillEntries_straight d k V hk .here entries fun kw _ => fill_straight kw.2
-          · rfl
+          exact fillEntries_straight d k V .here entries fun kw _ => fill_straight kw.2
 termination_by v => sizeOf v
 decreasing_by
   all_goals first
@@ -1531,14 +1545,14 @@ theorem okDeep_tyAtSegs : ∀ {segs : List Seg} {T T' : Ty}, T.okDeep = true →
 the path, or a path resolved, took its keys from `uint`/`int` values. -/
 def KeysOK : Ty → List Seg → Prop
   | _, [] => True
-  | T, seg :: rest => (∀ K V, T = .ref (.mapping K V) → K.numericKey = true) ∧
+  | T, seg :: rest => (∀ K V, T = .ref (.mapping K V) → K.isKey = true) ∧
       (match segTy T seg with
        | some T' => KeysOK T' rest
        | none => True)
 
 theorem KeysOK_append : ∀ {segs : List Seg} {T T₁ : Ty} (seg : Seg),
     KeysOK T segs → tyAtSegs T segs = some T₁ →
-    (∀ K V, T₁ = .ref (.mapping K V) → K.numericKey = true) → KeysOK T (segs ++ [seg])
+    (∀ K V, T₁ = .ref (.mapping K V) → K.isKey = true) → KeysOK T (segs ++ [seg])
   | [], T, T₁, seg, _, hs, hk => by
     simp only [tyAtSegs, Option.some.injEq] at hs; subst hs
     refine ⟨hk, ?_⟩
@@ -1871,7 +1885,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
             obtain ⟨-, htes⟩ := ht
-            have hkey : K.numericKey = true := hk₁ K V rfl
+            have hkey : K.isKey = true := hk₁ K V rfl
             simp only [SVal.save] at hf
             split at hf
             · rename_i old hl
@@ -2608,12 +2622,6 @@ section Paths
 
 variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
 
-theorem eval_key_numeric (hwt : RunWT C H σ) {k : PrimTy} {i : Val C Γ k} {w : Value} {iv : Int}
-    (he : i.eval σ = .ok w) (hi : w.asInt = .ok iv) : k.isNumeric = true := by
-  have := Val.eval_wt hwt i he
-  cases w with
-  | int n => cases k <;> simp_all [Value.toSVal, SVal.hasTy, PrimTy.isNumeric]
-  | bool b => simp [Value.asInt] at hi
 
 mutual
 
@@ -2664,7 +2672,7 @@ theorem Loc.resolve_keys (hwt : RunWT C H σ) (hte : Env.All (LTy.Keys C) σ.env
     | map =>
       simp only [Ty.ref.injEq, RefTy.mapping.injEq] at hKV
       obtain ⟨rfl, rfl⟩ := hKV
-      exact eval_key_numeric hwt hwv hiv
+      rfl
     | arr a => cases a <;> exact nomatch hKV
 
 end
@@ -3318,21 +3326,32 @@ theorem fixed_past_end_not_reachable :
   · have ht := reachableS_tight (by decide) (by decide) h "pair" _ _ rfl rfl
     exact nomatch ht.1
 
-/-- An entry in a `bool`-keyed mapping: canonical, reached by no scoped run,
-since the scoped run reads a key as a number (`Value.asInt`) and a `bool` is
-not one.  The typed run writes `bool` keys (decision 10); `Reachable` keeps
-it on the bridge (`Core.Prog.bridgeOk`), which has no `bool` key. -/
-theorem bool_key_not_reachable :
-    CanonStorage BoolKeyed [("flags", .map [(1, .int 3)] (.int 0))] ∧
-      ¬ ReachableS BoolKeyed [("flags", .map [(1, .int 3)] (.int 0))] := by
-  refine ⟨⟨rfl, fun r T hr => ?_⟩, fun h => ?_⟩
+/-- An entry in a `bool`-keyed mapping, at the key `1` that `true` hashes
+to (`Value.keyAt`, decisions 10 and 14): reachable, by the builder
+(`flags[true] = 3;`). -/
+theorem bool_key_reachable :
+    Reachable BoolKeyed [("flags", .map [(1, .int 3)] (.int 0))] := by
+  refine canon_reachable (by decide) (by decide) ⟨rfl, fun r T hr => ?_⟩ (fun r T v hr hv => ?_)
+    fun r T v hr hv => ?_
   · simp only [BoolKeyed, lookupBy] at hr
     split at hr
     · rename_i he; subst he; cases hr
       exact ⟨_, rfl, rfl, ⟨trivial, trivial⟩, defaultForTy_uint.symm, trivial⟩
     · exact nomatch hr
-  · have ht := reachableS_tight (by decide) (by decide) h "flags" _ _ rfl rfl
-    exact nomatch ht.1 rfl
+  · simp only [BoolKeyed, lookupBy] at hr
+    split at hr
+    · rename_i he; subst he; cases hr
+      simp only [lookupBy, if_pos] at hv
+      cases hv
+      exact ⟨(fun h => nomatch h), trivial, trivial⟩
+    · exact nomatch hr
+  · simp only [BoolKeyed, lookupBy] at hr
+    split at hr
+    · rename_i he; subst he; cases hr
+      simp only [lookupBy, if_pos] at hv
+      cases hv
+      exact ⟨rfl, rfl, trivial⟩
+    · exact nomatch hr
 
 /-- A `Token` past the end of `tokens`, written through a reference taken
 before its `pop`: reachable, by the builder. -/

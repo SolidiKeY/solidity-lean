@@ -173,7 +173,7 @@ def SVal.tightB : SVal → Ty → Bool
       tightElemsB E elems && tightElemsB E shadow
   | SVal.array elems shadow _, Ty.ref (RefTy.fixed E _) => shadow.isEmpty && tightElemsB E elems
   | SVal.map entries _, Ty.ref (RefTy.mapping K V) =>
-      (K.numericKey || entries.isEmpty) && tightEntriesB V entries
+      (K.isKey || entries.isEmpty) && tightEntriesB V entries
   | _, _ => true
 where
   tightFieldsB (s : Name) : List (Name × SVal) → Bool
@@ -189,10 +189,11 @@ where
     | [] => true
     | (_, v) :: rest => v.tightB V && tightEntriesB V rest
 
-/-- A mapping key fits its key type: a `uint` or `int` key in its range,
-any `Int` at a type no program indexes with (`Ty.numericKey`). -/
+/-- A mapping key fits its key type: a `uint` or `int` key in its range, a
+`bool` key `0` or `1` (`Value.keyAt`), any `Int` at a type no program
+indexes with (`Ty.isKey`). -/
 def Ty.keyFitsB : Ty → Int → Bool
-  | .prim p, k => !p.isNumeric || PrimVal.fits (.int k) p
+  | .prim p, k => if p.isNumeric then PrimVal.fits (.int k) p else k == 0 || k == 1
   | .ref _, _ => true
 
 /-- Every word of `v` in its type's range (`PrimVal.fits`), every key of a

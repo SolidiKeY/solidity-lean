@@ -167,11 +167,11 @@ theorem upd_storageIndexIncrementAssignment {p : PrimTy} (v : Var) (op : IncDec)
     (sp : SPath C (Ty.ref x)) (ie : Simple C x_1) (hs : (OpLoc.index it sp ie).recvSimple = true)
     (σ : State) :
     SameOk [] (Upd.apply (C := C) [UpdElem.storage
-          (STerm.storage.save (sp.lower.at ie.lower)
+          (STerm.storage.save (sp.lower.at ie.keyLower)
             (SValT.val
-              (Term.binop op.binOp p (Term.find STerm.storage (sp.lower.at ie.lower))
+              (Term.binop op.binOp p (Term.find STerm.storage (sp.lower.at ie.keyLower))
                 (Term.lit (.int 1))))),
-        UpdElem.val v (Term.bumped op p (Term.find STerm.storage (sp.lower.at ie.lower)))] σ)
+        UpdElem.val v (Term.bumped op p (Term.find STerm.storage (sp.lower.at ie.keyLower)))] σ)
       (Stmt.run σ (Stmt.assignIncDec v op hp (OpLoc.index it sp ie) hs)) := by
   rw [Term.bumped]; split <;> (upd_unfold'; res_split)
 
@@ -432,7 +432,7 @@ theorem upd_memoryToStorageFieldCopyRoot {x : Name} (sp : SPath C (Ty.struct x))
 
 theorem upd_memoryToStorageIndexCopyRoot {R R' : RefTy} {q : PrimTy} (it : IndexTy R q (Ty.ref R'))
     (b : SPath C (Ty.ref R)) (ie : Simple C q) (mpath : MPath C (Ty.ref R')) (σ : State) :
-    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.save (b.lower.at ie.lower)
+    SameOk [] (Upd.apply (C := C) [UpdElem.storage (STerm.storage.save (b.lower.at ie.keyLower)
         (SValT.copyMem MTerm.memory mpath.lower))] σ)
       (Stmt.run σ (Stmt.assignFromMem (Loc.index it b (Val.simple ie)) mpath)) := by
   upd_unfold'

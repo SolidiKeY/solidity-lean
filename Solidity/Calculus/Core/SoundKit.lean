@@ -128,6 +128,20 @@ section Lower
 
 variable {Γ : Ctx} (σ : State C Γ)
 
+/-- A key's term reads the word the key is hashed as (`Term.keyAt_eval`). -/
+theorem Tm.keyAt_eval (k : PrimTy) (t : Tm C Γ .val) {β : Type} (f : Int → Res β) :
+    ((Tm.keyAt k t).eval σ >>= fun v => v.asInt >>= f) =
+      (t.eval σ >>= fun v => v.keyAt k >>= f) := by
+  cases k with
+  | uint | int => rfl
+  | bool =>
+    simp only [Tm.keyAt, Tm.eval, Op3.eval, Op0.eval]
+    cases t.eval σ with
+    | error _ => rfl
+    | ok v => cases v with
+      | int _ => rfl
+      | bool b => cases b <;> rfl
+
 mutual
 
 theorem SPath.eval_lower : {T : Ty} → (b : SPath C Γ T) → b.lower.eval σ = b.resolve σ
@@ -138,8 +152,9 @@ theorem Loc.eval_lower : {T : Ty} → (l : Loc C Γ T) → l.lower.eval σ = l.r
   | _, .root .. => rfl
   | _, .field b f _ => by
     simp only [Loc.lower, Tm.eval, Op1.eval, Loc.resolve, SPath.eval_lower b]
-  | _, .index _ b i => by
-    simp only [Loc.lower, Tm.eval, Op2.eval, Loc.resolve, SPath.eval_lower b, Val.eval_lower i]
+  | _, .index (k := k) _ b i => by
+    simp only [Loc.lower, Tm.eval, Op2.eval, Loc.resolve, SPath.eval_lower b, bind_assoc]
+    simp only [Tm.keyAt_eval, Val.eval_lower i]
 
 theorem MPath.eval_lower : {T : Ty} → (b : MPath C Γ T) →
     b.lower.eval σ = (do (← b.mval σ).asRef)

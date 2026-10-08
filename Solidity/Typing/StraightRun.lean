@@ -8,8 +8,7 @@ in its erasure.  The other way fails in general, since the typed run diverges
 on a length past `uint` (`lenT`) and on a loop with no last iteration, where
 the scoped run may end.  A *straight* program (`Prog.straight`) has neither:
 it assigns simple values, binds aliases to paths, pushes defaults, pops,
-deletes and opens blocks, at paths whose indices are simple and whose mapping
-keys are not `bool`.  Its typed run never diverges (`Prog.trun_noDiv`) and is
+deletes and opens blocks, at paths whose indices are simple.  Its typed run never diverges (`Prog.trun_noDiv`) and is
 on the bridge (`Prog.bridgeOk_of_straight`), so it ends exactly where the
 scoped run does (`Prog.trun_of_run`).  The storage builder
 (`Core.Build.rootsProg`, `Typing/Constructibility.lean`) is straight, which
@@ -51,8 +50,7 @@ variable {Γ : Ctx}
 
 mutual
 
-/-- A path whose indices are simple values and whose mapping keys are not
-`bool`. -/
+/-- A path whose indices are simple values. -/
 def SPath.straight : {T : Ty} → SPath C Γ T → Bool
   | _, .alias _ => true
   | _, .loc l => l.straight
@@ -60,7 +58,7 @@ def SPath.straight : {T : Ty} → SPath C Γ T → Bool
 def Loc.straight : {T : Ty} → Loc C Γ T → Bool
   | _, .root .. => true
   | _, .field b _ _ => b.straight
-  | _, .index (k := k) _ b i => k != .bool && b.straight && i.isSimple
+  | _, .index _ b i => b.straight && i.isSimple
 
 end
 
@@ -107,40 +105,13 @@ section Bridge
 
 variable {Γ : Ctx}
 
-theorem Val.bridgeOk_of_isSimple {p : PrimTy} : {v : Val C Γ p} → v.isSimple = true →
-    v.bridgeOk = true
-  | .simple _, _ => rfl
-
 theorem Val.eq_simple_of_isSimple {p : PrimTy} : {v : Val C Γ p} → v.isSimple = true →
     ∃ s, v = .simple s
   | .simple s, _ => ⟨s, rfl⟩
 
-mutual
-
-theorem SPath.bridgeOk_of_straight : {T : Ty} → (q : SPath C Γ T) → q.straight = true →
-    q.bridgeOk = true
-  | _, .alias _, _ => rfl
-  | _, .loc l, h => Loc.bridgeOk_of_straight l h
-
-theorem Loc.bridgeOk_of_straight : {T : Ty} → (l : Loc C Γ T) → l.straight = true →
-    l.bridgeOk = true
-  | _, .root .., _ => rfl
-  | _, .field b _ _, h => SPath.bridgeOk_of_straight b h
-  | _, .index _ b i, h => by
-    simp only [Loc.straight, Bool.and_eq_true] at h
-    obtain ⟨⟨hk, hb⟩, hi⟩ := h
-    simp only [Loc.bridgeOk, hk, SPath.bridgeOk_of_straight b hb, Val.bridgeOk_of_isSimple hi,
-      Bool.and_self]
-
-end
-
 theorem Src.bridgeOk_of_straight {T : Ty} : {r : Src C Γ T} → r.straight = true →
     r.bridgeOk = true
-  | .val _, h => Val.bridgeOk_of_isSimple h
-
-theorem ARhs.bridgeOk_of_straight {R : RefTy} : {r : ARhs C Γ R} → r.straight = true →
-    r.bridgeOk = true
-  | .path p, h => SPath.bridgeOk_of_straight p h
+  | .val _, _ => rfl
 
 end Bridge
 
@@ -148,22 +119,10 @@ mutual
 
 theorem Stmt.bridgeOk_of_straight : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.straight = true →
     s.bridgeOk = true
-  | _, _, .assign l r, h => by
+  | _, _, .assign _ _, h => by
     simp only [Stmt.straight, Bool.and_eq_true] at h
-    simp only [Stmt.bridgeOk, Loc.bridgeOk_of_straight l h.1, Src.bridgeOk_of_straight h.2,
-      Bool.and_self]
-  | _, _, .declStorage _ _ init, h => by
-    cases init with
-    | none => rfl
-    | some r =>
-      simp only [Stmt.straight, Option.all_some] at h
-      simp only [Stmt.bridgeOk, Option.all_some, ARhs.bridgeOk_of_straight h]
-  | _, _, .push b v _, h => by
-    simp only [Stmt.straight, Bool.and_eq_true, Option.isNone_iff_eq_none] at h
-    obtain ⟨hb, rfl⟩ := h
-    simp only [Stmt.bridgeOk, SPath.bridgeOk_of_straight b hb, Option.all_none, Bool.and_self]
-  | _, _, .pop b, h => SPath.bridgeOk_of_straight b h
-  | _, _, .delete l, h => Loc.bridgeOk_of_straight l h
+    exact Src.bridgeOk_of_straight h.2
+  | _, _, .declStorage .., _ | _, _, .push .., _ | _, _, .pop _, _ | _, _, .delete _, _ => rfl
   | _, _, .block body, h => Prog.bridgeOk_of_straight body h
   | _, _, .rebind .., h | _, _, .assignLocal .., h | _, _, .declLocal .., h
   | _, _, .opAssign .., h | _, _, .incDec .., h | _, _, .assignIncDec .., h
@@ -211,7 +170,7 @@ theorem Loc.resolveT_noDiv (σ : TState C Γ) : {T : Ty} → (l : Loc C Γ T) �
   | _, .field b _ _, h => (SPath.resolveT_noDiv σ b h).bind fun _ => TRes.NoDiv.ok _
   | _, .index _ b i, h => by
     simp only [Loc.straight, Bool.and_eq_true] at h
-    exact (SPath.resolveT_noDiv σ b h.1.2).bind fun _ =>
+    exact (SPath.resolveT_noDiv σ b h.1).bind fun _ =>
       (Val.evalT_noDiv_of_isSimple σ h.2).bind fun _ =>
         (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
 

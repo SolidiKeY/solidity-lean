@@ -21,6 +21,13 @@ def Simple.lower {Γ : Ctx} {p : PrimTy} : Simple C Γ p → Tm C Γ .val
   | .local i => .pvV i
   | .env k _ => .app0 (.env k)
 
+/-- An index of key type `k` as the word it is hashed as: a `bool` key `b`
+is `b ? 1 : 0` (`Term.keyAt`). -/
+def Tm.keyAt {Γ : Ctx} : PrimTy → Tm C Γ .val → Tm C Γ .val
+  | .bool, t => .app3 .ite t (.app0 (.lit (.int 1))) (.app0 (.lit (.int 0)))
+  | .uint, t => t
+  | .int, t => t
+
 mutual
 
 def SPath.lower {Γ : Ctx} : {T : Ty} → SPath C Γ T → Tm C Γ .path
@@ -30,7 +37,7 @@ def SPath.lower {Γ : Ctx} : {T : Ty} → SPath C Γ T → Tm C Γ .path
 def Loc.lower {Γ : Ctx} : {T : Ty} → Loc C Γ T → Tm C Γ .path
   | _, .root r _ => .app0 (.root r)
   | _, .field b f _ => .app1 (.field f) rfl b.lower
-  | _, .index _ b i => .app2 .at b.lower i.lower
+  | _, .index (k := k) _ b i => .app2 .at b.lower (Tm.keyAt k i.lower)
 
 def MPath.lower {Γ : Ctx} : {T : Ty} → MPath C Γ T → Tm C Γ .ident
   | _, .var i _ => .pvI i
@@ -52,6 +59,13 @@ def Val.lower {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Tm C Γ .val
 
 end
 
+/-- An index's term: the word its key is hashed as (`Tm.keyAt`), what
+`Loc.lower` writes; a rule names it so, and it prints as the index. -/
+@[reducible] def Simple.keyLower {Γ : Ctx} {k : PrimTy} (s : Simple C Γ k) : Tm C Γ .val :=
+  Tm.keyAt k s.lower
+@[reducible] def Val.keyLower {Γ : Ctx} {k : PrimTy} (v : Val C Γ k) : Tm C Γ .val :=
+  Tm.keyAt k v.lower
+
 /-- A write's source as a storage value: the value, or the copied subtree. -/
 def Src.lower {Γ : Ctx} {T : Ty} : Src C Γ T → Tm C Γ .sv
   | .val v => .app1 .sval rfl v.lower
@@ -63,6 +77,10 @@ def MSrc.lower {Γ : Ctx} {T : Ty} : MSrc C Γ T → Tm C Γ .mv
   | .ref p => .app1 .ref rfl p.lower
 
 /-! ## Lowering commutes with erasure -/
+
+theorem Tm.keyAt_erase {Γ : Ctx} (ns : List Var) (k : PrimTy) (t : Tm C Γ .val) :
+    (Tm.keyAt k t).erase ns = Solidity.Term.keyAt k (t.erase ns) := by
+  cases k <;> rfl
 
 theorem Simple.lower_erase {Γ : Ctx} {p : PrimTy} (ns : List Var) (s : Simple C Γ p) :
     s.lower.erase ns = (s.erase ns).lower := by
@@ -81,9 +99,9 @@ theorem Loc.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (l : Loc C Γ 
   | _, .field b f _ => by
     show Solidity.Tm.app1 _ (b.lower.erase ns) = _
     rw [b.lower_erase ns]; rfl
-  | _, .index _ b i => by
-    show Solidity.Tm.app2 _ (b.lower.erase ns) (i.lower.erase ns) = _
-    rw [b.lower_erase ns, i.lower_erase ns]; rfl
+  | _, .index (k := k) _ b i => by
+    show Solidity.Tm.app2 _ (b.lower.erase ns) ((Tm.keyAt k i.lower).erase ns) = _
+    rw [b.lower_erase ns, Tm.keyAt_erase, i.lower_erase ns]; rfl
 
 theorem MPath.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (b : MPath C Γ T) →
     b.lower.erase ns = (b.erase ns).lower

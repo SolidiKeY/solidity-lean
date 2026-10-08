@@ -567,7 +567,7 @@ theorem Loc.resolve_up (σ : State C Γ) (w : t.Denote C) : {T : Ty} → (l : Lo
   | _, .index it b i => by
     show (do
       let (r, segs) ← b.up.resolve (σ.push w)
-      let i ← (← i.up.eval (σ.push w)).asInt
+      let i ← (← i.up.eval (σ.push w)).keyAt _
       (σ.push w).glob.checkIndex r segs i
       pure (r, segs ++ [Seg.at i])) = _
     rw [SPath.resolve_up σ w b, Val.eval_up σ w i]; rfl

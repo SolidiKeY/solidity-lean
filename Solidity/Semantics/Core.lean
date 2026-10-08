@@ -180,9 +180,9 @@ def Loc.resolve (σ : State C Γ) : {T : Ty} → Loc C Γ T → Res (Name × Lis
   | _, .field b f _ => do
     let (r, segs) ← b.resolve σ
     pure (r, segs ++ [.field f])
-  | _, .index _ b i => do
+  | _, .index (k := k) _ b i => do
     let (r, segs) ← b.resolve σ
-    let i ← (← i.eval σ).asInt
+    let i ← (← i.eval σ).keyAt k
     σ.glob.checkIndex r segs i
     pure (r, segs ++ [.at i])
 

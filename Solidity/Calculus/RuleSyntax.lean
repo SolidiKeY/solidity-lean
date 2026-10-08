@@ -1261,6 +1261,17 @@ partial def schemaTerm (Γ : Scope) (pos : TPos) (t : TSyntax `dl_term) : MacroM
     else `(MValT.val $(← schemaTerm0 Γ .val t))
   | _ => schemaTerm0 Γ pos t
 
+/-- A storage index: a program expression's term is the word its key is
+hashed as (`Simple.keyLower`, `Loc.lower`'s), any other term itself. -/
+partial def schemaKey (Γ : Scope) (i : TSyntax `dl_term) : MacroM Lean.Term := do
+  if let `(dl_term| $x:ident) := i then
+    if (nameParts x.getId).length == 1 then
+      match headOf Γ x with
+      | .simple s => return ← `(Simple.keyLower $s)
+      | .val e => return ← `(Val.keyLower $e)
+      | _ => pure ()
+  schemaTerm Γ .val i
+
 partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM Lean.Term
   | stx@`(dl_term| $n:num) =>
     match pos with
@@ -1323,7 +1334,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         | `(dl_term| $b:ident), `(dl_term| $x:ident) => pure (b.getId == x.getId)
         | _, _ => pure false
       let p ← if pastEnd then `(PTerm.next $(← schemaTerm Γ .path t))
-        else `(PTerm.at $(← schemaTerm Γ .path t) $(← schemaTerm Γ .val i))
+        else `(PTerm.at $(← schemaTerm Γ .path t) $(← schemaKey Γ i))
       match pos with
       | .path => pure p
       | .val => `(Term.find STerm.storage $p)
@@ -1386,8 +1397,8 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
             | some b => pure (b.raw.structEq p.raw)
             | none => pure false
           | _ => pure false
-        if past then `(PTerm.next $(← pa p)) else `(PTerm.at $(← pa p) $(← schemaTerm Γ .val i))
-      | `(dl_term| atMap($i)) => `(PTerm.at $(← pa p) $(← schemaTerm Γ .val i))
+        if past then `(PTerm.next $(← pa p)) else `(PTerm.at $(← pa p) $(← schemaKey Γ i))
+      | `(dl_term| atMap($i)) => `(PTerm.at $(← pa p) $(← schemaKey Γ i))
       | `(dl_term| $g:ident) =>
         if g.getId.toString == "size" then tposError f "`consr(p, size)` outside `find`" .path
         else `(PTerm.field $(← pa p) $g)
@@ -2918,7 +2929,7 @@ the expression itself. -/
 def loweredExpr? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
   let e ← instantiateMVars e
   for (c, n) in [(``Simple.lower, 3), (``Val.lower, 3), (``SPath.lower, 3), (``Loc.lower, 3),
-      (``MPath.lower, 3), (``MLoc.lower, 3)] do
+      (``MPath.lower, 3), (``MLoc.lower, 3), (``Simple.keyLower, 3), (``Val.keyLower, 3)] do
     if e.isAppOfArity c n then
       let x := e.appArg!
       if let some n ← fvarName? x then return some (← `(dl_term| $(nameIdent n):ident))

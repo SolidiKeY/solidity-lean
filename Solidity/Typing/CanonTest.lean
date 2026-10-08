@@ -94,7 +94,7 @@ theorem SVal.tightB_iff : ∀ {v : SVal} {T : Ty}, v.tightB T = true ↔ v.tight
   | SVal.map entries _, Ty.ref (RefTy.mapping K V) => by
     simp only [SVal.tightB, SVal.tight, Bool.and_eq_true, Bool.or_eq_true, List.isEmpty_iff,
       SVal.tightEntriesB_iff]
-    cases K.numericKey <;>
+    cases K.isKey <;>
       simp only [true_or, false_or, Bool.false_eq_true, true_and, forall_const, reduceCtorEq,
         false_implies]
   | SVal.prim _, _

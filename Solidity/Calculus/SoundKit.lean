@@ -392,6 +392,7 @@ macro "upd_unfold_with" "[" extra:simpArg,* "]" : tactic => do
     Term.eval_pv, ITerm.eval_pv,
     SPath.lower_eval, Loc.lower_eval, Val.lower_eval, Simple.lower_eval, Stmt.run, Src.value,
     Val.eval, Simple.eval_local, bind_assoc, pure_bind, bind_pure, State.writeStorage_toSVal,
+    Simple.keyLower, Val.keyLower, Term.keyAt_eval,
     OpLoc.store, OpLoc.bump, opStore, bumpStore, opLocal_eq, bumpLocal_eq, opMem, bumpMem,
     readLoc_eq, writeLoc_eq, ARhs.bind, MRhs.bind, MSrc.mval, MLoc.write, MPath.mval_var,
     MVal.asRef_ref, MLoc.read_field, MLoc.read_index, Loc.resolve, SPath.resolve, Src.pushVal,

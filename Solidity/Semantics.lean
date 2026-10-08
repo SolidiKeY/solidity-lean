@@ -752,6 +752,18 @@ def Value.asBool : Value -> Res Bool
   | Value.bool b => .ok b
   | Value.int _ => .error .stuck
 
+/-- An index of key type `k` as the word it is hashed as: a number is itself,
+a `bool` the word `0` or `1`, as solc pads it (`docs/solc-alignment.md`,
+"`bool` mapping keys").  A value of the other kind is no key of `k`. -/
+def Value.keyAt : PrimTy -> Value -> Res Int
+  | .bool, v => do pure (cond (← v.asBool) 1 0)
+  | .uint, v => v.asInt
+  | .int, v => v.asInt
+
+theorem Value.keyAt_numeric {k : PrimTy} (hk : k.isNumeric = true) (v : Value) :
+    v.keyAt k = v.asInt := by
+  cases k <;> first | rfl | exact absurd hk (by decide)
+
 def SVal.asValue : SVal -> Res Value
   | SVal.int v => .ok (Value.int v)
   | SVal.bool b => .ok (Value.bool b)
@@ -1190,9 +1202,9 @@ def Loc.resolve (σ : State) : {T : Ty} → Loc C T → Res (Name × List Seg)
   | _, .field b f _ => do
     let (r, segs) ← b.resolve σ
     pure (r, segs ++ [.field f])
-  | _, .index _ b i => do
+  | _, .index (k := k) _ b i => do
     let (r, segs) ← b.resolve σ
-    let i ← (← i.eval σ).asInt
+    let i ← (← i.eval σ).keyAt k
     σ.checkIndex r segs i
     pure (r, segs ++ [.at i])
 

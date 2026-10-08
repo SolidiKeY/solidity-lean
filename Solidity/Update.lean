@@ -1453,6 +1453,14 @@ A value position lowers with `lower`, a path position with `lowerPath`, once,
 at the rule (Maude's `lower(LV, C)`).  Lowering keeps meaning:
 `lower_eval` below. -/
 
+/-- An index of key type `k` as the word it is hashed as: a `bool` key `b`
+is `b ? 1 : 0`, as solc pads it (`Value.keyAt`; the solc frontend writes it so,
+`Frontend/SolcJson.lean`), a number is itself.  So `at` reads a number. -/
+def Term.keyAt : PrimTy → Term C → Term C
+  | .bool, t => .ite t (.lit (.int 1)) (.lit (.int 0))
+  | .uint, t => t
+  | .int, t => t
+
 def Simple.lower {p : PrimTy} : Simple C p → Term C
   | .lit n _ => .lit (.int n)
   | .bool b => .lit (.bool b)
@@ -1468,7 +1476,7 @@ def SPath.lower : {T : Ty} → SPath C T → PTerm C
 def Loc.lower : {T : Ty} → Loc C T → PTerm C
   | _, .root r _ => .root r
   | _, .field b f _ => .field b.lower f
-  | _, .index _ b i => .at b.lower i.lower
+  | _, .index (k := k) _ b i => .at b.lower (Term.keyAt k i.lower)
 
 def MPath.lower : {T : Ty} → MPath C T → ITerm C
   | _, .var x _ => .pv x
@@ -1490,6 +1498,11 @@ def Val.lower : {p : PrimTy} → Val C p → Term C
 
 end
 
+/-- An index's term: the word its key is hashed as (`Term.keyAt`), what
+`Loc.lower` writes; a rule names it so, and it prints as the index. -/
+@[reducible] def Simple.keyLower {k : PrimTy} (s : Simple C k) : Term C := Term.keyAt k s.lower
+@[reducible] def Val.keyLower {k : PrimTy} (v : Val C k) : Term C := Term.keyAt k v.lower
+
 /-- A write's source as a storage value: the value, or the copied subtree. -/
 def Src.lower {T : Ty} : Src C T → SValT C
   | .val v => .val v.lower
@@ -1501,6 +1514,20 @@ def MSrc.lower {T : Ty} : MSrc C T → MValT C
   | .ref p => .ref p.lower
 
 /-! ### Lowering keeps meaning -/
+
+/-- A key's term reads the word the key is hashed as. -/
+theorem Term.keyAt_eval (σ : State) (k : PrimTy) (t : Term C) {β : Type} (f : Int → Res β) :
+    ((Term.keyAt k t).eval σ >>= fun v => v.asInt >>= f) =
+      (t.eval σ >>= fun v => v.keyAt k >>= f) := by
+  cases k with
+  | uint | int => rfl
+  | bool =>
+    simp only [Term.keyAt, tm_eval]
+    cases t.eval σ with
+    | error _ => rfl
+    | ok v => cases v with
+      | int _ => rfl
+      | bool b => cases b <;> rfl
 
 /-- A simple value's term reads what it does: `x` is `x`. -/
 @[simp] theorem Simple.lower_eval (σ : State) {p : PrimTy} (s : Simple C p) :
@@ -1521,8 +1548,9 @@ theorem Loc.lower_eval (σ : State) : {T : Ty} → (l : Loc C T) →
   | _, .root .. => rfl
   | _, .field b f _ => by
     simp only [Loc.lower, tm_eval, Loc.resolve, b.lower_eval σ]
-  | _, .index _ b i => by
-    simp only [Loc.lower, tm_eval, Loc.resolve, b.lower_eval σ, i.lower_eval σ]
+  | _, .index (k := k) _ b i => by
+    simp only [Loc.lower, tm_eval, Loc.resolve, b.lower_eval σ]
+    simp only [Term.keyAt_eval, i.lower_eval σ]
 
 theorem MPath.lower_eval (σ : State) : {T : Ty} → (p : MPath C T) →
     p.lower.eval σ = (do (← p.mval σ).asRef)

@@ -104,12 +104,12 @@ def key : {p : PrimTy} → p.Denote → Int
   | .uint, n => n.1
   | .int, n => n.1
 
-/-- A numeric key is the integer the untyped interpreter reads.  A `bool` one
-is not: `Value.asInt` is stuck on it, where the typed key is `0` or `1`. -/
-theorem asInt_erase_key : {p : PrimTy} → p ≠ .bool → (v : p.Denote) →
-    Semantics.Value.asInt (erase v) = .ok (key v)
-  | .uint, _, _ | .int, _, _ => rfl
-  | .bool, h, _ => absurd rfl h
+/-- A key is the integer the untyped interpreter reads at its key type
+(`Value.keyAt`), a `bool` one too. -/
+theorem keyAt_erase_key : {p : PrimTy} → (v : p.Denote) →
+    Semantics.Value.keyAt p (erase v) = .ok (key v)
+  | .uint, _ | .int, _ => rfl
+  | .bool, b => by cases b <;> rfl
 
 end PrimTy
 

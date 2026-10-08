@@ -129,7 +129,7 @@ partial def extDepth (e : Expr) : MetaM Nat := do
 name (`Core/Lower.lean`'s `lower_erase`). -/
 def lowerFns : List Lean.Name :=
   [``Simple.lower, ``SPath.lower, ``Loc.lower, ``MPath.lower, ``MLoc.lower, ``Val.lower,
-    ``Src.lower, ``MSrc.lower]
+    ``Src.lower, ``MSrc.lower, ``Simple.keyLower, ``Val.keyLower]
 
 /-- A part of the program or a term, read with one local more on top:
 `Val.up` and its kin. -/

@@ -765,7 +765,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
           have hp' := PathSlot.key hp (Int.natCast_nonneg n) (by omega)
           rw [Int.toNat_natCast] at hp'
           refine .inl ⟨r, segs ++ [.at n], .hash n s₀ 0, _, ?_, ?_, hp', hall n hn, ?_⟩
-          · simp [hres, hv, Value.asInt, State.checkIndex, State.findStorage_of_findLive hsv, bind,
+          · simp [hres, hv, Value.keyAt, Value.asInt, State.checkIndex, State.findStorage_of_findLive hsv, bind,
               Except.bind, pure, Except.pure] <;> rfl
           · rw [findLive_append, hsv]
             simp only [bind, Except.bind, SVal.findLive]
@@ -792,12 +792,12 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
           have hsv' := State.findStorage_of_findLive hsv
           have hres' : (do
               let (r, segs) ← b.resolve σ
-              let i ← (← i.eval σ).asInt
+              let i ← (← i.eval σ).keyAt .uint
               σ.checkIndex r segs i
               pure (r, segs ++ [Seg.at i]) : Res (Name × List Seg)) =
                 (if n < elems.length then .ok (r, segs ++ [.at n]) else .error .revert) := by
             by_cases hin : n < elems.length <;>
-              simp [hres, hv, Value.asInt, State.checkIndex, hsv', hin, bind, Except.bind, pure,
+              simp [hres, hv, Value.keyAt, Value.asInt, State.checkIndex, hsv', hin, bind, Except.bind, pure,
                 Except.pure] <;> rfl
           rw [hres']
           have hb := boundsCheck_run m m.stack (elemSlot (size E)) n s₀
@@ -834,12 +834,12 @@ theorem loc_sim : ∀ {T : Ty} (l : Loc C T) {free : Bool} {m : Machine}, Sim C 
           have hsv' := State.findStorage_of_findLive hsv
           have hres' : (do
               let (r, segs) ← b.resolve σ
-              let i ← (← i.eval σ).asInt
+              let i ← (← i.eval σ).keyAt .uint
               σ.checkIndex r segs i
               pure (r, segs ++ [Seg.at i]) : Res (Name × List Seg)) =
                 (if k < elems.length then .ok (r, segs ++ [.at k]) else .error .revert) := by
             by_cases hin : k < elems.length <;>
-              simp [hres, hv, Value.asInt, State.checkIndex, hsv', hin, bind, Except.bind, pure,
+              simp [hres, hv, Value.keyAt, Value.asInt, State.checkIndex, hsv', hin, bind, Except.bind, pure,
                 Except.pure] <;> rfl
           rw [hres']
           have hb := fixedCheck_run m m.stack (fixedSlot (size E)) n k s₀
