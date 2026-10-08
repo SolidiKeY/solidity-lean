@@ -17,6 +17,8 @@ leaves, `empty` goes through the frames, `closeTrue` ends a `true` behind a
 box context.  Every other leaf goes to `Proves.close`: `Fml.closableB` of
 the sequent, and today's residue of its erasure (`Derive.residue`,
 `Calculus/Derive.lean`), each leaf of which is a goal of today's calculus.
+The kernel walks the leaf's context once for both (`Fml.closeErase`,
+`Calculus/Core/Closable.lean`).
 `Seq.run_sound` reads the walk back as the derivation; the kernel checks
 it as one evaluation (`Seq.residue H φ = some ls`), and the tactic leaves
 one goal `leafᵢ` per leaf, as `sol_prove` on `Core.Valid` does.
@@ -119,7 +121,7 @@ test (`Derive.groundCond`) on the erasure of `H, c ⟹ false`.  It only
 decides when to ask the closer to refute the branch (`refutes`), as today's
 `Derive.splitRes` asks it. -/
 def ground {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ) : Bool :=
-  match peel [] (((H.pre c).wrap .ff).erase []) with
+  match peel [] (((H.pre c).wrap .ff).eraseR []) with
   | (Γ', .not .tt) => match Γ'.getLast? with
     | some (.pre c') => Solidity.Derive.groundCond Γ' c'
     | _ => false
@@ -171,19 +173,25 @@ def pick {β : Type} (r : Solidity.Fml C → Option (List β × Nat)) (e : Solid
       | _ => r₁.map (·.1)
     | _ => r₁.map (·.1)
 
-/-- A leaf for the kernel: `Proves.close`'s side condition, and today's
-residue of its erasure (`pick`). -/
+/-- A leaf: `Proves.close`'s side condition and the erasure in one pass
+(`Fml.closeErase`, which is `Fml.closableB` beside `Fml.erase`), and the
+residue `r` of the erasure (`pick`). -/
+def leafWith {β : Type} (r : Solidity.Fml C → Option (List β × Nat)) {Γ : Ctx}
+    (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List β) :=
+  match (H.wrap φ).closeErase [] with
+  | some e => pick r e.2
+  | none => none
+
+/-- A leaf for the kernel: today's residue (`Derive.residue`). -/
 def leafRes {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (Solidity.Derive.Leaf C)) :=
-  cond ((H.wrap φ).closableB [])
-    (pick (Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-      Solidity.Derive.budget []) ((H.wrap φ).erase [])) none
+  leafWith (Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
+    Solidity.Derive.budget []) H φ
 
 /-- The same leaf quoted, for the tactic (`Derive.residueQuote`), the
 contract named by `c`. -/
 def leafQuote (c : Lean.Expr) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
     Option (List (Lean.Expr × Lean.Expr)) :=
-  cond ((H.wrap φ).closableB [])
-    (pick (Solidity.Derive.residueQuote c []) ((H.wrap φ).erase [])) none
+  leafWith (Solidity.Derive.residueQuote c []) H φ
 
 /-- The steps the walk is given, down a path and in all (today's
 `Derive.budget`). -/
@@ -375,12 +383,15 @@ theorem pick_valid {e : Solidity.Fml C} {ls : List (Solidity.Derive.Leaf C)}
 theorem leafRes_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ)
     (ls : List (Solidity.Derive.Leaf C)) (h : leafRes H φ = some ls)
     (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Proves C R [] H φ := by
-  unfold leafRes at h
-  cases hc : (H.wrap φ).closableB [] with
-  | false => simp only [hc, cond_false, reduceCtorEq] at h
-  | true =>
-    simp only [hc, cond_true] at h
+  unfold leafRes leafWith at h
+  split at h
+  · rename_i e he
+    rw [Fml.closeErase_eq] at he
+    obtain ⟨B, hB, rfl⟩ := Option.map_eq_some_iff.1 he
+    have hc : (H.wrap φ).closableB [] = true := by
+      simp only [Fml.closableB, hB, Option.isSome_some]
     exact Proves.close [] rfl List.nodup_nil (pick_valid h hl) hc (fun _ _ h => nomatch h)
+  · cases h
 
 end Seq
 
