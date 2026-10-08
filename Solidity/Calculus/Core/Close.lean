@@ -18,10 +18,12 @@ for every binding of the name.  The induction carries that as its
 hypothesis: the erasure holds in every state that differs from the one at
 hand only at the names `B` the binders below declare
 (`holds_of_erase_pos`).  It goes through an update, a precondition or a
-quantifier that does not mention those names, and `Fml.posB` checks this:
-the binders sit outside negations, preconditions and `{anon(…)}`, and no
-update, precondition or quantifier names them.  A leaf with a modality is
-not taken.
+quantifier that does not mention those names, and through `{anon(…)}`,
+whose untyped reading ranges over every binding of the names it anonymises
+(a loop's frame, with the body's binders under it); `Fml.posB` checks this:
+the binders sit outside negations and preconditions, and no update,
+precondition or quantifier names them.  A leaf with a modality is not
+taken.
 
 `posB` is evaluated by the kernel inside `sol_prove`'s check, so it is
 written by `Fml.rec`, and the checks it calls by a recursor or by `casesOn`
@@ -168,7 +170,8 @@ def disjointB (B vs : List Var) : Bool := !vs.any B.contains
 /-- `Fml.posB`'s compiled twin. -/
 def Fml.posM : {Γ : Ctx} → Fml C Γ → List Var → Option (List Var)
   | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => some []
-  | _, .not φ, ns | _, .anon _ φ, ns => if φ.plainB ns then some [] else none
+  | _, .not φ, ns => if φ.plainB ns then some [] else none
+  | _, .anon _ φ, ns => if φ.plainB ns then some [] else φ.posM ns
   | _, .and φ ψ, ns => (φ.posM ns).bind fun B₁ => (ψ.posM ns).map (B₁ ++ ·)
   | _, .imp a φ, ns =>
     if a.plainB ns then (φ.posM ns).bind fun B =>
@@ -187,8 +190,9 @@ def Fml.posM : {Γ : Ctx} → Fml C Γ → List Var → Option (List Var)
 
 /-- **A leaf closable by its erasure**: `some B`, `B` the names its hidden
 binders declare, when they sit where `holds_of_erase_pos` takes them (no
-binder under a negation, a precondition, a modality or `{anon(…)}`; no
-update, precondition or quantifier naming one; every binder fresh), and
+binder under a negation, a precondition or a modality, but one under
+`{anon(…)}` taken; no update, precondition or quantifier naming one; every
+binder fresh), and
 every diamond update keeps the `bool` locals `bool`s (`Upd.boolB`);
 `none` otherwise. -/
 @[implemented_by Fml.posM]
@@ -211,7 +215,7 @@ def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
       if ns.contains x then none
       else (ih (x :: ns)).bind fun B => if B.contains x then none else some B)
     (bind := fun _ x _ _ ih ns => if ns.contains x then none else (ih (x :: ns)).map (x :: ·))
-    (anon := fun _ φ _ ns => if φ.plainB ns then some [] else none) φ
+    (anon := fun _ φ ih ns => if φ.plainB ns then some [] else ih ns) φ
 
 /-! ## The checks are sound -/
 
@@ -409,13 +413,42 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
       · rfl
     exact (holds_erase (.not φ) (Fml.plain_of_plainB φ hp) hag).2
       (H τ (Semantics.EnvAgreeExcept.refl _ _))
-  | anon xs φ _ =>
+  | anon xs φ ih =>
     intro ns B h σ τ hag H
-    have hp : φ.plainB ns = true := by
-      cases hn : φ.plainB ns
-      · simp only [Fml.posB, hn] at h; cases h
-      · rfl
-    exact holds_of_erase_anon (Fml.plain_of_plainB φ hp) hag (H τ (Semantics.EnvAgreeExcept.refl _ _))
+    by_cases hp : φ.plainB ns = true
+    · exact holds_of_erase_anon (Fml.plain_of_plainB φ hp) hag
+        (H τ (Semantics.EnvAgreeExcept.refl _ _))
+    change (if φ.plainB ns then some [] else φ.posB ns) = some B at h
+    rw [if_neg hp] at h
+    -- a binding of the anonymised locals, on both sides: `τ₁` is `τ` but at
+    -- their names
+    intro b
+    obtain ⟨τ₁, h₁, h₂⟩ := Agree.anon b xs hag
+    have hτ₁ : withLocals σ.glob τ₁.env = τ₁ := by
+      have hg := h₁.glob
+      rwa [State.glob_anon b xs σ] at hg
+    have hττ₁ : EnvAgreeExcept (xs.map fun x => x.2.name ns) τ τ₁ := by
+      rw [← hag.glob, ← hτ₁]
+      exact ⟨rfl, rfl, rfl, rfl, fun y hy => (h₂ y hy).symm, rfl, rfl⟩
+    refine ih h h₁ fun ρ hρ => ?_
+    -- `ρ` is `τ` with `B` as `ρ` has them, then the anonymised names as `ρ` has them
+    have hτρ := Solidity.Mutability.agree_trans
+      (Solidity.Mutability.agree_mono (fun _ hy => List.mem_append_left B hy) hττ₁)
+      (Solidity.Mutability.agree_mono (fun _ hy => List.mem_append_right _ hy) hρ)
+    have Hρ₀ : Solidity.holds ((mergeOn B τ ρ).anon (xs.map fun x => x.2.name ns)
+        fun y => Semantics.lookupBy y ρ.env) (φ.erase ns) :=
+      H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) _
+    refine holds_of_envAgree_nil (EnvAgreeExcept.mk (s₁ := (mergeOn B τ ρ).anon
+      (xs.map fun x => x.2.name ns) fun y => Semantics.lookupBy y ρ.env) (s₂ := ρ)
+      hτρ.storage hτρ.heap hτρ.nextId hτρ.net (fun y _ => ?_) hτρ.selfBalance hτρ.tx) Hρ₀
+    simp only [Semantics.State.anon, lookupBy_anonEnv]
+    split
+    · rfl
+    · rename_i hyn
+      by_cases hyB : y ∈ B
+      · exact lookupBy_mergeOn hyB
+      · rw [← (mergeOn_agree B τ ρ).env y hyB]
+        exact hτρ.env y fun hm => (List.mem_append.1 hm).elim hyn hyB
   | modal => intro _ _ h; cases h
   | and φ ψ ihφ ihψ =>
     intro ns B h σ τ hag H
