@@ -316,7 +316,10 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 Two directories, by proof style (`.claude/rules/derivations.md`).
 
 `Examples/Chains/` — the calculus's worked examples, one file per section in
-its order, each example a chain in its printed lines and fresh names:
+its order, each example a chain in its printed lines and fresh names, read by
+the scoped calculus (`open scoped Solidity.Core.Surface`); a file's trailing
+`Left on Update.lean's calculus` part keeps the examples that do not read
+scoped yet, with the reason:
 
 | Module | Its examples |
 |---|---|
