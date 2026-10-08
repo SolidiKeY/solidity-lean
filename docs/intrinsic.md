@@ -1024,6 +1024,62 @@ elaborates with every module (no name clash).
 
 **Merge order:** sound → symex → chains → tree. Each later lane merges `intrinsic` and re-checks its own files.
 
+### W2 lane `tree` (`w2-tree`, 2026-10-08)
+
+- **The proof tree** (`Calculus/Core/ProofTree.lean`): `Core.ProofTree.build`
+  and `ofFormula` grow `Calculus/ProofTree.lean`'s `Tree` (rows, labels,
+  JSON and display reused) on a scoped goal `H ⊢ φ`.  The rule at a
+  statement is the one `ruleOf?` names, applied as
+  `apply update (Taclet.toStep .r)` (`LeanTaclet.toStep` for Lean's rules,
+  `rfl` for the non-emptiness of `branches`/`cases`); an operator family's
+  rule prints as KeY's taclet at the operator (`keyName`, by today's
+  constructor name).  `Proves.impRight`/`allRight`/`emptyModality` are the
+  aliases a walk names.  **Silent moves**: a scope end (an update of pops,
+  `updIntro`) and a hidden binder (`bindIntro`) are folded into the node
+  before them, and at the root, since KeY has no step there.  Leaves close
+  by `closeTrue` and then `Config.closers` (empty: a closer of scoped
+  leaves, `Proves.close` from `sound` and the erased closer from `symex`,
+  is to be plugged in once merged).
+- **The commands** (`Tools/CoreInspect.lean`): `#proof_tree`, `#proof_node`,
+  `#proof_tree_json` on a scoped formula, second elaborators of today's
+  syntax; `#step` names the rule the scoped strategy fires (`ruleAtC?`, at
+  the statement `Fml.stepAt` looks at), no longer through the erasure.
+- **Callbacks** (`Calculus/Core/Callback.lean`): `Core.CallbackTaclet`, the
+  three lines read under `Core.Schema`, each its no-callback twin
+  (`toTaclet`) and so `Stmt.step`'s premise (`toStep`); a printer for it
+  (the `try` line still escapes, as `tryCallNoCallbackBox`'s does, the W1
+  Delab item).  `ProvesC I H φ` stated with solkey's goals: `plain`,
+  `intro`, `allIntro`, `updIntro`, `bindIntro`, `update`, `unfold`, `bind`
+  (statements that do not fork, `Rule`s), `split`, `empty`, `callback`,
+  `send`, `tryCall`.  The invariant is a closed `Fml C []`, read in any
+  scope past an update that drops every local (`Fml.closedAt`, invisible
+  when printed), so no formula weakening is needed; a rule's fresh index is
+  past it (`Hyps.freshC`).  Printer `dl{ ..H ⟹ᶜ[I] φ }`.
+- **The flip switch** (`Calculus/Core/Surface.lean`):
+  `open scoped Solidity.Core.Surface` makes `dl!{}`, `dl![m]{}`, `dl[C]{}`,
+  `dl[C, m]{}` and their sequent lines `cdl…`, `spec!`/`problem!` `cspec…`/
+  `cproblem…`, `⊨ φ` `valid% φ` (scoped validity for a scoped formula,
+  today's otherwise; `Core.Valid` prints as `⊨`), and `⊢ φ` the scoped
+  sequent with nothing assumed.  Each is a `scoped macro_rules`, tried
+  before today's elaborator.  The commands read `dl!{}` scoped when the
+  switch is on (`surfaceOn`, the macro `core_surface%`).  Chain notation is
+  the `chains` lane's; it reads scoped once its elaborator takes a
+  `Core.Fml` line, since its lines are `dl!{}`.
+
+Pins (`Examples/Tactics/CoreProofTree.lean`, `CoreSurface.lean`,
+`CoreCallback.lean`) differ from today's `Examples/ProofTree.lean` where
+the scoped calculus does, each for a reason W3's list should carry:
+a parameter is bound by `∀` (`cdl!`), so a tree starts with `allRight`;
+a rule that leaves no statement goes on into the rest or past the frames
+(`Fml.modalK`, G0 condition 6), so **no `emptyModality` node** follows it
+(a new pin reason for W3: today's trees have one after every last
+statement); the branch's `}` prints in a split's goals.
+
+Found, not this lane's: `Core.Proves.valid` leaves its `R` open on a
+`⊨` goal (`apply Proves.valid` needs `(R := .all)`); an update of a
+comparison (`se1 := x == 1`) escapes in today's printer too (the `dl_term`
+grammar has no `==`).
+
 ## W3 — the flip, file by file (4 lanes)
 Each lane adds the `open scoped` line to the files it owns and re-pins them.
 
