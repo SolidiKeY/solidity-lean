@@ -5403,6 +5403,163 @@ them were checked before it.
 - **Left**: today's rule-map rows for `useContract` (W5's docs);
   `Calculus/Contracts.lean` (W4 `calc-del`).
 
+### W4 prep integration (2026-10-08)
+
+- **Merged** into `intrinsic`, in order: `w4-moves`, `w4-theorems`,
+  `w4-contracts` (merge commits, no fast-forward).  `w4-moves` merged
+  clean.  `w4-theorems`: two conflicts, both kept both ways.
+  `Calculus/Core/Delab.lean`: both lanes print a block read under a fresh
+  local; kept `w4-moves`' `wkUp?` (`(Prog.wk up P).2.2`, unfolded) beside
+  `w4-theorems`' `withProofHoles`, and in `progPieces` the theorems lane's
+  `Prog.up` of a schema block first, then the moves lane's unfolded form
+  (before and after `whnf`).  `Examples/Notation.lean`'s imports: the moves
+  lane's `Tools/Inspect` (`Tools/CoreInspect` is deleted) and the theorems
+  lane's `Core/SequentNotation`.  `w4-contracts`: this file only.  The
+  decisions list's three 33s: `w4-moves` keeps **33–35**, `w4-theorems`'
+  two become **36** (`⊢ₖ` restricts its rules) and **37** (the sequent
+  scope), entered in the list here, and `w4-contracts`' becomes **38**
+  (`ensures` at the snapshots); the citations follow (the theorems
+  section's list and table, `Theorems.lean`'s and
+  `Core/SolkeyFragment.lean`'s docstrings).  `Solidity.lean` and
+  `docs/module-map.md` merged with no duplicate line.  `dups.py`: only the
+  known `Evm/Repr`/`Examples/Verify` `as` false positive.
+- **Build**: `lean_build` over `Solidity`, `solkeycheck`, `SolidityCorpus`
+  and `SolkeyTestSuite` (the last two in `defaultTargets` for the run only,
+  reverted after): 335 jobs, **green at the first run**, no OOM kill, no
+  code fix.  One doc fix: `check-doc-paths` read a constructor name in
+  `Core/RuleExists`' docstring (`Rule`'s `lean`, written qualified) as a path;
+  reworded.  No new `sorry` (21), `axiom` (1) or `maxHeartbeats`
+  override (35), as at `31951be`.  `check-orphans`: 321 reachable, only the
+  git-excluded `Scratch/` modules orphaned.  `check-doc-paths`: OK (50
+  ambiguous citations, all resolving).  `check-rule-text`: empty.
+  `check-testsuite.sh` against solkey `1b4341a303` (extracted read-only by
+  `git archive`): ok (438 functions = 435 derived + 1 pending + 1 divergent
+  + 1 excluded; 2 skip).  `solkeycheck` built (no rule name or annotation
+  changed).  Not run: `check-corpus.sh` (it needs `lake`), and the
+  read-only finder/skeptic review pass.
+- **W3 gates**, re-timed by the W3d integration's method (each file copied
+  under `Solidity/Scratch/`, opened in a fresh worker, `/proc` sampled
+  every 20 ms, wall from the worker's start to its last CPU, the worker
+  stopped after), the merged state (`bcbaa0b`) and the pre-merge state
+  (`31951be`, a detached worktree) alternated, two runs a tree.  The
+  machine was quiet this time (load 0.2–0.8, runs within 2% of each
+  other).  The last column is the ratio times the W3d integration's figure
+  on its scale:
+
+  | Module | Limit | `31951be`, raw (min) | merged, raw (min) | ratio | merged, on the integration's scale |
+  |---|---|---|---|---|---|
+  | Derived9–11 | 22.9 s | 23.68 s (7.80 + 12.03 + 3.85) | 23.53 s (7.81 + 11.86 + 3.86) | 0.99 | about 22.3 s, within |
+  | `TestSuite/Problems` (`legacy`) | 1.44 s | CPU 0.67 s | CPU 0.64 s | 0.96 | 1.03 s |
+  | `TestSuite/CoreProblems` | 1.44 s | CPU 1.23 s | CPU 1.22 s | 0.99 | 1.33 s |
+  | `Examples/ProofTree` | 12.1 s | 13.37 s | 10.90 s | 0.82 | about 10.5 s, **within** (was 12.9 s, over) |
+  | `Examples/Chains/Storage` | 9.0 s | 8.09 s | 8.05 s | 1.00 | 7.6 s |
+  | `Solkey/TestSuite` | 12.5 s | 11.54 s | 11.43 s | 0.99 | 10.1 s |
+  | `Examples/Benchmark/Syntax` | 1.44 s | CPU 1.52 s | CPU 1.48 s | 0.97 | 1.44 s, at the limit (file and imports unchanged: as W3d) |
+
+  `ProofTree` is back within: `w4-contracts` moved its chain sections to
+  `Tactics/CoreChains` (the lead's approval), the 0.9 s the W3d gates lane
+  attributed to them.  The aggregate is about 53.0 s against 59.4 s of
+  limits (54.3 against 60.8 with `CoreProblems`): **under by about 6.4 s**
+  (W3d: 3.7 s).  Every row within or at its limit; nothing slowed by the
+  three lanes.
+- **Pins changed, union of the lanes** (each lane's section has the
+  detail; this integration changed none):
+  - *W5's qualified-name reason* (`w4-moves`): the `#taclet` pins of
+    `Examples/Tools` (`storageFieldWriteSave`,
+    `"storageFieldWriteCaptureSrc"`, `sendNoCallbackBox`,
+    `sendWithCallbackBox`, `ifTrue`) and `Examples/Tactics/Loops`
+    (`whileUnwind`, `loopExit`, `whileInvariantBox`, `whileClose`,
+    `whileNoVariantDiamond`, and `whileInvariantDiamond`/
+    `functionCallArgCapture`, whose rule lines are back after the lane's
+    review fix): scoped names and binders, `toStep` soundness; rule lines
+    unchanged.
+  - *Deleted with `Tools/InspectToday`* (`w4-moves`, task-named):
+    `Examples/Tools`' `#wp` of today's `int` product,
+    `Tactics/CoreNotation`'s today's `#wp`.
+  - *The W3d inventory's kept pins* (`w4-theorems`, task-named),
+    `Examples/Notation`: three `@Core.Taclet.*` `#check`s, the scoped
+    `sequentialToParallelNil` in place of today's `Proves.merge`, the
+    sequent-spine examples in the scoped sequent notation (decision 37).
+  - `Core/RuleText`'s `#check_rule_text`: 155 of 158 `Taclet`s, 7 of 9
+    `LeanTaclet`s (both lanes' `Core.Delab` work; was 140, 6).
+  - `Theorems.lean`: `Main.Today`'s five `#print axioms` removed; four new
+    (`rule_exists`, `rule_of_step`, `solkey_rule_exists`,
+    `solkey_lt_calculus`), all `[propext]`.
+  - *Moved, no text change* (`w4-contracts`, the lead's approval of
+    2026-10-09): `ProofTree`'s `sol_chain?`/`#chain`/`sol_rws` pins to
+    `Tactics/CoreChains`.
+  - The fresh names (`se1`, `sp1`) are unchanged.
+- **Awaiting the lead**: proposed decisions 33–35 (`w4-moves`: `Notation`/
+  `Spec`, `Logic`/`Derive` and `Core.RuleText` leave `calc-del`'s list),
+  36–37 (`w4-theorems`: `⊢ₖ` reads its rule set; the sequent scope), 38
+  (`w4-contracts`: `ensures` at the snapshots).
+- **The W4 inventory, remaining** (the W3d list's numbering):
+  1. *TestSuite* (unchanged): the legacy statements
+     (`N.f.problem.legacy`, meta only) and `Report.lean`'s count, which
+     reads either `⊢`.
+  2. done.
+  3. *Today's sequent rules on updates* (unchanged, M6c):
+     `Tactics/TermTaclets`.
+  4. done.
+  5. *The closer's input* (unchanged until M6c): `NFml`, `Tactics/Decide`'s
+     closing block and fragment pins, `ProofTree`'s guards on today's
+     residue; `Proves.close`/`Seq.leafRes` hand every scoped leaf to
+     today's closer.  Under proposed decision 34 this keeps `Logic`,
+     `Derive` and through them `RuleSoundness`, `SoundUpdate`, `SoundKit`,
+     `SoundUnfold`, `SoundLoop`, `Symex`, `Completeness` and today's
+     `Rules` body past `calc-del`, for `modal` to trim.
+  6.–7. done.
+  8. *Contracts*: done (scoped `\old`, several results, memory return,
+     `sol_close` reads `{havoc}`; `Core.Contracts` (`sol_erase`) deleted;
+     decision 31's `callDeposit` "post" by `sol_close`).  Left: today's
+     `Calculus/Contracts.lean` (`calc-del`); the `useContract` rows of
+     `docs/lean-key-rule-map.md` (W5's docs); the `{havoc}` lemmas reach
+     only importers of `Calculus/CloseHavoc.lean` (move them into `Close`
+     if another havoc user needs them); proposed decision 38.
+  9. *Chains past the program* (unchanged): `Core.ChainKit`,
+     `Core.ChainGen`, `Core.LastLine` (and `Core.Chains`) import today's
+     `Chains`, `ChainGen`, `LastLine`: the rewrite links run as today's
+     `Fml.Via`, whose `Link` carries program steps.  The cut: a
+     rewrite-only `Link`/`Via` with its own `Via.valid`, and the rewrite
+     elaborator (`elabChain`, `solveChain`, `rwLabel`, `rwAnyFind`,
+     `rwCandidatesWith`, `searchRewrites`, `stillApplies`) moved over.
+  10. *Whole modules on today's reading*: done for `Tools/Inspect`,
+      `Tools/Taclet` (scoped tables), `Tools/InspectToday`/`CoreInspect`
+      (deleted), `Theorems.lean` (`Main.Today` replaced: scoped
+      `rule_exists`, `rule_of_step`, `solkey_rule_exists`,
+      `solkey_lt_calculus`; `solkey_eq_calculus` and termination dropped)
+      and `Examples/Notation`'s kept pins.  Left: today's
+      `Calculus/SolkeyFragment.lean` and `Termination.lean`, now imported
+      only by `Solidity.lean` (`calc-del`); proposed decision 36 (a
+      low-module edit to `Calculus/Core/Proves.lean`, then the
+      judgement-level `solkey_eq_calculus`/`solkey_lt_calculus` and
+      `Taclet.premise_inSolkey`); `docs/solc-validation.md`
+      (`symex_terminates`) and `docs/loops.md` (`symex_normalizes`) still
+      cite today's termination (M7's docs pass).  Unchanged:
+      `Tools/Common`'s untyped candidate generation, `TState.lift?`.
+  11. *Core modules importing today's* (`w4-moves`' "Left" table): cut
+      for `Core.Proves`, `Core.Symex`, `Core.WalkSyntax`, `Core.Sequents`,
+      `Core.SoundArms`, `Core.Taclet`, `Core.ProofTree` (off today's
+      `ProofTree`), `Core.Close`, `Core.Spec`, `Core.SoundKit`.  Left:
+      the chains (item 9); `Core.Derive` → `Derive` and `TheoryRewrite` →
+      `Logic` (decision 34; the table's `Core.Contracts` row is gone,
+      `w4-contracts` deleted the module); `RuleShapes` → `Rules` (rows
+      keyed by today's constructors: re-key on plain names, or at W5);
+      `Core.RuleText` → `Rules` (decision 35).  `sem-del`'s edges,
+      untouched: `Core.Arms` → `Mutability`, `Core.HoldsErase` and
+      `Problem` → `RunErase`, `Evm.CoreCompile` → `Evm.Compile`,
+      `Typing.StraightRun` → `TypedRunErase`.
+  12. done.
+  13. *Files with no scoped formula* (unchanged): `Tactics/Theory`,
+      `Benchmark/Syntax`, the `Core*` twins (W5's rename).
+  14. *`#check_rule_text`* (new): `functionBodyExpand`,
+      `internalCallExpand`, `tryCallNoCallbackBox` (`Taclet`),
+      `functionCallArgCapture` (escapes on both sides),
+      `tryCallDiamond` (`LeanTaclet`) do not print as today's.
+- **Lane worktrees removed** (`w4-moves`, `w4-theorems`, `w4-contracts`,
+  and the timing worktree of `31951be`; the branches stay) and their Lean
+  servers and workers stopped.
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
