@@ -419,7 +419,7 @@ one.
   fields, and no solidity taclet mentions a well-formed heap.  Here the
   storage is any state of the interpreter, so the premise says it is one
   the contract can be in: the model's own Solidity-reachability assumption,
-  not KeY's.  Reachable is by the typed run on the bridge (`Reachable`,
+  not KeY's.  Reachable is by the typed run (`Reachable`,
   since W1; the scoped run's is `ReachableS`); `holds` reads the untyped
   one, and a storage it reaches from a block the locals check accepts is
   `ReachableS` (`ReachableU.reachableS`), and `Reachable` when its words,

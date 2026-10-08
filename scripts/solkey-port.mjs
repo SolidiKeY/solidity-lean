@@ -48,9 +48,7 @@
  * The diamond at the store is a closed term, and the kernel decides it
  * (`corpus_decide`, i.e. `decide +kernel` on the typed run, `Corpus.trunOk`).
  * Where the typed route does not apply — the program does not resolve to
- * the scoped syntax, or it is off the bridge between the typed and the
- * untyped runs (`Prog.bridgeOk`: a `bool` mapping key, a copy at a struct
- * whose members share a name) — the run is instead pinned by `#eval` of
+ * the scoped syntax — the run is instead pinned by `#eval` of
  * `Corpus.outcome` under `#guard_msgs`.
  *
  * ## Verdicts
@@ -62,7 +60,8 @@
  *
  *   - `proved`: a theorem, kernel-checked;
  *   - `evaluated`: the run ends normally, pinned by `#eval` (reason: the
- *     typed route does not apply: no resolution, or off the bridge);
+ *     typed route does not apply: the program does not resolve to the
+ *     scoped syntax);
  *   - `open`: the run reverts, panics (a failed `assert`) or is stuck —
  *     solkey proves it, the interpreter disagrees (reason: how the run
  *     ends), pinned by `#eval`;
@@ -308,9 +307,7 @@ const UNPORTED_REASON =
 /** `corpus_decide`'s typed route does not apply; the run is `#eval`-pinned. */
 const EVALUATED_REASON =
   "the typed run does not apply: the program does not resolve to the " +
-  "scoped syntax, or it is off the bridge (`Prog.bridgeOk`: a `bool` " +
-  "mapping key, or a copy at a struct whose members share a name); " +
-  "pinned by `#eval`";
+  "scoped syntax; pinned by `#eval`";
 
 /** Lean keywords a Solidity local may be named. */
 const LEAN_KEYWORDS = new Set([
@@ -1387,8 +1384,7 @@ function parityDoc(allRows, internal, commit) {
     "",
     "- **proved**: a theorem, decided by the kernel;",
     "- **evaluated**: the run ends normally, but the typed run does not",
-    "  apply (the program does not resolve, or it is off the bridge: a",
-    "  `bool` mapping key, a struct with a repeated member name), so it is",
+    "  apply (the program does not resolve to the scoped syntax), so it is",
     "  pinned by `#eval`;",
     "- **open**: solkey proves it, the interpreter's run from the initial",
     "  store does not end normally (pinned by `#eval`);",
@@ -1501,7 +1497,7 @@ async function main() {
         );
       } else {
         const why = e.status === "evaluated"
-          ? "The typed run does not apply (no resolution, or off the bridge); the run is pinned instead."
+          ? "The typed run does not apply (the program does not resolve to the scoped syntax); the run is pinned instead."
           : "solkey proves this; the run from the initial store does not end normally.";
         blocks.push(
           `/-! ${doc.join("\n")}\n\n${why} -/\n\n` +

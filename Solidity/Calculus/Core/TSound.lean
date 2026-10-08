@@ -19,12 +19,13 @@ premise `∀ mv. [mv = r; ω] φ` is vacuous there, and no typed reading of the
 binder makes it say what the conclusion needs: the instance that does is
 the reference `r` is about to allocate, a dangling one, which a typed state
 cannot hold (M3's untyped binder takes it).  So `Stmt.TSound C` is reduced
-to exactly that arm in those states (`Stmt.TResidual`): under the diamond
-it holds outright (`Stmt.tsound_diamond`), and `Proves.tvalid_of_residual`
-is `Proves.tvalid` given it.  The residual is false (`Stmt.not_tresidual`:
-`[uint[] memory m = new uint[](1);] false` from an empty heap), so
-`Stmt.TSound` is too (`Stmt.not_tsound`), and `Proves.tvalid` waits on a
-typed reading that can name an object not yet allocated.
+to exactly that arm in those states (`Stmt.TResidual`,
+`Stmt.tsound_iff_residual`); under the diamond every rule holds outright
+(`Stmt.tsound_diamond`).  The residual is false at every contract
+(`Stmt.not_tresidual`: `[uint[] memory m = new uint[](1);] false` from the
+initial state, whose heap is empty), so `Stmt.TSound C` is too
+(`Stmt.not_tsound`), and `Proves.tvalid`, which assumes it, waits on a typed
+reading that can name an object not yet allocated (decision 17, open).
 -/
 
 namespace Solidity.Core
@@ -79,37 +80,33 @@ theorem Stmt.tsound_iff_residual : Stmt.TSound C ↔ Stmt.TResidual C := by
     · exact Stmt.tstepSound k m s σ p hp hok
     · exact h k m s p hp σ hok
 
-/-- **A goal proved with an empty context is valid over the typed state**,
-given the residual arm. -/
-theorem Proves.tvalid_of_residual (h : Stmt.TResidual C) {R : RuleSet} {φ : Fml C []}
-    (d : Proves C R [] .nil φ) : TValid φ :=
-  Proves.tvalid (Stmt.tsound_iff_residual.2 h) d
-
 /-- **The residual is false**, so it is a gap in the typed reading, not in
-the proof: `[uint[] memory m = new uint[](1);] false` fails from a state with
-an empty heap, where `memoryLocalDeclInitDrop`'s premise
-`∀ m. [m = new uint[](1);] false` holds, its binder having no value. -/
-theorem Stmt.not_tresidual : ¬ Stmt.TResidual StandardExample := by
+the proof: `[uint[] memory m = new uint[](1);] false` fails from the initial
+state of any contract, whose heap is empty, where
+`memoryLocalDeclInitDrop`'s premise `∀ m. [m = new uint[](1);] false` holds,
+its binder having no value.  The program touches no storage, so the run's
+halt reduces at every `C`. -/
+theorem Stmt.not_tresidual (C : Contract) : ¬ Stmt.TResidual C := by
   intro h
-  let s : Stmt StandardExample [] [.mem (.array .uint)] :=
+  let s : Stmt C [] [.mem (.array .uint)] :=
     .declMem (.array .uint) (.user "m") (some (.newArr (.lit 1 rfl) rfl)) rfl rfl
-  have hempty : ∀ v : (LTy.mem (.array .uint)).TDenote StandardExample
-      (TState.init StandardExample).H, False := fun v => by
+  have hempty : ∀ v : (LTy.mem (.array .uint)).TDenote C
+      (TState.init C).H, False := fun v => by
     have := v.get?
     simp only [TState.init, List.getElem?_nil, reduceCtorEq] at this
-  have hc := h 0 .box s _ rfl (TState.init StandardExample) (fun hok => (hok rfl).elim hempty)
-    (Prog.nil : Prog StandardExample _ _) .nil (.not .tt) (fun v => (hempty v).elim)
-  have hok : (Prog.trunFrames (TState.init StandardExample) (.cons s .nil) .nil).halt? = none := by
-    decide +kernel
+  have hc := h 0 .box s _ rfl (TState.init C) (fun hok => (hok rfl).elim hempty)
+    (Prog.nil : Prog C _ _) .nil (.not .tt) (fun v => (hempty v).elim)
+  have hok : (Prog.trunFrames (TState.init C) (.cons s .nil) .nil).halt? = none := by
+    rfl
   obtain ⟨h₁, _⟩ := hc
   revert h₁ hok
-  cases Prog.trunFrames (TState.init StandardExample) (.cons s .nil) .nil with
+  cases Prog.trunFrames (TState.init C) (.cons s .nil) .nil with
   | ok _ => exact fun _ h₁ => h₁ trivial
   | error _ => exact fun h _ => nomatch h
 
-/-- So `Stmt.TSound` is false: `Proves.tvalid`'s hypothesis cannot be met
-until the typed reading changes (decision 17). -/
-theorem Stmt.not_tsound : ¬ Stmt.TSound StandardExample :=
-  fun h => Stmt.not_tresidual (Stmt.tsound_iff_residual.1 h)
+/-- So `Stmt.TSound C` is false at every contract: `Proves.tvalid`'s
+hypothesis cannot be met until the typed reading changes (decision 17). -/
+theorem Stmt.not_tsound (C : Contract) : ¬ Stmt.TSound C :=
+  fun h => Stmt.not_tresidual C (Stmt.tsound_iff_residual.1 h)
 
 end Solidity.Core

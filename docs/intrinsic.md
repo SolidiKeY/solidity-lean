@@ -2457,10 +2457,12 @@ has no bound and never sees it (`THalt.erase` maps it to `diverge`, and
 elaborator refuses a type that names one with solc's message
 (`unknownStructMsg`, both `ty!` and `elabTy`), pinned in
 `Syntax/Splice.lean` (`struct BadDup: identifier already declared: member
-a`).  `structDef_nodup` (every struct of the table, `split <;> rfl`) and
-`TyNodup.all` (`Semantics/Core/StorageErase.lean`) replace `nodupStructs`,
-`Ty.nodupS` and `TyNodup.of_nodupS*`; `Storage.writeStorage_erase` lost its
-`TyNodup` argument.  Deleted with them: `Src`/`NewLhs`/`Stmt`/`Prog.bridgeOk`,
+a`).  `structDef_nodup` (every struct of the table, `split <;> rfl`,
+`Semantics/Core/StorageErase.lean`) replaces `nodupStructs`, `Ty.nodupS`
+and `TyNodup` with its lemmas: `SVal.overlay_erase`, `SFields.overlay_erase`
+and `SVec.overlayOn_erase` take no hypothesis (the struct case reads
+`structDef_nodup`), and `Storage.writeStorage_erase` lost its `TyNodup`
+argument.  Deleted with them: `Src`/`NewLhs`/`Stmt`/`Prog.bridgeOk`,
 `Src.nodup`, the bridge hypotheses of `Stmt.trun_erase`, `Prog.trun_erase`,
 `Prog.run_of_trun`, `Prog.run_halt_of_trun`, `Prog.trun_init_erase` and
 every `TRun.*_erase`, `Prog.bridgeOk_of_straight` and kin, `Reachable`'s
@@ -2498,11 +2500,14 @@ the fallback can be met; recorded, not implemented.**
   statement meets `Stmt.TArmOk`, which is now only that arm's condition;
   `Stmt.tsound_diamond`, every rule sound under the diamond in every state;
   `Stmt.tsound_iff_residual`, `Stmt.TSound C` is exactly the arm in the
-  states failing the condition (`Stmt.TResidual`), and
-  `Proves.tvalid_of_residual`.  And the residual is false:
-  `Stmt.not_tresidual` (`[uint[] memory m = new uint[](1);] false` from an
-  empty heap: the premise holds, its binder having no value; the conclusion
-  fails), hence `Stmt.not_tsound`.  So **`Proves.tvalid` with no
+  states failing the condition (`Stmt.TResidual`).  And the residual is
+  false at every contract: `Stmt.not_tresidual C`
+  (`[uint[] memory m = new uint[](1);] false` from `TState.init C`, whose
+  heap is empty: the premise holds, its binder having no value; the
+  conclusion fails; the run's halt reduces by `rfl` at any `C`), hence
+  `Stmt.not_tsound C`.  (`Proves.tvalid_of_residual`, `Proves.tvalid` from
+  the residual, was deleted in review: its hypothesis is false, so it said
+  nothing.)  So **`Proves.tvalid` with no
   hypothesis is not proved**: the per-rule route cannot give it while a
   memory local must name an existing object.
 - *Options for the lead*: (a) a typed state whose locals may name objects
@@ -2515,6 +2520,13 @@ the fallback can be met; recorded, not implemented.**
   soundness through M3's (`Proves.valid`, unconditional) and a bridge
   `holds σ.erase φ → tholds σ φ` on the formulas the strategy reaches.
   Each is a low change (the typed state or the terms), for W4 or before.
+- *A partial result, not yet done*: `Proves.tvalid` for derivations that
+  fire rules under the diamond only, from `Stmt.tsound_diamond` (no
+  `TArmOk`).  `Proves` is a `Prop`, so "fires only diamond rules" cannot be
+  a function of the derivation: it needs a second inductive (or `Proves`
+  indexed by the modalities it may fire), or a formula predicate that every
+  premise keeps, which a loop's invariant and postcondition (any formula,
+  boxes included) do not give for free.
 
 ## Baselines (M0)
 

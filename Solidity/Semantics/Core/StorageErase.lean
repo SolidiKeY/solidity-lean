@@ -12,7 +12,7 @@ x)`, and `toRes` has no `stuck`.  This is the storage half of `run_erase`
 
 A struct is copied member by member in order (solc), and the untyped
 `overlay` looks each member up by name, which agrees because a struct's
-members have distinct names (`TyNodup.all`: solc refuses a struct that
+members have distinct names (`structDef_nodup`: solc refuses a struct that
 repeats one, and so does the elaborator, decision 16).
 
 `copyStToM` is never stuck on a type without mappings (`SVal.copyStToM_ok`),
@@ -527,17 +527,8 @@ end
 /-! ## Copy over
 
 A struct is copied member by member, in order (solc); the untyped `overlay`
-finds each member of the old value by name.  The two agree when no struct
-the type reaches has two members of one name. -/
-
-/-- No struct `T` reaches has two members of one name. -/
-inductive TyNodup : Ty → Prop where
-  | prim {p : PrimTy} : TyNodup (.prim p)
-  | struct {s : Name} (hk : Semantics.nodupKeysB (structDef s) = true)
-      (hf : ∀ fT ∈ structDef s, TyNodup fT.2) : TyNodup (.ref (.struct s))
-  | array {E : Ty} (h : TyNodup E) : TyNodup (.ref (.array E))
-  | fixed {E : Ty} {n : Nat} (h : TyNodup E) : TyNodup (.ref (.fixed E n))
-  | mapping {K V : Ty} : TyNodup (.ref (.mapping K V))
+finds each member of the old value by name.  The two agree because no
+struct has two members of one name (`structDef_nodup`). -/
 
 /-- **Every struct of the table has distinct member names**: solc refuses
 a struct that repeats one (`refusedStructs`, decision 16), and so does the
@@ -550,32 +541,6 @@ theorem tyRank_le_fieldsRank : {fs : List (Name × Ty)} → {fT : Name × Ty} �
     tyRank fT.2 ≤ fieldsRank fs
   | _ :: _, _, .head _ => Nat.le_max_left _ _
   | _ :: _, _, .tail _ h => Nat.le_trans (tyRank_le_fieldsRank h) (Nat.le_max_right _ _)
-
-mutual
-theorem TyNodup.all_at (k : Nat) (ih : ∀ T : Ty, tyRank T < k → TyNodup T) :
-    (T : Ty) → tyRank T < k + 1 → TyNodup T
-  | .prim _, _ => .prim
-  | .ref R, h => TyNodup.all_ref k ih R h
-
-theorem TyNodup.all_ref (k : Nat) (ih : ∀ T : Ty, tyRank T < k → TyNodup T) :
-    (R : RefTy) → tyRank (.ref R) < k + 1 → TyNodup (.ref R)
-  | .struct s, h =>
-    .struct (structDef_nodup s) fun fT hm => ih fT.2
-      (Nat.lt_of_le_of_lt (tyRank_le_fieldsRank hm)
-        (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (Nat.le_of_lt_succ h)))
-  | .array E, h => .array (TyNodup.all_at k ih E (by simpa only [tyRank] using h))
-  | .fixed E _, h => .fixed (TyNodup.all_at k ih E (Nat.lt_of_succ_lt (by simpa only [tyRank] using h)))
-  | .mapping _ _, _ => .mapping
-end
-
-theorem TyNodup.all_lt : (k : Nat) → (T : Ty) → tyRank T < k → TyNodup T
-  | 0, _, h => absurd h (Nat.not_lt_zero _)
-  | k + 1, T, h => TyNodup.all_at k (TyNodup.all_lt k) T h
-
-/-- No type reaches a struct with two members of one name
-(`structDef_nodup`). -/
-theorem TyNodup.all (T : Ty) : TyNodup T :=
-  TyNodup.all_lt _ T (Nat.lt_succ_self _)
 
 theorem lookupBy_append_of_none {κ α : Type} [DecidableEq κ] {k : κ} :
     (l₁ l₂ : List (κ × α)) → lookupBy k l₁ = none → lookupBy k (l₁ ++ l₂) = lookupBy k l₂
@@ -593,13 +558,13 @@ theorem overlayElems_eq_zip : (os vs : List Semantics.SVal) → os.length = vs.l
   | _ :: os, _ :: vs, h => congrArg (_ :: ·) (overlayElems_eq_zip os vs (Nat.succ.inj h))
 
 mutual
-theorem SVal.overlay_erase : {T : Ty} → TyNodup T → (o v : SVal T) →
+theorem SVal.overlay_erase : {T : Ty} → (o v : SVal T) →
     (o.overlay v).erase = o.erase.overlay v.erase
-  | _, _, .prim _, .prim _ => by with_unfolding_all rfl
-  | _, .struct hk hf, .struct ofs, .struct nfs => by
+  | _, .prim _, .prim _ => by with_unfolding_all rfl
+  | .ref (.struct s), .struct ofs, .struct nfs => by
     simp only [SVal.overlay, SVal.erase, Semantics.SVal.overlay]
-    rw [SFields.overlay_erase [] (fun _ _ _ => rfl) hk hf ofs nfs, List.nil_append]
-  | _, .array hE, .array oel osh _, .array nel _ _ => by
+    rw [SFields.overlay_erase [] (fun _ _ _ => rfl) (structDef_nodup s) ofs nfs, List.nil_append]
+  | _, .array oel osh _, .array nel _ _ => by
     simp only [SVal.overlay, SVal.erase, Semantics.SVal.overlay, SList.erase_ofList,
       List.map_append, List.map_drop, List.map_map, SVec.length_erase]
     have hd : List.map (SVal.erase ∘ SVal.defaultOf) oel.toList =
@@ -608,38 +573,38 @@ theorem SVal.overlay_erase : {T : Ty} → TyNodup T → (o v : SVal T) →
       congr 1
       funext x
       exact SVal.defaultOf_erase x
-    rw [SVec.overlayOn_erase hE (oel.toList ++ osh.toList) nel, defaultOfElems_eq, hd,
+    rw [SVec.overlayOn_erase (oel.toList ++ osh.toList) nel, defaultOfElems_eq, hd,
       List.map_append, ← SVec.erase_eq, ← SList.erase_eq, List.map_drop]
-  | _, .fixed hE, .fixed oel, .fixed nel => by
+  | _, .fixed oel, .fixed nel => by
     simp only [SVal.overlay, SVal.erase, Semantics.SVal.overlay, List.append_nil,
-      SVec.overlayOn_erase hE oel.toList nel, ← SVec.erase_eq, SVec.length_erase, List.drop_nil]
+      SVec.overlayOn_erase oel.toList nel, ← SVec.erase_eq, SVec.length_erase, List.drop_nil]
     rw [List.drop_of_length_le (by rw [SVec.length_erase]; exact Nat.le_refl _)]
     rfl
-  | _, _, .map _ _, .map _ _ => by with_unfolding_all rfl
+  | _, .map _ _, .map _ _ => by with_unfolding_all rfl
 
 theorem SFields.overlay_erase (pre : List (Name × Semantics.SVal)) :
     {fs : List (Name × Ty)} →
     (∀ k T, lookupBy k fs = some T → lookupBy k pre = none) →
-    Semantics.nodupKeysB fs = true → (∀ fT ∈ fs, TyNodup fT.2) → (os ns : SFields fs) →
+    Semantics.nodupKeysB fs = true → (os ns : SFields fs) →
     (SFields.overlay os ns).erase = Semantics.SVal.overlay.overlayFields (pre ++ os.erase) ns.erase
-  | [], _, _, _, .nil, .nil => by with_unfolding_all rfl
-  | (f, T) :: fs, hpre, hk, hf, .cons o os, .cons v ns => by
+  | [], _, _, .nil, .nil => by with_unfolding_all rfl
+  | (f, T) :: fs, hpre, hk, .cons o os, .cons v ns => by
     simp only [Semantics.nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at hk
     have hf0 : lookupBy f (pre ++ (f, o.erase) :: os.erase) = some o.erase := by
       rw [lookupBy_append_of_none _ _ (hpre f T (by simp only [lookupBy, ↓reduceIte]))]
       simp only [lookupBy, ↓reduceIte]
     simp only [SFields.overlay, SFields.erase, Semantics.SVal.overlay.overlayFields, hf0,
-      SVal.overlay_erase (hf (f, T) List.mem_cons_self) o v]
+      SVal.overlay_erase o v]
     have := SFields.overlay_erase (pre ++ [(f, o.erase)]) (fs := fs)
       (fun k T' h => by
         have hkf : ¬k = f := fun e => by rw [e, hk.1] at h; cases h
         rw [lookupBy_append_of_none _ _ (hpre k T' (by simp only [lookupBy, if_neg hkf]; exact h))]
         simp only [lookupBy, if_neg hkf])
-      hk.2 (fun fT h => hf fT (List.mem_cons_of_mem _ h)) os ns
+      hk.2 os ns
     rw [this, List.append_assoc]
     rfl
 
-theorem SVec.overlayOn_erase {E : Ty} (hE : TyNodup E) : {n : Nat} → (L : List (SVal E)) →
+theorem SVec.overlayOn_erase {E : Ty} : {n : Nat} → (L : List (SVal E)) →
     (ns : SVec E n) →
     (SVec.overlayOn L ns).erase =
       Semantics.SVal.overlay.overlayElems (L.map SVal.erase) ns.erase
@@ -648,8 +613,8 @@ theorem SVec.overlayOn_erase {E : Ty} (hE : TyNodup E) : {n : Nat} → (L : List
       SVec.strip_erase]
   | _, o :: os, .cons v rest => by
     simp only [SVec.overlayOn, SVec.erase, List.map_cons,
-      Semantics.SVal.overlay.overlayElems, SVal.overlay_erase hE o v,
-      SVec.overlayOn_erase hE os rest]
+      Semantics.SVal.overlay.overlayElems, SVal.overlay_erase o v,
+      SVec.overlayOn_erase os rest]
   | _, _ :: _, .nil => by with_unfolding_all rfl
 end
 
@@ -849,7 +814,7 @@ theorem writeStorage_erase (hs : σ.storage = st.erase) {T : Ty}
     σ.writeStorage r.root r.path.erase new.erase = toRes (into σ) (st.write r new) := by
   have key : ∀ cur : SVal T, σ.saveStorage r.root r.path.erase (cur.erase.overlay new.erase) =
       toRes (into σ) (st.save r (cur.overlay new)) := fun cur => by
-    rw [← SVal.overlay_erase (TyNodup.all T), saveStorage_erase hs]
+    rw [← SVal.overlay_erase, saveStorage_erase hs]
   cases new with
   | prim v =>
     simp only [Semantics.State.writeStorage, SVal.erase, Storage.write, SVal.isPrim,

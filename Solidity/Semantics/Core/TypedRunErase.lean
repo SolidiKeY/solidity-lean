@@ -15,7 +15,7 @@ never stuck where the typed one ends.
 
 Every program is on the bridge: a storage copy overlays a struct by position
 in the typed run and by name in the untyped one (`SVal.overlay_erase`), which
-agree since no struct repeats a member name (`TyNodup.all`, decision 16).  A
+agree since no struct repeats a member name (`structDef_nodup`, decision 16).  A
 `bool` mapping key is hashed as `0`/`1` by both runs (`Value.keyAt`,
 `PrimTy.key`; decisions 10 and 14).
 

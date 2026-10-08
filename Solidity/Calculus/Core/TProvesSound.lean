@@ -16,7 +16,7 @@ behind a context with no diamond update but scope ends
 (`tholds_exit`), and `close` is `tholds_of_erase_valid`
 (`Calculus/Core/TCloseErase.lean`).
 
-**`Stmt.TSound C` is false** (`Stmt.not_tsound`,
+**`Stmt.TSound C` is false**, at every contract (`Stmt.not_tsound`,
 `Calculus/Core/TSound.lean`): every arm is sound but the box
 `memoryLocalDeclInitDrop` at an allocating initializer over a heap with no
 object of the local's type, whose premise is vacuous there (decision 17,
@@ -264,7 +264,8 @@ theorem Proves.tsound (hS : Stmt.TSound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : H
     exact fun σ => tholds_of_erase_valid _ hlen hnd (Fml.closableB_tclosable hc) hB h σ
 
 /-- **A goal proved with an empty context is valid over the typed state**,
-given the arms'. -/
+given the arms'.  The hypothesis is false as stated (`Stmt.not_tsound`), so
+this is the shape of the result, not yet the result (decision 17). -/
 theorem Proves.tvalid (hS : Stmt.TSound C) {R : RuleSet} {φ : Fml C []}
     (d : Proves C R [] .nil φ) : TValid φ :=
   Proves.tsound hS d

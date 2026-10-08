@@ -69,7 +69,7 @@ mapping keys are unique, a struct carries exactly its declared members), and
 canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
 `no_hidden_invariant` (`Typing/Constructibility.lean`) prove canonical and tight
 is exactly reachable (for words, keys and slots in range, `SVal.fits`), so no
-hidden invariant is missing. Reachable is by the typed run on the bridge
+hidden invariant is missing. Reachable is by the typed run
 (`Reachable`, a subset of the scoped run's `ReachableS`); a storage the
 untyped run the calculus reads reaches from a block the locals check accepts
 is `ReachableS` (`ReachableU.reachableS`), and `Reachable` when its words,

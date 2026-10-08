@@ -27,7 +27,7 @@ struct missing its mapping.
 `Prog.run_canon` is the preservation theorem (the scoped run's
 `RunInv` with `Canon` on the global part, `canonInv`), `reachable_canon`
 its corollary from a contract's initial state (`Reachable`: a scoped program
-`Core.Prog C [] Γ'` on the bridge runs there by the typed interpreter, so the
+`Core.Prog C [] Γ'` runs there by the typed interpreter, so the
 scoped one ends in the erased state, `ReachableS`), and the two refutations the
 removed untyped layer left as `sorry` follow: a storage whose mapping default
 is not the default (`map_default_not_reachable`) and one whose struct misses
