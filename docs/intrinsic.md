@@ -3732,6 +3732,32 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     the body printed as a block; a memory return is declared in "post"
     (`[ T memory r; ]`) rather than bound by `∀` (no binder ranges over an
     object not yet in the heap).  See "W4 lane `contracts`" below.
+39. *Proposed (W4 `sem-del`), the lead's call:* today's interpreter
+    (`Stmt.run`/`Prog.run`/`Loop` of `Semantics.lean`), `Halt.stuck`, the
+    old run's frame lemmas (`Stmt.run_frame`/`Prog.run_frame`,
+    `Semantics/Agree.lean`) and `Semantics/Mutability.lean`'s frame lemmas
+    stay until the `modal` lane: they are the reading of today's
+    `Fml.modal` (`Update.lean`'s `holds`, `holds_frame`) and of the program
+    rules of today's `Proves`, which decision 34 keeps past `calc-del`
+    (`Logic`'s `Proves.valid` through `RuleSoundness`, `SoundLoop`, …).
+    `sem-del` before `modal` cannot delete them without deleting those
+    rules; the `modal` lane deletes them with `.modal`.  `Halt.stuck`
+    becomes the term model's `undef` then, when no run produces it.  See
+    "W4 lane `sem-del`" below.
+40. *Proposed (W4 `sem-del`), the lead's call:* M3's scoped run
+    (`Semantics/Core.lean`'s `Run.*`, `Stmt.run`/`runR`/`runC`, `Loop`) and
+    `Semantics/Core/TypedRunErase.lean` stay, for a lane of their own
+    after W4: they are the bridge every update arm's soundness goes through
+    (`Premise.sound_update_run`, `Calculus/Core/SoundKit.lean`: an arm is an
+    equation `U.apply σ.erase = s.run σ.erase`, carried to the typed run by
+    `Stmt.trun_erase`), and the run `Typing/` reads (`ReachableS`, the
+    builder's `Prog.keeps_canon`/`run_tight` carried to the typed run by
+    `Prog.trun_of_run`, `Stmt.run_wt` read by `SortCheck/Faithfulness`).
+    Its deletion is a re-proof, not a move: each update arm against the
+    typed step (`TRun.*`, through the per-step erasure lemmas of
+    `TypedRunErase`), the builder over the typed run, `Faithfulness` over
+    `TState`.  M3's `State C Γ`/`Env` stay regardless: they are the erased
+    state the closer's untyped terms read (`TState.erase`), until M6c.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
@@ -5559,6 +5585,120 @@ them were checked before it.
 - **Lane worktrees removed** (`w4-moves`, `w4-theorems`, `w4-contracts`,
   and the timing worktree of `31951be`; the branches stay) and their Lean
   servers and workers stopped.
+
+### W4 lane `sem-del` (2026-10-08, on `intrinsic`): the old runs' typed-side edges
+
+Directly on `intrinsic` from `4494a53`, three commits.  Built by
+`lean_build` of `Solidity`, `solkeycheck`, `SolidityCorpus` and
+`SolkeyTestSuite` (the last two in `defaultTargets` for the run only,
+reverted after): 331 jobs, green.  `check-orphans` (317 reachable; only the
+git-excluded `Scratch/`), `check-doc-paths` (OK, 50 ambiguous, all
+resolving), `check-rule-text` (empty), `dups.py` (only the known
+`Evm/Repr`/`Examples/Verify` `as` line), `check-testsuite.sh` against solkey
+`1b4341a303` (ok: 438 = 435 derived + 1 pending + 1 divergent + 1 excluded;
+2 skip).  No new `sorry` (21) or `axiom` (1); `maxHeartbeats` overrides 34
+(was 35: `Evm/Correctness`'s `stmt_sim` went).  Not run: `check-corpus.sh`
+and `solkeycheck` (they need `lake`; `solkeycheck` was built, no rule name
+or annotation changed), the M0 re-timing, the review pass.
+
+**Deleted.**
+- `Evm/Compile`, `Evm/Correctness`, `Evm/Examples` (the untyped compiler,
+  `wtStmt`, the untyped `Sim`, `stmt_sim`, `compile_*`, `not_stuck`).
+  `never_stuck` had gone at W4 prep (`Theorems.lean`).
+- `Evm/CoreCompile`'s erasure section (`compileStmt_erase`,
+  `compileProg_erase`, `compileProg_resolve`, `pushes_erase`,
+  `Instr.forgetCell`) and `Evm/CoreExamples`' `sameCode` (both compared with
+  the untyped compiler).
+- `Semantics/Callback` (the untyped callback reading) and today's
+  `Calculus/Callback` (`CallbackTaclet.sound`, today's `ProvesC` and
+  `ProvesC.sound`): imported by nothing but the root; the scoped reading
+  (`Semantics/Core/Callback.lean`, `Calculus/Core/Callback.lean`,
+  `CallbackSound`) replaced them at W2/W3.  Today's `CallbackTaclet`
+  (`Rules.lean`) stays with today's rule table, unproved now; the
+  `⟹ᶜ` sequent macro of `RuleSyntax` still names today's `ProvesC` and is
+  expanded by nothing.
+- `Semantics/NoPanic` (`Stmt.mayPanic`, `Prog.run_noPanic`): its users were
+  the two modules above.
+- `Semantics/RunErase`'s statement bridge: `Prog.run_erase`,
+  `Stmt.run_erase`, `Stmt.erasesAt`/`ErasesAt`, the leaves, scopes, calls
+  and `try` arms, `Stmt.binders`, `Stmt.popped`, the loop relation
+  (`StepRel₂`, `Loop.run_rel₂`), `callsCore_fresh`.  With it:
+  `Core.HoldsErase`'s runs section (`Prog.run_rel`, `Frames.run_erase`,
+  `RunRel.toRel`, `Modality.afterC_rel`), `Core.Problem.deploy_of_valid_nil`
+  (`Calculus/Core/Deploy.lean`: a scoped obligation read on
+  `Contract.deploy`, the erasure run by the untyped interpreter), and
+  `ReachableU`, `ReachableU.reachableS`, `ReachableU.reachable`,
+  `wt_of_reachableU` (`Calculus/Problem.lean`: a storage the untyped run
+  reaches); `Examples/Tactics/Constructors`' example now reads the typed
+  deployment (`Core.Problem.deploy_of_valid_typed`, decision 23).
+
+**Moved.**
+- `Evm/Layout.lean` (new): `Evm/Compile`'s layout (`size`, `offset`,
+  `rootSlot`, `Occ` and the disjointness lemmas, `leaves`), `binInFrag`,
+  `unInFrag`, `static`, and the code sequences (`assertTop` …
+  `bumpCode`).  `Repr`, `Exp`, `Signed` and `CoreCompile` import it.
+- `Evm/SimLemmas.lean` (new): `Evm/Correctness`' machine lemmas, none about
+  the syntax (the guard sequences, `ReprV`'s lemmas, `ValOut`, `tail_sim`,
+  the `*_run` slot and store sequences, `EnvSim`, `getNet_pay`,
+  `prim_read`, `repr_write`, `bump_sim`, `storeAt`, `State.fresh`).
+  `find_repr`/`save_repr` were already `Evm/Repr.lean`'s.  `Core.Sim.init`
+  (`Evm/CoreCorrect.lean`) is restated from `initStorage_repr` directly
+  (it went through the untyped `Sim.init`).
+- `Evm/CoreExamples.lean`: `Evm/Examples`' machine helpers (`storeAt`,
+  `reverted`, `reverted_eq`, `fresh`) and its fourteen programs, in their
+  namespace `Evm.Examples`, so `CoreInterpreter` is unchanged.
+  `Examples/Tactics/Operators`' `machine_run` runs the scoped compiler
+  (`Evm.Core.Examples.slotAfter`, `decide +kernel`; the same four slots).
+- `Semantics/Core/StateErase.lean` (new): `RunErase`'s agreement half
+  (`LTy.enc`, `Env.erase`, `State.erase`, `withLocals`, `Agree`, `RunRel`/
+  `RunRelA`, the `*_nat`/`*_wl` lemmas, `*_eval_erase`, the effects'
+  erasure, `lookupBy_of_mem_nodup`, `Agree.erase`), which the closer's
+  erasure reads (`HoldsErase`, `CloseErase`, `Closable`, `TypedToSem`,
+  `Faithfulness`, `Problem`).
+- `Mutability` (the type) → `AST.lean`, so `Core.Arms` no longer imports
+  `Semantics/Mutability.lean`; `Mutability.agree_trans`/`agree_mono` →
+  `Semantics.EnvAgreeExcept.trans`/`of_sub` (`Semantics/Agree.lean`; read
+  by `Core.Close` and today's `Contracts`).
+
+**Changed.**  `Machine.mem : Nat → Word`, `Instr.mload`/`mstore` take a
+level (`Nat`), and `cell l = l` (`Evm/CoreCompile.lean`; was
+`Var.fresh "%" l`); the printer writes `MLOAD %l` as before, so no pin
+moved.  `Core.memAt_upd` lost its `cell_inj` case.
+
+**Theorems restated or dropped** (none of the headline's): `Core.Sim.init`
+(same statement, new proof); dropped `Core.Problem.deploy_of_valid_nil`,
+`ReachableU.reachable(S)`, `wt_of_reachableU`, `compileStmt_erase`,
+`compileProg_resolve`, `pushes_erase`, `Prog.run_erase` (each about the
+untyped run or compiler).
+
+**Pins changed**: none.  The fresh names are unchanged.
+
+**Not deleted, and why** (proposed decisions 39 and 40):
+- today's `Stmt.run`/`Loop` and `Halt.stuck`, `Agree`'s `run_frame`
+  lemmas, `Mutability`'s frame lemmas: decision 39 (today's `.modal` and
+  program rules, kept by decision 34 until `modal`);
+- `Semantics/Core.lean`'s M3 run and `TypedRunErase`: decision 40 (the
+  update arms' bridge, `Typing/`'s builder and `run_wt`).  `Tools/Counterexample.lean`
+  already reads the typed run with fuel (`Prog.trunF`): nothing to port.
+
+**Left** (for the lead, the `modal` lane, or a lane of decision 40):
+- With `modal`: delete `Stmt.run`, `Prog.run`, `Loop`, `Contract.deploy`
+  and today's `Problem.deploy_of_valid`, `Agree`'s `Stmt.vars`/`run_frame`,
+  `Mutability.lean` (but its `Stmt.within`/`Prog.loopFrame` side conditions
+  of today's rules go with `Rules`' body), `CallbackTaclet` and the `⟹ᶜ`
+  macro; rename `Halt.stuck` to the term model's `undef` (the term model's
+  own `.stuck`s: `UpdateRules`, `DecideLang`, `ReadWrite`, `Decide`).
+- Decision 40's lane: the update arms against `TRun.*` (`SoundArms`,
+  `SoundStore`, `SoundMem`, `SoundLocal`, `SoundCapture`, `SoundCalls`,
+  `SoundControl`, `SoundLoops`, `FunContract`), `Frames.run`/
+  `Frames.trun_erase` (`Core.Logic`, `SoundKit`), `Typing/Soundness`'
+  `Stmt.run_wt` (read by `Faithfulness`), `ReachableS` and the builder
+  (`Typing/Reachability`, `Constructibility`, `StraightRun`'s
+  `Prog.trun_of_run`), then `Semantics/Core.lean`'s run and
+  `TypedRunErase`.
+- Docs, M7: `docs/compiler-verification.md` still describes the untyped
+  compiler's proof (`wtStmt`, `Sim C L Γ`), and `docs/solc-validation.md`
+  its `compileStmt`; the paths are fixed, the prose is not.
 
 ## Baselines (M0)
 
