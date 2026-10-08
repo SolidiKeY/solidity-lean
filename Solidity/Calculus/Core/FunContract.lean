@@ -688,7 +688,8 @@ elab_rules : term
           | "uint" | "address" => `(PrimTy.uint)
           | "int" => `(PrimTy.int)
           | "bool" => `(PrimTy.bool)
-          | s => throwErrorAt t "cdlIn: a local of a contract is a uint, int, address or bool, not {s}"
+          | s => throwErrorAt t
+            "cdlIn: a local of a contract is a uint, int, address or bool, not {s}"
         `(($(quote x.getId.toString), $p))
       | _ => throwUnsupportedSyntax
     let ns ← `([$items,*])
