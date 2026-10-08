@@ -1,5 +1,8 @@
 import Solidity.Calculus.Close
 import Solidity.Calculus.Contracts
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Core.Contracts
 
 /-!
 # Calls by contract
@@ -18,6 +21,12 @@ parameter, `se2` the return variable (`addOne`), `se1` the return variable
 The mutability is read off the inlined body (`Prog.within`): `addOne` is
 `pure`, `getTotal` reads storage (`view`), `deposit` writes it
 (`nonpayable`).
+
+The statements read scoped (`open scoped Solidity.Core.Surface`); the
+contract rule is today's, a derived rule over today's run, and a statement
+reaches it through its erasure (`sol_erase`, `Calculus/Core/Contracts.lean`):
+the formula is plain, so its erasure's validity proves it.  The rule's
+arguments, today's formulas, are stated before the switch.
 -/
 namespace Solidity.Examples.Tactics.Contracts
 
@@ -33,11 +42,33 @@ def ContractsExample : Contract := contract!{
 
 local instance : InContract := ⟨ContractsExample⟩
 
+/-! The contracts and preconditions, today's formulas: the rule's arguments. -/
+
+/-- `x == 4`. -/
+def preX4 : Fml ContractsExample := dl!{ x == 4 }
+/-- `total == 7`. -/
+def preTotal7 : Fml ContractsExample := dl!{ total == 7 }
+/-- `total == 3`. -/
+def preTotal3 : Fml ContractsExample := dl!{ total == 3 }
+/-- `addOne`'s `requires`. -/
+def reqAddOne : Fml ContractsExample := dl!{ se1 <= 100 }
+/-- `addOne`'s `ensures`. -/
+def ensAddOne : Fml ContractsExample := dl!{ se2 == se1 + 1 }
+/-- `getTotal`'s `ensures`. -/
+def ensGetTotal : Fml ContractsExample := dl!{ se1 == total }
+/-- `deposit`'s `requires`. -/
+def reqDeposit : Fml ContractsExample := dl!{ total == 3 ∧ se1 == 4 }
+/-- `deposit`'s `ensures`. -/
+def ensDeposit : Fml ContractsExample := dl!{ total == 7 }
+
+open scoped Solidity.Core.Surface
+
 /-- `y = addOne(x);` by `addOne`'s contract, a `pure` callee: nothing but
 the result is forgotten. -/
 theorem callAddOne : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
-  refine useContract_of_valid (Γ := [.pre dl!{ x == 4 }]) (μ := .pure)
-    (req := dl!{ se1 <= 100 }) (ens := dl!{ se2 == se1 + 1 }) ?hc ?pre ?post
+  sol_erase
+  refine useContract_of_valid (Γ := [.pre preX4]) (μ := .pure)
+    (req := reqAddOne) (ens := ensAddOne) ?hc ?pre ?post
   case hc =>
     apply FunContract.ofValid
     simp only [FunContract.obligation, CallRet.typed, CallRet.binders, CallRet.decl, List.map,
@@ -57,8 +88,9 @@ theorem callAddOne : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
 /-- `y = getTotal();` by its contract, a `view` callee: `total` is still
 `7` after the call, so `ensures` gives `y`. -/
 theorem callGetTotal : ⊨ dl!{ total == 7 → [ y = getTotal(); ] y == 7 } := by
-  refine useContract_of_valid (Γ := [.pre dl!{ total == 7 }]) (μ := .view)
-    (req := dl!{ total == 7 }) (ens := dl!{ se1 == total }) ?hc ?pre ?post
+  sol_erase
+  refine useContract_of_valid (Γ := [.pre preTotal7]) (μ := .view)
+    (req := preTotal7) (ens := ensGetTotal) ?hc ?pre ?post
   case hc =>
     apply FunContract.ofValid
     simp only [FunContract.obligation, CallRet.typed, CallRet.binders, CallRet.decl, List.map,
@@ -78,8 +110,9 @@ theorem callGetTotal : ⊨ dl!{ total == 7 → [ y = getTotal(); ] y == 7 } := b
 /-- `deposit(4);` by its contract, a `nonpayable` callee: storage is
 forgotten (`{havoc}`), and `ensures` is all that is known of it. -/
 theorem callDeposit : ⊨ dl!{ total == 3 → [ deposit(4); ] total == 7 } := by
-  refine useContract_of_valid (Γ := [.pre dl!{ total == 3 }]) (μ := .nonpayable)
-    (req := dl!{ total == 3 ∧ se1 == 4 }) (ens := dl!{ total == 7 }) ?hc ?pre ?post
+  sol_erase
+  refine useContract_of_valid (Γ := [.pre preTotal3]) (μ := .nonpayable)
+    (req := reqDeposit) (ens := ensDeposit) ?hc ?pre ?post
   case hc =>
     apply FunContract.ofValid
     simp only [FunContract.obligation, CallRet.typed, CallRet.binders, CallRet.decl, List.map,
@@ -97,8 +130,9 @@ theorem callDeposit : ⊨ dl!{ total == 3 → [ deposit(4); ] total == 7 } := by
 
 /-- `callAddOne`, its two goals derived one rule at a time (`⊢`). -/
 theorem callAddOneWalk : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
-  refine useContract (R := .all) (Γ := [.pre dl!{ x == 4 }]) (μ := .pure)
-    (req := dl!{ se1 <= 100 }) (ens := dl!{ se2 == se1 + 1 }) ?hc ?pre ?post
+  sol_erase
+  refine useContract (R := .all) (Γ := [.pre preX4]) (μ := .pure)
+    (req := reqAddOne) (ens := ensAddOne) ?hc ?pre ?post
   case hc =>
     apply FunContract.ofValid
     simp only [FunContract.obligation, CallRet.typed, CallRet.binders, CallRet.decl, List.map,
