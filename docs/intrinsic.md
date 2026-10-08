@@ -2686,7 +2686,10 @@ are deleted.
   formula gains `∀ uint a;` (parameters bound by `∀`, W2 `tree`).
 - `Tactics/UpdateRules.copyLocal_merge`: the trace gains `∀ uint y; ∀ uint
   x;` (W2 `tree`).
-- `Tactics/LoopsImport`: new pin `7 obligations declared scoped`.
+- `Tactics/LoopsImport`: new pin `7 obligations declared scoped`; the
+  theorems are solkey's obligations `⊨ Solc.Loops.f.problem`, now assuming
+  `wt(storage)` and binding the parameters by `∀`, where today's stated
+  `Valid (Fml.modal m Solc.Loops.f .tt)` with no premise.
 - `Tactics/CoreDerive`: new pins of the short walk (three, with replays).
 - `Tactics/CoreProofTree`: the diamond tree's three leaves close (new, the
   diamond close above).

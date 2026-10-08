@@ -401,7 +401,7 @@ info: dl{
 -- `oldNet := mtSt` reads back as the ledger snapshot, declared at its own
 -- type (`LTy.oldNet`), not a storage variable
 example : (match (dl[Booked]{ { oldNet := mtSt } true } : Core.Fml Booked []) with
-    | .upd _ (.decl (t := .oldNet) .nil _ _) _ => true
+    | .upd _ (.decl (t := .oldNet) .nil _ .saveNetMt) _ => true
     | _ => false) = true := rfl
 
 theorem booked_constructor : ⊨ spec[Booked]{ constructor } := by

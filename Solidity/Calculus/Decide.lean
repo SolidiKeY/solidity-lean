@@ -56,9 +56,10 @@ What the storage adds to mini-solkey's words:
 **No well-typed storage is assumed**, and none is needed for the
 equivalence: it holds of every state, which is what `⊨` quantifies over.
 The price is that a goal true only of well-typed storage is not valid:
-`[ delete alice.account; ] alice.account.balance == 0` fails where the old
-balance is a `bool` (`Examples/Tactics/Decide.lean`, `deleteWithoutWrite`), while the
-same goal after a write of a `uint` is decided.
+`[ delete alice.account; ] alice.account.balance == 0` is not valid without
+`wt(storage)` (the old balance may be a `bool`), while the same goal after a
+write of a `uint` is decided; `deleteWithoutWrite`
+(`Examples/Tactics/Decide.lean`) now proves it under `defined(wt(storage))`.
 
 **Completeness.**  The reduction loses nothing, so `sol_decide` fails on an
 invalid formula, as it should.  What it leaves reads a partial tree with

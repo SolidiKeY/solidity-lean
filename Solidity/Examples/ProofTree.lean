@@ -26,10 +26,11 @@ Solidity.Core.Surface`, `docs/intrinsic.md`, W3): a tree of `⊢ φ` over
 starts with `allRight`; a rule that leaves no statement goes on into the
 rest of the program, so no `emptyModality` follows it; a split has KeY's two
 goals under either modality, its branch's `}` printed; a leaf closes by
-`Proves.close` and today's closer on its erasure.  What stays today's: a
-diamond whose leaves sit behind a diamond update (`Proves.close` is
-box-only), and the tools with no scoped twin yet (`sol_prove?`,
-`sol_chain?`, `sol_rws?`).
+`Proves.close` and today's closer on its erasure; `Proves.close` takes a
+diamond update that keeps the `bool` locals `bool`s (`Upd.boolB`).  What
+stays today's: the diamond trees and walks below, until the tree lane flips
+them (`docs/intrinsic.md`, W3b, Left 5), and the tools with no scoped twin
+yet (`sol_chain?`, `sol_rws?`).
 -/
 
 namespace Solidity.Examples.ProofTree
@@ -242,8 +243,10 @@ example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
 end Scoped
 
 /-! Under the diamond, the scoped calculus's leaves stay behind a diamond
-update, which `Proves.close` does not take (box contexts only, `Fml.closableB`):
-the diamond trees and walks are today's until the typed reading closes them. -/
+update, which `Proves.close` takes when it keeps the `bool` locals `bool`s
+(`Upd.boolB`, `Fml.closableB`): the diamond trees and walks below are
+today's only until the tree lane flips them (`docs/intrinsic.md`, W3b,
+Left 5). -/
 
 /--
 info: 0: localValueDeclInitDrop
