@@ -149,8 +149,8 @@ elab_rules : command
       m!"\n\nfresh variables (a `FreshNames` table renames them):\n  [{", ".intercalate rows.toList}]"
     logInfo (m!"{"\n".intercalate (← g.decl φ).toList}" ++ table ++ g.stopNote)
 
-/-- The last line of a scoped chain's statement, and whether it is scoped
-(`false`: past the program, `Update.lean`'s). -/
+/-- The last line of a scoped chain's statement (a chain term, or `A ~~> B`),
+and whether it is scoped (`false`: past the program, `Update.lean`'s). -/
 def chainEnd? (ty : Expr) : MetaM (Option (Expr × Bool)) := do
   let ty ← instantiateMVars ty
   let lastOf (ws : Expr) (dflt : Expr) : MetaM (Option Expr) := do
@@ -161,7 +161,8 @@ def chainEnd? (ty : Expr) : MetaM (Option (Expr × Bool)) := do
     return some (w.getArg! 3)
   match ty.getAppFnArgs with
   | (``Core.Fml.OneStep, #[_, _, _, B]) | (``Core.Fml.Steps, #[_, _, _, B])
-  | (``Core.Fml.StepBy, #[_, _, _, _, B]) => return some (B, true)
+  | (``Core.Fml.StepBy, #[_, _, _, _, B]) | (``Core.Fml.Leads, #[_, _, _, B]) => return some (B, true)
+  | (``Core.Fml.LeadsE, #[_, _, _, L]) => return some (L, false)
   | (``Core.Fml.Via, #[_, _, A, ws]) => return (← lastOf ws A).map (·, true)
   | (``Core.Fml.ViaE, #[_, _, _, L, rs]) => return (← lastOf rs L).map (·, false)
   | _ => return none
@@ -205,9 +206,11 @@ elab_rules : command
 /-! ## `sol_chain`, `sol_chain?` and `sol_rws` on `~~>`
 
 A goal `A ~~> B` on scoped lines (`Core.Fml.Leads`) is the derivation from `A`
-to `B`; past the program (`Core.Fml.LeadsE A Z L`) the derivation to `Z`, then
-`Calculus/ChainGen.lean`'s search for the rewrites from `Z`'s erasure to `L`
-(`searchRewrites`), proved as `sol_rws` proves them. -/
+to `B`, which `sol_chain` proves.  Past the program (`Core.Fml.LeadsE A Z L`)
+it is the derivation to `Z`, then rewrites from `Z`'s erasure to `L`: the
+file names them (`sol_rws [..]`), and only the `?` twins search for them
+(`Calculus/ChainGen.lean`'s `searchRewrites`), so a re-check does not
+search; `sol_chain` refuses such a goal and points to them. -/
 
 /-- The merges, one per name, from `A` to `B`: the first sequence of merge
 candidates that ends at `B`, as `A ~~> B`. -/
@@ -251,39 +254,26 @@ def lastErasure (A Z : Expr) : TermElabM Expr := do
     | none => throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine Z}"
   return dropAllsE (← erasedLine run.splice erased)
 
-/-- `L₀ ~~> L` (`Update.lean`'s) by the rewrites `ns`, or by the ones the
-search finds. -/
-def legacyLeads (C L₀ L : Expr) (ns? : Option (Array Lean.Name)) : TermElabM (Expr × Array Lean.Name) := do
-  let ns ← match ns? with
-    | some ns => pure ns
-    | none =>
-      let (path, note) ← Solidity.Chain.searchRewrites C L₀ (some L)
-      let some path := path
-        | throwError "sol_chain: no run of rewrites from{indentExpr L₀}\nreaches{indentExpr L}\
-            {(note.map (m!"\n" ++ ·)).getD m!""}"
-      pure (path.map (Lean.Name.mkSimple ·.1))
+/-- `L₀ ~~> L` (`Update.lean`'s) by the rewrites `ns`. -/
+def legacyLeads (C L₀ L : Expr) (ns : Array Lean.Name) : TermElabM Expr := do
   let g ← mkFreshExprMVar (mkApp3 (mkConst ``Solidity.Fml.Leads) C L₀ L)
   Solidity.Chain.proveRws g.mvarId! ns
-  return (← instantiateMVars g, ns)
+  instantiateMVars g
 
-/-- Prove a goal `A ~~> B` (scoped, or past the program), the rewrites past
-the program `ns` or searched; the names it used. -/
-def solveLeads (g : MVarId) (ns? : Option (Array Lean.Name) := none) :
-    TermElabM (Option (Array Lean.Name)) := do
+/-- Prove a goal `A ~~> B`: scoped, by the derivation; past the program, by
+the derivation and then the rewrites `ns`. -/
+def solveLeads (g : MVarId) (ns : Array Lean.Name) : TermElabM Unit := do
   let ty ← instantiateMVars (← g.getType)
   match_expr ty with
-  | Core.Fml.Leads _ _ A B =>
-    g.assign (← leadsSteps A B)
-    return none
+  | Core.Fml.Leads _ _ A B => g.assign (← leadsSteps A B)
   | Core.Fml.LeadsE C A Z L =>
     let h₁ ← leadsSteps A Z
     let L₀ ← lastErasure A Z
-    let (h₂, ns) ← legacyLeads C L₀ L ns?
+    let h₂ ← legacyLeads C L₀ L ns
     let er ← mkAppM ``Core.Fml.erase #[mkApp (mkConst ``List.nil [0]) (mkConst ``Solidity.Var), Z]
     let h₂ ← mkExpectedTypeHint h₂ (mkApp3 (mkConst ``Solidity.Fml.Leads) C
       (mkApp2 (mkConst ``Solidity.Fml.dropAlls) C er) L)
     g.assign (← mkAppM ``And.intro #[h₁, h₂])
-    return some ns
   | _ => throwError "not a `~~>` goal"
 
 elab_rules : tactic
@@ -291,7 +281,14 @@ elab_rules : tactic
     let g ← Tactic.getMainGoal
     let ty ← instantiateMVars (← g.getType)
     unless ty.isAppOf ``Core.Fml.Leads || ty.isAppOf ``Core.Fml.LeadsE do throwUnsupportedSyntax
-    discard <| solveLeads g
+    if ty.isAppOf ``Core.Fml.LeadsE then
+      -- logged, not thrown: a throw falls through to `Calculus/Chains.lean`'s
+      -- `sol_chain`, whose error would be the one shown
+      logError "sol_chain: past the program the rewrites are named, so that a re-check does \
+        not search: `sol_rws [r₁, …]` (`sol_rws?` finds them), or the chain written out \
+        (`sol_chain?`)"
+      g.admit
+    else solveLeads g #[]
     Tactic.replaceMainGoal []
 
 /-- The text of a chain from `φ`: its first line, then each link's arrow and
@@ -378,7 +375,7 @@ def proveCoreRws (g : MVarId) (ns : Array Lean.Name) : TermElabM Unit := do
     let some h ← mergePath (← instantiateMVars A) (← instantiateMVars B) ns.size
       | throwError "sol_rws: {ns.size} merges of{← indentLine A}\ndo not give{← indentLine B}"
     g.assign h
-  | Core.Fml.LeadsE _ _ _ _ => discard <| solveLeads g (some ns)
+  | Core.Fml.LeadsE _ _ _ _ => solveLeads g ns
   | _ => throwUnsupportedSyntax
 
 elab_rules : tactic

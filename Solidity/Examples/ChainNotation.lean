@@ -186,10 +186,24 @@ it is judged at the box in `dl![.box]{ … }` (in `dl!{ … }`, at the diamond).
 In a `calc` each line after the first is computed from the line before when
 its step is proved (`by sol_chain`), and checked against its text. -/
 example : dl!{ [ alice.age = v; ] alice.age == v }
-    ~*> dl![.box]{ { storage := save(storage, alice.age, v) } alice.age == v } :=
+    ~[storageFieldWriteSave]~> dl![.box]{ { storage := save(storage, alice.age, v) } alice.age == v } :=
   calc dl!{ [ alice.age = v; ] alice.age == v }
-    _ ~*> dl!{ [ alice.age = v; ] alice.age == v } := by sol_chain
     _ ~[storageFieldWriteSave]~> dl![.box]{ { storage := save(storage, alice.age, v) } alice.age == v } := by
+      sol_chain
+
+/-- A merge while the program is open, then the strategy's step: a scoped
+`calc` of a `~[sequentialToParallel]~>` and a `~>` composes to `~~>`, its
+last line a scoped one, the program still open. -/
+example (m : Modality) (φ : Core.Post StandardExample []) :
+    dl![m]{ { se1 := 10 } { sp1 := alice.account } ⟨[ sp1.balance = se1; alice.age = 5; ]⟩ φ }
+    ~~> dl![m]{ { se1 := 10 ‖ sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+          ⟨[ alice.age = 5; ]⟩ φ } :=
+  calc dl![m]{ { se1 := 10 } { sp1 := alice.account } ⟨[ sp1.balance = se1; alice.age = 5; ]⟩ φ }
+    _ ~[sequentialToParallel]~>
+        dl![m]{ { se1 := 10 ‖ sp1 := alice.account } ⟨[ sp1.balance = se1; alice.age = 5; ]⟩ φ } := by
+      sol_chain
+    _ ~> dl![m]{ { se1 := 10 ‖ sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+          ⟨[ alice.age = 5; ]⟩ φ } := by
       sol_chain
 
 /-! ## 5 · A branch
@@ -468,6 +482,34 @@ example : ∃ ψ, Nonempty (dl![m]{ ⟨[ if (flags[a]) { revert(); } else { y = 
 
 -- Nested: past the done goal of the inner branch, the next step asks the goal
 -- `⟨[ x = 1; } ]⟩ φ`, active whatever `φ` is.
+/--
+info:
+  dl{ ∀ uint x; ⟨[ if (true) {if (true) {x = 2;} else {x = 1;};} else {x = 1;}; ]⟩ φ }
+  ~[ifElseSplit]~>
+  dl{ ∀ uint x; (true ≐ true → ⟨[ if (true) {x = 2;} else {x = 1;}; } ]⟩ φ) ∧ (true ≐ false → ⟨[ x = 1; } ]⟩ φ) }
+  ~[ifElseSplit]~>
+  dl{
+    ∀ uint x;
+      (true ≐ true → (true ≐ true → ⟨[ x = 2; } } ]⟩ φ) ∧ (true ≐ false → ⟨[ x = 1; } } ]⟩ φ)) ∧
+        (true ≐ false → ⟨[ x = 1; } ]⟩ φ) }
+  ~[localValueAssign]~>
+  dl{
+    ∀ uint x;
+      (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → ⟨[ x = 1; } } ]⟩ φ)) ∧
+        (true ≐ false → ⟨[ x = 1; } ]⟩ φ) }
+  ~[localValueAssign]~>
+  dl{
+    ∀ uint x;
+      (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ)) ∧ (true ≐ false → ⟨[ x = 1; } ]⟩ φ) }
+  ~[localValueAssign]~>
+  dl{
+    ∀ uint x;
+      (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ)) ∧ (true ≐ false → { x := 1 } φ) }
+-/
+#guard_msgs in
+variable (φ : Core.Post StandardExample [.val .uint]) in
+#derivation dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
+
 example (φ : Core.Post StandardExample [.val .uint]) :
     dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
     ~*> dl![m]{ (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ)) ∧
@@ -511,6 +553,27 @@ sequentialToParallel still applies (under either modality), and gives
 theorem unresolved : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
           x := find(save(storage, alice.age, 42), alice.age) } φ } := by
+  sol_rws [sequentialToParallel]
+
+/--
+error: #last_line: unresolved does not end at a last line:
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
+findOnSave still applies (under either modality), and gives
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ }
+findMemberCons still applies (under either modality), and gives
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := find(select(save(storage, alice.age, 42), alice), age) } φ }
+-/
+#guard_msgs in
+#last_line unresolved
+
+-- `sol_chain` does not search for the rewrites past the program.
+/--
+error: sol_chain: past the program the rewrites are named, so that a re-check does not search: `sol_rws [r₁, …]` (`sol_rws?` finds them), or the chain written out (`sol_chain?`)
+-/
+#guard_msgs in
+example : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
+    ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
+          x := find(save(storage, alice.age, 42), alice.age) } φ } := by
   sol_chain
 
 /-! A chain term ends at its last line; a long one is cut into segments, the
@@ -524,6 +587,18 @@ theorem readSeg :
     ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
           x := find(save(storage, alice.age, 42), alice.age) } φ } := by
   sol_chain
+
+-- The same line, the end of a scoped chain (`unresolved`'s is past the program).
+/--
+error: #last_line: readSeg does not end at a last line:
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
+findOnSave still applies (under either modality), and gives
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ }
+findMemberCons still applies (under either modality), and gives
+  dl{ { storage := save(storage, alice.age, 42) ‖ x := find(select(save(storage, alice.age, 42), alice), age) } φ }
+-/
+#guard_msgs in
+#last_line readSeg
 
 /-- The read of the write resolved a member at a time. -/
 theorem resolveSeg :
@@ -544,6 +619,9 @@ theorem composed :
 
 #guard_msgs in
 #last_line resolveSeg
+
+#guard_msgs in
+#last_line composed
 
 /-! `sol_chain?` writes a `~~>` out as the chain it is, and `sol_rws?` names the rewrites
 from one line to another (`Calculus/Core/ChainGen.lean`). -/

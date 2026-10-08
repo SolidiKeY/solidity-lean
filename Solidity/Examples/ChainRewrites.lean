@@ -93,12 +93,13 @@ theorem balanceWrite :
 /-- `alice.account.balance = 10;` to its last line, for every modality and
 postcondition, and on to the write alone: `φ` names no fresh variable
 (`Core.Post.noFresh`), so it reads neither `pv` nor `acc`, which the chain keeps,
-and `simplifyUpdate` drops both.  `sol_chain` finds the rewrites past the
-program (`balanceWrite`'s merge, then `simplifyUpdate`). -/
+and `simplifyUpdate` drops both.  `sol_rws` names the rewrites past the
+program (`balanceWrite`'s merge, then `simplifyUpdate`; `sol_rws?` finds
+them). -/
 theorem headlineWrite :
     dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } := by
-  sol_chain
+  sol_rws [sequentialToParallel, simplifyUpdate]
 
 end ExampleNames
 
