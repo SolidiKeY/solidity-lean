@@ -238,18 +238,8 @@ open Tactic in
 `sol_prove` (the scoped walk, `Calculus/Core/ProvesDerive.lean`), then
 `Derive.searchLeaf` on each leaf of today's calculus it leaves. -/
 def scopedSearch (g : MVarId) : TacticM Derive.Search := do
-  let h0 ← IO.getNumHeartbeats
   let_expr Core.Proves C R _ Γ H φ := ← g.getType | throwError "expected a scoped `⊢ φ`"
-  let leaves ← Core.Seq.prove g C R Γ H φ
-  let mut hb : Nat := (← IO.getNumHeartbeats) - h0
-  let mut found : List (Lean.Name × Array String) := []
-  for l in leaves do
-    match ← Derive.searchLeaf l with
-    | some (t, h) =>
-      found := found ++ [(← l.getTag, t)]
-      hb := hb + h
-    | none => return { found := found ++ [(← l.getTag, #["sorry"])], open_ := [l], heartbeats := hb }
-  return { found, open_ := [], heartbeats := hb }
+  Derive.proveSearch g (stopAtOpen := true) (prove := fun g => Core.Seq.prove g C R Γ H φ)
 
 syntax (name := solkeyDerive) "#solkey_derive? " ident (&" only " ident)? (&" from " num)?
   (&" count " num)? (&" timed")? (&" pending")? : command

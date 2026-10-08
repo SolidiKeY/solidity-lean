@@ -1168,10 +1168,12 @@ structure Search where
   open_ : List MVarId
   heartbeats : Nat
 
-/-- `sol_prove` on `g`, then `searchLeaf` on each leaf it leaves, the open
-ones left as goals; with `stopAtOpen`, the search ends at the first open
-leaf.  The one loop of `sol_prove?` and `#solkey_derive?`. -/
-def proveSearch (g : MVarId) (stopAtOpen : Bool := false) : TacticM Search := do
+/-- `sol_prove` on `g` (or the walk `prove` given, as `#solkey_derive?`'s
+scoped one), then `searchLeaf` on each leaf it leaves, the open ones left
+as goals; with `stopAtOpen`, the search ends at the first open leaf.  The
+one loop of `sol_prove?` and `#solkey_derive?`. -/
+def proveSearch (g : MVarId) (stopAtOpen : Bool := false)
+    (prove : MVarId → MetaM (List MVarId) := prove) : TacticM Search := do
   let h0 ← IO.getNumHeartbeats
   let leaves ← prove g
   let mut hb : Nat := (← IO.getNumHeartbeats) - h0

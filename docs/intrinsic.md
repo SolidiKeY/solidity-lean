@@ -2091,7 +2091,7 @@ changed).
 `be64b9b` they do not: `Fml.closableB` asks `m = .box` of an update, and
 `Proves.close`/`closeTrue` ask `H.boxOnly` (`Calculus/Core/Closable.lean`,
 `Calculus/Core/Proves.lean`).  The switch to `Fml.tclosableB` is CORE 2's
-item 5, which waits on decision 17 (CORE 2 section above).  Every `Derived`
+item 5, which waits on decision 17 (CORE 2 section below).  Every `Derived`
 module holds diamond obligations, so none can flip with its text unchanged;
 in a scratch module with the flipped layout, `#solkey_derive?` on the
 diamond `boolIsTrueOrFalse` reports the walk's error ("a leaf
@@ -2156,7 +2156,14 @@ Flipped Derived9–11 cannot be timed until diamond leaves close.
 **Checks.**  `lean_build` of the default targets is green (300 jobs, the
 `Symex` edit rebuilding its importers).  The following were checked file by
 file: `TestSuite/{Problems,CoreProblems,CoreSeq,Suggestions}`, Derived9–11,
-CoreDerived9–11 and `Solkey/Constructors`.  `SolkeyTestSuite` was not built
+CoreDerived9–11 and `Solkey/Constructors`.
+Review fixes: `Solkey/ScopedFlip.lean` pins the three switches on every
+build, over a one-function fixture (`tests/solc/ScopedFlip.sol`):
+`solc_problems … legacy`, `solc_scoped_problems … main decl`,
+`#solkey_problem`, the scoped `#solkey_derive?` (its replay is `sol_prove`)
+and `#solkey_obligations` counting the scoped theorem.  `scopedSearch` is
+`Derive.proveSearch` with the scoped walk as its `prove` parameter, so the
+two loops are one.  `SolkeyTestSuite` was not built
 whole: fourteen `Derived` workers at once exceed the memory cap.
 `check-orphans` (apart from the git-excluded `Scratch/`) and
 `check-doc-paths` pass.  No new `sorry`, `axiom` or `maxHeartbeats`.
