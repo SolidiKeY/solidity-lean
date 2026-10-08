@@ -40,11 +40,11 @@ theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ
   | assignLocal i v => exact localStep_sound σ k i v p hp
   | declLocal q x init =>
     cases init with
-    | none => cases hp; exact fun ω κ φ h _ => Stmt.step_sound_valueDeclSkip q x σ ω κ φ h
-    | some e => cases hp; exact fun ω κ φ h _ => Stmt.step_sound_localValueDeclInitDrop x e σ ω κ φ h
+    | none => cases hp; exact fun ω κ φ h => Stmt.step_sound_valueDeclSkip q x σ ω κ φ h
+    | some e => cases hp; exact fun ω κ φ h => Stmt.step_sound_localValueDeclInitDrop x e σ ω κ φ h
   | declStorage R x init =>
     cases init with
-    | none => cases hp; exact fun ω κ φ h _ => Stmt.step_sound_storageLocalDeclSkip R x σ ω κ φ h
+    | none => cases hp; exact fun ω κ φ h => Stmt.step_sound_storageLocalDeclSkip R x σ ω κ φ h
     | some r => cases hp; exact sound_declStorageInit σ x r
   | opAssign op hop hp' l r => exact opStep_sound σ k op hop hp' l r p hp
   | incDec op hp' l => exact incStep_sound σ k op hp' l p hp
@@ -66,11 +66,11 @@ theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ
   | ite c thn els => exact iteStep_sound σ k (WkRuns.of_run_wk σ _) c thn els p hp
   | require c => exact requireStep_sound σ k c p hp
   | assert c => exact assertStep_sound σ k c p hp
-  | revert => cases m <;> cases hp <;> exact fun ω κ φ h _ => Stmt.step_sound_revert σ ω κ φ h
+  | revert => cases m <;> cases hp <;> exact fun ω κ φ h => Stmt.step_sound_revert σ ω κ φ h
   | call f args ret body => exact Stmt.stepSound_call k m f args ret body σ p hp
   | tryCall call rets ok err code pnc other =>
     exact Stmt.stepSound_tryCall k m call rets ok err code pnc other σ p hp
   | loop a c body => exact Stmt.stepSound_loop k m a c body σ p hp
-  | block body => cases hp; exact fun ω κ φ h _ => Stmt.step_sound_block body σ ω κ φ h
+  | block body => cases hp; exact fun ω κ φ h => Stmt.step_sound_block body σ ω κ φ h
 
 end Solidity.Core
