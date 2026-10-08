@@ -12,6 +12,13 @@ of the printed lines), from `i` 7.  The elaborator captures the value first
 (the printed Repair 1), so the unsound derivation has no chain; Repair 2 is
 not taken.  The chain is one term, grouped as the paper prints it, every
 capture kept, and ends with the write folded to literals.
+
+It reads `Update.lean`'s calculus, not the scoped one (`open scoped
+Solidity.Core.Surface`): the elaborator writes the captures (`a`, `b`) in
+front of the write, so the scoped reading leaves them, fresh variables, in
+scope at the postcondition, whose erasure is then no postcondition
+(`Core.Post.erase`), until the elaborator puts a statement's captures in a
+block of their own.
 -/
 
 namespace Solidity.Examples.Chains.EvaluationOrder

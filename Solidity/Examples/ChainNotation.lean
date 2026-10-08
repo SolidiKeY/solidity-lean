@@ -29,7 +29,11 @@ what is *proved valid* is its instance under the box (`Close.lean`: a write
 under the diamond is stuck in a state without `alice`).
 
 This file tests the notation, not the calculus: the worked examples are the
-chains of `Examples/Chains/`, and are cited here, not drawn again.
+chains of `Examples/Chains/`, and are cited here, not drawn again.  It reads
+`Update.lean`'s formulas (`Calculus/Chains.lean`): the worked chains read the
+scoped calculus (`open scoped Solidity.Core.Surface`), whose chains have no
+`calc`, no `~~>` and no rewrite before the program's end, and whose notation
+`Examples/Tactics/CoreChains.lean` pins.
 -/
 
 namespace Solidity.Examples.ChainNotation
@@ -150,20 +154,42 @@ example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
 
 /-! ## 4 · A chain is a proof
 
-The headline, `Chains.Storage.BalanceWrite.chain` (one chain term, for every modality
-`m` and postcondition `φ`), proves its first line from its last
+The headline's trace (`Chains.Storage.BalanceWrite.chain`, one chain term, for every modality
+`m` and postcondition `φ`) proves its first line from its last
 (`Fml.Via.leads`, `Fml.Leads.valid`).  Here under the box, where the write is valid, at
 the postcondition the statement is written for.  The chain keeps its captures, which
 `sol_close` does not drop: `simplifyUpdate` drops them first. -/
 
 theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } :=
+  have chain : dl![.box]{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
+      ~*> dl![.box]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+        alice.account.balance == 10 }
+      ~[sequentialToParallel]~> dl![.box]{
+        { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+          alice.account.balance == 10 } := by
+    sol_chain
   have drop : dl![.box]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
         alice.account.balance == 10 }
       ~[simplifyUpdate]~> dl![.box]{ { storage := save(storage, alice.account.balance, 10) }
         alice.account.balance == 10 } := by
     sol_chain
-  ((Chains.Storage.BalanceWrite.chain .box { fml := dl!{ alice.account.balance == 10 } }).leads.comp
+  (chain.leads.comp
     (Fml.SoundRel.leads drop)).valid (by sol_close)
+
+/-- The same, scoped: past the program the chain goes on on the erasure (`Core.Fml.ViaE`), and its
+last scoped line is closed by `Core.Proves.close` (`Core.Fml.ViaE.valid_close`), the erasure's
+last line by `sol_close`. -/
+example : Core.Valid cdl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } :=
+  (show cdl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
+      ~*> cdl![.box]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
+        alice.account.balance == 10 }
+      ~[sequentialToParallel]~> cdl![.box]{
+        { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
+          alice.account.balance == 10 }
+      ~[simplifyUpdate]~> cdl![.box]{ { storage := save(storage, alice.account.balance, 10) }
+        alice.account.balance == 10 } by sol_chain).valid_close
+    (show Solidity.Valid dl![.box]{ { storage := save(storage, alice.account.balance, 10) }
+      alice.account.balance == 10 } by sol_close)
 
 /-- A box derivation's last line, written: an update with no modality under
 it is judged at the box in `dl![.box]{ … }` (in `dl!{ … }`, at the diamond). -/
@@ -214,12 +240,6 @@ def ageWrite (φ : Post StandardExample) :
     ~*> dl!{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ } := by
   sol_chain
 
-/-- It is that link: the worked chain states it. -/
-example (φ : Post StandardExample) :
-    Nonempty (dl!{ { ageVal := 42 } ⟨ alice.age = ageVal; ⟩ φ }
-      ~*> dl!{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }) :=
-  (Chains.Storage.AgeWrite.chain .diamond φ).1
-
 example (φ : Post StandardExample)
     (d : dl!{ { ageVal := 42 } ⟨ alice.age = ageVal; ⟩ φ }
       ~*> dl!{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ })
@@ -240,6 +260,20 @@ info: dl{ ⟨ alice.age = v; ⟩ find(storage, alice.age) = v }
 #guard_msgs in
 #check dl!{ ⟨ alice.age = v; ⟩ alice.age == v }
     ~[storageFieldWriteSave]~> dl!{ { storage := save(storage, alice.age, v) } ⟨⟩ alice.age == v }
+
+-- A captured equality, inequality or product prints in KeY's text and reads back.
+/-- info: dl{ { x := a == b ‖ y := a != b ‖ z := a * b } true } : Fml StandardExample -/
+#guard_msgs in
+#check dl!{ { x := a == b ‖ y := a != b ‖ z := a * b } true }
+
+example : dl!{ ⟨ bool c = a == b; uint d = a * b; ⟩ true }
+    ~*> dl!{ { c := a == b } { d := a * b } true } := by
+  sol_chain
+
+/-- The same line written in a scoped chain (`cdl!{ … }`), matched by its erasure. -/
+example : cdl!{ ⟨ bool c = a == b; uint d = a * b; ⟩ true }
+    ~*> cdl!{ { c := a == b } { d := a * b } true } := by
+  sol_chain
 
 -- `se1` and `sp1` are the fresh variables the rule declares
 example : dl!{ ⟨ alice.account.balance = 10; ⟩ true }

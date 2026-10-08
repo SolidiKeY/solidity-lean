@@ -1807,6 +1807,163 @@ time: all fourteen at once went past 30 GB beside the other lanes);
   against `ValidC`, waiting on `Stmt.TSound`; `Examples/Tactics/CoreCallback.lean`
   (the `tactics` lane's file) not re-pinned to `holdsC`.
 
+### W3 lane `chains` (`w25-chains`, 2026-10-08)
+
+**Flipped** (`open scoped Solidity.Core.Surface`, the Core imports): all of
+`Examples/Chains/` but `EvaluationOrder`, 144 chain declarations; 33 declarations stay on
+`Update.lean`'s calculus, in a trailing part of their file headed *Left on
+`Update.lean`'s calculus* that says why (below).  `ChainNotation` and
+`ChainRewrites` stay on today's calculus (below).
+
+**What the flip needs besides the line:**
+- *A postcondition at its context.*  `Core.Post C Γ` stands where it is, with
+  no weakening, so a chain whose first line declares locals before `φ` (an
+  update `{ ageVal := 42 }`, a parameter `v` bound `∀ uint v;`, a program's
+  top-level `uint x`) takes `φ` at that context, as a binder of the
+  declaration: `theorem chain (φ : Core.Post StandardExample [.val .uint]) :`.
+  The section variable stays `Core.Post C []` for the others.  A hole
+  (`Core.Post C _`) does not work: the coercion to `Core.Fml C Γ` does not
+  unify the context.
+- *No segments.*  Scoped chains have no `~~>`: the four chains composed of
+  two segments (`Storage.BalanceWriteRead`, `StorageDelete.SubtreeDelete`,
+  `MemoryDelete.FieldDeleteRef`, `StorageCoverage.ifElseUnfold`) are one
+  chain each, every line kept; `run`/`reads`/`ifElseUnfold1`/`ifElseUnfold2`
+  are gone.
+- *Parameters past the program* (`Calculus/Core/ChainKit.lean`,
+  `Chains.lean`): the erasure of a line whose parameters the reader binds
+  outermost starts with `∀ uint v;`, which no rewrite goes under; `Fml.ViaE`
+  now takes the erasure with its outer quantifiers dropped
+  (`Solidity.Fml.dropAlls`, sound by `holds_of_dropAlls`: validity is closed
+  under generalisation).
+- *A fixed modality in a line over `m`* (`Chains.lean`): the diamond and box
+  runs were compared with every `Modality` constant abstracted, so a hidden
+  binder's `.box` (Decision 12) made a line over `m` stop ("depends on the
+  modality").  `mergeModality` puts `m` back only where the two runs differ
+  (`Memory.RootAlias`).
+- `Fml.ViaE.valid_close`: the bridge of `Fml.ViaE.valid` is `Proves.close` at
+  the last scoped line, its side conditions decided by the kernel
+  (`ChainNotation`, §4, closes `[ alice.account.balance = 10; ] …` that way).
+- The printer (`Calculus/RuleSyntax.lean`, `Calculus/Notation.lean`):
+  `x := a == b`, `x := a != b` (a `uint` equality captured) and `a * b` have
+  KeY's text and read back (`ChainNotation` §7 pins both readings).
+
+**Pins and statements changed, each with its reason:**
+- W3 reason 1 (`cov` gone): `CheckedArithmetic.OverflowReverts.{box,diamond}`,
+  `StorageCoverage.{requireConditionCapture,requireSimple,ifElseUnfold,ifElseSplit}`:
+  the third conjunct `(⟨ revert(); ⟩ false ∨ c ≐ true ∨ c ≐ false)` dropped
+  from every line after the split.
+- W3 reason 2 (a branch's `}`): `StorageCoverage.{ifElseUnfold,ifElseSplit}`.
+- New, statements: the `φ` binders and the merged segments above;
+  `StorageCoverage.{revertDiamond,revertBox}` proved `by sol_chain` (a
+  scoped step over `φ` is not `rfl`).
+- New, printer: `Examples/Tactics/Branch.lean` (the `tactics` lane's file),
+  `branchLocals`' three goals print `{ se1 := a == b }` where they printed
+  the `‹Term.binop BinOp.eqB …›` escape.
+- `ChainNotation`: `headline_valid` and `ChainRewrites.headlineWrite` use a
+  local copy of the headline (today's), the "It is that link" example
+  (`AgeWrite.chain .diamond φ`) is gone; new pins: `==`/`!=`/`*`, a scoped
+  chain through them, a scoped `valid_close`.
+- No fresh name, `~*>` span or rule name of a flipped chain moved.
+
+**Gate**, `Examples/Chains/Storage` (M0 7.5 s, limit 9.0 s): **passed,
+8.7–8.8 s** after the review fixes, by the M0/M3.3 method (a copy under
+`Solidity/Scratch/` with `Elab.async false`, `#clock` reading
+`/proc/self/stat` and `/proc/uptime`, wall time from the worker's start to
+the end, imports built, load average under 2): flipped 8.84, 8.69 s;
+today's file (`e61996b^`) 7.48, 7.40 s in the same session, so the flip
+still costs ×1.17, which `.claude/rules/derivations.md` rule 7 ("in the
+time it did before or faster") does not allow: an explained cost, not an
+outlier past the gate.  Where it went, per chain (CPU ticks between
+`#clock`s, flipped against today's): every chain ×1.3–2 before the fixes,
+the header (both calculi's imports) +0.1 s, `#last_line` 0.04–0.1 s per
+chain on both.  The lane's first estimate (13.2–15.7 s against 10.5–12.3 s,
+×1.27–1.31) was under load; on a quiet machine the flip measured 10.06,
+10.12 s against 7.37, 7.40 s (×1.37) before the fixes below.
+- The cost was the run's evaluation (`closedLines`/`closedErased`): four
+  `evalExpr`s a run (lines and erasure, at the diamond and at the box), each
+  a definition the kernel type-checked (12 ms each, the formula inside it),
+  and every run done twice for a chain whose `φ` is a binder of the theorem
+  (`(φ : Core.Post C [.alias …])`): the proof sees the binder as a new
+  variable, so `runCache` missed in `sol_chain`.  Now one evaluation a
+  modality (`Fml.chainRunQ`, lines and erasure together), not
+  kernel-checked (`evalQuoted`, `debug.skipKernelTC`: the value is a quoted
+  term that the kernel checks where it is used), and cached by the closed
+  formula, postconditions in slots (`closedCache`), which is the same under
+  the theorem's new variables.  `AccountCopy`: 0.40 s → 0.27 s (today's
+  0.20 s).
+- Left: the scoped statement's elaboration (102 ms against 71 ms on
+  `AccountCopy`) and `sol_chain`'s meta-level `Kernel.isDefEq` before the
+  kernel's own check (59 ms against 24 ms).
+
+**Left on `Update.lean`'s calculus, with the reason** (the lead's call):
+- *Captures in the postcondition's scope* (`EvaluationOrder`, and the tails of
+  `Storage` (2), `StorageDelete` (1), `StorageArrays` (2), `Memory` (1),
+  `MemoryArrays` (5), `MemoryDelete` (1), `StorageCoverage` (8),
+  `MemoryCoverage` (5)): the elaborator writes a statement's captures
+  (`uint idx; idx = ++i;`, a call's result, a receiver) in front of it at the
+  top level, so the scoped program ends with them in scope, the postcondition
+  stands at a context with fresh names, and its erasure is no `Post`
+  (`Core.Post.erase`'s `maxIdx ns = 0`).  Fix: the elaborator puts a
+  statement and its captures in a block of their own (as W0 did for raw
+  blocks) — a low-module change whose pins are other lanes' too.
+- *A rewrite under the open modality, then more program*
+  (`StorageToMemory.{FieldCopy,TokenCopy}`): a scoped chain goes past a
+  rewrite only with rewrites.  Fix: a scoped `sequentialToParallel` on
+  `Core.Upd`, or chains re-pinned with the merge at the end.
+- *A rule the finder does not name* (`MemoryArrays.ElementOfField.valueWrite`):
+  the scoped strategy fires `memoryIndexWriteCaptureAllComplexRecv` on
+  `b.items[i] = val;`, but `Core.ruleOf?` names nothing (`#derivation` prints
+  `~[?]~>`), so the named link does not elaborate.
+- `ChainNotation`, `ChainRewrites`: they test `Calculus/Chains.lean`'s notation
+  and rewrites (`calc`, `~~>`, segments, rewrites before the program's end,
+  `Fml.Steps.ofSymex`, `Fml.StepBy.unique`), which scoped chains do not have;
+  `Examples/Tactics/CoreChains.lean` pins the scoped notation.  W4's
+  `calc-del` deletes `Calculus/Chains.lean`: both files are rewritten or
+  retired then.
+
+**Found, not this lane's:**
+- `Core/Notation.lean` says an update over a name nothing declares declares
+  it (`{ x := 10 } x == 10`); it binds `∀ uint x;` outermost instead (the
+  `.upd` case of `elabFmlC` does not put the update's new locals in the
+  reader's scope, so the reading without the parameter fails).  Harmless for
+  chains since `dropAlls`.
+- When `Memory.CallWrite` flips, its two inlined calls name
+  `functionBodyExpand` where today's chain names `internalCallExpand`
+  (`Account memory pv = makeAccount();`): a re-pin with a reason the W3 list
+  does not have.
+- `~[r]~>`'s "the rule for … is …" error fails to print the scoped statement
+  ("failed to pretty print expression").
+
+**Review fixes** (2026-10-08):
+- `#chain`/`sol_chain?` (`Core/ChainGen.lean`) and `#last_line`
+  (`Core/LastLine.lean`) take the erasure with its outer `∀`s dropped
+  (`dropAllsE`), as `elabCoreChain` does: a parameterised scoped line
+  (`{ ageVal := 42 } ⟨[ … ]⟩ φ`) now gets its rewrites past the program,
+  computed from the `L` `Fml.ViaE` checks.  Pinned: `#chain` of
+  `AgeWrite`'s first line and the pasted chain
+  (`Examples/Tactics/CoreChains.lean`).
+- The printer (`ppTerm`) writes `+ - * /` only at `uint`, the type they read
+  back at; an `int` (or unchecked `bool`) one escapes.  Pinned:
+  `Examples/Tools.lean`'s `#wp` of `int f = e * 7;`.  No other pin moved
+  (`ChainNotation`, `ProofTree`, `PrintedRules`, `Tactics/Values` checked).
+- The gate above (`evalQuoted`, `closedCache`).
+- Docs: `.claude/rules/derivations.md` rules 1 and 7 and the
+  `chain-authoring` skill say a scoped chain is one declaration
+  (`Core.Fml.Via`/`ViaE`), segments only on `Update.lean`'s calculus; the
+  docstrings of `Fml.Via.valid`, `Fml.Steps.eq_of_length`/`eq_of_measure`,
+  `StorageCoverage.requireSimple` and `CheckedArithmetic`'s module no longer
+  cite what the flip changed.
+- Checked after the `Core/Chains.lean` edit: all 14 `Examples/Chains/` files,
+  `Examples/{ChainNotation,Tactics/CoreChains,Tactics/CoreSurface,Tactics/CoreSequents,Tactics/CoreSolSpec}`,
+  `Tools/CoreInspect`, clean.
+
+**Checks:** every touched file's diagnostics clean (the seven files checked
+before `mergeModality` re-checked after it), `Examples/Tactics/CoreChains`
+clean.  Not run: the full build (the printer edit rebuilds everything above
+`RuleSyntax`; this session keeps Lake's parallel build off the shared
+memory), `check-corpus.sh`, `solkeycheck` (no rule name or annotation
+changed).
+
 ## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
 Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.
 

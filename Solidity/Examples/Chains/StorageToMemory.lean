@@ -1,6 +1,8 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.LastLine
 import Solidity.FreshNames
+import Solidity.Calculus.Core.LastLine
+import Solidity.Calculus.Core.Surface
 
 /-!
 # Storage-to-memory copies, as chains
@@ -19,10 +21,12 @@ through a write below it.
 
 namespace Solidity.Examples.Chains.StorageToMemory
 
+open scoped Solidity.Core.Surface
+
 local instance : InContract := ⟨StandardExample⟩
 
 section
-variable (m : Modality) (φ : Post StandardExample)
+variable (m : Modality) (φ : Core.Post StandardExample [])
 
 /-! ## Example: Symbolic Execution of Storage-to-Memory Copy with Lazy Read -/
 
@@ -31,7 +35,7 @@ namespace RootCopy
 snapshot of `alice`, and the read is a read of it.  The line the declaration leaves says `carol` is a memory
 local.  The updates merged, the read of the copy is a read of the storage copied (`readCopySt`), which the
 write answers (`findOnSave`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ ⟨[ alice.age = 25; Person memory carol = alice; v = carol.age; ]⟩ φ }
     ~[storageFieldWriteSave]~>
       dl![m]{ { storage := save(storage, alice.age, 25) } ⟨[ Person memory carol = alice; v = carol.age; ]⟩ φ }
@@ -63,6 +67,21 @@ theorem chain :
   sol_chain
 #last_line chain
 end RootCopy
+
+end
+
+end Solidity.Examples.Chains.StorageToMemory
+
+/-! ## Left on `Update.lean`'s calculus
+
+`FieldCopy` and `TokenCopy` merge the stack under the open modality (`~[sequentialToParallel]~>` before the copy) and run the program on from the merged line, as the worked examples print them; a scoped chain goes past a rewrite only with rewrites, so they read as today's chains. -/
+
+namespace Solidity.Examples.Chains.StorageToMemory
+
+local instance : InContract := ⟨StandardExample⟩
+
+section
+variable (m : Modality) (φ : Post StandardExample)
 
 /-! ## Example: Symbolic Execution of Storage-to-Memory Field Copy with Lazy Read -/
 

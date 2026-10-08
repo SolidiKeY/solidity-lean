@@ -110,6 +110,11 @@ def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
       ⟨pair, k, ψ.erasedQuoted c⟩ :: Fml.chainLines c n ψ
     | none => []
 
+/-- The lines of the derivation of `φ` and its erasure, quoted: one
+evaluation. -/
+def Fml.chainRunQ (c : Lean.Expr) {Γ : Ctx} (n : Nat) (φ : Fml C Γ) : List LineQ × Lean.Expr :=
+  (Fml.chainLines c n φ, φ.erasedQuoted c)
+
 /-- `⟨[ s; … } ω ]⟩ φ`: a modality `m` that is a variable, its program
 running into the end of a block (`Core.Delab`'s `core_item`). -/
 syntax:max "⟨" "[ " (sol_stmt "; ")* "} " core_item* "]" "⟩ " dl_fml:50 : dl_fml
@@ -170,9 +175,16 @@ def modalityOf? (φ : Expr) : MetaM (Option Expr) := do
         postconditions `φ : Core.Post C Γ` may be{indentExpr φ}"
   throwError "sol_chain: the line is under two modalities: take `cases` on one{indentExpr φ}"
 
-/-- `e` with the modality constant `μ` read as the variable `m`. -/
-def unModality (μ : Lean.Name) (m e : Expr) : Expr :=
-  e.replace fun x => if x.isConstOf μ then some m else none
+/-- The line whose readings at the diamond and at the box are `d` and `b`:
+the variable `m` where `d` has the diamond and `b` the box, the rest shared
+(a modality a line fixes, a hidden binder's `.box`, stays). -/
+partial def mergeModality (m d b : Expr) : Option Expr :=
+  if d == b then some d
+  else if d.isConstOf ``Modality.diamond && b.isConstOf ``Modality.box then some m
+  else match d, b with
+    | .app f x, .app g y => do pure (.app (← mergeModality m f g) (← mergeModality m x y))
+    | .mdata k x, .mdata _ y => do pure (.mdata k (← mergeModality m x y))
+    | _, _ => none
 
 /-! ## Running the strategy -/
 
@@ -189,15 +201,29 @@ structure Line where
 /-- The most lines a run computes. -/
 def runFuel : Nat := 200
 
-/-- The lines of the derivation of the closed formula `φ : Fml C Γ`. -/
-def closedLines (n : Lean.Name) (C Γ φ : Expr) : MetaM (List LineQ) := do
-  unsafe evalExpr (List LineQ) (mkApp (mkConst ``List [0]) (mkConst ``LineQ))
-    (mkAppN (mkConst ``Fml.chainLines) #[C, quoteConstName n, Γ, toExpr runFuel, φ])
+/-- `evalExpr` without the kernel's check of the throwaway definition it
+compiles (`debug.skipKernelTC`): the value is a quoted term, and every line
+or proof built from it is checked by the kernel where it is used.  The check
+was a third of a short chain's time (`docs/intrinsic.md`, W3 `chains`). -/
+unsafe def evalQuoted (α) (ty e : Expr) : MetaM α :=
+  withOptions (debug.skipKernelTC.set · true) (evalExpr α ty e)
 
-/-- The erasure of the closed formula `φ`, quoted. -/
-def closedErased (n : Lean.Name) (C Γ φ : Expr) : MetaM Expr := do
-  unsafe evalExpr Expr (mkConst ``Expr)
-    (mkAppN (mkConst ``Fml.erasedQuoted) #[C, quoteConstName n, Γ, φ])
+/-- The evaluated runs of this declaration, by their closed formula: a
+theorem's proof sees its binders as new variables, so `runCache` misses
+there, but the formula with its postconditions in slots is the same. -/
+initialize closedCache : EnvExtension (Std.HashMap Expr (List LineQ × Expr)) ←
+  registerEnvExtension (pure {}) (asyncMode := .local)
+
+/-- The lines of the derivation of the closed formula `φ : Fml C Γ`, and
+its erasure, quoted. -/
+def closedRun (n : Lean.Name) (C Γ φ : Expr) : MetaM (List LineQ × Expr) := do
+  if let some r := (closedCache.getState (← getEnv))[φ]? then return r
+  let ty := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) (mkConst ``LineQ))
+    (mkConst ``Expr)
+  let r ← unsafe evalQuoted (List LineQ × Expr) ty
+    (mkAppN (mkConst ``Fml.chainRunQ) #[C, quoteConstName n, Γ, toExpr runFuel, φ])
+  modifyEnv fun env => closedCache.modifyState env (·.insert φ r)
+  return r
 
 /-- A derivation: the Lean terms of its first line, the erasure of that line
 (once per modality), its lines, and whether they stop because the next rule
@@ -246,18 +272,18 @@ def runChain (φ : Expr) : MetaM Run := do
     let (f, ψ) := unpair q.pair
     { fml := unpunch sp ψ, focus := unpunch sp f, fresh := q.fresh, erased := #[q.erased] }
   let (erased, ls, stuck) ← match m? with
-    | none => pure (#[← closedErased n C Γ φ'], (← closedLines n C Γ φ').map line, false)
+    | none =>
+      let (ls, e) ← closedRun n C Γ φ'
+      pure (#[e], ls.map line, false)
     | some m =>
       let φd := φ'.replaceFVar m (mkConst ``Modality.diamond)
       let φb := φ'.replaceFVar m (mkConst ``Modality.box)
-      let ds ← closedLines n C Γ φd
-      let bs ← closedLines n C Γ φb
+      let (ds, ed) ← closedRun n C Γ φd
+      let (bs, eb) ← closedRun n C Γ φb
       let rec shared : List LineQ → List LineQ → List Line × Bool
         | d :: ds, b :: bs =>
-          let pd := unModality ``Modality.diamond m d.pair
-          let pb := unModality ``Modality.box m b.pair
-          if pd == pb && d.fresh == b.fresh then
-            let (f, ψ) := unpair pd
+          if let (some p, true) := (mergeModality m d.pair b.pair, d.fresh == b.fresh) then
+            let (f, ψ) := unpair p
             let (ls, s) := shared ds bs
             ({ fml := unpunch sp ψ, focus := unpunch sp f, fresh := d.fresh,
                erased := #[d.erased, b.erased] } :: ls, s)
@@ -265,7 +291,7 @@ def runChain (φ : Expr) : MetaM Run := do
         | [], [] => ([], false)
         | _, _ => ([], true)
       let (ls, s) := shared ds bs
-      pure (#[← closedErased n C Γ φd, ← closedErased n C Γ φb], ls, s)
+      pure (#[ed, eb], ls, s)
   let r : Run := { splice := sp, erased, lines := ls, stuck }
   modifyEnv fun env => runCache.modifyState env fun c => Id.run do
     let mut c := c.insert φ (r, 0)
@@ -809,12 +835,14 @@ def erasedLine (sp : Splice) (erased : Array Expr) : MetaM Expr := do
   match erased, sp.modality with
   | #[d], _ => fill d
   | #[d, b], some m =>
-    let d ← fill (unModality ``Modality.diamond m d)
-    let b ← fill (unModality ``Modality.box m b)
-    unless d == b do
+    let some e := mergeModality m d b |
       throwError "sol_chain: the erasure of the line {modalityStop m}"
-    return d
+    fill e
   | _, _ => throwError "sol_chain: no erasure"
+
+/-- `Solidity.Fml.dropAlls` on the term: the line's outer `∀`s dropped. -/
+partial def dropAllsE (e : Expr) : Expr :=
+  if e.isAppOfArity ``Solidity.Fml.all 4 then dropAllsE e.appArg! else e
 
 /-- The `Update.lean` postcondition standing for the Lean term `e` (a hole
 of a written line) in the line `L`. -/
@@ -886,7 +914,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
             match (← runChain A).lines.find? (·.fml == cur) with
             | some line => pure line.erased
             | none => pure run.erased
-          let L ← erasedLine run.splice erased
+          let L := dropAllsE (← erasedLine run.splice erased)
           legacy := some (L, L, run.splice.modality)
           pure (L, run.splice.modality)
       let b ← legacyWritten C m? L₀ w

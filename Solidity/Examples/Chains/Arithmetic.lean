@@ -1,6 +1,8 @@
 import Solidity.Calculus.Chains
 import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.LastLine
+import Solidity.Calculus.Core.Surface
 
 /-!
 # Arithmetic: the compound storage update
@@ -16,12 +18,14 @@ line, so the read ends at a literal and the sum folds.
 
 namespace Solidity.Examples.Chains.Arithmetic
 
+open scoped Solidity.Core.Surface
+
 local instance : InContract := ⟨StandardExample⟩
 
 /-! ## Example: Compound Storage Update -/
 
 section
-variable (m : Modality) (φ : Post StandardExample)
+variable (m : Modality) (φ : Core.Post StandardExample [])
 
 namespace CompoundStorageUpdate
 

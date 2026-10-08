@@ -541,12 +541,27 @@ def Fml.Via.last : Fml C Γ → List (Link C × Fml C Γ) → Fml C Γ
 
 end Relations
 
+/-- `Update.lean`'s formula with its outer quantifiers dropped: the
+parameters a scoped line binds outermost (`∀ uint v;`, `Core/Notation.lean`),
+left free, as `dl!{ … }` reads them, so that the rewrites see the update. -/
+def _root_.Solidity.Fml.dropAlls : Solidity.Fml C → Solidity.Fml C
+  | .all _ _ φ => φ.dropAlls
+  | φ => φ
+
+/-- A formula is valid where it is with its outer quantifiers dropped. -/
+theorem _root_.Solidity.Fml.holds_of_dropAlls : (φ : Solidity.Fml C) →
+    (∀ τ, Solidity.holds τ φ.dropAlls) → ∀ τ, Solidity.holds τ φ
+  | .all _ _ φ, h, _ => fun _ _ => Solidity.Fml.holds_of_dropAlls φ h _
+  | .tt, h, τ | .eq .., h, τ | .defined _, h, τ | .not _, h, τ | .and .., h, τ | .imp .., h, τ
+  | .upd .., h, τ | .modal .., h, τ | .havoc .., h, τ | .anon .., h, τ => h τ
+
 /-- A chain that goes on past the program by `Calculus/ChainRewrites.lean`'s
 rewrites: its scoped links, then, from the erasure `L` of its last scoped
-line, `Update.lean`'s (`Solidity.Fml.Via`), the first a rewrite. -/
+line, its parameters left free (`Fml.dropAlls`), `Update.lean`'s
+(`Solidity.Fml.Via`), the first a rewrite. -/
 @[reducible] def Fml.ViaE (φ : Fml C []) (ws : List (Link C × Fml C [])) (L : Solidity.Fml C)
     (rs : List (Solidity.Link C × Solidity.Fml C)) : Prop :=
-  Fml.Via φ ws ∧ (Fml.Via.last φ ws).erase [] = L ∧ Solidity.Fml.Via L rs
+  Fml.Via φ ws ∧ ((Fml.Via.last φ ws).erase []).dropAlls = L ∧ Solidity.Fml.Via L rs
 
 section Build
 
@@ -740,7 +755,19 @@ theorem Fml.ViaE.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Sol
     {rs : List (Solidity.Link C × Solidity.Fml C)} (v : Fml.ViaE φ ws L rs)
     (bridge : (∀ τ, Solidity.holds τ ((Fml.Via.last φ ws).erase [])) → Valid (Fml.Via.last φ ws))
     (h : ∀ τ, Solidity.holds τ (Solidity.Fml.Via.last L rs)) : Valid φ :=
-  v.1.valid (bridge (v.2.1 ▸ v.2.2.valid h))
+  v.1.valid (bridge (Solidity.Fml.holds_of_dropAlls _ (v.2.1 ▸ v.2.2.valid h)))
+
+/-- **A chain past the program, closed**: the bridge of `Fml.ViaE.valid` is
+`Proves.close` at the last scoped line, whose side conditions the kernel
+decides (`Fml.closableB`: no modality left, box updates only, a hidden
+binder's name avoided). -/
+theorem Fml.ViaE.valid_close {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.Fml C}
+    {rs : List (Solidity.Link C × Solidity.Fml C)} (v : Fml.ViaE φ ws L rs)
+    (h : ∀ τ, Solidity.holds τ (Solidity.Fml.Via.last L rs))
+    (hc : (Fml.Via.last φ ws).closableB [] = true := by first | rfl | decide)
+    (hB : Solidity.Avoids (Fml.Via.last φ ws).bindNames [] := by decide) : Valid φ :=
+  v.valid (fun he => Proves.valid (R := .all) (Proves.close (Γ₀ := []) (H := .nil) [] rfl
+    List.nodup_nil he hc hB)) h
 
 end Sound
 

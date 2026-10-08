@@ -76,6 +76,18 @@ section ExampleNames
 
 local instance : FreshNames := .ofTable Chains.Storage.BalanceWrite.names
 
+/-- `Chains.Storage.BalanceWrite.chain` read by this file's calculus (`Update.lean`'s formulas): the worked
+chain reads the scoped calculus, whose chains have no `~~>` to compose. -/
+theorem balanceWrite :
+    dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
+    ~[storageFieldWrite_unfold_leftFst]~>
+      dl![m]{ ⟨[ uint pv = 10; Account storage acc = alice.account; acc.balance = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 10 } { acc := alice.account } ⟨[ acc.balance = pv; ]⟩ φ }
+    ~*> dl![m]{ { pv := 10 } { acc := alice.account } { storage := save(storage, acc.balance, pv) } φ }
+    ~[sequentialToParallel]~>
+      dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } := by
+  sol_chain
+
 /-- `alice.account.balance = 10;` to its last line, for every modality and
 postcondition, and on to the write alone: `φ` names no fresh variable
 (`Post.noFresh`), so it reads neither `pv` nor `acc`, which the chain keeps,
@@ -85,7 +97,7 @@ theorem headlineWrite :
     ~~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } :=
   calc dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
     _ ~~> dl![m]{ { pv := 10 ‖ acc := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ } :=
-      (Chains.Storage.BalanceWrite.chain m φ).leads
+      (balanceWrite m φ).leads
     _ ~[simplifyUpdate]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) } φ } := by sol_chain
 
 end ExampleNames

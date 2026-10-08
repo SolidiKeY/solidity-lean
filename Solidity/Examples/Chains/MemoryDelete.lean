@@ -3,6 +3,8 @@ import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.LastLine
 import Solidity.Calculus.Close
 import Solidity.FreshNames
+import Solidity.Calculus.Core.LastLine
+import Solidity.Calculus.Core.Surface
 
 /-!
 # The memory `delete` examples as chains
@@ -30,11 +32,13 @@ writes a fresh default object into the field or element; the alias keeps the old
 
 namespace Solidity.Examples.Chains.MemoryDelete
 
+open scoped Solidity.Core.Surface
+
 /-! ## Example: Memory Delete Cases -/
 
 section
 local instance : InContract := ⟨StandardExample⟩
-variable (m : Modality) (φ : Post StandardExample)
+variable (m : Modality) (φ : Core.Post StandardExample [])
 
 namespace RootDelete
 
@@ -44,7 +48,7 @@ the module docstring says why), the run to the delete (`⇝*`),
 `delete` rebinding `carol` to a fresh default object (`⇝`), the two reads (`⇝*`) and the merge.  The
 alias keeps the old object: `newAge` reads the fresh one, the default `0` (`readAddEqual`); `oldAge` reads
 past that allocation (`readAddDifferent`) the write, `33` (`readOnWrite`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person"), .val .uint, .val .uint]) :
     dl![m]{
       ⟨[ Person memory carol; Person memory carolAlias = carol; carol.age = 33; delete carol; oldAge = carolAlias.age;
         newAge = carol.age; ]⟩ φ }
@@ -115,11 +119,14 @@ local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
 /-- `Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100;
-delete carol.account; oldBal = carolAcc.balance; newBal = carol.account.balance;` run: `carol` allocated (the
-paper's first `⇝`), to the delete (`⇝*`), `delete` writing a fresh default `Account` into `carol.account` (`⇝`), the two reads
-(`⇝*`), the merge, and `acc`, read at `carol.account`, the fresh object the delete wrote there
-(`readOnWriteIdentity`). -/
-theorem run :
+delete carol.account; oldBal = carolAcc.balance; newBal = carol.account.balance;`: `carol` allocated (the
+paper's first `⇝`), to the delete (`⇝*`), `delete` writing a fresh default `Account` into `carol.account`
+(`⇝`), the two reads (`⇝*`), the merge, and `acc`, read at `carol.account`, the fresh object the delete wrote
+there (`readOnWriteIdentity`); then `oldBal` read past the delete's write and allocation
+(`readWriteDifferent`, `readAddDifferent`) to the write through `carolAcc`, `100`, and `newBal`, `acc`'s
+`balance`, past the delete's write to the fresh object's default, `0` (`readAddEqual`).  The member gets a
+fresh default object, and `carolAcc` keeps the old one. -/
+theorem chain (φ : Core.Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person"), .val .uint, .val .uint]) :
     dl![m]{
       ⟨[ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100; delete carol.account;
         oldBal = carolAcc.balance; newBal = carol.account.balance; ]⟩ φ }
@@ -226,49 +233,7 @@ theorem run :
                 freshId(addM(write(addM(memory, Person),
                         read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
                       Account)).balance) }
-          φ } := by
-  sol_chain
-
-/-- The rest of `FieldDeleteRef.run`: `oldBal` read past the delete's write and allocation
-(`readWriteDifferent`, `readAddDifferent`) to the write through `carolAcc`, `100`; `newBal`, `acc`'s
-`balance`, past the delete's write to the fresh object's default, `0` (`readAddEqual`). -/
-theorem reads :
-    dl![m]{
-      { carol := freshId(addM(memory, Person)) ‖
-          carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
-          memory :=
-            write(addM(write(addM(memory, Person),
-                  read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                Account),
-              freshId(addM(memory, Person)).account,
-              freshId(addM(write(addM(memory, Person),
-                    read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                  Account))) ‖
-          oldBal :=
-            read(write(addM(write(addM(memory, Person),
-                    read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                  Account),
-                freshId(addM(memory, Person)).account,
-                freshId(addM(write(addM(memory, Person),
-                      read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                    Account))),
-              read(addM(memory, Person), freshId(addM(memory, Person)).account).balance) ‖
-          acc :=
-            freshId(addM(write(addM(memory, Person),
-                  read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                Account)) ‖
-          newBal :=
-            read(write(addM(write(addM(memory, Person),
-                    read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                  Account),
-                freshId(addM(memory, Person)).account,
-                freshId(addM(write(addM(memory, Person),
-                      read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                    Account))),
-              freshId(addM(write(addM(memory, Person),
-                      read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                    Account)).balance) }
-        φ }
+          φ }
     ~[readWriteDifferent]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
@@ -403,39 +368,21 @@ theorem reads :
             newBal := 0 }
           φ } := by
   sol_chain
-
-/-- `Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100;
-delete carol.account; oldBal = carolAcc.balance; newBal = carol.account.balance;`: `run` then `reads`.
-The member gets a fresh default object, and `carolAcc` keeps the old one: `100` through `carolAcc`, the
-default `0` through `carol.account`. -/
-theorem chain :
-    dl![m]{
-      ⟨[ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100; delete carol.account;
-        oldBal = carolAcc.balance; newBal = carol.account.balance; ]⟩ φ }
-    ~~> dl![m]{
-      { carol := freshId(addM(memory, Person)) ‖
-          carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
-          memory :=
-            write(addM(write(addM(memory, Person),
-                  read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                Account),
-              freshId(addM(memory, Person)).account,
-              freshId(addM(write(addM(memory, Person),
-                    read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                  Account))) ‖
-          oldBal := 100 ‖
-          acc :=
-            freshId(addM(write(addM(memory, Person),
-                  read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
-                Account)) ‖
-          newBal := 0 }
-        φ } :=
-  (run ..).leads.via (reads ..)
 #last_line chain
 
 end FieldDeleteRef
 
 end
+
+end Solidity.Examples.Chains.MemoryDelete
+
+/-! ## Left on `Update.lean`'s calculus
+
+`IndexedDelete`, whose program the elaborator writes with the receiver and the index captured in front (`toks = b.tokens; uint idx; idx = ++i;`): the scoped reading leaves the captures, fresh variables, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`).  It reads as today's chain until the elaborator puts a statement's captures in a block of their own. -/
+
+namespace Solidity.Examples.Chains.MemoryDelete
+
+section
 
 namespace IndexedDelete
 
@@ -1403,5 +1350,7 @@ theorem chain :
 #last_line chain
 
 end IndexedDelete
+
+end
 
 end Solidity.Examples.Chains.MemoryDelete

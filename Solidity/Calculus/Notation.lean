@@ -128,10 +128,10 @@ inductive RawTerm where
   | atIn (t i S : RawTerm)
   | add (a b : RawTerm)
   | sub (a b : RawTerm)
-  /-- `a <= b`, `a < b` as a term: the right-hand side of a captured
-  comparison, `x := a <= b`. -/
+  /-- `a <= b`, `a < b`, `a == b` as a term: the right-hand side of a
+  captured comparison, `x := a <= b`. -/
   | cmp (op : BinOp) (a b : RawTerm)
-  /-- `a / b`: an operation on two `uint`s other than `+` and `-`. -/
+  /-- `a / b`, `a * b`: an operation on two `uint`s other than `+` and `-`. -/
   | arith (op : BinOp) (a b : RawTerm)
   | app (f : String) (args : List RawTerm)
   /-- `msg.sender`, `address(this).balance`, …: KeY's program variables
@@ -252,6 +252,8 @@ partial def expandTerm : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| $a:dl_term - $b:dl_term) => do `(RawTerm.sub $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| $a:dl_term / $b:dl_term) => do
     `(RawTerm.arith BinOp.div $(← expandTerm a) $(← expandTerm b))
+  | `(dl_term| $a:dl_term * $b:dl_term) => do
+    `(RawTerm.arith BinOp.mul $(← expandTerm a) $(← expandTerm b))
   | `(dl_term| ( $t:dl_term )) => expandTerm t
   | `(dl_term| ! $t:dl_term) => do `(RawTerm.app "!" [$(← expandTerm t)])
   | `(dl_term| select(net, at($a))) => do `(RawTerm.app "net" [$(← expandTerm a)])
@@ -320,6 +322,8 @@ def expandUpd (U : TSyntax `dl_upd) : MacroM Lean.Term := do
     | `(dl_upd_elem| $l:dl_term := $a:dl_term < $b:dl_term) => assignCmp l ``BinOp.lt a b
     | `(dl_upd_elem| $l:dl_term := $a:dl_term > $b:dl_term) => assignCmp l ``BinOp.gt a b
     | `(dl_upd_elem| $l:dl_term := $a:dl_term >= $b:dl_term) => assignCmp l ``BinOp.ge a b
+    | `(dl_upd_elem| $l:dl_term := $a:dl_term == $b:dl_term) => assignCmp l ``BinOp.eqB a b
+    | `(dl_upd_elem| $l:dl_term := $a:dl_term != $b:dl_term) => assignCmp l ``BinOp.neB a b
     | _ => Macro.throwUnsupported
   `([$elems,*])
 where

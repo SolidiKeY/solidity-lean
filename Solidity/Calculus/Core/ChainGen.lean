@@ -56,7 +56,7 @@ def generate (φ : Expr) : TermElabM Gen := do
   unless (← whnfR Γ).isAppOf ``List.nil do
     return { splice := run.splice, erased := run.erased, steps, rewrites := #[], stop := none }
   let erased := (steps.back?.map (·.2.2)).getD run.erased
-  let L ← erasedLine run.splice erased
+  let L := dropAllsE (← erasedLine run.splice erased)
   let C := (← lineType φ).1
   let (rws, stop, _) ← Solidity.Chain.searchRewritesUsing C L none
   return { splice := run.splice, erased := run.erased, steps, rewrites := rws.getD #[], stop }

@@ -85,7 +85,7 @@ elab_rules : command
           unless (← whnfR (← lineType B).2).isAppOf ``List.nil do
             throwError "#last_line: the last line of {c} has a context of its own"
           let run ← runChain B
-          erasedLine run.splice run.erased
+          pure (dropAllsE (← erasedLine run.splice run.erased))
         else pure B
       let C := (← whnfR (← inferType L)).appArg!
       withLegacyPosts L fun L => do

@@ -3,6 +3,8 @@ import Solidity.Calculus.LastLine
 import Solidity.Calculus.ChainGen
 import Solidity.Calculus.Close
 import Solidity.FreshNames
+import Solidity.Calculus.Core.LastLine
+import Solidity.Calculus.Core.Surface
 
 /-!
 # Memory array examples as chains
@@ -32,10 +34,12 @@ conventions), in the printed names (`FreshNames` tables: `idx`, `pv`, `acc`, `mv
 
 namespace Solidity.Examples.Chains.MemoryArrays
 
+open scoped Solidity.Core.Surface
+
 local instance : InContract := ⟨StandardExample⟩
 
 section
-variable (m : Modality) (φ : Post StandardExample)
+variable (m : Modality) (φ : Core.Post StandardExample [])
 
 /-! ## Example: Index Read and Write on a Memory Array -/
 
@@ -44,7 +48,7 @@ namespace IndexRead
 /-- `v = carolValues[i];` with `i` 2, from a memory where `carolValues[2]` is 10: read out of the heap at
 the index (the paper's `⇝`, the rule and its empty program); past the merge the read is the write's value
 (`readOnWrite`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
     dl![m]{
       { i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
         { memory := write(memory, carolValues[2], 10) } ⟨[ v = carolValues[i]; ]⟩ φ }
@@ -69,7 +73,7 @@ end IndexRead
 namespace IndexWrite
 
 /-- `carolValues[i] = 100;` with `i` 2: written into the heap at the index (the paper's `⇝`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint]) :
     dl![m]{
       { i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
         ⟨[ carolValues[i] = 100; ]⟩ φ }
@@ -94,7 +98,7 @@ namespace FixedArray
 printed program's `assert`s are not drawn: each splits the line into its three goals, and the update
 notation prints a comparison's result (`se1 := 3 == 3`) only as a `‹…›` escape
 (`Calculus/RuleSyntax.lean`). -/
-theorem chain :
+theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3)]) :
     dl![m]{ ⟨[ uint[3] memory x; x[1] = 5; ]⟩ φ }
     ~[memoryReferenceDeclFreshAlloc]~> dl![m]{
         { x := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) } ⟨[ x[1] = 5; ]⟩ φ }
@@ -107,6 +111,147 @@ theorem chain :
 #last_line chain
 
 end FixedArray
+
+namespace ElementFromField
+
+/-- `acc`, the alias of `david.account`. -/
+def names : FreshTable := [("acc", "mv1")]
+local instance : FreshNames := .ofTable names
+#guard (FreshNames.clashes StandardExample names).isEmpty
+
+/-- `carolTokens[i] = david.account.token;` with `i` 2: the source's receiver is bound (`acc`, where the
+printed trace binds the source as `tok`), then the element is written with the identity the member holds
+(the paper's `⇝*`).  The last line keeps the reads of `david`'s members: no law reads a member of a fresh
+object to its identity. -/
+theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .mem (.fixed (.ref (.struct "Token")) 3), .val .uint]) :
+    dl![m]{
+      { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
+        { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          ⟨[ carolTokens[i] = david.account.token; ]⟩ φ }
+    ~[memoryFieldRead_unfold_rightFst]~> dl![m]{
+        { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
+          { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+            ⟨[ Account memory acc = david.account; carolTokens[i] = acc.token; ]⟩ φ }
+    ~*> dl![m]{
+        { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
+          { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+            { acc := read(memory, david.account) } { memory := write(memory, carolTokens[i], read(memory, acc.token)) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ david := freshId(addM(addM(memory, Token[3]), Person)) ‖
+            acc := read(addM(addM(memory, Token[3]), Person), freshId(addM(addM(memory, Token[3]), Person)).account) ‖
+            memory :=
+              write(addM(addM(memory, Token[3]), Person), freshId(addM(memory, Token[3]))[2],
+                read(addM(addM(memory, Token[3]), Person),
+                  read(addM(addM(memory, Token[3]), Person), freshId(addM(addM(memory, Token[3]), Person)).account).token)) }
+          φ } := by
+  sol_chain
+#last_line chain
+
+end ElementFromField
+
+namespace FieldFromElement
+
+/-- `mv`, the alias of `carol.account`. -/
+def names : FreshTable := [("mv", "mv1")]
+local instance : FreshNames := .ofTable names
+#guard (FreshNames.clashes StandardExample names).isEmpty
+
+/-- `carol.account.token = davidTokens[i];` with `i` 2: the target's receiver is bound (`mv`), then the
+member is written with the element's identity (the paper's `⇝*`; the printed `tok` is not declared).  Past
+the merge the read of `carol.account` passes the later allocation of `davidTokens`
+(`readAddDifferentIdentity`); the element of the fresh `davidTokens` is an identity, which no law reads. -/
+theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.ref (.struct "Token")) 3), .mem (.struct "Person"), .val .uint]) :
+    dl![m]{
+      { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+        { davidTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
+          ⟨[ carol.account.token = davidTokens[i]; ]⟩ φ }
+    ~[memoryFieldWrite_unfold_leftFst]~> dl![m]{
+        { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { davidTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
+            ⟨[ Account memory mv = carol.account; mv.token = davidTokens[i]; ]⟩ φ }
+    ~*> dl![m]{
+        { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+          { davidTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
+            { mv := read(memory, carol.account) } { memory := write(memory, mv.token, read(memory, davidTokens[i])) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ davidTokens := freshId(addM(addM(memory, Person), Token[3])) ‖
+            mv := read(addM(addM(memory, Person), Token[3]), freshId(addM(memory, Person)).account) ‖
+            memory :=
+              write(addM(addM(memory, Person), Token[3]),
+                read(addM(addM(memory, Person), Token[3]), freshId(addM(memory, Person)).account).token,
+                read(addM(addM(memory, Person), Token[3]), freshId(addM(addM(memory, Person), Token[3]))[2])) }
+          φ }
+    ~[readAddDifferentIdentity]~> dl![m]{
+        { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ davidTokens := freshId(addM(addM(memory, Person), Token[3])) ‖
+            mv := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+            memory :=
+              write(addM(addM(memory, Person), Token[3]),
+                read(addM(memory, Person), freshId(addM(memory, Person)).account).token,
+                read(addM(addM(memory, Person), Token[3]), freshId(addM(addM(memory, Person), Token[3]))[2])) }
+          φ } := by
+  sol_chain
+#last_line chain
+
+end FieldFromElement
+
+end
+
+namespace ElementOfField
+
+local instance : InContract := ⟨TestSuite⟩
+
+/-- `pv` the right-hand side, `mv` the receiver, `idx` the index. -/
+def names : FreshTable := [("pv", "se1"), ("mv", "mv1"), ("idx", "ie1")]
+local instance : FreshNames := .ofTable names
+#guard (FreshNames.clashes TestSuite names).isEmpty
+
+section
+variable (m : Modality) (φ : Core.Post TestSuite [])
+
+/-- `Token memory tk = b.tokens[i];` with `i` 2, for the printed `Token memory tok = carol.account.tokens[i];`
+(`TokenBucket memory b` for `carol.account`): the declaration dropped, the receiver bound (`mv`), its
+declaration dropped, then the element read — the paper's three `⇝` and its `⇝*`.  The reads stay, as in
+`valueWrite`. -/
+theorem tokenRead (φ : Core.Post TestSuite [.mem (.struct "Token"), .mem (.struct "TokenBucket"), .val .uint]) :
+    dl![m]{
+      { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
+        ⟨[ Token memory tk = b.tokens[i]; ]⟩ φ }
+    ~[memoryLocalDeclInitDrop]~> dl![m]{
+        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) } ⟨[ tk = b.tokens[i]; ]⟩ φ }
+    ~[memoryIndexRead_unfold_rightFst]~> dl![m]{
+        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
+          ⟨[ Token[] memory mv = b.tokens; tk = mv[i]; ]⟩ φ }
+    ~[memoryLocalDeclInitDrop]~> dl![m]{
+        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
+          ⟨[ mv = b.tokens; tk = mv[i]; ]⟩ φ }
+    ~*> dl![m]{
+        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
+          { mv := read(memory, b.tokens) } { tk := read(memory, mv[i]) } φ }
+    ~[sequentialToParallel]~> dl![m]{
+        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) ‖
+            mv := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
+            tk :=
+              read(addM(memory, TokenBucket), read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]) }
+          φ } := by
+  sol_chain
+#last_line tokenRead
+
+end
+
+end ElementOfField
+
+end Solidity.Examples.Chains.MemoryArrays
+
+/-! ## Left on `Update.lean`'s calculus
+
+`IndexReadCaptured`, `IndexWriteCaptured`, `ElementAlias` and `CallValue`, whose programs the elaborator writes with captures in front (`uint idx; idx = ++i;`, a call's result): the scoped reading leaves the captures, fresh variables, in scope at the postcondition, whose erasure is then no postcondition (`Core.Post.erase`); they read as today's chains until the elaborator puts a statement's captures in a block of their own.  And `ElementOfField.valueWrite`: the scoped strategy fires `memoryIndexWriteCaptureAllComplexRecv` on `b.items[i] = val;`, but the rule finder (`Core.ruleOf?`) names no rule there (`#derivation` prints `~[?]~>`), so its named link does not elaborate. -/
+
+namespace Solidity.Examples.Chains.MemoryArrays
+
+local instance : InContract := ⟨StandardExample⟩
+
+section
+variable (m : Modality) (φ : Post StandardExample)
 
 /-! ## Example: Additional Memory Array Cases -/
 
@@ -183,88 +328,6 @@ theorem chain :
 
 end IndexWriteCaptured
 
-namespace ElementFromField
-
-/-- `acc`, the alias of `david.account`. -/
-def names : FreshTable := [("acc", "mv1")]
-local instance : FreshNames := .ofTable names
-#guard (FreshNames.clashes StandardExample names).isEmpty
-
-/-- `carolTokens[i] = david.account.token;` with `i` 2: the source's receiver is bound (`acc`, where the
-printed trace binds the source as `tok`), then the element is written with the identity the member holds
-(the paper's `⇝*`).  The last line keeps the reads of `david`'s members: no law reads a member of a fresh
-object to its identity. -/
-theorem chain :
-    dl![m]{
-      { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
-        { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-          ⟨[ carolTokens[i] = david.account.token; ]⟩ φ }
-    ~[memoryFieldRead_unfold_rightFst]~> dl![m]{
-        { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
-          { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-            ⟨[ Account memory acc = david.account; carolTokens[i] = acc.token; ]⟩ φ }
-    ~*> dl![m]{
-        { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
-          { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-            { acc := read(memory, david.account) } { memory := write(memory, carolTokens[i], read(memory, acc.token)) } φ }
-    ~[sequentialToParallel]~> dl![m]{
-        { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ david := freshId(addM(addM(memory, Token[3]), Person)) ‖
-            acc := read(addM(addM(memory, Token[3]), Person), freshId(addM(addM(memory, Token[3]), Person)).account) ‖
-            memory :=
-              write(addM(addM(memory, Token[3]), Person), freshId(addM(memory, Token[3]))[2],
-                read(addM(addM(memory, Token[3]), Person),
-                  read(addM(addM(memory, Token[3]), Person), freshId(addM(addM(memory, Token[3]), Person)).account).token)) }
-          φ } := by
-  sol_chain
-#last_line chain
-
-end ElementFromField
-
-namespace FieldFromElement
-
-/-- `mv`, the alias of `carol.account`. -/
-def names : FreshTable := [("mv", "mv1")]
-local instance : FreshNames := .ofTable names
-#guard (FreshNames.clashes StandardExample names).isEmpty
-
-/-- `carol.account.token = davidTokens[i];` with `i` 2: the target's receiver is bound (`mv`), then the
-member is written with the element's identity (the paper's `⇝*`; the printed `tok` is not declared).  Past
-the merge the read of `carol.account` passes the later allocation of `davidTokens`
-(`readAddDifferentIdentity`); the element of the fresh `davidTokens` is an identity, which no law reads. -/
-theorem chain :
-    dl![m]{
-      { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-        { davidTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
-          ⟨[ carol.account.token = davidTokens[i]; ]⟩ φ }
-    ~[memoryFieldWrite_unfold_leftFst]~> dl![m]{
-        { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-          { davidTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
-            ⟨[ Account memory mv = carol.account; mv.token = davidTokens[i]; ]⟩ φ }
-    ~*> dl![m]{
-        { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-          { davidTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
-            { mv := read(memory, carol.account) } { memory := write(memory, mv.token, read(memory, davidTokens[i])) } φ }
-    ~[sequentialToParallel]~> dl![m]{
-        { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ davidTokens := freshId(addM(addM(memory, Person), Token[3])) ‖
-            mv := read(addM(addM(memory, Person), Token[3]), freshId(addM(memory, Person)).account) ‖
-            memory :=
-              write(addM(addM(memory, Person), Token[3]),
-                read(addM(addM(memory, Person), Token[3]), freshId(addM(memory, Person)).account).token,
-                read(addM(addM(memory, Person), Token[3]), freshId(addM(addM(memory, Person), Token[3]))[2])) }
-          φ }
-    ~[readAddDifferentIdentity]~> dl![m]{
-        { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ davidTokens := freshId(addM(addM(memory, Person), Token[3])) ‖
-            mv := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
-            memory :=
-              write(addM(addM(memory, Person), Token[3]),
-                read(addM(memory, Person), freshId(addM(memory, Person)).account).token,
-                read(addM(addM(memory, Person), Token[3]), freshId(addM(addM(memory, Person), Token[3]))[2])) }
-          φ } := by
-  sol_chain
-#last_line chain
-
-end FieldFromElement
-
 namespace ElementAlias
 
 /-- `idx`, the captured index. -/
@@ -301,8 +364,6 @@ theorem chain :
 #last_line chain
 
 end ElementAlias
-
-end
 
 namespace CallValue
 
@@ -407,14 +468,11 @@ end
 
 end CallValue
 
+end
+
 namespace ElementOfField
-
 local instance : InContract := ⟨TestSuite⟩
-
-/-- `pv` the right-hand side, `mv` the receiver, `idx` the index. -/
-def names : FreshTable := [("pv", "se1"), ("mv", "mv1"), ("idx", "ie1")]
 local instance : FreshNames := .ofTable names
-#guard (FreshNames.clashes TestSuite names).isEmpty
 
 section
 variable (m : Modality) (φ : Post TestSuite)
@@ -440,37 +498,7 @@ theorem valueWrite :
           φ } := by
   sol_chain
 #last_line valueWrite
-
-/-- `Token memory tk = b.tokens[i];` with `i` 2, for the printed `Token memory tok = carol.account.tokens[i];`
-(`TokenBucket memory b` for `carol.account`): the declaration dropped, the receiver bound (`mv`), its
-declaration dropped, then the element read — the paper's three `⇝` and its `⇝*`.  The reads stay, as in
-`valueWrite`. -/
-theorem tokenRead :
-    dl![m]{
-      { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
-        ⟨[ Token memory tk = b.tokens[i]; ]⟩ φ }
-    ~[memoryLocalDeclInitDrop]~> dl![m]{
-        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) } ⟨[ tk = b.tokens[i]; ]⟩ φ }
-    ~[memoryIndexRead_unfold_rightFst]~> dl![m]{
-        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
-          ⟨[ Token[] memory mv = b.tokens; tk = mv[i]; ]⟩ φ }
-    ~[memoryLocalDeclInitDrop]~> dl![m]{
-        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
-          ⟨[ mv = b.tokens; tk = mv[i]; ]⟩ φ }
-    ~*> dl![m]{
-        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
-          { mv := read(memory, b.tokens) } { tk := read(memory, mv[i]) } φ }
-    ~[sequentialToParallel]~> dl![m]{
-        { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) ‖
-            mv := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-            tk :=
-              read(addM(memory, TokenBucket), read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]) }
-          φ } := by
-  sol_chain
-#last_line tokenRead
-
 end
-
 end ElementOfField
 
 end Solidity.Examples.Chains.MemoryArrays
