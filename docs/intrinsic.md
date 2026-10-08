@@ -3540,6 +3540,113 @@ deleted (`Modality.afterRunC`, `afterRunC_rel`, `Res.Sim.afterRunC`,
 `run_cons_frames`, `afterRunC_bind`, `run_block_frames`, `aliasPath_there`).
 No pin moved.
 
+### W3b gate outliers (`w3c-perf`, 2026-10-08): the chains library's slowdown
+
+**Task**: `Examples/Chains/Storage` (12–20% over `be64b9b`, against the
+9.0 s limit) and `Examples/ProofTree` (12.4–12.7 s against 12.1 s on the
+integration's scale), fixed in the library only: no behaviour or pin moves.
+
+**Causes found** (statement benches: one chain's statement elaborated 7
+times in one worker, `IO.monoNanosNow`, the minimum; the components
+benched apart: the first line, `runChain`, each written line's `readings`):
+1. *The rule-mismatch message printed eagerly* (`Core/Chains.lean`'s
+   `labelFor`): every `~[r]~>` link delaborated its whole scoped line for
+   an error message it only needs on failure (the W3b printer change).  This
+   was the chains lane's "+0.8 s in the statement elaboration of seven
+   chains, cause not identified": the chains with the most named links and
+   the largest lines.  `PushAfterPop`'s statement 893 → 655 ms (`be64b9b`
+   606 ms).  The message is now computed only when thrown.
+2. *A written line read once per candidate*: `matchWritten` re-read the
+   text (its `readings`, two evaluations under a modality variable, each
+   compiling its term and kernel-checking the throwaway definition) for
+   every line it was compared with: a `~*>` over k steps k + 1 times, `~~>`
+   once per line of the derivation and again per merge.  Now read once
+   (`writtenMatcher`, `readWritten`/`readingMatches`), both readings in one
+   evaluation, with no kernel check of the throwaway definition
+   (`evalQuoted`, as `runChain`'s).  Statements: `PushAfterPop` 655 → 472
+   ms, `BalanceWriteRead` 770 → 637, `TokenWrite` 313 → 169, `BalanceWrite`
+   198 → 100 (`be64b9b`: 606–750, 823–875, 287–482, 182–257).
+3. *`ruleOf?` unified the whole rule table at every node*
+   (`Core/Completeness.lean`, used by the trees, the `sol_derive?` walks
+   and `#rule_of`): about 300 constructors, each a `forallMetaTelescope`
+   and unifications.  A prefilter (`FindHeads`, `mayFind`) skips a
+   constructor whose `\find` head is another statement constructor than the
+   statement's, or a hole none of its candidates has, read off the type with
+   no unification; the first constructor found is the same.  `#rule_of`
+   (old against new in one worker, results compared): an `if` 8.5 → 0.8
+   ms, a loop 7.6 → 0.6, an assignment 1.8 → 0.7, the hole rules (found
+   early) unchanged.  `labelOfFocus?` (`#derivation`, `#chain`,
+   `sol_chain?`) computed the hole candidates once per constructor; now
+   once.
+4. *Scoped `#chain` and `#derivation` elaborated today's notation twice*:
+   they elaborated a `dl!{ … }` with the switch off, then stepped aside and
+   today's command elaborated it again; they now step aside on the syntax
+   (`todaysNotation`), as `Tools/CoreInspect.lean`'s `elabCoreFormula?`
+   does.
+5. *The scoped `dl!`/`cdl` evaluation kernel-checked its throwaway
+   definition* (`Core/Notation.lean`'s `elabCdlAt`): about 5–8 ms a formula
+   (`⊢ dl!{ … }` statements 29/21/26 → 21/17/20 ms); now `elabAgainstQ`
+   (`debug.skipKernelTC`, as `evalQuoted`): what it returns is a quoted
+   formula, checked by the kernel where it is used.
+
+Commits: 5b7a82f (1, 2), 4e99314 (3, 4), 6a72080 (5).  Files:
+`Calculus/Core/{Chains,ChainGen,Completeness,Notation}.lean`, meta code
+only.
+
+**Gate timings.**  The machine was shared (another session's JVM on 10–12
+cores, load 3–13), so wall times moved by ±20% between runs; each row
+alternates the three trees, one fresh worker at a time (the integration's
+method: the file copied under `Solidity/Scratch/`, `/proc` sampled every 20
+ms, wall from the worker's start to its last CPU).  *Serial* is the
+per-command bench: every theorem, `#guard_msgs`, `example` and `#last_line`
+command of the file elaborated 2–3 times in one worker with `Elab.async`
+off, the minimum, summed; *heartbeats* are its allocation count, which load
+does not move.  `pre` is `9ec2b48` (this branch's base, the integration's
+merged state plus CORE A/B), `perf` this branch's head.
+
+| | `pre` | `perf` | `be64b9b` | `perf`/`be64b9b` |
+|---|---|---|---|---|
+| Storage, fresh worker, run A (s) | — | 9.85, 9.24, 9.39 | 13.01, 10.81, 11.03, 10.83 | 0.85 |
+| Storage, fresh worker, run B (s) | 11.81, 10.78 | 10.74, 8.32 | 10.15, 9.67 | 0.86 |
+| Storage, serial (s) | 11.05 | 7.73 | 8.30 | 0.93 |
+| Storage, heartbeats (M) | 209.7 | 141.7 | 177.6 | 0.80 |
+| ProofTree, fresh worker, run A (s), before 5 | — | 15.39, 14.13, 14.81 | 13.72, 13.21, 13.04 | 1.08 |
+| ProofTree, serial (s), before 5 | 12.60 | 11.60 | 10.47 | 1.11 |
+| ProofTree, heartbeats (M) | 258.6 | 247.8 | 233.0 | 1.06 |
+
+On the integration's scale (`be64b9b` there 8.6 s and about 11.2 s):
+**Storage about 7.4 s against the 9.0 s limit**, now below `be64b9b`
+(the two newly flipped chains included).  **ProofTree about 11.9–12.1 s
+against 12.1 s**: at the limit, down 4–8% from `pre`; the runs could not
+separate it from the limit under this load.  A quiet re-time is left.
+
+**What is left in ProofTree is the scoped calculus's own cost**, not the
+chains library's: the scoped `sol_prove` runs the typed strategy in the
+kernel (`Derive.proves`, 76–81 ms against today's 62–66 ms a proof; 13
+`sol_prove?` examples, about 30 ms each in all); `Proves.close` now takes
+diamond leaves, so an open diamond leaf runs today's whole closer before it
+is left open (`#proof_tree dl!{ ⟨ alice.age = 1; ⟩ true }` 45 → 106 ms);
+and a scoped leaf costs `refine close ?_` (two `decide +kernel`, about 27
+ms), `sol_symex` on its erasure (about 35 ms) and today's `sol_close`
+(100–280 ms): the `while`-invariant `sol_derive?` is a 65 ms walk and 1.4
+s of leaves.  *Proposed, the lead's call*: `Syntax/Splice.lean`'s
+`elabAgainstWith` kernel-checks the throwaway definition of every `dl!` and
+`sol!` literal of today's notation (about 7 ms each, about 0.4 s of
+ProofTree's legacy sections and more elsewhere); `debug.skipKernelTC` there
+as in `elabAgainstQ` would remove it, but it is a low module (a full
+rebuild) outside this lane's files.
+
+**Checks**: `lean_build` (`Solidity`, `solkeycheck`) green after the last
+change, 287 jobs; `ChainNotation`, `ChainRewrites`, `ExampleNames`, every
+`Examples/Chains/*`, `Tactics/{CoreChains,Loops}`, `ProofTree`,
+`TestSuite/{CoreSeq,CoreDerived9,CoreDerived10,CoreDerived11,Suggestions}`
+clean by diagnostics.  No new `sorry`, `axiom` or `maxHeartbeats`; no new
+module.  **No pin changed** (no reason number used); no rule name, branch
+label, fresh name or message text moved (the lazy messages are the same
+text).  `SolidityCorpus` and the rest of `SolkeyTestSuite` were not
+rebuilt (their text does not reach the changed functions but through
+`ruleOf?`, whose answers are unchanged).
+
 ## Baselines (M0)
 
 Measured 2026-10-07 on the `intrinsic-m0` worktree (master 74b89f3), Lean
