@@ -1,5 +1,9 @@
 import Solidity.Calculus.Chains
+import Solidity.Calculus.Core.Chains
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Call-valued operands: `values.push(makeValue());`
@@ -51,6 +55,8 @@ def Operands : Contract := contract!{
 }
 
 local instance : InContract := ⟨Operands⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## 1 · `values.push(makeValue());`
 
@@ -115,15 +121,12 @@ theorem bucketPushSlotWrite :
   sol_symex
   sol_close
 
-/-- `[ uint n = values.length; values.push(42); ] values.length == n + 1` is
-valid, but the strategy leaves it open: the push's write is not read back
-(`Calculus/Close.lean`).  Pinned, so that closing it shows here. -/
-example : True := by
-  fail_if_success
-    have : ⊨ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by
-      sol_symex
-      sol_close
-  trivial
+/-- `[ uint n = values.length; values.push(42); ] values.length == n + 1`:
+the scoped strategy reads the push's write back (today's left it open,
+`Calculus/Close.lean`). -/
+theorem pushLength : ⊨ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by
+  sol_symex
+  sol_close
 
 /-! ## 4 · Storage writes: `values[i] = makeValue();`, `total = makeValue();`
 
@@ -252,11 +255,12 @@ example : Prog.toStr (sol[MemCalls]{ Person memory p; p = choosePersonMem(); } :
 #eval IO.println (Prog.toStr (Prog.inlined (sol[MemCalls]{ Person memory p = choosePersonMem(); } :
     Prog MemCalls)))
 
-/-- The call's first step, `internalCallExpand`. -/
-example : dl[MemCalls]{ ⟨ Person memory p = choosePersonMem(); ⟩ true }
-    ~[internalCallExpand]~>
-      dl[MemCalls]{ ⟨ Person memory mv1; mv1 = alice; Person memory p = mv1; ⟩ true } :=
-  rfl
+/-- The call's first step, `functionBodyExpand`: a call with a target
+(today's strategy fired `internalCallExpand` here). -/
+example : cdl[MemCalls]{ ⟨ Person memory p = choosePersonMem(); ⟩ true }
+    ~[functionBodyExpand]~>
+      cdl[MemCalls]{ ⟨ Person memory mv1; mv1 = alice; Person memory p = mv1; ⟩ true } := by
+  sol_chain
 
 /-- A declaration from a memory-returning call: the copy of `alice`. -/
 theorem memCallDecl :
