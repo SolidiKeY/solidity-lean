@@ -3809,6 +3809,43 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     scoped statement (`N.f.problem.core`, or `N.f.problem` under `main`;
     `Core.Seq.scanLeaves`, the scoped walk with today's residue at the
     leaves), since today's walk on the legacy statement is gone.
+46. *Proposed (W4 `modal`), the lead's call:* the formula **as written** is
+    `Surface.Fml` (`Update.lean`): today's `Fml` with its modality over
+    `Surface.Prog`, and no reading, as decision 11 makes `Surface.Stmt` the
+    statement as written.  It is `dl!{ … }`'s output when a modality is in
+    it (`Surface.Fml.quoteAuto`; the closer's `NFml` otherwise), today's
+    obligations (`Problem.fml`, `ctorFml`, `specObligation`,
+    `solc_problems`' statements), and the printers' target
+    (`Core.Fml.eraseS`; `RuleSyntax.lean`'s `ppFml` prints both families,
+    `whnfF`, so no second printer).  `Core.Fml.resolveN` reads it.  A
+    schema `dl{ … }` with a modality (today's sequents) is an error that
+    names the scoped calculus.
+47. *Proposed (W4 `modal`), the lead's call:* `Core.Fml.erase` (the
+    closer's input) erases a modality to `false`: `NFml` has none, and the
+    closer takes only a formula with none (`Fml.Closable`), so nothing
+    reads it; `Fml.eraseS` keeps it for the printers and the chains' lines
+    (`Fml.erasedQuoted`).  `#wp` shows a reduction only of a formula with
+    no modality left (`!ψ.active`).
+48. *Proposed (W4 `modal`), the lead's call:* the examples' runs of today's
+    interpreter (`Prog.run`, `Prog.localAfter`, `Contract.deploy`) run the
+    typed run: `Surface.Prog.runT`/`localAfterT`/`Contract.deployRun`
+    (`Tools/Run.lean`: resolved, read at the contract's types
+    (`typedState?`), `Core.Prog.trun`, the end named back by
+    `TState.toSem`).  The `#eval` pins are unchanged; the 28 kernel checks
+    (`rfl`, `simp …; rfl`) of today's run are `#guard`s, since the typed run
+    behind `Prog.resolve` does not reduce in the kernel (`decide +kernel`
+    is stuck at the resolution; `Mini.deployRun … = .error .revert := rfl`
+    stays a theorem).
+49. *Proposed (W4 `modal`), the lead's call:* a rewrite link on a line
+    whose program is still open (`Examples/ChainRewrites`' §Literals,
+    `⟨[ revert(); ]⟩ φ` in a check's branch) is gone: the rewrites run on
+    the erasure, which has no modality.  The four examples stand a
+    postcondition `ψ` for the reverting branch; rewrites under an open
+    program come back with M6c's scoped rewrites.
+50. *Proposed (W4 `modal`), the lead's call:* `Halt.stuck` stays, not yet
+    `undef`: M3's scoped run (decision 40) still produces it on an
+    ill-typed state, so decision 39's condition ("when no run produces it")
+    is not met; the rename goes with decision 40's lane.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
@@ -5899,6 +5936,130 @@ binders, W5's qualified-name reason):
   now `toStep` and `Stmt.Sound`) still describes today's development in
   places.
 - Lead decisions: proposed 41–45 (this lane), and 33–40.
+
+### W4 lane `modal` (2026-10-09, on `intrinsic`): the modality off today's formulas
+
+Directly on `intrinsic` from `67bf9e8`.  Built by `lean_build` of
+`Solidity`, `solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (the last
+two in `defaultTargets` for the run only, reverted after): 311 jobs, green,
+no OOM kill.  `check-orphans` (297 reachable; only the git-excluded
+`Scratch/`), `check-doc-paths` (OK), `check-rule-text` (empty), `dups.py`
+(only the known `Evm/Repr`/`Examples/Verify` `as` line), `check-testsuite.sh`
+against solkey `1b4341a303` (ok: 438 = 435 derived + 1 pending + 1
+divergent + 1 excluded; 2 skip).  No new `sorry` (19), `axiom` (1) or
+`maxHeartbeats` (the textual counts fell with the deleted code).  Not run:
+`check-corpus.sh` and running `solkeycheck` (they need `lake`;
+`solkeycheck` was built, its annotations and parser untouched), the review
+pass.
+
+**Today's semantics deleted.**
+- `Update.lean`'s `Fml` loses `.modal` and is `NFml`, the closer's formula
+  (renamed by script, with its functions: `NFml.vars`, `NFml.toL`, …);
+  `Modality.afterRun`, `Fml.modalFree` and every `.modal` arm go
+  (`Close`, `UpdateRules`, `ChainRewrites`, `Decide`, `TermRules`,
+  `Derive`, `Rewrite`, `Logic`, `Hyp`, `TacticSyntax`, `RewriteChainGen`),
+  with `Fml.active` and today's `Post.inactive` (nothing is active now),
+  `Proves.empty`/`emptyModality` (`Logic`), the `modalFree` side conditions
+  of `Proves.close` and of the `Rewrite` closers, `Close.holds_revert`,
+  `Prog.reverts`, `Derive.wrap_dropWt`'s modality half.
+- `Semantics.lean`'s statement run: `Stmt.run`, `Prog.run`, `Loop`,
+  `Contract.deploy` (and `deploy_noCtor`), the call bindings only the run
+  read (`Arg.bindSeq`, `CallRet.enter`/`enterAll`/`leave`, `ARhs.bind`,
+  `MRhs.bind`), their `NoPanic` and frame lemmas (`NoPanicOps`, `Agree`'s
+  `run_frame`, `Stmt.vars`/`Prog.vars`, `*.bind_frame`), `Properties`'
+  `Prog.run_append`/`run_cons`/`localAfter`, and `Semantics/Mutability.lean`
+  whole (decision 39).  `Calculus/Problem.lean`'s `Problem.deploy_of_valid`
+  and `_nil` (the typed ones are `Calculus/Core/Deploy.lean`'s).  The
+  untyped `Stmt` is `Surface.Stmt` and `Prog` is `Surface.Prog` (decision
+  11, renamed by script; `Syntax.lean`'s docstring says what it is now).
+- The `⟹ᶜ` macro's expansion to today's `ProvesC` (the syntax stays, the
+  scoped printer's).
+
+**Added** (proposed decisions 46–50 above): `Surface.Fml` and its helpers
+(`Update.lean`: `toFml`, `NFml.toSurface`, `alls`, `conj`, `eqD`),
+`Surface.Fml.quote` (`Quote`), `Surface.Fml.quoteAuto` (`Notation`),
+`Core.Fml.eraseS` (`Calculus/Core/Fml.lean`), `whnfF` (`RuleSyntax`: one
+printer for both families), `Hyp.toFmlE`, `Core.headModality?`
+(`Core/Sequents`), `Surface.Prog.runT`/`localAfterT`,
+`Contract.deployRun` (`Tools/Run.lean`; `#deploy` runs typed).
+`Core.Delab` prints a formula with a modality as `Surface.Fml`
+(`isSurface`, `asSurface`), `legacyName?` maps `Core.Stmt`/`Prog`/`Fml` to
+`Surface.Stmt`/`Surface.Prog`/`NFml`, and `RuleSyntax.coreName?` reads
+`Solidity.Surface.Stmt.x` and `Solidity.NFml.x` back to their scoped twins.
+
+**Pins changed** (reasons: today's run and modality deleted; the rename,
+W5's qualified-name reason):
+- `Calculus/Notation`: the `#check` pins print `NFml StandardExample` or,
+  with a modality, `Surface.Fml StandardExample` (one wraps one line
+  earlier, the type name being longer); `Tactics/CoreSurface` likewise.
+- `Tactics/CoreCallback`: `⟹ᶜ[Fml.tt]` (was `⟹ᶜ[Core.Fml.tt]`: `Fml` is no
+  longer ambiguous).
+- `Semantics.lean`'s run pins: `aliasWrite` was M3's already
+  (`Semantics/Core.lean`, its program now written in place); the two `rfl`
+  halts are M3's (`guardLowCore`, `assertLowCore`); the solc evaluation
+  order `#eval` moved to `Examples/Tools` over the typed run, its output
+  unchanged.
+- The examples' `#eval`s of today's run (`Values`, `Memory`,
+  `StorageSuite`, `StorageDelete`, `LedgerDelete`, `CrossDomain`, `Calls`,
+  `TryCatch`) run `Surface.Prog.runT`: every output unchanged, so the typed
+  run agrees with today's on all of them.  28 kernel checks of today's run
+  are `#guard`s (decision 48): `Constructors.deploySeven`,
+  `Solkey/Constructors.counterDeploy`, `Coin`'s four, `EtherWallet`'s
+  three, `Net`'s eight, `StorageSuite`'s eight, `CallOperands.pushLvalueRun`
+  (from `Operands`' own storage), `TryCatch`'s and `Loops`' examples.
+- `Tactics/Decide`: `deleteWithoutWriteUntyped` (a refutation over today's
+  untyped run) and the pin of `sol_decide` refusing a modality, deleted.
+- `Examples/ChainRewrites` §Literals: four chains stand `ψ` for
+  `⟨[ revert(); ]⟩ φ` (decision 49).
+- The fresh names (`se1`, `sp1`) are unchanged; every other pin unchanged.
+
+**M0 re-timed** (the W3 gates' method: each file copied under
+`Solidity/Scratch/`, opened in a fresh worker, `/proc` sampled every 20 ms,
+wall from the worker's start to its last CPU; this lane (`b62158c`)
+against a detached worktree at `67bf9e8`, alternated, two runs a tree,
+the minimum kept; the machine shared, load 2.6–3.5, so the raw times sit
+above M0's and the W3 gates', and only the ratio is the measure):
+
+| M0 row | M0 | `67bf9e8` | `modal` | ratio |
+|---|---|---|---|---|
+| `TestSuite/Derived9` | 7.0 s | 9.86 s | 9.67 s | 0.98 |
+| `TestSuite/Derived10` | 9.3 s | 13.87 s | 13.81 s | 1.00 |
+| `TestSuite/Derived11` | 2.8 s | 4.99 s | 4.86 s | 0.97 |
+| `TestSuite/Problems` (`legacy`) | 1.2 s | 1.46 s | 1.44 s | 0.99 |
+| `TestSuite/CoreProblems` | — | 2.08 s | 2.10 s | 1.01 |
+| `Solkey/TestSuite` | 10.4 s | 12.62 s | 12.52 s | 0.99 |
+| `Examples/Benchmark/Syntax` | 1.2 s | 2.15 s | 2.10 s | 0.98 |
+| `Examples/ProofTree` | 10.1 s | 11.54 s | 11.10 s | 0.96 |
+| `Examples/Chains/Storage` | 7.5 s | 8.78 s | 8.89 s | 1.01 |
+| `Evm/CoreExamples` (`Evm/Examples`' row) | 9.5 s | 9.04 s | 9.03 s | 1.00 |
+| `Evm/CoreCorrect` (`Evm/Correctness`' rows; CPU 7.35 s → 7.02 s) | 25.6 s | 2.67 s | 2.62 s | 0.98 |
+
+Nothing slowed: every row within ±1.5% of the tree before the lane, the
+noise of the runs (the first run of each pair 10–15% slower in both
+trees).  `stmt_sim`'s row went with the untyped compiler at `sem-del`.
+
+**W4 is not done.**  Today's untyped run is gone, but M3's scoped run
+(`Semantics/Core.lean`'s `Run.*`, `Stmt.run`, `Loop`) and
+`Semantics/Core/TypedRunErase.lean` stay, by decision 40: the update arms'
+soundness bridge and `Typing/`'s builder read them.  That lane, then
+`Halt.stuck` → `undef` (decision 50), closes W4.
+
+**Left**:
+- Decision 40's lane (above); with it `Halt.stuck`; and `Surface.Prog.runT`'s
+  `stuck` for a program that does not resolve.
+- `NFml`'s `holds`/`Valid` keep their names, and so does today's term
+  syntax (`Val`, `SPath`, `Loc`, `MPath`, `CallRet`, …) beside `Core`'s:
+  W5's `Solidity.Core.X` → `Solidity.X` has to rename or qualify them
+  (`Core.holds`, `Core.Valid`, `Core.Val`, …) first.
+- Prose: comments of the files that are `Core`'s or mixed were not renamed
+  by the script (it renamed code, and prose only for names it could tell
+  apart); `Stmt.run`, `Fml.modal` and "the interpreter" in
+  `AGENTS.md`, `docs/kernel-port.md`, `docs/loops.md`,
+  `docs/solc-alignment.md`, `docs/solc-validation.md` and some module
+  docstrings still describe today's run (M7, W5).
+- `sol_decide`'s refusal message still lists "a modality" among what is
+  outside the fragment.
+- Lead decisions: proposed 46–50, and 33–45.
 
 ## Baselines (M0)
 
