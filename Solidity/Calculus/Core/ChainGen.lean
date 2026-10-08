@@ -75,8 +75,12 @@ def dlFmlOf? (t : Lean.Term) : Option (TSyntax `dl_fml) :=
 def wrappers (m? : Option Expr) (φ : TSyntax `dl_fml) : MetaM (Array Lean.Term) := do
   match m? with
   | some m => return #[← `(cdl![$(mkIdent (← m.fvarId!.getUserName))]{ $φ:dl_fml })]
-  | none => return #[← `(cdl!{ $φ:dl_fml }), ← `(cdl![.box]{ $φ:dl_fml }),
-      ← `(cdl![.diamond]{ $φ:dl_fml })]
+  | none =>
+    -- `.box`, `.diamond` with no macro scope, as written
+    let dot (n : Lean.Name) : Lean.Term :=
+      ⟨Syntax.node .none ``Lean.Parser.Term.dotIdent #[mkAtom ".", mkIdent n]⟩
+    return #[← `(cdl!{ $φ:dl_fml }), ← `(cdl![$(dot `box)]{ $φ:dl_fml }),
+      ← `(cdl![$(dot `diamond)]{ $φ:dl_fml })]
 
 /-- A line as text: the first wrapper that reads back as it. -/
 def lineText (sp : Splice) (C e : Expr) (isScoped : Bool) (erased : Array Expr) :

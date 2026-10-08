@@ -16,6 +16,29 @@ namespace Solidity.Core.Chain
 
 open Lean Elab Term Meta
 
+/-- `k` on the line `L` with each erased postcondition `↑(φ.erase ns)`
+(`Post.erase`) a local `φ : Post`, as a chain over `Update.lean`'s formulas
+writes it, so that what is left prints `φ`. -/
+def withLegacyPosts {α : Type} (L : Expr) (k : Expr → TermElabM α) : TermElabM α := do
+  let ref ← IO.mkRef (#[] : Array Expr)
+  forEachExpr' L fun x => do
+    if x.isAppOfArity ``Solidity.Post.fml 2 && x.appArg!.isAppOfArity ``Core.Post.erase 5 then
+      ref.modify fun ps => if ps.contains x then ps else ps.push x
+      return false
+    return true
+  let ps ← ref.get
+  let rec go (i : Nat) (L : Expr) : TermElabM α := do
+    if h : i < ps.size then
+      let p := ps[i]
+      let n ← match p.appArg!.getArg! 2 with
+        | .fvar fv => fv.getUserName
+        | _ => pure `φ
+      withLocalDeclD n (mkApp (mkConst ``Solidity.Post) (p.getArg! 0)) fun x =>
+        go (i + 1) (L.replace fun y =>
+          if y == p then some (mkApp2 (mkConst ``Solidity.Post.fml) (p.getArg! 0) x) else none)
+    else k L
+  go 0 L
+
 /-- What is left of a last line `L` (`Update.lean`'s, over the modalities
 `ms`), as `#last_line` lists it. -/
 def lastLineProblems (C L : Expr) : TermElabM (Array MessageData) := do
@@ -65,6 +88,7 @@ elab_rules : command
           erasedLine run.splice run.erased
         else pure B
       let C := (← whnfR (← inferType L)).appArg!
+      withLegacyPosts L fun L => do
       let problems ← lastLineProblems C L
       unless problems.isEmpty do
         throwError "#last_line: {c} does not end at a last line:{indentD m!"{← ppLegacyLine L}"}\n\

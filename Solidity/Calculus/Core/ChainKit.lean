@@ -734,7 +734,7 @@ theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C []} (s : Fml.StepBy r �
 
 /-- **A chain past the program** proves its first line from its last, given
 that the last scoped line is valid where its erasure is (the bridge, for a
-leaf with no modality `Calculus/Core/Close.lean`'s `Valid.of_erase`). -/
+leaf with no modality the scoped closer's `Valid.of_erase`, W2 `symex`). -/
 theorem Fml.ViaE.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.Fml C}
     {rs : List (Solidity.Link C × Solidity.Fml C)} (v : Fml.ViaE φ ws L rs)
     (bridge : (∀ τ, Solidity.holds τ ((Fml.Via.last φ ws).erase [])) → Valid (Fml.Via.last φ ws))
