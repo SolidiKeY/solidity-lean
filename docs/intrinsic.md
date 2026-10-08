@@ -6231,8 +6231,13 @@ the review pass.
 - **`#check_rule_text`** is back, in `Tools/Taclet.lean`: today's table
   being gone (decision 35), it checks that every constructor of the three
   families prints as a rule line (its judgement's delaborator, no scoped
-  term escaped), pinned in `Examples/Tools`: all 159 `Core.Taclet`, all 9
-  `Core.LeanTaclet`, all 3 `Core.CallbackTaclet`.
+  term escaped: no escape `‹…›` mentions `Core.`, so `‹(Core.…).snd›` and
+  `‹@Core.…›` are caught too, as whileInvariantDiamond's pin before 7e79e4f
+  would have been), pinned in `Examples/Tools`: all 159 `Core.Taclet`, all 9
+  `Core.LeanTaclet`, all 3 `Core.CallbackTaclet`.  The captured call's
+  `hsep` in `functionCallArgCapture`'s premise is the print-only
+  `Core.Delab.hsepPlaceholder` (`Eq.refl true`, shared with `callStmt?`),
+  not a `sorryAx`; it prints as `⋯` either way.
 - **`sol_decide`'s refusal** (`Calculus/DecideComplete.lean`) no longer
   lists "a modality": `NFml` has none since `modal`.  No pin printed it.
 

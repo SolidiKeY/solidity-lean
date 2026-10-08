@@ -333,6 +333,11 @@ def withProofHoles (n' : Lean.Name) (xs : Array Expr) : MetaM (Option Expr) := d
   if ← (try Meta.check f; pure true catch _ => pure false) then return some f
   return none
 
+/-- A print-only proof of a call's `hsep`: `Eq.refl true`, not a proof of
+its separation; it prints as `⋯` (proofs are elided) and is no `sorryAx`. -/
+def hsepPlaceholder : Expr :=
+  mkApp2 (mkConst ``Eq.refl [levelOne]) (mkConst ``Bool) (mkConst ``Bool.true)
+
 mutual
 
 /-- The erasure of a scoped term `e`, read where the term declared the
@@ -525,7 +530,7 @@ partial def generic (ns : List Expr) (e : Expr) (n : Lean.Name) : TrM (Option Ex
 read under the return variables and the parameters. -/
 partial def callStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) := do
   let c := args[0]!
-  let hsep := mkApp2 (mkConst ``Eq.refl [levelOne]) (mkConst ``Bool) (mkConst ``Bool.true)
+  let hsep := hsepPlaceholder
   -- KeY's `fbs`/`ic`: a call whose parts are schema variables, today's call
   -- of their twins (its `hsep` a placeholder: it prints as nothing)
   if let (some as, some ret, some body) := (← twin? args[7]!, ← twin? args[8]!, ← twin? args[9]!) then

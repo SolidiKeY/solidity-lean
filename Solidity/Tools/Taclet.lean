@@ -132,7 +132,8 @@ Every rule prints as a rule line: for each constructor of the three
 families, its conclusion, printed with the notation on (`pp.sol.dl`, and
 `pp.sol.ic` where its side condition makes the call KeY's `ic`), is a
 `dl{ … }` (or `dl[J C k]{ … }`) line in today's KeY text, with no scoped
-term left escaped (`‹Core.…›`).  The constructors whose line does not print
+term left escaped: no escape `‹…›` mentions `Core.` (`‹Core.…›`,
+`‹(Core.…).snd›`, `‹@Core.…›`).  The constructors whose line does not print
 are listed.  Today's rule table, which the scoped lines were once diffed
 against (`docs/intrinsic.md`, decision 35), is gone; the lines are pinned
 where each rule is shown (`#taclet`, `#check`). -/
@@ -146,9 +147,11 @@ def ruleLine (c : Lean.Name) : MetaM String := do
       return (← Meta.ppExpr body).pretty 100000
 
 /-- Whether a printed conclusion is a rule line: the judgement's
-delaborator wrote it, and no scoped term is escaped in it. -/
+delaborator wrote it, and no escape `‹…›` in it mentions `Core.` (a scoped
+term, however parenthesized or explicit; `‹Surface.…›` passes). -/
 def isRuleLine (t : String) : Bool :=
-  t.startsWith "dl" && !(t.splitOn "‹Core.").length > 1 && !(t.splitOn "‹Solidity.Core.").length > 1
+  t.startsWith "dl" && !((t.splitOn "‹").drop 1).any fun s =>
+    (((s.splitOn "›").headD "").splitOn "Core.").length > 1
 
 /-- The constructors of the family `J` whose line does not print, and how
 many there are in all. -/

@@ -50,7 +50,7 @@ def argCapture? (s p : Expr) :
         let t ← escapeTerm (mkAppN (mkConst ``Solidity.Surface.Stmt.call) #[c, a[3]!, as, h, ret, body])
         `(sol_stmt| ‹$t:term›)
       let st ← call as hsep
-      let st' ← call as' (← mkSorry (sepTy c as') false)
+      let st' ← call as' hsepPlaceholder
       return some (st, ← `(dl_premise| ⟨[ $decl:sol_stmt; $st':sol_stmt; ]⟩))
 
 /-- `Core.LeanTaclet C k m s p`: `dl[LeanTaclet C k]{ ⟨[ s; ]⟩ ⇝ p }`, as
