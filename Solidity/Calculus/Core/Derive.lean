@@ -385,6 +385,39 @@ def evalSolDeriveCore : Tactic := fun _ => withMainContext do
     setGoals (leaves ++ rest)
 
 open Lean Elab Tactic Meta in
+/-- A leaf of the walk closed by `Proves.close` at the root's scope and
+today's `sol_prove` on its erasure: the goals that leaves (today's
+`leafᵢ`), or the leaf itself where `Proves.close` does not apply (a modality
+left, a diamond update in the context, outer locals). -/
+def Walk.proveLeaf (g : MVarId) : TacticM (List MVarId) := do
+  let s ← saveState
+  let rfl' := mkIdent `rfl
+  let nd := mkIdent ``List.nodup_nil
+  let close ← `(tactic| refine $(mkIdent ``Proves.close) [] $rfl' $nd ?_)
+  let r ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (ProofTree.runOn g #[close]))
+    fun _ => pure none
+  let some [g'] := r | s.restore; return [g]
+  ProofTree.runOn g' #[← `(tactic| sol_prove)]
+
+open Lean Elab Tactic Meta in
+/-- `sol_prove` on a scoped sequent `H ⊢ φ` (`Core.Proves`, so `⊢ dl!{ … }`
+under `open scoped Solidity.Core.Surface`): the strategy as a walk
+(`Walk.run`), each leaf closed by `Proves.close` and today's `sol_prove` on
+its erasure (`Walk.proveLeaf`); the goals left are today's `leafᵢ` and the
+scoped leaves `Proves.close` does not take.  No search: the rule at each
+statement is the one `Stmt.step` fires. -/
+@[tactic Solidity.tacticSol_prove]
+def evalSolProveSeq : Tactic := fun _ => withMainContext do
+  let g ← getMainGoal
+  unless (← instantiateMVars (← g.getType)).isAppOf ``Core.Proves do throwUnsupportedSyntax
+  let rest := (← getUnsolvedGoals).erase g
+  Symex.reporting g do
+    let (_, leaves) ← Walk.run g
+    let mut left : Array MVarId := #[]
+    for l in leaves do left := left ++ (← Walk.proveLeaf l)
+    setGoals (left.toList ++ rest)
+
+open Lean Elab Tactic Meta in
 /-- `sol_derive?` on a scoped goal: the walk, offered as its script, one
 `refine` per rule, each leaf closed by `refine close ?_; sol_symex;
 sol_close`; a leaf that does not close is left as a goal (`sorry` in the
