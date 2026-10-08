@@ -12,10 +12,11 @@ memory path to a heap reference read through `Heap.field`/`Heap.index`, and
 an operator is `BinOp.evalT`/`UnOp.evalT`.  A run ends in a state or halts
 with `THalt`: `revert`, `panic` or `diverge`; there is no `stuck`.
 
-A length past `uint`'s range (an array of `2^256` elements, which the untyped
-run reads as an integer out of range) halts the run with `diverge`
-(`lenT`): no value of the type holds it, and no run that ends pushes that
-many elements.
+A dynamic array holds fewer than `2^256` elements (`SVal.array`, `MObj`), so
+a length is a `uint` (`Storage.len`, `Heap.lenU`).  A push onto `2^256 - 1`
+elements is out of gas: the run halts with `diverge` (`Storage.full`), as
+it does on a loop with no last iteration, and the untyped run, which has no
+bound, may go on (`docs/solc-alignment.md`, "Array lengths").
 
 The heap only grows, and a call sets its caller's locals aside while the body
 runs, so each step returns its state with the extension of the heap typing
@@ -75,17 +76,6 @@ def TRes.ofOpt {α : Type} : Option α → TRes α
 
 /-- A `bool` value as the Boolean it is. -/
 @[reducible] def boolT (b : PrimTy.bool.Denote) : Bool := b
-
-theorem lenT_inRange {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int) = true := by
-  simp only [PrimTy.inRange, decide_eq_true_eq]
-  omega
-
-/-- A length, as a `uint`: past the range, the run diverges.  Compared as a
-`Nat`, so a proof about a length the kernel does not know never unfolds
-`Int`'s order against `2^256`. -/
-def lenT (n : Nat) : TRes PrimTy.uint.Denote :=
-  if h : n < 2 ^ 256 then .ok (⟨n, lenT_inRange h⟩ : {n : Int // PrimTy.uint.inRange n = true})
-  else .error .diverge
 
 /-! ## States -/
 
@@ -211,10 +201,19 @@ def compoundT (op : BinOp) (p : PrimTy) (x y : Int) : Option p.Denote :=
 def bumpT (op : IncDec) (p : PrimTy) (x : Int) : Option p.Denote :=
   p.ofInt? (if op.isIncrement then x + 1 else x - 1)
 
+/-- `n` elements, `n` a `uint`: below the bound. -/
+theorem newArr_lt {E : Ty} (n : PrimTy.uint.Denote) (v : SVal E) :
+    (List.replicate n.1.toNat v).length < 2 ^ 256 := by
+  have h := n.2
+  simp only [PrimTy.inRange, decide_eq_true_eq] at h
+  rw [List.length_replicate]
+  omega
+
 /-- What `new R(n)` allocates, as the storage value it is a copy of
 (`newArrVal`): `n` default elements. -/
-def newArrT : (R : RefTy) → Int → R.newArrOk = true → SVal (.ref R)
-  | .array E, n, _ => .array (.ofList (List.replicate n.toNat (SVal.dflt E))) .nil
+def newArrT : (R : RefTy) → PrimTy.uint.Denote → R.newArrOk = true → SVal (.ref R)
+  | .array E, n, _ => .array (SVec.ofList (List.replicate n.1.toNat (SVal.dflt E))) .nil
+      (newArr_lt n _)
   | .struct _, _, h | .fixed .., _, h | .mapping .., _, h =>
     absurd h (by simp only [RefTy.newArrOk, Bool.false_eq_true, not_false_eq_true])
 
@@ -291,10 +290,10 @@ def Val.evalT (σ : TState C Γ) : {p : PrimTy} → Val C Γ p → TRes p.Denote
   | _, .len b hp => do
     let r ← b.resolveT σ
     let n ← TRes.ofOpt (σ.storage.len r)
-    hp ▸ lenT n
+    pure (hp ▸ n)
   | _, .mlen b hp => do
     let r ← b.mvalT σ
-    hp ▸ lenT (σ.heap.len r .dyn)
+    pure (hp ▸ σ.heap.lenU r)
 
 end
 
@@ -316,6 +315,7 @@ def ARhs.evalT (σ : TState C Γ) {R : RefTy} : ARhs C Γ R → TRes (Storage C 
   | .path p => do pure (σ.storage, ← p.resolveT σ)
   | .push b _ => do
     let r ← b.resolveT σ
+    if σ.storage.full r then .error .diverge else
     let (st, n) ← TRes.ofOpt (σ.storage.pushPlace r)
     pure (st, r.index (.arr .dyn) n)
 
@@ -331,7 +331,7 @@ def MRhs.evalT (σ : TState C Γ) {R : RefTy} : MRhs C Γ R → TRes (Grew C Γ 
     let g := σ.copyStToMG sv hm
     pure ⟨g.st, g.ext, g.val⟩
   | .newArr n h =>
-    let g := σ.copyStToMG (newArrT R (n.evalT σ).1 h) (RefTy.mapFree_of_newArrOk h)
+    let g := σ.copyStToMG (newArrT R (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h)
     .ok ⟨g.st, g.ext, g.val⟩
 
 /-- `a ⊕= v` at a storage reference: read, apply, check, write back. -/
@@ -596,6 +596,7 @@ def push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)) : TStep 
   let x ← match v with
     | none => pure none
     | some r => do pure (some (← r.valueT σ).strip)
+  if σ.storage.full ref then .error .diverge else
   let st ← TRes.ofOpt (σ.storage.push ref fun slot => some (x.getD slot))
   pure ⟨σ.withStorage st, List.prefix_refl _⟩
 
@@ -667,7 +668,7 @@ def deleteMem {T : Ty} (p : MPath C Γ T) : TStep C Γ Γ := fun σ =>
 
 def assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint) (h : R.newArrOk = true) :
     TStep C Γ Γ := fun σ =>
-  let g := σ.copyStToMG (newArrT R (n.evalT σ).1 h) (RefTy.mapFree_of_newArrOk h)
+  let g := σ.copyStToMG (newArrT R (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h)
   match l with
   | .store l => do
     let ref ← l.resolveT g.st

@@ -66,10 +66,10 @@ theorem SVal.erase_hasTy : {T : Ty} → (v : SVal T) → T.nodupDeep = true →
     rw [SVal.erase_struct]
     have hs := Ty.nodupDeep_struct h
     exact SFields.erase_hasTy s fs (fun _ hm => lookupBy_eq_of_nodup hs.1 hm) hs.2
-  | _, .array e sh, h => by
+  | _, .array e sh _, h => by
     rw [SVal.erase_array]
     simp only [Semantics.SVal.hasTy, Bool.not_false, Bool.true_and, Bool.and_eq_true]
-    exact ⟨SList.erase_hasTy e h, SList.erase_hasTy sh h⟩
+    exact ⟨SVec.erase_hasTy e h, SList.erase_hasTy sh h⟩
   | _, .fixed (n := n) e, h => by
     rw [SVal.erase_fixed]
     simp only [Semantics.SVal.hasTy, SVec.length_erase, beq_self_eq_true, Bool.true_and,
@@ -224,7 +224,7 @@ theorem MObj.erase_hasTyH {H : HTy} : (R : RefTy) → (o : MObj H R) →
     MFields.erase_hasTyH s (structDef s) o fun _ hm => lookupBy_eq_of_nodup (Ty.nodupDeep_struct h).1 hm
   | .array E, o, _ => by
     simp only [MObj.erase, Semantics.MObj.hasTyH, Bool.not_false, Bool.true_and]
-    exact MVal.erase_hasTyHElems E o
+    exact MVal.erase_hasTyHElems E (o : {l : List (MVal H E) // l.length < 2 ^ 256}).1
   | .fixed E n, o, _ => by
     obtain ⟨l, hl⟩ := (o : {l : List (MVal H E) // l.length = n})
     simp only [MObj.erase, Semantics.MObj.hasTyH, List.length_map, hl, beq_self_eq_true,

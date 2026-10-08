@@ -5,14 +5,17 @@ import Solidity.Semantics.Core.TypedRunErase
 
 `Prog.trun_erase` reads one way: a typed run that ends, ends the scoped run
 in its erasure.  The other way fails in general, since the typed run diverges
-on a length past `uint` (`lenT`) and on a loop with no last iteration, where
-the scoped run may end.  A *straight* program (`Prog.straight`) has neither:
-it assigns simple values, binds aliases to paths, pushes defaults, pops,
-deletes and opens blocks, at paths whose indices are simple.  Its typed run never diverges (`Prog.trun_noDiv`) and is
-on the bridge (`Prog.bridgeOk_of_straight`), so it ends exactly where the
-scoped run does (`Prog.trun_of_run`).  The storage builder
-(`Core.Build.rootsProg`, `Typing/Constructibility.lean`) is straight, which
-is how a storage the builder reaches is reached by the typed run.
+on a loop with no last iteration and on a push onto `2^256 - 1` elements
+(out of gas, `Storage.full`), where the scoped run may end.  A *straight*
+program (`Prog.straight`) has no loop: it assigns simple values, binds
+aliases to paths, pushes defaults, pops, deletes and opens blocks, at paths
+whose indices are simple.  Its typed run does not diverge when every push of
+its scoped run lands below the bound (`Prog.pushesShort`, `Prog.trun_noDiv`),
+and it is on the bridge (`Prog.bridgeOk_of_straight`), so it ends exactly
+where the scoped run does (`Prog.trun_of_run`).  The storage builder
+(`Core.Build.rootsProg`, `Typing/Constructibility.lean`) is straight and its
+pushes are short, which is how a storage the builder reaches is reached by
+the typed run.
 -/
 
 namespace Solidity.Core
@@ -142,6 +145,30 @@ theorem Prog.bridgeOk_of_straight : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → P
 
 end
 
+/-! ## Pushes below the bound
+
+A push onto `2^256 - 1` elements is out of gas in the typed run (`TRun.push`,
+`Storage.full`), and the scoped run, which has no bound, goes on: a straight
+program's typed run ends where its scoped one does if every push of the
+scoped run lands below the bound. -/
+
+mutual
+
+/-- Every `push` of the statement, run from `σ` by the scoped interpreter,
+lands on an array of fewer than `2^256 - 1` elements. -/
+def Stmt.pushesShort : {Γ Γ' : Ctx} → Stmt C Γ Γ' → State C Γ → Prop
+  | _, _, .push b _ _, σ => ∀ r segs elems sh fx, b.resolve σ = .ok (r, segs) →
+      σ.glob.findStorage r segs = .ok (.array elems sh fx) → elems.length + 1 < 2 ^ 256
+  | _, _, .block body, σ => Prog.pushesShort body σ
+  | _, _, _, _ => True
+
+/-- Every `push` of the program, along its scoped run from `σ`. -/
+def Prog.pushesShort : {Γ Γ' : Ctx} → Prog C Γ Γ' → State C Γ → Prop
+  | _, _, .nil, _ => True
+  | _, _, .cons s P, σ => Stmt.pushesShort s σ ∧ ∀ τ, s.run σ = .ok τ → Prog.pushesShort P τ
+
+end
+
 /-! ## Straight programs do not diverge -/
 
 section NoDiv
@@ -188,50 +215,71 @@ end NoDiv
 
 mutual
 
-/-- **A straight statement's typed run does not diverge.** -/
+/-- **A straight statement's typed run does not diverge**, its pushes below
+the bound. -/
 theorem Stmt.trun_noDiv : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.straight = true →
-    ∀ σ : TState C Γ, (s.trun σ).NoDiv
-  | _, _, .assign l r, h, σ => by
+    ∀ σ : TState C Γ, s.pushesShort σ.erase → (s.trun σ).NoDiv
+  | _, _, .assign l r, h, σ, _ => by
     simp only [Stmt.straight, Bool.and_eq_true] at h
     exact (Src.valueT_noDiv σ h.2).bind fun _ => (Loc.resolveT_noDiv σ l h.1).bind fun _ =>
       (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
-  | _, _, .declStorage _ _ init, h, σ => by
+  | _, _, .declStorage _ _ init, h, σ, _ => by
     cases init with
     | none => exact TRes.NoDiv.ok _
     | some r =>
       simp only [Stmt.straight, Option.all_some] at h
       exact (ARhs.evalT_noDiv σ h).bind fun _ => TRes.NoDiv.ok _
-  | _, _, .push b v _, h, σ => by
+  | _, _, .push b v _, h, σ, hp => by
     simp only [Stmt.straight, Bool.and_eq_true, Option.isNone_iff_eq_none] at h
     obtain ⟨hb, rfl⟩ := h
-    exact (SPath.resolveT_noDiv σ b hb).bind fun _ => (TRes.NoDiv.ok _).bind fun _ =>
+    show (TRun.push b none σ).NoDiv
+    unfold TRun.push
+    have hres := b.resolveT_erase σ
+    have hnd := SPath.resolveT_noDiv σ b hb
+    cases hr : b.resolveT σ with
+    | error e =>
+      rw [hr] at hnd
+      simp only [bind, Except.bind]
+      exact fun h' => hnd (by cases (h' : Except.error e = .error .diverge); rfl)
+    | ok ref =>
+      rw [hr] at hres
+      have hfull : σ.storage.full ref = false :=
+        Storage.full_eq_false rfl ref fun elems sh fx hf => hp _ _ elems sh fx hres hf
+      simp only [bind, Except.bind, pure, Except.pure, hfull, Bool.false_eq_true, ↓reduceIte]
+      exact (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
+  | _, _, .pop b, h, σ, _ => (SPath.resolveT_noDiv σ b h).bind fun _ =>
       (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
-  | _, _, .pop b, h, σ => (SPath.resolveT_noDiv σ b h).bind fun _ =>
+  | _, _, .delete l, h, σ, _ => (Loc.resolveT_noDiv σ l h).bind fun _ =>
       (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
-  | _, _, .delete l, h, σ => (Loc.resolveT_noDiv σ l h).bind fun _ =>
-      (TRes.NoDiv.ofOpt _).bind fun _ => TRes.NoDiv.ok _
-  | _, _, .block body, h, σ => (Prog.trun_noDiv body h σ).map _
-  | _, _, .rebind .., h, _ | _, _, .assignLocal .., h, _ | _, _, .declLocal .., h, _
-  | _, _, .opAssign .., h, _ | _, _, .incDec .., h, _ | _, _, .assignIncDec .., h, _
-  | _, _, .transfer .., h, _ | _, _, .send .., h, _ | _, _, .declMem .., h, _
-  | _, _, .rebindMem .., h, _ | _, _, .assignFromMem .., h, _ | _, _, .assignMem .., h, _
-  | _, _, .deleteMem .., h, _ | _, _, .assignNew .., h, _ | _, _, .ite .., h, _
-  | _, _, .require .., h, _ | _, _, .assert .., h, _ | _, _, .revert, h, _
-  | _, _, .call .., h, _ | _, _, .tryCall .., h, _ | _, _, .loop .., h, _ =>
+  | _, _, .block body, h, σ, hp => (Prog.trun_noDiv body h σ hp).map _
+  | _, _, .rebind .., h, _, _ | _, _, .assignLocal .., h, _, _ | _, _, .declLocal .., h, _, _
+  | _, _, .opAssign .., h, _, _ | _, _, .incDec .., h, _, _ | _, _, .assignIncDec .., h, _, _
+  | _, _, .transfer .., h, _, _ | _, _, .send .., h, _, _ | _, _, .declMem .., h, _, _
+  | _, _, .rebindMem .., h, _, _ | _, _, .assignFromMem .., h, _, _
+  | _, _, .assignMem .., h, _, _ | _, _, .deleteMem .., h, _, _ | _, _, .assignNew .., h, _, _
+  | _, _, .ite .., h, _, _ | _, _, .require .., h, _, _ | _, _, .assert .., h, _, _
+  | _, _, .revert, h, _, _ | _, _, .call .., h, _, _ | _, _, .tryCall .., h, _, _
+  | _, _, .loop .., h, _, _ =>
     absurd h Bool.false_ne_true
 
-/-- **A straight program's typed run does not diverge.** -/
+/-- **A straight program's typed run does not diverge**, its pushes below
+the bound. -/
 theorem Prog.trun_noDiv : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → P.straight = true →
-    ∀ σ : TState C Γ, (P.trun σ).NoDiv
-  | _, _, .nil, _, _ => TRes.NoDiv.ok _
-  | _, _, .cons s P, h, σ => by
+    ∀ σ : TState C Γ, P.pushesShort σ.erase → (P.trun σ).NoDiv
+  | _, _, .nil, _, _, _ => TRes.NoDiv.ok _
+  | _, _, .cons s P, h, σ, hp => by
     simp only [Prog.straight, Bool.and_eq_true] at h
     show (TRun.seq s.trunR P.trunR σ).NoDiv
     unfold TRun.seq
     cases hs : s.trunR σ with
-    | ok o => exact (Prog.trun_noDiv P h.2 o.st).map _
+    | ok o =>
+      have hr : s.run σ.erase = .ok o.st.erase := by
+        have := Stmt.trun_erase σ s (Stmt.bridgeOk_of_straight s h.1)
+        simp only [Stmt.trun, hs] at this
+        exact this
+      exact (Prog.trun_noDiv P h.2 o.st (hp.2 _ hr)).map _
     | error e =>
-      have := Stmt.trun_noDiv s h.1 σ
+      have := Stmt.trun_noDiv s h.1 σ hp.1
       simp only [Stmt.trun, hs] at this
       exact fun h' => this (by cases (h' : Except.error e = .error .diverge); rfl)
 
@@ -240,10 +288,11 @@ end
 /-- **A straight program's typed run ends where its scoped run does**: in
 the state the scoped run ends in, erased. -/
 theorem Prog.trun_of_run {Γ Γ' : Ctx} {P : Prog C Γ Γ'} (h : P.straight = true)
-    (σ : TState C Γ) {τ : State C Γ'} (hr : P.run σ.erase = .ok τ) :
+    (σ : TState C Γ) {τ : State C Γ'} (hr : P.run σ.erase = .ok τ)
+    (hp : P.pushesShort σ.erase) :
     ∃ o : Out C σ.H Γ', P.trun σ = .ok o ∧ o.st.erase = τ := by
   have ha := Prog.trun_erase σ P (Prog.bridgeOk_of_straight P h)
-  have hn := Prog.trun_noDiv P h σ
+  have hn := Prog.trun_noDiv P h σ hp
   cases hq : P.trun σ with
   | ok o =>
     rw [hq] at ha

@@ -811,13 +811,19 @@ theorem push_ok {E : Ty} {r : SRef C (.ref (.array E))} {elems shadow : List SVa
     (hsv : σ.sem.findLive r.root r.path.erase = .ok (.array elems shadow false))
     {stor : List (Name × SVal)}
     (hsave : σ.sem.saveStorage r.root r.path.erase
-      (.array (elems ++ [new]) (pushSlot E shadow).2 false) = .ok { σ.sem with storage := stor }) :
-    ∃ st', σ.storage.push r val' = some st' ∧
+      (.array (elems ++ [new]) (pushSlot E shadow).2 false) = .ok { σ.sem with storage := stor })
+    (hb : elems.length + 1 < 2 ^ 256) :
+    σ.storage.full r = false ∧ ∃ st', σ.storage.push r val' = some st' ∧
       (σ.withStorage st').sem = { σ.sem with storage := stor } := by
+  have hfull : σ.storage.full r = false :=
+    Solidity.Core.Storage.full_eq_false (σ := σ.sem) rfl r fun elems' sh fx hf => by
+      rw [State.findStorage_of_findLive hsv] at hf
+      cases hf
+      exact hb
   have hpa : pushAt σ.sem E r.root r.path.erase val = .ok { σ.sem with storage := stor } := by
     simp only [pushAt, State.findStorage_of_findLive hsv, bind, Except.bind, hnew, hsave]
-  rw [Solidity.Core.Storage.pushAt_erase (σ := σ.sem) rfl r val val' hval] at hpa
-  exact into_ok hpa
+  rw [Solidity.Core.Storage.pushAt_erase (σ := σ.sem) rfl r val val' hval (.inl hfull)] at hpa
+  exact ⟨hfull, into_ok hpa⟩
 
 /-- **`b.push(…)`**: the array's slot, the value, the length checked against
 solc's `2^64` and grown, the element stored. -/
@@ -862,13 +868,14 @@ theorem push_sim {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
             · rw [hx]; exact OccAt.prim
             · exact absurd (by rw [hst', upd_other _ _ hx, upd_other _ _ h1]) h2)
         subst hst'
-        obtain ⟨st', hst', hsem⟩ := push_ok (val := fun x => .ok x)
+        obtain ⟨hfull, st', hst', hsem⟩ := push_ok (val := fun x => .ok x)
           (val' := fun slot => some ((none : Option (Solidity.Core.SVal (.prim p))).getD slot))
           (fun _ => rfl) (by rw [pushSlot_isPrim rfl]) hsv hsave
+          (by have := Lmax_lt_W; unfold W at this; omega)
         refine .inl ⟨⟨σ.withStorage st', List.prefix_refl _⟩, _, ?_, rfl, rfl, Keeps.store hlen,
           Sim.withStore hsem (hm'.store' hrep hlen)⟩
-        simp only [Solidity.Core.TRun.push, hres, hst', bind, Except.bind, TRes.ofOpt, pure,
-          Except.pure]
+        simp only [Solidity.Core.TRun.push, hres, hfull, Bool.false_eq_true, ↓reduceIte, hst',
+          bind, Except.bind, TRes.ofOpt, pure, Except.pure]
     · exact .inr ⟨by simp only [Solidity.Core.TRun.push, hres, bind, Except.bind],
         run_append_revert hrun⟩
   | some src =>
@@ -910,17 +917,18 @@ theorem push_sim {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
                 · rw [hx]; exact OccAt.prim
                 · exact absurd (by rw [hst', upd_other _ _ hx, upd_other _ _ h1]) h2)
             subst hst'
-            obtain ⟨st', hst', hsem⟩ := push_ok
+            obtain ⟨hfull, st', hst', hsem⟩ := push_ok
               (val := fun _ => .ok (PrimTy.erase ve).toSVal)
               (val' := fun slot => some ((some (Solidity.Core.SVal.prim ve).strip).getD slot))
               (fun _ => by
                 simp only [Option.getD_some, Solidity.Core.toRes,
                   Solidity.Core.SVal.strip_erase, ← toSVal_erase, Value.toSVal_strip])
-              rfl hsv hsave
+              rfl hsv hsave (by have := Lmax_lt_W; unfold W at this; omega)
             refine .inl ⟨⟨σ.withStorage st', List.prefix_refl _⟩, _, ?_, rfl, rfl,
               Keeps.store hlen, Sim.withStore hsem (hm'.store' hrep hlen)⟩
-            simp only [Solidity.Core.TRun.push, Solidity.Core.Src.valueT, hres, hve, hst', bind,
-              Except.bind, TRes.ofOpt, pure, Except.pure]
+            simp only [Solidity.Core.TRun.push, Solidity.Core.Src.valueT, hres, hve, hfull,
+              Bool.false_eq_true, ↓reduceIte, hst', bind, Except.bind, TRes.ofOpt, pure,
+              Except.pure]
           · refine .inr ⟨?_, run_append_revert hrune⟩
             simp only [Solidity.Core.TRun.push, Solidity.Core.Src.valueT, hres, hve, bind,
               Except.bind]
@@ -984,15 +992,16 @@ theorem push_sim {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
                   exact leavesF_occAt _ _ _ o hst (List.mem_reverse.1 ho)
                 · refine absurd ?_ h2
                   rw [hst', storeAt_other fun o ho he => hx ⟨o, ho, he⟩, upd_other _ _ h1])
-            obtain ⟨st'', hst'', hsem⟩ := push_ok (val := fun _ => .ok tsv'.erase.strip)
+            obtain ⟨hfull, st'', hst'', hsem⟩ := push_ok (val := fun _ => .ok tsv'.erase.strip)
               (val' := fun slot => some ((some tsv'.strip).getD slot))
               (fun _ => by
                 simp only [Option.getD_some, Solidity.Core.toRes, Solidity.Core.SVal.strip_erase])
-              rfl hsv hsave
+              rfl hsv hsave (by have := Lmax_lt_W; unfold W at this; omega)
             refine .inl ⟨⟨σ.withStorage st'', List.prefix_refl _⟩, { m with store := st' }, ?_,
               ?_, rfl, Keeps.store hlen, Sim.withStore hsem (hm'.store' hrep hlen)⟩
             · simp only [Solidity.Core.TRun.push, Solidity.Core.Src.valueT, hres, hres', hf',
-                hst'', bind, Except.bind, TRes.ofOpt, pure, Except.pure]
+                hfull, Bool.false_eq_true, ↓reduceIte, hst'', bind, Except.bind, TRes.ofOpt, pure,
+                Except.pure]
             · rw [hst']; rfl
           · exact .inr ⟨by simp only [Solidity.Core.TRun.push, Solidity.Core.Src.valueT, hres,
               hres', bind, Except.bind], run_append_revert hrunq⟩

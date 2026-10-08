@@ -8,9 +8,10 @@ import Solidity.Semantics.Core.TypedRun
 state it ends in agrees with running `P` on `σ.erase` with
 `Semantics/Core.lean`'s interpreter.  The relation is `TRes.Agrees`: the
 same state, the same `revert` or `panic`; a typed `diverge` is matched by any
-untyped outcome, since the typed run also diverges on a length past `uint`'s
-range (`lenT`), which the untyped run reads as an integer and goes on with.
-So the untyped run is never stuck where the typed one ends.
+untyped outcome: a loop with no last iteration, and a push onto an array of
+`2^256 - 1` elements (out of gas, `Storage.full`), where the untyped run, which
+has no bound, goes on.  So the untyped run is never stuck where the typed one
+ends.
 
 One kind of program falls outside, `Prog.bridgeOk` excluding it: a storage
 copy at a type with a struct whose members share a name (`BadDup`), which the
@@ -205,21 +206,6 @@ theorem evalBinop_long {op : BinOp} {p : PrimTy} {x : p.Denote} (hs : op.shortT 
         Bool.false_eq_true] at hs)
 
 
-/-- A length read: past `uint`'s range, the typed run diverges. -/
-theorem lenT_agrees (n : Nat) :
-    TRes.Agrees PrimTy.erase (lenT n) (.ok (Semantics.Value.int n)) := by
-  unfold lenT
-  split
-  · rfl
-  · trivial
-
-theorem lenT_agrees_opt (o : Option Nat) :
-    TRes.Agrees PrimTy.erase (do let n ← TRes.ofOpt o; lenT n)
-      (toRes (fun n : Nat => Semantics.Value.int n) o) := by
-  cases o with
-  | none => exact TRes.Agrees.ofOpt (f := PrimTy.erase) none
-  | some n => exact lenT_agrees n
-
 mutual
 
 theorem SPath.resolveT_erase (σ : TState C Γ) : {T : Ty} → (b : SPath C Γ T) →
@@ -334,24 +320,20 @@ theorem Val.evalT_erase (σ : TState C Γ) : {p : PrimTy} → (v : Val C Γ p) �
   | _, .len b hp => by
     subst hp
     refine TRes.Agrees.bind (b.resolveT_erase σ) fun r => ?_
-    show TRes.Agrees _ (do let n ← TRes.ofOpt (σ.storage.len r); lenT n)
+    show TRes.Agrees _ (do let n ← TRes.ofOpt (σ.storage.len r); pure n)
       (arrayLen σ.erase.glob r.root r.path.erase)
     rw [Storage.arrayLen_erase (σ := σ.erase.glob) rfl r]
-    exact lenT_agrees_opt _
+    cases σ.storage.len r <;> rfl
   | _, .mlen b hp => by
     subst hp
     refine TRes.Agrees.bind (b.mvalT_erase σ) fun r => ?_
-    show TRes.Agrees _ (lenT (σ.heap.len r .dyn)) (memArrayLen σ.erase.glob r.id)
+    show TRes.Agrees _ (.ok (σ.heap.lenU r)) (memArrayLen σ.erase.glob r.id)
     rw [Heap.memArrayLen_erase (σ := σ.erase.glob) rfl r .dyn]
-    exact lenT_agrees _
+    rfl
 
 end
 
 /-! ### An expression does not panic -/
-
-theorem lenT_noPanic (n : Nat) : (lenT n).NoPanic := by
-  unfold lenT
-  split <;> exact fun h => nomatch h
 
 mutual
 
@@ -408,10 +390,11 @@ theorem Val.evalT_noPanic (σ : TState C Γ) : {p : PrimTy} → (v : Val C Γ p)
   | _, .readMem l => (l.addrT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
   | _, .len b hp => by
     subst hp
-    exact (b.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ => lenT_noPanic _
+    exact (b.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
+      fun h => nomatch h
   | _, .mlen b hp => by
     subst hp
-    exact (b.mvalT_noPanic σ).bind fun _ => lenT_noPanic _
+    exact (b.mvalT_noPanic σ).bind fun _ => fun h => nomatch h
 
 end
 
@@ -473,21 +456,24 @@ theorem ARhs.evalT_erase (σ : TState C Γ) {R : RefTy} (r : ARhs C Γ R) :
     exact TRes.Agrees.bind (p.resolveT_erase σ) fun _ => rfl
   | push b _ =>
     refine TRes.Agrees.bind (b.resolveT_erase σ) fun r => ?_
-    show TRes.Agrees _ (do
+    show TRes.Agrees _ (if σ.storage.full r then .error .diverge else do
         let (st, n) ← TRes.ofOpt (σ.storage.pushPlace r)
         pure (st, r.index (.arr .dyn) n))
       (do
         let (τ, n) ← pushPlaceAt σ.erase.glob (.ref R) r.root r.path.erase
         pure (σ.erase.withGlob τ, (r.root, r.path.erase ++ [.at n])))
-    rw [Storage.pushPlaceAt_erase (σ := σ.erase.glob) rfl r]
-    refine TRes.Agrees.bind (TRes.Agrees.ofOpt _) fun x => ?_
-    exact TRes.Agrees.of_eq (by rw [SRef.erase_index]; rfl)
+    cases hfull : σ.storage.full r
+    · rw [if_neg Bool.false_ne_true]
+      rw [Storage.pushPlaceAt_erase (σ := σ.erase.glob) rfl r hfull]
+      refine TRes.Agrees.bind (TRes.Agrees.ofOpt _) fun x => ?_
+      exact TRes.Agrees.of_eq (by rw [SRef.erase_index]; rfl)
+    · trivial
 
-theorem newArrT_erase : (R : RefTy) → (n : Int) → (h : R.newArrOk = true) →
-    (newArrT R n h).erase = newArrVal R n
+theorem newArrT_erase : (R : RefTy) → (n : PrimTy.uint.Denote) → (h : R.newArrOk = true) →
+    (newArrT R n h).erase = newArrVal R n.1
   | .array E, n, _ => by
-    simp only [newArrT, newArrVal, SVal.erase, SList.erase_ofList, SList.erase_nil, List.map_replicate,
-      SVal.dflt_erase]
+    simp only [newArrT, newArrVal, SVal.erase, SVec.erase_ofList, SList.erase_nil,
+      List.map_replicate, SVal.dflt_erase]
   | .struct _, _, h | .fixed .., _, h | .mapping .., _, h => by
     simp only [RefTy.newArrOk, Bool.false_eq_true] at h
 
@@ -1062,17 +1048,21 @@ theorem push_erase {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
   refine TRes.Agrees.bind (b.resolveT_erase σ) fun ref => ?_
   cases v with
   | none =>
-    show TRes.Agrees _ (do
+    show TRes.Agrees _ (if σ.storage.full ref then .error .diverge else do
         let st ← TRes.ofOpt (σ.storage.push ref fun slot => some slot)
         pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
       (σ.erase.withGlob <$> pushAt σ.erase.glob E ref.root ref.path.erase
         (Src.pushVal σ.erase none))
-    rw [Storage.pushAt_erase (σ := σ.erase.glob) rfl ref (Src.pushVal σ.erase none)
-      (fun slot => some slot) fun _ => rfl]
-    cases σ.storage.push ref (fun slot => some slot) <;> rfl
+    cases hfull : σ.storage.full ref
+    · rw [if_neg Bool.false_ne_true]
+      rw [Storage.pushAt_erase (σ := σ.erase.glob) rfl ref (Src.pushVal σ.erase none)
+        (fun slot => some slot) (fun _ => rfl) (.inl hfull)]
+      cases σ.storage.push ref (fun slot => some slot) <;> rfl
+    · trivial
   | some r =>
     show TRes.Agrees _ (do
         let sv ← r.valueT σ
+        if σ.storage.full ref then .error .diverge else do
         let st ← TRes.ofOpt (σ.storage.push ref fun _ => some sv.strip)
         pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
       (σ.erase.withGlob <$> pushAt σ.erase.glob E ref.root ref.path.erase
@@ -1088,11 +1078,14 @@ theorem push_erase {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
         show (do pure (← r.value σ.erase).strip) = _
         rw [show r.value σ.erase = .ok sv.erase from ha, ok_bind, ← SVal.strip_erase]
         rfl
-      rw [Storage.pushAt_erase (σ := σ.erase.glob) rfl ref _ _ hval]
-      show TRes.Agrees _ (do
+      show TRes.Agrees _ (if σ.storage.full ref then .error .diverge else do
           let st ← TRes.ofOpt (σ.storage.push ref fun _ => some sv.strip)
           pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ)) _
-      cases σ.storage.push ref (fun _ => some sv.strip) <;> rfl
+      cases hfull : σ.storage.full ref
+      · rw [if_neg Bool.false_ne_true]
+        rw [Storage.pushAt_erase (σ := σ.erase.glob) rfl ref _ _ hval (.inl hfull)]
+        cases σ.storage.push ref (fun _ => some sv.strip) <;> rfl
+      · trivial
     | error e =>
       intro ha hn
       cases e with
@@ -1104,7 +1097,7 @@ theorem push_erase {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
           show (do pure (← r.value σ.erase).strip) = _
           rw [show r.value σ.erase = .error .revert from ha]
           rfl
-        rw [Storage.pushAt_erase (σ := σ.erase.glob) rfl ref _ _ hval]
+        rw [Storage.pushAt_erase (σ := σ.erase.glob) rfl ref _ _ hval (.inr fun _ => rfl)]
         have hnone : σ.storage.push ref (fun _ => (none : Option (SVal E))) = none := by
           simp only [Storage.push]
           cases σ.storage.find ref <;> rfl
@@ -1262,8 +1255,8 @@ theorem assignNew_erase {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
         let (τ, mv) ← Semantics.copyStToM σ.erase.glob sv
         let id ← mv.asRef
         K τ id) =
-      K (σ.copyStToMG (newArrT R (n.evalT σ).1 h) (RefTy.mapFree_of_newArrOk h)).st.erase.glob
-        ((σ.copyStToMG (newArrT R (n.evalT σ).1 h) (RefTy.mapFree_of_newArrOk h)).val : HRef _ R).id := fun K => by
+      K (σ.copyStToMG (newArrT R (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h)).st.erase.glob
+        ((σ.copyStToMG (newArrT R (n.evalT σ) h) (RefTy.mapFree_of_newArrOk h)).val : HRef _ R).id := fun K => by
     rw [Simple.evalT_erase σ n, ok_bind, PrimTy.asInt_erase_uint, ok_bind, ← newArrT_erase R _ h]
     simp only []
     rw [TState.copyStToM_erase σ _ (RefTy.mapFree_of_newArrOk h), ok_bind]

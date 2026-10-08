@@ -62,10 +62,11 @@ def MFields (H : HTy) : List (Name × Ty) → Type
   | [] => Unit
   | (_, T) :: fs => MVal H T × MFields H fs
 
-/-- A memory object of type `R`.  A mapping has none. -/
+/-- A memory object of type `R`: an array has fewer than `2^256` elements
+(its length is a `uint`, `new T[](n)` takes one).  A mapping has none. -/
 def MObj (H : HTy) : RefTy → Type
   | .struct s => MFields H (structDef s)
-  | .array E => List (MVal H E)
+  | .array E => {l : List (MVal H E) // l.length < 2 ^ 256}
   | .fixed E n => {l : List (MVal H E) // l.length = n}
   | .mapping _ _ => Empty
 
@@ -89,7 +90,9 @@ def MFields.wk {H H' : HTy} (e : H <+: H') : (fs : List (Name × Ty)) → MField
 
 def MObj.wk {H H' : HTy} (e : H <+: H') : (R : RefTy) → MObj H R → MObj H' R
   | .struct s, o => MFields.wk e (structDef s) o
-  | .array E, o => (o : List (MVal H E)).map (MVal.wk e E)
+  | .array E, o =>
+    let o : {l : List (MVal H E) // l.length < 2 ^ 256} := o
+    ⟨o.1.map (MVal.wk e E), by rw [List.length_map]; exact o.2⟩
   | .fixed E n, o =>
     let o : {l : List (MVal H E) // l.length = n} := o
     ⟨o.1.map (MVal.wk e E), by rw [List.length_map]; exact o.2⟩
@@ -170,10 +173,10 @@ def MFields.set {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T : Ty} →
 casts nothing (Gate G0, condition 1). -/
 def MObj.elems {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) : MObj H R → List (MVal H E) :=
   @ArrTy.casesOn (fun R E _ => MObj H R → List (MVal H E)) R E a
-    (fun {_} o => o) (fun {_} {_} o => o.1)
+    (fun {_} o => o.1) (fun {_} {_} o => o.1)
 
 theorem MObj.elems_dyn {H : HTy} {E : Ty} (o : MObj H (.array E)) :
-    MObj.elems .dyn o = (o : List (MVal H E)) := rfl
+    MObj.elems .dyn o = (o : {l : List (MVal H E) // l.length < 2 ^ 256}).1 := rfl
 theorem MObj.elems_fixed {H : HTy} {E : Ty} {n : Nat} (o : MObj H (.fixed E n)) :
     MObj.elems .fixed o = (o : {l : List (MVal H E) // l.length = n}).1 := rfl
 
@@ -184,13 +187,17 @@ attribute [eqns MObj.elems_dyn MObj.elems_fixed] MObj.elems
 def MObj.setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) :
     MObj H R → Nat → MVal H E → MObj H R :=
   @ArrTy.casesOn (fun R E _ => MObj H R → Nat → MVal H E → MObj H R) R E a
-    (fun {E} o i v => ((o : List (MVal H E)).set i v : MObj H (.array E)))
+    (fun {E} o i v =>
+      let o : {l : List (MVal H E) // l.length < 2 ^ 256} := o
+      (⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩ : MObj H (.array E)))
     (fun {E} {n} o i v =>
       let o : {l : List (MVal H E) // l.length = n} := o
       (⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩ : MObj H (.fixed E n)))
 
 theorem MObj.setElem_dyn {H : HTy} {E : Ty} (o : MObj H (.array E)) (i : Nat) (v : MVal H E) :
-    MObj.setElem .dyn o i v = ((o : List (MVal H E)).set i v : MObj H (.array E)) := rfl
+    MObj.setElem .dyn o i v =
+      let o : {l : List (MVal H E) // l.length < 2 ^ 256} := o
+      (⟨o.1.set i v, by rw [List.length_set]; exact o.2⟩ : MObj H (.array E)) := rfl
 theorem MObj.setElem_fixed {H : HTy} {E : Ty} {n : Nat} (o : MObj H (.fixed E n)) (i : Nat)
     (v : MVal H E) :
     MObj.setElem .fixed o i v =
@@ -230,6 +237,16 @@ def setIndex {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (
 def len {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) : Nat :=
   (MObj.elems a (hp.get r)).length
 
+/-- A dynamic array's length is below `2^256`. -/
+theorem len_dyn_lt {E : Ty} (hp : Heap H) (r : HRef H (.array E)) : hp.len r .dyn < 2 ^ 256 := by
+  unfold len
+  rw [MObj.elems_dyn]
+  exact (hp.get r : {l : List (MVal H E) // l.length < 2 ^ 256}).2
+
+/-- `mv.length` of a dynamic array, a `uint`. -/
+def lenU {E : Ty} (hp : Heap H) (r : HRef H (.array E)) : PrimTy.uint.Denote :=
+  Core.lenU (hp.len r .dyn) (hp.len_dyn_lt r)
+
 end Heap
 
 /-! ## Storage to memory (`copySt`) -/
@@ -259,8 +276,9 @@ def copyStToMFold : Fold where
   struct := fun {s} _ ih H hp h =>
     Grown.alloc (R := .struct s)
       (ih H hp (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h)))
-  array := fun {E} _ _ ie _ H hp h =>
-    Grown.alloc (R := .array E) (ie H hp (by simpa only [Ty.mapFree] using h))
+  array := fun {E} {_} _ _ hn ie _ H hp h =>
+    let g := ie H hp (by simpa only [Ty.mapFree] using h)
+    Grown.alloc (R := .array E) ⟨g.ext, g.heap, ⟨g.val.1, by rw [g.val.2]; exact hn⟩⟩
   fixed := fun {E n} _ ie H hp h =>
     Grown.alloc (R := .fixed E n) (ie H hp (by simpa only [Ty.mapFree] using h))
   map := fun _ _ _ _ _ _ h =>
@@ -313,10 +331,11 @@ theorem SVal.copyStToM_struct {H : HTy} (hp : Heap H) {s : Name} (fs : SFields (
     SVal.copyStToM hp (.struct fs) h =
       Grown.alloc (R := .struct s) (SFields.copyStToM hp fs
         (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h))) := rfl
-theorem SVal.copyStToM_array {H : HTy} (hp : Heap H) {E : Ty} (e sh : SList E)
-    (h : (Ty.ref (.array E)).mapFree = true) :
-    SVal.copyStToM hp (.array e sh) h =
-      Grown.alloc (R := .array E) (SList.copyStToM hp e (by simpa only [Ty.mapFree] using h)) :=
+theorem SVal.copyStToM_array {H : HTy} (hp : Heap H) {E : Ty} {n : Nat} (e : SVec E n)
+    (sh : SList E) (hn : n < 2 ^ 256) (h : (Ty.ref (.array E)).mapFree = true) :
+    SVal.copyStToM hp (.array e sh hn) h =
+      let g := SVec.copyStToM hp e (by simpa only [Ty.mapFree] using h)
+      Grown.alloc (R := .array E) ⟨g.ext, g.heap, ⟨g.val.1, by rw [g.val.2]; exact hn⟩⟩ :=
   rfl
 theorem SVal.copyStToM_fixed {H : HTy} (hp : Heap H) {E : Ty} {n : Nat} (e : SVec E n)
     (h : (Ty.ref (.fixed E n)).mapFree = true) :
@@ -403,8 +422,9 @@ def MVal.copyRefAt (k : Nat) (ih : (T : Ty) → tyRank T < k → MVal H T → SV
     .struct (MFields.copyBelow k ih (structDef s)
       (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (Nat.le_of_lt_succ h)) (hp.get r))
   | .array E, h, r =>
-    .array (.ofList (((hp.get r : List (MVal H E))).map
-      (MVal.copyAt k ih E (by simpa only [tyRank] using h)))) .nil
+    let o : {l : List (MVal H E) // l.length < 2 ^ 256} := hp.get r
+    .array (SVec.ofList (o.1.map (MVal.copyAt k ih E (by simpa only [tyRank] using h)))) .nil
+      (by rw [List.length_map]; exact o.2)
   | .fixed E n, h, r =>
     let o : {l : List (MVal H E) // l.length = n} := hp.get r
     .fixed (SVec.ofLen (MVal.copyAt k ih E (Nat.lt_of_succ_lt (by simpa only [tyRank] using h)))
@@ -437,7 +457,8 @@ def MFields.erase {H : HTy} : (fs : List (Name × Ty)) → MFields H fs → List
 /-- The untyped object: a struct's members named, an array marked fixed or not. -/
 def MObj.erase {H : HTy} : (R : RefTy) → MObj H R → Semantics.MObj
   | .struct s, o => .struct (MFields.erase (structDef s) o)
-  | .array E, o => .array ((o : List (MVal H E)).map (MVal.erase E)) false
+  | .array E, o =>
+    .array ((o : {l : List (MVal H E) // l.length < 2 ^ 256}).1.map (MVal.erase E)) false
   | .fixed E n, o =>
     .array ((o : {l : List (MVal H E) // l.length = n}).1.map (MVal.erase E)) true
   | .mapping _ _, o => (o : Empty).elim

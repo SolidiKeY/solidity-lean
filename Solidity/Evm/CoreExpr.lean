@@ -644,7 +644,8 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
       | @array _ _ elems shadow hl hW _ =>
         rw [run_append_ok hrun]
         have := hm.bound; have := Lmax_lt_W
-        have hlen : σ.storage.len r = some elems.length := by
+        have hW' : elems.length < 2 ^ 256 := by unfold W at *; omega
+        have hlen : σ.storage.len r = some (Solidity.Core.lenU elems.length hW') := by
           have h := Solidity.Core.Storage.arrayLen_erase (σ := σ.sem) rfl r
           rw [show arrayLen σ.sem r.root r.path.erase = .ok (.int elems.length) by
             simp only [arrayLen, State.findStorage_of_findLive hsv]; rfl] at h
@@ -652,14 +653,11 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Core.Val C Γ p) {m : Machine},
           | none => rw [hc] at h; cases h
           | some n =>
             rw [hc] at h
-            simp only [Solidity.Core.toRes, Except.ok.injEq, Semantics.PrimVal.int.injEq,
-              Int.natCast_inj] at h
-            rw [h]
-        have hW' : elems.length < 2 ^ 256 := by unfold W at *; omega
-        refine .inl ⟨⟨elems.length, Solidity.Core.lenT_inRange hW'⟩, .val elems.length, ?_,
+            simp only [Solidity.Core.toRes, Except.ok.injEq] at h
+            exact congrArg some (Subtype.ext (Semantics.PrimVal.int.inj h).symm)
+        refine .inl ⟨Solidity.Core.lenU elems.length hW', .val elems.length, ?_,
           ReprV.uint (by omega), ?_⟩
-        · simp only [hres, hlen, bind, Except.bind, TRes.ofOpt, Solidity.Core.lenT, hW',
-            ↓reduceDIte]
+        · simp only [hres, hlen, bind, Except.bind, TRes.ofOpt, pure, Except.pure]
         · simp only [run, Machine.push, exec_cons_zero, Instr.step, Machine.next, hl, exec_nil,
             Out.ok_bind]
     · exact .inr ⟨by simp only [hres, bind, Except.bind], run_append_revert hrun⟩

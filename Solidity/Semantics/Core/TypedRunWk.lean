@@ -255,6 +255,9 @@ variable {Γ Δ : Ctx}
 def lift (h : Thin Γ Δ) (τ : TState C Γ) (d : TEnv C τ.H Δ) : TState C Δ :=
   τ.withEnv (TEnv.put h τ.env d)
 
+theorem lift_storage (h : Thin Γ Δ) (τ : TState C Γ) (d : TEnv C τ.H Δ) :
+    (τ.lift h d).storage = τ.storage := rfl
+
 /-- The locals a thinning keeps. -/
 def thin (h : Thin Γ Δ) (σ : TState C Δ) : TState C Γ := σ.withEnv (TEnv.thin h σ.env)
 
@@ -349,6 +352,9 @@ theorem liftedT_ite (h : Thin Γ Δ) {H : HTy} (d : TEnv C H Δ) (c : Prop) [Dec
     (x y : TRes (Out C H Γ)) :
     liftedT h d (if c then x else y) = if c then liftedT h d x else liftedT h d y := by
   split <;> rfl
+
+theorem liftedT_error (h : Thin Γ Δ) {H : HTy} (d : TEnv C H Δ) (e : THalt) :
+    liftedT h d (.error e : TRes (Out C H Γ)) = .error e := rfl
 
 /-- A declaration's outcome, lifted: the declared local kept on top. -/
 def Out.liftTop (h : Thin Γ Δ) {H : HTy} {t : LTy} (d : TEnv C H Δ) (a : Out C H (t :: Γ)) :
@@ -516,8 +522,8 @@ theorem MRhs.evalT_wk {R : RefTy} (r : MRhs C Γ R) :
     simp only [SPath.resolveT_wk, TState.copyStToMG_lift, TRes.map_bind]
     rfl
   | newArr n hn =>
-    show Except.ok ((τ.lift h d).copyStToMG (newArrT R ((n.wk h).evalT (τ.lift h d)).1 hn) _) =
-      Except.ok (Grew.lift h d (τ.copyStToMG (newArrT R (n.evalT τ).1 hn) _))
+    show Except.ok ((τ.lift h d).copyStToMG (newArrT R ((n.wk h).evalT (τ.lift h d)) hn) _) =
+      Except.ok (Grew.lift h d (τ.copyStToMG (newArrT R (n.evalT τ) hn) _))
     rw [Simple.evalT_wk, TState.copyStToMG_lift]
 
 end Grow
@@ -670,10 +676,12 @@ theorem TRun.push_wk {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ 
     TRun.push (b.wk h) (v.map (·.wk h)) (τ.lift h d) = liftedT h d (TRun.push b v τ) := by
   cases v with
   | none =>
-    simp only [TRun.push, Option.map, SPath.resolveT_wk, liftedT_bind]
+    simp only [TRun.push, Option.map, SPath.resolveT_wk, liftedT_bind, liftedT_ite,
+      liftedT_error, TState.lift_storage]
     lift_fin
   | some r =>
-    simp only [TRun.push, Option.map, SPath.resolveT_wk, Src.valueT_wk, liftedT_bind]
+    simp only [TRun.push, Option.map, SPath.resolveT_wk, Src.valueT_wk, liftedT_bind,
+      liftedT_ite, liftedT_error, TState.lift_storage]
     lift_fin
 
 theorem TRun.pop_wk {E : Ty} (b : SPath C Γ (.array E)) :
@@ -787,7 +795,7 @@ def TRun.newWrite {Γ : Ctx} {H : HTy} {R : RefTy} (l : NewLhs C Γ R)
 theorem TRun.assignNew_eq {Γ : Ctx} {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
     (hn : R.newArrOk = true) (σ : TState C Γ) :
     TRun.assignNew l n hn σ =
-      TRun.newWrite l (σ.copyStToMG (newArrT R (n.evalT σ).1 hn) (RefTy.mapFree_of_newArrOk hn)) := by
+      TRun.newWrite l (σ.copyStToMG (newArrT R (n.evalT σ) hn) (RefTy.mapFree_of_newArrOk hn)) := by
   cases l <;> rfl
 
 theorem TRun.newWrite_wk {R : RefTy} (l : NewLhs C Γ R) (g : Grew C Γ τ.H (MVal · (.ref R))) :

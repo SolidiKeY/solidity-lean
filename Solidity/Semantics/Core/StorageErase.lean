@@ -58,6 +58,9 @@ end SList
 theorem SVec.length_erase {E : Ty} {n : Nat} (l : SVec E n) : l.erase.length = n := by
   rw [erase_eq, List.length_map, length_toList]
 
+theorem SVec.erase_ofList {E : Ty} (l : List (SVal E)) : (SVec.ofList l).erase = l.map SVal.erase := by
+  rw [erase_eq, toList_ofList]
+
 /-! ## Members -/
 
 namespace SFields
@@ -145,8 +148,9 @@ theorem find_field {s f : Name} {T U : Ty} (fs : SFields (structDef s))
     (h : lookupBy f (structDef s) = some T) (p : Path T U) :
     (SVal.struct fs).find (.field h p) = (fs.get h).find p := rfl
 
-theorem find_at {E U : Ty} (e sh : SList E) (i : Int) (p : Path E U) :
-    (SVal.array e sh).find (.at i p) =
+theorem find_at {E U : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) (i : Int)
+    (p : Path E U) :
+    (SVal.array e sh h).find (.at i p) =
       if 0 ≤ i then
         match (e.toList ++ sh.toList)[i.toNat]? with
         | some x => x.find p
@@ -172,7 +176,7 @@ theorem find_eq_findM : {T U : Ty} → (v : SVal T) → (p : Path T U) → v.fin
   | _, _, .struct fs, .field h p => by
     rw [find_field, find_eq_findM _ p]
     simp only [findM]
-  | _, _, .array e sh, .at i p => by
+  | _, _, .array e sh _, .at i p => by
     rw [find_at]
     simp only [find_eq_findM _ p, findM]
     rfl
@@ -192,7 +196,7 @@ theorem findLive_eq_findLiveM : {T U : Ty} → (v : SVal T) → (p : Path T U) �
     show (fs.get h).findLive p = _
     rw [findLive_eq_findLiveM _ p]
     simp only [findLiveM]
-  | _, _, .array e sh, .at i p => by
+  | _, _, .array e sh _, .at i p => by
     show (if 0 ≤ i then
         match e.toList[i.toNat]? with
         | some x => x.findLive p
@@ -223,13 +227,14 @@ theorem save_eq_saveM : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new 
         let x ← (fs.get h).save p new
         some (SVal.struct (fs.set h x)) : Option (SVal (.ref (.struct s)))) = _
     simp only [save_eq_saveM _ p, saveM]
-  | _, _, @SVal.array E e sh, .at i p, new => by
+  | _, _, @SVal.array E n e sh h, .at i p, new => by
     show (if 0 ≤ i then
         match (e.toList ++ sh.toList)[i.toNat]? with
         | some x => do
           let x' ← x.save p new
           let slots := (e.toList ++ sh.toList).set i.toNat x'
-          some (SVal.array (.ofList (slots.take e.length)) (.ofList (slots.drop e.length)))
+          some (SVal.array (SVec.ofList (slots.take n)) (.ofList (slots.drop n))
+            (SVal.take_lt_bound slots h))
         | none => none
       else none : Option (SVal (.ref (.array E)))) = _
     simp only [save_eq_saveM _ p, saveM]
@@ -263,9 +268,9 @@ theorem SVal.findM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
   | _, _, .struct fs, .field h p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.find, SFields.lookupBy_erase fs h, findM,
       findM_erase _ p]
-  | _, _, .array e sh, .at i p => by
+  | _, _, .array e sh _, .at i p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.find, findM]
-    exact slot_erase _ _ (by rw [SList.erase_eq, SList.erase_eq, List.map_append]) i _
+    exact slot_erase _ _ (by rw [SVec.erase_eq, SList.erase_eq, List.map_append]) i _
       (fun w => w.find p.erase) _ (fun x => findM_erase x p)
   | _, _, .fixed e, .atF i p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.find, findM]
@@ -284,9 +289,9 @@ theorem SVal.findLiveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) �
   | _, _, .struct fs, .field h p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, SFields.lookupBy_erase fs h,
       findLiveM, findLiveM_erase _ p]
-  | _, _, .array e sh, .at i p => by
+  | _, _, .array e sh _, .at i p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLiveM]
-    exact slot_erase _ _ (SList.erase_eq e) i _ (fun w => w.findLive p.erase) _
+    exact slot_erase _ _ (SVec.erase_eq e) i _ (fun w => w.findLive p.erase) _
       (fun x => findLiveM_erase x p)
   | _, _, .fixed e, .atF i p => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.findLive, findLiveM]
@@ -310,10 +315,10 @@ theorem SVal.saveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) → (n
     | some x =>
       simp only [toRes, bind, Except.bind, Option.bind, SFields.setBy_erase fs h x]
       with_unfolding_all rfl
-  | _, _, .array e sh, .at i p, new => by
+  | _, _, .array e sh _, .at i p, new => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.save, saveM]
     refine slot_erase _ (e.erase ++ sh.erase)
-      (by rw [SList.erase_eq, SList.erase_eq, List.map_append]) i _ (fun w => do
+      (by rw [SVec.erase_eq, SList.erase_eq, List.map_append]) i _ (fun w => do
         let u ← w.save p.erase new.erase
         let slots := (e.erase ++ sh.erase).set i.toNat u
         .ok (Semantics.SVal.array (slots.take e.erase.length) (slots.drop e.erase.length) false))
@@ -323,8 +328,8 @@ theorem SVal.saveM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) → (n
     | none => rfl
     | some x' =>
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq,
-        SList.toList_ofList, SList.length, ← List.map_append, ← List.map_set, ← List.map_take,
-        ← List.map_drop, List.length_map]
+        SList.toList_ofList, SVec.erase_eq, SVec.toList_ofList, SVec.length_toList,
+        ← List.map_append, ← List.map_set, ← List.map_take, ← List.map_drop, List.length_map]
   | _, _, .fixed e, .atF i p, new => by
     simp only [SVal.erase, Path.erase, Semantics.SVal.save, saveM]
     refine slot_erase _ (e.erase ++ []) (by rw [SVec.erase_eq, List.append_nil]) i _
@@ -403,7 +408,7 @@ theorem SVal.dfltRefAt_erase (k : Nat) (ih : (T : Ty) → tyRank T < k → SVal 
   | .struct s, h => by
     simp only [SVal.dfltRefAt, SVal.erase, Semantics.defaultForTy, SFields.dfltBelow_erase k ih hih]
   | .array _, _ => by
-    simp only [SVal.dfltRefAt, SVal.erase, SList.erase, Semantics.defaultForTy]
+    simp only [SVal.dfltRefAt, SVal.erase, SVec.erase, SList.erase, Semantics.defaultForTy]
   | .fixed E n, h => by
     simp only [SVal.dfltRefAt, SVal.erase, Semantics.defaultForTy, SVec.erase_replicate,
       SVal.dfltAt_erase k ih hih E]
@@ -456,9 +461,9 @@ theorem SVal.defaultOf_erase : {T : Ty} → (v : SVal T) → v.defaultOf.erase =
   | _, @SVal.prim .bool _ | _, @SVal.prim .uint _ | _, @SVal.prim .int _ => by with_unfolding_all rfl
   | _, .struct fs => by
     simp only [SVal.defaultOf, SVal.erase, Semantics.SVal.defaultOf, SFields.defaultOf_erase fs]
-  | _, .array e sh => by
+  | _, .array e sh _ => by
     simp only [SVal.defaultOf, SVal.erase, Semantics.SVal.defaultOf, SList.erase_ofList,
-      List.map_append, ← SList.erase_eq, SList.defaultOf_erase e, SList.erase]
+      List.map_append, ← SVec.erase_eq, ← SList.erase_eq, SVec.defaultOf_erase e, SVec.erase]
   | _, .fixed e => by
     simp only [SVal.defaultOf, SVal.erase, Semantics.SVal.defaultOf, SVec.defaultOf_erase e]
   | _, .map m d => by with_unfolding_all rfl
@@ -490,8 +495,8 @@ theorem SVal.strip_erase : {T : Ty} → (v : SVal T) → v.strip.erase = v.erase
   | _, .prim _ => by with_unfolding_all rfl
   | _, .struct fs => by
     simp only [SVal.strip, SVal.erase, Semantics.SVal.strip, SFields.strip_erase fs]
-  | _, .array e _ => by
-    simp only [SVal.strip, SVal.erase, Semantics.SVal.strip, SList.strip_erase e, SList.erase]
+  | _, .array e _ _ => by
+    simp only [SVal.strip, SVal.erase, Semantics.SVal.strip, SVec.strip_erase e, SList.erase]
   | _, .fixed e => by
     simp only [SVal.strip, SVal.erase, Semantics.SVal.strip, SVec.strip_erase e]
   | _, .map m d => by with_unfolding_all rfl
@@ -610,22 +615,21 @@ theorem SVal.overlay_erase : {T : Ty} → TyNodup T → (o v : SVal T) →
   | _, .struct hk hf, .struct ofs, .struct nfs => by
     simp only [SVal.overlay, SVal.erase, Semantics.SVal.overlay]
     rw [SFields.overlay_erase [] (fun _ _ _ => rfl) hk hf ofs nfs, List.nil_append]
-  | _, .array hE, .array oel osh, .array nel _ => by
+  | _, .array hE, .array oel osh _, .array nel _ _ => by
     simp only [SVal.overlay, SVal.erase, Semantics.SVal.overlay, SList.erase_ofList,
-      List.map_append, List.map_drop, List.map_map, SList.length_erase]
+      List.map_append, List.map_drop, List.map_map, SVec.length_erase]
     have hd : List.map (SVal.erase ∘ SVal.defaultOf) oel.toList =
         List.map Semantics.SVal.defaultOf oel.erase := by
-      rw [SList.erase_eq, List.map_map]
+      rw [SVec.erase_eq, List.map_map]
       congr 1
       funext x
       exact SVal.defaultOf_erase x
-    rw [SList.overlayOn_erase hE (oel.toList ++ osh.toList) nel, defaultOfElems_eq, hd,
-      List.map_append, ← SList.erase_eq, ← SList.erase_eq, List.map_drop]
+    rw [SVec.overlayOn_erase hE (oel.toList ++ osh.toList) nel, defaultOfElems_eq, hd,
+      List.map_append, ← SVec.erase_eq, ← SList.erase_eq, List.map_drop]
   | _, .fixed hE, .fixed oel, .fixed nel => by
     simp only [SVal.overlay, SVal.erase, Semantics.SVal.overlay, List.append_nil,
-      SVec.overlay_erase hE oel nel, SVec.length_erase, List.drop_nil]
-    rw [overlayElems_eq_zip _ _ (by rw [SVec.length_erase, SVec.length_erase]),
-      List.drop_of_length_le (by rw [SVec.length_erase]; exact Nat.le_refl _)]
+      SVec.overlayOn_erase hE oel.toList nel, ← SVec.erase_eq, SVec.length_erase, List.drop_nil]
+    rw [List.drop_of_length_le (by rw [SVec.length_erase]; exact Nat.le_refl _)]
     rfl
   | _, _, .map _ _, .map _ _ => by with_unfolding_all rfl
 
@@ -651,24 +655,18 @@ theorem SFields.overlay_erase (pre : List (Name × Semantics.SVal)) :
     rw [this, List.append_assoc]
     rfl
 
-theorem SList.overlayOn_erase {E : Ty} (hE : TyNodup E) : (L : List (SVal E)) → (ns : SList E) →
-    (SList.overlayOn L ns).erase =
+theorem SVec.overlayOn_erase {E : Ty} (hE : TyNodup E) : {n : Nat} → (L : List (SVal E)) →
+    (ns : SVec E n) →
+    (SVec.overlayOn L ns).erase =
       Semantics.SVal.overlay.overlayElems (L.map SVal.erase) ns.erase
-  | [], ns => by
-    simp only [SList.overlayOn_nil_left, List.map_nil, Semantics.SVal.overlay.overlayElems,
-      SList.strip_erase]
-  | o :: os, .cons v rest => by
-    simp only [SList.overlayOn, SList.erase, List.map_cons,
+  | _, [], ns => by
+    simp only [SVec.overlayOn_nil_left, List.map_nil, Semantics.SVal.overlay.overlayElems,
+      SVec.strip_erase]
+  | _, o :: os, .cons v rest => by
+    simp only [SVec.overlayOn, SVec.erase, List.map_cons,
       Semantics.SVal.overlay.overlayElems, SVal.overlay_erase hE o v,
-      SList.overlayOn_erase hE os rest]
-  | _ :: _, .nil => by with_unfolding_all rfl
-
-theorem SVec.overlay_erase {E : Ty} (hE : TyNodup E) : {n : Nat} → (os ns : SVec E n) →
-    (SVec.overlay os ns).erase = List.zipWith Semantics.SVal.overlay os.erase ns.erase
-  | _, .nil, .nil => by with_unfolding_all rfl
-  | _, .cons o os, .cons v ns => by
-    simp only [SVec.overlay, SVec.erase, List.zipWith_cons_cons, SVal.overlay_erase hE o v,
-      SVec.overlay_erase hE os ns]
+      SVec.overlayOn_erase hE os rest]
+  | _, _ :: _, .nil => by with_unfolding_all rfl
 end
 
 /-! ## Storage
@@ -718,8 +716,8 @@ theorem checkIndex_erase (hs : σ.storage = st.erase) {R : RefTy} {k : PrimTy} {
       cases a with
       | dyn =>
         cases v with
-        | array e sh =>
-          simp only [SVal.erase, SList.length_erase, Storage.inBounds, SVal.view_array]
+        | array e sh _ =>
+          simp only [SVal.erase, SVec.length_erase, Storage.inBounds, SVal.view_array]
           split <;> rfl
       | fixed =>
         cases v with
@@ -728,62 +726,98 @@ theorem checkIndex_erase (hs : σ.storage = st.erase) {R : RefTy} {k : PrimTy} {
           split <;> rfl
 
 theorem arrayLen_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E))) :
-    arrayLen σ r.root r.path.erase = toRes (fun n : Nat => Semantics.Value.int n) (st.len r) := by
+    arrayLen σ r.root r.path.erase = toRes PrimTy.erase (st.len r) := by
   simp only [arrayLen, findStorage_erase hs, Storage.len]
   cases st.find r with
   | none => rfl
   | some v =>
     cases v with
-    | array e sh =>
-      simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.length_erase]
+    | array e sh _ =>
+      simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SVec.length_erase]
       rfl
+
+/-- Below the bound in the erasure, the typed array is not full. -/
+theorem full_eq_false {E : Ty}
+    (hs : σ.storage = st.erase) (r : SRef C (.ref (.array E)))
+    (h : ∀ elems sh fx, σ.findStorage r.root r.path.erase = .ok (.array elems sh fx) →
+      elems.length + 1 < 2 ^ 256) :
+    st.full r = false := by
+  unfold Storage.full
+  have he := Storage.findStorage_erase hs r
+  cases hf : st.find r with
+  | none => rfl
+  | some v =>
+    rw [hf] at he
+    cases v with
+    | @array _ n e sh hn =>
+      have hl := h e.erase sh.erase false (by rw [he]; simp only [toRes, SVal.erase_array])
+      rw [SVec.length_erase] at hl
+      simp only [SVal.view_array, hl, decide_true, Bool.not_true]
+
+/-- Below the bound, the array is not full. -/
+theorem full_false {E : Ty} {r : SRef C (.ref (.array E))} (h : st.full r = false) :
+    ∀ v, st.find r = some v → (SVal.view v : ArrView E).n + 1 < 2 ^ 256 := by
+  intro v hv
+  unfold Storage.full at h
+  rw [hv] at h
+  simpa only [Bool.not_eq_false', decide_eq_true_eq] using h
 
 theorem pushAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E)))
     (val : Semantics.SVal → Semantics.Res Semantics.SVal) (val' : SVal E → Option (SVal E))
-    (hval : ∀ x : SVal E, val x.erase = toRes SVal.erase (val' x)) :
+    (hval : ∀ x : SVal E, val x.erase = toRes SVal.erase (val' x))
+    (hfull : st.full r = false ∨ ∀ x, val' x = none) :
     pushAt σ E r.root r.path.erase val = toRes (into σ) (st.push r val') := by
   simp only [pushAt, findStorage_erase hs, Storage.push]
-  cases st.find r with
+  cases hf : st.find r with
   | none => rfl
   | some v =>
     cases v with
-    | array e sh =>
+    | @array _ n e sh h =>
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq sh,
         pushSlot_erase, hval, SVal.view_array]
-      cases val' (pushSlot E sh.toList).1 with
+      cases hx : val' (pushSlot E sh.toList).1 with
       | none => with_unfolding_all rfl
       | some x =>
+        have hb : n + 1 < 2 ^ 256 := by
+          rcases hfull with hfull | hnone
+          · simpa only [SVal.view_array] using full_false hfull _ hf
+          · rw [hnone] at hx; cases hx
         have hnew : Semantics.SVal.array (e.erase ++ [x.erase])
             (List.map SVal.erase (pushSlot E sh.toList).2) false =
-            (SVal.array (.ofList (e.toList ++ [x])) (.ofList (pushSlot E sh.toList).2)).erase := by
-          simp only [SVal.erase, SList.erase_eq, SList.toList_ofList, List.map_append,
-            List.map_cons, List.map_nil]
-        simp only []
+            (SVal.array (SVec.ofList (e.toList ++ [x])) (.ofList (pushSlot E sh.toList).2)
+              (SVec.snoc_lt_bound e x hb)).erase := by
+          simp only [SVal.erase, SVec.erase_ofList, SVec.erase_eq, SVec.toList_ofList,
+            SList.erase_eq, SList.toList_ofList, List.map_append, List.map_cons, List.map_nil]
+        simp only [dif_pos hb]
         rw [hnew, saveStorage_erase hs]
         with_unfolding_all rfl
 
-theorem pushPlaceAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E))) :
+theorem pushPlaceAt_erase (hs : σ.storage = st.erase) {E : Ty} (r : SRef C (.ref (.array E)))
+    (hfull : st.full r = false) :
     pushPlaceAt σ E r.root r.path.erase =
       toRes (fun p : Storage C × Nat => (into σ p.1, (p.2 : Int))) (st.pushPlace r) := by
+  have hb := full_false hfull
   simp only [pushPlaceAt, findStorage_erase hs, Storage.pushPlace]
-  cases st.find r with
+  cases hf : st.find r with
   | none => rfl
   | some v =>
+    have hb := hb v hf
     cases v with
-    | array e sh =>
+    | array e sh h =>
+      simp only [SVal.view_array] at hb
       have hnew : Semantics.SVal.array (e.erase ++ [(pushSlot E sh.toList).1.erase])
           (List.map SVal.erase (pushSlot E sh.toList).2) false =
-          (SVal.array (.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
-            (.ofList (pushSlot E sh.toList).2)).erase := by
-        simp only [SVal.erase, SList.erase_eq, SList.toList_ofList, List.map_append,
-          List.map_cons, List.map_nil]
+          (SVal.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
+            (.ofList (pushSlot E sh.toList).2) (SVec.snoc_lt_bound e _ hb)).erase := by
+        simp only [SVal.erase, SVec.erase_ofList, SVec.erase_eq, SVec.toList_ofList,
+          SList.erase_eq, SList.toList_ofList, List.map_append, List.map_cons, List.map_nil]
       simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq sh,
-        pushSlot_erase, SVal.view_array]
+        pushSlot_erase, SVal.view_array, dif_pos hb]
       rw [hnew, saveStorage_erase hs]
-      cases st.save r (SVal.array (.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
-          (.ofList (pushSlot E sh.toList).2)) with
+      cases st.save r (SVal.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
+          (.ofList (pushSlot E sh.toList).2) (SVec.snoc_lt_bound e _ hb)) with
       | none => with_unfolding_all rfl
-      | some st' => simp only [toRes, SList.length_erase]; with_unfolding_all rfl
+      | some st' => simp only [toRes, SVec.length_erase]; with_unfolding_all rfl
 
 theorem popAt_erase (hs : σ.storage = st.erase) {E : Ty} (keep : Bool)
     (r : SRef C (.ref (.array E))) :
@@ -793,18 +827,21 @@ theorem popAt_erase (hs : σ.storage = st.erase) {E : Ty} (keep : Bool)
   | none => rfl
   | some v =>
     cases v with
-    | array e sh =>
-      simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SList.erase_eq e,
+    | array e sh h =>
+      simp only [toRes, bind, Except.bind, Option.bind, SVal.erase, SVec.erase_eq e,
         ← List.map_reverse, SVal.view_array]
-      cases e.toList.reverse with
+      cases hrev : e.toList.reverse with
       | nil => with_unfolding_all rfl
       | cons last restRev =>
+        have hdrop : e.toList.dropLast = restRev.reverse := by
+          rw [← List.reverse_reverse e.toList, hrev, List.reverse_cons, List.dropLast_concat]
         have hnew : Semantics.SVal.array (List.map SVal.erase restRev).reverse
             ((if keep then last.erase else last.erase.defaultOf) :: sh.erase) false =
-            (SVal.array (.ofList restRev.reverse)
-              (.ofList ((if keep then last else last.defaultOf) :: sh.toList))).erase := by
-          simp only [SVal.erase, SList.erase_eq, SList.toList_ofList, List.map_reverse,
-            List.map_cons]
+            (SVal.array (SVec.ofList e.toList.dropLast)
+              (.ofList ((if keep then last else last.defaultOf) :: sh.toList))
+              (SVec.dropLast_lt_bound e h)).erase := by
+          simp only [SVal.erase, SVec.erase_ofList, hdrop, SList.erase_eq, SList.toList_ofList,
+            List.map_reverse, List.map_cons]
           cases keep <;> simp only [Bool.false_eq_true, ↓reduceIte, SVal.defaultOf_erase]
         simp only [List.map_cons]
         rw [hnew, saveStorage_erase hs]
@@ -836,7 +873,7 @@ theorem writeStorage_erase (hs : σ.storage = st.erase) {T : Ty} (hT : TyNodup T
     have h := saveStorage_erase hs r (.prim v)
     rw [SVal.erase_prim] at h
     exact h
-  | struct fs | array e sh | fixed e | map m d =>
+  | struct fs | array e sh _ | fixed e | map m d =>
     simp only [Semantics.State.writeStorage, SVal.erase, Storage.write, SVal.isPrim,
       Ty.isPrimitive, Bool.false_eq_true, ↓reduceIte, findStorage_erase hs]
     cases st.find r with
@@ -867,8 +904,8 @@ theorem SVal.copyStToM_ok : {T : Ty} → (v : SVal T) → T.mapFree = true →
     obtain ⟨⟨s', mf⟩, hr⟩ := SFields.copyStFields_ok fs
       (mapFree_structDef sn (by simpa only [Ty.mapFree, decide_eq_true_eq] using h)) s
     exact ⟨_, by simp only [SVal.erase, Semantics.copyStToM, hr]; rfl⟩
-  | _, .array e _, h, s => by
-    obtain ⟨⟨s', me⟩, hr⟩ := SList.copyStElems_ok e (by simpa only [Ty.mapFree] using h) s
+  | _, .array e _ _, h, s => by
+    obtain ⟨⟨s', me⟩, hr⟩ := SVec.copyStElems_ok e (by simpa only [Ty.mapFree] using h) s
     exact ⟨_, by simp only [SVal.erase, Semantics.copyStToM, hr]; rfl⟩
   | _, .fixed e, h, s => by
     obtain ⟨⟨s', me⟩, hr⟩ := SVec.copyStElems_ok e (by simpa only [Ty.mapFree] using h) s
@@ -908,9 +945,11 @@ def SVal.ofU : Semantics.SVal → (T : Ty) → Option (SVal T)
   | .prim v, .prim p => (PrimTy.ofValue? p v).map SVal.prim
   | .struct fields, .ref (.struct s) => (SFields.ofU fields (structDef s)).map SVal.struct
   | .array elems shadow false, .ref (.array E) =>
-    match SList.ofU elems E, SList.ofU shadow E with
-    | some e, some sh => some (.array e sh)
-    | _, _ => none
+    if h : elems.length < 2 ^ 256 then
+      match SVec.ofU elems E elems.length, SList.ofU shadow E with
+      | some e, some sh => some (.array e sh h)
+      | _, _ => none
+    else none
   | .array elems [] true, .ref (.fixed E n) => (SVec.ofU elems E n).map SVal.fixed
   | .map entries dflt, .ref (.mapping _ V) =>
     match SMap.ofU entries V, SVal.ofU dflt V with
@@ -951,14 +990,32 @@ def SMap.ofU : List (Int × Semantics.SVal) → (V : Ty) → Option (SMap V)
     | _, _ => none
 end
 
+/-- An array is its elements: the length index follows. -/
+theorem SVal.array_congr {E : Ty} {n m : Nat} (e : SVec E n) (e' : SVec E m) (sh : SList E)
+    (h : n < 2 ^ 256) (h' : m < 2 ^ 256) (hl : e.toList = e'.toList) :
+    SVal.array e sh h = SVal.array e' sh h' := by
+  have hnm : n = m := by rw [← SVec.length_toList e, hl, SVec.length_toList]
+  subst hnm
+  rw [SVec.eq_of_toList_eq e e' hl]
+
 mutual
 theorem SVal.ofU_erase : {T : Ty} → (v : SVal T) → SVal.ofU v.erase T = some v
   | _, @SVal.prim p v => by
     simp only [SVal.erase, SVal.ofU, PrimTy.ofValue?_erase, Option.map_some]
   | _, .struct fs => by
     simp only [SVal.erase, SVal.ofU, SFields.ofU_erase fs, Option.map_some]
-  | _, .array e sh => by
-    simp only [SVal.erase, SVal.ofU, SList.ofU_erase e, SList.ofU_erase sh]
+  | _, @SVal.array E n e sh h => by
+    -- the vector read back at its own length, however the length is written
+    have ih := SVec.ofU_erase e
+    have key : ∀ (m : Nat), m = n → ∃ l' : SVec E m, SVec.ofU e.erase E m = some l' ∧
+        l'.toList = e.toList := by
+      intro m hm
+      subst hm
+      exact ⟨e, ih, rfl⟩
+    obtain ⟨e', he', hl⟩ := key _ (SVec.length_erase e)
+    simp only [SVal.erase, SVal.ofU, dif_pos (show e.erase.length < 2 ^ 256 by
+      rw [SVec.length_erase]; exact h), he', SList.ofU_erase sh]
+    exact congrArg some (SVal.array_congr e' e sh _ h hl)
   | _, .fixed e => by
     simp only [SVal.erase, SVal.ofU, SVec.ofU_erase e, Option.map_some]
   | _, .map m d => by
@@ -1024,9 +1081,11 @@ theorem SVal.erase_of_ofU : (w : Semantics.SVal) → {T : Ty} → {v : SVal T} �
         | false =>
           simp only [SVal.ofU] at h
           split at h
-          · rename_i e sh he hsh
-            cases h
-            simp only [SVal.erase, SList.erase_of_ofU elems he, SList.erase_of_ofU shadow hsh]
+          · split at h
+            · rename_i e sh he hsh
+              cases h
+              simp only [SVal.erase, SVec.erase_of_ofU elems he, SList.erase_of_ofU shadow hsh]
+            · cases h
           · cases h
       | fixed E n =>
         cases fx with

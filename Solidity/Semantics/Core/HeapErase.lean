@@ -36,7 +36,9 @@ theorem MObj.erase_wk {H H' : HTy} (e : H <+: H') :
     (R : RefTy) → (o : MObj H R) → MObj.erase R (MObj.wk e R o) = MObj.erase R o
   | .struct s, o => congrArg Semantics.MObj.struct (MFields.erase_wk e (structDef s) o)
   | .array E, o => by
-    show Semantics.MObj.array (((o : List (MVal H E)).map (MVal.wk e E)).map (MVal.erase E)) false = _
+    show Semantics.MObj.array
+      (((o : {l : List (MVal H E) // l.length < 2 ^ 256}).1.map (MVal.wk e E)).map (MVal.erase E))
+      false = _
     rw [List.map_map]
     exact congrArg (Semantics.MObj.array · false)
       (List.map_congr_left (fun v _ => MVal.erase_wk e E v))
@@ -193,12 +195,12 @@ theorem SVal.copyStToM_erase : {T : Ty} → (v : SVal T) → (h : T.mapFree = tr
       (mapFree_structDef s (by simpa only [Ty.mapFree, decide_eq_true_eq] using h))).val
     rw [SVal.copyStToM]
     exact (congrArg (fun p => Except.ok (p.1, Semantics.MVal.ref p.2)) ha).trans rfl
-  | _, @SVal.array E e _, h, _, hp, σ, hh, hn => by
-    have hl := SList.copyStToM_erase e (by simpa only [Ty.mapFree] using h) hp σ hh hn
+  | _, @SVal.array E _ e _ hb, h, _, hp, σ, hh, hn => by
+    have hl := SVec.copyStToM_erase e (by simpa only [Ty.mapFree] using h) hp σ hh hn
     simp only [SVal.erase, Semantics.copyStToM, hl, bind, Except.bind]
-    have ha := Heap.alloc_erase (σ := Heap.into σ (SList.copyStToM hp e
-      (by simpa only [Ty.mapFree] using h)).heap) rfl rfl (R := .array E)
-      (SList.copyStToM hp e (by simpa only [Ty.mapFree] using h)).val
+    let g := SVec.copyStToM hp e (by simpa only [Ty.mapFree] using h)
+    have ha := Heap.alloc_erase (σ := Heap.into σ g.heap) rfl rfl (R := .array E)
+      (⟨g.val.1, by rw [g.val.2]; exact hb⟩ : MObj g.H' (.array E))
     rw [SVal.copyStToM]
     exact (congrArg (fun p => Except.ok (p.1, Semantics.MVal.ref p.2)) ha).trans rfl
   | _, @SVal.fixed E n e, h, _, hp, σ, hh, hn => by
@@ -397,7 +399,7 @@ theorem MVal.copyRefAt_erase (hh : σ.heap = hp.erase) (k : Nat)
     simp only [MObj.erase, bind, Except.bind,
       copyMElems_erase (MVal.copyAt hp k ih E (by simpa only [tyRank] using h)) (rem.erase r.id)
         (fun v => MVal.copyAt_erase hh k ih hih E _ v _ (hr.child r.get? (TyLt.array E))),
-      MVal.copyRefAt, SVal.erase, SList.erase_ofList, List.map_map, SList.erase]
+      MVal.copyRefAt, SVal.erase, SVec.erase_ofList, List.map_map, SList.erase]
     rfl
   | .fixed E n, h, r, rem, hr => by
     rw [Semantics.copyMToSt, dif_pos (hr.self r.get?), Heap.getObj_erase hh r]

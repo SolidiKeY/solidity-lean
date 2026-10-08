@@ -47,8 +47,11 @@ mutual
 inductive SVal : Ty → Type where
   | prim {p : PrimTy} (v : p.Denote) : SVal (.prim p)
   | struct {s : Name} (fs : SFields (structDef s)) : SVal (.ref (.struct s))
-  /-- The live elements and the slots past the end (`Semantics.SVal.array`). -/
-  | array {E : Ty} (elems shadow : SList E) : SVal (.ref (.array E))
+  /-- The live elements, fewer than `2^256` (a length is a `uint`; a push at
+  the bound is out of gas, `Storage.full`), and the slots past the end
+  (`Semantics.SVal.array`). -/
+  | array {E : Ty} {n : Nat} (elems : SVec E n) (shadow : SList E) (hn : n < 2 ^ 256) :
+      SVal (.ref (.array E))
   | fixed {E : Ty} {n : Nat} (elems : SVec E n) : SVal (.ref (.fixed E n))
   /-- The entries written and the value of every other key. -/
   | map {K V : Ty} (entries : SMap V) (dflt : SVal V) : SVal (.ref (.mapping K V))
@@ -101,7 +104,8 @@ structure Fold where
   M : Ty → Type
   prim : {p : PrimTy} → p.Denote → V (.prim p)
   struct : {s : Name} → SFields (structDef s) → F (structDef s) → V (.ref (.struct s))
-  array : {E : Ty} → SList E → SList E → L E → L E → V (.ref (.array E))
+  array : {E : Ty} → {n : Nat} → SVec E n → SList E → n < 2 ^ 256 → W E n → L E →
+    V (.ref (.array E))
   fixed : {E : Ty} → {n : Nat} → SVec E n → W E n → V (.ref (.fixed E n))
   map : {K U : Ty} → SMap U → SVal U → M U → V U → V (.ref (.mapping K U))
   fnil : F []
@@ -119,7 +123,7 @@ mutual
 def SVal.foldM (a : Fold) : {T : Ty} → SVal T → a.V T
   | _, .prim v => a.prim v
   | _, .struct fs => a.struct fs (SFields.foldM a fs)
-  | _, .array e sh => a.array e sh (SList.foldM a e) (SList.foldM a sh)
+  | _, .array e sh h => a.array e sh h (SVec.foldM a e) (SList.foldM a sh)
   | _, .fixed e => a.fixed e (SVec.foldM a e)
   | _, .map m d => a.map m d (SMap.foldM a m) (SVal.foldM a d)
 
@@ -177,9 +181,9 @@ theorem SVal.fold_eq_foldM (a : Fold) : {T : Ty} → (v : SVal T) → v.fold a =
   | _, .struct fs => by
     show a.struct fs (fs.fold a) = _
     rw [SFields.fold_eq_foldM a fs, SVal.foldM]
-  | _, .array e sh => by
-    show a.array e sh (e.fold a) (sh.fold a) = _
-    rw [SList.fold_eq_foldM a e, SList.fold_eq_foldM a sh, SVal.foldM]
+  | _, .array e sh h => by
+    show a.array e sh h (e.fold a) (sh.fold a) = _
+    rw [SVec.fold_eq_foldM a e, SList.fold_eq_foldM a sh, SVal.foldM]
   | _, .fixed e => by
     show a.fixed e (e.fold a) = _
     rw [SVec.fold_eq_foldM a e, SVal.foldM]
@@ -216,22 +220,31 @@ end
 
 /-! ### Views -/
 
+/-- What a dynamic array holds: its live elements, their number below
+`2^256`, and the slots past the end. -/
+structure ArrView (E : Ty) where
+  {n : Nat}
+  elems : SVec E n
+  shadow : SList E
+  hn : n < 2 ^ 256
+
 /-- What a value of type `T` holds, by `T`. -/
 def Shape : Ty → Type
   | .prim p => p.Denote
   | .ref (.struct s) => SFields (structDef s)
-  | .ref (.array E) => SList E × SList E
+  | .ref (.array E) => ArrView E
   | .ref (.fixed E n) => SVec E n
   | .ref (.mapping _ V) => SMap V × SVal V
 
 /-- A value's contents, at the type its type computes. -/
 def SVal.view {T : Ty} (v : SVal T) : Shape T :=
   @SVal.casesOn (fun T _ => Shape T) T v (fun {_} x => x) (fun {_} fs => fs)
-    (fun {_} e sh => (e, sh)) (fun {_} {_} e => e) (fun {_} {_} m d => (m, d))
+    (fun {_} {_} e sh h => ⟨e, sh, h⟩) (fun {_} {_} e => e) (fun {_} {_} m d => (m, d))
 
 theorem SVal.view_prim {p : PrimTy} (x : p.Denote) : (SVal.prim x).view = x := rfl
 theorem SVal.view_struct {s : Name} (fs : SFields (structDef s)) : (SVal.struct fs).view = fs := rfl
-theorem SVal.view_array {E : Ty} (e sh : SList E) : (SVal.array e sh).view = (e, sh) := rfl
+theorem SVal.view_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) :
+    (SVal.array e sh h).view = ⟨e, sh, h⟩ := rfl
 theorem SVal.view_fixed {E : Ty} {n : Nat} (e : SVec E n) : (SVal.fixed e).view = e := rfl
 theorem SVal.view_map {K U : Ty} (m : SMap U) (d : SVal U) :
     (SVal.map (K := K) m d).view = (m, d) := rfl
@@ -274,7 +287,7 @@ def eraseFold : Fold where
   M _ := List (Int × Semantics.SVal)
   prim := fun {p} v => .prim (PrimTy.erase (p := p) v)
   struct := fun _ ih => .struct ih
-  array := fun _ _ ie ish => .array ie ish false
+  array := fun _ _ _ ie ish => .array ie ish false
   fixed := fun _ ie => .array ie [] true
   map := fun _ _ im id => .map im id
   fnil := []
@@ -298,8 +311,8 @@ theorem SVal.erase_prim {p : PrimTy} (v : p.Denote) : (SVal.prim v).erase = .pri
   rfl
 theorem SVal.erase_struct {s : Name} (fs : SFields (structDef s)) :
     (SVal.struct fs).erase = .struct fs.erase := rfl
-theorem SVal.erase_array {E : Ty} (e sh : SList E) :
-    (SVal.array e sh).erase = .array e.erase sh.erase false := rfl
+theorem SVal.erase_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) :
+    (SVal.array e sh h).erase = .array e.erase sh.erase false := rfl
 theorem SVal.erase_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).erase = .array e.erase [] true := rfl
 theorem SVal.erase_map {K U : Ty} (m : SMap U) (d : SVal U) :
@@ -336,7 +349,7 @@ def toListFold : Fold where
   M U := List (Int × SVal U)
   prim := fun _ => ()
   struct := fun _ _ => ()
-  array := fun _ _ _ _ => ()
+  array := fun _ _ _ _ _ => ()
   fixed := fun _ _ => ()
   map := fun _ _ _ _ => ()
   fnil := ()
@@ -438,7 +451,7 @@ def setFold : Fold where
   M _ := Unit
   prim := fun _ => ()
   struct := fun _ _ => ()
-  array := fun _ _ _ _ => ()
+  array := fun _ _ _ _ _ => ()
   fixed := fun _ _ => ()
   map := fun _ _ _ _ => ()
   fnil := ()
@@ -477,6 +490,22 @@ theorem set_eq_setM {E : Ty} : {n : Nat} → (l : SVec E n) → (i : Nat) → (x
   | _, .nil, _, _ => by rw [set_nil, setM]
   | _, .cons _ _, 0, _ => by rw [set_cons_zero, setM]
   | _, .cons v rest, i + 1, x => by rw [set_cons_succ, setM, set_eq_setM rest i x]
+
+/-- A list as a vector of its length. -/
+def ofList {E : Ty} : (l : List (SVal E)) → SVec E l.length
+  | [] => .nil
+  | v :: rest => .cons v (ofList rest)
+
+@[simp] theorem toList_ofList {E : Ty} : (l : List (SVal E)) → (ofList l).toList = l
+  | [] => by rw [ofList, toList_nil]
+  | v :: rest => by rw [ofList, toList_cons, toList_ofList rest]
+
+/-- Two vectors with the same elements are the same. -/
+theorem eq_of_toList_eq {E : Ty} : {n : Nat} → (l l' : SVec E n) → l.toList = l'.toList → l = l'
+  | _, .nil, .nil, _ => rfl
+  | _, .cons v rest, .cons v' rest', h => by
+    rw [toList_cons, toList_cons, List.cons.injEq] at h
+    rw [h.1, eq_of_toList_eq rest rest' h.2]
 
 theorem toList_set {E : Ty} : {n : Nat} → (l : SVec E n) → (i : Nat) → (x : SVal E) →
     (l.set i x).toList = l.toList.set i x
@@ -563,7 +592,7 @@ def get {f : Name} {fs : List (Name × Ty)} {T : Ty} (x : SFields fs)
     (h : lookupBy f fs = some T) : SVal T :=
   @SFields.rec (fun _ _ => Unit) (fun fs _ => ∀ T, lookupBy f fs = some T → SVal T)
     (fun _ _ => Unit) (fun _ _ _ => Unit) (fun _ _ => Unit)
-    (fun {_} _ => ()) (fun {_} _ _ => ()) (fun {_} _ _ _ _ => ()) (fun {_} {_} _ _ => ())
+    (fun {_} _ => ()) (fun {_} _ _ => ()) (fun {_} {_} _ _ _ _ _ => ()) (fun {_} {_} _ _ => ())
     (fun {_} {_} _ _ _ _ => ())
     (fun _ h => absurd h (by simp only [lookupBy, reduceCtorEq, not_false_eq_true]))
     (fun {f'} {_} {_} v _ _ ih _ h =>
@@ -578,7 +607,7 @@ def set {f : Name} {fs : List (Name × Ty)} {T : Ty} (x : SFields fs)
     (h : lookupBy f fs = some T) (y : SVal T) : SFields fs :=
   @SFields.rec (fun _ _ => Unit) (fun fs _ => ∀ T, lookupBy f fs = some T → SVal T → SFields fs)
     (fun _ _ => Unit) (fun _ _ _ => Unit) (fun _ _ => Unit)
-    (fun {_} _ => ()) (fun {_} _ _ => ()) (fun {_} _ _ _ _ => ()) (fun {_} {_} _ _ => ())
+    (fun {_} _ => ()) (fun {_} _ _ => ()) (fun {_} {_} _ _ _ _ _ => ()) (fun {_} {_} _ _ => ())
     (fun {_} {_} _ _ _ _ => ())
     (fun _ _ _ => .nil)
     (fun {f'} {_} {_} v rest _ ih _ h y =>
@@ -602,6 +631,9 @@ theorem set_cons {f f' : Name} {T T' : Ty} {fs : List (Name × Ty)} (v : SVal T'
       else .cons v (rest.set (lookupBy_cons_neg e h) y) := rfl
 
 end SFields
+
+/-- An empty array is within the bound. -/
+theorem SVal.zero_lt_bound : 0 < 2 ^ 256 := by decide
 
 /-! ## Defaults
 
@@ -629,7 +661,7 @@ def SVal.dfltRefAt (k : Nat) (ih : (T : Ty) → tyRank T < k → SVal T) :
   | .struct s, h =>
     .struct (SFields.dfltBelow k ih (structDef s)
       (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (Nat.le_of_lt_succ h)))
-  | .array _, _ => .array .nil .nil
+  | .array _, _ => .array .nil .nil SVal.zero_lt_bound
   | .fixed E n, h =>
     .fixed (SVec.replicate
       (SVal.dfltAt k ih E (Nat.lt_of_succ_lt (by simpa only [tyRank] using h))) n)
@@ -776,11 +808,16 @@ cannot compile a recursor, so each has a `match` twin (`SVal.findM`, …) as
 its `implemented_by`, and a theorem that they are equal
 (`Semantics/Core/StorageErase.lean`). -/
 
+/-- What `save` keeps live is within the bound. -/
+theorem SVal.take_lt_bound {α : Type} {n : Nat} (l : List α) (h : n < 2 ^ 256) :
+    (l.take n).length < 2 ^ 256 :=
+  Nat.lt_of_le_of_lt (List.length_take_le n l) h
+
 /-- `SVal.find` by `match`, its compiled form. -/
 def SVal.findM : {T U : Ty} → SVal T → Path T U → Option (SVal U)
   | _, _, v, .nil => some v
   | _, _, .struct fs, .field h p => (fs.get h).findM p
-  | _, _, .array e sh, .at i p =>
+  | _, _, .array e sh _, .at i p =>
     if 0 ≤ i then
       match (e.toList ++ sh.toList)[i.toNat]? with
       | some x => x.findM p
@@ -801,7 +838,7 @@ def SVal.findM : {T U : Ty} → SVal T → Path T U → Option (SVal U)
 def SVal.findLiveM : {T U : Ty} → SVal T → Path T U → Option (SVal U)
   | _, _, v, .nil => some v
   | _, _, .struct fs, .field h p => (fs.get h).findLiveM p
-  | _, _, .array e _, .at i p =>
+  | _, _, .array e _ _, .at i p =>
     if 0 ≤ i then
       match e.toList[i.toNat]? with
       | some x => x.findLiveM p
@@ -824,13 +861,14 @@ def SVal.saveM : {T U : Ty} → SVal T → Path T U → SVal U → Option (SVal 
   | _, _, .struct fs, .field h p, new => do
     let x ← (fs.get h).saveM p new
     some (.struct (fs.set h x))
-  | _, _, .array e sh, .at i p, new =>
+  | _, _, @SVal.array _ n e sh h, .at i p, new =>
     if 0 ≤ i then
       match (e.toList ++ sh.toList)[i.toNat]? with
       | some x => do
         let x' ← x.saveM p new
         let slots := (e.toList ++ sh.toList).set i.toNat x'
-        some (.array (.ofList (slots.take e.length)) (.ofList (slots.drop e.length)))
+        some (.array (SVec.ofList (slots.take n)) (.ofList (slots.drop n))
+          (SVal.take_lt_bound slots h))
       | none => none
     else none
   | _, _, .fixed e, .atF i p, new =>
@@ -858,9 +896,9 @@ def SVal.find {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
     (fun {_} v => some v)
     (fun {_} {_} {_} {_} h _ ih v => ih (SFields.get (SVal.view v) h))
     (fun {_} {_} i _ ih v =>
-      let w : SList _ × SList _ := SVal.view v
+      let w : ArrView _ := SVal.view v
       if 0 ≤ i then
-        match (w.1.toList ++ w.2.toList)[i.toNat]? with
+        match (w.elems.toList ++ w.shadow.toList)[i.toNat]? with
         | some x => ih x
         | none => none
       else none)
@@ -885,9 +923,9 @@ def SVal.findLive {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
     (fun {_} v => some v)
     (fun {_} {_} {_} {_} h _ ih v => ih (SFields.get (SVal.view v) h))
     (fun {_} {_} i _ ih v =>
-      let w : SList _ × SList _ := SVal.view v
+      let w : ArrView _ := SVal.view v
       if 0 ≤ i then
-        match w.1.toList[i.toNat]? with
+        match w.elems.toList[i.toNat]? with
         | some x => ih x
         | none => none
       else none)
@@ -915,13 +953,14 @@ def SVal.save {T U : Ty} (v : SVal T) (p : Path T U) (new : SVal U) : Option (SV
         let x ← ih (fs.get h) new
         some (.struct (fs.set h x)))
     (fun {_} {_} i _ ih v new =>
-      let w : SList _ × SList _ := SVal.view v
+      let w : ArrView _ := SVal.view v
       if 0 ≤ i then
-        match (w.1.toList ++ w.2.toList)[i.toNat]? with
+        match (w.elems.toList ++ w.shadow.toList)[i.toNat]? with
         | some x => do
           let x' ← ih x new
-          let slots := (w.1.toList ++ w.2.toList).set i.toNat x'
-          some (.array (.ofList (slots.take w.1.length)) (.ofList (slots.drop w.1.length)))
+          let slots := (w.elems.toList ++ w.shadow.toList).set i.toNat x'
+          some (.array (SVec.ofList (slots.take w.n)) (.ofList (slots.drop w.n))
+            (SVal.take_lt_bound slots w.hn))
         | none => none
       else none)
     (fun {_} {_} {_} i _ ih v new =>
@@ -955,7 +994,8 @@ mutual
 def SVal.defaultOfM : {T : Ty} → SVal T → SVal T
   | _, @SVal.prim p _ => .prim (PrimTy.dflt p)
   | _, .struct fs => .struct (SFields.defaultOfM fs)
-  | _, .array e sh => .array .nil (.ofList ((SList.defaultOfM e).toList ++ sh.toList))
+  | _, .array e sh _ => .array .nil (.ofList ((SVec.defaultOfM e).toList ++ sh.toList))
+    SVal.zero_lt_bound
   | _, .fixed e => .fixed (SVec.defaultOfM e)
   | _, .map m d => .map m d
 
@@ -981,7 +1021,7 @@ def defaultOfFold : Fold where
   M U := SMap U
   prim := fun {p} _ => .prim (PrimTy.dflt p)
   struct := fun _ ih => .struct ih
-  array := fun _ sh ie _ => .array .nil (.ofList (SList.toList ie ++ sh.toList))
+  array := fun _ sh _ ie _ => .array .nil (.ofList (SVec.toList ie ++ sh.toList)) SVal.zero_lt_bound
   fixed := fun _ ie => .fixed ie
   map := fun m d _ _ => .map m d
   fnil := .nil
@@ -1009,8 +1049,9 @@ theorem SVal.defaultOf_prim {p : PrimTy} (v : p.Denote) :
     (SVal.prim v).defaultOf = .prim (PrimTy.dflt p) := rfl
 theorem SVal.defaultOf_struct {s : Name} (fs : SFields (structDef s)) :
     (SVal.struct fs).defaultOf = .struct fs.defaultOf := rfl
-theorem SVal.defaultOf_array {E : Ty} (e sh : SList E) :
-    (SVal.array e sh).defaultOf = .array .nil (.ofList (e.defaultOf.toList ++ sh.toList)) := rfl
+theorem SVal.defaultOf_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) :
+    (SVal.array e sh h).defaultOf =
+      .array .nil (.ofList (e.defaultOf.toList ++ sh.toList)) SVal.zero_lt_bound := rfl
 theorem SVal.defaultOf_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).defaultOf = .fixed e.defaultOf := rfl
 theorem SVal.defaultOf_map {K U : Ty} (m : SMap U) (d : SVal U) :
@@ -1038,8 +1079,8 @@ theorem SVal.defaultOf_eq_defaultOfM : {T : Ty} → (v : SVal T) → v.defaultOf
   | _, .prim _ => by rw [SVal.defaultOf_prim, SVal.defaultOfM]
   | _, .struct fs => by
     rw [SVal.defaultOf_struct, SVal.defaultOfM, SFields.defaultOf_eq_defaultOfM fs]
-  | _, .array e sh => by
-    rw [SVal.defaultOf_array, SVal.defaultOfM, SList.defaultOf_eq_defaultOfM e]
+  | _, .array e sh _ => by
+    rw [SVal.defaultOf_array, SVal.defaultOfM, SVec.defaultOf_eq_defaultOfM e]
   | _, .fixed e => by rw [SVal.defaultOf_fixed, SVal.defaultOfM, SVec.defaultOf_eq_defaultOfM e]
   | _, .map _ _ => by rw [SVal.defaultOf_map, SVal.defaultOfM]
 
@@ -1069,7 +1110,7 @@ mutual
 def SVal.stripM : {T : Ty} → SVal T → SVal T
   | _, .prim v => .prim v
   | _, .struct fs => .struct (SFields.stripM fs)
-  | _, .array e _ => .array (SList.stripM e) .nil
+  | _, .array e _ h => .array (SVec.stripM e) .nil h
   | _, .fixed e => .fixed (SVec.stripM e)
   | _, .map m d => .map m d
 
@@ -1095,7 +1136,7 @@ def stripFold : Fold where
   M U := SMap U
   prim := fun v => .prim v
   struct := fun _ ih => .struct ih
-  array := fun _ _ ie _ => .array ie .nil
+  array := fun _ _ h ie _ => .array ie .nil h
   fixed := fun _ ie => .fixed ie
   map := fun m d _ _ => .map m d
   fnil := .nil
@@ -1121,8 +1162,8 @@ def SVec.strip {E : Ty} {n : Nat} (l : SVec E n) : SVec E n := l.fold stripFold
 theorem SVal.strip_prim {p : PrimTy} (v : p.Denote) : (SVal.prim v).strip = .prim v := rfl
 theorem SVal.strip_struct {s : Name} (fs : SFields (structDef s)) :
     (SVal.struct fs).strip = .struct fs.strip := rfl
-theorem SVal.strip_array {E : Ty} (e sh : SList E) :
-    (SVal.array e sh).strip = .array e.strip .nil := rfl
+theorem SVal.strip_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) :
+    (SVal.array e sh h).strip = .array e.strip .nil h := rfl
 theorem SVal.strip_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).strip = .fixed e.strip := rfl
 theorem SVal.strip_map {K U : Ty} (m : SMap U) (d : SVal U) :
@@ -1148,7 +1189,7 @@ mutual
 theorem SVal.strip_eq_stripM : {T : Ty} → (v : SVal T) → v.strip = v.stripM
   | _, .prim _ => by rw [SVal.strip_prim, SVal.stripM]
   | _, .struct fs => by rw [SVal.strip_struct, SVal.stripM, SFields.strip_eq_stripM fs]
-  | _, .array e _ => by rw [SVal.strip_array, SVal.stripM, SList.strip_eq_stripM e]
+  | _, .array e _ _ => by rw [SVal.strip_array, SVal.stripM, SVec.strip_eq_stripM e]
   | _, .fixed e => by rw [SVal.strip_fixed, SVal.stripM, SVec.strip_eq_stripM e]
   | _, .map _ _ => by rw [SVal.strip_map, SVal.stripM]
 
@@ -1174,25 +1215,20 @@ mutual
 def SVal.overlayM : {T : Ty} → SVal T → SVal T → SVal T
   | _, _, .prim v => .prim v
   | _, .struct ofs, .struct nfs => .struct (SFields.overlayM ofs nfs)
-  | _, .array oel osh, .array nel _ =>
-    .array (SList.overlayOnM (oel.toList ++ osh.toList) nel)
-      (.ofList ((oel.toList.drop nel.length).map SVal.defaultOf ++
-        osh.toList.drop (nel.length - oel.length)))
-  | _, .fixed oel, .fixed nel => .fixed (SVec.overlayM oel nel)
+  | _, @SVal.array _ m oel osh _, @SVal.array _ n nel _ h =>
+    .array (SVec.overlayOnM (oel.toList ++ osh.toList) nel)
+      (.ofList ((oel.toList.drop n).map SVal.defaultOf ++ osh.toList.drop (n - m))) h
+  | _, .fixed oel, .fixed nel => .fixed (SVec.overlayOnM oel.toList nel)
   | _, .map oe od, .map _ _ => .map oe od
 
 def SFields.overlayM : {fs : List (Name × Ty)} → SFields fs → SFields fs → SFields fs
   | _, .nil, .nil => .nil
   | _, .cons o os, .cons v rest => .cons (SVal.overlayM o v) (SFields.overlayM os rest)
 
-def SList.overlayOnM : {E : Ty} → List (SVal E) → SList E → SList E
-  | _, [], rest => SList.strip rest
-  | _, o :: os, .cons v rest => .cons (SVal.overlayM o v) (SList.overlayOnM os rest)
-  | _, _ :: _, .nil => .nil
-
-def SVec.overlayM : {E : Ty} → {n : Nat} → SVec E n → SVec E n → SVec E n
-  | _, _, .nil, .nil => .nil
-  | _, _, .cons o os, .cons v rest => .cons (SVal.overlayM o v) (SVec.overlayM os rest)
+def SVec.overlayOnM : {E : Ty} → {n : Nat} → List (SVal E) → SVec E n → SVec E n
+  | _, _, [], rest => SVec.strip rest
+  | _, _, o :: os, .cons v rest => .cons (SVal.overlayM o v) (SVec.overlayOnM os rest)
+  | _, _, _ :: _, .nil => .nil
 end
 
 /-- A copy written over an old value: by recursion on the new one, the old
@@ -1200,31 +1236,28 @@ one read through the views. -/
 def overlayFold : Fold where
   V T := SVal T → SVal T
   F fs := SFields fs → SFields fs
-  L E := List (SVal E) → SList E
-  W E n := SVec E n → SVec E n
+  L _ := Unit
+  W E n := List (SVal E) → SVec E n
   M _ := Unit
   prim := fun v _ => .prim v
   struct := fun _ ih o => .struct (ih (SVal.view o))
-  array := fun nel _ ie _ o =>
-    let w : SList _ × SList _ := SVal.view o
-    .array (ie (w.1.toList ++ w.2.toList))
-      (.ofList ((w.1.toList.drop nel.length).map SVal.defaultOf ++
-        w.2.toList.drop (nel.length - w.1.length)))
-  fixed := fun _ ie o => .fixed (ie (SVal.view o))
+  array := fun {_} {n} _ _ h ie _ o =>
+    let w : ArrView _ := SVal.view o
+    .array (ie (w.elems.toList ++ w.shadow.toList))
+      (.ofList ((w.elems.toList.drop n).map SVal.defaultOf ++ w.shadow.toList.drop (n - w.n))) h
+  fixed := fun _ ie o => .fixed (ie (SVal.view o : SVec _ _).toList)
   map := fun _ _ _ _ o => o
   fnil := fun _ => .nil
   fcons := fun _ _ iv ir os =>
     let w := SFields.view os
     .cons (iv w.1) (ir w.2)
-  lnil := fun _ => .nil
-  lcons := fun v rest iv ir os =>
+  lnil := ()
+  lcons := fun _ _ _ _ => ()
+  wnil := fun _ => .nil
+  wcons := fun v rest iv ir os =>
     match os with
     | [] => .cons v.strip rest.strip
     | o :: os => .cons (iv o) (ir os)
-  wnil := fun _ => .nil
-  wcons := fun _ _ iv ir os =>
-    let w := SVec.view os
-    .cons (iv w.1) (ir w.2)
   mnil := ()
   mcons := fun _ _ _ _ _ => ()
 
@@ -1237,23 +1270,21 @@ def SVal.overlay {T : Ty} (old new : SVal T) : SVal T := new.fold overlayFold ol
 def SFields.overlay {fs : List (Name × Ty)} (old new : SFields fs) : SFields fs :=
   new.fold overlayFold old
 /-- The new elements over the old slots, as far as there are old slots. -/
-@[implemented_by SList.overlayOnM]
-def SList.overlayOn {E : Ty} (old : List (SVal E)) (new : SList E) : SList E :=
+@[implemented_by SVec.overlayOnM]
+def SVec.overlayOn {E : Ty} {n : Nat} (old : List (SVal E)) (new : SVec E n) : SVec E n :=
   new.fold overlayFold old
-@[implemented_by SVec.overlayM]
-def SVec.overlay {E : Ty} {n : Nat} (old new : SVec E n) : SVec E n := new.fold overlayFold old
 
 theorem SVal.overlay_prim {p : PrimTy} (o : SVal (.prim p)) (v : p.Denote) :
     o.overlay (.prim v) = .prim v := rfl
 theorem SVal.overlay_struct {s : Name} (ofs nfs : SFields (structDef s)) :
     (SVal.struct ofs).overlay (.struct nfs) = .struct (ofs.overlay nfs) := rfl
-theorem SVal.overlay_array {E : Ty} (oel osh nel nsh : SList E) :
-    (SVal.array oel osh).overlay (.array nel nsh) =
-      .array (SList.overlayOn (oel.toList ++ osh.toList) nel)
-        (.ofList ((oel.toList.drop nel.length).map SVal.defaultOf ++
-          osh.toList.drop (nel.length - oel.length))) := rfl
+theorem SVal.overlay_array {E : Ty} {m n : Nat} (oel : SVec E m) (osh : SList E)
+    (h₁ : m < 2 ^ 256) (nel : SVec E n) (nsh : SList E) (h₂ : n < 2 ^ 256) :
+    (SVal.array oel osh h₁).overlay (.array nel nsh h₂) =
+      .array (SVec.overlayOn (oel.toList ++ osh.toList) nel)
+        (.ofList ((oel.toList.drop n).map SVal.defaultOf ++ osh.toList.drop (n - m))) h₂ := rfl
 theorem SVal.overlay_fixed {E : Ty} {n : Nat} (oel nel : SVec E n) :
-    (SVal.fixed oel).overlay (.fixed nel) = .fixed (oel.overlay nel) := rfl
+    (SVal.fixed oel).overlay (.fixed nel) = .fixed (SVec.overlayOn oel.toList nel) := rfl
 theorem SVal.overlay_map {K U : Ty} (oe ne : SMap U) (od nd : SVal U) :
     (SVal.map (K := K) oe od).overlay (.map ne nd) = .map oe od := rfl
 theorem SFields.overlay_nil : SFields.overlay .nil .nil = .nil := rfl
@@ -1261,39 +1292,37 @@ theorem SFields.overlay_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (o v :
     (os rest : SFields fs) :
     SFields.overlay (.cons (f := f) o os) (.cons v rest) = .cons (o.overlay v) (os.overlay rest) :=
   rfl
-theorem SList.overlayOn_nil {E : Ty} (os : List (SVal E)) : SList.overlayOn os .nil = .nil := rfl
-theorem SList.overlayOn_nil_cons {E : Ty} (v : SVal E) (rest : SList E) :
-    SList.overlayOn [] (.cons v rest) = .cons v.strip rest.strip := rfl
-theorem SList.overlayOn_cons_cons {E : Ty} (o : SVal E) (os : List (SVal E)) (v : SVal E)
-    (rest : SList E) :
-    SList.overlayOn (o :: os) (.cons v rest) = .cons (o.overlay v) (SList.overlayOn os rest) := rfl
-theorem SVec.overlay_nil {E : Ty} : SVec.overlay (E := E) .nil .nil = .nil := rfl
-theorem SVec.overlay_cons {E : Ty} {n : Nat} (o v : SVal E) (os rest : SVec E n) :
-    SVec.overlay (.cons o os) (.cons v rest) = .cons (o.overlay v) (os.overlay rest) := rfl
+theorem SVec.overlayOn_nil {E : Ty} (os : List (SVal E)) : SVec.overlayOn os (.nil (E := E)) = .nil :=
+  rfl
+theorem SVec.overlayOn_nil_cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
+    SVec.overlayOn [] (.cons v rest) = .cons v.strip rest.strip := rfl
+theorem SVec.overlayOn_cons_cons {E : Ty} {n : Nat} (o : SVal E) (os : List (SVal E)) (v : SVal E)
+    (rest : SVec E n) :
+    SVec.overlayOn (o :: os) (.cons v rest) = .cons (o.overlay v) (SVec.overlayOn os rest) := rfl
 
-attribute [irreducible] SVal.overlay SFields.overlay SList.overlayOn SVec.overlay
+attribute [irreducible] SVal.overlay SFields.overlay SVec.overlayOn
 attribute [eqns SVal.overlay_prim SVal.overlay_struct SVal.overlay_array SVal.overlay_fixed
   SVal.overlay_map] SVal.overlay
 attribute [eqns SFields.overlay_nil SFields.overlay_cons] SFields.overlay
-attribute [eqns SList.overlayOn_nil SList.overlayOn_nil_cons SList.overlayOn_cons_cons]
-  SList.overlayOn
-attribute [eqns SVec.overlay_nil SVec.overlay_cons] SVec.overlay
+attribute [eqns SVec.overlayOn_nil SVec.overlayOn_nil_cons SVec.overlayOn_cons_cons]
+  SVec.overlayOn
 
-/-- `SList.overlayOn` over no old slots: the new elements as nothing wrote
+/-- `SVec.overlayOn` over no old slots: the new elements as nothing wrote
 them. -/
-theorem SList.overlayOn_nil_left {E : Ty} : (l : SList E) → SList.overlayOn [] l = l.strip
-  | .nil => by rw [overlayOn_nil, strip_nil]
-  | .cons v rest => by rw [overlayOn_nil_cons, strip_cons]
+theorem SVec.overlayOn_nil_left {E : Ty} : {n : Nat} → (l : SVec E n) →
+    SVec.overlayOn [] l = l.strip
+  | _, .nil => by rw [overlayOn_nil, strip_nil]
+  | _, .cons v rest => by rw [overlayOn_nil_cons, strip_cons]
 
 mutual
 theorem SVal.overlay_eq_overlayM : {T : Ty} → (o v : SVal T) → o.overlay v = o.overlayM v
   | _, _, .prim _ => by rw [SVal.overlay_prim, SVal.overlayM]
   | _, .struct ofs, .struct nfs => by
     rw [SVal.overlay_struct, SVal.overlayM, SFields.overlay_eq_overlayM ofs nfs]
-  | _, .array oel osh, .array nel _ => by
-    rw [SVal.overlay_array, SVal.overlayM, SList.overlayOn_eq_overlayOnM _ nel]
+  | _, .array oel osh _, .array nel _ _ => by
+    rw [SVal.overlay_array, SVal.overlayM, SVec.overlayOn_eq_overlayOnM _ nel]
   | _, .fixed oel, .fixed nel => by
-    rw [SVal.overlay_fixed, SVal.overlayM, SVec.overlay_eq_overlayM oel nel]
+    rw [SVal.overlay_fixed, SVal.overlayM, SVec.overlayOn_eq_overlayOnM _ nel]
   | _, .map _ _, .map _ _ => by rw [SVal.overlay_map, SVal.overlayM]
 
 theorem SFields.overlay_eq_overlayM : {fs : List (Name × Ty)} → (os x : SFields fs) →
@@ -1303,20 +1332,13 @@ theorem SFields.overlay_eq_overlayM : {fs : List (Name × Ty)} → (os x : SFiel
     rw [SFields.overlay_cons, SFields.overlayM, SVal.overlay_eq_overlayM o v,
       SFields.overlay_eq_overlayM os rest]
 
-theorem SList.overlayOn_eq_overlayOnM : {E : Ty} → (os : List (SVal E)) → (l : SList E) →
-    SList.overlayOn os l = SList.overlayOnM os l
-  | _, [], l => by rw [SList.overlayOn_nil_left, SList.overlayOnM]
-  | _, o :: os, .cons v rest => by
-    rw [SList.overlayOn_cons_cons, SList.overlayOnM, SVal.overlay_eq_overlayM o v,
-      SList.overlayOn_eq_overlayOnM os rest]
-  | _, _ :: _, .nil => by rw [SList.overlayOn_nil, SList.overlayOnM]
-
-theorem SVec.overlay_eq_overlayM : {E : Ty} → {n : Nat} → (os l : SVec E n) →
-    os.overlay l = os.overlayM l
-  | _, _, .nil, .nil => by rw [SVec.overlay_nil, SVec.overlayM]
-  | _, _, .cons o os, .cons v rest => by
-    rw [SVec.overlay_cons, SVec.overlayM, SVal.overlay_eq_overlayM o v,
-      SVec.overlay_eq_overlayM os rest]
+theorem SVec.overlayOn_eq_overlayOnM : {E : Ty} → {n : Nat} → (os : List (SVal E)) →
+    (l : SVec E n) → SVec.overlayOn os l = SVec.overlayOnM os l
+  | _, _, [], l => by rw [SVec.overlayOn_nil_left, SVec.overlayOnM]
+  | _, _, o :: os, .cons v rest => by
+    rw [SVec.overlayOn_cons_cons, SVec.overlayOnM, SVal.overlay_eq_overlayM o v,
+      SVec.overlayOn_eq_overlayOnM os rest]
+  | _, _, _ :: _, .nil => by rw [SVec.overlayOn_nil, SVec.overlayOnM]
 end
 
 /-- A primitive value: a write stores it, where a reference is copied over.
@@ -1334,14 +1356,14 @@ def beqFold : Fold where
   V T := SVal T → Bool
   F fs := SFields fs → Bool
   L E := SList E → Bool
-  W E n := SVec E n → Bool
+  W E _ := List (SVal E) → Bool
   M U := SMap U → Bool
   prim := fun {p} x w => decide (x = (SVal.view w : p.Denote))
   struct := fun _ ih w => ih (SVal.view w)
-  array := fun _ _ ie ish w =>
-    let x : SList _ × SList _ := SVal.view w
-    ie x.1 && ish x.2
-  fixed := fun _ ie w => ie (SVal.view w)
+  array := fun _ _ _ ie ish w =>
+    let x : ArrView _ := SVal.view w
+    ie x.elems.toList && ish x.shadow
+  fixed := fun _ ie w => ie (SVal.view w : SVec _ _).toList
   map := fun _ _ im id w =>
     let x : SMap _ × SVal _ := SVal.view w
     im x.1 && id x.2
@@ -1354,10 +1376,11 @@ def beqFold : Fold where
     match SList.uncons w with
     | some x => iv x.1 && ir x.2
     | none => false
-  wnil := fun _ => true
-  wcons := fun _ _ iv ir w =>
-    let x := SVec.view w
-    iv x.1 && ir x.2
+  wnil := fun l => l.isEmpty
+  wcons := fun _ _ iv ir l =>
+    match l with
+    | [] => false
+    | x :: xs => iv x && ir xs
   mnil := fun w => (SMap.uncons w).isNone
   mcons := fun k _ _ iv ir w =>
     match SMap.uncons w with
@@ -1367,17 +1390,19 @@ def beqFold : Fold where
 def SVal.beq {T : Ty} (v w : SVal T) : Bool := v.fold beqFold w
 def SFields.beq {fs : List (Name × Ty)} (x y : SFields fs) : Bool := x.fold beqFold y
 def SList.beq {E : Ty} (l l' : SList E) : Bool := l.fold beqFold l'
-def SVec.beq {E : Ty} {n : Nat} (l l' : SVec E n) : Bool := l.fold beqFold l'
+/-- A vector against a list: the same elements, as many. -/
+def SVec.beqL {E : Ty} {n : Nat} (l : SVec E n) (l' : List (SVal E)) : Bool := l.fold beqFold l'
 def SMap.beq {U : Ty} (m m' : SMap U) : Bool := m.fold beqFold m'
 
 theorem SVal.beq_prim {p : PrimTy} (x y : p.Denote) :
     (SVal.prim x).beq (.prim y) = decide (x = y) := rfl
 theorem SVal.beq_struct {s : Name} (fs gs : SFields (structDef s)) :
     (SVal.struct fs).beq (.struct gs) = fs.beq gs := rfl
-theorem SVal.beq_array {E : Ty} (e sh e' sh' : SList E) :
-    (SVal.array e sh).beq (.array e' sh') = (e.beq e' && sh.beq sh') := rfl
+theorem SVal.beq_array {E : Ty} {n m : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256)
+    (e' : SVec E m) (sh' : SList E) (h' : m < 2 ^ 256) :
+    (SVal.array e sh h).beq (.array e' sh' h') = (e.beqL e'.toList && sh.beq sh') := rfl
 theorem SVal.beq_fixed {E : Ty} {n : Nat} (e e' : SVec E n) :
-    (SVal.fixed e).beq (.fixed e') = e.beq e' := rfl
+    (SVal.fixed e).beq (.fixed e') = e.beqL e'.toList := rfl
 theorem SVal.beq_map {K U : Ty} (m m' : SMap U) (d d' : SVal U) :
     (SVal.map (K := K) m d).beq (.map m' d') = (m.beq m' && d.beq d') := rfl
 theorem SFields.beq_nil : SFields.beq .nil .nil = true := rfl
@@ -1391,9 +1416,14 @@ theorem SList.beq_cons_nil {E : Ty} (v : SVal E) (rest : SList E) :
     SList.beq (.cons v rest) .nil = false := rfl
 theorem SList.beq_cons_cons {E : Ty} (v w : SVal E) (rest rest' : SList E) :
     SList.beq (.cons v rest) (.cons w rest') = (v.beq w && rest.beq rest') := rfl
-theorem SVec.beq_nil {E : Ty} : SVec.beq (E := E) .nil .nil = true := rfl
-theorem SVec.beq_cons {E : Ty} {n : Nat} (v w : SVal E) (rest rest' : SVec E n) :
-    SVec.beq (.cons v rest) (.cons w rest') = (v.beq w && rest.beq rest') := rfl
+theorem SVec.beqL_nil_nil {E : Ty} : SVec.beqL (E := E) .nil [] = true := rfl
+theorem SVec.beqL_nil_cons {E : Ty} (w : SVal E) (rest' : List (SVal E)) :
+    SVec.beqL .nil (w :: rest') = false := rfl
+theorem SVec.beqL_cons_nil {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
+    SVec.beqL (.cons v rest) [] = false := rfl
+theorem SVec.beqL_cons_cons {E : Ty} {n : Nat} (v w : SVal E) (rest : SVec E n)
+    (rest' : List (SVal E)) :
+    SVec.beqL (.cons v rest) (w :: rest') = (v.beq w && rest.beqL rest') := rfl
 theorem SMap.beq_nil_nil {U : Ty} : SMap.beq (U := U) .nil .nil = true := rfl
 theorem SMap.beq_nil_cons {U : Ty} (k : Int) (w : SVal U) (rest' : SMap U) :
     SMap.beq .nil (.cons k w rest') = false := rfl
@@ -1403,13 +1433,14 @@ theorem SMap.beq_cons_cons {U : Ty} (k k' : Int) (v w : SVal U) (rest rest' : SM
     SMap.beq (.cons k v rest) (.cons k' w rest') = (decide (k = k') && v.beq w && rest.beq rest') :=
   rfl
 
-attribute [irreducible] SVal.beq SFields.beq SList.beq SVec.beq SMap.beq
+attribute [irreducible] SVal.beq SFields.beq SList.beq SVec.beqL SMap.beq
 attribute [eqns SVal.beq_prim SVal.beq_struct SVal.beq_array SVal.beq_fixed SVal.beq_map]
   SVal.beq
 attribute [eqns SFields.beq_nil SFields.beq_cons] SFields.beq
 attribute [eqns SList.beq_nil_nil SList.beq_nil_cons SList.beq_cons_nil SList.beq_cons_cons]
   SList.beq
-attribute [eqns SVec.beq_nil SVec.beq_cons] SVec.beq
+attribute [eqns SVec.beqL_nil_nil SVec.beqL_nil_cons SVec.beqL_cons_nil SVec.beqL_cons_cons]
+  SVec.beqL
 attribute [eqns SMap.beq_nil_nil SMap.beq_nil_cons SMap.beq_cons_nil SMap.beq_cons_cons] SMap.beq
 
 mutual
@@ -1420,12 +1451,15 @@ theorem SVal.eq_of_beq : {T : Ty} → (v w : SVal T) → v.beq w = true → v = 
   | _, .struct fs, .struct gs, h => by
     simp only [SVal.beq] at h
     rw [SFields.eq_of_beq fs gs h]
-  | _, .array e sh, .array e' sh', h => by
+  | _, @SVal.array _ n e sh _, @SVal.array _ m e' sh' _, h => by
     simp only [SVal.beq, Bool.and_eq_true] at h
-    rw [SList.eq_of_beq e e' h.1, SList.eq_of_beq sh sh' h.2]
+    have hl := SVec.toList_eq_of_beqL e e'.toList h.1
+    have hnm : n = m := by rw [← SVec.length_toList e, hl, SVec.length_toList]
+    subst hnm
+    rw [SVec.eq_of_toList_eq e e' hl, SList.eq_of_beq sh sh' h.2]
   | _, .fixed e, .fixed e', h => by
     simp only [SVal.beq] at h
-    rw [SVec.eq_of_beq e e' h]
+    rw [SVec.eq_of_toList_eq e e' (SVec.toList_eq_of_beqL e e'.toList h)]
   | _, .map m d, .map m' d', h => by
     simp only [SVal.beq, Bool.and_eq_true] at h
     rw [SMap.eq_of_beq m m' h.1, SVal.eq_of_beq d d' h.2]
@@ -1447,11 +1481,14 @@ theorem SList.eq_of_beq : {E : Ty} → (l l' : SList E) → l.beq l' = true → 
     rw [SVal.eq_of_beq v w h.1, SList.eq_of_beq rest rest' h.2]
 termination_by structural _ l => l
 
-theorem SVec.eq_of_beq : {E : Ty} → {n : Nat} → (l l' : SVec E n) → l.beq l' = true → l = l'
-  | _, _, .nil, .nil, _ => rfl
-  | _, _, .cons v rest, .cons w rest', h => by
-    simp only [SVec.beq, Bool.and_eq_true] at h
-    rw [SVal.eq_of_beq v w h.1, SVec.eq_of_beq rest rest' h.2]
+theorem SVec.toList_eq_of_beqL : {E : Ty} → {n : Nat} → (l : SVec E n) → (l' : List (SVal E)) →
+    l.beqL l' = true → l.toList = l'
+  | _, _, .nil, [], _ => by rw [SVec.toList_nil]
+  | _, _, .nil, _ :: _, h => by simp only [SVec.beqL, Bool.false_eq_true] at h
+  | _, _, .cons _ _, [], h => by simp only [SVec.beqL, Bool.false_eq_true] at h
+  | _, _, .cons v rest, w :: rest', h => by
+    simp only [SVec.beqL, Bool.and_eq_true] at h
+    rw [SVec.toList_cons, SVal.eq_of_beq v w h.1, SVec.toList_eq_of_beqL rest rest' h.2]
 termination_by structural _ _ l => l
 
 theorem SMap.eq_of_beq : {U : Ty} → (m m' : SMap U) → m.beq m' = true → m = m'
@@ -1468,8 +1505,9 @@ mutual
 theorem SVal.beq_self : {T : Ty} → (v : SVal T) → v.beq v = true
   | _, .prim x => by simp only [SVal.beq, decide_true]
   | _, .struct fs => by simp only [SVal.beq, SFields.beq_self fs]
-  | _, .array e sh => by simp only [SVal.beq, SList.beq_self e, SList.beq_self sh, Bool.and_self]
-  | _, .fixed e => by simp only [SVal.beq, SVec.beq_self e]
+  | _, .array e sh _ => by
+    simp only [SVal.beq, SVec.beqL_self e, SList.beq_self sh, Bool.and_self]
+  | _, .fixed e => by simp only [SVal.beq, SVec.beqL_self e]
   | _, .map m d => by simp only [SVal.beq, SMap.beq_self m, SVal.beq_self d, Bool.and_self]
 
 theorem SFields.beq_self : {fs : List (Name × Ty)} → (x : SFields fs) → x.beq x = true
@@ -1482,10 +1520,11 @@ theorem SList.beq_self : {E : Ty} → (l : SList E) → l.beq l = true
   | _, .cons v rest => by simp only [SList.beq, SVal.beq_self v, SList.beq_self rest,
       Bool.and_self]
 
-theorem SVec.beq_self : {E : Ty} → {n : Nat} → (l : SVec E n) → l.beq l = true
-  | _, _, .nil => by simp only [SVec.beq]
-  | _, _, .cons v rest => by simp only [SVec.beq, SVal.beq_self v, SVec.beq_self rest,
-      Bool.and_self]
+theorem SVec.beqL_self : {E : Ty} → {n : Nat} → (l : SVec E n) → l.beqL l.toList = true
+  | _, _, .nil => by rw [SVec.toList_nil]; simp only [SVec.beqL]
+  | _, _, .cons v rest => by
+    rw [SVec.toList_cons]
+    simp only [SVec.beqL, SVal.beq_self v, SVec.beqL_self rest, Bool.and_self]
 
 theorem SMap.beq_self : {U : Ty} → (m : SMap U) → m.beq m = true
   | _, .nil => by simp only [SMap.beq]
@@ -1510,6 +1549,25 @@ instance SFields.decEq {fs : List (Name × Ty)} : DecidableEq (SFields fs) :=
 def pushSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E)
   | [] => (SVal.dflt E, [])
   | c :: rest => (if E.isPrimitive then SVal.dflt E else c, rest)
+
+/-- A length below `2^256` is a `uint`. -/
+theorem lenU_inRange {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int) = true := by
+  simp only [PrimTy.inRange, decide_eq_true_eq]
+  omega
+
+/-- A length as a `uint`. -/
+def lenU (n : Nat) (h : n < 2 ^ 256) : PrimTy.uint.Denote :=
+  (⟨n, lenU_inRange h⟩ : {n : Int // PrimTy.uint.inRange n = true})
+
+/-- One more element, below the bound. -/
+theorem SVec.snoc_lt_bound {E : Ty} {n : Nat} (e : SVec E n) (x : SVal E) (h : n + 1 < 2 ^ 256) :
+    (e.toList ++ [x]).length < 2 ^ 256 := by
+  rw [List.length_append, SVec.length_toList, List.length_singleton]; exact h
+
+/-- One element fewer, below the bound. -/
+theorem SVec.dropLast_lt_bound {E : Ty} {n : Nat} (e : SVec E n) (h : n < 2 ^ 256) :
+    e.toList.dropLast.length < 2 ^ 256 := by
+  rw [List.length_dropLast, SVec.length_toList]; omega
 
 /-! ## Storage -/
 
@@ -1586,8 +1644,8 @@ def inBounds {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) :
     (fun {_} {_} _ => some ())
     (fun {_} {_} a => @ArrTy.casesOn (fun R _ _ => SVal (.ref R) → Option Unit) _ _ a
       (fun {_} v =>
-        let w : SList _ × SList _ := SVal.view v
-        if 0 ≤ i ∧ i.toNat < w.1.length then some () else none)
+        let w : ArrView _ := SVal.view v
+        if 0 ≤ i ∧ i.toNat < w.n then some () else none)
       (fun {_} {n} _ => if 0 ≤ i ∧ i.toNat < n then some () else none))
 
 /-- `b[i]`'s index in bounds where the program takes it (`State.checkIndex`):
@@ -1596,38 +1654,55 @@ def checkIndex {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (r : SRef C (.
     (it : IndexTy R k V) (i : Int) : Option Unit := do
   inBounds it i (← st.find r)
 
-/-- The live length of a dynamic array (`arrayLen`). -/
-def len {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) : Option Nat := do
-  let w : SList E × SList E := SVal.view (← st.find r)
-  some w.1.length
+/-- The live length of a dynamic array (`arrayLen`), a `uint`: it is below
+`2^256`. -/
+def len {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
+    Option PrimTy.uint.Denote := do
+  let w : ArrView E := SVal.view (← st.find r)
+  some (lenU w.n w.hn)
+
+/-- The array at `r` has `2^256 - 1` live elements: one more is past a
+`uint` length.  The typed run treats a push there as out of gas
+(`TRun.push`, `docs/solc-alignment.md`). -/
+def full {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) : Bool :=
+  match st.find r with
+  | some v => !decide ((SVal.view v : ArrView E).n + 1 < 2 ^ 256)
+  | none => false
 
 /-- `b.push(…)` (`pushAt`): the element `val` makes of the slot it lands on,
-appended. -/
+appended; `none` past the bound (`full`). -/
 def push {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E)))
     (val : SVal E → Option (SVal E)) : Option (Storage C) := do
-  let w : SList E × SList E := SVal.view (← st.find r)
-  let (slot, sh') := pushSlot E w.2.toList
+  let w : ArrView E := SVal.view (← st.find r)
+  let (slot, sh') := pushSlot E w.shadow.toList
   let x ← val slot
-  st.save r (.array (.ofList (w.1.toList ++ [x])) (.ofList sh'))
+  if h : w.n + 1 < 2 ^ 256 then
+    st.save r (.array (SVec.ofList (w.elems.toList ++ [x])) (.ofList sh')
+      (SVec.snoc_lt_bound w.elems x h))
+  else none
 
 /-- `b.push()` as a place (`pushPlaceAt`): the slot appended, and its index. -/
 def pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     Option (Storage C × Nat) := do
-  let w : SList E × SList E := SVal.view (← st.find r)
-  let (slot, sh') := pushSlot E w.2.toList
-  let st' ← st.save r (.array (.ofList (w.1.toList ++ [slot])) (.ofList sh'))
-  some (st', w.1.length)
+  let w : ArrView E := SVal.view (← st.find r)
+  let (slot, sh') := pushSlot E w.shadow.toList
+  if h : w.n + 1 < 2 ^ 256 then
+    let st' ← st.save r (.array (SVec.ofList (w.elems.toList ++ [slot])) (.ofList sh')
+      (SVec.snoc_lt_bound w.elems slot h))
+    some (st', w.n)
+  else none
 
 /-- `b.pop()` (`popAt`): the last element cleared into the slots past the
 end, or moved there as it is when `keep`; an empty array reverts. -/
 def pop {E : Ty} (st : Storage C) (keep : Bool) (r : SRef C (.ref (.array E))) :
     Option (Storage C) := do
-  let w : SList E × SList E := SVal.view (← st.find r)
-  match w.1.toList.reverse with
+  let w : ArrView E := SVal.view (← st.find r)
+  match w.elems.toList.reverse with
   | [] => none
-  | last :: restRev =>
-    st.save r (.array (.ofList restRev.reverse)
-      (.ofList ((if keep then last else last.defaultOf) :: w.2.toList)))
+  | last :: _ =>
+    st.save r (.array (SVec.ofList w.elems.toList.dropLast)
+      (.ofList ((if keep then last else last.defaultOf) :: w.shadow.toList))
+      (SVec.dropLast_lt_bound w.elems w.hn))
 
 /-- `delete b` on storage: its value reset in place (`SVal.defaultOf`). -/
 def delete {T : Ty} (st : Storage C) (r : SRef C T) : Option (Storage C) := do
