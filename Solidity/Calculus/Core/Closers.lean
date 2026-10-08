@@ -54,6 +54,9 @@ def evalSolMergeCore : Tactic := fun stx => Derive.onErased "sol_merge" stx stx
 @[tactic Solidity.tacticSol_fold_terms]
 def evalSolFoldTermsCore : Tactic := fun stx => Derive.onErased "sol_fold_terms" stx stx
 
+@[tactic Solidity.tacticSol_upd_]
+def evalSolUpdCore : Tactic := fun stx => Derive.onErased "sol_upd" stx stx
+
 /-! ## `sol_prove?` on a scoped goal
 
 The scoped `sol_prove` (`Core.Valid φ`, `Calculus/Core/Derive.lean`; `⊢ φ`,

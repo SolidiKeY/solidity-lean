@@ -1,4 +1,6 @@
 import Solidity.Calculus.Rewrite
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
 
 /-!
 # Update simplification: one update instead of a stack
@@ -9,6 +11,12 @@ mini-solkey's update examples).  Here the same derivation is shown
 rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨`, and with
 `apply merge`/`apply simplify` on `⊢`.  The goals are under the box: a
 write under the diamond is not valid (`Close.lean`).
+
+The formulas read scoped (`open scoped Solidity.Core.Surface`): the rules
+rewrite a leaf's erasure (`sol_upd`, `sol_merge`,
+`Calculus/Core/Closers.lean`), today's update.  The sequent rules `merge`
+and `simplify` are today's `⊢`'s (the scoped sequent has the program rules
+and `close`): that derivation is read without the switch, at the end.
 -/
 
 namespace Solidity.Examples.Tactics.UpdateRules
@@ -16,6 +24,8 @@ namespace Solidity.Examples.Tactics.UpdateRules
 open Proves
 
 local instance : InContract := ⟨StandardExample⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## Rule by rule
 
@@ -100,7 +110,7 @@ theorem selfAssign : ⊨ dl!{ [ x = x; y = 3; ] y == 3 } := by
   sol_merge
   refine fun σ => UpdElem.elimSelf_box rfl ?_
   revert σ
-  show ⊨ _
+  show Valid _
   sol_close
 
 /-! ## All at once: `sol_merge` -/
@@ -118,7 +128,7 @@ theorem deepFieldWrite_merge :
   sol_close
 
 /--
-trace: ⊢ ⊨ dl{ { x := 1 } { y := x } y = 1 }
+trace: ⊢ ⊨ dl{ ∀ uint y; ∀ uint x; { x := 1 } { y := x } y = 1 }
 ---
 trace: ⊢ ⊨ dl{ { y := 1 } y = 1 }
 -/
@@ -145,6 +155,16 @@ theorem twoWrites_merge : ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; ] true } 
   sol_merge
   trace_state
   sol_close
+
+end Solidity.Examples.Tactics.UpdateRules
+
+/-! ## Read without the switch -/
+
+namespace Solidity.Examples.Tactics.UpdateRules
+
+open Proves
+
+local instance : InContract := ⟨StandardExample⟩
 
 /-! ## In a derivation: `merge`, `simplify`
 
