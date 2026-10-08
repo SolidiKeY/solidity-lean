@@ -174,6 +174,7 @@ import Solidity.Examples.Tactics.CoreRules
 import Solidity.Examples.Tactics.CoreNotation
 import Solidity.Examples.Tactics.CoreSpec
 import Solidity.Examples.Tactics.CoreCallback
+import Solidity.Examples.Tactics.CoreDerive
 import Solidity.Examples.Benchmark.Syntax
 import Solidity.Examples.Benchmark.Counter
 import Solidity.Examples.Benchmark.SimpleStorage

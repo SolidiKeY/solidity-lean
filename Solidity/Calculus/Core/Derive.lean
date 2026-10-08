@@ -252,8 +252,6 @@ def ctorTacs (c : Lean.Name) (d : Lean.Term) : MetaM (Array (Array (TSyntax `tac
 tried; none at a leaf. -/
 def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withContext do
   let ty ← instantiateMVars (← g.getType)
-  -- under the box, a split's cover goal is vacuous
-  if ty.isForall then return #[#[← `(tactic| exact nofun)]]
   let_expr Proves C _ Γ₀ Γ H φ0 := ty | return #[]
   let φ ← whnf φ0
   let one (c : Lean.Name) : MetaM (Array (Array (TSyntax `tactic))) := do
@@ -336,13 +334,22 @@ def isCoreGoal (g : MVarId) : MetaM Bool := do
 
 end Walk
 
+/-- `sol_derive` on a scoped goal, the expansion of `sol_derive` tried
+before today's (below): today's is a macro that never fails, so an
+elaborator of the same syntax would never run. -/
+syntax (name := solDeriveScoped) "sol_derive_scoped" : tactic
+
+/-- `sol_derive` is first `sol_derive_scoped`, which fails on a goal that is
+not scoped; Lean then expands today's macro. -/
+macro_rules | `(tactic| sol_derive) => `(tactic| sol_derive_scoped)
+
 open Lean Elab Tactic Meta in
 /-- `sol_derive` on a scoped goal: the strategy as a walk of `Core.Proves`
 rules, leaving the leaves (`Walk.run`). -/
-@[tactic Solidity.tacticSol_derive]
+@[tactic solDeriveScoped]
 def evalSolDeriveCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
-  unless ← Walk.isCoreGoal g do throwUnsupportedSyntax
+  unless ← Walk.isCoreGoal g do throwError "sol_derive_scoped: not a scoped goal"
   let rest := (← getUnsolvedGoals).erase g
   Symex.reporting g do
     let (_, leaves) ← Walk.run g
