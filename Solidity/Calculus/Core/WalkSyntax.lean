@@ -145,7 +145,8 @@ scoped macro_rules
   | `(tactic| refine close ?_) =>
     `(tactic| first
       | refine _root_.Solidity.Proves.close ?_
-      | refine Solidity.Core.Proves.close [] rfl List.nodup_nil ?_)
+      | refine Solidity.Core.Proves.close [] rfl List.nodup_nil ?_ (by decide +kernel)
+          (by decide +kernel))
 
 end Surface
 
