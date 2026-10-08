@@ -19,9 +19,9 @@ without, when only `P` pays.
 
 The calculus with callbacks (`ProvesC`, `Calculus/Core/Callback.lean`) on a
 send: solkey's three goals of `sendWithCallbackBox`, each closed in the
-plain calculus, the invariant `true`.  Its soundness against `ValidC`
-waits on `Stmt.TSound` (`docs/intrinsic.md`, decision 17), so the
-derivation is pinned, not read as `ValidC`.
+plain calculus, the invariant `true`.  The arms are sound over `tholds`
+(`Stmt.tsound`, `Calculus/Core/TSound.lean`) but not yet over `holdsC`'s
+runs with callbacks, so the derivation is pinned, not read as `ValidC`.
 -/
 
 namespace Solidity.Examples.Tactics.CoreCallback

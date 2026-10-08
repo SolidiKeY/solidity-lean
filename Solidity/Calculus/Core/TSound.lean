@@ -54,4 +54,10 @@ state.** -/
 theorem Proves.tvalid {R : RuleSet} {φ : Fml C []} (d : Proves C R [] .nil φ) : TValid φ :=
   Proves.tsound d
 
+/-- info: 'Solidity.Core.Stmt.tsound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Stmt.tsound
+
+/-- info: 'Solidity.Core.Proves.tvalid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Proves.tvalid
+
 end Solidity.Core

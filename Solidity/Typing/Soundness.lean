@@ -964,8 +964,9 @@ end RunInv
 /-! ## The typed locals -/
 
 /-- A local's value is of its type: a value of its primitive type, an alias
-bound (if at all) to a path the layout types at its type, a memory local an
-identity the store typing claims at its type. -/
+bound (if at all) to a path the layout types at its type, a memory local,
+if set at all, an identity the store typing claims at its type (an unset
+one, decision 17', reads as a revert). -/
 def LTy.WT (C : Contract) (H : HeapTy) : (t : LTy) → t.Denote C → Prop
   | .val p, v => (Value.toSVal v).hasTy (.prim p) = true
   | .alias R, o => ∀ r segs, o = some (r, segs) → C.layout.tyAt r segs = some (.ref R)
