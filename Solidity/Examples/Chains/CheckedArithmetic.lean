@@ -17,7 +17,8 @@ trailing `require(x <= 255);` after the write (`narrowPost`).  The paper's one `
 `arithCheckedLocalCompoundAssign` is therefore three links: `~[localOpAssign]~>`, one `~*>` for the check
 (its condition captured in `se1`, the capture's declaration dropped, `requireSimple`'s split), and the
 revert closed (`~[revertBox]~>` to `true`, `~[revertDiamond]~>` to `false`).  Up to the revert the lines
-are the same under either modality (`Examples/ChainNotation.lean` states them over a modality variable);
+are the same under either modality (`Examples/ChainNotation.lean` states them over a
+modality variable in `Update.lean`'s calculus, with a third, coverage, conjunct these scoped lines do not have);
 that line is the paper's two goals.  The printed `inTy(uint8, 260)` is
 `se1`, which holds `x <= 255` read after the two updates.
 

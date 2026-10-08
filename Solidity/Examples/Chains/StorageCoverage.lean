@@ -644,7 +644,7 @@ theorem assertConditionCapture :
   sol_chain
 #last_line assertConditionCapture
 
-/-- `require(ok);` with `ok` `true`: the three goals, the failing one `true` under the box, and the condition
+/-- `require(ok);` with `ok` `true`: the two goals, the failing one `true` under the box, and the condition
 folded. -/
 theorem requireSimple (φ : Core.Post Coverage [.val .bool]) :
     dl![.box]{ { ok := true } ⟨[ require(ok); ]⟩ φ }
