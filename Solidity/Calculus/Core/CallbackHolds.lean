@@ -1,16 +1,16 @@
-import Solidity.Calculus.Core.TLogic
+import Solidity.Calculus.Core.Logic
 import Solidity.Semantics.Core.Callback
 
 /-!
 # Formulas read with callbacks, over the typed state
 
 `Semantics/Callback.lean`'s `holdsC` on scoped formulas and typed states
-(`docs/intrinsic.md`, W2 lane `tree`, carried into W3): `tholds`
-(`Calculus/Core/TLogic.lean`), but a modality ranges over every run with
+(`docs/intrinsic.md`, W2 lane `tree`, carried into W3): `holds`
+(`Calculus/Core/Logic.lean`), but a modality ranges over every run with
 callbacks (`ExecP`, then `ExecF` for its frames,
 `Semantics/Core/Callback.lean`), and none of them may break the invariant.
 The invariant is a closed formula `I : Fml C []`, kept by the runs as its
-typed reading (`Fml.stateInv`, `StateInv := ⟨fun σ => tholds σ I⟩`).
+typed reading (`Fml.stateInv`, `StateInv := ⟨fun σ => holds σ I⟩`).
 
 Proved: with no payment in a formula the two readings agree
 (`holdsC_iff_holds`, from `ExecP.forall_iff` and `ExecF.forall_iff`), and
@@ -18,7 +18,7 @@ Proved: with no payment in a formula the two readings agree
 (`holds_of_holdsC_modal`, `holds_of_holdsC_imp`, `valid_of_validC`, from
 `Prog.exec_run` and `Frames.exec_run`).  `ProvesC`'s soundness against
 `ValidC` (`Calculus/Core/Callback.lean`) is not proved yet: the arms are
-sound over `tholds` (`Stmt.tsound`, `Calculus/Core/TSound.lean`), and
+sound over `holds` (`Stmt.sound`, `Calculus/Core/Sound.lean`), and
 `holdsC` reads a modality over the runs with callbacks.
 -/
 
@@ -29,7 +29,7 @@ open Solidity (Modality)
 variable {C : Contract}
 
 /-- The invariant `I` read on typed states: what a callback run keeps. -/
-def Fml.stateInv (I : Fml C []) : StateInv C := ⟨fun σ => tholds σ I⟩
+def Fml.stateInv (I : Fml C []) : StateInv C := ⟨fun σ => holds σ I⟩
 
 /-- `p` after a callback run of a program `o`, then of its frames `κ`: of the
 state the frames end in, `m.onTHalt` of a halt that is not a panic, and
@@ -41,17 +41,18 @@ def COut.thenF (J : StateInv C) {H : HTy} {Γ₁ Γ₀ : Ctx} (κ : Frames C Γ�
   | .violated => False
 
 /-- **Whether `φ` holds in the typed state `σ` when every payment may call
-back into a contract with invariant `I`**: `tholds`, but a modality ranges
+back into a contract with invariant `I`**: `holds`, but a modality ranges
 over every run with callbacks, and none of them may break `I`. -/
 def holdsC (I : Fml C []) : {Γ : Ctx} → TState C Γ → Fml C Γ → Prop
   | _, _, .tt => True
-  | _, σ, .eq a b => tholds σ (.eq a b)
-  | _, σ, .defined t => tholds σ (.defined t)
+  | _, σ, .eq a b => holds σ (.eq a b)
+  | _, σ, .defined t => holds σ (.defined t)
   | _, σ, .not φ => ¬ holdsC I σ φ
   | _, σ, .and φ ψ => holdsC I σ φ ∧ holdsC I σ ψ
   | _, σ, .imp φ ψ => holdsC I σ φ → holdsC I σ ψ
   | _, σ, .upd m U φ =>
-    m.afterC (fun τ => ∀ σ' : TState C _, σ'.erase = τ → holdsC I σ' φ) (U.apply σ.erase)
+    m.afterC (fun τ => ∀ σ' : TState C _, σ'.erase = τ → σ.H <+: σ'.H → holdsC I σ' φ)
+      (U.apply σ.erase)
   | _, σ, .modal m P κ φ =>
     ∀ o, ExecP I.stateInv σ P o → o.thenF I.stateInv κ m (holdsC I · φ)
   | _, σ, .havoc φ => ∀ st nt, holdsC I (σ.havoc st nt) φ
@@ -73,16 +74,16 @@ inductive TransferSem (C : Contract) where
   | noCallback
   | withCallback (I : Invariant C)
 
-/-- **The judgement, parameterised by the transfer semantics**: `tholds`
+/-- **The judgement, parameterised by the transfer semantics**: `holds`
 without callbacks, `holdsC` with them. -/
 def holdsT : TransferSem C → {Γ : Ctx} → TState C Γ → Fml C Γ → Prop
-  | .noCallback => tholds
+  | .noCallback => holds
   | .withCallback I => holdsC I.fml
 
 /-- Valid under a transfer semantics. -/
 def ValidT (ts : TransferSem C) (φ : Fml C []) : Prop := ∀ σ : TState C [], holdsT ts σ φ
 
-theorem validT_noCallback {φ : Fml C []} : ValidT .noCallback φ ↔ TValid φ := Iff.rfl
+theorem validT_noCallback {φ : Fml C []} : ValidT .noCallback φ ↔ Valid φ := Iff.rfl
 
 theorem validT_withCallback {I : Invariant C} {φ : Fml C []} :
     ValidT (.withCallback I) φ ↔ ValidC I φ := Iff.rfl
@@ -145,7 +146,7 @@ end Frames
 
 /-- **With no payment, the two readings agree.** -/
 theorem holdsC_iff_holds {I : Fml C []} : {Γ : Ctx} → (φ : Fml C Γ) → φ.hasTransfer = false →
-    ∀ σ : TState C Γ, (holdsC I σ φ ↔ tholds σ φ)
+    ∀ σ : TState C Γ, (holdsC I σ φ ↔ holds σ φ)
   | _, .tt, _, _ => Iff.rfl
   | _, .eq _ _, _, _ | _, .defined _, _, _ => Iff.rfl
   | _, .not φ, h, σ => not_congr (holdsC_iff_holds φ h σ)
@@ -156,18 +157,18 @@ theorem holdsC_iff_holds {I : Fml C []} : {Γ : Ctx} → (φ : Fml C Γ) → φ.
     rw [Fml.hasTransfer_imp, Bool.or_eq_false_iff] at h
     exact imp_congr (holdsC_iff_holds φ h.1 σ) (holdsC_iff_holds ψ h.2 σ)
   | _, .upd m U φ, h, σ => by
-    have e : (fun τ => ∀ σ' : TState C _, σ'.erase = τ → holdsC I σ' φ) =
-        (fun τ => ∀ σ' : TState C _, σ'.erase = τ → tholds σ' φ) :=
+    have e : (fun τ => ∀ σ' : TState C _, σ'.erase = τ → σ.H <+: σ'.H → holdsC I σ' φ) =
+        (fun τ => ∀ σ' : TState C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ) :=
       funext fun _ => propext (forall_congr' fun σ' => imp_congr_right fun _ =>
-        holdsC_iff_holds φ h σ')
+        imp_congr_right fun _ => holdsC_iff_holds φ h σ')
     show m.afterC _ _ ↔ m.afterC _ _
     rw [e]
   | _, .modal m P κ φ, h, σ => by
     rw [Fml.hasTransfer_modal, Bool.or_eq_false_iff, Bool.or_eq_false_iff] at h
-    have e : (fun τ => holdsC I τ φ) = (fun τ => tholds τ φ) :=
+    have e : (fun τ => holdsC I τ φ) = (fun τ => holds τ φ) :=
       funext fun τ => propext (holdsC_iff_holds φ h.2 τ)
     show (∀ o, ExecP I.stateInv σ P o → o.thenF I.stateInv κ m (fun τ => holdsC I τ φ)) ↔
-      m.afterRunTR (fun τ => tholds τ φ) (Prog.trunFrames σ P κ)
+      m.afterRunTR (fun τ => holds τ φ) (Prog.trunFrames σ P κ)
     rw [e]
     exact after_frames_iff h.1.1 h.1.2 m _
   | _, .havoc φ, h, σ =>
@@ -175,7 +176,7 @@ theorem holdsC_iff_holds {I : Fml C []} : {Γ : Ctx} → (φ : Fml C Γ) → φ.
   | _, .all _ _ φ, h, σ => forall_congr' fun _ => holdsC_iff_holds φ h _
   | _, .bind m _ t φ, h, σ => by
     have e : (fun v : t.TDenote C σ.H => holdsC I (σ.push v) φ) =
-        (fun v : t.TDenote C σ.H => tholds (σ.push v) φ) :=
+        (fun v : t.TDenote C σ.H => holds (σ.push v) φ) :=
       funext fun v => propext (holdsC_iff_holds φ h (σ.push v))
     show m.forallB _ ↔ m.forallB _
     rw [e]
@@ -188,9 +189,9 @@ program and then its frames, is among the callback runs
 invariant. -/
 theorem holds_of_holdsC_modal {I : Fml C []} {Γ Γ₁ Γ₀ : Ctx} {σ : TState C Γ} {m : Modality}
     {P : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀} (H : holdsC I σ (.modal m P κ φ))
-    (hφ : φ.hasTransfer = false) : tholds σ (.modal m P κ φ) := by
+    (hφ : φ.hasTransfer = false) : holds σ (.modal m P κ φ) := by
   change ∀ o, ExecP I.stateInv σ P o → o.thenF I.stateInv κ m (holdsC I · φ) at H
-  show m.afterRunTR (tholds · φ) (Prog.trunFrames σ P κ)
+  show m.afterRunTR (holds · φ) (Prog.trunFrames σ P κ)
   rcases Prog.exec_run I.stateInv P σ with he | he
   · have H₁ := H _ he
     cases hr : Prog.trun σ P with
@@ -219,14 +220,14 @@ postcondition has a program paying. -/
 theorem holds_of_holdsC_imp {I : Fml C []} {Γ Γ₁ Γ₀ : Ctx} {σ : TState C Γ} {a : Fml C Γ}
     {m : Modality} {P : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
     (H : holdsC I σ (.imp a (.modal m P κ φ))) (ha : a.hasTransfer = false)
-    (hφ : φ.hasTransfer = false) : tholds σ (.imp a (.modal m P κ φ)) :=
+    (hφ : φ.hasTransfer = false) : holds σ (.imp a (.modal m P κ φ)) :=
   fun h => holds_of_holdsC_modal (H ((holdsC_iff_holds a ha σ).2 h)) hφ
 
 /-- **Valid with callbacks is valid without**, for `pre → [ P ] post`. -/
 theorem valid_of_validC {I : Invariant C} {Γ₁ Γ₀ : Ctx} {a : Fml C []} {m : Modality}
     {P : Prog C [] Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀} (H : ValidC I (.imp a (.modal m P κ φ)))
     (ha : a.hasTransfer = false) (hφ : φ.hasTransfer = false) :
-    TValid (.imp a (.modal m P κ φ)) :=
+    Valid (.imp a (.modal m P κ φ)) :=
   fun σ => holds_of_holdsC_imp (H σ) ha hφ
 
 end Solidity.Core

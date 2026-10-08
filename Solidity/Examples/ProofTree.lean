@@ -31,7 +31,8 @@ written).  There a parameter is bound by `∀`, so a tree starts with
 rest of the program, so no `emptyModality` follows it; a split has KeY's two
 goals under either modality, its branch's `}` printed; a leaf closes by
 `Proves.close` and today's closer on its erasure, behind diamond updates
-too where they keep the `bool` locals `bool`s (`Upd.boolB`).  `sol_prove?`
+too (`Fml.closableB`: an update's reading asks only of the typed states it
+may end in).  `sol_prove?`
 is the scoped one (`Calculus/Core/Closers.lean`), its replay today's
 text.  What stays today's, each said where it is: the two interval examples
 (an explicit `∀` is stripped with the parameters'), the guards on today's
@@ -54,8 +55,7 @@ open scoped Solidity.Core.Surface
 a run of steps, one flat branch, then `requireSimple`'s goals, each a
 sub-branch labelled as solkey labels it ("Holds", "Reverts").  `x == 1` is
 `binopAssignment` at `==`, which prints as KeY's `boolEqualityAssignment`.
-The leaves sit behind the diamond's updates, each of which keeps the `bool`
-locals `bool`s (`Upd.boolB`), so `Proves.close` takes them. -/
+The leaves sit behind the diamond's updates, which `Proves.close` takes. -/
 
 /--
 info: 0: allRight
@@ -249,8 +249,8 @@ example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
   exact ⟨rfl, rfl⟩
 
 /-! Under the diamond the leaves sit behind the diamond's updates, which
-`Proves.close` takes where they keep the `bool` locals `bool`s
-(`Fml.closableB`, `Upd.boolB`): here `to := 9`, `ok := true`, `ok := false`. -/
+`Proves.close` takes (`Fml.closableB`): here `to := 9`, `ok := true`,
+`ok := false`. -/
 
 /--
 info: 0: localValueDeclInitDrop
@@ -368,7 +368,7 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
 
 The suggestion is the walk `ApplySteps.guardedCopy` writes by hand, today's
 text with no `cov` goal; each leaf closes behind the diamond's updates
-(`Upd.boolB`). -/
+(`Fml.closableB`). -/
 
 /--
 info: Try this:

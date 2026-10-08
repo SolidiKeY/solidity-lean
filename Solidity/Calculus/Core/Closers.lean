@@ -97,32 +97,39 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
 
 /-! ## A scoped formula refuted at a state
 
-`¬ ⊨ dl!{ … }` by one state where the run panics, or halts under the
-diamond: the run's outcome read by the kernel (`decide +kernel` on
-`isPanic`/`isHalt`), as today's refutations read it by `rfl`. -/
+`¬ ⊨ dl!{ … }` by one typed state where the run panics, or fails under the
+diamond: the typed run's outcome read by the kernel (`decide +kernel` on
+`TRes.isPanic`/`TRes.isFail`), as today's refutations read it by `rfl`.  A
+run exhausted (a push at the bound) is no failure: both modalities accept
+it (decision 15). -/
 
-/-- The outcome is a panic. -/
-def _root_.Solidity.Semantics.Res.isPanic {α : Type} : Semantics.Res α → Bool
+/-- The typed outcome is a panic. -/
+def TRes.isPanic {α : Type} : TRes α → Bool
   | .error .panic => true
   | _ => false
 
-/-- The outcome is a halt (a revert or a panic). -/
-def _root_.Solidity.Semantics.Res.isHalt {α : Type} : Semantics.Res α → Bool
+/-- The typed outcome is one the diamond refuses: a revert, a panic, a
+divergence. -/
+def TRes.isFail {α : Type} : TRes α → Bool
+  | .error .exhausted => false
   | .error _ => true
   | .ok _ => false
 
 /-- No modality holds of a run that panics. -/
-theorem _root_.Solidity.Modality.afterRunC_not_panic {α : Type} {m : Modality} {p : α → Prop}
-    {r : Semantics.Res α} (h : m.afterRunC p r) (hp : r.isPanic = true) : False := by
+theorem _root_.Solidity.Modality.afterRunTR_not_panic {α : Type} {m : Modality} {p : α → Prop}
+    {r : TRes α} (h : m.afterRunTR p r) (hp : r.isPanic = true) : False := by
   cases r with
   | ok _ => cases hp
   | error e => cases e <;> first | exact h.2 rfl | cases hp
 
-/-- The diamond does not hold of a run that halts. -/
-theorem _root_.Solidity.Modality.afterRunC_diamond_halt {α : Type} {p : α → Prop}
-    {r : Semantics.Res α} (h : Modality.diamond.afterRunC p r) (hp : r.isHalt = true) : False := by
+/-- The diamond does not hold of a run that fails. -/
+theorem _root_.Solidity.Modality.afterRunTR_diamond_fail {α : Type} {p : α → Prop}
+    {r : TRes α} (h : Modality.diamond.afterRunTR p r) (hp : r.isFail = true) : False := by
   cases r with
   | ok _ => cases hp
-  | error _ => exact h.1
+  | error e =>
+    cases e with
+    | exhausted => cases hp
+    | _ => exact absurd h.1 nofun
 
 end Solidity.Core

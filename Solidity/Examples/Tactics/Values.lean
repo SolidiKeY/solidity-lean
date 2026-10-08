@@ -80,8 +80,8 @@ theorem declThenAssign : ⊨ dl!{ ⟨ uint x; x = 4; uint y = x + 1; ⟩ y == 5 
 theorem divisionByZeroBox : ⊨ dl!{ [ uint r = 8 / 0; ] r == 0 } := by sol_symex; sol_close
 
 /-- … and no diamond formula does. -/
-example : ¬ (⊨ dl!{ ⟨ uint r = 8 / 0; ⟩ r == 0 }) := fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+example : ¬ (⊨ dl!{ ⟨ uint r = 8 / 0; ⟩ r == 0 }) := fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-- `localDivAssign`'s zero-divisor branch: `x /= y` with `y == 0`. -/
 theorem divAssignByZeroBox : ⊨ dl!{ [ uint x = 10; uint y = 0; x /= y; ] x == 0 } := by
@@ -91,8 +91,8 @@ theorem divAssignByZeroBox : ⊨ dl!{ [ uint x = 10; uint y = 0; x /= y; ] x == 
 /-- The diamond twin fails: without it the box above would also pass if
 `x /= 0` silently produced `0`. -/
 example : ¬ (⊨ dl!{ ⟨ uint x = 10; uint y = 0; x /= y; ⟩ x == 0 }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-- Checked arithmetic: `2²⁵⁶ - 1 + 1` overflows and reverts. -/
 theorem overflowBox :
@@ -103,12 +103,12 @@ theorem overflowBox :
 
 example : ¬ (⊨ dl!{ ⟨ uint x = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
                       uint r = x + 1; ⟩ true }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-- `0 - 1` is below the `uint` range: it reverts too. -/
-example : ¬ (⊨ dl!{ ⟨ uint r = 0 - 1; ⟩ true }) := fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+example : ¬ (⊨ dl!{ ⟨ uint r = 0 - 1; ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-! ## Comparisons -/
 

@@ -1,78 +1,88 @@
 import Solidity.Calculus.Core.Proves
-import Solidity.Calculus.Core.SoundStep
 import Solidity.Calculus.Core.CloseErase
 
 /-!
-# The scoped sequent is sound
+# The scoped sequent is sound: the structure
 
-`H ⊢ φ` (`Calculus/Core/Proves.lean`) gives `H.wrap φ` in every state of the
-outer scope (`Proves.sound`), and a goal with an empty context is valid
-(`Proves.valid`), since every rule the strategy fires is sound
-(`Stmt.sound`): the premise `p` of `s.step k m = some p`, in front of any
-rest, frames and postcondition, gives the modality over `s` (`Premise.Sound`,
-`Calculus/Core/SoundKit.lean`).  That is the arms' soundness,
-`Calculus/Core/SoundStep.lean`'s `Stmt.stepSound`, collected by
-`Stmt.Sound.of_stepSound`; the rest of this module is the structural part,
-which does not depend on any arm.
+What `H ⊢ φ` proves holds, its context in front, in every typed state of the
+outer scope (`Proves.sound_of`, `holds`, `Calculus/Core/Logic.lean`), given
+that every rule the strategy fires is sound there (`Stmt.Sound`, the arms'
+part, `Premise.Sound` per premise, proved in `Calculus/Core/Sound.lean`:
+`Stmt.sound`, `Proves.sound`, `Proves.valid`).  This module is the
+structural part, which does not depend on any arm: the context is monotone
+and keeps a conjunction (`Hyps.wrap_and`), as every entry is an
+implication, an update or a universal; `closeTrue` holds behind a context
+with no diamond update but scope ends (`Hyps.wrap_valid`; a rule with no
+goal would not be sound behind a diamond update that halts, so `branches`
+and `cases` have at least one goal); `emptyModality` goes into the frames
+(`holds_exit`); and `close` is `holds_of_erase_valid`
+(`Calculus/Core/CloseErase.lean`).
 
-It holds in untyped states too, with no typing hypothesis: a branch on a
-condition that is stuck (a `bool` local holding no `bool`, which a formula's
-binders allow) satisfies the box, and the diamond reads only from and into
-states whose `bool` locals hold `bool`s (`State.BoolOK`,
-`Calculus/Core/Logic.lean`), where a branch's conditions cover the state, so
-`Proves.split` and `Proves.inv` have no cover goal.
-
-A rule's goals are the conjuncts of its premise's formula, each under the
-context: the context is monotone and keeps a conjunction
-(`Hyps.wrap_and`), as every entry is an implication, an update or a
-universal.  A rule with no goal would not be sound behind a diamond update
-that halts, so `branches` and `cases` have at least one goal, and
-`closeTrue` asks the context to have no diamond update but scope ends
-(`Hyps.wrap_valid`).
+An update's reading asks of every typed state that erases to the one it
+ends in, so a rule's premise gives its conclusion in the state the typed
+run ends in, one of them: only that direction is needed here.
 -/
 
 namespace Solidity.Core
-
 open Solidity (Modality RuleSet)
 
 variable {C : Contract}
 
 /-! ## The per-arm interface -/
 
-/-- **Every rule the strategy fires is sound** in every state, at any fresh
-index (a rule's fresh locals are positions, so soundness needs no freshness
-premise): what `Proves.sound` asks of the arms
-(`Stmt.sound`). -/
+/-- **A premise is sound** for the statement `s` in the typed state `σ`
+under `m`: in front of any rest, frames and postcondition, it gives
+`⟨ s; ω κ ⟩ φ` (`Premise.Sound`, over `TState`). -/
+def Premise.Sound (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ')
+    (σ : TState C Γ) : Prop :=
+  ∀ {Γ₁ Γ₀ : Ctx} (ω : Prog C Γ' Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀),
+    holds σ (p.fml m ω κ φ) → holds σ (.modal m (.cons s ω) κ φ)
+
+/-- **Every rule the strategy fires is sound** over the typed state, in
+every typed state, at any fresh index (`Stmt.Sound`, over `TState`). -/
 def Stmt.Sound (C : Contract) : Prop :=
   ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ'),
-    s.step k m = some p → ∀ σ : State C Γ, Premise.Sound m s p σ
+    s.step k m = some p → ∀ σ : TState C Γ, Premise.Sound m s p σ
 
-/-- The arms' interface (`Calculus/Core/SoundKit.lean`) gives it. -/
-theorem Stmt.Sound.of_stepSound
-    (hS : ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ'), Stmt.StepSound k m s) :
-    Stmt.Sound C :=
-  fun k m _ _ s p hp σ => hS k m s σ p hp
+/-! ## Scope ends -/
 
-/-- **Every rule the strategy fires is sound** (`Stmt.stepSound`). -/
-theorem Stmt.sound : Stmt.Sound C :=
-  Stmt.Sound.of_stepSound Stmt.stepSound
+theorem TEnv.thin_erase {H : HTy} : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (e : TEnv C H Δ) →
+    TEnv.erase Γ (TEnv.thin h e) = Env.thin h (TEnv.erase Δ e)
+  | _, _, .refl, _ => rfl
+  | _, _, .keep h, e => congrArg (Prod.mk _) (TEnv.thin_erase h e.2)
+  | _, _, .drop h, e => TEnv.thin_erase h e.2
 
-/-- **Every taclet is sound**: the scoped table's rules are the ones the
-strategy fires (`Taclet.toStep`), so `Stmt.sound` covers them with no proof
-per rule. -/
-theorem Taclet.sound {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (t : Taclet C k m s p) (σ : State C Γ) : Premise.Sound m s p σ :=
-  Stmt.sound k m s p t.toStep σ
+theorem TState.thin_erase {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : TState C Δ) :
+    (σ.thin h).erase = σ.erase.thin h := by
+  simp only [TState.erase, TState.thin, TState.withEnv, State.thin, State.withEnv, TEnv.thin_erase]
 
-/-- Every Lean-only rule is sound, as `Taclet.sound`. -/
-theorem LeanTaclet.sound {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (t : LeanTaclet C k m s p) (σ : State C Γ) : Premise.Sound m s p σ :=
-  Stmt.sound k m s p t.toStep σ
+theorem Prog.trunFrames_seq {Γ Γ₁ Γ₀ : Ctx} (σ : TState C Γ) (ω : Prog C Γ Γ₁)
+    (κ : Frames C Γ₁ Γ₀) : Prog.trunFrames σ .nil (.seq ω κ) = Prog.trunFrames σ ω κ := by
+  simp only [Prog.trunFrames, Prog.trun_nil, Frames.trun, TRun.seq, bind, Except.bind]
+  cases Prog.trun σ ω with
+  | error => rfl
+  | ok o =>
+    simp only [Except.map]
+    cases Frames.trun o.st κ <;> rfl
 
-/-- Every rule of the table is sound. -/
-theorem Rule.sound {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (r : Rule C k m s p) (σ : State C Γ) : Premise.Sound m s p σ :=
-  Stmt.sound k m s p r.toStep σ
+/-- A finished program's frames, as the formula `emptyModality` leaves
+(`Frames.exit`), give the modality: each scope end's update is read in the
+state the frame pops to, one of the states its erasure reaches. -/
+theorem holds_exit (m : Modality) {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C Γ Γ₀) →
+    ∀ (φ : Fml C Γ₀) (σ : TState C Γ), holds σ (κ.exit m φ) → holds σ (.modal m .nil κ φ)
+  | _, .nil, φ, σ, h => ⟨h, nofun⟩
+  | _, .seq .nil κ, φ, σ, h => by
+    show m.afterRunTR (holds · φ) (Prog.trunFrames σ .nil (.seq .nil κ))
+    rw [Prog.trunFrames_seq]
+    exact holds_exit m κ φ σ h
+  | _, .seq (.cons s ω) κ, φ, σ, h => by
+    show m.afterRunTR (holds · φ) (Prog.trunFrames σ .nil (.seq (.cons s ω) κ))
+    rw [Prog.trunFrames_seq]
+    exact h
+  | _, .pop _ e κ, φ, σ, h =>
+    holds_exit m κ φ (σ.drop e) (h (σ.drop e) (TState.drop_erase e σ) (List.prefix_refl _))
+  | _, .drop e κ, φ, σ, h =>
+    holds_exit m κ φ (σ.thin e) (h (σ.thin e) (TState.thin_erase e σ) (List.prefix_refl _))
 
 /-! ## Outcomes -/
 
@@ -82,27 +92,19 @@ theorem _root_.Solidity.Modality.afterC_and {α : Type} {m : Modality} {p q r : 
   | ok a => exact h a hp hq
   | error _ => exact hp
 
-theorem _root_.Solidity.Modality.afterT_and {α : Type} {m : Modality} {T : Prop} {ok p q r : α → Prop}
-    {x : Semantics.Res α} (hp : m.afterT T ok p x) (hq : m.afterT T ok q x)
-    (h : ∀ a, p a → q a → r a) : m.afterT T ok r x := by
-  cases m with
-  | box => exact Modality.afterC_and hp hq h
-  | diamond =>
-    exact fun hT => Modality.afterC_and (hp hT) (hq hT) fun a ⟨o, pa⟩ ⟨_, qa⟩ => ⟨o, h a pa qa⟩
-
-/-- A pop or a drop never halts, and keeps the `bool` locals `bool`s. -/
+/-- A pop or a drop never halts. -/
 theorem Upd.apply_popsOnly {Γ : Ctx} (σ : State C Γ) {Δ : Ctx} (U : Upd C Γ Δ)
-    (h : U.popsOnly = true) : ∃ τ, U.apply σ = .ok τ ∧ (σ.BoolOK → τ.BoolOK) := by
+    (h : U.popsOnly = true) : ∃ τ, U.apply σ = .ok τ := by
   induction U with
-  | nil => exact ⟨σ, rfl, id⟩
+  | nil => exact ⟨σ, rfl⟩
   | snoc _ _ => exact absurd h Bool.false_ne_true
   | decl _ _ _ => exact absurd h Bool.false_ne_true
   | pop U e ih =>
-    obtain ⟨τ, hτ, hok⟩ := ih h
-    exact ⟨τ.drop e, by rw [Upd.apply, hτ]; rfl, fun hσ => (hok hσ).drop e⟩
+    obtain ⟨τ, hτ⟩ := ih h
+    exact ⟨τ.drop e, by rw [Upd.apply, hτ]; rfl⟩
   | drop U e ih =>
-    obtain ⟨τ, hτ, hok⟩ := ih h
-    exact ⟨τ.thin e, by rw [Upd.apply, hτ]; rfl, fun hσ => (hok hσ).thin e⟩
+    obtain ⟨τ, hτ⟩ := ih h
+    exact ⟨τ.thin e, by rw [Upd.apply, hτ]; rfl⟩
 
 /-! ## The context -/
 
@@ -122,15 +124,14 @@ theorem Hyps.wrap_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
   | upd H m U ih =>
     intro φ ψ χ h
     exact ih (φ := .upd m U φ) (ψ := .upd m U ψ) (χ := .upd m U χ) fun τ f g =>
-      Modality.afterT_and f g h
+      Modality.afterC_and f g fun _ x y σ' e hx => h σ' (x σ' e hx) (y σ' e hx)
   | havoc H ih =>
     intro φ ψ χ h
     exact ih (φ := .havoc φ) (ψ := .havoc ψ) (χ := .havoc χ) fun τ f g st nt =>
       h _ (f st nt) (g st nt)
   | all H x p ih =>
     intro φ ψ χ h
-    exact ih (φ := .all x p φ) (ψ := .all x p ψ) (χ := .all x p χ) fun τ f g v hv =>
-      h _ (f v hv) (g v hv)
+    exact ih (φ := .all x p φ) (ψ := .all x p ψ) (χ := .all x p χ) fun τ f g v => h _ (f v) (g v)
   | bind H m x t ih =>
     intro φ ψ χ h
     exact ih (φ := .bind m x t φ) (ψ := .bind m x t ψ) (χ := .bind m x t χ) fun τ f g =>
@@ -141,12 +142,12 @@ theorem Hyps.wrap_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
 
 /-- The context is monotone. -/
 theorem Hyps.wrap_mono {Γ : Ctx} (H : Hyps C Γ₀ Γ) {φ ψ : Fml C Γ}
-    (h : ∀ τ, holds τ φ → holds τ ψ) (σ : State C Γ₀) (hφ : holds σ (H.wrap φ)) :
+    (h : ∀ τ, holds τ φ → holds τ ψ) (σ : TState C Γ₀) (hφ : holds σ (H.wrap φ)) :
     holds σ (H.wrap ψ) :=
   H.wrap_and (fun τ a _ => h τ a) σ hφ hφ
 
 /-- A conjunction of at least one formula, each under the context. -/
-theorem Hyps.wrap_conj {Γ : Ctx} (H : Hyps C Γ₀ Γ) (σ : State C Γ₀) :
+theorem Hyps.wrap_conj {Γ : Ctx} (H : Hyps C Γ₀ Γ) (σ : TState C Γ₀) :
     ∀ (ψs : List (Fml C Γ)), ψs ≠ [] → (∀ ψ ∈ ψs, holds σ (H.wrap ψ)) →
       holds σ (H.wrap (Fml.conj ψs))
   | [], hne, _ => absurd rfl hne
@@ -169,22 +170,21 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     | box =>
       refine ih (φ := .upd .box U φ) hb fun τ => ?_
       show Modality.afterC .box _ _
-      cases U.apply τ with
-      | ok a => exact h a
+      cases U.apply τ.erase with
+      | ok _ => exact fun σ' _ _ => h σ'
       | error _ => trivial
     | diamond =>
       have hb' : U.popsOnly = true ∧ H.boxOnly = true := Bool.and_eq_true_iff.mp hb
       refine ih (φ := .upd .diamond U φ) hb'.2 fun τ => ?_
-      obtain ⟨a, ha, hok⟩ := Upd.apply_popsOnly τ U hb'.1
-      intro hτ
+      obtain ⟨a, ha⟩ := Upd.apply_popsOnly τ.erase U hb'.1
       show Modality.afterC .diamond _ _
       rw [ha]
-      exact ⟨hok hτ, h a⟩
+      exact fun σ' _ _ => h σ'
   | havoc H ih => intro φ hb h; exact ih (φ := .havoc φ) hb fun τ _ _ => h _
-  | all H x p ih => intro φ hb h; exact ih (φ := .all x p φ) hb fun τ _ _ => h _
+  | all H x p ih => intro φ hb h; exact ih (φ := .all x p φ) hb fun τ _ => h _
   | bind H m x t ih =>
     intro φ hb h
-    exact ih (φ := .bind m x t φ) hb fun τ => holds_bind_intro fun _ => h _
+    exact ih (φ := .bind m x t φ) hb fun τ v => h _
   | anon H xs ih => intro φ hb h; exact ih (φ := .anon xs φ) hb fun τ _ => h _
 
 theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) × Idx Γ t))
@@ -195,22 +195,26 @@ end Wrap
 
 /-! ## Soundness -/
 
-/-- **Soundness of the scoped sequent**: what `H ⊢ φ` proves holds, its
-context in front, in every state of the outer scope. -/
-theorem Proves.sound {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
+/-- **Soundness of the scoped sequent over the typed state**, given the
+arms' (`Stmt.Sound`): what `H ⊢ φ` proves holds, its context in front, in
+every typed state of the outer scope.  The arms' are proved in
+`Calculus/Core/Sound.lean` (`Stmt.sound`, `Proves.sound`). -/
+theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
     {φ : Fml C Γ} (d : Proves C R Γ₀ H φ) : ∀ σ, holds σ (H.wrap φ) := by
-  have hS : Stmt.Sound C := Stmt.sound
   induction d with
   | intro _ ih => exact ih
   | allIntro _ ih => exact ih
   | updIntro _ ih => exact ih
   | bindIntro _ ih => exact ih
   | @update Γ Γ' Γ₁ Γ₂ H m s ω κ φ U d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.update U).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.update U).fml m ω κ φ)
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @unfold Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.unfold P e).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.unfold P e).fml m ω κ φ)
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @bind Γ Γ' Γ₁ Γ₂ H m s ω κ φ x t P d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.bind x t P).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.bind x t P).fml m ω κ φ)
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @split Γ Γ₁ Γ₂ Δ₁ Δ₂ H m s ω κ φ b c c' P Q d _ _ ihT ihE =>
     intro σ
     have hTE : holds σ (H.wrap ((Premise.split b c c' P Q).fml m ω κ φ)) :=
@@ -222,10 +226,12 @@ theorem Proves.sound {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
       (fun τ a b => hS _ _ s _ d τ ω κ φ (show holds τ ((Premise.check c).fml m ω κ φ)
         from ⟨a, b⟩)) σ (ihT σ) (ihE σ)
   | @done Γ Γ' Γ₁ Γ₂ H m s ω κ φ b d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.done b).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.done b).fml m ω κ φ)
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @branches Γ Γ₁ Γ₂ H m s ω κ φ bs d hne _ ih =>
     intro σ
-    refine H.wrap_mono (φ := (Premise.branches bs).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
+    refine H.wrap_mono (φ := (Premise.branches bs).fml m ω κ φ)
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
     refine H.wrap_conj σ _ ?_ ?_
     · cases bs with
       | nil => exact nomatch hne
@@ -235,7 +241,8 @@ theorem Proves.sound {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
       exact ih b hb σ
   | @cases Γ Γ₁ Γ₂ H m s ω κ φ fs us d hne _ _ ihF ihU =>
     intro σ
-    refine H.wrap_mono (φ := (Premise.cases fs us).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
+    refine H.wrap_mono (φ := (Premise.cases fs us).fml m ω κ φ)
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
     refine H.wrap_conj σ _ ?_ ?_
     · cases fs with
       | cons _ _ => exact List.cons_ne_nil _ _
@@ -256,38 +263,21 @@ theorem Proves.sound {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
     have hX : holds σ ((H.anonHavoc xs hv).wrap X) :=
       (H.anonHavoc xs hv).wrap_and (φ := .imp I (.upd m U (.imp c A)))
         (ψ := .imp I (.upd m U (.imp c' B))) (χ := X)
-        (fun τ x y hI => Modality.afterT_and (x hI) (y hI) fun _ f g => ⟨f, g⟩) σ (ihT σ) (ihE σ)
+        (fun τ x y hI => Modality.afterC_and (x hI) (y hI) fun _ f g σ' e hx =>
+          ⟨f σ' e hx, g σ' e hx⟩) σ (ihT σ) (ihE σ)
     rw [Hyps.wrap_anonHavoc] at hX
     have hF : holds σ (H.wrap ((Premise.inv I xs hv U c c' hu hb P post).fml m ω κ φ)) :=
       H.wrap_and (φ := I) (ψ := Fml.anonHavoc xs hv X) (χ := .and I (Fml.anonHavoc xs hv X))
         (fun _ x y => ⟨x, y⟩) σ (ihI σ) hX
     exact H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ hF
   | @inline Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.inline P e).fml m ω κ φ) (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_mono (φ := (Premise.inline P e).fml m ω κ φ)
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @empty Γ Γ₂ H m κ φ _ ih =>
     exact fun σ => H.wrap_mono (φ := κ.exit m φ) (ψ := .modal m .nil κ φ)
-      (fun τ h => holds_modal_intro fun hT => (holds_exit m κ φ τ hT).1 h) σ (ih σ)
+      (fun τ h => holds_exit m κ φ τ h) σ (ih σ)
   | @closeTrue Γ H h => exact H.wrap_valid (φ := .tt) h fun _ => trivial
   | close ns hlen hnd h hc hB =>
-    exact fun σ => holds_of_erase_valid _ (Fml.closableB_sound _ hc).1 hB (Agree.erase σ hnd hlen) fun τ _ => h τ
-
-/-- **A goal proved with an empty context is valid.** -/
-theorem Proves.valid {R : RuleSet} {φ : Fml C []}
-    (d : Proves C R [] .nil φ) : Valid φ :=
-  Proves.sound d
-
-/--
-info: 'Solidity.Core.Proves.valid' depends on axioms: [propext, Classical.choice, Quot.sound]
--/
-#guard_msgs in
-#print axioms Proves.valid
-
-/-- `∀ bool b; [ if (b) { } else { } ] true` is valid, by `allRight`,
-`ifElseSplit` and in each goal the block's end and `closeTrue`. -/
-example :
-    Valid (C := StandardExample) (.all (.user "b") .bool
-      (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt)) :=
-  Proves.valid (R := .all)
-    (.allIntro (.split rfl (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))))
+    exact fun σ => holds_of_erase_valid _ hlen hnd (Fml.closableB_sound _ hc) hB h σ
 
 end Solidity.Core

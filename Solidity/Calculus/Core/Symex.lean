@@ -1,4 +1,4 @@
-import Solidity.Calculus.Core.ProvesSound
+import Solidity.Calculus.Core.Sound
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Symex
 
@@ -23,16 +23,6 @@ open Solidity (Modality)
 
 variable {C : Contract}
 
-theorem _root_.Solidity.Modality.afterT_mono {α : Type} {m : Modality} {T : Prop} {ok p q : α → Prop}
-    (h : ∀ a, p a → q a) {x : Semantics.Res α} : m.afterT T ok p x → m.afterT T ok q x := by
-  cases m with
-  | box => cases x with
-    | ok a => exact h a
-    | error _ => exact id
-  | diamond => cases x with
-    | ok a => exact fun hx hT => ⟨(hx hT).1, h a (hx hT).2⟩
-    | error _ => exact id
-
 section Sound
 
 variable (hS : Stmt.Sound C)
@@ -41,11 +31,11 @@ include hS
 /-- One modality one step on is sound. -/
 theorem Fml.modalStep_sound (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) {ψ : Fml C Γ} (h : Fml.modalStep k m P κ φ = some ψ)
-    (σ : State C Γ) (hψ : holds σ ψ) : holds σ (.modal m P κ φ) := by
+    (σ : TState C Γ) (hψ : holds σ ψ) : holds σ (.modal m P κ φ) := by
   cases P with
   | nil =>
     cases h
-    exact holds_modal_intro fun hT => (holds_exit m κ φ σ hT).1 hψ
+    exact holds_exit m κ φ σ hψ
   | cons s ω =>
     change (s.step k m).map (fun p => p.fml m ω κ φ) = some ψ at h
     obtain ⟨p, hp, rfl⟩ := Option.map_eq_some_iff.1 h
@@ -76,7 +66,7 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     intro χ h σ hχ
     change (Fml.stepR k φ).map (Fml.upd m U) = some χ at h
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact Modality.afterT_mono (fun τ => ih hφ τ) hχ
+    exact Modality.afterC_imp hχ fun τ h σ' e hx => ih hφ σ' (h σ' e hx)
   | modal m P κ φ => intro χ h σ hχ; exact Fml.modalStep_sound hS k m P κ φ h σ hχ
   | havoc φ ih =>
     intro χ h σ hχ
@@ -87,7 +77,7 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     intro χ h σ hχ
     change (Fml.stepR k φ).map (Fml.all x p) = some χ at h
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun v hv => ih hφ _ (hχ v hv)
+    exact fun v => ih hφ _ (hχ v)
   | bind m x t φ ih =>
     intro χ h σ hχ
     change (Fml.stepR k φ).map (Fml.bind m x t) = some χ at h

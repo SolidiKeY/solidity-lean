@@ -112,8 +112,8 @@ theorem uncheckedWrap :
 
 /-- Division inside `unchecked` still reverts on a zero divisor. -/
 example : ¬ (⊨ dl!{ ⟨ uint x = 1; uint y = 0; unchecked { x = x / y; }; ⟩ true }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-! ## What the elaborator writes -/
 

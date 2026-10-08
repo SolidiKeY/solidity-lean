@@ -46,8 +46,8 @@ theorem overflowBox : ⊨ dl!{ [ uint8 x = 250; x += 10; ] false } := by
 
 /-- … and the diamond of nothing. -/
 theorem overflowDiamond : ¬ (⊨ dl!{ ⟨ uint8 x = 250; x += 10; ⟩ true }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-- In range, the check passes: `250 + 5` is `255`. -/
 theorem inRangeAdd : ⊨ dl!{ ⟨ uint8 x = 250; x += 5; ⟩ x == 255 } := by
@@ -63,14 +63,14 @@ theorem int8Underflow : ⊨ dl!{ [ int8 y = -100; y -= 29; ] false } := by
   sol_symex
   sol_close
 
-example : ¬ (⊨ dl!{ ⟨ int8 y = -100; y -= 29; ⟩ true }) := fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+example : ¬ (⊨ dl!{ ⟨ int8 y = -100; y -= 29; ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-- `++` and unary `-` are checked too: `255++`, and `-(-128)` at `int8`. -/
-example : ¬ (⊨ dl!{ ⟨ uint8 i = 255; i++; ⟩ true }) := fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
-example : ¬ (⊨ dl!{ ⟨ int8 y = -128; int8 z = -y; ⟩ true }) := fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+example : ¬ (⊨ dl!{ ⟨ uint8 i = 255; i++; ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
+example : ¬ (⊨ dl!{ ⟨ int8 y = -128; int8 z = -y; ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-- `unchecked` wraps at `2^8`: `250 + 10` is `4`, `4 - 5` is `255`, `255 * 2` is `254`. -/
 theorem uncheckedWrap :
@@ -83,8 +83,8 @@ theorem uncheckedWrap :
 `c` is a `uint` (solc checks it at `uint8`); with `a` cast to `uint` first it
 does not. -/
 example : ¬ (⊨ dl!{ ⟨ uint8 a = 200; uint8 b = 100; uint c = a + b; ⟩ true }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 theorem widenedAdd : ⊨ dl!{ ⟨ uint8 a = 200; uint8 b = 100; uint c = uint(a) + b; ⟩ c == 300 } := by
   sol_symex
@@ -92,8 +92,8 @@ theorem widenedAdd : ⊨ dl!{ ⟨ uint8 a = 200; uint8 b = 100; uint c = uint(a)
 
 /-- Inside a condition the operation is captured and checked first. -/
 example : ¬ (⊨ dl!{ ⟨ uint8 a = 200; bool t = a * 2 > a; ⟩ true }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-- A narrowing cast keeps the low bits: `uint8(300)` of a `uint` is `44`. -/
 theorem castTruncates : ⊨ dl!{ ⟨ uint w = 300; uint8 z = uint8(w); ⟩ z == 44 } := by

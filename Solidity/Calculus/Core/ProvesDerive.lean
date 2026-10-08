@@ -27,10 +27,9 @@ quotes the leaves for the tactic (`Seq.leafQuote`) and the kernel's
 condition 1); `n` bounds the steps down a path, `b` the steps of the whole
 walk, handed from a goal to the next.
 
-A leaf behind a diamond update is `closableB` when the update keeps the
-`bool` locals `bool`s (`Upd.boolB`, as the `Core.Valid` route's `Fml.posB`
-asks); behind any other it is not until `close` reads the typed state
-(`docs/intrinsic.md`, CORE 2), and the walk fails there.
+A leaf behind updates of either modality is `closableB`: an update's
+reading asks only of the typed states it may end in, as the `Core.Valid`
+route's `Fml.posB` takes it too.
 -/
 
 namespace Solidity.Core

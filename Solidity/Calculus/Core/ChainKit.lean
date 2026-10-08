@@ -1,7 +1,7 @@
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.HoldsErase
-import Solidity.Calculus.Core.ProvesSound
+import Solidity.Calculus.Core.Sound
 import Solidity.Calculus.Core.Merge
 import Solidity.Calculus.Chains
 
@@ -618,7 +618,7 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
     cases P with
     | nil =>
       cases h
-      exact holds_modal_intro fun hT => (holds_exit m κ φ σ hT).1 hψ
+      exact holds_exit m κ φ σ hψ
     | cons s ω =>
       have h : ((s.step k m).map fun p => (Focus.stmt k m s, p.fml m ω κ φ)) = some (f, ψ) := h
       cases hp : s.step k m with
@@ -663,7 +663,7 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
       rw [h₁] at h
       obtain ⟨f', φ'⟩ := q
       cases h
-      exact Modality.afterT_and hψ hψ fun τ a _ => Fml.stepFocusR_sound φ h₁ τ a
+      exact Modality.afterC_imp hψ fun τ a σ' e hx => Fml.stepFocusR_sound φ h₁ σ' (a σ' e hx)
   | _, .havoc φ, f, ψ, h, σ, hψ => by
     have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.havoc φ')) = some (f, ψ) := h
     cases h₁ : φ.stepFocusR k with
@@ -681,7 +681,7 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
       rw [h₁] at h
       obtain ⟨f', φ'⟩ := q
       cases h
-      exact fun v hv => Fml.stepFocusR_sound φ h₁ _ (hψ v hv)
+      exact fun v => Fml.stepFocusR_sound φ h₁ _ (hψ v)
   | _, .bind m x t φ, f, ψ, h, σ, hψ => by
     have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind m x t φ')) = some (f, ψ) := h
     cases h₁ : φ.stepFocusR k with
@@ -765,8 +765,8 @@ theorem Fml.ViaE.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Sol
 
 /-- **A chain past the program, closed**: the bridge of `Fml.ViaE.valid` is
 `Proves.close` at the last scoped line, whose side conditions the kernel
-decides (`Fml.closableB`: no modality left, box updates only; a hidden
-binder's name avoids the empty context's). -/
+decides (`Fml.closableB`: no modality left, updates of either modality; a
+hidden binder's name avoids the empty context's). -/
 theorem Fml.ViaE.valid_close {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.Fml C}
     {rs : List (Solidity.Link C × Solidity.Fml C)} (v : Fml.ViaE φ ws L rs)
     (h : ∀ τ, Solidity.holds τ (Solidity.Fml.Via.last L rs))

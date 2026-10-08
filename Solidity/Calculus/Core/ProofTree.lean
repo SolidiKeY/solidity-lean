@@ -25,9 +25,8 @@ A leaf is closed by `closeTrue` (`true` behind a context of scope ends and
 box updates), else as a walk ends: `Proves.close` takes the sequent, its
 context in front, to its erasure (`Calculus/Core/CloseErase.lean`), which
 today's `sol_symex; sol_close` closes (`closeTacs`), then by the tactics
-`Config.closers` lists.  `Proves.close` takes a leaf behind a diamond
-update when the update keeps the `bool` locals `bool`s (`Fml.closableB`,
-`Upd.boolB`); behind any other, the leaf stays open.
+`Config.closers` lists.  `Proves.close` takes a leaf behind updates of
+either modality (`Fml.closableB`).
 
 A rule of an operator family prints as KeY's taclet at its operator
 (`RuleShapes.keyTacletAt`, at today's name of the constructor).

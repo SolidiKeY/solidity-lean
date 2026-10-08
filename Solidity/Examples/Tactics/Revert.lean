@@ -124,9 +124,9 @@ the program reverts. -/
 /-- Without the precondition the diamond is not valid: where `a` is `0` and
 `b` is `1` the `require` reverts. -/
 example : ¬ (⊨ dl!{ ⟨ require(a == b); x = a; ⟩ x == b }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem Semantics.State.exampleStore) (.int 0) (by unfold PrimTy.admits; decide) (.int 1) (by unfold PrimTy.admits; decide)
-      (.int 0) (by unfold PrimTy.admits; decide) (by constructor <;> trivial)) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _) ⟨0, by decide⟩ ⟨1, by decide⟩
+      ⟨0, by decide⟩) (by decide +kernel)
 
 /-! ## `assert`: a check, under both modalities
 
@@ -179,15 +179,11 @@ theorem assertBox : ⊢ dl!{ a == b → [ assert(a == b); x = a; ] x == b } := b
     sol_symex
     sol_close
 
-/-- A state where `a` is `0` and `b` is `1`. -/
-def aNeB : Semantics.State :=
-  { storage := [], env := [(.user "a", .val (.int 0)), (.user "b", .val (.int 1))] }
-
 /-- Without the precondition the box is not valid: where `a != b` the
 assertion fails, and a panic satisfies no box formula. -/
 example : ¬ (⊨ dl!{ [ assert(a == b); x = a; ] x == b }) :=
-  fun h => Modality.afterRunC_not_panic
-    (h (Core.State.ofSem aNeB) (.int 0) (by unfold PrimTy.admits; decide) (.int 1) (by unfold PrimTy.admits; decide) (.int 0) (by unfold PrimTy.admits; decide))
+  fun h => Modality.afterRunTR_not_panic
+    (h (Core.TState.init _) ⟨0, by decide⟩ ⟨1, by decide⟩ ⟨0, by decide⟩)
     (by decide +kernel)
 
 /-! The regression the obligation forms rest on: `[ assert(false); ] true`
@@ -195,7 +191,7 @@ is neither valid nor derivable, `[ require(false); ] true` is both. -/
 
 /-- A failed `assert` is no box formula's: `[ assert(false); ] true` is not valid. -/
 theorem assertFalse_box_not_valid : ¬ (⊨ dl!{ [ assert(false); ] true }) :=
-  fun h => Modality.afterRunC_not_panic (h (Core.State.ofSem Semantics.State.exampleStore))
+  fun h => Modality.afterRunTR_not_panic (h (Core.TState.init _))
     (by decide +kernel)
 
 /-- ... and so not derivable (`Proves.valid`). -/
@@ -238,8 +234,8 @@ theorem revertDropsRest : ⊢ dl!{ [ revert(); total = 5; ] total == 7 } := by
   exact fun _ => trivial
 
 /-- The diamond of a revert is never true, whatever the postcondition. -/
-example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => Modality.afterRunC_diamond_halt
-  (h (Core.State.ofSem Semantics.State.exampleStore) trivial) (by decide +kernel)
+example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
+  (h (Core.TState.init _)) (by decide +kernel)
 
 /-- Only the rule for the goal's modality fires. -/
 example : ⊢ dl!{ [ revert(); ] true } := by

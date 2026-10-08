@@ -19,8 +19,8 @@ without, when only `P` pays.
 
 The calculus with callbacks (`ProvesC`, `Calculus/Core/Callback.lean`) on a
 send: solkey's three goals of `sendWithCallbackBox`, each closed in the
-plain calculus, the invariant `true`.  The arms are sound over `tholds`
-(`Stmt.tsound`, `Calculus/Core/TSound.lean`) but not yet over `holdsC`'s
+plain calculus, the invariant `true`.  The arms are sound over `holds`
+(`Stmt.sound`, `Calculus/Core/Sound.lean`) but not yet over `holdsC`'s
 runs with callbacks, so the derivation is pinned, not read as `ValidC`.
 -/
 
@@ -60,20 +60,20 @@ local instance : InContract := ⟨StandardExample⟩
 /-- With no payment the two readings agree (`holdsC_iff_holds`), whatever
 the invariant. -/
 example (I : Invariant StandardExample) :
-    ValidC I cdl!{ [ uint x = 1; ] x == 1 } ↔ TValid cdl!{ [ uint x = 1; ] x == 1 } :=
+    ValidC I cdl!{ [ uint x = 1; ] x == 1 } ↔ Core.Valid cdl!{ [ uint x = 1; ] x == 1 } :=
   ⟨fun h σ => (holdsC_iff_holds _ rfl σ).1 (h σ), fun h σ => (holdsC_iff_holds _ rfl σ).2 (h σ)⟩
 
 /-- KeY's `transferSemantics` option: `noCallback` is the typed reading
 (`validT_noCallback`), `withCallback I` the one with callbacks. -/
 example (I : Invariant StandardExample) (φ : Core.Fml StandardExample []) :
-    (ValidT .noCallback φ ↔ TValid φ) ∧ (ValidT (.withCallback I) φ ↔ ValidC I φ) :=
+    (ValidT .noCallback φ ↔ Core.Valid φ) ∧ (ValidT (.withCallback I) φ ↔ ValidC I φ) :=
   ⟨validT_noCallback, validT_withCallback⟩
 
 /-- A payment true with callbacks is true without: the deterministic run
 is a callback run (`valid_of_validC`, from `Prog.exec_run`). -/
 example (I : Invariant StandardExample) (a : Core.Fml StandardExample []) (P : Core.Prog StandardExample [] [])
     (H : ValidC I (.imp a (.modal .box P .nil .tt))) (ha : a.hasTransfer = false) :
-    TValid (.imp a (.modal .box P .nil .tt)) :=
+    Core.Valid (.imp a (.modal .box P .nil .tt)) :=
   valid_of_validC H ha rfl
 
 /-! ## The calculus with callbacks -/

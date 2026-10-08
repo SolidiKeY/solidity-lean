@@ -141,16 +141,18 @@ theorem miniProblem : ⊨ problem!{ constructor } := by
 /-- A derived obligation of no parameters is a theorem about
 `Contract.deploy` (`Core.Problem.deploy_of_valid_nil`, the erasure of its
 program run from `Contract.deployState`): `constructor(7);` runs for every
-deployer sending no value. -/
-example (tx : Semantics.TxEnv) (hv : tx.msgValue = 0) :
-    Modality.diamond.afterRun (fun _ => True) (Mini.deploy sol{ constructor(7); } tx) := by
+deployer sending no value.  The transaction is typed (`TTx`, its fields
+`uint`s), and the typed run ends: it reads no loop and no push, so it
+computes to its end. -/
+example (tx : Core.TTx) (hv : tx.msgValue.1 = 0) :
+    Modality.diamond.afterRun (fun _ => True) (Mini.deploy sol{ constructor(7); } tx.erase) := by
   have h : ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
       selfBalance := msg.value } ⟨ constructor(7); ⟩ true } := by
     sol_prove
     refine Proves.close ?_
     sol_symex
     sol_close_mt
-  refine Core.Problem.deploy_of_valid_nil h ?_ tx (.inr hv)
+  refine Core.Problem.deploy_of_valid_nil h ?_ tx (.inr hv) ⟨nofun, nofun⟩
   simp only [Core.Prog.Fresh, Core.Stmt.Fresh, List.mem_append, List.not_mem_nil,
     not_false_eq_true, and_self, implies_true, and_true, true_and]
   decide

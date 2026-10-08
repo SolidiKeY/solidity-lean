@@ -383,15 +383,14 @@ theorem assertHolds : ⊨ dl!{ [ age = 10; assert(age == 10); result = 1; ] resu
 /-- `assert(false); result = 1;` — a failing `assert` panics: unlike a
 `require`, the box does not hold … -/
 theorem assertFails : ¬ (⊨ dl!{ [ assert(false); result = 1; ] true }) :=
-  fun h => Modality.afterRunC_not_panic
-    (h (Core.State.ofSem State.exampleStore) (.int 0) (by unfold PrimTy.admits; decide))
+  fun h => Modality.afterRunTR_not_panic
+    (h (Core.TState.init _) ⟨0, by decide⟩)
     (by decide +kernel)
 
 /-- … and the diamond of nothing. -/
 theorem assertFailsDiamond : ¬ (⊨ dl!{ ⟨ assert(false); result = 1; ⟩ result == 1 }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem State.exampleStore) (.int 0) (by unfold PrimTy.admits; decide)
-      (by constructor <;> trivial)) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _) ⟨0, by decide⟩) (by decide +kernel)
 
 /-- `age = 10; require(age == 10); result = 1;` -/
 theorem requireHolds : ⊨ dl!{ [ age = 10; require(age == 10); result = 1; ] result == 1 } := by
@@ -405,9 +404,8 @@ theorem requireFails : ⊨ dl!{ [ require(false); result = 1; ] false } := by
 
 /-- … the diamond `c ∧ φ` (solkey `docs/require-assert.md`). -/
 theorem requireFailsDiamond : ¬ (⊨ dl!{ ⟨ require(false); result = 1; ⟩ result == 1 }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem State.exampleStore) (.int 0) (by unfold PrimTy.admits; decide)
-      (by constructor <;> trivial)) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _) ⟨0, by decide⟩) (by decide +kernel)
 
 /-! ## 7 · Fixed-size arrays
 

@@ -762,9 +762,9 @@ formula — `holdsC`, `ValidC`, `TransferSem`, `holdsT`, `ValidT`,
 lemmas (now `TRun.*`).  The M3 versions are removed with this rewrite (their only user was `Examples/Tactics/CoreCallback.lean`,
 re-pinned to the typed relation).
 
-For W2 `sound`: `TypedRunWk.lean` imports `Calculus/Core/RunWk.lean` for
+For W2 `sound`: `TypedRunWk.lean` imports `Calculus/Core/RunWk` for
 `Thin.Over` and `Stmt.wk_over`/`Prog.wk_over` (syntax only), and
-`TypedRunFrame.lean` imports `Calculus/Core/RunFrame.lean` for
+`TypedRunFrame.lean` imports `Calculus/Core/RunFrame` for
 `Prog.frame_some` and `frameMut` (syntax only).  Deleting the old
 `RunWk`/`RunFrame` means moving those into these two files first.
 
@@ -1143,7 +1143,7 @@ them leaves alone (`Upd.apply_keep`), so its validity covers every value
 they take.  `Taclet.sound`, `LeanTaclet.sound`, `Rule.sound`:
 `Stmt.sound` at `toStep`.
 
-**`holds` over `TState`** (`Calculus/Core/TLogic.lean`, `tholds`, beside
+**`holds` over `TState`** (`Calculus/Core/TLogic`, `tholds`, beside
 M3's `holds` until the flip): terms read on the erasure (their symbols are
 `Update.lean`'s, untyped until M6c), modalities run by the typed run
 (`Prog.trunFrames`: the program, then the frames), binders over typed
@@ -1155,14 +1155,14 @@ the typed run ends in, one of them.  The cost: `tholds` is not a function of
 the erasure (two heap typings may erase alike: an empty array of any
 element type), so only "premise gives conclusion" holds of a scope end's
 update, which is all `Proves.tsound` uses (`tholds_exit`).
-`Calculus/Core/TCloseErase.lean`: `tholds_of_erase_valid`, the induction of
+`Calculus/Core/TCloseErase`: `tholds_of_erase_valid`, the induction of
 `holds_of_erase_valid` read over the typed state, for `Fml.TClosable`
 (`Closable` and `Leaf`, a diamond update allowed in a positive position:
 the typed reading asks only of the typed states that erase to the state the
 update ends in, so no `BoolOK` is needed), so `Proves.close` is sound there
 too, and the flipped `close` covers diamond leaves (`tholds_of_holds`,
 `tholds_iff_holds` for `Fml.FO`, for the atoms).
-`Calculus/Core/TProvesSound.lean`: `Proves.tsound`/`Proves.tvalid` with the
+`Calculus/Core/TProvesSound`: `Proves.tsound`/`Proves.tvalid` with the
 structural part proved and the arms' part a hypothesis, `Stmt.TSound C`
 (`Premise.TSound`, `Premise.Sound` over `TState`).  Not provable as stated
 until decisions 2 and 3 below are taken: `Stmt.TSound` is false for a
@@ -1171,7 +1171,7 @@ contract with a `bool` mapping key, and under the diamond on a length past
 goes into `Stmt.TSound` (a `Prog.bridgeOk` premise, or a fixed key read in
 `Update.lean`), not left a false hypothesis.
 
-`Calculus/Core/TSoundKit.lean`: the premise shapes over `TState`
+`Calculus/Core/TSoundKit`: the premise shapes over `TState`
 (`Premise.tsound_update` … `tsound_done`), each an equation between typed
 runs read at the states they end in (`Stmt.trunSt`, `Prog.trunSt`,
 `Frames.trunSt`).
@@ -2553,7 +2553,7 @@ Build green (`lean_build`, 292 jobs, the new modules only rebuilt); no
 `sorry`, `axiom` or `maxHeartbeats`; `check-orphans`, `check-doc-paths`
 clean.
 
-**The per-arm statement** (`Calculus/Core/TSoundKit.lean`, committed first
+**The per-arm statement** (`Calculus/Core/TSoundKit`, committed first
 for `tsoundB`): an arm's theorem is M3's name with `tsound` for `sound`
 (`localStep_tsound`, `tsound_setLocal`), takes the typed state `σ` first,
 then the arm's arguments, the premise `q` and `hq : …Step k … = some q`, and
@@ -2569,7 +2569,7 @@ over `TState`, in the states where the statement meets `Stmt.TArmOk`.  The kit a
   `U.apply σ = s.run σ` (or `Res.Sim`), stated over any untyped state,
   gives the typed arm by `Stmt.trun_erase`, where the statement is on the
   bridge and the typed run does not diverge under the diamond.  Every update
-  arm is proved this way (`TSoundArms.lean`: M3's arm proofs as `*_run`
+  arm is proved this way (`TSoundArms`: M3's arm proofs as `*_run`
   lemmas, and `Val.evalT_nd` and its kin: an evaluator only reverts);
 * the typed shift lemmas (`Val.evalT_up` and kin, `TState.push_lift`: a
   pushed state is the state lifted along `up`, so each is
@@ -2577,7 +2577,7 @@ over `TState`, in the states where the statement meets `Stmt.TArmOk`.  The kit a
 
 A capture compares typed runs exactly (no bridge): a statement read with a
 local pushed runs lifted (`TRun.*_pushT`, `OpLoc.AgreeT`, `pushedT` in
-`TSoundCapture.lean`, from `TypedRunWk.lean`'s `*_lift`), a hole's typed
+`TSoundCapture`, from `TypedRunWk.lean`'s `*_lift`), a hole's typed
 continuation (`SHole.contT`, `MHole.contT`, `VHole.contT`), blocks of
 captures by `Prog.trunSt_declLocal_cons` and kin.  A `bool` is a `bool`, so
 the splits cover every state (`tholds_isBool`) and the short circuits run
@@ -2585,7 +2585,7 @@ as their unfolded `if` exactly; a captured `if` condition's weakened
 branches run lifted by `Prog.trun_wk` (`Prog.trun_wk_up`).
 
 **`Stmt.TSound C` is not provable as stated**: three arms are sound only
-under a condition on the statement (`Stmt.TArmOk`, `TSoundKit.lean`, a
+under a condition on the statement (`Stmt.TArmOk`, `TSoundKit`, a
 hypothesis of `Stmt.TStepSound`, which `Stmt.tstepSound_arms` concludes):
 
 1. *A storage copy off the bridge* (`l = sp;`, `l = mp;` at a type with a
@@ -2636,7 +2636,7 @@ subagents.
   `TypedRunWk.lean`/`TypedRunFrame.lean` import it instead of
   `RunWk`/`RunFrame`, so W4 can delete those two.  `RunWk` keeps only the M3
   reading `Thin.Over.env`.
-* **`Calculus/Core/TSoundCalls.lean`**: `Stmt.tsound_call` (every
+* **`Calculus/Core/TSoundCalls`**: `Stmt.tsound_call` (every
   `callStep` premise: the four `expand_function_body` shapes, the four
   `functionCallArgCapture` shapes) and `Stmt.tsound_tryCall`, as equations
   between typed runs read at their states (`Premise.tsound_unfold`/`inline`).
@@ -2647,7 +2647,7 @@ subagents.
   A capture runs the call from the caller with the value on top
   (`TRun.callFrom_capture`).  `try`'s clauses bind typed values, so no
   `Fits` is needed (`tholds_binders_all`); decoding never panics.
-* **`Calculus/Core/TSoundLoops.lean`**: `Stmt.tsound_loop`.  One turn
+* **`Calculus/Core/TSoundLoops`**: `Stmt.tsound_loop`.  One turn
   (`Stmt.trunSt_loop_unfold`, via `TLoop.run_map`: the extension a loop
   head carries plays no part), `loopExit` by `tholds_isBoolD_lower` (a
   lowered condition read on the erasure is its typed value:
@@ -2663,7 +2663,7 @@ subagents.
   assembly of `Stmt.TSound C`.
 * Uses from M3 modules that the flip must keep or restate:
   `Args.capture_snoc` (`Calculus/Core/SoundCalls.lean`), `holds_isBoolD`
-  (`Calculus/Core/SoundBlocks.lean`), `evalBinop_cmp_true`
+  (`Calculus/Core/SoundBlocks`), `evalBinop_cmp_true`
   (`Calculus/Core/SoundLoops.lean`), `Val.eval_lower`
   (`Calculus/Core/SoundKit.lean`), `Val.evalT_erase` and
   `Val.evalT_noPanic` (`Semantics/Core/TypedRunErase.lean`, deleted at W4
@@ -2714,7 +2714,7 @@ readings (`holds`, `Modality.after`, `afterC`) are unchanged: an untyped run
 has no bound and never sees it (`THalt.erase` maps it to `diverge`, and
 `TRes.Agrees` matches it with anything).  Consequences:
 - the push arms lose their `NoDiv` hypotheses: `TRun.push_nd` and
-  `ARhs.evalT_nd` (`TSoundKit.lean`) prove a push never diverges;
+  `ARhs.evalT_nd` (`TSoundKit`) prove a push never diverges;
 - `TRes.Sim` also asks that the second halt is exhausted where the first
   is, so an evaluator's halt is a revert (`Val.evalT_revert`,
   `SPath.resolveT_revert`, `MPath.mvalT_revert`, from `TRes.Ends`: the
@@ -2723,7 +2723,7 @@ has no bound and never sees it (`THalt.erase` maps it to `diverge`, and
   the capture shapes hand their `herr` a revert;
 - `Premise.tsound_update`'s halt clause skips an exhausted run under the
   diamond; the diamond invariant loop runs by `TLoop.run_variant_or` (a body
-  may end exhausted, `TSoundLoops.lean`);
+  may end exhausted, `TSoundLoops`);
 - `Typing/StraightRun.lean`: `TRes.Ends` (no `diverge`, no `exhausted`)
   for straight programs, `Prog.trun_ends`; `Prog.run_halt_of_trun` asks
   both; `docs/solc-alignment.md`, "Array lengths", has the row (solc panics
@@ -2773,7 +2773,7 @@ the fallback can be met; recorded, not implemented.**
   states): the condition fails at the start of most obligations, whose heap
   is empty (`T memory m = new T(..)` as a first statement), so it is not an
   invariant of reachable states either.
-- *What is proved instead* (`Calculus/Core/TSound.lean`, new):
+- *What is proved instead* (`Calculus/Core/TSound`, new):
   `Stmt.tstepSound`, every rule (arms and blocks) sound wherever its
   statement meets `Stmt.TArmOk`, which is now only that arm's condition;
   `Stmt.tsound_diamond`, every rule sound under the diamond in every state;
@@ -2810,16 +2810,16 @@ the fallback can be met; recorded, not implemented.**
 
 CORE 2 was meant to fold the `T*` modules into their original names, so
 that `tholds` becomes `holds`, `Proves.tvalid` becomes `Proves.valid`, and
-M3's reading is deleted with its arm proofs, `RunWk.lean` and
-`RunFrame.lean`.  `Proves.close` would then ask `Fml.tclosableB`, so that a
+M3's reading is deleted with its arm proofs, `RunWk` and
+`RunFrame`.  `Proves.close` would then ask `Fml.tclosableB`, so that a
 leaf behind a diamond update can close.  **It has not landed.**  The
 reason is CORE 1's open decision 17, not missing work.  Nothing was
 changed in Lean.  This section records why and what the lead has to
 decide.
 
 - *The fold makes soundness vacuous.*  `Proves.tsound` and
-  `Proves.tvalid` (`Calculus/Core/TProvesSound.lean`) take `Stmt.TSound C`
-  as a hypothesis, and `Stmt.not_tsound C` (`Calculus/Core/TSound.lean`)
+  `Proves.tvalid` (`Calculus/Core/TProvesSound`) take `Stmt.TSound C`
+  as a hypothesis, and `Stmt.not_tsound C` (`Calculus/Core/TSound`)
   proves that hypothesis false at every contract.  Once the fold makes
   them `Proves.sound`/`Proves.valid`, no derivation proves a `Valid` goal.
   That breaks everything that uses M3's unconditional `Proves.valid` today:
@@ -2844,12 +2844,12 @@ decide.
     hold a non-`bool`.
   - Over the typed state, the switch is justified by
     `tholds_of_erase_valid` under `Fml.TClosable`
-    (`Calculus/Core/TCloseErase.lean`).  But the typed `Proves.tsound` it
+    (`Calculus/Core/TCloseErase`).  But the typed `Proves.tsound` it
     would feed is the conditional one above.
   - So `Proves.close` keeps `closableB`.  No diamond leaf of
     `TestSuite/Problems` closes by `Proves.close` yet, and no Core example
     shows one.
-- *`RunWk.lean`/`RunFrame.lean` stay.*  M3's `Sound*` arms import them.
+- *`RunWk`/`RunFrame` stay.*  M3's `Sound*` arms import them.
   `Calculus/Core/WkOver.lean` already holds the syntax, so they can be
   deleted together with M3's reading.
 - *The residual cannot be proved away inside the calculus.*  The only false
@@ -2884,7 +2884,7 @@ decide.
   2. `Stmt.TSound C` unconditional, and `Stmt.not_tsound` deleted;
   3. the fold and the renames;
   4. deleting M3's `holds`, `State.BoolOK`, `Modality.afterT`, its
-     `Sound*` arms, `RunWk.lean` and `RunFrame.lean`;
+     `Sound*` arms, `RunWk` and `RunFrame`;
   5. the `Proves.close` switch to `Fml.tclosableB`, and a Core example
      that closes a diamond obligation of `TestSuite/Problems`;
   6. the build with `SolidityCorpus` and `SolkeyTestSuite`, and the
@@ -3318,7 +3318,7 @@ green, 302 jobs, every `sol_derive?` pin (`ProofTree`, `CoreProofTree`,
       switch.
   12. *M3's reading under every scoped `⊨`:* `Core.Valid` is M3's `holds`
       until CORE 2's change to the typed reading (Decision 17), so
-      `RunWk.lean`, `RunFrame.lean`, `State.BoolOK` and M3's `Sound*` arms
+      `RunWk`, `RunFrame`, `State.BoolOK` and M3's `Sound*` arms
       stay.
 - **Lane worktrees removed** (`w3b-testsuite`, `w3b-tactics`,
   `w3b-chains`, `w3b-tree`; the branches stay) and their Lean workers
@@ -3345,14 +3345,22 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     callee's body (solkey's `blockEmpty`, now claimed).
 21. `Derived7`'s `case leaf2` may go (one fewer residual leaf), recorded as
     the one deviation from "Derived1–14 text unchanged".
+22. *Proposed (CORE B), the lead's call:* an update's typed reading asks the
+    typed states it reads past it to extend the heap typing it is applied
+    in (`σ.H <+: σ'.H`), as a typed run's end state does; it makes the
+    `TokenCopy` merge across a memory binder sound.
+23. *Proposed (CORE B), the lead's call:* `Problem.deploy_of_valid_nil`
+    takes a typed transaction and asks the typed run to end (`TRes.Ends`);
+    `Problem.deploy_of_valid_typed` states the typed deployment with no
+    hypothesis.
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
 **Result.**  `Stmt.tsound C : Stmt.TSound C` at every contract, and
 `Proves.tsound`/`Proves.tvalid` with no hypothesis
-(`Calculus/Core/TSound.lean`); `#print axioms Proves.tvalid` and
+(`Calculus/Core/TSound`); `#print axioms Proves.tvalid` and
 `Stmt.tsound`: `propext`, `Classical.choice`, `Quot.sound`.  The
-hypothesised form is `Proves.tsound_of` (`Calculus/Core/TProvesSound.lean`).
+hypothesised form is `Proves.tsound_of` (`Calculus/Core/TProvesSound`).
 Deleted: `Stmt.TArmOk`, `Stmt.TResidual`, `Stmt.tsound_iff_residual`,
 `Stmt.not_tresidual`, `Stmt.not_tsound`, `Stmt.tsound_diamond`,
 `Stmt.tarmOk_diamond`, `tsound_declMemAlias` (an alias initializer is
@@ -3392,7 +3400,7 @@ CORE 2's items 1 and 2 are done; the W3b blockers 2 (callbacks, below) and
   `memoryIndexDeleteNonSimpleIndexCapture` read the index before the
   receiver local, the statement the other way round; with an unset receiver
   both revert, with different halts, so those arms (M3's in
-  `SoundMem.lean`, the typed ones in `TSoundMem.lean`) go up to the halt
+  `SoundMem.lean`, the typed ones in `TSoundMem`) go up to the halt
   (`Res.Sim`, `TRes.Sim`; helper `MPath.sim_err_ref`).  The rules are
   unchanged.
 - *EVM*: the simulation reads nothing of a memory local (`Seen (.mem _) =
@@ -3420,6 +3428,110 @@ re-timed (the change is a representation of one local type; no kernel
 read by nothing now (`Modality.forallB` ignores it); it can leave the syntax
 with `Premise.fml`'s, the printers already drop it.  Kept to leave this
 change below the printers and quoters.
+
+### CORE B, the typed reading is the reading (2026-10-08, on `intrinsic`)
+
+**Result.**  `Core.holds`/`Core.Valid` are the typed reading (over `TState`
+and the typed run); M3's reading is gone.  `Stmt.sound : Stmt.Sound C`,
+`Proves.sound` and `Proves.valid` (`Calculus/Core/Sound.lean`) have no
+hypothesis; `#print axioms Proves.valid` and `Stmt.sound`: `propext`,
+`Classical.choice`, `Quot.sound`.  `Proves.close` asks `Fml.closableB`, the
+Bool twin of the typed `Fml.Closable` (the former `Fml.TClosable`), so a
+leaf behind a diamond update closes; shown on two diamond obligations of
+`TestSuite/Problems` in `TestSuite/CoreSeq.lean`
+(`storageBoolRootReadWrite`, `storageBoolFieldRead`: `bool r = flag;`, a
+`bool` local set from storage, which decision 18's `Upd.boolB` refused),
+each by `sol_prove` on `⊢`.
+
+**The fold** (CORE 2's items 3–6), each `T*` module under its original name
+in place, M3's declarations deleted and the helpers the typed proofs read
+kept: `TLogic` → `Logic` (`tholds` → `holds`, `TValid` → `Valid`),
+`TCloseErase` → `CloseErase`, `TProvesSound` → `ProvesSound`
+(`Premise.TSound` → `Premise.Sound`, `Stmt.TSound` → `Stmt.Sound`,
+`Hyps.twrap_*` → `Hyps.wrap_*`, `Proves.tsound_of` → `Proves.sound_of`),
+`TSoundKit`/`TSoundArms`/`TSoundCapture`/`TSoundStore`/`TSoundMem`/
+`TSoundLocal`/`TSoundControl`/`TSoundLoops`/`TSoundCalls`/`TSoundStep` →
+`Sound*` (`…_tsound` → `…_sound`, `Stmt.TStepSound` → `Stmt.StepSound`),
+`TSound` → `Sound` (`Stmt.tsound`, `Proves.tsound`/`tvalid` →
+`Stmt.sound`, `Proves.sound`/`valid`).  Deleted: M3's `holds`, `Valid`,
+`State.BoolOK`, `LTy.BoolOK`, `Modality.okP`/`afterT`/`afterRunT`, the
+premise shapes and thirteen arms of `Logic.lean`, every M3 arm proof in the
+`Sound*` modules, `Calculus/Core/RunWk`, `RunFrame`, `SoundBlocks` and
+`SoundUpdates` (nothing typed read them; `Tm.denote_eval` moved to
+`SoundLoops.lean`), M3's `holds_erase`/`holds_erase_bind`/
+`holds_of_erase_anon` and `holds_of_erase_valid`, the M3 `Fml.Closable`,
+`Fml.Leaf`, `Fml.closableB`, and decision 18's interim close (`Upd.boolB`,
+`Tm.boolB`, `Rhs.boolB`, `Upd.apply_boolOK`, `Modality.isBox`, the box/`boolB`
+test of `Fml.posB`), and `Res.isPanic`/`isHalt` with the M3 refutation
+lemmas.  Kept on M3's `State C Γ`: the terms and updates (`Tm.eval`,
+`Upd.apply`, read on the erasure), `Frames.run` and the run lemmas the arms
+read through the bridge (`Stmt.trun_erase`).
+
+**What the typed reading needed, low to high:**
+- *An update's reading asks a heap extension* (proposed decision 22, the
+  lead's call): `{U} φ` reads `φ` in every typed state `σ'` that erases to
+  where `U` ends **and whose heap typing extends `σ.H`**, as every typed
+  run's end state does (`Out.ext`, `Stmt.trunSt_ext`).  Without it the
+  merge of `TokenCopy` (`Examples/Chains/StorageToMemory.lean`), `{U} ∀t.
+  {V} ψ` with `t` a memory local, is not sound: the binder after `U` ranges
+  over the references of any heap typing that erases alike, the merged one
+  over `σ.H`'s.  With it, `U` allocating nothing (`Upd.keepsNext`) leaves
+  the typing as it was (`List.IsPrefix.eq_of_length`).  The consumers took
+  the extension (`Premise.sound_update`, the loop rules' `prefix_refl`);
+  no rule changed.
+- *Closing by the erasure* (`holds_of_erase_valid`, `holds_of_erase_pos`):
+  the atoms and what is negated or assumed are first-order, read both ways
+  by `holds_erase_fo` (`HoldsErase.lean`, new); `Fml.plainB` is now
+  first-order and fresh (`posB`'s negations and preconditions), `posB`
+  takes updates of either modality and recurses under `{anon(…)}`.  No
+  closed leaf of the build was refused.
+- *Merges* (`Merge.lean`): the two updates' modalities equal (as before);
+  a hidden binder between them is not at a memory type (`LTy.notMem`, which
+  replaces `LTy.notBool`) or sits under an update that allocates nothing
+  (`Upd.keepsNext`).
+- *`sol_erase`* (`Contracts.lean`): `holds_of_erase_plain` for a
+  `Fml.Plain` formula first-order where negated or assumed (`Fml.negFO`,
+  new, checked by `decide`); a box modality reads through
+  `Prog.trunFrames_erase` and `Frames.trun_erase` (`SoundKit.lean`, new)
+  and `afterRunTR_box_of`.  The direction typed-to-erased fails for a
+  modality (a typed run that diverges or is exhausted agrees with any
+  untyped outcome), hence `negFO`.
+- *The deployment* (`Deploy.lean`, proposed decision 23): the typed
+  deployment state `TState.deploy C tx` (`tx : TTx`, typed fields);
+  `Problem.deploy_of_valid_typed` (the typed run, no hypothesis), and
+  `Problem.deploy_of_valid_nil` for `Contract.deploy` asks the typed run to
+  end (`hX : TRes.Ends …`): a typed run that diverges or is exhausted
+  (decision 15) says nothing of the untyped run, which has no bound.
+  `Tactics/Constructors`' example takes `tx : Core.TTx`, `tx.erase`, and
+  proves `hX` by `⟨nofun, nofun⟩` (the run computes); a statement change of
+  an `example`, no pin.
+- *Refutations* (`Tactics/{Revert,Checked,Values,Operators,StorageSuite,
+  StorageSteps}`): at `Core.TState.init _`, typed parameters (`⟨0, by
+  decide⟩`), by `Modality.afterRunTR_not_panic`/`afterRunTR_diamond_fail`
+  and `TRes.isPanic`/`isFail` read by `decide +kernel` (`Closers.lean`; the
+  diamond refuses a revert, a panic, a divergence, not an exhausted run);
+  `Revert`'s `aNeB` state went (the parameters are bound by `∀`).
+- `Tactics/CoreChains`' `Valid` of a box update proved by unfolding;
+  `Tactics/CoreCallback` names `Core.Valid` (it opens both namespaces).
+- Callbacks: `holdsC` reads an update as `holds` does (the extension too);
+  `ProvesC.sound` against `ValidC` is still not proved (W3b blocker 2: the
+  arms are sound over `holds`, not yet over `holdsC`'s runs with
+  callbacks).
+
+**Build**: `lean_build`, `Solidity`, `solkeycheck`, `SolidityCorpus`,
+`SolkeyTestSuite` (the last two in `defaultTargets` for the run only):
+green at the second run, 324 jobs (the first: the refutation examples,
+`CoreChains`, the `TokenCopy` merge; `SortCheck/Faithfulness` and
+`Derived3` killed by OOM, 137, built at the second).  No new `sorry`,
+`axiom` or `maxHeartbeats`; `dups.py` (but the known `as` false positive),
+`check-orphans` (but the git-excluded `Scratch/`), `check-doc-paths` (this
+file's citations of deleted modules written without `.lean`) and
+`check-rule-text` clean.  **No pin moved**; no rule name, branch label or
+fresh name changed.  The W3 gates were not re-timed.
+
+**Left**: `ProvesC.sound`; `Fml.bind`'s unread modality argument (CORE A's
+proposal); the W3 gate timings; the flip of the `TestSuite/Derived` modules
+(W3b blocker 1) is no longer blocked by the diamond leaves.
 
 ## Baselines (M0)
 
@@ -3845,7 +3957,7 @@ No block reads a `.length`, so the change of `lenT` to a `Nat` comparison
   a captured `if` condition runs as before, the run of `Prog.wk up`, which
   lane `sound2` proves: `Prog.run_wk`).  `#print axioms`: `propext`,
   `Classical.choice`, `Quot.sound`.
-  - Updates (`SoundArms.lean`, `SoundUpdates.lean`): the update ends as the
+  - Updates (`SoundArms.lean`, `SoundUpdates`): the update ends as the
     statement does (`Premise.Sound.update`), or alike up to the halt
     (`updateSim`: `delete` of a memory reference reads the address and the
     fresh object in the other order); `send` by `Premise.Sound.cases`.
@@ -4155,7 +4267,7 @@ the cutover:
 The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
 `Calculus/Core/SoundKit.lean`'s shape (`Stmt.StepSound`):
 
-- `Calculus/Core/RunWk.lean`: a weakened program runs as the program
+- `Calculus/Core/RunWk`: a weakened program runs as the program
   (`Stmt.run_wk`, `Prog.run_wk`, by the mutual recursion, every statement).
   The state of the wider context is `τ.lift h d` (`Env.put`: `τ`'s locals
   where `h` keeps, `d`'s elsewhere); the locals `h` drops are kept
@@ -4168,7 +4280,7 @@ The arms of `Calculus/Core/Blocks.lean` against `Core.Stmt.run`, in
   dropped from under the returns by `Premise.inline`) or with an argument
   captured (`functionCallArgCapture`, `Args.eval_capture`: the arguments
   before it are simple, so read without effect).
-- `Calculus/Core/RunFrame.lean`: `Mutability.lean`'s `frame_of_within`
+- `Calculus/Core/RunFrame`: `Mutability.lean`'s `frame_of_within`
   on scoped syntax (`Stmt.run_frame`), positionally: of the locals at
   least `d` deep only the ones `writesAt d` lists change (`LocAgree`), the
   global part only in storage and ledger, and those only when

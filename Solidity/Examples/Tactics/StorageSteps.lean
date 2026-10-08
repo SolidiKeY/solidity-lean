@@ -266,9 +266,8 @@ theorem arrayIndexRead : ⊨ dl!{ [ uint v = values[i]; ] v == values[i] } := by
 /-- `uint v = values[i];` under the diamond is not valid: in `StandardExample`'s
 initial store `values` is empty, so at `i = 0` the read halts. -/
 theorem arrayIndexReadDiamond : ¬ (⊨ dl!{ ⟨ uint v = values[i]; ⟩ true }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem State.exampleStore) (.int 0) (by unfold PrimTy.admits; decide)
-      (by constructor <;> trivial)) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _) ⟨0, by decide⟩) (by decide +kernel)
 
 /-- `values[i] = 100;` -/
 theorem arrayIndexWrite : ⊨ dl!{ [ values[i] = 100; ] values[i] == 100 } := by
@@ -419,8 +418,8 @@ theorem arrayPop : ⊨ dl!{ [ people.pop(); ] true } := by
 /-- `people.pop();` under the diamond is not valid: `people` starts empty, and
 a `pop` of an empty array reverts. -/
 theorem arrayPopDiamond : ¬ (⊨ dl!{ ⟨ people.pop(); ⟩ true }) :=
-  fun h => Modality.afterRunC_diamond_halt
-    (h (Core.State.ofSem State.exampleStore) trivial) (by decide +kernel)
+  fun h => Modality.afterRunTR_diamond_fail
+    (h (Core.TState.init _)) (by decide +kernel)
 
 /-- `Person storage p = bob; people.push(p);` — the pushed element is a copy of
 what the alias finds (`storagePushValueCopySource`). -/

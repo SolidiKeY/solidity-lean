@@ -19,16 +19,16 @@ under solkey's names where solkey has the rule:
 * `update`, `unfold`, `bind`, `split`, `check`, `done`, `branches`,
   `cases`, `inv`, `inline`: a taclet's premise in front of the rest `ω` and
   the frames `κ` (`Premise.fml`, its parts apart), one goal per conjunct.
-  `split` has KeY's two goals, under either modality: the diamond reads
-  from states whose `bool` locals hold `bool`s (`State.BoolOK`), where one
-  of a branch's conditions holds, so no third goal covers a stuck one;
+  `split` has KeY's two goals, under either modality: a `bool` local of
+  the typed state holds a `bool`, so one of a branch's conditions holds and
+  no third goal covers a stuck one;
 * `empty` (`emptyModality`): a finished program goes through its frames
   (`Frames.exit`), a scope end a popping update, which `updIntro` takes;
 * `closeTrue`, behind a context with no diamond update but scope ends
   (`Hyps.boxOnly`);
 * `close`: a leaf whose erasure is valid (`Calculus/Core/CloseErase.lean`),
-  as today's `Proves.close`, behind a context whose diamond updates keep the
-  `bool` locals `bool`s (`Upd.boolB`).
+  as today's `Proves.close`, behind any context of updates, under either
+  modality, hidden binders and `∀`s.
 
 A program rule fires the rule the strategy fires (`Stmt.step`, one per
 statement): its premise is `s.step k m = some p`, which `rfl` proves and
@@ -38,7 +38,8 @@ The fresh index `k` is one above every index in the sequent
 `casesOn` (Gate G0, condition 1): the kernel evaluates it when it checks
 that index.
 
-Soundness is `Calculus/Core/ProvesSound.lean`.
+Soundness is `Calculus/Core/ProvesSound.lean` (the structure) and
+`Calculus/Core/Sound.lean` (the rules).
 -/
 
 namespace Solidity.Core
@@ -224,12 +225,10 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | closeTrue {Γ : Ctx} {H : Hyps C Γ₀ Γ} (h : H.boxOnly = true) : Proves C R Γ₀ H .tt
   /-- Leave the calculus: the sequent, its context in front, erased
   (`Fml.erase`, the outer locals named `ns`) and proved in the logic, where
-  its erasure gives it, with no modality left (`Fml.closableB`: `Fml.Closable`
-  and `Fml.Leaf`, as today's `close` asks `modalFree`).  The kernel decides
-  both side conditions (`rfl`, `decide`).  A diamond update in the context
-  sets its `bool` locals to `bool`s (`Upd.boolB`): over M3's states the
-  erasure's diamond does not give `State.BoolOK` of the state it ends in,
-  and the update's terms do (`Upd.apply_boolOK`). -/
+  its erasure gives it, with no modality left (`Fml.closableB`, as today's
+  `close` asks `modalFree`).  The kernel decides both side conditions
+  (`rfl`, `decide`).  An update in the context may be a diamond: its reading
+  asks only of the typed states that erase to the one it ends in. -/
   | close {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (ns : List Var)
       (hlen : ns.length = Γ₀.length) (hnd : ns.Nodup)
       (h : Solidity.Valid ((H.wrap φ).erase ns))

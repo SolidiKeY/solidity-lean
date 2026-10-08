@@ -1,95 +1,32 @@
-import Solidity.Calculus.Core.SoundBlocks
 import Solidity.Calculus.Core.SoundArms
 import Solidity.Calculus.Core.SoundCapture
-import Solidity.Calculus.Core.RunWk
+import Solidity.Calculus.Core.SoundKit
 
 /-!
-# The rule of a call is sound
+# The rules of calls and `try` are sound
 
-`Calculus/Core/Blocks.lean`'s `callStep` against M3's interpreter
-(`Core.Stmt.run`, `Run.call`), in the shape of `Calculus/Core/SoundKit.lean`.
+`Calculus/Core/Blocks.lean`'s `callStep` and `tryStep` against the typed run
+(`Stmt.trun`, `TRun.call`, `TRun.tryCall`), in the shape of
+`Calculus/Core/SoundKit.lean` (`Premise.Sound`).
 
 * **`expand_function_body`.**  The parameters declared with the arguments
-  (`Args.run_declsThen`: each read under the ones before reads as in the
-  caller, `Val.eval_unders`), the return variables (`Binders.run_declsThen`,
-  their defaults, as `CallRet.enter` enters them), the body weakened by
-  `Thin.atop` run as the body in its own frame (`Prog.run_wk`; the frame's
-  state lifted is the caller's with the frame pushed, `Env.put_atop`), the
-  result assigned, and the frame popped (`Premise.unfold`) or dropped from
-  under the returns (`Premise.inline`, `Env.thin_keepAll`).
-* **`functionCallArgCapture`.**  The leftmost argument that is not simple is
-  read first: the ones before it are simple, so read without effect, and the
-  arguments with it captured read as before (`Args.eval_capture`).
+  (`Args.trunSt_declsThen`), the return variables at their defaults
+  (`Binders.trunSt_declsThen`), the body weakened by `Thin.atop` run as the
+  body in its own frame (`Stmt.trun_block_wk`, from `Prog.trun_wk`): the
+  frame's state lifted is the caller's with the frame pushed
+  (`TEnv.put_atop`), and the caller's locals come out weakened along the
+  heap the body grew, as `TRun.call` gives them back.
+* **`functionCallArgCapture`.**  The arguments with one captured read as
+  before (`Args.evalT_capture`).
+* **`try`** under the box: each clause's goal, for every typed value its
+  outcome binds (`holds_binders_all`), is the run of that clause.
 -/
 
 namespace Solidity.Core
-
 open Semantics (Value Res Halt)
 open Solidity (Modality)
 
 variable {C : Contract}
-
-/-! ## Environments of a frame -/
-
-namespace Env
-
-theorem put_nilTo : (Γ : Ctx) → (x : Env C []) → (d : Env C Γ) → Env.put (Thin.nilTo Γ) x d = d
-  | [], _, _ => rfl
-  | _ :: Γ, x, d => by
-    show (d.1, Env.put (Thin.nilTo Γ) x d.2) = d
-    rw [put_nilTo Γ x d.2]; rfl
-
-/-- A frame's locals put over the caller's: the frame on top. -/
-theorem put_atop {Γ : Ctx} : (ps : Ctx) → (x : Env C ps) → (d : Env C (ps ++ Γ)) →
-    Env.put (Thin.atop ps Γ) x d = Env.append ps x (Env.drop (Ext.append Γ ps) d)
-  | [], x, d => put_nilTo Γ x d
-  | _ :: ps, x, d => by
-    show (x.1, Env.put (Thin.atop ps Γ) x.2 d.2) =
-      (x.1, Env.append ps x.2 (Env.drop (Ext.append Γ ps) d.2))
-    rw [put_atop ps x.2 d.2]
-
-theorem append_take_drop {Γ : Ctx} : (ρ : Ctx) → (e : Env C (ρ ++ Γ)) →
-    Env.append ρ (Env.take ρ e) (Env.drop (Ext.append Γ ρ) e) = e
-  | [], _ => rfl
-  | _ :: ρ, e => by
-    show (e.1, Env.append ρ (Env.take ρ e.2) (Env.drop (Ext.append Γ ρ) e.2)) = e
-    rw [append_take_drop ρ e.2]; rfl
-
-theorem drop_set_under {Γ : Ctx} {t : LTy} (j : Idx Γ t) (v : t.Denote C) :
-    (ρ : Ctx) → (e : Env C (ρ ++ Γ)) →
-      Env.drop (Ext.append Γ ρ) (Env.set (j.under ρ) v e) =
-        Env.set j v (Env.drop (Ext.append Γ ρ) e)
-  | [], _ => rfl
-  | _ :: ρ, e => drop_set_under j v ρ e.2
-
-theorem drop_push_append {Γ : Ctx} {t : LTy} (ps : Ctx) (x : Env C (t :: ps)) (e : Env C Γ) :
-    Env.drop (Ext.append Γ ps).push (Env.append (t :: ps) x e) = e :=
-  Env.drop_append ps x.2 e
-
-theorem drop_push_set_under {Γ : Ctx} {t u : LTy} (j : Idx Γ t) (v : t.Denote C) (ps : Ctx)
-    (y : Env C (u :: (ps ++ Γ))) :
-    Env.drop (Ext.append Γ ps).push (Env.set (j.under ps).there v y) =
-      Env.set j v (Env.drop (Ext.append Γ ps) y.2) :=
-  drop_set_under j v ps y.2
-
-theorem thin_ofExt {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → (e : Env C Δ) →
-    Env.thin (Thin.ofExt h) e = Env.drop h e
-  | _, .refl, _ => rfl
-  | _, .push h, e => thin_ofExt h e.2
-
-theorem thin_keep_ofExt_append {Γ : Ctx} {t : LTy} (ps : Ctx) (x : Env C (t :: ps)) (e : Env C Γ) :
-    Env.thin (Thin.keep (Thin.ofExt (Ext.append Γ ps))) (Env.append (t :: ps) x e) = (x.1, e) := by
-  show (x.1, Env.thin (Thin.ofExt (Ext.append Γ ps)) (Env.append ps x.2 e)) = _
-  rw [thin_ofExt, drop_append]
-
-theorem thin_keepAll {Γ Δ : Ctx} (h : Thin Γ Δ) : (ρ : Ctx) → (r : Env C ρ) → (e : Env C Δ) →
-    Env.thin (Thin.keepAll ρ h) (Env.append ρ r e) = Env.append ρ r (Env.thin h e)
-  | [], _, _ => rfl
-  | _ :: ρ, r, e => by
-    show (r.1, Env.thin (Thin.keepAll ρ h) (Env.append ρ r.2 e)) = _
-    rw [thin_keepAll h ρ r.2 e]; rfl
-
-end Env
 
 /-! ## The arguments -/
 
@@ -97,108 +34,11 @@ section Args
 
 variable {Γ : Ctx}
 
-theorem Args.eval_snoc_bind (σ : State C Γ) {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var)
-    (e : Val C Γ p) :
-    (Args.snoc as p x e).eval σ = as.eval σ >>= fun r => e.eval σ >>= fun v => pure (v, r) := rfl
-
-theorem Args.eval_up {t : LTy} (σ : State C Γ) (w : t.Denote C) : {ps : Ctx} →
-    (as : Args C Γ ps) → (as.up (t := t)).eval (σ.push w) = as.eval σ
-  | _, .nil => rfl
-  | _, .snoc as p x e => by
-    show (Args.snoc (as.up (t := t)) p x e.up).eval (σ.push w) = _
-    rw [Args.eval_snoc_bind, Args.eval_snoc_bind, Args.eval_up σ w as, Val.eval_up]
-
 theorem Args.capture_snoc {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var) (e : Val C Γ p) :
     (Args.snoc as p x e).capture = match as.capture with
       | some ⟨p', v, as'⟩ => some ⟨p', v, .snoc as' p x e.up⟩
       | none => if e.isSimple then none else
           some ⟨p, e, .snoc as.up p x (.simple (.local .here))⟩ := rfl
-
-/-- Arguments that are all simple read without halting. -/
-theorem Args.eval_ok (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps) → as.capture = none →
-    ∃ a, as.eval σ = .ok a
-  | _, .nil, _ => ⟨(), rfl⟩
-  | _, .snoc as p x e, h => by
-    rw [Args.capture_snoc] at h
-    cases hc : as.capture with
-    | some q => rw [hc] at h; cases h
-    | none =>
-      rw [hc] at h
-      obtain ⟨a, ha⟩ := Args.eval_ok σ as hc
-      cases e with
-      | simple s =>
-        obtain ⟨v, hv⟩ := Simple.eval_ok σ s
-        refine ⟨(v, a), ?_⟩
-        rw [Args.eval_snoc_bind, ha]
-        exact (congrArg (· >>= fun v => (pure (v, a) : Res _)) hv : _)
-      | _ => simp only [Val.isSimple, Bool.false_eq_true, if_false, reduceCtorEq] at h
-
-/-- **The arguments with one captured** read as the captured value, then the
-arguments over it. -/
-theorem Args.eval_capture (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps) →
-    ∀ {p : PrimTy} {v : Val C Γ p} {as' : Args C (.val p :: Γ) ps},
-      as.capture = some ⟨p, v, as'⟩ → as.eval σ = v.eval σ >>= fun w => as'.eval (σ.push w)
-  | _, .nil, _, _, _, h => by cases h
-  | _, .snoc as p' x e, p, v, as', h => by
-    rw [Args.capture_snoc] at h
-    cases hc : as.capture with
-    | some q =>
-      obtain ⟨p₀, v₀, as₀⟩ := q
-      rw [hc] at h
-      dsimp only at h
-      cases h
-      simp only [Args.eval_snoc_bind, Args.eval_capture σ as hc, bind_assoc, Val.eval_up]
-    | none =>
-      rw [hc] at h
-      dsimp only at h
-      split at h
-      · cases h
-      · cases h
-        obtain ⟨a, ha⟩ := Args.eval_ok σ as hc
-        show _ = e.eval σ >>= fun w =>
-          (Args.snoc (as.up (t := .val p')) p' x (.simple (.local .here))).eval (σ.push (t := .val p') w)
-        simp only [Args.eval_snoc_bind, Args.eval_up, ha]
-        cases e.eval σ <;> rfl
-
-theorem Val.eval_unders {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) : (ρ : Ctx) → (r : Env C ρ) →
-    (v.unders ρ).eval (σ.withEnv (Env.append ρ r σ.env)) = v.eval σ
-  | [], _ => by
-    show v.eval (σ.withEnv σ.env) = _
-    rw [State.withEnv_self]
-  | _ :: ρ, r => by
-    show ((v.unders ρ).up).eval ((σ.withEnv (Env.append ρ r.2 σ.env)).push r.1) = _
-    rw [Val.eval_up, Val.eval_unders v σ ρ r.2]
-
-/-- **The parameters declared** with the arguments: the arguments read, then
-the rest with them on top. -/
-theorem Args.run_declsThen {Δ : Ctx} (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps) →
-    (rest : Prog C (ps ++ Γ) Δ) →
-      Prog.run σ (as.declsThen rest) =
-        as.eval σ >>= fun a => Prog.run (σ.withEnv (Env.append ps a σ.env)) rest
-  | _, .nil, rest => by
-    show Prog.run σ rest = Prog.run (σ.withEnv σ.env) rest
-    rw [State.withEnv_self]
-  | _, .snoc (ps := ps') as p x e, rest => by
-    show Prog.run σ (as.declsThen (.cons (.declLocal p x (some (e.unders ps'))) rest)) = _
-    rw [Args.run_declsThen σ as, Args.eval_snoc_bind, bind_assoc]
-    refine congrArg (as.eval σ >>= ·) (funext fun a => ?_)
-    rw [Prog.run_cons]
-    show (Run.declLocal p (some (e.unders ps')) (σ.withEnv (Env.append ps' a σ.env))).bind _ = _
-    simp only [Run.declLocal, Val.eval_unders, bind_assoc, pure_bind]
-    cases e.eval σ <;> rfl
-
-/-- **The return variables declared** at their defaults. -/
-theorem Binders.run_declsThen {Δ : Ctx} (σ : State C Γ) : {ρ : Ctx} → (bs : Binders ρ) →
-    (rest : Prog C (ρ ++ Γ) Δ) →
-      Prog.run σ (bs.declsThen rest) =
-        Prog.run (σ.withEnv (Env.append ρ (bs.defaults (C := C)) σ.env)) rest
-  | _, .nil, rest => by
-    show Prog.run σ rest = Prog.run (σ.withEnv σ.env) rest
-    rw [State.withEnv_self]
-  | _, .snoc (ρ := ρ') bs p x, rest => by
-    show Prog.run σ (bs.declsThen (.cons (.declLocal p x none) rest)) = _
-    rw [Binders.run_declsThen σ bs, Prog.run_cons]
-    rfl
 
 end Args
 
@@ -209,79 +49,217 @@ theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) : (Except.ok a :
 theorem Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) :
     Except.bind (Except.ok a : Res α) f = f a := rfl
 
-theorem Run.declMem_none {Γ : Ctx} (R : RefTy) (σ : State C Γ) :
-    Run.declMem R none σ =
-      (Semantics.allocDefault σ.glob R).map fun x =>
-        (σ.withGlob x.1).push (t := .mem R) (some x.2) := by
-  show (do
-    let (τ, id) ← Semantics.allocDefault σ.glob R
-    pure ((σ.withGlob τ).push (t := .mem R) (some id))) = _
-  cases Semantics.allocDefault σ.glob R <;> rfl
+open Semantics (lookupBy)
+open Solidity (Modality)
 
-theorem CallRet.enter_mem {Γ : Ctx} (R : RefTy) (r : Var) (hd : (Ty.ref R).defaultOkS = true)
-    (hm : (Ty.ref R).mapFree = true) (g : Semantics.State) :
-    CallRet.enter (C := C) g (CallRet.mem (Γ := Γ) R r hd hm) =
-      (Semantics.allocDefault g R).map fun x => (x.1, (some x.2, ())) := by
-  show (do let (τ', id) ← Semantics.allocDefault g R; pure (τ', (some id, ()))) = _
-  cases Semantics.allocDefault g R <;> rfl
+/-! ## Environments of a frame -/
 
-section Body
+namespace TEnv
+
+variable {H : HTy}
+
+theorem put_nilTo : (Γ : Ctx) → (x : TEnv C H []) → (d : TEnv C H Γ) →
+    TEnv.put (Thin.nilTo Γ) x d = d
+  | [], _, _ => rfl
+  | _ :: Γ, x, d => congrArg (Prod.mk d.1) (put_nilTo Γ x d.2)
+
+/-- A frame's locals put over the caller's: the frame on top. -/
+theorem put_atop {Γ : Ctx} : (ps : Ctx) → (x : TEnv C H ps) → (d : TEnv C H (ps ++ Γ)) →
+    TEnv.put (Thin.atop ps Γ) x d = TEnv.append ps x (TEnv.drop (Ext.append Γ ps) d)
+  | [], x, d => put_nilTo Γ x d
+  | _ :: ps, x, d => congrArg (Prod.mk x.1) (put_atop ps x.2 d.2)
+
+theorem append_take_drop {Γ : Ctx} : (ρ : Ctx) → (e : TEnv C H (ρ ++ Γ)) →
+    TEnv.append ρ (TEnv.take ρ e) (TEnv.drop (Ext.append Γ ρ) e) = e
+  | [], _ => rfl
+  | _ :: ρ, e => congrArg (Prod.mk e.1) (append_take_drop ρ e.2)
+
+theorem thin_ofExt {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → (e : TEnv C H Δ) →
+    TEnv.thin (Thin.ofExt h) e = TEnv.drop h e
+  | _, .refl, _ => rfl
+  | _, .push h, e => thin_ofExt h e.2
+
+theorem thin_keepAll {Γ Δ : Ctx} (h : Thin Γ Δ) : (ρ : Ctx) → (r : TEnv C H ρ) →
+    (e : TEnv C H Δ) → TEnv.thin (Thin.keepAll ρ h) (TEnv.append ρ r e) =
+      TEnv.append ρ r (TEnv.thin h e)
+  | [], _, _ => rfl
+  | _ :: ρ, r, e => congrArg (Prod.mk r.1) (thin_keepAll h ρ r.2 e)
+
+theorem drop_set_under {Γ : Ctx} {t : LTy} (j : Idx Γ t) (v : t.TDenote C H) :
+    (ρ : Ctx) → (e : TEnv C H (ρ ++ Γ)) →
+      TEnv.drop (Ext.append Γ ρ) (TEnv.set (j.under ρ) v e) =
+        TEnv.set j v (TEnv.drop (Ext.append Γ ρ) e)
+  | [], _ => rfl
+  | _ :: ρ, e => drop_set_under j v ρ e.2
+
+/-- The caller's locals under a frame put on top, over a grown heap. -/
+theorem drop_put_atop_wk {Γ : Ctx} {H' : HTy} (e : H <+: H') (ρ : Ctx) (x : TEnv C H' ρ)
+    (a : TEnv C H ρ) (g : TEnv C H Γ) :
+    TEnv.drop (Ext.append Γ ρ)
+        (TEnv.put (Thin.atop ρ Γ) x (TEnv.wk e (ρ ++ Γ) (TEnv.append ρ a g))) =
+      TEnv.wk e Γ g := by
+  rw [put_atop, drop_append, append_wk, drop_append]
+
+/-- The frame dropped from under the return variables it leaves, over a
+grown heap. -/
+theorem thin_put_keepAllAtop {Γ : Ctx} {rs ps : Ctx} {H' : HTy} (e : H <+: H')
+    (x : TEnv C H' (rs ++ ps)) (r : TEnv C H rs) (a : TEnv C H ps) (g : TEnv C H Γ) :
+    TEnv.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))
+        (TEnv.put (Thin.keepAll rs (Thin.atop ps Γ)) x
+          (TEnv.wk e (rs ++ (ps ++ Γ)) (TEnv.append rs r (TEnv.append ps a g)))) =
+      TEnv.append rs (TEnv.take rs x) (TEnv.wk e Γ g) := by
+  conv => lhs; rw [← append_take_drop rs x]
+  rw [append_wk, put_keepAll, put_atop, append_wk, drop_append, thin_keepAll, thin_ofExt,
+    drop_append]
+
+/-- The frame dropped from under a memory return, over a heap grown twice
+(the object, then the body). -/
+theorem thin_keep_put_atop {Γ ps : Ctx} {t : LTy} {H₂ H₃ : HTy} (e₁ : H <+: H₂)
+    (e₂ : H₂ <+: H₃) (x : TEnv C H₃ (t :: ps)) (w : t.TDenote C H₂) (a : TEnv C H ps)
+    (g : TEnv C H Γ) :
+    TEnv.thin (Thin.keep (Thin.ofExt (Ext.append Γ ps)))
+        (TEnv.put (Thin.atop (t :: ps) Γ) x
+          (TEnv.wk e₂ (t :: (ps ++ Γ)) (w, TEnv.wk e₁ (ps ++ Γ) (TEnv.append ps a g)))) =
+      (x.1, TEnv.wk (e₁.trans e₂) Γ g) := by
+  show (x.1, TEnv.thin (Thin.ofExt (Ext.append Γ ps))
+    (TEnv.put (Thin.atop ps Γ) x.2 (TEnv.wk e₂ _ (TEnv.wk e₁ _ (TEnv.append ps a g))))) = _
+  rw [thin_ofExt, wk_trans, drop_put_atop_wk]
+
+end TEnv
+
+/-! ## Runs of the pieces an inlined call is made of -/
+
+section Pieces
 
 variable {Γ : Ctx}
 
-/-- A body weakened under its caller's locals, run from the caller's state
-with the frame pushed, as a block: the body's run in its frame, lifted. -/
-theorem Prog.run_atop {ps Γf : Ctx} (body : Prog C ps Γf) (σ : State C Γ) (g : Semantics.State)
-    (a : Env C ps) :
-    (Prog.run ((σ.withGlob g).withEnv (Env.append ps a σ.env)) (body.wk (Thin.atop ps Γ)).2.2).map
-        (State.drop (body.wk (Thin.atop ps Γ)).2.2.ext) =
-      (Prog.run (State.ofGlob g a) body).map fun υ =>
-        (υ.drop body.ext).withEnv (Env.append ps (υ.drop body.ext).env σ.env) := by
-  have hs : (State.ofGlob g a).lift (Thin.atop ps Γ) (Env.append ps a σ.env) =
-      (σ.withGlob g).withEnv (Env.append ps a σ.env) := by
-    simp only [State.lift, Env.put_atop, Env.drop_append]; rfl
-  have hw := WkRel.eq_lifted (WkRel.drop (Prog.wk_over body (Thin.atop ps Γ))
-    (Prog.run_wk body (Thin.atop ps Γ) (Env.append ps a σ.env) (State.ofGlob g a)))
-  rw [← hs, hw]
-  cases Prog.run (State.ofGlob g a) body with
-  | error => rfl
-  | ok υ =>
-    show Except.ok _ = Except.ok _
-    simp only [State.lift, Env.put_atop, Env.drop_append]
+theorem TState.withEnv_self (σ : TState C Γ) : σ.withEnv σ.env = σ := rfl
 
-/-- A body weakened under its caller's locals with its return variables kept
-on top (`CallRet.rets`), run from the caller's state with the frame pushed. -/
-theorem Prog.run_keepAllAtop {rs ps Γf : Ctx} (body : Prog C (rs ++ ps) Γf) (σ : State C Γ)
-    (g : Semantics.State) (r : Env C rs) (a : Env C ps) :
-    (Prog.run ((σ.withGlob g).withEnv (Env.append rs r (Env.append ps a σ.env)))
-        (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2).map
-        (State.drop (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2.ext) =
-      (Prog.run (State.ofGlob g (Env.append rs r a)) body).map fun υ =>
-        (υ.drop body.ext).withEnv (Env.put (Thin.keepAll rs (Thin.atop ps Γ)) (υ.drop body.ext).env
-          (Env.append rs r (Env.append ps a σ.env))) := by
-  have hs : (State.ofGlob g (Env.append rs r a)).lift (Thin.keepAll rs (Thin.atop ps Γ))
-      (Env.append rs r (Env.append ps a σ.env)) =
-      (σ.withGlob g).withEnv (Env.append rs r (Env.append ps a σ.env)) := by
-    show (State.ofGlob g (Env.append rs r a)).withEnv (Env.put (Thin.keepAll rs (Thin.atop ps Γ))
-      (Env.append rs r a) (Env.append rs r (Env.append ps a σ.env))) = _
-    rw [Env.put_keepAll, Env.put_atop, Env.drop_append]; rfl
-  have hw := WkRel.eq_lifted (WkRel.drop (Prog.wk_over body (Thin.keepAll rs (Thin.atop ps Γ)))
-    (Prog.run_wk body (Thin.keepAll rs (Thin.atop ps Γ)) (Env.append rs r (Env.append ps a σ.env))
-      (State.ofGlob g (Env.append rs r a))))
-  rw [← hs, hw]
-  cases Prog.run (State.ofGlob g (Env.append rs r a)) body <;> rfl
+theorem Val.evalT_unders {p : PrimTy} (v : Val C Γ p) (σ : TState C Γ) :
+    (ρ : Ctx) → (r : TEnv C σ.H ρ) →
+      (v.unders ρ).evalT (σ.withEnv (TEnv.append ρ r σ.env)) = v.evalT σ
+  | [], _ => rfl
+  | _ :: ρ, r => by
+    show ((v.unders ρ).up).evalT ((σ.withEnv (TEnv.append ρ r.2 σ.env)).push r.1) = _
+    rw [Val.evalT_up, Val.evalT_unders v σ ρ r.2]
 
-/-- The frame dropped from under the return variables it leaves. -/
-theorem Env.thin_put_keepAllAtop {rs ps : Ctx} (x : Env C (rs ++ ps)) (r : Env C rs)
-    (a : Env C ps) (e : Env C Γ) :
-    Env.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))
-        (Env.put (Thin.keepAll rs (Thin.atop ps Γ)) x (Env.append rs r (Env.append ps a e))) =
-      Env.append rs (Env.take rs x) e := by
-  conv => lhs; rw [← Env.append_take_drop rs x]
-  rw [Env.put_keepAll, Env.put_atop, Env.drop_append, Env.thin_keepAll, Env.thin_ofExt,
-    Env.drop_append]
+theorem Stmt.trunSt_declLocal_none (p : PrimTy) (x : Var) (σ : TState C Γ) :
+    Stmt.trunSt σ (.declLocal p x none) = .ok (σ.push (t := .val p) (PrimTy.dflt p)) := rfl
 
-end Body
+theorem Args.evalT_snoc (σ : TState C Γ) {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var)
+    (e : Val C Γ p) :
+    (Args.snoc as p x e).evalT σ = as.evalT σ >>= fun r => e.evalT σ >>= fun v => pure (v, r) :=
+  rfl
+
+theorem Args.evalT_up {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) : {ps : Ctx} →
+    (as : Args C Γ ps) → (as.up (t := t)).evalT (σ.push w) = as.evalT σ
+  | _, .nil => rfl
+  | _, .snoc as p x e => by
+    show (Args.snoc (as.up (t := t)) p x e.up).evalT (σ.push w) = _
+    rw [Args.evalT_snoc, Args.evalT_snoc, Args.evalT_up σ w as, Val.evalT_up]
+    rfl
+
+/-- Arguments that are all simple read without halting. -/
+theorem Args.evalT_ok (σ : TState C Γ) : {ps : Ctx} → (as : Args C Γ ps) → as.capture = none →
+    ∃ a, as.evalT σ = .ok a
+  | _, .nil, _ => ⟨(), rfl⟩
+  | _, .snoc as p x e, h => by
+    rw [Args.capture_snoc] at h
+    cases hc : as.capture with
+    | some q => rw [hc] at h; cases h
+    | none =>
+      rw [hc] at h
+      obtain ⟨a, ha⟩ := Args.evalT_ok σ as hc
+      cases e with
+      | simple s =>
+        refine ⟨(s.evalT σ, a), ?_⟩
+        rw [Args.evalT_snoc, ha]
+        rfl
+      | _ => simp only [Val.isSimple, Bool.false_eq_true, if_false, reduceCtorEq] at h
+
+/-- **The arguments with one captured** read as the captured value, then the
+arguments over it. -/
+theorem Args.evalT_capture (σ : TState C Γ) : {ps : Ctx} → (as : Args C Γ ps) →
+    ∀ {p : PrimTy} {v : Val C Γ p} {as' : Args C (.val p :: Γ) ps},
+      as.capture = some ⟨p, v, as'⟩ →
+        as.evalT σ = v.evalT σ >>= fun w => as'.evalT (σ.push (t := .val p) w)
+  | _, .nil, _, _, _, h => by cases h
+  | _, .snoc as p' x e, p, v, as', h => by
+    rw [Args.capture_snoc] at h
+    cases hc : as.capture with
+    | some q =>
+      obtain ⟨p₀, v₀, as₀⟩ := q
+      rw [hc] at h
+      dsimp only at h
+      cases h
+      rw [Args.evalT_snoc, Args.evalT_capture σ as hc]
+      cases v.evalT σ with
+      | error => rfl
+      | ok w =>
+        show _ = Args.evalT (σ.push (t := .val p) w) (Args.snoc as₀ p' x e.up)
+        rw [Args.evalT_snoc, Val.evalT_up]
+        rfl
+    | none =>
+      rw [hc] at h
+      dsimp only at h
+      split at h
+      · cases h
+      · cases h
+        obtain ⟨a, ha⟩ := Args.evalT_ok σ as hc
+        rw [Args.evalT_snoc, ha]
+        cases e.evalT σ with
+        | error => rfl
+        | ok w =>
+          show _ = (Args.snoc (as.up (t := .val p')) p' x (.simple (.local .here))).evalT
+            (σ.push (t := .val p') w)
+          rw [Args.evalT_snoc, Args.evalT_up, ha]
+          rfl
+
+/-- **The parameters declared** with the arguments: the arguments read, then
+the rest with them on top. -/
+theorem Args.trunSt_declsThen {Δ : Ctx} (σ : TState C Γ) : {ps : Ctx} → (as : Args C Γ ps) →
+    (rest : Prog C (ps ++ Γ) Δ) →
+      Prog.trunSt σ (as.declsThen rest) =
+        (as.evalT σ).bind fun a => Prog.trunSt (σ.withEnv (TEnv.append ps a σ.env)) rest
+  | _, .nil, rest => rfl
+  | _, .snoc (ps := ps') as p x e, rest => by
+    show Prog.trunSt σ (as.declsThen (.cons (.declLocal p x (some (e.unders ps'))) rest)) = _
+    rw [Args.trunSt_declsThen σ as]
+    show _ = (Args.evalT σ as >>= fun r => e.evalT σ >>= fun v => pure (v, r)).bind _
+    cases as.evalT σ with
+    | error => rfl
+    | ok a =>
+      show Prog.trunSt _ (.cons _ rest) = (e.evalT σ >>= fun v => pure (v, a)).bind _
+      rw [Prog.trunSt_cons, Stmt.trunSt_declLocal, Val.evalT_unders]
+      cases e.evalT σ <;> rfl
+
+/-- **The return variables declared** at their defaults. -/
+theorem Binders.trunSt_declsThen {Δ : Ctx} (σ : TState C Γ) : {ρ : Ctx} → (bs : Binders ρ) →
+    (rest : Prog C (ρ ++ Γ) Δ) →
+      Prog.trunSt σ (bs.declsThen rest) =
+        Prog.trunSt (σ.withEnv (TEnv.append ρ (bs.defaultsT (C := C)) σ.env)) rest
+  | _, .nil, rest => rfl
+  | _, .snoc (ρ := ρ') bs p x, rest => by
+    show Prog.trunSt σ (bs.declsThen (.cons (.declLocal p x none) rest)) = _
+    rw [Binders.trunSt_declsThen σ bs, Prog.trunSt_cons]
+    rfl
+
+/-- **A weakened body run as a block** runs as the body, lifted, its locals
+popped. -/
+theorem Stmt.trun_block_wk {ρ Δ Γf : Ctx} (body : Prog C ρ Γf) (h : Thin ρ Δ) (τ : TState C ρ)
+    (d : TEnv C τ.H Δ) :
+    Stmt.trun (τ.lift h d) (.block (body.wk h).2.2) =
+      liftedT h d ((Prog.trun τ body).map (Out.drop body.ext)) :=
+  (TWkRel.drop (Prog.wk_over body h) (Prog.trun_wk body h τ d)).eq_lifted
+
+/-- The caller's state with a frame's locals pushed, read as the frame's state
+lifted (`Thin.atop`). -/
+theorem TState.withEnv_append_lift {ps : Ctx} (σ : TState C Γ) (a : TEnv C σ.H ps) :
+    σ.withEnv (TEnv.append ps a σ.env) =
+      (σ.withEnv a).lift (Thin.atop ps Γ) (TEnv.append ps a σ.env) := by
+  simp only [TState.lift, TState.withEnv, TEnv.put_atop, TEnv.drop_append]
+
+end Pieces
 
 /-! ## `expand_function_body` -/
 
@@ -290,255 +268,290 @@ section Calls
 variable {Γ : Ctx} {m : Modality}
 
 /-- `internalCallExpand` of a call with no result. -/
-theorem Premise.Sound.callNone {ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
-    (body : Prog C ([] ++ ps) Γf) (σ : State C Γ) :
+theorem Premise.sound_callNone {ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
+    (body : Prog C ([] ++ ps) Γf) (σ : TState C Γ) :
     Premise.Sound m (.call f args .none body)
       (.unfold (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil))
         (Ext.append Γ ps)) σ := by
-  refine Premise.Sound.unfold ?_
-  rw [Args.run_declsThen]
-  show _ = Run.call args .none body.ext body.runR σ
-  unfold Run.call
-  cases args.eval σ with
+  refine Premise.sound_unfold σ ?_
+  rw [Args.trunSt_declsThen]
+  show _ = (TRun.call args .none body.ext body.trunR σ).map (·.st)
+  rw [TRun.call_eq]
+  cases args.evalT σ with
   | error => rfl
   | ok a =>
-    show (Prog.run ((σ.withGlob σ.glob).withEnv (Env.append ps a σ.env))
-      (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil)).map _ = _
-    rw [Prog.run_cons, Stmt.run_block, bind_run_nil, Prog.run_atop]
-    show _ = (Prog.run (State.ofGlob σ.glob a) body).bind fun υ => pure (υ.withEnv σ.env)
-    cases Prog.run (State.ofGlob σ.glob a) body with
+    show (Prog.trunSt _ _).map _ =
+      (TRun.callFrom .none body.ext body.trunR σ ⟨σ.withEnv a, List.prefix_refl _⟩).map _
+    rw [Prog.trunSt_single, TState.withEnv_append_lift, Stmt.trunSt, Stmt.trun_block_wk]
+    unfold TRun.callFrom Prog.trun
+    dsimp only
+    cases Prog.trunR body (σ.withEnv a) with
     | error => rfl
-    | ok υ => exact congrArg Except.ok (by simp only [State.drop, State.withEnv, Env.drop_append])
+    | ok o =>
+      exact congrArg Except.ok (by
+        simp only [Out.drop, Out.lift, TState.lift, TState.drop, TState.withEnv, TEnv.put_atop,
+          TEnv.drop_append, TEnv.drop_wk, CallRet.leaveT])
 
+theorem TRes.ok_bind {α β : Type} (a : α) (f : α → TRes β) : (Except.ok a : TRes α).bind f = f a :=
+  rfl
+
+theorem TRes.ok_bind' {α β : Type} (a : α) (f : α → TRes β) : (Except.ok a : TRes α) >>= f = f a :=
+  rfl
 
 /-- `functionBodyExpand` of a call whose result lands in `res`. -/
-theorem Premise.Sound.callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p : PrimTy) (r : Var)
-    (res : Option (Idx Γ (.val p))) (body : Prog C ([.val p] ++ ps) Γf) (σ : State C Γ) :
+theorem Premise.sound_callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p : PrimTy)
+    (r : Var) (res : Option (Idx Γ (.val p))) (body : Prog C ([.val p] ++ ps) Γf)
+    (σ : TState C Γ) :
     Premise.Sound m (.call f args (.val p r res) body)
       (.unfold (args.declsThen (.cons (.declLocal p r none)
         (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (match res with
           | none => .nil
           | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil))))
         (.push (Ext.append Γ ps))) σ := by
-  refine Premise.Sound.unfold ?_
-  rw [Args.run_declsThen]
-  show _ = Run.call args (.val p r res) body.ext body.runR σ
-  unfold Run.call
-  cases args.eval σ with
+  refine Premise.sound_unfold σ ?_
+  rw [Args.trunSt_declsThen]
+  show _ = (TRun.call args (.val p r res) body.ext body.trunR σ).map (·.st)
+  rw [TRun.call_eq]
+  cases args.evalT σ with
   | error => rfl
   | ok a =>
-    show (Prog.run ((σ.withGlob σ.glob).withEnv (Env.append (.val p :: ps) ((PrimTy.default p, a) : Env C (.val p :: ps)) σ.env))
-      (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) _)).map _ = _
-    rw [Prog.run_cons, Stmt.run_block, Prog.run_atop (ps := .val p :: ps)]
-    show _ = (Prog.run (State.ofGlob (C := C) (Γ := .val p :: ps) σ.glob (PrimTy.default p, a)) body).bind fun υ =>
-      pure (υ.withEnv (CallRet.leave σ.env (.val p r res) (Env.take [.val p] (Env.drop body.ext υ.env))))
-    cases Prog.run (State.ofGlob (C := C) (Γ := .val p :: ps) σ.glob (PrimTy.default p, a)) body with
+    show (Prog.trunSt _ _).map _ = (TRun.callFrom (.val p r res) body.ext body.trunR σ
+      ⟨σ.withEnv ((PrimTy.dflt p, a) : TEnv C σ.H (.val p :: ps)), List.prefix_refl _⟩).map _
+    rw [Prog.trunSt_cons, Stmt.trunSt_declLocal_none, TRes.ok_bind, Prog.trunSt_cons,
+      show (σ.withEnv (TEnv.append ps a σ.env)).push (t := .val p) (PrimTy.dflt p) =
+        σ.withEnv (TEnv.append (.val p :: ps) (PrimTy.dflt p, a) σ.env) from rfl,
+      TState.withEnv_append_lift (ps := .val p :: ps) σ (PrimTy.dflt p, a), Stmt.trunSt,
+      Stmt.trun_block_wk]
+    unfold TRun.callFrom Prog.trun
+    dsimp only
+    cases Prog.trunR body (σ.withEnv ((PrimTy.dflt p, a) : TEnv C σ.H (.val p :: ps))) with
     | error => rfl
-    | ok υ =>
+    | ok o =>
+      rw [show (Ext.append Γ ps).push = Ext.append Γ (LTy.val p :: ps) from rfl]
       cases res with
       | none =>
-        exact congrArg Except.ok (by simp only [State.drop, State.withEnv, Env.drop_push_append]; rfl)
+        exact congrArg Except.ok (by
+          simp only [Out.drop, Out.lift, TState.lift, TState.drop, TState.withEnv, CallRet.leaveT]
+          erw [TEnv.drop_put_atop_wk (Γ := Γ) _ (LTy.val p :: ps)])
       | some j =>
         exact congrArg Except.ok (by
-          simp only [State.drop, State.setLocal, State.withEnv, Env.drop_push_set_under]
-          rw [show (Env.append (.val p :: ps) (Env.drop body.ext υ.env) σ.env).2 =
-            Env.append ps (Env.drop body.ext υ.env).2 σ.env from rfl, Env.drop_append]
+          simp only [Out.drop, Out.lift, TState.lift, TState.drop, TState.withEnv, TState.setLocal,
+            show (j.under ps).there = j.under (LTy.val p :: ps) from rfl, TEnv.drop_set_under,
+            CallRet.leaveT]
+          erw [TEnv.drop_put_atop_wk (Γ := Γ) _ (LTy.val p :: ps)]
           rfl)
-
 
 /-- `internalCallExpand` of a call that leaves its return variables
 (`CallRet.rets`): the frame dropped from under them. -/
-theorem Premise.Sound.callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) (bs : Binders rs)
-    (body : Prog C (rs ++ ps) Γf) (σ : State C Γ) :
+theorem Premise.sound_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
+    (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) (σ : TState C Γ) :
     Premise.Sound m (.call f args (.rets bs) body)
       (.inline (args.declsThen (bs.declsThen
           (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
         (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))) σ := by
-  refine Premise.Sound.inline ?_
-  rw [Args.run_declsThen]
-  show _ = Run.call args (.rets bs) body.ext body.runR σ
-  unfold Run.call
-  cases args.eval σ with
+  refine Premise.sound_inline σ ?_
+  rw [Args.trunSt_declsThen]
+  show _ = (TRun.call args (.rets bs) body.ext body.trunR σ).map (·.st)
+  rw [TRun.call_eq]
+  cases args.evalT σ with
   | error => rfl
   | ok a =>
-    show (Prog.run (σ.withEnv (Env.append ps a σ.env)) (bs.declsThen _)).map _ = _
-    rw [Binders.run_declsThen]
-    show (Prog.run ((σ.withGlob σ.glob).withEnv (Env.append rs bs.defaults (Env.append ps a σ.env)))
-      (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)).map _ = _
-    rw [Prog.run_cons, Stmt.run_block, bind_run_nil, Prog.run_keepAllAtop]
-    show _ = (Prog.run (State.ofGlob σ.glob (Env.append rs bs.defaults a)) body).bind fun υ =>
-      pure (υ.withEnv (Env.append rs (Env.take rs (Env.drop body.ext υ.env)) σ.env))
-    cases Prog.run (State.ofGlob σ.glob (Env.append rs bs.defaults a)) body with
+    show (Prog.trunSt _ _).map _ = (TRun.callFrom (.rets bs) body.ext body.trunR σ
+      ⟨σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a), List.prefix_refl _⟩).map _
+    have hs : (σ.withEnv (TEnv.append ps a σ.env)).withEnv
+        (TEnv.append rs (bs.defaultsT (C := C)) (σ.withEnv (TEnv.append ps a σ.env)).env) =
+        (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a)).lift
+          (Thin.keepAll rs (Thin.atop ps Γ))
+          (TEnv.append rs (bs.defaultsT (C := C)) (TEnv.append ps a σ.env)) := by
+      simp only [TState.lift, TState.withEnv, TEnv.put_keepAll, TEnv.put_atop, TEnv.drop_append]
+    rw [Binders.trunSt_declsThen, hs, Prog.trunSt_single, Stmt.trunSt, Stmt.trun_block_wk]
+    unfold TRun.callFrom Prog.trun
+    dsimp only
+    cases Prog.trunR body (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a)) with
     | error => rfl
-    | ok υ =>
+    | ok o =>
       exact congrArg Except.ok (by
-        simp only [State.thin, State.drop, State.withEnv, Env.thin_put_keepAllAtop])
+        simp only [Out.drop, Out.lift, TState.lift, TState.drop, TState.thin, TState.withEnv,
+          CallRet.leaveT]
+        erw [TEnv.thin_put_keepAllAtop])
+
+theorem Stmt.trunSt_declMem_none {Γ : Ctx} (R : RefTy) (x : Var) (hd : (Ty.ref R).defaultOkS = true)
+    (hm : (Ty.ref R).mapFree = true) (σ : TState C Γ) :
+    Stmt.trunSt σ (.declMem R x none hd hm) =
+      .ok ((σ.allocDefaultG R hm).st.push (t := .mem R) (some (σ.allocDefaultG R hm).val)) := rfl
 
 /-- `internalCallExpand` of a call with a memory return: the frame dropped
 from under the object. -/
-theorem Premise.Sound.callMem {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (R : RefTy) (r : Var)
-    (hd : (Ty.ref R).defaultOkS = true) (hm : (Ty.ref R).mapFree = true)
-    (body : Prog C ([.mem R] ++ ps) Γf) (σ : State C Γ) :
+theorem Premise.sound_callMem {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (R : RefTy)
+    (r : Var) (hd : (Ty.ref R).defaultOkS = true) (hm : (Ty.ref R).mapFree = true)
+    (body : Prog C ([.mem R] ++ ps) Γf) (σ : TState C Γ) :
     Premise.Sound m (.call f args (.mem R r hd hm) body)
       (.inline (args.declsThen (.cons (.declMem R r none hd hm)
           (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
         (.keep (Thin.ofExt (Ext.append Γ ps)))) σ := by
-  refine Premise.Sound.inline ?_
-  rw [Args.run_declsThen]
-  show _ = Run.call args (.mem R r hd hm) body.ext body.runR σ
-  unfold Run.call
-  cases args.eval σ with
+  refine Premise.sound_inline σ ?_
+  rw [Args.trunSt_declsThen]
+  show _ = (TRun.call args (.mem R r hd hm) body.ext body.trunR σ).map (·.st)
+  rw [TRun.call_eq]
+  cases args.evalT σ with
   | error => rfl
   | ok a =>
-    rw [Res.ok_bind, Res.ok_bind, Prog.run_cons, CallRet.enter_mem, Stmt.run_declMem, Run.declMem_none]
-    show (Except.bind ((Semantics.allocDefault σ.glob R).map _) _).map _ =
-      Except.bind ((Semantics.allocDefault σ.glob R).map _) _
-    cases Semantics.allocDefault σ.glob R with
+    let g := (σ.withEnv a).allocDefaultG R hm
+    show (Prog.trunSt _ _).map _ = (TRun.callFrom (.mem R r hd hm) body.ext body.trunR σ
+      ⟨g.st.push (t := .mem R) (some g.val), g.ext⟩).map _
+    rw [Prog.trunSt_cons, Stmt.trunSt_declMem_none, TRes.ok_bind, TState.withEnv_append_lift,
+      TState.allocDefaultG_lift, Prog.trunSt_single]
+    show (Stmt.trunSt ((g.st.push (t := .mem R) (some g.val)).lift (Thin.atop (.mem R :: ps) Γ)
+      (some g.val, TEnv.wk g.ext _ (TEnv.append ps a σ.env))) _).map _ = _
+    rw [Stmt.trunSt, Stmt.trun_block_wk]
+    unfold TRun.callFrom Prog.trun
+    dsimp only
+    cases Prog.trunR body (g.st.push (t := .mem R) (some g.val)) with
     | error => rfl
-    | ok x =>
-      obtain ⟨g, id⟩ := x
-      show (Prog.run ((σ.withGlob g).withEnv (Env.append (.mem R :: ps) (some id, a) σ.env))
-          (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)).map _ =
-        (Prog.run (State.ofGlob (C := C) (Γ := .mem R :: ps) g (some id, a)) body).bind fun υ =>
-          pure (υ.withEnv (CallRet.leave σ.env (.mem R r hd hm)
-            (Env.take [.mem R] (Env.drop body.ext υ.env))))
-      rw [Prog.run_cons, Stmt.run_block, bind_run_nil, Prog.run_atop (ps := .mem R :: ps)]
-      cases Prog.run (State.ofGlob (C := C) (Γ := .mem R :: ps) g (some id, a)) body with
-      | error => rfl
-      | ok υ =>
-        exact congrArg Except.ok (by
-          simp only [State.thin, State.drop, State.withEnv, Env.thin_keep_ofExt_append]; rfl)
+    | ok o =>
+      exact congrArg Except.ok (by
+        simp only [Out.drop, Out.lift, TState.lift, TState.drop, TState.thin, TState.withEnv,
+          CallRet.leaveT]
+        erw [TEnv.thin_keep_put_atop]
+        rfl)
 
-/-- `functionCallArgCapture` of a call with no result. -/
-theorem Premise.Sound.callCaptureNone {ps Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
-    (body : Prog C ([] ++ ps) Γf) {p : PrimTy} {v : Val C Γ p} {as' : Args C (.val p :: Γ) ps}
-    (hc : args.capture = some ⟨p, v, as'⟩) (σ : State C Γ) :
-    Premise.Sound m (.call f args .none body) (.capture p (fse k) v (.call f as' .none body)) σ := by
-  refine Premise.Sound.capture (fun w hw => ?_) (fun e he => ?_)
-  · show (Run.call as' .none body.ext body.runR (σ.push (t := .val p) w)).map (State.drop (.push .refl)) =
-      Run.call args .none body.ext body.runR σ
-    unfold Run.call
-    rw [Args.eval_capture σ args hc, hw]
-    show _ = Except.bind (as'.eval (σ.push (t := .val p) w)) _
-    cases as'.eval (σ.push (t := .val p) w) with
+/-! ## `functionCallArgCapture` -/
+
+/-- A call's body run from the caller with a captured value on top: what it
+leaves the caller, the capture popped (`F`), is what it leaves without it. -/
+theorem TRun.callFrom_capture {Γ' Γ'' ps rs Γf : Ctx} {t : LTy} (ret : CallRet Γ rs Γ')
+    (ret' : CallRet (t :: Γ) rs Γ'') (hb : Ext (rs ++ ps) Γf) (B : TStep C (rs ++ ps) Γf)
+    (σ : TState C Γ) (w : t.TDenote C σ.H) (o₁ : Out C σ.H (rs ++ ps))
+    (F : TState C Γ'' → TState C Γ')
+    (hF : ∀ (τ : TState C Γf) (e : σ.H <+: τ.H) (x : TEnv C τ.H rs),
+      F (τ.withEnv (ret'.leaveT (TEnv.wk e (t :: Γ) (σ.push w).env) x)) =
+        τ.withEnv (ret.leaveT (TEnv.wk e Γ σ.env) x)) :
+    ((TRun.callFrom ret' hb B (σ.push w) o₁).map (·.st)).map F =
+      (TRun.callFrom ret hb B σ o₁).map (·.st) := by
+  unfold TRun.callFrom
+  cases B o₁.st with
+  | error => rfl
+  | ok o => exact congrArg Except.ok (hF _ _ _)
+
+/-- `functionCallArgCapture` (none return). -/
+theorem Premise.sound_callCaptureNone {ps Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
+    (body : Prog C ([] ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
+    {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : TState C Γ) :
+    Premise.Sound m (.call f args .none body)
+      (.capture p (fse k) v (.call f as' .none body)) σ := by
+  refine Premise.sound_unfold σ ?_
+  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
+  show _ = (TRun.call args .none body.ext body.trunR σ).map (·.st)
+  rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
+  cases v.evalT σ with
+  | error => rfl
+  | ok w =>
+    rw [TRes.ok_bind']
+    show (Prog.trunSt (σ.push (t := .val p) w) _).map _ = _
+    rw [Prog.trunSt_single]
+    show ((TRun.call as' .none body.ext body.trunR (σ.push (t := .val p) w)).map _).map _ = _
+    rw [TRun.call_eq]
+    cases as'.evalT (σ.push (t := .val p) w) with
     | error => rfl
     | ok a =>
-      show (Except.bind (Prog.run (State.ofGlob σ.glob a) body) fun υ =>
-          pure (υ.withEnv (σ.push (t := .val p) w).env)).map _ =
-        Except.bind (Prog.run (State.ofGlob σ.glob a) body) fun υ => pure (υ.withEnv σ.env)
-      cases Prog.run (State.ofGlob σ.glob a) body <;> rfl
-  · show Run.call args .none body.ext body.runR σ = _
-    unfold Run.call
-    rw [Args.eval_capture σ args hc, he]; rfl
+      exact TRun.callFrom_capture (t := .val p) .none .none body.ext body.trunR σ w _
+        (TState.drop (.push .refl))
+        (fun _ _ _ => rfl)
 
-/-- `functionCallArgCapture` of a call whose result lands in `res`. -/
-theorem Premise.Sound.callCaptureVal {ps Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
-    (q : PrimTy) (r : Var) (res : Option (Idx Γ (.val q))) (body : Prog C ([.val q] ++ ps) Γf)
-    {p : PrimTy} {v : Val C Γ p} {as' : Args C (.val p :: Γ) ps}
-    (hc : args.capture = some ⟨p, v, as'⟩) (σ : State C Γ) :
+/-- `functionCallArgCapture` (val return). -/
+theorem Premise.sound_callCaptureVal {ps Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
+    (q : PrimTy) (r : Var) (res : Option (Idx Γ (.val q)))
+    (body : Prog C ([.val q] ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
+    {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : TState C Γ) :
     Premise.Sound m (.call f args (.val q r res) body)
       (.capture p (fse k) v (.call f as' (.val q r (res.map .there)) body)) σ := by
-  refine Premise.Sound.capture (fun w hw => ?_) (fun e he => ?_)
-  · show (Run.call as' (.val q r (res.map .there)) body.ext body.runR (σ.push (t := .val p) w)).map
-        (State.drop (.push .refl)) = Run.call args (.val q r res) body.ext body.runR σ
-    unfold Run.call
-    rw [Args.eval_capture σ args hc, hw]
-    show _ = Except.bind (as'.eval (σ.push (t := .val p) w)) _
-    cases as'.eval (σ.push (t := .val p) w) with
+  refine Premise.sound_unfold σ ?_
+  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
+  show _ = (TRun.call args (.val q r res) body.ext body.trunR σ).map (·.st)
+  rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
+  cases v.evalT σ with
+  | error => rfl
+  | ok w =>
+    rw [TRes.ok_bind']
+    show (Prog.trunSt (σ.push (t := .val p) w) _).map _ = _
+    rw [Prog.trunSt_single]
+    show ((TRun.call as' (.val q r (res.map .there)) body.ext body.trunR
+      (σ.push (t := .val p) w)).map _).map _ = _
+    rw [TRun.call_eq]
+    cases as'.evalT (σ.push (t := .val p) w) with
     | error => rfl
     | ok a =>
-      show (Except.bind (Prog.run (State.ofGlob (C := C) (Γ := .val q :: ps) σ.glob
-            (PrimTy.default q, a)) body) fun υ =>
-          pure (υ.withEnv (CallRet.leave (σ.push (t := .val p) w).env (.val q r (res.map .there))
-            (Env.take [.val q] (Env.drop body.ext υ.env))))).map _ =
-        Except.bind (Prog.run (State.ofGlob (C := C) (Γ := .val q :: ps) σ.glob
-            (PrimTy.default q, a)) body) fun υ =>
-          pure (υ.withEnv (CallRet.leave σ.env (.val q r res)
-            (Env.take [.val q] (Env.drop body.ext υ.env))))
-      cases Prog.run (State.ofGlob (C := C) (Γ := .val q :: ps) σ.glob (PrimTy.default q, a)) body with
-      | error => rfl
-      | ok υ => cases res <;> rfl
-  · show Run.call args (.val q r res) body.ext body.runR σ = _
-    unfold Run.call
-    rw [Args.eval_capture σ args hc, he]; rfl
+      exact TRun.callFrom_capture (t := .val p) (.val q r res) (.val q r (res.map .there))
+        body.ext body.trunR σ w _
+        (TState.drop (.push .refl))
+        (fun _ _ _ => by cases res <;> rfl)
 
-/-- `functionCallArgCapture` of a call that leaves its return variables. -/
-theorem Premise.Sound.callCaptureRets {ps rs Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
+/-- `functionCallArgCapture` (rets return). -/
+theorem Premise.sound_callCaptureRets {ps rs Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
     (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
-    {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : State C Γ) :
+    {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : TState C Γ) :
     Premise.Sound m (.call f args (.rets bs) body)
       (.inline (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.rets bs) body) .nil))
         (Thin.keepAll rs (.drop .refl))) σ := by
-  refine Premise.Sound.inline ?_
-  rw [Prog.run_cons]
-  show (Except.bind (Run.declLocal p (some v) σ) _).map _ =
-    Run.call args (.rets bs) body.ext body.runR σ
-  unfold Run.call
-  rw [Args.eval_capture σ args hc]
-  simp only [Run.declLocal]
-  cases v.eval σ with
+  refine Premise.sound_inline σ ?_
+  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
+  show _ = (TRun.call args (.rets bs) body.ext body.trunR σ).map (·.st)
+  rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
+  cases v.evalT σ with
   | error => rfl
   | ok w =>
-    show (Prog.run (σ.push (t := .val p) w) (.cons (.call f as' (.rets bs) body) .nil)).map _ =
-      Except.bind (as'.eval (σ.push (t := .val p) w)) _
-    rw [Prog.run_cons, bind_run_nil]
-    show (Run.call as' (.rets bs) body.ext body.runR (σ.push (t := .val p) w)).map _ = _
-    unfold Run.call
-    cases as'.eval (σ.push (t := .val p) w) with
+    rw [TRes.ok_bind']
+    show (Prog.trunSt (σ.push (t := .val p) w) _).map _ = _
+    rw [Prog.trunSt_single]
+    show ((TRun.call as' (.rets bs) body.ext body.trunR (σ.push (t := .val p) w)).map _).map _ = _
+    rw [TRun.call_eq]
+    cases as'.evalT (σ.push (t := .val p) w) with
     | error => rfl
     | ok a =>
-      show (Except.bind (Prog.run (State.ofGlob σ.glob (Env.append rs bs.defaults a)) body) fun υ =>
-          pure (υ.withEnv (Env.append rs (Env.take rs (Env.drop body.ext υ.env))
-            (σ.push (t := .val p) w).env))).map _ =
-        Except.bind (Prog.run (State.ofGlob σ.glob (Env.append rs bs.defaults a)) body) fun υ =>
-          pure (υ.withEnv (Env.append rs (Env.take rs (Env.drop body.ext υ.env)) σ.env))
-      cases Prog.run (State.ofGlob σ.glob (Env.append rs bs.defaults a)) body with
-      | error => rfl
-      | ok υ =>
-        exact congrArg Except.ok (by simp only [State.thin, State.withEnv, Env.thin_keepAll]; rfl)
+      exact TRun.callFrom_capture (t := .val p) (.rets bs) (.rets bs) body.ext body.trunR σ w _
+        (TState.thin (Thin.keepAll rs (.drop .refl)))
+        (fun _ _ _ => by
+          simp only [TState.thin, TState.withEnv, CallRet.leaveT]
+          erw [TEnv.thin_keepAll]
+          rfl)
 
-/-- `functionCallArgCapture` of a call with a memory return. -/
-theorem Premise.Sound.callCaptureMem {ps Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
-    (R : RefTy) (r : Var) (hd : (Ty.ref R).defaultOkS = true) (hm : (Ty.ref R).mapFree = true)
-    (body : Prog C ([.mem R] ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
-    {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : State C Γ) :
+/-- `functionCallArgCapture` (mem return). -/
+theorem Premise.sound_callCaptureMem {ps Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
+    (R : RefTy) (r : Var) (hd : (Ty.ref R).defaultOkS = true)
+    (hm : (Ty.ref R).mapFree = true) (body : Prog C ([.mem R] ++ ps) Γf) {p : PrimTy}
+    {v : Val C Γ p}
+    {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : TState C Γ) :
     Premise.Sound m (.call f args (.mem R r hd hm) body)
-      (.inline (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.mem R r hd hm) body) .nil))
+      (.inline (.cons (.declLocal p (fse k) (some v))
+          (.cons (.call f as' (.mem R r hd hm) body) .nil))
         (.keep (.drop .refl))) σ := by
-  refine Premise.Sound.inline ?_
-  rw [Prog.run_cons]
-  show (Except.bind (Run.declLocal p (some v) σ) _).map _ =
-    Run.call args (.mem R r hd hm) body.ext body.runR σ
-  unfold Run.call
-  rw [Args.eval_capture σ args hc]
-  simp only [Run.declLocal]
-  cases v.eval σ with
+  refine Premise.sound_inline σ ?_
+  rw [Prog.trunSt_cons, Stmt.trunSt_declLocal]
+  show _ = (TRun.call args (.mem R r hd hm) body.ext body.trunR σ).map (·.st)
+  rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
+  cases v.evalT σ with
   | error => rfl
   | ok w =>
-    show (Prog.run (σ.push (t := .val p) w) (.cons (.call f as' (.mem R r hd hm) body) .nil)).map _ =
-      Except.bind (as'.eval (σ.push (t := .val p) w)) _
-    rw [Prog.run_cons, bind_run_nil]
-    show (Run.call as' (.mem R r hd hm) body.ext body.runR (σ.push (t := .val p) w)).map _ = _
-    unfold Run.call
-    cases as'.eval (σ.push (t := .val p) w) with
+    rw [TRes.ok_bind']
+    show (Prog.trunSt (σ.push (t := .val p) w) _).map _ = _
+    rw [Prog.trunSt_single]
+    show ((TRun.call as' (.mem R r hd hm) body.ext body.trunR
+      (σ.push (t := .val p) w)).map _).map _ = _
+    rw [TRun.call_eq]
+    cases as'.evalT (σ.push (t := .val p) w) with
     | error => rfl
     | ok a =>
-      simp only [Res.ok_bind, Res.ok_bind', State.glob_push, CallRet.enter_mem]
-      cases Semantics.allocDefault σ.glob R with
-      | error => rfl
-      | ok x =>
-        obtain ⟨g, id⟩ := x
-        show (Except.bind (Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g (some id, a))
-          body) _).map _ = Except.bind (Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g
-            (some id, a)) body) _
-        cases Prog.run (State.ofGlob (C := C) (Γ := [LTy.mem R] ++ ps) g (some id, a)) body <;> rfl
+      exact TRun.callFrom_capture (t := .val p) (.mem R r hd hm) (.mem R r hd hm)
+        body.ext body.trunR σ w _
+        (TState.thin (.keep (.drop .refl)))
+        (fun _ _ _ => rfl)
 
-/-- **The rule of a call is sound**: its leftmost argument that is not simple
-captured, or its body inlined. -/
-theorem Stmt.stepSound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name)
-    (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) :
-    Stmt.StepSound k m (.call f args ret body) := by
-  intro σ pr hp
+/-- **The rule of a call is sound** over the typed state: its leftmost
+argument that is not simple captured, or its body inlined. -/
+theorem Stmt.sound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name)
+    (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) (σ : TState C Γ)
+    (pr : Premise C Γ Γ') (hp : Stmt.step k m (.call f args ret body) = some pr) :
+    Premise.Sound m (.call f args ret body) pr σ := by
   change callStep k f args ret body = some pr at hp
   unfold callStep at hp
   cases ret with
@@ -548,43 +561,194 @@ theorem Stmt.stepSound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : 
     | some q =>
       obtain ⟨p, v, as'⟩ := q
       rw [hc] at hp; cases hp
-      exact Premise.Sound.callCaptureNone (m := m) k f args body hc σ
+      exact Premise.sound_callCaptureNone k f args body hc σ
     | none =>
       rw [hc] at hp; cases hp
-      exact Premise.Sound.callNone (m := m) f args body σ
+      exact Premise.sound_callNone f args body σ
   | val q r res =>
     dsimp only at hp
     cases hc : args.capture with
     | some x =>
       obtain ⟨p, v, as'⟩ := x
       rw [hc] at hp; cases hp
-      exact Premise.Sound.callCaptureVal (m := m) k f args q r res body hc σ
+      exact Premise.sound_callCaptureVal k f args q r res body hc σ
     | none =>
       rw [hc] at hp; cases hp
       cases res with
-      | none => dsimp only; exact Premise.Sound.callVal (m := m) f args q r none body σ
-      | some j => dsimp only; exact Premise.Sound.callVal (m := m) f args q r (some j) body σ
+      | none => exact Premise.sound_callVal f args q r none body σ
+      | some j => exact Premise.sound_callVal f args q r (some j) body σ
   | rets bs =>
     dsimp only at hp
     cases hc : args.capture with
     | some x =>
       obtain ⟨p, v, as'⟩ := x
       rw [hc] at hp; cases hp
-      exact Premise.Sound.callCaptureRets (m := m) k f args bs body hc σ
+      exact Premise.sound_callCaptureRets k f args bs body hc σ
     | none =>
       rw [hc] at hp; cases hp
-      exact Premise.Sound.callRets (m := m) f args bs body σ
+      exact Premise.sound_callRets f args bs body σ
   | mem R r hd hm =>
     dsimp only at hp
     cases hc : args.capture with
     | some x =>
       obtain ⟨p, v, as'⟩ := x
       rw [hc] at hp; cases hp
-      exact Premise.Sound.callCaptureMem (m := m) k f args R r hd hm body hc σ
+      exact Premise.sound_callCaptureMem k f args R r hd hm body hc σ
     | none =>
       rw [hc] at hp; cases hp
-      exact Premise.Sound.callMem (m := m) f args R r hd hm body σ
+      exact Premise.sound_callMem f args R r hd hm body σ
 
 end Calls
+
+/-! ## `try` -/
+
+section Try
+
+variable {Γ : Ctx}
+
+/-- Decoding reverts, never panics. -/
+theorem Binders.decodeT_ne_panic {H : HTy} {ρ : Ctx} (bs : Binders ρ) :
+    ∀ (vs : List Semantics.Value), bs.decodeT (C := C) (H := H) vs ≠ .error .panic := by
+  induction bs with
+  | nil => intro _ h; cases h
+  | snoc bs p x ih =>
+    intro vs h
+    have hb : Binders.decodeT (C := C) (H := H) (Binders.snoc bs p x) vs =
+        (bs.decodeT (C := C) (H := H) vs >>= fun er => match er.2 with
+          | v :: rest => match PrimTy.ofValue? p v with
+            | some x => pure ((x, er.1), rest)
+            | none => .error .revert
+          | [] => .error .revert) := rfl
+    rw [hb] at h
+    cases hd : bs.decodeT (C := C) (H := H) vs with
+    | error e => rw [hd] at h; cases h; exact ih vs hd
+    | ok er =>
+      rw [hd] at h
+      obtain ⟨e, rest⟩ := er
+      cases rest with
+      | nil => cases h
+      | cons v rest =>
+        change (match PrimTy.ofValue? p v with
+          | some x => pure ((x, e), rest)
+          | none => Except.error THalt.revert : TRes _) = _ at h
+        split at h <;> cases h
+
+theorem CodeBinder.decodeT_ne_panic {H : HTy} {κ : Ctx} (code : CodeBinder κ)
+    (c : Semantics.Value) : code.decodeT (C := C) (H := H) c ≠ .error .panic := by
+  cases code with
+  | none => intro h; cases h
+  | some x =>
+    intro h
+    change (match PrimTy.ofValue? .uint c with
+      | Option.some x => pure (x, ())
+      | Option.none => Except.error THalt.revert : TRes _) = _ at h
+    split at h <;> cases h
+
+/-- `∀ xs. ψ` holds at every typed value of the binders. -/
+theorem holds_binders_all {ρ : Ctx} (bs : Binders ρ) :
+    ∀ (σ : TState C Γ) (ψ : Fml C (ρ ++ Γ)) (r : TEnv C σ.H ρ), holds σ (bs.all ψ) →
+      holds (σ.withEnv (TEnv.append ρ r σ.env)) ψ := by
+  induction bs with
+  | nil => intro σ ψ _ h; exact h
+  | snoc bs p x ih =>
+    intro σ ψ r h
+    exact ih σ (.all x p ψ) r.2 h r.1
+
+/-- A block's goal under the box, its locals popped by `h`: the block's run,
+then the rest. -/
+theorem holds_modalK_pop {Γ₂ Γ₀ Δ Γ₁ : Ctx} (τ : TState C Δ) (P : Prog C Δ Γ₁) (h : Ext Γ Γ₁)
+    (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀)
+    (hp : holds τ (Fml.modalK .box P (.pop .block h (.seq ω κ)) φ)) :
+    Modality.afterRunTR .box (holds · φ)
+      (((Prog.trunSt τ P).map (TState.drop h)).bind fun υ =>
+        (Prog.trunSt υ ω).bind (Frames.trunSt · κ)) := by
+  have h' := (holds_modal_iff τ P _ φ).1 (holds_modalK τ P _ φ hp)
+  revert h'
+  cases Prog.trunSt τ P with
+  | error => exact id
+  | ok υ =>
+    intro h'
+    change Modality.afterRunTR .box _ (Frames.trunSt υ (.pop .block h (.seq ω κ))) at h'
+    rw [Frames.trunSt_pop, Frames.trunSt_seq] at h'
+    exact h'
+
+/-- An outcome's states, each mapped, read through the states. -/
+theorem TRes.map_st {H : HTy} {Δ Γ' : Ctx} (X : TRes (Out C H Δ)) (f : Out C H Δ → Out C H Γ')
+    (g : TState C Δ → TState C Γ') (hfg : ∀ o, (f o).st = g o.st) :
+    (X.map f).map (·.st) = (X.map (·.st)).map g := by
+  cases X with
+  | error => rfl
+  | ok o => exact congrArg Except.ok (hfg o)
+
+/-- A halt that is no panic, under the box. -/
+theorem afterRunTR_box_error {Γ₂ Γ₀ : Ctx} {ω : Prog C Γ Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
+    {e : THalt} (he : e ≠ .panic) :
+    Modality.afterRunTR .box (holds · φ)
+      ((Except.error e : TRes (TState C Γ)).bind fun υ =>
+        (Prog.trunSt υ ω).bind (Frames.trunSt · κ)) :=
+  ⟨trivial, fun h => he (Except.error.inj h)⟩
+
+/-- `tryCallNoCallbackBox`: under the box, a goal per clause, each for every
+typed value its outcome binds. -/
+theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ)
+    (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe) (code : CodeBinder κc)
+    (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (σ : TState C Γ) :
+    Premise.Sound .box (.tryCall call rets ok err code pnc other)
+      (.branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩])
+      σ := by
+  intro _ _ ω κ φ
+  rintro ⟨h1, h2, h3, h4⟩
+  rw [holds_modal_iff, trunSt_cons_frames]
+  show Modality.afterRunTR .box _ (((TRun.tryCall call rets ok.ext ok.trunR err.ext err.trunR
+    code pnc.ext pnc.trunR other.ext other.trunR σ).map (·.st)).bind _)
+  unfold TRun.tryCall
+  cases lookupBy (call.keyT σ) σ.tx.ext with
+  | none => exact afterRunTR_box_error (by decide)
+  | some res =>
+    cases res with
+    | ok vs =>
+      dsimp only
+      cases hd : rets.decodeT (C := C) (H := σ.H) vs with
+      | error e => exact afterRunTR_box_error (fun he => rets.decodeT_ne_panic vs (he ▸ hd))
+      | ok p =>
+        obtain ⟨r, rest⟩ := p
+        rw [TRes.ok_bind']
+        dsimp only
+        rw [TRes.map_st _ _ (TState.drop ((Ext.append Γ ρ).trans ok.ext)) fun _ => rfl]
+        exact holds_modalK_pop _ ok _ ω κ φ (holds_binders_all rets σ _ r h1)
+    | error =>
+      dsimp only
+      have h2' := holds_modalK_pop σ err ((Ext.append Γ []).trans err.ext) ω κ φ h2
+      rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at h2'
+      rw [TRes.map_st _ _ (TState.drop err.ext) fun _ => rfl]
+      exact h2'
+    | panic c =>
+      dsimp only
+      cases hd : code.decodeT (C := C) (H := σ.H) c with
+      | error e => exact afterRunTR_box_error (fun he => code.decodeT_ne_panic c (he ▸ hd))
+      | ok r =>
+        rw [TRes.ok_bind', TRes.map_st _ _ (TState.drop ((Ext.append Γ κc).trans pnc.ext))
+          fun _ => rfl]
+        exact holds_modalK_pop _ pnc _ ω κ φ (holds_binders_all code.binders σ _ r h3)
+    | other =>
+      dsimp only
+      have h4' := holds_modalK_pop σ other ((Ext.append Γ []).trans other.ext) ω κ φ h4
+      rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at h4'
+      rw [TRes.map_st _ _ (TState.drop other.ext) fun _ => rfl]
+      exact h4'
+
+/-- **The rule of a `try` is sound** over the typed state: a goal per clause
+under the box, `false` under the diamond. -/
+theorem Stmt.sound_tryCall (k : Nat) (m : Modality) {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx}
+    (call : ExtCall C Γ) (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe)
+    (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (σ : TState C Γ)
+    (pr : Premise C Γ Γ) (hp : Stmt.step k m (.tryCall call rets ok err code pnc other) = some pr) :
+    Premise.Sound m (.tryCall call rets ok err code pnc other) pr σ := by
+  change tryStep m rets ok err code pnc other = some pr at hp
+  cases m with
+  | box => cases hp; exact Premise.sound_tryCallBox call rets ok err code pnc other σ
+  | diamond => cases hp; exact Premise.sound_done σ false nofun
+
+end Try
 
 end Solidity.Core

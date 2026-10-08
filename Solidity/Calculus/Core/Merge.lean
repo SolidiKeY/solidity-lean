@@ -1,4 +1,4 @@
-import Solidity.Calculus.Core.ProvesSound
+import Solidity.Calculus.Core.Sound
 import Solidity.Calculus.Core.Close
 
 /-!
@@ -16,8 +16,10 @@ leaves in them (`Upd.held`: a local of the state `U` is applied in, or the
 right-hand side `U` last wrote to it).  A symbol of `V` may read the global
 part of the state (`storage`, `memory`, a bounds check) only where `U` writes
 no global part (`Upd.envOnly`), so that both read the same; any other merge
-is refused (`none`), never wrong.  Under the diamond the state between the
-two updates must keep its `bool` locals `bool`s (`Upd.boolB`).
+is refused (`none`), never wrong.  The two updates have one modality, and
+a hidden binder between them is not at a memory type (`LTy.notMem`) or sits
+under an update that allocates nothing (`Upd.keepsNext`): the typed values
+of a memory local depend on the heap typing the update leaves.
 
 The merge is a function the kernel evaluates (`Fml.mergeRun`), and its
 soundness one theorem: `Fml.mergeRun_leads`.  It is written with `match` on
@@ -663,35 +665,86 @@ end Lift
 
 /-! ## Merging in a line -/
 
-/-- A local's type other than `bool`: every value is one a state keeps
-(`LTy.BoolOK`), so a binder over it reads the same from any state. -/
-def LTy.notBool : LTy → Bool
-  | .val .bool => false
+/-- A local's type other than a memory one: its typed values do not depend
+on the heap, so a binder over it reads the same values from any typed
+state. -/
+def LTy.notMem : LTy → Bool
+  | .mem _ => false
   | _ => true
 
-theorem LTy.boolOK_of_notBool : {t : LTy} → t.notBool = true → (v : t.Denote C) → LTy.BoolOK t v
-  | .val .bool, h, _ => absurd h Bool.false_ne_true
-  | .val .uint, _, _ | .val .int, _, _ | .alias _, _, _ | .mem _, _, _
-  | .old, _, _ | .oldNet, _, _ => trivial
+/-- A local's value of a type other than a memory one, in one heap, is one
+in any other, as erased. -/
+theorem LTy.erase_of_notMem {t : LTy} (ht : t.notMem = true) {H H' : HTy} (v' : t.TDenote C H') :
+    ∃ v : t.TDenote C H, LTy.TDenote.erase t v = LTy.TDenote.erase t v' := by
+  cases t with
+  | mem => cases ht
+  | val | alias | old | oldNet => exact ⟨v', rfl⟩
+
+/-- An element that allocates nothing: a local or the storage set. -/
+def UpdElem.keepsNext {Γ Δ : Ctx} : UpdElem C Γ Δ → Bool
+  | .local .. | .storage _ => true
+  | _ => false
+
+/-- An update that allocates nothing: the next identity it leaves is the one
+of the state it is applied in. -/
+def Upd.keepsNext {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
+  | _, .nil => true
+  | _, .snoc U e => U.keepsNext && e.keepsNext
+  | _, .decl U _ _ | _, .pop U _ | _, .drop U _ => U.keepsNext
+
+theorem Upd.apply_nextId (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) → U.keepsNext = true →
+    ∀ τ, U.apply σ₀ = .ok τ → τ.nextId = σ₀.nextId
+  | _, .nil, _, τ, h => by cases h; rfl
+  | _, .snoc U e, hk, τ, h => by
+    have hk' : U.keepsNext = true ∧ e.keepsNext = true := Bool.and_eq_true_iff.mp hk
+    obtain ⟨τ', h₁, h₂⟩ := Semantics.bind_ok_inv h
+    have ih := Upd.apply_nextId σ₀ U hk'.1 τ' h₁
+    cases e with
+    | «local» i r =>
+      obtain ⟨v, -, h₂⟩ := Semantics.bind_ok_inv h₂
+      cases h₂
+      exact ih
+    | storage s =>
+      obtain ⟨st, -, h₂⟩ := Semantics.bind_ok_inv h₂
+      cases h₂
+      exact ih
+    | _ => cases hk'.2
+  | _, .decl U _ r, hk, τ, h => by
+    obtain ⟨τ', h₁, h₂⟩ := Semantics.bind_ok_inv h
+    obtain ⟨v, -, h₂⟩ := Semantics.bind_ok_inv h₂
+    cases h₂
+    exact Upd.apply_nextId σ₀ U hk τ' h₁
+  | _, .pop U e, hk, τ, h => by
+    cases h₁ : U.apply σ₀ with
+    | error => rw [Upd.apply, h₁] at h; cases h
+    | ok τ' =>
+      rw [Upd.apply, h₁] at h
+      cases h
+      exact Upd.apply_nextId σ₀ U hk τ' h₁
+  | _, .drop U e, hk, τ, h => by
+    cases h₁ : U.apply σ₀ with
+    | error => rw [Upd.apply, h₁] at h; cases h
+    | ok τ' =>
+      rw [Upd.apply, h₁] at h
+      cases h
+      exact Upd.apply_nextId σ₀ U hk τ' h₁
+
+/-- A local's value, cast along an equal heap typing, erases as it did. -/
+theorem LTy.TDenote.erase_rec {H H' : HTy} (h : H' = H) (t : LTy) (v' : t.TDenote C H') :
+    LTy.TDenote.erase t (h ▸ v' : t.TDenote C H) = LTy.TDenote.erase t v' := by
+  subst h; rfl
 
 /-- `{U}_m {V}_m ψ` merged into `{W}_m ψ`, through the hidden binders between
-the two (`U` moved under each, `Upd.lift?`). -/
+the two (`U` moved under each, `Upd.lift?`), each at a type other than a
+memory one or under an update that allocates nothing (`Upd.keepsNext`). -/
 def Fml.merge2 (m : Modality) : {Γ Δ : Ctx} → Upd C Γ Δ → Fml C Δ → Option (Fml C Γ)
   | _, _, U, .upd m' V ψ =>
-    if m' = m ∧ U.boolB = true then (U.graft U.held U.envOnly V).map (.upd m · ψ) else none
+    if m' = m then (U.graft U.held U.envOnly V).map (.upd m · ψ) else none
   | _, _, U, .bind m' x t ψ =>
-    if U.boolB = true ∧ t.notBool = true then
+    if (t.notMem || U.keepsNext) = true then
       (U.lift? (t := t)).bind fun U' => (Fml.merge2 m U' ψ).map (.bind m' x t)
     else none
   | _, _, _, _ => none
-
-/-- Every local's type has a value a state keeps (a `bool` local's a `bool`). -/
-theorem LTy.boolOK_exists : (t : LTy) → ∃ v : t.Denote C, LTy.BoolOK t v
-  | .val p => ⟨PrimTy.default p, LTy.BoolOK.default p⟩
-  | .alias _ => ⟨none, trivial⟩
-  | .mem _ => ⟨none, trivial⟩
-  | .old => ⟨[], trivial⟩
-  | .oldNet => ⟨[], trivial⟩
 
 /-- `sequentialToParallel` on the updates at positions `k` and `k + 1` of
 the line's update spine, under its quantifiers and hidden binders. -/
@@ -716,44 +769,49 @@ section Leads
 
 variable {Γ : Ctx}
 
-/-- `{U} ∀x. ψ` from `∀x. {U↑} ψ`, `U↑` the update moved under the binder. -/
+/-- `{U} ∀x. ψ` from `∀x. {U↑} ψ`, `U↑` the update moved under the binder.
+A value of the binder after `U` is one before it: its type is not a memory
+one, or `U` allocates nothing, so the heap typing after it, which extends
+the one before, is that one. -/
 theorem Fml.upd_bind_of_lift {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} {t : LTy} {x : Var}
-    {U' : Upd C (t :: Γ) (t :: Δ)} (hU' : U.lift? = some U') (hb : U.boolB = true)
-    (ht : t.notBool = true) {ψ : Fml C (t :: Δ)} (σ : State C Γ)
-    (hψ : m'.forallB fun v => holds (σ.push v) (.upd m U' ψ)) :
+    {U' : Upd C (t :: Γ) (t :: Δ)} (hU' : U.lift? = some U') (ht : (t.notMem || U.keepsNext) = true)
+    {ψ : Fml C (t :: Δ)} (σ : TState C Γ)
+    (hψ : m'.forallB fun v : t.TDenote C σ.H => holds (σ.push v) (.upd m U' ψ)) :
     holds σ (.upd m U (.bind m' x t ψ)) := by
-  have hg : ∀ v, U'.apply (σ.push v) = (U.apply σ).map (·.push v) := fun v => Upd.apply_lift? σ v U hU'
-  obtain ⟨v₀, hv₀⟩ := LTy.boolOK_exists (C := C) t
-  have h₀ := Modality.forallB_all hψ v₀
-  show Modality.afterT m σ.BoolOK State.BoolOK (fun σ₁ => holds σ₁ (.bind m' x t ψ)) (U.apply σ)
-  cases hU : U.apply σ with
+  have hg : ∀ v : t.TDenote C σ.H, U'.apply (σ.push v).erase =
+      (U.apply σ.erase).map (·.push (LTy.TDenote.erase t v)) :=
+    fun v => Upd.apply_lift? σ.erase _ U hU'
+  obtain ⟨v₀⟩ := LTy.tdenote_nonempty (C := C) (H := σ.H) t
+  show m.afterC
+    (fun τ => ∀ σ' : TState C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' (.bind m' x t ψ))
+    (U.apply σ.erase)
+  cases hU : U.apply σ.erase with
   | error e =>
-    have he : U'.apply (σ.push v₀) = .error e := by rw [hg, hU]; rfl
-    cases m with
-    | box =>
-      have h₀ : Modality.afterC .box (holds · ψ) (U'.apply (σ.push v₀)) := h₀
-      rw [he] at h₀
-      exact h₀
-    | diamond =>
-      intro hT
-      have h₀ := h₀ (hT.push hv₀)
-      rw [he] at h₀
-      exact h₀
+    have h₀ : m.afterC
+        (fun τ => ∀ σ' : TState C _, σ'.erase = τ → (σ.push v₀).H <+: σ'.H → holds σ' ψ)
+        (U'.apply (σ.push v₀).erase) := Modality.forallB_all hψ v₀
+    rw [hg, hU] at h₀
+    exact h₀
   | ok σ₁ =>
-    have he : ∀ v, U'.apply (σ.push v) = .ok (σ₁.push v) := fun v => by rw [hg, hU]; rfl
-    cases m with
-    | box =>
-      refine Modality.forallB_imp (fun v h => ?_) hψ
-      have h : Modality.afterC .box (holds · ψ) (U'.apply (σ.push v)) := h
-      rw [he v] at h
-      exact h
-    | diamond =>
-      intro hT
-      refine ⟨Upd.apply_boolOK hT U hb hU, ?_⟩
-      refine Modality.forallB_imp (fun v h => ?_) hψ
-      have h := h (hT.push (LTy.boolOK_of_notBool ht v))
-      rw [he v] at h
-      exact h.2
+    intro σ' he hext
+    refine Modality.forallB_intro fun v' => ?_
+    have hv : ∃ v : t.TDenote C σ.H, LTy.TDenote.erase t v = LTy.TDenote.erase t v' := by
+      rcases Bool.or_eq_true_iff.mp ht with ht | hk
+      · exact LTy.erase_of_notMem ht v'
+      · have hn : σ'.H.length = σ.H.length := by
+          have h₁ := Upd.apply_nextId σ.erase U hk σ₁ hU
+          rw [← he] at h₁
+          exact h₁
+        have hH : σ'.H = σ.H := (hext.eq_of_length hn.symm).symm
+        exact ⟨hH ▸ v', LTy.TDenote.erase_rec hH t v'⟩
+    obtain ⟨v, hv⟩ := hv
+    have h : m.afterC
+        (fun τ => ∀ σ' : TState C _, σ'.erase = τ → (σ.push v).H <+: σ'.H → holds σ' ψ)
+        (U'.apply (σ.push v).erase) := Modality.forallB_all hψ v
+    rw [hg, hU] at h
+    refine h (σ'.push v') ?_ hext
+    show (σ'.erase.push (LTy.TDenote.erase t v') : State C _) = σ₁.push (LTy.TDenote.erase t v)
+    rw [he, hv]
 
 /-- **The merged update leads to the two.** -/
 theorem Fml.merge2_leads {m : Modality} : {Γ Δ : Ctx} → (U : Upd C Γ Δ) →
@@ -762,37 +820,33 @@ theorem Fml.merge2_leads {m : Modality} : {Γ Δ : Ctx} → (U : Upd C Γ Δ) �
     simp only [Fml.merge2] at h
     split at h
     · rename_i hc
-      obtain ⟨rfl, hb⟩ := hc
+      subst hc
       obtain ⟨W, hW, rfl⟩ := Option.map_eq_some_iff.1 h
       intro σ hψ
-      have hg := Upd.apply_graft U σ V hW
-      cases m' with
-      | box =>
-        show Modality.afterC .box _ (U.apply σ)
-        have hψ : Modality.afterC .box (holds · χ) (W.apply σ) := hψ
-        rw [hg] at hψ
-        cases hU : U.apply σ with
-        | error e => rw [hU] at hψ; exact hψ
-        | ok σ₁ => rw [hU] at hψ; exact hψ
-      | diamond =>
-        intro hT
-        have hψ := hψ hT
-        rw [hg] at hψ
-        cases hU : U.apply σ with
-        | error e => rw [hU] at hψ; exact hψ
-        | ok σ₁ =>
-          rw [hU] at hψ
-          exact ⟨Upd.apply_boolOK hT U hb hU, fun _ => hψ⟩
+      have hg := Upd.apply_graft U σ.erase V hW
+      show m'.afterC
+        (fun τ => ∀ σ' : TState C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' (.upd m' V χ))
+        (U.apply σ.erase)
+      have hψ : m'.afterC (fun τ => ∀ σ' : TState C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' χ)
+        (W.apply σ.erase) := hψ
+      rw [hg] at hψ
+      cases hU : U.apply σ.erase with
+      | error e => rw [hU] at hψ; exact hψ
+      | ok σ₁ =>
+        rw [hU] at hψ
+        intro σ' he hext
+        show m'.afterC _ (V.apply σ'.erase)
+        rw [he]
+        refine Modality.afterC_imp hψ fun τ h σ'' e₂ hext₂ => h σ'' e₂ (hext.trans hext₂)
     · cases h
   | _, _, U, .bind m' x t χ, ψ, h => by
     simp only [Fml.merge2] at h
     split at h
-    · rename_i hc
-      obtain ⟨hb, ht⟩ := hc
+    · rename_i ht
       obtain ⟨U', hU', h⟩ := Option.bind_eq_some_iff.1 h
       obtain ⟨χ', hχ', rfl⟩ := Option.map_eq_some_iff.1 h
       intro σ hψ
-      exact Fml.upd_bind_of_lift hU' hb ht σ
+      exact Fml.upd_bind_of_lift hU' ht σ
         (Modality.forallB_imp (fun v h => Fml.merge2_leads U' χ hχ' _ h) hψ)
     · cases h
   | _, _, _, .tt, _, h | _, _, _, .eq .., _, h | _, _, _, .defined _, _, h | _, _, _, .not _, _, h
@@ -804,7 +858,7 @@ theorem Fml.mergeAt_leads : {Γ : Ctx} → (k : Nat) → (φ : Fml C Γ) → {ψ
   | _, k, .all x p φ, ψ₀, h => by
     have h : (Fml.mergeAt k φ).map (Fml.all x p) = some ψ₀ := by rw [← h]; cases k <;> rfl
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs v hv => Fml.mergeAt_leads k φ hψ _ (hs v hv)
+    exact fun σ hs v => Fml.mergeAt_leads k φ hψ _ (hs v)
   | _, k, .bind m x t φ, ψ₀, h => by
     have h : (Fml.mergeAt k φ).map (Fml.bind m x t) = some ψ₀ := by rw [← h]; cases k <;> rfl
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
@@ -812,7 +866,8 @@ theorem Fml.mergeAt_leads : {Γ : Ctx} → (k : Nat) → (φ : Fml C Γ) → {ψ
   | _, 0, .upd m U φ, _, h => Fml.merge2_leads U φ h
   | _, k + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs => Modality.afterT_and hs hs fun τ a _ => Fml.mergeAt_leads k φ hψ τ a
+    exact fun σ hs => Modality.afterC_imp hs fun τ a σ' e hx =>
+      Fml.mergeAt_leads k φ hψ σ' (a σ' e hx)
   | _, k, .tt, _, h | _, k, .eq .., _, h | _, k, .defined _, _, h | _, k, .not _, _, h
   | _, k, .and .., _, h | _, k, .imp .., _, h | _, k, .modal .., _, h | _, k, .havoc _, _, h
   | _, k, .anon .., _, h => by

@@ -27,7 +27,7 @@ printed), so it needs no weakening.
 
 `ProvesC` has no soundness theorem yet: its `ValidC` (the callback reading
 over `TState`, `Calculus/Core/CallbackHolds.lean`) is stated, and the arms
-are sound over `tholds` (`Stmt.tsound`, `Calculus/Core/TSound.lean`), but
+are sound over `holds` (`Stmt.sound`, `Calculus/Core/Sound.lean`), but
 not yet over `holdsC`'s runs with callbacks, so no rule here is checked
 against it.
 -/

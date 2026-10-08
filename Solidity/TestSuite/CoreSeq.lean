@@ -12,9 +12,11 @@ statement scoped (`CoreProblems.lean`).  These are Derived1's and Derived9's
 box obligations, the three whose closer leaves goals (each closed by the
 same leaf tactics), and `testStorageNestedPushReturnAlias`, where the walk
 leaves one goal of today's calculus and `Derived7` two (`docs/intrinsic.md`,
-W3 lane `testsuite`).  The flip of the `Derived` modules waits on the
-diamond: `Proves.close` takes no leaf behind a diamond update, and 330 of
-the 437 obligations are diamonds.
+W3 lane `testsuite`).  Last, two diamond obligations whose leaf sits
+behind a diamond update that sets a `bool` local from storage, which
+`Proves.close` takes since the reading is the typed one (CORE B,
+`docs/intrinsic.md`): an update's reading asks only of the typed states
+that erase to the one it ends in, where a `bool` local holds a `bool`.
 -/
 
 open Solidity Proves
@@ -68,3 +70,16 @@ theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved_seq : ⊢ Solke
     refine Proves.close_dropWt ?_
     sol_symex
     sol_close
+
+/-! ## Diamond obligations closed behind a diamond update
+
+`flag = true; bool r = flag; assert(r);` under the diamond: the leaf is
+behind `{r := select(…, flag)}`, a `bool` local set from storage, which the
+closer could not take while the diamond read M3's states (decision 18's
+interim `Upd.boolB`). -/
+
+theorem Solkey.TestSuite.storageBoolRootReadWrite.proved_seq : ⊢ Solkey.TestSuite.storageBoolRootReadWrite.problem.core := by
+  sol_prove
+
+theorem Solkey.TestSuite.storageBoolFieldRead.proved_seq : ⊢ Solkey.TestSuite.storageBoolFieldRead.problem.core := by
+  sol_prove

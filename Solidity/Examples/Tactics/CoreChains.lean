@@ -37,7 +37,10 @@ theorem ageBox : cdl!{ [ alice.age = 3; ] true }
   sol_chain
 
 example : Core.Valid cdl!{ [ alice.age = 3; ] true } :=
-  ageBox.valid fun _ => Core.holds_upd_intro fun _ => by unfold Modality.afterC; split <;> trivial
+  ageBox.valid fun _ => by
+    show Modality.afterC _ _ _
+    unfold Modality.afterC
+    split <;> first | trivial | exact fun _ _ _ => trivial
 
 theorem balance : cdl!{ ⟨ alice.account.balance = 10; ⟩ true }
     ~[storageFieldWrite_unfold_leftFst]~>

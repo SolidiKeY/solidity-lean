@@ -3,12 +3,12 @@ import Solidity.Calculus.Core.Closable
 import Solidity.Semantics.RunErase
 
 /-!
-# A scoped formula holds where its erasure does
+# A scoped formula read as its erasure
 
-`holds_erase` (`docs/intrinsic.md`, M6a): a scoped formula holds in `σ`
-exactly where its erasure (`Fml.erase`, `Calculus/Core/Fml.lean`) holds,
-by `Update.lean`'s `holds`, in any untyped state that agrees with `σ` on the
-locals named `ns` (`Agree`, `Semantics/RunErase.lean`).  The pieces:
+A scoped formula against its erasure (`Fml.erase`, `Calculus/Core/Fml.lean`),
+`Update.lean`'s formula, in any untyped state that agrees with the typed
+state's erasure on the locals named `ns` (`Agree`, `Semantics/RunErase.lean`).
+The pieces:
 
 * a term reads alike (`Tm.eval_erase`): a value, a path, an identity the
   same, a storage or memory read with the untyped state's locals put back
@@ -17,21 +17,17 @@ locals named `ns` (`Agree`, `Semantics/RunErase.lean`).  The pieces:
   (`Tm.denote_erase`);
 * an update ends in agreeing states (`Upd.apply_erase`), a declaration under
   a fresh name;
-* a modality's program is `run_erase`'s (`Prog.erasesAt`), its frames the
+* a program runs as its erasure (`Prog.erasesAt`), its frames as the
   statements they hold, a scope's end nothing (the untyped state keeps the
-  popped locals, which `Agree` allows).
-
-The formulas are `Fml.Plain` (`Calculus/Core/Closable.lean`): every binder fresh (a declaration, a `∀`, a
-block's locals: `Prog.Fresh`), and no hidden binder or anonymising update,
-whose untyped readings range over more than the typed ones (the untyped
-`anon` over every binding, the erased hidden binder over whatever the name
-held before).  One direction holds for each (the last section):
-`holds_erase_bind` and `holds_of_erase_anon`.
+  popped locals, which `Agree` allows);
+* a first-order formula whose `∀`s bind fresh names (`Fml.Plain`,
+  `Fml.FO`, `Calculus/Core/Closable.lean`) holds exactly where its erasure
+  does (`holds_erase_fo`).  The other formulas go one way only
+  (`Calculus/Core/CloseErase.lean`).
 -/
 
 namespace Solidity.Core
-
-open Semantics (Value SVal MVal Seg Halt Res Binding lookupBy setBy)
+open Semantics (Value Seg Halt Res Binding lookupBy setBy)
 open Solidity (Srt Op0 Op1 Op2 Op3 Modality)
 
 variable {C : Contract}
@@ -143,15 +139,15 @@ section OpLemmas
 
 variable (s : Semantics.State) (e : List (Var × Binding))
 
-theorem saveStorage_wl' (r : Name) (segs : List Seg) (v : SVal) :
+theorem saveStorage_wl' (r : Name) (segs : List Seg) (v : Semantics.SVal) :
     (withLocals s e).saveStorage r segs v = (withLocals · e) <$> s.saveStorage r segs v :=
   saveStorage_nat r segs v s e
 
-theorem writeStorage_wl' (r : Name) (segs : List Seg) (v : SVal) :
+theorem writeStorage_wl' (r : Name) (segs : List Seg) (v : Semantics.SVal) :
     (withLocals s e).writeStorage r segs v = (withLocals · e) <$> s.writeStorage r segs v :=
   writeStorage_nat r segs v s e
 
-theorem pushAt_wl' (E : Ty) (r : Name) (segs : List Seg) (val : SVal → Res SVal) :
+theorem pushAt_wl' (E : Ty) (r : Name) (segs : List Seg) (val : Semantics.SVal → Res Semantics.SVal) :
     pushAt (withLocals s e) E r segs val = (withLocals · e) <$> pushAt s E r segs val :=
   pushAt_nat E r segs val s e
 
@@ -164,7 +160,7 @@ theorem pushPlaceAt_wl' (E : Ty) (r : Name) (segs : List Seg) :
       (fun p => (withLocals p.1 e, p.2)) <$> pushPlaceAt s E r segs :=
   pushPlaceAt_nat E r segs s e
 
-theorem writeAddr_wl' (mv : MVal) (a : Semantics.Addr) :
+theorem writeAddr_wl' (mv : Semantics.MVal) (a : Semantics.Addr) :
     writeAddr (withLocals s e) mv a = (withLocals · e) <$> writeAddr s mv a :=
   writeAddr_nat mv a s e
 
@@ -520,78 +516,74 @@ theorem _root_.Solidity.Modality.afterRunC_rel (m : Modality) {α : Type} {p : �
       simp only [Modality.afterRunC, Modality.afterRun, Modality.afterC, Modality.after, ne_eq,
         Except.error.injEq]
 
-/-- **A scoped formula holds where its erasure does** (`Update.lean`'s
-`holds`), in every untyped state that agrees with `σ` on the locals named
-`ns`. -/
-theorem holds_erase : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.Plain ns →
-    {σ : State C Γ} → {τ : Semantics.State} → Agree ns σ τ →
+/-! ## A first-order formula reads as its erasure
+
+Over the typed state: the terms read the erasure (`holds`), and a `∀`
+ranges over the values of its type, the erasure's over the values its type
+admits, which are their erasures (`PrimTy.exists_of_admits`).  Only the
+first-order formulas (`Fml.FO`) read the same both ways: an update may end
+in an untyped state no typed state erases to, which the typed reading skips
+and the erasure's does not, and the erased hidden binder and `{anon(…)}`
+range over other values than the typed ones; those go one way only
+(`Calculus/Core/CloseErase.lean`).
+-/
+
+theorem _root_.Solidity.PrimTy.admits_erase : {p : PrimTy} → (v : p.Denote) → p.admits (PrimTy.erase v)
+  | .bool, _ => trivial
+  | .uint, ⟨_, h⟩ => by
+    simp only [PrimTy.inRange, decide_eq_true_eq] at h
+    exact h
+  | .int, ⟨_, h⟩ => by
+    simp only [PrimTy.inRange, decide_eq_true_eq] at h
+    exact h
+
+theorem _root_.Solidity.PrimTy.exists_of_admits :
+    {p : PrimTy} → {v : Semantics.Value} → p.admits v → ∃ w : p.Denote, PrimTy.erase w = v
+  | .bool, .bool b, _ => ⟨b, rfl⟩
+  | .uint, .int n, h =>
+    ⟨(⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ :
+      {n : Int // PrimTy.uint.inRange n = true}), rfl⟩
+  | .int, .int n, h =>
+    ⟨(⟨n, by
+        simp only [PrimTy.inRange, decide_eq_true_eq]
+        exact h⟩ :
+      {n : Int // PrimTy.int.inRange n = true}), rfl⟩
+  | .bool, .int _, h | .uint, .bool _, h | .int, .bool _, h => h.elim
+
+/-- **A first-order formula holds in a typed state where its erasure holds**,
+in every untyped state that agrees with the typed state's erasure on the
+locals named `ns`, and the converse. -/
+theorem holds_erase_fo : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.Plain ns →
+    φ.FO = true → {σ : TState C Γ} → {τ : Semantics.State} → Agree ns σ.erase τ →
     (holds σ φ ↔ Solidity.holds τ (φ.erase ns))
-  | _, .tt, _, _, _, _, _ => Iff.rfl
-  | _, .eq a b, _, _, _, _, hag => by
+  | _, .tt, _, _, _, _, _, _ => Iff.rfl
+  | _, .eq a b, _, _, _, _, _, hag => by
     show _ ↔ Theory.StValue.Equiv ((a.erase _).denote _) ((b.erase _).denote _)
     rw [Tm.denote_erase hag a, Tm.denote_erase hag b]; rfl
-  | _, .defined t, _, _, _, _, hag => by
+  | _, .defined t, _, _, _, _, _, hag => by
     show _ ↔ ∃ x, (t.erase _).eval _ = .ok x
     rw [Tm.eval_erase hag t]; rfl
-  | _, .not φ, _, hφ, _, _, hag => not_congr (holds_erase φ hφ hag)
-  | _, .and φ ψ, _, hφ, _, _, hag => and_congr (holds_erase φ hφ.1 hag) (holds_erase ψ hφ.2 hag)
-  | _, .imp φ ψ, _, hφ, _, _, hag => imp_congr (holds_erase φ hφ.1 hag) (holds_erase ψ hφ.2 hag)
-  | _, .upd m U φ, ns, hφ, σ, τ, hag => by
-    obtain ⟨rfl, hφ⟩ := hφ
-    have hU := Upd.apply_erase hag U hφ.1
-    show Modality.afterC .box (holds · φ) (U.apply σ) ↔
-      Solidity.holds τ (Fml.erase ns (.upd .box U φ))
-    simp only [Fml.erase]
-    split
-    · rename_i hnil
-      rw [hnil] at hU
-      revert hU
-      cases U.apply σ with
-      | error => exact False.elim
-      | ok σ' => exact fun h => holds_erase φ hφ.2 h
-    · rename_i U' hne
-      show _ ↔ Modality.after .box _ (Solidity.Upd.apply (U.erase ns) τ)
-      exact Modality.afterC_rel .box hU fun _ _ h => holds_erase φ hφ.2 h
-  | _, .modal m P κ φ, ns, hφ, σ, τ, hag => by
-    obtain ⟨rfl, hφ⟩ := hφ
-    show Modality.afterRunC .box _ _ ↔
-      Modality.afterRun .box _ (Solidity.Prog.run τ (P.erase ns ++ κ.erase (P.outNames ns)))
-    rw [Solidity.SemanticsProperties.Prog.run_append]
-    exact Modality.afterRunC_rel .box (Res.Rel.bind (Prog.run_rel hag P hφ.1) fun _ _ h =>
-      Frames.run_erase κ hφ.2.1 h) fun _ _ h => holds_erase φ hφ.2.2 h
-  | _, .havoc φ, _, hφ, σ, τ, hag => by
-    show (∀ st nt, holds (σ.withGlob (σ.glob.havoc st nt)) φ) ↔ ∀ st nt, Solidity.holds _ _
-    refine forall_congr' fun st => forall_congr' fun nt => ?_
-    have h := hag.withGlob (σ.glob.havoc st nt)
-    have e : τ.havoc st nt = withLocals (σ.glob.havoc st nt) τ.env := by
-      have hw := hag.wl
-      generalize τ.env = env at hw ⊢
-      subst hw; rfl
-    rw [e]
-    exact holds_erase φ hφ h
-  | _, .all x p φ, _, hφ, σ, τ, hag => by
-    show (∀ v, p.admits v → holds (σ.push v) φ) ↔ ∀ v, p.admits v → Solidity.holds _ _
-    exact forall_congr' fun v => imp_congr_right fun _ => holds_erase φ hφ.2 (hag.push (t := .val p) hφ.1 v)
-  | _, .bind .., _, hφ, _, _, _ => hφ.elim
-  | _, .anon .., _, hφ, _, _, _ => hφ.elim
+  | _, .not φ, _, hφ, h, _, _, hag => not_congr (holds_erase_fo φ hφ h hag)
+  | _, .and φ ψ, _, hφ, h, _, _, hag => by
+    have h' : φ.FO = true ∧ ψ.FO = true := Bool.and_eq_true_iff.mp h
+    exact and_congr (holds_erase_fo φ hφ.1 h'.1 hag) (holds_erase_fo ψ hφ.2 h'.2 hag)
+  | _, .imp φ ψ, _, hφ, h, _, _, hag => by
+    have h' : φ.FO = true ∧ ψ.FO = true := Bool.and_eq_true_iff.mp h
+    exact imp_congr (holds_erase_fo φ hφ.1 h'.1 hag) (holds_erase_fo ψ hφ.2 h'.2 hag)
+  | _, .all _ p φ, _, hφ, h, σ, _, hag => by
+    show (∀ w : p.Denote, holds (σ.push (t := .val p) w) φ) ↔ ∀ v, p.admits v → Solidity.holds _ _
+    constructor
+    · intro hw v hv
+      obtain ⟨w, rfl⟩ := PrimTy.exists_of_admits hv
+      exact (holds_erase_fo φ hφ.2 h (σ := σ.push (t := .val p) w)
+        (hag.push (t := .val p) hφ.1 (PrimTy.erase w))).1 (hw w)
+    · intro hv w
+      exact (holds_erase_fo φ hφ.2 h (σ := σ.push (t := .val p) w)
+        (hag.push (t := .val p) hφ.1 (PrimTy.erase w))).2 (hv _ (PrimTy.admits_erase w))
+  | _, .upd .., _, _, h, _, _, _ | _, .modal .., _, _, h, _, _, _ | _, .havoc _, _, _, h, _, _, _
+  | _, .bind .., _, _, h, _, _, _ | _, .anon .., _, _, h, _, _, _ => nomatch h
 
-/-! ## Hidden binders and anonymising updates, one way each
-
-`Fml.Plain` leaves them out because their two readings range over different
-states, so `holds_erase`'s `↔` fails for them; one direction holds for each.
-
-* A hidden binder `Fml.bind x t φ` erases to `φ` read at `x`'s current
-  binding: the scoped formula, true for every value, gives the erasure in an
-  untyped state that binds `x` to some value of `t` (`holds_erase_bind`).
-  The converse fails: the erasure reads one value (`x = 0`, with `x` bound
-  to `0`, against `∀ x. x = 0`).
-* `{anon(xs)} φ` erases to the untyped `{anon(…)}`, which ranges over every
-  binding of the names, unbound or of another kind included, and so over
-  more than the scoped one (a value of each local's type): the erasure gives
-  the scoped formula (`holds_of_erase_anon`).  The converse fails: the
-  scoped `{anon(x)} defined(x)` is valid, its erasure false where `x` is
-  anonymised to no binding.
--/
+/-! ## Agreement under `{anon(…)}` -/
 
 section OneWay
 
@@ -622,37 +614,6 @@ theorem Agree.anon {Γ : Ctx} {ns : List Var} (b : (x : (t : LTy) × Idx Γ t) �
     have hne : y ≠ x.2.name ns := fun h => hy (h ▸ List.mem_cons_self)
     rw [h₂ y fun h => hy (List.mem_cons_of_mem _ h)]
     exact SemanticsProperties.lookupBy_setBy_ne hne _ _
-
-/-- **A hidden binder, scoped to erased**: in an untyped state that binds
-`x` to a value of `t`. -/
-theorem holds_erase_bind {Γ : Ctx} {m : Modality} {x : Var} {t : LTy} {φ : Fml C (t :: Γ)}
-    {ns : List Var} (hx : x ∉ ns) (hφ : φ.Plain (x :: ns)) {σ : State C Γ} {τ : Semantics.State}
-    (hag : Agree ns σ τ) {v : t.Denote C} (hv : lookupBy x τ.env = some (t.enc C v)) :
-    holds σ (.bind m x t φ) → Solidity.holds τ ((Fml.bind m x t φ).erase ns) := fun h =>
-  (holds_erase φ hφ ((hag.push hx v).congrEnv hag.glob fun y => by
-    by_cases hy : y = x
-    · subst hy
-      rw [hv]
-      exact (SemanticsProperties.lookupBy_setBy_self _ _ _).symm
-    · exact (SemanticsProperties.lookupBy_setBy_ne hy _ _).symm)).1 (Modality.forallB_all h v)
-
-/-- **An anonymising update, erased to scoped**: the untyped `{anon(…)}`
-ranges over the scoped one's states and more. -/
-theorem holds_of_erase_anon {Γ : Ctx} {xs : List ((t : LTy) × Idx Γ t)} {φ : Fml C Γ}
-    {ns : List Var} (hφ : φ.Plain ns) {σ : State C Γ} {τ : Semantics.State} (hag : Agree ns σ τ) :
-    Solidity.holds τ ((Fml.anon xs φ).erase ns) → holds σ (.anon xs φ) := fun h b => by
-  obtain ⟨τ₁, h₁, h₂⟩ := Agree.anon b xs hag
-  refine (holds_erase φ hφ (h₁.congrEnv ?_ fun y => ?_)).2 (h fun y => lookupBy y τ₁.env)
-  · rw [State.glob_anon b xs σ]
-    have hw := hag.wl
-    generalize τ.env = env at hw ⊢
-    subst hw
-    rfl
-  · show lookupBy y (anonEnv _ _ τ.env) = _
-    rw [lookupBy_anonEnv]
-    split
-    · rfl
-    · exact (h₂ y ‹_›).symm
 
 end OneWay
 

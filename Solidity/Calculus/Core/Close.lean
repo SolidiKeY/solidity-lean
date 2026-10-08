@@ -11,8 +11,10 @@ the closer is ported): a scoped formula is valid when its erasure is
 (`Valid.of_erase`), and the erasure goes to `Close.lean`'s `sol_close` or to
 `Derive.proves`, the closer `sol_prove` runs.
 
-`holds_erase` gives that for formulas with no hidden binder; a leaf has
-them (`uint r = e;` binds `r`, `localValueDeclInitDrop`).  A hidden binder
+A first-order formula reads as its erasure (`holds_erase_fo`); a leaf has
+more: updates, of either modality (the reading of an update asks only of
+the typed states that erase to the state it ends in), and hidden binders
+(`uint r = e;` binds `r`, `localValueDeclInitDrop`).  A hidden binder
 erases to its body read at the name's current binding, which one untyped
 state does not range over, but a valid erasure does: in every state, so
 for every binding of the name.  The induction carries that as its
@@ -22,9 +24,9 @@ hand only at the names `B` the binders below declare
 quantifier that does not mention those names, and through `{anon(…)}`,
 whose untyped reading ranges over every binding of the names it anonymises
 (a loop's frame, with the body's binders under it); `Fml.posB` checks this:
-the binders sit outside negations and preconditions, and no update,
-precondition or quantifier names them.  A leaf with a modality is not
-taken.
+the binders sit outside negations and preconditions, what is negated or
+assumed is first-order, and no update, precondition or quantifier names
+them.  A leaf with a modality is not taken.
 
 `posB` is evaluated by the kernel inside `sol_prove`'s check, so it is
 written by `Fml.rec`, and the checks it calls by a recursor or by `casesOn`
@@ -43,18 +45,6 @@ variable {C : Contract}
 
 Each by the recursor, which the kernel unfolds with no `brecOn`, and a
 compiled twin by `match` (`implemented_by`) for the tactics' first look. -/
-
-/-- The modality is the box: an update under the diamond reads into states
-whose `bool` locals hold `bool`s (`State.BoolOK`), which its erasure does
-not say. -/
-def _root_.Solidity.Modality.isBox : Modality → Bool
-  | .box => true
-  | .diamond => false
-
-theorem _root_.Solidity.Modality.eq_box_of_isBox {m : Modality} (h : m.isBox = true) : m = .box := by
-  cases m with
-  | box => rfl
-  | diamond => cases h
 
 /-- `Upd.freshK`'s compiled twin. -/
 def Upd.freshM {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Bool
@@ -75,13 +65,13 @@ def Upd.freshK {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
 /-- `Fml.plainB`'s compiled twin. -/
 def Fml.plainM : {Γ : Ctx} → Fml C Γ → List Var → Bool
   | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => true
-  | _, .not φ, ns | _, .havoc φ, ns => φ.plainM ns
+  | _, .not φ, ns => φ.plainM ns
   | _, .and φ ψ, ns | _, .imp φ ψ, ns => φ.plainM ns && ψ.plainM ns
-  | _, .upd m U φ, ns => m.isBox && U.freshK ns && φ.plainM (U.names ns)
   | _, .all x _ φ, ns => !ns.contains x && φ.plainM (x :: ns)
-  | _, .modal .., _ | _, .bind .., _ | _, .anon .., _ => false
+  | _, .upd .., _ | _, .havoc _, _ | _, .modal .., _ | _, .bind .., _ | _, .anon .., _ => false
 
-/-- `Fml.Plain`, decided on the formulas with no modality. -/
+/-- `Fml.Plain` and `Fml.FO`, decided: a first-order formula whose `∀`s bind
+fresh names, which reads as its erasure both ways (`holds_erase_fo`). -/
 @[implemented_by Fml.plainM]
 def Fml.plainB {Γ : Ctx} (φ : Fml C Γ) : List Var → Bool :=
   Fml.rec (motive := fun _ _ => List Var → Bool)
@@ -89,9 +79,9 @@ def Fml.plainB {Γ : Ctx} (φ : Fml C Γ) : List Var → Bool :=
     (not := fun _ ih ns => ih ns)
     (and := fun _ _ ihφ ihψ ns => ihφ ns && ihψ ns)
     (imp := fun _ _ iha ihφ ns => iha ns && ihφ ns)
-    (upd := fun m U _ ih ns => m.isBox && U.freshK ns && ih (U.names ns))
+    (upd := fun _ _ _ _ _ => false)
     (modal := fun _ _ _ _ _ _ => false)
-    (havoc := fun _ ih ns => ih ns)
+    (havoc := fun _ _ _ => false)
     (all := fun x _ _ ih ns => !ns.contains x && ih (x :: ns))
     (bind := fun _ _ _ _ _ _ => false) (anon := fun _ _ _ _ => false) φ
 
@@ -102,14 +92,14 @@ def disjointB (B vs : List Var) : Bool := !vs.any B.contains
 def Fml.posM : {Γ : Ctx} → Fml C Γ → List Var → Option (List Var)
   | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => some []
   | _, .not φ, ns => if φ.plainB ns then some [] else none
-  | _, .anon _ φ, ns => if φ.plainB ns then some [] else φ.posM ns
+  | _, .anon _ φ, ns => φ.posM ns
   | _, .and φ ψ, ns => (φ.posM ns).bind fun B₁ => (ψ.posM ns).map (B₁ ++ ·)
   | _, .imp a φ, ns =>
     if a.plainB ns then (φ.posM ns).bind fun B =>
       if disjointB B (a.erase ns).vars then some B else none
     else none
-  | _, .upd m U φ, ns =>
-    if (m.isBox || U.boolB) && U.freshK ns then (φ.posM (U.names ns)).bind fun B =>
+  | _, .upd _ U φ, ns =>
+    if U.freshK ns then (φ.posM (U.names ns)).bind fun B =>
       if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none
     else none
   | _, .modal .., _ => none
@@ -122,10 +112,9 @@ def Fml.posM : {Γ : Ctx} → Fml C Γ → List Var → Option (List Var)
 /-- **A leaf closable by its erasure**: `some B`, `B` the names its hidden
 binders declare, when they sit where `holds_of_erase_pos` takes them (no
 binder under a negation, a precondition or a modality, but one under
-`{anon(…)}` taken; no update, precondition or quantifier naming one; every
-binder fresh), and
-every diamond update keeps the `bool` locals `bool`s (`Upd.boolB`);
-`none` otherwise. -/
+`{anon(…)}` or an update of either modality taken; no update, precondition
+or quantifier naming one; every binder fresh), and what is negated or
+assumed is first-order (`Fml.plainB`); `none` otherwise. -/
 @[implemented_by Fml.posM]
 def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
   Fml.rec (motive := fun _ _ => List Var → Option (List Var))
@@ -136,8 +125,8 @@ def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
       if a.plainB ns then (ihφ ns).bind fun B =>
         if disjointB B (a.erase ns).vars then some B else none
       else none)
-    (upd := fun m U _ ih ns =>
-      if (m.isBox || U.boolB) && U.freshK ns then (ih (U.names ns)).bind fun B =>
+    (upd := fun _ U _ ih ns =>
+      if U.freshK ns then (ih (U.names ns)).bind fun B =>
         if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none
       else none)
     (modal := fun _ _ _ _ _ _ => none)
@@ -146,7 +135,7 @@ def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
       if ns.contains x then none
       else (ih (x :: ns)).bind fun B => if B.contains x then none else some B)
     (bind := fun _ x _ _ ih ns => if ns.contains x then none else (ih (x :: ns)).map (x :: ·))
-    (anon := fun _ φ ih ns => if φ.plainB ns then some [] else ih ns) φ
+    (anon := fun _ _ ih ns => ih ns) φ
 
 /-! ## The checks are sound -/
 
@@ -163,34 +152,25 @@ theorem Upd.fresh_of_freshK {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ 
   | drop U _ ih => exact ih h
 
 theorem Fml.plain_of_plainB {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns : List Var}, φ.plainB ns = true →
-    φ.Plain ns := by
+    φ.Plain ns ∧ φ.FO = true := by
   induction φ with
-  | tt | eq | defined => intro _ _; trivial
+  | tt | eq | defined => intro _ _; exact ⟨trivial, rfl⟩
   | not φ ih => intro ns h; exact ih h
   | and φ ψ ihφ ihψ =>
     intro ns h
     have h' : φ.plainB ns = true ∧ ψ.plainB ns = true := Bool.and_eq_true _ _ ▸ h
-    exact ⟨ihφ h'.1, ihψ h'.2⟩
+    exact ⟨⟨(ihφ h'.1).1, (ihψ h'.2).1⟩, Bool.and_eq_true_iff.mpr ⟨(ihφ h'.1).2, (ihψ h'.2).2⟩⟩
   | imp a φ iha ihφ =>
     intro ns h
     have h' : a.plainB ns = true ∧ φ.plainB ns = true := Bool.and_eq_true _ _ ▸ h
-    exact ⟨iha h'.1, ihφ h'.2⟩
-  | upd m U φ ih =>
-    intro ns h
-    have h' : (m.isBox && U.freshK ns) = true ∧ φ.plainB (U.names ns) = true :=
-      Bool.and_eq_true _ _ ▸ h
-    have h'' : m.isBox = true ∧ U.freshK ns = true := Bool.and_eq_true _ _ ▸ h'.1
-    exact ⟨Modality.eq_box_of_isBox h''.1, Upd.fresh_of_freshK ns U h''.2, ih h'.2⟩
-  | modal => intro _ h; cases h
-  | havoc φ ih => intro ns h; exact ih h
+    exact ⟨⟨(iha h'.1).1, (ihφ h'.2).1⟩, Bool.and_eq_true_iff.mpr ⟨(iha h'.1).2, (ihφ h'.2).2⟩⟩
+  | upd | modal | havoc | bind | anon => intro _ h; cases h
   | all x p φ ih =>
     intro ns h
     have h' : (!ns.contains x) = true ∧ φ.plainB (x :: ns) = true := Bool.and_eq_true _ _ ▸ h
-    refine ⟨fun hx => ?_, ih h'.2⟩
+    refine ⟨⟨fun hx => ?_, (ih h'.2).1⟩, (ih h'.2).2⟩
     rw [List.contains_iff_mem.2 hx] at h'
     cases h'.1
-  | bind => intro _ h; cases h
-  | anon => intro _ h; cases h
 
 theorem disjointB_avoids {B vs : List Var} (h : disjointB B vs = true) : Solidity.Avoids vs B := by
   intro x hx hB
@@ -242,40 +222,37 @@ theorem erase_upd_holds {Γ Δ : Ctx} {ns : List Var} {m : Modality} {U : Upd C 
 
 /-- **A leaf holds where its erasure is valid off its binders' names**:
 the erasure in every state that differs from `τ` only at `B` gives the
-scoped formula in a state agreeing with `τ`. -/
+scoped formula in a typed state whose erasure agrees with `τ`. -/
 theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, φ.posB ns = some B →
-    ∀ {σ : State C Γ} {τ : Semantics.State}, Agree ns σ τ →
+    ∀ {σ : TState C Γ} {τ : Semantics.State}, Agree ns σ.erase τ →
     (∀ ρ, EnvAgreeExcept B τ ρ → Solidity.holds ρ (φ.erase ns)) → holds σ φ := by
   induction φ with
   | tt => intro _ _ _ _ _ _ _; trivial
   | eq a b =>
     intro ns B _ σ τ hag H
-    exact (holds_erase (.eq a b) trivial hag).2 (H τ (Semantics.EnvAgreeExcept.refl _ _))
+    exact (holds_erase_fo (.eq a b) trivial rfl hag).2 (H τ (Semantics.EnvAgreeExcept.refl _ _))
   | defined t =>
     intro ns B _ σ τ hag H
-    exact (holds_erase (.defined t) trivial hag).2 (H τ (Semantics.EnvAgreeExcept.refl _ _))
+    exact (holds_erase_fo (.defined t) trivial rfl hag).2 (H τ (Semantics.EnvAgreeExcept.refl _ _))
   | not φ _ =>
     intro ns B h σ τ hag H
     have hp : φ.plainB ns = true := by
       cases hn : φ.plainB ns
       · simp only [Fml.posB, hn] at h; cases h
       · rfl
-    exact (holds_erase (.not φ) (Fml.plain_of_plainB φ hp) hag).2
-      (H τ (Semantics.EnvAgreeExcept.refl _ _))
+    have hp' := Fml.plain_of_plainB φ hp
+    exact (holds_erase_fo (.not φ) hp'.1 hp'.2 hag).2 (H τ (Semantics.EnvAgreeExcept.refl _ _))
   | anon xs φ ih =>
     intro ns B h σ τ hag H
-    by_cases hp : φ.plainB ns = true
-    · exact holds_of_erase_anon (Fml.plain_of_plainB φ hp) hag
-        (H τ (Semantics.EnvAgreeExcept.refl _ _))
-    change (if φ.plainB ns then some [] else φ.posB ns) = some B at h
-    rw [if_neg hp] at h
+    change φ.posB ns = some B at h
     -- a binding of the anonymised locals, on both sides: `τ₁` is `τ` but at
     -- their names
     intro b
-    obtain ⟨τ₁, h₁, h₂⟩ := Agree.anon b xs hag
-    have hτ₁ : withLocals σ.glob τ₁.env = τ₁ := by
+    obtain ⟨τ₁, h₁, h₂⟩ := Agree.anon (fun x => LTy.TDenote.erase x.1 (b x)) xs hag
+    rw [← TState.anon_erase] at h₁
+    have hτ₁ : withLocals σ.erase.glob τ₁.env = τ₁ := by
       have hg := h₁.glob
-      rwa [State.glob_anon b xs σ] at hg
+      rwa [TState.anon_erase, State.glob_anon _ xs σ.erase] at hg
     have hττ₁ : EnvAgreeExcept (xs.map fun x => x.2.name ns) τ τ₁ := by
       rw [← hag.glob, ← hτ₁]
       exact ⟨rfl, rfl, rfl, rfl, fun y hy => (h₂ y hy).symm, rfl, rfl⟩
@@ -322,79 +299,73 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
     · cases h
       rename_i hd
       intro hσa
-      have hτa := (holds_erase a (Fml.plain_of_plainB a ha) hag).1 hσa
+      have ha' := Fml.plain_of_plainB a ha
+      have hτa := (holds_erase_fo a ha'.1 ha'.2 hag).1 hσa
       exact ihφ h₁ hag fun ρ hρ =>
         H ρ hρ ((Solidity.holds_frame (a.erase ns) (disjointB_avoids hd) hρ).1 hτa)
     · cases h
   | upd m U φ ih =>
     intro ns B h σ τ hag H
-    change (if ((m.isBox || U.boolB) && U.freshK ns) then (φ.posB (U.names ns)).bind fun B =>
+    change (if U.freshK ns then (φ.posB (U.names ns)).bind fun B =>
         if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none else none) =
       some B at h
-    have hU : ((m.isBox || U.boolB) && U.freshK ns) = true := by
-      cases hn : ((m.isBox || U.boolB) && U.freshK ns)
+    have hU : U.freshK ns = true := by
+      cases hn : U.freshK ns
       · rw [hn] at h; cases h
       · rfl
-    have hU' : (m.isBox || U.boolB) = true ∧ U.freshK ns = true := Bool.and_eq_true _ _ ▸ hU
     rw [if_pos hU] at h
     obtain ⟨B', h₁, h⟩ := Option.bind_eq_some_iff.1 h
     split at h
     · cases h
       rename_i hd
       have hav := disjointB_avoids hd
-      have hrel := Upd.apply_erase hag U (Upd.fresh_of_freshK ns U hU'.2)
+      have hrel := Upd.apply_erase hag U (Upd.fresh_of_freshK ns U hU)
       have H₀ := erase_upd_holds.1 (H τ (Semantics.EnvAgreeExcept.refl _ _))
-      have core : m.afterC (holds · φ) (U.apply σ) := by
-        revert hrel H₀
-        cases U.apply σ with
-        | error e =>
-          cases Solidity.Upd.apply (U.erase ns) τ with
-          | error _ => intro _ H₀; exact H₀
-          | ok _ => intro hrel; exact hrel.elim
-        | ok σ₁ =>
-          cases hτ : Solidity.Upd.apply (U.erase ns) τ with
-          | error _ => intro hrel; exact hrel.elim
-          | ok τ₁ =>
-            intro hrel _
-            refine ih h₁ hrel fun ρ hρ => ?_
-            let ρ₀ := mergeOn B τ ρ
-            have hfr := Solidity.Upd.apply_frame (mergeOn_agree B τ ρ) (U.erase ns) hav
-            have Hρ₀ := erase_upd_holds.1 (H ρ₀ (mergeOn_agree B τ ρ))
-            rw [hτ] at hfr
-            revert hfr Hρ₀
-            cases hρ₁ : Solidity.Upd.apply (U.erase ns) ρ₀ with
-            | error _ => intro hfr; exact hfr.elim
-            | ok ρ₁ =>
-              intro hfr Hρ₁
-              refine holds_of_envAgree_nil ?_ Hρ₁
-              have h₁ρ := Solidity.Mutability.agree_trans (envAgree_symm hfr) hρ
-              refine ⟨h₁ρ.storage, h₁ρ.heap, h₁ρ.nextId, h₁ρ.net, fun y _ => ?_, h₁ρ.selfBalance,
-                h₁ρ.tx⟩
-              by_cases hy : y ∈ B
-              · rw [Derive.Upd.foldl_lookup (U.erase ns) (fun hv => hav y hv hy) hρ₁]
-                exact lookupBy_mergeOn hy
-              · exact h₁ρ.env y hy
-      cases m with
-      | box => exact core
-      | diamond =>
-        have hb : U.boolB = true := by simpa only [Modality.isBox, Bool.false_or] using hU'.1
-        show σ.BoolOK → Modality.afterC .diamond (fun τ => τ.BoolOK ∧ holds τ φ) (U.apply σ)
-        intro hT
-        revert core
-        cases hσ : U.apply σ with
-        | error _ => exact id
-        | ok σ₁ => exact fun hc => ⟨Upd.apply_boolOK hT U hb hσ, hc⟩
+      show m.afterC (fun τ' => ∀ σ' : TState C _, σ'.erase = τ' → σ.H <+: σ'.H → holds σ' φ)
+        (U.apply σ.erase)
+      revert hrel H₀
+      cases U.apply σ.erase with
+      | error e =>
+        cases Solidity.Upd.apply (U.erase ns) τ with
+        | error _ => intro _ H₀; exact H₀
+        | ok _ => intro hrel; exact hrel.elim
+      | ok σ₁ =>
+        cases hτ : Solidity.Upd.apply (U.erase ns) τ with
+        | error _ => intro hrel; exact hrel.elim
+        | ok τ₁ =>
+          intro hrel _ σ' e _
+          subst e
+          refine ih h₁ hrel fun ρ hρ => ?_
+          let ρ₀ := mergeOn B τ ρ
+          have hfr := Solidity.Upd.apply_frame (mergeOn_agree B τ ρ) (U.erase ns) hav
+          have Hρ₀ := erase_upd_holds.1 (H ρ₀ (mergeOn_agree B τ ρ))
+          rw [hτ] at hfr
+          revert hfr Hρ₀
+          cases hρ₁ : Solidity.Upd.apply (U.erase ns) ρ₀ with
+          | error _ => intro hfr; exact hfr.elim
+          | ok ρ₁ =>
+            intro hfr Hρ₁
+            refine holds_of_envAgree_nil ?_ Hρ₁
+            have h₁ρ := Solidity.Mutability.agree_trans (envAgree_symm hfr) hρ
+            refine ⟨h₁ρ.storage, h₁ρ.heap, h₁ρ.nextId, h₁ρ.net, fun y _ => ?_, h₁ρ.selfBalance,
+              h₁ρ.tx⟩
+            by_cases hy : y ∈ B
+            · rw [Derive.Upd.foldl_lookup (U.erase ns) (fun hv => hav y hv hy) hρ₁]
+              exact lookupBy_mergeOn hy
+            · exact h₁ρ.env y hy
     · cases h
   | havoc φ ih =>
     intro ns B h σ τ hag H
     change φ.posB ns = some B at h
     intro st nt
-    have e : τ.havoc st nt = withLocals (σ.glob.havoc st nt) τ.env := by
+    have e : τ.havoc st.erase nt = withLocals (σ.erase.glob.havoc st.erase nt) τ.env := by
       have hw := hag.wl
       generalize τ.env = env at hw ⊢
       subst hw; rfl
-    refine ih h (e ▸ hag.withGlob (σ.glob.havoc st nt)) fun ρ hρ => ?_
-    refine holds_of_envAgree_nil ?_ (H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) st nt)
+    have hag' := hag.withGlob (σ.erase.glob.havoc st.erase nt)
+    rw [← e, ← TState.havoc_erase] at hag'
+    refine ih h hag' fun ρ hρ => ?_
+    refine holds_of_envAgree_nil ?_ (H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) st.erase nt)
     refine ⟨hρ.storage, hρ.heap, hρ.nextId, hρ.net, fun y _ => ?_, hρ.selfBalance, hρ.tx⟩
     by_cases hy : y ∈ B
     · exact lookupBy_mergeOn hy
@@ -415,9 +386,11 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
       rename_i hxB
       have hxn : x ∉ ns := fun hm => by simp only [List.contains_iff_mem.2 hm] at hx; cases hx
       have hxB' : x ∉ B := fun hm => hxB (List.contains_iff_mem.2 hm)
-      intro v hv
-      refine ih h₁ (hag.push (t := .val p) hxn v) fun ρ hρ => ?_
-      refine holds_of_envAgree_nil ?_ (H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) v hv)
+      intro w
+      refine ih h₁ (σ := σ.push (t := .val p) w) (hag.push (t := .val p) hxn (PrimTy.erase w))
+        fun ρ hρ => ?_
+      refine holds_of_envAgree_nil ?_
+        (H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) (PrimTy.erase w) (PrimTy.admits_erase w))
       refine ⟨hρ.storage, hρ.heap, hρ.nextId, hρ.net, fun y _ => ?_, hρ.selfBalance, hρ.tx⟩
       by_cases hy : y ∈ B
       · have hyx : y ≠ x := fun e => hxB' (e ▸ hy)
@@ -440,8 +413,8 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
     rw [if_neg (by simp only [hx]; decide)] at h
     obtain ⟨B', h₁, rfl⟩ := Option.map_eq_some_iff.1 h
     have hxn : x ∉ ns := fun hm => by simp only [List.contains_iff_mem.2 hm] at hx; cases hx
-    refine holds_bind_intro fun v => ?_
-    refine ih h₁ (hag.push hxn v) fun ρ hρ => H ρ ?_
+    refine Modality.forallB_intro fun v => ?_
+    refine ih h₁ (σ := σ.push v) (hag.push hxn (LTy.TDenote.erase t v)) fun ρ hρ => H ρ ?_
     exact Solidity.Mutability.agree_trans
       (Solidity.Mutability.agree_setEnv List.mem_cons_self τ _)
       (Solidity.Mutability.agree_mono (fun _ hy => List.mem_cons_of_mem _ hy) hρ)
@@ -459,6 +432,6 @@ theorem Valid.of_erase {φ : Fml C []} (hp : (φ.posB []).isSome = true)
     (h : Solidity.Valid (φ.erase [])) : Valid φ := by
   intro σ
   obtain ⟨B, hB⟩ := Option.isSome_iff_exists.1 hp
-  exact holds_of_erase_pos φ hB (Agree.nil σ) fun ρ _ => h ρ
+  exact holds_of_erase_pos φ hB (Agree.nil σ.erase) fun ρ _ => h ρ
 
 end Solidity.Core

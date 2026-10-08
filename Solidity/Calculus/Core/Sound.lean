@@ -1,0 +1,63 @@
+import Solidity.Calculus.Core.SoundStep
+import Solidity.Calculus.Core.SoundCalls
+import Solidity.Calculus.Core.SoundLoops
+
+/-!
+# Every rule of `Stmt.step` over the typed state
+
+The arms (`Stmt.stepSound_arms`, `Calculus/Core/SoundStep.lean`) and the
+blocks' (`Stmt.sound_call`, `Stmt.sound_tryCall`, `Stmt.sound_loop`),
+assembled: `Stmt.sound`, every rule sound in every typed state, so the
+sequent is sound over the typed state with no hypothesis
+(`Proves.sound`, `Proves.valid`).
+
+Decisions 15 and 16 took two conditions away (a push at the bound is
+exhausted, which both modalities accept; no struct repeats a member name),
+and 17' the last (`docs/intrinsic.md`, "Decision 17', implemented"): a
+memory local may be unset, so `T memory mv = r;`'s premise
+`∀ mv. [mv = r; ω] φ` holds at `mv` unset, from which `mv = r;` runs as the
+declaration does, where before no typed value of `mv` named the object `r`
+was about to allocate.
+-/
+
+namespace Solidity.Core
+
+open Solidity (Modality RuleSet)
+
+variable {C : Contract}
+
+/-- **Every rule of `Stmt.step` is sound over the typed state.** -/
+theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
+    Stmt.StepSound k m s := by
+  intro σ p hp
+  cases s with
+  | call f args ret body => exact Stmt.sound_call k m f args ret body σ p hp
+  | tryCall call rets ok err code pnc other =>
+    exact Stmt.sound_tryCall k m call rets ok err code pnc other σ p hp
+  | loop a c body => exact Stmt.sound_loop k m a c body σ p hp
+  | _ => exact Stmt.stepSound_arms k m _ rfl σ p hp
+
+/-- **Every rule the strategy fires is sound over the typed state**, in
+every typed state, at every contract. -/
+theorem Stmt.sound : Stmt.Sound C :=
+  fun k m _ _ s p hp σ => Stmt.stepSound k m s σ p hp
+
+/-- **Soundness of the scoped sequent over the typed state**: what `H ⊢ φ`
+proves holds, its context in front, in every typed state of the outer
+scope. -/
+theorem Proves.sound {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ}
+    (d : Proves C R Γ₀ H φ) : ∀ σ, holds σ (H.wrap φ) :=
+  Proves.sound_of Stmt.sound d
+
+/-- **A goal proved with an empty context is valid over the typed
+state.** -/
+theorem Proves.valid {R : RuleSet} {φ : Fml C []} (d : Proves C R [] .nil φ) : Valid φ :=
+  Proves.sound d
+
+/-- info: 'Solidity.Core.Stmt.sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Stmt.sound
+
+/-- info: 'Solidity.Core.Proves.valid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Proves.valid
+
+end Solidity.Core

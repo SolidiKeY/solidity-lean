@@ -4,8 +4,8 @@ import Solidity.Calculus.Core.WkOver
 /-!
 # A loop body runs within its frame, typed
 
-`Calculus/Core/RunFrame.lean`'s `Prog.run_frame` for the typed run
-(`docs/intrinsic.md`, W1 lane `runlemmas`): a program within the mutability
+The frame lemma of the typed run (`docs/intrinsic.md`, W1 lane
+`runlemmas`): a program within the mutability
 `μ` (`Stmt.within`, `Calculus/Core/Blocks.lean`) keeps the heap and its
 typing, the funds and the transaction, and the storage and the ledger too
 unless `μ` is `nonpayable` (`TGFrame`); of the locals of the context `d`

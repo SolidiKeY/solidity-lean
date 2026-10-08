@@ -14,8 +14,7 @@ trees differ from today's:
   past the frames to the postcondition, in one step (`Fml.modalK`, Gate G0's
   condition 6), so there is no `emptyModality` after it;
 * a leaf is closed by `closeTrue`, else by `Proves.close` and today's closer
-  on its erasure, behind a diamond update too where it keeps the `bool`
-  locals `bool`s (`Upd.boolB`).
+  on its erasure, behind a diamond update too (`Fml.closableB`).
 -/
 
 namespace Solidity.Examples.Tactics.CoreProofTree
