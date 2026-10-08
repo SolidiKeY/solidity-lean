@@ -203,7 +203,10 @@ an empty modality through its frames, `closeTrue`, or the rule the
 statement fires, named as solkey names it (`ruleOf?`,
 `Calculus/Core/Completeness.lean`) and cited by its taclet
 (`Taclet.step_eq .rule`, `LeanTaclet.toStep .rule`).  A goal with no
-modality is a leaf, left to the closer. -/
+modality is a leaf: `sol_derive` leaves it, `sol_derive?` closes it as
+today's does, by `refine close ?_; sol_symex; sol_close` (`Proves.close`
+on the erasure, the root's locals named by `[]`), and prints `sorry` where
+that fails. -/
 
 namespace Walk
 
@@ -283,11 +286,30 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
     ctorTacs c d
   | _ => return #[]
 
+/-- The tactics a leaf is closed by: `Proves.close` at the root's scope
+(no outer locals), then today's `sol_symex; sol_close` on the erasure. -/
+def closeTacs : MetaM (Array (TSyntax `tactic)) := do
+  let rfl' := mkIdent `rfl
+  let nd := mkIdent ``List.nodup_nil
+  return #[← `(tactic| refine $(← ProofTree.short ``Proves.close) [] $rfl' $nd ?_),
+    ← `(tactic| sol_symex), ← `(tactic| sol_close)]
+
+/-- Close the leaf `g` by `closeTacs`: their lines, or `none` where they
+fail or leave a goal. -/
+def closeLeaf (g : MVarId) : TacticM (Option (Array String)) := do
+  let s ← saveState
+  let tacs ← closeTacs
+  let r ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (ProofTree.runOn g tacs))
+    fun _ => pure none
+  match r with
+  | some [] => return some (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
+  | _ => s.restore; return none
+
 /-- The walk from `g`: its script, lines indented relative to the first, a
-`case` per goal of a step with several, `sorry` for a leaf; the leaves are
-collected in `open`. -/
-partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarId) :
-    TacticM (Array String) := do
+`case` per goal of a step with several; a leaf closed by `closeLeaf` when
+`close` is set, else (or where that fails) `sorry`, collected in `leaves`. -/
+partial def walk (close : Bool) (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId))
+    (g : MVarId) : TacticM (Array String) := do
   let n ← fuel.get
   if n == 0 then throwError "sol_derive: more than {Derive.fuel} steps"
   fuel.set (n - 1)
@@ -300,14 +322,18 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     if let some gs := r then
       step := some (tacs, gs)
       break
-  let some (tacs, gs) := step | leaves.modify (·.push g); return #["sorry"]
+  let some (tacs, gs) := step | do
+    if close then
+      if let some lines ← closeLeaf g then return lines
+    leaves.modify (·.push g)
+    return #["sorry"]
   let head := (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
   match gs with
-  | [g'] => return head ++ (← walk fuel leaves g')
+  | [g'] => return head ++ (← walk close fuel leaves g')
   | gs =>
     let mut out := head
     for g' in gs do
-      let body ← walk fuel leaves g'
+      let body ← walk close fuel leaves g'
       match ← g'.getTag with
       | .str _ l =>
         out := out.push s!"case {l} =>"
@@ -315,9 +341,9 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
       | _ => out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
     return out
 
-/-- The walk from the goal `g` (`Core.Valid φ` starts with `Proves.valid`):
-its lines, and the leaves it leaves. -/
-def run (g : MVarId) : TacticM (Array String × List MVarId) := do
+/-- The walk from the goal `g` (`Core.Valid φ` starts with `Proves.valid`),
+its leaves closed when `close` is set: its lines, and the leaves it leaves. -/
+def run (g : MVarId) (close : Bool := false) : TacticM (Array String × List MVarId) := do
   let (pre, g) ← match ← Symex.validGoal? g with
     | some _ =>
       let t ← `(tactic| refine $(← ProofTree.short ``Proves.valid)
@@ -327,7 +353,7 @@ def run (g : MVarId) : TacticM (Array String × List MVarId) := do
     | none => pure (#[], g)
   let fuel ← IO.mkRef Derive.fuel
   let leaves ← IO.mkRef #[]
-  let lines ← walk fuel leaves g
+  let lines ← walk close fuel leaves g
   return (pre ++ lines, (← leaves.get).toList)
 
 /-- A scoped goal: `Core.Valid φ` or `H ⊢ φ` over `Core.Proves`. -/
@@ -360,14 +386,16 @@ def evalSolDeriveCore : Tactic := fun _ => withMainContext do
 
 open Lean Elab Tactic Meta in
 /-- `sol_derive?` on a scoped goal: the walk, offered as its script, one
-`refine` per rule; a leaf is left as a goal (`sorry` in the script). -/
+`refine` per rule, each leaf closed by `refine close ?_; sol_symex;
+sol_close`; a leaf that does not close is left as a goal (`sorry` in the
+script). -/
 @[tactic Solidity.ProofTree.tacticSol_derive?]
 def evalSolDeriveQCore : Tactic := fun stx => withMainContext do
   let g ← getMainGoal
   unless ← Walk.isCoreGoal g do throwUnsupportedSyntax
   let rest := (← getUnsolvedGoals).erase g
   Symex.reporting g do
-    let (lines, leaves) ← Walk.run g
+    let (lines, leaves) ← Walk.run g (close := true)
     setGoals (leaves ++ rest)
     ProofTree.suggest stx[0] lines
 
