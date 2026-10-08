@@ -1159,8 +1159,7 @@ theorem TRes.map_drop_self {Γ : Ctx} (e : Ext Γ Γ) (r : TRes (TState C Γ)) :
 The typed run of a program and its frames erases to M3's
 (`Prog.trun_erase`, for the frames too), which `Calculus/Core/HoldsErase.lean`
 relates to the erased program's: what reads a modality on the erasure
-(`Calculus/Core/Contracts.lean`, `Calculus/Core/Deploy.lean`) goes through
-these. -/
+(`Calculus/Core/Deploy.lean`) goes through these. -/
 
 /-- The frames' typed run erases to M3's (`Prog.trun_erase`'s, for the
 frames). -/

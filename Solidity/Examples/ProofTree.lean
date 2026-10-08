@@ -4,7 +4,6 @@ import Solidity.Tools.ProofTree
 import Solidity.Tools.Inspect
 import Solidity.Calculus.Core.Derive
 import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.ChainGen
 import Solidity.Calculus.Derive
 
 /-!
@@ -15,8 +14,7 @@ the tactics that write a proof out, as `#guard_msgs` tests:
 
 * `#proof_tree`, `#proof_node` and `#proof_tree_json` (`Tools/ProofTree.lean`)
   print the tree of `⊢ φ` as solkey's GUI and web prover do;
-* `sol_derive?` suggests the `apply` walk the tree is, `sol_chain?` the
-  chain term a derivation `φ ~~> ψ` is;
+* `sol_derive?` suggests the `apply` walk the tree is;
 * `sol_prove?` suggests `sol_prove` (`Calculus/Derive.lean`), the same walk
   as one kernel evaluation, and a tactic per leaf its closer leaves.
 
@@ -36,9 +34,9 @@ goals under either modality, its branch's `}` printed; a leaf closes by
 too (`Fml.closableB`: an update's reading asks only of the typed states it
 may end in).  `sol_prove?`
 is the scoped one (`Calculus/Core/Closers.lean`), its replay today's
-text.  `sol_chain?`, `#chain` and `sol_rws?` are the scoped ones
-(`Calculus/Core/ChainGen.lean`), their lines `cdl![m]{ … }`.  What stays
-today's: the guards on today's residue and closer (the closer's input).
+text.  The chains the tactics write (`sol_chain?`, `#chain`, `sol_rws?`)
+are pinned in `Examples/Tactics/CoreChains.lean`.  What stays today's: the
+guards on today's residue and closer (the closer's input).
 -/
 
 namespace Solidity.Examples.ProofTree
@@ -750,117 +748,6 @@ info: Try this:
 #guard_msgs in
 example : ⊢ dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 } := by
   sol_prove?
-
-/-! ## `sol_chain?`: the chain written out
-
-`sol_chain?` on `φ ~~> ψ` writes the derivation out as one chain term,
-every line and every rule (`Calculus/Core/ChainGen.lean`): the parameters
-bound by `∀` in each line, and no `emptyModality` after the last statement. -/
-
-/--
-info: Try this:
-  exact Solidity.Core.Fml.Via.leads (show cdl!{ ∀ uint x; ∀ uint v; [ alice.age = v; x = 1; ] find(storage, alice.age) = v }
-        ~[storageFieldWriteSave]~> cdl!{ ∀ uint x; ∀ uint v; { storage := save(storage, alice.age, v) } [ x = 1; ] find(storage, alice.age) = v }
-        ~[localValueAssign]~> cdl![.box]{ ∀ uint x; ∀ uint v; { storage := save(storage, alice.age, v) } { x := 1 } find(storage, alice.age) = v } by sol_chain)
--/
-#guard_msgs in
-example : dl!{ [ alice.age = v; x = 1; ] alice.age == v }
-    ~~> dl![.box]{ { storage := save(storage, alice.age, v) } { x := 1 } alice.age == v } := by
-  sol_chain?
-
-section
-variable (m : Modality)
-
-/-! At a modality `m` and a postcondition `φ`, the chain is `by sol_chain`. -/
-/--
-info: Try this:
-  exact Solidity.Core.Fml.SoundRel.leads (show cdl![m]{ ∀ uint v; ⟨[ alice.age = v; ]⟩ φ }
-        ~[storageFieldWriteSave]~> cdl![m]{ ∀ uint v; { storage := save(storage, alice.age, v) } φ } by sol_chain)
--/
-#guard_msgs in
-example (φ : Core.Post StandardExample [.val .uint]) :
-    dl![m]{ ⟨[ alice.age = v; ]⟩ φ } ~~> dl![m]{ { storage := save(storage, alice.age, v) } φ } := by
-  sol_chain?
-
-end
-
-/-! ## `#chain`, `sol_rws`: past the program
-
-`#chain φ` writes the whole chain from `φ`: the program's steps, then,
-from the erasure of the line the program ends at, one rewrite a link until
-the line is last, written as one chain term to paste
-(`Calculus/Core/ChainGen.lean`).
-The strategy's steps are grouped as the worked examples print them
-(`ChainGen.groupSteps`): a declaration with the binding or read it leaves
-is one `~*>`; no `emptyModality` follows a rule that leaves no statement. -/
-
-section
-variable (m : Modality)
-
-variable (φ : Core.Post StandardExample [.val .uint, .val .uint]) in
-/--
-info: theorem chain :
-    cdl![m]{ ∀ uint x; ∀ uint v; ⟨[ alice.age = v; x = 1; ]⟩ φ }
-    ~[storageFieldWriteSave]~> cdl![m]{ ∀ uint x; ∀ uint v; { storage := save(storage, alice.age, v) } ⟨[ x = 1; ]⟩ φ }
-    ~[localValueAssign]~> cdl![m]{ ∀ uint x; ∀ uint v; { storage := save(storage, alice.age, v) } { x := 1 } φ }
-    ~[sequentialToParallel]~> cdl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
-  sol_chain
--/
-#guard_msgs in
-#chain dl![m]{ ⟨[ alice.age = v; x = 1; ]⟩ φ }
-
--- A concrete starting state in front of the program: the declaration and
--- its read are one `~*>`, and the read resolves to the literal.
-variable (φ : Core.Post StandardExample [.val .uint]) in
-/--
-info: theorem chain :
-    cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
-    ~*> cdl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
-    ~[sequentialToParallel]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
-    ~[findOnSave]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
-  sol_chain
--/
-#guard_msgs in
-#chain dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
-
-/-- The program by the strategy, then the merge and the read of the fresh
-`Person`: past the program the rewrites are named (`sol_rws`), the
-derivation to the program's end found. -/
-example (φ : Core.Post StandardExample [.mem (.struct "Person"), .val .uint]) :
-    dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-            ⟨[ v = carol.account.balance; ]⟩ φ }
-    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
-          mv1 := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖ v := 0 } φ } := by
-  sol_rws [sequentialToParallel, readAddEqual]
-
-variable (φ : Core.Post StandardExample [.val .uint, .val .uint]) in
-/--
-info: Try this:
-  sol_rws [sequentialToParallel]
--/
-#guard_msgs in
-example : dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } φ }
-    ~~> dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
-  sol_rws?
-
-/-! `sol_chain?` on `~~>` at any length: one rewrite, one step, none. -/
-variable (φ : Core.Post StandardExample [.val .uint, .val .uint]) in
-#guard_msgs (drop info) in
-example : dl![m]{ { storage := save(storage, alice.age, v) } { x := 1 } φ }
-    ~~> dl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
-  sol_chain?
-
-variable (φ : Core.Post StandardExample [.val .uint]) in
-#guard_msgs (drop info) in
-example : dl![m]{ { x := 1 } ⟨[ ]⟩ φ } ~~> dl![m]{ { x := 1 } φ } := by
-  sol_chain?
-
-variable (φ : Core.Post StandardExample [.val .uint]) in
-#guard_msgs (drop info) in
-example : dl![m]{ { x := 1 } φ } ~~> dl![m]{ { x := 1 } φ } := by
-  sol_chain?
-
-end
 
 /-! ## Calls
 

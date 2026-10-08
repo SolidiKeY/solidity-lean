@@ -3215,7 +3215,7 @@ silent steps unwritten), the walk running those very lines; without the
 scope, the explicit `Core.Proves` text as before.  New scoped readings:
 `apply invLean r`, `apply updIntro` (`WalkSyntax.lean`), `sol_prove?` on a
 scoped goal and `sol_upd` on a scoped leaf (`Closers.lean`), `sol_erase`
-and `Valid.of_erase_plain` (`Calculus/Core/Contracts.lean`, a plain
+and `Valid.of_erase_plain` (`Calculus/Core/Contracts`, a plain
 formula proved on its erasure), `Core.Problem.text` and
 `Core.Problem.deploy_of_valid_nil` (`Calculus/Core/Deploy.lean`).
 
@@ -3314,7 +3314,7 @@ jobs; `TestSuite/CoreSeq`, `CoreDerived11`, `Examples/Chains/StorageCoverage`,
 
 Then merged `w3b-tactics` through 1e71cb1: `Tactics/Dangling`'s diamond walk
 flipped (its docstrings fixed), `Tactics/Contracts` flipped through
-`sol_erase` (`Calculus/Core/Contracts.lean`), the module-map rows of
+`sol_erase` (`Calculus/Core/Contracts`), the module-map rows of
 `Close`/`Closable`/`CloseErase` corrected.  `Core.Walk.walk`'s tag rule
 stays this lane's (below); 0209193's last component past macro scopes and
 `h` is not taken (erasing the macro scopes before the prefix test turns
@@ -3683,7 +3683,8 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     that is not first-order weakens to `true` (`Fml.wkD`).  Today's rule
     read the parameters at their values after the body, with a freshness
     side condition (`CallRet.freshFor`), and took `\old` and every return
-    shape.
+    shape.  These interim limits are lifted by W4 `contracts`
+    (`Calculus/Core/FunContract.lean`; proposal 33).
 32. *Proposed (W4 preparation), renumbered from 31 at the W3d integration, the lead's call:* the corpus reads the typed
     run.  An obligation is `Corpus.Diamond (Core.TState.init C) P`, the
     program resolved and `⟨ Q ⟩ true` read by `Core.holds` (`Runs`), so an
@@ -3713,6 +3714,24 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `Sequents`, `Chains` are cut from it.  See "W4 lane `moves`".
 35. *Proposed (W4 `moves`), the lead's call:* `Calculus/Core/RuleText.lean`
     (the scoped rule lines against today's) goes with today's rule table.
+36. *Proposed (W4 `theorems`), the lead's call:* the scoped `Core.Proves`'
+    step rules read the rule set, so that under `.solkey` the step's rule
+    must be a `Taclet` (a low-module edit to `Calculus/Core/Proves.lean`);
+    then the judgement-level `solkey_eq_calculus` and `solkey_lt_calculus`
+    are restated and `Taclet.premise_inSolkey` ported.  Until then
+    `solkey_eq_calculus` is dropped (it holds of every formula) and
+    `solkey_soundness` is `soundness'`.  See "W4 lane `theorems`".
+37. *Proposed (W4 `theorems`), the lead's call:* the scoped sequent input
+    notation lives in its own scope `Solidity.Core.Sequent`; W5 may fold it
+    into `Surface`.  See "W4 lane `theorems`".
+38. *Proposed (W4 `contracts`), the lead's call:* `ensures` always
+    stands at the snapshots (`rs ++ Olds ++ ps`), as today's rule always
+    took them, so a contract with no `\old` still lists `old, oldNet` in
+    its `cdlIn`; the obligation is
+    `requires → {old := storage ‖ oldNet := net} [ T r; { body } ] ensures`,
+    the body printed as a block; a memory return is declared in "post"
+    (`[ T memory r; ]`) rather than bound by `∀` (no binder ranges over an
+    object not yet in the heap).  See "W4 lane `contracts`" below.
 
 **Lead, 2026-10-09:** proposals 22–29 are approved as written, with 27 and
 28 together: explicit `∀`s are marked by `cdl!` and always keep their range
@@ -4974,7 +4993,7 @@ git-excluded `Scratch/` modules only).
   today's closer does not read, as before), the mutability checks on the
   scoped calls (`calleeWithin`, `decide`), the `view` frame fact on the
   typed run.  It no longer imports `Calculus/Contracts.lean` or
-  `Calculus/Core/Contracts.lean` (`sol_erase`, now used by nothing but
+  `Calculus/Core/Contracts` (`sol_erase`, now used by nothing but
   kept).  Proposed decision 31 records what the scoped rule reads
   differently.
 - **Pins changed**:
@@ -5149,7 +5168,7 @@ git-excluded `Scratch/` modules only).
      where a formula is rebuilt fall back to stripping every leading `∀`).
   7. done.
   8. *Contracts*: the scoped rule is done; `Calculus/Contracts.lean` and
-     `Calculus/Core/Contracts.lean` (`sol_erase`) are used by nothing but
+     `Calculus/Core/Contracts` (`sol_erase`) are used by nothing but
      `Solidity.lean` (delete in `calc-del`).  Left: `\old` in a scoped
      contract, calls with several results or a memory return (goal
      `false`), `callDeposit`'s "post" by hand until the closer reads
@@ -5229,11 +5248,11 @@ clean.
    | `rule_exists` (`Stmt.complete`) | `rule_exists`, `rule_of_step` | the step is a function to `Option`; the rule is found after the fact |
    | `solkey_rule_exists` (`Stmt.step_taclet`) | `solkey_rule_exists` | as today's, the premise the step's |
    | `solkey_lt_calculus` | `solkey_lt_calculus`, at the rule level | a loop: a rule, no taclet of solkey's |
-   | `solkey_eq_calculus` (`Proves.solkey_iff`) | **dropped** | `Core.Proves` takes the rule set `R` as an index no rule reads: `⊢ₖ` and `⊢` have the same derivations, so the statement holds of every formula and says nothing (proposed decision 33) |
+   | `solkey_eq_calculus` (`Proves.solkey_iff`) | **dropped** | `Core.Proves` takes the rule set `R` as an index no rule reads: `⊢ₖ` and `⊢` have the same derivations, so the statement holds of every formula and says nothing (proposed decision 36) |
    | `symex_terminates` (`symex_normalizes`) | **dropped** | the scoped strategy is fuelled (`Core.symex n`); W2 `symex` retired termination (a program it does not finish fails `sol_prove`, `posB`) |
 
    `solkey_soundness`'s docstring says that it is `soundness'` until
-   decision 33.
+   decision 36.
 4. **`Core.Delab`** prints a hole a schema variable fills (`SHole.fill`,
    `MHole.fill`, `VHole.fill`, `NewLhs.fill`: today's `Hole`/`MHole`/
    `VHole`/`NewLhs` twin, filled; a statement piece read before `whnf`
@@ -5250,7 +5269,7 @@ clean.
    lean`): under `open scoped Solidity.Core.Sequent`, `dl{ ..H, a ⟹[R] φ }`
    reads as `Core.Proves C R Γ₀ (H.pre a) φ`, the context a `Core.Hyps`
    telescope built from the left, entries and formulas schema variables
-   and connectives (proposed decision 34 for the scope).
+   and connectives (proposed decision 37 for the scope).
 
 **Pins changed** (none of W3's reasons 1–8; each the W4 inventory's item,
 the task's):
@@ -5273,7 +5292,7 @@ the task's):
 
 **Proposed decisions** (the lead's call):
 
-33. *The scoped `⊢ₖ` restricts its rules.*  Today `Core.Proves C R` reads
+36. *The scoped `⊢ₖ` restricts its rules.*  Today `Core.Proves C R` reads
     `R` nowhere, so `⊢ₖ φ ↔ ⊢ φ` for every `φ`.  Most faithful to solkey's
     rule text: the step rules of `Core.Proves` (`update`, `unfold`,
     `bind`, `split`, `check`, `done`, `branches`, `cases`, `inv`,
@@ -5283,7 +5302,7 @@ the task's):
     `solkey_lt_calculus` (off it) can be stated again, with
     `Taclet.premise_inSolkey` ported.  A low-module change
     (`Calculus/Core/Proves.lean`), so not this lane's.
-34. *The sequent input is its own scope* (`Solidity.Core.Sequent`), not
+37. *The sequent input is its own scope* (`Solidity.Core.Sequent`), not
     `Core.Surface`: `Surface` switches how the program text reads, and
     files under it still write today's sequents nowhere but in pins; a
     separate scope changes no existing file's reading.  W5 may fold it into
@@ -5295,7 +5314,94 @@ the task's):
 - `#check_rule_text`'s last five (`functionBodyExpand`,
   `internalCallExpand`, `tryCallNoCallbackBox`, `functionCallArgCapture`,
   `tryCallDiamond`).
-- Decisions 33 and 34.
+- Decisions 36 and 37.
+
+### W4 lane `contracts` (`w4-contracts`, 2026-10-08): scoped contracts after decision 31
+
+On `intrinsic` at `31951be`.  Checked file by file through the MCP
+(`Calculus/Core/FunContract.lean`, `Examples/Tactics/Contracts.lean`,
+`Examples/Tactics/CoreChains.lean`, `Examples/ProofTree.lean`,
+`Calculus/Core/Closable.lean`, `Calculus/Core/SoundKit.lean`); no `lake
+build`.  No new `sorry`, `axiom` or `maxHeartbeats`; `#print axioms` of
+`callDeposit`, `callDepositOld`, `callPair`, `callFresh`, `callAddOneWalk`:
+Lean's three.  `check-orphans` (314 reachable) and `check-doc-paths` clean.
+The last commit edits two docstrings only (`Closable`, `SoundKit`, the
+deleted module's citations), checked in their own files; the modules above
+them were checked before it.
+
+- **Decision 31's interim parts, done** (`Calculus/Core/FunContract.lean`):
+  - *`\old`*: "post" is today's text again, `[ params := args ] {old :=
+    storage ‖ oldNet := net} {havoc} …` (`snapOld`, the snapshots declared
+    at `LTy.old`/`LTy.oldNet`, named `old`/`oldNet` as solkey's).  `ensures`
+    is a formula of `rs ++ Olds ++ ps` (the return variables, the
+    snapshots, the parameters); the contract reads it at the body's end
+    with the snapshots of its entry (`TState.withOlds`).  The obligation is
+    `requires → {old := storage ‖ oldNet := net} [ T r; { body } ] ensures`:
+    the body read under the snapshots (`thinOlds`, a `Thin` keeping the
+    returns and parameters), as a block, which the inlined call does too
+    (`Stmt.trun_block_wk`).  `cdlIn![uint se1, old, oldNet, uint se2]{ … }`
+    lists the snapshots (`old` read as the reader's storage variable,
+    `oldNet` by name).
+  - *Several results* (`CallRet.rets`): "post" binds each (`Binders.all`,
+    `∀ T r₁ … T rₙ`), and drops the frame from under them
+    (`Frames.drop`, as `Premise.inline`), the tuple's targets read after.
+  - *A memory return* (`CallRet.mem`): "post" declares the object the
+    callee is entered with, `[ T memory r; ] (ensures → …)`, after
+    `{havoc}` (an allocation reads only the heap, which `{havoc}` keeps).
+    The body may write none of its frame's locals (`CallRet.nVals = 0`), so
+    the object is the one it was entered with; a callee within a
+    mutability cannot write memory (`Stmt.within`).  `cdlIn` reads a
+    struct's memory local (`Person memory p`).
+  - The soundness is one theorem per shape (`holds_callNone`, `…Val`,
+    `…Rets`, `…Mem`; `holds_callPost` opens "post" once for all), and
+    `FunContract.ofValid` covers every shape (no `noMem` hypothesis).
+  - `core_contract` elaborates `req` and `ens` after the call has fixed
+    the frame they stand in (`?req`/`?ens`, then `exact`), which a call of
+    several results needs.
+- **`{havoc}` read by today's closer** (`Calculus/CloseHavoc.lean`, new):
+  `Close.holds_havoc` and `Close.State.havoc_eq_mk` in `close_rw`, so
+  `sol_close` names the storage and ledger a callee may leave as variables
+  and reads the locals and heap as before (`getEnv_mk`, `readAddr_mk`);
+  `find(old, …)` reads the snapshot.  Imported by `FunContract` (the
+  attribute applies where the module is imported, not in `Close.lean`
+  itself, so nothing below it rebuilds).  `callDeposit`'s "post" is
+  `sol_symex; sol_close` now; `Tactics/Contracts` gains `callDepositOld`
+  (an `ensures` over `find(old, total)`), `callPair` (two results; the
+  tuple's declarations are two `sol_step`s first) and `callFresh` (a
+  memory return), and today's `FunContract` coverage is matched.
+- **`Calculus/Core/Contracts` deleted** (`sol_erase`, used by
+  nothing); its citations in the `Closable` and `SoundKit` docstrings and
+  in this file reworded.  Today's `Calculus/Contracts.lean` stays for
+  `calc-del`.
+- **Proposed decision 38** (this lane, the lead's call; recorded as the
+  option most faithful to solkey's rule text): `ensures` always stands at
+  the snapshots (`rs ++ Olds ++ ps`), as today's rule always took them, so
+  a contract that reads no `\old` still lists `old, oldNet` in its
+  `cdlIn`; the obligation prints the body as a block (`}`); a memory
+  return is declared in "post" rather than bound by `∀` (no binder ranges
+  over an object not yet in the heap).
+- **`ProofTree`'s chain examples moved** (the lead's approval of
+  2026-10-09): the `sol_chain?`, `#chain` and `sol_rws` sections, text
+  unchanged, to `Examples/Tactics/CoreChains.lean`'s last section (`open
+  scoped Solidity.Core.Surface`); `ProofTree` no longer imports
+  `Calculus/Core/ChainGen`.  Re-timed by the W3d integration's method
+  (each copy under `Solidity/Scratch/` in a fresh worker, `/proc` sampled
+  every 20 ms, wall to the worker's last CPU), `intrinsic` and this branch
+  alternated, another lane's agent building beside (load 3–15):
+
+  | Module | Limit | `intrinsic`, raw (min of 5) | this branch, raw (min of 4) | ratio |
+  |---|---|---|---|---|
+  | `Examples/ProofTree` | 12.1 s | 13.64 s (13.64, 13.94, 20.4, 20.4, 36.4) | 10.24 s (10.24, 10.34, 10.97, 14.04) | 0.75 |
+  | `Examples/Tactics/CoreChains` | — | 6.11 s (1 run) | 7.05 s (7.05, 12.02) | 1.15 |
+
+  On the integration's scale (its `ProofTree` 13.67 s raw read as 12.9 s)
+  `ProofTree` is about 9.7 s, **within its 12.1 s limit**; the chain
+  sections cost `CoreChains` about 0.9 s, as `w3d-gates` estimated.
+- **Pins changed**: none.  The moved pins are byte-identical in their new
+  file (*moved, no text change*, approved); `Tactics/Contracts` has no
+  pin.  The fresh names are unchanged.
+- **Left**: today's rule-map rows for `useContract` (W5's docs);
+  `Calculus/Contracts.lean` (W4 `calc-del`).
 
 ## Baselines (M0)
 

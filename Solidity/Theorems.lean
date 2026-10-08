@@ -15,7 +15,7 @@ calculus's (`Calculus/Core/`), over the typed state and its run
 typed state `σ : Core.TState C Γ`, and a program `P : Core.Prog C Γ Γ'` runs
 from it by `Core.Prog.trun`.  Three of today's statements are not restated
 over the judgement.  Two wait for `⊢ₖ` to restrict its rules (proposed
-decision 33; the scoped `Core.Proves` never reads its rule set): that
+decision 36; the scoped `Core.Proves` never reads its rule set): that
 solkey's rules alone derive what the calculus derives on the fragment
 (`solkey_eq_calculus`), and that they derive less off it (the
 judgement-level `solkey_lt_calculus`, `∃ φ, ⊢ φ ∧ ¬ ⊢ₖ φ`, false until
@@ -191,7 +191,7 @@ theorem soundness' {φ : Core.Fml C []} : ⊢ φ → ⊨ φ :=
 
 /-- **solkey's rules are sound**: what they derive alone is valid.  (The
 scoped judgement takes the rule set as an index no rule reads yet, so this
-is `soundness'` itself: `docs/intrinsic.md`, proposed decision 33.) -/
+is `soundness'` itself: `docs/intrinsic.md`, proposed decision 36.) -/
 theorem solkey_soundness {φ : Core.Fml C []} : ⊢ₖ φ → ⊨ φ :=
   Core.Proves.valid
 

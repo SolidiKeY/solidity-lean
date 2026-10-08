@@ -42,8 +42,9 @@ def Frames.Fresh : {Γ Γ₀ : Ctx} → List Var → Frames C Γ Γ₀ → Prop
 /-- A formula whose binders are all fresh, and with no hidden binder nor an
 anonymising update: their untyped readings range over more states than the
 typed ones (the untyped `anon` over any binding, the erased hidden binder
-over whatever the name held).  Its updates and modalities are boxes
-(`Calculus/Core/Contracts.lean` reads its erasure's modalities). -/
+over whatever the name held).  Its updates and modalities are boxes: the
+erasure's run has more outcomes than the typed one, so only the box reads
+a modality on the erasure. -/
 def Fml.Plain : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, _, .tt => True
   | _, _, .eq _ _ => True

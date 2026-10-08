@@ -84,7 +84,6 @@ import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Spec
 import Solidity.Calculus.Core.Deploy
-import Solidity.Calculus.Core.Contracts
 import Solidity.Calculus.Core.FunContract
 import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.Close
@@ -120,6 +119,7 @@ import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.SolkeyFragment
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Close
+import Solidity.Calculus.CloseHavoc
 import Solidity.Calculus.CloseTests
 import Solidity.Calculus.MemNames
 import Solidity.Calculus.DecideLang

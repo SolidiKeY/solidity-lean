@@ -19,7 +19,7 @@ Today's module also states the fragment for the judgement
 derives).  The scoped `Core.Proves` takes the rule set `R` as an index but
 no rule reads it, so `⊢ₖ` and `⊢` have the same derivations and that
 statement says nothing; it waits for `R` to restrict the steps
-(`docs/intrinsic.md`, W4 `theorems`, proposed decision 33).
+(`docs/intrinsic.md`, W4 `theorems`, proposed decision 36).
 -/
 
 namespace Solidity.Core
