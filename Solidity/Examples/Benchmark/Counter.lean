@@ -1,6 +1,9 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Spec
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Benchmark: `Counter`
@@ -70,6 +73,8 @@ def Counter : Contract := contract!{
 
 local instance : InContract := ⟨Counter⟩
 
+open scoped Solidity.Core.Surface
+
 /-- `inc()`: `ensures count == \old(count) + 1`. -/
 theorem inc_spec : ⊢ dl!{ c == count → [ inc(); ] count == c + 1 } := by
   sol_prove
@@ -93,7 +98,7 @@ info: dl{
   ((0 <= find(storage, count) ∧
             find(storage, count) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
         msg.value = 0 ∧ find(storage, count) >= 1) →
-    { old := storage } [ dec(); ] find(storage, count) = find(old, count) - 1 } : Fml Counter
+    { old := storage } [ dec(); ] find(storage, count) = find(old, count) - 1 } : Core.Fml Counter []
 -/
 #guard_msgs in #check spec!{ dec }
 

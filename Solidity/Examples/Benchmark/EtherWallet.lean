@@ -1,5 +1,8 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Benchmark: `EtherWallet`
@@ -44,6 +47,8 @@ def EtherWallet : Contract := contract!{
 }
 
 local instance : InContract := ⟨EtherWallet⟩
+
+open scoped Solidity.Core.Surface
 
 /-- `constructor()`: the caller is the owner, from any storage. -/
 theorem ctor : ⊢ dl!{ [ constructor(); ] owner == msg.sender } := by

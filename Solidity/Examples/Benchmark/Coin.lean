@@ -1,6 +1,9 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Spec
 import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Benchmark: `Coin`
@@ -60,6 +63,8 @@ def Coin : Contract := contract!{
 
 local instance : InContract := ⟨Coin⟩
 
+open scoped Solidity.Core.Surface
+
 /-! ## The constructor -/
 
 /-- `constructor()`: the caller is the minter, from any storage. -/
@@ -105,7 +110,7 @@ frame clause needs the layout premise instantiated at the quantified key. -/
 theorem spec_mint : ⊢ spec!{ mint } := by
   sol_derive
   all_goals
-    refine close ?_
+    refine Core.Proves.close [] rfl List.nodup_nil ?_
     sol_symex
     sol_close_unwrap
     intro σ

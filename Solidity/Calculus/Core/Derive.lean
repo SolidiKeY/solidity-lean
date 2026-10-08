@@ -168,32 +168,67 @@ def evalSolProveCore : Tactic := fun _ => withMainContext do
 
 /-! ## `sol_close` on a scoped leaf -/
 
+/-- A formula valid with `x` free is valid under `∀ p x`: the erasure of a
+scoped leaf binds the parameters by `∀` (`cdl!`), today's leaf has them free. -/
+theorem _root_.Solidity.Valid.all_of_free {φ : Solidity.Fml C} (x : Var) (p : PrimTy)
+    (h : Solidity.Valid φ) : Solidity.Valid (.all x p φ) :=
+  fun _ _ _ => h _
+
+namespace Derive
+
+open Lean Elab Tactic Meta
+
+/-- Today's goal `Valid (∀ p x. … φ)` as `Valid φ`, its leading quantifiers'
+locals free, as today's leaves have them (`Valid.all_of_free`). -/
+partial def stripAlls (g : MVarId) : MetaM MVarId := do
+  let ty ← instantiateMVars (← g.getType)
+  let_expr Solidity.Valid C φ := ty | return g
+  let_expr Solidity.Fml.all _ x p φ' := φ | return g
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C φ') (← g.getTag)
+  g.assign (mkAppN (mkConst ``Solidity.Valid.all_of_free) #[C, φ', x, p, g'])
+  stripAlls g'.mvarId!
+
+/-- A scoped leaf `Core.Valid ψ` with no modality left, as today's goal: the
+leaf taken by `Fml.posB` (checked by the kernel), its erasure computed
+(`Solidity.normValid`), the goal `Solidity.Valid` of it (`Valid.of_erase`),
+the parameters' quantifiers stripped (`stripAlls`).  `tac` names the tactic
+in the error. -/
+def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
+  let bool := mkConst ``Bool
+  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
+  let hpTy := mkApp3 (mkConst ``Eq [1]) bool
+    (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
+      (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
+  let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
+    catch _ => throwError "{tac}: the leaf is not one its erasure closes (`Fml.posB`): a \
+      hidden binder under a negation, a precondition or a modality, or named twice, or a \
+      diamond update that may set a `bool` local to what is not a `bool`"
+  let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
+  g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
+  stripAlls (← Solidity.normValid g'.mvarId!)
+
+/-- Run today's closer `stx` on a scoped leaf: the leaf erased
+(`eraseLeaf`), then `stx` itself on today's goal, where today's tactic
+takes it.  Throws `unsupportedSyntax` on a goal that is not scoped, so
+today's tactic runs there. -/
+def onErased (tac : String) (stx : Syntax) : Tactic := fun _ => withMainContext do
+  let g ← getMainGoal
+  let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
+  Symex.reporting g do
+    replaceMainGoal [← eraseLeaf tac g C ψ]
+    evalTactic stx
+
+end Derive
+
 open Lean Elab Tactic Meta in
 /-- `sol_close` on a scoped goal `Core.Valid ψ` with no modality left (after
 `sol_symex`): the leaf taken by `Fml.posB` (checked by the kernel), its
 erasure computed (`Solidity.normValid`) and closed by today's `sol_close`
 (`Valid.of_erase`). -/
 @[tactic Solidity.tacticSol_close]
-def evalSolCloseCore : Tactic := fun _ => withMainContext do
-  let g ← getMainGoal
-  let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
-  Symex.reporting g do
-    let bool := mkConst ``Bool
-    let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-    let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
-    let hpTy := mkApp3 (mkConst ``Eq [1]) bool
-      (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
-        (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
-    let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
-      catch _ => throwError "sol_close: the leaf is not one its erasure closes (`Fml.posB`): a \
-        hidden binder under a negation, a precondition or a modality, or named twice, or a \
-        diamond update that may set a `bool` local to what is not a `bool`"
-    let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
-    let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
-    g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
-    let g'' ← Solidity.normValid g'.mvarId!
-    replaceMainGoal [g'']
-    evalTactic (← `(tactic| sol_close))
+def evalSolCloseCore : Tactic := fun stx => Derive.onErased "sol_close" stx stx
 
 /-! ## `sol_derive`: the strategy as a walk
 
@@ -283,7 +318,10 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
     let d ← if r.getPrefix == ``Taclet then
         `(term| ($(← ProofTree.short ``Taclet.step_eq) .$rule:ident))
       else `(term| ($(← ProofTree.short ``LeanTaclet.toStep) .$rule:ident))
-    ctorTacs c d
+    -- a rule whose line `apply` cannot match (a read into a hole, whose
+    -- `fill` does not reduce while unifying): the premise by `rfl`, the
+    -- statement's own `Stmt.step`
+    return (← ctorTacs c d) ++ (← ctorTacs c (← `(term| $(mkIdent `rfl):ident)))
   | _ => return #[]
 
 /-- The tactics a leaf is closed by: `Proves.close` at the root's scope
@@ -383,39 +421,6 @@ def evalSolDeriveCore : Tactic := fun _ => withMainContext do
   Symex.reporting g do
     let (_, leaves) ← Walk.run g
     setGoals (leaves ++ rest)
-
-open Lean Elab Tactic Meta in
-/-- A leaf of the walk closed by `Proves.close` at the root's scope and
-today's `sol_prove` on its erasure: the goals that leaves (today's
-`leafᵢ`), or the leaf itself where `Proves.close` does not apply (a modality
-left, a diamond update in the context, outer locals). -/
-def Walk.proveLeaf (g : MVarId) : TacticM (List MVarId) := do
-  let s ← saveState
-  let rfl' := mkIdent `rfl
-  let nd := mkIdent ``List.nodup_nil
-  let close ← `(tactic| refine $(mkIdent ``Proves.close) [] $rfl' $nd ?_)
-  let r ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (ProofTree.runOn g #[close]))
-    fun _ => pure none
-  let some [g'] := r | s.restore; return [g]
-  ProofTree.runOn g' #[← `(tactic| sol_prove)]
-
-open Lean Elab Tactic Meta in
-/-- `sol_prove` on a scoped sequent `H ⊢ φ` (`Core.Proves`, so `⊢ dl!{ … }`
-under `open scoped Solidity.Core.Surface`): the strategy as a walk
-(`Walk.run`), each leaf closed by `Proves.close` and today's `sol_prove` on
-its erasure (`Walk.proveLeaf`); the goals left are today's `leafᵢ` and the
-scoped leaves `Proves.close` does not take.  No search: the rule at each
-statement is the one `Stmt.step` fires. -/
-@[tactic Solidity.tacticSol_prove]
-def evalSolProveSeq : Tactic := fun _ => withMainContext do
-  let g ← getMainGoal
-  unless (← instantiateMVars (← g.getType)).isAppOf ``Core.Proves do throwUnsupportedSyntax
-  let rest := (← getUnsolvedGoals).erase g
-  Symex.reporting g do
-    let (_, leaves) ← Walk.run g
-    let mut left : Array MVarId := #[]
-    for l in leaves do left := left ++ (← Walk.proveLeaf l)
-    setGoals (left.toList ++ rest)
 
 open Lean Elab Tactic Meta in
 /-- `sol_derive?` on a scoped goal: the walk, offered as its script, one

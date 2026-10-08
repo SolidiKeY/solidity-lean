@@ -1,6 +1,9 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Close
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Benchmark: `Purchase`
@@ -260,6 +263,8 @@ def Purchase : Contract := contract!{
 }
 
 local instance : InContract := ⟨Purchase⟩
+
+open scoped Solidity.Core.Surface
 
 /-! ## The modifiers, inlined
 

@@ -1,6 +1,9 @@
 import Solidity.Calculus.Derive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Spec
+import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Core.Closers
+import Solidity.Tools.CoreInspect
 
 /-!
 # Benchmark: `Mapping` and `NestedMapping`
@@ -104,6 +107,8 @@ section Mapping
 
 local instance : InContract := ⟨Mapping⟩
 
+open scoped Solidity.Core.Surface
+
 /-- `set(a, i)`: `ensures myMap[_addr] == _i`. -/
 theorem set_spec : ⊢ dl!{ [ set(a, i); ] myMap[a] == i } := by
   sol_prove
@@ -140,14 +145,14 @@ instantiate. -/
 theorem spec_set : ⊢ spec!{ set } := by
   sol_derive
   all_goals
-    refine close ?_
+    refine Core.Proves.close [] rfl List.nodup_nil ?_
     sol_spec
 /-- `remove(_addr)`'s obligation: the entry reset to `0`, every other key
 kept (by `sol_spec`, as `spec_set`). -/
 theorem spec_remove : ⊢ spec!{ remove } := by
   sol_derive
   all_goals
-    refine close ?_
+    refine Core.Proves.close [] rfl List.nodup_nil ?_
     sol_spec
 /-- `get(_addr)` has no clause: the obligation is the invariant-free `true`. -/
 theorem spec_get : ⊢ spec!{ get } := by
@@ -158,6 +163,8 @@ end Mapping
 section NestedMapping
 
 local instance : InContract := ⟨NestedMapping⟩
+
+open scoped Solidity.Core.Surface
 
 /-- `set(a, i, true)`: `ensures nested[_addr1][_i] == _boo`. -/
 theorem nested_set_spec_true : ⊢ dl!{ [ set(a, i, true); ] nested[a][i] == true } := by
@@ -187,7 +194,7 @@ theorem spec_nested_set : ⊢ spec!{ set } := by
 theorem spec_nested_remove : ⊢ spec!{ remove } := by
   sol_derive
   all_goals
-    refine close ?_
+    refine Core.Proves.close [] rfl List.nodup_nil ?_
     sol_spec
 
 end NestedMapping
