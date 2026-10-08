@@ -1,4 +1,5 @@
 import Solidity.Calculus.Core.TProvesSound
+import Solidity.Typing.StraightRun
 
 /-!
 # Premise shapes over the typed state
@@ -260,5 +261,235 @@ theorem Premise.tsound_done {s : Stmt C Γ Γ'} (σ : TState C Γ) (b : Bool)
     exact ⟨trivial, fun h => hp (Except.error.inj h)⟩
 
 end Shapes
+
+/-! ## The per-arm statement
+
+Each arm of `Stmt.step` proves, for its statement, that the premise it
+gives is sound in a typed state `σ` (`Premise.TSound`): its theorem is named
+as M3's with `tsound` for `sound` (`localStep_sound` → `localStep_tsound`)
+and takes `σ` first, then the arm's arguments, the premise `q` and
+`hq : …Step k … = some q`.  An arm that is sound only under a condition (a
+push at the bound under the diamond) takes it as a hypothesis. -/
+
+/-- **The rule of `s` is sound over the typed state**, in every typed state
+(`Stmt.StepSound`, over `TState`). -/
+def Stmt.TStepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
+  ∀ σ : TState C Γ, ∀ p, s.step k m = some p → Premise.TSound m s p σ
+
+/-! ## Runs that halt alike
+
+A rule that captures a part evaluates it first, where the statement may read
+another part first; the two runs then halt alike but maybe not with the same
+halt, which a modality does not tell apart but for a panic
+(`Modality.afterRunTR`): `Res.Sim`, over the typed run. -/
+
+section Sim
+
+variable {α β : Type}
+
+/-- The same state, or two halts that are both panics or both not. -/
+def TRes.Sim : TRes α → TRes α → Prop
+  | .ok a, .ok b => a = b
+  | .error e, .error e' => (e = .panic ↔ e' = .panic)
+  | _, _ => False
+
+theorem TRes.Sim.refl (r : TRes α) : TRes.Sim r r := by
+  cases r <;> simp only [TRes.Sim, iff_self]
+
+theorem TRes.Sim.of_eq {r r' : TRes α} (h : r = r') : TRes.Sim r r' := h ▸ TRes.Sim.refl r
+
+theorem TRes.Sim.bind {r r' : TRes α} (h : TRes.Sim r r') (f : α → TRes β) :
+    TRes.Sim (r.bind f) (r'.bind f) := by
+  match r, r', h with
+  | .ok a, .ok b, h => cases h; exact TRes.Sim.refl _
+  | .error _, .error _, h => exact h
+
+theorem TRes.Sim.afterRunTR {m : Modality} {p : α → Prop} {r r' : TRes α} (h : TRes.Sim r r') :
+    m.afterRunTR p r → m.afterRunTR p r' := by
+  match r, r', h with
+  | .ok a, .ok b, h => cases h; exact id
+  | .error e, .error e', h =>
+    rintro ⟨h₁, h₂⟩
+    exact ⟨h₁, fun he => h₂ (by rw [h.2 (Except.error.inj he)])⟩
+
+/-- An error, its halt not a panic, against a run that does not panic and
+does not end. -/
+theorem TRes.Sim.err {r : TRes α} {e : THalt} (he : e ≠ .panic) (hr : r ≠ .error .panic)
+    (hok : ∀ a, r ≠ .ok a) : TRes.Sim (.error e) r := by
+  match r with
+  | .ok a => exact absurd rfl (hok a)
+  | .error e' => exact ⟨fun h => absurd h he, fun h => absurd (h ▸ rfl) hr⟩
+
+end Sim
+
+/-! ## The premise shapes, up to the halt -/
+
+section ShapesSim
+
+variable {Γ Γ' : Ctx} {m : Modality}
+
+/-- **A block** is sound when it runs as the statement up to the halt, its
+fresh locals popped. -/
+theorem Premise.tsound_unfoldSim {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Ext Γ' Γ''}
+    {s : Stmt C Γ Γ'} (σ : TState C Γ)
+    (hs : TRes.Sim ((Prog.trunSt σ P).map (TState.drop h)) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.unfold P h) σ := by
+  intro _ _ ω κ φ hp
+  have h' := (tholds_modal_iff σ P (.pop .capture h (.seq ω κ)) φ).1 hp
+  rw [tholds_modal_iff, trunSt_cons_frames]
+  have e : (Prog.trunSt σ P).bind (Frames.trunSt · (.pop .capture h (.seq ω κ))) =
+      ((Prog.trunSt σ P).map (TState.drop h)).bind fun τ =>
+        (Prog.trunSt τ ω).bind (Frames.trunSt · κ) := by
+    cases Prog.trunSt σ P with
+    | error => rfl
+    | ok τ =>
+      show Frames.trunSt τ (.pop .capture h (.seq ω κ)) = _
+      rw [Frames.trunSt_pop, Frames.trunSt_seq]
+      rfl
+  rw [e] at h'
+  exact (hs.bind _).afterRunTR h'
+
+/-- A one-statement sequence runs as its statement. -/
+theorem Prog.trunSt_single {Γ' : Ctx} (σ : TState C Γ) (s : Stmt C Γ Γ') :
+    Prog.trunSt σ (.cons s .nil) = Stmt.trunSt σ s := by
+  rw [Prog.trunSt_cons]
+  cases Stmt.trunSt σ s <;> rfl
+
+/-- `T se = nse;`, typed: the value read, then pushed. -/
+theorem Stmt.trunSt_declLocal (σ : TState C Γ) (p : PrimTy) (x : Var) (e : Val C Γ p) :
+    Stmt.trunSt σ (.declLocal p x (some e)) = (e.evalT σ).map fun v => σ.push (t := .val p) v := by
+  show (TRun.declLocal p (some e) σ).map _ = _
+  simp only [TRun.declLocal]
+  cases e.evalT σ <;> rfl
+
+/-- `T storage sp = nsp;`, typed: the path resolved, then pushed. -/
+theorem Stmt.trunSt_declStorage (σ : TState C Γ) (R : RefTy) (x : Var) (b : SPath C Γ (.ref R)) :
+    Stmt.trunSt σ (.declStorage R x (some (.path b))) =
+      (b.resolveT σ).map fun q => σ.push (t := .alias R) (some q) := by
+  show (TRun.declStorage R (some (.path b)) σ).map _ = _
+  simp only [TRun.declStorage, ARhs.evalT]
+  cases b.resolveT σ <;> rfl
+
+/-- `T memory mv = nmp;`, typed: the object read, then pushed. -/
+theorem Stmt.trunSt_declMem (σ : TState C Γ) (R : RefTy) (x : Var) (b : MPath C Γ (.ref R)) :
+    Stmt.trunSt σ (.declMem R x (some (.alias b)) rfl b.mapFree) =
+      (b.mvalT σ).map fun r => σ.push (t := .mem R) r := by
+  show (TRun.declMem R (some (.alias b)) b.mapFree σ).map _ = _
+  simp only [TRun.declMem, MRhs.evalT]
+  cases b.mvalT σ <;> rfl
+
+/-- A declaration, then a statement on top of it, its local popped: the
+declaration's outcome, then the statement's. -/
+theorem trunSt_declThen {t : LTy} (σ : TState C Γ) (d : Stmt C Γ (t :: Γ))
+    (s' : Stmt C (t :: Γ) (t :: Γ)) :
+    (Prog.trunSt σ (.cons d (.cons s' .nil))).map (TState.drop (.push .refl)) =
+      (Stmt.trunSt σ d).bind fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl)) := by
+  rw [Prog.trunSt_cons]
+  cases Stmt.trunSt σ d with
+  | error => rfl
+  | ok τ =>
+    show (Prog.trunSt τ (.cons s' .nil)).map _ = _
+    rw [Prog.trunSt_single]
+    rfl
+
+/-- **A value captured**, by what the statement does with the value (`G`):
+the statement on top of the local runs as `G`, and the statement is the value
+read, then `G`, up to the halt. -/
+theorem Premise.tsound_captureK {p : PrimTy} {x : Var} {e : Val C Γ p}
+    {s' : Stmt C (.val p :: Γ) (.val p :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (G : p.Denote → TRes (TState C Γ))
+    (hs' : ∀ v, (Stmt.trunSt (σ.push (t := .val p) v) s').map (TState.drop (.push .refl)) = G v)
+    (hs : TRes.Sim ((e.evalT σ).bind G) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.capture p x e s') σ := by
+  refine Premise.tsound_unfoldSim σ ?_
+  rw [trunSt_declThen, Stmt.trunSt_declLocal]
+  have : ((e.evalT σ).map fun v => σ.push (t := .val p) v).bind
+      (fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl))) = (e.evalT σ).bind G := by
+    cases e.evalT σ with
+    | error => rfl
+    | ok v => exact hs' v
+  rw [this]; exact hs
+
+/-- **A storage path captured**, by what the statement does with the
+reference. -/
+theorem Premise.tsound_captureSPK {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
+    {s' : Stmt C (.alias R :: Γ) (.alias R :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (G : SRef C (.ref R) → TRes (TState C Γ))
+    (hs' : ∀ q, (Stmt.trunSt (σ.push (t := .alias R) (some q)) s').map
+      (TState.drop (.push .refl)) = G q)
+    (hs : TRes.Sim ((b.resolveT σ).bind G) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.captureSP x b s') σ := by
+  refine Premise.tsound_unfoldSim σ ?_
+  rw [trunSt_declThen, Stmt.trunSt_declStorage]
+  have : ((b.resolveT σ).map fun q => σ.push (t := .alias R) (some q)).bind
+      (fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl))) = (b.resolveT σ).bind G := by
+    cases b.resolveT σ with
+    | error => rfl
+    | ok q => exact hs' q
+  rw [this]; exact hs
+
+/-- **A memory path captured**, by what the statement does with the
+object. -/
+theorem Premise.tsound_captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
+    {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} (σ : TState C Γ)
+    (G : MVal σ.H (.ref R) → TRes (TState C Γ))
+    (hs' : ∀ r, (Stmt.trunSt (σ.push (t := .mem R) r) s').map
+      (TState.drop (.push .refl)) = G r)
+    (hs : TRes.Sim ((b.mvalT σ).bind G) (Stmt.trunSt σ s)) :
+    Premise.TSound m s (.captureMV x b s') σ := by
+  refine Premise.tsound_unfoldSim σ ?_
+  rw [trunSt_declThen, Stmt.trunSt_declMem]
+  have : ((b.mvalT σ).map fun r => σ.push (t := .mem R) r).bind
+      (fun τ => (Stmt.trunSt τ s').map (TState.drop (.push .refl))) = (b.mvalT σ).bind G := by
+    cases b.mvalT σ with
+    | error => rfl
+    | ok r => exact hs' r
+  rw [this]; exact hs
+
+end ShapesSim
+
+/-! ## An update, through the bridge
+
+An update rule's update is a term of `Update.lean`, read on the erasure, so
+what it needs of the typed run (`Premise.tsound_update`) follows from M3's
+equation with the scoped run (`Premise.Sound.update`'s `U.apply σ = s.run σ`)
+by the bridge (`Stmt.trun_erase`), where the typed run does not diverge: a
+typed `diverge` agrees with any untyped outcome, so under the diamond the
+arm asks that it does not happen (a push at the bound). -/
+
+section Bridge
+
+variable {Γ Γ' : Ctx} {m : Modality}
+
+/-- **An update, through the bridge**: an update that ends as the scoped run
+of the statement does from the erasure is sound over the typed state, on the
+bridge (`Stmt.bridgeOk`), where the typed run does not diverge under the
+diamond. -/
+theorem Premise.tsound_update_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
+    (hb : s.bridgeOk = true) (hs : U.apply σ.erase = s.run σ.erase)
+    (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.TSound m s (.update U) σ := by
+  have ha := Stmt.trun_erase σ s hb
+  apply Premise.tsound_update σ
+  · intro τ hτ
+    simp only [Stmt.trunSt] at hτ
+    cases ht : s.trun σ with
+    | error => rw [ht] at hτ; cases hτ
+    | ok o =>
+      rw [ht] at hτ ha
+      obtain rfl : o.st = τ := Except.ok.inj hτ
+      exact hs.trans ha
+  · intro e he
+    simp only [Stmt.trunSt] at he
+    cases ht : s.trun σ with
+    | ok o => rw [ht] at he; cases he
+    | error e' =>
+      rw [ht] at he ha
+      obtain rfl : e' = e := Except.error.inj he
+      cases e' with
+      | revert => exact ⟨nofun, fun _ => ⟨_, hs.trans ha⟩⟩
+      | panic => exact absurd (hs.trans ha) (Upd.apply_noPanic σ.erase U)
+      | diverge => exact ⟨nofun, fun hm => absurd ht (hd hm)⟩
+
+end Bridge
 
 end Solidity.Core
