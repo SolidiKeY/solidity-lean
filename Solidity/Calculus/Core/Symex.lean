@@ -167,8 +167,11 @@ def normValid (g : MVarId) : TacticM MVarId := do
 def applyValid (tac : String) (g : MVarId) (lem : Expr) (unchanged : Option MessageData := none) :
     TacticM MVarId := do
   let before ← instantiateMVars (← g.getType)
+  let tag ← g.getTag
   let [g'] ← g.apply lem | throwError "{tac}: unexpected goals"
   let g'' ← normValid g'
+  -- the goal keeps its name, as today's (`apply` names it by the premise)
+  g''.setTag tag
   if let some msg := unchanged then
     if (← instantiateMVars (← g''.getType)) == before then throwError "{tac}: {msg}"
   return g''
