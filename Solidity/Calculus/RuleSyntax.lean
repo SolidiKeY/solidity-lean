@@ -2951,7 +2951,8 @@ def mkBinTerm (sym : String) (a b : TSyntax `dl_term) : MetaM (TSyntax `dl_term)
   | _ => `(dl_term| $a ⊕ $b)
 
 /-- The term of `t ⊕ u` with a concrete operator: `+`, `-`, `*`, `/` have
-term syntax; the others escape (`‹…›`). -/
+term syntax (at `uint`, the type they read back at: `ppTerm` escapes the
+others); the other operators escape (`‹…›`). -/
 def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   if (← fvarName? op).isSome then return some "⊕"
   if op.isAppOfArity ``IncDec.binOp 1 then
@@ -3102,8 +3103,11 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   | Term.pv _ x =>
     let some x ← ppVar? x | escapeDl e
     `(dl_term| $x:ident)
-  | Term.binop _ op _ a b =>
+  | Term.binop _ op ty a b =>
     let some sym ← termOpSym? op | escapeDl e
+    -- `+ - * /` read back as `uint` arithmetic only (`schemaTerm0`): an
+    -- `int` (or unchecked `bool`) one escapes
+    unless sym == "⊕" || sym == "±" || (← whnf ty).isConstOf ``PrimTy.uint do return ← escapeDl e
     mkBinTerm sym (← ppTerm a) (← ppTerm b)
   | Term.unop _ op _ a =>
     if (← fvarName? op).isSome then return ← `(dl_term| ⊖$(← ppTerm a))

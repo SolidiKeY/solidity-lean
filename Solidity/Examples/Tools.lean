@@ -147,6 +147,17 @@ info:   ~[storageFieldWriteSave]~>
 /-- info: no modality left: `close` -/
 #guard_msgs in #step dl!{ x == 42 }
 
+-- An `int` product escapes: `*` reads back only as a `uint` one.
+/--
+info: symbolic execution leaves:
+    dl{
+  { e := -5 }
+    { f := ‹Term.binop BinOp.mul PrimTy.int (Term.pv (Var.user "e")) (Term.lit (Semantics.PrimVal.int 7))› } f = 0 }
+update-free:
+    -5 = -5 → -35 = -35 → -35 = 0
+-/
+#guard_msgs in #wp dl!{ [ int e = -5; int f = e * 7; ] f == 0 }
+
 /-! A void function's obligation is solkey's `f(x̄)@C;`, a call with no
 target: `functionBodyExpand`'s, as a tuple assignment's call is. -/
 
