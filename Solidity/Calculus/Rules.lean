@@ -5,8 +5,8 @@ import Solidity.Calculus.RuleSyntax
 # The taclets on scoped statements
 
 The rule table over the scoped syntax (`docs/intrinsic.md`, W1 "rules";
-today's `Calculus/Rules`, whose lines these were copied from, went at
-W4 `calc-del`).  Under `open scoped Solidity.Schema` a line
+its lines were copied from the unscoped table, which W4 `calc-del`
+deleted).  Under `open scoped Solidity.Schema` a line
 `dl{ ⟨[ s; ]⟩ ⇝ p }` writes the scoped taclet
 (`RuleSyntax.schemaTacletCore`): the `\find` read in its context `Γ`, a
 fresh local a position, the `\find`'s schema variables weakened past the
@@ -157,6 +157,18 @@ def MHole.isTarget {T : Ty} : MHole C Γ T → Bool
 def VHole.isTarget {p : PrimTy} : VHole C Γ p → Bool
   | .mem l => l.isTarget
   | _ => true
+
+/-- `side_cond`, the side conditions' `autoParam`: the predicates above
+compute (`Taclet.lean`'s `coreSidePreds` names them for the tools). -/
+macro_rules
+  | `(tactic| side_cond) => `(tactic| first
+      | rfl
+      | assumption
+      | (simp_all [SPath.isSimple, Val.isSimple, MPath.isSimple, Loc.isTarget, Loc.isRoot,
+          MLoc.isTarget, MPath.isBindable, Val.notTernary, SHole.isTarget, MHole.isTarget,
+          VHole.isTarget, SPath.elemMapping, SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
+          Ty.isMapping, Ty.isPrimitive]; done)
+      | fail "the rule's side condition does not hold: `Stmt.step` fires another rule here")
 
 /-! ## Calls -/
 
@@ -474,7 +486,7 @@ inductive Taclet (C : Contract) (k : Nat) :
   | send_unfold_rightSndArgument :
       dl{ ⟨[ pv = sadr.send(nse); ]⟩ ⇝ ⟨[ uint se = nse; pv = sadr.send(se); ]⟩ }
   /-- A send under the box: taken, the payment booked as `transfer` books it
-  and `pv` true; refused, nothing booked and `pv` false (`Semantics.sendAt`,
+  and `pv` true; refused, nothing booked and `pv` false (`TRun.send`,
   where the transaction's oracle says which). -/
   | sendNoCallbackBox :
       dl{ [ pv = sadr.send(se); ] ⇝
@@ -522,9 +534,10 @@ inductive Taclet (C : Contract) (k : Nat) :
       dl{ ⟨[ nmp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T memory mv = nmp; T ie = e₁; mv[ie] = se; ]⟩ }
   | memoryIndexWriteMemRefCaptureAllComplexRecv :
       dl{ ⟨[ nmp[e] = mpath; ]⟩ ⇝ ⟨[ T memory mv = nmp; T ie = e; mv[ie] = mpath; ]⟩ }
-  /-- KeY re-binds the receiver too (`T memory mv' = mv;`); a memory local is
-  untyped (`MPath.var`), so that alias would not fix its array type, and it
-  renames `mv` and nothing else. -/
+  /-- KeY re-binds the receiver too (`T memory mv' = mv;`).  The receiver
+  is already a simple memory local, typed by its position (`MPath.var`), so
+  the rebinding only renames `mv`; it is left out to keep the rule text and
+  its fresh names (`se`, `ie`) as they were.  A deviation in shape. -/
   | memoryIndexWriteCaptureAllNonSimpleIndex :
       dl{ ⟨[ mv[nse₁] = e; ]⟩ ⇝ ⟨[ T se = e; T ie = nse₁; mv[ie] = se; ]⟩ }
   | memoryIndexWriteMemRefCaptureAllNonSimpleIndex :
@@ -682,10 +695,9 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   /-- solkey's `whileInvariantBox`.  The invariant holds now, and from every
   state the body's frame allows (`{anon(body)}`, solkey's `#loopAnon`) where
   it holds, the condition's value `b` (solkey's `bType b = cond;`) picks the
-  body, which keeps the invariant, or the rest of the program.  A `b`
-  neither `TRUE` nor `FALSE` (Lean's locals are untyped) is ruled out under
-  the diamond, as a branch's cover is.  A body with no frame
-  (`Prog.loopFrame`) has no invariant rule: one that writes memory, as in
+  body, which keeps the invariant, or the rest of the program; a `bool`
+  local holds a `bool`, so the two goals cover every state.  A body with no
+  frame (`Prog.frame`) has no invariant rule: one that writes memory, as in
   solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,
   rebinds an alias or calls out, which solkey frames as writing storage and
   the ledger. -/

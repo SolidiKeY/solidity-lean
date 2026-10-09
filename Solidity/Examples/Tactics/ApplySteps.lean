@@ -70,7 +70,7 @@ example : ⊢ dl!{ [ alice.age = 10; revert(); ] true } := by
 
 `Stmt.step` sends `alice.account.balance = 10;` to Step 2: capture the
 source, alias the receiver, then write through the alias.  That is the only
-rule for it (`Taclet.eq_step`): `storageFieldWriteSave` writes through an
+rule for it (`Rule.premise_unique`): `storageFieldWriteSave` writes through an
 `sp`, a simple path, and `alice.account` is not one, so its side condition
 refuses the shortcut through the whole path at once. -/
 

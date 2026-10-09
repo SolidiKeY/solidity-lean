@@ -14,16 +14,19 @@ equivalence, `NFml.valid_iff_reduce`, into a statement about the initial
 state in which every read of a write is a case tree over key equalities;
 then by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
 into a statement about free reads under the constraints a storage puts on
-them, and closes that.  Nothing is lost on the way, so a goal it does not
-close is either not valid, outside the fragment,
-or beyond the final `omega`/`grind`.
+them, and closes that.  Nothing is lost by those two steps, so a leaf it
+does not close is either not valid over untyped states, outside the
+fragment, or beyond the final `omega`/`grind`.
 
-Every goal is stated with `⊨`, over **every** state: one whose `balances`
-is an array, whose `alice.account.balance` holds a `bool`, or that has no
-`alice` at all.  Under the box a write that halts proves the formula, so
-the programs below may write anywhere; a read of the initial storage is
-another matter: it owes `wt(storage)` (`deleteWithoutWrite`; without it,
-`deleteWithoutWriteUntyped`).
+Every goal is stated with `⊨`, which (under `open scoped Scoped`) ranges
+over typed states; `sol_decide` works on a leaf's erasure, over **every**
+untyped state: one whose `balances` is an array, whose
+`alice.account.balance` holds a `bool`, or that has no `alice` at all.
+Erasing a leaf drops its typing, so a goal it does not close may still be
+valid (until M6c, `docs/intrinsic.md`).  Under the box a write that halts
+proves the formula, so the programs below may write anywhere; a read of
+the initial storage is another matter: its erasure owes `wt(storage)`
+(`deleteWithoutWrite`).
 -/
 
 namespace Solidity.Examples.Tactics.Decide
@@ -136,10 +139,10 @@ theorem deleteBelowAndBeside :
   sol_decide
 
 /-- **`delete` without a write before it, in a well-typed storage**: the
-member below reads the default of its declared type, `0`.  Over today's
-untyped storage it was refuted (a `bool` there leaves `false`); a typed
-state, which `wt(storage)` describes, holds the `uint` `StandardExample`
-declares. -/
+member below reads the default of its declared type, `0`.  Over untyped
+storage it is refuted (a `bool` there leaves `false`); a typed state holds
+the `uint` `StandardExample` declares, and the premise `wt(storage)` stands
+in for the typing the erasure drops. -/
 theorem deleteWithoutWrite :
     ⊨ dl!{ defined(wt(storage)) → [ delete alice.account; ] alice.account.balance == 0 } := by
   sol_prove
@@ -266,14 +269,17 @@ theorem copyReadsSource :
   sol_symex
   sol_decide
 
-/-! ## Formulas that are not valid
+/-! ## Formulas `sol_decide` does not close
 
-`sol_decide` fails on them, and it is right to: the reduction is an
-equivalence. -/
+The reduction is an equivalence on the erasure, so each of these is not
+valid over untyped states.  The first two hold in every typed state and
+are left open only because the leaf is erased (until M6c); the frame
+without `a != b` is not valid at all. -/
 
-/-- Over every state `bob` need not have an `age` (it may hold a word),
-and nothing in the program reads it, so the equation may compare two reads
-that halt.  With `uint x = bob.age;` in the program it is valid
+/-- Valid over typed states, not on its erasure: over every untyped state
+`bob` need not have an `age` (it may hold a word), and nothing in the
+program reads it, so the equation may compare two reads that halt.  With
+`uint x = bob.age;` in the program the erasure is valid too
 (`copyReadsSource`). -/
 example : True := by
   fail_if_success
@@ -290,8 +296,9 @@ example : True := by
       sol_decide
   trivial
 
-/-- An index read does not make another one of the same array in bounds:
-`balances` may be an array longer than `k` and no longer than `j`. -/
+/-- Valid over typed states (`balances` is a mapping), not on its erasure:
+there an index read does not make another one of the same array in bounds,
+and `balances` may be an array longer than `k` and no longer than `j`. -/
 example : True := by
   fail_if_success
     have : ⊨ dl!{ [ uint y = balances[k]; ] ⟨ balances[j] = 1; ⟩ true } := by
@@ -606,9 +613,9 @@ end Solidity.Examples.Tactics.Decide
 /-! ## On the closer's formulas
 
 Read without `open scoped Solidity.Scoped`: the fragment (`NFml.inL`)
-of the closer's input.  (`deleteWithoutWriteUntyped`, a refutation over
-today's untyped run, and `sol_decide` refusing a modality went with the
-modality at W4 `modal`.) -/
+of the closer's input.  (The refutation of `deleteWithoutWrite` over
+untyped storage, where the balance is a `bool`, and `sol_decide` refusing a
+modality went with the modality at W4 `modal`.) -/
 
 namespace Solidity.Examples.Tactics.Decide
 

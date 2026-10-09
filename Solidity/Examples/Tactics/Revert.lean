@@ -11,8 +11,9 @@ import Solidity.Tools.Inspect
 Without reverts the two agree.  `revert();` aborts the transaction, and so
 does a `require(c);` whose condition is false, and a `transfer` the contract
 cannot fund: a reverted run satisfies every box formula and no diamond
-formula (`Modality.onHalt`).  An `assert(c);` whose condition is false
-panics instead, and a panic satisfies neither (`Modality.afterRun`): the box
+formula (`Modality.onTHalt`).  An `assert(c);` whose condition is false
+panics instead, and a panic satisfies neither (`Modality.afterRunTR`,
+`Calculus/Logic.lean`): the box
 says that no assertion fails, as KeY's does.
 
 Every other rule is written for both modalities at once,

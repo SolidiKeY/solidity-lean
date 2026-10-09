@@ -36,9 +36,6 @@ namespace Solidity.Evm
 
 open Solidity (Ctx Idx)
 
-/-- The scoped syntax's local types. -/
-abbrev CLTy := Solidity.LTy
-
 variable {C : Contract}
 
 /-! ## Levels -/
@@ -50,10 +47,10 @@ abbrev cell (l : Nat) : Nat := l
 theorem cell_inj {l l' : Nat} (h : cell l = cell l') : l = l' := h
 
 /-- The level of the local at position `i` of `Γ`, in a frame based at `b`. -/
-def lvl (b : Nat) {Γ : Ctx} {t : CLTy} (i : Idx Γ t) : Nat := b + (Γ.length - 1 - i.toNat)
+def lvl (b : Nat) {Γ : Ctx} {t : LTy} (i : Idx Γ t) : Nat := b + (Γ.length - 1 - i.toNat)
 
 /-- The cell of the local at position `i`. -/
-abbrev cellOf (b : Nat) {Γ : Ctx} {t : CLTy} (i : Idx Γ t) : Nat := cell (lvl b i)
+abbrev cellOf (b : Nat) {Γ : Ctx} {t : LTy} (i : Idx Γ t) : Nat := cell (lvl b i)
 
 /-- The memory read by level. -/
 def _root_.Solidity.Evm.Machine.memAt (m : Machine) (l : Nat) : Word := m.mem (cell l)
@@ -80,12 +77,12 @@ namespace Frag
 /-- Every local readable: a call's frame, the empty program's. -/
 def init (Γ : Ctx) : Frag Γ := ⟨Γ.map fun _ => .ok⟩
 
-def get {Γ : Ctx} {t : CLTy} (F : Frag Γ) (i : Idx Γ t) : Fl := F.fl.getD i.toNat .dead
+def get {Γ : Ctx} {t : LTy} (F : Frag Γ) (i : Idx Γ t) : Fl := F.fl.getD i.toNat .dead
 
 /-- A local pushed. -/
-def push {Γ : Ctx} (t : CLTy) (F : Frag Γ) (f : Fl) : Frag (t :: Γ) := ⟨f :: F.fl⟩
+def push {Γ : Ctx} (t : LTy) (F : Frag Γ) (f : Fl) : Frag (t :: Γ) := ⟨f :: F.fl⟩
 
-def set {Γ : Ctx} {t : CLTy} (F : Frag Γ) (i : Idx Γ t) (f : Fl) : Frag Γ := ⟨F.fl.set i.toNat f⟩
+def set {Γ : Ctx} {t : LTy} (F : Frag Γ) (i : Idx Γ t) (f : Fl) : Frag Γ := ⟨F.fl.set i.toNat f⟩
 
 /-- After a `pop` or a `delete`: the fragile aliases forgotten. -/
 def dropFragile {Γ : Ctx} (F : Frag Γ) : Frag Γ :=
@@ -195,7 +192,8 @@ def Frag.guard {Γ : Ctx} (F : Frag Γ) (ok : Bool) : Option (Frag Γ) := if ok 
 
 /-- `l = r;` of the fragment: a value, or a copy of a static value (the
 typed run's positional copy is the name-wise one the representation reads:
-no struct repeats a member name, `Core.TyNodup.all`). -/
+no struct repeats a member name, `structDef_nodup`, which
+`Storage.writeStorage_erase` reads). -/
 def assignIn {Γ : Ctx} (F : Frag Γ) : {T : Ty} → Solidity.Src C Γ T →
     Solidity.Loc C Γ T → Bool
   | _, .val v, l => locIn F false l && valIn F v
@@ -220,9 +218,9 @@ def inFrag {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Stmt C Γ Γ' → Option (Fra
   | .assignLocal _ r => F.guard (valIn F r)
   | .declLocal p _ init => (F.push (.val p) .ok).guard (init.all (valIn F))
   | .declStorage R _ init => declStorageIn F R init
-  | @Solidity.Stmt.opAssign _ _ p _ _ _ l r => F.guard (p != .bool && opLocIn F l && valIn F r)
-  | @Solidity.Stmt.incDec _ _ p _ _ l => F.guard (p != .bool && opLocIn F l)
-  | @Solidity.Stmt.assignIncDec _ _ p _ _ _ l _ => F.guard (p != .bool && opLocIn F l)
+  | .opAssign _ _ _ l r => F.guard (opLocIn F l && valIn F r)
+  | .incDec _ _ l => F.guard (opLocIn F l)
+  | .assignIncDec _ _ _ l _ => F.guard (opLocIn F l)
   | .push b v _ => F.guard (pushIn F v b)
   | .pop b => F.dropFragile.guard (spathIn F false b)
   | .transfer r a => F.guard (valIn F r && valIn F a)

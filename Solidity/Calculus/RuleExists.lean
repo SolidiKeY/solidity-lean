@@ -4,12 +4,11 @@ import Solidity.Calculus.Completeness
 # Every statement has a rule, and the strategy fires only rules
 
 `Taclet.toStep` (`Calculus/Taclet.lean`) says each rule's premise is the
-one the strategy (`Stmt.step`) computes.  This module proves the converse,
-`Completeness.lean`'s `Stmt.complete` on scoped syntax: for every statement,
-under either modality, `Stmt.step` leaves a premise, and that premise is a
-rule's (`Stmt.rule_exists`); so the strategy fires nothing the rule table
-does not have (`Rule.ofStep`).  Today's dispatcher built the derivation
-with the premise; the scoped one is a function to `Option`, so here the
+one the strategy (`Stmt.step`) computes.  This module proves the converse:
+for every statement, under either modality, `Stmt.step` leaves a premise,
+and that premise is a rule's (`Stmt.rule_exists`); so the strategy fires
+nothing the rule table does not have (`Rule.ofStep`).  Master's dispatcher
+built the derivation with the premise; the scoped one is a function to `Option`, so here the
 derivation is found after the fact.
 
 The proof is one lemma per statement constructor (`Stmt.<c>.ruleExists`),
@@ -573,8 +572,7 @@ not), a leaf ruled out by a contradicted hypothesis (`!`). -/
 
 /-- **Every statement has a rule, and it is the strategy's**: under either
 modality, `Stmt.step` leaves a premise, and some rule of the table
-(`Taclet`, or `LeanTaclet`) rewrites the statement to it.  The
-scoped `Completeness.lean`'s `Stmt.complete`. -/
+(`Taclet`, or `LeanTaclet`) rewrites the statement to it. -/
 theorem Stmt.rule_exists (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
     ∃ p, s.step k m = some p ∧ Rule C k m s p := by
   cases s <;> apply_ruleExists

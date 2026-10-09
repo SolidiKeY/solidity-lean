@@ -101,7 +101,7 @@ example : ProvesC .tt [] .nil cdl!{ [ ok = to.send(5); ] true } := by
 /-- The derivation proves the send valid with callbacks, whatever a callee
 that keeps the invariant does (`ProvesC.valid`). -/
 example : ValidC ⟨.tt, rfl⟩ cdl!{ [ ok = to.send(5); ] true } := by
-  apply ProvesC.valid rfl
+  apply ProvesC.valid
   apply ProvesC.allIntro
   apply ProvesC.bindIntro
   apply ProvesC.send .sendWithCallbackBox

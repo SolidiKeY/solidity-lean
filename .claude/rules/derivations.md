@@ -45,7 +45,7 @@ Two directories, by proof style:
      `⇝*` is one `~*>`; a step it prints as `⇝` is its own `~[rule]~>`, or
      one `~*>` where Lean takes several rules for it (an alias bound and read,
      a capture and its binding).  `#chain` groups the steps
-     (`ChainGen.groupSteps`): declarations dropped with the bindings they
+     (`NFml.Chain.groupSteps`): declarations dropped with the bindings they
      leave are one `~*>`, and so is a rule with the `emptyModality` after it
      (the paper never shows the `⟨[ ]⟩` line).  The paper's grouping wins over
      `#chain`'s: where it folds more, join links into one `~*>`; where it

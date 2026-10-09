@@ -22,8 +22,8 @@ Where the scoped calculus takes a step today's names otherwise:
 * `apply unfold r` is `Proves.unfold`, `bind` (a declaration with an
   initializer: the local joins the context, `localValueDeclInitDrop`) or
   `inline` (a call's frame dropped under its returns), whichever `r`'s premise is;
-  `apply unfoldRule (Stmt.step _ _ _).rule` (a read into a hole, whose line
-  `apply` cannot match) is the strategy's premise by `rfl`;
+  `apply unfoldStep` (a read into a hole, whose line `apply` cannot match,
+  so the line names no rule) is the strategy's premise by `rfl`;
 * the steps KeY does not show are taken before and after each rule,
   silently (`core_silent`): a scope's end (an update that only pops) and a hidden
   binder join the context;
@@ -205,7 +205,7 @@ scoped macro_rules
   | `(tactic| apply checkLean $r:term) =>
     `(tactic| first
       | core_rule2 Solidity.Proves.check $r)
-  | `(tactic| apply unfoldRule $r:term) =>
+  | `(tactic| apply unfoldStep) =>
     `(tactic| first
       | (core_silent; apply Solidity.Proves.unfold rfl) <;> core_silent
       | (core_silent; apply Solidity.Proves.bind rfl) <;> core_silent

@@ -11,7 +11,8 @@ postcondition; KeY merges them as it goes (`Calculus/NFmlUpdateRules.lean`,
 mini-solkey's update examples).  Here the same derivation is shown
 rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨`, and with
 `refine merge rfl ?_`/`refine simplify ?_` on `⊢`.  The goals are under the box: a
-write under the diamond is not valid (`Close.lean`).
+leaf is closed on its erasure over untyped states (`Calculus/CloseErase.lean`,
+until M6c), where a write under the diamond may fail.
 
 The formulas read scoped (`open scoped Solidity.Scoped`): the rules
 rewrite a leaf's erasure (`sol_upd`, `sol_merge`,

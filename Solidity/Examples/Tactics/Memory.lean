@@ -33,7 +33,7 @@ file, from `State.exampleStore`.
 
 A read whose receiver is not simple (`memoryFieldRead_unfold_rightFst`,
 `memoryIndexRead_unfold_rightFst`) lands in a hole, as its storage twin does,
-so the walk takes the strategy's rule for it, `unfoldRule (Stmt.step _ _ _).rule`, and
+so the walk takes the strategy's rule for it, `apply unfoldStep` (its premise by `rfl`), and
 a comment names it (`StorageSteps.lean`'s docstring says why).
 
 The arrays are the struct table's (`AST.lean`): a `Token[]` inside a
@@ -97,15 +97,15 @@ theorem memoryDeclDeepAlias :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
@@ -138,7 +138,7 @@ theorem memoryDeepFieldWrite :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
@@ -179,7 +179,7 @@ theorem memoryAliasWrite :
   apply update .memoryFieldReadAliasRoot  -- { carolAcc := read(memory, carol.account) }
   apply update .memoryFieldWrite     -- { memory := write(memory, carolAcc.balance, 100) }
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule   -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep   -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
@@ -246,7 +246,7 @@ theorem memoryRootRebind :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
@@ -299,15 +299,15 @@ theorem memoryNestedArrayWrite :
   apply update .memoryStorageCopy
   apply unfold .memoryFieldWrite_unfold_leftFst
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexReadArrayMemory
@@ -332,7 +332,7 @@ theorem memoryArrayWriteRefSource :
   apply update .memoryIndexWriteCopy
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldRead
@@ -363,9 +363,9 @@ theorem memoryFieldWriteFromArrayElem :
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldReadAliasRoot
@@ -385,15 +385,15 @@ theorem memoryDeclFromNestedArrayElem :
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryStorageCopy
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldWrite
   apply unfold .localValueDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryIndexRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryIndexRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexReadArrayMemory
@@ -506,7 +506,7 @@ theorem memoryFieldDeleteRef :
   apply update .memoryFieldWrite
   apply update .memoryFieldDeleteReference
   apply update .memoryFieldRead
-  apply unfoldRule (Stmt.step _ _ _).rule  -- `memoryFieldRead_unfold_rightFst`
+  apply unfoldStep  -- `memoryFieldRead_unfold_rightFst`
   apply unfold .memoryLocalDeclInitDrop
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead

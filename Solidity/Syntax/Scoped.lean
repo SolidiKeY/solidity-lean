@@ -25,11 +25,12 @@ Names are labels on binders (`declLocal p x`, `Args.snoc`, `Binders`), not
 part of the index (Gate G0, condition 3).  The printers keep them beside the
 context, a `List Var` aligned with it, and write the same Solidity as
 `Syntax.lean`'s.  `Stmt.wk` weakens a statement into a context with more
-locals (`Thin`); it runs at elaboration time, so it may `match` on the
-indexed families, which kernel-evaluated code may not (condition 1).
+locals (`Thin`).  `Stmt.wk`/`Prog.wk` and `Idx.wk` use `match` and are also
+evaluated by the kernel, once per `ifElseUnfold`, call or invariant rule
+fired: the documented exceptions to condition 1 (`Calculus/Step.lean`).
 
-Until M4 these families live in `Solidity` beside `Syntax.lean`'s,
-which the elaborator still emits (Decision 8).
+`Syntax.lean`'s families are `Surface.*`: the elaborator emits them, and
+`resolve` (`Syntax/Resolve.lean`) produces these.
 -/
 
 namespace Solidity

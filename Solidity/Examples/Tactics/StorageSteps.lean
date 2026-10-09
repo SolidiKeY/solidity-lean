@@ -43,7 +43,7 @@ A Step 1 rule whose read lands in a hole (`storageFieldRead_unfold_rightFst`,
 applied by name: its conclusion is `Hole.fill lhs …`, whose dependent match does
 not reduce while unifying, so `apply unfold .storageFieldRead_unfold_rightFst`
 cannot see the statement it matches.  The walk takes the strategy's rule for
-that statement instead, `unfoldRule (Stmt.step _ _ _).rule`, and a comment names it.
+that statement instead, `apply unfoldStep` (the strategy's premise by `rfl`), and a comment names it.
 -/
 
 namespace Solidity.Examples.Tactics.StorageSteps
@@ -111,7 +111,7 @@ theorem deepFieldRead :
   apply Proves.valid
   apply unfold .localValueDeclInitDrop
   -- Step 1, `storageFieldRead_unfold_rightFst` (see the module docstring)
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldStep
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -131,7 +131,7 @@ theorem deeperFieldWrite :
   apply unfold .storageLocalDeclInitDrop
   -- the alias's own right-hand side `alice.account.token` is a read with a
   -- non-simple receiver: Step 1 (`storageFieldRead_unfold_rightFst`) unfolds it
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldStep
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadBindLocalRoot
@@ -150,7 +150,7 @@ theorem fieldWriteFromAlias :
   apply Proves.valid
   apply unfold .localValueDeclInitDrop
   -- Step 1, `storageFieldRead_unfold_rightFst` (see the module docstring)
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldStep
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -209,7 +209,7 @@ theorem globalRootCopy :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   -- Step 1, `storageFieldRead_unfold_rightFst`
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldStep
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadStoreRoot
@@ -231,7 +231,7 @@ theorem localRebindThenWrite :
   apply Proves.valid
   apply unfold .localValueDeclInitDrop
   -- Step 1, `storageFieldRead_unfold_rightFst` (see the module docstring)
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldStep
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
@@ -360,7 +360,7 @@ theorem receiverAndIndexCaptured :
   apply update .localValueAssign
   apply unfold .storageLocalDeclInitDrop
   -- Step 1, `storageIndexRead_unfold_rightSndIndex`
-  apply unfoldRule (Stmt.step _ _ _).rule
+  apply unfoldStep
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
   apply update .storageIndexReadArrayBindLocalRoot

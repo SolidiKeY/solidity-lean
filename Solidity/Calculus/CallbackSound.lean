@@ -11,7 +11,7 @@ what it derives holds, its context in front, when every payment may call
 back into the contract and the callee leaves the invariant as it found it
 (`holdsC`, `ValidC`, `Calculus/CallbackHolds.lean`).  `ProvesC.sound_of`
 and `ProvesC.valid` take the invariant first-order (`Fml.FO`, a contract
-invariant of the storage and the ledger): "the invariant holds" is then a
+invariant of the storage and the ledger; `Invariant.fo` carries it): "the invariant holds" is then a
 fact of the state's erasure, which the callee's run and the updates read.
 
 * A rule of the calculus fires on a statement that runs no other by a
@@ -528,11 +528,11 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
       (holdsC_and_right ab) (holdsC_and_left cd) (holdsC_and_left (holdsC_and_right cd))
       (holdsC_and_right (holdsC_and_right cd))
 
-/-- **A derivation from the empty context proves validity with callbacks**,
-for a first-order invariant. -/
-theorem ProvesC.valid {I : Invariant C} (hI : I.fml.FO = true) {φ : Fml C []}
+/-- **A derivation from the empty context proves validity with callbacks**
+(the invariant first-order, `Invariant.fo`). -/
+theorem ProvesC.valid {I : Invariant C} {φ : Fml C []}
     (d : ProvesC I.fml [] .nil φ) : ValidC I φ :=
-  ProvesC.sound_of hI I.noTransfer d
+  ProvesC.sound_of I.fo I.noTransfer d
 
 /-! ## The invariant assumed, at the end of a resumed program
 

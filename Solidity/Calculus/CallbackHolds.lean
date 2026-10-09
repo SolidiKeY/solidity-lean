@@ -1,4 +1,5 @@
 import Solidity.Calculus.Logic
+import Solidity.Calculus.Closable
 import Solidity.Semantics.Callback
 
 /-!
@@ -59,11 +60,29 @@ def holdsC (I : Fml C []) : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => holdsC I (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, holdsC I (σ.anon xs b) φ
 
-/-- A contract invariant: a closed formula with no payment in it (solkey's
-`CInv(storage, net)`). -/
+/-- A first-order formula has no program, so no payment. -/
+theorem Fml.hasTransfer_of_FO : {Γ : Ctx} → (φ : Fml C Γ) → φ.FO = true → φ.hasTransfer = false
+  | _, .tt, _ | _, .eq _ _, _ | _, .defined _, _ => rfl
+  | _, .not φ, h => Fml.hasTransfer_of_FO φ h
+  | _, .and φ ψ, h | _, .imp φ ψ, h => by
+    have h' : (φ.FO && ψ.FO) = true := h
+    rw [Bool.and_eq_true] at h'
+    show (φ.hasTransfer || ψ.hasTransfer) = false
+    rw [Fml.hasTransfer_of_FO φ h'.1, Fml.hasTransfer_of_FO ψ h'.2]
+    rfl
+  | _, .all _ _ φ, h => Fml.hasTransfer_of_FO φ h
+  | _, .upd .., h | _, .modal .., h | _, .havoc _, h | _, .bind .., h | _, .anon .., h =>
+    (Bool.false_ne_true h).elim
+
+/-- A contract invariant: a closed first-order formula (solkey's
+`CInv(storage, net)`, of the storage and the ledger), so with no payment in
+it (`noTransfer`). -/
 structure Invariant (C : Contract) where
   fml : Fml C []
-  noTransfer : fml.hasTransfer = false := by rfl
+  fo : fml.FO = true := by rfl
+
+theorem Invariant.noTransfer (I : Invariant C) : I.fml.hasTransfer = false :=
+  Fml.hasTransfer_of_FO I.fml I.fo
 
 /-- Valid with callbacks: true in every typed state. -/
 def ValidC (I : Invariant C) (φ : Fml C []) : Prop := ∀ σ : State C [], holdsC I.fml σ φ

@@ -30,7 +30,8 @@ a cell leaves it (`exec_mem`), so the caller's `Sim` survives the call:
 caller's locals back over the machine the callee left.
 
 What needs the typed run (`Stmt.run`) is not here: the expression and
-statement lemmas (`val_sim` … `stmt_sim`) and `compile_correct` over `Core`.
+statement lemmas (`val_sim` … `stmt_sim`) and `compile_correct` over the
+typed run (`Evm/Expr.lean`, `Evm/Stmt.lean`, `Evm/Correct.lean`).
 -/
 
 namespace Solidity.Evm
@@ -43,33 +44,33 @@ variable {C : Contract}
 
 /-! ## Levels -/
 
-theorem lvl_here (b : Nat) {Γ : Ctx} {t : CLTy} : lvl b (Idx.here : Idx (t :: Γ) t) = b + Γ.length := by
+theorem lvl_here (b : Nat) {Γ : Ctx} {t : LTy} : lvl b (Idx.here : Idx (t :: Γ) t) = b + Γ.length := by
   simp only [lvl, Idx.toNat, List.length_cons]; omega
 
-theorem lvl_there (b : Nat) {Γ : Ctx} {t u : CLTy} (i : Idx Γ t) :
+theorem lvl_there (b : Nat) {Γ : Ctx} {t u : LTy} (i : Idx Γ t) :
     lvl b (Idx.there (u := u) i) = lvl b i := by
   have := i.toNat_lt
   simp only [lvl, Idx.toNat, List.length_cons]; omega
 
-theorem lvl_lt (b : Nat) {Γ : Ctx} {t : CLTy} (i : Idx Γ t) : lvl b i < b + Γ.length := by
+theorem lvl_lt (b : Nat) {Γ : Ctx} {t : LTy} (i : Idx Γ t) : lvl b i < b + Γ.length := by
   have := i.toNat_lt
   simp only [lvl]; omega
 
-theorem le_lvl (b : Nat) {Γ : Ctx} {t : CLTy} (i : Idx Γ t) : b ≤ lvl b i := by
+theorem le_lvl (b : Nat) {Γ : Ctx} {t : LTy} (i : Idx Γ t) : b ≤ lvl b i := by
   simp only [lvl]; omega
 
-theorem lvl_eq_iff (b : Nat) {Γ : Ctx} {t t' : CLTy} (i : Idx Γ t) (j : Idx Γ t') :
+theorem lvl_eq_iff (b : Nat) {Γ : Ctx} {t t' : LTy} (i : Idx Γ t) (j : Idx Γ t') :
     lvl b i = lvl b j ↔ i.toNat = j.toNat := by
   have := i.toNat_lt; have := j.toNat_lt
   simp only [lvl]; omega
 
-theorem lvl_ext (b : Nat) {Γ Δ : Ctx} {t : CLTy} (h : Ext Γ Δ) (i : Idx Γ t) :
+theorem lvl_ext (b : Nat) {Γ Δ : Ctx} {t : LTy} (h : Ext Γ Δ) (i : Idx Γ t) :
     lvl b (i.ext h) = lvl b i := by
   have := i.toNat_lt; have := h.length_eq
   simp only [lvl, Ext.toNat_idx]; omega
 
 /-- Two locals at one position have one type. -/
-theorem Idx.ty_eq {Γ : Ctx} {t t' : CLTy} (i : Idx Γ t) (j : Idx Γ t') (h : i.toNat = j.toNat) :
+theorem Idx.ty_eq {Γ : Ctx} {t t' : LTy} (i : Idx Γ t) (j : Idx Γ t') (h : i.toNat = j.toNat) :
     t = t' := by
   have h1 := i.getElem?_toNat; have h2 := j.getElem?_toNat
   rw [h, h2] at h1; exact (Option.some.inj h1).symm
@@ -84,52 +85,52 @@ theorem memAt_upd (m : Machine) (l l' : Nat) (w : Word) :
 the storage reference an alias holds (`none` while unset); nothing of a
 memory reference, a whole storage or a ledger, which the fragment has
 none of. -/
-@[reducible] def Seen (C : Contract) : CLTy → Type
+@[reducible] def Seen (C : Contract) : LTy → Type
   | .val p => p.Denote
   | .alias R => Option (Solidity.SRef C (.ref R))
   | .mem _ | .old | .oldNet => Unit
 
 /-- What each local of `Γ` holds, by position, as the simulation reads it:
 `TEnv.get` of the typed run's locals, seen (`Look.ofTEnv`). -/
-abbrev Look (C : Contract) (Γ : Ctx) := ∀ {t : CLTy}, Idx Γ t → Seen C t
+abbrev Look (C : Contract) (Γ : Ctx) := ∀ {t : LTy}, Idx Γ t → Seen C t
 
 /-- A local declared: `TEnv`'s pair. -/
-def Look.cons {Γ : Ctx} {u : CLTy} (v : Seen C u) (ρ : Look C Γ) : Look C (u :: Γ) :=
+def Look.cons {Γ : Ctx} {u : LTy} (v : Seen C u) (ρ : Look C Γ) : Look C (u :: Γ) :=
   fun {t} i => match t, i with
     | _, .here => v
     | _, .there j => ρ j
 
 /-- The locals below the innermost. -/
-def Look.tail {Γ : Ctx} {u : CLTy} (ρ : Look C (u :: Γ)) : Look C Γ := fun j => ρ (.there j)
+def Look.tail {Γ : Ctx} {u : LTy} (ρ : Look C (u :: Γ)) : Look C Γ := fun j => ρ (.there j)
 
 /-- A local assigned: `TEnv.set`, by recursion on the position. -/
-def Look.set : {Γ : Ctx} → {t : CLTy} → Look C Γ → Idx Γ t → Seen C t → Look C Γ
+def Look.set : {Γ : Ctx} → {t : LTy} → Look C Γ → Idx Γ t → Seen C t → Look C Γ
   | _ :: _, _, ρ, .here, v => Look.cons v ρ.tail
   | _ :: _, _, ρ, .there i, v => Look.cons (ρ .here) (Look.set ρ.tail i v)
 
 /-- A scope's locals popped. -/
 def Look.drop {Γ Δ : Ctx} (h : Ext Γ Δ) (ρ : Look C Δ) : Look C Γ := fun i => ρ (i.ext h)
 
-@[simp] theorem Look.cons_here {Γ : Ctx} {u : CLTy} (v : Seen C u) (ρ : Look C Γ) :
+@[simp] theorem Look.cons_here {Γ : Ctx} {u : LTy} (v : Seen C u) (ρ : Look C Γ) :
     Look.cons (u := u) v ρ .here = v := rfl
 
-@[simp] theorem Look.cons_there {Γ : Ctx} {u t : CLTy} (v : Seen C u) (ρ : Look C Γ)
+@[simp] theorem Look.cons_there {Γ : Ctx} {u t : LTy} (v : Seen C u) (ρ : Look C Γ)
     (j : Idx Γ t) : Look.cons (u := u) v ρ (.there j) = ρ j := rfl
 
 /-- Two positions with one number are one. -/
-theorem Idx.eq_of_toNat {Γ : Ctx} {t : CLTy} : (i j : Idx Γ t) → i.toNat = j.toNat → i = j
+theorem Idx.eq_of_toNat {Γ : Ctx} {t : LTy} : (i j : Idx Γ t) → i.toNat = j.toNat → i = j
   | .here, .here, _ => rfl
   | .there i, .there j, h => by
     rw [Idx.eq_of_toNat i j (by simp only [Idx.toNat, Nat.add_right_cancel_iff] at h; exact h)]
   | .here, .there j, h => by simp only [Idx.toNat, Nat.zero_ne_add_one] at h
   | .there i, .here, h => by simp only [Idx.toNat, Nat.add_one_ne_zero] at h
 
-theorem Look.set_same : {Γ : Ctx} → {t : CLTy} → (ρ : Look C Γ) → (i : Idx Γ t) →
+theorem Look.set_same : {Γ : Ctx} → {t : LTy} → (ρ : Look C Γ) → (i : Idx Γ t) →
     (v : Seen C t) → Look.set ρ i v i = v
   | _ :: _, _, _, .here, _ => rfl
   | _ :: _, _, ρ, .there i, v => Look.set_same ρ.tail i v
 
-theorem Look.set_other : {Γ : Ctx} → {t t' : CLTy} → (ρ : Look C Γ) → (i : Idx Γ t) →
+theorem Look.set_other : {Γ : Ctx} → {t t' : LTy} → (ρ : Look C Γ) → (i : Idx Γ t) →
     (v : Seen C t) → (j : Idx Γ t') → j.toNat ≠ i.toNat → Look.set ρ i v j = ρ j
   | _ :: _, _, _, _, .here, _, .here, h => absurd rfl h
   | _ :: _, _, _, _, .here, _, .there _, _ => rfl
@@ -141,13 +142,13 @@ theorem Look.set_other : {Γ : Ctx} → {t t' : CLTy} → (ρ : Look C Γ) → (
 
 namespace Frag
 
-theorem get_push_here {Γ : Ctx} (t : CLTy) (F : Frag Γ) (f : Fl) :
+theorem get_push_here {Γ : Ctx} (t : LTy) (F : Frag Γ) (f : Fl) :
     (F.push t f).get .here = f := rfl
 
-theorem get_push_there {Γ : Ctx} {t u : CLTy} (F : Frag Γ) (f : Fl) (i : Idx Γ t) :
+theorem get_push_there {Γ : Ctx} {t u : LTy} (F : Frag Γ) (f : Fl) (i : Idx Γ t) :
     (F.push u f).get (.there i) = F.get i := rfl
 
-theorem get_set {Γ : Ctx} {t t' : CLTy} (F : Frag Γ) (i : Idx Γ t) (f : Fl) (j : Idx Γ t') :
+theorem get_set {Γ : Ctx} {t t' : LTy} (F : Frag Γ) (i : Idx Γ t) (f : Fl) (j : Idx Γ t') :
     (F.set i f).get j = if j.toNat = i.toNat ∧ i.toNat < F.fl.length then f else F.get j := by
   simp only [get, set, List.getD_eq_getElem?_getD, List.getElem?_set]
   by_cases h1 : i.toNat = j.toNat
@@ -158,17 +159,17 @@ theorem get_set {Γ : Ctx} {t t' : CLTy} (F : Frag Γ) (i : Idx Γ t) (f : Fl) (
       simp only [h2, ↓reduceIte, Option.getD_none, and_false, not_false_eq_true, getElem?_neg]
   · simp only [h1, ↓reduceIte, Ne.symm h1, false_and]
 
-theorem get_eq_dead {Γ : Ctx} {t : CLTy} (F : Frag Γ) (i : Idx Γ t) (h : F.fl.length ≤ i.toNat) :
+theorem get_eq_dead {Γ : Ctx} {t : LTy} (F : Frag Γ) (i : Idx Γ t) (h : F.fl.length ≤ i.toNat) :
     F.get i = .dead := by
   simp only [get, List.getD_eq_getElem?_getD, List.getElem?_eq_none h, Option.getD_none]
 
-theorem get_restrict {Γ Δ : Ctx} (h : Ext Γ Δ) (F : Frag Δ) {t : CLTy} (i : Idx Γ t) :
+theorem get_restrict {Γ Δ : Ctx} (h : Ext Γ Δ) (F : Frag Δ) {t : LTy} (i : Idx Γ t) :
     (F.restrict Γ).get i = F.get (i.ext h) := by
   have := h.length_eq
   simp only [get, restrict, List.getD_eq_getElem?_getD, List.getElem?_drop, Ext.toNat_idx]
   congr 2; omega
 
-theorem get_meet {Γ : Ctx} (F G : Frag Γ) {t : CLTy} (i : Idx Γ t) {g : Fl}
+theorem get_meet {Γ : Ctx} (F G : Frag Γ) {t : LTy} (i : Idx Γ t) {g : Fl}
     (h : (F.meet G).get i = g) (hg : g ≠ .dead) : F.get i = g := by
   simp only [get, meet, List.getD_eq_getElem?_getD, List.getElem?_zipWith] at h ⊢
   cases h1 : F.fl[i.toNat]? <;> cases h2 : G.fl[i.toNat]? <;>
@@ -176,7 +177,7 @@ theorem get_meet {Γ : Ctx} (F G : Frag Γ) {t : CLTy} (i : Idx Γ t) {g : Fl}
     not_true_eq_false]
   split at h <;> simp_all only [not_true_eq_false]
 
-theorem get_meet_right {Γ : Ctx} (F G : Frag Γ) {t : CLTy} (i : Idx Γ t) {g : Fl}
+theorem get_meet_right {Γ : Ctx} (F G : Frag Γ) {t : LTy} (i : Idx Γ t) {g : Fl}
     (h : (F.meet G).get i = g) (hg : g ≠ .dead) : G.get i = g := by
   simp only [get, meet, List.getD_eq_getElem?_getD, List.getElem?_zipWith] at h ⊢
   cases h1 : F.fl[i.toNat]? <;> cases h2 : G.fl[i.toNat]? <;>
@@ -184,7 +185,7 @@ theorem get_meet_right {Γ : Ctx} (F G : Frag Γ) {t : CLTy} (i : Idx Γ t) {g :
     not_true_eq_false]
   split at h <;> simp_all only [not_true_eq_false]
 
-theorem get_dropFragile {Γ : Ctx} (F : Frag Γ) {t : CLTy} (i : Idx Γ t) {g : Fl}
+theorem get_dropFragile {Γ : Ctx} (F : Frag Γ) {t : LTy} (i : Idx Γ t) {g : Fl}
     (h : F.dropFragile.get i = g) (hg : g ≠ .dead) : F.get i = g ∧ g ≠ .fragile := by
   simp only [get, dropFragile, List.getD_eq_getElem?_getD, List.getElem?_map] at h ⊢
   cases h1 : F.fl[i.toNat]? <;>
@@ -297,7 +298,7 @@ theorem drop {Δ : Ctx} {G : Frag Δ} {ρ' : Look C Δ} {m : Machine} (hΓ : Ext
 theorem congrMem {m : Machine} {mem : Nat → Word} (h : Sim C L b F σ ρ m)
     (hm : ∀ l, b ≤ l → l < b + Γ.length → mem (cell l) = m.mem (cell l)) :
     Sim C L b F σ ρ { m with mem := mem } := by
-  have e : ∀ {t : CLTy} (i : Idx Γ t), ({ m with mem := mem } : Machine).memAt (lvl b i) =
+  have e : ∀ {t : LTy} (i : Idx Γ t), ({ m with mem := mem } : Machine).memAt (lvl b i) =
       m.memAt (lvl b i) := fun i => hm _ (le_lvl b i) (lvl_lt b i)
   refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
   · rw [e]; exact h.vals i
@@ -306,7 +307,7 @@ theorem congrMem {m : Machine} {mem : Nat → Word} (h : Sim C L b F σ ρ m)
 
 /-- `Sim` reads the locals pointwise. -/
 theorem congrLook {ρ' : Look C Γ} {m : Machine} (h : Sim C L b F σ ρ m)
-    (hρ : ∀ {t : CLTy} (i : Idx Γ t), ρ' i = ρ i) : Sim C L b F σ ρ' m := by
+    (hρ : ∀ {t : LTy} (i : Idx Γ t), ρ' i = ρ i) : Sim C L b F σ ρ' m := by
   refine ⟨h.store, fun i => ?_, fun i hi => ?_, h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩
   · rw [hρ]; exact h.vals i
   · rw [hρ]; exact h.aliases i hi
@@ -319,7 +320,7 @@ theorem consVal {m : Machine} (h : Sim C L b F σ ρ m) {p : PrimTy} {v : p.Deno
     (hv : ReprV p (PrimTy.erase v) w) :
     Sim C L b (F.push (.val p) .ok) σ (ρ.cons (u := .val p) v)
       { m with mem := upd m.mem (cell (b + Γ.length)) w } := by
-  have e : ∀ {t : CLTy} (i : Idx Γ t),
+  have e : ∀ {t : LTy} (i : Idx Γ t),
       ({ m with mem := upd m.mem (cell (b + Γ.length)) w } : Machine).memAt (lvl b i) =
         m.memAt (lvl b i) := fun i => by
     rw [memAt_upd, if_neg (Nat.ne_of_lt (lvl_lt b i))]
@@ -338,7 +339,7 @@ theorem consAlias {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy}
     (hp : PathSlot C true r.root r.path.erase (.ref R) s) :
     Sim C L b (F.push (.alias R) .ok) σ (ρ.cons (u := .alias R) (some r))
       { m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } := by
-  have e : ∀ {t : CLTy} (i : Idx Γ t),
+  have e : ∀ {t : LTy} (i : Idx Γ t),
       ({ m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } : Machine).memAt (lvl b i) =
         m.memAt (lvl b i) := fun i => by
     rw [memAt_upd, if_neg (Nat.ne_of_lt (lvl_lt b i))]
@@ -359,7 +360,7 @@ theorem consFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy}
     (hlive : ∃ sv, σ.findLive r.root r.path.erase = .ok sv) :
     Sim C L b (F.push (.alias R) .fragile) σ (ρ.cons (u := .alias R) (some r))
       { m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } := by
-  have e : ∀ {t : CLTy} (i : Idx Γ t),
+  have e : ∀ {t : LTy} (i : Idx Γ t),
       ({ m with mem := upd m.mem (cell (b + Γ.length)) (.slot s) } : Machine).memAt (lvl b i) =
         m.memAt (lvl b i) := fun i => by
     rw [memAt_upd, if_neg (Nat.ne_of_lt (lvl_lt b i))]
@@ -393,7 +394,7 @@ theorem consDead {m : Machine} (h : Sim C L b F σ ρ m) (R : RefTy) (v : Seen C
 theorem setVal {m : Machine} (h : Sim C L b F σ ρ m) {p : PrimTy} (i : Idx Γ (.val p))
     {v : p.Denote} {w : Word} (hv : ReprV p (PrimTy.erase v) w) :
     Sim C L b F σ (ρ.set i v) { m with mem := upd m.mem (cellOf b i) w } := by
-  have e : ∀ {t : CLTy} (j : Idx Γ t),
+  have e : ∀ {t : LTy} (j : Idx Γ t),
       ({ m with mem := upd m.mem (cellOf b i) w } : Machine).memAt (lvl b j) =
         if j.toNat = i.toNat then w else m.memAt (lvl b j) := fun j => by
     simp only [memAt_upd, lvl_eq_iff]
@@ -415,7 +416,7 @@ theorem setAlias {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx Γ
     (hp : PathSlot C true r.root r.path.erase (.ref R) s) :
     Sim C L b (F.set i .ok) σ (ρ.set i (some r))
       { m with mem := upd m.mem (cellOf b i) (.slot s) } := by
-  have e : ∀ {t : CLTy} (j : Idx Γ t),
+  have e : ∀ {t : LTy} (j : Idx Γ t),
       ({ m with mem := upd m.mem (cellOf b i) (.slot s) } : Machine).memAt (lvl b j) =
         if j.toNat = i.toNat then .slot s else m.memAt (lvl b j) := fun j => by
     simp only [memAt_upd, lvl_eq_iff]
@@ -447,7 +448,7 @@ theorem setFragile {m : Machine} (h : Sim C L b F σ ρ m) {R : RefTy} (i : Idx 
     (hlive : ∃ sv, σ.findLive r.root r.path.erase = .ok sv) :
     Sim C L b (F.set i .fragile) σ (ρ.set i (some r))
       { m with mem := upd m.mem (cellOf b i) (.slot s) } := by
-  have e : ∀ {t : CLTy} (j : Idx Γ t),
+  have e : ∀ {t : LTy} (j : Idx Γ t),
       ({ m with mem := upd m.mem (cellOf b i) (.slot s) } : Machine).memAt (lvl b j) =
         if j.toNat = i.toNat then .slot s else m.memAt (lvl b j) := fun j => by
     simp only [memAt_upd, lvl_eq_iff]
@@ -493,7 +494,7 @@ theorem «return» {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : S
     (hmem : ∀ l, l < b + Γ.length → m'.memAt l = m.memAt l)
     (hlen : ∀ x, LenSlot C x → m.store x ≤ m'.store x) :
     Sim C L b F σ' ρ m' := by
-  have e : ∀ {t : CLTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=
+  have e : ∀ {t : LTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=
     fun i => hmem _ (lvl_lt b i)
   refine ⟨h'.store, fun i => ?_, fun i hi => ?_, h'.net, h'.netSelf, h'.bound, fun i hi => ?_,
     h'.env⟩
@@ -509,7 +510,7 @@ theorem returnDrop {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : S
     {ρ' : Look C Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
     (hmem : ∀ l, l < b + Γ.length → m'.memAt l = m.memAt l) :
     Sim C L b F.dropFragile σ' ρ m' := by
-  have e : ∀ {t : CLTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=
+  have e : ∀ {t : LTy} (i : Idx Γ t), m'.memAt (lvl b i) = m.memAt (lvl b i) :=
     fun i => hmem _ (lvl_lt b i)
   refine ⟨h'.store, fun i => ?_, fun i hi => ?_, h'.net, h'.netSelf, h'.bound, fun i hi => ?_,
     h'.env⟩
@@ -754,7 +755,7 @@ theorem noStore_pushCode (b : Nat) {Γ : Ctx} {E : Ty} (v : Option (Solidity.Src
 
 theorem storesFrom_opLocCode (b n : Nat) {Γ : Ctx} {p : PrimTy} (l : Solidity.OpLoc C Γ p)
     (onLocal : Nat → List Instr) (onLoc : Solidity.Loc C Γ (.prim p) → List Instr)
-    (h₁ : ∀ {t : CLTy} (i : Idx Γ t), StoresFrom n (onLocal (cellOf b i)))
+    (h₁ : ∀ {t : LTy} (i : Idx Γ t), StoresFrom n (onLocal (cellOf b i)))
     (h₂ : ∀ l, StoresFrom n (onLoc l)) : StoresFrom n (opLocCode b l onLocal onLoc) := by
   cases l <;> simp only [opLocCode] <;> first | exact h₁ _ | exact h₂ _ | exact fun _ _ h => nomatch h
 

@@ -474,7 +474,7 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
 * `sendWithCallbackDiamond` — a send that may call back, under the diamond:
   the callback reading is the box's only (`Calculus/Callback.lean`).  A send
   with no callback has its diamond (`sendNoCallbackDiamond`): a refused send
-  is an outcome of the run (`Semantics.sendAt`), not the world's.
+  is an outcome of the run (`TRun.send`), not the world's.
 
 The other semantics of `transfer` and `send`, `transferWithCallbackBox` and
 `sendWithCallbackBox`, are claimed by `callbackOrigins`. -/

@@ -22,7 +22,7 @@ checked line `show sequent!{ Γ ⟹ ψ }` (`Calculus/Sequents.lean`).
 outcome: `"send succeeded"`, the same booking with `pv` true, and `"send
 failed"`, nothing booked and `pv` false.  A refused send returns `false`
 rather than reverting, and the interpreter says which outcome a run takes
-(`Semantics.sendAt`, the transaction's oracle), so the diamond has its rule
+(`TRun.send`, the transaction's oracle), so the diamond has its rule
 too (`sendNoCallbackDiamond`), with the amount's sign owed first
 (`"non-negative amount"`).
 

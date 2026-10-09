@@ -132,7 +132,9 @@ open Solidity.Evm.Examples
 
 local instance : InContract := ⟨StandardExample⟩
 
-/-- `P` resolved from no locals, or the empty program if it does not resolve. -/
+/-- `P` resolved from no locals, or the empty program if it does not
+resolve; a theorem that the empty program would also satisfy states
+`compiles P` beside it (`delete_run`, `shortCircuit_run`, `transfer_self`). -/
 def scopedOf {C : Contract} (P : Solidity.Surface.Prog C) : (Γ' : Solidity.Ctx) × Solidity.Prog C [] Γ' :=
   match Solidity.Prog.resolve [] P with
   | .ok ⟨Γ', P'⟩ => ⟨Γ'.ctx, P'⟩
@@ -153,6 +155,10 @@ abbrev reverts {C : Contract} (P : Solidity.Surface.Prog C) (m : Machine := fres
 /-- `P` resolves and is in the compiled fragment, from no locals. -/
 abbrev compiles {C : Contract} (P : Solidity.Surface.Prog C) : Bool :=
   (Solidity.Prog.resolve [] P).toBool && (inFragP (Frag.init []) (scopedOf P).2).isSome
+
+/-- `P` resolves, and `inFrag` rejects it. -/
+abbrev rejects {C : Contract} (P : Solidity.Surface.Prog C) : Bool :=
+  (Solidity.Prog.resolve [] P).toBool && (inFragP (Frag.init []) (scopedOf P).2).isNone
 
 /-! ## Storage writes -/
 
@@ -210,6 +216,7 @@ theorem incDec_run :
   decide +kernel
 
 theorem shortCircuit_run :
+    compiles sol{ require(total == 0 || total / total == 1); } ∧
     reverts sol{ require(total == 0 || total / total == 1); } = false := by
   decide +kernel
 
@@ -231,6 +238,7 @@ theorem scopedBranch_run :
 theorem delete_run :
     let o := run (codeOf sol{
       alice.age = 10; alice.account.balance = 4; delete alice; }) (fresh)
+    compiles sol{ alice.age = 10; alice.account.balance = 4; delete alice; } ∧
     Examples.storeAt o (.root 11) = some 0 ∧ Examples.storeAt o (.root 13) = some 0 := by
   decide +kernel
 
@@ -263,6 +271,7 @@ theorem transfer_refused :
   decide +kernel
 
 theorem transfer_self :
+    compiles sol{ owner = 0; owner.transfer(30); } ∧
     (match run (codeOf sol{ owner = 0; owner.transfer(30); }) (fresh 100) with
       | .ok m 0 => some (m.bal 0)
       | _ => none) = some 100 := by
@@ -276,7 +285,7 @@ theorem envReads_run :
   decide +kernel
 
 theorem selfBalance_out :
-    compiles (sol{ total = address(this).balance; } : Solidity.Surface.Prog StandardExample) = false := by
+    rejects (sol{ total = address(this).balance; } : Solidity.Surface.Prog StandardExample) := by
   decide +kernel
 
 /-! ## Lengths, `v = x++`, copies, `push` -/
@@ -342,14 +351,14 @@ theorem elemAlias_run :
 local, a copy of a struct holding a dynamic array, a fragile alias read after
 a `pop`; and, through a branch, an alias forgotten by a `pop` in it. -/
 theorem rejected :
-    compiles (sol{ persons.push(); } : Solidity.Surface.Prog StandardExample) = false ∧
-    compiles (sol{ Person memory m; } : Solidity.Surface.Prog StandardExample) = false ∧
-    compiles (sol[TestSuite]{ basketA = basketB; } : Solidity.Surface.Prog TestSuite) = false ∧
-    compiles (sol{ Person storage p = persons[0]; persons.pop(); p.age = 1; } :
-      Solidity.Surface.Prog StandardExample) = false ∧
-    compiles (sol{ Person storage p = persons[0];
+    rejects (sol{ persons.push(); } : Solidity.Surface.Prog StandardExample) ∧
+    rejects (sol{ Person memory m; } : Solidity.Surface.Prog StandardExample) ∧
+    rejects (sol[TestSuite]{ basketA = basketB; } : Solidity.Surface.Prog TestSuite) ∧
+    rejects (sol{ Person storage p = persons[0]; persons.pop(); p.age = 1; } :
+      Solidity.Surface.Prog StandardExample) ∧
+    rejects (sol{ Person storage p = persons[0];
         if (total == 0) { persons.pop(); } else { }; p.age = 1; } :
-      Solidity.Surface.Prog StandardExample) = false := by
+      Solidity.Surface.Prog StandardExample) := by
   decide +kernel
 
 /-! ## Calls -/

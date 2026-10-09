@@ -73,8 +73,9 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 #guard_msgs in
 #proof_tree dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 }
 
-/-! A write under the diamond is not valid (`alice` may be missing): the leaf
-stays open, and shows its sequent. -/
+/-! A write under the diamond is valid over typed states, but its leaf is
+closed on its erasure, over every untyped state (one with no `alice` among
+them) until M6c: the leaf stays open and shows its sequent. -/
 /--
 info: 0: storageFieldWriteSave
 1: OPEN GOAL
@@ -463,7 +464,7 @@ example : ⊢ dl!{ ⟨ uint x = 5; uint r = ++x; ⟩ r == 6 && x == 6 } := by
   sol_prove?
 
 /-! A split whose condition is ground under its updates keeps only the
-branch it takes (`Derive.splitRes`): the `revert()` branches are closed by
+branch it takes (`Seq.ground`, `Seq.refutes`): the `revert()` branches are closed by
 `Proves.closeFalse`, not run (two steps fewer in each).  The second reads `y` through twelve updates
 `y := y * y`, each local listed once (`Upd.groundStep`), not `2¹²` times. -/
 

@@ -440,8 +440,9 @@ sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 #guard_msgs in #taclet whileInvariantDiamond
 
 /-- A counting loop: from `i = 0`, `i <= n` holds at every head, so the loop
-ends at `n`.  The `require` keeps `n` a number: `⊨` reads every state, and a
-local there may hold anything. -/
+ends at `n`.  The `require` keeps `n` a number on the leaf's erasure, which
+is closed over untyped states (`Calculus/CloseErase.lean`, until M6c),
+where a local may hold anything. -/
 theorem countToN :
     ⊨ dl!{ [ require(n >= 0); uint i = 0;
              /// @custom:key invariant i <= n

@@ -43,7 +43,7 @@ theorem sem_pay {Γ : Ctx} (σ : State C Γ) (a x : Int) : (σ.pay a x).sem = σ
 /-! ## The locals of a typed state -/
 
 /-- A typed local, as the simulation reads it. -/
-def see {H : HTy} : (t : CLTy) → t.TDenote C H → Seen C t
+def see {H : HTy} : (t : LTy) → t.TDenote C H → Seen C t
   | .val _, v => v
   | .alias _, a => a
   | .mem _, _ | .old, _ | .oldNet, _ => ()
@@ -59,14 +59,14 @@ theorem Look.ofTEnv_alias {H : HTy} {Γ : Ctx} {R : RefTy} (e : TEnv C H Γ)
     (i : Idx Γ (.alias R)) : Look.ofTEnv e i = TEnv.get i e := rfl
 
 /-- A local declared: the pair's head. -/
-theorem Look.ofTEnv_cons {H : HTy} {Γ : Ctx} {u : CLTy} (v : u.TDenote C H) (e : TEnv C H Γ)
-    {t : CLTy} (i : Idx (u :: Γ) t) :
+theorem Look.ofTEnv_cons {H : HTy} {Γ : Ctx} {u : LTy} (v : u.TDenote C H) (e : TEnv C H Γ)
+    {t : LTy} (i : Idx (u :: Γ) t) :
     Look.ofTEnv (Γ := u :: Γ) (v, e) i = Look.cons (see u v) (Look.ofTEnv e) i := by
   cases i <;> rfl
 
 /-- A local set. -/
-theorem Look.ofTEnv_set {H : HTy} {Γ : Ctx} {u : CLTy} (i : Idx Γ u) (v : u.TDenote C H)
-    (e : TEnv C H Γ) {t : CLTy} (j : Idx Γ t) :
+theorem Look.ofTEnv_set {H : HTy} {Γ : Ctx} {u : LTy} (i : Idx Γ u) (v : u.TDenote C H)
+    (e : TEnv C H Γ) {t : LTy} (j : Idx Γ t) :
     Look.ofTEnv (TEnv.set i v e) j = Look.set (Look.ofTEnv e) i (see u v) j := by
   induction i with
   | here => cases j <;> rfl
@@ -76,24 +76,24 @@ theorem Look.ofTEnv_set {H : HTy} {Γ : Ctx} {u : CLTy} (i : Idx Γ u) (v : u.TD
     | there j => exact ih v e.2 j
 
 /-- A scope's locals popped. -/
-theorem Look.ofTEnv_drop {H : HTy} {Γ Δ : Ctx} (h : Ext Γ Δ) (e : TEnv C H Δ) {t : CLTy}
+theorem Look.ofTEnv_drop {H : HTy} {Γ Δ : Ctx} (h : Ext Γ Δ) (e : TEnv C H Δ) {t : LTy}
     (i : Idx Γ t) : Look.ofTEnv (TEnv.drop h e) i = Look.drop h (Look.ofTEnv e) i := by
   induction h with
   | refl => rfl
   | push h ih => exact ih e.2
 
 theorem see_wk {H H' : HTy} (x : H <+: H') :
-    (t : CLTy) → (v : t.TDenote C H) → see t (Solidity.LTy.TDenote.wk x t v) = see t v
+    (t : LTy) → (v : t.TDenote C H) → see t (Solidity.LTy.TDenote.wk x t v) = see t v
   | .val _, _ | .alias _, _ | .mem _, _ | .old, _ | .oldNet, _ => rfl
 
 theorem TEnv.get_wk {H H' : HTy} (x : H <+: H') :
-    {Γ : Ctx} → {t : CLTy} → (i : Idx Γ t) → (e : TEnv C H Γ) →
+    {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → (e : TEnv C H Γ) →
       TEnv.get i (TEnv.wk x Γ e) = Solidity.LTy.TDenote.wk x t (TEnv.get i e)
   | _ :: _, _, .here, _ => rfl
   | _ :: _, _, .there i, e => TEnv.get_wk x i e.2
 
 /-- The locals over a grown heap read as they did. -/
-theorem Look.ofTEnv_wk {H H' : HTy} {Γ : Ctx} (x : H <+: H') (e : TEnv C H Γ) {t : CLTy}
+theorem Look.ofTEnv_wk {H H' : HTy} {Γ : Ctx} (x : H <+: H') (e : TEnv C H Γ) {t : LTy}
     (i : Idx Γ t) : Look.ofTEnv (TEnv.wk x Γ e) i = Look.ofTEnv e i := by
   simp only [Look.ofTEnv, TEnv.get_wk, see_wk]
 

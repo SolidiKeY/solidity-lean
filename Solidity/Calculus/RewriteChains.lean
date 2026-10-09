@@ -393,16 +393,6 @@ def kernelDefEq (a b : Lean.Expr) : MetaM Bool := do
   if a.hasMVar || b.hasMVar then return false
   return Kernel.isDefEqGuarded (← getEnv) (← getLCtx) a b
 
-/-- Close each goal `a = b` the kernel computes: `Eq.refl b`, checked by
-`kernelDefEq`.  The goals it cannot close are returned. -/
-def kernelRefl (gs : List MVarId) : MetaM (List MVarId) :=
-  gs.filterM fun g => do
-    let ty ← instantiateMVars (← g.getType)
-    let some (_, a, b) := ty.eq? | return true
-    unless ← kernelDefEq a b do return true
-    g.assign (← mkExpectedTypeHint (← mkEqRefl b) ty)
-    return false
-
 /-! ### Rewrite links
 
 `~[n]~>` names a rewrite when `n` is no rule of the strategy: an update rule

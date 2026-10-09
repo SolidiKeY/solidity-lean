@@ -74,7 +74,7 @@ theorem withdrawSafe :
     ValidC vaultInv dl!{ balance + paidOut == deposited →
       [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
         balance + paidOut == deposited } := by
-  apply ProvesC.valid rfl
+  apply ProvesC.valid
   apply ProvesC.allIntro
   apply ProvesC.intro
   apply ProvesC.bind (.key .localValueDeclInitDrop) rfl rfl
@@ -145,7 +145,7 @@ nothing ("send failed", `ok` false). -/
 theorem callToKeepsInv :
     ValidC sendVaultInv dl[SendVault]{ balance + paidOut == deposited →
       [ bool ok = to.send(5); sent = ok; ] balance + paidOut == deposited } := by
-  apply ProvesC.valid rfl
+  apply ProvesC.valid
   apply ProvesC.allIntro
   apply ProvesC.intro
   apply ProvesC.update (.key .valueDeclSkip) rfl

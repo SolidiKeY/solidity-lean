@@ -19,8 +19,10 @@ shows reads back through `dl[C]{ φ }` (or `dl!{ φ }`) as the formula it is —
 at its modality, `dl![m]{ φ }`, when it has `⟨[ ]⟩` or is a box's: an update
 prints `{U} ψ` whatever the modality it is judged at.  The reading is
 mini-solkey's: the macros build a raw formula, `elabDl` resolves its names
-at compile time (`elabAgainst`, as `sol[C]{ … }` does), and `Fml.quote`
-(`Quote.lean`) splices the result.
+at compile time (`elabAgainst`, as `sol[C]{ … }` does), and
+`Surface.Fml.quoteAuto` splices the result (`NFml.quote`,
+`Calculus/NFmlQuote.lean`, for a formula with no modality;
+`Surface.Fml.quote` otherwise).
 
 **Lean terms in a formula.**  `dl![m]{ φ }` (`dl[C, m]{ φ }`) reads `φ` at
 the modality `m`, a Lean term — a variable, `.box`, `.diamond`: `⟨[ P ]⟩ ψ`
@@ -43,13 +45,13 @@ with `→` ("Chain-only spellings" below).  In `dl{ Γ ⟹ φ }`, and in the
 goals a `⊢` derivation prints, it is a sequent, a `Proves` with its context
 apart, which no `dl!{ … }` reads back.
 
-**Two equations.**  `a = b` here is the interpreter's equation, `Fml.eqD`:
+**Two equations.**  `a = b` here is the interpreter's equation, `NFml.eqD`:
 both sides return, with one value — what `==` means, and what `a = b`
 meant before `holds` read an equation in the Theory.  `a ≐ b` is the total
-one, `Fml.eq` (KeY's `=`, which a taclet writes as `=` in `dl{ … }`): it
+one, `NFml.eq` (KeY's `=`, which a taclet writes as `=` in `dl{ … }`): it
 compares what the sides denote, and may hold of sides that halt.
-`defined(t)` says `t` returns.  The printer follows: `Fml.eqD` prints as `=`
-(a comparison `a < b` as itself), `Fml.eq` as `≐`.
+`defined(t)` says `t` returns.  The printer follows: `NFml.eqD` prints as `=`
+(a comparison `a < b` as itself), `NFml.eq` as `≐`.
 
 What a name is:
 

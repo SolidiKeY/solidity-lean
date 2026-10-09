@@ -213,7 +213,7 @@ theorem netMsgValue :
 
 `ok = a.send(v);` pays as `a.transfer(v);` does when the recipient takes the
 payment, `ok` then `true`, and books nothing when it refuses, `ok` then
-`false`; it never reverts (`Semantics.sendAt`).  Which, the transaction says
+`false`; it never reverts (`TRun.send`).  Which, the transaction says
 (`TxEnv.ext`, at `sendKey a v`): no entry is an address with no code, which
 takes it.  The calculus reads none of it, `sendNoCallbackBox` having a goal
 for each outcome, so a claim about the ledger after a send holds of both. -/

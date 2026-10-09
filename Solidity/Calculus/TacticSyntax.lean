@@ -3,12 +3,15 @@ import Solidity.Calculus.NFmlQuote
 /-!
 # The strategy's tactics: their syntax, and the formula goal they work on
 
-The tactics both calculi elaborate, declared once so that today's
-(`Calculus/Symex.lean`, `Calculus/ProofTree.lean`, `Calculus/Derive.lean`)
-and the scoped one (`Calculus/Symex.lean`, `Calculus/Derive.lean`,
-`Calculus/Closers.lean`) each add an elaborator to the same syntax:
-`sol_step`, `sol_symex`, `sol_derive`, `sol_derive?`, `sol_chain?`,
-`sol_prove` and `sol_prove?`.  The syntax kinds keep their names
+The strategy's tactics, declared once so that the scoped calculus and the
+closer each add an elaborator to the same syntax: `sol_step`, `sol_symex`,
+`sol_derive`, `sol_derive?`, `sol_chain?`, `sol_prove` and `sol_prove?`.
+The scoped elaborators are `Calculus/Symex.lean`'s (`sol_step`,
+`sol_symex`), `Calculus/Derive.lean`'s (`sol_prove`, `sol_derive?`),
+`Calculus/ProvesDerive.lean`'s (`sol_prove`) and `Calculus/Closers.lean`'s
+(`sol_prove?`); the closer's, on an `NFml.Valid` goal, are
+`Calculus/NFmlDerive.lean`'s (`sol_prove`, `sol_prove?`) and this module's
+(`sol_symex`).  The syntax kinds keep their names
 (`Solidity.tacticSol_step`, `Solidity.ProofTree.tacticSol_derive?`, …), which
 the scoped elaborators are registered under.
 
@@ -29,7 +32,7 @@ open Lean Elab Tactic Meta in
 the rule rather than the call; the kernel re-checks it (`replaceTargetDefEq`).
 
 A closed formula of a named contract — what `dl[C]{ … }` gives — is run by
-the compiled code and quoted back (`Fml.quote`), as mini-solkey's
+the compiled code and quoted back (`NFml.quote`), as mini-solkey's
 `normValid` does: `Meta.reduce` would unfold `symex 200 φ` by the
 interpreter of `whnf`, which takes a minute on three storage writes.  Any
 other formula (a variable in it, or an anonymous contract) falls back to
@@ -82,10 +85,9 @@ syntax (name := tacticSol_symex) "sol_symex" : tactic
 open Lean Elab Tactic Meta in
 /-- `sol_symex` on a goal `⊨ φ` of the closer's formulas, which have no
 modality: the strategy has nothing to fire, and `φ` is computed as `symex`
-would leave it (`normValid`).  The goal a scoped leaf leaves for today's closer, the erasure
+would leave it (`normValid`).  The goal a scoped leaf leaves for the closer, the erasure
 `Valid ((H.wrap φ).erase ns)` (`Proves.close`), is one.  Declared before
-today's strategy (`Symex.lean`) and the scoped one (`Symex.lean`), it is
-tried after them. -/
+the scoped strategy (`Symex.lean`), it is tried after it. -/
 elab_rules : tactic
   | `(tactic| sol_symex) => do
     if (← getUnsolvedGoals).isEmpty then return

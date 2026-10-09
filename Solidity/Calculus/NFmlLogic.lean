@@ -103,7 +103,7 @@ inductive NFml.Proves : RuleSet → List (Hyp C) → NFml C → Prop
   condition became when its updates were applied and it was simplified.
   This rule is KeY's `cut` on `false` followed by `closeFalse` on the TRUE
   goal; the FALSE goal, the context refuted (`Γ ⟹ false`), is the premise,
-  which the closer proves (`Derive.splitRes`).  A deviation in shape. -/
+  which the closer proves (`Seq.refutes`, `Calculus/ProvesDerive.lean`).  A deviation in shape. -/
   | closeFalse {R : RuleSet} {Γ : List (Hyp C)} {φ : NFml C} (h : dl{ ..Γ ⟹[R] false }) :
       dl{ ..Γ ⟹[R] φ }
   /-- Leave the calculus: what is left is proved in the logic. -/

@@ -190,7 +190,7 @@ changes nothing. -/
 theorem pingKeepsInv :
     ValidC pingInv dl!{ fails <= pings →
       [ try I(7).ping() { pings += 1; } catch { }; ] fails <= pings } := by
-  apply ProvesC.valid rfl
+  apply ProvesC.valid
   apply ProvesC.intro
   apply ProvesC.tryCall .tryCallWithCallbackBox
   · -- invariant on exit

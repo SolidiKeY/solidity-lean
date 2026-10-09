@@ -35,11 +35,11 @@ A leaf behind updates of either modality is `closableB`: an update's
 reading asks only of the typed states it may end in, as the `Valid`
 route's `Fml.posB` takes it too.
 
-Two steps follow today's `sol_prove` (`Calculus/NFmlDerive.lean`).  A split
-whose condition is ground under the context (`ground`, today's
-`Derive.groundCond` on the erasure) and whose branch the closer refutes
-keeps only the other branch, the refuted one closed by `Proves.closeFalse`
-(`refutes`, today's `Derive.splitRes`): `returnEarly` runs one path of its
+Two steps follow the closer's `sol_prove` (`Calculus/NFmlDerive.lean`).  A
+split whose condition is ground under the context (`ground`,
+`NFml.Derive.groundCond` on the erasure) and whose branch the closer
+refutes keeps only the other branch, the refuted one closed by
+`Proves.closeFalse` (`refutes`): `returnEarly` runs one path of its
 callee, not 27.  A leaf's erasure goes to today's residue with the
 parameters free, as today's leaves have them (`Fml.stripN`); where that
 leaves goals and the leaf with the parameters' `∀` kept closes, that one
@@ -120,10 +120,10 @@ def peel : List (Solidity.Hyp C) → Solidity.NFml C → List (Solidity.Hyp C) �
   | Γ, .upd m U ψ => peel (Γ ++ [.upd m U]) ψ
   | Γ, ψ => (Γ, ψ)
 
-/-- Whether a split's condition `c` is ground in the context `H`: today's
-test (`Derive.groundCond`) on the erasure of `H, c ⟹ false`.  It only
-decides when to ask the closer to refute the branch (`refutes`), as today's
-`Derive.splitRes` asks it. -/
+/-- Whether a split's condition `c` is ground in the context `H`: the
+closer's test (`NFml.Derive.groundCond`) on the erasure of
+`H, c ⟹ false`.  It only decides when to ask the closer to refute the
+branch (`refutes`). -/
 def ground {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ) : Bool :=
   match peel [] (((H.pre c).wrap .ff).eraseR []) with
   | (Γ', .not .tt) => match Γ'.getLast? with

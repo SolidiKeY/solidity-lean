@@ -7,7 +7,9 @@ The elaborator's entry points: `elabProg`, `elabProgAt` (and its `go`, which
 `solc_import` runs per function) and `ctorProg` run the elaborator
 (`Syntax.lean`) and then the locals check, `resolve` (`Syntax/Resolve.lean`),
 from the locals in scope where the block starts; `sol[C]{ … }` and
-`sol{ … }` splice the checked block as a term (`Prog.quote`).  The other
+`sol{ … }` splice the checked block as a term, a `Surface.Prog C`
+(`Surface.Prog.quote`).  The scoped program is only checked here;
+`Prog.defineCore` (`Syntax/Quote.lean`) declares it, for `solc_scoped`.  The other
 entry points run the same check: a specification's call (`specPieces`), a
 constructor's obligation (`Problem.ctor`) and each statement of a `dl!{ … }`
 modality (`Calculus/SurfaceNotation.lean`).

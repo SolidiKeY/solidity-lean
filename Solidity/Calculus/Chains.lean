@@ -1467,9 +1467,9 @@ elab_rules : tactic
 
 /-- Whether the term `t` is today's notation (`dl!{ … }`, `dl[C]{ … }`)
 with the scope's switch off (`core_surface%`, `Calculus/Surface.lean`):
-it reads as `Update.lean`'s formula, so a command on scoped formulas steps
-aside without elaborating it, which today's command does again
-(`Tools/ProofTree.lean`'s `elabCoreFormula?` does the same). -/
+it reads as `Update.lean`'s formula, which no command here reads, so the
+command refuses it without elaborating it (`notScopedNotation`;
+`Tools/ProofTree.lean`'s `elabCoreFormula?` does the same). -/
 def todaysNotation (t : Syntax) : TermElabM Bool := do
   let some (.atom _ v) := t.getHead? | return false
   unless v.startsWith "dl" do return false
@@ -1477,11 +1477,16 @@ def todaysNotation (t : Syntax) : TermElabM Bool := do
   let some out ← liftMacroM (expandMacro? flag) | return true
   return !(out.isIdent && out.getId.eraseMacroScopes == `true)
 
+/-- What a command on scoped formulas says of `todaysNotation`. -/
+def notScopedNotation {α : Type} (cmd : String) : TermElabM α :=
+  throwError "{cmd}: not a scoped formula: write `cdl!\{ … }` or \
+    `open scoped Solidity.Scoped`"
+
 /-- `#derivation φ` for a scoped `φ`: the lines the strategy takes, each with
 the rule that reached it. -/
 elab_rules : command
   | `(command| #derivation $t) => Command.runTermElabM fun _ => do
-    if ← todaysNotation t then throwUnsupportedSyntax
+    if ← todaysNotation t then notScopedNotation "#derivation"
     let φ ← instantiateMVars (← elabTerm t none)
     synthesizeSyntheticMVarsNoPostponing
     let φ ← instantiateMVars φ

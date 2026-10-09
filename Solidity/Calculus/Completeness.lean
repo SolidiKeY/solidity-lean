@@ -3,8 +3,8 @@ import Solidity.Calculus.Taclet
 /-!
 # The rule a scoped statement fires, by name
 
-`Completeness.lean`'s dispatcher names the rule it fires because it builds
-the derivation.  On scoped syntax the strategy is a function
+Master's dispatcher (`Calculus/Completeness.lean` at `ad728b16`) named the
+rule it fired because it built the derivation.  On scoped syntax the strategy is a function
 (`Stmt.step`, `Calculus/Step.lean`) and the rule table a relation
 over it (`Taclet.toStep`, `LeanTaclet.toStep`: a rule's premise is the
 step's, so at most one premise per statement, `Rule.premise_unique`); what

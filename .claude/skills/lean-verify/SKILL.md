@@ -83,7 +83,7 @@ general. The build cache works: an unchanged file re-checks in 1–4 s.
   the whole chain. Finish the low-level edits first, then move up.
 - **One declaration is one core.** Lean elaborates separate theorems in
   parallel, but a single proof runs serially. A `cases d <;> …` over hundreds
-  of constructors (`Taclet.eq_step`) should be one lemma per constructor (or
+  of constructors (`Taclet.toStep`) should be one lemma per constructor (or
   per family) that the main theorem dispatches to. The check then gets
   parallel, and a new rule only elaborates its own lemma. Split a proof when
   its check exceeds ~30 s. `set_option profiler true in` shows where the time

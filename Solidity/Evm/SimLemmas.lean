@@ -622,20 +622,6 @@ theorem compound_frag {op : BinOp} {p : PrimTy} (h : op.hasCompoundAssign = true
 
 attribute [local simp] Res.ok_bind Res.error_bind
 
-/-- Reassociating a checked result: `total += 1;` computes, checks, then writes. -/
-theorem bind_bind_ok {x : Res Value} {f : Value → Res Value} {g : Value → Res State} {v : Value}
-    (h : (x >>= f) = .ok v) : (x >>= fun a => f a >>= g) = g v := by
-  cases x with
-  | error e => cases h
-  | ok a => simp only [Res.ok_bind] at h ⊢; rw [h]; rfl
-
-/-- A failed check stops the write: `total += 1;` at `2^256 - 1` never writes. -/
-theorem bind_bind_error {x : Res Value} {f : Value → Res Value} {g : Value → Res State} {e : Halt}
-    (h : (x >>= f) = .error e) : (x >>= fun a => f a >>= g) = .error e := by
-  cases x with
-  | error e' => simp only [Res.error_bind, Except.error.injEq] at h ⊢; exact h
-  | ok a => simp only [Res.ok_bind] at h ⊢; rw [h]; rfl
-
 /-- A value written to a slot is represented there: a `uint` or a `bool` as
 itself, an `int` as its word. -/
 theorem repr_write {p : PrimTy} {v : Value} {w : Word}

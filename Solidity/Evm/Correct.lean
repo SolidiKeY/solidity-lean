@@ -259,7 +259,7 @@ theorem call_run_eq {Γ' ps rs Γf : Ctx} (f : Name) (args : Solidity.Args C Γ 
   simp only [Solidity.TRun.call, ha, bind, Except.bind]
   cases body.runR (ret.enterT (σ.withEnv a)).st <;> rfl
 
-theorem TEnv.get_drop {H : HTy} {Γ₀ Δ : Ctx} (h : Ext Γ₀ Δ) (e : TEnv C H Δ) {t : CLTy}
+theorem TEnv.get_drop {H : HTy} {Γ₀ Δ : Ctx} (h : Ext Γ₀ Δ) (e : TEnv C H Δ) {t : LTy}
     (i : Idx Γ₀ t) : TEnv.get i (TEnv.drop h e) = TEnv.get (i.ext h) e := by
   induction h with
   | refl => rfl
@@ -490,13 +490,13 @@ theorem opAssign_family {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = 
       (run (compileStmt b (.opAssign op hop hpn l r)) m) m := by
   simp only [inFrag] at hw
   obtain ⟨hok, rfl⟩ := Frag.guard_some hw
-  simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at hok
-  obtain ⟨⟨hp, hl⟩, hr⟩ := hok
+  simp only [Bool.and_eq_true] at hok
+  obtain ⟨hl, hr⟩ := hok
   cases l with
-  | «local» i => exact opLocal_sim hp hop i r hm hr
-  | root rt h => exact opStore_sim hp hop rfl r hm hl hr
-  | field q f h => exact opStore_sim hp hop rfl r hm hl hr
-  | index it q i => exact opStore_sim hp hop rfl r hm hl hr
+  | «local» i => exact opLocal_sim hpn hop i r hm hr
+  | root rt h => exact opStore_sim hpn hop rfl r hm hl hr
+  | field q f h => exact opStore_sim hpn hop rfl r hm hl hr
+  | index it q i => exact opStore_sim hpn hop rfl r hm hl hr
   | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
   | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
 
@@ -507,13 +507,12 @@ theorem incDec_family {p : PrimTy} (op : IncDec) (hpn : p.isNumeric = true)
       (run (compileStmt b (.incDec op hpn l)) m) m := by
   simp only [inFrag] at hw
   obtain ⟨hok, rfl⟩ := Frag.guard_some hw
-  simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at hok
-  obtain ⟨hp, hl⟩ := hok
+  have hl := hok
   cases l with
-  | «local» i => exact bumpLocal_sim hp op i hm
-  | root rt h => exact bumpStore_sim hp op rfl hm hl
-  | field q f h => exact bumpStore_sim hp op rfl hm hl
-  | index it q i => exact bumpStore_sim hp op rfl hm hl
+  | «local» i => exact bumpLocal_sim hpn op i hm
+  | root rt h => exact bumpStore_sim hpn op rfl hm hl
+  | field q f h => exact bumpStore_sim hpn op rfl hm hl
+  | index it q i => exact bumpStore_sim hpn op rfl hm hl
   | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
   | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
 
@@ -525,13 +524,12 @@ theorem assignIncDec_family {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
       (run (compileStmt b (.assignIncDec i op hpn l hs)) m) m := by
   simp only [inFrag] at hw
   obtain ⟨hok, rfl⟩ := Frag.guard_some hw
-  simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at hok
-  obtain ⟨hp, hl⟩ := hok
+  have hl := hok
   cases l with
-  | «local» j => exact assignBumpLocal_sim hp op i j hm
-  | root rt h => exact assignBumpStore_sim hp op i rfl hm hl
-  | field q f h => exact assignBumpStore_sim hp op i rfl hm hl
-  | index it q j => exact assignBumpStore_sim hp op i rfl hm hl
+  | «local» j => exact assignBumpLocal_sim hpn op i j hm
+  | root rt h => exact assignBumpStore_sim hpn op i rfl hm hl
+  | field q f h => exact assignBumpStore_sim hpn op i rfl hm hl
+  | index it q j => exact assignBumpStore_sim hpn op i rfl hm hl
   | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
   | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
 

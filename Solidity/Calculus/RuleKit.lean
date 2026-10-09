@@ -4,9 +4,10 @@ import Solidity.Calculus.KeyTaclets
 /-!
 # What a rule is made of
 
-The parts of a taclet that outlive today's rule table (`Calculus/Rules`, deleted at W4 `calc-del`):
-where a read or a value lands (`Hole`, `MHole`, `VHole`, `NewLhs` and
-their `fill`), the side conditions a taclet states and `side_cond` proves,
+The parts of a taclet on the surface syntax that the printers and the
+tools keep: where a read or a value lands (`Hole`, `MHole`, `VHole`,
+`NewLhs` and their `fill`), the side conditions a taclet states (`side_cond`
+proves the scoped ones, `Calculus/Rules.lean`),
 what a taclet leaves (`Premise`, the printers' target for the scoped
 premises too: `Calculus/Delab.lean` prints a scoped premise through
 its erasure), solkey's branch labels (`Taclet.branchLabels`,
@@ -168,33 +169,6 @@ theorem Arg.separatedFrom_captureFirst {se : Var} :
       exact ⟨h.1, Arg.separatedFrom_captureFirst h.2⟩
     · simp only [Arg.separatedFrom, Surface.Val.isSimple, Bool.true_or, Bool.true_and]
       exact h.2
-
-macro_rules
-  | `(tactic| side_cond) => `(tactic| first
-      | rfl
-      | assumption
-      | (simp_all [Surface.SPath.isSimple, Surface.Val.isSimple, Surface.MPath.isSimple, Surface.Loc.isTarget, Surface.Loc.isRoot,
-          Surface.MLoc.isTarget, Surface.MPath.isBindable, Surface.Val.notTernary, Surface.Hole.isTarget, Surface.MHole.isTarget,
-          Surface.VHole.isTarget, Surface.SPath.elemMapping, Surface.SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
-          Ty.isMapping, Ty.isPrimitive]; done)
-      | fail "the rule's side condition does not hold: `Stmt.step` fires another rule here")
-
-/-- The predicates a side condition is stated with. -/
-def sidePreds : List Lean.Name :=
-  [``Surface.SPath.isSimple, ``Surface.Val.isSimple, ``Surface.MPath.isSimple, ``Surface.Loc.isTarget, ``Surface.Loc.isRoot,
-    ``Surface.MLoc.isTarget, ``Surface.MPath.isBindable, ``Surface.Val.notTernary, ``Surface.Hole.isTarget, ``Surface.MHole.isTarget,
-    ``Surface.VHole.isTarget, ``Surface.SPath.elemMapping, ``Surface.SPath.elemPrim]
-
-open Lean Elab Tactic Meta in
-/-- Forget a derivation's side conditions: after `cases` on a derivation, a
-proof that does not need to know which rule fires (soundness) clears them. -/
-elab "clear_side" : tactic => withMainContext do
-  let mut g ← getMainGoal
-  for d in ← getLCtx do
-    if d.isImplementationDetail then continue
-    let some (_, lhs, _) := (← instantiateMVars d.type).eq? | continue
-    if sidePreds.any lhs.isAppOf then g ← g.tryClear d.fvarId
-  replaceMainGoal [g]
 
 /-! ## Premises -/
 

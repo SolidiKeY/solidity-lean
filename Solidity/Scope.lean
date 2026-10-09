@@ -17,8 +17,10 @@ Two ways one context sits in another:
   (condition 5).  Its functions are written with `Ext.casesOn` and structural
   recursion, since the kernel evaluates them (condition 1).
 * `Thin Γ Δ`: an order-preserving embedding, `Γ`'s locals among `Δ`'s.  It
-  weakens a statement into a context with more locals (`Stmt.wk`), at
-  elaboration time only, so its functions may `match`.
+  weakens a statement into a context with more locals (`Stmt.wk`).
+  `Stmt.wk`/`Prog.wk` and `Idx.wk` use `match` and are also evaluated by
+  the kernel, once per `ifElseUnfold`, call or invariant rule fired: the
+  documented exceptions to condition 1 (`Calculus/Step.lean`).
 
 `Binders ρ` and `CodeBinder κ` are the names a statement binds in a context
 `ρ` of its own (a `try`'s returned values and `Panic` code), in the order it

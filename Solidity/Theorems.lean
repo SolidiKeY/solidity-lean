@@ -16,10 +16,12 @@ typed state `σ : State C Γ`, and a program `P : Prog C Γ Γ'` runs
 from it by `Prog.run`.  A step of `⊢ₖ` must fire one of solkey's
 taclets (decision 36: the step rules read the rule set), so solkey's rules
 alone derive what the calculus derives on the fragment
-(`solkey_eq_calculus`) and less off it (`solkey_lt_calculus`), as today's
-did; `solkey_rule_lt_calculus` says the same at the rule level.  One of
-today's statements is not restated: that symbolic execution terminates
-(`symex_terminates`), retired at W2: the scoped strategy is fuelled.  Its progress, that it steps exactly while a modality is left
+(`solkey_eq_calculus`) and less off it (`solkey_lt_calculus`), as master's
+did; `solkey_rule_lt_calculus` says the same at the rule level.  Two of
+master's statements are not restated: that symbolic execution terminates
+(`symex_terminates`), retired at W2: the scoped strategy is fuelled; and
+that the compiled fragment never gets stuck (`never_stuck`), subsumed: the
+typed run has no stuck outcome, so `compiler_correct` covers every case.  Its progress, that it steps exactly while a modality is left
 (`Fml.active_iff_step`), was retired with the old calculus at W4
 `calc-del`; one direction holds (`Fml.stepFocusR_eq_none`).
 `docs/intrinsic.md` (W2 `symex`, W4 `theorems`) says why.
@@ -216,9 +218,9 @@ into a contract with a first-order invariant `I` (KeY's `CInv`, of the
 storage and the ledger), what that calculus derives is valid for that
 reading.  Its transfer rule has two sequents as premises, the second after a
 `{havoc}`; its send rule a third, the send refused. -/
-theorem callback_soundness {I : Invariant C} (hI : I.fml.FO = true) {φ : Fml C []} :
+theorem callback_soundness {I : Invariant C} {φ : Fml C []} :
     ⊢[I] φ → ⊨[I] φ :=
-  ProvesC.valid hI
+  ProvesC.valid
 
 /-! ## Symbolic execution -/
 

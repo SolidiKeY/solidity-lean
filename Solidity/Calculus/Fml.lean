@@ -374,8 +374,7 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   frame holds (`{anon(xs)}`, with `{havoc}` when `hv`), from where `I`
   holds and after `U` (the condition's value, and under the diamond the
   variant's, declared on top of `Γ`), the body `P` to `post` where `c`
-  holds, the rest where `c'` does (under the diamond one of them, its cover:
-  `Premise.cover`).  The condition's local is popped before
+  holds, the rest where `c'` does.  The condition's local is popped before
   the body (`hb`), so the body reads `Δ₀`: `Γ`, or `Γ` with the variant on
   top (`hu`); every local `U` declares is popped before the rest. -/
   | inv {Δ₀ Δ Γ₁ : Ctx} (I : Fml C Γ) (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool)

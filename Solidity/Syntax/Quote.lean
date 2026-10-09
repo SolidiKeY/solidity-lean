@@ -5,7 +5,7 @@ import Solidity.Syntax.Splice
 # Quoting the scoped syntax
 
 `Syntax/Scoped.lean`'s programs turned back into terms, as `Syntax.lean`'s
-`Prog.quote` does for the untyped ones: by hand (no `deriving ToExpr` for an
+`Surface.Prog.quote` does for the surface ones: by hand (no `deriving ToExpr` for an
 indexed family whose constructors carry proofs), the contract the constant
 it names, every proof `Eq.refl` (`rflTrue`, `rflSome`, `rflPrim`), so the
 kernel re-checks each one.

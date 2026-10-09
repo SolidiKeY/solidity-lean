@@ -3,8 +3,8 @@ import Solidity.Calculus.Blocks
 /-!
 # The strategy on scoped formulas
 
-`Completeness.lean`'s `Stmt.step` and `Symex.lean`'s `symex` on the scoped
-formulas of `Calculus/Fml.lean` (`docs/intrinsic.md`, M6a): the rule of a
+master's `Stmt.step` (`Calculus/Completeness.lean` at `ad728b16`) and
+`symex` on the scoped formulas of `Calculus/Fml.lean` (`docs/intrinsic.md`, M6a): the rule of a
 statement is one function of its constructors (`Stmt.step`), and the strategy
 fires the rule of the first statement of a formula until none is left.  The
 fresh names are numbered as `Symex.lean` numbers them, one above every index

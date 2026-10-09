@@ -50,12 +50,12 @@ syntax "#proof_tree_json " term : command
 /-! ## The formula a command reads -/
 
 /-- A closed scoped formula of a named contract: the formula, and the
-contract's name quoted; none for today's formula (`dl!{ … }` read without
-the switch) or any other term. -/
+contract's name quoted; none for `dl!{ … }` read without the switch, or any
+other term. -/
 def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr)) := do
-  -- today's notation (`dl!{ … }`, `dl[C]{ … }`) is today's elaborator's,
-  -- left unread so that it is not elaborated twice, unless the switch
-  -- (`open scoped Solidity.Scoped`) makes it scoped
+  -- `dl!{ … }`, `dl[C]{ … }` without the switch (`open scoped
+  -- Solidity.Scoped`) read as the closer's formulas, which have no tree:
+  -- left unread, so that the command says so (`notScoped`)
   if let some (.atom _ v) := t.raw.getHead? then
     if v.startsWith "dl" && !(← surfaceOn) then return none
   let φ ← try elabTerm t none catch _ => return none

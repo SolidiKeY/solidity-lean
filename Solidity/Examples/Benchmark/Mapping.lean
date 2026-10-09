@@ -119,9 +119,9 @@ theorem set_frame : ⊢ dl!{ b != a && v == myMap[b] → [ set(a, i); ] myMap[b]
 
 /-- `remove(a)`: `ensures myMap[_addr] == 0`, where `myMap[a]` held a
 `uint` (`myMap[a] + 0` evaluates).  A `delete` leaves the default of the old
-value, and what `⊢` proves holds in every storage, `myMap[a]` holding a `bool` too
-(`Decide.deleteWithoutWriteUntyped`): the premise is the typing every storage of
-this contract has. -/
+value, and the leaf is closed on its erasure, over untyped storages where
+`myMap[a]` may hold a `bool` (until M6c): the premise stands in for the
+typing. -/
 theorem remove_spec : ⊢ dl!{ myMap[a] + 0 == myMap[a] → [ remove(a); ] myMap[a] == 0 } := by
   sol_prove
   refine close ?_

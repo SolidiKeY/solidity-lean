@@ -484,12 +484,12 @@ theorem opLocT_bump {p : PrimTy} {l : Solidity.OpLoc C Γ p}
     l.bumpT σ op = (loc.resolveT σ >>= fun r => Solidity.bumpStoreT σ op r) := by
   cases l <;> simp only [opLocToLoc, reduceCtorEq, Option.some.injEq] at h <;> subst h <;> rfl
 
-theorem numeric_of_ne {p : PrimTy} (hp : p ≠ .bool) : p.isNumeric = true := by
-  cases p <;> first | rfl | exact absurd rfl hp
+theorem ne_bool_of_numeric {p : PrimTy} (hpn : p.isNumeric = true) : p ≠ .bool := by
+  rintro rfl; exact Bool.noConfusion hpn
 
 /-- `total += e;` on a storage target: the target resolved and read once,
 the right-hand side, the checked operator, the write back. -/
-theorem opStore_sim {p : PrimTy} (hp : p ≠ .bool) {op : BinOp} (hop : op.hasCompoundAssign = true)
+theorem opStore_sim {p : PrimTy} (hpn : p.isNumeric = true) {op : BinOp} (hop : op.hasCompoundAssign = true)
     {l : Solidity.OpLoc C Γ p} {loc : Solidity.Loc C Γ (.prim p)}
     (hl : opLocToLoc l = some loc) (r : Solidity.Val C Γ p)
     (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hwl : locIn F false loc = true)
@@ -497,8 +497,8 @@ theorem opStore_sim {p : PrimTy} (hp : p ≠ .bool) {op : BinOp} (hop : op.hasCo
     StmtOut C L b F false false false (Solidity.TRun.opAssign op l r σ)
       (run (compileLoc b loc ++ [.dup 1, .sload] ++ compileVal b r ++ binTail p op ++
         [.swap 1, .sstore]) m) m := by
+  have hp := ne_bool_of_numeric hpn
   obtain ⟨hfrag, hand, hor, hret, hretTy⟩ := compound_frag hop hp
-  have hpn := numeric_of_ne hp
   simp only [List.append_assoc]
   rcases loc_sim loc hm hwl with ⟨rt, s, sv, hres, hsv, hps, hr, hrunl⟩ | ⟨hres, hrunl⟩
   · obtain ⟨old, hold, hrold, rfl⟩ := prim_read hr
@@ -543,14 +543,14 @@ theorem opStore_sim {p : PrimTy} (hp : p ≠ .bool) {op : BinOp} (hop : op.hasCo
 
 /-- `x += e;` on a numeric local: its cell read, the checked operator, the
 cell written. -/
-theorem opLocal_sim {p : PrimTy} (hp : p ≠ .bool) {op : BinOp} (hop : op.hasCompoundAssign = true)
+theorem opLocal_sim {p : PrimTy} (hpn : p.isNumeric = true) {op : BinOp} (hop : op.hasCompoundAssign = true)
     (i : Idx Γ (.val p)) (r : Solidity.Val C Γ p)
     (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hwr : valIn F r = true) :
     StmtOut C L b F false false false (Solidity.TRun.opAssign op (.local i) r σ)
       (run ([.mload (cellOf b i)] ++ compileVal b r ++ binTail p op ++ [.mstore (cellOf b i)]) m)
       m := by
+  have hp := ne_bool_of_numeric hpn
   obtain ⟨hfrag, hand, hor, hret, hretTy⟩ := compound_frag hop hp
-  have hpn := numeric_of_ne hp
   have hrold := hm.vals i
   simp only [List.append_assoc]
   rw [run_append_ok (m' := m.push (m.memAt (lvl b i))) rfl]
@@ -586,13 +586,13 @@ theorem bump_key {p : PrimTy} (hpn : p.isNumeric = true) {x : p.Denote} {n : Int
 
 /-- `total++;` on a storage target: read once, the checked increment, the
 write back. -/
-theorem bumpStore_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) {l : Solidity.OpLoc C Γ p}
+theorem bumpStore_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) {l : Solidity.OpLoc C Γ p}
     {loc : Solidity.Loc C Γ (.prim p)} (hl : opLocToLoc l = some loc)
     (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hwl : locIn F false loc = true) :
     StmtOut C L b F false false false (Solidity.TRun.incDec op l σ)
       (run (compileLoc b loc ++ [.dup 1, .sload, .push (.val 1)] ++ binTail p op.binOp ++
         [.swap 1, .sstore]) m) m := by
-  have hpn := numeric_of_ne hp
+  have hp := ne_bool_of_numeric hpn
   simp only [List.append_assoc]
   rcases loc_sim loc hm hwl with ⟨rt, s, sv, hres, hsv, hps, hr, hrunl⟩ | ⟨hres, hrunl⟩
   · obtain ⟨old, hold, hrold, rfl⟩ := prim_read hr
@@ -625,12 +625,12 @@ theorem bumpStore_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) {l : Solidit
       run_append_revert hrunl⟩
 
 /-- `x++;` on a numeric local. -/
-theorem bumpLocal_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) (i : Idx Γ (.val p))
+theorem bumpLocal_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) (i : Idx Γ (.val p))
     (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) :
     StmtOut C L b F false false false (Solidity.TRun.incDec op (.local i) σ)
       (run ([.mload (cellOf b i), .push (.val 1)] ++ binTail p op.binOp ++ [.mstore (cellOf b i)]) m)
       m := by
-  have hpn := numeric_of_ne hp
+  have hp := ne_bool_of_numeric hpn
   have hrold := hm.vals i
   obtain ⟨n, hn, hv⟩ := bump_sim hp op hrold m
   rw [bump_erase hpn, ← bump_key hpn hn] at hv
@@ -656,12 +656,12 @@ theorem bumpLocal_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) (i : Idx Γ 
 
 /-- `v = x++;` on a numeric local: `x`'s cell bumped, `v` given the old or the
 new word. -/
-theorem assignBumpLocal_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) (i j : Idx Γ (.val p))
+theorem assignBumpLocal_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) (i j : Idx Γ (.val p))
     (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) :
     StmtOut C L b F false false false (Solidity.TRun.assignIncDec i op (.local j) σ)
       (run ([.mload (cellOf b j)] ++ bumpCode p op ++ [.mstore (cellOf b j), .mstore (cellOf b i)]) m)
       m := by
-  have hpn := numeric_of_ne hp
+  have hp := ne_bool_of_numeric hpn
   have hrold := hm.vals j
   obtain ⟨n, hn, hv⟩ := bumpCode_sim hp op hrold m
   have hk := bump_key hpn hn
@@ -695,14 +695,14 @@ theorem assignBumpLocal_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) (i j :
       TRes.ofOpt, h]
 
 /-- `v = total++;`: the target bumped, `v` given the old or the new word. -/
-theorem assignBumpStore_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) (i : Idx Γ (.val p))
+theorem assignBumpStore_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) (i : Idx Γ (.val p))
     {l : Solidity.OpLoc C Γ p} {loc : Solidity.Loc C Γ (.prim p)}
     (hl : opLocToLoc l = some loc) (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
     (hwl : locIn F false loc = true) :
     StmtOut C L b F false false false (Solidity.TRun.assignIncDec i op l σ)
       (run (compileLoc b loc ++ [.dup 1, .sload] ++ bumpCode p op ++
         [.dup 3, .sstore, .swap 1, .pop, .mstore (cellOf b i)]) m) m := by
-  have hpn := numeric_of_ne hp
+  have hp := ne_bool_of_numeric hpn
   simp only [List.append_assoc]
   rcases loc_sim loc hm hwl with ⟨rt, s, sv, hres, hsv, hps, hr, hrunl⟩ | ⟨hres, hrunl⟩
   · obtain ⟨old, hold, hrold, rfl⟩ := prim_read hr

@@ -350,7 +350,7 @@ from the erasure of the line the program ends at, one rewrite a link until
 the line is last, written as one chain term to paste
 (`Calculus/ChainGen.lean`).
 The strategy's steps are grouped as the worked examples print them
-(`ChainGen.groupSteps`): a declaration with the binding or read it leaves
+(`NFml.Chain.groupSteps`): a declaration with the binding or read it leaves
 is one `~*>`; no `emptyModality` follows a rule that leaves no statement. -/
 
 section
