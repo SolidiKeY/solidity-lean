@@ -33,7 +33,7 @@ variable {C : Contract}
 /-- What the machine-level lemmas read of a typed state: its storage erased,
 its ledger, its funds and its transaction (`ReprStore`, `EnvSim`).  Its
 locals are `Look.ofTEnv`'s. -/
-def _root_.Solidity.Core.TState.sem {Γ : Ctx} (σ : TState C Γ) : State :=
+def _root_.Solidity.Core.TState.sem {Γ : Ctx} (σ : TState C Γ) : Semantics.State :=
   { storage := σ.storage.erase, net := σ.net, selfBalance := σ.selfBalance.1, tx := σ.tx.erase }
 
 theorem sem_storage {Γ : Ctx} (σ : TState C Γ) : σ.sem.storage = σ.storage.erase := rfl
@@ -100,10 +100,10 @@ theorem Look.ofTEnv_wk {H H' : HTy} {Γ : Ctx} (x : H <+: H') (e : TEnv C H Γ) 
 
 namespace Sim
 
-variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : State}
+variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : Semantics.State}
 
 /-- `Sim` reads the global part through `storage`, `net` and `tx` only. -/
-theorem congrGlob {σ' : State} {ρ : Look C Γ} {m : Machine} (h : Sim C L b F σ ρ m)
+theorem congrGlob {σ' : Semantics.State} {ρ : Look C Γ} {m : Machine} (h : Sim C L b F σ ρ m)
     (hs : σ'.storage = σ.storage) (hn : σ'.net = σ.net) (ht : σ'.tx = σ.tx) :
     Sim C L b F σ' ρ m := by
   have hnet : ∀ a, σ'.getNet a = σ.getNet a := fun a => by simp only [State.getNet, hn]
@@ -126,7 +126,7 @@ def ValOutT (p : PrimTy) (res : TRes p.Denote) (out : Out) (m : Machine) : Prop 
 
 /-- A location's outcome: the slot of the reference pushed, the reference
 live and its value laid out there; or both revert. -/
-def LocOutT (C : Contract) (L : Nat) (σ : State) (free : Bool) (T : Ty) (res : TRes (SRef C T))
+def LocOutT (C : Contract) (L : Nat) (σ : Semantics.State) (free : Bool) (T : Ty) (res : TRes (SRef C T))
     (out : Out) (m : Machine) : Prop :=
   (∃ r s sv, res = .ok r ∧ σ.findLive r.root r.path.erase = .ok sv ∧
       PathSlot C free r.root r.path.erase T s ∧ ReprAt m.store L T s sv ∧

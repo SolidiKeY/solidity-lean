@@ -202,7 +202,7 @@ transaction; `σ.env` is not read) and the locals `ρ` of `Γ`, which a frame
 based at `b` keeps at their levels, and of whose aliases the fragment knows
 `F`.  A value local is represented by its cell outright (`ReprV` of the
 value it holds), an alias by the slot of the path its reference names. -/
-structure Sim (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State) (ρ : Look C Γ)
+structure Sim (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : Semantics.State) (ρ : Look C Γ)
     (m : Machine) : Prop where
   store : ReprStore C L m.store σ.storage
   vals : ∀ {p : PrimTy} (i : Idx Γ (.val p)), ReprV p (PrimTy.erase (ρ i)) (m.memAt (lvl b i))
@@ -225,7 +225,7 @@ structure Sim (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State) (
   /-- `msg.sender`, `msg.value`, `block.timestamp`, `address(this)`. -/
   env : EnvSim σ m
 
-variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : State} {ρ : Look C Γ}
+variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : Semantics.State} {ρ : Look C Γ}
 
 namespace Sim
 
@@ -489,7 +489,7 @@ caller's locals where they were (the callee stored above them,
 `storesFrom_callFrame`), and its fragile aliases still in bounds, the callee
 having lowered no array's length.  A callee that may (`Stmt.shrinks`) is
 `returnDrop`. -/
-theorem «return» {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : State}
+theorem «return» {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : Semantics.State}
     {ρ' : Look C Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
     (hmem : ∀ l, l < b + Γ.length → m'.memAt l = m.memAt l)
     (hlen : ∀ x, LenSlot C x → m.store x ≤ m'.store x) :
@@ -506,7 +506,7 @@ theorem «return» {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : S
 
 /-- Back from a call that may have shrunk an array: the caller's fragile
 aliases forgotten. -/
-theorem returnDrop {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : State}
+theorem returnDrop {m m' : Machine} {Δ : Ctx} {b' : Nat} {G : Frag Δ} {σ' : Semantics.State}
     {ρ' : Look C Δ} (h : Sim C L b F σ ρ m) (h' : Sim C L b' G σ' ρ' m')
     (hmem : ∀ l, l < b + Γ.length → m'.memAt l = m.memAt l) :
     Sim C L b F.dropFragile σ' ρ m' := by

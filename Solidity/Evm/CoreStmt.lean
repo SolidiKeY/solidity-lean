@@ -237,7 +237,7 @@ section States
 variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : TState C Γ} {m : Machine}
 
 /-- The storage replaced. -/
-theorem Sim.withStore {st : Solidity.Core.Storage C} {τ : State} (hτ : (σ.withStorage st).sem = τ)
+theorem Sim.withStore {st : Solidity.Core.Storage C} {τ : Semantics.State} (hτ : (σ.withStorage st).sem = τ)
     (h : Sim C L b F τ (Look.ofTEnv σ.env) m) :
     Sim C L b F (σ.withStorage st).sem (Look.ofTEnv (σ.withStorage st).env) m := by
   rw [hτ]; exact h
