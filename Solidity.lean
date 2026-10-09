@@ -70,6 +70,7 @@ import Solidity.Calculus.ProvesSound
 import Solidity.Calculus.DelabLean
 import Solidity.Calculus.Graft
 import Solidity.Calculus.Merge
+import Solidity.Calculus.RewriteScoped
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.RewriteSyntax
 import Solidity.Calculus.ChainKit
