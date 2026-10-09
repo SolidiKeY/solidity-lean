@@ -219,6 +219,7 @@ alt2=$(IFS='|'; echo "${others[*]}")
 script=$(mktemp)
 trap 'rm -f "$script"' EXIT
 cat > "$script" <<SED
+s#\`Core/([A-Z][A-Za-z]*)#\`\1#g
 s/\bSolidity\.Calculus\.Core\./Solidity.Calculus./g
 s/\bSolidity\.Evm\.Core([A-Z])/Solidity.Evm.\1/g
 s/\bSolidity\.Semantics\.Core\.Typed/Solidity.Semantics./g
@@ -239,7 +240,17 @@ s/\bTState\b/State/g
 s/\btrun([A-Z_])/run\1/g
 s/\btrun\b/run/g
 SED
+# a citation `Core/X.lean` relative to `Calculus/` (in `Calculus/Core/*`,
+# `Calculus/TacticSyntax`, `docs/module-map`) loses its `Core/`; the one
+# outside `Calculus/` gains `Calculus/`
+sed -i 's#`Core/Notation.lean`#`Calculus/Notation.lean`#' Solidity/Examples/Chains/EvaluationOrder.lean
 git ls-files -z '*.lean' '*.md' '*.sh' '*.mjs' '*.toml' ':!:tests/**' ':!:scripts/w5-rename.sh' ':!:docs/intrinsic.md' \
   | xargs -0 sed -E -i -f "$script"
+# the corpus notes `scripts/solkey-port.mjs` writes cite module paths
+sed -E -i -f "$script" tests/solkey/expected.tsv
+# the record cites files by the paths they had at each step: history, like
+# `git log`, which `check-doc-paths` does not read (decision 68)
+sed -i 's#^  git ls-files -z \\$#  git ls-files -z -- '"':!:docs/intrinsic.md'"' \\#' scripts/check-doc-paths.sh
+grep -q "git ls-files -z -- ':!:docs/intrinsic.md'" scripts/check-doc-paths.sh
 
 echo "w5-rename: done; build with SolidityCorpus and SolkeyTestSuite, then commit"
