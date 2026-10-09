@@ -1,41 +1,46 @@
 # Compiler verification
 
-`Solidity/Evm/` compiles a fragment of the typed syntax (`Stmt C`,
-`Solidity/Syntax.lean`) to an EVM-style stack machine and proves that the
-compiled code does what the interpreter (`Stmt.run`, `Solidity/Semantics.lean`)
-does. It is mini-solkey's `Ch08_EVM`–`Ch10_Correctness` scaled up to the typed
-calculus: control flow, reverts, checked arithmetic (signed too, and `**`),
-arrays (`push` and `pop`, copies, aliases into elements), internal calls and
-`transfer`. `docs/module-map.md` lists the seven modules.
+`Solidity/Evm/` compiles a fragment of the scoped syntax (`Stmt C Γ Γ'`,
+`Solidity/Syntax/Scoped.lean`) to an EVM-style stack machine and proves that
+the compiled code does what the typed run (`Stmt.run`,
+`Solidity/Semantics/Run.lean`) does. It is mini-solkey's
+`Ch08_EVM`–`Ch10_Correctness` scaled up to the typed calculus: control flow,
+reverts, checked arithmetic (signed too, and `**`), arrays (`push` and `pop`,
+copies, aliases into elements), internal calls and `transfer`.
+`docs/module-map.md` lists the modules.
 
 ## What is proved
 
-For a program `P` of the fragment (`wtProg Γ P = some Γ'`), a machine `m`
-representing the interpreter state `σ` with every dynamic array below `L`
-elements (`Sim C L Γ σ m`, `L ≤ 2^64`), and room for its pushes:
+For a program `P : Prog C Γ Γ'` of the fragment (`inFragP F P = some F'`), a
+machine `m` representing the typed state `σ` with its frame at base `b` and
+every dynamic array below `L` elements (`Sim C L b F σ.sem (Look.ofTEnv σ.env) m`,
+`L ≤ 2^64`), and room for its pushes:
 
 ```lean
-theorem compile_correct (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m)
-    (hL : L + pushesP P ≤ Lmax) :
-    (∃ σ' m', Prog.run σ P = .ok σ' ∧ run (compileProg P) m = .ok m' 0 ∧
-      m'.stack = m.stack ∧ Sim C (L + pushesP P) Γ' σ' m') ∨
-    ((Prog.run σ P = .error .revert ∨ Prog.run σ P = .error .panic) ∧
-      run (compileProg P) m = .revert) ∨
-    (paysP P = true ∧ run (compileProg P) m = .revert ∧
-      ∃ σ' m', Prog.run σ P = .ok σ' ∧ Sim C (L + pushesP P) Γ' σ' m')
+theorem compile_correct {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F')
+    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax) :
+    (∃ o m', Solidity.Prog.run σ P = .ok o ∧ run (compileProg b P) m = .ok m' 0 ∧
+      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st.sem (Look.ofTEnv o.st.env) m') ∨
+    ((Solidity.Prog.run σ P = .error .revert ∨
+        (Prog.asserts P = true ∧ Solidity.Prog.run σ P = .error .panic)) ∧
+      run (compileProg b P) m = .revert) ∨
+    (Prog.pays P = true ∧ run (compileProg b P) m = .revert ∧ ∃ o m',
+      Solidity.Prog.run σ P = .ok o ∧
+      Sim C (L + Prog.pushes P) b F' o.st.sem (Look.ofTEnv o.st.env) m')
 ```
 
 Both succeed, the machine's stack as it was and its storage, locals and
-balances representing the interpreter's final state; or both halt, the
-interpreter by a revert or a panic (a failed `assert`), the machine by a
-revert, as solc's `Panic(0x01)` is one; or the program pays (`paysP`), the world refuses a payment, and the machine alone
-reverts. The third is the price of a `transfer` that books `net` and nothing
-else (`Semantics.transferAt`): the interpreter does not know whether the
-contract's account covers the amount or whether the recipient accepts it,
-and the machine does. So the theorem is for the box: what the machine does
-when it succeeds, the interpreter did (`compile_box`), and a program that
-pays no one agrees exactly (`compile_exact`). The interpreter is never stuck
-on the fragment (`not_stuck`), so `wtProg` is a type system for it.
+balances representing the run's final state; or both halt, the run by a
+revert or a panic (a failed `assert`), the machine by a revert, as solc's
+`Panic(0x01)` is one; or the program pays (`Prog.pays`), the world refuses a
+payment, and the machine alone reverts. The third is the price of a
+`transfer` that books `net` and nothing else (`Semantics.transferAt`): the
+run does not know whether the contract's account covers the amount or
+whether the recipient accepts it, and the machine does. So the theorem is for
+the box: what the machine does when it succeeds, the run did
+(`compile_box`), and a program that pays no one agrees exactly
+(`compile_exact`). The typed run has no stuck outcome, so no `not_stuck` is
+needed, and `inFragP` says only what the compiler covers.
 
 **The ledger is the money that moved.** KeY's `net` is a ghost of the
 interpreter: the machine has no ledger, only every account's balance `bal`
@@ -53,16 +58,17 @@ dropping the `if`: a payment to the contract itself would then move its own
 entry, which `Sim.netSelf` pins. Read off a run that succeeds:
 
 ```lean
-theorem compile_net (hP : wtProg Γ P = some Γ') (hm : Sim C L Γ σ m)
-    (hL : L + pushesP P ≤ Lmax) (hrun : run (compileProg P) m = .ok m' 0) :
-    ∃ σ', Prog.run σ P = .ok σ' ∧
-      (∀ a : Nat, a < W → a ≠ m'.self → σ'.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
-      σ'.getNet m'.self = 0
+theorem compile_net {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F P = some F')
+    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax)
+    (hrun : run (compileProg b P) m = .ok m' 0) :
+    ∃ o, Solidity.Prog.run σ P = .ok o ∧
+      (∀ a : Nat, a < W → a ≠ m'.self → o.st.sem.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
+      o.st.sem.getNet m'.self = 0
 ```
 
 `Evm/Examples.lean` runs `owner = 5; owner.transfer(30);` on a contract
 holding `100` (`payOwner_run`: `70` left, `30` in `5`'s account) and reads the
-interpreter's `net(5) = -30` and `net(this) = 0` off it
+run's `net(5) = -30` and `net(this) = 0` off it
 (`payOwner_interpreter`).
 
 From a fresh contract (`Sim.init`, every slot `0`, `L = 1`, any balances, at
@@ -70,31 +76,34 @@ any address `self < 2^256`, which `address(this)` reads and `ADDRESS`
 pushes):
 
 ```lean
-theorem compile_storage (hP : wtProg (fun _ => none) P = some Γ')
-    (hL : pushesP P < Lmax) (balance : Nat) (bal : Nat → Nat) (self : Nat) (hs : self < W) :
-    (∃ σ' m', Prog.run (State.fresh C balance self) P = .ok σ' ∧
-      run (compileProg P) (Machine.init bal self) = .ok m' 0 ∧
-      ∀ r segs s n, PathSlot C false r segs (.prim .uint) s →
-        σ'.findLive r segs = .ok (.prim (.int n)) → m'.store s = n.toNat) ∨
-    ((Prog.run (State.fresh C balance self) P = .error .revert ∨
-        Prog.run (State.fresh C balance self) P = .error .panic) ∧
-      run (compileProg P) (Machine.init bal self) = .revert) ∨
-    (paysP P = true ∧ run (compileProg P) (Machine.init bal self) = .revert ∧
-      ∃ σ', Prog.run (State.fresh C balance self) P = .ok σ')
+theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')
+    (hL : Prog.pushes P < Lmax) (balance : Nat) (hb : balance < W) (bal : Nat → Nat)
+    (self : Nat) (hs : self < W) :
+    (∃ o m', Solidity.Prog.run (freshT C balance hb self hs) P = .ok o ∧
+        run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧
+      ∀ (r : SRef C (.prim .uint)) s (v : PrimTy.uint.Denote),
+        PathSlot C false r.root r.path.erase (.prim .uint) s →
+        o.st.storage.findLive r = some (.prim v) → m'.store s = v.1.toNat) ∨
+    ((Solidity.Prog.run (freshT C balance hb self hs) P = .error .revert ∨
+        (Prog.asserts P = true ∧
+          Solidity.Prog.run (freshT C balance hb self hs) P = .error .panic)) ∧
+      run (compileProg 0 P) (Machine.init bal self) = .revert) ∨
+    (Prog.pays P = true ∧ run (compileProg 0 P) (Machine.init bal self) = .revert ∧
+      ∃ o, Solidity.Prog.run (freshT C balance hb self hs) P = .ok o)
 ```
 
-every `uint` path the interpreter reads, the machine holds at its slot.
+every `uint` path the typed storage holds, the machine holds at its slot.
 None uses more than `propext`, `Classical.choice` and `Quot.sound`; no
 `sorry`, no `native_decide`.
 
 **The bound.** solc's `push` reverts when an array already holds `2^64`
-elements (`Panic(0x41)`); the interpreter's arrays are unbounded. The two
-agree while no array reaches the limit, and that is the hypothesis: `Sim`
+elements (`Panic(0x41)`); the run's arrays are bounded only by `2^256`. The
+two agree while no array reaches the limit, and that is the hypothesis: `Sim`
 carries a bound `L ≤ 2^64` on every dynamic array's length (`ReprAt.array`),
-each `push` raises it by one, and a compiled program has no loops (`wtStmt`
+each `push` raises it by one, and a compiled program has no loops (`inFrag`
 refuses one), so it raises it by
-at most `pushesP P`, its number of `push` statements. From a fresh contract
-the hypothesis is `pushesP P < 2^64`, which `decide` discharges for any
+at most `Prog.pushes P`, its number of `push` statements. From a fresh contract
+the hypothesis is `Prog.pushes P < 2^64`, which `decide` discharges for any
 program one can write. The compiled `push` emits solc's check all the same;
 under the hypothesis it never fires.
 
@@ -113,11 +122,11 @@ says why):
   `data s o` (`keccak256(s) + o`) — so keccak never collides, solc's assumption
   made structural; an offset added to a slot does not wrap;
 - **relative forward jumps** (`exec` carries the instructions still to skip,
-  so it is structural; the fragment has no loops (`wtStmt` refuses a
+  so it is structural; the fragment has no loops (`inFrag` refuses a
   `Stmt.loop`), and the one solc emits for it,
   `checked_exp_helper`'s, is unrolled: it runs at most 255 times);
-- **locals in memory cells** addressed by the variable (solc keeps them on the
-  stack); `KECCAK256` takes its inputs from the stack;
+- **locals in memory cells** addressed by their level in the context (`cell`,
+  `lvl`; solc keeps them on the stack); `KECCAK256` takes its inputs from the stack;
 - **the world is the accounts' balances** (`bal`, `self`); a recipient's code
   is not run, and whether it accepts a payment is `accepts`, which no
   instruction changes and the theorem quantifies over; `CALL` takes an
@@ -146,7 +155,7 @@ paths start from (`len_prim_disjoint`).
 
 ## The fragment, and what is out
 
-In (`wtStmt`): `uint`, `int` and `bool` values; storage of any shape (structs,
+In (`inFrag`): `uint`, `int` and `bool` values; storage of any shape (structs,
 dynamic and fixed-size arrays, mappings keyed by `uint`, nested); literals (a
 `uint` below `2^256`, an `int` in `[-2^255, 2^255)`), locals, storage reads,
 every operator (`**` at `uint`, `-x` at `int`), `?:`, short-circuit
@@ -171,14 +180,14 @@ product back with `SDIV`, `smul_ok`), `/` and `%` by zero, `-2^255 / -1`,
 an empty array, `push` at `2^64` elements, a refused `transfer`.
 
 An alias bound through an array index (`Person storage p = persons[i];`) is
-*fragile* (`LTy.falias`): the interpreter checks the index once, when `p` is
+*fragile* (a flag of `Frag Γ`): the run checks the index once, when `p` is
 bound, as solc does, and a later `pop` or `delete` could leave `p` naming a
-slot past the end, which it still reads and writes (the interpreter's
-`shadow`). The representation relates live elements only, so the fragment
-forgets fragile aliases at every `pop` and `delete` (`TyCtx.dropFragile`);
+slot past the end, which it still reads and writes. The representation
+relates live elements only, so the fragment forgets fragile aliases at every
+`pop` and `delete` (`Frag.dropFragile`);
 until then no array shrinks, the machine only ever raises a length slot
 (`LenSlot`: a primitive write never lands on one, `len_prim_disjoint`), and the
-alias's path stays in bounds (`live_mono`, carried by `Sim.fragile`).
+alias's path stays in bounds (carried by `Sim.flags`).
 
 Out, and why:
 
@@ -190,11 +199,11 @@ Out, and why:
 | `push()` of a struct or an array element | solc does not clear the slot it grows into (a `pop` cleared it), and the interpreter revives the popped value there (`pushSlot`); the representation does not relate slots past the end (relating them would need `delete` and `pop` to clear them, which for a dynamic array is a loop). `push()` of a primitive (solc writes `0`) and `push(e)`/`push(sp)` (every slot written) are in. |
 | a fragile alias used after a `pop` or `delete` | See above: it may name a slot past the end, which the representation does not relate. |
 | `address(this).balance` | The interpreter's is the funds the transaction found, which a `transfer` leaves (it books `net` only); `SELFBALANCE` reads the account a `CALL` debits. The two part at the first payment. |
-| mappings keyed by `bool`/`int` | `ReprAt` claims nothing for them (the interpreter indexes by `Int`, and reads a `bool` key as stuck). |
+| mappings keyed by `bool`/`int` | `ReprAt` relates a mapping keyed by `uint` only (`ReprAt.map`; any other key type is `ReprAt.mapOther`, which claims nothing): a `bool` key, which the typed run hashes as `0`/`1`, and an `int` key's two's complement are not related yet. |
 
-The interpreter evaluates an `op=`'s right-hand side before its target; the
+The run evaluates an `op=`'s right-hand side before its target; the
 compiled code resolves the target first. The simulation lemmas are
-dichotomies (a value or a revert, never stuck), so the two orders agree on
+dichotomies (a value or a revert; the typed run has no stuck outcome), so the two orders agree on
 every outcome. A copy loads every word of the source before it resolves the
 target and stores; solc interleaves the two member by member. The two agree
 whenever source and target do not overlap; loading first is right even when

@@ -14,19 +14,19 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 
 | mini-solkey | here |
 |---|---|
-| `Ch01_Syntax`, `Ch02_Elab` | `AST.lean`, `Syntax.lean` (`Stmt C`, `sol[C]{}`) |
+| `Ch01_Syntax`, `Ch02_Elab` | `AST.lean`, `Scope.lean`, `Syntax/Scoped.lean` (`Stmt C Γ Γ'`), `Syntax.lean` (`sol[C]{}`, its output `Surface.Stmt C`), `Syntax/Resolve.lean` |
 | `Ch03_Theory` | `Theory/` |
-| `Ch04_Semantics` | `Semantics.lean` (`Stmt.run`), `Semantics/Agree.lean` |
-| `Ch05_Logic` | `Update.lean` (terms, updates, `Fml`, both modalities) |
+| `Ch04_Semantics` | `Semantics/Run.lean` (`Stmt.run`, typed), `Semantics/State.lean`, `Semantics.lean` (the untyped state's operations), `Semantics/Agree.lean` |
+| `Ch05_Logic` | `Calculus/Fml.lean` (`Fml C Γ`, both modalities), `Calculus/Logic.lean` (`holds`), `Update.lean` (terms, updates, the closer's `NFml`) |
 | `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/SurfaceNotation.lean` (`dl[C]{}`) |
-| `Ch06_Taclets` | `Calculus/Rules.lean`, `Calculus/Sound*.lean` (`Stmt.sound`), `Calculus/Proves.lean` (`Proves`), `Calculus/Taclet.lean` |
-| `Ch07_Symex` | `Calculus/Symex.lean`, `Calculus/NFmlClose.lean` |
+| `Ch06_Taclets` | `Calculus/Rules.lean`, `Calculus/Taclet.lean` (`Taclet.toStep`), `Calculus/Sound*.lean` (`Stmt.sound`), `Calculus/Proves.lean` (`Proves`) |
+| `Ch07_Symex` | `Calculus/Step.lean`, `Calculus/Symex.lean`, `Calculus/NFmlClose.lean` |
 | `Ch08_EVM`-`Ch10_Correctness` | `Evm/` (`docs/compiler-verification.md`) |
 | `Ch11_Completeness` | `Calculus/Step.lean` (`Stmt.step`), `Calculus/RuleExists.lean` (`Stmt.rule_exists`); progress (`Fml.active_iff_step`) retired at W4 `calc-del` of `docs/intrinsic.md` |
 | `Ch12_Termination` | retired at W4 `calc-del` (the scoped strategy is fuelled) |
 | `Ch13_Chains` | `Calculus/Chains.lean` |
-| `Ch14_Updates` | `Calculus/NFmlUpdateRules.lean` |
-| `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `Fml.valid_iff_cons`) |
+| `Ch14_Updates` | `Calculus/NFmlUpdateRules.lean`, `Calculus/UpdateRules.lean` |
+| `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `NFml.valid_iff_cons`) |
 | `Examples/` | `Solidity/Examples/` |
 
 Beyond mini-solkey: type soundness and reachability (`Typing/`), sort
@@ -34,20 +34,27 @@ faithfulness (`SortCheck/Faithfulness.lean`), the callback semantics
 (`Semantics/Callback.lean`, `Calculus/Callback.lean`), function
 specifications (`Calculus/SurfaceSpec.lean`), the solkey corpus (`SolidityCorpus`,
 `docs/corpus-parity.md`), and the `SolKey` reader's correspondence against
-`Taclet` (`~/projects/side-projects/lean/solkey`).
+`Taclet` (`~/projects/side-projects/lean/solkey`).  The intrinsic refactor
+(`docs/intrinsic.md`, 2026-10-07 to 10-09) scoped the syntax, typed the state
+and the run, and moved the calculus onto both.
 
 ## Still open
 
-- **The bridge (2026-10-07, ends at M4 of `docs/intrinsic.md`).** The scoped
-  syntax `Solidity` (`Scope.lean`, `Syntax/Scoped.lean`) lives beside
-  `Syntax.lean`'s `Stmt C`, which the elaborator still emits, until it
-  replaces it: the one deliberate exception to porting in place.
-  `Syntax/Resolve.lean` maps between them (`erase`, `resolve`), and the
-  elaborator's locals check is `resolve`.  `Syntax/Quote.lean` quotes
-  the scoped form (`Prog.quote`, hash-consed), and `solc_scoped` declares
-  every imported program scoped for the kernel to check (the lint, M2.3,
-  2026-10-07).  They go at M4 with the untyped `Stmt C` and its quoter,
-  when the import emits the scoped form itself.
+- **The bridge: closed (2026-10-07 to 2026-10-09, W4 and W5 of
+  `docs/intrinsic.md`).** The scoped syntax (`Scope.lean`,
+  `Syntax/Scoped.lean`) replaced `Syntax.lean`'s `Stmt C` in every
+  semantics, rule and proof: the untyped run, its calculus and the bridge
+  theorems (`run_erase`) are deleted.  What stays of the untyped side has no
+  semantics of its own: `Surface.Stmt` (`Syntax.lean`), the elaborator's
+  output and the printers' target, which `resolve` scopes
+  (`Syntax/Resolve.lean`, also the elaborator's locals check; decision 11);
+  and the closer's input below.
+- **The closer (M6c).** A leaf is closed by its erasure (`Fml.erase`,
+  `Calculus/CloseErase.lean`): `NFml` (`Update.lean`) over the untyped state
+  of `Semantics.lean`, which `Semantics/Erased.lean`'s `EState` and the
+  typed state erase to.  Porting `Closer`, `Decide*`, `NFmlClose`, the update
+  rules and the chain rewrites onto `Fml C Γ` is M6c, gated per module
+  (`docs/intrinsic.md`, "What is left").
 
 - **Calls.** Parameters and return values of reference type (`Person storage
   p`, `uint[] memory xs`) are elaboration errors (`Syntax.lean`).  An external
@@ -86,10 +93,10 @@ specifications (`Calculus/SurfaceSpec.lean`), the solkey corpus (`SolidityCorpus
 
 ## Port later
 
-- **The `SolKey` reader** (separate repository).  It imports only
-  `Solidity.Calculus.Rules` and `Solidity.Calculus.KeyTaclets` and still names
-  the old `RuleName` table; its correspondence proofs are to be migrated to
-  `Taclet`.  `AGENTS.md` and `scripts/solkey-port.mjs` cite this section.
+- **The `SolKey` reader** (separate repository, `lean/solkey`).  Ported to
+  the scoped `Taclet` on its branch `intrinsic` (`docs/intrinsic.md`, "W5
+  reader"); it requires `../../../solidity-lean-intrinsic` until `intrinsic`
+  merges into `master`, when its require goes back and the branch merges.
 - **The `Rules` corpus** (34 `.key` problems hand-written in the removed
   untyped layer): to be re-derived over the typed syntax
   (`tests/solkey/expected.tsv`).
@@ -111,8 +118,11 @@ specifications (`Calculus/SurfaceSpec.lean`), the solkey corpus (`SolidityCorpus
 - **An inner `match` does not refine an index.**  Dispatcher arms need
   top-level patterns, and `if h : ...` rather than `if ...`, so the branch
   fact reaches the proof obligations.
-- **`cases` on the indexed syntax** fails with "dependent elimination
-  failed" unless the index is generalised first.
+- **Kernel-evaluated code takes a context-indexed family apart by
+  `casesOn`**, never by `match`: the equation compiler casts every index and
+  the kernel pays a context comparison per cast (11–13× on symex; Gate G0 of
+  `docs/intrinsic.md`, condition 1).  `cases` itself works on `Prog C Γ Γ'`
+  without generalising.
 - **Notation.**  The concrete `dl{}` needs `priority := high` over the
   schematic one; the chain macro builds applications with `Syntax.mkApp` (in a
   quotation `$a $b` reads `$b` as an arrow); `dl_fml`/`dl_term` need category
@@ -129,7 +139,7 @@ their names.
 |---|---|
 | Unknown names | An error: parameters are declared locals.  mini-solkey reads an unknown name as a `uint` parameter. |
 | Struct bodies | The package-wide `Semantics.structDef`, which the interpreter reads; a `Contract` is its storage roots only (`Contract.fieldType` reads the table).  A per-contract table would let a contract disagree with what runs. |
-| Conditions | `if`, `require` and `assert` test a `Simple` value; the elaborator captures any other condition into a fresh `bool` first.  A branch may not declare, so a complex condition nested in a branch is an elaboration error. |
+| Conditions | `if`, `require` and `assert` test a `Simple` value; the elaborator captures any other condition into a fresh `bool` first, in the scope the condition stands in (a nested `else if` inside its branch). |
 | `T storage x;` | Binds `x` to no path (`Binding.unset`, since 2026-10-07): a read through it reverts, where solc 0.5 and later reject it statically.  A conditional of references declares its alias so, before the branches. |
 | Effects inside expressions | `++`/`--` in an expression and a conditional of references are captured by the elaborator before the statement (`hoist`), so `Val` stays effect-free and no rule sees them.  The order is solc's (right operand before left, right-hand side before target, base before index), pinned by `TestSuite.sol`'s evaluation-order functions.  A call in an expression (`x = f(a) + 1;`) is captured the same way, counting as an effect.  An effect or call under `&&`/`\|\|` or in a conditional's branch is an elaboration error.  A decrement is spelled `x--`/`--x` with two U+2212, since `--` opens a Lean comment. |
 | What elaborates away | `event`/`error` declarations, visibility and mutability words, ether and time units, `payable(e)`/`address(e)`, `uint256`/`int256` and enums are read by `sol{}`/`contract!{}` and gone before any `Stmt`: no constructor, no rule. |
@@ -145,8 +155,8 @@ their names.
 
 | Question | Decision |
 |---|---|
-| Modalities | The box is partial correctness (it holds unless the run ends normally in a bad state); the diamond needs a normal end.  Neither tells a revert from a stuck run, so an unfolding rule owes its statement the same successful outcome (`SameOk`), which the order-changing rules meet without side conditions.  `SolidityJudgment.Holds` differs on stuck runs. |
-| Array bounds | An index is checked where the program takes the path (`State.checkIndex`), so an update fails as its statement does and a failing update reads as a revert.  `SVal.find`/`save` address slots past the end: an alias checked when bound writes the slot a later `pop` left, as solc does. |
+| Modalities | The box is partial correctness (it holds unless the run ends normally in a bad state); the diamond needs a normal end; both accept a run that is `exhausted` (a push at the bound, decision 15 of `docs/intrinsic.md`).  The typed run is never stuck.  An unfolding rule owes its statement the same outcome up to the halt (`TRes.Sim`, `Calculus/SoundKit.lean`), which the order-changing rules meet without side conditions. |
+| Array bounds | An index is checked where the program takes the path (`checkIndex`), so an update fails as its statement does and a failing update reads as a revert.  `SVal.find`/`save` address slots past the end: an alias checked when bound writes the slot a later `pop` left, as solc does. |
 | Memory `delete` of a reference | The location gets a fresh default object (KeY's `memoryFieldDeleteReference`, solc), not a reset of the old one: an alias keeps it. |
 | Fixed-size arrays | One `RefTy.fixed E n`, not a length index on `.array`; array rules take an `ArrTy R E` (`dyn`/`fixed`) so one rule covers both, as solkey's `Path[...,array]` does.  `delete` keeps a fixed array's `n` elements (reset) and empties a dynamic one; a fixed array has no `length` slot, and its `.length` is the literal `n`; a literal index `>= n` is an elaboration error.  solkey's delete/`pop` taclets exclude fixed elements; the Lean rules do not, and are sound for them. |
 
@@ -161,11 +171,11 @@ their names.
 
 | Question | Decision |
 |---|---|
-| Where a callee's body lives | In the call (`Stmt.call ... body`), with every callee local renamed fresh (`renameStmts`), not looked up in the contract: a contract holding `Stmt` bodies indexed by itself is an inductive-inductive type Lean lacks.  The contract keeps the body as read (`FunDecl.body`); the elaborator types and inlines it at each call.  `Stmt.run` is structural with no rank certificate, and the elaborator is the only author of a call's body.  A function calls only the functions declared before it, so inlining ends; a recursive call is an elaboration error. |
-| Binding arguments | One after another (`Arg.bindSeq`), so `internalCallExpand` and `functionBodyExpand` are exact.  solc reads every argument before the call; the two agree because a call is separated (`Arg.separatedFrom [] args`), which the elaborator's fresh parameters guarantee.  The capture rule takes the leftmost argument that is not simple: a criterion the capture could re-trigger would loop at an index that is not fresh, and `Fml.step_decreases` holds at every index. |
+| Where a callee's body lives | In the call (`Stmt.call f args ret body`), closed over a frame of its own (its returns on its parameters, `rs ++ ps`), not looked up in the contract: a contract holding `Stmt` bodies indexed by itself is an inductive-inductive type Lean lacks.  The contract keeps the body as read (`FunDecl.body`); the elaborator inlines it at each call with every callee local renamed fresh (`renameStmts`), and `resolve` reads it back as the closed frame.  `Stmt.run` is structural with no rank certificate, and the elaborator is the only author of a call's body.  A function calls only the functions declared before it, so inlining ends; a recursive call is an elaboration error. |
+| Binding arguments | The arguments are read in the caller's context and bound as the frame's parameters, as solc reads every argument before the call, so `internalCallExpand` and `functionBodyExpand` are exact with no condition (the untyped side's `Arg.separatedFrom` is gone with its run).  The capture rule (`functionCallArgCapture`) takes the leftmost argument that is not simple: a criterion the capture could re-trigger would loop. |
 | `return` | Anywhere in a body, lowered away by the elaborator (`lowerReturns`, run on a callee's body after its locals are renamed) rather than as an abrupt completion in `Stmt.run`.  What follows a `return` is dead; the statements after an `if` with a returning branch move into the other branch.  A moved statement naming a branch's own declaration is an elaboration error.  A callee's `return` ends the callee only. |
 | Callback semantics | A relation over `Stmt.run` (`ExecS`/`ExecP`), not a second interpreter: every statement but a transfer, a branch and a call is `Stmt.run`'s, so the relation cannot drift.  A transfer halts, leaves the invariant broken (an outcome no formula accepts), or resumes in `State.havoc` (storage and ledger replaced; locals, memory and funds kept, as solkey `0b885c229d` keeps `selfBalance`) satisfying it. |
-| Callback taclets | A second inductive `CallbackTaclet`, not `Taclet` constructors: `Taclet.sound` is against `Stmt.run`, and one-rule-per-statement would break.  The box constructor as in solkey (the diamond is not ported); the resume premise is a second sequent under `{havoc}` (KeY's anonymising update). |
+| Callback taclets | A second inductive `CallbackTaclet`, not `Taclet` constructors: `Stmt.sound` is against `holds` (the deterministic run), and one-rule-per-statement would break.  The box constructor as in solkey (the diamond is not ported); the resume premise is a second sequent under `{havoc}` (KeY's anonymising update). |
 | The invariant | An `Invariant C` is a formula with no local and no transfer (solkey's `CInv(storage, net)`); the frame lemmas need it closed.  It may read the ledger, which a callback havocs, and `address(this).balance`, which it keeps (`State.havoc`). |
 | `ProvesC` | The ordinary taclets lift on a statement that pays nothing and runs no other, and whose premise pays nothing; a goal with no transfer left is `Proves`'s (`holdsC_iff_holds`).  Validity with callbacks implies validity without (`valid_of_validC`). |
 | External calls (`try`) | The callee is never run.  Without callbacks how a call ends is the transaction's (`TxEnv.ext`, a table read by `Stmt.run`, which no formula reads); a call with no entry reaches an address with no code and reverts in the caller, and so does data that does not decode (`bindData`).  `tryCallNoCallbackBox` has a goal per clause, for every value of the locals it binds (`Premise.branches`, `Fml.alls`), so a proof holds whatever the table says.  With callbacks a `try` is a point where control leaves (`Stmt.hasTransfer`), and `ExecS` runs it nondeterministically, its success from a `havoc`ked state keeping the invariant. |
@@ -177,7 +187,7 @@ their names.
 |---|---|
 | How a send ends | Asked of the transaction, as a `try`'s ending is: `Semantics.sendAt` reads `TxEnv.ext` at `sendKey a v` (empty calldata, the amount as the one word).  No entry or `ok` books the payment as `transfer` does and sets `pv` true; any other entry books nothing and sets `pv` false.  No new field: the oracle a `try` already reads.  Always-succeeding would prove `ok == true`, false on the EVM. |
 | The statement | `Stmt.send pv r a`, `pv` a `bool` local, beside `Stmt.transfer`.  `bool ok = r.send(a);` elaborates as `bool ok; ok = r.send(a);`: `valueDeclSkip` where solkey fires `localValueDeclInitDrop` (same node count; the default is set, then overwritten by the send); a bare `r.send(a);` does not parse, as solkey has no rule for it. |
-| Labelled goals | `Premise.cases fs us`: each formula of `fs`, then `{U} ⟨[ ..ω ]⟩ φ` for each update, read as one conjunction (`Premise.fml`) and as `Proves.cases`'s two hypotheses.  `Premise.Correct` asks that the run be one of the updates; the formulas are extra goals.  `Derive.casesGoals` lists the goals by recursion, with no `List.append` for `decide +kernel`. |
+| Labelled goals | `Premise.cases fs us`: each formula of `fs`, then `{U} ⟨[ ..ω ]⟩ φ` for each update, read as one conjunction (`Premise.fml`) and as `Proves.cases`'s two hypotheses.  `Premise.Sound` asks that the run be one of the updates; the formulas are extra goals.  `Derive.casesGoals` lists the goals by recursion, with no `List.append` for `decide +kernel`. |
 | The diamond | Ported (`sendNoCallbackDiamond`), unlike `transfer`'s: a refusal is an outcome of the run.  Its "non-negative amount" goal is solkey's and not needed for soundness (the booking halts on a negative amount). |
 | With callbacks | A send is a point where control leaves (`Stmt.forks`, `Stmt.hasTransfer`).  `ExecS` books it as the transfer of its amount and then halts where that does, leaves the invariant broken, resumes in a `havoc`ked state keeping it with `pv` true, or fails with nothing booked and `pv` false (`sendFailed`), the last whatever the oracle says: a callee may always revert.  `ProvesC.send` reads `CallbackTaclet.sendWithCallbackBox`'s premise as solkey's three goals, sound by `holdsC_sendCb`; the ordinary send rules do not lift (the statement forks).  `Examples/Tactics/Callback.lean`'s `callToKeepsInv` is `PiggyBankNet.callTo` under a storage invariant. |
 | Cost | `Stmt.run` and the proofs by cases on it grow by one arm; `TestSuite/Derived1.lean` re-checks in 7.7 s on a fresh worker on this branch and on master alike. |
@@ -197,10 +207,10 @@ their names.
 | Several returns | `FunDecl.rets`, a list (unnamed returns are `_ret`, or `_ret0`, `_ret1`, …, where solkey's `ExpandFunctionBody` names every unnamed return `ret{i}`, a single one `ret0`; `FunDecl.ret` is the one return of a function that has one).  A call with targets (a tuple assignment's, an obligation's) carries `CallRet.rets`: each return variable declared at its type's default on entry (solc zeroes them; KeyTaclets' `R ri;` leaves them unconstrained), nothing assigned on leaving; a bare `f(a);` carries `CallRet.none` and declares the returns at the head of its body.  The targets are ordinary statements after the call, `t = r;`, solkey's `function-frame{…} t0 = r0;` without the frame; the printers write the call and them as the tuple assignment (`Stmt.tupleCallStr?`).  Only value types: `memory` on a return of several is an elaboration error.  `Stmt.run` is unchanged (`CallRet.enter`/`leave`). |
 | Tuples | Desugared by the elaborator as `ParserUtils.tupleAssignment` does (`elabTuple`): from a call, the call then the targets left to right; from a tuple, each component with a target into a fresh temporary, then the targets, so `(a, b) = (b, a);` swaps; a declaration `(uint a, , bool b) = …` declares its variables first and assigns them directly.  A component left out is dropped when it can neither revert nor have an effect, and evaluated otherwise (solc; solkey keeps only a call and drops the rest).  Targets that may alias (the same name twice, two that are not stack locals, one that reads another) are refused until solc's order of their writes is checked. |
 | `return (e₀, e₁)` | `lowerReturn`: each return variable assigned in order, or, when a component reads a return variable (solkey's `ReturnLowering`, `returnSwapped`), the tuple assignment `(r₀, r₁) = (e₀, e₁);`, which reads every component first.  **Lean only:** `return g();` of several values is the tuple assignment `(r₀, r₁) = g();`, which solkey's `ReturnLowering` refuses (one value for several returns). |
-| Blocks | `{ … }` is `RawStmt.block`, elaborated as a branch (its declarations scoped to it) and spliced flat.  A block with a `return` inside is spliced into the statements after it before `lowerReturns` moves them (solkey's `blockReturn`), under the same guard as an `if`: a statement after it may not name one of its declarations.  There is no block, frame or `return` left in `Stmt`: `blockReturn`, `functionFrameReturn` and `functionFrameEmpty` have nothing to rewrite. |
+| Blocks | `{ … }` is `RawStmt.block`, elaborated as a branch (its declarations scoped to it); in the scoped syntax it is `Stmt.block`, its locals popped at its end, and `blockEmpty` steps into it (claimed since the intrinsic refactor).  A block with a `return` inside is spliced into the statements after it before `lowerReturns` moves them (solkey's `blockReturn`), under the same guard as an `if`: a statement after it may not name one of its declarations.  There is no `return` left in `Stmt`: `blockReturn` and `functionFrameReturn` have nothing to rewrite; a call's frame ends with its expansion (`functionFrameEmpty`, claimed with `internalCallExpand`/`functionBodyExpand`). |
 | `return` inside a loop | Lowered through a flag local, as solkey's `LoopLowering` does (`lowerLoops`, `docs/loops.md`): `r = e; ret = true;`, the loops' conditions and the rest of their bodies guarded by `!ret`, and `if (ret) return;` after the outermost loop, which `lowerReturns` lowers as any early `return`.  `lowerReturns` alone cannot: inside a loop the rest of the body and the remaining iterations would have to move, which no rewrite of the body can do.  Not an early-exit outcome in `Stmt.run` (rejected: Frame rules, below). |
 | No recursion | A function calls only the functions declared before it, so inlining ends; this lane adds none. |
-| Two call rules | solkey `671f6762a9` splits KeY's call into `InternalCall` (`f(a);`, `y = f(a);`: `internalCallExpand`) and `FunctionBodyStatement` with targets (a tuple assignment's call, a synthesized obligation's `result = f(x̄)@C;`: `functionBodyExpand`).  Lean keys the split on the call's `CallRet`: `CallRet.rets` (the call returns to targets after it) is `fbs`, anything else `ic` (`CallRet.isRets`, a side condition of each; `callStep` picks by it, so `Uniqueness` stays one rule per statement).  A bare call of a function of several returns, `f(a);`, is an `InternalCall` in solkey; here it declares the returns at the head of its body and carries `CallRet.none` (`elabCallRet`), so it is `ic` too.  Both rules have the same premise, `expand_function_body`, and the same soundness (`Stmt.run_call_expand`).  Like `functionBodyExpand`, `internalCallExpand` waits for simple arguments (`functionCallArgCapture` first, decision D3), where KeY's binds `T p = arg` as written. |
+| Two call rules | solkey `671f6762a9` splits KeY's call into `InternalCall` (`f(a);`, `y = f(a);`: `internalCallExpand`) and `FunctionBodyStatement` with targets (a tuple assignment's call, a synthesized obligation's `result = f(x̄)@C;`: `functionBodyExpand`).  Lean keys the split on the call's `CallRet`: `CallRet.rets` (the call returns to targets after it) is `fbs`, anything else `ic` (`CallRet.isRets`, a side condition of each; `callStep` picks by it, so `Rule.premise_unique` stays one rule per statement; a memory return is `ic`, decision 19 of `docs/intrinsic.md`).  A bare call of a function of several returns, `f(a);`, is an `InternalCall` in solkey; here it declares the returns at the head of its body and carries `CallRet.none` (`elabCallRet`), so it is `ic` too.  Both rules have the same premise, `expand_function_body`, and the same soundness (`Stmt.sound_call`).  Like `functionBodyExpand`, `internalCallExpand` waits for simple arguments (`functionCallArgCapture` first, decision D3), where KeY's binds `T p = arg` as written. |
 | Specification obligations | Elaborated as solkey's synthesized `result = f(x̄)@C;` (decision D1): `T result;` then a call that returns to `result` (`CallRet.rets`; a void function's `f(x̄)@C;` returns to no target, `CallRet.rets []`), so the obligation fires `functionBodyExpand` as solkey's does.  **Lean only:** `T result;` is a statement of the box (one more node, `valueDeclSkip`), where solkey declares `result` among the problem's program variables; the sequent prints it `result = f(x̄);`.  A function of several returns returns to `result_<name>` (`SpecCompiler.resultVariable`), printed `(result_lo, result_hi) = f(x̄);`, and an `ensures` names a return by its name after the locals and before the state variables (`SpecCompiler.visitIdent`); `\result` needs one return.  **Lean only:** a function with an unnamed return has an obligation (its return is `result`, or `result__ret0`, … of several), where solkey refuses one (`SolidityOutline.unsupportedReason`). The tree has the same nodes as before but for the rule's name: `result = r;` was the call's own last statement (`CallRet.result`) and is now the statement after it. |
 | Printing a call with targets | `ppTupleCall?` (`Calculus/RuleSyntax.lean`) prints a `CallRet.rets` call and the target assignments after it as the tuple assignment, as `Stmt.tupleCallStr?` does for `Prog.toStr`.  With two targets or more the printed tuple re-elaborates to the same call (up to the elaborator's fresh names, which a chain line cannot pin; no chain runs a tuple call); `y = f(x̄);` and `f(x̄);` print an `fbs` as the `ic` they re-elaborate to (solkey tells the two apart by `@C`). |
-| Frame rules | `blockReturn`, `functionFrameReturn`, `functionFrameEmpty` are architectural, like `blockEmpty`: returns are lowered at elaboration (`lowerReturns`), and a call's body is spliced flat, so there is no block and no frame to rewrite.  A faithful `function-frame` (an abrupt `return` completion in `Stmt.run`) would undo decision `978083b` and rewrite `Res`/`Halt` and every soundness, Typing, NoPanic, Callback and Evm proof.  **User decision (2026-10-06): an early-exit outcome in `Stmt.run` is rejected** in favour of lowering (`lowerReturns`) plus flags (a `return` that cannot be moved, as in a loop, lowered through a flag local); `RuleShapes.unclaimedTaclets` lists the three beside `blockEmpty`. |
+| Frame rules | `blockReturn` and `functionFrameReturn` are architectural: returns are lowered at elaboration (`lowerReturns`), so there is no `return` to rewrite.  A faithful `function-frame` (an abrupt `return` completion in `Stmt.run`) would undo decision `978083b` and rewrite `Res`/`Halt` and every soundness, Typing, NoPanic, Callback and Evm proof.  **User decision (2026-10-06): an early-exit outcome in `Stmt.run` is rejected** in favour of lowering (`lowerReturns`) plus flags (a `return` that cannot be moved, as in a loop, lowered through a flag local); `RuleShapes.unclaimedTaclets` lists `blockReturn` and `functionFrameReturn`; `blockEmpty` and `functionFrameEmpty` are claimed since the scoped calculus (`docs/lean-key-rule-map.md`). |

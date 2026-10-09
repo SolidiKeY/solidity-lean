@@ -9,6 +9,15 @@ twin that prints a cheap replay for every searching tactic.
 Today 435 of the 438 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
+Since the intrinsic refactor (`docs/intrinsic.md`, W3 and W4) the
+obligations are scoped formulas (`TestSuite/ScopedProblems.lean`,
+`Fml Solkey.TestSuite []`, each checked to erase to its statement in
+`TestSuite/Problems.lean`), `⊢` is the scoped sequent over the typed run, and
+`sol_prove` walks it (`Calculus/ProvesDerive.lean`), its leaves erased and
+closed by the closer of the sections below.  The sections are dated records:
+the modules and theorems they name are the ones of their date (the untyped
+run, `Taclet.sound`, the cover goal `cov` are gone).
+
 ## Decisions (2026-10-05)
 
 - **Box meaning.** Follow Solidity and solkey exactly: a failed `assert` is a
@@ -2311,12 +2320,14 @@ The W7 review's follow-up, in `Derive.residue`.
   (`propRule.key`), its TRUE goal `Γ, false ⟹ φ` closed by `closeFalse`, its
   FALSE goal `Γ ⟹ false, φ` the premise weakened, which the closer proves.
   Since solkey's rules derive it, both rule sets have it, so
-  `Proves.toSolkey` keeps it, and `Proves.solkey_not_call`
-  (`Calculus/SolkeyFragment`) now says that solkey's rules derive
-  nothing about a call with an argument that is not simple *except behind a
-  context that refutes itself*: its conclusion is `Valid (Hyp.wrap Γ .ff)`,
-  and `Proves.solkey_lt_calculus` reads it at the empty context.  Sound by
-  `Hyp.wrap_mono`, one line of `Proves.sound`.
+  `Proves.toSolkey` keeps it.  (On that date `Proves.solkey_not_call` said
+  that solkey's rules derive nothing about a call with an argument that is
+  not simple *except behind a context that refutes itself*, and
+  `Proves.solkey_lt_calculus` read it at the empty context.  Since decision
+  60 of `docs/intrinsic.md` the scoped `Proves.solkey_lt_calculus`
+  (`Calculus/SolkeyProves.lean`) is witnessed by a loop,
+  `[ while (false) { } ] true`, which `⊢` derives and `⊢ₖ` does not:
+  `Proves.solkey_blocked`.)
 - **The strategy** (`Derive.splitRes`).  At a split `c`/`c'`, when `c`
   reads only locals the context binds, through its updates, to terms of
   literals and value operators, transitively (`Derive.groundCond`, a

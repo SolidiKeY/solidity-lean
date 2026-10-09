@@ -1,7 +1,8 @@
 # Aligning the executable semantics with solc
 
-The interpreter (`Stmt.run`, `Solidity/Semantics.lean`) is a port of KeY's
-state layer, and KeY's calculus is in several places more liberal than the
+The interpreter, the typed run (`Stmt.run`, `Solidity/Semantics/Run.lean`)
+over the typed state, whose operations erase to `Solidity/Semantics.lean`'s
+untyped ones (the closer's terms read those), is a port of KeY's state layer, and KeY's calculus is in several places more liberal than the
 Solidity compiler it models. Where the two differ the interpreter follows
 **solc** (the 0.8 line), and this document is the authority for where and
 why. solkey `f2eb3d98eb` reads storage the same way in the array items
@@ -16,26 +17,26 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Unary minus | at `int` only, range-checked there: `-x` at `uint` is refused by the elaborator and the spec reader (`UnOp.accepts`, since 2026-10-07; before, it was accepted and its result left `uint`'s range), as solc refuses it | `UnOp.accepts`, `unopCheck` | |
 | `**` | reverts on overflow (`2 ** 256`), `0 ** 0` is `1`, a negative exponent reverts (since 2026-10-07; it was `.stuck`): solc's exponent is unsigned, so never negative on the EVM; here one can be, from an out-of-range environment value (`TxEnv` fields are unconstrained `Int`s) or storage word | `applyBinOp` | `Evm/Examples.lean` |
 | Literals | a literal is in its type's range, `uint` below `2^256`, `int` in `[-2^255, 2^255)` (since 2026-10-07): one out of it is solc's compile error, and here no term (`Simple.lit` carries `PrimTy.inRange`); the elaborator refuses it (`litAt`), and the EVM fragment no longer checks it.  In a constant expression solc folds the literals exactly first: `2**256 - 1` written out as one literal minus `1` is the literal `2^256 - 1`, and so here (`check` folds `+ - *` and an exact `/` of two literals, `BinOp.foldLit?`; a result out of range is still refused) | `Simple.lit`, `PrimTy.inRange`, `litAt`, `BinOp.foldLit?` | `Typing/Constructibility.lean` (`SVal.fits`) |
-| Mappings in memory | a memory local, a memory declaration and a memory path are at a type with no mapping (since 2026-10-07; solc rejects one): `MPath.var` and `declMem` carry `(Ty.ref R).mapFree`, and a member or element of a memory path inherits it (`MPath.mapFree`).  The interpreter's `allocDefault`/`copyStToM` keep their `undef` arms on a mapping: no theorem yet connects `mapFree` to them, and the closer's untyped `.alloc R`/`.addM R` terms reach them, until M4c (`docs/intrinsic.md`) | `MPath.var`, `Stmt.declMem`, `memOk` | |
+| Mappings in memory | a memory local, a memory declaration and a memory path are at a type with no mapping (since 2026-10-07; solc rejects one): `MPath.var` and `declMem` carry `(Ty.ref R).mapFree`, and a member or element of a memory path inherits it (`MPath.mapFree`).  The typed heap holds no mapping object (`MObj`, `Semantics/Heap.lean`), so the run never allocates one; the untyped `allocDefault`/`copyStToM` keep their `undef` arms on a mapping, which only the closer's untyped `.alloc R`/`.addM R` terms reach (until M6c, `docs/intrinsic.md`) | `MPath.var`, `Stmt.declMem`, `memOk` | |
 | `bool` mapping keys | a `mapping(bool => V)` keeps two slots, at `0` and `1`: solc hashes a key padded to a word (`keccak256(h(k) . p)`), and a `bool` pads to `0`/`1` (decisions 10 and 14, `docs/intrinsic.md`).  The interpreters read an index at its key type (`Value.keyAt`: a `bool` as `0`/`1`, a number as itself, a value of the other kind `undef`), the typed run hashes it so (`PrimTy.key`, `SRef.atKey`), and a rule's term writes the hash: `m[b]` lowers to `at(m, b ? 1 : 0)` (`Term.keyAt`, `Simple.keyLower`), as the solc frontend writes it (`Frontend/SolcJson.lean`, `boolKey`).  So `at` itself still reads a number, and the closer, which reads formulas over untyped states, still tells two numeric keys apart by their values; each typed step's erasure lemma holds at every key (`PrimTy.keyAt_erase_key`, `Semantics/StepErase.lean`).  The solkey corpus's `boolKeyed` store is still unported | `Value.keyAt`, `PrimTy.key`, `Term.keyAt`, `Simple.keyLower` | `Typing/Constructibility.lean` (`bool_key_reachable`) |
 | Storage pointer without a target | `T storage p;` binds `p` to no path (since 2026-10-07; it bound nothing, so a loop's next iteration saw the last one's binding and a read was `.stuck`): a read or a write through `p` reverts.  solc rejects such a read statically; KeY's `storageLocalDeclSkip` binds nothing (`docs/lean-key-rule-map.md`) | `Binding.unset`, `aliasPath`, `UpdElem.unset` | `Examples/Tactics/StorageSuite.lean` (`unsetAliasWrite`, `unsetAliasRead`, `unsetAliasLoop`) |
 | Memory local without an object | a memory local may be unset (decision 17', `docs/intrinsic.md`, since 2026-10-08): no statement leaves one so (`T memory m;` allocates a default object, as solc's zero-initialised memory does, and every other declaration binds an object), but the calculus's hidden binder ranges over it, as over an unset alias (above).  A read or a write through an unset memory local reverts, in the typed run and in the erasure's evaluators (`Binding.unset` read as memory, which was `.stuck`).  solc has no such local | `LTy.TDenote`, `memRef`, `MPath.mvalT`, `MPath.mval`, `bindingRef` | `Calculus/Sound.lean` (`Stmt.sound`) |
-| Block-scoped locals | in the check (since 2026-10-07, M2.2): the elaborator's locals check (`resolve`) reads the branches of an `if` and a `try`, a loop's body and a call's body as scopes and a name as its newest declaration, so `{ bool x = true; } if (c) { uint x = 1; }` is accepted, as solc accepts it, and a branch's local is not read after it.  The typed run (`Stmt.run`, `TRun.ite`/`TRun.block`, `docs/intrinsic.md`) pops a scope's locals at its end, and the typing invariants are carried along it (`Typing/TypedRunInv.lean`); the untyped interpreter (`Stmt.run`), which the calculus still reads, has no scopes: a branch's local stays bound after it, unread, until M4 retires it | `resolve`, `Prog.resolveCheck`, `TRun.ite`, `TRun.block` | `Examples/Tactics/Branch.lean`, `Syntax/Splice.lean` |
+| Block-scoped locals | in the check (since 2026-10-07, M2.2): the elaborator's locals check (`resolve`) reads the branches of an `if` and a `try`, a loop's body and a call's body as scopes and a name as its newest declaration, so `{ bool x = true; } if (c) { uint x = 1; }` is accepted, as solc accepts it, and a branch's local is not read after it.  The run (`Stmt.run`, `TRun.ite`/`TRun.block`, `docs/intrinsic.md`) pops a scope's locals at its end, and the typing invariants are carried along it (`Typing/TypedRunInv.lean`); since W4 it is the only run of a statement, and the calculus reads it, so no local outlives its scope | `resolve`, `Prog.resolveCheck`, `TRun.ite`, `TRun.block` | `Examples/Tactics/Branch.lean`, `Syntax/Splice.lean` |
 | Conditional of memory references | `T memory m = c ? a : b;` binds `m` to `a`'s or `b`'s object, as solc: the elaborator declares a fresh `mv` before the branches, bound to a branch that indexes nothing (a read that cannot revert), and rebinds it in each branch.  When both branches index, `mv` is first bound to a fresh default object (`T memory mv;`), which nothing reaches: the heap has one object solc does not allocate (since 2026-10-07).  So when both branches index and `T`'s default is not well-formed (`defaultOkS`), the conditional is refused ("a conditional of two indexed memory …s, whose default is not well-formed"), where before 2026-10-07 each branch declared `mv` itself | `hoist`, `MPath.indexFree` | `Syntax/Splice.lean`, `Examples/Tactics/Branch.lean` |
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `applyBinOp`, `RawExpr.uncheck` | |
 | Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Tactics/Checked.lean` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `applyBinOp` | |
 | `assert` | a failing `assert` panics (`Panic(0x01)`), a halt distinct from `require`'s revert that neither modality accepts; KeY's "Violated" goal, an obligation under the box too | `assertOk`, `Modality.afterRun`, `Taclet.assertSimple` | `Examples/Tactics/Revert.lean` |
-| Assignment order | right-hand side first, target resolved once | `Stmt.run` (`.assign`, `.opAssign`, `.incDec`) | `Semantics.lean` examples |
-| Effects in an expression | captured before the statement in solc's order (table below) | `hoist`, `captureExpr` | `Semantics.lean` examples |
+| Assignment order | right-hand side first, target resolved once | `Stmt.run` (`TRun.assign`, `TRun.opAssign`, `TRun.incDec`) | `Examples/Tools.lean` (`Surface.Prog.runT`) |
+| Effects in an expression | captured before the statement in solc's order (table below) | `hoist`, `captureExpr` | `Examples/Tools.lean` (`Surface.Prog.runT`) |
 | Repeated member names | a struct that declares two members of one name is refused ("Identifier already declared"): the elaborator refuses a type naming one (`refusedStructs`, `unknownStructMsg`, decision 16), so every struct of `structDef` has distinct member names and the typed (positional) and untyped (by name) copies agree | `structDef_nodup`, `SVal.overlay_erase` | `Syntax/Splice.lean` (`BadDup`) |
 | Mapping-carrying copy | a storage copy of a type containing a mapping cannot be written | `Src.copy` (`mapFree`), `tyHasMapping` | |
-| Arrays past their end | `pop`, `delete`, `push` and copies keep the slots past the length; an index is checked when the path is taken | `SVal.array`, `State.checkIndex`, `SVal.overlay` | `testDanglingReferenceSurvivesPush` and three more |
+| Arrays past their end | `pop`, `delete`, `push` and copies keep the slots past the length; an index is checked when the path is taken | `SVal.array`, `checkIndex`, `SVal.overlay` | `testDanglingReferenceSurvivesPush` and three more |
 | Array lengths | a dynamic array holds fewer than `2^256` elements: its length is a `uint` (decision 13, `docs/intrinsic.md`).  The typed storage and heap carry the bound (`SVal.array`, `MObj`), so a typed length read is in range (`Storage.len`, `Heap.lenU`), and so are an erasure's lengths.  A push onto `2^256 - 1` elements exhausts the resources: the typed run halts with `exhausted` there (`Storage.full`, `TRun.push`; decision 15), and both modalities accept it (`Modality.onTHalt`), as KeY, which models no gas, reads every run (solkey's arrays are unbounded, so its diamond obligations with a push stay provable).  solc panics (`0x41`) on a storage array past `2^64` elements and its code runs out of gas long before; Lean's bound is `2^256`, and an exhausted run proves any modality.  The untyped operations have no bound and go on; a typed step read on the erasure reads the typed `exhausted` as any outcome (`TRes.Agrees`, `Semantics/StepErase.lean`), and a push below the bound ends (`push_none_ends`, `Typing/Constructibility.lean`).  Decision 13 said the push reverts: a typed revert needs the untyped push to revert too, and the untyped calculus's diamond obligations with a push (most of solkey's TestSuite is diamonds) could then not be discharged, since a storage with `2^256 - 1` elements is reachable | `SVal.array`, `MObj`, `Storage.full`, `lenU` | `Semantics/Ends.lean` |
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
 | `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `transferAt`; `Evm.compile_correct` | `Semantics.lean` |
 | `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `sendAt`, `TxEnv.ext` | `Examples/Tactics/Net.lean` |
-| Call arguments | all read, left to right, before the callee runs | `Arg.bindSeq`, `Arg.separatedFrom` | |
+| Call arguments | all read, left to right, before the callee runs | `Args.evalT`, `CallRet.enterT` (`Semantics/Run.lean`) | |
 | `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is imported as `bool ok = a.send(v)`, as solkey's `SolJSONParser.isValueCall` reads it; solc forwards all gas there, so the callee can re-enter and write storage, which `holds` ignores (the no-callback reading) and only `holdsC` covers (`Semantics/Callback.lean`). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`) | |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule) | `Stmt.run` (`.tryCall`), `bindData` | `Examples/Tactics/TryCatch.lean` |
 
@@ -74,7 +75,8 @@ is not captured again: `uint se1 = 0; y = se1++ + se1;` reads the right
 `se1` after the `++` (`1`, where solc gives `0`), by the convention of
 written lines (proposed decision 30 of `docs/intrinsic.md`).
 
-`Semantics.lean`'s examples pin three of them. An effect under the right
+`Examples/Tools.lean` pins three of them (a block run typed,
+`Surface.Prog.runT`). An effect under the right
 operand of `&&`/`||`, or in a branch of a conditional, would run where solc
 does not run it, so it is an elaboration error.
 
@@ -299,12 +301,11 @@ ignores that, as solkey's `noCallback` does.
 ## Calls
 
 solc evaluates every argument of an internal call, left to right, before the
-callee runs. `Stmt.run` binds them one after another (`Arg.bindSeq`), as
-KeY's function-body expansion declares them. The two agree because a call is
-*separated* (`Arg.separatedFrom`: no non-simple argument reads a parameter
-bound before it) and the elaborator's parameters are fresh names. A callee's
-locals are renamed fresh at each call, so they live in the caller's locals as
-they would in a frame of their own.
+callee runs. `Stmt.run` does the same: it evaluates the arguments in the
+caller's context (`Args.evalT`) and runs the body in a frame of its own, its
+returns on its parameters (`Stmt.call`, `Syntax/Scoped.lean`), which sees
+no caller's local; KeY's function-body expansion declares the parameters one
+after another, and the two agree because no argument can read a parameter.
 
 ### Returns and tuples
 
@@ -321,12 +322,13 @@ they would in a frame of their own.
 
 ## Constructors
 
-A deployment (`Contract.deploy`, `Semantics.lean`) runs the program
-`constructor(args);` from `Contract.deployState tx`: every root at its
+A deployment (`Contract.deployT`, `Calculus/Deploy.lean`) runs the program
+`constructor(args);` typed from the state `Contract.deployState tx`
+(`Semantics.lean`) reads as: every root at its
 default, no locals, an empty heap, `net` holding the deployer's payment.
 
 - **A constructor that is not `payable` refuses value**, as solc's creation
-  code reverts on a nonzero `CALLVALUE`: `Contract.deploy` reverts before it
+  code reverts on a nonzero `CALLVALUE`: `Contract.deployT` reverts before it
   runs anything.  The obligation does not check it: solkey's unspecified
   one has no `msg.value` fact, and `Problem.deploy_of_valid_nil` takes
   `payable ∨ msg.value = 0` as a hypothesis; a specified one assumes
@@ -374,9 +376,9 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   `transfer`/`send` amount, which revert (since 2026-10-07; the table above). The compiled code has no
   panic: there a failing `assert` reverts (`compile_correct`).
 - **Block-scoped locals.** The locals check scopes them as solc does, and
-  so does the typed run (`Semantics/Run.lean`); the untyped interpreter the calculus still reads
-  keeps a block's local bound after it (unread) until M4; a conditional of two indexed memory references
-  allocates an object nothing reaches (the table above).
+  so does the run (`Semantics/Run.lean`), the only one since W4; a
+  conditional of two indexed memory references allocates an object nothing
+  reaches (the table above).
 - **Fragment width.** Loops run (`Loop.run`, `docs/loops.md`) and are
   proved by unwinding to a bound or by an invariant, but the EVM compiler
   refuses them (`Evm.inFrag`); `uintN`/`intN`
@@ -392,9 +394,10 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   dropped where solc keeps it. No test in the corpus reads it.
 - **No bound on a dynamic array's length.** solc's `push` panics (0x41)
   on an array whose length is already `2^64` (`oldLen >= 2^64`), so a
-  deployed contract holds lengths up to `2^64` and no longer; here `push`
-  (`pushOn`) appends unchecked and `wt(storage)` (`storageWtB`) bounds
-  words and keys, not lengths. The delta goes both ways for a diamond
+  deployed contract holds lengths up to `2^64` and no longer; here a length
+  is bounded only by `2^256` (the push at it `exhausted`, "Array lengths"
+  above) and `wt(storage)` (`storageWtB`) bounds words and keys, not
+  lengths. The delta goes both ways for a diamond
   obligation. One that reads a length through checked arithmetic
   (`storagePushReadBack`: `values[values.length - 1]` after a `push`) is
   false in the model from a storage solc cannot reach, and stays underived

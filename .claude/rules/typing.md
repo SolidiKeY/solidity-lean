@@ -26,9 +26,12 @@ roots), by a typed builder that reaches past an array's end through aliases
 (Reachability) and `Stmt.keeps_tight` (Constructibility), a leaf through
 `RunInv.TKeeps.of_agrees`.
 
-`Semantics/Agree.lean` is the frame kit every soundness proof composes:
-`EnvAgreeExcept ns`, and a `*_frame` lemma per evaluator. A new evaluator in
-`Semantics.lean` needs its frame lemma there.
+The run is `Semantics/Run.lean`'s, over typed states; `Semantics.lean` keeps
+the untyped state's operations, which the typed ones erase to
+(`Semantics/StorageErase.lean`, `HeapErase.lean`, `StepErase.lean`) and the
+closer's terms read. `Semantics/Agree.lean` is the frame kit for reads on the
+erasure: `EnvAgreeExcept ns`, and a `*_frame` lemma per evaluator. A new
+evaluator in `Semantics.lean` needs its frame lemma there.
 
-Interpreter changes that follow solc over KeY are recorded in
+Changes to the run that follow solc over KeY are recorded in
 `docs/solc-alignment.md`.

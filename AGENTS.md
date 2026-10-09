@@ -11,6 +11,18 @@ judgement written in the calculus's notation, and a sound proof system.
 `docs/kernel-port.md` says which chapter landed where and what is still to
 port.
 
+**The model is intrinsic** (`docs/intrinsic.md`). A statement is
+`Stmt C Γ Γ'` (`Syntax/Scoped.lean`): its locals are positions `Idx Γ t` in a
+context (`Scope.lean`), so a local read out of scope or at another type cannot
+be written. The run (`Stmt.run`, `Semantics/Run.lean`) is over a state typed by
+the context (`State C Γ`: typed storage, heap and locals) and halts only by
+revert, panic, divergence or exhaustion: it is never stuck. The elaborator
+emits `Surface.Stmt` (`Syntax.lean`: no run, no rule), which `resolve` scopes
+(`Syntax/Resolve.lean`) and the printers print. Formulas are `Fml C Γ`
+(`Calculus/Fml.lean`). A leaf reaches the closer erased (`Fml.erase`) to
+`Update.lean`'s untyped `NFml`, read over `Semantics.lean`'s untyped state,
+until M6c ports the closer.
+
 **Updates are terms** (`Update.lean`): `STerm` at `structRules.key`'s
 signature, `MTerm` at `memoryRules.key`'s — `save`/`delAt` nest, and so do
 `write`/`addM`/`copySt`.  An allocation is the two parallel elements KeY
@@ -22,13 +34,13 @@ writes, a push and a pop are nested writes over `size`, and
 **Calls are inlined** (`Syntax.lean`): a contract declares its functions
 (`contract!{ function f(uint x) returns (uint r) { … } }`), a function may
 call only the ones declared before it, and a call statement (`Stmt.call`)
-carries its callee's body with every local renamed fresh — KeY's
+carries its callee's body, closed over a frame of its own — KeY's
 `InternalCall`, which `internalCallExpand` inlines (`functionBodyExpand` for
 a call with targets, `CallRet.rets`: a tuple assignment's, a spec
 obligation's).  **Callbacks** are
-a second reading of the modalities (`Semantics/Callback.lean`, `holdsC`, the
-`CallbackTaclet`s and `ProvesC` of `Calculus/Callback.lean`), not a change
-to `Stmt.run`.
+a second reading of the modalities (`Semantics/Callback.lean`, `holdsC` of
+`Calculus/CallbackHolds.lean`, the `CallbackTaclet`s and `ProvesC` of
+`Calculus/Callback.lean`), not a change to `Stmt.run`.
 
 **`sol{ … }` is Solidity, with two spellings of its own** (`Syntax.lean`):
 a decrement is `x−−`/`−−x` (two U+2212; `--` opens a Lean comment), and
@@ -37,8 +49,9 @@ of references is captured by the elaborator before its statement, in solc's
 evaluation order.
 
 A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
-files in a separate repository. It imports only `Solidity.Calculus.Rules` and
-`Solidity.Calculus.KeyTaclets` (and through them the syntax). That is its
+files in a separate repository. It imports only `Solidity.Calculus.Rules`,
+`Solidity.Calculus.DelabErase` and `Solidity.Calculus.KeyTaclets` (and through
+them the syntax). That is its
 whole dependency surface: renaming a `Taclet` constructor breaks its
 correspondence proofs, which is the point of it. It lives in the
 side-projects repository (`lean/solkey`, requiring this checkout by path):
@@ -63,9 +76,11 @@ earlier change made for speed.
 `docs/module-map.md` — one line per module. Read it instead of searching
 when you need to know where something lives.
 
-Layering: types and names in `AST.lean`, the typed syntax in `Syntax.lean`,
-the interpreter in `Semantics.lean`, terms and formulas in `Update.lean`, the
-taclets in `Calculus/Rules.lean`, everything proved about them after. Keep
+Layering: types and names in `AST.lean`, contexts in `Scope.lean`, the syntax
+as written in `Syntax.lean` and scoped in `Syntax/Scoped.lean`, the state's
+operations in `Semantics.lean` and the run in `Semantics/Run.lean`, terms and
+the closer's formulas in `Update.lean`, scoped formulas in `Calculus/Fml.lean`,
+the taclets in `Calculus/Rules.lean`, everything proved about them after. Keep
 imports acyclic and local. Add new modules to `Solidity.lean`:
 `node scripts/check-orphans.mjs` fails on a module nothing imports.
 
@@ -75,9 +90,9 @@ read them by path.
 
 | Editing | Read first |
 |---|---|
-| the rule table: `Calculus/{Rules,RuleSyntax,Completeness,RuleShapes,PrintedRules,KeyTaclets}.lean`, `SortCheck/**` | `.claude/rules/rule-table.md` |
+| the rule table: `Calculus/{Rules,RuleSyntax,Arms,Blocks,Step,Taclet,Completeness,RuleShapes,PrintedRules,KeyTaclets}.lean`, `SortCheck/**` | `.claude/rules/rule-table.md` |
 | `Examples/**`, `Theory/**`, `Update.lean` (derivations and notation) | `.claude/rules/derivations.md` |
-| `Calculus/{Sound*,RuleSoundness,Logic,Symex,Close}.lean`, `Counterexamples/**` | `.claude/rules/soundness.md` |
+| `Calculus/{Sound*,ProvesSound,Logic,Symex,Close,CloseErase}.lean`, `Counterexamples/**` | `.claude/rules/soundness.md` |
 | `Typing/**`, `Semantics/**` | `.claude/rules/typing.md` |
 
 `docs/README.md` indexes the documents. `docs/lean-key-rule-map.md` is the
@@ -88,9 +103,12 @@ solc over KeY.
 ## Using the calculus
 
 A formula is written in `dl!{ … }` over a named contract (`local instance :
-InContract := ⟨StandardExample⟩`, `Calculus/SurfaceNotation.lean`). Import
-`Solidity.Calculus.NFmlClose` for the tactics, `Solidity.Calculus.Chains` for
-chains, `Solidity.Tools.ProofTree` for the tree. `Examples/` shows each of
+InContract := ⟨StandardExample⟩`) under `open scoped Solidity.Scoped`
+(`Calculus/Surface.lean`), which reads it as a scoped `Fml C []`. Import
+`Solidity.Calculus.Surface`, `Solidity.Calculus.Closers` and
+`Solidity.Calculus.NFmlClose` for the tactics,
+`Solidity.Calculus.LastLine` for chains, `Solidity.Tools.Inspect` for `#wp`,
+`#step` and the tree. `Examples/` shows each of
 these once; `.claude/rules/derivations.md` is the convention.
 
 **The taclets.** A taclet is one constructor of `Taclet C k m s p`
@@ -104,16 +122,15 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
   writes; `sol_spec` for a `spec!{f}` obligation). `#wp φ` prints what
   `sol_symex` leaves, `#step φ` one step and the rule it fired.
 - **by a walk**: `apply Proves.valid`, then one `apply` per rule — `intro`
-  (solkey's `impRight`), `update r`, `unfold r`, `split r` (goals
-  `thn`/`els`/`cov`), `splitBox r` (under the box: KeY's two goals
-  `thn`/`els`, `Calculus/Symex.lean`), `Proves.check r` (an `assert`; goals `thn`/`els`; qualified,
+  (solkey's `impRight`), `update r`, `unfold r`, `split r` (KeY's two
+  goals `thn`/`els`; `splitBox r` is the same rule), `Proves.check r` (an `assert`; goals `thn`/`els`; qualified,
   since `check` is also the elaborator's), `done r`, `empty`
   (`emptyModality`), `allIntro` (`allRight`) — and
   `refine close ?_; sol_symex; sol_close` at each leaf. `sol_derive?` writes
   the solkey names (`impRight`, `emptyModality`, `allRight`).
   `apply` refuses a rule whose `\find` or side conditions do not match.
   `sol_derive` runs the walk; `sol_derive?` prints it as a `Try this`.
-- **by a chain**: `(chain .box φ).valid h`, with `h` proving its last line
+- **by a chain**: `chain.valid h`, with `h` proving its last line
   (`Fml.Via.valid`, `Fml.Steps.valid`, `Fml.Leads.valid`).
 
 **Chains** (`Calculus/Chains.lean`) state a derivation with every line
@@ -128,7 +145,7 @@ rules' fresh names (`se1`, `sp1`); `#chain φ` (`Calculus/ChainGen.lean`)
 writes the whole chain, the program and then one rewrite a link to a last
 line, as the declaration to paste (`#chain_rest c` from the end of the chain
 `c`; `sol_chain?` on a `φ ~~> ψ` goal). A line keeps a modality open with
-`dl![m]{ ⟨[ p ]⟩ φ }` and a postcondition with `φ : Post C`; a box chain's
+`dl![m]{ ⟨[ p ]⟩ φ }` and a postcondition with `φ : Post C Γ`; a box chain's
 last line is `dl![.box]{ … }`.
 When a line is not reached, `sol_chain`'s error shows the derivation it
 computed.
@@ -140,9 +157,8 @@ walk; every node is an elaborated `apply`, nothing is trusted.
 `[serial, parent, name, branchLabel, state]`, `Tree.toJson` the web prover's
 shape, `Tree.openGoals`/`Tree.closed` its state. Branch labels are solkey's
 (`Taclet.branchLabels`, as the rules write them: `"Holds"`, `"if s#se true"`
-with `se` filled in); `thn`/`els`/`cov` are only the walk's case names, and
-`cov`, which solkey does not have, appears under the diamond, and under the
-box only where `Proves.closeTrue` does not prove it. The commands: `#proof_tree φ` (the GUI layout and a
+with `se` filled in); `thn`/`els` are only the walk's case names. The
+commands: `#proof_tree φ` (the GUI layout and a
 summary), `#proof_node n φ` (sequent, rule, parent, children, tactics),
 `#proof_tree_json φ`. `Examples/ProofTree.lean` pins their output: a change
 to the strategy or a printer fails there.
@@ -159,7 +175,7 @@ to the strategy or a printer fails there.
    (`tryCatchRuntimeEx`; a plain `try` does not catch them). A step that
    fails ends the search with a note, not with an error. Greedy choices can
    dead-end: search depth first in a fixed order and keep the best leaf
-   (`ChainGen.searchRewrites`).
+   (`NFml.Chain.searchRewritesUsing`).
 3. **Measure before optimising.** In a scratch module under
    `Solidity/Scratch/` (never committed), time one term or tactic with an
    `IO.monoNanosNow` wrapper, or set `trace.profiler` on one declaration. A

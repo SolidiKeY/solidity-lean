@@ -22,7 +22,7 @@ Solidity source ──(1) sol{…} / contract!{…}──▶ Prog C ──(2) Pr
       └──(3) solc (legacy | via-IR) ──▶ EVM bytecode ──(4) EVM──▶ storage slots
 ```
 
-Proved: the rules are sound for (2) (`Rule.sound`, `Proves.sound`,
+Proved: the rules are sound for (2) (`Stmt.sound` with `Rule.toStep`, `Proves.sound`,
 `ProvesC.sound_of`/`ProvesC.valid`); the repository's compiler agrees with (2) (`compile_correct`)
 on the programs it compiles (`inFrag`: no memory, loops or `try`) from a
 state it simulates.  (2) is never stuck, by construction: the typed run halts
@@ -259,7 +259,7 @@ Mutate `Semantics.lean` one decision at a time (RHS after target, a `checkArith`
 dropped, `pop` not clearing, `delete` resetting mappings, a push not reusing its slot,
 an unbounded alias bind, `**` unchecked, `transfer` not debiting) and require the suite
 to kill each. Mutate `Calculus/Rules.lean` too (drop a guard, swap a capture order): if
-`Taclet.sound` still builds, the semantics does not constrain that detail (a freedom or
+`Stmt.sound` still builds, the semantics does not constrain that detail (a freedom or
 a hole in the typed run); if G misses it, G is too weak. A survivor is a decision no test
 observes. Proofs do not build on a mutant, hence `solcases` must not import them.
 
@@ -328,8 +328,8 @@ Proved: every statement has exactly one rule, the strategy's (`Stmt.rule_exists`
 measurement (F, `docs/corpus-parity.md`), not a theorem.
 
 **M. Symbolic execution is exact; premises as equivalences.** The rules are
-equivalences in substance (`Modality.after_sameOk` is an `↔`; `UpdRule.sound` and
-`Fml.simpUpds_holds` hold both ways). Missing: `Premise.Correct` as an equivalence and
+equivalences in substance (an update arm is an equation between runs, `StepAgrees.erased`;
+`UpdRule.sound` and `NFml.simpUpds_holds` hold both ways). Missing: `Premise.Sound` as an equivalence and
 `symex_complete : holds σ φ → holds σ (symex n φ)`. Then a loop-free formula is valid
 exactly when its modality-free form is: relative completeness, so the calculus is never
 why a proof fails, and L3 becomes a theorem.  The typed run has no `stuck` (it halts by
@@ -377,7 +377,7 @@ use them as data, as external programs, or from a sibling repository.
   write through a dangling reference survives the re-grow: the recorded
   push-over-a-recycled-slot delta). D's printer should emit their case format; a sibling
   repository can run the typed run and their interpreter on the same programs with no EVM in
-  the loop, and later prove a simulation, so `Taclet.sound` reaches a semantics tested
+  the loop, and later prove a simulation, so `Stmt.sound` reaches a semantics tested
   against the EVM. Methods to copy: a pinning test per fix (99 witness modules), a classed
   divergence log, fault-injected detectors.
 - **EVMYulLean** (`NethermindEth/EVMYulLean`): EVM and Yul at Cancun, 22,330 of 22,332
