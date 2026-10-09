@@ -252,7 +252,7 @@ theorem mono {m : Machine} {L' : Nat} (h : Sim C L b F σ ρ m) (hL : L ≤ L') 
 
 /-- A storage write that lowers no array's length. -/
 theorem store' {m : Machine} (h : Sim C L b F σ ρ m) {st' : Slot → Nat}
-    {stor : List (Name × SVal)} (hs : ReprStore C L st' stor)
+    {stor : List (Name × Semantics.SVal)} (hs : ReprStore C L st' stor)
     (hlen : ∀ x, LenSlot C x → m.store x ≤ st' x) :
     Sim C L b F { σ with storage := stor } ρ { m with store := st' } :=
   ⟨hs, h.vals, h.aliases, h.net, h.netSelf, h.bound, fun i hi => by
@@ -280,7 +280,7 @@ theorem meet_right {m : Machine} (G : Frag Γ) (h : Sim C L b F σ ρ m) :
 /-- A storage write that may shrink an array (`pop`, `delete`): the fragile
 aliases forgotten. -/
 theorem storeDrop {m : Machine} (h : Sim C L b F σ ρ m) {st' : Slot → Nat}
-    {stor : List (Name × SVal)} (hs : ReprStore C L st' stor) :
+    {stor : List (Name × Semantics.SVal)} (hs : ReprStore C L st' stor) :
     Sim C L b F.dropFragile { σ with storage := stor } ρ { m with store := st' } := by
   refine ⟨hs, h.vals, fun i hi => h.aliases i (Frag.get_dropFragile F i hi (by decide)).1,
     h.net, h.netSelf, h.bound, fun i hi => ?_, h.env⟩

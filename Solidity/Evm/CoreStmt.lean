@@ -157,7 +157,7 @@ variable {Γ : Ctx}
 /-- A storage operation the untyped side completed, typed: the typed state
 over the new storage is the untyped one. -/
 theorem into_ok {σ : TState C Γ} {o : Option (Solidity.Core.Storage C)}
-    {stor : List (Name × SVal)}
+    {stor : List (Name × Semantics.SVal)}
     (h : Solidity.Core.toRes (Solidity.Core.Storage.into σ.sem) o =
       .ok { σ.sem with storage := stor }) :
     ∃ st', o = some st' ∧ (σ.withStorage st').sem = { σ.sem with storage := stor } := by
@@ -804,14 +804,14 @@ theorem copy_sim {R : RefTy} (l : Solidity.Core.Loc C Γ (.ref R))
       Except.bind], run_append_revert hrun⟩
 
 /-- A `push` the untyped side completed, typed. -/
-theorem push_ok {E : Ty} {r : SRef C (.ref (.array E))} {elems shadow : List SVal}
-    {val : SVal → Res SVal} {val' : Solidity.Core.SVal E → Option (Solidity.Core.SVal E)}
+theorem push_ok {E : Ty} {r : SRef C (.ref (.array E))} {elems shadow : List Semantics.SVal}
+    {val : Semantics.SVal → Res Semantics.SVal} {val' : Solidity.Core.SVal E → Option (Solidity.Core.SVal E)}
     (hval : ∀ x : Solidity.Core.SVal E, val x.erase = Solidity.Core.toRes Solidity.Core.SVal.erase (val' x))
-    {new : SVal} (hnew : val (pushSlot E shadow).1 = .ok new)
+    {new : Semantics.SVal} (hnew : val (Semantics.pushSlot E shadow).1 = .ok new)
     (hsv : σ.sem.findLive r.root r.path.erase = .ok (.array elems shadow false))
-    {stor : List (Name × SVal)}
+    {stor : List (Name × Semantics.SVal)}
     (hsave : σ.sem.saveStorage r.root r.path.erase
-      (.array (elems ++ [new]) (pushSlot E shadow).2 false) = .ok { σ.sem with storage := stor })
+      (.array (elems ++ [new]) (Semantics.pushSlot E shadow).2 false) = .ok { σ.sem with storage := stor })
     (hb : elems.length + 1 < 2 ^ 256) :
     σ.storage.full r = false ∧ ∃ st', σ.storage.push r val' = some st' ∧
       (σ.withStorage st').sem = { σ.sem with storage := stor } := by
@@ -855,7 +855,7 @@ theorem push_sim {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
             (defaultForTy (.prim p)) := zero_prim_repr (by rw [size_prim, ← hl, hst', upd_same])
         have hout : ∀ x, x ≠ s → x ≠ .data s (elems.length * 1) → st' x = m.store x :=
           fun x h1 h2 => by rw [hst', hl, upd_other _ _ h2, upd_other _ _ h1]
-        have harr := push_repr (shadow' := (pushSlot (.prim p) shadow).2) hr'
+        have harr := push_repr (shadow' := (Semantics.pushSlot (.prim p) shadow).2) hr'
           (st' := st') (by rw [hst', upd_other _ _ (Slot.ne_data _ _), upd_same, hl]) hnew
           (fun x hx hx' => hout x hx fun he => hx' (by rw [he, size_prim]; exact Occ.prim))
         obtain ⟨stor, hsave, hrep⟩ := save_repr hm'.store hp ⟨_, hsv⟩ harr
@@ -904,7 +904,7 @@ theorem push_sim {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
               simp only [Nat.mul_one, size_prim]] at hnew
             have hout : ∀ x, x ≠ s → x ≠ .data s (elems.length * 1) → st' x = m.store x :=
               fun x h1 h2 => by rw [hst', hl, upd_other _ _ h2, upd_other _ _ h1]
-            have harr := push_repr (shadow' := (pushSlot (.prim p) shadow).2) hr'
+            have harr := push_repr (shadow' := (Semantics.pushSlot (.prim p) shadow).2) hr'
               (st' := st') (by rw [hst', upd_other _ _ (Slot.ne_data _ _), upd_same, hl]) hnew
               (fun x hx hx' => hout x hx fun he => hx' (by rw [he, size_prim]; exact Occ.prim))
             obtain ⟨stor, hsave, hrep⟩ := save_repr hm'.store hp ⟨_, hsv⟩ harr
@@ -977,7 +977,7 @@ theorem push_sim {E : Ty} (q : Solidity.Core.SPath C Γ (.array E))
               rw [hst', hl, storeAt_other fun o ho hxo =>
                 h2 (by rw [hxo]; exact leavesF_occ _ _ _ o (List.mem_reverse.1 ho)),
                 upd_other _ _ h1]
-            have harr := push_repr (shadow' := (pushSlot (.ref R) shadow).2) hr' (st' := st')
+            have harr := push_repr (shadow' := (Semantics.pushSlot (.ref R) shadow).2) hr' (st' := st')
               (by rw [hst', storeAt_other fun o _ he => Slot.ne_data s _ he,
                 upd_same, hl]) hnew hout
             obtain ⟨stor, hsave, hrep⟩ := save_repr hm'.store hp ⟨_, hsv⟩ harr

@@ -148,7 +148,7 @@ theorem ValOutT.ofRes {p : PrimTy} {o : Option p.Denote} {out : Out} {m : Machin
     · cases h
 
 /-- A reference found live is found, typed. -/
-theorem find_of_findLive {Γ : Ctx} {σ : TState C Γ} {U : Ty} {r : SRef C U} {sv : SVal}
+theorem find_of_findLive {Γ : Ctx} {σ : TState C Γ} {U : Ty} {r : SRef C U} {sv : Semantics.SVal}
     (h : σ.sem.findLive r.root r.path.erase = .ok sv) :
     ∃ tv, σ.storage.find r = some tv ∧ tv.erase = sv := by
   have h' := State.findStorage_of_findLive h
@@ -276,7 +276,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
         refine .inl ⟨r.field h, s₀.add (offset s f), v, ?_, ?_, ?_, hall f T v h' hv, ?_⟩
         · simp only [hres]; rfl
         · rw [hroot, hpath, findLive_append, hsv]
-          simp only [bind, Except.bind, SVal.findLive, hv, SVal.findLive_nil]
+          simp only [bind, Except.bind, Semantics.SVal.findLive, hv, SVal.findLive_nil]
         · rw [hroot, hpath]; exact .field hp h
         · rw [run_append_ok hrun]; simp only [run, Machine.push, exec_cons_zero, Instr.step,
             Machine.next, Out.ok_bind, exec_nil]
@@ -314,7 +314,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
           · simp only [Solidity.Core.Loc.resolveT, hres, hv, bind, Except.bind]
             rw [show PrimTy.key v = (n : Int) from hv1, hc]; rfl
           · rw [hat, hroot, hpath, findLive_append, hsv]
-            simp only [bind, Except.bind, SVal.findLive]
+            simp only [bind, Except.bind, Semantics.SVal.findLive]
             cases lookupBy (n : Int) entries <;> simp only [Option.getD_none, Option.getD_some]
           · rw [hat, hroot, hpath]; exact hp'
           · rw [run_append_ok hrun']; simp only [run, Machine.push, exec_cons_zero, Instr.step,
@@ -371,7 +371,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
             refine .inl ⟨r.atKey (.arr .dyn) v, .data s₀ (n * size E), elems[n], rfl, ?_, ?_,
               hall n hin, elemSlot_run m m.stack n (size E) s₀⟩
             · rw [hat, hroot, hpath, findLive_append, hsv]
-              simp only [bind, Except.bind, SVal.findLive, Int.ofNat_zero_le, Int.toNat_natCast,
+              simp only [bind, Except.bind, Semantics.SVal.findLive, Int.ofNat_zero_le, Int.toNat_natCast,
                 hin, and_self, ↓reduceDIte, List.get_eq_getElem, SVal.findLive_nil]
             · rw [hat, hroot, hpath]; exact hp'
           · rw [if_neg hin, if_neg hin]
@@ -429,7 +429,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Core.Loc C Γ T) {free : Bool} {m :
             refine .inl ⟨r.atKey (.arr .fixed) v, s₀.add (k * size E), elems[k], rfl, ?_, ?_,
               hall k hin, fixedSlot_run m m.stack k (size E) s₀⟩
             · rw [hat, hroot, hpath, findLive_append, hsv]
-              simp only [bind, Except.bind, SVal.findLive, Int.ofNat_zero_le, Int.toNat_natCast,
+              simp only [bind, Except.bind, Semantics.SVal.findLive, Int.ofNat_zero_le, Int.toNat_natCast,
                 hin, and_self, ↓reduceDIte, List.get_eq_getElem, SVal.findLive_nil]
             · rw [hat, hroot, hpath]; exact hp'
           · rw [if_neg hin, if_neg (hl ▸ hin)]
