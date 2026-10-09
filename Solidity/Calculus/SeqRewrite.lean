@@ -17,9 +17,11 @@ not preserve (`Proves.updRw` rewrites the former with a refinement).
 `Proves.rewrite` (`Calculus/Proves.lean`) rewrites the context's
 preconditions and the goal at once (`Hyps.rwEqC`), as today's does.
 
-`Fml.rwEqC` uses `match` on the indexed family, against Gate G0's first
-condition: an exemption, as before (W3c `tactics`), since it runs once a
-rule.
+The kernel unfolds `Fml.rwEqC` and `Hyps.rwEqC` where `Proves.rewrite'`
+checks the rewritten sequent (`rfl`), so both are written by the
+recursors (Gate G0, conditions 1 and 2), each with its `match` form as the
+compiled twin (`Fml.rwEqCM`, `Hyps.rwEqCM`) and a link theorem; the
+recursor's clauses are stated by hand (`Fml.rwEqC_not`, …), by `rfl`.
 -/
 
 namespace Solidity
@@ -92,22 +94,64 @@ theorem Tm.denote_ofClosed (σ : EState C Γ) : {s : Srt} → (q : Surface.Tm C 
 def Tm.sideC (q : Solidity.Term C × Solidity.Term C) (t : Tm C Γ .val) : Tm C Γ .val :=
   if (t.toNil?).isSome && t.erase [] == q.1 then (Tm.ofClosed? q.2).getD t else t
 
-/-- Every equation of a formula, rewritten: both sides by `Tm.sideC`,
-through every connective, update, quantifier and hidden binder, and into the
-postcondition of a modality. -/
-def Fml.rwEqC (q : Solidity.Term C × Solidity.Term C) : {Γ : Ctx} → Fml C Γ → Fml C Γ
+/-- `Fml.rwEqC`'s compiled twin. -/
+def Fml.rwEqCM (q : Solidity.Term C × Solidity.Term C) : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .tt => .tt
   | _, .eq a b => .eq (a.sideC q) (b.sideC q)
   | _, .defined t => .defined t
-  | _, .not φ => .not (Fml.rwEqC q φ)
-  | _, .and φ ψ => .and (Fml.rwEqC q φ) (Fml.rwEqC q ψ)
-  | _, .imp φ ψ => .imp (Fml.rwEqC q φ) (Fml.rwEqC q ψ)
-  | _, .upd m U φ => .upd m U (Fml.rwEqC q φ)
-  | _, .modal m P κ φ => .modal m P κ (Fml.rwEqC q φ)
-  | _, .havoc φ => .havoc (Fml.rwEqC q φ)
-  | _, .all x p φ => .all x p (Fml.rwEqC q φ)
-  | _, .bind m x t φ => .bind m x t (Fml.rwEqC q φ)
-  | _, .anon xs φ => .anon xs (Fml.rwEqC q φ)
+  | _, .not φ => .not (Fml.rwEqCM q φ)
+  | _, .and φ ψ => .and (Fml.rwEqCM q φ) (Fml.rwEqCM q ψ)
+  | _, .imp φ ψ => .imp (Fml.rwEqCM q φ) (Fml.rwEqCM q ψ)
+  | _, .upd m U φ => .upd m U (Fml.rwEqCM q φ)
+  | _, .modal m P κ φ => .modal m P κ (Fml.rwEqCM q φ)
+  | _, .havoc φ => .havoc (Fml.rwEqCM q φ)
+  | _, .all x p φ => .all x p (Fml.rwEqCM q φ)
+  | _, .bind m x t φ => .bind m x t (Fml.rwEqCM q φ)
+  | _, .anon xs φ => .anon xs (Fml.rwEqCM q φ)
+
+/-- Every equation of a formula, rewritten: both sides by `Tm.sideC`,
+through every connective, update, quantifier and hidden binder, and into the
+postcondition of a modality; by the recursor. -/
+@[implemented_by Fml.rwEqCM]
+def Fml.rwEqC (q : Solidity.Term C × Solidity.Term C) {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ :=
+  Fml.rec (motive := fun Γ _ => Fml C Γ)
+    (tt := .tt) (eq := fun a b => .eq (a.sideC q) (b.sideC q)) (defined := fun t => .defined t)
+    (not := fun _ ih => .not ih) (and := fun _ _ ihφ ihψ => .and ihφ ihψ)
+    (imp := fun _ _ ihφ ihψ => .imp ihφ ihψ) (upd := fun m U _ ih => .upd m U ih)
+    (modal := fun m P κ _ ih => .modal m P κ ih) (havoc := fun _ ih => .havoc ih)
+    (all := fun x p _ ih => .all x p ih) (bind := fun m x t _ ih => .bind m x t ih)
+    (anon := fun xs _ ih => .anon xs ih) φ
+
+section Clauses
+
+variable (q : Solidity.Term C × Solidity.Term C)
+
+theorem Fml.rwEqC_not (φ : Fml C Γ) : (Fml.not φ).rwEqC q = .not (φ.rwEqC q) := rfl
+theorem Fml.rwEqC_and (φ ψ : Fml C Γ) : (Fml.and φ ψ).rwEqC q = .and (φ.rwEqC q) (ψ.rwEqC q) :=
+  rfl
+theorem Fml.rwEqC_imp (φ ψ : Fml C Γ) : (Fml.imp φ ψ).rwEqC q = .imp (φ.rwEqC q) (ψ.rwEqC q) :=
+  rfl
+theorem Fml.rwEqC_upd {Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
+    (Fml.upd m U φ).rwEqC q = .upd m U (φ.rwEqC q) := rfl
+theorem Fml.rwEqC_modal {Γ₁ Γ₂ : Ctx} (m : Modality) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₂)
+    (φ : Fml C Γ₂) : (Fml.modal m P κ φ).rwEqC q = .modal m P κ (φ.rwEqC q) := rfl
+theorem Fml.rwEqC_havoc (φ : Fml C Γ) : (Fml.havoc φ).rwEqC q = .havoc (φ.rwEqC q) := rfl
+theorem Fml.rwEqC_all (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) :
+    (Fml.all x p φ).rwEqC q = .all x p (φ.rwEqC q) := rfl
+theorem Fml.rwEqC_bind (m : Modality) (x : Var) (t : LTy) (φ : Fml C (t :: Γ)) :
+    (Fml.bind m x t φ).rwEqC q = .bind m x t (φ.rwEqC q) := rfl
+theorem Fml.rwEqC_anon (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
+    (Fml.anon xs φ).rwEqC q = .anon xs (φ.rwEqC q) := rfl
+
+/-- The recursor's rewrite is the twin's. -/
+theorem Fml.rwEqC_eq_rwEqCM (φ : Fml C Γ) : φ.rwEqC q = φ.rwEqCM q := by
+  induction φ with
+  | tt | eq | defined => rfl
+  | not φ ih | upd m U φ ih | modal m P κ φ ih | havoc φ ih | all x p φ ih | bind m x t φ ih
+  | anon xs φ ih => simp only [Fml.rwEqCM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.rwEqCM, ← ihφ, ← ihψ]; rfl
+
+end Clauses
 
 theorem Tm.sideC_denote {q : Solidity.Term C × Solidity.Term C} (hq : Term.Theq q.1 q.2)
     (σ : EState C Γ) (t : Tm C Γ .val) : Equiv ((t.sideC q).denote σ) (t.denote σ) := by
@@ -140,22 +184,22 @@ theorem Fml.rwEqC_holds {q : Solidity.Term C × Solidity.Term C} (hq : Term.Theq
   | _, .imp φ ψ, σ => imp_congr (Fml.rwEqC_holds hq φ σ) (Fml.rwEqC_holds hq ψ σ)
   | _, .upd m U φ, σ => by
     have ih := Fml.rwEqC_holds hq φ
-    simp only [Fml.rwEqC, holds, ih]
+    simp only [Fml.rwEqC_upd, holds, ih]
   | _, .modal m P κ φ, σ => by
     have ih := Fml.rwEqC_holds hq φ
-    simp only [Fml.rwEqC, holds, ih]
+    simp only [Fml.rwEqC_modal, holds, ih]
   | _, .havoc φ, σ => by
     have ih := Fml.rwEqC_holds hq φ
-    simp only [Fml.rwEqC, holds, ih]
+    simp only [Fml.rwEqC_havoc, holds, ih]
   | _, .all x p φ, σ => by
     have ih := Fml.rwEqC_holds hq φ
-    simp only [Fml.rwEqC, holds, ih]
+    simp only [Fml.rwEqC_all, holds, ih]
   | _, .bind m x t φ, σ => by
     have ih := Fml.rwEqC_holds hq φ
-    simp only [Fml.rwEqC, holds, ih]
+    simp only [Fml.rwEqC_bind, holds, ih]
   | _, .anon xs φ, σ => by
     have ih := Fml.rwEqC_holds hq φ
-    simp only [Fml.rwEqC, holds, ih]
+    simp only [Fml.rwEqC_anon, holds, ih]
 
 end RwEq
 

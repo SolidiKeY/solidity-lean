@@ -60,11 +60,12 @@ theorem Fml.inSolkey_rwEqC (q : Solidity.Term C × Solidity.Term C) :
   | _, .tt | _, .eq .. | _, .defined _ => rfl
   | _, .not φ => Fml.inSolkey_rwEqC q φ
   | _, .and φ ψ | _, .imp φ ψ => by
-    simp only [Fml.rwEqC, Fml.inSolkey, Fml.inSolkey_rwEqC q φ, Fml.inSolkey_rwEqC q ψ]
+    simp only [Fml.rwEqC_and, Fml.rwEqC_imp, Fml.inSolkey, Fml.inSolkey_rwEqC q φ,
+      Fml.inSolkey_rwEqC q ψ]
   | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ =>
     Fml.inSolkey_rwEqC q φ
   | _, .modal m P κ φ => by
-    simp only [Fml.rwEqC, Fml.inSolkey, Fml.inSolkey_rwEqC q φ]
+    simp only [Fml.rwEqC_modal, Fml.inSolkey, Fml.inSolkey_rwEqC q φ]
 
 /-- The first statement of a modality in the fragment is in it, and so are
 the rest, the frames and the postcondition. -/
