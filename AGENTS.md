@@ -19,9 +19,13 @@ the context (`State C Γ`: typed storage, heap and locals) and halts only by
 revert, panic, divergence or exhaustion: it is never stuck. The elaborator
 emits `Surface.Stmt` (`Syntax.lean`: no run, no rule), which `resolve` scopes
 (`Syntax/Resolve.lean`) and the printers print. Formulas are `Fml C Γ`
-(`Calculus/Fml.lean`). A leaf reaches the closer erased (`Fml.erase`) to
-`Update.lean`'s untyped `NFml`, read over `Semantics.lean`'s untyped state,
-until M6c ports the closer.
+(`Calculus/Fml.lean`). The closer is ported in part (M6c): `sol_decide`
+reduces a scoped leaf by position (`Calculus/DecideScoped.lean`), `sol_close`
+reads a leaf's parameters at their types, `sol_prove`'s leaves on `⊢` are
+scoped sequents (`rw` in them, `Calculus/SeqRewrite.lean`), and a chain
+rewrites while the program is open (`Calculus/RewriteScoped.lean`). Below
+that a leaf is still erased (`Fml.erase`) to `Update.lean`'s untyped `NFml`,
+read over the untyped state: the decision procedure's IR.
 
 **Updates are terms** (`Update.lean`): `STerm` at `structRules.key`'s
 signature, `MTerm` at `memoryRules.key`'s — `save`/`delAt` nest, and so do
@@ -137,8 +141,9 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
 written, as one chain term proved `by sol_chain`:
 `A ~[r]~> B ~*> C ~[sequentialToParallel]~> D ~[findOnSave]~> E` — `~[r]~>`
 a rule of the strategy (a wrong name is an elaboration error), `~>` one
-step, `~*>` several, and past the program the rewrite links
-`~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/ChainRewrites.lean`).
+step, `~*>` several, and the rewrite links
+`~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/ChainRewrites.lean`
+past the program, `Calculus/RewriteScoped.lean` while it is open).
 `Fml.Via.leads` makes a chain `A ~~> E`, and `Fml.Leads.via` composes
 segments of a long one. `#derivation φ` prints the strategy's lines, in the
 rules' fresh names (`se1`, `sp1`); `#chain φ` (`Calculus/ChainGen.lean`)
