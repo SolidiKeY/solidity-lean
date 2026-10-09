@@ -759,7 +759,7 @@ example (φ : Post StandardExample [.val .uint]) :
 /--
 error: ~~>: the line after is no line of the derivation of
   dl{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
-nor reached from one by `sequentialToParallel`, applyOnRigid, concrete, simplifyUpdate (at most 3 of them) while the program is open
+nor reached from one by sequentialToParallel, applyOnRigid, concrete, simplifyUpdate (at most 3 of them) while the program is open
   (the line after depends on the modality m, through a rule that reads it (`revertBox`, `revertDiamond`, a loop's invariant rule): go on after `cases m`)
 -/
 #guard_msgs in
@@ -767,6 +767,51 @@ example (φ : Post StandardExample [.val .uint]) :
     dl![m]{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
     ~~> dl![m]{ { x := 7 } ⟨[ revert(); ]⟩ φ } := by
   sol_chain
+
+/-- `sequentialToParallel` under a branch with the revert still to run
+(`FmlRw.mergeIn`): the first merge the line's connectives lead to. -/
+example (φ : Post StandardExample [.val .uint, .val .uint]) (ψ : Post StandardExample [.val .uint]) :
+    dl![.box]{ (x ≐ 1 → { x := 1 } { y := x } [ revert(); ] φ) ∧ (x ≐ 2 → ψ) }
+    ~[sequentialToParallel]~>
+      dl![.box]{ (x ≐ 1 → { x := 1 ‖ y := 1 } [ revert(); ] φ) ∧ (x ≐ 2 → ψ) } := by
+  sol_chain
+
+/-- `add_literals` in an equation of the line, the revert still to run
+(`FmlRw.litEq`): an equivalence, so on the left of the implication too. -/
+example (φ : Post StandardExample []) :
+    dl![m]{ (250 + 10 ≐ 260 → ⟨[ revert(); ]⟩ φ) }
+    ~[add_literals]~> dl![m]{ (260 ≐ 260 → ⟨[ revert(); ]⟩ φ) } := by
+  sol_chain
+
+/-- `~=>` with the revert still to run: each line picks its rewrite. -/
+example (φ : Post StandardExample []) :
+    dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~=> dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+          (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~=> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain
+
+/-- The same as a `calc`, each step's line computed from the line before
+(`pendingLines`, the rewrite found by `sol_chain`). -/
+example (φ : Post StandardExample []) :
+    dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+      ~~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } :=
+  calc dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    _ ~[applyOnRigid]~> dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+          (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) } := by sol_chain
+    _ ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by sol_chain
+
+-- The line prints as it is written, the postcondition under the capture
+-- too (a reading of `φ` past `se1`'s scope).
+/--
+info: fun φ =>
+  dl{
+    { se1 := false }
+      ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) } : Post StandardExample [] → Fml StandardExample []
+-/
+#guard_msgs in
+#check fun (φ : Post StandardExample []) =>
+  dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
 
 end Open
 
