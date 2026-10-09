@@ -2709,9 +2709,9 @@ Not done from the inventory, with the reasons above: the `Chains`,
 while the heavy ones stay), the closer's driver split out of `Derive`.
 
 ## W5 — final rename (the lead alone)
-**Status (2026-10-09): prepared** ("W5 preparation" below): no clash
-left, the script `scripts/w5-rename.sh` dry-run; its build fails only on
-the pins it shortens.
+**Status (2026-10-09): renamed** ("W5" below, after "W5 preparation"):
+the scripted commit, the pins re-wrapped, the four targets green; the
+reader, the docs (M7) and the review pass are left.
 - One scripted commit (`git mv` plus `rg`/`sed`, no hand edits):
   - `Solidity.Core.X` → `Solidity.X`.
   - `Calculus/Core/*` → `Calculus/*`; `TypedRun` → `Semantics`.
@@ -4013,6 +4013,29 @@ below the delaborators is done before W5's rename.
     `check-doc-paths` reports its 96 citations of moved modules: W5
     exempts the record there (it is history, like `git log`) rather than
     editing it.
+69. *Proposed (W5), the lead's call:* with the prefix `Solidity.Core`
+    gone, a scoped family is one with an erased twin (`legacyName?`) or one
+    of `Delab.untwinnedFamilies` (`Idx`, `Args`, `Binders`, `CodeBinder`,
+    `SHole`, `Prog`, `Frames`, `LTy`): `Delab.isScopedFamily`, which
+    `trArg` now tests.  No name of the erased side or of the shared
+    vocabulary has a twin (checked over the environment of `Solidity`
+    before the rename), so the test admits no shared name; the scoped
+    families it no longer admits (propositions, the tools' structures)
+    are ones `tr` left as they were but for unfolding a definition.
+70. *Proposed (W5), the lead's call:* `#check_rule_text` prints a rule
+    line with full names, and an escape `‹…›` fails the line when a name
+    in it, or a namespace it is in, is a scoped family
+    (`Tools.isScopedName`): `‹Solidity.Val.…›`, `‹(Solidity.Upd.…).snd›`,
+    `‹@Solidity.Idx.…›` fail, `‹Solidity.Surface.…›` and
+    `‹Solidity.Term.bumped …›` pass (checked on these five strings).
+    `Delab.isUp` keeps the prefix `Solidity`: the one other name ending
+    in `up` is the theorem `Wrote.up`, which no term heads.
+71. *Proposed (W5), the lead's call:* the script's scope beyond the
+    preparation's: a backticked `Core/X` relative to `Calculus/` loses
+    `Core/` (`Examples/Chains/EvaluationOrder`'s gains `Calculus/`),
+    `tests/solkey/expected.tsv` takes the path rules (its notes are what
+    `scripts/solkey-port.mjs` writes, which the rules change), and
+    `check-doc-paths` skips this record (decision 68).
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
@@ -6753,6 +6776,65 @@ apart once the prefix is gone):
   Delab,TacticSyntax}` and `Examples/Chains/EvaluationOrder` (`Core/` to
   drop in `Calculus/`, `Calculus/` to write in `Examples/`), and two in
   `tests/solkey/expected.tsv`, which the script does not touch.
+
+### W5 (2026-10-09, on `intrinsic`)
+
+Directly on `intrinsic`: `5787831` and `a58b447` (the script, decision 71),
+`73cccf0` (the scripted commit: 257 files, the script's output alone),
+`678aa70` (the pins and decisions 69 and 70 by hand), `9990e99` (the
+script deleted), then this record.
+
+**The rename** is the preparation's (`Solidity.Core.X` → `Solidity.X`,
+`Solidity.Evm.Core.X` → `Solidity.Evm.X`, `Calculus/Core/*` →
+`Calculus/*`, `Evm/CoreX` → `Evm/X`, `Semantics/Core/TypedX` →
+`Semantics/X`, `Semantics/Core/X` → `Semantics/X`, `Semantics/Core.lean` →
+`Semantics/Erased.lean`, `TState` → `State`, `trun…` → `run…`; decision
+66 for the paths kept), plus decision 71.  The script was re-run first in
+two clones, the preparation's version and this one: their outputs differ
+only in decision 71's lines.
+
+**By hand** (no rename can make these): decisions 69 and 70, the tests
+keyed on the `Core` prefix (`DelabErase.trArg`, `Tools/Taclet`'s
+`isRuleLine`), which the rename made true, resp. vacuous.
+
+**Pins changed** (37 in 15 files, the dry run's list:
+`Examples/Notation` 9, `Examples/Tools` 4, `Tactics/Loops` 4,
+`CorePrint` 3, two each in `TryCatch`, `Branch`, `Values`, `Callback`,
+`Calls`, `Revert`, one each in `CoreSurface`, `Payment`, `CoreNotation`,
+`CoreSpec`, `Specs`): every one is line wrapping alone, each file equal to
+its scripted version modulo whitespace; the wrap moves because the printed
+names are shorter by `Core.` (W5's reason).  The `#taclet` pins' qualified
+names (`Solidity.Core.Taclet.x` → `Solidity.Taclet.x`) were rewritten by the
+script itself.  `#check_rule_text` and every other pin unchanged; fresh
+names unchanged.
+
+**Checks**: `lean_build` with `SolidityCorpus` and `SolkeyTestSuite` in
+`defaultTargets` for the run (reverted after): green.  `check-orphans`:
+300 reachable, the orphans the git-excluded `Scratch/` modules.
+`check-doc-paths` (now skipping this record): OK, 13 ambiguous basenames
+(non-strict).  `check-rule-text`: OK.  `check-testsuite.sh` against a
+`git archive` of solkey `1b4341a303`: ok (438 = 435 derived + 1 pending +
+1 divergent + 1 excluded; 2 skip).  `solkey-port.mjs` without `--probe`
+against the same archive writes `tests/solkey/expected.tsv`, `Corpus/*`
+and `SolidityCorpus.lean` as committed, but for the solkey hash in the
+headers (an archive has none).  `dups.py`: the known `as` line, and two
+new false positives, `delabFml` and `delabProves` (`Calculus/Delab.lean`'s
+are in `Solidity.Delab`; the script reads its docstring line `end
+(\`Premise.unfold\`'s …` as closing the namespace, which `Core.` used to
+keep apart).  `sorry` (19), `axiom` (1) and `maxHeartbeats` (30) as before
+the rename.
+
+**Left**:
+- The SolKey reader (side-projects, branch `intrinsic`; not touched):
+  its import of `Calculus/Core/DelabErase` is `Calculus/DelabErase`, the
+  namespace `Solidity.Core` is `Solidity`, and the earlier items
+  (`legacyName? env n`, old constants under `Surface`/`NFml`).
+- Prose (M7): docstrings name the old side unqualified and M3's state
+  `Core.State` (now `EState`); `TacticSyntax`'s "today's strategy
+  (`Symex.lean`) and the scoped one (`Symex.lean`)" names one file twice;
+  the W5 list under "Docs (M7)".
+- Not run: `check-corpus.sh` (its probes build through `lake`), the
+  `solkeycheck` executable (built), the M0 re-timing, the review pass.
 
 ## Baselines (M0)
 
