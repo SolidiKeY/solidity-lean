@@ -1471,6 +1471,55 @@ while the program is open are on `Fml C Γ`, decisions 92 and 94; past the
 program `ChainRewrites`, `ChainBranches` and `RewriteChains` stay on
 `NFml` as the rewrites' IR, decision 93).
 
+**Wave 6c merge (2026-10-09, `w6-closer`): `w6c-upd`, `w6c-rw`,
+`w6c-chain`.**  Merged in that order; the code changes are disjoint (lane
+`w6c-rw` moved the `RwEq` section of `Calculus/UpdateRules.lean`, which
+lane `w6c-upd`'s modules import, to `Calculus/SeqRewrite.lean`; neither
+other lane uses `Fml.rwEqC` or `Proves.rewrite`).  Conflicts only in this
+record, `docs/module-map.md` and `docs/lean-key-rule-map.md`; each lane
+had numbered its proposals 86–88, now 86–88 (`w6c-upd`), 89–91
+(`w6c-rw`) and 92–94 (`w6c-chain`), every citation in the lanes' added
+lines renumbered (docs and docstrings).  The rule map's scoped `rewrite`
+row is `w6c-rw`'s (a rule of `Proves`), its `updRw` row `w6c-chain`'s
+(with `FmlRw.lawUpd`).  `lean_build` of `Solidity`, `solkeycheck`,
+`SolidityCorpus` and `SolkeyTestSuite` green with no fix needed (no OOM);
+`check-orphans` (306 reachable), `check-doc-paths` and `check-rule-text`
+OK; the duplicate-name scan reports only `as` (`Evm/Repr`,
+`Examples/Verify`) and `delabFml`/`delabProves`, all three already at
+`77c6e047` and false positives of the scan (the build accepts them);
+`sorry` unchanged (21 lines in 12 files); no `axiom` or `maxHeartbeats`
+added.  The lanes' gates were not re-timed after the merge: no lane
+changed a module another lane's timings depend on, beside the
+`UpdateRules` move, which only `w6c-upd`'s untimed new modules import.
+
+**`NFml`, `Fml.erase` and `Semantics/Erased.lean` stay** (the plan's last
+M6c step, deferred): 123 modules still name them.  What reads them, and why
+(decision 7's fallback, decisions 83, 88, 91 and 93):
+- *the closer's IR*: `NFmlLogic` (`NFml.Proves`, what a scoped leaf
+  erases to: `Proves.close`, `close_leaf`), `NFmlDerive`
+  (`Derive.residue`, `synClose`), `NFmlClose`, `Closable`, `CloseErase`,
+  `Hyp`, `Decide`/`DecideComplete` (the scoped front end
+  `DecideScoped` proves through the commutation, decision 83);
+- *update rules and merges on the erasure*: `NFmlUpdateRules`,
+  `StateParts`; their scoped ports (`UpdRuleScoped`, `StatePartsScoped`)
+  have no consumer yet: the scoped `sol_upd`/`sol_merge`
+  (`Closers.lean`'s `Derive.onErased`) still erase the leaf;
+- *chains past the program*: `ChainRewrites`, `ChainBranches`,
+  `RewriteChains`, `RewriteChainGen`, `ChainGen`, `LastLine` (`Fml.ViaE`;
+  only the rewrites while the program is open are scoped,
+  `RewriteScoped`);
+- *the `⊨` route*: `Derive.lean`'s `sol_prove` on `Valid φ` has no
+  sequent, so its leaves are the erasure of the strategy's output
+  (decision 89);
+- *today's notation and sequents*: `Update.lean` (where `NFml` is
+  defined), `RuleSyntax`'s `dl{}`/`⊨`, `SurfaceNotation`, `SurfaceSpec`,
+  `Literals`, `TermTaclets` and `CloseTests` (sequents written over
+  today's terms), `Rewrite.lean`'s tactics;
+- `Semantics/Erased.lean` is the erased state the closer's terms read
+  (`State.erase`), imported by `Semantics/State.lean`,
+  `Semantics/StateErase.lean`, `Calculus/Logic.lean` and
+  `Typing/Soundness.lean`: it goes only with the last of the above.
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
@@ -1511,7 +1560,13 @@ program `ChainRewrites`, `ChainBranches` and `RewriteChains` stay on
   (the W6 baselines, Gates: the end-of-work column and its gate).
 - **Fallback (decision 7):** a module that fails its gate stays on `NFml`
   for good, documented as the decision procedure's IR.  When nothing uses
-  `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.
+  `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.  Not yet
+  (after the 6c merge): the closer's IR, the update rules on the erasure,
+  the chains past the program, the `⊨` route and today's notation still use
+  them (Gates, "Wave 6c merge").  Next: switch `sol_upd`/`sol_merge` and
+  the chain rewrite links onto `UpdRuleScoped`/`StatePartsScoped`, then
+  `ChainRewrites`' locals-then-memory merge and `simplifyUpdate`'s shadowed
+  writes (decision 87).
 
 **Besides M6c:**
 - The lead's calls on proposals 78–94; the user's on decision 11 (whether
