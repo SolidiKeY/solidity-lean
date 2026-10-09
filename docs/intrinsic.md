@@ -50,7 +50,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
 | M6c | **left** | the closer and `Decide` on `Fml C Γ` ("What is left") |
-| M7 | done 2026-10-09 (this trim) | the docs; the review pass is left |
+| M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
 | W2 | done 2026-10-08 | soundness over the typed run (`sound`), the strategy (`symex`), chains (`chains`), the tree (`tree`) |
@@ -70,6 +70,68 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 branch label or fresh name changed by W5.  Pins moved only for the reasons
 allowed by the plan and decision 20 (each lane section at `ad728b16` lists
 them).
+
+## M7 review (2026-10-09)
+
+The read-only finder/skeptic pass of M7; its confirmed findings applied
+but for two left as proposals (75, 76):
+
+- **Docstrings to the current design**: the surface syntax's names and
+  `resolve` (`Syntax.lean`, `AST.lean`), `Stmt.wk`/`Prog.wk`/`Idx.wk` as the
+  documented kernel exceptions to condition 1 (`Scope.lean`,
+  `Syntax/Scoped.lean`), `Surface.Prog.quote` (`Syntax/Splice.lean`,
+  `Syntax/Quote.lean`), the elaborators of each tactic
+  (`Calculus/TacticSyntax.lean`, `module-map`), `Surface.Fml.quoteAuto`
+  and `NFml.eqD`/`NFml.eq` (`Calculus/SurfaceNotation.lean`), the typed run
+  (`Semantics/Run.lean`, `StepErase`), W5 self-citations
+  (`Calculus/{Step,Completeness,RuleExists,Rules,Callback}.lean`),
+  `Theorems.lean`'s two statements not restated, the rule table's untyped
+  rationales (`whileInvariantBox`, `Premise.inv`,
+  `memoryIndexWriteCaptureAllNonSimpleIndex` and its rule-map row: kept as
+  a deviation in shape, the rule text and fresh names unchanged),
+  `Seq.ground`/`Seq.refutes` for `Derive.splitRes`, `TRun.send` for
+  `Semantics.sendAt`, `NFml.Chain.groupSteps`, `Rule.premise_unique`,
+  `Modality.onTHalt`/`afterRunTR`; the examples that called a formula "not
+  valid" over untyped states now say the leaf is closed on its erasure
+  (until M6c: `Examples/{ProofTree,Tactics/Decide,Benchmark/Mapping,
+  Tactics/UpdateRules,Tactics/Calls,Tactics/Loops}.lean`); the EVM's
+  docstrings and `docs/compiler-verification.md`.
+- **Dead code deleted**: `Semantics.lean`'s untyped evaluators over
+  `Surface` syntax (`Surface.Src.value`, `MLoc.write`, `MSrc.mval`,
+  `MLoc.addr`, `OpLoc.store`, `OpLoc.bump`, `Src.pushVal`,
+  `ExtCall.key`, `Semantics.sendAt`/`guardOk`/`assertOk`/`opLocal`/
+  `bumpLocal`) with their `_frame` (`Agree`) and `_noPanic` (`NoPanicOps`)
+  lemmas; `bindData_induct` and the `Counter` witness (`Reachability`),
+  `kernelRefl`, `Semantics.State.valueOf`, `bind_bind_ok`/`_error`,
+  `sidePreds`/`clear_side`, `CLTy`.
+- **Types carry what they can**: `defaultOk` premises (decision 16),
+  `Invariant.fo` (decision 24), `inFrag` no longer re-checks
+  `p != .bool` (the `*_sim` lemmas take `p.isNumeric`, `numeric_of_ne`
+  replaced by `ne_bool_of_numeric`).
+- **Weakened statements**: `Problem.deploy_of_valid` restated for any
+  parameters (decision 23); `reachable_iff`'s `FitsStorage` recorded
+  (proposal 77, `module-map`).
+- **Tools**: `side_cond` reads the scoped predicates (`Calculus/Rules.lean`);
+  the walk line `apply unfoldStep` takes no argument (was
+  `apply unfoldRule (Stmt.step _ _ _).rule`, whose argument was never
+  read); `#chain`/`#derivation` on an unscoped formula say so
+  (`notScopedNotation`); `Evm/Examples`' `rejects`, and `compiles`
+  conjuncts on the runs the empty program would also satisfy.
+- **`simp only`**: the bare `simp`s the branch added
+  (`Constructibility`, `Reachability.Canon.init`, `Agree`, `Syntax.lean`'s
+  four `simp [hd]`) replaced by `simp?`'s lists.
+
+Checks: `lean_build` of `Solidity`, `solkeycheck`, `SolidityCorpus` and
+`SolkeyTestSuite` green, no pin moved; `dups.py` reports only false
+positives (`as`, and `Delab.delabFml`/`delabProves`, which the script
+places in `Solidity` because a docstring line of `Calculus/Delab.lean`
+starts with `end`); `check-orphans` (300 reachable; the four orphans are
+the git-excluded `Scratch/` modules), `check-doc-paths`, `check-rule-text`:
+OK; `check-testsuite.sh` against solkey `1b4341a303` (read-only
+`git archive`): 438 = 435 derived + 1 pending + 1 divergent + 1 excluded
+(2 skip).  `sorry` 19, `axiom` 1, `maxHeartbeats` overrides 30, as before.
+Not re-timed: no kernel-evaluated function changed (`inFrag` lost a
+conjunct; `Evm/Examples` gained three `compiles` checks).
 
 ## Gates
 
@@ -264,7 +326,15 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
 16. *Copy off the bridge*: the elaborator rejects a struct with a repeated
     member name, as solc does ("Identifier already declared"); `BadDup`
     becomes a pinned elaboration error; `bridgeOk` and `Ty.nodupS`
-    hypotheses go.
+    hypotheses go.  *M7 review:* so does `defaultOk`, which existed for the
+    same reason: `defaultOk_true` (from `structDef_nodup`, now in
+    `AST.lean`), so `defaultForTy_hasTy`, `defaultForTy_canon`,
+    `pushSlot_hasTy`/`_canon`, `pushPlaceAt_wt`/`_canon`,
+    `allocDefault_typed`/`_canon`, `StateWT.init`, `RunWT.init`,
+    `Canon.init` and `reachable_canon` lose the premise, and
+    `defaultOk_of_defaultOkS`/`defaultOk_struct_of_mem` are deleted.  The
+    closer's `defaultForTy_canonB` keeps its (now vacuous) `okDeep` premise
+    for its callers in `Closer`/`Decide` until M6c.
 17. *`memoryLocalDeclInitDrop` under the box*: change the typed reading, not
     the rule text: the hidden binder at a memory type ranges over the
     references of the heap grown by the initializer's allocations (or any
@@ -297,11 +367,17 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
 23. *Proposed (CORE B), the lead's call:* `Problem.deploy_of_valid_nil`
     takes a typed transaction and asks the typed run to end (`TRes.Ends`);
     `Problem.deploy_of_valid_typed` states the typed deployment with no
-    hypothesis.
+    hypothesis.  *M7 review:* master's `Problem.deploy_of_valid` is restated
+    for any parameter list (`Calculus/Deploy.lean`: for every typed value
+    of the parameters, `State.deploy` with them bound, via
+    `holds_closeN`); `_typed` is its case of none.
 24. *Proposed (W3c `tactics`), the lead's call:* `ProvesC.valid` asks the
     invariant first-order (`Fml.FO`, KeY's `CInv` of the storage and the
     ledger): "the invariant holds" is then a fact of the erasure, which the
     callee's havocked state and the updates read; today's asks it closed.
+    *M7 review:* `Invariant` carries it (`fo := by rfl`, as master's carried
+    `closed`), `noTransfer` is a lemma of it (`Fml.hasTransfer_of_FO`), and
+    `ProvesC.valid`/`Main.callback_soundness` take no hypothesis.
 25. *Proposed (W3c `tactics`), the lead's call:* `Core.Proves.closeHolds`,
     today's semantic `Proves.close` over the typed reading (modal-free), is
     a rule of the scoped sequent beside the erasure's `close`; the steps
@@ -699,6 +775,29 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     (`try call returns (rets) … catch Panic (code) …`), KeY's statement
     variables do not.
 
+75. *Proposed (M7 review), the lead's call:* the canonicity invariant keeps
+    its store typing on the erasure for now (`canonInv.glob` is
+    `StateWT ∧ Canon`, `Prog.run_canon`/`Prog.run_tight` take
+    `hwt : RunWT C H σ.erase`).  Tying it to the typed state
+    (`RunInv.TKeeps` over `HTy.toHeapTy 0 σ.H`, the leaf obligation
+    `State.erase_wt hnd σ`, `canonInv.glob := CanonStorage`) rewrites every
+    `keepsC_*` leaf, `TypedRunInv` and the tightness invariant of
+    `Constructibility` (about 120 sites): its own lane, after M6c, which
+    moves the closer onto the same states.
+76. *Proposed (M7 review), the lead's call:* `Stmt.step` keeps its `Option`
+    result.  `Stmt.rule_exists` proves it never `none`, but making it total
+    changes the kernel-evaluated strategy (every arm, `shortStep`, the
+    `apply_toStep` dispatch) and every `Proves` program rule, `Premise.Sound`
+    and `Stmt.Sound` (about 70 sites); AGENTS.md asks that such a change be
+    timed against `TestSuite/Derived9–11` and `Examples/ProofTree` before
+    and after, so it is a lane of its own with those gates.
+77. *Proposed (M7 review), the lead's call:* `Reachable C st ↔ Canon ∧
+    Tight` (`reachable_iff`, `shape_iff_reachable`, `wt_iff_reachable`)
+    holds for a storage that fits (`FitsStorage C st`): a consequence of
+    M1's in-range literals, since a word, key or slot out of range is
+    canonical and tight but no literal writes it.  `Reachable → FitsStorage`
+    is not proved here.
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
@@ -723,7 +822,7 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
   `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.
 
 **Besides M6c:**
-- The lead's calls on proposals 54–74; the user's on decision 11 (whether
+- The lead's calls on proposals 54–77; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").
 - At the merge into `master`: the SolKey reader's require back to
@@ -732,10 +831,10 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
 - Not run since W4: `check-corpus.sh` (its probes need `lake`), the
   `solkeycheck` executable (built only; no rule name or annotation changed),
   the reader's `keycheck` executable as a target and the VS Code extension's
-  tests, the M0 re-timing after W5, and the read-only finder/skeptic review
-  pass of M7.
-- Lean docstrings still call the erased side "today's" and cite this
-  record's sections (at `ad728b16`); `Calculus/TacticSyntax.lean` cites
-  `Symex.lean` twice, as "today's" and "the scoped one".
+  tests, the M0 re-timing after W5.
+- From the M7 review: proposals 75 (the canonicity invariant on the typed
+  state) and 76 (`Stmt.step` total), each a lane with its gates.
+- Lean docstrings still call the erased side "today's" in places and cite
+  this record's sections (at `ad728b16`).
 - `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on
   its `frames = true` path; nothing calls it with both set.

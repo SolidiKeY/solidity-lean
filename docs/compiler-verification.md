@@ -67,9 +67,9 @@ theorem compile_net {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F 
 ```
 
 `Evm/Examples.lean` runs `owner = 5; owner.transfer(30);` on a contract
-holding `100` (`payOwner_run`: `70` left, `30` in `5`'s account) and reads the
-run's `net(5) = -30` and `net(this) = 0` off it
-(`payOwner_interpreter`).
+holding `100` (`payOwner_run`: `70` left, `30` in `5`'s account), and
+`Evm/Interpreter.lean` reads the run's `net(5) = -30` and `net(this) = 0` off
+it (`payOwner_interpreter`).
 
 From a fresh contract (`Sim.init`, every slot `0`, `L = 1`, any balances, at
 any address `self < 2^256`, which `address(this)` reads and `ADDRESS`
@@ -211,7 +211,7 @@ they do, so the proof needs no argument about it.
 
 ## Build cost
 
-`lake build Solidity.Evm.Interpreter` builds the modules. `Evm/Correct.lean`
-is the slow one (`stmt_sim` dispatches one lemma per family, within
-`maxHeartbeats 10000`); `Evm/Examples.lean` runs the unrolled `**` code under
-`decide +kernel` with a raised `maxRecDepth`.
+`lake build Solidity.Evm.Interpreter` builds the modules. `Evm/Examples.lean`
+is the slowest (the `decide +kernel` runs, the unrolled `**` code under a
+raised `maxRecDepth`); `Evm/Correct.lean`'s `stmt_sim` dispatches one lemma
+per family, held to `maxHeartbeats 10000`.

@@ -222,7 +222,7 @@ Lean ports `send_unfold_leftFstReceiver`, `send_unfold_rightSndArgument`,
 `sendNoCallbackBox` and `sendNoCallbackDiamond` with solkey's shapes and
 labels (`docs/lean-key-rule-map.md`, Payments), and proves them sound for an
 interpreter whose `send` asks the transaction whether the recipient takes the
-payment (`Semantics.sendAt`, `docs/solc-alignment.md`). Two observations:
+payment (`TRun.send`, `docs/solc-alignment.md`). Two observations:
 
 - **The send diamond is sound where the transfer diamond is not.** On the
   EVM a refused `transfer` reverts, so `transferNoCallbackDiamond`'s one
