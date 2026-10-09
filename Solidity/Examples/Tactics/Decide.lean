@@ -10,10 +10,10 @@ import Solidity.Tools.Inspect
 `sol_close` (`Calculus/NFmlClose.lean`) finishes a goal with `simp` and `grind`
 on whatever facts the formula states; it cannot split on two keys being
 equal.  `sol_decide` (`Calculus/Decide.lean`) reduces the leaf, its
-locals by position (`Fml.reduceS`, `Calculus/DecideScoped.lean`), into a
-statement about the initial state in which every read of a write is a
-case tree over key equalities, the reduction of the leaf's erasure exactly
-(`Fml.toLS_eq`, then `NFml.valid_iff_reduce`, an equivalence); then
+locals and its binders' locals by position (`Fml.reduceS`,
+`Calculus/DecideScoped.lean`), into a statement about the initial state in
+which every read of a write is a case tree over key equalities, sound over
+the typed state (`Valid.of_reduceS`, `Calculus/DecideTyped.lean`); then
 rewrites by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
 into a statement about free reads under the constraints a storage puts on
 them, and closes that.  Nothing is lost by those two steps, so a leaf it
@@ -440,7 +440,7 @@ private def aCopy : LMem :=
 /-- info: true -/
 #guard_msgs in -- `readOnWrite` at a symbolic index: one `kite`; `initElement` below it
 #eval xsNew.readT ⟨0, []⟩ (.idx (.lit (.int 1))) ==
-  some (.kite (.lit (.int 1)) (.var (.user "i")) (.lit (.int 7)) (.lit (.int 0)))
+  some (.kite (.lit (.int 1)) (.var (.name (.user "i"))) (.lit (.int 7)) (.lit (.int 0)))
 
 /-- info: true -/
 #guard_msgs in -- `memoryArrayFreshAlloc`: the length allocated
@@ -462,8 +462,8 @@ private def aCopy : LMem :=
 
 /-- info: true -/
 #guard_msgs in -- the write guard (Lean only): an index below the length
-#eval xsNew.writeG ⟨0, []⟩ (.idx (.var (.user "j"))) ==
-  some (ltG (.var (.user "j")) (.lit (.int 3)))
+#eval xsNew.writeG ⟨0, []⟩ (.idx (.var (.name (.user "j")))) ==
+  some (ltG (.var (.name (.user "j"))) (.lit (.int 3)))
 
 /-- info: [true, false] -/
 #guard_msgs in -- `refDesc` (Lean only): a reference written names an older root
@@ -521,8 +521,8 @@ private def aCopy : LMem :=
 /-- info: true -/
 #guard_msgs in -- `initElement`: an element of a fresh `uint[3]` is `0` below the length
 #eval (LMem.addM .init 0 (.struct "FixedTriple")).readT ⟨0, [.field "items"]⟩
-    (.idx (.var (.user "i"))) ==
-  some (seqL (ltR (.var (.user "i")) (.lit (.int 3))) (.lit (.int 0)))
+    (.idx (.var (.name (.user "i")))) ==
+  some (seqL (ltR (.var (.name (.user "i"))) (.lit (.int 3))) (.lit (.int 0)))
 
 /-- info: true -/
 #guard_msgs in -- `defaultValueBool`: a fresh `bool` member is `false`
@@ -650,10 +650,10 @@ open scoped Scoped
 
 /-- info: false -/
 #guard_msgs in -- a copy from storage outside its pair is outside the fragment
-#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inLS Decide.SymS.empty
+#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inLS true Decide.SymS.empty
 
 /-- info: false -/
 #guard_msgs in -- a read of the ledger is outside the fragment
-#eval (dl!{ { y := net(a) } y == 0 }).inLS Decide.SymS.empty
+#eval (dl!{ { y := net(a) } y == 0 }).inLS true Decide.SymS.empty
 
 end Solidity.Examples.Tactics.Decide

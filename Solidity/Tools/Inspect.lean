@@ -97,7 +97,7 @@ keep Lean's names (`has`, `isMap`, `isFixed`, `ok`, `copyOk`, `orElse`,
 `err`), and `(d; a)` is `a` where `d` returns. -/
 partial def LTerm.fmt [FreshNames] : LTerm → String
   | .lit v => Value.fmt v
-  | .var x => toString x
+  | .var a => toString a.key
   | .binop op _ a b => s!"{LTerm.fmtArg a} {BinOp.sym op} {LTerm.fmtArg b}"
   | .unop op _ a => s!"{UnOp.sym op}{LTerm.fmtArg a}"
   | .ite c a b => s!"if({LTerm.fmt c}) then {LTerm.fmtArg a} else {LTerm.fmt b}"

@@ -635,7 +635,7 @@ def _root_.Solidity.Surface.Tm.toL (ρ : Sym) : Surface.Tm C s → s.LTy
     match lookupBy x ρ.env with
     | some (.val t) => t
     | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) | some .unset => .err
-    | none => .var x
+    | none => .var (.name x)
   | .pvP x =>
     match lookupBy x ρ.env with
     | some (.path q) => q
@@ -670,7 +670,7 @@ def Sym.vars (ρ : Sym) : List Var :=
 
 /-- The updates so far, with `x` free again: bound by a quantifier, `x` is
 the local itself. -/
-def Sym.free (ρ : Sym) (x : Var) : Sym := { ρ with env := (x, .val (.var x)) :: ρ.env }
+def Sym.free (ρ : Sym) (x : Var) : Sym := { ρ with env := (x, .val (.var (.name x))) :: ρ.env }
 
 /-- The storage the updates left, `storage`. -/
 def _root_.Solidity.Surface.Tm.isStorage : Surface.Tm C s → Bool
@@ -1164,7 +1164,7 @@ theorem Rel.free {σ τ : Semantics.State} {ρ : Sym} (h : Rel σ ρ τ) {x : Va
   · rw [hB]
     by_cases hy : y = x
     · subst hy
-      simp only [Sym.free, lookupBy, if_true, EnvRel, LTerm.eval]
+      simp only [Sym.free, lookupBy, if_true, EnvRel, LTerm.eval, Atom.key]
       exact ⟨v, by simp only [State.getEnv_setEnv_self]; rfl,
           by simp only [State.getEnv_setEnv_self]⟩
     · have hl : lookupBy y (ρ.free x).env = lookupBy y ρ.env := by
@@ -3277,6 +3277,179 @@ theorem pair_sound {σ τ : Semantics.State} {ρ ρ' : Sym} {x : Var} {i : ITerm
   · cases hq
 
 
+/-- **One update pushed in**: its term returns exactly where the update
+writes, and the state it leaves is what the symbols it binds read. -/
+theorem Surface.UpdElem.toL_sound {σ τ : Semantics.State} {ρ : Sym} (h : Rel σ ρ τ)
+    (e : Surface.UpdElem C) (hf : e.inL ρ = true) :
+    ((∃ v, (e.toL ρ).1.eval σ = .ok v) ↔ ∃ τ', e.write τ τ = .ok τ') ∧
+      ∀ τ', e.write τ τ = .ok τ' → Rel σ (e.toL ρ).2 τ' := by
+  cases e with
+  | val x t =>
+    have ht := Term.toL_eval h t hf
+    rw [Close.UpdElem.write_val]
+    refine ⟨(by
+      simp only [Surface.UpdElem.toL, Res.bind_eq_ok]
+      exact ⟨fun ⟨v, hv⟩ => ⟨_, v, (ht v).1 hv, rfl⟩, fun ⟨_, v, hv, _⟩ => ⟨v, (ht v).2 hv⟩⟩), fun τ' hτ => ?_⟩
+    obtain ⟨v, hv, he⟩ := Res.bind_eq_ok.1 hτ
+    cases he
+    refine h.bind x _ _ ?_
+    exact ⟨v, (ht v).2 hv, by simp only [State.getEnv_setEnv_self]⟩
+  | path x p =>
+    have hA := PTerm.toL_chk h p hf
+    rw [Close.UpdElem.write_path]
+    refine ⟨(by
+      simp only [Surface.UpdElem.toL]
+      rw [guardPath_ok h.stor]
+      simp only [Res.bind_eq_ok]
+      constructor
+      · rintro ⟨qs, hq, hl⟩
+        obtain ⟨rs, hrs, -⟩ := (hA qs).2 ⟨hq, hl⟩
+        exact ⟨_, rs, hrs, rfl⟩
+      · rintro ⟨_, rs, hrs, -⟩
+        obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hrs, rfl⟩
+        exact ⟨_, hq, hl⟩), fun τ' hτ => ?_⟩
+    obtain ⟨rs, hr, he⟩ := Res.bind_eq_ok.1 hτ
+    cases he
+    refine h.bind x _ _ ?_
+    obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hr, rfl⟩
+    exact ⟨rs.1, rs.2, hq, by simp only [State.getEnv_setEnv_self], hl⟩
+  | storage s =>
+    have hs := STerm.toLS_eval h s hf
+    rw [Close.UpdElem.write_storage]
+    refine ⟨(by
+      simp only [Surface.UpdElem.toL, LTerm.eval, Res.bind_eq_ok]
+      constructor
+      · rintro ⟨_, v, hv, -⟩
+        obtain ⟨τ₁, h₁, -⟩ := Res.bind_eq_ok.1 ((hs v).1 hv)
+        exact ⟨_, τ₁, h₁, rfl⟩
+      · rintro ⟨_, τ₁, h₁, -⟩
+        exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩), fun τ' hτ => ?_⟩
+    obtain ⟨τ₁, h₁, he⟩ := Res.bind_eq_ok.1 hτ
+    cases he
+    refine ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_,
+      fun k => by rw [← h.tx k]; cases k <;> rfl, h.mem.of_heap rfl rfl⟩
+    simp only [Surface.UpdElem.toL, lookupBy_onWrite]
+    exact (h.env y).onWrite rfl
+  | store x s =>
+    have hs := STerm.toL_eval h s hf
+    rw [Close.UpdElem.write_store]
+    refine ⟨(by
+      simp only [Surface.UpdElem.toL, LTerm.eval, Res.bind_eq_ok]
+      constructor
+      · rintro ⟨_, v, hv, -⟩
+        obtain ⟨τ₁, h₁, -⟩ := Res.bind_eq_ok.1 ((hs v).1 hv)
+        exact ⟨_, τ₁, h₁, rfl⟩
+      · rintro ⟨_, τ₁, h₁, -⟩
+        exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩), fun τ' hτ => ?_⟩
+    obtain ⟨τ₁, h₁, he⟩ := Res.bind_eq_ok.1 hτ
+    cases he
+    refine h.bind x _ _ ?_
+    exact ⟨τ₁.storage, (hs _).2 (by rw [h₁]; rfl), by simp only [State.getEnv_setEnv_self]⟩
+  | net r op a =>
+    have hra : r.inL ρ = true ∧ a.inL ρ = true := by simpa only [Surface.UpdElem.inL,
+        Bool.and_eq_true] using hf
+    have hr := Term.toL_eval h r hra.1
+    have ha := Term.toL_eval h a hra.2
+    rw [Close.UpdElem.write_net]
+    refine ⟨?_, fun τ' hτ => ?_⟩
+    · simp only [Surface.UpdElem.toL, LTerm.eval]
+      constructor
+      · rintro ⟨_, hv⟩
+        obtain ⟨i, hi, hv⟩ := Res.bind_eq_ok.1 hv
+        obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
+        obtain ⟨j, hj, -⟩ := Res.bind_eq_ok.1 hv
+        obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
+        exact ⟨_, by simp only [(hr x).1 hx, (ha y).1 hy, Res.ok_bind, hi, hj]; rfl⟩
+      · rintro ⟨τ', hτ⟩
+        obtain ⟨i, hi, hτ⟩ := Res.bind_eq_ok.1 hτ
+        obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
+        obtain ⟨j, hj, -⟩ := Res.bind_eq_ok.1 hτ
+        obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
+        refine ⟨.bool true, ?_⟩
+        simp only [(hr x).2 hx, (ha y).2 hy, Res.ok_bind, hi, hj]
+        split <;> rfl
+    · obtain ⟨i, -, hτ⟩ := Res.bind_eq_ok.1 hτ
+      obtain ⟨j, -, hτ⟩ := Res.bind_eq_ok.1 hτ
+      cases hτ
+      exact ⟨h.stor, fun y => h.env y, fun k => h.tx k, h.mem.of_heap rfl rfl⟩
+  | pay r a =>
+    have hra : r.inL ρ = true ∧ a.inL ρ = true := by simpa only [Surface.UpdElem.inL,
+        Bool.and_eq_true] using hf
+    have hr := Term.toL_eval h r hra.1
+    have ha := Term.toL_eval h a hra.2
+    rw [Close.UpdElem.write_pay]
+    refine ⟨?_, fun τ' hτ => ?_⟩
+    · simp only [Surface.UpdElem.toL, LTerm.eval]
+      constructor
+      · rintro ⟨_, hv⟩
+        obtain ⟨i, hi, hv⟩ := Res.bind_eq_ok.1 hv
+        obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
+        obtain ⟨j, hj, hv⟩ := Res.bind_eq_ok.1 hv
+        obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
+        have hn : ¬ j < 0 := by
+          intro hn
+          rw [payGuard_eval σ _ hy hj, if_pos hn] at hv
+          split at hv <;> cases hv
+        exact ⟨_, by simp only [(hr x).1 hx, (ha y).1 hy, Res.ok_bind, hi, hj, if_neg hn]; rfl⟩
+      · rintro ⟨τ', hτ⟩
+        obtain ⟨i, hi, hτ⟩ := Res.bind_eq_ok.1 hτ
+        obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
+        obtain ⟨j, hj, hτ⟩ := Res.bind_eq_ok.1 hτ
+        obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
+        have hn : ¬ j < 0 := by intro hn; rw [if_pos hn] at hτ; cases hτ
+        refine ⟨.bool true, ?_⟩
+        simp only [(hr x).2 hx, (ha y).2 hy, Res.ok_bind, hi, hj]
+        split <;> rw [payGuard_eval σ _ ((ha y).2 hy) hj, if_neg hn]
+    · obtain ⟨i, -, hτ⟩ := Res.bind_eq_ok.1 hτ
+      obtain ⟨j, -, hτ⟩ := Res.bind_eq_ok.1 hτ
+      split at hτ
+      · cases hτ
+      · cases hτ
+        exact ⟨h.stor, fun y => h.env y, fun k => h.tx k, h.mem.of_heap rfl rfl⟩
+  | mref x i =>
+    obtain ⟨j, g, hI, hir, hie⟩ := ITerm.toL_eval h i hf
+    simp only [Surface.UpdElem.toL, hI]
+    rw [Close.UpdElem.write_mref]
+    refine ⟨?_, fun τ' hτ => ?_⟩
+    · simp only [Res.bind_eq_ok]
+      constructor
+      · intro hg
+        obtain ⟨id, hid⟩ := hir hg
+        exact ⟨_, id, hid, rfl⟩
+      · rintro ⟨_, id, hid, -⟩
+        exact (hie id hid).1
+    · obtain ⟨id, hid, he⟩ := Res.bind_eq_ok.1 hτ
+      cases he
+      refine h.bind x _ _ ?_
+      exact ⟨id, (hie id hid).2, by simp only [State.getEnv_setEnv_self]⟩
+  | memory mm =>
+    have hmm : mm.inL ρ = true ∧ memWithin (mm.toL ρ) = true := by
+      simpa only [Surface.UpdElem.inL, Bool.and_eq_true] using hf
+    obtain ⟨M, g, hM, hmr, hme⟩ := MTerm.toL_eval h mm hmm.1
+    have hw : M.within memSize = true := by simpa only [memWithin, hM] using hmm.2
+    simp only [Surface.UpdElem.toL, hM, hw, ↓reduceIte]
+    rw [Close.UpdElem.write_memory]
+    refine ⟨?_, fun τ' hτ => ?_⟩
+    · constructor
+      · intro hg
+        obtain ⟨μ, hμ⟩ := hmr hg
+        exact ⟨_, by rw [hμ, Res.ok_bind]⟩
+      · rintro ⟨_, hτ⟩
+        obtain ⟨μ, hμ, -⟩ := Res.bind_eq_ok.1 hτ
+        exact (hme μ hμ).1
+    · obtain ⟨μ', hμ', he⟩ := Res.bind_eq_ok.1 hτ
+      cases he
+      obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
+      exact h.setMem hrun hp hh
+  | unset x =>
+    rw [Close.UpdElem.write_unset]
+    refine ⟨(by simp only [Surface.UpdElem.toL, LTerm.eval]; exact ⟨fun _ => ⟨_, rfl⟩,
+      fun _ => ⟨_, rfl⟩⟩), fun τ' hτ => ?_⟩
+    cases hτ
+    exact h.bind x _ _ (by simp only [EnvRel, State.getEnv_setEnv_self])
+  | selfBalance _ _ | saveNet _ | saveNetMt _ | netMt _ _ | setBalance _ =>
+    simp only [Surface.UpdElem.inL, Bool.false_eq_true] at hf
+
 /-- **Pushing the updates in keeps the meaning**, halts included.
 
 Example: `{ storage := save(storage, balances[k], 5) } find(storage, balances[k]) = 5`
@@ -3340,177 +3513,8 @@ theorem NFml.toL_holds :
   | .upd m [e] φ, σ, τ, ρ, h, hf => by
     simp only [NFml.inL, Bool.and_eq_true] at hf
     simp only [NFml.holds, NFml.toL, Surface.Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure]
-    cases e with
-    | val x t =>
-      have ht := Term.toL_eval h t hf.1
-      rw [Close.UpdElem.write_val]
-      refine after_guardM (by
-        simp only [Surface.UpdElem.toL, Res.bind_eq_ok]
-        exact ⟨fun ⟨v, hv⟩ => ⟨_, v, (ht v).1 hv, rfl⟩, fun ⟨_, v, hv, _⟩ => ⟨v, (ht v).2 hv⟩⟩)
-        fun τ' hτ => ?_
-      obtain ⟨v, hv, he⟩ := Res.bind_eq_ok.1 hτ
-      cases he
-      refine NFml.toL_holds φ (h.bind x _ _ ?_) hf.2
-      exact ⟨v, (ht v).2 hv, by simp only [State.getEnv_setEnv_self]⟩
-    | path x p =>
-      have hA := PTerm.toL_chk h p hf.1
-      rw [Close.UpdElem.write_path]
-      refine after_guardM (by
-        simp only [Surface.UpdElem.toL]
-        rw [guardPath_ok h.stor]
-        simp only [Res.bind_eq_ok]
-        constructor
-        · rintro ⟨qs, hq, hl⟩
-          obtain ⟨rs, hrs, -⟩ := (hA qs).2 ⟨hq, hl⟩
-          exact ⟨_, rs, hrs, rfl⟩
-        · rintro ⟨_, rs, hrs, -⟩
-          obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hrs, rfl⟩
-          exact ⟨_, hq, hl⟩) fun τ' hτ => ?_
-      obtain ⟨rs, hr, he⟩ := Res.bind_eq_ok.1 hτ
-      cases he
-      refine NFml.toL_holds φ (h.bind x _ _ ?_) hf.2
-      obtain ⟨hq, hl⟩ := (hA _).1 ⟨rs, hr, rfl⟩
-      exact ⟨rs.1, rs.2, hq, by simp only [State.getEnv_setEnv_self], hl⟩
-    | storage s =>
-      have hs := STerm.toLS_eval h s hf.1
-      rw [Close.UpdElem.write_storage]
-      refine after_guardM (by
-        simp only [Surface.UpdElem.toL, LTerm.eval, Res.bind_eq_ok]
-        constructor
-        · rintro ⟨_, v, hv, -⟩
-          obtain ⟨τ₁, h₁, -⟩ := Res.bind_eq_ok.1 ((hs v).1 hv)
-          exact ⟨_, τ₁, h₁, rfl⟩
-        · rintro ⟨_, τ₁, h₁, -⟩
-          exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩) fun τ' hτ => ?_
-      obtain ⟨τ₁, h₁, he⟩ := Res.bind_eq_ok.1 hτ
-      cases he
-      refine NFml.toL_holds φ ⟨(hs _).2 (by rw [h₁]; rfl), fun y => ?_,
-        fun k => by rw [← h.tx k]; cases k <;> rfl, h.mem.of_heap rfl rfl⟩ hf.2
-      simp only [Surface.UpdElem.toL, lookupBy_onWrite]
-      exact (h.env y).onWrite rfl
-    | store x s =>
-      have hs := STerm.toL_eval h s hf.1
-      rw [Close.UpdElem.write_store]
-      refine after_guardM (by
-        simp only [Surface.UpdElem.toL, LTerm.eval, Res.bind_eq_ok]
-        constructor
-        · rintro ⟨_, v, hv, -⟩
-          obtain ⟨τ₁, h₁, -⟩ := Res.bind_eq_ok.1 ((hs v).1 hv)
-          exact ⟨_, τ₁, h₁, rfl⟩
-        · rintro ⟨_, τ₁, h₁, -⟩
-          exact ⟨_, _, (hs _).2 (by rw [h₁]; rfl), rfl⟩) fun τ' hτ => ?_
-      obtain ⟨τ₁, h₁, he⟩ := Res.bind_eq_ok.1 hτ
-      cases he
-      refine NFml.toL_holds φ (h.bind x _ _ ?_) hf.2
-      exact ⟨τ₁.storage, (hs _).2 (by rw [h₁]; rfl), by simp only [State.getEnv_setEnv_self]⟩
-    | net r op a =>
-      have hra : r.inL ρ = true ∧ a.inL ρ = true := by simpa only [Surface.UpdElem.inL,
-          Bool.and_eq_true] using hf.1
-      have hr := Term.toL_eval h r hra.1
-      have ha := Term.toL_eval h a hra.2
-      rw [Close.UpdElem.write_net]
-      refine after_guardM ?_ fun τ' hτ => ?_
-      · simp only [Surface.UpdElem.toL, LTerm.eval]
-        constructor
-        · rintro ⟨_, hv⟩
-          obtain ⟨i, hi, hv⟩ := Res.bind_eq_ok.1 hv
-          obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
-          obtain ⟨j, hj, -⟩ := Res.bind_eq_ok.1 hv
-          obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
-          exact ⟨_, by simp only [(hr x).1 hx, (ha y).1 hy, Res.ok_bind, hi, hj]; rfl⟩
-        · rintro ⟨τ', hτ⟩
-          obtain ⟨i, hi, hτ⟩ := Res.bind_eq_ok.1 hτ
-          obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
-          obtain ⟨j, hj, -⟩ := Res.bind_eq_ok.1 hτ
-          obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
-          refine ⟨.bool true, ?_⟩
-          simp only [(hr x).2 hx, (ha y).2 hy, Res.ok_bind, hi, hj]
-          split <;> rfl
-      · obtain ⟨i, -, hτ⟩ := Res.bind_eq_ok.1 hτ
-        obtain ⟨j, -, hτ⟩ := Res.bind_eq_ok.1 hτ
-        cases hτ
-        exact NFml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k,
-          h.mem.of_heap rfl rfl⟩ hf.2
-    | pay r a =>
-      have hra : r.inL ρ = true ∧ a.inL ρ = true := by simpa only [Surface.UpdElem.inL,
-          Bool.and_eq_true] using hf.1
-      have hr := Term.toL_eval h r hra.1
-      have ha := Term.toL_eval h a hra.2
-      rw [Close.UpdElem.write_pay]
-      refine after_guardM ?_ fun τ' hτ => ?_
-      · simp only [Surface.UpdElem.toL, LTerm.eval]
-        constructor
-        · rintro ⟨_, hv⟩
-          obtain ⟨i, hi, hv⟩ := Res.bind_eq_ok.1 hv
-          obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
-          obtain ⟨j, hj, hv⟩ := Res.bind_eq_ok.1 hv
-          obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
-          have hn : ¬ j < 0 := by
-            intro hn
-            rw [payGuard_eval σ _ hy hj, if_pos hn] at hv
-            split at hv <;> cases hv
-          exact ⟨_, by simp only [(hr x).1 hx, (ha y).1 hy, Res.ok_bind, hi, hj, if_neg hn]; rfl⟩
-        · rintro ⟨τ', hτ⟩
-          obtain ⟨i, hi, hτ⟩ := Res.bind_eq_ok.1 hτ
-          obtain ⟨x, hx, hi⟩ := Res.bind_eq_ok.1 hi
-          obtain ⟨j, hj, hτ⟩ := Res.bind_eq_ok.1 hτ
-          obtain ⟨y, hy, hj⟩ := Res.bind_eq_ok.1 hj
-          have hn : ¬ j < 0 := by intro hn; rw [if_pos hn] at hτ; cases hτ
-          refine ⟨.bool true, ?_⟩
-          simp only [(hr x).2 hx, (ha y).2 hy, Res.ok_bind, hi, hj]
-          split <;> rw [payGuard_eval σ _ ((ha y).2 hy) hj, if_neg hn]
-      · obtain ⟨i, -, hτ⟩ := Res.bind_eq_ok.1 hτ
-        obtain ⟨j, -, hτ⟩ := Res.bind_eq_ok.1 hτ
-        split at hτ
-        · cases hτ
-        · cases hτ
-          exact NFml.toL_holds φ ⟨h.stor, fun y => h.env y, fun k => h.tx k,
-          h.mem.of_heap rfl rfl⟩ hf.2
-    | mref x i =>
-      obtain ⟨j, g, hI, hir, hie⟩ := ITerm.toL_eval h i hf.1
-      have hf2 := hf.2
-      simp only [Surface.UpdElem.toL, hI] at hf2 ⊢
-      rw [Close.UpdElem.write_mref]
-      refine after_guardM ?_ fun τ' hτ => ?_
-      · simp only [Res.bind_eq_ok]
-        constructor
-        · intro hg
-          obtain ⟨id, hid⟩ := hir hg
-          exact ⟨_, id, hid, rfl⟩
-        · rintro ⟨_, id, hid, -⟩
-          exact (hie id hid).1
-      · obtain ⟨id, hid, he⟩ := Res.bind_eq_ok.1 hτ
-        cases he
-        refine NFml.toL_holds φ (h.bind x _ _ ?_) hf2
-        exact ⟨id, (hie id hid).2, by simp only [State.getEnv_setEnv_self]⟩
-    | memory mm =>
-      have hmm : mm.inL ρ = true ∧ memWithin (mm.toL ρ) = true := by
-        simpa only [Surface.UpdElem.inL, Bool.and_eq_true] using hf.1
-      obtain ⟨M, g, hM, hmr, hme⟩ := MTerm.toL_eval h mm hmm.1
-      have hf2 := hf.2
-      have hw : M.within memSize = true := by simpa only [memWithin, hM] using hmm.2
-      simp only [Surface.UpdElem.toL, hM, hw, ↓reduceIte] at hf2 ⊢
-      rw [Close.UpdElem.write_memory]
-      refine after_guardM ?_ fun τ' hτ => ?_
-      · constructor
-        · intro hg
-          obtain ⟨μ, hμ⟩ := hmr hg
-          exact ⟨_, by rw [hμ, Res.ok_bind]⟩
-        · rintro ⟨_, hτ⟩
-          obtain ⟨μ, hμ, -⟩ := Res.bind_eq_ok.1 hτ
-          exact (hme μ hμ).1
-      · obtain ⟨μ', hμ', he⟩ := Res.bind_eq_ok.1 hτ
-        cases he
-        obtain ⟨-, μ, B, hrun, hh, hp⟩ := hme μ' hμ'
-        exact NFml.toL_holds φ (h.setMem hrun hp hh) hf2
-    | unset x =>
-      rw [Close.UpdElem.write_unset]
-      refine after_guardM (by simp only [Surface.UpdElem.toL, LTerm.eval]; exact ⟨fun _ => ⟨_, rfl⟩,
-        fun _ => ⟨_, rfl⟩⟩) fun τ' hτ => ?_
-      cases hτ
-      exact NFml.toL_holds φ (h.bind x _ _ (by simp only [EnvRel, State.getEnv_setEnv_self])) hf.2
-    | selfBalance _ _ | saveNet _ | saveNetMt _ | netMt _ _ | setBalance _ =>
-      simp only [Surface.UpdElem.inL, Bool.false_eq_true, false_and] at hf
+    obtain ⟨hg, hr⟩ := Surface.UpdElem.toL_sound h e hf.1
+    exact after_guardM hg fun τ' hτ => NFml.toL_holds φ (hr τ' hτ) hf.2
   | .all x p φ, σ, τ, ρ, h, hf => by
     simp only [NFml.inL, Bool.and_eq_true, Bool.not_eq_true'] at hf
     have hx : x ∉ ρ.vars := by simpa only [List.contains_eq_mem, decide_eq_false_iff_not] using hf.1
@@ -9925,7 +9929,7 @@ elab "sol_decide_split" : tactic => withMainContext do
   let xs ← unsafe evalExpr (List Var) (mkApp (mkConst ``List [levelZero]) (mkConst ``Var))
     (mkApp (mkConst ``LFml.vars) r)
   for x in xs.eraseDups do
-    let t := mkApp2 (mkConst ``LTerm.eval) σ (mkApp (mkConst ``LTerm.var) (toExpr x))
+    let t := mkApp2 (mkConst ``LTerm.eval) σ (mkApp (mkConst ``LTerm.var) (toExpr (Atom.ofKey x)))
     let tt ← Term.exprToSyntax t
     evalTactic (← `(tactic| all_goals
       rcases value_cases $tt with ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩))

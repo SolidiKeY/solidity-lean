@@ -1,5 +1,6 @@
 import Solidity.Calculus.DecideSyn
-import Solidity.Calculus.DecideScoped
+import Solidity.Calculus.DecideTyped
+import Solidity.Calculus.Closer
 import Solidity.Calculus.Symex
 
 /-!
@@ -406,7 +407,7 @@ initial one halts: a reduced formula has none but where a write goes
 through a member named `length` (`LTerm.initOnly`). -/
 def LTerm.evalA (E : Var → Res Value) (o : List Seg → Obs) : LTerm → Res Value
   | key{ lit(v) } => .ok v
-  | key{ var(x) } => E x
+  | key{ var(x) } => E x.key
   | key{ binop(op, p, a, b) } => a.evalA E o >>= fun x => evalBinop op p x (b.evalA E o)
   | key{ unop(op, p, a) } => a.evalA E o >>= fun x => applyUnOp op x >>= unopCheck op p
   | key{ if(c) then a else b } =>
@@ -1013,7 +1014,10 @@ theorem LTerm.evalA_kite (a b t e : LTerm) : (LTerm.kite a b t e).evalA E o =
 theorem LTerm.evalA_zero (a : LTerm) :
     (LTerm.zero a).evalA E o = a.evalA E o >>= fun v => .ok (zeroV v) := rfl
 theorem LTerm.evalA_err : LTerm.err.evalA E o = .error .undef := rfl
-theorem LTerm.evalA_var (x : Var) : (LTerm.var x).evalA E o = E x := rfl
+theorem LTerm.evalA_var (x : Atom) : (LTerm.var x).evalA E o = E x.key := rfl
+/-- A position reads at its slot, as the binders' keys spell it. -/
+theorem LTerm.evalA_pos (k : Nat) : (LTerm.var (.pos k)).evalA E o = E (.fresh "#" k) := rfl
+theorem LTerm.evalA_name (x : Var) : (LTerm.var (.name x)).evalA E o = E x := rfl
 end
 
 open Lean Elab Tactic Meta in
@@ -1131,7 +1135,7 @@ attribute [decide_evalA] LFml.holdsA_tt LFml.holdsA_not LFml.holdsA_and LFml.hol
   LFml.holdsA_eq LTerm.evalA_lit LTerm.evalA_binop LTerm.evalA_unop LTerm.evalA_ite
   LTerm.evalA_find LTerm.evalA_has LTerm.evalA_kmap LTerm.evalA_len LTerm.evalA_sok
   LTerm.evalA_pok LTerm.evalA_seq LTerm.evalA_orElse LTerm.evalA_kite LTerm.evalA_zero
-  LTerm.evalA_err LTerm.evalA_var LPath.evalA LPath.consA zeroV_int zeroV_bool orElseR_ok
+  LTerm.evalA_err LTerm.evalA_pos LTerm.evalA_name LPath.evalA LPath.consA zeroV_int zeroV_bool orElseR_ok
   orElseR_error Obs.find_eq_ok Obs.has_eq_ok Obs.test_map_eq_ok Obs.test_fixed_eq_ok Obs.len_eq_ok
 
 /-- Unfold the reduced formula over free reads into `sol_close`'s weakest
@@ -1303,7 +1307,7 @@ elab "sol_decide_syn_alls" : tactic => withMainContext do
   let hn ← nodupLemma xs
   let known ← mkAppM ``List.map #[← withLocalDeclD `q (← mkAppM ``Prod #[mkConst ``Var,
     mkConst ``PrimTy]) fun q => do mkLambdaFVars #[q] (mkApp (mkConst ``LTerm.var)
-      (← mkAppM ``Prod.fst #[q])), xs]
+      (mkApp (mkConst ``Atom.ofKey) (← mkAppM ``Prod.fst #[q]))), xs]
   let nilKeys ← mkListLit (← mkAppM ``Prod #[mkConst ``Bool, ← mkAppM ``Prod
     #[mkConst ``LTerm, mkConst ``LTerm]]) []
   let h ← trueLemma (mkApp3 (mkConst ``LFml.syn) known nilKeys body)
@@ -1371,36 +1375,46 @@ elab "sol_decide_body" : tactic => withMainContext do
     | throwError "sol_decide: unexpected goals"
   replaceMainGoal [g']
 
+/-- The closer on a scoped leaf's reduction (`Fml.reduceS`, decision 81):
+within the bound `NFml.Derive.elimSize` keeps for the erased one, and
+with no layout, since a typed state's storage is typed but not canonical
+(`LayoutOk` asks `SVal.canonB` of each root; `SVal.map`'s default is any
+value of its type). -/
+def LFml.closeS (φ : LFml) : Bool := (φ.fits 8000).isSome && LFml.close [] φ
+
+/-- **The closer, on a scoped leaf's reduction**: what it accepts holds in
+every state. -/
+theorem LFml.closeS_valid {φ : LFml} (h : φ.closeS = true) : ∀ σ, φ.holds σ := by
+  simp only [LFml.closeS, Bool.and_eq_true] at h
+  exact fun _ => LFml.close_holds (fun _ _ hT => by simp only [lookupBy, reduceCtorEq] at hT) h.2
+
+/-- `LFml.closeS` on the computed reduction, checked by the kernel. -/
+macro "sol_decide_close" : tactic => `(tactic| exact LFml.closeS_valid (by decide +kernel))
+
 open Lean Elab Tactic Meta in
 /-- The scoped leaf `Valid ψ` as `∀ σ, (Fml.reduceS ψ).holds σ`, reduced on
-the leaf itself (`Valid.of_reduceS`): `Fml.posB` and the fragment
-(`Fml.inLS`) checked by the kernel. -/
+the leaf itself (`Valid.of_reduceS`): the fragment (`Fml.inLS`) checked by
+the kernel. -/
 def reduceScoped (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
-  let bool := mkConst ``Bool
   let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-  let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
-  let hpTy := mkApp3 (mkConst ``Eq [1]) bool
-    (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
-      (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
-  let hp ← try NFml.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
-    catch _ => throwError "sol_decide: the leaf is not one its erasure closes (`Fml.posB`): a \
-      hidden binder under a negation, a precondition or a modality, or named twice, or what \
-      is negated or assumed is not first-order (an update, a modality or a `havoc` there)"
-  let hf ← try trueLemma (mkAppN (mkConst ``Fml.inLS) #[C, nilCtx, mkConst ``SymS.empty, ψ])
+  let hf ← try trueLemma (mkAppN (mkConst ``Fml.inLS)
+      #[C, nilCtx, mkConst ``Bool.true, mkConst ``SymS.empty, ψ])
     catch _ => throwError "sol_decide: the formula is outside the fragment (a push of a memory \
       object, a copy of memory whose guards are not literals, a copy from storage outside its \
       allocation's pair, a memory past memSize, a read of the ledger, an alias no update \
-      binds, or one through an index used after a write)"
+      binds, one through an index used after a write, or an update, a hidden binder or a \
+      modality under a negation or a precondition)"
   let goal := Lean.mkForall `σ .default (mkConst ``Semantics.State)
     (mkApp2 (mkConst ``LFml.holds) (.bvar 0) (mkApp2 (mkConst ``Fml.reduceS) C ψ))
   let g' ← mkFreshExprSyntheticOpaqueMVar goal (← g.getTag)
-  g.assign (mkAppN (mkConst ``Valid.of_reduceS) #[C, ψ, hp, hf, g'])
+  g.assign (mkAppN (mkConst ``Valid.of_reduceS) #[C, ψ, hf, g'])
   return g'.mvarId!
 
 open Lean Elab Tactic Meta in
 /-- **`sol_decide` on a scoped leaf** (`Valid ψ`, after `sol_symex`): the
 leaf reduced by position (`Valid.of_reduceS`), then closed by its terms
-with its parameters known (`LFml.syn_valid_alls`), or by the constraints
+with its parameters known (`LFml.syn_valid_alls`), or by the closer
+(`LFml.closeS`, `Calculus/Closer.lean`), or by the constraints
 with its parameters typed (`LFml.valid_alls_of_cons`), or by
 `sol_decide_heuristic` with them free.  Today's `sol_decide` runs on
 today's goal. -/
@@ -1414,6 +1428,7 @@ def evalSolDecideScoped : Tactic := fun _ => withMainContext do
       sol_reduce
       first
       | sol_decide_syn_alls
+      | sol_decide_close
       | sol_decide_typed
       | (sol_decide_body; sol_decide_heuristic))))
 

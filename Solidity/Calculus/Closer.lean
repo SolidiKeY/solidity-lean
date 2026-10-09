@@ -895,7 +895,8 @@ def BndOk (σ : Semantics.State) (B : List (LTerm × Int × Int)) : Prop :=
 /-- What the facts say holds in `σ`. -/
 def Facts.Ok (σ : Semantics.State) (F : Facts) : Prop :=
   (∀ u ∈ F.known, Returns σ u) ∧ Apart σ F.ne ∧ EqOk σ F.eqs ∧ LayoutOk F.lay σ ∧
-    (∀ xp ∈ F.vars, ∃ v, (LTerm.var xp.1).eval σ = .ok v ∧ xp.2.admits v) ∧ BndOk σ F.bnds
+    (∀ xp ∈ F.vars, ∃ v, (σ.getEnv xp.1 >>= Close.bindingVal) = .ok v ∧ xp.2.admits v) ∧
+      BndOk σ F.bnds
 
 /-- The normal form a path's key is compared by: its guards dropped (`LTerm.core`),
 `(x - a) + a` cancelled (`LTerm.arith`), and simplified (`LTerm.simpE`). -/
@@ -1708,7 +1709,7 @@ def Facts.isInt (F : Facts) : LTerm → Bool
   | .lit (.int _) | .env _ | .len _ _ => true
   | .binop op _ _ _ => op.isArith
   | .unop op _ _ => op != .not
-  | .var x => F.vars.any fun xp => xp.1 == x && xp.2 != .bool
+  | .var x => F.vars.any fun xp => xp.1 == x.key && xp.2 != .bool
   | .find .init q | .findP .init q =>
     match F.pty q with
     | some (.prim .uint) | some (.prim .int) => true
@@ -1723,7 +1724,7 @@ def Facts.isBool (F : Facts) : LTerm → Bool
   | .lit (.bool _) | .has _ _ | .kmap _ _ _ | .sok _ | .pok _ => true
   | .binop op _ _ _ => !op.isArith
   | .unop op _ _ => op == .not
-  | .var x => F.vars.any fun xp => xp.1 == x && xp.2 == .bool
+  | .var x => F.vars.any fun xp => xp.1 == x.key && xp.2 == .bool
   | .find .init q | .findP .init q => F.pty q == some (.prim .bool)
   | .find (.arr op s P w) q | .findP (.arr op s P w) q => tyBool (F.slotTy (.arr op s P w) q)
   | .seq _ a | .zero a => F.isBool a
@@ -1840,7 +1841,7 @@ theorem Facts.isInt_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) :
       ne_eq] at hi
     obtain ⟨⟨y, p⟩, hm, rfl, hp⟩ := hi
     obtain ⟨w, hw, ha⟩ := hF.2.2.2.2.1 _ hm
-    rw [hw] at h; cases h
+    rw [LTerm.eval_var, hw] at h; cases h
     cases p <;> cases v <;> simp_all only [not_true_eq_false, reduceCtorEq, not_false_eq_true,
         PrimTy.admits, PrimVal.int.injEq, exists_eq']
   | .find .init q, hi, v, h | .findP .init q, hi, v, h => by
@@ -1961,7 +1962,7 @@ theorem Facts.isBool_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) :
     simp only [Facts.isBool, List.any_eq_true, Bool.and_eq_true, beq_iff_eq] at hi
     obtain ⟨⟨y, p⟩, hm, rfl, rfl⟩ := hi
     obtain ⟨w, hw, ha⟩ := hF.2.2.2.2.1 _ hm
-    rw [hw] at h; cases h
+    rw [LTerm.eval_var, hw] at h; cases h
     cases v <;> simp_all only [PrimTy.admits, PrimVal.bool.injEq, exists_eq']
   | .find .init q, hi, v, h | .findP .init q, hi, v, h => by
     simp only [Facts.isBool, beq_iff_eq] at hi
@@ -2053,7 +2054,7 @@ def Facts.range (F : Facts) : LTerm → Option (Int × Int)
   | t@(.var x) =>
     match F.bndOf t with
     | some r => some r
-    | none => (F.vars.find? (·.1 == x)).bind (·.2.range?)
+    | none => (F.vars.find? (·.1 == x.key)).bind (·.2.range?)
   | t@(.seq _ a) =>
     match F.bndOf t with
     | some r => some r
@@ -2087,8 +2088,9 @@ theorem Facts.range_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) :
     · rename_i hb; rw [hr] at hb; exact F.bndOf_sound hF hb hi
     · simp only [Option.bind_eq_some_iff] at hr
       obtain ⟨xp, hf, hr⟩ := hr
-      have he : xp.1 = x := by simpa only [beq_iff_eq] using List.find?_some hf
+      have he : xp.1 = x.key := by simpa only [beq_iff_eq] using List.find?_some hf
       obtain ⟨w, hw, ha⟩ := hF.2.2.2.2.1 xp (List.mem_of_find?_eq_some hf)
+      rw [LTerm.eval_var] at hi
       rw [he, hi] at hw
       cases hw
       revert ha hr
@@ -2393,7 +2395,7 @@ def Facts.retsW (F : Facts) (N : LTerm → LTerm) : LTerm → Bool
   | key{ lit(_) } => true
   | key{ env(_) } => true
   | key{ err } => false
-  | t@(.var x) => t.known F.known F.ne || F.vars.any (·.1 == x)
+  | t@(.var x) => t.known F.known F.ne || F.vars.any (·.1 == x.key)
   | t@(.seq d a) => t.known F.known F.ne || (F.retsW N d && F.retsW N a)
   | t@(.zero a) => t.known F.known F.ne || F.retsW N a
   | t@(.orElse a b) => t.known F.known F.ne || F.retsW N a || F.retsW N b
@@ -2521,10 +2523,10 @@ theorem Facts.retsW_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {N :
   | .err, h => by simp only [retsW, Bool.false_eq_true] at h
   | .var x, h => by
     simp only [Facts.retsW, Bool.or_eq_true, List.any_eq_true, beq_iff_eq] at h
-    rcases h with h | ⟨xp, hm, rfl⟩
+    rcases h with h | ⟨xp, hm, hx⟩
     · exact LTerm.known_returns hF.1 hF.2.1 _ h
     · obtain ⟨v, hv, -⟩ := hF.2.2.2.2.1 xp hm
-      exact ⟨v, hv⟩
+      exact ⟨v, by rw [LTerm.eval_var, ← hx]; exact hv⟩
   | .seq d a, h => by
     simp only [Facts.retsW, Bool.or_eq_true, Bool.and_eq_true] at h
     rcases h with h | ⟨hd, ha⟩
@@ -3475,18 +3477,18 @@ theorem Facts.bind_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {x : Var
   · exact hl
   · intro xp hm
     rcases List.mem_cons.1 hm with rfl | hm
-    · exact ⟨v, by simp only [LTerm.eval, State.getEnv_setEnv_self, Res.ok_bind]; rfl, hv⟩
+    · exact ⟨v, by simp only [State.getEnv_setEnv_self, Res.ok_bind]; rfl, hv⟩
     · simp only [List.mem_filter, bne_iff_ne, ne_eq] at hm
       obtain ⟨hm, hne⟩ := hm
       obtain ⟨w, hw, ha⟩ := hvs xp hm
-      exact ⟨w, by simp only [LTerm.eval, State.getEnv_setEnv_ne hne] at hw ⊢; exact hw, ha⟩
+      exact ⟨w, by simp only [State.getEnv_setEnv_ne hne]; exact hw, ha⟩
   · intro b hm i hi
     rw [LTerm.eval_setEnv _ (hbx b hm)] at hi
     exact hb b hm i hi
 
 /-- The locals of type `bool`: what a case split takes first. -/
 def Facts.boolVars (F : Facts) : List LTerm :=
-  F.vars.filterMap fun xp => if xp.2 == .bool then some (.var xp.1) else none
+  F.vars.filterMap fun xp => if xp.2 == .bool then some (.var (Atom.ofKey xp.1)) else none
 
 /-- `k` holds of the facts, or of the facts with `c` `true` and with `c`
 `false` for one `bool` term `c` of `cs` that returns: KeY's case split on a
