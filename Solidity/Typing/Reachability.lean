@@ -24,9 +24,12 @@ struct with a mapping member can exist (the member would need a claim at a
 mapping type, which no object satisfies), and a copy back never produces a
 struct missing its mapping.
 
-`Prog.run_canon` is the preservation theorem (the typed run keeps
-`canonInv`, a `RunInv` with `Canon` on the erased global part, each step
-through what it erases to, `TypedRunInv.lean`), `reachable_canon` its
+The heap's fact holds by construction: a typed heap's struct object is
+its members, all of them (`State.erase_canonHeap`).  `Prog.run_canon` is the
+preservation theorem for the storage's (the typed run keeps `canonInv`,
+canonical storage on the erasure, each step through what it erases to from a
+state well-typed and with a canonical heap by construction,
+`TypedRunInv.lean`), `reachable_canon` its
 corollary from a contract's initial state (`Reachable`: a scoped program
 `Prog C [] Γ'` runs there by the typed interpreter), and the two
 refutations the removed untyped layer left as `sorry` follow: a storage whose
@@ -1256,14 +1259,49 @@ open SemanticsProperties (HeapWellFormed)
 
 variable {C : Contract}
 
-/-- What a run keeps: the state well-typed, and canonical. -/
-def canonInv (C : Contract) : RunInv C where
-  glob H τ := StateWT H C.layout τ ∧ Canon C H τ
-  loc := LTy.WT C
-  loc_mono hext h := LTy.WT.mono hext h
-  reglob e h := ⟨h.1.reglob e, h.2.of_eq rfl rfl⟩
+/-- Every local satisfies the trivial predicate. -/
+theorem Env.all_true : {Γ : Ctx} → (e : Env C Γ) → Env.All (C := C) (fun _ _ => True) e
+  | [], _ => trivial
+  | _ :: _, e => ⟨trivial, Env.all_true e.2⟩
 
-/-- The state well-typed under `H`, and canonical. -/
+/-- A struct's members, erased, keep their names. -/
+theorem MFields.erase_names {H : HTy} : (fs : List (Name × Ty)) → (x : MFields H fs) →
+    (MFields.erase fs x).map (·.1) = fs.map (·.1)
+  | [], _ => rfl
+  | (_, _) :: fs, x => by
+    simp only [MFields.erase, List.map_cons, MFields.erase_names fs x.2]
+
+/-- A typed heap erases to a canonical one: an object at a struct type is
+the struct's members, all of them. -/
+theorem Objs.erase_canon {H : HTy} (start : Nat) : (Rs : List RefTy) → (os : Objs H Rs) →
+    CanonHeap (HTy.toHeapTy start Rs) (Objs.erase start Rs os)
+  | [], _, _, _, h => nomatch h
+  | R :: Rs, os, id, s, h => by
+    simp only [HTy.toHeapTy, lookupBy] at h
+    simp only [Objs.erase, lookupBy]
+    by_cases he : id = start
+    · simp only [he, ↓reduceIte, Option.some.injEq, Ty.ref.injEq] at h ⊢
+      subst h
+      exact ⟨_, rfl, MFields.erase_names _ _⟩
+    · simp only [he, ↓reduceIte] at h ⊢
+      exact Objs.erase_canon (start + 1) Rs os.2 id s h
+
+/-- **The heap is canonical by construction**: a typed state's erasure,
+under the store typing its heap typing lists. -/
+theorem State.erase_canonHeap {Γ : Ctx} (σ : State C Γ) :
+    CanonHeap (HTy.toHeapTy 0 σ.H) σ.erase.heap :=
+  Objs.erase_canon 0 σ.H σ.heap
+
+/-- What a run keeps beyond its types: canonical storage.  The heap is
+canonical and every value of its type by construction
+(`State.erase_canonHeap`, `State.erase_wt`). -/
+def canonInv (C : Contract) : RunInv C where
+  glob _ τ := CanonStorage C τ.storage
+  loc _ _ _ := True
+  loc_mono _ h := h
+  reglob _ h := h
+
+/-- The storage canonical. -/
 abbrev RunCanon (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : EState C Γ) : Prop :=
   (canonInv C).Holds H σ
 
@@ -1271,13 +1309,26 @@ namespace RunCanon
 
 variable {Γ : Ctx} {H : HeapTy} {σ : EState C Γ}
 
-theorem wt (h : RunCanon C H σ) : RunWT C H σ := ⟨h.1.1, h.2⟩
+theorem of_storage (h : CanonStorage C σ.storage) : RunCanon C H σ := ⟨h, Env.all_true σ.env⟩
 
-theorem canon (h : RunCanon C H σ) : Canon C H σ.glob := h.1.2
+theorem of_canon {H₀ : HeapTy} (hc : Canon C H₀ σ.glob) : RunCanon C H σ := of_storage hc.storage
 
-theorem mk' (hwt : RunWT C H σ) (hc : Canon C H σ.glob) : RunCanon C H σ := ⟨⟨hwt.1, hc⟩, hwt.2⟩
+/-- A typed state whose erasure has canonical storage is canonical, its heap
+by construction. -/
+theorem typed {σ : State C Γ} (h : RunCanon C H σ.erase) :
+    Canon C (HTy.toHeapTy 0 σ.H) σ.erase.glob :=
+  ⟨h.1, State.erase_canonHeap σ⟩
 
 end RunCanon
+
+/-- A leaf keeps the storage canonical when, from a well-typed canonical
+erased state, what it erases to ends in a canonical one. -/
+theorem canonInv.ekeeps {Γ Γ' : Ctx} {u : EState C Γ → Res (EState C Γ')}
+    (hk : ∀ (H : HeapTy) (σ : EState C Γ) (σ' : EState C Γ'), RunWT C H σ → Canon C H σ.glob →
+      u σ = .ok σ' → ∃ H', Canon C H' σ'.glob) : (canonInv C).EKeeps u :=
+  fun σ σ' hwt hcn h _ _ _ =>
+    let ⟨_, hc'⟩ := hk _ σ.erase σ' hwt (RunCanon.typed hcn) h
+    RunCanon.of_canon hc'
 
 section Effects
 
@@ -1400,16 +1451,18 @@ theorem MLoc.write_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {mv : Sem
     exact (memWriteIndex_canon hwt.glob hc hb ak.arrElem hτ).of_eq rfl rfl
 
 /-- An allocation's copy keeps the state canonical. -/
-theorem RunCanon.ofCopyOutC (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {H' : HeapTy}
-    {τ : Semantics.State} (hout : CopyOutC H σ.glob H' τ) : RunCanon C H' (σ.withGlob τ) :=
-  RunCanon.mk' (hwt.withGlob hout.out.ext (hwt.glob.ofCopyOut hout.out))
-    (Canon.of_eq ⟨hout.out.storage ▸ hc.storage, hout.canon⟩ rfl rfl)
+theorem CopyOutC.wtCanon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {H' : HeapTy}
+    {τ : Semantics.State} (hout : CopyOutC H σ.glob H' τ) :
+    RunWT C H' (σ.withGlob τ) ∧ Canon C H' (σ.withGlob τ).glob :=
+  ⟨hwt.withGlob hout.out.ext (hwt.glob.ofCopyOut hout.out),
+    Canon.of_eq ⟨hout.out.storage ▸ hc.storage, hout.canon⟩ rfl rfl⟩
 
 /-- `m = n;` and `m = alice;` keep the state canonical, the second by
 allocating a canonical copy. -/
 theorem MRhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy}
     {r : MRhs C Γ R} {σ₁ : EState C Γ} {id : Nat} (h : r.eval σ = .ok (σ₁, id)) :
-    ∃ H', H.Extends H' ∧ RunCanon C H' σ₁ ∧ MVal.hasTyH H' (.ref id) (.ref R) = true := by
+    ∃ H', H.Extends H' ∧ (RunWT C H' σ₁ ∧ Canon C H' σ₁.glob) ∧
+      MVal.hasTyH H' (.ref id) (.ref R) = true := by
   cases r with
   | alias p =>
     obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
@@ -1417,7 +1470,7 @@ theorem MRhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy
     cases h
     have := MPath.mval_wt hwt p hm0
     rw [MVal.asRef_ok hid] at this
-    exact ⟨H, .refl H, RunCanon.mk' hwt hc, this⟩
+    exact ⟨H, .refl H, ⟨hwt, hc⟩, this⟩
   | copy p _ =>
     obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
     obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
@@ -1428,7 +1481,7 @@ theorem MRhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy
     obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.glob.heapTyNodup hwt.glob.heap
       hwt.glob.heapWf hc.heap (findStorage_hasTy hwt.glob.storage hT hsv) (hc.find hT hsv) hcopy
     rw [MVal.asRef_ok hid] at hmv
-    exact ⟨H', hout.out.ext, RunCanon.ofCopyOutC hwt hc hout, hmv⟩
+    exact ⟨H', hout.out.ext, CopyOutC.wtCanon hwt hc hout, hmv⟩
   | newArr n hn =>
     bind_inv h
     obtain ⟨nv, _, h⟩ := bind_ok_inv h
@@ -1438,7 +1491,7 @@ theorem MRhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy
     obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.glob.heapTyNodup hwt.glob.heap
       hwt.glob.heapWf hc.heap (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
     rw [MVal.asRef_ok hid] at hmv
-    exact ⟨H', hout.out.ext, RunCanon.ofCopyOutC hwt hc hout, hmv⟩
+    exact ⟨H', hout.out.ext, CopyOutC.wtCanon hwt hc hout, hmv⟩
 
 /-- `p = alice;` and `p = persons.push();` keep the state canonical. -/
 theorem ARhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy}
@@ -1477,187 +1530,134 @@ end Effects
 
 section Leaves
 
-variable {Γ : Ctx}
+variable {Γ : Ctx} (hnd : nodupKeysB C.vars = true)
+include hnd
 
 theorem keepsC_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
     (canonInv C).TKeeps (TRun.assign l r) :=
-  RunInv.TKeeps.of_agrees (TRun.assign_erase l r) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.assign_erase l r) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
-  have hc := RunCanon.canon hcn
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
   obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
   have hT := Loc.resolve_wt hwt l hr
-  exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H)
-    (hwt.glob.write hT (Src.value_wt hwt hsv) hτ))
-    ((hc.write hT (Src.value_canon hwt hc hsv) hτ).of_eq rfl rfl)⟩
+  exact ⟨H, ((hc.write hT (Src.value_canon hwt hc hsv) hτ).of_eq rfl rfl)⟩
 
 theorem keepsC_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
     (canonInv C).TKeeps (TRun.rebind i r) :=
-  RunInv.TKeeps.of_agrees (TRun.rebind_erase i r) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.rebind_erase i r) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
   obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
   cases h
-  obtain ⟨hwt₁, hty⟩ := ARhs.eval_wt hwt he
-  exact ⟨H, .refl H, RunCanon.mk' (hwt₁.setLocal i (ARhs.alias_wt hty))
-    ((ARhs.eval_canon hwt hcn.canon he).of_eq rfl rfl)⟩
+  exact ⟨H, ((ARhs.eval_canon hwt hc he).of_eq rfl rfl)⟩
 
 theorem keepsC_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
     (canonInv C).TKeeps (TRun.assignLocal i r) :=
-  RunInv.TKeeps.of_agrees (TRun.assignLocal_erase i r) <| by
-  intro H σ σ' hcn h
-  dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
+  RunInv.TKeeps.of_agrees hnd (TRun.assignLocal_erase i r) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   obtain ⟨w, hv, h⟩ := bind_ok_inv h
   cases h
-  exact ⟨H, .refl H, RunCanon.mk' (hwt.setLocal i (Val.eval_wt hwt r hv))
-    (hcn.canon.of_eq rfl rfl)⟩
+  exact ⟨H, (hc.of_eq rfl rfl)⟩
 
 theorem keepsC_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
     (canonInv C).TKeeps (TRun.declLocal p init) :=
-  RunInv.TKeeps.of_agrees (TRun.declLocal_erase p init) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.declLocal_erase p init) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
   cases init with
   | none =>
     cases h
-    exact ⟨H, .refl H, RunCanon.mk' (hwt.push (LTy.WT.default p)) (hcn.canon.of_eq rfl rfl)⟩
+    exact ⟨H, (hc.of_eq rfl rfl)⟩
   | some e =>
     obtain ⟨w, hv, h⟩ := bind_ok_inv h
     cases h
-    exact ⟨H, .refl H, RunCanon.mk' (hwt.push (Val.eval_wt hwt e hv)) (hcn.canon.of_eq rfl rfl)⟩
+    exact ⟨H, (hc.of_eq rfl rfl)⟩
 
 theorem keepsC_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
     (canonInv C).TKeeps (TRun.declStorage R init) :=
-  RunInv.TKeeps.of_agrees (TRun.declStorage_erase R init) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.declStorage_erase R init) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
   cases init with
   | none =>
     cases h
-    exact ⟨H, .refl H, RunCanon.mk' (hwt.push (t := .alias R) (fun _ _ h => nomatch h))
-      (hcn.canon.of_eq rfl rfl)⟩
+    exact ⟨H, (hc.of_eq rfl rfl)⟩
   | some r =>
     obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
     cases h
-    obtain ⟨hwt₁, hty⟩ := ARhs.eval_wt hwt he
-    exact ⟨H, .refl H, RunCanon.mk' (hwt₁.push (ARhs.alias_wt hty))
-      ((ARhs.eval_canon hwt hcn.canon he).of_eq rfl rfl)⟩
+    exact ⟨H, ((ARhs.eval_canon hwt hc he).of_eq rfl rfl)⟩
 
 theorem keepsC_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) :
     (canonInv C).TKeeps (TRun.opAssign op l r) :=
-  RunInv.TKeeps.of_agrees (TRun.opAssign_erase op hop hp l r) <| by
-  intro H σ σ' hcn h
-  dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
+  RunInv.TKeeps.of_agrees hnd (TRun.opAssign_erase op hop hp l r) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   obtain ⟨v, _, h⟩ := bind_ok_inv h
-  exact ⟨H, .refl H, RunCanon.mk' (OpLoc.store_wt hwt (compound_isArith hop) l hp h)
-    (OpLoc.store_canon hwt hcn.canon (compound_isArith hop) l hp h)⟩
+  exact ⟨H, (OpLoc.store_canon hwt hc (compound_isArith hop) l hp h)⟩
 
 theorem keepsC_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
     (canonInv C).TKeeps (TRun.incDec op l) :=
-  RunInv.TKeeps.of_agrees (TRun.incDec_erase op hp l) <| by
-  intro H σ σ' hcn h
-  dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
+  RunInv.TKeeps.of_agrees hnd (TRun.incDec_erase op hp l) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
   cases h
-  exact ⟨H, .refl H, RunCanon.mk' (OpLoc.bump_wt hwt l hp hb).1
-    (OpLoc.bump_canon hwt hcn.canon l hp hb)⟩
+  exact ⟨H, OpLoc.bump_canon hwt hc l hp hb⟩
 
 theorem keepsC_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
     (canonInv C).TKeeps (TRun.assignIncDec i op l) :=
-  RunInv.TKeeps.of_agrees (TRun.assignIncDec_erase i op hp l) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.assignIncDec_erase i op hp l) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
   obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
   cases h
-  obtain ⟨hwt₁, hw⟩ := OpLoc.bump_wt hwt l hp hb
-  exact ⟨H, .refl H, RunCanon.mk' (hwt₁.setLocal i hw)
-    ((OpLoc.bump_canon hwt hcn.canon l hp hb).of_eq rfl rfl)⟩
+  exact ⟨H, ((OpLoc.bump_canon hwt hc l hp hb).of_eq rfl rfl)⟩
 
 theorem keepsC_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     (hd : (v.isSome || E.defaultOkS) = true) : (canonInv C).TKeeps (TRun.push b v) :=
-  RunInv.TKeeps.of_agrees (TRun.push_erase b v) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.push_erase b v) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
-  have hc := RunCanon.canon hcn
   obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
   obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
   have hT := SPath.resolve_wt hwt b hr
-  refine ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (pushAt_wt hwt.glob hT ?_ hτ))
-    ((pushAt_canon hc hT ?_ hτ).of_eq rfl rfl)⟩
-  · intro slot w hslot hw
-    cases v with
-    | none =>
-      cases hw
-      exact hslot
-    | some r =>
-      obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
-      cases hw
-      exact SVal.strip_hasTy (Src.value_wt hwt hv)
-  · intro slot w hslot hw
-    cases v with
-    | none =>
-      cases hw
-      exact hslot
-    | some r =>
-      obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
-      cases hw
-      exact SVal.strip_canon (Src.value_canon hwt hc hv)
+  refine ⟨H, ((pushAt_canon hc hT ?_ hτ).of_eq rfl rfl)⟩
+  intro slot w hslot hw
+  cases v with
+  | none =>
+    cases hw
+    exact hslot
+  | some r =>
+    obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
+    cases hw
+    exact SVal.strip_canon (Src.value_canon hwt hc hv)
 
 theorem keepsC_pop {E : Ty} (b : SPath C Γ (.array E)) : (canonInv C).TKeeps (TRun.pop b) :=
-  RunInv.TKeeps.of_agrees (TRun.pop_erase b) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.pop_erase b) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
   obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
   obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
   have hT := SPath.resolve_wt hwt b hr
-  exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (popAt_wt hwt.glob hT hτ))
-    ((popAt_canon hcn.canon hT hτ).of_eq rfl rfl)⟩
+  exact ⟨H, ((popAt_canon hc hT hτ).of_eq rfl rfl)⟩
 
 theorem keepsC_transfer (r a : Val C Γ .uint) : (canonInv C).TKeeps (TRun.transfer r a) :=
-  RunInv.TKeeps.of_agrees (TRun.transfer_erase r a) <| by
-  intro H σ σ' hcn h
-  dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
+  RunInv.TKeeps.of_agrees hnd (TRun.transfer_erase r a) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   iterate 4 bind_inv h
   obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-  refine ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (hwt.glob.transferAt hτ)) ?_⟩
+  refine ⟨H, ?_⟩
   unfold Solidity.transferAt at hτ
   split at hτ
   · exact nomatch hτ
-  · cases hτ; rw [Semantics.State.pay_eq]; exact hcn.canon.of_eq rfl rfl
+  · cases hτ; rw [Semantics.State.pay_eq]; exact hc.of_eq rfl rfl
 
 theorem keepsC_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
     (canonInv C).TKeeps (TRun.send pv r a) :=
-  RunInv.TKeeps.of_agrees (TRun.send_erase pv r a) <| by
-  intro H σ σ' hcn h
-  dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
+  RunInv.TKeeps.of_agrees hnd (TRun.send_erase pv r a) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   obtain ⟨_, _, h⟩ := bind_ok_inv h
   obtain ⟨addr, _, h⟩ := bind_ok_inv h
   obtain ⟨_, _, h⟩ := bind_ok_inv h
@@ -1666,58 +1666,46 @@ theorem keepsC_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
   split at h
   · exact nomatch h
   · have hp : Canon C H (σ.glob.pay addr amt) := by
-      rw [Semantics.State.pay_eq]; exact hcn.canon.of_eq rfl rfl
+      rw [Semantics.State.pay_eq]; exact hc.of_eq rfl rfl
     split at h <;> cases h
-    · exact ⟨H, .refl H, RunCanon.mk'
-        ((hwt.withGlob (.refl H) hwt.glob.pay).setLocal pv rfl) (hp.of_eq rfl rfl)⟩
-    · exact ⟨H, .refl H, RunCanon.mk'
-        ((hwt.withGlob (.refl H) hwt.glob.pay).setLocal pv rfl) (hp.of_eq rfl rfl)⟩
-    · exact ⟨H, .refl H, RunCanon.mk' (hwt.setLocal pv rfl) (hcn.canon.of_eq rfl rfl)⟩
+    · exact ⟨H, hp.of_eq rfl rfl⟩
+    · exact ⟨H, hp.of_eq rfl rfl⟩
+    · exact ⟨H, (hc.of_eq rfl rfl)⟩
 
 theorem keepsC_declMem (R : RefTy) (init : Option (MRhs C Γ R))
     (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
     (canonInv C).TKeeps (TRun.declMem R init hm) :=
-  RunInv.TKeeps.of_agrees (TRun.declMem_erase R init hm) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.declMem_erase R init hm) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
   cases init with
   | none =>
     obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
     cases h
-    obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hcn.canon ha
-    have h₁ := RunCanon.ofCopyOutC hwt hcn.canon hout
-    exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.push (t := .mem R) (LTy.WT.mem_some hid))
-      (h₁.canon.of_eq rfl rfl)⟩
+    obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc ha
+    have h₁ := CopyOutC.wtCanon hwt hc hout
+    exact ⟨H', (h₁.2.of_eq rfl rfl)⟩
   | some r =>
     obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
     cases h
-    obtain ⟨H', hext, h₁, hid⟩ := MRhs.eval_canon hwt hcn.canon he
-    exact ⟨H', hext, RunCanon.mk' (h₁.wt.push (t := .mem R) (LTy.WT.mem_some hid))
-      (h₁.canon.of_eq rfl rfl)⟩
+    obtain ⟨H', hext, h₁, hid⟩ := MRhs.eval_canon hwt hc he
+    exact ⟨H', (h₁.2.of_eq rfl rfl)⟩
 
 theorem keepsC_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
     (canonInv C).TKeeps (TRun.rebindMem i r) :=
-  RunInv.TKeeps.of_agrees (TRun.rebindMem_erase i r) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.rebindMem_erase i r) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
   obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
   cases h
-  obtain ⟨H', hext, h₁, hid⟩ := MRhs.eval_canon hwt hcn.canon he
-  exact ⟨H', hext, RunCanon.mk' (h₁.wt.setLocal i (LTy.WT.mem_some hid))
-    (h₁.canon.of_eq rfl rfl)⟩
+  obtain ⟨H', hext, h₁, hid⟩ := MRhs.eval_canon hwt hc he
+  exact ⟨H', (h₁.2.of_eq rfl rfl)⟩
 
 theorem keepsC_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
     (canonInv C).TKeeps (TRun.assignFromMem l p) :=
-  RunInv.TKeeps.of_agrees (TRun.assignFromMem_erase l p) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.assignFromMem_erase l p) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
-  have hc := RunCanon.canon hcn
   obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
   obtain ⟨id, hid, h⟩ := bind_ok_inv h
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
@@ -1726,79 +1714,56 @@ theorem keepsC_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ
   have hm := MPath.mval_wt hwt p hm0
   rw [MVal.asRef_ok hid] at hm
   have hT := Loc.resolve_wt hwt l hr
-  exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H)
-      (hwt.glob.write hT (copyMem_hasTy hwt.glob.heap hm hsv) hτ))
-    ((hc.write hT (copyMToSt_canon hwt.glob.heap hc.heap hm hsv) hτ).of_eq rfl rfl)⟩
+  exact ⟨H, ((hc.write hT (copyMToSt_canon hwt.glob.heap hc.heap hm hsv) hτ).of_eq rfl rfl)⟩
 
 theorem keepsC_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
     (canonInv C).TKeeps (TRun.assignMem l r) :=
-  RunInv.TKeeps.of_agrees (TRun.assignMem_erase l r) <| by
-  intro H σ σ' hcn h
-  dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
+  RunInv.TKeeps.of_agrees hnd (TRun.assignMem_erase l r) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
-  exact ⟨H, .refl H, RunCanon.mk' (MLoc.write_wt hwt l (MSrc.mval_wt hwt hmv) h)
-    (MLoc.write_canon hwt hcn.canon l h)⟩
+  exact ⟨H, (MLoc.write_canon hwt hc l h)⟩
 
 theorem keepsC_delete {T : Ty} (l : Loc C Γ T) : (canonInv C).TKeeps (TRun.delete l) :=
-  RunInv.TKeeps.of_agrees (TRun.delete_erase l) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.delete_erase l) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
-  have hc := RunCanon.canon hcn
   obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
   obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
   obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
   have hty := Loc.resolve_wt hwt l hr
-  exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (hwt.glob.save hty
-      (SVal.defaultOf_hasTy (findStorage_hasTy hwt.glob.storage hty hcur)) hτ))
-    ((hc.save hty (SVal.defaultOf_canon (hc.find hty hcur)) hτ).of_eq rfl rfl)⟩
+  exact ⟨H, ((hc.save hty (SVal.defaultOf_canon (hc.find hty hcur)) hτ).of_eq rfl rfl)⟩
 
 theorem keepsC_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) :
     (canonInv C).TKeeps (TRun.deleteMem p) :=
-  RunInv.TKeeps.of_agrees (TRun.deleteMem_erase p) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.deleteMem_erase p) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
-  have hc := RunCanon.canon hcn
   cases p with
   | var i _ =>
     obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
     cases h
     obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc ha
-    have h₁ := RunCanon.ofCopyOutC hwt hc hout
-    exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.setLocal i (LTy.WT.mem_some hid))
-      (h₁.canon.of_eq rfl rfl)⟩
+    have h₁ := CopyOutC.wtCanon hwt hc hout
+    exact ⟨H', (h₁.2.of_eq rfl rfl)⟩
   | loc l =>
     obtain ⟨a, ha, h⟩ := bind_ok_inv h
     obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
     have hat := MLoc.addr_wt hwt l ha
     cases T with
     | prim p =>
-      refine ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H)
-        (writeAddr_wt hwt.glob hat (Value.toMVal_hasTyH ?_) hτ))
-        ((writeAddr_canon hwt.glob hc hat hτ).of_eq rfl rfl)⟩
-      cases p <;> rfl
+      refine ⟨H, ((writeAddr_canon hwt.glob hc hat hτ).of_eq rfl rfl)⟩
     | ref R =>
       obtain ⟨⟨τ₁, id⟩, hal, hτ⟩ := bind_ok_inv hτ
       obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc hal
       have hg₁ : StateWT H' C.layout τ₁ := hwt.glob.ofCopyOut hout.out
       have hc₁ : Canon C H' τ₁ := ⟨hout.out.storage ▸ hc.storage, hout.canon⟩
-      exact ⟨H', hout.out.ext, RunCanon.mk'
-        (hwt.withGlob hout.out.ext (writeAddr_wt hg₁ (hat.mono hout.out.ext) hid hτ))
-        ((writeAddr_canon hg₁ hc₁ (hat.mono hout.out.ext) hτ).of_eq rfl rfl)⟩
+      exact ⟨H', (writeAddr_canon hg₁ hc₁ (hat.mono hout.out.ext) hτ).of_eq rfl rfl⟩
 
 theorem keepsC_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
     (hn : R.newArrOk = true) : (canonInv C).TKeeps (TRun.assignNew l n hn) :=
-  RunInv.TKeeps.of_agrees (TRun.assignNew_erase l n hn) <| by
-  intro H σ σ' hcn h
+  RunInv.TKeeps.of_agrees hnd (TRun.assignNew_erase l n hn) <| canonInv.ekeeps
+    fun H σ σ' hwt hc h => by
   dsimp only at h
-  replace hcn : RunCanon C H σ := hcn
-  have hwt := RunCanon.wt hcn
-  have hc := RunCanon.canon hcn
   bind_inv h
   obtain ⟨nv, _, h⟩ := bind_ok_inv h
   obtain ⟨⟨τ, mv⟩, hcopy, h⟩ := bind_ok_inv h
@@ -1808,21 +1773,31 @@ theorem keepsC_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
   rw [MVal.asRef_ok (show mv.asRef = .ok id from hid)] at hmv
   have hg₁ : StateWT H' C.layout τ := hwt.glob.ofCopyOut hout.out
   have hc₁ : Canon C H' τ := ⟨hout.out.storage ▸ hc.storage, hout.canon⟩
-  have h₁ := RunCanon.ofCopyOutC hwt hc hout
+  have h₁ := CopyOutC.wtCanon hwt hc hout
   cases l with
   | store l =>
     obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
     obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
     obtain ⟨τ', hτ', rfl⟩ := map_ok_inv h
-    have hT := Loc.resolve_wt h₁.wt l hr
-    exact ⟨H', hout.out.ext, RunCanon.mk'
-      (h₁.wt.withGlob (.refl H') (hg₁.write hT (copyMem_hasTy hg₁.heap hmv hsv) hτ'))
-      ((hc₁.write hT (copyMToSt_canon hg₁.heap hc₁.heap hmv hsv) hτ').of_eq rfl rfl)⟩
+    have hT := Loc.resolve_wt h₁.1 l hr
+    exact ⟨H', (hc₁.write hT (copyMToSt_canon hg₁.heap hc₁.heap hmv hsv) hτ').of_eq rfl rfl⟩
   | mem l =>
-    exact ⟨H', hout.out.ext, RunCanon.mk' (MLoc.write_wt h₁.wt l hmv h)
-      (MLoc.write_canon h₁.wt h₁.canon l h)⟩
+    exact ⟨H', (MLoc.write_canon h₁.1 h₁.2 l h)⟩
 
 end Leaves
+
+/-- A call's entry keeps the storage canonical: a memory return variable is
+allocated, the storage left alone. -/
+theorem canonInv.enter (hnd : nodupKeysB C.vars = true) {Γ Γ' ps rs : Ctx}
+    (ret : CallRet Γ rs Γ') (σ : State C Γ) (a : TEnv C σ.H ps)
+    (hcn : RunCanon C (HTy.toHeapTy 0 σ.H) (σ.withEnv a).erase) :
+    RunCanon C (HTy.toHeapTy 0 (ret.enterT (σ.withEnv a)).st.H)
+      (ret.enterT (σ.withEnv a)).st.erase := by
+  obtain ⟨τ', r, hen, he⟩ := CallRet.enterT_ok ret σ a
+  rw [he]
+  obtain ⟨_, _, ⟨_, hc'⟩, _⟩ := CallRet.enter_canon ret (State.erase_wt hnd σ).glob
+    ((RunCanon.typed hcn).of_eq rfl rfl) hen
+  exact RunCanon.of_canon (hc'.of_eq rfl rfl)
 
 mutual
 
@@ -1831,58 +1806,58 @@ canonical state ends in one: after `alice.age = 3;` `alice` still has both
 members, after `balances[7] += 1;` key `7` is there once, after
 `alice = m;` the copy has every member `m`'s object has, which is all of
 them. -/
-theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv C).TKeeps (Stmt.runR s)
-  | _, _, .assign l r => keepsC_assign l r
-  | _, _, .rebind i r => keepsC_rebind i r
-  | _, _, .assignLocal i r => keepsC_assignLocal i r
-  | _, _, .declLocal p _ init => keepsC_declLocal p init
-  | _, _, .declStorage R _ init => keepsC_declStorage R init
-  | _, _, .opAssign op hop hp l r => keepsC_opAssign op hop hp l r
-  | _, _, .incDec op hp l => keepsC_incDec op hp l
-  | _, _, .assignIncDec i op hp l _ => keepsC_assignIncDec i op hp l
-  | _, _, .push b v hd => keepsC_push b v hd
-  | _, _, .pop b => keepsC_pop b
-  | _, _, .transfer r a => keepsC_transfer r a
-  | _, _, .send pv r a => keepsC_send pv r a
-  | _, _, .declMem R _ init hd hm => keepsC_declMem R init hd hm
-  | _, _, .rebindMem i r => keepsC_rebindMem i r
-  | _, _, .assignFromMem l p => keepsC_assignFromMem l p
-  | _, _, .assignMem l r => keepsC_assignMem l r
-  | _, _, .delete l => keepsC_delete l
-  | _, _, .deleteMem p hd => keepsC_deleteMem p hd
-  | _, _, .assignNew l n hn => keepsC_assignNew l n hn
+theorem Stmt.keeps_canon (hnd : nodupKeysB C.vars = true) :
+    {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv C).TKeeps (Stmt.runR s)
+  | _, _, .assign l r => keepsC_assign hnd l r
+  | _, _, .rebind i r => keepsC_rebind hnd i r
+  | _, _, .assignLocal i r => keepsC_assignLocal hnd i r
+  | _, _, .declLocal p _ init => keepsC_declLocal hnd p init
+  | _, _, .declStorage R _ init => keepsC_declStorage hnd R init
+  | _, _, .opAssign op hop hp l r => keepsC_opAssign hnd op hop hp l r
+  | _, _, .incDec op hp l => keepsC_incDec hnd op hp l
+  | _, _, .assignIncDec i op hp l _ => keepsC_assignIncDec hnd i op hp l
+  | _, _, .push b v hd => keepsC_push hnd b v hd
+  | _, _, .pop b => keepsC_pop hnd b
+  | _, _, .transfer r a => keepsC_transfer hnd r a
+  | _, _, .send pv r a => keepsC_send hnd pv r a
+  | _, _, .declMem R _ init hd hm => keepsC_declMem hnd R init hd hm
+  | _, _, .rebindMem i r => keepsC_rebindMem hnd i r
+  | _, _, .assignFromMem l p => keepsC_assignFromMem hnd l p
+  | _, _, .assignMem l r => keepsC_assignMem hnd l r
+  | _, _, .delete l => keepsC_delete hnd l
+  | _, _, .deleteMem p hd => keepsC_deleteMem hnd p hd
+  | _, _, .assignNew l n hn => keepsC_assignNew hnd l n hn
   | _, _, .ite c thn els =>
-    RunInv.tkeeps_ite c thn.ext els.ext (Prog.keeps_canon thn) (Prog.keeps_canon els)
+    RunInv.tkeeps_ite c thn.ext els.ext (Prog.keeps_canon hnd thn) (Prog.keeps_canon hnd els)
   | _, _, .require c => RunInv.tkeeps_require c
   | _, _, .assert c => RunInv.tkeeps_assert c
   | _, _, .revert => RunInv.tkeeps_revert
   | _, _, .call _ args ret body =>
     RunInv.tkeeps_call args ret body.ext
-      (fun _ _ _ hcn h => Args.eval_wt (RunCanon.wt hcn) args h)
-      (fun _ _ _ _ hτ h => CallRet.enter_canon ret hτ.1 hτ.2 h) (Prog.keeps_canon body)
+      (fun _ _ a _ _ => Env.all_true a) (canonInv.enter hnd ret) (Prog.keeps_canon hnd body)
   | _, _, .tryCall call rets ok err code pnc other =>
     RunInv.tkeeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
-      (fun _ _ _ _ h => Binders.decode_wt rets h) (fun _ _ _ h => CodeBinder.decode_wt code h)
-      (Prog.keeps_canon ok) (Prog.keeps_canon err) (Prog.keeps_canon pnc)
-      (Prog.keeps_canon other)
-  | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_canon body)
-  | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_canon body)
+      (fun _ _ r _ _ => Env.all_true r) (fun _ _ r _ => Env.all_true r)
+      (Prog.keeps_canon hnd ok) (Prog.keeps_canon hnd err) (Prog.keeps_canon hnd pnc)
+      (Prog.keeps_canon hnd other)
+  | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_canon hnd body)
+  | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_canon hnd body)
 
 /-- **Canonicity, block level.** -/
-theorem Prog.keeps_canon : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (canonInv C).TKeeps (Prog.runR P)
+theorem Prog.keeps_canon (hnd : nodupKeysB C.vars = true) :
+    {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (canonInv C).TKeeps (Prog.runR P)
   | _, _, .nil => RunInv.tkeeps_nil
-  | _, _, .cons s P => RunInv.tkeeps_seq (Stmt.keeps_canon s) (Prog.keeps_canon P)
+  | _, _, .cons s P => RunInv.tkeeps_seq (Stmt.keeps_canon hnd s) (Prog.keeps_canon hnd P)
 
 end
 
 /-- **Canonicity**: a block run by the typed run from a state whose erasure
-is well-typed and canonical ends, if in a state, in one, under a store typing
-that only grew. -/
-theorem Prog.run_canon {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy} {σ : State C Γ}
-    {o : Out C σ.H Γ'} (hwt : RunWT C H σ.erase) (hc : Canon C H σ.erase.glob)
-    (h : P.run σ = .ok o) : ∃ H', H.Extends H' ∧ RunWT C H' o.st.erase ∧ Canon C H' o.st.erase.glob :=
-  let ⟨H', hext, h'⟩ := Prog.keeps_canon P H σ o (RunCanon.mk' hwt hc) h
-  ⟨H', hext, RunCanon.wt h', RunCanon.canon h'⟩
+has canonical storage ends, if in a state, in one whose erasure has; its
+heap and its values are canonical and typed by construction. -/
+theorem Prog.run_canon (hnd : nodupKeysB C.vars = true) {Γ Γ' : Ctx} (P : Prog C Γ Γ')
+    {σ : State C Γ} {o : Out C σ.H Γ'} (hc : CanonStorage C σ.erase.storage)
+    (h : P.run σ = .ok o) : CanonStorage C o.st.erase.storage :=
+  (Prog.keeps_canon hnd P σ o (RunCanon.of_storage hc) h).1
 
 end Solidity
 
@@ -1928,12 +1903,9 @@ her `account`. -/
 theorem reachable_canon (hnd : nodupKeysB C.vars = true) {st : List (Name × Semantics.SVal)}
     (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
-  have hwt : RunWT C [] (State.init C).erase := by
-    rw [Reachable.init_erase]; exact RunWT.init hnd rfl rfl
-  have hc : Canon C [] (State.init C).erase.glob := by
-    rw [Reachable.init_erase]; exact Canon.init rfl
-  obtain ⟨_, _, hwt', hcn⟩ := Prog.run_canon P hwt hc hrun
-  exact ⟨hwt'.glob.storage, hcn.storage⟩
+  have hc : CanonStorage C (State.init C).erase.storage := by
+    rw [Reachable.init_erase]; exact (Canon.init (σ := C.initState) rfl).storage
+  exact ⟨Storage.erase_wt hnd o.st.storage, Prog.run_canon hnd P hc hrun⟩
 
 /-! ## What is not reachable
 

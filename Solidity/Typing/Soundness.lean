@@ -729,13 +729,6 @@ variable (I : RunInv C)
 def Holds {Γ : Ctx} (H : HeapTy) (σ : EState C Γ) : Prop :=
   I.glob H σ.glob ∧ Env.All (I.loc H) σ.env
 
-/-- A step on erased states keeps the invariant: from a state it holds of,
-it ends, if in a state, in one it holds of under a store typing that only
-grew (what a typed leaf erases to, `RunInv.TKeeps.of_agrees`). -/
-def Keeps {Γ Γ' : Ctx} (f : EState C Γ → Res (EState C Γ')) : Prop :=
-  ∀ (H : HeapTy) (σ : EState C Γ) (σ' : EState C Γ'), I.Holds H σ → f σ = .ok σ' →
-    ∃ H', H.Extends H' ∧ I.Holds H' σ'
-
 variable {I}
 
 theorem env_mono {Γ : Ctx} {H H' : HeapTy} (hext : H.Extends H') {e : Env C Γ}

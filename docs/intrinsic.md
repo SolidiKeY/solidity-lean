@@ -857,6 +857,23 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     `keepsC_*` leaf, `TypedRunInv` and the tightness invariant of
     `Constructibility` (about 120 sites): its own lane, after M6c, which
     moves the closer onto the same states.
+    *Implemented (W6 lane `canon`):* `RunInv.TKeeps` reads the invariant
+    under `HTy.toHeapTy 0 σ.H` before and after the step; a leaf's
+    obligation (`RunInv.EKeeps`, `TKeeps.of_agrees hnd`) is read on the
+    erasure of a typed state, so it is given `RunWT` by `State.erase_wt hnd
+    σ`; a call's entry is read on the typed state (`tkeeps_call`'s
+    `henter`, `CallRet.enterT_ok`).  `canonInv.glob` is `CanonStorage` and
+    its locals carry nothing: the heap is canonical by construction
+    (`State.erase_canonHeap`), so `canonInv.ekeeps` hands each leaf
+    `Canon` and asks for the storage's.  `tightInv` is `canonInv` and
+    `Semantics.Tight` on the global part, `LTy.Keys` on the locals.
+    `Prog.run_canon hnd P hc h` and `Prog.run_tight hd hnd P hc ht h` take
+    `hc : CanonStorage C σ.erase.storage` and no `hwt`; the `tight_*`
+    leaves are unchanged (`tkeepsT_of hnd` instantiates their `RunWT` and
+    `Canon` from the typed state).  `RunInv.Keeps`, the erased obligation,
+    is deleted (`Typing/Soundness.lean`); `RunCanon.ofCopyOutC` is
+    `CopyOutC.wtCanon` and `MRhs.eval_canon` returns `RunWT ∧ Canon`, the
+    old `RunCanon`.  No statement outside `Typing/` moved; no pin moved.
 76. *Proposed (M7 review), the lead's call:* `Stmt.step` keeps its `Option`
     result.  `Stmt.rule_exists` proves it never `none`, but making it total
     changes the kernel-evaluated strategy (every arm, `shortStep`, the
@@ -870,6 +887,23 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     M1's in-range literals, since a word, key or slot out of range is
     canonical and tight but no literal writes it.  `Reachable → FitsStorage`
     is not proved here.
+    *Recorded (W6 lane `canon`), not proved, because it is false:*
+    `huge_reachable_not_fits` (`Typing/Constructibility.lean`): the contract
+    `Huge`, one `uint[2^256 + 1]` root, reaches its initial storage by the
+    empty program, and that root has more elements than `FitsStorage`
+    allows a fixed-size array (`≤ 2^256`, each written at a literal index
+    by the builder).  So the three theorems keep their `FitsStorage`
+    premise.  With a premise on the contract instead (every fixed size at
+    most `2^256`, which solc's "type too large for storage" check
+    implies), `Reachable → FitsStorage` would need a third run invariant
+    beside `canonInv` and `tightInv`, which the typed state does not give
+    by construction: every mapping key in its key type's range
+    (`SMap` keys are `Int`, written through `Value.keyAt` and alias paths)
+    and every dynamic array's live and recycled slots together fewer than
+    `2^256` (`SVal.array` bounds the live ones only; `push`, `pop`,
+    `delete` and the overlay copies keep the sum).  Its leaves would
+    mirror `tight_*` (about 20, with `save`/`overlay`/`copyMToSt`
+    lemmas for the sum and the keys); left as a proposal for the lead.
 
 **Lead, 2026-10-09 (4):** proposals 54–77 are approved. 75 (store typing
 tied to the typed state), 76 (`Stmt.step` total, behind the Derived9–11
@@ -910,8 +944,10 @@ the closer port.
   `solkeycheck` executable (built only; no rule name or annotation changed),
   the reader's `keycheck` executable as a target and the VS Code extension's
   tests.
-- From the M7 review: proposals 75 (the canonicity invariant on the typed
-  state) and 76 (`Stmt.step` total), each a lane with its gates.
+- From the M7 review: proposal 76 (`Stmt.step` total), a lane with its
+  gates.  75 is implemented and 77 recorded as false (lane `canon`,
+  Decisions); 77's conditional form (a bound on fixed sizes, a third run
+  invariant) is open.
 - Lean docstrings still call the erased side "today's" in places and cite
   this record's sections (at `ad728b16`).
 - `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on

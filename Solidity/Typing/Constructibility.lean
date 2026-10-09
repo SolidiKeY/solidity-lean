@@ -3083,16 +3083,16 @@ theorem tight_assignNew (hd : DeepOk C) (hwt : RunWT C H σ.erase) (hc : Canon C
     obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.glob.heapTyNodup hwt.glob.heap hwt.glob.heapWf
       hc.heap (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
     rw [MVal.asRef_ok (show mv.asRef = .ok id from hid)] at hmv
-    have h₁ := RunCanon.ofCopyOutC hwt hc hout
+    have h₁ := CopyOutC.wtCanon hwt hc hout
     obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
     obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
     obtain ⟨τ', hτ', rfl⟩ := map_ok_inv h
     have hg₁ : StateWT H' C.layout τ := hwt.glob.ofCopyOut hout.out
     have hc₁ : Canon C H' τ := ⟨hout.out.storage ▸ hc.storage, hout.canon⟩
-    have hT := Loc.resolve_wt h₁.wt l hr
+    have hT := Loc.resolve_wt h₁.1 l hr
     have hsc := copyMToSt_canon hg₁.heap hc₁.heap hmv hsv
     have hτt : Semantics.Tight C τ := ⟨ht₁.storage⟩
-    exact ht₁.withGlob (hτt.write hd hc₁ hT (Loc.resolve_keys h₁.wt ht₁.env l hr)
+    exact ht₁.withGlob (hτt.write hd hc₁ hT (Loc.resolve_keys h₁.1 ht₁.env l hr)
       (fun _ => Loc.resolve_live l hr) hsc (copyMToSt_tight hd hT hsc hsv) hτ')
   | mem l =>
     obtain ⟨hs, hen⟩ := MLoc.write_se l h
@@ -3139,11 +3139,11 @@ end Leaves
 /-- What a run keeps: the state well-typed, canonical and tight. -/
 def tightInv (C : Contract) : RunInv C where
   glob H τ := (canonInv C).glob H τ ∧ Semantics.Tight C τ
-  loc H t v := LTy.WT C H t v ∧ LTy.Keys C t v
-  loc_mono hext h := ⟨LTy.WT.mono hext h.1, h.2⟩
+  loc _ t v := LTy.Keys C t v
+  loc_mono _ h := h
   reglob e h := ⟨(canonInv C).reglob e h.1, ⟨h.2.storage⟩⟩
 
-/-- The state well-typed under `H`, canonical and tight. -/
+/-- The storage canonical and tight, every alias bound along keys. -/
 abbrev RunTight (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : EState C Γ) : Prop :=
   (tightInv C).Holds H σ
 
@@ -3152,29 +3152,28 @@ namespace RunTight
 variable {Γ : Ctx} {H : HeapTy} {σ : EState C Γ}
 
 theorem canon (h : RunTight C H σ) : RunCanon C H σ :=
-  ⟨h.1.1, Env.All.mono (fun _ _ h => h.1) h.2⟩
+  ⟨h.1.1, Env.all_true σ.env⟩
 
 theorem tight (h : RunTight C H σ) : Tight C σ :=
-  ⟨h.1.2.storage, Env.All.mono (fun _ _ h => h.2) h.2⟩
+  ⟨h.1.2.storage, h.2⟩
 
 theorem mk' (hc : RunCanon C H σ) (ht : Tight C σ) : RunTight C H σ :=
-  ⟨⟨hc.1, ht.glob⟩, Env.All.and hc.2 ht.env⟩
+  ⟨⟨hc.1, ht.glob⟩, ht.env⟩
 
 end RunTight
 
 /-- A typed leaf keeps the state tight when it keeps it canonical and, from
 a state whose erasure is canonical and tight, leaves one whose erasure is
 tight. -/
-theorem tkeepsT_of {Γ Γ' : Ctx} {t : TStep C Γ Γ'} (hc : (canonInv C).TKeeps t)
+theorem tkeepsT_of (hnd : nodupKeysB C.vars = true) {Γ Γ' : Ctx} {t : TStep C Γ Γ'}
+    (hc : (canonInv C).TKeeps t)
     (ht : ∀ (H : HeapTy) (σ : State C Γ) (o : Out C σ.H Γ'), RunWT C H σ.erase →
       Canon C H σ.erase.glob → Tight C σ.erase → t σ = .ok o → Tight C o.st.erase) :
     (tightInv C).TKeeps t := by
-  intro H σ o h hrun
-  replace h : RunTight C H σ.erase := h
-  obtain ⟨H', hext, hc'⟩ := hc H σ o (RunTight.canon h) hrun
-  exact ⟨H', hext, RunTight.mk' hc'
-    (ht H σ o (RunCanon.wt (RunTight.canon h)) (RunCanon.canon (RunTight.canon h))
-      (RunTight.tight h) hrun)⟩
+  intro σ o h hrun
+  replace h : RunTight C (HTy.toHeapTy 0 σ.H) σ.erase := h
+  exact RunTight.mk' (hc σ o (RunTight.canon h) hrun)
+    (ht _ σ o (State.erase_wt hnd σ) (RunCanon.typed (RunTight.canon h)) (RunTight.tight h) hrun)
 
 /-- Every local of a call's parameters, return variables or decoded data is
 a value, or a fresh memory object: no alias. -/
@@ -3208,93 +3207,103 @@ theorem CallRet.enter_tight {Γ rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' 
     cases h
     exact ⟨(allocDefault_se ha).1, trivial, trivial⟩
 
+
+/-- A call's entry keeps the storage tight: no return variable is an
+alias. -/
+theorem tightInv.enter (hnd : nodupKeysB C.vars = true) {Γ Γ' ps rs : Ctx}
+    (ret : CallRet Γ rs Γ') (σ : State C Γ) (a : TEnv C σ.H ps)
+    (h : RunTight C (HTy.toHeapTy 0 σ.H) (σ.withEnv a).erase) :
+    RunTight C (HTy.toHeapTy 0 (ret.enterT (σ.withEnv a)).st.H)
+      (ret.enterT (σ.withEnv a)).st.erase := by
+  have hc := canonInv.enter hnd ret σ a (RunTight.canon h)
+  obtain ⟨τ', r, hen, he⟩ := CallRet.enterT_ok ret σ a
+  obtain ⟨hs, hk⟩ := CallRet.enter_tight ret hen
+  rw [he] at hc ⊢
+  exact ⟨⟨hc.1, h.1.2.of_eq hs⟩, Env.All.append rs hk h.2⟩
+
 mutual
 
 /-- **Tightness, statement level**: a statement run from a well-typed,
 canonical, tight state ends in a tight one. -/
-theorem Stmt.keeps_tight (hd : DeepOk C) :
+theorem Stmt.keeps_tight (hd : DeepOk C) (hnd : nodupKeysB C.vars = true) :
     {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (tightInv C).TKeeps (Stmt.runR s)
   | _, _, .assign l r =>
-    tkeepsT_of (keepsC_assign l r) fun _ _ _ hwt hc ht h => tight_assign hd hwt hc ht l r h
+    tkeepsT_of hnd (keepsC_assign hnd l r) fun _ _ _ hwt hc ht h => tight_assign hd hwt hc ht l r h
   | _, _, .rebind i r =>
-    tkeepsT_of (keepsC_rebind i r) fun _ _ _ hwt hc ht h => tight_rebind hd hwt hc ht i r h
+    tkeepsT_of hnd (keepsC_rebind hnd i r) fun _ _ _ hwt hc ht h => tight_rebind hd hwt hc ht i r h
   | _, _, .assignLocal i r =>
-    tkeepsT_of (keepsC_assignLocal i r) fun _ _ _ _ _ ht h => tight_assignLocal ht i r h
+    tkeepsT_of hnd (keepsC_assignLocal hnd i r) fun _ _ _ _ _ ht h => tight_assignLocal ht i r h
   | _, _, .declLocal p _ init =>
-    tkeepsT_of (keepsC_declLocal p init) fun _ _ _ _ _ ht h => tight_declLocal ht p init h
+    tkeepsT_of hnd (keepsC_declLocal hnd p init) fun _ _ _ _ _ ht h => tight_declLocal ht p init h
   | _, _, .declStorage R _ init =>
-    tkeepsT_of (keepsC_declStorage R init) fun _ _ _ hwt hc ht h =>
+    tkeepsT_of hnd (keepsC_declStorage hnd R init) fun _ _ _ hwt hc ht h =>
       tight_declStorage hd hwt hc ht R init h
   | _, _, .opAssign op hop hp l r =>
-    tkeepsT_of (keepsC_opAssign op hop hp l r) fun _ _ _ hwt hc ht h =>
+    tkeepsT_of hnd (keepsC_opAssign hnd op hop hp l r) fun _ _ _ hwt hc ht h =>
       tight_opAssign hd hwt hc ht op hop hp l r h
   | _, _, .incDec op hp l =>
-    tkeepsT_of (keepsC_incDec op hp l) fun _ _ _ hwt hc ht h => tight_incDec hd hwt hc ht op hp l h
+    tkeepsT_of hnd (keepsC_incDec hnd op hp l) fun _ _ _ hwt hc ht h =>
+      tight_incDec hd hwt hc ht op hp l h
   | _, _, .assignIncDec i op hp l _ =>
-    tkeepsT_of (keepsC_assignIncDec i op hp l) fun _ _ _ hwt hc ht h =>
+    tkeepsT_of hnd (keepsC_assignIncDec hnd i op hp l) fun _ _ _ hwt hc ht h =>
       tight_assignIncDec hd hwt hc ht i op hp l h
   | _, _, .push b v hdo =>
-    tkeepsT_of (keepsC_push b v hdo) fun _ _ _ hwt hc ht h => tight_push hd hwt hc ht b v h
-  | _, _, .pop b => tkeepsT_of (keepsC_pop b) fun _ _ _ hwt hc ht h => tight_pop hd hwt hc ht b h
+    tkeepsT_of hnd (keepsC_push hnd b v hdo) fun _ _ _ hwt hc ht h => tight_push hd hwt hc ht b v h
+  | _, _, .pop b =>
+    tkeepsT_of hnd (keepsC_pop hnd b) fun _ _ _ hwt hc ht h => tight_pop hd hwt hc ht b h
   | _, _, .transfer r a =>
-    tkeepsT_of (keepsC_transfer r a) fun _ _ _ _ _ ht h => tight_transfer ht r a h
+    tkeepsT_of hnd (keepsC_transfer hnd r a) fun _ _ _ _ _ ht h => tight_transfer ht r a h
   | _, _, .send pv r a =>
-    tkeepsT_of (keepsC_send pv r a) fun _ _ _ _ _ ht h => tight_send ht pv r a h
+    tkeepsT_of hnd (keepsC_send hnd pv r a) fun _ _ _ _ _ ht h => tight_send ht pv r a h
   | _, _, .declMem R _ init hdo hm =>
-    tkeepsT_of (keepsC_declMem R init hdo hm) fun _ _ _ _ _ ht h => tight_declMem ht R init hm h
+    tkeepsT_of hnd (keepsC_declMem hnd R init hdo hm) fun _ _ _ _ _ ht h =>
+      tight_declMem ht R init hm h
   | _, _, .rebindMem i r =>
-    tkeepsT_of (keepsC_rebindMem i r) fun _ _ _ _ _ ht h => tight_rebindMem ht i r h
+    tkeepsT_of hnd (keepsC_rebindMem hnd i r) fun _ _ _ _ _ ht h => tight_rebindMem ht i r h
   | _, _, .assignFromMem l p =>
-    tkeepsT_of (keepsC_assignFromMem l p) fun _ _ _ hwt hc ht h =>
+    tkeepsT_of hnd (keepsC_assignFromMem hnd l p) fun _ _ _ hwt hc ht h =>
       tight_assignFromMem hd hwt hc ht l p h
   | _, _, .assignMem l r =>
-    tkeepsT_of (keepsC_assignMem l r) fun _ _ _ _ _ ht h => tight_assignMem ht l r h
+    tkeepsT_of hnd (keepsC_assignMem hnd l r) fun _ _ _ _ _ ht h => tight_assignMem ht l r h
   | _, _, .delete l =>
-    tkeepsT_of (keepsC_delete l) fun _ _ _ hwt hc ht h => tight_delete hd hwt hc ht l h
+    tkeepsT_of hnd (keepsC_delete hnd l) fun _ _ _ hwt hc ht h => tight_delete hd hwt hc ht l h
   | _, _, .deleteMem p hdo =>
-    tkeepsT_of (keepsC_deleteMem p hdo) fun _ _ _ _ _ ht h => tight_deleteMem ht p h
+    tkeepsT_of hnd (keepsC_deleteMem hnd p hdo) fun _ _ _ _ _ ht h => tight_deleteMem ht p h
   | _, _, .assignNew l n hn =>
-    tkeepsT_of (keepsC_assignNew l n hn) fun _ _ _ hwt hc ht h =>
+    tkeepsT_of hnd (keepsC_assignNew hnd l n hn) fun _ _ _ hwt hc ht h =>
       tight_assignNew hd hwt hc ht l n hn h
   | _, _, .ite c thn els =>
-    RunInv.tkeeps_ite c thn.ext els.ext (Prog.keeps_tight hd thn) (Prog.keeps_tight hd els)
+    RunInv.tkeeps_ite c thn.ext els.ext (Prog.keeps_tight hd hnd thn) (Prog.keeps_tight hd hnd els)
   | _, _, .require c => RunInv.tkeeps_require c
   | _, _, .assert c => RunInv.tkeeps_assert c
   | _, _, .revert => RunInv.tkeeps_revert
   | _, _, .call _ args ret body =>
     RunInv.tkeeps_call args ret body.ext
-      (fun _ _ _ h ha => Env.All.and (Args.eval_wt (RunCanon.wt (RunTight.canon h)) args ha)
-        (Args.eval_keys args ha))
-      (fun _ _ _ _ hτ he => by
-        obtain ⟨H', hext, hg, hr⟩ := CallRet.enter_canon ret hτ.1.1 hτ.1.2 he
-        obtain ⟨hs, hk⟩ := CallRet.enter_tight ret he
-        exact ⟨H', hext, ⟨hg, hτ.2.of_eq hs⟩, Env.All.and hr hk⟩)
-      (Prog.keeps_tight hd body)
+      (fun _ _ _ _ ha => Args.eval_keys args ha) (tightInv.enter hnd ret)
+      (Prog.keeps_tight hd hnd body)
   | _, _, .tryCall call rets ok err code pnc other =>
     RunInv.tkeeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
-      (fun _ _ r _ h => Env.All.and (Binders.decode_wt rets h) (Binders.keys rets r))
-      (fun _ _ r h => Env.All.and (CodeBinder.decode_wt code h) (CodeBinder.keys code r))
-      (Prog.keeps_tight hd ok) (Prog.keeps_tight hd err) (Prog.keeps_tight hd pnc)
-      (Prog.keeps_tight hd other)
-  | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_tight hd body)
-  | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_tight hd body)
+      (fun _ _ r _ _ => Binders.keys rets r) (fun _ _ r _ => CodeBinder.keys code r)
+      (Prog.keeps_tight hd hnd ok) (Prog.keeps_tight hd hnd err) (Prog.keeps_tight hd hnd pnc)
+      (Prog.keeps_tight hd hnd other)
+  | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_tight hd hnd body)
+  | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_tight hd hnd body)
 
 /-- **Tightness, block level.** -/
-theorem Prog.keeps_tight (hd : DeepOk C) :
+theorem Prog.keeps_tight (hd : DeepOk C) (hnd : nodupKeysB C.vars = true) :
     {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (tightInv C).TKeeps (Prog.runR P)
   | _, _, .nil => RunInv.tkeeps_nil
-  | _, _, .cons s P => RunInv.tkeeps_seq (Stmt.keeps_tight hd s) (Prog.keeps_tight hd P)
+  | _, _, .cons s P => RunInv.tkeeps_seq (Stmt.keeps_tight hd hnd s) (Prog.keeps_tight hd hnd P)
 
 end
 
 /-- **Tightness**: a block run by the typed run from a state whose erasure
-is well-typed, canonical and tight ends, if in a state, in one whose erasure
-is tight. -/
-theorem Prog.run_tight (hd : DeepOk C) {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy}
-    {σ : State C Γ} {o : Out C σ.H Γ'} (hwt : RunWT C H σ.erase) (hc : Canon C H σ.erase.glob)
+has canonical, tight storage and aliases along keys ends, if in a state, in
+one whose erasure is tight. -/
+theorem Prog.run_tight (hd : DeepOk C) (hnd : nodupKeysB C.vars = true) {Γ Γ' : Ctx}
+    (P : Prog C Γ Γ') {σ : State C Γ} {o : Out C σ.H Γ'} (hc : CanonStorage C σ.erase.storage)
     (ht : Tight C σ.erase) (h : P.run σ = .ok o) : Tight C o.st.erase :=
-  let ⟨_, _, h'⟩ := Prog.keeps_tight hd P H σ o (RunTight.mk' (RunCanon.mk' hwt hc) ht) h
-  RunTight.tight h'
+  RunTight.tight (Prog.keeps_tight hd hnd P σ o (RunTight.mk' (RunCanon.of_storage hc) ht) h)
 
 /-- A contract starts tight: each root at its type's default, no alias. -/
 theorem Tight.init (hd : DeepOk C) : Tight C (EState.ofSem C.initState) := by
@@ -3331,13 +3340,11 @@ theorem defaultOkS_of_deep (h : C.vars.all (·.2.okDeep) = true) :
 theorem reachable_tight (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
     {st : List (Name × Semantics.SVal)} (h : Reachable C st) : TightStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
-  have hwt : RunWT C [] (State.init C).erase := by
-    rw [Reachable.init_erase]; exact RunWT.init hnd rfl rfl
-  have hc : Canon C [] (State.init C).erase.glob := by
-    rw [Reachable.init_erase]; exact Canon.init rfl
+  have hc : CanonStorage C (State.init C).erase.storage := by
+    rw [Reachable.init_erase]; exact (Canon.init (σ := C.initState) rfl).storage
   have ht : Tight C (State.init C).erase := by
     rw [Reachable.init_erase]; exact Tight.init (deepOk_of_all hdeep)
-  exact (Prog.run_tight (deepOk_of_all hdeep) P hwt hc ht hrun).storage
+  exact (Prog.run_tight (deepOk_of_all hdeep) hnd P hc ht hrun).storage
 
 /-- **Reachable ⇒ canonical and tight**, for a contract whose types have
 well-formed defaults all the way down. -/
@@ -3398,6 +3405,25 @@ theorem fixed_past_end_not_reachable :
     · exact nomatch hr
   · have ht := reachable_tight (by decide) (by decide) h "pair" _ _ rfl rfl
     exact nomatch ht.1
+
+/-- One `uint[2^256 + 1]` root: more slots than a `uint` index reaches
+(solc refuses a storage type that large). -/
+def Huge : Contract := { vars := [("big", .ref (.fixed .uint (2 ^ 256 + 1)))] }
+
+/-- **Reachable does not imply `FitsStorage`** (decision 77): `Huge`'s
+initial storage is reached by the empty program, and its root has
+`2^256 + 1` elements, past what `FitsStorage` allows a fixed-size array (the
+builder writes each element at a literal index).  So `reachable_iff` keeps
+its `FitsStorage` premise: canonical and tight is not enough for this root,
+and reachable says nothing about the slot count. -/
+theorem huge_reachable_not_fits :
+    Reachable Huge Huge.initStorage ∧ ¬ FitsStorage Huge Huge.initStorage := by
+  refine ⟨⟨[], .nil, ⟨State.init Huge, List.prefix_refl _⟩, Prog.run_nil _,
+    congrArg EState.storage Reachable.init_erase⟩, fun hf => ?_⟩
+  have h := hf "big" _ _ rfl rfl
+  rw [defaultForTy] at h
+  simp only [Semantics.SVal.fits, List.length_replicate] at h
+  exact Nat.not_succ_le_self _ h.1
 
 /-- An entry in a `bool`-keyed mapping, at the key `1` that `true` hashes
 to (`Value.keyAt`, decisions 10 and 14): reachable, by the builder
