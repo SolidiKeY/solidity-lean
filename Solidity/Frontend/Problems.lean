@@ -250,7 +250,7 @@ def elabSolkeyScan : CommandElab := fun stx => do
 open Tactic in
 /-- `Derive.proveSearch` (`stopAtOpen`) on a scoped goal `⊢ N.f.problem`:
 `sol_prove` (the scoped walk, `Calculus/ProvesDerive.lean`), then
-`Derive.searchLeaf` on each leaf of today's calculus it leaves. -/
+`Derive.searchLeaf` on each leaf it leaves (`Seq.goalFits`). -/
 def scopedSearch (g : MVarId) : TacticM NFml.Derive.Search := do
   let_expr Proves C R _ Γ H φ := ← g.getType | throwError "expected a scoped `⊢ φ`"
   NFml.Derive.proveSearch g (stopAtOpen := true) (prove := fun g => Seq.prove g C R Γ H φ)

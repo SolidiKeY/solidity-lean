@@ -15,19 +15,23 @@ context, a modality fires the rule of its first statement (`Stmt.stepIn R`
 at `Hyps.fresh`, the index the rules ask: under `⊢ₖ` solkey's rules alone) and walks each goal its premise
 leaves, `empty` goes through the frames, `closeTrue` ends a `true` behind a
 box context.  Every other leaf goes to `Proves.close`: `Fml.closableB` of
-the sequent, and today's residue of its erasure (`Derive.residue`,
-`Calculus/NFmlDerive.lean`), each leaf of which is a goal of today's calculus.
-The kernel walks the leaf's context once for both (`Fml.closeErase`,
-`Calculus/Closable.lean`).
+the sequent, and today's closer on its erasure (`Derive.residue`,
+`Derive.synClose`, `Calculus/NFmlDerive.lean`, the decision procedure's
+IR).  The kernel walks the leaf's context once for both (`Fml.closeErase`,
+`Calculus/Closable.lean`).  A leaf the closer does not close stays the
+walk's own sequent `H ⊢ φ` (`Seq.SLeaf`, `Seq.leafS`; M6c 6c, decision
+86), a goal of the scoped calculus: `Proves.close_leaf` erases it to the
+goal of today's calculus that today's leaf was, its first line spelled as
+today's (`refine NFml.Proves.close_dropWt ?_`, `core_leaf_close_wt`).
 `Seq.run_sound` reads the walk back as the derivation; the kernel checks
 it as one evaluation (`Seq.residue R np full H φ = some ls`, where `full` only
 orders `pick`'s two residues: `Seq.pickH`, `pickH_eq`), and the tactic
 leaves one goal `leafᵢ` per leaf, as `sol_prove` on `Valid` does.
 
 The walk is generic in what a leaf is (`α`), so the compiled run that
-quotes the leaves for the tactic (`Seq.leafQuoteI`, which marks the residue
+quotes the leaves for the tactic (`Seq.leafQuoteS`, which marks the residue
 that closed each leaf) and the kernel's
-(`Seq.leafRes`) are one function.  It is written with `casesOn` (Gate G0,
+(`Seq.leafS`) are one function.  It is written with `casesOn` (Gate G0,
 condition 1); `n` bounds the steps down a path, `b` the steps of the whole
 walk, handed from a goal to the next.
 
