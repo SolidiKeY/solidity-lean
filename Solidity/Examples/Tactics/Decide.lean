@@ -9,10 +9,12 @@ import Solidity.Tools.Inspect
 
 `sol_close` (`Calculus/NFmlClose.lean`) finishes a goal with `simp` and `grind`
 on whatever facts the formula states; it cannot split on two keys being
-equal.  `sol_decide` (`Calculus/Decide.lean`) rewrites the goal by an
-equivalence, `NFml.valid_iff_reduce`, into a statement about the initial
-state in which every read of a write is a case tree over key equalities;
-then by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
+equal.  `sol_decide` (`Calculus/Decide.lean`) reduces the leaf, its
+locals by position (`Fml.reduceS`, `Calculus/DecideScoped.lean`), into a
+statement about the initial state in which every read of a write is a
+case tree over key equalities, the reduction of the leaf's erasure exactly
+(`Fml.toLS_eq`, then `NFml.valid_iff_reduce`, an equivalence); then
+rewrites by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
 into a statement about free reads under the constraints a storage puts on
 them, and closes that.  Nothing is lost by those two steps, so a leaf it
 does not close is either not valid over untyped states, outside the
@@ -629,10 +631,14 @@ end Solidity.Examples.Tactics.Decide
 
 /-! ## On the closer's formulas
 
-Read without `open scoped Solidity.Scoped`: the fragment (`NFml.inL`)
-of the closer's input.  (The refutation of `deleteWithoutWrite` over
-untyped storage, where the balance is a `bool`, and `sol_decide` refusing a
-modality went with the modality at W4 `modal`.) -/
+The fragment (`Fml.inLS`, `Calculus/DecideScoped.lean`) is checked on the
+scoped leaf itself, its locals by position.  The unbound memory local the
+erased pin read (`{ x := read(memory, carol.age) }`) has no scoped
+spelling: a free name is a `uint` parameter, and a memory local is in scope
+only through a binder.  (The refutation of
+`deleteWithoutWrite` over untyped storage, where the balance is a `bool`,
+and `sol_decide` refusing a modality went with the modality at W4
+`modal`.) -/
 
 namespace Solidity.Examples.Tactics.Decide
 
@@ -640,12 +646,14 @@ open NFml.Proves Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-/-- info: false -/
-#guard_msgs in -- a copy from storage outside its pair is outside the fragment
-#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inL Decide.Sym.empty
+open scoped Scoped
 
 /-- info: false -/
-#guard_msgs in -- a memory local no update bound is outside the fragment
-#eval (dl!{ { x := read(memory, carol.age) } x == 0 }).inL Decide.Sym.empty
+#guard_msgs in -- a copy from storage outside its pair is outside the fragment
+#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inLS Decide.SymS.empty
+
+/-- info: false -/
+#guard_msgs in -- a read of the ledger is outside the fragment
+#eval (dl!{ { y := net(a) } y == 0 }).inLS Decide.SymS.empty
 
 end Solidity.Examples.Tactics.Decide

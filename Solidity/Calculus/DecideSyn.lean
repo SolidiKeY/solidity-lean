@@ -37,8 +37,9 @@ premises leave open, instantiate a quantified premise (a layout premise at a
 quantified key), or reason about arithmetic beyond the cancellation —
 and `sol_decide` falls back to the full procedure where it says no.
 
-On a scoped leaf (M6c) `sol_decide` erases only to call the reduction
-(`Valid.of_reduce`); the leaf's parameters stay its leading quantifiers, and
+On a scoped leaf (M6c) `sol_decide` reduces the leaf by position
+(`Valid.of_reduceS`, `Calculus/DecideScoped.lean`); the leaf's parameters
+stay its leading quantifiers, and
 `syn` starts with their locals known to return (`LFml.syn_valid_alls`).
 -/
 
@@ -1005,10 +1006,10 @@ theorem LFml.syn_valid (φ : LFml) (h : φ.syn [] [] = true) : ∀ σ, φ.holds 
 /-! ## A scoped leaf (M6c)
 
 `sol_decide` takes the scoped leaf `Valid φ` (`φ : Fml C []`) itself and
-erases it only to call the reduction below it (`Valid.of_reduce`).  The
-leaf's parameters, its leading `∀ p x`, stay quantifiers: the context the
-leaf's body is read in, one local per position, each of its type.  Erased,
-they are the reduction's leading `LFml.all`s (`LFml.alls`), and their
+reduces it by position (`Valid.of_reduceS`, `Calculus/DecideScoped.lean`).
+The leaf's parameters, its leading `∀ p x`, stay quantifiers: the context
+the leaf's body is read in, one local per position, each of its type.
+Reduced, they are the reduction's leading `LFml.all`s (`LFml.alls`), and their
 locals are atoms that return, at a value of their type (`Bound`): `syn`
 starts from them known (`LFml.syn_valid_alls`), and the constraints'
 step reads them typed (`Calculus/DecideComplete.lean`), where the erased
@@ -1072,14 +1073,5 @@ theorem LFml.syn_valid_alls (xs : List (Var × PrimTy)) (body : LFml)
   exact (hb q (by simpa only [List.append_nil] using hq)).returns
 
 end Decide
-
-open Decide in
-/-- **The boundary**: a scoped leaf is valid where the reduction of its
-erasure holds in every state.  `ψ` is the erasure, computed once
-(`he`, by `rfl`); `Fml.posB` takes the leaf's hidden binders. -/
-theorem Valid.of_reduce {C : Contract} {φ : Fml C []} (hp : (φ.posB []).isSome = true)
-    {ψ : NFml C} (he : φ.erase [] = ψ) (hf : ψ.inL Sym.empty = true)
-    (h : ∀ σ, ψ.reduce.holds σ) : Valid φ :=
-  Valid.of_erase hp (he ▸ (NFml.valid_iff_reduce ψ hf).2 h)
 
 end Solidity

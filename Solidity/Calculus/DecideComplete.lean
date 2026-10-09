@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideSyn
+import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.Symex
 
 /-!
@@ -35,8 +36,9 @@ them, and nothing is lost.
 * **`sol_decide`** rewrites by both equivalences, splits on the locals and
   on the shape of every location with a read below it, and closes what is
   left by `omega` or `grind`.
-* **On a scoped leaf** (M6c) it erases only to reduce (`Valid.of_reduce`,
-  `Calculus/DecideSyn.lean`), and reads the leaf's parameters, the
+* **On a scoped leaf** (M6c) it reduces the leaf itself, its locals by
+  position (`Valid.of_reduceS`, `Calculus/DecideScoped.lean`), and reads
+  the leaf's parameters, the
   reduction's leading quantifiers, at their types (`Typed`,
   `LFml.valid_alls_of_cons`): a `uint` parameter is an integer in range
   rather than a name split three ways.  That direction is sound, not an
@@ -1370,9 +1372,9 @@ elab "sol_decide_body" : tactic => withMainContext do
   replaceMainGoal [g']
 
 open Lean Elab Tactic Meta in
-/-- The scoped leaf `Valid ψ` as `∀ σ, (NFml.reduce φ).holds σ`, `φ` its
-erasure computed and quoted (`Valid.of_reduce`): `Fml.posB` and the
-fragment checked by the kernel. -/
+/-- The scoped leaf `Valid ψ` as `∀ σ, (Fml.reduceS ψ).holds σ`, reduced on
+the leaf itself (`Valid.of_reduceS`): `Fml.posB` and the fragment
+(`Fml.inLS`) checked by the kernel. -/
 def reduceScoped (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
   let bool := mkConst ``Bool
   let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
@@ -1384,27 +1386,20 @@ def reduceScoped (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
     catch _ => throwError "sol_decide: the leaf is not one its erasure closes (`Fml.posB`): a \
       hidden binder under a negation, a precondition or a modality, or named twice, or what \
       is negated or assumed is not first-order (an update, a modality or a `havoc` there)"
-  let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
-  let φ ← match C.constName?, ψ.hasFVar || ψ.hasMVar with
-    | some n, false =>
-      unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)
-        (mkApp3 (mkConst ``NFml.quote) C (Solidity.quoteConstName n) erased)
-    | _, _ => withTransparency .all <| Meta.reduce erased (skipTypes := true) (skipProofs := true)
-  let he := mkApp2 (mkConst ``Eq.refl [1]) (mkApp (mkConst ``NFml) C) φ
-  let hf ← try trueLemma (mkApp3 (mkConst ``NFml.inL) C (mkConst ``Sym.empty) φ)
+  let hf ← try trueLemma (mkAppN (mkConst ``Fml.inLS) #[C, nilCtx, mkConst ``SymS.empty, ψ])
     catch _ => throwError "sol_decide: the formula is outside the fragment (a push of a memory \
       object, a copy of memory whose guards are not literals, a copy from storage outside its \
       allocation's pair, a memory past memSize, a read of the ledger, an alias no update \
       binds, or one through an index used after a write)"
   let goal := Lean.mkForall `σ .default (mkConst ``Semantics.State)
-    (mkApp2 (mkConst ``LFml.holds) (.bvar 0) (mkApp2 (mkConst ``NFml.reduce) C φ))
+    (mkApp2 (mkConst ``LFml.holds) (.bvar 0) (mkApp2 (mkConst ``Fml.reduceS) C ψ))
   let g' ← mkFreshExprSyntheticOpaqueMVar goal (← g.getTag)
-  g.assign (mkAppN (mkConst ``Valid.of_reduce) #[C, ψ, hp, φ, he, hf, g'])
+  g.assign (mkAppN (mkConst ``Valid.of_reduceS) #[C, ψ, hp, hf, g'])
   return g'.mvarId!
 
 open Lean Elab Tactic Meta in
 /-- **`sol_decide` on a scoped leaf** (`Valid ψ`, after `sol_symex`): the
-leaf erased only to reduce it (`Valid.of_reduce`), then closed by its terms
+leaf reduced by position (`Valid.of_reduceS`), then closed by its terms
 with its parameters known (`LFml.syn_valid_alls`), or by the constraints
 with its parameters typed (`LFml.valid_alls_of_cons`), or by
 `sol_decide_heuristic` with them free.  Today's `sol_decide` runs on
