@@ -262,7 +262,80 @@ setup-file`, so the CPU column is the steadier):
 Nothing slowed: every row within ±1.5% of the tree before the lanes, in
 wall and in CPU.  Only `Evm/CoreCorrect` of these files changed (`run40`).
 
-Not re-timed after W5 (a rename changes no elaboration).
+Not re-timed after W5 (a rename changes no elaboration); the W6 baselines
+below re-time them.
+
+**W6 baselines** (2026-10-09, `8761bbde`, no code change): the erased
+form's timings that M6c's gates compare against.  Method: the file copied
+under `Solidity/Scratch/` and opened in a fresh worker through the Lean MCP
+(`lean_diagnostic_messages`), one worker at a time, every import built
+beforehand (a warm-up module importing all of them), `/proc` sampled every
+20 ms, the worker killed after each run.  Two passes of three runs each:
+pass 1 measures the wall from the worker's start to its last CPU (the
+integration's method); pass 2 also keeps the CPU series and measures the
+wall to the *end of work*, the first sample at which the worker's CPU is
+within 50 ms of its final value.  The two differ because the worker
+spends a tick of CPU (10 ms) at whole seconds after its start
+(x.04–x.07 s) while the MCP is still polling it: 50 of the 144 runs ended
+on such a tick, 0.4–7.4 s after the end of work.  The minimum of three
+filters most of them out, but not pass 1's `Derived1` (8.05 s against
+7.32), `Problems` (1.05 against 0.81) and `ScopedProblems` (2.04 against
+1.39).  **The gate column is the end of work**, pass 2's
+minimum; a ported module is timed the same way.  CPU is the worker's
+user + system time, the minimum of the six runs (above the wall where
+Lean elaborates declarations in parallel).
+
+Machine: Intel i9-13900 (32 threads), 64 GB, the 32 GiB session cgroup at
+9.0–11.0 GB throughout.  Load average (1 min) at each worker's start:
+pass 1 (06:45–07:09) 0.43–3.98, median 0.76, its first six runs
+(`Derived9`, `Derived10`) at 2.0–4.0 while another session's work wound
+down (pass 2's end of work, at load under 1.3: 7.16 and 11.11 s against
+pass 1's 7.17 and 11.33); pass 2 (07:10–07:35) 0.24–1.24, median 0.76.
+
+| Module | wall, last CPU (pass 1 min) | **wall, end of work** (pass 2 min; the three runs) | gate (1.2×) | CPU (min) | peak RSS |
+|---|---|---|---|---|---|
+| `TestSuite/Derived1` | 8.05 s | **7.32 s** (7.38, 7.39, 7.32) | 8.78 s | 8.98 s | 3.2 GB |
+| `TestSuite/Derived2` | 8.77 s | **8.63 s** (8.69, 8.63, 8.76) | 10.36 s | 10.38 s | 4.1 GB |
+| `TestSuite/Derived3` | 13.05 s | **13.01 s** (13.03, 13.03, 13.01) | 15.61 s | 14.48 s | 4.8 GB |
+| `TestSuite/Derived4` | 17.56 s | **17.57 s** (17.75, 17.66, 17.57) | 21.08 s | 19.61 s | 5.4 GB |
+| `TestSuite/Derived5` | 7.07 s | **6.95 s** (6.97, 6.97, 6.95) | 8.34 s | 8.23 s | 3.4 GB |
+| `TestSuite/Derived6` | 11.47 s | **11.42 s** (11.49, 11.42, 11.43) | 13.70 s | 13.00 s | 4.8 GB |
+| `TestSuite/Derived7` | 50.45 s | **50.43 s** (50.53, 50.66, 50.43) | 60.52 s | 52.88 s | 7.8 GB |
+| `TestSuite/Derived8` | 26.27 s | **26.38 s** (26.43, 26.38, 26.44) | 31.66 s | 27.50 s | 6.3 GB |
+| `TestSuite/Derived9` | 7.17 s | **7.16 s** (7.16, 7.23, 7.19) | 8.59 s | 8.62 s | 3.4 GB |
+| `TestSuite/Derived10` | 11.33 s | **11.11 s** (11.21, 11.28, 11.11) | 13.33 s | 12.75 s | 4.6 GB |
+| `TestSuite/Derived11` | 3.23 s | **3.16 s** (3.24, 3.22, 3.16) | 3.79 s | 3.36 s | 2.2 GB |
+| `TestSuite/Derived12` | 13.27 s | **13.17 s** (13.17, 13.35, 13.29) | 15.80 s | 14.01 s | 4.3 GB |
+| `TestSuite/Derived13` | 6.33 s | **6.36 s** (6.36, 6.39, 6.36) | 7.63 s | 6.38 s | 2.9 GB |
+| `TestSuite/Derived14` | 11.05 s | **10.89 s** (10.89, 10.92, 11.00) | 13.07 s | 11.50 s | 3.8 GB |
+| Derived1–14, sum | 195.1 s | **193.6 s** | 232.3 s | 211.7 s | |
+| `Examples/Tactics/Decide` | 49.42 s | **49.14 s** (49.14, 49.75, 49.40) | 58.97 s | 49.97 s | 2.0 GB |
+| `Examples/ProofTree` | 9.89 s | **9.81 s** (9.81, 9.95, 9.97) | 11.77 s | 9.85 s | 1.6 GB |
+| `Examples/Chains/Storage` | 7.51 s | **7.45 s** (7.45, 7.49, 7.55) | 8.94 s | 7.86 s | 1.6 GB |
+| `Examples/ChainRewrites` | 6.34 s | **6.36 s** (6.36, 6.37, 6.36) | 7.63 s | 7.24 s | 1.6 GB |
+
+The M0 rows, the same runs (M0's limit is M0 + 20%; W4b's wall is the
+merged column of the table above, and its CPU):
+
+| M0 row | M0 limit | W4b wall | **W6, end of work** (last CPU, pass 1) | W4b CPU → W6 CPU |
+|---|---|---|---|---|
+| `TestSuite/Derived9` | 8.4 s | 7.96 s | **7.16 s** (7.17) | 8.65 → 8.62 s |
+| `TestSuite/Derived10` | 11.2 s | 12.08 s | **11.11 s** (11.33) | 12.99 → 12.75 s |
+| `TestSuite/Derived11` | 3.4 s | 3.97 s | **3.16 s** (3.23) | 3.44 → 3.36 s |
+| `TestSuite/Problems` (`legacy`) | 1.44 s | 1.55 s | **0.81 s** (1.05) | 0.66 → 0.63 s |
+| `TestSuite/ScopedProblems` (was `CoreProblems`) | — | 2.15 s | **1.39 s** (2.04) | 1.23 → 1.21 s |
+| `Solkey/TestSuite` | 12.5 s | 11.84 s | **10.83 s** (10.92) | 11.11 → 10.95 s |
+| `Examples/Benchmark/Syntax` | 1.44 s | 2.18 s | **1.41 s** (1.44) | 1.52 → 1.49 s |
+| `Examples/ProofTree` | 12.1 s | 10.63 s | **9.81 s** (9.89) | 9.93 → 9.85 s |
+| `Examples/Chains/Storage` | 9.0 s | 8.23 s | **7.45 s** (7.51) | 7.90 → 7.86 s |
+| `Evm/Examples` (was `CoreExamples`) | 11.4 s | 8.52 s | **7.75 s** (7.81) | 8.05 → 8.00 s |
+| `Evm/Correct` (was `CoreCorrect`) | 30.7 s | 2.40 s | **1.68 s** (1.73) | 6.05 → 5.92 s |
+
+Nothing slowed since W4b: the CPU of every M0 row is within −5% to 0% of
+W4b's.  The walls are 0.7–1.0 s lower throughout, the share of W4b's wall
+that was the worker's wait for `lake setup-file` (here every import was
+built and traced before the first run).  Every M0 row is within its
+M0 + 20% limit, raw (`Derived10` by 0.05 s, `Benchmark/Syntax` by 0.03 s).
 
 ## Decisions
 
@@ -820,8 +893,8 @@ the closer port.
   `ChainRewrites`, `ChainBranches`, then `NFmlDerive`, `NFmlLogic`,
   `RewriteChains`.
 - **Gate per module:** the `TestSuite/Derived*` files and
-  `Examples/Tactics/Decide` within 1.2× of the erased form's timings, which
-  are to be taken first.
+  `Examples/Tactics/Decide` within 1.2× of the erased form's timings
+  (the W6 baselines, Gates: the end-of-work column and its gate).
 - **Fallback (decision 7):** a module that fails its gate stays on `NFml`
   for good, documented as the decision procedure's IR.  When nothing uses
   `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.
@@ -836,7 +909,7 @@ the closer port.
 - Not run since W4: `check-corpus.sh` (its probes need `lake`), the
   `solkeycheck` executable (built only; no rule name or annotation changed),
   the reader's `keycheck` executable as a target and the VS Code extension's
-  tests, the M0 re-timing after W5.
+  tests.
 - From the M7 review: proposals 75 (the canonicity invariant on the typed
   state) and 76 (`Stmt.step` total), each a lane with its gates.
 - Lean docstrings still call the erased side "today's" in places and cite
