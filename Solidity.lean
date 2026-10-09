@@ -77,6 +77,7 @@ import Solidity.Calculus.UpdRuleScoped
 import Solidity.Calculus.StatePartsScoped
 import Solidity.Calculus.RewriteSyntax
 import Solidity.Calculus.ChainKit
+import Solidity.Calculus.ChainRules
 import Solidity.Calculus.Chains
 import Solidity.Calculus.ChainGen
 import Solidity.Calculus.LastLine

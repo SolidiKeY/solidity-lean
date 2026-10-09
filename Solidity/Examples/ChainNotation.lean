@@ -227,7 +227,7 @@ example : dl!{ ⟨ balances[a] = 1; if (true) { x = 2; } else { x = 1; }; ⟩ ba
 
 /-! ## 6 · The evidence is unique
 
-A formula has one next line and fires one statement (`Fml.StepBy.unique`),
+A formula has one next line and fires one rule (`Fml.StepBy.unique`),
 so two derivations of the same length between the same ends are one: every
 one-step derivation of the first link of `Chains.Storage.AgeWrite.chain`
 (`alice.age = ageVal;` with `ageVal` 42) is `ageWrite`, at the diamond and

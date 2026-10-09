@@ -879,12 +879,24 @@ instance (priority := low) {R : Fml C Γ → Fml C Γ → Sort u} {S : Fml C Γ 
 
 /-! ## The evidence is unique -/
 
-/-- A step fires one statement, and leaves one line. -/
+/-- A rule is fixed by the statement it fires on: its premise by
+`Rule.premise_unique`, its derivation by proof irrelevance. -/
+theorem StepRule.eq_of_focus : {r r' : StepRule C} → r.focus = r'.focus → r = r'
+  | .taclet k m s p d, .taclet k' m' s' p' d', h => by
+    simp only [StepRule.focus, Focus.stmt.injEq] at h
+    obtain ⟨rfl, rfl, rfl, rfl, h⟩ := h
+    obtain rfl := eq_of_heq h
+    obtain rfl := d.premise_unique d'
+    rfl
+  | .emptyModality, .emptyModality, _ => rfl
+  | .taclet .., .emptyModality, h | .emptyModality, .taclet .., h => Focus.noConfusion h
+
+/-- A step fires one rule, and leaves one line. -/
 theorem Fml.StepBy.unique {r r' : StepRule C} {χ : Fml C Γ} (h : Fml.StepBy r φ ψ)
-    (h' : Fml.StepBy r' φ χ) : r.focus = r'.focus ∧ ψ = χ := by
+    (h' : Fml.StepBy r' φ χ) : r = r' ∧ ψ = χ := by
   have := h.symm.trans h'
   simp only [Option.some.injEq, Prod.mk.injEq] at this
-  exact this
+  exact ⟨StepRule.eq_of_focus this.1, this.2⟩
 
 /-- Two derivations of the same length between the same ends are one. -/
 theorem Fml.Steps.eq_of_length : {φ ψ : Fml C Γ} → (c d : Fml.Steps φ ψ) → c.length = d.length → c = d
@@ -896,6 +908,25 @@ theorem Fml.Steps.eq_of_length : {φ ψ : Fml C Γ} → (c d : Fml.Steps φ ψ) 
     obtain rfl : ψ₁ = ψ₂ := s.unique s'
     have : c.length = c'.length := by simp only [Fml.Steps.length] at h; omega
     rw [Fml.Steps.eq_of_length c c' this]
+
+/-- Along a derivation a measure the step decreases does not go up. -/
+theorem Fml.Steps.measure_le (μ : Fml C Γ → Nat)
+    (hμ : ∀ {φ ψ : Fml C Γ}, Fml.OneStep φ ψ → μ ψ < μ φ) :
+    {φ ψ : Fml C Γ} → Fml.Steps φ ψ → μ ψ ≤ μ φ
+  | _, _, .refl _ => Nat.le_refl _
+  | _, _, .cons s c => Nat.le_of_lt (Nat.lt_of_le_of_lt (c.measure_le μ hμ) (hμ s))
+
+/-- A derivation between two formulas is unique, given a measure every step
+decreases: it cannot come back to where it started. -/
+theorem Fml.Steps.eq_of_measure (μ : Fml C Γ → Nat)
+    (hμ : ∀ {φ ψ : Fml C Γ}, Fml.OneStep φ ψ → μ ψ < μ φ) :
+    {φ ψ : Fml C Γ} → (c d : Fml.Steps φ ψ) → c = d
+  | _, _, .refl _, .refl _ => rfl
+  | _, _, .refl _, .cons s c | _, _, .cons s c, .refl _ =>
+    absurd (hμ s) (Nat.not_lt.2 (c.measure_le μ hμ))
+  | _, _, .cons (ψ := ψ₁) s c, .cons (ψ := ψ₂) s' c' => by
+    obtain rfl : ψ₁ = ψ₂ := s.unique s'
+    rw [Fml.Steps.eq_of_measure μ hμ c c']
 
 /-- The strategy run `n` steps, as a derivation. -/
 def Fml.Steps.ofSymex : (n : Nat) → (φ : Fml C Γ) → Fml.Steps φ (symex n φ)
