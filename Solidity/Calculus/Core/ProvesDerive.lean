@@ -11,8 +11,8 @@ does (`Calculus/Derive.lean`).
 
 `Seq.run` walks the sequent as `Proves` has its rules: `intro`,
 `allIntro`, `updIntro`, `bindIntro` take the formula's head into the
-context, a modality fires the rule of its first statement (`Stmt.step` at
-`Hyps.fresh`, the index the rules ask) and walks each goal its premise
+context, a modality fires the rule of its first statement (`Stmt.stepIn R`
+at `Hyps.fresh`, the index the rules ask: under `⊢ₖ` solkey's rules alone) and walks each goal its premise
 leaves, `empty` goes through the frames, `closeTrue` ends a `true` behind a
 box context.  Every other leaf goes to `Proves.close`: `Fml.closableB` of
 the sequent, and today's residue of its erasure (`Derive.residue`,
@@ -20,7 +20,7 @@ the sequent, and today's residue of its erasure (`Derive.residue`,
 The kernel walks the leaf's context once for both (`Fml.closeErase`,
 `Calculus/Core/Closable.lean`).
 `Seq.run_sound` reads the walk back as the derivation; the kernel checks
-it as one evaluation (`Seq.residue np full H φ = some ls`, where `full` only
+it as one evaluation (`Seq.residue R np full H φ = some ls`, where `full` only
 orders `pick`'s two residues: `Seq.pickH`, `pickH_eq`), and the tactic
 leaves one goal `leafᵢ` per leaf, as `sol_prove` on `Core.Valid` does.
 
@@ -103,12 +103,12 @@ def premise (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (Li
 
 /-- A modality: the frames when the program is done (`empty`), else the rule
 of the first statement and its premise's goals. -/
-def modal (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat))
+def modal (R : RuleSet) (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat))
     (x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (H : Hyps C [] Γ) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
     (φ : Fml C Γ₀) (b : Nat) : Option (List α × Nat) :=
   Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames C Γ₁ Γ₀ → Hyps C [] Γ → Option (List α × Nat)) P
     (fun κ H => r H (κ.exit m φ) b)
-    (fun s ω κ H => match s.step (H.fresh (.modal m (.cons s ω) κ φ)) m with
+    (fun s ω κ H => match s.stepIn R (H.fresh (.modal m (.cons s ω) κ φ)) m with
       | some p => premise r x H m ω κ φ p b
       | none => none) κ H
 
@@ -143,7 +143,7 @@ def refutes (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α
 /-- The walk of the sequent `H ⊢ φ`: the leaves `leaf` leaves, or `none`
 when a step has no rule, a leaf does not close, or `n` or `b` runs out; `rf`
 says which of a split's branches is refuted (`refutes`). -/
-def run (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
+def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
     (rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) :
     Nat → {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat)
   | 0, _, _, _, _ => none
@@ -155,12 +155,12 @@ def run (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
       (defined := fun t H => (leaf H (.defined t)).map (·, b))
       (not := fun ψ H => (leaf H (.not ψ)).map (·, b))
       (and := fun ψ χ H => (leaf H (.and ψ χ)).map (·, b))
-      (imp := fun a ψ H => run leaf rf n (H.pre a) ψ b)
-      (upd := fun m U ψ H => run leaf rf n (H.upd m U) ψ b)
-      (modal := fun m P κ ψ H => modal (fun H φ b => run leaf rf n H φ b) rf m H P κ ψ b)
+      (imp := fun a ψ H => run R leaf rf n (H.pre a) ψ b)
+      (upd := fun m U ψ H => run R leaf rf n (H.upd m U) ψ b)
+      (modal := fun m P κ ψ H => modal R (fun H φ b => run R leaf rf n H φ b) rf m H P κ ψ b)
       (havoc := fun ψ H => (leaf H (.havoc ψ)).map (·, b))
-      (all := fun x p ψ H => run leaf rf n (H.all x p) ψ b)
-      (bind := fun m x t ψ H => run leaf rf n (H.bind m x t) ψ b)
+      (all := fun x p ψ H => run R leaf rf n (H.all x p) ψ b)
+      (bind := fun m x t ψ H => run R leaf rf n (H.bind m x t) ψ b)
       (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) H
 
 /-- Today's formula without its first `n` leading quantifiers, every one
@@ -290,9 +290,9 @@ def fuel : Nat := Solidity.Derive.budget
 none when every leaf closes; `np` the sequent's parameters (`pick`);
 `full` only orders `pick`'s two residues (`pickH`).  A split's branch is
 refuted as `pick` reads its leaf. -/
-def residue (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
-    Option (List (Solidity.Derive.Leaf C)) :=
-  (run (leafRes np full) (refutes (leafRes np false)) fuel H φ fuel).map (·.1)
+def residue (R : RuleSet) (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ)
+    (φ : Fml C Γ) : Option (List (Solidity.Derive.Leaf C)) :=
+  (run R (leafRes np full) (refutes (leafRes np false)) fuel H φ fuel).map (·.1)
 
 /-- `#solkey_scan`'s view of `⊢ φ` (`Frontend/Problems.lean`): how many
 leaves the walk leaves, closed by `synClose` or (`walk`) not, and the most
@@ -301,14 +301,14 @@ the walk runs out or a step has no rule. -/
 def scanLeaves (walk : Bool) (φ : Fml C []) : Option (Nat × Nat) :=
   let r := Solidity.Derive.residue Solidity.Derive.budget
     (if walk then fun _ _ => false else Solidity.Derive.synClose) Solidity.Derive.budget []
-  (run (leafWith false none r) (refutes (leafRes none false)) fuel .nil φ fuel).map fun (ls, _) =>
+  (run .all (leafWith false none r) (refutes (leafRes none false)) fuel .nil φ fuel).map fun (ls, _) =>
     (ls.length, ls.foldl (fun m l => max m (Solidity.Derive.storageWrites l.1)) 0)
 
 /-- `residue`, the leaves quoted, each walk leaf marked by the residue that
 closed it (`leafQuoteI`). -/
-def residueQuote (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
-    Option (List ((Lean.Expr × Lean.Expr) ⊕ Bool)) :=
-  (run (leafQuoteI c np) (refutes (leafQuote c np)) fuel H φ fuel).map (·.1)
+def residueQuote (R : RuleSet) (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ)
+    (φ : Fml C Γ) : Option (List ((Lean.Expr × Lean.Expr) ⊕ Bool)) :=
+  (run R (leafQuoteI c np) (refutes (leafQuote c np)) fuel H φ fuel).map (·.1)
 
 /-! ## Soundness -/
 
@@ -353,31 +353,33 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → 
     (hx : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ), x H c = true → Proves C R [] (H.pre c) .ff)
     {Γ Γ' Γ₁ Γ₂ : Ctx} (H : Hyps C [] Γ) (m : Modality) (s : Stmt C Γ Γ') (ω : Prog C Γ' Γ₁)
     (κ : Frames C Γ₁ Γ₂) (φ : Fml C Γ₂) (p : Premise C Γ Γ')
-    (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some p) {b : Nat} {ls : List α}
+    (d : s.stepIn R (H.fresh (.modal m (.cons s ω) κ φ)) m = some p) {b : Nat} {ls : List α}
     {b' : Nat} (h : premise r x H m ω κ φ p b = some (ls, b')) (hl : ∀ l ∈ ls, P l) :
     Proves C R [] H (.modal m (.cons s ω) κ φ) := by
+  have hd := Stmt.step_of_stepIn d
+  have hR := Stmt.admits_of_stepIn d
   cases p with
-  | update U => exact .update d (hr _ _ _ _ _ h hl)
-  | unfold P e => exact .unfold d (hr _ _ _ _ _ h hl)
-  | bind x t P => exact .bind d (hr _ _ _ _ _ h hl)
+  | update U => exact .update (hR := hR) hd (hr _ _ _ _ _ h hl)
+  | unfold P e => exact .unfold (hR := hR) hd (hr _ _ _ _ _ h hl)
+  | bind x t P => exact .bind (hR := hR) hd (hr _ _ _ _ _ h hl)
   | split bk c c' P Q =>
     cases h1 : x H c
     · cases h2 : x H c'
       · simp only [premise, h1, h2, cond_false] at h
         have := both_sound h hl (hr _ _) (hr _ _)
-        exact .split d this.1 this.2
+        exact .split (hR := hR) hd this.1 this.2
       · simp only [premise, h1, h2, cond_false, cond_true] at h
-        exact .split d (hr _ _ _ _ _ h hl) (.closeFalse (hx H c' h2))
+        exact .split (hR := hR) hd (hr _ _ _ _ _ h hl) (.closeFalse (hx H c' h2))
     · simp only [premise, h1, cond_true] at h
-      exact .split d (.closeFalse (hx H c h1)) (hr _ _ _ _ _ h hl)
+      exact .split (hR := hR) hd (.closeFalse (hx H c h1)) (hr _ _ _ _ _ h hl)
   | check c =>
     have := both_sound h hl (hr _ _) (hr _ _)
-    exact .check d this.1 this.2
-  | done bo => exact .done d (hr _ _ _ _ _ h hl)
+    exact .check (hR := hR) hd this.1 this.2
+  | done bo => exact .done (hR := hR) hd (hr _ _ _ _ _ h hl)
   | branches bs =>
     cases hb : bs.isEmpty
     · simp only [premise, hb, cond_false] at h
-      exact .branches d hb (each_sound h hl fun _ _ _ _ => hr _ _ _ _ _)
+      exact .branches (hR := hR) hd hb (each_sound h hl fun _ _ _ _ => hr _ _ _ _ _)
     · simp only [premise, hb, cond_true, reduceCtorEq] at h
   | cases fs us =>
     cases hb : (fs.isEmpty && us.isEmpty)
@@ -385,13 +387,13 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → 
       have := both_sound h hl
         (fun _ _ _ h₁ hl₁ => each_sound h₁ hl₁ fun _ _ _ _ => hr _ _ _ _ _)
         (fun _ _ _ h₁ hl₁ => each_sound h₁ hl₁ fun _ _ _ _ => hr _ _ _ _ _)
-      exact .cases d hb this.1 this.2
+      exact .cases (hR := hR) hd hb this.1 this.2
     · simp only [premise, hb, cond_true, reduceCtorEq] at h
   | inv I xs hv U c c' hu hb P post =>
     have := both_sound h hl (hr _ _)
       (fun _ _ _ h₁ hl₁ => both_sound h₁ hl₁ (hr _ _) (hr _ _))
-    exact .inv d this.1 this.2.1 this.2.2
-  | inline P e => exact .inline d (hr _ _ _ _ _ h hl)
+    exact .inv (hR := hR) hd this.1 this.2.1 this.2.2
+  | inline P e => exact .inline (hR := hR) hd (hr _ _ _ _ _ h hl)
 
 variable {leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α)}
   (hleaf : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) ls, leaf H φ = some ls →
@@ -419,12 +421,12 @@ variable {rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool}
 include hrf in
 /-- **The walk is a derivation.** -/
 theorem run_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) (b : Nat)
-    (ls : List α) (b' : Nat), run leaf rf n H φ b = some (ls, b') → (∀ l ∈ ls, P l) →
+    (ls : List α) (b' : Nat), run R leaf rf n H φ b = some (ls, b') → (∀ l ∈ ls, P l) →
     Proves C R [] H φ
   | 0, _, _, _, _, _, _, h, _ => by simp only [run, reduceCtorEq] at h
   | _ + 1, _, _, _, 0, _, _, h, _ => by simp only [run, reduceCtorEq] at h
   | n + 1, _, H, φ, b + 1, ls, b', h, hl => by
-    have ih : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) b ls b', run leaf rf n H φ b = some (ls, b') →
+    have ih : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) b ls b', run R leaf rf n H φ b = some (ls, b') →
         (∀ l ∈ ls, P l) → Proves C R [] H φ :=
       fun H φ b ls b' h hl => run_sound n H φ b ls b' h hl
     cases φ with
@@ -442,8 +444,8 @@ theorem run_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) 
       cases P with
       | nil => exact .empty (ih _ _ _ _ _ h hl)
       | cons s ω =>
-        change (match s.step (H.fresh (.modal m (.cons s ω) κ ψ)) m with
-          | some p => premise (fun H φ b => run leaf rf n H φ b) rf H m ω κ ψ p b
+        change (match s.stepIn R (H.fresh (.modal m (.cons s ω) κ ψ)) m with
+          | some p => premise (fun H φ b => run R leaf rf n H φ b) rf H m ω κ ψ p b
           | none => none) = some (ls, b') at h
         split at h
         · rename_i p hp
@@ -507,7 +509,7 @@ end Seq
 today's leaves proved. -/
 theorem Proves.of_residue {R : RuleSet} {np : Option Nat} {Γ : Ctx} {H : Hyps C [] Γ}
     {φ : Fml C Γ} {full : Bool} {ls : List (Solidity.Derive.Leaf C)}
-    (h : Seq.residue np full H φ = some ls)
+    (h : Seq.residue R np full H φ = some ls)
     (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Proves C R [] H φ := by
   obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
   cases he
@@ -553,7 +555,7 @@ partial def paramCount (H φ : Expr) : MetaM (Option Nat) := do
 leaves, one per leaf of today's residue. -/
 def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
   let some n := C.constName? | throwError "sol_prove: the contract is not a named constant"
-  if H.hasFVar || H.hasMVar || φ.hasFVar || φ.hasMVar then
+  if H.hasFVar || H.hasMVar || φ.hasFVar || φ.hasMVar || R.hasFVar || R.hasMVar then
     throwError "sol_prove: the sequent mentions a local hypothesis or a metavariable"
   let φe ← Symex.evaluable φ
   let np := toExpr (← paramCount H φe)
@@ -565,7 +567,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
   let lemmaFor (full : Bool) (ls : Expr) : MetaM Expr := do
     let someLs := mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``List [0]) leafTy) ls
     let type := mkApp3 (mkConst ``Eq [1]) resTy
-      (mkAppN (mkConst ``residue) #[C, np, toExpr full, Γ, H, φ]) someLs
+      (mkAppN (mkConst ``residue) #[C, R, np, toExpr full, Γ, H, φ]) someLs
     Solidity.Derive.kernelLemma type (mkApp2 (mkConst ``Eq.refl [1]) resTy someLs)
   let assignWith (full : Bool) (ls h : Expr) (hl : Expr) : MetaM Unit :=
     g.assign (mkAppN (mkConst ``Proves.of_residue) #[C, R, np, Γ, H, φ, toExpr full, ls, h, hl])
@@ -578,7 +580,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
     (mkApp2 (mkConst ``Sum [0, 0])
       (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Expr) (mkConst ``Expr)) (mkConst ``Bool)))
   let some marked ← unsafe evalExpr (Option (List ((Expr × Expr) ⊕ Bool))) qTy
-      (mkAppN (mkConst ``residueQuote) #[C, quoteConstName n, np, Γ, H, φe])
+      (mkAppN (mkConst ``residueQuote) #[C, R, quoteConstName n, np, Γ, H, φe])
     | throwError "sol_prove: the walk does not reach the end of the sequent: a step with no \
         rule, a leaf `Proves.close` does not take (`Fml.closableB`: a modality left, a negated \
         or assumed part not first-order, or a hidden binder's name reused), or more than \

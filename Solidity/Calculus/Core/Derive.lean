@@ -293,7 +293,8 @@ def provesCtor? (p : Expr) : Option Lean.Name :=
   | some ``Premise.inline => some ``Proves.inline
   | _ => none
 
-/-- The explicit arguments of the constructor `c` after the rule `d`. -/
+/-- The explicit arguments of the constructor `c` after the rule `d`, but
+those a default proves (`hR`). -/
 def ctorArgs (c : Lean.Name) : MetaM (Array Lean.Name) := do
   let some info := (← getEnv).find? c | throwError "unknown constant {c}"
   forallTelescope info.type fun xs _ => do
@@ -302,6 +303,8 @@ def ctorArgs (c : Lean.Name) : MetaM (Array Lean.Name) := do
     for x in xs do
       let ld ← x.fvarId!.getDecl
       unless ld.binderInfo.isExplicit do continue
+      -- the rule set's admission (`hR`) is proved by its default
+      if ld.type.isAppOf ``autoParam then continue
       if !seen then seen := true; continue
       out := out.push ld.userName
     return out

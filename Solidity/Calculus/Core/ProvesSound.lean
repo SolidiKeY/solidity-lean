@@ -220,29 +220,29 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
   | allIntro _ ih => exact ih
   | updIntro _ ih => exact ih
   | bindIntro _ ih => exact ih
-  | @update Γ Γ' Γ₁ Γ₂ H m s ω κ φ U d _ ih =>
+  | @update Γ Γ' Γ₁ Γ₂ H m s ω κ φ U d _ _ ih =>
     exact fun σ => H.wrap_mono (φ := (Premise.update U).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
-  | @unfold Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ ih =>
+  | @unfold Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>
     exact fun σ => H.wrap_mono (φ := (Premise.unfold P e).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
-  | @bind Γ Γ' Γ₁ Γ₂ H m s ω κ φ x t P d _ ih =>
+  | @bind Γ Γ' Γ₁ Γ₂ H m s ω κ φ x t P d _ _ ih =>
     exact fun σ => H.wrap_mono (φ := (Premise.bind x t P).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
-  | @split Γ Γ₁ Γ₂ Δ₁ Δ₂ H m s ω κ φ b c c' P Q d _ _ ihT ihE =>
+  | @split Γ Γ₁ Γ₂ Δ₁ Δ₂ H m s ω κ φ b c c' P Q d _ _ _ ihT ihE =>
     intro σ
     have hTE : holds σ (H.wrap ((Premise.split b c c' P Q).fml m ω κ φ)) :=
       H.wrap_and (χ := (Premise.split b c c' P Q).fml m ω κ φ) (fun _ x y => ⟨x, y⟩) σ
         (ihT σ) (ihE σ)
     exact H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ hTE
-  | @check Γ Γ₁ Γ₂ H m s ω κ φ c d _ _ ihT ihE =>
+  | @check Γ Γ₁ Γ₂ H m s ω κ φ c d _ _ _ ihT ihE =>
     exact fun σ => H.wrap_and
       (fun τ a b => hS _ _ s _ d τ ω κ φ (show holds τ ((Premise.check c).fml m ω κ φ)
         from ⟨a, b⟩)) σ (ihT σ) (ihE σ)
-  | @done Γ Γ' Γ₁ Γ₂ H m s ω κ φ b d _ ih =>
+  | @done Γ Γ' Γ₁ Γ₂ H m s ω κ φ b d _ _ ih =>
     exact fun σ => H.wrap_mono (φ := (Premise.done b).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
-  | @branches Γ Γ₁ Γ₂ H m s ω κ φ bs d hne _ ih =>
+  | @branches Γ Γ₁ Γ₂ H m s ω κ φ bs d hne _ _ ih =>
     intro σ
     refine H.wrap_mono (φ := (Premise.branches bs).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
@@ -253,7 +253,7 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
     · intro ψ hψ
       obtain ⟨b, hb, rfl⟩ := List.mem_map.mp hψ
       exact ih b hb σ
-  | @cases Γ Γ₁ Γ₂ H m s ω κ φ fs us d hne _ _ ihF ihU =>
+  | @cases Γ Γ₁ Γ₂ H m s ω κ φ fs us d hne _ _ _ ihF ihU =>
     intro σ
     refine H.wrap_mono (φ := (Premise.cases fs us).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
@@ -269,7 +269,7 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
       · exact ihF ψ hf σ
       · obtain ⟨U, hU, rfl⟩ := List.mem_map.mp hu
         exact ihU U hU σ
-  | @inv Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ H m s ω κ φ I xs hv U c c' hu hb P post d _ _ _ ihI ihT ihE =>
+  | @inv Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ H m s ω κ φ I xs hv U c c' hu hb P post d _ _ _ _ ihI ihT ihE =>
     intro σ
     let A : Fml C Δ := .upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)
     let B : Fml C Δ := .upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)
@@ -284,7 +284,7 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
       H.wrap_and (φ := I) (ψ := Fml.anonHavoc xs hv X) (χ := .and I (Fml.anonHavoc xs hv X))
         (fun _ x y => ⟨x, y⟩) σ (ihI σ) hX
     exact H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ hF
-  | @inline Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ ih =>
+  | @inline Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>
     exact fun σ => H.wrap_mono (φ := (Premise.inline P e).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
   | @empty Γ Γ₂ H m κ φ _ ih =>

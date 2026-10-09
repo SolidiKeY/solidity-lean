@@ -6,7 +6,7 @@ import Solidity.Calculus.Core.Delab
 `Calculus/Core/Delab.lean`'s printer for `Core.Taclet`, for the other scoped
 judgement, `Core.LeanTaclet` (`Calculus/Core/Rules.lean`): the rule as
 `dl[LeanTaclet C k]{ ⟨[ s; ]⟩ ⇝ p }`, its statement and premise erased with
-their schema variables (`Core.Delab.tr`) and printed by `Rules.lean`'s
+their schema variables (`Core.Delab.tr`, `Calculus/Core/DelabErase.lean`) and printed by `Rules.lean`'s
 printers, a loop's invariant rule with solkey's branch labels.
 -/
 

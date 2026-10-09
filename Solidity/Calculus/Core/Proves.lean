@@ -47,6 +47,13 @@ under solkey's names where solkey has the rule:
 A program rule fires the rule the strategy fires (`Stmt.step`, one per
 statement): its premise is `s.step k m = some p`, which `rfl` proves and
 `Taclet.step_eq` gives from a named taclet (`Calculus/Core/Taclet.lean`).
+The rule must be one of `R`'s (`hR : R.admits m s = true`, last, proved by
+default): every rule under `.all`; under `.solkey` the statement must be one
+whose rule is solkey's (`Stmt.keyStep`: no argument to capture, no payment
+or `try` under the diamond, no loop), so a derivation of `⊢ₖ` fires
+`Taclet`s alone (`Stmt.taclet_of_admits`,
+`Calculus/Core/SolkeyFragment.lean`; decision 36).  `Stmt.stepIn` is the
+step with `R`'s rules, the walk's (`Calculus/Core/ProvesDerive.lean`).
 The fresh index `k` is one above every index in the sequent
 (`Hyps.fresh`), as `Hyp.fresh` numbers it.  `Hyps.wrap` is written with
 `casesOn` (Gate G0, condition 1): the kernel evaluates it when it checks
@@ -61,6 +68,86 @@ namespace Solidity.Core
 open Solidity (Modality RuleSet)
 
 variable {C : Contract}
+
+/-- Whether the rule `Stmt.step` fires on `s` under `m` is one of solkey's
+(`Taclet`), read off the statement alone: a call with an argument to capture
+(`functionCallArgCapture`), a payment or a `try` under the diamond
+(`transferDiamond`, `tryCallDiamond`) and a loop (`whileUnwind`, `loopExit`,
+the invariant rules) have Lean's rules only (`LeanTaclet.keyStep`). -/
+def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
+  Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := fun _ _ => true) (rebind := fun _ _ => true) (assignLocal := fun _ _ => true)
+    (declLocal := fun _ _ _ => true) (declStorage := fun _ _ _ => true)
+    (opAssign := fun _ _ _ _ _ => true) (incDec := fun _ _ _ => true)
+    (assignIncDec := fun _ _ _ _ _ => true) (push := fun _ _ _ => true) (pop := fun _ => true)
+    (transfer := fun _ _ => m == .box) (send := fun _ _ _ => true)
+    (declMem := fun _ _ _ _ _ => true) (rebindMem := fun _ _ => true)
+    (assignFromMem := fun _ _ => true) (assignMem := fun _ _ => true) (delete := fun _ => true)
+    (deleteMem := fun _ _ => true) (assignNew := fun _ _ _ => true)
+    (ite := fun _ _ _ => true) (require := fun _ => true) (assert := fun _ => true)
+    (revert := true) (call := fun _ args _ _ => (Args.capture args).isNone)
+    (tryCall := fun _ _ _ _ _ _ _ => m == .box) (loop := fun _ _ _ => false)
+    (block := fun _ => true)
+
+/-- Whether the rule set `R` has the rule `Stmt.step` fires on `s` under `m`:
+`.all` every rule, `.solkey` solkey's (`Stmt.keyStep`). -/
+def _root_.Solidity.RuleSet.admits (R : RuleSet) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
+    Bool :=
+  RuleSet.casesOn (motive := fun _ => Bool) R (s.keyStep m) true
+
+/-- The step of `s` with the rules of `R`: `Stmt.step`'s premise where `R`
+has its rule (`RuleSet.admits`), none where it does not. -/
+def Stmt.stepIn (R : RuleSet) (k : Nat) (m : Modality) {Γ Γ' : Ctx}
+    (s : Stmt C Γ Γ') : Option (Premise C Γ Γ') :=
+  match R with
+  | .solkey => cond (s.keyStep m) (s.step k m) none
+  | .all => s.step k m
+
+theorem Stmt.stepIn_all (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
+    s.stepIn .all k m = s.step k m := rfl
+
+/-- A step with the rules of `R` is the strategy's. -/
+theorem Stmt.step_of_stepIn {R : RuleSet} {k : Nat} {m : Modality} {Γ Γ' : Ctx}
+    {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (h : s.stepIn R k m = some p) : s.step k m = some p := by
+  cases R with
+  | all => exact h
+  | solkey =>
+    cases hk : s.keyStep m with
+    | true => simpa only [Stmt.stepIn, hk, cond_true] using h
+    | false => simp only [Stmt.stepIn, hk, cond_false, reduceCtorEq] at h
+
+/-- A step with the rules of `R` is one `R` has the rule of. -/
+theorem Stmt.admits_of_stepIn {R : RuleSet} {k : Nat} {m : Modality} {Γ Γ' : Ctx}
+    {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (h : s.stepIn R k m = some p) : R.admits m s = true := by
+  cases R with
+  | all => rfl
+  | solkey =>
+    cases hk : s.keyStep m with
+    | true => exact hk
+    | false => simp only [Stmt.stepIn, hk, cond_false, reduceCtorEq] at h
+
+/-- The strategy's step is one with the rules of `R` where `R` has the rule. -/
+theorem Stmt.stepIn_of_step {R : RuleSet} {k : Nat} {m : Modality} {Γ Γ' : Ctx}
+    {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (hR : R.admits m s = true) (h : s.step k m = some p) :
+    s.stepIn R k m = some p := by
+  cases R with
+  | all => exact h
+  | solkey =>
+    have hk : s.keyStep m = true := hR
+    simpa only [Stmt.stepIn, hk, cond_true] using h
+
+/-- **A rule solkey does not have fires only where `Stmt.keyStep` says so.** -/
+theorem LeanTaclet.keyStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    {p : Premise C Γ Γ'} (d : LeanTaclet C k m s p) : s.keyStep m = false := by
+  cases d with
+  | functionCallArgCapture hcap =>
+    show (Args.capture _).isNone = false
+    rw [hcap]; rfl
+  | _ => rfl
+
+/-- The default proof of a step rule's `hR`: `RuleSet.admits` of a closed
+statement reduces (`rfl`), or is decided. -/
+macro "rule_admits" : tactic => `(tactic| first | rfl | decide)
 
 /-- The context of a sequent, from the scope `Γ₀` of the whole goal to the
 scope `Γ` of its last formula. -/
@@ -162,14 +249,16 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | update {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {U : Upd C Γ Γ'}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.update U))
-      (h : Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ)) :
+      (h : Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that produces statements: they replace the first one, their
   fresh locals popped after them (`pop .capture`). -/
   | unfold {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.unfold P e))
-      (h : Proves C R Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
+      (h : Proves C R Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A declaration with its initializer dropped (`localValueDeclInitDrop`):
   the local joins the context, the assignment replaces the declaration. -/
@@ -177,7 +266,8 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {x : Var} {t : LTy}
       {P : Prog C (t :: Γ) Γ'}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.bind x t P))
-      (h : Proves C R Γ₀ (H.bind m x t) (.modal m P (.seq ω κ) φ)) :
+      (h : Proves C R Γ₀ (H.bind m x t) (.modal m P (.seq ω κ) φ))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that branches: two goals, KeY's, each branch a block ended
   as the premise says (`}` for an `if`). -/
@@ -186,20 +276,23 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.split b c c' P Q))
       (thn : Proves C R Γ₀ (H.pre c) (.modalK m P (.pop b P.ext (.seq ω κ)) φ))
-      (els : Proves C R Γ₀ (H.pre c') (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ)) :
+      (els : Proves C R Γ₀ (H.pre c') (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that checks (`assertSimple`): the goal with the condition
   assumed ("Holds"), and the condition ("Violated"). -/
   | check {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {c : Fml C Γ}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.check c))
-      (thn : Proves C R Γ₀ (H.pre c) (.modalK m ω κ φ)) (els : Proves C R Γ₀ H c) :
+      (thn : Proves C R Γ₀ (H.pre c) (.modalK m ω κ φ)) (els : Proves C R Γ₀ H c)
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that closes the modality (`revertBox`, `revertDiamond`). -/
   | done {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : Bool}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.done b))
-      (h : Proves C R Γ₀ H (if b then .tt else .ff)) :
+      (h : Proves C R Γ₀ H (if b then .tt else .ff))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet with a goal per way an external call may end
   (`tryCallNoCallbackBox`): each clause's block in the statement's place,
@@ -211,7 +304,8 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.branches bs))
       (hne : bs.isEmpty = false)
       (h : ∀ b ∈ bs, Proves C R Γ₀ H
-        (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))) :
+        (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet with labelled goals (`sendNoCallbackBox`): each formula, then
   the rest after each update, one per way the statement may end. -/
@@ -221,7 +315,8 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.cases fs us))
       (hne : (fs.isEmpty && us.isEmpty) = false)
       (fml : ∀ f ∈ fs, Proves C R Γ₀ H f)
-      (upd : ∀ U ∈ us, Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ)) :
+      (upd : ∀ U ∈ us, Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A loop's invariant (`whileInvariantBox`, `whileInvariantDiamond`): the
   invariant now ("invariant initially valid"), and past the frame's
@@ -238,7 +333,8 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (thn : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c)
         (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
       (els : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c')
-        (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ))) :
+        (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that produces a block whose end drops a frame from under the
   locals it keeps (`expand_function_body` of a call that leaves its return
@@ -246,7 +342,8 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | inline {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Thin Γ' Γ''}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.inline P e))
-      (h : Proves C R Γ₀ H (.modal m P (.drop e (.seq ω κ)) φ)) :
+      (h : Proves C R Γ₀ H (.modal m P (.drop e (.seq ω κ)) φ))
+      (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- `emptyModality`: a finished program goes through its frames, the rest
   of the program next, a scope end a popping update. -/

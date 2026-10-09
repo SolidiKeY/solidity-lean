@@ -47,6 +47,7 @@ import Solidity.Calculus.Core.Taclet
 import Solidity.Calculus.Core.Completeness
 import Solidity.Calculus.Core.RuleExists
 import Solidity.Calculus.Core.SolkeyFragment
+import Solidity.Calculus.Core.SolkeyProves
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.SoundKit
 import Solidity.Calculus.Core.SoundArms
@@ -62,6 +63,7 @@ import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.Closable
 import Solidity.Calculus.Core.CloseErase
 import Solidity.Calculus.Core.Sound
+import Solidity.Calculus.Core.DelabErase
 import Solidity.Calculus.Core.Delab
 import Solidity.Calculus.Core.Proves
 import Solidity.Calculus.Core.ProvesSound
