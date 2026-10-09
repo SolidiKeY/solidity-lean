@@ -114,15 +114,16 @@ found by `#eval` and the iteration computed by `rfl`.
 `Loop.run_rel` (two loops whose iterations go in step from related states
 run alike: `Prog.run_frame`) and `Loop.run_induct` (an invariant of the loop
 head: `frame_of_within`); `Loop.run_unfold` is the
-unwinding. The typing proofs recurse on the scoped run (`Semantics/Core.lean`)
-and take a loop's case from `Core.Loop.run_induct`, once for every invariant
-(`Invariant.keeps_loop`: the invariant at the loop head, the body's locals
-popped each iteration). In more detail:
+unwinding. The typing proofs recurse on the typed run, reading its states'
+erasure (`Typing/TypedRunInv.lean`), and take a loop's case from
+`Core.TLoop.run_induct`, once for every invariant (`RunInv.tkeeps_loop`: the
+invariant at the loop head, the body's locals popped each iteration; M3's
+scoped run went at decision 40). In more detail:
 
 `Stmt.run_frame`/`Prog.run_frame` (`Semantics/Agree.lean`: states agreeing off
-`ns` iterate alike), `Core.Stmt.run_wt` (`Typing/Soundness.lean`: `RunWT` at
-the loop head is the invariant), `Core.Prog.run_canon` and
-`Core.Prog.run_tight` (`Typing/Reachability.lean`,
+`ns` iterate alike), `RunWT` (a typed state's erasure is well-typed by
+construction, `Typing/TypedWT.lean`), `Core.Prog.trun_canon` and
+`Core.Prog.trun_tight` (`Typing/Reachability.lean`,
 `Typing/Constructibility.lean`; `reachable_iff` stays true, since a loop
 reaches nothing a finite sequence of body runs does not), and
 `Stmt.exec_run`/`ExecS` (`Semantics/Core/Callback.lean`: a loop whose body has no

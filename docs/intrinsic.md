@@ -774,7 +774,7 @@ Check: `TypedRunWk.lean` re-elaborates in about 7 s warm; `import Solidity`
 elaborates with every module (no name clash).
 
 ### W1 `typing` note (2026-10-08)
-- New modules: `Typing/StraightRun.lean` (the builder's straight-line typed
+- New modules: `Typing/StraightRun` (the builder's straight-line typed
   run) and `Typing/TypedWT.lean` (`RunWT` by construction).
   `Reachability` now imports `Semantics.Core.TypedRunErase`, through
   `StraightRun`.
@@ -1212,7 +1212,7 @@ arms close:
    `[ v = m[true]; ] false`.  Options: `Update.lean`'s key read hashing a
    `bool` as `0`/`1` (a low-module change, with M3's run), or the typed
    calculus restricted to `Prog.bridgeOk` programs (a premise of every
-   arm, as `TypedRunErase.lean`'s bridge has).
+   arm, as `TypedRunErase`'s bridge has).
    The first arm tried, `localValueAssign` (`sound_setLocal`), meets 2 and
    3 at once: `Val.evalT_erase` needs `bridgeOk`, and a typed `len` read
    diverges where the erased one does not.
@@ -2783,7 +2783,7 @@ m[a] == 1` is no longer valid there (`a = true`, `b = 1` hit one slot), and
 `Tour`, and the TestSuite's distinct-key proofs would follow).
 `Prog.bridgeOk` keeps only the copy at a `BadDup` type (`Src`, `NewLhs`,
 `assignFromMem`); the path and value `bridgeOk`s and their hypotheses are
-gone from `TypedRunErase.lean`, `StraightRun.lean`, `Constructibility.lean`.
+gone from `TypedRunErase`, `StraightRun`, `Constructibility.lean`.
 `PrimTy.keyAt_erase_key` replaces `asInt_erase_key`.  A storage keeps
 entries at a `bool` key: `Ty.numericKey` is `Ty.isKey` (a reference key
 alone has none), `SVal.fits` takes a `bool` key `0`/`1` (`PrimTy.keyFits`),
@@ -2807,7 +2807,7 @@ the untyped calculus's diamond obligations with a push (331 of the
 TestSuite's 452 functions are diamonds), since a storage with `2^256 - 1`
 elements is reachable.  `diverge` agrees with any untyped outcome, so the
 bridge needs nothing; `docs/solc-alignment.md`, "Array lengths", says so.
-The straight programs' bridge (`StraightRun.lean`) now asks that every push
+The straight programs' bridge (`StraightRun`) now asks that every push
 of the scoped run land below the bound (`Prog.pushesShort`), and the
 builder proves it of its own pushes (`pushes_short`, the run lemmas' fourth
 conjunct), with `SVal.fits` strict for a dynamic array (`elems + shadow <
@@ -2968,7 +2968,7 @@ subagents.
   (`Calculus/Core/SoundBlocks`), `evalBinop_cmp_true`
   (`Calculus/Core/SoundLoops.lean`), `Val.eval_lower`
   (`Calculus/Core/SoundKit.lean`), `Val.evalT_erase` and
-  `Val.evalT_noPanic` (`Semantics/Core/TypedRunErase.lean`, deleted at W4
+  `Val.evalT_noPanic` (`Semantics/Core/TypedRunErase`, deleted at W4
   `sem-del`).
 
 
@@ -3021,12 +3021,12 @@ has no bound and never sees it (`THalt.erase` maps it to `diverge`, and
   is, so an evaluator's halt is a revert (`Val.evalT_revert`,
   `SPath.resolveT_revert`, `MPath.mvalT_revert`, from `TRes.Ends`: the
   evaluators neither diverge nor are exhausted, `Val.evalT_ends` and kin,
-  moved to `Typing/StraightRun.lean`, replacing its straight-only copies);
+  moved to `Typing/StraightRun`, replacing its straight-only copies);
   the capture shapes hand their `herr` a revert;
 - `Premise.tsound_update`'s halt clause skips an exhausted run under the
   diamond; the diamond invariant loop runs by `TLoop.run_variant_or` (a body
   may end exhausted, `TSoundLoops`);
-- `Typing/StraightRun.lean`: `TRes.Ends` (no `diverge`, no `exhausted`)
+- `Typing/StraightRun`: `TRes.Ends` (no `diverge`, no `exhausted`)
   for straight programs, `Prog.trun_ends`; `Prog.run_halt_of_trun` asks
   both; `docs/solc-alignment.md`, "Array lengths", has the row (solc panics
   `0x41` past `2^64`; Lean's bound is `2^256`, and an exhausted run proves
@@ -3756,7 +3756,7 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     "W4 lane `sem-del`" below.
 40. *Proposed (W4 `sem-del`), the lead's call:* M3's scoped run
     (`Semantics/Core.lean`'s `Run.*`, `Stmt.run`/`runR`/`runC`, `Loop`) and
-    `Semantics/Core/TypedRunErase.lean` stay, for a lane of their own
+    `Semantics/Core/TypedRunErase` stay, for a lane of their own
     after W4: they are the bridge every update arm's soundness goes through
     (`Premise.sound_update_run`, `Calculus/Core/SoundKit.lean`: an arm is an
     equation `U.apply σ.erase = s.run σ.erase`, carried to the typed run by
@@ -3906,6 +3906,40 @@ and `solkey_lt_calculus` restated). 40 and 50 get their own lane next
 (M3's scoped run, `TypedRunErase` and `Halt.stuck` deleted, the update arms
 proved against the typed run directly). 53's move of `tr`/`withTwins`
 below the delaborators is done before W5's rename.
+
+55. *Proposed (W4 `run40`), the lead's call:* the per-step erasure lemmas
+    stay, with their right-hand sides written out: `TRun.x_erase :
+    StepAgrees (TRun.x …) (fun τ => …)` (`Semantics/Core/TypedStepErase.lean`),
+    the body each deleted `Run.x` had, as a lemma's statement, not a
+    definition; `StepAgrees.erased ha` names it for the update arms'
+    equations (`save_run : U.apply τ = (TRun.assign_erase l r).erased τ`).
+    Decision 40 asked the arms "against the typed step, through the
+    per-step erasure lemmas"; no untyped step or run is defined any more.
+56. *Proposed (W4 `run40`), the lead's call:* the non-reachability witnesses
+    (`map_default_not_reachable` and its kin, `dirty_word_not_reachable`,
+    `fixed_past_end_not_reachable`) are stated as `¬ Reachable` (the typed
+    run's): they were `¬ ReachableS`, the stronger claim about M3's run,
+    which is gone with that run.
+57. *Proposed (W4 `run40`), the lead's call:* type soundness of the typed run
+    is by construction alone (`TState.erase_wt`): `Stmt.run_wt`/`Prog.run_wt`
+    and the wt leaves (`keeps_assign` …) are deleted, not moved;
+    `Read.sortOk_after_run` (`SortCheck/Faithfulness`) becomes
+    `Read.sortOk_typed` (any typed state, given `nodupKeysB C.vars`).  The
+    canonical and tight invariants are carried along the typed run on its
+    erasure (`RunInv.TKeeps`, `Typing/TypedRunInv.lean`), each leaf through
+    its erasure lemma (`TKeeps.of_agrees`), so their leaf proofs are the old
+    ones read on the erased step.
+58. *Proposed (W4 `run40`), the lead's call:* `Halt.stuck` is `Halt.undef`,
+    the term model's ill-sorted value, and the term model's own `.stuck`s
+    are `.undef` (`Term.undef`, `PTerm.undef`, `ITerm.undef`, `STerm.undef`,
+    `LPath.undef`, `*.undef_eval`, `NoPanic.undef`); `Surface.Prog.runT`
+    (`Tools/Run.lean`) returns `.error .undef` where the program does not
+    resolve or the state is not of the contract's types (no typed run
+    starts).  The identifiers that said "stuck" in another sense are renamed
+    so that `rg stuck` finds prose only: `#verify`'s outcome `gaveUp`
+    (`Tools/Verify.lean`), the chains' `Run.modalStop`/`modalStopNote`
+    (`Calculus/Core/Chains.lean`), `rule_exists`'s `Blocker`/`blockerOf`
+    (`Calculus/Core/RuleExists.lean`, a blocked `whnf`).
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
@@ -6090,7 +6124,7 @@ trees).  `stmt_sim`'s row went with the untyped compiler at `sem-del`.
 
 **W4 is not done.**  Today's untyped run is gone, but M3's scoped run
 (`Semantics/Core.lean`'s `Run.*`, `Stmt.run`, `Loop`) and
-`Semantics/Core/TypedRunErase.lean` stay, by decision 40: the update arms'
+`Semantics/Core/TypedRunErase` stay, by decision 40: the update arms'
 soundness bridge and `Typing/`'s builder read them.  That lane, then
 `Halt.stuck` → `undef` (decision 50), closes W4.
 
@@ -6195,6 +6229,115 @@ scratch module).
   not build (the corpus count changes in `8c2bfc2`); the import closure
   (decision 53); `keycheck` itself was not run (its `--map`/`--parse` were
   run from a scratch copy of its source).
+
+### W4 lane `run40` (decisions 40 and 50, 2026-10-09, branch `w4b-run40`)
+
+From `intrinsic` at `78182e5`.  Built by `lean_build` of `Solidity`,
+`solkeycheck`, `SolidityCorpus` and `SolkeyTestSuite` (the last two in
+`defaultTargets` for the run only, reverted after): 312 jobs, green.
+`check-orphans` (298 reachable, 0 orphaned), `check-doc-paths` (OK).  No new
+`sorry` (19) or `axiom` (1); `maxHeartbeats` overrides unchanged (30).  Not
+run: `check-corpus.sh`, `solkeycheck` itself (built; no rule or annotation
+changed), `check-testsuite.sh` (the sibling solkey checkout here is not at
+the `TestSuite.sol` the fixture was imported from), the M0 re-timing, the
+review pass.
+
+**Deleted (decision 40).**
+- `Semantics/Core.lean`'s M3 run: `Loop`, `Run.*`, `Stmt.runC`/`runR`/`run`,
+  `Prog.runC`/`runR`/`run`, `Stmt.runR_eq`, the equations, and its examples
+  (`runResolved`, `countUpCore`, the `rfl` runs; the typed run's examples in
+  `Semantics/Core/TypedRun.lean` already ran the same programs).  What stays
+  is the erased state and its evaluators (`State C Γ`, `Env`, `Val.eval`,
+  `OpLoc.store`, `CallRet.enter`, …): what the closer's terms read and a
+  typed step erases to (its docstring says so).
+- `Semantics/Core/TypedRunErase`: its evaluator agreements and leaf
+  step lemmas move to the new `Semantics/Core/TypedStepErase.lean`, each
+  leaf restated against its erasure written out (proposal 55); the
+  structural agreements (`ite`, `block`, `seq`, `call`, `tryCall`, the loop
+  and `SumAgrees`), the recursion `Stmt.trunR_erase`, `Stmt.trun_erase`,
+  `Prog.trun_erase`, `Prog.run_of_trun`, `Prog.run_halt_of_trun`,
+  `Prog.trun_init_erase` go.
+- `Typing/StraightRun` becomes `Semantics/Core/TypedEnds.lean`
+  (`TRes.NoDiv`, `TRes.Ends`, the evaluators' `*_ends`); straightness,
+  `pushesShort`, `Stmt.trun_ends`/`Prog.trun_ends` and `Prog.trun_of_run` go.
+- `Typing/Soundness.lean`: the M3 scope lemmas (`RunInv.keeps_seq` …
+  `keeps_tryCall`, `Keeps.drop`, `Loop.run_induct`), the wt leaves
+  (`keeps_assign` … `keeps_assignNew`), `Stmt.keeps_wt`/`Prog.keeps_wt`,
+  `Stmt.run_wt`/`Prog.run_wt`, `Prog.run_storage_wt` (proposal 57).
+- `Typing/Reachability.lean`: `ReachableS`, `Reachable.reachableS`,
+  `reachableS_canon`, `not_reachable_of_not_reachableS`; `Prog.run_canon` is
+  `Prog.trun_canon`.  `Typing/Constructibility.lean`: `Prog.run_append`, the
+  pushes-below-the-bound section (`bound_short`, `primProg_short`,
+  `pushes_short`), the builder's straightness section (`fill_straight`,
+  `rootsProg_straight`, …), `reachableS_tight`, `reachableS_shape`,
+  `ReachableS.reachable`; `Prog.run_tight` is `Prog.trun_tight`.
+- `Calculus/Core/SoundKit.lean`: `Premise.sound_update_run`,
+  `sound_updateSim_run`, `sound_cases_run`, `Frames.trun_erase`,
+  `Prog.trunFrames_erase`, and the M3 push lemmas (`State.push_setLocal` …);
+  `Calculus/Core/Logic.lean`: `Frames.run` and the M3 shift lemmas
+  (`Val.eval_up` and kin); `Calculus/Core/SoundArms.lean`: the M3 push
+  section (`pushed`, `OpLoc.Agree`, `MLoc.Agree`, `ARhs.eval_up`, …);
+  `Calculus/Core/SoundCapture.lean`: M3's holes (`SHole.cont`,
+  `fill_run`, `fill_push`, …), `Prog.run_single`, `Res.Sim.err_bind`/
+  `err_refl` (the typed `TRes.Sim` ones stay).  All dead once the run went.
+
+**Re-proved against the typed run.**
+- The update arms (`Calculus/Core/SoundArms.lean`): each `*_run` equation
+  is `U.apply τ = (TRun.x_erase …).erased τ`, its proof unchanged but for
+  the `Run.x` it unfolded; the bridge is `Premise.sound_update_erased`
+  (`sound_updateSim_erased`, `sound_cases_erased`; `sound_updateSim_agrees`
+  for any `X` the typed run agrees with), whose step agreement is matched
+  to the statement's typed run by an auto-parameter (`ht`, by `rfl`).
+- `Typing/TypedRunInv.lean` (new): `RunInv.TKeeps`, a run invariant carried
+  along the typed run on its erasure; the scopes (`tkeeps_seq`, `ite`,
+  `block`, `require`, `assert`, `revert`, `loop` by `TLoop.run_induct`,
+  `call` and `tryCall` with the old erasure-side hypotheses, through
+  `Args.evalT_erase`, `CallRet.enterT_erase`/`leaveT_erase`,
+  `Binders.decodeT_erase`, `CodeBinder.decodeT_erase`), a leaf by
+  `TKeeps.of_agrees`.  The canonical leaves (`keepsC_*`) and the tight ones
+  (`tight_*`, three new: `tight_opAssign`, `tight_incDec`,
+  `tight_assignIncDec`) are the old proofs on the erased step;
+  `Stmt.keeps_canon`/`keeps_tight` recurse on `Stmt.trunR`.
+- The builder (`Typing/Constructibility.lean`): `TRuns σ P τ` (a typed run
+  from `σ` to `τ`), `SRuns.of_agrees` (a statement's typed step ends where
+  its erasure ends, when it neither diverges nor is exhausted),
+  `push_none_ends`; `run_push`/`run_pop`/`run_delete`/`run_primProg`/
+  `run_decl`/`run_bound` and every fill (`FillOK` over a typed state, its
+  claims on the erasure) run typed; `storage_tight` ends in
+  `TRuns (TState.init C) (rootsProg C st) σ`, so `canon_reachable` needs no
+  bridge; `no_hidden_invariant`'s step is the typed run's.
+- `SortCheck/Faithfulness.lean`: `Read.sortOk_typed` (proposal 57).
+
+**Halt.stuck (decision 50)**, renamed by script (proposal 58): `Halt.undef`
+in `Semantics.lean` and every untyped operation, the term model's
+(`UpdateRules`, `DecideLang`, `ReadWrite`, `Decide`, `StateParts`,
+`MemNames`, `MemRead`, `Close`, `ChainRewrites`, `Theory/StateWrites`,
+`Semantics/Properties`, `NoPanicOps`), the erasure's (`Semantics/Core.lean`,
+`HeapErase`, `TypedStepErase`, `Constructibility`'s `putSt`) and the tools'
+(`Tools/Run`, `Tools/Show`'s text "undef (an ill-sorted state, outside the
+typing)", which no pin prints).  `rg stuck` now finds prose about the old
+design only (the typed run's "no `stuck`", the absent third branch goal,
+`docs/solc-alignment.md`'s history).
+
+**Pins changed**: none of a `#guard_msgs`.  `Semantics/Core.lean`'s `#eval`
+of `x = 10` through an alias moved to `Examples/Tools.lean` over
+`Surface.Prog.runT`, output unchanged; its kernel examples of M3's run
+(guard, assert, solc's `++` order, the calls, the loop) are deleted, the
+first four's typed twins standing in `Semantics/Core/TypedRun.lean` and the
+loop's in `Examples/Tactics/Loops.lean` (`countTo3Run`); the
+`TypedRunErase` example (the scoped run ends where the typed one does)
+went with its theorem.  The fresh names are unchanged.
+
+**Docs**: `module-map` rows (the new modules, `Semantics/Core.lean`,
+`SoundKit`, `SoundArms`, `SoundCapture`, `Typing/*`, `Tools/Verify`,
+`RuleExists`), `solc-validation` (the chain of trust: the typed run is never
+stuck by construction; L1; M), `solc-alignment` (`Halt.undef`, the array
+lengths row), `loops.md`, `solkey-feedback.md`, `testsuite-proofs.md`,
+`function-specs.md`.  `compiler-verification.md`, `kernel-port.md` and
+`AGENTS.md` still describe `Stmt.run` (M7, W5).
+
+**Left**: the review pass; `check-corpus.sh`, `check-testsuite.sh` against
+`1b4341a303`; the M0 re-timing; lead decisions 55–58.
 
 ## Baselines (M0)
 
@@ -6339,7 +6482,7 @@ untyped operation is never stuck on an erased input.
    compared as a `Nat` (`lenT`, `n < 2 ^ 256`): `PrimTy.uint.ofInt?` of a
    length the kernel does not know unfolds `Int`'s order against `2^256`
    (`Nat.sub` recursing `2^256` times) in any proof that whnf's it.
-   The agreement is `Semantics/Core/TypedRunErase.lean`'s
+   The agreement is `Semantics/Core/TypedRunErase`'s
    `Prog.trun_erase`: `TRes.Agrees (·.st.erase) (P.trun σ) (P.run σ.erase)`,
    the erased state, the same `revert` or `panic`, and a typed `diverge`
    against any untyped outcome (a length past `uint`, which the untyped run
@@ -7062,7 +7205,7 @@ user).  What did not compile together, and how it was resolved:
   halt, and no expression panics (`Val.eval_noPanic`).
 - **Names declared twice** (an import of both fails at the root):
   `Core.Prog.outNames` (one, in `Syntax/Core.lean`, already on
-  `intrinsic-calculus`); `Core.MLoc.write_eq` (`Semantics/Core/TypedRunErase.lean`
+  `intrinsic-calculus`); `Core.MLoc.write_eq` (`Semantics/Core/TypedRunErase`
   and `Calculus/Core/SoundArms.lean`: one, in `Semantics/Core.lean` beside
   `MLoc.addr`); `Core.Stmt.run_declMem` (`SoundCalls.lean` now imports
   `SoundCapture.lean`'s); `Core.Invariant` (M3's run invariant in

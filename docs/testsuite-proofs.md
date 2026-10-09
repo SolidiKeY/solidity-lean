@@ -421,8 +421,7 @@ one.
   storage is any state of the interpreter, so the premise says it is one
   the contract can be in: the model's own Solidity-reachability assumption,
   not KeY's.  Reachable is by the typed run (`Reachable`,
-  since W1; the scoped run's is `ReachableS`, and `Reachable` when its
-  words, keys and slots are in range, `ReachableS.reachable`).  Both modalities carry it (M3b review): a box over every
+  since W1; M3's scoped run and its `ReachableS` went at decision 40).  Both modalities carry it (M3b review): a box over every
   storage is false of some functions Solidity runs safely (below).  So a
   derived obligation need not imply solkey's: `assert(total >= 0)` on a
   `uint total` holds under `wt`, where solkey's free `total` can be
@@ -1052,7 +1051,7 @@ modality-free and within `closeSize`; none holds `p[i]@S` (`Op3.atIn`).
 Each is refused at one place: `Fml.inL` is false on the write through the
 alias, the first storage write after the `pop`, where `SymB.onWrite` had
 made the alias `stale`: `save(storage, r.value, 5)` in the first four,
-`push(storage, ptr, 66)` in the last (`Tm.toL` gives `LPath.stuck`).  The
+`push(storage, ptr, 66)` in the last (`Tm.toL` gives `LPath.undef`).  The
 search names `leaf1` open in all five.
 
 The shapes are as solkey's taclets give them: a `push()` is

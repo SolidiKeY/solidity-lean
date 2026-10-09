@@ -60,18 +60,19 @@ claim does need the invariant). A `\forall` clause over a mapping is provable
 in Lean only under the layout premises `layoutAt` states (`Calculus/Spec.lean`);
 solkey's obligation states none.
 
-**Lean evidence.** `Core.Prog.run_wt` (`Typing/Soundness.lean`) preserves
-`RunWT`, so the invariant can be assumed once. It is not tight:
+**Lean evidence.** Every typed state's erasure is `RunWT`
+(`Core.TState.erase_wt`, `Typing/TypedWT.lean`), so the invariant can be
+assumed once. It is not tight:
 `SVal.canon` adds what `hasTy` forgets (mapping default is the type's default,
 mapping keys are unique, a struct carries exactly its declared members), and
-`Prog.run_canon`, `reachable_canon`, `map_default_not_reachable` and
+`Prog.trun_canon`, `reachable_canon`, `map_default_not_reachable` and
 `struct_missing_field_not_reachable` (`Typing/Reachability.lean`) prove that
 canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
 `no_hidden_invariant` (`Typing/Constructibility.lean`) prove canonical and tight
 is exactly reachable (for words, keys and slots in range, `SVal.fits`), so no
 hidden invariant is missing. Reachable is by the typed run
-(`Reachable`, a subset of the scoped run's `ReachableS`; `ReachableS.reachable`
-when its words, keys and slots are in range, `FitsStorage`). `uint` range is not yet proved an invariant of the
+(`Reachable`; for words, keys and slots in range, `FitsStorage`, exactly the
+canonical and tight storages). `uint` range is not yet proved an invariant of the
 model (literals are in range since 2026-10-07, `Simple.lit`, but no theorem says
 a run keeps every word in range), which is why item 1 owns it.
 

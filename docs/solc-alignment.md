@@ -31,7 +31,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Repeated member names | a struct that declares two members of one name is refused ("Identifier already declared"): the elaborator refuses a type naming one (`refusedStructs`, `unknownStructMsg`, decision 16), so every struct of `structDef` has distinct member names and the typed (positional) and untyped (by name) copies agree | `structDef_nodup`, `SVal.overlay_erase` | `Syntax/Splice.lean` (`BadDup`) |
 | Mapping-carrying copy | a storage copy of a type containing a mapping cannot be written | `Src.copy` (`mapFree`), `tyHasMapping` | |
 | Arrays past their end | `pop`, `delete`, `push` and copies keep the slots past the length; an index is checked when the path is taken | `SVal.array`, `State.checkIndex`, `SVal.overlay` | `testDanglingReferenceSurvivesPush` and three more |
-| Array lengths | a dynamic array holds fewer than `2^256` elements: its length is a `uint` (decision 13, `docs/intrinsic.md`).  The typed storage and heap carry the bound (`SVal.array`, `MObj`), so a typed length read is in range (`Storage.len`, `Heap.lenU`), and so are an erasure's lengths.  A push onto `2^256 - 1` elements exhausts the resources: the typed run halts with `exhausted` there (`Storage.full`, `TRun.push`; decision 15), and both modalities accept it (`Modality.onTHalt`), as KeY, which models no gas, reads every run (solkey's arrays are unbounded, so its diamond obligations with a push stay provable).  solc panics (`0x41`) on a storage array past `2^64` elements and its code runs out of gas long before; Lean's bound is `2^256`, and an exhausted run proves any modality.  The untyped interpreters have no bound and go on; the bridge reads the typed `exhausted` as any outcome (`TRes.Agrees`), and a straight program's typed run ends where its scoped one does when its pushes stay below the bound (`Prog.pushesShort`).  Decision 13 said the push reverts: a typed revert needs the untyped push to revert too, and the untyped calculus's diamond obligations with a push (most of solkey's TestSuite is diamonds) could then not be discharged, since a storage with `2^256 - 1` elements is reachable | `SVal.array`, `MObj`, `Storage.full`, `lenU` | `Typing/StraightRun.lean` |
+| Array lengths | a dynamic array holds fewer than `2^256` elements: its length is a `uint` (decision 13, `docs/intrinsic.md`).  The typed storage and heap carry the bound (`SVal.array`, `MObj`), so a typed length read is in range (`Storage.len`, `Heap.lenU`), and so are an erasure's lengths.  A push onto `2^256 - 1` elements exhausts the resources: the typed run halts with `exhausted` there (`Storage.full`, `TRun.push`; decision 15), and both modalities accept it (`Modality.onTHalt`), as KeY, which models no gas, reads every run (solkey's arrays are unbounded, so its diamond obligations with a push stay provable).  solc panics (`0x41`) on a storage array past `2^64` elements and its code runs out of gas long before; Lean's bound is `2^256`, and an exhausted run proves any modality.  The untyped operations have no bound and go on; a typed step read on the erasure reads the typed `exhausted` as any outcome (`TRes.Agrees`, `Semantics/Core/TypedStepErase.lean`), and a push below the bound ends (`push_none_ends`, `Typing/Constructibility.lean`).  Decision 13 said the push reverts: a typed revert needs the untyped push to revert too, and the untyped calculus's diamond obligations with a push (most of solkey's TestSuite is diamonds) could then not be discharged, since a storage with `2^256 - 1` elements is reachable | `SVal.array`, `MObj`, `Storage.full`, `lenU` | `Semantics/Core/TypedEnds.lean` |
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
 | `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `transferAt`; `Evm.Core.compile_correct` | `Semantics.lean` |
 | `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `sendAt`, `TxEnv.ext` | `Examples/Tactics/Net.lean` |
@@ -174,7 +174,7 @@ solc ≥ 0.7 rejects an assignment that would copy a mapping (directly or
 nested in a struct or array) into storage. `Src.copy` carries a `mapFree`
 obligation, so the typed syntax cannot express it (solkey's
 `ParserUtils.parseAssignmentMaybe`, at the type level); `tyHasMapping` guards
-the storage-source read, which is `.stuck` on such a type, the image of
+the storage-source read, which is `.undef` on such a type, the image of
 "rejected at compile time" and deliberately not `.revert`. `delete` keeps a
 mapping member in place, as solc does, and memory types contain no mappings.
 
@@ -203,7 +203,7 @@ elements, `shadow` the slots past the end.
   `storageIndexReadArrayBindLocalRoot` guard and solc's `Panic(0x32)` say).
   `SVal.find`/`SVal.save` then address the slot, past the end included, so
   an alias used later is not checked again. An index into a word or a struct
-  is `.stuck`.
+  is `.undef` (no typed path is one).
 - **A write through a reference to a popped element writes the slot.**
   `Token storage r = tokens[0]; tokens.pop(); r.value = 5;` writes the
   cleared slot, and a `push()` of a struct or array element takes that slot
@@ -363,11 +363,13 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
 
 - **Error classification.** A failing `assert` (Panic 0x01) is `Halt.panic`,
   a halt of its own (the table above). Every other failure collapses into
-  `Halt.revert` or `Halt.stuck`; solc distinguishes the other `Panic(uint256)`
+  `Halt.revert` (the typed run's `THalt.revert`; the term model's ill-sorted
+  value is `Halt.undef`, which no run reaches); solc distinguishes the other `Panic(uint256)`
   codes, `Error(string)` and empty revert data. Checked overflow (Panic
   0x11, at a narrow width too), an out-of-range index (0x32), an empty `pop`
   (0x31) and a zero divisor (0x12) are all `.revert`; "rejected at compile
-  time" and "outside the fragment" are `.stuck`, except an access through
+  time" and "outside the fragment" are not programs (the elaborator refuses
+  them) or `.undef` on an ill-sorted erased state, except an access through
   an unset storage pointer, a negative `**` exponent and a negative
   `transfer`/`send` amount, which revert (since 2026-10-07; the table above). The compiled code has no
   panic: there a failing `assert` reverts (`compile_correct`).
