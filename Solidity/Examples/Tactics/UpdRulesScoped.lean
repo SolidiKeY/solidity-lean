@@ -9,8 +9,7 @@ import Solidity.Calculus.Closers
 merges on scoped formulas, each computed by the kernel (`rfl`) and used on a
 `⊨` goal through `Valid.of_simpUpdsS`/`Valid.of_updAtS`, then closed by
 `sol_close`.  The rules give the formula they rewrite, one way, so they
-apply at its positive positions only: the last example's update under a
-negation stays.
+apply at its positive positions only: an update under a negation stays.
 -/
 
 namespace Solidity.Examples.Tactics.UpdRulesScoped
