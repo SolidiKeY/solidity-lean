@@ -1243,6 +1243,20 @@ where 6b's review fix left it (34.32 s, 1.01).  **Gate: partial**
 decision 49's four chain examples are not restored, decision 87; the
 closer and its sequents on the erasure stay the IR, decision 88).
 
+Review fix (2026-10-09): `Fml.rwEqC` and `Hyps.rwEqC`, which the kernel
+unfolds in `Proves.rewrite'`'s `rfl`s, matched on indexed families (G0's
+condition 1, no exemption recorded); they are now recursors with `match`
+twins (`Fml.rwEqCM`, `Hyps.rwEqCM`, link theorems `…_eq_rwEqCM`), their
+clauses stated by `rfl` (`Fml.rwEqC_not`, …).  `rw`/`sol_rw` on a
+scoped goal re-quoted the whole context when it rewrote a precondition,
+dropping the marks of explicit `∀`s (`Seq.paramCount` then read the
+explicit `∀` as a parameter, decision 28); `Walk.rwHyps` now rewrites
+only the preconditions and keeps every other entry as written, and a
+goal's marks are restored (`Symex.restoreMarks`).  Pinned in
+`Examples/Tactics/SelectOnSaveConsr.lean` (`some (0)` after the rewrite;
+`some (1)` before the fix).  The rule map's scoped `rewrite` rows now name
+it a rule (decision 87).
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
