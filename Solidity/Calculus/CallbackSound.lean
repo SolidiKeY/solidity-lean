@@ -182,7 +182,7 @@ variable {I : Fml C []} {m : Modality} {Γ Γ' Γ₁ Γ₀ : Ctx} {σ : State C 
   {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
 
 /-- A sequence that pays nothing runs with callbacks as it runs. -/
-theorem ExecP.of_trun {J : StateInv C} {Δ : Ctx} {τ : State C Δ} {P : Prog C Δ Γ'}
+theorem ExecP.of_run {J : StateInv C} {Δ : Ctx} {τ : State C Δ} {P : Prog C Δ Γ'}
     (hP : Prog.hasTransfer P = false) : ExecP J τ P (.ofRes (Prog.run τ P)) := by
   rcases Prog.exec_run J P τ with h | h
   · exact h
@@ -253,7 +253,7 @@ theorem holdsC_unfold {Γ'' : Ctx} {s : Stmt C Γ Γ'} {P : Prog C Γ Γ''} {e :
     holdsC I σ (.modal m (.cons s ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
   rw [ExecS.det_inv he hs]
-  have h₁ := COut.thenF_drop _ (h _ (ExecP.of_trun hP))
+  have h₁ := COut.thenF_drop _ (h _ (ExecP.of_run hP))
   rw [COut.map_ofRes] at h₁
   refine COut.thenF_of_sim ?_ h₁
   have hr : TRes.Sim ((Prog.runSt σ P).map (State.drop e)) (Stmt.runSt σ s) := hr
@@ -272,7 +272,7 @@ theorem holdsC_bind {s : Stmt C Γ Γ'} {x : Var} {t : LTy} {P : Prog C (t :: Γ
   rw [ExecS.det_inv he hs]
   obtain ⟨v, hv⟩ := hr
   have h₁ := (Modality.forallB_all h v : holdsC I (σ.push v) (.modal m P (.seq ω κ) φ)) _
-    (ExecP.of_trun hP)
+    (ExecP.of_run hP)
   refine COut.thenF_of_sim (r := Prog.run (σ.push v) P) ?_ h₁
   exact TRes.Sim.of_eq hv
 

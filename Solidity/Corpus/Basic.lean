@@ -91,13 +91,13 @@ def runOk [FreshNames] (σ : State C []) (P : Surface.Prog C) : Bool :=
   | .error _ => false
 
 /-- A typed run that ends normally proves the diamond. -/
-theorem runs_of_trun {Γ' : Ctx} {σ : State C []} {Q : Prog C [] Γ'}
+theorem runs_of_run {Γ' : Ctx} {σ : State C []} {Q : Prog C [] Γ'}
     {o : Out C σ.H Γ'} (h : Q.run σ = .ok o) : Runs .diamond σ Q := by
   simp only [Runs, holds, Prog.runFrames, h]
   exact ⟨trivial, nofun⟩
 
 /-- `runOk` proves the diamond. -/
-theorem diamond_of_trunOk [FreshNames] (σ : State C []) {P : Surface.Prog C}
+theorem diamond_of_runOk [FreshNames] (σ : State C []) {P : Surface.Prog C}
     (h : runOk σ P = true) : Diamond σ P := by
   unfold runOk at h
   unfold Diamond
@@ -105,12 +105,12 @@ theorem diamond_of_trunOk [FreshNames] (σ : State C []) {P : Surface.Prog C}
   · rename_i Q _
     cases ht : Q.run σ with
     | error e => rw [ht] at h; cases h
-    | ok o => exact runs_of_trun ht
+    | ok o => exact runs_of_run ht
   · cases h
 
 /-- `corpus_decide`: let the kernel resolve the program and run it typed. -/
 macro "corpus_decide" : tactic =>
-  `(tactic| (apply diamond_of_trunOk; decide +kernel))
+  `(tactic| (apply diamond_of_runOk; decide +kernel))
 
 section Examples
 

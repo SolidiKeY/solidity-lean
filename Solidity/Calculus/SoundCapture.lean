@@ -62,7 +62,7 @@ def SHole.contT : {T : Ty} → SHole C Γ T → (σ : State C Γ) → SRef C T �
     let st ← TRes.ofOpt (σ.storage.write ref sv)
     pure ⟨σ.withStorage st, List.prefix_refl _⟩
 
-theorem SHole.fill_trun (σ : State C Γ) {T : Ty} (lhs : SHole C Γ T) (l : Loc C Γ T) :
+theorem SHole.fill_run (σ : State C Γ) {T : Ty} (lhs : SHole C Γ T) (l : Loc C Γ T) :
     (lhs.fill (.loc l)).run σ = l.resolveT σ >>= lhs.contT σ := by
   cases lhs with
   | «local» i =>
@@ -94,7 +94,7 @@ theorem SHole.fill_pushT {t : LTy} (σ : State C Γ) (w : t.TDenote C σ.H) {T :
     (hl : l'.resolveT (σ.push w) = l.resolveT σ) :
     (lhs.up.fill (.loc l')).run (σ.push w) =
       liftedT Solidity.up (w, σ.env) ((lhs.fill (.loc l)).run σ) := by
-  rw [SHole.fill_trun, SHole.fill_trun, hl, liftedT_bind]
+  rw [SHole.fill_run, SHole.fill_run, hl, liftedT_bind]
   congr 1; funext q; exact SHole.contT_up σ w lhs q
 
 /-- What a memory hole does with the address it is given: `v = read(…)`,
@@ -112,7 +112,7 @@ def MHole.contT : {T : Ty} → MHole C Γ T → (σ : State C Γ) → MAddr σ.H
     let hp ← TRes.ofOpt (σ.heap.writeAddr a' mv)
     pure ⟨σ.withHeap hp, List.prefix_refl _⟩
 
-theorem MHole.fill_trun (σ : State C Γ) {T : Ty} (lhs : MHole C Γ T) (l : MLoc C Γ T) :
+theorem MHole.fill_run (σ : State C Γ) {T : Ty} (lhs : MHole C Γ T) (l : MLoc C Γ T) :
     (lhs.fill l).run σ = l.addrT σ >>= lhs.contT σ := by
   cases lhs with
   | «local» i =>
@@ -143,7 +143,7 @@ theorem MHole.fill_pushT {t : LTy} (σ : State C Γ) (w : t.TDenote C σ.H) {T :
     (lhs : MHole C Γ T) (l' : MLoc C (t :: Γ) T) (l : MLoc C Γ T)
     (hl : l'.addrT (σ.push w) = l.addrT σ) :
     (lhs.up.fill l').run (σ.push w) = liftedT Solidity.up (w, σ.env) ((lhs.fill l).run σ) := by
-  rw [MHole.fill_trun, MHole.fill_trun, hl, liftedT_bind]
+  rw [MHole.fill_run, MHole.fill_run, hl, liftedT_bind]
   congr 1; funext q; exact MHole.contT_up σ w lhs q
 
 /-- What a value hole does with the value it is given: `v = e`, `loc = e`,
@@ -159,7 +159,7 @@ def VHole.contT {p : PrimTy} : VHole C Γ p → (σ : State C Γ) → p.Denote �
     let hp ← TRes.ofOpt (σ.heap.writeAddr a v)
     pure ⟨σ.withHeap hp, List.prefix_refl _⟩
 
-theorem VHole.fill_trun (σ : State C Γ) {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) :
+theorem VHole.fill_run (σ : State C Γ) {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) :
     (lhs.fill e).run σ = e.evalT σ >>= lhs.contT σ := by
   cases lhs with
   | «local» i => rfl
@@ -188,7 +188,7 @@ theorem VHole.fill_pushT {t : LTy} (σ : State C Γ) (w : t.TDenote C σ.H) {p :
     (lhs : VHole C Γ p) (e' : Val C (t :: Γ) p) (e : Val C Γ p)
     (he : e'.evalT (σ.push w) = e.evalT σ) :
     (lhs.up.fill e').run (σ.push w) = liftedT Solidity.up (w, σ.env) ((lhs.fill e).run σ) := by
-  rw [VHole.fill_trun, VHole.fill_trun, he, liftedT_bind]
+  rw [VHole.fill_run, VHole.fill_run, he, liftedT_bind]
   congr 1; funext q; exact VHole.contT_up σ w lhs q
 
 end Holes
@@ -209,7 +209,7 @@ theorem SHole.sound_fieldCapture {T : Ty} (lhs : SHole C Γ T) {s : Name}
     simp only [Loc.resolveT, hq]; rfl
   · refine TRes.Sim.err_refl ?_
     show ((lhs.fill (.loc (.field b f hf))).run σ).map _ = _
-    rw [SHole.fill_trun]
+    rw [SHole.fill_run]
     simp only [Loc.resolveT, hh]; rfl
 
 /-- `storageIndexRead_unfold_rightFst`: the receiver bound first. -/
@@ -222,7 +222,7 @@ theorem SHole.sound_indexRecvCapture {T : Ty} (lhs : SHole C Γ T) {R : RefTy} {
     simp only [Loc.resolveT, Val.evalT_up, hq]; rfl
   · refine TRes.Sim.err_refl ?_
     show ((lhs.fill (.loc (.index it b i))).run σ).map _ = _
-    rw [SHole.fill_trun]
+    rw [SHole.fill_run]
     simp only [Loc.resolveT, hh]; rfl
 
 /-- `storageIndexRead_unfold_rightSndIndex`: the index captured, the receiver
@@ -235,7 +235,7 @@ theorem SHole.sound_indexCapture {T : Ty} (lhs : SHole C Γ T) {R : RefTy} {kp :
   · refine runSt_pushed σ _ (SHole.fill_pushT σ (t := .val kp) v lhs _ (.index it b i) ?_)
     simp only [Loc.resolveT, SPath.resolveT_up, hv]; rfl
   · show TRes.Sim _ (((lhs.fill (.loc (.index it b i))).run σ).map _)
-    rw [SHole.fill_trun]
+    rw [SHole.fill_run]
     simp only [Loc.resolveT, bind_assoc, TRes.map_bind]
     refine TRes.Sim.err_bind (SPath.resolveT_noPanic σ b) hp fun _ _ => ?_
     simp only [hh]
@@ -286,7 +286,7 @@ theorem MHole.sound_fieldCapture {T : Ty} (lhs : MHole C Γ T) {s : Name}
     simp only [MLoc.addrT, hr]; rfl
   · refine TRes.Sim.err_refl ?_
     show ((lhs.fill (.field b f hf)).run σ).map _ = _
-    rw [MHole.fill_trun]
+    rw [MHole.fill_run]
     simp only [MLoc.addrT, hh]; rfl
 
 /-- `memoryIndexRead_unfold_rightFst`: the receiver bound first. -/
@@ -299,7 +299,7 @@ theorem MHole.sound_indexRecvCapture {T : Ty} (lhs : MHole C Γ T) {R : RefTy} (
     simp only [MLoc.addrT, Val.evalT_up, hr]; rfl
   · refine TRes.Sim.err_refl ?_
     show ((lhs.fill (.index a b i)).run σ).map _ = _
-    rw [MHole.fill_trun]
+    rw [MHole.fill_run]
     simp only [MLoc.addrT, hh]; rfl
 
 /-- `memoryIndexRead_unfold_rightSndIndex`: the index captured. -/
@@ -311,7 +311,7 @@ theorem MHole.sound_indexCapture {T : Ty} (lhs : MHole C Γ T) {R : RefTy} (a : 
   · refine runSt_pushed σ _ (MHole.fill_pushT σ (t := .val .uint) v lhs _ (.index a b i) ?_)
     simp only [MLoc.addrT, MPath.mvalT_up, hv]; rfl
   · show TRes.Sim _ (((lhs.fill (.index a b i)).run σ).map _)
-    rw [MHole.fill_trun]
+    rw [MHole.fill_run]
     simp only [MLoc.addrT, bind_assoc, TRes.map_bind]
     refine TRes.Sim.err_bind (MPath.mvalT_noPanic σ b) hp fun _ _ => ?_
     simp only [hh]
@@ -351,7 +351,7 @@ theorem VHole.sound_capture {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) (
   · exact runSt_pushed σ _ (VHole.fill_pushT σ (t := .val p) v lhs _ e (by rw [hv]; rfl))
   · refine TRes.Sim.err_refl ?_
     show ((lhs.fill e).run σ).map _ = _
-    rw [VHole.fill_trun, hh]; rfl
+    rw [VHole.fill_run, hh]; rfl
 
 /-- `ternaryCaptureCond`: the condition captured first. -/
 theorem VHole.sound_ternaryCapture {p : PrimTy} (lhs : VHole C Γ p) (c : Val C Γ .bool)
@@ -363,7 +363,7 @@ theorem VHole.sound_ternaryCapture {p : PrimTy} (lhs : VHole C Γ p) (c : Val C 
     simp only [Val.evalT, Val.evalT_up, hv]; rfl
   · refine TRes.Sim.err_refl ?_
     show ((lhs.fill (.ternary c a b)).run σ).map _ = _
-    rw [VHole.fill_trun]
+    rw [VHole.fill_run]
     simp only [Val.evalT, hh]; rfl
 
 /-- An `if` on a simple condition, typed: the branch it picks, its locals
@@ -385,7 +385,7 @@ theorem Stmt.runSt_ite_simple {Γ₁ Γ₂ : Ctx} (se : Simple C Γ .bool) (thn 
 theorem VHole.runSt_fill {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) :
     Stmt.runSt σ (lhs.fill e) = (e.evalT σ >>= lhs.contT σ).map (·.st) := by
   show ((lhs.fill e).run σ).map _ = _
-  rw [VHole.fill_trun]
+  rw [VHole.fill_run]
 
 /-- `ternaryToIf`: `lhs = se ? a : b;` is `if (se) lhs = a; else lhs = b;`. -/
 theorem VHole.sound_ternaryToIf {p : PrimTy} (lhs : VHole C Γ p) (se : Simple C Γ .bool)

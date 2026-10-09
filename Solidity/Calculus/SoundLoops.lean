@@ -361,7 +361,7 @@ theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
 
 /-- A block's run, its frame popped with nothing after it, read through
 its states. -/
-theorem frames_pop_nil_trun {H : HTy} {Γ' : Ctx} (b : BlockKind) (X : TRes (Out C H Γ₁))
+theorem frames_pop_nil_run {H : HTy} {Γ' : Ctx} (b : BlockKind) (X : TRes (Out C H Γ₁))
     (h : Ext Γ' Γ₁) :
     (X.map (·.st)).bind (Frames.runSt · (.pop b h .nil)) = (X.map (Out.drop h)).map (·.st) := by
   cases X <;> rfl
@@ -502,7 +502,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       (List.prefix_refl _)
     have h' := (holds_modal_iff _ _ _ _).1 (holds_modalK _ _ _ _ hT')
     unfold Prog.runSt at h'
-    rw [frames_pop_nil_trun, State.push_lift,
+    rw [frames_pop_nil_run, State.push_lift,
       (TWkRel.drop (Prog.wk_over body up)
         (Prog.run_wk body up a.st
           ((dv, a.st.env) : TEnv C a.st.H (.val .uint :: Γ)))).eq_lifted] at h'
