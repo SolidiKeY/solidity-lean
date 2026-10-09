@@ -17,7 +17,7 @@ link `~[r]~>` of a chain, `r` the rule KeY names
 the erasure of the chain's last scoped line (`Core.Fml.ViaE`,
 `Calculus/Core/Chains.lean`), and a chain with one composes to `~~>`, a proof
 of its first line from its last (`Core.Fml.ViaE.valid_close`).  The file reads
-the scoped calculus (`open scoped Solidity.Core.Surface`): a line with no
+the scoped calculus (`open scoped Solidity.Core.Scoped`): a line with no
 program is a scoped line too, the rewrites going on from its erasure, and a
 postcondition `φ : Core.Post C Γ` stands at the context of the line's user
 locals, its fresh ones dropped.  While the program is still open,

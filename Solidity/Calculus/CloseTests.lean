@@ -6,7 +6,7 @@ import Solidity.Calculus.Core.Closers
 # Tests of `sol_close`
 
 Goals `sol_close` is expected to close (`Close.lean`), each a leaf the
-scoped strategy leaves (`open scoped Solidity.Core.Surface`), erased to
+scoped strategy leaves (`open scoped Solidity.Core.Scoped`), erased to
 today's formulas.
 -/
 

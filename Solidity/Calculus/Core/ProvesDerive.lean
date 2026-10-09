@@ -4,7 +4,7 @@ import Solidity.Calculus.Core.Derive
 # `sol_prove` on a scoped sequent: `⊢ φ` as one kernel evaluation
 
 `Calculus/Core/Derive.lean`'s `sol_prove` proves `Core.Valid φ`; under
-`open scoped Solidity.Core.Surface` an obligation is stated `⊢ φ`, the
+`open scoped Solidity.Core.Scoped` an obligation is stated `⊢ φ`, the
 scoped sequent `Core.Proves C .all [] .nil φ` (`Calculus/Core/Surface.lean`),
 so the strategy has to build a derivation, as today's `Proves.of_residue`
 does (`Calculus/NFmlDerive.lean`).
@@ -621,7 +621,7 @@ end Seq
 
 open Lean Elab Tactic Meta in
 /-- `sol_prove` on a scoped sequent `H ⊢ φ` (`Core.Proves C R [] H φ`,
-`⊢ φ` under `open scoped Solidity.Core.Surface`): the walk as one kernel
+`⊢ φ` under `open scoped Solidity.Core.Scoped`): the walk as one kernel
 evaluation (`Proves.of_residue`), one goal `leafᵢ` per leaf today's closer
 leaves. -/
 @[tactic Solidity.tacticSol_prove]

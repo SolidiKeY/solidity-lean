@@ -263,7 +263,7 @@ modality is a leaf: `sol_derive` leaves it, `sol_derive?` closes it as
 today's suggestion does where it can (`Proves.close`, then today's
 `sol_symex; sol_close` on the erasure, as the tree's leaves close).
 
-Under `open scoped Solidity.Core.Surface` (`Walk.surfaceOn`) `sol_derive?`
+Under `open scoped Solidity.Core.Scoped` (`Walk.surfaceOn`) `sol_derive?`
 writes today's short walk instead, which the scope's macros read
 (`Calculus/Core/WalkSyntax.lean`): `apply Proves.valid`, solkey's aliases
 (`apply impRight`, `apply allRight`, `apply emptyModality`), one `apply
@@ -334,7 +334,7 @@ def ctorTacs (c : Lean.Name) (d : Lean.Term) : MetaM (Array (Array (TSyntax `tac
       #[← `(tactic| refine $f $d $args*)]]
   return #[#[app], #[← `(tactic| refine $f $d $args*)]]
 
-/-- Whether today's walk text reads here: `open scoped Solidity.Core.Surface`
+/-- Whether today's walk text reads here: `open scoped Solidity.Core.Scoped`
 is in effect (its `core_surface%` reads `true`, `Core.surfaceOn`, read
 without importing the switch) and the walk's macros are loaded
 (`Calculus/Core/WalkSyntax.lean`). -/

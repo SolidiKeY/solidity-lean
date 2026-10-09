@@ -7,7 +7,7 @@ import Solidity.Calculus.Core.SoundKit
 
 `Calculus/Problem.lean`'s `Problem.text` and `Problem.deploy_of_valid`
 for the scoped obligation (`Problem.ctorFml`, `cproblem!{constructor}`,
-`problem!{constructor}` under `open scoped Solidity.Core.Surface`):
+`problem!{constructor}` under `open scoped Solidity.Core.Scoped`):
 
 * `Problem.text` prints the KeY problem file of its erasure, which is
   today's obligation (`Problem.ofLegacy` reads today's back);

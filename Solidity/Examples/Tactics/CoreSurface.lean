@@ -5,7 +5,7 @@ import Solidity.Tools.Inspect
 /-!
 # The flip switch, pinned
 
-`open scoped Solidity.Core.Surface` (`Calculus/Core/Surface.lean`): today's
+`open scoped Solidity.Core.Scoped` (`Calculus/Core/Surface.lean`): today's
 text read scoped, `dl!{ … }` a `Core.Fml C []`, `⊨` scoped validity, `⊢`
 the scoped sequent, and the commands on it.  Outside the scope the same text
 is today's.  The callback taclets print as today's

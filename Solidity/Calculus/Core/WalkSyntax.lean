@@ -5,7 +5,7 @@ import Solidity.Calculus.TacticSyntax
 /-!
 # Today's walk on a scoped goal
 
-Under `open scoped Solidity.Core.Surface` a walk keeps today's text: one
+Under `open scoped Solidity.Core.Scoped` a walk keeps today's text: one
 `apply` per rule, the rule named as solkey names it (`apply update
 .storageFieldWriteSave`, `apply unfold .localValueDeclInitDrop`, `apply
 empty`, `refine close ?_`, …).  On a scoped goal (`Core.Proves`) each line
@@ -40,7 +40,7 @@ Where the scoped calculus takes a step today's names otherwise:
   explicit `∀ uint x;` (`cdl!` marks it, decision 28) is left to its own
   `apply allRight`.
 
-Each reading is a `scoped macro_rules` of the namespace `Solidity.Core.Surface`,
+Each reading is a `scoped macro_rules` of the namespace `Solidity.Core.Scoped`,
 tried before today's `apply`: the scoped rule first, today's last where
 today's calculus has it, for today's goals a file still meets (a leaf
 today's `sol_prove` leaves).

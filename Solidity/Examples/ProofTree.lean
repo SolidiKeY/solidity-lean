@@ -19,7 +19,7 @@ the tactics that write a proof out, as `#guard_msgs` tests:
 If the strategy picks another rule, or a printer changes, these fail.
 
 The sections `Scoped` read the scoped calculus (`open scoped
-Solidity.Core.Surface`, `docs/intrinsic.md`, W3): a tree of `⊢ φ` over
+Solidity.Core.Scoped`, `docs/intrinsic.md`, W3): a tree of `⊢ φ` over
 `Core.Proves` (`Calculus/Core/ProofTree.lean`), a walk of its rules
 (`Calculus/Core/Derive.lean`) written in today's walk text, which the
 scope's macros read (`Calculus/Core/WalkSyntax.lean`; the steps KeY does

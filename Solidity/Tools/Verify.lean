@@ -5,7 +5,7 @@ import Solidity.Tools.Counterexample
 
 `#verify C.f` states the obligation of the function `f` of the contract `C`,
 scoped (`cspec[C]{f}`, `Calculus/Core/Spec.lean`: `spec[C]{f}` under `open
-scoped Solidity.Core.Surface`), and tries `sol_spec_try` on `⊨` of it
+scoped Solidity.Core.Scoped`), and tries `sol_spec_try` on `⊨` of it
 (`Core.Valid`).  With
 no goal left the function is proved, and the command offers the theorem
 as a suggestion (`Try this:`; a click replaces the `#verify C.f` with it;
@@ -82,7 +82,7 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
 
 /-- The theorem a proved `f` of the contract `c` is: the scoped obligation
 `#verify` proved, written `⊨ spec[C]{f}` where `open scoped
-Solidity.Core.Surface` is in effect (`inScope`; `spec[C]{f}` is then
+Solidity.Core.Scoped` is in effect (`inScope`; `spec[C]{f}` is then
 `cspec[C]{f}`), `valid% cspec[C]{f}` (`Core.Valid`) elsewhere. -/
 def provedTheorem (c : Lean.Name) (f : String) (inScope : Bool) : String :=
   if inScope then s!"theorem {f}_spec : ⊨ spec[{c}]\{{f}} := by sol_spec"

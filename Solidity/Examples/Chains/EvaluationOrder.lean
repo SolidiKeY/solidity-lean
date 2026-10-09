@@ -15,7 +15,7 @@ of the printed lines), from `i` 7.  The elaborator captures the value first
 not taken.  The chain is one term, grouped as the paper prints it, every
 capture kept, and ends with the write folded to literals.
 
-It reads the scoped calculus (`open scoped Solidity.Core.Surface`): the
+It reads the scoped calculus (`open scoped Solidity.Core.Scoped`): the
 elaborator writes the captures (`a`, `b`) in front of the write, and the
 postcondition `φ` stands where they are out of scope (`Core/Notation.lean`'s
 `NCtx.dropFresh`), at the context of `i` alone.

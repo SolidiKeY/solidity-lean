@@ -605,7 +605,7 @@ end Solidity.Examples.Tactics.Decide
 
 /-! ## On the closer's formulas
 
-Read without `open scoped Solidity.Core.Surface`: the fragment (`NFml.inL`)
+Read without `open scoped Solidity.Core.Scoped`: the fragment (`NFml.inL`)
 of the closer's input.  (`deleteWithoutWriteUntyped`, a refutation over
 today's untyped run, and `sol_decide` refusing a modality went with the
 modality at W4 `modal`.) -/

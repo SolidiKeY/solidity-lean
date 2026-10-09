@@ -54,7 +54,7 @@ derivation still sees of it is the side condition `p.hasSeg`, that a
 has fixed `p`, so the law is named bare.
 
 The formulas and the sequent are the scoped ones (`open scoped
-Solidity.Core.Surface`): the leaf `ageWriteRead` reads by hand is its
+Solidity.Core.Scoped`): the leaf `ageWriteRead` reads by hand is its
 erasure, computed (`refine close ?_; sol_symex`), today's `Update.lean`
 terms over today's interpreter, where the `consr` path is; the merge, the
 split and the rewrite of `ageWriteReadKeY` are the scoped sequent's

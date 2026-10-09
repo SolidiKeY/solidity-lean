@@ -5,7 +5,7 @@ import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.Proves
 
 /-!
-# The flip switch: `open scoped Solidity.Core.Surface`
+# The flip switch: `open scoped Solidity.Core.Scoped`
 
 With the scope open, today's notation reads the scoped calculus
 (`docs/intrinsic.md`, W2 `tree`): the same text, a scoped term.
@@ -35,13 +35,13 @@ namespace Solidity.Core
 
 open Lean Elab Term Meta
 
-/-- `core_surface%`: `true` where `open scoped Solidity.Core.Surface` is in
+/-- `core_surface%`: `true` where `open scoped Solidity.Core.Scoped` is in
 effect, `false` elsewhere. -/
 syntax (name := coreSurfaceFlag) "core_surface%" : term
 
 macro_rules | `(core_surface%) => `(false)
 
-/-- Whether `open scoped Solidity.Core.Surface` is in effect here. -/
+/-- Whether `open scoped Solidity.Core.Scoped` is in effect here. -/
 def surfaceOn : TermElabM Bool := do
   let some stx ← liftMacroM (expandMacro? (← `(core_surface%))) | return false
   return stx.isIdent && stx.getId.eraseMacroScopes == `true

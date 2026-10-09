@@ -178,7 +178,7 @@ def expandChainStx : Macro := fun stx => do
       | `(chain_arrow| ~[ $r:ident ]~>) =>
         pure (← `(link% ($prev) $r ($b)), ← `(stepBy% ($prev) $r ($b)))
       | _ => Macro.throwErrorAt l[0] "a step of the strategy (`~>`, `~*>`) is a scoped chain's: \
-          write the first line scoped (`open scoped Solidity.Core.Surface`)"
+          write the first line scoped (`open scoped Solidity.Core.Scoped`)"
     links := links.push (link.1, link.2, b)
     prev := b
   match links with
@@ -1144,13 +1144,13 @@ elab_rules : term
     let b ← elabTermEnsuringType b (mkApp (mkConst ``NFml) C)
     let some arrow ← rwArrow? r
       | throwError "~[{r}]~>: a rule of the strategy is a scoped chain's step: write the line \
-          before it scoped (`open scoped Solidity.Core.Surface`)"
+          before it scoped (`open scoped Solidity.Core.Scoped`)"
     let l ← rwLabelOf C a b r arrow
     return mkAppN (mkConst ``NFml.RwBy) #[C, toExpr r.getId.toString, l, a, b]
   | `(link% $a $r $b) => do
     let some arrow ← rwArrow? r
       | throwError "~[{r}]~>: a rule of the strategy is a scoped chain's step: write the line \
-          before it scoped (`open scoped Solidity.Core.Surface`)"
+          before it scoped (`open scoped Solidity.Core.Scoped`)"
     let a ← elabTerm a none
     let C ← lineContract a r
     let b ← elabTermEnsuringType b (mkApp (mkConst ``NFml) C)
@@ -1186,11 +1186,11 @@ link after it, `dl!{ … }` read three times. -/
       | `(chain_arrow| ~[ $r:ident ]~>) =>
         match ← rwArrow? r with
         | none => throwError "~[{r}]~>: a rule of the strategy is a scoped chain's step: write \
-            the first line scoped (`open scoped Solidity.Core.Surface`)"
+            the first line scoped (`open scoped Solidity.Core.Scoped`)"
         | some arrow =>
           return mkApp3 (mkConst ``Link.rw) C (toExpr r.getId.toString) (← rwLabelOf C a b r arrow)
       | _ => throwError "a step of the strategy (`~>`, `~*>`) is a scoped chain's: write the \
-          first line scoped (`open scoped Solidity.Core.Surface`)"
+          first line scoped (`open scoped Solidity.Core.Scoped`)"
     ws := ws.push (mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``Link) C, fml, link, b])
   return mkApp3 (mkConst ``NFml.Via) C a (← mkListLit pairTy ws.toList)
 

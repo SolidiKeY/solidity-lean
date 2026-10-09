@@ -2709,6 +2709,9 @@ Not done from the inventory, with the reasons above: the `Chains`,
 while the heavy ones stay), the closer's driver split out of `Derive`.
 
 ## W5 — final rename (the lead alone)
+**Status (2026-10-09): prepared** ("W5 preparation" below): no clash
+left, the script `scripts/w5-rename.sh` dry-run; its build fails only on
+the pins it shortens.
 - One scripted commit (`git mv` plus `rg`/`sed`, no hand edits):
   - `Solidity.Core.X` → `Solidity.X`.
   - `Calculus/Core/*` → `Calculus/*`; `TypedRun` → `Semantics`.
@@ -3961,6 +3964,47 @@ below the delaborators is done before W5's rename.
 61. *Proposed (W4b `rules36`):* `sol_prove` on `⊢ₖ` walks solkey's rules
     only (`Seq.run R`, `Stmt.stepIn`), and fails where a statement is not
     admitted, rather than proving `⊢` and failing in the kernel.
+62. *Proposed (W5 preparation), the lead's call:* the old side of every
+    clash W5 would create moves into the namespace it belongs to, and the
+    scoped one keeps the plain name: today's term syntax as written is
+    `Surface`'s (`Surface.Val`, `Simple`, `SPath`, `Loc`, `MPath`, `MLoc`,
+    `Src`, `ARhs`, `MRhs`, `NewLhs`, `MSrc`, `OpLoc`, `CallRet`, `ExtArg`,
+    `ExtCall`, `LoopAnn`, `Tm`, `MAddr`, `UpdElem`, `Upd`, the holes `Hole`,
+    `MHole`, `VHole`, `Premise`, the obligations `Problem.*` and
+    `specObligation`, `primName`, `cmpParts?`); the closer's is `NFml`'s
+    (`NFml.holds`, `holds_conj`, `Valid`, `Proves`, `Post`, `Link`, the
+    rewrite chains' `Chain.*`, `Derive.*`, `instSoundRelLeads`); the untyped
+    semantics' is `Semantics`' (the lemma namespaces `State.*`, `SVal.*`,
+    `MVal.*`, `MObj.*`, `Value.*`, `Res.*`, and `SE`, `Tight`,
+    `lookupBy_map_snd`, `writeLoc_eq`, `aliasPath`, `assertOk`, `guardOk`,
+    `bumpLocal`, `opLocal`, `sendAt`); `Typing/Storage`'s `elemTy` is
+    `Ty.elemTy`.  See "W5 preparation" below.
+63. *Proposed (W5 preparation), the lead's call:* M3's erased state
+    `Core.State` is `Core.EState` (with its namespace), the one scoped name
+    renamed: W5's `TState` → `State` takes the plain name.
+64. *Proposed (W5 preparation), the lead's call:* the switch
+    `Solidity.Core.Surface` (`open scoped`, the scoped reading of `dl!{}`,
+    `⊨`, the walks' `apply`) is `Solidity.Core.Scoped`: W5 would merge it
+    into the old side's `Surface`, and every `def Surface.X …` (which opens
+    its prefix) would read its formulas scoped.
+65. *Proposed (W5 preparation), the lead's call:* the old modules W5's
+    moves would overwrite are renamed by their side:
+    `Calculus/{Close,Derive,Logic,Quote,UpdateRules}.lean` →
+    `Calculus/NFml{Close,Derive,Logic,Quote,UpdateRules}.lean`,
+    `Calculus/{Notation,Spec}.lean` → `Calculus/Surface{Notation,Spec}.lean`.
+66. *Proposed (W5 preparation), the lead's call:* the script's scope beyond
+    the plan's list: `Solidity.Evm.Core` folds into `Solidity.Evm` with its
+    files; `Semantics/Core/TypedX` → `Semantics/X` (the plan's
+    "`TypedRun` → `Semantics`": `Semantics/Run`),
+    `Semantics/Core/X` → `Semantics/X`, `Semantics/Core.lean` →
+    `Semantics/Erased`; `Syntax/Core*.lean`,
+    `Examples/Tactics/Core*.lean` and `TestSuite/CoreProblems.lean` keep
+    their paths (two would overwrite `Examples/Tactics/Callback.lean` and
+    `TestSuite/Problems.lean`).
+67. *Proposed (W5 preparation), the lead's call:* two exact duplicates go
+    instead of being renamed: `Core.Res.bind_eq_ok` and `Core.Res.ok_bind`
+    (`Calculus/Core/SoundArms`, `SoundCalls`) are `SemanticsProperties`'
+    `Res.bind_eq_ok`/`Res.ok_bind`, which their users now name.
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
@@ -6600,6 +6644,100 @@ untyped terms read (`Semantics.lean`'s operations and `Semantics/Core.lean`'s
   `AGENTS.md` still describe `Stmt.run`; `docs/testsuite-proofs.md`
   (line 2319) cites today's `Proves.solkey_lt_calculus`.
 - Lead decisions: proposals 55–61.
+
+### W5 preparation (2026-10-09, on `intrinsic`)
+
+Directly on `intrinsic` from `25978c0`: `c65a7c0` (the renames), `17e0fce`
+(the script; `State` qualified in `Evm/Core*`), `c411323` (the ambiguous
+names of `Evm/Core*`), then the switch's prose and this record.
+
+**What W5 would clash with.**  A scratch meta-program (not committed) listed,
+for every constant of the environment of `Solidity`, `SolidityCorpus` and
+`SolkeyTestSuite`, its name after W5 (`Solidity.Core.X` → `Solidity.X`,
+`Solidity.Evm.Core.X` → `Solidity.Evm.X`, `TState` → `State`, `trun…` →
+`run…`) and every other constant with that name: 64 clashes, not counting
+the private auxiliaries of separate modules, among them `Val` and the whole
+term syntax, `Tm`/`Upd`/`UpdElem`, `holds`/`Valid`/`Proves`/`Post`/`Link`,
+the rewrite chains' `Chain.*`, `Derive.*`, `Problem.*`, M3's `Core.State`
+against `TState`, and six of `Semantics.lean`'s operations against M3's.
+Seven old modules would be overwritten by the moves.  Rerun on the renamed
+tree: none, but two anonymous local instances of `Evm/CoreExamples`, which
+Lean names apart itself.
+
+**How they were renamed** (decisions 62–67 proposed above): by a resolver
+of Lean's names (namespaces innermost first, then `open`s, each module's
+import closure, `def A.b` opening `A`, mutual blocks, `open … in`), driven
+by each identifier's resolved constant: a reference to a renamed constant
+is rewritten to the shortest spelling that resolves to it both now and
+after the W5 rules; a reference that resolves through an `open` today and
+that a W5 name would capture by namespace priority is qualified now (`State`
+→ `Semantics.State` where `open Semantics` read it, `Res.bind_eq_ok` …);
+declarations, `namespace`/`end` lines, `open` lines, double-backtick and
+absolute name literals and `delab app.X` keys likewise.  Left as written:
+comments (prose for M7), the `sol{}`/`dl{}`/`contract!{}`/… blocks, macro
+patterns and the identifiers they match by spelling (the walks' `apply
+Proves.valid`, `refine Proves.mergeStorage ?_` under the scoped reading),
+constructor, field, case and named-argument names.  6.4k identifiers in
+188 files.  By hand: the two duplicates deleted (decision 67), two bare
+`open Core` lines, the old `Leads` instance named, `DelabErase.legacyName?`
+(a scoped name's erased twin is looked up as `Surface.X`, then `NFml.X`:
+the twins are no longer at `Solidity.X`), the closer's leaf tactics as text
+(`NFmlDerive.leafTacs`: `refine NFml.Proves.close …`), the switch's name in
+prose and messages, and 18 identifiers of `Evm/Core{Expr,Sim,Stmt}` that
+were ambiguous between `Semantics`' and the typed `SVal`/`pushSlot`/
+`SVal.findLive` (the elaborator picked the untyped one by its type; W5's
+namespace priority would pick the typed one): `Semantics.` written.
+
+**Pins changed** (reason: renamed declarations print qualified, W5's):
+`Calculus/SurfaceNotation`'s `#check` (`φ.Valid ∧ ∀ (σ : State),
+NFml.holds σ φ`), `TestSuite/Suggestions`' and `Examples/ProofTree`'s
+suggestions (`refine NFml.Proves.close_dropWt ?_`, `refine NFml.Proves.close
+?_`).  No other pin moved; the fresh names are unchanged.
+
+**Checks**: `lean_build` with `SolidityCorpus` and `SolkeyTestSuite` in
+`defaultTargets` for the run (reverted after): 314 jobs, green.  `dups.py`:
+only the known `as` line.  `check-orphans`: 300 reachable, the orphans the
+git-excluded `Scratch/` modules.  `check-doc-paths`, `check-rule-text`: OK.
+`check-testsuite.sh` against solkey `1b4341a303`: ok (438 = 435 derived +
+1 pending + 1 divergent + 1 excluded; 2 skip).  `sorry`, `axiom` and
+`maxHeartbeats` counts as at `25978c0`.  Not run: `check-corpus.sh`,
+`solkeycheck` itself (built), the review pass.  `Examples/Tactics/Calls` built in
+135–144 s under the build's load (102 s at W1, also under load); not
+re-timed alone, nor the M0 rows (a rename changes no elaboration).
+
+**The script**, `scripts/w5-rename.sh` (decision 66 for its scope): `git
+mv` of the modules, then one `sed -E` program over every tracked `.lean`,
+`.md`, `.sh`, `.mjs` and `.toml` file but `tests/`: the module paths, the
+namespaces (`Solidity.Core` → `Solidity`, `namespace Core`/`end Core` lines
+dropped, `Core.X` → `X` for `X` a first component of a scoped name, a list
+of 977 taken from the environment, so `Core.CoreM` and `Syntax/Core.lean`
+stay), `TState` → `State`, `trun` → `run`.  **Dry run**: a fresh clone at
+`c411323`; the script ran in a second (86 moves, 170 files edited); its
+output equals, on all 341 files, the simulation the resolver checked: every
+identifier resolves after the rules to the W5 name of the constant it
+resolved to before, every declaration lands at its W5 name, every `open`
+names its namespace's.  A build of the dry run (the four targets) fails only
+on `#guard_msgs` pins, about 40 in 16 files (`Examples/Notation` 9,
+`Tools` 4, `Tactics/Loops` 4, `CorePrint` 3, two each in `TryCatch`,
+`Branch`, `Values`, `Callback`, `Calls`, `Revert`, one each in
+`CoreSurface`, `Payment`, `CoreNotation`, `CoreSpec`, `Specs`); the sixteen
+read are line wrapping, the printed names shorter by `Core.` (W5's allowed
+reason).  W5 re-pins them.
+
+**Left for W5** (meta code keyed on the `Core` prefix, which no rename keeps
+apart once the prefix is gone):
+- `Tools/Taclet.lean`'s `isRuleLine` refuses a rule line whose escape
+  mentions `Core.`: after the script no scoped term prints `Core.`, so the
+  test is vacuous (no pin moved in the dry run).
+- `DelabErase.isUp` and `trArg` test `(`Solidity.Core).isPrefixOf n`, which
+  the script makes `(`Solidity).isPrefixOf n`, true of every name;
+  `legacyNames`' fallback likewise (harmless: it looks the twin up).
+- The SolKey reader (side-projects, branch `intrinsic`) calls
+  `legacyName?`, now `legacyName? env n`, and names old constants that moved
+  (`Solidity.Val` …, `Solidity.Proves`); its import of
+  `Calculus/Core/DelabErase` becomes `Calculus/DelabErase`.
+- Prose: docstrings still name the old side unqualified and M3's state
+  `Core.State` (M7).
 
 ## Baselines (M0)
 

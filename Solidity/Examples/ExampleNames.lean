@@ -23,7 +23,7 @@ A table changes spellings only: each line is the term its default spelling
 gives (`headlineLast`, `captured`), so the chains of `Examples/Chains/` check
 as they do in the default spelling.
 
-The formulas read the scoped calculus (`open scoped Solidity.Core.Surface`,
+The formulas read the scoped calculus (`open scoped Solidity.Core.Scoped`,
 sections `Scoped`), a table changing the scoped lines' spellings as it does
 today's, `sol_chain`'s error included.
 -/

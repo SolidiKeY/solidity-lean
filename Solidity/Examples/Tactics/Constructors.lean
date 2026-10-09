@@ -33,7 +33,7 @@ unspecified one writes `{storage := mtSt || net := mtSt}`, an empty ledger
 `z == 0` below is what needs `mtSt`: the constructor never writes `z`, so
 only the empty storage says what it holds.
 
-The formulas read scoped (`open scoped Solidity.Core.Surface`): a
+The formulas read scoped (`open scoped Solidity.Core.Scoped`): a
 parameter is bound by `∀`, an obligation is `Core.Fml C []`, its problem
 file and its reading at `Core.Contract.deployT` are `Calculus/Core/Deploy.lean`'s.
 -/

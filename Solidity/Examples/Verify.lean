@@ -11,7 +11,7 @@ premise of a mapping is a `\forall` over a `uint`, which the certificate
 cannot evaluate), one refuted by a failed `assert`, and one given up on: true,
 but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula.
 
-Both read the scoped calculus (`open scoped Solidity.Core.Surface`,
+Both read the scoped calculus (`open scoped Solidity.Core.Scoped`,
 `docs/intrinsic.md`): `#verify` states `⊨ spec[C]{f}` of the scoped
 obligation (`Core.Valid`), and a certificate is the kernel's `¬ ⊨` of that
 statement; `#counterexample` evaluates scoped formulas over the typed state

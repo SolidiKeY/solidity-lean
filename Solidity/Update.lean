@@ -1007,7 +1007,7 @@ def Surface.Fml.toFml : Surface.Fml C → Except String (NFml C)
   | .imp φ ψ => return .imp (← φ.toFml) (← ψ.toFml)
   | .upd m U φ => return .upd m U (← φ.toFml)
   | .modal .. => throw "a modality is read by the scoped calculus: `cdl!{ … }`, or \
-      `dl!{ … }` under `open scoped Solidity.Core.Surface`"
+      `dl!{ … }` under `open scoped Solidity.Core.Scoped`"
   | .havoc φ => return .havoc (← φ.toFml)
   | .all x p φ => return .all x p (← φ.toFml)
   | .anon xs φ => return .anon xs (← φ.toFml)

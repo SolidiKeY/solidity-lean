@@ -7,7 +7,7 @@ import Solidity.Calculus.Rewrite
 # Today's closers on a scoped leaf
 
 After `sol_symex` on a scoped goal (`Core.Valid ψ`, `⊨ dl!{ … }` under
-`open scoped Solidity.Core.Surface`), a leaf is closed by today's closers on
+`open scoped Solidity.Core.Scoped`), a leaf is closed by today's closers on
 its erasure, as `sol_close` and `sol_close_mt` are through their first
 step, `sol_close_unwrap` (`Calculus/Core/Derive.lean`): each tactic below
 has a second elaborator that erases the leaf (`Derive.eraseLeaf`:

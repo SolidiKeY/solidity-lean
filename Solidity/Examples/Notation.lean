@@ -16,7 +16,7 @@ these fail.
 Everything here is the scoped calculus's: the rule lines are
 `Core.Taclet`'s, printed by `Core.Delab` as today's print, the premises
 `Core.Premise`'s, the rules of `⊢` `Core.Proves`'s, and the formulas and
-the derivation read scoped (`open scoped Solidity.Core.Surface`, section
+the derivation read scoped (`open scoped Solidity.Core.Scoped`, section
 `Scoped`): a parameter is bound by `∀`, a formula is a `Core.Fml C []`.
 A sequent is read as it prints under `open scoped Solidity.Core.Sequent`
 (section `Sequents`).

@@ -11,7 +11,7 @@ import Solidity.Examples.Chains.Payment
 
 A derivation, stated (`Calculus/Core/Chains.lean`): both ends written in
 `dl!{ … }`, and in between as many lines as you like (mini-solkey's chain
-examples).  The scoped calculus (`open scoped Solidity.Core.Surface`): a line
+examples).  The scoped calculus (`open scoped Solidity.Core.Scoped`): a line
 after the first is computed by the strategy, its text checked against the
 computed line's erasure.
 

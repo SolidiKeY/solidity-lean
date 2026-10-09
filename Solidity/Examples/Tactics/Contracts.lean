@@ -28,7 +28,7 @@ closes by the strategy.
 behind its parameters and preconditions; the mutability `μ` is checked on
 the callee's body (`Prog.within`, by `rfl`): `addOne` is `pure`,
 `getTotal` reads storage (`view`), `deposit` writes it (`nonpayable`).
-The statements read scoped (`open scoped Solidity.Core.Surface`).
+The statements read scoped (`open scoped Solidity.Core.Scoped`).
 -/
 namespace Solidity.Examples.Tactics.Contracts
 

@@ -1290,7 +1290,7 @@ def elabCalcStep (inner : Syntax) : TermElabM (Option Expr) := do
 
 /-! ## `φ ~~> ψ` on scoped lines
 
-With `open scoped Solidity.Core.Surface`, `A ~~> B` whose first line is scoped
+With `open scoped Solidity.Core.Scoped`, `A ~~> B` whose first line is scoped
 reads `B` as the line of `A`'s derivation it is written as (`Core.Fml.Leads`),
 else as a scoped line with a program still open (a merged line,
 `Core.Fml.Leads`), else past the program, `Update.lean`'s, from the erasure

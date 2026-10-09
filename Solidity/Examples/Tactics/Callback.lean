@@ -35,7 +35,7 @@ A `send` (`PiggyBankNet`'s `callTo`) is read so too, with a third outcome:
 the callee refuses, and the send returns `false` with nothing booked
 (`sendWithCallbackBox`, `ProvesC.send`).
 
-The withdrawals read scoped (`open scoped Solidity.Core.Surface`): the
+The withdrawals read scoped (`open scoped Solidity.Core.Scoped`): the
 calculus with callbacks is `Calculus/Core/Callback.lean`'s `ProvesC`, sound
 against `ValidC` for a first-order invariant (`ProvesC.valid`,
 `Calculus/Core/CallbackSound.lean`); a rule takes its taclet as a `Rule`

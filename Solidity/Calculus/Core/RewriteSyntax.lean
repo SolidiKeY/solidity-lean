@@ -5,7 +5,7 @@ import Solidity.Calculus.Rewrite
 /-!
 # Today's steps after the program, on a scoped goal
 
-Under `open scoped Solidity.Core.Surface` the lines that finish a goal keep
+Under `open scoped Solidity.Core.Scoped` the lines that finish a goal keep
 today's text (`Calculus/Rewrite.lean`): `refine merge rfl ?_` and
 `refine Proves.mergeStorage ?_` (`sequentialToParallel`), `refine simplify
 ?_`, `refine Proves.eqDSplit ?_ ?_ ?_`, `exact Proves.definedWritten`,

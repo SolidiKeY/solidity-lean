@@ -304,7 +304,7 @@ end
 /-! ## Chains the tactics write
 
 `sol_chain?`, `#chain` and `sol_rws?` on `dl!{ … }` read scoped (`open scoped
-Solidity.Core.Surface`), their lines `cdl![m]{ … }`
+Solidity.Core.Scoped`), their lines `cdl![m]{ … }`
 (`Calculus/Core/ChainGen.lean`). -/
 
 section Surface

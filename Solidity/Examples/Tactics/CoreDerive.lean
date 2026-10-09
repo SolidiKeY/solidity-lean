@@ -197,7 +197,7 @@ example : Core.Proves StandardExample .all [] .nil (Core.loopFalse (C := Standar
 
 /-! ## Today's short walk
 
-Under `open scoped Solidity.Core.Surface` `sol_derive?` writes today's walk
+Under `open scoped Solidity.Core.Scoped` `sol_derive?` writes today's walk
 text, which the scope's macros read (`Calculus/Core/WalkSyntax.lean`):
 solkey's aliases, one `apply` per rule, `refine close ?_` at a leaf, the
 steps KeY does not show left unwritten.  A `∀` written in the formula is

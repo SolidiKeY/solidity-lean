@@ -1245,7 +1245,7 @@ end Search
 function `f` of the contract `C`; `#counterexample C`: to each of its
 functions with an obligation; `#counterexample φ`: to the closed scoped
 formula `φ : Core.Fml C []` (`dl!{ … }` under `open scoped
-Solidity.Core.Surface`, or `cdl!{ … }`). -/
+Solidity.Core.Scoped`, or `cdl!{ … }`). -/
 syntax (name := counterexampleCmd) "#counterexample " term : command
 
 open Lean Elab Command Term Meta in
@@ -1272,7 +1272,7 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
     let ty ← whnf (← inferType φE)
     unless ty.isAppOfArity ``Core.Fml 2 && (← whnfR ty.appArg!).isAppOf ``List.nil do
       throwError "#counterexample: not a closed scoped formula `Core.Fml C []` (`cdl!\{ … }`, or \
-        `dl!\{ … }` under `open scoped Solidity.Core.Surface`){indentExpr φE}"
+        `dl!\{ … }` under `open scoped Solidity.Core.Scoped`){indentExpr φE}"
     if φE.hasFVar || φE.hasMVar then
       throwError "#counterexample: the formula is not closed{indentExpr φE}"
     let cE := ty.appFn!.appArg!

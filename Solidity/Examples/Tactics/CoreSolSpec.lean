@@ -8,7 +8,7 @@ import Solidity.Examples.Tactics.Specs
 `Examples/Tactics/Specs.lean`'s obligations, scoped (`cspec!{f}`), proved by
 the same `sol_spec` (`Calculus/Core/SolSpec.lean`): the scoped strategy,
 then each leaf erased and closed as today's.  Under the switch
-(`open scoped Solidity.Core.Surface`) the text is today's.
+(`open scoped Solidity.Core.Scoped`) the text is today's.
 -/
 
 namespace Solidity.Examples.Tactics.CoreSolSpec

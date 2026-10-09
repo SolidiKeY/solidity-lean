@@ -96,7 +96,7 @@ section Inspect
 local instance : InContract := ⟨StandardExample⟩
 
 /-! The formulas read the scoped calculus (`open scoped
-Solidity.Core.Surface`, `Tools/Inspect.lean`): a parameter is bound by
+Solidity.Core.Scoped`, `Tools/Inspect.lean`): a parameter is bound by
 `∀`, and `#step` names the rule `Stmt.step` fires. -/
 
 open scoped Core.Scoped

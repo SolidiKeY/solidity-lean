@@ -13,7 +13,7 @@ rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨`, and with
 `refine merge rfl ?_`/`refine simplify ?_` on `⊢`.  The goals are under the box: a
 write under the diamond is not valid (`Close.lean`).
 
-The formulas read scoped (`open scoped Solidity.Core.Surface`): the rules
+The formulas read scoped (`open scoped Solidity.Core.Scoped`): the rules
 rewrite a leaf's erasure (`sol_upd`, `sol_merge`,
 `Calculus/Core/Closers.lean`), today's update.  The sequent rules `merge`
 and `simplify` are the scoped sequent's (`Calculus/Core/RewriteSyntax.lean`

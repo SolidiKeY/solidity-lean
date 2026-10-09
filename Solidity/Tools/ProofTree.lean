@@ -55,7 +55,7 @@ the switch) or any other term. -/
 def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr)) := do
   -- today's notation (`dl!{ … }`, `dl[C]{ … }`) is today's elaborator's,
   -- left unread so that it is not elaborated twice, unless the switch
-  -- (`open scoped Solidity.Core.Surface`) makes it scoped
+  -- (`open scoped Solidity.Core.Scoped`) makes it scoped
   if let some (.atom _ v) := t.raw.getHead? then
     if v.startsWith "dl" && !(← Core.surfaceOn) then return none
   let φ ← try elabTerm t none catch _ => return none
@@ -71,7 +71,7 @@ def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr
 /-- What a command says of a term that is not a closed scoped formula. -/
 def notScoped {α : Type} (cmd : String) : MetaM α :=
   throwError "{cmd}: not a closed scoped formula `Core.Fml C Γ` (`cdl!\{ … }`, or `dl!\{ … }` \
-    under `open scoped Solidity.Core.Surface`)"
+    under `open scoped Solidity.Core.Scoped`)"
 
 /-! ## The proof tree -/
 

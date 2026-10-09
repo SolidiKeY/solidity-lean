@@ -3,7 +3,7 @@ import Solidity.Calculus.Core.Sequents
 /-!
 # Checked sequent lines on scoped goals, pinned
 
-`Calculus/Core/Sequents.lean`: under `open scoped Solidity.Core.Surface`,
+`Calculus/Core/Sequents.lean`: under `open scoped Solidity.Core.Scoped`,
 `show sequent!{ Γ ⟹ φ }` checks that a scoped goal prints as the line
 (its erasure against the line read as today's), as a walk over today's
 goals states them (today's `Calculus/Sequents`).  A block's `}` is not

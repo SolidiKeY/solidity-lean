@@ -18,7 +18,7 @@ the goal prints, with today's spellings (`x == 1` for `x = 1`), without the
 `}` of a block's end, and a hidden binder is no entry.
 
 `show_sequent[C]{ Γ ⟹ φ }` and `show_sequent!{ Γ ⟹ φ }` are the checks;
-under `open scoped Solidity.Core.Surface`, `show sequent!{ … }` and
+under `open scoped Solidity.Core.Scoped`, `show sequent!{ … }` and
 `show sequent[C]{ … }` are them.  The goal is left as it is.
 -/
 

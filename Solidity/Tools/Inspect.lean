@@ -27,7 +27,7 @@ import Solidity.Tools.Taclet
   (`ruleAtC?`, `Core.ruleOf?`), as a line of `#derivation`.
 
 `φ` is a closed scoped formula of a named contract, `φ : Core.Fml C Γ`
-(`cdl!{ … }`, or `dl!{ … }` under `open scoped Solidity.Core.Surface`): the
+(`cdl!{ … }`, or `dl!{ … }` under `open scoped Solidity.Core.Scoped`): the
 strategy runs as compiled code (`unsafe evalExpr`), its result is quoted
 (`Core.Fml.quote`) against the contract's name and printed by `Core.Delab`'s
 printer (`elabCoreFormula?`, `Tools/ProofTree.lean`).
