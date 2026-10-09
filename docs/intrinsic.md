@@ -6819,9 +6819,9 @@ against the same archive writes `tests/solkey/expected.tsv`, `Corpus/*`
 and `SolidityCorpus.lean` as committed, but for the solkey hash in the
 headers (an archive has none).  `dups.py`: the known `as` line, and two
 new false positives, `delabFml` and `delabProves` (`Calculus/Delab.lean`'s
-are in `Solidity.Delab`; the script reads its docstring line `end
-(\`Premise.unfold\`'s …` as closing the namespace, which `Core.` used to
-keep apart).  `sorry` (19), `axiom` (1) and `maxHeartbeats` (30) as before
+are in `Solidity.Delab`; the script reads a docstring line there that
+begins with `end` as closing the namespace, which `Core.` used to keep
+apart).  `sorry` (19), `axiom` (1) and `maxHeartbeats` (30) as before
 the rename.
 
 **Left**:
