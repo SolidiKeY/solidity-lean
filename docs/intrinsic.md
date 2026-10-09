@@ -49,7 +49,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2 and 6b (`Decide.lean`) partial 2026-10-09 |
+| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2, 6b (`Decide.lean`) and 6c part 1 (`NFmlUpdateRules`, `StateParts`) partial 2026-10-09 |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
@@ -982,6 +982,50 @@ the closer port.
     the ledger (`{ y := net(a) }`), also outside the fragment.  Both still
     print `false`.
 
+86. *Proposed (M6c 6c, `w6c-upd`; renumber at the merge if another lane
+    took 86–88), the lead's call:* the update rules on scoped formulas are
+    **one way** (`UpdRuleS.sound`: `holds σ ψ → holds σ φ`, the direction
+    a derivation uses), where the erased ones are equivalences.  The
+    converse fails on the typed state: `{U} φ` reads `φ` in every typed
+    state the update's result erases to, and a merged update can reach a
+    typed state the two updates in turn do not (`{x := 300}{x := 1} φ`
+    for a `uint8` local holds vacuously, its merge only where `φ` does).
+    So a rule applies at the positive positions only (`Fml.rwAtS`: under
+    an update, a conjunction, the right of an implication, a binder,
+    `{havoc}`, `{anon}`, a modality's postcondition), not under a negation
+    or on the left of an implication, where `NFml.updAt` rewrites.  The
+    scoped sequent's rules (`merge`, `simplify`, `applyOnRigidBox`) were
+    already one way.
+87. *Proposed (M6c 6c), the lead's call:* the scoped rules transcribe
+    solkey's as far as positions allow: `sequentialToParallel` is
+    `Upd.seqPar` (Graft's, unchanged); `simplifyUpdate`
+    (`\dropEffectlessElementaries`) drops what the update pops later
+    (`Upd.simp`, under the box, as `Proves.simplify`), not a write
+    shadowed by a later one nor a local in scope that the formula does not
+    read, which the erased form drops by name (a gap, not a deviation in
+    soundness); `applySkip` asks a formula with no modality (`{}` reads it
+    in every typed state of the same erasure and heap typing,
+    `holds_congr_erase`); `applyOnRigid` under the diamond asks an update
+    that cannot halt (`Upd.totalB`: what the erased `Upd.total` admits, a
+    literal and an alias to a root and its fields, `sp1 := alice.account`,
+    and also a local, `unset` and the ledger's saves, which cannot halt on
+    the typed state; review fix: the alias was missing), under the box
+    any update (`Fml.substU`).  `elimSelfUpdate`, commented out in solkey
+    and theorems only in the erased form, is not ported.
+88. *Proposed (M6c 6c), the lead's call:* `StateParts`' two merges port
+    as one graft through a term map read where a write looks
+    (`Upd.graftF`, `GraftOK`: `Srt.AgreePart`, the erased form's), beside
+    Graft's exact one, which the sequent and the scoped chains run and
+    which stays as timed: `{L ‖ storage := S}{V}` (`Upd.mergeSt?`, memory
+    reads kept, an index check and a push slot read in `S`, a storage
+    variable `U` sets read as what it is set to) and `{memory := M}{V}`
+    (`Upd.mergeMem?`, a lone memory write, as `mergeMemory_holds`; the
+    locals-then-memory merge is `ChainRewrites`', which ports with it).
+    `NFmlUpdateRules` and `StateParts` stay: `Rewrite`, `TheoryRewrite`,
+    `ChainRewrites`, `ChainBranches`, `NFmlLogic`, `RewriteChains`,
+    `Decide` and `Hyp` still read `NFml`; they go when those port.  This
+    is not decision 7's fallback (the gate rows did not move).
+
 ## M6c
 
 **Wave 6a, part 1 (2026-10-09, `w6-closer`): `DecideSyn`, `DecideComplete`
@@ -1132,6 +1176,83 @@ did not change).  The build (`Solidity`, `solkeycheck`, `SolidityCorpus`,
 `SolkeyTestSuite`) green; no pin moved; no `sorry`, `axiom` or
 `maxHeartbeats` added.
 
+**Wave 6c, part 1 (2026-10-09, `w6c-upd`): `NFmlUpdateRules`,
+`StateParts`; Gate: partial.**  Two new modules on `Fml C Γ` and
+`Upd C Γ Δ`, read over the typed state (decisions 86–88):
+
+* `Calculus/UpdRuleScoped.lean` (`NFmlUpdateRules`' port): `UpdRuleS`
+  (`sequentialToParallel` by `Upd.seqPar`, `simplifyUpdate` by `Upd.simp`
+  under the box, `applySkip` before a formula with no modality,
+  `applyOnRigid` by `Fml.substU`, under the diamond for `Upd.totalB`),
+  `UpdRuleS.sound` one way; `Fml.rwAtS` (a rewrite at the first positive
+  position where it fits), `Fml.updAtS`, `Fml.simpUpdsS` and
+  `Valid.of_updAtS`/`Valid.of_simpUpdsS`; `holds_congr_erase` (a formula
+  with no modality reads the typed state by its erasure and heap typing),
+  `holds_upd_of_apply` (Graft's `holds_upd_graft` for any update that
+  runs as two), `holds_upd_mono`.
+* `Calculus/StatePartsScoped.lean` (`StateParts`' port): `Upd.graftF`, a
+  graft through a term map read where a write looks (`GraftOK`,
+  `Srt.AgreePart`), with `Upd.apply_graftF`; the storage merge
+  `Upd.mergeSt?` (`Tm.substStS`: locals and `storage` substituted, memory
+  reads kept, `p[p.length]@S`, `p[i]@S`) and the memory merge
+  `Upd.mergeMem?` (`Tm.withMemS`), `holds_upd_mergeSt`,
+  `holds_upd_mergeMem`, `Fml.mergeAtS`.
+* `Examples/Tactics/UpdRulesScoped.lean`: the functions computed by the
+  kernel (`rfl`) on `dl!{ … }` leaves, the three entry points
+  (`Valid.of_simpUpdsS`, `Valid.of_updAtS`, `Valid.of_mergeAtS`) each used
+  on a `⊨` goal; a rule
+  refused under a negation, `Upd.seqPar` refusing a memory term after a
+  storage write that the storage merge reads.
+
+`NFmlUpdateRules` and `StateParts` stay, their consumers (`Rewrite`,
+`TheoryRewrite`, `ChainRewrites`, `ChainBranches`, `NFmlLogic`,
+`RewriteChains`, `Decide`, `Hyp`) still on `NFml`; no consumer switched,
+no existing file but `Solidity.lean` and `docs/module-map.md` edited.  The
+build (`Solidity`) green; `check-orphans` (304 reachable),
+`check-doc-paths` OK; no pin moved; no `sorry`, `axiom` or `maxHeartbeats`
+added (`Fml.simpUpdsS_holds`, `Fml.updAtS_sound`, `Fml.mergeAtS_sound` on
+`propext`, `Classical.choice`, `Quot.sound`).
+
+Review fixes: the functions the kernel evaluates keep G0's conditions 1
+and 2, as `DecideScoped` does (decision 83), rather than claim Graft's
+exemption, which was granted to Graft and UpdateRules as timed: the walks
+over a whole formula or update (`Fml.rwAtS`, `Fml.simpUpdsS`,
+`Upd.graftF`, `Upd.totalB`, `Upd.size`) are written by the recursor with
+their `match` twins as `implemented_by` (`Fml.rwAtSM`, …) and link
+theorems (`Fml.rwAtS_eq_rwAtSM`, …), the proofs on the twins; a head is
+read by `Fml.casesOn`/`Upd.casesOn` (`Fml.updHead?`, `Upd.skipS`,
+`Upd.mergeMem?`), so `UpdRuleNameS.top`, `MergeNameS.top`, `Fml.mkUpdS`
+and `Fml.cleanS` match on no indexed family; `match` stays on one `Tm`,
+`Rhs` or `UpdElem` (decision 83's helpers).  `Upd.totalB` admits an alias
+to a root and its fields (`Tm.totalP`, `Tm.totalP_eval`), as the erased
+`Upd.total` does, so `applyOnRigid` fires under the diamond on
+`{ sp := alice.account }` (pinned).  The example module uses
+`Valid.of_updAtS` and `Valid.of_mergeAtS` on a `⊨` goal each, beside
+`Valid.of_simpUpdsS`.
+
+Gate: no gate file imports the new modules (checked on the import
+closure of `TestSuite/Derived1–14` and `Examples/Tactics/Decide`), and
+none of their imports changed, so their elaboration is the same by
+construction.  Re-timed as a check of the machine (the W6 baselines'
+method, measured at `8eca1996`; another session's build ran beside, load
+1.7–3.4 at the starts, two `Derived9` runs at load 2–11 left out):
+
+| Module | W6 end of work | 6c part 1 (runs) | ratio | CPU (min) |
+|---|---|---|---|---|
+| `TestSuite/Derived9` | 7.16 s | **7.53 s** (7.78, 7.53, 8.18) | 1.05 | 9.04 s |
+| `TestSuite/Derived10` | 11.11 s | **11.49 s** (11.49, 11.69, 11.82) | 1.03 | 13.40 s |
+| `TestSuite/Derived11` | 3.16 s | **3.28 s** (3.28, 3.38, 3.32) | 1.04 | 3.49 s |
+| `Examples/Tactics/Decide` | 49.14 s | **36.20 s** (36.48, 36.20, 37.54) | 0.74 | 37.04 s |
+| `Examples/Tactics/UpdRulesScoped` (new) | — | **0.75 s** (0.76, 0.80, 0.75) | — | 0.63 s |
+
+Every row within 1.2×; the 3–5% over the earlier lanes' (`Decide` 34.32 s
+at the 6b review fix) is the load, as the CPU column shows on files that
+did not change.  **Gate: partial**: the rules and merges run on
+`Fml C Γ`, but nothing calls them yet (the scoped `sol_upd`/`sol_merge`
+still erase the leaf, `Closers.lean`'s `Derive.onErased`, and the chains'
+rewrite links read the erasure: `Rewrite`, `ChainRewrites`), and
+`simplifyUpdate` drops less than the erased form (decision 87).
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
@@ -1153,9 +1274,11 @@ did not change).  The build (`Solidity`, `solkeycheck`, `SolidityCorpus`,
   6b `Decide.lean` with `Closer` (10k and 3.7k lines, one agent;
   `Decide.lean` ported as a scoped front end, `Calculus/DecideScoped.lean`,
   its proofs on `NFml` through the commutation, decision 83; `Closer` not
-  yet); 6c `NFmlUpdateRules`, `StateParts`, `Rewrite`, `TheoryRewrite`,
-  `ChainRewrites`, `ChainBranches`, then `NFmlDerive`, `NFmlLogic`,
-  `RewriteChains`.
+  yet); 6c `NFmlUpdateRules`, `StateParts` (scoped ports beside them,
+  `Calculus/UpdRuleScoped.lean`, `Calculus/StatePartsScoped.lean`, one
+  way, decisions 86–88; unused until `Rewrite` and `ChainRewrites` port),
+  `Rewrite`, `TheoryRewrite`, `ChainRewrites`, `ChainBranches`, then
+  `NFmlDerive`, `NFmlLogic`, `RewriteChains`.
 - **Gate per module:** the `TestSuite/Derived*` files and
   `Examples/Tactics/Decide` within 1.2× of the erased form's timings
   (the W6 baselines, Gates: the end-of-work column and its gate).
@@ -1164,7 +1287,7 @@ did not change).  The build (`Solidity`, `solkeycheck`, `SolidityCorpus`,
   `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.
 
 **Besides M6c:**
-- The lead's calls on proposals 78–85; the user's on decision 11 (whether
+- The lead's calls on proposals 78–88; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").
 - At the merge into `master`: the SolKey reader's require back to

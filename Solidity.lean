@@ -71,6 +71,8 @@ import Solidity.Calculus.DelabLean
 import Solidity.Calculus.Graft
 import Solidity.Calculus.Merge
 import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.UpdRuleScoped
+import Solidity.Calculus.StatePartsScoped
 import Solidity.Calculus.RewriteSyntax
 import Solidity.Calculus.ChainKit
 import Solidity.Calculus.Chains
@@ -172,6 +174,7 @@ import Solidity.Examples.Notation
 import Solidity.Examples.Tactics.ApplySteps
 import Solidity.Examples.ChainNotation
 import Solidity.Examples.Tactics.UpdateRules
+import Solidity.Examples.Tactics.UpdRulesScoped
 import Solidity.Examples.ChainRewrites
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.ExampleNames
