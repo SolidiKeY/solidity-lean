@@ -2710,8 +2710,9 @@ while the heavy ones stay), the closer's driver split out of `Derive`.
 
 ## W5 — final rename (the lead alone)
 **Status (2026-10-09): renamed** ("W5" below, after "W5 preparation"):
-the scripted commit, the pins re-wrapped, the four targets green; the
-reader, the docs (M7) and the review pass are left.
+the scripted commit, the pins re-wrapped, the four targets green, the
+review's fixes applied ("W5 review fixes"); the reader and the docs (M7)
+are left.
 - One scripted commit (`git mv` plus `rg`/`sed`, no hand edits):
   - `Solidity.Core.X` → `Solidity.X`.
   - `Calculus/Core/*` → `Calculus/*`; `TypedRun` → `Semantics`.
@@ -4000,7 +4001,8 @@ below the delaborators is done before W5's rename.
     `Semantics/Erased`; `Syntax/Core*.lean`,
     `Examples/Tactics/Core*.lean` and `TestSuite/CoreProblems.lean` keep
     their paths (two would overwrite `Examples/Tactics/Callback.lean` and
-    `TestSuite/Problems.lean`).
+    `TestSuite/Problems.lean`).  *Superseded by decision 72* (review fix):
+    they lose `Core` too.
 67. *Proposed (W5 preparation), the lead's call:* two exact duplicates go
     instead of being renamed: `Core.Res.bind_eq_ok` and `Core.Res.ok_bind`
     (`Calculus/Core/SoundArms`, `SoundCalls`) are `SemanticsProperties`'
@@ -4028,6 +4030,15 @@ below the delaborators is done before W5's rename.
     (`Tools.isScopedName`): `‹Solidity.Val.…›`, `‹(Solidity.Upd.…).snd›`,
     `‹@Solidity.Idx.…›` fail, `‹Solidity.Surface.…›` and
     `‹Solidity.Term.bumped …›` pass (checked on these five strings).
+    *Review fix*: a family with no twin that `Solidity.Core` alone kept
+    apart (`Ext`, `Thin`, `Hyps`, `Tms`, `Env`, `TEnv`, …) fails it too:
+    `Tools.scopedOnlyRoots`, the roots of every type or namespace declared
+    under `Solidity.Core` that is neither twinned nor in `untwinnedFamilies`,
+    but the shared vocabulary that only gained lemmas there (`Contract`,
+    `PrimTy`, `BinOp`, `Op0`–`Op3`, `Srt`, `Binds`, `Res`, `Value`,
+    `Delab`); kept apart from `Delab.isScopedFamily`, so `trArg` is
+    unchanged.  `‹Solidity.Ext.push e›` and `‹Solidity.Tms.STerm.save a b›`
+    fail (checked with the five above).
     `Delab.isUp` keeps the prefix `Solidity`: the one other name ending
     in `up` is the theorem `Wrote.up`, which no term heads.
 71. *Proposed (W5), the lead's call:* the script's scope beyond the
@@ -4036,6 +4047,18 @@ below the delaborators is done before W5's rename.
     `tests/solkey/expected.tsv` takes the path rules (its notes are what
     `scripts/solkey-port.mjs` writes, which the rules change), and
     `check-doc-paths` skips this record (decision 68).
+72. *Proposed (W5 review fix), the lead's call:* the paths decision 66 kept
+    lose `Core`: `Syntax/Core.lean` → `Syntax/Scoped.lean` (its title, "the
+    typed syntax, scoped"), `Syntax/CoreQuote.lean` → `Syntax/Quote.lean`,
+    `Examples/Tactics/CoreX.lean` → `Examples/Tactics/X.lean` for the twelve
+    that clash with nothing, with their namespaces
+    (`Solidity.Examples.CoreChains` → `Solidity.Examples.Tactics.Chains`),
+    and the two that would clash renamed rather than merged:
+    `CoreCallback` → `Examples/Tactics/CallbackRuns.lean` (the callback
+    reading on typed runs, beside `Callback`'s worked withdrawals),
+    `TestSuite/CoreProblems.lean` → `TestSuite/ScopedProblems.lean` (what
+    `solc_scoped_problems` declares; merging it into `Problems.lean` would
+    put that module past its timing gate, W3b lane `testsuite`).
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
@@ -6788,8 +6811,11 @@ script deleted), then this record.
 `Solidity.Evm.Core.X` → `Solidity.Evm.X`, `Calculus/Core/*` →
 `Calculus/*`, `Evm/CoreX` → `Evm/X`, `Semantics/Core/TypedX` →
 `Semantics/X`, `Semantics/Core/X` → `Semantics/X`, `Semantics/Core.lean` →
-`Semantics/Erased.lean`, `TState` → `State`, `trun…` → `run…`; decision
-66 for the paths kept), plus decision 71.  The script was re-run first in
+`Semantics/Erased.lean`, `TState` → `State`, `trun…` → `run…` where
+`trun` begins a word; decision 66 for the paths kept), plus decision 71.
+The rules missed `trun` after `_`: `SHole`/`MHole`/`VHole.fill_trun`,
+`ExecP.of_trun`, `frames_pop_nil_trun`, `runs_of_trun` and
+`diamond_of_trunOk`, renamed by the review fixes below.  The script was re-run first in
 two clones, the preparation's version and this one: their outputs differ
 only in decision 71's lines.
 
@@ -6797,16 +6823,33 @@ only in decision 71's lines.
 keyed on the `Core` prefix (`DelabErase.trArg`, `Tools/Taclet`'s
 `isRuleLine`), which the rename made true, resp. vacuous.
 
-**Pins changed** (37 in 15 files, the dry run's list:
-`Examples/Notation` 9, `Examples/Tools` 4, `Tactics/Loops` 4,
-`CorePrint` 3, two each in `TryCatch`, `Branch`, `Values`, `Callback`,
-`Calls`, `Revert`, one each in `CoreSurface`, `Payment`, `CoreNotation`,
-`CoreSpec`, `Specs`): every one is line wrapping alone, each file equal to
-its scripted version modulo whitespace; the wrap moves because the printed
-names are shorter by `Core.` (W5's reason).  The `#taclet` pins' qualified
-names (`Solidity.Core.Taclet.x` → `Solidity.Taclet.x`) were rewritten by the
-script itself.  `#check_rule_text` and every other pin unchanged; fresh
-names unchanged.
+**Pins changed** (W5's reason: the printed names lose `Core.`), two sets:
+- *By the script* (`73cccf0`): 114 `#guard_msgs` blocks in 26 files
+  (`Examples/Notation` 19, `CoreRules` 14, `CoreNotation` 13, `CorePrint` 7,
+  `Tactics/Loops` 6, `Examples/Tools` 6, `Payment` 5, `Revert` 5,
+  `ChainNotation` 4, `Constructors` 4, three each in `CoreSpec`,
+  `CoreSurface`, `TryCatch`, two each in `Calculus/Sound`, `Branch`,
+  `Callback`, `Calls`, `CoreChains`, `CoreDerive`, `CoreProofTree`, `Specs`,
+  `Values`, one each in `Calculus/CallbackSound`, `Benchmark/Counter`,
+  `Examples/ProofTree`, `StorageDelete`): 73 types (`Core.Fml`,
+  `Core.Ctx`, `Core.Premise` → `Fml`, `Ctx`, `Premise`; 71 `#check`, one
+  under `set_option`, one printed by `run_meta`), 13 `#rule_of`, 12 `#taclet`
+  (`Solidity.Core.Taclet.x` → `Solidity.Taclet.x`), 4 `#print axioms`
+  (`Solidity.Core.Stmt.sound`, `Solidity.Core.Proves.valid`,
+  `Solidity.Core.ProvesC.valid`, `Solidity.Core.Rule.premise_unique`), 3
+  `#proof_node` tactic lines, 8 `sol_derive?`/`sol_chain?` suggestions and
+  `sol_chain` errors, and `#check_rule_text` (`all 159 rules of
+  Solidity.Core.Taclet` → `Solidity.Taclet`).  Each block equals its old
+  text once `Solidity.Core.`, `Core.`, `TState`, `trun` and whitespace are
+  normalized (replayed over `73cccf0^`..`73cccf0`, the renamed files paired).
+- *By hand* (`678aa70`): 37 in 15 files, the dry run's list
+  (`Examples/Notation` 9, `Examples/Tools` 4, `Tactics/Loops` 4,
+  `CorePrint` 3, two each in `TryCatch`, `Branch`, `Values`, `Callback`,
+  `Calls`, `Revert`, one each in `CoreSurface`, `Payment`, `CoreNotation`,
+  `CoreSpec`, `Specs`): line wrapping alone, each file equal to its scripted
+  version modulo whitespace; the wrap moves because the names are shorter.
+
+Fresh names unchanged.
 
 **Checks**: `lean_build` with `SolidityCorpus` and `SolkeyTestSuite` in
 `defaultTargets` for the run (reverted after): green.  `check-orphans`:
@@ -6829,12 +6872,62 @@ the rename.
   its import of `Calculus/Core/DelabErase` is `Calculus/DelabErase`, the
   namespace `Solidity.Core` is `Solidity`, and the earlier items
   (`legacyName? env n`, old constants under `Surface`/`NFml`).
-- Prose (M7): docstrings name the old side unqualified and M3's state
-  `Core.State` (now `EState`); `TacticSyntax`'s "today's strategy
+- Prose (M7): docstrings name the old side unqualified; `TacticSyntax`'s "today's strategy
   (`Symex.lean`) and the scoped one (`Symex.lean`)" names one file twice;
   the W5 list under "Docs (M7)".
 - Not run: `check-corpus.sh` (its probes build through `lake`), the
   `solkeycheck` executable (built), the M0 re-timing, the review pass.
+
+### W5 review fixes (2026-10-09, on `intrinsic`)
+
+Five confirmed findings of the W5 review, directly on `intrinsic`:
+`99a3d74` (`trun` → `run` after `_`), `ed8fbf15` (decision 70's review
+fix), `80869cd` (`EState` in prose), `5aac7b1` (decision 72), then this
+record.
+
+- **`trun`**: `SHole`/`MHole`/`VHole.fill_trun` → `fill_run`,
+  `ExecP.of_trun` → `ExecP.of_run`, `frames_pop_nil_trun` →
+  `frames_pop_nil_run`, `runs_of_trun` → `runs_of_run`,
+  `diamond_of_trunOk` → `diamond_of_runOk` (and `corpus_decide`, its user);
+  none was taken, and `scripts/solkey-port.mjs` emits none of them.  No
+  `trun` is left in `Solidity/` or `scripts/` but the word "truncate".
+- **`#check_rule_text`**: `Tools.scopedOnlyRoots` (decision 70's review
+  fix).  The roots were computed over the environment of `Tools/Taclet`
+  from the W5 script's list of `Solidity.Core` first components: the types
+  and namespaces among them with no twin, the shared vocabulary removed by
+  where its declaration and lemmas live (pre-W5 `git grep`).  Still all
+  159 + 9 + 3 rules print as rule lines.
+- **`EState`**: the `module-map` rows of `Semantics/State.lean` and
+  `Semantics/StateErase.lean`, and the two modules' docstrings
+  (`EState.erase ns σ`, `EState C Γ`; `Core.State` → `EState`).
+- **The paths** (decision 72): `git mv` and one `sed` over every tracked
+  `.lean`, `.md`, `.sh`, `.mjs`, `.toml` and `.tsv` but this record (module
+  names, paths, the bare `CoreX.lean` citations, the namespaces).  Bare
+  citations the renames made ambiguous or silently re-pointed at a new
+  sibling now name their directory (`Calculus/Rules.lean` in
+  `Examples/Notation`, `.claude/rules/{rule-table,soundness}.md` and the
+  `Calculus/Callback` row, `Calculus/Derive.lean` in
+  `testsuite-proofs.md`, `Calculus/Notation.lean` in `ApplySteps`,
+  `Examples/Tactics/Step.lean` in `Tactics/Print`); and
+  `compiler-verification.md`'s `CoreCorrect`/`CoreExamples`, which W5
+  missed, are `Evm/Correct.lean`/`Evm/Examples.lean`.
+- **The record**: W5's "Pins changed" lists the script's 114 pins beside
+  the 37 re-wraps; its `trun` claim is qualified.
+
+**Pins changed**: one, by decision 72's namespace:
+`Examples/Tactics/Chains`' `#check` prints
+`Solidity.Examples.Tactics.Chains.balance` (was
+`Solidity.Examples.CoreChains.balance`).  Fresh names unchanged.
+
+**Checks**: `lean_build` with `SolidityCorpus` and `SolkeyTestSuite` in
+`defaultTargets` for the run (reverted after): 314 jobs, green.
+`check-orphans`: 300 reachable, the orphans the git-excluded `Scratch/`
+modules.  `check-doc-paths`: OK, 12 ambiguous basenames (13 before; none
+new).  `check-rule-text`: OK.  `check-testsuite.sh` against a `git
+archive` of solkey `1b4341a303`: ok (438 = 435 derived + 1 pending + 1
+divergent + 1 excluded; 2 skip).  No `sorry`, `axiom` or `maxHeartbeats`
+added.  Not run: `check-corpus.sh`, the `solkeycheck` executable (built),
+the M0 re-timing.
 
 ## Baselines (M0)
 
