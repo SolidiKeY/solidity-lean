@@ -2711,8 +2711,8 @@ while the heavy ones stay), the closer's driver split out of `Derive`.
 ## W5 — final rename (the lead alone)
 **Status (2026-10-09): renamed** ("W5" below, after "W5 preparation"):
 the scripted commit, the pins re-wrapped, the four targets green, the
-review's fixes applied ("W5 review fixes"); the reader and the docs (M7)
-are left.
+review's fixes applied ("W5 review fixes"), the reader ported ("W5
+reader"); the docs (M7) are left.
 - One scripted commit (`git mv` plus `rg`/`sed`, no hand edits):
   - `Solidity.Core.X` → `Solidity.X`.
   - `Calculus/Core/*` → `Calculus/*`; `TypedRun` → `Semantics`.
@@ -4059,6 +4059,28 @@ below the delaborators is done before W5's rename.
     `TestSuite/CoreProblems.lean` → `TestSuite/ScopedProblems.lean` (what
     `solc_scoped_problems` declares; merging it into `Problems.lean` would
     put that module past its timing gate, W3b lane `testsuite`).
+73. *Proposed (W5 reader), the lead's call:* the SolKey reader erases a
+    constructor as the taclet printer does (`withTwins (schema := true)`),
+    so a call whose parts are schema variables is read as one variable,
+    `call(args, ret, body)` (the printer's `fbs`/`ic`, KeY's
+    `FunctionBody`/`InternalCall` variable), and its premise as
+    `expand_function_body` of it; the side condition `CallRet.isRets` on
+    that variable is now compared against KeY's sort (`FunctionBody`
+    returns to targets, `InternalCall` does not), where it was recorded
+    and not compared.  `Args.firstNonSimple = none` stays uncompared (KeY's
+    `internalCallExpand` binds `T p = arg` as written, the rule map's
+    deviation).
+74. *Proposed (W5 reader), the lead's call:* the reader excuses two more
+    rows: `functionFrameEmpty` (a call's body is inlined as a block and its
+    frame ends with the expansion; `RuleShapes` claims it merged into
+    `internalCallExpand`/`functionBodyExpand`, a pairing the shapes cannot
+    see, since the erasure prints a frame's end as nothing) and
+    `tryCallWithCallbackBox` (callbacks, as the `transfer`/`send` ones;
+    `CallbackTaclet.tryCallWithCallbackBox`, which the reader does not
+    import).  `tryCallNoCallbackBox` stays `differs`: the scoped `try`
+    binds its return locals and `Panic` code in the statement
+    (`try call returns (rets) … catch Panic (code) …`), KeY's statement
+    variables do not.
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
@@ -6928,6 +6950,76 @@ archive` of solkey `1b4341a303`: ok (438 = 435 derived + 1 pending + 1
 divergent + 1 excluded; 2 skip).  No `sorry`, `axiom` or `maxHeartbeats`
 added.  Not run: `check-corpus.sh`, the `solkeycheck` executable (built),
 the M0 re-timing.
+
+### W5 reader (2026-10-09, side-projects branch `intrinsic`)
+
+The SolKey reader (side-projects `lean/solkey`, worktree
+`~/projects/side-projects-intrinsic`, branch `intrinsic`, not pushed) on
+this branch after W5: `1bc553c`, one commit on top of `8c2bfc2` (the dry
+run's).  It also carries the dry run's uncommitted corpus counts in the
+reader's prose (163 files / 1050 taclets, 323 program taclets).  The require
+stays `../../../solidity-lean-intrinsic` (back to `../../../solidity-lean`
+when `intrinsic` merges into `master`).
+
+- **Names.**  Every erased constant the walk matches is `Surface`'s now
+  (`Surface.Val`, `Simple`, `SPath`, `Loc`, `MPath`, `MLoc`, `OpLoc`, the
+  holes, `Src`, `MSrc`, `ARhs`, `MRhs`, `NewLhs`, `ExtCall`, `CallRet`,
+  `MAddr`, `Tm`, `UpdElem`, `Premise`; decision 62); the scoped ones lost
+  `Core` (`Taclet`, `Idx`, `Args`, `Binders`, `CodeBinder`, `Prog`,
+  `Premise.expandCall`/`branches`, `SHole.isTarget`); `Update.lean`'s
+  named symbols (`Term.find`, `STerm.save`, …) and the shared vocabulary
+  keep theirs.  The map was computed, not guessed: a scratch module listed,
+  for each of the reader's 271 `Solidity.*` literals, which of `X`,
+  `Surface.X`, `NFml.X` and `Semantics.X` the environment declares; every
+  family with a `Surface` twin moved, none to `NFml` or `Semantics`.
+  `legacyName? env n`; `GenProved` writes `open Solidity`.
+- **The import path** (decision 53): `Calculus/Rules`, `Calculus/DelabErase`
+  and `Calculus/KeyTaclets`, 31 sibling modules (68 at the dry run).
+- **Calls** (decision 73): the walk erases under `withTwins (schema :=
+  true)`; `Surface.Stmt.call` of twins is the variable `call(args, ret,
+  body)` (`LRole.call`), `Surface.Stmt.expandBody` of them `expandBody` of
+  it; `SideCond.callRets` is a sort condition (`condFits`).  The decoder
+  reads `\program FunctionBody`/`InternalCall`/`ExternalCall`
+  (`SchemaRole.call`, `KRole.internalCall`/`externalCall`), and
+  `s#expand_function_body(x)` as the statement `expandBody(x)`.
+- **The decoder's new statements**: `function-frame { … }` is one
+  statement (`StmtPat.functionFrame`, `Head.functionFrame`); `pv =
+  a.send(e);` is `Head.send` (the sibling's `Surface.Stmt.send pv r a`,
+  same order); `try s#call s#body catch Error … catch Panic … catch …` is
+  one statement (`StmtPat.tryStmt`, `Head.tryCall`, which the sibling's
+  `Surface.Stmt.tryCall` heads too).  Each is structurally recursive, so
+  the kernel still runs the decoder (a first `clauseSh` recursing on its
+  own argument fell to well-founded recursion, and every `decide +kernel`
+  got stuck).
+- **Pins that moved** (`expectedPins`): `functionBodyExpand` (`named
+  differs` → `agrees`), `internalCallExpand` (`undecoded` → `agrees`),
+  `send_unfold_leftFstReceiver`/`rightSndArgument` (`differs` →
+  `agrees`), `sendNoCallbackBox`/`Diamond` (`differs` → `findOnly`: KeY's
+  two and three goals are no `Premise` form, the sibling's `Premise.cases`
+  neither), `tryCallNoCallbackBox` (`undecoded` → `named differs`,
+  decision 74), `functionFrameEmpty` and `tryCallWithCallbackBox`
+  (`undecoded` → excused, decision 74), `sendWithCallbackBox`/`Diamond`
+  (excused, now `find=[sendNoCallback…]`).  One docstring changed besides:
+  `storageLocalDeclSkip`'s premise prints `Surface.UpdElem.unset`.  Six new
+  theorems: `functionBodyExpand`, `internalCallExpand` and the two
+  `send_unfold_…` (`Agrees`), `sendNoCallbackBox.find` and
+  `sendNoCallbackDiamond.find`.
+- **`--map`** (run from a scratch copy of `Main.lean`): 323 taclets, 168
+  agreed with (70 namesakes, 98 found), 36 namesakes `findOnly`, 1
+  differing (`tryCallNoCallbackBox`), 71 candidates, 19 none, 28 excused,
+  0 undecoded; 96 of 159 constructors agreed with; 206 theorems (170
+  `Agrees`, 36 `FindAgrees`).  `--parse`: 163/163 files, 1050 taclets, 0
+  unread.
+- **Checks**: `lean_build` of the reader (55 jobs) green.  The axiom check
+  (`check-axioms.sh`'s probe, from a scratch module): 206 correspondence
+  theorems, none on `sorryAx`, `ofReduceBool` or `trustCompiler`.  No
+  `sorry` or `axiom`.  The `keycheck` executable was not built as a target
+  (its source was checked as a scratch copy, which ran `--map` and
+  `--parse`).
+- **Left**: the require back to `../../../solidity-lean`, and the reader's
+  merge, at `intrinsic`'s merge.  The VS Code extension's tests
+  (`corpus.test.ts`) were not run; their counts are the `--parse` and
+  `programRules_count` numbers above, unchanged.
 
 ## Baselines (M0)
 
