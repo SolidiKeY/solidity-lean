@@ -179,24 +179,54 @@ partial def Walk.hypSides (H : Expr) : MetaM (Array Expr) := do
     return ← Walk.hypSides (H.getArg! 3)
   return #[]
 
+/-- A formula rewritten by `q` (`Fml.rwEqC`), computed and quoted back; the
+formula as written where nothing in it is rewritten, its explicit `∀`s
+marked again otherwise (`Symex.restoreMarks`). -/
+def Walk.rwFml (C q a : Expr) : MetaM Expr := do
+  let some a₀ ← Walk.evalQuoteOpt C ``Fml.quote (← mkAppM ``Option.some #[a])
+    | throwError "rw: internal error"
+  let some a' ← Walk.evalQuoteOpt C ``Fml.quote (← mkAppM ``Option.some #[← mkAppM ``Fml.rwEqC #[q, a]])
+    | throwError "rw: internal error"
+  return if a' == a₀ then a else Symex.restoreMarks a a'
+
+/-- A context rewritten by `q` (`Hyps.rwEqC`): each precondition by
+`Walk.rwFml`, every other entry kept as written, so that the marks of
+explicit `∀`s (`Fml.markExplicitVar`), which `Seq.paramCount` reads, stay
+(decision 28); `none` where the context is not written out. -/
+partial def Walk.rwHyps (C q H : Expr) : MetaM (Option Expr) := do
+  let H ← whnfR (← instantiateMVars H)
+  let below (i : Nat) (f : Array Expr → MetaM (Array Expr) := pure) : MetaM (Option Expr) := do
+    let some H₁ ← Walk.rwHyps C q (H.getArg! i) | return none
+    let args ← f (H.getAppArgs.set! i H₁)
+    return some (mkAppN H.getAppFn args)
+  if H.isAppOfArity ``Hyps.nil 2 then return some H
+  if H.isAppOfArity ``Hyps.pre 5 then
+    return ← below 3 fun args => do return args.set! 4 (← Walk.rwFml C q (H.getArg! 4))
+  if H.isAppOfArity ``Hyps.upd 7 then return ← below 4
+  if H.isAppOfArity ``Hyps.havoc 4 || H.isAppOfArity ``Hyps.all 6 ||
+      H.isAppOfArity ``Hyps.bind 7 || H.isAppOfArity ``Hyps.anon 5 then
+    return ← below 3
+  return none
+
 /-- Rewrite the main goal by `q = (t, t')`: in the sides of the sequent's
 equations (`Proves.rewrite'`, `hq : Term.Theq t t'`), the context's
 preconditions and the goal, a modality still open or not, when one is `t`;
 else in the last box update's right-hand sides (`Proves.updRw'`) when `t'`
-cannot halt.  A context with nothing to rewrite is kept as written (its
-marks of explicit `∀`s with it). -/
+cannot halt.  The context keeps what it does not rewrite as written, its
+marks of explicit `∀`s with it (`Walk.rwHyps`). -/
 def Walk.rwWith (C q hq : Expr) (inGoal : Bool) : TacticM Unit := withMainContext do
   let (_, H, φ) ← Walk.provesParts (← getMainTarget)
   let qS ← Term.exprToSyntax q
   let hqS ← Term.exprToSyntax hq
   if inGoal then
-    let some φ' ← Walk.evalQuoteOpt C ``Fml.quote (← mkAppM ``Option.some #[← mkAppM ``Fml.rwEqC #[q, φ]])
-      | throwError "rw: internal error"
-    let some H₀ ← Walk.evalQuoteOpt C ``Hyps.quote (← mkAppM ``Option.some #[H])
-      | throwError "rw: internal error"
-    let some H' ← Walk.evalQuoteOpt C ``Hyps.quote (← mkAppM ``Option.some #[← mkAppM ``Hyps.rwEqC #[q, H]])
-      | throwError "rw: internal error"
-    let H' := if H' == H₀ then H else H'
+    let φ' ← Walk.rwFml C q φ
+    let H' ← match ← Walk.rwHyps C q H with
+      | some H' => pure H'
+      | none =>
+        let some H' ← Walk.evalQuoteOpt C ``Hyps.quote
+            (← mkAppM ``Option.some #[← mkAppM ``Hyps.rwEqC #[q, H]])
+          | throwError "rw: internal error"
+        pure H'
     let φ'S ← Term.exprToSyntax φ'
     let H'S ← Term.exprToSyntax H'
     evalTactic (← `(tactic|

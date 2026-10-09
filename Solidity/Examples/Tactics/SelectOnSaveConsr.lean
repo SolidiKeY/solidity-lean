@@ -186,4 +186,22 @@ example : ⊢ dl!{ find(save(storage, bob.age, 7), bob.age) ≐ 7 → [ alice.ag
   -- dl{ 7 ≐ 7 ⟹ [ alice.age = 1; ] true }
   sol_prove
 
+/-! A precondition rewritten beside an explicit `∀` in the context: the
+context keeps its mark (`Walk.rwHyps` rewrites only the preconditions), so
+`sol_prove` still counts no parameter (`Seq.paramCount`) and keeps `x`'s
+range, which `x + 1` needs (decision 28). -/
+
+/-- info: some (0) -/
+#guard_msgs in
+example : ⊢ dl!{ ∀ uint x; find(save(storage, bob.age, 7), bob.age) ≐ 7 →
+    x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
+  apply allRight
+  apply impRight
+  rw [findOnSave]
+  -- dl{ ∀ uint x, 7 ≐ 7 ⟹ x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 }
+  run_tac do
+    let ty ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
+    Lean.logInfo m!"{← Seq.paramCount ty.appFn!.appArg! (← Symex.evaluable ty.appArg!)}"
+  sol_prove
+
 end Solidity.Examples.Tactics.SelectOnSaveConsr
