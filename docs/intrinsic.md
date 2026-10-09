@@ -4005,6 +4005,14 @@ below the delaborators is done before W5's rename.
     instead of being renamed: `Core.Res.bind_eq_ok` and `Core.Res.ok_bind`
     (`Calculus/Core/SoundArms`, `SoundCalls`) are `SemanticsProperties`'
     `Res.bind_eq_ok`/`Res.ok_bind`, which their users now name.
+68. *Proposed (W5 preparation, review fix), the lead's call:* the script
+    leaves this record alone (`':!:docs/intrinsic.md'`): it describes the
+    rename, which its rules would rewrite into nonsense (`Solidity.Core.X`
+    → `Solidity.X` would read `Solidity.X` → `Solidity.X`).  The record cites
+    files by the paths they had at each step, so after W5
+    `check-doc-paths` reports its 96 citations of moved modules: W5
+    exempts the record there (it is history, like `git log`) rather than
+    editing it.
 
 ### Decision 17', implemented (2026-10-08, CORE A, on `intrinsic`)
 
@@ -6707,7 +6715,8 @@ re-timed alone, nor the M0 rows (a rename changes no elaboration).
 
 **The script**, `scripts/w5-rename.sh` (decision 66 for its scope): `git
 mv` of the modules, then one `sed -E` program over every tracked `.lean`,
-`.md`, `.sh`, `.mjs` and `.toml` file but `tests/`: the module paths, the
+`.md`, `.sh`, `.mjs` and `.toml` file but `tests/` and this record (decision
+68): the module paths, the
 namespaces (`Solidity.Core` → `Solidity`, `namespace Core`/`end Core` lines
 dropped, `Core.X` → `X` for `X` a first component of a scoped name, a list
 of 977 taken from the environment, so `Core.CoreM` and `Syntax/Core.lean`
@@ -6738,6 +6747,12 @@ apart once the prefix is gone):
   `Calculus/Core/DelabErase` becomes `Calculus/DelabErase`.
 - Prose: docstrings still name the old side unqualified and M3's state
   `Core.State` (M7).
+- `check-doc-paths` on the dry run (after decision 68, at `98166751`):
+  103 missing, 96 of them this record's (decision 68), and 7 the rules
+  miss: a citation `Core/X` relative to `Calculus/` in `Calculus/Core/{ChainKit,DelabErase,
+  Delab,TacticSyntax}` and `Examples/Chains/EvaluationOrder` (`Core/` to
+  drop in `Calculus/`, `Calculus/` to write in `Examples/`), and two in
+  `tests/solkey/expected.tsv`, which the script does not touch.
 
 ## Baselines (M0)
 
