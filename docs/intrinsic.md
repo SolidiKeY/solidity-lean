@@ -49,7 +49,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a part 1 partial 2026-10-09 |
+| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2 partial 2026-10-09 |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
@@ -902,6 +902,34 @@ the closer port.
     `sol_reduce`, `sol_reads`, `sol_decide_heuristic`,
     `sol_decide_unconstrained`) keep their erased elaborators: a written
     proof that calls them names today's steps.
+81. *Proposed (M6c 6a part 2, `w6-closer`; renumber at the merge), the
+    lead's call:* `Closer.lean` does not port in wave 6a.  It reads only
+    `LFml`, the reduction's output (`LFml.close`, `Facts`), never `Fml`
+    or `NFml`: its input is `Decide.lean`'s (wave 6b), and under decision
+    78 its atoms stay name-keyed until the reduction lowers scoped terms by
+    position.  On a scoped leaf it already reads the parameters typed:
+    `sol_prove`'s residue moves each `∀ p x` into the context
+    (`NFml.Derive.residue`), and the closer binds it at its type
+    (`Facts.bind`).  Its layout (`LayoutOk`) stays read off `wt(storage)`:
+    a typed storage is not canonical (`SVal.map`'s default is any value of
+    its type, its entries may repeat a key), so the typed state does not
+    give it until decision 75's lane ties canonicity to the typed state.
+    `Closer` moves to wave 6b with `Decide.lean`; it is not the fallback
+    (nothing was ported and timed).
+82. *Proposed (M6c 6a part 2), the lead's call:* the scoped
+    `sol_close_unwrap` (`Calculus/Derive.lean`, the first step of
+    `sol_close`, `sol_close_mt`, `sol_spec_close`) erases the leaf with
+    its parameters kept as quantifiers (`Derive.eraseLeaf … (typed :=
+    true)`), so `NFmlClose`'s `sol_close` introduces each with its type's
+    range (`Close.holds_all`, `PrimTy.admits`), as it already did an
+    explicit `∀` (decision 28).  The other closers on a scoped leaf
+    (`Closers.lean`'s `sol_close_eval`, `sol_apply_upd`, …) keep the
+    stripped leaf: a written proof that calls them names today's steps, as
+    decision 80 keeps `sol_decide`'s parts.  `NFmlClose` keeps its name and
+    its simp set over the untyped interpreter: a scoped term reads its
+    symbols on the erasure (`Calculus/Logic.lean`), so a `sol_close` over
+    the typed state would restate the whole `close_rw` set for symbols
+    that are still untyped.
 
 ## M6c
 
@@ -954,6 +982,50 @@ by `omega`/`grind`.  **Gate: partial** (timings within 1.2×; atoms not
 re-keyed by `Idx`, decision 78; the Derived rows do not exercise the
 changed path), for both modules (ported together, timed together).
 
+**Wave 6a, part 2 (2026-10-09, `w6-closer`): `NFmlClose`, `Closer`;
+Gate: partial.**  `NFmlClose`: the scoped `sol_close`, `sol_close_mt` and
+`sol_spec_close` erase the leaf with its parameters kept as quantifiers
+(decision 82), so a parameter is a `uint` in range where the erased leaf
+read a name bound to anything: three examples added to
+`Calculus/CloseTests.lean` (`[ uint x = a; ] x >= 0`, `⟨ uint x = a; ⟩
+x == a`, `a < 100 → ⟨ uint y = a + 1; ⟩ y <= 100`; open before).  No other
+proof or pin moved (the whole build, `SolidityCorpus` and
+`SolkeyTestSuite` included, green on the first run); no `sorry`, `axiom`
+or `maxHeartbeats` added.  `NFmlClose` keeps its name: its simp set reads
+the untyped interpreter, as the scoped terms' symbols still are.
+`Closer`: not ported, moved to wave 6b with `Decide.lean` (decision 81).
+
+Gate (the W6 baselines' method, `702df6bf`; load 0.5–1.7 at the starts,
+the first `Decide` run 6.8, after the build):
+
+| Module | W6 end of work | 6a part 2 (three runs) | ratio | CPU (min) |
+|---|---|---|---|---|
+| `TestSuite/Derived1` | 7.32 s | **7.33 s** (7.35, 7.33, 7.38) | 1.00 | 9.01 s |
+| `TestSuite/Derived2` | 8.63 s | **8.79 s** (8.79, 8.85, 8.79) | 1.02 | 10.51 s |
+| `TestSuite/Derived3` | 13.01 s | **13.06 s** (13.15, 13.06, 13.07) | 1.00 | 14.61 s |
+| `TestSuite/Derived4` | 17.57 s | **17.49 s** (17.49, 17.57, 17.71) | 1.00 | 19.58 s |
+| `TestSuite/Derived5` | 6.95 s | **7.03 s** (7.07, 7.04, 7.03) | 1.01 | 8.36 s |
+| `TestSuite/Derived6` | 11.42 s | **11.46 s** (11.47, 11.46, 11.50) | 1.00 | 13.03 s |
+| `TestSuite/Derived7` | 50.43 s | **50.27 s** (50.41, 50.45, 50.27) | 1.00 | 52.85 s |
+| `TestSuite/Derived8` | 26.38 s | **26.31 s** (26.38, 26.35, 26.31) | 1.00 | 27.64 s |
+| `TestSuite/Derived9` | 7.16 s | **7.10 s** (7.12, 7.12, 7.10) | 0.99 | 8.55 s |
+| `TestSuite/Derived10` | 11.11 s | **11.21 s** (11.21, 11.22, 11.25) | 1.01 | 12.77 s |
+| `TestSuite/Derived11` | 3.16 s | **3.16 s** (3.20, 3.18, 3.16) | 1.00 | 3.34 s |
+| `TestSuite/Derived12` | 13.17 s | **13.26 s** (13.31, 13.26, 13.33) | 1.01 | 14.22 s |
+| `TestSuite/Derived13` | 6.36 s | **6.26 s** (6.43, 6.37, 6.26) | 0.98 | 6.38 s |
+| `TestSuite/Derived14` | 10.89 s | **10.91 s** (10.91, 11.01, 10.98) | 1.00 | 11.49 s |
+| Derived1–14, sum | 193.6 s | **193.6 s** | 1.00 | |
+| `Examples/Tactics/Decide` | 49.14 s | **34.79 s** (34.98, 34.79, 34.90) | 0.71 | 35.64 s |
+
+Only `Derived7` (one) and `Examples/Tactics/Decide` (nine) call
+`sol_close` on a scoped leaf; the Derived rows are where they were.
+`Examples/Tactics/Decide` is 7% faster than after part 1 (37.59 s), 29%
+faster than the baseline: a `uint` parameter read at its value, not a
+binding split by `sol_close`'s `simp` and `grind`.  **Gate: partial**
+(timings within 1.2×; `NFmlClose` reads its parameters typed but its
+`simp` set is the untyped interpreter's, decision 82; `Closer` not
+ported, decision 81).
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
@@ -968,9 +1040,10 @@ changed path), for both modules (ported together, timed together).
 - **Waves:** 6a `Closer`, `DecideSyn`, `DecideComplete`, `NFmlClose`, with
   symbolic atoms keyed by `Idx` (`DecideSyn`, `DecideComplete`: the scoped
   entry `Valid.of_reduce` and typed parameters only; their atoms stay
-  name-keyed `LFml`, decision 78, pending the lead's call; `Closer` and
-  `NFmlClose` left); 6b `Decide.lean` alone (10k lines, one
-  agent); 6c `NFmlUpdateRules`, `StateParts`, `Rewrite`, `TheoryRewrite`,
+  name-keyed `LFml`, decision 78, pending the lead's call; `NFmlClose`:
+  the scoped `sol_close` with typed parameters only, its `simp` set the
+  untyped interpreter's, decision 82; `Closer` moved to 6b, decision 81);
+  6b `Decide.lean` with `Closer` (10k and 3.7k lines, one agent); 6c `NFmlUpdateRules`, `StateParts`, `Rewrite`, `TheoryRewrite`,
   `ChainRewrites`, `ChainBranches`, then `NFmlDerive`, `NFmlLogic`,
   `RewriteChains`.
 - **Gate per module:** the `TestSuite/Derived*` files and
@@ -981,7 +1054,7 @@ changed path), for both modules (ported together, timed together).
   `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.
 
 **Besides M6c:**
-- The lead's calls on proposals 54–77; the user's on decision 11 (whether
+- The lead's calls on proposals 78–82; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").
 - At the merge into `master`: the SolKey reader's require back to
