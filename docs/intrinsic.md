@@ -3977,8 +3977,8 @@ below the delaborators is done before W5's rename.
     semantics' is `Semantics`' (the lemma namespaces `State.*`, `SVal.*`,
     `MVal.*`, `MObj.*`, `Value.*`, `Res.*`, and `SE`, `Tight`,
     `lookupBy_map_snd`, `writeLoc_eq`, `aliasPath`, `assertOk`, `guardOk`,
-    `bumpLocal`, `opLocal`, `sendAt`); `Typing/Storage`'s `elemTy` is
-    `Ty.elemTy`.  See "W5 preparation" below.
+    `bumpLocal`, `opLocal`, `sendAt`); `Calculus/SurfaceNotation`'s path
+    reader `elemTy` is `Surface.elemTy`.  See "W5 preparation" below.
 63. *Proposed (W5 preparation), the lead's call:* M3's erased state
     `Core.State` is `Core.EState` (with its namespace), the one scoped name
     renamed: W5's `TState` → `State` takes the plain name.

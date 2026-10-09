@@ -589,7 +589,7 @@ def pathTy (Γ : ECtx) : RawTerm → Option Ty
   | _ => none
 
 /-- The element type of the array a path term names. -/
-def Ty.elemTy (Γ : ECtx) (t : RawTerm) : Except String Ty :=
+def Surface.elemTy (Γ : ECtx) (t : RawTerm) : Except String Ty :=
   match pathTy C Γ t with
   | some (.ref (.array E)) => pure E
   | _ => throw "a push or a pop on a path the contract does not type as an array"
@@ -749,9 +749,9 @@ def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (STerm C)
     | .app "save" [s', .at _ _, w], .add _ (.num 1) =>
       pure (.push (← R.stor s') (← R.path b) (← R.sval w))
     | .app "delAt" [s', .at _ _], .add _ (.num 1) =>
-      pure (.pushSlot (← R.stor s') (← R.path b) (← Ty.elemTy C Γ b))
+      pure (.pushSlot (← R.stor s') (← R.path b) (← Surface.elemTy C Γ b))
     | .app "delAt" [s', .at _ _], .sub _ (.num 1) => pure (.pop (← R.stor s') (← R.path b))
-    | _, .add _ (.num 1) => pure (.extend (← R.stor s) (← R.path b) (← Ty.elemTy C Γ b))
+    | _, .add _ (.num 1) => pure (.extend (← R.stor s) (← R.path b) (← Surface.elemTy C Γ b))
     | _, .sub _ (.num 1) => pure (.shrink (← R.stor s) (← R.path b))
     | _, _ => throw "the length of an array is written by a push or a pop"
   | .app "save" [s, p, v] => do

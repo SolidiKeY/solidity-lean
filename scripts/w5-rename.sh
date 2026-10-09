@@ -239,7 +239,7 @@ s/\bTState\b/State/g
 s/\btrun([A-Z_])/run\1/g
 s/\btrun\b/run/g
 SED
-git ls-files -z '*.lean' '*.md' '*.sh' '*.mjs' '*.toml' ':!:tests/**' ':!:scripts/w5-rename.sh' \
+git ls-files -z '*.lean' '*.md' '*.sh' '*.mjs' '*.toml' ':!:tests/**' ':!:scripts/w5-rename.sh' ':!:docs/intrinsic.md' \
   | xargs -0 sed -E -i -f "$script"
 
 echo "w5-rename: done; build with SolidityCorpus and SolkeyTestSuite, then commit"
