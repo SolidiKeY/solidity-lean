@@ -13,11 +13,11 @@ so a read of a local is a read of its position, and a pop or a frame's
 drop is a pop or a drop of the entries.
 
 What the reduction produces is the erased reduction's formula, exactly
-(`Fml.toLS_eq`, `Fml.inLS_eq`), so `NFml.valid_iff_reduce` (the reduction
+(`Fml.toLS_eq`, the fragment with it), so `NFml.valid_iff_reduce` (the reduction
 is exact on the erasure) and `Valid.of_erase` (a leaf is valid where its
 erasure is) give its soundness, `Valid.of_reduceS`, with no erasure
 computed: the leaf's terms are lowered from their positions, and only two
-syntactic tests compare terms by their erasure (`Tm.sameLS`, an equation's
+syntactic tests compare terms by their erasure (`sameAt`, an equation's
 two readings; `allocPairS?`, an allocation's pair).
 
 The symbolic state keeps, beside the positions, the erased reduction's
@@ -363,7 +363,7 @@ def _root_.Solidity.Op2.shapeS {a b s : Srt} : Op2 a b s → Tm C Γ a → Bool 
   | .len, s, _, y => s.isStorageS && y
   | _, _, _, _ => false
 
-/-- The terms `sameLS` compares (`Surface.Tm.sameShape`). -/
+/-- The terms `sameAt` compares (`Surface.Tm.sameShape`). -/
 def _root_.Solidity.Tm.sameShapeS : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ | _, .pvP _ => true
   | _, .pvS _ | _, .pvI _ | _, .netOf _ _ => false
@@ -375,11 +375,6 @@ def _root_.Solidity.Tm.sameShapeS : {s : Srt} → Tm C Γ s → Bool
   | _, .app3 o a b c => match o with
     | .ite => a.sameShapeS && b.sameShapeS && c.sameShapeS
     | _ => false
-
-/-- The same term of the fragment (`Surface.Tm.sameL`): compared by their
-erasures under the context's names, a syntactic test. -/
-def _root_.Solidity.Tm.sameLS {s : Srt} (ρ : SymS) (a b : Tm C Γ s) : Bool :=
-  a.sameShapeS && decide (a.erase ρ.names = b.erase ρ.names)
 
 /-- A literal or a local (`Term.isAtom`). -/
 def _root_.Solidity.Tm.isAtomS : Tm C Γ .val → Bool
@@ -442,10 +437,6 @@ theorem _root_.Solidity.Tm.sameShapeS_eq : {s : Srt} → (t : Tm C Γ s) →
     have hb := Tm.sameShapeS_eq b
     have hc := Tm.sameShapeS_eq c
     cases o <;> simp only [Tm.sameShapeS, Tm.erase, Surface.Tm.sameShape, ha, hb, hc]
-
-theorem _root_.Solidity.Tm.sameLS_eq (hok : ρ.Ok ns) {s : Srt} (a b : Tm C Γ s) :
-    a.sameLS ρ b = (a.erase ns).sameL (b.erase ns) := by
-  simp only [Tm.sameLS, Surface.Tm.sameL, Tm.sameShapeS_eq (ns := ns), SymS.names_of_ok hok]
 
 theorem _root_.Solidity.Tm.eqLitS_eq (a b : Tm C Γ .val) :
     a.eqLitS b = Term.eqLit (a.erase ns) (b.erase ns) := by

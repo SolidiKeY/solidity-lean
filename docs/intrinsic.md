@@ -1067,7 +1067,7 @@ binding split by `sol_close`'s `simp` and `grind`.  **Gate: partial**
 ported, decision 81).
 
 **Wave 6b (2026-10-09, `w6-closer`): `Decide.lean`; Gate: partial.**
-`Calculus/DecideScoped.lean` (new, about 1,700 lines, no `sorry`): the
+`Calculus/DecideScoped.lean` (new, 1,700 lines, no `sorry`; `Valid.of_reduceS` on `propext`, `Classical.choice`, `Quot.sound` only): the
 reduction on `Fml C Γ` by position (decisions 83–85).  `sol_decide` on a
 scoped leaf checks `Fml.posB` and `Fml.inLS` in the kernel and reduces
 `Fml.reduceS φ` (compiled and quoted, as before), where it used to
@@ -1077,7 +1077,7 @@ proof or pin moved but the two fragment pins (decision 85); no `sorry`,
 before).  The build (`Solidity`, `solkeycheck`, `SolidityCorpus`,
 `SolkeyTestSuite`) green, no module OOM-killed.
 
-Gate (the W6 baselines' method, measured at `38bd6a24`; load 0.4–2.3 at
+Gate (the W6 baselines' method, measured at `38bd6a24`, one dead definition and two docstrings before the commit that records it; load 0.4–2.3 at
 the starts, the `Decide` runs the highest, right after the build):
 
 | Module | W6 end of work | 6b (three runs) | ratio | CPU (min) |
