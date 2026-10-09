@@ -49,7 +49,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2 partial 2026-10-09 |
+| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2 and 6b (`Decide.lean`) partial 2026-10-09 |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
@@ -931,6 +931,45 @@ the closer port.
     the typed state would restate the whole `close_rw` set for symbols
     that are still untyped.
 
+83. *Proposed (M6c 6b, `w6-closer`; renumber at the merge), the lead's
+    call:* `Decide.lean` ports as a scoped front end,
+    `Calculus/DecideScoped.lean`: `sol_decide` reduces the leaf itself
+    (`Fml.reduceS`), its updates pushed in by position (`SymS`: one entry
+    per position of the context, a pop or a frame's drop popping or
+    dropping entries) and the fragment checked on it (`Fml.inLS`).  Its
+    soundness is the commutation with the erased reduction, exactly
+    (`Fml.toLS_eq`: the scoped reduction and fragment are the erasure's,
+    for every leaf `Fml.posB` takes), then `NFml.valid_iff_reduce` and
+    `Valid.of_erase` (`Valid.of_reduceS`), not a re-proof of
+    `NFml.toL_holds` and the elimination over the typed state: those
+    read the scoped terms' symbols on the erasure anyway
+    (`Calculus/Logic.lean`), so the 9k lines of term lemmas would restate
+    the untyped interpreter by position for no new theorem.  `NFml` stays
+    `Decide.lean`'s IR for its proofs (decision 7's documented IR), not for
+    the computation: no erasure is computed or checked by the kernel.
+    `Valid.of_reduce` (the erasure computed and quoted) is deleted.
+84. *Proposed (M6c 6b), the lead's call:* the positional state keeps,
+    beside the positions, the erased reduction's `Sym` (its bindings by
+    name, newest first), read only by the two checks that ask about names
+    the scope no longer has: a quantifier's local is read by no binding so
+    far, a popped local's included (`Sym.vars`), and a hidden binder's
+    local starts at its name's last binding (`SymS.push`), as the erasure
+    reads it (a hidden binder erases to nothing).  That keeps
+    `Fml.toLS_eq` an equality with no side condition beyond `Fml.posB`'s
+    freshness (`Fml.FreshS`).  An equation `eqD a b` is recognised
+    through the two constructors the erasure drops, an update of pops and
+    a hidden binder (`Fml.peelS`), and two syntactic tests compare terms
+    by their erasures under the context's names (`sameAt`, an equation's
+    two readings; `allocPairS?`, an allocation's pair): the erased
+    reduction compares names there.
+85. *Proposed (M6c 6b), the lead's call:* `Examples/Tactics/Decide`'s
+    fragment pins read `Fml.inLS` on scoped formulas; the second pin, a
+    memory local no update binds (`{ x := read(memory, carol.age) }`),
+    has no scoped spelling (a free name is a `uint` parameter, a memory
+    local is in scope only through a binder) and is replaced by a read of
+    the ledger (`{ y := net(a) }`), also outside the fragment.  Both still
+    print `false`.
+
 ## M6c
 
 **Wave 6a, part 1 (2026-10-09, `w6-closer`): `DecideSyn`, `DecideComplete`
@@ -1027,6 +1066,49 @@ binding split by `sol_close`'s `simp` and `grind`.  **Gate: partial**
 `simp` set is the untyped interpreter's, decision 82; `Closer` not
 ported, decision 81).
 
+**Wave 6b (2026-10-09, `w6-closer`): `Decide.lean`; Gate: partial.**
+`Calculus/DecideScoped.lean` (new, about 1,700 lines, no `sorry`): the
+reduction on `Fml C Γ` by position (decisions 83–85).  `sol_decide` on a
+scoped leaf checks `Fml.posB` and `Fml.inLS` in the kernel and reduces
+`Fml.reduceS φ` (compiled and quoted, as before), where it used to
+compute and quote the erasure and check `φ.erase [] = ψ`, `ψ.inL`.  No
+proof or pin moved but the two fragment pins (decision 85); no `sorry`,
+`axiom` or `maxHeartbeats` added (`sorry` in 12 files, 30 overrides, as
+before).  The build (`Solidity`, `solkeycheck`, `SolidityCorpus`,
+`SolkeyTestSuite`) green, no module OOM-killed.
+
+Gate (the W6 baselines' method, measured at `38bd6a24`; load 0.4–2.3 at
+the starts, the `Decide` runs the highest, right after the build):
+
+| Module | W6 end of work | 6b (three runs) | ratio | CPU (min) |
+|---|---|---|---|---|
+| `TestSuite/Derived1` | 7.32 s | **7.33 s** (7.35, 7.33, 7.38) | 1.00 | 8.94 s |
+| `TestSuite/Derived2` | 8.63 s | **8.71 s** (8.71, 8.74, 8.74) | 1.01 | 10.38 s |
+| `TestSuite/Derived3` | 13.01 s | **12.95 s** (13.13, 13.02, 12.95) | 1.00 | 14.44 s |
+| `TestSuite/Derived4` | 17.57 s | **17.45 s** (17.66, 17.45, 17.56) | 0.99 | 19.72 s |
+| `TestSuite/Derived5` | 6.95 s | **6.93 s** (6.99, 6.93, 7.10) | 1.00 | 8.27 s |
+| `TestSuite/Derived6` | 11.42 s | **11.39 s** (11.43, 11.39, 11.54) | 1.00 | 12.98 s |
+| `TestSuite/Derived7` | 50.43 s | **50.22 s** (50.61, 50.22, 50.70) | 1.00 | 52.59 s |
+| `TestSuite/Derived8` | 26.38 s | **26.21 s** (26.21, 26.34, 26.25) | 0.99 | 27.54 s |
+| `TestSuite/Derived9` | 7.16 s | **7.11 s** (7.18, 7.15, 7.11) | 0.99 | 8.59 s |
+| `TestSuite/Derived10` | 11.11 s | **11.21 s** (11.24, 11.21, 11.27) | 1.01 | 12.86 s |
+| `TestSuite/Derived11` | 3.16 s | **3.19 s** (3.23, 3.30, 3.19) | 1.01 | 3.44 s |
+| `TestSuite/Derived12` | 13.17 s | **13.22 s** (13.22, 13.40, 13.30) | 1.00 | 14.15 s |
+| `TestSuite/Derived13` | 6.36 s | **6.35 s** (6.39, 6.35, 6.45) | 1.00 | 6.46 s |
+| `TestSuite/Derived14` | 10.89 s | **10.90 s** (10.90, 10.96, 10.97) | 1.00 | 11.45 s |
+| Derived1–14, sum | 193.6 s | **193.2 s** | 1.00 | |
+| `Examples/Tactics/Decide` | 49.14 s | **35.35 s** (35.50, 35.35, 35.46) | 0.72 | 36.17 s |
+
+The Derived files reach `sol_decide` only through `sol_prove`'s leaves
+(`sol_decide_cons` on `NFml`), which did not change: they are where they
+were.  `Examples/Tactics/Decide` is where 6a part 2 left it (34.79 s,
++1.6%): the positional reduction costs the kernel what the erasure and
+its check did.  **Gate: partial** (timings within 1.2×; the reduction's
+entry, push-in and fragment run on `Fml C Γ` by position, but its
+soundness is the commutation with the erased reduction, whose proofs stay
+on `NFml` and the untyped state, decision 83; the atoms keep the
+binders' names, decision 78; `Closer` not ported, decision 81).
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
@@ -1040,11 +1122,15 @@ ported, decision 81).
   that handle locals, updates or formula structure port.
 - **Waves:** 6a `Closer`, `DecideSyn`, `DecideComplete`, `NFmlClose`, with
   symbolic atoms keyed by `Idx` (`DecideSyn`, `DecideComplete`: the scoped
-  entry `Valid.of_reduce` and typed parameters only; their atoms stay
+  entry `Valid.of_reduce`, replaced at 6b by `Valid.of_reduceS`, and
+  typed parameters only; their atoms stay
   name-keyed `LFml`, decision 78, pending the lead's call; `NFmlClose`:
   the scoped `sol_close` with typed parameters only, its `simp` set the
   untyped interpreter's, decision 82; `Closer` moved to 6b, decision 81);
-  6b `Decide.lean` with `Closer` (10k and 3.7k lines, one agent); 6c `NFmlUpdateRules`, `StateParts`, `Rewrite`, `TheoryRewrite`,
+  6b `Decide.lean` with `Closer` (10k and 3.7k lines, one agent;
+  `Decide.lean` ported as a scoped front end, `Calculus/DecideScoped.lean`,
+  its proofs on `NFml` through the commutation, decision 83; `Closer` not
+  yet); 6c `NFmlUpdateRules`, `StateParts`, `Rewrite`, `TheoryRewrite`,
   `ChainRewrites`, `ChainBranches`, then `NFmlDerive`, `NFmlLogic`,
   `RewriteChains`.
 - **Gate per module:** the `TestSuite/Derived*` files and
@@ -1055,7 +1141,7 @@ ported, decision 81).
   `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.
 
 **Besides M6c:**
-- The lead's calls on proposals 78–82; the user's on decision 11 (whether
+- The lead's calls on proposals 78–85; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").
 - At the merge into `master`: the SolKey reader's require back to
