@@ -104,7 +104,8 @@ section Ops
 
 variable {Γ : Ctx} (σ : State C Γ)
 
-theorem MSrc.mvalT_noPanic {T : Ty} : (r : MSrc C Γ T) → (r.mvalT σ).NoPanic
+/-- `Calculus/SoundMem.lean`'s `MSrc.mvalT_noPanic`, below it. -/
+private theorem MSrc.mvalT_noPanic' {T : Ty} : (r : MSrc C Γ T) → (r.mvalT σ).NoPanic
   | .val v => v.evalT_noPanic σ
   | .ref p => p.mvalT_noPanic σ
 
@@ -339,7 +340,7 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
   | _, _, .rebindMem _ r, _, σ => (r.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
   | _, _, .assignFromMem l p, _, σ => (p.mvalT_noPanic σ).bind fun _ =>
       (l.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
-  | _, _, .assignMem l r, _, σ => (r.mvalT_noPanic σ).bind fun _ => (l.addrT_noPanic σ).bind
+  | _, _, .assignMem l r, _, σ => (MSrc.mvalT_noPanic' σ r).bind fun _ => (l.addrT_noPanic σ).bind
       fun _ => (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
   | _, _, .delete l, _, σ => (l.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind
       fun _ => TRes.NoPanic.ok _

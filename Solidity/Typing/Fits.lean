@@ -1,4 +1,5 @@
 import Solidity.Typing.Constructibility
+import Solidity.Semantics.RunFrame
 
 /-!
 # Reachable storage fits (decision 77, its conditional form)
@@ -823,12 +824,6 @@ invariant on aliases, its keys' range (`SRef.KeysFit`). -/
 
 /-- Every key along a typed reference's path in range. -/
 def SRef.KeysFit {U : Ty} (r : SRef C U) : Prop := Solidity.KeysFit r.ty r.path.erase
-
-theorem tbind_ok_inv {α β : Type} {x : TRes α} {f : α → TRes β} {b : β}
-    (h : (x >>= f) = .ok b) : ∃ a, x = .ok a ∧ f a = .ok b := by
-  cases x with
-  | error e => exact nomatch h
-  | ok a => exact ⟨a, rfl, h⟩
 
 theorem TRes.ofOpt_ok {α : Type} {x : Option α} {a : α} (h : TRes.ofOpt x = .ok a) :
     x = some a := by
