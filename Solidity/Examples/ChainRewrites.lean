@@ -23,8 +23,9 @@ postcondition `φ : Post C Γ` stands at the context of the line's user
 locals, its fresh ones dropped.  While the program is still open,
 `sequentialToParallel` merges the scoped line's spine itself
 (`Calculus/Merge.lean`), and the literal laws, a term taclet in a box
-update, `applyOnRigid` and `concrete` rewrite the scoped line
-(`Calculus/RewriteScoped.lean`).
+update, `applyOnRigid`, `concrete` and `simplifyUpdate` rewrite the
+scoped line (`Calculus/RewriteScoped.lean`): §3‴'s branches keep their
+reverting program.
 
 * §1 — the headline as the calculus draws it (`Chains.Storage.BalanceWrite.chain`),
   for any modality `m` and postcondition `φ`, down to its last line, and on to
@@ -520,19 +521,23 @@ example : dl!{ defined(250 + 10) ∧ 250 + 10 ≐ 260 }
 
 /-- `applyOnRigid` through a conjunction under `m`: the update cannot halt,
 each rigid leaf is substituted, and the goals keep the update in front.
-The second branch is a postcondition `ψ`: past the program a rewrite runs on
-the line's erasure; with the reverting branch still to run, it runs on the
-scoped line (§3⁗). -/
-example (ψ : Post StandardExample []) : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
+The reverting branch still has its program, so the rewrite runs on the
+scoped line (`Calculus/RewriteScoped.lean`, as in §3⁗). -/
+example : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
     ~[applyOnRigid]~>
       dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-        (false ≐ false → { se1 := false } ψ) } := by sol_chain
+        (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) } := by sol_chain
 
 /-- `concrete`: the literal equations close (`eqClose`), the connectives
 fold (`concrete_impl_2`, `concrete_impl_1`, `concrete_and_1`). -/
-example (ψ : Post StandardExample []) : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-      (false ≐ false → { se1 := false } ψ) }
-    ~[concrete]~> dl![m]{ { se1 := false } ψ } := by sol_chain
+example : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+      (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by sol_chain
+
+/-- The two as one `~~>`: the line after is two rewrites past the first,
+found while the program is open (`openRwPath`). -/
+example : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by sol_chain
 
 /-- `sequentialToParallel` under a branch: the first spine the skeleton finds. -/
 example (φ : Post StandardExample [.val .uint, .val .uint]) (ψ : Post StandardExample [.val .uint]) :
@@ -541,13 +546,19 @@ example (φ : Post StandardExample [.val .uint, .val .uint]) (ψ : Post Standard
 
 set_option maxHeartbeats 300000 in
 /-- The check's trace, folded: the captured comparison, the update pushed
-through, the branch closed, and the capture dropped. -/
-example (φ ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
-    ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
+through, the branch closed.  The capture `se1` stays: the reverting
+branch's scope still holds it until the revert runs (the line's frames
+drop it), so `simplifyUpdate` cannot take it while the program is open. -/
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
     ~[applyOnRigid]~>
       dl![m]{ (false ≐ true → { x := 260 ‖ se1 := false } φ) ∧
-        (false ≐ false → { x := 260 ‖ se1 := false } ψ) }
-    ~[concrete]~> dl![m]{ { x := 260 ‖ se1 := false } ψ }
+        (false ≐ false → { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> dl![m]{ { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain
+
+/-- Past the program the capture goes (`simplifyUpdate` on the erasure). -/
+example (ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := false } ψ }
     ~[simplifyUpdate]~> dl![m]{ { x := 260 } ψ } := by
   sol_chain
 
@@ -574,8 +585,11 @@ The same rewrites on the scoped line itself, before the program is done
 leaves, so a step and a rewrite are links of one chain.  A literal law in
 an update's right-hand sides (`FmlRw.lit`), `applyOnRigid` along the
 skeleton of the formula under the update (`FmlRw.applyOnRigid`: the update
-cannot halt, or the box), and `concrete` (`FmlRw.concrete`), each proved by
-`rfl` over the postcondition and the program it does not look at.  A
+cannot halt, or the box), `concrete` (`FmlRw.concrete`) and
+`simplifyUpdate` (`FmlRw.simplifyUpdate`: what the update pops, under the
+box, and its shadowed writes), each proved by `rfl` over the
+postcondition and the program it does not look at; `~~>` finds up to three
+of them and the merges past a line of the derivation.  A
 term taclet in a box update (`FmlRw.lawUpd`) is the box's.  Under a
 modality variable `m` each rewrite runs as the diamond and as the box, and
 applies where both give the same line with `m` read back. -/
@@ -704,6 +718,54 @@ while the program is open
 example (φ : Post StandardExample [.val .uint]) :
     dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨[ revert(); ]⟩ φ }
     ~[findOnSave]~> _ := by
+  sol_chain
+
+/-- `simplifyUpdate` under `m` with the revert still to run: the declaration
+`x := 250` takes the write that shadows it (`Upd.redecl`, KeY's shadowed
+elementary dropped); its right-hand side cannot halt, so under the diamond
+too. -/
+example (φ : Post StandardExample [.val .uint]) :
+    dl![m]{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
+    ~[sequentialToParallel]~> dl![m]{ { x := 250 ‖ x := 250 + 10 } ⟨[ revert(); ]⟩ φ }
+    ~[simplifyUpdate]~> dl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain
+
+/-- The same as one `~~>` (`openRwPath`). -/
+example (φ : Post StandardExample [.val .uint]) :
+    dl![m]{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
+    ~~> dl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain
+
+/-- Under the box a shadowed write that may halt goes too: where it halts,
+the box line holds. -/
+example (φ : Post StandardExample [.val .uint]) :
+    dl![.box]{ { x := 1 / 0 ‖ x := 1 } [ revert(); ] φ }
+    ~[simplifyUpdate]~> dl![.box]{ { x := 1 } [ revert(); ] φ } := by
+  sol_chain
+
+-- Under the diamond it stays: the line after would hold where it halts.
+/--
+error: ~[simplifyUpdate]~>: simplifyUpdate does not apply to
+  dl{ { x := 1 / 0 ‖ x := 1 } ⟨ revert(); ⟩ φ }
+while the program is open
+-/
+#guard_msgs in
+example (φ : Post StandardExample [.val .uint]) :
+    dl!{ { x := 1 / 0 ‖ x := 1 } ⟨ revert(); ⟩ φ } ~[simplifyUpdate]~> _ := by
+  sol_chain
+
+-- `~~>` while the program is open finds the line after up to three rewrites
+-- past a line of the derivation, else says so.
+/--
+error: ~~>: the line after is no line of the derivation of
+  dl{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
+nor reached from one by `sequentialToParallel`, applyOnRigid, concrete, simplifyUpdate (at most 3 of them) while the program is open
+  (the line after depends on the modality m, through a rule that reads it (`revertBox`, `revertDiamond`, a loop's invariant rule): go on after `cases m`)
+-/
+#guard_msgs in
+example (φ : Post StandardExample [.val .uint]) :
+    dl![m]{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
+    ~~> dl![m]{ { x := 7 } ⟨[ revert(); ]⟩ φ } := by
   sol_chain
 
 end Open

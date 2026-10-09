@@ -231,7 +231,8 @@ partial def mergePath (A B : Expr) : Nat → MetaM (Option Expr)
     return none
 
 /-- The derivation from `A` to `B`, as `A ~~> B`: the strategy's steps, then a
-merge of the line's update spine (`Fml.MergeBy`) if `B` is one. -/
+merge of the line's update spine (`Fml.MergeBy`) if `B` is one, else
+rewrites while the program is open (`openRwPath`). -/
 partial def leadsSteps (A B : Expr) : TermElabM Expr := do
   let run ← runChain A
   match (if A == B then some 0 else (run.lines.findIdx? (·.fml == B)).map (· + 1)) with
@@ -242,6 +243,11 @@ partial def leadsSteps (A B : Expr) : TermElabM Expr := do
       if let some h ← mergePath L B 1 then
         let st ← mkAppM ``Fml.Steps.sound #[← stepsProof run.splice A (run.lines.take i)]
         return ← mkAppM ``Fml.Leads.comp #[st, h]
+    for i in [0:run.lines.length + 1] do
+      let L := if i == 0 then A else ((run.lines[i - 1]?).map (·.fml)).getD A
+      if let some (_, pf) ← openRwPath L (fun B' _ _ => pure (B' == B)) openRwDepth then
+        let st ← mkAppM ``Fml.Steps.sound #[← stepsProof run.splice A (run.lines.take i)]
+        return ← mkAppM ``Fml.Leads.comp #[st, ← pf]
     throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}"
 
 

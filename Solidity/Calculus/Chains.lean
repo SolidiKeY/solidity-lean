@@ -413,6 +413,10 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) :
       for i in List.range (k + 1) do
         let s := skels[i]!
         if s.hasLit then rs := rs.push (mkApp3 (mkConst ``FmlRw.concrete) C (toExpr i) (toExpr s))
+    else if n == `simplifyUpdate then
+      for i in List.range k do
+        for b in [false, true] do
+          rs := rs.push (mkApp3 (mkConst ``FmlRw.simplifyUpdate) C (toExpr i) (toExpr b))
   | .litLaw c =>
     let (is, f) ← NFml.Chain.lawInstances c erased
     failed := f
@@ -1420,6 +1424,57 @@ else as a scoped line with a program still open (a merged line,
 `Fml.Leads`), else past the program, `Update.lean`'s, from the erasure
 of the strategy's last line `Z` (`Fml.LeadsE A Z B`). -/
 
+/-- The rewrites `~~>` tries on a line while its program is open, after the
+merges: KeY's names, no law (a law is named, `~[r]~>`). -/
+def openRwNames : List Lean.Name := [`applyOnRigid, `concrete, `simplifyUpdate]
+
+/-- One rewrite of the line `L` while its program is open (a merge of its
+spine, or `openRwNames`), each with the line it leaves, that line's splice
+and erasures, and the proof of `L ~~> it`, built when asked. -/
+def openRwSteps (L : Expr) :
+    TermElabM (List (Expr × Splice × Array Expr × TermElabM Expr)) := do
+  let run ← runChain L
+  unless run.isOpen do return []
+  let (C, Γ) ← lineType L
+  let fml := mkApp2 (mkConst ``Fml) C Γ
+  let mut out := []
+  let (sp, ms) ← mergeCands L
+  for c in ms do
+    let pf : TermElabM Expr := do
+      let lhs := mkAppN (mkConst ``Fml.mergeRun) #[C, Γ, toExpr c.k, toExpr c.n, L]
+      let h ← kernelReflOrCases sp.modality lhs (mkApp2 (mkConst ``Option.some [0]) fml c.fml)
+      mkAppM ``Fml.mergeRun_leads #[toExpr c.k, toExpr c.n, L, h]
+    out := out ++ [(c.fml, sp, c.erased, pf)]
+  for n in openRwNames do
+    let (sp, cs, _) ← scopedRwCands L (.table n) run.erased[0]!
+    for c in cs do
+      let pf : TermElabM Expr := do
+        let lhs := mkAppN (mkConst ``FmlRw.apply) #[C, c.rw, Γ, L]
+        let h ← kernelReflOrCases sp.modality lhs (mkApp2 (mkConst ``Option.some [0]) fml c.fml)
+        mkExpectedTypeHint (mkAppN (mkConst ``FmlRw.sound) #[C, c.rw, Γ, L, c.fml, h])
+          (mkApp4 (mkConst ``Fml.Leads) C Γ L c.fml)
+      out := out ++ [(c.fml, sp, c.erased, pf)]
+  return out
+
+/-- At most `n` rewrites of the line `L` while its program is open
+(`openRwSteps`), breadth first, to a line `fits` accepts: that line and the
+proof of `L ~~> it`. -/
+partial def openRwPath (L : Expr) (fits : Expr → Splice → Array Expr → TermElabM Bool) :
+    Nat → TermElabM (Option (Expr × TermElabM Expr))
+  | 0 => return none
+  | n + 1 => do
+    let steps ← openRwSteps L
+    for (B, sp, er, pf) in steps do
+      if ← fits B sp er then return some (B, pf)
+    for (B, _, _, pf) in steps do
+      if B == L then continue
+      if let some (D, pf') ← openRwPath B fits n then
+        return some (D, do mkAppM ``Fml.Leads.comp #[← pf, ← pf'])
+    return none
+
+/-- How many rewrites `~~>` looks for while the program is open. -/
+def openRwDepth : Nat := 3
+
 /-- `leads% A B`: `A ~~> B`, read by the first line's kind. -/
 syntax (name := leadsAnyStx) "leads% " term:max term:max : term
 
@@ -1448,8 +1503,19 @@ syntax (name := leadsAnyStx) "leads% " term:max term:max : term
     let (sp, ms) ← mergeCands L
     if let some c ← ms.findM? (fun c => fits sp c.fml c.erased) then
       return mkApp4 (mkConst ``Fml.Leads) C Γ A c.fml
+  -- rewrites of a line whose program is still open (`Calculus/RewriteScoped.lean`)
+  for (L, _) in cands do
+    if !(← runChain L).isOpen then continue
+    if let some (B, _) ← openRwPath L (fun B sp er => fits sp B er) openRwDepth then
+      return mkApp4 (mkConst ``Fml.Leads) C Γ A B
   unless (← whnfR Γ).isAppOf ``List.nil do
     throwError "~~>: the line after is no line of the derivation of{← indentLine A}"
+  -- past the program the line after is `Update.lean`'s; where the derivation
+  -- stops on a modality variable, the program is still open
+  if run.modalStop then
+    throwError "~~>: the line after is no line of the derivation of{← indentLine A}\n\
+      nor reached from one by `sequentialToParallel`, {", ".intercalate (openRwNames.map toString)} \
+      (at most {openRwDepth} of them) while the program is open{modalStopNote run}"
   let (Z, erased) := match run.lines.getLast? with
     | some l => (l.fml, l.erased)
     | none => (A, run.erased)

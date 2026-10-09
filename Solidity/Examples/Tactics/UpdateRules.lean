@@ -14,9 +14,13 @@ rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨`, and with
 leaf is closed on its erasure over untyped states (`Calculus/CloseErase.lean`,
 until M6c), where a write under the diamond may fail.
 
-The formulas read scoped (`open scoped Solidity.Scoped`): the rules
-rewrite a leaf's erasure (`sol_upd`, `sol_merge`,
-`Calculus/Closers.lean`), today's update.  The sequent rules `merge`
+The formulas read scoped (`open scoped Solidity.Scoped`), and so do the
+rules: `sol_upd` and `sol_merge` rewrite the scoped leaf itself
+(`Calculus/UpdRuleScoped.lean`, `Calculus/Closers.lean`), its
+parameters kept as quantifiers.  A local is a position there, so
+`simplifyUpdate` drops what the update pops and the writes a later one
+shadows, but keeps a write to a local still in scope that the formula does
+not read (decision 87).  The sequent rules `merge`
 and `simplify` are the scoped sequent's (`Calculus/RewriteSyntax.lean`
 reads today's lines).
 -/
@@ -80,9 +84,10 @@ example : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
 /-! ## The other rules
 
 `applyOnRigid` substitutes an update that cannot halt into the first-order
-formula under it, and `applySkip` removes an update with nothing left in it.
-The empty update is KeY's `skip`; the notation has no syntax for it, so it
-prints as the escaped term `‹[]›`. -/
+formula under it, and `simplifyUpdate` drops a write a later one shadows,
+here a declaration, which takes the later write's value.  `applySkip`
+removes an update with nothing left in it, KeY's `skip`, which the notation
+has no syntax for and a scoped line does not reach: a declaration stays. -/
 
 /-- trace: ⊢ ⊨ dl{ 3 = 3 } -/
 #guard_msgs in
@@ -92,27 +97,26 @@ example : ⊨ dl!{ { y := 3 } y = 3 } := by
   sol_close
 
 /--
-trace: ⊢ ⊨ dl{ ‹[]› true }
+trace: ⊢ ⊨ dl{ { y := 3 ‖ y := 4 } y = 4 }
 ---
-trace: ⊢ ⊨ dl{ true }
+trace: ⊢ ⊨ dl{ { y := 4 } y = 4 }
 -/
 #guard_msgs in
-example : ⊨ dl!{ { y := 3 } true } := by
+example : ⊨ dl!{ { y := 3 } { y := 4 } y = 4 } := by
+  sol_upd .sequentialToParallel
+  trace_state
   sol_upd .simplifyUpdate
   trace_state
-  sol_upd .applySkip
-  trace_state
+  sol_upd .applyOnRigid
   sol_close
 
-/-- `x = x;` leaves `x := x`, which halts where `x` holds no value: dropping
-it is sound under the box only (`UpdElem.elimSelf_box`), so it is a lemma
-applied by hand, not a rule of `sol_upd`. -/
+/-- `x = x;` leaves `x := x`.  On the erasure it halts where `x` holds no
+value, and dropping it was a lemma applied by hand
+(`Surface.UpdElem.elimSelf_box`); in a typed state a local always holds
+one, so the scoped leaf closes as it is. -/
 theorem selfAssign : ⊨ dl!{ [ x = x; y = 3; ] y == 3 } := by
   sol_symex
   sol_merge
-  refine fun σ => Surface.UpdElem.elimSelf_box rfl ?_
-  revert σ
-  show NFml.Valid _
   sol_close
 
 /-! ## All at once: `sol_merge` -/
@@ -132,10 +136,12 @@ theorem deepFieldWrite_merge :
 /--
 trace: ⊢ ⊨ dl{ ∀ uint y; ∀ uint x; { x := 1 } { y := x } y = 1 }
 ---
-trace: ⊢ ⊨ dl{ { y := 1 } y = 1 }
+trace: ⊢ ⊨ dl{ ∀ uint y; ∀ uint x; { x := 1 ‖ y := 1 } y = 1 }
 -/
 #guard_msgs in
-/-- `x = 1; y = x;`: merged, then `x := 1` dropped as unused. -/
+/-- `x = 1; y = x;`: merged.  `x := 1` stays: `x` is a parameter, still in
+scope, which the scoped `simplifyUpdate` keeps where the formula does not
+read it (decision 87; the erasure dropped it by name). -/
 theorem copyLocal_merge : ⊨ dl!{ [ x = 1; y = x; ] y == 1 } := by
   sol_symex
   trace_state
@@ -148,7 +154,10 @@ is not substituted into one that reads it (`Upd.envOnly`), and a
 `storage :=` element is never effectless. -/
 
 /--
-trace: ⊢ ⊨ dl{ { storage := save(storage, balances[a], 1) } { storage := save(storage, balances[b], 2) } true }
+trace: ⊢ ⊨
+    dl{
+      ∀ uint b;
+        ∀ uint a; { storage := save(storage, balances[a], 1) } { storage := save(storage, balances[b], 2) } true }
 -/
 #guard_msgs in
 /-- `balances[a] = 1; balances[b] = 2;`: nothing to merge. -/

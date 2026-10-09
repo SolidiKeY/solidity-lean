@@ -1,4 +1,4 @@
-import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.UpdRuleScoped
 import Solidity.Calculus.Merge
 import Solidity.Calculus.Literals
 
@@ -22,6 +22,7 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 | `lawUpd r ht i` | a term taclet onto a term that cannot halt, in the box update at `i` | `holds_upd_rwC` | `updRw` |
 | `applyOnRigid i s` | `{U}(A ∧ B)`, `{U}(a → B)`, `{U}¬a`, `{U}a` with `a` first-order: `U` applied to the first-order parts (`Fml.substU`), kept in front of the rest; `U` at `i`, cannot halt or under the box | `Fml.pushS_sound` | `applyOnRigidFormula` |
 | `concrete n s` | `true ∧ A ⇝ A`, `false → A ⇝ true`, `v ≐ v ⇝ true`, … below `n` updates | `Fml.concreteAlongS_holds` (iff) | `concrete_*`, `eqClose` |
+| `simplifyUpdate i b` | the update at `i` without what it pops later (the box) and its shadowed writes (`Upd.simpS`), the scope ends after it merged in first where `b` | `Fml.simpAtB_holds` | `simplifyUpdate1/2/3` |
 
 `sequentialToParallel` while the program is open is `Calculus/Merge.lean`'s.
 
@@ -342,11 +343,6 @@ theorem Upd.totalS_apply {Γ : Ctx} (σ₀ : EState C Γ) :
     obtain ⟨τ, hτ⟩ := Upd.totalS_apply σ₀ U h
     exact ⟨τ.thin e, by simp only [Upd.apply, hτ]; rfl⟩
 
-/-- Whether a modality is the box. -/
-def Modality.isBoxS : Modality → Bool
-  | .box => true
-  | .diamond => false
-
 /-- A skeleton with no part not to look at: a first-order formula of
 connectives and literal leaves. -/
 def Skel.closedS : Skel → Bool
@@ -492,6 +488,33 @@ end Push
 of the formula under that update. -/
 def FmlRw.applyOnRigid (i : Nat) (s : Skel) : FmlRw C :=
   FmlRw.atSpine (fun m U φ => Fml.pushAt s m U φ) (fun h σ hψ => Fml.pushAt_sound h σ hψ) i
+
+/-! ## `simplifyUpdate` -/
+
+/-- `simplifyUpdate` on `{U}_m φ` (`Fml.simpAt`), with the scope ends `φ`
+begins with merged in first only where `absorb` says: the elaborator asks
+it only where the line under `U` is an update, never a postcondition the
+kernel cannot look into. -/
+def Fml.simpAtB (absorb : Bool) {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
+    Option (Fml C Γ) :=
+  if absorb then Fml.simpAt m U φ
+  else if (U.simpS m).size < U.size then some (.upd m (U.simpS m) φ) else none
+
+theorem Fml.simpAtB_holds {absorb : Bool} {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ}
+    {φ : Fml C Δ} {χ : Fml C Γ} (h : Fml.simpAtB absorb m U φ = some χ) (σ : State C Γ)
+    (hχ : holds σ χ) : holds σ (.upd m U φ) := by
+  unfold Fml.simpAtB at h
+  split at h
+  · exact Fml.simpAt_holds h σ hχ
+  · split at h
+    · cases h; exact holds_upd_simpS σ hχ
+    · cases h
+
+/-- **`simplifyUpdate`** on the update at position `i` of the spine: what
+it pops later, under the box, and the writes a later one shadows dropped
+(`Upd.simpS`), the scope ends after it merged in first where `absorb`. -/
+def FmlRw.simplifyUpdate (i : Nat) (absorb : Bool) : FmlRw C :=
+  FmlRw.atSpine (fun m U φ => Fml.simpAtB absorb m U φ) (fun h σ hψ => Fml.simpAtB_holds h σ hψ) i
 
 /-! ## The literal connectives folded -/
 
