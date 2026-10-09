@@ -26,7 +26,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `applyBinOp`, `RawExpr.uncheck` | |
 | Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Tactics/Checked.lean` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `applyBinOp` | |
-| `assert` | a failing `assert` panics (`Panic(0x01)`), a halt distinct from `require`'s revert that neither modality accepts; KeY's "Violated" goal, an obligation under the box too | `assertOk`, `Modality.afterRun`, `Taclet.assertSimple` | `Examples/Tactics/Revert.lean` |
+| `assert` | a failing `assert` panics (`Panic(0x01)`), a halt distinct from `require`'s revert that neither modality accepts; KeY's "Violated" goal, an obligation under the box too | `assertOk`, `Modality.afterRunTR`, `Taclet.assertSimple` | `Examples/Tactics/Revert.lean` |
 | Assignment order | right-hand side first, target resolved once | `Stmt.run` (`TRun.assign`, `TRun.opAssign`, `TRun.incDec`) | `Examples/Tools.lean` (`Surface.Prog.runT`) |
 | Effects in an expression | captured before the statement in solc's order (table below) | `hoist`, `captureExpr` | `Examples/Tools.lean` (`Surface.Prog.runT`) |
 | Repeated member names | a struct that declares two members of one name is refused ("Identifier already declared"): the elaborator refuses a type naming one (`refusedStructs`, `unknownStructMsg`, decision 16), so every struct of `structDef` has distinct member names and the typed (positional) and untyped (by name) copies agree | `structDef_nodup`, `SVal.overlay_erase` | `Syntax/Splice.lean` (`BadDup`) |
@@ -379,7 +379,7 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   so does the run (`Semantics/Run.lean`), the only one since W4; a
   conditional of two indexed memory references allocates an object nothing
   reaches (the table above).
-- **Fragment width.** Loops run (`Loop.run`, `docs/loops.md`) and are
+- **Fragment width.** Loops run (`TLoop.run`, `docs/loops.md`) and are
   proved by unwinding to a bound or by an invariant, but the EVM compiler
   refuses them (`Evm.inFrag`); `uintN`/`intN`
   for `N < 256` only as above, no `address`/`bytes`/`string`, no external calls beyond

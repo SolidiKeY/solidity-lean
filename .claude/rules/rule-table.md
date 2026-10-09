@@ -38,8 +38,10 @@ syntax, and every constructor's premise is the one it builds:
   change the syntax (`Syntax.lean`) so it cannot be written. Never add a
   well-formedness hypothesis.
 - One rule, one constructor; the modality is a parameter (`⟨[ ]⟩`), not a
-  box/diamond twin. Only `revertBox`/`revertDiamond` tell them apart (and
-  the loop invariant rules). `sol_chain` relies on it: it runs a line under a
+  box/diamond twin. Only revert, send, transfer and try (`revertBox`/`revertDiamond`,
+  `sendNoCallbackBox`/`sendNoCallbackDiamond`, `transferNoCallbackBox`/`transferDiamond`,
+  `tryCallNoCallbackBox`/`tryCallDiamond`) and the loop invariant rules
+  tell them apart. `sol_chain` relies on it: it runs a line under a
   modality `m` as the diamond and as the box and keeps the lines they share
   (`Chains.runChain`), so a rule that cases on `m` must give premises that
   differ elsewhere than in the modality (as revert's `true`/`false` do);

@@ -149,8 +149,8 @@ lemma set for I.
 
 ## Deterministic checks
 
-**A. The trusted base, in CI.** `#print axioms` on `Rule.sound`, `Proves.sound`,
-`ProvesC.sound_of`, `symex_sound`, `Evm.compile_correct`; fail on anything beyond `propext`,
+**A. The trusted base, in CI.** `#print axioms` on `Stmt.sound` (`Calculus/Sound.lean`), `Proves.sound`,
+`Proves.valid`, `ProvesC.sound_of`, `symex_sound`, `Evm.compile_correct`; fail on anything beyond `propext`,
 `Quot.sound`, `Classical.choice`, or on `sorry`, `native_decide`, `implemented_by` in
 the closure (`Calculus/RuleShapes.lean:44` and `Typing/State.lean` use them; the
 closure decides). A day; every other check assumes it (L4).
@@ -340,7 +340,7 @@ invariants.
 
 **N. Reflective decision procedures.** A tactic cannot be proved complete; a function
 `dec : LFml → Bool` with `dec ψ = true ↔ ∀ σ, ψ.holds σ` can, and `sol_decide`'s
-reductions are already equivalences (`Fml.valid_iff_reduce`, `Fml.valid_iff_cons`; the
+reductions are already equivalences (`NFml.valid_iff_reduce`, `NFml.valid_iff_cons`; the
 last step is `omega | grind`). Replace that step by fragment: key equalities and
 reads-of-writes (congruence closure over symbolic keys; small; first), linear arithmetic
 over bounded integers, then nonlinear, `**` and bitwise on 256-bit words (finite, so
