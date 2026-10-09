@@ -1692,6 +1692,15 @@ def delabStepBy : Delab := do
   return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 3))
     #[(← `(chain_arrow| ~[$(mkIdent n):ident]~>), ← ppCoreLine (e.getArg! 4))]
 
+/-- `φ ~[n]~> ψ`, a rewrite of the scoped line (`Calculus/RewriteScoped.lean`). -/
+@[delab app.Solidity.Fml.RwBy]
+def delabRwBy : Delab := do
+  let e ← getExpr
+  guard (e.getAppNumArgs == 6)
+  let .lit (.strVal n) := e.getArg! 2 | failure
+  return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 4))
+    #[(← `(chain_arrow| ~[$(mkIdent (.mkSimple n)):ident]~>), ← ppCoreLine (e.getArg! 5))]
+
 @[delab app.Solidity.Fml.Via]
 def delabVia : Delab := do
   let e ← getExpr
