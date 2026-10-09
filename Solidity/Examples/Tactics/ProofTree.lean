@@ -17,7 +17,7 @@ trees differ from today's:
   on its erasure, behind a diamond update too (`Fml.closableB`).
 -/
 
-namespace Solidity.Examples.Tactics.CoreProofTree
+namespace Solidity.Examples.Tactics.ProofTree
 
 open Solidity
 
@@ -225,4 +225,4 @@ refused, not grown on an ill-typed goal. -/
 #guard_msgs in
 #proof_tree (Fml.tt : Fml StandardExample [.val .uint])
 
-end Solidity.Examples.Tactics.CoreProofTree
+end Solidity.Examples.Tactics.ProofTree

@@ -8,7 +8,7 @@ import Solidity.Calculus.SequentNotation
 # The notation, pinned
 
 What the printers show, as `#guard_msgs` tests: a taclet as its rule line
-(`Rules.lean`, `RuleSyntax.lean`), a premise standing alone, a formula read
+(`Calculus/Rules.lean`, `RuleSyntax.lean`), a premise standing alone, a formula read
 by `dl!{ … }` and printed back (`Notation.lean`), and the goals of an `apply`
 derivation as sequents `dl{ Γ ⟹ φ }` (`Logic.lean`).  If a printer changes,
 these fail.
@@ -143,7 +143,7 @@ info: @Taclet.memoryStorageCopy : ∀ {C : Contract} {k : Nat} {m : Modality} {�
 
 /-! ### With the notation off: the constructors it stands for
 
-and the side condition the line leaves out: `sp` is simple (`Rules.lean`,
+and the side condition the line leaves out: `sp` is simple (`Calculus/Rules.lean`,
 "Side conditions"), filled by `side_cond` wherever the rule is applied. -/
 
 /--

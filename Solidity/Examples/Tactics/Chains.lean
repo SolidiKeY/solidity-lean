@@ -13,7 +13,7 @@ the tactics write on `dl!{ … }` read scoped (`sol_chain?`, `#chain`,
 `sol_rws?`).
 -/
 
-namespace Solidity.Examples.CoreChains
+namespace Solidity.Examples.Tactics.Chains
 
 open Solidity
 
@@ -52,7 +52,7 @@ theorem balance : cdl!{ ⟨ alice.account.balance = 10; ⟩ true }
   sol_chain
 
 /--
-info: Solidity.Examples.CoreChains.balance :
+info: Solidity.Examples.Tactics.Chains.balance :
   dl{ ⟨ alice.account.balance = 10; ⟩ true }
       ~[storageFieldWrite_unfold_leftFst]~>
         dl{ ⟨ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ⟩ true }
@@ -423,4 +423,4 @@ end
 
 end Surface
 
-end Solidity.Examples.CoreChains
+end Solidity.Examples.Tactics.Chains

@@ -39,11 +39,11 @@ specifications (`Calculus/SurfaceSpec.lean`), the solkey corpus (`SolidityCorpus
 ## Still open
 
 - **The bridge (2026-10-07, ends at M4 of `docs/intrinsic.md`).** The scoped
-  syntax `Solidity` (`Scope.lean`, `Syntax/Core.lean`) lives beside
+  syntax `Solidity` (`Scope.lean`, `Syntax/Scoped.lean`) lives beside
   `Syntax.lean`'s `Stmt C`, which the elaborator still emits, until it
   replaces it: the one deliberate exception to porting in place.
   `Syntax/Resolve.lean` maps between them (`erase`, `resolve`), and the
-  elaborator's locals check is `resolve`.  `Syntax/CoreQuote.lean` quotes
+  elaborator's locals check is `resolve`.  `Syntax/Quote.lean` quotes
   the scoped form (`Prog.quote`, hash-consed), and `solc_scoped` declares
   every imported program scoped for the kernel to check (the lint, M2.3,
   2026-10-07).  They go at M4 with the untyped `Stmt C` and its quoter,

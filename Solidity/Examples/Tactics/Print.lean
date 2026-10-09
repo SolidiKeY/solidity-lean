@@ -1,5 +1,5 @@
 import Solidity.Calculus.Delab
-import Solidity.Examples.Tactics.CoreSymex
+import Solidity.Examples.Tactics.Symex
 import Solidity.Tools.Inspect
 import Solidity.Tools.Taclet
 
@@ -18,7 +18,7 @@ The premises of `branches`, `cases`, `inv` and `inline` print from their
 `Proves` goal prints as today's sequent.
 -/
 
-namespace Solidity.Examples.Tactics.CorePrint
+namespace Solidity.Examples.Tactics.Print
 
 open Solidity Lean Meta
 
@@ -200,7 +200,7 @@ info: { y := 0 } [ se1 = 4; uint se2; se2 = se1 + 1; y = se2; credit(y, 5); bump
 
 end Calls
 
-/-- Functions returning a pair and a memory object (`CoreStep.lean`'s). -/
+/-- Functions returning a pair and a memory object (`Examples/Tactics/Step.lean`'s). -/
 def Rets : Contract := contract!{
   uint total;
   function pair(uint x) returns (uint lo, uint hi) { return (x, x + 1); }
@@ -211,7 +211,7 @@ section Rets
 
 local instance : InContract := ⟨Rets⟩
 
-private def re : Expr := mkConst ``Solidity.Examples.Tactics.CorePrint.Rets
+private def re : Expr := mkConst ``Solidity.Examples.Tactics.Print.Rets
 
 private def retsCallφ : Solidity.Surface.Fml Rets :=
   dl!{ [ uint a; uint b; (a, b) = pair(3); Person memory m = mk(2); uint y = m.age; ] true }
@@ -252,7 +252,7 @@ section Try
 
 local instance : InContract := ⟨Pinger⟩
 
-private def pe : Expr := mkConst ``Solidity.Examples.Tactics.CorePrint.Pinger
+private def pe : Expr := mkConst ``Solidity.Examples.Tactics.Print.Pinger
 
 private def tryφ : Solidity.Surface.Fml Pinger :=
   dl!{ [ try I(7).get() returns (uint v) { last = v; } catch Panic(uint c) { last = c; }
@@ -356,4 +356,4 @@ example : Proves SE .all [] .nil (.all (.user "b") .bool
     exact .updIntro (.closeTrue rfl)
   · exact .updIntro (.closeTrue rfl)
 
-end Solidity.Examples.Tactics.CorePrint
+end Solidity.Examples.Tactics.Print

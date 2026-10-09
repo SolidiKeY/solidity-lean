@@ -8,7 +8,7 @@ import Solidity.Calculus.Shift
 taclet of `Calculus/Rules.lean` whose side conditions hold, in the order
 `Completeness.lean` tries them (Step 1 unfolds a read, Step 2 decomposes a
 write, Step 3 is an update).  Each arm names the taclet it fires; the
-premise's erasure is what that taclet leaves (`Examples/Tactics/CoreStep.lean`
+premise's erasure is what that taclet leaves (`Examples/Tactics/Step.lean`
 pins it, statement by statement, against today's strategy).
 
 What scoping adds to a rule, as `docs/intrinsic.md` ("how `dl{ … }` will

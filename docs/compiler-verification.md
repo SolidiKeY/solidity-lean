@@ -202,7 +202,7 @@ they do, so the proof needs no argument about it.
 
 ## Build cost
 
-`lake build Solidity.Evm.Interpreter` builds the modules. `CoreCorrect`
+`lake build Solidity.Evm.Interpreter` builds the modules. `Evm/Correct.lean`
 is the slow one (`stmt_sim` dispatches one lemma per family, within
-`maxHeartbeats 10000`); `CoreExamples` runs the unrolled `**` code under
+`maxHeartbeats 10000`); `Evm/Examples.lean` runs the unrolled `**` code under
 `decide +kernel` with a raised `maxRecDepth`.

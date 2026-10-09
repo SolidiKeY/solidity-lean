@@ -22,7 +22,7 @@ not say; `SVal.tight` is exactly them:
 Everything canonical and tight is reachable when its words, mapping keys
 and array slots are in range (`SVal.fits`: a literal is in its type's
 range, `Simple.lit`), by one scoped program (`Build.rootsProg`, over
-`Syntax/Core.lean`): a word is assigned; a struct is filled member by member
+`Syntax/Scoped.lean`): a word is assigned; a struct is filled member by member
 through an alias bound to it; a dynamic array is pushed to its whole run of
 slots, then each slot past the end is bound to an alias, popped, and filled
 through the alias (the only way to write past an end), then the live

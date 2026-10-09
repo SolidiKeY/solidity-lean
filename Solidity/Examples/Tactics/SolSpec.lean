@@ -11,7 +11,7 @@ then each leaf erased and closed as today's.  Under the switch
 (`open scoped Solidity.Scoped`) the text is today's.
 -/
 
-namespace Solidity.Examples.Tactics.CoreSolSpec
+namespace Solidity.Examples.Tactics.SolSpec
 
 open Solidity Examples.Tactics.Specs
 
@@ -36,4 +36,4 @@ theorem ordered_inc : ⊨ spec!{ inc } := by sol_spec
 theorem ordered_order : ⊨ spec!{ order } := by sol_spec
 end
 
-end Solidity.Examples.Tactics.CoreSolSpec
+end Solidity.Examples.Tactics.SolSpec

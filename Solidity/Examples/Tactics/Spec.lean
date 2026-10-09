@@ -9,7 +9,7 @@ specification's, read in their parameters' context, print as today's do
 (a hidden binder printing as nothing), and erase to today's.
 -/
 
-namespace Solidity.Examples.Tactics.CoreSpec
+namespace Solidity.Examples.Tactics.Spec
 
 open Solidity
 
@@ -82,4 +82,4 @@ def sameAs (a b : Except String (Surface.Fml Ledger)) : Bool :=
   (Surface.specObligation Ledger "constructor")
 #guard sameAs ((Problem.ctor Ledger .diamond).map (·.eraseS [])) (Surface.Problem.ctor Ledger .diamond)
 
-end Solidity.Examples.Tactics.CoreSpec
+end Solidity.Examples.Tactics.Spec

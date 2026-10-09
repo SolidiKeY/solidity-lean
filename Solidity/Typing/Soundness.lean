@@ -6,7 +6,7 @@ import Solidity.Semantics.Erased
 
 The typed syntax rules out every *static* mismatch: a member exists, an
 operator takes its operand, a copy holds no mapping, a pushed default is
-well-formed, and, since the scoped syntax (`Syntax/Core.lean`), a local is a
+well-formed, and, since the scoped syntax (`Syntax/Scoped.lean`), a local is a
 position in a context `Γ`, read and written at the type `Γ` gives it.  The
 typed run (`Semantics/Run.lean`) rules out the dynamic ones: its
 states hold values of their types, so their erasure is well-typed by

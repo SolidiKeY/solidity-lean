@@ -11,7 +11,7 @@ branch's local out of scope after it), and `#wp`/`#step` on the result
 (`Tools/Inspect.lean`).
 -/
 
-namespace Solidity.Examples.Tactics.CoreNotation
+namespace Solidity.Examples.Tactics.Notation
 
 open Solidity
 
@@ -109,4 +109,4 @@ info:   ~[storageFieldWriteSave]~>
 -/
 #guard_msgs in #step cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }
 
-end Solidity.Examples.Tactics.CoreNotation
+end Solidity.Examples.Tactics.Notation

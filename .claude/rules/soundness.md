@@ -44,7 +44,7 @@ new hypothesis.
 
 Do not weaken the theorem. Find the state where the premise and the statement
 end differently, check which one solc agrees with, and fix that side: the rule
-(`Rules.lean`) or the interpreter (`Semantics.lean`, recording it in
+(`Calculus/Rules.lean`) or the interpreter (`Semantics.lean`, recording it in
 `docs/solc-alignment.md`). `MSrc.mval` reading a memory reference through
 `asRef` is such a fix: a copy from a slot holding a primitive refuted
 `memoryFieldWriteCopy` until the interpreter read it as the rule does.

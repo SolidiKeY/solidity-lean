@@ -1,4 +1,4 @@
-import Solidity.TestSuite.CoreProblems
+import Solidity.TestSuite.ScopedProblems
 
 /-!
 # The suggestions `#solkey_derive?` prints, pinned

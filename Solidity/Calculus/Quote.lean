@@ -8,7 +8,7 @@ Entry points: `Fml.quote`, `Tm.quote`, `Upd.quote`, `Frames.quote` and
 `Premise.quote`, each hash-consed.
 
 `Calculus/NFmlQuote.lean`'s quoter for the scoped formulas of
-`Calculus/Fml.lean` and the programs of `Syntax/Core.lean`: a formula
+`Calculus/Fml.lean` and the programs of `Syntax/Scoped.lean`: a formula
 computed by compiled code (the strategy, `Calculus/Step.lean`) becomes
 an `Expr` again, written with the constructors' names and the contract by
 its name, for the kernel to check that it is what the formula steps to.
@@ -526,7 +526,7 @@ def Frames.quote {C : Contract} (c : Expr) {Γ Γ₀ : Ctx} (κ : Frames C Γ Γ
 def Premise.quote {C : Contract} (c : Expr) {Γ Γ' : Ctx} (p : Premise C Γ Γ') : Expr :=
   Lean.ShareCommon.shareCommon ((Quote.qPremise Γ Γ' p).run c)
 
-/-! A scoped block on its own is quoted by `Syntax/CoreQuote.lean`'s
+/-! A scoped block on its own is quoted by `Syntax/Quote.lean`'s
 `Prog.quoteShared`. -/
 
 /-! ## Explicit quantifiers (decision 28)

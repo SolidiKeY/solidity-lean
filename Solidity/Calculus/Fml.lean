@@ -5,7 +5,7 @@ import Solidity.Syntax.Resolve
 # Terms, updates and formulas, scoped
 
 `Update.lean`'s terms, updates and formulas read in a context `Γ : Ctx`
-(`docs/intrinsic.md`, M6a), over the scoped programs of `Syntax/Core.lean`.
+(`docs/intrinsic.md`, M6a), over the scoped programs of `Syntax/Scoped.lean`.
 A program variable is a position (`Tm.pvV i`, `i : Idx Γ (.val p)`), so a
 formula cannot read a local that is not in scope.
 

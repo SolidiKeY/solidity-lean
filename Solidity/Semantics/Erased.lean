@@ -1,5 +1,5 @@
 import Solidity.Semantics
-import Solidity.Syntax.CoreQuote
+import Solidity.Syntax.Quote
 
 /-!
 # The erased state and its evaluators over the scoped syntax

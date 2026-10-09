@@ -12,7 +12,7 @@ is today's.  The callback taclets print as today's
 (`Calculus/Callback.lean`).
 -/
 
-namespace Solidity.Examples.Tactics.CoreSurface
+namespace Solidity.Examples.Tactics.Surface
 
 open Solidity
 
@@ -67,4 +67,4 @@ info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ
 -/
 #guard_msgs in #check @CallbackTaclet.transferWithCallbackBox
 
-end Solidity.Examples.Tactics.CoreSurface
+end Solidity.Examples.Tactics.Surface

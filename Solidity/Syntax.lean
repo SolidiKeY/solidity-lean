@@ -10,7 +10,7 @@ primitive type `p`, `SPath C T` a storage path of type `T`, `Surface.Stmt C`
 a statement (mini-solkey's `Ch02_Elab`).  A statement here is the syntax as
 written (decision 11 of `docs/intrinsic.md`): the elaborator's output and
 the printers' target, with no run, no taclet and no `wt`; `resolve`
-(`Syntax/Resolve.lean`) makes it the scoped statement (`Syntax/Core.lean`)
+(`Syntax/Resolve.lean`) makes it the scoped statement (`Syntax/Scoped.lean`)
 that the typed run runs and the calculus steps.  A member access carries the proof
 that the member exists, an operator the proof that it takes its operand
 type, a copy the proof that its type holds no mapping.  So a statement no

@@ -33,7 +33,7 @@ picks at every goal, until only `close` is left.
 solkey names the rule; hover it to see its taclet.  Unification matches its
 `\find` against the first statement and produces the premise, so after each
 `apply` the goal is the next line of the derivation, printed as the sequent
-`dl{ Γ ⟹ φ }` (`Notation.lean`).  A rule that does not match, or whose
+`dl{ Γ ⟹ φ }` (`Calculus/Notation.lean`).  A rule that does not match, or whose
 side conditions do not hold (`nsp` where the part is simple, …), is refused
 by `apply`.  `Proves.valid` turns a derivation into a proof of `⊨ φ`; it is the
 only place soundness is used.

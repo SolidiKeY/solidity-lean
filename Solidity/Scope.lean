@@ -3,7 +3,7 @@ import Solidity.AST
 /-!
 # Scopes: contexts and positions
 
-The vocabulary of the intrinsic syntax (`Syntax/Core.lean`, `docs/intrinsic.md`):
+The vocabulary of the intrinsic syntax (`Syntax/Scoped.lean`, `docs/intrinsic.md`):
 a context `Ctx` lists the types of the locals in scope, innermost first, and
 a local is read by its position `Idx Γ t` (a de Bruijn index), which carries
 its type.  Names are not in the index (Gate G0, condition 3): a binder

@@ -297,7 +297,7 @@ I.cost + 2`, and the premise (`body` alone, `ω` alone, under modal-free
 `{anon}`, `{U}` and conditions) measured less than `loop :: ω`
 (`Premise.measure_lt`, `Fml.loopAnon_measure`).
 
-**Typing and declarations.** In the scoped syntax (`Syntax/Core.lean`) a
+**Typing and declarations.** In the scoped syntax (`Syntax/Scoped.lean`) a
 loop is `Stmt C Γ Γ`: its condition and annotation are read in `Γ`, its body
 is a `Prog C Γ Γb` whose locals the typed run pops every iteration
 (`TRun.loop`), as for `ite`; the invariants of `Typing/` are kept at every

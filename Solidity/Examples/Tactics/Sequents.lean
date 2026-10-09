@@ -10,7 +10,7 @@ goals states them (today's `Calculus/Sequents`).  A block's `}` is not
 written; a hidden binder is no entry.
 -/
 
-namespace Solidity.Examples.Tactics.CoreSequents
+namespace Solidity.Examples.Tactics.Sequents
 
 open Solidity
 
@@ -48,4 +48,4 @@ example : ⊢ dl!{ [ uint to = 9; to.transfer(x + 2); ] true } := by
   apply Proves.update (Taclet.toStep .transferNoCallbackBox)
   exact .updIntro (.closeTrue rfl)
 
-end Solidity.Examples.Tactics.CoreSequents
+end Solidity.Examples.Tactics.Sequents

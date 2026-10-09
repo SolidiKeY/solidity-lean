@@ -44,7 +44,7 @@ a total function over the typed syntax, and it is the only rule that can:
 
 ## Adding or changing a rule
 
-1. The constructor, in its section of `Rules.lean`, in `dl{ … }`. Spell its
+1. The constructor, in its section of `Calculus/Rules.lean`, in `dl{ … }`. Spell its
    schema variables so that the side conditions they give it
    (`RuleSyntax.sideConds`) are **exactly** what its `Stmt.step` arm knows:
    `nsp`/`nse` where the arm has found the part not simple, `sp` where it

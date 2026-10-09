@@ -1,4 +1,4 @@
-import Solidity.TestSuite.CoreProblems
+import Solidity.TestSuite.ScopedProblems
 
 /-!
 # solkey's `TestSuite`, derived (3 of 12)

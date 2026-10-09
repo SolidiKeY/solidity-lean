@@ -10,7 +10,7 @@ fires the rule of the first statement of a formula until none is left.  The
 fresh names are numbered as `Symex.lean` numbers them, one above every index
 in the formula (`Fml.fresh`), so the erasure of what `symex` leaves is what
 today's `symex` leaves of the erasure, its cover goals dropped
-(`Examples/Tactics/CoreSymex.lean` pins it).
+(`Examples/Tactics/Symex.lean` pins it).
 
 The kernel evaluates these functions when a goal is closed by them, so they
 follow Gate G0's conditions:

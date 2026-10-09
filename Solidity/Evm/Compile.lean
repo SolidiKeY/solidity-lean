@@ -5,7 +5,7 @@ import Solidity.Semantics.StorageErase
 /-!
 # The compiler over the scoped syntax
 
-The compiler, on `Syntax/Core.lean`'s statements (`docs/intrinsic.md`,
+The compiler, on `Syntax/Scoped.lean`'s statements (`docs/intrinsic.md`,
 M5), from `Evm/Layout.lean`'s code sequences.
 
 **A local lives at its level.**  A local of `Γ` at position `i` (innermost

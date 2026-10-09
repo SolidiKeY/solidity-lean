@@ -14,13 +14,13 @@ frame).  Until W4 `calc-del` each result's erasure was also compared with
 what today's strategy left (each branch's cover goal dropped, the same
 fresh names); that strategy is deleted with today's rule table.
 
-`Examples/Tactics/CoreSymex.lean` prints three results; here a program only
+`Examples/Tactics/Symex.lean` prints three results; here a program only
 has to agree.  A loop body's own locals are left out of the invariant
 rule's `{anon(…)}` by the scoped frame (`Calculus/Blocks.lean`), so the
 loops below declare none.
 -/
 
-namespace Solidity.Examples.Tactics.CoreStep
+namespace Solidity.Examples.Tactics.Step
 
 open Solidity Lean Meta
 
@@ -56,7 +56,7 @@ private def readsφ : Solidity.Surface.Fml StandardExample :=
          uint w = people[total + 1].account.balance; uint l = values.length;
          uint n = matrix[x].length; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.reads readsφ
+run_meta agree se `Solidity.Examples.Tactics.Step.reads readsφ
 
 /-- `storageIndexWriteMappingSave`, `indexWriteValueRhsCapture`,
 `storageIndexWriteCaptureAllNonSimpleIndex`,
@@ -65,7 +65,7 @@ private def writesφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ balances[2] = 5; balances[2] = total + 1; balances[total + 1] = total;
          people[total].age = 3; values[total] = alice.age; matrix[total][1] = 4; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.writes writesφ
+run_meta agree se `Solidity.Examples.Tactics.Step.writes writesφ
 
 /-- `storageRootWriteCopySource`, `storageIndexReadMappingStoreRoot`,
 `storageFieldWriteCopySource`, `storageFieldRead_unfold_rightSndResult`,
@@ -76,7 +76,7 @@ private def copiesφ : Solidity.Surface.Fml StandardExample :=
          folks[1].account = people[2].account; folks[1] = alice; people[1].account = bob.account;
          folks[total + 1] = bob; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.copies copiesφ
+run_meta agree se `Solidity.Examples.Tactics.Step.copies copiesφ
 
 /-- `storageRootDelete`, `storageFieldDelete`, `storageIndexDelete`,
 `storageIndexDeleteNonSimpleIndexCapture`, `storageFieldDelete_unfold_leftFst`,
@@ -85,7 +85,7 @@ private def deletesφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ delete alice; delete alice.age; delete balances[2]; delete balances[total + 1];
          delete people[1].account; delete matrix[1][2]; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.deletes deletesφ
+run_meta agree se `Solidity.Examples.Tactics.Step.deletes deletesφ
 
 /-- `storageFieldReadBindLocalRoot`, `storageIndexReadMappingBindLocalRoot`,
 `storageLocalRootPushBind`, `storageLocalRootPush_unfold_leftFstReceiver`. -/
@@ -93,7 +93,7 @@ private def aliasesφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ Account storage a = alice.account; Person storage p = folks[2];
          Person storage q = people.push(); p = people[1]; a = folks[3].account; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.aliases aliasesφ
+run_meta agree se `Solidity.Examples.Tactics.Step.aliases aliasesφ
 
 /-! ## Operators, the conditional, `&&` and `||` -/
 
@@ -104,7 +104,7 @@ private def conditionalsφ : Solidity.Surface.Fml StandardExample :=
          balances[1] = total > 2 ? 1 : 0; bool c = b && flags[2]; bool d = b || total > 3;
          bool e = flags[1] && flags[2]; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.conditionals conditionalsφ
+run_meta agree se `Solidity.Examples.Tactics.Step.conditionals conditionalsφ
 
 /-- Compound assignments and `++`/`--`, at a local, a state variable, a
 member, an entry, with a source and a receiver to unfold. -/
@@ -113,7 +113,7 @@ private def compoundφ : Solidity.Surface.Fml StandardExample :=
          people[total].age += 1; total += x + 1; x++; total++; people[1].age++;
          uint y = x++; uint z = ++total; uint w = alice.age++; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.compound compoundφ
+run_meta agree se `Solidity.Examples.Tactics.Step.compound compoundφ
 
 /-! ## Arrays and payments -/
 
@@ -125,7 +125,7 @@ private def arraysφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ values.push(3); values.push(total + 1); values.push(); people.push();
          persons.push(alice); matrix[total].push(2); values.pop(); matrix[total].pop(); ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.arrays arraysφ
+run_meta agree se `Solidity.Examples.Tactics.Step.arrays arraysφ
 
 /-- `transferNoCallbackBox`, `transfer_unfold_rightSndArgument`,
 `transfer_unfold_leftFstReceiver`, `sendNoCallbackBox`,
@@ -134,13 +134,13 @@ private def paymentsφ : Solidity.Surface.Fml StandardExample :=
   dl!{ [ uint to = 9; to.transfer(5); to.transfer(total + 1); owner.transfer(2);
          bool ok; ok = to.send(3); ok = to.send(total); ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.payments paymentsφ
+run_meta agree se `Solidity.Examples.Tactics.Step.payments paymentsφ
 
 /-- Under the diamond: `transferDiamond`, `sendNoCallbackDiamond`. -/
 private def paymentsDiamondφ : Solidity.Surface.Fml StandardExample :=
   dl!{ ⟨ uint to = 9; bool ok; ok = to.send(3); to.transfer(5); ⟩ true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.paymentsDiamond paymentsDiamondφ
+run_meta agree se `Solidity.Examples.Tactics.Step.paymentsDiamond paymentsDiamondφ
 
 /-! ## Memory -/
 
@@ -153,7 +153,7 @@ private def memoryφ : Solidity.Surface.Fml StandardExample :=
          delete m.age; delete m.account; delete m.account.balance; delete n;
          m.age = x + 1; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.memory memoryφ
+run_meta agree se `Solidity.Examples.Tactics.Step.memory memoryφ
 
 end Standard
 
@@ -169,7 +169,7 @@ private def unwindφ : Solidity.Surface.Fml StandardExample :=
          /// @custom:key unwind 2
          while (i < 3) { i = i + 1; total = i; }; ⟩ true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.unwind unwindφ
+run_meta agree se `Solidity.Examples.Tactics.Step.unwind unwindφ
 
 /-- `whileInvariantBox`: a body writing a local and storage. -/
 private def invBoxφ : Solidity.Surface.Fml StandardExample :=
@@ -177,7 +177,7 @@ private def invBoxφ : Solidity.Surface.Fml StandardExample :=
          /// @custom:key invariant i <= 3
          while (i < 3) { i = i + 1; total = i; }; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.invBox invBoxφ
+run_meta agree se `Solidity.Examples.Tactics.Step.invBox invBoxφ
 
 /-- `whileInvariantDiamond`. -/
 private def invDiamondφ : Solidity.Surface.Fml StandardExample :=
@@ -186,7 +186,7 @@ private def invDiamondφ : Solidity.Surface.Fml StandardExample :=
          /// @custom:key decreases 3 - i
          while (i < 3) { i = i + 1; }; ⟩ true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.invDiamond invDiamondφ
+run_meta agree se `Solidity.Examples.Tactics.Step.invDiamond invDiamondφ
 
 /-- `whileClose`: the body pushes, so it has no frame. -/
 private def invCloseφ : Solidity.Surface.Fml StandardExample :=
@@ -194,7 +194,7 @@ private def invCloseφ : Solidity.Surface.Fml StandardExample :=
          /// @custom:key invariant i <= 3
          while (i < 3) { values.push(i); i = i + 1; }; ] true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.invClose invCloseφ
+run_meta agree se `Solidity.Examples.Tactics.Step.invClose invCloseφ
 
 /-- `whileNoVariantDiamond`: a framed body under the diamond, with no
 `decreases`. -/
@@ -203,7 +203,7 @@ private def invNoVariantφ : Solidity.Surface.Fml StandardExample :=
          /// @custom:key invariant i <= 3
          while (i < 3) { i = i + 1; }; ⟩ true }
 
-run_meta agree se `Solidity.Examples.Tactics.CoreStep.invNoVariant invNoVariantφ
+run_meta agree se `Solidity.Examples.Tactics.Step.invNoVariant invNoVariantφ
 
 end Loops
 
@@ -233,7 +233,7 @@ private def memoryArraysφ : Solidity.Surface.Fml TestSuite :=
          uint v = b.tokens[i + 1].value; t.value += 2; b.tokens[i].value += 1;
          b.tokens[i].value++; ] true }
 
-run_meta agree ts `Solidity.Examples.Tactics.CoreStep.memoryArrays memoryArraysφ
+run_meta agree ts `Solidity.Examples.Tactics.Step.memoryArrays memoryArraysφ
 
 /-- Arrays whose elements hold a mapping: `storagePopSaveMappingElement`,
 `storageLocalRootPushBindMappingElement`,
@@ -248,7 +248,7 @@ private def suiteArraysφ : Solidity.Surface.Fml TestSuite :=
          Person memory m = alice; persons[i + 1] = m; Token memory t = tok;
          buckets[x].tokens[i] = t; ] true }
 
-run_meta agree ts `Solidity.Examples.Tactics.CoreStep.suiteArrays suiteArraysφ
+run_meta agree ts `Solidity.Examples.Tactics.Step.suiteArrays suiteArraysφ
 
 end Suite
 
@@ -266,7 +266,7 @@ private def callsφ : Solidity.Surface.Fml CallsExample :=
   dl!{ [ uint y = addOne(4); uint z = addTwo(y); uint w = addOne(y + 1); credit(y, 5); bump();
          uint v = larger(z, w + 1); ] true }
 
-run_meta agree ce `Solidity.Examples.Tactics.CoreStep.calls callsφ
+run_meta agree ce `Solidity.Examples.Tactics.Step.calls callsφ
 
 end Calls
 
@@ -293,7 +293,7 @@ private def retsφ : Solidity.Surface.Fml Rets :=
          Person memory n = mk(total + 1); uint y = n.age; Basket memory k; k.items = new uint[](3);
          basket.items = new uint[](a); uint[] memory xs = new uint[](2); ] true }
 
-run_meta agree re `Solidity.Examples.Tactics.CoreStep.rets retsφ
+run_meta agree re `Solidity.Examples.Tactics.Step.rets retsφ
 
 end Rets
 
@@ -313,14 +313,14 @@ private def tryBoxφ : Solidity.Surface.Fml Pinger :=
   dl!{ [ try I(7).get() returns (uint v) { last = v; } catch Panic(uint c) { last = c; }
          catch { last = 0; }; pings = 1; ] true }
 
-run_meta agree pe `Solidity.Examples.Tactics.CoreStep.tryBox tryBoxφ
+run_meta agree pe `Solidity.Examples.Tactics.Step.tryBox tryBoxφ
 
 /-- `tryCallDiamond`. -/
 private def tryDiamondφ : Solidity.Surface.Fml Pinger :=
   dl!{ ⟨ try I(7).get() returns (uint v) { last = v; } catch { last = 0; }; ⟩ true }
 
-run_meta agree pe `Solidity.Examples.Tactics.CoreStep.tryDiamond tryDiamondφ
+run_meta agree pe `Solidity.Examples.Tactics.Step.tryDiamond tryDiamondφ
 
 end Try
 
-end Solidity.Examples.Tactics.CoreStep
+end Solidity.Examples.Tactics.Step

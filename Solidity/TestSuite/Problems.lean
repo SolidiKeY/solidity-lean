@@ -11,7 +11,7 @@ as solkey inlines it at its calls: the obligation as solkey's
 `∀` over its parameters, under `wt(storage)` (`Calculus/Problem.lean`).
 Declared `Solkey.TestSuite.f.problem.legacy` and not compiled (`legacy`):
 the statement proved is the scoped `Solkey.TestSuite.f.problem` of
-`CoreProblems.lean`, checked to erase to this one, and `#solkey_problem`
+`ScopedProblems.lean`, checked to erase to this one, and `#solkey_problem`
 prints this one.  The theorems are in the `Derived*` modules; `Report.lean`
 counts them.  The suggestions `#solkey_derive?` prints are pinned in
 `Suggestions.lean`, which no `Derived` module imports, so that its

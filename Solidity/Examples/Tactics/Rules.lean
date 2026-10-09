@@ -10,7 +10,7 @@ rule is found through the hole read off the statement (`x = people[i].age;`
 is `storageFieldRead_unfold_rightFst` with `lhs` the local `x`).
 -/
 
-namespace Solidity.Examples.Tactics.CoreRules
+namespace Solidity.Examples.Tactics.Rules
 
 open Solidity Solidity
 
@@ -73,4 +73,4 @@ private def iteLt : Stmt SE [.val .uint] [.val .uint] :=
 /-- info: 'Solidity.Rule.premise_unique' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Rule.premise_unique
 
-end Solidity.Examples.Tactics.CoreRules
+end Solidity.Examples.Tactics.Rules

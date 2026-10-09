@@ -466,7 +466,7 @@ one.
 **The statements.**  `solc_problems Solkey.TestSuite legacy`
 (`Frontend/Problems.lean`) defines `Solkey.TestSuite.f.problem.legacy : Fml _`
 for each program, not compiled, and `solc_scoped_problems Solkey.TestSuite
-main decl` (`TestSuite/CoreProblems.lean`) the statement proved,
+main decl` (`TestSuite/ScopedProblems.lean`) the statement proved,
 `Solkey.TestSuite.f.problem : Fml _ []`, checked to erase to it; the
 `Derived` modules state `⊢` scoped (`open scoped Solidity.Scoped`).
 `#solkey_problem` prints one in solkey's `--print-problem` syntax (same
@@ -2484,7 +2484,7 @@ match on `Proves` and `UpdElem` has both lanes' arms.  Confirmed and fixed:
   `.anon` arm only matters for a closer that reads them; its docstring
   says so.
 - **Prose.**  `docs/loops.md` cited `solkey-feedback.md` §9 (now §10) and
-  this file "on that branch"; `Derive.lean`'s header and its
+  this file "on that branch"; `Calculus/Derive.lean`'s header and its
   `module-map.md` row now name the invariant rule (and `cases`);
   `Logic.lean` names `invLean`; `Completeness.lean` and
   `solkey-feedback.md` §3 no longer say there is one `LeanTaclet`.

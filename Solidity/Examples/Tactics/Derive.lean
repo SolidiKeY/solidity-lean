@@ -16,7 +16,7 @@ and today's closer on its erasure), pinned and replayed; `sol_prove` and
 a walk under `⊢ₖ`, solkey's rules alone.
 -/
 
-namespace Solidity.Examples.Tactics.CoreDerive
+namespace Solidity.Examples.Tactics.Derive
 
 open Solidity
 
@@ -331,4 +331,4 @@ example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
 
 end Surface
 
-end Solidity.Examples.Tactics.CoreDerive
+end Solidity.Examples.Tactics.Derive

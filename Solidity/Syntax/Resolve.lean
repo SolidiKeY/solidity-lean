@@ -1,10 +1,10 @@
-import Solidity.Syntax.Core
+import Solidity.Syntax.Scoped
 
 /-!
 # Names to positions, and back
 
 The bridge between `Syntax.lean`'s statements, whose locals are names, and
-the scoped ones of `Syntax/Core.lean`, whose locals are positions
+the scoped ones of `Syntax/Scoped.lean`, whose locals are positions
 (`docs/intrinsic.md`, M2).
 
 `erase` forgets the scopes: a position becomes the name its binder gave it

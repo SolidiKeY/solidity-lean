@@ -20,7 +20,7 @@ are those it agreed with.
 `docs/intrinsic.md` ("M6a lane") has the kernel times beside today's.
 -/
 
-namespace Solidity.Examples.Tactics.CoreSymex
+namespace Solidity.Examples.Tactics.Symex
 
 open Solidity Lean Meta
 
@@ -55,7 +55,7 @@ private def branchφ : Solidity.Surface.Fml SE :=
 info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 ≐ true → { storage := save(storage, total, 1) } { y := find(storage, total) } true) ∧ (se1 ≐ false → { storage := save(storage, total, 2) } { y := find(storage, total) } true))
 -/
 #guard_msgs in
-run_meta coreSymex `Solidity.Examples.Tactics.CoreSymex.branch branchφ
+run_meta coreSymex `Solidity.Examples.Tactics.Symex.branch branchφ
 
 /-! ## Reads and writes of a member -/
 
@@ -63,7 +63,7 @@ private def memberφ : Solidity.Surface.Fml SE := dl!{ [ uint x = alice.age; uin
 
 /-- info: { x := find(storage, alice.age) } { y := x + 1 } { storage := save(storage, alice.age, y) } true -/
 #guard_msgs in
-run_meta coreSymex `Solidity.Examples.Tactics.CoreSymex.member memberφ
+run_meta coreSymex `Solidity.Examples.Tactics.Symex.member memberφ
 
 /-! ## A default, a `require`, a write -/
 
@@ -74,6 +74,6 @@ private def guardφ : Solidity.Surface.Fml SE :=
 info: { x := 0 } { x := 4 } { y := x + 1 } { se1 := y > 3 } ((se1 ≐ true → { storage := save(storage, total, y) } true) ∧ (se1 ≐ false → true))
 -/
 #guard_msgs in
-run_meta coreSymex `Solidity.Examples.Tactics.CoreSymex.guard guardφ
+run_meta coreSymex `Solidity.Examples.Tactics.Symex.guard guardφ
 
-end Solidity.Examples.Tactics.CoreSymex
+end Solidity.Examples.Tactics.Symex

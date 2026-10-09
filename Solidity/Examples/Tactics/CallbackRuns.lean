@@ -24,7 +24,7 @@ plain calculus, the invariant `true`, read as `ValidC` by `ProvesC.valid`
 (`Calculus/CallbackSound.lean`).
 -/
 
-namespace Solidity.Examples.Tactics.CoreCallback
+namespace Solidity.Examples.Tactics.CallbackRuns
 
 open Solidity Solidity
 
@@ -33,7 +33,7 @@ private def pays : Solidity.Surface.Prog StandardExample := sol[StandardExample]
 
 open Lean Elab Command in
 run_cmd liftCoreM do
-  if let some e ← Prog.defineCore `Solidity.Examples.Tactics.CoreCallback.paysCore
+  if let some e ← Prog.defineCore `Solidity.Examples.Tactics.CallbackRuns.paysCore
       ``StandardExample [] pays then
     throwError "paysCore: {e}"
 
@@ -108,4 +108,4 @@ example : ValidC ⟨.tt, rfl⟩ cdl!{ [ ok = to.send(5); ] true } := by
   case exit => exact .plain (.updIntro (.updIntro (.closeTrue rfl))) rfl
   all_goals exact .plain (.closeTrue rfl) rfl
 
-end Solidity.Examples.Tactics.CoreCallback
+end Solidity.Examples.Tactics.CallbackRuns

@@ -33,7 +33,7 @@ too (`Fml.closableB`: an update's reading asks only of the typed states it
 may end in).  `sol_prove?`
 is the scoped one (`Calculus/Closers.lean`), its replay today's
 text.  The chains the tactics write (`sol_chain?`, `#chain`, `sol_rws?`)
-are pinned in `Examples/Tactics/CoreChains.lean`.  What stays today's: the
+are pinned in `Examples/Tactics/Chains.lean`.  What stays today's: the
 guards on today's closer (the closer's input, the leaves' erasure).
 -/
 
