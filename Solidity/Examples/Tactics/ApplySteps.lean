@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -41,11 +41,11 @@ only place soundness is used.
 
 namespace Solidity.Examples.Tactics.ApplySteps
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Wrong rules are refused
 

@@ -1,6 +1,6 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
 
@@ -35,7 +35,7 @@ condition has no rule here (`if (true)` is `ifElseSplit`).
 
 namespace Solidity.Examples.Chains.StorageCoverage
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- The state of the rows: `values` and `tokens` arrays, `ledgers` an array of mappings,
 `tokenById` and `personById` mappings, `flag` a boolean. -/

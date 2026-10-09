@@ -1,5 +1,5 @@
 import Solidity.Frontend.Problems
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 
 /-!
@@ -17,8 +17,8 @@ tests/solc/ScopedFlip.ast.json --wrapper Solidity/Solkey/ScopedFlip.lean`
 rewrites the fixture and its hash.
 -/
 
-open Solidity Proves
-open scoped Solidity.Core.Surface
+open Solidity NFml.Proves
+open scoped Core.Scoped
 
 solc_import "../../tests/solc/ScopedFlip.ast.json" hash 0x7c6221bb7e6edb3f as Solkey.ScopedFlip
 

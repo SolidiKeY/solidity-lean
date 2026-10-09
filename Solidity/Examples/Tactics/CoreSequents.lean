@@ -16,7 +16,7 @@ open Solidity
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- A walk, its goals checked lines; a wrong line fails. -/
 example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] true } := by

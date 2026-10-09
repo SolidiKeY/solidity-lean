@@ -60,7 +60,7 @@ theorem _root_.Solidity.Op2.denote_globFree {a b s : Srt} {o : Op2 a b s} (h : o
 
 section Denote
 
-variable {Γ Δ : Ctx} {σ₀ : State C Γ} {σ₁ : State C Δ} {U : Upd C Γ Δ}
+variable {Γ Δ : Ctx} {σ₀ : EState C Γ} {σ₁ : EState C Δ} {U : Upd C Γ Δ}
 
 theorem Tm.denote_substH_pvV {p : PrimTy} {i : Idx Δ (.val p)} {t' : Tm C Γ .val} :
     (x : Held C Γ (.val p)) → Held.OK σ₀ σ₁ i x →
@@ -199,7 +199,7 @@ def Fml.substU {Γ Δ : Ctx} (U : Upd C Γ Δ) : Fml C Δ → Option (Fml C Γ)
   | _ => none
 
 /-- **A goal read before an update holds after it.** -/
-theorem Fml.substU_holds {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {σ₁ : State C Δ}
+theorem Fml.substU_holds {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : EState C Γ} {σ₁ : EState C Δ}
     (hU : U.apply σ₀ = .ok σ₁) : (φ : Fml C Δ) → {φ' : Fml C Γ} → Fml.substU U φ = some φ' →
       ∀ (σ : TState C Γ) (σ' : TState C Δ), σ.erase = σ₀ → σ'.erase = σ₁ →
         (holds σ φ' ↔ holds σ' φ)
@@ -247,7 +247,7 @@ section RwEq
 variable {Γ : Ctx}
 
 /-- A closed term denotes its erasure in the global part. -/
-theorem Tm.denote_toNil (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
+theorem Tm.denote_toNil (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
     t.toNil? = some t₀ → t.denote σ = (t.erase []).denote σ.glob
   | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h =>
     nomatch h
@@ -272,7 +272,7 @@ theorem Tm.denote_toNil (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {t
     rw [Tm.denote_toNil σ x hx, Tm.denote_toNil σ y hy, Tm.denote_toNil σ z hz]
 
 /-- Today's closed term, at a scope, denotes itself in the global part. -/
-theorem Tm.denote_ofClosed (σ : State C Γ) : {s : Srt} → (q : Solidity.Tm C s) →
+theorem Tm.denote_ofClosed (σ : EState C Γ) : {s : Srt} → (q : Surface.Tm C s) →
     {t : Tm C Γ s} → Tm.ofClosed? q = some t → t.denote σ = q.denote σ.glob
   | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h => nomatch h
   | _, .app0 _, _, h => by cases h; rfl
@@ -314,7 +314,7 @@ def Fml.rwEqC (q : Solidity.Term C × Solidity.Term C) : Fml C Γ → Fml C Γ
   | φ => φ
 
 theorem Tm.sideC_denote {q : Solidity.Term C × Solidity.Term C} (hq : Term.Theq q.1 q.2)
-    (σ : State C Γ) (t : Tm C Γ .val) : Equiv ((t.sideC q).denote σ) (t.denote σ) := by
+    (σ : EState C Γ) (t : Tm C Γ .val) : Equiv ((t.sideC q).denote σ) (t.denote σ) := by
   unfold Tm.sideC
   split
   · rename_i hc
@@ -368,13 +368,13 @@ def Upd.simp {Γ : Ctx} : {Δ : Ctx} → Nat → Upd C Γ Δ → Upd C Γ Δ
   | _, _, .drop U h => .drop (Upd.simp 0 U) h
 
 /-- Two states alike but in their `n` top locals. -/
-def State.AgreeAbove {Δ : Ctx} (n : Nat) (τ τ' : State C Δ) : Prop :=
+def EState.AgreeAbove {Δ : Ctx} (n : Nat) (τ τ' : EState C Δ) : Prop :=
   τ' = τ.withEnv τ'.env ∧ ∀ {t : LTy} (i : Idx Δ t), n ≤ i.toNat → Env.get i τ.env = Env.get i τ'.env
 
-theorem State.AgreeAbove.refl {Δ : Ctx} (n : Nat) (τ : State C Δ) : State.AgreeAbove n τ τ :=
+theorem EState.AgreeAbove.refl {Δ : Ctx} (n : Nat) (τ : EState C Δ) : EState.AgreeAbove n τ τ :=
   ⟨rfl, fun _ _ => rfl⟩
 
-theorem State.AgreeAbove.eq {Δ : Ctx} {τ τ' : State C Δ} (h : State.AgreeAbove 0 τ τ') : τ' = τ := by
+theorem EState.AgreeAbove.eq {Δ : Ctx} {τ τ' : EState C Δ} (h : EState.AgreeAbove 0 τ τ') : τ' = τ := by
   obtain ⟨h₁, h₂⟩ := h
   rw [h₁, Env.ext_get τ'.env τ.env fun i => (h₂ i (Nat.zero_le _)).symm]
   rfl
@@ -392,8 +392,8 @@ theorem Res.map_bind_ok {α β γ : Type} (x : Semantics.Res α) (f : α → Sem
 
 /-- An element that sets no local reads the locals of the state it writes
 into not at all. -/
-theorem UpdElem.write_withEnv {Γ Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ)
-    (he : ∀ {t} (i : Idx Δ t) (r : Rhs C Γ t), e ≠ .local i r) (τ : State C Δ) (e' : Env C Δ) :
+theorem UpdElem.write_withEnv {Γ Δ : Ctx} (σ₀ : EState C Γ) (e : UpdElem C Γ Δ)
+    (he : ∀ {t} (i : Idx Δ t) (r : Rhs C Γ t), e ≠ .local i r) (τ : EState C Δ) (e' : Env C Δ) :
     e.write σ₀ (τ.withEnv e') = (e.write σ₀ τ).map (·.withEnv e') := by
   cases e with
   | «local» i r => exact absurd rfl (he i r)
@@ -410,12 +410,12 @@ theorem UpdElem.write_withEnv {Γ Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C 
 
 /-- An element that sets no local, written into two states alike above
 `n`, leaves two states alike above `n`. -/
-theorem Upd.simp_snoc_other {Γ Δ : Ctx} (σ₀ : State C Γ) {n : Nat} {U U' : Upd C Γ Δ}
-    {e : UpdElem C Γ Δ} {τ τ₀ τ₀' : State C Δ} (_ : U.apply σ₀ = .ok τ₀)
+theorem Upd.simp_snoc_other {Γ Δ : Ctx} (σ₀ : EState C Γ) {n : Nat} {U U' : Upd C Γ Δ}
+    {e : UpdElem C Γ Δ} {τ τ₀ τ₀' : EState C Δ} (_ : U.apply σ₀ = .ok τ₀)
     (h₀' : U'.apply σ₀ = .ok τ₀') (hw : τ₀' = τ₀.withEnv τ₀'.env)
     (hag : ∀ {t : LTy} (i : Idx Δ t), n ≤ i.toNat → Env.get i τ₀.env = Env.get i τ₀'.env)
     (he : ∀ {t} (i : Idx Δ t) (r : Rhs C Γ t), e ≠ .local i r) (h : e.write σ₀ τ₀ = .ok τ) :
-    ∃ τ', (Upd.snoc U' e).apply σ₀ = .ok τ' ∧ State.AgreeAbove n τ τ' := by
+    ∃ τ', (Upd.snoc U' e).apply σ₀ = .ok τ' ∧ EState.AgreeAbove n τ τ' := by
   have hτ : τ = τ.withEnv τ₀.env := by
     have := UpdElem.write_withEnv σ₀ e he τ₀ τ₀.env
     rw [show τ₀.withEnv τ₀.env = τ₀ from rfl, h] at this
@@ -431,9 +431,9 @@ theorem Upd.simp_snoc_other {Γ Δ : Ctx} (σ₀ : State C Γ) {n : Nat} {U U' :
 
 /-- **Where an update returns, so does the update with what it pops
 dropped**, to a state alike but in its `n` top locals. -/
-theorem Upd.simp_apply {Γ : Ctx} (σ₀ : State C Γ) : {Δ : Ctx} → (n : Nat) → (U : Upd C Γ Δ) →
-    ∀ τ, U.apply σ₀ = .ok τ → ∃ τ', (U.simp n).apply σ₀ = .ok τ' ∧ State.AgreeAbove n τ τ'
-  | _, _, .nil, τ, h => ⟨τ, h, State.AgreeAbove.refl _ _⟩
+theorem Upd.simp_apply {Γ : Ctx} (σ₀ : EState C Γ) : {Δ : Ctx} → (n : Nat) → (U : Upd C Γ Δ) →
+    ∀ τ, U.apply σ₀ = .ok τ → ∃ τ', (U.simp n).apply σ₀ = .ok τ' ∧ EState.AgreeAbove n τ τ'
+  | _, _, .nil, τ, h => ⟨τ, h, EState.AgreeAbove.refl _ _⟩
   | _, n, .snoc U e, τ, h => by
     obtain ⟨τ₀, hτ₀, h⟩ := Semantics.bind_ok_inv h
     obtain ⟨τ₀', h₀', ⟨hw, hag⟩⟩ := Upd.simp_apply σ₀ n U τ₀ hτ₀
@@ -480,7 +480,7 @@ theorem Upd.simp_apply {Γ : Ctx} (σ₀ : State C Γ) : {Δ : Ctx} → (n : Nat
       rw [Upd.apply, hτ₀] at h; cases h
       obtain ⟨τ₀', h₀', ⟨hw, hag⟩⟩ := Upd.simp_apply σ₀ (n + e.depth) U τ₀ hτ₀
       refine ⟨τ₀'.drop e, ?_, ?_, fun j hj => ?_⟩
-      · show ((U.simp (n + e.depth)).apply σ₀).map (State.drop e) = _
+      · show ((U.simp (n + e.depth)).apply σ₀).map (EState.drop e) = _
         rw [h₀']; rfl
       · rw [hw]; rfl
       · show Env.get j (Env.drop e τ₀.env) = Env.get j (Env.drop e τ₀'.env)
@@ -493,8 +493,8 @@ theorem Upd.simp_apply {Γ : Ctx} (σ₀ : State C Γ) : {Δ : Ctx} → (n : Nat
       rw [Upd.apply, hτ₀] at h; cases h
       obtain ⟨τ₀', h₀', hag⟩ := Upd.simp_apply σ₀ 0 U τ₀ hτ₀
       rw [hag.eq] at h₀'
-      refine ⟨τ₀.thin e, ?_, State.AgreeAbove.refl _ _⟩
-      show ((U.simp 0).apply σ₀).map (State.thin e) = _
+      refine ⟨τ₀.thin e, ?_, EState.AgreeAbove.refl _ _⟩
+      show ((U.simp 0).apply σ₀).map (EState.thin e) = _
       rw [h₀']; rfl
 
 /-- Under the box, an update with what it pops dropped gives the update. -/

@@ -99,7 +99,7 @@ local instance : InContract := ⟨StandardExample⟩
 Solidity.Core.Surface`, `Tools/Inspect.lean`): a parameter is bound by
 `∀`, and `#step` names the rule `Stmt.step` fires. -/
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! What symbolic execution leaves is a formula of updates; reduced, it
 reads the initial state alone: it holds wherever `alice.age` is a location

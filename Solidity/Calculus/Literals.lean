@@ -118,15 +118,15 @@ theorem LitLaw.theq {t t' : Term C} (r : LitLaw t t') : Term.Theq t t' := by
 
 /-- The literal law on the right-hand sides of `{U}_m φ`, if it rewrites
 one: under any modality, and with no premise on `U`, since the law is exact. -/
-def NFml.rwLitTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.rwLitTop (q : Term C × Term C) (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   if (U.rwEv q != U) = true then some (.upd m (U.rwEv q) φ) else none
 
-theorem NFml.rwLitTop_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) {m : Modality} {U : Upd C}
+theorem NFml.rwLitTop_holds {q : Term C × Term C} (r : LitLaw q.1 q.2) {m : Modality} {U : Surface.Upd C}
     {φ ψ : NFml C} (h : NFml.rwLitTop q m U φ = some ψ) (σ : State) :
     holds σ ψ ↔ holds σ (.upd m U φ) := by
   unfold NFml.rwLitTop at h
   split at h
-  · cases h; exact Upd.rwEv_holds (u := .val) r.refines.at (fun σ _ _ => r.refines_rev σ) m φ σ
+  · cases h; exact Surface.Upd.rwEv_holds (u := .val) r.refines.at (fun σ _ _ => r.refines_rev σ) m φ σ
   · nomatch h
 
 /-- The literal law on the right-hand sides of the update at position `i`. -/

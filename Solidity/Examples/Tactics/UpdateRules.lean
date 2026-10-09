@@ -7,7 +7,7 @@ import Solidity.Calculus.Core.RewriteSyntax
 # Update simplification: one update instead of a stack
 
 Symbolic execution leaves one update per terminal rule in front of the
-postcondition; KeY merges them as it goes (`Calculus/UpdateRules.lean`,
+postcondition; KeY merges them as it goes (`Calculus/NFmlUpdateRules.lean`,
 mini-solkey's update examples).  Here the same derivation is shown
 rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨`, and with
 `refine merge rfl ?_`/`refine simplify ?_` on `⊢`.  The goals are under the box: a
@@ -22,11 +22,11 @@ reads today's lines).
 
 namespace Solidity.Examples.Tactics.UpdateRules
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Rule by rule
 
@@ -109,9 +109,9 @@ applied by hand, not a rule of `sol_upd`. -/
 theorem selfAssign : ⊨ dl!{ [ x = x; y = 3; ] y == 3 } := by
   sol_symex
   sol_merge
-  refine fun σ => UpdElem.elimSelf_box rfl ?_
+  refine fun σ => Surface.UpdElem.elimSelf_box rfl ?_
   revert σ
-  show Valid _
+  show NFml.Valid _
   sol_close
 
 /-! ## All at once: `sol_merge` -/

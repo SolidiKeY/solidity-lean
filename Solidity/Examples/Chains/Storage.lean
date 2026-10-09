@@ -1,7 +1,7 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
@@ -25,7 +25,7 @@ box) the declaration says what is missing; a starting length has no spelling at 
 
 namespace Solidity.Examples.Chains.Storage
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -362,7 +362,7 @@ end IndexWriteStruct
 /-! ## Example: Push and Pop on a Storage Array -/
 
 /- A concrete starting length has no spelling: the notation writes a length by a push or a pop only
-(`Calculus/Notation.lean`, `rStor`), so the push and pop examples start from the storage as it is and keep
+(`Calculus/SurfaceNotation.lean`, `rStor`), so the push and pop examples start from the storage as it is and keep
 its length, `values.length`, symbolic. -/
 
 namespace Push

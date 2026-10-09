@@ -72,7 +72,7 @@ inductive Obs where
   deriving DecidableEq, Repr, Inhabited
 
 /-- What a read of the storage shows. -/
-def obsOf : Res SVal → Obs
+def obsOf : Res Semantics.SVal → Obs
   | .ok (.prim p) => .word p
   | .ok (.struct _) => .struct
   | .ok (.array es _ fx) => .arr es.length fx
@@ -93,38 +93,38 @@ def ChildOk : Obs → Seg → Obs → Prop
 
 /-- **Every storage meets the constraint**: `alice.account` and
 `alice.account.balance` as read in any tree. -/
-theorem childOk_findLive (T : SVal) (P : List Seg) (s : Seg) :
+theorem childOk_findLive (T : Semantics.SVal) (P : List Seg) (s : Seg) :
     ChildOk (obsOf (T.findLive P)) s (obsOf (T.findLive (P ++ [s]))) := by
   rw [SVal.findLive_append]
   rcases T.findLive P with e | v
   · cases s <;> simp [ChildOk, obsOf, bind, Except.bind]
   · simp only [Res.ok_bind]
     cases v with
-    | prim p => cases s <;> simp [ChildOk, obsOf, SVal.findLive]
+    | prim p => cases s <;> simp [ChildOk, obsOf, Semantics.SVal.findLive]
     | struct fs =>
       cases s with
       | field f =>
         simp [ChildOk, obsOf]
-      | «at» i => simp [ChildOk, obsOf, SVal.findLive]
+      | «at» i => simp [ChildOk, obsOf, Semantics.SVal.findLive]
     | array es sh fx =>
       cases s with
       | field f =>
         by_cases hf : f = "length"
-        · subst hf; cases fx <;> simp [ChildOk, obsOf, SVal.findLive]
-        · simp [ChildOk, obsOf, SVal.findLive, hf]
+        · subst hf; cases fx <;> simp [ChildOk, obsOf, Semantics.SVal.findLive]
+        · simp [ChildOk, obsOf, Semantics.SVal.findLive, hf]
       | «at» i =>
-        simp only [ChildOk, obsOf, SVal.findLive]
+        simp only [ChildOk, obsOf, Semantics.SVal.findLive]
         by_cases h : 0 ≤ i ∧ i.toNat < es.length
         · rw [dif_pos h, if_pos ⟨h.1, by omega⟩]
           cases (es.get ⟨i.toNat, h.2⟩) <;> simp
         · rw [dif_neg h, if_neg (by omega)]
     | map es d =>
       cases s with
-      | field f => simp [ChildOk, obsOf, SVal.findLive]
+      | field f => simp [ChildOk, obsOf, Semantics.SVal.findLive]
       | «at» i =>
         cases h : lookupBy i es with
-        | none => cases d <;> simp [ChildOk, obsOf, SVal.findLive, h]
-        | some v => cases v <;> simp [ChildOk, obsOf, SVal.findLive, h]
+        | none => cases d <;> simp [ChildOk, obsOf, Semantics.SVal.findLive, h]
+        | some v => cases v <;> simp [ChildOk, obsOf, Semantics.SVal.findLive, h]
 
 /-! ## Realizing the reads
 
@@ -147,7 +147,7 @@ def keyKids (Ks : List (List Seg)) (P : List Seg) : List Int :=
     | _ => none
 
 /-- A tree showing `o` at the paths `Ks`, from `P` down, `d` levels deep. -/
-def build (o : List Seg → Obs) (Ks : List (List Seg)) : Nat → List Seg → SVal
+def build (o : List Seg → Obs) (Ks : List (List Seg)) : Nat → List Seg → Semantics.SVal
   | 0, _ => .prim (.int 0)
   | d + 1, P =>
     match o P with
@@ -261,7 +261,7 @@ theorem build_findLive {o : List Seg → Obs} {Ks : List (List Seg)} (hc : Prefi
       rw [hv] at hk
       cases s with
       | field f =>
-        simp only [SVal.findLive, lookupBy_map_self]
+        simp only [Semantics.SVal.findLive, lookupBy_map_self]
         by_cases hf : f ∈ fieldKids o Ks P
         · simp only [if_pos hf]
           exact ih _ rfl (mem_fieldKids.1 hf).2
@@ -277,26 +277,26 @@ theorem build_findLive {o : List Seg → Obs} {Ks : List (List Seg)} (hc : Prefi
         by_cases hl : fx = false ∧ f = "length"
         · obtain ⟨rfl, rfl⟩ := hl
           simp only [ChildOk, and_self, if_true] at hk
-          simp only [SVal.findLive, List.length_map, List.length_range]
+          simp only [Semantics.SVal.findLive, List.length_map, List.length_range]
           cases rest with
           | nil => simp [obsOf, hk]
           | cons s' rest' =>
             have := absent_below hc hok (s' :: rest') (P := P ++ [.field "length"])
               (.inr ⟨_, hk⟩) (by simp) (by simpa using hK)
             simp only [List.append_assoc, List.singleton_append] at this
-            simp [SVal.findLive, obsOf, this]
+            simp [Semantics.SVal.findLive, obsOf, this]
         · simp only [ChildOk, hl, if_false] at hk
-          have : (SVal.array ((List.range n).map fun i => build o Ks d (P ++ [.at (i : Int)])) []
+          have : (Semantics.SVal.array ((List.range n).map fun i => build o Ks d (P ++ [.at (i : Int)])) []
               fx).findLive (.field f :: rest) = .error .undef := by
             by_cases hf : f = "length"
             · subst hf
               have : fx = true := by cases fx <;> simp_all
               subst this; rfl
-            · simp [SVal.findLive]
+            · simp [Semantics.SVal.findLive]
           rw [this]; exact hbelow hk _
       | «at» i =>
         simp only [ChildOk] at hk
-        simp only [SVal.findLive, List.length_map, List.length_range]
+        simp only [Semantics.SVal.findLive, List.length_map, List.length_range]
         split
         · rename_i hb
           rw [if_pos ⟨hb.1, by omega⟩] at hk
@@ -311,7 +311,7 @@ theorem build_findLive {o : List Seg → Obs} {Ks : List (List Seg)} (hc : Prefi
       cases s with
       | field f => exact hbelow hk _
       | «at» i =>
-        simp only [SVal.findLive, lookupBy_map_self, if_pos (mem_keyKids hm)]
+        simp only [Semantics.SVal.findLive, lookupBy_map_self, if_pos (mem_keyKids hm)]
         exact ih _ rfl hk
 
 /-- The deepest path of `Ks`, and one more. -/
@@ -332,7 +332,7 @@ is a struct of its roots. -/
 def atRoot (o : List Seg → Obs) (P : List Seg) : Obs := if P = [] then .struct else o P
 
 /-- The storage showing `o` at the paths `Ks`. -/
-def realize (o : List Seg → Obs) (Ks : List (List Seg)) : SVal :=
+def realize (o : List Seg → Obs) (Ks : List (List Seg)) : Semantics.SVal :=
   build (atRoot o) Ks (depth Ks) []
 
 /-- **Realizability**: any choice of what the finitely many paths `Ks` show,
@@ -469,29 +469,29 @@ def LFml.initOnly : LFml → Bool
   | .all .. => false
 
 /-- The locals of a state, as values. -/
-def envOf (σ : State) : Var → Res Value := fun x => σ.getEnv x >>= Close.bindingVal
+def envOf (σ : Semantics.State) : Var → Res Value := fun x => σ.getEnv x >>= Close.bindingVal
 
 /-- What the storage of a state shows at each path. -/
-def obsAt (σ : State) : List Seg → Obs := fun qs => obsOf ((SVal.struct σ.storage).findLive qs)
+def obsAt (σ : Semantics.State) : List Seg → Obs := fun qs => obsOf ((Semantics.SVal.struct σ.storage).findLive qs)
 
-theorem find_sim (r : Res SVal) : Sim ((obsOf r).find) (r >>= SVal.asValue) := by
+theorem find_sim (r : Res Semantics.SVal) : Sim ((obsOf r).find) (r >>= SVal.asValue) := by
   intro a
   rcases r with e | (p | fs | ⟨es, sh, fx⟩ | ⟨es, d⟩)
   · simp [obsOf, Obs.find, bind, Except.bind]
   · cases p <;> simp [obsOf, Obs.find, SVal.asValue, Res.ok_bind]
   all_goals simp [obsOf, Obs.find, SVal.asValue, Res.ok_bind]
 
-theorem has_sim (r : Res SVal) : Sim ((obsOf r).has) (r >>= fun _ => .ok (.bool true)) := by
+theorem has_sim (r : Res Semantics.SVal) : Sim ((obsOf r).has) (r >>= fun _ => .ok (.bool true)) := by
   intro a
   rcases r with e | (p | fs | ⟨es, sh, fx⟩ | ⟨es, d⟩) <;>
     simp [obsOf, Obs.has, bind, Except.bind]
 
-theorem len_sim (r : Res SVal) : Sim ((obsOf r).len) (r >>= Close.arrLen) := by
+theorem len_sim (r : Res Semantics.SVal) : Sim ((obsOf r).len) (r >>= Close.arrLen) := by
   intro a
   rcases r with e | (p | fs | ⟨es, sh, fx⟩ | ⟨es, d⟩) <;>
     simp [obsOf, Obs.len, Close.arrLen, bind, Except.bind]
 
-theorem test_sim (sh : KShape) (r : Res SVal) : Sim ((obsOf r).test sh) (r >>= sh.test) := by
+theorem test_sim (sh : KShape) (r : Res Semantics.SVal) : Sim ((obsOf r).test sh) (r >>= sh.test) := by
   intro a
   rcases r with e | (p | fs | ⟨es, sh', fx⟩ | ⟨es, d⟩)
   · cases sh <;> simp [obsOf, Obs.test, bind, Except.bind]
@@ -502,7 +502,7 @@ mutual
 
 /-- **Over the storage of a state, the free reads are the reads**:
 `balances[k]` read through `o = obsAt σ` returns what it returns in `σ`. -/
-theorem LTerm.evalA_sim (σ : State) :
+theorem LTerm.evalA_sim (σ : Semantics.State) :
     (t : LTerm) → t.initOnly = true → Sim (t.evalA (envOf σ) (obsAt σ)) (t.eval σ)
   | .lit _, _ => Sim.refl _
   | .var _, _ => Sim.refl _
@@ -543,7 +543,7 @@ theorem LTerm.evalA_sim (σ : State) :
     simp [LTerm.initOnly] at h
 
 /-- The same for a path. -/
-theorem LPath.evalA_sim (σ : State) :
+theorem LPath.evalA_sim (σ : Semantics.State) :
     (q : LPath) → q.initOnly = true → Sim (q.evalA (envOf σ) (obsAt σ)) (q.eval σ)
   | .root _, _ => Sim.refl _
   | .field q _, h => Sim.bind (LPath.evalA_sim σ q h) fun _ => Sim.refl _
@@ -555,7 +555,7 @@ theorem LPath.evalA_sim (σ : State) :
 end
 
 /-- A formula holds alike of runs that agree. -/
-theorem LFml.holdsA_iff (σ : State) :
+theorem LFml.holdsA_iff (σ : Semantics.State) :
     (φ : LFml) → φ.initOnly = true → (φ.holdsA (envOf σ) (obsAt σ) ↔ φ.holds σ)
   | .tt, _ => Iff.rfl
   | .all .., h => by simp [LFml.initOnly] at h
@@ -747,7 +747,7 @@ theorem consAll_iff {E o} : (R : List LPath) → (consAll E o R ↔ ∀ Q ∈ R,
   | Q :: R => by simp [consAll, consAll_iff R]
 
 /-- **Every storage meets the constraints.** -/
-theorem consA_obsAt (σ : State) : (Q : LPath) → Q.consA (envOf σ) (obsAt σ)
+theorem consA_obsAt (σ : Semantics.State) : (Q : LPath) → Q.consA (envOf σ) (obsAt σ)
   | .root _ => trivial
   | .field _ f => fun qs _ => childOk_findLive _ qs (.field f)
   | .at _ _ => fun qs _ i _ => childOk_findLive _ qs (.at i)
@@ -900,20 +900,20 @@ theorem evalPaths_childOk {E o} {R : List LPath} (hc : ∀ Q ∈ R, Q.consA E o)
     exact hc _ hq _ hi
 
 /-- The roots of a storage tree. -/
-def rootsOf : SVal → List (Name × SVal)
+def rootsOf : Semantics.SVal → List (Name × Semantics.SVal)
   | .struct fs => fs
   | _ => []
 
 theorem realize_struct (o : List Seg → Obs) (Ks : List (List Seg)) :
-    SVal.struct (rootsOf (realize o Ks)) = realize o Ks := by
+    Semantics.SVal.struct (rootsOf (realize o Ks)) = realize o Ks := by
   simp [realize, depth, build, atRoot, rootsOf]
 
 /-- **Realizability, for a formula**: a choice of reads that meets the
 constraints of `ψ`'s read paths is what the storage of some state shows at
 every one of them, a state with the locals of `σ`. -/
-theorem realize_reads (ψ : LFml) (σ : State) (o : List Seg → Obs)
+theorem realize_reads (ψ : LFml) (σ : Semantics.State) (o : List Seg → Obs)
     (hc : consAll (envOf σ) o ψ.reads) :
-    ∃ σ' : State, envOf σ' = envOf σ ∧ Agree (envOf σ) o (obsAt σ') ψ.reads := by
+    ∃ σ' : Semantics.State, envOf σ' = envOf σ ∧ Agree (envOf σ) o (obsAt σ') ψ.reads := by
   let Ks := evalPaths (envOf σ) o ψ.reads
   refine ⟨{ σ with storage := rootsOf (realize o Ks) }, rfl, ?_⟩
   intro Q hQ qs hq

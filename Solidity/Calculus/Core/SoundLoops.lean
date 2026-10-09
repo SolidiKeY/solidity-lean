@@ -62,7 +62,7 @@ variable {Γ : Ctx}
 
 /-- **The term bridge** on scoped terms (`Theory/Bridge/Denote.lean`): a term's denotation agrees with its
 reading wherever the reading returns. -/
-theorem Tm.denote_eval (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) →
+theorem Tm.denote_eval (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) →
     Srt.Bridge s (t.denote σ) (t.eval σ)
   | _, .pvV _ => by intro x h; cases h; rfl
   | _, .pvP i => by

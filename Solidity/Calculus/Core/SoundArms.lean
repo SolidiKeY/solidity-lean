@@ -39,7 +39,7 @@ nothing else (`Theory/StateWrites.lean`'s `*_with`). -/
 
 section Updates
 
-variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
+variable {Γ : Ctx} {m : Modality} (σ : EState C Γ)
 
 theorem Src.eval_lower {T : Ty} (r : Src C Γ T) : r.lower.eval σ = r.value σ := by
   cases r with
@@ -91,7 +91,7 @@ theorem saveStorage_glob (r : Name) (segs : List Seg) (v : Semantics.SVal) :
     (σ.glob.saveStorage r segs v >>= fun d =>
       pure (σ.withGlob { σ.glob with storage := d.storage })) =
       σ.withGlob <$> σ.glob.saveStorage r segs v :=
-  storage_glob σ _ (Solidity.State.saveStorage_with _ _ _ _)
+  storage_glob σ _ (Semantics.State.saveStorage_with _ _ _ _)
 
 /-- A heap write through the term, as the statement's write. -/
 theorem writeAddr_glob (mv : Semantics.MVal) (a : Semantics.Addr) :
@@ -102,7 +102,7 @@ theorem writeAddr_glob (mv : Semantics.MVal) (a : Semantics.Addr) :
 
 /-- A global step's state and value, with the locals (`Semantics/Core.lean`'s
 private `withGlob₂`). -/
-def glob₂ (x : Semantics.State × Value) : State C Γ × Value := (σ.withGlob x.1, x.2)
+def glob₂ (x : Semantics.State × Value) : EState C Γ × Value := (σ.withGlob x.1, x.2)
 
 @[simp] theorem glob₂_fst (x : Semantics.State × Value) : (glob₂ σ x).1 = σ.withGlob x.1 := rfl
 @[simp] theorem glob₂_snd (x : Semantics.State × Value) : (glob₂ σ x).2 = x.2 := rfl
@@ -168,7 +168,7 @@ theorem incDec_write {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) :
     cases Loc.resolve σ (Loc.index it b (.simple ie)) <;> rfl
   | mfield b f h =>
     simp only [MLoc.lower, MPath.eval_lower, OpLoc.bump_mfield, bumpMem, writeAddr_glob,
-      Solidity.readLoc_eq, Solidity.writeLoc_eq, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      Solidity.readLoc_eq, Semantics.writeLoc_eq, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
       Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump,
       bind_assoc, pure_bind, map_bind, map_pure, glob₂_fst, bind_withGlob]
     cases MPath.mval σ b with
@@ -178,7 +178,7 @@ theorem incDec_write {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) :
     obtain ⟨iv, hi⟩ := Simple.eval_ok σ ie
     have hi' : ie.eval σ = pure iv := hi
     simp only [MLoc.lower, MPath.eval_lower, Simple.eval_lower, hi', OpLoc.bump_mindex, bumpMem,
-      writeAddr_glob, Solidity.readLoc_eq, Solidity.writeLoc_eq, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
+      writeAddr_glob, Solidity.readLoc_eq, Semantics.writeLoc_eq, OpLoc.set, OpLoc.op, OpLoc.cur, UpdElem.write, Tm.eval, Op3.eval, Op2.eval,
       Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump,
       bind_assoc, pure_bind, map_bind, map_pure, glob₂_fst, bind_withGlob]
     cases MPath.mval σ b with
@@ -195,12 +195,6 @@ theorem writeAddr_ok_with {s x : Semantics.State} {mv : Semantics.MVal} {a : Sem
 theorem upd2_apply (e₁ e₂ : UpdElem C Γ Γ) :
     ((Upd.nil.snoc e₁).snoc e₂).apply σ = (do e₂.write σ (← e₁.write σ σ)) := rfl
 
-theorem Res.bind_eq_ok {α β : Type} {x : Res α} {f : α → Res β} {b : β} :
-    (x >>= f) = .ok b ↔ ∃ a, x = .ok a ∧ f a = .ok b := by
-  cases x with
-  | error e => exact ⟨fun h => (nomatch h), fun ⟨_, h, _⟩ => (nomatch h)⟩
-  | ok a => exact ⟨fun h => ⟨a, rfl, h⟩, fun ⟨_, h, h'⟩ => by cases h; exact h'⟩
-
 theorem Res.map_eq_ok {α β : Type} {x : Res α} {f : α → β} {b : β} :
     (f <$> x) = .ok b ↔ ∃ a, x = .ok a ∧ f a = b := by
   cases x with
@@ -208,44 +202,44 @@ theorem Res.map_eq_ok {α β : Type} {x : Res α} {f : α → β} {b : β} :
   | ok a => exact ⟨fun h => ⟨a, rfl, Except.ok.inj h⟩, fun ⟨_, h, h'⟩ => by cases h; rw [← h']; rfl⟩
 
 /-- The value `l++` gives is what the term `bumped(l)` reads in the state before. -/
-theorem bump_bumped {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) {σ' : State C Γ} {v : Value}
+theorem bump_bumped {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) {σ' : EState C Γ} {v : Value}
     (hb : l.bump σ op = .ok (σ', v)) : (Tm.bumped op p l.cur).eval σ = .ok v := by
   unfold Tm.bumped
   cases l with
   | «local» j =>
-    simp only [OpLoc.bump, bumpLocal, Res.bind_eq_ok] at hb
+    simp only [OpLoc.bump, bumpLocal, SemanticsProperties.Res.bind_eq_ok] at hb
     obtain ⟨n, hn, new, hnew, he⟩ := hb
     cases Except.ok.inj he
     split <;> simp only [OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, evalBinop_bump,
       Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, *]
     all_goals rfl
   | root r h =>
-    simp only [OpLoc.bump_root, bumpStore, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    simp only [OpLoc.bump_root, bumpStore, Res.map_eq_ok, SemanticsProperties.Res.bind_eq_ok] at hb
     obtain ⟨⟨τ, w⟩, ⟨sv, hsv, old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
     cases Except.ok.inj he; cases hg
     split <;> simp only [Loc.lower, OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hsv, hold, hn, hnew] <;> rfl
   | field b f h =>
-    simp only [OpLoc.bump_field, bumpStore, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    simp only [OpLoc.bump_field, bumpStore, Res.map_eq_ok, SemanticsProperties.Res.bind_eq_ok] at hb
     obtain ⟨⟨rt, segs⟩, hr, ⟨τ, w⟩, ⟨sv, hsv, old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
     cases Except.ok.inj he; cases hg
     split <;> simp only [Loc.eval_lower, OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hr, hsv, hold, hn, hnew] <;> rfl
   | index it b ie =>
-    simp only [OpLoc.bump_index, bumpStore, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    simp only [OpLoc.bump_index, bumpStore, Res.map_eq_ok, SemanticsProperties.Res.bind_eq_ok] at hb
     obtain ⟨⟨rt, segs⟩, hr, ⟨τ, w⟩, ⟨sv, hsv, old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
     cases Except.ok.inj he; cases hg
     split <;> simp only [Loc.eval_lower, OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hr, hsv, hold, hn, hnew] <;> rfl
   | mfield b f h =>
-    simp only [OpLoc.bump_mfield, bumpMem, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    simp only [OpLoc.bump_mfield, bumpMem, Res.map_eq_ok, SemanticsProperties.Res.bind_eq_ok] at hb
     obtain ⟨mv, hmv, id, hid, ⟨τ, w⟩, ⟨old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
     cases Except.ok.inj he; cases hg
-    simp only [Solidity.readLoc_eq, Res.bind_eq_ok] at hold
+    simp only [Solidity.readLoc_eq, SemanticsProperties.Res.bind_eq_ok] at hold
     obtain ⟨r, hr, hro⟩ := hold
     split <;> simp only [MLoc.lower, MPath.eval_lower, OpLoc.cur, Tm.eval, Op2.eval, Op1.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hmv, hid, hr, hro, hn, hnew] <;> rfl
   | mindex a b ie =>
-    simp only [OpLoc.bump_mindex, bumpMem, Res.map_eq_ok, Res.bind_eq_ok] at hb
+    simp only [OpLoc.bump_mindex, bumpMem, Res.map_eq_ok, SemanticsProperties.Res.bind_eq_ok] at hb
     obtain ⟨mv, hmv, id, hid, iv, hiv, k, hk, ⟨τ, w⟩, ⟨old, hold, n, hn, new, hnew, τ', hτ', he⟩, hg⟩ := hb
     cases Except.ok.inj he; cases hg
-    simp only [Solidity.readLoc_eq, Res.bind_eq_ok] at hold
+    simp only [Solidity.readLoc_eq, SemanticsProperties.Res.bind_eq_ok] at hold
     obtain ⟨r, hr, hro⟩ := hold
     split <;> simp only [MLoc.lower, MPath.eval_lower, Simple.eval_lower, OpLoc.cur, Tm.eval, Op2.eval, Op0.eval, Val.lower, evalBinop_bump, Solidity.applyBinOp_bump, Res.bind_ok, pure_bind, bind_assoc, hmv, hid, hiv, hk,
       hr, hro, hn, hnew] <;> rfl
@@ -263,7 +257,7 @@ typed step erases to, over any erased state, as
 
 section Runs
 
-variable {Γ : Ctx} (σ : State C Γ)
+variable {Γ : Ctx} (σ : EState C Γ)
 
 theorem setLocal_run {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) :
     (Upd.nil.snoc (.local i (.val v.lower))).apply σ = (TRun.assignLocal_erase i v).erased σ := by
@@ -278,7 +272,7 @@ theorem save_run {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
     pure (σ.withGlob { σ.glob with storage := st.storage })) = _
   simp only [Op3.eval, Loc.eval_lower, Src.eval_lower, StepAgrees.erased, bind_assoc, pure_bind]
   congr 1; funext sv; congr 1; funext q
-  exact storage_glob σ _ (Solidity.State.writeStorage_with _ _ _ _)
+  exact storage_glob σ _ (Semantics.State.writeStorage_with _ _ _ _)
 
 theorem saveMem_run {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
     (Upd.nil.snoc (.storage (.app3 .save .storage l.lower
@@ -290,7 +284,7 @@ theorem saveMem_run {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)
   simp only [Op3.eval, Op2.eval, Loc.eval_lower, MPath.eval_lower, StepAgrees.erased, bind_assoc,
     pure_bind]
   congr 1; funext mv; congr 1; funext id; congr 1; funext sv; congr 1; funext q
-  exact storage_glob σ _ (Solidity.State.writeStorage_with _ _ _ _)
+  exact storage_glob σ _ (Semantics.State.writeStorage_with _ _ _ _)
 
 theorem delAt_run {T : Ty} (l : Loc C Γ T) :
     (Upd.nil.snoc (.storage (.app2 .delAt .storage l.lower))).apply σ =
@@ -300,7 +294,7 @@ theorem delAt_run {T : Ty} (l : Loc C Γ T) :
     pure (σ.withGlob { σ.glob with storage := st.storage })) = _
   simp only [Op2.eval, Loc.eval_lower, StepAgrees.erased, bind_assoc, pure_bind]
   congr 1; funext q; congr 1; funext cur
-  exact storage_glob σ _ (Solidity.State.saveStorage_with _ _ _ _)
+  exact storage_glob σ _ (Semantics.State.saveStorage_with _ _ _ _)
 
 theorem writeMem_run {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
     (Upd.nil.snoc (.memory (.app3 .write .memory l.lower r.lower))).apply σ =
@@ -365,7 +359,7 @@ theorem opAssign_run {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = tru
       Op1.eval, Op0.eval, Val.lower, MLoc.lower, MPath.eval_lower, Simple.eval_lower, hv',
       evalBinop_compound hop, StepAgrees.erased, Val.eval, OpLoc.store, opMem, bind_assoc,
       pure_bind,
-      writeAddr_glob, map_bind, Solidity.readLoc_eq, Solidity.writeLoc_eq]
+      writeAddr_glob, map_bind, Solidity.readLoc_eq, Semantics.writeLoc_eq]
     cases MPath.mval σ b with
     | error => rfl
     | ok mv => cases hr : mv.asRef <;> simp only [Res.bind_ok, hr] <;> rfl
@@ -377,7 +371,7 @@ theorem opAssign_run {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = tru
       Op1.eval, Op0.eval, Val.lower, MLoc.lower, MPath.eval_lower, Simple.eval_lower, hv', hi',
       evalBinop_compound hop, StepAgrees.erased, Val.eval, OpLoc.store, opMem, bind_assoc,
       pure_bind,
-      writeAddr_glob, map_bind, Solidity.readLoc_eq, Solidity.writeLoc_eq]
+      writeAddr_glob, map_bind, Solidity.readLoc_eq, Semantics.writeLoc_eq]
     cases MPath.mval σ b with
     | error => rfl
     | ok mv =>
@@ -493,7 +487,7 @@ end Arms
 
 section Runs2
 
-variable {Γ : Ctx} (σ : State C Γ)
+variable {Γ : Ctx} (σ : EState C Γ)
 
 theorem pushSlot_run {E : Ty} (b : SPath C Γ (.array E)) :
     (Upd.nil.snoc (.storage (.app2 (.pushSlot E) .storage b.lower))).apply σ =

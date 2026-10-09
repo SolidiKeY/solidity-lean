@@ -40,7 +40,7 @@ def Simple.up {Γ : Ctx} {t : LTy} {p : PrimTy} : Simple C Γ p → Simple C (t 
   | .env k hp => .env k hp
 
 theorem Simple.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} (s : Simple C Γ p) :
-    s.up (t := t) = s.wk Core.up := by
+    s.up (t := t) = s.wk Solidity.Core.up := by
   cases s with
   | «local» i => exact congrArg Simple.local (Idx.up_eq i).symm
   | _ => rfl
@@ -83,40 +83,40 @@ def ARhs.up {Γ : Ctx} {t : LTy} {R : RefTy} : ARhs C Γ R → ARhs C (t :: Γ) 
 mutual
 
 theorem SPath.up_eq {Γ : Ctx} {t : LTy} {T : Ty} :
-    (b : SPath C Γ T) → b.up (t := t) = b.wk Core.up
+    (b : SPath C Γ T) → b.up (t := t) = b.wk Solidity.Core.up
   | .alias i => congrArg SPath.alias (Idx.up_eq i).symm
   | .loc l => congrArg SPath.loc (Loc.up_eq l)
 
 theorem Loc.up_eq {Γ : Ctx} {t : LTy} {T : Ty} :
-    (l : Loc C Γ T) → l.up (t := t) = l.wk Core.up
+    (l : Loc C Γ T) → l.up (t := t) = l.wk Solidity.Core.up
   | .root _ _ => rfl
   | .field b f hf => congrArg (Loc.field · f hf) (SPath.up_eq b)
   | .index it b i => by
-    show Loc.index it b.up i.up = Loc.index it (b.wk Core.up) (i.wk Core.up)
+    show Loc.index it b.up i.up = Loc.index it (b.wk Solidity.Core.up) (i.wk Solidity.Core.up)
     rw [SPath.up_eq b, Val.up_eq i]
 
 theorem MPath.up_eq {Γ : Ctx} {t : LTy} {T : Ty} :
-    (b : MPath C Γ T) → b.up (t := t) = b.wk Core.up
+    (b : MPath C Γ T) → b.up (t := t) = b.wk Solidity.Core.up
   | .var i hm => congrArg (MPath.var · hm) (Idx.up_eq i).symm
   | .loc l => congrArg MPath.loc (MLoc.up_eq l)
 
 theorem MLoc.up_eq {Γ : Ctx} {t : LTy} {T : Ty} :
-    (l : MLoc C Γ T) → l.up (t := t) = l.wk Core.up
+    (l : MLoc C Γ T) → l.up (t := t) = l.wk Solidity.Core.up
   | .field b f hf => congrArg (MLoc.field · f hf) (MPath.up_eq b)
   | .index a b i => by
-    show MLoc.index a b.up i.up = MLoc.index a (b.wk Core.up) (i.wk Core.up)
+    show MLoc.index a b.up i.up = MLoc.index a (b.wk Solidity.Core.up) (i.wk Solidity.Core.up)
     rw [MPath.up_eq b, Val.up_eq i]
 
 theorem Val.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} :
-    (v : Val C Γ p) → v.up (t := t) = v.wk Core.up
+    (v : Val C Γ p) → v.up (t := t) = v.wk Solidity.Core.up
   | .simple s => congrArg Val.simple (Simple.up_eq s)
   | .read l => congrArg Val.read (Loc.up_eq l)
   | .binop op ha hq a b => by
-    show Val.binop op ha hq a.up b.up = Val.binop op ha hq (a.wk Core.up) (b.wk Core.up)
+    show Val.binop op ha hq a.up b.up = Val.binop op ha hq (a.wk Solidity.Core.up) (b.wk Solidity.Core.up)
     rw [Val.up_eq a, Val.up_eq b]
   | .unop op ha hq a => congrArg (Val.unop op ha hq) (Val.up_eq a)
   | .ternary c a b => by
-    show Val.ternary c.up a.up b.up = Val.ternary (c.wk Core.up) (a.wk Core.up) (b.wk Core.up)
+    show Val.ternary c.up a.up b.up = Val.ternary (c.wk Solidity.Core.up) (a.wk Solidity.Core.up) (b.wk Solidity.Core.up)
     rw [Val.up_eq c, Val.up_eq a, Val.up_eq b]
   | .readMem l => congrArg Val.readMem (MLoc.up_eq l)
   | .len b hp => congrArg (Val.len · hp) (SPath.up_eq b)
@@ -125,7 +125,7 @@ theorem Val.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} :
 end
 
 theorem ARhs.up_eq {Γ : Ctx} {t : LTy} {R : RefTy} (r : ARhs C Γ R) :
-    r.up (t := t) = r.wk Core.up := by
+    r.up (t := t) = r.wk Solidity.Core.up := by
   cases r with
   | path p => exact congrArg ARhs.path (SPath.up_eq p)
   | push b hd => exact congrArg (ARhs.push · hd) (SPath.up_eq b)
@@ -161,42 +161,42 @@ def OpLoc.up {Γ : Ctx} {t : LTy} {p : PrimTy} : OpLoc C Γ p → OpLoc C (t :: 
   | .mfield b f h => .mfield b.up f h
   | .mindex a b i => .mindex a b.up i.up
 
-theorem Src.up_eq {Γ : Ctx} {t : LTy} {T : Ty} (r : Src C Γ T) : r.up (t := t) = r.wk Core.up := by
+theorem Src.up_eq {Γ : Ctx} {t : LTy} {T : Ty} (r : Src C Γ T) : r.up (t := t) = r.wk Solidity.Core.up := by
   cases r with
   | val v => exact congrArg Src.val (Val.up_eq v)
   | copy p hm => exact congrArg (Src.copy · hm) (SPath.up_eq p)
 
 theorem MSrc.up_eq {Γ : Ctx} {t : LTy} {T : Ty} (r : MSrc C Γ T) :
-    r.up (t := t) = r.wk Core.up := by
+    r.up (t := t) = r.wk Solidity.Core.up := by
   cases r with
   | val v => exact congrArg MSrc.val (Val.up_eq v)
   | ref p => exact congrArg MSrc.ref (MPath.up_eq p)
 
 theorem MRhs.up_eq {Γ : Ctx} {t : LTy} {R : RefTy} (r : MRhs C Γ R) :
-    r.up (t := t) = r.wk Core.up := by
+    r.up (t := t) = r.wk Solidity.Core.up := by
   cases r with
   | alias p => exact congrArg MRhs.alias (MPath.up_eq p)
   | copy p hm => exact congrArg (MRhs.copy · hm) (SPath.up_eq p)
   | newArr n h => exact congrArg (MRhs.newArr · h) (Simple.up_eq n)
 
 theorem NewLhs.up_eq {Γ : Ctx} {t : LTy} {R : RefTy} (l : NewLhs C Γ R) :
-    l.up (t := t) = l.wk Core.up := by
+    l.up (t := t) = l.wk Solidity.Core.up := by
   cases l with
   | store l => exact congrArg NewLhs.store (Loc.up_eq l)
   | mem l => exact congrArg NewLhs.mem (MLoc.up_eq l)
 
 theorem OpLoc.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} (l : OpLoc C Γ p) :
-    l.up (t := t) = l.wk Core.up := by
+    l.up (t := t) = l.wk Solidity.Core.up := by
   cases l with
   | «local» i => exact congrArg OpLoc.local (Idx.up_eq i).symm
   | root => rfl
   | field b f h => exact congrArg (OpLoc.field · f h) (SPath.up_eq b)
   | index it b i =>
-    show OpLoc.index it b.up i.up = OpLoc.index it (b.wk Core.up) (i.wk Core.up)
+    show OpLoc.index it b.up i.up = OpLoc.index it (b.wk Solidity.Core.up) (i.wk Solidity.Core.up)
     rw [SPath.up_eq b, Simple.up_eq i]
   | mfield b f h => exact congrArg (OpLoc.mfield · f h) (MPath.up_eq b)
   | mindex a b i =>
-    show OpLoc.mindex a b.up i.up = OpLoc.mindex a (b.wk Core.up) (i.wk Core.up)
+    show OpLoc.mindex a b.up i.up = OpLoc.mindex a (b.wk Solidity.Core.up) (i.wk Solidity.Core.up)
     rw [MPath.up_eq b, Simple.up_eq i]
 
 theorem SPath.isSimple_up {Γ : Ctx} {t : LTy} {T : Ty} (b : SPath C Γ T) :

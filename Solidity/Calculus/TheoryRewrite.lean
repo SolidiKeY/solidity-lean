@@ -1,5 +1,5 @@
-import Solidity.Calculus.Logic
-import Solidity.Calculus.Quote
+import Solidity.Calculus.NFmlLogic
+import Solidity.Calculus.NFmlQuote
 
 /-!
 # A Theory lemma as a rewrite rule
@@ -48,7 +48,7 @@ def theoryUnfoldLemmas : List Lean.Name :=
 /-- `e`, a `denote` of a term of the sort `srt` at `σ` (`Tm.denote σ t`),
 is that term. -/
 def reifyFolded? (srt : Lean.Name) (σ e : Expr) : MetaM (Option Expr) := do
-  unless e.isAppOfArity ``Tm.denote 4 do return none
+  unless e.isAppOfArity ``Surface.Tm.denote 4 do return none
   unless (← whnf (e.getArg! 1)).isConstOf srt do return none
   if ← isDefEq (e.getArg! 2) σ then return some e.appArg! else return none
 
@@ -161,7 +161,7 @@ def dischargeTheory : Simp.Discharge := fun e => do
 term. -/
 def theoryRewrite (thms : SimpTheorems) (C u : Expr) : MetaM (Option (Expr × Expr)) :=
   withLocalDeclD `σ (mkConst ``Semantics.State) fun σ => do
-    let denote (t : Expr) : Expr := mkApp4 (mkConst ``Tm.denote) C (mkConst ``Srt.val) σ t
+    let denote (t : Expr) : Expr := mkApp4 (mkConst ``Surface.Tm.denote) C (mkConst ``Srt.val) σ t
     let lhs := denote u
     let mut unfold : SimpTheorems := {}
     for n in theoryUnfoldLemmas do unfold ← unfold.addConst n
@@ -192,7 +192,7 @@ variable {C : Contract} (c : Expr)
 /-- A context entry as the expression that builds it. -/
 def Hyp.quote : Hyp C → Expr
   | .pre a => mkAppN (mkConst ``Hyp.pre) #[c, NFml.quote c a]
-  | .upd m U => mkAppN (mkConst ``Hyp.upd) #[c, toExpr m, Upd.quote c U]
+  | .upd m U => mkAppN (mkConst ``Hyp.upd) #[c, toExpr m, Surface.Upd.quote c U]
   | .havoc => mkAppN (mkConst ``Hyp.havoc) #[c]
   | .all x p => mkAppN (mkConst ``Hyp.all) #[c, toExpr x, toExpr p]
   | .anon xs => mkAppN (mkConst ``Hyp.anon) #[c, toExpr xs]
@@ -209,7 +209,7 @@ end Quote
 other goal as it is. -/
 def normProves (g : MVarId) : MetaM MVarId := do
   let ty ← instantiateMVars (← g.getType)
-  let_expr Proves C R Γ φ := ty | return g
+  let_expr NFml.Proves C R Γ φ := ty | return g
   let some n := C.constName? | return g
   if Γ.hasFVar || Γ.hasMVar || φ.hasFVar || φ.hasMVar then return g
   let Γ' ← unsafe evalExpr Expr (mkConst ``Expr)
@@ -224,7 +224,7 @@ steps of a derivation build, so that a rule stated on `Γ ++ [.upd m U]`
 any other goal as it is. -/
 def snocProves (g : MVarId) : MetaM MVarId := do
   let ty ← instantiateMVars (← g.getType)
-  let_expr Proves C R Γ φ := ty | return g
+  let_expr NFml.Proves C R Γ φ := ty | return g
   let some hs := listLit? Γ | return g
   let hyp := mkApp (mkConst ``Hyp) C
   let Γ' ← hs.foldlM (fun acc h => do mkAppM ``HAppend.hAppend #[acc, ← mkListLit hyp [h]])
@@ -235,7 +235,7 @@ def snocProves (g : MVarId) : MetaM MVarId := do
 outermost first, each once. -/
 partial def theoryCandidates (e : Expr) (acc : Array Expr := #[]) : Array Expr :=
   let read := e.isAppOfArity ``Term.find 3 || e.isAppOfArity ``Term.len 3 ||
-    (e.isAppOfArity ``Tm.app2 7 &&
+    (e.isAppOfArity ``Surface.Tm.app2 7 &&
       ((e.getArg! 4).isConstOf ``Op2.find || (e.getArg! 4).isConstOf ``Op2.len))
   let acc := if read
       && !e.hasLooseBVars && !e.hasMVar && !acc.contains e

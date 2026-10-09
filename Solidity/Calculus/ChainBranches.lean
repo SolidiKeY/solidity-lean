@@ -113,21 +113,21 @@ theorem NFml.belowSpine_holds {f : NFml C → Option (NFml C)}
     | _ => nomatch h
 
 /-- An update that cannot halt returns from every state. -/
-theorem Upd.apply_total {U : Upd C} (hU : U.total = true) (σ : State) :
+theorem Surface.Upd.apply_total {U : Surface.Upd C} (hU : U.total = true) (σ : State) :
     ∃ τ, U.apply σ = .ok τ :=
-  Upd.foldl_total σ U hU σ
+  Surface.Upd.foldl_total σ U hU σ
 
 /-- `{U}_m φ` where `U` returns `τ`: `φ` at `τ`. -/
-theorem holds_upd_ok {U : Upd C} {σ τ : State} (h : U.apply σ = .ok τ) (m : Modality)
-    (φ : NFml C) : holds σ (.upd m U φ) ↔ holds τ φ := by
-  simp only [holds, h, Modality.after]
+theorem holds_upd_ok {U : Surface.Upd C} {σ τ : State} (h : U.apply σ = .ok τ) (m : Modality)
+    (φ : NFml C) : NFml.holds σ (.upd m U φ) ↔ NFml.holds τ φ := by
+  simp only [NFml.holds, h, Modality.after]
 
 /-! ## `applyOnRigid` through the connectives -/
 
 /-- `{U}_m φ` pushed through the connectives along the skeleton `s`: a
 literal leaf substituted (`NFml.subst`) where it is rigid and sorted for
 `U`, any other part kept under `{U}_m`. -/
-def NFml.pushAlong (m : Modality) (U : Upd C) : Skel → NFml C → NFml C
+def NFml.pushAlong (m : Modality) (U : Surface.Upd C) : Skel → NFml C → NFml C
   | .and _ _ l r, .and φ ψ => .and (φ.pushAlong m U l) (ψ.pushAlong m U r)
   | .imp _ _ l r, .imp φ ψ => .imp (φ.pushAlong m U l) (ψ.pushAlong m U r)
   | .not _ s, .not φ => .not (φ.pushAlong m U s)
@@ -136,7 +136,7 @@ def NFml.pushAlong (m : Modality) (U : Upd C) : Skel → NFml C → NFml C
 
 /-- **`applyOnRigid` through the connectives is an equivalence** where `U`
 cannot halt: `U` returns one state, and each part is read there. -/
-theorem NFml.pushAlong_holds {U : Upd C} (hU : U.total = true) (m : Modality) (σ : State) :
+theorem NFml.pushAlong_holds {U : Surface.Upd C} (hU : U.total = true) (m : Modality) (σ : State) :
     (s : Skel) → (φ : NFml C) → (holds σ (φ.pushAlong m U s) ↔ holds σ (.upd m U φ))
   | .opaque, _ | .upd _, _ => Iff.rfl
   | .lit, φ => by
@@ -149,7 +149,7 @@ theorem NFml.pushAlong_holds {U : Upd C} (hU : U.total = true) (m : Modality) (�
   | .and _ _ l r, φ => by
     cases φ with
     | and a b =>
-      obtain ⟨τ, hτ⟩ := Upd.apply_total hU σ
+      obtain ⟨τ, hτ⟩ := Surface.Upd.apply_total hU σ
       rw [holds_upd_ok hτ]
       show holds σ (a.pushAlong m U l) ∧ holds σ (b.pushAlong m U r) ↔ holds τ a ∧ holds τ b
       rw [NFml.pushAlong_holds hU m σ l a, NFml.pushAlong_holds hU m σ r b, holds_upd_ok hτ,
@@ -158,7 +158,7 @@ theorem NFml.pushAlong_holds {U : Upd C} (hU : U.total = true) (m : Modality) (�
   | .imp _ _ l r, φ => by
     cases φ with
     | imp a b =>
-      obtain ⟨τ, hτ⟩ := Upd.apply_total hU σ
+      obtain ⟨τ, hτ⟩ := Surface.Upd.apply_total hU σ
       rw [holds_upd_ok hτ]
       show (holds σ (a.pushAlong m U l) → holds σ (b.pushAlong m U r)) ↔ (holds τ a → holds τ b)
       rw [NFml.pushAlong_holds hU m σ l a, NFml.pushAlong_holds hU m σ r b, holds_upd_ok hτ,
@@ -167,7 +167,7 @@ theorem NFml.pushAlong_holds {U : Upd C} (hU : U.total = true) (m : Modality) (�
   | .not _ s, φ => by
     cases φ with
     | not a =>
-      obtain ⟨τ, hτ⟩ := Upd.apply_total hU σ
+      obtain ⟨τ, hτ⟩ := Surface.Upd.apply_total hU σ
       rw [holds_upd_ok hτ]
       show ¬ holds σ (a.pushAlong m U s) ↔ ¬ holds τ a
       rw [NFml.pushAlong_holds hU m σ s a, holds_upd_ok hτ]
@@ -175,18 +175,18 @@ theorem NFml.pushAlong_holds {U : Upd C} (hU : U.total = true) (m : Modality) (�
 
 /-- `{U}_m φ` pushed through every connective of `φ`: KeY's `applyOnRigid`
 on a formula with connectives. -/
-def NFml.push (m : Modality) (U : Upd C) (φ : NFml C) : NFml C := φ.pushAlong m U φ.skel
+def NFml.push (m : Modality) (U : Surface.Upd C) (φ : NFml C) : NFml C := φ.pushAlong m U φ.skel
 
-theorem NFml.push_holds {U : Upd C} (hU : U.total = true) (m : Modality) (φ : NFml C) (σ : State) :
+theorem NFml.push_holds {U : Surface.Upd C} (hU : U.total = true) (m : Modality) (φ : NFml C) (σ : State) :
     holds σ (φ.push m U) ↔ holds σ (.upd m U φ) :=
   NFml.pushAlong_holds hU m σ φ.skel φ
 
 /-- `applyOnRigid` through the connectives at the top of `{U}_m φ`: where
 `U` cannot halt and `φ` is a connective, so that the line changes. -/
-def NFml.pushTop (s : Skel) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.pushTop (s : Skel) (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   if (U.total && s.isConn) = true then some (φ.pushAlong m U s) else none
 
-theorem NFml.pushTop_holds {s : Skel} {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.pushTop_holds {s : Skel} {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.pushTop s m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
   unfold NFml.pushTop at h
   split at h
@@ -199,9 +199,9 @@ theorem NFml.pushTop_holds {s : Skel} {m : Modality} {U : Upd C} {φ ψ : NFml C
 /-! ## `applyOnRigid` through the connectives, under the box -/
 
 /-- The box holds of a conjunction where it holds of each part. -/
-theorem holds_box_and {U : Upd C} {σ : State} {a b : NFml C} (ha : holds σ (.upd .box U a))
-    (hb : holds σ (.upd .box U b)) : holds σ (.upd .box U (.and a b)) := by
-  simp only [holds] at ha hb ⊢
+theorem holds_box_and {U : Surface.Upd C} {σ : State} {a b : NFml C} (ha : NFml.holds σ (.upd .box U a))
+    (hb : NFml.holds σ (.upd .box U b)) : NFml.holds σ (.upd .box U (.and a b)) := by
+  simp only [NFml.holds] at ha hb ⊢
   generalize U.apply σ = r at ha hb ⊢
   cases r with
   | ok τ => exact ⟨ha, hb⟩
@@ -209,18 +209,18 @@ theorem holds_box_and {U : Upd C} {σ : State} {a b : NFml C} (ha : holds σ (.u
 
 /-- The box holds of an implication where it holds of the consequent
 whenever it holds of the antecedent. -/
-theorem holds_box_imp {U : Upd C} {σ : State} {a b : NFml C}
-    (h : holds σ (.upd .box U a) → holds σ (.upd .box U b)) : holds σ (.upd .box U (.imp a b)) := by
-  simp only [holds] at h ⊢
+theorem holds_box_imp {U : Surface.Upd C} {σ : State} {a b : NFml C}
+    (h : NFml.holds σ (.upd .box U a) → NFml.holds σ (.upd .box U b)) : NFml.holds σ (.upd .box U (.imp a b)) := by
+  simp only [NFml.holds] at h ⊢
   generalize U.apply σ = r at h ⊢
   cases r with
   | ok τ => exact h
   | error _ => trivial
 
 /-- The box holds of a negation where it does not hold of the part. -/
-theorem holds_box_not {U : Upd C} {σ : State} {a : NFml C} (h : ¬ holds σ (.upd .box U a)) :
-    holds σ (.upd .box U (.not a)) := by
-  simp only [holds] at h ⊢
+theorem holds_box_not {U : Surface.Upd C} {σ : State} {a : NFml C} (h : ¬ NFml.holds σ (.upd .box U a)) :
+    NFml.holds σ (.upd .box U (.not a)) := by
+  simp only [NFml.holds] at h ⊢
   generalize U.apply σ = r at h ⊢
   cases r with
   | ok τ => exact h
@@ -230,7 +230,7 @@ theorem holds_box_not {U : Upd C} {σ : State} {a : NFml C} (h : ¬ holds σ (.u
 conjunction part by part, the consequent of an implication; an antecedent
 and a negated part stay whole under `[U]` (the module docstring says why);
 a rigid leaf is substituted as `NFml.applyOnRigidBoxTop` substitutes it. -/
-def NFml.pushBoxAlong (U : Upd C) : Skel → NFml C → NFml C
+def NFml.pushBoxAlong (U : Surface.Upd C) : Skel → NFml C → NFml C
   | .and _ _ l r, .and φ ψ => .and (φ.pushBoxAlong U l) (ψ.pushBoxAlong U r)
   | .imp _ _ _ r, .imp φ ψ => .imp (.upd .box U φ) (ψ.pushBoxAlong U r)
   | .not _ _, .not φ => .not (.upd .box U φ)
@@ -239,7 +239,7 @@ def NFml.pushBoxAlong (U : Upd C) : Skel → NFml C → NFml C
 
 /-- **`applyOnRigid` through the connectives under the box**: wherever the
 pushed line holds, the box line does. -/
-theorem NFml.pushBoxAlong_sound {U : Upd C} (σ : State) :
+theorem NFml.pushBoxAlong_sound {U : Surface.Upd C} (σ : State) :
     (s : Skel) → (φ : NFml C) → holds σ (φ.pushBoxAlong U s) → holds σ (.upd .box U φ)
   | .opaque, _, h | .upd _, _, h => h
   | .lit, φ, h => by
@@ -266,18 +266,18 @@ theorem NFml.pushBoxAlong_sound {U : Upd C} (σ : State) :
     | _ => exact h
 
 /-- `[U] φ` pushed through every connective of `φ`. -/
-def NFml.pushBox (U : Upd C) (φ : NFml C) : NFml C := φ.pushBoxAlong U φ.skel
+def NFml.pushBox (U : Surface.Upd C) (φ : NFml C) : NFml C := φ.pushBoxAlong U φ.skel
 
-theorem NFml.pushBox_sound (U : Upd C) (φ : NFml C) (σ : State) (h : holds σ (φ.pushBox U)) :
+theorem NFml.pushBox_sound (U : Surface.Upd C) (φ : NFml C) (σ : State) (h : holds σ (φ.pushBox U)) :
     holds σ (.upd .box U φ) :=
   NFml.pushBoxAlong_sound σ φ.skel φ h
 
 /-- `applyOnRigid` through the connectives at the top of `[U] φ`, `φ` a
 connective: the box only. -/
-def NFml.pushBoxTop (s : Skel) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.pushBoxTop (s : Skel) (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   if (decide (m = .box) && s.isConn) = true then some (φ.pushBoxAlong U s) else none
 
-theorem NFml.pushBoxTop_sound {s : Skel} {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.pushBoxTop_sound {s : Skel} {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.pushBoxTop s m U φ = some ψ) (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
   unfold NFml.pushBoxTop at h
   split at h
@@ -608,16 +608,16 @@ def Term.litOf? : Term C → Option Value
   | _ => none
 
 /-- The locals `U` binds last to a literal, as the rewrites `x ⇝ v`. -/
-def Upd.litPVs (U : Upd C) : List (Term C × Term C) :=
+def Surface.Upd.litPVs (U : Surface.Upd C) : List (Term C × Term C) :=
   U.filterMap fun e => match e with
     | .val x t => match t.litOf? with
       | some v => if U.valOf x = .lit v then some (.pv x, .lit v) else none
       | none => none
     | _ => none
 
-theorem Upd.litPVs_mem {U : Upd C} {q : Term C × Term C} (h : q ∈ U.litPVs) :
+theorem Surface.Upd.litPVs_mem {U : Surface.Upd C} {q : Term C × Term C} (h : q ∈ U.litPVs) :
     ∃ x v, q = (.pv x, .lit v) ∧ U.valOf x = .lit v := by
-  simp only [Upd.litPVs, List.mem_filterMap] at h
+  simp only [Surface.Upd.litPVs, List.mem_filterMap] at h
   obtain ⟨e, -, he⟩ := h
   cases e with
   | val x t =>
@@ -632,13 +632,13 @@ theorem Upd.litPVs_mem {U : Upd C} {q : Term C × Term C} (h : q ∈ U.litPVs) :
 
 /-- After an update of locals and storage writes, a local it binds last to a
 literal holds that literal. -/
-theorem Upd.pv_eval_of_valOf {U : Upd C} (hU : U.localsOrStorage = true) {x : Var} {v : Value}
+theorem Surface.Upd.pv_eval_of_valOf {U : Surface.Upd C} (hU : U.localsOrStorage = true) {x : Var} {v : Value}
     (hx : U.valOf x = .lit v) {σ τ : State} (h : U.apply σ = .ok τ) :
     (Term.pv x : Term C).eval τ = .ok v := by
-  obtain ⟨τ', hτ', st', rfl⟩ := Upd.foldl_locals σ U hU (ρ := σ) (st := σ.storage) h
+  obtain ⟨τ', hτ', st', rfl⟩ := Surface.Upd.foldl_locals σ U hU (ρ := σ) (st := σ.storage) h
   have hA : SubstAgree U U.locals.targets σ τ' :=
-    (Upd.substAgree (Upd.locals_envOnly U) hτ').of_lastWrite
-      fun x => (Upd.lastWrite_locals x U).symm
+    (Surface.Upd.substAgree (Surface.Upd.locals_envOnly U) hτ').of_lastWrite
+      fun x => (Surface.Upd.lastWrite_locals x U).symm
   have hv := hA.val x
   rw [hx] at hv
   rw [Term.eval_withStorage τ' st' (.pv x) rfl, ← hv]
@@ -703,12 +703,12 @@ theorem NFml.rwEqsAlong_holds {qs : List (Term C × Term C)} {σ : State}
 
 /-- `applyOnPV` under the update `{U}_m φ`, `φ` of skeleton `s`: each local `U`
 binds last to a literal, read as it in the equations of `φ`, if one is. -/
-def NFml.applyOnPVTop (s : Skel) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.applyOnPVTop (s : Skel) (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   if (U.localsOrStorage && φ.eqsRewrite U.litPVs s) = true then
     some (.upd m U (φ.rwEqsAlong U.litPVs s))
   else none
 
-theorem NFml.applyOnPVTop_holds {s : Skel} {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.applyOnPVTop_holds {s : Skel} {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.applyOnPVTop s m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
   unfold NFml.applyOnPVTop at h
   split at h
@@ -720,9 +720,9 @@ theorem NFml.applyOnPVTop_holds {s : Skel} {m : Modality} {U : Upd C} {φ ψ : N
     | error _ => exact Iff.rfl
     | ok τ =>
       refine NFml.rwEqsAlong_holds (fun q hq => ?_) s φ
-      obtain ⟨x, v, rfl, hx⟩ := Upd.litPVs_mem hq
+      obtain ⟨x, v, rfl, hx⟩ := Surface.Upd.litPVs_mem hq
       show Theory.StValue.Equiv ((Term.pv x : Term C).denote τ) ((Term.lit v : Term C).denote τ)
-      rw [Term.denote_eval (Upd.pv_eval_of_valOf hc.1 hx hτ)]
+      rw [Term.denote_eval (Surface.Upd.pv_eval_of_valOf hc.1 hx hτ)]
       exact Theory.StValue.Equiv.refl _
   · nomatch h
 

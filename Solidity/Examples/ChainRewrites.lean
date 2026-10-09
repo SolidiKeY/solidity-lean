@@ -60,7 +60,7 @@ An update `simplifyUpdate` empties goes with it (KeY's `applySkip`), since
 
 namespace Solidity.Examples.ChainRewrites
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 

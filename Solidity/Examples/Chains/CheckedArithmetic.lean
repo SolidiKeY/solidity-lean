@@ -1,7 +1,7 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
 
@@ -29,7 +29,7 @@ Past the program the stack merges, every binding kept (the overwritten `x := 250
 
 namespace Solidity.Examples.Chains.CheckedArithmetic
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 

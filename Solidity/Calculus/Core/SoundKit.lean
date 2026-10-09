@@ -40,7 +40,7 @@ section NoPanic
 variable {Γ : Ctx}
 
 /-- **A scoped term never panics**: its symbols are `Update.lean`'s. -/
-theorem Tm.eval_noPanic (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → s.NoPanic (t.eval σ)
+theorem Tm.eval_noPanic (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → s.NoPanic (t.eval σ)
   | _, .pvV _ => NoPanic.pure _
   | _, .pvP i => by
     show NoPanic (aliasPath σ i)
@@ -59,7 +59,7 @@ theorem Tm.eval_noPanic (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → s.
   | _, .app3 o a b c =>
     Op3.eval_noPanic σ.glob o (Tm.eval_noPanic σ a) (Tm.eval_noPanic σ b) (Tm.eval_noPanic σ c)
 
-theorem Rhs.eval_noPanic (σ : State C Γ) {t : LTy} (r : Rhs C Γ t) : NoPanic (r.eval σ) := by
+theorem Rhs.eval_noPanic (σ : EState C Γ) {t : LTy} (r : Rhs C Γ t) : NoPanic (r.eval σ) := by
   cases r with
   | val t => exact Tm.eval_noPanic σ t
   | path p => have := Tm.eval_noPanic σ p; simp only [Rhs.eval]; no_panic
@@ -69,7 +69,7 @@ theorem Rhs.eval_noPanic (σ : State C Γ) {t : LTy} (r : Rhs C Γ t) : NoPanic 
   | saveNet => exact NoPanic.pure _
   | saveNetMt => exact NoPanic.pure _
 
-theorem UpdElem.write_noPanic {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ) (τ : State C Δ) :
+theorem UpdElem.write_noPanic {Δ : Ctx} (σ₀ : EState C Γ) (e : UpdElem C Γ Δ) (τ : EState C Δ) :
     NoPanic (e.write σ₀ τ) := by
   have hv : ∀ t : Tm C Γ .val, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
   have hs : ∀ t : Tm C Γ .st, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
@@ -79,7 +79,7 @@ theorem UpdElem.write_noPanic {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ 
   | _ => simp only [UpdElem.write]; no_panic
 
 /-- **An update never panics.** -/
-theorem Upd.apply_noPanic (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) → NoPanic (U.apply σ₀)
+theorem Upd.apply_noPanic (σ₀ : EState C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) → NoPanic (U.apply σ₀)
   | _, .nil => NoPanic.pure _
   | _, .snoc U e =>
     NoPanic.bind (Upd.apply_noPanic σ₀ U) fun τ _ => UpdElem.write_noPanic σ₀ e τ
@@ -87,10 +87,10 @@ theorem Upd.apply_noPanic (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ
     NoPanic.bind (Upd.apply_noPanic σ₀ U) fun _ _ =>
       NoPanic.bind (Rhs.eval_noPanic σ₀ r) fun _ _ => NoPanic.pure _
   | _, .pop U h => by
-    show NoPanic (State.drop h <$> U.apply σ₀)
+    show NoPanic (EState.drop h <$> U.apply σ₀)
     rw [NoPanic.map]; exact Upd.apply_noPanic σ₀ U
   | _, .drop U h => by
-    show NoPanic (State.thin h <$> U.apply σ₀)
+    show NoPanic (EState.thin h <$> U.apply σ₀)
     rw [NoPanic.map]; exact Upd.apply_noPanic σ₀ U
 
 end NoPanic
@@ -99,7 +99,7 @@ end NoPanic
 
 section Lower
 
-variable {Γ : Ctx} (σ : State C Γ)
+variable {Γ : Ctx} (σ : EState C Γ)
 
 /-- A key's term reads the word the key is hashed as (`Term.keyAt_eval`). -/
 theorem Tm.keyAt_eval (k : PrimTy) (t : Tm C Γ .val) {β : Type} (f : Int → Res β) :
@@ -212,7 +212,7 @@ end Sim
 
 section NoPanicE
 
-variable {Γ : Ctx} (σ : State C Γ)
+variable {Γ : Ctx} (σ : EState C Γ)
 
 theorem Val.eval_noPanic {p : PrimTy} (v : Val C Γ p) : NoPanic (v.eval σ) := by
   have h := Tm.eval_noPanic σ v.lower
@@ -887,7 +887,7 @@ as what the statement's typed run agrees with (`X`), up to the halt
 (`Res.Sim`), is sound over the typed state, where the typed run does not
 diverge under the diamond. -/
 theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
-    {X : Res (State C Γ')} (ha : TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (s.trun σ) X)
+    {X : Res (EState C Γ')} (ha : TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (s.trun σ) X)
     (hs : Res.Sim (U.apply σ.erase) X)
     (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.Runs m s (.update U) σ := by
   have hU := Upd.apply_noPanic σ.erase U
@@ -933,7 +933,7 @@ theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (�
 /-- **An update, through the erasure, up to the halt**, given the statement's
 step read on the erasure. -/
 theorem Premise.sound_updateSim_erased {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
-    {u : State C Γ → Res (State C Γ')} (ha : StepAgrees t u) (σ : TState C Γ)
+    {u : EState C Γ → Res (EState C Γ')} (ha : StepAgrees t u) (σ : TState C Γ)
     (hs : Res.Sim (U.apply σ.erase) (u σ.erase))
     (hd : m = .diamond → (s.trun σ).NoDiv) (ht : ∀ σ : TState C Γ, s.trun σ = t σ := by
       intro _; rfl) : Premise.Runs m s (.update U) σ :=
@@ -942,7 +942,7 @@ theorem Premise.sound_updateSim_erased {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t
 /-- **An update, through the erasure**: an update that ends as the
 statement's typed step does on the erasure (`StepAgrees`). -/
 theorem Premise.sound_update_erased {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
-    {u : State C Γ → Res (State C Γ')} (ha : StepAgrees t u) (σ : TState C Γ)
+    {u : EState C Γ → Res (EState C Γ')} (ha : StepAgrees t u) (σ : TState C Γ)
     (hs : U.apply σ.erase = u σ.erase)
     (hd : m = .diamond → (s.trun σ).NoDiv) (ht : ∀ σ : TState C Γ, s.trun σ = t σ := by
       intro _; rfl) : Premise.Runs m s (.update U) σ :=
@@ -962,7 +962,7 @@ after each update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas holding
 the statement's step on the erasure ends as one of the updates, up to the
 halt. -/
 theorem Premise.sound_cases_erased {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
-    {t : TStep C Γ Γ} {u : State C Γ → Res (State C Γ)} (ha : StepAgrees t u) (σ : TState C Γ)
+    {t : TStep C Γ Γ} {u : EState C Γ → Res (EState C Γ)} (ha : StepAgrees t u) (σ : TState C Γ)
     (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ.erase) (u σ.erase))
     (hd : m = .diamond → (s.trun σ).NoDiv) (ht : ∀ σ : TState C Γ, s.trun σ = t σ := by
       intro _; rfl) : Premise.Sound m s (.cases fs us) σ := by
@@ -989,39 +989,39 @@ theorem TState.push_lift : σ.push w = σ.lift Core.up (w, σ.env) := rfl
 
 theorem Simple.evalT_up {p : PrimTy} (s : Simple C Γ p) :
     (s.up (t := t)).evalT (σ.push w) = s.evalT σ := by
-  rw [Simple.up_eq]; exact Simple.evalT_wk Core.up σ (w, σ.env) s
+  rw [Simple.up_eq]; exact Simple.evalT_wk Solidity.Core.up σ (w, σ.env) s
 
 theorem SPath.resolveT_up {T : Ty} (b : SPath C Γ T) :
     (b.up (t := t)).resolveT (σ.push w) = b.resolveT σ := by
-  rw [SPath.up_eq]; exact SPath.resolveT_wk Core.up σ (w, σ.env) b
+  rw [SPath.up_eq]; exact SPath.resolveT_wk Solidity.Core.up σ (w, σ.env) b
 
 theorem Loc.resolveT_up {T : Ty} (l : Loc C Γ T) :
     (l.up (t := t)).resolveT (σ.push w) = l.resolveT σ := by
-  rw [Loc.up_eq]; exact Loc.resolveT_wk Core.up σ (w, σ.env) l
+  rw [Loc.up_eq]; exact Loc.resolveT_wk Solidity.Core.up σ (w, σ.env) l
 
 theorem MPath.mvalT_up {T : Ty} (b : MPath C Γ T) :
     (b.up (t := t)).mvalT (σ.push w) = b.mvalT σ := by
-  rw [MPath.up_eq]; exact MPath.mvalT_wk Core.up σ (w, σ.env) b
+  rw [MPath.up_eq]; exact MPath.mvalT_wk Solidity.Core.up σ (w, σ.env) b
 
 theorem MLoc.addrT_up {T : Ty} (l : MLoc C Γ T) :
     (l.up (t := t)).addrT (σ.push w) = l.addrT σ := by
-  rw [MLoc.up_eq]; exact MLoc.addrT_wk Core.up σ (w, σ.env) l
+  rw [MLoc.up_eq]; exact MLoc.addrT_wk Solidity.Core.up σ (w, σ.env) l
 
 theorem Val.evalT_up {p : PrimTy} (v : Val C Γ p) :
     (v.up (t := t)).evalT (σ.push w) = v.evalT σ := by
-  rw [Val.up_eq]; exact Val.evalT_wk Core.up σ (w, σ.env) v
+  rw [Val.up_eq]; exact Val.evalT_wk Solidity.Core.up σ (w, σ.env) v
 
 theorem Src.valueT_up {T : Ty} (r : Src C Γ T) :
     (r.up (t := t)).valueT (σ.push w) = r.valueT σ := by
-  rw [Src.up_eq]; exact Src.valueT_wk Core.up σ (w, σ.env) r
+  rw [Src.up_eq]; exact Src.valueT_wk Solidity.Core.up σ (w, σ.env) r
 
 theorem MSrc.mvalT_up {T : Ty} (r : MSrc C Γ T) :
     (r.up (t := t)).mvalT (σ.push w) = r.mvalT σ := by
-  rw [MSrc.up_eq]; exact MSrc.mvalT_wk Core.up σ (w, σ.env) r
+  rw [MSrc.up_eq]; exact MSrc.mvalT_wk Solidity.Core.up σ (w, σ.env) r
 
 theorem ARhs.evalT_up {R : RefTy} (r : ARhs C Γ R) :
     (r.up (t := t)).evalT (σ.push w) = r.evalT σ := by
-  rw [ARhs.up_eq]; exact ARhs.evalT_wk Core.up σ (w, σ.env) r
+  rw [ARhs.up_eq]; exact ARhs.evalT_wk Solidity.Core.up σ (w, σ.env) r
 
 theorem TState.get_push_here : (TEnv.get .here (σ.push w).env : t.TDenote C σ.H) = w := rfl
 

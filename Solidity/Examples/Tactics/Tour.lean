@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -19,7 +19,7 @@ compiler).
 4. What elaboration rejects.
 
 A proof by hand starts with `apply Proves.valid`, which turns `⊨ φ` into the
-judgement `⊢ φ` (`Calculus/Logic.lean`); each `apply` then checks that its rule
+judgement `⊢ φ` (`Calculus/NFmlLogic.lean`); each `apply` then checks that its rule
 matches the first statement and replaces the goal by the rule's premise.  A
 read whose receiver is not simple is unfolded by `storageFieldRead_unfold_rightFst`,
 whose conclusion `Hole.fill lhs …` does not unify by name
@@ -29,11 +29,11 @@ whose conclusion `Hole.fill lhs …` does not unify by name
 
 namespace Solidity.Examples.Tactics.Tour
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## 1. The running example -/
 

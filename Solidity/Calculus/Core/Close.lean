@@ -1,6 +1,6 @@
 import Solidity.Calculus.Core.HoldsErase
 import Solidity.Calculus.Core.CloseErase
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 
 /-!
 # Closing a scoped leaf by its erasure
@@ -100,7 +100,7 @@ def Fml.posM : {Γ : Ctx} → Fml C Γ → List Var → Option (List Var)
     else none
   | _, .upd _ U φ, ns =>
     if U.freshK ns then (φ.posM (U.names ns)).bind fun B =>
-      if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none
+      if disjointB B (Surface.Upd.vars (U.erase ns)) then some B else none
     else none
   | _, .modal .., _ => none
   | _, .havoc φ, ns => φ.posM ns
@@ -127,7 +127,7 @@ def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
       else none)
     (upd := fun _ U _ ih ns =>
       if U.freshK ns then (ih (U.names ns)).bind fun B =>
-        if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none
+        if disjointB B (Surface.Upd.vars (U.erase ns)) then some B else none
       else none)
     (modal := fun _ _ _ _ _ _ => none)
     (havoc := fun _ ih ns => ih ns)
@@ -191,7 +191,7 @@ theorem envAgree_symm {ns : List Var} {σ τ : Semantics.State} (h : EnvAgreeExc
 /-- Two states alike but for their locals, whose lookups agree, satisfy the
 same formulas. -/
 theorem holds_of_envAgree_nil {φ : Solidity.NFml C} {σ τ : Semantics.State} (h : EnvAgreeExcept [] σ τ) :
-    Solidity.holds σ φ → Solidity.holds τ φ :=
+    NFml.holds σ φ → NFml.holds τ φ :=
   (Solidity.holds_frame φ (fun _ _ => List.not_mem_nil) h).1
 
 /-- `τ` with the names `B` bound as in `ρ`. -/
@@ -211,8 +211,8 @@ end Untyped
 
 theorem erase_upd_holds {Γ Δ : Ctx} {ns : List Var} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
     {τ : Semantics.State} :
-    Solidity.holds τ (Fml.erase ns (.upd m U φ)) ↔
-      m.after (Solidity.holds · (φ.erase (U.names ns))) (Solidity.Upd.apply (U.erase ns) τ) := by
+    NFml.holds τ (Fml.erase ns (.upd m U φ)) ↔
+      m.after (NFml.holds · (φ.erase (U.names ns))) (Surface.Upd.apply (U.erase ns) τ) := by
   simp only [Fml.erase]
   split
   · rename_i h
@@ -225,7 +225,7 @@ the erasure in every state that differs from `τ` only at `B` gives the
 scoped formula in a typed state whose erasure agrees with `τ`. -/
 theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, φ.posB ns = some B →
     ∀ {σ : TState C Γ} {τ : Semantics.State}, Agree ns σ.erase τ →
-    (∀ ρ, EnvAgreeExcept B τ ρ → Solidity.holds ρ (φ.erase ns)) → holds σ φ := by
+    (∀ ρ, EnvAgreeExcept B τ ρ → NFml.holds ρ (φ.erase ns)) → holds σ φ := by
   induction φ with
   | tt => intro _ _ _ _ _ _ _; trivial
   | eq a b =>
@@ -252,7 +252,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
     rw [← TState.anon_erase] at h₁
     have hτ₁ : withLocals σ.erase.glob τ₁.env = τ₁ := by
       have hg := h₁.glob
-      rwa [TState.anon_erase, State.glob_anon _ xs σ.erase] at hg
+      rwa [TState.anon_erase, EState.glob_anon _ xs σ.erase] at hg
     have hττ₁ : EnvAgreeExcept (xs.map fun x => x.2.name ns) τ τ₁ := by
       rw [← hag.glob, ← hτ₁]
       exact ⟨rfl, rfl, rfl, rfl, fun y hy => (h₂ y hy).symm, rfl, rfl⟩
@@ -261,7 +261,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
     have hτρ := Solidity.Semantics.EnvAgreeExcept.trans
       (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_append_left B hy) hττ₁)
       (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_append_right _ hy) hρ)
-    have Hρ₀ : Solidity.holds ((mergeOn B τ ρ).anon (xs.map fun x => x.2.name ns)
+    have Hρ₀ : NFml.holds ((mergeOn B τ ρ).anon (xs.map fun x => x.2.name ns)
         fun y => Semantics.lookupBy y ρ.env) (φ.erase ns) :=
       H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) _
     refine holds_of_envAgree_nil (EnvAgreeExcept.mk (s₁ := (mergeOn B τ ρ).anon
@@ -307,7 +307,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
   | upd m U φ ih =>
     intro ns B h σ τ hag H
     change (if U.freshK ns then (φ.posB (U.names ns)).bind fun B =>
-        if disjointB B (Solidity.Upd.vars (U.erase ns)) then some B else none else none) =
+        if disjointB B (Surface.Upd.vars (U.erase ns)) then some B else none else none) =
       some B at h
     have hU : U.freshK ns = true := by
       cases hn : U.freshK ns
@@ -326,22 +326,22 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
       revert hrel H₀
       cases U.apply σ.erase with
       | error e =>
-        cases Solidity.Upd.apply (U.erase ns) τ with
+        cases Surface.Upd.apply (U.erase ns) τ with
         | error _ => intro _ H₀; exact H₀
         | ok _ => intro hrel; exact hrel.elim
       | ok σ₁ =>
-        cases hτ : Solidity.Upd.apply (U.erase ns) τ with
+        cases hτ : Surface.Upd.apply (U.erase ns) τ with
         | error _ => intro hrel; exact hrel.elim
         | ok τ₁ =>
           intro hrel _ σ' e _
           subst e
           refine ih h₁ hrel fun ρ hρ => ?_
           let ρ₀ := mergeOn B τ ρ
-          have hfr := Solidity.Upd.apply_frame (mergeOn_agree B τ ρ) (U.erase ns) hav
+          have hfr := Surface.Upd.apply_frame (mergeOn_agree B τ ρ) (U.erase ns) hav
           have Hρ₀ := erase_upd_holds.1 (H ρ₀ (mergeOn_agree B τ ρ))
           rw [hτ] at hfr
           revert hfr Hρ₀
-          cases hρ₁ : Solidity.Upd.apply (U.erase ns) ρ₀ with
+          cases hρ₁ : Surface.Upd.apply (U.erase ns) ρ₀ with
           | error _ => intro hfr; exact hfr.elim
           | ok ρ₁ =>
             intro hfr Hρ₁
@@ -350,7 +350,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
             refine ⟨h₁ρ.storage, h₁ρ.heap, h₁ρ.nextId, h₁ρ.net, fun y _ => ?_, h₁ρ.selfBalance,
               h₁ρ.tx⟩
             by_cases hy : y ∈ B
-            · rw [Solidity.Upd.foldl_lookup (U.erase ns) (fun hv => hav y hv hy) hρ₁]
+            · rw [Surface.Upd.foldl_lookup (U.erase ns) (fun hv => hav y hv hy) hρ₁]
               exact lookupBy_mergeOn hy
             · exact h₁ρ.env y hy
     · cases h
@@ -420,7 +420,7 @@ theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, �
       (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_cons_of_mem _ hy) hρ)
 
 /-- The empty context agrees with the global part alone. -/
-theorem Agree.nil (σ : State C []) : Agree [] σ (withLocals σ.glob []) where
+theorem Agree.nil (σ : EState C []) : Agree [] σ (withLocals σ.glob []) where
   len := rfl
   nodup := List.nodup_nil
   glob := rfl
@@ -429,7 +429,7 @@ theorem Agree.nil (σ : State C []) : Agree [] σ (withLocals σ.glob []) where
 /-- **A leaf is valid when its erasure is**, its hidden binders where
 `Fml.posB` takes them. -/
 theorem Valid.of_erase {φ : Fml C []} (hp : (φ.posB []).isSome = true)
-    (h : Solidity.Valid (φ.erase [])) : Valid φ := by
+    (h : NFml.Valid (φ.erase [])) : Valid φ := by
   intro σ
   obtain ⟨B, hB⟩ := Option.isSome_iff_exists.1 hp
   exact holds_of_erase_pos φ hB (Agree.nil σ.erase) fun ρ _ => h ρ

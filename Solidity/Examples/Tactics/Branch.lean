@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -45,11 +45,11 @@ hypothesis is `true ≐ false` is then closed by the logic, not by a rule.
 
 namespace Solidity.Examples.Tactics.Branch
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## The taclets
 

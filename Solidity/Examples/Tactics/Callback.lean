@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.CallbackSound
@@ -49,7 +49,7 @@ rules are pinned as the scoped calculus has them (`Core.CallbackTaclet`).
 
 namespace Solidity.Examples.Tactics.Callback
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 /-- A vault: what the customer may still withdraw, what was paid out, what
 was deposited. -/
@@ -57,7 +57,7 @@ def Vault : Contract := contract!{ uint balance; uint paidOut; uint deposited; }
 
 local instance : InContract := ⟨Vault⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `balance + paidOut == deposited`: what the vault owes whenever control
 leaves it, and may assume whenever it comes back. -/

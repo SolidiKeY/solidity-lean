@@ -10,7 +10,7 @@ of the derivation.  `TermTaclet t t'` is that judgement: one constructor per
 rule, a schema over the terms of a formula (`find(save(s, p, v), p) ⇝ v`),
 under the name the chains write on the arrow, its terms in `tm{ … }`
 (`Calculus/RuleSyntax.lean`).  `Proves.rewrite` and
-`Proves.updRw` (`Calculus/Logic.lean`) apply one, so `⊢` sees names and
+`Proves.updRw` (`Calculus/NFmlLogic.lean`) apply one, so `⊢` sees names and
 terms only.
 
 `TermTaclet.sound` is the other side, `⊨`: each rule's terms have the same
@@ -73,7 +73,7 @@ theorem Term.eq_of_litInt? {t : Term C} {i : Int} (h : t.litInt? = some i) : t =
 /-- A path built from a root by members and literal indices: its segments,
 the same in every state.  An index check in a storage (`p[i]@S`) is the
 index `p[i]`. -/
-def Tm.segs? : Tm C s → Option (List Seg)
+def Surface.Tm.segs? : Surface.Tm C s → Option (List Seg)
   | PTerm.root r => some [.field r]
   | PTerm.field p f => p.segs?.map (· ++ [.field f])
   | PTerm.at p i => match Term.litInt? i with
@@ -93,7 +93,7 @@ inductive SegT where
   deriving DecidableEq, Repr
 
 /-- A path's shape, read off its syntax: `none` through an alias. -/
-def Tm.shape? : Tm C s → Option (List SegT)
+def Surface.Tm.shape? : Surface.Tm C s → Option (List SegT)
   | PTerm.root r => some [.field r]
   | PTerm.field p f => p.shape?.map (· ++ [.field f])
   | PTerm.next p => p.shape?.map (· ++ [.at none])
@@ -155,24 +155,24 @@ def PTerm.divergesLen (q p : PTerm C) : Bool :=
 /-- The path its checks aside: `p[i]@S` is `p[i]`, whatever `S`.  A slot
 past the end reads its length in a storage, so `p[p.length]@S` stays.
 Generic in the sort, as structural recursion over `Tm` asks. -/
-def Tm.eraseChecks : Tm C u → Tm C u
-  | PTerm.field p f => .app1 (.field f) (Tm.eraseChecks p)
-  | PTerm.next p => .app1 .next (Tm.eraseChecks p)
-  | PTerm.at p i => .app2 .at (Tm.eraseChecks p) i
-  | PTerm.nextIn S p => .app2 .nextIn S (Tm.eraseChecks p)
-  | PTerm.atIn _ p i => .app2 .at (Tm.eraseChecks p) i
+def Surface.Tm.eraseChecks : Surface.Tm C u → Surface.Tm C u
+  | PTerm.field p f => .app1 (.field f) (Surface.Tm.eraseChecks p)
+  | PTerm.next p => .app1 .next (Surface.Tm.eraseChecks p)
+  | PTerm.at p i => .app2 .at (Surface.Tm.eraseChecks p) i
+  | PTerm.nextIn S p => .app2 .nextIn S (Surface.Tm.eraseChecks p)
+  | PTerm.atIn _ p i => .app2 .at (Surface.Tm.eraseChecks p) i
   | p => p
 
 /-- The two paths have the same segments in every state, their checks
 aside (`eraseChecks`). -/
-def PTerm.sameSegs (p q : PTerm C) : Bool := Tm.eraseChecks p == Tm.eraseChecks q
+def PTerm.sameSegs (p q : PTerm C) : Bool := Surface.Tm.eraseChecks p == Surface.Tm.eraseChecks q
 
 theorem PTerm.sameSegs_refl (p : PTerm C) : p.sameSegs p = true := beq_self_eq_true _
 
 /-- `f` of some path on the way down to `t`'s root: `t` itself, the path it
 selects from, and so on.  Generic in the sort, as structural recursion over
 `Tm` asks. -/
-def Tm.extendsAny (f : PTerm C → Bool) : Tm C u → Bool
+def Surface.Tm.extendsAny (f : PTerm C → Bool) : Surface.Tm C u → Bool
   | PTerm.field q _ => f q || q.extendsAny f
   | PTerm.at q _ => f q || q.extendsAny f
   | PTerm.atIn _ q _ => f q || q.extendsAny f
@@ -185,19 +185,19 @@ def PTerm.extends (q p : PTerm C) : Bool := q.extendsAny (· == p)
 theorem PTerm.extends_denote {p : PTerm C} (σ : State) :
     (q : PTerm C) → q.extends p = true → ∃ r, r ≠ [] ∧ q.denote σ = p.denote σ ++ r
   | PTerm.field q f, h => by
-    simp only [PTerm.extends, Tm.extendsAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [PTerm.extends, Surface.Tm.extendsAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨[.field f], List.cons_ne_nil _ _, by simp only [tm_denote]⟩
     · obtain ⟨r, hr, hq⟩ := PTerm.extends_denote σ q h
       exact ⟨r ++ [.field f], by simp, by simp only [tm_denote, hq, List.append_assoc]⟩
   | PTerm.at q i, h => by
-    simp only [PTerm.extends, Tm.extendsAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [PTerm.extends, Surface.Tm.extendsAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨[.at (asInt (i.denote σ))], List.cons_ne_nil _ _, by simp only [tm_denote]⟩
     · obtain ⟨r, hr, hq⟩ := PTerm.extends_denote σ q h
       exact ⟨r ++ [.at (asInt (i.denote σ))], by simp, by simp only [tm_denote, hq, List.append_assoc]⟩
   | PTerm.atIn _ q i, h => by
-    simp only [PTerm.extends, Tm.extendsAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [PTerm.extends, Surface.Tm.extendsAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨[.at (asInt (i.denote σ))], List.cons_ne_nil _ _, by simp only [tm_denote]⟩
     · obtain ⟨r, hr, hq⟩ := PTerm.extends_denote σ q h
@@ -205,13 +205,13 @@ theorem PTerm.extends_denote {p : PTerm C} (σ : State) :
   | .pvP _, h | PTerm.root _, h | PTerm.next _, h | PTerm.nextIn _ _, h => nomatch h
 
 /-- The state variable a path is, if it is one alone. -/
-def Tm.root? : Tm C u → Option Name
+def Surface.Tm.root? : Surface.Tm C u → Option Name
   | PTerm.root r => some r
   | _ => none
 
 theorem PTerm.eq_root_of_root? : (p : PTerm C) → {r : Name} → p.root? = some r → p = .root r
   | PTerm.root _, _, h => by
-    simp only [Tm.root?, Option.some.injEq] at h
+    simp only [Surface.Tm.root?, Option.some.injEq] at h
     subst h
     rfl
   | .pvP _, _, h | .app1 _ _, _, h | .app2 _ _ _, _, h | .app3 _ _ _ _, _, h => nomatch h
@@ -219,26 +219,26 @@ theorem PTerm.eq_root_of_root? : (p : PTerm C) → {r : Name} → p.root? = some
 /-- A path read from its head, as solkey reads it: the root, and the rest of
 the path rooted at its first member — `alice.account.balance` is `alice` and
 `account.balance`.  `none` for a root alone or a path through an alias. -/
-def Tm.shift? : Tm C u → Option (Name × PTerm C)
+def Surface.Tm.shift? : Surface.Tm C u → Option (Name × PTerm C)
   | PTerm.field p f => match p.root? with
     | some r => some (r, .root f)
-    | none => (Tm.shift? p).map fun (r, p') => (r, .field p' f)
+    | none => (Surface.Tm.shift? p).map fun (r, p') => (r, .field p' f)
   | PTerm.at p i => match p.root? with
     | some _ => none
-    | none => (Tm.shift? p).map fun (r, p') => (r, .at p' i)
+    | none => (Surface.Tm.shift? p).map fun (r, p') => (r, .at p' i)
   | PTerm.atIn S p i => match p.root? with
     | some _ => none
-    | none => (Tm.shift? p).map fun (r, p') => (r, .atIn S p' i)
+    | none => (Surface.Tm.shift? p).map fun (r, p') => (r, .atIn S p' i)
   | _ => none
 
-@[inherit_doc Tm.shift?]
-def PTerm.shift? (p : PTerm C) : Option (Name × PTerm C) := Tm.shift? p
+@[inherit_doc Surface.Tm.shift?]
+def PTerm.shift? (p : PTerm C) : Option (Name × PTerm C) := Surface.Tm.shift? p
 
 /-- `shift?` splits the Theory's path at its head, in every state. -/
 theorem PTerm.shift?_denote (σ : State) : (p : PTerm C) → {r : Name} → {p' : PTerm C} →
     p.shift? = some (r, p') → p.denote σ = .field r :: p'.denote σ
   | PTerm.field p f, _, _, h => by
-    simp only [PTerm.shift?, Tm.shift?] at h
+    simp only [PTerm.shift?, Surface.Tm.shift?] at h
     split at h
     · rename_i r hr
       obtain rfl := PTerm.eq_root_of_root? p hr
@@ -254,7 +254,7 @@ theorem PTerm.shift?_denote (σ : State) : (p : PTerm C) → {r : Name} → {p' 
       rw [ih]
       rfl
   | PTerm.at p i, _, _, h => by
-    simp only [PTerm.shift?, Tm.shift?] at h
+    simp only [PTerm.shift?, Surface.Tm.shift?] at h
     split at h
     · nomatch h
     · simp only [Option.map_eq_some_iff] at h
@@ -266,7 +266,7 @@ theorem PTerm.shift?_denote (σ : State) : (p : PTerm C) → {r : Name} → {p' 
       rw [ih]
       rfl
   | PTerm.atIn _ p i, _, _, h => by
-    simp only [PTerm.shift?, Tm.shift?] at h
+    simp only [PTerm.shift?, Surface.Tm.shift?] at h
     split at h
     · nomatch h
     · simp only [Option.map_eq_some_iff] at h
@@ -284,7 +284,7 @@ theorem PTerm.shift?_denote (σ : State) : (p : PTerm C) → {r : Name} → {p' 
 theorem PTerm.shift?_hasSeg : (p : PTerm C) → {r : Name} → {p' : PTerm C} →
     p.shift? = some (r, p') → p'.hasSeg = true
   | PTerm.field p _, _, _, h => by
-    simp only [PTerm.shift?, Tm.shift?] at h
+    simp only [PTerm.shift?, Surface.Tm.shift?] at h
     split at h
     · simp only [Option.some.injEq, Prod.mk.injEq] at h
       obtain ⟨rfl, rfl⟩ := h
@@ -295,7 +295,7 @@ theorem PTerm.shift?_hasSeg : (p : PTerm C) → {r : Name} → {p' : PTerm C} �
       obtain ⟨rfl, rfl⟩ := h
       rfl
   | PTerm.at p _, _, _, h | PTerm.atIn _ p _, _, _, h => by
-    simp only [PTerm.shift?, Tm.shift?] at h
+    simp only [PTerm.shift?, Surface.Tm.shift?] at h
     split at h
     · nomatch h
     · simp only [Option.map_eq_some_iff] at h
@@ -317,7 +317,7 @@ theorem SValT.lit?_eq : (v : SValT C) → {w : Value} → v.lit? = some w → v 
 `save` at that path of a word, and past a `save` at a path that leaves it.
 `eq` and `div` are the path's `(·.sameSegs q)` and `(·.diverges q)`,
 functions so that the recursion is structural. -/
-def Tm.findLitBy (eq div : PTerm C → Bool) : Tm C u → Option Value
+def Surface.Tm.findLitBy (eq div : PTerm C → Bool) : Surface.Tm C u → Option Value
   | STerm.save s p v => if eq p then SValT.lit? v else if div p then s.findLitBy eq div else none
   | _ => none
 
@@ -347,14 +347,14 @@ theorem PTerm.denote_of_segs? (σ : State) : (p : PTerm C) → {l : List Seg} �
     p.segs? = some l → p.denote σ = l
   | .pvP _, _, h | PTerm.next _, _, h | PTerm.nextIn _ _, _, h => nomatch h
   | PTerm.root _, _, h => by
-    simp only [Tm.segs?, Option.some.injEq] at h
+    simp only [Surface.Tm.segs?, Option.some.injEq] at h
     simp only [tm_denote, h]
   | PTerm.field p _, _, h => by
-    simp only [Tm.segs?, Option.map_eq_some_iff] at h
+    simp only [Surface.Tm.segs?, Option.map_eq_some_iff] at h
     obtain ⟨a, ha, rfl⟩ := h
     simp only [tm_denote, PTerm.denote_of_segs? σ p ha]
   | PTerm.at p i, _, h | PTerm.atIn _ p i, _, h => by
-    simp only [Tm.segs?] at h
+    simp only [Surface.Tm.segs?] at h
     split at h
     · rename_i k hk
       simp only [Option.map_eq_some_iff] at h
@@ -378,22 +378,22 @@ theorem PTerm.shape?_matches (σ : State) : (p : PTerm C) → {a : List SegT} �
     p.shape? = some a → SegT.matches a (p.denote σ) = true
   | .pvP _, _, h => nomatch h
   | PTerm.root _, _, h => by
-    simp only [Tm.shape?, Option.some.injEq] at h
+    simp only [Surface.Tm.shape?, Option.some.injEq] at h
     subst h
     simp only [tm_denote, SegT.matches, SegT.fits, BEq.rfl, Bool.and_self]
   | PTerm.field p _, _, h => by
-    simp only [Tm.shape?, Option.map_eq_some_iff] at h
+    simp only [Surface.Tm.shape?, Option.map_eq_some_iff] at h
     obtain ⟨a, ha, rfl⟩ := h
     simp only [tm_denote]
     exact SegT.matches_append _ _ _ _ (PTerm.shape?_matches σ p ha)
       (by simp only [SegT.matches, SegT.fits, BEq.rfl, Bool.and_self])
   | PTerm.next p, _, h | PTerm.nextIn _ p, _, h => by
-    simp only [Tm.shape?, Option.map_eq_some_iff] at h
+    simp only [Surface.Tm.shape?, Option.map_eq_some_iff] at h
     obtain ⟨a, ha, rfl⟩ := h
     simp only [tm_denote]
     exact SegT.matches_append _ _ _ _ (PTerm.shape?_matches σ p ha) rfl
   | PTerm.at p i, _, h | PTerm.atIn _ p i, _, h => by
-    simp only [Tm.shape?, Option.map_eq_some_iff] at h
+    simp only [Surface.Tm.shape?, Option.map_eq_some_iff] at h
     obtain ⟨a, ha, rfl⟩ := h
     simp only [tm_denote]
     refine SegT.matches_append _ _ _ _ (PTerm.shape?_matches σ p ha) ?_
@@ -472,13 +472,13 @@ theorem PTerm.divergesLen_denote {q p : PTerm C} (h : q.divergesLen p = true) (�
 
 /-- A check erased leaves the Theory's path, in every state. -/
 theorem PTerm.eraseChecks_denote (σ : State) :
-    (p : PTerm C) → (Tm.eraseChecks p).denote σ = p.denote σ
+    (p : PTerm C) → (Surface.Tm.eraseChecks p).denote σ = p.denote σ
   | .pvP _ | PTerm.root _ => rfl
   | PTerm.field p _ | PTerm.next p | PTerm.at p _ | PTerm.nextIn _ p | PTerm.atIn _ p _ => by
-    simp only [Tm.eraseChecks, tm_denote, PTerm.eraseChecks_denote σ p]
+    simp only [Surface.Tm.eraseChecks, tm_denote, PTerm.eraseChecks_denote σ p]
 
 /-- A check erased leaves a segment where there was one. -/
-theorem PTerm.eraseChecks_hasSeg : (p : PTerm C) → PTerm.hasSeg (Tm.eraseChecks p) = p.hasSeg
+theorem PTerm.eraseChecks_hasSeg : (p : PTerm C) → PTerm.hasSeg (Surface.Tm.eraseChecks p) = p.hasSeg
   | .pvP _ | PTerm.root _ | PTerm.field _ _ | PTerm.next _ | PTerm.at _ _
   | PTerm.nextIn _ _ | PTerm.atIn _ _ _ => rfl
 
@@ -692,11 +692,11 @@ theorem Term.find_fill_theq {s s' : STerm C} (h : ∀ σ, s.denote σ = s'.denot
 
 /-- The word read off the writes is the word read: `findOnSave` at the write
 of `q`, `findOnSaveFrame` past the others. -/
-theorem Tm.findLitBy_theq {q : PTerm C} (hq : q.hasSeg = true) :
+theorem Surface.Tm.findLitBy_theq {q : PTerm C} (hq : q.hasSeg = true) :
     (s : STerm C) → {w : Value} → s.findLitBy (·.sameSegs q) (·.diverges q) = some w →
       Term.Theq (.find s q) (.lit w)
   | STerm.save s p v, w, h => fun σ => by
-    simp only [Tm.findLitBy] at h
+    simp only [Surface.Tm.findLitBy] at h
     split at h
     · rename_i hpq
       obtain rfl := SValT.lit?_eq v h
@@ -706,7 +706,7 @@ theorem Tm.findLitBy_theq {q : PTerm C} (hq : q.hasSeg = true) :
       exact Equiv.refl _
     · split at h
       · rename_i hd
-        have ih := Tm.findLitBy_theq hq s h σ
+        have ih := Surface.Tm.findLitBy_theq hq s h σ
         simp only [tm_denote] at ih ⊢
         rw [find_copyTo_frame _ _ _ _ (PTerm.diverges_denote hd σ)]
         exact ih
@@ -719,7 +719,7 @@ theorem STerm.findLit?_theq {s : STerm C} {q : PTerm C} {w : Value} (h : s.findL
     Term.Theq (.find s q) (.lit w) := by
   unfold STerm.findLit? at h
   split at h
-  · exact Tm.findLitBy_theq ‹_› s h
+  · exact Surface.Tm.findLitBy_theq ‹_› s h
   · nomatch h
 
 /-- **Each term taclet is sound**: its two terms have one Theory value in

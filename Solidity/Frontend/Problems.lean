@@ -109,7 +109,7 @@ def elabSolcProblems : CommandElab := fun stx => do
         continue
     let n := N ++ Lean.Name.mkSimple r.name ++ suffix
     -- the constructor's is a deployment's, from the empty storage
-    let stmt := if r.name == "constructor" then ``Problem.ctorFml else ``Problem.fml
+    let stmt := if r.name == "constructor" then ``Surface.Problem.ctorFml else ``Surface.Problem.fml
     let value := mkAppN (mkConst stmt) #[mkConst N, toExpr m, toExpr xs,
       mkConst (N ++ Lean.Name.mkSimple r.name)]
     liftCoreM <| addDecl <| .defnDecl {
@@ -160,9 +160,9 @@ def elabSolcScopedProblems : CommandElab := fun stx => do
           -- is computed here from `P`: an `evalConst` of it would run the
           -- interpreter on the contract again, 9 ms an obligation
           let ctor := r.name == "constructor"
-          let want := mkAppN (mkConst (if ctor then ``Problem.ctorFml else ``Problem.fml))
+          let want := mkAppN (mkConst (if ctor then ``Surface.Problem.ctorFml else ``Surface.Problem.fml))
             #[mkConst N, toExpr m, toExpr xs, mkConst n]
-          let legacy := if ctor then Problem.ctorFml m xs P else Problem.fml m xs P
+          let legacy := if ctor then Surface.Problem.ctorFml m xs P else Surface.Problem.fml m xs P
           unless d.value == want &&
               Solidity.Surface.Fml.quote (mkConst N) (φ.eraseS []) ==
                 Solidity.Surface.Fml.quote (mkConst N) legacy do
@@ -205,7 +205,7 @@ syntax. -/
 def elabSolkeyProblem : CommandElab := fun stx => do
   let f := stx[1].getId
   let N := f.getPrefix
-  let e := mkAppN (mkConst ``Problem.text) #[mkConst N, toExpr N.getString!,
+  let e := mkAppN (mkConst ``Surface.Problem.text) #[mkConst N, toExpr N.getString!,
     toExpr f.getString!, legacyStatement (← getEnv) f]
   let s ← liftTermElabM <| unsafe evalExpr String (mkConst ``String) e
   logInfo s
@@ -251,9 +251,9 @@ open Tactic in
 /-- `Derive.proveSearch` (`stopAtOpen`) on a scoped goal `⊢ N.f.problem`:
 `sol_prove` (the scoped walk, `Calculus/Core/ProvesDerive.lean`), then
 `Derive.searchLeaf` on each leaf of today's calculus it leaves. -/
-def scopedSearch (g : MVarId) : TacticM Derive.Search := do
+def scopedSearch (g : MVarId) : TacticM NFml.Derive.Search := do
   let_expr Core.Proves C R _ Γ H φ := ← g.getType | throwError "expected a scoped `⊢ φ`"
-  Derive.proveSearch g (stopAtOpen := true) (prove := fun g => Core.Seq.prove g C R Γ H φ)
+  NFml.Derive.proveSearch g (stopAtOpen := true) (prove := fun g => Core.Seq.prove g C R Γ H φ)
 
 syntax (name := solkeyDerive) "#solkey_derive? " ident (&" only " ident)? (&" from " num)?
   (&" count " num)? (&" timed")? (&" pending")? : command
@@ -297,19 +297,19 @@ def elabSolkeyDerive : CommandElab := fun stx => do
       let ty := if isScoped then
           mkAppN (mkConst ``Core.Proves) #[C, mkConst ``RuleSet.all, nilCtx, nilCtx,
             mkApp2 (mkConst ``Core.Hyps.nil) C nilCtx, mkConst (f ++ `problem)]
-        else Derive.provesNil C (legacyStatement env f)
+        else NFml.Derive.provesNil C (legacyStatement env f)
       let g ← mkFreshExprSyntheticOpaqueMVar ty
       tryCatchRuntimeEx (do
-          let out ← IO.mkRef (none : Option Derive.Search)
+          let out ← IO.mkRef (none : Option NFml.Derive.Search)
           let _ ← Tactic.run g.mvarId! do
             out.set (some (← if isScoped then scopedSearch g.mvarId!
-              else Derive.proveSearch g.mvarId! (stopAtOpen := true)))
+              else NFml.Derive.proveSearch g.mvarId! (stopAtOpen := true)))
           let some s ← out.get | return .error "the search did not run"
           if let some l := s.open_.head? then return .error s!"{← l.getTag} stays open"
-          unless ← Derive.replayFits s.heartbeats do
+          unless ← NFml.Derive.replayFits s.heartbeats do
             let hb := if timed then s!" ({s.heartbeats / 1000} heartbeats)" else ""
             return .error s!"its replay is past maxHeartbeats as one declaration{hb}"
-          return .ok (Derive.replayLines s.found))
+          return .ok (NFml.Derive.replayLines s.found))
         fun e => do return .error (← e.toMessageData.toString)
     let t1 ← IO.monoMsNow
     let ms := if timed then s!", {t1 - t0} ms" else ""
@@ -362,7 +362,7 @@ def elabSolkeyObligations : CommandElab := fun stx => do
         let why := if r.tag.modality?.isNone then r.tag.toStr else "unstated"
         other := other.push s!"{why} {r.name}"
         continue
-      let want := Derive.provesNil C (mkConst (f ++ `problem))
+      let want := NFml.Derive.provesNil C (mkConst (f ++ `problem))
       match env.find? (f ++ `proved) with
       | some (.thmInfo t) =>
         if t.type.consumeMData == want || provesScoped C (mkConst (f ++ `problem)) t.type then matched := matched.push (r.name, f ++ `proved)

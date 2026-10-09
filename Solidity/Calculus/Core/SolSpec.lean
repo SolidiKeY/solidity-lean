@@ -1,11 +1,11 @@
 import Solidity.Calculus.Core.Derive
 import Solidity.Calculus.Core.Spec
-import Solidity.Calculus.Spec
+import Solidity.Calculus.SurfaceSpec
 
 /-!
 # `sol_spec` on a scoped obligation: `⊨ cspec!{f}`
 
-`Calculus/Spec.lean`'s `sol_spec` (`sol_symex; sol_spec_close`) on a scoped
+`Calculus/SurfaceSpec.lean`'s `sol_spec` (`sol_symex; sol_spec_close`) on a scoped
 goal `Core.Valid φ`, `φ` a specification's obligation (`cspec!{f}`,
 `Calculus/Core/Spec.lean`): `sol_symex` runs the scoped strategy
 (`Calculus/Core/Symex.lean`), and each leaf it leaves is erased
@@ -29,11 +29,11 @@ def eraseLeaf (g : MVarId) : TacticM (Option MVarId) := g.withContext do
   let hpTy := mkApp3 (mkConst ``Eq [1]) bool
     (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
       (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
-  let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
+  let hp ← try NFml.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
     catch _ => throwError "sol_spec: the leaf is not one its erasure closes (`Fml.posB`): a \
       hidden binder under a negation, a precondition or a modality, or named twice"
   let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
-  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``NFml.Valid) C erased) (← g.getTag)
   g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
   return some (← Solidity.normValid g'.mvarId!)
 

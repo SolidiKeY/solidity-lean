@@ -408,7 +408,7 @@ theorem TState.withHeap_erase (σ : TState C Γ) (hp : Heap σ.H) :
 
 theorem TState.withGlob_adopt {α : HTy → Type} (σ : TState C Γ) (g : Grown σ.H α) :
     σ.erase.withGlob (σ.adopt g).1.erase.glob = (σ.adopt g).1.erase := by
-  simp only [TState.adopt, TState.erase, State.withGlob, State.ofGlob, State.glob,
+  simp only [TState.adopt, TState.erase, EState.withGlob, EState.ofGlob, EState.glob,
     TEnv.erase_wk]
 
 theorem ARhs.evalT_erase (σ : TState C Γ) {R : RefTy} (r : ARhs C Γ R) :
@@ -604,7 +604,7 @@ theorem opMemT_erase (σ : TState C Γ) {op : BinOp} (hop : op.hasCompoundAssign
       cases σ.heap.writeAddr a new <;> rfl
 
 theorem bumpStoreT_erase (σ : TState C Γ) (op : IncDec) {p : PrimTy} (hp : p.isNumeric = true)
-    (r : SRef C (.prim p)) {k' : Semantics.State × Value → State C Γ × Value}
+    (r : SRef C (.prim p)) {k' : Semantics.State × Value → EState C Γ × Value}
     (hk : ∀ τ v, k' (τ, v) = (σ.erase.withGlob τ, v)) :
     TRes.Agrees (fun x : Out C σ.H Γ × p.Denote => (x.1.st.erase, PrimTy.erase x.2))
       (bumpStoreT σ op r) (k' <$> bumpStore σ.erase.glob op p r.root r.path.erase) := by
@@ -627,7 +627,7 @@ theorem bumpStoreT_erase (σ : TState C Γ) (op : IncDec) {p : PrimTy} (hp : p.i
         cases op.isPre <;> exact congrArg Except.ok (hk _ _)
 
 theorem bumpMemT_erase (σ : TState C Γ) (op : IncDec) {p : PrimTy} (hp : p.isNumeric = true)
-    (a : MAddr σ.H (.prim p)) {k' : Semantics.State × Value → State C Γ × Value}
+    (a : MAddr σ.H (.prim p)) {k' : Semantics.State × Value → EState C Γ × Value}
     (hk : ∀ τ v, k' (τ, v) = (σ.erase.withGlob τ, v)) :
     TRes.Agrees (fun x : Out C σ.H Γ × p.Denote => (x.1.st.erase, PrimTy.erase x.2))
       (bumpMemT σ op a) (k' <$> bumpMem σ.erase.glob op p a.erase) := by
@@ -712,7 +712,7 @@ theorem OpLoc.bumpT_erase (σ : TState C Γ) (op : IncDec) {p : PrimTy} (hp : p.
   | «local» i =>
     simp only [OpLoc.bumpT, OpLoc.bump, bumpLocal, TState.erase_get, LTy.TDenote.erase_val,
       asInt_erase_numeric hp, ok_bind, bump_erase hp]
-    cases Core.bumpT op p (PrimTy.key (TEnv.get i σ.env)) with
+    cases Solidity.Core.bumpT op p (PrimTy.key (TEnv.get i σ.env)) with
     | none => rfl
     | some new =>
       refine TRes.Agrees.of_eq ?_
@@ -845,20 +845,20 @@ theorem TState.withEnv_erase {Δ : Ctx} (σ : TState C Γ) (e : TEnv C σ.H Δ) 
 /-- Entering a call: the frame the untyped run builds on the erased caller is
 the erasure of the typed one. -/
 theorem CallRet.enterT_erase {rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (σ : TState C Γ)
-    (a : TEnv C σ.H ps) {β : Type} (K : State C (rs ++ ps) → Res β) :
+    (a : TEnv C σ.H ps) {β : Type} (K : EState C (rs ++ ps) → Res β) :
     (do
       let (τ, r) ← ret.enter σ.erase.glob
-      K (State.ofGlob τ (Env.append rs r (TEnv.erase ps a)))) =
+      K (EState.ofGlob τ (Env.append rs r (TEnv.erase ps a)))) =
       K (ret.enterT (σ.withEnv a)).st.erase := by
   cases ret with
   | none => rfl
   | val p r res =>
-    show K (State.ofGlob (Γ := .val p :: ps) σ.erase.glob
+    show K (EState.ofGlob (Γ := .val p :: ps) σ.erase.glob
       (PrimTy.default p, TEnv.erase ps a)) = _
     rw [← PrimTy.erase_dflt]
     rfl
   | rets bs =>
-    show K (State.ofGlob σ.erase.glob (Env.append rs (Binders.defaults bs) (TEnv.erase ps a))) = _
+    show K (EState.ofGlob σ.erase.glob (Env.append rs (Binders.defaults bs) (TEnv.erase ps a))) = _
     rw [← Binders.defaultsT_erase (H := σ.H) bs, ← TEnv.append_erase]
     rfl
   | mem R r hd hm =>
@@ -866,11 +866,11 @@ theorem CallRet.enterT_erase {rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (σ : T
       let (τ, r) ← (do
         let (τ', id) ← Semantics.allocDefault (σ.withEnv a).erase.glob R
         pure (τ', ((id, ()) : Env C [.mem R])))
-      K (State.ofGlob τ (Env.append [.mem R] r (TEnv.erase ps a)))) = _
+      K (EState.ofGlob τ (Env.append [.mem R] r (TEnv.erase ps a)))) = _
     rw [TState.allocDefault_erase (σ.withEnv a) R hm]
     refine congrArg K ?_
     simp only [CallRet.enterT, TState.allocDefaultG, TState.grow, TState.allocDefault,
-      TState.adopt, TState.push, TState.withEnv, TState.erase, State.ofGlob, State.glob,
+      TState.adopt, TState.push, TState.withEnv, TState.erase, EState.ofGlob, EState.glob,
       Env.append, TEnv.erase_wk]
     congr 1
     show (_, TEnv.erase ps a) = (_, TEnv.erase ps (TEnv.wk _ ps a))
@@ -898,14 +898,14 @@ end Eval
 
 /-- A typed step against what its erasure does: from every typed state, the
 results agree on the erased one. -/
-def StepAgrees {Γ Γ' : Ctx} (t : TStep C Γ Γ') (u : State C Γ → Res (State C Γ')) : Prop :=
+def StepAgrees {Γ Γ' : Ctx} (t : TStep C Γ Γ') (u : EState C Γ → Res (EState C Γ')) : Prop :=
   ∀ σ : TState C Γ, TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (t σ) (u σ.erase)
 
 /-- What a typed step erases to, read off its agreement (`TRun.assign_erase`
 and its kin): the right-hand side the lemma writes out, by name, for the
 statements of the update rules' soundness. -/
-abbrev StepAgrees.erased {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : State C Γ → Res (State C Γ')}
-    (_ : StepAgrees t u) : State C Γ → Res (State C Γ') := u
+abbrev StepAgrees.erased {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : EState C Γ → Res (EState C Γ')}
+    (_ : StepAgrees t u) : EState C Γ → Res (EState C Γ') := u
 
 theorem TRes.Agrees.emap {α β γ δ : Type} {f : α → β} {g : γ → δ} {t : TRes α} {u : Res β}
     (h : TRes.Agrees f t u) {k : α → γ} {k' : β → δ} (hk : ∀ a, k' (f a) = g (k a)) :
@@ -1231,7 +1231,7 @@ theorem clearT_erase (σ : TState C Γ) {T : Ty} (a : MAddr σ.H T) (hm : T.mapF
       refine TRes.Agrees.of_eq (congrArg Except.ok ?_)
       show σ.erase.withGlob _ = ((σ.allocDefaultG R hm).st.withHeap hp).erase
       rw [TState.withHeap_erase]
-      simp only [State.withGlob]
+      simp only [EState.withGlob]
       rw [show (σ.allocDefaultG R hm).st.erase.env = σ.erase.env from TState.erase_env_adopt σ _]
 
 theorem deleteMem_erase {T : Ty} (p : MPath C Γ T) :
@@ -1286,7 +1286,7 @@ theorem assignNew_erase {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
     rfl
   cases l with
   | store l =>
-    have e := key (β := State C Γ) fun τ id => do
+    have e := key (β := EState C Γ) fun τ id => do
       let σ' := σ.erase.withGlob τ
       let sv' ← Semantics.copyMem τ (.ref id)
       let (root, segs) ← l.resolve σ'
@@ -1323,7 +1323,7 @@ theorem assignNew_erase {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
       cases G.st.storage.write ref (G.st.copyMToSt G.val) <;> rfl
     exact gen _
   | mem l =>
-    have e := key (β := State C Γ) fun τ id => l.write (σ.erase.withGlob τ) (.ref id)
+    have e := key (β := EState C Γ) fun τ id => l.write (σ.erase.withGlob τ) (.ref id)
     show TRes.Agrees _ _ (do
       let sv := newArrVal R (← (← n.eval σ.erase).asInt)
       let (τ, mv) ← Semantics.copyStToM σ.erase.glob sv

@@ -26,7 +26,7 @@ plain calculus, the invariant `true`, read as `ValidC` by `ProvesC.valid`
 
 namespace Solidity.Examples.Tactics.CoreCallback
 
-open Solidity Core
+open Solidity Solidity.Core
 
 private def pays : Solidity.Surface.Prog StandardExample := sol[StandardExample]{
   uint to = 9; to.transfer(2); }

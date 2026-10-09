@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -26,11 +26,11 @@ local has no root to fall back on (`Memory.lean`).
 
 namespace Solidity.Examples.Tactics.CrossDomain
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## 1 · Storage to memory -/
 

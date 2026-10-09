@@ -1,11 +1,11 @@
-import Solidity.Calculus.Notation
+import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.Core.NotationResolve
 import Solidity.Calculus.Core.Quote
 
 /-!
 # Reading concrete formulas into scoped ones: `cdl!{ φ }`
 
-`Calculus/Notation.lean`'s reader (`dl!{ φ }`), producing a scoped formula
+`Calculus/SurfaceNotation.lean`'s reader (`dl!{ φ }`), producing a scoped formula
 `Core.Fml C []` (`docs/intrinsic.md`, M6b).  The text is the same, so is the
 reading of every name; what changes is that every local is now bound
 somewhere in the formula, at the type the reading gave it:

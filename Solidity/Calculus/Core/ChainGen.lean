@@ -58,14 +58,14 @@ def generate (φ : Expr) : TermElabM Gen := do
   let erased := (steps.back?.map (·.2.2)).getD run.erased
   let L := dropAllsE (← erasedLine run.splice erased)
   let C := (← lineType φ).1
-  let (rws, stop, _) ← Solidity.Chain.searchRewritesUsing C L none
+  let (rws, stop, _) ← NFml.Chain.searchRewritesUsing C L none
   return { splice := run.splice, erased := run.erased, steps, rewrites := rws.getD #[], stop }
 
 /-- The links of a generated chain: the strategy's steps grouped
 (`groupSteps`), then one `~[r]~>` per rewrite; each with its line, and
 whether that line is scoped. -/
 def Gen.links (g : Gen) : Array (String × Expr × Bool) :=
-  let grouped := Solidity.Chain.groupSteps (g.steps.map fun (n, l, _) => (n, l))
+  let grouped := NFml.Chain.groupSteps (g.steps.map fun (n, l, _) => (n, l))
   grouped.map (fun (a, l) => (a, l, true)) ++ g.rewrites.map fun (n, l) => (s!"~[{n}]~>", l, false)
 
 /-- The `dl_fml` of a printed line `dl{ φ }`. -/
@@ -122,7 +122,7 @@ def Gen.decl (g : Gen) (φ : Expr) (name : String := "chain") : TermElabM (Array
 def Gen.tableRows (g : Gen) (φ : Expr) : Array String := Id.run do
   let mut seen : Array String := #[]
   for e in #[φ] ++ g.steps.map (·.2.1) ++ g.rewrites.map (·.2) do
-    for s in Solidity.Chain.freshSpellings e do
+    for s in NFml.Chain.freshSpellings e do
       unless seen.contains s do seen := seen.push s
   return seen.map fun s => s!"(\"?\", \"{s}\")"
 
@@ -183,7 +183,7 @@ elab_rules : command
         else do
           let ty ← whnfR (← inferType B)
           let C := ty.appArg!
-          let (rws, stop, _) ← Solidity.Chain.searchRewritesUsing C B none
+          let (rws, stop, _) ← NFml.Chain.searchRewritesUsing C B none
           let sp ← collectPosts B {}
           let m? ← (do
             for x in (collectFVars {} B).fvarIds do
@@ -258,7 +258,7 @@ def lastErasure (A Z : Expr) : TermElabM Expr := do
 /-- `L₀ ~~> L` (`Update.lean`'s) by the rewrites `ns`. -/
 def legacyLeads (C L₀ L : Expr) (ns : Array Lean.Name) : TermElabM Expr := do
   let g ← mkFreshExprMVar (mkApp3 (mkConst ``Solidity.NFml.Leads) C L₀ L)
-  Solidity.Chain.proveRws g.mvarId! ns
+  NFml.Chain.proveRws g.mvarId! ns
   instantiateMVars g
 
 /-- Prove a goal `A ~~> B`: scoped, by the derivation; past the program, by
@@ -338,7 +338,7 @@ elab_rules : tactic
         pure { gen with steps := gen.steps.extract 0 i, rewrites := #[], stop := none }
       | Core.Fml.LeadsE C _ Z L =>
         let L₀ ← lastErasure A (← instantiateMVars Z)
-        let (path, note) ← Solidity.Chain.searchRewrites C L₀ (some (← instantiateMVars L))
+        let (path, note) ← NFml.Chain.searchRewrites C L₀ (some (← instantiateMVars L))
         let some path := path
           | throwError "sol_chain?: no run of rewrites from{indentExpr L₀}\nreaches{indentExpr L}\
               {(note.map (m!"\n" ++ ·)).getD m!""}"
@@ -403,7 +403,7 @@ elab_rules : tactic
         pure (Array.replicate n `sequentialToParallel)
       | Core.Fml.LeadsE C A Z L =>
         let L₀ ← lastErasure (← instantiateMVars A) (← instantiateMVars Z)
-        let (path, note) ← Solidity.Chain.searchRewrites C L₀ (some (← instantiateMVars L))
+        let (path, note) ← NFml.Chain.searchRewrites C L₀ (some (← instantiateMVars L))
         let some path := path
           | throwError "sol_rws?: no run of rewrites from{indentExpr L₀}\nreaches{indentExpr L}\
               {(note.map (m!"\n" ++ ·)).getD m!""}"

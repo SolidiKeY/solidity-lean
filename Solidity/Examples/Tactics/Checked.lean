@@ -1,5 +1,5 @@
 import Solidity.Calculus.RewriteChains
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -28,11 +28,11 @@ and a cast is a capture at its type.  What is not modelled is in
 
 namespace Solidity.Examples.Tactics.Checked
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## 1 · The runs
 

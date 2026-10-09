@@ -27,7 +27,7 @@ the state a subformula is judged in does not matter.  It does not reach:
   two terms with one Theory value can differ in whether they halt;
 * an update's right-hand sides or a program, which run in the interpreter
   (`Proves.updRw` reaches the first, for a rewrite that keeps what a run
-  returns, `Calculus/UpdateRules.lean`);
+  returns, `Calculus/NFmlUpdateRules.lean`);
 * a memory term (`read`, `mlen`, `copyMem`), which `denote`s through `eval`:
   an equality of denotations says nothing about its subterms' evaluations.
   `Tm.rw` replaces such a term as a whole, but never looks inside it.
@@ -103,7 +103,7 @@ def Term.pick (q : Term C × Term C) (e d : Term C) : Term C := if e = q.1 then 
 
 /-- `q.2` where the term is `q.1`, at a value term; any other sort is left as
 it is. -/
-def Tm.pickAt (q : Term C × Term C) : {s : Srt} → Tm C s → Tm C s → Tm C s
+def Surface.Tm.pickAt (q : Term C × Term C) : {s : Srt} → Surface.Tm C s → Surface.Tm C s → Surface.Tm C s
   | .val, e, d => Term.pick q e d
   | .path, _, d | .st, _, d | .sv, _, d | .ident, _, d | .addr, _, d | .mem, _, d | .mv, _, d => d
 
@@ -115,16 +115,16 @@ def Op2.opaque : Op2 a b s → Bool
 
 /-- Every occurrence of `q.1` in a term, replaced by `q.2` — not looking
 inside a memory read (`Op2.opaque`), whose denotation is its evaluation. -/
-def Tm.rw (q : Term C × Term C) : Tm C s → Tm C s
-  | .pvV x => Tm.pickAt q (.pvV x) (.pvV x)
+def Surface.Tm.rw (q : Term C × Term C) : Surface.Tm C s → Surface.Tm C s
+  | .pvV x => Surface.Tm.pickAt q (.pvV x) (.pvV x)
   | .pvP x => .pvP x
   | .pvS x => .pvS x
   | .pvI x => .pvI x
-  | .app0 o => Tm.pickAt q (.app0 o) (.app0 o)
-  | .app1 o a => Tm.pickAt q (.app1 o a) (.app1 o (a.rw q))
+  | .app0 o => Surface.Tm.pickAt q (.app0 o) (.app0 o)
+  | .app1 o a => Surface.Tm.pickAt q (.app1 o a) (.app1 o (a.rw q))
   | .app2 o a b =>
-    Tm.pickAt q (.app2 o a b) (if o.opaque then .app2 o a b else .app2 o (a.rw q) (b.rw q))
-  | .app3 o a b c => Tm.pickAt q (.app3 o a b c) (.app3 o (a.rw q) (b.rw q) (c.rw q))
+    Surface.Tm.pickAt q (.app2 o a b) (if o.opaque then .app2 o a b else .app2 o (a.rw q) (b.rw q))
+  | .app3 o a b c => Surface.Tm.pickAt q (.app3 o a b c) (.app3 o (a.rw q) (b.rw q) (c.rw q))
 
 /-! ### Replacing an equivalent term keeps the denotation
 
@@ -174,9 +174,9 @@ theorem Srt.DEquiv.refl : (s : Srt) → (d : s.Den) → Srt.DEquiv s d d
   | .path, _ => rfl
   | .ident, _ | .addr, _ | .mem, _ | .mv, _ => trivial
 
-theorem Tm.pickAt_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
-    {s : Srt} → {e d : Tm C s} → Srt.DEquiv s (d.denote σ) (e.denote σ) →
-      Srt.DEquiv s ((Tm.pickAt q e d).denote σ) (e.denote σ)
+theorem Surface.Tm.pickAt_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
+    {s : Srt} → {e d : Surface.Tm C s} → Srt.DEquiv s (d.denote σ) (e.denote σ) →
+      Srt.DEquiv s ((Surface.Tm.pickAt q e d).denote σ) (e.denote σ)
   | .val, _, _, h => Term.pick_denote hd h
   | .path, _, _, h | .st, _, _, h | .sv, _, _, h | .ident, _, _, h | .addr, _, _, h
   | .mem, _, _, h | .mv, _, _, h => h
@@ -286,28 +286,28 @@ theorem Op3.denote_congr : (o : Op3 a b c s) → {da da' : a.Den} → {db db' : 
   | .write, _, _, _, _, _, _, _, _, _ => trivial
 
 /-- **Replacing an equivalent term keeps the denotation**, up to `Equiv`. -/
-theorem Tm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
-    (e : Tm C s) → Srt.DEquiv s ((e.rw q).denote σ) (e.denote σ)
-  | .pvV _ | .app0 _ => Tm.pickAt_denote hd (Srt.DEquiv.refl _ _)
+theorem Surface.Tm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) :
+    (e : Surface.Tm C s) → Srt.DEquiv s ((e.rw q).denote σ) (e.denote σ)
+  | .pvV _ | .app0 _ => Surface.Tm.pickAt_denote hd (Srt.DEquiv.refl _ _)
   | .pvP _ | .pvS _ | .pvI _ => Srt.DEquiv.refl _ _
-  | .app1 o a => Tm.pickAt_denote hd (o.denote_congr (a.rw_denote hd))
-  | .app2 o a b => Tm.pickAt_denote hd (by
+  | .app1 o a => Surface.Tm.pickAt_denote hd (o.denote_congr (a.rw_denote hd))
+  | .app2 o a b => Surface.Tm.pickAt_denote hd (by
       cases ho : o.opaque
-      · simp only [Bool.false_eq_true, ↓reduceIte, Tm.denote]
+      · simp only [Bool.false_eq_true, ↓reduceIte, Surface.Tm.denote]
         exact o.denote_congr ho (a.rw_denote hd) (b.rw_denote hd)
       · simp only [↓reduceIte]
         exact Srt.DEquiv.refl _ _)
-  | .app3 o a b c => Tm.pickAt_denote hd
+  | .app3 o a b c => Surface.Tm.pickAt_denote hd
       (o.denote_congr (a.rw_denote hd) (b.rw_denote hd) (c.rw_denote hd))
 
 theorem Term.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) (e : Term C) :
-    StValue.Equiv ((e.rw q).denote σ) (e.denote σ) := Tm.rw_denote hd e
+    StValue.Equiv ((e.rw q).denote σ) (e.denote σ) := Surface.Tm.rw_denote hd e
 theorem PTerm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) (p : PTerm C) :
-    (p.rw q).denote σ = p.denote σ := Tm.rw_denote hd p
+    (p.rw q).denote σ = p.denote σ := Surface.Tm.rw_denote hd p
 theorem STerm.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) (s : STerm C) :
-    Struct.Equiv ((s.rw q).denote σ) (s.denote σ) := Tm.rw_denote hd s
+    Struct.Equiv ((s.rw q).denote σ) (s.denote σ) := Surface.Tm.rw_denote hd s
 theorem SValT.rw_denote (hd : StValue.Equiv (q.1.denote σ) (q.2.denote σ)) (v : SValT C) :
-    StValue.Equiv ((v.rw q).denote σ) (v.denote σ) := Tm.rw_denote hd v
+    StValue.Equiv ((v.rw q).denote σ) (v.denote σ) := Surface.Tm.rw_denote hd v
 
 end Denote
 

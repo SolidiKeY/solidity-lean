@@ -51,30 +51,30 @@ variable {C : Contract}
 /-- `v` is a canonical value of type `T`: well-typed, with every struct
 carrying exactly its declared members, every mapping unique keys and the
 default default, recursively (recycled array slots included). -/
-def Semantics.SVal.canon : SVal → Ty → Prop
+def Semantics.SVal.canon : Semantics.SVal → Ty → Prop
   | SVal.int _, Ty.int => True
   | SVal.int _, Ty.uint => True
   | SVal.bool _, Ty.bool => True
-  | SVal.struct fields, Ty.ref (RefTy.struct s) =>
+  | Semantics.SVal.struct fields, Ty.ref (RefTy.struct s) =>
       fields.map (·.1) = (structDef s).map (·.1) ∧ canonFields s fields
-  | SVal.array elems shadow fx, Ty.ref (RefTy.array E) =>
+  | Semantics.SVal.array elems shadow fx, Ty.ref (RefTy.array E) =>
       fx = false ∧ canonElems E elems ∧ canonElems E shadow
-  | SVal.array elems shadow fx, Ty.ref (RefTy.fixed E n) =>
+  | Semantics.SVal.array elems shadow fx, Ty.ref (RefTy.fixed E n) =>
       fx = true ∧ elems.length = n ∧ canonElems E elems ∧ canonElems E shadow
-  | SVal.map entries dflt, Ty.ref (RefTy.mapping _ V) =>
+  | Semantics.SVal.map entries dflt, Ty.ref (RefTy.mapping _ V) =>
       nodupKeysB entries = true ∧ canonEntries V entries ∧ dflt = defaultForTy V ∧ dflt.canon V
   | _, _ => False
 where
-  canonFields (s : Name) : List (Name × SVal) → Prop
+  canonFields (s : Name) : List (Name × Semantics.SVal) → Prop
     | [] => True
     | (n, v) :: rest =>
         (match lookupBy n (structDef s) with
          | some T => v.canon T
          | none => False) ∧ canonFields s rest
-  canonElems (E : Ty) : List SVal → Prop
+  canonElems (E : Ty) : List Semantics.SVal → Prop
     | [] => True
     | v :: rest => v.canon E ∧ canonElems E rest
-  canonEntries (V : Ty) : List (Int × SVal) → Prop
+  canonEntries (V : Ty) : List (Int × Semantics.SVal) → Prop
     | [] => True
     | (_, v) :: rest => v.canon V ∧ canonEntries V rest
 
@@ -111,7 +111,7 @@ theorem lookupBy_isSome_of_map_fst {κ α β : Type} [DecidableEq κ] {k : κ} :
       exact lookupBy_isSome_of_map_fst he h
 
 /-- A member of a canonical `Person` is canonical at its declared type: `alice.age`. -/
-theorem canonFields_lookup {s : Name} {fields : List (Name × SVal)} {n : Name} {v : SVal}
+theorem canonFields_lookup {s : Name} {fields : List (Name × Semantics.SVal)} {n : Name} {v : Semantics.SVal}
     (h : canonFields s fields) (hl : lookupBy n fields = some v) :
     ∃ T, lookupBy n (structDef s) = some T ∧ v.canon T := by
   induction fields with
@@ -131,7 +131,7 @@ theorem canonFields_lookup {s : Name} {fields : List (Name × SVal)} {n : Name} 
       exact ih h.2 hl
 
 /-- `alice.age = 3` keeps `alice`'s members canonical. -/
-theorem canonFields_setBy {s : Name} {fields : List (Name × SVal)} {n : Name} {w : SVal}
+theorem canonFields_setBy {s : Name} {fields : List (Name × Semantics.SVal)} {n : Name} {w : Semantics.SVal}
     {T : Ty}
     (h : canonFields s fields) (hd : lookupBy n (structDef s) = some T) (hw : w.canon T) :
     canonFields s (setBy n w fields) := by
@@ -145,7 +145,7 @@ theorem canonFields_setBy {s : Name} {fields : List (Name × SVal)} {n : Name} {
     · simp only [setBy, if_neg hn, canonFields]; exact ⟨h.1, ih h.2⟩
 
 /-- An element of a canonical `uint[]` is canonical. -/
-theorem canonElems_mem {E : Ty} {elems : List SVal} {v : SVal} (h : canonElems E elems)
+theorem canonElems_mem {E : Ty} {elems : List Semantics.SVal} {v : Semantics.SVal} (h : canonElems E elems)
     (hm : v ∈ elems) : v.canon E := by
   induction elems with
   | nil => cases hm
@@ -155,7 +155,7 @@ theorem canonElems_mem {E : Ty} {elems : List SVal} {v : SVal} (h : canonElems E
     | tail _ hm => exact ih h.2 hm
 
 /-- Elements canonical one by one make a canonical `uint[]`. -/
-theorem canonElems_of_forall {E : Ty} {elems : List SVal} (h : ∀ v ∈ elems, v.canon E) :
+theorem canonElems_of_forall {E : Ty} {elems : List Semantics.SVal} (h : ∀ v ∈ elems, v.canon E) :
     canonElems E elems := by
   induction elems with
   | nil => trivial
@@ -163,7 +163,7 @@ theorem canonElems_of_forall {E : Ty} {elems : List SVal} (h : ∀ v ∈ elems, 
     exact ⟨h v List.mem_cons_self, ih fun w hw => h w (List.mem_cons_of_mem _ hw)⟩
 
 /-- An entry of a canonical mapping is canonical: `balances[7]`. -/
-theorem canonEntries_lookup {V : Ty} {entries : List (Int × SVal)} {i : Int} {v : SVal}
+theorem canonEntries_lookup {V : Ty} {entries : List (Int × Semantics.SVal)} {i : Int} {v : Semantics.SVal}
     (h : canonEntries V entries) (hl : lookupBy i entries = some v) : v.canon V := by
   induction entries with
   | nil => simp [lookupBy] at hl
@@ -174,7 +174,7 @@ theorem canonEntries_lookup {V : Ty} {entries : List (Int × SVal)} {i : Int} {v
     · simp [lookupBy, hi] at hl; exact ih h.2 hl
 
 /-- `balances[7] = 1` keeps the entries canonical. -/
-theorem canonEntries_setBy {V : Ty} {entries : List (Int × SVal)} {i : Int} {w : SVal}
+theorem canonEntries_setBy {V : Ty} {entries : List (Int × Semantics.SVal)} {i : Int} {w : Semantics.SVal}
     (h : canonEntries V entries) (hw : w.canon V) : canonEntries V (setBy i w entries) := by
   induction entries with
   | nil => simp [setBy, canonEntries, hw]
@@ -185,7 +185,7 @@ theorem canonEntries_setBy {V : Ty} {entries : List (Int × SVal)} {i : Int} {w 
     · simp only [setBy, if_neg hi, canonEntries]; exact ⟨h.1, ih h.2⟩
 
 /-- `values[i] = 3` keeps the elements canonical. -/
-theorem canonElems_set {E : Ty} {elems : List SVal} {i : Nat} {w : SVal}
+theorem canonElems_set {E : Ty} {elems : List Semantics.SVal} {i : Nat} {w : Semantics.SVal}
     (h : canonElems E elems) (hw : w.canon E) : canonElems E (elems.set i w) := by
   induction elems generalizing i with
   | nil => exact h
@@ -195,19 +195,19 @@ theorem canonElems_set {E : Ty} {elems : List SVal} {i : Nat} {w : SVal}
     | succ n => exact ⟨h.1, ih h.2⟩
 
 /-- `values.push(3)` appends a canonical element. -/
-theorem canonElems_append {E : Ty} {xs ys : List SVal} (hx : canonElems E xs)
+theorem canonElems_append {E : Ty} {xs ys : List Semantics.SVal} (hx : canonElems E xs)
     (hy : canonElems E ys) : canonElems E (xs ++ ys) := by
   induction xs with
   | nil => exact hy
   | cons v rest ih => exact ⟨hx.1, ih hx.2⟩
 
 /-- The live elements of a canonical slot list are canonical. -/
-theorem canonElems_take {E : Ty} {xs : List SVal} (n : Nat) (h : canonElems E xs) :
+theorem canonElems_take {E : Ty} {xs : List Semantics.SVal} (n : Nat) (h : canonElems E xs) :
     canonElems E (xs.take n) :=
   canonElems_of_forall fun _ hv => canonElems_mem h (List.mem_of_mem_take hv)
 
 /-- The slots past the end of a canonical slot list are canonical. -/
-theorem canonElems_drop {E : Ty} {xs : List SVal} (n : Nat) (h : canonElems E xs) :
+theorem canonElems_drop {E : Ty} {xs : List Semantics.SVal} (n : Nat) (h : canonElems E xs) :
     canonElems E (xs.drop n) :=
   canonElems_of_forall fun _ hv => canonElems_mem h (List.mem_of_mem_drop hv)
 
@@ -218,7 +218,7 @@ end Lists
 section Shapes
 
 /-- A canonical `Person` is a struct with `Person`'s members. -/
-theorem canon_struct {v : SVal} {s : Name} (h : v.canon (.ref (.struct s))) :
+theorem canon_struct {v : Semantics.SVal} {s : Name} (h : v.canon (.ref (.struct s))) :
     ∃ fields, v = .struct fields ∧ fields.map (·.1) = (structDef s).map (·.1) ∧
       canonFields s fields := by
   cases v with
@@ -229,7 +229,7 @@ theorem canon_struct {v : SVal} {s : Name} (h : v.canon (.ref (.struct s))) :
 
 /-- A canonical `uint[]` is an array of canonical numbers, recycled slots
 included. -/
-theorem canon_array {v : SVal} {E : Ty} (h : v.canon (.ref (.array E))) :
+theorem canon_array {v : Semantics.SVal} {E : Ty} (h : v.canon (.ref (.array E))) :
     ∃ elems shadow, v = .array elems shadow false ∧ canonElems E elems ∧ canonElems E shadow := by
   cases v with
   | prim p => cases p <;> exact h.elim
@@ -238,7 +238,7 @@ theorem canon_array {v : SVal} {E : Ty} (h : v.canon (.ref (.array E))) :
   | map _ _ => exact h.elim
 
 /-- A canonical `uint[3]` is a marked array of three canonical numbers. -/
-theorem canon_fixed {v : SVal} {E : Ty} {n : Nat} (h : v.canon (.ref (.fixed E n))) :
+theorem canon_fixed {v : Semantics.SVal} {E : Ty} {n : Nat} (h : v.canon (.ref (.fixed E n))) :
     ∃ elems shadow, v = .array elems shadow true ∧ elems.length = n ∧ canonElems E elems ∧
       canonElems E shadow := by
   cases v with
@@ -249,7 +249,7 @@ theorem canon_fixed {v : SVal} {E : Ty} {n : Nat} (h : v.canon (.ref (.fixed E n
 
 /-- A canonical `mapping(uint => uint)` has unique keys and the default
 default. -/
-theorem canon_map {v : SVal} {K V : Ty} (h : v.canon (.ref (.mapping K V))) :
+theorem canon_map {v : Semantics.SVal} {K V : Ty} (h : v.canon (.ref (.mapping K V))) :
     ∃ entries dflt, v = .map entries dflt ∧ nodupKeysB entries = true ∧
       canonEntries V entries ∧ dflt = defaultForTy V ∧ dflt.canon V := by
   cases v with
@@ -259,7 +259,7 @@ theorem canon_map {v : SVal} {K V : Ty} (h : v.canon (.ref (.mapping K V))) :
   | map entries dflt => exact ⟨entries, dflt, rfl, h⟩
 
 /-- On a primitive type canonical is well-typed: `3` at `uint`. -/
-theorem canon_prim_iff {v : SVal} {p : PrimTy} :
+theorem canon_prim_iff {v : Semantics.SVal} {p : PrimTy} :
     v.canon (.prim p) ↔ v.hasTy (.prim p) = true := by
   cases v with
   | prim pv => cases p <;> cases pv <;> simp [SVal.canon, SVal.hasTy]
@@ -273,18 +273,18 @@ end Shapes
 
 /-- What `find` reaches in a canonical value is canonical: `alice.account`
 of a canonical `alice` has both `Account` members. -/
-theorem find_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
+theorem find_canon : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {w : Semantics.SVal},
     v.canon T → tyAtSegs T segs = some T' → v.find segs = .ok w → w.canon T'
   | [], v, T, T', w, h, hs, hf => by
     simp only [tyAtSegs, Option.some.injEq] at hs
     subst hs
-    simp only [SVal.find, Except.ok.injEq] at hf
+    simp only [Semantics.SVal.find, Except.ok.injEq] at hf
     subst hf; exact h
   | seg :: rest, v, T, T', w, h, hs, hf => by
     simp only [tyAtSegs] at hs
     cases hseg : segTy T seg with
     | none => rw [hseg] at hs; exact nomatch hs
-    | some Tm =>
+    | some Surface.Tm =>
       rw [hseg] at hs
       cases seg with
       | field n =>
@@ -295,7 +295,7 @@ theorem find_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
           | struct s =>
             obtain ⟨fields, rfl, -, hfs⟩ := canon_struct h
             simp only [segTy] at hseg
-            simp only [SVal.find] at hf
+            simp only [Semantics.SVal.find] at hf
             split at hf
             · rename_i v' hl
               obtain ⟨Tf, hd, hv⟩ := canonFields_lookup hfs hl
@@ -315,7 +315,7 @@ theorem find_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
             obtain ⟨elems, sh, rfl, he, hsh⟩ := canon_array h
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
-            simp only [SVal.find] at hf
+            simp only [Semantics.SVal.find] at hf
             split at hf
             · exact find_canon (canonElems_mem (canonElems_append he hsh) (List.get_mem _ _)) hs hf
             · exact nomatch hf
@@ -323,7 +323,7 @@ theorem find_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
             obtain ⟨elems, sh, rfl, -, he, hsh⟩ := canon_fixed h
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
-            simp only [SVal.find] at hf
+            simp only [Semantics.SVal.find] at hf
             split at hf
             · exact find_canon (canonElems_mem (canonElems_append he hsh) (List.get_mem _ _)) hs hf
             · exact nomatch hf
@@ -331,7 +331,7 @@ theorem find_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
             obtain ⟨es, d, rfl, -, hes, -, hd⟩ := canon_map h
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
-            simp only [SVal.find] at hf
+            simp only [Semantics.SVal.find] at hf
             split at hf
             · rename_i v' hl
               exact find_canon (canonEntries_lookup hes hl) hs hf
@@ -340,19 +340,19 @@ theorem find_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
 /-- Saving a canonical value at a typed path keeps the tree canonical:
 `alice.age = 3` leaves `alice` with both members, `balances[7] = 1` adds
 key `7` once. -/
-theorem save_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal},
+theorem save_canon : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new w : Semantics.SVal},
     v.canon T → tyAtSegs T segs = some T' → new.canon T' → v.save segs new = .ok w →
       w.canon T
   | [], v, T, T', new, w, _, hs, hn, hf => by
     simp only [tyAtSegs, Option.some.injEq] at hs
     subst hs
-    simp only [SVal.save, Except.ok.injEq] at hf
+    simp only [Semantics.SVal.save, Except.ok.injEq] at hf
     subst hf; exact hn
   | seg :: rest, v, T, T', new, w, h, hs, hn, hf => by
     simp only [tyAtSegs] at hs
     cases hseg : segTy T seg with
     | none => rw [hseg] at hs; exact nomatch hs
-    | some Tm =>
+    | some Surface.Tm =>
       rw [hseg] at hs
       cases seg with
       | field n =>
@@ -363,7 +363,7 @@ theorem save_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
           | struct s =>
             obtain ⟨fields, rfl, hnames, hfs⟩ := canon_struct h
             simp only [segTy] at hseg
-            simp only [SVal.save] at hf
+            simp only [Semantics.SVal.save] at hf
             split at hf
             · rename_i old hl
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
@@ -387,7 +387,7 @@ theorem save_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
             obtain ⟨elems, sh, rfl, he, hsh⟩ := canon_array h
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
-            simp only [SVal.save] at hf
+            simp only [Semantics.SVal.save] at hf
             split at hf
             · obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
               cases hf
@@ -400,7 +400,7 @@ theorem save_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
             obtain ⟨elems, sh, rfl, hlen, he, hsh⟩ := canon_fixed h
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
-            simp only [SVal.save] at hf
+            simp only [Semantics.SVal.save] at hf
             split at hf
             · obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
               cases hf
@@ -413,7 +413,7 @@ theorem save_canon : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
             obtain ⟨es, d, rfl, hnd, hes, hdd, hd⟩ := canon_map h
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
-            simp only [SVal.save] at hf
+            simp only [Semantics.SVal.save] at hf
             split at hf
             · rename_i old hl
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
@@ -430,17 +430,17 @@ mutual
 
 /-- `delete` keeps a value canonical: members reset in place, arrays
 emptied, mappings untouched. -/
-theorem SVal.defaultOf_canon : ∀ {v : SVal} {T : Ty}, v.canon T → v.defaultOf.canon T
+theorem Semantics.SVal.defaultOf_canon : ∀ {v : Semantics.SVal} {T : Ty}, v.canon T → v.defaultOf.canon T
   | .prim (.int _), .prim .int, _ | .prim (.int _), .prim .uint, _
   | .prim (.bool _), .prim .bool, _ => trivial
   | .struct fields, .ref (.struct s), h => by
     obtain ⟨hn, hf⟩ := h
-    refine ⟨?_, SVal.defaultOfFields_canon hf⟩
+    refine ⟨?_, Semantics.SVal.defaultOfFields_canon hf⟩
     rw [← hn]; exact defaultOfFields_names fields
   | .array _ _ false, .ref (.array _), h =>
-    ⟨rfl, trivial, canonElems_append (SVal.defaultOfElems_canon h.2.1) h.2.2⟩
+    ⟨rfl, trivial, canonElems_append (Semantics.SVal.defaultOfElems_canon h.2.1) h.2.2⟩
   | .array elems _ true, .ref (.fixed _ _), h =>
-    ⟨rfl, (SVal.defaultOfElems_length elems).trans h.2.1, SVal.defaultOfElems_canon h.2.2.1,
+    ⟨rfl, (SVal.defaultOfElems_length elems).trans h.2.1, Semantics.SVal.defaultOfElems_canon h.2.2.1,
       h.2.2.2⟩
   | .array _ _ true, .ref (.array _), h => nomatch h.1
   | .array _ _ false, .ref (.fixed _ _), h => nomatch h.1
@@ -456,27 +456,27 @@ theorem SVal.defaultOf_canon : ∀ {v : SVal} {T : Ty}, v.canon T → v.defaultO
   | .map _ _, .ref (.fixed _ _), h => h.elim
 
 /-- `delete alice` resets each member in place. -/
-theorem SVal.defaultOfFields_canon {s : Name} :
-    ∀ {fields : List (Name × SVal)}, canonFields s fields →
+theorem Semantics.SVal.defaultOfFields_canon {s : Name} :
+    ∀ {fields : List (Name × Semantics.SVal)}, canonFields s fields →
       canonFields s (SVal.defaultOf.defaultOfFields fields)
   | [], _ => trivial
   | (n, v) :: rest, h => by
-    refine ⟨?_, SVal.defaultOfFields_canon h.2⟩
+    refine ⟨?_, Semantics.SVal.defaultOfFields_canon h.2⟩
     have h1 := h.1
     revert h1
     cases lookupBy n (structDef s) with
     | none => exact fun h => h.elim
-    | some T => exact fun h => SVal.defaultOf_canon h
+    | some T => exact fun h => Semantics.SVal.defaultOf_canon h
 
 /-- `delete values` clears each element in place. -/
-theorem SVal.defaultOfElems_canon {E : Ty} :
-    ∀ {elems : List SVal}, canonElems E elems →
+theorem Semantics.SVal.defaultOfElems_canon {E : Ty} :
+    ∀ {elems : List Semantics.SVal}, canonElems E elems →
       canonElems E (SVal.defaultOf.defaultOfElems elems)
   | [], _ => trivial
-  | _ :: _, h => ⟨SVal.defaultOf_canon h.1, SVal.defaultOfElems_canon h.2⟩
+  | _ :: _, h => ⟨Semantics.SVal.defaultOf_canon h.1, Semantics.SVal.defaultOfElems_canon h.2⟩
 
 /-- `delete` keeps the member names. -/
-theorem defaultOfFields_names : ∀ (fields : List (Name × SVal)),
+theorem defaultOfFields_names : ∀ (fields : List (Name × Semantics.SVal)),
     (SVal.defaultOf.defaultOfFields fields).map (·.1) = fields.map (·.1)
   | [] => rfl
   | (n, _) :: rest => by
@@ -529,14 +529,14 @@ theorem defaultForTy_canon : ∀ {T : Ty}, defaultOk T = true → (defaultForTy 
 
 /-- The slot `persons.push();` lands on is canonical, and so are the
 recycled slots left. -/
-theorem pushSlot_canon {E : Ty} {shadow : List SVal} (hsh : canonElems E shadow) :
-    (defaultOk E = true → (pushSlot E shadow).1.canon E) ∧
-      canonElems E (pushSlot E shadow).2 := by
+theorem pushSlot_canon {E : Ty} {shadow : List Semantics.SVal} (hsh : canonElems E shadow) :
+    (defaultOk E = true → (Semantics.pushSlot E shadow).1.canon E) ∧
+      canonElems E (Semantics.pushSlot E shadow).2 := by
   cases shadow with
   | nil => exact ⟨fun hok => defaultForTy_canon hok, trivial⟩
   | cons c rest =>
     refine ⟨fun hok => ?_, hsh.2⟩
-    simp only [pushSlot]
+    simp only [Semantics.pushSlot]
     split
     · exact defaultForTy_canon hok
     · exact hsh.1
@@ -547,14 +547,14 @@ A copy lays the source over what is there (`SVal.overlay`); onto fresh slots
 it lands stripped of what is past its arrays' ends (`SVal.strip`). -/
 
 /-- Stripping keeps the member names. -/
-theorem stripFields_names : ∀ (fields : List (Name × SVal)),
+theorem stripFields_names : ∀ (fields : List (Name × Semantics.SVal)),
     (SVal.strip.stripFields fields).map (·.1) = fields.map (·.1)
   | [] => rfl
   | (n, _) :: rest => by
     simp only [SVal.strip.stripFields, List.map_cons, stripFields_names rest]
 
 /-- A copy takes the source's member names. -/
-theorem overlayFields_names (ofs : List (Name × SVal)) : ∀ (nfs : List (Name × SVal)),
+theorem overlayFields_names (ofs : List (Name × Semantics.SVal)) : ∀ (nfs : List (Name × Semantics.SVal)),
     (SVal.overlay.overlayFields ofs nfs).map (·.1) = nfs.map (·.1)
   | [] => rfl
   | (n, _) :: rest => by
@@ -563,13 +563,13 @@ theorem overlayFields_names (ofs : List (Name × SVal)) : ∀ (nfs : List (Name 
 mutual
 
 /-- A value laid on fresh slots stays canonical. -/
-theorem SVal.strip_canon : ∀ {v : SVal} {T : Ty}, v.canon T → v.strip.canon T
-  | .prim _, _, h => by simpa only [SVal.strip] using h
+theorem Semantics.SVal.strip_canon : ∀ {v : Semantics.SVal} {T : Ty}, v.canon T → v.strip.canon T
+  | .prim _, _, h => by simpa only [Semantics.SVal.strip] using h
   | .struct fields, .ref (.struct _), h =>
-    ⟨(stripFields_names fields).trans h.1, SVal.stripFields_canon h.2⟩
-  | .array _ _ _, .ref (.array _), h => ⟨h.1, SVal.stripElems_canon h.2.1, trivial⟩
+    ⟨(stripFields_names fields).trans h.1, Semantics.SVal.stripFields_canon h.2⟩
+  | .array _ _ _, .ref (.array _), h => ⟨h.1, Semantics.SVal.stripElems_canon h.2.1, trivial⟩
   | .array elems _ _, .ref (.fixed _ _), h =>
-    ⟨h.1, (SVal.stripElems_length' elems).trans h.2.1, SVal.stripElems_canon h.2.2.1, trivial⟩
+    ⟨h.1, (SVal.stripElems_length' elems).trans h.2.1, Semantics.SVal.stripElems_canon h.2.2.1, trivial⟩
   | .map _ _, .ref (.mapping _ _), h => h
   | .struct _, .prim p, h | .array _ _ _, .prim p, h | .map _ _, .prim p, h => by
     cases p <;> exact h.elim
@@ -579,22 +579,22 @@ theorem SVal.strip_canon : ∀ {v : SVal} {T : Ty}, v.canon T → v.strip.canon 
   | .map _ _, .ref (.struct _), h | .map _ _, .ref (.array _), h
   | .map _ _, .ref (.fixed _ _), h => h.elim
 
-theorem SVal.stripFields_canon {s : Name} :
-    ∀ {fields : List (Name × SVal)}, canonFields s fields →
+theorem Semantics.SVal.stripFields_canon {s : Name} :
+    ∀ {fields : List (Name × Semantics.SVal)}, canonFields s fields →
       canonFields s (SVal.strip.stripFields fields)
   | [], _ => trivial
   | (n, v) :: rest, h => by
-    refine ⟨?_, SVal.stripFields_canon h.2⟩
+    refine ⟨?_, Semantics.SVal.stripFields_canon h.2⟩
     have h1 := h.1
     revert h1
     cases lookupBy n (structDef s) with
     | none => exact fun h => h.elim
-    | some T => exact fun h => SVal.strip_canon h
+    | some T => exact fun h => Semantics.SVal.strip_canon h
 
-theorem SVal.stripElems_canon {E : Ty} :
-    ∀ {elems : List SVal}, canonElems E elems → canonElems E (SVal.strip.stripElems elems)
+theorem Semantics.SVal.stripElems_canon {E : Ty} :
+    ∀ {elems : List Semantics.SVal}, canonElems E elems → canonElems E (SVal.strip.stripElems elems)
   | [], _ => trivial
-  | _ :: _, h => ⟨SVal.strip_canon h.1, SVal.stripElems_canon h.2⟩
+  | _ :: _, h => ⟨Semantics.SVal.strip_canon h.1, Semantics.SVal.stripElems_canon h.2⟩
 
 end
 
@@ -602,10 +602,10 @@ mutual
 
 /-- **A copy keeps storage canonical**: `bob = alice;` over a `Person`
 leaves a `Person`, each member laid over the old one. -/
-theorem SVal.overlay_canon {old new : SVal} {T : Ty} (ho : old.canon T) (hn : new.canon T) :
+theorem Semantics.SVal.overlay_canon {old new : Semantics.SVal} {T : Ty} (ho : old.canon T) (hn : new.canon T) :
     (old.overlay new).canon T := by
   match new with
-  | .prim p => cases old <;> simpa [SVal.overlay, SVal.strip] using hn
+  | .prim p => cases old <;> simpa [Semantics.SVal.overlay, Semantics.SVal.strip] using hn
   | .struct nfs =>
       cases old with
       | struct ofs =>
@@ -615,13 +615,13 @@ theorem SVal.overlay_canon {old new : SVal} {T : Ty} (ho : old.canon T) (hn : ne
               cases r with
               | struct s =>
                   exact ⟨(overlayFields_names ofs nfs).trans hn.1,
-                    SVal.overlayFields_canon ho.2 hn.2⟩
+                    Semantics.SVal.overlayFields_canon ho.2 hn.2⟩
               | array _ => exact hn.elim
               | fixed _ _ => exact hn.elim
               | mapping _ _ => exact hn.elim
-      | prim _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-      | array _ _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-      | map _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
+      | prim _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
+      | array _ _ _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
+      | map _ _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
   | .array nel nsh nfx =>
       cases old with
       | array oel osh ofx =>
@@ -630,33 +630,33 @@ theorem SVal.overlay_canon {old new : SVal} {T : Ty} (ho : old.canon T) (hn : ne
           | ref r =>
               cases r with
               | array E =>
-                  exact ⟨hn.1, SVal.overlayElems_canon (canonElems_append ho.2.1 ho.2.2) hn.2.1,
+                  exact ⟨hn.1, Semantics.SVal.overlayElems_canon (canonElems_append ho.2.1 ho.2.2) hn.2.1,
                     canonElems_append (SVal.defaultOfElems_canon (canonElems_drop _ ho.2.1))
                       (canonElems_drop _ ho.2.2)⟩
               | fixed E n =>
                   exact ⟨hn.1, (SVal.overlayElems_length _ nel).trans hn.2.1,
-                    SVal.overlayElems_canon (canonElems_append ho.2.2.1 ho.2.2.2) hn.2.2.1,
+                    Semantics.SVal.overlayElems_canon (canonElems_append ho.2.2.1 ho.2.2.2) hn.2.2.1,
                     canonElems_append (SVal.defaultOfElems_canon (canonElems_drop _ ho.2.2.1))
                       (canonElems_drop _ ho.2.2.2)⟩
               | struct _ => exact hn.elim
               | mapping _ _ => exact hn.elim
-      | prim _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-      | struct _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-      | map _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
+      | prim _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
+      | struct _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
+      | map _ _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
   | .map ne nd =>
       cases old with
-      | map oe od => simpa only [SVal.overlay] using ho
-      | prim _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-      | struct _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
-      | array _ _ _ => simp only [SVal.overlay]; exact SVal.strip_canon hn
+      | map oe od => simpa only [Semantics.SVal.overlay] using ho
+      | prim _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
+      | struct _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
+      | array _ _ _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_canon hn
 
-theorem SVal.overlayFields_canon {s : Name} {ofs nfs : List (Name × SVal)}
+theorem Semantics.SVal.overlayFields_canon {s : Name} {ofs nfs : List (Name × Semantics.SVal)}
     (ho : canonFields s ofs) (hn : canonFields s nfs) :
     canonFields s (SVal.overlay.overlayFields ofs nfs) := by
   match nfs with
   | [] => trivial
   | (n, v) :: rest =>
-      refine ⟨?_, SVal.overlayFields_canon ho hn.2⟩
+      refine ⟨?_, Semantics.SVal.overlayFields_canon ho hn.2⟩
       have h1 := hn.1
       revert h1
       cases hdef : lookupBy n (structDef s) with
@@ -669,13 +669,13 @@ theorem SVal.overlayFields_canon {s : Name} {ofs nfs : List (Name × SVal)}
               obtain ⟨T', hd', hoc⟩ := canonFields_lookup ho hl
               rw [hdef] at hd'
               cases hd'
-              exact SVal.overlay_canon hoc h1
+              exact Semantics.SVal.overlay_canon hoc h1
 
-theorem SVal.overlayElems_canon {E : Ty} {olds news : List SVal}
+theorem Semantics.SVal.overlayElems_canon {E : Ty} {olds news : List Semantics.SVal}
     (ho : canonElems E olds) (hn : canonElems E news) :
     canonElems E (SVal.overlay.overlayElems olds news) := by
   match olds, news with
-  | o :: os, v :: rest => exact ⟨SVal.overlay_canon ho.1 hn.1, SVal.overlayElems_canon ho.2 hn.2⟩
+  | o :: os, v :: rest => exact ⟨Semantics.SVal.overlay_canon ho.1 hn.1, Semantics.SVal.overlayElems_canon ho.2 hn.2⟩
   | [], rest => simpa only [SVal.overlay.overlayElems] using SVal.stripElems_canon hn
   | _ :: _, [] => trivial
 
@@ -685,26 +685,26 @@ end
 
 /-- Every memory object the store typing claims at a struct carries exactly
 the struct's members: `Person memory m;` allocates both. -/
-def CanonHeap (H : HeapTy) (heap : List (Nat × MObj)) : Prop :=
+def CanonHeap (H : HeapTy) (heap : List (Nat × Semantics.MObj)) : Prop :=
   ∀ id s, lookupBy id H = some (.ref (.struct s)) →
     ∃ fields, lookupBy id heap = some (.struct fields) ∧
       fields.map (·.1) = (structDef s).map (·.1)
 
 /-- A storage→memory copy that also keeps the heap canonical and leaves the
 objects that were there alone. -/
-structure CopyOutC (H : HeapTy) (s : State) (H' : HeapTy) (s' : State) : Prop where
+structure CopyOutC (H : HeapTy) (s : Semantics.State) (H' : HeapTy) (s' : Semantics.State) : Prop where
   out : CopyOut H s H' s'
   canon : CanonHeap H' s'.heap
   frame : ∀ id obj, lookupBy id s.heap = some obj → lookupBy id s'.heap = some obj
 
 /-- Two copies in a row: `alice`'s members, then `alice` herself. -/
-theorem CopyOutC.trans {H₁ H₂ H₃ : HeapTy} {s₁ s₂ s₃ : State} (h₁ : CopyOutC H₁ s₁ H₂ s₂)
+theorem CopyOutC.trans {H₁ H₂ H₃ : HeapTy} {s₁ s₂ s₃ : Semantics.State} (h₁ : CopyOutC H₁ s₁ H₂ s₂)
     (h₂ : CopyOutC H₂ s₂ H₃ s₃) : CopyOutC H₁ s₁ H₃ s₃ :=
   ⟨h₁.out.trans h₂.out, h₂.canon, fun id obj h => h₂.frame id obj (h₁.frame id obj h)⟩
 
 /-- Copying `alice` into memory: the copies of its members first. -/
-theorem copyStFields_names {s s' : State} :
-    ∀ {fields : List (Name × SVal)} {mfields : List (Name × MVal)},
+theorem copyStFields_names {s s' : Semantics.State} :
+    ∀ {fields : List (Name × Semantics.SVal)} {mfields : List (Name × Semantics.MVal)},
       copyStFields s fields = .ok (s', mfields) → mfields.map (·.1) = fields.map (·.1)
   | [], mfields, h => by
     simp only [copyStFields, Except.ok.injEq, Prod.mk.injEq] at h
@@ -717,7 +717,7 @@ theorem copyStFields_names {s s' : State} :
     simp [copyStFields_names hrest]
 
 /-- Allocating a new object keeps the heap canonical when the object is. -/
-theorem CopyOutC.alloc {H H₁ : HeapTy} {s s₁ : State} {r : RefTy} {obj : MObj}
+theorem CopyOutC.alloc {H H₁ : HeapTy} {s s₁ : Semantics.State} {r : RefTy} {obj : Semantics.MObj}
     (hout : CopyOutC H s H₁ s₁) (hobj : MObj.hasTyH H₁ obj (Ty.ref r) = true)
     (hnames : ∀ str, r = .struct str → ∃ fields, obj = .struct fields ∧
       fields.map (·.1) = (structDef str).map (·.1)) :
@@ -746,7 +746,7 @@ mutual
 
 /-- Copying a canonical storage value into memory keeps the heap canonical:
 `Person memory m = alice;` allocates a `Person` with both members. -/
-theorem copyStToM_canon {H : HeapTy} {s s' : State} {v : SVal} {ty : Ty} {mv : MVal}
+theorem copyStToM_canon {H : HeapTy} {s s' : Semantics.State} {v : Semantics.SVal} {ty : Ty} {mv : Semantics.MVal}
     (hnd : nodupKeysB H = true) (hheap : heapTypedB H s.heap = true)
     (hwf : HeapWellFormed s) (hc : CanonHeap H s.heap) (hty : v.hasTy ty = true)
     (hcn : v.canon ty) (hcopy : copyStToM s v = .ok (s', mv)) :
@@ -812,8 +812,8 @@ theorem copyStToM_canon {H : HeapTy} {s s' : State} {v : SVal} {ty : Ty} {mv : M
   | map _ _ => exact nomatch hcopy
 
 /-- Copying `alice`'s members into memory keeps the heap canonical. -/
-theorem copyStFields_canon {H : HeapTy} {s s₁ : State} {str : Name}
-    {fields : List (Name × SVal)} {mfields : List (Name × MVal)}
+theorem copyStFields_canon {H : HeapTy} {s s₁ : Semantics.State} {str : Name}
+    {fields : List (Name × Semantics.SVal)} {mfields : List (Name × Semantics.MVal)}
     (hnd : nodupKeysB H = true) (hheap : heapTypedB H s.heap = true)
     (hwf : HeapWellFormed s) (hc : CanonHeap H s.heap)
     (hty : SVal.hasTy.hasTyFields str fields = true) (hcn : canonFields str fields)
@@ -843,8 +843,8 @@ theorem copyStFields_canon {H : HeapTy} {s s₁ : State} {str : Name}
       exact ⟨MVal.hasTyH_mono hout₃.out.ext hmv, hmrest⟩
 
 /-- Copying `persons`' elements into memory keeps the heap canonical. -/
-theorem copyStElems_canon {H : HeapTy} {s s₁ : State} {elem : Ty}
-    {elems : List SVal} {melems : List MVal}
+theorem copyStElems_canon {H : HeapTy} {s s₁ : Semantics.State} {elem : Ty}
+    {elems : List Semantics.SVal} {melems : List Semantics.MVal}
     (hnd : nodupKeysB H = true) (hheap : heapTypedB H s.heap = true)
     (hwf : HeapWellFormed s) (hc : CanonHeap H s.heap)
     (hty : SVal.hasTy.hasTyElems elem elems = true) (hcn : canonElems elem elems)
@@ -873,10 +873,10 @@ end
 /-! ## Memory back to storage -/
 
 /-- Copying `m`'s members back into storage gives canonical members, all of them. -/
-theorem copyMFields_canon {s : State} {H : HeapTy} {rem : List Nat} {str : Name}
-    (IH : ∀ {mv : MVal} {ty : Ty} {sv : SVal},
+theorem copyMFields_canon {s : Semantics.State} {H : HeapTy} {rem : List Nat} {str : Name}
+    (IH : ∀ {mv : Semantics.MVal} {ty : Ty} {sv : Semantics.SVal},
       MVal.hasTyH H mv ty = true → copyMToSt s rem mv = .ok sv → sv.canon ty) :
-    ∀ {fields : List (Name × MVal)} {sfields : List (Name × SVal)},
+    ∀ {fields : List (Name × Semantics.MVal)} {sfields : List (Name × Semantics.SVal)},
       MObj.hasTyH.hasTyHFields H str fields = true → copyMFields s rem fields = .ok sfields →
       sfields.map (·.1) = fields.map (·.1) ∧ canonFields str sfields
   | [], sfields, _, hcopy => by
@@ -897,10 +897,10 @@ theorem copyMFields_canon {s : State} {H : HeapTy} {rem : List Nat} {str : Name}
     | some ty => intro h1; exact IH h1 hv
 
 /-- Copying `ns`' elements back into storage gives canonical elements. -/
-theorem copyMElems_canon {s : State} {H : HeapTy} {rem : List Nat} {elem : Ty}
-    (IH : ∀ {mv : MVal} {ty : Ty} {sv : SVal},
+theorem copyMElems_canon {s : Semantics.State} {H : HeapTy} {rem : List Nat} {elem : Ty}
+    (IH : ∀ {mv : Semantics.MVal} {ty : Ty} {sv : Semantics.SVal},
       MVal.hasTyH H mv ty = true → copyMToSt s rem mv = .ok sv → sv.canon ty) :
-    ∀ {elems : List MVal} {selems : List SVal},
+    ∀ {elems : List Semantics.MVal} {selems : List Semantics.SVal},
       MObj.hasTyH.hasTyHElems H elem elems = true → copyMElems s rem elems = .ok selems →
       canonElems elem selems
   | [], selems, _, hcopy => by
@@ -917,9 +917,9 @@ theorem copyMElems_canon {s : State} {H : HeapTy} {rem : List Nat} {elem : Ty}
 /-- Copying a typed memory object back into storage gives a canonical value:
 `alice = m;` stores a `Person` with both members, because `m`'s object has
 both. -/
-theorem copyMToSt_canon {H : HeapTy} {s : State} (hheap : heapTypedB H s.heap = true)
+theorem copyMToSt_canon {H : HeapTy} {s : Semantics.State} (hheap : heapTypedB H s.heap = true)
     (hc : CanonHeap H s.heap) {rem : List Nat} :
-    ∀ {mv : MVal} {ty : Ty} {sv : SVal},
+    ∀ {mv : Semantics.MVal} {ty : Ty} {sv : Semantics.SVal},
       MVal.hasTyH H mv ty = true → copyMToSt s rem mv = .ok sv → sv.canon ty := by
   intro mv ty sv h hcopy
   cases mv with
@@ -988,18 +988,18 @@ decreasing_by all_goals
 
 /-- Storage holds exactly `C`'s roots, in declaration order, each canonical
 at its declared type. -/
-def CanonStorage (C : Contract) (st : List (Name × SVal)) : Prop :=
+def CanonStorage (C : Contract) (st : List (Name × Semantics.SVal)) : Prop :=
   st.map (·.1) = C.vars.map (·.1) ∧
     ∀ r T, lookupBy r C.vars = some T → ∃ v, lookupBy r st = some v ∧ v.canon T
 
 /-- What a run keeps beyond `RunWT`: canonical storage, canonical heap. -/
-structure Canon (C : Contract) (H : HeapTy) (σ : State) : Prop where
+structure Canon (C : Contract) (H : HeapTy) (σ : Semantics.State) : Prop where
   storage : CanonStorage C σ.storage
   heap : CanonHeap H σ.heap
 
 namespace Canon
 
-variable {H : HeapTy} {σ σ' : State}
+variable {H : HeapTy} {σ σ' : Semantics.State}
 
 /-- A step that leaves storage and heap alone keeps them canonical:
 `uint x = 1;`, `a.transfer(v);`. -/
@@ -1008,7 +1008,7 @@ theorem of_eq (hc : Canon C H σ) (hs : σ'.storage = σ.storage) (hh : σ'.heap
   ⟨hs ▸ hc.storage, hh ▸ hc.heap⟩
 
 /-- A read at a typed path finds a canonical value: `alice.account`. -/
-theorem find (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {v : SVal}
+theorem find (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {v : Semantics.SVal}
     (hT : C.layout.tyAt r segs = some T) (hv : σ.findStorage r segs = .ok v) : v.canon T := by
   obtain ⟨T₀, hr, hT⟩ := Layout.tyAt_split hT
   obtain ⟨v₀, hv₀, hc₀⟩ := hc.storage.2 r T₀ hr
@@ -1017,7 +1017,7 @@ theorem find (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {v : SVal
 
 /-- A write of a canonical value at a typed path keeps storage canonical:
 `alice.age = 3;`. -/
-theorem save (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {new : SVal}
+theorem save (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {new : Semantics.SVal}
     (hT : C.layout.tyAt r segs = some T) (hnew : new.canon T)
     (h : σ.saveStorage r segs new = .ok σ') : Canon C H σ' := by
   obtain ⟨hheap, -⟩ := SemanticsProperties.State.saveStorage_frame h
@@ -1038,7 +1038,7 @@ theorem save (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {new : SV
 
 /-- An assignment's storage write keeps storage canonical: a word saved, or
 a copy laid over what is there (`SVal.overlay_canon`). -/
-theorem write (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {new : SVal}
+theorem write (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {new : Semantics.SVal}
     (hT : C.layout.tyAt r segs = some T) (hnew : new.canon T)
     (h : σ.writeStorage r segs new = .ok σ') : Canon C H σ' := by
   rcases State.writeStorage_ok_inv h with h | ⟨cur, hcur, h⟩
@@ -1048,12 +1048,12 @@ theorem write (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {new : S
 end Canon
 
 /-- A contract starts canonical: each root at its type's default. -/
-theorem Canon.init {σ : State} (hok : C.vars.all (·.2.defaultOkS) = true)
+theorem Canon.init {σ : Semantics.State} (hok : C.vars.all (·.2.defaultOkS) = true)
     (hst : σ.storage = C.initStorage) : Canon C [] σ := by
   refine ⟨⟨?_, fun r T hr => ?_⟩, fun _ _ h => nomatch h⟩
   · rw [hst]; simp [Contract.initStorage]
   · refine ⟨defaultForTy T, ?_, ?_⟩
-    · rw [hst]; simp [Contract.initStorage, lookupBy_map_snd, hr]
+    · rw [hst]; simp [Contract.initStorage, Semantics.lookupBy_map_snd, hr]
     · have hmem := lookupBy_eq_some_mem hr
       exact defaultForTy_canon (defaultOk_of_defaultOkS (List.all_eq_true.mp hok _ hmem))
 
@@ -1061,11 +1061,11 @@ theorem Canon.init {σ : State} (hok : C.vars.all (·.2.defaultOkS) = true)
 
 section Effects
 
-variable {H : HeapTy} {σ σ' : State}
+variable {H : HeapTy} {σ σ' : Semantics.State}
 
 /-- `b.push(v)` keeps storage canonical. -/
 theorem pushAt_canon (hc : Canon C H σ) {E : Ty} {r : Name} {segs : List Seg}
-    {val : SVal → Res SVal} (hty : C.layout.tyAt r segs = some (.ref (.array E)))
+    {val : Semantics.SVal → Res Semantics.SVal} (hty : C.layout.tyAt r segs = some (.ref (.array E)))
     (hval : ∀ slot v, (defaultOk E = true → slot.canon E) → val slot = .ok v → v.canon E)
     (h : pushAt σ E r segs val = .ok σ') : Canon C H σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
@@ -1129,7 +1129,7 @@ theorem bumpStore_canon (hc : Canon C H σ) {op : IncDec} {p : PrimTy} {r : Name
 
 /-- A write into a memory struct's member keeps its members. -/
 theorem memWriteField_canon (hc : Canon C H σ) {id : Nat} {s f : Name}
-    {T : Ty} {mv : MVal} (hid : lookupBy id H = some (.ref (.struct s)))
+    {T : Ty} {mv : Semantics.MVal} (hid : lookupBy id H = some (.ref (.struct s)))
     (hf : lookupBy f (structDef s) = some T) (h : memWriteField σ id f mv = .ok σ') :
     Canon C H σ' := by
   obtain ⟨fields, hobj, hn⟩ := hc.heap id s hid
@@ -1149,7 +1149,7 @@ theorem memWriteField_canon (hc : Canon C H σ) {id : Nat} {s f : Name}
 
 /-- A write into a memory array's element touches no struct. -/
 theorem memWriteIndex_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {id : Nat} {i : Int}
-    {R : RefTy} {E : Ty} {mv : MVal} (hid : lookupBy id H = some (.ref R))
+    {R : RefTy} {E : Ty} {mv : Semantics.MVal} (hid : lookupBy id H = some (.ref R))
     (hR : R.arrElem? = some E)
     (h : memWriteIndex σ id i mv = .ok σ') : Canon C H σ' := by
   obtain ⟨obj, hobj, hty⟩ := heapTypedB_obj hwt.heap hid
@@ -1231,7 +1231,7 @@ theorem newArrVal_canon {R : RefTy} (h : R.newArrOk = true) (n : Int) :
 
 /-- `delete m.inner;` through a resolved address keeps the heap canonical. -/
 theorem writeAddr_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {T : Ty} {a : Addr}
-    {mv : MVal} (ha : AddrTyT H T a) (h : writeAddr σ mv a = .ok σ') : Canon C H σ' := by
+    {mv : Semantics.MVal} (ha : AddrTyT H T a) (h : writeAddr σ mv a = .ok σ') : Canon C H σ' := by
   cases a with
   | memoryField id f =>
     obtain ⟨s, hid, hf⟩ := ha
@@ -1245,8 +1245,8 @@ end Effects
 /-- Binding the locals an outcome of an external call binds only binds
 locals to values (`Calculus/Problem.lean` reads a constructor's parameters
 so, on the untyped interpreter). -/
-theorem bindData_induct {P : State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w))) :
-    ∀ {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : State}, P σ →
+theorem bindData_induct {P : Semantics.State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w))) :
+    ∀ {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : Semantics.State}, P σ →
       bindData xs vs σ = .ok σ' → P σ'
   | [], _, _, _, hp, h => by cases h; exact hp
   | _ :: _, [], _, _, _, h => by simp [bindData] at h
@@ -1275,12 +1275,12 @@ def canonInv (C : Contract) : RunInv C where
   reglob e h := ⟨h.1.reglob e, h.2.of_eq rfl rfl⟩
 
 /-- The state well-typed under `H`, and canonical. -/
-abbrev RunCanon (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
+abbrev RunCanon (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : EState C Γ) : Prop :=
   (canonInv C).Holds H σ
 
 namespace RunCanon
 
-variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ : EState C Γ}
 
 theorem wt (h : RunCanon C H σ) : RunWT C H σ := ⟨h.1.1, h.2⟩
 
@@ -1292,7 +1292,7 @@ end RunCanon
 
 section Effects
 
-variable {Γ : Ctx} {H : HeapTy} {σ σ' : State C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ σ' : EState C Γ}
 
 /-- A source stores a canonical value: `alice = bob;` a canonical `Person`. -/
 theorem Src.value_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {T : Ty} {r : Src C Γ T}
@@ -1419,7 +1419,7 @@ theorem RunCanon.ofCopyOutC (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {H' : 
 /-- `m = n;` and `m = alice;` keep the state canonical, the second by
 allocating a canonical copy. -/
 theorem MRhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy}
-    {r : MRhs C Γ R} {σ₁ : State C Γ} {id : Nat} (h : r.eval σ = .ok (σ₁, id)) :
+    {r : MRhs C Γ R} {σ₁ : EState C Γ} {id : Nat} (h : r.eval σ = .ok (σ₁, id)) :
     ∃ H', H.Extends H' ∧ RunCanon C H' σ₁ ∧ MVal.hasTyH H' (.ref id) (.ref R) = true := by
   cases r with
   | alias p =>
@@ -1453,7 +1453,7 @@ theorem MRhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy
 
 /-- `p = alice;` and `p = persons.push();` keep the state canonical. -/
 theorem ARhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy}
-    {r : ARhs C Γ R} {σ₁ : State C Γ} {p : Name × List Seg} (h : r.eval σ = .ok (σ₁, p)) :
+    {r : ARhs C Γ R} {σ₁ : EState C Γ} {p : Name × List Seg} (h : r.eval σ = .ok (σ₁, p)) :
     Canon C H σ₁.glob := by
   cases r with
   | path q =>
@@ -1911,7 +1911,7 @@ variable {C : Contract}
 
 /-- The state a contract starts in: each root at its type's default, no
 locals, an empty heap. -/
-def Contract.initState (C : Contract) : State := { storage := C.initStorage }
+def Contract.initState (C : Contract) : Semantics.State := { storage := C.initStorage }
 
 /-- A deployment of no value from address `0` starts in `initState`, but
 for the ledger, which books the `0` paid at `0` (`getNet` reads `0` either
@@ -1926,12 +1926,12 @@ program's locals are used as declared, and its values are of their types, by
 construction; what the typed run keeps on the erasure
 (`Core.Prog.trun_canon`, `Core.Prog.trun_tight`) holds of a reachable
 storage.  A `bool` mapping key is hashed as `0`/`1` (decisions 10 and 14). -/
-def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
+def Reachable (C : Contract) (st : List (Name × Semantics.SVal)) : Prop :=
   ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (o : Core.Out C (Core.TState.init C).H Γ'),
     P.trun (Core.TState.init C) = .ok o ∧ o.st.storage.erase = st
 
 /-- The erasure of the state a contract starts in. -/
-theorem Reachable.init_erase : (Core.TState.init C).erase = Core.State.ofSem C.initState :=
+theorem Reachable.init_erase : (Core.TState.init C).erase = Core.EState.ofSem C.initState :=
   Core.TState.init_erase C
 
 /-- **Reachable ⇒ well-typed and canonical.**  Every storage a scoped
@@ -1939,7 +1939,7 @@ program reaches from `C`'s initial state holds `C`'s roots in order, each
 well-typed and canonical: no run of `StandardExample` leaves `alice` without
 her `account`. -/
 theorem reachable_canon (hnd : nodupKeysB C.vars = true)
-    (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × SVal)}
+    (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × Semantics.SVal)}
     (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
   have hwt : Core.RunWT C [] (Core.TState.init C).erase := by

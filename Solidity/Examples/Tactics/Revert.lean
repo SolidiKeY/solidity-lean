@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -63,11 +63,11 @@ The same programs as chains, at every modality and postcondition, are in
 
 namespace Solidity.Examples.Tactics.Revert
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## The taclets -/
 

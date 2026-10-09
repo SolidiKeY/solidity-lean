@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -27,11 +27,11 @@ oracle says, and its claims hold of both (§5, `net-send-simple.key`).
 
 namespace Solidity.Examples.Tactics.Net
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## 1 · The frame -/
 

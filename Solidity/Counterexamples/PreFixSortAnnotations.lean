@@ -42,23 +42,23 @@ def People : Contract := contract!{ Person alice; Person bob; }
 def Flags : Contract := contract!{ bool flag; bool flag2; }
 
 /-- A `Person` with its members at zero. -/
-def person0 : SVal :=
+def person0 : Semantics.SVal :=
   .struct [("account", .struct [("balance", .int 0), ("token", .struct [("value", .int 0)])]),
     ("age", .int 0)]
 
 /-- `alice` and `bob` at zero. -/
-def peopleStore : State := { storage := [("alice", person0), ("bob", person0)] }
+def peopleStore : Semantics.State := { storage := [("alice", person0), ("bob", person0)] }
 
 /-- The flags, and the local `x` the read binds, declared. -/
-def flagStore : State :=
+def flagStore : Semantics.State :=
   { storage := [("flag", .bool false), ("flag2", .bool true)],
     env := [(.user "x", .val (.bool false))] }
 
 /-- `peopleStore`, as a scoped state with no locals. -/
-def peopleCore : Core.State People [] := Core.State.ofSem peopleStore
+def peopleCore : Core.EState People [] := Core.EState.ofSem peopleStore
 
 /-- `flagStore`, as a scoped state with its local `bool x`. -/
-def flagCore : Core.State Flags [.val .bool] := Core.State.ofGlob flagStore (.bool false, ())
+def flagCore : Core.EState Flags [.val .bool] := Core.EState.ofGlob flagStore (.bool false, ())
 
 /-- `People`'s store is well-typed. -/
 theorem peopleStore_wt : Core.RunWT People [] peopleCore :=

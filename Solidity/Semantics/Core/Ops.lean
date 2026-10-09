@@ -20,7 +20,7 @@ only (`UnOp.accepts`), as solc accepts it.
 
 namespace Solidity
 
-open Core (toRes)
+open Solidity.Core (toRes)
 
 /-- An integer at a type, range-checked as `checkArith` checks it: `none`
 outside the range, and at `bool`. -/

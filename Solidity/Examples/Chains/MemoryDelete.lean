@@ -1,7 +1,7 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
@@ -32,7 +32,7 @@ writes a fresh default object into the field or element; the alias keeps the old
 
 namespace Solidity.Examples.Chains.MemoryDelete
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Example: Memory Delete Cases -/
 

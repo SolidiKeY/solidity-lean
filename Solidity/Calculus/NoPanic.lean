@@ -56,30 +56,30 @@ theorem Op3.eval_noPanic (σ : State) {a b c s : Srt} (o : Op3 a b c s) {ra : a.
   all_goals no_panic
 
 /-- **A term never panics.** -/
-theorem Tm.eval_noPanic (σ : State) {s : Srt} : (t : Tm C s) → s.NoPanic (t.eval σ)
-  | .pvV x => by simp only [Tm.eval, Srt.NoPanic]; no_panic
-  | .pvP x => by simp only [Tm.eval, Srt.NoPanic]; no_panic
-  | .pvS x => by simp only [Tm.eval, Srt.NoPanic]; no_panic
-  | .pvI x => by simp only [Tm.eval, Srt.NoPanic]; no_panic
+theorem Surface.Tm.eval_noPanic (σ : State) {s : Srt} : (t : Surface.Tm C s) → s.NoPanic (t.eval σ)
+  | .pvV x => by simp only [Surface.Tm.eval, Srt.NoPanic]; no_panic
+  | .pvP x => by simp only [Surface.Tm.eval, Srt.NoPanic]; no_panic
+  | .pvS x => by simp only [Surface.Tm.eval, Srt.NoPanic]; no_panic
+  | .pvI x => by simp only [Surface.Tm.eval, Srt.NoPanic]; no_panic
   | .app0 o => Op0.eval_noPanic σ o
-  | .app1 o a => Op1.eval_noPanic σ o (Tm.eval_noPanic σ a)
-  | .app2 o a b => Op2.eval_noPanic σ o (Tm.eval_noPanic σ a) (Tm.eval_noPanic σ b)
+  | .app1 o a => Op1.eval_noPanic σ o (Surface.Tm.eval_noPanic σ a)
+  | .app2 o a b => Op2.eval_noPanic σ o (Surface.Tm.eval_noPanic σ a) (Surface.Tm.eval_noPanic σ b)
   | .app3 o a b c =>
-    Op3.eval_noPanic σ o (Tm.eval_noPanic σ a) (Tm.eval_noPanic σ b) (Tm.eval_noPanic σ c)
+    Op3.eval_noPanic σ o (Surface.Tm.eval_noPanic σ a) (Surface.Tm.eval_noPanic σ b) (Surface.Tm.eval_noPanic σ c)
 
-theorem UpdElem.write_noPanic (σ₀ : State) (e : UpdElem C) (τ : State) :
+theorem Surface.UpdElem.write_noPanic (σ₀ : State) (e : Surface.UpdElem C) (τ : State) :
     NoPanic (e.write σ₀ τ) := by
-  have hv : ∀ t : Term C, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
-  have hp : ∀ t : PTerm C, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
-  have hi : ∀ t : ITerm C, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
-  have hs : ∀ t : STerm C, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
-  have hm : ∀ t : MTerm C, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
-  cases e <;> simp only [UpdElem.write] <;> no_panic
+  have hv : ∀ t : Term C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
+  have hp : ∀ t : PTerm C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
+  have hi : ∀ t : ITerm C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
+  have hs : ∀ t : STerm C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
+  have hm : ∀ t : MTerm C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
+  cases e <;> simp only [Surface.UpdElem.write] <;> no_panic
 
 /-- **An update never panics**: what it reads are terms. -/
-theorem Upd.apply_ne_panic (U : Upd C) (σ : State) : U.apply σ ≠ .error .panic := by
-  unfold Upd.apply
-  suffices h : ∀ (V : Upd C) (τ : State),
+theorem Surface.Upd.apply_ne_panic (U : Surface.Upd C) (σ : State) : U.apply σ ≠ .error .panic := by
+  unfold Surface.Upd.apply
+  suffices h : ∀ (V : Surface.Upd C) (τ : State),
       NoPanic (V.foldlM (fun τ e => e.write σ τ) τ) from h U σ
   intro V
   induction V with
@@ -87,6 +87,6 @@ theorem Upd.apply_ne_panic (U : Upd C) (σ : State) : U.apply σ ≠ .error .pan
   | cons e V ih =>
     intro τ
     simp only [List.foldlM_cons]
-    exact NoPanic.bind (UpdElem.write_noPanic σ e τ) fun τ' _ => ih τ'
+    exact NoPanic.bind (Surface.UpdElem.write_noPanic σ e τ) fun τ' _ => ih τ'
 
 end Solidity

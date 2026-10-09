@@ -84,7 +84,7 @@ def kindError {α : Type} (x : Var) (t : LTy) (what : String) : Except String α
   .error s!"`{x}` is declared as {t.toStr}, read as {what}"
 
 /-- A term of `Update.lean`, its locals read as positions in `Γ`. -/
-def Tm.resolveN (Γ : NCtx) : {s : Srt} → Solidity.Tm C s → Except String (Tm C Γ.ctx s)
+def Tm.resolveN (Γ : NCtx) : {s : Srt} → Surface.Tm C s → Except String (Tm C Γ.ctx s)
   | _, .pvV x => do
     let ⟨t, i⟩ ← Γ.findAny x
     match t, i with
@@ -122,26 +122,26 @@ def Tm.resolveN (Γ : NCtx) : {s : Srt} → Solidity.Tm C s → Except String (T
 /-! ## Updates -/
 
 /-- The local an element sets, if it sets one. -/
-def _root_.Solidity.UpdElem.setsLocal? : Solidity.UpdElem C → Option Var
+def _root_.Solidity.Surface.UpdElem.setsLocal? : Surface.UpdElem C → Option Var
   | .val x _ | .path x _ | .unset x | .mref x _ | .store x _ | .saveNet x | .saveNetMt x => some x
   | _ => none
 
 /-- Whether a local of type `t` is what the element sets. -/
-def _root_.Solidity.UpdElem.fits : Solidity.UpdElem C → LTy → Bool
+def _root_.Solidity.Surface.UpdElem.fits : Surface.UpdElem C → LTy → Bool
   | .val .., .val _ | .path .., .alias _ | .unset _, .alias _ | .mref .., .mem _
   | .store .., .old | .saveNet _, .oldNet | .saveNetMt _, .oldNet => true
   | _, _ => false
 
 /-- The type of the local an element sets, when nothing else says: a
 storage's `old`, a ledger's `oldNet`, a value's `uint`. -/
-def _root_.Solidity.UpdElem.ownTy? : Solidity.UpdElem C → Option LTy
+def _root_.Solidity.Surface.UpdElem.ownTy? : Surface.UpdElem C → Option LTy
   | .val .. => some (.val .uint)
   | .store .. => some .old
   | .saveNet _ | .saveNetMt _ => some .oldNet
   | _ => none
 
 /-- The right-hand side an element gives a local of type `t`, read in `Γ`. -/
-def Rhs.resolveN (Γ : NCtx) : (t : LTy) → Solidity.UpdElem C → Except String (Rhs C Γ.ctx t)
+def Rhs.resolveN (Γ : NCtx) : (t : LTy) → Surface.UpdElem C → Except String (Rhs C Γ.ctx t)
   | .val _, .val _ r => do pure (.val (← Tm.resolveN Γ r))
   | .alias _, .path _ p => do pure (.path (← Tm.resolveN Γ p))
   | .alias _, .unset _ => pure .unset
@@ -154,7 +154,7 @@ def Rhs.resolveN (Γ : NCtx) : (t : LTy) → Solidity.UpdElem C → Except Strin
 /-- The type of the local `x` the element `e` sets, in the targets `Δ`: the
 reader's (`hint`), the newest local of that name if it fits, or the
 element's own. -/
-def elemTy (hint : Var → Option LTy) (Δ : NCtx) (x : Var) (e : Solidity.UpdElem C) :
+def elemTy (hint : Var → Option LTy) (Δ : NCtx) (x : Var) (e : Surface.UpdElem C) :
     Except String LTy :=
   match hint x with
   | some t => if e.fits t then pure t else fallback
@@ -174,7 +174,7 @@ where
 leaves `Δ`: a local in scope at the element's type is assigned, any other
 declared. -/
 def Upd.resolveN (hint : Var → Option LTy) (Γ : NCtx) :
-    (Δ : NCtx) → Upd C Γ.ctx Δ.ctx → List (Solidity.UpdElem C) →
+    (Δ : NCtx) → Upd C Γ.ctx Δ.ctx → List (Surface.UpdElem C) →
       Except String ((Δ' : NCtx) × Upd C Γ.ctx Δ'.ctx)
   | Δ, U, [] => pure ⟨Δ, U⟩
   | Δ, U, .storage s :: es => do

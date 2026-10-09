@@ -1,4 +1,4 @@
-import Solidity.Calculus.Spec
+import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.SolSpec
@@ -10,7 +10,7 @@ import Solidity.Tools.Inspect
 A contract here carries `@custom:key` clauses where the NatSpec lines stand
 (`requires e;`, `ensures e;`, `assignable l;` above the function).
 `spec!{f}` is the obligation solkey's `SolidityProblemSynthesizer` builds for
-`f` (`Calculus/Spec.lean`), and `sol_spec` proves it.
+`f` (`Calculus/SurfaceSpec.lean`), and `sol_spec` proves it.
 
 solkey's benchmark contracts carry their clauses in their own files, with
 their `spec!{f}` theorems: `Examples/Benchmark/Counter.lean` (with `dec`'s
@@ -59,7 +59,7 @@ def ERC20 : Contract := contract!{
 section
 local instance : InContract := ⟨ERC20⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 /-- `approve(spender, amount)`: `ensures \result && allowance[msg.sender][spender] == amount`. -/
 theorem erc_approve : ⊨ spec!{ approve } := by sol_spec
 set_option maxHeartbeats 1000000 in
@@ -91,7 +91,7 @@ def Tally : Contract := contract!{
 section
 local instance : InContract := ⟨Tally⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 /-! `pay()`'s obligation: `msg.value` is booked to the sender's ledger entry
 in front of the call, `\old(net(msg.sender))` reads the snapshot `oldNet`,
 and `assignable \nothing` owes every word of the storage where it was.  The
@@ -144,7 +144,7 @@ def Ordered : Contract := contract!{
 section
 local instance : InContract := ⟨Ordered⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /--
 info: dl{

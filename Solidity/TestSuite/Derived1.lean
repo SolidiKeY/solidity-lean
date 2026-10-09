@@ -10,8 +10,8 @@ import Solidity.TestSuite.CoreProblems
 sets the premise aside (`Proves.close_dropWt`).
 -/
 
-open Solidity Proves
-open scoped Solidity.Core.Surface
+open Solidity NFml.Proves
+open scoped Core.Scoped
 
 theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by
   sol_prove
@@ -42,7 +42,7 @@ theorem Solkey.TestSuite.storageIndexMappingAddAssign.proved : ⊢ Solkey.TestSu
 
 theorem Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
+  refine NFml.Proves.close_dropWt ?_
   sol_symex
   refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
@@ -50,7 +50,7 @@ theorem Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved : �
 
 theorem Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
+  refine NFml.Proves.close_dropWt ?_
   sol_symex
   refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce

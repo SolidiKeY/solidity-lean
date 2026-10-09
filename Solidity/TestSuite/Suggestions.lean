@@ -26,7 +26,7 @@ additionStorageWrite: derived
 /--
 info: theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
+  refine NFml.Proves.close_dropWt ?_
   sol_symex
   sol_close
 

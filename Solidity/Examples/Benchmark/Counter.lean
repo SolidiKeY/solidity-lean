@@ -1,6 +1,6 @@
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
-import Solidity.Calculus.Spec
+import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -17,11 +17,11 @@ has them.  The functions are internal functions here, and a call inlines one
 (`Examples/Tactics/Calls.lean`).
 
 The clauses are proved twice.  `spec!{f}` is the obligation solkey's
-`SolidityProblemSynthesizer` builds from them (`Calculus/Spec.lean`), derived
+`SolidityProblemSynthesizer` builds from them (`Calculus/SurfaceSpec.lean`), derived
 as `⊢` (`spec_inc`, `spec_dec`): the snapshot `{ old := storage }` joins the
 context (`Proves.updIntro`), the program runs, and each leaf closes by
 the closer (`LFml.close`), all in one kernel evaluation (`sol_prove`,
-`Calculus/Derive.lean`).  Before it, the same clauses by hand, also by
+`Calculus/NFmlDerive.lean`).  Before it, the same clauses by hand, also by
 `sol_prove`, the premise `c == count` rewriting `count` to `c` (KeY's
 `applyEq`): `ensures count == \old(count) + 1` with a parameter `c` for
 the old value, and no `requires count >= 1`, which the box does not need (a `dec()` that
@@ -52,7 +52,7 @@ contract Counter {
 
 namespace Solidity.Examples.Benchmark.Counter
 
-open Proves
+open NFml.Proves
 
 /-- `Counter.sol`, as published, with solkey's clauses. -/
 def Counter : Contract := contract!{
@@ -73,7 +73,7 @@ def Counter : Contract := contract!{
 
 local instance : InContract := ⟨Counter⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `inc()`: `ensures count == \old(count) + 1`. -/
 theorem inc_spec : ⊢ dl!{ c == count → [ inc(); ] count == c + 1 } := by

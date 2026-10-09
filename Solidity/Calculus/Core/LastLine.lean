@@ -22,7 +22,7 @@ writes it, so that what is left prints `φ`. -/
 def withLegacyPosts {α : Type} (L : Expr) (k : Expr → TermElabM α) : TermElabM α := do
   let ref ← IO.mkRef (#[] : Array Expr)
   forEachExpr' L fun x => do
-    if x.isAppOfArity ``Solidity.Post.fml 2 && x.appArg!.isAppOfArity ``Core.Post.erase 5 then
+    if x.isAppOfArity ``NFml.Post.fml 2 && x.appArg!.isAppOfArity ``Core.Post.erase 5 then
       ref.modify fun ps => if ps.contains x then ps else ps.push x
       return false
     return true
@@ -33,17 +33,17 @@ def withLegacyPosts {α : Type} (L : Expr) (k : Expr → TermElabM α) : TermEla
       let n ← match p.appArg!.getArg! 2 with
         | .fvar fv => fv.getUserName
         | _ => pure `φ
-      withLocalDeclD n (mkApp (mkConst ``Solidity.Post) (p.getArg! 0)) fun x =>
+      withLocalDeclD n (mkApp (mkConst ``NFml.Post) (p.getArg! 0)) fun x =>
         go (i + 1) (L.replace fun y =>
-          if y == p then some (mkApp2 (mkConst ``Solidity.Post.fml) (p.getArg! 0) x) else none)
+          if y == p then some (mkApp2 (mkConst ``NFml.Post.fml) (p.getArg! 0) x) else none)
     else k L
   go 0 L
 
 /-- What is left of a last line `L` (`Update.lean`'s, over the modalities
 `ms`), as `#last_line` lists it. -/
 def lastLineProblems (C L : Expr) : TermElabM (Array MessageData) := do
-  let mut problems ← Solidity.Chain.shapeProblems L
-  let ms ← Solidity.Chain.modalityVars L
+  let mut problems ← NFml.Chain.shapeProblems L
+  let ms ← NFml.Chain.modalityVars L
   if ms.size ≥ 2 then throwError "#last_line: the last line is under two modalities{indentExpr L}"
   let lines : List (Option String × Expr) := match ms[0]? with
     | some m => [(some "under the box", L.replaceFVar (.fvar m) (mkConst ``Modality.box)),
@@ -59,7 +59,7 @@ def lastLineProblems (C L : Expr) : TermElabM (Array MessageData) := do
     | none => q
   let mut found : Array (String × Expr × Array String) := #[]
   for (where?, L) in lines do
-    for (r, q) in ← Solidity.Chain.stillApplies C L do
+    for (r, q) in ← NFml.Chain.stillApplies C L do
       let q := back q
       let tag := where?.getD ""
       if let some i := found.findIdx? fun (r', q', _) => r' == r && q' == q then

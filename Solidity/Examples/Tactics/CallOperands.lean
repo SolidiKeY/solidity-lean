@@ -1,6 +1,6 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.RewriteChains
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.Chains
@@ -40,13 +40,13 @@ binds the caller's local to it after the call (`Syntax.lean`), and the
 printers write the pair as the call it came from.
 
 `sol_close` does not read back what a push wrote into an array known only by
-its shape (pinned at the end of §3; `Calculus/Close.lean`), so the push rows
+its shape (pinned at the end of §3; `Calculus/NFmlClose.lean`), so the push rows
 have no box theorem about the pushed value.
 -/
 
 namespace Solidity.Examples.Tactics.CallOperands
 
-open Proves
+open NFml.Proves
 
 /-- `makeValue()` reads a state variable: its value is symbolic, as close to
 an opaque value as a body gets. -/
@@ -57,7 +57,7 @@ def Operands : Contract := contract!{
 
 local instance : InContract := ⟨Operands⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## 1 · `values.push(makeValue());`
 
@@ -133,7 +133,7 @@ theorem bucketPushSlotWrite :
 
 /-- `[ uint n = values.length; values.push(42); ] values.length == n + 1` is
 valid, but the strategy leaves it open: the push's write is not read back
-(`Calculus/Close.lean`).  Pinned, so that closing it shows here. -/
+(`Calculus/NFmlClose.lean`).  Pinned, so that closing it shows here. -/
 example : True := by
   fail_if_success
     have : ⊨ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by

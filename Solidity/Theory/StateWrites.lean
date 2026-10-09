@@ -13,7 +13,7 @@ component (`State.saveStorage_with`, `pushAt_with`, `popAt_with`), an
 operator's evaluation unfolded (`evalBinop_compound`, `evalBinop_bump`),
 and what a binding holds (`Close.bindingVal`, …).  Today's taclet soundness
 (`Calculus/Core/SoundKit.lean`, `Calculus/Core/SoundArms.lean`), the scoped one
-(`Calculus/Core/SoundArms.lean`) and the closer (`Calculus/Close.lean`,
+(`Calculus/Core/SoundArms.lean`) and the closer (`Calculus/NFmlClose.lean`,
 `Calculus/Decide.lean`) share them.  Moved out of `SoundKit.lean` and
 `Calculus/Core/SoundArms.lean` (`docs/intrinsic.md`, W4 item 11).
 -/
@@ -29,11 +29,11 @@ variable {C : Contract}
 section
 variable {σ : State} {x : Var} {b : Binding}
 
-@[simp] theorem State.findStorage_setEnv (r : Name) (segs : List Seg) :
+@[simp] theorem Semantics.State.findStorage_setEnv (r : Name) (segs : List Seg) :
     (σ.setEnv x b).findStorage r segs = σ.findStorage r segs := rfl
-@[simp] theorem State.checkIndex_setEnv (r : Name) (segs : List Seg) (i : Int) :
+@[simp] theorem Semantics.State.checkIndex_setEnv (r : Name) (segs : List Seg) (i : Int) :
     (σ.setEnv x b).checkIndex r segs i = σ.checkIndex r segs i := rfl
-@[simp] theorem State.getObj_setEnv (id : Nat) : (σ.setEnv x b).getObj id = σ.getObj id := rfl
+@[simp] theorem Semantics.State.getObj_setEnv (id : Nat) : (σ.setEnv x b).getObj id = σ.getObj id := rfl
 @[simp] theorem arrayLen_setEnv (r : Name) (segs : List Seg) :
     arrayLen (σ.setEnv x b) r segs = arrayLen σ r segs := rfl
 @[simp] theorem memArrayLen_setEnv (id : Nat) : memArrayLen (σ.setEnv x b) id = memArrayLen σ id := rfl
@@ -52,11 +52,11 @@ def Semantics.State.writeRes (σ : State) (r : Name) (segs : List Seg) (x : SVal
     let cur ← σ.findStorage r segs
     σ.storeRes r segs (cur.overlay x)
 
-@[simp] theorem State.writeRes_toSVal (σ : State) (r segs) (v : Value) :
+@[simp] theorem Semantics.State.writeRes_toSVal (σ : State) (r segs) (v : Value) :
     σ.writeRes r segs v.toSVal = σ.storeRes r segs v.toSVal := by
   cases v <;> rfl
 
-theorem State.writeStorage_eq (σ : State) (r segs x) :
+theorem Semantics.State.writeStorage_eq (σ : State) (r segs x) :
     σ.writeStorage r segs x = (do let s ← σ.writeRes r segs x; pure { σ with storage := s }) := by
   unfold State.writeStorage State.writeRes
   cases x <;> simp only [State.saveStorage_eq, bind_assoc]
@@ -91,12 +91,12 @@ theorem writeAddr_eq (σ : State) (mv : MVal) (a : Addr) :
       | struct _ => rfl
       | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh] <;> rfl
 
-theorem State.saveStorage_with (σ : State) (r segs v) :
+theorem Semantics.State.saveStorage_with (σ : State) (r segs v) :
     (σ.saveStorage r segs v >>= fun τ => pure { σ with storage := τ.storage }) =
       σ.saveStorage r segs v := by
   rw [State.saveStorage_eq]; cases σ.storeRes r segs v <;> rfl
 
-theorem State.writeStorage_with (σ : State) (r segs v) :
+theorem Semantics.State.writeStorage_with (σ : State) (r segs v) :
     (σ.writeStorage r segs v >>= fun τ => pure { σ with storage := τ.storage }) =
       σ.writeStorage r segs v := by
   rw [State.writeStorage_eq]; cases σ.writeRes r segs v <;> rfl
@@ -180,7 +180,7 @@ end Close
       | struct _ => rfl
       | array elems => by_cases hh : 0 ≤ i ∧ i.toNat < elems.length <;> simp [hh]
 
-@[simp] theorem writeLoc_eq (σ : State) (a : Addr) (v : Value) :
+@[simp] theorem Semantics.writeLoc_eq (σ : State) (a : Addr) (v : Value) :
     writeLoc σ a v = writeAddr σ v.toMVal a := by
   cases a <;> rfl
 
@@ -276,34 +276,34 @@ theorem popAt_with (σ : State) (keep : Bool) (r : Name) (segs : List Seg) :
 
 /-! ### An update keeps the locals it does not write -/
 
-theorem UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
-    (e : UpdElem C) → x ∉ e.vars → e.write σ₀ τ = .ok τ' → lookupBy x τ'.env = lookupBy x τ.env
+theorem Surface.UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
+    (e : Surface.UpdElem C) → x ∉ e.vars → e.write σ₀ τ = .ok τ' → lookupBy x τ'.env = lookupBy x τ.env
   | .val y t, hx, h | .path y t, hx, h | .mref y t, hx, h | .store y t, hx, h => by
-    have hy : x ≠ y := fun e => hx (by simp only [UpdElem.vars, e, List.mem_cons, true_or])
-    simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
+    have hy : x ≠ y := fun e => hx (by simp only [Surface.UpdElem.vars, e, List.mem_cons, true_or])
+    simp only [Surface.UpdElem.write, bind, Except.bind, pure, Except.pure] at h
     repeat' split at h
     all_goals first
       | (cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy])
       | cases h
   | .saveNet y, hx, h | .saveNetMt y, hx, h | .unset y, hx, h => by
-    have hy : x ≠ y := fun e => hx (by simp only [UpdElem.vars, e, List.mem_cons,
+    have hy : x ≠ y := fun e => hx (by simp only [Surface.UpdElem.vars, e, List.mem_cons,
       List.not_mem_nil, or_false])
-    simp only [UpdElem.write, pure, Except.pure] at h
+    simp only [Surface.UpdElem.write, pure, Except.pure] at h
     cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy]
   | .storage s, _, h | .memory s, _, h | .selfBalance _ s, _, h | .net _ _ s, _, h
   | .pay _ s, _, h | .netMt _ s, _, h | .setBalance s, _, h => by
-    simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
+    simp only [Surface.UpdElem.write, bind, Except.bind, pure, Except.pure] at h
     repeat' split at h
     all_goals first | (cases h; rfl) | cases h
 
-theorem Upd.foldl_lookup {σ₀ : State} {x : Var} :
-    (U : Upd C) → x ∉ Upd.vars U → ∀ {τ ρ : State},
+theorem Surface.Upd.foldl_lookup {σ₀ : State} {x : Var} :
+    (U : Surface.Upd C) → x ∉ Surface.Upd.vars U → ∀ {τ ρ : State},
       U.foldlM (fun τ e => e.write σ₀ τ) τ = .ok ρ → lookupBy x ρ.env = lookupBy x τ.env
   | [], _, _, _, h => by cases h; rfl
   | e :: U, hx, τ, ρ, h => by
-    simp only [Upd.vars, List.mem_append, not_or] at hx
+    simp only [Surface.Upd.vars, List.mem_append, not_or] at hx
     simp only [List.foldlM_cons] at h
     obtain ⟨τ', h₁, h₂⟩ := SemanticsProperties.Res.bind_eq_ok.1 h
-    rw [Upd.foldl_lookup U hx.2 h₂, UpdElem.write_lookup e hx.1 h₁]
+    rw [Surface.Upd.foldl_lookup U hx.2 h₂, Surface.UpdElem.write_lookup e hx.1 h₁]
 
 end Solidity

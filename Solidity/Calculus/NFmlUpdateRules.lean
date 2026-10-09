@@ -63,7 +63,7 @@ denotes something other than its substitution.
 The rules are used through `NFml.simpUpds` (merge every stack, drop what is
 dead) and the tactics `sol_merge` and `sol_upd r` (`Calculus/Rewrite.lean`)
 on `⊨` goals, and on `⊢` goals as constructors of `Proves`
-(`Calculus/Logic.lean`), which is why this module sits below it:
+(`Calculus/NFmlLogic.lean`), which is why this module sits below it:
 `Proves.merge`, `Proves.mergeStorage`, `Proves.simplify`,
 `Proves.applyOnRigidBox`, `Proves.applyStorageBox`, and `Proves.updRw`, the
 rewrite inside an update's right-hand sides (the last section).
@@ -101,7 +101,7 @@ substitution. -/
 
 /-- A term that cannot halt: a literal value, a state variable and members
 of it. -/
-def Tm.total : Tm C s → Bool
+def Surface.Tm.total : Surface.Tm C s → Bool
   | Term.lit _ => true
   | PTerm.root _ => true
   | PTerm.field p _ => p.total
@@ -122,24 +122,24 @@ theorem PTerm.total_eval (σ : State) : {p : PTerm C} → p.total = true → ∃
 /-! ## What an element writes -/
 
 /-- The variable an element writes, if it writes one. -/
-def UpdElem.var? : UpdElem C → Option Var
+def Surface.UpdElem.var? : Surface.UpdElem C → Option Var
   | .val x _ | .path x _ | .mref x _ => some x
   | _ => none
 
 /-- The update writes locals, aliases and memory locals only. -/
-def Upd.envOnly (U : Upd C) : Bool := U.all (·.var?.isSome)
+def Surface.Upd.envOnly (U : Surface.Upd C) : Bool := U.all (·.var?.isSome)
 
 /-- The element cannot halt: `x := 10`, `p := alice.account`. -/
-def UpdElem.total : UpdElem C → Bool
+def Surface.UpdElem.total : Surface.UpdElem C → Bool
   | .val _ t => t.total
   | .path _ p => p.total
   | _ => false
 
 /-- No element of the update can halt. -/
-def Upd.total (U : Upd C) : Bool := U.all (·.total)
+def Surface.Upd.total (U : Surface.Upd C) : Bool := U.all (·.total)
 
 /-- The binding an element writes, its right-hand side read in `σ₀`. -/
-def UpdElem.binding (σ₀ : State) : UpdElem C → Res Binding
+def Surface.UpdElem.binding (σ₀ : State) : Surface.UpdElem C → Res Binding
   | .val _ t => do pure (.val (← t.eval σ₀))
   | .path _ p => do
     let (r, segs) ← p.eval σ₀
@@ -149,17 +149,17 @@ def UpdElem.binding (σ₀ : State) : UpdElem C → Res Binding
 
 /-- An element that writes `x` binds `x` to its binding: `x := a + 1` binds
 `x` to the value of `a + 1` in the pre-state, or halts where that does. -/
-theorem UpdElem.write_var {σ₀ τ : State} {x : Var} :
-    {e : UpdElem C} → e.var? = some x → e.write σ₀ τ = (e.binding σ₀ >>= fun b => pure (τ.setEnv x b))
+theorem Surface.UpdElem.write_var {σ₀ τ : State} {x : Var} :
+    {e : Surface.UpdElem C} → e.var? = some x → e.write σ₀ τ = (e.binding σ₀ >>= fun b => pure (τ.setEnv x b))
   | .val _ t, h | .path _ t, h | .mref _ t, h => by
     cases h
-    simp only [UpdElem.write, UpdElem.binding, bind, Except.bind, pure, Except.pure]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.binding, bind, Except.bind, pure, Except.pure]
     cases t.eval σ₀ <;> rfl
 
 /-- An element that cannot halt has a binding: `sp1 := alice.account` binds
 `sp1` to the path `alice.account` in every state. -/
-theorem UpdElem.total_binding (σ₀ : State) :
-    {e : UpdElem C} → e.total = true → ∃ b, e.binding σ₀ = .ok b
+theorem Surface.UpdElem.total_binding (σ₀ : State) :
+    {e : Surface.UpdElem C} → e.total = true → ∃ b, e.binding σ₀ = .ok b
   | .val _ t, h => by
     obtain ⟨v, hv⟩ := Term.total_eval σ₀ (t := t) h
     exact ⟨.val v, by simp only [binding, bind, Except.bind, hv, pure, Except.pure]⟩
@@ -168,25 +168,25 @@ theorem UpdElem.total_binding (σ₀ : State) :
     exact ⟨.spath r segs, by simp only [binding, bind, Except.bind, hp, pure, Except.pure]⟩
 
 /-- An element that cannot halt writes a variable: `se1 := 10` writes `se1`. -/
-theorem UpdElem.total_var : {e : UpdElem C} → e.total = true → ∃ x, e.var? = some x
+theorem Surface.UpdElem.total_var : {e : Surface.UpdElem C} → e.total = true → ∃ x, e.var? = some x
   | .val x _, _ | .path x _, _ => ⟨x, rfl⟩
 
 /-- The last element of `U` that writes `x`: the one whose binding `x` has
 after `U`. -/
-def Upd.lastWrite (x : Var) : Upd C → Option (UpdElem C)
+def Surface.Upd.lastWrite (x : Var) : Surface.Upd C → Option (Surface.UpdElem C)
   | [] => none
   | e :: U =>
-    match Upd.lastWrite x U with
+    match Surface.Upd.lastWrite x U with
     | some e' => some e'
     | none => if e.var? = some x then some e else none
 
 /-- The last write of `x` writes `x`: in `{ x := 0 ‖ y := 2 ‖ x := 1 }` it is `x := 1`. -/
-theorem Upd.lastWrite_var {x : Var} : {U : Upd C} → {e : UpdElem C} → U.lastWrite x = some e →
+theorem Surface.Upd.lastWrite_var {x : Var} : {U : Surface.Upd C} → {e : Surface.UpdElem C} → U.lastWrite x = some e →
     e.var? = some x
   | e' :: U, e, h => by
-    simp only [Upd.lastWrite] at h
+    simp only [Surface.Upd.lastWrite] at h
     split at h
-    · exact Upd.lastWrite_var (U := U) (by assumption) |> fun h' => by cases h; exact h'
+    · exact Surface.Upd.lastWrite_var (U := U) (by assumption) |> fun h' => by cases h; exact h'
     · split at h
       · cases h; assumption
       · cases h
@@ -198,21 +198,21 @@ A variable is replaced by what `U` binds it to: `valOf`, `pathOf`,
 neither (`Upd.envOnly`). -/
 
 /-- `{U}x` for a value `x`. -/
-def Upd.valOf (U : Upd C) (x : Var) : Term C :=
+def Surface.Upd.valOf (U : Surface.Upd C) (x : Var) : Term C :=
   match U.lastWrite x with
   | some (.val _ t) => t
   | some _ => Term.undef
   | none => .pv x
 
 /-- `{U}p` for an alias `p`. -/
-def Upd.pathOf (U : Upd C) (x : Var) : PTerm C :=
+def Surface.Upd.pathOf (U : Surface.Upd C) (x : Var) : PTerm C :=
   match U.lastWrite x with
   | some (.path _ p) => p
   | some _ => PTerm.undef
   | none => .pv x
 
 /-- `{U}m` for a memory local `m`. -/
-def Upd.refOf (U : Upd C) (x : Var) : ITerm C :=
+def Surface.Upd.refOf (U : Surface.Upd C) (x : Var) : ITerm C :=
   match U.lastWrite x with
   | some (.mref _ i) => i
   | some _ => ITerm.undef
@@ -221,14 +221,14 @@ def Upd.refOf (U : Upd C) (x : Var) : ITerm C :=
 /-- `{U}old` for a storage variable `old`: `U` binds no storage
 (`Upd.envOnly`), so `old` is itself where `U` does not write the name, and
 halts where `U` binds it to a value, a path or an identity. -/
-def Upd.storOf (U : Upd C) (x : Var) : STerm C :=
+def Surface.Upd.storOf (U : Surface.Upd C) (x : Var) : STerm C :=
   match U.lastWrite x with
   | some _ => STerm.undef
   | none => .pv x
 
 /-- `{U}t`: KeY's `applyOnPV`/`applyOnDifferentPV`, through every symbol.
 A ledger variable `U` writes halts (`U` binds no ledger, `Upd.envOnly`). -/
-def Tm.subst (U : Upd C) : Tm C s → Tm C s
+def Surface.Tm.subst (U : Surface.Upd C) : Surface.Tm C s → Surface.Tm C s
   | .pvV x => U.valOf x
   | .pvP x => U.pathOf x
   | .pvS x => U.storOf x
@@ -243,7 +243,7 @@ def Tm.subst (U : Upd C) : Tm C s → Tm C s
   | .app3 o a b c => .app3 o (a.subst U) (b.subst U) (c.subst U)
 
 /-- `{U}(x := t)` is `x := {U}t`: KeY's `applyOnElementary`. -/
-def UpdElem.subst (U : Upd C) : UpdElem C → UpdElem C
+def Surface.UpdElem.subst (U : Surface.Upd C) : Surface.UpdElem C → Surface.UpdElem C
   | .val x t => .val x (t.subst U)
   | .path x p => .path x (p.subst U)
   | .mref x i => .mref x (i.subst U)
@@ -261,7 +261,7 @@ def UpdElem.subst (U : Upd C) : UpdElem C → UpdElem C
 
 /-- `V.subst U` is `{U}V`: `{U}(e₁ ‖ … ‖ eₙ)` is `{U}e₁ ‖ … ‖ {U}eₙ`, KeY's
 `applyOnParallel`. -/
-def Upd.subst (V U : Upd C) : Upd C := V.map (·.subst U)
+def Surface.Upd.subst (V U : Surface.Upd C) : Surface.Upd C := V.map (·.subst U)
 
 /-! ### Substitution is evaluation after the update
 
@@ -270,7 +270,7 @@ of a term — every variable read in `τ` is what `U` binds it to read in `σ`,
 and the two states agree off the variables `ns` that `U` writes.  Then a
 substituted term read in `σ` is the term read in `τ`. -/
 
-structure SubstAgree (U : Upd C) (ns : List Var) (σ τ : State) : Prop where
+structure SubstAgree (U : Surface.Upd C) (ns : List Var) (σ τ : State) : Prop where
   agree : EnvAgreeExcept ns σ τ
   val : ∀ x, (U.valOf x).eval σ = (Term.pv x : Term C).eval τ
   path : ∀ x, (U.pathOf x).eval σ = (PTerm.pv x : PTerm C).eval τ
@@ -285,7 +285,7 @@ structure SubstAgree (U : Upd C) (ns : List Var) (σ τ : State) : Prop where
 
 section Subst
 
-variable {U : Upd C} {ns : List Var} {σ τ : State}
+variable {U : Surface.Upd C} {ns : List Var} {σ τ : State}
 
 /-- **Substitution is evaluation after the update**: a substituted term read
 in `σ` is the term read in `τ` — a storage or memory to states that agree
@@ -294,8 +294,8 @@ and a ledger `netOf` reads are `U`'s.
 
 Example: after `x = 1;`, `{ x := 1 }(x + 1)` is `1 + 1`, which reads `2`
 before the update as `x + 1` reads it after. -/
-theorem Tm.subst_eval (h : SubstAgree U ns σ τ) :
-    (t : Tm C s) → Srt.Agree ns s ((t.subst U).eval σ) (t.eval τ)
+theorem Surface.Tm.subst_eval (h : SubstAgree U ns σ τ) :
+    (t : Surface.Tm C s) → Srt.Agree ns s ((t.subst U).eval σ) (t.eval τ)
   | .pvV x => h.val x
   | .pvP x => h.path x
   | .pvS x => h.stor x
@@ -306,7 +306,7 @@ theorem Tm.subst_eval (h : SubstAgree U ns σ τ) :
     cases o
     case netOf x =>
       have ha : (a.subst U).eval σ = a.eval τ := ih
-      simp only [Tm.subst]
+      simp only [Surface.Tm.subst]
       split
       · rename_i e hx
         obtain ⟨b, hb, hnl⟩ := h.written x e hx
@@ -321,88 +321,88 @@ theorem Tm.subst_eval (h : SubstAgree U ns σ τ) :
   | .app3 o a b c => o.eval_agree (a.subst_eval h) (b.subst_eval h) (c.subst_eval h)
 
 theorem Term.subst_eval (h : SubstAgree U ns σ τ) (t : Term C) :
-    (t.subst U).eval σ = t.eval τ := Tm.subst_eval h t
+    (t.subst U).eval σ = t.eval τ := Surface.Tm.subst_eval h t
 theorem PTerm.subst_eval (h : SubstAgree U ns σ τ) (p : PTerm C) :
-    (p.subst U).eval σ = p.eval τ := Tm.subst_eval h p
+    (p.subst U).eval σ = p.eval τ := Surface.Tm.subst_eval h p
 theorem STerm.subst_eval (h : SubstAgree U ns σ τ) (s : STerm C) :
-    ResultsAgree ns ((s.subst U).eval σ) (s.eval τ) := Tm.subst_eval h s
+    ResultsAgree ns ((s.subst U).eval σ) (s.eval τ) := Surface.Tm.subst_eval h s
 theorem SValT.subst_eval (h : SubstAgree U ns σ τ) (v : SValT C) :
-    (v.subst U).eval σ = v.eval τ := Tm.subst_eval h v
+    (v.subst U).eval σ = v.eval τ := Surface.Tm.subst_eval h v
 theorem ITerm.subst_eval (h : SubstAgree U ns σ τ) (i : ITerm C) :
-    (i.subst U).eval σ = i.eval τ := Tm.subst_eval h i
-theorem MAddr.subst_eval (h : SubstAgree U ns σ τ) (a : MAddr C) :
-    (a.subst U).eval σ = a.eval τ := Tm.subst_eval h a
+    (i.subst U).eval σ = i.eval τ := Surface.Tm.subst_eval h i
+theorem Surface.MAddr.subst_eval (h : SubstAgree U ns σ τ) (a : Surface.MAddr C) :
+    (a.subst U).eval σ = a.eval τ := Surface.Tm.subst_eval h a
 theorem MTerm.subst_eval (h : SubstAgree U ns σ τ) (m : MTerm C) :
-    ResultsAgree ns ((m.subst U).eval σ) (m.eval τ) := Tm.subst_eval h m
+    ResultsAgree ns ((m.subst U).eval σ) (m.eval τ) := Surface.Tm.subst_eval h m
 theorem MValT.subst_eval (h : SubstAgree U ns σ τ) (v : MValT C) :
-    (v.subst U).eval σ = v.eval τ := Tm.subst_eval h v
+    (v.subst U).eval σ = v.eval τ := Surface.Tm.subst_eval h v
 
 /-- Writing `{U}e` reads its right-hand side before `U`; that is writing `e`
 with its right-hand side read after `U`.
 
 Example: after `x = 1; y = x;`, `{ x := 1 }(y := x)` is `y := 1`, and writing
 it sets `y` to `1`, as `y := x` does once `x` is `1`. -/
-theorem UpdElem.subst_write (h : SubstAgree U ns σ τ) (τ' : State) :
-    (e : UpdElem C) → (e.subst U).write σ τ' = e.write τ τ'
-  | .val _ t => by simp only [UpdElem.subst, UpdElem.write, t.subst_eval h]
-  | .path _ p => by simp only [UpdElem.subst, UpdElem.write, p.subst_eval h]
-  | .mref _ i => by simp only [UpdElem.subst, UpdElem.write, i.subst_eval h]
+theorem Surface.UpdElem.subst_write (h : SubstAgree U ns σ τ) (τ' : State) :
+    (e : Surface.UpdElem C) → (e.subst U).write σ τ' = e.write τ τ'
+  | .val _ t => by simp only [Surface.UpdElem.subst, Surface.UpdElem.write, t.subst_eval h]
+  | .path _ p => by simp only [Surface.UpdElem.subst, Surface.UpdElem.write, p.subst_eval h]
+  | .mref _ i => by simp only [Surface.UpdElem.subst, Surface.UpdElem.write, i.subst_eval h]
   | .storage s => by
-    simp only [UpdElem.subst, UpdElem.write]
+    simp only [Surface.UpdElem.subst, Surface.UpdElem.write]
     match (s.subst U).eval σ, s.eval τ, s.subst_eval h with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs => simp only [bind, Except.bind, hs.storage]
   | .store _ s => by
-    simp only [UpdElem.subst, UpdElem.write]
+    simp only [Surface.UpdElem.subst, Surface.UpdElem.write]
     match (s.subst U).eval σ, s.eval τ, s.subst_eval h with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs => simp only [bind, Except.bind, hs.storage]
   | .memory m => by
-    simp only [UpdElem.subst, UpdElem.write]
+    simp only [Surface.UpdElem.subst, Surface.UpdElem.write]
     match (m.subst U).eval σ, m.eval τ, m.subst_eval h with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs => simp only [bind, Except.bind, hs.heap, hs.nextId]
   | .selfBalance _ a => by
-    simp only [UpdElem.subst, UpdElem.write, a.subst_eval h, h.agree.selfBalance]
+    simp only [Surface.UpdElem.subst, Surface.UpdElem.write, a.subst_eval h, h.agree.selfBalance]
   | .net r _ a => by
-    simp only [UpdElem.subst, UpdElem.write, r.subst_eval h, a.subst_eval h, State.getNet,
+    simp only [Surface.UpdElem.subst, Surface.UpdElem.write, r.subst_eval h, a.subst_eval h, State.getNet,
       h.agree.net]
   | .pay r a => by
-    simp only [UpdElem.subst, UpdElem.write, r.subst_eval h, a.subst_eval h, State.getNet,
+    simp only [Surface.UpdElem.subst, Surface.UpdElem.write, r.subst_eval h, a.subst_eval h, State.getNet,
       h.agree.tx]
-  | .saveNet _ => by simp only [UpdElem.subst, UpdElem.write, h.agree.net]
+  | .saveNet _ => by simp only [Surface.UpdElem.subst, Surface.UpdElem.write, h.agree.net]
   | .saveNetMt _ | .unset _ => rfl
-  | .netMt r a => by simp only [UpdElem.subst, UpdElem.write, r.subst_eval h, a.subst_eval h]
-  | .setBalance a => by simp only [UpdElem.subst, UpdElem.write, a.subst_eval h]
+  | .netMt r a => by simp only [Surface.UpdElem.subst, Surface.UpdElem.write, r.subst_eval h, a.subst_eval h]
+  | .setBalance a => by simp only [Surface.UpdElem.subst, Surface.UpdElem.write, a.subst_eval h]
 
 /-- Running `{U}V` before `U` is running `V` after it, element by element.
 
 Example: `{ x := 1 }(y := x ‖ z := x + 1)` is `y := 1 ‖ z := 1 + 1`, which
 writes what `y := x ‖ z := x + 1` writes once `x` is `1`. -/
-theorem Upd.foldl_subst (h : SubstAgree U ns σ τ) :
-    (V : Upd C) → ∀ τ', (V.subst U).foldlM (fun ρ e => e.write σ ρ) τ' =
+theorem Surface.Upd.foldl_subst (h : SubstAgree U ns σ τ) :
+    (V : Surface.Upd C) → ∀ τ', (V.subst U).foldlM (fun ρ e => e.write σ ρ) τ' =
       V.foldlM (fun ρ e => e.write τ ρ) τ'
   | [], _ => rfl
   | e :: V, τ' => by
-    simp only [Upd.subst, List.map_cons, List.foldlM_cons] at *
-    rw [UpdElem.subst_write h]
+    simp only [Surface.Upd.subst, List.map_cons, List.foldlM_cons] at *
+    rw [Surface.UpdElem.subst_write h]
     congr 1
     funext ρ
-    exact Upd.foldl_subst h V ρ
+    exact Surface.Upd.foldl_subst h V ρ
 
 end Subst
 
 /-! ### What an update of locals leaves -/
 
 /-- The variables an update writes. -/
-def Upd.targets (U : Upd C) : List Var := U.filterMap (·.var?)
+def Surface.Upd.targets (U : Surface.Upd C) : List Var := U.filterMap (·.var?)
 
 /-- Running an update of locals changes the environment at the variables it
 writes, and there to the binding of the last element that writes each.
 
 Example: `{ x := 0 ‖ y := 2 ‖ x := 1 }` (after `x = 0; y = 2; x = 1;`) leaves
 `x` bound to `1`, `y` to `2`, and everything else as it was. -/
-theorem Upd.foldl_env (σ₀ : State) : (U : Upd C) → U.envOnly = true →
+theorem Surface.Upd.foldl_env (σ₀ : State) : (U : Surface.Upd C) → U.envOnly = true →
     ∀ {τ₀ τ : State}, U.foldlM (fun ρ e => e.write σ₀ ρ) τ₀ = .ok τ →
       EnvAgreeExcept U.targets τ₀ τ ∧
       (∀ x, U.lastWrite x = none → lookupBy x τ.env = lookupBy x τ₀.env) ∧
@@ -411,16 +411,16 @@ theorem Upd.foldl_env (σ₀ : State) : (U : Upd C) → U.envOnly = true →
     cases h
     exact ⟨EnvAgreeExcept.refl _ _, fun _ _ => rfl, fun _ _ h => by cases h⟩
   | e :: U, hU, τ₀, τ, h => by
-    simp only [Upd.envOnly, List.all_cons, Bool.and_eq_true] at hU
+    simp only [Surface.Upd.envOnly, List.all_cons, Bool.and_eq_true] at hU
     obtain ⟨he, hU⟩ := hU
     obtain ⟨x₀, hx₀⟩ := Option.isSome_iff_exists.1 he
     simp only [List.foldlM_cons] at h
     obtain ⟨τ₁, h₁, h⟩ := bind_ok_inv h
-    rw [UpdElem.write_var hx₀] at h₁
+    rw [Surface.UpdElem.write_var hx₀] at h₁
     obtain ⟨b₀, hb₀, h₁⟩ := bind_ok_inv h₁
     cases h₁
-    obtain ⟨hag, hnone, hsome⟩ := Upd.foldl_env σ₀ U hU h
-    have htargets : Upd.targets (e :: U) = x₀ :: Upd.targets U := by
+    obtain ⟨hag, hnone, hsome⟩ := Surface.Upd.foldl_env σ₀ U hU h
+    have htargets : Surface.Upd.targets (e :: U) = x₀ :: Surface.Upd.targets U := by
       simp only [targets, hx₀, Option.some.injEq, List.filterMap_cons_some]
     refine ⟨?_, fun x hx => ?_, fun x e' hx => ?_⟩
     · rw [htargets]
@@ -428,7 +428,7 @@ theorem Upd.foldl_env (σ₀ : State) : (U : Upd C) → U.envOnly = true →
       have hne : n ≠ x₀ := fun he => hn (he ▸ List.mem_cons_self)
       rw [← hag.env n (fun h' => hn (List.mem_cons_of_mem _ h'))]
       simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hne]
-    · simp only [Upd.lastWrite] at hx
+    · simp only [Surface.Upd.lastWrite] at hx
       split at hx
       · cases hx
       · rename_i hU'
@@ -438,7 +438,7 @@ theorem Upd.foldl_env (σ₀ : State) : (U : Upd C) → U.envOnly = true →
           rw [hnone x hU']
           have : x ≠ x₀ := fun h' => hne (h' ▸ hx₀)
           simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne this]
-    · simp only [Upd.lastWrite] at hx
+    · simp only [Surface.Upd.lastWrite] at hx
       split at hx
       · rename_i hU'
         cases hx
@@ -458,9 +458,9 @@ to, read before the update.
 
 Example: after `{ se1 := 10 ‖ sp1 := alice.account }`, `se1` reads `10` and
 `sp1` the path `alice.account`, as `10` and `alice.account` read before it. -/
-theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
+theorem Surface.Upd.substAgree {U : Surface.Upd C} (hU : U.envOnly = true) {σ τ : State}
     (h : U.apply σ = .ok τ) : SubstAgree U U.targets σ τ := by
-  obtain ⟨hag, hnone, hsome⟩ := Upd.foldl_env σ U hU h
+  obtain ⟨hag, hnone, hsome⟩ := Surface.Upd.foldl_env σ U hU h
   have getEnv_eq : ∀ x, U.lastWrite x = none → τ.getEnv x = σ.getEnv x := fun x hx => by
     simp only [State.getEnv, hnone x hx]
   have written : ∀ x e, U.lastWrite x = some e →
@@ -468,12 +468,12 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
     obtain ⟨b, hb, hl⟩ := hsome x e hx
     refine ⟨b, by simp only [State.getEnv, hl], fun l hbl => ?_⟩
     subst hbl
-    have hvar := Upd.lastWrite_var hx
+    have hvar := Surface.Upd.lastWrite_var hx
     cases e with
     | val _ t | path _ t | mref _ t =>
-      simp only [UpdElem.binding, bind, Except.bind] at hb
+      simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
       split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
-    | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
+    | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [Surface.UpdElem.var?,
         reduceCtorEq] at hvar
   refine ⟨hag, fun x => ?_, fun x => ?_, fun x => ?_, fun x => ?_,
     fun x hx => (getEnv_eq x hx).symm, written, fun x e hx => ?_⟩
@@ -481,26 +481,26 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
   · obtain ⟨b, hb, _⟩ := hsome x e hx
     exact ⟨b, hb⟩
   rotate_left 3
-  · unfold Upd.storOf
+  · unfold Surface.Upd.storOf
     split
     · rename_i e hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
-      have hvar := Upd.lastWrite_var hx
+      have hvar := Surface.Upd.lastWrite_var hx
       have hτ : τ.getEnv x = .ok b := by simp only [State.getEnv, hl]
       have hb' : ∀ st, b ≠ .store st := by
         intro st hst
         subst hst
         cases e with
         | val _ t =>
-          simp only [UpdElem.binding, bind, Except.bind] at hb
+          simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
           split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
         | path _ p =>
-          simp only [UpdElem.binding, bind, Except.bind] at hb
+          simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
           split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
         | mref _ i =>
-          simp only [UpdElem.binding, bind, Except.bind] at hb
+          simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
           split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
-        | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
+        | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [Surface.UpdElem.var?,
             reduceCtorEq] at hvar
       simp only [STerm.undef_eval, tm_eval, hτ, bind, Except.bind]
       cases b with
@@ -514,11 +514,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         cases b with
         | store st => exact ⟨rfl, hag.heap, hag.nextId, hag.net, hag.env, hag.selfBalance, hag.tx⟩
         | _ => rfl
-  · unfold Upd.valOf
+  · unfold Surface.Upd.valOf
     split
     · rename_i y t hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
-      simp only [UpdElem.binding, bind, Except.bind] at hb
+      simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
       cases ht : t.eval σ with
       | error e => simp only [ht, reduceCtorEq] at hb
       | ok v =>
@@ -527,11 +527,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         simp only [tm_eval, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnv hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
-      have hvar := Upd.lastWrite_var hx
+      have hvar := Surface.Upd.lastWrite_var hx
       cases e with
       | val => exact absurd rfl (hnv _ _)
       | path _ p =>
-        simp only [UpdElem.binding, bind, Except.bind] at hb
+        simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
         cases hp : p.eval σ with
         | error => simp only [hp, reduceCtorEq] at hb
         | ok r =>
@@ -539,22 +539,22 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           subst hb
           simp only [Term.undef_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | mref _ i =>
-        simp only [UpdElem.binding, bind, Except.bind] at hb
+        simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
         cases hi : i.eval σ with
         | error => simp only [hi, reduceCtorEq] at hb
         | ok r =>
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [Term.undef_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [Surface.UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [tm_eval, getEnv_eq x hx]
-  · unfold Upd.pathOf
+  · unfold Surface.Upd.pathOf
     split
     · rename_i y p hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
-      simp only [UpdElem.binding, bind, Except.bind] at hb
+      simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
       cases hp : p.eval σ with
       | error e => simp only [hp, reduceCtorEq] at hb
       | ok r =>
@@ -563,11 +563,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         simp only [tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnp hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
-      have hvar := Upd.lastWrite_var hx
+      have hvar := Surface.Upd.lastWrite_var hx
       cases e with
       | path => exact absurd rfl (hnp _ _)
       | val _ t =>
-        simp only [UpdElem.binding, bind, Except.bind] at hb
+        simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
         cases ht : t.eval σ with
         | error => simp only [ht, reduceCtorEq] at hb
         | ok r =>
@@ -575,22 +575,22 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           subst hb
           simp only [PTerm.undef_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
       | mref _ i =>
-        simp only [UpdElem.binding, bind, Except.bind] at hb
+        simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
         cases hi : i.eval σ with
         | error => simp only [hi, reduceCtorEq] at hb
         | ok r =>
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [PTerm.undef_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [Surface.UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [tm_eval, aliasPath, getEnv_eq x hx]
-  · unfold Upd.refOf
+  · unfold Surface.Upd.refOf
     split
     · rename_i y i hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
-      simp only [UpdElem.binding, bind, Except.bind] at hb
+      simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
       cases hi : i.eval σ with
       | error e => simp only [hi, reduceCtorEq] at hb
       | ok r =>
@@ -599,11 +599,11 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         simp only [tm_eval, bind, Except.bind, State.getEnv, hl, pure, Except.pure]
     · rename_i e hnr hx
       obtain ⟨b, hb, hl⟩ := hsome x _ hx
-      have hvar := Upd.lastWrite_var hx
+      have hvar := Surface.Upd.lastWrite_var hx
       cases e with
       | mref => exact absurd rfl (hnr _ _)
       | val _ t =>
-        simp only [UpdElem.binding, bind, Except.bind] at hb
+        simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
         cases ht : t.eval σ with
         | error => simp only [ht, reduceCtorEq] at hb
         | ok r =>
@@ -611,14 +611,14 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           subst hb
           simp only [ITerm.undef_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | path _ p =>
-        simp only [UpdElem.binding, bind, Except.bind] at hb
+        simp only [Surface.UpdElem.binding, bind, Except.bind] at hb
         cases hp : p.eval σ with
         | error => simp only [hp, reduceCtorEq] at hb
         | ok r =>
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
           simp only [ITerm.undef_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
-      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
+      | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [Surface.UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
       simp only [tm_eval, getEnv_eq x hx]
@@ -627,13 +627,13 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
 
 Example: for `x = 1; y = x;`, running `{ x := 1 }` then `{ y := x }` is
 running `{ x := 1 ‖ y := 1 }`. -/
-theorem Upd.apply_seq {U : Upd C} (hU : U.envOnly = true) (V : Upd C) (σ : State) :
+theorem Surface.Upd.apply_seq {U : Surface.Upd C} (hU : U.envOnly = true) (V : Surface.Upd C) (σ : State) :
     (U ++ V.subst U).apply σ = (U.apply σ >>= V.apply) := by
-  unfold Upd.apply
+  unfold Surface.Upd.apply
   rw [List.foldlM_append]
   cases h : U.foldlM (fun ρ e => e.write σ ρ) σ with
   | error => rfl
-  | ok τ => exact Upd.foldl_subst (Upd.substAgree hU h) V τ
+  | ok τ => exact Surface.Upd.foldl_subst (Surface.Upd.substAgree hU h) V τ
 
 /-! ## Effectless elements
 
@@ -644,7 +644,7 @@ that cannot halt goes.  A `storage :=`, `memory :=`, `selfBalance :=` or
 `net :=` element never goes. -/
 
 /-- The element can go from `{e ‖ rest} φ`, `F` the variables of `φ`. -/
-def UpdElem.effectless (F : List Var) (rest : Upd C) (e : UpdElem C) : Bool :=
+def Surface.UpdElem.effectless (F : List Var) (rest : Surface.Upd C) (e : Surface.UpdElem C) : Bool :=
   e.total && match e.var? with
     | some x => !(F.contains x) || rest.any (·.var? == some x)
     | none => false
@@ -652,9 +652,9 @@ def UpdElem.effectless (F : List Var) (rest : Upd C) (e : UpdElem C) : Bool :=
 /-- `\dropEffectlessElementaries`: drop the elements that are shadowed or
 unused and cannot halt, reading `F` as the variables of the formula under
 the update. -/
-def Upd.dropEffectless (F : List Var) : Upd C → Upd C
+def Surface.Upd.dropEffectless (F : List Var) : Surface.Upd C → Surface.Upd C
   | [] => []
-  | e :: U => if e.effectless F U then Upd.dropEffectless F U else e :: Upd.dropEffectless F U
+  | e :: U => if e.effectless F U then Surface.Upd.dropEffectless F U else e :: Surface.Upd.dropEffectless F U
 
 /-- Agreeing off fewer names is agreeing off more: two states that differ
 only at `se1` differ only at `se1` and `sp1`. -/
@@ -677,44 +677,44 @@ theorem Semantics.EnvAgreeExcept.setEnv_filter {A : List Var} {σ τ : State} (h
 /-- One element written into two agreeing states, its right-hand side read
 in the same pre-state, leaves them agreeing: `y := 2` written into two
 states that differ at `x` gives two that differ at `x`. -/
-theorem UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvAgreeExcept A τ₁ τ₂) :
-    (e : UpdElem C) → ResultsAgree A (e.write σ₀ τ₁) (e.write σ₀ τ₂)
-  | .val .. | .path .. | .mref .. => by simp only [UpdElem.write]; agree_run h
+theorem Surface.UpdElem.write_agree {A : List Var} {σ₀ τ₁ τ₂ : State} (h : EnvAgreeExcept A τ₁ τ₂) :
+    (e : Surface.UpdElem C) → ResultsAgree A (e.write σ₀ τ₁) (e.write σ₀ τ₂)
+  | .val .. | .path .. | .mref .. => by simp only [Surface.UpdElem.write]; agree_run h
   | .store x s => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     cases s.eval σ₀ with
     | error => rfl
     | ok a => exact h.setEnv_both x _
   | .storage s => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     cases s.eval σ₀ with
     | error => rfl
     | ok a => exact ⟨rfl, h.heap, h.nextId, h.net, h.env, h.selfBalance, h.tx⟩
   | .memory m => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     cases m.eval σ₀ with
     | error => rfl
     | ok a => exact ⟨h.storage, rfl, rfl, h.net, h.env, h.selfBalance, h.tx⟩
-  | .saveNet x => by simp only [UpdElem.write]; exact h.setEnv_both x _
+  | .saveNet x => by simp only [Surface.UpdElem.write]; exact h.setEnv_both x _
   | .saveNetMt x | .unset x => h.setEnv_both x _
   | .selfBalance .. => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, h.net, h.env, rfl, h.tx⟩
   | .net .. => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, by simp only [State.getNet, h.net], h.env, h.selfBalance, h.tx⟩
   | .pay .. => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, by simp only [State.getNet, h.net], h.env, h.selfBalance, h.tx⟩
   | .netMt .. => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, h.selfBalance, h.tx⟩
   | .setBalance .. => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, h.net, h.env, rfl, h.tx⟩
 
@@ -726,8 +726,8 @@ sides.
 Example: in `{ x := 0 ‖ y := 2 ‖ x := 1 } x = 1` (after `x = 0; y = 2; x = 1;`)
 `x := 0` goes, the runs differ at `x` until `x := 1`, and `y := 2` goes,
 the runs then differing at `y`, which `x = 1` does not read. -/
-theorem Upd.dropEffectless_foldl (F G : List Var) (σ₀ : State) :
-    (U : Upd C) → (∀ e ∈ U, ∀ x, e.var? = some x → x ∉ F → x ∈ G) →
+theorem Surface.Upd.dropEffectless_foldl (F G : List Var) (σ₀ : State) :
+    (U : Surface.Upd C) → (∀ e ∈ U, ∀ x, e.var? = some x → x ∉ F → x ∈ G) →
     ∀ {A : List Var} {τ₁ τ₂ : State}, EnvAgreeExcept A τ₁ τ₂ →
       (∀ x ∈ A, x ∈ G ∨ (x ∈ F ∧ U.any (·.var? == some x) = true)) →
       ResultsAgree G ((U.dropEffectless F).foldlM (fun ρ e => e.write σ₀ ρ) τ₁)
@@ -738,17 +738,17 @@ theorem Upd.dropEffectless_foldl (F G : List Var) (σ₀ : State) :
   | e :: U, hG, A, τ₁, τ₂, h, hA => by
     have hGU : ∀ e ∈ U, ∀ x, e.var? = some x → x ∉ F → x ∈ G :=
       fun e' he' => hG e' (List.mem_cons_of_mem _ he')
-    simp only [Upd.dropEffectless]
+    simp only [Surface.Upd.dropEffectless]
     split
     · -- dropped: the full run writes `x₀`, the other does not
       rename_i hd
-      simp only [UpdElem.effectless, Bool.and_eq_true] at hd
+      simp only [Surface.UpdElem.effectless, Bool.and_eq_true] at hd
       obtain ⟨ht, hx⟩ := hd
-      obtain ⟨x₀, hx₀⟩ := UpdElem.total_var ht
-      obtain ⟨b, hb⟩ := UpdElem.total_binding σ₀ ht
+      obtain ⟨x₀, hx₀⟩ := Surface.UpdElem.total_var ht
+      obtain ⟨b, hb⟩ := Surface.UpdElem.total_binding σ₀ ht
       rw [hx₀] at hx
-      simp only [List.foldlM_cons, UpdElem.write_var hx₀, hb]
-      refine Upd.dropEffectless_foldl F G σ₀ U hGU (A := x₀ :: A)
+      simp only [List.foldlM_cons, Surface.UpdElem.write_var hx₀, hb]
+      refine Surface.Upd.dropEffectless_foldl F G σ₀ U hGU (A := x₀ :: A)
         ((h.mono fun y hy => List.mem_cons_of_mem _ hy).setEnv_right List.mem_cons_self b) ?_
       have hx₀' : x₀ ∈ G ∨ (x₀ ∈ F ∧ U.any (·.var? == some x₀) = true) := by
         by_cases hF : x₀ ∈ F
@@ -772,11 +772,11 @@ theorem Upd.dropEffectless_foldl (F G : List Var) (σ₀ : State) :
       simp only [List.foldlM_cons]
       cases hv : e.var? with
       | some x₀ =>
-        rw [UpdElem.write_var hv, UpdElem.write_var hv]
+        rw [Surface.UpdElem.write_var hv, Surface.UpdElem.write_var hv]
         cases e.binding σ₀ with
         | error => rfl
         | ok b =>
-          refine Upd.dropEffectless_foldl F G σ₀ U hGU (h.setEnv_filter x₀ b) fun y hy => ?_
+          refine Surface.Upd.dropEffectless_foldl F G σ₀ U hGU (h.setEnv_filter x₀ b) fun y hy => ?_
           obtain ⟨hy, hne⟩ := List.mem_filter.1 hy
           have hne : y ≠ x₀ := by simpa using hne
           rcases hA y hy with hy | ⟨hF, hany⟩
@@ -786,10 +786,10 @@ theorem Upd.dropEffectless_foldl (F G : List Var) (σ₀ : State) :
           · exact absurd he.symm hne
           · exact .inr ⟨hF, hany⟩
       | none =>
-        match e.write σ₀ τ₁, e.write σ₀ τ₂, UpdElem.write_agree (σ₀ := σ₀) h e with
+        match e.write σ₀ τ₁, e.write σ₀ τ₂, Surface.UpdElem.write_agree (σ₀ := σ₀) h e with
         | .error _, .error _, he => subst he; rfl
         | .ok a, .ok c, hac =>
-          refine Upd.dropEffectless_foldl F G σ₀ U hGU hac fun y hy => ?_
+          refine Surface.Upd.dropEffectless_foldl F G σ₀ U hGU hac fun y hy => ?_
           rcases hA y hy with hy | ⟨hF, hany⟩
           · exact .inl hy
           simp only [List.any_cons, Bool.or_eq_true, hv] at hany
@@ -802,9 +802,9 @@ not read.
 
 Example: dropping `se1 := 10` and `sp1 := alice.account` from the update of
 `alice.account.balance = 10;` changes only `se1` and `sp1`. -/
-theorem Upd.dropEffectless_apply (F : List Var) (U : Upd C) (σ : State) :
-    ResultsAgree ((Upd.targets U).filter (· ∉ F)) ((U.dropEffectless F).apply σ) (U.apply σ) :=
-  Upd.dropEffectless_foldl F _ σ U
+theorem Surface.Upd.dropEffectless_apply (F : List Var) (U : Surface.Upd C) (σ : State) :
+    ResultsAgree ((Surface.Upd.targets U).filter (· ∉ F)) ((U.dropEffectless F).apply σ) (U.apply σ) :=
+  Surface.Upd.dropEffectless_foldl F _ σ U
     (fun e he x hx hF => List.mem_filter.2 ⟨List.mem_filterMap.2 ⟨e, he, hx⟩, by simpa using hF⟩)
     (EnvAgreeExcept.refl [] σ) (by simp)
 
@@ -814,9 +814,9 @@ the update holds.
 Example: for `alice.account.balance = 10;`,
 `{ storage := save(storage, alice.account.balance, 10) } find(storage, alice.account.balance) = 10`
 holds exactly when the same formula under the three-element merged update does. -/
-theorem Upd.dropEffectless_holds (m : Modality) (U : Upd C) (φ : NFml C) (σ : State) :
-    holds σ (.upd m (U.dropEffectless φ.vars) φ) ↔ holds σ (.upd m U φ) :=
-  m.after_frame (Upd.dropEffectless_apply φ.vars U σ) fun _ _ h =>
+theorem Surface.Upd.dropEffectless_holds (m : Modality) (U : Surface.Upd C) (φ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m (U.dropEffectless φ.vars) φ) ↔ NFml.holds σ (.upd m U φ) :=
+  m.after_frame (Surface.Upd.dropEffectless_apply φ.vars U σ) fun _ _ h =>
     holds_frame φ (fun x hx hG => by
       have := (List.mem_filter.1 hG).2
       simp only [decide_eq_true_eq] at this
@@ -825,13 +825,13 @@ theorem Upd.dropEffectless_holds (m : Modality) (U : Upd C) (φ : NFml C) (σ : 
 /-! ## `x := x` -/
 
 /-- An element that writes a variable its own old value, `x := x`. -/
-def UpdElem.isSelf : UpdElem C → Bool
+def Surface.UpdElem.isSelf : Surface.UpdElem C → Bool
   | .val x (.pv y) | .path x (.pv y) | .mref x (.pv y) => x == y
   | _ => false
 
 /-- Binding `x` to what it is bound to changes nothing: after `x = 1;`,
 binding `x` to `1` again gives the same lookups. -/
-theorem State.setEnv_same {σ : State} {x : Var} {b : Binding} (hl : lookupBy x σ.env = some b) :
+theorem Semantics.State.setEnv_same {σ : State} {x : Var} {b : Binding} (hl : lookupBy x σ.env = some b) :
     EnvAgreeExcept [] (σ.setEnv x b) σ := by
   refine ⟨rfl, rfl, rfl, rfl, fun n _ => ?_, rfl, rfl⟩
   by_cases he : n = x
@@ -842,10 +842,10 @@ theorem State.setEnv_same {σ : State} {x : Var} {b : Binding} (hl : lookupBy x 
 
 Example: `x = x;` leaves `{ x := x }`; where `x` holds a value, writing it
 gives back the state it started from. -/
-theorem UpdElem.write_self {σ τ : State} :
-    {e : UpdElem C} → e.isSelf = true → e.write σ σ = .ok τ → EnvAgreeExcept [] τ σ
+theorem Surface.UpdElem.write_self {σ τ : State} :
+    {e : Surface.UpdElem C} → e.isSelf = true → e.write σ σ = .ok τ → EnvAgreeExcept [] τ σ
   | .val x (.pv y), h, hw | .path x (.pv y), h, hw | .mref x (.pv y), h, hw => by
-    simp only [UpdElem.isSelf, beq_iff_eq] at h
+    simp only [Surface.UpdElem.isSelf, beq_iff_eq] at h
     subst h
     cases hl : lookupBy x σ.env with
     | none =>
@@ -856,38 +856,38 @@ theorem UpdElem.write_self {σ τ : State} :
         subst hw <;> exact State.setEnv_same hl
 
 /-- `{x := x ‖ U} φ` is `{U} φ` when `x := x` does not halt. -/
-theorem UpdElem.elimSelf_holds {e : UpdElem C} (he : e.isSelf = true) {σ τ : State}
-    (hw : e.write σ σ = .ok τ) (m : Modality) (U : Upd C) (φ : NFml C) :
-    holds σ (.upd m (e :: U) φ) ↔ holds σ (.upd m U φ) := by
-  simp only [holds, Upd.apply, List.foldlM_cons, hw]
+theorem Surface.UpdElem.elimSelf_holds {e : Surface.UpdElem C} (he : e.isSelf = true) {σ τ : State}
+    (hw : e.write σ σ = .ok τ) (m : Modality) (U : Surface.Upd C) (φ : NFml C) :
+    NFml.holds σ (.upd m (e :: U) φ) ↔ NFml.holds σ (.upd m U φ) := by
+  simp only [NFml.holds, Surface.Upd.apply, List.foldlM_cons, hw]
 
-  exact m.after_frame (Upd.foldl_frame (EnvAgreeExcept.refl [] σ) U (fun _ _ h => nomatch h)
-    (UpdElem.write_self he hw)) fun _ _ h => holds_frame φ (fun _ _ h => by simp at h) h
+  exact m.after_frame (Surface.Upd.foldl_frame (EnvAgreeExcept.refl [] σ) U (fun _ _ h => nomatch h)
+    (Surface.UpdElem.write_self he hw)) fun _ _ h => holds_frame φ (fun _ _ h => by simp at h) h
 
 /-- **`elimSelfUpdate`, under the box**: to prove `{x := x ‖ U} φ`, prove
 `{U} φ`.  Where `x` holds no value `x := x` halts, and the box is true.
 
 Example: `[ x = x; y = 3; ] y == 3` leaves `{ x := x ‖ y := 3 } y = 3`, which
 `{ y := 3 } y = 3` proves. -/
-theorem UpdElem.elimSelf_box {e : UpdElem C} (he : e.isSelf = true) {σ : State} {U : Upd C}
-    {φ : NFml C} (h : holds σ (.upd .box U φ)) : holds σ (.upd .box (e :: U) φ) := by
+theorem Surface.UpdElem.elimSelf_box {e : Surface.UpdElem C} (he : e.isSelf = true) {σ : State} {U : Surface.Upd C}
+    {φ : NFml C} (h : NFml.holds σ (.upd .box U φ)) : NFml.holds σ (.upd .box (e :: U) φ) := by
   cases hw : e.write σ σ with
-  | error => simp only [holds, Modality.after, Upd.apply, List.foldlM_cons, bind, Except.bind, hw,
+  | error => simp only [NFml.holds, Modality.after, Surface.Upd.apply, List.foldlM_cons, bind, Except.bind, hw,
       Modality.onHalt]
-  | ok τ => exact (UpdElem.elimSelf_holds he hw .box U φ).2 h
+  | ok τ => exact (Surface.UpdElem.elimSelf_holds he hw .box U φ).2 h
 
 /-- **`elimSelfUpdate`, under the diamond**, the other way: `{x := x ‖ U} φ`
 gives `{U} φ`; the converse fails where `x` holds no value.
 
 Example: `⟨ x = x; y = 3; ⟩ y == 3` leaves `{ x := x ‖ y := 3 } y = 3`, from
 which `{ y := 3 } y = 3` follows. -/
-theorem UpdElem.elimSelf_diamond {e : UpdElem C} (he : e.isSelf = true) {σ : State}
-    {U : Upd C} {φ : NFml C} (h : holds σ (.upd .diamond (e :: U) φ)) :
-    holds σ (.upd .diamond U φ) := by
+theorem Surface.UpdElem.elimSelf_diamond {e : Surface.UpdElem C} (he : e.isSelf = true) {σ : State}
+    {U : Surface.Upd C} {φ : NFml C} (h : NFml.holds σ (.upd .diamond (e :: U) φ)) :
+    NFml.holds σ (.upd .diamond U φ) := by
   cases hw : e.write σ σ with
-  | error => simp only [holds, Modality.after, Upd.apply, List.foldlM_cons, bind, Except.bind, hw,
+  | error => simp only [NFml.holds, Modality.after, Surface.Upd.apply, List.foldlM_cons, bind, Except.bind, hw,
       Modality.onHalt] at h
-  | ok τ => exact (UpdElem.elimSelf_holds he hw .diamond U φ).1 h
+  | ok τ => exact (Surface.UpdElem.elimSelf_holds he hw .diamond U φ).1 h
 
 /-! ### Substitution is denotation after the update
 
@@ -901,7 +901,7 @@ denote `st mtSt`); a path or storage variable written at another sort is not:
 cannot say it; here `Tm.sortedFor U` excludes it. -/
 
 /-- `U` writes `x`, if at all, as an alias. -/
-def Upd.pathSorted (U : Upd C) (x : Var) : Bool :=
+def Surface.Upd.pathSorted (U : Surface.Upd C) (x : Var) : Bool :=
   match U.lastWrite x with
   | some (.path ..) | none => true
   | some _ => false
@@ -909,7 +909,7 @@ def Upd.pathSorted (U : Upd C) (x : Var) : Bool :=
 /-- Every alias the term reads `U` writes, if at all, as an alias, and every
 storage variable it reads `U` does not write.  A memory read is not looked
 into: it denotes its evaluation. -/
-def Tm.sortedFor (U : Upd C) : Tm C s → Bool
+def Surface.Tm.sortedFor (U : Surface.Upd C) : Surface.Tm C s → Bool
   | .pvV _ | .pvI _ => true
   | .pvP x => U.pathSorted x
   | .pvS x => (U.lastWrite x).isNone
@@ -938,7 +938,7 @@ theorem PTerm.pv_denote_of_error {σ : State} {x : Var} {e : Halt}
 
 section SubstDenote
 
-variable {U : Upd C} {ns : List Var} {σ τ : State}
+variable {U : Surface.Upd C} {ns : List Var} {σ τ : State}
 
 open Theory Theory.StValue
 
@@ -957,12 +957,12 @@ theorem SubstAgree.val_denote (h : SubstAgree U ns σ τ) (x : Var) :
   | error e =>
     rw [hv] at h1
     rw [Term.pv_denote_of_error h1.symm]
-    unfold Upd.valOf at hv ⊢
+    unfold Surface.Upd.valOf at hv ⊢
     split
     · rename_i y t hx
       rw [hx] at hv
       obtain ⟨b, hb⟩ := h.bound x _ hx
-      simp only [UpdElem.binding, hv, bind, Except.bind, reduceCtorEq] at hb
+      simp only [Surface.UpdElem.binding, hv, bind, Except.bind, reduceCtorEq] at hb
     · exact Equiv.refl _
     · rename_i hx
       rw [hx] at hv
@@ -981,13 +981,13 @@ theorem SubstAgree.path_denote (h : SubstAgree U ns σ τ) {x : Var} (hs : U.pat
   | error e =>
     rw [hp] at h1
     rw [PTerm.pv_denote_of_error h1.symm]
-    unfold Upd.pathSorted at hs
-    unfold Upd.pathOf at hp ⊢
+    unfold Surface.Upd.pathSorted at hs
+    unfold Surface.Upd.pathOf at hp ⊢
     split
     · rename_i y q hx
       rw [hx] at hp
       obtain ⟨b, hb⟩ := h.bound x _ hx
-      simp only [UpdElem.binding, hp, bind, Except.bind, reduceCtorEq] at hb
+      simp only [Surface.UpdElem.binding, hp, bind, Except.bind, reduceCtorEq] at hb
     · rename_i e' hne hx
       rw [hx] at hs
       split at hs
@@ -1015,24 +1015,24 @@ the arguments.
 
 Example: after `y = 3;`, `{ y := 3 }(y + 1)` is `3 + 1`, which denotes `4`
 before the update as `y + 1` does after it. -/
-theorem Tm.subst_denote (h : SubstAgree U ns σ τ) :
-    (t : Tm C s) → t.sortedFor U = true → Srt.DEquiv s ((t.subst U).denote σ) (t.denote τ)
+theorem Surface.Tm.subst_denote (h : SubstAgree U ns σ τ) :
+    (t : Surface.Tm C s) → t.sortedFor U = true → Srt.DEquiv s ((t.subst U).denote σ) (t.denote τ)
   | .pvV x, _ => h.val_denote x
   | .pvP _, hs => h.path_denote hs
   | .pvS x, hs => by
-    simp only [Tm.sortedFor, Option.isNone_iff_eq_none] at hs
-    simp only [Srt.DEquiv, Tm.subst, Upd.storOf, hs, tm_denote, h.unwritten x hs]
+    simp only [Surface.Tm.sortedFor, Option.isNone_iff_eq_none] at hs
+    simp only [Srt.DEquiv, Surface.Tm.subst, Surface.Upd.storOf, hs, tm_denote, h.unwritten x hs]
     exact Equiv.refl _
   | .pvI _, _ => trivial
   | .app0 o, _ => by
-    simp only [Tm.subst, Tm.denote]
+    simp only [Surface.Tm.subst, Surface.Tm.denote]
     exact Srt.DEquiv.of_eq (o.denote_agree h.agree) (Srt.DEquiv.refl _ _)
   | .app1 o a, hs => by
-    simp only [Tm.sortedFor] at hs
+    simp only [Surface.Tm.sortedFor] at hs
     have ih := a.subst_denote h hs
     cases o
     case netOf x =>
-      simp only [Tm.subst]
+      simp only [Surface.Tm.subst]
       split
       · rename_i e hx
         obtain ⟨b, hb, hnl⟩ := h.written x e hx
@@ -1057,26 +1057,26 @@ theorem Tm.subst_denote (h : SubstAgree U ns σ τ) :
   | .app2 o a b, hs => by
     have ea := a.subst_eval h
     have eb := b.subst_eval h
-    simp only [Tm.subst, Tm.denote]
+    simp only [Surface.Tm.subst, Surface.Tm.denote]
     refine Srt.DEquiv.of_eq (o.denote_agree h.agree ea eb _ _) ?_
     cases ho : o.opaque
-    · simp only [Tm.sortedFor, ho, Bool.false_or, Bool.and_eq_true] at hs
+    · simp only [Surface.Tm.sortedFor, ho, Bool.false_or, Bool.and_eq_true] at hs
       exact o.denote_congr ho (a.subst_denote h hs.1) (b.subst_denote h hs.2)
     · rw [o.denote_irrel ho _ (a.denote τ) _ (b.denote τ)]
       exact Srt.DEquiv.refl _ _
   | .app3 o a b c, hs => by
-    simp only [Tm.sortedFor, Bool.and_eq_true] at hs
+    simp only [Surface.Tm.sortedFor, Bool.and_eq_true] at hs
     exact o.denote_congr (a.subst_denote h hs.1.1) (b.subst_denote h hs.1.2)
       (c.subst_denote h hs.2)
 
 theorem Term.subst_denote (h : SubstAgree U ns σ τ) (t : Term C) (hs : t.sortedFor U = true) :
-    Equiv ((t.subst U).denote σ) (t.denote τ) := Tm.subst_denote h t hs
+    Equiv ((t.subst U).denote σ) (t.denote τ) := Surface.Tm.subst_denote h t hs
 theorem PTerm.subst_denote (h : SubstAgree U ns σ τ) (p : PTerm C) (hs : p.sortedFor U = true) :
-    (p.subst U).denote σ = p.denote τ := Tm.subst_denote h p hs
+    (p.subst U).denote σ = p.denote τ := Surface.Tm.subst_denote h p hs
 theorem STerm.subst_denote (h : SubstAgree U ns σ τ) (s : STerm C) (hs : s.sortedFor U = true) :
-    Struct.Equiv ((s.subst U).denote σ) (s.denote τ) := Tm.subst_denote h s hs
+    Struct.Equiv ((s.subst U).denote σ) (s.denote τ) := Surface.Tm.subst_denote h s hs
 theorem SValT.subst_denote (h : SubstAgree U ns σ τ) (v : SValT C) (hs : v.sortedFor U = true) :
-    Equiv ((v.subst U).denote σ) (v.denote τ) := Tm.subst_denote h v hs
+    Equiv ((v.subst U).denote σ) (v.denote τ) := Surface.Tm.subst_denote h v hs
 
 end SubstDenote
 
@@ -1090,7 +1090,7 @@ def NFml.rigid : NFml C → Bool
   | _ => false
 
 /-- `{U} φ` for a first-order `φ`: `U` substituted into its terms. -/
-def NFml.subst (U : Upd C) : NFml C → NFml C
+def NFml.subst (U : Surface.Upd C) : NFml C → NFml C
   | .tt => .tt
   | .eq a b => .eq (a.subst U) (b.subst U)
   | .defined t => .defined (t.subst U)
@@ -1101,7 +1101,7 @@ def NFml.subst (U : Upd C) : NFml C → NFml C
 
 /-- Every equation of `φ` reads its variables at the sorts `U` writes them
 (`Tm.sortedFor`). -/
-def NFml.sortedFor (U : Upd C) : NFml C → Bool
+def NFml.sortedFor (U : Surface.Upd C) : NFml C → Bool
   | .eq a b => a.sortedFor U && b.sortedFor U
   | .not φ => φ.sortedFor U
   | .and φ ψ | .imp φ ψ => φ.sortedFor U && ψ.sortedFor U
@@ -1112,7 +1112,7 @@ does after it.
 
 Example: after `y = 3;`, `(y = 3).subst { y := 3 }` is `3 = 3`, true before
 the update as `y = 3` is after it. -/
-theorem NFml.subst_holds {U : Upd C} {ns : List Var} {σ τ : State} (h : SubstAgree U ns σ τ) :
+theorem NFml.subst_holds {U : Surface.Upd C} {ns : List Var} {σ τ : State} (h : SubstAgree U ns σ τ) :
     (φ : NFml C) → φ.rigid = true → φ.sortedFor U = true → (holds σ (φ.subst U) ↔ holds τ φ)
   | .tt, _, _ => Iff.rfl
   | .eq a b, _, hs => by
@@ -1135,25 +1135,25 @@ theorem NFml.subst_holds {U : Upd C} {ns : List Var} {σ τ : State} (h : SubstA
     simp only [NFml.subst, holds, NFml.subst_holds h φ hr.1 hs.1, NFml.subst_holds h ψ hr.2 hs.2]
 
 /-- An update that cannot halt writes only locals: `{ se1 := 10 ‖ sp1 := alice.account }`. -/
-theorem Upd.total_envOnly : {U : Upd C} → U.total = true → U.envOnly = true
+theorem Surface.Upd.total_envOnly : {U : Surface.Upd C} → U.total = true → U.envOnly = true
   | [], _ => rfl
   | e :: U, h => by
-    simp only [Upd.total, List.all_cons, Bool.and_eq_true] at h
-    obtain ⟨x, hx⟩ := UpdElem.total_var h.1
-    simp only [Upd.envOnly, List.all_cons, hx, Option.isSome_some, Bool.true_and]
-    exact Upd.total_envOnly (U := U) h.2
+    simp only [Surface.Upd.total, List.all_cons, Bool.and_eq_true] at h
+    obtain ⟨x, hx⟩ := Surface.UpdElem.total_var h.1
+    simp only [Surface.Upd.envOnly, List.all_cons, hx, Option.isSome_some, Bool.true_and]
+    exact Surface.Upd.total_envOnly (U := U) h.2
 
 /-- An update none of whose elements can halt does not halt:
 `{ se1 := 10 ‖ sp1 := alice.account }` runs in every state. -/
-theorem Upd.foldl_total (σ₀ : State) : (U : Upd C) → U.total = true →
+theorem Surface.Upd.foldl_total (σ₀ : State) : (U : Surface.Upd C) → U.total = true →
     ∀ τ₀, ∃ τ, U.foldlM (fun ρ e => e.write σ₀ ρ) τ₀ = .ok τ
   | [], _, τ₀ => ⟨τ₀, rfl⟩
   | e :: U, h, τ₀ => by
-    simp only [Upd.total, List.all_cons, Bool.and_eq_true] at h
-    obtain ⟨x, hx⟩ := UpdElem.total_var h.1
-    obtain ⟨b, hb⟩ := UpdElem.total_binding σ₀ h.1
-    simp only [List.foldlM_cons, UpdElem.write_var hx, hb]
-    exact Upd.foldl_total σ₀ U h.2 _
+    simp only [Surface.Upd.total, List.all_cons, Bool.and_eq_true] at h
+    obtain ⟨x, hx⟩ := Surface.UpdElem.total_var h.1
+    obtain ⟨b, hb⟩ := Surface.UpdElem.total_binding σ₀ h.1
+    simp only [List.foldlM_cons, Surface.UpdElem.write_var hx, hb]
+    exact Surface.Upd.foldl_total σ₀ U h.2 _
 
 /-- A modality after a run that continues: a halt anywhere is a halt. -/
 theorem Modality.after_bind (m : Modality) (p : State → Prop) (r : Res State)
@@ -1168,11 +1168,11 @@ constructor for the KeY taclet it is. -/
 inductive UpdRule : NFml C → NFml C → Prop
   /-- `sequentialToParallel2 { \find({u}{u2}phi) \replacewith({u || {u}u2}phi) }`,
   for `u` an update of locals. -/
-  | sequentialToParallel {m : Modality} {u u2 : Upd C} {φ : NFml C} (hu : u.envOnly = true) :
+  | sequentialToParallel {m : Modality} {u u2 : Surface.Upd C} {φ : NFml C} (hu : u.envOnly = true) :
       UpdRule dl_schema{ {u}{u2}φ } dl_schema{ {u ‖ {u}u2}φ }
   /-- `simplifyUpdate2 { \find({u}phi)
   \varcond(\dropEffectlessElementaries(u, phi, result)) \replacewith(result) }` -/
-  | simplifyUpdate {m : Modality} {u : Upd C} {φ : NFml C} :
+  | simplifyUpdate {m : Modality} {u : Surface.Upd C} {φ : NFml C} :
       UpdRule dl_schema{ {u}φ } (.upd m (u.dropEffectless φ.vars) φ)
   /-- `applySkip2 { \find({skip}phi) \replacewith(phi) }` -/
   | applySkip {m : Modality} {φ : NFml C} : UpdRule (.upd m [] φ) φ
@@ -1181,7 +1181,7 @@ inductive UpdRule : NFml C → NFml C → Prop
   `applyOnPV`/`applyOnDifferentPV` on the terms under it; for `u` that
   cannot halt, and `φ` reading no variable at another sort than `u` writes it
   (`NFml.sortedFor`, which KeY's sorts give for free). -/
-  | applyOnRigid {m : Modality} {u : Upd C} {φ : NFml C} (hu : u.total = true)
+  | applyOnRigid {m : Modality} {u : Surface.Upd C} {φ : NFml C} (hu : u.total = true)
       (hφ : φ.rigid = true) (hs : φ.sortedFor u = true) : UpdRule dl_schema{ {u}φ } (φ.subst u)
 
 /-- **Soundness of the update rules**: each rewrites a formula to an
@@ -1190,16 +1190,16 @@ equivalent one.
 Example: `x = 1; y = x;` leaves `{ x := 1 } { y := x } y = 1`;
 `sequentialToParallel` rewrites it to `{ x := 1 ‖ y := 1 } y = 1`, and the two
 hold in the same states. -/
-theorem UpdRule.sound {φ ψ : NFml C} : UpdRule φ ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
+theorem UpdRule.sound {φ ψ : NFml C} : UpdRule φ ψ → ∀ σ, (NFml.holds σ ψ ↔ NFml.holds σ φ)
   | .sequentialToParallel hU, σ => by
-    simp only [holds]
-    rw [Upd.apply_seq hU, ← Modality.after_bind]
-  | .simplifyUpdate, σ => Upd.dropEffectless_holds _ _ _ σ
+    simp only [NFml.holds]
+    rw [Surface.Upd.apply_seq hU, ← Modality.after_bind]
+  | .simplifyUpdate, σ => Surface.Upd.dropEffectless_holds _ _ _ σ
   | .applySkip, _ => Iff.rfl
   | @UpdRule.applyOnRigid _ m U φ hU hφ hs, σ => by
-    obtain ⟨τ, hτ⟩ := Upd.foldl_total σ U hU σ
-    simp only [holds, Upd.apply, hτ]
-    exact NFml.subst_holds (Upd.substAgree (Upd.total_envOnly hU) hτ) φ hφ hs
+    obtain ⟨τ, hτ⟩ := Surface.Upd.foldl_total σ U hU σ
+    simp only [NFml.holds, Surface.Upd.apply, hτ]
+    exact NFml.subst_holds (Surface.Upd.substAgree (Surface.Upd.total_envOnly hU) hτ) φ hφ hs
 
 /-! ## One rule at a time: `sol_upd r`
 
@@ -1215,7 +1215,7 @@ inductive UpdRuleName where
   deriving DecidableEq, Repr
 
 /-- Rule `r` on `{U} φ` under `m`, if it fits and changes something. -/
-def UpdRuleName.top : UpdRuleName → Modality → Upd C → NFml C → Option (NFml C)
+def UpdRuleName.top : UpdRuleName → Modality → Surface.Upd C → NFml C → Option (NFml C)
   | .sequentialToParallel, m, U, .upd m' V φ =>
     if m' = m ∧ U.envOnly = true then some (.upd m (U ++ V.subst U) φ) else none
   | .simplifyUpdate, m, U, φ =>
@@ -1231,7 +1231,7 @@ rewrite of `{U} φ`.
 
 Example: `sequentialToParallel` fits `{ x := 1 } { y := x } y = 1` (after
 `x = 1; y = x;`) and returns `{ x := 1 ‖ y := 1 } y = 1`. -/
-theorem UpdRuleName.top_rule {r : UpdRuleName} {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem UpdRuleName.top_rule {r : UpdRuleName} {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : r.top m U φ = some ψ) : UpdRule (.upd m U φ) ψ := by
   unfold UpdRuleName.top at h
   split at h
@@ -1329,11 +1329,11 @@ effectless elements go (`simplifyUpdate`), and an update left empty goes
 too (`applySkip`). -/
 
 /-- `{U} φ` without its effectless elements, and without the braces if none is left. -/
-def NFml.clean (m : Modality) (U : Upd C) (φ : NFml C) : NFml C :=
+def NFml.clean (m : Modality) (U : Surface.Upd C) (φ : NFml C) : NFml C :=
   if (U.dropEffectless φ.vars).isEmpty then φ else .upd m (U.dropEffectless φ.vars) φ
 
 /-- `{U} φ`, merged with an update at the head of `φ`, then cleaned. -/
-def NFml.mkUpd (m : Modality) (U : Upd C) : NFml C → NFml C
+def NFml.mkUpd (m : Modality) (U : Surface.Upd C) : NFml C → NFml C
   | .upd m' V φ =>
     if m' = m ∧ U.envOnly = true then NFml.clean m (U ++ V.subst U) φ
     else NFml.clean m U (.upd m' V φ)
@@ -1354,9 +1354,9 @@ def NFml.simpUpds : NFml C → NFml C
 
 Example: after `x = 1;`, `NFml.clean m [x := 1] true` is `true` (its only
 element is unused, and the braces go). -/
-theorem NFml.clean_holds (m : Modality) (U : Upd C) (φ : NFml C) (σ : State) :
+theorem NFml.clean_holds (m : Modality) (U : Surface.Upd C) (φ : NFml C) (σ : State) :
     holds σ (NFml.clean m U φ) ↔ holds σ (.upd m U φ) := by
-  rw [← Upd.dropEffectless_holds]
+  rw [← Surface.Upd.dropEffectless_holds]
   unfold NFml.clean
   split
   · rename_i h; simp only [List.isEmpty_iff] at h; rw [h]; exact Iff.rfl
@@ -1366,7 +1366,7 @@ theorem NFml.clean_holds (m : Modality) (U : Upd C) (φ : NFml C) (σ : State) :
 
 Example: after `x = 1; y = x;`, `mkUpd m [x := 1] ({ y := x } y = 1)` merges to
 `{ x := 1 ‖ y := 1 }` and cleans that to `{ y := 1 } y = 1`. -/
-theorem NFml.mkUpd_holds (m : Modality) (U : Upd C) (φ : NFml C) (σ : State) :
+theorem NFml.mkUpd_holds (m : Modality) (U : Surface.Upd C) (φ : NFml C) (σ : State) :
     holds σ (NFml.mkUpd m U φ) ↔ holds σ (.upd m U φ) := by
   cases φ with
   | upd m' V φ =>
@@ -1430,13 +1430,13 @@ locals gives the formula behind the update: where `U` runs, the run gives
 Example: `find(storage, alice.age) ≐ 42` gives
 `[{ x := find(storage, alice.age) }] x ≐ 42`, also where `alice.age` does not
 read and the update halts. -/
-theorem NFml.subst_box {U : Upd C} (hU : U.envOnly = true) {φ : NFml C} (hφ : φ.rigid = true)
+theorem NFml.subst_box {U : Surface.Upd C} (hU : U.envOnly = true) {φ : NFml C} (hφ : φ.rigid = true)
     (hs : φ.sortedFor U = true) (σ : State) (h : holds σ (φ.subst U)) :
     holds σ (.upd .box U φ) := by
   simp only [holds]
   cases hτ : U.apply σ with
   | error _ => trivial
-  | ok τ => exact (NFml.subst_holds (Upd.substAgree hU hτ) φ hφ hs).1 h
+  | ok τ => exact (NFml.subst_holds (Surface.Upd.substAgree hU hτ) φ hφ hs).1 h
 
 /-! ### Under the box, past a storage write
 
@@ -1456,21 +1456,21 @@ storage, path or memory subterm at all.  That also leaves out a
 a path, whose index check reads the storage. -/
 
 /-- The element writes the storage: `storage := s`. -/
-def UpdElem.isStorage : UpdElem C → Bool
+def Surface.UpdElem.isStorage : Surface.UpdElem C → Bool
   | .storage _ => true
   | _ => false
 
 /-- Every element writes a local, an alias, a memory local or the storage:
 `{ storage := S ‖ x := find(storage, alice.age) }`. -/
-def Upd.localsOrStorage (U : Upd C) : Bool := U.all fun e => e.var?.isSome || e.isStorage
+def Surface.Upd.localsOrStorage (U : Surface.Upd C) : Bool := U.all fun e => e.var?.isSome || e.isStorage
 
 /-- The elements that write a variable: `{ x := t }` of
 `{ storage := S ‖ x := t }`. -/
-def Upd.locals (U : Upd C) : Upd C := U.filter (·.var?.isSome)
+def Surface.Upd.locals (U : Surface.Upd C) : Surface.Upd C := U.filter (·.var?.isSome)
 
 /-- A value term with no storage, path or memory subterm: `x + 1`, not
 `find(storage, alice.age)`. -/
-def Tm.stFree : Tm C s → Bool
+def Surface.Tm.stFree : Surface.Tm C s → Bool
   | .pvV _ => true
   | Term.lit _ | Term.env _ => true
   | Term.unop _ _ a | Term.net a | Term.netOf _ a => a.stFree
@@ -1496,53 +1496,53 @@ theorem NFml.stFree_rigid : {φ : NFml C} → φ.stFree = true → φ.rigid = tr
     simp only [NFml.rigid, NFml.stFree_rigid h.1, NFml.stFree_rigid h.2, Bool.and_self]
 
 /-- The locals of an update are an update of locals. -/
-theorem Upd.locals_envOnly : (U : Upd C) → Upd.envOnly (Upd.locals U) = true
+theorem Surface.Upd.locals_envOnly : (U : Surface.Upd C) → Surface.Upd.envOnly (Surface.Upd.locals U) = true
   | [] => rfl
   | e :: U => by
-    have ih : Upd.envOnly (Upd.locals U) = true := Upd.locals_envOnly U
+    have ih : Surface.Upd.envOnly (Surface.Upd.locals U) = true := Surface.Upd.locals_envOnly U
     cases he : e.var?.isSome
-    · simpa only [Upd.locals, List.filter_cons, he] using ih
-    · simp only [Upd.locals, List.filter_cons, he, if_true, Upd.envOnly, List.all_cons,
+    · simpa only [Surface.Upd.locals, List.filter_cons, he] using ih
+    · simp only [Surface.Upd.locals, List.filter_cons, he, if_true, Surface.Upd.envOnly, List.all_cons,
         Bool.true_and] at ih ⊢
       exact ih
 
 /-- The locals of an update write each variable last where the update does:
 an element that writes no variable is no write of one. -/
-theorem Upd.lastWrite_locals (x : Var) :
-    (U : Upd C) → Upd.lastWrite x (Upd.locals U) = Upd.lastWrite x U
+theorem Surface.Upd.lastWrite_locals (x : Var) :
+    (U : Surface.Upd C) → Surface.Upd.lastWrite x (Surface.Upd.locals U) = Surface.Upd.lastWrite x U
   | [] => rfl
   | e :: U => by
-    have ih : Upd.lastWrite x (Upd.locals U) = Upd.lastWrite x U := Upd.lastWrite_locals x U
+    have ih : Surface.Upd.lastWrite x (Surface.Upd.locals U) = Surface.Upd.lastWrite x U := Surface.Upd.lastWrite_locals x U
     cases he : e.var? with
     | none =>
-      have hf : Upd.locals (e :: U) = Upd.locals U := by
-        simp only [Upd.locals, List.filter_cons, he, Option.isSome_none]
+      have hf : Surface.Upd.locals (e :: U) = Surface.Upd.locals U := by
+        simp only [Surface.Upd.locals, List.filter_cons, he, Option.isSome_none]
         rfl
       rw [hf, ih]
-      simp only [Upd.lastWrite, he, reduceCtorEq, if_false]
+      simp only [Surface.Upd.lastWrite, he, reduceCtorEq, if_false]
       split <;> simp_all only
     | some y =>
-      have hf : Upd.locals (e :: U) = e :: Upd.locals U := by
-        simp only [Upd.locals, List.filter_cons, he, Option.isSome_some, if_true]
+      have hf : Surface.Upd.locals (e :: U) = e :: Surface.Upd.locals U := by
+        simp only [Surface.Upd.locals, List.filter_cons, he, Option.isSome_some, if_true]
       rw [hf]
-      simp only [Upd.lastWrite, ih]
+      simp only [Surface.Upd.lastWrite, ih]
 
 /-- `SubstAgree` sees an update through its `lastWrite` only. -/
-theorem SubstAgree.of_lastWrite {U V : Upd C} {ns : List Var} {σ τ : State}
-    (hw : ∀ x, Upd.lastWrite x U = V.lastWrite x) (h : SubstAgree V ns σ τ) :
+theorem SubstAgree.of_lastWrite {U V : Surface.Upd C} {ns : List Var} {σ τ : State}
+    (hw : ∀ x, Surface.Upd.lastWrite x U = V.lastWrite x) (h : SubstAgree V ns σ τ) :
     SubstAgree U ns σ τ where
   agree := h.agree
   val x := by
-    rw [show U.valOf x = V.valOf x by simp only [Upd.valOf, hw x]]
+    rw [show U.valOf x = V.valOf x by simp only [Surface.Upd.valOf, hw x]]
     exact h.val x
   path x := by
-    rw [show U.pathOf x = V.pathOf x by simp only [Upd.pathOf, hw x]]
+    rw [show U.pathOf x = V.pathOf x by simp only [Surface.Upd.pathOf, hw x]]
     exact h.path x
   ref x := by
-    rw [show U.refOf x = V.refOf x by simp only [Upd.refOf, hw x]]
+    rw [show U.refOf x = V.refOf x by simp only [Surface.Upd.refOf, hw x]]
     exact h.ref x
   stor x := by
-    rw [show U.storOf x = V.storOf x by simp only [Upd.storOf, hw x]]
+    rw [show U.storOf x = V.storOf x by simp only [Surface.Upd.storOf, hw x]]
     exact h.stor x
   unwritten x hx := h.unwritten x (by rw [← hw x]; exact hx)
   written x e hx := h.written x e (by rw [← hw x]; exact hx)
@@ -1552,51 +1552,51 @@ theorem SubstAgree.of_lastWrite {U V : Upd C} {ns : List Var} {σ τ : State}
 `Upd.locals` write from that state with any storage, and leaves the state
 they leave with some storage: the storage writes read the pre-state `σ₀`,
 and no other element reads the storage it is writing into. -/
-theorem Upd.foldl_locals (σ₀ : State) : (U : Upd C) → U.localsOrStorage = true →
+theorem Surface.Upd.foldl_locals (σ₀ : State) : (U : Surface.Upd C) → U.localsOrStorage = true →
     ∀ {ρ : State} {st : List (Name × SVal)} {τ : State},
       U.foldlM (fun ρ e => e.write σ₀ ρ) { ρ with storage := st } = .ok τ →
-      ∃ τ', (Upd.locals U).foldlM (fun ρ e => e.write σ₀ ρ) ρ = .ok τ' ∧
+      ∃ τ', (Surface.Upd.locals U).foldlM (fun ρ e => e.write σ₀ ρ) ρ = .ok τ' ∧
         ∃ st', τ = { τ' with storage := st' }
   | [], _, ρ, st, τ, h => by
     cases h
     exact ⟨ρ, rfl, st, rfl⟩
   | e :: U, hU, ρ, st, τ, h => by
-    simp only [Upd.localsOrStorage, List.all_cons, Bool.and_eq_true, Bool.or_eq_true] at hU
+    simp only [Surface.Upd.localsOrStorage, List.all_cons, Bool.and_eq_true, Bool.or_eq_true] at hU
     obtain ⟨he, hU⟩ := hU
     simp only [List.foldlM_cons] at h
     obtain ⟨ρ₁, h₁, h⟩ := bind_ok_inv h
     cases hv : e.var? with
     | some x =>
-      rw [UpdElem.write_var hv] at h₁
+      rw [Surface.UpdElem.write_var hv] at h₁
       obtain ⟨b, hb, h₁⟩ := bind_ok_inv h₁
       cases h₁
-      obtain ⟨τ', hτ', st', rfl⟩ := Upd.foldl_locals σ₀ U hU (ρ := ρ.setEnv x b) (st := st) h
-      have hf : Upd.locals (e :: U) = e :: Upd.locals U := by
-        simp only [Upd.locals, List.filter_cons, hv, Option.isSome_some, if_true]
+      obtain ⟨τ', hτ', st', rfl⟩ := Surface.Upd.foldl_locals σ₀ U hU (ρ := ρ.setEnv x b) (st := st) h
+      have hf : Surface.Upd.locals (e :: U) = e :: Surface.Upd.locals U := by
+        simp only [Surface.Upd.locals, List.filter_cons, hv, Option.isSome_some, if_true]
       refine ⟨τ', ?_, st', rfl⟩
-      rw [hf, List.foldlM_cons, UpdElem.write_var hv, hb]
+      rw [hf, List.foldlM_cons, Surface.UpdElem.write_var hv, hb]
       exact hτ'
     | none =>
       have hs : e.isStorage = true := by
         simpa only [hv, Option.isSome_none, Bool.false_eq_true, false_or] using he
-      have hf : Upd.locals (e :: U) = Upd.locals U := by
-        simp only [Upd.locals, List.filter_cons, hv, Option.isSome_none]
+      have hf : Surface.Upd.locals (e :: U) = Surface.Upd.locals U := by
+        simp only [Surface.Upd.locals, List.filter_cons, hv, Option.isSome_none]
         rfl
       rw [hf]
       cases e with
       | storage s =>
-        simp only [UpdElem.write] at h₁
+        simp only [Surface.UpdElem.write] at h₁
         obtain ⟨v, -, h₁⟩ := bind_ok_inv h₁
         cases h₁
-        exact Upd.foldl_locals σ₀ U hU (ρ := ρ) (st := v.storage) h
-      | _ => simp only [UpdElem.isStorage, Bool.false_eq_true] at hs
+        exact Surface.Upd.foldl_locals σ₀ U hU (ρ := ρ) (st := v.storage) h
+      | _ => simp only [Surface.UpdElem.isStorage, Bool.false_eq_true] at hs
 
 /-- A storage-free term reads alike in two states that differ in the storage. -/
 theorem Term.eval_withStorage (σ : State) (st : List (Name × SVal)) :
     (t : Term C) → t.stFree = true → t.eval { σ with storage := st } = t.eval σ
   | .lit _, _ | .pv _, _ | .env _, _ => rfl
   | .binop _ _ a b, h => by
-    simp only [Tm.stFree, Bool.and_eq_true] at h
+    simp only [Surface.Tm.stFree, Bool.and_eq_true] at h
     simp only [tm_eval, Term.eval_withStorage σ st a h.1, Term.eval_withStorage σ st b h.2]
   | .unop _ _ a, h => by simp only [tm_eval, Term.eval_withStorage σ st a h]
   | .net a, h => by
@@ -1606,7 +1606,7 @@ theorem Term.eval_withStorage (σ : State) (st : List (Name × SVal)) :
     simp only [tm_eval, Term.eval_withStorage σ st a h]
     rfl
   | .ite c a b, h => by
-    simp only [Tm.stFree, Bool.and_eq_true] at h
+    simp only [Surface.Tm.stFree, Bool.and_eq_true] at h
     simp only [tm_eval, Term.eval_withStorage σ st c h.1.1, Term.eval_withStorage σ st a h.1.2, Term.eval_withStorage σ st b h.2]
 
 /-- A storage-free term denotes alike in two states that differ in the storage. -/
@@ -1614,7 +1614,7 @@ theorem Term.denote_withStorage (σ : State) (st : List (Name × SVal)) :
     (t : Term C) → t.stFree = true → t.denote { σ with storage := st } = t.denote σ
   | .lit _, _ | .pv _, _ | .env _, _ => rfl
   | .binop _ _ a b, h => by
-    simp only [Tm.stFree, Bool.and_eq_true] at h
+    simp only [Surface.Tm.stFree, Bool.and_eq_true] at h
     simp only [tm_denote, Term.denote_withStorage σ st a h.1, Term.denote_withStorage σ st b h.2]
   | .unop _ _ a, h => by simp only [tm_denote, Term.denote_withStorage σ st a h]
   | .net a, h => by
@@ -1624,7 +1624,7 @@ theorem Term.denote_withStorage (σ : State) (st : List (Name × SVal)) :
     simp only [tm_denote, Term.denote_withStorage σ st a h]
     rfl
   | .ite c a b, h => by
-    simp only [Tm.stFree, Bool.and_eq_true] at h
+    simp only [Surface.Tm.stFree, Bool.and_eq_true] at h
     simp only [tm_denote, Term.denote_withStorage σ st c h.1.1, Term.denote_withStorage σ st a h.1.2, Term.denote_withStorage σ st b h.2]
 
 /-- A storage-free formula holds alike in two states that differ in the storage. -/
@@ -1646,17 +1646,17 @@ runs, its locals ran to the same state up to the storage.
 
 Example: `x ≐ 42` substituted is `find(S, alice.age) ≐ 42`, which gives
 `[{ storage := S ‖ x := find(S, alice.age) }] x ≐ 42`. -/
-theorem NFml.subst_box_st {U : Upd C} (hU : U.localsOrStorage = true) {φ : NFml C}
+theorem NFml.subst_box_st {U : Surface.Upd C} (hU : U.localsOrStorage = true) {φ : NFml C}
     (hφ : φ.stFree = true) (hs : φ.sortedFor U = true) (σ : State) (h : holds σ (φ.subst U)) :
     holds σ (.upd .box U φ) := by
   simp only [holds]
   cases hτ : U.apply σ with
   | error _ => trivial
   | ok τ =>
-    obtain ⟨τ', hτ', st', rfl⟩ := Upd.foldl_locals σ U hU (ρ := σ) (st := σ.storage) hτ
+    obtain ⟨τ', hτ', st', rfl⟩ := Surface.Upd.foldl_locals σ U hU (ρ := σ) (st := σ.storage) hτ
     have hA : SubstAgree U U.locals.targets σ τ' :=
-      (Upd.substAgree (Upd.locals_envOnly U) hτ').of_lastWrite
-        fun x => (Upd.lastWrite_locals x U).symm
+      (Surface.Upd.substAgree (Surface.Upd.locals_envOnly U) hτ').of_lastWrite
+        fun x => (Surface.Upd.lastWrite_locals x U).symm
     exact (NFml.holds_withStorage τ' st' φ hφ).2
       ((NFml.subst_holds hA φ (NFml.stFree_rigid hφ) hs).1 h)
 
@@ -1665,14 +1665,14 @@ theorem NFml.subst_box_st {U : Upd C} (hU : U.localsOrStorage = true) {φ : NFml
 /-- The local an element binds in the environment: `var?`'s, and also a
 storage variable (`old := s`) and a ledger variable (`oldNet := net`), which
 `var?` leaves out because `Upd.subst` has nothing to put for them. -/
-def UpdElem.envVar? : UpdElem C → Option Var
+def Surface.UpdElem.envVar? : Surface.UpdElem C → Option Var
   | .val x _ | .path x _ | .mref x _ | .store x _ | .saveNet x | .saveNetMt x | .unset x => some x
   | _ => none
 
 /-- An element that binds another local leaves `x` as it was: a storage,
 memory or funds write does not touch the environment. -/
-theorem UpdElem.write_getEnv_other {σ₀ ρ ρ' : State} {x : Var} :
-    (e : UpdElem C) → e.envVar? ≠ some x → e.write σ₀ ρ = .ok ρ' → ρ'.getEnv x = ρ.getEnv x
+theorem Surface.UpdElem.write_getEnv_other {σ₀ ρ ρ' : State} {x : Var} :
+    (e : Surface.UpdElem C) → e.envVar? ≠ some x → e.write σ₀ ρ = .ok ρ' → ρ'.getEnv x = ρ.getEnv x
   | .val y t, hne, h | .mref y t, hne, h => by
     obtain ⟨v, -, h⟩ := bind_ok_inv h
     cases h
@@ -1736,17 +1736,17 @@ binds it to a value: `x := t`.
 Example: true of `x` in `{ storage := S ‖ x := find(S, alice.age) }`, false
 in `{ x := 1 ‖ x := alice.account }`, where the last write makes `x` an
 alias. -/
-def Upd.bindsVal (x : Var) : Upd C → Bool
+def Surface.Upd.bindsVal (x : Var) : Surface.Upd C → Bool
   | [] => false
   | e :: U =>
-    if U.any (fun e' => decide (e'.envVar? = some x)) then Upd.bindsVal x U
+    if U.any (fun e' => decide (e'.envVar? = some x)) then Surface.Upd.bindsVal x U
     else match e with
       | .val y _ => decide (y = x)
       | _ => false
 
 /-- A run of an update leaves a local no element binds as it was, and a local
 whose last binder is `x := t` bound to a value. -/
-theorem Upd.foldl_getEnv (σ₀ : State) {x : Var} : (U : Upd C) → ∀ {τ₀ τ : State},
+theorem Surface.Upd.foldl_getEnv (σ₀ : State) {x : Var} : (U : Surface.Upd C) → ∀ {τ₀ τ : State},
     U.foldlM (fun ρ e => e.write σ₀ ρ) τ₀ = .ok τ →
       (U.any (fun e => decide (e.envVar? = some x)) = false → τ.getEnv x = τ₀.getEnv x) ∧
       (U.bindsVal x = true → ∃ v, τ.getEnv x = .ok (.val v))
@@ -1756,11 +1756,11 @@ theorem Upd.foldl_getEnv (σ₀ : State) {x : Var} : (U : Upd C) → ∀ {τ₀ 
   | e :: U, τ₀, τ, h => by
     simp only [List.foldlM_cons] at h
     obtain ⟨τ₁, h₁, h⟩ := bind_ok_inv h
-    obtain ⟨ih₁, ih₂⟩ := Upd.foldl_getEnv σ₀ U h
+    obtain ⟨ih₁, ih₂⟩ := Surface.Upd.foldl_getEnv σ₀ U h
     refine ⟨fun hn => ?_, fun hb => ?_⟩
     · simp only [List.any_cons, Bool.or_eq_false_iff, decide_eq_false_iff_not] at hn
-      rw [ih₁ hn.2, UpdElem.write_getEnv_other e hn.1 h₁]
-    · simp only [Upd.bindsVal] at hb
+      rw [ih₁ hn.2, Surface.UpdElem.write_getEnv_other e hn.1 h₁]
+    · simp only [Surface.Upd.bindsVal] at hb
       split at hb
       · exact ih₂ hb
       · rename_i hn
@@ -1777,13 +1777,13 @@ theorem Upd.foldl_getEnv (σ₀ : State) {x : Var} : (U : Upd C) → ∀ {τ₀ 
 /-- Behind a box update whose last binder of `x` is `x := t`, `x` reads:
 where the update runs it bound `x` to the value of `t`, and where it halts
 the box holds. -/
-theorem Upd.defined_box {U : Upd C} {x : Var} (hw : U.bindsVal x = true) (σ : State) :
-    holds σ (.upd .box U (.defined (.pv x))) := by
-  simp only [holds]
+theorem Surface.Upd.defined_box {U : Surface.Upd C} {x : Var} (hw : U.bindsVal x = true) (σ : State) :
+    NFml.holds σ (.upd .box U (.defined (.pv x))) := by
+  simp only [NFml.holds]
   cases hτ : U.apply σ with
   | error _ => trivial
   | ok τ =>
-    obtain ⟨v, hv⟩ := (Upd.foldl_getEnv σ U hτ).2 hw
+    obtain ⟨v, hv⟩ := (Surface.Upd.foldl_getEnv σ U hτ).2 hw
     exact ⟨v, by simp only [tm_eval, hv, bind, Except.bind, pure, Except.pure]⟩
 
 /-! ## Tactics -/
@@ -1812,7 +1812,7 @@ section StorageWrite
 open SemanticsProperties
 
 /-- `{storage := s}` replaces the storage, and nothing else. -/
-theorem UpdElem.storage_write (σ₀ τ : State) (s : STerm C) : (UpdElem.storage s).write σ₀ τ =
+theorem Surface.UpdElem.storage_write (σ₀ τ : State) (s : STerm C) : (Surface.UpdElem.storage s).write σ₀ τ =
     s.eval σ₀ >>= fun τ' => .ok { τ with storage := τ'.storage } := rfl
 
 /-! ## Updates in parallel: `sequentialToParallel` over a storage write
@@ -1965,7 +1965,7 @@ structure StWrite (C : Contract) where
 
 /-- `{storage := s}e`: `s` for every `storage` in `e`, not looking inside a
 memory read (`Op2.opaque`). -/
-def Tm.withSt (w : StWrite C) : Tm C s → Tm C s
+def Surface.Tm.withSt (w : StWrite C) : Surface.Tm C s → Surface.Tm C s
   | .pvV x => .pvV x
   | .pvP x => .pvP x
   | .pvS x => .pvS x
@@ -1993,7 +1993,7 @@ def Op2.stExplicit (o : Op2 a b s) : Bool :=
 
 /-- Every storage read of the term is a `storage` term: no index check, no
 push slot, no memory. -/
-def Tm.stExplicit : Tm C s → Bool
+def Surface.Tm.stExplicit : Surface.Tm C s → Bool
   | .pvV _ | .pvP _ | .pvS _ | .pvI _ => true
   | .app0 o => o.stExplicit
   | .app1 o a => o.stExplicit && a.stExplicit
@@ -2022,30 +2022,30 @@ theorem Op2.eval_keeps (_hk : σ.Keeps τ) :
 
 /-- **Read before `{storage := s}`, the substituted term reads what the
 term reads after it**, where every storage read is a `storage` term. -/
-theorem Tm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (e : Tm C s) → e.stExplicit = true → (e.withSt w).eval σ = e.eval τ
+theorem Surface.Tm.withSt_eval (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (e : Surface.Tm C s) → e.stExplicit = true → (e.withSt w).eval σ = e.eval τ
   | .pvV _, _ | .pvP _, _ | .pvS _, _ | .pvI _, _ => by rw [← hk]; rfl
   | .app0 o, he => by
     cases o with
     | storage => exact hs
-    | memory => simp only [Tm.stExplicit, Op0.stExplicit, Bool.false_eq_true] at he
+    | memory => simp only [Surface.Tm.stExplicit, Op0.stExplicit, Bool.false_eq_true] at he
     | lit _ | root _ => rfl
     | env _ | mtSt _ => rw [← hk]; rfl
   | .app1 o a, he => by
-    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.Tm.stExplicit, Bool.and_eq_true] at he
     have ih := a.withSt_eval hs hk he.2
-    simp only [Tm.withSt, Tm.eval, ih]
+    simp only [Surface.Tm.withSt, Surface.Tm.eval, ih]
     exact o.eval_keeps hk he.1 _
   | .app2 o a b, he => by
-    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.Tm.stExplicit, Bool.and_eq_true] at he
     have ha := a.withSt_eval hs hk he.1.2
     have hb := b.withSt_eval hs hk he.2
-    simp only [Tm.withSt, Op2.opaque_of_stExplicit he.1.1, Bool.false_eq_true, ↓reduceIte, Tm.eval,
+    simp only [Surface.Tm.withSt, Op2.opaque_of_stExplicit he.1.1, Bool.false_eq_true, ↓reduceIte, Surface.Tm.eval,
       ha, hb]
     exact o.eval_keeps hk he.1.1 _ _
   | .app3 o a b c, he => by
-    simp only [Tm.stExplicit, Bool.and_eq_true] at he
-    simp only [Tm.withSt, Tm.eval, a.withSt_eval hs hk he.1.1, b.withSt_eval hs hk he.1.2,
+    simp only [Surface.Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.Tm.withSt, Surface.Tm.eval, a.withSt_eval hs hk he.1.1, b.withSt_eval hs hk he.1.2,
       c.withSt_eval hs hk he.2]
     rfl
 
@@ -2053,7 +2053,7 @@ end WithSt
 
 /-! ### The merge -/
 
-def UpdElem.withSt (s : STerm C) : UpdElem C → UpdElem C
+def Surface.UpdElem.withSt (s : STerm C) : Surface.UpdElem C → Surface.UpdElem C
   | .val x t => .val x (t.withSt ⟨s⟩)
   | .path x p => .path x (p.withSt ⟨s⟩)
   | .storage s' => .storage (s'.withSt ⟨s⟩)
@@ -2069,7 +2069,7 @@ def UpdElem.withSt (s : STerm C) : UpdElem C → UpdElem C
   | .netMt r a => .netMt (r.withSt ⟨s⟩) (a.withSt ⟨s⟩)
   | .setBalance a => .setBalance (a.withSt ⟨s⟩)
 
-def UpdElem.stExplicit : UpdElem C → Bool
+def Surface.UpdElem.stExplicit : Surface.UpdElem C → Bool
   | .val _ t => t.stExplicit
   | .path _ p => p.stExplicit
   | .storage s | .store _ s => s.stExplicit
@@ -2081,64 +2081,64 @@ def UpdElem.stExplicit : UpdElem C → Bool
   | .mref .. | .memory _ => false
 
 /-- `{storage := s}V`: `s` substituted for `storage` in `V`'s right-hand sides. -/
-def Upd.withSt (s : STerm C) (V : Upd C) : Upd C := V.map (·.withSt s)
+def Surface.Upd.withSt (s : STerm C) (V : Surface.Upd C) : Surface.Upd C := V.map (·.withSt s)
 
-theorem UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ)
+theorem Surface.UpdElem.withSt_write {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ)
     (hk : σ.Keeps τ) (ρ : State) :
-    (e : UpdElem C) → e.stExplicit = true → (e.withSt s).write σ ρ = e.write τ ρ
+    (e : Surface.UpdElem C) → e.stExplicit = true → (e.withSt s).write σ ρ = e.write τ ρ
   | .val _ t, he => by
-    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk t he]
+    simp only [Surface.UpdElem.withSt, Surface.UpdElem.write, Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk t he]
   | .path _ p, he => by
-    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk p he]
+    simp only [Surface.UpdElem.withSt, Surface.UpdElem.write, Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk p he]
   | .storage s', he | .store _ s', he => by
-    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk s' he]
+    simp only [Surface.UpdElem.withSt, Surface.UpdElem.write, Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk s' he]
   | .selfBalance _ a, he => by
-    simp only [UpdElem.stExplicit] at he
-    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk a he]
+    simp only [Surface.UpdElem.stExplicit] at he
+    simp only [Surface.UpdElem.withSt, Surface.UpdElem.write, Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk a he]
     rw [← hk]
   | .net r _ a, he => by
-    simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
-    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
-      Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
+    simp only [Surface.UpdElem.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.UpdElem.withSt, Surface.UpdElem.write, Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
+      Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
   | .pay r a, he => by
-    simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
-    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
-      Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
+    simp only [Surface.UpdElem.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.UpdElem.withSt, Surface.UpdElem.write, Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
+      Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
     rw [← hk]
-  | .saveNet _, _ => by simp only [UpdElem.withSt, UpdElem.write]; rw [← hk]
+  | .saveNet _, _ => by simp only [Surface.UpdElem.withSt, Surface.UpdElem.write]; rw [← hk]
   | .saveNetMt _, _ | .unset _, _ => rfl
   | .netMt r a, he => by
-    simp only [UpdElem.stExplicit, Bool.and_eq_true] at he
-    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
-      Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
+    simp only [Surface.UpdElem.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.UpdElem.withSt, Surface.UpdElem.write, Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk r he.1,
+      Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk a he.2]
   | .setBalance a, he => by
-    simp only [UpdElem.stExplicit] at he
-    simp only [UpdElem.withSt, UpdElem.write, Tm.withSt_eval (w := ⟨s⟩) hs hk a he]
-  | .mref .., he | .memory _, he => by simp only [UpdElem.stExplicit, Bool.false_eq_true] at he
+    simp only [Surface.UpdElem.stExplicit] at he
+    simp only [Surface.UpdElem.withSt, Surface.UpdElem.write, Surface.Tm.withSt_eval (w := ⟨s⟩) hs hk a he]
+  | .mref .., he | .memory _, he => by simp only [Surface.UpdElem.stExplicit, Bool.false_eq_true] at he
 
-theorem Upd.withSt_foldl {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (V : Upd C) → V.all (·.stExplicit) = true → ∀ ρ,
+theorem Surface.Upd.withSt_foldl {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (V : Surface.Upd C) → V.all (·.stExplicit) = true → ∀ ρ,
       (V.withSt s).foldlM (fun ρ e => e.write σ ρ) ρ = V.foldlM (fun ρ e => e.write τ ρ) ρ
   | [], _, _ => rfl
   | e :: V, hV, ρ => by
     simp only [List.all_cons, Bool.and_eq_true] at hV
-    simp only [Upd.withSt, List.map_cons, List.foldlM_cons, UpdElem.withSt_write hs hk ρ e hV.1]
+    simp only [Surface.Upd.withSt, List.map_cons, List.foldlM_cons, Surface.UpdElem.withSt_write hs hk ρ e hV.1]
     congr 1
     funext ρ'
-    exact Upd.withSt_foldl hs hk V hV.2 ρ'
+    exact Surface.Upd.withSt_foldl hs hk V hV.2 ρ'
 
 /-- **`sequentialToParallel`** over a storage write:
 `{storage := s}{V} ψ ⟺ {storage := s ‖ {storage := s}V} ψ`. -/
-theorem Upd.mergeStorage_holds (m : Modality) (s : STerm C) (V : Upd C)
+theorem Surface.Upd.mergeStorage_holds (m : Modality) (s : STerm C) (V : Surface.Upd C)
     (hV : V.all (·.stExplicit) = true) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (.storage s :: V.withSt s) ψ) ↔ holds σ (.upd m [.storage s] (.upd m V ψ)) := by
-  simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.storage_write]
+    NFml.holds σ (.upd m (.storage s :: V.withSt s) ψ) ↔ NFml.holds σ (.upd m [.storage s] (.upd m V ψ)) := by
+  simp only [NFml.holds, Surface.Upd.apply, List.foldlM_cons, List.foldlM_nil, Surface.UpdElem.storage_write]
   cases hs : s.eval σ with
   | error _ => exact Iff.rfl
   | ok τ =>
     have hk : σ.Keeps τ := STerm.eval_keeps s hs
     simp only [Res.ok_bind]
-    rw [hk, Upd.withSt_foldl hs hk V hV τ]
+    rw [hk, Surface.Upd.withSt_foldl hs hk V hV τ]
     exact Iff.rfl
 
 /-! ### A storage write applied to a first-order formula
@@ -2177,38 +2177,38 @@ theorem Op2.denote_keeps (_hk : σ.Keeps τ) :
 /-- **Read before `{storage := s}`, the substituted term denotes, up to
 `Equiv`, what the term denotes after it**; `storage` itself becomes `s`,
 which denotes the storage its run leaves (`STerm.denote_eval`). -/
-theorem Tm.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
-    (e : Tm C s) → e.stExplicit = true → Srt.DEquiv s ((e.withSt w).denote σ) (e.denote τ)
+theorem Surface.Tm.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) :
+    (e : Surface.Tm C s) → e.stExplicit = true → Srt.DEquiv s ((e.withSt w).denote σ) (e.denote τ)
   | .pvV x, _ | .pvS x, _ => by
-    simp only [Srt.DEquiv, Tm.withSt, Tm.denote, hk.getEnv x]
+    simp only [Srt.DEquiv, Surface.Tm.withSt, Surface.Tm.denote, hk.getEnv x]
     exact Equiv.refl _
-  | .pvP x, _ => by simp only [Srt.DEquiv, Tm.withSt, Tm.denote, aliasPath, hk.getEnv x]
+  | .pvP x, _ => by simp only [Srt.DEquiv, Surface.Tm.withSt, Surface.Tm.denote, aliasPath, hk.getEnv x]
   | .pvI _, _ => trivial
   | .app0 o, he => by
     cases o with
     | storage => exact STerm.denote_eval hs
-    | memory => simp only [Tm.stExplicit, Op0.stExplicit, Bool.false_eq_true] at he
+    | memory => simp only [Surface.Tm.stExplicit, Op0.stExplicit, Bool.false_eq_true] at he
     | lit _ | root _ | mtSt _ => exact Srt.DEquiv.refl _ _
     | env _ => rw [← hk]; exact Srt.DEquiv.refl _ _
   | .app1 o a, he => by
-    simp only [Tm.stExplicit, Bool.and_eq_true] at he
-    simp only [Tm.withSt, Tm.denote]
+    simp only [Surface.Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.Tm.withSt, Surface.Tm.denote]
     exact Srt.DEquiv.of_eq (o.denote_keeps hk he.1 _) (o.denote_congr (a.withSt_denote hs hk he.2))
   | .app2 o a b, he => by
-    simp only [Tm.stExplicit, Bool.and_eq_true] at he
-    simp only [Tm.withSt, Op2.opaque_of_stExplicit he.1.1, Bool.false_eq_true, ↓reduceIte,
-      Tm.denote]
+    simp only [Surface.Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.Tm.withSt, Op2.opaque_of_stExplicit he.1.1, Bool.false_eq_true, ↓reduceIte,
+      Surface.Tm.denote]
     exact Srt.DEquiv.of_eq (o.denote_keeps hk he.1.1 _ (a.eval τ) _ (b.eval τ) _ _)
       (o.denote_congr (Op2.opaque_of_stExplicit he.1.1) (a.withSt_denote hs hk he.1.2)
         (b.withSt_denote hs hk he.2))
   | .app3 o a b c, he => by
-    simp only [Tm.stExplicit, Bool.and_eq_true] at he
+    simp only [Surface.Tm.stExplicit, Bool.and_eq_true] at he
     exact o.denote_congr (a.withSt_denote hs hk he.1.1) (b.withSt_denote hs hk he.1.2)
       (c.withSt_denote hs hk he.2)
 
 theorem Term.withSt_denote (hs : w.s.eval σ = .ok τ) (hk : σ.Keeps τ) (e : Term C)
     (he : e.stExplicit = true) : Equiv ((e.withSt w).denote σ) (e.denote τ) :=
-  Tm.withSt_denote hs hk e he
+  Surface.Tm.withSt_denote hs hk e he
 
 end WithStDenote
 
@@ -2248,7 +2248,7 @@ theorem NFml.withSt_holds {s : STerm C} {σ τ : State} (hs : s.eval σ = .ok τ
   | .defined t, _, he => by
     simp only [NFml.stExplicit] at he
     simp only [NFml.withSt, holds,
-      Tm.withSt_eval (w := ⟨s⟩) hs (STerm.eval_keeps s hs) t he]
+      Surface.Tm.withSt_eval (w := ⟨s⟩) hs (STerm.eval_keeps s hs) t he]
   | .not φ, hr, he => by
     simp only [NFml.rigid] at hr
     simp only [NFml.stExplicit] at he
@@ -2270,7 +2270,7 @@ halts, the box holds. -/
 theorem NFml.withSt_box {s : STerm C} {φ : NFml C} (hr : φ.rigid = true)
     (he : φ.stExplicit = true) (σ : State) (h : holds σ (φ.withSt s)) :
     holds σ (.upd .box [.storage s] φ) := by
-  simp only [holds, Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.storage_write]
+  simp only [holds, Surface.Upd.apply, List.foldlM_cons, List.foldlM_nil, Surface.UpdElem.storage_write]
   cases hs : s.eval σ with
   | error _ => trivial
   | ok τ =>
@@ -2300,11 +2300,11 @@ mini-solkey's `Hyp.rwAll` does in a calculus whose terms cannot halt. -/
 section RwEval
 
 /-- Where `a` returns a value, `b` returns it too. -/
-def Res.Le {α : Type} (a b : Res α) : Prop := ∀ x, a = .ok x → b = .ok x
+def Semantics.Res.Le {α : Type} (a b : Res α) : Prop := ∀ x, a = .ok x → b = .ok x
 
-theorem Res.Le.refl {α : Type} (a : Res α) : Res.Le a a := fun _ h => h
+theorem Semantics.Res.Le.refl {α : Type} (a : Res α) : Res.Le a a := fun _ h => h
 
-theorem Res.Le.bind {α β : Type} {a a' : Res α} {f f' : α → Res β} (ha : Res.Le a a')
+theorem Semantics.Res.Le.bind {α β : Type} {a a' : Res α} {f f' : α → Res β} (ha : Res.Le a a')
     (hf : ∀ x, Res.Le (f x) (f' x)) : Res.Le (a >>= f) (a' >>= f') := fun y h => by
   obtain ⟨x, hx, hy⟩ := bind_ok_inv h
   rw [ha x hx]
@@ -2418,41 +2418,41 @@ theorem Op3.eval_le {σ : State} : (o : Op3 a b c s) → {ra ra' : a.Ev} → {rb
   | .write, _, _, _, _, _, _, hm, ha, hv =>
     Res.Le.bind hv fun _ => Res.Le.bind hm fun _ => Res.Le.bind ha fun _ => Res.Le.refl _
 
-theorem Tm.pickAt_eval (hq : Term.EvalRefines q.1 q.2) :
-    {s : Srt} → {e d : Tm C s} → (∀ σ, Srt.Le s (e.eval σ) (d.eval σ)) → (σ : State) →
-      Srt.Le s (e.eval σ) ((Tm.pickAt q e d).eval σ)
+theorem Surface.Tm.pickAt_eval (hq : Term.EvalRefines q.1 q.2) :
+    {s : Srt} → {e d : Surface.Tm C s} → (∀ σ, Srt.Le s (e.eval σ) (d.eval σ)) → (σ : State) →
+      Srt.Le s (e.eval σ) ((Surface.Tm.pickAt q e d).eval σ)
   | .val, _, _, hd, σ => Term.pick_eval hq hd σ
   | .path, _, _, hd, σ | .st, _, _, hd, σ | .sv, _, _, hd, σ | .ident, _, _, hd, σ
   | .addr, _, _, hd, σ | .mem, _, _, hd, σ | .mv, _, _, hd, σ => hd σ
 
 /-- **Replacing `q.1` by a term that refines it keeps every value a term
 returns.** -/
-theorem Tm.rw_eval (hq : Term.EvalRefines q.1 q.2) :
-    (e : Tm C s) → ∀ σ, Srt.Le s (e.eval σ) ((e.rw q).eval σ)
-  | .pvV _ | .app0 _ => Tm.pickAt_eval hq fun _ => Srt.Le.refl _ _
+theorem Surface.Tm.rw_eval (hq : Term.EvalRefines q.1 q.2) :
+    (e : Surface.Tm C s) → ∀ σ, Srt.Le s (e.eval σ) ((e.rw q).eval σ)
+  | .pvV _ | .app0 _ => Surface.Tm.pickAt_eval hq fun _ => Srt.Le.refl _ _
   | .pvP _ | .pvS _ | .pvI _ => fun _ => Srt.Le.refl _ _
-  | .app1 o a => Tm.pickAt_eval hq fun σ => o.eval_le (a.rw_eval hq σ)
-  | .app2 o a b => Tm.pickAt_eval hq fun σ => by
+  | .app1 o a => Surface.Tm.pickAt_eval hq fun σ => o.eval_le (a.rw_eval hq σ)
+  | .app2 o a b => Surface.Tm.pickAt_eval hq fun σ => by
     cases ho : o.opaque
     · simp only [Bool.false_eq_true, ↓reduceIte]
       exact o.eval_le (a.rw_eval hq σ) (b.rw_eval hq σ)
     · simp only [↓reduceIte]
       exact Srt.Le.refl _ _
-  | .app3 o a b c => Tm.pickAt_eval hq fun σ =>
+  | .app3 o a b c => Surface.Tm.pickAt_eval hq fun σ =>
     o.eval_le (a.rw_eval hq σ) (b.rw_eval hq σ) (c.rw_eval hq σ)
 
 theorem Term.rw_eval (hq : Term.EvalRefines q.1 q.2) (e : Term C) (σ : State) :
-    Res.Le (e.eval σ) ((e.rw q).eval σ) := Tm.rw_eval hq e σ
+    Res.Le (e.eval σ) ((e.rw q).eval σ) := Surface.Tm.rw_eval hq e σ
 theorem PTerm.rw_eval (hq : Term.EvalRefines q.1 q.2) (p : PTerm C) (σ : State) :
-    Res.Le (p.eval σ) ((p.rw q).eval σ) := Tm.rw_eval hq p σ
+    Res.Le (p.eval σ) ((p.rw q).eval σ) := Surface.Tm.rw_eval hq p σ
 theorem STerm.rw_eval (hq : Term.EvalRefines q.1 q.2) (s : STerm C) (σ : State) :
-    Res.Le (s.eval σ) ((s.rw q).eval σ) := Tm.rw_eval hq s σ
+    Res.Le (s.eval σ) ((s.rw q).eval σ) := Surface.Tm.rw_eval hq s σ
 theorem SValT.rw_eval (hq : Term.EvalRefines q.1 q.2) (v : SValT C) (σ : State) :
-    Res.Le (v.eval σ) ((v.rw q).eval σ) := Tm.rw_eval hq v σ
+    Res.Le (v.eval σ) ((v.rw q).eval σ) := Surface.Tm.rw_eval hq v σ
 
 /-- Every occurrence of `q.1` in an element's right-hand side, replaced by
 `q.2`; a memory right-hand side is left alone, as `Tm.rw` leaves a memory term. -/
-def UpdElem.rw (q : Term C × Term C) : UpdElem C → UpdElem C
+def Surface.UpdElem.rw (q : Term C × Term C) : Surface.UpdElem C → Surface.UpdElem C
   | .val x t => .val x (t.rw q)
   | .path x p => .path x (p.rw q)
   | .mref x i => .mref x i
@@ -2469,10 +2469,10 @@ def UpdElem.rw (q : Term C × Term C) : UpdElem C → UpdElem C
   | .setBalance a => .setBalance (a.rw q)
 
 /-- Every right-hand side of an update, rewritten (`UpdElem.rw`). -/
-def Upd.rw (q : Term C × Term C) (U : Upd C) : Upd C := U.map (·.rw q)
+def Surface.Upd.rw (q : Term C × Term C) (U : Surface.Upd C) : Surface.Upd C := U.map (·.rw q)
 
-theorem UpdElem.rw_write (hq : Term.EvalRefines q.1 q.2) (σ₀ τ : State) :
-    (e : UpdElem C) → Res.Le (e.write σ₀ τ) ((e.rw q).write σ₀ τ)
+theorem Surface.UpdElem.rw_write (hq : Term.EvalRefines q.1 q.2) (σ₀ τ : State) :
+    (e : Surface.UpdElem C) → Res.Le (e.write σ₀ τ) ((e.rw q).write σ₀ τ)
   | .val _ t => Res.Le.bind (Term.rw_eval hq t σ₀) fun _ => Res.Le.refl _
   | .path _ p => Res.Le.bind (PTerm.rw_eval hq p σ₀) fun _ => Res.Le.refl _
   | .storage s | .store _ s => Res.Le.bind (STerm.rw_eval hq s σ₀) fun _ => Res.Le.refl _
@@ -2483,29 +2483,29 @@ theorem UpdElem.rw_write (hq : Term.EvalRefines q.1 q.2) (σ₀ τ : State) :
     Res.Le.bind (Term.rw_eval hq a σ₀) fun _ => Res.Le.refl _
   | .mref .. | .memory _ | .saveNet _ | .saveNetMt _ | .unset _ => Res.Le.refl _
 
-theorem Upd.rw_foldl (hq : Term.EvalRefines q.1 q.2) (σ₀ : State) :
-    (U : Upd C) → ∀ ρ, Res.Le (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
+theorem Surface.Upd.rw_foldl (hq : Term.EvalRefines q.1 q.2) (σ₀ : State) :
+    (U : Surface.Upd C) → ∀ ρ, Res.Le (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
       ((U.rw q).foldlM (fun τ e => e.write σ₀ τ) ρ)
   | [], _ => Res.Le.refl _
   | e :: U, ρ => by
-    simp only [Upd.rw, List.map_cons, List.foldlM_cons]
-    exact Res.Le.bind (UpdElem.rw_write hq σ₀ ρ e) fun ρ' => Upd.rw_foldl hq σ₀ U ρ'
+    simp only [Surface.Upd.rw, List.map_cons, List.foldlM_cons]
+    exact Res.Le.bind (Surface.UpdElem.rw_write hq σ₀ ρ e) fun ρ' => Surface.Upd.rw_foldl hq σ₀ U ρ'
 
 /-- A rewritten update ends where the update does, wherever the update returns. -/
-theorem Upd.rw_apply (hq : Term.EvalRefines q.1 q.2) (U : Upd C) (σ : State) :
+theorem Surface.Upd.rw_apply (hq : Term.EvalRefines q.1 q.2) (U : Surface.Upd C) (σ : State) :
     Res.Le (U.apply σ) ((U.rw q).apply σ) :=
-  Upd.rw_foldl hq σ U σ
+  Surface.Upd.rw_foldl hq σ U σ
 
 /-- **Under the box, a rewritten update gives the update**: where the update
 returns, the rewritten one returns the same state; where it halts, the box holds. -/
-theorem Upd.rw_box (hq : Term.EvalRefines q.1 q.2) {U : Upd C} {ψ ψ' : NFml C}
-    (h : ∀ τ, holds τ ψ' → holds τ ψ) (σ : State) (hσ : holds σ (.upd .box (U.rw q) ψ')) :
-    holds σ (.upd .box U ψ) := by
-  simp only [holds] at hσ ⊢
+theorem Surface.Upd.rw_box (hq : Term.EvalRefines q.1 q.2) {U : Surface.Upd C} {ψ ψ' : NFml C}
+    (h : ∀ τ, NFml.holds τ ψ' → NFml.holds τ ψ) (σ : State) (hσ : NFml.holds σ (.upd .box (U.rw q) ψ')) :
+    NFml.holds σ (.upd .box U ψ) := by
+  simp only [NFml.holds] at hσ ⊢
   cases hU : U.apply σ with
   | error _ => trivial
   | ok τ =>
-    rw [Upd.rw_apply hq U σ τ hU] at hσ
+    rw [Surface.Upd.rw_apply hq U σ τ hU] at hσ
     exact h τ hσ
 
 /-! ### The other direction, at one state
@@ -2526,38 +2526,38 @@ theorem Term.pick_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)
     exact hq
   · exact hd
 
-theorem Tm.pickAt_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) :
-    {s : Srt} → {e d : Tm C s} → Srt.Le s (d.eval σ) (e.eval σ) →
-      Srt.Le s ((Tm.pickAt q e d).eval σ) (e.eval σ)
+theorem Surface.Tm.pickAt_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) :
+    {s : Srt} → {e d : Surface.Tm C s} → Srt.Le s (d.eval σ) (e.eval σ) →
+      Srt.Le s ((Surface.Tm.pickAt q e d).eval σ) (e.eval σ)
   | .val, _, _, hd => Term.pick_eval_rev hq hd
   | .path, _, _, hd | .st, _, _, hd | .sv, _, _, hd | .ident, _, _, hd
   | .addr, _, _, hd | .mem, _, _, hd | .mv, _, _, hd => hd
 
 /-- **Replacing `q.1` by a term that returns what it returns at `σ` keeps
 every value the rewritten term returns there.** -/
-theorem Tm.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) :
-    (e : Tm C s) → Srt.Le s ((e.rw q).eval σ) (e.eval σ)
-  | .pvV _ | .app0 _ => Tm.pickAt_eval_rev hq (Srt.Le.refl _ _)
+theorem Surface.Tm.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) :
+    (e : Surface.Tm C s) → Srt.Le s ((e.rw q).eval σ) (e.eval σ)
+  | .pvV _ | .app0 _ => Surface.Tm.pickAt_eval_rev hq (Srt.Le.refl _ _)
   | .pvP _ | .pvS _ | .pvI _ => Srt.Le.refl _ _
-  | .app1 o a => Tm.pickAt_eval_rev hq (o.eval_le (a.rw_eval_rev hq))
-  | .app2 o a b => Tm.pickAt_eval_rev hq (by
+  | .app1 o a => Surface.Tm.pickAt_eval_rev hq (o.eval_le (a.rw_eval_rev hq))
+  | .app2 o a b => Surface.Tm.pickAt_eval_rev hq (by
     cases ho : o.opaque
     · simp only [Bool.false_eq_true, ↓reduceIte]
       exact o.eval_le (a.rw_eval_rev hq) (b.rw_eval_rev hq)
     · simp only [↓reduceIte]
       exact Srt.Le.refl _ _)
   | .app3 o a b c =>
-    Tm.pickAt_eval_rev hq (o.eval_le (a.rw_eval_rev hq) (b.rw_eval_rev hq) (c.rw_eval_rev hq))
+    Surface.Tm.pickAt_eval_rev hq (o.eval_le (a.rw_eval_rev hq) (b.rw_eval_rev hq) (c.rw_eval_rev hq))
 
 theorem Term.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (e : Term C) :
-    Res.Le ((e.rw q).eval σ) (e.eval σ) := Tm.rw_eval_rev hq e
+    Res.Le ((e.rw q).eval σ) (e.eval σ) := Surface.Tm.rw_eval_rev hq e
 theorem PTerm.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (p : PTerm C) :
-    Res.Le ((p.rw q).eval σ) (p.eval σ) := Tm.rw_eval_rev hq p
+    Res.Le ((p.rw q).eval σ) (p.eval σ) := Surface.Tm.rw_eval_rev hq p
 theorem STerm.rw_eval_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (s : STerm C) :
-    Res.Le ((s.rw q).eval σ) (s.eval σ) := Tm.rw_eval_rev hq s
+    Res.Le ((s.rw q).eval σ) (s.eval σ) := Surface.Tm.rw_eval_rev hq s
 
-theorem UpdElem.rw_write_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.eval σ₀)) (τ : State) :
-    (e : UpdElem C) → Res.Le ((e.rw q).write σ₀ τ) (e.write σ₀ τ)
+theorem Surface.UpdElem.rw_write_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.eval σ₀)) (τ : State) :
+    (e : Surface.UpdElem C) → Res.Le ((e.rw q).write σ₀ τ) (e.write σ₀ τ)
   | .val _ t => Res.Le.bind (Term.rw_eval_rev hq t) fun _ => Res.Le.refl _
   | .path _ p => Res.Le.bind (PTerm.rw_eval_rev hq p) fun _ => Res.Le.refl _
   | .storage s | .store _ s => Res.Le.bind (STerm.rw_eval_rev hq s) fun _ => Res.Le.refl _
@@ -2571,35 +2571,35 @@ theorem UpdElem.rw_write_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.
     Res.Le.bind (Term.rw_eval_rev hq a) fun _ => Res.Le.refl _
   | .mref .. | .memory _ | .saveNet _ | .saveNetMt _ | .unset _ => Res.Le.refl _
 
-theorem Upd.rw_foldl_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.eval σ₀)) :
-    (U : Upd C) → ∀ ρ, Res.Le ((U.rw q).foldlM (fun τ e => e.write σ₀ τ) ρ)
+theorem Surface.Upd.rw_foldl_rev {σ₀ : State} (hq : Res.Le (q.2.eval σ₀) (q.1.eval σ₀)) :
+    (U : Surface.Upd C) → ∀ ρ, Res.Le ((U.rw q).foldlM (fun τ e => e.write σ₀ τ) ρ)
       (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
   | [], _ => Res.Le.refl _
   | e :: U, ρ => by
-    simp only [Upd.rw, List.map_cons, List.foldlM_cons]
-    exact Res.Le.bind (UpdElem.rw_write_rev hq ρ e) fun ρ' => Upd.rw_foldl_rev hq U ρ'
+    simp only [Surface.Upd.rw, List.map_cons, List.foldlM_cons]
+    exact Res.Le.bind (Surface.UpdElem.rw_write_rev hq ρ e) fun ρ' => Surface.Upd.rw_foldl_rev hq U ρ'
 
 /-- Where the replacement returns what the replaced term does at `σ`, the
 update ends where its rewrite does, wherever the rewrite returns. -/
-theorem Upd.rw_apply_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (U : Upd C) :
+theorem Surface.Upd.rw_apply_rev {σ : State} (hq : Res.Le (q.2.eval σ) (q.1.eval σ)) (U : Surface.Upd C) :
     Res.Le ((U.rw q).apply σ) (U.apply σ) :=
-  Upd.rw_foldl_rev hq U σ
+  Surface.Upd.rw_foldl_rev hq U σ
 
 /-- **A rewrite inside an update, under any modality**: `t'` returns what `t`
 returns, and wherever the rewritten update returns, `t` returns what `t'`
 does — so the two updates return the same state and halt in the same states,
 and a halt reads alike under a modality whatever it is (`Modality.after`). -/
-theorem Upd.rw_holds (hq : Term.EvalRefines q.1 q.2) {U : Upd C}
+theorem Surface.Upd.rw_holds (hq : Term.EvalRefines q.1 q.2) {U : Surface.Upd C}
     (hb : ∀ σ τ, (U.rw q).apply σ = .ok τ → Res.Le (q.2.eval σ) (q.1.eval σ))
     (m : Modality) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (U.rw q) ψ) ↔ holds σ (.upd m U ψ) := by
-  simp only [holds]
+    NFml.holds σ (.upd m (U.rw q) ψ) ↔ NFml.holds σ (.upd m U ψ) := by
+  simp only [NFml.holds]
   cases hU : U.apply σ with
-  | ok τ => rw [Upd.rw_apply hq U σ τ hU]
+  | ok τ => rw [Surface.Upd.rw_apply hq U σ τ hU]
   | error e =>
     cases hU' : (U.rw q).apply σ with
     | ok τ' =>
-      rw [Upd.rw_apply_rev (hb σ τ' hU') U τ' hU'] at hU
+      rw [Surface.Upd.rw_apply_rev (hb σ τ' hU') U τ' hU'] at hU
       cases hU
     | error e' => exact Iff.rfl
 
@@ -2614,36 +2614,36 @@ replacement must satisfy is `Tm.EvalRefinesAt`, `Term.EvalRefines` at the
 sort of the law. -/
 
 /-- Where `t` returns, `t'` returns the same, at the sort `u`. -/
-def Tm.EvalRefinesAt {u : Srt} (t t' : Tm C u) : Prop := ∀ σ, Srt.Le u (t.eval σ) (t'.eval σ)
+def Surface.Tm.EvalRefinesAt {u : Srt} (t t' : Surface.Tm C u) : Prop := ∀ σ, Srt.Le u (t.eval σ) (t'.eval σ)
 
-theorem Term.EvalRefines.at {t t' : Term C} (h : Term.EvalRefines t t') : Tm.EvalRefinesAt t t' := h
+theorem Term.EvalRefines.at {t t' : Term C} (h : Term.EvalRefines t t') : Surface.Tm.EvalRefinesAt t t' := h
 
 /-- `q.2` where the term is `q.1`, at the sort of `q`; a term of any other
 sort is left as it is. -/
-def Tm.pickAtSort {u : Srt} (q : Tm C u × Tm C u) {s : Srt} (e d : Tm C s) : Tm C s :=
-  if h : u = s then (if cast (congrArg (Tm C) h) q.1 = e then cast (congrArg (Tm C) h) q.2 else d)
+def Surface.Tm.pickAtSort {u : Srt} (q : Surface.Tm C u × Surface.Tm C u) {s : Srt} (e d : Surface.Tm C s) : Surface.Tm C s :=
+  if h : u = s then (if cast (congrArg (Surface.Tm C) h) q.1 = e then cast (congrArg (Surface.Tm C) h) q.2 else d)
   else d
 
 /-- Every occurrence of `q.1` in a term, replaced by `q.2`, a memory read
 looked into. -/
-def Tm.rwEv {u : Srt} (q : Tm C u × Tm C u) : Tm C s → Tm C s
-  | .pvV x => Tm.pickAtSort q (.pvV x) (.pvV x)
-  | .pvP x => Tm.pickAtSort q (.pvP x) (.pvP x)
-  | .pvS x => Tm.pickAtSort q (.pvS x) (.pvS x)
-  | .pvI x => Tm.pickAtSort q (.pvI x) (.pvI x)
-  | .app0 o => Tm.pickAtSort q (.app0 o) (.app0 o)
-  | .app1 o a => Tm.pickAtSort q (.app1 o a) (.app1 o (a.rwEv q))
-  | .app2 o a b => Tm.pickAtSort q (.app2 o a b) (.app2 o (a.rwEv q) (b.rwEv q))
-  | .app3 o a b c => Tm.pickAtSort q (.app3 o a b c) (.app3 o (a.rwEv q) (b.rwEv q) (c.rwEv q))
+def Surface.Tm.rwEv {u : Srt} (q : Surface.Tm C u × Surface.Tm C u) : Surface.Tm C s → Surface.Tm C s
+  | .pvV x => Surface.Tm.pickAtSort q (.pvV x) (.pvV x)
+  | .pvP x => Surface.Tm.pickAtSort q (.pvP x) (.pvP x)
+  | .pvS x => Surface.Tm.pickAtSort q (.pvS x) (.pvS x)
+  | .pvI x => Surface.Tm.pickAtSort q (.pvI x) (.pvI x)
+  | .app0 o => Surface.Tm.pickAtSort q (.app0 o) (.app0 o)
+  | .app1 o a => Surface.Tm.pickAtSort q (.app1 o a) (.app1 o (a.rwEv q))
+  | .app2 o a b => Surface.Tm.pickAtSort q (.app2 o a b) (.app2 o (a.rwEv q) (b.rwEv q))
+  | .app3 o a b c => Surface.Tm.pickAtSort q (.app3 o a b c) (.app3 o (a.rwEv q) (b.rwEv q) (c.rwEv q))
 
 section RwEvAt
 
-variable {u : Srt} {qu : Tm C u × Tm C u}
+variable {u : Srt} {qu : Surface.Tm C u × Surface.Tm C u}
 
-theorem Tm.pickAtSort_eval (hq : Tm.EvalRefinesAt qu.1 qu.2) {s : Srt} {e d : Tm C s}
+theorem Surface.Tm.pickAtSort_eval (hq : Surface.Tm.EvalRefinesAt qu.1 qu.2) {s : Srt} {e d : Surface.Tm C s}
     (hd : ∀ σ, Srt.Le s (e.eval σ) (d.eval σ)) (σ : State) :
-    Srt.Le s (e.eval σ) ((Tm.pickAtSort qu e d).eval σ) := by
-  unfold Tm.pickAtSort
+    Srt.Le s (e.eval σ) ((Surface.Tm.pickAtSort qu e d).eval σ) := by
+  unfold Surface.Tm.pickAtSort
   split
   · rename_i h
     subst h
@@ -2657,18 +2657,18 @@ theorem Tm.pickAtSort_eval (hq : Tm.EvalRefinesAt qu.1 qu.2) {s : Srt} {e d : Tm
 
 /-- **Replacing `qu.1` by a term that refines it keeps every value a term
 returns**, a memory read looked into. -/
-theorem Tm.rwEv_eval (hq : Tm.EvalRefinesAt qu.1 qu.2) :
-    (e : Tm C s) → ∀ σ, Srt.Le s (e.eval σ) ((e.rwEv qu).eval σ)
-  | .pvV _ | .pvP _ | .pvS _ | .pvI _ | .app0 _ => Tm.pickAtSort_eval hq fun _ => Srt.Le.refl _ _
-  | .app1 o a => Tm.pickAtSort_eval hq fun σ => o.eval_le (a.rwEv_eval hq σ)
-  | .app2 o a b => Tm.pickAtSort_eval hq fun σ => o.eval_le (a.rwEv_eval hq σ) (b.rwEv_eval hq σ)
-  | .app3 o a b c => Tm.pickAtSort_eval hq fun σ =>
+theorem Surface.Tm.rwEv_eval (hq : Surface.Tm.EvalRefinesAt qu.1 qu.2) :
+    (e : Surface.Tm C s) → ∀ σ, Srt.Le s (e.eval σ) ((e.rwEv qu).eval σ)
+  | .pvV _ | .pvP _ | .pvS _ | .pvI _ | .app0 _ => Surface.Tm.pickAtSort_eval hq fun _ => Srt.Le.refl _ _
+  | .app1 o a => Surface.Tm.pickAtSort_eval hq fun σ => o.eval_le (a.rwEv_eval hq σ)
+  | .app2 o a b => Surface.Tm.pickAtSort_eval hq fun σ => o.eval_le (a.rwEv_eval hq σ) (b.rwEv_eval hq σ)
+  | .app3 o a b c => Surface.Tm.pickAtSort_eval hq fun σ =>
     o.eval_le (a.rwEv_eval hq σ) (b.rwEv_eval hq σ) (c.rwEv_eval hq σ)
 
-theorem Tm.pickAtSort_eval_rev {σ : State} (hq : Srt.Le u (qu.2.eval σ) (qu.1.eval σ)) {s : Srt}
-    {e d : Tm C s} (hd : Srt.Le s (d.eval σ) (e.eval σ)) :
-    Srt.Le s ((Tm.pickAtSort qu e d).eval σ) (e.eval σ) := by
-  unfold Tm.pickAtSort
+theorem Surface.Tm.pickAtSort_eval_rev {σ : State} (hq : Srt.Le u (qu.2.eval σ) (qu.1.eval σ)) {s : Srt}
+    {e d : Surface.Tm C s} (hd : Srt.Le s (d.eval σ) (e.eval σ)) :
+    Srt.Le s ((Surface.Tm.pickAtSort qu e d).eval σ) (e.eval σ) := by
+  unfold Surface.Tm.pickAtSort
   split
   · rename_i h
     subst h
@@ -2682,12 +2682,12 @@ theorem Tm.pickAtSort_eval_rev {σ : State} (hq : Srt.Le u (qu.2.eval σ) (qu.1.
 
 /-- **Replacing `qu.1` by a term that returns what it returns at `σ` keeps
 every value the rewritten term returns there.** -/
-theorem Tm.rwEv_eval_rev {σ : State} (hq : Srt.Le u (qu.2.eval σ) (qu.1.eval σ)) :
-    (e : Tm C s) → Srt.Le s ((e.rwEv qu).eval σ) (e.eval σ)
-  | .pvV _ | .pvP _ | .pvS _ | .pvI _ | .app0 _ => Tm.pickAtSort_eval_rev hq (Srt.Le.refl _ _)
-  | .app1 o a => Tm.pickAtSort_eval_rev hq (o.eval_le (a.rwEv_eval_rev hq))
-  | .app2 o a b => Tm.pickAtSort_eval_rev hq (o.eval_le (a.rwEv_eval_rev hq) (b.rwEv_eval_rev hq))
-  | .app3 o a b c => Tm.pickAtSort_eval_rev hq
+theorem Surface.Tm.rwEv_eval_rev {σ : State} (hq : Srt.Le u (qu.2.eval σ) (qu.1.eval σ)) :
+    (e : Surface.Tm C s) → Srt.Le s ((e.rwEv qu).eval σ) (e.eval σ)
+  | .pvV _ | .pvP _ | .pvS _ | .pvI _ | .app0 _ => Surface.Tm.pickAtSort_eval_rev hq (Srt.Le.refl _ _)
+  | .app1 o a => Surface.Tm.pickAtSort_eval_rev hq (o.eval_le (a.rwEv_eval_rev hq))
+  | .app2 o a b => Surface.Tm.pickAtSort_eval_rev hq (o.eval_le (a.rwEv_eval_rev hq) (b.rwEv_eval_rev hq))
+  | .app3 o a b c => Surface.Tm.pickAtSort_eval_rev hq
     (o.eval_le (a.rwEv_eval_rev hq) (b.rwEv_eval_rev hq) (c.rwEv_eval_rev hq))
 
 end RwEvAt

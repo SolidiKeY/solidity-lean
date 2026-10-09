@@ -33,7 +33,7 @@ write, and `readWriteDifferentIdentity` (the write at `balance` leaves
 
 namespace Solidity.Examples.Chains.MemoryToStorage
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 

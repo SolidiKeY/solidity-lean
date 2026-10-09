@@ -1,11 +1,11 @@
-import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.NFmlUpdateRules
 
 /-!
 # Today's sequents: the context, the rule sets, fresh indices
 
-What `Calculus/Logic.lean`'s judgement `Γ ⊢ φ` shares with the scoped one
+What `Calculus/NFmlLogic.lean`'s judgement `Γ ⊢ φ` shares with the scoped one
 (`Calculus/Core/Proves.lean`) and with the closer's drivers on the erasure
-(`Calculus/Derive.lean`, `Calculus/TheoryRewrite.lean`, `Calculus/Problem.lean`):
+(`Calculus/NFmlDerive.lean`, `Calculus/TheoryRewrite.lean`, `Calculus/Problem.lean`):
 the context of a sequent (`Hyp`, put back in front of a formula by
 `Hyp.wrap`), the rule sets a derivation may use (`RuleSet`), the fresh index
 above every index in sight (`maxIdx`, `Fml.fresh`, `Hyp.fresh`) and the
@@ -61,7 +61,7 @@ inductive Hyp (C : Contract) where
   /-- `a → …` -/
   | pre (a : NFml C)
   /-- `{U} …`, produced under the modality `m` -/
-  | upd (m : Modality) (U : Upd C)
+  | upd (m : Modality) (U : Surface.Upd C)
   /-- `{havoc} …`: any storage and ledger a callee may leave, as
   KeY's anonymising update with fresh skolem symbols. -/
   | havoc

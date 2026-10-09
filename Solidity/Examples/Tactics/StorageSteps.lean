@@ -14,7 +14,7 @@ is a theorem `⊨ dl!{ … }`, proved one of two ways:
   `sol_close` applies the updates in an arbitrary state and reads back the
   writes;
 * for a worked example, by a **walk**: `apply Proves.valid` turns
-  the goal into the judgement `⊢ φ` (`Calculus/Logic.lean`), and the derivation
+  the goal into the judgement `⊢ φ` (`Calculus/NFmlLogic.lean`), and the derivation
   is built one `apply` per taclet, so each rule the derivation names is named here —
   `unfold r` for Steps 1 and 2, `update r` for Step 3, `empty` for
   `emptyModality`, `intro` for a precondition.  Put the cursor after an `apply`
@@ -48,11 +48,11 @@ that statement instead, `unfoldRule (Stmt.step _ _ _).rule`, and a comment names
 
 namespace Solidity.Examples.Tactics.StorageSteps
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## 0 · The headline: `alice.account.balance = 10;` -/
 

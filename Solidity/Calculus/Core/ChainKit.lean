@@ -340,7 +340,7 @@ theorem Tm.erase_idxLe {Γ : Ctx} {n : Nat} {ns : List Var} (h : IdxLe n ns) :
   | _, .app0 _ => fun _ hx => nomatch hx
   | _, .app1 o ho a => by
     have ih := Tm.erase_idxLe h a
-    show IdxLe n (Solidity.Tm.app1 o (a.erase ns)).vars
+    show IdxLe n (Surface.Tm.app1 o (a.erase ns)).vars
     cases o <;> first
       | exact ih
       | cases ho
@@ -381,24 +381,24 @@ theorem Upd.names_idxLe {Γ : Ctx} {ns : List Var} :
   | _, .pop U _ => fun x hx => Upd.names_idxLe U x (List.mem_of_mem_drop hx)
   | _, .drop U h => fun x hx => Upd.names_idxLe U x (Thin.names_subset h _ x hx)
 
-theorem _root_.Solidity.Upd.vars_append (U V : Solidity.Upd C) :
-    Solidity.Upd.vars (U ++ V) = Solidity.Upd.vars U ++ Solidity.Upd.vars V := by
+theorem _root_.Solidity.Surface.Upd.vars_append (U V : Surface.Upd C) :
+    Surface.Upd.vars (U ++ V) = Surface.Upd.vars U ++ Surface.Upd.vars V := by
   induction U with
   | nil => rfl
-  | cons e U ih => simp only [List.cons_append, Solidity.Upd.vars, ih, List.append_assoc]
+  | cons e U ih => simp only [List.cons_append, Surface.Upd.vars, ih, List.append_assoc]
 
 theorem Upd.erase_idxLe {Γ : Ctx} {ns : List Var} :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → IdxLe (max (Solidity.maxIdx ns) U.maxIdx) (Solidity.Upd.vars (U.erase ns))
+    {Δ : Ctx} → (U : Upd C Γ Δ) → IdxLe (max (Solidity.maxIdx ns) U.maxIdx) (Surface.Upd.vars (U.erase ns))
   | _, .nil => fun _ hx => nomatch hx
   | _, .snoc U e => by
-    show IdxLe _ (Solidity.Upd.vars (U.erase ns ++ [e.erase ns (U.names ns)]))
-    rw [Solidity.Upd.vars_append]
+    show IdxLe _ (Surface.Upd.vars (U.erase ns ++ [e.erase ns (U.names ns)]))
+    rw [Surface.Upd.vars_append]
     exact IdxLe.append (Upd.erase_idxLe U)
       (IdxLe.append (UpdElem.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _))
         (Upd.names_idxLe U) e) fun _ hx => nomatch hx)
   | _, .decl U x r => by
-    show IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx x.idx)) (Solidity.Upd.vars (U.erase ns ++ [r.erase ns x]))
-    rw [Solidity.Upd.vars_append]
+    show IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx x.idx)) (Surface.Upd.vars (U.erase ns ++ [r.erase ns x]))
+    rw [Surface.Upd.vars_append]
     exact IdxLe.append ((Upd.erase_idxLe U).mono (by omega))
       (IdxLe.append (Rhs.erase_idxLe ((IdxLe.maxIdx ns).mono (by omega)) (by omega) r)
         fun _ hx => nomatch hx)
@@ -454,7 +454,7 @@ theorem Fml.erase_idxLe : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false �
 /-- `Update.lean`'s postcondition, the context's locals named by `ns`, which
 name no fresh variable. -/
 def Post.erase {Γ : Ctx} (φ : Post C Γ) (ns : List Var) (hns : Solidity.maxIdx ns = 0 := by decide) :
-    Solidity.Post C where
+    NFml.Post C where
   fml := φ.fml.erase ns
   noFresh := Nat.le_zero.1 (Nat.le_trans (Fml.erase_idxLe φ.fml φ.inactive ns).maxIdx_le
     (by rw [hns, φ.noFresh]; exact Nat.le_refl _))
@@ -533,7 +533,7 @@ def _root_.Solidity.NFml.dropAlls : Solidity.NFml C → Solidity.NFml C
 
 /-- A formula is valid where it is with its outer quantifiers dropped. -/
 theorem _root_.Solidity.NFml.holds_of_dropAlls : (φ : Solidity.NFml C) →
-    (∀ τ, Solidity.holds τ φ.dropAlls) → ∀ τ, Solidity.holds τ φ
+    (∀ τ, NFml.holds τ φ.dropAlls) → ∀ τ, NFml.holds τ φ
   | .all _ _ φ, h, _ => fun _ _ => Solidity.NFml.holds_of_dropAlls φ h _
   | .tt, h, τ | .eq .., h, τ | .defined _, h, τ | .not _, h, τ | .and .., h, τ | .imp .., h, τ
   | .upd .., h, τ | .havoc .., h, τ | .anon .., h, τ => h τ
@@ -543,7 +543,7 @@ rewrites: its scoped links, then, from the erasure `L` of its last scoped
 line, its parameters left free (`Fml.dropAlls`), `Update.lean`'s
 (`Solidity.NFml.Via`), the first a rewrite. -/
 @[reducible] def Fml.ViaE (φ : Fml C []) (ws : List (Link C × Fml C [])) (L : Solidity.NFml C)
-    (rs : List (Solidity.Link C × Solidity.NFml C)) : Prop :=
+    (rs : List (NFml.Link C × Solidity.NFml C)) : Prop :=
   Fml.Via φ ws ∧ ((Fml.Via.last φ ws).erase []).dropAlls = L ∧ Solidity.NFml.Via L rs
 
 section Build
@@ -736,9 +736,9 @@ theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C []} (s : Fml.StepBy r �
 that the last scoped line is valid where its erasure is (the bridge, for a
 leaf with no modality the scoped closer's `Valid.of_erase`, W2 `symex`). -/
 theorem Fml.ViaE.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.NFml C}
-    {rs : List (Solidity.Link C × Solidity.NFml C)} (v : Fml.ViaE φ ws L rs)
-    (bridge : (∀ τ, Solidity.holds τ ((Fml.Via.last φ ws).erase [])) → Valid (Fml.Via.last φ ws))
-    (h : ∀ τ, Solidity.holds τ (Solidity.NFml.Via.last L rs)) : Valid φ :=
+    {rs : List (NFml.Link C × Solidity.NFml C)} (v : Fml.ViaE φ ws L rs)
+    (bridge : (∀ τ, NFml.holds τ ((Fml.Via.last φ ws).erase [])) → Valid (Fml.Via.last φ ws))
+    (h : ∀ τ, NFml.holds τ (Solidity.NFml.Via.last L rs)) : Valid φ :=
   v.1.valid (bridge (Solidity.NFml.holds_of_dropAlls _ (v.2.1 ▸ v.2.2.valid h)))
 
 /-- **A chain past the program, closed**: the bridge of `Fml.ViaE.valid` is
@@ -746,8 +746,8 @@ theorem Fml.ViaE.valid {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Sol
 decides (`Fml.closableB`: no modality left, updates of either modality; a
 hidden binder's name avoids the empty context's). -/
 theorem Fml.ViaE.valid_close {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.NFml C}
-    {rs : List (Solidity.Link C × Solidity.NFml C)} (v : Fml.ViaE φ ws L rs)
-    (h : ∀ τ, Solidity.holds τ (Solidity.NFml.Via.last L rs))
+    {rs : List (NFml.Link C × Solidity.NFml C)} (v : Fml.ViaE φ ws L rs)
+    (h : ∀ τ, NFml.holds τ (Solidity.NFml.Via.last L rs))
     (hc : (Fml.Via.last φ ws).closableB [] = true := by first | rfl | decide) : Valid φ :=
   v.valid (fun he => Proves.valid (R := .all) (Proves.close (Γ₀ := []) (H := .nil) [] rfl
     List.nodup_nil he hc fun _ _ h => nomatch h)) h
@@ -778,42 +778,42 @@ def Fml.LeadsE (φ Z : Fml C []) (L : Solidity.NFml C) : Prop :=
 
 /-- A chain past the program, as `~~>`. -/
 theorem Fml.ViaE.leads {φ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.NFml C}
-    {rs : List (Solidity.Link C × Solidity.NFml C)} (v : Fml.ViaE φ ws L rs) :
+    {rs : List (NFml.Link C × Solidity.NFml C)} (v : Fml.ViaE φ ws L rs) :
     Fml.LeadsE φ (Fml.Via.last φ ws) (Solidity.NFml.Via.last L rs) := by
   obtain ⟨h₁, rfl, h₃⟩ := v
   exact ⟨h₁.leads, Solidity.NFml.Via.leads h₃⟩
 
 /-- A scoped segment, then one past the program. -/
 theorem Fml.Leads.viaE {φ ψ : Fml C []} {ws : List (Link C × Fml C [])} {L : Solidity.NFml C}
-    {rs : List (Solidity.Link C × Solidity.NFml C)} (h : Fml.Leads φ ψ) (v : Fml.ViaE ψ ws L rs) :
+    {rs : List (NFml.Link C × Solidity.NFml C)} (h : Fml.Leads φ ψ) (v : Fml.ViaE ψ ws L rs) :
     Fml.LeadsE φ (Fml.Via.last ψ ws) (Solidity.NFml.Via.last L rs) := by
   obtain ⟨h₁, rfl, h₃⟩ := v
   exact ⟨h.comp h₁.leads, Solidity.NFml.Via.leads h₃⟩
 
 /-- Past the program, a segment of `Update.lean`'s rewrites. -/
 theorem Fml.LeadsE.via {φ Z : Fml C []} {L : Solidity.NFml C}
-    {rs : List (Solidity.Link C × Solidity.NFml C)} (h : Fml.LeadsE φ Z L) (v : Solidity.NFml.Via L rs) :
+    {rs : List (NFml.Link C × Solidity.NFml C)} (h : Fml.LeadsE φ Z L) (v : Solidity.NFml.Via L rs) :
     Fml.LeadsE φ Z (Solidity.NFml.Via.last L rs) :=
   ⟨h.1, Solidity.NFml.Leads.comp h.2 (Solidity.NFml.Via.leads v)⟩
 
 /-- Past the program, a segment written from a line with no program left
 (its erasure `L`, the line the chain so far ends at). -/
 theorem Fml.LeadsE.viaE {φ Z B : Fml C []} {L : Solidity.NFml C}
-    {rs : List (Solidity.Link C × Solidity.NFml C)} (h : Fml.LeadsE φ Z L) (v : Fml.ViaE B [] L rs) :
+    {rs : List (NFml.Link C × Solidity.NFml C)} (h : Fml.LeadsE φ Z L) (v : Fml.ViaE B [] L rs) :
     Fml.LeadsE φ Z (Solidity.NFml.Via.last L rs) :=
   h.via v.2.2
 
 /-- **`~~>` past the program is a proof**, given the bridge at its last
 scoped line (`Fml.ViaE.valid`'s). -/
 theorem Fml.LeadsE.valid {φ Z : Fml C []} {L : Solidity.NFml C} (h : Fml.LeadsE φ Z L)
-    (bridge : (∀ τ, Solidity.holds τ (Z.erase [])) → Valid Z) (hL : ∀ τ, Solidity.holds τ L) :
+    (bridge : (∀ τ, NFml.holds τ (Z.erase [])) → Valid Z) (hL : ∀ τ, NFml.holds τ L) :
     Valid φ :=
   h.1.valid (bridge (Solidity.NFml.holds_of_dropAlls _ (fun τ => h.2 τ (hL τ))))
 
 /-- `~~>` past the program, the bridge `Proves.close` at its last scoped line
 (`Fml.ViaE.valid_close`'s). -/
 theorem Fml.LeadsE.valid_close {φ Z : Fml C []} {L : Solidity.NFml C} (h : Fml.LeadsE φ Z L)
-    (hL : ∀ τ, Solidity.holds τ L) (hc : Z.closableB [] = true := by first | rfl | decide) :
+    (hL : ∀ τ, NFml.holds τ L) (hc : Z.closableB [] = true := by first | rfl | decide) :
     Valid φ :=
   h.valid (fun he => Proves.valid (R := .all) (Proves.close (Γ₀ := []) (H := .nil) [] rfl
     List.nodup_nil he hc fun _ _ h => nomatch h)) hL

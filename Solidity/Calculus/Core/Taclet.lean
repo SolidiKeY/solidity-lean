@@ -687,7 +687,7 @@ theorem Taclet.step_eq {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ
 
 /-- `Rules.lean`'s premise, the positions named by `ns`: a capture's scope
 and a hidden binder are erased, a branch's block is its statements. -/
-def Premise.erase {Γ Γ' : Ctx} (ns : List Var) : Premise C Γ Γ' → Solidity.Premise C
+def Premise.erase {Γ Γ' : Ctx} (ns : List Var) : Premise C Γ Γ' → Surface.Premise C
   | .update U => .update (U.erase ns)
   | .unfold P _ => .unfold (P.erase ns)
   | .bind x _ P => .unfold (P.erase (x :: ns))

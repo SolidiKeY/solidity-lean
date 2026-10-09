@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Rewrite
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -39,11 +39,11 @@ The walks start with `apply Proves.valid`, which turns `⊨ φ` into the judgeme
 
 namespace Solidity.Examples.Tactics.StorageDelete
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Example 15: `delete alice.account;` — a simple receiver
 
@@ -237,7 +237,7 @@ section Fixed
 
 local instance : InContract := ⟨TestSuite⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! From the initial store, solkey's `testFixedArrayDeleteKeepsLength`,
 `testFixedStructArrayDeleteResetsElements`,
@@ -288,11 +288,11 @@ binders. -/
 
 namespace Solidity.Examples.Tactics.StorageDelete
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 open Theory Theory.StValue in
 /-- `alice.account.balance = 5; delete alice.account.balance;` read two

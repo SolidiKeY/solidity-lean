@@ -17,7 +17,7 @@ variable {C : Contract}
 
 section Mem
 
-variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
+variable {Γ : Ctx} {m : Modality} (σ : EState C Γ)
 
 theorem MSrc.mval_noPanic {T : Ty} (r : MSrc C Γ T) : NoPanic (r.mval σ) := by
   cases r with
@@ -25,7 +25,7 @@ theorem MSrc.mval_noPanic {T : Ty} (r : MSrc C Γ T) : NoPanic (r.mval σ) := by
   | ref p =>
     simp only [MSrc.mval]
     exact NoPanic.bind (MPath.mval_noPanic σ p) fun _ _ =>
-      NoPanic.bind (Solidity.MVal.asRef_noPanic _) fun _ _ => NoPanic.pure _
+      NoPanic.bind (Semantics.MVal.asRef_noPanic _) fun _ _ => NoPanic.pure _
 
 end Mem
 

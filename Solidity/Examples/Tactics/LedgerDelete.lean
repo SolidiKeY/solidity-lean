@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Theory.Storage
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -40,11 +40,11 @@ carry the sorts the program's types give: `ledger` is not a mapping, and
 
 namespace Solidity.Examples.Tactics.LedgerDelete
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 local instance : InContract := ⟨TestSuite⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Part 1 · The calculus -/
 

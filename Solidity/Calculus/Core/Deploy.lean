@@ -28,7 +28,7 @@ variable {C : Contract}
 /-- solkey's problem file of a scoped obligation: its erasure's
 (`Solidity.Problem.text`). -/
 def Problem.text (contract fn : String) (φ : Fml C []) : String :=
-  Solidity.Problem.text contract fn (φ.eraseS [])
+  Surface.Problem.text contract fn (φ.eraseS [])
 
 /-- The typed state a deployment starts in (`Contract.deployState`): the
 empty storage, no memory, a ledger holding the deployer's payment, and the
@@ -38,7 +38,7 @@ def TState.deploy (C : Contract) (tx : TTx) : TState C [] :=
     net := [(tx.msgSender.1, tx.msgValue.1)], selfBalance := tx.msgValue, tx := tx }
 
 theorem TState.deploy_erase (C : Contract) (tx : TTx) :
-    (TState.deploy C tx).erase = State.ofSem (C.deployState tx.erase) := by
+    (TState.deploy C tx).erase = EState.ofSem (C.deployState tx.erase) := by
   simp only [TState.erase, TState.deploy, Storage.init_erase]
   rfl
 

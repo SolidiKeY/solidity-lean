@@ -1,6 +1,6 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
@@ -33,7 +33,7 @@ conventions), in the printed names (`FreshNames` tables: `idx`, `pv`, `acc`, `mv
 
 namespace Solidity.Examples.Chains.MemoryArrays
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 

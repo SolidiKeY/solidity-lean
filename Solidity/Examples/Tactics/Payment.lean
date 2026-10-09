@@ -32,11 +32,11 @@ the callback rules are `Callback.lean`'s.
 
 namespace Solidity.Examples.Tactics.Payment
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## 1 · The rule -/
 

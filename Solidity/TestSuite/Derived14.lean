@@ -21,8 +21,8 @@ its updates, and the strategy keeps only the branch it takes
 is run, not 27 and 32.
 -/
 
-open Solidity Proves
-open scoped Solidity.Core.Surface
+open Solidity NFml.Proves
+open scoped Core.Scoped
 
 theorem Solkey.TestSuite.sendToOwner.proved : ⊢ Solkey.TestSuite.sendToOwner.problem := by
   sol_prove

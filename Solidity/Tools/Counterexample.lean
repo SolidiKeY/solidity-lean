@@ -25,7 +25,7 @@ Kleene's.  An answer is never wrong, only sometimes missing:
 A counterexample to a specification (`refuteSpec`) is a state in
 which the stated premises (`I ∧ requires`) evaluate to `tt` and a
 conjunct after the call to `ff`.  The premises that are true by
-construction (`R`, `L`, `msg.value`, `Calculus/Spec.lean`) are not
+construction (`R`, `L`, `msg.value`, `Calculus/SurfaceSpec.lean`) are not
 evaluated but made true by the generator: arguments are drawn in their
 type's range, storages are canonical (`Typing/Reachability.lean`: every
 struct member present in order, a mapping's keys unique and its default the
@@ -336,7 +336,7 @@ theorem TEnv.lift?_erase (st : Storage C) : (Δ : Ctx) → (e : Env C Δ) → (e
 `σ`'s storage and transaction: `none` where `σ`'s heap typing is not empty
 or `τ` holds memory, another storage or transaction, or a local no typed
 value of its type erases to. -/
-def TState.lift? {Γ Δ : Ctx} (σ : TState C Γ) (τ : State C Δ) : Option (TState C Δ) :=
+def TState.lift? {Γ Δ : Ctx} (σ : TState C Γ) (τ : EState C Δ) : Option (TState C Δ) :=
   if σ.H.isEmpty && τ.heap.isEmpty && τ.nextId == 0 &&
       Semantics.SVal.fieldsBeqK τ.storage σ.storage.erase &&
       decide (τ.tx = σ.tx.erase) then do
@@ -346,7 +346,7 @@ def TState.lift? {Γ Δ : Ctx} (σ : TState C Γ) (τ : State C Δ) : Option (TS
            selfBalance := bal, tx := σ.tx }
   else none
 
-theorem TState.lift?_spec {Γ Δ : Ctx} {σ : TState C Γ} {τ : State C Δ} {σ' : TState C Δ}
+theorem TState.lift?_spec {Γ Δ : Ctx} {σ : TState C Γ} {τ : EState C Δ} {σ' : TState C Δ}
     (h : σ.lift? τ = some σ') : σ'.erase = τ ∧ σ.H <+: σ'.H := by
   unfold TState.lift? at h
   split at h
@@ -684,14 +684,14 @@ def products {α : Type} : List (List α) → List (List α)
 /-- A candidate: the storage, the arguments, the transaction, the ledger
 and the funds a call starts from. -/
 structure Cand where
-  st : List (Name × SVal)
+  st : List (Name × Semantics.SVal)
   args : List (String × Value)
   tx : TxEnv := { msgSender := 1 }
   net : List (Int × Int) := []
   bal : Int := 0
 
 /-- The state a candidate starts in: the arguments bound as locals. -/
-def Cand.state [FreshNames] (c : Cand) : State :=
+def Cand.state [FreshNames] (c : Cand) : Semantics.State :=
   { storage := c.st, env := c.args.map fun (n, v) => (Var.ofName n, .val v), tx := c.tx,
     net := c.net, selfBalance := c.bal }
 
@@ -727,7 +727,7 @@ the equalities the witness relies on survive.  A step is kept when the
 candidate is still a counterexample. -/
 
 /-- The integers a storage value holds, keys included. -/
-partial def SVal.ints : SVal → List Int
+partial def SVal.ints : Semantics.SVal → List Int
   | .prim (.int n) => [n]
   | .prim (.bool _) => []
   | .struct fs => fs.flatMap fun (_, v) => SVal.ints v
@@ -735,7 +735,7 @@ partial def SVal.ints : SVal → List Int
   | .map es d => es.flatMap (fun (k, v) => k :: SVal.ints v) ++ SVal.ints d
 
 /-- `v` renamed `s`, keys and words alike. -/
-partial def SVal.rename (v s : Int) : SVal → SVal
+partial def SVal.rename (v s : Int) : Semantics.SVal → Semantics.SVal
   | .prim (.int n) => .prim (.int (if n = v then s else n))
   | .prim (.bool b) => .prim (.bool b)
   | .struct fs => .struct (fs.map fun (f, x) => (f, SVal.rename v s x))
@@ -969,9 +969,9 @@ storage the typed run ends with or how it halts (`none` for a formula with
 no run in front), and the indices of the conjuncts after the call that
 evaluate to `ff`. -/
 structure Witness where
-  state : State
+  state : Semantics.State
   args : List (String × Value)
-  outcome : Option (Except Halt (List (Name × SVal)))
+  outcome : Option (Except Halt (List (Name × Semantics.SVal)))
   failing : List Nat
 
 /-- What a search found, among how many candidates, of which how many met

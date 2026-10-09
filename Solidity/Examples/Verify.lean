@@ -21,7 +21,7 @@ and the typed run with fuel (`Core.Fml.eval3`, `Tools/Counterexample.lean`).
 namespace Solidity.Examples.Verify
 
 open Solidity.Tools
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 def Counter : Contract := contract!{
   uint count;

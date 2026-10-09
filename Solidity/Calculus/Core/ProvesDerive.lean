@@ -7,7 +7,7 @@ import Solidity.Calculus.Core.Derive
 `open scoped Solidity.Core.Surface` an obligation is stated `⊢ φ`, the
 scoped sequent `Core.Proves C .all [] .nil φ` (`Calculus/Core/Surface.lean`),
 so the strategy has to build a derivation, as today's `Proves.of_residue`
-does (`Calculus/Derive.lean`).
+does (`Calculus/NFmlDerive.lean`).
 
 `Seq.run` walks the sequent as `Proves` has its rules: `intro`,
 `allIntro`, `updIntro`, `bindIntro` take the formula's head into the
@@ -16,7 +16,7 @@ at `Hyps.fresh`, the index the rules ask: under `⊢ₖ` solkey's rules alone) a
 leaves, `empty` goes through the frames, `closeTrue` ends a `true` behind a
 box context.  Every other leaf goes to `Proves.close`: `Fml.closableB` of
 the sequent, and today's residue of its erasure (`Derive.residue`,
-`Calculus/Derive.lean`), each leaf of which is a goal of today's calculus.
+`Calculus/NFmlDerive.lean`), each leaf of which is a goal of today's calculus.
 The kernel walks the leaf's context once for both (`Fml.closeErase`,
 `Calculus/Core/Closable.lean`).
 `Seq.run_sound` reads the walk back as the derivation; the kernel checks
@@ -35,7 +35,7 @@ A leaf behind updates of either modality is `closableB`: an update's
 reading asks only of the typed states it may end in, as the `Core.Valid`
 route's `Fml.posB` takes it too.
 
-Two steps follow today's `sol_prove` (`Calculus/Derive.lean`).  A split
+Two steps follow today's `sol_prove` (`Calculus/NFmlDerive.lean`).  A split
 whose condition is ground under the context (`ground`, today's
 `Derive.groundCond` on the erasure) and whose branch the closer refutes
 keeps only the other branch, the refuted one closed by `Proves.closeFalse`
@@ -127,7 +127,7 @@ decides when to ask the closer to refute the branch (`refutes`), as today's
 def ground {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ) : Bool :=
   match peel [] (((H.pre c).wrap .ff).eraseR []) with
   | (Γ', .not .tt) => match Γ'.getLast? with
-    | some (.pre c') => Solidity.Derive.groundCond Γ' c'
+    | some (.pre c') => NFml.Derive.groundCond Γ' c'
     | _ => false
   | _ => false
 
@@ -173,11 +173,11 @@ def _root_.Solidity.NFml.stripN : Option Nat → Solidity.NFml C → Solidity.NF
 
 /-- A formula is valid where it is with its first leading quantifiers'
 locals free. -/
-theorem _root_.Solidity.Valid.of_stripN : {n : Option Nat} → {φ : Solidity.NFml C} →
-    Solidity.Valid (φ.stripN n) → Solidity.Valid φ
-  | none, _, h => Solidity.Valid.of_stripAlls (by rwa [Solidity.NFml.stripN] at h)
+theorem _root_.Solidity.NFml.Valid.of_stripN : {n : Option Nat} → {φ : Solidity.NFml C} →
+    NFml.Valid (φ.stripN n) → NFml.Valid φ
+  | none, _, h => NFml.Valid.of_stripAlls (by rwa [Solidity.NFml.stripN] at h)
   | some (n + 1), .all x p φ, h =>
-    Solidity.Valid.all_of_free x p (Solidity.Valid.of_stripN (n := some n) (φ := φ) h)
+    NFml.Valid.all_of_free x p (NFml.Valid.of_stripN (n := some n) (φ := φ) h)
   | some 0, _, h => by rwa [Solidity.NFml.stripN] at h
   | some (_ + 1), .tt, h | some (_ + 1), .eq _ _, h | some (_ + 1), .not _, h
   | some (_ + 1), .and _ _, h | some (_ + 1), .imp _ _, h
@@ -250,15 +250,15 @@ def leafWith {β : Type} (full : Bool) (np : Option Nat)
 
 /-- A leaf for the kernel: today's residue (`Derive.residue`). -/
 def leafRes (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
-    Option (List (Solidity.Derive.Leaf C)) :=
-  leafWith full np (Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-    Solidity.Derive.budget []) H φ
+    Option (List (NFml.Derive.Leaf C)) :=
+  leafWith full np (NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
+    NFml.Derive.budget []) H φ
 
 /-- The same leaf quoted, for the tactic (`Derive.residueQuote`), the
 contract named by `c`. -/
 def leafQuote (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
     Option (List (Lean.Expr × Lean.Expr)) :=
-  leafWith false np (Solidity.Derive.residueQuote c []) H φ
+  leafWith false np (NFml.Derive.residueQuote c []) H φ
 
 /-- `leafQuote`, and which of `pick`'s residues closed the leaf: `.inr true`
 when only the quantified one did, `.inr false` otherwise, then the quoted
@@ -267,7 +267,7 @@ def leafQuoteI (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (
     Option (List ((Lean.Expr × Lean.Expr) ⊕ Bool)) :=
   match (H.wrap φ).closeErase [] with
   | some e =>
-    let r := Solidity.Derive.residueQuote (C := C) c []
+    let r := NFml.Derive.residueQuote (C := C) c []
     match r (e.2.stripN np) with
     | some ([], _) => some [.inr false]
     | r₁ =>
@@ -284,14 +284,14 @@ def leafQuoteI (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (
 
 /-- The steps the walk is given, down a path and in all (today's
 `Derive.budget`). -/
-def fuel : Nat := Solidity.Derive.budget
+def fuel : Nat := NFml.Derive.budget
 
 /-- **`sol_prove`'s check**: the leaves of today's calculus the walk leaves,
 none when every leaf closes; `np` the sequent's parameters (`pick`);
 `full` only orders `pick`'s two residues (`pickH`).  A split's branch is
 refuted as `pick` reads its leaf. -/
 def residue (R : RuleSet) (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ)
-    (φ : Fml C Γ) : Option (List (Solidity.Derive.Leaf C)) :=
+    (φ : Fml C Γ) : Option (List (NFml.Derive.Leaf C)) :=
   (run R (leafRes np full) (refutes (leafRes np false)) fuel H φ fuel).map (·.1)
 
 /-- `#solkey_scan`'s view of `⊢ φ` (`Frontend/Problems.lean`): how many
@@ -299,10 +299,10 @@ leaves the walk leaves, closed by `synClose` or (`walk`) not, and the most
 storage writes in one leaf's context (`Derive.storageWrites`); `none` when
 the walk runs out or a step has no rule. -/
 def scanLeaves (walk : Bool) (φ : Fml C []) : Option (Nat × Nat) :=
-  let r := Solidity.Derive.residue Solidity.Derive.budget
-    (if walk then fun _ _ => false else Solidity.Derive.synClose) Solidity.Derive.budget []
+  let r := NFml.Derive.residue NFml.Derive.budget
+    (if walk then fun _ _ => false else NFml.Derive.synClose) NFml.Derive.budget []
   (run .all (leafWith false none r) (refutes (leafRes none false)) fuel .nil φ fuel).map fun (ls, _) =>
-    (ls.length, ls.foldl (fun m l => max m (Solidity.Derive.storageWrites l.1)) 0)
+    (ls.length, ls.foldl (fun m l => max m (NFml.Derive.storageWrites l.1)) 0)
 
 /-- `residue`, the leaves quoted, each walk leaf marked by the residue that
 closed it (`leafQuoteI`). -/
@@ -460,38 +460,38 @@ end Sound
 
 /-- What `pick` leaves of today's residue is valid once its leaves are
 proved. -/
-theorem pick_valid {np : Option Nat} {e : Solidity.NFml C} {ls : List (Solidity.Derive.Leaf C)}
-    (h : pick np (Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-      Solidity.Derive.budget []) e = some ls)
-    (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Solidity.Valid e := by
-  have hv : ∀ {e' : Solidity.NFml C} {ls' : List (Solidity.Derive.Leaf C)} {b : Nat},
-      Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-        Solidity.Derive.budget [] e' = some (ls', b) →
-      (∀ l ∈ ls', Solidity.Proves .all l.1 l.2) → Solidity.Valid e' :=
-    fun hr hl' => Solidity.Proves.valid (Solidity.Proves.of_synResidue hr hl')
-  have hs : ∀ {r : Option (List (Solidity.Derive.Leaf C) × Nat)},
-      Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-        Solidity.Derive.budget [] (e.stripN np) = r → r.map (·.1) = some ls →
-      Solidity.Valid e := fun hr h => by
+theorem pick_valid {np : Option Nat} {e : Solidity.NFml C} {ls : List (NFml.Derive.Leaf C)}
+    (h : pick np (NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
+      NFml.Derive.budget []) e = some ls)
+    (hl : ∀ l ∈ ls, NFml.Proves .all l.1 l.2) : NFml.Valid e := by
+  have hv : ∀ {e' : Solidity.NFml C} {ls' : List (NFml.Derive.Leaf C)} {b : Nat},
+      NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
+        NFml.Derive.budget [] e' = some (ls', b) →
+      (∀ l ∈ ls', NFml.Proves .all l.1 l.2) → NFml.Valid e' :=
+    fun hr hl' => NFml.Proves.valid (NFml.Proves.of_synResidue hr hl')
+  have hs : ∀ {r : Option (List (NFml.Derive.Leaf C) × Nat)},
+      NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
+        NFml.Derive.budget [] (e.stripN np) = r → r.map (·.1) = some ls →
+      NFml.Valid e := fun hr h => by
     obtain ⟨⟨ls', b'⟩, hr', he⟩ := Option.map_eq_some_iff.1 h
     cases he
-    exact Solidity.Valid.of_stripN (hv (hr.trans hr') hl)
+    exact NFml.Valid.of_stripN (hv (hr.trans hr') hl)
   unfold pick at h
   split at h
   · rename_i b h1
-    exact Solidity.Valid.of_stripN (hv h1 Solidity.Derive.leaves_nil)
+    exact NFml.Valid.of_stripN (hv h1 NFml.Derive.leaves_nil)
   · split at h
     · exact hs rfl h
     · split at h
       · rename_i b h2
-        exact hv h2 Solidity.Derive.leaves_nil
+        exact hv h2 NFml.Derive.leaves_nil
       · exact hs rfl h
     · exact hs rfl h
 
 /-- A leaf `leafRes` takes is proved once today's leaves are. -/
 theorem leafRes_sound {R : RuleSet} (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ)
-    (φ : Fml C Γ) (ls : List (Solidity.Derive.Leaf C)) (h : leafRes np full H φ = some ls)
-    (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Proves C R [] H φ := by
+    (φ : Fml C Γ) (ls : List (NFml.Derive.Leaf C)) (h : leafRes np full H φ = some ls)
+    (hl : ∀ l ∈ ls, NFml.Proves .all l.1 l.2) : Proves C R [] H φ := by
   unfold leafRes leafWith at h
   split at h
   · rename_i e he
@@ -508,12 +508,12 @@ end Seq
 /-- **`sol_prove`'s proof of a sequent**: the walk's residue, each of
 today's leaves proved. -/
 theorem Proves.of_residue {R : RuleSet} {np : Option Nat} {Γ : Ctx} {H : Hyps C [] Γ}
-    {φ : Fml C Γ} {full : Bool} {ls : List (Solidity.Derive.Leaf C)}
+    {φ : Fml C Γ} {full : Bool} {ls : List (NFml.Derive.Leaf C)}
     (h : Seq.residue R np full H φ = some ls)
-    (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Proves C R [] H φ := by
+    (hl : ∀ l ∈ ls, NFml.Proves .all l.1 l.2) : Proves C R [] H φ := by
   obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
   cases he
-  exact Seq.run_sound (P := fun l => Solidity.Proves .all l.1 l.2)
+  exact Seq.run_sound (P := fun l => NFml.Proves .all l.1 l.2)
     (fun H φ ls h hl => Seq.leafRes_sound np full H φ ls h hl)
     (Seq.refutes_sound (fun H φ ls h hl => Seq.leafRes_sound np false H φ ls h hl))
     _ H φ _ _ _ hr hl
@@ -568,7 +568,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
     let someLs := mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``List [0]) leafTy) ls
     let type := mkApp3 (mkConst ``Eq [1]) resTy
       (mkAppN (mkConst ``residue) #[C, R, np, toExpr full, Γ, H, φ]) someLs
-    Solidity.Derive.kernelLemma type (mkApp2 (mkConst ``Eq.refl [1]) resTy someLs)
+    NFml.Derive.kernelLemma type (mkApp2 (mkConst ``Eq.refl [1]) resTy someLs)
   let assignWith (full : Bool) (ls h : Expr) (hl : Expr) : MetaM Unit :=
     g.assign (mkAppN (mkConst ``Proves.of_residue) #[C, R, np, Γ, H, φ, toExpr full, ls, h, hl])
   let nil := mkApp (mkConst ``List.nil [0]) leafTy
@@ -593,7 +593,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
   if leaves.isEmpty then
     let h ← try lemmaFor full nil
       catch e => throwError "sol_prove: the kernel rejects the walk:{indentD e.toMessageData}"
-    assignWith full nil h (mkApp (mkConst ``Solidity.Derive.leaves_nil) C)
+    assignWith full nil h (mkApp (mkConst ``NFml.Derive.leaves_nil) C)
     return []
   let mkLeaf (Γ' φ' : Expr) : Expr :=
     mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``List [0]) hyp,
@@ -605,14 +605,14 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
   let mut proofs : Array Expr := #[]
   for (Γ', φ') in leaves, i in [1:leaves.length + 1] do
     let gi ← mkFreshExprSyntheticOpaqueMVar
-      (mkAppN (mkConst ``Solidity.Proves) #[C, mkConst ``RuleSet.all, Γ', φ'])
+      (mkAppN (mkConst ``NFml.Proves) #[C, mkConst ``RuleSet.all, Γ', φ'])
       (Name.mkSimple s!"leaf{i}")
     goals := goals.push gi.mvarId!
     proofs := proofs.push gi
-  let mut hl := mkApp (mkConst ``Solidity.Derive.leaves_nil) C
+  let mut hl := mkApp (mkConst ``NFml.Derive.leaves_nil) C
   let mut rest := nil
   for (Γ', φ') in leaves.reverse, p in proofs.reverse do
-    hl := mkAppN (mkConst ``Solidity.Derive.leaves_cons) #[C, Γ', φ', rest, p, hl]
+    hl := mkAppN (mkConst ``NFml.Derive.leaves_cons) #[C, Γ', φ', rest, p, hl]
     rest := mkAppN (mkConst ``List.cons [0]) #[leafTy, mkLeaf Γ' φ', rest]
   assignWith full ls h hl
   return goals.toList

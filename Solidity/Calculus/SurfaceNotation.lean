@@ -1,5 +1,5 @@
 import Solidity.Calculus.Hyp
-import Solidity.Calculus.Quote
+import Solidity.Calculus.NFmlQuote
 
 /-!
 # Reading concrete formulas: `dl[C]{ φ }`
@@ -589,7 +589,7 @@ def pathTy (Γ : ECtx) : RawTerm → Option Ty
   | _ => none
 
 /-- The element type of the array a path term names. -/
-def elemTy (Γ : ECtx) (t : RawTerm) : Except String Ty :=
+def Ty.elemTy (Γ : ECtx) (t : RawTerm) : Except String Ty :=
   match pathTy C Γ t with
   | some (.ref (.array E)) => pure E
   | _ => throw "a push or a pop on a path the contract does not type as an array"
@@ -644,7 +644,7 @@ structure Readers (C : Contract) where
   stor : RawTerm → Except String (STerm C)
   sval : RawTerm → Except String (SValT C)
   ident : RawTerm → Except String (ITerm C)
-  addr : RawTerm → Except String (MAddr C)
+  addr : RawTerm → Except String (Surface.MAddr C)
   mem : RawTerm → Except String (MTerm C)
   mval : RawTerm → Except String (MValT C)
 
@@ -749,9 +749,9 @@ def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (STerm C)
     | .app "save" [s', .at _ _, w], .add _ (.num 1) =>
       pure (.push (← R.stor s') (← R.path b) (← R.sval w))
     | .app "delAt" [s', .at _ _], .add _ (.num 1) =>
-      pure (.pushSlot (← R.stor s') (← R.path b) (← elemTy C Γ b))
+      pure (.pushSlot (← R.stor s') (← R.path b) (← Ty.elemTy C Γ b))
     | .app "delAt" [s', .at _ _], .sub _ (.num 1) => pure (.pop (← R.stor s') (← R.path b))
-    | _, .add _ (.num 1) => pure (.extend (← R.stor s) (← R.path b) (← elemTy C Γ b))
+    | _, .add _ (.num 1) => pure (.extend (← R.stor s) (← R.path b) (← Ty.elemTy C Γ b))
     | _, .sub _ (.num 1) => pure (.shrink (← R.stor s) (← R.path b))
     | _, _ => throw "the length of an array is written by a push or a pop"
   | .app "save" [s, p, v] => do
@@ -785,7 +785,7 @@ def rIdent (R : Readers C) (Γ : ECtx) : RawTerm → Except String (ITerm C)
   | _ => throw "not a memory reference"
 
 /-- A term at the memory-location sort: a member or an element. -/
-def rAddr (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (MAddr C)
+def rAddr (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (Surface.MAddr C)
   | .field t f => do pure (.field (← R.ident t) f)
   | .at t k => do pure (.at (← R.ident t) (← R.val k))
   | _ => throw "not a memory location: `i.f` or `i[k]`"
@@ -830,7 +830,7 @@ def tSVal (Γ : ECtx) (t : RawTerm) : Except String (SValT C) := (readers C Γ).
 /-- A term at the memory-identity sort. -/
 def tIdent (Γ : ECtx) (t : RawTerm) : Except String (ITerm C) := (readers C Γ).ident t
 /-- A term at the memory-location sort. -/
-def tAddr (Γ : ECtx) (t : RawTerm) : Except String (MAddr C) := (readers C Γ).addr t
+def tAddr (Γ : ECtx) (t : RawTerm) : Except String (Surface.MAddr C) := (readers C Γ).addr t
 /-- A term at the memory sort. -/
 def tMem (Γ : ECtx) (t : RawTerm) : Except String (MTerm C) := (readers C Γ).mem t
 /-- What a memory `write` writes. -/
@@ -873,7 +873,7 @@ object `i` whose type the scope gives (`memTy`: `freshId(addM(memory, S))`,
 `read(memory, carol.account)`, `carol`) binds it as a memory local of that
 type, and `x := t` for a `bool` term `t` (`se1 := x <= 255`) as a `bool`
 local, where `x` is a parameter.  Every right-hand side is read in the scope in front of the update. -/
-def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Upd C × ECtx)
+def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Surface.Upd C × ECtx)
   | [] => pure ([], Γ)
   | .selfBalance op a :: U => do
     let (U', Γ') ← elabUpd Γ U
@@ -1232,7 +1232,7 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
     withoutModifyingState do
       try
         let e ← withoutErrToSorry <| withoutAutoBoundImplicit <| elabTerm t none
-        return !(← whnfR (← inferType e)).isAppOf `Solidity.Post
+        return !(← whnfR (← inferType e)).isAppOf `Solidity.NFml.Post
       catch _ => return true
   let pastAll := quote opaqueHole
   let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
@@ -1298,11 +1298,11 @@ elab_rules : term
   | `(st!{ $t:dl_term }) => do
     let raw ← liftMacroM (expandTerm t)
     let c ← `(InContract.contract)
-    elabAgainst c fun q => `((tStor $c [] $raw).map (Tm.quote $q))
+    elabAgainst c fun q => `((tStor $c [] $raw).map (Surface.Tm.quote $q))
   | `(pt!{ $t:dl_term }) => do
     let raw ← liftMacroM (expandTerm t)
     let c ← `(InContract.contract)
-    elabAgainst c fun q => `((tFPath $c [] $raw).map (Tm.quote $q))
+    elabAgainst c fun q => `((tFPath $c [] $raw).map (Surface.Tm.quote $q))
 
 /-! ## Examples -/
 
@@ -1499,8 +1499,8 @@ example : ∀ φ : NFml StandardExample, dl!{ ⟨ x = 1; ⟩ φ } = dl!{ ⟨ x =
   rfl
 
 -- `⊨` and `⊧` of a name alone are Lean's to print.
-/-- info: fun φ => Valid φ ∧ ∀ (σ : State), holds σ φ : NFml StandardExample → Prop -/
-#guard_msgs in #check fun (φ : NFml StandardExample) => (⊨ φ) ∧ ∀ σ, holds σ φ
+/-- info: fun φ => φ.Valid ∧ ∀ (σ : State), NFml.holds σ φ : NFml StandardExample → Prop -/
+#guard_msgs in #check fun (φ : NFml StandardExample) => (⊨ φ) ∧ ∀ σ, NFml.holds σ φ
 
 /-! ### Chain-only spellings -/
 

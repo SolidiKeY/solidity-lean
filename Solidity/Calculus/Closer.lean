@@ -83,11 +83,11 @@ open Semantics SemanticsProperties
 /-! ## Ground evaluation and known values -/
 
 /-- `b` returns what `a` returns, wherever `a` returns. -/
-def Keeps (σ : State) (a b : LTerm) : Prop := ∀ v, a.eval σ = .ok v → b.eval σ = .ok v
+def Keeps (σ : Semantics.State) (a b : LTerm) : Prop := ∀ v, a.eval σ = .ok v → b.eval σ = .ok v
 
-theorem Keeps.refl (σ : State) (a : LTerm) : Keeps σ a a := fun _ h => h
+theorem Keeps.refl (σ : Semantics.State) (a : LTerm) : Keeps σ a a := fun _ h => h
 
-theorem Keeps.trans {σ : State} {a b c : LTerm} (h₁ : Keeps σ a b) (h₂ : Keeps σ b c) :
+theorem Keeps.trans {σ : Semantics.State} {a b c : LTerm} (h₁ : Keeps σ a b) (h₂ : Keeps σ b c) :
     Keeps σ a c := fun v h => h₂ v (h₁ v h)
 
 /-- `a ⊕ b` on two literals, evaluated (not a power past `powBig`);
@@ -106,7 +106,7 @@ def foldBin (op : BinOp) (p : PrimTy) (a b : LTerm) : LTerm :=
       | _ => key{ binop(op, p, a, b) }
   | _ => key{ binop(op, p, a, b) }
 
-theorem foldBin_keeps (σ : State) (op : BinOp) (p : PrimTy) (a b : LTerm) :
+theorem foldBin_keeps (σ : Semantics.State) (op : BinOp) (p : PrimTy) (a b : LTerm) :
     Keeps σ (.binop op p a b) (foldBin op p a b) := by
   intro v h
   unfold foldBin
@@ -145,7 +145,7 @@ def foldUn (op : UnOp) (p : PrimTy) (a : LTerm) : LTerm :=
     | .error _ => key{ unop(op, p, a) }
   | _ => key{ unop(op, p, a) }
 
-theorem foldUn_keeps (σ : State) (op : UnOp) (p : PrimTy) (a : LTerm) :
+theorem foldUn_keeps (σ : Semantics.State) (op : UnOp) (p : PrimTy) (a : LTerm) :
     Keeps σ (.unop op p a) (foldUn op p a) := by
   intro v h
   unfold foldUn
@@ -165,7 +165,7 @@ def foldIte (c a b : LTerm) : LTerm :=
   | key{ false } => b                           -- ifthenelse_false
   | _ => key{ if(c) then a else b }
 
-theorem foldIte_keeps (σ : State) (c a b : LTerm) : Keeps σ (.ite c a b) (foldIte c a b) := by
+theorem foldIte_keeps (σ : Semantics.State) (c a b : LTerm) : Keeps σ (.ite c a b) (foldIte c a b) := by
   intro v h
   unfold foldIte
   split
@@ -181,7 +181,7 @@ def foldKite (a b t e : LTerm) : LTerm :=
   | key{ lit(‹.int i›) }, key{ lit(‹.int j›) } => if i = j then t else e
   | _, _ => key{ if(a = b) then t else e }
 
-theorem foldKite_keeps (σ : State) (a b t e : LTerm) :
+theorem foldKite_keeps (σ : Semantics.State) (a b t e : LTerm) :
     Keeps σ (.kite a b t e) (foldKite a b t e) := by
   intro v h
   unfold foldKite
@@ -207,7 +207,7 @@ where `t` returns (`EqOk`).  A premise `x ≐ 5` gives `(x, 5)`, a premise
 abbrev Eqs := List (LTerm × LTerm)
 
 /-- What the facts of `E` say holds in `σ`. -/
-def EqOk (σ : State) (E : Eqs) : Prop := ∀ p ∈ E, Keeps σ p.1 p.2
+def EqOk (σ : Semantics.State) (E : Eqs) : Prop := ∀ p ∈ E, Keeps σ p.1 p.2
 
 /-- `t`, or the term `E` knows it by. -/
 def substE (E : Eqs) (t : LTerm) : LTerm :=
@@ -215,7 +215,7 @@ def substE (E : Eqs) (t : LTerm) : LTerm :=
   | some p => p.2
   | none => t
 
-theorem substE_keeps {σ : State} {E : Eqs} (hE : EqOk σ E) (t : LTerm) :
+theorem substE_keeps {σ : Semantics.State} {E : Eqs} (hE : EqOk σ E) (t : LTerm) :
     Keeps σ t (substE E t) := by
   intro v h
   unfold substE
@@ -228,7 +228,7 @@ theorem substE_keeps {σ : State} {E : Eqs} (hE : EqOk σ E) (t : LTerm) :
   · exact h
 
 /-- Where `t` returns: an integer (`some true`), a `bool` (`some false`). -/
-def KindOk (σ : State) (K : LTerm → Option Bool) : Prop :=
+def KindOk (σ : Semantics.State) (K : LTerm → Option Bool) : Prop :=
   ∀ t v, t.eval σ = .ok v → (K t = some true → ∃ i, v = .int i) ∧ (K t = some false → ∃ b,
       v = .bool b)
 
@@ -243,20 +243,20 @@ structure Orc where
 
 /-- An interval holds of a term: where `t` returns an integer, it lies in
 it. -/
-def RangeOk (σ : State) (R : LTerm → Option (Int × Int)) : Prop :=
+def RangeOk (σ : Semantics.State) (R : LTerm → Option (Int × Int)) : Prop :=
   ∀ t l h i, R t = some (l, h) → t.eval σ = .ok (.int i) → l ≤ i ∧ i ≤ h
 
 /-- A lower bound holds of a term: where `t` returns an integer, it is at
 least that. -/
-def LoOk (σ : State) (L : LTerm → Option Int) : Prop :=
+def LoOk (σ : Semantics.State) (L : LTerm → Option Int) : Prop :=
   ∀ t l i, L t = some l → t.eval σ = .ok (.int i) → l ≤ i
 
 /-- The oracle's answers hold in `σ`. -/
-def Orc.Ok (σ : State) (O : Orc) : Prop :=
+def Orc.Ok (σ : Semantics.State) (O : Orc) : Prop :=
   KindOk σ O.kind ∧ (∀ t v, O.halts t = true → t.eval σ ≠ .ok v) ∧
     (∀ t, O.rets t = true → Returns σ t) ∧ RangeOk σ O.range ∧ LoOk σ O.lo
 
-theorem Orc.ok_none (σ : State) : Orc.Ok σ {} :=
+theorem Orc.ok_none (σ : Semantics.State) : Orc.Ok σ {} :=
   ⟨fun _ _ _ => ⟨fun h => by simp only [reduceCtorEq] at h,
       fun h => by simp only [reduceCtorEq] at h⟩, fun _ _ h => by simp only [Bool.false_eq_true]
           at h,
@@ -273,7 +273,7 @@ def foldZeroT (K : LTerm → Option Bool) (a : LTerm) : LTerm :=
     | some false => key{ false }                -- defaultValue<[bool]>
     | none => key{ delValue(a) }
 
-theorem foldZeroT_keeps {σ : State} {K : LTerm → Option Bool} (hK : KindOk σ K) (a : LTerm) :
+theorem foldZeroT_keeps {σ : Semantics.State} {K : LTerm → Option Bool} (hK : KindOk σ K) (a : LTerm) :
     Keeps σ (.zero a) (foldZeroT K a) := by
   intro v h
   unfold foldZeroT
@@ -300,7 +300,7 @@ def foldSame (t : LTerm) : LTerm :=
     else t
   | _ => t
 
-theorem foldSame_keeps (σ : State) (t : LTerm) : Keeps σ t (foldSame t) := by
+theorem foldSame_keeps (σ : Semantics.State) (t : LTerm) : Keeps σ t (foldSame t) := by
   intro v h
   unfold foldSame
   split
@@ -444,7 +444,7 @@ def bndsOf (R : LTerm → Option (Int × Int)) (L : LTerm → Option Int) (a : L
   | some (l, h) => (some l, some h)
   | none => (L a, none)
 
-theorem bndsOf_holds {σ : State} {R : LTerm → Option (Int × Int)} {L : LTerm → Option Int}
+theorem bndsOf_holds {σ : Semantics.State} {R : LTerm → Option (Int × Int)} {L : LTerm → Option Int}
     (hR : RangeOk σ R) (hL : LoOk σ L) {a : LTerm} {i : Int} (ha : a.eval σ = .ok (.int i)) :
     LoHolds (bndsOf R L a).1 i ∧ HiHolds (bndsOf R L a).2 i := by
   unfold bndsOf
@@ -463,7 +463,7 @@ def foldCmp (R : LTerm → Option (Int × Int)) (L : LTerm → Option Int) (t : 
     | none => t
   | _ => t
 
-theorem foldCmp_keeps {σ : State} {R : LTerm → Option (Int × Int)} {L : LTerm → Option Int}
+theorem foldCmp_keeps {σ : Semantics.State} {R : LTerm → Option (Int × Int)} {L : LTerm → Option Int}
     (hR : RangeOk σ R) (hL : LoOk σ L) (t : LTerm) : Keeps σ t (foldCmp R L t) := by
   intro v h
   unfold foldCmp
@@ -537,7 +537,7 @@ end
 mutual
 
 /-- **Simplifying keeps what a term returns.** -/
-theorem LTerm.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : EqOk σ E) :
+theorem LTerm.simpE_eval {σ : Semantics.State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : EqOk σ E) :
     (t : LTerm) → Keeps σ t (t.simpE O E)
   | .lit _, _, h | .err, _, h | .env _, _, h | .cpok _ _, _, h => h
   | .var x, v, h => substE_keeps hE _ v h
@@ -635,7 +635,7 @@ theorem LTerm.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : E
           exact LTerm.simpE_eval hO hE b v h
 
 /-- Simplifying keeps the path a path evaluates to. -/
-theorem LPath.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : EqOk σ E) :
+theorem LPath.simpE_eval {σ : Semantics.State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : EqOk σ E) :
     (q : LPath) → ∀ {ps : List Seg}, q.eval σ = .ok ps → (q.simpE O E).eval σ = .ok ps
   | .root _, _, h => h
   | .field q f, ps, h => by
@@ -653,8 +653,8 @@ theorem LPath.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : E
     exact h
 
 /-- Simplifying keeps the storage a storage evaluates to. -/
-theorem LStor.simpE_eval {σ : State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : EqOk σ E) :
-    (s : LStor) → ∀ {sv : SVal}, s.eval σ = .ok sv → (s.simpE O E).eval σ = .ok sv
+theorem LStor.simpE_eval {σ : Semantics.State} {O : Orc} {E : Eqs} (hO : O.Ok σ) (hE : EqOk σ E) :
+    (s : LStor) → ∀ {sv : Semantics.SVal}, s.eval σ = .ok sv → (s.simpE O E).eval σ = .ok sv
   | .init, _, h => h
   | .save s q w, sv, h => by
     simp only [LStor.eval] at h
@@ -711,7 +711,7 @@ the layout gives statically, a fixed-size array indexed in range, returns:
 KeY's `wellFormed(heap)` with the typed `select` lemmas. -/
 
 /-- The roots of `L` are in `σ`'s storage, each canonical at its type. -/
-def LayoutOk (L : List (Name × Ty)) (σ : State) : Prop :=
+def LayoutOk (L : List (Name × Ty)) (σ : Semantics.State) : Prop :=
   ∀ r T, lookupBy r L = some T → ∃ v, lookupBy r σ.storage = some v ∧ v.canonB T = true
 
 /-- The type of a path in the layout `L`: through a struct's member, a
@@ -730,8 +730,8 @@ def LPath.ty (L : List (Name × Ty)) (inB : LTerm → Nat → Bool) : LPath → 
     | _ => none
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
-theorem canonFieldsB_lookup {s f : Name} {v : SVal} :
-    ∀ {fields : List (Name × SVal)}, canonFieldsB s fields = true → lookupBy f fields = some v →
+theorem canonFieldsB_lookup {s f : Name} {v : Semantics.SVal} :
+    ∀ {fields : List (Name × Semantics.SVal)}, canonFieldsB s fields = true → lookupBy f fields = some v →
       ∃ T, lookupBy f (structDef s) = some T ∧ v.canonB T = true
   | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
   | (n, w) :: rest, hc, h => by
@@ -760,8 +760,8 @@ theorem lookupBy_isSome_iff {κ α : Type} [DecidableEq κ] {k : κ} :
     · rename_i h; simp only [h, false_or]; exact lookupBy_isSome_iff
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
-theorem canonEntriesB_lookup {V : Ty} {i : Int} {v : SVal} :
-    ∀ {es : List (Int × SVal)}, canonEntriesB V es = true → lookupBy i es = some v →
+theorem canonEntriesB_lookup {V : Ty} {i : Int} {v : Semantics.SVal} :
+    ∀ {es : List (Int × Semantics.SVal)}, canonEntriesB V es = true → lookupBy i es = some v →
       v.canonB V = true
   | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
   | (n, w) :: rest, hc, h => by
@@ -773,7 +773,7 @@ theorem canonEntriesB_lookup {V : Ty} {i : Int} {v : SVal} :
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 theorem canonElemsB_get {E : Ty} :
-    ∀ {es : List SVal} {i : Nat} (h : i < es.length), canonElemsB E es = true →
+    ∀ {es : List Semantics.SVal} {i : Nat} (h : i < es.length), canonElemsB E es = true →
       (es.get ⟨i, h⟩).canonB E = true
   | [], _, h, _ => absurd h (Nat.not_lt_zero _)
   | w :: rest, 0, _, hc => by
@@ -784,7 +784,7 @@ theorem canonElemsB_get {E : Ty} :
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- One step down a canonical value, at a member its type declares. -/
-theorem canon_field {v : SVal} {s f : Name} {T : Ty} (hv : v.canonB (.ref (.struct s)) = true)
+theorem canon_field {v : Semantics.SVal} {s f : Name} {T : Ty} (hv : v.canonB (.ref (.struct s)) = true)
     (hT : lookupBy f (structDef s) = some T) :
     ∃ w, v.findLive [.field f] = .ok w ∧ w.canonB T = true := by
   match v, hv with
@@ -797,17 +797,17 @@ theorem canon_field {v : SVal} {s f : Name} {T : Ty} (hv : v.canonB (.ref (.stru
     obtain ⟨T', hT', hc'⟩ := canonFieldsB_lookup hc hw
     rw [hT] at hT'
     cases hT'
-    exact ⟨w, by simp only [SVal.findLive, hw, SVal.findLive_nil], hc'⟩
+    exact ⟨w, by simp only [Semantics.SVal.findLive, hw, SVal.findLive_nil], hc'⟩
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- One step down a canonical mapping, at any key. -/
-theorem canon_key {v : SVal} {K V : Ty} (hv : v.canonB (.ref (.mapping K V)) = true) (i : Int) :
+theorem canon_key {v : Semantics.SVal} {K V : Ty} (hv : v.canonB (.ref (.mapping K V)) = true) (i : Int) :
     ∃ w, v.findLive [.at i] = .ok w ∧ w.canonB V = true := by
   match v, hv with
   | .map es d, hv =>
     simp only [SVal.canonB, Bool.and_eq_true] at hv
     obtain ⟨⟨⟨-, hc⟩, -⟩, hd⟩ := hv
-    simp only [SVal.findLive]
+    simp only [Semantics.SVal.findLive]
     split
     · rename_i w hw
       exact ⟨w, rfl, canonEntriesB_lookup hc hw⟩
@@ -815,7 +815,7 @@ theorem canon_key {v : SVal} {K V : Ty} (hv : v.canonB (.ref (.mapping K V)) = t
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- One step down a canonical fixed-size array, at an index in range. -/
-theorem canon_index {v : SVal} {E : Ty} {n : Nat} (hv : v.canonB (.ref (.fixed E n)) = true)
+theorem canon_index {v : Semantics.SVal} {E : Ty} {n : Nat} (hv : v.canonB (.ref (.fixed E n)) = true)
     {i : Int} (h0 : 0 ≤ i) (hn : i < n) :
     ∃ w, v.findLive [.at i] = .ok w ∧ w.canonB E = true := by
   match v, hv with
@@ -824,20 +824,20 @@ theorem canon_index {v : SVal} {E : Ty} {n : Nat} (hv : v.canonB (.ref (.fixed E
     obtain ⟨⟨⟨-, hl⟩, hc⟩, -⟩ := hv
     have hi : i.toNat < es.length := by omega
     refine ⟨es.get ⟨i.toNat, hi⟩, ?_, canonElemsB_get hi hc⟩
-    simp only [SVal.findLive, h0, hi, and_self, dif_pos, SVal.findLive_nil]
+    simp only [Semantics.SVal.findLive, h0, hi, and_self, dif_pos, SVal.findLive_nil]
 
 /-- **A path the layout types is there** in a storage that holds the
 layout, canonical at its type. -/
-theorem LPath.ty_find {σ : State} {L : List (Name × Ty)} {inB : LTerm → Nat → Bool}
+theorem LPath.ty_find {σ : Semantics.State} {L : List (Name × Ty)} {inB : LTerm → Nat → Bool}
     (hL : LayoutOk L σ)
     (hB : ∀ k n, inB k n = true → ∀ i, (k.eval σ >>= Value.asInt) = .ok i → 0 ≤ i ∧ i < n) :
     (q : LPath) → ∀ {T : Ty} {qs : List Seg}, q.ty L inB = some T → q.eval σ = .ok qs →
-      ∃ v, (SVal.struct σ.storage).findLive qs = .ok v ∧ v.canonB T = true
+      ∃ v, (Semantics.SVal.struct σ.storage).findLive qs = .ok v ∧ v.canonB T = true
   | .root r, T, qs, ht, hq => by
     simp only [LPath.eval] at hq
     cases hq
     obtain ⟨v, hv, hc⟩ := hL r T ht
-    exact ⟨v, by simp only [SVal.findLive, hv, SVal.findLive_nil], hc⟩
+    exact ⟨v, by simp only [Semantics.SVal.findLive, hv, SVal.findLive_nil], hc⟩
   | .field q f, T, qs, ht, hq => by
     simp only [LPath.eval] at hq
     obtain ⟨qs₀, hq₀, hq⟩ := Res.bind_eq_ok.1 hq
@@ -889,11 +889,11 @@ structure Facts where
   bnds : List (LTerm × Int × Int) := []
 
 /-- The intervals of `B` hold in `σ`. -/
-def BndOk (σ : State) (B : List (LTerm × Int × Int)) : Prop :=
+def BndOk (σ : Semantics.State) (B : List (LTerm × Int × Int)) : Prop :=
   ∀ b ∈ B, ∀ i, b.1.eval σ = .ok (.int i) → b.2.1 ≤ i ∧ i ≤ b.2.2
 
 /-- What the facts say holds in `σ`. -/
-def Facts.Ok (σ : State) (F : Facts) : Prop :=
+def Facts.Ok (σ : Semantics.State) (F : Facts) : Prop :=
   (∀ u ∈ F.known, Returns σ u) ∧ Apart σ F.ne ∧ EqOk σ F.eqs ∧ LayoutOk F.lay σ ∧
     (∀ xp ∈ F.vars, ∃ v, (LTerm.var xp.1).eval σ = .ok v ∧ xp.2.admits v) ∧ BndOk σ F.bnds
 
@@ -901,12 +901,12 @@ def Facts.Ok (σ : State) (F : Facts) : Prop :=
 `(x - a) + a` cancelled (`LTerm.arith`), and simplified (`LTerm.simpE`). -/
 def Facts.nf0 (F : Facts) (t : LTerm) : LTerm := ((t.core F.ne).arith).simpE {} F.eqs
 
-theorem Facts.nf0_keeps {σ : State} {F : Facts} (hF : F.Ok σ) (t : LTerm) : Keeps σ t (F.nf0 t) :=
+theorem Facts.nf0_keeps {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) (t : LTerm) : Keeps σ t (F.nf0 t) :=
   fun v h => LTerm.simpE_eval (Orc.ok_none σ) hF.2.2.1 _ v
     (LTerm.arith_eval _ (LTerm.core_eval hF.2.1 t h))
 
 /-- A term whose normal form is a literal returns that literal, if anything. -/
-theorem Facts.nf0_lit {σ : State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {w v : Value}
+theorem Facts.nf0_lit {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {w v : Value}
     (hn : F.nf0 t = .lit w) (hv : t.eval σ = .ok v) : v = w := by
   have h := F.nf0_keeps hF t v hv
   rw [hn] at h
@@ -919,7 +919,7 @@ def Facts.inB (F : Facts) (k : LTerm) (n : Nat) : Bool :=
   | .lit (.int i) => decide (0 ≤ i ∧ i < n)
   | _ => false
 
-theorem Facts.inB_sound {σ : State} {F : Facts} (hF : F.Ok σ) {k : LTerm} {n : Nat}
+theorem Facts.inB_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {k : LTerm} {n : Nat}
     (h : F.inB k n = true) (i : Int) (hi : (k.eval σ >>= Value.asInt) = .ok i) :
     0 ≤ i ∧ i < n := by
   unfold Facts.inB at h
@@ -935,9 +935,9 @@ theorem Facts.inB_sound {σ : State} {F : Facts} (hF : F.Ok σ) {k : LTerm} {n :
 /-- The type of a path in the layout. -/
 def Facts.pty (F : Facts) (q : LPath) : Option Ty := q.ty F.lay F.inB
 
-theorem Facts.pty_find {σ : State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T : Ty}
+theorem Facts.pty_find {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T : Ty}
     {qs : List Seg} (ht : F.pty q = some T) (hq : q.eval σ = .ok qs) :
-    ∃ v, (SVal.struct σ.storage).findLive qs = .ok v ∧ v.canonB T = true :=
+    ∃ v, (Semantics.SVal.struct σ.storage).findLive qs = .ok v ∧ v.canonB T = true :=
   LPath.ty_find hF.2.2.2.1 (fun _ _ h i hi => F.inB_sound hF h i hi) q ht hq
 
 /-! ## The slot a `push()` of the initial storage takes
@@ -985,7 +985,7 @@ theorem LPath.splitAt_spec {P Q : LPath} {k : LTerm} {rest : List SSeg}
     exact segsAfter_spec hs
   · cases h
 
-theorem segsEval_append_inv (σ : State) : ∀ {xs ys : List SSeg} {zs : List Seg},
+theorem segsEval_append_inv (σ : Semantics.State) : ∀ {xs ys : List SSeg} {zs : List Seg},
     segsEval σ (xs ++ ys) = .ok zs →
       ∃ a b, segsEval σ xs = .ok a ∧ segsEval σ ys = .ok b ∧ zs = a ++ b
   | [], ys, zs, h => ⟨[], zs, rfl, h, rfl⟩
@@ -1023,18 +1023,18 @@ def exFrom (inB : LTerm → Nat → Bool) : Ty → List SSeg → Bool
   | .ref (.fixed E n), .key k :: r => inB k n && exFrom inB E r
   | _, _ :: _ => false
 
-theorem findLive_cons (v : SVal) (s : Seg) (r : List Seg) :
+theorem findLive_cons (v : Semantics.SVal) (s : Seg) (r : List Seg) :
     v.findLive (s :: r) = v.findLive [s] >>= fun w => w.findLive r := by
   rw [← SVal.findLive_append]; rfl
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- An index of a canonical array read: a canonical element. -/
-theorem canon_elem_find {v : SVal} {E : Ty}
+theorem canon_elem_find {v : Semantics.SVal} {E : Ty}
     (hv : ∃ es sh fx, v = .array es sh fx ∧ canonElemsB E es = true) {i : Int} {r : List Seg}
-    {w : SVal} (h : v.findLive (.at i :: r) = .ok w) :
-    ∃ e : SVal, e.canonB E = true ∧ e.findLive r = .ok w := by
+    {w : Semantics.SVal} (h : v.findLive (.at i :: r) = .ok w) :
+    ∃ e : Semantics.SVal, e.canonB E = true ∧ e.findLive r = .ok w := by
   obtain ⟨es, sh, fx, rfl, hes⟩ := hv
-  simp only [SVal.findLive] at h
+  simp only [Semantics.SVal.findLive] at h
   split at h
   · rename_i hr
     exact ⟨_, canonElemsB_get hr.2 hes, h⟩
@@ -1043,14 +1043,14 @@ theorem canon_elem_find {v : SVal} {E : Ty}
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- **A typed read below a canonical value** returns a canonical value of its
 type, where it returns. -/
-theorem tyFrom_canon {σ : State} :
-    ∀ (rest : List SSeg) {v : SVal} {T T' : Ty} {r : List Seg}, v.canonB T = true →
+theorem tyFrom_canon {σ : Semantics.State} :
+    ∀ (rest : List SSeg) {v : Semantics.SVal} {T T' : Ty} {r : List Seg}, v.canonB T = true →
       tyFrom T rest = some T' → segsEval σ rest = .ok r →
         ∀ w, v.findLive r = .ok w → w.canonB T' = true
   | [], v, T, T', r, hv, ht, hr, w, hw => by
     simp only [tyFrom, Option.some.injEq] at ht; subst ht
     cases hr
-    have : w = v := by cases v <;> simp_all only [SVal.findLive, Except.ok.injEq]
+    have : w = v := by cases v <;> simp_all only [Semantics.SVal.findLive, Except.ok.injEq]
     subst this; exact hv
   | .field f :: rest, v, T, T', r, hv, ht, hr, w, hw => by
     obtain ⟨r', hr', he⟩ := Res.bind_eq_ok.1 hr
@@ -1090,9 +1090,9 @@ theorem tyFrom_canon {σ : State} :
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- **A typed read below a canonical value returns** where its indices are
 in range, and it reads no dynamic array's element. -/
-theorem tyFrom_exists {σ : State} {inB : LTerm → Nat → Bool}
+theorem tyFrom_exists {σ : Semantics.State} {inB : LTerm → Nat → Bool}
     (hB : ∀ k n, inB k n = true → ∀ i, (k.eval σ >>= Value.asInt) = .ok i → 0 ≤ i ∧ i < n) :
-    ∀ (rest : List SSeg) {v : SVal} {T : Ty} {r : List Seg}, v.canonB T = true →
+    ∀ (rest : List SSeg) {v : Semantics.SVal} {T : Ty} {r : List Seg}, v.canonB T = true →
       exFrom inB T rest = true → segsEval σ rest = .ok r → ∃ w, v.findLive r = .ok w
   | [], v, T, r, _, _, hr => by cases hr; exact ⟨v, by cases v <;> rfl⟩
   | .field f :: rest, v, T, r, hv, he, hr => by
@@ -1130,7 +1130,7 @@ def LPath.rootN : LPath → Name
   | .field q _ => q.rootN
   | .at q _ => q.rootN
 
-theorem LPath.eval_rootN (σ : State) : ∀ {q : LPath} {qs : List Seg}, q.eval σ = .ok qs →
+theorem LPath.eval_rootN (σ : Semantics.State) : ∀ {q : LPath} {qs : List Seg}, q.eval σ = .ok qs →
     ∃ t, qs = .field q.rootN :: t
   | .root _, qs, h => by cases h; exact ⟨[], rfl⟩
   | .field q f, qs, h => by
@@ -1154,9 +1154,9 @@ def LStor.offRoot (r : Name) : LStor → Bool
   | .view .. => false
 termination_by structural s => s
 
-theorem LStor.offRoot_findLive {σ : State} {r : Name} {ps : List Seg} {t : List Seg}
-    (ht : ps = .field r :: t) : ∀ {s : LStor} {v : SVal}, s.offRoot r = true →
-      s.eval σ = .ok v → v.findLive ps = (SVal.struct σ.storage).findLive ps
+theorem LStor.offRoot_findLive {σ : Semantics.State} {r : Name} {ps : List Seg} {t : List Seg}
+    (ht : ps = .field r :: t) : ∀ {s : LStor} {v : Semantics.SVal}, s.offRoot r = true →
+      s.eval σ = .ok v → v.findLive ps = (Semantics.SVal.struct σ.storage).findLive ps
   | .init, v, _, hv => by cases hv; rfl
   | .view .., _, h, _ => by simp only [LStor.offRoot, Bool.false_eq_true] at h
   | .save s q w, v, h, hv => by
@@ -1202,7 +1202,7 @@ theorem LStor.offRoot_findLive {σ : State} {r : Name} {ps : List Seg} {t : List
     exact LStor.offRoot_findLive ht h.2 hv'
 
 /-- A path with no index evaluates. -/
-theorem LPath.noAt_ok (σ : State) : ∀ {q : LPath}, q.noAt = true → ∃ qs, q.eval σ = .ok qs
+theorem LPath.noAt_ok (σ : Semantics.State) : ∀ {q : LPath}, q.noAt = true → ∃ qs, q.eval σ = .ok qs
   | .root r, _ => ⟨[.field r], rfl⟩
   | .field q f, h => by
     obtain ⟨qs, hq⟩ := LPath.noAt_ok σ (q := q) h
@@ -1228,7 +1228,7 @@ theorem Facts.offDel_offRoot {F : Facts} {r : Name} : ∀ {s : LStor}, F.offDel 
   | .save .., h | .arr .., h | .stale .., h | .copy .., h | .view .., h => by
     simp only [Facts.offDel, Bool.false_eq_true] at h
 
-theorem Facts.offDel_eval {σ : State} {F : Facts} (hF : F.Ok σ) {r : Name} :
+theorem Facts.offDel_eval {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {r : Name} :
     ∀ {s : LStor}, F.offDel r s = true → ∃ v, s.eval σ = .ok v
   | .init, _ => ⟨_, rfl⟩
   | .delAt s q, h => by
@@ -1287,7 +1287,7 @@ def Facts.slotIn (F : Facts) (N : LTerm → LTerm) : LStor → LPath → Bool
   | _, _ => false
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
-theorem canonElemsB_append {E : Ty} : ∀ {es fs : List SVal}, canonElemsB E es = true →
+theorem canonElemsB_append {E : Ty} : ∀ {es fs : List Semantics.SVal}, canonElemsB E es = true →
     canonElemsB E fs = true → canonElemsB E (es ++ fs) = true
   | [], _, _, h => h
   | _ :: es, fs, h, h' => by
@@ -1295,7 +1295,7 @@ theorem canonElemsB_append {E : Ty} : ∀ {es fs : List SVal}, canonElemsB E es 
     exact ⟨h.1, canonElemsB_append h.2 h'⟩
 
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
-theorem canonElemsB_defaultOf {E : Ty} : ∀ {es : List SVal}, canonElemsB E es = true →
+theorem canonElemsB_defaultOf {E : Ty} : ∀ {es : List Semantics.SVal}, canonElemsB E es = true →
     canonElemsB E (SVal.defaultOf.defaultOfElems es) = true
   | [], _ => by simp only [SVal.defaultOf.defaultOfElems, canonElemsB]
   | e :: es, h => by
@@ -1308,16 +1308,16 @@ open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- **The array a slot is taken from**: in the initial storage or after its
 `delete`, an array whose elements and slots past the end are canonical, of
 the length `baseLen` reads. -/
-theorem Facts.slot_base {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {P : LPath}
+theorem Facts.slot_base {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {base : LStor} {P : LPath}
     {E : Ty} (hb : F.baseOk base P = true) (hn : P.noLen = true)
     (hpty : F.pty P = some (.ref (.array E))) {ps : List Seg} (hp : P.eval σ = .ok ps)
-    {v0 : SVal} (hv0 : base.eval σ = .ok v0) :
+    {v0 : Semantics.SVal} (hv0 : base.eval σ = .ok v0) :
     ∃ es sh fx, v0.findLive ps = .ok (.array es sh fx) ∧
       canonElemsB E es = true ∧ canonElemsB E sh = true ∧
       (baseLen base P).eval σ = .ok (.int es.length) := by
   obtain ⟨c0, hc0, hcan⟩ := F.pty_find hF hpty hp
   obtain ⟨t, ht⟩ := LPath.eval_rootN σ hp
-  have hoff : ∀ {s : LStor} {v : SVal}, F.offDel P.rootN s = true → s.eval σ = .ok v →
+  have hoff : ∀ {s : LStor} {v : Semantics.SVal}, F.offDel P.rootN s = true → s.eval σ = .ok v →
       v.findLive ps = .ok c0 := fun hs hv => by
     rw [LStor.offRoot_findLive ht (Facts.offDel_offRoot hs) hv]; exact hc0
   have hlen0 : ∀ {n : Nat}, Close.arrLen c0 = .ok (.int n) →
@@ -1355,7 +1355,7 @@ theorem Facts.slot_base {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {
     all_goals exact hkeep hb (hlen0 rfl)
 
 /-- Such a storage returns. -/
-theorem Facts.base_eval {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {P : LPath}
+theorem Facts.base_eval {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {base : LStor} {P : LPath}
     {T : Ty} (hb : F.baseOk base P = true) (hn : P.noLen = true)
     (hpty : F.pty P = some T) {ps : List Seg} (hp : P.eval σ = .ok ps) :
     ∃ v0, base.eval σ = .ok v0 := by
@@ -1379,12 +1379,12 @@ theorem Facts.base_eval {σ : State} {F : Facts} (hF : F.Ok σ) {base : LStor} {
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- The slot a `push()` takes, canonical at the element type: an element
 popped before, or the default. -/
-theorem pushSlot_canonB {E : Ty} {sh : List SVal} (hE : E.okDeep = true)
-    (hsh : canonElemsB E sh = true) : (pushSlot E sh).1.canonB E = true := by
+theorem pushSlot_canonB {E : Ty} {sh : List Semantics.SVal} (hE : E.okDeep = true)
+    (hsh : canonElemsB E sh = true) : (Semantics.pushSlot E sh).1.canonB E = true := by
   cases sh with
   | nil => exact defaultForTy_canonB hE
   | cons c t =>
-    simp only [pushSlot]
+    simp only [Semantics.pushSlot]
     split
     · exact defaultForTy_canonB hE
     · simp only [canonElemsB, Bool.and_eq_true] at hsh; exact hsh.1
@@ -1393,12 +1393,12 @@ open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- **Below the slot or an element up to the old length** is a canonical
 element: where a read below the index returns, it reads one; where the
 index is in range, it does. -/
-theorem slotElem {E : Ty} {es sh : List SVal} {fx : Bool} (hE : E.okDeep = true)
+theorem slotElem {E : Ty} {es sh : List Semantics.SVal} {fx : Bool} (hE : E.okDeep = true)
     (hes : canonElemsB E es = true) (hsh : canonElemsB E sh = true) (i : Int) (r : List Seg) :
-    (∀ w, (SVal.array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx).findLive (.at i :: r) =
-        .ok w → ∃ e : SVal, e.canonB E = true ∧ e.findLive r = .ok w) ∧
-    (0 ≤ i ∧ i ≤ es.length → ∃ e : SVal, e.canonB E = true ∧
-      (SVal.array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx).findLive (.at i :: r) =
+    (∀ w, (Semantics.SVal.array (es ++ [(Semantics.pushSlot E sh).1]) (Semantics.pushSlot E sh).2 fx).findLive (.at i :: r) =
+        .ok w → ∃ e : Semantics.SVal, e.canonB E = true ∧ e.findLive r = .ok w) ∧
+    (0 ≤ i ∧ i ≤ es.length → ∃ e : Semantics.SVal, e.canonB E = true ∧
+      (Semantics.SVal.array (es ++ [(Semantics.pushSlot E sh).1]) (Semantics.pushSlot E sh).2 fx).findLive (.at i :: r) =
         e.findLive r) := by
   rw [findLive_grow es sh _ fx _ i r]
   by_cases hi : i = es.length
@@ -1407,12 +1407,12 @@ theorem slotElem {E : Ty} {es sh : List SVal} {fx : Bool} (hE : E.okDeep = true)
   · rw [if_neg hi]
     by_cases hr : 0 ≤ i ∧ i.toNat < es.length
     · have hc := canonElemsB_get hr.2 hes
-      have hf : (SVal.array es sh fx).findLive (.at i :: r) = (es.get ⟨i.toNat, hr.2⟩).findLive r := by
-        simp only [SVal.findLive, dif_pos hr]
+      have hf : (Semantics.SVal.array es sh fx).findLive (.at i :: r) = (es.get ⟨i.toNat, hr.2⟩).findLive r := by
+        simp only [Semantics.SVal.findLive, dif_pos hr]
       rw [hf]
       exact ⟨fun w h => ⟨_, hc, h⟩, fun _ => ⟨_, hc, rfl⟩⟩
-    · have hf : (SVal.array es sh fx).findLive (.at i :: r) = .error .revert := by
-        simp only [SVal.findLive, dif_neg hr]
+    · have hf : (Semantics.SVal.array es sh fx).findLive (.at i :: r) = .error .revert := by
+        simp only [Semantics.SVal.findLive, dif_neg hr]
       rw [hf]
       refine ⟨fun w h => (by cases h), fun h => ?_⟩
       exfalso; apply hr; exact ⟨h.1, by omega⟩
@@ -1420,8 +1420,8 @@ theorem slotElem {E : Ty} {es sh : List SVal} {fx : Bool} (hE : E.okDeep = true)
 /-- **What the slot facts say holds**: a read the slot type types returns a
 canonical value of its type where it returns, and returns where its index
 is in range. -/
-theorem Facts.slot_find {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
-    (ht : F.slotTy S Q = some T) {v : SVal} {qs : List Seg} (hS : S.eval σ = .ok v)
+theorem Facts.slot_find {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
+    (ht : F.slotTy S Q = some T) {v : Semantics.SVal} {qs : List Seg} (hS : S.eval σ = .ok v)
     (hq : Q.eval σ = .ok qs) :
     (∀ w, v.findLive qs = .ok w → w.canonB T = true) ∧
     (∀ N : LTerm → LTerm, (∀ t, Keeps σ t (N t)) → F.slotIn N S Q = true →
@@ -1450,7 +1450,7 @@ theorem Facts.slot_find {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q :
           obtain ⟨r, hr, he⟩ := Res.bind_eq_ok.1 hb
           cases he
           have hread : v.findLive (ps ++ .at i :: r) =
-              (SVal.array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx).findLive
+              (Semantics.SVal.array (es ++ [(Semantics.pushSlot E sh).1]) (Semantics.pushSlot E sh).2 fx).findLive
                 (.at i :: r) := by
             rw [SVal.findLive_append, findLive_saveLive_same hu, Res.ok_bind]
           have hel := slotElem (fx := fx) hok hes hsh i r
@@ -1496,7 +1496,7 @@ theorem Facts.slot_find {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q :
     · cases ht
 
 /-- A path whose segments evaluate evaluates to them. -/
-theorem LPath.eval_of_segs (σ : State) : ∀ {q : LPath} {qs : List Seg},
+theorem LPath.eval_of_segs (σ : Semantics.State) : ∀ {q : LPath} {qs : List Seg},
     segsEval σ q.segs = .ok qs → q.eval σ = .ok qs
   | .root r, qs, h => by cases h; rfl
   | .field q f, qs, h => by
@@ -1511,7 +1511,7 @@ theorem LPath.eval_of_segs (σ : State) : ∀ {q : LPath} {qs : List Seg},
     simp only [LPath.eval, LPath.eval_of_segs σ ha, Res.ok_bind, hi]
 
 /-- The storage the slot facts read returns where the read's path does. -/
-theorem Facts.slot_ret {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
+theorem Facts.slot_ret {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
     (ht : F.slotTy S Q = some T) {qs : List Seg} (hq : Q.eval σ = .ok qs) :
     ∃ v, S.eval σ = .ok v := by
   match S, ht with
@@ -1529,7 +1529,7 @@ theorem Facts.slot_ret {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : 
         obtain ⟨v0, hv0⟩ := F.base_eval hF hnb.2 hnb.1 hpty hp
         obtain ⟨es, sh, fx, hnode, -, -, -⟩ := F.slot_base hF hnb.2 hnb.1 hpty hp hv0
         obtain ⟨u, hu⟩ := (save_ok_iff_find_ok
-          (new := .array (es ++ [(pushSlot E sh).1]) (pushSlot E sh).2 fx)
+          (new := .array (es ++ [(Semantics.pushSlot E sh).1]) (Semantics.pushSlot E sh).2 fx)
           (LPath.noLen_eval σ hnb.1 hp)).2 ⟨_, hnode⟩
         exact ⟨u, by simp only [LStor.eval, LTerm.eval, Res.ok_bind, hv0, hp, hnode, AOp.apply, hu]⟩
       · cases ht
@@ -1537,8 +1537,8 @@ theorem Facts.slot_ret {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : 
 
 /-- **A read the slot facts type**, where it returns, reads a canonical
 value of its type. -/
-theorem Facts.slot_read {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
-    (ht : F.slotTy S Q = some T) {α : Type} {G : SVal → Res α} {x : α}
+theorem Facts.slot_read {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
+    (ht : F.slotTy S Q = some T) {α : Type} {G : Semantics.SVal → Res α} {x : α}
     (h : (S.eval σ >>= fun v => Q.eval σ >>= fun qs => v.findLive qs >>= G) = .ok x) :
     ∃ w, w.canonB T = true ∧ G w = .ok x := by
   obtain ⟨v, hv, h⟩ := Res.bind_eq_ok.1 h
@@ -1549,11 +1549,11 @@ theorem Facts.slot_read {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q :
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- A slot of a canonical array read past its end too (`SVal.find`): a
 canonical element, live or not. -/
-theorem canon_slot_find {E : Ty} {es sh : List SVal} {fx : Bool}
-    (hes : canonElemsB E (es ++ sh) = true) {i : Int} {r : List Seg} {w : SVal}
-    (h : (SVal.array es sh fx).find (.at i :: r) = .ok w) :
-    ∃ e : SVal, e.canonB E = true ∧ e.find r = .ok w := by
-  simp only [SVal.find] at h
+theorem canon_slot_find {E : Ty} {es sh : List Semantics.SVal} {fx : Bool}
+    (hes : canonElemsB E (es ++ sh) = true) {i : Int} {r : List Seg} {w : Semantics.SVal}
+    (h : (Semantics.SVal.array es sh fx).find (.at i :: r) = .ok w) :
+    ∃ e : Semantics.SVal, e.canonB E = true ∧ e.find r = .ok w := by
+  simp only [Semantics.SVal.find] at h
   split at h
   · rename_i hr
     exact ⟨_, canonElemsB_get hr.2 hes, h⟩
@@ -1562,14 +1562,14 @@ theorem canon_slot_find {E : Ty} {es sh : List SVal} {fx : Bool}
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- **A typed read below a canonical value, past the live ends too**,
 returns a canonical value of its type where it returns. -/
-theorem tyFrom_canonP {σ : State} :
-    ∀ (rest : List SSeg) {v : SVal} {T T' : Ty} {r : List Seg}, v.canonB T = true →
+theorem tyFrom_canonP {σ : Semantics.State} :
+    ∀ (rest : List SSeg) {v : Semantics.SVal} {T T' : Ty} {r : List Seg}, v.canonB T = true →
       tyFrom T rest = some T' → segsEval σ rest = .ok r →
         ∀ w, v.find r = .ok w → w.canonB T' = true
   | [], v, T, T', r, hv, ht, hr, w, hw => by
     simp only [tyFrom, Option.some.injEq] at ht; subst ht
     cases hr
-    have : w = v := by cases v <;> simp_all only [SVal.find, Except.ok.injEq]
+    have : w = v := by cases v <;> simp_all only [Semantics.SVal.find, Except.ok.injEq]
     subst this; exact hv
   | .field f :: rest, v, T, T', r, hv, ht, hr, w, hw => by
     obtain ⟨r', hr', he⟩ := Res.bind_eq_ok.1 hr
@@ -1611,8 +1611,8 @@ theorem tyFrom_canonP {σ : State} :
 open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB) in
 /-- **A snapshot read the slot facts type** reads a canonical value of its
 type where it returns: past the live ends, the slots are canonical too. -/
-theorem Facts.slot_readP {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
-    (ht : F.slotTy S Q = some T) {α : Type} {G : SVal → Res α} {x : α}
+theorem Facts.slot_readP {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q : LPath} {T : Ty}
+    (ht : F.slotTy S Q = some T) {α : Type} {G : Semantics.SVal → Res α} {x : α}
     (h : (S.eval σ >>= fun v => Q.eval σ >>= fun qs => v.find qs >>= G) = .ok x) :
     ∃ w, w.canonB T = true ∧ G w = .ok x := by
   obtain ⟨v, hS, h⟩ := Res.bind_eq_ok.1 h
@@ -1643,7 +1643,7 @@ theorem Facts.slot_readP {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q 
           cases he
           rw [SVal.find_append, SVal.find_of_findLive (findLive_saveLive_same hu),
             Res.ok_bind] at hw
-          have hall : canonElemsB E ((es ++ [(pushSlot E sh).1]) ++ (pushSlot E sh).2) = true := by
+          have hall : canonElemsB E ((es ++ [(Semantics.pushSlot E sh).1]) ++ (Semantics.pushSlot E sh).2) = true := by
             refine canonElemsB_append (canonElemsB_append hes ?_) ?_
             · simp only [canonElemsB, pushSlot_canonB hok hsh, Bool.and_self]
             · cases sh with
@@ -1659,7 +1659,7 @@ theorem Facts.slot_readP {σ : State} {F : Facts} (hF : F.Ok σ) {S : LStor} {Q 
 
 /-- **A read the slot facts type, at an index in range**, returns a
 canonical value of its type. -/
-theorem Facts.slot_resolve {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
+theorem Facts.slot_resolve {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
     (hN : ∀ t, Keeps σ t (N t)) {S : LStor} {Q : LPath} {T : Ty} (ht : F.slotTy S Q = some T)
     (hin : F.slotIn N S Q = true) (hk : ∃ qs, Q.eval σ = .ok qs) :
     ∃ v qs w, S.eval σ = .ok v ∧ Q.eval σ = .ok qs ∧ v.findLive qs = .ok w ∧
@@ -1759,19 +1759,19 @@ theorem evalBinop_notArith_bool {op : BinOp} {p : PrimTy} {x : Value} {rb : Res 
       (try split at hr) <;> (try split at hr) <;> (try split at hr) <;>
       first | (cases hr; exact ⟨_, rfl⟩) | cases hr
 
-theorem canonB_uint {v : SVal} (h : v.canonB (.prim .uint) = true) : ∃ i, v = SVal.int i := by
+theorem canonB_uint {v : Semantics.SVal} (h : v.canonB (.prim .uint) = true) : ∃ i, v = SVal.int i := by
   match v, h with
   | SVal.int i, _ => exact ⟨i, rfl⟩
 
-theorem canonB_int {v : SVal} (h : v.canonB (.prim .int) = true) : ∃ i, v = SVal.int i := by
+theorem canonB_int {v : Semantics.SVal} (h : v.canonB (.prim .int) = true) : ∃ i, v = SVal.int i := by
   match v, h with
   | SVal.int i, _ => exact ⟨i, rfl⟩
 
-theorem canonB_bool {v : SVal} (h : v.canonB (.prim .bool) = true) : ∃ b, v = SVal.bool b := by
+theorem canonB_bool {v : Semantics.SVal} (h : v.canonB (.prim .bool) = true) : ∃ b, v = SVal.bool b := by
   match v, h with
   | SVal.bool b, _ => exact ⟨b, rfl⟩
 
-theorem canonB_prim {v : SVal} {p : PrimTy} (h : v.canonB (.prim p) = true) :
+theorem canonB_prim {v : Semantics.SVal} {p : PrimTy} (h : v.canonB (.prim p) = true) :
     ∃ w, v.asValue = .ok w := by
   cases p with
   | uint => obtain ⟨i, rfl⟩ := canonB_uint h; exact ⟨_, rfl⟩
@@ -1779,10 +1779,10 @@ theorem canonB_prim {v : SVal} {p : PrimTy} (h : v.canonB (.prim p) = true) :
   | bool => obtain ⟨b, rfl⟩ := canonB_bool h; exact ⟨_, rfl⟩
 
 /-- The read of a typed path in the initial storage: what it finds. -/
-theorem Facts.read_init {σ : State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T : Ty}
+theorem Facts.read_init {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T : Ty}
     (ht : F.pty q = some T) {v : Value} (hv : (LTerm.find .init q).eval σ = .ok v ∨
       (LTerm.findP .init q).eval σ = .ok v) :
-    ∃ w : SVal, w.canonB T = true ∧ w.asValue = .ok v := by
+    ∃ w : Semantics.SVal, w.canonB T = true ∧ w.asValue = .ok v := by
   rcases hv with hv | hv
   · simp only [LTerm.eval, LStor.eval, Res.ok_bind] at hv
     obtain ⟨qs, hq, hv⟩ := Res.bind_eq_ok.1 hv
@@ -1797,7 +1797,7 @@ theorem Facts.read_init {σ : State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T :
     rw [SVal.find_of_findLive hw'] at hw; cases hw
     exact ⟨w, hc, hv⟩
 
-theorem Facts.isInt_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
+theorem Facts.isInt_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) :
     (t : LTerm) → F.isInt t = true → ∀ {v : Value}, t.eval σ = .ok v → ∃ i, v = .int i
   | .lit (.int _), _, _, h => by cases h; exact ⟨_, rfl⟩
   | .env _, _, _, h => by cases h; exact ⟨_, rfl⟩
@@ -1916,7 +1916,7 @@ theorem Facts.isInt_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
   | .lit (.bool _), hi, _, _ | .err, hi, _, _ | .has .., hi, _, _ | .kmap .., hi, _, _
   | .sok _, hi, _, _ | .pok _, hi, _, _ => by simp only [isInt, Bool.false_eq_true] at hi
 
-theorem Facts.isBool_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
+theorem Facts.isBool_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) :
     (t : LTerm) → F.isBool t = true → ∀ {v : Value}, t.eval σ = .ok v → ∃ b, v = .bool b
   | .lit (.bool _), _, _, h => by cases h; exact ⟨_, rfl⟩
   | .has s q, _, v, h => by
@@ -2064,7 +2064,7 @@ def Facts.range (F : Facts) : LTerm → Option (Int × Int)
     | none => rangeOp op (F.range a) (F.range b)
   | t => F.bndOf t
 
-theorem Facts.bndOf_sound {σ : State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {l h : Int}
+theorem Facts.bndOf_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {l h : Int}
     (hb : F.bndOf t = some (l, h)) {i : Int} (hi : t.eval σ = .ok (.int i)) : l ≤ i ∧ i ≤ h := by
   simp only [Facts.bndOf, Option.map_eq_some_iff] at hb
   obtain ⟨b, hf, hbe⟩ := hb
@@ -2074,7 +2074,7 @@ theorem Facts.bndOf_sound {σ : State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {l
   rw [hbe] at this
   exact this
 
-theorem Facts.range_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
+theorem Facts.range_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) :
     (t : LTerm) → ∀ {l h i : Int}, F.range t = some (l, h) → t.eval σ = .ok (.int i) →
       l ≤ i ∧ i ≤ h
   | .lit (.int n), l, h, i, hr, hi => by
@@ -2174,7 +2174,7 @@ theorem evalBinop_add_int {p : PrimTy} {x : Value} {rb : Res Value} {i : Int}
         · cases h
     | ref _ => simp only [checkArith] at h; cases h; rfl
 
-theorem Facts.lo_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
+theorem Facts.lo_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) :
     (t : LTerm) → ∀ {l i : Int}, F.lo t = some l → t.eval σ = .ok (.int i) → l ≤ i
   | .len s q, l, i, hl, hi => by
     simp only [Facts.lo, Option.some.injEq] at hl
@@ -2225,7 +2225,7 @@ theorem Facts.lo_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
     exact (F.range_sound hF _ hr hi).1
 
 /-- A literal a term keeps is what it returns. -/
-theorem lit_of_keeps {σ : State} {t u : LTerm} {w v : Value} (hk : Keeps σ t u)
+theorem lit_of_keeps {σ : Semantics.State} {t u : LTerm} {w v : Value} (hk : Keeps σ t u)
     (hn : u = .lit w) (hv : t.eval σ = .ok v) : v = w := by
   have h := hk v hv
   rw [hn] at h
@@ -2253,7 +2253,7 @@ def Facts.knownOp (F : Facts) (N : LTerm → LTerm) (op : BinOp) (p : PrimTy) (a
     | .binop op' p' a' b' => op' == op && p' == p && N a' == N a && N b' == N b
     | _ => false
 
-theorem Facts.knownOp_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
+theorem Facts.knownOp_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
     (hN : ∀ t, Keeps σ t (N t)) {op : BinOp} {p : PrimTy} {a b : LTerm}
     (h : F.knownOp N op p a b = true) {x y : Value} (ha : a.eval σ = .ok x)
     (hb : b.eval σ = .ok y) : ∃ v, evalBinop op p x (.ok y) = .ok v := by
@@ -2294,7 +2294,7 @@ def Facts.fitsArith (F : Facts) (op : BinOp) (p : PrimTy) (a b : LTerm) : Bool :
     | some (l, h) => inTy p l && inTy p h
     | none => false)
 
-theorem Facts.fitsArith_sound {σ : State} {F : Facts} (hF : F.Ok σ) {op : BinOp} {p : PrimTy}
+theorem Facts.fitsArith_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {op : BinOp} {p : PrimTy}
     {a b : LTerm} (h : F.fitsArith op p a b = true) {x y : Value} (ha : a.eval σ = .ok x)
     (hb : b.eval σ = .ok y) : ∃ v, evalBinop op p x (.ok y) = .ok v := by
   simp only [Facts.fitsArith, Bool.and_eq_true] at h
@@ -2440,7 +2440,7 @@ theorem evalBinop_or_bool (p : PrimTy) (a b : Bool) :
     ∃ v, evalBinop .or p (.bool a) (.ok (.bool b)) = .ok v := by
   cases a <;> cases b <;> exact ⟨_, rfl⟩
 
-theorem Facts.binRets_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
+theorem Facts.binRets_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
     (hN : ∀ t, Keeps σ t (N t)) {op : BinOp} {p : PrimTy}
     {a b : LTerm} {rb : Bool} (h : F.binRets N op p a b rb = true) {x : Value}
     (ha : a.eval σ = .ok x) (hb : rb = true → Returns σ b) :
@@ -2484,7 +2484,7 @@ theorem Facts.binRets_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm �
        · exact F.knownOp_sound hF hN h ha hy
        · exact F.fitsArith_sound hF h ha hy)
 
-theorem Facts.unRets_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
+theorem Facts.unRets_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
     (hN : ∀ t, Keeps σ t (N t)) {op : UnOp} {p : PrimTy}
     {a : LTerm} (h : F.unRets N op p a = true) {x : Value} (ha : a.eval σ = .ok x) :
     ∃ v, (applyUnOp op x >>= unopCheck op p) = .ok v := by
@@ -2502,9 +2502,9 @@ theorem Facts.unRets_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm �
 
 /-- A path the layout types and whose keys return resolves in the initial
 storage, to a value canonical at its type. -/
-theorem Facts.resolve {σ : State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T : Ty}
+theorem Facts.resolve {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T : Ty}
     (hk : ∃ qs, q.eval σ = .ok qs) (ht : F.pty q = some T) :
-    ∃ qs w, q.eval σ = .ok qs ∧ (SVal.struct σ.storage).findLive qs = .ok w ∧
+    ∃ qs w, q.eval σ = .ok qs ∧ (Semantics.SVal.struct σ.storage).findLive qs = .ok w ∧
       w.canonB T = true := by
   obtain ⟨qs, hq⟩ := hk
   obtain ⟨w, hw, hc⟩ := F.pty_find hF ht hq
@@ -2513,7 +2513,7 @@ theorem Facts.resolve {σ : State} {F : Facts} (hF : F.Ok σ) {q : LPath} {T : T
 mutual
 
 /-- **What `Facts.rets` accepts returns.** -/
-theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
+theorem Facts.retsW_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
     (hN : ∀ t, Keeps σ t (N t)) :
     (t : LTerm) → F.retsW N t = true → Returns σ t
   | .lit _, _ => ⟨_, rfl⟩
@@ -2752,7 +2752,7 @@ theorem Facts.retsW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm →
       exact ⟨_, by simp only [LTerm.eval, hq, Res.ok_bind] <;> rfl⟩
 
 /-- A path whose keys return integers evaluates. -/
-theorem Facts.keysRetW_sound {σ : State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
+theorem Facts.keysRetW_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {N : LTerm → LTerm}
     (hN : ∀ t, Keeps σ t (N t)) :
     (q : LPath) → F.keysRetW N q = true → ∃ qs, q.eval σ = .ok qs
   | .root _, _ => ⟨_, rfl⟩
@@ -2774,7 +2774,7 @@ end
 def Facts.kind (F : Facts) (t : LTerm) : Option Bool :=
   if F.isInt t then some true else if F.isBool t then some false else none
 
-theorem Facts.kind_ok {σ : State} {F : Facts} (hF : F.Ok σ) : KindOk σ F.kind := by
+theorem Facts.kind_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) : KindOk σ F.kind := by
   intro t v hv
   unfold Facts.kind
   refine ⟨fun h => ?_, fun h => ?_⟩
@@ -2805,19 +2805,19 @@ def Facts.halts (F : Facts) : LTerm → Bool
   | key{ delValue(a) } => F.halts a
   | _ => false
 
-theorem canonB_map_ty {es : List (Int × SVal)} {d : SVal} {T : Ty}
-    (h : (SVal.map es d).canonB T = true) : ∃ K V, T = .ref (.mapping K V) := by
+theorem canonB_map_ty {es : List (Int × Semantics.SVal)} {d : Semantics.SVal} {T : Ty}
+    (h : (Semantics.SVal.map es d).canonB T = true) : ∃ K V, T = .ref (.mapping K V) := by
   match T, h with
   | .ref (.mapping K V), _ => exact ⟨K, V, rfl⟩
 
-theorem canonB_fixed_ty {es sh : List SVal} {T : Ty}
-    (h : (SVal.array es sh true).canonB T = true) : ∃ E n, T = .ref (.fixed E n) := by
+theorem canonB_fixed_ty {es sh : List Semantics.SVal} {T : Ty}
+    (h : (Semantics.SVal.array es sh true).canonB T = true) : ∃ E n, T = .ref (.fixed E n) := by
   match T, h with
   | .ref (.fixed E n), _ => exact ⟨E, n, rfl⟩
   | .ref (.array E), h => simp only [SVal.canonB, Bool.not_true, Bool.false_and,
       Bool.false_eq_true] at h
 
-theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
+theorem Facts.halts_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) :
     (t : LTerm) → F.halts t = true → ∀ v, t.eval σ ≠ .ok v
   | .err, _, _, h => nomatch h
   | .seq d a, hh, v, h => by
@@ -2905,7 +2905,7 @@ theorem Facts.halts_sound {σ : State} {F : Facts} (hF : F.Ok σ) :
 `rets` reads `nfH` back). -/
 def Facts.orcH (F : Facts) : Orc := { kind := F.kind, halts := F.halts }
 
-theorem Facts.orcH_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orcH.Ok σ :=
+theorem Facts.orcH_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) : F.orcH.Ok σ :=
   ⟨F.kind_ok hF, fun t v h => F.halts_sound hF t h v, (Orc.ok_none σ).2.2.1,
     (Orc.ok_none σ).2.2.2.1, (Orc.ok_none σ).2.2.2.2⟩
 
@@ -2913,7 +2913,7 @@ theorem Facts.orcH_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orcH.Ok σ :=
 `delete` reset, `kite(k, (len; 0) + 1 - 1, …)`, gets its literal. -/
 def Facts.nfH (F : Facts) (t : LTerm) : LTerm := ((t.core F.ne).arith).simpE F.orcH F.eqs
 
-theorem Facts.nfH_keeps {σ : State} {F : Facts} (hF : F.Ok σ) (t : LTerm) : Keeps σ t (F.nfH t) :=
+theorem Facts.nfH_keeps {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) (t : LTerm) : Keeps σ t (F.nfH t) :=
   fun v h => LTerm.simpE_eval (F.orcH_ok hF) hF.2.2.1 _ v
     (LTerm.arith_eval _ (LTerm.core_eval hF.2.1 t h))
 
@@ -2930,7 +2930,7 @@ def Facts.orc (F : Facts) : Orc :=
     rets := fun t => F.retsW F.nf0 t || (t.isKite && F.retsW F.nfH t),
     range := F.range, lo := F.lo }
 
-theorem Facts.orc_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orc.Ok σ :=
+theorem Facts.orc_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) : F.orc.Ok σ :=
   ⟨F.kind_ok hF, fun t v h => F.halts_sound hF t h v,
     fun t h => by
       rcases Bool.or_eq_true_iff.1 h with h | h
@@ -2943,12 +2943,12 @@ theorem Facts.orc_ok {σ : State} {F : Facts} (hF : F.Ok σ) : F.orc.Ok σ :=
 a default of a known kind read as `0` or `false`. -/
 def Facts.nf (F : Facts) (t : LTerm) : LTerm := ((t.core F.ne).arith).simpE F.orc F.eqs
 
-theorem Facts.nf_keeps {σ : State} {F : Facts} (hF : F.Ok σ) (t : LTerm) : Keeps σ t (F.nf t) :=
+theorem Facts.nf_keeps {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) (t : LTerm) : Keeps σ t (F.nf t) :=
   fun v h => LTerm.simpE_eval (F.orc_ok hF) hF.2.2.1 _ v
     (LTerm.arith_eval _ (LTerm.core_eval hF.2.1 t h))
 
 /-- A term whose normal form is a literal returns that literal, if anything. -/
-theorem Facts.nf_lit {σ : State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {w v : Value}
+theorem Facts.nf_lit {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {w v : Value}
     (hn : F.nf t = .lit w) (hv : t.eval σ = .ok v) : v = w := by
   have h := F.nf_keeps hF t v hv
   rw [hn] at h
@@ -2961,7 +2961,7 @@ def Facts.rets (F : Facts) : LTerm → Bool := F.retsW F.nf
 /-- Every key returns an integer, by the typed normal form. -/
 def Facts.keysRet (F : Facts) : LPath → Bool := F.keysRetW F.nf
 
-theorem Facts.rets_sound {σ : State} {F : Facts} (hF : F.Ok σ) (t : LTerm)
+theorem Facts.rets_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) (t : LTerm)
     (h : F.rets t = true) : Returns σ t :=
   F.retsW_sound hF (F.nf_keeps hF) t h
 
@@ -3047,7 +3047,7 @@ theorem unop_not {p : PrimTy} {x : Value} {b : Bool}
 def Facts.addEq (F : Facts) (t : LTerm) (v : Value) : Facts :=
   { F with known := t :: F.known, eqs := (F.nf t, .lit v) :: F.eqs }
 
-theorem Facts.addEq_ok {σ : State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {v : Value}
+theorem Facts.addEq_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {v : Value}
     (ht : t.eval σ = .ok v) : (F.addEq t v).Ok σ := by
   obtain ⟨hk, hn, he, hl, hv⟩ := hF
   refine ⟨?_, hn, ?_, hl, hv⟩
@@ -3071,7 +3071,7 @@ def LTerm.isAtomT : LTerm → Bool
 `b`'s. -/
 def Facts.addSubst (F : Facts) (a b : LTerm) : Facts := { F with eqs := (F.nf a, F.nf b) :: F.eqs }
 
-theorem Facts.addSubst_ok {σ : State} {F : Facts} (hF : F.Ok σ) {a b : LTerm} {x : Value}
+theorem Facts.addSubst_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {a b : LTerm} {x : Value}
     (ha : a.eval σ = .ok x) (hb : b.eval σ = .ok x) : (F.addSubst a b).Ok σ := by
   obtain ⟨hk, hn, he, hl, hv⟩ := hF
   refine ⟨hk, hn, ?_, hl, hv⟩
@@ -3087,7 +3087,7 @@ theorem Facts.addSubst_ok {σ : State} {F : Facts} (hF : F.Ok σ) {a b : LTerm} 
 def Facts.withNe (F : Facts) (c : Bool) (a b : LTerm) : Facts :=
   { F with known := a.strict ++ b.strict ++ F.known, ne := (c, a, b) :: F.ne }
 
-theorem Facts.withNe_ok {σ : State} {F : Facts} (hF : F.Ok σ) {c : Bool} {a b : LTerm}
+theorem Facts.withNe_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {c : Bool} {a b : LTerm}
     {x y : Value} (ha : a.eval σ = .ok x) (hb : b.eval σ = .ok y) (hxy : x = y ↔ c = true) :
     (F.withNe c a b).Ok σ := by
   obtain ⟨hk, hn, he, hl, hv⟩ := hF
@@ -3120,7 +3120,7 @@ def Facts.eqnK (F : Facts) (a b : LTerm) (ka kb : Facts → Value → Facts) : F
       else if ((F.withNe true a b).nf a).isAtomT then (F.withNe true a b).addSubst b a
       else F.withNe true a b
 
-theorem Facts.eqnK_ok {σ : State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
+theorem Facts.eqnK_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
     {ka kb : Facts → Value → Facts} {x : Value} (ha : a.eval σ = .ok x) (hb : b.eval σ = .ok x)
     (hka : ∀ G w, G.Ok σ → a.eval σ = .ok w → (ka G w).Ok σ)
     (hkb : ∀ G w, G.Ok σ → b.eval σ = .ok w → (kb G w).Ok σ) :
@@ -3207,7 +3207,7 @@ def Facts.narrow (F : Facts) (t : LTerm) (lo hi : Option Int) : Facts :=
   | some (l, h) => { F with bnds := (t, max l (lo.getD l), min h (hi.getD h)) :: F.bnds }
   | none => F
 
-theorem Facts.narrow_ok {σ : State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {i : Int}
+theorem Facts.narrow_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {i : Int}
     (ht : t.eval σ = .ok (.int i)) {lo hi : Option Int} (hlo : ∀ l, lo = some l → l ≤ i)
     (hhi : ∀ h, hi = some h → i ≤ h) : (F.narrow t lo hi).Ok σ := by
   unfold Facts.narrow
@@ -3242,7 +3242,7 @@ def Facts.addCmp (F : Facts) (op : BinOp) (a b : LTerm) (c : Bool) : Facts :=
     | .lit (.int k) => F.narrow b (cmpBoundR op c k).1 (cmpBoundR op c k).2
     | _ => F
 
-theorem Facts.addCmp_ok {σ : State} {F : Facts} (hF : F.Ok σ) {op : BinOp} {a b : LTerm}
+theorem Facts.addCmp_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {op : BinOp} {a b : LTerm}
     {i j : Int} (ha : a.eval σ = .ok (.int i)) (hb : b.eval σ = .ok (.int j)) {c : Bool}
     (hc : cmpOp op i j = c) : (F.addCmp op a b c).Ok σ := by
   unfold Facts.addCmp
@@ -3277,7 +3277,7 @@ def Facts.decomp (F : Facts) : LTerm → Value → Facts
   | t@(.unop .not _ a), .bool c => ((F.addEq t (.bool c)).decomp a (.bool !c))
   | t, v => F.addEq t v
 
-theorem Facts.decomp_ok {σ : State} :
+theorem Facts.decomp_ok {σ : Semantics.State} :
     (t : LTerm) → ∀ {F : Facts} {v : Value}, F.Ok σ → t.eval σ = .ok v → (F.decomp t v).Ok σ
   | .seq d a, F, v, hF, ht => by
     simp only [Facts.decomp]
@@ -3341,7 +3341,7 @@ theorem Facts.decomp_ok {σ : State} :
 /-- `a` and `b` never return one value. -/
 def Facts.apartNe (F : Facts) (a b : LTerm) : Facts := { F with ne := (false, a, b) :: F.ne }
 
-theorem Facts.apartNe_ok {σ : State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
+theorem Facts.apartNe_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
     (h : ∀ x y, a.eval σ = .ok x → b.eval σ = .ok y → x ≠ y) : (F.apartNe a b).Ok σ := by
   obtain ⟨hk, hn, he, hl, hv⟩ := hF
   refine ⟨hk, ?_, he, hl, hv⟩
@@ -3365,7 +3365,7 @@ def Facts.prem (F : Facts) : LFml → Facts
   | .and φ ψ => (F.prem φ).prem ψ
   | _ => F
 
-theorem Facts.prem_ok {σ : State} : (φ : LFml) → ∀ {F : Facts}, F.Ok σ → φ.holds σ →
+theorem Facts.prem_ok {σ : Semantics.State} : (φ : LFml) → ∀ {F : Facts}, F.Ok σ → φ.holds σ →
     (F.prem φ).Ok σ
   | .eq a b, F, hF, h => by
     obtain ⟨x, ha, hb⟩ := (LFml.holds_eq_iff σ a b).1 h
@@ -3405,7 +3405,7 @@ def Facts.apart (F : Facts) (a b : LTerm) : Bool :=
   F.halts a || F.halts b || F.nf a == .err || F.nf b == .err || litNe (F.nf a) (F.nf b) ||
     F.ne.any fun (c, p, q) => !c && ((p == a && q == b) || (p == b && q == a))
 
-theorem Facts.apart_sound {σ : State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
+theorem Facts.apart_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
     (h : F.apart a b = true) : ¬ (LFml.eq a b).holds σ := by
   intro hab
   obtain ⟨x, ha, hb⟩ := (LFml.holds_eq_iff σ a b).1 hab
@@ -3454,7 +3454,7 @@ def Facts.fresh (F : Facts) (x : Var) : Bool :=
 def Facts.bind (F : Facts) (x : Var) (p : PrimTy) : Facts :=
   { F with vars := (x, p) :: F.vars.filter (·.1 != x) }
 
-theorem Facts.bind_ok {σ : State} {F : Facts} (hF : F.Ok σ) {x : Var} (hx : F.fresh x = true)
+theorem Facts.bind_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {x : Var} (hx : F.fresh x = true)
     {p : PrimTy} {v : Value} (hv : p.admits v) : (F.bind x p).Ok (σ.setEnv x (.val v)) := by
   obtain ⟨hk, hn, he, hl, hvs, hb⟩ := hF
   simp only [Facts.fresh, Bool.and_eq_true, List.all_eq_true, Bool.not_eq_true',
@@ -3495,7 +3495,7 @@ def Facts.split (F : Facts) (k : Facts → Bool) (cs : List LTerm) : Bool :=
   k F || cs.any fun c => F.rets c && F.isBool c &&
     k (F.addEq c (.bool true)) && k (F.addEq c (.bool false))
 
-theorem Facts.split_sound {σ : State} {F : Facts} (hF : F.Ok σ) {k : Facts → Bool}
+theorem Facts.split_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {k : Facts → Bool}
     {cs : List LTerm} {P : Prop} (hk : ∀ G : Facts, G.Ok σ → k G = true → P)
     (h : F.split k cs = true) : P := by
   simp only [Facts.split, Bool.or_eq_true, List.any_eq_true, Bool.and_eq_true] at h
@@ -3514,7 +3514,7 @@ def Facts.eqHolds (F : Facts) (a b : LTerm) : Bool :=
     (F.nf a == F.nf b || F.ne.any fun (c, p, q) => c && F.rets p && F.rets q &&
       ((F.nf a == F.nf p && F.nf b == F.nf q) || (F.nf a == F.nf q && F.nf b == F.nf p)))
 
-theorem Facts.eqHolds_sound {σ : State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
+theorem Facts.eqHolds_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {a b : LTerm}
     (h : F.eqHolds a b = true) : (LFml.eq a b).holds σ := by
   simp only [Facts.eqHolds, Bool.and_eq_true, Bool.or_eq_true, beq_iff_eq,
     List.any_eq_true] at h
@@ -3562,7 +3562,7 @@ end
 
 mutual
 
-theorem Facts.prove_sound : (φ : LFml) → ∀ {σ : State} {F : Facts}, F.Ok σ →
+theorem Facts.prove_sound : (φ : LFml) → ∀ {σ : Semantics.State} {F : Facts}, F.Ok σ →
     F.prove φ = true → φ.holds σ
   | .tt, _, _, _, _ => trivial
   | .imp φ ψ, σ, F, hF, h => fun hφ => by
@@ -3582,7 +3582,7 @@ theorem Facts.prove_sound : (φ : LFml) → ∀ {σ : State} {F : Facts}, F.Ok �
     intro v hv
     exact Facts.prove_sound φ (F.bind_ok hF h.1 hv) h.2
 
-theorem Facts.refute_sound : (φ : LFml) → ∀ {σ : State} {F : Facts}, F.Ok σ →
+theorem Facts.refute_sound : (φ : LFml) → ∀ {σ : Semantics.State} {F : Facts}, F.Ok σ →
     F.refute φ = true → ¬ φ.holds σ
   | .tt, _, _, _, h => by simp only [refute, Bool.false_eq_true] at h
   | .all .., _, _, _, h => by simp only [refute, Bool.false_eq_true] at h
@@ -3604,7 +3604,7 @@ end
 layout `L` (none asked when `L` is empty). -/
 def LFml.close (L : List (Name × Ty)) (φ : LFml) : Bool := Facts.prove { lay := L } φ
 
-theorem LFml.close_holds {L : List (Name × Ty)} {φ : LFml} {σ : State} (hL : LayoutOk L σ)
+theorem LFml.close_holds {L : List (Name × Ty)} {φ : LFml} {σ : Semantics.State} (hL : LayoutOk L σ)
     (h : LFml.close L φ = true) : φ.holds σ :=
   Facts.prove_sound φ (F := { lay := L })
     ⟨fun _ hu => (nomatch hu), fun _ hp => (nomatch hp), fun _ hp => (nomatch hp), hL,

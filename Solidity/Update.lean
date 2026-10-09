@@ -219,39 +219,39 @@ inductive Op3 : Srt → Srt → Srt → Srt → Type where
   deriving DecidableEq, Repr
 
 /-- A term of sort `s`: a variable, or a symbol applied to terms. -/
-inductive Tm (C : Contract) : Srt → Type where
+inductive Surface.Tm (C : Contract) : Srt → Type where
   /-- A stack local. -/
-  | pvV (x : Var) : Tm C .val
+  | pvV (x : Var) : Surface.Tm C .val
   /-- A storage alias. -/
-  | pvP (x : Var) : Tm C .path
+  | pvP (x : Var) : Surface.Tm C .path
   /-- A storage variable: KeY's `old`, of sort `Struct`, bound by the update
   `old := storage` in front of a specification's modality. -/
-  | pvS (x : Var) : Tm C .st
+  | pvS (x : Var) : Surface.Tm C .st
   /-- A memory local. -/
-  | pvI (x : Var) : Tm C .ident
-  | app0 {s : Srt} (o : Op0 s) : Tm C s
-  | app1 {a s : Srt} (o : Op1 a s) (x : Tm C a) : Tm C s
-  | app2 {a b s : Srt} (o : Op2 a b s) (x : Tm C a) (y : Tm C b) : Tm C s
-  | app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C a) (y : Tm C b) (z : Tm C c) : Tm C s
+  | pvI (x : Var) : Surface.Tm C .ident
+  | app0 {s : Srt} (o : Op0 s) : Surface.Tm C s
+  | app1 {a s : Srt} (o : Op1 a s) (x : Surface.Tm C a) : Surface.Tm C s
+  | app2 {a b s : Srt} (o : Op2 a b s) (x : Surface.Tm C a) (y : Surface.Tm C b) : Surface.Tm C s
+  | app3 {a b c s : Srt} (o : Op3 a b c s) (x : Surface.Tm C a) (y : Surface.Tm C b) (z : Surface.Tm C c) : Surface.Tm C s
   deriving DecidableEq, Repr
 
 /-- A value term. -/
-abbrev Term (C : Contract) := Tm C .val
+abbrev Term (C : Contract) := Surface.Tm C .val
 /-- A storage path. -/
-abbrev PTerm (C : Contract) := Tm C .path
+abbrev PTerm (C : Contract) := Surface.Tm C .path
 /-- A storage. -/
-abbrev STerm (C : Contract) := Tm C .st
+abbrev STerm (C : Contract) := Surface.Tm C .st
 /-- What a storage `save` writes: a value, a subtree read out of a storage,
 or a memory object copied back (`copyMem(mtSt, m, i)`). -/
-abbrev SValT (C : Contract) := Tm C .sv
+abbrev SValT (C : Contract) := Surface.Tm C .sv
 /-- A memory identity. -/
-abbrev ITerm (C : Contract) := Tm C .ident
+abbrev ITerm (C : Contract) := Surface.Tm C .ident
 /-- A member or an element of a memory object. -/
-abbrev MAddr (C : Contract) := Tm C .addr
+abbrev Surface.MAddr (C : Contract) := Surface.Tm C .addr
 /-- A memory. -/
-abbrev MTerm (C : Contract) := Tm C .mem
+abbrev MTerm (C : Contract) := Surface.Tm C .mem
 /-- What a memory `write` writes: a value or a reference. -/
-abbrev MValT (C : Contract) := Tm C .mv
+abbrev MValT (C : Contract) := Surface.Tm C .mv
 
 section Ctors
 
@@ -265,7 +265,7 @@ variable {C : Contract}
   .app1 (.unop op p) a
 @[match_pattern, reducible] def Term.find (s : STerm C) (p : PTerm C) : Term C := .app2 .find s p
 @[match_pattern, reducible] def Term.len (s : STerm C) (p : PTerm C) : Term C := .app2 .len s p
-@[match_pattern, reducible] def Term.read (m : MTerm C) (a : MAddr C) : Term C := .app2 .read m a
+@[match_pattern, reducible] def Term.read (m : MTerm C) (a : Surface.MAddr C) : Term C := .app2 .read m a
 @[match_pattern, reducible] def Term.ite (c a b : Term C) : Term C := .app3 .ite c a b
 @[match_pattern, reducible] def Term.mlen (m : MTerm C) (i : ITerm C) : Term C := .app2 .mlen m i
 @[match_pattern, reducible] def Term.env (k : EnvKey) : Term C := .app0 (.env k)
@@ -307,15 +307,15 @@ variable {C : Contract}
 @[match_pattern, reducible] def SValT.newArr (R : RefTy) (n : Term C) : SValT C := .app1 (.newArr R) n
 
 @[match_pattern, reducible] def ITerm.pv (x : Var) : ITerm C := .pvI x
-@[match_pattern, reducible] def ITerm.read (m : MTerm C) (a : MAddr C) : ITerm C := .app2 .iread m a
+@[match_pattern, reducible] def ITerm.read (m : MTerm C) (a : Surface.MAddr C) : ITerm C := .app2 .iread m a
 @[match_pattern, reducible] def ITerm.alloc (m : MTerm C) (R : RefTy) : ITerm C := .app1 (.alloc R) m
 @[match_pattern, reducible] def ITerm.copy (m : MTerm C) (v : SValT C) : ITerm C := .app2 .copy m v
 
-@[match_pattern, reducible] def MAddr.field (i : ITerm C) (f : Name) : MAddr C := .app1 (.mfield f) i
-@[match_pattern, reducible] def MAddr.at (i : ITerm C) (k : Term C) : MAddr C := .app2 .mat i k
+@[match_pattern, reducible] def Surface.MAddr.field (i : ITerm C) (f : Name) : Surface.MAddr C := .app1 (.mfield f) i
+@[match_pattern, reducible] def Surface.MAddr.at (i : ITerm C) (k : Term C) : Surface.MAddr C := .app2 .mat i k
 
 @[match_pattern, reducible] def MTerm.memory : MTerm C := .app0 .memory
-@[match_pattern, reducible] def MTerm.write (m : MTerm C) (a : MAddr C) (v : MValT C) : MTerm C :=
+@[match_pattern, reducible] def MTerm.write (m : MTerm C) (a : Surface.MAddr C) (v : MValT C) : MTerm C :=
   .app3 .write m a v
 @[match_pattern, reducible] def MTerm.addM (m : MTerm C) (R : RefTy) : MTerm C := .app1 (.addM R) m
 @[match_pattern, reducible] def MTerm.copySt (m : MTerm C) (v : SValT C) : MTerm C := .app2 .copySt m v
@@ -507,7 +507,7 @@ def Op3.eval (_σ : State) : Op3 a b c s → a.Ev → b.Ev → c.Ev → s.Ev
 
 /-- A term read in `σ` by the interpreter: a storage or memory term reads to
 the state with that storage or memory. -/
-def Tm.eval (σ : State) : Tm C s → s.Ev
+def Surface.Tm.eval (σ : State) : Surface.Tm C s → s.Ev
   | .pvV x => do
     match ← σ.getEnv x with
     | .val v => pure v
@@ -527,7 +527,7 @@ def Tm.eval (σ : State) : Tm C s → s.Ev
   | .app2 o a b => o.eval σ (a.eval σ) (b.eval σ)
   | .app3 o a b c => o.eval σ (a.eval σ) (b.eval σ) (c.eval σ)
 
-attribute [tm_eval] Tm.eval Op0.eval Op1.eval Op2.eval Op3.eval
+attribute [tm_eval] Surface.Tm.eval Op0.eval Op1.eval Op2.eval Op3.eval
 
 /-! ## What a term denotes in the Theory
 
@@ -560,7 +560,7 @@ def Theory.StValue.toRes : StValue → Res Value
   | .st _ => .error .undef
 
 /-- An interpreter result as a Theory value: a halt reads as nothing. -/
-def Res.toSt : Res Value → StValue
+def Semantics.Res.toSt : Res Value → StValue
   | .ok v => .prim v
   | .error _ => .st .mtSt
 
@@ -640,7 +640,7 @@ def Op3.denote : Op3 a b c s → a.Den → b.Den → c.Den → s.Den
   | .write, _, _, _ => ()
 
 /-- A term in the Theory, over `State.abs σ`. -/
-def Tm.denote (σ : State) : Tm C s → s.Den
+def Surface.Tm.denote (σ : State) : Surface.Tm C s → s.Den
   | .pvV x => match σ.getEnv x with
     | .ok (.val v) => .prim v
     | _ => .st .mtSt
@@ -656,7 +656,7 @@ def Tm.denote (σ : State) : Tm C s → s.Den
   | .app2 o a b => o.denote σ (a.eval σ) (b.eval σ) (a.denote σ) (b.denote σ)
   | .app3 o a b c => o.denote (a.denote σ) (b.denote σ) (c.denote σ)
 
-attribute [tm_denote] Tm.denote Op0.denote Op1.denote Op2.denote Op3.denote
+attribute [tm_denote] Surface.Tm.denote Op0.denote Op1.denote Op2.denote Op3.denote
 
 
 /-- A binop that returns on a halting right operand short-circuited, so it
@@ -697,14 +697,14 @@ def IntOp.apply : IntOp → Int → Int → Int
   | .add, a, b => a + b
   | .sub, a, b => a - b
 
-/-- The operator as a Lean term, for the quoters (`Calculus/Quote.lean`,
+/-- The operator as a Lean term, for the quoters (`Calculus/NFmlQuote.lean`,
 `Calculus/Core/Quote.lean`). -/
 def IntOp.quote : IntOp → Lean.Expr
   | .add => Lean.mkConst ``IntOp.add
   | .sub => Lean.mkConst ``IntOp.sub
 
 /-- One elementary update. -/
-inductive UpdElem (C : Contract) where
+inductive Surface.UpdElem (C : Contract) where
   /-- `v := t` -/
   | val (x : Var) (t : Term C)
   /-- `lsv := p`: an alias binds a path. -/
@@ -750,11 +750,11 @@ inductive UpdElem (C : Contract) where
   | setBalance (a : Term C)
 
 /-- A parallel update `{a ‖ b ‖ …}`. -/
-abbrev Upd (C : Contract) := List (UpdElem C)
+abbrev Surface.Upd (C : Contract) := List (Surface.UpdElem C)
 
 /-- One elementary update: the right-hand side is read in the *pre*-state
 `σ₀`, the write goes into `τ`.  That is what makes a list of them parallel. -/
-def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
+def Surface.UpdElem.write (σ₀ : State) : Surface.UpdElem C → State → Res State
   | .val x t, τ => do pure (τ.setEnv x (.val (← t.eval σ₀)))
   | .path x p, τ => do
     let (r, segs) ← p.eval σ₀
@@ -790,7 +790,7 @@ def UpdElem.write (σ₀ : State) : UpdElem C → State → Res State
     pure { τ with selfBalance := amt }
 
 /-- The state an update leaves, from `σ`. -/
-def Upd.apply (U : Upd C) (σ : State) : Res State :=
+def Surface.Upd.apply (U : Surface.Upd C) (σ : State) : Res State :=
   U.foldlM (fun τ e => e.write σ τ) σ
 
 /-! ## States a callee may leave -/
@@ -904,7 +904,7 @@ inductive NFml (C : Contract) where
   | and (φ ψ : NFml C)
   | imp (φ ψ : NFml C)
   /-- `{U} φ`, produced under the modality `m`. -/
-  | upd (m : Modality) (U : Upd C) (φ : NFml C)
+  | upd (m : Modality) (U : Surface.Upd C) (φ : NFml C)
   /-- `{havoc} φ`: `φ` after any storage and ledger a callee may
   leave — KeY's anonymising update with fresh skolem symbols. -/
   | havoc (φ : NFml C)
@@ -934,26 +934,26 @@ def PrimTy.admits : PrimTy → Value → Prop
 
 /-- Whether `φ` holds in `σ`.  An equation compares the Theory values of its
 sides, up to `StValue.Equiv`; `defined` says a term returns. -/
-def holds (σ : State) : NFml C → Prop
+def NFml.holds (σ : State) : NFml C → Prop
   | .tt => True
   | .eq a b => Theory.StValue.Equiv (a.denote σ) (b.denote σ)
   | .defined t => ∃ x, t.eval σ = .ok x
-  | .not φ => ¬ holds σ φ
-  | .and φ ψ => holds σ φ ∧ holds σ ψ
-  | .imp φ ψ => holds σ φ → holds σ ψ
-  | .upd m U φ => m.after (holds · φ) (U.apply σ)
-  | .havoc φ => ∀ st nt, holds (σ.havoc st nt) φ
-  | .all x p φ => ∀ v, p.admits v → holds (σ.setEnv x (.val v)) φ
-  | .anon xs φ => ∀ b, holds (σ.anon xs b) φ
+  | .not φ => ¬ NFml.holds σ φ
+  | .and φ ψ => NFml.holds σ φ ∧ NFml.holds σ ψ
+  | .imp φ ψ => NFml.holds σ φ → NFml.holds σ ψ
+  | .upd m U φ => m.after (NFml.holds · φ) (U.apply σ)
+  | .havoc φ => ∀ st nt, NFml.holds (σ.havoc st nt) φ
+  | .all x p φ => ∀ v, p.admits v → NFml.holds (σ.setEnv x (.val v)) φ
+  | .anon xs φ => ∀ b, NFml.holds (σ.anon xs b) φ
 
 /-- Valid: true in every state. -/
-def Valid (φ : NFml C) : Prop := ∀ σ, holds σ φ
+def NFml.Valid (φ : NFml C) : Prop := ∀ σ, NFml.holds σ φ
 
 /-! ## Formulas as written
 
 `Surface.Fml` is `Fml` with the two modalities over the untyped statements
 (`Syntax.lean`): what `dl!{ … }` reads, a specification's obligation and a
-problem state (`Calculus/Spec.lean`, `Calculus/Problem.lean`), and what the
+problem state (`Calculus/SurfaceSpec.lean`, `Calculus/Problem.lean`), and what the
 printers print (`RuleSyntax.lean`'s `ppFml`, `Core.Fml.eraseS`).  It has no
 reading: `Core.Fml.resolveN` makes it a scoped formula, read by the typed
 run, and `Surface.Fml.toFml` the closer's `Fml` when it has no modality.
@@ -1048,18 +1048,18 @@ theorem PrimTy.admits_iff_fits (p : PrimTy) (v : Value) : p.admits v ↔ v.fits 
 outcome's data binds them. -/
 def Binds (xs : List (PrimTy × Var)) (σ σ' : State) : Prop := ∃ vs, bindData xs vs σ = .ok σ'
 
-theorem holds_conj {σ : State} : {φs : List (NFml C)} → (holds σ (NFml.conj φs) ↔ ∀ φ ∈ φs, holds σ φ)
-  | [] => by simp [NFml.conj, holds]
+theorem NFml.holds_conj {σ : State} : {φs : List (NFml C)} → (NFml.holds σ (NFml.conj φs) ↔ ∀ φ ∈ φs, NFml.holds σ φ)
+  | [] => by simp [NFml.conj, NFml.holds]
   | [φ] => by simp [NFml.conj]
-  | φ :: ψ :: φs => by simp [NFml.conj, holds, holds_conj (φs := ψ :: φs)]
+  | φ :: ψ :: φs => by simp [NFml.conj, NFml.holds, NFml.holds_conj (φs := ψ :: φs)]
 
 theorem holds_alls {φ : NFml C} : {xs : List (PrimTy × Var)} → {σ : State} →
-    (holds σ (NFml.alls xs φ) ↔ ∀ σ', Binds xs σ σ' → holds σ' φ)
+    (NFml.holds σ (NFml.alls xs φ) ↔ ∀ σ', Binds xs σ σ' → NFml.holds σ' φ)
   | [], σ => by
     simp only [NFml.alls, Binds, bindData]
     exact ⟨fun h σ' ⟨_, he⟩ => by cases he; exact h, fun h => h σ ⟨[], rfl⟩⟩
   | (p, x) :: xs, σ => by
-    simp only [NFml.alls, holds, holds_alls (xs := xs), Binds, PrimTy.admits_iff_fits]
+    simp only [NFml.alls, NFml.holds, holds_alls (xs := xs), Binds, PrimTy.admits_iff_fits]
     constructor
     · rintro h σ' ⟨_ | ⟨v, vs⟩, he⟩
       · simp [bindData] at he
@@ -1079,7 +1079,7 @@ declare a fresh `se1` in front of the rest of the program and the
 postcondition. -/
 
 /-- The variables a term reads. -/
-def Tm.vars : Tm C s → List Var
+def Surface.Tm.vars : Surface.Tm C s → List Var
   | .pvV x | .pvP x | .pvS x | .pvI x => [x]
   | .app0 _ => []
   | .app1 (.netOf x) a => x :: a.vars
@@ -1087,7 +1087,7 @@ def Tm.vars : Tm C s → List Var
   | .app2 _ a b => a.vars ++ b.vars
   | .app3 _ a b c => a.vars ++ b.vars ++ c.vars
 
-def UpdElem.vars : UpdElem C → List Var
+def Surface.UpdElem.vars : Surface.UpdElem C → List Var
   | .val x t => x :: t.vars
   | .path x p => x :: p.vars
   | .mref x i => x :: i.vars
@@ -1101,9 +1101,9 @@ def UpdElem.vars : UpdElem C → List Var
   | .netMt r a => r.vars ++ a.vars
   | .setBalance a => a.vars
 
-def Upd.vars : Upd C → List Var
+def Surface.Upd.vars : Surface.Upd C → List Var
   | [] => []
-  | e :: U => e.vars ++ Upd.vars U
+  | e :: U => e.vars ++ Surface.Upd.vars U
 
 /-- The variables a formula mentions, a quantifier's own included. -/
 def NFml.vars : NFml C → List Var
@@ -1112,7 +1112,7 @@ def NFml.vars : NFml C → List Var
   | .defined t => t.vars
   | .not φ => φ.vars
   | .and φ ψ | .imp φ ψ => φ.vars ++ ψ.vars
-  | .upd _ U φ => Upd.vars U ++ φ.vars
+  | .upd _ U φ => Surface.Upd.vars U ++ φ.vars
   | .havoc φ => φ.vars
   | .all x _ φ => x :: φ.vars
   | .anon xs φ => xs ++ φ.vars
@@ -1143,7 +1143,7 @@ A symbol reads its arguments and, at most, the state's environment, ledger
 and storage.  So two states that agree off `ns` read a symbol alike once its
 arguments read alike (`OpN.eval_agree`), and a term that avoids `ns` reads
 alike (`Tm.eval_frame`): a value equal, a storage or memory to states that
-agree off `ns` (`Srt.Agree`).  Substitution (`Calculus/UpdateRules.lean`)
+agree off `ns` (`Srt.Agree`).  Substitution (`Calculus/NFmlUpdateRules.lean`)
 reuses the per-symbol lemmas, with the variables read after the update. -/
 
 /-- Two readings of a sort agree off `ns`: equal, and for a storage or a
@@ -1163,7 +1163,7 @@ def Op1.vars : Op1 a s → List Var
   | .netOf x => [x]
   | _ => []
 
-theorem Tm.vars_app1 (o : Op1 a s) (t : Tm C a) : (Tm.app1 o t).vars = o.vars ++ t.vars := by
+theorem Surface.Tm.vars_app1 (o : Op1 a s) (t : Surface.Tm C a) : (Surface.Tm.app1 o t).vars = o.vars ++ t.vars := by
   cases o <;> rfl
 
 theorem Op0.eval_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
@@ -1298,12 +1298,12 @@ theorem Op3.eval_agree {σ τ : State} :
     exact bindPureResults_agree _ fun _ => writeAddr_agree h' _ _
 
 /-- A term that avoids `ns` reads alike in two states that agree off `ns`. -/
-theorem Tm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (t : Tm C s) → Avoids t.vars ns → Srt.Agree ns s (t.eval σ) (t.eval τ)
-  | .pvV x, h | .pvI x, h => by simp only [Srt.Agree, Tm.eval, getEnv_congr hag h.head]
+theorem Surface.Tm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (t : Surface.Tm C s) → Avoids t.vars ns → Srt.Agree ns s (t.eval σ) (t.eval τ)
+  | .pvV x, h | .pvI x, h => by simp only [Srt.Agree, Surface.Tm.eval, getEnv_congr hag h.head]
   | .pvP x, h => aliasPath_frame hag h.head
   | .pvS x, h => by
-    simp only [Srt.Agree, Tm.eval, getEnv_congr hag h.head]
+    simp only [Srt.Agree, Surface.Tm.eval, getEnv_congr hag h.head]
     rcases τ.getEnv x with _ | b
     · exact ResultsAgree.refl _ _
     · cases b
@@ -1312,7 +1312,7 @@ theorem Tm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
         | exact ⟨rfl, hag.heap, hag.nextId, hag.net, hag.env, hag.selfBalance, hag.tx⟩
   | .app0 o, _ => o.eval_agree hag
   | .app1 o a, h => by
-    rw [Tm.vars_app1] at h
+    rw [Surface.Tm.vars_app1] at h
     exact o.eval_agree hag h.left (a.eval_frame hag h.right)
   | .app2 o a b, h => o.eval_agree hag (a.eval_frame hag h.left) (b.eval_frame hag h.right)
   | .app3 o a b c, h =>
@@ -1320,21 +1320,21 @@ theorem Tm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
       (c.eval_frame hag h.right)
 
 theorem Term.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (t : Term C)
-    (h : Avoids t.vars ns) : t.eval σ = t.eval τ := Tm.eval_frame hag t h
+    (h : Avoids t.vars ns) : t.eval σ = t.eval τ := Surface.Tm.eval_frame hag t h
 theorem PTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (p : PTerm C)
-    (h : Avoids p.vars ns) : p.eval σ = p.eval τ := Tm.eval_frame hag p h
+    (h : Avoids p.vars ns) : p.eval σ = p.eval τ := Surface.Tm.eval_frame hag p h
 theorem STerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (s : STerm C)
-    (h : Avoids s.vars ns) : ResultsAgree ns (s.eval σ) (s.eval τ) := Tm.eval_frame hag s h
+    (h : Avoids s.vars ns) : ResultsAgree ns (s.eval σ) (s.eval τ) := Surface.Tm.eval_frame hag s h
 theorem SValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (v : SValT C)
-    (h : Avoids v.vars ns) : v.eval σ = v.eval τ := Tm.eval_frame hag v h
+    (h : Avoids v.vars ns) : v.eval σ = v.eval τ := Surface.Tm.eval_frame hag v h
 theorem ITerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (i : ITerm C)
-    (h : Avoids i.vars ns) : i.eval σ = i.eval τ := Tm.eval_frame hag i h
-theorem MAddr.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (a : MAddr C)
-    (h : Avoids a.vars ns) : a.eval σ = a.eval τ := Tm.eval_frame hag a h
+    (h : Avoids i.vars ns) : i.eval σ = i.eval τ := Surface.Tm.eval_frame hag i h
+theorem Surface.MAddr.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (a : Surface.MAddr C)
+    (h : Avoids a.vars ns) : a.eval σ = a.eval τ := Surface.Tm.eval_frame hag a h
 theorem MTerm.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (m : MTerm C)
-    (h : Avoids m.vars ns) : ResultsAgree ns (m.eval σ) (m.eval τ) := Tm.eval_frame hag m h
+    (h : Avoids m.vars ns) : ResultsAgree ns (m.eval σ) (m.eval τ) := Surface.Tm.eval_frame hag m h
 theorem MValT.eval_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (v : MValT C)
-    (h : Avoids v.vars ns) : v.eval σ = v.eval τ := Tm.eval_frame hag v h
+    (h : Avoids v.vars ns) : v.eval σ = v.eval τ := Surface.Tm.eval_frame hag v h
 
 theorem Op0.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
     (o : Op0 s) → o.denote σ = o.denote τ
@@ -1373,42 +1373,42 @@ theorem Op2.denote_agree {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
   | .copySt, _, _, _, _, _, _, _, _ => rfl
 
 /-- A term that avoids `ns` denotes alike in two states that agree off `ns`. -/
-theorem Tm.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
-    (t : Tm C s) → Avoids t.vars ns → t.denote σ = t.denote τ
-  | .pvV x, h | .pvS x, h => by simp only [Tm.denote, getEnv_congr hag h.head]
-  | .pvP x, h => by simp only [Tm.denote, aliasPath_frame hag h.head]
+theorem Surface.Tm.denote_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) :
+    (t : Surface.Tm C s) → Avoids t.vars ns → t.denote σ = t.denote τ
+  | .pvV x, h | .pvS x, h => by simp only [Surface.Tm.denote, getEnv_congr hag h.head]
+  | .pvP x, h => by simp only [Surface.Tm.denote, aliasPath_frame hag h.head]
   | .pvI _, _ => rfl
   | .app0 o, _ => o.denote_agree hag
   | .app1 o a, h => by
-    rw [Tm.vars_app1] at h
-    simp only [Tm.denote, a.denote_frame hag h.right]
+    rw [Surface.Tm.vars_app1] at h
+    simp only [Surface.Tm.denote, a.denote_frame hag h.right]
     exact o.denote_agree hag h.left _
   | .app2 o a b, h => by
-    simp only [Tm.denote, a.denote_frame hag h.left, b.denote_frame hag h.right]
+    simp only [Surface.Tm.denote, a.denote_frame hag h.left, b.denote_frame hag h.right]
     exact o.denote_agree hag (a.eval_frame hag h.left) (b.eval_frame hag h.right) _ _
   | .app3 o a b c, h => by
-    simp only [Tm.denote, a.denote_frame hag h.left.left, b.denote_frame hag h.left.right,
+    simp only [Surface.Tm.denote, a.denote_frame hag h.left.left, b.denote_frame hag h.left.right,
       c.denote_frame hag h.right]
 
-theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀')
-    (h : EnvAgreeExcept ns τ τ') : (e : UpdElem C) → Avoids e.vars ns →
+theorem Surface.UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀')
+    (h : EnvAgreeExcept ns τ τ') : (e : Surface.UpdElem C) → Avoids e.vars ns →
       ResultsAgree ns (e.write σ₀ τ) (e.write σ₀' τ')
   | .val x t, hv => by
-    simp only [UpdElem.write, t.eval_frame h₀ hv.tail]
+    simp only [Surface.UpdElem.write, t.eval_frame h₀ hv.tail]
     agree_run h
   | .path x p, hv => by
-    simp only [UpdElem.write, p.eval_frame h₀ hv.tail]
+    simp only [Surface.UpdElem.write, p.eval_frame h₀ hv.tail]
     agree_run h
   | .mref x i, hv => by
-    simp only [UpdElem.write, i.eval_frame h₀ hv.tail]
+    simp only [Surface.UpdElem.write, i.eval_frame h₀ hv.tail]
     agree_run h
   | .storage s, hv => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     match s.eval σ₀, s.eval σ₀', s.eval_frame h₀ hv with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs => exact ⟨hs.storage, h.heap, h.nextId, h.net, h.env, h.selfBalance, h.tx⟩
   | .store x s, hv => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     match s.eval σ₀, s.eval σ₀', s.eval_frame h₀ hv.tail with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs =>
@@ -1417,20 +1417,20 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
       rw [hs.storage]
       exact h.setEnv_both x _
   | .memory m, hv => by
-    simp only [UpdElem.write]
+    simp only [Surface.UpdElem.write]
     match m.eval σ₀, m.eval σ₀', m.eval_frame h₀ hv with
     | .error _, .error _, he => subst he; rfl
     | .ok a, .ok b, hs => exact ⟨h.storage, hs.heap, hs.nextId, h.net, h.env, h.selfBalance, h.tx⟩
   | .selfBalance _ a, hv => by
-    simp only [UpdElem.write, a.eval_frame h₀ hv, h₀.selfBalance]
+    simp only [Surface.UpdElem.write, a.eval_frame h₀ hv, h₀.selfBalance]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, h.net, h.env, rfl, h.tx⟩
   | .net r _ a, hv => by
-    simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right, State.getNet]
+    simp only [Surface.UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right, State.getNet]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, by rw [h.net], h.env, h.selfBalance, h.tx⟩
   | .pay r a, hv => by
-    simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right, h₀.tx]
+    simp only [Surface.UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right, h₀.tx]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, by simp only [State.getNet, h.net], h.env, h.selfBalance, h.tx⟩
   | .saveNet x, _ => by
@@ -1439,27 +1439,27 @@ theorem UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgreeExcept
     exact h.setEnv_both x _
   | .saveNetMt x, _ | .unset x, _ => h.setEnv_both x _
   | .netMt r a, hv => by
-    simp only [UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right]
+    simp only [Surface.UpdElem.write, r.eval_frame h₀ hv.left, a.eval_frame h₀ hv.right]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, rfl, h.env, h.selfBalance, h.tx⟩
   | .setBalance a, hv => by
-    simp only [UpdElem.write, a.eval_frame h₀ hv]
+    simp only [Surface.UpdElem.write, a.eval_frame h₀ hv]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, h.net, h.env, rfl, h.tx⟩
 
-theorem Upd.foldl_frame {σ₀ σ₀' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀') :
-    (U : Upd C) → Avoids (Upd.vars U) ns → ∀ {τ τ' : State}, EnvAgreeExcept ns τ τ' →
+theorem Surface.Upd.foldl_frame {σ₀ σ₀' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀') :
+    (U : Surface.Upd C) → Avoids (Surface.Upd.vars U) ns → ∀ {τ τ' : State}, EnvAgreeExcept ns τ τ' →
       ResultsAgree ns (U.foldlM (fun τ e => e.write σ₀ τ) τ)
         (U.foldlM (fun τ e => e.write σ₀' τ) τ')
   | [], _, _, _, h => h
   | e :: U, hv, _, _, h => by
     simp only [List.foldlM_cons]
     exact ResultsAgree.bind (e.write_frame h₀ h hv.left) fun _ _ h' =>
-      Upd.foldl_frame h₀ U hv.right h'
+      Surface.Upd.foldl_frame h₀ U hv.right h'
 
-theorem Upd.apply_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (U : Upd C)
-    (hv : Avoids (Upd.vars U) ns) : ResultsAgree ns (U.apply σ) (U.apply τ) :=
-  Upd.foldl_frame hag U hv hag
+theorem Surface.Upd.apply_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (U : Surface.Upd C)
+    (hv : Avoids (Surface.Upd.vars U) ns) : ResultsAgree ns (U.apply σ) (U.apply τ) :=
+  Surface.Upd.foldl_frame hag U hv hag
 
 theorem Modality.after_frame (m : Modality) {p q : State → Prop} {r r' : Res State}
     (hr : ResultsAgree ns r r') (hpq : ∀ a b, EnvAgreeExcept ns a b → (p a ↔ q b)) :
@@ -1471,29 +1471,29 @@ theorem Modality.after_frame (m : Modality) {p q : State → Prop} {r r' : Res S
 /-- **Frame, for formulas**: two states that agree off `ns` satisfy a formula
 that avoids `ns` alike. -/
 theorem holds_frame : (φ : NFml C) → Avoids φ.vars ns → ∀ {σ τ : State},
-    EnvAgreeExcept ns σ τ → (holds σ φ ↔ holds τ φ)
+    EnvAgreeExcept ns σ τ → (NFml.holds σ φ ↔ NFml.holds τ φ)
   | .tt, _, _, _, _ => Iff.rfl
   | .eq a b, h, _, _, hag => by
-    simp only [holds, a.denote_frame hag h.left, b.denote_frame hag h.right]
-  | .defined t, h, _, _, hag => by simp only [holds, t.eval_frame hag h]
-  | .not φ, h, _, _, hag => by simp only [holds, holds_frame φ h hag]
+    simp only [NFml.holds, a.denote_frame hag h.left, b.denote_frame hag h.right]
+  | .defined t, h, _, _, hag => by simp only [NFml.holds, t.eval_frame hag h]
+  | .not φ, h, _, _, hag => by simp only [NFml.holds, holds_frame φ h hag]
   | .and φ ψ, h, _, _, hag => by
-    simp only [holds, holds_frame φ h.left hag, holds_frame ψ h.right hag]
+    simp only [NFml.holds, holds_frame φ h.left hag, holds_frame ψ h.right hag]
   | .imp φ ψ, h, _, _, hag => by
-    simp only [holds, holds_frame φ h.left hag, holds_frame ψ h.right hag]
+    simp only [NFml.holds, holds_frame φ h.left hag, holds_frame ψ h.right hag]
   | .upd m U φ, h, _, _, hag => by
-    simp only [holds]
-    exact m.after_frame (Upd.apply_frame hag U h.left) fun _ _ h' => holds_frame φ h.right h'
+    simp only [NFml.holds]
+    exact m.after_frame (Surface.Upd.apply_frame hag U h.left) fun _ _ h' => holds_frame φ h.right h'
   | .havoc φ, h, _, _, hag => by
-    simp only [holds]
+    simp only [NFml.holds]
     exact forall_congr' fun st => forall_congr' fun nt =>
       holds_frame φ h (hag.havoc st nt)
   | .all x _ φ, h, _, _, hag => by
-    simp only [holds]
+    simp only [NFml.holds]
     exact forall_congr' fun v => imp_congr_right fun _ =>
       holds_frame φ h.tail (hag.setEnv_both x (.val v))
   | .anon xs φ, h, _, _, hag => by
-    simp only [holds]
+    simp only [NFml.holds]
     exact forall_congr' fun b =>
       holds_frame φ (fun y hy hn => h y (List.mem_append_right _ hy) hn) (hag.anon xs b)
 
@@ -1513,7 +1513,7 @@ def Term.keyAt : PrimTy → Term C → Term C
   | .uint, t => t
   | .int, t => t
 
-def Simple.lower {p : PrimTy} : Simple C p → Term C
+def Surface.Simple.lower {p : PrimTy} : Surface.Simple C p → Term C
   | .lit n _ => .lit (.int n)
   | .bool b => .lit (.bool b)
   | .local x => .pv x
@@ -1521,28 +1521,28 @@ def Simple.lower {p : PrimTy} : Simple C p → Term C
 
 mutual
 
-def SPath.lower : {T : Ty} → SPath C T → PTerm C
+def Surface.SPath.lower : {T : Ty} → Surface.SPath C T → PTerm C
   | _, .alias x => .pv x
   | _, .loc l => l.lower
 
-def Loc.lower : {T : Ty} → Loc C T → PTerm C
+def Surface.Loc.lower : {T : Ty} → Surface.Loc C T → PTerm C
   | _, .root r _ => .root r
   | _, .field b f _ => .field b.lower f
   | _, .index (k := k) _ b i => .at b.lower (Term.keyAt k i.lower)
 
-def MPath.lower : {T : Ty} → MPath C T → ITerm C
+def Surface.MPath.lower : {T : Ty} → Surface.MPath C T → ITerm C
   | _, .var x _ => .pv x
   | _, .loc l => .read .memory l.lower
 
-def MLoc.lower : {T : Ty} → MLoc C T → MAddr C
+def Surface.MLoc.lower : {T : Ty} → Surface.MLoc C T → Surface.MAddr C
   | _, .field b f _ => .field b.lower f
   | _, .index _ b i => .at b.lower i.lower
 
-def Val.lower : {p : PrimTy} → Val C p → Term C
+def Surface.Val.lower : {p : PrimTy} → Surface.Val C p → Term C
   | _, .simple s => s.lower
   | _, .read l => .find .storage l.lower
-  | _, @Val.binop _ p _ op _ _ a b => .binop op p a.lower b.lower
-  | _, @Val.unop _ p _ op _ _ a => .unop op p a.lower
+  | _, @Surface.Val.binop _ p _ op _ _ a b => .binop op p a.lower b.lower
+  | _, @Surface.Val.unop _ p _ op _ _ a => .unop op p a.lower
   | _, .ternary c a b => .ite c.lower a.lower b.lower
   | _, .readMem l => .read .memory l.lower
   | _, .len b _ => .len .storage b.lower
@@ -1552,16 +1552,16 @@ end
 
 /-- An index's term: the word its key is hashed as (`Term.keyAt`), what
 `Loc.lower` writes; a rule names it so, and it prints as the index. -/
-@[reducible] def Simple.keyLower {k : PrimTy} (s : Simple C k) : Term C := Term.keyAt k s.lower
-@[reducible] def Val.keyLower {k : PrimTy} (v : Val C k) : Term C := Term.keyAt k v.lower
+@[reducible] def Surface.Simple.keyLower {k : PrimTy} (s : Surface.Simple C k) : Term C := Term.keyAt k s.lower
+@[reducible] def Surface.Val.keyLower {k : PrimTy} (v : Surface.Val C k) : Term C := Term.keyAt k v.lower
 
 /-- A write's source as a storage value: the value, or the copied subtree. -/
-def Src.lower {T : Ty} : Src C T → SValT C
+def Surface.Src.lower {T : Ty} : Surface.Src C T → SValT C
   | .val v => .val v.lower
   | .copy p _ => .find .storage p.lower
 
 /-- A memory write's source. -/
-def MSrc.lower {T : Ty} : MSrc C T → MValT C
+def Surface.MSrc.lower {T : Ty} : Surface.MSrc C T → MValT C
   | .val v => .val v.lower
   | .ref p => .ref p.lower
 
@@ -1582,7 +1582,7 @@ theorem Term.keyAt_eval (σ : State) (k : PrimTy) (t : Term C) {β : Type} (f : 
       | bool b => cases b <;> rfl
 
 /-- A simple value's term reads what it does: `x` is `x`. -/
-@[simp] theorem Simple.lower_eval (σ : State) {p : PrimTy} (s : Simple C p) :
+@[simp] theorem Surface.Simple.lower_eval (σ : State) {p : PrimTy} (s : Surface.Simple C p) :
     s.lower.eval σ = s.eval σ := by
   cases s <;> rfl
 
@@ -1590,58 +1590,58 @@ mutual
 
 /-- A path's term is the path it resolves to: `alice.account` lowers to
 `alice.account`, `sp.age` to whatever `sp` is bound to, then `age`. -/
-theorem SPath.lower_eval (σ : State) : {T : Ty} → (p : SPath C T) →
+theorem Surface.SPath.lower_eval (σ : State) : {T : Ty} → (p : Surface.SPath C T) →
     p.lower.eval σ = p.resolve σ
   | _, .alias _ => rfl
   | _, .loc l => l.lower_eval σ
 
-theorem Loc.lower_eval (σ : State) : {T : Ty} → (l : Loc C T) →
+theorem Surface.Loc.lower_eval (σ : State) : {T : Ty} → (l : Surface.Loc C T) →
     l.lower.eval σ = l.resolve σ
   | _, .root .. => rfl
   | _, .field b f _ => by
-    simp only [Loc.lower, tm_eval, Loc.resolve, b.lower_eval σ]
+    simp only [Surface.Loc.lower, tm_eval, Surface.Loc.resolve, b.lower_eval σ]
   | _, .index (k := k) _ b i => by
-    simp only [Loc.lower, tm_eval, Loc.resolve, b.lower_eval σ]
+    simp only [Surface.Loc.lower, tm_eval, Surface.Loc.resolve, b.lower_eval σ]
     simp only [Term.keyAt_eval, i.lower_eval σ]
 
-theorem MPath.lower_eval (σ : State) : {T : Ty} → (p : MPath C T) →
+theorem Surface.MPath.lower_eval (σ : State) : {T : Ty} → (p : Surface.MPath C T) →
     p.lower.eval σ = (do (← p.mval σ).asRef)
   | _, .var x _ => by
-    simp only [MPath.lower, tm_eval, MPath.mval, bind, Except.bind]
+    simp only [Surface.MPath.lower, tm_eval, Surface.MPath.mval, bind, Except.bind]
     cases σ.getEnv x with
     | error _ => rfl
     | ok b => cases b <;> rfl
   | _, .loc l => by
-    simp only [MPath.lower, tm_eval, MPath.mval, ← l.lower_eval σ, bind_assoc, pure_bind]
+    simp only [Surface.MPath.lower, tm_eval, Surface.MPath.mval, ← l.lower_eval σ, bind_assoc, pure_bind]
 
-theorem MLoc.lower_eval (σ : State) : {T : Ty} → (l : MLoc C T) →
+theorem Surface.MLoc.lower_eval (σ : State) : {T : Ty} → (l : Surface.MLoc C T) →
     (do readAddr σ (← l.lower.eval σ)) = l.read σ
   | _, .field b f _ => by
-    simp only [MLoc.lower, tm_eval, MLoc.read, b.lower_eval σ, bind_assoc, pure_bind]
+    simp only [Surface.MLoc.lower, tm_eval, Surface.MLoc.read, b.lower_eval σ, bind_assoc, pure_bind]
     rfl
   | _, .index _ b i => by
-    simp only [MLoc.lower, tm_eval, MLoc.read, b.lower_eval σ, i.lower_eval σ, bind_assoc, pure_bind]
+    simp only [Surface.MLoc.lower, tm_eval, Surface.MLoc.read, b.lower_eval σ, i.lower_eval σ, bind_assoc, pure_bind]
     rfl
 
 /-- A value's term reads what it does: `alice.age + 1` lowers to
 `find(storage, alice.age) + 1`. -/
-theorem Val.lower_eval (σ : State) : {p : PrimTy} → (v : Val C p) →
+theorem Surface.Val.lower_eval (σ : State) : {p : PrimTy} → (v : Surface.Val C p) →
     v.lower.eval σ = v.eval σ
   | _, .simple s => s.lower_eval σ
   | _, .read l => by
-    simp only [Val.lower, tm_eval, Val.eval, l.lower_eval σ, pure_bind]
+    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, l.lower_eval σ, pure_bind]
   | _, .binop _ _ _ a b => by
-    simp only [Val.lower, tm_eval, Val.eval, a.lower_eval σ, b.lower_eval σ]
+    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, a.lower_eval σ, b.lower_eval σ]
   | _, .unop _ _ _ a => by
-    simp only [Val.lower, tm_eval, Val.eval, a.lower_eval σ]
+    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, a.lower_eval σ]
   | _, .ternary c a b => by
-    simp only [Val.lower, tm_eval, Val.eval, c.lower_eval σ, a.lower_eval σ, b.lower_eval σ]
+    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, c.lower_eval σ, a.lower_eval σ, b.lower_eval σ]
   | _, .readMem l => by
-    simp only [Val.lower, tm_eval, Val.eval, ← l.lower_eval σ, bind_assoc, pure_bind]
+    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, ← l.lower_eval σ, bind_assoc, pure_bind]
   | _, .len b _ => by
-    simp only [Val.lower, tm_eval, Val.eval, b.lower_eval σ, pure_bind]
+    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, b.lower_eval σ, pure_bind]
   | _, .mlen b _ => by
-    simp only [Val.lower, tm_eval, Val.eval, b.lower_eval σ, bind_assoc, pure_bind]
+    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, b.lower_eval σ, bind_assoc, pure_bind]
 
 end
 

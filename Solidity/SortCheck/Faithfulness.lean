@@ -59,13 +59,13 @@ variable {C : Contract}
 
 /-- A read of a storage path or a memory path, at its static type. -/
 inductive Read (C : Contract) where
-  | storage (T : Ty) (p : SPath C T)
-  | memory (T : Ty) (p : MPath C T)
+  | storage (T : Ty) (p : Surface.SPath C T)
+  | memory (T : Ty) (p : Surface.MPath C T)
   /-- `values.length`: KeY reads it as the member `length` of the array, a
   `uint` cell (`size`). -/
-  | slen {E : Ty} (p : SPath C (.array E))
+  | slen {E : Ty} (p : Surface.SPath C (.array E))
   /-- `xs.length` of a memory array. -/
-  | mlen {E : Ty} (p : MPath C (.array E))
+  | mlen {E : Ty} (p : Surface.MPath C (.array E))
 
 /-- `alice.age` is read from storage, `m.age` from memory. -/
 def Read.domain : Read C → ReadDomain
@@ -155,24 +155,24 @@ def Stmt.read? {Γ Γ' : Core.Ctx} : Core.Stmt C Γ Γ' → Option (CRead C Γ)
 
 /-- What `find<[s]>`/`select<[s]>` claims of the storage value found, the
 read place being of type `T`. -/
-def SortOkS : ReadSort → Ty → SVal → Bool
+def SortOkS : ReadSort → Ty → Semantics.SVal → Bool
   | .generic _, T, v => v.hasTy T
   | .fixed s, _, v => v.keySort.le s
 
 /-- What `read<[s]>` claims of the memory slot found. -/
-def SortOkM (H : HeapTy) : ReadSort → Ty → MVal → Bool
+def SortOkM (H : HeapTy) : ReadSort → Ty → Semantics.MVal → Bool
   | .generic _, T, mv => MVal.hasTyH H mv T
   | .fixed s, _, mv => mv.keySort.le s
 
 /-- The declared sort `rs` holds of whatever the read finds in `σ`:
 resolving the storage path and finding the value, or reading the memory
 slot. -/
-def Read.SortOk (σ : State) (H : HeapTy) (rs : ReadSort) : Read C → Prop
+def Read.SortOk (σ : Semantics.State) (H : HeapTy) (rs : ReadSort) : Read C → Prop
   | .storage T p => ∀ r segs v, p.resolve σ = .ok (r, segs) →
       σ.findStorage r segs = .ok v → SortOkS rs T v = true
   | .memory T p => ∀ mv, p.mval σ = .ok mv → SortOkM H rs T mv = true
-  | .slen p => ∀ v, (Val.len (p := .uint) p rfl).eval σ = .ok v → SortOkS rs .uint v.toSVal = true
-  | .mlen p => ∀ v, (Val.mlen (p := .uint) p rfl).eval σ = .ok v →
+  | .slen p => ∀ v, (Surface.Val.len (p := .uint) p rfl).eval σ = .ok v → SortOkS rs .uint v.toSVal = true
+  | .mlen p => ∀ v, (Surface.Val.mlen (p := .uint) p rfl).eval σ = .ok v →
       SortOkM H rs .uint v.toMVal = true
 
 /-- What a constructor's schema fixes about its read's static type. -/
@@ -205,7 +205,7 @@ def ReadClass.supports (cls : ReadClass) : ReadDomain → ReadSort → Bool
   | _, _ => false
 
 /-- A memory slot typed `uint` holds a number: `m.age` in `m.age += 1;`. -/
-theorem MVal.int_of_hasTyH_numeric {H : HeapTy} {mv : MVal} {T : Ty}
+theorem MVal.int_of_hasTyH_numeric {H : HeapTy} {mv : Semantics.MVal} {T : Ty}
     (hT : isNumericTy T = true) (h : MVal.hasTyH H mv T = true) : ∃ n, mv = .int n := by
   cases T with
   | prim p =>
@@ -215,7 +215,7 @@ theorem MVal.int_of_hasTyH_numeric {H : HeapTy} {mv : MVal} {T : Ty}
   | ref _ => simp [isNumericTy] at hT
 
 /-- A memory slot typed at a reference holds an identity: `m.account`. -/
-theorem MVal.ref_of_hasTyH_ref {H : HeapTy} {mv : MVal} {T : Ty}
+theorem MVal.ref_of_hasTyH_ref {H : HeapTy} {mv : Semantics.MVal} {T : Ty}
     (hT : T.isReference = true) (h : MVal.hasTyH H mv T = true) : ∃ id, mv = .ref id := by
   cases T with
   | prim p => simp [Ty.isReference, Ty.isPrimitive] at hT
@@ -229,8 +229,8 @@ class the declared sort is supported by, finds a value the sort claims, in
 every state that agrees with a `RunWT` state: `x = total;` finds a number
 where `total : uint`, `alice.age += 1` finds an `int`, `m = alice;` finds a
 `Struct` node. -/
-theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.State C Γ}
-    {τ : State} (hwt : Core.RunWT C H σ) (hag : Core.Agree ns σ τ) {R : Read C}
+theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.EState C Γ}
+    {τ : Semantics.State} (hwt : Core.RunWT C H σ) (hag : Core.Agree ns σ τ) {R : Read C}
     (hw : R.Typed ns Γ) {cls : ReadClass} (hfit : cls.fits R.ty = true) {rs : ReadSort}
     (hsup : cls.supports R.domain rs = true) : R.SortOk τ H rs := by
   cases R with
@@ -305,7 +305,7 @@ statement's read finds what its sort declares.
 `Person storage p = alice; p.age = 10;` then `x = alice.age;` still reads a
 number. -/
 theorem Read.sortOk_typed {Γ : Core.Ctx} {ns : List Var} (hnd : nodupKeysB C.vars = true)
-    (σ : Core.TState C Γ) {τ : State} {R : Read C} {cls : ReadClass} {rs : ReadSort}
+    (σ : Core.TState C Γ) {τ : Semantics.State} {R : Read C} {cls : ReadClass} {rs : ReadSort}
     (hag : Core.Agree ns σ.erase τ) (hR : R.Typed ns Γ) (hfit : cls.fits R.ty = true)
     (hsup : cls.supports R.domain rs = true) : ∃ H', R.SortOk τ H' rs :=
   ⟨_, Read.sortOk (Core.TState.erase_wt hnd σ) hag hR hfit hsup⟩
@@ -360,7 +360,7 @@ state that agrees with a `RunWT` state over `Γ`, the declared sort holds of
 what the read finds. -/
 def RowFaithful (row : TacletReadAnn) {Γ Γ' : Core.Ctx} (s : Core.Stmt C Γ Γ') : Prop :=
   ∀ r ∈ valueReads row, ∃ R, Stmt.read? s = some R ∧ R.domain = r.domain ∧
-    ∀ (ns : List Var) (H : HeapTy) (σ : Core.State C Γ) (τ : State),
+    ∀ (ns : List Var) (H : HeapTy) (σ : Core.EState C Γ) (τ : Semantics.State),
       Core.RunWT C H σ → Core.Agree ns σ τ → (R.erase ns).SortOk τ H r.sort
 
 /-- Every row constructor `n` transcribes is faithful at `s`. -/

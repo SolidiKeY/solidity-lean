@@ -1,6 +1,6 @@
 import Solidity.Calculus.TreeData
 import Solidity.Calculus.RuleShapes
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Completeness
 import Solidity.Calculus.Core.Delab
 
@@ -101,7 +101,7 @@ def operatorOf? (env : Environment) (s : Expr) : Option Lean.Name :=
 KeY's taclet at the operator, for a row of an operator family; else `c`'s
 own. -/
 def keyName (c : Lean.Name) (s : Expr) : MetaM Lean.Name := do
-  let own := Chain.lastName c
+  let own := NFml.Chain.lastName c
   let row := (`Solidity.Core.Taclet).append own
   if (RuleShapes.operatorOrder.lookup row).isNone then return own
   let s ← instantiateMVars s
@@ -187,7 +187,7 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let some ctor := provesCtor premise | return #[]
     let toStep := if (`Solidity.Core.LeanTaclet).isPrefixOf c then ``LeanTaclet.toStep
       else ``Taclet.toStep
-    let d ← `(($(← short toStep) $(dotIdent (Chain.lastName c))))
+    let d ← `(($(← short toStep) $(dotIdent (NFml.Chain.lastName c))))
     let name ← keyName c s
     -- an `if`'s condition, as `ifElseSplit`'s labels name it
     let se ← if premise == ``Premise.split then condOf? C H s else pure none

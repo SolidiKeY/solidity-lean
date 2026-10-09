@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.FunContract
@@ -32,7 +32,7 @@ The statements read scoped (`open scoped Solidity.Core.Surface`).
 -/
 namespace Solidity.Examples.Tactics.Contracts
 
-open Proves
+open NFml.Proves
 
 /-- A `pure`, a `view` and a `nonpayable` function. -/
 def ContractsExample : Contract := contract!{
@@ -46,7 +46,7 @@ def ContractsExample : Contract := contract!{
 
 local instance : InContract := ⟨ContractsExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `y = addOne(x);` by `addOne`'s contract, a `pure` callee: nothing but
 the result is forgotten. -/

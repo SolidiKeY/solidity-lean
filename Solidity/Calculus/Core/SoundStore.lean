@@ -25,7 +25,7 @@ variable {C : Contract}
 
 section Blocks
 
-variable {Γ : Ctx} (σ : State C Γ)
+variable {Γ : Ctx} (σ : EState C Γ)
 
 theorem Res.map_bind' {α β γ : Type} (x : Res α) (f : α → Res β) (g : β → γ) :
     (x >>= f).map g = x >>= fun a => (f a).map g := by
@@ -46,7 +46,7 @@ theorem Src.value_noPanic {T : Ty} (r : Src C Γ T) : NoPanic (r.value σ) := by
     exact NoPanic.bind this fun _ _ => NoPanic.pure _
   | copy p hm =>
     simp only [Src.value]
-    exact NoPanic.bind (SPath.resolve_noPanic σ p) fun _ _ => Solidity.State.findStorage_noPanic _ _ _
+    exact NoPanic.bind (SPath.resolve_noPanic σ p) fun _ _ => Semantics.State.findStorage_noPanic _ _ _
 
 theorem MPath.mval_noPanic {T : Ty} (b : MPath C Γ T) : NoPanic (b.mval σ) := by
   cases b with

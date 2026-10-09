@@ -7,7 +7,7 @@ import Solidity.Tools.Inspect
 /-!
 # `sol_decide`: the storage goals, decided
 
-`sol_close` (`Calculus/Close.lean`) finishes a goal with `simp` and `grind`
+`sol_close` (`Calculus/NFmlClose.lean`) finishes a goal with `simp` and `grind`
 on whatever facts the formula states; it cannot split on two keys being
 equal.  `sol_decide` (`Calculus/Decide.lean`) rewrites the goal by an
 equivalence, `NFml.valid_iff_reduce`, into a statement about the initial
@@ -28,11 +28,11 @@ another matter: it owes `wt(storage)` (`deleteWithoutWrite`; without it,
 
 namespace Solidity.Examples.Tactics.Decide
 
-open Proves Decide Semantics
+open NFml.Proves Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Two symbolic keys
 
@@ -316,7 +316,7 @@ section Ledger
 
 local instance : InContract := ⟨TestSuite⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 set_option maxHeartbeats 1600000 in
 /-- The whole program of `LedgerDelete.lean`, both `delete`s included, in
@@ -612,7 +612,7 @@ modality at W4 `modal`.) -/
 
 namespace Solidity.Examples.Tactics.Decide
 
-open Proves Decide Semantics
+open NFml.Proves Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

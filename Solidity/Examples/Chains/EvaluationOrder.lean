@@ -23,7 +23,7 @@ postcondition `φ` stands where they are out of scope (`Core/Notation.lean`'s
 
 namespace Solidity.Examples.Chains.EvaluationOrder
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 

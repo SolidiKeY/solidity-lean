@@ -1,6 +1,6 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Close
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -30,11 +30,11 @@ it.  From there the body's statements run by their own rules.
 
 namespace Solidity.Examples.Tactics.Calls
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨CallsExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## The rules -/
 
@@ -449,11 +449,11 @@ end Solidity.Examples.Tactics.Calls
 
 namespace Solidity.Examples.Tactics.Calls
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨CallsExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## solkey's `TestSuite` shapes, derived
 

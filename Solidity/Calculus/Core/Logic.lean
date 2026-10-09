@@ -64,7 +64,7 @@ variable {Γ : Ctx}
 
 /-- A term read by the interpreter in `σ`: a local by its position, a symbol
 on the global part. -/
-def Tm.eval (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.Ev
+def Tm.eval (σ : EState C Γ) : {s : Srt} → Tm C Γ s → s.Ev
   | _, .pvV i => pure (Env.get i σ.env)
   | _, .pvP i => aliasPath σ i
   | _, .pvS i => pure { σ.glob with storage := Env.get i σ.env }
@@ -79,7 +79,7 @@ def Tm.eval (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.Ev
 
 /-- A term in the Theory, over `State.abs σ.glob` (`Update.lean`'s
 `Tm.denote`). -/
-def Tm.denote (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.Den
+def Tm.denote (σ : EState C Γ) : {s : Srt} → Tm C Γ s → s.Den
   | _, .pvV i => .prim (Env.get i σ.env)
   | _, .pvP i => match aliasPath σ i with
     | .ok (r, segs) => rootPath r segs
@@ -107,13 +107,13 @@ def Env.thin : {Γ Δ : Ctx} → Thin Γ Δ → Env C Δ → Env C Γ
   | _, _, .drop h, e => Env.thin h e.2
 
 /-- A state's locals thinned. -/
-def State.thin {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) : State C Γ :=
+def EState.thin {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) : EState C Γ :=
   σ.withEnv (Env.thin h σ.env)
 
 variable {Γ : Ctx}
 
 /-- What a local is set to, read in `σ₀`. -/
-def Rhs.eval (σ₀ : State C Γ) : {t : LTy} → Rhs C Γ t → Res (t.Denote C)
+def Rhs.eval (σ₀ : EState C Γ) : {t : LTy} → Rhs C Γ t → Res (t.Denote C)
   | _, .val t => t.eval σ₀
   | _, .path p => do pure (some (← p.eval σ₀))
   | _, .unset => pure none
@@ -124,7 +124,7 @@ def Rhs.eval (σ₀ : State C Γ) : {t : LTy} → Rhs C Γ t → Res (t.Denote C
 
 /-- One assigning element: its right-hand sides read in `σ₀`, the write
 into `τ` (`Update.lean`'s `UpdElem.write`). -/
-def UpdElem.write {Δ : Ctx} (σ₀ : State C Γ) : UpdElem C Γ Δ → State C Δ → Res (State C Δ)
+def UpdElem.write {Δ : Ctx} (σ₀ : EState C Γ) : UpdElem C Γ Δ → EState C Δ → Res (EState C Δ)
   | .local i r, τ => do pure (τ.setLocal i (← r.eval σ₀))
   | .storage s, τ => do
     let st := (← s.eval σ₀).storage
@@ -155,14 +155,14 @@ def UpdElem.write {Δ : Ctx} (σ₀ : State C Γ) : UpdElem C Γ Δ → State C 
 
 /-- The state an update applied in `σ₀` leaves, in the context its type
 says. -/
-def Upd.apply (σ₀ : State C Γ) : {Δ : Ctx} → Upd C Γ Δ → Res (State C Δ)
+def Upd.apply (σ₀ : EState C Γ) : {Δ : Ctx} → Upd C Γ Δ → Res (EState C Δ)
   | _, .nil => pure σ₀
   | _, .snoc U e => do e.write σ₀ (← U.apply σ₀)
   | _, .decl U _ r => do
     let τ ← U.apply σ₀
     pure (τ.push (← r.eval σ₀))
-  | _, .pop U h => (U.apply σ₀).map (State.drop h)
-  | _, .drop U h => (U.apply σ₀).map (State.thin h)
+  | _, .pop U h => (U.apply σ₀).map (EState.drop h)
+  | _, .drop U h => (U.apply σ₀).map (EState.thin h)
 
 end Updates
 
@@ -174,8 +174,8 @@ def _root_.Solidity.Modality.afterC {α : Type} (m : Modality) (p : α → Prop)
   | .error _ => m.onHalt
 
 /-- The locals `xs` set as `b` says: a loop body's frame anonymised. -/
-def State.anon {Γ : Ctx} (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
-    (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) : State C Γ :=
+def EState.anon {Γ : Ctx} (σ : EState C Γ) (xs : List ((t : LTy) × Idx Γ t))
+    (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) : EState C Γ :=
   xs.foldl (fun τ x => τ.setLocal x.2 (b x)) σ
 
 /-! ## Rules -/
@@ -185,12 +185,12 @@ section Rules
 variable {Γ Γ₁ Γ₀ : Ctx} {m : Modality}
 
 /-- A simple value lowered reads as it evaluates. -/
-theorem Simple.eval_lower {p : PrimTy} (s : Simple C Γ p) (σ : State C Γ) :
+theorem Simple.eval_lower {p : PrimTy} (s : Simple C Γ p) (σ : EState C Γ) :
     s.lower.eval σ = s.eval σ := by
   cases s <;> rfl
 
 /-- A simple value denotes what it evaluates to. -/
-theorem Simple.denote_lower {p : PrimTy} (se : Simple C Γ p) (σ : State C Γ) {v : Value}
+theorem Simple.denote_lower {p : PrimTy} (se : Simple C Γ p) (σ : EState C Γ) {v : Value}
     (h : se.eval σ = .ok v) : se.lower.denote σ = .prim v := by
   cases se <;> cases h <;> rfl
 

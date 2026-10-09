@@ -101,37 +101,37 @@ theorem Tm.wk_app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C Γ a) (y : Tm C �
 
 end WkEqns
 
-theorem State.thin_glob {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) : (σ.thin h).glob = σ.glob :=
+theorem EState.thin_glob {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) : (σ.thin h).glob = σ.glob :=
   rfl
 
-theorem Tm.eval_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
+theorem Tm.eval_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) :
     {s : Srt} → (t : Tm C Γ s) → (t.wk h).eval σ = t.eval (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.eval, State.thin, State.withEnv, Env.get_thin]
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.eval, EState.thin, EState.withEnv, Env.get_thin]
   | _, .pvP i => by
-    simp only [Tm.wk_pvP, Tm.eval, aliasPath, State.thin, State.withEnv, Env.get_thin]
+    simp only [Tm.wk_pvP, Tm.eval, aliasPath, EState.thin, EState.withEnv, Env.get_thin]
   | _, .pvS i => by
-    simp only [Tm.wk_pvS, Tm.eval, State.thin, State.withEnv, Env.get_thin]
+    simp only [Tm.wk_pvS, Tm.eval, EState.thin, EState.withEnv, Env.get_thin]
     rfl
-  | _, .pvI i => by simp only [Tm.wk_pvI, Tm.eval, memRef, State.thin, State.withEnv, Env.get_thin]
+  | _, .pvI i => by simp only [Tm.wk_pvI, Tm.eval, memRef, EState.thin, EState.withEnv, Env.get_thin]
   | _, .netOf i a => by
     simp only [Tm.wk_netOf, Tm.eval, Tm.eval_wk h σ a]
-    simp only [State.thin, State.withEnv, Env.get_thin]
+    simp only [EState.thin, EState.withEnv, Env.get_thin]
   | _, .app0 o => rfl
   | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.eval, Tm.eval_wk h σ a]; rfl
   | _, .app2 o a b => by simp only [Tm.wk_app2, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b]; rfl
   | _, .app3 o a b c => by
     simp only [Tm.wk_app3, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b, Tm.eval_wk h σ c]; rfl
 
-theorem Tm.denote_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
+theorem Tm.denote_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) :
     {s : Srt} → (t : Tm C Γ s) → (t.wk h).denote σ = t.denote (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denote, State.thin, State.withEnv, Env.get_thin]
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denote, EState.thin, EState.withEnv, Env.get_thin]
   | _, .pvP i => by
-    simp only [Tm.wk_pvP, Tm.denote, aliasPath, State.thin, State.withEnv, Env.get_thin]
-  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denote, State.thin, State.withEnv, Env.get_thin]
+    simp only [Tm.wk_pvP, Tm.denote, aliasPath, EState.thin, EState.withEnv, Env.get_thin]
+  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denote, EState.thin, EState.withEnv, Env.get_thin]
   | _, .pvI i => rfl
   | _, .netOf i a => by
     simp only [Tm.wk_netOf, Tm.denote, Tm.denote_wk h σ a]
-    simp only [State.thin, State.withEnv, Env.get_thin]
+    simp only [EState.thin, EState.withEnv, Env.get_thin]
   | _, .app0 o => rfl
   | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.denote, Tm.denote_wk h σ a]; rfl
   | _, .app2 o a b => by

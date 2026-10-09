@@ -16,14 +16,14 @@ tactic writing a proof out uses (`runOn`, `short`, `qualified`,
 
 namespace Solidity
 
-namespace Chain
+namespace NFml.Chain
 
 /-- The last component of a constructor's name, as `~[r]~>` shows it. -/
 def lastName : Lean.Name → Lean.Name
   | .str _ s => .mkSimple s
   | n => n
 
-end Chain
+end NFml.Chain
 
 namespace ProofTree
 

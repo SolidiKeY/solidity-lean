@@ -2,7 +2,7 @@ import Solidity.Tools.ProofTree
 import Solidity.Tools.Inspect
 import Solidity.Calculus.Core.Derive
 import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlDerive
 
 /-!
 # The proof tree, pinned
@@ -13,7 +13,7 @@ the tactics that write a proof out, as `#guard_msgs` tests:
 * `#proof_tree`, `#proof_node` and `#proof_tree_json` (`Tools/ProofTree.lean`)
   print the tree of `⊢ φ` as solkey's GUI and web prover do;
 * `sol_derive?` suggests the `apply` walk the tree is;
-* `sol_prove?` suggests `sol_prove` (`Calculus/Derive.lean`), the same walk
+* `sol_prove?` suggests `sol_prove` (`Calculus/NFmlDerive.lean`), the same walk
   as one kernel evaluation, and a tactic per leaf its closer leaves.
 
 If the strategy picks another rule, or a printer changes, these fail.
@@ -39,12 +39,12 @@ guards on today's closer (the closer's input, the leaves' erasure).
 
 namespace Solidity.Examples.ProofTree
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
 section Scoped
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## The tree
 
@@ -441,7 +441,7 @@ closed by `sol_decide`'s next step, which splits on `k == j`. -/
 /--
 info: Try this:
   sol_prove
-    refine Proves.close ?_
+    refine NFml.Proves.close ?_
     sol_symex
     refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
     sol_reduce
@@ -618,11 +618,11 @@ heartbeats. -/
 #guard_msgs in
 #eval show Lean.CoreM (List Bool) from do
   let at_ (max hb : Nat) : Lean.CoreM Bool :=
-    withTheReader Lean.Core.Context ({ · with maxHeartbeats := max }) (Derive.replayFits hb)
+    withTheReader Lean.Core.Context ({ · with maxHeartbeats := max }) (NFml.Derive.replayFits hb)
   return [← at_ 1000 2000, ← at_ 1000 1000, ← at_ 0 2000]
 
 section Scoped
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! The reduction's compiled code reads a pushed array's old length and
 value only where the read needs them (`CaseTree.toTermLazy`).  Run
@@ -645,8 +645,8 @@ def pushes22 : Core.Fml StandardExample [] :=
 
 #guard (Core.Derive.residueOf pushes22).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
-      Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+    (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
+      NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
 
 /-! The size bound (`Derive.closeSize`): a storage written from its own
 read doubles the leaf with each write.  Four `total += 1;` close inside the
@@ -665,7 +665,7 @@ def writes6 : Core.Fml StandardExample [] :=
 #guard Core.Derive.proves writes4
 #guard (Core.Derive.residueOf writes6).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    Derive.leafFits l.1 l.2) == some [false]
+    NFml.Derive.leafFits l.1 l.2) == some [false]
 
 /-! The reduction is bounded apart (`Derive.elimSize`): a read below a
 `delete` carries the read before it twice, so ten deletes make a leaf of
@@ -679,8 +679,8 @@ def deletes10 : Core.Fml StandardExample [] :=
 
 #guard (Core.Derive.residueOf deletes10).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
-      Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+    (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
+      NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
 
 end Scoped
 
@@ -695,7 +695,7 @@ end Scoped
   | _ => false
 
 section Scoped
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## A failed `assert`
 

@@ -52,7 +52,7 @@ namespace Solidity
 
 open Semantics SemanticsProperties
 
-theorem Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) : ((Except.ok a : Res α) >>= f) = f a := rfl
+theorem Semantics.Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) : ((Except.ok a : Res α) >>= f) = f a := rfl
 
 /-! ## A fresh default object, read along a path
 

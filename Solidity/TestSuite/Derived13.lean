@@ -16,8 +16,8 @@ then `selectOnSaveCons`), directly, after a `delete` of the emptied array
 slot readers count (`LStor.slotLenU`, `findDefinitionSize`).
 -/
 
-open Solidity Proves
-open scoped Solidity.Core.Surface
+open Solidity NFml.Proves
+open scoped Core.Scoped
 
 theorem Solkey.TestSuite.testDanglingReferenceSurvivesPush.proved :
     ⊢ Solkey.TestSuite.testDanglingReferenceSurvivesPush.problem := by

@@ -1,5 +1,5 @@
 import Solidity.Calculus.Core.CloseErase
-import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.NFmlUpdateRules
 
 /-!
 # One update for two: `sequentialToParallel`'s side conditions on scoped updates
@@ -200,7 +200,7 @@ variable {Γ : Ctx}
 
 /-- What `U` left in a local, read in the states before (`σ₀`) and after
 (`σ₁`). -/
-def Held.OK {Δ : Ctx} (σ₀ : State C Γ) (σ₁ : State C Δ) {t : LTy} (i : Idx Δ t) :
+def Held.OK {Δ : Ctx} (σ₀ : EState C Γ) (σ₁ : EState C Δ) {t : LTy} (i : Idx Δ t) :
     Held C Γ t → Prop
   | .pos j => Env.get i σ₁.env = Env.get j σ₀.env
   | .rhs r => r.eval σ₀ = .ok (Env.get i σ₁.env)
@@ -231,14 +231,14 @@ theorem Env.get_thin : {Δ Δ' : Ctx} → (h : Thin Δ' Δ) → {t : LTy} → (j
   | _, _, .drop h, _, j, e => Env.get_thin h j e.2
 
 /-- A local read alike in two states keeps what it holds. -/
-theorem Held.OK.congr {Δ Δ' : Ctx} {σ₀ : State C Γ} {σ₁ : State C Δ} {σ₁' : State C Δ'} {t : LTy}
+theorem Held.OK.congr {Δ Δ' : Ctx} {σ₀ : EState C Γ} {σ₁ : EState C Δ} {σ₁' : EState C Δ'} {t : LTy}
     {i : Idx Δ t} {i' : Idx Δ' t} (he : Env.get i' σ₁'.env = Env.get i σ₁.env) :
     (x : Held C Γ t) → Held.OK σ₀ σ₁ i x → Held.OK σ₀ σ₁' i' x
   | .pos _, h => he.trans h
   | .rhs _, h => h.trans (congrArg _ he.symm)
 
 /-- **What `U` leaves in each local** is what `Upd.held` says. -/
-theorem Upd.held_ok {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → {σ₁ : State C Δ} →
+theorem Upd.held_ok {σ₀ : EState C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → {σ₁ : EState C Δ} →
     U.apply σ₀ = .ok σ₁ → ∀ {t : LTy} (i : Idx Δ t), Held.OK σ₀ σ₁ i (U.held i)
   | _, .nil, _, h, _, i => by cases h; rfl
   | _, .snoc U e, σ₁, h, t, i => by
@@ -274,14 +274,14 @@ theorem Upd.held_ok {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → 
     | here => exact hv
     | there j => exact Held.OK.congr (σ₁ := τ) (i := j) rfl _ (Upd.held_ok U hτ j)
   | _, .pop U e, σ₁, h, t, i => by
-    change (U.apply σ₀).map (State.drop e) = .ok σ₁ at h
+    change (U.apply σ₀).map (EState.drop e) = .ok σ₁ at h
     cases hτ : U.apply σ₀ with
     | error => rw [hτ] at h; cases h
     | ok τ =>
       rw [hτ] at h; cases h
       exact Held.OK.congr (Env.get_drop e i τ.env) _ (Upd.held_ok U hτ (i.ext e))
   | _, .drop U e, σ₁, h, t, i => by
-    change (U.apply σ₀).map (State.thin e) = .ok σ₁ at h
+    change (U.apply σ₀).map (EState.thin e) = .ok σ₁ at h
     cases hτ : U.apply σ₀ with
     | error => rw [hτ] at h; cases h
     | ok τ =>
@@ -289,8 +289,8 @@ theorem Upd.held_ok {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → 
       exact Held.OK.congr (Env.get_thin e i τ.env) _ (Upd.held_ok U hτ (i.wk e))
 
 /-- An update of locals only leaves the global part as it found it. -/
-theorem Upd.envOnly_glob {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → U.envOnly = true →
-    {σ₁ : State C Δ} → U.apply σ₀ = .ok σ₁ → σ₁.glob = σ₀.glob
+theorem Upd.envOnly_glob {σ₀ : EState C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → U.envOnly = true →
+    {σ₁ : EState C Δ} → U.apply σ₀ = .ok σ₁ → σ₁.glob = σ₀.glob
   | _, .nil, _, _, h => by cases h; rfl
   | _, .snoc U e, hU, σ₁, h => by
     change (do e.write σ₀ (← U.apply σ₀)) = .ok σ₁ at h
@@ -311,7 +311,7 @@ theorem Upd.envOnly_glob {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ)
     have := Upd.envOnly_glob U hU hτ
     exact this
   | _, .pop U e, hU, σ₁, h => by
-    change (U.apply σ₀).map (State.drop e) = .ok σ₁ at h
+    change (U.apply σ₀).map (EState.drop e) = .ok σ₁ at h
     cases hτ : U.apply σ₀ with
     | error => rw [hτ] at h; cases h
     | ok τ =>
@@ -319,7 +319,7 @@ theorem Upd.envOnly_glob {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ)
       have := Upd.envOnly_glob U hU hτ
       exact this
   | _, .drop U e, hU, σ₁, h => by
-    change (U.apply σ₀).map (State.thin e) = .ok σ₁ at h
+    change (U.apply σ₀).map (EState.thin e) = .ok σ₁ at h
     cases hτ : U.apply σ₀ with
     | error => rw [hτ] at h; cases h
     | ok τ =>
@@ -327,7 +327,7 @@ theorem Upd.envOnly_glob {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ)
       have := Upd.envOnly_glob U hU hτ
       exact this
 
-variable {Δ : Ctx} {σ₀ : State C Γ} {σ₁ : State C Δ}
+variable {Δ : Ctx} {σ₀ : EState C Γ} {σ₁ : EState C Δ}
 
 theorem Tm.eval_substH_pvV {p : PrimTy} {i : Idx Δ (.val p)} {t' : Tm C Γ .val} :
     (x : Held C Γ (.val p)) → Held.OK σ₀ σ₁ i x →
@@ -503,7 +503,7 @@ theorem Rhs.eval_substH (hU : U.apply σ₀ = .ok σ₁)
 
 theorem UpdElem.write_substH (hU : U.apply σ₀ = .ok σ₁)
     (hst : ∀ x, st = some x → x.eval σ₀ = pure σ₁.glob) {Ε : Ctx} (e : UpdElem C Δ Ε)
-    {e' : UpdElem C Γ Ε} (h : e.substH U.held U.envOnly st = some e') (τ : State C Ε) :
+    {e' : UpdElem C Γ Ε} (h : e.substH U.held U.envOnly st = some e') (τ : EState C Ε) :
     e'.write σ₀ τ = e.write σ₁ τ := by
   cases e with
   | «local» i r =>
@@ -558,7 +558,7 @@ theorem UpdElem.write_substH (hU : U.apply σ₀ = .ok σ₁)
 end Sound
 
 /-- **The grafted update runs as the two in turn.** -/
-theorem Upd.apply_graft {Γ Δ₁ : Ctx} (U : Upd C Γ Δ₁) (σ₀ : State C Γ) {st : Option (Tm C Γ .st)}
+theorem Upd.apply_graft {Γ Δ₁ : Ctx} (U : Upd C Γ Δ₁) (σ₀ : EState C Γ) {st : Option (Tm C Γ .st)}
     (hst : ∀ σ₁, U.apply σ₀ = .ok σ₁ → ∀ x, st = some x → x.eval σ₀ = pure σ₁.glob) :
     {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graft U.held U.envOnly st V = some W →
       W.apply σ₀ = (U.apply σ₀ >>= V.apply)
@@ -594,12 +594,12 @@ theorem Upd.apply_graft {Γ Δ₁ : Ctx} (U : Upd C Γ Δ₁) (σ₀ : State C �
       rw [Rhs.eval_substH hU (hst σ₁ hU) r hr]
   | _, .pop V e, W, h => by
     obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
-    change (W'.apply σ₀).map (State.drop e) = _
+    change (W'.apply σ₀).map (EState.drop e) = _
     rw [Upd.apply_graft U σ₀ hst V hW]
     cases U.apply σ₀ <;> rfl
   | _, .drop V e, W, h => by
     obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
-    change (W'.apply σ₀).map (State.thin e) = _
+    change (W'.apply σ₀).map (EState.thin e) = _
     rw [Upd.apply_graft U σ₀ hst V hW]
     cases U.apply σ₀ <;> rfl
 
@@ -632,13 +632,13 @@ section Lift
 
 variable {Γ : Ctx} {t : LTy}
 
-theorem Upd.dropTop_apply (σ : State C Γ) (v : t.Denote C) :
+theorem Upd.dropTop_apply (σ : EState C Γ) (v : t.Denote C) :
     (Upd.dropTop (C := C) Γ t).apply (σ.push v) = .ok σ := rfl
 
 theorem Upd.dropTop_envOnly : (Upd.dropTop (C := C) Γ t).envOnly = true := rfl
 
-theorem UpdElem.write_lift? {Δ : Ctx} (σ : State C Γ) (v : t.Denote C) (e : UpdElem C Γ Δ)
-    {e' : UpdElem C (t :: Γ) (t :: Δ)} (h : e.lift? = some e') (τ : State C Δ) :
+theorem UpdElem.write_lift? {Δ : Ctx} (σ : EState C Γ) (v : t.Denote C) (e : UpdElem C Γ Δ)
+    {e' : UpdElem C (t :: Γ) (t :: Δ)} (h : e.lift? = some e') (τ : EState C Δ) :
     e'.write (σ.push v) (τ.push v) = (e.write σ τ).map (·.push v) := by
   have hD := Upd.dropTop_apply (C := C) (t := t) σ v
   have ev := fun {k : Srt} (x : Tm C Γ k) {x' : Tm C (t :: Γ) k}
@@ -651,7 +651,7 @@ theorem UpdElem.write_lift? {Δ : Ctx} (σ : State C Γ) (v : t.Denote C) (e : U
     have := Rhs.eval_substH (U := Upd.dropTop (C := C) Γ t) (st := none) hD (fun _ h => nomatch h) r
       (by rw [Upd.dropTop_envOnly]; exact hr)
     show (do pure ((τ.push v).setLocal i.there (← r'.eval (σ.push v)))) =
-      (do pure (τ.setLocal i (← r.eval σ))).map (fun τ' : State C Δ => τ'.push v)
+      (do pure (τ.setLocal i (← r.eval σ))).map (fun τ' : EState C Δ => τ'.push v)
     rw [this]
     cases r.eval σ <;> rfl
   | storage x =>
@@ -669,7 +669,7 @@ theorem UpdElem.write_lift? {Δ : Ctx} (σ : State C Γ) (v : t.Denote C) (e : U
   | setBalance _ => cases h
 
 /-- **The moved update runs as the update, the local kept on top.** -/
-theorem Upd.apply_lift? (σ : State C Γ) (v : t.Denote C) : {Δ : Ctx} → (U : Upd C Γ Δ) →
+theorem Upd.apply_lift? (σ : EState C Γ) (v : t.Denote C) : {Δ : Ctx} → (U : Upd C Γ Δ) →
     {U' : Upd C (t :: Γ) (t :: Δ)} → U.lift? = some U' →
       U'.apply (σ.push v) = (U.apply σ).map (·.push v)
   | _, .nil, _, h => by cases h; rfl
@@ -716,7 +716,7 @@ def Upd.keepsNext {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .snoc U e => U.keepsNext && e.keepsNext
   | _, .decl U _ _ | _, .pop U _ | _, .drop U _ => U.keepsNext
 
-theorem Upd.apply_nextId (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) → U.keepsNext = true →
+theorem Upd.apply_nextId (σ₀ : EState C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) → U.keepsNext = true →
     ∀ τ, U.apply σ₀ = .ok τ → τ.nextId = σ₀.nextId
   | _, .nil, _, τ, h => by cases h; rfl
   | _, .snoc U e, hk, τ, h => by
@@ -764,7 +764,7 @@ one, or `U` allocates nothing, so the heap typing after it, which extends
 the one before, is that one. -/
 theorem Fml.upd_bind_of_apply {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} {t : LTy} {x : Var}
     {U' : Upd C (t :: Γ) (t :: Δ)}
-    (hap : ∀ (τ : State C Γ) (w : t.Denote C), U'.apply (τ.push w) = (U.apply τ).map (·.push w))
+    (hap : ∀ (τ : EState C Γ) (w : t.Denote C), U'.apply (τ.push w) = (U.apply τ).map (·.push w))
     (ht : (t.notMem || U.keepsNext) = true)
     {ψ : Fml C (t :: Δ)} (σ : TState C Γ)
     (hψ : m'.forallB fun v : t.TDenote C σ.H => holds (σ.push v) (.upd m U' ψ)) :
@@ -801,7 +801,7 @@ theorem Fml.upd_bind_of_apply {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} 
         (U'.apply (σ.push v).erase) := Modality.forallB_all hψ v
     rw [hg, hU] at h
     refine h (σ'.push v') ?_ hext
-    show (σ'.erase.push (LTy.TDenote.erase t v') : State C _) = σ₁.push (LTy.TDenote.erase t v)
+    show (σ'.erase.push (LTy.TDenote.erase t v') : EState C _) = σ₁.push (LTy.TDenote.erase t v)
     rw [he, hv]
 
 theorem Fml.upd_bind_of_lift {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} {t : LTy} {x : Var}
@@ -827,7 +827,7 @@ theorem Env.thin_ofExt {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → (e : Env 
   | _, .push h, e => Env.thin_ofExt h e.2
 
 /-- **The moved update runs as the update, the local kept on top.** -/
-theorem Upd.apply_liftG? {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.Denote C) :
+theorem Upd.apply_liftG? {Γ : Ctx} {t : LTy} (σ : EState C Γ) (v : t.Denote C) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → {U' : Upd C (t :: Γ) (t :: Δ)} → U.liftG? = some U' →
       U'.apply (σ.push v) = (U.apply σ).map (·.push v)
   | _, .nil, _, h => by cases h; rfl
@@ -843,16 +843,16 @@ theorem Upd.apply_liftG? {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.Denote C)
     | ok τ => exact UpdElem.write_lift? σ v e he τ
   | _, .pop U h, _, hh => by
     obtain ⟨U', hU, rfl⟩ := Option.map_eq_some_iff.1 hh
-    change (U'.apply (σ.push v)).map (State.thin _) = ((U.apply σ).map (State.drop h)).map _
+    change (U'.apply (σ.push v)).map (EState.thin _) = ((U.apply σ).map (EState.drop h)).map _
     rw [Upd.apply_liftG? σ v U hU]
     cases U.apply σ with
     | error => rfl
     | ok τ =>
-      show Except.ok (State.thin _ (τ.push v)) = Except.ok ((τ.drop h).push v)
-      simp only [State.thin, State.push, State.drop, State.withEnv, Env.thin, Env.thin_ofExt]
+      show Except.ok (EState.thin _ (τ.push v)) = Except.ok ((τ.drop h).push v)
+      simp only [EState.thin, EState.push, EState.drop, EState.withEnv, Env.thin, Env.thin_ofExt]
   | _, .drop U h, _, hh => by
     obtain ⟨U', hU, rfl⟩ := Option.map_eq_some_iff.1 hh
-    change (U'.apply (σ.push v)).map (State.thin _) = ((U.apply σ).map (State.thin h)).map _
+    change (U'.apply (σ.push v)).map (EState.thin _) = ((U.apply σ).map (EState.thin h)).map _
     rw [Upd.apply_liftG? σ v U hU]
     cases U.apply σ with
     | error => rfl
@@ -957,7 +957,7 @@ def Srt.StChgOf (g₀ : Semantics.State) : (s : Srt) → s.Ev → Prop
   | _, _ => True
 
 /-- **A storage term changes only the storage** of the state it is read in. -/
-theorem Tm.eval_stChg {Γ : Ctx} (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) →
+theorem Tm.eval_stChg {Γ : Ctx} (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) →
     Srt.StChgOf σ.glob s (t.eval σ)
   | _, .pvV _ | _, .pvP _ | _, .pvI _ | _, .netOf .. => trivial
   | _, .pvS i => fun g h => by cases h; rfl
@@ -1020,14 +1020,14 @@ theorem Tm.eval_stChg {Γ : Ctx} (σ : State C Γ) : {s : Srt} → (t : Tm C Γ 
       exact (ih τ hτ).trans (pushAt_stChg h)
     | _ => trivial
 
-theorem Tm.eval_st_glob {Γ : Ctx} (σ : State C Γ) (t : Tm C Γ .st) (g : Semantics.State)
+theorem Tm.eval_st_glob {Γ : Ctx} (σ : EState C Γ) (t : Tm C Γ .st) (g : Semantics.State)
     (h : t.eval σ = .ok g) : StChg σ.glob g :=
   Tm.eval_stChg σ t g h
 
 /-- An update that writes no global part but the storage leaves the global
 part with another storage. -/
-theorem Upd.stOnly_glob {Γ : Ctx} {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
-    U.stOnly = true → {σ₁ : State C Δ} → U.apply σ₀ = .ok σ₁ → StChg σ₀.glob σ₁.glob
+theorem Upd.stOnly_glob {Γ : Ctx} {σ₀ : EState C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    U.stOnly = true → {σ₁ : EState C Δ} → U.apply σ₀ = .ok σ₁ → StChg σ₀.glob σ₁.glob
   | _, .nil, _, _, h => by cases h; rfl
   | _, .snoc U e, hU, σ₁, h => by
     have hU' : U.stOnly = true ∧ e.stOnly = true := Bool.and_eq_true_iff.mp hU
@@ -1063,8 +1063,8 @@ theorem Upd.stOnly_glob {Γ : Ctx} {σ₀ : State C Γ} : {Δ : Ctx} → (U : Up
 
 /-- **The storage an update last wrote, read before it, is the global part
 after it.** -/
-theorem Upd.lastSt_eval {Γ : Ctx} {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
-    {σ₁ : State C Δ} → U.apply σ₀ = .ok σ₁ → ∀ x, U.lastSt = some x → x.eval σ₀ = pure σ₁.glob
+theorem Upd.lastSt_eval {Γ : Ctx} {σ₀ : EState C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    {σ₁ : EState C Δ} → U.apply σ₀ = .ok σ₁ → ∀ x, U.lastSt = some x → x.eval σ₀ = pure σ₁.glob
   | _, .nil, _, _, _, h => by cases h
   | _, .snoc U e, σ₁, h, x, hx => by
     obtain ⟨τ, hτ, h⟩ := Semantics.bind_ok_inv h
@@ -1108,7 +1108,7 @@ theorem Upd.lastSt_eval {Γ : Ctx} {σ₀ : State C Γ} : {Δ : Ctx} → (U : Up
 end StGlob
 
 /-- **`sequentialToParallel` runs as the two updates in turn.** -/
-theorem Upd.apply_seqPar {Γ Δ₁ Δ₂ : Ctx} (U : Upd C Γ Δ₁) (σ₀ : State C Γ) (V : Upd C Δ₁ Δ₂)
+theorem Upd.apply_seqPar {Γ Δ₁ Δ₂ : Ctx} (U : Upd C Γ Δ₁) (σ₀ : EState C Γ) (V : Upd C Δ₁ Δ₂)
     {W : Upd C Γ Δ₂} (h : U.seqPar V = some W) : W.apply σ₀ = (U.apply σ₀ >>= V.apply) :=
   Upd.apply_graft U σ₀ (fun _ hU x hx => Upd.lastSt_eval U hU x hx) V h
 
@@ -1193,7 +1193,7 @@ def Tm.toNil? {Γ : Ctx} : {s : Srt} → Tm C Γ s → Option (Tm C [] s)
   | _, .app3 o x y z => do pure (.app3 o (← Tm.toNil? x) (← Tm.toNil? y) (← Tm.toNil? z))
 
 /-- Today's term with no local, at the scope `Γ`. -/
-def Tm.ofClosed? {Γ : Ctx} : {s : Srt} → Solidity.Tm C s → Option (Tm C Γ s)
+def Tm.ofClosed? {Γ : Ctx} : {s : Srt} → Surface.Tm C s → Option (Tm C Γ s)
   | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => none
   | _, .app0 o => some (.app0 o)
   | _, .app1 o x => if ho : o.named = false then (Tm.ofClosed? x).map (.app1 o ho) else none
@@ -1254,10 +1254,10 @@ section RwC
 
 variable {Γ : Ctx}
 
-theorem State.glob_env (σ : State C Γ) : withLocals σ.glob [] = σ.glob := rfl
+theorem EState.glob_env (σ : EState C Γ) : withLocals σ.glob [] = σ.glob := rfl
 
 /-- A closed term reads as its erasure in the global part. -/
-theorem Tm.eval_toNil (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
+theorem Tm.eval_toNil (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
     t.toNil? = some t₀ → t.eval σ = (t.erase []).eval σ.glob
   | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h =>
     nomatch h
@@ -1281,7 +1281,7 @@ theorem Tm.eval_toNil (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {t�
     rw [Tm.eval_toNil σ x hx, Tm.eval_toNil σ y hy, Tm.eval_toNil σ z hz]
 
 /-- Today's closed term, at a scope, reads as itself in the global part. -/
-theorem Tm.eval_ofClosed (σ : State C Γ) : {s : Srt} → (q : Solidity.Tm C s) → {t : Tm C Γ s} →
+theorem Tm.eval_ofClosed (σ : EState C Γ) : {s : Srt} → (q : Surface.Tm C s) → {t : Tm C Γ s} →
     Tm.ofClosed? q = some t → t.eval σ = q.eval σ.glob
   | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h => nomatch h
   | _, .app0 o, _, h => by cases h; rfl
@@ -1309,7 +1309,7 @@ theorem Tm.eval_ofClosed (σ : State C Γ) : {s : Srt} → (q : Solidity.Tm C s)
 
 variable {q : Solidity.Term C × Solidity.Term C}
 
-theorem Tm.pickC_eval (hq : Term.EvalRefines q.1 q.2) (σ : State C Γ) :
+theorem Tm.pickC_eval (hq : Term.EvalRefines q.1 q.2) (σ : EState C Γ) :
     {s : Srt} → {t d : Tm C Γ s} → Srt.Le s (t.eval σ) (d.eval σ) →
       Srt.Le s (t.eval σ) ((Tm.pickC q t d).eval σ)
   | .val, t, d, hd => by
@@ -1329,7 +1329,7 @@ theorem Tm.pickC_eval (hq : Term.EvalRefines q.1 q.2) (σ : State C Γ) :
   | .mem, _, _, hd | .mv, _, _, hd => hd
 
 /-- **Rewriting keeps every value a term returns.** -/
-theorem Tm.rwC_eval (hq : Term.EvalRefines q.1 q.2) (σ : State C Γ) :
+theorem Tm.rwC_eval (hq : Term.EvalRefines q.1 q.2) (σ : EState C Γ) :
     {s : Srt} → (t : Tm C Γ s) → Srt.Le s (t.eval σ) ((t.rwC q).eval σ)
   | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => Srt.Le.refl _ _
   | _, .netOf _ a => Res.Le.bind (Tm.rwC_eval hq σ a) fun _ => Res.Le.refl _
@@ -1339,7 +1339,7 @@ theorem Tm.rwC_eval (hq : Term.EvalRefines q.1 q.2) (σ : State C Γ) :
   | _, .app3 o x y z =>
     Tm.pickC_eval hq σ (o.eval_le (Tm.rwC_eval hq σ x) (Tm.rwC_eval hq σ y) (Tm.rwC_eval hq σ z))
 
-theorem Rhs.rwC_eval (hq : Term.EvalRefines q.1 q.2) (σ : State C Γ) {t : LTy} (r : Rhs C Γ t) :
+theorem Rhs.rwC_eval (hq : Term.EvalRefines q.1 q.2) (σ : EState C Γ) {t : LTy} (r : Rhs C Γ t) :
     Res.Le (r.eval σ) ((r.rwC q).eval σ) := by
   cases r with
   | val t => exact Tm.rwC_eval hq σ t
@@ -1350,8 +1350,8 @@ theorem Rhs.rwC_eval (hq : Term.EvalRefines q.1 q.2) (σ : State C Γ) {t : LTy}
   | saveNet => exact Res.Le.refl _
   | saveNetMt => exact Res.Le.refl _
 
-theorem UpdElem.rwC_write (hq : Term.EvalRefines q.1 q.2) {Δ : Ctx} (σ₀ : State C Γ)
-    (e : UpdElem C Γ Δ) (τ : State C Δ) : Res.Le (e.write σ₀ τ) ((e.rwC q).write σ₀ τ) := by
+theorem UpdElem.rwC_write (hq : Term.EvalRefines q.1 q.2) {Δ : Ctx} (σ₀ : EState C Γ)
+    (e : UpdElem C Γ Δ) (τ : EState C Δ) : Res.Le (e.write σ₀ τ) ((e.rwC q).write σ₀ τ) := by
   have hv := fun t : Tm C Γ .val => Tm.rwC_eval hq σ₀ t
   cases e with
   | «local» i r => exact Res.Le.bind (Rhs.rwC_eval hq σ₀ r) fun _ => Res.Le.refl _
@@ -1364,27 +1364,27 @@ theorem UpdElem.rwC_write (hq : Term.EvalRefines q.1 q.2) {Δ : Ctx} (σ₀ : St
   | setBalance a => exact Res.Le.bind (hv a) fun _ => Res.Le.refl _
 
 /-- **Where an update returns, its rewrite returns the same state.** -/
-theorem Upd.rwC_apply (hq : Term.EvalRefines q.1 q.2) (σ₀ : State C Γ) :
+theorem Upd.rwC_apply (hq : Term.EvalRefines q.1 q.2) (σ₀ : EState C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → Res.Le (U.apply σ₀) ((U.rwC q).apply σ₀)
   | _, .nil => Res.Le.refl _
   | _, .snoc U e => Res.Le.bind (Upd.rwC_apply hq σ₀ U) fun τ => UpdElem.rwC_write hq σ₀ e τ
   | _, .decl U x r => Res.Le.bind (Upd.rwC_apply hq σ₀ U) fun _ =>
       Res.Le.bind (Rhs.rwC_eval hq σ₀ r) fun _ => Res.Le.refl _
   | _, .pop U h => fun τ hτ => by
-    change (U.apply σ₀).map (State.drop h) = .ok τ at hτ
+    change (U.apply σ₀).map (EState.drop h) = .ok τ at hτ
     cases hU : U.apply σ₀ with
     | error => rw [hU] at hτ; cases hτ
     | ok τ₀ =>
       rw [hU] at hτ; cases hτ
-      show ((U.rwC q).apply σ₀).map (State.drop h) = _
+      show ((U.rwC q).apply σ₀).map (EState.drop h) = _
       rw [Upd.rwC_apply hq σ₀ U τ₀ hU]; rfl
   | _, .drop U h => fun τ hτ => by
-    change (U.apply σ₀).map (State.thin h) = .ok τ at hτ
+    change (U.apply σ₀).map (EState.thin h) = .ok τ at hτ
     cases hU : U.apply σ₀ with
     | error => rw [hU] at hτ; cases hτ
     | ok τ₀ =>
       rw [hU] at hτ; cases hτ
-      show ((U.rwC q).apply σ₀).map (State.thin h) = _
+      show ((U.rwC q).apply σ₀).map (EState.thin h) = _
       rw [Upd.rwC_apply hq σ₀ U τ₀ hU]; rfl
 
 /-- **Under the box, a rewritten update gives the update.** -/

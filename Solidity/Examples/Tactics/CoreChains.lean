@@ -308,7 +308,7 @@ Solidity.Core.Surface`), their lines `cdl![m]{ … }`
 (`Calculus/Core/ChainGen.lean`). -/
 
 section Surface
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## `sol_chain?`: the chain written out
 

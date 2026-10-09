@@ -21,7 +21,7 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ [ s; ] ⇝ p }`, `dl{ ⟨ s; ⟩ ⇝ p }` | a taclet for the box only, the diamond only |
 | `dl[LeanTaclet C k]{ ⟨ s; ⟩ ⇝ p }` | a rule of another judgement, `LeanTaclet C k .diamond s p` |
 | `dl{ p }` | a premise |
-| `dl{ ..Γ, c, {U} ⟹[R] φ }` | the closer's sequent `Proves R (Γ ++ [.pre c] ++ [.upd m U]) φ` (`Calculus/Logic.lean`; a scoped sequent with a modality is `Calculus/Core/SequentNotation.lean`'s) |
+| `dl{ ..Γ, c, {U} ⟹[R] φ }` | the closer's sequent `Proves R (Γ ++ [.pre c] ++ [.upd m U]) φ` (`Calculus/NFmlLogic.lean`; a scoped sequent with a modality is `Calculus/Core/SequentNotation.lean`'s) |
 | `dl{ ..Γ ⟹ᶜ[I] φ }` | printing only: a scoped sequent with callbacks (`Core.ProvesC`, `Calculus/Core/Callback.lean`) |
 | `tm{ find(save(s, p, v), q) }` | a term (`Tm`), every name a Lean variable |
 | `⊨ φ` | `Valid φ` |
@@ -342,8 +342,8 @@ syntax:50 term:51 " ⊧ " term:51 : term
 syntax "stmt{ " sol_stmt "; " "}" : term
 
 macro_rules
-  | `(⊨ $φ:term) => `(Solidity.Valid $φ)
-  | `($σ:term ⊧ $φ:term) => `(Solidity.holds $σ $φ)
+  | `(⊨ $φ:term) => `(NFml.Valid $φ)
+  | `($σ:term ⊧ $φ:term) => `(NFml.holds $σ $φ)
 
 /-! ## Side conditions
 
@@ -521,24 +521,24 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
 /-- A head at a position. -/
 def headAt (pos : Pos) (stx : Lean.Syntax) : Head → MacroM Lean.Term
   | .local v => match pos with
-    | .val => `(Val.simple (Simple.local $v))
-    | .simple => `(Simple.local $v)
-    | .oploc => `(OpLoc.local $v)
+    | .val => `(Surface.Val.simple (Surface.Simple.local $v))
+    | .simple => `(Surface.Simple.local $v)
+    | .oploc => `(Surface.OpLoc.local $v)
     | _ => posError stx "a stack local" pos
   | .alias v => match pos with
-    | .spath => `(SPath.alias $v)
+    | .spath => `(Surface.SPath.alias $v)
     | _ => posError stx "a storage alias" pos
   | .mem v h => match pos with
-    | .mpath => `(MPath.var $v $h)
+    | .mpath => `(Surface.MPath.var $v $h)
     | _ => posError stx "a memory local" pos
   | .root r h => match pos with
-    | .loc => `(Loc.root $r $h)
-    | .spath => `(SPath.loc (Loc.root $r $h))
-    | .val => `(Val.read (Loc.root $r $h))
-    | .oploc => `(OpLoc.root $r $h)
+    | .loc => `(Surface.Loc.root $r $h)
+    | .spath => `(Surface.SPath.loc (Surface.Loc.root $r $h))
+    | .val => `(Surface.Val.read (Surface.Loc.root $r $h))
+    | .oploc => `(Surface.OpLoc.root $r $h)
     | _ => posError stx "a state variable" pos
   | .simple x => match pos with
-    | .val => `(Val.simple $x)
+    | .val => `(Surface.Val.simple $x)
     | .simple => pure x
     | _ => posError stx "a simple value" pos
   | .val x => match pos with
@@ -552,13 +552,13 @@ def headAt (pos : Pos) (stx : Lean.Syntax) : Head → MacroM Lean.Term
     | _ => posError stx "a memory path" pos
   | .loc x => match pos with
     | .loc => pure x
-    | .spath => `(SPath.loc $x)
-    | .val => `(Val.read $x)
+    | .spath => `(Surface.SPath.loc $x)
+    | .val => `(Surface.Val.read $x)
     | _ => posError stx "a storage location" pos
   | .mloc x => match pos with
     | .mloc => pure x
-    | .mpath => `(MPath.loc $x)
-    | .val => `(Val.readMem $x)
+    | .mpath => `(Surface.MPath.loc $x)
+    | .val => `(Surface.Val.readMem $x)
     | _ => posError stx "a memory location" pos
   | .other x => pure x
   | .weak x d => pure (iterApp pos.coreUp d x)
@@ -629,21 +629,21 @@ partial def fieldAt (Γ : Scope) (pos : Pos) (stx : Lean.Syntax) (mem : Bool) (b
   if f.getId.toString == "length" && pos == .val then
     -- the element type named `E`, so that the scratch path a rule reads the
     -- length through has it too
-    return ← if mem then `(Val.mlen (E := $(schemaIdent "E")) $b $(schemaIdent "hlen"))
-      else `(Val.len (E := $(schemaIdent "E")) $b $(schemaIdent "hlen"))
+    return ← if mem then `(Surface.Val.mlen (E := $(schemaIdent "E")) $b $(schemaIdent "hlen"))
+      else `(Surface.Val.len (E := $(schemaIdent "E")) $b $(schemaIdent "hlen"))
   if mem then
     match pos with
-    | .mloc => `(MLoc.field $b $f $h)
-    | .mpath => `(MPath.loc (MLoc.field $b $f $h))
-    | .val => `(Val.readMem (MLoc.field $b $f $h))
-    | .oploc => `(OpLoc.mfield $b $f $h)
+    | .mloc => `(Surface.MLoc.field $b $f $h)
+    | .mpath => `(Surface.MPath.loc (Surface.MLoc.field $b $f $h))
+    | .val => `(Surface.Val.readMem (Surface.MLoc.field $b $f $h))
+    | .oploc => `(Surface.OpLoc.mfield $b $f $h)
     | _ => posError stx "a memory member" pos
   else
     match pos with
-    | .loc => `(Loc.field $b $f $h)
-    | .spath => `(SPath.loc (Loc.field $b $f $h))
-    | .val => `(Val.read (Loc.field $b $f $h))
-    | .oploc => `(OpLoc.field $b $f $h)
+    | .loc => `(Surface.Loc.field $b $f $h)
+    | .spath => `(Surface.SPath.loc (Surface.Loc.field $b $f $h))
+    | .val => `(Surface.Val.read (Surface.Loc.field $b $f $h))
+    | .oploc => `(Surface.OpLoc.field $b $f $h)
     | _ => posError stx "a storage member" pos
 
 /-- `b.f₁.….fₙ`: the inner members are receivers. -/
@@ -656,8 +656,8 @@ partial def fieldsAt (Γ : Scope) (pos : Pos) (stx : Lean.Syntax) (mem : Bool) (
 /-- A program expression at the sort `pos`. -/
 partial def schemaAt (Γ : Scope) (pos : Pos) : TSyntax `sol_expr → MacroM Lean.Term
   | stx@`(sol_expr| $n:num) => match pos with
-    | .val => `(Val.simple (Simple.lit $n rfl))
-    | .simple => `(Simple.lit $n rfl)
+    | .val => `(Surface.Val.simple (Surface.Simple.lit $n rfl))
+    | .simple => `(Surface.Simple.lit $n rfl)
     | _ => posError stx "a number" pos
   | stx@`(sol_expr| $x:ident) => do
     match nameParts x.getId with
@@ -665,8 +665,8 @@ partial def schemaAt (Γ : Scope) (pos : Pos) : TSyntax `sol_expr → MacroM Lea
     | ["true"] | ["false"] =>
       let b ← if x.getId.toString == "true" then `(true) else `(false)
       match pos with
-      | .val => `(Val.simple (Simple.bool $b))
-      | .simple => `(Simple.bool $b)
+      | .val => `(Surface.Val.simple (Surface.Simple.bool $b))
+      | .simple => `(Surface.Simple.bool $b)
       | _ => posError stx "a Boolean" pos
     | [_] => headAt pos x (headOf Γ x)
     | h :: fs =>
@@ -686,39 +686,39 @@ partial def schemaAt (Γ : Scope) (pos : Pos) : TSyntax `sol_expr → MacroM Lea
       -- a memory array of either kind: the schema variable `mk` (`ArrTy`)
       let a := schemaIdent "mk"
       match pos with
-      | .mloc => `(MLoc.index $a $b $(← schemaAt Γ .val k))
-      | .mpath => `(MPath.loc (MLoc.index $a $b $(← schemaAt Γ .val k)))
-      | .val => `(Val.readMem (MLoc.index $a $b $(← schemaAt Γ .val k)))
-      | .oploc => `(OpLoc.mindex $a $b $(← schemaAt Γ .simple k))
+      | .mloc => `(Surface.MLoc.index $a $b $(← schemaAt Γ .val k))
+      | .mpath => `(Surface.MPath.loc (Surface.MLoc.index $a $b $(← schemaAt Γ .val k)))
+      | .val => `(Surface.Val.readMem (Surface.MLoc.index $a $b $(← schemaAt Γ .val k)))
+      | .oploc => `(Surface.OpLoc.mindex $a $b $(← schemaAt Γ .simple k))
       | _ => posError stx "a memory element" pos
     else
       let b ← schemaAt Γ .spath e
       let it ← indexTyOf e
       match pos with
-      | .loc => `(Loc.index $it $b $(← schemaAt Γ .val k))
-      | .spath => `(SPath.loc (Loc.index $it $b $(← schemaAt Γ .val k)))
-      | .val => `(Val.read (Loc.index $it $b $(← schemaAt Γ .val k)))
-      | .oploc => `(OpLoc.index $it $b $(← schemaAt Γ .simple k))
+      | .loc => `(Surface.Loc.index $it $b $(← schemaAt Γ .val k))
+      | .spath => `(Surface.SPath.loc (Surface.Loc.index $it $b $(← schemaAt Γ .val k)))
+      | .val => `(Surface.Val.read (Surface.Loc.index $it $b $(← schemaAt Γ .val k)))
+      | .oploc => `(Surface.OpLoc.index $it $b $(← schemaAt Γ .simple k))
       | _ => posError stx "a storage entry" pos
   | `(sol_expr| ( $e:sol_expr )) => schemaAt Γ pos e
   | `(sol_expr| ‹ $t:term ›) => pure t
   | stx@`(sol_expr| $a:sol_expr ⊕ $b:sol_expr) => do
     unless pos == .val do posError stx "an operator application" pos
-    `(Val.binop (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
+    `(Surface.Val.binop (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
         $(← schemaAt Γ .val a) $(← schemaAt Γ .val b))
   | stx@`(sol_expr| ⊖ $a:sol_expr) => do
     unless pos == .val do posError stx "an operator application" pos
-    `(Val.unop (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
+    `(Surface.Val.unop (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
       $(← schemaAt Γ .val a))
   | stx@`(sol_expr| $a:sol_expr && $b:sol_expr) => do
     unless pos == .val do posError stx "`&&`" pos
-    `(Val.binop BinOp.and rfl rfl $(← schemaAt Γ .val a) $(← schemaAt Γ .val b))
+    `(Surface.Val.binop BinOp.and rfl rfl $(← schemaAt Γ .val a) $(← schemaAt Γ .val b))
   | stx@`(sol_expr| $a:sol_expr || $b:sol_expr) => do
     unless pos == .val do posError stx "`||`" pos
-    `(Val.binop BinOp.or rfl rfl $(← schemaAt Γ .val a) $(← schemaAt Γ .val b))
+    `(Surface.Val.binop BinOp.or rfl rfl $(← schemaAt Γ .val a) $(← schemaAt Γ .val b))
   | stx@`(sol_expr| $c:sol_expr ? $a:sol_expr : $b:sol_expr) => do
     unless pos == .val do posError stx "a conditional" pos
-    `(Val.ternary $(← schemaAt Γ .val c) $(← schemaAt Γ .val a) $(← schemaAt Γ .val b))
+    `(Surface.Val.ternary $(← schemaAt Γ .val c) $(← schemaAt Γ .val a) $(← schemaAt Γ .val b))
   | _ => Macro.throwUnsupported
 
 end
@@ -901,7 +901,7 @@ def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
     let d : Ident ← match (⟨w[0][6]⟩ : TSyntax `sol_expr) with
       | `(sol_expr| $d:ident) => pure d
       | _ => Macro.throwErrorAt cl msg
-    return (← `(LoopAnn.inv $x (some $d)), w')
+    return (← `(Surface.LoopAnn.inv $x (some $d)), w')
   unless w.getKind == ``solWhile do
     Macro.throwErrorAt w "a taclet's `/// @custom:key` clause stands above `while`"
   let e : TSyntax `sol_expr := ⟨cl[6]⟩
@@ -910,13 +910,13 @@ def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
   let kw := cl[5].getId.toString
   let ann ← if kw == "unwind" then
       match e with
-      | `(sol_expr| $n:num) => `(LoopAnn.unwind $n)
-      | `(sol_expr| $x:ident) => `(LoopAnn.unwind $x)
-      | `(sol_expr| $x:ident + 1) => `(LoopAnn.unwind ($x + 1))
+      | `(sol_expr| $n:num) => `(Surface.LoopAnn.unwind $n)
+      | `(sol_expr| $x:ident) => `(Surface.LoopAnn.unwind $x)
+      | `(sol_expr| $x:ident + 1) => `(Surface.LoopAnn.unwind ($x + 1))
       | _ => bad
     else if kw == "invariant" then
       match e with
-      | `(sol_expr| $x:ident) => `(LoopAnn.inv $x $(schemaIdent "dec"))
+      | `(sol_expr| $x:ident) => `(Surface.LoopAnn.inv $x $(schemaIdent "dec"))
       | _ => bad
     else bad
   return (ann, w)
@@ -933,7 +933,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     return (x, Γ)
   | `(sol_stmt| $l:sol_expr = $b:sol_expr .push()) => do
     let some (.alias x) := lhsHead Γ l | Macro.throwErrorAt l "`= b.push()` binds a storage alias"
-    return (← `(Surface.Stmt.rebind (R := $(schemaIdent "R")) $x (ARhs.push $(← schemaAt Γ .spath b) $(schemaIdent "hd"))), Γ)
+    return (← `(Surface.Stmt.rebind (R := $(schemaIdent "R")) $x (Surface.ARhs.push $(← schemaAt Γ .spath b) $(schemaIdent "hd"))), Γ)
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( )) => do
     let some (b, "push") ← callRecv? f | Macro.throwErrorAt f "only `b.push()` is a call on the right"
     schemaStmt fresh Γ (← `(sol_stmt| $l:sol_expr = $b:sol_expr .push()))
@@ -956,7 +956,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
       let n ← schemaAt Γ .simple n
       match lhsHead Γ l, stemOfExpr? l with
       | some (.mem x _), _ =>
-        return (← `(Surface.Stmt.rebindMem (R := $R) $x (MRhs.newArr (R := $R) $n $(schemaIdent "hn"))), Γ)
+        return (← `(Surface.Stmt.rebindMem (R := $R) $x (Surface.MRhs.newArr (R := $R) $n $(schemaIdent "hn"))), Γ)
       | _, some "tgt" =>
         let `(sol_expr| $x:ident) := l | Macro.throwErrorAt l "a `tgt`"
         return (← `(Surface.Stmt.assignNew (R := $R) $x $n $(schemaIdent "hn")), Γ)
@@ -966,17 +966,17 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
       if Γ.isCore then
         return (← `($(Lean.mkCIdent `Solidity.Core.NewLhs.fill)
           $(iterApp `Solidity.Core.NewLhs.up Γ.depth x) $(← schemaAt Γ .mpath r)), Γ)
-      return (← `($(mkIdent `Solidity.NewLhs.fill) $x $(← schemaAt Γ .mpath r)), Γ)
+      return (← `($(mkIdent `Solidity.Surface.NewLhs.fill) $x $(← schemaAt Γ .mpath r)), Γ)
     let t ← match lhsHead Γ l with
       | some (.local v) => `(Surface.Stmt.assignLocal $v $(← schemaAt Γ .val r))
       | some (.alias x) =>
         match rhsTerm Γ "rhs" r with
         | some v => `(Surface.Stmt.rebind $x $v)
-        | none => `(Surface.Stmt.rebind $x (ARhs.path $(← schemaAt Γ .spath r)))
+        | none => `(Surface.Stmt.rebind $x (Surface.ARhs.path $(← schemaAt Γ .spath r)))
       | some (.mem x _) =>
         if let some v := rhsTerm Γ "mrhs" r then `(Surface.Stmt.rebindMem $x $v) else
-        if isMem Γ r then `(Surface.Stmt.rebindMem $x (MRhs.alias $(← schemaAt Γ .mpath r)))
-        else `(Surface.Stmt.rebindMem $x (MRhs.copy $(← schemaAt Γ .spath r) $(schemaIdent "hm")))
+        if isMem Γ r then `(Surface.Stmt.rebindMem $x (Surface.MRhs.alias $(← schemaAt Γ .mpath r)))
+        else `(Surface.Stmt.rebindMem $x (Surface.MRhs.copy $(← schemaAt Γ .spath r) $(schemaIdent "hm")))
       | some (.other h) | some (.weak h _) =>
         match h with
         | `($x:ident) =>
@@ -1002,7 +1002,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
       | _ =>
         if isMem Γ l then
           if let some v := rhsTerm Γ "msrc" r then `(Surface.Stmt.assignMem $(← schemaAt Γ .mloc l) $v) else
-          if isMem Γ r then `(Surface.Stmt.assignMem $(← schemaAt Γ .mloc l) (MSrc.ref $(← schemaAt Γ .mpath r)))
+          if isMem Γ r then `(Surface.Stmt.assignMem $(← schemaAt Γ .mloc l) (Surface.MSrc.ref $(← schemaAt Γ .mpath r)))
           else
             -- a memory element's type is its value's, named `p` so that a
             -- scratch value written back (`mv[ie] = se`) has it too
@@ -1011,26 +1011,26 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
               | _ => false
             if elem then
               `(Surface.Stmt.assignMem (T := Ty.prim $(schemaIdent "p")) $(← schemaAt Γ .mloc l)
-                (MSrc.val $(← schemaAt Γ .val r)))
-            else `(Surface.Stmt.assignMem $(← schemaAt Γ .mloc l) (MSrc.val $(← schemaAt Γ .val r)))
+                (Surface.MSrc.val $(← schemaAt Γ .val r)))
+            else `(Surface.Stmt.assignMem $(← schemaAt Γ .mloc l) (Surface.MSrc.val $(← schemaAt Γ .val r)))
         else if isMem Γ r then
           `(Surface.Stmt.assignFromMem $(← schemaAt Γ .loc l) $(← schemaAt Γ .mpath r))
         else if let some v := rhsTerm Γ "src" r then `(Surface.Stmt.assign $(← schemaAt Γ .loc l) $v)
         else if isPath Γ r then
-          `(Surface.Stmt.assign $(← schemaAt Γ .loc l) (Src.copy $(← schemaAt Γ .spath r) $(schemaIdent "hm")))
-        else `(Surface.Stmt.assign $(← schemaAt Γ .loc l) (Src.val $(← schemaAt Γ .val r)))
+          `(Surface.Stmt.assign $(← schemaAt Γ .loc l) (Surface.Src.copy $(← schemaAt Γ .spath r) $(schemaIdent "hm")))
+        else `(Surface.Stmt.assign $(← schemaAt Γ .loc l) (Surface.Src.val $(← schemaAt Γ .val r)))
     return (t, Γ)
   | `(sol_stmt| $T:sol_ty storage $x:ident = $b:sol_expr .push()) => do
     let v ← declVar fresh x
     let _ := T
-    let t ← `(Surface.Stmt.declStorage _ $v (some (ARhs.push $(← schemaAt Γ .spath b) $(schemaIdent "hd"))))
+    let t ← `(Surface.Stmt.declStorage _ $v (some (Surface.ARhs.push $(← schemaAt Γ .spath b) $(schemaIdent "hd"))))
     return (t, (x.getId.toString, .alias v) :: Γ)
   | `(sol_stmt| $T:sol_ty storage $x:ident = $e:sol_expr) => do
     let v ← declVar fresh x
     let _ := T
     let r : Lean.Term ← match rhsTerm Γ "rhs" e with
       | some r => pure r
-      | none => `(ARhs.path $(← schemaAt Γ .spath e))
+      | none => `(Surface.ARhs.path $(← schemaAt Γ .spath e))
     let t ← `(Surface.Stmt.declStorage _ $v (some $r))
     return (t, (x.getId.toString, .alias v) :: Γ)
   | `(sol_stmt| $T:sol_ty storage $x:ident) => do
@@ -1043,10 +1043,10 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     let _ := T
     let r : Lean.Term ← if let some r := rhsTerm Γ "mrhs" e then pure r
       else if let some n := newRhs? e then
-        `(MRhs.newArr (R := $(schemaIdent "R")) $(← schemaAt Γ .simple n) $(schemaIdent "hn"))
-      else if isMem Γ e then `(MRhs.alias $(← schemaAt Γ .mpath e))
-      else `(MRhs.copy $(← schemaAt Γ .spath e) $(schemaIdent "hm"))
-    let h ← `(MRhs.mapFree $r)
+        `(Surface.MRhs.newArr (R := $(schemaIdent "R")) $(← schemaAt Γ .simple n) $(schemaIdent "hn"))
+      else if isMem Γ e then `(Surface.MRhs.alias $(← schemaAt Γ .mpath e))
+      else `(Surface.MRhs.copy $(← schemaAt Γ .spath e) $(schemaIdent "hm"))
+    let h ← `(Surface.MRhs.mapFree $r)
     let t ← `(Surface.Stmt.declMem _ $v (some $r) rfl $h)
     return (t, (x.getId.toString, .mem v h) :: Γ)
   | `(sol_stmt| $T:sol_ty memory $x:ident) => do
@@ -1066,8 +1066,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     let t ← `(Surface.Stmt.declLocal $(schemaIdent "p") $v none)
     return (t, (x.getId.toString, .val v) :: Γ)
   | `(sol_stmt| $b:sol_expr .push( $a:sol_expr )) => do
-    let v : Lean.Term ← if let some r := rhsTerm Γ "src" a then pure r else if isPath Γ a then `(Src.copy $(← schemaAt Γ .spath a) $(schemaIdent "hm"))
-      else `(Src.val $(← schemaAt Γ .val a))
+    let v : Lean.Term ← if let some r := rhsTerm Γ "src" a then pure r else if isPath Γ a then `(Surface.Src.copy $(← schemaAt Γ .spath a) $(schemaIdent "hm"))
+      else `(Surface.Src.val $(← schemaAt Γ .val a))
     return (← `(Surface.Stmt.push $(← schemaAt Γ .spath b) (some $v) rfl), Γ)
   | `(sol_stmt| $b:sol_expr .push()) => do
     return (← `(Surface.Stmt.push (E := $(schemaIdent "E")) $(← schemaAt Γ .spath b) none $(schemaIdent "hd")), Γ)
@@ -1202,14 +1202,14 @@ def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
   | .mem v _, .mvalue => `(MValT.ref (ITerm.pv $v))
   | .root r _, .val => `(Term.find STerm.storage (PTerm.root $r))
   | .root r _, .path => `(PTerm.root $r)
-  | .simple s, .val => `(Simple.lower $s)
-  | .simple s, .svalue => `(SValT.val (Simple.lower $s))
-  | .simple s, .mvalue => `(MValT.val (Simple.lower $s))
-  | .val e, .val => `(Val.lower $e)
-  | .spath p, .path => `(SPath.lower $p)
-  | .mpath p, .ident => `(MPath.lower $p)
-  | .mpath p, .mvalue => `(MValT.ref (MPath.lower $p))
-  | .loc l, .path => `(Loc.lower $l)
+  | .simple s, .val => `(Surface.Simple.lower $s)
+  | .simple s, .svalue => `(SValT.val (Surface.Simple.lower $s))
+  | .simple s, .mvalue => `(MValT.val (Surface.Simple.lower $s))
+  | .val e, .val => `(Surface.Val.lower $e)
+  | .spath p, .path => `(Surface.SPath.lower $p)
+  | .mpath p, .ident => `(Surface.MPath.lower $p)
+  | .mpath p, .mvalue => `(MValT.ref (Surface.MPath.lower $p))
+  | .loc l, .path => `(Surface.Loc.lower $l)
   | .other o, _ => pure o
   | _, _ => tposError x s!"`{n}`" pos
 
@@ -1219,12 +1219,12 @@ def memMember (pos : TPos) (stx : Lean.Syntax) : Lean.Term → List Ident → Ma
   | b, [f] =>
     if f.getId.toString == "length" && pos == .val then `(Term.mlen MTerm.memory $b) else
     match pos with
-    | .addr => `(MAddr.field $b $f)
-    | .val => `(Term.read MTerm.memory (MAddr.field $b $f))
-    | .ident => `(ITerm.read MTerm.memory (MAddr.field $b $f))
-    | .mvalue => `(MValT.ref (ITerm.read MTerm.memory (MAddr.field $b $f)))
+    | .addr => `(Surface.MAddr.field $b $f)
+    | .val => `(Term.read MTerm.memory (Surface.MAddr.field $b $f))
+    | .ident => `(ITerm.read MTerm.memory (Surface.MAddr.field $b $f))
+    | .mvalue => `(MValT.ref (ITerm.read MTerm.memory (Surface.MAddr.field $b $f)))
     | _ => tposError stx "a memory member" pos
-  | b, f :: fs => do memMember pos stx (← `(ITerm.read MTerm.memory (MAddr.field $b $f))) fs
+  | b, f :: fs => do memMember pos stx (← `(ITerm.read MTerm.memory (Surface.MAddr.field $b $f))) fs
 
 /-- `p.length`, however it was parsed, or KeY's `consr(p, size)`: the path `p`. -/
 def lengthBase? : TSyntax `dl_term → MacroM (Option (TSyntax `dl_term))
@@ -1274,8 +1274,8 @@ partial def schemaKey (Γ : Scope) (i : TSyntax `dl_term) : MacroM Lean.Term := 
   if let `(dl_term| $x:ident) := i then
     if (nameParts x.getId).length == 1 then
       match headOf Γ x with
-      | .simple s => return ← `(Simple.keyLower $s)
-      | .val e => return ← `(Val.keyLower $e)
+      | .simple s => return ← `(Surface.Simple.keyLower $s)
+      | .val e => return ← `(Surface.Val.keyLower $e)
       | _ => pure ()
   schemaTerm Γ .val i
 
@@ -1326,7 +1326,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         | [] => false
       | _ => false
     if mem then
-      let a ← `(MAddr.at $(← schemaTerm Γ .ident t) $(← schemaTerm Γ .val i))
+      let a ← `(Surface.MAddr.at $(← schemaTerm Γ .ident t) $(← schemaTerm Γ .val i))
       match pos with
       | .addr => pure a
       | .val => `(Term.read MTerm.memory $a)
@@ -1375,8 +1375,8 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     -- the member `f`, the element `at(k)`
     let maddr (i a : TSyntax `dl_term) : MacroM Lean.Term := do
       match a with
-      | `(dl_term| at($k)) => `(MAddr.at $(← schemaTerm Γ .ident i) $(← schemaTerm Γ .val k))
-      | `(dl_term| $g:ident) => `(MAddr.field $(← schemaTerm Γ .ident i) $g)
+      | `(dl_term| at($k)) => `(Surface.MAddr.at $(← schemaTerm Γ .ident i) $(← schemaTerm Γ .val k))
+      | `(dl_term| $g:ident) => `(Surface.MAddr.field $(← schemaTerm Γ .ident i) $g)
       | _ => tposError a "a member `f` or an element `at(k)`" .addr
     match f.getId.toString, args, pos with
     | "select", #[s, r], .val => `(Term.find $(← st s) $(← pa r))
@@ -1502,27 +1502,27 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
     if n == "selfBalance" then
       return ← match r with
         | `(dl_term| selfBalance - $a) => do
-          `(UpdElem.selfBalance IntOp.sub $(← schemaTerm Γ .val a))
+          `(Surface.UpdElem.selfBalance IntOp.sub $(← schemaTerm Γ .val a))
         | `(dl_term| selfBalance + $a) => do
-          `(UpdElem.selfBalance IntOp.add $(← schemaTerm Γ .val a))
+          `(Surface.UpdElem.selfBalance IntOp.add $(← schemaTerm Γ .val a))
         | _ => Macro.throwErrorAt r "`selfBalance - a` or `selfBalance + a`"
     if n == "net" then
       return ← match r with
         | `(dl_term| store(net, at($a), net($a') - $v)) =>
           if a.raw.structEq a'.raw then do
-            `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.sub $(← schemaTerm Γ .val v))
+            `(Surface.UpdElem.net $(← schemaTerm Γ .val a) IntOp.sub $(← schemaTerm Γ .val v))
           else Macro.throwErrorAt a' "the entry read is the one written"
         | `(dl_term| store(net, at($a), net($a') + $v)) =>
           if a.raw.structEq a'.raw then do
-            `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.add $(← schemaTerm Γ .val v))
+            `(Surface.UpdElem.net $(← schemaTerm Γ .val a) IntOp.add $(← schemaTerm Γ .val v))
           else Macro.throwErrorAt a' "the entry read is the one written"
         | `(dl_term| storeSt(net, at($a), selectSt(net, at($a')) - $v)) =>
           if a.raw.structEq a'.raw then do
-            `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.sub $(← schemaTerm Γ .val v))
+            `(Surface.UpdElem.net $(← schemaTerm Γ .val a) IntOp.sub $(← schemaTerm Γ .val v))
           else Macro.throwErrorAt a' "the entry read is the one written"
         | `(dl_term| storeSt(net, at($a), selectSt(net, at($a')) + $v)) =>
           if a.raw.structEq a'.raw then do
-            `(UpdElem.net $(← schemaTerm Γ .val a) IntOp.add $(← schemaTerm Γ .val v))
+            `(Surface.UpdElem.net $(← schemaTerm Γ .val a) IntOp.add $(← schemaTerm Γ .val v))
           else Macro.throwErrorAt a' "the entry read is the one written"
         | `(dl_term| if($a = $t:ident) then $n':ident else storeSt(net, at($a'), selectSt(net, at($a'')) - $v))
         | `(dl_term| if($a = $t:ident) then $n':ident else store(net, at($a'), net($a'') - $v)) => do
@@ -1531,21 +1531,21 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
           unless n'.getId.toString == "net" do Macro.throwErrorAt n' "a payment to `this` leaves `net`"
           unless a.raw.structEq a'.raw && a.raw.structEq a''.raw do
             Macro.throwErrorAt a' "the entry read is the one written, and the one compared"
-          `(UpdElem.pay $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val v))
+          `(Surface.UpdElem.pay $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val v))
         | _ => Macro.throwErrorAt r "`store(net, at(r), net(r) - a)`, `… + a`, or \
             `if(r = this) then net else store(net, at(r), net(r) - a)`"
-    if n == "storage" then return ← `(UpdElem.storage $(← schemaTerm Γ .storage r))
-    if n == "memory" then return ← `(UpdElem.memory $(← schemaTerm Γ .memory r))
+    if n == "storage" then return ← `(Surface.UpdElem.storage $(← schemaTerm Γ .storage r))
+    if n == "memory" then return ← `(Surface.UpdElem.memory $(← schemaTerm Γ .memory r))
     match headOf Γ x with
-    | .local v => `(UpdElem.val $v $(← schemaTerm Γ .val r))
+    | .local v => `(Surface.UpdElem.val $v $(← schemaTerm Γ .val r))
     | .alias v =>
       -- `lsv := unset`: the alias of a declaration without a path (Lean only)
       match r with
       | `(dl_term| $u:ident) =>
-        if u.getId == `unset then `(UpdElem.unset $v)
-        else `(UpdElem.path $v $(← schemaTerm Γ .path r))
-      | _ => `(UpdElem.path $v $(← schemaTerm Γ .path r))
-    | .mem v _ => `(UpdElem.mref $v $(← schemaTerm Γ .ident r))
+        if u.getId == `unset then `(Surface.UpdElem.unset $v)
+        else `(Surface.UpdElem.path $v $(← schemaTerm Γ .path r))
+      | _ => `(Surface.UpdElem.path $v $(← schemaTerm Γ .path r))
+    | .mem v _ => `(Surface.UpdElem.mref $v $(← schemaTerm Γ .ident r))
     | _ => Macro.throwErrorAt x "an update assigns a local, an alias, a memory local, \
         `storage` or `memory`"
   | _ => Macro.throwUnsupported
@@ -1554,7 +1554,7 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
 `{u}u2` (`u2` with `u` applied, `Upd.subst`). -/
 def updVar? : TSyntax `dl_upd_elem → MacroM (Option Lean.Term)
   | `(dl_upd_elem| $u:ident) => pure (some u)
-  | `(dl_upd_elem| { $u:ident } $v:ident) => some <$> `($(mkIdent `Solidity.Upd.subst) $v $u)
+  | `(dl_upd_elem| { $u:ident } $v:ident) => some <$> `($(mkIdent `Solidity.Surface.Upd.subst) $v $u)
   | _ => pure none
 
 /-- Whether an update has a schema variable among its elements: the formula
@@ -1580,7 +1580,7 @@ def schemaUpd (Γ : Scope) (U : TSyntax `dl_upd) : MacroM Lean.Term := do
       segs := segs.push u
     | none => run := run.push (← schemaUpdElem Γ ⟨e⟩)
   -- no schema variable: the list of the elements, as ever
-  if segs.isEmpty then return ← `(([$run,*] : Upd _))
+  if segs.isEmpty then return ← `(([$run,*] : Surface.Upd _))
   unless run.isEmpty do segs := segs.push (← `([$run,*]))
   -- the parts appended, left-nested as `u ++ u2.subst u` is written
   segs[1:].foldlM (init := segs[0]!) fun acc t => `($acc ++ $t)
@@ -1701,39 +1701,39 @@ def schemaInv (fresh : Bool) (Γ : Scope) (i : TSyntax `dl_fml) (b : TSyntax `so
   let U ← match U with
     | some U => schemaUpd Γ U
     | none => `([])
-  `($(mkIdent `Solidity.Premise.inv) $(← schemaFml i) $U $(← schemaFml c) $(← schemaFml c')
+  `($(mkIdent `Solidity.Surface.Premise.inv) $(← schemaFml i) $U $(← schemaFml c) $(← schemaFml c')
       $(← schemaBlock fresh Γ t) $(← schemaFml post))
 
 def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM Lean.Term
-  | `(dl_premise| $U:dl_upd ⟨[ ]⟩) => do `($(mkIdent `Solidity.Premise.update) $(← schemaUpd Γ U))
+  | `(dl_premise| $U:dl_upd ⟨[ ]⟩) => do `($(mkIdent `Solidity.Surface.Premise.update) $(← schemaUpd Γ U))
   | `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) => do
     let (ts, _) ← schemaProg fresh Γ ss
-    `($(mkIdent `Solidity.Premise.unfold) $(← progTerm false ts none))
+    `($(mkIdent `Solidity.Surface.Premise.unfold) $(← progTerm false ts none))
   | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ ; $[$_:str :]? $nc:dl_fml ⟹ ⟨[ $f:sol_block ]⟩) => do
-    `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
+    `($(mkIdent `Solidity.Surface.Premise.split) $(← schemaFml c) $(← schemaFml nc)
         $(← schemaBlock fresh Γ t) $(← schemaBlock fresh Γ f))
   | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ;
       $[$_:str :]? $nc:dl_fml ⟹ ⟨[ $[$fs:sol_stmt;]* ]⟩) => do
     let (ts, _) ← schemaProg fresh Γ ts
     let (fs, _) ← schemaProg fresh Γ fs
-    `($(mkIdent `Solidity.Premise.split) $(← schemaFml c) $(← schemaFml nc)
+    `($(mkIdent `Solidity.Surface.Premise.split) $(← schemaFml c) $(← schemaFml nc)
         $(← progTerm true ts none) $(← progTerm true fs none))
   | `(dl_premise| $[$_:str :]? $c:dl_fml ⟹ ⟨[ $[$ts:sol_stmt;]* ]⟩ ; $[$_:str :]? $c':dl_fml) => do
     unless c.raw.structEq c'.raw do
       Macro.throwErrorAt c' "a check assumes the condition it checks: write it on both sides"
     let (ts, _) ← schemaProg fresh Γ ts
-    `($(mkIdent `Solidity.Premise.check) $(← schemaFml c) $(← progTerm true ts none))
+    `($(mkIdent `Solidity.Surface.Premise.check) $(← schemaFml c) $(← progTerm true ts none))
   | `(dl_premise| $[$_:str :]? $i:dl_fml ; $[$_:str :]? { anon($b:sol_block) } ($h:dl_fml →
       $c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩)) => do
     schemaInv fresh Γ i b h none c t post c'
   | `(dl_premise| $[$_:str :]? $i:dl_fml ; $[$_:str :]? { anon($b:sol_block) } ($h:dl_fml →
       $U:dl_upd ($c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩))) => do
     schemaInv fresh Γ i b h (some U) c t post c'
-  | `(dl_premise| true) => `($(mkIdent `Solidity.Premise.done) true)
-  | `(dl_premise| false) => `($(mkIdent `Solidity.Premise.done) false)
+  | `(dl_premise| true) => `($(mkIdent `Solidity.Surface.Premise.done) true)
+  | `(dl_premise| false) => `($(mkIdent `Solidity.Surface.Premise.done) false)
   | `(dl_premise| $b:dl_branch ; $bs:dl_branch;*) => do
     let bs ← (#[b] ++ bs.getElems).mapM (schemaBranch fresh Γ)
-    `($(mkIdent `Solidity.Premise.branches) [$bs,*])
+    `($(mkIdent `Solidity.Surface.Premise.branches) [$bs,*])
   | `(dl_premise| $c:dl_case ; $cs:dl_case;*) => do
     let mut fs : Array Lean.Term := #[]
     let mut us : Array Lean.Term := #[]
@@ -1744,7 +1744,7 @@ def schemaPremise (fresh : Bool) (Γ : Scope) : TSyntax `dl_premise → MacroM L
         unless us.isEmpty do Macro.throwErrorAt c "the formula goals come first"
         fs := fs.push (← schemaFml φ)
       | _ => Macro.throwUnsupported
-    `($(mkIdent `Solidity.Premise.cases) [$fs,*] [$us,*])
+    `($(mkIdent `Solidity.Surface.Premise.cases) [$fs,*] [$us,*])
   | _ => Macro.throwUnsupported
 
 /-- The identifiers of a `\find`, outside `‹…›`. -/
@@ -1795,27 +1795,27 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
     seen := n :: seen
     let v := schemaIdent n
     match stemOf n with
-    | "nsp" => out := out.push (hyp n, ← `(SPath.isSimple $v = false))
-    | "sp" | "map" | "arr" => out := out.push (hyp n, ← `(SPath.isSimple $v = true))
+    | "nsp" => out := out.push (hyp n, ← `(Surface.SPath.isSimple $v = false))
+    | "sp" | "map" | "arr" => out := out.push (hyp n, ← `(Surface.SPath.isSimple $v = true))
     | "parr" | "rarr" | "marr" | "darr" =>
-      out := out.push (hyp n, ← `(SPath.isSimple $v = true))
+      out := out.push (hyp n, ← `(Surface.SPath.isSimple $v = true))
       let (pred, b) := match stemOf n with
-        | "parr" => (`Solidity.SPath.elemPrim, true)
-        | "rarr" => (`Solidity.SPath.elemPrim, false)
-        | "marr" => (`Solidity.SPath.elemMapping, true)
-        | _ => (`Solidity.SPath.elemMapping, false)
+        | "parr" => (`Solidity.Surface.SPath.elemPrim, true)
+        | "rarr" => (`Solidity.Surface.SPath.elemPrim, false)
+        | "marr" => (`Solidity.Surface.SPath.elemMapping, true)
+        | _ => (`Solidity.Surface.SPath.elemMapping, false)
       let bv ← if b then `(true) else `(false)
       out := out.push (hyp (n ++ "_e"), ← `($(mkIdent pred) $v = $bv))
-    | "nse" | "nadr" => out := out.push (hyp n, ← `(Val.isSimple $v = false))
-    | "nmp" => out := out.push (hyp n, ← `(MPath.isSimple $v = false))
+    | "nse" | "nadr" => out := out.push (hyp n, ← `(Surface.Val.isSimple $v = false))
+    | "nmp" => out := out.push (hyp n, ← `(Surface.MPath.isSimple $v = false))
     | "loc" =>
-      out := out.push (hyp n, ← `($(mkIdent `Solidity.Loc.isTarget) $v = true))
-      out := out.push (hyp (n ++ "_nr"), ← `($(mkIdent `Solidity.Loc.isRoot) $v = false))
+      out := out.push (hyp n, ← `($(mkIdent `Solidity.Surface.Loc.isTarget) $v = true))
+      out := out.push (hyp (n ++ "_nr"), ← `($(mkIdent `Solidity.Surface.Loc.isRoot) $v = false))
     | _ => pure ()
   let notTernary (r : TSyntax `sol_expr) : MacroM (Array (Ident × Lean.Term)) := do
     let some n := singleVar? r | return #[]
     unless ["e", "nse"].contains (stemOf n) do return #[]
-    return #[(hyp (n ++ "_nt"), ← `($(mkIdent `Solidity.Val.notTernary) $(schemaIdent n) = true))]
+    return #[(hyp (n ++ "_nt"), ← `($(mkIdent `Solidity.Surface.Val.notTernary) $(schemaIdent n) = true))]
   match s with
   | `(sol_stmt| $x:ident) =>
     -- `fbs`, `ic`, a call: its arguments simple (`functionCallArgCapture`
@@ -1824,15 +1824,15 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
     unless isCallStem n do return out
     let b ← if stemOf n == "fbs" then `(true) else `(false)
     return out.push (mkIdent `hexp, ← `($(mkIdent `Solidity.Arg.firstNonSimple) $(schemaIdent "args") = none))
-      |>.push (mkIdent `hrets, ← `($(mkIdent `Solidity.CallRet.isRets) $(schemaIdent "ret") = $b))
+      |>.push (mkIdent `hrets, ← `($(mkIdent `Solidity.Surface.CallRet.isRets) $(schemaIdent "ret") = $b))
   | `(sol_stmt| $l:sol_expr = $r:sol_expr) =>
     match lhsHead [] l with
     | some (.other h) =>
       let some n := singleVar? l | return out
       unless stemOf n == "lhs" do return out
-      if isMem [] r then return out.push (hyp n, ← `($(mkIdent `Solidity.MHole.isTarget) $h = true))
-      if isPath [] r then return out.push (hyp n, ← `($(mkIdent `Solidity.Hole.isTarget) $h = true))
-      return out.push (hyp n, ← `($(mkIdent `Solidity.VHole.isTarget) $h = true))
+      if isMem [] r then return out.push (hyp n, ← `($(mkIdent `Solidity.Surface.MHole.isTarget) $h = true))
+      if isPath [] r then return out.push (hyp n, ← `($(mkIdent `Solidity.Surface.Hole.isTarget) $h = true))
+      return out.push (hyp n, ← `($(mkIdent `Solidity.Surface.VHole.isTarget) $h = true))
     | some (.local _) | some (.alias _) | some (.mem ..) => return out
     | _ =>
       if isMem [] l then
@@ -1842,7 +1842,7 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
         unless memTarget l do return out
         if isMem [] r then
           let some n := singleVar? r | return out
-          return out.push (hyp (n ++ "_b"), ← `($(mkIdent `Solidity.MPath.isBindable) $(schemaIdent n) = true))
+          return out.push (hyp (n ++ "_b"), ← `($(mkIdent `Solidity.Surface.MPath.isBindable) $(schemaIdent n) = true))
         return out ++ (← notTernary r)
       if isMem [] r || (rhsVar? "src" r).isSome || isPath [] r then return out
       return out ++ (← notTernary r)
@@ -2180,13 +2180,13 @@ macro_rules
   | `(dl_schema{ $φ:dl_fml }) => schemaFml φ
   | `(dl{ $φ:dl_fml }) => schemaFml φ
   | `(dl{ $[$hs:dl_hyp],* ⟹ $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.all) $(← schemaHyps hs)
+    `($(mkIdent `Solidity.NFml.Proves) $(mkIdent `Solidity.RuleSet.all) $(← schemaHyps hs)
       $(← schemaFml φ))
   | `(dl{ $[$hs:dl_hyp],* ⟹ₖ $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.Proves) $(mkIdent `Solidity.RuleSet.solkey) $(← schemaHyps hs)
+    `($(mkIdent `Solidity.NFml.Proves) $(mkIdent `Solidity.RuleSet.solkey) $(← schemaHyps hs)
       $(← schemaFml φ))
   | `(dl{ $[$hs:dl_hyp],* ⟹[ $R:term ] $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.Proves) $R $(← schemaHyps hs) $(← schemaFml φ))
+    `($(mkIdent `Solidity.NFml.Proves) $R $(← schemaHyps hs) $(← schemaFml φ))
   | `(tm{ $t:dl_term }) => schemaTerm rawScope (tmSort t) t
   | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTaclet (schemaIdent "m") s p
   | `(dl{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do schemaTaclet (← `(Modality.box)) s p
@@ -2418,17 +2418,17 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
     dotExpr (← ppExpr b) f
   let index (b k : Lean.Expr) := do `(sol_expr| $(← ppExpr b):sol_expr[$(← ppExpr k):sol_expr])
   match_expr (← whnf e) with
-  | Simple.lit _ _ n _ =>
+  | Surface.Simple.lit _ _ n _ =>
     let some n ← intOf? n | escape
     if n < 0 then `(sol_expr| -$(Syntax.mkNumLit (toString n.natAbs)):num)
     else `(sol_expr| $(Syntax.mkNumLit (toString n)):num)
-  | Simple.bool _ b =>
+  | Surface.Simple.bool _ b =>
     match_expr (← whnf b) with
     | Bool.true => `(sol_expr| true)
     | Bool.false => `(sol_expr| false)
     | _ => escape
-  | Simple.local _ _ x => var x
-  | Simple.env _ _ k _ =>
+  | Surface.Simple.local _ _ x => var x
+  | Surface.Simple.env _ _ k _ =>
     match_expr (← whnf k) with
     | EnvKey.msgSender => `(sol_expr| msg.sender)
     | EnvKey.msgValue => `(sol_expr| msg.value)
@@ -2436,47 +2436,47 @@ partial def ppExpr (e : Lean.Expr) : MetaM (TSyntax `sol_expr) := do
     | EnvKey.selfBalance => `(sol_expr| address(this).balance)
     | EnvKey.selfAddress => `(sol_expr| address(this))
     | _ => escape
-  | SPath.alias _ _ x => var x
-  | SPath.loc _ _ l => ppExpr l
-  | Loc.root _ _ r _ => name r
-  | Loc.field _ _ _ b f _ => field b f
-  | Loc.index _ _ _ _ _ b i => index b i
-  | MPath.var _ _ x _ => var x
-  | MPath.loc _ _ l => ppExpr l
-  | MLoc.field _ _ _ b f _ => field b f
-  | MLoc.index _ _ _ _ b i => index b i
-  | Val.simple _ _ s => ppExpr s
-  | Val.read _ _ l => ppExpr l
-  | Val.readMem _ _ l => ppExpr l
-  | Val.binop _ _ _ op _ _ a b =>
+  | Surface.SPath.alias _ _ x => var x
+  | Surface.SPath.loc _ _ l => ppExpr l
+  | Surface.Loc.root _ _ r _ => name r
+  | Surface.Loc.field _ _ _ b f _ => field b f
+  | Surface.Loc.index _ _ _ _ _ b i => index b i
+  | Surface.MPath.var _ _ x _ => var x
+  | Surface.MPath.loc _ _ l => ppExpr l
+  | Surface.MLoc.field _ _ _ b f _ => field b f
+  | Surface.MLoc.index _ _ _ _ b i => index b i
+  | Surface.Val.simple _ _ s => ppExpr s
+  | Surface.Val.read _ _ l => ppExpr l
+  | Surface.Val.readMem _ _ l => ppExpr l
+  | Surface.Val.binop _ _ _ op _ _ a b =>
     let some sym ← binopSym? op | escape
     mkBinExpr sym (← ppExpr a) (← ppExpr b)
-  | Val.unop _ _ _ op _ _ a =>
+  | Surface.Val.unop _ _ _ op _ _ a =>
     if (← fvarName? op).isSome then return ← `(sol_expr| ⊖$(← ppExpr a))
     match_expr (← whnf op) with
     | UnOp.neg => `(sol_expr| -$(← ppExpr a))
     | UnOp.not => `(sol_expr| !$(← ppExpr a))
     | UnOp.bnot => `(sol_expr| ~$(← ppExpr a))
     | _ => escape
-  | Val.ternary _ _ c a b => `(sol_expr| $(← ppExpr c) ? $(← ppExpr a) : $(← ppExpr b))
-  | Val.len _ _ _ b _ => dotExpr (← ppExpr b) "length"
-  | Val.mlen _ _ _ b _ => dotExpr (← ppExpr b) "length"
-  | MRhs.newArr _ R n _ => `(sol_expr| new $(← ppTy.ppRef R):sol_ty ( $(← ppExpr n) ))
-  | NewLhs.store _ _ l => ppExpr l
-  | NewLhs.mem _ _ l => ppExpr l
-  | Src.val _ _ v => ppExpr v
-  | Src.copy _ _ p _ => ppExpr p
-  | ARhs.path _ _ p => ppExpr p
-  | MRhs.alias _ _ p => ppExpr p
-  | MRhs.copy _ _ p _ => ppExpr p
-  | MSrc.val _ _ v => ppExpr v
-  | MSrc.ref _ _ p => ppExpr p
-  | OpLoc.local _ _ x => var x
-  | OpLoc.root _ _ r _ => name r
-  | OpLoc.field _ _ _ b f _ => field b f
-  | OpLoc.index _ _ _ _ _ b i => index b i
-  | OpLoc.mfield _ _ _ b f _ => field b f
-  | OpLoc.mindex _ _ _ _ b i => index b i
+  | Surface.Val.ternary _ _ c a b => `(sol_expr| $(← ppExpr c) ? $(← ppExpr a) : $(← ppExpr b))
+  | Surface.Val.len _ _ _ b _ => dotExpr (← ppExpr b) "length"
+  | Surface.Val.mlen _ _ _ b _ => dotExpr (← ppExpr b) "length"
+  | Surface.MRhs.newArr _ R n _ => `(sol_expr| new $(← ppTy.ppRef R):sol_ty ( $(← ppExpr n) ))
+  | Surface.NewLhs.store _ _ l => ppExpr l
+  | Surface.NewLhs.mem _ _ l => ppExpr l
+  | Surface.Src.val _ _ v => ppExpr v
+  | Surface.Src.copy _ _ p _ => ppExpr p
+  | Surface.ARhs.path _ _ p => ppExpr p
+  | Surface.MRhs.alias _ _ p => ppExpr p
+  | Surface.MRhs.copy _ _ p _ => ppExpr p
+  | Surface.MSrc.val _ _ v => ppExpr v
+  | Surface.MSrc.ref _ _ p => ppExpr p
+  | Surface.OpLoc.local _ _ x => var x
+  | Surface.OpLoc.root _ _ r _ => name r
+  | Surface.OpLoc.field _ _ _ b f _ => field b f
+  | Surface.OpLoc.index _ _ _ _ _ b i => index b i
+  | Surface.OpLoc.mfield _ _ _ b f _ => field b f
+  | Surface.OpLoc.mindex _ _ _ _ b i => index b i
   | _ => escape
 
 /-- `x++`, `--x`, or `x⊕⊕` for an operator schema variable. -/
@@ -2506,8 +2506,8 @@ def ppCallParts? (f args : Lean.Expr) :
 (`lo = se2;`, `total = se3;`): its target and the return variable it reads. -/
 def ppRetTarget? (t : Lean.Expr) : MetaM (Option (TSyntax `sol_expr × Lean.Expr)) := do
   let local? (v : Lean.Expr) : MetaM (Option Lean.Expr) := do
-    let_expr Val.simple _ _ s := (← whnf v) | return none
-    let_expr Simple.local _ _ r := (← whnf s) | return none
+    let_expr Surface.Val.simple _ _ s := (← whnf v) | return none
+    let_expr Surface.Simple.local _ _ r := (← whnf s) | return none
     return some r
   match_expr (← whnf (← instantiateMVars t)) with
   | Surface.Stmt.assignLocal _ _ x v =>
@@ -2515,11 +2515,11 @@ def ppRetTarget? (t : Lean.Expr) : MetaM (Option (TSyntax `sol_expr × Lean.Expr
     let some r ← local? v | return none
     return some (← `(sol_expr| $x:ident), r)
   | Surface.Stmt.assign _ _ l src =>
-    let_expr Src.val _ _ v := (← whnf src) | return none
+    let_expr Surface.Src.val _ _ v := (← whnf src) | return none
     let some r ← local? v | return none
     return some (← ppExpr l, r)
   | Surface.Stmt.assignMem _ _ l src =>
-    let_expr MSrc.val _ _ v := (← whnf src) | return none
+    let_expr Surface.MSrc.val _ _ v := (← whnf src) | return none
     let some r ← local? v | return none
     return some (← ppExpr l, r)
   | _ => return none
@@ -2533,7 +2533,7 @@ print as the declarations they are: `(uint a, uint b) = h();`. -/
 def ppTupleCall? (s : Lean.Expr) (rest : List Lean.Expr) :
     MetaM (Option (TSyntax `sol_stmt × Nat)) := do
   let_expr Surface.Stmt.call _ f args _ ret _ := (← whnf (← instantiateMVars s)) | return none
-  let_expr CallRet.rets rs := (← whnf ret) | return none
+  let_expr Surface.CallRet.rets rs := (← whnf ret) | return none
   let some rs ← listElems? rs | return none
   let mut rvs : Array Lean.Expr := #[]
   let mut rps : Array Lean.Expr := #[]
@@ -2589,15 +2589,15 @@ first), as the one statement they are elaborated from:
 (`Stmt.memCallStr?`). -/
 def ppMemCall? (s t : Lean.Expr) : MetaM (Option (TSyntax `sol_stmt)) := do
   let_expr Surface.Stmt.call _ f args _ ret body := (← whnf (← instantiateMVars s)) | return none
-  let_expr CallRet.none := (← whnf ret) | return none
+  let_expr Surface.CallRet.none := (← whnf ret) | return none
   let some bs ← listElems? body | return none
   let some b := bs[0]? | return none
   let_expr Surface.Stmt.declMem _ _ r init _ _ := (← whnf b) | return none
   let_expr Option.none _ := (← whnf init) | return none
   -- the local `t` binds to `r`, and the statement's form
   let bound (rhs : Lean.Expr) : MetaM Bool := do
-    let_expr MRhs.alias _ _ p := (← whnf rhs) | return false
-    let_expr MPath.var _ _ r' _ := (← whnf p) | return false
+    let_expr Surface.MRhs.alias _ _ p := (← whnf rhs) | return false
+    let_expr Surface.MPath.var _ _ r' _ := (← whnf p) | return false
     isDefEq r r'
   let some (fe, xs) ← ppCallParts? f args | return none
   let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
@@ -2622,7 +2622,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     let some n ← fvarName? h | escape
     `(sol_stmt| $(nameIdent n):ident = $rhs)
   -- a hole that is a schema variable does not compute: print it by its name
-  if [`Solidity.Hole.fill, `Solidity.MHole.fill, `Solidity.VHole.fill, `Solidity.NewLhs.fill].any
+  if [`Solidity.Surface.Hole.fill, `Solidity.Surface.MHole.fill, `Solidity.Surface.VHole.fill, `Solidity.Surface.NewLhs.fill].any
       (e.isAppOfArity · 4) then
     let args := e.getAppArgs
     if (← fvarName? args[2]!).isSome then return ← hole args[2]! (← ppExpr args[3]!)
@@ -2633,7 +2633,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
   | Surface.Stmt.rebind _ _ x r =>
     let some x ← ppVar? x | escape
     match_expr (← whnf r) with
-    | ARhs.push _ _ b _ => `(sol_stmt| $x:ident = $(← ppExpr b):sol_expr .push())
+    | Surface.ARhs.push _ _ b _ => `(sol_stmt| $x:ident = $(← ppExpr b):sol_expr .push())
     | _ =>
       if let some n ← fvarName? r then return ← `(sol_stmt| $x:ident = $(nameIdent n):ident)
       `(sol_stmt| $x:ident = $(← ppExpr r):sol_expr)
@@ -2654,7 +2654,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
     | Option.none _ => `(sol_stmt| $T:sol_ty storage $x:ident)
     | Option.some _ r =>
       match_expr (← whnf r) with
-      | ARhs.push _ _ b _ => `(sol_stmt| $T:sol_ty storage $x:ident = $(← ppExpr b):sol_expr .push())
+      | Surface.ARhs.push _ _ b _ => `(sol_stmt| $T:sol_ty storage $x:ident = $(← ppExpr b):sol_expr .push())
       | _ => `(sol_stmt| $T:sol_ty storage $x:ident = $(← ppExpr r):sol_expr)
     | _ => escape
   | Surface.Stmt.declMem _ R x init _ _ =>
@@ -2725,7 +2725,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
       return ← if (← getOptions).getBool `pp.sol.ic then `(sol_stmt| ic) else `(sol_stmt| fbs)
     let some (fe, xs) ← ppCallParts? f args | escape
     let res ← match_expr (← whnf ret) with
-      | CallRet.val _ _ res =>
+      | Surface.CallRet.val _ _ res =>
         match_expr (← whnf res) with
         | Option.some _ y => ppVar? y
         | _ => pure none
@@ -2775,7 +2775,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
       unless (← (evalNat o).run) == some 1 do return none
       name? x
     match_expr (← whnf a) with
-    | LoopAnn.unwind _ k =>
+    | Surface.LoopAnn.unwind _ k =>
       -- a taclet's bound: `n`, `n + 1`
       if let some x ← name? k then return ← clause "unwind" (← `(sol_expr| $x:ident)) w
       if let some x ← succName? k then
@@ -2783,7 +2783,7 @@ partial def ppStmt (e : Lean.Expr) : MetaM (TSyntax `sol_stmt) := do
       let some n ← (evalNat k).run | escape
       if n == 0 then return w
       clause "unwind" (← `(sol_expr| $(Lean.Syntax.mkNumLit (toString n)):num)) w
-    | LoopAnn.inv _ I dec =>
+    | Surface.LoopAnn.inv _ I dec =>
       let w ← match_expr (← whnf dec) with
         | Option.some _ d => clause "decreases" (← ppExpr d) w
         | Option.none _ => pure w
@@ -2810,7 +2810,7 @@ partial def ppCode? (code : Lean.Expr) : MetaM (Option (TSyntax `sol_tparam)) :=
 /-- `address(a).f(e₁, …)`: an external call. -/
 partial def ppExtCall? (c : Lean.Expr) : MetaM (Option (TSyntax `sol_expr)) := do
   let c ← whnf c
-  unless c.isAppOfArity ``ExtCall.mk 4 do return none
+  unless c.isAppOfArity ``Surface.ExtCall.mk 4 do return none
   let a := c.getAppArgs
   let some f ← nameOf? a[2]! | return none
   let some args ← listElems? a[3]! | return none
@@ -2926,8 +2926,8 @@ partial def allocTy? (R : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
 the expression itself. -/
 def loweredExpr? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
   let e ← instantiateMVars e
-  for (c, n) in [(``Simple.lower, 3), (``Val.lower, 3), (``SPath.lower, 3), (``Loc.lower, 3),
-      (``MPath.lower, 3), (``MLoc.lower, 3), (``Simple.keyLower, 3), (``Val.keyLower, 3)] do
+  for (c, n) in [(``Surface.Simple.lower, 3), (``Surface.Val.lower, 3), (``Surface.SPath.lower, 3), (``Surface.Loc.lower, 3),
+      (``Surface.MPath.lower, 3), (``Surface.MLoc.lower, 3), (``Surface.Simple.keyLower, 3), (``Surface.Val.keyLower, 3)] do
     if e.isAppOfArity c n then
       let x := e.appArg!
       if let some n ← fvarName? x then return some (← `(dl_term| $(nameIdent n):ident))
@@ -2963,15 +2963,15 @@ def foldTmHead (e : Lean.Expr) (red : Bool := true) : MetaM Lean.Expr := do
   let mk (n : Lean.Name) (args : Array Lean.Expr) : Lean.Expr := mkAppN (mkConst n) args
   let args := e.getAppArgs
   let some f := e.getAppFn.constName? | return e
-  if f == ``Tm.pvV && args.size == 2 then return mk ``Term.pv args
-  if f == ``Tm.pvP && args.size == 2 then return mk ``PTerm.pv args
-  if f == ``Tm.pvS && args.size == 2 then return mk ``STerm.pv args
-  if f == ``Tm.pvI && args.size == 2 then return mk ``ITerm.pv args
+  if f == ``Surface.Tm.pvV && args.size == 2 then return mk ``Term.pv args
+  if f == ``Surface.Tm.pvP && args.size == 2 then return mk ``PTerm.pv args
+  if f == ``Surface.Tm.pvS && args.size == 2 then return mk ``STerm.pv args
+  if f == ``Surface.Tm.pvI && args.size == 2 then return mk ``ITerm.pv args
   let opOf (o : Lean.Expr) : MetaM (Option (Lean.Name × Array Lean.Expr)) := do
     let o ← if red then whnf o else pure o.consumeMData
     let some n := o.getAppFn.constName? | return none
     return some (n, o.getAppArgs)
-  if f == ``Tm.app0 && args.size == 3 then
+  if f == ``Surface.Tm.app0 && args.size == 3 then
     let C := args[0]!
     let some (n, oa) ← opOf args[2]! | return e
     return match n with
@@ -2982,7 +2982,7 @@ def foldTmHead (e : Lean.Expr) (red : Bool := true) : MetaM Lean.Expr := do
       | ``Op0.mtSt => mk ``STerm.mtSt (#[C] ++ oa)
       | ``Op0.memory => mk ``MTerm.memory #[C]
       | _ => e
-  if f == ``Tm.app1 && args.size == 5 then
+  if f == ``Surface.Tm.app1 && args.size == 5 then
     let C := args[0]!
     let x := args[4]!
     let some (n, oa) ← opOf args[3]! | return e
@@ -2997,13 +2997,13 @@ def foldTmHead (e : Lean.Expr) (red : Bool := true) : MetaM Lean.Expr := do
       | ``Op1.sval => mk ``SValT.val #[C, x]
       | ``Op1.newArr => mk ``SValT.newArr (#[C] ++ oa ++ #[x])
       | ``Op1.alloc => mk ``ITerm.alloc (#[C, x] ++ oa)
-      | ``Op1.mfield => mk ``MAddr.field (#[C, x] ++ oa)
+      | ``Op1.mfield => mk ``Surface.MAddr.field (#[C, x] ++ oa)
       | ``Op1.addM => mk ``MTerm.addM (#[C, x] ++ oa)
       | ``Op1.mval => mk ``MValT.val #[C, x]
       | ``Op1.ref => mk ``MValT.ref #[C, x]
       | ``Op1.wt => mk ``Term.wt (#[C] ++ oa ++ #[x])
       | _ => e
-  if f == ``Tm.app2 && args.size == 7 then
+  if f == ``Surface.Tm.app2 && args.size == 7 then
     let C := args[0]!
     let x := args[5]!
     let y := args[6]!
@@ -3025,10 +3025,10 @@ def foldTmHead (e : Lean.Expr) (red : Bool := true) : MetaM Lean.Expr := do
       | ``Op2.copyMem => mk ``SValT.copyMem #[C, x, y]
       | ``Op2.iread => mk ``ITerm.read #[C, x, y]
       | ``Op2.copy => mk ``ITerm.copy #[C, x, y]
-      | ``Op2.mat => mk ``MAddr.at #[C, x, y]
+      | ``Op2.mat => mk ``Surface.MAddr.at #[C, x, y]
       | ``Op2.copySt => mk ``MTerm.copySt #[C, x, y]
       | _ => e
-  if f == ``Tm.app3 && args.size == 9 then
+  if f == ``Surface.Tm.app3 && args.size == 9 then
     let C := args[0]!
     let some (n, _) ← opOf args[5]! | return e
     let xs := #[C, args[6]!, args[7]!, args[8]!]
@@ -3139,10 +3139,10 @@ partial def ppTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
 `read(m, i, at(k))`): the identity and the field. -/
 partial def keyAddr? (a : Lean.Expr) : MetaM (Option (TSyntax `dl_term × TSyntax `dl_term)) := do
   match_expr (← whnfPP a) with
-  | MAddr.field _ i f =>
+  | Surface.MAddr.field _ i f =>
     let some f ← nameOf? f | return none
     return some (← ppITerm i, ← `(dl_term| $(nameIdent f):ident))
-  | MAddr.at _ i k => return some (← ppITerm i, ← `(dl_term| at($(← ppTerm k))))
+  | Surface.MAddr.at _ i k => return some (← ppITerm i, ← `(dl_term| at($(← ppTerm k))))
   | _ => return none
 
 partial def ppPTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
@@ -3261,10 +3261,10 @@ partial def ppITerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
 partial def ppMAddr (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
   if let some x ← tmVar? e then return x
   match_expr (← whnfPP e) with
-  | MAddr.field _ i f =>
+  | Surface.MAddr.field _ i f =>
     let some f ← nameOf? f | escapeDl e
     dotTerm (← ppITerm i) f
-  | MAddr.at _ i k => `(dl_term| $(← ppITerm i):dl_term[$(← ppTerm k):dl_term])
+  | Surface.MAddr.at _ i k => `(dl_term| $(← ppITerm i):dl_term[$(← ppTerm k):dl_term])
   | _ => escapeDl e
 
 partial def ppMTerm (e : Lean.Expr) : MetaM (TSyntax `dl_term) := do
@@ -3300,7 +3300,7 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
     let some x ← ppVar? x | return none
     return some (← `(dl_term| $x:ident))
   match_expr (← whnf (← instantiateMVars e)) with
-  | UpdElem.val _ x t =>
+  | Surface.UpdElem.val _ x t =>
     let some x ← var x | return none
     let t' ← whnfTm t
     if t'.isAppOfArity ``Term.binop 5 then
@@ -3319,27 +3319,27 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
           return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term != $b:dl_term))
       | _ => pure ()
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppTerm t):dl_term))
-  | UpdElem.path _ x p =>
+  | Surface.UpdElem.path _ x p =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppPTerm p):dl_term))
-  | UpdElem.unset _ x =>
+  | Surface.UpdElem.unset _ x =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := unset))
-  | UpdElem.mref _ x i =>
+  | Surface.UpdElem.mref _ x i =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppITerm i):dl_term))
-  | UpdElem.storage _ s => return some (← `(dl_upd_elem| storage := $(← ppSTerm s):dl_term))
-  | UpdElem.store _ x s =>
+  | Surface.UpdElem.storage _ s => return some (← `(dl_upd_elem| storage := $(← ppSTerm s):dl_term))
+  | Surface.UpdElem.store _ x s =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppSTerm s):dl_term))
-  | UpdElem.memory _ m => return some (← `(dl_upd_elem| memory := $(← ppMTerm m):dl_term))
-  | UpdElem.selfBalance _ op a =>
+  | Surface.UpdElem.memory _ m => return some (← `(dl_upd_elem| memory := $(← ppMTerm m):dl_term))
+  | Surface.UpdElem.selfBalance _ op a =>
     let a ← ppTerm a
     match_expr (← whnf op) with
     | IntOp.sub => return some (← `(dl_upd_elem| selfBalance := selfBalance - $a))
     | IntOp.add => return some (← `(dl_upd_elem| selfBalance := selfBalance + $a))
     | _ => return none
-  | UpdElem.net _ r op a =>
+  | Surface.UpdElem.net _ r op a =>
     let r ← ppTerm r
     let a ← ppTerm a
     let key ← keyOn
@@ -3351,7 +3351,7 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
       if key then return some (← `(dl_upd_elem| net := storeSt(net, at($r), selectSt(net, at($r)) + $a)))
       return some (← `(dl_upd_elem| net := store(net, at($r), net($r) + $a)))
     | _ => return none
-  | UpdElem.pay _ r a =>
+  | Surface.UpdElem.pay _ r a =>
     let r ← ppTerm r
     let a ← ppTerm a
     if ← keyOn then
@@ -3361,18 +3361,18 @@ def ppUpdElem? (e : Lean.Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
     return some (← `(dl_upd_elem|
       net := if($r = $(mkIdent `this):ident) then $(mkIdent `net):ident
         else store(net, at($r), net($r) - $a)))
-  | UpdElem.saveNet _ x =>
+  | Surface.UpdElem.saveNet _ x =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := net))
-  | UpdElem.saveNetMt _ x =>
+  | Surface.UpdElem.saveNetMt _ x =>
     let some x ← var x | return none
     return some (← `(dl_upd_elem| $x:dl_term := mtSt))
-  | UpdElem.netMt _ r a =>
+  | Surface.UpdElem.netMt _ r a =>
     let r ← ppTerm r
     let a ← ppTerm a
     if ← keyOn then return some (← `(dl_upd_elem| net := storeSt(mtSt, at($r), $a)))
     return some (← `(dl_upd_elem| net := store(mtSt, at($r), $a)))
-  | UpdElem.setBalance _ a => return some (← `(dl_upd_elem| selfBalance := $(← ppTerm a)))
+  | Surface.UpdElem.setBalance _ a => return some (← `(dl_upd_elem| selfBalance := $(← ppTerm a)))
   | _ => return none
 
 /-- The elements of an update made of schema variables (`u`, `{u}u2`) and
@@ -3383,7 +3383,7 @@ partial def updParts? (e : Lean.Expr) : MetaM (Option (Array (TSyntax `dl_upd_el
   if e.isAppOfArity ``HAppend.hAppend 6 then
     if let (some a, some b) := (← updParts? (e.getArg! 4), ← updParts? (e.getArg! 5)) then
       return some (a ++ b)
-  if e.isAppOfArity `Solidity.Upd.subst 3 then
+  if e.isAppOfArity `Solidity.Surface.Upd.subst 3 then
     if let (some v, some u) := (← fvarName? (e.getArg! 1), ← fvarName? (e.getArg! 2)) then
       return some #[← `(dl_upd_elem| { $(nameIdent u):ident } $(nameIdent v):ident)]
   -- anything else: the list it computes to
@@ -3435,7 +3435,7 @@ def isConnective (e : Lean.Expr) : MetaM Bool := do
 
 /-- `a < b = true`, a comparison as the specification writes one: its
 operator and operands. -/
-def cmpParts? (a b : Lean.Expr) : MetaM (Option (String × Lean.Expr × Lean.Expr)) := do
+def Surface.cmpParts? (a b : Lean.Expr) : MetaM (Option (String × Lean.Expr × Lean.Expr)) := do
   let some (_, v) := (← whnfTm b).app2? ``Term.lit | return none
   unless (← whnfF v).isAppOfArity ``Semantics.PrimVal.bool 1 &&
     (← whnfF (← whnfF v).appArg!).isConstOf ``Bool.true do return none
@@ -3523,7 +3523,7 @@ partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
     `(dl_fml| ∀ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFml φ):dl_fml)
   | NFml.and _ φ ψ =>
     if let some (a, b) ← eqDParts? e then
-      if let some (sym, l, r) ← cmpParts? a b then
+      if let some (sym, l, r) ← Surface.cmpParts? a b then
         let l ← ppTerm l
         let r ← ppTerm r
         return ← match sym with
@@ -3595,7 +3595,7 @@ partial def copyDecls (bound : Array String) (e : Lean.Expr) :
     let mut bound := bound
     if let some us ← listElems? U then
       for u in us do
-        let_expr UpdElem.mref _ x _ := (← whnfF u) | continue
+        let_expr Surface.UpdElem.mref _ x _ := (← whnfF u) | continue
         if let some x ← varName? x then bound := bound.push x
     copyDecls bound φ
   | Surface.Fml.modal _ _ P φ =>
@@ -3620,7 +3620,7 @@ partial def copyDeclsProg (bound : Array String) (ss : Array Lean.Expr) :
     | Surface.Stmt.declMem _ _ x _ _ _ => if let some x ← varName? x then bound := bound.push x
     | Surface.Stmt.rebindMem _ R x r =>
       let some x ← varName? x | continue
-      if !bound.contains x && (← whnfF r).isAppOfArity ``MRhs.copy 4 then
+      if !bound.contains x && (← whnfF r).isAppOfArity ``Surface.MRhs.copy 4 then
         out := out.push (x, R)
         bound := bound.push x
     | Surface.Stmt.ite _ _ t f =>
@@ -3686,7 +3686,7 @@ attribute [delab app.Solidity.NFml.eq, delab app.Solidity.NFml.eqD, delab app.So
   delab app.Solidity.Surface.Fml.anon] delabFml
 
 /-- `Valid φ`: `⊨ φ`. -/
-@[delab app.Solidity.Valid]
+@[delab app.Solidity.NFml.Valid]
 def delabValid : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
@@ -3696,7 +3696,7 @@ def delabValid : Delab := do
   `(⊨ dl{ $(← withDecls e.appArg! φ):dl_fml })
 
 /-- `holds σ φ`: `σ ⊧ φ`, what `Valid` leaves once its state is introduced. -/
-@[delab app.Solidity.holds]
+@[delab app.Solidity.NFml.holds]
 def delabHolds : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
@@ -3761,7 +3761,7 @@ def delabTm : Delab := do
   guard e'.hasFVar
   let fvs := (collectFVars {} e').fvarIds
   guard (← fvs.anyM fun fv => return !(← fv.getType).isConstOf ``Contract)
-  let_expr Tm _ s := (← whnfR (← inferType e)) | failure
+  let_expr Surface.Tm _ s := (← whnfR (← inferType e)) | failure
   let some srt := (← whnf s).constName? | failure
   let printer : Lean.Expr → MetaM (TSyntax `dl_term) ← match srt with
     | ``Srt.val => pure ppTerm
@@ -3777,9 +3777,9 @@ def delabTm : Delab := do
   guard !(isEscape t)
   `(tm{ $t })
 
-attribute [delab app.Solidity.Tm.pvV, delab app.Solidity.Tm.pvP, delab app.Solidity.Tm.pvS,
-  delab app.Solidity.Tm.pvI, delab app.Solidity.Tm.app0, delab app.Solidity.Tm.app1,
-  delab app.Solidity.Tm.app2, delab app.Solidity.Tm.app3,
+attribute [delab app.Solidity.Surface.Tm.pvV, delab app.Solidity.Surface.Tm.pvP, delab app.Solidity.Surface.Tm.pvS,
+  delab app.Solidity.Surface.Tm.pvI, delab app.Solidity.Surface.Tm.app0, delab app.Solidity.Surface.Tm.app1,
+  delab app.Solidity.Surface.Tm.app2, delab app.Solidity.Surface.Tm.app3,
   delab app.Solidity.Term.lit, delab app.Solidity.Term.pv, delab app.Solidity.Term.binop,
   delab app.Solidity.Term.unop, delab app.Solidity.Term.find, delab app.Solidity.Term.len,
   delab app.Solidity.Term.read, delab app.Solidity.Term.ite, delab app.Solidity.Term.mlen,
@@ -3795,7 +3795,7 @@ attribute [delab app.Solidity.Tm.pvV, delab app.Solidity.Tm.pvP, delab app.Solid
   delab app.Solidity.SValT.val, delab app.Solidity.SValT.find, delab app.Solidity.SValT.copyMem,
   delab app.Solidity.SValT.newArr,
   delab app.Solidity.ITerm.pv, delab app.Solidity.ITerm.read, delab app.Solidity.ITerm.alloc,
-  delab app.Solidity.ITerm.copy, delab app.Solidity.MAddr.field, delab app.Solidity.MAddr.at,
+  delab app.Solidity.ITerm.copy, delab app.Solidity.Surface.MAddr.field, delab app.Solidity.Surface.MAddr.at,
   delab app.Solidity.MTerm.memory, delab app.Solidity.MTerm.write, delab app.Solidity.MTerm.addM,
   delab app.Solidity.MTerm.copySt, delab app.Solidity.MValT.val, delab app.Solidity.MValT.ref] delabTm
 

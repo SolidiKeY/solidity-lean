@@ -1,6 +1,6 @@
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -160,7 +160,7 @@ contract Purchase {
 
 namespace Solidity.Examples.Benchmark.Purchase
 
-open Proves
+open NFml.Proves
 
 /-- `Purchase`, with `msg.sender`, `msg.value`, `address(this).balance` as
 state variables and the constructor marked `skip`. -/
@@ -264,7 +264,7 @@ def Purchase : Contract := contract!{
 
 local instance : InContract := ⟨Purchase⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## The modifiers, inlined
 

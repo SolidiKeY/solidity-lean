@@ -1,7 +1,7 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
@@ -30,7 +30,7 @@ for the pre-state slot.
 
 namespace Solidity.Examples.Chains.StorageArrays
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Example: Additional Storage Array Cases -/
 

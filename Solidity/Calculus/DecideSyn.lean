@@ -44,7 +44,7 @@ namespace Decide
 open Semantics SemanticsProperties
 
 /-- `t` returns in `σ`. -/
-def Returns (σ : State) (t : LTerm) : Prop := ∃ v, t.eval σ = .ok v
+def Returns (σ : Semantics.State) (t : LTerm) : Prop := ∃ v, t.eval σ = .ok v
 
 /-! ## Strict positions -/
 
@@ -103,7 +103,7 @@ theorem evalBinop_right {op : BinOp} {p : PrimTy} {x : Value} {rb : Res Value} {
 mutual
 
 /-- A term that returns returns at each of its strict positions. -/
-theorem LTerm.strict_returns {σ : State} : (t : LTerm) → Returns σ t →
+theorem LTerm.strict_returns {σ : Semantics.State} : (t : LTerm) → Returns σ t →
     ∀ u ∈ t.strict, Returns σ u
   | .lit _, h, u, hu | .var _, h, u, hu | .err, h, u, hu | .env _, h, u, hu => by
     simp only [LTerm.strict, List.mem_singleton] at hu; subst hu; exact h
@@ -192,7 +192,7 @@ theorem LTerm.strict_returns {σ : State} : (t : LTerm) → Returns σ t →
     · exact LTerm.strict_returns b ⟨y, hb⟩ u hu
 
 /-- A path that evaluates evaluates its keys. -/
-theorem LPath.strict_returns {σ : State} : (q : LPath) → (∃ ps, q.eval σ = .ok ps) →
+theorem LPath.strict_returns {σ : Semantics.State} : (q : LPath) → (∃ ps, q.eval σ = .ok ps) →
     ∀ u ∈ q.strict, Returns σ u
   | .root _, _, u, hu => by simp [LPath.strict] at hu
   | .field q _, ⟨ps, h⟩, u, hu => by
@@ -211,7 +211,7 @@ theorem LPath.strict_returns {σ : State} : (q : LPath) → (∃ ps, q.eval σ =
     · exact LTerm.strict_returns k ⟨y, hk⟩ u hu
 
 /-- A storage that evaluates evaluates what it writes and where. -/
-theorem LStor.strict_returns {σ : State} : (s : LStor) → (∃ sv, s.eval σ = .ok sv) →
+theorem LStor.strict_returns {σ : Semantics.State} : (s : LStor) → (∃ sv, s.eval σ = .ok sv) →
     ∀ u ∈ s.strict, Returns σ u
   | .init, _, u, hu => by simp [LStor.strict] at hu
   | .save s q w, ⟨sv, h⟩, u, hu => by
@@ -277,7 +277,7 @@ return one value (`a ≐ b`), `(false, a, b)` that they never do
 abbrev Keys := List (Bool × LTerm × LTerm)
 
 /-- The facts of `ne` hold in `σ`. -/
-def Apart (σ : State) (ne : Keys) : Prop :=
+def Apart (σ : Semantics.State) (ne : Keys) : Prop :=
   ∀ p ∈ ne, ∀ x y, p.2.1.eval σ = .ok x → p.2.2.eval σ = .ok y → (x = y ↔ p.1 = true)
 
 mutual
@@ -351,7 +351,7 @@ theorem evalBinop_congr {op : BinOp} {p : PrimTy} {x : Value} {rb rb' : Res Valu
 mutual
 
 /-- **Dropping the guards keeps what a term returns.** -/
-theorem LTerm.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
+theorem LTerm.core_eval {σ : Semantics.State} {ne : Keys} (hne : Apart σ ne) :
     (t : LTerm) → ∀ {v : Value}, t.eval σ = .ok v →
     (t.core ne).eval σ = .ok v
   | .lit _, _, h | .var _, _, h | .err, _, h | .env _, _, h | .cpok _ _, _, h => h
@@ -448,7 +448,7 @@ theorem LTerm.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
         · rw [if_neg hij] at h ⊢; exact LTerm.core_eval hne e h
 
 /-- Dropping the guards keeps the path a path evaluates to. -/
-theorem LPath.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
+theorem LPath.core_eval {σ : Semantics.State} {ne : Keys} (hne : Apart σ ne) :
     (q : LPath) → ∀ {ps : List Seg}, q.eval σ = .ok ps →
     (q.core ne).eval σ = .ok ps
   | .root _, _, h => h
@@ -467,8 +467,8 @@ theorem LPath.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
     exact h
 
 /-- Dropping the guards keeps the storage a storage evaluates to. -/
-theorem LStor.core_eval {σ : State} {ne : Keys} (hne : Apart σ ne) :
-    (s : LStor) → ∀ {sv : SVal}, s.eval σ = .ok sv →
+theorem LStor.core_eval {σ : Semantics.State} {ne : Keys} (hne : Apart σ ne) :
+    (s : LStor) → ∀ {sv : Semantics.SVal}, s.eval σ = .ok sv →
     (s.core ne).eval σ = .ok sv
   | .init, _, h => h
   | .save s q w, sv, h => by
@@ -559,7 +559,7 @@ def LTerm.arith : LTerm → LTerm
 
 /-- The cancellation at one operator: where `a` returns what `a'` does and
 `b` what `b'` does, `a' ⊕ b'` cancelled returns what `a ⊕ b` does. -/
-theorem arith_step {σ : State} {op : BinOp} (hop : op = .add ∨ op = .sub) {p : PrimTy}
+theorem arith_step {σ : Semantics.State} {op : BinOp} (hop : op = .add ∨ op = .sub) {p : PrimTy}
     {a b a' b' : LTerm} {v : Value} (h : (LTerm.binop op p a b).eval σ = .ok v)
     (ha : ∀ w, a.eval σ = .ok w → a'.eval σ = .ok w)
     (hb : ∀ w, b.eval σ = .ok w → b'.eval σ = .ok w) :
@@ -618,7 +618,7 @@ theorem LTerm.arith_binop {op : BinOp} {p : PrimTy} {a b : LTerm} (h₁ : op ≠
   cases op <;> simp_all [LTerm.arith]
 
 /-- **The cancellation keeps what a term returns.** -/
-theorem LTerm.arith_eval {σ : State} : (t : LTerm) → ∀ {v : Value}, t.eval σ = .ok v →
+theorem LTerm.arith_eval {σ : Semantics.State} : (t : LTerm) → ∀ {v : Value}, t.eval σ = .ok v →
     t.arith.eval σ = .ok v
   | .binop op p a b, v, h => by
     by_cases h₁ : op = .add
@@ -645,7 +645,7 @@ dropped and their arithmetic cancelled. -/
 def LTerm.same (ne : Keys) (a b : LTerm) : Bool :=
   (a.core ne).arith == (b.core ne).arith
 
-theorem LTerm.same_eval {σ : State} {ne : Keys} (hne : Apart σ ne)
+theorem LTerm.same_eval {σ : Semantics.State} {ne : Keys} (hne : Apart σ ne)
     {a b : LTerm} {x y : Value} (h : a.same ne b = true) (ha : a.eval σ = .ok x)
     (hb : b.eval σ = .ok y) : x = y := by
   simp only [LTerm.same, beq_iff_eq] at h
@@ -668,7 +668,7 @@ def LTerm.known (known : List LTerm) (ne : Keys) (t : LTerm) : Bool :=
       | _ => false
   | t => known.contains t
 
-theorem LTerm.known_returns {σ : State} {known : List LTerm} {ne : Keys}
+theorem LTerm.known_returns {σ : Semantics.State} {known : List LTerm} {ne : Keys}
     (hk : ∀ u ∈ known, Returns σ u) (hne : Apart σ ne) (t : LTerm)
     (h : t.known known ne = true) : Returns σ t := by
   have mem : ∀ u, known.contains u = true → Returns σ u :=
@@ -703,7 +703,7 @@ def LPath.keys : LPath → List LTerm
   | .at q k => k :: q.keys
 
 /-- A path that evaluates has integer keys. -/
-theorem LPath.keys_int {σ : State} : (q : LPath) → (∃ ps, q.eval σ = .ok ps) →
+theorem LPath.keys_int {σ : Semantics.State} : (q : LPath) → (∃ ps, q.eval σ = .ok ps) →
     ∀ k ∈ q.keys, ∃ i, (k.eval σ >>= Value.asInt) = .ok i
   | .root _, _, k, hk => by simp [LPath.keys] at hk
   | .field q _, ⟨ps, h⟩, k, hk => by
@@ -725,7 +725,7 @@ def LTerm.isIntLit : LTerm → Bool
   | .lit (.int _) | .env _ => true
   | _ => false
 
-theorem LTerm.isIntLit_int {σ : State} : (t : LTerm) → t.isIntLit = true →
+theorem LTerm.isIntLit_int {σ : Semantics.State} : (t : LTerm) → t.isIntLit = true →
     ∃ i, (t.eval σ >>= Value.asInt) = .ok i
   | .lit (.int n), _ => ⟨n, rfl⟩
   | .env _, _ => ⟨_, rfl⟩
@@ -741,7 +741,7 @@ def LTerm.isInt (known : List LTerm) (t : LTerm) : Bool :=
     | .pok q => q.keys.contains t
     | _ => false
 
-theorem LTerm.isInt_int {σ : State} {known : List LTerm} (hk : ∀ u ∈ known, Returns σ u)
+theorem LTerm.isInt_int {σ : Semantics.State} {known : List LTerm} (hk : ∀ u ∈ known, Returns σ u)
     {t : LTerm} (h : t.isInt known = true) : ∃ i, (t.eval σ >>= Value.asInt) = .ok i := by
   simp only [LTerm.isInt, Bool.or_eq_true, List.any_eq_true] at h
   rcases h with h | ⟨K, hK, hc⟩
@@ -776,7 +776,7 @@ def LTerm.rets (known : List LTerm) (ne : Keys) : LTerm → Bool
   | t@(.has ..) | t@(.kmap ..) | t@(.len ..) | t@(.sok _) | t@(.pok _) | t@(.orElse ..)
   | t@(.zero _) | t@.err | t@(.env _) | t@(.cpok ..) => t.known known ne
 
-theorem LTerm.rets_returns {σ : State} {known : List LTerm} {ne : Keys}
+theorem LTerm.rets_returns {σ : Semantics.State} {known : List LTerm} {ne : Keys}
     (hk : ∀ u ∈ known, Returns σ u) (hne : Apart σ ne) :
     (t : LTerm) → t.rets known ne = true → Returns σ t
   | .seq d a, h => by
@@ -880,7 +880,7 @@ def LFml.syn (known : List LTerm) (ne : Keys) : LFml → Bool
       ne.all (fun q => !q.2.1.vars.contains x && !q.2.2.vars.contains x) && LFml.syn known ne φ
 
 /-- What a premise that holds tells is so. -/
-theorem LFml.prem_ok {σ : State} : (φ : LFml) → φ.holds σ →
+theorem LFml.prem_ok {σ : Semantics.State} : (φ : LFml) → φ.holds σ →
     ∀ (kn : List LTerm × Keys), (∀ u ∈ kn.1, Returns σ u) → Apart σ kn.2 →
     (∀ u ∈ (φ.prem kn).1, Returns σ u) ∧ Apart σ (φ.prem kn).2
   | .eq a b, h, (k, n), hk, hn => by
@@ -950,7 +950,7 @@ theorem LFml.prem_ok {σ : State} : (φ : LFml) → φ.holds σ →
   | .not (.and (.eq _ _) (.and (.all ..) _)), _, _, hk, hn
   | .not (.and (.eq _ _) (.and (.eq _ _) (.all ..))), _, _, hk, hn => ⟨hk, hn⟩
 
-theorem LFml.syn_holds : (φ : LFml) → ∀ (σ : State) (known : List LTerm)
+theorem LFml.syn_holds : (φ : LFml) → ∀ (σ : Semantics.State) (known : List LTerm)
     (ne : Keys), (∀ u ∈ known, Returns σ u) → Apart σ ne →
     φ.syn known ne = true → φ.holds σ
   | .tt, _, _, _, _, _, _ => trivial

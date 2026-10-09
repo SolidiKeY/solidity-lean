@@ -18,21 +18,21 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 | `Ch03_Theory` | `Theory/` |
 | `Ch04_Semantics` | `Semantics.lean` (`Stmt.run`), `Semantics/Agree.lean` |
 | `Ch05_Logic` | `Update.lean` (terms, updates, `Fml`, both modalities) |
-| `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/Notation.lean` (`dl[C]{}`) |
+| `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/SurfaceNotation.lean` (`dl[C]{}`) |
 | `Ch06_Taclets` | `Calculus/Core/Rules.lean`, `Calculus/Core/Sound*.lean` (`Stmt.sound`), `Calculus/Core/Proves.lean` (`Proves`), `Calculus/Core/Taclet.lean` |
-| `Ch07_Symex` | `Calculus/Core/Symex.lean`, `Calculus/Close.lean` |
+| `Ch07_Symex` | `Calculus/Core/Symex.lean`, `Calculus/NFmlClose.lean` |
 | `Ch08_EVM`-`Ch10_Correctness` | `Evm/` (`docs/compiler-verification.md`) |
 | `Ch11_Completeness` | `Calculus/Core/Step.lean` (`Stmt.step`), `Calculus/Core/RuleExists.lean` (`Stmt.rule_exists`); progress (`Fml.active_iff_step`) retired at W4 `calc-del` of `docs/intrinsic.md` |
 | `Ch12_Termination` | retired at W4 `calc-del` (the scoped strategy is fuelled) |
 | `Ch13_Chains` | `Calculus/Core/Chains.lean` |
-| `Ch14_Updates` | `Calculus/UpdateRules.lean` |
+| `Ch14_Updates` | `Calculus/NFmlUpdateRules.lean` |
 | `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `Fml.valid_iff_cons`) |
 | `Examples/` | `Solidity/Examples/` |
 
 Beyond mini-solkey: type soundness and reachability (`Typing/`), sort
 faithfulness (`SortCheck/Faithfulness.lean`), the callback semantics
 (`Semantics/Core/Callback.lean`, `Calculus/Core/Callback.lean`), function
-specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
+specifications (`Calculus/SurfaceSpec.lean`), the solkey corpus (`SolidityCorpus`,
 `docs/corpus-parity.md`), and the `SolKey` reader's correspondence against
 `Taclet` (`~/projects/side-projects/lean/solkey`).
 
@@ -101,7 +101,7 @@ specifications (`Calculus/Spec.lean`), the solkey corpus (`SolidityCorpus`,
 
 - **`Meta.reduce` through indexed families is about 100 times slower.**
   Closed goals are evaluated as compiled code (`evalExpr`) and quoted back by
-  hand-written quoters (`Calculus/Quote.lean`); the kernel re-checks.  This
+  hand-written quoters (`Calculus/NFmlQuote.lean`); the kernel re-checks.  This
   works only for a contract that is a named constant, and every new syntax
   constructor needs an arm in every quoter.
 - **`deriving ToExpr` fails on constructors with proof fields.**  Quote the
@@ -188,7 +188,7 @@ their names.
 
 | Question | Decision |
 |---|---|
-| Specifications | Compiled as solkey compiles them (`Calculus/Spec.lean`): a clause reads a storage term, `\old(count)` is `find(old, count)` with `old` a storage variable bound by `{old := storage}`, and `\forall T x; e` is `Fml.all` over `PrimTy.admits` (so a quantified invariant is not `closed`).  Lean adds two premises solkey's total typed reads need not: each parameter's range and the layout of the state the clauses read (`layoutFmls`).  `sol_decide` keeps `find(old, p)` and leaves `\forall` outside its fragment. |
+| Specifications | Compiled as solkey compiles them (`Calculus/SurfaceSpec.lean`): a clause reads a storage term, `\old(count)` is `find(old, count)` with `old` a storage variable bound by `{old := storage}`, and `\forall T x; e` is `Fml.all` over `PrimTy.admits` (so a quantified invariant is not `closed`).  Lean adds two premises solkey's total typed reads need not: each parameter's range and the layout of the state the clauses read (`layoutFmls`).  `sol_decide` keeps `find(old, p)` and leaves `\forall` outside its fragment. |
 
 ### Several returns, tuples and blocks
 

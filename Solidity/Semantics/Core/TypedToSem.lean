@@ -213,7 +213,7 @@ theorem _root_.Solidity.Core.TEnv.toSem_eq {H : HTy} : {Γ : Ctx} → (ns : List
 
 /-- The named state is the scoped state's erasure. -/
 theorem toSem_eq (ns : List Var) (σ : TState C Γ) : σ.toSem ns = σ.erase.erase ns := by
-  simp only [toSem, erase, State.erase, State.glob, TEnv.toSem_eq]
+  simp only [toSem, erase, EState.erase, EState.glob, TEnv.toSem_eq]
 
 /-- **A typed state agrees with its named reading** (`Agree`, `Semantics/Core/StateErase.lean`). -/
 theorem agree_toSem (ns : List Var) (σ : TState C Γ) (hnd : ns.Nodup)

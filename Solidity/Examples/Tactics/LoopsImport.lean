@@ -1,6 +1,6 @@
 import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Show
@@ -46,7 +46,7 @@ solc_problems Solc.Loops legacy
 
 namespace Solidity.Examples.LoopsImport
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- info: 9 functions (4 diamond, 3 box, 0 skip, 2 internal): 9 elaborated, 0 skipped, 0 excluded, 0 unsupported -/
 #guard_msgs in
@@ -63,7 +63,7 @@ assert(i == n); -/
 invariant proves the `assert` after it. -/
 theorem invariantCountsToBound : ⊨ Solc.Loops.invariantCountsToBound.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
+  refine NFml.Proves.close_dropWt ?_
   sol_symex
   sol_close
 
@@ -71,7 +71,7 @@ theorem invariantCountsToBound : ⊨ Solc.Loops.invariantCountsToBound.problem :
 from too. -/
 theorem invariantBreak : ⊨ Solc.Loops.invariantBreak.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
+  refine NFml.Proves.close_dropWt ?_
   sol_symex
   sol_close
 
@@ -89,7 +89,7 @@ theorem doWhileRunsBodyFirst : ⊨ Solc.Loops.doWhileRunsBodyFirst.problem := by
 solkey's `KeyNatspec` joins them. -/
 theorem invariantTwoLines : ⊨ Solc.Loops.invariantTwoLines.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
+  refine NFml.Proves.close_dropWt ?_
   sol_symex
   sol_close
 

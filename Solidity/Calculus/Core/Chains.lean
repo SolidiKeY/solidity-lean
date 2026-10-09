@@ -963,7 +963,7 @@ def erasedPost (sp : Splice) (i : Nat) (ns : Expr) : MetaM Expr := do
     throwError "sol_chain: the postcondition {p.appArg!} stands where a fresh variable is in \
       scope ({ns}): its erasure is no postcondition"
   let hns ← mkExpectedTypeHint (← mkEqRefl (toExpr 0)) (← mkEq mx (toExpr 0))
-  return mkApp2 (mkConst ``Solidity.Post.fml) C
+  return mkApp2 (mkConst ``NFml.Post.fml) C
     (mkAppN (mkConst ``Core.Post.erase) #[C, Γ, p.appArg!, ns, hns])
 
 /-- The erasure of a computed line, `Update.lean`'s, its postconditions
@@ -996,7 +996,7 @@ partial def dropAllsE (e : Expr) : Expr :=
 /-- The `Update.lean` postcondition standing for the Lean term `e` (a hole
 of a written line) in the line `L`. -/
 def postIn (L e : Expr) : Option Expr :=
-  L.find? fun x => x.isAppOfArity ``Solidity.Post.fml 2 &&
+  L.find? fun x => x.isAppOfArity ``NFml.Post.fml 2 &&
     (let q := x.appArg!; q.isAppOfArity ``Core.Post.erase 5 && q.getArg! 2 == e)
 
 /-- A written line past the program, read as `Update.lean`'s, its
@@ -1030,7 +1030,7 @@ def withErasedPosts (es : Array Expr) (k : Array Expr → TermElabM (Array Expr)
   let ref ← IO.mkRef (#[] : Array Expr)
   for e in es do
     forEachExpr' e fun x => do
-      if x.isAppOfArity ``Solidity.Post.fml 2 && x.appArg!.isAppOfArity ``Core.Post.erase 5 then
+      if x.isAppOfArity ``NFml.Post.fml 2 && x.appArg!.isAppOfArity ``Core.Post.erase 5 then
         ref.modify fun ps => if ps.contains x.appArg! then ps else ps.push x.appArg!
         return false
       return true
@@ -1041,7 +1041,7 @@ def withErasedPosts (es : Array Expr) (k : Array Expr → TermElabM (Array Expr)
       let n ← match p.getArg! 2 with
         | .fvar fv => fv.getUserName
         | _ => pure `φ
-      withLocalDeclD n (mkApp (mkConst ``Solidity.Post) (p.getArg! 0)) fun x => go (i + 1) (xs.push x)
+      withLocalDeclD n (mkApp (mkConst ``NFml.Post) (p.getArg! 0)) fun x => go (i + 1) (xs.push x)
     else
       let sub (e : Expr) : Expr := e.replace fun y => (ps.idxOf? y).map (xs[·]!)
       let rs ← k (es.map sub)
@@ -1062,7 +1062,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
   let fml := mkApp2 (mkConst ``Core.Fml) C Γ
   let pairTy := mkApp2 (mkConst ``Prod [0, 0]) (linkTy C) fml
   let lfml := mkApp (mkConst ``Solidity.NFml) C
-  let lpairTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``Solidity.Link) C) lfml
+  let lpairTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``NFml.Link) C) lfml
   let mk (l B : Expr) : Expr := mkAppN (mkConst ``Prod.mk [0, 0]) #[linkTy C, fml, l, B]
   let mut cur := A
   let mut ws : Array Expr := #[]
@@ -1078,7 +1078,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
     let rw? ← match arrow with
       | `(chain_arrow| ~[ $r:ident ]~>) => do
         if !(← ruleCtors r.getId).isEmpty then pure none
-        else pure ((← Solidity.Chain.rwArrow? r).map fun a => (some (r, a)))
+        else pure ((← NFml.Chain.rwArrow? r).map fun a => (some (r, a)))
       | `(chain_arrow| ~=>) => pure (some none)
       | _ => pure none
     if let some (some (r, .table `sequentialToParallel)) := rw? then
@@ -1122,20 +1122,20 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         | some (r, a) =>
           let #[lbl, q] ← withErasedPosts #[L₀, b] fun es => do
               let b' ← if bHole then mkFreshExprMVar lfml else pure es[1]!
-              let (lbl, q, _) ← Solidity.Chain.rwLabel C es[0]! b' r a
+              let (lbl, q, _) ← NFml.Chain.rwLabel C es[0]! b' r a
               pure #[lbl, q]
             | throwError "~>: no rewrite"
-          pure (mkApp3 (mkConst ``Solidity.Link.rw) C (toExpr r.getId.toString) lbl, q)
+          pure (mkApp3 (mkConst ``NFml.Link.rw) C (toExpr r.getId.toString) lbl, q)
         | none =>
           if bHole then throwError "~=>: write the line after, it is what picks the rewrite"
           let #[q] ← withErasedPosts #[L₀, b] fun es => do
-              let (_, q, _) ← Solidity.Chain.rwAnyFind C es[0]! es[1]!
+              let (_, q, _) ← NFml.Chain.rwAnyFind C es[0]! es[1]!
               pure #[q]
             | throwError "~>: no rewrite"
-          pure (mkApp (mkConst ``Solidity.Link.rwAny) C, q)
+          pure (mkApp (mkConst ``NFml.Link.rwAny) C, q)
       unless ← isDefEq b q do throwError "~>: the line after is not{indentExpr q}"
       rs := rs.push (mkAppN (mkConst ``Prod.mk [0, 0])
-        #[mkApp (mkConst ``Solidity.Link) C, lfml, lnk, q])
+        #[mkApp (mkConst ``NFml.Link) C, lfml, lnk, q])
       if let some (L, _, m?) := legacy then legacy := some (L, q, m?)
       continue
     if legacy.isSome then
@@ -1285,7 +1285,7 @@ def elabCalcStep (inner : Syntax) : TermElabM (Option Expr) := do
   if let some a := first? then
     if !a.hasMVar && (← isCoreLine a) then return ← elabCoreChain inner a
   st.restore
-  if Solidity.chainWritten inner then Solidity.Chain.elabChain inner expectedType?
+  if Solidity.chainWritten inner then NFml.Chain.elabChain inner expectedType?
   else elabTerm (← liftMacroM (Solidity.expandChainStx inner)) expectedType?
 
 /-! ## `φ ~~> ψ` on scoped lines
@@ -1456,7 +1456,7 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
   | _ =>
     let ty' ← whnfR ty
     if ty' != ty then return ← solveCore (← g.replaceTargetDefEq ty')
-    Solidity.Chain.solveChain g
+    NFml.Chain.solveChain g
 
 elab_rules : tactic
   | `(tactic| sol_chain) => Tactic.withMainContext do
@@ -1510,7 +1510,7 @@ def arrowOf (l : Expr) : MetaM (TSyntax `chain_arrow) := do
 def ppLegacyLine (e : Expr) : MetaM Lean.Term := do
   let ref ← IO.mkRef (#[] : Array Expr)
   forEachExpr' e fun x => do
-    if x.isAppOfArity ``Solidity.Post.fml 2 && x.appArg!.isAppOfArity ``Core.Post.erase 5 then
+    if x.isAppOfArity ``NFml.Post.fml 2 && x.appArg!.isAppOfArity ``Core.Post.erase 5 then
       ref.modify fun ps => if ps.contains x then ps else ps.push x
       return false
     return true
@@ -1521,9 +1521,9 @@ def ppLegacyLine (e : Expr) : MetaM Lean.Term := do
       let n ← match p.appArg!.getArg! 2 with
         | .fvar fv => fv.getUserName
         | _ => pure `φ
-      withLocalDeclD n (mkApp (mkConst ``Solidity.Post) (p.getArg! 0)) fun x =>
-        go (i + 1) (e.replace fun y => if y == p then some (mkApp2 (mkConst ``Solidity.Post.fml) (p.getArg! 0) x) else none)
-    else Solidity.Chain.ppLine e
+      withLocalDeclD n (mkApp (mkConst ``NFml.Post) (p.getArg! 0)) fun x =>
+        go (i + 1) (e.replace fun y => if y == p then some (mkApp2 (mkConst ``NFml.Post.fml) (p.getArg! 0) x) else none)
+    else NFml.Chain.ppLine e
   go 0 e
 
 /-- The links of a list of `(link, line)` pairs, printed. -/
@@ -1533,21 +1533,21 @@ def linkLines (ws : Expr) (legacyLinks : Bool) : MetaM (Array (TSyntax `chain_ar
     let w ← whnfR w
     guard (w.isAppOfArity ``Prod.mk 4)
     if legacyLinks then
-      pure (← Solidity.Chain.arrowOf (w.getArg! 2), ← ppLegacyLine (w.getArg! 3))
+      pure (← NFml.Chain.arrowOf (w.getArg! 2), ← ppLegacyLine (w.getArg! 3))
     else pure (← arrowOf (w.getArg! 2), ← ppCoreLine (w.getArg! 3))
 
 @[delab app.Solidity.Core.Fml.OneStep]
 def delabOneStep : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 4)
-  return Solidity.Chain.chainNode (← ppCoreLine (e.getArg! 2))
+  return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 2))
     #[(← `(chain_arrow| ~>), ← ppCoreLine (e.getArg! 3))]
 
 @[delab app.Solidity.Core.Fml.Steps]
 def delabSteps : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 4)
-  return Solidity.Chain.chainNode (← ppCoreLine (e.getArg! 2))
+  return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 2))
     #[(← `(chain_arrow| ~*>), ← ppCoreLine (e.getArg! 3))]
 
 @[delab app.Solidity.Core.Fml.StepBy]
@@ -1555,7 +1555,7 @@ def delabStepBy : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 5)
   let some n ← ruleName? (e.getArg! 2) | failure
-  return Solidity.Chain.chainNode (← ppCoreLine (e.getArg! 3))
+  return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 3))
     #[(← `(chain_arrow| ~[$(mkIdent n):ident]~>), ← ppCoreLine (e.getArg! 4))]
 
 @[delab app.Solidity.Core.Fml.Via]
@@ -1564,7 +1564,7 @@ def delabVia : Delab := do
   guard (e.getAppNumArgs == 4)
   let arrows ← linkLines (e.getArg! 3) false
   guard !arrows.isEmpty
-  return Solidity.Chain.chainNode (← ppCoreLine (e.getArg! 2)) arrows
+  return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 2)) arrows
 
 /-- `Fml.ViaE φ ws L rs`: the chain, the erasure `L` unwritten. -/
 @[delab app.Solidity.Core.Fml.ViaE]
@@ -1573,17 +1573,17 @@ def delabViaE : Delab := do
   guard (e.getAppNumArgs == 5)
   let a ← linkLines (e.getArg! 2) false
   let b ← linkLines (e.getArg! 4) true
-  return Solidity.Chain.chainNode (← ppCoreLine (e.getArg! 1)) (a ++ b)
+  return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 1)) (a ++ b)
 
 end Print
 
 end Chain
 
-namespace Surface
+namespace Scoped
 
 scoped macro_rules
   | `($a:term ~~> $b:term) => `(leads% $a $b)
 
-end Surface
+end Scoped
 
 end Solidity.Core

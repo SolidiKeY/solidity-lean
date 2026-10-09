@@ -105,7 +105,7 @@ def blockLine? (e : Expr) : MetaM (Option (TSyntax `sol_stmt × TSyntax `dl_prem
   withTwins (schema := true) e false fun env => do
     let st ← (tr [] (e.getArg! 5)).run env
     let p ← whnf ((← (tr [] (e.getArg! 6)).run env))
-    unless p.isAppOf ``Solidity.Premise.unfold do return none
+    unless p.isAppOf ``Surface.Premise.unfold do return none
     let (some ss, some ps) := (← progItems? st, ← progItems? p.appArg!) | return none
     return some (← `(sol_stmt| { $[$ss;]* }), ← `(dl_premise| ⟨[ $[$ps;]* ]⟩))
 

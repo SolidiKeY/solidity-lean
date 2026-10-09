@@ -1,4 +1,4 @@
-import Solidity.Calculus.Quote
+import Solidity.Calculus.NFmlQuote
 
 /-!
 # The strategy's tactics: their syntax, and the formula goal they work on
@@ -13,7 +13,7 @@ and the scoped one (`Calculus/Core/Symex.lean`, `Calculus/Core/Derive.lean`,
 the scoped elaborators are registered under.
 
 With them, the plumbing of a tactic on a goal `⊨ φ` (`normValid`,
-`applyValid`), which the closer's drivers use too (`Calculus/Close.lean`,
+`applyValid`), which the closer's drivers use too (`Calculus/NFmlClose.lean`,
 `Calculus/Rewrite.lean`).
 Moved out of `Symex.lean` (`docs/intrinsic.md`, W4 item 11).
 -/
@@ -36,14 +36,14 @@ other formula (a variable in it, or an anonymous contract) falls back to
 `Meta.reduce`. -/
 def normValid (g : MVarId) : TacticM MVarId := do
   let ty ← instantiateMVars (← g.getType)
-  let_expr Valid C φ := ty | throwError "expected a goal `Valid φ`"
+  let_expr NFml.Valid C φ := ty | throwError "expected a goal `Valid φ`"
   let φ ← instantiateMVars φ
   let φ' ← match C.constName?, φ.hasFVar || φ.hasMVar with
     | some n, false =>
       unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)
         (mkApp3 (mkConst ``NFml.quote) C (quoteConstName n) φ)
     | _, _ => withTransparency .all <| Meta.reduce φ (skipTypes := true) (skipProofs := true)
-  g.replaceTargetDefEq (mkApp2 (mkConst ``Valid) C φ')
+  g.replaceTargetDefEq (mkApp2 (mkConst ``NFml.Valid) C φ')
 
 open Lean Elab Tactic Meta in
 /-- The shape of the formula tactics: apply `lem`, a lemma `Valid ψ → Valid φ`
@@ -59,7 +59,7 @@ def applyValid (tac : String) (lem : Lean.Term) (unchanged : Option MessageData 
     if (← instantiateMVars (← g''.getType)) == before then throwError "{tac}: {msg}"
   replaceMainGoal [g'']
 
-namespace Derive
+namespace NFml.Derive
 
 open Lean Meta in
 /-- A lemma `type` proved by `value`, checked by the kernel now, as
@@ -68,7 +68,7 @@ def kernelLemma (type value : Expr) : MetaM Expr := do
   let n ← withOptions (Elab.async.set · false) <| mkAuxLemma [] type value
   return mkConst n
 
-end Derive
+end NFml.Derive
 
 /-! ## The syntax -/
 
@@ -91,7 +91,7 @@ elab_rules : tactic
     if (← getUnsolvedGoals).isEmpty then return
     let g ← getMainGoal
     let ty ← instantiateMVars (← g.getType)
-    let_expr Valid _ _ := ty | throwUnsupportedSyntax
+    let_expr NFml.Valid _ _ := ty | throwUnsupportedSyntax
     replaceMainGoal [← normValid g]
 
 /-- `sol_derive`: run the strategy as a derivation, until no goal has a

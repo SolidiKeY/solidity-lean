@@ -1,4 +1,4 @@
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -45,7 +45,7 @@ not be in range, and there the second form overflows.
 
 namespace Solidity.Examples.Benchmark.ERC20
 
-open Proves
+open NFml.Proves
 
 /-- ERC20, with `msg.sender` passed as a parameter. -/
 def ERC20 : Contract := contract!{
@@ -89,7 +89,7 @@ def ERC20 : Contract := contract!{
 
 local instance : InContract := ⟨ERC20⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## `transfer` -/
 

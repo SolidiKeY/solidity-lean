@@ -120,9 +120,9 @@ theorem holds_isBool (se : Simple C Γ .bool) (b : Bool) :
 /-- A block weakened under one local runs as before, lifted, its locals
 popped (`Prog.trun_wk` at `up`). -/
 theorem Prog.trun_wk_up {t : LTy} {Δ : Ctx} (P : Prog C Γ Δ) (w : t.TDenote C σ.H) :
-    ((P.wk (Core.up (t := t))).2.2.trun (σ.push w)).map (Out.drop (P.wk Core.up).2.2.ext) =
+    ((P.wk (Solidity.Core.up (t := t))).2.2.trun (σ.push w)).map (Out.drop (P.wk Solidity.Core.up).2.2.ext) =
       pushedT σ w ((P.trun σ).map (Out.drop P.ext)) :=
-  TWkRel.eq_lifted (TWkRel.drop (Prog.wk_over P Core.up) (Prog.trun_wk P Core.up σ (w, σ.env)))
+  TWkRel.eq_lifted (TWkRel.drop (Prog.wk_over P Solidity.Core.up) (Prog.trun_wk P Solidity.Core.up σ (w, σ.env)))
 
 /-- `ifElseUnfold`: the condition captured, the branches weakened under it. -/
 theorem sound_iteCapture {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)

@@ -1,6 +1,6 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
 import Solidity.Examples.Chains.Storage
@@ -43,7 +43,7 @@ chains of `Examples/Chains/`, and are cited here, not drawn again.
 
 namespace Solidity.Examples.ChainNotation
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -177,7 +177,7 @@ theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.
           alice.account.balance == 10 }
       ~[simplifyUpdate]~> dl![.box]{ { storage := save(storage, alice.account.balance, 10) }
         alice.account.balance == 10 } by sol_chain).valid_close ?_
-  show Solidity.Valid _
+  show NFml.Valid _
   dsimp only [Solidity.NFml.Via.last]
   sol_close
 

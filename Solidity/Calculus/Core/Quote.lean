@@ -1,5 +1,5 @@
 import Solidity.Calculus.Core.Fml
-import Solidity.Calculus.Quote
+import Solidity.Calculus.NFmlQuote
 
 /-!
 # Quoting scoped formulas back into Lean
@@ -7,7 +7,7 @@ import Solidity.Calculus.Quote
 Entry points: `Fml.quote`, `Tm.quote`, `Upd.quote`, `Frames.quote` and
 `Premise.quote`, each hash-consed.
 
-`Calculus/Quote.lean`'s quoter for the scoped formulas of
+`Calculus/NFmlQuote.lean`'s quoter for the scoped formulas of
 `Calculus/Core/Fml.lean` and the programs of `Syntax/Core.lean`: a formula
 computed by compiled code (the strategy, `Calculus/Core/Step.lean`) becomes
 an `Expr` again, written with the constructors' names and the contract by

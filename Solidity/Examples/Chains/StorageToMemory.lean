@@ -22,7 +22,7 @@ through a write below it.
 
 namespace Solidity.Examples.Chains.StorageToMemory
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 

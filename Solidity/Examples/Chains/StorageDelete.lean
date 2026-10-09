@@ -1,7 +1,7 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.ChainRewrites
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
@@ -22,7 +22,7 @@ short of the printed `10`, `0`, `0`.
 
 namespace Solidity.Examples.Chains.StorageDelete
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Example: Storage Delete Cases -/
 

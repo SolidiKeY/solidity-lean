@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 
 /-!
 # `sol_close` past `{havoc}`
@@ -27,7 +27,7 @@ namespace Close
 variable {C : Contract} {σ : State}
 
 /-- `{havoc} φ`: `φ` for every storage and ledger the callee may leave. -/
-theorem holds_havoc (φ : NFml C) : holds σ (.havoc φ) ↔ ∀ st nt, holds (σ.havoc st nt) φ :=
+theorem holds_havoc (φ : NFml C) : NFml.holds σ (.havoc φ) ↔ ∀ st nt, NFml.holds (σ.havoc st nt) φ :=
   Iff.rfl
 
 /-- The state a `{havoc}` leaves, as the structure: its locals, heap,

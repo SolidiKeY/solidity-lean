@@ -70,11 +70,11 @@ member at a time.
 
 namespace Solidity.Examples.Tactics.SelectOnSaveConsr
 
-open Proves Semantics SemanticsProperties Close
+open NFml.Proves Semantics SemanticsProperties Close
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `alice.age = 42; uint x = alice.age;` leaves `x == 42`. -/
 theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 } := by
@@ -87,9 +87,9 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   refine close ?_
   -- the leaf's erasure, computed
   sol_symex
-  unfold Valid
+  unfold NFml.Valid
   intro σ
-  rw [holds_upd, Upd.apply, List.foldlM_cons, Modality.wp_bind, UpdElem.write_storage,
+  rw [holds_upd, Surface.Upd.apply, List.foldlM_cons, Modality.wp_bind, UpdElem.write_storage,
     Modality.wp_bind, STerm.eval_save, Term.eval_lit,
     Modality.wp_bind, Modality.wp_ok, STerm.eval_storage, Modality.wp_bind, Modality.wp_ok,
     PTerm.eval_field, PTerm.eval_root, Modality.wp_bind, Modality.wp_bind, Modality.wp_ok,
@@ -97,7 +97,7 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   dsimp only
   rw [Modality.wp_box]
   intro τ hsave
-  rw [Modality.wp_ok, List.foldlM_nil, Modality.wp_pure, holds_upd, Upd.apply, List.foldlM_cons,
+  rw [Modality.wp_ok, List.foldlM_nil, Modality.wp_pure, holds_upd, Surface.Upd.apply, List.foldlM_cons,
     Modality.wp_bind, UpdElem.write_val, Modality.wp_bind, Term.eval_find, STerm.eval_storage,
     Modality.wp_bind, Modality.wp_ok]
   rw [PTerm.eval_field, PTerm.eval_root, Modality.wp_bind, Modality.wp_bind, Modality.wp_ok,
@@ -116,8 +116,8 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
     cases v with
     | struct fields =>
       -- the path is `[] ++ [age]`, the equation wants `age :: rest`
-      fail_if_success rw [SVal.save] at hsave
-      rw [List.nil_append, SVal.save] at hsave
+      fail_if_success rw [Semantics.SVal.save] at hsave
+      rw [List.nil_append, Semantics.SVal.save] at hsave
       cases ha : lookupBy "age" fields with
       | none =>
         rw [ha] at hsave
@@ -125,22 +125,22 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
       | some old =>
         rw [ha] at hsave
         dsimp only at hsave
-        rw [SVal.save] at hsave
+        rw [Semantics.SVal.save] at hsave
         cases hsave
         dsimp only
         rw [lookupBy_setBy_self]
         dsimp only
         -- the same block on the read
-        fail_if_success rw [SVal.find]
-        rw [List.nil_append, SVal.find, lookupBy_setBy_self]
+        fail_if_success rw [Semantics.SVal.find]
+        rw [List.nil_append, Semantics.SVal.find, lookupBy_setBy_self]
         dsimp only
-        rw [SVal.find, Modality.wp_ok, asValue_toSVal, Modality.wp_ok, Modality.wp_ok,
+        rw [Semantics.SVal.find, Modality.wp_ok, asValue_toSVal, Modality.wp_ok, Modality.wp_ok,
           List.foldlM_nil, Modality.wp_pure]
         -- `x = 42`
         rw [holds_eqD, Close.Term.eval_pv, State.getEnv_setEnv_self, Modality.wp_bind,
           Modality.wp_ok, bindingVal_val, Modality.wp_ok, Term.eval_lit, Modality.wp_ok]
     | _ =>
-      rw [List.nil_append, SVal.save] at hsave
+      rw [List.nil_append, Semantics.SVal.save] at hsave
       cases hsave
 
 /-- The same program as solkey takes it: the calculus steps, the updates

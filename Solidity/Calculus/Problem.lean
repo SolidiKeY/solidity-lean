@@ -1,5 +1,5 @@
 import Solidity.Typing.CanonTest
-import Solidity.Calculus.Spec
+import Solidity.Calculus.SurfaceSpec
 import Solidity.Semantics.Core.StateErase
 
 /-!
@@ -80,7 +80,7 @@ variable {C : Contract}
 /-! ## The shape test -/
 
 /-- A storage the shape test accepts holds the roots, canonical and tight. -/
-theorem storageShapeB_sound {st : List (Name × SVal)} (h : storageShapeB C.vars st = true) :
+theorem storageShapeB_sound {st : List (Name × Semantics.SVal)} (h : storageShapeB C.vars st = true) :
     CanonStorage C st ∧ TightStorage C st := by
   simp only [storageShapeB, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
   obtain ⟨hn, hall⟩ := h
@@ -105,7 +105,7 @@ theorem storageShapeB_sound {st : List (Name × SVal)} (h : storageShapeB C.vars
 
 /-- A storage that holds the roots, canonical and tight, passes the shape
 test, when no root is declared twice. -/
-theorem storageShapeB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name × SVal)}
+theorem storageShapeB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name × Semantics.SVal)}
     (hc : CanonStorage C st) (ht : TightStorage C st) : storageShapeB C.vars st = true := by
   simp only [storageShapeB, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true]
   refine ⟨hc.1, fun rT hm => ?_⟩
@@ -120,15 +120,15 @@ theorem storageShapeB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name
 /-- `wt(storage)`: the storage is one `C` can be in. -/
 def NFml.wt (C : Contract) : NFml C := .defined (.wt C.vars .storage)
 
-theorem holds_wt {σ : State} : holds σ (NFml.wt C) ↔ storageWtB C.vars σ.storage = true := by
-  simp only [NFml.wt, holds, Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
+theorem holds_wt {σ : Semantics.State} : NFml.holds σ (NFml.wt C) ↔ storageWtB C.vars σ.storage = true := by
+  simp only [NFml.wt, NFml.holds, Surface.Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
   cases storageWtB C.vars σ.storage with
   | true => exact ⟨fun _ => rfl, fun _ => ⟨_, rfl⟩⟩
   | false => exact ⟨fun ⟨_, h⟩ => (nomatch h), fun h => (nomatch h)⟩
 
 /-- A reachable storage passes the shape test. -/
 theorem shape_of_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} (h : Reachable C st) :
+    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × Semantics.SVal)} (h : Reachable C st) :
     storageShapeB C.vars st = true :=
   let ⟨hc, ht⟩ := reachable_shape hnd hdeep h; storageShapeB_complete hnd hc ht
 
@@ -137,7 +137,7 @@ well-formed defaults all the way down, a storage whose words, keys and
 slots are in range (`FitsStorage`) passes the shape test exactly when a
 program reaches it from the contract's initial state. -/
 theorem shape_iff_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} (hf : FitsStorage C st) :
+    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × Semantics.SVal)} (hf : FitsStorage C st) :
     storageShapeB C.vars st = true ↔ Reachable C st :=
   ⟨fun h => (reachable_iff hnd hdeep hf).2 (storageShapeB_sound h), shape_of_reachable hnd hdeep⟩
 
@@ -146,13 +146,13 @@ keys and slots are in range is well-formed exactly when a program reaches it
 and its words fit their types, which a program solc compiles keeps
 (`Semantics/WellFormed.lean`). -/
 theorem wt_iff_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} (hf : FitsStorage C st) :
+    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × Semantics.SVal)} (hf : FitsStorage C st) :
     storageWtB C.vars st = true ↔ Reachable C st ∧ storageWordsB C.vars st = true := by
   rw [storageWtB, Bool.and_eq_true, shape_iff_reachable hnd hdeep hf]
 
 /-- A reachable storage whose words fit is well-formed. -/
 theorem wt_of_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × SVal)} (h : Reachable C st)
+    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × Semantics.SVal)} (h : Reachable C st)
     (hw : storageWordsB C.vars st = true) : storageWtB C.vars st = true := by
   rw [storageWtB, Bool.and_eq_true]
   exact ⟨shape_of_reachable hnd hdeep h, hw⟩
@@ -182,7 +182,7 @@ theorem storageWordsB_init (hnd : nodupKeysB C.vars = true) :
 /-- The contract's initial storage is well-formed (the empty program reaches
 it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) : holds C.initState (NFml.wt C) :=
+    (hdeep : C.vars.all (·.2.okDeep) = true) : NFml.holds C.initState (NFml.wt C) :=
   holds_wt.2 (wt_of_reachable hnd hdeep
     ⟨[], .nil, ⟨Core.TState.init C, List.prefix_refl _⟩, rfl, Core.Storage.init_erase C⟩
     (storageWordsB_init hnd))
@@ -192,22 +192,22 @@ theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
 /-- solkey's obligation for a function of body `P` and parameters `xs`
 under the modality `m`: `∀xs. wt(storage) → [ P ] true`, or the same with
 `⟨ P ⟩`. -/
-def Problem.fml (m : Modality) (xs : List (PrimTy × Var)) (P : Surface.Prog C) : Surface.Fml C :=
+def Surface.Problem.fml (m : Modality) (xs : List (PrimTy × Var)) (P : Surface.Prog C) : Surface.Fml C :=
   Surface.Fml.alls xs (.imp (NFml.wt C).toSurface (.modal m P .tt))
 
 /-- solkey's deployment update,
 `{storage := mtSt ‖ net := storeSt(mtSt, at(msgSender), msgValue) ‖ selfBalance := msgValue}`:
 the empty storage, a ledger holding the deployer's payment, and the value
 sent as the contract's funds (`Contract.deployState`). -/
-def Problem.deployUpd (C : Contract) : Upd C :=
+def Surface.Problem.deployUpd (C : Contract) : Surface.Upd C :=
   [.storage (.mtSt C.vars), .netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
 
 /-- solkey's obligation for a constructor, of parameters `xs`, deployed by
 `P` (`constructor(x̄);`): `∀xs. {deployUpd} ⟨ P ⟩ true`, or the box.  No
 `wt(storage)` premise: the update discards the storage, and the empty one
 is well formed (`initStorage_wt`). -/
-def Problem.ctorFml (m : Modality) (xs : List (PrimTy × Var)) (P : Surface.Prog C) : Surface.Fml C :=
-  Surface.Fml.alls xs (.upd m (Problem.deployUpd C) (.modal m P .tt))
+def Surface.Problem.ctorFml (m : Modality) (xs : List (PrimTy × Var)) (P : Surface.Prog C) : Surface.Fml C :=
+  Surface.Fml.alls xs (.upd m (Surface.Problem.deployUpd C) (.modal m P .tt))
 
 /-- A constructor's obligation with no specification, `Problem.ctorFml` of
 the contract's constructor: its parameters bound, the program
@@ -216,7 +216,7 @@ only where neither the contract nor the constructor is specified, and with
 `{storage := mtSt || net := mtSt}`; Lean with `Problem.deployUpd`, its
 specified problem's update (`docs/solkey-feedback.md`).  A constructor
 marked `skip`, or specified, is refused. -/
-def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Surface.Fml C) := do
+def Surface.Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Surface.Fml C) := do
   let some d := C.ctor | throw "the contract declares no constructor: an implicit one has no obligation"
   if d.spec.skip then throw "constructor is marked `skip`: it has no obligation"
   -- solkey states the unspecified form only where neither the contract
@@ -231,7 +231,7 @@ def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Sur
   let Γ : ECtx := ps.map fun (n, p) => (n, LocalTy.val p)
   let P ← ((elabStmts C call).run { funs := C.funs }).run' (Γ, 1)
   let _ ← Core.Prog.resolveCheck (ECtx.toNCtx Γ) P
-  pure (Problem.ctorFml m (ps.map fun (n, p) => (p, Var.ofName n)) P)
+  pure (Surface.Problem.ctorFml m (ps.map fun (n, p) => (p, Var.ofName n)) P)
 
 /-- `problem[C]{constructor}`: `Problem.ctor C .diamond`, the unspecified
 constructor obligation, elaborated (`constructor` is a keyword,
@@ -245,7 +245,7 @@ syntax (name := problemCtorBang) "problem!{ " &"constructor" " }" : term
 open Lean Elab Term Meta in
 elab_rules (kind := problemCtor) : term
   | `(problem[ $c ]{ constructor }) =>
-    elabAgainst c fun q => `((Problem.ctor ($c) Modality.diamond).map (Surface.Fml.quote $q))
+    elabAgainst c fun q => `((Surface.Problem.ctor ($c) Modality.diamond).map (Surface.Fml.quote $q))
 
 macro_rules (kind := problemCtorBang)
   | `(problem!{ constructor }) => `(problem[InContract.contract]{ constructor })
@@ -253,8 +253,8 @@ macro_rules (kind := problemCtorBang)
 /-- The parameters an obligation binds, whether it is a deployment, its
 modality and its program, read back off the formula: what `Problem.text`
 prints. -/
-def Problem.parts : Surface.Fml C → Option (List (PrimTy × Var) × Bool × Modality × Surface.Prog C)
-  | .all x p φ => (Problem.parts φ).map fun (xs, r) => ((p, x) :: xs, r)
+def Surface.Problem.parts : Surface.Fml C → Option (List (PrimTy × Var) × Bool × Modality × Surface.Prog C)
+  | .all x p φ => (Surface.Problem.parts φ).map fun (xs, r) => ((p, x) :: xs, r)
   | .imp (.defined (.app1 (.wt _) (.app0 .storage))) (.modal m P .tt) => some ([], false, m, P)
   | .upd m [.storage (.app0 (.mtSt _)), .netMt (.env .msgSender) (.env .msgValue),
       .setBalance (.env .msgValue)] (.modal m' P .tt) =>
@@ -274,8 +274,8 @@ with its update, solkey's specified one: solkey's unspecified constructor
 problem writes `{storage := mtSt || net := mtSt}`, an empty ledger and free
 funds, where the interpreter's deployment books the payment
 (`Contract.deployState`). -/
-def Problem.text (contract fn : String) (φ : Surface.Fml C) : String :=
-  match Problem.parts φ with
+def Surface.Problem.text (contract fn : String) (φ : Surface.Fml C) : String :=
+  match Surface.Problem.parts φ with
   | none => "(not an obligation)"
   | some (xs, deploy, m, _) =>
     let vars := if xs.isEmpty then "" else

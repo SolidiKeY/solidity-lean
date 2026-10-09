@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.CallbackSound
@@ -28,14 +28,14 @@ call may revert in the caller, and no formula says it does not.
 
 namespace Solidity.Examples.Tactics.TryCatch
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 /-- A pinger: how often a ping went through, and how often it failed. -/
 def Pinger : Contract := contract!{ uint pings; uint fails; uint last; }
 
 local instance : InContract := ⟨Pinger⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## The rules -/
 
@@ -97,7 +97,7 @@ example : Surface.Prog.toStr (sol{ try I(last).ping() { pings += 1; } catch { fa
 /-! ## Running -/
 
 /-- The call's outcome is the transaction's: here `ping` on `7` returns. -/
-def pingOk : State where
+def pingOk : Semantics.State where
   storage := Pinger.initStorage
   tx := { ext := [(⟨7, "ping", []⟩, .ok [])] }
 
@@ -109,7 +109,7 @@ def pingOk : State where
 
 /-- The same call reverting with `Panic(0x11)`: the `Panic` clause runs, with
 the code bound. -/
-def pingPanic : State where
+def pingPanic : Semantics.State where
   storage := Pinger.initStorage
   tx := { ext := [(⟨7, "ping", []⟩, .panic (.int 17))] }
 

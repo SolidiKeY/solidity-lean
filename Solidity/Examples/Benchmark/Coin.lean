@@ -1,6 +1,6 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Derive
-import Solidity.Calculus.Spec
+import Solidity.Calculus.NFmlDerive
+import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Deploy
@@ -22,9 +22,9 @@ The constructor is the contract's (`Contract.ctor`): `constructor();` runs it
 
 solkey's `@custom:key` clauses are written above the functions, as its
 file has them.  `spec!{ mint }`, the obligation solkey synthesizes
-(`Calculus/Spec.lean`), is derived as `⊢`, its leaves closed by `sol_spec`'s
+(`Calculus/SurfaceSpec.lean`), is derived as `⊢`, its leaves closed by `sol_spec`'s
 steps (`spec_mint`); `send`'s is not.  Before it, the clauses by hand, as `⊢ dl{}` obligations, one per
-clause, each by `sol_prove` (`Calculus/Derive.lean`): the calculus's steps
+clause, each by `sol_prove` (`Calculus/NFmlDerive.lean`): the calculus's steps
 and each leaf closed by the closer (`LFml.close`), in one kernel evaluation.
 `\old(e)` is a local declared before the call (`uint b = balances[r];`), and
 `msg.sender` is the transaction's (`Simple.env`), the same before and after.
@@ -34,7 +34,7 @@ and each leaf closed by the closer (`LFml.close`), in one kernel evaluation.
 
 namespace Solidity.Examples.Benchmark.Coin
 
-open Proves
+open NFml.Proves
 
 /-- `Coin.sol`, as solkey's benchmark has it, with its clauses. -/
 def Coin : Contract := contract!{
@@ -65,7 +65,7 @@ def Coin : Contract := contract!{
 
 local instance : InContract := ⟨Coin⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## The constructor -/
 

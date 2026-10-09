@@ -78,9 +78,9 @@ def sameAs (a b : Except String (Surface.Fml Ledger)) : Bool :=
 
 /-! Each scoped obligation erases to today's. -/
 
-#guard sameAs ((Core.specObligation Ledger "add").map (·.eraseS [])) (specObligation Ledger "add")
+#guard sameAs ((Core.specObligation Ledger "add").map (·.eraseS [])) (Surface.specObligation Ledger "add")
 #guard sameAs ((Core.specObligation Ledger "constructor").map (·.eraseS []))
-  (specObligation Ledger "constructor")
-#guard sameAs ((Core.Problem.ctor Ledger .diamond).map (·.eraseS [])) (Problem.ctor Ledger .diamond)
+  (Surface.specObligation Ledger "constructor")
+#guard sameAs ((Core.Problem.ctor Ledger .diamond).map (·.eraseS [])) (Surface.Problem.ctor Ledger .diamond)
 
 end Solidity.Examples.Tactics.CoreSpec

@@ -1,6 +1,6 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
 
@@ -18,7 +18,7 @@ line, so the read ends at a literal and the sum folds.
 
 namespace Solidity.Examples.Chains.Arithmetic
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 

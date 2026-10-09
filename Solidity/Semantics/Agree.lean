@@ -436,28 +436,28 @@ theorem Avoids.tail {x : Var} {vs ns : List Var} (h : Avoids (x :: vs) ns) : Avo
 theorem Avoids.head {x : Var} {vs ns : List Var} (h : Avoids (x :: vs) ns) : x ∉ ns :=
   h x List.mem_cons_self
 
-def Src.vars {T : Ty} : Src C T → List Var
+def Surface.Src.vars {T : Ty} : Surface.Src C T → List Var
   | .val v => v.vars
   | .copy p _ => p.vars
 
-def ARhs.vars {R : RefTy} : ARhs C R → List Var
+def Surface.ARhs.vars {R : RefTy} : Surface.ARhs C R → List Var
   | .path p => p.vars
   | .push b _ => b.vars
 
-def MRhs.vars {R : RefTy} : MRhs C R → List Var
+def Surface.MRhs.vars {R : RefTy} : Surface.MRhs C R → List Var
   | .alias p => p.vars
   | .copy p _ => p.vars
   | .newArr n _ => n.vars
 
-def NewLhs.vars {R : RefTy} : NewLhs C R → List Var
+def Surface.NewLhs.vars {R : RefTy} : Surface.NewLhs C R → List Var
   | .store l => l.vars
   | .mem l => l.vars
 
-def MSrc.vars {T : Ty} : MSrc C T → List Var
+def Surface.MSrc.vars {T : Ty} : Surface.MSrc C T → List Var
   | .val v => v.vars
   | .ref p => p.vars
 
-def OpLoc.vars {p : PrimTy} : OpLoc C p → List Var
+def Surface.OpLoc.vars {p : PrimTy} : Surface.OpLoc C p → List Var
   | .local x => [x]
   | .root .. => []
   | .field b _ _ => b.vars
@@ -477,19 +477,19 @@ def Arg.vars : List (Arg C) → List Var
   | a :: as => a.x :: a.e.vars ++ Arg.vars as
 
 /-- The variables an external call reads. -/
-def ExtCall.vars (c : ExtCall C) : List Var :=
+def Surface.ExtCall.vars (c : Surface.ExtCall C) : List Var :=
   c.addr.vars ++ c.args.flatMap fun a => a.2.vars
 
 /-- The return variable of a call, and the local it lands in. -/
-def CallRet.vars : CallRet → List Var
+def Surface.CallRet.vars : Surface.CallRet → List Var
   | .none => []
   | .val _ r res => r :: res.toList
   | .rets rs => rs.map (·.2)
 
 /-- The variables a loop's annotation reads. -/
-def LoopAnn.vars : LoopAnn C → List Var
+def Surface.LoopAnn.vars : Surface.LoopAnn C → List Var
   | .unwind _ => []
-  | .inv I dec => I.vars ++ optVars Val.vars dec
+  | .inv I dec => I.vars ++ optVars Surface.Val.vars dec
 
 
 /-! ## Frames
@@ -507,63 +507,63 @@ theorem aliasPath_frame (hag : EnvAgreeExcept ns σ τ) {x : Var} (hx : x ∉ ns
     aliasPath σ x = aliasPath τ x := by
   unfold aliasPath; rw [getEnv_congr hag hx]
 
-theorem Simple.eval_frame (hag : EnvAgreeExcept ns σ τ) {p : PrimTy} :
-    (s : Simple C p) → Avoids s.vars ns → s.eval σ = s.eval τ
+theorem Surface.Simple.eval_frame (hag : EnvAgreeExcept ns σ τ) {p : PrimTy} :
+    (s : Surface.Simple C p) → Avoids s.vars ns → s.eval σ = s.eval τ
   | .lit .., _ | .bool _, _ => rfl
-  | .local x, h => by simp only [Simple.eval, getEnv_congr hag (h x (by simp [Simple.vars]))]
-  | .env k _, _ => by simp only [Simple.eval, State.envVal_congr hag]
+  | .local x, h => by simp only [Surface.Simple.eval, getEnv_congr hag (h x (by simp [Surface.Simple.vars]))]
+  | .env k _, _ => by simp only [Surface.Simple.eval, State.envVal_congr hag]
 
 mutual
 
-theorem SPath.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
-    {T : Ty} → (p : SPath C T) → Avoids p.vars ns → p.resolve σ = p.resolve τ
-  | _, .alias x, h => aliasPath_frame hag (h x (by simp [SPath.vars]))
+theorem Surface.SPath.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
+    {T : Ty} → (p : Surface.SPath C T) → Avoids p.vars ns → p.resolve σ = p.resolve τ
+  | _, .alias x, h => aliasPath_frame hag (h x (by simp [Surface.SPath.vars]))
   | _, .loc l, h => l.resolve_frame hag h
 
-theorem Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
-    {T : Ty} → (l : Loc C T) → Avoids l.vars ns → l.resolve σ = l.resolve τ
+theorem Surface.Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
+    {T : Ty} → (l : Surface.Loc C T) → Avoids l.vars ns → l.resolve σ = l.resolve τ
   | _, .root .., _ => rfl
-  | _, .field b _ _, h => by simp only [Loc.resolve, b.resolve_frame hag h]
+  | _, .field b _ _, h => by simp only [Surface.Loc.resolve, b.resolve_frame hag h]
   | _, .index _ b i, h => by
-    simp only [Loc.resolve, b.resolve_frame hag h.left, i.eval_frame hag h.right,
+    simp only [Surface.Loc.resolve, b.resolve_frame hag h.left, i.eval_frame hag h.right,
       checkIndex_congr hag]
 
-theorem MPath.mval_frame (hag : EnvAgreeExcept ns σ τ) :
-    {T : Ty} → (p : MPath C T) → Avoids p.vars ns → p.mval σ = p.mval τ
-  | _, .var x _, h => by simp only [MPath.mval, getEnv_congr hag (h x (by simp [MPath.vars]))]
+theorem Surface.MPath.mval_frame (hag : EnvAgreeExcept ns σ τ) :
+    {T : Ty} → (p : Surface.MPath C T) → Avoids p.vars ns → p.mval σ = p.mval τ
+  | _, .var x _, h => by simp only [Surface.MPath.mval, getEnv_congr hag (h x (by simp [Surface.MPath.vars]))]
   | _, .loc l, h => l.read_frame hag h
 
-theorem MLoc.read_frame (hag : EnvAgreeExcept ns σ τ) :
-    {T : Ty} → (l : MLoc C T) → Avoids l.vars ns → l.read σ = l.read τ
-  | _, .field b _ _, h => by simp only [MLoc.read, b.mval_frame hag h, getObj_congr hag]
+theorem Surface.MLoc.read_frame (hag : EnvAgreeExcept ns σ τ) :
+    {T : Ty} → (l : Surface.MLoc C T) → Avoids l.vars ns → l.read σ = l.read τ
+  | _, .field b _ _, h => by simp only [Surface.MLoc.read, b.mval_frame hag h, getObj_congr hag]
   | _, .index _ b i, h => by
-    simp only [MLoc.read, b.mval_frame hag h.left, i.eval_frame hag h.right, getObj_congr hag]
+    simp only [Surface.MLoc.read, b.mval_frame hag h.left, i.eval_frame hag h.right, getObj_congr hag]
 
-theorem Val.eval_frame (hag : EnvAgreeExcept ns σ τ) :
-    {p : PrimTy} → (v : Val C p) → Avoids v.vars ns → v.eval σ = v.eval τ
+theorem Surface.Val.eval_frame (hag : EnvAgreeExcept ns σ τ) :
+    {p : PrimTy} → (v : Surface.Val C p) → Avoids v.vars ns → v.eval σ = v.eval τ
   | _, .simple s, h => s.eval_frame hag h
-  | _, .read l, h => by simp only [Val.eval, l.resolve_frame hag h, findStorage_congr hag]
+  | _, .read l, h => by simp only [Surface.Val.eval, l.resolve_frame hag h, findStorage_congr hag]
   | _, .binop _ _ _ a b, h => by
-    simp only [Val.eval, a.eval_frame hag h.left, b.eval_frame hag h.right]
-  | _, .unop _ _ _ a, h => by simp only [Val.eval, a.eval_frame hag h]
+    simp only [Surface.Val.eval, a.eval_frame hag h.left, b.eval_frame hag h.right]
+  | _, .unop _ _ _ a, h => by simp only [Surface.Val.eval, a.eval_frame hag h]
   | _, .ternary c a b, h => by
-    simp only [Val.eval, c.eval_frame hag h.left.left, a.eval_frame hag h.left.right,
+    simp only [Surface.Val.eval, c.eval_frame hag h.left.left, a.eval_frame hag h.left.right,
       b.eval_frame hag h.right]
-  | _, .readMem l, h => by simp only [Val.eval, l.read_frame hag h]
-  | _, .len b _, h => by simp only [Val.eval, b.resolve_frame hag h, arrayLen, findStorage_congr hag]
-  | _, .mlen b _, h => by simp only [Val.eval, b.mval_frame hag h, memArrayLen, getObj_congr hag]
+  | _, .readMem l, h => by simp only [Surface.Val.eval, l.read_frame hag h]
+  | _, .len b _, h => by simp only [Surface.Val.eval, b.resolve_frame hag h, arrayLen, findStorage_congr hag]
+  | _, .mlen b _, h => by simp only [Surface.Val.eval, b.mval_frame hag h, memArrayLen, getObj_congr hag]
 
 end
 
-theorem Src.value_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
-    (r : Src C T) → Avoids r.vars ns → r.value σ = r.value τ
-  | .val v, h => by simp only [Src.value, v.eval_frame hag h]
-  | .copy p _, h => by simp only [Src.value, p.resolve_frame hag h, findStorage_congr hag]
+theorem Surface.Src.value_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
+    (r : Surface.Src C T) → Avoids r.vars ns → r.value σ = r.value τ
+  | .val v, h => by simp only [Surface.Src.value, v.eval_frame hag h]
+  | .copy p _, h => by simp only [Surface.Src.value, p.resolve_frame hag h, findStorage_congr hag]
 
-theorem MSrc.mval_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
-    (r : MSrc C T) → Avoids r.vars ns → r.mval σ = r.mval τ
-  | .val v, h => by simp only [MSrc.mval, v.eval_frame hag h]
-  | .ref p, h => by simp only [MSrc.mval, p.mval_frame hag h]
+theorem Surface.MSrc.mval_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
+    (r : Surface.MSrc C T) → Avoids r.vars ns → r.mval σ = r.mval τ
+  | .val v, h => by simp only [Surface.MSrc.mval, v.eval_frame hag h]
+  | .ref p, h => by simp only [Surface.MSrc.mval, p.mval_frame hag h]
 
 /-! ### The state operations respect agreement -/
 
@@ -647,13 +647,13 @@ macro "agree_run" h:term : tactic => `(tactic| repeat (first
   | refine bindPureRes_agree _ fun _ => ?_
   | split))
 
-theorem MLoc.write_frame (hag : EnvAgreeExcept ns σ τ) (mv : MVal) {T : Ty} :
-    (l : MLoc C T) → Avoids l.vars ns → ResultsAgree ns (l.write σ mv) (l.write τ mv)
+theorem Surface.MLoc.write_frame (hag : EnvAgreeExcept ns σ τ) (mv : MVal) {T : Ty} :
+    (l : Surface.MLoc C T) → Avoids l.vars ns → ResultsAgree ns (l.write σ mv) (l.write τ mv)
   | .field b f _, h => by
-    simp only [MLoc.write, b.mval_frame hag h]
+    simp only [Surface.MLoc.write, b.mval_frame hag h]
     agree_run hag
   | .index _ b i, h => by
-    simp only [MLoc.write, b.mval_frame hag h.left, i.eval_frame hag h.right]
+    simp only [Surface.MLoc.write, b.mval_frame hag h.left, i.eval_frame hag h.right]
     agree_run hag
 
 theorem opStore_agree (hag : EnvAgreeExcept ns σ τ) (op : BinOp) (p : PrimTy) (r : Name)
@@ -667,24 +667,24 @@ theorem opMem_agree (hag : EnvAgreeExcept ns σ τ) (op : BinOp) (p : PrimTy) (a
   simp only [opMem, readLoc_congr hag]
   agree_run hag
 
-theorem OpLoc.store_frame (hag : EnvAgreeExcept ns σ τ) (op : BinOp) {p : PrimTy} :
-    (l : OpLoc C p) → Avoids l.vars ns → (v : Value) →
+theorem Surface.OpLoc.store_frame (hag : EnvAgreeExcept ns σ τ) (op : BinOp) {p : PrimTy} :
+    (l : Surface.OpLoc C p) → Avoids l.vars ns → (v : Value) →
       ResultsAgree ns (l.store σ op v) (l.store τ op v)
   | .local x, h, v => by
-    simp only [OpLoc.store, opLocal, getEnv_congr hag (h.head)]
+    simp only [Surface.OpLoc.store, opLocal, getEnv_congr hag (h.head)]
     agree_run hag
   | .root .., _, v => opStore_agree hag _ _ _ _ _
   | .field b f hf, h, v => by
-    simp only [OpLoc.store, (Loc.field b f hf).resolve_frame hag h]
+    simp only [Surface.OpLoc.store, (Surface.Loc.field b f hf).resolve_frame hag h]
     agree_run hag
   | .index it b i, h, v => by
-    simp only [OpLoc.store, (Loc.index it b (.simple i)).resolve_frame hag h]
+    simp only [Surface.OpLoc.store, (Surface.Loc.index it b (.simple i)).resolve_frame hag h]
     agree_run hag
   | .mfield b f _, h, v => by
-    simp only [OpLoc.store, b.mval_frame hag h]
+    simp only [Surface.OpLoc.store, b.mval_frame hag h]
     agree_run hag
   | .mindex _ b i, h, v => by
-    simp only [OpLoc.store, b.mval_frame hag h.left, i.eval_frame hag h.right]
+    simp only [Surface.OpLoc.store, b.mval_frame hag h.left, i.eval_frame hag h.right]
     agree_run hag
 
 theorem bumpStore_agree (hag : EnvAgreeExcept ns σ τ) (op : IncDec) (p : PrimTy) (r : Name)
@@ -697,23 +697,23 @@ theorem bumpMem_agree (hag : EnvAgreeExcept ns σ τ) (op : IncDec) (p : PrimTy)
   simp only [bumpMem, readLoc_congr hag]
   agree_run hag
 
-theorem OpLoc.bump_frame (hag : EnvAgreeExcept ns σ τ) (op : IncDec) {p : PrimTy} :
-    (l : OpLoc C p) → Avoids l.vars ns → ResAgree ns (l.bump σ op) (l.bump τ op)
+theorem Surface.OpLoc.bump_frame (hag : EnvAgreeExcept ns σ τ) (op : IncDec) {p : PrimTy} :
+    (l : Surface.OpLoc C p) → Avoids l.vars ns → ResAgree ns (l.bump σ op) (l.bump τ op)
   | .local x, h => by
-    simp only [OpLoc.bump, bumpLocal, getEnv_congr hag (h.head)]
+    simp only [Surface.OpLoc.bump, bumpLocal, getEnv_congr hag (h.head)]
     agree_run hag
   | .root .., _ => bumpStore_agree hag _ _ _ _
   | .field b f hf, h => by
-    simp only [OpLoc.bump, (Loc.field b f hf).resolve_frame hag h]
+    simp only [Surface.OpLoc.bump, (Surface.Loc.field b f hf).resolve_frame hag h]
     agree_run hag
   | .index it b i, h => by
-    simp only [OpLoc.bump, (Loc.index it b (.simple i)).resolve_frame hag h]
+    simp only [Surface.OpLoc.bump, (Surface.Loc.index it b (.simple i)).resolve_frame hag h]
     agree_run hag
   | .mfield b f _, h => by
-    simp only [OpLoc.bump, b.mval_frame hag h]
+    simp only [Surface.OpLoc.bump, b.mval_frame hag h]
     agree_run hag
   | .mindex _ b i, h => by
-    simp only [OpLoc.bump, b.mval_frame hag h.left, i.eval_frame hag h.right]
+    simp only [Surface.OpLoc.bump, b.mval_frame hag h.left, i.eval_frame hag h.right]
     agree_run hag
 
 theorem pushAt_agree (hag : EnvAgreeExcept ns σ τ) (E : Ty) (r : Name) (segs : List Seg)
@@ -772,10 +772,10 @@ theorem writeAddr_agree (hag : EnvAgreeExcept ns σ τ) (mv : MVal) (a : Addr) :
   · exact memWriteField_agree hag _ _ _
   · exact memWriteIndex_agree hag _ _ _
 
-theorem MLoc.addr_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
-    (l : MLoc C T) → Avoids l.vars ns → l.addr σ = l.addr τ
-  | .field b _ _, h => by simp only [MLoc.addr, b.mval_frame hag h]
-  | .index _ b i, h => by simp only [MLoc.addr, b.mval_frame hag h.left, i.eval_frame hag h.right]
+theorem Surface.MLoc.addr_frame (hag : EnvAgreeExcept ns σ τ) {T : Ty} :
+    (l : Surface.MLoc C T) → Avoids l.vars ns → l.addr σ = l.addr τ
+  | .field b _ _, h => by simp only [Surface.MLoc.addr, b.mval_frame hag h]
+  | .index _ b i, h => by simp only [Surface.MLoc.addr, b.mval_frame hag h.left, i.eval_frame hag h.right]
 
 theorem memClear_agree (hag : EnvAgreeExcept ns σ τ) (a : Addr) :
     (T : Ty) → ResultsAgree ns (memClear σ a T) (memClear τ a T)
@@ -789,9 +789,9 @@ theorem allocDefault_bind_agree (hag : EnvAgreeExcept ns σ τ) (R : RefTy) (x :
 
 /-- An external call is made alike from two states that agree off what it
 reads. -/
-theorem ExtCall.key_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (c : ExtCall C)
+theorem Surface.ExtCall.key_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (c : Surface.ExtCall C)
     (h : Avoids c.vars ns) : c.key σ = c.key τ := by
-  have hargs : ∀ as : List (ExtArg C), Avoids (as.flatMap fun a => a.2.vars) ns →
+  have hargs : ∀ as : List (Surface.ExtArg C), Avoids (as.flatMap fun a => a.2.vars) ns →
       as.mapM (fun a => a.2.eval σ) = as.mapM (fun a => a.2.eval τ) := by
     intro as
     induction as with
@@ -801,7 +801,7 @@ theorem ExtCall.key_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (c : E
       simp only [List.mapM_cons, a.2.eval_frame hag (h.left (ws := _) |> fun h' => by
         simpa [List.flatMap_cons] using fun x hx => h x (by simp [List.flatMap_cons, hx])),
         ih (fun x hx => h x (by simp only [List.flatMap_cons]; exact List.mem_append_right _ hx))]
-  simp only [ExtCall.key, c.addr.eval_frame hag h.left, hargs c.args h.right]
+  simp only [Surface.ExtCall.key, c.addr.eval_frame hag h.left, hargs c.args h.right]
 
 /-- The locals an outcome binds, bound alike in two states that agree. -/
 theorem bindData_frame :

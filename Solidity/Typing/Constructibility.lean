@@ -69,34 +69,34 @@ variable {C : Contract}
 elements have no well-formed default has no slots at all, the slots past the
 end of an array of words are cleared, a fixed-size array has no slots past
 its end, and a mapping no program indexes (a reference key) has no entries. -/
-def Semantics.SVal.tight : SVal → Ty → Prop
-  | SVal.struct fields, Ty.ref (RefTy.struct s) => tightFields s fields
-  | SVal.array elems shadow _, Ty.ref (RefTy.array E) =>
+def Semantics.SVal.tight : Semantics.SVal → Ty → Prop
+  | Semantics.SVal.struct fields, Ty.ref (RefTy.struct s) => tightFields s fields
+  | Semantics.SVal.array elems shadow _, Ty.ref (RefTy.array E) =>
       (E.defaultOkS = false → elems = [] ∧ shadow = []) ∧
       (E.isPrimitive = true → ∀ w ∈ shadow, w = defaultForTy E) ∧
       tightElems E elems ∧ tightElems E shadow
-  | SVal.array elems shadow _, Ty.ref (RefTy.fixed E _) => shadow = [] ∧ tightElems E elems
-  | SVal.map entries _, Ty.ref (RefTy.mapping K V) =>
+  | Semantics.SVal.array elems shadow _, Ty.ref (RefTy.fixed E _) => shadow = [] ∧ tightElems E elems
+  | Semantics.SVal.map entries _, Ty.ref (RefTy.mapping K V) =>
       (K.isKey = false → entries = []) ∧ tightEntries V entries
   | _, _ => True
 where
-  tightFields (s : Name) : List (Name × SVal) → Prop
+  tightFields (s : Name) : List (Name × Semantics.SVal) → Prop
     | [] => True
     | (n, v) :: rest =>
         (match lookupBy n (structDef s) with
          | some T => v.tight T
          | none => True) ∧ tightFields s rest
-  tightElems (E : Ty) : List SVal → Prop
+  tightElems (E : Ty) : List Semantics.SVal → Prop
     | [] => True
     | v :: rest => v.tight E ∧ tightElems E rest
-  tightEntries (V : Ty) : List (Int × SVal) → Prop
+  tightEntries (V : Ty) : List (Int × Semantics.SVal) → Prop
     | [] => True
     | (_, v) :: rest => v.tight V ∧ tightEntries V rest
 
 open Semantics.SVal.tight (tightFields tightElems tightEntries)
 
 /-- Every root canonical and tight at its declared type. -/
-def TightStorage (C : Contract) (st : List (Name × SVal)) : Prop :=
+def TightStorage (C : Contract) (st : List (Name × Semantics.SVal)) : Prop :=
   ∀ r T v, lookupBy r C.vars = some T → lookupBy r st = some v → v.tight T
 
 /-- A mapping key a literal writes: a number in its type's range, a `bool`
@@ -111,25 +111,25 @@ in its type's range): every word and every mapping key in its type's range,
 and every array's slots, past its end too, numbered below `2^256` (a dynamic
 array's fewer than `2^256` in all: the builder pushes them all, and a push
 onto `2^256 - 1` elements is out of gas, `Storage.full`). -/
-def Semantics.SVal.fits : SVal → Ty → Prop
-  | SVal.prim (.int z), Ty.prim p => p.inRange z = true
-  | SVal.struct fields, Ty.ref (RefTy.struct s) => fitsFields s fields
-  | SVal.array elems shadow _, Ty.ref (RefTy.array E) =>
+def Semantics.SVal.fits : Semantics.SVal → Ty → Prop
+  | Semantics.SVal.prim (.int z), Ty.prim p => p.inRange z = true
+  | Semantics.SVal.struct fields, Ty.ref (RefTy.struct s) => fitsFields s fields
+  | Semantics.SVal.array elems shadow _, Ty.ref (RefTy.array E) =>
       elems.length + shadow.length < 2 ^ 256 ∧ fitsElems E elems ∧ fitsElems E shadow
-  | SVal.array elems _ _, Ty.ref (RefTy.fixed E _) => elems.length ≤ 2 ^ 256 ∧ fitsElems E elems
-  | SVal.map entries _, Ty.ref (RefTy.mapping K V) => fitsEntries K V entries
+  | Semantics.SVal.array elems _ _, Ty.ref (RefTy.fixed E _) => elems.length ≤ 2 ^ 256 ∧ fitsElems E elems
+  | Semantics.SVal.map entries _, Ty.ref (RefTy.mapping K V) => fitsEntries K V entries
   | _, _ => True
 where
-  fitsFields (s : Name) : List (Name × SVal) → Prop
+  fitsFields (s : Name) : List (Name × Semantics.SVal) → Prop
     | [] => True
     | (n, v) :: rest =>
         (match lookupBy n (structDef s) with
          | some T => v.fits T
          | none => True) ∧ fitsFields s rest
-  fitsElems (E : Ty) : List SVal → Prop
+  fitsElems (E : Ty) : List Semantics.SVal → Prop
     | [] => True
     | v :: rest => v.fits E ∧ fitsElems E rest
-  fitsEntries (K V : Ty) : List (Int × SVal) → Prop
+  fitsEntries (K V : Ty) : List (Int × Semantics.SVal) → Prop
     | [] => True
     | (key, v) :: rest =>
         (match K with
@@ -139,7 +139,7 @@ where
 open Semantics.SVal.fits (fitsFields fitsElems fitsEntries)
 
 /-- Every root's words, keys and slots in range. -/
-def FitsStorage (C : Contract) (st : List (Name × SVal)) : Prop :=
+def FitsStorage (C : Contract) (st : List (Name × Semantics.SVal)) : Prop :=
   ∀ r T v, lookupBy r C.vars = some T → lookupBy r st = some v → v.fits T
 
 namespace Build
@@ -161,26 +161,26 @@ storage, `getSt` is `State.findStorage`. -/
 open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne setBy_setBy_self)
 
 /-- The storage `State.saveStorage` leaves. -/
-def putSt (st : List (Name × SVal)) (r : Name) (segs : List Seg) (X : SVal) :
-    Res (List (Name × SVal)) :=
+def putSt (st : List (Name × Semantics.SVal)) (r : Name) (segs : List Seg) (X : Semantics.SVal) :
+    Res (List (Name × Semantics.SVal)) :=
   match lookupBy r st with
   | some V => do let u ← V.save segs X; pure (setBy r u st)
   | none => .error .undef
 
 /-- `st'` is `st` with `X` saved at `r.segs`. -/
-def Wrote (st st' : List (Name × SVal)) (r : Name) (segs : List Seg) (X : SVal) : Prop :=
+def Wrote (st st' : List (Name × Semantics.SVal)) (r : Name) (segs : List Seg) (X : Semantics.SVal) : Prop :=
   putSt st r segs X = .ok st'
 
 /-- `putSt` at a state's storage is `State.storeRes`. -/
-theorem putSt_eq (σ : State) (r : Name) (segs : List Seg) (X : SVal) :
+theorem putSt_eq (σ : Semantics.State) (r : Name) (segs : List Seg) (X : Semantics.SVal) :
     putSt σ.storage r segs X = σ.storeRes r segs X := rfl
 
-theorem saveStorage_ok {σ : State} {r : Name} {segs : List Seg} {X : SVal}
-    {st : List (Name × SVal)} (h : putSt σ.storage r segs X = .ok st) :
+theorem saveStorage_ok {σ : Semantics.State} {r : Name} {segs : List Seg} {X : Semantics.SVal}
+    {st : List (Name × Semantics.SVal)} (h : putSt σ.storage r segs X = .ok st) :
     σ.saveStorage r segs X = .ok { σ with storage := st } := by
   rw [SemanticsProperties.State.saveStorage_eq, ← putSt_eq, h]; rfl
 
-theorem putSt_of_saveStorage {σ τ : State} {r : Name} {segs : List Seg} {X : SVal}
+theorem putSt_of_saveStorage {σ τ : Semantics.State} {r : Name} {segs : List Seg} {X : Semantics.SVal}
     (h : σ.saveStorage r segs X = .ok τ) : putSt σ.storage r segs X = .ok τ.storage := by
   rw [SemanticsProperties.State.saveStorage_eq, ← putSt_eq] at h
   obtain ⟨st, hst, h⟩ := bind_ok_inv h
@@ -196,21 +196,21 @@ theorem setBy_of_lookupBy [DecidableEq κ] {k : κ} {v : α} :
       simp [setBy, hk, setBy_of_lookupBy h]
 
 /-- Saving twice at one path keeps the second: `alice.age = 1; alice.age = 2;`. -/
-theorem save_save : ∀ {segs : List Seg} {v v₁ a : SVal} (b : SVal),
+theorem save_save : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Semantics.SVal),
     v.save segs a = .ok v₁ → v₁.save segs b = v.save segs b
   | [], v, v₁, a, b, h => by
     rw [SVal.save_nil] at h; cases h; rw [SVal.save_nil, SVal.save_nil]
   | .field n :: rest, .struct fields, v₁, a, b, h => by
-    simp only [SVal.save] at h ⊢
+    simp only [Semantics.SVal.save] at h ⊢
     split at h
     · rename_i old hold
       obtain ⟨u, hu, h⟩ := bind_ok_inv h
       cases h
-      simp only [SVal.save, lookupBy_setBy_self, save_save b hu]
+      simp only [Semantics.SVal.save, lookupBy_setBy_self, save_save b hu]
       cases old.save rest b <;> simp [setBy_setBy_self]
     · exact nomatch h
   | .at i :: rest, .array elems sh fx, v₁, a, b, h => by
-    simp only [SVal.save] at h
+    simp only [Semantics.SVal.save] at h
     split at h
     · rename_i hb
       obtain ⟨u, hu, h⟩ := bind_ok_inv h
@@ -219,7 +219,7 @@ theorem save_save : ∀ {segs : List Seg} {v v₁ a : SVal} (b : SVal),
       have hb' : 0 ≤ i ∧ i.toNat < (((elems ++ sh).set i.toNat u).take elems.length ++
           ((elems ++ sh).set i.toNat u).drop elems.length).length := by
         rw [List.take_append_drop, hlen]; exact hb
-      simp only [SVal.save, dif_pos hb', dif_pos hb]
+      simp only [Semantics.SVal.save, dif_pos hb', dif_pos hb]
       have hget : (((elems ++ sh).set i.toNat u).take elems.length ++
           ((elems ++ sh).set i.toNat u).drop elems.length).get ⟨i.toNat, hb'.2⟩ = u := by
         simp [List.take_append_drop, List.getElem_set_self]
@@ -230,26 +230,26 @@ theorem save_save : ∀ {segs : List Seg} {v v₁ a : SVal} (b : SVal),
         simp [List.take_append_drop, htl]
     · exact nomatch h
   | .at i :: rest, .map entries dflt, v₁, a, b, h => by
-    simp only [SVal.save] at h
+    simp only [Semantics.SVal.save] at h
     split at h
     · rename_i old hold
       obtain ⟨u, hu, h⟩ := bind_ok_inv h
       cases h
-      simp only [SVal.save, lookupBy_setBy_self, hold, save_save b hu]
+      simp only [Semantics.SVal.save, lookupBy_setBy_self, hold, save_save b hu]
       cases old.save rest b <;> simp [setBy_setBy_self]
     · rename_i hold
       obtain ⟨u, hu, h⟩ := bind_ok_inv h
       cases h
-      simp only [SVal.save, lookupBy_setBy_self, hold, save_save b hu]
+      simp only [Semantics.SVal.save, lookupBy_setBy_self, hold, save_save b hu]
       cases dflt.save rest b <;> simp [setBy_setBy_self]
   | .field _ :: _, .prim _, _, _, _, h | .at _ :: _, .prim _, _, _, _, h
   | .at _ :: _, .struct _, _, _, _, h | .field _ :: _, .array .., _, _, _, h
-  | .field _ :: _, .map .., _, _, _, h => by simp [SVal.save] at h
+  | .field _ :: _, .map .., _, _, _, h => by simp [Semantics.SVal.save] at h
 
 /-! ### Chains of writes at one path -/
 
-theorem Wrote.trans {st₀ st₁ st₂ : List (Name × SVal)} {r : Name} {segs : List Seg}
-    {X Y : SVal} (h₁ : Wrote st₀ st₁ r segs X) (h₂ : Wrote st₁ st₂ r segs Y) :
+theorem Wrote.trans {st₀ st₁ st₂ : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg}
+    {X Y : Semantics.SVal} (h₁ : Wrote st₀ st₁ r segs X) (h₂ : Wrote st₁ st₂ r segs Y) :
     Wrote st₀ st₂ r segs Y := by
   unfold Wrote putSt at *
   split at h₁
@@ -264,7 +264,7 @@ theorem Wrote.trans {st₀ st₁ st₂ : List (Name × SVal)} {r : Name} {segs :
   · exact nomatch h₁
 
 /-- After a write, saving the same value again changes nothing. -/
-theorem Wrote.noop {st₀ st : List (Name × SVal)} {r : Name} {segs : List Seg} {X : SVal}
+theorem Wrote.noop {st₀ st : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg} {X : Semantics.SVal}
     (h : Wrote st₀ st r segs X) : Wrote st st r segs X := by
   unfold Wrote putSt at *
   split at h
@@ -277,7 +277,7 @@ theorem Wrote.noop {st₀ st : List (Name × SVal)} {r : Name} {segs : List Seg}
   · exact nomatch h
 
 /-- After a write, the path reads what was written. -/
-theorem Wrote.find {st₀ st : List (Name × SVal)} {r : Name} {segs : List Seg} {X : SVal}
+theorem Wrote.find {st₀ st : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg} {X : Semantics.SVal}
     (h : Wrote st₀ st r segs X) :
     ∃ V, lookupBy r st = some V ∧ V.find segs = .ok X := by
   unfold Wrote putSt at h
@@ -287,14 +287,14 @@ theorem Wrote.find {st₀ st : List (Name × SVal)} {r : Name} {segs : List Seg}
     exact ⟨u, lookupBy_setBy_self _ _ _, SemanticsProperties.SVal.find_save_same hu⟩
   · exact nomatch h
 
-theorem Wrote.findStorage {σ : State} {st₀ : List (Name × SVal)} {r : Name} {segs : List Seg}
-    {X : SVal} (h : Wrote st₀ σ.storage r segs X) : σ.findStorage r segs = .ok X := by
+theorem Wrote.findStorage {σ : Semantics.State} {st₀ : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg}
+    {X : Semantics.SVal} (h : Wrote st₀ σ.storage r segs X) : σ.findStorage r segs = .ok X := by
   obtain ⟨V, hV, hf⟩ := h.find
   simp [State.findStorage, hV, hf]
 
 /-- A write below `segs` is a write at `segs` of what is there, updated. -/
-theorem Wrote.up {st st' : List (Name × SVal)} {r : Name} {segs rest : List Seg}
-    {N N' w : SVal} (hN : ∃ V, lookupBy r st = some V ∧ V.find segs = .ok N)
+theorem Wrote.up {st st' : List (Name × Semantics.SVal)} {r : Name} {segs rest : List Seg}
+    {N N' w : Semantics.SVal} (hN : ∃ V, lookupBy r st = some V ∧ V.find segs = .ok N)
     (hs : N.save rest w = .ok N') (h : Wrote st st' r (segs ++ rest) w) :
     Wrote st st' r segs N' := by
   obtain ⟨V, hV, hf⟩ := hN
@@ -305,32 +305,32 @@ theorem Wrote.up {st st' : List (Name × SVal)} {r : Name} {segs rest : List Seg
 
 /-! ### One step down -/
 
-theorem save_field {fs : List (Name × SVal)} {n : Name} {c : SVal} (w : SVal)
+theorem save_field {fs : List (Name × Semantics.SVal)} {n : Name} {c : Semantics.SVal} (w : Semantics.SVal)
     (h : lookupBy n fs = some c) :
-    (SVal.struct fs).save [.field n] w = .ok (.struct (setBy n w fs)) := by
-  simp [SVal.save, h, SVal.save_nil]; rfl
+    (Semantics.SVal.struct fs).save [.field n] w = .ok (.struct (setBy n w fs)) := by
+  simp [Semantics.SVal.save, h, SVal.save_nil]; rfl
 
-theorem save_at_map (es : List (Int × SVal)) (dflt : SVal) (k : Int) (w : SVal) :
-    (SVal.map es dflt).save [.at k] w = .ok (.map (setBy k w es) dflt) := by
-  simp only [SVal.save]
+theorem save_at_map (es : List (Int × Semantics.SVal)) (dflt : Semantics.SVal) (k : Int) (w : Semantics.SVal) :
+    (Semantics.SVal.map es dflt).save [.at k] w = .ok (.map (setBy k w es) dflt) := by
+  simp only [Semantics.SVal.save]
   split <;> rfl
 
 /-- The first slot past the end, written: a popped slot filled through its alias. -/
-theorem save_at_shadow (es sh : List SVal) (x w : SVal) (fx : Bool) :
-    (SVal.array es (x :: sh) fx).save [.at (es.length : Int)] w = .ok (.array es (w :: sh) fx) := by
+theorem save_at_shadow (es sh : List Semantics.SVal) (x w : Semantics.SVal) (fx : Bool) :
+    (Semantics.SVal.array es (x :: sh) fx).save [.at (es.length : Int)] w = .ok (.array es (w :: sh) fx) := by
   have hb : 0 ≤ (es.length : Int) ∧ (es.length : Int).toNat < (es ++ x :: sh).length := by
     simp
-  simp only [SVal.save]
+  simp only [Semantics.SVal.save]
   rw [dif_pos hb]
   simp [bind, Except.bind, List.set_append_right]
 
 /-- A live element written: `values[j] = w;`. -/
-theorem save_at_live (es rest sh : List SVal) (x w : SVal) (fx : Bool) :
-    (SVal.array (es ++ x :: rest) sh fx).save [.at (es.length : Int)] w =
+theorem save_at_live (es rest sh : List Semantics.SVal) (x w : Semantics.SVal) (fx : Bool) :
+    (Semantics.SVal.array (es ++ x :: rest) sh fx).save [.at (es.length : Int)] w =
       .ok (.array (es ++ w :: rest) sh fx) := by
   have hb : 0 ≤ (es.length : Int) ∧ (es.length : Int).toNat < (es ++ x :: rest ++ sh).length := by
     simp
-  simp only [SVal.save]
+  simp only [Semantics.SVal.save]
   rw [dif_pos hb]
   have hset : (es ++ x :: rest ++ sh).set (es.length : Int).toNat w = (es ++ w :: rest) ++ sh := by
     simp [List.set_append_right]
@@ -338,7 +338,7 @@ theorem save_at_live (es rest sh : List SVal) (x w : SVal) (fx : Bool) :
   simp only [bind, Except.bind, hset, hl, List.take_left', List.drop_left']
 
 /-- Saving what a path already holds, one step below a no-op write, is a no-op. -/
-theorem Wrote.down {st : List (Name × SVal)} {r : Name} {segs rest : List Seg} {N c : SVal}
+theorem Wrote.down {st : List (Name × Semantics.SVal)} {r : Name} {segs rest : List Seg} {N c : Semantics.SVal}
     (h : Wrote st st r segs N) (hs : N.save rest c = .ok N) : Wrote st st r (segs ++ rest) c := by
   obtain ⟨V, hV, hf⟩ := h.find
   unfold Wrote putSt at *
@@ -354,13 +354,13 @@ theorem defaultOf_default (T : Ty) : (defaultForTy T).defaultOf = defaultForTy T
   induction T using defaultForTy.induct
     (motive2 := fun l => SVal.defaultOf.defaultOfFields (defaultForFields l) = defaultForFields l)
     with
-  | case1 => simp [defaultForTy, SVal.defaultOf]
-  | case2 => simp [defaultForTy, SVal.defaultOf]
-  | case3 => simp [defaultForTy, SVal.defaultOf]
-  | case4 name ih => rw [defaultForTy]; simp only [SVal.defaultOf, ih]
-  | case5 elem => simp [defaultForTy, SVal.defaultOf, SVal.defaultOf.defaultOfElems]
+  | case1 => simp [defaultForTy, Semantics.SVal.defaultOf]
+  | case2 => simp [defaultForTy, Semantics.SVal.defaultOf]
+  | case3 => simp [defaultForTy, Semantics.SVal.defaultOf]
+  | case4 name ih => rw [defaultForTy]; simp only [Semantics.SVal.defaultOf, ih]
+  | case5 elem => simp [defaultForTy, Semantics.SVal.defaultOf, SVal.defaultOf.defaultOfElems]
   | case6 elem n ih =>
-    rw [defaultForTy]; simp only [SVal.defaultOf]
+    rw [defaultForTy]; simp only [Semantics.SVal.defaultOf]
     congr 1
     induction n with
     | zero => rfl
@@ -418,11 +418,11 @@ theorem nodupKeysB_mid [DecidableEq κ] {k : κ} {x : α} {l₂ : List (κ × α
     · simp [lookupBy, hk, nodupKeysB_mid h.2]
 
 /-- A write succeeds where another write along the same path did. -/
-theorem save_ok_any : ∀ {segs : List Seg} {v v₁ a : SVal} (b : SVal),
+theorem save_ok_any : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Semantics.SVal),
     v.save segs a = .ok v₁ → ∃ v₂, v.save segs b = .ok v₂
   | [], v, _, _, b, _ => ⟨b, SVal.save_nil v b⟩
   | .field n :: rest, .struct fields, v₁, a, b, h => by
-    simp only [SVal.save] at h ⊢
+    simp only [Semantics.SVal.save] at h ⊢
     split at h
     · rename_i old hold
       obtain ⟨u, hu, -⟩ := bind_ok_inv h
@@ -430,7 +430,7 @@ theorem save_ok_any : ∀ {segs : List Seg} {v v₁ a : SVal} (b : SVal),
       simp only [hu']; exact ⟨_, rfl⟩
     · exact nomatch h
   | .at i :: rest, .array elems sh fx, v₁, a, b, h => by
-    simp only [SVal.save] at h ⊢
+    simp only [Semantics.SVal.save] at h ⊢
     split at h
     · rename_i hb
       obtain ⟨u, hu, -⟩ := bind_ok_inv h
@@ -438,7 +438,7 @@ theorem save_ok_any : ∀ {segs : List Seg} {v v₁ a : SVal} (b : SVal),
       rw [dif_pos hb, hu']; exact ⟨_, rfl⟩
     · exact nomatch h
   | .at i :: rest, .map entries dflt, v₁, a, b, h => by
-    simp only [SVal.save] at h ⊢
+    simp only [Semantics.SVal.save] at h ⊢
     split at h
     · rename_i old hold
       obtain ⟨u, hu, -⟩ := bind_ok_inv h
@@ -450,10 +450,10 @@ theorem save_ok_any : ∀ {segs : List Seg} {v v₁ a : SVal} (b : SVal),
       simp only [hu']; exact ⟨_, rfl⟩
   | .field _ :: _, .prim _, _, _, _, h | .at _ :: _, .prim _, _, _, _, h
   | .at _ :: _, .struct _, _, _, _, h | .field _ :: _, .array .., _, _, _, h
-  | .field _ :: _, .map .., _, _, _, h => by simp [SVal.save] at h
+  | .field _ :: _, .map .., _, _, _, h => by simp [Semantics.SVal.save] at h
 
-theorem Wrote.any {st₀ st : List (Name × SVal)} {r : Name} {segs : List Seg} {X : SVal}
-    (h : Wrote st₀ st r segs X) (Y : SVal) : ∃ st', Wrote st₀ st' r segs Y := by
+theorem Wrote.any {st₀ st : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg} {X : Semantics.SVal}
+    (h : Wrote st₀ st r segs X) (Y : Semantics.SVal) : ∃ st', Wrote st₀ st' r segs Y := by
   unfold Wrote putSt at *
   split at h
   · obtain ⟨u, hu, -⟩ := bind_ok_inv h
@@ -462,40 +462,40 @@ theorem Wrote.any {st₀ st : List (Name × SVal)} {r : Name} {segs : List Seg} 
   · exact nomatch h
 
 /-- A statement that only saves at `r.segs`, as a chain step. -/
-theorem Wrote.save {σ τ : State} {st₀ : List (Name × SVal)} {r : Name} {segs : List Seg}
-    {X Y : SVal} (hc : Wrote st₀ σ.storage r segs X) (h : σ.saveStorage r segs Y = .ok τ) :
+theorem Wrote.save {σ τ : Semantics.State} {st₀ : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg}
+    {X Y : Semantics.SVal} (hc : Wrote st₀ σ.storage r segs X) (h : σ.saveStorage r segs Y = .ok τ) :
     Wrote st₀ τ.storage r segs Y :=
   hc.trans (putSt_of_saveStorage h)
 
-theorem saveStorage_env {σ τ : State} {r : Name} {segs : List Seg} {Y : SVal}
+theorem saveStorage_env {σ τ : Semantics.State} {r : Name} {segs : List Seg} {Y : Semantics.SVal}
     (h : σ.saveStorage r segs Y = .ok τ) : τ.env = σ.env :=
   (SemanticsProperties.State.saveStorage_frame h).2.2.1
 
-theorem Wrote.saveStorage {σ : State} {st₀ : List (Name × SVal)} {r : Name} {segs : List Seg}
-    {X : SVal} (hc : Wrote st₀ σ.storage r segs X) (Y : SVal) :
+theorem Wrote.saveStorage {σ : Semantics.State} {st₀ : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg}
+    {X : Semantics.SVal} (hc : Wrote st₀ σ.storage r segs X) (Y : Semantics.SVal) :
     ∃ τ, σ.saveStorage r segs Y = .ok τ ∧ Wrote st₀ τ.storage r segs Y ∧ τ.env = σ.env := by
   obtain ⟨st', h'⟩ := hc.noop.any Y
   have h := saveStorage_ok h'
   exact ⟨_, h, hc.save h, saveStorage_env h⟩
 
-theorem sizeOf_lt_fields {fields : List (Name × SVal)} {nw : Name × SVal} (h : nw ∈ fields) :
-    sizeOf nw.2 < sizeOf (SVal.struct fields) := by
+theorem sizeOf_lt_fields {fields : List (Name × Semantics.SVal)} {nw : Name × Semantics.SVal} (h : nw ∈ fields) :
+    sizeOf nw.2 < sizeOf (Semantics.SVal.struct fields) := by
   have := List.sizeOf_lt_of_mem h
   obtain ⟨n, w⟩ := nw
   simp at this ⊢; omega
 
-theorem sizeOf_lt_elems {elems shadow : List SVal} {fx : Bool} {w : SVal} (h : w ∈ elems) :
-    sizeOf w < sizeOf (SVal.array elems shadow fx) := by
+theorem sizeOf_lt_elems {elems shadow : List Semantics.SVal} {fx : Bool} {w : Semantics.SVal} (h : w ∈ elems) :
+    sizeOf w < sizeOf (Semantics.SVal.array elems shadow fx) := by
   have := List.sizeOf_lt_of_mem h
   simp; omega
 
-theorem sizeOf_lt_shadow {elems shadow : List SVal} {fx : Bool} {w : SVal} (h : w ∈ shadow) :
-    sizeOf w < sizeOf (SVal.array elems shadow fx) := by
+theorem sizeOf_lt_shadow {elems shadow : List Semantics.SVal} {fx : Bool} {w : Semantics.SVal} (h : w ∈ shadow) :
+    sizeOf w < sizeOf (Semantics.SVal.array elems shadow fx) := by
   have := List.sizeOf_lt_of_mem h
   simp; omega
 
-theorem sizeOf_lt_entries {entries : List (Int × SVal)} {dflt : SVal} {kw : Int × SVal}
-    (h : kw ∈ entries) : sizeOf kw.2 < sizeOf (SVal.map entries dflt) := by
+theorem sizeOf_lt_entries {entries : List (Int × Semantics.SVal)} {dflt : Semantics.SVal} {kw : Int × Semantics.SVal}
+    (h : kw ∈ entries) : sizeOf kw.2 < sizeOf (Semantics.SVal.map entries dflt) := by
   have := List.sizeOf_lt_of_mem h
   obtain ⟨k, w⟩ := kw
   simp at this ⊢; omega
@@ -652,26 +652,26 @@ section Steps
 variable {Γ : Ctx}
 
 /-- The alias at `a` is bound to `r.segs`. -/
-def Bound (σ : State C Γ) {R : RefTy} (a : Idx Γ (.alias R)) (r : Name) (segs : List Seg) :
+def Bound (σ : EState C Γ) {R : RefTy} (a : Idx Γ (.alias R)) (r : Name) (segs : List Seg) :
     Prop :=
   (Env.get a σ.env : Option (Name × List Seg)) = some (r, segs)
 
-theorem aliasPath_bound {σ : State C Γ} {R : RefTy} {a : Idx Γ (.alias R)} {r : Name}
+theorem aliasPath_bound {σ : EState C Γ} {R : RefTy} {a : Idx Γ (.alias R)} {r : Name}
     {segs : List Seg} (h : Bound σ a r segs) : aliasPath σ a = .ok (r, segs) := by
   unfold aliasPath Bound at *
   rw [h]; rfl
 
-theorem resolve_alias {σ : State C Γ} {R : RefTy} {a : Idx Γ (.alias R)} {r : Name}
+theorem resolve_alias {σ : EState C Γ} {R : RefTy} {a : Idx Γ (.alias R)} {r : Name}
     {segs : List Seg} (h : Bound σ a r segs) : (SPath.alias (C := C) a).resolve σ = .ok (r, segs) :=
   aliasPath_bound h
 
-theorem resolve_field {σ : State C Γ} {s n : Name} {T : Ty} {a : Idx Γ (.alias (.struct s))}
+theorem resolve_field {σ : EState C Γ} {s n : Name} {T : Ty} {a : Idx Γ (.alias (.struct s))}
     {r : Name} {segs : List Seg} (hf : C.fieldType s n = some T) (h : Bound σ a r segs) :
     (SPath.loc (Loc.field (.alias a) n hf)).resolve σ = .ok (r, segs ++ [.field n]) := by
   simp only [SPath.resolve, Loc.resolve, aliasPath_bound h, bind, Except.bind]
   rfl
 
-theorem resolve_index_arr {σ : State C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R E)
+theorem resolve_index_arr {σ : EState C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R E)
     {a : Idx Γ (.alias R)} {j : Nat} {r : Name} {segs : List Seg} {es sh : List Semantics.SVal} {fx : Bool}
     (h : Bound σ a r segs) (hf : σ.glob.findStorage r segs = .ok (.array es sh fx))
     (hj : j < es.length) (hb : j < 2 ^ 256) :
@@ -682,7 +682,7 @@ theorem resolve_index_arr {σ : State C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R E
   simp [SPath.resolve, Loc.resolve, aliasPath_bound h, Val.eval, Simple.eval, Value.keyAt, Value.asInt,
     Semantics.State.checkIndex, hf, hj, bind, Except.bind, pure, Except.pure]
 
-theorem keyLit_keyAt (σ : State C Γ) {k : PrimTy} {key : Int} (hr : k.keyFits key = true) :
+theorem keyLit_keyAt (σ : EState C Γ) {k : PrimTy} {key : Int} (hr : k.keyFits key = true) :
     ((Val.simple (keyLit (C := C) (Γ := Γ) k key)).eval σ >>= Value.keyAt k) = .ok key := by
   cases k with
   | bool =>
@@ -691,7 +691,7 @@ theorem keyLit_keyAt (σ : State C Γ) {k : PrimTy} {key : Int} (hr : k.keyFits 
   | uint => rw [keyLit, numLit_eq (p := .uint) hr]; rfl
   | int => rw [keyLit, numLit_eq (p := .int) hr]; rfl
 
-theorem resolve_index_map {σ : State C Γ} {k : PrimTy} {V : Ty} {key : Int}
+theorem resolve_index_map {σ : EState C Γ} {k : PrimTy} {V : Ty} {key : Int}
     (hr : k.keyFits key = true)
     {a : Idx Γ (.alias (.mapping (.prim k) V))}
     {r : Name} {segs : List Seg} {es : List (Int × Semantics.SVal)} {dflt : Semantics.SVal}
@@ -778,8 +778,8 @@ theorem TRes.Agrees.ok_of_ends {α β : Type} {f : α → β} {t : TRes α} {u :
 
 /-- A statement whose typed step ends, read on the erasure: where what it
 erases to ends in `τ`, the typed step ends in a state erasing to `τ`. -/
-theorem SRuns.of_agrees {Γ' : Ctx} {s : Stmt C Γ Γ'} {u : State C Γ → Res (State C Γ')}
-    {σ : TState C Γ} {τ : State C Γ'} (ha : StepAgrees s.trunR u) (he : (s.trun σ).Ends)
+theorem SRuns.of_agrees {Γ' : Ctx} {s : Stmt C Γ Γ'} {u : EState C Γ → Res (EState C Γ')}
+    {σ : TState C Γ} {τ : EState C Γ'} (ha : StepAgrees s.trunR u) (he : (s.trun σ).Ends)
     (hu : u σ.erase = .ok τ) : ∃ σ', SRuns σ s σ' ∧ σ'.erase = τ :=
   let ⟨o, ho, hoe⟩ := TRes.Agrees.ok_of_ends (ha σ) hu he
   ⟨o.st, ⟨o, ho, rfl⟩, hoe⟩
@@ -910,7 +910,7 @@ section Fills
 variable {Γ : Ctx}
 
 /-- A save in a scoped state, as a write at one path. -/
-theorem Wrote.saveCore {σ : State C Γ} {st₀ : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg}
+theorem Wrote.saveCore {σ : EState C Γ} {st₀ : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg}
     {X : Semantics.SVal} (hc : Wrote st₀ σ.storage r segs X) (Y : Semantics.SVal) :
     ∃ τ, σ.glob.saveStorage r segs Y = .ok τ ∧ Wrote st₀ (σ.withGlob τ).storage r segs Y := by
   obtain ⟨τ, hτ, hW, -⟩ := Solidity.Build.Wrote.saveStorage (σ := σ.glob) hc Y
@@ -929,7 +929,7 @@ theorem child_step {d : Nat} {T : Ty} {q : SPath C Γ T} {σ : TState C Γ}
     hw T (d + 1) Γ q σ r (segs ++ [seg]) hc ht hf hok hq (hchain.noop.down hnoop)
   exact ⟨σ', hrun, hchain.trans (Wrote.up hchain.noop.find hs hW), he⟩
 
-theorem Bound.of_env {σ σ' : State C Γ} {R : RefTy} {a : Idx Γ (.alias R)} {r : Name}
+theorem Bound.of_env {σ σ' : EState C Γ} {R : RefTy} {a : Idx Γ (.alias R)} {r : Name}
     {segs : List Seg} (he : σ'.env = σ.env) (h : Bound σ a r segs) : Bound σ' a r segs := by
   unfold Bound; rw [he]; exact h
 
@@ -1406,7 +1406,7 @@ theorem nodupKeysB_of_map_fst_eq {α β : Type} :
 /-- **Canonical and tight ⇒ reachable, by one program**: `Build.rootsProg`,
 run by the typed run from `C`'s initial state, leaves exactly `st`. -/
 theorem storage_tight (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.defaultOkS) = true)
-    {st : List (Name × SVal)} (hc : CanonStorage C st) (ht : TightStorage C st)
+    {st : List (Name × Semantics.SVal)} (hc : CanonStorage C st) (ht : TightStorage C st)
     (hf : FitsStorage C st) :
     ∃ σ, Core.Build.TRuns (Core.TState.init C) (Core.Build.rootsProg C st) σ ∧
       σ.erase.storage = st := by
@@ -1435,7 +1435,7 @@ theorem storage_tight (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.d
 
 /-- **Canonical and tight ⇒ reachable**, for words, keys and slots in range. -/
 theorem canon_reachable (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.defaultOkS) = true)
-    {st : List (Name × SVal)} (hc : CanonStorage C st) (ht : TightStorage C st)
+    {st : List (Name × Semantics.SVal)} (hc : CanonStorage C st) (ht : TightStorage C st)
     (hf : FitsStorage C st) : Reachable C st := by
   obtain ⟨_, ⟨o, ho, rfl⟩, hst⟩ := storage_tight hnd hok hc ht hf
   exact ⟨[], Core.Build.rootsProg C st, o, ho, hst⟩
@@ -1445,12 +1445,12 @@ initially and that every program keeps, by the typed run from any state
 whose erasure is well-typed and canonical, holds of every canonical, tight
 storage. -/
 theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true)
-    (hok : C.vars.all (·.2.defaultOkS) = true) (P : List (Name × SVal) → Prop)
+    (hok : C.vars.all (·.2.defaultOkS) = true) (P : List (Name × Semantics.SVal) → Prop)
     (hinit : P C.initStorage)
     (hstep : ∀ (Γ' : Core.Ctx) (σ : Core.TState C []) (o : Core.Out C σ.H Γ')
       (prog : Core.Prog C [] Γ'), Core.RunWT C [] σ.erase → Canon C [] σ.erase.glob →
       prog.trun σ = .ok o → P σ.erase.storage → P o.st.erase.storage)
-    (st : List (Name × SVal)) (hc : CanonStorage C st) (ht : TightStorage C st)
+    (st : List (Name × Semantics.SVal)) (hc : CanonStorage C st) (ht : TightStorage C st)
     (hf : FitsStorage C st) : P st := by
   obtain ⟨_, ⟨o, ho, rfl⟩, hst⟩ := storage_tight hnd hok hc ht hf
   rw [← hst]
@@ -1520,7 +1520,7 @@ theorem okDeep_tyAtSegs : ∀ {segs : List Seg} {T T' : Ty}, T.okDeep = true →
   | seg :: rest, T, T', h, hs => by
     simp only [tyAtSegs] at hs
     split at hs
-    · rename_i Tm hm; exact okDeep_tyAtSegs (okDeep_segTy h hm) hs
+    · rename_i Surface.Tm hm; exact okDeep_tyAtSegs (okDeep_segTy h hm) hs
     · exact nomatch hs
 
 /-- Every mapping on the way is indexed by a number: an alias bound along
@@ -1544,29 +1544,29 @@ theorem KeysOK_append : ∀ {segs : List Seg} {T T₁ : Ty} (seg : Seg),
     obtain ⟨hk₁, hk₂⟩ := hk₀
     refine ⟨hk₁, ?_⟩
     split at hs
-    · rename_i Tm hm
+    · rename_i Surface.Tm hm
       simp only [hm] at hk₂ ⊢
       exact KeysOK_append seg hk₂ hs hk
     · exact nomatch hs
 
 /-- A word written through an index is written into a live slot: the index
 was checked against the length where the path was taken. -/
-def IdxLive (v : SVal) (segs : List Seg) : Prop :=
+def IdxLive (v : Semantics.SVal) (segs : List Seg) : Prop :=
   ∀ pre i, segs = pre ++ [.at i] → ∀ es sh fx, v.find pre = .ok (.array es sh fx) →
     0 ≤ i ∧ i.toNat < es.length
 
 /-! ### Tight lists -/
 
-theorem tightElems_iff {E : Ty} : ∀ {l : List SVal}, tightElems E l ↔ ∀ v ∈ l, v.tight E
+theorem tightElems_iff {E : Ty} : ∀ {l : List Semantics.SVal}, tightElems E l ↔ ∀ v ∈ l, v.tight E
   | [] => by simp [tightElems]
   | v :: rest => by simp [tightElems, tightElems_iff (l := rest)]
 
 theorem tightEntries_iff {V : Ty} :
-    ∀ {l : List (Int × SVal)}, tightEntries V l ↔ ∀ kv ∈ l, kv.2.tight V
+    ∀ {l : List (Int × Semantics.SVal)}, tightEntries V l ↔ ∀ kv ∈ l, kv.2.tight V
   | [] => by simp [tightEntries]
   | (k, v) :: rest => by simp [tightEntries, tightEntries_iff (l := rest)]
 
-theorem tightFields_lookup {s : Name} {fields : List (Name × SVal)} {n : Name} {v : SVal}
+theorem tightFields_lookup {s : Name} {fields : List (Name × Semantics.SVal)} {n : Name} {v : Semantics.SVal}
     {T : Ty} (h : tightFields s fields) (hl : lookupBy n fields = some v)
     (hT : lookupBy n (structDef s) = some T) : v.tight T := by
   induction fields with
@@ -1581,7 +1581,7 @@ theorem tightFields_lookup {s : Name} {fields : List (Name × SVal)} {n : Name} 
     · simp [lookupBy, hn] at hl
       exact ih h.2 hl
 
-theorem tightFields_setBy {s : Name} {fields : List (Name × SVal)} {n : Name} {w : SVal} {T : Ty}
+theorem tightFields_setBy {s : Name} {fields : List (Name × Semantics.SVal)} {n : Name} {w : Semantics.SVal} {T : Ty}
     (h : tightFields s fields) (hd : lookupBy n (structDef s) = some T) (hw : w.tight T) :
     tightFields s (setBy n w fields) := by
   induction fields with
@@ -1593,7 +1593,7 @@ theorem tightFields_setBy {s : Name} {fields : List (Name × SVal)} {n : Name} {
     · subst hn; simp [setBy, tightFields, hd, hw, h.2]
     · simp only [setBy, if_neg hn, tightFields]; exact ⟨h.1, ih h.2⟩
 
-theorem tightEntries_setBy {V : Ty} {entries : List (Int × SVal)} {i : Int} {w : SVal}
+theorem tightEntries_setBy {V : Ty} {entries : List (Int × Semantics.SVal)} {i : Int} {w : Semantics.SVal}
     (h : tightEntries V entries) (hw : w.tight V) : tightEntries V (setBy i w entries) := by
   induction entries with
   | nil => simp [setBy, tightEntries, hw]
@@ -1603,11 +1603,11 @@ theorem tightEntries_setBy {V : Ty} {entries : List (Int × SVal)} {i : Int} {w 
     · subst hi; simp [setBy, tightEntries, hw, h.2]
     · simp only [setBy, if_neg hi, tightEntries]; exact ⟨h.1, ih h.2⟩
 
-theorem tightEntries_lookup {V : Ty} {entries : List (Int × SVal)} {i : Int} {v : SVal}
+theorem tightEntries_lookup {V : Ty} {entries : List (Int × Semantics.SVal)} {i : Int} {v : Semantics.SVal}
     (h : tightEntries V entries) (hl : lookupBy i entries = some v) : v.tight V :=
   tightEntries_iff.mp h (i, v) (lookupBy_eq_some_mem hl)
 
-theorem mem_set_or {l : List SVal} {i : Nat} {u v : SVal} (h : v ∈ l.set i u) : v ∈ l ∨ v = u := by
+theorem mem_set_or {l : List Semantics.SVal} {i : Nat} {u v : Semantics.SVal} (h : v ∈ l.set i u) : v ∈ l ∨ v = u := by
   rcases List.mem_or_eq_of_mem_set h with h | h
   · exact Or.inl h
   · exact Or.inr h
@@ -1648,18 +1648,18 @@ theorem defaultForTy_tight : ∀ {T : Ty}, T.defaultOkS = true → (defaultForTy
     exact ⟨iht hok, ihrest s fun nt hm => h nt (List.mem_cons_of_mem _ hm)⟩
 
 /-- What `find` reaches in a tight value is tight. -/
-theorem find_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
+theorem find_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {w : Semantics.SVal},
     v.canon T → v.tight T → T.okDeep = true → tyAtSegs T segs = some T' → v.find segs = .ok w →
       w.tight T'
   | [], v, T, T', w, _, ht, _, hs, hf => by
     simp only [tyAtSegs, Option.some.injEq] at hs
     subst hs
-    rw [SVal.find_nil] at hf; cases hf; exact ht
+    rw [SemanticsProperties.SVal.find_nil] at hf; cases hf; exact ht
   | seg :: rest, v, T, T', w, h, ht, hok, hs, hf => by
     simp only [tyAtSegs] at hs
     cases hseg : segTy T seg with
     | none => rw [hseg] at hs; exact nomatch hs
-    | some Tm =>
+    | some Surface.Tm =>
       rw [hseg] at hs
       have hokm := okDeep_segTy hok hseg
       cases seg with
@@ -1671,7 +1671,7 @@ theorem find_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
           | struct s =>
             obtain ⟨fields, rfl, -, hfs⟩ := canon_struct h
             simp only [segTy] at hseg
-            simp only [SVal.find] at hf
+            simp only [Semantics.SVal.find] at hf
             split at hf
             · rename_i v' hl
               obtain ⟨Tf, hd, hv⟩ := canonFields_lookup hfs hl
@@ -1692,7 +1692,7 @@ theorem find_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
             obtain ⟨-, -, hte, hts⟩ := ht
-            simp only [SVal.find] at hf
+            simp only [Semantics.SVal.find] at hf
             split at hf
             · have hm := List.get_mem (elems ++ sh) ⟨i.toNat, by omega⟩
               refine find_tight (canonElems_mem (canonElems_append he hsh) hm) ?_ hokm hs hf
@@ -1705,7 +1705,7 @@ theorem find_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
             obtain ⟨rfl, hte⟩ := ht
-            simp only [SVal.find] at hf
+            simp only [Semantics.SVal.find] at hf
             split at hf
             · have hm := List.get_mem (elems ++ []) ⟨i.toNat, by omega⟩
               refine find_tight (canonElems_mem (canonElems_append he hsh) hm) ?_ hokm hs hf
@@ -1716,14 +1716,14 @@ theorem find_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {w : SVal},
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
             obtain ⟨-, htes⟩ := ht
-            simp only [SVal.find] at hf
+            simp only [Semantics.SVal.find] at hf
             split at hf
             · rename_i v' hl
               exact find_tight (canonEntries_lookup hes hl) (tightEntries_lookup htes hl) hokm hs hf
             · subst hdd
               exact find_tight hd (defaultForTy_tight (okDeep_defaultOkS hokm)) hokm hs hf
 
-theorem IdxLive.child {v c : SVal} {seg : Seg} {rest : List Seg} (h : IdxLive v (seg :: rest))
+theorem IdxLive.child {v c : Semantics.SVal} {seg : Seg} {rest : List Seg} (h : IdxLive v (seg :: rest))
     (hc : v.find [seg] = .ok c) : IdxLive c rest := by
   intro pre i hrest es sh fx hf
   refine h (seg :: pre) i (by simp [hrest]) es sh fx ?_
@@ -1732,8 +1732,8 @@ theorem IdxLive.child {v c : SVal} {seg : Seg} {rest : List Seg} (h : IdxLive v 
   rw [this, hc]; exact hf
 
 /-- A word at a primitive type has no path below it. -/
-theorem save_prim_cons {v : SVal} {p : PrimTy} (hc : v.canon (.prim p)) (seg : Seg)
-    (rest : List Seg) (new : SVal) : ∃ e, v.save (seg :: rest) new = .error e := by
+theorem save_prim_cons {v : Semantics.SVal} {p : PrimTy} (hc : v.canon (.prim p)) (seg : Seg)
+    (rest : List Seg) (new : Semantics.SVal) : ∃ e, v.save (seg :: rest) new = .error e := by
   cases v with
   | prim _ => cases seg <;> exact ⟨_, rfl⟩
   | struct _ => cases p <;> simp [SVal.canon] at hc
@@ -1742,7 +1742,7 @@ theorem save_prim_cons {v : SVal} {p : PrimTy} (hc : v.canon (.prim p)) (seg : S
 
 /-- Saving a tight value at a path whose mappings are indexed by numbers,
 into a live slot when it is a word, keeps the tree tight. -/
-theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal},
+theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new w : Semantics.SVal},
     v.canon T → v.tight T → T.okDeep = true → tyAtSegs T segs = some T' → KeysOK T segs →
     (T'.isPrimitive = true → IdxLive v segs) → new.tight T' → v.save segs new = .ok w →
       w.tight T
@@ -1755,7 +1755,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
     obtain ⟨hk₁, hk₂⟩ := hk
     cases hseg : segTy T seg with
     | none => rw [hseg] at hs; exact nomatch hs
-    | some Tm =>
+    | some Surface.Tm =>
       rw [hseg] at hs
       simp only [hseg] at hk₂
       have hokm := okDeep_segTy hok hseg
@@ -1768,15 +1768,15 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
           | struct s =>
             obtain ⟨fields, rfl, -, hfs⟩ := canon_struct h
             simp only [segTy] at hseg
-            simp only [SVal.save] at hf
+            simp only [Semantics.SVal.save] at hf
             split at hf
             · rename_i old hl
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
               cases hf
               obtain ⟨Tf, hd, hv⟩ := canonFields_lookup hfs hl
               rw [hseg] at hd; cases hd
-              have hchild : (SVal.struct fields).find [.field n] = .ok old := by
-                simp [SVal.find, hl, SVal.find_nil]
+              have hchild : (Semantics.SVal.struct fields).find [.field n] = .ok old := by
+                simp [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
               exact tightFields_setBy ht hseg (save_tight hv (tightFields_lookup ht hl hseg) hokm
                 hs hk₂ (fun hp => (hlive hp).child hchild) hn hup)
             · exact nomatch hf
@@ -1794,7 +1794,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
             obtain ⟨-, hpr, hte, hts⟩ := ht
-            simp only [SVal.save] at hf
+            simp only [Semantics.SVal.save] at hf
             split at hf
             · rename_i hb
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
@@ -1805,9 +1805,9 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
                 · exact tightElems_iff.mp hte _ hm
                 · exact tightElems_iff.mp hts _ hm
               have hcc := canonElems_mem (canonElems_append he hsh) hm
-              have hchild : (SVal.array elems sh false).find [.at i] =
+              have hchild : (Semantics.SVal.array elems sh false).find [.at i] =
                   .ok ((elems ++ sh).get ⟨i.toNat, hb.2⟩) := by
-                simp only [SVal.find, dif_pos hb, SVal.find_nil]
+                simp only [Semantics.SVal.find, dif_pos hb, SemanticsProperties.SVal.find_nil]
               have hupt := save_tight hcc hct hokm hs hk₂ (fun hp => (hlive hp).child hchild) hn hup
               have hall : ∀ x ∈ (elems ++ sh).set i.toNat up, x.tight E := by
                 intro x hx
@@ -1831,7 +1831,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
               | nil =>
                 simp only [tyAtSegs, Option.some.injEq] at hs
                 subst hs
-                have hl := hlive hp [] i rfl elems sh false (SVal.find_nil _)
+                have hl := hlive hp [] i rfl elems sh false (SemanticsProperties.SVal.find_nil _)
                 have hdrop : ((elems ++ sh).set i.toNat up).drop elems.length = sh := by
                   rw [List.set_append_left _ _ hl.2, List.drop_left' (by simp)]
                 rw [hdrop]
@@ -1842,7 +1842,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
             simp only [segTy, Option.some.injEq] at hseg
             subst hseg
             obtain ⟨rfl, hte⟩ := ht
-            simp only [SVal.save] at hf
+            simp only [Semantics.SVal.save] at hf
             split at hf
             · rename_i hb
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
@@ -1850,9 +1850,9 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
               have hm := List.get_mem (elems ++ []) ⟨i.toNat, hb.2⟩
               have hmm : (elems ++ []).get ⟨i.toNat, hb.2⟩ ∈ elems := by simp
               have hcc := canonElems_mem (canonElems_append he hsh) hm
-              have hchild : (SVal.array elems [] true).find [.at i] =
+              have hchild : (Semantics.SVal.array elems [] true).find [.at i] =
                   .ok ((elems ++ []).get ⟨i.toNat, hb.2⟩) := by
-                simp only [SVal.find, dif_pos hb, SVal.find_nil]
+                simp only [Semantics.SVal.find, dif_pos hb, SemanticsProperties.SVal.find_nil]
               have hupt := save_tight hcc (tightElems_iff.mp hte _ hmm) hokm hs hk₂
                 (fun hp => (hlive hp).child hchild) hn hup
               refine ⟨?_, tightElems_iff.mpr fun x hx => ?_⟩
@@ -1868,21 +1868,21 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
             subst hseg
             obtain ⟨-, htes⟩ := ht
             have hkey : K.isKey = true := hk₁ K V rfl
-            simp only [SVal.save] at hf
+            simp only [Semantics.SVal.save] at hf
             split at hf
             · rename_i old hl
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
               cases hf
-              have hchild : (SVal.map es d).find [.at i] = .ok old := by
-                simp [SVal.find, hl, SVal.find_nil]
+              have hchild : (Semantics.SVal.map es d).find [.at i] = .ok old := by
+                simp [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
               exact ⟨fun h => absurd h (by simp [hkey]), tightEntries_setBy htes
                 (save_tight (canonEntries_lookup hes hl) (tightEntries_lookup htes hl) hokm hs hk₂
                   (fun hp => (hlive hp).child hchild) hn hup)⟩
             · rename_i hl
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
               cases hf
-              have hchild : (SVal.map es d).find [.at i] = .ok d := by
-                simp [SVal.find, hl, SVal.find_nil]
+              have hchild : (Semantics.SVal.map es d).find [.at i] = .ok d := by
+                simp [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
               subst hdd
               exact ⟨fun h => absurd h (by simp [hkey]), tightEntries_setBy htes
                 (save_tight hd (defaultForTy_tight (okDeep_defaultOkS hokm)) hokm hs hk₂
@@ -1890,15 +1890,15 @@ theorem save_tight : ∀ {segs : List Seg} {v : SVal} {T T' : Ty} {new w : SVal}
 
 /-! ### `delete`, copies, pushes -/
 
-theorem defaultOf_prim {v : SVal} {p : PrimTy} (h : v.canon (.prim p)) :
+theorem defaultOf_prim {v : Semantics.SVal} {p : PrimTy} (h : v.canon (.prim p)) :
     v.defaultOf = defaultForTy (.prim p) := by
   cases v with
-  | prim pv => cases p <;> cases pv <;> simp_all [SVal.canon, SVal.defaultOf, defaultForTy]
+  | prim pv => cases p <;> cases pv <;> simp_all [SVal.canon, Semantics.SVal.defaultOf, defaultForTy]
   | struct _ => cases p <;> simp [SVal.canon] at h
   | array _ _ _ => cases p <;> simp [SVal.canon] at h
   | map _ _ => cases p <;> simp [SVal.canon] at h
 
-theorem defaultOfElems_prim {p : PrimTy} : ∀ {elems : List SVal}, canonElems (.prim p) elems →
+theorem defaultOfElems_prim {p : PrimTy} : ∀ {elems : List Semantics.SVal}, canonElems (.prim p) elems →
     ∀ w ∈ SVal.defaultOf.defaultOfElems elems, w = defaultForTy (.prim p)
   | [], _, w, hw => by simp [SVal.defaultOf.defaultOfElems] at hw
   | v :: rest, h, w, hw => by
@@ -1915,11 +1915,11 @@ mutual
 
 /-- `delete` keeps a value tight: words cleared, arrays emptied into their
 cleared slots, mappings untouched. -/
-theorem SVal.defaultOf_tight : ∀ {v : SVal} {T : Ty}, v.canon T → v.tight T → T.okDeep = true →
+theorem Semantics.SVal.defaultOf_tight : ∀ {v : Semantics.SVal} {T : Ty}, v.canon T → v.tight T → T.okDeep = true →
     v.defaultOf.tight T
   | .prim pv, .prim _, _, _, _ => by cases pv <;> trivial
   | .struct fields, .ref (.struct s), hc, ht, hok =>
-    SVal.defaultOfFields_tight hc.2 ht (fun hl => member_okDeep hok hl)
+    Semantics.SVal.defaultOfFields_tight hc.2 ht (fun hl => member_okDeep hok hl)
   | .array elems sh false, .ref (.array E), hc, ht, hok => by
     have hE : E.okDeep = true := by simpa [Ty.okDeep] using hok
     refine ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hE]), fun hp w hw => ?_, trivial,
@@ -1932,10 +1932,10 @@ theorem SVal.defaultOf_tight : ∀ {v : SVal} {T : Ty}, v.canon T → v.tight T 
         exact defaultOfElems_prim hc.2.1 w hw
       · exact ht.2.1 hp w hw
     · rcases List.mem_append.mp hw with hw | hw
-      · exact tightElems_iff.mp (SVal.defaultOfElems_tight hc.2.1 ht.2.2.1 hE) w hw
+      · exact tightElems_iff.mp (Semantics.SVal.defaultOfElems_tight hc.2.1 ht.2.2.1 hE) w hw
       · exact tightElems_iff.mp ht.2.2.2 w hw
   | .array elems sh true, .ref (.fixed E n), hc, ht, hok =>
-    ⟨ht.1, SVal.defaultOfElems_tight hc.2.2.1 ht.2 (by simpa [Ty.okDeep] using hok)⟩
+    ⟨ht.1, Semantics.SVal.defaultOfElems_tight hc.2.2.1 ht.2 (by simpa [Ty.okDeep] using hok)⟩
   | .array _ _ true, .ref (.array _), hc, _, _ => nomatch hc.1
   | .array _ _ false, .ref (.fixed _ _), hc, _, _ => nomatch hc.1
   | .map _ _, .ref (.mapping _ _), _, ht, _ => ht
@@ -1949,61 +1949,61 @@ theorem SVal.defaultOf_tight : ∀ {v : SVal} {T : Ty}, v.canon T → v.tight T 
   | .map _ _, .ref (.struct _), hc, _, _ | .map _ _, .ref (.array _), hc, _, _
   | .map _ _, .ref (.fixed _ _), hc, _, _ => hc.elim
 
-theorem SVal.defaultOfFields_tight {s : Name} :
-    ∀ {fields : List (Name × SVal)}, canonFields s fields → tightFields s fields →
+theorem Semantics.SVal.defaultOfFields_tight {s : Name} :
+    ∀ {fields : List (Name × Semantics.SVal)}, canonFields s fields → tightFields s fields →
       (∀ {n T}, lookupBy n (structDef s) = some T → T.okDeep = true) →
       tightFields s (SVal.defaultOf.defaultOfFields fields)
   | [], _, _, _ => trivial
   | (n, v) :: rest, hc, ht, hok => by
-    refine ⟨?_, SVal.defaultOfFields_tight hc.2 ht.2 hok⟩
+    refine ⟨?_, Semantics.SVal.defaultOfFields_tight hc.2 ht.2 hok⟩
     have h1 := hc.1
     have h2 := ht.1
     revert h1 h2
     cases hl : lookupBy n (structDef s) with
     | none => intro _ _; trivial
-    | some T => intro h1 h2; exact SVal.defaultOf_tight h1 h2 (hok hl)
+    | some T => intro h1 h2; exact Semantics.SVal.defaultOf_tight h1 h2 (hok hl)
 
-theorem SVal.defaultOfElems_tight {E : Ty} :
-    ∀ {elems : List SVal}, canonElems E elems → tightElems E elems → E.okDeep = true →
+theorem Semantics.SVal.defaultOfElems_tight {E : Ty} :
+    ∀ {elems : List Semantics.SVal}, canonElems E elems → tightElems E elems → E.okDeep = true →
       tightElems E (SVal.defaultOf.defaultOfElems elems)
   | [], _, _, _ => trivial
   | _ :: _, hc, ht, hE =>
-    ⟨SVal.defaultOf_tight hc.1 ht.1 hE, SVal.defaultOfElems_tight hc.2 ht.2 hE⟩
+    ⟨Semantics.SVal.defaultOf_tight hc.1 ht.1 hE, Semantics.SVal.defaultOfElems_tight hc.2 ht.2 hE⟩
 
 end
 
 mutual
 
 /-- A value laid on fresh slots is tight: nothing is past its arrays' ends. -/
-theorem SVal.strip_tight : ∀ {v : SVal} {T : Ty}, v.tight T → v.strip.tight T
-  | .prim _, _, h => by simpa only [SVal.strip] using h
-  | .struct fields, .ref (.struct _), h => SVal.stripFields_tight h
+theorem Semantics.SVal.strip_tight : ∀ {v : Semantics.SVal} {T : Ty}, v.tight T → v.strip.tight T
+  | .prim _, _, h => by simpa only [Semantics.SVal.strip] using h
+  | .struct fields, .ref (.struct _), h => Semantics.SVal.stripFields_tight h
   | .array _ _ _, .ref (.array _), h =>
     ⟨(fun hE => by obtain ⟨h1, -⟩ := h.1 hE; subst h1; exact ⟨rfl, rfl⟩),
-      (fun _ w hw => by simp at hw), SVal.stripElems_tight h.2.2.1, trivial⟩
-  | .array _ _ _, .ref (.fixed _ _), h => ⟨rfl, SVal.stripElems_tight h.2⟩
-  | .map _ _, _, h => by simpa only [SVal.strip] using h
+      (fun _ w hw => by simp at hw), Semantics.SVal.stripElems_tight h.2.2.1, trivial⟩
+  | .array _ _ _, .ref (.fixed _ _), h => ⟨rfl, Semantics.SVal.stripElems_tight h.2⟩
+  | .map _ _, _, h => by simpa only [Semantics.SVal.strip] using h
   | .struct _, .prim _, _ | .struct _, .ref (.array _), _ | .struct _, .ref (.mapping _ _), _
   | .struct _, .ref (.fixed _ _), _ => trivial
   | .array _ _ _, .prim _, _ | .array _ _ _, .ref (.struct _), _
   | .array _ _ _, .ref (.mapping _ _), _ => trivial
 
-theorem SVal.stripFields_tight {s : Name} :
-    ∀ {fields : List (Name × SVal)}, tightFields s fields →
+theorem Semantics.SVal.stripFields_tight {s : Name} :
+    ∀ {fields : List (Name × Semantics.SVal)}, tightFields s fields →
       tightFields s (SVal.strip.stripFields fields)
   | [], _ => trivial
   | (n, v) :: rest, h => by
-    refine ⟨?_, SVal.stripFields_tight h.2⟩
+    refine ⟨?_, Semantics.SVal.stripFields_tight h.2⟩
     have h1 := h.1
     revert h1
     cases lookupBy n (structDef s) with
     | none => intro _; trivial
-    | some T => exact fun h => SVal.strip_tight h
+    | some T => exact fun h => Semantics.SVal.strip_tight h
 
-theorem SVal.stripElems_tight {E : Ty} :
-    ∀ {elems : List SVal}, tightElems E elems → tightElems E (SVal.strip.stripElems elems)
+theorem Semantics.SVal.stripElems_tight {E : Ty} :
+    ∀ {elems : List Semantics.SVal}, tightElems E elems → tightElems E (SVal.strip.stripElems elems)
   | [], _ => trivial
-  | _ :: _, h => ⟨SVal.strip_tight h.1, SVal.stripElems_tight h.2⟩
+  | _ :: _, h => ⟨Semantics.SVal.strip_tight h.1, Semantics.SVal.stripElems_tight h.2⟩
 
 end
 
@@ -2012,11 +2012,11 @@ mutual
 /-- **A copy keeps storage tight**: the old slots past the new length are
 cleared, the ones past the old length kept, and a fixed-size array is
 copied over one of its own length. -/
-theorem SVal.overlay_tight {old new : SVal} {T : Ty} (hoc : old.canon T) (hot : old.tight T)
+theorem Semantics.SVal.overlay_tight {old new : Semantics.SVal} {T : Ty} (hoc : old.canon T) (hot : old.tight T)
     (hnc : new.canon T) (hnt : new.tight T) (hok : T.okDeep = true) :
     (old.overlay new).tight T := by
   match new with
-  | .prim p => cases old <;> simpa [SVal.overlay, SVal.strip] using hnt
+  | .prim p => cases old <;> simpa [Semantics.SVal.overlay, Semantics.SVal.strip] using hnt
   | .struct nfs =>
       cases old with
       | struct ofs =>
@@ -2025,14 +2025,14 @@ theorem SVal.overlay_tight {old new : SVal} {T : Ty} (hoc : old.canon T) (hot : 
           | ref r =>
               cases r with
               | struct s =>
-                  exact SVal.overlayFields_tight hoc.2 hot hnc.2 hnt
+                  exact Semantics.SVal.overlayFields_tight hoc.2 hot hnc.2 hnt
                     (fun hl => member_okDeep hok hl)
               | array _ => exact hnc.elim
               | fixed _ _ => exact hnc.elim
               | mapping _ _ => exact hnc.elim
-      | prim _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
-      | array _ _ _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
-      | map _ _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
+      | prim _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
+      | array _ _ _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
+      | map _ _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
   | .array nel nsh nfx =>
       cases old with
       | array oel osh ofx =>
@@ -2042,9 +2042,9 @@ theorem SVal.overlay_tight {old new : SVal} {T : Ty} (hoc : old.canon T) (hot : 
               cases r with
               | array E =>
                   have hE : E.okDeep = true := by simpa [Ty.okDeep] using hok
-                  simp only [SVal.overlay]
+                  simp only [Semantics.SVal.overlay]
                   refine ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hE]), fun hp w hw => ?_,
-                    SVal.overlayElems_tight (canonElems_append hoc.2.1 hoc.2.2)
+                    Semantics.SVal.overlayElems_tight (canonElems_append hoc.2.1 hoc.2.2)
                       (tightElems_iff.mpr fun x hx => ?_) hnc.2.1 hnt.2.2.1 hE,
                     tightElems_iff.mpr fun x hx => ?_⟩
                   · rcases List.mem_append.mp hw with hw | hw
@@ -2069,30 +2069,30 @@ theorem SVal.overlay_tight {old new : SVal} {T : Ty} (hoc : old.canon T) (hot : 
                   have hnlen : nel.length = n := hnc.2.1
                   obtain ⟨hsh, hote⟩ := hot
                   subst hsh
-                  simp only [SVal.overlay]
-                  refine ⟨?_, SVal.overlayElems_tight (canonElems_append hoc.2.2.1 hoc.2.2.2)
+                  simp only [Semantics.SVal.overlay]
+                  refine ⟨?_, Semantics.SVal.overlayElems_tight (canonElems_append hoc.2.2.1 hoc.2.2.2)
                     (by simpa using hote) hnc.2.2.1 hnt.2 hE⟩
                   rw [hnlen, ← holen]; simp [SVal.defaultOf.defaultOfElems]
               | struct _ => exact hnc.elim
               | mapping _ _ => exact hnc.elim
-      | prim _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
-      | struct _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
-      | map _ _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
+      | prim _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
+      | struct _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
+      | map _ _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
   | .map ne nd =>
       cases old with
-      | map oe od => simpa only [SVal.overlay] using hot
-      | prim _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
-      | struct _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
-      | array _ _ _ => simp only [SVal.overlay]; exact SVal.strip_tight hnt
+      | map oe od => simpa only [Semantics.SVal.overlay] using hot
+      | prim _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
+      | struct _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
+      | array _ _ _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
 
-theorem SVal.overlayFields_tight {s : Name} {ofs nfs : List (Name × SVal)}
+theorem Semantics.SVal.overlayFields_tight {s : Name} {ofs nfs : List (Name × Semantics.SVal)}
     (hoc : canonFields s ofs) (hot : tightFields s ofs) (hnc : canonFields s nfs)
     (hnt : tightFields s nfs) (hok : ∀ {n T}, lookupBy n (structDef s) = some T → T.okDeep = true) :
     tightFields s (SVal.overlay.overlayFields ofs nfs) := by
   match nfs with
   | [] => trivial
   | (n, v) :: rest =>
-      refine ⟨?_, SVal.overlayFields_tight hoc hot hnc.2 hnt.2 hok⟩
+      refine ⟨?_, Semantics.SVal.overlayFields_tight hoc hot hnc.2 hnt.2 hok⟩
       have h1 := hnc.1
       have h2 := hnt.1
       revert h1 h2
@@ -2106,16 +2106,16 @@ theorem SVal.overlayFields_tight {s : Name} {ofs nfs : List (Name × SVal)}
               obtain ⟨T', hd', hoc'⟩ := canonFields_lookup hoc hl
               rw [hdef] at hd'
               cases hd'
-              exact SVal.overlay_tight hoc' (tightFields_lookup hot hl hdef) h1 h2 (hok hdef)
+              exact Semantics.SVal.overlay_tight hoc' (tightFields_lookup hot hl hdef) h1 h2 (hok hdef)
 
-theorem SVal.overlayElems_tight {E : Ty} {olds news : List SVal}
+theorem Semantics.SVal.overlayElems_tight {E : Ty} {olds news : List Semantics.SVal}
     (hoc : canonElems E olds) (hot : tightElems E olds) (hnc : canonElems E news)
     (hnt : tightElems E news) (hE : E.okDeep = true) :
     tightElems E (SVal.overlay.overlayElems olds news) := by
   match olds, news with
   | o :: os, v :: rest =>
-    exact ⟨SVal.overlay_tight hoc.1 hot.1 hnc.1 hnt.1 hE,
-      SVal.overlayElems_tight hoc.2 hot.2 hnc.2 hnt.2 hE⟩
+    exact ⟨Semantics.SVal.overlay_tight hoc.1 hot.1 hnc.1 hnt.1 hE,
+      Semantics.SVal.overlayElems_tight hoc.2 hot.2 hnc.2 hnt.2 hE⟩
   | [], rest => simpa only [SVal.overlay.overlayElems] using SVal.stripElems_tight hnt
   | _ :: _, [] => trivial
 
@@ -2125,16 +2125,16 @@ end
 
 /-- A value with no mapping and nothing past its arrays' ends: what a copy
 out of memory gives. -/
-def Semantics.SVal.plain : SVal → Prop
+def Semantics.SVal.plain : Semantics.SVal → Prop
   | .prim _ => True
   | .struct fields => plainFields fields
   | .array elems shadow _ => shadow = [] ∧ plainElems elems
   | .map _ _ => False
 where
-  plainFields : List (Name × SVal) → Prop
+  plainFields : List (Name × Semantics.SVal) → Prop
     | [] => True
     | (_, v) :: rest => v.plain ∧ plainFields rest
-  plainElems : List SVal → Prop
+  plainElems : List Semantics.SVal → Prop
     | [] => True
     | v :: rest => v.plain ∧ plainElems rest
 
@@ -2142,7 +2142,7 @@ open Semantics.SVal.plain (plainFields plainElems)
 
 mutual
 
-theorem plain_tight : ∀ {v : SVal} {T : Ty}, v.plain → v.canon T → T.okDeep = true → v.tight T
+theorem plain_tight : ∀ {v : Semantics.SVal} {T : Ty}, v.plain → v.canon T → T.okDeep = true → v.tight T
   | .prim _, .prim _, _, _, _ => trivial
   | .prim pv, .ref _, _, hc, _ => by cases pv <;> exact hc.elim
   | .struct fields, .ref (.struct s), hp, hc, hok =>
@@ -2162,7 +2162,7 @@ theorem plain_tight : ∀ {v : SVal} {T : Ty}, v.plain → v.canon T → T.okDee
   | .array _ _ _, .ref (.mapping _ _), _, _, _ => trivial
 
 theorem plainFields_tight {s : Name} :
-    ∀ {fields : List (Name × SVal)}, plainFields fields → canonFields s fields →
+    ∀ {fields : List (Name × Semantics.SVal)}, plainFields fields → canonFields s fields →
       (∀ {n T}, lookupBy n (structDef s) = some T → T.okDeep = true) → tightFields s fields
   | [], _, _, _ => trivial
   | (n, v) :: rest, hp, hc, hok => by
@@ -2174,16 +2174,16 @@ theorem plainFields_tight {s : Name} :
     | some T => intro h1; exact plain_tight hp.1 h1 (hok hl)
 
 theorem plainElems_tight {E : Ty} :
-    ∀ {elems : List SVal}, plainElems elems → canonElems E elems → E.okDeep = true →
+    ∀ {elems : List Semantics.SVal}, plainElems elems → canonElems E elems → E.okDeep = true →
       tightElems E elems
   | [], _, _, _ => trivial
   | _ :: _, hp, hc, hE => ⟨plain_tight hp.1 hc.1 hE, plainElems_tight hp.2 hc.2 hE⟩
 
 end
 
-theorem copyMFields_plain {s : State} {rem : List Nat}
-    (IH : ∀ {mv : MVal} {sv : SVal}, copyMToSt s rem mv = .ok sv → sv.plain) :
-    ∀ {fields : List (Name × MVal)} {sfields : List (Name × SVal)},
+theorem copyMFields_plain {s : Semantics.State} {rem : List Nat}
+    (IH : ∀ {mv : Semantics.MVal} {sv : Semantics.SVal}, copyMToSt s rem mv = .ok sv → sv.plain) :
+    ∀ {fields : List (Name × Semantics.MVal)} {sfields : List (Name × Semantics.SVal)},
       copyMFields s rem fields = .ok sfields → plainFields sfields
   | [], sfields, hcopy => by
     simp only [copyMFields, Except.ok.injEq] at hcopy
@@ -2195,9 +2195,9 @@ theorem copyMFields_plain {s : State} {rem : List Nat}
     cases hcopy
     exact ⟨IH hv, copyMFields_plain IH hrest⟩
 
-theorem copyMElems_plain {s : State} {rem : List Nat}
-    (IH : ∀ {mv : MVal} {sv : SVal}, copyMToSt s rem mv = .ok sv → sv.plain) :
-    ∀ {elems : List MVal} {selems : List SVal}, copyMElems s rem elems = .ok selems →
+theorem copyMElems_plain {s : Semantics.State} {rem : List Nat}
+    (IH : ∀ {mv : Semantics.MVal} {sv : Semantics.SVal}, copyMToSt s rem mv = .ok sv → sv.plain) :
+    ∀ {elems : List Semantics.MVal} {selems : List Semantics.SVal}, copyMElems s rem elems = .ok selems →
       plainElems selems
   | [], selems, hcopy => by
     simp only [copyMElems, Except.ok.injEq] at hcopy
@@ -2210,8 +2210,8 @@ theorem copyMElems_plain {s : State} {rem : List Nat}
     exact ⟨IH hv, copyMElems_plain IH hrest⟩
 
 /-- A copy out of memory has no mapping and nothing past its arrays' ends. -/
-theorem copyMToSt_plain {s : State} {rem : List Nat} :
-    ∀ {mv : MVal} {sv : SVal}, copyMToSt s rem mv = .ok sv → sv.plain := by
+theorem copyMToSt_plain {s : Semantics.State} {rem : List Nat} :
+    ∀ {mv : Semantics.MVal} {sv : Semantics.SVal}, copyMToSt s rem mv = .ok sv → sv.plain := by
   intro mv sv hcopy
   cases mv with
   | prim p =>
@@ -2239,13 +2239,13 @@ decreasing_by all_goals
 
 /-- What a run keeps beyond `Canon`, of the global state: tight storage.
 The scoped state adds its aliases (`Core.Tight`). -/
-structure Tight (C : Contract) (σ : State) : Prop where
+structure Semantics.Tight (C : Contract) (σ : Semantics.State) : Prop where
   storage : TightStorage C σ.storage
 
 /-- Every root's type has well-formed defaults all the way down. -/
 def DeepOk (C : Contract) : Prop := ∀ r T, lookupBy r C.vars = some T → T.okDeep = true
 
-namespace Tight
+namespace Semantics.Tight
 
 variable {H : HeapTy} {σ σ' : State}
 
@@ -2291,7 +2291,7 @@ theorem write (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) {r : Name} {
     exact ht.save hd hc hT hk hlive (SVal.overlay_tight (hc.find hT hcur) (ht.find hd hc hT hcur)
       hnc hnt (okDeep_tyAtSegs (hd r T hr) hs)) h
 
-end Tight
+end Semantics.Tight
 
 /-! ### Paths -/
 
@@ -2304,25 +2304,25 @@ theorem append_single_ne {l l' : List Seg} {a b : Seg} (h : l ++ [a] = l' ++ [b]
 
 section Effects
 
-variable {H : HeapTy} {σ σ' : State}
+variable {H : HeapTy} {σ σ' : Semantics.State}
 
-theorem pushSlot_tight {E : Ty} {shadow : List SVal} (hE : E.defaultOkS = true)
+theorem pushSlot_tight {E : Ty} {shadow : List Semantics.SVal} (hE : E.defaultOkS = true)
     (hsh : tightElems E shadow) :
-    (pushSlot E shadow).1.tight E ∧ (∀ w ∈ (pushSlot E shadow).2, w ∈ shadow) := by
+    (Semantics.pushSlot E shadow).1.tight E ∧ (∀ w ∈ (Semantics.pushSlot E shadow).2, w ∈ shadow) := by
   cases shadow with
-  | nil => exact ⟨defaultForTy_tight hE, fun w hw => by simp [pushSlot] at hw⟩
+  | nil => exact ⟨defaultForTy_tight hE, fun w hw => by simp [Semantics.pushSlot] at hw⟩
   | cons c rest =>
     refine ⟨?_, fun w hw => List.mem_cons_of_mem _ hw⟩
-    simp only [pushSlot]
+    simp only [Semantics.pushSlot]
     split
     · exact defaultForTy_tight hE
     · exact hsh.1
 
 /-- An array one element longer, the slot it took gone from past its end. -/
-theorem pushed_tight {E : Ty} {elems shadow shadow' : List SVal} {x : SVal}
-    (hE : E.okDeep = true) (ht : (SVal.array elems shadow false).tight (.ref (.array E)))
+theorem pushed_tight {E : Ty} {elems shadow shadow' : List Semantics.SVal} {x : Semantics.SVal}
+    (hE : E.okDeep = true) (ht : (Semantics.SVal.array elems shadow false).tight (.ref (.array E)))
     (hx : x.tight E) (hsub : ∀ w ∈ shadow', w ∈ shadow) :
-    (SVal.array (elems ++ [x]) shadow' false).tight (.ref (.array E)) := by
+    (Semantics.SVal.array (elems ++ [x]) shadow' false).tight (.ref (.array E)) := by
   obtain ⟨-, hpr, hte, hts⟩ := ht
   refine ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hE]), fun hp w hw => hpr hp w (hsub w hw),
     tightElems_iff.mpr fun w hw => ?_, tightElems_iff.mpr fun w hw => tightElems_iff.mp hts w (hsub w hw)⟩
@@ -2335,11 +2335,11 @@ theorem arr_okDeep {E : Ty} (hd : DeepOk C) {r : Name} {segs : List Seg}
   obtain ⟨T, hr, hs⟩ := Layout.tyAt_split hT
   simpa [Ty.okDeep] using okDeep_tyAtSegs (hd r T hr) hs
 
-theorem pushAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) {E : Ty} {r : Name}
-    {segs : List Seg} {val : SVal → Res SVal} (hT : C.layout.tyAt r segs = some (.ref (.array E)))
+theorem pushAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {E : Ty} {r : Name}
+    {segs : List Seg} {val : Semantics.SVal → Res Semantics.SVal} (hT : C.layout.tyAt r segs = some (.ref (.array E)))
     (hk : ∀ T, lookupBy r C.vars = some T → KeysOK T segs)
     (hval : ∀ slot v, slot.tight E → val slot = .ok v → v.tight E)
-    (h : pushAt σ E r segs val = .ok σ') : Tight C σ' := by
+    (h : pushAt σ E r segs val = .ok σ') : Semantics.Tight C σ' := by
   have hE := arr_okDeep hd hT
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hts := ht.find hd hc hT hsv
@@ -2349,10 +2349,10 @@ theorem pushAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) {E : 
   exact ht.save hd hc hT hk (fun hp => by simp [Ty.isPrimitive] at hp)
     (pushed_tight hE hts (hval _ _ hs1 hnew) hs2) h
 
-theorem pushPlaceAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) {E : Ty} {r : Name}
+theorem pushPlaceAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {E : Ty} {r : Name}
     {segs : List Seg} {n : Int} (hT : C.layout.tyAt r segs = some (.ref (.array E)))
     (hk : ∀ T, lookupBy r C.vars = some T → KeysOK T segs)
-    (h : pushPlaceAt σ E r segs = .ok (σ', n)) : Tight C σ' := by
+    (h : pushPlaceAt σ E r segs = .ok (σ', n)) : Semantics.Tight C σ' := by
   have hE := arr_okDeep hd hT
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hts := ht.find hd hc hT hsv
@@ -2363,10 +2363,10 @@ theorem pushPlaceAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) 
   exact ht.save hd hc hT hk (fun hp => by simp [Ty.isPrimitive] at hp)
     (pushed_tight hE hts hs1 hs2) hσ₁
 
-theorem popAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) {E : Ty} {r : Name}
+theorem popAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {E : Ty} {r : Name}
     {segs : List Seg} (hT : C.layout.tyAt r segs = some (.ref (.array E)))
     (hk : ∀ T, lookupBy r C.vars = some T → KeysOK T segs)
-    (h : popAt σ E.isMapping r segs = .ok σ') : Tight C σ' := by
+    (h : popAt σ E.isMapping r segs = .ok σ') : Semantics.Tight C σ' := by
   have hE := arr_okDeep hd hT
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hts := ht.find hd hc hT hsv
@@ -2403,24 +2403,24 @@ end Effects
 
 section Frames
 
-variable {σ σ' : State}
+variable {σ σ' : Semantics.State}
 
 /-- Storage and locals as they were: a write into memory, an allocation. -/
-def SE (σ σ' : State) : Prop := σ'.storage = σ.storage ∧ σ'.env = σ.env
+def Semantics.SE (σ σ' : Semantics.State) : Prop := σ'.storage = σ.storage ∧ σ'.env = σ.env
 
-theorem SE.tight (h : SE σ σ') (ht : Tight C σ) : Tight C σ' := ht.of_eq h.1
+theorem Semantics.SE.tight (h : SE σ σ') (ht : Semantics.Tight C σ) : Semantics.Tight C σ' := ht.of_eq h.1
 
-theorem SE.trans {σ₁ σ₂ σ₃ : State} (h₁ : SE σ₁ σ₂) (h₂ : SE σ₂ σ₃) : SE σ₁ σ₃ :=
+theorem Semantics.SE.trans {σ₁ σ₂ σ₃ : Semantics.State} (h₁ : SE σ₁ σ₂) (h₂ : SE σ₂ σ₃) : SE σ₁ σ₃ :=
   ⟨h₂.1.trans h₁.1, h₂.2.trans h₁.2⟩
 
-theorem memWriteField_se {id : Nat} {f : Name} {mv : MVal}
+theorem memWriteField_se {id : Nat} {f : Name} {mv : Semantics.MVal}
     (h : memWriteField σ id f mv = .ok σ') : SE σ σ' := by
   obtain ⟨o, _, h⟩ := bind_ok_inv h
   split at h
   · cases h; exact ⟨rfl, rfl⟩
   · exact nomatch h
 
-theorem memWriteIndex_se {id : Nat} {i : Int} {mv : MVal}
+theorem memWriteIndex_se {id : Nat} {i : Int} {mv : Semantics.MVal}
     (h : memWriteIndex σ id i mv = .ok σ') : SE σ σ' := by
   obtain ⟨o, _, h⟩ := bind_ok_inv h
   split at h
@@ -2444,7 +2444,7 @@ theorem writeLoc_se {loc : Addr} {v : Value} (h : writeLoc σ loc v = .ok σ') :
       · exact nomatch h
     · exact nomatch h
 
-theorem writeAddr_se {a : Addr} {mv : MVal} (h : writeAddr σ mv a = .ok σ') : SE σ σ' := by
+theorem writeAddr_se {a : Addr} {mv : Semantics.MVal} (h : writeAddr σ mv a = .ok σ') : SE σ σ' := by
   cases a with
   | memoryField id f => exact memWriteField_se h
   | memoryIndex id i => exact memWriteIndex_se h
@@ -2459,7 +2459,7 @@ theorem bumpMem_se {op : IncDec} {p : PrimTy} {loc : Addr} {w : Value}
   let ⟨_, _, _, h, _⟩ := bumpMem_ok_inv h
   writeLoc_se h
 
-theorem copyStToM_se {v : SVal} {mv : MVal} (h : copyStToM σ v = .ok (σ', mv)) : SE σ σ' := by
+theorem copyStToM_se {v : Semantics.SVal} {mv : Semantics.MVal} (h : copyStToM σ v = .ok (σ', mv)) : SE σ σ' := by
   have := SemanticsProperties.copyStToM_frame σ v σ' mv h
   exact ⟨this.1, this.2.1⟩
 
@@ -2491,36 +2491,36 @@ end Frames
 
 section Run
 
-variable {Γ : Ctx} {H : HeapTy} {σ σ' : State}
+variable {Γ : Ctx} {H : HeapTy} {σ σ' : Semantics.State}
 
-theorem IdxLive.nil (V : SVal) : IdxLive V [] := fun _ _ h => by simp at h
+theorem IdxLive.nil (V : Semantics.SVal) : IdxLive V [] := fun _ _ h => by simp at h
 
 /-- A word written back at a checked path: `alice.age += 1;`. -/
-theorem Tight.saveWord (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) {r : Name}
+theorem Semantics.Tight.saveWord (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {r : Name}
     {segs : List Seg} {p : PrimTy} {v : Value} (hT : C.layout.tyAt r segs = some (.prim p))
     (hk : ∀ T, lookupBy r C.vars = some T → KeysOK T segs)
     (hlive : ∀ V, lookupBy r σ.storage = some V → IdxLive V segs)
-    (h : σ.saveStorage r segs v.toSVal = .ok σ') : Tight C σ' :=
+    (h : σ.saveStorage r segs v.toSVal = .ok σ') : Semantics.Tight C σ' :=
   ht.save hd hc hT hk (fun _ => hlive) (by cases v <;> trivial) h
 
-theorem opStore_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) {op : BinOp}
+theorem opStore_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {op : BinOp}
     {p : PrimTy} {r : Name} {segs : List Seg} {v : Value}
     (hT : C.layout.tyAt r segs = some (.prim p)) (hk : ∀ T, lookupBy r C.vars = some T → KeysOK T segs)
     (hlive : ∀ V, lookupBy r σ.storage = some V → IdxLive V segs)
-    (h : opStore σ op p r segs v = .ok σ') : Tight C σ' :=
+    (h : opStore σ op p r segs v = .ok σ') : Semantics.Tight C σ' :=
   let ⟨_, _, _, _, _, h⟩ := opStore_ok_inv h
   ht.saveWord hd hc hT hk hlive h
 
-theorem bumpStore_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Tight C σ) {op : IncDec}
+theorem bumpStore_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {op : IncDec}
     {p : PrimTy} {r : Name} {segs : List Seg} {w : Value}
     (hT : C.layout.tyAt r segs = some (.prim p)) (hk : ∀ T, lookupBy r C.vars = some T → KeysOK T segs)
     (hlive : ∀ V, lookupBy r σ.storage = some V → IdxLive V segs)
-    (h : bumpStore σ op p r segs = .ok (σ', w)) : Tight C σ' :=
+    (h : bumpStore σ op p r segs = .ok (σ', w)) : Semantics.Tight C σ' :=
   let ⟨_, _, _, h, _⟩ := bumpStore_ok_inv h
   ht.saveWord hd hc hT hk hlive h
 
 /-- A copy out of memory stored at a checked location: `alice = m;`. -/
-theorem copyMToSt_tight (hd : DeepOk C) {s : State} {rem : List Nat} {mv : MVal} {sv : SVal}
+theorem copyMToSt_tight (hd : DeepOk C) {s : Semantics.State} {rem : List Nat} {mv : Semantics.MVal} {sv : Semantics.SVal}
     {r : Name} {segs : List Seg} {T : Ty} (hT : C.layout.tyAt r segs = some T)
     (hsc : sv.canon T) (h : copyMToSt s rem mv = .ok sv) : sv.tight T := by
   obtain ⟨T₀, hr, hs⟩ := Layout.tyAt_split hT
@@ -2530,7 +2530,7 @@ end Run
 
 section RunAll
 
-variable {Γ : Ctx} {H : HeapTy} {σ σ' : State}
+variable {Γ : Ctx} {H : HeapTy} {σ σ' : Semantics.State}
 
 theorem tyAt_okDeep (hd : DeepOk C) {r : Name} {segs : List Seg} {T : Ty}
     (hT : C.layout.tyAt r segs = some T) : T.okDeep = true := by
@@ -2565,17 +2565,17 @@ def LTy.Keys (C : Contract) : (t : LTy) → t.Denote C → Prop
 
 /-- What a run keeps beyond `Canon`: tight storage, and aliases bound along
 numeric keys. -/
-structure Tight (C : Contract) {Γ : Ctx} (σ : State C Γ) : Prop where
+structure Tight (C : Contract) {Γ : Ctx} (σ : EState C Γ) : Prop where
   storage : TightStorage C σ.storage
   env : Env.All (LTy.Keys C) σ.env
 
 namespace Tight
 
-variable {Γ : Ctx} {σ : State C Γ}
+variable {Γ : Ctx} {σ : EState C Γ}
 
-theorem glob (ht : Tight C σ) : Solidity.Tight C σ.glob := ⟨ht.storage⟩
+theorem glob (ht : Tight C σ) : Semantics.Tight C σ.glob := ⟨ht.storage⟩
 
-theorem withGlob (ht : Tight C σ) {τ : Semantics.State} (hτ : Solidity.Tight C τ) :
+theorem withGlob (ht : Tight C σ) {τ : Semantics.State} (hτ : Semantics.Tight C τ) :
     Tight C (σ.withGlob τ) :=
   ⟨hτ.storage, ht.env⟩
 
@@ -2592,7 +2592,7 @@ theorem push (ht : Tight C σ) {t : LTy} {v : t.Denote C} (hv : LTy.Keys C t v) 
     Tight C (σ.push v) :=
   ⟨ht.storage, hv, ht.env⟩
 
-theorem of_eq {σ' : State C Γ} (ht : Tight C σ) (hs : σ'.storage = σ.storage)
+theorem of_eq {σ' : EState C Γ} (ht : Tight C σ) (hs : σ'.storage = σ.storage)
     (he : σ'.env = σ.env) : Tight C σ' :=
   ⟨hs ▸ ht.storage, he ▸ ht.env⟩
 
@@ -2602,7 +2602,7 @@ end Tight
 
 section Paths
 
-variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ : EState C Γ}
 
 
 mutual
@@ -2682,7 +2682,7 @@ theorem Loc.resolve_live : ∀ {T : Ty} (l : Loc C Γ T) {r : Name} {segs : List
     intro pre j hseg es sh fx hf
     obtain ⟨rfl, hj⟩ := append_single_ne hseg
     cases hj
-    simp only [Semantics.State.checkIndex, Semantics.State.findStorage, State.glob, hV, hf, bind,
+    simp only [Semantics.State.checkIndex, Semantics.State.findStorage, EState.glob, hV, hf, bind,
       Except.bind] at hck
     split at hck
     · assumption
@@ -2694,7 +2694,7 @@ end Paths
 
 section Effects
 
-variable {Γ : Ctx} {H : HeapTy} {σ σ' : State C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ σ' : EState C Γ}
 
 theorem Src.value_tight (hd : DeepOk C) (hwt : RunWT C H σ) (hc : Canon C H σ.glob)
     (ht : Tight C σ) {T : Ty} {r : Src C Γ T} {sv : Semantics.SVal} (h : r.value σ = .ok sv) :
@@ -2787,7 +2787,7 @@ theorem Tight.writeLoc (hd : DeepOk C) (hwt : RunWT C H σ) (hc : Canon C H σ.g
 
 /-- `p = alice;`, `p = persons.push();` name a path along numeric keys. -/
 theorem ARhs.eval_tight (hd : DeepOk C) (hwt : RunWT C H σ) (hc : Canon C H σ.glob)
-    (ht : Tight C σ) {R : RefTy} {r : ARhs C Γ R} {σ₁ : State C Γ} {root : Name}
+    (ht : Tight C σ) {R : RefTy} {r : ARhs C Γ R} {σ₁ : EState C Γ} {root : Name}
     {segs : List Seg} (h : r.eval σ = .ok (σ₁, (root, segs))) :
     Tight C σ₁ ∧ LTy.Keys C (.alias R) (some (root, segs)) := by
   cases r with
@@ -2810,7 +2810,7 @@ theorem ARhs.eval_tight (hd : DeepOk C) (hwt : RunWT C H σ) (hc : Canon C H σ.
     exact ⟨T, hT, KeysOK_append _ (hk T hT) hs (fun K V h => nomatch h)⟩
 
 /-- `m = n;`, `m = alice;` leave storage and the locals as they were. -/
-theorem MRhs.eval_se {R : RefTy} {r : MRhs C Γ R} {σ₁ : State C Γ} {id : Nat}
+theorem MRhs.eval_se {R : RefTy} {r : MRhs C Γ R} {σ₁ : EState C Γ} {id : Nat}
     (h : r.eval σ = .ok (σ₁, id)) : σ₁.storage = σ.storage ∧ σ₁.env = σ.env := by
   cases r with
   | alias p =>
@@ -3079,7 +3079,7 @@ theorem tight_assignNew (hd : DeepOk C) (hwt : RunWT C H σ.erase) (hc : Canon C
     have hc₁ : Canon C H' τ := ⟨hout.out.storage ▸ hc.storage, hout.canon⟩
     have hT := Loc.resolve_wt h₁.wt l hr
     have hsc := copyMToSt_canon hg₁.heap hc₁.heap hmv hsv
-    have hτt : Solidity.Tight C τ := ⟨ht₁.storage⟩
+    have hτt : Semantics.Tight C τ := ⟨ht₁.storage⟩
     exact ht₁.withGlob (hτt.write hd hc₁ hT (Loc.resolve_keys h₁.wt ht₁.env l hr)
       (fun _ => Loc.resolve_live l hr) hsc (copyMToSt_tight hd hT hsc hsv) hτ')
   | mem l =>
@@ -3126,18 +3126,18 @@ end Leaves
 
 /-- What a run keeps: the state well-typed, canonical and tight. -/
 def tightInv (C : Contract) : RunInv C where
-  glob H τ := (canonInv C).glob H τ ∧ Solidity.Tight C τ
+  glob H τ := (canonInv C).glob H τ ∧ Semantics.Tight C τ
   loc H t v := LTy.WT C H t v ∧ LTy.Keys C t v
   loc_mono hext h := ⟨LTy.WT.mono hext h.1, h.2⟩
   reglob e h := ⟨(canonInv C).reglob e h.1, ⟨h.2.storage⟩⟩
 
 /-- The state well-typed under `H`, canonical and tight. -/
-abbrev RunTight (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
+abbrev RunTight (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : EState C Γ) : Prop :=
   (tightInv C).Holds H σ
 
 namespace RunTight
 
-variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ : EState C Γ}
 
 theorem canon (h : RunTight C H σ) : RunCanon C H σ :=
   ⟨h.1.1, Env.All.mono (fun _ _ h => h.1) h.2⟩
@@ -3166,7 +3166,7 @@ theorem tkeepsT_of {Γ Γ' : Ctx} {t : TStep C Γ Γ'} (hc : (canonInv C).TKeeps
 
 /-- Every local of a call's parameters, return variables or decoded data is
 a value, or a fresh memory object: no alias. -/
-theorem Args.eval_keys {Γ : Ctx} {σ : State C Γ} : {ps : Ctx} → (args : Args C Γ ps) →
+theorem Args.eval_keys {Γ : Ctx} {σ : EState C Γ} : {ps : Ctx} → (args : Args C Γ ps) →
     {a : Env C ps} → args.eval σ = .ok a → Env.All (LTy.Keys C) a
   | _, .nil, _, _ => trivial
   | _, .snoc as _ _ _, _, h => by
@@ -3285,9 +3285,9 @@ theorem Prog.trun_tight (hd : DeepOk C) {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : 
   RunTight.tight h'
 
 /-- A contract starts tight: each root at its type's default, no alias. -/
-theorem Tight.init (hd : DeepOk C) : Tight C (State.ofSem C.initState) := by
+theorem Tight.init (hd : DeepOk C) : Tight C (EState.ofSem C.initState) := by
   refine ⟨fun r T v hr hv => ?_, trivial⟩
-  simp only [State.ofSem, State.ofGlob, Contract.initState, Contract.initStorage,
+  simp only [EState.ofSem, EState.ofGlob, Contract.initState, Contract.initStorage,
     lookupBy_map_snd, hr, Option.map_some, Option.some.injEq] at hv
   subst hv
   exact defaultForTy_tight (okDeep_defaultOkS (hd r T hr))
@@ -3317,7 +3317,7 @@ theorem defaultOkS_of_deep (h : C.vars.all (·.2.okDeep) = true) :
 
 /-- **Reachable ⇒ tight.** -/
 theorem reachable_tight (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
-    {st : List (Name × SVal)} (h : Reachable C st) : TightStorage C st := by
+    {st : List (Name × Semantics.SVal)} (h : Reachable C st) : TightStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
   have hok := defaultOkS_of_deep hdeep
   have hwt : Core.RunWT C [] (Core.TState.init C).erase := by
@@ -3331,7 +3331,7 @@ theorem reachable_tight (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·
 /-- **Reachable ⇒ canonical and tight**, for a contract whose types have
 well-formed defaults all the way down. -/
 theorem reachable_shape (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
-    {st : List (Name × SVal)} (h : Reachable C st) : CanonStorage C st ∧ TightStorage C st :=
+    {st : List (Name × Semantics.SVal)} (h : Reachable C st) : CanonStorage C st ∧ TightStorage C st :=
   ⟨(reachable_canon hnd (defaultOkS_of_deep hdeep) h).2, reachable_tight hnd hdeep h⟩
 
 /-- **The reachable storages, exactly**: for a contract whose types have
@@ -3339,7 +3339,7 @@ well-formed defaults all the way down, a storage whose words, keys and slots
 are in range (`FitsStorage`, what a literal can write) is reachable by a
 program iff it is canonical and tight. -/
 theorem reachable_iff (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
-    {st : List (Name × SVal)} (hf : FitsStorage C st) :
+    {st : List (Name × Semantics.SVal)} (hf : FitsStorage C st) :
     Reachable C st ↔ CanonStorage C st ∧ TightStorage C st :=
   ⟨reachable_shape hnd hdeep, fun ⟨hc, ht⟩ => canon_reachable hnd (defaultOkS_of_deep hdeep) hc ht hf⟩
 

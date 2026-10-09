@@ -108,8 +108,8 @@ end Tms
 weakens its branches (`Calculus/Core/Arms.lean`); an `up` to the printer,
 which shows the block as written. -/
 abbrev Prog.up {t : LTy} {Γ₁ : Ctx} (P : Prog C Γ Γ₁) :
-    Prog C (t :: Γ) (P.wk (Core.up (t := t))).1 :=
-  (P.wk Core.up).2.2
+    Prog C (t :: Γ) (P.wk (Solidity.Core.up (t := t))).1 :=
+  (P.wk Solidity.Core.up).2.2
 
 /-! ## Side conditions
 

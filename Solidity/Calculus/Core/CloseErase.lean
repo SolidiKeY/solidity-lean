@@ -81,11 +81,11 @@ theorem agreeExcept_setEnv (s : Semantics.State) (x : Var) (b : Binding) :
 
 /-- States that agree everywhere satisfy the same formulas. -/
 theorem holds_congr_full {s t : Semantics.State} (h : EnvAgreeExcept [] s t) (φ : Solidity.NFml C) :
-    Solidity.holds s φ ↔ Solidity.holds t φ :=
+    NFml.holds s φ ↔ NFml.holds t φ :=
   Solidity.holds_frame φ (fun _ _ => List.not_mem_nil) h
 
 /-- An elementary update leaves a name it does not mention. -/
-theorem UpdElem.write_keep (σ₀ : Semantics.State) (e : Solidity.UpdElem C)
+theorem UpdElem.write_keep (σ₀ : Semantics.State) (e : Surface.UpdElem C)
     {τ τ' : Semantics.State} (h : e.write σ₀ τ = .ok τ') {y : Var} (hy : y ∉ e.vars) :
     lookupBy y τ'.env = lookupBy y τ.env := by
   have hne : ∀ {x : Var} {vs : List Var}, y ∉ x :: vs → y ≠ x := fun h hx => h (hx ▸ List.mem_cons_self)
@@ -135,15 +135,15 @@ theorem UpdElem.write_keep (σ₀ : Semantics.State) (e : Solidity.UpdElem C)
 
 /-- An update leaves a name it does not mention. -/
 theorem Upd.apply_keep (σ₀ : Semantics.State) :
-    (U : Solidity.Upd C) → {τ τ' : Semantics.State} →
-      U.foldlM (fun τ e => e.write σ₀ τ) τ = .ok τ' → ∀ y, y ∉ Solidity.Upd.vars U →
+    (U : Surface.Upd C) → {τ τ' : Semantics.State} →
+      U.foldlM (fun τ e => e.write σ₀ τ) τ = .ok τ' → ∀ y, y ∉ Surface.Upd.vars U →
         lookupBy y τ'.env = lookupBy y τ.env
   | [], _, _, h, _, _ => by cases h; rfl
   | e :: U, τ, τ', h, y, hy => by
     rw [List.foldlM_cons] at h
     obtain ⟨τ₁, h₁, h⟩ := Semantics.bind_ok_inv h
-    have hy' : y ∉ e.vars ∧ y ∉ Solidity.Upd.vars U := by
-      simp only [Solidity.Upd.vars, List.mem_append, not_or] at hy; exact hy
+    have hy' : y ∉ e.vars ∧ y ∉ Surface.Upd.vars U := by
+      simp only [Surface.Upd.vars, List.mem_append, not_or] at hy; exact hy
     exact (Upd.apply_keep σ₀ U h y hy'.2).trans (UpdElem.write_keep σ₀ e h₁ hy'.1)
 
 end Untyped
@@ -151,7 +151,7 @@ end Untyped
 /-! ## The formulas -/
 
 /-- Agreement survives a change of the untyped state off the scope's names. -/
-theorem Agree.congrExcept {Γ : Ctx} {ns B : List Var} {σ : State C Γ} {τ₀ τ : Semantics.State}
+theorem Agree.congrExcept {Γ : Ctx} {ns B : List Var} {σ : EState C Γ} {τ₀ τ : Semantics.State}
     (hag : Agree ns σ τ₀) (h : EnvAgreeExcept B τ τ₀) (hB : Avoids B ns) : Agree ns σ τ where
   len := hag.len
   nodup := hag.nodup
@@ -208,7 +208,7 @@ open Semantics (lookupBy setBy EnvAgreeExcept) in
 theorem holds_of_erase_valid_agree : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} →
     φ.Closable ns → Avoids φ.bindNames ns → {σ : TState C Γ} → {τ₀ : Semantics.State} →
     Agree ns σ.erase τ₀ →
-    (∀ τ, EnvAgreeExcept φ.bindNames τ τ₀ → Solidity.holds τ (φ.erase ns)) → holds σ φ
+    (∀ τ, EnvAgreeExcept φ.bindNames τ τ₀ → NFml.holds τ (φ.erase ns)) → holds σ φ
   | _, .tt, _, _, _, _, _, _, _ => trivial
   | _, .eq a b, _, _, _, σ, τ₀, hag, h =>
     (holds_erase_fo (.eq a b) trivial rfl hag).2 (h τ₀ (agreeExcept_refl _ τ₀))
@@ -228,7 +228,7 @@ theorem holds_of_erase_valid_agree : {Γ : Ctx} → (φ : Fml C Γ) → {ns : Li
   | _, .upd m U φ, ns, hφ, _, σ, τ₀, hag, h => by
     obtain ⟨hU, hUB, hBU, hφ⟩ := hφ
     have hE : ∀ τ, EnvAgreeExcept φ.bindNames τ τ₀ →
-        Solidity.holds τ (.upd m (U.erase ns) (φ.erase (U.names ns))) := fun τ hτ => by
+        NFml.holds τ (.upd m (U.erase ns) (φ.erase (U.names ns))) := fun τ hτ => by
       have h' := h τ hτ
       simp only [Fml.erase] at h'
       split at h'
@@ -245,28 +245,28 @@ theorem holds_of_erase_valid_agree : {Γ : Ctx} → (φ : Fml C Γ) → {ns : Li
       cases m with
       | box => trivial
       | diamond =>
-        have h1 : Modality.after .diamond (Solidity.holds · (φ.erase (U.names ns)))
-            (Solidity.Upd.apply (U.erase ns) τ₀) := hE τ₀ (agreeExcept_refl _ τ₀)
+        have h1 : Modality.after .diamond (NFml.holds · (φ.erase (U.names ns)))
+            (Surface.Upd.apply (U.erase ns) τ₀) := hE τ₀ (agreeExcept_refl _ τ₀)
         revert h1 hR
-        cases Solidity.Upd.apply (U.erase ns) τ₀ with
+        cases Surface.Upd.apply (U.erase ns) τ₀ with
         | error => intro _ h1; exact h1.elim
         | ok _ => intro hR _; exact hR.elim
     | ok σ'' =>
       rw [hσ] at hR
-      cases hτ₀ : Solidity.Upd.apply (U.erase ns) τ₀ with
+      cases hτ₀ : Surface.Upd.apply (U.erase ns) τ₀ with
       | error => rw [hτ₀] at hR; exact hR.elim
       | ok τ₀' =>
         rw [hτ₀] at hR
         intro σ' e _
         subst e
         refine holds_of_erase_valid_agree φ hφ hBU hR fun τ' hτ' => ?_
-        have h1 : Modality.after m (Solidity.holds · (φ.erase (U.names ns)))
-            (Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀)) :=
+        have h1 : Modality.after m (NFml.holds · (φ.erase (U.names ns)))
+            (Surface.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀)) :=
           hE (overlay φ.bindNames τ' τ₀) (agreeExcept_overlay _ _ _)
-        have hfr := Upd.apply_frame (agreeExcept_overlay φ.bindNames τ' τ₀) (U.erase ns) hUB
+        have hfr := Surface.Upd.apply_frame (agreeExcept_overlay φ.bindNames τ' τ₀) (U.erase ns) hUB
         rw [hτ₀] at hfr
         revert h1 hfr
-        cases hτ : Solidity.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀) with
+        cases hτ : Surface.Upd.apply (U.erase ns) (overlay φ.bindNames τ' τ₀) with
         | error => intro _ hfr; exact hfr.elim
         | ok τ'' =>
           intro h1 hfr
@@ -317,7 +317,7 @@ theorem holds_of_erase_valid_agree : {Γ : Ctx} → (φ : Fml C Γ) → {ns : Li
     have hag' : Agree ns (σ.anon xs b).erase (overlay (xs.map fun x => x.2.name ns) τ₁ τ₀) := by
       rw [TState.anon_erase]
       refine h₁.congrEnv ?_ fun y => ?_
-      · rw [State.glob_anon _ xs σ.erase]
+      · rw [EState.glob_anon _ xs σ.erase]
         have hw := hag.wl
         generalize τ₀.env = env at hw ⊢
         subst hw
@@ -347,7 +347,7 @@ theorem holds_of_erase_valid_agree : {Γ : Ctx} → (φ : Fml C Γ) → {ns : Li
 diamond update in a positive position allowed (`Fml.Closable`). -/
 theorem holds_of_erase_valid {Γ : Ctx} (φ : Fml C Γ) {ns : List Var} (hlen : ns.length = Γ.length)
     (hnd : ns.Nodup) (hc : φ.Closable ns) (hB : Avoids φ.bindNames ns)
-    (h : Solidity.Valid (φ.erase ns)) (σ : TState C Γ) : holds σ φ :=
+    (h : NFml.Valid (φ.erase ns)) (σ : TState C Γ) : holds σ φ :=
   holds_of_erase_valid_agree φ hc hB (Agree.erase σ.erase hnd hlen) fun τ _ => h τ
 
 end Solidity.Core

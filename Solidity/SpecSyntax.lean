@@ -6,7 +6,7 @@ import Solidity.AST
 solkey's `SolSpec.g4`: Solidity expressions, plus `\old(e)`, `\result`,
 `net(e)`, `->`, `<->` and `\forall T x; e`/`\exists T x; e`.  A clause is
 kept as read (`SpecExpr`), as a function's body is: a `Contract` cannot hold
-an `Fml C`, whose index it is.  `Calculus/Spec.lean` compiles a clause to a
+an `Fml C`, whose index it is.  `Calculus/SurfaceSpec.lean` compiles a clause to a
 formula against a storage term, as solkey's `SpecCompiler` does.
 
 The clauses stand where solkey's NatSpec lines stand, above what they

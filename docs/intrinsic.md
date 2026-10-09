@@ -1881,7 +1881,7 @@ time: all fourteen at once went past 30 GB beside the other lanes);
 - `Fml.ViaE.valid_close`: the bridge of `Fml.ViaE.valid` is `Proves.close` at
   the last scoped line, its side conditions decided by the kernel
   (`ChainNotation`, §4, closes `[ alice.account.balance = 10; ] …` that way).
-- The printer (`Calculus/RuleSyntax.lean`, `Calculus/Notation.lean`):
+- The printer (`Calculus/RuleSyntax.lean`, `Calculus/SurfaceNotation.lean`):
   `x := a == b`, `x := a != b` (a `uint` equality captured) and `a * b` have
   KeY's text and read back (`ChainNotation` §7 pins both readings).
 
@@ -2440,7 +2440,7 @@ reachable, only the git-excluded `Scratch/`), `check-doc-paths` and
      run's (`ok`, `revert`, `panic`, `diverge`, `exhausted`, or
      `unresolved`); `corpus_decide` takes no argument.  Gone: the
      `*Store_eq` theorems (the M3 erasure of the typed starts), the untyped
-     `diamond_of_isOk`, and the imports of `Calculus/Notation`,
+     `diamond_of_isOk`, and the imports of `Calculus/SurfaceNotation`,
      `Semantics/RunErase` and `TypedRunErase`.
    - `Imported`: `Obligation.Diamond`/`Box`, `runs_of_proved` (the scoped
      `⊢`'s `Proves.valid` at `Core.TState.init C`, `wt` read scoped by
@@ -2664,7 +2664,7 @@ conditions of `Core.LeanTaclet` and `Core.CallbackTaclet` too (as
   (the leaves close again, by the fallback above).
 
 **Proposed decisions** (none of reasons 1–8):
-- **33.** `Calculus/Notation.lean` and `Calculus/Spec.lean` stay (the
+- **33.** `Calculus/SurfaceNotation.lean` and `Calculus/SurfaceSpec.lean` stay (the
   inventory's "stays with `Surface`"): neither uses a module W4 deletes now,
   they are the elaborator's frontends (`dl!{ … }`, `spec[C]{f}`), which
   `Core.Notation`, `Core.Surface`, `Core.SolSpec` and `Core.Spec` read; the
@@ -3606,7 +3606,7 @@ green, 302 jobs, every `sol_derive?` pin (`ProofTree`, `CoreProofTree`,
       `Tools/{Verify,Counterexample}` (`Fml.eval3` over `Prog.runFuel`
       and `Stmt.run`: W4 `sem-del`'s first item, and Decision 17 for a
       typed refutation); `Corpus/Basic` (`corpus_decide` through
-      `Semantics/RunErase` and today's `Calculus/Notation`);
+      `Semantics/RunErase` and today's `Calculus/SurfaceNotation`);
       `Tools/{Inspect,ProofTree}` (today's `Chains`, `Callback`,
       `ProofTree`); `Theorems.lean` (`SolkeyFragment`, `Uniqueness`,
       `Callback`); `Examples/Notation`'s sections outside `Scoped`
@@ -3710,13 +3710,13 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `DecidableEq`); and the 16 `evaluated` rows, which `corpus_decide`
     proves since W1 `evm` made it typed, are `proved` (their `#eval` pins
     replaced by theorems).  See "W4 preparation" above.
-33. *Proposed (W4 `moves`), the lead's call:* `Calculus/Notation.lean` and
-    `Calculus/Spec.lean` leave `calc-del`'s list: the elaborator's frontends
+33. *Proposed (W4 `moves`), the lead's call:* `Calculus/SurfaceNotation.lean` and
+    `Calculus/SurfaceSpec.lean` leave `calc-del`'s list: the elaborator's frontends
     (`dl!{ … }`, `spec[C]{f}`), which use no deleted module and which the
     scoped reader reads; the `modal` lane types their output.  See "W4 lane
     `moves`".
-34. *Proposed (W4 `moves`), the lead's call:* `Calculus/Logic.lean` and
-    `Calculus/Derive.lean` leave `calc-del`'s list: today's `Proves` is the
+34. *Proposed (W4 `moves`), the lead's call:* `Calculus/NFmlLogic.lean` and
+    `Calculus/NFmlDerive.lean` leave `calc-del`'s list: today's `Proves` is the
     closer's sequent calculus on the erasure (`Rewrite`, `TheoryRewrite`,
     `Derive.residue`, `Proves.of_residue`) until M6c; the `modal` lane trims
     their program rules (and the program-rule soundness modules with them).
@@ -3771,8 +3771,8 @@ Decisions 17'–21 (lead, 2026-10-09), after Decision 17 proved infeasible
     `TypedRunErase`), the builder over the typed run, `Faithfulness` over
     `TState`.  M3's `State C Γ`/`Env` stay regardless: they are the erased
     state the closer's untyped terms read (`TState.erase`), until M6c.
-41. *Proposed (W4 `calc-del`), the lead's call; amends 34:* `Calculus/Logic.lean`
-    and `Calculus/Derive.lean` are trimmed in `calc-del`, not deleted and
+41. *Proposed (W4 `calc-del`), the lead's call; amends 34:* `Calculus/NFmlLogic.lean`
+    and `Calculus/NFmlDerive.lean` are trimmed in `calc-del`, not deleted and
     not left whole: today's `Proves` keeps its connective, update, rewrite
     and close rules (the closer's sequent calculus on a leaf's erasure) and
     loses its program rules (`update` … `invLean`, their soundness
@@ -5409,7 +5409,7 @@ git-excluded `Scratch/` modules only).
   11. *Core modules importing today's*: none cut yet; `w3d-w4prep`'s table
       ("Item 11, the inventory", in its section) says what each takes and
       where it must move before `calc-del`.  **Plan correction**:
-      `Calculus/Quote.lean` leaves `calc-del`'s list (it is `NFml`'s quoter,
+      `Calculus/NFmlQuote.lean` leaves `calc-del`'s list (it is `NFml`'s quoter,
       which `Core.Print` prints erasures with); `IntOp.quote` moves beside
       `IntOp`.
   12. done.
@@ -6092,7 +6092,7 @@ printer for both families), `Hyp.toFmlE`, `Core.headModality?`
 
 **Pins changed** (reasons: today's run and modality deleted; the rename,
 W5's qualified-name reason):
-- `Calculus/Notation`: the `#check` pins print `NFml StandardExample` or,
+- `Calculus/SurfaceNotation`: the `#check` pins print `NFml StandardExample` or,
   with a modality, `Surface.Fml StandardExample` (one wraps one line
   earlier, the type name being longer); `Tactics/CoreSurface` likewise.
 - `Tactics/CoreCallback`: `⟹ᶜ[Fml.tt]` (was `⟹ᶜ[Core.Fml.tt]`: `Fml` is no
@@ -6644,7 +6644,7 @@ untyped operation is never stuck on an erased input.
   (`BinOp.evalT`, `UnOp.evalT`).  `UnOp.accepts .neg` is `int` only, as
   solc's (since 2026-10-07; it accepted `uint`, where the untyped
   `unopCheck` does not range-check, so `-x` left the type), and the
-  elaborator and `Calculus/Spec.lean` reject `-x` at `uint`;
+  elaborator and `Calculus/SurfaceSpec.lean` reject `-x` at `uint`;
   `UnOp.evalT_erase` holds at every accepted type, and the closer's
   `Facts.unRets` lost its `-a` at non-`int` arm.
 - **Storage (M4b).** `Semantics/Core/Storage.lean`,

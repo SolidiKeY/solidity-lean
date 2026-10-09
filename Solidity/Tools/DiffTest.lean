@@ -67,7 +67,7 @@ open Semantics Evm
 /-! ## The layout, as a function -/
 
 /-- The mapping keys a value holds anywhere, as words. -/
-partial def SVal.mapKeys : SVal → List Nat
+partial def SVal.mapKeys : Semantics.SVal → List Nat
   | .prim _ => []
   | .struct fs => fs.flatMap (SVal.mapKeys ·.2)
   | .array es sh _ => (es ++ sh).flatMap SVal.mapKeys
@@ -84,7 +84,7 @@ a `uint`-keyed mapping entry `k` from `.hash k s 0`, for the keys `keys` and
 its own (an entry of another key type takes no slot the fragment reads, as
 `ReprAt.mapOther` says).  An error is a value no machine storage represents:
 out of range, of another type, or a struct short of a member. -/
-partial def SVal.encode (keys : List Nat) : Ty → Slot → SVal → Except String (List (Slot × Nat))
+partial def SVal.encode (keys : List Nat) : Ty → Slot → Semantics.SVal → Except String (List (Slot × Nat))
   | .prim .uint, s, .prim (.int n) =>
     if 0 ≤ n ∧ n < (W : Int) then pure [(s, n.toNat)] else throw s!"uint {n} out of range"
   | .prim .bool, s, .prim (.bool b) => pure [(s, bword b)]
@@ -110,7 +110,7 @@ partial def SVal.encode (keys : List Nat) : Ty → Slot → SVal → Except Stri
   | T, _, v => throw s!"{SVal.fmt T v} is no {Ty.toStr T}"
 
 /-- The whole storage laid out: every root of the contract at `rootSlot`. -/
-def encodeStorage (C : Contract) (keys : List Nat) (st : List (Name × SVal)) :
+def encodeStorage (C : Contract) (keys : List Nat) (st : List (Name × Semantics.SVal)) :
     Except String (List (Slot × Nat)) :=
   C.vars.flatMapM fun (r, T) => do
     let some v := lookupBy r st | throw s!"no root {r}"
@@ -178,7 +178,7 @@ def genArg : Ty → Gen (Option (RawExpr × Value))
 
 /-- What a run starts from. -/
 structure Start where
-  storage : List (Name × SVal)
+  storage : List (Name × Semantics.SVal)
   args : List Value
   sender : Nat
   value : Nat
@@ -189,7 +189,7 @@ structure Start where
   self : Nat
 
 /-- The start state, untyped: what a mismatch prints. -/
-def Start.state (s : Start) : State where
+def Start.state (s : Start) : Semantics.State where
   storage := s.storage
   selfBalance := s.balance
   tx := { msgSender := s.sender, msgValue := s.value, timestamp := s.time, selfAddress := s.self }
@@ -213,7 +213,7 @@ def fmtTRes {α : Type} : Core.TRes α → String
   | .error h => fmtHalt h.erase
 
 /-- A machine run's outcome, for the report. -/
-def fmtOut : Out → String
+def fmtOut : Evm.Out → String
   | .ok _ 0 => "ok"
   | .ok _ k => s!"ok with {k} instructions still to skip"
   | .revert => "revert"

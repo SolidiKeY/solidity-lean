@@ -1,7 +1,7 @@
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Closer
 import Solidity.Calculus.TheoryRewrite
-import Solidity.Calculus.Spec
+import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.TreeData
 
 /-!
@@ -52,7 +52,7 @@ open Semantics
 
 variable {C : Contract}
 
-namespace Derive
+namespace NFml.Derive
 
 /-- A goal left over: a context and a formula. -/
 abbrev Leaf (C : Contract) := List (Hyp C) × NFml C
@@ -72,7 +72,7 @@ when to ask: what is closed, the closer proves. -/
 
 /-- The locals a value term reads when it is built from literals and value
 operators alone; `none` when it reads anything else. -/
-def _root_.Solidity.Tm.litVars : {s : Srt} → Tm C s → Option (List Var)
+def _root_.Solidity.Surface.Tm.litVars : {s : Srt} → Surface.Tm C s → Option (List Var)
   | .val, .pvV x => some [x]
   | .val, .app0 (.lit _) => some []
   | .val, .app1 (.unop _ _) a => a.litVars
@@ -98,14 +98,14 @@ def _root_.Solidity.NFml.litVars : NFml C → Option (List Var)
   | _ => none
 
 /-- Whether the element binds the local `x`. -/
-def _root_.Solidity.UpdElem.binds (x : Var) : UpdElem C → Bool
+def _root_.Solidity.Surface.UpdElem.binds (x : Var) : Surface.UpdElem C → Bool
   | .val y _ | .path y _ | .mref y _ | .store y _ | .saveNet y | .saveNetMt y | .unset y => y == x
   | _ => false
 
 /-- `Upd.groundStep` on a parallel update's elements read last first. Each
 local is kept once (`List.insert`): `y := y * y` repeated would otherwise
 double the list at every update. -/
-def groundStepRev (Ur : Upd C) : List Var → Option (List Var)
+def groundStepRev (Ur : Surface.Upd C) : List Var → Option (List Var)
   | [] => some []
   | x :: xs =>
     match groundStepRev Ur xs with
@@ -119,7 +119,7 @@ def groundStepRev (Ur : Upd C) : List Var → Option (List Var)
 /-- The locals `xs` read before the parallel update `U`: each one `U` binds
 by `x := t` replaced by `t`'s, when `t` is of literals; `none` when one is
 bound otherwise.  No local is listed twice. -/
-def _root_.Solidity.Upd.groundStep (U : Upd C) (xs : List Var) : Option (List Var) :=
+def _root_.Solidity.Surface.Upd.groundStep (U : Surface.Upd C) (xs : List Var) : Option (List Var) :=
   groundStepRev U.reverse xs
 
 /-- Whether every local of `xs` is bound by the context `Γ`, its entries
@@ -187,19 +187,19 @@ backwards): `{ r := x + 1 }{ x := x + 1 }`.  `NFml.seqUpd` splits every such
 update before the closer runs; it only has to imply the leaf. -/
 
 /-- The local an update element binds, for the two kinds the split moves. -/
-def _root_.Solidity.UpdElem.target? : UpdElem C → Option Var
+def _root_.Solidity.Surface.UpdElem.target? : Surface.UpdElem C → Option Var
   | .val x _ | .path x _ => some x
   | _ => none
 
 /-- A parallel update, its elements reversed (`rs`), as one update per
 element from the last, while the last binds a local the rest does not
 mention; the rest as one parallel update. -/
-def seqRev (m : Modality) (ψ : NFml C) : List (UpdElem C) → NFml C
+def seqRev (m : Modality) (ψ : NFml C) : List (Surface.UpdElem C) → NFml C
   | [] => .upd m [] ψ
   | [e] => .upd m [e] ψ
   | e :: rest =>
     match e.target? with
-    | some x => if x ∈ Upd.vars rest.reverse then .upd m (e :: rest).reverse ψ
+    | some x => if x ∈ Surface.Upd.vars rest.reverse then .upd m (e :: rest).reverse ψ
       else .upd m [e] (seqRev m ψ rest)
     | none => .upd m (e :: rest).reverse ψ
 
@@ -217,26 +217,26 @@ section PushAlias
 open SemanticsProperties
 
 /-- A key that reads no storage: a local or a literal. -/
-def _root_.Solidity.Tm.keyFree {s : Srt} : Tm C s → Bool
+def _root_.Solidity.Surface.Tm.keyFree {s : Srt} : Surface.Tm C s → Bool
   | .pvV _ | .app0 (.lit _) => true
   | _ => false
 
 /-- A path that reads the storage only to check its indices: roots,
 aliases, members, and indices by locals or literals.  A write below it
 leaves it naming the same location (`stable_eval`). -/
-def _root_.Solidity.Tm.stablePath {s : Srt} : Tm C s → Bool
+def _root_.Solidity.Surface.Tm.stablePath {s : Srt} : Surface.Tm C s → Bool
   | .app0 (.root _) | .pvP _ => true
   | .app1 (.field _) q => q.stablePath
   | .app2 .at q k => q.stablePath && k.keyFree
   | _ => false
 termination_by structural t => t
 
-theorem keyFree_eval {σ τ : State} (henv : τ.env = σ.env) :
-    (k : Tm C .val) → k.keyFree = true → k.eval τ = k.eval σ
-  | .pvV x, _ => by simp only [Tm.eval, State.getEnv, henv]
+theorem keyFree_eval {σ τ : Semantics.State} (henv : τ.env = σ.env) :
+    (k : Surface.Tm C .val) → k.keyFree = true → k.eval τ = k.eval σ
+  | .pvV x, _ => by simp only [Surface.Tm.eval, State.getEnv, henv]
   | .app0 (.lit _), _ => rfl
 
-theorem saveStorage_state {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
+theorem saveStorage_state {σ τ : Semantics.State} {r : Name} {P : List Seg} {X : Semantics.SVal}
     (h : σ.saveStorage r P X = .ok τ) : τ = { σ with storage := τ.storage } := by
   unfold State.saveStorage at h
   split at h
@@ -245,17 +245,17 @@ theorem saveStorage_state {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
 
 /-- **A path below which the storage was written names the same
 location**: its checks are of locations above the write. -/
-theorem stable_eval {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
+theorem stable_eval {σ τ : Semantics.State} {r : Name} {P : List Seg} {X : Semantics.SVal}
     (hsv : σ.saveStorage r P X = .ok τ) :
-    (p : Tm C .path) → p.stablePath = true → ∀ {r' : Name} {segs : List Seg},
+    (p : Surface.Tm C .path) → p.stablePath = true → ∀ {r' : Name} {segs : List Seg},
       p.eval σ = .ok (r', segs) → (r' = r → ∃ rest, P = segs ++ rest) →
         p.eval τ = .ok (r', segs)
   | .app0 (.root _), _, _, _, h, _ => h
   | .pvP x, _, _, _, h, _ => by
     rw [saveStorage_state hsv]
-    simpa only [Tm.eval, aliasPath, State.getEnv] using h
+    simpa only [Surface.Tm.eval, Semantics.aliasPath, State.getEnv] using h
   | .app1 (.field f) q, hp, r', segs, h, hpre => by
-    simp only [Tm.stablePath] at hp
+    simp only [Surface.Tm.stablePath] at hp
     rw [Close.PTerm.eval_field] at h ⊢
     obtain ⟨⟨r₀, segs₀⟩, h₀, he⟩ := Res.bind_eq_ok.1 h
     cases he
@@ -265,7 +265,7 @@ theorem stable_eval {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
           List.nil_append]⟩]
     rfl
   | .app2 .at q k, hp, r', segs, h, hpre => by
-    simp only [Tm.stablePath, Bool.and_eq_true] at hp
+    simp only [Surface.Tm.stablePath, Bool.and_eq_true] at hp
     rw [Close.PTerm.eval_at] at h ⊢
     obtain ⟨⟨r₀, segs₀⟩, h₀, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h
@@ -287,7 +287,7 @@ theorem stable_eval {σ τ : State} {r : Name} {P : List Seg} {X : SVal}
       omega
     · exact .inl hr
   | .app1 .next _, h, _, _, _, _ | .app2 .nextIn _ _, h, _, _, _, _
-  | .app3 .atIn _ _ _, h, _, _, _, _ => by simp only [Tm.stablePath, Bool.false_eq_true] at h
+  | .app3 .atIn _ _ _, h, _, _, _, _ => by simp only [Surface.Tm.stablePath, Bool.false_eq_true] at h
 
 
 /-- Where `p = arr.push();` leaves its alias: the last slot, once the push
@@ -296,7 +296,7 @@ def lastSlot (P : PTerm C) : PTerm C :=
   .at P (.binop .sub .bool (.len .storage P) (.lit (.int 1)))
 
 /-- **The last slot after the push is the slot past the end before it.** -/
-theorem lastSlot_eval {P : PTerm C} (hP : P.stablePath = true) {E : Ty} {σ τ : State}
+theorem lastSlot_eval {P : PTerm C} (hP : P.stablePath = true) {E : Ty} {σ τ : Semantics.State}
     (hs : (STerm.extend .storage P E).eval σ = .ok τ) :
     (lastSlot P).eval τ = (PTerm.next P).eval σ := by
   rw [Decide.STerm.eval_extend] at hs
@@ -320,7 +320,7 @@ theorem lastSlot_eval {P : PTerm C} (hP : P.stablePath = true) {E : Ty} {σ τ :
 
 /-- `{ storage := extend(storage, p) ‖ x := p[p.length] }` of
 `T storage x = p.push();`: the push, then the alias to its last slot. -/
-def pushAlias? : Upd C → Option (STerm C × Var × PTerm C)
+def pushAlias? : Surface.Upd C → Option (STerm C × Var × PTerm C)
   | [.storage s, .path x n] =>
     match s, n with
     | .app2 (.extend _) (.app0 .storage) P, .app1 .next P' =>
@@ -328,8 +328,8 @@ def pushAlias? : Upd C → Option (STerm C × Var × PTerm C)
     | _, _ => none
   | _ => none
 
-theorem pushAlias?_sound {U : Upd C} {s : STerm C} {x : Var} {Q : PTerm C}
-    (h : pushAlias? U = some (s, x, Q)) {m : Modality} {ψ : NFml C} {σ : State}
+theorem pushAlias?_sound {U : Surface.Upd C} {s : STerm C} {x : Var} {Q : PTerm C}
+    (h : pushAlias? U = some (s, x, Q)) {m : Modality} {ψ : NFml C} {σ : Semantics.State}
     (hh : holds σ (.upd m [.storage s] (.upd m [.path x Q] ψ))) : holds σ (.upd m U ψ) := by
   unfold pushAlias? at h
   split at h
@@ -342,11 +342,11 @@ theorem pushAlias?_sound {U : Upd C} {s : STerm C} {x : Var} {Q : PTerm C}
         obtain ⟨hP, rfl⟩ := hc
         simp only [Option.some.injEq, Prod.mk.injEq] at h
         obtain ⟨rfl, rfl, rfl⟩ := h
-        have h' : m.after (fun τ => m.after (fun ρ => holds ρ ψ) (Upd.apply [.path x₀ (lastSlot P)] τ))
-          (Upd.apply [.storage (STerm.extend .storage P E)] σ) := hh
-        change m.after (fun ρ => holds ρ ψ) (Upd.apply [.storage (STerm.extend .storage P E),
+        have h' : m.after (fun τ => m.after (fun ρ => holds ρ ψ) (Surface.Upd.apply [.path x₀ (lastSlot P)] τ))
+          (Surface.Upd.apply [.storage (STerm.extend .storage P E)] σ) := hh
+        change m.after (fun ρ => holds ρ ψ) (Surface.Upd.apply [.storage (STerm.extend .storage P E),
           .path x₀ (PTerm.next P)] σ)
-        simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, UpdElem.write, bind_pure] at h' ⊢
+        simp only [Surface.Upd.apply, List.foldlM_cons, List.foldlM_nil, Surface.UpdElem.write, bind_pure] at h' ⊢
         cases hs : (STerm.extend .storage P E).eval σ with
         | error e =>
           rw [hs] at h'
@@ -382,7 +382,7 @@ allocation, so the pair stays one update: `NFml.toL` reads it as one
 (`Decide.pairL`), KeY's single Skolem `freshIdp`. -/
 
 /-- `{ x := i ‖ memory := m }`: an allocation's pair, which `seqUpd` keeps. -/
-def memAlloc? : Upd C → Bool
+def memAlloc? : Surface.Upd C → Bool
   | [.mref _ _, .memory _] => true
   | _ => false
 
@@ -399,65 +399,65 @@ def _root_.Solidity.NFml.seqUpd : NFml C → NFml C
   | .all x p φ => .all x p φ.seqUpd
   | φ => φ
 
-theorem afterImp {m : Modality} {p q : State → Prop} {r : Res State} (h : ∀ τ, p τ → q τ) :
+theorem afterImp {m : Modality} {p q : Semantics.State → Prop} {r : Res Semantics.State} (h : ∀ τ, p τ → q τ) :
     m.after p r → m.after q r := by
   cases r with
   | ok τ => exact h τ
   | error _ => exact id
 
-theorem Upd.apply_single (e : UpdElem C) (σ : State) : Upd.apply [e] σ = e.write σ σ := by
-  simp only [Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure]
+theorem Upd.apply_single (e : Surface.UpdElem C) (σ : Semantics.State) : Surface.Upd.apply [e] σ = e.write σ σ := by
+  simp only [Surface.Upd.apply, List.foldlM_cons, List.foldlM_nil, bind_pure]
 
-theorem Upd.apply_append_single (P : Upd C) (e : UpdElem C) (σ : State) :
-    Upd.apply (P ++ [e]) σ = Upd.apply P σ >>= fun ρ => e.write σ ρ := by
-  simp only [Upd.apply, List.foldlM_append, List.foldlM_cons, List.foldlM_nil, bind_pure]
+theorem Upd.apply_append_single (P : Surface.Upd C) (e : Surface.UpdElem C) (σ : Semantics.State) :
+    Surface.Upd.apply (P ++ [e]) σ = Surface.Upd.apply P σ >>= fun ρ => e.write σ ρ := by
+  simp only [Surface.Upd.apply, List.foldlM_append, List.foldlM_cons, List.foldlM_nil, bind_pure]
 
 /-- **The last element first**: `{e}{P}ψ` implies `{P ‖ e}ψ` where `e`
 binds a local `P` does not mention. -/
-theorem peel_sound {m : Modality} {P : Upd C} {e : UpdElem C} {x : Var}
-    (he : e.target? = some x) (hx : x ∉ Upd.vars P) {ψ : NFml C} {σ : State}
+theorem peel_sound {m : Modality} {P : Surface.Upd C} {e : Surface.UpdElem C} {x : Var}
+    (he : e.target? = some x) (hx : x ∉ Surface.Upd.vars P) {ψ : NFml C} {σ : Semantics.State}
     (h : holds σ (.upd m [e] (.upd m P ψ))) : holds σ (.upd m (P ++ [e]) ψ) := by
   -- the element writes `x := b`, `b` read in the state it starts from
-  obtain ⟨bnd, hw⟩ : ∃ bnd : State → Res Binding, ∀ σ₀ τ,
+  obtain ⟨bnd, hw⟩ : ∃ bnd : Semantics.State → Res Binding, ∀ σ₀ τ,
       e.write σ₀ τ = bnd σ₀ >>= fun b => .ok (τ.setEnv x b) := by
-    unfold UpdElem.target? at he
+    unfold Surface.UpdElem.target? at he
     split at he
     · rename_i y t
       cases he
       exact ⟨fun σ₀ => t.eval σ₀ >>= fun v => .ok (.val v), fun σ₀ τ => by
-        simp only [UpdElem.write, bind, Except.bind, pure, Except.pure]
+        simp only [Surface.UpdElem.write, bind, Except.bind, pure, Except.pure]
         split <;> rfl⟩
     · rename_i y p
       cases he
       exact ⟨fun σ₀ => p.eval σ₀ >>= fun rs => .ok (.spath rs.1 rs.2), fun σ₀ τ => by
-        simp only [UpdElem.write, bind, Except.bind, pure, Except.pure]
+        simp only [Surface.UpdElem.write, bind, Except.bind, pure, Except.pure]
         split <;> rfl⟩
     · cases he
-  have h' : m.after (fun τ => m.after (fun ρ => holds ρ ψ) (Upd.apply P τ)) (Upd.apply [e] σ) := h
-  change m.after (fun ρ => holds ρ ψ) (Upd.apply (P ++ [e]) σ)
+  have h' : m.after (fun τ => m.after (fun ρ => holds ρ ψ) (Surface.Upd.apply P τ)) (Surface.Upd.apply [e] σ) := h
+  change m.after (fun ρ => holds ρ ψ) (Surface.Upd.apply (P ++ [e]) σ)
   rw [Upd.apply_single, hw] at h'
   rw [Upd.apply_append_single]
   simp only [hw]
   cases hb : bnd σ with
   | error eb =>
     rw [hb] at h'
-    cases Upd.apply P σ with
+    cases Surface.Upd.apply P σ with
     | error _ => exact h'
     | ok _ => exact h'
   | ok b =>
     rw [hb] at h'
-    have h'' : m.after (fun ρ => holds ρ ψ) (Upd.apply P (σ.setEnv x b)) := h'
+    have h'' : m.after (fun ρ => holds ρ ψ) (Surface.Upd.apply P (σ.setEnv x b)) := h'
     have hag : EnvAgreeExcept [x] σ (σ.setEnv x b) :=
       EnvAgreeExcept.setEnv_right ⟨rfl, rfl, rfl, rfl, fun _ _ => rfl, rfl, rfl⟩
         (List.mem_singleton_self x) b
-    have hr := Upd.apply_frame hag P (fun y hy hm => by
+    have hr := Surface.Upd.apply_frame hag P (fun y hy hm => by
       rw [List.mem_singleton] at hm; subst hm; exact hx hy)
-    have hl : ∀ ρ₁, Upd.apply P (σ.setEnv x b) = .ok ρ₁ →
+    have hl : ∀ ρ₁, Surface.Upd.apply P (σ.setEnv x b) = .ok ρ₁ →
         lookupBy x ρ₁.env = lookupBy x (σ.setEnv x b).env :=
-      fun ρ₁ h₁ => Upd.foldl_lookup P hx h₁
+      fun ρ₁ h₁ => Surface.Upd.foldl_lookup P hx h₁
     revert h'' hr hl
-    generalize Upd.apply P σ = r₀
-    generalize Upd.apply P (σ.setEnv x b) = r₁
+    generalize Surface.Upd.apply P σ = r₀
+    generalize Surface.Upd.apply P (σ.setEnv x b) = r₁
     intro h'' hr hl
     match r₀, r₁, hr with
     | .error _, .error _, _ => exact h''
@@ -476,9 +476,9 @@ theorem peel_sound {m : Modality} {P : Upd C} {e : UpdElem C} {x : Var}
       exact (holds_frame ψ (by intro _ _ hm; simp only [List.not_mem_nil] at hm) hag').1 h''
 
 theorem seqRev_sound {m : Modality} {ψ ψ' : NFml C} (hψ : ∀ σ, holds σ ψ' → holds σ ψ) :
-    (rs : List (UpdElem C)) → ∀ σ, holds σ (seqRev m ψ' rs) → holds σ (.upd m rs.reverse ψ)
+    (rs : List (Surface.UpdElem C)) → ∀ σ, holds σ (seqRev m ψ' rs) → holds σ (.upd m rs.reverse ψ)
   | [], σ, h => by
-    simp only [seqRev, holds, Upd.apply, List.reverse_nil, List.foldlM_nil] at h ⊢
+    simp only [seqRev, holds, Surface.Upd.apply, List.reverse_nil, List.foldlM_nil] at h ⊢
     exact hψ σ h
   | [e], σ, h => by
     simp only [seqRev, holds, List.reverse_cons, List.reverse_nil, List.nil_append] at h ⊢
@@ -633,15 +633,15 @@ theorem wrap_dropWt {φ : NFml C} : (Γ : List (Hyp C)) →
 
 /-- `Proves.close` with the `wt` premises set aside: a leaf of an
 obligation, closed by a tactic that does not read `wt`. -/
-theorem _root_.Solidity.Proves.close_dropWt {R : RuleSet} {Γ : List (Hyp C)} {φ : NFml C}
+theorem _root_.Solidity.NFml.Proves.close_dropWt {R : RuleSet} {Γ : List (Hyp C)} {φ : NFml C}
     (h : Valid (Hyp.wrap (dropWt Γ) φ)) : Proves R Γ φ :=
   Proves.close (fun σ => wrap_dropWt Γ σ (h σ))
 
 /-- A `wt(storage)` premise holds of a storage that holds its layout. -/
-theorem layoutOk_of_wt {σ : State} {vs : List (Name × Ty)}
+theorem layoutOk_of_wt {σ : Semantics.State} {vs : List (Name × Ty)}
     (h : holds σ (.defined (Term.wt vs (C := C) .storage))) : Decide.LayoutOk vs σ := by
   have hw : storageWtB vs σ.storage = true := by
-    simp only [holds, Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at h
+    simp only [holds, Surface.Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at h
     revert h
     cases storageWtB vs σ.storage with
     | true => exact fun _ => rfl
@@ -663,7 +663,7 @@ theorem wtRoots?_isWt {a : NFml C} {vs : List (Name × Ty)} (h : wtRoots? a = so
   · rfl
   · cases h
 
-theorem wtRoots?_layout {a : NFml C} {vs : List (Name × Ty)} (h : wtRoots? a = some vs) {σ : State}
+theorem wtRoots?_layout {a : NFml C} {vs : List (Name × Ty)} (h : wtRoots? a = some vs) {σ : Semantics.State}
     (ha : holds σ a) : Decide.LayoutOk vs σ := by
   unfold wtRoots? at h
   split at h
@@ -711,21 +711,21 @@ theorem synClose_sound {Γ : List (Hyp C)} {φ : NFml C} (h : synClose Γ φ = t
   rw [Decide.NFml.toL_holds _ (Decide.Rel.empty σ) hf, ← Decide.LFml.elim_holds σ]
   exact Decide.LFml.close_holds hL hs
 
-end Derive
+end NFml.Derive
 
-open Derive in
+open NFml.Derive in
 /-- **A residue whose leaves are proved proves the sequent.** -/
-theorem Proves.of_residue {close : List (Hyp C) → NFml C → Bool}
-    (hclose : ∀ Γ φ, close Γ φ = true → Proves .all Γ φ) :
+theorem NFml.Proves.of_residue {close : List (Hyp C) → NFml C → Bool}
+    (hclose : ∀ Γ φ, close Γ φ = true → NFml.Proves .all Γ φ) :
     ∀ {n b : Nat} {Γ : List (Hyp C)} {φ : NFml C} {ls : List (Leaf C)} {b' : Nat},
-      residue n close b Γ φ = some (ls, b') → (∀ l ∈ ls, Proves .all l.1 l.2) →
-      Proves .all Γ φ
+      residue n close b Γ φ = some (ls, b') → (∀ l ∈ ls, NFml.Proves .all l.1 l.2) →
+      NFml.Proves .all Γ φ
   | 0, _, _, _, _, _, h, _ => nomatch h
   | _ + 1, 0, _, _, _, _, h, _ => nomatch h
   | n + 1, b + 1, Γ, φ, ls, b', h, hl => by
     have ih : ∀ b Γ φ ls b', residue n close b Γ φ = some (ls, b') →
-        (∀ l ∈ ls, Proves .all l.1 l.2) → Proves .all Γ φ :=
-      fun _ _ _ _ _ h' hl' => Proves.of_residue hclose h' hl'
+        (∀ l ∈ ls, NFml.Proves .all l.1 l.2) → NFml.Proves .all Γ φ :=
+      fun _ _ _ _ _ h' hl' => NFml.Proves.of_residue hclose h' hl'
     match φ, h with
     | .imp a ψ, h => exact .intro (ih _ _ _ _ _ h hl)
     | .all x p ψ, h => exact .allIntro (ih _ _ _ _ _ h hl)
@@ -737,30 +737,30 @@ theorem Proves.of_residue {close : List (Hyp C) → NFml C → Bool}
       · cases h
         exact hl _ (List.mem_singleton_self _)
 
-open Derive in
+open NFml.Derive in
 /-- Nothing left: the strategy and the closer prove the sequent. -/
-theorem Proves.of_closes {n : Nat} {close : List (Hyp C) → NFml C → Bool}
-    (hclose : ∀ Γ φ, close Γ φ = true → Proves .all Γ φ) {b : Nat} {Γ : List (Hyp C)}
-    {φ : NFml C} (h : closes n close b Γ φ = true) : Proves .all Γ φ := by
+theorem NFml.Proves.of_closes {n : Nat} {close : List (Hyp C) → NFml C → Bool}
+    (hclose : ∀ Γ φ, close Γ φ = true → NFml.Proves .all Γ φ) {b : Nat} {Γ : List (Hyp C)}
+    {φ : NFml C} (h : closes n close b Γ φ = true) : NFml.Proves .all Γ φ := by
   simp only [closes] at h
   split at h
-  · exact Proves.of_residue hclose ‹_› leaves_nil
+  · exact NFml.Proves.of_residue hclose ‹_› leaves_nil
   · cases h
 
 /-- `sol_prove`'s proof when nothing is left. -/
-theorem Proves.of_proves {Γ : List (Hyp C)} {φ : NFml C} (h : Derive.proves Γ φ = true) :
-    Proves .all Γ φ :=
-  Proves.of_closes (fun _ _ => Derive.synClose_sound) h
+theorem NFml.Proves.of_proves {Γ : List (Hyp C)} {φ : NFml C} (h : NFml.Derive.proves Γ φ = true) :
+    NFml.Proves .all Γ φ :=
+  NFml.Proves.of_closes (fun _ _ => NFml.Derive.synClose_sound) h
 
 /-- `sol_prove`'s proof when leaves are left. -/
-theorem Proves.of_synResidue {Γ : List (Hyp C)} {φ : NFml C} {ls : List (Derive.Leaf C)}
-    {b' : Nat} (h : Derive.residue Derive.budget Derive.synClose Derive.budget Γ φ = some (ls, b'))
-    (hl : ∀ l ∈ ls, Proves .all l.1 l.2) : Proves .all Γ φ :=
-  Proves.of_residue (fun _ _ => Derive.synClose_sound) h hl
+theorem NFml.Proves.of_synResidue {Γ : List (Hyp C)} {φ : NFml C} {ls : List (NFml.Derive.Leaf C)}
+    {b' : Nat} (h : NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose NFml.Derive.budget Γ φ = some (ls, b'))
+    (hl : ∀ l ∈ ls, NFml.Proves .all l.1 l.2) : NFml.Proves .all Γ φ :=
+  NFml.Proves.of_residue (fun _ _ => NFml.Derive.synClose_sound) h hl
 
 /-! ## The tactics -/
 
-namespace Derive
+namespace NFml.Derive
 
 open Lean Elab Tactic Meta
 
@@ -843,7 +843,7 @@ subsumes, each on its own so that the replay does not try the other; then
 `fitsClose` (`small = false`) gets only the last two, whose `simp`,
 `omega` and `grind` heed heartbeats. -/
 def leafTacs (wt : Bool := false) (small : Bool := true) : Array (Array String) :=
-  let pre := #[if wt then "refine Proves.close_dropWt ?_" else "refine Proves.close ?_",
+  let pre := #[if wt then "refine NFml.Proves.close_dropWt ?_" else "refine NFml.Proves.close ?_",
     "sol_symex"]
   let red := pre ++ #["refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_", "sol_reduce"]
   (if small then #[red.push "sol_decide_cons", red.push "sol_decide_heuristic"] else #[]) ++
@@ -858,7 +858,7 @@ def goalFits (l : MVarId) : MetaM Bool := do
   if ty.hasFVar || ty.hasMVar then return true
   unsafe evalExpr Bool (mkConst ``Bool) (mkAppN (mkConst ``leafFits) #[C, Γ, φ])
 
-end Derive
+end NFml.Derive
 
 open Lean Elab Tactic Meta in
 /-- `sol_prove`: the strategy as one kernel evaluation (`Proves.of_residue`),
@@ -867,10 +867,10 @@ elab_rules : tactic
   | `(tactic| sol_prove) => withMainContext do
     let g ← getMainGoal
     let rest ← getUnsolvedGoals
-    let leaves ← Derive.prove g
+    let leaves ← NFml.Derive.prove g
     setGoals (leaves ++ rest.erase g)
 
-namespace Derive
+namespace NFml.Derive
 
 open Lean Elab Tactic Meta
 
@@ -949,7 +949,7 @@ def replayLines (found : List (Lean.Name × Array String)) : Array String :=
   | _ => found.foldl (fun ls (n, body) =>
       (ls.push s!"case {n} =>") ++ body.map ("  " ++ ·)) #["sol_prove"]
 
-end Derive
+end NFml.Derive
 
 open Lean Elab Tactic Meta in
 /-- `sol_prove?`: `sol_prove`, each leaf closed by the first of
@@ -961,19 +961,19 @@ elab_rules : tactic
   | `(tactic| sol_prove?%$tk) => withMainContext do
     let g ← getMainGoal
     let rest ← getUnsolvedGoals
-    let s ← Derive.proveSearch g
+    let s ← NFml.Derive.proveSearch g
     if let some l := s.open_.head? then
       logInfo m!"sol_prove?: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
-    else unless ← Derive.replayFits s.heartbeats do
+    else unless ← NFml.Derive.replayFits s.heartbeats do
       logWarning m!"sol_prove?: the replay needs about {s.heartbeats / 1000} heartbeats in one \
         declaration, past `maxHeartbeats`"
     setGoals (s.open_ ++ rest.erase g)
-    ProofTree.suggest tk (Derive.replayLines s.found)
+    ProofTree.suggest tk (NFml.Derive.replayLines s.found)
 
 /-! ## The leaves' storage writes, counted (`#solkey_scan`, `Core.Seq.scanLeaves`) -/
 
 /-- How many storage writes the context's updates hold. -/
-def Derive.storageWrites (Γ : List (Hyp C)) : Nat :=
+def NFml.Derive.storageWrites (Γ : List (Hyp C)) : Nat :=
   Γ.foldl (fun n h => match h with
     | .upd _ U => n + (U.filter fun | .storage _ => true | _ => false).length
     | _ => n) 0

@@ -80,7 +80,7 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
   let mut open_ : List MVarId := []
   for l in leaves do
     let name ← l.getTag
-    match ← Solidity.Derive.searchLeaf l with
+    match ← NFml.Derive.searchLeaf l with
     | some (t, h) =>
       found := found ++ [(name, t)]
       hb := hb + h
@@ -89,11 +89,11 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
       found := found ++ [(name, #["sorry"])]
   if let some l := open_.head? then
     logInfo m!"sol_prove?: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
-  else unless ← Solidity.Derive.replayFits hb do
+  else unless ← NFml.Derive.replayFits hb do
     logWarning m!"sol_prove?: the replay needs about {hb / 1000} heartbeats in one \
       declaration, past `maxHeartbeats`"
   setGoals (open_ ++ rest)
-  ProofTree.suggest stx[0] (Solidity.Derive.replayLines found)
+  ProofTree.suggest stx[0] (NFml.Derive.replayLines found)
 
 /-! ## A scoped formula refuted at a state
 

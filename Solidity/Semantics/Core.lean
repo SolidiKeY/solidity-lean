@@ -103,7 +103,7 @@ end Env
 
 /-- A state in the context `Γ`: `Semantics.State`'s parts, the locals typed
 by `Γ`. -/
-structure State (C : Contract) (Γ : Ctx) where
+structure EState (C : Contract) (Γ : Ctx) where
   storage : List (Name × SVal)
   heap : List (Nat × Semantics.MObj) := []
   nextId : Nat := 0
@@ -112,41 +112,41 @@ structure State (C : Contract) (Γ : Ctx) where
   selfBalance : Int := 0
   tx : Semantics.TxEnv := {}
 
-namespace State
+namespace EState
 
 /-- Everything but the locals, as `Semantics.lean`'s operations take it. -/
-def glob {Γ : Ctx} (σ : State C Γ) : Semantics.State :=
+def glob {Γ : Ctx} (σ : EState C Γ) : Semantics.State :=
   { storage := σ.storage, heap := σ.heap, nextId := σ.nextId, net := σ.net,
     selfBalance := σ.selfBalance, tx := σ.tx }
 
 /-- A global part with locals. -/
-def ofGlob {Γ : Ctx} (τ : Semantics.State) (e : Env C Γ) : State C Γ :=
+def ofGlob {Γ : Ctx} (τ : Semantics.State) (e : Env C Γ) : EState C Γ :=
   { storage := τ.storage, heap := τ.heap, nextId := τ.nextId, env := e, net := τ.net,
     selfBalance := τ.selfBalance, tx := τ.tx }
 
 /-- The global part replaced. -/
-def withGlob {Γ : Ctx} (σ : State C Γ) (τ : Semantics.State) : State C Γ := ofGlob τ σ.env
+def withGlob {Γ : Ctx} (σ : EState C Γ) (τ : Semantics.State) : EState C Γ := ofGlob τ σ.env
 
 /-- The locals replaced, in another context. -/
-def withEnv {Γ Δ : Ctx} (σ : State C Γ) (e : Env C Δ) : State C Δ :=
+def withEnv {Γ Δ : Ctx} (σ : EState C Γ) (e : Env C Δ) : EState C Δ :=
   { storage := σ.storage, heap := σ.heap, nextId := σ.nextId, env := e, net := σ.net,
     selfBalance := σ.selfBalance, tx := σ.tx }
 
 /-- A local declared. -/
-def push {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.Denote C) : State C (t :: Γ) :=
+def push {Γ : Ctx} {t : LTy} (σ : EState C Γ) (v : t.Denote C) : EState C (t :: Γ) :=
   σ.withEnv (v, σ.env)
 
 /-- A local set. -/
-def setLocal {Γ : Ctx} {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.Denote C) : State C Γ :=
+def setLocal {Γ : Ctx} {t : LTy} (σ : EState C Γ) (i : Idx Γ t) (v : t.Denote C) : EState C Γ :=
   σ.withEnv (Env.set i v σ.env)
 
 /-- A scope's locals popped. -/
-def drop {Γ Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : State C Γ := σ.withEnv (Env.drop h σ.env)
+def drop {Γ Δ : Ctx} (h : Ext Γ Δ) (σ : EState C Δ) : EState C Γ := σ.withEnv (Env.drop h σ.env)
 
 /-- A global state with no locals. -/
-def ofSem (τ : Semantics.State) : State C [] := State.ofGlob τ ()
+def ofSem (τ : Semantics.State) : EState C [] := EState.ofGlob τ ()
 
-end State
+end EState
 
 /-! ## Expressions -/
 
@@ -156,21 +156,21 @@ variable {Γ : Ctx}
 
 /-- The value a simple value denotes: a literal, a local's, the
 environment's. -/
-def Simple.eval (σ : State C Γ) {p : PrimTy} : Simple C Γ p → Res Value
+def Simple.eval (σ : EState C Γ) {p : PrimTy} : Simple C Γ p → Res Value
   | .lit n _ => pure (.int n)
   | .bool b => pure (.bool b)
   | .local i => pure (Env.get i σ.env)
   | .env k _ => pure (.int (σ.glob.envVal k))
 
 /-- The path an alias is bound to; an unset one reverts. -/
-def aliasPath (σ : State C Γ) {R : RefTy} (i : Idx Γ (.alias R)) : Res (Name × List Seg) :=
+def aliasPath (σ : EState C Γ) {R : RefTy} (i : Idx Γ (.alias R)) : Res (Name × List Seg) :=
   match (Env.get i σ.env : Option (Name × List Seg)) with
   | some p => pure p
   | none => .error .revert
 
 /-- The object a memory local names; an unset one reverts, as an unset
 alias does (decision 17'). -/
-def memRef (σ : State C Γ) {R : RefTy} (i : Idx Γ (.mem R)) : Res Nat :=
+def memRef (σ : EState C Γ) {R : RefTy} (i : Idx Γ (.mem R)) : Res Nat :=
   match (Env.get i σ.env : Option Nat) with
   | some id => pure id
   | none => .error .revert
@@ -178,11 +178,11 @@ def memRef (σ : State C Γ) {R : RefTy} (i : Idx Γ (.mem R)) : Res Nat :=
 mutual
 
 /-- The storage path a path denotes in `σ`. -/
-def SPath.resolve (σ : State C Γ) : {T : Ty} → SPath C Γ T → Res (Name × List Seg)
+def SPath.resolve (σ : EState C Γ) : {T : Ty} → SPath C Γ T → Res (Name × List Seg)
   | _, .alias i => aliasPath σ i
   | _, .loc l => l.resolve σ
 
-def Loc.resolve (σ : State C Γ) : {T : Ty} → Loc C Γ T → Res (Name × List Seg)
+def Loc.resolve (σ : EState C Γ) : {T : Ty} → Loc C Γ T → Res (Name × List Seg)
   | _, .root r _ => pure (r, [])
   | _, .field b f _ => do
     let (r, segs) ← b.resolve σ
@@ -194,11 +194,11 @@ def Loc.resolve (σ : State C Γ) : {T : Ty} → Loc C Γ T → Res (Name × Lis
     pure (r, segs ++ [.at i])
 
 /-- The slot a memory path holds in `σ`. -/
-def MPath.mval (σ : State C Γ) : {T : Ty} → MPath C Γ T → Res MVal
+def MPath.mval (σ : EState C Γ) : {T : Ty} → MPath C Γ T → Res MVal
   | _, .var i _ => do pure (.ref (← memRef σ i))
   | _, .loc l => l.read σ
 
-def MLoc.read (σ : State C Γ) : {T : Ty} → MLoc C Γ T → Res MVal
+def MLoc.read (σ : EState C Γ) : {T : Ty} → MLoc C Γ T → Res MVal
   | _, .field b f _ => do
     let id ← (← b.mval σ).asRef
     match ← σ.glob.getObj id with
@@ -217,7 +217,7 @@ def MLoc.read (σ : State C Γ) : {T : Ty} → MLoc C Γ T → Res MVal
     | .struct _ => .error .undef
 
 /-- The value a value expression denotes in `σ`. -/
-def Val.eval (σ : State C Γ) : {p : PrimTy} → Val C Γ p → Res Value
+def Val.eval (σ : EState C Γ) : {p : PrimTy} → Val C Γ p → Res Value
   | _, .simple s => s.eval σ
   | _, .read l => do
     let (r, segs) ← l.resolve σ
@@ -234,19 +234,19 @@ def Val.eval (σ : State C Γ) : {p : PrimTy} → Val C Γ p → Res Value
 end
 
 /-- The storage value a source stores. -/
-def Src.value (σ : State C Γ) {T : Ty} : Src C Γ T → Res SVal
+def Src.value (σ : EState C Γ) {T : Ty} : Src C Γ T → Res SVal
   | .val v => do pure (← v.eval σ).toSVal
   | .copy p _ => do
     let (r, segs) ← p.resolve σ
     σ.glob.findStorage r segs
 
 /-- What a push appends: the slot, or its argument laid on fresh slots. -/
-def Src.pushVal (σ : State C Γ) {T : Ty} : Option (Src C Γ T) → SVal → Res SVal
+def Src.pushVal (σ : EState C Γ) {T : Ty} : Option (Src C Γ T) → SVal → Res SVal
   | none, slot => pure slot
   | some r, _ => do pure (← r.value σ).strip
 
 /-- `l = mv` into a memory location. -/
-def MLoc.write (σ : State C Γ) (mv : MVal) {T : Ty} : MLoc C Γ T → Res (State C Γ)
+def MLoc.write (σ : EState C Γ) (mv : MVal) {T : Ty} : MLoc C Γ T → Res (EState C Γ)
   | .field b f _ => do
     let id ← (← b.mval σ).asRef
     σ.withGlob <$> memWriteField σ.glob id f mv
@@ -256,13 +256,13 @@ def MLoc.write (σ : State C Γ) (mv : MVal) {T : Ty} : MLoc C Γ T → Res (Sta
     σ.withGlob <$> memWriteIndex σ.glob id iv mv
 
 /-- The slot a memory source writes. -/
-def MSrc.mval (σ : State C Γ) {T : Ty} : MSrc C Γ T → Res MVal
+def MSrc.mval (σ : EState C Γ) {T : Ty} : MSrc C Γ T → Res MVal
   | .val v => do pure (← v.eval σ).toMVal
   | .ref p => do pure (.ref (← (← p.mval σ).asRef))
 
 /-- The object a memory right-hand side names, and the state its
 allocation leaves: an object by identity, a deep copy, a fresh array. -/
-def MRhs.eval (σ : State C Γ) {R : RefTy} : MRhs C Γ R → Res (State C Γ × Nat)
+def MRhs.eval (σ : EState C Γ) {R : RefTy} : MRhs C Γ R → Res (EState C Γ × Nat)
   | .alias p => do pure (σ, ← (← p.mval σ).asRef)
   | .copy p _ => do
     let (root, segs) ← p.resolve σ
@@ -275,7 +275,7 @@ def MRhs.eval (σ : State C Γ) {R : RefTy} : MRhs C Γ R → Res (State C Γ ×
     pure (σ.withGlob τ, ← mv.asRef)
 
 /-- The path an alias's right-hand side names, and the state a push leaves. -/
-def ARhs.eval (σ : State C Γ) {R : RefTy} : ARhs C Γ R → Res (State C Γ × (Name × List Seg))
+def ARhs.eval (σ : EState C Γ) {R : RefTy} : ARhs C Γ R → Res (EState C Γ × (Name × List Seg))
   | .path p => do pure (σ, ← p.resolve σ)
   | .push b _ => do
     let (root, segs) ← b.resolve σ
@@ -283,27 +283,27 @@ def ARhs.eval (σ : State C Γ) {R : RefTy} : ARhs C Γ R → Res (State C Γ ×
     pure (σ.withGlob τ, (root, segs ++ [.at n]))
 
 /-- The address of a memory location. -/
-def MLoc.addr (σ : State C Γ) {T : Ty} : MLoc C Γ T → Res Semantics.Addr
+def MLoc.addr (σ : EState C Γ) {T : Ty} : MLoc C Γ T → Res Semantics.Addr
   | .field b f _ => do pure (.memoryField (← (← b.mval σ).asRef) f)
   | .index _ b i => do
     let id ← (← b.mval σ).asRef
     pure (.memoryIndex id (← (← i.eval σ).asInt))
 
 /-- A memory write is a write at its location's address. -/
-theorem MLoc.write_eq (σ : State C Γ) (mv : MVal) {T : Ty} (l : MLoc C Γ T) :
+theorem MLoc.write_eq (σ : EState C Γ) (mv : MVal) {T : Ty} (l : MLoc C Γ T) :
     l.write σ mv = l.addr σ >>= fun a => σ.withGlob <$> Solidity.writeAddr σ.glob mv a := by
   cases l <;> simp only [MLoc.write, MLoc.addr, Solidity.writeAddr, bind_assoc, pure_bind]
 
 /-- `x ⊕= v` on a local. -/
-def opLocal (σ : State C Γ) (op : BinOp) (p : PrimTy) (i : Idx Γ (.val p)) (v : Value) :
-    Res (State C Γ) := do
+def opLocal (σ : EState C Γ) (op : BinOp) (p : PrimTy) (i : Idx Γ (.val p)) (v : Value) :
+    Res (EState C Γ) := do
   let new ← applyBinOp op (Env.get i σ.env) v
   let new ← checkArith (.prim p) new
   pure (σ.setLocal i new)
 
 /-- A compound assignment's write of `v` into its target. -/
-def OpLoc.store (σ : State C Γ) (op : BinOp) : {p : PrimTy} → OpLoc C Γ p → Value →
-    Res (State C Γ)
+def OpLoc.store (σ : EState C Γ) (op : BinOp) : {p : PrimTy} → OpLoc C Γ p → Value →
+    Res (EState C Γ)
   | p, .local i, v => opLocal σ op p i v
   | p, .root r _, v => σ.withGlob <$> opStore σ.glob op p r [] v
   | p, .field b f h, v => do
@@ -321,20 +321,20 @@ def OpLoc.store (σ : State C Γ) (op : BinOp) : {p : PrimTy} → OpLoc C Γ p �
     σ.withGlob <$> opMem σ.glob op p (.memoryIndex id iv) v
 
 /-- `x++` on a local: the state, and the value. -/
-def bumpLocal (σ : State C Γ) (op : IncDec) (p : PrimTy) (i : Idx Γ (.val p)) :
-    Res (State C Γ × Value) := do
+def bumpLocal (σ : EState C Γ) (op : IncDec) (p : PrimTy) (i : Idx Γ (.val p)) :
+    Res (EState C Γ × Value) := do
   let old : Value := Env.get i σ.env
   let oldInt ← old.asInt
   let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
   pure (σ.setLocal i new, if op.isPre then new else old)
 
 /-- A global step's state and value, with the locals. -/
-private def withGlob₂ (σ : State C Γ) : Semantics.State × Value → State C Γ × Value
+private def withGlob₂ (σ : EState C Γ) : Semantics.State × Value → EState C Γ × Value
   | (τ, v) => (σ.withGlob τ, v)
 
 /-- `l++`: the state it leaves, and its value. -/
-def OpLoc.bump (σ : State C Γ) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p →
-    Res (State C Γ × Value)
+def OpLoc.bump (σ : EState C Γ) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p →
+    Res (EState C Γ × Value)
   | p, .local i => bumpLocal σ op p i
   | p, .root r _ => withGlob₂ σ <$> bumpStore σ.glob op p r []
   | p, .field b f h => do
@@ -352,20 +352,20 @@ def OpLoc.bump (σ : State C Γ) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p �
     withGlob₂ σ <$> bumpMem σ.glob op p (.memoryIndex id iv)
 
 /-- `pv = a.send(v);` with both evaluated (`Solidity.sendAt`). -/
-def sendAt (σ : State C Γ) (pv : Idx Γ (.val .bool)) (addr amt : Int) : Res (State C Γ) :=
+def sendAt (σ : EState C Γ) (pv : Idx Γ (.val .bool)) (addr amt : Int) : Res (EState C Γ) :=
   if amt < 0 then .error .revert
   else match lookupBy (sendKey addr amt) σ.tx.ext with
     | none | some (.ok _) => .ok ((σ.withGlob (σ.glob.pay addr amt)).setLocal pv (.bool true))
     | some _ => .ok (σ.setLocal pv (.bool false))
 
 /-- The call as it is made, its receiver and arguments evaluated. -/
-def ExtCall.key (σ : State C Γ) (c : ExtCall C Γ) : Res Semantics.ExtKey := do
+def ExtCall.key (σ : EState C Γ) (c : ExtCall C Γ) : Res Semantics.ExtKey := do
   let a ← (← c.addr.eval σ).asInt
   let vs ← c.args.mapM fun a => a.2.eval σ
   pure ⟨a, c.fn, vs⟩
 
 /-- A call's arguments, each read in the caller's state, in order. -/
-def Args.eval (σ : State C Γ) : {ps : Ctx} → Args C Γ ps → Res (Env C ps)
+def Args.eval (σ : EState C Γ) : {ps : Ctx} → Args C Γ ps → Res (Env C ps)
   | _, as => Args.casesOn (motive := fun ps _ => Res (Env C ps)) as (pure ())
       (fun as _ _ e => do
         let r ← Args.eval σ as

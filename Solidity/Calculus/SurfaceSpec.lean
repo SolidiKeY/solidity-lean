@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 
 /-!
 # Specifications, compiled to dynamic logic
@@ -202,7 +202,7 @@ partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × 
     match T with
     | .ref (.mapping (.prim kp) V) => do
       let (q, t) ← k.term ctx
-      unless q = kp || k.isNum do throw s!"a key of type {primName q} where a {primName kp} is expected"
+      unless q = kp || k.isNum do throw s!"a key of type {Surface.primName q} where a {Surface.primName kp} is expected"
       pure (V, .at p t)
     | .ref (.array E) | .ref (.fixed E _) => do
       let (_, t) ← k.term ctx
@@ -224,7 +224,7 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
     e.term ctx.old
   | .net e => do
     let (p, t) ← e.term ctx
-    unless p = .uint || e.isNum do throw s!"net(…) of a {primName p}, where an address is expected"
+    unless p = .uint || e.isNum do throw s!"net(…) of a {Surface.primName p}, where an address is expected"
     match ctx.ledger with
     | none => pure (.uint, .net t)
     | some x => pure (.uint, .netOf x t)
@@ -247,15 +247,15 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
   | .unop .neg (.num n) => pure (.int, .lit (.int (-(n : Int))))
   | .unop op a => do
     let (p, t) ← a.term ctx
-    unless op.accepts p do throw s!"operator {UnOp.sym op} does not take {primName p}"
+    unless op.accepts p do throw s!"operator {UnOp.sym op} does not take {Surface.primName p}"
     pure (op.ret p, .unop op p t)
   | .binop op a b => do
     let (pa, ta) ← a.term ctx
     let (pb, tb) ← b.term ctx
     let p := if a.isNum then pb else pa
     unless a.isNum || b.isNum || pa = pb do
-      throw s!"operands of {BinOp.sym op} of types {primName pa} and {primName pb}"
-    unless op.accepts p do throw s!"operator {BinOp.sym op} does not take {primName p}"
+      throw s!"operands of {BinOp.sym op} of types {Surface.primName pa} and {Surface.primName pb}"
+    unless op.accepts p do throw s!"operator {BinOp.sym op} does not take {Surface.primName p}"
     pure (op.ret p, .binop op p ta tb)
   | .imp .. | .iff .. | .all .. | .ex .. => throw "a formula where a value is expected"
 
@@ -308,7 +308,7 @@ where
   /-- A `bool` value as a condition, `t = true`. -/
   cond (e : SpecExpr) : Except String (NFml C) := do
     let (p, t) ← e.term C ctx
-    unless p = .bool do throw s!"a {primName p} where a condition is expected"
+    unless p = .bool do throw s!"a {Surface.primName p} where a condition is expected"
     pure (boolFml t)
 
 /-! ### `assignable`: the words a function may change -/
@@ -339,7 +339,7 @@ def SpecLoc.compile (ctx : SpecCtx C) : SpecLoc → Except String (String × Ty 
     match T with
     | .ref (.mapping (.prim kp) V) =>
       unless q = kp || e.isNum do
-        throw s!"assignable: a key of type {primName q} where a {primName kp} is expected"
+        throw s!"assignable: a key of type {Surface.primName q} where a {Surface.primName kp} is expected"
       pure (r, V, ss ++ [.key t])
     | .ref (.array E) | .ref (.fixed E _) => pure (r, E, ss ++ [.key t])
     | _ => throw "assignable: indexing something that is not a mapping or an array"
@@ -429,7 +429,7 @@ update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
 `A` one by one (a counterexample search names the one that fails).  For
 `constructor`, the deployment's (the module docstring). -/
 def specPieces (f : String) :
-    Except String (List (NFml C) × List (NFml C) × Upd C × Surface.Prog C × List (NFml C)) := do
+    Except String (List (NFml C) × List (NFml C) × Surface.Upd C × Surface.Prog C × List (NFml C)) := do
   -- `constructor` names the contract's constructor (`Contract.ctor`)
   let ctor := f == "constructor"
   let some d := if ctor then C.ctor else lookupBy f C.funs
@@ -473,7 +473,7 @@ def specPieces (f : String) :
   -- `T result; result = f(x̄)@C;`: the call returns to its targets (none
   -- for a void function, `f(x̄)@C;`, still a `FunctionBodyStatement`)
   let call : List RawStmt := if ctor then [.call (.name f) args] else
-    rets.map (fun (_, v, p) => RawStmt.decl (.named (primName p)) v none) ++
+    rets.map (fun (_, v, p) => RawStmt.decl (.named (Surface.primName p)) v none) ++
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
   let Γ : ECtx := ps.map fun (n, p) => (n, LocalTy.val p)
   let P ← ((elabStmts C call).run { funs := C.funs }).run' (Γ, 1)
@@ -483,7 +483,7 @@ def specPieces (f : String) :
   -- oldNet := mtSt`: the update is parallel, so `old := storage` would bind
   -- the storage it discards)
   let start : STerm C := if ctor then .mtSt C.vars else .storage
-  let snap : Upd C :=
+  let snap : Surface.Upd C :=
     (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar start]
       else []) ++
     if d.spec.ensures.any SpecExpr.usesOldNet || (d.spec.assignable.getD []).any SpecLoc.usesNet
@@ -510,7 +510,7 @@ def specPieces (f : String) :
 
 /-- The conclusion `{U} [ P ] (φ₁ ∧ … ∧ φₙ)`, the update left out when it
 is empty. -/
-def specBody (U : Upd C) (P : Surface.Prog C) (posts : List (NFml C)) : Surface.Fml C :=
+def specBody (U : Surface.Upd C) (P : Surface.Prog C) (posts : List (NFml C)) : Surface.Fml C :=
   let body : Surface.Fml C := .modal .box P (NFml.conj posts).toSurface
   if U.isEmpty then body else .upd .box U body
 
@@ -524,7 +524,7 @@ def specParts (f : String) : Except String (List (NFml C) × List (NFml C) × Su
 /-- **The obligation of `f`**: `R ∧ L ∧ M ∧ I ∧ requires → {old := storage ‖
 oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`,
 the parts of `specParts` put together. -/
-def specObligation (f : String) : Except String (Surface.Fml C) := do
+def Surface.specObligation (f : String) : Except String (Surface.Fml C) := do
   let (a, b, body) ← specParts C f
   pure (.imp (NFml.conj (a ++ b)).toSurface body)
 
@@ -540,7 +540,7 @@ syntax "spec!{ " ident " }" : term
 open Lean Elab Term Meta in
 elab_rules : term
   | `(spec[ $c ]{ $f:ident }) =>
-    elabAgainst c fun q => `((specObligation $c $(quote f.getId.toString)).map (Surface.Fml.quote $q))
+    elabAgainst c fun q => `((Surface.specObligation $c $(quote f.getId.toString)).map (Surface.Fml.quote $q))
 
 macro_rules
   | `(spec!{ $f:ident }) => `(spec[InContract.contract]{ $f })

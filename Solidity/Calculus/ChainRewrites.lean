@@ -1,4 +1,4 @@
-import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.NFmlUpdateRules
 import Solidity.Calculus.TermTaclets
 import Solidity.Calculus.StateParts
 
@@ -17,7 +17,7 @@ values:
 None of these is a step of the strategy (`Fml.step`).  Each is here a
 function on the whole line, computing the line after, with the one fact a
 chain needs of it: wherever the line after holds, the line before does
-(`LineRw`).  The semantics is `Calculus/UpdateRules.lean`'s and
+(`LineRw`).  The semantics is `Calculus/NFmlUpdateRules.lean`'s and
 `Calculus/TermRules.lean`'s; this module says *where* a rule acts.  A
 function returns `none` where its rule does not fit or would change
 nothing, so a link never repeats its line.
@@ -108,11 +108,11 @@ structure LineRw (C : Contract) where
   /-- The line after, or `none` where the rule does not fit. -/
   apply : NFml C → Option (NFml C)
   /-- Wherever the line after holds, the line before does. -/
-  sound : ∀ {φ ψ : NFml C}, apply φ = some ψ → ∀ σ, holds σ ψ → holds σ φ
+  sound : ∀ {φ ψ : NFml C}, apply φ = some ψ → ∀ σ, NFml.holds σ ψ → NFml.holds σ φ
 
 /-- A line rewritten to a valid one is valid. -/
-theorem LineRw.valid (r : LineRw C) {φ ψ : NFml C} (h : r.apply φ = some ψ) (hψ : Valid ψ) :
-    Valid φ :=
+theorem LineRw.valid (r : LineRw C) {φ ψ : NFml C} (h : r.apply φ = some ψ) (hψ : NFml.Valid ψ) :
+    NFml.Valid φ :=
   fun σ => r.sound h σ (hψ σ)
 
 /-- A postcondition that follows from another after the same run:
@@ -127,13 +127,13 @@ theorem Modality.after_mono (m : Modality) {p q : State → Prop} (h : ∀ τ, p
 /-- `f` on the update at position `i` of the spine, `0` the outermost:
 `f m U φ` rewrites `{U}_m φ`.  The updates above it stay; nothing below
 `{U} φ` is looked at but what `f` looks at. -/
-def NFml.atSpine (f : Modality → Upd C → NFml C → Option (NFml C)) : Nat → NFml C → Option (NFml C)
+def NFml.atSpine (f : Modality → Surface.Upd C → NFml C → Option (NFml C)) : Nat → NFml C → Option (NFml C)
   | 0, .upd m U φ => f m U φ
   | i + 1, .upd m U φ => (φ.atSpine f i).map (.upd m U)
   | _, _ => none
 
 /-- A rewrite of one update, one direction, is one of the line. -/
-theorem NFml.atSpine_sound {f : Modality → Upd C → NFml C → Option (NFml C)}
+theorem NFml.atSpine_sound {f : Modality → Surface.Upd C → NFml C → Option (NFml C)}
     (hf : ∀ {m U φ ψ}, f m U φ = some ψ → ∀ σ, holds σ ψ → holds σ (.upd m U φ)) :
     (i : Nat) → (φ : NFml C) → ∀ {ψ : NFml C}, φ.atSpine f i = some ψ → ∀ σ, holds σ ψ → holds σ φ
   | 0, φ, _, h, σ, hψ => by
@@ -149,7 +149,7 @@ theorem NFml.atSpine_sound {f : Modality → Upd C → NFml C → Option (NFml C
     | _ => nomatch h
 
 /-- A rewrite of one update that is an equivalence is one of the line. -/
-theorem NFml.atSpine_holds {f : Modality → Upd C → NFml C → Option (NFml C)}
+theorem NFml.atSpine_holds {f : Modality → Surface.Upd C → NFml C → Option (NFml C)}
     (hf : ∀ {m U φ ψ}, f m U φ = some ψ → ∀ σ, (holds σ ψ ↔ holds σ (.upd m U φ))) :
     (i : Nat) → (φ : NFml C) → ∀ {ψ : NFml C}, φ.atSpine f i = some ψ → ∀ σ, (holds σ ψ ↔ holds σ φ)
   | 0, φ, _, h, σ => by
@@ -177,7 +177,7 @@ storage it runs in (`Upd.foldl_setStorage`).  The printed merged line has one
 a storage operation whose storage argument is on the spine of `s`.  So `t`
 halts wherever `s` does (`Tm.onSpine_error`).  `spineAny f` asks `f` of each
 term on the spine. -/
-def Tm.spineAny (f : STerm C → Bool) : Tm C u → Bool
+def Surface.Tm.spineAny (f : STerm C → Bool) : Surface.Tm C u → Bool
   | STerm.select a r => f (.app1 (.select r) a) || a.spineAny f
   | STerm.delAt a p => f (.app2 .delAt a p) || a.spineAny f
   | STerm.pushSlot a p E => f (.app2 (.pushSlot E) a p) || a.spineAny f
@@ -190,52 +190,52 @@ def Tm.spineAny (f : STerm C → Bool) : Tm C u → Bool
     | .st, t => f t
     | _, _ => false
 
-@[inherit_doc Tm.spineAny]
-def Tm.onSpine (t s : STerm C) : Bool := t.spineAny (· == s)
+@[inherit_doc Surface.Tm.spineAny]
+def Surface.Tm.onSpine (t s : STerm C) : Bool := t.spineAny (· == s)
 
-theorem Tm.app1_eval (σ : State) (o : Op1 a s) (x : Tm C a) :
-    (Tm.app1 o x).eval σ = o.eval σ (x.eval σ) := rfl
-theorem Tm.app2_eval (σ : State) (o : Op2 a b s) (x : Tm C a) (y : Tm C b) :
-    (Tm.app2 o x y).eval σ = o.eval σ (x.eval σ) (y.eval σ) := rfl
-theorem Tm.app3_eval (σ : State) (o : Op3 a b c s) (x : Tm C a) (y : Tm C b) (z : Tm C c) :
-    (Tm.app3 o x y z).eval σ = o.eval σ (x.eval σ) (y.eval σ) (z.eval σ) := rfl
+theorem Surface.Tm.app1_eval (σ : State) (o : Op1 a s) (x : Surface.Tm C a) :
+    (Surface.Tm.app1 o x).eval σ = o.eval σ (x.eval σ) := rfl
+theorem Surface.Tm.app2_eval (σ : State) (o : Op2 a b s) (x : Surface.Tm C a) (y : Surface.Tm C b) :
+    (Surface.Tm.app2 o x y).eval σ = o.eval σ (x.eval σ) (y.eval σ) := rfl
+theorem Surface.Tm.app3_eval (σ : State) (o : Op3 a b c s) (x : Surface.Tm C a) (y : Surface.Tm C b) (z : Surface.Tm C c) :
+    (Surface.Tm.app3 o x y z).eval σ = o.eval σ (x.eval σ) (y.eval σ) (z.eval σ) := rfl
 
 /-- A term on the spine of `s` halts wherever `s` does. -/
-theorem Tm.onSpine_error {s : STerm C} {σ : State} {e : Halt} (hs : s.eval σ = .error e) :
+theorem Surface.Tm.onSpine_error {s : STerm C} {σ : State} {e : Halt} (hs : s.eval σ = .error e) :
     (t : STerm C) → t.onSpine s = true → ∃ e', t.eval σ = .error e'
   | STerm.select a r, h => by
-    simp only [Tm.onSpine, Tm.spineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onSpine, Surface.Tm.spineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onSpine_error hs a h
-      exact ⟨e', by rw [Tm.app1_eval, ha]; rfl⟩
+    · obtain ⟨e', ha⟩ := Surface.Tm.onSpine_error hs a h
+      exact ⟨e', by rw [Surface.Tm.app1_eval, ha]; rfl⟩
   | STerm.delAt a p, h | STerm.pushSlot a p _, h | STerm.pop a p, h | STerm.shrink a p, h
   | STerm.extend a p _, h => by
-    simp only [Tm.onSpine, Tm.spineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onSpine, Surface.Tm.spineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onSpine_error hs a h
-      exact ⟨e', by rw [Tm.app2_eval, ha]; rfl⟩
+    · obtain ⟨e', ha⟩ := Surface.Tm.onSpine_error hs a h
+      exact ⟨e', by rw [Surface.Tm.app2_eval, ha]; rfl⟩
   | STerm.save a p v, h => by
-    simp only [Tm.onSpine, Tm.spineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onSpine, Surface.Tm.spineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onSpine_error hs a h
-      rw [Tm.app3_eval, ha]
+    · obtain ⟨e', ha⟩ := Surface.Tm.onSpine_error hs a h
+      rw [Surface.Tm.app3_eval, ha]
       cases v.eval σ <;> exact ⟨_, rfl⟩
   | STerm.push a p v, h => by
-    simp only [Tm.onSpine, Tm.spineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onSpine, Surface.Tm.spineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onSpine_error hs a h
-      exact ⟨e', by rw [Tm.app3_eval, ha]; rfl⟩
+    · obtain ⟨e', ha⟩ := Surface.Tm.onSpine_error hs a h
+      exact ⟨e', by rw [Surface.Tm.app3_eval, ha]; rfl⟩
   | .pvS _, h | STerm.storage, h | STerm.mtSt _, h => by
-    simp only [Tm.onSpine, Tm.spineAny, beq_iff_eq] at h
+    simp only [Surface.Tm.onSpine, Surface.Tm.spineAny, beq_iff_eq] at h
     subst h; exact ⟨e, hs⟩
 
 /-- `t` is read before anything else of `s` on the memory spine: `s` is `t`,
 or a memory operation over a term on the spine of `t`. -/
-def Tm.memSpineAny (f : MTerm C → Bool) : Tm C u → Bool
+def Surface.Tm.memSpineAny (f : MTerm C → Bool) : Surface.Tm C u → Bool
   | MTerm.addM a R => f (.app1 (.addM R) a) || a.memSpineAny f
   | MTerm.copySt a v => f (.app2 .copySt a v) || a.memSpineAny f
   | MTerm.write a p v => f (.app3 .write a p v) || a.memSpineAny f
@@ -243,42 +243,42 @@ def Tm.memSpineAny (f : MTerm C → Bool) : Tm C u → Bool
     | .mem, t => f t
     | _, _ => false
 
-@[inherit_doc Tm.memSpineAny]
-def Tm.onMemSpine (t s : MTerm C) : Bool := t.memSpineAny (· == s)
+@[inherit_doc Surface.Tm.memSpineAny]
+def Surface.Tm.onMemSpine (t s : MTerm C) : Bool := t.memSpineAny (· == s)
 
 /-- A term on the memory spine of `s` halts wherever `s` does. -/
-theorem Tm.onMemSpine_error {s : MTerm C} {σ : State} {e : Halt} (hs : s.eval σ = .error e) :
+theorem Surface.Tm.onMemSpine_error {s : MTerm C} {σ : State} {e : Halt} (hs : s.eval σ = .error e) :
     (t : MTerm C) → t.onMemSpine s = true → ∃ e', t.eval σ = .error e'
   | MTerm.addM a _, h => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onMemSpine, Surface.Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
-      exact ⟨e', by rw [Tm.app1_eval, ha]; rfl⟩
+    · obtain ⟨e', ha⟩ := Surface.Tm.onMemSpine_error hs a h
+      exact ⟨e', by rw [Surface.Tm.app1_eval, ha]; rfl⟩
   | MTerm.copySt a v, h => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onMemSpine, Surface.Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
-      rw [Tm.app2_eval, ha]
+    · obtain ⟨e', ha⟩ := Surface.Tm.onMemSpine_error hs a h
+      rw [Surface.Tm.app2_eval, ha]
       cases v.eval σ <;> exact ⟨_, rfl⟩
   | MTerm.write a p v, h => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onMemSpine, Surface.Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · exact ⟨e, hs⟩
-    · obtain ⟨e', ha⟩ := Tm.onMemSpine_error hs a h
-      rw [Tm.app3_eval, ha]
+    · obtain ⟨e', ha⟩ := Surface.Tm.onMemSpine_error hs a h
+      rw [Surface.Tm.app3_eval, ha]
       cases v.eval σ <;> exact ⟨_, rfl⟩
   | MTerm.memory, h => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, beq_iff_eq] at h
+    simp only [Surface.Tm.onMemSpine, Surface.Tm.memSpineAny, beq_iff_eq] at h
     subst h; exact ⟨e, hs⟩
 
 /-- The element writes the storage with a term on the spine of `s`. -/
-def UpdElem.onSpine (s : STerm C) : UpdElem C → Bool
+def Surface.UpdElem.onSpine (s : STerm C) : Surface.UpdElem C → Bool
   | .storage t => t.onSpine s
   | _ => false
 
-theorem UpdElem.onSpine_eq {s : STerm C} : (e : UpdElem C) → e.onSpine s = true →
+theorem Surface.UpdElem.onSpine_eq {s : STerm C} : (e : Surface.UpdElem C) → e.onSpine s = true →
     ∃ t, e = .storage t ∧ t.onSpine s = true
   | .storage t, h => ⟨t, rfl, h⟩
 
@@ -286,35 +286,35 @@ theorem UpdElem.onSpine_eq {s : STerm C} : (e : UpdElem C) → e.onSpine s = tru
 writes the same, every other element leaves that storage where it is.  No
 element reads the storage it runs in — a right-hand side is read in the
 pre-state `σ₀`. -/
-theorem UpdElem.write_setStorage (σ₀ : State) (st : List (Name × SVal)) (ρ : State) :
-    (e : UpdElem C) → e.write σ₀ { ρ with storage := st } =
+theorem Surface.UpdElem.write_setStorage (σ₀ : State) (st : List (Name × SVal)) (ρ : State) :
+    (e : Surface.UpdElem C) → e.write σ₀ { ρ with storage := st } =
       if e.isStorage then e.write σ₀ ρ else (e.write σ₀ ρ).map fun τ => { τ with storage := st }
   | .val _ t => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases t.eval σ₀ <;> rfl
   | .path _ p => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases p.eval σ₀ with
     | error _ => rfl
     | ok rs => cases rs; rfl
   | .mref _ i => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases i.eval σ₀ <;> rfl
   | .storage s => by
-    simp only [UpdElem.write, UpdElem.isStorage, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, ↓reduceIte]
   | .store _ s => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases s.eval σ₀ <;> rfl
   | .memory μ => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases μ.eval σ₀ <;> rfl
   | .selfBalance _ a => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases a.eval σ₀ with
     | error _ => rfl
     | ok v => cases v <;> rfl
   | .net r _ a => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases r.eval σ₀ with
     | error _ => rfl
     | ok v =>
@@ -325,7 +325,7 @@ theorem UpdElem.write_setStorage (σ₀ : State) (st : List (Name × SVal)) (ρ 
         | error _ => rfl
         | ok w => cases w <;> rfl
   | .pay r a => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases r.eval σ₀ with
     | error _ => rfl
     | ok v =>
@@ -342,7 +342,7 @@ theorem UpdElem.write_setStorage (σ₀ : State) (st : List (Name × SVal)) (ρ 
             split <;> rfl
   | .saveNet _ | .saveNetMt _ | .unset _ => rfl
   | .netMt r a => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases r.eval σ₀ with
     | error _ => rfl
     | ok v =>
@@ -353,137 +353,137 @@ theorem UpdElem.write_setStorage (σ₀ : State) (st : List (Name × SVal)) (ρ 
         | error _ => rfl
         | ok w => cases w <;> rfl
   | .setBalance a => by
-    simp only [UpdElem.write, UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isStorage, Bool.false_eq_true, ↓reduceIte]
     cases a.eval σ₀ with
     | error _ => rfl
     | ok v => cases v <;> rfl
 
 /-- An update run from a state with another storage: the same run, if some
 element writes the storage; else the run with that storage put back. -/
-theorem Upd.foldl_setStorage (σ₀ : State) (st : List (Name × SVal)) :
-    (W : Upd C) → ∀ ρ, W.foldlM (fun τ e => e.write σ₀ τ) { ρ with storage := st } =
-      if W.any (·.isStorage) then W.foldlM (fun τ (e : UpdElem C) => e.write σ₀ τ) ρ
-      else (W.foldlM (fun τ (e : UpdElem C) => e.write σ₀ τ) ρ).map fun τ => { τ with storage := st }
+theorem Surface.Upd.foldl_setStorage (σ₀ : State) (st : List (Name × SVal)) :
+    (W : Surface.Upd C) → ∀ ρ, W.foldlM (fun τ e => e.write σ₀ τ) { ρ with storage := st } =
+      if W.any (·.isStorage) then W.foldlM (fun τ (e : Surface.UpdElem C) => e.write σ₀ τ) ρ
+      else (W.foldlM (fun τ (e : Surface.UpdElem C) => e.write σ₀ τ) ρ).map fun τ => { τ with storage := st }
   | [], ρ => rfl
   | e :: W, ρ => by
-    simp only [List.foldlM_cons, List.any_cons, UpdElem.write_setStorage σ₀ st ρ e]
+    simp only [List.foldlM_cons, List.any_cons, Surface.UpdElem.write_setStorage σ₀ st ρ e]
     cases he : e.isStorage
     · simp only [Bool.false_eq_true, ↓reduceIte, Bool.false_or]
       cases e.write σ₀ ρ with
       | error _ => cases W.any (·.isStorage) <;> rfl
       | ok ρ' =>
         show W.foldlM (fun τ e => e.write σ₀ τ) { ρ' with storage := st } = _
-        rw [Upd.foldl_setStorage σ₀ st W ρ']
+        rw [Surface.Upd.foldl_setStorage σ₀ st W ρ']
         cases W.any (·.isStorage) <;> rfl
     · simp only [↓reduceIte, Bool.true_or]
 
 /-- A run of an update with a storage element does not see the storage it
 starts from. -/
-theorem Upd.foldl_storage_irrel (σ₀ : State) {W : Upd C} (hW : W.any (·.isStorage) = true)
+theorem Surface.Upd.foldl_storage_irrel (σ₀ : State) {W : Surface.Upd C} (hW : W.any (·.isStorage) = true)
     (st : List (Name × SVal)) (ρ : State) :
     W.foldlM (fun τ e => e.write σ₀ τ) { ρ with storage := st } =
       W.foldlM (fun τ e => e.write σ₀ τ) ρ := by
-  rw [Upd.foldl_setStorage, if_pos hW]
+  rw [Surface.Upd.foldl_setStorage, if_pos hW]
 
 /-- A run of an update halts where a storage write of it halts. -/
-theorem Upd.foldl_error_of_storage (σ₀ : State) {t : STerm C} {e : Halt} (ht : t.eval σ₀ = .error e) :
-    (W : Upd C) → UpdElem.storage t ∈ W → ∀ ρ,
+theorem Surface.Upd.foldl_error_of_storage (σ₀ : State) {t : STerm C} {e : Halt} (ht : t.eval σ₀ = .error e) :
+    (W : Surface.Upd C) → Surface.UpdElem.storage t ∈ W → ∀ ρ,
       ∃ e', W.foldlM (fun τ d => d.write σ₀ τ) ρ = .error e'
   | [], h, _ => nomatch h
   | d :: W, h, ρ => by
     simp only [List.foldlM_cons]
     rcases List.mem_cons.1 h with rfl | h
     · refine ⟨e, ?_⟩
-      rw [UpdElem.storage_write, ht]
+      rw [Surface.UpdElem.storage_write, ht]
       rfl
     · cases d.write σ₀ ρ with
       | error e' => exact ⟨e', rfl⟩
-      | ok ρ' => exact Upd.foldl_error_of_storage σ₀ ht W h ρ'
+      | ok ρ' => exact Surface.Upd.foldl_error_of_storage σ₀ ht W h ρ'
 
 /-- **The shadowed storage write goes**: `{L ‖ storage := s ‖ W}` is
 `{L ‖ W}` where `W` writes the storage with a term on the spine of `s`. -/
-theorem Upd.dropStorage_holds {s : STerm C} {W : Upd C} (hW : W.any (·.onSpine s) = true)
-    (m : Modality) (L : Upd C) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (L ++ W) ψ) ↔ holds σ (.upd m (L ++ .storage s :: W) ψ) := by
+theorem Surface.Upd.dropStorage_holds {s : STerm C} {W : Surface.Upd C} (hW : W.any (·.onSpine s) = true)
+    (m : Modality) (L : Surface.Upd C) (ψ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m (L ++ W) ψ) ↔ NFml.holds σ (.upd m (L ++ .storage s :: W) ψ) := by
   obtain ⟨d, hd, hd'⟩ := List.any_eq_true.1 hW
-  obtain ⟨t, rfl, ht⟩ := UpdElem.onSpine_eq d hd'
-  simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, UpdElem.storage_write]
+  obtain ⟨t, rfl, ht⟩ := Surface.UpdElem.onSpine_eq d hd'
+  simp only [NFml.holds, Surface.Upd.apply, List.foldlM_append, List.foldlM_cons, Surface.UpdElem.storage_write]
   cases L.foldlM (fun τ e => e.write σ τ) σ with
   | error _ => exact Iff.rfl
   | ok ρ =>
     simp only [bind, Except.bind]
     cases hs : s.eval σ with
     | error e =>
-      obtain ⟨e', ht'⟩ := Tm.onSpine_error hs t ht
-      obtain ⟨e'', h⟩ := Upd.foldl_error_of_storage σ ht' W hd ρ
+      obtain ⟨e', ht'⟩ := Surface.Tm.onSpine_error hs t ht
+      obtain ⟨e'', h⟩ := Surface.Upd.foldl_error_of_storage σ ht' W hd ρ
       dsimp only
       rw [h]
       exact Iff.rfl
     | ok τ =>
       have hst : W.any (·.isStorage) = true := List.any_eq_true.2 ⟨_, hd, rfl⟩
       dsimp only
-      rw [Upd.foldl_storage_irrel σ hst τ.storage ρ]
+      rw [Surface.Upd.foldl_storage_irrel σ hst τ.storage ρ]
 
 /-- `{storage := s}{V}` as one update: `V` over the write (`withStM`, memory
 reads included), and the write itself unless `V` writes the storage over it
 (`Upd.dropStorage_holds`). -/
-def Upd.mergeSt (s : STerm C) (V : Upd C) : Upd C :=
+def Surface.Upd.mergeSt (s : STerm C) (V : Surface.Upd C) : Surface.Upd C :=
   if (V.withStM s).any (·.onSpine s) then V.withStM s else .storage s :: V.withStM s
 
-theorem Upd.mergeSt_holds (s : STerm C) (V : Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (Upd.mergeSt s V) ψ) ↔ holds σ (.upd m (.storage s :: V.withStM s) ψ) := by
-  unfold Upd.mergeSt
+theorem Surface.Upd.mergeSt_holds (s : STerm C) (V : Surface.Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m (Surface.Upd.mergeSt s V) ψ) ↔ NFml.holds σ (.upd m (.storage s :: V.withStM s) ψ) := by
+  unfold Surface.Upd.mergeSt
   split
-  · exact Upd.dropStorage_holds ‹_› m [] ψ σ
+  · exact Surface.Upd.dropStorage_holds ‹_› m [] ψ σ
   · exact Iff.rfl
 
 /-- The element writes the memory with a term on the memory spine of `M`. -/
-def UpdElem.onMemSpine (M : MTerm C) : UpdElem C → Bool
+def Surface.UpdElem.onMemSpine (M : MTerm C) : Surface.UpdElem C → Bool
   | .memory N => N.onMemSpine M
   | _ => false
 
-theorem UpdElem.onMemSpine_eq {M : MTerm C} : (e : UpdElem C) → e.onMemSpine M = true →
+theorem Surface.UpdElem.onMemSpine_eq {M : MTerm C} : (e : Surface.UpdElem C) → e.onMemSpine M = true →
     ∃ N, e = .memory N ∧ N.onMemSpine M = true
   | .memory N, h => ⟨N, rfl, h⟩
 
 /-- The element writes the memory: `memory := M`. -/
-def UpdElem.isMemory : UpdElem C → Bool
+def Surface.UpdElem.isMemory : Surface.UpdElem C → Bool
   | .memory _ => true
   | _ => false
 
 /-- An element run from a state with another memory: the memory write
 writes the same, every other element leaves that memory where it is
 (`UpdElem.write_setStorage`'s mirror). -/
-theorem UpdElem.write_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat) (ρ : State) :
-    (e : UpdElem C) → e.write σ₀ { ρ with heap := hp, nextId := n } =
+theorem Surface.UpdElem.write_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat) (ρ : State) :
+    (e : Surface.UpdElem C) → e.write σ₀ { ρ with heap := hp, nextId := n } =
       if e.isMemory then e.write σ₀ ρ
       else (e.write σ₀ ρ).map fun τ => { τ with heap := hp, nextId := n }
   | .val _ t => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases t.eval σ₀ <;> rfl
   | .path _ p => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases p.eval σ₀ with
     | error _ => rfl
     | ok rs => cases rs; rfl
   | .mref _ i => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases i.eval σ₀ <;> rfl
   | .storage s => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases s.eval σ₀ <;> rfl
   | .store _ s => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases s.eval σ₀ <;> rfl
   | .memory μ => by
-    simp only [UpdElem.write, UpdElem.isMemory, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, ↓reduceIte]
   | .selfBalance _ a => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases a.eval σ₀ with
     | error _ => rfl
     | ok v => cases v <;> rfl
   | .net r _ a => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases r.eval σ₀ with
     | error _ => rfl
     | ok v =>
@@ -494,7 +494,7 @@ theorem UpdElem.write_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat)
         | error _ => rfl
         | ok w => cases w <;> rfl
   | .pay r a => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases r.eval σ₀ with
     | error _ => rfl
     | ok v =>
@@ -511,7 +511,7 @@ theorem UpdElem.write_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat)
             split <;> rfl
   | .saveNet _ | .saveNetMt _ | .unset _ => rfl
   | .netMt r a => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases r.eval σ₀ with
     | error _ => rfl
     | ok v =>
@@ -522,86 +522,86 @@ theorem UpdElem.write_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat)
         | error _ => rfl
         | ok w => cases w <;> rfl
   | .setBalance a => by
-    simp only [UpdElem.write, UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
+    simp only [Surface.UpdElem.write, Surface.UpdElem.isMemory, Bool.false_eq_true, ↓reduceIte]
     cases a.eval σ₀ with
     | error _ => rfl
     | ok v => cases v <;> rfl
 
 /-- An update run from a state with another memory: the same run, if some
 element writes the memory; else the run with that memory put back. -/
-theorem Upd.foldl_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat) :
-    (W : Upd C) → ∀ ρ, W.foldlM (fun τ e => e.write σ₀ τ) { ρ with heap := hp, nextId := n } =
-      if W.any (·.isMemory) then W.foldlM (fun τ (e : UpdElem C) => e.write σ₀ τ) ρ
-      else (W.foldlM (fun τ (e : UpdElem C) => e.write σ₀ τ) ρ).map
+theorem Surface.Upd.foldl_setMem (σ₀ : State) (hp : List (Nat × MObj)) (n : Nat) :
+    (W : Surface.Upd C) → ∀ ρ, W.foldlM (fun τ e => e.write σ₀ τ) { ρ with heap := hp, nextId := n } =
+      if W.any (·.isMemory) then W.foldlM (fun τ (e : Surface.UpdElem C) => e.write σ₀ τ) ρ
+      else (W.foldlM (fun τ (e : Surface.UpdElem C) => e.write σ₀ τ) ρ).map
         fun τ => { τ with heap := hp, nextId := n }
   | [], ρ => rfl
   | e :: W, ρ => by
-    simp only [List.foldlM_cons, List.any_cons, UpdElem.write_setMem σ₀ hp n ρ e]
+    simp only [List.foldlM_cons, List.any_cons, Surface.UpdElem.write_setMem σ₀ hp n ρ e]
     cases he : e.isMemory
     · simp only [Bool.false_eq_true, ↓reduceIte, Bool.false_or]
       cases e.write σ₀ ρ with
       | error _ => cases W.any (·.isMemory) <;> rfl
       | ok ρ' =>
         show W.foldlM (fun τ e => e.write σ₀ τ) { ρ' with heap := hp, nextId := n } = _
-        rw [Upd.foldl_setMem σ₀ hp n W ρ']
+        rw [Surface.Upd.foldl_setMem σ₀ hp n W ρ']
         cases W.any (·.isMemory) <;> rfl
     · simp only [↓reduceIte, Bool.true_or]
 
 /-- A run of an update with a memory element does not see the memory it
 starts from. -/
-theorem Upd.foldl_mem_irrel (σ₀ : State) {W : Upd C} (hW : W.any (·.isMemory) = true)
+theorem Surface.Upd.foldl_mem_irrel (σ₀ : State) {W : Surface.Upd C} (hW : W.any (·.isMemory) = true)
     (hp : List (Nat × MObj)) (n : Nat) (ρ : State) :
     W.foldlM (fun τ e => e.write σ₀ τ) { ρ with heap := hp, nextId := n } =
       W.foldlM (fun τ e => e.write σ₀ τ) ρ := by
-  rw [Upd.foldl_setMem, if_pos hW]
+  rw [Surface.Upd.foldl_setMem, if_pos hW]
 
 /-- A run of an update halts where a memory write of it halts. -/
-theorem Upd.foldl_error_of_memory (σ₀ : State) {t : MTerm C} {e : Halt} (ht : t.eval σ₀ = .error e) :
-    (W : Upd C) → UpdElem.memory t ∈ W → ∀ ρ,
+theorem Surface.Upd.foldl_error_of_memory (σ₀ : State) {t : MTerm C} {e : Halt} (ht : t.eval σ₀ = .error e) :
+    (W : Surface.Upd C) → Surface.UpdElem.memory t ∈ W → ∀ ρ,
       ∃ e', W.foldlM (fun τ d => d.write σ₀ τ) ρ = .error e'
   | [], h, _ => nomatch h
   | d :: W, h, ρ => by
     simp only [List.foldlM_cons]
     rcases List.mem_cons.1 h with rfl | h
     · refine ⟨e, ?_⟩
-      rw [UpdElem.memory_write, ht]
+      rw [Surface.UpdElem.memory_write, ht]
       rfl
     · cases d.write σ₀ ρ with
       | error e' => exact ⟨e', rfl⟩
-      | ok ρ' => exact Upd.foldl_error_of_memory σ₀ ht W h ρ'
+      | ok ρ' => exact Surface.Upd.foldl_error_of_memory σ₀ ht W h ρ'
 
 /-- **The shadowed memory write goes**: `{L ‖ memory := M ‖ W}` is `{L ‖ W}`
 where `W` writes the memory with a term on the memory spine of `M`
 (`Upd.dropStorage_holds`'s mirror, with the elements before the write). -/
-theorem Upd.dropMemory_holds {M : MTerm C} {W : Upd C} (hW : W.any (·.onMemSpine M) = true)
-    (m : Modality) (L : Upd C) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (L ++ W) ψ) ↔ holds σ (.upd m (L ++ .memory M :: W) ψ) := by
+theorem Surface.Upd.dropMemory_holds {M : MTerm C} {W : Surface.Upd C} (hW : W.any (·.onMemSpine M) = true)
+    (m : Modality) (L : Surface.Upd C) (ψ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m (L ++ W) ψ) ↔ NFml.holds σ (.upd m (L ++ .memory M :: W) ψ) := by
   obtain ⟨d, hd, hd'⟩ := List.any_eq_true.1 hW
-  obtain ⟨N, rfl, hN⟩ := UpdElem.onMemSpine_eq d hd'
-  simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, UpdElem.memory_write]
+  obtain ⟨N, rfl, hN⟩ := Surface.UpdElem.onMemSpine_eq d hd'
+  simp only [NFml.holds, Surface.Upd.apply, List.foldlM_append, List.foldlM_cons, Surface.UpdElem.memory_write]
   cases L.foldlM (fun τ e => e.write σ τ) σ with
   | error _ => exact Iff.rfl
   | ok ρ =>
     simp only [bind, Except.bind]
     cases hs : M.eval σ with
     | error e =>
-      obtain ⟨e', hN'⟩ := Tm.onMemSpine_error hs N hN
-      obtain ⟨e'', h⟩ := Upd.foldl_error_of_memory σ hN' W hd ρ
+      obtain ⟨e', hN'⟩ := Surface.Tm.onMemSpine_error hs N hN
+      obtain ⟨e'', h⟩ := Surface.Upd.foldl_error_of_memory σ hN' W hd ρ
       rw [h]
       exact Iff.rfl
     | ok μ =>
       have hmem : W.any (·.isMemory) = true := List.any_eq_true.2 ⟨_, hd, rfl⟩
       dsimp only
-      rw [Upd.foldl_mem_irrel σ hmem μ.heap μ.nextId ρ]
+      rw [Surface.Upd.foldl_mem_irrel σ hmem μ.heap μ.nextId ρ]
 
 /-! ## `sequentialToParallel` -/
 
 /-- An update that cannot halt reads alike under either modality:
 `{ se1 := 10 } φ` under the box is `{ se1 := 10 } φ` under the diamond. -/
-theorem Upd.holds_total {U : Upd C} (hU : U.total = true) (m m' : Modality) (φ : NFml C)
-    (σ : State) : holds σ (.upd m U φ) ↔ holds σ (.upd m' U φ) := by
-  obtain ⟨τ, hτ⟩ := Upd.foldl_total σ U hU σ
-  simp only [holds, Upd.apply, hτ, Modality.after]
+theorem Surface.Upd.holds_total {U : Surface.Upd C} (hU : U.total = true) (m m' : Modality) (φ : NFml C)
+    (σ : State) : NFml.holds σ (.upd m U φ) ↔ NFml.holds σ (.upd m' U φ) := by
+  obtain ⟨τ, hτ⟩ := Surface.Upd.foldl_total σ U hU σ
+  simp only [NFml.holds, Surface.Upd.apply, hτ, Modality.after]
 
 /-- `{L ‖ memory := M}{V}` as one update, `L` locals: `M` substituted for
 `memory` in `V` (`withMem`), then the locals (`subst`), after the write.
@@ -610,53 +610,53 @@ variables (`M.subst L = M`), and the two merges are `Upd.mergeMemory_holds`
 and `sequentialToParallel`.  The write itself goes where `V` writes the
 memory over it (`Upd.dropMemory_holds`), so a merged line has one
 `memory :=`. -/
-def Upd.mergeMem (L : Upd C) (M : MTerm C) (V : Upd C) : Upd C :=
-  if (Upd.subst (V.withMem M) L).any (·.onMemSpine M) then L ++ Upd.subst (V.withMem M) L
-  else L ++ (.memory M :: Upd.subst (V.withMem M) L)
+def Surface.Upd.mergeMem (L : Surface.Upd C) (M : MTerm C) (V : Surface.Upd C) : Surface.Upd C :=
+  if (Surface.Upd.subst (V.withMem M) L).any (·.onMemSpine M) then L ++ Surface.Upd.subst (V.withMem M) L
+  else L ++ (.memory M :: Surface.Upd.subst (V.withMem M) L)
 
-theorem Upd.mergeMem_holds {L : Upd C} (hL : L.envOnly = true) {M : MTerm C} (hM : M.subst L = M)
-    (V : Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (Upd.mergeMem L M V) ψ) ↔ holds σ (.upd m (L ++ [.memory M]) (.upd m V ψ)) := by
-  have h1 : Upd.subst (UpdElem.memory M :: V.withMem M) L = .memory M :: Upd.subst (V.withMem M) L := by
-    simp only [Upd.subst, List.map_cons, UpdElem.subst, hM]
-  have h2 : Upd.subst [UpdElem.memory M] L = [.memory M] := by
-    simp only [Upd.subst, List.map_cons, List.map_nil, UpdElem.subst, hM]
-  calc holds σ (.upd m (Upd.mergeMem L M V) ψ)
-      ↔ holds σ (.upd m (L ++ (.memory M :: Upd.subst (V.withMem M) L)) ψ) := by
-        unfold Upd.mergeMem
+theorem Surface.Upd.mergeMem_holds {L : Surface.Upd C} (hL : L.envOnly = true) {M : MTerm C} (hM : M.subst L = M)
+    (V : Surface.Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m (Surface.Upd.mergeMem L M V) ψ) ↔ NFml.holds σ (.upd m (L ++ [.memory M]) (.upd m V ψ)) := by
+  have h1 : Surface.Upd.subst (Surface.UpdElem.memory M :: V.withMem M) L = .memory M :: Surface.Upd.subst (V.withMem M) L := by
+    simp only [Surface.Upd.subst, List.map_cons, Surface.UpdElem.subst, hM]
+  have h2 : Surface.Upd.subst [Surface.UpdElem.memory M] L = [.memory M] := by
+    simp only [Surface.Upd.subst, List.map_cons, List.map_nil, Surface.UpdElem.subst, hM]
+  calc NFml.holds σ (.upd m (Surface.Upd.mergeMem L M V) ψ)
+      ↔ NFml.holds σ (.upd m (L ++ (.memory M :: Surface.Upd.subst (V.withMem M) L)) ψ) := by
+        unfold Surface.Upd.mergeMem
         split
-        · exact Upd.dropMemory_holds ‹_› m L ψ σ
+        · exact Surface.Upd.dropMemory_holds ‹_› m L ψ σ
         · exact Iff.rfl
-    _ ↔ holds σ (.upd m L (.upd m (.memory M :: V.withMem M) ψ)) := by
+    _ ↔ NFml.holds σ (.upd m L (.upd m (.memory M :: V.withMem M) ψ)) := by
         rw [← h1]
         exact (UpdRule.sequentialToParallel hL).sound σ
-    _ ↔ holds σ (.upd m L (.upd m [.memory M] (.upd m V ψ))) := by
-        simp only [holds]
-        exact m.after_congr (fun τ => Upd.mergeMemory_holds m M V ψ τ) _
-    _ ↔ holds σ (.upd m (L ++ [.memory M]) (.upd m V ψ)) := by
+    _ ↔ NFml.holds σ (.upd m L (.upd m [.memory M] (.upd m V ψ))) := by
+        simp only [NFml.holds]
+        exact m.after_congr (fun τ => Surface.Upd.mergeMemory_holds m M V ψ τ) _
+    _ ↔ NFml.holds σ (.upd m (L ++ [.memory M]) (.upd m V ψ)) := by
         conv => rhs; rw [← h2]
         exact ((UpdRule.sequentialToParallel hL).sound σ).symm
 
 /-- The update's one element that writes no local, with the locals before
 and after it. -/
-def Upd.splitWrite : Upd C → Option (Upd C × UpdElem C × Upd C)
+def Surface.Upd.splitWrite : Surface.Upd C → Option (Surface.Upd C × Surface.UpdElem C × Surface.Upd C)
   | [] => none
   | e :: U =>
-    if e.var?.isSome then (Upd.splitWrite U).map fun r => (e :: r.1, r.2.1, r.2.2)
-    else if Upd.envOnly U then some ([], e, U) else none
+    if e.var?.isSome then (Surface.Upd.splitWrite U).map fun r => (e :: r.1, r.2.1, r.2.2)
+    else if Surface.Upd.envOnly U then some ([], e, U) else none
 
-theorem Upd.splitWrite_eq {L₁ L₂ : Upd C} {e : UpdElem C} :
-    (U : Upd C) → U.splitWrite = some (L₁, e, L₂) →
+theorem Surface.Upd.splitWrite_eq {L₁ L₂ : Surface.Upd C} {e : Surface.UpdElem C} :
+    (U : Surface.Upd C) → U.splitWrite = some (L₁, e, L₂) →
       U = L₁ ++ e :: L₂ ∧ L₁.envOnly = true ∧ L₂.envOnly = true
   | [], h => nomatch h
   | d :: U, h => by
-    simp only [Upd.splitWrite] at h
+    simp only [Surface.Upd.splitWrite] at h
     split at h
     · rename_i hd
       simp only [Option.map_eq_some_iff, Prod.mk.injEq] at h
       obtain ⟨⟨L₁', e', L₂'⟩, h', rfl, rfl, rfl⟩ := h
-      obtain ⟨rfl, h₁, h₂⟩ := Upd.splitWrite_eq U h'
-      exact ⟨rfl, by simpa [Upd.envOnly, hd] using h₁, h₂⟩
+      obtain ⟨rfl, h₁, h₂⟩ := Surface.Upd.splitWrite_eq U h'
+      exact ⟨rfl, by simpa [Surface.Upd.envOnly, hd] using h₁, h₂⟩
     · split at h
       · rename_i hU
         simp only [Option.some.injEq, Prod.mk.injEq] at h
@@ -667,11 +667,11 @@ theorem Upd.splitWrite_eq {L₁ L₂ : Upd C} {e : UpdElem C} :
 /-- A storage write moved past locals of a parallel update: the locals read
 the pre-state and write no storage, so the run leaves the same state, or
 halts either way. -/
-theorem Upd.storage_perm_holds (m : Modality) (L₁ : Upd C) (S : STerm C) {L₂ : Upd C}
-    (hL : L₂.any (·.isStorage) = false) (W : Upd C) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (L₁ ++ .storage S :: (L₂ ++ W)) ψ) ↔
-      holds σ (.upd m (L₁ ++ (L₂ ++ .storage S :: W)) ψ) := by
-  simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, UpdElem.storage_write]
+theorem Surface.Upd.storage_perm_holds (m : Modality) (L₁ : Surface.Upd C) (S : STerm C) {L₂ : Surface.Upd C}
+    (hL : L₂.any (·.isStorage) = false) (W : Surface.Upd C) (ψ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m (L₁ ++ .storage S :: (L₂ ++ W)) ψ) ↔
+      NFml.holds σ (.upd m (L₁ ++ (L₂ ++ .storage S :: W)) ψ) := by
+  simp only [NFml.holds, Surface.Upd.apply, List.foldlM_append, List.foldlM_cons, Surface.UpdElem.storage_write]
   cases L₁.foldlM (fun τ e => e.write σ τ) σ with
   | error _ => exact Iff.rfl
   | ok ρ =>
@@ -684,37 +684,37 @@ theorem Upd.storage_perm_holds (m : Modality) (L₁ : Upd C) (S : STerm C) {L₂
       | ok _ => simp only [Modality.after]
     | ok τ' =>
       dsimp only
-      rw [Upd.foldl_setStorage σ τ'.storage L₂ ρ, if_neg (by simp [hL])]
+      rw [Surface.Upd.foldl_setStorage σ τ'.storage L₂ ρ, if_neg (by simp [hL])]
       cases L₂.foldlM (fun τ e => e.write σ τ) ρ with
       | error _ => simp only [Except.map, Modality.after]
       | ok ρ₂ => simp only [Except.map]
 
 /-- An update of locals writes no storage. -/
-theorem Upd.envOnly_isStorage {L : Upd C} (h : L.envOnly = true) : L.any (·.isStorage) = false := by
-  simp only [Upd.envOnly, List.all_eq_true] at h
+theorem Surface.Upd.envOnly_isStorage {L : Surface.Upd C} (h : L.envOnly = true) : L.any (·.isStorage) = false := by
+  simp only [Surface.Upd.envOnly, List.all_eq_true] at h
   simp only [List.any_eq_false]
   intro e he
   have := h e he
-  cases e <;> simp_all [UpdElem.var?, UpdElem.isStorage]
+  cases e <;> simp_all [Surface.UpdElem.var?, Surface.UpdElem.isStorage]
 
 /-- `{L₁ ‖ storage := S ‖ L₂}{V}` as one update, `L₁`, `L₂` locals: the
 locals and `S` substituted into `V` (`Upd.substSt`), after the three; the
 write stays where it was unless `V` writes the storage over it
 (`Upd.dropStorage_holds`). -/
-def Upd.mergeStL (L₁ : Upd C) (S : STerm C) (L₂ : Upd C) (V : Upd C) : Upd C :=
-  let V' := Upd.substSt (L₁ ++ L₂) S V
+def Surface.Upd.mergeStL (L₁ : Surface.Upd C) (S : STerm C) (L₂ : Surface.Upd C) (V : Surface.Upd C) : Surface.Upd C :=
+  let V' := Surface.Upd.substSt (L₁ ++ L₂) S V
   if V'.any (·.onSpine S) then L₁ ++ (L₂ ++ V') else L₁ ++ .storage S :: (L₂ ++ V')
 
 /-- The merge with the write kept, `L` locals: every element of
 `{L ‖ storage := S ‖ {L ‖ storage := S}V}` reads the pre-state, and `V`'s
 substituted right-hand sides read there what `V`'s read after the two
 (`Tm.substSt_eval`). -/
-theorem Upd.mergeStL_core {L : Upd C} (hL : L.envOnly = true) (S : STerm C) (V : Upd C)
+theorem Surface.Upd.mergeStL_core {L : Surface.Upd C} (hL : L.envOnly = true) (S : STerm C) (V : Surface.Upd C)
     (m : Modality) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (L ++ .storage S :: Upd.substSt L S V) ψ) ↔
-      holds σ (.upd m (L ++ [.storage S]) (.upd m V ψ)) := by
-  simp only [holds, Upd.apply, List.foldlM_append, List.foldlM_cons, List.foldlM_nil,
-    UpdElem.storage_write]
+    NFml.holds σ (.upd m (L ++ .storage S :: Surface.Upd.substSt L S V) ψ) ↔
+      NFml.holds σ (.upd m (L ++ [.storage S]) (.upd m V ψ)) := by
+  simp only [NFml.holds, Surface.Upd.apply, List.foldlM_append, List.foldlM_cons, List.foldlM_nil,
+    Surface.UpdElem.storage_write]
   cases hL' : L.foldlM (fun τ e => e.write σ τ) σ with
   | error _ => exact Iff.rfl
   | ok σ₁ =>
@@ -722,58 +722,58 @@ theorem Upd.mergeStL_core {L : Upd C} (hL : L.envOnly = true) (S : STerm C) (V :
     cases hs : S.eval σ with
     | error _ => exact Iff.rfl
     | ok τ =>
-      have h := Upd.substAgree hL hL'
+      have h := Surface.Upd.substAgree hL hL'
       have hr : σ.Rest { σ₁ with storage := τ.storage } :=
         ⟨h.agree.net, h.agree.selfBalance, h.agree.tx⟩
       dsimp only
       simp only [pure, Except.pure, Modality.after]
-      rw [Upd.substSt, Upd.mapTm_foldl (P := fun {_} _ => true) hr
-        (fun t _ => Tm.substSt_eval h hs t) V (List.all_eq_true.2 fun e _ => by cases e <;> rfl)]
+      rw [Surface.Upd.substSt, Surface.Upd.mapTm_foldl (P := fun {_} _ => true) hr
+        (fun t _ => Surface.Tm.substSt_eval h hs t) V (List.all_eq_true.2 fun e _ => by cases e <;> rfl)]
 
 /-- `Upd.mergeStL_core` with the write between the locals, where
 `Upd.splitWrite` finds it. -/
-theorem Upd.mergeStL_keep_holds {L₁ L₂ : Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
-    (S : STerm C) (V : Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (L₁ ++ .storage S :: (L₂ ++ Upd.substSt (L₁ ++ L₂) S V)) ψ) ↔
-      holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
-  have hL : (L₁ ++ L₂).envOnly = true := by simp only [Upd.envOnly, List.all_append] at *; simp [h₁, h₂]
-  have hL₂ := Upd.envOnly_isStorage h₂
-  rw [Upd.storage_perm_holds m L₁ S hL₂ _ ψ σ]
-  have hperm := Upd.storage_perm_holds m L₁ S hL₂ [] (.upd m V ψ) σ
+theorem Surface.Upd.mergeStL_keep_holds {L₁ L₂ : Surface.Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
+    (S : STerm C) (V : Surface.Upd C) (m : Modality) (ψ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m (L₁ ++ .storage S :: (L₂ ++ Surface.Upd.substSt (L₁ ++ L₂) S V)) ψ) ↔
+      NFml.holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
+  have hL : (L₁ ++ L₂).envOnly = true := by simp only [Surface.Upd.envOnly, List.all_append] at *; simp [h₁, h₂]
+  have hL₂ := Surface.Upd.envOnly_isStorage h₂
+  rw [Surface.Upd.storage_perm_holds m L₁ S hL₂ _ ψ σ]
+  have hperm := Surface.Upd.storage_perm_holds m L₁ S hL₂ [] (.upd m V ψ) σ
   simp only [List.append_nil] at hperm
   rw [hperm, ← List.append_assoc, ← List.append_assoc]
-  exact Upd.mergeStL_core hL S V m ψ σ
+  exact Surface.Upd.mergeStL_core hL S V m ψ σ
 
-theorem Upd.mergeStL_holds {L₁ L₂ : Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
-    {S : STerm C} {V : Upd C} (m : Modality) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (Upd.mergeStL L₁ S L₂ V) ψ) ↔
-      holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
-  rw [← Upd.mergeStL_keep_holds h₁ h₂ S V m ψ σ]
-  dsimp only [Upd.mergeStL]
+theorem Surface.Upd.mergeStL_holds {L₁ L₂ : Surface.Upd C} (h₁ : L₁.envOnly = true) (h₂ : L₂.envOnly = true)
+    {S : STerm C} {V : Surface.Upd C} (m : Modality) (ψ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m (Surface.Upd.mergeStL L₁ S L₂ V) ψ) ↔
+      NFml.holds σ (.upd m (L₁ ++ .storage S :: L₂) (.upd m V ψ)) := by
+  rw [← Surface.Upd.mergeStL_keep_holds h₁ h₂ S V m ψ σ]
+  dsimp only [Surface.Upd.mergeStL]
   split
   · rename_i hW
-    rw [Upd.storage_perm_holds m L₁ S (Upd.envOnly_isStorage h₂) _ ψ σ, ← List.append_assoc,
+    rw [Surface.Upd.storage_perm_holds m L₁ S (Surface.Upd.envOnly_isStorage h₂) _ ψ σ, ← List.append_assoc,
       ← List.append_assoc]
-    exact Upd.dropStorage_holds hW m (L₁ ++ L₂) ψ σ
+    exact Surface.Upd.dropStorage_holds hW m (L₁ ++ L₂) ψ σ
   · exact Iff.rfl
 
 /-- The update's last element, and the rest. -/
-def Upd.splitLast : Upd C → Option (Upd C × UpdElem C)
+def Surface.Upd.splitLast : Surface.Upd C → Option (Surface.Upd C × Surface.UpdElem C)
   | [] => none
   | [e] => some ([], e)
-  | e :: d :: U => (Upd.splitLast (d :: U)).map fun r => (e :: r.1, r.2)
+  | e :: d :: U => (Surface.Upd.splitLast (d :: U)).map fun r => (e :: r.1, r.2)
 
-theorem Upd.splitLast_eq {L : Upd C} {e : UpdElem C} :
-    (U : Upd C) → U.splitLast = some (L, e) → U = L ++ [e]
+theorem Surface.Upd.splitLast_eq {L : Surface.Upd C} {e : Surface.UpdElem C} :
+    (U : Surface.Upd C) → U.splitLast = some (L, e) → U = L ++ [e]
   | [], h => nomatch h
   | [_], h => by
-    simp only [Upd.splitLast, Option.some.injEq, Prod.mk.injEq] at h
+    simp only [Surface.Upd.splitLast, Option.some.injEq, Prod.mk.injEq] at h
     obtain ⟨rfl, rfl⟩ := h
     rfl
   | e' :: d :: U, h => by
-    simp only [Upd.splitLast, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    simp only [Surface.Upd.splitLast, Option.map_eq_some_iff, Prod.mk.injEq] at h
     obtain ⟨⟨L', e''⟩, h', rfl, rfl⟩ := h
-    rw [List.cons_append, ← Upd.splitLast_eq (d :: U) h']
+    rw [List.cons_append, ← Surface.Upd.splitLast_eq (d :: U) h']
 
 /-- `{U}_m {V}_m'` as one parallel update and its modality, if a rule merges
 them: `U` of locals substituted into `V`; `U` one storage write substituted
@@ -783,20 +783,20 @@ locals and a memory write, substituted into `V` (`Upd.mergeMem`); or `U`
 locals and a storage write (`Upd.mergeStL`).  The two
 modalities are compared only when neither update can stand for the other's:
 `{ se1 := 10 }` cannot halt, so it merges under any `m'`. -/
-def Upd.merge (m : Modality) (U : Upd C) (m' : Modality) (V : Upd C) :
-    Option (Modality × Upd C) :=
+def Surface.Upd.merge (m : Modality) (U : Surface.Upd C) (m' : Modality) (V : Surface.Upd C) :
+    Option (Modality × Surface.Upd C) :=
   if (U.envOnly && (U.total || decide (m' = m))) = true then some (m', U ++ V.subst U)
   else match U with
     | [.storage s] =>
-      if (V.total || decide (m' = m)) = true then some (m, Upd.mergeSt s V) else none
+      if (V.total || decide (m' = m)) = true then some (m, Surface.Upd.mergeSt s V) else none
     | _ => match U.splitLast with
       | some (L, .memory M) =>
         if (L.envOnly && (M.subst L == M) && (V.total || decide (m' = m))) = true then
-          some (m, Upd.mergeMem L M V)
+          some (m, Surface.Upd.mergeMem L M V)
         else none
       | _ => match U.splitWrite with
         | some (L₁, .storage S, L₂) =>
-          if (V.total || decide (m' = m)) = true then some (m, Upd.mergeStL L₁ S L₂ V) else none
+          if (V.total || decide (m' = m)) = true then some (m, Surface.Upd.mergeStL L₁ S L₂ V) else none
         | _ => none
 
 /-- **`sequentialToParallel`**: the merged update holds exactly where the
@@ -806,10 +806,10 @@ Example: `{ sp1 := alice.account } { storage := save(storage, sp1.balance, se1) 
 merges to `{ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, se1) }`,
 and `{ storage := save(storage, alice.age, 1) } { storage := save(storage, alice.age, 2) }`
 to `{ storage := save(save(storage, alice.age, 1), alice.age, 2) }`. -/
-theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
-    (h : Upd.merge m U m' V = some (m'', W)) (φ : NFml C) (σ : State) :
-    holds σ (.upd m'' W φ) ↔ holds σ (.upd m U (.upd m' V φ)) := by
-  unfold Upd.merge at h
+theorem Surface.Upd.merge_holds {m m' m'' : Modality} {U V W : Surface.Upd C}
+    (h : Surface.Upd.merge m U m' V = some (m'', W)) (φ : NFml C) (σ : State) :
+    NFml.holds σ (.upd m'' W φ) ↔ NFml.holds σ (.upd m U (.upd m' V φ)) := by
+  unfold Surface.Upd.merge at h
   split at h
   · rename_i hc
     simp only [Option.some.injEq, Prod.mk.injEq] at h
@@ -817,7 +817,7 @@ theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
     simp only [Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq] at hc
     rw [(UpdRule.sequentialToParallel (m := m') (u2 := V) (φ := φ) hc.1).sound σ]
     rcases hc.2 with ht | rfl
-    · exact Upd.holds_total ht m' m _ σ
+    · exact Surface.Upd.holds_total ht m' m _ σ
     · exact Iff.rfl
   · split at h
     · split at h
@@ -825,11 +825,11 @@ theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
         simp only [Option.some.injEq, Prod.mk.injEq] at h
         obtain ⟨rfl, rfl⟩ := h
         simp only [Bool.or_eq_true, decide_eq_true_eq] at hc
-        rw [Upd.mergeSt_holds, Upd.mergeStorageM_holds m s V φ σ]
-        simp only [holds]
+        rw [Surface.Upd.mergeSt_holds, Surface.Upd.mergeStorageM_holds m s V φ σ]
+        simp only [NFml.holds]
         refine m.after_congr (fun τ => ?_) _
         rcases hc with ht | rfl
-        · exact Upd.holds_total ht m m' φ τ
+        · exact Surface.Upd.holds_total ht m m' φ τ
         · exact Iff.rfl
       · nomatch h
     · split at h
@@ -838,11 +838,11 @@ theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
           simp only [Option.some.injEq, Prod.mk.injEq] at h
           obtain ⟨rfl, rfl⟩ := h
           simp only [Bool.and_eq_true, Bool.or_eq_true, decide_eq_true_eq, beq_iff_eq] at hc
-          rw [Upd.splitLast_eq U hsplit, Upd.mergeMem_holds hc.1.1 hc.1.2 V m φ σ]
-          simp only [holds]
+          rw [Surface.Upd.splitLast_eq U hsplit, Surface.Upd.mergeMem_holds hc.1.1 hc.1.2 V m φ σ]
+          simp only [NFml.holds]
           refine m.after_congr (fun τ => ?_) _
           rcases hc.2 with ht | rfl
-          · exact Upd.holds_total ht m m' φ τ
+          · exact Surface.Upd.holds_total ht m m' φ τ
           · exact Iff.rfl
         · nomatch h
       · split at h
@@ -851,28 +851,28 @@ theorem Upd.merge_holds {m m' m'' : Modality} {U V W : Upd C}
             simp only [Option.some.injEq, Prod.mk.injEq] at h
             obtain ⟨rfl, rfl⟩ := h
             simp only [Bool.or_eq_true, decide_eq_true_eq] at hc
-            obtain ⟨heq, h₁, h₂⟩ := Upd.splitWrite_eq U hsplit
-            rw [heq, Upd.mergeStL_holds h₁ h₂ m φ σ]
-            simp only [holds]
+            obtain ⟨heq, h₁, h₂⟩ := Surface.Upd.splitWrite_eq U hsplit
+            rw [heq, Surface.Upd.mergeStL_holds h₁ h₂ m φ σ]
+            simp only [NFml.holds]
             refine m.after_congr (fun τ => ?_) _
             rcases hc with ht | rfl
-            · exact Upd.holds_total ht m m' φ τ
+            · exact Surface.Upd.holds_total ht m m' φ τ
             · exact Iff.rfl
           · nomatch h
         · nomatch h
 
 /-- `{U}_m φ` merged with the update at the head of `φ`. -/
-def NFml.mergeInto (m : Modality) (U : Upd C) : NFml C → Option (NFml C)
-  | .upd m' V φ => (Upd.merge m U m' V).map fun r => .upd r.1 r.2 φ
+def NFml.mergeInto (m : Modality) (U : Surface.Upd C) : NFml C → Option (NFml C)
+  | .upd m' V φ => (Surface.Upd.merge m U m' V).map fun r => .upd r.1 r.2 φ
   | _ => none
 
-theorem NFml.mergeInto_holds {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.mergeInto_holds {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.mergeInto m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
   cases φ with
   | upd m' V χ =>
     simp only [NFml.mergeInto, Option.map_eq_some_iff] at h
     obtain ⟨⟨m'', W⟩, hw, rfl⟩ := h
-    exact Upd.merge_holds hw χ σ
+    exact Surface.Upd.merge_holds hw χ σ
   | _ => nomatch h
 
 /-- `sequentialToParallel` on the updates at positions `i` and `i + 1`. -/
@@ -995,10 +995,10 @@ theorem NFml.freshVars_eq : (φ : NFml C) → φ.freshVars = φ.vars.filter (·.
 /-- Dropping the effectless elements, reading `F` for what the formula
 reads, changes no binding the formula sees, if `F` holds every variable of
 the update the formula reads. -/
-theorem Upd.dropEffectless_holds_of {F : List Var} {U : Upd C} {φ : NFml C}
+theorem Surface.Upd.dropEffectless_holds_of {F : List Var} {U : Surface.Upd C} {φ : NFml C}
     (hF : ∀ x ∈ φ.vars, x ∈ U.targets → x ∈ F) (m : Modality) (σ : State) :
-    holds σ (.upd m (U.dropEffectless F) φ) ↔ holds σ (.upd m U φ) :=
-  m.after_frame (Upd.dropEffectless_apply F U σ) fun _ _ h =>
+    NFml.holds σ (.upd m (U.dropEffectless F) φ) ↔ NFml.holds σ (.upd m U φ) :=
+  m.after_frame (Surface.Upd.dropEffectless_apply F U σ) fun _ _ h =>
     holds_frame φ (fun x hx hG => by
       obtain ⟨hU, hn⟩ := List.mem_filter.1 hG
       simp only [decide_eq_true_eq] at hn
@@ -1006,20 +1006,20 @@ theorem Upd.dropEffectless_holds_of {F : List Var} {U : Upd C} {φ : NFml C}
 
 /-- `{U}_m φ` with its effectless elements dropped, `F` read for what `φ`
 reads, and the update with them if none is left; `none` if none goes. -/
-def NFml.simplifyWith (F : List Var) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.simplifyWith (F : List Var) (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   if (U.dropEffectless F).length < U.length then
     some (match U.dropEffectless F with
       | [] => φ
       | V => .upd m V φ)
   else none
 
-theorem NFml.simplifyWith_holds {F : List Var} {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.simplifyWith_holds {F : List Var} {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (hF : ∀ x ∈ φ.vars, x ∈ U.targets → x ∈ F) (h : NFml.simplifyWith F m U φ = some ψ)
     (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) := by
   unfold NFml.simplifyWith at h
   split at h
   · cases h
-    rw [← Upd.dropEffectless_holds_of hF m σ]
+    rw [← Surface.Upd.dropEffectless_holds_of hF m σ]
     split
     · rename_i hV
       rw [hV]
@@ -1028,15 +1028,15 @@ theorem NFml.simplifyWith_holds {F : List Var} {m : Modality} {U : Upd C} {φ ψ
   · nomatch h
 
 /-- `simplifyUpdate` on `{U}_m φ`, reading `φ`'s variables. -/
-def NFml.simplifyTop (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.simplifyTop (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   NFml.simplifyWith φ.vars m U φ
 
 /-- `simplifyUpdate` on `{U}_m φ`, reading `φ`'s fresh variables, and every
 user variable `U` writes. -/
-def NFml.simplifyFreshTop (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.simplifyFreshTop (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   NFml.simplifyWith (φ.freshVars ++ U.targets.filter (·.idx == 0)) m U φ
 
-theorem NFml.simplifyFreshTop_holds {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.simplifyFreshTop_holds {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.simplifyFreshTop m U φ = some ψ) (σ : State) : holds σ ψ ↔ holds σ (.upd m U φ) :=
   NFml.simplifyWith_holds (fun x hx hU => by
     rw [List.mem_append, NFml.freshVars_eq, List.mem_filter, List.mem_filter]
@@ -1064,22 +1064,22 @@ rewrites (`find(save(…), p)` halts where `p` does not resolve), so
 
 /-- A line under the box gives it under `m` where `m` is the box or `U`
 cannot halt. -/
-theorem NFml.upd_of_box {m : Modality} {U : Upd C} {φ : NFml C} (hm : U.total = true ∨ m = .box)
+theorem NFml.upd_of_box {m : Modality} {U : Surface.Upd C} {φ : NFml C} (hm : U.total = true ∨ m = .box)
     {σ : State} (h : holds σ (.upd .box U φ)) : holds σ (.upd m U φ) := by
   rcases hm with hU | rfl
-  · exact (Upd.holds_total hU .box m φ σ).1 h
+  · exact (Surface.Upd.holds_total hU .box m φ σ).1 h
   · exact h
 
 /-- `applyOnRigidFormula` under the box (`Proves.applyOnRigidBox`): `[{U}] φ ⇝ φ[U]`
 for a first-order `φ`, `U` of locals, or of locals and storage writes under a
 `φ` that reads no storage; under any modality where `U` cannot halt. -/
-def NFml.applyOnRigidBoxTop (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.applyOnRigidBoxTop (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   if ((U.total || decide (m = .box)) && (U.envOnly || U.localsOrStorage && φ.stFree) &&
       φ.rigid && φ.sortedFor U) = true then
     some (φ.subst U)
   else none
 
-theorem NFml.applyOnRigidBoxTop_sound {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.applyOnRigidBoxTop_sound {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.applyOnRigidBoxTop m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
     holds σ (.upd m U φ) := by
   unfold NFml.applyOnRigidBoxTop at h
@@ -1100,11 +1100,11 @@ def NFml.applyOnRigidBoxAt (i : Nat) : NFml C → Option (NFml C) := NFml.atSpin
 /-- `applyOnRigidFormula` for a storage write under the box
 (`Proves.applyStorageBox`): `[{storage := s}] φ ⇝ φ[s/storage]`.  The box
 only: the write halts where its path does not resolve. -/
-def NFml.applyStorageBoxTop : Modality → Upd C → NFml C → Option (NFml C)
+def NFml.applyStorageBoxTop : Modality → Surface.Upd C → NFml C → Option (NFml C)
   | .box, [.storage s], φ => if (φ.rigid && φ.stExplicit) = true then some (φ.withSt s) else none
   | _, _, _ => none
 
-theorem NFml.applyStorageBoxTop_sound {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.applyStorageBoxTop_sound {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.applyStorageBoxTop m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
     holds σ (.upd m U φ) := by
   unfold NFml.applyStorageBoxTop at h
@@ -1149,24 +1149,24 @@ theorem NFml.rwLaw_holds {q : Term C × Term C} (h : Term.Theq q.1 q.2) {φ ψ :
 
 -- Here rather than on `UpdElem` (`Update.lean`) to spare a low edit; it moves
 -- to that type's `deriving` clause at the next batched edit of `Update.lean`.
-deriving instance DecidableEq for UpdElem
+deriving instance DecidableEq for Surface.UpdElem
 
 /-- The law on the right-hand sides of `[{U}] φ` (`Proves.updRw`), if it
 rewrites one.  The box only: the rewritten update may run where `U` halts
 (`find(save(S, p, 10), p) ⇝ 10`), which the diamond would count against. -/
-def NFml.rwUpdTop (q : Term C × Term C) : Modality → Upd C → NFml C → Option (NFml C)
+def NFml.rwUpdTop (q : Term C × Term C) : Modality → Surface.Upd C → NFml C → Option (NFml C)
   | .box, U, φ => if (U.rw q != U) = true then some (.upd .box (U.rw q) φ) else none
   | .diamond, _, _ => none
 
 theorem NFml.rwUpdTop_sound {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {m : Modality}
-    {U : Upd C} {φ ψ : NFml C} (h : NFml.rwUpdTop q m U φ = some ψ) (σ : State)
+    {U : Surface.Upd C} {φ ψ : NFml C} (h : NFml.rwUpdTop q m U φ = some ψ) (σ : State)
     (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
   cases m with
   | diamond => nomatch h
   | box =>
     simp only [NFml.rwUpdTop] at h
     split at h
-    · cases h; exact Upd.rw_box hq (fun _ h => h) σ hψ
+    · cases h; exact Surface.Upd.rw_box hq (fun _ h => h) σ hψ
     · nomatch h
 
 /-- The law on the right-hand sides of the box update at position `i`. -/
@@ -1187,8 +1187,8 @@ storage write that is an element of the update. -/
 
 /-- Where a run of an update returns, every element wrote: its right-hand
 side returned. -/
-theorem Upd.foldl_ok_elem (σ₀ : State) : (U : Upd C) → ∀ {ρ₀ τ : State},
-    U.foldlM (fun ρ e => e.write σ₀ ρ) ρ₀ = .ok τ → ∀ {e : UpdElem C}, e ∈ U →
+theorem Surface.Upd.foldl_ok_elem (σ₀ : State) : (U : Surface.Upd C) → ∀ {ρ₀ τ : State},
+    U.foldlM (fun ρ e => e.write σ₀ ρ) ρ₀ = .ok τ → ∀ {e : Surface.UpdElem C}, e ∈ U →
       ∃ ρ ρ', e.write σ₀ ρ = .ok ρ'
   | [], _, _, _, _, he => nomatch he
   | d :: U, ρ₀, τ, h, e, he => by
@@ -1196,17 +1196,17 @@ theorem Upd.foldl_ok_elem (σ₀ : State) : (U : Upd C) → ∀ {ρ₀ τ : Stat
     obtain ⟨ρ₁, h₁, h⟩ := bind_ok_inv h
     rcases List.mem_cons.1 he with rfl | he
     · exact ⟨ρ₀, ρ₁, h₁⟩
-    · exact Upd.foldl_ok_elem σ₀ U h he
+    · exact Surface.Upd.foldl_ok_elem σ₀ U h he
 
-theorem Upd.apply_ok_elem {U : Upd C} {σ τ : State} (h : U.apply σ = .ok τ) {e : UpdElem C}
+theorem Surface.Upd.apply_ok_elem {U : Surface.Upd C} {σ τ : State} (h : U.apply σ = .ok τ) {e : Surface.UpdElem C}
     (he : e ∈ U) : ∃ ρ ρ', e.write σ ρ = .ok ρ' :=
-  Upd.foldl_ok_elem σ U h he
+  Surface.Upd.foldl_ok_elem σ U h he
 
 /-- A storage write that is an element of an update that returns, returns. -/
-theorem Upd.storage_eval_of_apply {U : Upd C} {σ τ : State} (h : U.apply σ = .ok τ) {s : STerm C}
-    (he : UpdElem.storage s ∈ U) : ∃ τ', s.eval σ = .ok τ' := by
-  obtain ⟨ρ, ρ', hw⟩ := Upd.apply_ok_elem h he
-  rw [UpdElem.storage_write] at hw
+theorem Surface.Upd.storage_eval_of_apply {U : Surface.Upd C} {σ τ : State} (h : U.apply σ = .ok τ) {s : STerm C}
+    (he : Surface.UpdElem.storage s ∈ U) : ∃ τ', s.eval σ = .ok τ' := by
+  obtain ⟨ρ, ρ', hw⟩ := Surface.Upd.apply_ok_elem h he
+  rw [Surface.UpdElem.storage_write] at hw
   obtain ⟨τ', hs, -⟩ := bind_ok_inv hw
   exact ⟨τ', hs⟩
 
@@ -1239,7 +1239,7 @@ theorem STerm.save_lit_eval {s : STerm C} {p : PTerm C} {v : Value} {σ τ : Sta
   exact ⟨r, segs, hp, State.findStorage_saveStorage_same h⟩
 
 /-- `f` of some path on the way down to `t`'s root through members only. -/
-def Tm.fieldsBelowAny (f : PTerm C → Bool) : Tm C u → Bool
+def Surface.Tm.fieldsBelowAny (f : PTerm C → Bool) : Surface.Tm C u → Bool
   | PTerm.field q _ => f q || q.fieldsBelowAny f
   | _ => false
 
@@ -1266,15 +1266,15 @@ theorem PTerm.fieldsBelow_eval {p : PTerm C} {σ : State} {r : Name} {segs : Lis
     (q : PTerm C) → q.fieldsBelow p = true →
       ∃ tail, tail ≠ [] ∧ tail.all Seg.isField = true ∧ q.eval σ = .ok (r, segs ++ tail)
   | PTerm.field q f, h => by
-    simp only [PTerm.fieldsBelow, Tm.fieldsBelowAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [PTerm.fieldsBelow, Surface.Tm.fieldsBelowAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · refine ⟨[.field f], List.cons_ne_nil _ _, rfl, ?_⟩
-      rw [Tm.app1_eval, hp]
+      rw [Surface.Tm.app1_eval, hp]
       rfl
     · obtain ⟨tail, hne, hf, hq⟩ := PTerm.fieldsBelow_eval hp q h
       refine ⟨tail ++ [.field f], by simp, ?_, ?_⟩
       · simp only [List.all_append, hf, List.all_cons, List.all_nil, Seg.isField, Bool.and_self]
-      · rw [Tm.app1_eval, hq]
+      · rw [Surface.Tm.app1_eval, hq]
         show Except.ok (r, (segs ++ tail) ++ [Seg.field f]) = _
         rw [List.append_assoc]
   | .pvP _, h | PTerm.root _, h | PTerm.next _, h | PTerm.at _ _, h | PTerm.nextIn _ _, h
@@ -1299,11 +1299,11 @@ first. -/
 theorem PTerm.fields?_eval (σ : State) : (q : PTerm C) → {l : List Seg} → q.fields? = some l →
     ∃ r segs, l = .field r :: segs ∧ q.eval σ = .ok (r, segs)
   | PTerm.root r, l, h => by
-    simp only [PTerm.fields?, Tm.segs?, List.all_cons, List.all_nil, Seg.isField, Bool.and_self,
+    simp only [PTerm.fields?, Surface.Tm.segs?, List.all_cons, List.all_nil, Seg.isField, Bool.and_self,
       ↓reduceIte, Option.some.injEq] at h
     exact ⟨r, [], h.symm, rfl⟩
   | PTerm.field q f, l, h => by
-    simp only [PTerm.fields?, Tm.segs?] at h
+    simp only [PTerm.fields?, Surface.Tm.segs?] at h
     split at h
     · rename_i l' hl'
       simp only [Option.map_eq_some_iff] at hl'
@@ -1316,13 +1316,13 @@ theorem PTerm.fields?_eval (σ : State) : (q : PTerm C) → {l : List Seg} → q
         obtain ⟨r, segs, rfl, hq⟩ := PTerm.fields?_eval σ q (l := l'') (by
           simp only [PTerm.fields?, hl'', hall, ↓reduceIte])
         refine ⟨r, segs ++ [.field f], rfl, ?_⟩
-        rw [Tm.app1_eval, hq]
+        rw [Surface.Tm.app1_eval, hq]
         rfl
       · nomatch h
     · nomatch h
   | .pvP _, _, h | PTerm.next _, _, h | PTerm.nextIn _ _, _, h => nomatch h
   | PTerm.at q i, _, h | PTerm.atIn _ q i, _, h => by
-    simp only [PTerm.fields?, Tm.segs?] at h
+    simp only [PTerm.fields?, Surface.Tm.segs?] at h
     split at h
     · rename_i l' hl'
       split at hl'
@@ -1381,7 +1381,7 @@ theorem PTerm.diverges_eval {p q : PTerm C} {σ : State} {r r' : Name} {segs seg
 
 /-- A reset struct keeps its members, each reset: a word read below the node
 reads a word after the reset. -/
-theorem SVal.find_defaultOf_prim : (tail : List Seg) → tail.all Seg.isField = true → (v : SVal) →
+theorem Semantics.SVal.find_defaultOf_prim : (tail : List Seg) → tail.all Seg.isField = true → (v : SVal) →
     ∀ {x : PrimVal}, v.find tail = .ok (.prim x) → ∃ y, v.defaultOf.find tail = .ok (.prim y)
   | [], _, v, x, h => by
     rw [SVal.find_nil] at h
@@ -1417,7 +1417,7 @@ theorem SVal.find_defaultOf_prim : (tail : List Seg) → tail.all Seg.isField = 
 
 /-- A write that returned saved, with the value it wrote laid over the old one
 where it is not a word. -/
-theorem State.writeStorage_ok {σ τ : State} {r : Name} {segs : List Seg} {v : SVal}
+theorem Semantics.State.writeStorage_ok {σ τ : State} {r : Name} {segs : List Seg} {v : SVal}
     (h : σ.writeStorage r segs v = .ok τ) : ∃ x, σ.saveStorage r segs x = .ok τ := by
   cases v with
   | prim _ => exact ⟨_, h⟩
@@ -1444,24 +1444,24 @@ theorem STerm.save_eval (σ : State) (s : STerm C) (p : PTerm C) (v : SValT C) :
 /-- The word `s` reads at a closed member path `q`, read off its writes at
 closed member paths (`Tm.findLitBy` on those): a run of `s` reads it there
 (`STerm.findLitF?_eval`), so a read through a delete of `s` below `q` returns. -/
-def Tm.findLitFBy (eq div : PTerm C → Bool) : Tm C u → Option Value
+def Surface.Tm.findLitFBy (eq div : PTerm C → Bool) : Surface.Tm C u → Option Value
   | STerm.save s p v =>
     if (PTerm.fields? p).isSome then
       if eq p then SValT.lit? v else if div p then s.findLitFBy eq div else none
     else none
   | _ => none
 
-@[inherit_doc Tm.findLitFBy]
+@[inherit_doc Surface.Tm.findLitFBy]
 def STerm.findLitF? (s : STerm C) (q : PTerm C) : Option Value :=
   if (PTerm.fields? q).isSome then s.findLitFBy (· == q) (·.diverges q) else none
 
 /-- The word read off the writes is the word a run reads. -/
-theorem Tm.findLitFBy_eval {q : PTerm C} (hq : (PTerm.fields? q).isSome = true) {σ : State} {r : Name}
+theorem Surface.Tm.findLitFBy_eval {q : PTerm C} (hq : (PTerm.fields? q).isSome = true) {σ : State} {r : Name}
     {sq : List Seg} (eq : q.eval σ = .ok (r, sq)) :
     (s : STerm C) → {w : Value} → s.findLitFBy (· == q) (·.diverges q) = some w →
       ∀ {τ : State}, s.eval σ = .ok τ → τ.findStorage r sq = .ok w.toSVal
   | STerm.save s p v, w, h, τ, hs => by
-    simp only [Tm.findLitFBy] at h
+    simp only [Surface.Tm.findLitFBy] at h
     split at h
     · rename_i hpf
       split at h
@@ -1483,7 +1483,7 @@ theorem Tm.findLitFBy_eval {q : PTerm C} (hq : (PTerm.fields? q).isSome = true) 
           change τs.writeStorage r'' segs'' sv = .ok τ at hs
           obtain ⟨x, hs⟩ := State.writeStorage_ok hs
           rw [Close.findStorage_saveStorage_apart hs (PTerm.diverges_eval hd hpf hq ep eq)]
-          exact Tm.findLitFBy_eval hq eq s h hτs
+          exact Surface.Tm.findLitFBy_eval hq eq s h hτs
         · nomatch h
     · nomatch h
   | .pvS _, _, h, _, _ | STerm.storage, _, h, _, _ | STerm.select _ _, _, h, _, _
@@ -1496,14 +1496,14 @@ theorem STerm.findLitF?_eval {s : STerm C} {q : PTerm C} {w : Value} (h : s.find
     τ.findStorage r sq = .ok w.toSVal := by
   unfold STerm.findLitF? at h
   split at h
-  · exact Tm.findLitFBy_eval ‹_› eq s h hs
+  · exact Surface.Tm.findLitFBy_eval ‹_› eq s h hs
   · nomatch h
 
 /-- A word at or below a deleted node, in a run: the delete returned, so the
 node was read and reset; the storage before it reads the word at the member path
 (`STerm.findLitF?_eval`), so the reset node, which keeps its members
 (`SVal.find_defaultOf_prim`), reads a word there. -/
-theorem Upd.delAtBelow_eval {s : STerm C} {p q : PTerm C} {w : Value} (hb : q.atOrBelow p = true)
+theorem Surface.Upd.delAtBelow_eval {s : STerm C} {p q : PTerm C} {w : Value} (hb : q.atOrBelow p = true)
     (hw : STerm.findLitF? s q = some w) {σ τ'' : State} (hd : (STerm.delAt s p).eval σ = .ok τ'') :
     ∃ y, (Term.find (.delAt s p) q).eval σ = .ok y := by
   have hd' := hd
@@ -1552,7 +1552,7 @@ the write it reads back is (`Upd.covers`). -/
 
 /-- `select(s, r)`'s run on the state `s` leaves: that state with the struct
 at the root `r` for its storage (`Op1.eval`). -/
-def State.selectRoot (r : Name) (τ : State) : Res State := do
+def Semantics.State.selectRoot (r : Name) (τ : State) : Res State := do
   match ← τ.findStorage r [] with
   | .struct fields => pure { τ with storage := fields }
   | .prim _ | .array .. | .map .. => .error .undef
@@ -1561,11 +1561,11 @@ theorem STerm.select_eval (σ : State) (s : STerm C) (r : Name) :
     (STerm.select s r).eval σ = (s.eval σ >>= State.selectRoot r) := rfl
 
 /-- The frame `F`: the state with the struct at `r₁.r₂…` for its storage. -/
-def State.frameOf : List Name → State → Res State
+def Semantics.State.frameOf : List Name → State → Res State
   | [], τ => .ok τ
   | r :: F, τ => State.selectRoot r τ >>= State.frameOf F
 
-theorem State.frameOf_append (F G : List Name) (τ : State) :
+theorem Semantics.State.frameOf_append (F G : List Name) (τ : State) :
     State.frameOf (F ++ G) τ = (State.frameOf F τ >>= State.frameOf G) := by
   induction F generalizing τ with
   | nil => rfl
@@ -1576,7 +1576,7 @@ theorem State.frameOf_append (F G : List Name) (τ : State) :
     | ok τ' => exact ih τ'
 
 /-- In the frame at `r`, a read at `g.segs` is the read at `r.g.segs` outside it. -/
-theorem State.findStorage_selectRoot {r : Name} {τ τ' : State} (h : State.selectRoot r τ = .ok τ')
+theorem Semantics.State.findStorage_selectRoot {r : Name} {τ τ' : State} (h : State.selectRoot r τ = .ok τ')
     (g : Name) (segs : List Seg) : τ'.findStorage g segs = τ.findStorage r (.field g :: segs) := by
   unfold State.selectRoot at h
   simp only [State.findStorage] at h
@@ -1595,7 +1595,7 @@ theorem State.findStorage_selectRoot {r : Name} {τ τ' : State} (h : State.sele
 
 /-- In the frame at `r`, a write at `g.rest` is the write at `r.g.rest` outside
 it, the frame taken after: the two runs end alike. -/
-theorem State.saveStorage_selectRoot (r : Name) (τ : State) (g : Name) (rest : List Seg) (new : SVal) :
+theorem Semantics.State.saveStorage_selectRoot (r : Name) (τ : State) (g : Name) (rest : List Seg) (new : SVal) :
     (τ.saveStorage r (.field g :: rest) new >>= State.selectRoot r) =
       (State.selectRoot r τ >>= fun τ' => τ'.saveStorage g rest new) := by
   unfold State.selectRoot State.saveStorage
@@ -1616,18 +1616,18 @@ theorem State.saveStorage_selectRoot (r : Name) (τ : State) (g : Name) (rest : 
 
 /-- Where a run returns, the other returns the same: the two agree but for
 how they halt. -/
-def Res.OkEq {α : Type} (a b : Res α) : Prop := ∀ x, a = .ok x ↔ b = .ok x
+def Semantics.Res.OkEq {α : Type} (a b : Res α) : Prop := ∀ x, a = .ok x ↔ b = .ok x
 
-theorem Res.OkEq.refl {α : Type} (a : Res α) : Res.OkEq a a := fun _ => Iff.rfl
-theorem Res.OkEq.symm {α : Type} {a b : Res α} (h : Res.OkEq a b) : Res.OkEq b a :=
+theorem Semantics.Res.OkEq.refl {α : Type} (a : Res α) : Res.OkEq a a := fun _ => Iff.rfl
+theorem Semantics.Res.OkEq.symm {α : Type} {a b : Res α} (h : Res.OkEq a b) : Res.OkEq b a :=
   fun x => (h x).symm
-theorem Res.OkEq.trans {α : Type} {a b c : Res α} (h : Res.OkEq a b) (h' : Res.OkEq b c) :
+theorem Semantics.Res.OkEq.trans {α : Type} {a b c : Res α} (h : Res.OkEq a b) (h' : Res.OkEq b c) :
     Res.OkEq a c := fun x => (h x).trans (h' x)
-theorem Res.OkEq.of_eq {α : Type} {a b : Res α} (h : a = b) : Res.OkEq a b := h ▸ Res.OkEq.refl a
-theorem Res.OkEq.le {α : Type} {a b : Res α} (h : Res.OkEq a b) : Res.Le a b := fun x => (h x).1
-theorem Res.OkEq.ge {α : Type} {a b : Res α} (h : Res.OkEq a b) : Res.Le b a := fun x => (h x).2
+theorem Semantics.Res.OkEq.of_eq {α : Type} {a b : Res α} (h : a = b) : Res.OkEq a b := h ▸ Res.OkEq.refl a
+theorem Semantics.Res.OkEq.le {α : Type} {a b : Res α} (h : Res.OkEq a b) : Res.Le a b := fun x => (h x).1
+theorem Semantics.Res.OkEq.ge {α : Type} {a b : Res α} (h : Res.OkEq a b) : Res.Le b a := fun x => (h x).2
 
-theorem Res.OkEq.bind {α β : Type} {a a' : Res α} {f f' : α → Res β} (ha : Res.OkEq a a')
+theorem Semantics.Res.OkEq.bind {α β : Type} {a a' : Res α} {f f' : α → Res β} (ha : Res.OkEq a a')
     (hf : ∀ x, Res.OkEq (f x) (f' x)) : Res.OkEq (a >>= f) (a' >>= f') := fun y => by
   constructor
   · intro h
@@ -1641,7 +1641,7 @@ theorem Res.OkEq.bind {α β : Type} {a a' : Res α} {f f' : α → Res β} (ha 
 
 /-- In the frame at `r`, a write of a value at `g.rest` is the write at
 `r.g.rest` outside it, the frame taken after. -/
-theorem State.writeStorage_selectRoot (r : Name) (τ : State) (g : Name) (rest : List Seg) (new : SVal) :
+theorem Semantics.State.writeStorage_selectRoot (r : Name) (τ : State) (g : Name) (rest : List Seg) (new : SVal) :
     Res.OkEq (τ.writeStorage r (.field g :: rest) new >>= State.selectRoot r)
       (State.selectRoot r τ >>= fun τ' => τ'.writeStorage g rest new) := by
   have key : ∀ x : SVal, Res.OkEq
@@ -1716,7 +1716,7 @@ theorem PTerm.sameSegs_eval {p q : PTerm C} {σ : State} {r r' : Name}
 
 /-- A storage word and its default either both fail to be words, or read as
 the value and its primitive default. -/
-theorem SVal.defaultOf_asValue_primDefault (v : SVal) :
+theorem Semantics.SVal.defaultOf_asValue_primDefault (v : SVal) :
     v.defaultOf.asValue = (do pure (Theory.StValue.primDefault (← v.asValue))) := by
   cases v with
   | prim p => cases p <;> rfl
@@ -1976,7 +1976,7 @@ theorem TermTaclet.RefLaw.evalRefines {r : TermTaclet t t'} : RefLaw r →
 
 /-- In the frame at `r`, a delete at `g.rest` is the delete at `r.g.rest`
 outside it, the frame taken after. -/
-theorem State.delAtAt_selectRoot (r : Name) (τ : State) (g : Name) (rest : List Seg) :
+theorem Semantics.State.delAtAt_selectRoot (r : Name) (τ : State) (g : Name) (rest : List Seg) :
     Res.OkEq (τ.delAtAt r (.field g :: rest) >>= State.selectRoot r)
       (State.selectRoot r τ >>= fun τ' => τ'.delAtAt g rest) := by
   unfold State.delAtAt
@@ -2007,48 +2007,48 @@ theorem State.delAtAt_selectRoot (r : Name) (τ : State) (g : Name) (rest : List
 
 /-- The root of a path: `alice` of `alice.account.balance`; `none` through an
 alias. -/
-def Tm.rootName? : Tm C u → Option Name
+def Surface.Tm.rootName? : Surface.Tm C u → Option Name
   | PTerm.root r => some r
-  | PTerm.field p _ => Tm.rootName? p
-  | PTerm.next p => Tm.rootName? p
-  | PTerm.at p _ => Tm.rootName? p
+  | PTerm.field p _ => Surface.Tm.rootName? p
+  | PTerm.next p => Surface.Tm.rootName? p
+  | PTerm.at p _ => Surface.Tm.rootName? p
   | _ => none
 
 /-- A path of a root and members only: no alias, no index, no push slot. -/
-def Tm.isFields : Tm C u → Bool
+def Surface.Tm.isFields : Surface.Tm C u → Bool
   | PTerm.root _ => true
-  | PTerm.field p _ => Tm.isFields p
+  | PTerm.field p _ => Surface.Tm.isFields p
   | _ => false
 
 /-- A member path resolves in every state, to its root and its members. -/
-theorem Tm.isFields_eval (σ : State) : (p : PTerm C) → Tm.isFields p = true →
+theorem Surface.Tm.isFields_eval (σ : State) : (p : PTerm C) → Surface.Tm.isFields p = true →
     ∃ f segs, p.eval σ = .ok (f, segs) ∧ segs.all Seg.isField = true
   | PTerm.root f, _ => ⟨f, [], rfl, rfl⟩
   | PTerm.field p g, h => by
-    obtain ⟨f, segs, hp, hf⟩ := Tm.isFields_eval σ p h
+    obtain ⟨f, segs, hp, hf⟩ := Surface.Tm.isFields_eval σ p h
     refine ⟨f, segs ++ [.field g], ?_, ?_⟩
-    · rw [Tm.app1_eval, hp]; rfl
+    · rw [Surface.Tm.app1_eval, hp]; rfl
     · simp only [List.all_append, hf, List.all_cons, List.all_nil, Seg.isField, Bool.and_self]
   | .pvP _, h | PTerm.next _, h | PTerm.at _ _, h | PTerm.nextIn _ _, h
   | PTerm.atIn _ _ _, h => nomatch h
 
 /-- The path under the root `r`: `age` under `alice` is `alice.age`.  A path
 through an alias is left as it is. -/
-def Tm.prefixRoot (r : Name) : Tm C u → Tm C u
+def Surface.Tm.prefixRoot (r : Name) : Surface.Tm C u → Surface.Tm C u
   | PTerm.root f => .app1 (.field f) (.app0 (.root r))
   | PTerm.field p f => .app1 (.field f) (p.prefixRoot r)
   | PTerm.at p i => .app2 .at (p.prefixRoot r) i
   | t => t
 
-theorem Tm.prefixRoot_isFields (r : Name) : (p : PTerm C) → Tm.isFields p = true →
-    Tm.isFields (p.prefixRoot r) = true
+theorem Surface.Tm.prefixRoot_isFields (r : Name) : (p : PTerm C) → Surface.Tm.isFields p = true →
+    Surface.Tm.isFields (p.prefixRoot r) = true
   | PTerm.root _, _ => rfl
-  | PTerm.field p _, h => Tm.prefixRoot_isFields r p h
+  | PTerm.field p _, h => Surface.Tm.prefixRoot_isFields r p h
   | .pvP _, h | PTerm.next _, h | PTerm.at _ _, h | PTerm.nextIn _ _, h
   | PTerm.atIn _ _ _, h => nomatch h
 
 /-- `r.p` resolves as the member path `p` does, one segment on. -/
-theorem Tm.prefixRoot_eval {σ : State} (r : Name) : (p : PTerm C) → Tm.isFields p = true →
+theorem Surface.Tm.prefixRoot_eval {σ : State} (r : Name) : (p : PTerm C) → Surface.Tm.isFields p = true →
     ∀ {f : Name} {segs : List Seg}, p.eval σ = .ok (f, segs) →
       (p.prefixRoot r).eval σ = .ok (r, .field f :: segs)
   | PTerm.root g, _, f, segs, h => by
@@ -2056,7 +2056,7 @@ theorem Tm.prefixRoot_eval {σ : State} (r : Name) : (p : PTerm C) → Tm.isFiel
     obtain ⟨rfl, rfl⟩ := h
     rfl
   | PTerm.field p g, hf, f, segs, h => by
-    rw [Tm.app1_eval] at h
+    rw [Surface.Tm.app1_eval] at h
     cases hp : p.eval σ with
     | error e => rw [hp] at h; cases h
     | ok fs =>
@@ -2064,8 +2064,8 @@ theorem Tm.prefixRoot_eval {σ : State} (r : Name) : (p : PTerm C) → Tm.isFiel
       rw [hp] at h
       simp only [Op1.eval, bind, Except.bind, pure, Except.pure, Except.ok.injEq, Prod.mk.injEq] at h
       obtain ⟨rfl, rfl⟩ := h
-      show (Tm.app1 (.field g) (p.prefixRoot r)).eval σ = _
-      rw [Tm.app1_eval, Tm.prefixRoot_eval r p hf hp]
+      show (Surface.Tm.app1 (.field g) (p.prefixRoot r)).eval σ = _
+      rw [Surface.Tm.app1_eval, Surface.Tm.prefixRoot_eval r p hf hp]
       rfl
   | .pvP _, hf, _, _, _ | PTerm.next _, hf, _, _, _ | PTerm.at _ _, hf, _, _, _
   | PTerm.nextIn _ _, hf, _, _, _ | PTerm.atIn _ _ _, hf, _, _, _ => nomatch hf
@@ -2078,39 +2078,39 @@ def PTerm.under? (F : List Name) (p : PTerm C) : Option (PTerm C) :=
   match F with
   | [] => some p
   | _ :: _ =>
-    if Tm.isFields p && (Tm.rootName? p != some "length") then some (F.foldr Tm.prefixRoot p)
+    if Surface.Tm.isFields p && (Surface.Tm.rootName? p != some "length") then some (F.foldr Surface.Tm.prefixRoot p)
     else none
 
 /-- `F.p` resolves to `F`'s members, then `p`'s root and members. -/
-theorem PTerm.foldr_prefixRoot_eval {σ : State} (p : PTerm C) (hf : Tm.isFields p = true)
+theorem PTerm.foldr_prefixRoot_eval {σ : State} (p : PTerm C) (hf : Surface.Tm.isFields p = true)
     {f : Name} {segs : List Seg} (hp : p.eval σ = .ok (f, segs)) :
-    (F : List Name) → ∃ r rest, (F.foldr Tm.prefixRoot p).eval σ = .ok (r, rest) ∧
+    (F : List Name) → ∃ r rest, (F.foldr Surface.Tm.prefixRoot p).eval σ = .ok (r, rest) ∧
       (Seg.field r :: rest) = F.map Seg.field ++ (Seg.field f :: segs)
   | [] => ⟨f, segs, hp, rfl⟩
   | r :: F => by
     obtain ⟨r', rest', h, e⟩ := PTerm.foldr_prefixRoot_eval p hf hp F
-    have hf' : Tm.isFields (F.foldr Tm.prefixRoot p) = true := by
+    have hf' : Surface.Tm.isFields (F.foldr Surface.Tm.prefixRoot p) = true := by
       clear h e
       induction F with
       | nil => exact hf
-      | cons r F ih => exact Tm.prefixRoot_isFields r _ ih
+      | cons r F ih => exact Surface.Tm.prefixRoot_isFields r _ ih
     refine ⟨r, .field r' :: rest', ?_, ?_⟩
-    · exact Tm.prefixRoot_eval r _ hf' h
+    · exact Surface.Tm.prefixRoot_eval r _ hf' h
     · simp only [List.map_cons, List.cons_append, e]
 
 /-- A storage term read member-wise, as the term it reads and the frame it
 reads it in: `save(select(s, r), p, v)` reads `save(s, r.p, v)` in the frame
 `[r]`; `s` alone reads itself at the top. -/
-def Tm.baseAny : Tm C u → Option (Tm C u × List Name)
-  | STerm.select s r => (Tm.baseAny s).map fun (b, F) => (b, F ++ [r])
+def Surface.Tm.baseAny : Surface.Tm C u → Option (Surface.Tm C u × List Name)
+  | STerm.select s r => (Surface.Tm.baseAny s).map fun (b, F) => (b, F ++ [r])
   | STerm.save s p v =>
-    (Tm.baseAny s).bind fun (b, F) => (PTerm.under? F p).map fun p' => (STerm.save b p' v, F)
+    (Surface.Tm.baseAny s).bind fun (b, F) => (PTerm.under? F p).map fun p' => (STerm.save b p' v, F)
   | STerm.delAt s p =>
-    (Tm.baseAny s).bind fun (b, F) => (PTerm.under? F p).map fun p' => (STerm.delAt b p', F)
+    (Surface.Tm.baseAny s).bind fun (b, F) => (PTerm.under? F p).map fun p' => (STerm.delAt b p', F)
   | s => some (s, [])
 
-@[inherit_doc Tm.baseAny]
-def STerm.base? (s : STerm C) : Option (STerm C × List Name) := Tm.baseAny s
+@[inherit_doc Surface.Tm.baseAny]
+def STerm.base? (s : STerm C) : Option (STerm C × List Name) := Surface.Tm.baseAny s
 
 /-- A read, member-wise, as the read it is: `find(select(s, r), p)` is
 `find(s, r.p)`. -/
@@ -2118,19 +2118,19 @@ def Term.base? : Term C → Option (Term C)
   | .find s q => (STerm.base? s).bind fun (b, F) => (PTerm.under? F q).map fun q' => .find b q'
   | _ => none
 
-theorem Res.bind_assoc {α β γ : Type} (x : Res α) (f : α → Res β) (g : β → Res γ) :
+theorem Semantics.Res.bind_assoc {α β γ : Type} (x : Res α) (f : α → Res β) (g : β → Res γ) :
     ((x >>= f) >>= g) = (x >>= fun a => f a >>= g) := by cases x <;> rfl
 
 
 /-- A member path's root. -/
-theorem Tm.rootName?_eval {σ : State} : (p : PTerm C) → Tm.isFields p = true →
-    ∀ {f : Name} {segs : List Seg}, p.eval σ = .ok (f, segs) → Tm.rootName? p = some f
+theorem Surface.Tm.rootName?_eval {σ : State} : (p : PTerm C) → Surface.Tm.isFields p = true →
+    ∀ {f : Name} {segs : List Seg}, p.eval σ = .ok (f, segs) → Surface.Tm.rootName? p = some f
   | PTerm.root g, _, f, segs, h => by
     simp only [tm_eval, pure, Except.pure, Except.ok.injEq, Prod.mk.injEq] at h
     obtain ⟨rfl, -⟩ := h
     rfl
   | PTerm.field p g, hf, f, segs, h => by
-    rw [Tm.app1_eval] at h
+    rw [Surface.Tm.app1_eval] at h
     cases hp : p.eval σ with
     | error e => rw [hp] at h; cases h
     | ok fs =>
@@ -2138,13 +2138,13 @@ theorem Tm.rootName?_eval {σ : State} : (p : PTerm C) → Tm.isFields p = true 
       rw [hp] at h
       simp only [Op1.eval, bind, Except.bind, pure, Except.pure, Except.ok.injEq, Prod.mk.injEq] at h
       obtain ⟨rfl, -⟩ := h
-      exact Tm.rootName?_eval p hf hp
+      exact Surface.Tm.rootName?_eval p hf hp
   | .pvP _, hf, _, _, _ | PTerm.next _, hf, _, _, _ | PTerm.at _ _, hf, _, _, _
   | PTerm.nextIn _ _, hf, _, _, _ | PTerm.atIn _ _ _, hf, _, _, _ => nomatch hf
 
 /-- A read of a word through a node that is no struct halts, but at the
 `length` of an array with nothing after it. -/
-theorem SVal.find_field_of_nonStruct {V : SVal} (hV : ∀ fields, V ≠ .struct fields) {g : Name}
+theorem Semantics.SVal.find_field_of_nonStruct {V : SVal} (hV : ∀ fields, V ≠ .struct fields) {g : Name}
     {segs : List Seg} (hg : g = "length" → segs ≠ []) {x : SVal} :
     V.find (.field g :: segs) ≠ .ok x := by
   cases V with
@@ -2162,12 +2162,12 @@ theorem SVal.find_field_of_nonStruct {V : SVal} (hV : ∀ fields, V ≠ .struct 
         | cons _ _ => simp [SVal.find]
     · simp [SVal.find]
 
-theorem Res.bind_pure_ok {α : Type} (x : Res α) : (x >>= fun a => (Except.ok a : Res α)) = x := by
+theorem Semantics.Res.bind_pure_ok {α : Type} (x : Res α) : (x >>= fun a => (Except.ok a : Res α)) = x := by
   cases x <;> rfl
 
 /-- A read in the frame `F` is the read outside it, at `F`'s members then the
 path, where the path's root is not an array's `length`. -/
-theorem State.frameOf_findStorage (r₁ : Name) (g : Name) (segs : List Seg) (hg : g ≠ "length") :
+theorem Semantics.State.frameOf_findStorage (r₁ : Name) (g : Name) (segs : List Seg) (hg : g ≠ "length") :
     (F' : List Name) → (τ : State) →
       Res.OkEq (State.frameOf (r₁ :: F') τ >>= fun τ' => τ'.findStorage g segs)
         (τ.findStorage r₁ (F'.map Seg.field ++ (.field g :: segs)))
@@ -2224,7 +2224,7 @@ theorem State.frameOf_findStorage (r₁ : Name) (g : Name) (segs : List Seg) (hg
               (fun _ h' => by simp at h') h
 
 /-- A write in the frame `F` is the write outside it, the frame taken after. -/
-theorem State.frameOf_writeStorage (r₁ : Name) (g : Name) (segs : List Seg) (sv : SVal) :
+theorem Semantics.State.frameOf_writeStorage (r₁ : Name) (g : Name) (segs : List Seg) (sv : SVal) :
     (F' : List Name) → (τ : State) →
       Res.OkEq (τ.writeStorage r₁ (F'.map Seg.field ++ (.field g :: segs)) sv >>= State.frameOf (r₁ :: F'))
         (State.frameOf (r₁ :: F') τ >>= fun τ' => τ'.writeStorage g segs sv)
@@ -2247,7 +2247,7 @@ theorem State.frameOf_writeStorage (r₁ : Name) (g : Name) (segs : List Seg) (s
     exact Res.OkEq.bind (Res.OkEq.refl _) fun τ' => State.frameOf_writeStorage r₂ g segs sv F'' τ'
 
 /-- A delete in the frame `F` is the delete outside it, the frame taken after. -/
-theorem State.frameOf_delAtAt (r₁ : Name) (g : Name) (segs : List Seg) :
+theorem Semantics.State.frameOf_delAtAt (r₁ : Name) (g : Name) (segs : List Seg) :
     (F' : List Name) → (τ : State) →
       Res.OkEq (τ.delAtAt r₁ (F'.map Seg.field ++ (.field g :: segs)) >>= State.frameOf (r₁ :: F'))
         (State.frameOf (r₁ :: F') τ >>= fun τ' => τ'.delAtAt g segs)
@@ -2270,7 +2270,7 @@ theorem State.frameOf_delAtAt (r₁ : Name) (g : Name) (segs : List Seg) :
 
 /-- A save at `r.g.rest` that returned went through the struct at `r`, before
 and after: the save at `g.rest` in that frame. -/
-theorem State.saveStorage_field_ok {r g : Name} {rest : List Seg} {new : SVal} {τ τ₁ : State}
+theorem Semantics.State.saveStorage_field_ok {r g : Name} {rest : List Seg} {new : SVal} {τ τ₁ : State}
     (h : τ.saveStorage r (.field g :: rest) new = .ok τ₁) :
     ∃ τ' τ₁', State.selectRoot r τ = .ok τ' ∧ State.selectRoot r τ₁ = .ok τ₁' ∧
       τ'.saveStorage g rest new = .ok τ₁' := by
@@ -2301,7 +2301,7 @@ theorem State.saveStorage_field_ok {r g : Name} {rest : List Seg} {new : SVal} {
         exact ⟨_, _, hsel, by rw [e]; exact inner, inner⟩
 
 /-- The frame `F` of a save at `F.g.segs` that returned exists, before and after it. -/
-theorem State.frameOf_of_saveStorage (r₁ g : Name) (segs : List Seg) (new : SVal) :
+theorem Semantics.State.frameOf_of_saveStorage (r₁ g : Name) (segs : List Seg) (new : SVal) :
     (F' : List Name) → (τ τ₁ : State) →
       τ.saveStorage r₁ (F'.map Seg.field ++ (.field g :: segs)) new = .ok τ₁ →
       (∃ τ', State.frameOf (r₁ :: F') τ = .ok τ') ∧ ∃ τ₁', State.frameOf (r₁ :: F') τ₁ = .ok τ₁'
@@ -2341,8 +2341,8 @@ theorem PTerm.under?_eval {σ : State} {r₁ : Name} {F' : List Name} {p p' : PT
     subst h
     simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at hc
     obtain ⟨hf, hl⟩ := hc
-    obtain ⟨g, segs, hpe, -⟩ := Tm.isFields_eval σ p hf
-    have hroot := Tm.rootName?_eval p hf hpe
+    obtain ⟨g, segs, hpe, -⟩ := Surface.Tm.isFields_eval σ p hf
+    have hroot := Surface.Tm.rootName?_eval p hf hpe
     refine ⟨g, segs, hpe, fun e => hl (by rw [hroot, e]), ?_⟩
     obtain ⟨r, rest, hp'e, he⟩ := PTerm.foldr_prefixRoot_eval p hf hpe (r₁ :: F')
     simp only [List.map_cons, List.cons_append, List.cons.injEq, Seg.field.injEq] at he
@@ -2355,7 +2355,7 @@ frame.** -/
 theorem STerm.base_eval : (s : STerm C) → {b : STerm C} → {F : List Name} →
     STerm.base? s = some (b, F) → ∀ σ, Res.OkEq (s.eval σ) (b.eval σ >>= State.frameOf F)
   | STerm.select s r, b, F, h, σ => by
-    simp only [STerm.base?, Tm.baseAny, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    simp only [STerm.base?, Surface.Tm.baseAny, Option.map_eq_some_iff, Prod.mk.injEq] at h
     obtain ⟨⟨b₀, F₀⟩, hb, rfl, rfl⟩ := h
     rw [STerm.select_eval]
     refine Res.OkEq.trans (Res.OkEq.bind (STerm.base_eval s hb σ) fun _ => Res.OkEq.refl _) ?_
@@ -2364,7 +2364,7 @@ theorem STerm.base_eval : (s : STerm C) → {b : STerm C} → {F : List Name} �
     rw [State.frameOf_append]
     simp only [State.frameOf, Res.bind_pure_ok]
   | STerm.save s p v, b, F, h, σ => by
-    simp only [STerm.base?, Tm.baseAny, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    simp only [STerm.base?, Surface.Tm.baseAny, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.mk.injEq] at h
     obtain ⟨⟨b₀, F₀⟩, hb, p', hp, rfl, rfl⟩ := h
     have ih := STerm.base_eval s hb σ
     rw [STerm.save_eval', STerm.save_eval']
@@ -2384,7 +2384,7 @@ theorem STerm.base_eval : (s : STerm C) → {b : STerm C} → {F : List Name} �
       refine Res.OkEq.bind (Res.OkEq.refl _) fun τb => ?_
       exact (State.frameOf_writeStorage r₁ g segs sv F' τb).symm
   | STerm.delAt s p, b, F, h, σ => by
-    simp only [STerm.base?, Tm.baseAny, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    simp only [STerm.base?, Surface.Tm.baseAny, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.mk.injEq] at h
     obtain ⟨⟨b₀, F₀⟩, hb, p', hp, rfl, rfl⟩ := h
     have ih := STerm.base_eval s hb σ
     rw [STerm.delAt_eval', STerm.delAt_eval']
@@ -2406,7 +2406,7 @@ theorem STerm.base_eval : (s : STerm C) → {b : STerm C} → {F : List Name} �
   | STerm.pushSlot _ _ _, b, F, h, σ
   | STerm.pop _ _, b, F, h, σ | STerm.shrink _ _, b, F, h, σ | STerm.extend _ _ _, b, F, h, σ
   | STerm.push _ _ _, b, F, h, σ => by
-    simp only [STerm.base?, Tm.baseAny, Option.some.injEq, Prod.mk.injEq] at h
+    simp only [STerm.base?, Surface.Tm.baseAny, Option.some.injEq, Prod.mk.injEq] at h
     obtain ⟨rfl, rfl⟩ := h
     simp only [State.frameOf, Res.bind_pure_ok]
     exact Res.OkEq.refl _
@@ -2440,13 +2440,13 @@ theorem Term.base_eval : (t : Term C) → {t' : Term C} → Term.base? t = some 
   | Term.mlen _ _, _, h, _ => nomatch h
 
 /-- A write of the frame `F` at `F.p` that returned leaves the frame in place. -/
-theorem State.frameOf_of_writeStorage {r₁ g : Name} {segs : List Seg} {sv : SVal} {F' : List Name}
+theorem Semantics.State.frameOf_of_writeStorage {r₁ g : Name} {segs : List Seg} {sv : SVal} {F' : List Name}
     {τ τ₁ : State} (h : τ.writeStorage r₁ (F'.map Seg.field ++ (.field g :: segs)) sv = .ok τ₁) :
     ∃ τ₁', State.frameOf (r₁ :: F') τ₁ = .ok τ₁' := by
   obtain ⟨x, hx⟩ := State.writeStorage_ok h
   exact (State.frameOf_of_saveStorage r₁ g segs x F' τ τ₁ hx).2
 
-theorem State.frameOf_of_delAtAt {r₁ g : Name} {segs : List Seg} {F' : List Name} {τ τ₁ : State}
+theorem Semantics.State.frameOf_of_delAtAt {r₁ g : Name} {segs : List Seg} {F' : List Name} {τ τ₁ : State}
     (h : τ.delAtAt r₁ (F'.map Seg.field ++ (.field g :: segs)) = .ok τ₁) :
     ∃ τ₁', State.frameOf (r₁ :: F') τ₁ = .ok τ₁' := by
   obtain ⟨cur, -, hx⟩ := bind_ok_inv h
@@ -2456,11 +2456,11 @@ theorem State.frameOf_of_delAtAt {r₁ g : Name} {segs : List Seg} {F' : List Na
 theorem STerm.save_returns_of_base {s : STerm C} {p : PTerm C} {v : SValT C} {b : STerm C}
     {F : List Name} (h : STerm.base? (.save s p v) = some (b, F)) {σ τ₁ : State}
     (hb : b.eval σ = .ok τ₁) : ∃ τ, (STerm.save s p v).eval σ = .ok τ := by
-  simp only [STerm.base?, Tm.baseAny, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.mk.injEq] at h
+  simp only [STerm.base?, Surface.Tm.baseAny, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.mk.injEq] at h
   obtain ⟨⟨b₀, F₀⟩, hb₀, p', hp, rfl, rfl⟩ := h
   dsimp only at hp hb
   have e := STerm.base_eval (.save s p v) (b := .save b₀ p' v) (F := F₀) (by
-    simp only [STerm.base?, Tm.baseAny, hb₀, Option.bind_some, hp, Option.map_some]) σ
+    simp only [STerm.base?, Surface.Tm.baseAny, hb₀, Option.bind_some, hp, Option.map_some]) σ
   have hres : ∃ τ, ((STerm.save b₀ p' v).eval σ >>= State.frameOf F₀) = .ok τ := by
     rw [hb, Res.ok_bind']
     cases F₀ with
@@ -2480,11 +2480,11 @@ theorem STerm.save_returns_of_base {s : STerm C} {p : PTerm C} {v : SValT C} {b 
 theorem STerm.delAt_returns_of_base {s : STerm C} {p : PTerm C} {b : STerm C} {F : List Name}
     (h : STerm.base? (.delAt s p) = some (b, F)) {σ τ₁ : State} (hb : b.eval σ = .ok τ₁) :
     ∃ τ, (STerm.delAt s p).eval σ = .ok τ := by
-  simp only [STerm.base?, Tm.baseAny, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.mk.injEq] at h
+  simp only [STerm.base?, Surface.Tm.baseAny, Option.bind_eq_some_iff, Option.map_eq_some_iff, Prod.mk.injEq] at h
   obtain ⟨⟨b₀, F₀⟩, hb₀, p', hp, rfl, rfl⟩ := h
   dsimp only at hp hb
   have e := STerm.base_eval (.delAt s p) (b := .delAt b₀ p') (F := F₀) (by
-    simp only [STerm.base?, Tm.baseAny, hb₀, Option.bind_some, hp, Option.map_some]) σ
+    simp only [STerm.base?, Surface.Tm.baseAny, hb₀, Option.bind_some, hp, Option.map_some]) σ
   have hres : ∃ τ, ((STerm.delAt b₀ p').eval σ >>= State.frameOf F₀) = .ok τ := by
     rw [hb, Res.ok_bind']
     cases F₀ with
@@ -2501,28 +2501,28 @@ theorem STerm.delAt_returns_of_base {s : STerm C} {p : PTerm C} {b : STerm C} {F
 
 /-- `U` writes the storage with a term on whose spine the write `w` reads
 member-wise lies (`STerm.base?`): `w` returns wherever `U` does. -/
-def Upd.holdsWrite (U : Upd C) (w : STerm C) : Bool :=
+def Surface.Upd.holdsWrite (U : Surface.Upd C) (w : STerm C) : Bool :=
   match STerm.base? w with
   | some (b, _) => U.any fun e => match e with
     | .storage S => S.onSpine b
     | _ => false
   | none => false
 
-theorem Upd.holdsWrite_eval {U : Upd C} {w : STerm C} (h : U.holdsWrite w = true) {σ τ : State}
+theorem Surface.Upd.holdsWrite_eval {U : Surface.Upd C} {w : STerm C} (h : U.holdsWrite w = true) {σ τ : State}
     (hU : U.apply σ = .ok τ) : ∃ b F, STerm.base? w = some (b, F) ∧ ∃ τ₁, b.eval σ = .ok τ₁ := by
-  unfold Upd.holdsWrite at h
+  unfold Surface.Upd.holdsWrite at h
   split at h
   · rename_i b F hb
     simp only [List.any_eq_true] at h
     obtain ⟨e, he, hs⟩ := h
     cases e with
     | storage S =>
-      obtain ⟨τ', hS⟩ := Upd.storage_eval_of_apply hU he
+      obtain ⟨τ', hS⟩ := Surface.Upd.storage_eval_of_apply hU he
       refine ⟨b, F, hb, ?_⟩
       cases hbe : b.eval σ with
       | ok τ₁ => exact ⟨τ₁, rfl⟩
       | error e' =>
-        obtain ⟨e'', hS'⟩ := Tm.onSpine_error hbe S hs
+        obtain ⟨e'', hS'⟩ := Surface.Tm.onSpine_error hbe S hs
         rw [hS'] at hS
         cases hS
     | val _ _ | path _ _ | mref _ _ | store _ _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _
@@ -2536,7 +2536,7 @@ storage write `U` holds (`Upd.holdsWrite`) — `find(save(s, p, v), p)` over
 storage deleted writes the word at the member path read (`STerm.findLitF?`),
 over `storage := delAt(s, p)` — each read member-wise too — so `q.1` returns
 wherever `U` does.  Syntactic, so that `rfl` decides it. -/
-def Upd.covers (U : Upd C) : Term C × Term C → Bool
+def Surface.Upd.covers (U : Surface.Upd C) : Term C × Term C → Bool
   | (.find (.save s p (.val (.lit v))) p', _) =>
     p' == p && U.holdsWrite (.save s p (.val (.lit v)))
   | (.find (.delAt s p) q, _) =>
@@ -2544,14 +2544,14 @@ def Upd.covers (U : Upd C) : Term C × Term C → Bool
   | _ => false
 
 /-- Where the update returns, the term a covered rewrite replaces returns. -/
-theorem Upd.covers_eval {q : Term C × Term C} {U : Upd C} (hc : U.covers q = true) {σ τ : State}
+theorem Surface.Upd.covers_eval {q : Term C × Term C} {U : Surface.Upd C} (hc : U.covers q = true) {σ τ : State}
     (hU : U.apply σ = .ok τ) : ∃ y, q.1.eval σ = .ok y := by
-  unfold Upd.covers at hc
+  unfold Surface.Upd.covers at hc
   split at hc
   · rename_i s p v p' heq
     simp only [Bool.and_eq_true, beq_iff_eq] at hc
     obtain ⟨rfl, hw⟩ := hc
-    obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hw hU
+    obtain ⟨b, F, hb, τ₁, hbe⟩ := Surface.Upd.holdsWrite_eval hw hU
     obtain ⟨τ', hs⟩ := STerm.save_returns_of_base hb hbe
     obtain ⟨r, segs, hp, hf⟩ := STerm.save_lit_eval hs
     refine ⟨v, ?_⟩
@@ -2561,17 +2561,17 @@ theorem Upd.covers_eval {q : Term C × Term C} {U : Upd C} (hc : U.covers q = tr
   · rename_i s p q' heq
     simp only [Bool.and_eq_true, Option.isSome_iff_exists] at hc
     obtain ⟨⟨hwr, hb⟩, w, hw⟩ := hc
-    obtain ⟨b, F, hbase, τ₁, hbe⟩ := Upd.holdsWrite_eval hwr hU
+    obtain ⟨b, F, hbase, τ₁, hbe⟩ := Surface.Upd.holdsWrite_eval hwr hU
     obtain ⟨τ'', hd⟩ := STerm.delAt_returns_of_base hbase hbe
-    exact Upd.delAtBelow_eval hb hw hd
+    exact Surface.Upd.delAtBelow_eval hb hw hd
   · nomatch hc
 
 /-- Where the update returns, a covered rewrite is exact: its replacement
 returns what the replaced term returns. -/
-theorem Upd.covers_le {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {U : Upd C}
+theorem Surface.Upd.covers_le {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2) {U : Surface.Upd C}
     (hc : U.covers q = true) {σ τ : State} (hU : U.apply σ = .ok τ) :
     Res.Le (q.2.eval σ) (q.1.eval σ) := fun x hx => by
-  obtain ⟨y, hy⟩ := Upd.covers_eval hc hU
+  obtain ⟨y, hy⟩ := Surface.Upd.covers_eval hc hU
   rw [hq σ y hy] at hx
   obtain rfl := Except.ok.inj hx
   exact hy
@@ -2583,7 +2583,7 @@ That read is not total, but once the update returns its storage operation
 has returned; the two sides then evaluate identically. -/
 
 /-- A covered reference law's storage operation is held by the update. -/
-def Upd.coversRef (U : Upd C) : Term C × Term C → Bool
+def Surface.Upd.coversRef (U : Surface.Upd C) : Term C × Term C → Bool
   | (.find (.save s p v) _, _) => U.holdsWrite (.save s p v)
   | (.find (.delAt s p) _, _) => U.holdsWrite (.delAt s p)
   | (.len (.save s p v) _, _) => U.holdsWrite (.save s p v)
@@ -2592,49 +2592,49 @@ def Upd.coversRef (U : Upd C) : Term C × Term C → Bool
 
 /-- Wherever a covered update returns, a reference law also refines in the
 reverse direction. -/
-theorem TermTaclet.RefLaw.back {r : TermTaclet t t'} (hr : RefLaw r) {U : Upd C}
+theorem TermTaclet.RefLaw.back {r : TermTaclet t t'} (hr : RefLaw r) {U : Surface.Upd C}
     (hc : U.coversRef (t, t') = true) {σ τ : State} (hU : U.apply σ = .ok τ) :
     Res.Le (t'.eval σ) (t.eval σ) := by
   cases hr with
   | findOnSaveFrame hd =>
-      simp only [Upd.coversRef] at hc
-      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      simp only [Surface.Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Surface.Upd.holdsWrite_eval hc hU
       obtain ⟨τ', hs⟩ := STerm.save_returns_of_base hb hbe
       rw [Term.find_save_frame_eval hd hs]
       exact Res.Le.refl _
   | findOnDelAtValue _ hq =>
-      simp only [Upd.coversRef] at hc
-      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      simp only [Surface.Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Surface.Upd.holdsWrite_eval hc hU
       obtain ⟨τ', hs⟩ := STerm.delAt_returns_of_base hb hbe
       rw [Term.find_delAt_value_eval hq hs]
       exact Res.Le.refl _
   | findOnDelAtFrame hd =>
-      simp only [Upd.coversRef] at hc
-      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      simp only [Surface.Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Surface.Upd.holdsWrite_eval hc hU
       obtain ⟨τ', hs⟩ := STerm.delAt_returns_of_base hb hbe
       rw [Term.find_delAt_frame_eval hd hs]
       exact Res.Le.refl _
   | lenOnSaveFrame hd =>
-      simp only [Upd.coversRef] at hc
-      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      simp only [Surface.Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Surface.Upd.holdsWrite_eval hc hU
       obtain ⟨τ', hs⟩ := STerm.save_returns_of_base hb hbe
       rw [Term.len_save_frame_eval hd hs]
       exact Res.Le.refl _
   | lenOnDelAtFrame hd =>
-      simp only [Upd.coversRef] at hc
-      obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc hU
+      simp only [Surface.Upd.coversRef] at hc
+      obtain ⟨b, F, hb, τ₁, hbe⟩ := Surface.Upd.holdsWrite_eval hc hU
       obtain ⟨τ', hs⟩ := STerm.delAt_returns_of_base hb hbe
       rw [Term.len_delAt_frame_eval hd hs]
       exact Res.Le.refl _
 
 /-- A reference law in the right-hand sides of `{U}_m φ`, when the
 rewritten update holds its storage operation. -/
-def NFml.rwUpdRefTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : NFml C) :
+def NFml.rwUpdRefTop (q : Term C × Term C) (m : Modality) (U : Surface.Upd C) (φ : NFml C) :
     Option (NFml C) :=
   if (U.rw q != U && (U.rw q).coversRef q) = true then some (.upd m (U.rw q) φ) else none
 
 theorem NFml.rwUpdRefTop_sound {q : Term C × Term C} {r : TermTaclet q.1 q.2}
-    (hr : TermTaclet.RefLaw r) {m : Modality} {U : Upd C} {φ ψ : NFml C}
+    (hr : TermTaclet.RefLaw r) {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.rwUpdRefTop q m U φ = some ψ) (σ : State) (hψ : holds σ ψ) :
     holds σ (.upd m U φ) := by
   unfold NFml.rwUpdRefTop at h
@@ -2642,7 +2642,7 @@ theorem NFml.rwUpdRefTop_sound {q : Term C × Term C} {r : TermTaclet q.1 q.2}
   · rename_i hc
     cases h
     simp only [Bool.and_eq_true] at hc
-    exact (Upd.rw_holds hr.evalRefines (fun _ _ hU => hr.back hc.2 hU) m φ σ).1 hψ
+    exact (Surface.Upd.rw_holds hr.evalRefines (fun _ _ hU => hr.back hc.2 hU) m φ σ).1 hψ
   · nomatch h
 
 /-- A reference law in the update at position `i`. -/
@@ -2652,12 +2652,12 @@ def NFml.rwUpdRefAt (q : Term C × Term C) (i : Nat) : NFml C → Option (NFml C
 /-- The law on the right-hand sides of `{U}_m φ` under any `m`, if it rewrites
 one and both its terms read member-wise what one read is (`Term.base?`): the
 two return alike in every state (`Term.base_eval`). -/
-def NFml.rwUpdEqTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : NFml C) : Option (NFml C) :=
+def NFml.rwUpdEqTop (q : Term C × Term C) (m : Modality) (U : Surface.Upd C) (φ : NFml C) : Option (NFml C) :=
   if (U.rw q != U && (Term.base? q.1).isSome && (Term.base? q.1 == Term.base? q.2)) = true then
     some (.upd m (U.rw q) φ)
   else none
 
-theorem NFml.rwUpdEqTop_sound {q : Term C × Term C} {m : Modality} {U : Upd C} {φ ψ : NFml C}
+theorem NFml.rwUpdEqTop_sound {q : Term C × Term C} {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C}
     (h : NFml.rwUpdEqTop q m U φ = some ψ) (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
   unfold NFml.rwUpdEqTop at h
   split at h
@@ -2667,7 +2667,7 @@ theorem NFml.rwUpdEqTop_sound {q : Term C × Term C} {m : Modality} {U : Upd C} 
     obtain ⟨⟨-, t', ht'⟩, he⟩ := hc
     have e1 := Term.base_eval q.1 ht'
     have e2 := Term.base_eval q.2 (he ▸ ht')
-    exact (Upd.rw_holds (fun σ => ((e1 σ).trans (e2 σ).symm).le)
+    exact (Surface.Upd.rw_holds (fun σ => ((e1 σ).trans (e2 σ).symm).le)
       (fun σ _ _ => ((e1 σ).trans (e2 σ).symm).ge) m φ σ).1 hψ
   · nomatch h
 
@@ -2696,11 +2696,11 @@ section EvalLaws
 variable (σ : State)
 
 theorem Term.lit_eval (v : Value) : (Term.lit v : Term C).eval σ = .ok v := rfl
-theorem Term.read_eval (m : MTerm C) (a : MAddr C) : (Term.read m a).eval σ = (do
+theorem Term.read_eval (m : MTerm C) (a : Surface.MAddr C) : (Term.read m a).eval σ = (do
     let τ ← m.eval σ
     let ad ← a.eval σ
     (← readAddr τ ad).asValue) := rfl
-theorem MTerm.write_eval (m : MTerm C) (a : MAddr C) (v : MValT C) :
+theorem MTerm.write_eval (m : MTerm C) (a : Surface.MAddr C) (v : MValT C) :
     (MTerm.write m a v).eval σ = (do
       let mv ← v.eval σ
       let τ ← m.eval σ
@@ -2719,8 +2719,8 @@ theorem ITerm.copy_eval (m : MTerm C) (v : SValT C) : (ITerm.copy m v).eval σ =
     let sv ← v.eval σ
     let τ ← m.eval σ
     (← copyStToM τ sv).2.asRef) := rfl
-theorem MAddr.field_eval (i : ITerm C) (f : Name) :
-    (MAddr.field i f).eval σ = (do pure (.memoryField (← i.eval σ) f)) := rfl
+theorem Surface.MAddr.field_eval (i : ITerm C) (f : Name) :
+    (Surface.MAddr.field i f).eval σ = (do pure (.memoryField (← i.eval σ) f)) := rfl
 theorem SValT.find_eval (s : STerm C) (p : PTerm C) : (SValT.find s p).eval σ = (do
     let τ ← s.eval σ
     let (r, segs) ← p.eval σ
@@ -2735,11 +2735,11 @@ theorem ITerm.alloc_eval (m : MTerm C) (R : RefTy) : (ITerm.alloc m R).eval σ =
 theorem MTerm.addM_eval (m : MTerm C) (R : RefTy) : (MTerm.addM m R).eval σ = (do
     let τ ← m.eval σ
     return (← allocDefault τ R).1) := rfl
-theorem ITerm.read_eval (m : MTerm C) (a : MAddr C) : (ITerm.read m a).eval σ = (do
+theorem ITerm.read_eval (m : MTerm C) (a : Surface.MAddr C) : (ITerm.read m a).eval σ = (do
     let τ ← m.eval σ
     let ad ← a.eval σ
     (← readAddr τ ad).asRef) := rfl
-theorem MAddr.at_eval (i : ITerm C) (k : Term C) : (MAddr.at i k).eval σ = (do
+theorem Surface.MAddr.at_eval (i : ITerm C) (k : Term C) : (Surface.MAddr.at i k).eval σ = (do
     let id ← i.eval σ
     pure (.memoryIndex id (← (← k.eval σ).asInt))) := rfl
 theorem MValT.ref_eval (i : ITerm C) : (MValT.ref i).eval σ = (do pure (.ref (← i.eval σ))) := rfl
@@ -2747,14 +2747,14 @@ theorem MValT.ref_eval (i : ITerm C) : (MValT.ref i).eval σ = (do pure (.ref (�
 
 end EvalLaws
 
-theorem Value.toMVal_asValue (v : Value) : v.toMVal.asValue = .ok v := by cases v <;> rfl
+theorem Semantics.Value.toMVal_asValue (v : Value) : v.toMVal.asValue = .ok v := by cases v <;> rfl
 
 theorem PrimVal.asValue_eq (p : PrimVal) : (SVal.prim p).asValue = (MVal.prim p).asValue := by
   cases p <;> rfl
 
-theorem SVal.strip_asValue (v : SVal) : v.strip.asValue = v.asValue := by cases v <;> rfl
+theorem Semantics.SVal.strip_asValue (v : SVal) : v.strip.asValue = v.asValue := by cases v <;> rfl
 
-theorem SVal.overlay_asValue (old new : SVal) : (old.overlay new).asValue = new.asValue := by
+theorem Semantics.SVal.overlay_asValue (old new : SVal) : (old.overlay new).asValue = new.asValue := by
   cases old <;> cases new <;> first | rfl | exact SVal.strip_asValue _
 
 theorem Close.layAt_asValue (old : SVal) (q : List Seg) (v : SVal) :
@@ -2775,7 +2775,7 @@ theorem Close.layAt_asValue (old : SVal) (q : List Seg) (v : SVal) :
 
 /-- A member read at a word below a storage write reads the word written
 there, whatever the write copied over. -/
-theorem State.writeStorage_find_field {σ τ : State} {r : Name} {segs : List Seg} {sv : SVal}
+theorem Semantics.State.writeStorage_find_field {σ τ : State} {r : Name} {segs : List Seg} {sv : SVal}
     (h : σ.writeStorage r segs sv = .ok τ) (f : Name) :
     (τ.findStorage r (segs ++ [.field f]) >>= SVal.asValue) = (sv.find [.field f] >>= SVal.asValue) := by
   rw [State.findStorage_append]
@@ -2830,71 +2830,71 @@ with the same two directions as `Upd.rw_holds`. -/
 
 section RwEvUpd
 
-variable {u : Srt} {q : Tm C u × Tm C u}
+variable {u : Srt} {q : Surface.Tm C u × Surface.Tm C u}
 
 /-- Every right-hand side of an update, rewritten at the sort of `q` (`Tm.rwEv`). -/
-def Upd.rwEv (q : Tm C u × Tm C u) (U : Upd C) : Upd C :=
+def Surface.Upd.rwEv (q : Surface.Tm C u × Surface.Tm C u) (U : Surface.Upd C) : Surface.Upd C :=
   U.map (·.mapTm fun {_} t => t.rwEv q)
 
-theorem UpdElem.mapTm_write_le (hq : Tm.EvalRefinesAt q.1 q.2) (σ₀ τ : State) :
-    (e : UpdElem C) → Res.Le (e.write σ₀ τ) ((e.mapTm fun {_} t => t.rwEv q).write σ₀ τ)
+theorem Surface.UpdElem.mapTm_write_le (hq : Surface.Tm.EvalRefinesAt q.1 q.2) (σ₀ τ : State) :
+    (e : Surface.UpdElem C) → Res.Le (e.write σ₀ τ) ((e.mapTm fun {_} t => t.rwEv q).write σ₀ τ)
   | .val _ t | .path _ t | .mref _ t | .storage t | .store _ t | .memory t =>
-    Res.Le.bind (Tm.rwEv_eval hq t σ₀) fun _ => Res.Le.refl _
+    Res.Le.bind (Surface.Tm.rwEv_eval hq t σ₀) fun _ => Res.Le.refl _
   | .net r _ a | .pay r a | .netMt r a =>
-    Res.Le.bind (Tm.rwEv_eval hq r σ₀) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
-      Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
-  | .selfBalance _ a | .setBalance a => Res.Le.bind (Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
+    Res.Le.bind (Surface.Tm.rwEv_eval hq r σ₀) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
+      Res.Le.bind (Surface.Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
+  | .selfBalance _ a | .setBalance a => Res.Le.bind (Surface.Tm.rwEv_eval hq a σ₀) fun _ => Res.Le.refl _
   | .saveNet _ | .saveNetMt _ | .unset _ => Res.Le.refl _
 
-theorem UpdElem.mapTm_write_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) (q.1.eval σ₀))
+theorem Surface.UpdElem.mapTm_write_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) (q.1.eval σ₀))
     (τ : State) :
-    (e : UpdElem C) → Res.Le ((e.mapTm fun {_} t => t.rwEv q).write σ₀ τ) (e.write σ₀ τ)
+    (e : Surface.UpdElem C) → Res.Le ((e.mapTm fun {_} t => t.rwEv q).write σ₀ τ) (e.write σ₀ τ)
   | .val _ t | .path _ t | .mref _ t | .storage t | .store _ t | .memory t =>
-    Res.Le.bind (Tm.rwEv_eval_rev hq t) fun _ => Res.Le.refl _
+    Res.Le.bind (Surface.Tm.rwEv_eval_rev hq t) fun _ => Res.Le.refl _
   | .net r _ a | .pay r a | .netMt r a =>
-    Res.Le.bind (Tm.rwEv_eval_rev hq r) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
-      Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
-  | .selfBalance _ a | .setBalance a => Res.Le.bind (Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
+    Res.Le.bind (Surface.Tm.rwEv_eval_rev hq r) fun _ => Res.Le.bind (Res.Le.refl _) fun _ =>
+      Res.Le.bind (Surface.Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
+  | .selfBalance _ a | .setBalance a => Res.Le.bind (Surface.Tm.rwEv_eval_rev hq a) fun _ => Res.Le.refl _
   | .saveNet _ | .saveNetMt _ | .unset _ => Res.Le.refl _
 
-theorem Upd.rwEv_foldl (hq : Tm.EvalRefinesAt q.1 q.2) (σ₀ : State) :
-    (U : Upd C) → ∀ ρ, Res.Le (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
+theorem Surface.Upd.rwEv_foldl (hq : Surface.Tm.EvalRefinesAt q.1 q.2) (σ₀ : State) :
+    (U : Surface.Upd C) → ∀ ρ, Res.Le (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
       ((U.rwEv q).foldlM (fun τ e => e.write σ₀ τ) ρ)
   | [], _ => Res.Le.refl _
   | e :: U, ρ => by
-    simp only [Upd.rwEv, List.map_cons, List.foldlM_cons]
-    exact Res.Le.bind (UpdElem.mapTm_write_le hq σ₀ ρ e) fun ρ' => Upd.rwEv_foldl hq σ₀ U ρ'
+    simp only [Surface.Upd.rwEv, List.map_cons, List.foldlM_cons]
+    exact Res.Le.bind (Surface.UpdElem.mapTm_write_le hq σ₀ ρ e) fun ρ' => Surface.Upd.rwEv_foldl hq σ₀ U ρ'
 
-theorem Upd.rwEv_foldl_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) (q.1.eval σ₀)) :
-    (U : Upd C) → ∀ ρ, Res.Le ((U.rwEv q).foldlM (fun τ e => e.write σ₀ τ) ρ)
+theorem Surface.Upd.rwEv_foldl_rev {σ₀ : State} (hq : Srt.Le u (q.2.eval σ₀) (q.1.eval σ₀)) :
+    (U : Surface.Upd C) → ∀ ρ, Res.Le ((U.rwEv q).foldlM (fun τ e => e.write σ₀ τ) ρ)
       (U.foldlM (fun τ e => e.write σ₀ τ) ρ)
   | [], _ => Res.Le.refl _
   | e :: U, ρ => by
-    simp only [Upd.rwEv, List.map_cons, List.foldlM_cons]
-    exact Res.Le.bind (UpdElem.mapTm_write_rev hq ρ e) fun ρ' => Upd.rwEv_foldl_rev hq U ρ'
+    simp only [Surface.Upd.rwEv, List.map_cons, List.foldlM_cons]
+    exact Res.Le.bind (Surface.UpdElem.mapTm_write_rev hq ρ e) fun ρ' => Surface.Upd.rwEv_foldl_rev hq U ρ'
 
-theorem Upd.rwEv_apply (hq : Tm.EvalRefinesAt q.1 q.2) (U : Upd C) (σ : State) :
+theorem Surface.Upd.rwEv_apply (hq : Surface.Tm.EvalRefinesAt q.1 q.2) (U : Surface.Upd C) (σ : State) :
     Res.Le (U.apply σ) ((U.rwEv q).apply σ) :=
-  Upd.rwEv_foldl hq σ U σ
+  Surface.Upd.rwEv_foldl hq σ U σ
 
-theorem Upd.rwEv_apply_rev {σ : State} (hq : Srt.Le u (q.2.eval σ) (q.1.eval σ)) (U : Upd C) :
+theorem Surface.Upd.rwEv_apply_rev {σ : State} (hq : Srt.Le u (q.2.eval σ) (q.1.eval σ)) (U : Surface.Upd C) :
     Res.Le ((U.rwEv q).apply σ) (U.apply σ) :=
-  Upd.rwEv_foldl_rev hq U σ
+  Surface.Upd.rwEv_foldl_rev hq U σ
 
 /-- **A rewrite at any sort inside an update, under any modality**
 (`Upd.rw_holds` for `Tm.rwEv`): `q.2` returns what `q.1` returns, and
 wherever the rewritten update returns, `q.1` returns what `q.2` does. -/
-theorem Upd.rwEv_holds (hq : Tm.EvalRefinesAt q.1 q.2) {U : Upd C}
+theorem Surface.Upd.rwEv_holds (hq : Surface.Tm.EvalRefinesAt q.1 q.2) {U : Surface.Upd C}
     (hb : ∀ σ τ, (U.rwEv q).apply σ = .ok τ → Srt.Le u (q.2.eval σ) (q.1.eval σ))
     (m : Modality) (ψ : NFml C) (σ : State) :
-    holds σ (.upd m (U.rwEv q) ψ) ↔ holds σ (.upd m U ψ) := by
-  simp only [holds]
+    NFml.holds σ (.upd m (U.rwEv q) ψ) ↔ NFml.holds σ (.upd m U ψ) := by
+  simp only [NFml.holds]
   cases hU : U.apply σ with
-  | ok τ => rw [Upd.rwEv_apply hq U σ τ hU]
+  | ok τ => rw [Surface.Upd.rwEv_apply hq U σ τ hU]
   | error e =>
     cases hU' : (U.rwEv q).apply σ with
     | ok τ' =>
-      rw [Upd.rwEv_apply_rev (hb σ τ' hU') U τ' hU'] at hU
+      rw [Surface.Upd.rwEv_apply_rev (hb σ τ' hU') U τ' hU'] at hU
       cases hU
     | error e' => exact Iff.rfl
 
@@ -2903,19 +2903,19 @@ end RwEvUpd
 /-- The law on the right-hand sides of `{U}_m φ` under any `m`, inside a memory
 term too (`Upd.rwEv`), if it rewrites one and the rewritten update holds the
 write the law reads back. -/
-def NFml.rwUpdCoveredTop (q : Term C × Term C) (m : Modality) (U : Upd C) (φ : NFml C) :
+def NFml.rwUpdCoveredTop (q : Term C × Term C) (m : Modality) (U : Surface.Upd C) (φ : NFml C) :
     Option (NFml C) :=
   if (U.rwEv q != U && (U.rwEv q).covers q) = true then some (.upd m (U.rwEv q) φ) else none
 
 theorem NFml.rwUpdCoveredTop_sound {q : Term C × Term C} (hq : Term.EvalRefines q.1 q.2)
-    {m : Modality} {U : Upd C} {φ ψ : NFml C} (h : NFml.rwUpdCoveredTop q m U φ = some ψ)
+    {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C} (h : NFml.rwUpdCoveredTop q m U φ = some ψ)
     (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
   unfold NFml.rwUpdCoveredTop at h
   split at h
   · rename_i hc
     cases h
     simp only [Bool.and_eq_true] at hc
-    exact (Upd.rwEv_holds (u := .val) hq.at (fun _ _ hU => Upd.covers_le hq hc.2 hU) m φ σ).1 hψ
+    exact (Surface.Upd.rwEv_holds (u := .val) hq.at (fun _ _ hU => Surface.Upd.covers_le hq hc.2 hU) m φ σ).1 hψ
   · nomatch h
 
 /-- The law on the right-hand sides of the update at position `i`, under any
@@ -2938,18 +2938,18 @@ a law is applied, with a soundness lemma by sort. -/
 /-- The path at which a term reads below the root `addM(m, R)` allocates:
 `freshId(addM(m, R))` is the root, `read(addM(m, R), i.f)` the member `f` of
 what `i` reads, `i.f` and `i[k]` (a literal `k`) the path one step down. -/
-def Tm.freshPath? : Tm C u → MTerm C → RefTy → Option (List Seg)
+def Surface.Tm.freshPath? : Surface.Tm C u → MTerm C → RefTy → Option (List Seg)
   | ITerm.alloc m' R', m, R => if m' == m && R' == R then some [] else none
   | ITerm.read M a, m, R => if M == MTerm.addM m R then a.freshPath? m R else none
-  | MAddr.field i f, m, R => (i.freshPath? m R).map (· ++ [.field f])
-  | MAddr.at i (Term.lit (.int k)), m, R => (i.freshPath? m R).map (· ++ [.at k])
+  | Surface.MAddr.field i f, m, R => (i.freshPath? m R).map (· ++ [.field f])
+  | Surface.MAddr.at i (Term.lit (.int k)), m, R => (i.freshPath? m R).map (· ++ [.at k])
   | _, _, _ => none
 
 /-- What a term at a fresh path reads, by sort: an identity is what the path
 reads in the fresh object, and it reads where the declared type is a
 reference; an address reads what the path reads, and it reads where the
 path is declared. -/
-def FreshRead (σ μ₁ : State) (root : Nat) (R : RefTy) (p : List Seg) : {u : Srt} → Tm C u → Prop
+def FreshRead (σ μ₁ : State) (root : Nat) (R : RefTy) (p : List Seg) : {u : Srt} → Surface.Tm C u → Prop
   | .ident, t => (∀ id, t.eval σ = .ok id → μ₁.readPath root p = .ok (.ref id)) ∧
       (∀ R', (Ty.ref R).memberTy p = some (.ref R') → ∃ id, t.eval σ = .ok id)
   | .addr, t => (∀ ad, t.eval σ = .ok ad → readAddr μ₁ ad = μ₁.readPath root p) ∧
@@ -2966,18 +2966,18 @@ theorem Ty.memberTy_snoc_some {T T' : Ty} {p : List Seg} {s : Seg}
     | prim q => simp [hp, Ty.memberTy, Ty.at_prim] at h
     | ref R' => exact ⟨R', rfl⟩
 
-theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {root : Nat}
-    (hm : m.eval σ = .ok μ₀) (ha : allocDefault μ₀ R = .ok (μ₁, root)) (t : Tm C u) :
+theorem Surface.Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {root : Nat}
+    (hm : m.eval σ = .ok μ₀) (ha : allocDefault μ₀ R = .ok (μ₁, root)) (t : Surface.Tm C u) :
     ∀ {p : List Seg}, t.freshPath? m R = some p → FreshRead σ μ₁ root R p t := by
   induction t with
   | pvV x | pvP x | pvS x | pvI x | app0 o | app3 o a b c =>
     intro p h
-    simp only [Tm.freshPath?] at h <;> nomatch h
+    simp only [Surface.Tm.freshPath?] at h <;> nomatch h
   | app1 o a ih =>
     intro p h
     cases o with
     | alloc R' =>
-      simp only [Tm.freshPath?] at h
+      simp only [Surface.Tm.freshPath?] at h
       split at h
       · rename_i hmR
         simp only [Bool.and_eq_true, beq_iff_eq] at hmR
@@ -2990,11 +2990,11 @@ theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {ro
         · exact ⟨root, by rw [ITerm.alloc_eval, hm, Res.ok_bind', ha]; rfl⟩
       · nomatch h
     | mfield f =>
-      simp only [Tm.freshPath?, Option.map_eq_some_iff] at h
+      simp only [Surface.Tm.freshPath?, Option.map_eq_some_iff] at h
       obtain ⟨p', hp', rfl⟩ := h
       obtain ⟨ih1, ih2⟩ := ih hp'
       refine ⟨fun ad had => ?_, fun T' hT' => ?_⟩
-      · rw [MAddr.field_eval] at had
+      · rw [Surface.MAddr.field_eval] at had
         obtain ⟨id, hid, had⟩ := bind_ok_inv had
         simp only [pure, Except.pure, Except.ok.injEq] at had
         subst had
@@ -3003,15 +3003,15 @@ theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {ro
         rfl
       · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
         obtain ⟨id, hid⟩ := ih2 R'' hR''
-        exact ⟨_, by rw [MAddr.field_eval, hid]; rfl⟩
+        exact ⟨_, by rw [Surface.MAddr.field_eval, hid]; rfl⟩
     | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref
     | delValue | wt _ =>
-      simp only [Tm.freshPath?] at h <;> nomatch h
+      simp only [Surface.Tm.freshPath?] at h <;> nomatch h
   | app2 o a b iha ihb =>
     intro p h
     cases o with
     | iread =>
-      simp only [Tm.freshPath?] at h
+      simp only [Surface.Tm.freshPath?] at h
       split at h
       · rename_i hM
         simp only [beq_iff_eq] at hM
@@ -3047,11 +3047,11 @@ theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {ro
         | lit v =>
           cases v with
           | int k =>
-            simp only [Tm.freshPath?, Option.map_eq_some_iff] at h
+            simp only [Surface.Tm.freshPath?, Option.map_eq_some_iff] at h
             obtain ⟨p', hp', rfl⟩ := h
             obtain ⟨ih1, ih2⟩ := iha hp'
             refine ⟨fun ad had => ?_, fun T' hT' => ?_⟩
-            · rw [MAddr.at_eval] at had
+            · rw [Surface.MAddr.at_eval] at had
               obtain ⟨id, hid, had⟩ := bind_ok_inv had
               simp only [Term.lit_eval, Res.ok_bind', Value.asInt, pure, Except.pure,
                 Except.ok.injEq] at had
@@ -3061,29 +3061,29 @@ theorem Tm.freshPath_eval {m : MTerm C} {R : RefTy} {σ μ₀ μ₁ : State} {ro
               rfl
             · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
               obtain ⟨id, hid⟩ := ih2 R'' hR''
-              exact ⟨_, by rw [MAddr.at_eval, hid]; rfl⟩
-          | bool _ => simp only [Tm.freshPath?] at h <;> nomatch h
-        | env _ => simp only [Tm.freshPath?] at h <;> nomatch h
-      | pvV _ | app1 _ _ | app2 _ _ _ | app3 _ _ _ _ => simp only [Tm.freshPath?] at h <;> nomatch h
+              exact ⟨_, by rw [Surface.MAddr.at_eval, hid]; rfl⟩
+          | bool _ => simp only [Surface.Tm.freshPath?] at h <;> nomatch h
+        | env _ => simp only [Surface.Tm.freshPath?] at h <;> nomatch h
+      | pvV _ | app1 _ _ | app2 _ _ _ | app3 _ _ _ _ => simp only [Surface.Tm.freshPath?] at h <;> nomatch h
     | binop _ _ | find | len | read | mlen | «at» | delAt | pushSlot _ | pop | shrink | extend _
     | sfind | copyMem | copy | copySt | nextIn =>
-      simp only [Tm.freshPath?] at h <;> nomatch h
+      simp only [Surface.Tm.freshPath?] at h <;> nomatch h
 
 /-- A memory term on the memory spine of `t` leaves a counter `t` only advances. -/
-theorem Tm.onMemSpine_nextId_le {s : MTerm C} {σ μs : State} (hs : s.eval σ = .ok μs) :
+theorem Surface.Tm.onMemSpine_nextId_le {s : MTerm C} {σ μs : State} (hs : s.eval σ = .ok μs) :
     (t : MTerm C) → t.onMemSpine s = true → ∀ {μt : State}, t.eval σ = .ok μt →
       μs.nextId ≤ μt.nextId
   | MTerm.addM a R, h, μt, ht => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onMemSpine, Surface.Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · rw [hs] at ht; cases ht; exact Nat.le_refl _
     · rw [MTerm.addM_eval] at ht
       obtain ⟨τ, hτ, ht⟩ := bind_ok_inv ht
       obtain ⟨⟨μ', id⟩, hal, ht⟩ := bind_ok_inv ht
       cases ht
-      exact Nat.le_trans (Tm.onMemSpine_nextId_le hs a h hτ) (allocDefault_nextId hal)
+      exact Nat.le_trans (Surface.Tm.onMemSpine_nextId_le hs a h hτ) (allocDefault_nextId hal)
   | MTerm.copySt a v, h, μt, ht => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onMemSpine, Surface.Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · rw [hs] at ht; cases ht; exact Nat.le_refl _
     · rw [MTerm.copySt_eval] at ht
@@ -3091,9 +3091,9 @@ theorem Tm.onMemSpine_nextId_le {s : MTerm C} {σ μs : State} (hs : s.eval σ =
       obtain ⟨τ, hτ, ht⟩ := bind_ok_inv ht
       obtain ⟨⟨μ', mv⟩, hc, ht⟩ := bind_ok_inv ht
       cases ht
-      exact Nat.le_trans (Tm.onMemSpine_nextId_le hs a h hτ) (copyStToM_nextId τ sv _ _ hc)
+      exact Nat.le_trans (Surface.Tm.onMemSpine_nextId_le hs a h hτ) (copyStToM_nextId τ sv _ _ hc)
   | MTerm.write a p v, h, μt, ht => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
+    simp only [Surface.Tm.onMemSpine, Surface.Tm.memSpineAny, Bool.or_eq_true, beq_iff_eq] at h
     rcases h with rfl | h
     · rw [hs] at ht; cases ht; exact Nat.le_refl _
     · rw [MTerm.write_eval] at ht
@@ -3101,9 +3101,9 @@ theorem Tm.onMemSpine_nextId_le {s : MTerm C} {σ μs : State} (hs : s.eval σ =
       obtain ⟨τ, hτ, ht⟩ := bind_ok_inv ht
       obtain ⟨ad, -, ht⟩ := bind_ok_inv ht
       rw [Close.writeAddr_nextId ht]
-      exact Tm.onMemSpine_nextId_le hs a h hτ
+      exact Surface.Tm.onMemSpine_nextId_le hs a h hτ
   | MTerm.memory, h, μt, ht => by
-    simp only [Tm.onMemSpine, Tm.memSpineAny, beq_iff_eq] at h
+    simp only [Surface.Tm.onMemSpine, Surface.Tm.memSpineAny, beq_iff_eq] at h
     subst h
     rw [hs] at ht; cases ht; exact Nat.le_refl _
 
@@ -3111,19 +3111,19 @@ theorem Tm.onMemSpine_nextId_le {s : MTerm C} {σ μs : State} (hs : s.eval σ =
 spine: a root `freshId(addM(m₀, R₀))` or `freshId(copySt(m₀, v))` whose
 allocation `M` performs, or a reference member of a fresh root read out of
 that allocation; an address is bounded where its identity is. -/
-def Tm.boundedIn : Tm C u → MTerm C → Bool
+def Surface.Tm.boundedIn : Surface.Tm C u → MTerm C → Bool
   | ITerm.alloc m₀ R₀, M => M.onMemSpine (.addM m₀ R₀)
   | ITerm.copy m₀ v, M => M.onMemSpine (.copySt m₀ v)
-  | ITerm.read (MTerm.addM m₀ R₀) (MAddr.field i _), M =>
+  | ITerm.read (MTerm.addM m₀ R₀) (Surface.MAddr.field i _), M =>
     M.onMemSpine (.addM m₀ R₀) && (i.freshPath? m₀ R₀).isSome
-  | ITerm.read (MTerm.addM m₀ R₀) (MAddr.at i _), M =>
+  | ITerm.read (MTerm.addM m₀ R₀) (Surface.MAddr.at i _), M =>
     M.onMemSpine (.addM m₀ R₀) && (i.freshPath? m₀ R₀).isSome
-  | MAddr.field i _, M => i.boundedIn M
-  | MAddr.at i _, M => i.boundedIn M
+  | Surface.MAddr.field i _, M => i.boundedIn M
+  | Surface.MAddr.at i _, M => i.boundedIn M
   | _, _ => false
 
 /-- What a bounded term reads, by sort: an identity below the counter `M` leaves. -/
-def BoundedRead (σ μ : State) : {u : Srt} → Tm C u → Prop
+def BoundedRead (σ μ : State) : {u : Srt} → Surface.Tm C u → Prop
   | .ident, t => ∀ id, t.eval σ = .ok id → id < μ.nextId
   | .addr, t => ∀ ad, t.eval σ = .ok ad → ad.id < μ.nextId
   | _, _ => True
@@ -3139,7 +3139,7 @@ theorem freshRoot_read_lt {m₀ : MTerm C} {R₀ : RefTy} {i : ITerm C} {σ μ�
   obtain ⟨⟨μ₁', root⟩, ha, hμ⟩ := bind_ok_inv hμ
   cases hμ
   obtain ⟨p, hp⟩ := Option.isSome_iff_exists.1 hp
-  have h1 := (Tm.freshPath_eval hm ha i hp).1 id₀ hi
+  have h1 := (Surface.Tm.freshPath_eval hm ha i hp).1 id₀ hi
   have hpath : μ₁'.readPath root (p ++ [s]) = .ok (.ref id) := by
     simp only [State.readPath, MVal.readPath_snoc] at h1 ⊢
     rw [h1, Res.ok_bind']
@@ -3153,42 +3153,42 @@ theorem freshRoot_read_lt {m₀ : MTerm C} {R₀ : RefTy} {i : ITerm C} {σ μ�
     cases hid'
     exact hlt
 
-theorem Tm.boundedIn_eval {M : MTerm C} {σ μ : State} (hM : M.eval σ = .ok μ) (t : Tm C u) :
+theorem Surface.Tm.boundedIn_eval {M : MTerm C} {σ μ : State} (hM : M.eval σ = .ok μ) (t : Surface.Tm C u) :
     t.boundedIn M = true → BoundedRead σ μ t := by
   induction t with
   | pvV x | pvP x | pvS x | pvI x | app0 o | app3 o a b c =>
     intro h
-    simp only [Tm.boundedIn] at h <;> nomatch h
+    simp only [Surface.Tm.boundedIn] at h <;> nomatch h
   | app1 o a ih =>
     intro h
     cases o with
     | alloc R₀ =>
       intro id hid
-      simp only [Tm.boundedIn] at h
+      simp only [Surface.Tm.boundedIn] at h
       rw [ITerm.alloc_eval] at hid
       obtain ⟨μ₀, hm, hid⟩ := bind_ok_inv hid
       obtain ⟨⟨μ₁, id'⟩, ha, hid⟩ := bind_ok_inv hid
       cases hid
       have hμ₁ : (MTerm.addM a R₀).eval σ = .ok μ₁ := by
         rw [MTerm.addM_eval, hm, Res.ok_bind', ha]; rfl
-      exact Nat.lt_of_lt_of_le (allocDefault_id_lt ha) (Tm.onMemSpine_nextId_le hμ₁ M h hM)
+      exact Nat.lt_of_lt_of_le (allocDefault_id_lt ha) (Surface.Tm.onMemSpine_nextId_le hμ₁ M h hM)
     | mfield f =>
       intro ad had
-      simp only [Tm.boundedIn] at h
-      rw [MAddr.field_eval] at had
+      simp only [Surface.Tm.boundedIn] at h
+      rw [Surface.MAddr.field_eval] at had
       obtain ⟨id, hi, had⟩ := bind_ok_inv had
       simp only [pure, Except.pure, Except.ok.injEq] at had
       subst had
       exact ih h id hi
     | unop _ _ | net | netOf _ | field _ | next | select _ | sval | newArr _ | addM _ | mval | ref
     | delValue | wt _ =>
-      simp only [Tm.boundedIn] at h <;> nomatch h
+      simp only [Surface.Tm.boundedIn] at h <;> nomatch h
   | app2 o a b iha ihb =>
     intro h
     cases o with
     | copy =>
       intro id hid
-      simp only [Tm.boundedIn] at h
+      simp only [Surface.Tm.boundedIn] at h
       rw [ITerm.copy_eval] at hid
       obtain ⟨sv, hv, hid⟩ := bind_ok_inv hid
       obtain ⟨μ₀, hm, hid⟩ := bind_ok_inv hid
@@ -3200,11 +3200,11 @@ theorem Tm.boundedIn_eval {M : MTerm C} {σ μ : State} (hM : M.eval σ = .ok μ
         subst hid
         have hμ₁ : (MTerm.copySt a b).eval σ = .ok μ₁ := by
           rw [MTerm.copySt_eval, hv, Res.ok_bind', hm, Res.ok_bind', hc]; rfl
-        exact Nat.lt_of_lt_of_le (copyStToM_ref_lt hc) (Tm.onMemSpine_nextId_le hμ₁ M h hM)
+        exact Nat.lt_of_lt_of_le (copyStToM_ref_lt hc) (Surface.Tm.onMemSpine_nextId_le hμ₁ M h hM)
     | mat =>
       intro ad had
-      simp only [Tm.boundedIn] at h
-      rw [MAddr.at_eval] at had
+      simp only [Surface.Tm.boundedIn] at h
+      rw [Surface.MAddr.at_eval] at had
       obtain ⟨id, hi, had⟩ := bind_ok_inv had
       obtain ⟨kv, -, had⟩ := bind_ok_inv had
       obtain ⟨kn, -, had⟩ := bind_ok_inv had
@@ -3232,54 +3232,54 @@ theorem Tm.boundedIn_eval {M : MTerm C} {σ μ : State} (hM : M.eval σ = .ok μ
             | app1 o₂ i =>
               cases o₂ with
               | mfield f =>
-                simp only [Tm.boundedIn, Bool.and_eq_true] at h
-                rw [MAddr.field_eval] at had
+                simp only [Surface.Tm.boundedIn, Bool.and_eq_true] at h
+                rw [Surface.MAddr.field_eval] at had
                 obtain ⟨id₀, hi, had⟩ := bind_ok_inv had
                 simp only [pure, Except.pure, Except.ok.injEq] at had
                 subst had
                 exact Nat.lt_of_lt_of_le (freshRoot_read_lt h.2 hμ₁ hi (s := .field f) hmv)
-                  (Tm.onMemSpine_nextId_le hμ₁ M h.1 hM)
+                  (Surface.Tm.onMemSpine_nextId_le hμ₁ M h.1 hM)
             | app2 o₂ i k =>
               cases o₂ with
               | mat =>
-                simp only [Tm.boundedIn, Bool.and_eq_true] at h
-                rw [MAddr.at_eval] at had
+                simp only [Surface.Tm.boundedIn, Bool.and_eq_true] at h
+                rw [Surface.MAddr.at_eval] at had
                 obtain ⟨id₀, hi, had⟩ := bind_ok_inv had
                 obtain ⟨kv, -, had⟩ := bind_ok_inv had
                 obtain ⟨kn, -, had⟩ := bind_ok_inv had
                 simp only [pure, Except.pure, Except.ok.injEq] at had
                 subst had
                 exact Nat.lt_of_lt_of_le (freshRoot_read_lt h.2 hμ₁ hi (s := .at kn) hmv)
-                  (Tm.onMemSpine_nextId_le hμ₁ M h.1 hM)
-      | app0 _ | app2 _ _ _ | app3 _ _ _ _ => simp only [Tm.boundedIn] at h <;> nomatch h
+                  (Surface.Tm.onMemSpine_nextId_le hμ₁ M h.1 hM)
+      | app0 _ | app2 _ _ _ | app3 _ _ _ _ => simp only [Surface.Tm.boundedIn] at h <;> nomatch h
     | binop _ _ | find | len | read | mlen | «at» | delAt | pushSlot _ | pop | shrink | extend _
     | sfind | copyMem | copySt | nextIn =>
-      simp only [Tm.boundedIn] at h <;> nomatch h
+      simp only [Surface.Tm.boundedIn] at h <;> nomatch h
 
 /-- Two memory addresses that never meet: different members, a member and
 an element, elements of one object at different literal indices. -/
-def MAddr.apart? : MAddr C → MAddr C → Bool
-  | MAddr.field _ f, MAddr.field _ g => f != g
-  | MAddr.field _ _, MAddr.at _ _ => true
-  | MAddr.at _ _, MAddr.field _ _ => true
-  | MAddr.at i (Term.lit (.int k)), MAddr.at j (Term.lit (.int k')) => i == j && k != k'
+def Surface.MAddr.apart? : Surface.MAddr C → Surface.MAddr C → Bool
+  | Surface.MAddr.field _ f, Surface.MAddr.field _ g => f != g
+  | Surface.MAddr.field _ _, Surface.MAddr.at _ _ => true
+  | Surface.MAddr.at _ _, Surface.MAddr.field _ _ => true
+  | Surface.MAddr.at i (Term.lit (.int k)), Surface.MAddr.at j (Term.lit (.int k')) => i == j && k != k'
   | _, _ => false
 
-theorem MAddr.apart?_eval {σ : State} (a b : MAddr C) (h : a.apart? b = true) {ad bd : Addr}
+theorem Surface.MAddr.apart?_eval {σ : State} (a b : Surface.MAddr C) (h : a.apart? b = true) {ad bd : Addr}
     (ha : a.eval σ = .ok ad) (hb : b.eval σ = .ok bd) : Close.Apart ad bd := by
-  unfold MAddr.apart? at h
+  unfold Surface.MAddr.apart? at h
   split at h
   · rename_i f i g j
     simp only [bne_iff_ne, ne_eq] at h
-    rw [MAddr.field_eval] at ha hb
+    rw [Surface.MAddr.field_eval] at ha hb
     obtain ⟨id, -, ha⟩ := bind_ok_inv ha
     obtain ⟨id', -, hb⟩ := bind_ok_inv hb
     simp only [pure, Except.pure, Except.ok.injEq] at ha hb
     subst ha hb
     exact Or.inr fun h' => h h'.symm
   · rename_i f i j k
-    rw [MAddr.field_eval] at ha
-    rw [MAddr.at_eval] at hb
+    rw [Surface.MAddr.field_eval] at ha
+    rw [Surface.MAddr.at_eval] at hb
     obtain ⟨id, -, ha⟩ := bind_ok_inv ha
     obtain ⟨id', -, hb⟩ := bind_ok_inv hb
     obtain ⟨kv, -, hb⟩ := bind_ok_inv hb
@@ -3288,8 +3288,8 @@ theorem MAddr.apart?_eval {σ : State} (a b : MAddr C) (h : a.apart? b = true) {
     subst ha hb
     trivial
   · rename_i i k g j
-    rw [MAddr.at_eval] at ha
-    rw [MAddr.field_eval] at hb
+    rw [Surface.MAddr.at_eval] at ha
+    rw [Surface.MAddr.field_eval] at hb
     obtain ⟨id, -, ha⟩ := bind_ok_inv ha
     obtain ⟨kv, -, ha⟩ := bind_ok_inv ha
     obtain ⟨kn, -, ha⟩ := bind_ok_inv ha
@@ -3300,7 +3300,7 @@ theorem MAddr.apart?_eval {σ : State} (a b : MAddr C) (h : a.apart? b = true) {
   · rename_i i k j k'
     simp only [Bool.and_eq_true, beq_iff_eq, bne_iff_ne, ne_eq] at h
     obtain ⟨rfl, hk⟩ := h
-    rw [MAddr.at_eval] at ha hb
+    rw [Surface.MAddr.at_eval] at ha hb
     obtain ⟨id, hi, ha⟩ := bind_ok_inv ha
     obtain ⟨id', hi', hb⟩ := bind_ok_inv hb
     rw [hi] at hi'
@@ -3312,9 +3312,9 @@ theorem MAddr.apart?_eval {σ : State} (a b : MAddr C) (h : a.apart? b = true) {
 
 /-- A law of a memory read, at the value or the identity sort: where the
 read returns, the replacement returns the same (`EvalLaw.sound`). -/
-inductive EvalLaw : {u : Srt} → Tm C u → Tm C u → Prop
+inductive EvalLaw : {u : Srt} → Surface.Tm C u → Surface.Tm C u → Prop
   /-- **`readOnWrite`**: `read(write(m, a, v), a) ⇝ v` (`readAddr_writeAddr_same`). -/
-  | readOnWrite {m : MTerm C} {a : MAddr C} {v : Value} :
+  | readOnWrite {m : MTerm C} {a : Surface.MAddr C} {v : Value} :
       EvalLaw tm{ read(write(m, a, lit(v)), a) } tm{ lit(v) }
   /-- **`findCopyMem`**: a member read out of a memory object copied into
   storage is read out of memory,
@@ -3334,41 +3334,41 @@ inductive EvalLaw : {u : Srt} → Tm C u → Tm C u → Prop
   object holds its type's default, `read(addM(m, R), a) ⇝ default`, where
   `a` reads at a fresh path of the allocation whose declared type is the
   primitive (`copyStToM_default_readPath`). -/
-  | readAddEqual {m : MTerm C} {R : RefTy} {a : MAddr C} {q : PrimTy}
+  | readAddEqual {m : MTerm C} {R : RefTy} {a : Surface.MAddr C} {q : PrimTy}
       (h : (a.freshPath? m R).bind (Ty.ref R).memberTy = some (.prim q) := by rfl) :
       EvalLaw tm{ read(addM(m), a) } tm{ lit(‹PrimTy.default q›) }
   /-- **`readAddDifferent`**: an allocation leaves every object allocated
   before it, `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s identity is
   allocated strictly earlier on `m`'s spine (`Tm.boundedIn`, `readAddr_heapExt`). -/
-  | readAddDifferent {m : MTerm C} {R : RefTy} {a : MAddr C} (h : a.boundedIn m = true := by rfl) :
+  | readAddDifferent {m : MTerm C} {R : RefTy} {a : Surface.MAddr C} (h : a.boundedIn m = true := by rfl) :
       EvalLaw tm{ read(addM(m), a) } tm{ read(m, a) }
   /-- **`readAddDifferentIdentity`**: `readAddDifferent` at the identity sort. -/
-  | readAddDifferentIdentity {m : MTerm C} {R : RefTy} {a : MAddr C}
+  | readAddDifferentIdentity {m : MTerm C} {R : RefTy} {a : Surface.MAddr C}
       (h : a.boundedIn m = true := by rfl) :
       EvalLaw (ITerm.read (.addM m R) a) (ITerm.read m a)
   /-- **`readWriteDifferent`**: a write leaves every other address,
   `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet
   (`MAddr.apart?`, `writeAddr_setObj`). -/
-  | readWriteDifferent {m : MTerm C} {a b : MAddr C} {v : MValT C}
+  | readWriteDifferent {m : MTerm C} {a b : Surface.MAddr C} {v : MValT C}
       (h : a.apart? b = true := by rfl) :
       EvalLaw tm{ read(write(m, a, v), b) } tm{ read(m, b) }
   /-- **`readWriteDifferentIdentity`**: `readWriteDifferent` at the identity sort. -/
-  | readWriteDifferentIdentity {m : MTerm C} {a b : MAddr C} {v : MValT C}
+  | readWriteDifferentIdentity {m : MTerm C} {a b : Surface.MAddr C} {v : MValT C}
       (h : a.apart? b = true := by rfl) :
       EvalLaw (ITerm.read (.write m a v) b) (ITerm.read m b)
   /-- **`readOnWriteIdentity`**: `readOnWrite` at the identity sort,
   `read(write(m, a, ref(i)), a) ⇝ i` (`readAddr_writeAddr_same`). -/
-  | readOnWriteIdentity {m : MTerm C} {a : MAddr C} {i : ITerm C} :
+  | readOnWriteIdentity {m : MTerm C} {a : Surface.MAddr C} {i : ITerm C} :
       EvalLaw (ITerm.read (.write m a (.ref i)) a) i
 
 section EvalLawSound
 
 variable {σ : State}
 
-theorem Res.ok_inj {α : Type} {a b : α} (h : (Except.ok a : Res α) = .ok b) : a = b :=
+theorem Semantics.Res.ok_inj {α : Type} {a b : α} (h : (Except.ok a : Res α) = .ok b) : a = b :=
   Except.ok.inj h
 
-theorem EvalLaw.readOnWrite_le {m : MTerm C} {a : MAddr C} {v : Value} {τ : State}
+theorem EvalLaw.readOnWrite_le {m : MTerm C} {a : Surface.MAddr C} {v : Value} {τ : State}
     (hw : (MTerm.write m a (.val (.lit v))).eval σ = .ok τ) :
     (Term.read (.write m a (.val (.lit v))) a).eval σ = .ok v := by
   rw [Term.read_eval, hw, Res.ok_bind']
@@ -3393,7 +3393,7 @@ theorem EvalLaw.findCopyMem_eval {s : STerm C} {p : PTerm C} {m : MTerm C} {i : 
   obtain ⟨id, hi, hsv⟩ := bind_ok_inv hsv
   obtain ⟨τs, -, hw⟩ := bind_ok_inv hw
   obtain ⟨⟨r, segs⟩, hp, hw⟩ := bind_ok_inv hw
-  rw [hp, Term.read_eval, hm, Res.ok_bind', MAddr.field_eval, hi]
+  rw [hp, Term.read_eval, hm, Res.ok_bind', Surface.MAddr.field_eval, hi]
   simp only [Res.ok_bind', pure, Except.pure]
   rw [State.writeStorage_find_field hw f, Close.copyMem_member hsv hf']
   cases readAddr τm (.memoryField id f) with
@@ -3411,7 +3411,7 @@ theorem EvalLaw.readCopySt_eval {m : MTerm C} {s : STerm C} {p : PTerm C} {f : N
       Res.Le ((Term.find s (.field p f)).eval σ)
         ((Term.read (.copySt m (.find s p)) (.field (.copy m (.find s p)) f)).eval σ) := by
   have hf' : f ≠ "length" := by simpa using hf
-  rw [Term.read_eval, hw, Res.ok_bind', MAddr.field_eval, ITerm.copy_eval]
+  rw [Term.read_eval, hw, Res.ok_bind', Surface.MAddr.field_eval, ITerm.copy_eval]
   rw [MTerm.copySt_eval] at hw
   obtain ⟨sv, hsv, hw⟩ := bind_ok_inv hw
   obtain ⟨τm, hm, hw⟩ := bind_ok_inv hw
@@ -3454,7 +3454,7 @@ theorem EvalLaw.readCopySt_eval {m : MTerm C} {s : STerm C} {p : PTerm C} {f : N
     rw [this']
     exact ⟨Res.Le.refl _, Res.Le.refl _⟩
 
-theorem EvalLaw.readAddEqual_eval {m : MTerm C} {R : RefTy} {a : MAddr C} {q : PrimTy}
+theorem EvalLaw.readAddEqual_eval {m : MTerm C} {R : RefTy} {a : Surface.MAddr C} {q : PrimTy}
     (h : (a.freshPath? m R).bind (Ty.ref R).memberTy = some (.prim q)) {μ₁ : State}
     (hw : (MTerm.addM m R).eval σ = .ok μ₁) :
     (Term.read (.addM m R) a).eval σ = .ok (PrimTy.default q) := by
@@ -3467,7 +3467,7 @@ theorem EvalLaw.readAddEqual_eval {m : MTerm C} {R : RefTy} {a : MAddr C} {q : P
   | none => simp [hp] at h
   | some p =>
     simp only [hp, Option.bind] at h
-    obtain ⟨h1, h2⟩ := Tm.freshPath_eval hm ha a hp
+    obtain ⟨h1, h2⟩ := Surface.Tm.freshPath_eval hm ha a hp
     obtain ⟨ad, had⟩ := h2 _ h
     obtain ⟨mv', hmv', hd⟩ :=
       (copyStToM_default_readPath p (Close.allocDefault_copy ha) (State.HeapExt.refl _)).2 _ h
@@ -3477,7 +3477,7 @@ theorem EvalLaw.readAddEqual_eval {m : MTerm C} {R : RefTy} {a : MAddr C} {q : P
     simp only [State.readPath]
     rw [hmv', Res.ok_bind', Value.toMVal_asValue]
 
-theorem EvalLaw.readAddDifferent_eval {m : MTerm C} {R : RefTy} {a : MAddr C}
+theorem EvalLaw.readAddDifferent_eval {m : MTerm C} {R : RefTy} {a : Surface.MAddr C}
     (h : a.boundedIn m = true) {μ₁ : State} (hw : (MTerm.addM m R).eval σ = .ok μ₁) :
     (Term.read (.addM m R) a).eval σ = (Term.read m a).eval σ := by
   have hμ := hw
@@ -3490,9 +3490,9 @@ theorem EvalLaw.readAddDifferent_eval {m : MTerm C} {R : RefTy} {a : MAddr C}
   | error _ => rfl
   | ok ad =>
     simp only [Res.ok_bind']
-    rw [readAddr_heapExt (allocDefault_heapExt ha) (Tm.boundedIn_eval hm a h ad had)]
+    rw [readAddr_heapExt (allocDefault_heapExt ha) (Surface.Tm.boundedIn_eval hm a h ad had)]
 
-theorem EvalLaw.readAddDifferentIdentity_eval {m : MTerm C} {R : RefTy} {a : MAddr C}
+theorem EvalLaw.readAddDifferentIdentity_eval {m : MTerm C} {R : RefTy} {a : Surface.MAddr C}
     (h : a.boundedIn m = true) {μ₁ : State} (hw : (MTerm.addM m R).eval σ = .ok μ₁) :
     (ITerm.read (.addM m R) a).eval σ = (ITerm.read m a).eval σ := by
   have hμ := hw
@@ -3505,9 +3505,9 @@ theorem EvalLaw.readAddDifferentIdentity_eval {m : MTerm C} {R : RefTy} {a : MAd
   | error _ => rfl
   | ok ad =>
     simp only [Res.ok_bind']
-    rw [readAddr_heapExt (allocDefault_heapExt ha) (Tm.boundedIn_eval hm a h ad had)]
+    rw [readAddr_heapExt (allocDefault_heapExt ha) (Surface.Tm.boundedIn_eval hm a h ad had)]
 
-theorem EvalLaw.readWriteDifferent_eval {m : MTerm C} {a b : MAddr C} {v : MValT C}
+theorem EvalLaw.readWriteDifferent_eval {m : MTerm C} {a b : Surface.MAddr C} {v : MValT C}
     (h : a.apart? b = true) {τ : State} (hw : (MTerm.write m a v).eval σ = .ok τ) :
     (Term.read (.write m a v) b).eval σ = (Term.read m b).eval σ := by
   have hμ := hw
@@ -3521,9 +3521,9 @@ theorem EvalLaw.readWriteDifferent_eval {m : MTerm C} {a b : MAddr C} {v : MValT
   | ok bd =>
     simp only [Res.ok_bind']
     obtain ⟨-, -, -, hfr⟩ := Close.writeAddr_setObj hw
-    rw [hfr bd (MAddr.apart?_eval a b h had hbd)]
+    rw [hfr bd (Surface.MAddr.apart?_eval a b h had hbd)]
 
-theorem EvalLaw.readWriteDifferentIdentity_eval {m : MTerm C} {a b : MAddr C} {v : MValT C}
+theorem EvalLaw.readWriteDifferentIdentity_eval {m : MTerm C} {a b : Surface.MAddr C} {v : MValT C}
     (h : a.apart? b = true) {τ : State} (hw : (MTerm.write m a v).eval σ = .ok τ) :
     (ITerm.read (.write m a v) b).eval σ = (ITerm.read m b).eval σ := by
   have hμ := hw
@@ -3537,9 +3537,9 @@ theorem EvalLaw.readWriteDifferentIdentity_eval {m : MTerm C} {a b : MAddr C} {v
   | ok bd =>
     simp only [Res.ok_bind']
     obtain ⟨-, -, -, hfr⟩ := Close.writeAddr_setObj hw
-    rw [hfr bd (MAddr.apart?_eval a b h had hbd)]
+    rw [hfr bd (Surface.MAddr.apart?_eval a b h had hbd)]
 
-theorem EvalLaw.readOnWriteIdentity_eval {m : MTerm C} {a : MAddr C} {i : ITerm C} {τ : State}
+theorem EvalLaw.readOnWriteIdentity_eval {m : MTerm C} {a : Surface.MAddr C} {i : ITerm C} {τ : State}
     (hw : (MTerm.write m a (.ref i)).eval σ = .ok τ) :
     (ITerm.read (.write m a (.ref i)) a).eval σ = i.eval σ := by
   have hμ := hw
@@ -3555,7 +3555,7 @@ theorem EvalLaw.readOnWriteIdentity_eval {m : MTerm C} {a : MAddr C} {i : ITerm 
 
 /-- **A law of a memory read refines evaluation**: where the read returns,
 its replacement returns the same. -/
-theorem EvalLaw.sound {u : Srt} {t t' : Tm C u} : EvalLaw t t' → Tm.EvalRefinesAt t t'
+theorem EvalLaw.sound {u : Srt} {t t' : Surface.Tm C u} : EvalLaw t t' → Surface.Tm.EvalRefinesAt t t'
   | .readOnWrite => fun σ x hx => by
     have hx0 := hx
     rw [Term.read_eval] at hx
@@ -3608,30 +3608,30 @@ end EvalLawSound
 
 /-- `U` writes the memory with a term on whose spine the write `w` lies: `w`
 returns wherever `U` does. -/
-def Upd.holdsMem (U : Upd C) (w : MTerm C) : Bool :=
+def Surface.Upd.holdsMem (U : Surface.Upd C) (w : MTerm C) : Bool :=
   U.any fun e => match e with
     | .memory M => M.onMemSpine w
     | _ => false
 
 /-- A memory write that is an element of an update that returns, returns. -/
-theorem Upd.memory_eval_of_apply {U : Upd C} {σ τ : State} (h : U.apply σ = .ok τ) {M : MTerm C}
-    (he : UpdElem.memory M ∈ U) : ∃ μ, M.eval σ = .ok μ := by
-  obtain ⟨ρ, ρ', hw⟩ := Upd.apply_ok_elem h he
-  rw [UpdElem.memory_write] at hw
+theorem Surface.Upd.memory_eval_of_apply {U : Surface.Upd C} {σ τ : State} (h : U.apply σ = .ok τ) {M : MTerm C}
+    (he : Surface.UpdElem.memory M ∈ U) : ∃ μ, M.eval σ = .ok μ := by
+  obtain ⟨ρ, ρ', hw⟩ := Surface.Upd.apply_ok_elem h he
+  rw [Surface.UpdElem.memory_write] at hw
   obtain ⟨μ, hm, -⟩ := bind_ok_inv hw
   exact ⟨μ, hm⟩
 
-theorem Upd.holdsMem_eval {U : Upd C} {w : MTerm C} (h : U.holdsMem w = true) {σ τ : State}
+theorem Surface.Upd.holdsMem_eval {U : Surface.Upd C} {w : MTerm C} (h : U.holdsMem w = true) {σ τ : State}
     (hU : U.apply σ = .ok τ) : ∃ μ, w.eval σ = .ok μ := by
-  simp only [Upd.holdsMem, List.any_eq_true] at h
+  simp only [Surface.Upd.holdsMem, List.any_eq_true] at h
   obtain ⟨e, he, hs⟩ := h
   cases e with
   | memory M =>
-    obtain ⟨μ', hM⟩ := Upd.memory_eval_of_apply hU he
+    obtain ⟨μ', hM⟩ := Surface.Upd.memory_eval_of_apply hU he
     cases hw : w.eval σ with
     | ok μ => exact ⟨μ, rfl⟩
     | error e' =>
-      obtain ⟨e'', hM'⟩ := Tm.onMemSpine_error hw M hs
+      obtain ⟨e'', hM'⟩ := Surface.Tm.onMemSpine_error hw M hs
       rw [hM'] at hM
       cases hM
   | val _ _ | path _ _ | mref _ _ | storage _ | store _ _ | selfBalance _ _ | net _ _ _ | pay _ _
@@ -3643,7 +3643,7 @@ write `U` holds — the memory write or allocation the read looks past
 (`Upd.holdsMem`), the storage write of `findCopyMem` (`Upd.holdsWrite`).
 By the sort of the law, then the shape of its read.  Syntactic, so that
 `rfl` decides it. -/
-def Upd.coversEval (U : Upd C) : {u : Srt} → Tm C u × Tm C u → Bool
+def Surface.Upd.coversEval (U : Surface.Upd C) : {u : Srt} → Surface.Tm C u × Surface.Tm C u → Bool
   | .val, (Term.read (.write m a v) _, _) => U.holdsMem (.write m a v)
   | .val, (Term.find (.save s p (.copyMem m i)) (.field p' _), _) =>
     p' == p && U.holdsWrite (.save s p (.copyMem m i))
@@ -3656,77 +3656,77 @@ def Upd.coversEval (U : Upd C) : {u : Srt} → Tm C u × Tm C u → Bool
 
 /-- Where the update returns, a covered memory law is exact: its replacement
 returns what the replaced term returns. -/
-theorem EvalLaw.back {u : Srt} {t t' : Tm C u} (r : EvalLaw t t') {U : Upd C}
+theorem EvalLaw.back {u : Srt} {t t' : Surface.Tm C u} (r : EvalLaw t t') {U : Surface.Upd C}
     (hc : U.coversEval (t, t') = true) {σ τ : State} (hU : U.apply σ = .ok τ) :
     Srt.Le u (t'.eval σ) (t.eval σ) := by
   cases r with
   | readOnWrite =>
-    simp only [Upd.coversEval] at hc
-    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc hU
+    simp only [Surface.Upd.coversEval] at hc
+    obtain ⟨τw, hw⟩ := Surface.Upd.holdsMem_eval hc hU
     intro x hx
     cases hx
     exact EvalLaw.readOnWrite_le hw
   | readAddEqual h =>
-    simp only [Upd.coversEval] at hc
-    obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval hc hU
+    simp only [Surface.Upd.coversEval] at hc
+    obtain ⟨μ₁, hw⟩ := Surface.Upd.holdsMem_eval hc hU
     intro x hx
     cases hx
     exact EvalLaw.readAddEqual_eval h hw
   | readAddDifferent h =>
-    simp only [Upd.coversEval] at hc
-    obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval hc hU
+    simp only [Surface.Upd.coversEval] at hc
+    obtain ⟨μ₁, hw⟩ := Surface.Upd.holdsMem_eval hc hU
     rw [EvalLaw.readAddDifferent_eval h hw]
     exact Res.Le.refl _
   | readAddDifferentIdentity h =>
-    simp only [Upd.coversEval] at hc
-    obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval hc hU
+    simp only [Surface.Upd.coversEval] at hc
+    obtain ⟨μ₁, hw⟩ := Surface.Upd.holdsMem_eval hc hU
     rw [EvalLaw.readAddDifferentIdentity_eval h hw]
     exact Res.Le.refl _
   | readWriteDifferent h =>
-    simp only [Upd.coversEval] at hc
-    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc hU
+    simp only [Surface.Upd.coversEval] at hc
+    obtain ⟨τw, hw⟩ := Surface.Upd.holdsMem_eval hc hU
     rw [EvalLaw.readWriteDifferent_eval h hw]
     exact Res.Le.refl _
   | readWriteDifferentIdentity h =>
-    simp only [Upd.coversEval] at hc
-    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc hU
+    simp only [Surface.Upd.coversEval] at hc
+    obtain ⟨τw, hw⟩ := Surface.Upd.holdsMem_eval hc hU
     rw [EvalLaw.readWriteDifferentIdentity_eval h hw]
     exact Res.Le.refl _
   | readOnWriteIdentity =>
-    simp only [Upd.coversEval] at hc
-    obtain ⟨τw, hw⟩ := Upd.holdsMem_eval hc hU
+    simp only [Surface.Upd.coversEval] at hc
+    obtain ⟨τw, hw⟩ := Surface.Upd.holdsMem_eval hc hU
     rw [EvalLaw.readOnWriteIdentity_eval hw]
     exact Res.Le.refl _
   | findCopyMem hf =>
-    simp only [Upd.coversEval, Bool.and_eq_true, beq_iff_eq] at hc
-    obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc.2 hU
+    simp only [Surface.Upd.coversEval, Bool.and_eq_true, beq_iff_eq] at hc
+    obtain ⟨b, F, hb, τ₁, hbe⟩ := Surface.Upd.holdsWrite_eval hc.2 hU
     obtain ⟨τ', hs⟩ := STerm.save_returns_of_base hb hbe
     exact (EvalLaw.findCopyMem_eval hf hs).2
   | readCopySt hf =>
-    simp only [Upd.coversEval, Bool.and_eq_true, beq_iff_eq] at hc
-    obtain ⟨μ, hw⟩ := Upd.holdsMem_eval hc.2 hU
+    simp only [Surface.Upd.coversEval, Bool.and_eq_true, beq_iff_eq] at hc
+    obtain ⟨μ, hw⟩ := Surface.Upd.holdsMem_eval hc.2 hU
     exact (EvalLaw.readCopySt_eval hf hw).2
 
 /-- The memory law on the right-hand sides of `{U}_m φ` under any `m`, if it
 rewrites one and the rewritten update holds the write the law reads back. -/
-def NFml.rwUpdEvalTop {u : Srt} (q : Tm C u × Tm C u) (m : Modality) (U : Upd C) (φ : NFml C) :
+def NFml.rwUpdEvalTop {u : Srt} (q : Surface.Tm C u × Surface.Tm C u) (m : Modality) (U : Surface.Upd C) (φ : NFml C) :
     Option (NFml C) :=
   if (U.rwEv q != U && (U.rwEv q).coversEval q) = true then some (.upd m (U.rwEv q) φ) else none
 
-theorem NFml.rwUpdEvalTop_sound {u : Srt} {q : Tm C u × Tm C u} (r : EvalLaw q.1 q.2)
-    {m : Modality} {U : Upd C} {φ ψ : NFml C} (h : NFml.rwUpdEvalTop q m U φ = some ψ)
+theorem NFml.rwUpdEvalTop_sound {u : Srt} {q : Surface.Tm C u × Surface.Tm C u} (r : EvalLaw q.1 q.2)
+    {m : Modality} {U : Surface.Upd C} {φ ψ : NFml C} (h : NFml.rwUpdEvalTop q m U φ = some ψ)
     (σ : State) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
   unfold NFml.rwUpdEvalTop at h
   split at h
   · rename_i hc
     cases h
     simp only [Bool.and_eq_true] at hc
-    exact (Upd.rwEv_holds r.sound (fun _ _ hU => r.back hc.2 hU) m φ σ).1 hψ
+    exact (Surface.Upd.rwEv_holds r.sound (fun _ _ hU => r.back hc.2 hU) m φ σ).1 hψ
   · nomatch h
 
 /-- The memory law on the right-hand sides of the update at position `i`,
 under any modality, where that update holds the write the law reads back. -/
-def NFml.rwUpdEvalAt {u : Srt} (q : Tm C u × Tm C u) (i : Nat) : NFml C → Option (NFml C) :=
+def NFml.rwUpdEvalAt {u : Srt} (q : Surface.Tm C u × Surface.Tm C u) (i : Nat) : NFml C → Option (NFml C) :=
   NFml.atSpine (NFml.rwUpdEvalTop q) i
 
 /-! ## The rewrites, bundled -/
@@ -3801,7 +3801,7 @@ def lawUpdEq {t t' : Term C} (_r : TermTaclet t t') (i : Nat) : LineRw C :=
 /-- The memory law `r` on the right-hand sides of the update at position `i`
 under any modality, where that update holds the write `r` reads back
 (`Upd.coversEval`). -/
-def lawUpdEval {u : Srt} {t t' : Tm C u} (r : EvalLaw t t') (i : Nat) : LineRw C :=
+def lawUpdEval {u : Srt} {t t' : Surface.Tm C u} (r : EvalLaw t t') (i : Nat) : LineRw C :=
   ⟨NFml.rwUpdEvalAt (t, t') i, NFml.atSpine_sound (NFml.rwUpdEvalTop_sound r) i _⟩
 
 end LineRw

@@ -36,7 +36,7 @@ open SortFaithfulness
 def Total : Contract := contract!{ uint total; }
 
 /-- The minimal ill-typed store: `total` holds a `bool`. -/
-def badStore : State := { storage := [("total", .bool true)] }
+def badStore : Semantics.State := { storage := [("total", .bool true)] }
 
 /-- `x = total;`, as `storageRootReadSelect` matches it. -/
 def totalRead : Core.Stmt Total [.val .uint] [.val .uint] :=

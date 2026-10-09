@@ -1,6 +1,6 @@
 import Solidity.Calculus.Core.Fml
 import Solidity.Calculus.RuleSyntax
-import Solidity.Calculus.Quote
+import Solidity.Calculus.NFmlQuote
 
 /-!
 # Printing scoped formulas
@@ -8,7 +8,7 @@ import Solidity.Calculus.Quote
 A formula of `Calculus/Core/Fml.lean` printed as the `dl{ … }` printers of
 `Calculus/RuleSyntax.lean` print its erasure (`Fml.eraseS`): the same KeY text.
 Terms, updates and statements are printed by those printers themselves, on
-the erased part quoted (`Calculus/Quote.lean`); this module only walks the
+the erased part quoted (`Calculus/NFmlQuote.lean`); this module only walks the
 formula, with the names of its context beside it.
 
 What erasure loses prints as KeY would have it: a frame's statements follow
@@ -31,7 +31,7 @@ def fmtCat (cat : Lean.Name) (stx : Lean.Syntax) : MetaM String := do
   return (← PrettyPrinter.ppCategory cat stx).pretty 100000
 
 def Tm.show {Γ : Ctx} (ns : List Var) (t : Tm C Γ .val) : MetaM String := do
-  fmtCat `dl_term (← ppTerm (Solidity.Tm.quote c (t.erase ns)))
+  fmtCat `dl_term (← ppTerm (Surface.Tm.quote c (t.erase ns)))
 
 /-- The statements of an erased block, each with its `;`. -/
 def showStmts (ss : List (Solidity.Surface.Stmt C)) : MetaM (List String) := do
@@ -124,7 +124,7 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
   | .upd _ U ψ =>
     let U' := U.erase ns
     if U'.isEmpty then return ← Fml.showP (U.names ns) ψ
-    return (s!"{← fmtCat `dl_upd (← ppUpd (Solidity.Upd.quote c U'))} {← arg (U.names ns) ψ 50}",
+    return (s!"{← fmtCat `dl_upd (← ppUpd (Surface.Upd.quote c U'))} {← arg (U.names ns) ψ 50}",
       1024)
   | .havoc ψ => return (s!"\{ havoc } {← arg ns ψ 50}", 1024)
   | .anon xs ψ =>

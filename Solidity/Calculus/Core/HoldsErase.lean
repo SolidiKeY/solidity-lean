@@ -191,7 +191,7 @@ end Ops2
 
 section Terms
 
-variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+variable {Γ : Ctx} {ns : List Var} {σ : EState C Γ} {τ : Semantics.State}
 
 theorem Agree.wl (hag : Agree ns σ τ) : τ = withLocals σ.glob τ.env := hag.glob.symm
 
@@ -200,13 +200,13 @@ the untyped state's locals. -/
 theorem Tm.eval_erase (hag : Agree ns σ τ) : {s : Srt} → (t : Tm C Γ s) →
     (t.erase ns).eval τ = Srt.wl τ.env s (t.eval σ)
   | _, .pvV i => by
-    simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i]; rfl
+    simp only [Tm.erase, Surface.Tm.eval, hag.getEnv i]; rfl
   | _, .pvP i => aliasPath_erase hag i
   | _, .pvS i => by
-    simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i]
+    simp only [Tm.erase, Surface.Tm.eval, hag.getEnv i]
     rw [hag.wl]; rfl
   | _, .pvI i => by
-    simp only [Tm.erase, Solidity.Tm.eval, hag.getEnv i, Tm.eval, memRef]
+    simp only [Tm.erase, Surface.Tm.eval, hag.getEnv i, Tm.eval, memRef]
     cases Env.get i σ.env <;> rfl
   | _, .netOf i a => by
     show Op1.eval τ (.netOf (i.name ns)) ((a.erase ns).eval τ) = _
@@ -256,14 +256,14 @@ end Denote
 
 section TermsDenote
 
-variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+variable {Γ : Ctx} {ns : List Var} {σ : EState C Γ} {τ : Semantics.State}
 
 /-- **A term denotes as its erasure.** -/
 theorem Tm.denote_erase (hag : Agree ns σ τ) : {s : Srt} → (t : Tm C Γ s) →
     (t.erase ns).denote τ = t.denote σ
-  | _, .pvV i => by simp only [Tm.erase, Solidity.Tm.denote, hag.getEnv i]; rfl
-  | _, .pvP i => by simp only [Tm.erase, Solidity.Tm.denote, aliasPath_erase hag i]; rfl
-  | _, .pvS i => by simp only [Tm.erase, Solidity.Tm.denote, hag.getEnv i]; rfl
+  | _, .pvV i => by simp only [Tm.erase, Surface.Tm.denote, hag.getEnv i]; rfl
+  | _, .pvP i => by simp only [Tm.erase, Surface.Tm.denote, aliasPath_erase hag i]; rfl
+  | _, .pvS i => by simp only [Tm.erase, Surface.Tm.denote, hag.getEnv i]; rfl
   | _, .pvI i => rfl
   | _, .netOf i a => by
     show Op1.denote τ (.netOf (i.name ns)) ((a.erase ns).denote τ) = _
@@ -332,7 +332,7 @@ theorem Env.mem_erase_thin : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (ns : List V
 
 /-- A frame dropped from under what it keeps: the kept locals are still
 bound under their names. -/
-theorem Agree.thin {Γ Δ : Ctx} {ns : List Var} {σ : State C Δ} {τ : Semantics.State}
+theorem Agree.thin {Γ Δ : Ctx} {ns : List Var} {σ : EState C Δ} {τ : Semantics.State}
     (hag : Agree ns σ τ) (h : Thin Γ Δ) : Agree (h.names ns) (σ.thin h) τ where
   len := Thin.names_length h ns hag.len
   nodup := (Thin.names_sublist h ns).nodup hag.nodup
@@ -340,7 +340,7 @@ theorem Agree.thin {Γ Δ : Ctx} {ns : List Var} {σ : State C Δ} {τ : Semanti
   env m hm := hag.env m (Env.mem_erase_thin h ns σ.env hag.len m hm)
 
 /-- A scope's locals popped, the names of what is left. -/
-theorem Agree.dropNames {Γ Δ : Ctx} {ns : List Var} {σ : State C Δ} {τ : Semantics.State}
+theorem Agree.dropNames {Γ Δ : Ctx} {ns : List Var} {σ : EState C Δ} {τ : Semantics.State}
     (hag : Agree ns σ τ) (h : Ext Γ Δ) : Agree (ns.drop h.depth) (σ.drop h) τ := by
   have hl : (ns.take h.depth).length = h.depth := by
     rw [List.length_take, hag.len, h.length_eq]; omega
@@ -352,30 +352,30 @@ end Thin
 
 section Updates
 
-variable {Γ : Ctx} {ns : List Var} {σ₀ : State C Γ} {τ₀ : Semantics.State}
+variable {Γ : Ctx} {ns : List Var} {σ₀ : EState C Γ} {τ₀ : Semantics.State}
 
 theorem Rhs.write_erase (hag : Agree ns σ₀ τ₀) {t : LTy} (r : Rhs C Γ t) (x : Var)
     (τ : Semantics.State) :
     (r.erase ns x).write τ₀ τ = (fun v => τ.setEnv x (t.enc C v)) <$> r.eval σ₀ := by
   cases r with
   | val a =>
-    simp only [Rhs.erase, Solidity.UpdElem.write, Tm.eval_erase hag a, Srt.wl, Rhs.eval]
+    simp only [Rhs.erase, Surface.UpdElem.write, Tm.eval_erase hag a, Srt.wl, Rhs.eval]
     cases a.eval σ₀ <;> rfl
   | path p =>
-    simp only [Rhs.erase, Solidity.UpdElem.write, Tm.eval_erase hag p, Srt.wl, Rhs.eval]
+    simp only [Rhs.erase, Surface.UpdElem.write, Tm.eval_erase hag p, Srt.wl, Rhs.eval]
     cases p.eval σ₀ <;> rfl
   | unset => rfl
   | mref i =>
-    simp only [Rhs.erase, Solidity.UpdElem.write, Tm.eval_erase hag i, Srt.wl, Rhs.eval]
+    simp only [Rhs.erase, Surface.UpdElem.write, Tm.eval_erase hag i, Srt.wl, Rhs.eval]
     cases i.eval σ₀ <;> rfl
   | store st =>
-    simp only [Rhs.erase, Solidity.UpdElem.write, Tm.eval_erase hag st, Srt.wl, Rhs.eval]
+    simp only [Rhs.erase, Surface.UpdElem.write, Tm.eval_erase hag st, Srt.wl, Rhs.eval]
     cases st.eval σ₀ <;> rfl
-  | saveNet => simp only [Rhs.erase, Solidity.UpdElem.write, Rhs.eval]; rw [hag.wl]; rfl
+  | saveNet => simp only [Rhs.erase, Surface.UpdElem.write, Rhs.eval]; rw [hag.wl]; rfl
   | saveNetMt => rfl
 
 /-- One element written into agreeing states, read in agreeing ones. -/
-theorem UpdElem.write_erase (hag : Agree ns σ₀ τ₀) {Δ : Ctx} {ms : List Var} {σ : State C Δ}
+theorem UpdElem.write_erase (hag : Agree ns σ₀ τ₀) {Δ : Ctx} {ms : List Var} {σ : EState C Δ}
     {τ : Semantics.State} (hag' : Agree ms σ τ) (e : UpdElem C Γ Δ) :
     Res.Rel (Agree ms) (e.write σ₀ σ) ((e.erase ns ms).write τ₀ τ) := by
   rw [hag'.wl]
@@ -387,26 +387,26 @@ theorem UpdElem.write_erase (hag : Agree ns σ₀ τ₀) {Δ : Ctx} {ms : List V
     | error => rfl
     | ok v => exact hag'.setLocal i v
   | storage st =>
-    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag st, Srt.wl]
+    simp only [UpdElem.erase, UpdElem.write, Surface.UpdElem.write, Tm.eval_erase hag st, Srt.wl]
     cases st.eval σ₀ with
     | error => rfl
     | ok g => exact hag'.withGlob _
   | memory mm =>
-    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag mm, Srt.wl]
+    simp only [UpdElem.erase, UpdElem.write, Surface.UpdElem.write, Tm.eval_erase hag mm, Srt.wl]
     cases mm.eval σ₀ with
     | error => rfl
     | ok g => exact hag'.withGlob _
   | selfBalance op a =>
-    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag a, Srt.wl]
+    simp only [UpdElem.erase, UpdElem.write, Surface.UpdElem.write, Tm.eval_erase hag a, Srt.wl]
     rw [hag.wl]
     exact Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ => hag'.withGlob _
   | net r op a =>
-    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag r,
+    simp only [UpdElem.erase, UpdElem.write, Surface.UpdElem.write, Tm.eval_erase hag r,
       Tm.eval_erase hag a, Srt.wl]
     exact Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ =>
       Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ => hag'.withGlob _
   | pay r a =>
-    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag r,
+    simp only [UpdElem.erase, UpdElem.write, Surface.UpdElem.write, Tm.eval_erase hag r,
       Tm.eval_erase hag a, Srt.wl]
     rw [hag.wl]
     refine Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ =>
@@ -415,19 +415,19 @@ theorem UpdElem.write_erase (hag : Agree ns σ₀ τ₀) {Δ : Ctx} {ms : List V
     · simp only [hk, ↓reduceIte]; rfl
     · simp only [hk, ↓reduceIte]; exact hag'.withGlob _
   | netMt r a =>
-    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag r,
+    simp only [UpdElem.erase, UpdElem.write, Surface.UpdElem.write, Tm.eval_erase hag r,
       Tm.eval_erase hag a, Srt.wl]
     exact Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ =>
       Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ => hag'.withGlob _
   | setBalance a =>
-    simp only [UpdElem.erase, UpdElem.write, Solidity.UpdElem.write, Tm.eval_erase hag a, Srt.wl]
+    simp only [UpdElem.erase, UpdElem.write, Surface.UpdElem.write, Tm.eval_erase hag a, Srt.wl]
     exact Res.Rel.bind_same _ fun _ _ => Res.Rel.bind_same _ fun _ _ => hag'.withGlob _
 
 /-- **An update ends in agreeing states**: the untyped update of its
 erasure, read in an agreeing state, halts alike or agrees on the names of
 the context it leaves. -/
 theorem Upd.apply_erase (hag : Agree ns σ₀ τ₀) : {Δ : Ctx} → (U : Upd C Γ Δ) → U.Fresh ns →
-    Res.Rel (Agree (U.names ns)) (U.apply σ₀) (Solidity.Upd.apply (U.erase ns) τ₀)
+    Res.Rel (Agree (U.names ns)) (U.apply σ₀) (Surface.Upd.apply (U.erase ns) τ₀)
   | _, .nil, _ => hag
   | _, .snoc U e, hU => by
     show Res.Rel _ (do e.write σ₀ (← U.apply σ₀))
@@ -446,10 +446,10 @@ theorem Upd.apply_erase (hag : Agree ns σ₀ τ₀) : {Δ : Ctx} → (U : Upd C
     | error => rfl
     | ok v => exact h'.push hU.2 v
   | _, .pop U h, hU => by
-    show Res.Rel _ ((U.apply σ₀).map (State.drop h)) (Solidity.Upd.apply (U.erase ns) τ₀)
+    show Res.Rel _ ((U.apply σ₀).map (EState.drop h)) (Surface.Upd.apply (U.erase ns) τ₀)
     exact (Upd.apply_erase hag U hU).map_left fun _ _ h' => h'.dropNames h
   | _, .drop U h, hU => by
-    show Res.Rel _ ((U.apply σ₀).map (State.thin h)) (Solidity.Upd.apply (U.erase ns) τ₀)
+    show Res.Rel _ ((U.apply σ₀).map (EState.thin h)) (Surface.Upd.apply (U.erase ns) τ₀)
     exact (Upd.apply_erase hag U hU).map_left fun _ _ h' => h'.thin h
 
 end Updates
@@ -493,7 +493,7 @@ in every untyped state that agrees with the typed state's erasure on the
 locals named `ns`, and the converse. -/
 theorem holds_erase_fo : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → φ.Plain ns →
     φ.FO = true → {σ : TState C Γ} → {τ : Semantics.State} → Agree ns σ.erase τ →
-    (holds σ φ ↔ Solidity.holds τ (φ.erase ns))
+    (holds σ φ ↔ NFml.holds τ (φ.erase ns))
   | _, .tt, _, _, _, _, _, _ => Iff.rfl
   | _, .eq a b, _, _, _, _, _, hag => by
     show _ ↔ Theory.StValue.Equiv ((a.erase _).denote _) ((b.erase _).denote _)
@@ -509,7 +509,7 @@ theorem holds_erase_fo : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → 
     have h' : φ.FO = true ∧ ψ.FO = true := Bool.and_eq_true_iff.mp h
     exact imp_congr (holds_erase_fo φ hφ.1 h'.1 hag) (holds_erase_fo ψ hφ.2 h'.2 hag)
   | _, .all _ p φ, _, hφ, h, σ, _, hag => by
-    show (∀ w : p.Denote, holds (σ.push (t := .val p) w) φ) ↔ ∀ v, p.admits v → Solidity.holds _ _
+    show (∀ w : p.Denote, holds (σ.push (t := .val p) w) φ) ↔ ∀ v, p.admits v → NFml.holds _ _
     constructor
     · intro hw v hv
       obtain ⟨w, rfl⟩ := PrimTy.exists_of_admits hv
@@ -526,7 +526,7 @@ theorem holds_erase_fo : {Γ : Ctx} → (φ : Fml C Γ) → {ns : List Var} → 
 section OneWay
 
 /-- Agreement only reads the untyped locals by name. -/
-theorem Agree.congrEnv {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ τ' : Semantics.State}
+theorem Agree.congrEnv {Γ : Ctx} {ns : List Var} {σ : EState C Γ} {τ τ' : Semantics.State}
     (hag : Agree ns σ τ) (hg : withLocals σ.glob τ'.env = τ')
     (he : ∀ y, lookupBy y τ'.env = lookupBy y τ.env) : Agree ns σ τ' where
   len := hag.len
@@ -534,15 +534,15 @@ theorem Agree.congrEnv {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ τ' : Se
   glob := hg
   env m hm := (he m.1).trans (hag.env m hm)
 
-theorem State.glob_anon {Γ : Ctx} (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) :
-    (xs : List ((t : LTy) × Idx Γ t)) → (σ : State C Γ) → (σ.anon xs b).glob = σ.glob
+theorem EState.glob_anon {Γ : Ctx} (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) :
+    (xs : List ((t : LTy) × Idx Γ t)) → (σ : EState C Γ) → (σ.anon xs b).glob = σ.glob
   | [], _ => rfl
-  | x :: xs, σ => State.glob_anon b xs (σ.setLocal x.2 (b x))
+  | x :: xs, σ => EState.glob_anon b xs (σ.setLocal x.2 (b x))
 
 /-- The locals `xs` set as `b` says, on both sides: the untyped state differs
 only at their names. -/
 theorem Agree.anon {Γ : Ctx} {ns : List Var} (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) :
-    (xs : List ((t : LTy) × Idx Γ t)) → {σ : State C Γ} → {τ : Semantics.State} →
+    (xs : List ((t : LTy) × Idx Γ t)) → {σ : EState C Γ} → {τ : Semantics.State} →
       Agree ns σ τ → ∃ τ₁, Agree ns (σ.anon xs b) τ₁ ∧
         ∀ y, y ∉ xs.map (fun x => x.2.name ns) → lookupBy y τ₁.env = lookupBy y τ.env
   | [], _, τ, hag => ⟨τ, hag, fun _ _ => rfl⟩

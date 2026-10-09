@@ -28,43 +28,43 @@ same for all of them: the rule writes `lhs = nsp.fld`.  A hole is that
 
 /-- Where a storage path lands: `v = □` (a value read), `lsv = □` (an alias
 bound), `loc = □` (a copy into a member or an entry). -/
-inductive Hole (C : Contract) : Ty → Type where
-  | local {p : PrimTy} (x : Var) : Hole C (.prim p)
-  | rebind {R : RefTy} (x : Var) : Hole C (.ref R)
-  | copy {R : RefTy} (l : Loc C (.ref R)) (h : (Ty.ref R).mapFree = true) : Hole C (.ref R)
+inductive Surface.Hole (C : Contract) : Ty → Type where
+  | local {p : PrimTy} (x : Var) : Surface.Hole C (.prim p)
+  | rebind {R : RefTy} (x : Var) : Surface.Hole C (.ref R)
+  | copy {R : RefTy} (l : Surface.Loc C (.ref R)) (h : (Ty.ref R).mapFree = true) : Surface.Hole C (.ref R)
 
 /-- The statement, with the path in the hole. -/
-def Hole.fill {T : Ty} : Hole C T → SPath C T → Surface.Stmt C
+def Surface.Hole.fill {T : Ty} : Surface.Hole C T → Surface.SPath C T → Surface.Stmt C
   | .local x, .loc l => .assignLocal x (.read l)
   | .rebind x, p => .rebind x (.path p)
   | .copy l h, p => .assign l (.copy p h)
 
 /-- Where a memory location lands: `v = □` (a value read), `mv = □` (a
 memory local bound), `mloc = □` (a reference written). -/
-inductive MHole (C : Contract) : Ty → Type where
-  | local {p : PrimTy} (x : Var) : MHole C (.prim p)
-  | rebind {R : RefTy} (x : Var) : MHole C (.ref R)
-  | write {R : RefTy} (l : MLoc C (.ref R)) : MHole C (.ref R)
+inductive Surface.MHole (C : Contract) : Ty → Type where
+  | local {p : PrimTy} (x : Var) : Surface.MHole C (.prim p)
+  | rebind {R : RefTy} (x : Var) : Surface.MHole C (.ref R)
+  | write {R : RefTy} (l : Surface.MLoc C (.ref R)) : Surface.MHole C (.ref R)
 
-def MHole.fill {T : Ty} : MHole C T → MLoc C T → Surface.Stmt C
+def Surface.MHole.fill {T : Ty} : Surface.MHole C T → Surface.MLoc C T → Surface.Stmt C
   | .local x, l => .assignLocal x (.readMem l)
   | .rebind x, l => .rebindMem x (.alias (.loc l))
   | .write l', l => .assignMem l' (.ref (.loc l))
 
 /-- Where a value lands: a local, a storage location, a memory location. -/
-inductive VHole (C : Contract) : PrimTy → Type where
-  | local {p : PrimTy} (x : Var) : VHole C p
-  | store {p : PrimTy} (l : Loc C (.prim p)) : VHole C p
-  | mem {p : PrimTy} (l : MLoc C (.prim p)) : VHole C p
+inductive Surface.VHole (C : Contract) : PrimTy → Type where
+  | local {p : PrimTy} (x : Var) : Surface.VHole C p
+  | store {p : PrimTy} (l : Surface.Loc C (.prim p)) : Surface.VHole C p
+  | mem {p : PrimTy} (l : Surface.MLoc C (.prim p)) : Surface.VHole C p
 
-def VHole.fill {p : PrimTy} : VHole C p → Val C p → Surface.Stmt C
+def Surface.VHole.fill {p : PrimTy} : Surface.VHole C p → Surface.Val C p → Surface.Stmt C
   | .local x, v => .assignLocal x v
   | .store l, v => .assign l (.val v)
   | .mem l, v => .assignMem l (.val v)
 
 /-- A fresh array's target written with the memory local it was bound to:
 `tgt = mv`, a copy into storage or a reference written into memory. -/
-def NewLhs.fill {R : RefTy} : NewLhs C R → MPath C (.ref R) → Surface.Stmt C
+def Surface.NewLhs.fill {R : RefTy} : Surface.NewLhs C R → Surface.MPath C (.ref R) → Surface.Stmt C
   | .store l, p => .assignFromMem l p
   | .mem l, p => .assignMem l (.ref p)
 
@@ -77,60 +77,60 @@ its source to be unfolded, whether a value is a conditional, whether a
 memory path can be written as it is. -/
 
 /-- `total`: a state variable. -/
-def Loc.isRoot {T : Ty} : Loc C T → Bool
+def Surface.Loc.isRoot {T : Ty} : Surface.Loc C T → Bool
   | .root .. => true
   | _ => false
 
 /-- A target every part of which is simple (`total`, `sp.fld`, `sp[ie]`):
 only into such a target is a copy's *source* unfolded
 (`folks[1].account = folks[2].account;` unfolds its target first). -/
-def Loc.isTarget {T : Ty} : Loc C T → Bool
+def Surface.Loc.isTarget {T : Ty} : Surface.Loc C T → Bool
   | .root .. => true
   | .field b _ _ => b.isSimple
   | .index _ b i => b.isSimple && i.isSimple
 
 /-- A memory target every part of which is simple (`mv.fld`, `mv[ie]`). -/
-def MLoc.isTarget {T : Ty} : MLoc C T → Bool
+def Surface.MLoc.isTarget {T : Ty} : Surface.MLoc C T → Bool
   | .field b _ _ => b.isSimple
   | .index _ b i => b.isSimple && i.isSimple
 
 /-- A memory path written as it is (`mv`, `mv.fld`, `mv[ie]`): any other is
 unfolded first (`m.account = n.inner.account;`). -/
-def MPath.isBindable {T : Ty} : MPath C T → Bool
+def Surface.MPath.isBindable {T : Ty} : Surface.MPath C T → Bool
   | .var .. => true
   | .loc l => l.isTarget
 
 /-- Not a conditional: a conditional written to storage or memory is lowered
 to a branch (`ternaryToIf`), never captured. -/
-def Val.notTernary {p : PrimTy} : Val C p → Bool
+def Surface.Val.notTernary {p : PrimTy} : Surface.Val C p → Bool
   | .ternary .. => false
   | _ => true
 
 /-- The elements of the array `b` are mappings: `marr` in a rule, and
 solkey's `Path[…,mappingElement]` (`storagePopSaveMappingElement`); `darr`
 is its negation, `nonMappingElement`. -/
-def SPath.elemMapping {T : Ty} (_ : SPath C T) : Bool := T.elemIsMapping
+def Surface.SPath.elemMapping {T : Ty} (_ : Surface.SPath C T) : Bool := T.elemIsMapping
 
 /-- The elements of the array `b` are primitive: `parr` in a rule, solkey's
 `Path[…,primitiveElement]` (`storagePushLengthSave`); `rarr` is its negation,
 `referenceElement`. -/
-def SPath.elemPrim {T : Ty} (_ : SPath C T) : Bool := T.elemIsPrim
+def Surface.SPath.elemPrim {T : Ty} (_ : Surface.SPath C T) : Bool := T.elemIsPrim
 
 /-- A hole whose statement is ready for its path to be unfolded: a local, an
 alias, or a copy into a target. -/
-def Hole.isTarget {T : Ty} : Hole C T → Bool
+def Surface.Hole.isTarget {T : Ty} : Surface.Hole C T → Bool
   | .copy l _ => l.isTarget
   | _ => true
 
 /-- A memory hole ready for its location to be unfolded: a local, a memory
 local, or a reference written to a target. -/
-def MHole.isTarget {T : Ty} : MHole C T → Bool
+def Surface.MHole.isTarget {T : Ty} : Surface.MHole C T → Bool
   | .write l => l.isTarget
   | _ => true
 
 /-- A value hole ready for its value to be lowered: a local, any storage
 location (whose receiver waits for the branch), or a memory target. -/
-def VHole.isTarget {p : PrimTy} : VHole C p → Bool
+def Surface.VHole.isTarget {p : PrimTy} : Surface.VHole C p → Bool
   | .mem l => l.isTarget
   | _ => true
 
@@ -138,7 +138,7 @@ def VHole.isTarget {p : PrimTy} : VHole C p → Bool
 KeY's `FunctionBodyStatement` (`fbs`, `functionBodyExpand`), the call of a
 tuple assignment or of a specification's obligation; any other call is an
 `InternalCall` (`ic`, `internalCallExpand`). -/
-def CallRet.isRets : CallRet → Bool
+def Surface.CallRet.isRets : Surface.CallRet → Bool
   | .rets _ => true
   | _ => false
 
@@ -166,24 +166,24 @@ theorem Arg.separatedFrom_captureFirst {se : Var} :
     split
     · simp only [Arg.separatedFrom, Bool.and_eq_true]
       exact ⟨h.1, Arg.separatedFrom_captureFirst h.2⟩
-    · simp only [Arg.separatedFrom, Val.isSimple, Bool.true_or, Bool.true_and]
+    · simp only [Arg.separatedFrom, Surface.Val.isSimple, Bool.true_or, Bool.true_and]
       exact h.2
 
 macro_rules
   | `(tactic| side_cond) => `(tactic| first
       | rfl
       | assumption
-      | (simp_all [SPath.isSimple, Val.isSimple, MPath.isSimple, Loc.isTarget, Loc.isRoot,
-          MLoc.isTarget, MPath.isBindable, Val.notTernary, Hole.isTarget, MHole.isTarget,
-          VHole.isTarget, SPath.elemMapping, SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
+      | (simp_all [Surface.SPath.isSimple, Surface.Val.isSimple, Surface.MPath.isSimple, Surface.Loc.isTarget, Surface.Loc.isRoot,
+          Surface.MLoc.isTarget, Surface.MPath.isBindable, Surface.Val.notTernary, Surface.Hole.isTarget, Surface.MHole.isTarget,
+          Surface.VHole.isTarget, Surface.SPath.elemMapping, Surface.SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
           Ty.isMapping, Ty.isPrimitive]; done)
       | fail "the rule's side condition does not hold: `Core.Stmt.step` fires another rule here")
 
 /-- The predicates a side condition is stated with. -/
 def sidePreds : List Lean.Name :=
-  [``SPath.isSimple, ``Val.isSimple, ``MPath.isSimple, ``Loc.isTarget, ``Loc.isRoot,
-    ``MLoc.isTarget, ``MPath.isBindable, ``Val.notTernary, ``Hole.isTarget, ``MHole.isTarget,
-    ``VHole.isTarget, ``SPath.elemMapping, ``SPath.elemPrim]
+  [``Surface.SPath.isSimple, ``Surface.Val.isSimple, ``Surface.MPath.isSimple, ``Surface.Loc.isTarget, ``Surface.Loc.isRoot,
+    ``Surface.MLoc.isTarget, ``Surface.MPath.isBindable, ``Surface.Val.notTernary, ``Surface.Hole.isTarget, ``Surface.MHole.isTarget,
+    ``Surface.VHole.isTarget, ``Surface.SPath.elemMapping, ``Surface.SPath.elemPrim]
 
 open Lean Elab Tactic Meta in
 /-- Forget a derivation's side conditions: after `cases` on a derivation, a
@@ -209,8 +209,8 @@ A condition can be `undef` (a local read
 before it is bound), so a branch's two conditions need not cover every
 state: a box goal is true of an `undef` run anyway, and a diamond goal owes
 that one of them holds (`Proves.split`). -/
-inductive Premise (C : Contract) where
-  | update (U : Upd C)
+inductive Surface.Premise (C : Contract) where
+  | update (U : Surface.Upd C)
   | unfold (P : Surface.Prog C)
   | split (c c' : NFml C) (P Q : Surface.Prog C)
   /-- `c ⟹ ⟨[ P ]⟩ ; c`: the goal with `c` assumed, and `c` to prove. -/
@@ -223,14 +223,14 @@ inductive Premise (C : Contract) where
   /-- Goals labelled as KeY labels a taclet's (`"send failed": \replacewith(…)`):
   each formula of `fs` to prove, then for each update `U` of `us` the rest
   after it, `{U} ⟨[ ..ω ]⟩ φ`, one per way the statement may end. -/
-  | cases (fs : List (NFml C)) (us : List (Upd C))
+  | cases (fs : List (NFml C)) (us : List (Surface.Upd C))
   /-- A loop's invariant rule (`whileInvariantBox`, `whileInvariantDiamond`):
   the invariant `I` now ("invariant initially valid"), and, whatever the
   body's frame holds (`{anon(P)}`, `Core.Fml.anonHavoc`), from where `I` holds and
   after `U` (the variant's value, under the diamond), the body `P` to `post`
   where the condition `c` holds, the rest where `c'` does, and under the
   diamond one of them ("invariant preserved and used"). -/
-  | inv (I : NFml C) (U : Upd C) (c c' : NFml C) (P : Surface.Prog C) (post : NFml C)
+  | inv (I : NFml C) (U : Surface.Upd C) (c c' : NFml C) (P : Surface.Prog C) (post : NFml C)
 
 /-! ## solkey's branch labels -/
 
@@ -280,11 +280,11 @@ def ppPremise? (e : Lean.Expr) (labels : List String := []) (box : Bool := false
   let l0 := lbl 0
   let l1 := lbl 1
   match_expr (← whnf (← instantiateMVars e)) with
-  | Premise.update _ U => return some (← `(dl_premise| $(← ppUpd U):dl_upd ⟨[ ]⟩))
-  | Premise.unfold _ P =>
+  | Surface.Premise.update _ U => return some (← `(dl_premise| $(← ppUpd U):dl_upd ⟨[ ]⟩))
+  | Surface.Premise.unfold _ P =>
     let some ss ← ppProg? P | return none
     return some (← `(dl_premise| ⟨[ $[$ss;]* ]⟩))
-  | Premise.split _ c c' P Q =>
+  | Surface.Premise.split _ c c' P Q =>
     let c ← ppFml c
     let c' ← ppFml c'
     match ← ppProg? P, ← ppProg? Q with
@@ -298,16 +298,16 @@ def ppPremise? (e : Lean.Expr) (labels : List String := []) (box : Bool := false
     | _, _ =>
       return some (← `(dl_premise| $[$l0:str :]? $c:dl_fml ⟹ ⟨[ $(← ppBlock P) ]⟩ ;
         $[$l1:str :]? $c':dl_fml ⟹ ⟨[ $(← ppBlock Q) ]⟩))
-  | Premise.check _ c P =>
+  | Surface.Premise.check _ c P =>
     let c ← ppFml c
     let some ts ← ppProg? P | return none
     return some (← `(dl_premise| $[$l0:str :]? $c:dl_fml ⟹ ⟨[ $[$ts;]* ]⟩ ; $[$l1:str :]? $c:dl_fml))
-  | Premise.done _ b =>
+  | Surface.Premise.done _ b =>
     match_expr (← whnf b) with
     | Bool.true => return some (← `(dl_premise| true))
     | Bool.false => return some (← `(dl_premise| false))
     | _ => return none
-  | Premise.branches _ bs =>
+  | Surface.Premise.branches _ bs =>
     -- a goal per block, `"label": ∀ xs. ⟨[ P ]⟩` (`[ P ]` for a box-only taclet)
     let some bs ← listElems? bs | return none
     let mut out : Array (TSyntax `dl_branch) := #[]
@@ -329,7 +329,7 @@ def ppPremise? (e : Lean.Expr) (labels : List String := []) (box : Bool := false
     let some b := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $b:dl_branch ; $[$(out.extract 1 out.size)];*))
-  | Premise.cases _ fs us =>
+  | Surface.Premise.cases _ fs us =>
     -- `"label": φ` for each formula, then `"label": {U} ⟨[ ]⟩` for each update
     let some fs ← listElems? fs | return none
     let some us ← listElems? us | return none
@@ -343,7 +343,7 @@ def ppPremise? (e : Lean.Expr) (labels : List String := []) (box : Bool := false
     let some c := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $c:dl_case ; $[$(out.extract 1 out.size)];*))
-  | Premise.inv _ I U c c' P post =>
+  | Surface.Premise.inv _ I U c c' P post =>
     let I ← ppFml I
     let c ← ppFml c
     let c' ← ppFml c'
@@ -363,10 +363,10 @@ def delabPremise : Delab := do
   let some p ← ppPremise? (← getExpr) | failure
   `(dl{ $p:dl_premise })
 
-attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
-  delab app.Solidity.Premise.split, delab app.Solidity.Premise.check,
-  delab app.Solidity.Premise.done, delab app.Solidity.Premise.branches,
-  delab app.Solidity.Premise.cases, delab app.Solidity.Premise.inv] delabPremise
+attribute [delab app.Solidity.Surface.Premise.update, delab app.Solidity.Surface.Premise.unfold,
+  delab app.Solidity.Surface.Premise.split, delab app.Solidity.Surface.Premise.check,
+  delab app.Solidity.Surface.Premise.done, delab app.Solidity.Surface.Premise.branches,
+  delab app.Solidity.Surface.Premise.cases, delab app.Solidity.Surface.Premise.inv] delabPremise
 
 /-- The type without its `autoParam` hypotheses (a taclet's side conditions),
 which nothing after them depends on. -/
@@ -382,7 +382,7 @@ partial def callSide : Lean.Expr → Option Lean.Expr
   | .forallE _ t b _ =>
     if t.isAppOfArity ``autoParam 2 then
       match (t.getArg! 0).eq? with
-      | some (_, l, r) => if l.isAppOf ``CallRet.isRets then some r else callSide b
+      | some (_, l, r) => if l.isAppOf ``Surface.CallRet.isRets then some r else callSide b
       | none => callSide b
     else callSide b
   | _ => none

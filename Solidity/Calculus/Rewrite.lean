@@ -1,5 +1,5 @@
-import Solidity.Calculus.Close
-import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.NFmlUpdateRules
 import Solidity.Calculus.TheoryRewrite
 
 /-!
@@ -8,7 +8,7 @@ import Solidity.Calculus.TheoryRewrite
 What symbolic execution leaves is closed as KeY closes it: the updates
 merged, the terms rewritten inside the sequent, the goal closed.  The
 merging, applying and rewriting are rules of the calculus, constructors of
-`Proves` (`Calculus/Logic.lean`): `Proves.merge`, `Proves.mergeStorage`,
+`Proves` (`Calculus/NFmlLogic.lean`): `Proves.merge`, `Proves.mergeStorage`,
 `Proves.applyOnRigidBox`, `Proves.applyStorageBox`, and the rewrites
 `Proves.rewrite` (a term taclet, in every equation of the sequent) and
 `Proves.updRw` (the same, in the right-hand sides of the box updates, when
@@ -49,16 +49,16 @@ variable {C : Contract}
 /-! ## Closing -/
 
 /-- **`eqClose`**: `v ≐ v`, behind a context with no diamond. -/
-theorem Proves.eqClose {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
+theorem NFml.Proves.eqClose {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
     (hb : Hyp.boxOnly Γ = true := by rfl) :
-    Proves R Γ (.eq (.lit v) (.lit v)) :=
+    NFml.Proves R Γ (.eq (.lit v) (.lit v)) :=
   .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => Theory.StValue.Equiv.refl _))
 
 /-- **`eqDClose`**: `v = v` as a program comparison writes it (`Fml.eqD`),
 behind a context with no diamond: a literal is defined everywhere. -/
-theorem Proves.eqDClose {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
+theorem NFml.Proves.eqDClose {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
     (hb : Hyp.boxOnly Γ = true := by rfl) :
-    Proves R Γ (NFml.eqD (.lit v) (.lit v)) :=
+    NFml.Proves R Γ (NFml.eqD (.lit v) (.lit v)) :=
   .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => holds_eqD_iff.2 ⟨v, rfl, rfl⟩))
 
 /-! ## `rw` on a sequent
@@ -123,13 +123,13 @@ def solRwApply (pf : Expr) (h : MessageData) (upd : Bool := false) : TacticM Uni
   let pf ← Term.exprToSyntax (← asTaclet pf)
   -- without recovery, an elaboration error is thrown rather than logged
   withoutRecover <| evalTactic <| ← if upd
-    then `(tactic| refine Proves.updRw $pf rfl ?_)
-    else `(tactic| refine Proves.rewrite $pf ?_)
+    then `(tactic| refine NFml.Proves.updRw $pf rfl ?_)
+    else `(tactic| refine NFml.Proves.rewrite $pf ?_)
   evalTactic (← `(tactic| simp (config := { decide := true }) only
-    [Hyp.rwEq, NFml.rwEq, Hyp.rwUpd, Upd.rw, UpdElem.rw, List.map_cons, List.map_nil, Tm.rw,
-      Tm.pickAt, Op2.opaque, Term.pick, ↓reduceIte, Bool.false_eq_true, reduceCtorEq, and_true,
-      true_and, and_false, false_and, and_self, heq_eq_eq, Tm.pvV.injEq, Tm.pvP.injEq,
-      Tm.pvS.injEq, Tm.pvI.injEq, Tm.app0.injEq, Tm.app1.injEq, Tm.app2.injEq, Tm.app3.injEq,
+    [Hyp.rwEq, NFml.rwEq, Hyp.rwUpd, Surface.Upd.rw, Surface.UpdElem.rw, List.map_cons, List.map_nil, Surface.Tm.rw,
+      Surface.Tm.pickAt, Op2.opaque, Term.pick, ↓reduceIte, Bool.false_eq_true, reduceCtorEq, and_true,
+      true_and, and_false, false_and, and_self, heq_eq_eq, Surface.Tm.pvV.injEq, Surface.Tm.pvP.injEq,
+      Surface.Tm.pvS.injEq, Surface.Tm.pvI.injEq, Surface.Tm.app0.injEq, Surface.Tm.app1.injEq, Surface.Tm.app2.injEq, Surface.Tm.app3.injEq,
       Op0.lit.injEq, Op0.env.injEq, Op0.root.injEq, Op1.unop.injEq, Op1.netOf.injEq,
       Op1.field.injEq, Op1.select.injEq, Op1.newArr.injEq, Op2.binop.injEq, Op2.pushSlot.injEq,
       Op2.extend.injEq]))
@@ -187,7 +187,7 @@ such as `find(save(storage, p, w), p)` against `find(save(storage, p, v), p)`
 with `w` and `v` unknown. -/
 def solRw (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContext do
   let before ← instantiateMVars (← getMainTarget)
-  unless (← whnfR before).isAppOf ``Proves do
+  unless (← whnfR before).isAppOf ``NFml.Proves do
     throwError "sol_rw: the goal is not a sequent `Γ ⟹ φ`"
   let h' ← qualifyTaclet h
   let pf ← match h' with
@@ -228,7 +228,7 @@ def solRwTheory (thms : SimpTheorems) (names : Array Lean.Term) : TacticM Unit :
     progress := false
     replaceMainGoal [← normProves (← getMainGoal)]
     let goal ← instantiateMVars (← getMainTarget)
-    unless (← whnfR goal).isAppOf ``Proves do
+    unless (← whnfR goal).isAppOf ``NFml.Proves do
       throwError "sol_rw: the goal is not a sequent `Γ ⟹ φ`"
     for u in theoryCandidates goal do
       let some C := (← withMainContext (inferType u)).app1? ``Solidity.Term | continue
@@ -292,7 +292,7 @@ open Lean Elab Tactic in
 elab_rules : tactic
   | `(tactic| sol_rw [$rs,*]) => solRwRules (rs.getElems.map (·.raw))
 
-namespace Proves
+namespace NFml.Proves
 
 open Lean Elab Tactic Meta in
 /-- `rw [h₁, …]` on a sequent is `sol_rw h₁; …`.  An elaborator, not a
@@ -309,7 +309,7 @@ scoped elab_rules : tactic
     unless isSeq do throwUnsupportedSyntax
     solRwRules (rs.getElems.map (·.raw))
 
-end Proves
+end NFml.Proves
 
 /-! ## Under the box: splitting, closing, applying a storage write
 
@@ -317,7 +317,7 @@ The steps that finish a goal once the program is gone, in KeY's order: a
 program comparison `a = b` (`Fml.eqD`) splits into its two `defined`
 conjuncts and its Theory equation (`Proves.eqDSplit`, `Proves.andSplit`);
 a local's `defined` is proved from the update that wrote it
-(`Proves.definedWritten`, `Calculus/UpdateRules.lean`) and a literal's from
+(`Proves.definedWritten`, `Calculus/NFmlUpdateRules.lean`) and a literal's from
 nothing (`Proves.definedLit`); the updates are applied to the equation and
 dropped (`Proves.applyOnRigidBox` for locals, or locals and a storage write
 under a storage-free goal; `Proves.applyStorageBox` for a storage write, both
@@ -328,9 +328,9 @@ that the context has no diamond (`Hyp.boxOnly`), since behind a halting box
 update everything holds. -/
 
 /-- **`andRight`**: a conjunction from each conjunct, in the same context. -/
-theorem Proves.andSplit {R : RuleSet} {Γ : List (Hyp C)} {φ ψ : NFml C}
-    (h₁ : Proves R Γ φ) (h₂ : Proves R Γ ψ) :
-    Proves R Γ (.and φ ψ) :=
+theorem NFml.Proves.andSplit {R : RuleSet} {Γ : List (Hyp C)} {φ ψ : NFml C}
+    (h₁ : NFml.Proves R Γ φ) (h₂ : NFml.Proves R Γ ψ) :
+    NFml.Proves R Γ (.and φ ψ) :=
   .close (fun σ => Hyp.wrap_mono₃ (ψ₁ := φ) (ψ₂ := ψ) (ψ₃ := φ) (φ := .and φ ψ)
     (fun _ a b _ => ⟨a, b⟩) Γ σ (h₁.sound σ) (h₂.sound σ)
     (h₁.sound σ))
@@ -339,9 +339,9 @@ theorem Proves.andSplit {R : RuleSet} {Γ : List (Hyp C)} {φ ψ : NFml C}
 `b` return, and they are equal in the Theory.
 
 Example: `x = 42` from `defined(x)`, `defined(42)` and `x ≐ 42`. -/
-theorem Proves.eqDSplit {R : RuleSet} {Γ : List (Hyp C)} {a b : Term C}
-    (ha : Proves R Γ (.defined a)) (hb : Proves R Γ (.defined b)) (he : Proves R Γ (.eq a b)) :
-    Proves R Γ (NFml.eqD a b) :=
+theorem NFml.Proves.eqDSplit {R : RuleSet} {Γ : List (Hyp C)} {a b : Term C}
+    (ha : NFml.Proves R Γ (.defined a)) (hb : NFml.Proves R Γ (.defined b)) (he : NFml.Proves R Γ (.eq a b)) :
+    NFml.Proves R Γ (NFml.eqD a b) :=
   .close (fun σ => Hyp.wrap_mono₃ (ψ₁ := .defined a) (ψ₂ := .defined b) (ψ₃ := .eq a b)
     (φ := NFml.eqD a b) (fun _ x y z => ⟨x, y, z⟩) Γ σ (ha.sound σ) (hb.sound σ)
     (he.sound σ))
@@ -349,15 +349,15 @@ theorem Proves.eqDSplit {R : RuleSet} {Γ : List (Hyp C)} {a b : Term C}
 /-- **`eqClose`** for any term: `t ≐ t`, behind a context with no diamond.
 The Theory equation is total, so a term that halts is equal to itself too
 (`StValue.Equiv.refl`). -/
-theorem Proves.eqRefl {R : RuleSet} {Γ : List (Hyp C)} {t : Term C}
+theorem NFml.Proves.eqRefl {R : RuleSet} {Γ : List (Hyp C)} {t : Term C}
     (hb : Hyp.boxOnly Γ = true := by first | rfl | decide) :
-    Proves R Γ (.eq t t) :=
+    NFml.Proves R Γ (.eq t t) :=
   .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => Theory.StValue.Equiv.refl _))
 
 /-- A literal is defined, behind a context with no diamond. -/
-theorem Proves.definedLit {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
+theorem NFml.Proves.definedLit {R : RuleSet} {Γ : List (Hyp C)} {v : Value}
     (hb : Hyp.boxOnly Γ = true := by first | rfl | decide) :
-    Proves R Γ (.defined (.lit v)) :=
+    NFml.Proves R Γ (.defined (.lit v)) :=
   .close (fun σ => Hyp.wrap_of_reaches Γ hb σ (fun _ _ => ⟨v, rfl⟩))
 
 /-- `sol_apply_upd`: apply the last update of the context to the first-order
@@ -368,11 +368,11 @@ substituted goal, so that the next `rw [h]` finds its terms (it matches
 syntactically, and `NFml.subst`/`NFml.withSt` left folded hide them). -/
 macro "sol_apply_upd" : tactic => `(tactic| (
   first
-    | refine Proves.applyStorageBox ?_
-    | refine Proves.applyOnRigidBox ?_
-  simp (config := { decide := true }) only [NFml.withSt, Tm.withSt, Op2.opaque, NFml.subst,
-    Tm.subst, Upd.valOf, Upd.pathOf, Upd.refOf, Upd.storOf, Upd.lastWrite, UpdElem.var?,
-    Upd.withSt, UpdElem.withSt, List.map_cons, List.map_nil, ↓reduceIte, Bool.false_eq_true]
+    | refine NFml.Proves.applyStorageBox ?_
+    | refine NFml.Proves.applyOnRigidBox ?_
+  simp (config := { decide := true }) only [NFml.withSt, Surface.Tm.withSt, Op2.opaque, NFml.subst,
+    Surface.Tm.subst, Surface.Upd.valOf, Surface.Upd.pathOf, Surface.Upd.refOf, Surface.Upd.storOf, Surface.Upd.lastWrite, Surface.UpdElem.var?,
+    Surface.Upd.withSt, Surface.UpdElem.withSt, List.map_cons, List.map_nil, ↓reduceIte, Bool.false_eq_true]
   sol_fold_terms))
 
 /-- **`defined(x)` after `x := t`**: behind a box update whose last binder of
@@ -380,24 +380,24 @@ macro "sol_apply_upd" : tactic => `(tactic| (
 what `Proves.applyOnRigidBox` forgets, that the update ran.
 
 Example: `{ storage := S }, { x := find(storage, alice.age) } ⟹ defined(x)`. -/
-theorem Proves.definedWritten {R : RuleSet} {Γ : List (Hyp C)} {U : Upd C} {x : Var}
+theorem NFml.Proves.definedWritten {R : RuleSet} {Γ : List (Hyp C)} {U : Surface.Upd C} {x : Var}
     (hw : U.bindsVal x = true := by first | rfl | decide)
     (hb : Hyp.boxOnly Γ = true := by first | rfl | decide) :
-    Proves R (Γ ++ [.upd .box U]) (.defined (.pv x)) :=
+    NFml.Proves R (Γ ++ [.upd .box U]) (.defined (.pv x)) :=
   .close (fun σ => by
     rw [Hyp.wrap_append]
-    exact Hyp.wrap_of_reaches Γ hb σ (fun τ _ => Upd.defined_box hw τ))
+    exact Hyp.wrap_of_reaches Γ hb σ (fun τ _ => Surface.Upd.defined_box hw τ))
 
 /-- **`{U}(φ ∧ ψ)` from `{U}φ` and `{U}ψ`**, under either modality: where
 `U` runs both hold after it, where it halts both judge the halt alike.
 
 Example: `⟹ [{ x := t }](defined(x) ∧ x ≐ 42)` from
 `⟹ [{ x := t }] defined(x)` and `⟹ [{ x := t }] x ≐ 42`. -/
-theorem Proves.andSplitUpd {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Upd C}
-    {φ ψ : NFml C} (h₁ : Proves R Γ (.upd m U φ)) (h₂ : Proves R Γ (.upd m U ψ)) :
-    Proves R Γ (.upd m U (.and φ ψ)) :=
+theorem NFml.Proves.andSplitUpd {R : RuleSet} {Γ : List (Hyp C)} {m : Modality} {U : Surface.Upd C}
+    {φ ψ : NFml C} (h₁ : NFml.Proves R Γ (.upd m U φ)) (h₂ : NFml.Proves R Γ (.upd m U ψ)) :
+    NFml.Proves R Γ (.upd m U (.and φ ψ)) :=
   .close (fun σ => Hyp.wrap_mono₃ (fun τ a b _ => by
-      simp only [holds] at a b ⊢
+      simp only [NFml.holds] at a b ⊢
       cases hU : U.apply τ with
       | error _ => rw [hU] at a; exact a
       | ok ρ => rw [hU] at a b; exact ⟨a, b⟩) Γ σ (h₁.sound σ) (h₂.sound σ) (h₁.sound σ))

@@ -97,51 +97,51 @@ theorem Loc.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (l : Loc C Γ 
     l.lower.erase ns = (l.erase ns).lower
   | _, .root .. => rfl
   | _, .field b f _ => by
-    show Solidity.Tm.app1 _ (b.lower.erase ns) = _
+    show Surface.Tm.app1 _ (b.lower.erase ns) = _
     rw [b.lower_erase ns]; rfl
   | _, .index (k := k) _ b i => by
-    show Solidity.Tm.app2 _ (b.lower.erase ns) ((Tm.keyAt k i.lower).erase ns) = _
+    show Surface.Tm.app2 _ (b.lower.erase ns) ((Tm.keyAt k i.lower).erase ns) = _
     rw [b.lower_erase ns, Tm.keyAt_erase, i.lower_erase ns]; rfl
 
 theorem MPath.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (b : MPath C Γ T) →
     b.lower.erase ns = (b.erase ns).lower
   | _, .var .. => rfl
   | _, .loc l => by
-    show Solidity.Tm.app2 _ _ (l.lower.erase ns) = _
+    show Surface.Tm.app2 _ _ (l.lower.erase ns) = _
     rw [l.lower_erase ns]; rfl
 
 theorem MLoc.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (l : MLoc C Γ T) →
     l.lower.erase ns = (l.erase ns).lower
   | _, .field b f _ => by
-    show Solidity.Tm.app1 _ (b.lower.erase ns) = _
+    show Surface.Tm.app1 _ (b.lower.erase ns) = _
     rw [b.lower_erase ns]; rfl
   | _, .index _ b i => by
-    show Solidity.Tm.app2 _ (b.lower.erase ns) (i.lower.erase ns) = _
+    show Surface.Tm.app2 _ (b.lower.erase ns) (i.lower.erase ns) = _
     rw [b.lower_erase ns, i.lower_erase ns]; rfl
 
 theorem Val.lower_erase {Γ : Ctx} (ns : List Var) : {p : PrimTy} → (v : Val C Γ p) →
     v.lower.erase ns = (v.erase ns).lower
   | _, .simple s => s.lower_erase ns
   | _, .read l => by
-    show Solidity.Tm.app2 _ _ (l.lower.erase ns) = _
+    show Surface.Tm.app2 _ _ (l.lower.erase ns) = _
     rw [l.lower_erase ns]; rfl
   | _, .binop _ _ _ a b => by
-    show Solidity.Tm.app2 _ (a.lower.erase ns) (b.lower.erase ns) = _
+    show Surface.Tm.app2 _ (a.lower.erase ns) (b.lower.erase ns) = _
     rw [a.lower_erase ns, b.lower_erase ns]; rfl
   | _, .unop _ _ _ a => by
-    show Solidity.Tm.app1 _ (a.lower.erase ns) = _
+    show Surface.Tm.app1 _ (a.lower.erase ns) = _
     rw [a.lower_erase ns]; rfl
   | _, .ternary c a b => by
-    show Solidity.Tm.app3 _ (c.lower.erase ns) (a.lower.erase ns) (b.lower.erase ns) = _
+    show Surface.Tm.app3 _ (c.lower.erase ns) (a.lower.erase ns) (b.lower.erase ns) = _
     rw [c.lower_erase ns, a.lower_erase ns, b.lower_erase ns]; rfl
   | _, .readMem l => by
-    show Solidity.Tm.app2 _ _ (l.lower.erase ns) = _
+    show Surface.Tm.app2 _ _ (l.lower.erase ns) = _
     rw [l.lower_erase ns]; rfl
   | _, .len b _ => by
-    show Solidity.Tm.app2 _ _ (b.lower.erase ns) = _
+    show Surface.Tm.app2 _ _ (b.lower.erase ns) = _
     rw [b.lower_erase ns]; rfl
   | _, .mlen b _ => by
-    show Solidity.Tm.app2 _ _ (b.lower.erase ns) = _
+    show Surface.Tm.app2 _ _ (b.lower.erase ns) = _
     rw [b.lower_erase ns]; rfl
 
 end
@@ -149,13 +149,13 @@ end
 theorem Src.lower_erase {Γ : Ctx} {T : Ty} (ns : List Var) (s : Src C Γ T) :
     s.lower.erase ns = (s.erase ns).lower := by
   cases s with
-  | val v => show Solidity.Tm.app1 _ (v.lower.erase ns) = _; rw [v.lower_erase ns]; rfl
-  | copy p _ => show Solidity.Tm.app2 _ _ (p.lower.erase ns) = _; rw [p.lower_erase ns]; rfl
+  | val v => show Surface.Tm.app1 _ (v.lower.erase ns) = _; rw [v.lower_erase ns]; rfl
+  | copy p _ => show Surface.Tm.app2 _ _ (p.lower.erase ns) = _; rw [p.lower_erase ns]; rfl
 
 theorem MSrc.lower_erase {Γ : Ctx} {T : Ty} (ns : List Var) (s : MSrc C Γ T) :
     s.lower.erase ns = (s.erase ns).lower := by
   cases s with
-  | val v => show Solidity.Tm.app1 _ (v.lower.erase ns) = _; rw [v.lower_erase ns]; rfl
-  | ref p => show Solidity.Tm.app1 _ (p.lower.erase ns) = _; rw [p.lower_erase ns]; rfl
+  | val v => show Surface.Tm.app1 _ (v.lower.erase ns) = _; rw [v.lower_erase ns]; rfl
+  | ref p => show Surface.Tm.app1 _ (p.lower.erase ns) = _; rw [p.lower_erase ns]; rfl
 
 end Solidity.Core

@@ -50,7 +50,7 @@ abbrev withLocals (τ : Semantics.State) (e : List (Var × Binding)) : Semantics
   { τ with env := e }
 
 /-- A state erased: its global part, its locals named by `ns`. -/
-def State.erase {Γ : Ctx} (ns : List Var) (σ : State C Γ) : Semantics.State :=
+def EState.erase {Γ : Ctx} (ns : List Var) (σ : EState C Γ) : Semantics.State :=
   withLocals σ.glob (Env.erase ns σ.env)
 
 theorem Idx.name_mem {Γ : Ctx} {t : LTy} (i : Idx Γ t) (ns : List Var)
@@ -176,7 +176,7 @@ end Env
 /-- A scoped state and an untyped one agree on the locals named `ns`: the
 global parts are equal, and each local is bound under its name.  The untyped
 state may bind more names. -/
-structure Agree {Γ : Ctx} (ns : List Var) (σ : State C Γ) (τ : Semantics.State) : Prop where
+structure Agree {Γ : Ctx} (ns : List Var) (σ : EState C Γ) (τ : Semantics.State) : Prop where
   len : ns.length = Γ.length
   nodup : ns.Nodup
   glob : withLocals σ.glob τ.env = τ
@@ -184,7 +184,7 @@ structure Agree {Γ : Ctx} (ns : List Var) (σ : State C Γ) (τ : Semantics.Sta
 
 namespace Agree
 
-variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+variable {Γ : Ctx} {ns : List Var} {σ : EState C Γ} {τ : Semantics.State}
 
 theorem glob_with (hag : Agree ns σ τ) (e : List (Var × Binding)) :
     withLocals σ.glob e = withLocals τ e := by
@@ -240,7 +240,7 @@ theorem withGlob (hag : Agree ns σ τ) (s : Semantics.State) :
   env := hag.env
 
 /-- A scope's locals popped. -/
-theorem drop {Δ : Ctx} {qs : List Var} {σ : State C Δ} (hag : Agree (qs ++ ns) σ τ)
+theorem drop {Δ : Ctx} {qs : List Var} {σ : EState C Δ} (hag : Agree (qs ++ ns) σ τ)
     (h : Ext Γ Δ) (hq : qs.length = h.depth) : Agree ns (σ.drop h) τ where
   len := by
     have h₁ := hag.len
@@ -476,7 +476,7 @@ theorem popAt_nat (keep : Bool) (r : Name) (segs : List Seg) :
 
 namespace Agree
 
-variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+variable {Γ : Ctx} {ns : List Var} {σ : EState C Γ} {τ : Semantics.State}
 
 theorem findStorage (hag : Agree ns σ τ) (r : Name) (segs : List Seg) :
     τ.findStorage r segs = σ.glob.findStorage r segs := by
@@ -509,74 +509,74 @@ end Agree
 
 section Eval
 
-variable {Γ : Ctx} {ns : List Var} {σ : State C Γ} {τ : Semantics.State}
+variable {Γ : Ctx} {ns : List Var} {σ : EState C Γ} {τ : Semantics.State}
 
 theorem Simple.eval_erase (hag : Agree ns σ τ) {p : PrimTy} :
-    (s : Simple C Γ p) → Solidity.Simple.eval τ (s.erase ns) = s.eval σ
+    (s : Simple C Γ p) → Surface.Simple.eval τ (s.erase ns) = s.eval σ
   | .lit .. => rfl
   | .bool _ => rfl
   | .local i => by
-    simp only [Simple.erase, Solidity.Simple.eval, hag.getEnv i, Simple.eval]
+    simp only [Simple.erase, Surface.Simple.eval, hag.getEnv i, Simple.eval]
     rfl
-  | .env k _ => by simp only [Simple.erase, Solidity.Simple.eval, hag.envVal k, Simple.eval]
+  | .env k _ => by simp only [Simple.erase, Surface.Simple.eval, hag.envVal k, Simple.eval]
 
 theorem aliasPath_erase (hag : Agree ns σ τ) {R : RefTy} (i : Idx Γ (.alias R)) :
-    Solidity.aliasPath τ (i.name ns) = aliasPath σ i := by
-  simp only [Solidity.aliasPath, hag.getEnv i, aliasPath]
+    Semantics.aliasPath τ (i.name ns) = aliasPath σ i := by
+  simp only [Semantics.aliasPath, hag.getEnv i, aliasPath]
   generalize (Env.get i σ.env : Option (Name × List Seg)) = v
   rcases v with _ | ⟨r, segs⟩ <;> rfl
 
 mutual
 
 theorem SPath.resolve_erase (hag : Agree ns σ τ) :
-    {T : Ty} → (p : SPath C Γ T) → Solidity.SPath.resolve τ (p.erase ns) = p.resolve σ
+    {T : Ty} → (p : SPath C Γ T) → Surface.SPath.resolve τ (p.erase ns) = p.resolve σ
   | _, .alias i => aliasPath_erase hag i
   | _, .loc l => l.resolve_erase hag
 
 theorem Loc.resolve_erase (hag : Agree ns σ τ) :
-    {T : Ty} → (l : Loc C Γ T) → Solidity.Loc.resolve τ (l.erase ns) = l.resolve σ
+    {T : Ty} → (l : Loc C Γ T) → Surface.Loc.resolve τ (l.erase ns) = l.resolve σ
   | _, .root .. => rfl
   | _, .field b _ _ => by
-    simp only [Loc.erase, Solidity.Loc.resolve, b.resolve_erase hag, Loc.resolve]
+    simp only [Loc.erase, Surface.Loc.resolve, b.resolve_erase hag, Loc.resolve]
   | _, .index _ b i => by
-    simp only [Loc.erase, Solidity.Loc.resolve, b.resolve_erase hag, i.eval_erase hag,
+    simp only [Loc.erase, Surface.Loc.resolve, b.resolve_erase hag, i.eval_erase hag,
       hag.checkIndex, Loc.resolve]
 
 theorem MPath.mval_erase (hag : Agree ns σ τ) :
-    {T : Ty} → (p : MPath C Γ T) → Solidity.MPath.mval τ (p.erase ns) = p.mval σ
+    {T : Ty} → (p : MPath C Γ T) → Surface.MPath.mval τ (p.erase ns) = p.mval σ
   | _, .var i _ => by
-    simp only [MPath.erase, Solidity.MPath.mval, hag.getEnv i, MPath.mval, memRef]
+    simp only [MPath.erase, Surface.MPath.mval, hag.getEnv i, MPath.mval, memRef]
     cases Env.get i σ.env <;> rfl
   | _, .loc l => l.read_erase hag
 
 theorem MLoc.read_erase (hag : Agree ns σ τ) :
-    {T : Ty} → (l : MLoc C Γ T) → Solidity.MLoc.read τ (l.erase ns) = l.read σ
+    {T : Ty} → (l : MLoc C Γ T) → Surface.MLoc.read τ (l.erase ns) = l.read σ
   | _, .field b _ _ => by
-    simp only [MLoc.erase, Solidity.MLoc.read, b.mval_erase hag, hag.getObj, MLoc.read]
+    simp only [MLoc.erase, Surface.MLoc.read, b.mval_erase hag, hag.getObj, MLoc.read]
     rfl
   | _, .index _ b i => by
-    simp only [MLoc.erase, Solidity.MLoc.read, b.mval_erase hag, i.eval_erase hag, hag.getObj,
+    simp only [MLoc.erase, Surface.MLoc.read, b.mval_erase hag, i.eval_erase hag, hag.getObj,
       MLoc.read]
     rfl
 
 theorem Val.eval_erase (hag : Agree ns σ τ) :
-    {p : PrimTy} → (v : Val C Γ p) → Solidity.Val.eval τ (v.erase ns) = v.eval σ
+    {p : PrimTy} → (v : Val C Γ p) → Surface.Val.eval τ (v.erase ns) = v.eval σ
   | _, .simple s => s.eval_erase hag
   | _, .read l => by
-    simp only [Val.erase, Solidity.Val.eval, l.resolve_erase hag, hag.findStorage, Val.eval]
+    simp only [Val.erase, Surface.Val.eval, l.resolve_erase hag, hag.findStorage, Val.eval]
   | _, .binop _ _ _ a b => by
-    simp only [Val.erase, Solidity.Val.eval, a.eval_erase hag, b.eval_erase hag, Val.eval]
+    simp only [Val.erase, Surface.Val.eval, a.eval_erase hag, b.eval_erase hag, Val.eval]
   | _, .unop _ _ _ a => by
-    simp only [Val.erase, Solidity.Val.eval, a.eval_erase hag, Val.eval]
+    simp only [Val.erase, Surface.Val.eval, a.eval_erase hag, Val.eval]
   | _, .ternary c a b => by
-    simp only [Val.erase, Solidity.Val.eval, c.eval_erase hag, a.eval_erase hag,
+    simp only [Val.erase, Surface.Val.eval, c.eval_erase hag, a.eval_erase hag,
       b.eval_erase hag, Val.eval]
   | _, .readMem l => by
-    simp only [Val.erase, Solidity.Val.eval, l.read_erase hag, Val.eval]
+    simp only [Val.erase, Surface.Val.eval, l.read_erase hag, Val.eval]
   | _, .len b _ => by
-    simp only [Val.erase, Solidity.Val.eval, b.resolve_erase hag, hag.arrayLen, Val.eval]
+    simp only [Val.erase, Surface.Val.eval, b.resolve_erase hag, hag.arrayLen, Val.eval]
   | _, .mlen b _ => by
-    simp only [Val.erase, Solidity.Val.eval, b.mval_erase hag, hag.memArrayLen, Val.eval]
+    simp only [Val.erase, Surface.Val.eval, b.mval_erase hag, hag.memArrayLen, Val.eval]
 
 end
 
@@ -600,7 +600,7 @@ theorem lookupBy_of_mem_nodup {κ α : Type} [DecidableEq κ] :
       exact lookupBy_of_mem_nodup hnd'.2 hm
 
 /-- A state agrees with its erasure. -/
-theorem Agree.erase {ns : List Var} (σ : State C Γ) (hnd : ns.Nodup) (hlen : ns.length = Γ.length) :
+theorem Agree.erase {ns : List Var} (σ : EState C Γ) (hnd : ns.Nodup) (hlen : ns.length = Γ.length) :
     Agree ns σ (σ.erase ns) where
   len := hlen
   nodup := hnd

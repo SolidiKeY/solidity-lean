@@ -1,5 +1,5 @@
 import Solidity.Tools.ProofTree
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 
@@ -27,11 +27,11 @@ today's budgets (`Core.Derive.residueOf`).
 
 namespace Solidity.Examples.Tactics.Dangling
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## A write past the end, made live by a `push()`
 
@@ -138,12 +138,12 @@ def rounds6 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
 #guard Core.Derive.proves rounds2
 #guard (Core.Derive.residueOf rounds4).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
-      Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+    (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
+      NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
 
 #guard (Core.Derive.residueOf rounds6).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    (((Hyp.wrap (Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
-      Derive.closeSize).isSome && !Derive.leafFits l.1 l.2) == some [true]
+    (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
+      NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
 
 end Solidity.Examples.Tactics.Dangling

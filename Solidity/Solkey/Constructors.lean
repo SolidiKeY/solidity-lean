@@ -1,6 +1,6 @@
 import Solidity.Tools.Run
 import Solidity.Frontend.Problems
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.Deploy
 
@@ -27,8 +27,8 @@ solkey's unspecified problem writes `{storage := mtSt || net := mtSt}`, and
 Lean books the payment there too (`docs/solkey-feedback.md`).
 -/
 
-open Solidity Proves
-open scoped Solidity.Core.Surface
+open Solidity NFml.Proves
+open scoped Core.Scoped
 
 solc_import "../../tests/solc/Counter.ast.json" hash 0x2d54a4ea32c96108 as Solkey.Counter
 
@@ -135,7 +135,7 @@ context that holds `mtSt` (`Decide` has no clause for it yet), even with
 closed by `sol_close_mt`. -/
 theorem Solkey.EtherWallet.constructor.proved : ⊢ Solkey.EtherWallet.constructor.problem := by
   sol_prove
-  refine Proves.close ?_
+  refine NFml.Proves.close ?_
   sol_symex
   sol_close_mt
 

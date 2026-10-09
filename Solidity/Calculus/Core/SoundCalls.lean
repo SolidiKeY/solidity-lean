@@ -44,8 +44,6 @@ end Args
 
 /-! ## A body run in its frame -/
 
-theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) : (Except.ok a : Res α) >>= f = f a := rfl
-
 theorem Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) :
     Except.bind (Except.ok a : Res α) f = f a := rfl
 

@@ -26,108 +26,108 @@ open SemanticsProperties (lookupBy_eq_some_mem)
 
 mutual
 
-theorem SVal.canonB_iff : ∀ {v : SVal} {T : Ty}, v.canonB T = true ↔ v.canon T
-  | SVal.prim (.int _), Ty.int | SVal.prim (.int _), Ty.uint | SVal.prim (.bool _), Ty.bool =>
+theorem Semantics.SVal.canonB_iff : ∀ {v : Semantics.SVal} {T : Ty}, v.canonB T = true ↔ v.canon T
+  | Semantics.SVal.prim (.int _), Ty.int | Semantics.SVal.prim (.int _), Ty.uint | Semantics.SVal.prim (.bool _), Ty.bool =>
     ⟨fun _ => trivial, fun _ => rfl⟩
-  | SVal.struct fields, Ty.ref (RefTy.struct s) => by
+  | Semantics.SVal.struct fields, Ty.ref (RefTy.struct s) => by
     simp only [SVal.canonB, SVal.canon, Bool.and_eq_true, decide_eq_true_eq,
-      SVal.canonFieldsB_iff]
-  | SVal.array elems shadow fx, Ty.ref (RefTy.array E) => by
+      Semantics.SVal.canonFieldsB_iff]
+  | Semantics.SVal.array elems shadow fx, Ty.ref (RefTy.array E) => by
     simp only [SVal.canonB, SVal.canon, Bool.and_eq_true, Bool.not_eq_true',
-      SVal.canonElemsB_iff, and_assoc]
-  | SVal.array elems shadow fx, Ty.ref (RefTy.fixed E n) => by
+      Semantics.SVal.canonElemsB_iff, and_assoc]
+  | Semantics.SVal.array elems shadow fx, Ty.ref (RefTy.fixed E n) => by
     simp only [SVal.canonB, SVal.canon, Bool.and_eq_true, decide_eq_true_eq,
-      SVal.canonElemsB_iff, and_assoc]
-  | SVal.map entries dflt, Ty.ref (RefTy.mapping _ V) => by
+      Semantics.SVal.canonElemsB_iff, and_assoc]
+  | Semantics.SVal.map entries dflt, Ty.ref (RefTy.mapping _ V) => by
     simp only [SVal.canonB, SVal.canon, Bool.and_eq_true,
-      SVal.canonEntriesB_iff, SVal.isDfltB_iff, SVal.canonB_iff (v := dflt), and_assoc]
-  | SVal.prim (.int _), Ty.bool | SVal.prim (.bool _), Ty.uint | SVal.prim (.bool _), Ty.int
-  | SVal.prim _, Ty.ref _
-  | SVal.struct _, Ty.prim _ | SVal.struct _, Ty.ref (.array _)
-  | SVal.struct _, Ty.ref (.fixed _ _) | SVal.struct _, Ty.ref (.mapping _ _)
-  | SVal.array .., Ty.prim _ | SVal.array .., Ty.ref (.struct _)
-  | SVal.array .., Ty.ref (.mapping _ _)
-  | SVal.map .., Ty.prim _ | SVal.map .., Ty.ref (.struct _)
-  | SVal.map .., Ty.ref (.array _) | SVal.map .., Ty.ref (.fixed _ _) =>
+      Semantics.SVal.canonEntriesB_iff, SVal.isDfltB_iff, Semantics.SVal.canonB_iff (v := dflt), and_assoc]
+  | Semantics.SVal.prim (.int _), Ty.bool | Semantics.SVal.prim (.bool _), Ty.uint | Semantics.SVal.prim (.bool _), Ty.int
+  | Semantics.SVal.prim _, Ty.ref _
+  | Semantics.SVal.struct _, Ty.prim _ | Semantics.SVal.struct _, Ty.ref (.array _)
+  | Semantics.SVal.struct _, Ty.ref (.fixed _ _) | Semantics.SVal.struct _, Ty.ref (.mapping _ _)
+  | Semantics.SVal.array .., Ty.prim _ | Semantics.SVal.array .., Ty.ref (.struct _)
+  | Semantics.SVal.array .., Ty.ref (.mapping _ _)
+  | Semantics.SVal.map .., Ty.prim _ | Semantics.SVal.map .., Ty.ref (.struct _)
+  | Semantics.SVal.map .., Ty.ref (.array _) | Semantics.SVal.map .., Ty.ref (.fixed _ _) =>
     ⟨fun h => by simp only [SVal.canonB, Bool.false_eq_true] at h,
       fun h => by simp only [SVal.canon] at h⟩
 
-theorem SVal.canonFieldsB_iff {s : Name} :
-    ∀ {fs : List (Name × SVal)}, canonFieldsB s fs = true ↔ canonFields s fs
+theorem Semantics.SVal.canonFieldsB_iff {s : Name} :
+    ∀ {fs : List (Name × Semantics.SVal)}, canonFieldsB s fs = true ↔ canonFields s fs
   | [] => ⟨fun _ => trivial, fun _ => rfl⟩
   | (n, v) :: rest => by
-    simp only [canonFieldsB, canonFields, Bool.and_eq_true, SVal.canonFieldsB_iff (fs := rest)]
+    simp only [canonFieldsB, canonFields, Bool.and_eq_true, Semantics.SVal.canonFieldsB_iff (fs := rest)]
     cases lookupBy n (structDef s) with
     | none => simp only [Bool.false_eq_true, false_and]
-    | some T => simp only [SVal.canonB_iff (v := v) (T := T)]
+    | some T => simp only [Semantics.SVal.canonB_iff (v := v) (T := T)]
 
-theorem SVal.canonElemsB_iff {E : Ty} :
-    ∀ {es : List SVal}, canonElemsB E es = true ↔ canonElems E es
+theorem Semantics.SVal.canonElemsB_iff {E : Ty} :
+    ∀ {es : List Semantics.SVal}, canonElemsB E es = true ↔ canonElems E es
   | [] => ⟨fun _ => trivial, fun _ => rfl⟩
   | v :: rest => by
-    simp only [canonElemsB, canonElems, Bool.and_eq_true, SVal.canonB_iff (v := v),
-      SVal.canonElemsB_iff (es := rest)]
+    simp only [canonElemsB, canonElems, Bool.and_eq_true, Semantics.SVal.canonB_iff (v := v),
+      Semantics.SVal.canonElemsB_iff (es := rest)]
 
-theorem SVal.canonEntriesB_iff {V : Ty} :
-    ∀ {es : List (Int × SVal)}, canonEntriesB V es = true ↔ canonEntries V es
+theorem Semantics.SVal.canonEntriesB_iff {V : Ty} :
+    ∀ {es : List (Int × Semantics.SVal)}, canonEntriesB V es = true ↔ canonEntries V es
   | [] => ⟨fun _ => trivial, fun _ => rfl⟩
   | (_, v) :: rest => by
-    simp only [canonEntriesB, canonEntries, Bool.and_eq_true, SVal.canonB_iff (v := v),
-      SVal.canonEntriesB_iff (es := rest)]
+    simp only [canonEntriesB, canonEntries, Bool.and_eq_true, Semantics.SVal.canonB_iff (v := v),
+      Semantics.SVal.canonEntriesB_iff (es := rest)]
 
 end
 
 mutual
 
-theorem SVal.tightB_iff : ∀ {v : SVal} {T : Ty}, v.tightB T = true ↔ v.tight T
-  | SVal.struct fields, Ty.ref (RefTy.struct s) => by
-    simp only [SVal.tightB, SVal.tight, SVal.tightFieldsB_iff]
-  | SVal.array elems shadow _, Ty.ref (RefTy.array E) => by
+theorem Semantics.SVal.tightB_iff : ∀ {v : Semantics.SVal} {T : Ty}, v.tightB T = true ↔ v.tight T
+  | Semantics.SVal.struct fields, Ty.ref (RefTy.struct s) => by
+    simp only [SVal.tightB, SVal.tight, Semantics.SVal.tightFieldsB_iff]
+  | Semantics.SVal.array elems shadow _, Ty.ref (RefTy.array E) => by
     simp only [SVal.tightB, SVal.tight, Bool.and_eq_true, Bool.or_eq_true, List.isEmpty_iff,
-      Bool.not_eq_true', List.all_eq_true, SVal.isDfltB_iff, SVal.tightElemsB_iff, and_assoc]
+      Bool.not_eq_true', List.all_eq_true, SVal.isDfltB_iff, Semantics.SVal.tightElemsB_iff, and_assoc]
     cases E.defaultOkS <;> cases E.isPrimitive <;>
       simp only [true_or, false_or, Bool.false_eq_true, Bool.true_eq_false, true_and,
         forall_const, false_implies]
-  | SVal.array elems shadow _, Ty.ref (RefTy.fixed E _) => by
+  | Semantics.SVal.array elems shadow _, Ty.ref (RefTy.fixed E _) => by
     simp only [SVal.tightB, SVal.tight, Bool.and_eq_true, List.isEmpty_iff,
-      SVal.tightElemsB_iff]
-  | SVal.map entries _, Ty.ref (RefTy.mapping K V) => by
+      Semantics.SVal.tightElemsB_iff]
+  | Semantics.SVal.map entries _, Ty.ref (RefTy.mapping K V) => by
     simp only [SVal.tightB, SVal.tight, Bool.and_eq_true, Bool.or_eq_true, List.isEmpty_iff,
-      SVal.tightEntriesB_iff]
+      Semantics.SVal.tightEntriesB_iff]
     cases K.isKey <;>
       simp only [true_or, false_or, Bool.false_eq_true, true_and, forall_const, reduceCtorEq,
         false_implies]
-  | SVal.prim _, _
-  | SVal.struct _, Ty.prim _ | SVal.struct _, Ty.ref (.array _)
-  | SVal.struct _, Ty.ref (.fixed _ _) | SVal.struct _, Ty.ref (.mapping _ _)
-  | SVal.array .., Ty.prim _ | SVal.array .., Ty.ref (.struct _)
-  | SVal.array .., Ty.ref (.mapping _ _)
-  | SVal.map .., Ty.prim _ | SVal.map .., Ty.ref (.struct _)
-  | SVal.map .., Ty.ref (.array _) | SVal.map .., Ty.ref (.fixed _ _) =>
+  | Semantics.SVal.prim _, _
+  | Semantics.SVal.struct _, Ty.prim _ | Semantics.SVal.struct _, Ty.ref (.array _)
+  | Semantics.SVal.struct _, Ty.ref (.fixed _ _) | Semantics.SVal.struct _, Ty.ref (.mapping _ _)
+  | Semantics.SVal.array .., Ty.prim _ | Semantics.SVal.array .., Ty.ref (.struct _)
+  | Semantics.SVal.array .., Ty.ref (.mapping _ _)
+  | Semantics.SVal.map .., Ty.prim _ | Semantics.SVal.map .., Ty.ref (.struct _)
+  | Semantics.SVal.map .., Ty.ref (.array _) | Semantics.SVal.map .., Ty.ref (.fixed _ _) =>
     ⟨fun _ => trivial, fun _ => rfl⟩
 
-theorem SVal.tightFieldsB_iff {s : Name} :
-    ∀ {fs : List (Name × SVal)}, tightFieldsB s fs = true ↔ tightFields s fs
+theorem Semantics.SVal.tightFieldsB_iff {s : Name} :
+    ∀ {fs : List (Name × Semantics.SVal)}, tightFieldsB s fs = true ↔ tightFields s fs
   | [] => ⟨fun _ => trivial, fun _ => rfl⟩
   | (n, v) :: rest => by
-    simp only [tightFieldsB, tightFields, Bool.and_eq_true, SVal.tightFieldsB_iff (fs := rest)]
+    simp only [tightFieldsB, tightFields, Bool.and_eq_true, Semantics.SVal.tightFieldsB_iff (fs := rest)]
     cases lookupBy n (structDef s) with
     | none => simp only [true_and]
-    | some T => simp only [SVal.tightB_iff (v := v) (T := T)]
+    | some T => simp only [Semantics.SVal.tightB_iff (v := v) (T := T)]
 
-theorem SVal.tightElemsB_iff {E : Ty} :
-    ∀ {es : List SVal}, tightElemsB E es = true ↔ tightElems E es
+theorem Semantics.SVal.tightElemsB_iff {E : Ty} :
+    ∀ {es : List Semantics.SVal}, tightElemsB E es = true ↔ tightElems E es
   | [] => ⟨fun _ => trivial, fun _ => rfl⟩
   | v :: rest => by
-    simp only [tightElemsB, tightElems, Bool.and_eq_true, SVal.tightB_iff (v := v),
-      SVal.tightElemsB_iff (es := rest)]
+    simp only [tightElemsB, tightElems, Bool.and_eq_true, Semantics.SVal.tightB_iff (v := v),
+      Semantics.SVal.tightElemsB_iff (es := rest)]
 
-theorem SVal.tightEntriesB_iff {V : Ty} :
-    ∀ {es : List (Int × SVal)}, tightEntriesB V es = true ↔ tightEntries V es
+theorem Semantics.SVal.tightEntriesB_iff {V : Ty} :
+    ∀ {es : List (Int × Semantics.SVal)}, tightEntriesB V es = true ↔ tightEntries V es
   | [] => ⟨fun _ => trivial, fun _ => rfl⟩
   | (_, v) :: rest => by
-    simp only [tightEntriesB, tightEntries, Bool.and_eq_true, SVal.tightB_iff (v := v),
-      SVal.tightEntriesB_iff (es := rest)]
+    simp only [tightEntriesB, tightEntries, Bool.and_eq_true, Semantics.SVal.tightB_iff (v := v),
+      Semantics.SVal.tightEntriesB_iff (es := rest)]
 
 end
 

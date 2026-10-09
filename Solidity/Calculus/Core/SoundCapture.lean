@@ -77,7 +77,7 @@ theorem SHole.fill_trun (σ : TState C Γ) {T : Ty} (lhs : SHole C Γ T) (l : Lo
 
 theorem SHole.contT_up {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {T : Ty}
     (lhs : SHole C Γ T) (r : SRef C T) :
-    lhs.up.contT (σ.push w) r = liftedT Core.up (w, σ.env) (lhs.contT σ r) := by
+    lhs.up.contT (σ.push w) r = liftedT Solidity.Core.up (w, σ.env) (lhs.contT σ r) := by
   cases lhs with
   | «local» i =>
     simp only [SHole.up, SHole.contT, liftedT_bind]
@@ -93,7 +93,7 @@ theorem SHole.fill_pushT {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {T 
     (lhs : SHole C Γ T) (l' : Loc C (t :: Γ) T) (l : Loc C Γ T)
     (hl : l'.resolveT (σ.push w) = l.resolveT σ) :
     (lhs.up.fill (.loc l')).trun (σ.push w) =
-      liftedT Core.up (w, σ.env) ((lhs.fill (.loc l)).trun σ) := by
+      liftedT Solidity.Core.up (w, σ.env) ((lhs.fill (.loc l)).trun σ) := by
   rw [SHole.fill_trun, SHole.fill_trun, hl, liftedT_bind]
   congr 1; funext q; exact SHole.contT_up σ w lhs q
 
@@ -127,7 +127,7 @@ theorem MHole.fill_trun (σ : TState C Γ) {T : Ty} (lhs : MHole C Γ T) (l : ML
 
 theorem MHole.contT_up {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {T : Ty}
     (lhs : MHole C Γ T) (a : MAddr σ.H T) :
-    lhs.up.contT (σ.push w) a = liftedT Core.up (w, σ.env) (lhs.contT σ a) := by
+    lhs.up.contT (σ.push w) a = liftedT Solidity.Core.up (w, σ.env) (lhs.contT σ a) := by
   cases lhs with
   | «local» i =>
     simp only [MHole.up, MHole.contT, liftedT_bind]
@@ -142,7 +142,7 @@ theorem MHole.contT_up {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {T : 
 theorem MHole.fill_pushT {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {T : Ty}
     (lhs : MHole C Γ T) (l' : MLoc C (t :: Γ) T) (l : MLoc C Γ T)
     (hl : l'.addrT (σ.push w) = l.addrT σ) :
-    (lhs.up.fill l').trun (σ.push w) = liftedT Core.up (w, σ.env) ((lhs.fill l).trun σ) := by
+    (lhs.up.fill l').trun (σ.push w) = liftedT Solidity.Core.up (w, σ.env) ((lhs.fill l).trun σ) := by
   rw [MHole.fill_trun, MHole.fill_trun, hl, liftedT_bind]
   congr 1; funext q; exact MHole.contT_up σ w lhs q
 
@@ -172,7 +172,7 @@ theorem VHole.fill_trun (σ : TState C Γ) {p : PrimTy} (lhs : VHole C Γ p) (e 
 
 theorem VHole.contT_up {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {p : PrimTy}
     (lhs : VHole C Γ p) (v : p.Denote) :
-    lhs.up.contT (σ.push w) v = liftedT Core.up (w, σ.env) (lhs.contT σ v) := by
+    lhs.up.contT (σ.push w) v = liftedT Solidity.Core.up (w, σ.env) (lhs.contT σ v) := by
   cases lhs with
   | «local» i =>
     simp only [VHole.up, VHole.contT]
@@ -187,7 +187,7 @@ theorem VHole.contT_up {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {p : 
 theorem VHole.fill_pushT {t : LTy} (σ : TState C Γ) (w : t.TDenote C σ.H) {p : PrimTy}
     (lhs : VHole C Γ p) (e' : Val C (t :: Γ) p) (e : Val C Γ p)
     (he : e'.evalT (σ.push w) = e.evalT σ) :
-    (lhs.up.fill e').trun (σ.push w) = liftedT Core.up (w, σ.env) ((lhs.fill e).trun σ) := by
+    (lhs.up.fill e').trun (σ.push w) = liftedT Solidity.Core.up (w, σ.env) ((lhs.fill e).trun σ) := by
   rw [VHole.fill_trun, VHole.fill_trun, he, liftedT_bind]
   congr 1; funext q; exact VHole.contT_up σ w lhs q
 
@@ -476,8 +476,8 @@ theorem sendT_push (pv : Idx Γ (.val .bool)) (addr amt : Int) :
   exact sendT_lift Core.up σ (w, σ.env) pv addr amt
 
 theorem MRhs.evalT_up {R : RefTy} (r : MRhs C Γ R) :
-    (r.up (t := t)).evalT (σ.push w) = (r.evalT σ).map (Grew.lift Core.up (w, σ.env)) := by
-  rw [MRhs.up_eq]; exact MRhs.evalT_wk Core.up σ (w, σ.env) r
+    (r.up (t := t)).evalT (σ.push w) = (r.evalT σ).map (Grew.lift Solidity.Core.up (w, σ.env)) := by
+  rw [MRhs.up_eq]; exact MRhs.evalT_wk Solidity.Core.up σ (w, σ.env) r
 
 /-- A compound target read with a local pushed as `l` reads (`OpLoc.Agree`,
 typed). -/

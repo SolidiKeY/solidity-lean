@@ -88,8 +88,8 @@ solc over KeY.
 ## Using the calculus
 
 A formula is written in `dl!{ … }` over a named contract (`local instance :
-InContract := ⟨StandardExample⟩`, `Calculus/Notation.lean`). Import
-`Solidity.Calculus.Close` for the tactics, `Solidity.Calculus.Chains` for
+InContract := ⟨StandardExample⟩`, `Calculus/SurfaceNotation.lean`). Import
+`Solidity.Calculus.NFmlClose` for the tactics, `Solidity.Calculus.Chains` for
 chains, `Solidity.Tools.ProofTree` for the tree. `Examples/` shows each of
 these once; `.claude/rules/derivations.md` is the convention.
 
@@ -217,7 +217,7 @@ rebuilds nothing after merging a lane that was built elsewhere.
 
 - **A parallel lane is a `git worktree`** on its own branch
   (`git worktree add ../solidity-lean-<lane> -b <lane>`), not a `cp -r`:
-  the cache fills its `.lake` in seconds (a file importing `Calculus/Close`
+  the cache fills its `.lake` in seconds (a file importing `Calculus/NFmlClose`
   opened in 8 s with no build directory), and its commits are visible to
   master without a fetch.
 - **RAM is per open file, not per build.** A Lean worker holds 0.6–1.5 GB,

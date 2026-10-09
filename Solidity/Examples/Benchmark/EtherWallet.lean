@@ -1,6 +1,6 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Derive
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlDerive
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Deploy
 import Solidity.Calculus.Core.Closers
@@ -32,7 +32,7 @@ recipient could change the ledger before control returns
 
 namespace Solidity.Examples.Benchmark.EtherWallet
 
-open Proves
+open NFml.Proves
 
 def EtherWallet : Contract := contract!{
   address owner;
@@ -50,7 +50,7 @@ def EtherWallet : Contract := contract!{
 
 local instance : InContract := ⟨EtherWallet⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `constructor()`: the caller is the owner, from any storage. -/
 theorem ctor : ⊢ dl!{ [ constructor(); ] owner == msg.sender } := by

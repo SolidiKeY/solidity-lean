@@ -29,7 +29,7 @@ variable {C : Contract}
 
 /-- A typed step that ends in a state: what it erases to ends in that state's
 erasure. -/
-theorem StepAgrees.ok {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : State C Γ → Res (State C Γ')}
+theorem StepAgrees.ok {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : EState C Γ → Res (EState C Γ')}
     (ha : StepAgrees t u) {σ : TState C Γ} {o : Out C σ.H Γ'} (h : t σ = .ok o) :
     u σ.erase = .ok o.st.erase := by
   have hu := ha σ
@@ -49,7 +49,7 @@ def TKeeps {Γ Γ' : Ctx} (I : RunInv C) (t : TStep C Γ Γ') : Prop :=
 
 /-- **A leaf, through its erasure**: a typed step keeps the invariant when
 what it erases to does (`Semantics/Core/TypedStepErase.lean`). -/
-theorem TKeeps.of_agrees {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : State C Γ → Res (State C Γ')}
+theorem TKeeps.of_agrees {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : EState C Γ → Res (EState C Γ')}
     (ha : StepAgrees t u) (hk : I.Keeps u) : I.TKeeps t := by
   intro H σ o hσ h
   exact hk H σ.erase o.st.erase hσ (ha.ok h)
@@ -157,7 +157,7 @@ theorem tkeeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {bo
 
 theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
     (x : Ext (rs ++ ps) Γf) {body : TStep C (rs ++ ps) Γf}
-    (hargs : ∀ (H : HeapTy) (σ : State C Γ) (a : Env C ps), I.Holds H σ → args.eval σ = .ok a →
+    (hargs : ∀ (H : HeapTy) (σ : EState C Γ) (a : Env C ps), I.Holds H σ → args.eval σ = .ok a →
       Env.All (I.loc H) a)
     (henter : ∀ (H : HeapTy) (τ τ' : Semantics.State) (r : Env C rs), I.glob H τ →
       ret.enter τ = .ok (τ', r) → ∃ H', H.Extends H' ∧ I.glob H' τ' ∧ Env.All (I.loc H') r)

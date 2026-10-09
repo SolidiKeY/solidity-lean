@@ -1,7 +1,7 @@
 import Solidity.Calculus.Core.Step
 import Solidity.Calculus.Core.Quote
 import Solidity.Calculus.Core.Print
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 
 /-!
 # Every statement's rule, on scoped formulas

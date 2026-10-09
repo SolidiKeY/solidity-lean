@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Evm.CoreExamples
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
@@ -29,11 +29,11 @@ Every obligation is proved by the strategy: `sol_symex` runs the rules,
 
 namespace Solidity.Examples.Tactics.Operators
 
-open Proves
+open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Bitwise and shifts -/
 

@@ -1,6 +1,6 @@
 import Solidity.Calculus.Core.Notation
 import Solidity.Calculus.Core.Spec
-import Solidity.Calculus.Spec
+import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.Core.Proves
 
@@ -57,7 +57,7 @@ def elabValidDispatch : TermElab := fun stx _ => do
   let φ ← instantiateMVars φ
   let ty ← whnf (← inferType φ)
   if ty.isAppOfArity ``Core.Fml 2 then return ← mkAppM ``Core.Valid #[φ]
-  mkAppM ``Solidity.Valid #[φ]
+  mkAppM ``NFml.Valid #[φ]
 
 /-- `Core.Valid φ` prints as `⊨ φ`. -/
 @[app_unexpander Core.Valid]
@@ -65,7 +65,7 @@ def unexpandValid : PrettyPrinter.Unexpander
   | `($_ $φ) => `(⊨ $φ)
   | _ => throw ()
 
-namespace Surface
+namespace Scoped
 
 scoped macro_rules | `(core_surface%) => `(true)
 
@@ -91,6 +91,6 @@ scoped macro_rules
 /-- `⊢ φ`: the scoped sequent with nothing assumed. -/
 scoped notation:25 "⊢ " φ:26 => Core.Proves _ RuleSet.all [] Core.Hyps.nil φ
 
-end Surface
+end Scoped
 
 end Solidity.Core

@@ -31,7 +31,7 @@ end
 
 section
 local instance : InContract := ⟨Ordered⟩
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 theorem ordered_inc : ⊨ spec!{ inc } := by sol_spec
 theorem ordered_order : ⊨ spec!{ order } := by sol_spec
 end

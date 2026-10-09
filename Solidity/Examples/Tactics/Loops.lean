@@ -1,7 +1,7 @@
 import Solidity.Tools.Run
 import Solidity.Tools.Inspect
 import Solidity.Tools.ProofTree
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Calculus.Core.Chains
@@ -25,11 +25,11 @@ locals its body writes (`{anon(…)}`).
 
 namespace Solidity.Examples.Loops
 
-open Semantics Proves
+open Semantics NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## The lowering
 
@@ -378,7 +378,7 @@ loops solkey now writes, each unwound as often as it runs. -/
 section
 local instance : InContract := ⟨SolcControlFlow⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `doWhileFalseRunsBodyOnce` (solc `statements/do_while_loop_continue.sol`):
 `do { … } while (false)` runs its body once, and the `continue` it skips

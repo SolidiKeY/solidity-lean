@@ -33,7 +33,7 @@ namespace Solidity.Examples.ExampleNames
 local instance : InContract := ⟨StandardExample⟩
 
 section Scoped
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- The headline's last line, in the default spelling. -/
 def headlineLast : Core.Fml StandardExample [] :=
@@ -70,7 +70,7 @@ namespace Headline
 local instance : FreshNames := .ofTable Chains.Storage.BalanceWrite.names
 
 section Scoped
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 -- `acc` reads as `sp1`, and `se1` prints as `pv`
 #guard Var.ofName "acc" == .fresh "sp" 1 && toString (Var.fresh "se" 1) == "pv"

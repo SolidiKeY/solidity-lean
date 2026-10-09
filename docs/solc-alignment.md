@@ -162,7 +162,7 @@ What is not modelled, each an elaboration error unless said otherwise:
   at run time instead and reverts;
 - `type(uint8).max` and the other type members;
 - a public function's ABI decoding, which reverts on an out-of-range
-  argument: a specification's precondition (`Calculus/Spec.lean`) does not
+  argument: a specification's precondition (`Calculus/SurfaceSpec.lean`) does not
   assume a narrow parameter's range, which is weaker, not unsound.
 
 The printed program has `uint`/`int` where the source has `uint8`/`int8`

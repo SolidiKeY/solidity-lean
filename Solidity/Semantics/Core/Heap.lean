@@ -245,7 +245,7 @@ theorem len_dyn_lt {E : Ty} (hp : Heap H) (r : HRef H (.array E)) : hp.len r .dy
 
 /-- `mv.length` of a dynamic array, a `uint`. -/
 def lenU {E : Ty} (hp : Heap H) (r : HRef H (.array E)) : PrimTy.uint.Denote :=
-  Core.lenU (hp.len r .dyn) (hp.len_dyn_lt r)
+  Solidity.Core.lenU (hp.len r .dyn) (hp.len_dyn_lt r)
 
 end Heap
 

@@ -28,7 +28,7 @@ under solkey's names where solkey has the rule:
 * `closeTrue`, behind a context with no diamond update but scope ends
   (`Hyps.boxOnly`);
 * `closeFalse`: a context that refutes itself closes any goal, as today's
-  `Proves.closeFalse` (`Calculus/Logic.lean`), the shape of KeY's `cut` on
+  `Proves.closeFalse` (`Calculus/NFmlLogic.lean`), the shape of KeY's `cut` on
   `false` and `closeFalse`; `sol_prove` closes a split's branch so when its
   condition is ground under the context (`Calculus/Core/ProvesDerive.lean`);
 * `close`: a leaf whose erasure is valid (`Calculus/Core/CloseErase.lean`),
@@ -365,7 +365,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   asks only of the typed states that erase to the one it ends in. -/
   | close {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (ns : List Var)
       (hlen : ns.length = Γ₀.length) (hnd : ns.Nodup)
-      (h : Solidity.Valid ((H.wrap φ).erase ns))
+      (h : NFml.Valid ((H.wrap φ).erase ns))
       (hc : (H.wrap φ).closableB ns = true := by first | rfl | decide)
       (hB : Solidity.Avoids (H.wrap φ).bindNames ns := by decide) : Proves C R Γ₀ H φ
   /-- **`sequentialToParallel`** (`merge`, and `mergeStorage` over a storage

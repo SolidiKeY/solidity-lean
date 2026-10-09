@@ -10,7 +10,7 @@ from the locals in scope where the block starts; `sol[C]{ … }` and
 `sol{ … }` splice the checked block as a term (`Prog.quote`).  The other
 entry points run the same check: a specification's call (`specPieces`), a
 constructor's obligation (`Problem.ctor`) and each statement of a `dl!{ … }`
-modality (`Calculus/Notation.lean`).
+modality (`Calculus/SurfaceNotation.lean`).
 
 `resolve` reads the branches of an `if` and of a `try`, a loop's body and a
 call's body as scopes, as solc does, so a local a branch declares cannot be

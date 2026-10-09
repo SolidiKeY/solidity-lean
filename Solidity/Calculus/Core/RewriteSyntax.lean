@@ -238,13 +238,13 @@ def Walk.rwTheory (thms : SimpTheorems) (names : Array Lean.Term) : TacticM Unit
     progress := false
     let (C, _, _) ← withMainContext do Walk.provesParts (← getMainTarget)
     for (_, er, inGoal) in ← Walk.rwCandidates do
-      unless er.isAppOfArity ``Solidity.Tm.app2 7 &&
+      unless er.isAppOfArity ``Surface.Tm.app2 7 &&
           ((er.getArg! 4).isConstOf ``Op2.find || (er.getArg! 4).isConstOf ``Op2.len) do continue
       let some (u', pf) ← withMainContext (theoryRewrite thms C er) | continue
       let saved ← saveState
       try
         if !inGoal then
-          unless (← whnfR u').isAppOf ``Solidity.Tm.app0 do throwError "not a literal"
+          unless (← whnfR u').isAppOf ``Surface.Tm.app0 do throwError "not a literal"
         Walk.rwWith C (← mkAppM ``Prod.mk #[er, u']) pf inGoal
         progress := true
         break
@@ -293,37 +293,37 @@ elab_rules : tactic
 
 /-! ## Today's lines, read on a scoped goal -/
 
-namespace Surface
+namespace Scoped
 
 scoped macro_rules
   | `(tactic| refine merge rfl ?_) =>
-    `(tactic| first | core_merge | refine _root_.Solidity.Proves.merge rfl ?_)
+    `(tactic| first | core_merge | refine Solidity.NFml.Proves.merge rfl ?_)
   | `(tactic| refine Proves.merge rfl ?_) =>
-    `(tactic| first | core_merge | refine _root_.Solidity.Proves.merge rfl ?_)
+    `(tactic| first | core_merge | refine Solidity.NFml.Proves.merge rfl ?_)
   | `(tactic| refine mergeStorage ?_) =>
-    `(tactic| first | core_merge | refine _root_.Solidity.Proves.mergeStorage ?_)
+    `(tactic| first | core_merge | refine Solidity.NFml.Proves.mergeStorage ?_)
   | `(tactic| refine Proves.mergeStorage ?_) =>
-    `(tactic| first | core_merge | refine _root_.Solidity.Proves.mergeStorage ?_)
+    `(tactic| first | core_merge | refine Solidity.NFml.Proves.mergeStorage ?_)
   | `(tactic| refine simplify ?_) =>
-    `(tactic| first | core_simplify | refine _root_.Solidity.Proves.simplify ?_)
+    `(tactic| first | core_simplify | refine Solidity.NFml.Proves.simplify ?_)
   | `(tactic| refine Proves.simplify ?_) =>
-    `(tactic| first | core_simplify | refine _root_.Solidity.Proves.simplify ?_)
+    `(tactic| first | core_simplify | refine Solidity.NFml.Proves.simplify ?_)
   | `(tactic| refine Proves.eqDSplit ?_ ?_ ?_) =>
-    `(tactic| first | refine Solidity.Core.Proves.eqDSplit ?_ ?_ ?_ | refine _root_.Solidity.Proves.eqDSplit ?_ ?_ ?_)
+    `(tactic| first | refine Solidity.Core.Proves.eqDSplit ?_ ?_ ?_ | refine Solidity.NFml.Proves.eqDSplit ?_ ?_ ?_)
   | `(tactic| exact Proves.definedWritten) =>
-    `(tactic| first | exact Solidity.Core.Proves.definedWritten | exact _root_.Solidity.Proves.definedWritten)
+    `(tactic| first | exact Solidity.Core.Proves.definedWritten | exact Solidity.NFml.Proves.definedWritten)
   | `(tactic| exact Proves.definedLit) =>
-    `(tactic| first | exact Solidity.Core.Proves.definedLit | exact _root_.Solidity.Proves.definedLit)
+    `(tactic| first | exact Solidity.Core.Proves.definedLit | exact Solidity.NFml.Proves.definedLit)
   | `(tactic| exact Proves.eqRefl) =>
-    `(tactic| first | exact Solidity.Core.Proves.eqRefl | exact _root_.Solidity.Proves.eqRefl)
+    `(tactic| first | exact Solidity.Core.Proves.eqRefl | exact Solidity.NFml.Proves.eqRefl)
   | `(tactic| exact Proves.eqClose) =>
-    `(tactic| first | exact Solidity.Core.Proves.eqClose | exact _root_.Solidity.Proves.eqClose)
+    `(tactic| first | exact Solidity.Core.Proves.eqClose | exact Solidity.NFml.Proves.eqClose)
   | `(tactic| exact Proves.eqDClose) =>
-    `(tactic| first | exact Solidity.Core.Proves.eqDClose | exact _root_.Solidity.Proves.eqDClose)
+    `(tactic| first | exact Solidity.Core.Proves.eqDClose | exact Solidity.NFml.Proves.eqDClose)
   | `(tactic| sol_apply_upd) => `(tactic| core_apply_upd)
   | `(tactic| sol_rw [$rs,*]) => `(tactic| core_rw [$rs,*])
   | `(tactic| rw [$rs,*]) => `(tactic| core_rw [$rs,*])
 
-end Surface
+end Scoped
 
 end Solidity.Core

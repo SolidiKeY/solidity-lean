@@ -23,7 +23,7 @@ local instance : InContract := ⟨StandardExample⟩
 
 section Scoped
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- info: dl{ ∀ uint a; a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Core.Fml StandardExample [] -/
 #guard_msgs in #check dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }

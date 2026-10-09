@@ -1,6 +1,6 @@
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
-import Solidity.Calculus.Spec
+import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -66,7 +66,7 @@ contract NestedMapping {
 
 namespace Solidity.Examples.Benchmark.Mapping
 
-open Proves
+open NFml.Proves
 
 /-- `Mapping`, as published, with solkey's clauses. -/
 def Mapping : Contract := contract!{
@@ -107,7 +107,7 @@ section Mapping
 
 local instance : InContract := ⟨Mapping⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `set(a, i)`: `ensures myMap[_addr] == _i`. -/
 theorem set_spec : ⊢ dl!{ [ set(a, i); ] myMap[a] == i } := by
@@ -164,7 +164,7 @@ section NestedMapping
 
 local instance : InContract := ⟨NestedMapping⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `set(a, i, true)`: `ensures nested[_addr1][_i] == _boo`. -/
 theorem nested_set_spec_true : ⊢ dl!{ [ set(a, i, true); ] nested[a][i] == true } := by

@@ -10,8 +10,8 @@ order of the source; the replays are what `#solkey_derive? … pending`
 (`Frontend/Problems.lean`) prints.
 -/
 
-open Solidity Proves
-open scoped Solidity.Core.Surface
+open Solidity NFml.Proves
+open scoped Core.Scoped
 
 theorem Solkey.TestSuite.memoryDeclDefault.proved : ⊢ Solkey.TestSuite.memoryDeclDefault.problem := by
   sol_prove

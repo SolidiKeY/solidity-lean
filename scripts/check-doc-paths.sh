@@ -6,7 +6,7 @@
 # is resolved in this order and the first hit wins:
 #
 #   1. relative to the citing file's own directory  (`ReadWrite.lean` cited
-#                                                     from `Calculus/Close.lean`)
+#                                                     from `Calculus/NFmlClose.lean`)
 #   2. relative to `Solidity/`                      (`Theory/Storage.lean`)
 #   3. relative to the repository root              (`Solidity/AST.lean`)
 #   4. by unique basename anywhere in the package   (`KeyTaclets.lean` cited

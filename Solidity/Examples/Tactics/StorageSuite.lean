@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Closers
 import Solidity.Tools.Inspect
@@ -25,11 +25,11 @@ under the box a write out of bounds reverts, which satisfies the formula, so
 
 namespace Solidity.Examples.Tactics.StorageSuite
 
-open Proves Semantics
+open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## 1 · Roots and fields -/
 
@@ -199,7 +199,7 @@ so the run is printed. -/
 /-- info: ("ok", "revert") -/
 #guard_msgs in
 #eval
-  let halt (r : Res State) := match r with
+  let halt (r : Res Semantics.State) := match r with
     | .error .revert => "revert" | .ok _ => "ok" | .error _ => "another halt"
   (halt (Surface.Prog.runT State.exampleStore
       (sol{ uint i = 0; while (i < 1) { Person storage p; if (i == 0) { p = alice; }
@@ -441,7 +441,7 @@ section Fixed
 
 local instance : InContract := ⟨TestSuite⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- `fixedValues[2] = 1; uint result = fixedValues[2];`
 (`TestSuite.testFixedArrayIndexInBounds`). -/

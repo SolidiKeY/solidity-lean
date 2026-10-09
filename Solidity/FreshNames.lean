@@ -23,7 +23,7 @@ A printed line reads back when the table round-trips, which
 identifier, the names are distinct and none is itself a default spelling
 (`se2`), and none is a name the readers resolve before a variable — a state
 variable or an enum of the contract, a word of `FreshNames.reserved`, or a
-`k1` of `Calculus/Spec.lean` — or a name a reader resolves before it in
+`k1` of `Calculus/SurfaceSpec.lean` — or a name a reader resolves before it in
 its own position: a struct type (`Account storage Account` does not read
 back) or a function of the contract.  An example guards its table with
 `#guard (FreshNames.clashes C rows).isEmpty`.  What it cannot check: a table
@@ -58,7 +58,7 @@ def FreshNames.ofTable (rows : FreshTable) (base : FreshNames := inferInstance) 
 (`tStor`, `tMem`), `true` and `false` (`tVal`), `this`, `msg` and `block`
 (the environment), `selfBalance` (the environment's, and the left side of
 `{ selfBalance := selfBalance - a }`), `net` (the ledger: `{ x := net }`
-saves it), and the names `Calculus/Spec.lean` fixes. -/
+saves it), and the names `Calculus/SurfaceSpec.lean` fixes. -/
 def FreshNames.reserved : List String :=
   ["storage", "memory", "true", "false", "this", "msg", "block", "selfBalance", "net",
    "old", "oldNet", "result"]

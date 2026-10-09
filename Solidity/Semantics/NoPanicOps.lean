@@ -61,47 +61,47 @@ macro_rules
     | (split <;> no_panic))
 
 @[no_panic_simp]
-theorem SVal.find_noPanic (v : SVal) (segs : List Seg) : NoPanic (v.find segs) := by
+theorem Semantics.SVal.find_noPanic (v : SVal) (segs : List Seg) : NoPanic (v.find segs) := by
   fun_induction SVal.find v segs <;> simp_all only [ne_eq, NoPanic.ok, not_false_eq_true,
       Except.error.injEq, reduceCtorEq, List.get_eq_getElem, List.length_append, not_and,
       Int.toNat_lt, Int.natCast_add, Int.not_lt, Bool.not_eq_true, imp_false]
 
-@[no_panic_simp] theorem SVal.save_noPanic (v : SVal) (segs : List Seg) (new : SVal) :
+@[no_panic_simp] theorem Semantics.SVal.save_noPanic (v : SVal) (segs : List Seg) (new : SVal) :
     NoPanic (v.save segs new) := by
   fun_induction SVal.save v segs new <;> simp_all only [ne_eq, NoPanic.ok, not_false_eq_true,
       implies_true, NoPanic.bind, Except.error.injEq, reduceCtorEq, List.get_eq_getElem,
       List.length_append, not_and, Int.toNat_lt, Int.natCast_add, Int.not_lt]
 
-@[no_panic_simp] theorem State.findStorage_noPanic (σ : State) (r : Name) (segs : List Seg) :
+@[no_panic_simp] theorem Semantics.State.findStorage_noPanic (σ : State) (r : Name) (segs : List Seg) :
     NoPanic (σ.findStorage r segs) := by
   unfold State.findStorage; split <;> simp_all only [ne_eq, SVal.find_noPanic, not_false_eq_true,
       Except.error.injEq, reduceCtorEq]
 
 @[no_panic_simp]
-theorem State.saveStorage_noPanic (σ : State) (r : Name) (segs : List Seg) (new : SVal) :
+theorem Semantics.State.saveStorage_noPanic (σ : State) (r : Name) (segs : List Seg) (new : SVal) :
     NoPanic (σ.saveStorage r segs new) := by
   unfold State.saveStorage; split <;> simp_all only [ne_eq, SVal.save_noPanic, not_false_eq_true,
       NoPanic.ok, implies_true, NoPanic.bind, Except.error.injEq, reduceCtorEq]
 
 @[no_panic_simp]
-theorem State.writeStorage_noPanic (σ : State) (r : Name) (segs : List Seg) (new : SVal) :
+theorem Semantics.State.writeStorage_noPanic (σ : State) (r : Name) (segs : List Seg) (new : SVal) :
     NoPanic (σ.writeStorage r segs new) := by
   unfold State.writeStorage; split <;> simp_all only [ne_eq, saveStorage_noPanic,
       not_false_eq_true, findStorage_noPanic, implies_true, NoPanic.bind]
 
 @[no_panic_simp]
-theorem State.checkIndex_noPanic (σ : State) (r : Name) (segs : List Seg) (i : Int) :
+theorem Semantics.State.checkIndex_noPanic (σ : State) (r : Name) (segs : List Seg) (i : Int) :
     NoPanic (σ.checkIndex r segs i) := by
   unfold State.checkIndex
   refine NoPanic.bind (by simp only [ne_eq, findStorage_noPanic, not_false_eq_true]) fun a _ => ?_
   split <;> (try split) <;> simp only [ne_eq, NoPanic.pure, not_false_eq_true, Except.error.injEq,
       reduceCtorEq]
 
-@[no_panic_simp] theorem State.getEnv_noPanic (σ : State) (x : Var) : NoPanic (σ.getEnv x) := by
+@[no_panic_simp] theorem Semantics.State.getEnv_noPanic (σ : State) (x : Var) : NoPanic (σ.getEnv x) := by
   unfold State.getEnv; split <;> simp only [ne_eq, NoPanic.ok, not_false_eq_true,
       Except.error.injEq, reduceCtorEq]
 
-@[no_panic_simp] theorem State.getObj_noPanic (σ : State) (id : Nat) : NoPanic (σ.getObj id) := by
+@[no_panic_simp] theorem Semantics.State.getObj_noPanic (σ : State) (id : Nat) : NoPanic (σ.getObj id) := by
   unfold State.getObj; split <;> simp only [ne_eq, NoPanic.ok, not_false_eq_true,
       Except.error.injEq, reduceCtorEq]
 
@@ -193,27 +193,27 @@ attribute [no_panic_simp] copyStToM_noPanic copyMToSt_noPanic
 @[no_panic_simp] theorem copyMem_noPanic (σ : State) (v : MVal) : NoPanic (copyMem σ v) :=
   copyMToSt_noPanic _ _ _
 
-@[no_panic_simp] theorem Value.asInt_noPanic (v : Value) : NoPanic v.asInt := by
+@[no_panic_simp] theorem Semantics.Value.asInt_noPanic (v : Value) : NoPanic v.asInt := by
   cases v <;> simp only [Value.asInt, ne_eq, NoPanic.ok, not_false_eq_true, Except.error.injEq,
       reduceCtorEq]
 
-@[no_panic_simp] theorem Value.keyAt_noPanic (k : PrimTy) (v : Value) : NoPanic (v.keyAt k) := by
+@[no_panic_simp] theorem Semantics.Value.keyAt_noPanic (k : PrimTy) (v : Value) : NoPanic (v.keyAt k) := by
   cases k <;> cases v <;> simp only [Value.keyAt, Value.asInt, Value.asBool, bind, Except.bind,
     pure, Except.pure, ne_eq, NoPanic.ok, not_false_eq_true, Except.error.injEq, reduceCtorEq]
 
-@[no_panic_simp] theorem Value.asBool_noPanic (v : Value) : NoPanic v.asBool := by
+@[no_panic_simp] theorem Semantics.Value.asBool_noPanic (v : Value) : NoPanic v.asBool := by
   cases v <;> simp only [Value.asBool, ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true,
       NoPanic.ok]
 
-@[no_panic_simp] theorem SVal.asValue_noPanic (v : SVal) : NoPanic v.asValue := by
+@[no_panic_simp] theorem Semantics.SVal.asValue_noPanic (v : SVal) : NoPanic v.asValue := by
   unfold SVal.asValue; split <;> simp only [ne_eq, NoPanic.ok, not_false_eq_true,
       Except.error.injEq, reduceCtorEq]
 
-@[no_panic_simp] theorem MVal.asValue_noPanic (v : MVal) : NoPanic v.asValue := by
+@[no_panic_simp] theorem Semantics.MVal.asValue_noPanic (v : MVal) : NoPanic v.asValue := by
   unfold MVal.asValue; split <;> simp only [ne_eq, NoPanic.ok, not_false_eq_true,
       Except.error.injEq, reduceCtorEq]
 
-@[no_panic_simp] theorem MVal.asRef_noPanic (v : MVal) : NoPanic v.asRef := by
+@[no_panic_simp] theorem Semantics.MVal.asRef_noPanic (v : MVal) : NoPanic v.asRef := by
   unfold MVal.asRef; split <;> simp only [ne_eq, NoPanic.pure, not_false_eq_true,
       Except.error.injEq, reduceCtorEq]
 
@@ -275,82 +275,82 @@ theorem pushAt_noPanic (σ : State) (E : Ty) (r : Name) (segs : List Seg) {val :
 A statement's halt and its update's halt may come from different reads (the
 two evaluate in another order); neither is a panic. -/
 
-@[no_panic_simp] theorem Simple.eval_noPanic (σ : State) {p : PrimTy} (s : Simple C p) :
+@[no_panic_simp] theorem Surface.Simple.eval_noPanic (σ : State) {p : PrimTy} (s : Surface.Simple C p) :
     NoPanic (s.eval σ) := by
-  cases s <;> simp only [Simple.eval] <;> no_panic
+  cases s <;> simp only [Surface.Simple.eval] <;> no_panic
 
 mutual
-theorem SPath.resolve_noPanic (σ : State) : {T : Ty} → (p : SPath C T) → NoPanic (p.resolve σ)
-  | _, .alias x => by simp only [SPath.resolve, ne_eq, aliasPath_noPanic, not_false_eq_true]
-  | _, .loc l => by simp only [SPath.resolve]; exact Loc.resolve_noPanic σ l
+theorem Surface.SPath.resolve_noPanic (σ : State) : {T : Ty} → (p : Surface.SPath C T) → NoPanic (p.resolve σ)
+  | _, .alias x => by simp only [Surface.SPath.resolve, ne_eq, aliasPath_noPanic, not_false_eq_true]
+  | _, .loc l => by simp only [Surface.SPath.resolve]; exact Surface.Loc.resolve_noPanic σ l
 
-theorem Loc.resolve_noPanic (σ : State) : {T : Ty} → (l : Loc C T) → NoPanic (l.resolve σ)
-  | _, .root r _ => by simp only [Loc.resolve, ne_eq, NoPanic.pure, not_false_eq_true]
+theorem Surface.Loc.resolve_noPanic (σ : State) : {T : Ty} → (l : Surface.Loc C T) → NoPanic (l.resolve σ)
+  | _, .root r _ => by simp only [Surface.Loc.resolve, ne_eq, NoPanic.pure, not_false_eq_true]
   | _, .field b f _ => by
-    have hb := SPath.resolve_noPanic σ b
-    simp only [Loc.resolve]; no_panic
+    have hb := Surface.SPath.resolve_noPanic σ b
+    simp only [Surface.Loc.resolve]; no_panic
   | _, .index _ b i => by
-    have hb := SPath.resolve_noPanic σ b
-    have hi := Val.eval_noPanic σ i
-    simp only [Loc.resolve]; no_panic
+    have hb := Surface.SPath.resolve_noPanic σ b
+    have hi := Surface.Val.eval_noPanic σ i
+    simp only [Surface.Loc.resolve]; no_panic
 
-theorem MPath.mval_noPanic (σ : State) : {T : Ty} → (p : MPath C T) → NoPanic (p.mval σ)
-  | _, .var x _ => by simp only [MPath.mval]; no_panic
-  | _, .loc l => by simp only [MPath.mval]; exact MLoc.read_noPanic σ l
+theorem Surface.MPath.mval_noPanic (σ : State) : {T : Ty} → (p : Surface.MPath C T) → NoPanic (p.mval σ)
+  | _, .var x _ => by simp only [Surface.MPath.mval]; no_panic
+  | _, .loc l => by simp only [Surface.MPath.mval]; exact Surface.MLoc.read_noPanic σ l
 
-theorem MLoc.read_noPanic (σ : State) : {T : Ty} → (l : MLoc C T) → NoPanic (l.read σ)
+theorem Surface.MLoc.read_noPanic (σ : State) : {T : Ty} → (l : Surface.MLoc C T) → NoPanic (l.read σ)
   | _, .field b f _ => by
-    have hb := MPath.mval_noPanic σ b
-    simp only [MLoc.read]; no_panic
+    have hb := Surface.MPath.mval_noPanic σ b
+    simp only [Surface.MLoc.read]; no_panic
   | _, .index _ b i => by
-    have hb := MPath.mval_noPanic σ b
-    have hi := Val.eval_noPanic σ i
-    simp only [MLoc.read]; no_panic
+    have hb := Surface.MPath.mval_noPanic σ b
+    have hi := Surface.Val.eval_noPanic σ i
+    simp only [Surface.MLoc.read]; no_panic
 
-theorem Val.eval_noPanic (σ : State) : {p : PrimTy} → (v : Val C p) → NoPanic (v.eval σ)
-  | _, .simple s => by simp only [Val.eval, ne_eq, Simple.eval_noPanic, not_false_eq_true]
+theorem Surface.Val.eval_noPanic (σ : State) : {p : PrimTy} → (v : Surface.Val C p) → NoPanic (v.eval σ)
+  | _, .simple s => by simp only [Surface.Val.eval, ne_eq, Surface.Simple.eval_noPanic, not_false_eq_true]
   | _, .read l => by
-    have hl := Loc.resolve_noPanic σ l
-    simp only [Val.eval]; no_panic
+    have hl := Surface.Loc.resolve_noPanic σ l
+    simp only [Surface.Val.eval]; no_panic
   | _, .binop _ _ _ a b => by
-    have ha := Val.eval_noPanic σ a
-    have hb := Val.eval_noPanic σ b
-    simp only [Val.eval]
+    have ha := Surface.Val.eval_noPanic σ a
+    have hb := Surface.Val.eval_noPanic σ b
+    simp only [Surface.Val.eval]
     exact NoPanic.bind ha fun _ _ => evalBinop_noPanic _ _ _ hb
   | _, .unop _ _ _ a => by
-    have ha := Val.eval_noPanic σ a
-    simp only [Val.eval]; no_panic
+    have ha := Surface.Val.eval_noPanic σ a
+    simp only [Surface.Val.eval]; no_panic
   | _, .ternary c a b => by
-    have hc := Val.eval_noPanic σ c
-    have ha := Val.eval_noPanic σ a
-    have hb := Val.eval_noPanic σ b
-    simp only [Val.eval]
+    have hc := Surface.Val.eval_noPanic σ c
+    have ha := Surface.Val.eval_noPanic σ a
+    have hb := Surface.Val.eval_noPanic σ b
+    simp only [Surface.Val.eval]
     exact NoPanic.bind hc fun _ _ => pickBranch_noPanic _ ha hb
   | _, .readMem l => by
-    have hl := MLoc.read_noPanic σ l
-    simp only [Val.eval]; no_panic
+    have hl := Surface.MLoc.read_noPanic σ l
+    simp only [Surface.Val.eval]; no_panic
   | _, .len b _ => by
-    have hb := SPath.resolve_noPanic σ b
-    simp only [Val.eval]; no_panic
+    have hb := Surface.SPath.resolve_noPanic σ b
+    simp only [Surface.Val.eval]; no_panic
   | _, .mlen b _ => by
-    have hb := MPath.mval_noPanic σ b
-    simp only [Val.eval]; no_panic
+    have hb := Surface.MPath.mval_noPanic σ b
+    simp only [Surface.Val.eval]; no_panic
 end
 
-attribute [no_panic_simp] SPath.resolve_noPanic Loc.resolve_noPanic MPath.mval_noPanic
-  MLoc.read_noPanic Val.eval_noPanic
+attribute [no_panic_simp] Surface.SPath.resolve_noPanic Surface.Loc.resolve_noPanic Surface.MPath.mval_noPanic
+  Surface.MLoc.read_noPanic Surface.Val.eval_noPanic
 
 @[no_panic_simp]
-theorem Src.value_noPanic (σ : State) {T : Ty} (r : Src C T) : NoPanic (r.value σ) := by
-  cases r <;> simp only [Src.value] <;> no_panic
+theorem Surface.Src.value_noPanic (σ : State) {T : Ty} (r : Surface.Src C T) : NoPanic (r.value σ) := by
+  cases r <;> simp only [Surface.Src.value] <;> no_panic
 
 @[no_panic_simp]
-theorem MSrc.mval_noPanic (σ : State) {T : Ty} (r : MSrc C T) : NoPanic (r.mval σ) := by
-  cases r <;> simp only [MSrc.mval] <;> no_panic
+theorem Surface.MSrc.mval_noPanic (σ : State) {T : Ty} (r : Surface.MSrc C T) : NoPanic (r.mval σ) := by
+  cases r <;> simp only [Surface.MSrc.mval] <;> no_panic
 
 @[no_panic_simp]
-theorem MLoc.addr_noPanic (σ : State) {T : Ty} (l : MLoc C T) : NoPanic (l.addr σ) := by
-  cases l <;> simp only [MLoc.addr] <;> no_panic
+theorem Surface.MLoc.addr_noPanic (σ : State) {T : Ty} (l : Surface.MLoc C T) : NoPanic (l.addr σ) := by
+  cases l <;> simp only [Surface.MLoc.addr] <;> no_panic
 
 theorem NoPanic.mapM {α β : Type} {f : α → Res β} (hf : ∀ a, NoPanic (f a)) :
     (l : List α) → NoPanic (l.mapM f)
@@ -360,10 +360,10 @@ theorem NoPanic.mapM {α β : Type} {f : α → Res β} (hf : ∀ a, NoPanic (f 
     exact NoPanic.bind (hf a) fun _ _ => NoPanic.bind (NoPanic.mapM hf l) fun _ _ => by simp only [
         ne_eq, NoPanic.pure, not_false_eq_true]
 
-@[no_panic_simp] theorem ExtCall.key_noPanic (σ : State) (c : ExtCall C) : NoPanic (c.key σ) := by
+@[no_panic_simp] theorem Surface.ExtCall.key_noPanic (σ : State) (c : Surface.ExtCall C) : NoPanic (c.key σ) := by
   have hm : NoPanic (c.args.mapM fun a => a.2.eval σ) :=
-    NoPanic.mapM (fun _ => Simple.eval_noPanic σ _) _
-  unfold ExtCall.key; no_panic
+    NoPanic.mapM (fun _ => Surface.Simple.eval_noPanic σ _) _
+  unfold Surface.ExtCall.key; no_panic
 
 @[no_panic_simp]
 theorem bindData_noPanic : (xs : List (PrimTy × Var)) → (vs : List Value) → (σ : State) →
@@ -402,21 +402,21 @@ theorem bindData_noPanic : (xs : List (PrimTy × Var)) → (vs : List Value) →
 theorem memClear_noPanic (σ : State) (a : Addr) (T : Ty) : NoPanic (memClear σ a T) := by
   cases T <;> simp only [memClear] <;> no_panic
 
-@[no_panic_simp] theorem OpLoc.store_noPanic (σ : State) (op : BinOp) {p : PrimTy} (l : OpLoc C p)
+@[no_panic_simp] theorem Surface.OpLoc.store_noPanic (σ : State) (op : BinOp) {p : PrimTy} (l : Surface.OpLoc C p)
     (v : Value) : NoPanic (l.store σ op v) := by
-  cases l <;> simp only [OpLoc.store, opLocal, opStore, opMem] <;> no_panic
+  cases l <;> simp only [Surface.OpLoc.store, opLocal, opStore, opMem] <;> no_panic
 
-@[no_panic_simp] theorem OpLoc.bump_noPanic (σ : State) (op : IncDec) {p : PrimTy} (l : OpLoc C p) :
+@[no_panic_simp] theorem Surface.OpLoc.bump_noPanic (σ : State) (op : IncDec) {p : PrimTy} (l : Surface.OpLoc C p) :
     NoPanic (l.bump σ op) := by
-  cases l <;> simp only [OpLoc.bump, bumpLocal, bumpStore, bumpMem] <;> no_panic
+  cases l <;> simp only [Surface.OpLoc.bump, bumpLocal, bumpStore, bumpMem] <;> no_panic
 
-@[no_panic_simp] theorem MLoc.write_noPanic (σ : State) (mv : MVal) {T : Ty} (l : MLoc C T) :
+@[no_panic_simp] theorem Surface.MLoc.write_noPanic (σ : State) (mv : MVal) {T : Ty} (l : Surface.MLoc C T) :
     NoPanic (l.write σ mv) := by
-  cases l <;> simp only [MLoc.write, memWriteField, memWriteIndex] <;> no_panic
+  cases l <;> simp only [Surface.MLoc.write, memWriteField, memWriteIndex] <;> no_panic
 
 @[no_panic_simp]
-theorem Src.pushVal_noPanic (σ : State) {T : Ty} (o : Option (Src C T)) (slot : SVal) :
-    NoPanic (Src.pushVal σ o slot) := by
-  cases o <;> simp only [Src.pushVal] <;> no_panic
+theorem Surface.Src.pushVal_noPanic (σ : State) {T : Ty} (o : Option (Surface.Src C T)) (slot : SVal) :
+    NoPanic (Surface.Src.pushVal σ o slot) := by
+  cases o <;> simp only [Surface.Src.pushVal] <;> no_panic
 
 end Solidity

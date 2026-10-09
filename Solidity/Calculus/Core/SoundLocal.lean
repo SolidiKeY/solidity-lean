@@ -17,7 +17,7 @@ variable {C : Contract}
 
 section Local
 
-variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
+variable {Γ : Ctx} {m : Modality} (σ : EState C Γ)
 
 /-! ### A local assigned -/
 
@@ -27,12 +27,12 @@ theorem Env.set_set {Γ : Ctx} {t : LTy} (i : Idx Γ t) (v w : t.Denote C) (e : 
   | here => rfl
   | there i ih => exact congrArg (e.1, ·) (ih v w e.2)
 
-theorem State.setLocal_setLocal {t : LTy} (i : Idx Γ t) (v w : t.Denote C) :
+theorem EState.setLocal_setLocal {t : LTy} (i : Idx Γ t) (v w : t.Denote C) :
     (σ.setLocal i v).setLocal i w = σ.setLocal i w := by
   show σ.withEnv (Env.set i w (Env.set i v σ.env)) = σ.withEnv (Env.set i w σ.env)
   rw [Env.set_set]
 
-theorem State.get_setLocal {t : LTy} (i : Idx Γ t) (v : t.Denote C) :
+theorem EState.get_setLocal {t : LTy} (i : Idx Γ t) (v : t.Denote C) :
     (Env.get i (σ.setLocal i v).env : t.Denote C) = v := Env.get_set i v σ.env
 
 theorem evalBinop_and_true (bv : Value) :

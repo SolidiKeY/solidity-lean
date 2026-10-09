@@ -5,7 +5,7 @@ import Solidity.Calculus.Core.Quote
 /-!
 # Obligations and specifications, scoped
 
-`Calculus/Problem.lean`'s obligations and `Calculus/Spec.lean`'s
+`Calculus/Problem.lean`'s obligations and `Calculus/SurfaceSpec.lean`'s
 specifications as scoped formulas, `Core.Fml C []` (`docs/intrinsic.md`,
 M6b): the program is read in the context of the parameters, so every local
 the obligation reads is bound in it.
@@ -77,14 +77,14 @@ def Problem.resolve (ctor : Bool) (m : Modality) (xs : List (PrimTy × Var))
 /-- Today's obligation (`Solidity.Problem.fml`, `Solidity.Problem.ctorFml`)
 scoped: its parts read back (`Problem.parts`), its program resolved. -/
 def Problem.ofLegacy (φ : Solidity.Surface.Fml C) : Except String (Fml C []) :=
-  match Solidity.Problem.parts φ with
+  match Surface.Problem.parts φ with
   | some (xs, ctor, m, P) => Problem.resolve ctor m xs P
   | none => .error "not an obligation `∀x̄. wt(storage) → [ P ] true` or a deployment's"
 
 /-- A constructor's obligation with no specification, scoped
 (`Solidity.Problem.ctor`). -/
 def Problem.ctor (C : Contract) (m : Modality) : Except String (Fml C []) := do
-  Problem.ofLegacy (← Solidity.Problem.ctor C m)
+  Problem.ofLegacy (← Surface.Problem.ctor C m)
 
 /-! ## Specifications -/
 
@@ -100,7 +100,7 @@ def specParams (C : Contract) (f : String) : Except String (List (PrimTy × Var)
 parameters' context and closed by hidden binders; `old` and `oldNet` are
 declared by its update, at `LTy.old` and `LTy.oldNet`. -/
 def specObligation (C : Contract) (f : String) : Except String (Fml C []) := do
-  let φ ← Solidity.specObligation C f
+  let φ ← Surface.specObligation C f
   let Γ := paramsN (← specParams C f)
   pure (Fml.closeN false Γ (← Fml.resolveN (fun _ => none) Γ φ))
 

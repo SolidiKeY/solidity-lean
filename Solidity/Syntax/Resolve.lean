@@ -39,7 +39,7 @@ variable {C : Contract}
 
 section Erase
 
-def Simple.erase {Γ : Ctx} {p : PrimTy} (ns : List Var) : Simple C Γ p → Solidity.Simple C p
+def Simple.erase {Γ : Ctx} {p : PrimTy} (ns : List Var) : Simple C Γ p → Surface.Simple C p
   | .lit n h => .lit n h
   | .bool b => .bool b
   | .local i => .local (i.name ns)
@@ -47,24 +47,24 @@ def Simple.erase {Γ : Ctx} {p : PrimTy} (ns : List Var) : Simple C Γ p → Sol
 
 mutual
 
-def SPath.erase {Γ : Ctx} (ns : List Var) {T : Ty} : SPath C Γ T → Solidity.SPath C T
+def SPath.erase {Γ : Ctx} (ns : List Var) {T : Ty} : SPath C Γ T → Surface.SPath C T
   | .alias i => .alias (i.name ns)
   | .loc l => .loc (l.erase ns)
 
-def Loc.erase {Γ : Ctx} (ns : List Var) {T : Ty} : Loc C Γ T → Solidity.Loc C T
+def Loc.erase {Γ : Ctx} (ns : List Var) {T : Ty} : Loc C Γ T → Surface.Loc C T
   | .root r h => .root r h
   | .field b f h => .field (b.erase ns) f h
   | .index it b i => .index it (b.erase ns) (i.erase ns)
 
-def MPath.erase {Γ : Ctx} (ns : List Var) {T : Ty} : MPath C Γ T → Solidity.MPath C T
+def MPath.erase {Γ : Ctx} (ns : List Var) {T : Ty} : MPath C Γ T → Surface.MPath C T
   | .var i hm => .var (i.name ns) hm
   | .loc l => .loc (l.erase ns)
 
-def MLoc.erase {Γ : Ctx} (ns : List Var) {T : Ty} : MLoc C Γ T → Solidity.MLoc C T
+def MLoc.erase {Γ : Ctx} (ns : List Var) {T : Ty} : MLoc C Γ T → Surface.MLoc C T
   | .field b f h => .field (b.erase ns) f h
   | .index a b i => .index a (b.erase ns) (i.erase ns)
 
-def Val.erase {Γ : Ctx} (ns : List Var) {p : PrimTy} : Val C Γ p → Solidity.Val C p
+def Val.erase {Γ : Ctx} (ns : List Var) {p : PrimTy} : Val C Γ p → Surface.Val C p
   | .simple s => .simple (s.erase ns)
   | .read l => .read (l.erase ns)
   | .binop op h hq a b => .binop op h hq (a.erase ns) (b.erase ns)
@@ -76,28 +76,28 @@ def Val.erase {Γ : Ctx} (ns : List Var) {p : PrimTy} : Val C Γ p → Solidity.
 
 end
 
-def Src.erase {Γ : Ctx} (ns : List Var) {T : Ty} : Src C Γ T → Solidity.Src C T
+def Src.erase {Γ : Ctx} (ns : List Var) {T : Ty} : Src C Γ T → Surface.Src C T
   | .val v => .val (v.erase ns)
   | .copy p h => .copy (p.erase ns) h
 
-def ARhs.erase {Γ : Ctx} (ns : List Var) {R : RefTy} : ARhs C Γ R → Solidity.ARhs C R
+def ARhs.erase {Γ : Ctx} (ns : List Var) {R : RefTy} : ARhs C Γ R → Surface.ARhs C R
   | .path p => .path (p.erase ns)
   | .push b hd => .push (b.erase ns) hd
 
-def MRhs.erase {Γ : Ctx} (ns : List Var) {R : RefTy} : MRhs C Γ R → Solidity.MRhs C R
+def MRhs.erase {Γ : Ctx} (ns : List Var) {R : RefTy} : MRhs C Γ R → Surface.MRhs C R
   | .alias p => .alias (p.erase ns)
   | .copy p hm => .copy (p.erase ns) hm
   | .newArr n h => .newArr (n.erase ns) h
 
-def NewLhs.erase {Γ : Ctx} (ns : List Var) {R : RefTy} : NewLhs C Γ R → Solidity.NewLhs C R
+def NewLhs.erase {Γ : Ctx} (ns : List Var) {R : RefTy} : NewLhs C Γ R → Surface.NewLhs C R
   | .store l => .store (l.erase ns)
   | .mem l => .mem (l.erase ns)
 
-def MSrc.erase {Γ : Ctx} (ns : List Var) {T : Ty} : MSrc C Γ T → Solidity.MSrc C T
+def MSrc.erase {Γ : Ctx} (ns : List Var) {T : Ty} : MSrc C Γ T → Surface.MSrc C T
   | .val v => .val (v.erase ns)
   | .ref p => .ref (p.erase ns)
 
-def OpLoc.erase {Γ : Ctx} (ns : List Var) {p : PrimTy} : OpLoc C Γ p → Solidity.OpLoc C p
+def OpLoc.erase {Γ : Ctx} (ns : List Var) {p : PrimTy} : OpLoc C Γ p → Surface.OpLoc C p
   | .local i => .local (i.name ns)
   | .root r h => .root r h
   | .field b f h => .field (b.erase ns) f h
@@ -118,13 +118,13 @@ theorem OpLoc.recvSimple_erase {Γ : Ctx} (ns : List Var) {p : PrimTy} (l : OpLo
   cases l <;> first | rfl | exact SPath.isSimple_erase ns _ | exact MPath.isSimple_erase ns _
 
 /-- An external call's argument, erased. -/
-def ExtArg.erase {Γ : Ctx} (ns : List Var) (a : ExtArg C Γ) : Solidity.ExtArg C :=
+def ExtArg.erase {Γ : Ctx} (ns : List Var) (a : ExtArg C Γ) : Surface.ExtArg C :=
   ⟨a.1, a.2.erase ns⟩
 
-def ExtCall.erase {Γ : Ctx} (ns : List Var) (c : ExtCall C Γ) : Solidity.ExtCall C :=
+def ExtCall.erase {Γ : Ctx} (ns : List Var) (c : ExtCall C Γ) : Surface.ExtCall C :=
   ⟨c.addr.erase ns, c.fn, c.args.map (ExtArg.erase ns)⟩
 
-def LoopAnn.erase {Γ : Ctx} (ns : List Var) : LoopAnn C Γ → Solidity.LoopAnn C
+def LoopAnn.erase {Γ : Ctx} (ns : List Var) : LoopAnn C Γ → Surface.LoopAnn C
   | .unwind k => .unwind k
   | .inv I dec => .inv (I.erase ns) (dec.map (Val.erase ns))
 
@@ -135,7 +135,7 @@ def Args.erase {Γ : Ctx} (ns : List Var) : {ps : Ctx} → Args C Γ ps → List
 
 /-- What the call returns, as `Syntax.lean` writes it: a memory return is
 `CallRet.none`, its return variable declared by the body (`CallRet.pre`). -/
-def CallRet.erase {Γ : Ctx} (ns : List Var) : {rs Γ' : Ctx} → CallRet Γ rs Γ' → Solidity.CallRet
+def CallRet.erase {Γ : Ctx} (ns : List Var) : {rs Γ' : Ctx} → CallRet Γ rs Γ' → Surface.CallRet
   | _, _, .none => .none
   | _, _, .val p r res => .val p r (res.map (Idx.name ns))
   | _, _, .rets bs => .rets bs.toList
@@ -420,7 +420,7 @@ def resolveList {α β : Type} (er : α → β) (f : (b : β) → Except String 
     pure ⟨a :: l', by rw [List.map_cons, h, h']⟩
 
 def resolveSimple (Γ : NCtx) {p : PrimTy} :
-    (u : Solidity.Simple C p) → Except String {s : Simple C Γ.ctx p // s.erase Γ.names = u}
+    (u : Surface.Simple C p) → Except String {s : Simple C Γ.ctx p // s.erase Γ.names = u}
   | .lit n h => pure ⟨.lit n h, rfl⟩
   | .bool b => pure ⟨.bool b, rfl⟩
   | .local x => do
@@ -431,7 +431,7 @@ def resolveSimple (Γ : NCtx) {p : PrimTy} :
 mutual
 
 def resolveSPath (Γ : NCtx) {T : Ty} :
-    (u : Solidity.SPath C T) → Except String {s : SPath C Γ.ctx T // s.erase Γ.names = u}
+    (u : Surface.SPath C T) → Except String {s : SPath C Γ.ctx T // s.erase Γ.names = u}
   | .alias (R := R) x => do
     let ⟨i, h⟩ ← Γ.find x (.alias R)
     pure ⟨.alias i, by subst h; rfl⟩
@@ -440,7 +440,7 @@ def resolveSPath (Γ : NCtx) {T : Ty} :
     pure ⟨.loc l', by subst h; rfl⟩
 
 def resolveLoc (Γ : NCtx) {T : Ty} :
-    (u : Solidity.Loc C T) → Except String {s : Loc C Γ.ctx T // s.erase Γ.names = u}
+    (u : Surface.Loc C T) → Except String {s : Loc C Γ.ctx T // s.erase Γ.names = u}
   | .root r h => pure ⟨.root r h, rfl⟩
   | .field b f h => do
     let ⟨b', hb⟩ ← resolveSPath Γ b
@@ -451,7 +451,7 @@ def resolveLoc (Γ : NCtx) {T : Ty} :
     pure ⟨.index it b' i', by subst hb hi; rfl⟩
 
 def resolveMPath (Γ : NCtx) {T : Ty} :
-    (u : Solidity.MPath C T) → Except String {s : MPath C Γ.ctx T // s.erase Γ.names = u}
+    (u : Surface.MPath C T) → Except String {s : MPath C Γ.ctx T // s.erase Γ.names = u}
   | .var (R := R) x hm => do
     let ⟨i, h⟩ ← Γ.find x (.mem R)
     pure ⟨.var i hm, by subst h; rfl⟩
@@ -460,7 +460,7 @@ def resolveMPath (Γ : NCtx) {T : Ty} :
     pure ⟨.loc l', by subst h; rfl⟩
 
 def resolveMLoc (Γ : NCtx) {T : Ty} :
-    (u : Solidity.MLoc C T) → Except String {s : MLoc C Γ.ctx T // s.erase Γ.names = u}
+    (u : Surface.MLoc C T) → Except String {s : MLoc C Γ.ctx T // s.erase Γ.names = u}
   | .field b f h => do
     let ⟨b', hb⟩ ← resolveMPath Γ b
     pure ⟨.field b' f h, by subst hb; rfl⟩
@@ -470,7 +470,7 @@ def resolveMLoc (Γ : NCtx) {T : Ty} :
     pure ⟨.index a b' i', by subst hb hi; rfl⟩
 
 def resolveVal (Γ : NCtx) {p : PrimTy} :
-    (u : Solidity.Val C p) → Except String {s : Val C Γ.ctx p // s.erase Γ.names = u}
+    (u : Surface.Val C p) → Except String {s : Val C Γ.ctx p // s.erase Γ.names = u}
   | .simple s => do
     let ⟨s', h⟩ ← resolveSimple Γ s
     pure ⟨.simple s', by subst h; rfl⟩
@@ -502,7 +502,7 @@ def resolveVal (Γ : NCtx) {p : PrimTy} :
 end
 
 def resolveSrc (Γ : NCtx) {T : Ty} :
-    (u : Solidity.Src C T) → Except String {s : Src C Γ.ctx T // s.erase Γ.names = u}
+    (u : Surface.Src C T) → Except String {s : Src C Γ.ctx T // s.erase Γ.names = u}
   | .val v => do
     let ⟨v', h⟩ ← resolveVal Γ v
     pure ⟨.val v', by subst h; rfl⟩
@@ -511,7 +511,7 @@ def resolveSrc (Γ : NCtx) {T : Ty} :
     pure ⟨.copy p' hm, by subst h; rfl⟩
 
 def resolveARhs (Γ : NCtx) {R : RefTy} :
-    (u : Solidity.ARhs C R) → Except String {s : ARhs C Γ.ctx R // s.erase Γ.names = u}
+    (u : Surface.ARhs C R) → Except String {s : ARhs C Γ.ctx R // s.erase Γ.names = u}
   | .path p => do
     let ⟨p', h⟩ ← resolveSPath Γ p
     pure ⟨.path p', by subst h; rfl⟩
@@ -520,7 +520,7 @@ def resolveARhs (Γ : NCtx) {R : RefTy} :
     pure ⟨.push b' hd, by subst h; rfl⟩
 
 def resolveMRhs (Γ : NCtx) {R : RefTy} :
-    (u : Solidity.MRhs C R) → Except String {s : MRhs C Γ.ctx R // s.erase Γ.names = u}
+    (u : Surface.MRhs C R) → Except String {s : MRhs C Γ.ctx R // s.erase Γ.names = u}
   | .alias p => do
     let ⟨p', h⟩ ← resolveMPath Γ p
     pure ⟨.alias p', by subst h; rfl⟩
@@ -532,7 +532,7 @@ def resolveMRhs (Γ : NCtx) {R : RefTy} :
     pure ⟨.newArr n' hn, by subst h; rfl⟩
 
 def resolveNewLhs (Γ : NCtx) {R : RefTy} :
-    (u : Solidity.NewLhs C R) → Except String {s : NewLhs C Γ.ctx R // s.erase Γ.names = u}
+    (u : Surface.NewLhs C R) → Except String {s : NewLhs C Γ.ctx R // s.erase Γ.names = u}
   | .store l => do
     let ⟨l', h⟩ ← resolveLoc Γ l
     pure ⟨.store l', by subst h; rfl⟩
@@ -541,7 +541,7 @@ def resolveNewLhs (Γ : NCtx) {R : RefTy} :
     pure ⟨.mem l', by subst h; rfl⟩
 
 def resolveMSrc (Γ : NCtx) {T : Ty} :
-    (u : Solidity.MSrc C T) → Except String {s : MSrc C Γ.ctx T // s.erase Γ.names = u}
+    (u : Surface.MSrc C T) → Except String {s : MSrc C Γ.ctx T // s.erase Γ.names = u}
   | .val v => do
     let ⟨v', h⟩ ← resolveVal Γ v
     pure ⟨.val v', by subst h; rfl⟩
@@ -550,7 +550,7 @@ def resolveMSrc (Γ : NCtx) {T : Ty} :
     pure ⟨.ref p', by subst h; rfl⟩
 
 def resolveOpLoc (Γ : NCtx) {p : PrimTy} :
-    (u : Solidity.OpLoc C p) → Except String {s : OpLoc C Γ.ctx p // s.erase Γ.names = u}
+    (u : Surface.OpLoc C p) → Except String {s : OpLoc C Γ.ctx p // s.erase Γ.names = u}
   | .local x => do
     let ⟨i, h⟩ ← Γ.find x (.val p)
     pure ⟨.local i, by subst h; rfl⟩
@@ -570,17 +570,17 @@ def resolveOpLoc (Γ : NCtx) {p : PrimTy} :
     let ⟨i', hi⟩ ← resolveSimple Γ i
     pure ⟨.mindex a b' i', by subst hb hi; rfl⟩
 
-def resolveExtCall (Γ : NCtx) (u : Solidity.ExtCall C) :
+def resolveExtCall (Γ : NCtx) (u : Surface.ExtCall C) :
     Except String {c : ExtCall C Γ.ctx // c.erase Γ.names = u} := do
   let ⟨a, ha⟩ ← resolveSimple Γ u.addr
   let ⟨as, has⟩ ← resolveList (ExtArg.erase Γ.names)
-    (fun (b : Solidity.ExtArg C) => do
+    (fun (b : Surface.ExtArg C) => do
       let ⟨s, h⟩ ← resolveSimple Γ b.2
       pure ⟨⟨b.1, s⟩, by simp only [ExtArg.erase, h]⟩) u.args
   pure ⟨⟨a, u.fn, as⟩, by simp only [ExtCall.erase, ha, has]⟩
 
 def resolveLoopAnn (Γ : NCtx) :
-    (u : Solidity.LoopAnn C) → Except String {a : LoopAnn C Γ.ctx // a.erase Γ.names = u}
+    (u : Surface.LoopAnn C) → Except String {a : LoopAnn C Γ.ctx // a.erase Γ.names = u}
   | .unwind k => pure ⟨.unwind k, rfl⟩
   | .inv I dec => do
     let ⟨I', hI⟩ ← resolveVal Γ I

@@ -11,8 +11,8 @@ order of the source; the replays are what `#solkey_derive? … pending`
 `wt(storage)` premise aside (`Proves.close_dropWt`).
 -/
 
-open Solidity Proves
-open scoped Solidity.Core.Surface
+open Solidity NFml.Proves
+open scoped Core.Scoped
 
 theorem Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.proved : ⊢ Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.problem := by
   sol_prove
@@ -133,6 +133,6 @@ theorem Solkey.TestSuite.testStorageMapStructCopy.proved : ⊢ Solkey.TestSuite.
 
 theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
+  refine NFml.Proves.close_dropWt ?_
   sol_symex
   sol_close

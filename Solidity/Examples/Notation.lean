@@ -1,4 +1,4 @@
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Derive
 import Solidity.Tools.Inspect
@@ -186,7 +186,7 @@ run_meta do
   Lean.logInfo m!"{e} : {← Lean.Meta.inferType e}"
 
 section Scoped
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## A formula prints as it reads
 

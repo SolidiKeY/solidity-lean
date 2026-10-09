@@ -33,7 +33,7 @@ Legend (a row with several taclets or constructors lists them in one cell):
   `unclaimedTaclets`.
 - **Lean only** — a `LeanTaclet`: no taclet behind it.
 - **⊢ rule** — no `Taclet` constructor: a `Proves` constructor or a derived
-  theorem (`Calculus/Logic.lean`, `Calculus/Core/Symex.lean`) is the rule.  A
+  theorem (`Calculus/NFmlLogic.lean`, `Calculus/Core/Symex.lean`) is the rule.  A
   `solidityProgramRules.key` taclet is listed in `RuleShapes.unclaimedTaclets`;
   a row from another `.key` file names that file.
 
@@ -337,17 +337,17 @@ gives their shapes and the stages that port them.
 
 An update is a term (`Upd C`, a list of `UpdElem`s read against the
 pre-state), so KeY's update rules are rules here too: `UpdRule` in
-`Calculus/UpdateRules.lean`, each an equivalence over `holds`, plus box forms;
-on sequents they are `Proves` constructors (`Calculus/Logic.lean`), usable with
+`Calculus/NFmlUpdateRules.lean`, each an equivalence over `holds`, plus box forms;
+on sequents they are `Proves` constructors (`Calculus/NFmlLogic.lean`), usable with
 the program still to run. A side condition KeY's rule lacks exists because a
-term here can halt and KeY's cannot (`Calculus/UpdateRules.lean`, "What halting
+term here can halt and KeY's cannot (`Calculus/NFmlUpdateRules.lean`, "What halting
 changes").
 
 | KeY rule | Lean | Status | Notes |
 | --- | --- | --- | --- |
 | `sequentialToParallel1-3` | `UpdRule.sequentialToParallel`, `Proves.merge` (also `Proves.sequentialToParallel`); + under a branch (`LineRw.mergeIn`, `Calculus/ChainBranches.lean`) | done | `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` for `u` of locals (`Upd.envOnly`); in a chain also at the first spine under `∧`, `→`, `¬`.  **Scoped calculus** (`Core.Proves.merge`, `Calculus/Core/Proves.lean`; read as `refine merge rfl ?_` and `Proves.mergeStorage`, `core_merge`): one rule for both rows, `{U}{V}φ ⇝ {W}φ` with `W = Upd.seqPar U V` (`Calculus/Core/Graft.lean`): `V`'s locals read as `U` leaves them (`Upd.held`), the rest as in the row below.  **Lean only:** it merges past the hidden binders between the two updates (`Hyps.binds`), the earlier update moved under them (`Upd.liftBinds?`, scope ends included), which KeY, with no binders, does not need |
 | `sequentialToParallel1-3` over a storage write | `Proves.mergeStorage` (also `Proves.sequentialToParallelStorage`) | done | `{storage := s}{V}φ ⇝ {storage := s ‖ {storage := s}V}φ` (`Upd.withSt`), for a `V` whose every storage read is a `storage` term (`stExplicit`, `Upd.mergeStorage_holds`).  **Scoped** (`Core.Proves.merge`, the row above): no `stExplicit` premise; `V`'s `storage` is replaced by the storage `U` last wrote (`Upd.lastSt`), where `U` writes no other global part, sound because a storage term changes only the storage of the state it is read in (`Tm.eval_st_glob`); any other merge reading the global part needs `U` to write none (`Upd.envOnly`), else it is refused |
-| `sequentialToParallel1-3`, read backwards | `Fml.seqUpd` (`Calculus/Derive.lean`) | Lean only | before the closer runs, a parallel update whose last element binds a local the others neither read nor write is split into that element first and the others after it (`{ r := x + 1 }{ x := x + 1 }`), which `Fml.toL` reads; a push with its alias (`pushAlias?`) is split into the storage write and the alias, and an allocation's pair is kept whole (`memAlloc?`) |
+| `sequentialToParallel1-3`, read backwards | `Fml.seqUpd` (`Calculus/NFmlDerive.lean`) | Lean only | before the closer runs, a parallel update whose last element binds a local the others neither read nor write is split into that element first and the others after it (`{ r := x + 1 }{ x := x + 1 }`), which `Fml.toL` reads; a push with its alias (`pushAlias?`) is split into the storage write and the alias, and an allocation's pair is kept whole (`memAlloc?`) |
 | — (KeY keeps an update on its formula) | `Proves.updIntro` | arch | `⟹ {U} φ` becomes `{U} ⟹ φ`: the update joins the context, where every rule reads it, the sequent KeY writes with the update on the formula. A specification's `{ old := storage }` enters the derivation so |
 | `applyOnElementary`, `applyOnParallel` | `UpdElem.subst`, `Upd.subst` | functions | `{u}` pushed into right-hand sides |
 | `applyOnPV`, `applyOnPVLastInParallel`, `applyOnDifferentPV`, `applyOnDifferentPVLastInParallel` | `Fml.subst` (`Upd.lastWrite`) | functions | the last write of a local wins; an unwritten local is kept |
@@ -380,7 +380,7 @@ diamond (`Hyps.boxOnly`). A program comparison produces `Fml.eqD a b` —
 | — | `Proves.definedWritten` | Lean only | `defined(x)` behind a box update whose last binder of `x` is `x := t`: what `applyOnRigidBox` forgets |
 | — | `Core.Proves.definedWritten` (`Calculus/Core/UpdateRules.lean`) | Lean only (deviation from the row above) | `defined(x)` for any `.val` local, behind a context with no diamond (`Hyps.boxOnly`), with **no update asked**: a typed local always holds a value of its type, where today's state may not bind it |
 | — | `Proves.definedLit`; `Fml.concrete` (`defined(v) ⇝ true`) | Lean only | a literal is defined |
-| any theory taclet on a sequent | `Proves.rewrite` (`Calculus/Logic.lean`), `rw [r]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a term taclet `r : TermTaclet t t'` rewrites every total equation of the sequent (`Fml.rwEq`); `TermTaclet.sound` proves each rule once, from its Theory lemma.  Scoped: `Core.Proves.rewrite` (`core_rw`), a closed side of an equation (`Fml.rwEqC`), derived from `Core.Proves.closeHolds` |
+| any theory taclet on a sequent | `Proves.rewrite` (`Calculus/NFmlLogic.lean`), `rw [r]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a term taclet `r : TermTaclet t t'` rewrites every total equation of the sequent (`Fml.rwEq`); `TermTaclet.sound` proves each rule once, from its Theory lemma.  Scoped: `Core.Proves.rewrite` (`core_rw`), a closed side of an equation (`Fml.rwEqC`), derived from `Core.Proves.closeHolds` |
 | the same, inside an update | `Proves.updRw`, `sol_rw` | done | an update's right-hand side runs in the interpreter, so the rewrite asks `Term.EvalRefines t t'`, which a Theory equation onto a literal gives (`Term.EvalRefines.of_theq`); box updates only.  Scoped: `Core.Proves.updRw` (`core_rw`), on the **last** box update of the context only, its closed occurrences of `t` read on their erasure (`Upd.rwC`, `holds_upd_rwC`) |
 
 ### The closer's clauses (`Calculus/Closer.lean`)
@@ -567,7 +567,7 @@ them as KeY's `\replacewith` updates do.
 | `defaultValueStruct` | `defaultValueStruct`, `defaultValueInt`, `defaultValueBool` | done: `defaultValue<[α]>` is `st mtSt`, the `Struct` default, read through the caller's cast |
 | `selectOnStore`, `selectOnEmptyStorage`, `findDefinitionEmpty` | same names | done |
 | `saveOnEmptyStorage` | same | done, with an `isEmpty(flds)` split upstream lacks (the collapsing leaf) |
-| `selectOnEmptyStorage`, `saveOnEmptyStorage` in the closer | `sol_close_mt` (`Calculus/Close.lean`) | Phase 1, Lean-only: `mtSt` evaluates to the roots at their defaults (`Close.STerm.eval_mtSt`), and the storage evaluators are unfolded over that list; no `LStor` clause yet, so `sol_prove` refuses `mtSt` (`Op0.inL`) |
+| `selectOnEmptyStorage`, `saveOnEmptyStorage` in the closer | `sol_close_mt` (`Calculus/NFmlClose.lean`) | Phase 1, Lean-only: `mtSt` evaluates to the roots at their defaults (`Close.STerm.eval_mtSt`), and the storage evaluators are unfolded over that list; no `LStor` clause yet, so `sol_prove` refuses `mtSt` (`Op0.inL`) |
 | `saveOnStoreCons` | same | done, likewise; `(Struct) v0` is `asStruct v0` |
 | `findDefinitionElement`, `findDefinitionMapElement`, `findDefinitionSize`, `findDefinitionMemberPrim`, `findDefinitionMemberValue` | `findDefinitionCons` | done: `atMap(i)` is `Seg.at i`, `size` is `Seg.field "length"` |
 | `findDefinitionMemberStruct`, `findDefinitionMemberCons` | `findDefinitionCons` | done **without the tag**: upstream wraps the member read in `typed(fieldShape(m), …)`, which is not modelled (below) |

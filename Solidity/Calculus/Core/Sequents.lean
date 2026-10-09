@@ -1,5 +1,5 @@
 import Solidity.Calculus.Hyp
-import Solidity.Calculus.Notation
+import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.Core.Surface
 import Solidity.Calculus.Core.Delab
 
@@ -113,7 +113,7 @@ macro_rules
   | `(tactic| show_sequent!{ $[$hs:dl_hyp],* $a:seq_arrow $φ:dl_fml }) =>
     `(tactic| show_sequent[InContract.contract]{ $[$hs],* $a $φ })
 
-namespace Surface
+namespace Scoped
 
 scoped macro_rules
   | `(tactic| show sequent!{ $[$hs:dl_hyp],* $a:seq_arrow $φ:dl_fml }) =>
@@ -121,6 +121,6 @@ scoped macro_rules
   | `(tactic| show sequent[ $c ]{ $[$hs:dl_hyp],* $a:seq_arrow $φ:dl_fml }) =>
     `(tactic| show_sequent[$c]{ $[$hs],* $a $φ })
 
-end Surface
+end Scoped
 
 end Solidity.Core

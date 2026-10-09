@@ -1,5 +1,5 @@
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
@@ -27,7 +27,7 @@ for every receiver and amount, is `Examples/Tactics/Payment.lean`'s.
 
 namespace Solidity.Examples.Chains.Payment
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 

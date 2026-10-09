@@ -58,7 +58,7 @@ section Lemmas
 variable {H : HeapTy}
 
 /-- A reference slot typed at a reference type is the store typing's claim. -/
-theorem MVal.hasTyH_ref {id : Nat} {R : RefTy} :
+theorem Semantics.MVal.hasTyH_ref {id : Nat} {R : RefTy} :
     MVal.hasTyH H (.ref id) (.ref R) = true ↔ lookupBy id H = some (.ref R) := by
   simp [MVal.hasTyH]
 
@@ -131,7 +131,7 @@ theorem ArrTy.arrElem {R : RefTy} {E : Ty} : ArrTy R E → R.arrElem? = some E
   | .dyn | .fixed => rfl
 
 /-- An object typed at an array type is an array of the element type. -/
-theorem MObj.hasTyH_arrElem {R : RefTy} {E : Ty} {obj : MObj} (hR : R.arrElem? = some E)
+theorem Semantics.MObj.hasTyH_arrElem {R : RefTy} {E : Ty} {obj : MObj} (hR : R.arrElem? = some E)
     (h : MObj.hasTyH H obj (.ref R) = true) :
     ∃ elems fx, obj = .array elems fx ∧ MObj.hasTyH.hasTyHElems H E elems = true := by
   cases R <;> simp only [RefTy.arrElem?, Option.some.injEq, reduceCtorEq] at hR <;> subst hR <;>
@@ -186,7 +186,7 @@ theorem HeapWellFormed.setObj' {s : State} {id : Nat} {obj : MObj}
   exact hwf i hi
 
 /-- A primitive slot read out is a stack value of the slot's type. -/
-theorem MVal.asValue_hasTy {mv : MVal} {ty : Ty} {v : Value}
+theorem Semantics.MVal.asValue_hasTy {mv : MVal} {ty : Ty} {v : Value}
     (h : MVal.hasTyH H mv ty = true) (hval : mv.asValue = .ok v) :
     (Value.toSVal v).hasTy ty = true := by
   cases mv with
@@ -198,19 +198,19 @@ theorem MVal.asValue_hasTy {mv : MVal} {ty : Ty} {v : Value}
   | ref id => exact nomatch hval
 
 /-- A typed stack value stored in memory is a typed slot. -/
-theorem Value.toMVal_hasTyH {v : Value} {ty : Ty}
+theorem Semantics.Value.toMVal_hasTyH {v : Value} {ty : Ty}
     (h : (Value.toSVal v).hasTy ty = true) : MVal.hasTyH H v.toMVal ty = true := by
   cases v <;> cases ty with
   | prim pt => cases pt <;> simp_all [Value.toSVal, SVal.hasTy, Value.toMVal, MVal.hasTyH]
   | ref r => simp [Value.toSVal, SVal.hasTy] at h
 
 /-- A stored primitive read out is a stack value of its type. -/
-theorem SVal.asValue_hasTy {sv : SVal} {ty : Ty} {v : Value}
+theorem Semantics.SVal.asValue_hasTy {sv : SVal} {ty : Ty} {v : Value}
     (h : sv.hasTy ty = true) (hval : sv.asValue = .ok v) : (Value.toSVal v).hasTy ty = true := by
   rw [SVal.asValue_toSVal hval]; exact h
 
 /-- A slot read as an object is a reference: `m` in `m.age`. -/
-theorem MVal.asRef_ok {mv : MVal} {id : Nat} (h : mv.asRef = .ok id) : mv = .ref id := by
+theorem Semantics.MVal.asRef_ok {mv : MVal} {id : Nat} (h : mv.asRef = .ok id) : mv = .ref id := by
   cases mv with
   | ref i => cases h; rfl
   | prim _ => exact nomatch h
@@ -614,7 +614,7 @@ end Effects
 
 /-! ## Where a run starts -/
 
-theorem lookupBy_map_snd {k : Name} {f : Ty → SVal} :
+theorem Semantics.lookupBy_map_snd {k : Name} {f : Ty → SVal} :
     ∀ l : List (Name × Ty), lookupBy k (l.map fun (n, T) => (n, f T)) = (lookupBy k l).map f
   | [] => rfl
   | (n, T) :: rest => by
@@ -749,21 +749,21 @@ structure RunInv (C : Contract) where
   loc_mono : ∀ {H H' : HeapTy} {t : LTy} {v : t.Denote C}, H.Extends H' → loc H t v →
     loc H' t v
   reglob : ∀ {H : HeapTy} {τ : Semantics.State} {Γ : Ctx} (e : Env C Γ), glob H τ →
-    glob H (State.ofGlob τ e).glob
+    glob H (EState.ofGlob τ e).glob
 
 namespace RunInv
 
 variable (I : RunInv C)
 
 /-- The invariant holds of a state under the store typing `H`. -/
-def Holds {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
+def Holds {Γ : Ctx} (H : HeapTy) (σ : EState C Γ) : Prop :=
   I.glob H σ.glob ∧ Env.All (I.loc H) σ.env
 
 /-- A step on erased states keeps the invariant: from a state it holds of,
 it ends, if in a state, in one it holds of under a store typing that only
 grew (what a typed leaf erases to, `RunInv.TKeeps.of_agrees`). -/
-def Keeps {Γ Γ' : Ctx} (f : State C Γ → Res (State C Γ')) : Prop :=
-  ∀ (H : HeapTy) (σ : State C Γ) (σ' : State C Γ'), I.Holds H σ → f σ = .ok σ' →
+def Keeps {Γ Γ' : Ctx} (f : EState C Γ → Res (EState C Γ')) : Prop :=
+  ∀ (H : HeapTy) (σ : EState C Γ) (σ' : EState C Γ'), I.Holds H σ → f σ = .ok σ' →
     ∃ H', H.Extends H' ∧ I.Holds H' σ'
 
 variable {I}
@@ -772,11 +772,11 @@ theorem env_mono {Γ : Ctx} {H H' : HeapTy} (hext : H.Extends H') {e : Env C Γ}
     (h : Env.All (I.loc H) e) : Env.All (I.loc H') e :=
   Env.All.mono (fun _ _ => I.loc_mono hext) h
 
-theorem Holds.withEnv {Γ Δ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.Holds H σ) {e : Env C Δ}
+theorem Holds.withEnv {Γ Δ : Ctx} {H : HeapTy} {σ : EState C Γ} (h : I.Holds H σ) {e : Env C Δ}
     (he : Env.All (I.loc H) e) : I.Holds H (σ.withEnv e) :=
   ⟨h.1, he⟩
 
-theorem Holds.drop {Γ Δ : Ctx} {H : HeapTy} {σ : State C Δ} (h : I.Holds H σ) (x : Ext Γ Δ) :
+theorem Holds.drop {Γ Δ : Ctx} {H : HeapTy} {σ : EState C Δ} (h : I.Holds H σ) (x : Ext Γ Δ) :
     I.Holds H (σ.drop x) :=
   ⟨h.1, Env.All.drop x h.2⟩
 
@@ -813,7 +813,7 @@ theorem LTy.WT.default (p : PrimTy) : LTy.WT C H (.val p) (PrimTy.default p) := 
 
 /-- A storage-and-heap invariant is blind to the locals. -/
 theorem _root_.Solidity.Semantics.StateWT.reglob {H : HeapTy} {L : Layout} {τ : Semantics.State}
-    {Γ : Ctx} (h : StateWT H L τ) (e : Env C Γ) : StateWT H L (State.ofGlob τ e).glob :=
+    {Γ : Ctx} (h : StateWT H L τ) (e : Env C Γ) : StateWT H L (EState.ofGlob τ e).glob :=
   ⟨h.1, h.2, h.3, h.4, h.5⟩
 
 /-- Type soundness's invariant: the global part well-typed, every local of
@@ -826,11 +826,11 @@ def wtInv (C : Contract) : RunInv C where
 
 /-- The state invariant over a context: the global part well-typed under
 `C`'s layout and the store typing `H`, each local of its type. -/
-abbrev RunWT (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop := (wtInv C).Holds H σ
+abbrev RunWT (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : EState C Γ) : Prop := (wtInv C).Holds H σ
 
 namespace RunWT
 
-variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ : EState C Γ}
 
 theorem glob (hwt : RunWT C H σ) : StateWT H C.layout σ.glob := hwt.1
 
@@ -860,7 +860,7 @@ allocates. -/
 
 section Eval
 
-variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ : EState C Γ}
 
 /-- A simple value is of its type: the local `x : uint` holds a number. -/
 theorem Simple.eval_wt (hwt : RunWT C H σ) {p : PrimTy} {s : Simple C Γ p} {w : Value}
@@ -1080,7 +1080,7 @@ end Eval
 
 section Effects
 
-variable {Γ : Ctx} {H : HeapTy} {σ σ' : State C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ σ' : EState C Γ}
 
 /-- `x ⊕= e` keeps the state typed: the target is resolved once, and the
 number written back is of its type. -/
@@ -1199,7 +1199,7 @@ theorem MLoc.write_wt (hwt : RunWT C H σ) {mv : MVal} :
 
 /-- `m = n;` and `m = alice;` name an object of `m`'s type: `n`'s, or a
 fresh deep copy, which grows the store typing. -/
-theorem MRhs.eval_wt (hwt : RunWT C H σ) {R : RefTy} {r : MRhs C Γ R} {σ₁ : State C Γ}
+theorem MRhs.eval_wt (hwt : RunWT C H σ) {R : RefTy} {r : MRhs C Γ R} {σ₁ : EState C Γ}
     {id : Nat} (h : r.eval σ = .ok (σ₁, id)) :
     ∃ H', H.Extends H' ∧ RunWT C H' σ₁ ∧ MVal.hasTyH H' (.ref id) (.ref R) = true := by
   cases r with
@@ -1234,7 +1234,7 @@ theorem MRhs.eval_wt (hwt : RunWT C H σ) {R : RefTy} {r : MRhs C Γ R} {σ₁ :
 
 /-- `p = alice;` and `p = persons.push();` name a path the layout types at
 `p`'s type. -/
-theorem ARhs.eval_wt (hwt : RunWT C H σ) {R : RefTy} {r : ARhs C Γ R} {σ₁ : State C Γ}
+theorem ARhs.eval_wt (hwt : RunWT C H σ) {R : RefTy} {r : ARhs C Γ R} {σ₁ : EState C Γ}
     {root : Name} {segs : List Seg} (h : r.eval σ = .ok (σ₁, (root, segs))) :
     RunWT C H σ₁ ∧ C.layout.tyAt root segs = some (.ref R) := by
   cases r with
@@ -1321,7 +1321,7 @@ end Effects
 
 /-- A contract starts well-typed: each root at its type's default, no
 locals, an empty heap. -/
-theorem RunWT.init {σ : State C []} (hnd : nodupKeysB C.vars = true)
+theorem RunWT.init {σ : EState C []} (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) (hst : σ.storage = C.initStorage)
     (hheap : σ.heap = []) : RunWT C [] σ :=
   ⟨StateWT.init (σ := σ.glob) hnd hok hst hheap, trivial⟩

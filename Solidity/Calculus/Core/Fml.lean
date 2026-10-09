@@ -73,7 +73,7 @@ inductive Tm (C : Contract) (Γ : Ctx) : Srt → Type where
   | app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C Γ a) (y : Tm C Γ b) (z : Tm C Γ c) : Tm C Γ s
 
 /-- `Update.lean`'s term, the positions named by `ns` (innermost first). -/
-def Tm.erase {Γ : Ctx} (ns : List Var) : {s : Srt} → Tm C Γ s → Solidity.Tm C s
+def Tm.erase {Γ : Ctx} (ns : List Var) : {s : Srt} → Tm C Γ s → Surface.Tm C s
   | _, .pvV i => .pvV (i.name ns)
   | _, .pvP i => .pvP (i.name ns)
   | _, .pvS i => .pvS (i.name ns)
@@ -139,7 +139,7 @@ inductive Upd (C : Contract) (Γ : Ctx) : Ctx → Type where
   | drop {Δ Δ' : Ctx} (U : Upd C Γ Δ) (h : Thin Δ' Δ) : Upd C Γ Δ'
 
 /-- The element setting the local named `x` to `r`, in `Update.lean`'s terms. -/
-def Rhs.erase {Γ : Ctx} (ns : List Var) (x : Var) : {t : LTy} → Rhs C Γ t → Solidity.UpdElem C
+def Rhs.erase {Γ : Ctx} (ns : List Var) (x : Var) : {t : LTy} → Rhs C Γ t → Surface.UpdElem C
   | _, .val t => .val x (t.erase ns)
   | _, .path p => .path x (p.erase ns)
   | _, .unset => .unset x
@@ -150,7 +150,7 @@ def Rhs.erase {Γ : Ctx} (ns : List Var) (x : Var) : {t : LTy} → Rhs C Γ t �
 
 /-- The element, its right-hand sides named by `ns` (`Γ`'s names) and its
 target by `ms` (`Δ`'s). -/
-def UpdElem.erase {Γ Δ : Ctx} (ns ms : List Var) : UpdElem C Γ Δ → Solidity.UpdElem C
+def UpdElem.erase {Γ Δ : Ctx} (ns ms : List Var) : UpdElem C Γ Δ → Surface.UpdElem C
   | .local i r => r.erase ns (i.name ms)
   | .storage s => .storage (s.erase ns)
   | .memory m => .memory (m.erase ns)
@@ -179,7 +179,7 @@ def Upd.names {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → List V
 
 /-- `Update.lean`'s update: the elements in order, a pop none (there, a
 local outlives its scope). -/
-def Upd.erase {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Solidity.Upd C
+def Upd.erase {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Surface.Upd C
   | _, .nil => []
   | _, .snoc U e => U.erase ns ++ [e.erase ns (U.names ns)]
   | _, .decl U x r => U.erase ns ++ [r.erase ns x]

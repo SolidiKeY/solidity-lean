@@ -161,7 +161,7 @@ variable {Γ : Ctx}
 
 /-- `Core.State` of the same state: the storage and the heap erased, the next
 identity the heap's length, the locals erased. -/
-def erase (σ : TState C Γ) : State C Γ :=
+def erase (σ : TState C Γ) : EState C Γ :=
   { storage := σ.storage.erase, heap := σ.heap.erase, nextId := σ.H.length,
     env := TEnv.erase Γ σ.env, net := σ.net, selfBalance := σ.selfBalance.1, tx := σ.tx.erase }
 
@@ -171,7 +171,7 @@ def init (C : Contract) : TState C [] :=
   { storage := Storage.init C, H := [], heap := Heap.empty, env := () }
 
 theorem init_erase (C : Contract) :
-    (TState.init C).erase = State.ofSem { storage := C.initStorage } := by
+    (TState.init C).erase = EState.ofSem { storage := C.initStorage } := by
   simp only [erase, init, Storage.init_erase]
   rfl
 
@@ -195,11 +195,11 @@ theorem push_erase {t : LTy} (σ : TState C Γ) (v : t.TDenote C σ.H) :
 
 theorem setLocal_erase {t : LTy} (σ : TState C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
     (σ.setLocal i v).erase = σ.erase.setLocal i (LTy.TDenote.erase t v) := by
-  simp only [erase, setLocal, State.setLocal, State.withEnv, TEnv.set_erase]
+  simp only [erase, setLocal, EState.setLocal, EState.withEnv, TEnv.set_erase]
 
 theorem drop_erase {Δ : Ctx} (h : Ext Γ Δ) (σ : TState C Δ) :
     (σ.drop h).erase = σ.erase.drop h := by
-  simp only [erase, drop, State.drop, State.withEnv, TEnv.drop_erase]
+  simp only [erase, drop, EState.drop, EState.withEnv, TEnv.drop_erase]
 
 theorem withStorage_erase (σ : TState C Γ) (st : Storage C) :
     (σ.withStorage st).erase = σ.erase.withGlob { σ.erase.glob with storage := st.erase } := rfl
@@ -220,7 +220,7 @@ def adopt {α : HTy → Type} (σ : TState C Γ) (g : Grown σ.H α) :
 are the same. -/
 theorem adopt_erase {α : HTy → Type} (σ : TState C Γ) (g : Grown σ.H α) :
     (σ.adopt g).1.erase = σ.erase.withGlob (Heap.into σ.erase.glob g.heap) := by
-  simp only [adopt, erase, State.withGlob, State.ofGlob, Heap.into, State.glob,
+  simp only [adopt, erase, EState.withGlob, EState.ofGlob, Heap.into, EState.glob,
     TEnv.erase_wk]
 
 /-- A fresh object (`State.alloc`): the heap grows by its type. -/

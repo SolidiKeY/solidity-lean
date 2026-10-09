@@ -100,7 +100,7 @@ def Fml.Closable : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, ns, .and φ ψ => φ.Closable ns ∧ ψ.Closable ns
   | _, ns, .imp φ ψ => (φ.Plain ns ∧ φ.FO = true) ∧ ψ.Closable ns
   | _, ns, .upd _ U φ =>
-    U.Fresh ns ∧ Avoids (Solidity.Upd.vars (U.erase ns)) φ.bindNames ∧
+    U.Fresh ns ∧ Avoids (Surface.Upd.vars (U.erase ns)) φ.bindNames ∧
       Avoids φ.bindNames (U.names ns) ∧ φ.Closable (U.names ns)
   | _, _, .modal .. => False
   | _, ns, .havoc φ => φ.Closable ns
@@ -249,7 +249,7 @@ def Fml.bindsBM : {Γ : Ctx} → List Var → Fml C Γ → Option (List Var)
   | _, ns, .imp a φ => bif a.foFreshB ns then φ.bindsBM ns else none
   | _, ns, .upd _ U φ =>
     bif U.freshB ns then (φ.bindsBM (U.names ns)).bind fun B =>
-      bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
+      bif meetsB B (Surface.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
       else some B
     else none
   | _, _, .modal .. => none
@@ -273,7 +273,7 @@ def Fml.bindsB {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var) :=
     (imp := fun a _ _ ih ns => bif a.foFreshB ns then ih ns else none)
     (upd := fun _ U _ ih ns =>
       bif U.freshB ns then (ih (U.names ns)).bind fun B =>
-        bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
+        bif meetsB B (Surface.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
         else some B
       else none)
     (modal := fun _ _ _ _ _ _ => none)
@@ -320,10 +320,10 @@ theorem Fml.bindsB_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var},
     cases hU : U.freshB ns
     · simp only [Fml.bindsB, hU, cond_false, reduceCtorEq] at h
     · have h' : (φ.bindsB (U.names ns)).bind (fun B =>
-          bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
+          bif meetsB B (Surface.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
           else some B) = some B := by simpa only [Fml.bindsB, hU, cond_true] using h
       obtain ⟨B', h₁, h₂⟩ := Option.bind_eq_some_iff.1 h'
-      cases hm : (meetsB B' (Solidity.Upd.vars (U.erase ns)) || meetsB B' (U.names ns))
+      cases hm : (meetsB B' (Surface.Upd.vars (U.erase ns)) || meetsB B' (U.names ns))
       · simp only [hm, cond_false, Option.some.injEq] at h₂
         subst h₂
         obtain ⟨c, rfl⟩ := ih h₁
@@ -396,8 +396,8 @@ theorem Idx.nameR_eq {Γ : Ctx} {t : LTy} (ns : List Var) (i : Idx Γ t) :
 
 /-- `Tm.erase`, by the recursor. -/
 @[implemented_by Tm.erase]
-def Tm.eraseR {Γ : Ctx} (ns : List Var) {s : Srt} (t : Tm C Γ s) : Solidity.Tm C s :=
-  Tm.rec (motive := fun s _ => Solidity.Tm C s)
+def Tm.eraseR {Γ : Ctx} (ns : List Var) {s : Srt} (t : Tm C Γ s) : Surface.Tm C s :=
+  Tm.rec (motive := fun s _ => Surface.Tm C s)
     (fun i => .pvV (i.nameR ns)) (fun i => .pvP (i.nameR ns)) (fun i => .pvS (i.nameR ns))
     (fun i => .pvI (i.nameR ns)) (fun i _ ih => .app1 (.netOf (i.nameR ns)) ih)
     (fun o => .app0 o) (fun o _ _ ih => .app1 o ih) (fun o _ _ ih ih' => .app2 o ih ih')
@@ -415,8 +415,8 @@ theorem Tm.eraseR_eq {Γ : Ctx} (ns : List Var) {s : Srt} (t : Tm C Γ s) :
 
 /-- `Rhs.erase`, its terms by `Tm.eraseR`. -/
 def Rhs.eraseR {Γ : Ctx} (ns : List Var) (x : Var) {t : LTy} (r : Rhs C Γ t) :
-    Solidity.UpdElem C :=
-  Rhs.casesOn (motive := fun _ _ => Solidity.UpdElem C) r
+    Surface.UpdElem C :=
+  Rhs.casesOn (motive := fun _ _ => Surface.UpdElem C) r
     (fun t => .val x (t.eraseR ns)) (fun p => .path x (p.eraseR ns)) (.unset x)
     (fun i => .mref x (i.eraseR ns)) (fun s => .store x (s.eraseR ns)) (.saveNet x) (.saveNetMt x)
 
@@ -425,8 +425,8 @@ theorem Rhs.eraseR_eq {Γ : Ctx} (ns : List Var) (x : Var) {t : LTy} (r : Rhs C 
   cases r <;> simp only [Rhs.erase, ← Tm.eraseR_eq] <;> rfl
 
 /-- `UpdElem.erase`, its terms by `Tm.eraseR`. -/
-def UpdElem.eraseR {Γ Δ : Ctx} (ns ms : List Var) (e : UpdElem C Γ Δ) : Solidity.UpdElem C :=
-  UpdElem.casesOn (motive := fun _ => Solidity.UpdElem C) e
+def UpdElem.eraseR {Γ Δ : Ctx} (ns ms : List Var) (e : UpdElem C Γ Δ) : Surface.UpdElem C :=
+  UpdElem.casesOn (motive := fun _ => Surface.UpdElem C) e
     (fun i r => r.eraseR ns (i.nameR ms)) (fun s => .storage (s.eraseR ns))
     (fun m => .memory (m.eraseR ns)) (fun op a => .selfBalance op (a.eraseR ns))
     (fun r op a => .net (r.eraseR ns) op (a.eraseR ns))
@@ -458,12 +458,12 @@ theorem Thin.namesR_eq {Γ Δ : Ctx} (h : Thin Γ Δ) (ns : List Var) :
 
 /-- `Upd.erase` and `Upd.names` together, by the recursor. -/
 def Upd.eraseNRM {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) :
-    Solidity.Upd C × List Var := (U.erase ns, U.names ns)
+    Surface.Upd C × List Var := (U.erase ns, U.names ns)
 
 @[implemented_by Upd.eraseNRM]
 def Upd.eraseNR {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) :
-    Solidity.Upd C × List Var :=
-  Upd.rec (motive := fun _ _ => Solidity.Upd C × List Var) ([], ns)
+    Surface.Upd C × List Var :=
+  Upd.rec (motive := fun _ _ => Surface.Upd C × List Var) ([], ns)
     (fun _ e ih => (ih.1 ++ [e.eraseR ns ih.2], ih.2))
     (fun _ x r ih => (ih.1 ++ [r.eraseR ns x], x :: ih.2))
     (fun _ h ih => (ih.1, ih.2.drop h.depth)) (fun _ h ih => (ih.1, h.namesR ih.2)) U
@@ -544,19 +544,19 @@ theorem Tm.anyE_eq {Γ : Ctx} (ns : List Var) (p : Var → Bool) {s : Srt} (t : 
     t.anyE ns p = (t.erase ns).vars.any p := by
   induction t with
   | pvV i | pvP i | pvS i | pvI i =>
-    simp only [Tm.erase, Solidity.Tm.vars, ← Idx.nameR_eq, List.any_cons, List.any_nil,
+    simp only [Tm.erase, Surface.Tm.vars, ← Idx.nameR_eq, List.any_cons, List.any_nil,
       Bool.or_false]; rfl
   | netOf i a ih =>
-    simp only [Tm.erase, Solidity.Tm.vars, ← Idx.nameR_eq, List.any_cons, ← ih]; rfl
-  | app0 o => simp only [Tm.erase, Solidity.Tm.vars, List.any_nil]; rfl
+    simp only [Tm.erase, Surface.Tm.vars, ← Idx.nameR_eq, List.any_cons, ← ih]; rfl
+  | app0 o => simp only [Tm.erase, Surface.Tm.vars, List.any_nil]; rfl
   | app1 o ho x ih =>
-    have hv : (Solidity.Tm.app1 o (x.erase ns)).vars = (x.erase ns).vars := by
-      cases o <;> first | (simp only [Op1.named, reduceCtorEq] at ho; done) | simp only [Solidity.Tm.vars]
+    have hv : (Surface.Tm.app1 o (x.erase ns)).vars = (x.erase ns).vars := by
+      cases o <;> first | (simp only [Op1.named, reduceCtorEq] at ho; done) | simp only [Surface.Tm.vars]
     simp only [Tm.erase, hv, ← ih]; rfl
   | app2 o x y ihx ihy =>
-    simp only [Tm.erase, Solidity.Tm.vars, List.any_append, ← ihx, ← ihy]; rfl
+    simp only [Tm.erase, Surface.Tm.vars, List.any_append, ← ihx, ← ihy]; rfl
   | app3 o x y z ihx ihy ihz =>
-    simp only [Tm.erase, Solidity.Tm.vars, List.any_append, ← ihx, ← ihy, ← ihz]; rfl
+    simp only [Tm.erase, Surface.Tm.vars, List.any_append, ← ihx, ← ihy, ← ihz]; rfl
 
 /-- `Tm.anyE` of the element `x := r`. -/
 def Rhs.anyE {Γ : Ctx} (ns : List Var) (p : Var → Bool) (x : Var) {t : LTy} (r : Rhs C Γ t) :
@@ -567,7 +567,7 @@ def Rhs.anyE {Γ : Ctx} (ns : List Var) (p : Var → Bool) (x : Var) {t : LTy} (
 
 theorem Rhs.anyE_eq {Γ : Ctx} (ns : List Var) (p : Var → Bool) (x : Var) {t : LTy}
     (r : Rhs C Γ t) : r.anyE ns p x = (r.erase ns x).vars.any p := by
-  cases r <;> simp only [Rhs.erase, Solidity.UpdElem.vars, List.any_cons, List.any_nil,
+  cases r <;> simp only [Rhs.erase, Surface.UpdElem.vars, List.any_cons, List.any_nil,
     Bool.or_false, ← Tm.anyE_eq] <;> rfl
 
 /-- `Tm.anyE` of an element. -/
@@ -582,13 +582,13 @@ theorem UpdElem.anyE_eq {Γ Δ : Ctx} (ns ms : List Var) (p : Var → Bool) (e :
     e.anyE ns ms p = (e.erase ns ms).vars.any p := by
   cases e with
   | «local» i r => exact (Rhs.anyE_eq ns p _ r).trans (by rw [Idx.nameR_eq]; rfl)
-  | _ => simp only [UpdElem.erase, Solidity.UpdElem.vars, List.any_append, ← Tm.anyE_eq] <;> rfl
+  | _ => simp only [UpdElem.erase, Surface.UpdElem.vars, List.any_append, ← Tm.anyE_eq] <;> rfl
 
-theorem _root_.Solidity.Upd.vars_append_single (U : Solidity.Upd C) (e : Solidity.UpdElem C) :
-    Solidity.Upd.vars (U ++ [e]) = Solidity.Upd.vars U ++ e.vars := by
+theorem _root_.Solidity.Surface.Upd.vars_append_single (U : Surface.Upd C) (e : Surface.UpdElem C) :
+    Surface.Upd.vars (U ++ [e]) = Surface.Upd.vars U ++ e.vars := by
   induction U with
-  | nil => simp only [List.nil_append, Solidity.Upd.vars, List.append_nil]
-  | cons e' U ih => simp only [List.cons_append, Solidity.Upd.vars, ih, List.append_assoc]
+  | nil => simp only [List.nil_append, Surface.Upd.vars, List.append_nil]
+  | cons e' U ih => simp only [List.cons_append, Surface.Upd.vars, ih, List.append_assoc]
 
 theorem _root_.Solidity.Var.eqB_refl (x : Var) : x.eqB x = true := by
   cases x <;> simp only [Var.eqB, Nat.beq_refl, decide_true, Bool.and_self]
@@ -615,14 +615,14 @@ theorem meetsB_eq_any (B vs : List Var) : meetsB B vs = vs.any fun v => v.memB B
 the scope it leaves, and whether one of the names `B` is a variable of the
 erasure (`meetsB B (Upd.vars …)`). -/
 structure UpdE (C : Contract) where
-  upd : Solidity.Upd C
+  upd : Surface.Upd C
   names : List Var
   hit : List Var → Bool
 
 /-- `Upd.closeErase`'s compiled twin. -/
 def Upd.closeEraseM {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) : Option (UpdE C) :=
   bif U.freshB ns then
-    some ⟨U.erase ns, U.names ns, fun B => (Solidity.Upd.vars (U.erase ns)).any (·.memB B)⟩
+    some ⟨U.erase ns, U.names ns, fun B => (Surface.Upd.vars (U.erase ns)).any (·.memB B)⟩
   else none
 
 /-- `Upd.freshB`, and the update's erasure, names and variables, in one
@@ -651,7 +651,7 @@ theorem Upd.closeErase_eq {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ
     cases U.freshB ns
     · rfl
     · simp only [cond_true, Option.map_some, UpdElem.eraseR_eq, UpdElem.anyE_eq,
-        Upd.erase, Upd.names, Solidity.Upd.vars_append_single, List.any_append]
+        Upd.erase, Upd.names, Surface.Upd.vars_append_single, List.any_append]
   | decl U x r ih =>
     change (U.closeErase ns).bind (fun q => bif x.memB q.names then none
       else some (⟨q.upd ++ [r.eraseR ns x], x :: q.names,
@@ -664,7 +664,7 @@ theorem Upd.closeErase_eq {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ
     · simp only [cond_true, Option.bind_some]
       cases hm : x.memB (U.names ns)
       · simp only [cond_false, cond_true, Bool.and_self, Bool.not_false, Rhs.eraseR_eq, Rhs.anyE_eq,
-          Upd.erase, Upd.names, Solidity.Upd.vars_append_single, List.any_append]
+          Upd.erase, Upd.names, Surface.Upd.vars_append_single, List.any_append]
       · simp only [cond_true, Bool.not_true, Bool.and_false, cond_false]
   | pop U h ih =>
     change (U.closeErase ns).map (fun r => (⟨r.upd, r.names.drop h.depth, r.hit⟩ : UpdE C)) = _
@@ -765,7 +765,7 @@ theorem Fml.closeErase_eq {Γ : Ctx} (φ : Fml C Γ) :
           | [] => r.2
           | U' => .upd m U' r.2)) =
       (bif U.freshB ns then (φ.bindsB (U.names ns)).bind (fun B =>
-        bif meetsB B (Solidity.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
+        bif meetsB B (Surface.Upd.vars (U.erase ns)) || meetsB B (U.names ns) then none
         else some B) else none).map _
     rw [Upd.closeErase_eq]
     unfold Upd.closeEraseM
@@ -784,7 +784,7 @@ theorem Fml.closeErase_eq {Γ : Ctx} (φ : Fml C Γ) :
           cases U' <;> rfl
         | cons y ys =>
           dsimp only
-          cases meetsB (y :: ys) (Solidity.Upd.vars (U.erase ns)) ||
+          cases meetsB (y :: ys) (Surface.Upd.vars (U.erase ns)) ||
               meetsB (y :: ys) (U.names ns)
           · simp only [cond_false, Option.map_some, Fml.erase]
             generalize U.erase ns = U'

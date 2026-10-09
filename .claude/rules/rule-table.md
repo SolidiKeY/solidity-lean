@@ -40,7 +40,7 @@ a total function over the typed syntax, and it is the only rule that can:
 - Every theorem has a docstring with a small Solidity example.
 - Example contracts are **named** `Contract` constants: the quoters and the
   kernel re-check rely on it. A new syntax constructor needs an arm in every
-  quoter (`Syntax.lean`, `Calculus/Notation.lean`).
+  quoter (`Syntax.lean`, `Calculus/SurfaceNotation.lean`).
 
 ## Adding or changing a rule
 

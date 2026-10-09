@@ -43,7 +43,7 @@ def argCapture? (s p : Expr) :
         (← tw (s.getArg! 7), ← tw (s.getArg! 8), ← tw (s.getArg! 9), ← tw a[10]!) | return none
     let v ← (tr [] a[9]!).run env
     let x := mkApp2 (mkConst ``Solidity.Var.fresh) (toExpr "se") a[2]!
-    let init := mkApp2 (mkConst ``Option.some [levelZero]) (mkApp2 (mkConst ``Solidity.Val) c a[8]!) v
+    let init := mkApp2 (mkConst ``Option.some [levelZero]) (mkApp2 (mkConst ``Surface.Val) c a[8]!) v
     let decl ← ppStmt (mkApp4 (mkConst ``Solidity.Surface.Stmt.declLocal) c a[8]! x init)
     withLocalDeclD `hsep (sepTy c as) fun hsep => do
       let call (as h : Expr) : MetaM (TSyntax `sol_stmt) := do
@@ -70,7 +70,7 @@ def delabLeanTaclet : Delab := do
     let p ← (tr [] (e.getArg! 6)).run env
     let st' ← whnf st
     -- a loop's goals are labelled by the rule its annotation picks
-    let rule? : Option String := if p.isAppOf ``Solidity.Premise.inv then some "whileInvariantBox"
+    let rule? : Option String := if p.isAppOf ``Surface.Premise.inv then some "whileInvariantBox"
       else Solidity.Taclet.labelledBy (st'.getAppFn.constName?.getD Lean.Name.anonymous)
         (m.isConstOf ``Modality.diamond)
     let labels := (do (← Solidity.Taclet.branchLabels.lookup (← rule?))).getD []

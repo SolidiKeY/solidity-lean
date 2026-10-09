@@ -206,9 +206,9 @@ allRight` line. -/
 
 section Surface
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
-open Proves
+open NFml.Proves
 
 /--
 info: Try this:

@@ -555,7 +555,7 @@ def Fml.closedB {Γ : Ctx} : Fml C Γ → Bool
 
 /-- **A closed formula reads as its erasure, in the global part.** -/
 theorem holds_closedB {Γ : Ctx} : (φ : Fml C Γ) → φ.closedB = true → (σ : TState C Γ) →
-    (holds σ φ ↔ Solidity.holds σ.erase.glob (φ.erase []))
+    (holds σ φ ↔ NFml.holds σ.erase.glob (φ.erase []))
   | .tt, _, _ => Iff.rfl
   | .eq a b, h, σ => by
     have h' : a.toNil?.isSome = true ∧ b.toNil?.isSome = true := Bool.and_eq_true_iff.mp h
@@ -586,7 +586,7 @@ def Frames.popsOnly {Γ Γ₀ : Ctx} : Frames C Γ Γ₀ → Bool
 
 /-- Past scope ends, a closed formula holds where it holds before them. -/
 theorem holds_exit_closed {Γ₀ : Ctx} {φ : Fml C Γ₀} {g : Semantics.State}
-    (hφ : φ.closedB = true) (h : Solidity.holds g (φ.erase [])) :
+    (hφ : φ.closedB = true) (h : NFml.holds g (φ.erase [])) :
     {Γ : Ctx} → (κ : Frames C Γ Γ₀) → κ.popsOnly = true → ∀ σ : TState C Γ, σ.erase.glob = g →
       holds σ (κ.exit .box φ)
   | _, .nil, _, σ, e => (holds_closedB φ hφ σ).2 (e ▸ h)
@@ -657,7 +657,7 @@ def Hyps.openInv {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Hyps C Γ₀
   | _, .anon H xs => .anon (Hyps.openInv H) xs
 
 theorem Tm.reclose_eval {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
-    (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.glob = τ.glob) :
+    (h : t.reclose? = some t') (σ : EState C Γ) (τ : EState C Γ') (hg : σ.glob = τ.glob) :
     t'.eval τ = t.eval σ := by
   unfold Tm.reclose? at h
   split at h
@@ -667,7 +667,7 @@ theorem Tm.reclose_eval {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' 
   · cases h
 
 theorem Tm.reclose_denote {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
-    (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.glob = τ.glob) :
+    (h : t.reclose? = some t') (σ : EState C Γ) (τ : EState C Γ') (hg : σ.glob = τ.glob) :
     t'.denote τ = t.denote σ := by
   unfold Tm.reclose? at h
   split at h

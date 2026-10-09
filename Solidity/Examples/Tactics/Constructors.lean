@@ -50,7 +50,7 @@ def Mini : Contract := contract!{
 
 local instance : InContract := ⟨Mini⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-! ## Deploying it in the interpreter -/
 
@@ -95,7 +95,7 @@ theorem deployMini :
         selfBalance := msg.value }
       ⟨ constructor(a); ⟩ (x == 5 ∧ y == a ∧ z == 0) } := by
   sol_prove
-  refine Proves.close ?_
+  refine NFml.Proves.close ?_
   sol_symex
   sol_close_mt
 
@@ -144,7 +144,7 @@ info: \programVariables {
 /-- The obligation, derived: every argument deploys. -/
 theorem miniProblem : ⊨ problem!{ constructor } := by
   sol_prove
-  refine Proves.close ?_
+  refine NFml.Proves.close ?_
   sol_symex
   sol_close_mt
 
@@ -153,7 +153,7 @@ obligation. -/
 theorem miniDeploy : ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
     selfBalance := msg.value } ⟨ constructor(7); ⟩ true } := by
   sol_prove
-  refine Proves.close ?_
+  refine NFml.Proves.close ?_
   sol_symex
   sol_close_mt
 
@@ -314,7 +314,7 @@ def Counter : Contract := contract!{
 
 local instance : InContract := ⟨Counter⟩
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /--
 info: dl{

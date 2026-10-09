@@ -41,7 +41,7 @@ Today's strategy's steps before the rewrites (`#chain`, `#chain_rest` on
 
 namespace Solidity
 
-namespace Chain
+namespace NFml.Chain
 
 open Lean Elab Term Meta
 
@@ -496,9 +496,9 @@ def Gen.stopNote (g : Gen) : MessageData :=
   | some m => m!"\n\nthe chain stops early: {m}"
   | none => m!""
 
-end Chain
+end NFml.Chain
 
-namespace Chain
+namespace NFml.Chain
 open Lean Elab Command Term Meta
 
 /-- `#last_line c`: the chain `c` ends at a last line — no program left, one
@@ -557,7 +557,7 @@ syntax "#chain " term : command
 scoped chains' (`Calculus/Core/ChainGen.lean`). -/
 syntax "#chain_rest " ident : command
 
-end Chain
+end NFml.Chain
 
 namespace ProofTree
 open Lean Elab Tactic Meta
@@ -573,21 +573,21 @@ elab_rules : tactic
     let g ← getMainGoal
     let ty ← instantiateMVars (← g.getType)
     if ty.isAppOfArity ``NFml.Via 3 then
-      let some (C, _, B) ← Chain.chainEnds? ty | throwUnsupportedSyntax
-      Chain.solveChain g
+      let some (C, _, B) ← NFml.Chain.chainEnds? ty | throwUnsupportedSyntax
+      NFml.Chain.solveChain g
       replaceMainGoal []
       suggest tk #["sol_chain"]
-      let gen ← Chain.generate C (← instantiateMVars B)
+      let gen ← NFml.Chain.generate C (← instantiateMVars B)
       unless gen.links.isEmpty do
-        let lines ← Chain.viaLines C gen.splice.modality B gen.links
-        let start := (← Chain.lineText C gen.splice.modality B).size
+        let lines ← NFml.Chain.viaLines C gen.splice.modality B gen.links
+        let start := (← NFml.Chain.lineText C gen.splice.modality B).size
         logInfoAt tk (m!"the chain goes on to a last line; append to its statement:\n\
           {"\n".intercalate (lines.extract start lines.size |>.map ("    " ++ ·)).toList}" ++
           gen.stopNote)
       return
     unless ty.isAppOfArity ``NFml.Leads 3 do throwUnsupportedSyntax
     let #[C, φ, ψ] := ty.getAppArgs | throwUnsupportedSyntax
-    let gen ← Chain.generate C φ (some (← instantiateMVars ψ))
+    let gen ← NFml.Chain.generate C φ (some (← instantiateMVars ψ))
     let last := gen.last φ
     unless ← isDefEq last ψ do
       throwError "sol_chain?: the chain from the line before ends at{indentExpr last}\nnot{indentExpr ψ}"
@@ -596,7 +596,7 @@ elab_rules : tactic
     let lines ← if links.isEmpty then
         pure #["exact Solidity.NFml.Leads.self _"]
       else do
-        let ls ← Chain.viaLines C gen.splice.modality φ links
+        let ls ← NFml.Chain.viaLines C gen.splice.modality φ links
         let head := if links.size == 1 then "exact Solidity.NFml.SoundRel.leads (show "
           else "exact Solidity.NFml.Via.leads (show "
         let body := #[head ++ ls[0]!] ++ (ls.extract 1 ls.size).map ("    " ++ ·)
@@ -610,7 +610,7 @@ elab_rules : tactic
 
 end ProofTree
 
-namespace Chain
+namespace NFml.Chain
 open Lean Elab Tactic Meta
 
 /-- The rewrite `n` on the line `A`, at the first place it applies: the line
@@ -669,6 +669,6 @@ elab_rules : tactic
     let ids := ns.map (mkIdent ·)
     Lean.Meta.Tactic.TryThis.addSuggestion tk (← `(tactic| sol_rws [$ids,*]))
 
-end Chain
+end NFml.Chain
 
 end Solidity

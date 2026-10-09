@@ -54,7 +54,7 @@ theorem TEnv.thin_erase {H : HTy} : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (e : 
 
 theorem TState.thin_erase {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : TState C Δ) :
     (σ.thin h).erase = σ.erase.thin h := by
-  simp only [TState.erase, TState.thin, TState.withEnv, State.thin, State.withEnv, TEnv.thin_erase]
+  simp only [TState.erase, TState.thin, TState.withEnv, EState.thin, EState.withEnv, TEnv.thin_erase]
 
 theorem Prog.trunFrames_seq {Γ Γ₁ Γ₀ : Ctx} (σ : TState C Γ) (ω : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) : Prog.trunFrames σ .nil (.seq ω κ) = Prog.trunFrames σ ω κ := by
@@ -93,7 +93,7 @@ theorem _root_.Solidity.Modality.afterC_and {α : Type} {m : Modality} {p q r : 
   | error _ => exact hp
 
 /-- A pop or a drop never halts. -/
-theorem Upd.apply_popsOnly {Γ : Ctx} (σ : State C Γ) {Δ : Ctx} (U : Upd C Γ Δ)
+theorem Upd.apply_popsOnly {Γ : Ctx} (σ : EState C Γ) {Δ : Ctx} (U : Upd C Γ Δ)
     (h : U.popsOnly = true) : ∃ τ, U.apply σ = .ok τ := by
   induction U with
   | nil => exact ⟨σ, rfl⟩

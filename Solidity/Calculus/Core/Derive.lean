@@ -2,7 +2,7 @@ import Solidity.Calculus.Core.Symex
 import Solidity.Calculus.Core.Close
 import Solidity.Calculus.Core.Completeness
 import Solidity.Calculus.Core.ProofTree
-import Solidity.Calculus.Derive
+import Solidity.Calculus.NFmlDerive
 
 /-!
 # The scoped strategy as one kernel evaluation: `sol_prove`
@@ -41,22 +41,22 @@ def fuel : Nat := 5000
 /-- A leaf left by the strategy is closed: taken by `Fml.posB`, its erasure
 proved by today's closer. -/
 def closes (ψ : Fml C []) : Bool :=
-  (ψ.posB []).isSome && Solidity.Derive.proves [] (ψ.erase [])
+  (ψ.posB []).isSome && NFml.Derive.proves [] (ψ.erase [])
 
 /-- **`sol_prove`'s check**: the strategy run to its end, and what it leaves
 closed. -/
 def proves (φ : Fml C []) : Bool := closes (symex fuel φ)
 
 /-- Today's residue of the erasure of a leaf `Fml.posB` takes. -/
-def residueAt (ψ : Fml C []) : Option (List (Solidity.Derive.Leaf C) × Nat) :=
+def residueAt (ψ : Fml C []) : Option (List (NFml.Derive.Leaf C) × Nat) :=
   if (ψ.posB []).isSome then
-    Solidity.Derive.residue Solidity.Derive.budget Solidity.Derive.synClose
-      Solidity.Derive.budget [] (ψ.erase [])
+    NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
+      NFml.Derive.budget [] (ψ.erase [])
   else none
 
 /-- **`sol_prove`'s check when leaves are left**: the strategy run once, its
 leaf checked and its erasure's residue computed, in one kernel evaluation. -/
-def residueOf (φ : Fml C []) : Option (List (Solidity.Derive.Leaf C) × Nat) :=
+def residueOf (φ : Fml C []) : Option (List (NFml.Derive.Leaf C) × Nat) :=
   residueAt (symex fuel φ)
 
 end Derive
@@ -64,7 +64,7 @@ end Derive
 /-- What `Derive.closes` accepts is valid. -/
 theorem Valid.of_closes {ψ : Fml C []} (h : Derive.closes ψ = true) : Valid ψ := by
   simp only [Derive.closes, Bool.and_eq_true] at h
-  exact Valid.of_erase h.1 (Solidity.Proves.valid (Solidity.Proves.of_proves h.2))
+  exact Valid.of_erase h.1 (NFml.Proves.valid (NFml.Proves.of_proves h.2))
 
 /-- **`sol_prove`'s proof when nothing is left.** -/
 theorem Valid.of_proves (hS : Stmt.Sound C) {φ : Fml C []} (h : Derive.proves φ = true) :
@@ -74,12 +74,12 @@ theorem Valid.of_proves (hS : Stmt.Sound C) {φ : Fml C []} (h : Derive.proves �
 /-- **`sol_prove`'s proof when leaves are left**: today's residue of the
 erasure, each leaf proved. -/
 theorem Valid.of_residue (hS : Stmt.Sound C) {φ : Fml C []}
-    {ls : List (Solidity.Derive.Leaf C)} {b' : Nat} (h : Derive.residueOf φ = some (ls, b'))
-    (hl : ∀ l ∈ ls, Solidity.Proves .all l.1 l.2) : Valid φ := by
+    {ls : List (NFml.Derive.Leaf C)} {b' : Nat} (h : Derive.residueOf φ = some (ls, b'))
+    (hl : ∀ l ∈ ls, NFml.Proves .all l.1 l.2) : Valid φ := by
   unfold Derive.residueOf Derive.residueAt at h
   split at h
   · exact symex_valid hS Derive.fuel
-      (Valid.of_erase ‹_› (Solidity.Proves.valid (Solidity.Proves.of_synResidue h hl)))
+      (Valid.of_erase ‹_› (NFml.Proves.valid (NFml.Proves.of_synResidue h hl)))
   · cases h
 
 /-! ## The tactic -/
@@ -93,7 +93,7 @@ open Lean Elab Tactic Meta
 def residueQuoteC (c : Lean.Expr) (φ : Fml C []) :
     Option (List (Lean.Expr × Lean.Expr) × Nat) :=
   let ψ := symex fuel φ
-  if (ψ.posB []).isSome then Solidity.Derive.residueQuote c [] (ψ.erase []) else none
+  if (ψ.posB []).isSome then NFml.Derive.residueQuote c [] (ψ.erase []) else none
 
 /-- `sol_prove` on the scoped goal `g`, `Core.Valid φ`: the goals it leaves,
 one per leaf of today's residue. -/
@@ -107,7 +107,7 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
   -- the kernel first: compiling the check of a formula with no code of its
   -- own costs about as much as the kernel's evaluation
   let type := mkApp3 (mkConst ``Eq [1]) bool (mkApp2 (mkConst ``proves) C φ) (mkConst ``Bool.true)
-  if let some h ← (some <$> Solidity.Derive.kernelLemma type
+  if let some h ← (some <$> NFml.Derive.kernelLemma type
       (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))) <|> pure none then
     g.assign (mkApp4 (mkConst ``Valid.of_proves) C sound φ h)
     return []
@@ -118,7 +118,7 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
   let some (leaves, left) ← unsafe evalExpr (Option (List (Expr × Expr) × Nat)) resTy
       (mkAppN (mkConst ``residueQuoteC) #[C, quoteConstName n, φe])
     | throwError "sol_prove: the strategy leaves a formula the erasure does not close \
-        (`Fml.posB`), or today's closer takes more than {Solidity.Derive.budget} steps"
+        (`Fml.posB`), or today's closer takes more than {NFml.Derive.budget} steps"
   let hyp := mkApp (mkConst ``Solidity.Hyp) C
   let leafTy := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) hyp)
     (mkApp (mkConst ``Solidity.NFml) C)
@@ -135,20 +135,20 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
   let type := mkApp3 (mkConst ``Eq [1]) (mkApp (mkConst ``Option [0]) pairTy)
     (mkApp2 (mkConst ``residueOf) C φ) someLs
   let rfl' := mkApp2 (mkConst ``Eq.refl [1]) (mkApp (mkConst ``Option [0]) pairTy) someLs
-  let h ← try Solidity.Derive.kernelLemma type rfl'
+  let h ← try NFml.Derive.kernelLemma type rfl'
     catch e => throwError "sol_prove: the kernel rejects the residue:{indentD e.toMessageData}"
   let mut goals : Array MVarId := #[]
   let mut proofs : Array Expr := #[]
   for (Γ', φ') in leaves, i in [1:leaves.length + 1] do
     let gi ← mkFreshExprSyntheticOpaqueMVar
-      (mkAppN (mkConst ``Solidity.Proves) #[C, mkConst ``RuleSet.all, Γ', φ'])
+      (mkAppN (mkConst ``NFml.Proves) #[C, mkConst ``RuleSet.all, Γ', φ'])
       (Name.mkSimple s!"leaf{i}")
     goals := goals.push gi.mvarId!
     proofs := proofs.push gi
-  let mut hl := mkApp (mkConst ``Solidity.Derive.leaves_nil) C
+  let mut hl := mkApp (mkConst ``NFml.Derive.leaves_nil) C
   let mut rest := mkApp (mkConst ``List.nil [0]) leafTy
   for (Γ', φ') in leaves.reverse, p in proofs.reverse do
-    hl := mkAppN (mkConst ``Solidity.Derive.leaves_cons) #[C, Γ', φ', rest, p, hl]
+    hl := mkAppN (mkConst ``NFml.Derive.leaves_cons) #[C, Γ', φ', rest, p, hl]
     rest := mkAppN (mkConst ``List.cons [0]) #[leafTy, mkLeaf Γ' φ', rest]
   g.assign (mkAppN (mkConst ``Valid.of_residue) #[C, sound, φ, ls, mkRawNatLit left, h, hl])
   return goals.toList
@@ -172,8 +172,8 @@ def evalSolProveCore : Tactic := fun _ => withMainContext do
 
 /-- A formula valid with `x` free is valid under `∀ p x`: the erasure of a
 scoped leaf binds the parameters by `∀` (`cdl!`), today's leaf has them free. -/
-theorem _root_.Solidity.Valid.all_of_free {φ : Solidity.NFml C} (x : Var) (p : PrimTy)
-    (h : Solidity.Valid φ) : Solidity.Valid (.all x p φ) :=
+theorem _root_.Solidity.NFml.Valid.all_of_free {φ : Solidity.NFml C} (x : Var) (p : PrimTy)
+    (h : NFml.Valid φ) : NFml.Valid (.all x p φ) :=
   fun _ _ _ => h _
 
 /-- Today's formula without its leading quantifiers: a scoped leaf's
@@ -183,9 +183,9 @@ def _root_.Solidity.NFml.stripAlls : Solidity.NFml C → Solidity.NFml C
   | φ => φ
 
 /-- A formula is valid where it is with its leading quantifiers' locals free. -/
-theorem _root_.Solidity.Valid.of_stripAlls : {φ : Solidity.NFml C} →
-    Solidity.Valid φ.stripAlls → Solidity.Valid φ
-  | .all x p φ, h => Solidity.Valid.all_of_free x p (Solidity.Valid.of_stripAlls (φ := φ) h)
+theorem _root_.Solidity.NFml.Valid.of_stripAlls : {φ : Solidity.NFml C} →
+    NFml.Valid φ.stripAlls → NFml.Valid φ
+  | .all x p φ, h => NFml.Valid.all_of_free x p (NFml.Valid.of_stripAlls (φ := φ) h)
   | .tt, h | .eq _ _, h | .not _, h | .and _ _, h | .imp _ _, h
   | .upd _ _ _, h | .havoc _, h | .anon _ _, h | .defined _, h => h
 
@@ -199,10 +199,10 @@ locals free, as today's leaves have them (`Valid.all_of_free`): the first
 partial def stripAlls (g : MVarId) (n : Option Nat := none) : MetaM MVarId := do
   if n == some 0 then return g
   let ty ← instantiateMVars (← g.getType)
-  let_expr Solidity.Valid C φ := ty | return g
+  let_expr NFml.Valid C φ := ty | return g
   let_expr Solidity.NFml.all _ x p φ' := φ | return g
-  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C φ') (← g.getTag)
-  g.assign (mkAppN (mkConst ``Solidity.Valid.all_of_free) #[C, φ', x, p, g'])
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``NFml.Valid) C φ') (← g.getTag)
+  g.assign (mkAppN (mkConst ``NFml.Valid.all_of_free) #[C, φ', x, p, g'])
   stripAlls g'.mvarId! (n.map (· - 1))
 
 /-- A scoped leaf `Core.Valid ψ` with no modality left, as today's goal: the
@@ -218,12 +218,12 @@ def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
   let hpTy := mkApp3 (mkConst ``Eq [1]) bool
     (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
       (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
-  let hp ← try Solidity.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
+  let hp ← try NFml.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
     catch _ => throwError "{tac}: the leaf is not one its erasure closes (`Fml.posB`): a \
       hidden binder under a negation, a precondition or a modality, or named twice, or what \
       is negated or assumed is not first-order (an update, a modality or a `havoc` there)"
   let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
-  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Solidity.Valid) C erased) (← g.getTag)
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``NFml.Valid) C erased) (← g.getTag)
   g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
   stripAlls (← Solidity.normValid g'.mvarId!) (← Symex.paramCount ψ)
 

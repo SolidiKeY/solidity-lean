@@ -93,29 +93,29 @@ def callProg [FreshNames] (C : Contract) (f : String) (args : List RawExpr) :
 
 /-- The state a contract starts in: every root at its default, no funds, the
 transaction `tx`. -/
-def freshState (C : Contract) (tx : TxEnv := {}) (balance : Int := 0) : State :=
+def freshState (C : Contract) (tx : TxEnv := {}) (balance : Int := 0) : Semantics.State :=
   { storage := C.initStorage, selfBalance := balance, tx }
 
 /-- `σ` with the transaction fields given replaced. -/
-def State.withTx (σ : State) (sender value time balance : Option Int) : State :=
+def State.withTx (σ : Semantics.State) (sender value time balance : Option Int) : Semantics.State :=
   { σ with
     tx := { msgSender := sender.getD σ.tx.msgSender, msgValue := value.getD σ.tx.msgValue,
             timestamp := time.getD σ.tx.timestamp }
     selfBalance := balance.getD σ.selfBalance }
 
 /-- `σ` with the state variables given replaced. -/
-def State.withRoots (σ : State) (roots : List (Name × SVal)) : State :=
+def State.withRoots (σ : Semantics.State) (roots : List (Name × Semantics.SVal)) : Semantics.State :=
   { σ with storage := roots.foldl (fun st (r, v) => setBy r v st) σ.storage }
 
 /-- No locals and no memory: what the typed run's start state has
 (`Core.TState C []`, its heap empty). -/
-def noLocals (σ : State) : Bool :=
+def noLocals (σ : Semantics.State) : Bool :=
   σ.env.isEmpty && σ.heap.isEmpty && σ.nextId == 0
 
 /-- A state of no locals and no memory (`none` for any other), read at the contract's types: the
 storage (`SFields.ofU`), the funds and the transaction's words as `uint`s,
 the ledger as it is; `none` where one is not of its type. -/
-def typedState? (C : Contract) (σ : State) : Option (Core.TState C []) := do
+def typedState? (C : Contract) (σ : Semantics.State) : Option (Core.TState C []) := do
   guard (noLocals σ)
   let st ← Core.SFields.ofU σ.storage C.vars
   let u (n : Int) : Option PrimTy.uint.Denote := PrimTy.ofValue? .uint (.int n)
@@ -135,7 +135,7 @@ at the contract's types (`typedState?`), and its end state named back
 (`THalt.erase`); `undef` where `P` does not resolve or `σ` is not of the
 contract's types, so that no typed run starts.  What the examples' `#eval`s
 run (`docs/intrinsic.md`, decision 48). -/
-def _root_.Solidity.Surface.Prog.runT {C : Contract} (σ : State) (P : Surface.Prog C) : Res State :=
+def _root_.Solidity.Surface.Prog.runT {C : Contract} (σ : Semantics.State) (P : Surface.Prog C) : Res Semantics.State :=
   match Core.Prog.resolve [] P, typedState? C σ with
   | .ok ⟨Γ', Q⟩, some τ =>
     match Core.Prog.trun τ Q with
@@ -144,14 +144,14 @@ def _root_.Solidity.Surface.Prog.runT {C : Contract} (σ : State) (P : Surface.P
   | _, _ => .error .undef
 
 /-- What the local `x` holds after `P` runs from `σ` (`Surface.Prog.runT`). -/
-def _root_.Solidity.Surface.Prog.localAfterT {C : Contract} (σ : State) (P : Surface.Prog C)
+def _root_.Solidity.Surface.Prog.localAfterT {C : Contract} (σ : Semantics.State) (P : Surface.Prog C)
     (x : String) : Res Binding := do
   (← Surface.Prog.runT σ P).getEnv (.user x)
 
 /-- A deployment in the typed run, its end state named back: `#deploy`'s
 (`deployReport`), as a value. -/
 def _root_.Solidity.Contract.deployRun (C : Contract) (P : Surface.Prog C)
-    (tx : TxEnv) : Res State :=
+    (tx : TxEnv) : Res Semantics.State :=
   if !((C.ctor.map (·.payable)).getD false) && tx.msgValue != 0 then .error .revert
   else Surface.Prog.runT (C.deployState tx) P
 
@@ -171,7 +171,7 @@ def localVals {C : Contract} {H : Core.HTy} {Γ : Core.Ctx} (names : List Var)
   (names.zip (localCells Γ e)).filterMap fun (x, _, c) => c.map fun (_, v) => (x, v)
 
 /-- What `#run` prints: the outcome, the value returned, the storage. -/
-def runReport [FreshNames] (C : Contract) (σ : State) (f : String) (args : List RawExpr) :
+def runReport [FreshNames] (C : Contract) (σ : Semantics.State) (f : String) (args : List RawExpr) :
     Except String (List String) := do
   let P ← elabProg C [← runStmt C f args]
   let ⟨Γ', Q⟩ ← Core.Prog.resolve [] P

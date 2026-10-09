@@ -393,7 +393,7 @@ def OpLoc.bumpT (σ : TState C Γ) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p
     TRes (Out C σ.H Γ × p.Denote)
   | p, .local i => do
     let old : p.Denote := TEnv.get i σ.env
-    let new ← TRes.ofOpt (Core.bumpT op p (PrimTy.key old))
+    let new ← TRes.ofOpt (Solidity.Core.bumpT op p (PrimTy.key old))
     pure (⟨σ.setLocal i new, List.prefix_refl _⟩, if op.isPre then new else old)
   | _, .root r h => bumpStoreT σ op (SRef.ofRoot r h)
   | _, .field b f h => do bumpStoreT σ op (← (Loc.field b f h).resolveT σ)

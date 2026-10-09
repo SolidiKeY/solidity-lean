@@ -1,4 +1,4 @@
-import Solidity.Calculus.Notation
+import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.TreeData
 import Solidity.Calculus.ChainRewrites
@@ -64,22 +64,22 @@ which fresh variables it reads (`LineRw.simplifyFresh`) is proved from
 
 Example: `⟨dl!{ alice.account.balance == 10 }, by decide⟩`, which
 `{ fml := dl!{ alice.account.balance == 10 } }` abbreviates. -/
-structure Post (C : Contract) where
+structure NFml.Post (C : Contract) where
   fml : NFml C
   noFresh : maxIdx fml.vars = 0 := by decide
 
-attribute [coe] Post.fml
+attribute [coe] NFml.Post.fml
 
 /-- A postcondition names no fresh variable: `simplifyUpdate` over it drops
 a capture of the rules (`LineRw.simplifyFresh`). -/
-theorem Post.freshVars_eq_nil (φ : Post C) : φ.fml.freshVars = [] := by
+theorem NFml.Post.freshVars_eq_nil (φ : NFml.Post C) : φ.fml.freshVars = [] := by
   rw [NFml.freshVars_eq, List.filter_eq_nil_iff]
   intro x hx
   have : x.idx ≤ 0 := φ.noFresh ▸ le_maxIdx hx
   simp only [bne_iff_ne, ne_eq, Decidable.not_not]
   omega
 
-instance : Coe (Post C) (NFml C) := ⟨Post.fml⟩
+instance : Coe (NFml.Post C) (NFml C) := ⟨NFml.Post.fml⟩
 
 /-! ## Rewrites and chains of them -/
 
@@ -103,14 +103,14 @@ the line after picks it (`sol_chain` searches for it). -/
 def NFml.RwAny (φ ψ : NFml C) : Prop := ∃ r : LineRw C, r.apply φ = some ψ
 
 /-- The arrows of a chain past the program. -/
-inductive Link (C : Contract) : Type where
+inductive NFml.Link (C : Contract) : Type where
   /-- `~[n]~>` for a rewrite: an update rule or a Theory law -/
   | rw (n : String) (r : LineRw C)
   /-- `~=>`: a rewrite the line after picks -/
   | rwAny
 
 /-- What an arrow says about the two lines it joins. -/
-@[reducible] def Link.Rel : Link C → NFml C → NFml C → Prop
+@[reducible] def NFml.Link.Rel : NFml.Link C → NFml C → NFml C → Prop
   | .rw n r => NFml.RwBy n r
   | .rwAny => NFml.RwAny
 
@@ -124,7 +124,7 @@ to abstract when it is added. -/
   | φ, (l, ψ) :: w :: ws => l.Rel φ ψ ∧ NFml.Via ψ (w :: ws)
 
 /-- The last line of a chain. -/
-def NFml.Via.last : NFml C → List (Link C × NFml C) → NFml C
+def NFml.Via.last : NFml C → List (NFml.Link C × NFml C) → NFml C
   | φ, [] => φ
   | _, (_, ψ) :: ws => NFml.Via.last ψ ws
 
@@ -174,7 +174,7 @@ def expandChainStx : Macro := fun stx => do
   for l in stx[1].getArgs do
     let b : Lean.Term := ⟨l[1]⟩
     let link ← match (⟨l[0]⟩ : TSyntax `chain_arrow) with
-      | `(chain_arrow| ~=>) => pure (← `(Link.rwAny), app ``NFml.RwAny #[prev, b])
+      | `(chain_arrow| ~=>) => pure (← `(NFml.Link.rwAny), app ``NFml.RwAny #[prev, b])
       | `(chain_arrow| ~[ $r:ident ]~>) =>
         pure (← `(link% ($prev) $r ($b)), ← `(stepBy% ($prev) $r ($b)))
       | _ => Macro.throwErrorAt l[0] "a step of the strategy (`~>`, `~*>`) is a scoped chain's: \
@@ -184,7 +184,7 @@ def expandChainStx : Macro := fun stx => do
   match links with
   | #[(_, rel, _)] => pure rel
   | _ =>
-    let ws ← links.mapM fun (l, _, b) => `((($l : Link _), $b:term))
+    let ws ← links.mapM fun (l, _, b) => `((($l : NFml.Link _), $b:term))
     pure (app ``NFml.Via #[a, ← `([$ws,*])])
 
 open Lean in
@@ -193,7 +193,7 @@ written chain of two links or more is `elabChain`'s. -/
 @[macro chainStx] def expandChain : Macro := fun stx =>
   if chainWritten stx then Macro.throwUnsupported else expandChainStx stx
 
-namespace Chain
+namespace NFml.Chain
 section Print
 open Lean Meta PrettyPrinter Delaborator SubExpr
 
@@ -245,7 +245,7 @@ def delabVia : Delab := do
   return chainNode (← withNaryArg 1 delab) arrows
 
 end Print
-end Chain
+end NFml.Chain
 
 /-! ## Soundness: a chain is a proof -/
 
@@ -264,7 +264,7 @@ theorem NFml.RwAny.sound {φ ψ : NFml C} (h : NFml.RwAny φ ψ) : φ ~~> ψ :=
 
 /-- A chain is sound state by state: where its last line holds, its first
 line holds, whatever its arrows. -/
-theorem NFml.Via.sound : {φ : NFml C} → {ws : List (Link C × NFml C)} → NFml.Via φ ws →
+theorem NFml.Via.sound : {φ : NFml C} → {ws : List (NFml.Link C × NFml C)} → NFml.Via φ ws →
     φ ~~> NFml.Via.last φ ws
   | _, [], _ => fun _ h => h
   | _, [(.rw _ _, _)], h => NFml.RwBy.sound h
@@ -276,7 +276,7 @@ theorem NFml.Via.sound : {φ : NFml C} → {ws : List (Link C × NFml C)} → NF
 
 Example: `{ x := 1 } { y := x } φ ~[sequentialToParallel]~> { x := 1 ‖ y := 1 } φ`
 proves its first line from its last. -/
-theorem NFml.Via.valid {φ : NFml C} {ws : List (Link C × NFml C)} (v : NFml.Via φ ws)
+theorem NFml.Via.valid {φ : NFml C} {ws : List (NFml.Link C × NFml C)} (v : NFml.Via φ ws)
     (h : ⊨ NFml.Via.last φ ws) : ⊨ φ :=
   fun σ => v.sound σ (h σ)
 
@@ -300,7 +300,7 @@ name a composition reads by.
 
 Example: `(AgeWriteRead.chain m φ).leads` is
 `⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ ~~> { storage := save(storage, alice.age, 42) ‖ x := 42 } φ`. -/
-theorem NFml.Via.leads {φ : NFml C} {ws : List (Link C × NFml C)} (v : NFml.Via φ ws) :
+theorem NFml.Via.leads {φ : NFml C} {ws : List (NFml.Link C × NFml C)} (v : NFml.Via φ ws) :
     φ ~~> NFml.Via.last φ ws :=
   NFml.Via.sound v
 
@@ -308,7 +308,7 @@ theorem NFml.Via.leads {φ : NFml C} {ws : List (Link C × NFml C)} (v : NFml.Vi
 `ψ`, the segment `v` starts at `ψ`, and together they reach `v`'s last line.
 The segments of a long trace compose so, each a `theorem` with its own
 heartbeats: `(seg₁ ..).leads.via (seg₂ ..) |>.via (seg₃ ..)`. -/
-theorem NFml.Leads.via {φ ψ : NFml C} {ws : List (Link C × NFml C)} (h : φ ~~> ψ)
+theorem NFml.Leads.via {φ ψ : NFml C} {ws : List (NFml.Link C × NFml C)} (h : φ ~~> ψ)
     (v : NFml.Via ψ ws) : φ ~~> NFml.Via.last ψ ws :=
   h.comp v.leads
 
@@ -321,7 +321,7 @@ class NFml.SoundRel (R : NFml C → NFml C → Sort u) : Prop where
 
 instance {n : String} {r : LineRw C} : NFml.SoundRel (NFml.RwBy n r) := ⟨fun h => h.sound⟩
 instance : NFml.SoundRel (@NFml.RwAny C) := ⟨fun h => h.sound⟩
-instance : NFml.SoundRel (@NFml.Leads C) := ⟨id⟩
+instance NFml.instSoundRelLeads : NFml.SoundRel (@NFml.Leads C) := ⟨id⟩
 
 /-- A `calc` with a rewrite in it composes to `~~>`; one of steps alone still
 composes to `~*>`, whose instances come first. -/
@@ -336,7 +336,7 @@ def NFml.rwQuoted (c : Lean.Expr) (φ : NFml C) (rs : List (NFml C → Option (N
     List (Option Lean.Expr) :=
   rs.map fun r => (r φ).map (NFml.quote c)
 
-namespace Chain
+namespace NFml.Chain
 section Tactic
 open Lean Elab Tactic Meta
 
@@ -721,7 +721,7 @@ def rwCandidatesWith (keep : Lean.Expr → Bool) (C φ : Lean.Expr) :
     for (t, t', pf) in is do
       unless keep t do continue
       out := out.push (mkAppN (mkConst ``LineRw.law) #[C, t, t', pf])
-      if ← isDefEq (mkApp3 (mkConst ``Tm.total) C (mkConst ``Srt.val) t') (mkConst ``Bool.true) then
+      if ← isDefEq (mkApp3 (mkConst ``Surface.Tm.total) C (mkConst ``Srt.val) t') (mkConst ``Bool.true) then
         let ht ← mkEqRefl (mkConst ``Bool.true)
         for i in List.range k do
           out := out.push (mkAppN (mkConst ``LineRw.lawUpdAny) #[C, t, t', pf, ht, toExpr i])
@@ -1195,6 +1195,6 @@ link after it, `dl!{ … }` read three times. -/
   return mkApp3 (mkConst ``NFml.Via) C a (← mkListLit pairTy ws.toList)
 
 end Elab
-end Chain
+end NFml.Chain
 
 end Solidity

@@ -43,7 +43,7 @@ Clauses are NatSpec lines above a function, or above the contract for
   `{storage := mtSt ‖ old := mtSt ‖ oldNet := mtSt ‖
   net := storeSt(mtSt, at(msgSender), …) ‖ selfBalance := msgValue}`, and
   assumes no `CInv`. In Lean it is `spec!{constructor}`
-  (`Calculus/Spec.lean`), where `\old(net(a))` reads the empty ledger
+  (`Calculus/SurfaceSpec.lean`), where `\old(net(a))` reads the empty ledger
   (`UpdElem.saveNetMt`); a `requires` that reads the state, the ledger or
   the funds is refused there (Lean only: solkey reads it of the storage the
   update discards).
@@ -62,7 +62,7 @@ The benchmark README reports 19 of 21 obligations closed; ERC20's
 (`FunDecl.payable`). They stay raw because a `Contract` cannot hold an
 `Fml C`.
 
-**The compiler** is `SpecCompiler`'s (`Calculus/Spec.lean`). A `SpecCtx`
+**The compiler** is `SpecCompiler`'s (`Calculus/SurfaceSpec.lean`). A `SpecCtx`
 names the storage term a clause reads, whether `\old`/`\result` are allowed,
 and the locals in scope. A state variable is `find(ctx.storage, p)`;
 `msg.sender`, `msg.value`, `block.timestamp`, `this.balance` are `Term.env`;

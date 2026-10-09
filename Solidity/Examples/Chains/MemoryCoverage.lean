@@ -1,6 +1,6 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.Close
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Core.LastLine
 import Solidity.Calculus.Core.Surface
 
@@ -18,7 +18,7 @@ stack merges and every read is resolved one law a link, every capture kept to th
 `#last_line` checks.
 
 A memory object is declared by a `where` clause, `Person memory carol`, as the printer writes it
-(`Calculus/Notation.lean`), on each line that still runs a program, and on each line whose update binds or
+(`Calculus/SurfaceNotation.lean`), on each line that still runs a program, and on each line whose update binds or
 writes a reference (`{ carol := david }`, `write(memory, carol.account, acc)`): without it the reference reads
 as a value, and the line is another one.  `#chain` prints these lines without the clause.  The row
 `Person memory carol;` declares its object in the program.  A free value parameter (`balanceVal`, `ageVal`, `val`, `i`, `n`) gets a small int in an
@@ -39,7 +39,7 @@ the statement.
 
 namespace Solidity.Examples.Chains.MemoryCoverage
 
-open scoped Solidity.Core.Surface
+open scoped Core.Scoped
 
 /-- Memory needs no state; `makeValue()` is the call of its row. -/
 def MemCoverage : Contract := contract!{

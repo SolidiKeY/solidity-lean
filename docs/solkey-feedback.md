@@ -33,7 +33,7 @@ The same choice reaches the specifications. A clause's `+`/`-` is solc's
 checked arithmetic in Lean (`\old(balances[to]) + amount` overflowing makes the
 equation false) and KeY's unbounded `int` in solkey. A parameter is a KeY `int`
 with no range; Lean's obligation assumes `0 <= x <= 2^256 - 1` for a `uint`
-(`rangeFml` in `Calculus/Spec.lean`), so a clause like `requires amount >= 0` is
+(`rangeFml` in `Calculus/SurfaceSpec.lean`), so a clause like `requires amount >= 0` is
 redundant there and load-bearing in solkey.
 
 **Lean evidence.** `Semantics.checkArith` (`Semantics.lean`); the EVM compiler
@@ -57,7 +57,7 @@ range. This is a completeness and faithfulness gap, not an unsoundness: a read
 on a mismatching store degrades to an underspecified cast and proves nothing
 false (`WellTypedNecessity.readSelect_needs_storage` shows the interpreter-side
 claim does need the invariant). A `\forall` clause over a mapping is provable
-in Lean only under the layout premises `layoutAt` states (`Calculus/Spec.lean`);
+in Lean only under the layout premises `layoutAt` states (`Calculus/SurfaceSpec.lean`);
 solkey's obligation states none.
 
 **Lean evidence.** Every typed state's erasure is `RunWT`
@@ -281,7 +281,7 @@ resume, where KeY puts `pv := TRUE` into the anonymising update.
 ## 9. Constructors (`a764703bf1`)
 
 Found while porting solkey's constructor obligations (`Problem.ctorFml`,
-`spec!{constructor}`, `Calculus/Problem.lean`, `Calculus/Spec.lean`).
+`spec!{constructor}`, `Calculus/Problem.lean`, `Calculus/SurfaceSpec.lean`).
 
 - **The precondition is read before `storage := mtSt`.** A constructor's
   `requires` and the `msgSender != self` fact are compiled outside the

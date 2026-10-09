@@ -12,7 +12,7 @@ empty`, `refine close ?_`, …).  On a scoped goal (`Core.Proves`) each line
 is the scoped rule of the same kind, its premise the named taclet's
 (`Taclet.step_eq`, `LeanTaclet.toStep`); on today's goal (a leaf's
 erasure) only the rules today's calculus kept are read today's way (`intro`,
-`allIntro`, `updIntro`, `empty`, `close`: `Calculus/Logic.lean`).
+`allIntro`, `updIntro`, `empty`, `close`: `Calculus/NFmlLogic.lean`).
 
 Where the scoped calculus takes a step today's names otherwise:
 
@@ -183,7 +183,7 @@ macro_rules
     `(tactic| (refine Solidity.Core.Proves.inv (by exact $d) ?_ ?_ ?_; core_tag init thn els)
       <;> core_silent)
 
-namespace Surface
+namespace Scoped
 
 scoped macro_rules
   | `(tactic| apply update $r:term) =>
@@ -241,44 +241,44 @@ scoped macro_rules
   | `(tactic| apply updIntro) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.updIntro) <;> core_silent
-      | apply _root_.Solidity.Proves.updIntro)
+      | apply Solidity.NFml.Proves.updIntro)
   | `(tactic| apply impRight) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.intro) <;> core_silent
-      | apply _root_.Solidity.Proves.impRight)
+      | apply Solidity.NFml.Proves.impRight)
   | `(tactic| apply allRight) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.allIntro) <;> core_silent
-      | apply _root_.Solidity.Proves.allRight)
+      | apply Solidity.NFml.Proves.allRight)
   | `(tactic| apply emptyModality) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.empty) <;> core_silent
       | core_skip empty
-      | apply _root_.Solidity.Proves.emptyModality)
+      | apply Solidity.NFml.Proves.emptyModality)
   | `(tactic| apply empty) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.empty) <;> core_silent
       | core_skip empty
-      | apply _root_.Solidity.Proves.empty)
+      | apply Solidity.NFml.Proves.empty)
   | `(tactic| apply intro) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.intro) <;> core_silent
-      | apply _root_.Solidity.Proves.intro)
+      | apply Solidity.NFml.Proves.intro)
   | `(tactic| apply allIntro) =>
     `(tactic| first
       | (core_silent; apply Solidity.Core.Proves.allIntro) <;> core_silent
       | core_skip allIntro
-      | apply _root_.Solidity.Proves.allIntro)
+      | apply Solidity.NFml.Proves.allIntro)
   | `(tactic| apply Proves.valid) =>
     `(tactic| first
       | (refine Solidity.Core.Proves.valid (R := RuleSet.all) ?_; core_params)
-      | apply _root_.Solidity.Proves.valid)
+      | apply Solidity.NFml.Proves.valid)
   | `(tactic| refine close ?_) =>
     `(tactic| first
       | refine Solidity.Core.Proves.close [] rfl List.nodup_nil ?_ (by decide +kernel)
           (by decide +kernel)
-      | refine _root_.Solidity.Proves.close ?_)
+      | refine Solidity.NFml.Proves.close ?_)
 
-end Surface
+end Scoped
 
 end Solidity.Core

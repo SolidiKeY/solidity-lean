@@ -88,7 +88,7 @@ namespace `Solidity.Examples.<Dir>.<File>`: an anonymous `local instance` gets a
 generated name, and two files in one namespace clash when both are imported.
 
 **Do not spell a formula out as raw constructors.** If `dl!{ … }` cannot say
-something, extend the notation (`Calculus/Notation.lean`); if a goal prints
+something, extend the notation (`Calculus/SurfaceNotation.lean`); if a goal prints
 with a `‹…›` escape, extend the printer (`Calculus/RuleSyntax.lean`).
 
 **Valid means every state.** `⊨` quantifies over every state, including
@@ -99,5 +99,5 @@ of the interpreter from `State.exampleStore`, checked by `rfl` or pinned with
 `#guard_msgs in #eval` where `rfl` cannot unfold a struct default.
 
 When `sol_close` does not close a true goal, the gap belongs in
-`Calculus/Close.lean` (its docstring lists what it cannot do yet), not in a
+`Calculus/NFmlClose.lean` (its docstring lists what it cannot do yet), not in a
 bespoke proof in the example.

@@ -14,8 +14,8 @@ memory is not seen), from `storageNewIntoField` to
 `mappingEntryThroughMemoryToMappingEntry`.
 -/
 
-open Solidity Proves
-open scoped Solidity.Core.Surface
+open Solidity NFml.Proves
+open scoped Core.Scoped
 
 theorem Solkey.TestSuite.storageToMemory.proved : ⊢ Solkey.TestSuite.storageToMemory.problem := by
   sol_prove
@@ -46,7 +46,7 @@ theorem Solkey.TestSuite.memoryToStorageIndexArrayCopyRootExample.proved : ⊢ S
 
 theorem Solkey.TestSuite.memoryToStorageIndexArrayCopyRootOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.memoryToStorageIndexArrayCopyRootOutOfBoundsReverts.problem := by
   sol_prove
-  refine Proves.close_dropWt ?_
+  refine NFml.Proves.close_dropWt ?_
   sol_symex
   refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce
