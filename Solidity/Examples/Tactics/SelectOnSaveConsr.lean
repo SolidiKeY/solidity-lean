@@ -171,4 +171,19 @@ theorem ageWriteReadKeY : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 
     -- findOnSave: dl{ ⟹ 42 ≐ 42 }
     exact Proves.eqRefl
 
+/-- `findOnSave` while the program is still open: the read of the write in
+the postcondition of `[ alice.age = 1; ]` (`Proves.rewrite`, every equation
+of the sequent, decision 87), then the strategy. -/
+example : ⊢ dl!{ [ alice.age = 1; ] find(save(storage, bob.age, 7), bob.age) ≐ 7 } := by
+  rw [findOnSave]
+  -- dl{ ⟹ [ alice.age = 1; ] 7 ≐ 7 }
+  sol_prove
+
+/-- The same in the context: a precondition rewritten with the program open. -/
+example : ⊢ dl!{ find(save(storage, bob.age, 7), bob.age) ≐ 7 → [ alice.age = 1; ] true } := by
+  apply impRight
+  rw [findOnSave]
+  -- dl{ 7 ≐ 7 ⟹ [ alice.age = 1; ] true }
+  sol_prove
+
 end Solidity.Examples.Tactics.SelectOnSaveConsr

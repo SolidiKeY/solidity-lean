@@ -325,6 +325,10 @@ partial def qHyps (Γ₀ : Ctx) (np : Option Nat) : (Γ : Ctx) → Hyps C Γ₀ 
 
 end Quote
 
+/-- A context, quoted and hash-consed, the contract named by `c`. -/
+def _root_.Solidity.Hyps.quote (c : Lean.Expr) {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) : Lean.Expr :=
+  Lean.ShareCommon.shareCommon ((Quote.qHyps Γ₀ none Γ H).run c)
+
 namespace Seq
 
 /-- The leaf `⟨Γ, H, φ⟩ : SLeaf C` quoted, hash-consed, the contract named
