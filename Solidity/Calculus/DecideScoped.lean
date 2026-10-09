@@ -32,6 +32,11 @@ is a symbol library and does not port (decision 78).
 The erasure drops two constructors, an update of pops and a hidden binder;
 an equation `eqD a b` is recognised through them (`Fml.peelS`), as the
 erased reduction recognises it on the erasure (`NFml.eqDView`).
+
+What the kernel evaluates (`Fml.inLS` checked, `Fml.toLS` unfolded by
+`sol_decide`) is written by the recursors (Gate G0, conditions 1 and 2),
+each with its `match` form as the compiled twin (`…M`) and a link theorem
+(`…_eq_…M`); the proofs are stated on the twins and carried across.
 -/
 
 namespace Solidity
@@ -78,6 +83,16 @@ theorem SymS.get_of_ok {ns : List Var} {ρ : SymS} (h : ρ.Ok ns) {Γ : Ctx} {t 
   simp only [SymS.get, h, List.getElem?_map, List.getElem?_eq_getElem hi, Option.map_some,
     Option.bind_some, Idx.name, List.getD_eq_getElem?_getD, Option.getD_some]
 
+/-- `Idx.toNat`, by the recursor. -/
+@[implemented_by Idx.toNat]
+def _root_.Solidity.Idx.toNatR {Γ : Ctx} {t : LTy} (i : Idx Γ t) : Nat :=
+  Idx.rec (motive := fun _ _ _ => Nat) 0 (fun _ ih => ih + 1) i
+
+theorem _root_.Solidity.Idx.toNatR_eq {Γ : Ctx} {t : LTy} (i : Idx Γ t) : i.toNatR = i.toNat := by
+  induction i with
+  | here => rfl
+  | there i ih => exact congrArg (· + 1) ih
+
 /-! ## Terms, by position -/
 
 section Terms
@@ -87,7 +102,7 @@ variable {Γ : Ctx}
 /-- The storage a storage variable is bound to (`Surface.Tm.storLocal?`). -/
 def _root_.Solidity.Tm.storLocalS (ρ : SymS) : Tm C Γ .st → Option LStor
   | .pvS i =>
-    match ρ.get i.toNat with
+    match ρ.get i.toNatR with
     | some (.stor s) => some s
     | _ => none
   | _ => none
@@ -136,9 +151,8 @@ def _root_.Solidity.Op3.toLAtS {a b c s : Srt} (ρ : SymS) : Op3 a b c s → Tm 
   | .write, m, v, x, y, z => writeM x y (freshRefS ρ m v z)
   | o, _, _, x, y, z => o.toL x y z
 
-/-- **A term with the updates pushed in, its locals read by position**
-(`Surface.Tm.toL`). -/
-def _root_.Solidity.Tm.toLS (ρ : SymS) : {s : Srt} → Tm C Γ s → s.LTy
+/-- `Tm.toLS`'s compiled twin. -/
+def _root_.Solidity.Tm.toLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → s.LTy
   | _, .pvV i =>
     match ρ.get i.toNat with
     | some (.val t) => t
@@ -155,9 +169,32 @@ def _root_.Solidity.Tm.toLS (ρ : SymS) : {s : Srt} → Tm C Γ s → s.LTy
     | _ => none
   | _, .netOf _ _ => .err
   | _, .app0 o => o.toL ρ.sym
-  | _, .app1 o _ a => o.toL (a.toLS ρ)
-  | _, .app2 o a b => Op2.toLAtS ρ o a (a.toLS ρ) (b.toLS ρ)
-  | _, .app3 o a b c => Op3.toLAtS ρ o a c (a.toLS ρ) (b.toLS ρ) (c.toLS ρ)
+  | _, .app1 o _ a => o.toL (a.toLSM ρ)
+  | _, .app2 o a b => Op2.toLAtS ρ o a (a.toLSM ρ) (b.toLSM ρ)
+  | _, .app3 o a b c => Op3.toLAtS ρ o a c (a.toLSM ρ) (b.toLSM ρ) (c.toLSM ρ)
+
+/-- **A term with the updates pushed in, its locals read by position**
+(`Surface.Tm.toL`), by the recursor. -/
+@[implemented_by Tm.toLSM]
+def _root_.Solidity.Tm.toLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : s.LTy :=
+  Tm.rec (motive := fun s _ => s.LTy)
+    (fun i =>
+      match ρ.get i.toNatR with
+      | some (.val t) => t
+      | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) | some .unset => .err
+      | none => .var (i.nameR ρ.names))
+    (fun i =>
+      match ρ.get i.toNatR with
+      | some (.path q) => q
+      | _ => .undef)
+    (fun _ => .init)
+    (fun i =>
+      match ρ.get i.toNatR with
+      | some (.mref j) => some (j, .lit (.bool true))
+      | _ => none)
+    (fun _ _ _ => .err) (fun o => o.toL ρ.sym) (fun o _ _ ih => o.toL ih)
+    (fun o a _ iha ihb => Op2.toLAtS ρ o a iha ihb)
+    (fun o a _ c iha ihb ihc => Op3.toLAtS ρ o a c iha ihb ihc) t
 
 /-- `Op2.inL`, by position. -/
 def _root_.Solidity.Op2.inLS {a b s : Srt} (ρ : SymS) : Op2 a b s → Tm C Γ a → a.LTy → b.LTy →
@@ -187,8 +224,8 @@ def _root_.Solidity.Op3.inLS {a b c s : Srt} (ρ : SymS) : Op3 a b c s → Tm C 
     hm && ha && (hv || (freshRefS ρ m v none).isSome) && (writeM x y (freshRefS ρ m v z)).isSome
   | _, _, _, _, _, _, _, _, _ => false
 
-/-- **The fragment, by position** (`Surface.Tm.inL`). -/
-def _root_.Solidity.Tm.inLS (ρ : SymS) : {s : Srt} → Tm C Γ s → Bool
+/-- `Tm.inLS`'s compiled twin. -/
+def _root_.Solidity.Tm.inLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ => true
   | _, .pvP i =>
     match ρ.get i.toNat with
@@ -201,10 +238,49 @@ def _root_.Solidity.Tm.inLS (ρ : SymS) : {s : Srt} → Tm C Γ s → Bool
     | _ => false
   | _, .netOf _ _ => false
   | _, .app0 o => o.inL
-  | _, .app1 o _ a => o.inL (a.toLS ρ) (a.inLS ρ)
-  | _, .app2 o a b => Op2.inLS ρ o a (a.toLS ρ) (b.toLS ρ) (a.inLS ρ) (b.inLS ρ)
+  | _, .app1 o _ a => o.inL (a.toLSM ρ) (a.inLSM ρ)
+  | _, .app2 o a b => Op2.inLS ρ o a (a.toLSM ρ) (b.toLSM ρ) (a.inLSM ρ) (b.inLSM ρ)
   | _, .app3 o a b c =>
-    Op3.inLS ρ o a c (a.toLS ρ) (b.toLS ρ) (c.toLS ρ) (a.inLS ρ) (b.inLS ρ) (c.inLS ρ)
+    Op3.inLS ρ o a c (a.toLSM ρ) (b.toLSM ρ) (c.toLSM ρ) (a.inLSM ρ) (b.inLSM ρ) (c.inLSM ρ)
+
+/-- **The fragment, by position** (`Surface.Tm.inL`), by the recursor. -/
+@[implemented_by Tm.inLSM]
+def _root_.Solidity.Tm.inLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : Bool :=
+  Tm.rec (motive := fun _ _ => Bool)
+    (fun _ => true)
+    (fun i =>
+      match ρ.get i.toNatR with
+      | some (.path _) | some (.val _) => true
+      | some (.stale _) | some (.stor _) | some (.mref _) | some .unset | none => false)
+    (fun _ => false)
+    (fun i =>
+      match ρ.get i.toNatR with
+      | some (.mref _) => true
+      | _ => false)
+    (fun _ _ _ => false) (fun o => o.inL) (fun o _ a ih => o.inL (a.toLS ρ) ih)
+    (fun o a b iha ihb => Op2.inLS ρ o a (a.toLS ρ) (b.toLS ρ) iha ihb)
+    (fun o a b c iha ihb ihc =>
+      Op3.inLS ρ o a c (a.toLS ρ) (b.toLS ρ) (c.toLS ρ) iha ihb ihc) t
+
+/-- The recursor's reading is the twin's. -/
+theorem _root_.Solidity.Tm.toLS_eq_toLSM (ρ : SymS) {s : Srt} (t : Tm C Γ s) :
+    t.toLS ρ = t.toLSM ρ := by
+  induction t with
+  | pvV i | pvP i | pvI i => simp only [Tm.toLSM, ← Idx.toNatR_eq, ← Idx.nameR_eq]; rfl
+  | pvS _ | netOf _ _ | app0 _ => rfl
+  | app1 o _ x ih => simp only [Tm.toLSM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [Tm.toLSM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [Tm.toLSM, ← ihx, ← ihy, ← ihz]; rfl
+
+theorem _root_.Solidity.Tm.inLS_eq_inLSM (ρ : SymS) {s : Srt} (t : Tm C Γ s) :
+    t.inLS ρ = t.inLSM ρ := by
+  induction t with
+  | pvP i | pvI i => simp only [Tm.inLSM, ← Idx.toNatR_eq]; rfl
+  | pvV _ | pvS _ | netOf _ _ | app0 _ => rfl
+  | app1 o _ x ih => simp only [Tm.inLSM, ← ih, ← Tm.toLS_eq_toLSM]; rfl
+  | app2 o x y ihx ihy => simp only [Tm.inLSM, ← ihx, ← ihy, ← Tm.toLS_eq_toLSM]; rfl
+  | app3 o x y z ihx ihy ihz =>
+    simp only [Tm.inLSM, ← ihx, ← ihy, ← ihz, ← Tm.toLS_eq_toLSM]; rfl
 
 /-! ### The same as the erasure's -/
 
@@ -214,7 +290,7 @@ theorem _root_.Solidity.Tm.storLocalS_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.l
     (t : Tm C Γ .st) : t.storLocalS ρ = (t.erase ns).storLocal? ρ.sym := by
   cases t with
   | pvS i =>
-    simp only [Tm.storLocalS, Tm.erase, Surface.Tm.storLocal?, SymS.get_of_ok hok hl i]
+    simp only [Tm.storLocalS, Tm.erase, Surface.Tm.storLocal?, Idx.toNatR_eq, SymS.get_of_ok hok hl i]
     rcases lookupBy (i.name ns) ρ.sym.env with _ | b
     · rfl
     · cases b <;> rfl
@@ -277,36 +353,40 @@ theorem _root_.Solidity.Op3.toLAtS_eq {a b c s : Srt} (o : Op3 a b c s) (t : Tm 
   | write => simp only [Op3.toLAtS, Op3.toLAt, freshRefS_eq (ns := ns)]
   | _ => rfl
 
-/-- **A term reads as its erasure**: lowered by position, it is what the
-erased reduction lowers by name. -/
-theorem _root_.Solidity.Tm.toLS_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) :
-    {s : Srt} → (t : Tm C Γ s) → t.toLS ρ = (t.erase ns).toL ρ.sym
+theorem _root_.Solidity.Tm.toLSM_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) :
+    {s : Srt} → (t : Tm C Γ s) → t.toLSM ρ = (t.erase ns).toL ρ.sym
   | _, .pvV i => by
-    simp only [Tm.toLS, Tm.erase, Surface.Tm.toL, SymS.get_of_ok hok hl i, SymS.names_of_ok hok]
+    simp only [Tm.toLSM, Tm.erase, Surface.Tm.toL, SymS.get_of_ok hok hl i, SymS.names_of_ok hok]
     rcases lookupBy (i.name ns) ρ.sym.env with _ | b
     · rfl
     · cases b <;> rfl
   | _, .pvP i => by
-    simp only [Tm.toLS, Tm.erase, Surface.Tm.toL, SymS.get_of_ok hok hl i]
+    simp only [Tm.toLSM, Tm.erase, Surface.Tm.toL, SymS.get_of_ok hok hl i]
     rcases lookupBy (i.name ns) ρ.sym.env with _ | b
     · rfl
     · cases b <;> rfl
   | _, .pvS _ => rfl
   | _, .pvI i => by
-    simp only [Tm.toLS, Tm.erase, Surface.Tm.toL, SymS.get_of_ok hok hl i]
+    simp only [Tm.toLSM, Tm.erase, Surface.Tm.toL, SymS.get_of_ok hok hl i]
     rcases lookupBy (i.name ns) ρ.sym.env with _ | b
     · rfl
     · cases b <;> rfl
   | _, .netOf _ _ => rfl
   | _, .app0 _ => rfl
   | _, .app1 o _ a => by
-    simp only [Tm.toLS, Tm.erase, Surface.Tm.toL, Tm.toLS_eq hok hl a]
+    simp only [Tm.toLSM, Tm.erase, Surface.Tm.toL, Tm.toLSM_eq hok hl a]
   | _, .app2 o a b => by
-    simp only [Tm.toLS, Tm.erase, Surface.Tm.toL, Tm.toLS_eq hok hl a, Tm.toLS_eq hok hl b,
+    simp only [Tm.toLSM, Tm.erase, Surface.Tm.toL, Tm.toLSM_eq hok hl a, Tm.toLSM_eq hok hl b,
       Op2.toLAtS_eq hok hl]
   | _, .app3 o a b c => by
-    simp only [Tm.toLS, Tm.erase, Surface.Tm.toL, Tm.toLS_eq hok hl a, Tm.toLS_eq hok hl b,
-      Tm.toLS_eq hok hl c, Op3.toLAtS_eq (ns := ns)]
+    simp only [Tm.toLSM, Tm.erase, Surface.Tm.toL, Tm.toLSM_eq hok hl a, Tm.toLSM_eq hok hl b,
+      Tm.toLSM_eq hok hl c, Op3.toLAtS_eq (ns := ns)]
+
+/-- **A term reads as its erasure**: lowered by position, it is what the
+erased reduction lowers by name. -/
+theorem _root_.Solidity.Tm.toLS_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) {s : Srt}
+    (t : Tm C Γ s) : t.toLS ρ = (t.erase ns).toL ρ.sym :=
+  (Tm.toLS_eq_toLSM ρ t).trans (Tm.toLSM_eq hok hl t)
 
 theorem _root_.Solidity.Op2.inLS_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) {a b s : Srt}
     (o : Op2 a b s) (t : Tm C Γ a) (x : a.LTy) (y : b.LTy) (ha hb : Bool) :
@@ -327,32 +407,36 @@ theorem _root_.Solidity.Op3.inLS_eq {a b c s : Srt} (o : Op3 a b c s) (t : Tm C 
   | save => simp only [Op3.inLS, Op3.inL, Tm.isStorageS_eq (ns := ns)]
   | _ => rfl
 
-/-- **The fragment is the erasure's.** -/
-theorem _root_.Solidity.Tm.inLS_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) :
-    {s : Srt} → (t : Tm C Γ s) → t.inLS ρ = (t.erase ns).inL ρ.sym
+theorem _root_.Solidity.Tm.inLSM_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) :
+    {s : Srt} → (t : Tm C Γ s) → t.inLSM ρ = (t.erase ns).inL ρ.sym
   | _, .pvV _ => rfl
   | _, .pvP i => by
-    simp only [Tm.inLS, Tm.erase, Surface.Tm.inL, SymS.get_of_ok hok hl i]
+    simp only [Tm.inLSM, Tm.erase, Surface.Tm.inL, SymS.get_of_ok hok hl i]
     rcases lookupBy (i.name ns) ρ.sym.env with _ | b
     · rfl
     · cases b <;> rfl
   | _, .pvS _ => rfl
   | _, .pvI i => by
-    simp only [Tm.inLS, Tm.erase, Surface.Tm.inL, SymS.get_of_ok hok hl i]
+    simp only [Tm.inLSM, Tm.erase, Surface.Tm.inL, SymS.get_of_ok hok hl i]
     rcases lookupBy (i.name ns) ρ.sym.env with _ | b
     · rfl
     · cases b <;> rfl
   | _, .netOf _ _ => rfl
   | _, .app0 _ => rfl
   | _, .app1 o _ a => by
-    simp only [Tm.inLS, Tm.erase, Surface.Tm.inL, Tm.toLS_eq hok hl a, Tm.inLS_eq hok hl a]
+    simp only [Tm.inLSM, Tm.erase, Surface.Tm.inL, Tm.toLSM_eq hok hl a, Tm.inLSM_eq hok hl a]
   | _, .app2 o a b => by
-    simp only [Tm.inLS, Tm.erase, Surface.Tm.inL, Tm.toLS_eq hok hl a, Tm.toLS_eq hok hl b,
-      Tm.inLS_eq hok hl a, Tm.inLS_eq hok hl b, Op2.inLS_eq hok hl]
+    simp only [Tm.inLSM, Tm.erase, Surface.Tm.inL, Tm.toLSM_eq hok hl a, Tm.toLSM_eq hok hl b,
+      Tm.inLSM_eq hok hl a, Tm.inLSM_eq hok hl b, Op2.inLS_eq hok hl]
   | _, .app3 o a b c => by
-    simp only [Tm.inLS, Tm.erase, Surface.Tm.inL, Tm.toLS_eq hok hl a, Tm.toLS_eq hok hl b,
-      Tm.toLS_eq hok hl c, Tm.inLS_eq hok hl a, Tm.inLS_eq hok hl b, Tm.inLS_eq hok hl c,
+    simp only [Tm.inLSM, Tm.erase, Surface.Tm.inL, Tm.toLSM_eq hok hl a, Tm.toLSM_eq hok hl b,
+      Tm.toLSM_eq hok hl c, Tm.inLSM_eq hok hl a, Tm.inLSM_eq hok hl b, Tm.inLSM_eq hok hl c,
       Op3.inLS_eq (ns := ns)]
+
+/-- **The fragment is the erasure's.** -/
+theorem _root_.Solidity.Tm.inLS_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) {s : Srt}
+    (t : Tm C Γ s) : t.inLS ρ = (t.erase ns).inL ρ.sym :=
+  (Tm.inLS_eq_inLSM ρ t).trans (Tm.inLSM_eq hok hl t)
 
 /-! ### Equations and stale writes -/
 
@@ -394,7 +478,7 @@ def _root_.Solidity.Tm.eqLitS (a b : Tm C Γ .val) : Bool :=
 (`Surface.Tm.slotPath?`). -/
 def _root_.Solidity.Tm.slotPathS (ρ : SymS) : {u : Srt} → Tm C Γ u → Option LPath
   | _, .pvP i =>
-    match ρ.get i.toNat with
+    match ρ.get i.toNatR with
     | some (.stale q) => some q
     | _ => none
   | _, .app1 (.field f) _ p => (Tm.slotPathS ρ p).map fun q => key{ q.f }
@@ -455,7 +539,7 @@ theorem _root_.Solidity.Tm.eqLitS_eq (a b : Tm C Γ .val) :
 theorem _root_.Solidity.Tm.slotPathS_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) :
     {u : Srt} → (t : Tm C Γ u) → t.slotPathS ρ = (t.erase ns).slotPath? ρ.sym
   | _, .pvP i => by
-    simp only [Tm.slotPathS, Tm.erase, Surface.Tm.slotPath?, SymS.get_of_ok hok hl i]
+    simp only [Tm.slotPathS, Tm.erase, Surface.Tm.slotPath?, Idx.toNatR_eq, SymS.get_of_ok hok hl i]
     rcases lookupBy (i.name ns) ρ.sym.env with _ | b
     · rfl
     · cases b <;> rfl
@@ -576,16 +660,34 @@ def SymS.push (ρ : SymS) (x : Var) : Act → SymS
   | .bind b => ⟨(x, some b) :: ρ.loc, { ρ.sym with env := (x, b) :: ρ.sym.env }⟩
   | _ => ⟨(x, lookupBy x ρ.sym.env) :: ρ.loc, ρ.sym⟩
 
-/-- The positions a thinning keeps (`Thin.names`, for any list). -/
-def _root_.Solidity.Thin.sel {α : Type} : {Γ Δ : Ctx} → Thin Γ Δ → List α → List α
+/-- `Thin.sel`'s compiled twin. -/
+def _root_.Solidity.Thin.selM {α : Type} : {Γ Δ : Ctx} → Thin Γ Δ → List α → List α
   | _, _, .refl, l => l
-  | _, _, .keep h, a :: l => a :: Thin.sel h l
-  | _, _, .keep h, [] => Thin.sel h []
-  | _, _, .drop h, l => Thin.sel h l.tail
+  | _, _, .keep h, a :: l => a :: Thin.selM h l
+  | _, _, .keep h, [] => Thin.selM h []
+  | _, _, .drop h, l => Thin.selM h l.tail
+
+/-- The positions a thinning keeps (`Thin.names`, for any list), by the
+recursor. -/
+@[implemented_by Thin.selM]
+def _root_.Solidity.Thin.sel {α : Type} {Γ Δ : Ctx} (h : Thin Γ Δ) : List α → List α :=
+  Thin.rec (motive := fun _ _ _ => List α → List α) (fun l => l)
+    (fun _ ih l => List.casesOn (motive := fun _ => List α) l (ih []) (fun a l => a :: ih l))
+    (fun _ ih l => ih l.tail) h
+
+theorem _root_.Solidity.Thin.sel_eq_selM {α : Type} {Γ Δ : Ctx} (h : Thin Γ Δ) (l : List α) :
+    Thin.sel h l = Thin.selM h l := by
+  induction h generalizing l with
+  | refl => rfl
+  | keep h ih =>
+    cases l with
+    | nil => exact (ih []).trans (by simp only [Thin.selM])
+    | cons a l => exact (congrArg (a :: ·) (ih l)).trans (by simp only [Thin.selM])
+  | drop h ih => exact (ih l.tail).trans (by simp only [Thin.selM])
 
 /-- The target position of an element: an assignment's local. -/
 def _root_.Solidity.UpdElem.tgt {Γ Δ : Ctx} : UpdElem C Γ Δ → Option Nat
-  | .local i _ => some i.toNat
+  | .local i _ => some i.toNatR
   | _ => none
 
 /-- The target's name. -/
@@ -597,15 +699,32 @@ section Upd
 
 variable {Γ : Ctx}
 
-/-- The state an update leaves, every element's act read off it by
-`aE` (an assignment) and `aR` (a declaration's right-hand side). -/
-def _root_.Solidity.Upd.replayS (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
+/-- `Upd.replayS`'s compiled twin. -/
+def _root_.Solidity.Upd.replaySM (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
     (aR : ∀ {t : LTy}, Rhs C Γ t → Act) (ρ₀ : SymS) : {Δ : Ctx} → Upd C Γ Δ → SymS
   | _, .nil => ρ₀
-  | _, .snoc U e => (U.replayS aE aR ρ₀).act e.tgt (aE e)
-  | _, .decl U x r => (U.replayS aE aR ρ₀).push x (aR r)
-  | _, .pop U h => ⟨(U.replayS aE aR ρ₀).loc.drop h.depth, (U.replayS aE aR ρ₀).sym⟩
-  | _, .drop U h => ⟨Thin.sel h (U.replayS aE aR ρ₀).loc, (U.replayS aE aR ρ₀).sym⟩
+  | _, .snoc U e => (U.replaySM aE aR ρ₀).act e.tgt (aE e)
+  | _, .decl U x r => (U.replaySM aE aR ρ₀).push x (aR r)
+  | _, .pop U h => ⟨(U.replaySM aE aR ρ₀).loc.drop h.depth, (U.replaySM aE aR ρ₀).sym⟩
+  | _, .drop U h => ⟨Thin.sel h (U.replaySM aE aR ρ₀).loc, (U.replaySM aE aR ρ₀).sym⟩
+
+/-- The state an update leaves, every element's act read off it by
+`aE` (an assignment) and `aR` (a declaration's right-hand side), by the
+recursor. -/
+@[implemented_by Upd.replaySM]
+def _root_.Solidity.Upd.replayS (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
+    (aR : ∀ {t : LTy}, Rhs C Γ t → Act) (ρ₀ : SymS) {Δ : Ctx} (U : Upd C Γ Δ) : SymS :=
+  Upd.rec (motive := fun _ _ => SymS) ρ₀ (fun _ e ih => ih.act e.tgt (aE e))
+    (fun _ x r ih => ih.push x (aR r)) (fun _ h ih => ⟨ih.loc.drop h.depth, ih.sym⟩)
+    (fun _ h ih => ⟨Thin.sel h ih.loc, ih.sym⟩) U
+
+theorem _root_.Solidity.Upd.replayS_eq_replaySM (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
+    (aR : ∀ {t : LTy}, Rhs C Γ t → Act) (ρ₀ : SymS) {Δ : Ctx} (U : Upd C Γ Δ) :
+    U.replayS aE aR ρ₀ = U.replaySM aE aR ρ₀ := by
+  induction U with
+  | nil => rfl
+  | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih =>
+    simp only [Upd.replaySM, ← ih]; rfl
 
 /-- An element of an update: a right-hand side (an assignment's or a
 declaration's), or an element that assigns no local. -/
@@ -631,13 +750,24 @@ def UView.add : UView C Γ → ElemS C Γ → UView C Γ
   | .one a, b => .two a b
   | _, _ => .many
 
-/-- The elements of an update, pops and drops aside. -/
-def _root_.Solidity.Upd.view : {Δ : Ctx} → Upd C Γ Δ → UView C Γ
+/-- `Upd.view`'s compiled twin. -/
+def _root_.Solidity.Upd.viewM : {Δ : Ctx} → Upd C Γ Δ → UView C Γ
   | _, .nil => .zero
-  | _, .snoc U e => U.view.add e.toElemS
-  | _, .decl U _ r => U.view.add (.rhs r)
-  | _, .pop U _ => U.view
-  | _, .drop U _ => U.view
+  | _, .snoc U e => U.viewM.add e.toElemS
+  | _, .decl U _ r => U.viewM.add (.rhs r)
+  | _, .pop U _ => U.viewM
+  | _, .drop U _ => U.viewM
+
+/-- The elements of an update, pops and drops aside, by the recursor. -/
+@[implemented_by Upd.viewM]
+def _root_.Solidity.Upd.view {Δ : Ctx} (U : Upd C Γ Δ) : UView C Γ :=
+  Upd.rec (motive := fun _ _ => UView C Γ) .zero (fun _ e ih => ih.add e.toElemS)
+    (fun _ _ r ih => ih.add (.rhs r)) (fun _ _ ih => ih) (fun _ _ ih => ih) U
+
+theorem _root_.Solidity.Upd.view_eq_viewM {Δ : Ctx} (U : Upd C Γ Δ) : U.view = U.viewM := by
+  induction U with
+  | nil => rfl
+  | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih => simp only [Upd.viewM, ← ih]; rfl
 
 /-- The element on the erasure, its local named `x`. -/
 def ElemS.erase (ns : List Var) (x : Var) : ElemS C Γ → Surface.UpdElem C
@@ -716,7 +846,7 @@ def pairViewS : ElemS C Γ → ElemS C Γ → Option (Tm C Γ .ident × Tm C Γ 
 /-- `allocPair?`, a syntactic test on the pair's two terms, read on their
 erasures (two copies of the same value compared). -/
 def allocPairS? (ρ : SymS) (i : Tm C Γ .ident) (mm : Tm C Γ .mem) : Bool :=
-  allocPair? (i.erase ρ.names) (mm.erase ρ.names)
+  allocPair? (i.eraseR ρ.names) (mm.eraseR ρ.names)
 
 /-- A copy from storage (`copyOf?`): its path. -/
 def copyOfS? : Tm C Γ .mem → Option (Tm C Γ .path)
@@ -767,20 +897,44 @@ def noActE {Γ Δ : Ctx} (_ : UpdElem C Γ Δ) : Act := .keep
 /-- No act, on a declaration. -/
 def noActR {Γ : Ctx} {t : LTy} (_ : Rhs C Γ t) : Act := .keep
 
-/-- The formula under the constructors the erasure drops (an update of
-pops and drops, a hidden binder), and the state they leave. -/
-def _root_.Solidity.Fml.peelS : {Γ : Ctx} → SymS → Fml C Γ → (Γ' : Ctx) × SymS × Fml C Γ'
+/-- `Fml.peelS`'s compiled twin. -/
+def _root_.Solidity.Fml.peelSM : {Γ : Ctx} → SymS → Fml C Γ → (Γ' : Ctx) × SymS × Fml C Γ'
   | _, ρ, .upd m U φ =>
     match U.view with
-    | .zero => φ.peelS (U.replayS noActE noActR ρ)
+    | .zero => φ.peelSM (U.replayS noActE noActR ρ)
     | _ => ⟨_, ρ, .upd m U φ⟩
-  | _, ρ, .bind _ x _ φ => φ.peelS (ρ.push x .keep)
+  | _, ρ, .bind _ x _ φ => φ.peelSM (ρ.push x .keep)
   | Γ, ρ, φ => ⟨Γ, ρ, φ⟩
+
+/-- The formula under the constructors the erasure drops (an update of
+pops and drops, a hidden binder), and the state they leave, by the
+recursor. -/
+@[implemented_by Fml.peelSM]
+def _root_.Solidity.Fml.peelS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : (Γ' : Ctx) × SymS × Fml C Γ' :=
+  Fml.rec (motive := fun _ _ => SymS → (Γ' : Ctx) × SymS × Fml C Γ')
+    (tt := fun {Γ} ρ => ⟨Γ, ρ, .tt⟩) (eq := fun a b ρ => ⟨_, ρ, .eq a b⟩)
+    (defined := fun t ρ => ⟨_, ρ, .defined t⟩) (not := fun φ _ ρ => ⟨_, ρ, .not φ⟩)
+    (and := fun φ ψ _ _ ρ => ⟨_, ρ, .and φ ψ⟩) (imp := fun φ ψ _ _ ρ => ⟨_, ρ, .imp φ ψ⟩)
+    (upd := fun m U φ ih ρ =>
+      match U.view with
+      | .zero => ih (U.replayS noActE noActR ρ)
+      | _ => ⟨_, ρ, .upd m U φ⟩)
+    (modal := fun m P κ φ _ ρ => ⟨_, ρ, .modal m P κ φ⟩)
+    (havoc := fun φ _ ρ => ⟨_, ρ, .havoc φ⟩) (all := fun x p φ _ ρ => ⟨_, ρ, .all x p φ⟩)
+    (bind := fun _ x _ _ ih ρ => ih (ρ.push x .keep))
+    (anon := fun xs φ _ ρ => ⟨_, ρ, .anon xs φ⟩) φ ρ
+
+theorem _root_.Solidity.Fml.peelS_eq_peelSM {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) :
+    φ.peelS ρ = φ.peelSM ρ := by
+  induction φ generalizing ρ with
+  | upd m U φ ih => simp only [Fml.peelSM, ← ih]; rfl
+  | bind m x t φ ih => simp only [Fml.peelSM, ← ih]; rfl
+  | _ => rfl
 
 /-- Two terms the same (`Surface.Tm.sameL`), each with the state it is
 read in: compared by their erasures, a syntactic test. -/
 def sameAt {Γ Δ : Ctx} (ρa : SymS) (a : Tm C Γ .val) (ρb : SymS) (b : Tm C Δ .val) : Bool :=
-  a.sameShapeS && decide (a.erase ρa.names = b.erase ρb.names)
+  a.sameShapeS && decide (a.eraseR ρa.names = b.eraseR ρb.names)
 
 /-- `defined a`. -/
 def _root_.Solidity.Fml.asDefinedS {Γ : Ctx} : Fml C Γ → Option (Tm C Γ .val)
@@ -815,65 +969,140 @@ def eqDViewS {Γ : Ctx} (ρ : SymS) (φ ψ : Fml C Γ) :
     | _, _ => none
   | _, _ => none
 
-/-- **A scoped formula with its updates pushed in** (`NFml.toL` of its
-erasure). -/
-def _root_.Solidity.Fml.toLS : {Γ : Ctx} → SymS → Fml C Γ → LFml
+/-- `Fml.toLS`'s compiled twin. -/
+def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → SymS → Fml C Γ → LFml
   | _, _, .tt => .tt
   | _, ρ, .eq a b => .eq (a.toLS ρ) (b.toLS ρ)
   | _, ρ, .defined t => .eq (t.toLS ρ) (t.toLS ρ)
-  | _, ρ, .not φ => .not (φ.toLS ρ)
+  | _, ρ, .not φ => .not (φ.toLSM ρ)
   | _, ρ, .and φ ψ =>
     match eqDViewS ρ φ ψ with
     | some (⟨_, ρa, a⟩, ⟨_, ρb, b⟩) => .eq (a.toLS ρa) (b.toLS ρb)
-    | none => .and (φ.toLS ρ) (ψ.toLS ρ)
-  | _, ρ, .imp φ ψ => .imp (φ.toLS ρ) (ψ.toLS ρ)
+    | none => .and (φ.toLSM ρ) (ψ.toLSM ρ)
+  | _, ρ, .imp φ ψ => .imp (φ.toLSM ρ) (ψ.toLSM ρ)
   | _, ρ, .upd m U φ =>
     match U.view with
-    | .zero => φ.toLS (U.replayS noActE noActR ρ)
-    | .one a => guardM m (a.guard ρ) (φ.toLS (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+    | .zero => φ.toLSM (U.replayS noActE noActR ρ)
+    | .one a => guardM m (a.guard ρ) (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
     | .two a b =>
       match pairViewS a b with
       | some (i, mm) =>
         match pairLS ρ i mm with
-        | some (g, M) => guardM m g (φ.toLS (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
+        | some (g, M) => guardM m g (φ.toLSM (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
         | none => .tt
       | none => .tt
     | .many => .tt
   | _, _, .modal .. => .not .tt
   | _, _, .havoc _ => .tt
-  | _, ρ, .all x p φ => .all x p (φ.toLS (ρ.push x (.bind (.val (.var x)))))
-  | _, ρ, .bind _ x _ φ => φ.toLS (ρ.push x .keep)
+  | _, ρ, .all x p φ => .all x p (φ.toLSM (ρ.push x (.bind (.val (.var x)))))
+  | _, ρ, .bind _ x _ φ => φ.toLSM (ρ.push x .keep)
   | _, _, .anon .. => .tt
 
-/-- **The fragment, on a scoped formula** (`NFml.inL` of its erasure). -/
-def _root_.Solidity.Fml.inLS : {Γ : Ctx} → SymS → Fml C Γ → Bool
+/-- `Fml.inLS`'s compiled twin. -/
+def _root_.Solidity.Fml.inLSM : {Γ : Ctx} → SymS → Fml C Γ → Bool
   | _, _, .tt => true
   | _, _, .eq a b => a.eqLitS b
   | _, ρ, .defined t => t.inLS ρ
-  | _, ρ, .not φ => φ.inLS ρ
+  | _, ρ, .not φ => φ.inLSM ρ
   | _, ρ, .and φ ψ =>
     match eqDViewS ρ φ ψ with
     | some (⟨_, ρa, a⟩, ⟨_, ρb, b⟩) => a.inLS ρa && b.inLS ρb
-    | none => φ.inLS ρ && ψ.inLS ρ
-  | _, ρ, .imp φ ψ => φ.inLS ρ && ψ.inLS ρ
+    | none => φ.inLSM ρ && ψ.inLSM ρ
+  | _, ρ, .imp φ ψ => φ.inLSM ρ && ψ.inLSM ρ
   | _, ρ, .upd _ U φ =>
     match U.view with
-    | .zero => φ.inLS (U.replayS noActE noActR ρ)
-    | .one a => a.inLS ρ && φ.inLS (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)
+    | .zero => φ.inLSM (U.replayS noActE noActR ρ)
+    | .one a => a.inLS ρ && φ.inLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)
     | .two a b =>
       match pairViewS a b with
       | some (i, mm) =>
         match pairLS ρ i mm with
         | some (_, M) =>
-          pairInS ρ mm && M.within memSize && φ.inLS (U.replayS (pairActE ρ M) (pairActR ρ) ρ)
+          pairInS ρ mm && M.within memSize && φ.inLSM (U.replayS (pairActE ρ M) (pairActR ρ) ρ)
         | none => false
       | none => false
     | .many => false
   | _, _, .modal .. => true
   | _, _, .havoc _ => false
-  | _, ρ, .all x _ φ => !ρ.sym.vars.contains x && φ.inLS (ρ.push x (.bind (.val (.var x))))
-  | _, ρ, .bind _ x _ φ => φ.inLS (ρ.push x .keep)
+  | _, ρ, .all x _ φ => !ρ.sym.vars.contains x && φ.inLSM (ρ.push x (.bind (.val (.var x))))
+  | _, ρ, .bind _ x _ φ => φ.inLSM (ρ.push x .keep)
   | _, _, .anon .. => false
+
+/-- **A scoped formula with its updates pushed in** (`NFml.toL` of its
+erasure), by the recursor. -/
+@[implemented_by Fml.toLSM]
+def _root_.Solidity.Fml.toLS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : LFml :=
+  Fml.rec (motive := fun _ _ => SymS → LFml)
+    (tt := fun _ => .tt) (eq := fun a b ρ => .eq (a.toLS ρ) (b.toLS ρ))
+    (defined := fun t ρ => .eq (t.toLS ρ) (t.toLS ρ))
+    (not := fun _ ih ρ => .not (ih ρ))
+    (and := fun φ ψ ihφ ihψ ρ =>
+      match eqDViewS ρ φ ψ with
+      | some (⟨_, ρa, a⟩, ⟨_, ρb, b⟩) => .eq (a.toLS ρa) (b.toLS ρb)
+      | none => .and (ihφ ρ) (ihψ ρ))
+    (imp := fun _ _ ihφ ihψ ρ => .imp (ihφ ρ) (ihψ ρ))
+    (upd := fun m U _ ih ρ =>
+      match U.view with
+      | .zero => ih (U.replayS noActE noActR ρ)
+      | .one a => guardM m (a.guard ρ) (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+      | .two a b =>
+        match pairViewS a b with
+        | some (i, mm) =>
+          match pairLS ρ i mm with
+          | some (g, M) => guardM m g (ih (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
+          | none => .tt
+        | none => .tt
+      | .many => .tt)
+    (modal := fun _ _ _ _ _ _ => .not .tt) (havoc := fun _ _ _ => .tt)
+    (all := fun x p _ ih ρ => .all x p (ih (ρ.push x (.bind (.val (.var x))))))
+    (bind := fun _ x _ _ ih ρ => ih (ρ.push x .keep)) (anon := fun _ _ _ _ => .tt) φ ρ
+
+/-- **The fragment, on a scoped formula** (`NFml.inL` of its erasure), by the
+recursor. -/
+@[implemented_by Fml.inLSM]
+def _root_.Solidity.Fml.inLS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : Bool :=
+  Fml.rec (motive := fun _ _ => SymS → Bool)
+    (tt := fun _ => true) (eq := fun a b _ => a.eqLitS b) (defined := fun t ρ => t.inLS ρ)
+    (not := fun _ ih ρ => ih ρ)
+    (and := fun φ ψ ihφ ihψ ρ =>
+      match eqDViewS ρ φ ψ with
+      | some (⟨_, ρa, a⟩, ⟨_, ρb, b⟩) => a.inLS ρa && b.inLS ρb
+      | none => ihφ ρ && ihψ ρ)
+    (imp := fun _ _ ihφ ihψ ρ => ihφ ρ && ihψ ρ)
+    (upd := fun _ U _ ih ρ =>
+      match U.view with
+      | .zero => ih (U.replayS noActE noActR ρ)
+      | .one a => a.inLS ρ && ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)
+      | .two a b =>
+        match pairViewS a b with
+        | some (i, mm) =>
+          match pairLS ρ i mm with
+          | some (_, M) =>
+            pairInS ρ mm && M.within memSize && ih (U.replayS (pairActE ρ M) (pairActR ρ) ρ)
+          | none => false
+        | none => false
+      | .many => false)
+    (modal := fun _ _ _ _ _ _ => true) (havoc := fun _ _ _ => false)
+    (all := fun x _ _ ih ρ => !ρ.sym.vars.contains x && ih (ρ.push x (.bind (.val (.var x)))))
+    (bind := fun _ x _ _ ih ρ => ih (ρ.push x .keep)) (anon := fun _ _ _ _ => false) φ ρ
+
+theorem _root_.Solidity.Fml.toLS_eq_toLSM {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) :
+    φ.toLS ρ = φ.toLSM ρ := by
+  induction φ generalizing ρ with
+  | tt | modal | havoc | anon => rfl
+  | eq | defined => simp only [Fml.toLSM]; rfl
+  | not φ ih | all x p φ ih | bind m x t φ ih => simp only [Fml.toLSM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.toLSM, ← ihφ, ← ihψ]; rfl
+  | upd m U φ ih => simp only [Fml.toLSM, ← ih]; rfl
+
+theorem _root_.Solidity.Fml.inLS_eq_inLSM {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) :
+    φ.inLS ρ = φ.inLSM ρ := by
+  induction φ generalizing ρ with
+  | tt | modal | havoc | anon => rfl
+  | eq | defined => simp only [Fml.inLSM]; rfl
+  | not φ ih | all x p φ ih | bind m x t φ ih => simp only [Fml.inLSM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.inLSM, ← ihφ, ← ihψ]; rfl
+  | upd m U φ ih => simp only [Fml.inLSM, ← ih]; rfl
 
 /-- What `sol_decide` proves of a scoped leaf: its updates pushed in by
 position, the reads of writes eliminated (`NFml.reduce`). -/
@@ -911,25 +1140,27 @@ theorem nodup_getElem_ne {α : Type} {l : List α} (h : l.Nodup) {i j : Nat} (hi
   · exact List.pairwise_iff_getElem.1 h i j hi hj h'
   · exact (List.pairwise_iff_getElem.1 h j i hj hi h').symm
 
-theorem _root_.Solidity.Thin.sel_nil {α : Type} : {Γ Δ : Ctx} → (h : Thin Γ Δ) →
-    Thin.sel h ([] : List α) = []
+theorem _root_.Solidity.Thin.selM_nil {α : Type} : {Γ Δ : Ctx} → (h : Thin Γ Δ) →
+    Thin.selM h ([] : List α) = []
   | _, _, .refl => rfl
-  | _, _, .keep h => Thin.sel_nil h
-  | _, _, .drop h => Thin.sel_nil h
+  | _, _, .keep h => Thin.selM_nil h
+  | _, _, .drop h => Thin.selM_nil h
 
-theorem _root_.Solidity.Thin.sel_map {α β : Type} (f : α → β) :
-    {Γ Δ : Ctx} → (h : Thin Γ Δ) → (l : List α) → Thin.sel h (l.map f) = (Thin.sel h l).map f
+theorem _root_.Solidity.Thin.selM_map {α β : Type} (f : α → β) :
+    {Γ Δ : Ctx} → (h : Thin Γ Δ) → (l : List α) → Thin.selM h (l.map f) = (Thin.selM h l).map f
   | _, _, .refl, _ => rfl
-  | _, _, .keep h, a :: l => by simp only [List.map_cons, Thin.sel, Thin.sel_map f h l]
-  | _, _, .keep h, [] => by simp only [List.map_nil, Thin.sel, Thin.sel_nil]
-  | _, _, .drop h, l => by simp only [Thin.sel, ← List.map_tail, Thin.sel_map f h l.tail]
+  | _, _, .keep h, a :: l => by simp only [List.map_cons, Thin.selM, Thin.selM_map f h l]
+  | _, _, .keep h, [] => by simp only [List.map_nil, Thin.selM, Thin.selM_nil]
+  | _, _, .drop h, l => by simp only [Thin.selM, ← List.map_tail, Thin.selM_map f h l.tail]
 
-theorem _root_.Solidity.Thin.sel_eq_names : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (l : List Var) →
-    Thin.sel h l = h.names l
-  | _, _, .refl, _ => rfl
-  | _, _, .keep h, a :: l => by simp only [Thin.sel, Thin.names, Thin.sel_eq_names h l]
-  | _, _, .keep h, [] => by simp only [Thin.sel, Thin.names, Thin.sel_eq_names h []]
-  | _, _, .drop h, l => by simp only [Thin.sel, Thin.names, Thin.sel_eq_names h l.tail]
+theorem _root_.Solidity.Thin.sel_map {α β : Type} (f : α → β) {Γ Δ : Ctx} (h : Thin Γ Δ)
+    (l : List α) : Thin.sel h (l.map f) = (Thin.sel h l).map f := by
+  simp only [Thin.sel_eq_selM, Thin.selM_map]
+
+/-- On names, the positions kept are `Thin.namesR`'s, the same recursion. -/
+theorem _root_.Solidity.Thin.sel_eq_names {Γ Δ : Ctx} (h : Thin Γ Δ) (l : List Var) :
+    Thin.sel h l = h.names l :=
+  Thin.namesR_eq h l
 
 variable {ms : List Var} {ρ : SymS}
 
@@ -964,6 +1195,7 @@ theorem SymS.act_ok (hok : ρ.Ok ms) (hnd : ms.Nodup) {Γ Δ : Ctx} (hl : ms.len
     cases e with
     | «local» i r =>
       have hi : i.toNat < ms.length := hl ▸ i.toNat_lt
+      simp only [UpdElem.tgt, Idx.toNatR_eq]
       exact SymS.bindAt_ok hok hnd hi b
     | _ => exact absurd (hb b rfl) (by simp only [UpdElem.tgt, Option.isSome_none,
         Bool.false_eq_true, not_false_eq_true])
@@ -981,6 +1213,45 @@ theorem SymS.push_ok (hok : ρ.Ok ms) (x : Var) (a : Act) (ha : a = .keep ∨ �
     have hne : y ≠ x := fun he => hx' (he ▸ hy)
     simp only [hne, if_false]
 
+theorem _root_.Solidity.Upd.replaySM_ok {Γ : Ctx} {ns : List Var}
+    (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act) (aR : ∀ {t : LTy}, Rhs C Γ t → Act)
+    (hbE : ∀ {Δ : Ctx} (e : UpdElem C Γ Δ) (b : SymB), aE e = .bind b → e.tgt.isSome = true)
+    (hR : ∀ {t : LTy} (r : Rhs C Γ t), aR r = .keep ∨ ∃ b, aR r = .bind b)
+    (aN : Surface.UpdElem C → NAct)
+    (hE : ∀ {Δ : Ctx} (ms : List Var) (e : UpdElem C Γ Δ),
+      aN (e.erase ns ms) = (aE e).named (e.tgtName ms))
+    (hRN : ∀ {t : LTy} (x : Var) (r : Rhs C Γ t), aN (r.erase ns x) = (aR r).named x)
+    {ρ₀ : SymS} (hok : ρ₀.Ok ns) (hnd : ns.Nodup) (hl : ns.length = Γ.length) :
+    ∀ {Δ : Ctx} (U : Upd C Γ Δ), U.Fresh ns →
+      (U.replaySM aE aR ρ₀).Ok (U.names ns) ∧ (U.names ns).Nodup ∧
+        (U.names ns).length = Δ.length ∧
+        (U.replaySM aE aR ρ₀).sym = (U.erase ns).foldl (fun acc e => (aN e).apply acc) ρ₀.sym
+  | _, .nil, _ => ⟨hok, hnd, hl, rfl⟩
+  | _, .snoc U e, hf => by
+    obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replaySM_ok aE aR hbE hR aN hE hRN hok hnd hl U hf
+    obtain ⟨h₅, h₆⟩ := SymS.act_ok h₁ h₂ h₃ e (aE e) (hbE e)
+    refine ⟨h₅, h₂, h₃, ?_⟩
+    simp only [Upd.replaySM, Upd.erase, List.foldl_append, List.foldl_cons,
+      List.foldl_nil, h₆, h₄, hE]
+  | _, .decl U x r, hf => by
+    obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replaySM_ok aE aR hbE hR aN hE hRN hok hnd hl U hf.1
+    obtain ⟨h₅, h₆⟩ := SymS.push_ok h₁ x (aR r) (hR r) fun _ => hf.2
+    refine ⟨h₅, List.nodup_cons.2 ⟨hf.2, h₂⟩, by simp only [Upd.names, List.length_cons, h₃], ?_⟩
+    simp only [Upd.replaySM, Upd.erase, List.foldl_append, List.foldl_cons,
+      List.foldl_nil, h₆, h₄, hRN]
+  | _, .pop U h, hf => by
+    obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replaySM_ok aE aR hbE hR aN hE hRN hok hnd hl U hf
+    refine ⟨?_, h₂.sublist (List.drop_sublist _ _), ?_, h₄⟩
+    · unfold SymS.Ok at h₁ ⊢
+      simp only [Upd.replaySM, Upd.names, h₁, List.map_drop]
+    · simp only [Upd.names, List.length_drop, h₃, h.length_eq]
+      omega
+  | _, .drop U h, hf => by
+    obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replaySM_ok aE aR hbE hR aN hE hRN hok hnd hl U hf
+    refine ⟨?_, (Thin.names_sublist h _).nodup h₂, Thin.names_length h _ h₃, h₄⟩
+    unfold SymS.Ok at h₁ ⊢
+    simp only [Upd.replaySM, Upd.names, h₁, Thin.sel_map, Thin.sel_eq_names]
+
 /-- **An update's replay keeps the positions the names' bindings**, and
 leaves the erased reduction's state: the elements of its erasure applied
 in order, each act as `aN` reads it. -/
@@ -992,36 +1263,13 @@ theorem _root_.Solidity.Upd.replayS_ok {Γ : Ctx} {ns : List Var}
     (hE : ∀ {Δ : Ctx} (ms : List Var) (e : UpdElem C Γ Δ),
       aN (e.erase ns ms) = (aE e).named (e.tgtName ms))
     (hRN : ∀ {t : LTy} (x : Var) (r : Rhs C Γ t), aN (r.erase ns x) = (aR r).named x)
-    {ρ₀ : SymS} (hok : ρ₀.Ok ns) (hnd : ns.Nodup) (hl : ns.length = Γ.length) :
-    ∀ {Δ : Ctx} (U : Upd C Γ Δ), U.Fresh ns →
+    {ρ₀ : SymS} (hok : ρ₀.Ok ns) (hnd : ns.Nodup) (hl : ns.length = Γ.length)
+    {Δ : Ctx} (U : Upd C Γ Δ) (hf : U.Fresh ns) :
       (U.replayS aE aR ρ₀).Ok (U.names ns) ∧ (U.names ns).Nodup ∧
         (U.names ns).length = Δ.length ∧
-        (U.replayS aE aR ρ₀).sym = (U.erase ns).foldl (fun acc e => (aN e).apply acc) ρ₀.sym
-  | _, .nil, _ => ⟨hok, hnd, hl, rfl⟩
-  | _, .snoc U e, hf => by
-    obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replayS_ok aE aR hbE hR aN hE hRN hok hnd hl U hf
-    obtain ⟨h₅, h₆⟩ := SymS.act_ok h₁ h₂ h₃ e (aE e) (hbE e)
-    refine ⟨h₅, h₂, h₃, ?_⟩
-    simp only [Upd.replayS, Upd.erase, List.foldl_append, List.foldl_cons,
-      List.foldl_nil, h₆, h₄, hE]
-  | _, .decl U x r, hf => by
-    obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replayS_ok aE aR hbE hR aN hE hRN hok hnd hl U hf.1
-    obtain ⟨h₅, h₆⟩ := SymS.push_ok h₁ x (aR r) (hR r) fun _ => hf.2
-    refine ⟨h₅, List.nodup_cons.2 ⟨hf.2, h₂⟩, by simp only [Upd.names, List.length_cons, h₃], ?_⟩
-    simp only [Upd.replayS, Upd.erase, List.foldl_append, List.foldl_cons,
-      List.foldl_nil, h₆, h₄, hRN]
-  | _, .pop U h, hf => by
-    obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replayS_ok aE aR hbE hR aN hE hRN hok hnd hl U hf
-    refine ⟨?_, h₂.sublist (List.drop_sublist _ _), ?_, h₄⟩
-    · unfold SymS.Ok at h₁ ⊢
-      simp only [Upd.replayS, Upd.names, h₁, List.map_drop]
-    · simp only [Upd.names, List.length_drop, h₃, h.length_eq]
-      omega
-  | _, .drop U h, hf => by
-    obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replayS_ok aE aR hbE hR aN hE hRN hok hnd hl U hf
-    refine ⟨?_, (Thin.names_sublist h _).nodup h₂, Thin.names_length h _ h₃, h₄⟩
-    unfold SymS.Ok at h₁ ⊢
-    simp only [Upd.replayS, Upd.names, h₁, Thin.sel_map, Thin.sel_eq_names]
+        (U.replayS aE aR ρ₀).sym = (U.erase ns).foldl (fun acc e => (aN e).apply acc) ρ₀.sym := by
+  rw [Upd.replayS_eq_replaySM]
+  exact Upd.replaySM_ok aE aR hbE hR aN hE hRN hok hnd hl U hf
 
 end Ok
 
@@ -1172,7 +1420,8 @@ theorem _root_.Solidity.Upd.view_erases (ns : List Var) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → U.view.Erases ns (U.erase ns)
   | _, .nil => rfl
   | _, .snoc U e => by
-    simp only [Upd.view, Upd.erase, UpdElem.erase_toElemS (ns := ns)]
+    show (U.view.add e.toElemS).Erases ns (U.erase ns ++ [e.erase ns (U.names ns)])
+    rw [UpdElem.erase_toElemS (ns := ns)]
     exact UView.erases_add (Upd.view_erases ns U) _ _
   | _, .decl U x r => UView.erases_add (Upd.view_erases ns U) (.rhs r) x
   | _, .pop U _ => Upd.view_erases ns U
@@ -1261,7 +1510,7 @@ theorem pairLS_eq (hok : ρ.Ok ns) (hl : ns.length = Γ.length) (x : Var) (i : T
     pairL ρ.sym x (i.erase ns) (mm.erase ns) = (pairLS ρ i mm).map fun p =>
       (p.1, { ρ.sym with env := (x, idRef ρ) :: ρ.sym.env, mem := p.2 }) := by
   unfold pairL pairLS allocPairS?
-  rw [SymS.names_of_ok hok, ← pairMemS_eq hok hl]
+  rw [Tm.eraseR_eq, Tm.eraseR_eq, SymS.names_of_ok hok, ← pairMemS_eq hok hl]
   split
   · rcases pairMemS ρ mm with _ | ⟨M, g⟩
     · rfl
@@ -1385,7 +1634,7 @@ theorem _root_.Solidity.Fml.peelS_spec : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : Li
     cases hv : U.view with
     | zero =>
       have hp : (Fml.upd m U φ).peelS ρ = φ.peelS (U.replayS noActE noActR ρ) := by
-        simp only [Fml.peelS, hv]
+        simp only [Fml.peelS_eq_peelSM, Fml.peelSM, hv]
       rw [hp] at h
       obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replayS_ok noActE noActR (fun _ _ h => by cases h)
         (fun _ => .inl rfl) (fun _ => .keep) (fun _ _ => rfl) (fun _ _ => rfl) hi.ok hi.nodup
@@ -1401,11 +1650,11 @@ theorem _root_.Solidity.Fml.peelS_spec : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : Li
       · rw [r₄]
         simp only [Fml.erase, hz]
     | _ =>
-      have hp : (Fml.upd m U φ).peelS ρ = ⟨_, ρ, .upd m U φ⟩ := by simp only [Fml.peelS, hv]
+      have hp : (Fml.upd m U φ).peelS ρ = ⟨_, ρ, .upd m U φ⟩ := by simp only [Fml.peelS_eq_peelSM, Fml.peelSM, hv]
       rw [hp] at h
       exact peelS_base hi hf (by simp only [Fml.isHead, hv]) h
   | Γ, .bind m x t φ, ns, ρ, hi, hf, Γ', ρ', φ', h => by
-    have hp : (Fml.bind m x t φ).peelS ρ = φ.peelS (ρ.push x .keep) := by simp only [Fml.peelS]
+    have hp : (Fml.bind m x t φ).peelS ρ = φ.peelS (ρ.push x .keep) := by simp only [Fml.peelS_eq_peelSM, Fml.peelSM]
     rw [hp] at h
     obtain ⟨o₁, o₂⟩ := SymS.push_ok hi.ok x .keep (.inl rfl) (fun ⟨_, h⟩ => by cases h)
     have hi' : Inv (x :: ns) (t :: Γ) (ρ.push x .keep) :=
@@ -1425,7 +1674,7 @@ theorem _root_.Solidity.Fml.peelS_spec : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : Li
 
 theorem sameAt_eq {Γ Δ : Ctx} (ρa : SymS) (a : Tm C Γ .val) (ρb : SymS) (b : Tm C Δ .val) :
     sameAt ρa a ρb b = (a.erase ρa.names).sameL (b.erase ρb.names) := by
-  simp only [sameAt, Surface.Tm.sameL, Tm.sameShapeS_eq (ns := ρa.names)]
+  simp only [sameAt, Surface.Tm.sameL, Tm.sameShapeS_eq (ns := ρa.names), Tm.eraseR_eq]
 
 /-- **`eqD a b` is the erasure's.** -/
 theorem eqDViewS_spec {Γ : Ctx} {ns : List Var} {ρ : SymS} {φ ψ : Fml C Γ} (hi : Inv ns Γ ρ)
@@ -1480,31 +1729,30 @@ theorem pairView_cons (e₁ e₂ e : Surface.UpdElem C) (rest : List (Surface.Up
     pairView e₁ e₂ (e :: rest) = none := by
   cases e₁ <;> cases e₂ <;> rfl
 
-/-- **The scoped reduction is the erased one**, and so is its fragment. -/
-theorem _root_.Solidity.Fml.toLS_eq : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : List Var} {ρ : SymS},
+theorem _root_.Solidity.Fml.toLSM_eq : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : List Var} {ρ : SymS},
     Inv ns Γ ρ → φ.FreshS ns →
-      φ.toLS ρ = NFml.toL ρ.sym (φ.erase ns) ∧ φ.inLS ρ = NFml.inL ρ.sym (φ.erase ns)
+      φ.toLSM ρ = NFml.toL ρ.sym (φ.erase ns) ∧ φ.inLSM ρ = NFml.inL ρ.sym (φ.erase ns)
   | _, .tt, _, _, _, _ => ⟨rfl, rfl⟩
   | _, .eq a b, ns, ρ, hi, _ =>
-    ⟨by simp only [Fml.toLS, Fml.erase, NFml.toL, Tm.toLS_eq hi.ok hi.len],
-      by simp only [Fml.inLS, Fml.erase, NFml.inL, Tm.eqLitS_eq (ns := ns)]⟩
+    ⟨by simp only [Fml.toLSM, Fml.erase, NFml.toL, Tm.toLS_eq hi.ok hi.len],
+      by simp only [Fml.inLSM, Fml.erase, NFml.inL, Tm.eqLitS_eq (ns := ns)]⟩
   | _, .defined t, ns, ρ, hi, _ =>
-    ⟨by simp only [Fml.toLS, Fml.erase, NFml.toL, Tm.toLS_eq hi.ok hi.len],
-      by simp only [Fml.inLS, Fml.erase, NFml.inL, Tm.inLS_eq hi.ok hi.len]⟩
+    ⟨by simp only [Fml.toLSM, Fml.erase, NFml.toL, Tm.toLS_eq hi.ok hi.len],
+      by simp only [Fml.inLSM, Fml.erase, NFml.inL, Tm.inLS_eq hi.ok hi.len]⟩
   | _, .not φ, ns, ρ, hi, hf => by
-    obtain ⟨h₁, h₂⟩ := Fml.toLS_eq φ hi hf
-    exact ⟨by simp only [Fml.toLS, Fml.erase, NFml.toL, h₁],
-      by simp only [Fml.inLS, Fml.erase, NFml.inL, h₂]⟩
+    obtain ⟨h₁, h₂⟩ := Fml.toLSM_eq φ hi hf
+    exact ⟨by simp only [Fml.toLSM, Fml.erase, NFml.toL, h₁],
+      by simp only [Fml.inLSM, Fml.erase, NFml.inL, h₂]⟩
   | _, .imp φ ψ, ns, ρ, hi, hf => by
-    obtain ⟨h₁, h₂⟩ := Fml.toLS_eq φ hi hf.1
-    obtain ⟨h₃, h₄⟩ := Fml.toLS_eq ψ hi hf.2
-    exact ⟨by simp only [Fml.toLS, Fml.erase, NFml.toL, h₁, h₃],
-      by simp only [Fml.inLS, Fml.erase, NFml.inL, h₂, h₄]⟩
+    obtain ⟨h₁, h₂⟩ := Fml.toLSM_eq φ hi hf.1
+    obtain ⟨h₃, h₄⟩ := Fml.toLSM_eq ψ hi hf.2
+    exact ⟨by simp only [Fml.toLSM, Fml.erase, NFml.toL, h₁, h₃],
+      by simp only [Fml.inLSM, Fml.erase, NFml.inL, h₂, h₄]⟩
   | _, .and φ ψ, ns, ρ, hi, hf => by
-    obtain ⟨h₁, h₂⟩ := Fml.toLS_eq φ hi hf.1
-    obtain ⟨h₃, h₄⟩ := Fml.toLS_eq ψ hi hf.2
+    obtain ⟨h₁, h₂⟩ := Fml.toLSM_eq φ hi hf.1
+    obtain ⟨h₃, h₄⟩ := Fml.toLSM_eq ψ hi hf.2
     have hv := eqDViewS_spec hi hf.1 hf.2
-    simp only [Fml.toLS, Fml.inLS, Fml.erase, NFml.toL, NFml.inL]
+    simp only [Fml.toLSM, Fml.inLSM, Fml.erase, NFml.toL, NFml.inL]
     revert hv
     cases eqDViewS ρ φ ψ with
     | none =>
@@ -1529,13 +1777,13 @@ theorem _root_.Solidity.Fml.toLS_eq : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : List 
       obtain ⟨h₁, h₂, h₃, h₄⟩ := Upd.replayS_ok noActE noActR (fun _ _ h => by cases h)
         (fun _ => .inl rfl) (fun _ => .keep) (fun _ _ => rfl) (fun _ _ => rfl) hi.ok hi.nodup
         hi.len U hf.1
-      obtain ⟨i₁, i₂⟩ := Fml.toLS_eq φ ⟨h₁, h₂, h₃⟩ hf.2
+      obtain ⟨i₁, i₂⟩ := Fml.toLSM_eq φ ⟨h₁, h₂, h₃⟩ hf.2
       have hs : (U.replayS noActE noActR ρ).sym = ρ.sym := by
         rw [h₄]
         change List.foldl _ _ (U.erase ns) = _
         rw [show U.erase ns = [] from hvE]
         rfl
-      simp only [Fml.toLS, Fml.inLS, hv, Fml.erase, show U.erase ns = [] from hvE]
+      simp only [Fml.toLSM, Fml.inLSM, hv, Fml.erase, show U.erase ns = [] from hvE]
       rw [i₁, i₂, hs]
       exact ⟨rfl, rfl⟩
     | one a =>
@@ -1545,19 +1793,19 @@ theorem _root_.Solidity.Fml.toLS_eq : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : List 
         (fun e b h => UpdElem.actS_bind e b h) (fun r => Act.ofOpt_cases _)
         (Surface.UpdElem.nact ρ.sym) (fun ms e => UpdElem.nact_eq hi.ok hi.len ms e)
         (fun x r => Rhs.nact_eq hi.ok hi.len x r) hi.ok hi.nodup hi.len U hf.1
-      obtain ⟨i₁, i₂⟩ := Fml.toLS_eq φ ⟨h₁, h₂, h₃⟩ hf.2
+      obtain ⟨i₁, i₂⟩ := Fml.toLSM_eq φ ⟨h₁, h₂, h₃⟩ hf.2
       have hs : (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ).sym =
           ((a.erase ns x).toL ρ.sym).2 := by
         rw [h₄, hx, Surface.UpdElem.toL_snd]
         rfl
-      simp only [Fml.toLS, Fml.inLS, hv, Fml.erase, hx, NFml.toL, NFml.inL]
+      simp only [Fml.toLSM, Fml.inLSM, hv, Fml.erase, hx, NFml.toL, NFml.inL]
       rw [i₁, i₂, hs, ElemS.guard_eq hi.ok hi.len x a, ElemS.inLS_eq hi.ok hi.len x a]
       exact ⟨rfl, rfl⟩
     | two a b =>
       rw [hv] at hvE
       obtain ⟨x, y, hx⟩ := hvE
       have hpv := pairViewS_eq (ns := ns) a b x y
-      simp only [Fml.toLS, Fml.inLS, hv, Fml.erase, hx, NFml.toL, NFml.inL, hpv]
+      simp only [Fml.toLSM, Fml.inLSM, hv, Fml.erase, hx, NFml.toL, NFml.inL, hpv]
       cases hp : pairViewS a b with
       | none => exact ⟨rfl, rfl⟩
       | some q =>
@@ -1573,7 +1821,7 @@ theorem _root_.Solidity.Fml.toLS_eq : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : List 
             (fun e b h => pairActE_bind M e b h) (fun r => pairActR_cases r) (pairNAct ρ M)
             (fun ms e => pairNAct_eqE M ms e) (fun x r => pairNAct_eqR M x r) hi.ok hi.nodup
             hi.len U hf.1
-          obtain ⟨i₁, i₂⟩ := Fml.toLS_eq φ ⟨h₁, h₂, h₃⟩ hf.2
+          obtain ⟨i₁, i₂⟩ := Fml.toLSM_eq φ ⟨h₁, h₂, h₃⟩ hf.2
           have hs : (U.replayS (pairActE ρ M) (pairActR ρ) ρ).sym =
               { ρ.sym with env := (x, idRef ρ) :: ρ.sym.env, mem := M } := by
             rw [h₄, hx, he₁, he₂]
@@ -1584,7 +1832,7 @@ theorem _root_.Solidity.Fml.toLS_eq : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : List 
     | many =>
       rw [hv] at hvE
       obtain ⟨e₁, e₂, e₃, rest, hx⟩ := hvE
-      simp only [Fml.toLS, Fml.inLS, hv, Fml.erase, hx, NFml.toL, NFml.inL, pairView_cons]
+      simp only [Fml.toLSM, Fml.inLSM, hv, Fml.erase, hx, NFml.toL, NFml.inL, pairView_cons]
       exact ⟨trivial, trivial⟩
   | _, .modal .., _, _, _, _ => ⟨rfl, rfl⟩
   | _, .havoc _, _, _, _, _ => ⟨rfl, rfl⟩
@@ -1593,16 +1841,23 @@ theorem _root_.Solidity.Fml.toLS_eq : ∀ {Γ : Ctx} (φ : Fml C Γ) {ns : List 
     obtain ⟨o₁, o₂⟩ := SymS.push_ok hi.ok x (.bind (.val (.var x))) (.inr ⟨_, rfl⟩) fun _ => hf.1
     have hi' : Inv (x :: ns) (.val p :: Γ) (ρ.push x (.bind (.val (.var x)))) :=
       ⟨o₁, List.nodup_cons.2 ⟨hf.1, hi.nodup⟩, by simp only [List.length_cons, hi.len]⟩
-    obtain ⟨i₁, i₂⟩ := Fml.toLS_eq φ hi' hf.2
-    simp only [Fml.toLS, Fml.inLS, Fml.erase, NFml.toL, NFml.inL, i₁, i₂, o₂]
+    obtain ⟨i₁, i₂⟩ := Fml.toLSM_eq φ hi' hf.2
+    simp only [Fml.toLSM, Fml.inLSM, Fml.erase, NFml.toL, NFml.inL, i₁, i₂, o₂]
     exact ⟨rfl, rfl⟩
   | Γ, .bind m x t φ, ns, ρ, hi, hf => by
     obtain ⟨o₁, o₂⟩ := SymS.push_ok hi.ok x .keep (.inl rfl) fun ⟨_, h⟩ => by cases h
     have hi' : Inv (x :: ns) (t :: Γ) (ρ.push x .keep) :=
       ⟨o₁, List.nodup_cons.2 ⟨hf.1, hi.nodup⟩, by simp only [List.length_cons, hi.len]⟩
-    obtain ⟨i₁, i₂⟩ := Fml.toLS_eq φ hi' hf.2
-    simp only [Fml.toLS, Fml.inLS, Fml.erase, i₁, i₂, o₂]
+    obtain ⟨i₁, i₂⟩ := Fml.toLSM_eq φ hi' hf.2
+    simp only [Fml.toLSM, Fml.inLSM, Fml.erase, i₁, i₂, o₂]
     exact ⟨rfl, rfl⟩
+
+/-- **The scoped reduction is the erased one**, and so is its fragment. -/
+theorem _root_.Solidity.Fml.toLS_eq {Γ : Ctx} (φ : Fml C Γ) {ns : List Var} {ρ : SymS}
+    (hi : Inv ns Γ ρ) (hf : φ.FreshS ns) :
+    φ.toLS ρ = NFml.toL ρ.sym (φ.erase ns) ∧ φ.inLS ρ = NFml.inL ρ.sym (φ.erase ns) := by
+  rw [Fml.toLS_eq_toLSM, Fml.inLS_eq_inLSM]
+  exact Fml.toLSM_eq φ hi hf
 
 theorem _root_.Solidity.Fml.freshS_of_plainB {Γ : Ctx} (φ : Fml C Γ) :
     ∀ {ns : List Var}, φ.plainB ns = true → φ.FreshS ns := by

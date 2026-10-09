@@ -948,6 +948,18 @@ the closer port.
     `Decide.lean`'s IR for its proofs (decision 7's documented IR), not for
     the computation: no erasure is computed or checked by the kernel.
     `Valid.of_reduce` (the erasure computed and quoted) is deleted.
+    The kernel-evaluated functions keep G0's conditions 1 and 2 (review
+    fix): `Fml.toLS`, `Fml.inLS`, `Fml.peelS`, `Upd.view`, `Upd.replayS`,
+    `Thin.sel`, `Tm.toLS`, `Tm.inLS` and `Idx.toNatR` are written by the
+    recursor, each with its `match` form as the `implemented_by` twin
+    (`Fml.toLSM`, …) and a link theorem (`Fml.toLS_eq_toLSM`, …); the
+    proofs are stated on the twins and carried across by the links, and
+    `sameAt`/`allocPairS?` compare `Tm.eraseR`.  Still by `match`, the
+    lead's call: the helpers that take one `Tm C Γ s` (or `Rhs C Γ t`)
+    apart at fixed constructors (`Tm.storLocalS`, `Tm.slotPathS`,
+    `Tm.sameShapeS`, `Op2.toLAtS`, `Rhs.actS`, …): the context is that
+    family's parameter, so their casts compare a `Srt` or `LTy`, not a
+    context; not timed apart from the module.
 84. *Proposed (M6c 6b), the lead's call:* the positional state keeps,
     beside the positions, the erased reduction's `Sym` (its bindings by
     name, newest first), read only by the two checks that ask about names
@@ -1108,6 +1120,17 @@ entry, push-in and fragment run on `Fml C Γ` by position, but its
 soundness is the commutation with the erased reduction, whose proofs stay
 on `NFml` and the untyped state, decision 83; the atoms keep the
 binders' names, decision 78; `Closer` not ported, decision 81).
+
+Review fix (2026-10-09): the 6b functions the kernel evaluates broke G0's
+condition 1 (`match` on `Fml C Γ`, `Upd C Γ Δ`, `Thin Γ Δ`, `Idx Γ t`);
+they are now recursors with `match` twins (decision 83).  Re-timed by the
+same method (load 0.6–0.8 at the starts): `Examples/Tactics/Decide`
+**34.32 s** (34.50, 34.32, 34.40), CPU 35.32 s: 0.97 of 6b, 0.70 of the
+W6 baseline.  Only that module's leaves reach the scoped reduction; the
+Derived files were not re-timed (their path, `sol_decide_cons` on `NFml`,
+did not change).  The build (`Solidity`, `solkeycheck`, `SolidityCorpus`,
+`SolkeyTestSuite`) green; no pin moved; no `sorry`, `axiom` or
+`maxHeartbeats` added.
 
 ## What is left
 
