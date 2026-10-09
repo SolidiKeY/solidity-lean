@@ -37,6 +37,11 @@ by computation, that of symbolic keys (`balances[k]`, `balances[j]`) by a
 hypothesis `k != j` of the formula or a branch.  Every step is a lemma or a
 hypothesis: nothing evaluated is trusted, the kernel checks the proof.
 
+**A scoped leaf** (`open scoped Solidity.Scoped`) comes here erased,
+its parameters kept as its leading quantifiers (`sol_close_unwrap`,
+`Calculus/Derive.lean`, M6c): `Close.holds_all` introduces each with its
+type's range (`PrimTy.admits`), so `[ uint x = a; ] x >= 0` closes.
+
 What does not close, and why:
 
 * a write under the diamond: the closer reads the write's update on the

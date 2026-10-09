@@ -207,6 +207,18 @@ theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LT
 
 end Wrap
 
+/-- Rewriting the context and the goal is rewriting the sequent. -/
+theorem Hyps.wrap_rwEqC (q : Solidity.Term C × Solidity.Term C) {Γ₀ : Ctx} :
+    {Γ : Ctx} → (H : Hyps C Γ₀ Γ) → (φ : Fml C Γ) →
+      (H.rwEqC q).wrap (φ.rwEqC q) = (H.wrap φ).rwEqC q
+  | _, .nil, _ => rfl
+  | _, .pre H a, φ => Hyps.wrap_rwEqC q H (.imp a φ)
+  | _, .upd H m U, φ => Hyps.wrap_rwEqC q H (.upd m U φ)
+  | _, .havoc H, φ => Hyps.wrap_rwEqC q H (.havoc φ)
+  | _, .all H x p, φ => Hyps.wrap_rwEqC q H (.all x p φ)
+  | _, .bind H m x t, φ => Hyps.wrap_rwEqC q H (.bind m x t φ)
+  | _, .anon H xs, φ => Hyps.wrap_rwEqC q H (.anon xs φ)
+
 /-! ## Soundness -/
 
 /-- **Soundness of the scoped sequent over the typed state**, given the
@@ -310,6 +322,11 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
   | @updRw Γ Δ H U φ q hq _ ih =>
     exact fun σ => H.wrap_mono (φ := .upd .box (U.rwC q) φ) (ψ := .upd .box U φ)
       (fun τ hτ => holds_upd_rwC hq τ hτ) σ (ih σ)
+  | @rewrite Γ H φ q hq _ ih =>
+    intro σ
+    have h := ih σ
+    rw [Hyps.wrap_rwEqC] at h
+    exact (Fml.rwEqC_holds hq _ σ).1 h
   | closeHolds h _ => exact h
 
 end Solidity

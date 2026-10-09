@@ -171,4 +171,37 @@ theorem ageWriteReadKeY : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 
     -- findOnSave: dl{ ⟹ 42 ≐ 42 }
     exact Proves.eqRefl
 
+/-- `findOnSave` while the program is still open: the read of the write in
+the postcondition of `[ alice.age = 1; ]` (`Proves.rewrite`, every equation
+of the sequent, decision 90), then the strategy. -/
+example : ⊢ dl!{ [ alice.age = 1; ] find(save(storage, bob.age, 7), bob.age) ≐ 7 } := by
+  rw [findOnSave]
+  -- dl{ ⟹ [ alice.age = 1; ] 7 ≐ 7 }
+  sol_prove
+
+/-- The same in the context: a precondition rewritten with the program open. -/
+example : ⊢ dl!{ find(save(storage, bob.age, 7), bob.age) ≐ 7 → [ alice.age = 1; ] true } := by
+  apply impRight
+  rw [findOnSave]
+  -- dl{ 7 ≐ 7 ⟹ [ alice.age = 1; ] true }
+  sol_prove
+
+/-! A precondition rewritten beside an explicit `∀` in the context: the
+context keeps its mark (`Walk.rwHyps` rewrites only the preconditions), so
+`sol_prove` still counts no parameter (`Seq.paramCount`) and keeps `x`'s
+range, which `x + 1` needs (decision 28). -/
+
+/-- info: some (0) -/
+#guard_msgs in
+example : ⊢ dl!{ ∀ uint x; find(save(storage, bob.age, 7), bob.age) ≐ 7 →
+    x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
+  apply allRight
+  apply impRight
+  rw [findOnSave]
+  -- dl{ ∀ uint x, 7 ≐ 7 ⟹ x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 }
+  run_tac do
+    let ty ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
+    Lean.logInfo m!"{← Seq.paramCount ty.appFn!.appArg! (← Symex.evaluable ty.appArg!)}"
+  sol_prove
+
 end Solidity.Examples.Tactics.SelectOnSaveConsr

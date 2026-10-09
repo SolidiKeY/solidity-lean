@@ -24,11 +24,10 @@ diamond in it (`Hyps.boxOnly`):
   no global part where the update writes one, as today's asks `stFree`);
 * `simplify` (`simplifyUpdate`, under the box): an element setting a local
   the same update pops later is dropped (`Upd.simp`);
-* `rewrite` (`Proves.rewrite` on the goal): a side of an equation that is a
-  closed term reading `t`, made `t'`, by a Theory equation
-  (`Term.Theq`, `Fml.rwEqC`).
+* `rewrite'`: `Proves.rewrite` (a rule of the calculus, decision 90) with
+  the rewritten context and goal written out.
 
-`Upd.simp`, `Fml.substU` and `Fml.rwEqC` use `match` on the indexed
+`Upd.simp` and `Fml.substU` use `match` on the indexed
 families, against Gate G0's first condition: an exemption, timed
 (`docs/intrinsic.md`, W3c `tactics`), since they run once a rule.
 -/
@@ -240,109 +239,6 @@ theorem holds_upd_of_substU {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ} {φ'
   | error => trivial
   | ok σ₁ => exact fun σ' e _ => (Fml.substU_holds hU φ hs σ σ' rfl e).1 h
 
-/-! ## Rewriting a closed side of an equation -/
-
-section RwEq
-
-variable {Γ : Ctx}
-
-/-- A closed term denotes its erasure in the global part. -/
-theorem Tm.denote_toNil (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
-    t.toNil? = some t₀ → t.denote σ = (t.erase []).denote σ.glob
-  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h =>
-    nomatch h
-  | _, .app0 _, _, _ => rfl
-  | _, .app1 o _ x, _, h => by
-    obtain ⟨x₀, hx, -⟩ := Option.map_eq_some_iff.1 h
-    show o.denote σ.glob (x.denote σ) = o.denote σ.glob ((x.erase []).denote σ.glob)
-    rw [Tm.denote_toNil σ x hx]
-  | _, .app2 o x y, _, h => by
-    obtain ⟨x₀, hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y₀, hy, -⟩ := Option.bind_eq_some_iff.1 h
-    show o.denote σ.glob (x.eval σ) (y.eval σ) (x.denote σ) (y.denote σ) =
-      o.denote σ.glob ((x.erase []).eval σ.glob) ((y.erase []).eval σ.glob)
-        ((x.erase []).denote σ.glob) ((y.erase []).denote σ.glob)
-    rw [Tm.denote_toNil σ x hx, Tm.denote_toNil σ y hy, Tm.eval_toNil σ x hx, Tm.eval_toNil σ y hy]
-  | _, .app3 o x y z, _, h => by
-    obtain ⟨x₀, hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y₀, hy, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨z₀, hz, -⟩ := Option.bind_eq_some_iff.1 h
-    show o.denote (x.denote σ) (y.denote σ) (z.denote σ) =
-      o.denote ((x.erase []).denote σ.glob) ((y.erase []).denote σ.glob) ((z.erase []).denote σ.glob)
-    rw [Tm.denote_toNil σ x hx, Tm.denote_toNil σ y hy, Tm.denote_toNil σ z hz]
-
-/-- Today's closed term, at a scope, denotes itself in the global part. -/
-theorem Tm.denote_ofClosed (σ : EState C Γ) : {s : Srt} → (q : Surface.Tm C s) →
-    {t : Tm C Γ s} → Tm.ofClosed? q = some t → t.denote σ = q.denote σ.glob
-  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h => nomatch h
-  | _, .app0 _, _, h => by cases h; rfl
-  | _, .app1 o x, _, h => by
-    simp only [Tm.ofClosed?] at h
-    split at h
-    · obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
-      show o.denote σ.glob (x'.denote σ) = o.denote σ.glob (x.denote σ.glob)
-      rw [Tm.denote_ofClosed σ x hx]
-    · cases h
-  | _, .app2 o x y, _, h => by
-    obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show o.denote σ.glob (x'.eval σ) (y'.eval σ) (x'.denote σ) (y'.denote σ) =
-      o.denote σ.glob (x.eval σ.glob) (y.eval σ.glob) (x.denote σ.glob) (y.denote σ.glob)
-    rw [Tm.denote_ofClosed σ x hx, Tm.denote_ofClosed σ y hy, Tm.eval_ofClosed σ x hx,
-      Tm.eval_ofClosed σ y hy]
-  | _, .app3 o x y z, _, h => by
-    obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨z', hz, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show o.denote (x'.denote σ) (y'.denote σ) (z'.denote σ) =
-      o.denote (x.denote σ.glob) (y.denote σ.glob) (z.denote σ.glob)
-    rw [Tm.denote_ofClosed σ x hx, Tm.denote_ofClosed σ y hy, Tm.denote_ofClosed σ z hz]
-
-/-- A side of an equation, made `q.2` where it is a closed term reading
-`q.1` on its erasure. -/
-def Tm.sideC (q : Solidity.Term C × Solidity.Term C) (t : Tm C Γ .val) : Tm C Γ .val :=
-  if (t.toNil?).isSome && t.erase [] == q.1 then (Tm.ofClosed? q.2).getD t else t
-
-/-- The sides of the equations of a first-order goal, rewritten. -/
-def Fml.rwEqC (q : Solidity.Term C × Solidity.Term C) : Fml C Γ → Fml C Γ
-  | .eq a b => .eq (a.sideC q) (b.sideC q)
-  | .not φ => .not (Fml.rwEqC q φ)
-  | .and φ ψ => .and (Fml.rwEqC q φ) (Fml.rwEqC q ψ)
-  | .imp φ ψ => .imp (Fml.rwEqC q φ) (Fml.rwEqC q ψ)
-  | φ => φ
-
-theorem Tm.sideC_denote {q : Solidity.Term C × Solidity.Term C} (hq : Term.Theq q.1 q.2)
-    (σ : EState C Γ) (t : Tm C Γ .val) : Equiv ((t.sideC q).denote σ) (t.denote σ) := by
-  unfold Tm.sideC
-  split
-  · rename_i hc
-    simp only [Bool.and_eq_true, Option.isSome_iff_exists, beq_iff_eq] at hc
-    obtain ⟨⟨t₀, ht₀⟩, he⟩ := hc
-    cases ho : Tm.ofClosed? (Γ := Γ) q.2 with
-    | none => exact Equiv.refl _
-    | some u =>
-      show Equiv (u.denote σ) (t.denote σ)
-      rw [Tm.denote_toNil σ t ht₀, he, Tm.denote_ofClosed σ q.2 ho]
-      exact (hq σ.glob).symm
-  · exact Equiv.refl _
-
-/-- **The goal rewritten by a Theory equation holds where the goal does.** -/
-theorem Fml.rwEqC_holds {q : Solidity.Term C × Solidity.Term C} (hq : Term.Theq q.1 q.2)
-    (σ : State C Γ) : (φ : Fml C Γ) → (holds σ (φ.rwEqC q) ↔ holds σ φ)
-  | .eq a b => by
-    show Equiv ((a.sideC q).denote σ.erase) ((b.sideC q).denote σ.erase) ↔
-      Equiv (a.denote σ.erase) (b.denote σ.erase)
-    have ha := Tm.sideC_denote hq σ.erase a
-    have hb := Tm.sideC_denote hq σ.erase b
-    exact ⟨fun h => (ha.symm.trans h).trans hb, fun h => (ha.trans h).trans hb.symm⟩
-  | .not φ => not_congr (Fml.rwEqC_holds hq σ φ)
-  | .and φ ψ => and_congr (Fml.rwEqC_holds hq σ φ) (Fml.rwEqC_holds hq σ ψ)
-  | .imp φ ψ => imp_congr (Fml.rwEqC_holds hq σ φ) (Fml.rwEqC_holds hq σ ψ)
-  | .tt | .defined _ | .upd .. | .modal .. | .havoc _ | .all .. | .bind .. | .anon .. => Iff.rfl
-
-end RwEq
 
 /-! ## Dropping what an update pops -/
 
@@ -598,20 +494,11 @@ theorem Proves.simplify' {Δ : Ctx} {U U₂ : Upd C Γ Δ} {φ : Fml C Δ} (hs :
     Proves C R Γ₀ (H.upd .box U) φ :=
   Proves.simplify (hs ▸ h) hm
 
-/-- **A term taclet as a rewrite rule** on the goal (`Proves.rewrite`): a
-side of an equation that is a closed term reading `q.1` becomes `q.2`, by a
-Theory equation (`Term.Theq`; `TermTaclet.sound` of a taclet). -/
-theorem Proves.rewrite {φ : Fml C Γ} (q : Solidity.Term C × Solidity.Term C)
-    (hq : Solidity.Term.Theq q.1 q.2) (h : Proves C R Γ₀ H (φ.rwEqC q))
-    (hm : (H.wrap φ).modalFree = true := by first | rfl | decide) : Proves C R Γ₀ H φ :=
-  .closeHolds (fun σ => H.wrap_mono (φ := φ.rwEqC q) (ψ := φ)
-    (fun τ hτ => (Fml.rwEqC_holds hq τ φ).1 hτ) σ (Proves.sound h σ)) hm
-
-/-- `Proves.rewrite`, the rewritten goal written out. -/
-theorem Proves.rewrite' {φ φ' : Fml C Γ} (q : Solidity.Term C × Solidity.Term C)
-    (hq : Solidity.Term.Theq q.1 q.2) (hs : φ.rwEqC q = φ') (h : Proves C R Γ₀ H φ')
-    (hm : (H.wrap φ).modalFree = true := by first | rfl | decide) : Proves C R Γ₀ H φ :=
-  Proves.rewrite q hq (hs ▸ h) hm
+/-- `Proves.rewrite`, the rewritten context and goal written out. -/
+theorem Proves.rewrite' {H' : Hyps C Γ₀ Γ} {φ φ' : Fml C Γ}
+    (q : Solidity.Term C × Solidity.Term C) (hq : Solidity.Term.Theq q.1 q.2)
+    (hH : H.rwEqC q = H') (hs : φ.rwEqC q = φ') (h : Proves C R Γ₀ H' φ') : Proves C R Γ₀ H φ :=
+  Proves.rewrite q hq (hH ▸ hs ▸ h)
 
 /-- `Proves.updRw`, the rewritten update written out. -/
 theorem Proves.updRw' {Δ : Ctx} {U U₂ : Upd C Γ Δ} {φ : Fml C Δ}

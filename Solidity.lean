@@ -69,8 +69,12 @@ import Solidity.Calculus.Proves
 import Solidity.Calculus.ProvesSound
 import Solidity.Calculus.DelabLean
 import Solidity.Calculus.Graft
+import Solidity.Calculus.SeqRewrite
 import Solidity.Calculus.Merge
+import Solidity.Calculus.RewriteScoped
 import Solidity.Calculus.UpdateRules
+import Solidity.Calculus.UpdRuleScoped
+import Solidity.Calculus.StatePartsScoped
 import Solidity.Calculus.RewriteSyntax
 import Solidity.Calculus.ChainKit
 import Solidity.Calculus.Chains
@@ -116,6 +120,7 @@ import Solidity.Calculus.MemTheory
 import Solidity.Calculus.SlotLemmas
 import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideSyn
+import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.Problem
@@ -171,6 +176,7 @@ import Solidity.Examples.Notation
 import Solidity.Examples.Tactics.ApplySteps
 import Solidity.Examples.ChainNotation
 import Solidity.Examples.Tactics.UpdateRules
+import Solidity.Examples.Tactics.UpdRulesScoped
 import Solidity.Examples.ChainRewrites
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.ExampleNames

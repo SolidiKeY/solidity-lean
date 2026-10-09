@@ -9,21 +9,24 @@ import Solidity.Tools.Inspect
 
 `sol_close` (`Calculus/NFmlClose.lean`) finishes a goal with `simp` and `grind`
 on whatever facts the formula states; it cannot split on two keys being
-equal.  `sol_decide` (`Calculus/Decide.lean`) rewrites the goal by an
-equivalence, `NFml.valid_iff_reduce`, into a statement about the initial
-state in which every read of a write is a case tree over key equalities;
-then by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
+equal.  `sol_decide` (`Calculus/Decide.lean`) reduces the leaf, its
+locals by position (`Fml.reduceS`, `Calculus/DecideScoped.lean`), into a
+statement about the initial state in which every read of a write is a
+case tree over key equalities, the reduction of the leaf's erasure exactly
+(`Fml.toLS_eq`, then `NFml.valid_iff_reduce`, an equivalence); then
+rewrites by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
 into a statement about free reads under the constraints a storage puts on
 them, and closes that.  Nothing is lost by those two steps, so a leaf it
 does not close is either not valid over untyped states, outside the
 fragment, or beyond the final `omega`/`grind`.
 
 Every goal is stated with `⊨`, which (under `open scoped Scoped`) ranges
-over typed states; `sol_decide` works on a leaf's erasure, over **every**
-untyped state: one whose `balances` is an array, whose
-`alice.account.balance` holds a `bool`, or that has no `alice` at all.
-Erasing a leaf drops its typing, so a goal it does not close may still be
-valid (until M6c, `docs/intrinsic.md`).  Under the box a write that halts
+over typed states.  `sol_decide` reads the leaf's parameters at their
+types (a `uint` is an integer in range), and its storage through the
+leaf's erasure, over **every** untyped storage: one whose `balances` is an
+array, whose `alice.account.balance` holds a `bool`, or that has no
+`alice` at all.  The erasure drops the storage's typing, so a goal it does
+not close may still be valid (`docs/intrinsic.md`, M6c).  Under the box a write that halts
 proves the formula, so the programs below may write anywhere; a read of
 the initial storage is another matter: its erasure owes `wt(storage)`
 (`deleteWithoutWrite`).
@@ -237,6 +240,22 @@ theorem diamondLocals :
   sol_symex
   sol_decide
 
+/-! ## The parameters, typed
+
+A parameter is a `uint`: it returns, in range.  The leaf's erasure read it
+as a name bound to anything (no value, a `bool`), where neither formula
+below is valid. -/
+
+/-- `⟨ uint x = a; ⟩ x == a` — `a` returns. -/
+theorem parameterReturns : ⊨ dl!{ ⟨ uint x = a; ⟩ x == a } := by
+  sol_symex
+  sol_decide
+
+/-- `a < 10 → ⟨ uint y = a + 1; ⟩ y == a + 1` — `a + 1` does not overflow. -/
+theorem parameterInRange : ⊨ dl!{ a < 10 → ⟨ uint y = a + 1; ⟩ y == a + 1 } := by
+  sol_symex
+  sol_decide
+
 /-! ## Pushes, pops and copies
 
 A push or a pop is one write of the array (`LStor.arr`): a read below it
@@ -272,9 +291,9 @@ theorem copyReadsSource :
 /-! ## Formulas `sol_decide` does not close
 
 The reduction is an equivalence on the erasure, so each of these is not
-valid over untyped states.  The first two hold in every typed state and
-are left open only because the leaf is erased (until M6c); the frame
-without `a != b` is not valid at all. -/
+valid over untyped storage.  The first and the third hold in every typed
+state and are left open only because the storage is read erased (M6c);
+the frame without `a != b` and the last are not valid at all. -/
 
 /-- Valid over typed states, not on its erasure: over every untyped state
 `bob` need not have an `age` (it may hold a word), and nothing in the
@@ -612,10 +631,14 @@ end Solidity.Examples.Tactics.Decide
 
 /-! ## On the closer's formulas
 
-Read without `open scoped Solidity.Scoped`: the fragment (`NFml.inL`)
-of the closer's input.  (The refutation of `deleteWithoutWrite` over
-untyped storage, where the balance is a `bool`, and `sol_decide` refusing a
-modality went with the modality at W4 `modal`.) -/
+The fragment (`Fml.inLS`, `Calculus/DecideScoped.lean`) is checked on the
+scoped leaf itself, its locals by position.  The unbound memory local the
+erased pin read (`{ x := read(memory, carol.age) }`) has no scoped
+spelling: a free name is a `uint` parameter, and a memory local is in scope
+only through a binder.  (The refutation of
+`deleteWithoutWrite` over untyped storage, where the balance is a `bool`,
+and `sol_decide` refusing a modality went with the modality at W4
+`modal`.) -/
 
 namespace Solidity.Examples.Tactics.Decide
 
@@ -623,12 +646,14 @@ open NFml.Proves Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-/-- info: false -/
-#guard_msgs in -- a copy from storage outside its pair is outside the fragment
-#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inL Decide.Sym.empty
+open scoped Scoped
 
 /-- info: false -/
-#guard_msgs in -- a memory local no update bound is outside the fragment
-#eval (dl!{ { x := read(memory, carol.age) } x == 0 }).inL Decide.Sym.empty
+#guard_msgs in -- a copy from storage outside its pair is outside the fragment
+#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inLS Decide.SymS.empty
+
+/-- info: false -/
+#guard_msgs in -- a read of the ledger is outside the fragment
+#eval (dl!{ { y := net(a) } y == 0 }).inLS Decide.SymS.empty
 
 end Solidity.Examples.Tactics.Decide

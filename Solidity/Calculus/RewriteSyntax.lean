@@ -1,6 +1,7 @@
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.Rewrite
+import Solidity.Calculus.ProvesDerive
 
 /-!
 # Today's steps after the program, on a scoped goal
@@ -152,27 +153,84 @@ partial def Walk.closedVals (e : Expr) (acc : Array (Expr × Expr) := #[]) :
   for a in e.getAppArgs do acc ← Walk.closedVals a acc
   return acc
 
-/-- The sides of the goal's equations (`Fml.eq`), through `¬`, `∧`, `→`. -/
+/-- The sides of a formula's equations (`Fml.eq`), at any depth: through
+the connectives, updates, quantifiers, hidden binders and an open
+modality's postcondition, as `Fml.rwEqC` rewrites them. -/
 partial def Walk.eqSides (φ : Expr) : MetaM (Array Expr) := do
   let φ ← whnf φ
   if φ.isAppOfArity ``Fml.eq 4 then return #[φ.getArg! 2, φ.getArg! 3]
-  if φ.isAppOfArity ``Fml.not 3 then return ← Walk.eqSides (φ.getArg! 2)
   if φ.isAppOfArity ``Fml.and 4 || φ.isAppOfArity ``Fml.imp 4 then
     return (← Walk.eqSides (φ.getArg! 2)) ++ (← Walk.eqSides (φ.getArg! 3))
+  if φ.isAppOfArity ``Fml.not 3 || φ.isAppOfArity ``Fml.havoc 3 ||
+      φ.isAppOfArity ``Fml.upd 6 || φ.isAppOfArity ``Fml.modal 8 ||
+      φ.isAppOfArity ``Fml.all 5 || φ.isAppOfArity ``Fml.bind 6 ||
+      φ.isAppOfArity ``Fml.anon 4 then
+    return ← Walk.eqSides φ.appArg!
   return #[]
 
-/-- Rewrite the main goal by `q = (t, t')`: in the sides of its equations
-(`Proves.rewrite'`, `hq : Term.Theq t t'`) when one is `t`, else in the last
-box update's right-hand sides (`Proves.updRw'`) when `t'` cannot halt. -/
+/-- The sides of the equations of a context's preconditions (`Hyps.rwEqC`). -/
+partial def Walk.hypSides (H : Expr) : MetaM (Array Expr) := do
+  let H ← whnf H
+  if H.isAppOfArity ``Hyps.pre 5 then
+    return (← Walk.hypSides (H.getArg! 3)) ++ (← Walk.eqSides (H.getArg! 4))
+  if H.isAppOfArity ``Hyps.upd 7 then return ← Walk.hypSides (H.getArg! 4)
+  if H.isAppOfArity ``Hyps.havoc 4 || H.isAppOfArity ``Hyps.all 6 ||
+      H.isAppOfArity ``Hyps.bind 7 || H.isAppOfArity ``Hyps.anon 5 then
+    return ← Walk.hypSides (H.getArg! 3)
+  return #[]
+
+/-- A formula rewritten by `q` (`Fml.rwEqC`), computed and quoted back; the
+formula as written where nothing in it is rewritten, its explicit `∀`s
+marked again otherwise (`Symex.restoreMarks`). -/
+def Walk.rwFml (C q a : Expr) : MetaM Expr := do
+  let some a₀ ← Walk.evalQuoteOpt C ``Fml.quote (← mkAppM ``Option.some #[a])
+    | throwError "rw: internal error"
+  let some a' ← Walk.evalQuoteOpt C ``Fml.quote (← mkAppM ``Option.some #[← mkAppM ``Fml.rwEqC #[q, a]])
+    | throwError "rw: internal error"
+  return if a' == a₀ then a else Symex.restoreMarks a a'
+
+/-- A context rewritten by `q` (`Hyps.rwEqC`): each precondition by
+`Walk.rwFml`, every other entry kept as written, so that the marks of
+explicit `∀`s (`Fml.markExplicitVar`), which `Seq.paramCount` reads, stay
+(decision 28); `none` where the context is not written out. -/
+partial def Walk.rwHyps (C q H : Expr) : MetaM (Option Expr) := do
+  let H ← whnfR (← instantiateMVars H)
+  let below (i : Nat) (f : Array Expr → MetaM (Array Expr) := pure) : MetaM (Option Expr) := do
+    let some H₁ ← Walk.rwHyps C q (H.getArg! i) | return none
+    let args ← f (H.getAppArgs.set! i H₁)
+    return some (mkAppN H.getAppFn args)
+  if H.isAppOfArity ``Hyps.nil 2 then return some H
+  if H.isAppOfArity ``Hyps.pre 5 then
+    return ← below 3 fun args => do return args.set! 4 (← Walk.rwFml C q (H.getArg! 4))
+  if H.isAppOfArity ``Hyps.upd 7 then return ← below 4
+  if H.isAppOfArity ``Hyps.havoc 4 || H.isAppOfArity ``Hyps.all 6 ||
+      H.isAppOfArity ``Hyps.bind 7 || H.isAppOfArity ``Hyps.anon 5 then
+    return ← below 3
+  return none
+
+/-- Rewrite the main goal by `q = (t, t')`: in the sides of the sequent's
+equations (`Proves.rewrite'`, `hq : Term.Theq t t'`), the context's
+preconditions and the goal, a modality still open or not, when one is `t`;
+else in the last box update's right-hand sides (`Proves.updRw'`) when `t'`
+cannot halt.  The context keeps what it does not rewrite as written, its
+marks of explicit `∀`s with it (`Walk.rwHyps`). -/
 def Walk.rwWith (C q hq : Expr) (inGoal : Bool) : TacticM Unit := withMainContext do
   let (_, H, φ) ← Walk.provesParts (← getMainTarget)
   let qS ← Term.exprToSyntax q
   let hqS ← Term.exprToSyntax hq
   if inGoal then
-    let some φ' ← Walk.evalQuoteOpt C ``Fml.quote (← mkAppM ``Option.some #[← mkAppM ``Fml.rwEqC #[q, φ]])
-      | throwError "rw: internal error"
+    let φ' ← Walk.rwFml C q φ
+    let H' ← match ← Walk.rwHyps C q H with
+      | some H' => pure H'
+      | none =>
+        let some H' ← Walk.evalQuoteOpt C ``Hyps.quote
+            (← mkAppM ``Option.some #[← mkAppM ``Hyps.rwEqC #[q, H]])
+          | throwError "rw: internal error"
+        pure H'
     let φ'S ← Term.exprToSyntax φ'
-    evalTactic (← `(tactic| refine Solidity.Proves.rewrite' ($qS) ($hqS) (φ' := $φ'S) rfl ?_))
+    let H'S ← Term.exprToSyntax H'
+    evalTactic (← `(tactic|
+      refine Solidity.Proves.rewrite' ($qS) ($hqS) (H' := $H'S) (φ' := $φ'S) rfl rfl ?_))
   else
     let some (_, _, U) ← Walk.updTop? H | throwError "rw: no update at the top of the context"
     let some U₂ ← Walk.evalQuoteOpt C ``Upd.quote (← mkAppM ``Option.some #[← mkAppM ``Upd.rwC #[q, U]])
@@ -188,7 +246,7 @@ term with its erasure, and whether it is in the goal. -/
 def Walk.rwCandidates : TacticM (Array (Expr × Expr × Bool)) := withMainContext do
   let (_, H, φ) ← Walk.provesParts (← getMainTarget)
   let mut out : Array (Expr × Expr × Bool) := #[]
-  for side in ← Walk.eqSides φ do
+  for side in (← Walk.hypSides H) ++ (← Walk.eqSides φ) do
     for (t, er) in ← Walk.closedVals side do
       if t == side then out := out.push (t, er, true)
   if let some (_, m, U) ← Walk.updTop? H then

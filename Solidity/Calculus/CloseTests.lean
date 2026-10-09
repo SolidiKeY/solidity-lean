@@ -111,6 +111,29 @@ example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x 
     sol_symex
     sol_close
 
+/-! ## Parameters read at their types (M6c)
+
+A scoped leaf keeps its parameters as quantifiers (`sol_close_unwrap`,
+`Calculus/Derive.lean`), so `sol_close` reads `a` as a `uint` in range (a
+parameter is a `uint`, `Calculus/Notation.lean`).  The erased leaf with
+`a` stripped to a free name, bound to anything (unset, a negative
+integer, a boolean), left these open. -/
+
+/-- A `uint` parameter is at least `0`. -/
+example : ⊨ dl!{ [ uint x = a; ] x >= 0 } := by
+  sol_symex
+  sol_close
+
+/-- … and is set: the diamond's read of it returns. -/
+example : ⊨ dl!{ ⟨ uint x = a; ⟩ x == a } := by
+  sol_symex
+  sol_close
+
+/-- … and the diamond's checked `+` returns below the bound. -/
+example : ⊨ dl!{ a < 100 → ⟨ uint y = a + 1; ⟩ y <= 100 } := by
+  sol_symex
+  sol_close
+
 /-- With no goal left, `sol_close` does nothing. -/
 example : ⊨ dl!{ [ revert(); ] true } := by
   sol_symex

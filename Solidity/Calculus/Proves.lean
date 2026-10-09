@@ -2,6 +2,7 @@ import Solidity.Calculus.Taclet
 import Solidity.Calculus.Closable
 import Solidity.Calculus.Graft
 import Solidity.Calculus.Hyp
+import Solidity.Calculus.SeqRewrite
 
 /-!
 # Sequents on scoped formulas: the skeleton
@@ -39,6 +40,11 @@ under solkey's names where solkey has the rule:
   past the hidden binders between the two updates) and `updRw` (a term
   taclet in the last box update's right-hand sides), both while a modality
   may still be open (`Calculus/Graft.lean`);
+* `rewrite`: a Theory equation (a term taclet's, `TermTaclet.sound`) in
+  every equation of the sequent, its context's preconditions and its goal,
+  at any depth and under a modality still open (`Fml.rwEqC`,
+  `Calculus/SeqRewrite.lean`): today's `Proves.rewrite`, the closer's
+  rewrite, on the scoped sequent (decision 90);
 * `closeHolds`: a sequent with no modality left, proved over the typed
   reading, today's `Proves.close`; the steps after the program
   (`Proves.eqDSplit`, `definedWritten`, `applyOnRigidBox`, `simplify`, the
@@ -228,6 +234,37 @@ def Hyps.anonHavoc {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LTy) 
     Hyps C Γ₀ Γ :=
   if hv then (H.anon xs).havoc else H.anon xs
 
+/-- `Hyps.rwEqC`'s compiled twin. -/
+def Hyps.rwEqCM (q : Solidity.Term C × Solidity.Term C) {Γ₀ : Ctx} :
+    {Γ : Ctx} → Hyps C Γ₀ Γ → Hyps C Γ₀ Γ
+  | _, .nil => .nil
+  | _, .pre H a => .pre (Hyps.rwEqCM q H) (a.rwEqCM q)
+  | _, .upd H m U => .upd (Hyps.rwEqCM q H) m U
+  | _, .havoc H => .havoc (Hyps.rwEqCM q H)
+  | _, .all H x p => .all (Hyps.rwEqCM q H) x p
+  | _, .bind H m x t => .bind (Hyps.rwEqCM q H) m x t
+  | _, .anon H xs => .anon (Hyps.rwEqCM q H) xs
+
+/-- A Theory rewrite of the context (`Fml.rwEqC`): in every precondition;
+an update, a `havoc`, a quantifier or a binder stays as it is, as today's
+`Hyp.rwEq` leaves them.  By the recursor, as `Fml.rwEqC`
+(`Calculus/SeqRewrite.lean`). -/
+@[implemented_by Hyps.rwEqCM]
+def Hyps.rwEqC (q : Solidity.Term C × Solidity.Term C) {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) :
+    Hyps C Γ₀ Γ :=
+  Hyps.rec (motive := fun Γ _ => Hyps C Γ₀ Γ) .nil (fun _ a ih => .pre ih (a.rwEqC q))
+    (fun _ m U ih => .upd ih m U) (fun _ ih => .havoc ih) (fun _ x p ih => .all ih x p)
+    (fun _ m x t ih => .bind ih m x t) (fun _ xs ih => .anon ih xs) H
+
+/-- The recursor's rewrite is the twin's. -/
+theorem Hyps.rwEqC_eq_rwEqCM (q : Solidity.Term C × Solidity.Term C) {Γ₀ Γ : Ctx}
+    (H : Hyps C Γ₀ Γ) : H.rwEqC q = H.rwEqCM q := by
+  induction H with
+  | nil => rfl
+  | pre H a ih => simp only [Hyps.rwEqCM, ← ih, ← Fml.rwEqC_eq_rwEqCM]; rfl
+  | upd H m U ih | havoc H ih | all H x p ih | bind H m x t ih | anon H xs ih =>
+    simp only [Hyps.rwEqCM, ← ih]; rfl
+
 /-- `H ⊢ φ`: the calculus proves `φ` in the context `H` (with `R`, solkey's
 rules alone or all of them). -/
 inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
@@ -386,6 +423,14 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | updRw {Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {U : Upd C Γ Δ} {φ : Fml C Δ}
       (q : Solidity.Term C × Solidity.Term C) (hq : Solidity.Term.EvalRefines q.1 q.2)
       (h : Proves C R Γ₀ (H.upd .box (U.rwC q)) φ) : Proves C R Γ₀ (H.upd .box U) φ
+  /-- **A term taclet as a rewrite rule** (today's `Proves.rewrite`): a
+  side of an equation that is a closed term reading `q.1` on its erasure
+  becomes `q.2`, in every equation of the sequent (`Hyps.rwEqC`,
+  `Fml.rwEqC`), a modality still open or not.  `hq` is the Theory equation
+  (`TermTaclet.sound` of a taclet, `TermTaclet.theory` of a law). -/
+  | rewrite {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (q : Solidity.Term C × Solidity.Term C)
+      (hq : Solidity.Term.Theq q.1 q.2) (h : Proves C R Γ₀ (H.rwEqC q) (φ.rwEqC q)) :
+      Proves C R Γ₀ H φ
   /-- Leave the calculus: with no modality left anywhere in the sequent
   (`Fml.modalFree`), what is left is proved over the typed reading, as
   today's `Proves.close` proves it over today's.  The steps KeY takes after
