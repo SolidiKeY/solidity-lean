@@ -995,8 +995,9 @@ or `maxHeartbeats` added.  `NFmlClose` keeps its name: its simp set reads
 the untyped interpreter, as the scoped terms' symbols still are.
 `Closer`: not ported, moved to wave 6b with `Decide.lean` (decision 81).
 
-Gate (the W6 baselines' method, `702df6bf`; load 0.5–1.7 at the starts,
-the first `Decide` run 6.8, after the build):
+Gate (the W6 baselines' method, measured at `702df6bf`; load 0.5–1.7 at
+the starts of the Derived runs; the `Decide` runs 6.8, 3.6, 2.4; after the
+build):
 
 | Module | W6 end of work | 6a part 2 (three runs) | ratio | CPU (min) |
 |---|---|---|---|---|
