@@ -109,9 +109,6 @@ def Stmt.stepIn (R : RuleSet) (k : Nat) (m : Modality) {Γ Γ' : Ctx}
   | .solkey => cond (s.keyStep m) (some (s.step k m)) none
   | .all => some (s.step k m)
 
-theorem Stmt.stepIn_all (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
-    s.stepIn .all k m = some (s.step k m) := rfl
-
 /-- A step with the rules of `R` is the strategy's. -/
 theorem Stmt.step_of_stepIn {R : RuleSet} {k : Nat} {m : Modality} {Γ Γ' : Ctx}
     {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (h : s.stepIn R k m = some p) : s.step k m = p := by

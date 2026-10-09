@@ -22,9 +22,6 @@ import Solidity.Calculus.SoundCalls
   is `true` or `false` wherever it is read; what the rule's terms read on
   the erasure is the typed value (`holds_isBoolD_lower`, from
   `Val.evalT_erase`, `Val.evalT_ends` and the term bridge `Tm.denote_eval`).
-* A block (`Stmt.sound_block`) is its body unfolded, its locals popped
-  after it (`Stmt.runSt_block`); it sits here beside `Stmt.runSt_ite`,
-  which the loop's turn reads through.
 -/
 
 namespace Solidity
@@ -34,7 +31,8 @@ open Solidity (Modality Mutability)
 variable {C : Contract}
 
 /-- `a < b`, `a <= b` between `uint`s true: both sides are numbers, so
-ordered (today's `Calculus/SoundLoop`'s `Term.cmp_true`, on values). -/
+ordered (master's `Term.cmp_true`, `Calculus/SoundLoop` at `ad728b16`,
+on values). -/
 theorem evalBinop_cmp_true {op : BinOp} (hop : op = .lt ∨ op = .le) {a : Value} {rb : Res Value}
     (h : evalBinop op .uint a rb = .ok (.bool true)) :
     ∃ x y : Int, a = .int x ∧ rb = .ok (.int y) ∧ (op = .lt → x < y) ∧ (op = .le → x ≤ y) := by
@@ -224,11 +222,6 @@ theorem Stmt.runSt_ite {Γ₂ : Ctx} (σ : State C Γ) (c : Val C Γ .bool) (thn
   cases c.evalT σ with
   | error => rfl
   | ok v => cases v <;> exact TRes.map_st _ _ _ fun _ => rfl
-
-/-- **A block** is its statements, its locals popped after it. -/
-theorem Stmt.sound_block {m : Modality} (body : Prog C Γ Γ₁) (σ : State C Γ) :
-    Premise.Runs m (.block body) (.unfold body body.ext) σ :=
-  Premise.sound_unfold σ (Stmt.runSt_block σ body).symm
 
 /-- The loop's annotation plays no part in its run. -/
 theorem Stmt.runSt_loop_ann (σ : State C Γ) (a a' : LoopAnn C Γ) (c : Val C Γ .bool)

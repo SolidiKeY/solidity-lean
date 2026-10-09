@@ -38,16 +38,6 @@ theorem Res.Sim.err_of_not_ok {α : Type} {h : Halt} (hh : h ≠ .panic) {r : Re
   | ok a => exact absurd rfl (hn a)
   | error e => exact ⟨fun e' => absurd e' hh, fun e' => absurd (congrArg Except.error e') hr⟩
 
-theorem Src.value_noPanic {T : Ty} (r : Src C Γ T) : NoPanic (r.value σ) := by
-  cases r with
-  | val v =>
-    have := Val.eval_noPanic σ v
-    simp only [Src.value]
-    exact NoPanic.bind this fun _ _ => NoPanic.pure _
-  | copy p hm =>
-    simp only [Src.value]
-    exact NoPanic.bind (SPath.resolve_noPanic σ p) fun _ _ => Semantics.State.findStorage_noPanic _ _ _
-
 theorem MPath.mval_noPanic {T : Ty} (b : MPath C Γ T) : NoPanic (b.mval σ) := by
   cases b with
   | var i _ =>

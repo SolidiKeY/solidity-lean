@@ -131,8 +131,6 @@ section Pieces
 
 variable {Γ : Ctx}
 
-theorem State.withEnv_self (σ : State C Γ) : σ.withEnv σ.env = σ := rfl
-
 theorem Val.evalT_unders {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) :
     (ρ : Ctx) → (r : TEnv C σ.H ρ) →
       (v.unders ρ).evalT (σ.withEnv (TEnv.append ρ r σ.env)) = v.evalT σ

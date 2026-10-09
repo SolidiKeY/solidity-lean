@@ -364,23 +364,6 @@ theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State
         rw [he'] at h'
         exact h'.elim
 
-/-- **A block**: `⟨ P (pop) ω κ ⟩ φ` gives `⟨ s; ω κ ⟩ φ` when `P`, its
-fresh locals popped, runs as `s`. -/
-theorem Premise.sound_unfoldH {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Ext Γ' Γ''} {s : Stmt C Γ Γ'}
-    (σ : State C Γ) (hs : (Prog.runSt σ P).map (State.drop h) = Stmt.runSt σ s) :
-    Premise.Sound m s (.unfold P h) σ := by
-  intro _ _ ω κ φ hp
-  have h' := (holds_modal_iff σ P (.pop .capture h (.seq ω κ)) φ).1 hp
-  rw [holds_modal_iff, runSt_cons_frames, ← hs]
-  revert h'
-  cases Prog.runSt σ P with
-  | error => exact id
-  | ok τ =>
-    intro h'
-    change m.afterRunTR _ (Frames.runSt τ (.pop .capture h (.seq ω κ))) at h'
-    rw [Frames.runSt_pop, Frames.runSt_seq] at h'
-    exact h'
-
 /-- **A block dropping a frame from under what it keeps**
 (`Premise.inline`). -/
 theorem Premise.sound_inline {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Thin Γ' Γ''} {s : Stmt C Γ Γ'}
@@ -1028,11 +1011,6 @@ theorem State.get_push_here : (TEnv.get .here (σ.push w).env : t.TDenote C σ.H
 theorem State.get_push_there {u : LTy} (i : Idx Γ u) :
     (TEnv.get i.there (σ.push w).env : u.TDenote C σ.H) = TEnv.get i σ.env := rfl
 
-theorem State.push_setLocal {u : LTy} (i : Idx Γ u) (x : u.TDenote C σ.H) :
-    (σ.push w).setLocal i.there x = (σ.setLocal i x).push w := rfl
-
-theorem State.drop_push : (σ.push w).drop (.push .refl) = σ := rfl
-
 /-- An outcome lifted along `up`, its top local popped: the outcome. -/
 theorem liftedT_up_drop (r : TRes (Out C σ.H Γ)) :
     ((liftedT up (w, σ.env) r).map (·.st)).map (State.drop (.push .refl)) = r.map (·.st) := by
@@ -1112,14 +1090,6 @@ theorem Premise.sound_captureMVSim {R : RefTy} {x : Var} {b : MPath C Γ (.ref R
   | ok r => exact TRes.Sim.of_eq (hok r hb)
   | error h => exact herr h hb (MPath.mvalT_revert σ b hb)
 
-/-- When the box's statement halts, not in a panic, any premise gives it. -/
-theorem Premise.sound_of_halt {Γ' : Ctx} {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'}
-    (σ : State C Γ) {e : THalt} (he : Stmt.runSt σ s = .error e) (hp : e ≠ .panic) :
-    Premise.Sound .box s p σ := by
-  intro _ _ ω κ φ _
-  rw [holds_modal_iff, runSt_cons_frames, he]
-  exact ⟨trivial, fun h => hp (Except.error.inj h)⟩
-
 end CaptureSim
 
 /-! ## A scope end that pops nothing -/
@@ -1138,9 +1108,6 @@ theorem Ext.eq_refl_of {Γ : Ctx} : {Δ : Ctx} → (e : Ext Γ Δ) → (h : Δ =
 
 /-- A scope end from a context to itself pops nothing. -/
 theorem Ext.self_eq_refl {Γ : Ctx} (e : Ext Γ Γ) : e = .refl := Ext.eq_refl_of e rfl
-
-theorem State.drop_self {Γ : Ctx} (e : Ext Γ Γ) (σ : State C Γ) : σ.drop e = σ := by
-  rw [Ext.self_eq_refl e]; rfl
 
 theorem TRes.map_drop_self {Γ : Ctx} (e : Ext Γ Γ) (r : TRes (State C Γ)) :
     r.map (State.drop e) = r := by

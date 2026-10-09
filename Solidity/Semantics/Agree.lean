@@ -103,24 +103,6 @@ theorem ResAgree.bind {ns : List Var} {x₁ x₂ : Res (State × α)}
       subst heq
       exact hf s₁ s₂ a₁ hs
 
-/-- `ResAgree.bind`, additionally handing the continuation the two
-`ok`-equations — for continuations whose proof needs to *invert* the
-prefix (e.g. to extract the freshness of a resolved `Loc`). -/
-theorem ResAgree.bindWith {ns : List Var} {x₁ x₂ : Res (State × α)}
-    (hx : ResAgree ns x₁ x₂)
-    {f₁ f₂ : State × α -> Res (State × β)}
-    (hf : ∀ s₁ s₂ a, x₁ = .ok (s₁, a) -> x₂ = .ok (s₂, a) ->
-      EnvAgreeExcept ns s₁ s₂ ->
-      ResAgree ns (f₁ (s₁, a)) (f₂ (s₂, a))) :
-    ResAgree ns (x₁ >>= f₁) (x₂ >>= f₂) := by
-  match x₁, x₂, hx with
-  | .error e₁, .error e₂, hx =>
-      subst hx
-      exact rfl
-  | .ok (s₁, a₁), .ok (s₂, a₂), ⟨heq, hs⟩ =>
-      subst heq
-      exact hf s₁ s₂ a₁ rfl rfl hs
-
 theorem ResAgree.bindState {ns : List Var} {x₁ x₂ : Res (State × α)}
     (hx : ResAgree ns x₁ x₂)
     {f₁ f₂ : State × α -> Res State}
@@ -285,12 +267,6 @@ theorem setObj_agree {ns : List Var} {s₁ s₂ : State}
     EnvAgreeExcept ns (s₁.setObj id obj) (s₂.setObj id obj) :=
   ⟨h.storage, by simp [State.setObj, h.heap], h.nextId, h.net, h.env,
     h.selfBalance, h.tx⟩
-
-theorem getNet_congr {ns : List Var} {s₁ s₂ : State}
-    (h : EnvAgreeExcept ns s₁ s₂) (addr : Int) :
-    s₁.getNet addr = s₂.getNet addr := by
-  unfold State.getNet
-  rw [h.net]
 
 /-! ## Congruence for the cross-domain copies -/
 
@@ -692,27 +668,11 @@ theorem transferAt_agree (hag : EnvAgreeExcept ns σ τ) (addr amt : Int) :
   exact ⟨hag.storage, hag.heap, hag.nextId,
     by simp only [State.getNet, hag.net, hag.tx], hag.env, hag.selfBalance, hag.tx⟩
 
-theorem pay_agree (hag : EnvAgreeExcept ns σ τ) (addr amt : Int) :
-    EnvAgreeExcept ns (σ.pay addr amt) (τ.pay addr amt) := by
-  rw [State.pay_eq, State.pay_eq]
-  exact ⟨hag.storage, hag.heap, hag.nextId,
-    by simp only [State.getNet, hag.net, hag.tx], hag.env, hag.selfBalance, hag.tx⟩
-
 theorem writeAddr_agree (hag : EnvAgreeExcept ns σ τ) (mv : MVal) (a : Addr) :
     ResultsAgree ns (writeAddr σ mv a) (writeAddr τ mv a) := by
   cases a
   · exact memWriteField_agree hag _ _ _
   · exact memWriteIndex_agree hag _ _ _
-
-theorem memClear_agree (hag : EnvAgreeExcept ns σ τ) (a : Addr) :
-    (T : Ty) → ResultsAgree ns (memClear σ a T) (memClear τ a T)
-  | .prim _ => writeAddr_agree hag _ _
-  | .ref R => ResAgree.bindState (allocDefault_agree hag R) fun _ _ _ h' => writeAddr_agree h' _ _
-
-theorem allocDefault_bind_agree (hag : EnvAgreeExcept ns σ τ) (R : RefTy) (x : Var) :
-    ResultsAgree ns (do let (σ', id) ← allocDefault σ R; pure (σ'.setEnv x (.mref id)))
-      (do let (σ', id) ← allocDefault τ R; pure (σ'.setEnv x (.mref id))) :=
-  ResAgree.bindState (allocDefault_agree hag R) fun _ _ _ h' => EnvAgreeExcept.setEnv_both h' _ _
 
 /-- The locals an outcome binds, bound alike in two states that agree. -/
 theorem bindData_frame :

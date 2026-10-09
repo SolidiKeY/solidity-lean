@@ -580,18 +580,6 @@ theorem TRun.incDec_pushT {p : PrimTy} (op : IncDec) {l' : OpLoc C (t :: Γ) p} 
   simp only [TRun.incDec, hl.bumpT]
   cases l.bumpT σ op <;> rfl
 
-theorem TRun.assignIncDec_pushT {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
-    {l' : OpLoc C (t :: Γ) p} {l : OpLoc C Γ p} (hl : OpLoc.AgreeT σ w l' l) :
-    TRun.assignIncDec i.there op l' (σ.push w) = pushedT σ w (TRun.assignIncDec i op l σ) := by
-  simp only [TRun.assignIncDec, hl.bumpT]
-  cases l.bumpT σ op with
-  | error => rfl
-  | ok x =>
-    show Except.ok (⟨(Out.lift up (w, σ.env) x.1).st.setLocal i.there x.2, x.1.ext⟩ :
-        Out C σ.H (t :: Γ)) = Except.ok (Out.lift up (w, σ.env) ⟨x.1.st.setLocal i x.2, x.1.ext⟩)
-    rw [← Idx.up_eq i]
-    simp only [Out.lift, State.lift_setLocal]
-
 theorem TRun.push_none_pushT {E : Ty} (b' : SPath C (t :: Γ) (.array E)) (b : SPath C Γ (.array E))
     (hb : b'.resolveT (σ.push w) = b.resolveT σ) :
     TRun.push b' none (σ.push w) = pushedT σ w (TRun.push b none σ) := by

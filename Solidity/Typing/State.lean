@@ -1,11 +1,10 @@
 import Solidity.Typing.StoragePreservation
 
 /-!
-# State typing: contexts, heap/env invariants, copy typing
+# State typing: store typings and the global invariant
 
-The second layer of the type-soundness development. `StoragePreservation`
-handles the storage tree; this module adds what full soundness needs on
-top:
+The typing of the erased state's global part, on top of the storage lemmas
+of `Typing/StoragePreservation.lean`:
 
 - a store typing `HeapTy` (the type each memory identity holds) — the
   standard shallow store-typing setup: `MVal.hasTyH` checks a reference
@@ -14,12 +13,9 @@ top:
 - `heapTypedB` / `StateWT`, the invariant of a state's global part
   (storage, heap, allocation counter).  The locals are typed by their
   context (`Typing/Soundness.lean`'s `RunWT`, over the scoped syntax);
-- the cross-domain copy typing theorems: `copyMToSt_hasTy`
-  (memory→storage: a heap-typed source lands as a storage value of its
-  type — the fuel is the interpreter's own cycle guard, so exhaustion
-  is vacuous) and `copyStToM_typed` (storage→memory: the copy
-  allocates, so the store typing *extends*, and everything already
-  typed stays typed — the weakening lemmas).
+- the weakening lemmas (a store typing extended keeps what was typed),
+  the copies' lengths, and `CopyOut`, what a storage→memory copy keeps
+  (`Typing/Reachability.lean`'s copies read it).
 -/
 
 namespace Solidity
@@ -316,11 +312,7 @@ theorem heapTypedB_alloc {H : HeapTy} {s : State} {obj : MObj}
     rw [hheap', lookupBy_setBy_self]
     exact hobj
 
-/-! ## Memory→storage copy typing
-
-`rem` is the interpreter's own cycle guard (`copyMem` passes every heap
-identity): a cyclic heap exhausts it and errors, so the theorems are
-stated for every `rem` and exhaustion is vacuous. -/
+/-! ## The copies' lengths -/
 
 /-- A copy back from memory has as many elements as the memory array: a
 fixed-size array lands as long as it was. -/
@@ -359,179 +351,7 @@ theorem copyStElems_length {s : State} :
           cases h
           simp [ih hr]
 
-private theorem copyMFields_hasTy {s : State} {H : HeapTy} {rem : List Nat}
-    {str : Name}
-    (IH : ∀ {mv : MVal} {ty : Ty} {sv : SVal},
-      MVal.hasTyH H mv ty = true -> copyMToSt s rem mv = Except.ok sv ->
-      sv.hasTy ty = true) :
-    ∀ {fields : List (Name × MVal)} {sfields : List (Name × SVal)},
-      MObj.hasTyH.hasTyHFields H str fields = true ->
-      copyMFields s rem fields = Except.ok sfields ->
-      SVal.hasTy.hasTyFields str sfields = true := by
-  intro fields
-  induction fields with
-  | nil =>
-      intro sfields _ hcopy
-      simp only [copyMFields] at hcopy
-      simp [<- Except.ok.inj hcopy, SVal.hasTy.hasTyFields]
-  | cons p rest ih =>
-      intro sfields h hcopy
-      obtain ⟨n, v⟩ := p
-      simp only [MObj.hasTyH.hasTyHFields, Bool.and_eq_true] at h
-      simp only [copyMFields, bind, Except.bind] at hcopy
-      cases hv : copyMToSt s rem v with
-      | error e => rw [hv] at hcopy; exact nomatch hcopy
-      | ok sv =>
-          rw [hv] at hcopy
-          try dsimp only at hcopy
-          cases hrest : copyMFields s rem rest with
-          | error e => rw [hrest] at hcopy; exact nomatch hcopy
-          | ok srest =>
-              rw [hrest] at hcopy
-              try dsimp only at hcopy
-              simp only [<- Except.ok.inj hcopy,
-                SVal.hasTy.hasTyFields, Bool.and_eq_true]
-              refine ⟨?_, ih h.2 hrest⟩
-              cases hdef : lookupBy n (structDef str) with
-              | none => rw [hdef] at h; exact Bool.noConfusion h.1
-              | some ty =>
-                  rw [hdef] at h
-                  exact IH h.1 hv
-
-private theorem copyMElems_hasTy {s : State} {H : HeapTy} {rem : List Nat}
-    {elem : Ty}
-    (IH : ∀ {mv : MVal} {ty : Ty} {sv : SVal},
-      MVal.hasTyH H mv ty = true -> copyMToSt s rem mv = Except.ok sv ->
-      sv.hasTy ty = true) :
-    ∀ {elems : List MVal} {selems : List SVal},
-      MObj.hasTyH.hasTyHElems H elem elems = true ->
-      copyMElems s rem elems = Except.ok selems ->
-      SVal.hasTy.hasTyElems elem selems = true := by
-  intro elems
-  induction elems with
-  | nil =>
-      intro selems _ hcopy
-      simp only [copyMElems] at hcopy
-      simp [<- Except.ok.inj hcopy, SVal.hasTy.hasTyElems]
-  | cons v rest ih =>
-      intro selems h hcopy
-      simp only [MObj.hasTyH.hasTyHElems, Bool.and_eq_true] at h
-      simp only [copyMElems, bind, Except.bind] at hcopy
-      cases hv : copyMToSt s rem v with
-      | error e => rw [hv] at hcopy; exact nomatch hcopy
-      | ok sv =>
-          rw [hv] at hcopy
-          try dsimp only at hcopy
-          cases hrest : copyMElems s rem rest with
-          | error e => rw [hrest] at hcopy; exact nomatch hcopy
-          | ok srest =>
-              rw [hrest] at hcopy
-              try dsimp only at hcopy
-              simp only [<- Except.ok.inj hcopy,
-                SVal.hasTy.hasTyElems, Bool.and_eq_true]
-              exact ⟨IH h.1 hv, ih h.2 hrest⟩
-
-/-- Memory→storage copy typing: a heap-typed slot value copies to a
-storage value of its type. -/
-theorem copyMToSt_hasTy {H : HeapTy} {s : State}
-    (hheap : heapTypedB H s.heap = true) {rem : List Nat} :
-    ∀ {mv : MVal} {ty : Ty} {sv : SVal},
-      MVal.hasTyH H mv ty = true ->
-      copyMToSt s rem mv = Except.ok sv -> sv.hasTy ty = true := by
-  intro mv ty sv h hcopy
-  cases mv with
-  | prim p =>
-      cases p with
-      | int n =>
-          simp only [copyMToSt] at hcopy
-          cases Except.ok.inj hcopy
-          cases ty with
-          | prim pt => cases pt <;> simp_all [MVal.hasTyH, SVal.hasTy]
-          | ref r => simp [MVal.hasTyH] at h
-      | bool b =>
-          simp only [copyMToSt] at hcopy
-          cases Except.ok.inj hcopy
-          cases ty with
-          | prim pt => cases pt <;> simp_all [MVal.hasTyH, SVal.hasTy]
-          | ref r => simp [MVal.hasTyH] at h
-  | ref id =>
-      cases ty with
-      | prim pt => cases pt <;> simp [MVal.hasTyH] at h
-      | ref r =>
-          simp only [MVal.hasTyH, beq_iff_eq] at h
-          have hin := lookupBy_eq_some_mem h
-          have hrow := List.all_eq_true.mp hheap _ hin
-          by_cases hmem : id ∈ rem
-          · simp only [copyMToSt, hmem, dif_pos, State.getObj] at hcopy
-            cases hlook : lookupBy id s.heap with
-            | none => rw [hlook] at hrow; exact Bool.noConfusion hrow
-            | some obj =>
-                rw [hlook] at hrow hcopy
-                cases obj with
-                | struct fields =>
-                    cases r with
-                    | struct str =>
-                        simp only [bind, Except.bind] at hcopy
-                        cases hfs : copyMFields s (rem.erase id) fields with
-                        | error e =>
-                            rw [hfs] at hcopy; exact nomatch hcopy
-                        | ok sfields =>
-                            rw [hfs] at hcopy
-                            try dsimp only at hcopy
-                            simp only [<- Except.ok.inj hcopy, SVal.hasTy]
-                            exact copyMFields_hasTy
-                              (fun hv hc => copyMToSt_hasTy hheap hv hc)
-                              (by simpa [MObj.hasTyH] using hrow) hfs
-                    | array elem => simp [MObj.hasTyH] at hrow
-                    | fixed elem _ => simp [MObj.hasTyH] at hrow
-                    | mapping k v => simp [MObj.hasTyH] at hrow
-                | array elems fx =>
-                    cases r with
-                    | struct str => simp [MObj.hasTyH] at hrow
-                    | array elem =>
-                        simp only [bind, Except.bind] at hcopy
-                        simp only [MObj.hasTyH, Bool.and_eq_true] at hrow
-                        cases hes : copyMElems s (rem.erase id) elems with
-                        | error e =>
-                            rw [hes] at hcopy; exact nomatch hcopy
-                        | ok selems =>
-                            rw [hes] at hcopy
-                            try dsimp only at hcopy
-                            simp only [<- Except.ok.inj hcopy, SVal.hasTy,
-                              SVal.hasTy.hasTyElems, Bool.and_true, Bool.and_eq_true]
-                            exact ⟨hrow.1, copyMElems_hasTy
-                              (fun hv hc => copyMToSt_hasTy hheap hv hc) hrow.2 hes⟩
-                    | fixed elem n =>
-                        simp only [bind, Except.bind] at hcopy
-                        simp only [MObj.hasTyH, Bool.and_eq_true, beq_iff_eq] at hrow
-                        cases hes : copyMElems s (rem.erase id) elems with
-                        | error e =>
-                            rw [hes] at hcopy; exact nomatch hcopy
-                        | ok selems =>
-                            rw [hes] at hcopy
-                            try dsimp only at hcopy
-                            simp only [<- Except.ok.inj hcopy, SVal.hasTy,
-                              SVal.hasTy.hasTyElems, Bool.and_true, Bool.and_eq_true,
-                              beq_iff_eq, copyMElems_length hes]
-                            exact ⟨hrow.1, copyMElems_hasTy
-                              (fun hv hc => copyMToSt_hasTy hheap hv hc) hrow.2 hes⟩
-                    | mapping k v => simp [MObj.hasTyH] at hrow
-          · simp only [copyMToSt, hmem, dif_neg, not_false_iff] at hcopy
-            exact nomatch hcopy
-termination_by rem.length
-decreasing_by all_goals
-  (have h1 := List.length_erase_of_mem hmem
-   have h2 := List.length_pos_of_mem hmem
-   omega)
-
-/-- `copyMem` at the interpreter's own visited set. -/
-theorem copyMem_hasTy {H : HeapTy} {s : State} {mv : MVal} {ty : Ty}
-    {sv : SVal} (hheap : heapTypedB H s.heap = true)
-    (h : MVal.hasTyH H mv ty = true)
-    (hcopy : copyMem s mv = Except.ok sv) : sv.hasTy ty = true :=
-  copyMToSt_hasTy hheap h hcopy
-
-/-! ## Storage→memory copy typing -/
+/-! ## What a storage→memory copy keeps -/
 
 /-- What `copyStToM` (and each of its list companions) guarantees:
 the store typing extends by fresh claims only, stays nodup-keyed and
@@ -569,7 +389,7 @@ theorem heapTy_fresh {H : HeapTy} {s : State}
       rw [hwf.nextId_fresh] at this
       exact Bool.noConfusion this
 
-/-- The allocation step shared by `copyStToM_typed`'s node arms: claim
+/-- The allocation step of a storage→memory copy (`copyStToM_canon`'s node arms): claim
 the fresh identity at the node's (reference) type. -/
 theorem CopyOut.alloc {H H₁ : HeapTy} {s s₁ : State} {r : RefTy}
     {obj : MObj} (hout : CopyOut H s H₁ s₁)
@@ -588,237 +408,6 @@ theorem CopyOut.alloc {H H₁ : HeapTy} {s s₁ : State} {r : RefTy}
     hout.storage, hout.env⟩, ?_⟩
   simp [MVal.hasTyH, lookupBy_setBy_self]
 
-mutual
-
-/-- Storage→memory copy typing: copying a `ty`-typed storage value
-allocates fresh objects, extending the store typing so that the
-returned slot value has type `ty` and everything already typed stays
-typed. -/
-theorem copyStToM_typed {H : HeapTy} {s s' : State} {v : SVal}
-    {ty : Ty} {mv : MVal}
-    (hnd : nodupKeysB H = true) (hheap : heapTypedB H s.heap = true)
-    (hwf : HeapWellFormed s) (hty : v.hasTy ty = true)
-    (hcopy : copyStToM s v = Except.ok (s', mv)) :
-    ∃ H', CopyOut H s H' s' ∧ MVal.hasTyH H' mv ty = true := by
-  cases v with
-  | prim p =>
-      cases p with
-      | int n =>
-          simp only [copyStToM] at hcopy
-          try dsimp only at hcopy
-          simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-          obtain ⟨hs, hmv⟩ := hcopy
-          subst hs hmv
-          refine ⟨H, CopyOut.refl hnd hheap hwf, ?_⟩
-          cases ty with
-          | prim pt => cases pt <;> simp_all [SVal.hasTy, MVal.hasTyH]
-          | ref r => simp [SVal.hasTy] at hty
-      | bool b =>
-          simp only [copyStToM] at hcopy
-          try dsimp only at hcopy
-          simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-          obtain ⟨hs, hmv⟩ := hcopy
-          subst hs hmv
-          refine ⟨H, CopyOut.refl hnd hheap hwf, ?_⟩
-          cases ty with
-          | prim pt => cases pt <;> simp_all [SVal.hasTy, MVal.hasTyH]
-          | ref r => simp [SVal.hasTy] at hty
-  | struct fields =>
-      cases ty with
-      | prim pt => simp [SVal.hasTy] at hty
-      | ref r =>
-          cases r with
-          | struct str =>
-              simp only [SVal.hasTy] at hty
-              simp only [copyStToM, bind, Except.bind] at hcopy
-              cases hfs : copyStFields s fields with
-              | error e => rw [hfs] at hcopy; exact nomatch hcopy
-              | ok out =>
-                  obtain ⟨s₁, mfields⟩ := out
-                  rw [hfs] at hcopy
-                  try dsimp only at hcopy
-                  obtain ⟨H₁, hout, hflds⟩ :=
-                    copyStFields_typed hnd hheap hwf hty hfs
-                  simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-                  obtain ⟨hs', hmv⟩ := hcopy
-                  subst hs' hmv
-                  have halloc := CopyOut.alloc
-                    (r := RefTy.struct str) (obj := MObj.struct mfields)
-                    hout (by simpa [MObj.hasTyH] using hflds)
-                  exact ⟨_, halloc.1, halloc.2⟩
-          | array elem => simp [SVal.hasTy] at hty
-          | fixed elem _ => simp [SVal.hasTy] at hty
-          | mapping k value => simp [SVal.hasTy] at hty
-  | array elems shadow fx =>
-      cases ty with
-      | prim pt => simp [SVal.hasTy] at hty
-      | ref r =>
-          cases r with
-          | struct str => simp [SVal.hasTy] at hty
-          | array elem =>
-              simp only [SVal.hasTy, Bool.and_eq_true] at hty
-              simp only [copyStToM, bind, Except.bind] at hcopy
-              cases hes : copyStElems s elems with
-              | error e => rw [hes] at hcopy; exact nomatch hcopy
-              | ok out =>
-                  obtain ⟨s₁, melems⟩ := out
-                  rw [hes] at hcopy
-                  try dsimp only at hcopy
-                  obtain ⟨H₁, hout, hels⟩ :=
-                    copyStElems_typed hnd hheap hwf hty.1.2 hes
-                  simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-                  obtain ⟨hs', hmv⟩ := hcopy
-                  subst hs' hmv
-                  have halloc := CopyOut.alloc
-                    (r := RefTy.array elem) (obj := MObj.array melems fx)
-                    hout (by simp only [MObj.hasTyH, Bool.and_eq_true]; exact ⟨hty.1.1, hels⟩)
-                  exact ⟨_, halloc.1, halloc.2⟩
-          | fixed elem n =>
-              simp only [SVal.hasTy, Bool.and_eq_true, beq_iff_eq] at hty
-              simp only [copyStToM, bind, Except.bind] at hcopy
-              cases hes : copyStElems s elems with
-              | error e => rw [hes] at hcopy; exact nomatch hcopy
-              | ok out =>
-                  obtain ⟨s₁, melems⟩ := out
-                  rw [hes] at hcopy
-                  try dsimp only at hcopy
-                  obtain ⟨H₁, hout, hels⟩ :=
-                    copyStElems_typed hnd hheap hwf hty.1.2 hes
-                  simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-                  obtain ⟨hs', hmv⟩ := hcopy
-                  subst hs' hmv
-                  have halloc := CopyOut.alloc
-                    (r := RefTy.fixed elem n) (obj := MObj.array melems fx)
-                    hout (by
-                      simp only [MObj.hasTyH, Bool.and_eq_true, beq_iff_eq,
-                        copyStElems_length hes]
-                      exact ⟨hty.1.1, hels⟩)
-                  exact ⟨_, halloc.1, halloc.2⟩
-          | mapping k value => simp [SVal.hasTy] at hty
-  | map entries dflt => exact nomatch hcopy
-
-theorem copyStFields_typed {H : HeapTy} {s s₁ : State} {str : Name}
-    {fields : List (Name × SVal)} {mfields : List (Name × MVal)}
-    (hnd : nodupKeysB H = true) (hheap : heapTypedB H s.heap = true)
-    (hwf : HeapWellFormed s)
-    (hty : SVal.hasTy.hasTyFields str fields = true)
-    (hcopy : copyStFields s fields = Except.ok (s₁, mfields)) :
-    ∃ H₁, CopyOut H s H₁ s₁ ∧
-      MObj.hasTyH.hasTyHFields H₁ str mfields = true := by
-  match fields with
-  | [] =>
-      simp only [copyStFields] at hcopy
-      try dsimp only at hcopy
-      simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-      obtain ⟨hs, hmf⟩ := hcopy
-      subst hs hmf
-      exact ⟨H, CopyOut.refl hnd hheap hwf, rfl⟩
-  | (n, v) :: rest =>
-      simp only [SVal.hasTy.hasTyFields, Bool.and_eq_true] at hty
-      simp only [copyStFields, bind, Except.bind] at hcopy
-      cases hdef : lookupBy n (structDef str) with
-      | none => rw [hdef] at hty; exact Bool.noConfusion hty.1
-      | some tyf =>
-          rw [hdef] at hty
-          cases hv : copyStToM s v with
-          | error e => rw [hv] at hcopy; exact nomatch hcopy
-          | ok out =>
-              obtain ⟨s₂, mv⟩ := out
-              rw [hv] at hcopy
-              try dsimp only at hcopy
-              obtain ⟨H₂, hout₂, hmv⟩ :=
-                copyStToM_typed hnd hheap hwf hty.1 hv
-              cases hrest : copyStFields s₂ rest with
-              | error e => rw [hrest] at hcopy; exact nomatch hcopy
-              | ok outr =>
-                  obtain ⟨s₃, mrest⟩ := outr
-                  rw [hrest] at hcopy
-                  try dsimp only at hcopy
-                  obtain ⟨H₃, hout₃, hmrest⟩ :=
-                    copyStFields_typed hout₂.nodup hout₂.heap
-                      hout₂.heapWf hty.2 hrest
-                  try dsimp only at hcopy
-                  simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-                  obtain ⟨hs₁, hmf⟩ := hcopy
-                  subst hs₁ hmf
-                  refine ⟨H₃, hout₂.trans hout₃, ?_⟩
-                  simp only [MObj.hasTyH.hasTyHFields, hdef,
-                    Bool.and_eq_true]
-                  exact ⟨MVal.hasTyH_mono hout₃.ext hmv, hmrest⟩
-
-theorem copyStElems_typed {H : HeapTy} {s s₁ : State} {elem : Ty}
-    {elems : List SVal} {melems : List MVal}
-    (hnd : nodupKeysB H = true) (hheap : heapTypedB H s.heap = true)
-    (hwf : HeapWellFormed s)
-    (hty : SVal.hasTy.hasTyElems elem elems = true)
-    (hcopy : copyStElems s elems = Except.ok (s₁, melems)) :
-    ∃ H₁, CopyOut H s H₁ s₁ ∧
-      MObj.hasTyH.hasTyHElems H₁ elem melems = true := by
-  match elems with
-  | [] =>
-      simp only [copyStElems] at hcopy
-      try dsimp only at hcopy
-      simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-      obtain ⟨hs, hme⟩ := hcopy
-      subst hs hme
-      exact ⟨H, CopyOut.refl hnd hheap hwf, rfl⟩
-  | v :: rest =>
-      simp only [SVal.hasTy.hasTyElems, Bool.and_eq_true] at hty
-      simp only [copyStElems, bind, Except.bind] at hcopy
-      cases hv : copyStToM s v with
-      | error e => rw [hv] at hcopy; exact nomatch hcopy
-      | ok out =>
-          obtain ⟨s₂, mv⟩ := out
-          rw [hv] at hcopy
-          try dsimp only at hcopy
-          obtain ⟨H₂, hout₂, hmv⟩ :=
-            copyStToM_typed hnd hheap hwf hty.1 hv
-          cases hrest : copyStElems s₂ rest with
-          | error e => rw [hrest] at hcopy; exact nomatch hcopy
-          | ok outr =>
-              obtain ⟨s₃, mrest⟩ := outr
-              rw [hrest] at hcopy
-              try dsimp only at hcopy
-              obtain ⟨H₃, hout₃, hmrest⟩ :=
-                copyStElems_typed hout₂.nodup hout₂.heap
-                  hout₂.heapWf hty.2 hrest
-              try dsimp only at hcopy
-              simp only [Except.ok.injEq, Prod.mk.injEq] at hcopy
-              obtain ⟨hs₁, hme⟩ := hcopy
-              subst hs₁ hme
-              refine ⟨H₃, hout₂.trans hout₃, ?_⟩
-              simp only [MObj.hasTyH.hasTyHElems, Bool.and_eq_true]
-              exact ⟨MVal.hasTyH_mono hout₃.ext hmv, hmrest⟩
-
-end
-
-/-- Fresh default memory allocation is typed: the identity
-`allocDefault` returns is claimed at the declared reference type. -/
-theorem allocDefault_typed {H : HeapTy} {s s' : State} {ref : RefTy}
-    {id : Nat}
-    (hnd : nodupKeysB H = true) (hheap : heapTypedB H s.heap = true)
-    (hwf : HeapWellFormed s)
-    (halloc : allocDefault s ref = Except.ok (s', id)) :
-    ∃ H', CopyOut H s H' s' ∧
-      MVal.hasTyH H' (MVal.ref id) (Ty.ref ref) = true := by
-  simp only [allocDefault] at halloc
-  cases hcopy : copyStToM s (defaultForRef ref) with
-  | error e => rw [hcopy] at halloc; exact nomatch halloc
-  | ok out =>
-      obtain ⟨s₁, mv⟩ := out
-      rw [hcopy] at halloc
-      have hdefault : (defaultForRef ref).hasTy (Ty.ref ref) = true :=
-        defaultForTy_hasTy
-      obtain ⟨H', hout, hmv⟩ :=
-        copyStToM_typed hnd hheap hwf hdefault hcopy
-      cases mv with
-      | prim p => exact nomatch halloc
-      | ref rid =>
-          try dsimp only at halloc
-          simp only [Except.ok.injEq, Prod.mk.injEq] at halloc
-          obtain ⟨hs', hid⟩ := halloc
-          subst hs' hid
-          exact ⟨H', hout, hmv⟩
 
 end Semantics
 end Solidity
