@@ -240,10 +240,10 @@ s/\bTState\b/State/g
 s/\btrun([A-Z_])/run\1/g
 s/\btrun\b/run/g
 SED
-# a citation `Core/X.lean` relative to `Calculus/` (in `Calculus/Core/*`,
+# a citation of `Core/X` relative to `Calculus/` (in `Calculus/Core/*`,
 # `Calculus/TacticSyntax`, `docs/module-map`) loses its `Core/`; the one
 # outside `Calculus/` gains `Calculus/`
-sed -i 's#`Core/Notation.lean`#`Calculus/Notation.lean`#' Solidity/Examples/Chains/EvaluationOrder.lean
+sed -i 's#`Core/Notation\.lean`#`Calculus/Notation.lean`#' Solidity/Examples/Chains/EvaluationOrder.lean
 git ls-files -z '*.lean' '*.md' '*.sh' '*.mjs' '*.toml' ':!:tests/**' ':!:scripts/w5-rename.sh' ':!:docs/intrinsic.md' \
   | xargs -0 sed -E -i -f "$script"
 # the corpus notes `scripts/solkey-port.mjs` writes cite module paths
