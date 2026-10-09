@@ -1006,7 +1006,10 @@ the closer port.
     soundness); `applySkip` asks a formula with no modality (`{}` reads it
     in every typed state of the same erasure and heap typing,
     `holds_congr_erase`); `applyOnRigid` under the diamond asks an update
-    that cannot halt (`Upd.totalB`, the erased `Upd.total`), under the box
+    that cannot halt (`Upd.totalB`: what the erased `Upd.total` admits, a
+    literal and an alias to a root and its fields, `sp1 := alice.account`,
+    and also a local, `unset` and the ledger's saves, which cannot halt on
+    the typed state; review fix: the alias was missing), under the box
     any update (`Fml.substU`).  `elimSelfUpdate`, commented out in solkey
     and theorems only in the erased form, is not ported.
 88. *Proposed (M6c 6c), the lead's call:* `StateParts`' two merges port
@@ -1195,7 +1198,9 @@ did not change).  The build (`Solidity`, `solkeycheck`, `SolidityCorpus`,
   `Upd.mergeMem?` (`Tm.withMemS`), `holds_upd_mergeSt`,
   `holds_upd_mergeMem`, `Fml.mergeAtS`.
 * `Examples/Tactics/UpdRulesScoped.lean`: the functions computed by the
-  kernel (`rfl`) on `dl!{ … }` leaves, one used on a `⊨` goal; a rule
+  kernel (`rfl`) on `dl!{ … }` leaves, the three entry points
+  (`Valid.of_simpUpdsS`, `Valid.of_updAtS`, `Valid.of_mergeAtS`) each used
+  on a `⊨` goal; a rule
   refused under a negation, `Upd.seqPar` refusing a memory term after a
   storage write that the storage merge reads.
 
@@ -1206,8 +1211,24 @@ no existing file but `Solidity.lean` and `docs/module-map.md` edited.  The
 build (`Solidity`) green; `check-orphans` (304 reachable),
 `check-doc-paths` OK; no pin moved; no `sorry`, `axiom` or `maxHeartbeats`
 added (`Fml.simpUpdsS_holds`, `Fml.updAtS_sound`, `Fml.mergeAtS_sound` on
-`propext`, `Classical.choice`, `Quot.sound`).  The functions use `match`
-on the indexed families: Graft's exemption (once a rule, not once a step).
+`propext`, `Classical.choice`, `Quot.sound`).
+
+Review fixes: the functions the kernel evaluates keep G0's conditions 1
+and 2, as `DecideScoped` does (decision 83), rather than claim Graft's
+exemption, which was granted to Graft and UpdateRules as timed: the walks
+over a whole formula or update (`Fml.rwAtS`, `Fml.simpUpdsS`,
+`Upd.graftF`, `Upd.totalB`, `Upd.size`) are written by the recursor with
+their `match` twins as `implemented_by` (`Fml.rwAtSM`, …) and link
+theorems (`Fml.rwAtS_eq_rwAtSM`, …), the proofs on the twins; a head is
+read by `Fml.casesOn`/`Upd.casesOn` (`Fml.updHead?`, `Upd.skipS`,
+`Upd.mergeMem?`), so `UpdRuleNameS.top`, `MergeNameS.top`, `Fml.mkUpdS`
+and `Fml.cleanS` match on no indexed family; `match` stays on one `Tm`,
+`Rhs` or `UpdElem` (decision 83's helpers).  `Upd.totalB` admits an alias
+to a root and its fields (`Tm.totalP`, `Tm.totalP_eval`), as the erased
+`Upd.total` does, so `applyOnRigid` fires under the diamond on
+`{ sp := alice.account }` (pinned).  The example module uses
+`Valid.of_updAtS` and `Valid.of_mergeAtS` on a `⊨` goal each, beside
+`Valid.of_simpUpdsS`.
 
 Gate: no gate file imports the new modules (checked on the import
 closure of `TestSuite/Derived1–14` and `Examples/Tactics/Decide`), and

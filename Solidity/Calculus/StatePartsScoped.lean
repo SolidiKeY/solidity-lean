@@ -29,9 +29,11 @@ the map reads each term where a write looks (`GraftOK`,
 modality (`holds_upd_mergeSt`, `holds_upd_mergeMem`), one way, as
 `Calculus/UpdRuleScoped.lean`'s rules.
 
-The functions use `match` on the indexed families, against Gate G0's first
-condition: the exemption of `Calculus/Graft.lean`'s merge, since they run
-once a rule.
+Gate G0's first two conditions hold as in `Calculus/UpdRuleScoped.lean`:
+the walk over `V` (`Upd.graftF`) is the recursor, its `match` twin
+`Upd.graftFM` linked by `Upd.graftF_eq_graftFM`; a head is read by
+`Upd.casesOn` (`Upd.mergeMem?`) or `Fml.updHead?` (`MergeNameS.top`), and
+`match` stays on one `Tm`, `Rhs` or `UpdElem` (a family with no index).
 -/
 
 namespace Solidity
@@ -73,14 +75,29 @@ def UpdElem.mapF {Ε : Ctx} : UpdElem C Δ Ε → Option (UpdElem C Γ Ε)
   | .netMt r a => do pure (.netMt (← F r) (← F a))
   | .setBalance a => (F a).map .setBalance
 
-/-- `V` after `U`, as one update from `U`'s state: `U`'s elements, then
-`V`'s, each right-hand side read through `F`. -/
-def Upd.graftF (U : Upd C Γ Δ) : {Δ₂ : Ctx} → Upd C Δ Δ₂ → Option (Upd C Γ Δ₂)
+/-- `Upd.graftF`'s compiled twin. -/
+def Upd.graftFM (U : Upd C Γ Δ) : {Δ₂ : Ctx} → Upd C Δ Δ₂ → Option (Upd C Γ Δ₂)
   | _, .nil => some U
-  | _, .snoc V e => do pure (.snoc (← Upd.graftF U V) (← e.mapF F))
-  | _, .decl V x r => do pure (.decl (← Upd.graftF U V) x (← r.mapF F))
-  | _, .pop V h => (Upd.graftF U V).map (.pop · h)
-  | _, .drop V h => (Upd.graftF U V).map (.drop · h)
+  | _, .snoc V e => do pure (.snoc (← Upd.graftFM U V) (← e.mapF F))
+  | _, .decl V x r => do pure (.decl (← Upd.graftFM U V) x (← r.mapF F))
+  | _, .pop V h => (Upd.graftFM U V).map (.pop · h)
+  | _, .drop V h => (Upd.graftFM U V).map (.drop · h)
+
+/-- `V` after `U`, as one update from `U`'s state: `U`'s elements, then
+`V`'s, each right-hand side read through `F`; by the recursor. -/
+@[implemented_by Upd.graftFM]
+def Upd.graftF (U : Upd C Γ Δ) {Δ₂ : Ctx} (V : Upd C Δ Δ₂) : Option (Upd C Γ Δ₂) :=
+  Upd.rec (motive := fun Δ₂ _ => Option (Upd C Γ Δ₂)) (some U)
+    (fun _ e ih => do pure (.snoc (← ih) (← e.mapF F)))
+    (fun _ x r ih => do pure (.decl (← ih) x (← r.mapF F)))
+    (fun _ h ih => ih.map (.pop · h)) (fun _ h ih => ih.map (.drop · h)) V
+
+theorem Upd.graftF_eq_graftFM (U : Upd C Γ Δ) {Δ₂ : Ctx} (V : Upd C Δ Δ₂) :
+    U.graftF F V = U.graftFM F V := by
+  induction V with
+  | nil => rfl
+  | snoc V e ih | decl V x r ih | pop V h ih | drop V h ih =>
+    simp only [Upd.graftFM, ← ih]; rfl
 
 end GraftF
 
@@ -175,22 +192,21 @@ theorem UpdElem.write_mapF (hF : GraftOK σ₀ σ₁ F) {Ε : Ctx} (e : UpdElem 
 
 end GraftFSound
 
-/-- **The grafted update runs as the two in turn**, where `F` reads each
-term where a write looks. -/
-theorem Upd.apply_graftF {Γ Δ₁ : Ctx} {F : {k : Srt} → Tm C Δ₁ k → Option (Tm C Γ k)}
+/-- The grafted update runs as the two in turn (on the twin). -/
+theorem Upd.apply_graftFM {Γ Δ₁ : Ctx} {F : {k : Srt} → Tm C Δ₁ k → Option (Tm C Γ k)}
     (U : Upd C Γ Δ₁) (σ₀ : EState C Γ) (hF : ∀ σ₁, U.apply σ₀ = .ok σ₁ → GraftOK σ₀ σ₁ F) :
-    {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graftF F V = some W →
+    {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graftFM F V = some W →
       W.apply σ₀ = (U.apply σ₀ >>= V.apply)
   | _, .nil, W, h => by
     cases h
     cases U.apply σ₀ <;> rfl
   | _, .snoc V e, W, h => by
-    simp only [Upd.graftF] at h
+    simp only [Upd.graftFM] at h
     obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
     change (do e'.write σ₀ (← W'.apply σ₀)) = _
-    rw [Upd.apply_graftF U σ₀ hF V hW]
+    rw [Upd.apply_graftFM U σ₀ hF V hW]
     cases hU : U.apply σ₀ with
     | error => rfl
     | ok σ₁ =>
@@ -199,12 +215,12 @@ theorem Upd.apply_graftF {Γ Δ₁ : Ctx} {F : {k : Srt} → Tm C Δ₁ k → Op
       | error => rfl
       | ok τ => exact UpdElem.write_mapF (hF σ₁ hU) e he τ
   | _, .decl V x r, W, h => by
-    simp only [Upd.graftF] at h
+    simp only [Upd.graftFM] at h
     obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
     change (do let τ ← W'.apply σ₀; pure (τ.push (← r'.eval σ₀))) = _
-    rw [Upd.apply_graftF U σ₀ hF V hW]
+    rw [Upd.apply_graftFM U σ₀ hF V hW]
     cases hU : U.apply σ₀ with
     | error => rfl
     | ok σ₁ =>
@@ -214,13 +230,21 @@ theorem Upd.apply_graftF {Γ Δ₁ : Ctx} {F : {k : Srt} → Tm C Δ₁ k → Op
   | _, .pop V e, W, h => by
     obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
     change (W'.apply σ₀).map (EState.drop e) = _
-    rw [Upd.apply_graftF U σ₀ hF V hW]
+    rw [Upd.apply_graftFM U σ₀ hF V hW]
     cases U.apply σ₀ <;> rfl
   | _, .drop V e, W, h => by
     obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
     change (W'.apply σ₀).map (EState.thin e) = _
-    rw [Upd.apply_graftF U σ₀ hF V hW]
+    rw [Upd.apply_graftFM U σ₀ hF V hW]
     cases U.apply σ₀ <;> rfl
+
+/-- **The grafted update runs as the two in turn**, where `F` reads each
+term where a write looks. -/
+theorem Upd.apply_graftF {Γ Δ₁ Δ₂ : Ctx} {F : {k : Srt} → Tm C Δ₁ k → Option (Tm C Γ k)}
+    (U : Upd C Γ Δ₁) (σ₀ : EState C Γ) (hF : ∀ σ₁, U.apply σ₀ = .ok σ₁ → GraftOK σ₀ σ₁ F)
+    (V : Upd C Δ₁ Δ₂) {W : Upd C Γ Δ₂} (h : U.graftF F V = some W) :
+    W.apply σ₀ = (U.apply σ₀ >>= V.apply) :=
+  Upd.apply_graftFM U σ₀ hF V (Upd.graftF_eq_graftFM F U V ▸ h)
 
 /-! ## `{L ‖ storage := S}` substituted -/
 
@@ -493,28 +517,40 @@ end WithMemSound
 /-- **`sequentialToParallel` over a memory write**: `{memory := M}{V}` as
 one update, `M` substituted for `memory` in `V`; `none` for any other `U`. -/
 def Upd.mergeMem? {Γ Δ₁ Δ₂ : Ctx} (U : Upd C Γ Δ₁) (V : Upd C Δ₁ Δ₂) : Option (Upd C Γ Δ₂) :=
-  match Δ₁, U, V with
-  | _, .snoc .nil (.memory M), V => (Upd.snoc .nil (.memory M)).graftF (fun t => some (Tm.withMemS M t)) V
-  | _, _, _ => none
+  Upd.casesOn (motive := fun Δ₁ _ => Upd C Δ₁ Δ₂ → Option (Upd C Γ Δ₂)) U
+    (nil := fun _ => none)
+    (snoc := fun U e V =>
+      Upd.casesOn (motive := fun Δ₁ _ => UpdElem C Γ Δ₁ → Upd C Δ₁ Δ₂ → Option (Upd C Γ Δ₂)) U
+        (nil := fun e V => match e with
+          | .memory M => (Upd.snoc .nil (.memory M)).graftF (fun t => some (Tm.withMemS M t)) V
+          | _ => none)
+        (snoc := fun _ _ _ _ => none) (decl := fun _ _ _ _ _ => none)
+        (pop := fun _ _ _ _ => none) (drop := fun _ _ _ _ => none) e V)
+    (decl := fun _ _ _ _ => none) (pop := fun _ _ _ => none) (drop := fun _ _ _ => none) V
 
 /-- The memory merge runs as the two updates in turn. -/
 theorem Upd.apply_mergeMem {Γ Δ₁ Δ₂ : Ctx} (U : Upd C Γ Δ₁) (V : Upd C Δ₁ Δ₂)
     {W : Upd C Γ Δ₂} (h : U.mergeMem? V = some W) (σ₀ : EState C Γ) :
     W.apply σ₀ = (U.apply σ₀ >>= V.apply) := by
-  unfold Upd.mergeMem? at h
-  split at h
-  · rename_i M _
-    refine Upd.apply_graftF _ σ₀ (fun σ₁ hU => ?_) _ h
-    change (do UpdElem.write σ₀ (.memory M) σ₀) = .ok σ₁ at hU
-    change (do
-      let μ ← M.eval σ₀
-      pure (σ₀.withGlob { σ₀.glob with heap := μ.heap, nextId := μ.nextId })) = .ok σ₁ at hU
-    cases hM : M.eval σ₀ with
-    | error => rw [hM] at hU; cases hU
-    | ok μ =>
-      rw [hM] at hU; cases hU
-      exact ⟨fun t _ ht => by cases ht; exact Tm.withMemS_eval hM t, rfl, rfl, rfl⟩
-  · cases h
+  cases U with
+  | snoc U e =>
+    cases U with
+    | nil =>
+      cases e with
+      | memory M =>
+        refine Upd.apply_graftF _ σ₀ (fun σ₁ hU => ?_) _ h
+        change (do UpdElem.write σ₀ (.memory M) σ₀) = .ok σ₁ at hU
+        change (do
+          let μ ← M.eval σ₀
+          pure (σ₀.withGlob { σ₀.glob with heap := μ.heap, nextId := μ.nextId })) = .ok σ₁ at hU
+        cases hM : M.eval σ₀ with
+        | error => rw [hM] at hU; cases hU
+        | ok μ =>
+          rw [hM] at hU; cases hU
+          exact ⟨fun t _ ht => by cases ht; exact Tm.withMemS_eval hM t, rfl, rfl, rfl⟩
+      | _ => cases h
+    | _ => cases h
+  | _ => cases h
 
 /-- `{W} φ` gives `{memory := M}{V} φ` for the memory merge `W`. -/
 theorem holds_upd_mergeMem {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ Δ₁} {V : Upd C Δ₁ Δ₂}
@@ -531,21 +567,26 @@ inductive MergeNameS where
   deriving DecidableEq, Repr
 
 /-- Merge `r` on `{U}{V} ψ` under one modality. -/
-def MergeNameS.top (r : MergeNameS) {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) :
-    Fml C Δ → Option (Fml C Γ)
-  | .upd m' V ψ =>
+def MergeNameS.top (r : MergeNameS) {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
+    Option (Fml C Γ) :=
+  match φ.updHead? with
+  | some ⟨m', V, ψ⟩ =>
     if m' = m then
       (match r with
         | .storage => U.mergeSt? V
         | .memory => U.mergeMem? V).map fun W => .upd m W ψ
     else none
-  | _ => none
+  | none => none
 
 theorem MergeNameS.top_sound (r : MergeNameS) : UpdRw.Sound (C := C) fun m U φ => r.top m U φ := by
   intro Γ Δ m U φ ψ h σ hψ
   cases φ with
   | upd m' V ψ' =>
-    simp only [MergeNameS.top] at h
+    change (if m' = m then
+      (match r with
+        | .storage => U.mergeSt? V
+        | .memory => U.mergeMem? V).map fun W => Fml.upd m W ψ'
+    else none) = some ψ at h
     split at h
     · rename_i hm; subst hm
       obtain ⟨W, hW, rfl⟩ := Option.map_eq_some_iff.1 h
@@ -553,7 +594,7 @@ theorem MergeNameS.top_sound (r : MergeNameS) : UpdRw.Sound (C := C) fun m U φ 
       | storage => exact holds_upd_mergeSt hW σ hψ
       | memory => exact holds_upd_mergeMem hW σ hψ
     · cases h
-  | _ => simp only [MergeNameS.top, reduceCtorEq] at h
+  | _ => cases h
 
 /-- Merge `r` at the first update where it fits (`Fml.rwAtS`). -/
 def Fml.mergeAtS (r : MergeNameS) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=

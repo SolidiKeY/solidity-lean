@@ -6,10 +6,11 @@ import Solidity.Calculus.Closers
 # Update simplification on scoped formulas
 
 `Calculus/UpdRuleScoped.lean`'s rules and `Calculus/StatePartsScoped.lean`'s
-merges on scoped formulas, each computed by the kernel (`rfl`) and used on a
-`⊨` goal through `Valid.of_simpUpdsS`/`Valid.of_updAtS`, then closed by
-`sol_close`.  The rules give the formula they rewrite, one way, so they
-apply at its positive positions only: an update under a negation stays.
+merges on scoped formulas, each computed by the kernel (`rfl`), and used on
+a `⊨` goal through `Valid.of_simpUpdsS`, `Valid.of_updAtS` and
+`Valid.of_mergeAtS`, each once, then closed by `sol_close`.  The rules
+give the formula they rewrite, one way, so they apply at its positive
+positions only: an update under a negation stays.
 -/
 
 namespace Solidity.Examples.Tactics.UpdRulesScoped
@@ -40,6 +41,17 @@ diamond for an update that cannot halt (`x` a parameter, set to `1`). -/
 example : (dl![.diamond]{ { x := 1 } x == 1 }).updAtS .applyOnRigid =
     some dl![.diamond]{ ∀ uint x; 1 == 1 } := rfl
 
+/-- `applyOnRigid` under the diamond: an alias to a root and its fields
+cannot halt, so the alias update symex leaves applies. -/
+example : (dl![.diamond]{ { sp := alice.account } sp.balance == 1 }).updAtS
+    .applyOnRigid = some dl![.diamond]{ alice.account.balance == 1 } := rfl
+
+/-- One rule on a `⊨` goal (`Valid.of_updAtS`). -/
+example : ⊨ dl!{ { x := 1 } { y := x } y == 1 } := by
+  refine Valid.of_updAtS (r := .sequentialToParallel)
+    (ψ := dl!{ { x := 1 ‖ y := 1 } y == 1 }) rfl ?_
+  sol_close
+
 /-- A rule under a negation is not applied: it gives the formula it
 rewrites, not the converse. -/
 example : (dl!{ ¬ { x := 1 } { y := x } y == 1 }).updAtS .sequentialToParallel = none := rfl
@@ -66,5 +78,12 @@ example : (dl!{ { storage := save(storage, alice.age, 1) } { v := find(storage, 
 example : (dl!{ { memory := addM(memory, Person) } { memory := addM(memory, Person) } true }).mergeAtS
     .memory = some dl!{ { memory := addM(memory, Person) ‖
       memory := addM(addM(memory, Person), Person) } true } := rfl
+
+/-- The storage merge on a `⊨` goal (`Valid.of_mergeAtS`), under the box:
+the write and the allocation may halt. -/
+example : ⊨ dl![.box]{ { storage := save(storage, alice.age, 1) } { memory := addM(memory, Person) } true } := by
+  refine Valid.of_mergeAtS (r := .storage) (ψ := dl![.box]{ { storage := save(storage, alice.age, 1) ‖
+      memory := addM(memory, Person) } true }) rfl ?_
+  sol_close
 
 end Solidity.Examples.Tactics.UpdRulesScoped
