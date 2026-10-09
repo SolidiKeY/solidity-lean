@@ -3136,7 +3136,9 @@ end Leaves
 
 /-! #### The run keeps the state tight -/
 
-/-- What a run keeps: the state well-typed, canonical and tight. -/
+/-- What a run keeps beyond its types: the storage canonical and tight, every
+alias bound along keys (well-typedness and the heap's canonicity hold by
+construction, `State.erase_wt`, `State.erase_canonHeap`). -/
 def tightInv (C : Contract) : RunInv C where
   glob H τ := (canonInv C).glob H τ ∧ Semantics.Tight C τ
   loc _ t v := LTy.Keys C t v
