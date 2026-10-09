@@ -215,6 +215,7 @@ import Solidity.Semantics.Ends
 import Solidity.Typing.TypedWT
 import Solidity.Typing.Reachability
 import Solidity.Typing.Constructibility
+import Solidity.Typing.Fits
 import Solidity.Typing.CanonTest
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage

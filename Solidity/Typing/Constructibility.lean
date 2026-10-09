@@ -3478,7 +3478,9 @@ initial storage is reached by the empty program, and its root has
 `2^256 + 1` elements, past what `FitsStorage` allows a fixed-size array (the
 builder writes each element at a literal index).  So `reachable_iff` keeps
 its `FitsStorage` premise: canonical and tight is not enough for this root,
-and reachable says nothing about the slot count. -/
+and reachable says nothing about the slot count.  Under solc's bound on
+fixed sizes (`FixedFits`, which `Huge` fails) every reachable storage fits,
+and `reachable_iff_fits` drops the premise (`Typing/Fits.lean`). -/
 theorem huge_reachable_not_fits :
     Reachable Huge Huge.initStorage ∧ ¬ FitsStorage Huge Huge.initStorage := by
   refine ⟨⟨[], .nil, ⟨State.init Huge, List.prefix_refl _⟩, Prog.run_nil _,
