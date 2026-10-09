@@ -5,22 +5,23 @@ import Solidity.Calculus.Completeness
 
 `Taclet.toStep` (`Calculus/Taclet.lean`) says each rule's premise is the
 one the strategy (`Stmt.step`) computes.  This module proves the converse:
-for every statement, under either modality, `Stmt.step` leaves a premise,
-and that premise is a rule's (`Stmt.rule_exists`); so the strategy fires
-nothing the rule table does not have (`Rule.ofStep`).  Master's dispatcher
-built the derivation with the premise; the scoped one is a function to `Option`, so here the
-derivation is found after the fact.
+for every statement, under either modality, the premise `Stmt.step` leaves
+is a rule's (`Stmt.rule_exists`); so the strategy fires nothing the rule
+table does not have (`Rule.ofStep`).  Master's dispatcher built the
+derivation with the premise; the scoped one is a function to `Premise`
+(total, decision 76), so here the derivation is found after the fact.
 
 The proof is one lemma per statement constructor (`Stmt.<c>.ruleExists`),
 each its own declaration.  It takes `Stmt.step` apart where it is blocked: on
 a part of the statement (a path, a value, a location: `cases` on it), or on
 a computed test (`b.isSimple`, `args.capture`, `body.frame`: `cases` on its
-value, which stays in scope as a hypothesis), until the step is `some P`;
+value, which stays in scope as a hypothesis), until the step is a premise `P`;
 there the rule is the constructor of `Taclet` or `LeanTaclet`
 whose `\find` is the statement (a hole's statement read off it,
 `holeCandidates`), whose premise is `P`, and whose side conditions hold, by
-evaluation, by a hypothesis the splits left, or by `simp_all`.  A step that
-is `none` is ruled out by the hypotheses of its branch.
+evaluation, by a hypothesis the splits left, or by `simp_all`.  A branch
+the step never reaches (`shortStep` on an operator that does not short
+circuit) is ruled out by the hypotheses of its branch (`!`).
 
 The search runs once, under `#derive_ruleExists?`, which offers a
 `#replay_ruleExists` table: for each statement constructor, the rules of
@@ -106,7 +107,7 @@ partial def majorOf (a : Expr) (gen : Bool) : MetaM (Option (Expr × Blocker)) :
 
 end
 
-/-- `∃ p, e = some p ∧ R p`, read back: `e`, and the rule `R` at `p`. -/
+/-- `∃ p, e = p ∧ R p`, read back: `e`, and the rule `R` at `p`. -/
 def parseTarget (t : Expr) : MetaM (Option (Expr × Expr)) := do
   let t ← instantiateMVars t
   unless t.isAppOfArity ``Exists 2 do return none
@@ -278,18 +279,25 @@ def closeAbsurd (g : MVarId) : MetaM Bool := g.withContext do
     return true
   return false
 
-/-- The rule `R` of the leaf of the goal `g`, its step `some P`. -/
+/-- Whether `e` (in `whnf`) is a premise built: a constructor of `Premise`
+at its head. -/
+def isPremise (e : Expr) : MetaM Bool := do
+  let .const c _ := e.getAppFn | return false
+  return match (← getEnv).find? c with
+    | some (.ctorInfo ci) => ci.induct == ``Premise
+    | _ => false
+
+/-- The rule `R` of the leaf of the goal `g`, its step the premise `P`. -/
 def ruleGoal (g : MVarId) : MetaM (Expr × Expr × Expr) := do
-  let some (e, _) ← parseTarget (← g.getType) | throwError "rule_exists: not `∃ p, step = some p ∧ …`"
-  let e' ← whnfD e
-  let P := e'.appArg!
+  let some (e, _) ← parseTarget (← g.getType) | throwError "rule_exists: not `∃ p, step = p ∧ …`"
+  let P ← whnfD e
   let t ← instantiateMVars (← g.getType)
   let .lam _ _ body _ := t.appArg! | throwError "rule_exists: not an existential"
   return ((body.getArg! 1).instantiate1 P, P, t)
 
 mutual
 
-/-- Prove the main goal `∃ p, e = some p ∧ Rule C k m s p`: split the
+/-- Prove the main goal `∃ p, e = p ∧ Rule C k m s p`: split the
 step where it is blocked until it computes, then each leaf by its rule,
 following `plan` (the replay) or searching (`plan` is `none`).  Returns the
 plan of the goal, and what is left of the one given. -/
@@ -297,16 +305,10 @@ partial def go (plan : Option (List Tok)) (depth : Nat := 0) :
     TacticM (Array Tok × Option (List Tok)) := do
   let g ← getMainGoal
   g.withContext do
-  let some (e, _) ← parseTarget (← g.getType) | throwError "rule_exists: not `∃ p, step = some p ∧ …`"
+  let some (e, _) ← parseTarget (← g.getType) | throwError "rule_exists: not `∃ p, step = p ∧ …`"
   let e' ← whnfD e
   -- each leaf in a heartbeat budget of its own (its search tries rules)
-  if e'.isAppOfArity ``Option.some 2 then return ← withCurrHeartbeats (atLeaf plan depth)
-  if e'.isAppOfArity ``Option.none 1 then
-    -- a branch with no rule: its hypotheses rule it out
-    try evalTactic (← `(tactic| contradiction))
-    catch _ =>
-      throwError "rule_exists: a branch with no rule is not ruled out{indentExpr (← g.getType)}"
-    return (#[], plan)
+  if ← isPremise e' then return ← withCurrHeartbeats (atLeaf plan depth)
   let some (e'', s) ← blockerOf e' | throwError "rule_exists: the step is blocked on nothing to split{indentExpr e'}"
   let g ← g.replaceTargetDefEq (← replaceStep (← g.getType) e'')
   let gs ← match s with
@@ -332,7 +334,7 @@ partial def goals (gs : List MVarId) (plan : Option (List Tok)) (depth : Nat) :
   setGoals []
   return (out, plan)
 
-/-- A leaf, its step `some P`: the rule the plan names, a split it names,
+/-- A leaf, its step the premise `P`: the rule the plan names, a split it names,
 or, searching, the first rule that closes it, else a split of the side
 condition a rule leaves undecided, or of the statement's parts, after which
 every case has one. -/
@@ -343,7 +345,7 @@ partial def atLeaf (plan : Option (List Tok)) (depth : Nat) : TacticM (Array Tok
     g.withContext do
       let (some (c, r), und) ← leaf R c? | return (none, (← leaf R c?).2)
       let pf ← mkAppOptM ``Exists.intro #[none, t.appArg!, P,
-        ← mkAppM ``And.intro #[← mkEqRefl (← mkAppM ``Option.some #[P]), r]]
+        ← mkAppM ``And.intro #[← mkEqRefl P, r]]
       unless ← isDefEq (← inferType pf) (← g.getType) do return (none, [])
       g.assign pf
       replaceMainGoal []
@@ -449,7 +451,7 @@ def planOfText (s : String) : List Tok :=
 /-! ## The lemmas -/
 
 /-- `Stmt.<c>.ruleExists`'s statement: for the constructor `c`'s statement
-`s`, every `k` and `m`, `∃ p, s.step k m = some p ∧ Rule C k m s p`. -/
+`s`, every `k` and `m`, `∃ p, s.step k m = p ∧ Rule C k m s p`. -/
 def lemmaType (c : Lean.Name) : MetaM Expr := do
   forallTelescope (← getConstInfo c).type fun xs body => do
     let s := mkAppN (mkConst c) xs
@@ -457,7 +459,7 @@ def lemmaType (c : Lean.Name) : MetaM Expr := do
     withLocalDeclD `k (mkConst ``Nat) fun k => withLocalDeclD `m (mkConst ``Modality) fun m => do
       let pTy := mkApp3 (mkConst ``Premise) C (body.getArg! 1) (body.getArg! 2)
       let ex ← withLocalDeclD `p pTy fun p => do
-        let eq ← mkEq (← mkAppM ``Stmt.step #[k, m, s]) (← mkAppM ``Option.some #[p])
+        let eq ← mkEq (← mkAppM ``Stmt.step #[k, m, s]) p
         let r ← mkAppOptM ``Rule #[C, k, m, none, none, s, p]
         mkAppM ``Exists #[← mkLambdaFVars #[p] (mkAnd eq r)]
       mkForallFVars (xs ++ #[k, m]) ex
@@ -522,7 +524,7 @@ elab_rules : command
     unless left.isEmpty do
       throwError "#replay_ruleExists: no lemma for {left.toList}; run `#derive_ruleExists?`"
 
-/-- Close `∃ p, s.step k m = some p ∧ Rule C k m s p` for the case of
+/-- Close `∃ p, s.step k m = p ∧ Rule C k m s p` for the case of
 `cases s` it is, by its constructor's lemma. -/
 elab "apply_ruleExists" : tactic => do
   let n := ``Stmt ++ (← getMainTag) ++ `ruleExists
@@ -544,7 +546,7 @@ not), a leaf ruled out by a contradicted hypothesis (`!`). -/
 #replay_ruleExists
   assign "storageRootWriteStore 3*storageRootWriteValueRhsCapture ternaryToIf 7*ternaryCaptureCond 3*storageRootWriteValueRhsCapture 2*storageRootWriteCopySource storageFieldRead_unfold_rightFst storageFieldReadStoreRoot storageIndexRead_unfold_rightFst /IndexTy storageIndexReadMappingStoreRoot storageIndexReadArrayStoreRoot 7*storageIndexRead_unfold_rightSndIndex 4*storageFieldWrite_unfold_leftFst ternaryToIf 7*ternaryCaptureCond 3*storageFieldWrite_unfold_leftFst storageFieldWriteSave 3*fieldWriteValueRhsCapture ternaryToIf 7*ternaryCaptureCond 3*fieldWriteValueRhsCapture storageFieldWriteStorageRef_unfold_leftFst 2*storageFieldWriteCopySource storageFieldRead_unfold_rightFst storageFieldRead_unfold_rightSndResult storageIndexRead_unfold_rightFst storageIndexRead_unfold_rightSndResult 7*storageIndexRead_unfold_rightSndIndex 4*storageIndexWriteCaptureAllComplexRecv ternaryToIf 7*ternaryCaptureCond 3*storageIndexWriteCaptureAllComplexRecv /IndexTy storageIndexWriteMappingSave storageIndexWriteArraySave 3*indexWriteValueRhsCapture ternaryToIf 7*ternaryCaptureCond 3*indexWriteValueRhsCapture 4*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 7*ternaryCaptureCond 7*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 7*ternaryCaptureCond 7*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 7*ternaryCaptureCond 7*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 7*ternaryCaptureCond 7*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 7*ternaryCaptureCond 7*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 7*ternaryCaptureCond 7*storageIndexWriteCaptureAllNonSimpleIndex ternaryToIf 7*ternaryCaptureCond 3*storageIndexWriteCaptureAllNonSimpleIndex storageIndexWriteStorageRefCaptureAllComplexRecv /IndexTy storageIndexWriteMappingCopySource storageIndexWriteArrayCopySource /IndexTy storageIndexWriteMappingCopySource storageIndexWriteArrayCopySource ?storageFieldRead_unfold_rightFst /SPath storageFieldRead_unfold_rightFst /Loc 4*storageFieldRead_unfold_rightFst ?storageFieldRead_unfold_rightSndResult /SPath storageFieldRead_unfold_rightSndResult /Loc 4*storageFieldRead_unfold_rightSndResult ?storageIndexRead_unfold_rightFst /SPath storageIndexRead_unfold_rightFst /Loc 4*storageIndexRead_unfold_rightFst ?storageIndexRead_unfold_rightSndResult /SPath storageIndexRead_unfold_rightSndResult /Loc 4*storageIndexRead_unfold_rightSndResult ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex ?storageIndexRead_unfold_rightSndIndex /SPath storageIndexRead_unfold_rightSndIndex /Loc 4*storageIndexRead_unfold_rightSndIndex 7*storageIndexWriteStorageRefCaptureAllNonSimpleIndex"
   rebind "2*storageLocalRootRebind storageFieldRead_unfold_rightFst storageFieldReadBindLocalRoot storageIndexRead_unfold_rightFst /IndexTy storageIndexReadMappingBindLocalRoot ?storageIndexReadArrayBindLocalRoot storageIndexReadArrayBindLocalRoot storageIndexReadArrayBindLocalRootMappingElement 7*storageIndexRead_unfold_rightSndIndex storageLocalRootPush_unfold_leftFstReceiver ?storageLocalRootPushBind storageLocalRootPushBind storageLocalRootPushBindMappingElement"
-  assignLocal "localValueAssign storageRootReadSelect storageFieldRead_unfold_rightFst storageFieldReadFind storageIndexRead_unfold_rightFst /IndexTy storageIndexReadMappingFind storageIndexReadArrayFind 7*storageIndexRead_unfold_rightSndIndex binopAssignment binopUnfoldRight logicalAndShortCircuitRhs logicalOrShortCircuitRhs binopUnfoldRight logicalAndShortCircuitRhs logicalOrShortCircuitRhs binopUnfoldRight logicalAndShortCircuitRhs logicalOrShortCircuitRhs binopUnfoldRight logicalAndShortCircuitRhs logicalOrShortCircuitRhs binopUnfoldRight logicalAndShortCircuitRhs logicalOrShortCircuitRhs binopUnfoldRight logicalAndShortCircuitRhs logicalOrShortCircuitRhs binopUnfoldRight logicalAndShortCircuitRhs logicalOrShortCircuitRhs 7*binopUnfoldLeft unopAssignment 7*unopCapture ternaryToIf 7*ternaryCaptureCond memoryFieldRead memoryFieldRead_unfold_rightFst memoryIndexReadArrayValue 7*memoryIndexRead_unfold_rightSndIndex memoryIndexRead_unfold_rightFst storageLengthRead_unfold_rightFst storageLengthRead memoryLengthRead memoryLengthRead_unfold_rightFst"
+  assignLocal "localValueAssign storageRootReadSelect storageFieldRead_unfold_rightFst storageFieldReadFind storageIndexRead_unfold_rightFst /IndexTy storageIndexReadMappingFind storageIndexReadArrayFind 7*storageIndexRead_unfold_rightSndIndex binopAssignment binopUnfoldRight 12*! logicalAndShortCircuitRhs 4*! logicalOrShortCircuitRhs 13*! binopUnfoldRight 12*! logicalAndShortCircuitRhs 4*! logicalOrShortCircuitRhs 13*! binopUnfoldRight 12*! logicalAndShortCircuitRhs 4*! logicalOrShortCircuitRhs 13*! binopUnfoldRight 12*! logicalAndShortCircuitRhs 4*! logicalOrShortCircuitRhs 13*! binopUnfoldRight 12*! logicalAndShortCircuitRhs 4*! logicalOrShortCircuitRhs 13*! binopUnfoldRight 12*! logicalAndShortCircuitRhs 4*! logicalOrShortCircuitRhs 13*! binopUnfoldRight 12*! logicalAndShortCircuitRhs 4*! logicalOrShortCircuitRhs 13*! 7*binopUnfoldLeft unopAssignment 7*unopCapture ternaryToIf 7*ternaryCaptureCond memoryFieldRead memoryFieldRead_unfold_rightFst memoryIndexReadArrayValue 7*memoryIndexRead_unfold_rightSndIndex memoryIndexRead_unfold_rightFst storageLengthRead_unfold_rightFst storageLengthRead memoryLengthRead memoryLengthRead_unfold_rightFst"
   declLocal "valueDeclSkip localValueDeclInitDrop"
   declStorage "storageLocalDeclSkip storageLocalDeclInitDrop"
   opAssign "localOpAssign storageRootOpAssign storageFieldOpAssignUnfoldLeftFst storageFieldOpAssign storageIndexOpAssignUnfoldLeftFst /IndexTy storageIndexMappingOpAssign storageIndexArrayOpAssign memoryFieldOpAssign memoryFieldOpAssignUnfoldLeftFst memoryIndexArrayOpAssign memoryIndexOpAssignUnfoldLeftFst 7*compoundAssignValueRhsCapture"
@@ -559,7 +561,7 @@ not), a leaf ruled out by a contradicted hypothesis (`!`). -/
   assignFromMem "memoryToStorageStoreRoot memoryToStorageField_unfold_leftFst memoryToStorageFieldCopyRoot memoryToStorageIndexCaptureAllComplexRecv /IndexTy memoryToStorageIndexMappingCopyRoot memoryToStorageIndexArrayCopyRoot 7*memoryToStorageIndexCaptureAllNonSimpleIndex"
   assignMem "memoryFieldWrite 3*memoryFieldWriteUnfoldSource ternaryToIf 7*ternaryCaptureCond 3*memoryFieldWriteUnfoldSource memoryFieldWrite_unfold_leftFst 2*memoryFieldWriteCopy memoryFieldRead_unfold_rightFst memoryFieldWriteCopy 7*memoryIndexRead_unfold_rightSndIndex memoryIndexRead_unfold_rightFst memoryFieldWrite_unfold_leftFst memoryIndexWriteArray 3*memoryIndexWriteUnfoldSource ternaryToIf 7*ternaryCaptureCond 3*memoryIndexWriteUnfoldSource 7*memoryIndexWriteCaptureAllNonSimpleIndex memoryIndexWriteCaptureAllComplexRecv 2*memoryIndexWriteCopy memoryFieldRead_unfold_rightFst memoryIndexWriteCopy 7*memoryIndexRead_unfold_rightSndIndex memoryIndexRead_unfold_rightFst 7*memoryIndexWriteMemRefCaptureAllNonSimpleIndex memoryIndexWriteMemRefCaptureAllComplexRecv"
   delete "storageRootDelete storageFieldDelete_unfold_leftFst storageFieldDelete storageIndexDelete_unfold_leftFst /IndexTy storageIndexDelete storageIndexArrayDelete 7*storageIndexDeleteNonSimpleIndexCapture"
-  deleteMem "memoryRootDeleteFreshRebind /Ty memoryFieldDeletePrimitive memoryFieldDeleteReference memoryFieldDelete_unfold_leftFst /ArrTy /Ty memoryIndexDeletePrimitive memoryIndexDeleteReference /Ty memoryIndexDeletePrimitive memoryIndexDeleteReference 7*memoryIndexDeleteNonSimpleIndexCapture memoryIndexDelete_unfold_leftFst"
+  deleteMem "memoryRootDeleteFreshRebind memoryFieldDeletePrimitive memoryFieldDeleteReference memoryFieldDelete_unfold_leftFst memoryIndexDeletePrimitive memoryIndexDeleteReference 7*memoryIndexDeleteNonSimpleIndexCapture memoryIndexDelete_unfold_leftFst"
   assignNew "newArrayCapture"
   ite "ifElseSplit 7*ifElseUnfold"
   require "requireSimple 7*requireConditionCapture"
@@ -571,23 +573,22 @@ not), a leaf ruled out by a contradicted hypothesis (`!`). -/
   block "blockEmpty"
 
 /-- **Every statement has a rule, and it is the strategy's**: under either
-modality, `Stmt.step` leaves a premise, and some rule of the table
-(`Taclet`, or `LeanTaclet`) rewrites the statement to it. -/
+modality, some rule of the table (`Taclet`, or `LeanTaclet`) rewrites the
+statement to the premise `Stmt.step` leaves. -/
 theorem Stmt.rule_exists (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
-    ∃ p, s.step k m = some p ∧ Rule C k m s p := by
-  cases s <;> apply_ruleExists
+    Rule C k m s (s.step k m) := by
+  obtain ⟨p, h, d⟩ : ∃ p, s.step k m = p ∧ Rule C k m s p := by cases s <;> apply_ruleExists
+  rw [h]; exact d
 
 /-- **The strategy fires only rules**: a premise `Stmt.step` leaves is a
 rule's (the converse of `Rule.toStep`). -/
 theorem Rule.ofStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'}
-    (h : s.step k m = some p) : Rule C k m s p := by
-  obtain ⟨p', h', d⟩ := Stmt.rule_exists k m s
-  rw [h] at h'
-  exact Option.some.inj h' ▸ d
+    (h : s.step k m = p) : Rule C k m s p :=
+  h ▸ Stmt.rule_exists k m s
 
 /-- A rule exactly when the strategy's: `Rule.toStep` and `Rule.ofStep`. -/
 theorem Rule.iff_step {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} :
-    Rule C k m s p ↔ s.step k m = some p :=
+    Rule C k m s p ↔ s.step k m = p :=
   ⟨Rule.toStep, Rule.ofStep⟩
 
 end Solidity

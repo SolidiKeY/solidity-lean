@@ -67,7 +67,7 @@ theorem Fml.inSolkey_modal_cons {m : Modality} {Γ Γ' Γ₁ Γ₂ : Ctx} {s : S
 /-- The premise's rule is solkey's, and the premise in the fragment, for a
 statement in it. -/
 theorem Stmt.premise_inSolkey_of_step {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (hs : s.inSolkey m = true) (d : s.step k m = some p) :
+    {p : Premise C Γ Γ'} (hs : s.inSolkey m = true) (d : s.step k m = p) :
     p.inSolkey m = true :=
   (Stmt.step_taclet hs d).premise_inSolkey hs
 

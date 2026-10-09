@@ -548,9 +548,9 @@ theorem Premise.sound_callCaptureMem {ps Γf : Ctx} (k : Nat) (f : Name) (args :
 argument that is not simple captured, or its body inlined. -/
 theorem Stmt.sound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name)
     (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Prog C (rs ++ ps) Γf) (σ : State C Γ)
-    (pr : Premise C Γ Γ') (hp : Stmt.step k m (.call f args ret body) = some pr) :
+    (pr : Premise C Γ Γ') (hp : Stmt.step k m (.call f args ret body) = pr) :
     Premise.Runs m (.call f args ret body) pr σ := by
-  change callStep k f args ret body = some pr at hp
+  change callStep k f args ret body = pr at hp
   unfold callStep at hp
   cases ret with
   | none =>
@@ -740,9 +740,9 @@ under the box, `false` under the diamond. -/
 theorem Stmt.sound_tryCall (k : Nat) (m : Modality) {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx}
     (call : ExtCall C Γ) (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe)
     (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (σ : State C Γ)
-    (pr : Premise C Γ Γ) (hp : Stmt.step k m (.tryCall call rets ok err code pnc other) = some pr) :
+    (pr : Premise C Γ Γ) (hp : Stmt.step k m (.tryCall call rets ok err code pnc other) = pr) :
     Premise.Runs m (.tryCall call rets ok err code pnc other) pr σ := by
-  change tryStep m rets ok err code pnc other = some pr at hp
+  change tryStep m rets ok err code pnc other = pr at hp
   cases m with
   | box => cases hp; exact Premise.sound_tryCallBox call rets ok err code pnc other σ
   | diamond => cases hp; exact Premise.sound_done σ false nofun

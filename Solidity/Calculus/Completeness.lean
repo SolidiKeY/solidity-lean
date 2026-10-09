@@ -183,7 +183,7 @@ def ruleOf? (k m s : Expr) : MetaM (Option (Lean.Name × Expr)) := do
       | some (c, p) =>
         -- the premise is the step's (`Rule.toStep`)
         let step ← whnfD (← mkAppM ``Solidity.Stmt.step #[k, m, s])
-        unless ← isDefEq step (← mkAppM ``Option.some #[p]) do
+        unless ← isDefEq step p do
           throwError "ruleOf?: `{c}` does not leave `Stmt.step`'s premise"
         return some (c, p)
       | none => st.restore

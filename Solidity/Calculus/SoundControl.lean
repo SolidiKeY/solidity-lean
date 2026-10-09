@@ -57,7 +57,7 @@ theorem sound_transferLeft (r a : Val C Γ .uint) (x : Var) :
 
 /-- **A transfer** (`transferStep`). -/
 theorem transferStep_sound (k : Nat) (r a : Val C Γ .uint) (q : Premise C Γ Γ)
-    (hs : transferStep k m r a = some q) : Premise.Runs m (.transfer r a) q σ := by
+    (hs : transferStep k m r a = q) : Premise.Runs m (.transfer r a) q σ := by
   cases r with
   | simple sadr =>
     cases a with
@@ -94,7 +94,7 @@ theorem sound_sendLeft (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (x : Va
 
 /-- **A send** (`sendStep`). -/
 theorem sendStep_sound (k : Nat) (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint)
-    (q : Premise C Γ Γ) (hs : sendStep k m pv r a = some q) :
+    (q : Premise C Γ Γ) (hs : sendStep k m pv r a = q) :
     Premise.Runs m (.send pv r a) q σ := by
   cases r with
   | simple sadr =>
@@ -143,7 +143,7 @@ theorem sound_iteCapture {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C 
 
 /-- **An `if`** (`iteStep`). -/
 theorem iteStep_sound (k : Nat) {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
-    (els : Prog C Γ Γ₂) (q : Premise C Γ Γ) (hs : iteStep k c thn els = some q) :
+    (els : Prog C Γ Γ₂) (q : Premise C Γ Γ) (hs : iteStep k c thn els = q) :
     Premise.Runs m (.ite c thn els) q σ := by
   cases c with
   | simple se =>
@@ -186,7 +186,7 @@ theorem sound_requireCapture (c : Val C Γ .bool) (x : Var) :
 /-- **A `require`** (`requireStep`): `requireSimple`, or the condition
 captured. -/
 theorem requireStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
-    (hs : requireStep k c = some q) : Premise.Runs m (.require c) q σ := by
+    (hs : requireStep k c = q) : Premise.Runs m (.require c) q σ := by
   cases c with
   | simple se =>
     cases hs
@@ -218,7 +218,7 @@ theorem sound_assertCapture (c : Val C Γ .bool) (x : Var) :
 /-- **An `assert`** (`assertStep`): `assertSimple`, or the condition
 captured. -/
 theorem assertStep_sound (k : Nat) (c : Val C Γ .bool) (q : Premise C Γ Γ)
-    (hs : assertStep k c = some q) : Premise.Runs m (.assert c) q σ := by
+    (hs : assertStep k c = q) : Premise.Runs m (.assert c) q σ := by
   cases c with
   | simple se =>
     cases hs

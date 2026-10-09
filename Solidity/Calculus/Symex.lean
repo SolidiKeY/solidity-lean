@@ -37,9 +37,9 @@ theorem Fml.modalStep_sound (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P :
     cases h
     exact holds_exit m κ φ σ hψ
   | cons s ω =>
-    change (s.step k m).map (fun p => p.fml m ω κ φ) = some ψ at h
-    obtain ⟨p, hp, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact hS k m s p hp σ ω κ φ hψ
+    change some ((s.step k m).fml m ω κ φ) = some ψ at h
+    cases h
+    exact hS k m s _ rfl σ ω κ φ hψ
 
 /-- **One step of the strategy is sound**, at any fresh index. -/
 theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :

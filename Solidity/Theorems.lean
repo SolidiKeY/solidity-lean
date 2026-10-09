@@ -151,18 +151,17 @@ theorem rule_unique (d : s ⇝[k, m] p) (d' : s ⇝[k, m] p') : p = p' :=
 
 /-- **Every rule is the strategy's**: a rule's premise is the one the
 strategy (`Stmt.step`) computes. -/
-theorem rule_is_step (d : s ⇝[k, m] p) : s.step k m = some p :=
+theorem rule_is_step (d : s ⇝[k, m] p) : s.step k m = p :=
   d.toStep
 
-/-- **Every statement has a rule**, under either modality: the strategy
-leaves a premise, and a rule rewrites the statement to it. -/
-theorem rule_exists (k : Nat) (m : Modality) (s : Stmt C Γ Γ') :
-    ∃ p, s.step k m = some p ∧ s ⇝[k, m] p :=
+/-- **Every statement has a rule**, under either modality: a rule rewrites
+the statement to the premise the strategy leaves. -/
+theorem rule_exists (k : Nat) (m : Modality) (s : Stmt C Γ Γ') : s ⇝[k, m] s.step k m :=
   Stmt.rule_exists k m s
 
 /-- **The strategy fires only rules**: what it leaves is a rule's premise
 (the converse of `rule_is_step`). -/
-theorem rule_of_step (h : s.step k m = some p) : s ⇝[k, m] p :=
+theorem rule_of_step (h : s.step k m = p) : s ⇝[k, m] p :=
   Rule.ofStep h
 
 /-! ## solkey's rules -/
@@ -170,7 +169,7 @@ theorem rule_of_step (h : s.step k m = some p) : s ⇝[k, m] p :=
 /-- **On the fragment, solkey has the rule**: a statement whose calls take
 simple arguments, with no loop or `try` and no payment under the diamond,
 is rewritten by one of solkey's taclets. -/
-theorem solkey_rule_exists (h : s.inSolkey m = true) (hs : s.step k m = some p) : s ⇝ₖ[k, m] p :=
+theorem solkey_rule_exists (h : s.inSolkey m = true) (hs : s.step k m = p) : s ⇝ₖ[k, m] p :=
   Stmt.step_taclet h hs
 
 /-- **Off the fragment the rules differ**: a loop has a rule of the
@@ -182,7 +181,7 @@ theorem solkey_rule_lt_calculus (k : Nat) (m : Modality) {Γ₁ : Ctx} (a : Loop
 
 /-- **A step of `⊢ₖ` is one of solkey's taclets**: the rule set admits the
 statement only where the rule the strategy fires is a `Taclet`. -/
-theorem solkey_step_taclet (hR : RuleSet.admits .solkey m s = true) (hs : s.step k m = some p) :
+theorem solkey_step_taclet (hR : RuleSet.admits .solkey m s = true) (hs : s.step k m = p) :
     s ⇝ₖ[k, m] p :=
   Stmt.taclet_of_admits hR hs
 

@@ -60,20 +60,20 @@ variable {C : Contract}
 named at index `k`: one `casesOn` over the statement (Gate G0, condition 1),
 each arm the rule `Completeness.lean`'s `Stmt.step` fires
 (`Calculus/Arms.lean`, `Calculus/Blocks.lean`).  Every statement
-has one. -/
-def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Option (Premise C Γ Γ') :=
-  Stmt.casesOn (motive_1 := fun Γ Γ' _ => Option (Premise C Γ Γ')) s
+has one, so the step is total (decision 76). -/
+def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Premise C Γ Γ' :=
+  Stmt.casesOn (motive_1 := fun Γ Γ' _ => Premise C Γ Γ') s
     (assign := fun l r => assignStep k l r)
     (rebind := fun i r => rebindStep k i r)
     (assignLocal := fun i v => localStep k i v)
     -- valueDeclSkip, localValueDeclInitDrop
     (declLocal := fun p x init => match init with
-      | none => some (.update (Upd.nil.decl x (.val (.app0 (.lit p.default)))))
-      | some e => some (.bind x (.val p) (.cons (.assignLocal .here e.up) .nil)))
+      | none => .update (Upd.nil.decl x (.val (.app0 (.lit p.default))))
+      | some e => .bind x (.val p) (.cons (.assignLocal .here e.up) .nil))
     -- storageLocalDeclSkip, storageLocalDeclInitDrop
     (declStorage := fun R x init => match init with
-      | none => some (.update (Upd.nil.decl (t := .alias R) x .unset))
-      | some r => some (.bind x (.alias R) (.cons (.rebind .here r.up) .nil)))
+      | none => .update (Upd.nil.decl (t := .alias R) x .unset)
+      | some r => .bind x (.alias R) (.cons (.rebind .here r.up) .nil))
     (opAssign := fun op hop hp l r => opStep k op hop hp l r)
     (incDec := fun op hp l => incStep k op hp l)
     (assignIncDec := fun i op _ l _ => assignIncStep i op l)
@@ -81,9 +81,9 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Opti
     (transfer := fun r a => transferStep k m r a) (send := fun pv r a => sendStep k m pv r a)
     -- memoryReferenceDeclFreshAlloc, memoryLocalDeclInitDrop
     (declMem := fun R x init _ _ => match init with
-      | none => some (.update ((Upd.nil.decl x (.mref (.app1 (.alloc R) rfl .memory))).snoc
-          (.memory (.app1 (.addM R) rfl .memory))))
-      | some r => some (.bind x (.mem R) (.cons (.rebindMem .here r.up) .nil)))
+      | none => .update ((Upd.nil.decl x (.mref (.app1 (.alloc R) rfl .memory))).snoc
+          (.memory (.app1 (.addM R) rfl .memory)))
+      | some r => .bind x (.mem R) (.cons (.rebindMem .here r.up) .nil))
     (rebindMem := fun i r => rebindMemStep k i r)
     (assignFromMem := fun l p => assignFromMemStep k l p)
     (assignMem := fun l r => assignMemStep k l r)
@@ -95,13 +95,13 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Opti
     (assert := fun c => assertStep k c)
     -- revertBox, revertDiamond
     (revert := match m with
-      | .box => some (.done true)
-      | .diamond => some (.done false))
+      | .box => .done true
+      | .diamond => .done false)
     (call := fun f args ret body => callStep k f args ret body)
     (tryCall := fun _ rets ok err code pnc other => tryStep m rets ok err code pnc other)
     (loop := fun a c body => loopStep k m a c body)
     -- a block is its statements, its locals popped after it
-    (block := fun body => some (.unfold body body.ext))
+    (block := fun body => .unfold body body.ext)
 
 /-! ## Fresh names: one above every index in the formula -/
 
@@ -180,7 +180,7 @@ def Fml.modalStep (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P : Prog C Γ
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) : Option (Fml C Γ) :=
   Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames C Γ₁ Γ₀ → Option (Fml C Γ)) P
     (fun κ => some (κ.exit m φ))
-    (fun s ω κ => (s.step k m).map fun p => p.fml m ω κ φ) κ
+    (fun s ω κ => some ((s.step k m).fml m ω κ φ)) κ
 
 /-- Fire the rule of the first statement with a rule, looking through
 updates, a precondition, binders and the goals of a branch, fresh names at

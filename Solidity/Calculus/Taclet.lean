@@ -211,8 +211,7 @@ of the statement the premise, the side conditions hypotheses. -/
 def toStepType (c : Lean.Name) : MetaM Expr := do
   let ty ← forallTelescope (← getConstInfo c).type fun xs body => do
     let args := body.getAppArgs
-    let concl ← mkEq (← mkAppM ``Stmt.step #[args[1]!, args[2]!, args[5]!])
-      (← mkAppM ``Option.some #[args[6]!])
+    let concl ← mkEq (← mkAppM ``Stmt.step #[args[1]!, args[2]!, args[5]!]) args[6]!
     mkForallFVars xs concl
   return ty.replace fun e => if e.isAppOfArity ``autoParam 2 then some (e.getArg! 0) else none
 
@@ -273,7 +272,7 @@ elab_rules : command
     unless left.isEmpty do
       throwError "#replay_toStep: no lemma for {left.toList}; run `#derive_toStep? {J}`"
 
-/-- Close `s.step k m = some p` for the case of `cases h` it is, by its
+/-- Close `s.step k m = p` for the case of `cases h` it is, by its
 constructor's lemma. -/
 elab "apply_toStep " j:ident : tactic => do
   let J ← realizeGlobalConstNoOverload j
@@ -293,9 +292,9 @@ theorem Taclet.storageIndexRead_unfold_rightSndIndex.toStep {x : Ty} {lhs : SHol
     {R : RefTy} {kp : PrimTy} {it : IndexTy R kp x} {sp : SPath C Γ (Ty.ref R)} {nse : Val C Γ kp}
     (h1 : sp.isSimple = true) (h2 : nse.isSimple = false) (h3 : lhs.isTarget = true) :
     Stmt.step k m (lhs.fill (SPath.loc (Loc.index it sp nse))) =
-      some (Premise.unfold (Prog.cons (Stmt.declLocal kp (Var.fresh "ie" k) (some nse))
+      Premise.unfold (Prog.cons (Stmt.declLocal kp (Var.fresh "ie" k) (some nse))
         (Prog.cons (lhs.up.fill (SPath.loc (Loc.index it sp.up (Val.simple (Simple.local Idx.here)))))
-          Prog.nil)) Ext.refl.push) := by
+          Prog.nil)) Ext.refl.push := by
   cases lhs with
   | «local» i =>
     cases nse <;> (try contradiction) <;>
@@ -322,8 +321,8 @@ theorem Taclet.storageIndexRead_unfold_rightSndIndex.toStep {x : Ty} {lhs : SHol
 theorem Taclet.ternaryToIf.toStep {p : PrimTy} {lhs : VHole C Γ p} {se : Simple C Γ .bool}
     {thenExpr elseExpr : Val C Γ p} (h : lhs.isTarget = true) :
     Stmt.step k m (lhs.fill ((Val.simple se).ternary thenExpr elseExpr)) =
-      some (Premise.unfold (Prog.cons (Stmt.ite (Val.simple se) (Prog.cons (lhs.fill thenExpr) Prog.nil)
-        (Prog.cons (lhs.fill elseExpr) Prog.nil)) Prog.nil) Ext.refl) := by
+      Premise.unfold (Prog.cons (Stmt.ite (Val.simple se) (Prog.cons (lhs.fill thenExpr) Prog.nil)
+        (Prog.cons (lhs.fill elseExpr) Prog.nil)) Prog.nil) Ext.refl := by
   cases lhs with
   | «local» => rfl
   | store l => cases l with
@@ -344,9 +343,9 @@ theorem Taclet.ternaryToIf.toStep {p : PrimTy} {lhs : VHole C Γ p} {se : Simple
 theorem Taclet.ternaryCaptureCond.toStep {p : PrimTy} {lhs : VHole C Γ p} {nse : Val C Γ .bool}
     {thenExpr elseExpr : Val C Γ p} (h1 : nse.isSimple = false) (h : lhs.isTarget = true) :
     Stmt.step k m (lhs.fill (nse.ternary thenExpr elseExpr)) =
-      some (Premise.unfold (Prog.cons (Stmt.declLocal .bool (Var.fresh "se" k) (some nse))
+      Premise.unfold (Prog.cons (Stmt.declLocal .bool (Var.fresh "se" k) (some nse))
         (Prog.cons (lhs.up.fill ((Val.simple (Simple.local Idx.here)).ternary thenExpr.up elseExpr.up))
-          Prog.nil)) Ext.refl.push) := by
+          Prog.nil)) Ext.refl.push := by
   cases lhs with
   | «local» => cases nse <;> (try contradiction) <;> rfl
   | store l => cases l with
@@ -372,19 +371,19 @@ theorem Taclet.memoryFieldWrite_unfold_leftFst.toStep {s : Name} {nmp : MPath C 
     {fld : Name} {T : Ty} {hfld : C.fieldType s fld = some T} {msrc : MSrc C Γ T}
     (h : nmp.isSimple = false) :
     Stmt.step k m (Stmt.assignMem (MLoc.field nmp fld hfld) msrc) =
-      some (Premise.unfold
+      Premise.unfold
         (Prog.cons (Stmt.declMem (RefTy.struct s) (Var.fresh "mv" k) (some (MRhs.alias nmp)) rfl
           (MRhs.alias nmp).mapFree)
           (Prog.cons (Stmt.assignMem (MLoc.field (MPath.var Idx.here (MRhs.alias nmp).mapFree) fld hfld)
-            msrc.up) Prog.nil)) Ext.refl.push) := by
+            msrc.up) Prog.nil)) Ext.refl.push := by
   cases nmp <;> (try contradiction) <;> cases msrc <;> rfl
 
 theorem Taclet.storagePushLengthSave.toStep {E : Ty} {parr : SPath C Γ E.array}
     {hd : ((none : Option (Src C Γ E)).isSome || E.defaultOkS) = true}
     (h1 : parr.isSimple = true) (h2 : parr.elemPrim = true) :
     Stmt.step k m (Stmt.push parr none hd) =
-      some (Premise.update (Upd.nil.snoc (UpdElem.storage
-        (Tms.STerm.pushSlot Tms.STerm.storage parr.lower E)))) := by
+      Premise.update (Upd.nil.snoc (UpdElem.storage
+        (Tms.STerm.pushSlot Tms.STerm.storage parr.lower E))) := by
   show pushStep k parr none hd = _
   simp only [pushStep, h1, h2]
   rfl
@@ -393,8 +392,8 @@ theorem Taclet.storagePushLengthSaveReferenceElement.toStep {E : Ty} {rarr : SPa
     {hd : ((none : Option (Src C Γ E)).isSome || E.defaultOkS) = true}
     (h1 : rarr.isSimple = true) (h2 : rarr.elemPrim = false) :
     Stmt.step k m (Stmt.push rarr none hd) =
-      some (Premise.update (Upd.nil.snoc (UpdElem.storage
-        (Tms.STerm.extend Tms.STerm.storage rarr.lower E)))) := by
+      Premise.update (Upd.nil.snoc (UpdElem.storage
+        (Tms.STerm.extend Tms.STerm.storage rarr.lower E))) := by
   show pushStep k rarr none hd = _
   simp only [pushStep, h1, h2]
   rfl
@@ -402,8 +401,8 @@ theorem Taclet.storagePushLengthSaveReferenceElement.toStep {E : Ty} {rarr : SPa
 theorem Taclet.storagePopSave.toStep {E : Ty} {darr : SPath C Γ E.array}
     (h1 : darr.isSimple = true) (h2 : darr.elemMapping = false) :
     Stmt.step k m (Stmt.pop darr) =
-      some (Premise.update (Upd.nil.snoc (UpdElem.storage
-        (Tms.STerm.pop Tms.STerm.storage darr.lower)))) := by
+      Premise.update (Upd.nil.snoc (UpdElem.storage
+        (Tms.STerm.pop Tms.STerm.storage darr.lower))) := by
   show popStep k darr = _
   simp only [popStep, h1, h2]
   rfl
@@ -411,8 +410,8 @@ theorem Taclet.storagePopSave.toStep {E : Ty} {darr : SPath C Γ E.array}
 theorem Taclet.storagePopSaveMappingElement.toStep {E : Ty} {marr : SPath C Γ E.array}
     (h1 : marr.isSimple = true) (h2 : marr.elemMapping = true) :
     Stmt.step k m (Stmt.pop marr) =
-      some (Premise.update (Upd.nil.snoc (UpdElem.storage
-        (Tms.STerm.shrink Tms.STerm.storage marr.lower)))) := by
+      Premise.update (Upd.nil.snoc (UpdElem.storage
+        (Tms.STerm.shrink Tms.STerm.storage marr.lower))) := by
   show popStep k marr = _
   simp only [popStep, h1, h2]
   rfl
@@ -421,31 +420,31 @@ theorem Taclet.storagePopSaveMappingElement.toStep {E : Ty} {marr : SPath C Γ E
 theorem Premise.expandCall_step {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}
     {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf}
     (h1 : args.firstNonSimple = none) :
-    Stmt.step k m (Stmt.call f args ret body) = some (Premise.expandCall k args ret body) := by
+    Stmt.step k m (Stmt.call f args ret body) = Premise.expandCall k args ret body := by
   simp only [Args.firstNonSimple, Option.map_eq_none_iff] at h1
   cases ret <;> (dsimp only [Stmt.step]; simp only [callStep, h1]) <;> rfl
 
 theorem Taclet.functionBodyExpand.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}
     {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf}
     (h1 : args.firstNonSimple = none) (_ : ret.isRets = true) :
-    Stmt.step k m (Stmt.call f args ret body) = some (Premise.expandCall k args ret body) :=
+    Stmt.step k m (Stmt.call f args ret body) = Premise.expandCall k args ret body :=
   Premise.expandCall_step h1
 
 theorem Taclet.internalCallExpand.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx}
     {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf}
     (h1 : args.firstNonSimple = none) (_ : ret.isRets = false) :
-    Stmt.step k m (Stmt.call f args ret body) = some (Premise.expandCall k args ret body) :=
+    Stmt.step k m (Stmt.call f args ret body) = Premise.expandCall k args ret body :=
   Premise.expandCall_step h1
 
 theorem LeanTaclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ .uint)}
     {cond inv : Val C Γ .bool} (hf : body.frame = some (xs, hv)) :
     Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec) cond body) =
-      some (Premise.inv (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) xs hv
+      Premise.inv (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) xs hv
         (Upd.nil.decl (Var.fresh "se" k) (Rhs.val cond.lower))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool true)))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool false))) Ext.refl
-        Ext.refl.push body (Fml.eqD inv.lower (Tms.Term.lit (.bool true)))) := by
+        Ext.refl.push body (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
 
@@ -453,7 +452,7 @@ theorem LeanTaclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ 
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
     (hf : body.frame = some (xs, hv)) :
     Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec)) cond body) =
-      some (Premise.inv (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) xs hv
+      Premise.inv (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) xs hv
         ((Upd.nil.decl (Var.fresh "ie" k) (Rhs.val (p := .uint) dec.lower)).decl (Var.fresh "se" k)
           (Rhs.val (p := .bool) cond.lower))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool true)))
@@ -465,20 +464,20 @@ theorem LeanTaclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ 
               ((Fml.eqD (Tms.Term.binop .le .uint (Tms.Term.lit (.int 0)) dec.up.up.lower)
                   (Tms.Term.lit (.bool true))).and
                 (Fml.eqD (Tms.Term.binop .lt .uint dec.up.up.lower (Tms.Term.pv (p := .uint) Idx.here.there))
-                  (Tms.Term.lit (.bool true)))))))) := by
+                  (Tms.Term.lit (.bool true))))))) := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
 
 theorem LeanTaclet.whileClose.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁} {inv : Val C Γ .bool}
     {dec : Option (Val C Γ .uint)} {cond : Val C Γ .bool} (hf : body.frame = none) :
-    Stmt.step k m (Stmt.loop (LoopAnn.inv inv dec) cond body) = some (Premise.done false) := by
+    Stmt.step k m (Stmt.loop (LoopAnn.inv inv dec) cond body) = Premise.done false := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
 
 theorem LeanTaclet.whileNoVariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {inv cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)} (hf : body.frame.isSome = true)
     (hd : dec.isNone = true) :
-    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv dec) cond body) = some (Premise.done false) := by
+    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv dec) cond body) = Premise.done false := by
   cases dec with
   | some => simp only [Option.isNone_some, Bool.false_eq_true] at hd
   | none =>
@@ -489,7 +488,7 @@ theorem LeanTaclet.whileNoVariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ 
 theorem LeanTaclet.functionCallArgCapture.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps}
     {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {p : PrimTy}
     {v : Val C Γ p} {as' : Args C (.val p :: Γ) ps} (hcap : Args.capture args = some ⟨p, v, as'⟩) :
-    Stmt.step k m (Stmt.call f args ret body) = some (Premise.argCapture k f p v as' ret body) := by
+    Stmt.step k m (Stmt.call f args ret body) = Premise.argCapture k f p v as' ret body := by
   cases ret <;> (dsimp only [Stmt.step]; simp only [callStep, hcap]) <;> rfl
 
 end Hand
@@ -659,29 +658,29 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
 /-- **Each taclet is the rule the strategy fires on its statement**: its
 premise is `Stmt.step`'s, so it is sound by `Stmt.Sound`. -/
 theorem Taclet.toStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (h : Taclet C k m s p) : s.step k m = some p := by
+    {p : Premise C Γ Γ'} (h : Taclet C k m s p) : s.step k m = p := by
   cases h <;> apply_toStep Taclet
 
 /-- The rules solkey does not have are `Stmt.step`'s too. -/
 theorem LeanTaclet.toStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (h : LeanTaclet C k m s p) : s.step k m = some p := by
+    {p : Premise C Γ Γ'} (h : LeanTaclet C k m s p) : s.step k m = p := by
   cases h <;> apply_toStep LeanTaclet
 
 /-- **Every rule of the calculus is the one `Stmt.step` fires**: at most one
 premise per statement, the dispatcher's. -/
 theorem Rule.toStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} : Rule C k m s p → s.step k m = some p
+    {p : Premise C Γ Γ'} : Rule C k m s p → s.step k m = p
   | .key d => d.toStep
   | .lean d => d.toStep
 
 /-- Two rules on one statement leave the same premise. -/
 theorem Rule.premise_unique {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
     {p p' : Premise C Γ Γ'} (d : Rule C k m s p) (d' : Rule C k m s p') : p = p' :=
-  Option.some.inj (d.toStep.symm.trans d'.toStep)
+  d.toStep.symm.trans d'.toStep
 
 /-- `Taclet.toStep`, under its first name. -/
 theorem Taclet.step_eq {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (h : Taclet C k m s p) : s.step k m = some p := h.toStep
+    {p : Premise C Γ Γ'} (h : Taclet C k m s p) : s.step k m = p := h.toStep
 
 /-! ## Erasure: today's premise -/
 
