@@ -209,9 +209,11 @@ partial def stripAlls (g : MVarId) (n : Option Nat := none) : MetaM MVarId := do
 leaf taken by `Fml.posB` (checked by the kernel), its erasure computed
 (`Solidity.normValid`), the goal `Solidity.Valid` of it (`Valid.of_erase`),
 the parameters' quantifiers stripped (`stripAlls`), an explicit `∀` kept
-with its range (`Symex.paramCount`, decision 28).  `tac` names the tactic
-in the error. -/
-def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
+with its range (`Symex.paramCount`, decision 28); with `typed`, every
+quantifier kept, so a parameter is read at its type.  `tac` names the
+tactic in the error. -/
+def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) (typed : Bool := false) :
+    TacticM MVarId := do
   let bool := mkConst ``Bool
   let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
   let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
@@ -225,7 +227,9 @@ def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
   let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
   let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``NFml.Valid) C erased) (← g.getTag)
   g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
-  stripAlls (← Solidity.normValid g'.mvarId!) (← Symex.paramCount ψ)
+  let g' ← Solidity.normValid g'.mvarId!
+  if typed then return g'
+  stripAlls g' (← Symex.paramCount ψ)
 
 /-- Run today's closer `stx` on a scoped leaf: the leaf erased
 (`eraseLeaf`), then `stx` itself on today's goal, where today's tactic
@@ -242,12 +246,20 @@ end Derive
 
 open Lean Elab Tactic Meta in
 /-- `sol_close_unwrap` on a scoped goal `Valid ψ` with no modality left
-(after `sol_symex`): the leaf erased (`Derive.eraseLeaf`), then today's.
-It is the first step of today's `sol_close`, `sol_close_mt` and
-`sol_spec_close`, so each of them runs on a scoped leaf as on today's, its
-erasure. -/
+(after `sol_symex`): the leaf erased with its parameters kept as
+quantifiers (`Derive.eraseLeaf` with `typed`, M6c), then today's.  It is
+the first step of today's `sol_close`, `sol_close_mt` and
+`sol_spec_close`, so each of them runs on a scoped leaf's erasure, and
+introduces each parameter with its type's range (`Close.holds_all`,
+`PrimTy.admits`): a `uint` in `[0, 2²⁵⁶)`, a `bool` a boolean, where the
+leaf stripped of them (`stripAlls`) read a name bound to anything. -/
 @[tactic Solidity.tacticSol_close_unwrap]
-def evalSolCloseUnwrapCore : Tactic := fun stx => Derive.onErased "sol_close" stx stx
+def evalSolCloseUnwrapCore : Tactic := fun stx => withMainContext do
+  let g ← getMainGoal
+  let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
+  Symex.reporting g do
+    replaceMainGoal [← Derive.eraseLeaf "sol_close" g C ψ (typed := true)]
+    evalTactic stx
 
 /-! ## `sol_derive`: the strategy as a walk
 
