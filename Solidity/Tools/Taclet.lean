@@ -134,7 +134,8 @@ families, its conclusion, printed with the notation on (`pp.sol.dl`, and
 `dl{ … }` (or `dl[J C k]{ … }`) line in today's KeY text, with no scoped
 term left escaped: no escape `‹…›` names a scoped constant, printed with
 full names (`‹Solidity.Val.…›`, `‹(Solidity.Upd.…).snd›`,
-`‹@Solidity.Val.…›`; `‹Solidity.Surface.…›` passes).  The constructors whose line does not print
+`‹@Solidity.Val.…›`, `‹Solidity.Ext.push …›`, `‹Solidity.Tms.STerm.save …›`;
+`‹Solidity.Surface.…›` passes).  The constructors whose line does not print
 are listed.  Today's rule table, which the scoped lines were once diffed
 against (`docs/intrinsic.md`, decision 35), is gone; the lines are pinned
 where each rule is shown (`#taclet`, `#check`). -/
@@ -149,12 +150,36 @@ def ruleLine (c : Lean.Name) (full : Bool := false) : MetaM String := do
         `pp.fullNames full) do
       return (← Meta.ppExpr body).pretty 100000
 
+/-- The scoped families and namespaces that have no erased twin and are not
+among `Delab.untwinnedFamilies`, which the prefix `Solidity.Core` once kept
+apart: every root of a type or a namespace that was declared under it, but the
+shared vocabulary that only gained lemmas there (`Contract`, `PrimTy`,
+`BinOp`, `Op0`–`Op3`, `Srt`, `Binds`, `Res`, `Value`, `Delab`). -/
+def scopedOnlyRoots : List Lean.Name :=
+  [``Solidity.Agree, ``Solidity.ArrView, ``Solidity.BlockKind, ``Solidity.Branch,
+   ``Solidity.CallbackTaclet, ``Solidity.COut, ``Solidity.Ctx, ``Solidity.EState,
+   ``Solidity.Env, ``Solidity.ExecF, ``Solidity.ExecP, ``Solidity.ExecS, ``Solidity.Ext,
+   ``Solidity.FrameFresh, ``Solidity.Fold, ``Solidity.FShape, ``Solidity.Grew,
+   ``Solidity.Grown, ``Solidity.Heap, ``Solidity.Held, ``Solidity.HRef, ``Solidity.HTy,
+   ``Solidity.Hyps, ``Solidity.LeanTaclet, ``Solidity.MFields, ``Solidity.MObj,
+   ``Solidity.MVal, ``Solidity.Natural, ``Solidity.NaturalA, ``Solidity.NCtx, ``Solidity.Objs,
+   ``Solidity.Out, ``Solidity.Path, ``Solidity.Proves, ``Solidity.ProvesC, ``Solidity.RemOk,
+   ``Solidity.Resolved, ``Solidity.Rhs, ``Solidity.Rule, ``Solidity.RunInv, ``Solidity.RunWT,
+   ``Solidity.SFields, ``Solidity.Shape, ``Solidity.SList, ``Solidity.SMap, ``Solidity.SRef,
+   ``Solidity.StateInv, ``Solidity.StChg, ``Solidity.Storage, ``Solidity.Subst,
+   ``Solidity.SVal, ``Solidity.SVec, ``Solidity.Taclet, ``Solidity.TEnv, ``Solidity.TGFrame,
+   ``Solidity.THalt, ``Solidity.Thin, ``Solidity.TLocAgree, `Solidity.TLoop, ``Solidity.TRes,
+   `Solidity.TRun, ``Solidity.TStep, ``Solidity.TTx, ``Solidity.TWkRel, ``Solidity.TyLe,
+   ``Solidity.TyLt, `Solidity.Tms, ``Solidity.UpdE, ``Solidity.VShape]
+
 /-- Whether a full name printed in an escape is a scoped constant: it, or a
-namespace it is in, is a scoped family (`Delab.isScopedFamily`). -/
+namespace it is in, is a scoped family (`Delab.isScopedFamily`) or one of
+`scopedOnlyRoots`. -/
 def isScopedName (env : Environment) (tok : String) : Bool :=
   let rec go : Lean.Name → Bool
     | .anonymous => false
-    | n@(.str p _) => n != `Solidity && (Delab.isScopedFamily env n || go p)
+    | n@(.str p _) => n != `Solidity &&
+        (Delab.isScopedFamily env n || scopedOnlyRoots.contains n || go p)
     | .num p _ => go p
   tok.startsWith "Solidity." && go tok.toName
 
