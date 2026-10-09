@@ -226,7 +226,7 @@ theorem callback_soundness {I : Invariant C} {φ : Fml C []} :
 /-- **Symbolic execution is sound**: where what it leaves holds, the formula
 holds. -/
 theorem symex_sound (n : Nat) (σ : State C Γ) : σ ⊧ symex n φ → σ ⊧ φ :=
-  Solidity.symex_sound Stmt.sound n φ σ
+  Solidity.symex_sound n φ σ
 
 /-! ## The compiler -/
 

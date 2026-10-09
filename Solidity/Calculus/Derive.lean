@@ -67,18 +67,18 @@ theorem Valid.of_closes {ψ : Fml C []} (h : Derive.closes ψ = true) : Valid ψ
   exact Valid.of_erase h.1 (NFml.Proves.valid (NFml.Proves.of_proves h.2))
 
 /-- **`sol_prove`'s proof when nothing is left.** -/
-theorem Valid.of_proves (hS : Stmt.Sound C) {φ : Fml C []} (h : Derive.proves φ = true) :
+theorem Valid.of_proves {φ : Fml C []} (h : Derive.proves φ = true) :
     Valid φ :=
-  symex_valid hS Derive.fuel (Valid.of_closes h)
+  symex_valid Derive.fuel (Valid.of_closes h)
 
 /-- **`sol_prove`'s proof when leaves are left**: today's residue of the
 erasure, each leaf proved. -/
-theorem Valid.of_residue (hS : Stmt.Sound C) {φ : Fml C []}
+theorem Valid.of_residue {φ : Fml C []}
     {ls : List (NFml.Derive.Leaf C)} {b' : Nat} (h : Derive.residueOf φ = some (ls, b'))
     (hl : ∀ l ∈ ls, NFml.Proves .all l.1 l.2) : Valid φ := by
   unfold Derive.residueOf Derive.residueAt at h
   split at h
-  · exact symex_valid hS Derive.fuel
+  · exact symex_valid Derive.fuel
       (Valid.of_erase ‹_› (NFml.Proves.valid (NFml.Proves.of_synResidue h hl)))
   · cases h
 
@@ -101,7 +101,6 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
   let some n := C.constName? | throwError "sol_prove: the contract is not a named constant"
   if φ.hasFVar || φ.hasMVar then
     throwError "sol_prove: the formula mentions a local hypothesis or a metavariable"
-  let sound := mkApp (mkConst Symex.soundName) C
   let φe ← Symex.evaluable φ
   let bool := mkConst ``Bool
   -- the kernel first: compiling the check of a formula with no code of its
@@ -109,7 +108,7 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
   let type := mkApp3 (mkConst ``Eq [1]) bool (mkApp2 (mkConst ``proves) C φ) (mkConst ``Bool.true)
   if let some h ← (some <$> NFml.Derive.kernelLemma type
       (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))) <|> pure none then
-    g.assign (mkApp4 (mkConst ``Valid.of_proves) C sound φ h)
+    g.assign (mkApp3 (mkConst ``Valid.of_proves) C φ h)
     return []
   let resTy := mkApp (mkConst ``Option [0]) (mkApp2 (mkConst ``Prod [0, 0])
     (mkApp (mkConst ``List [0])
@@ -150,7 +149,7 @@ def prove (g : MVarId) (C φ : Expr) : MetaM (List MVarId) := do
   for (Γ', φ') in leaves.reverse, p in proofs.reverse do
     hl := mkAppN (mkConst ``NFml.Derive.leaves_cons) #[C, Γ', φ', rest, p, hl]
     rest := mkAppN (mkConst ``List.cons [0]) #[leafTy, mkLeaf Γ' φ', rest]
-  g.assign (mkAppN (mkConst ``Valid.of_residue) #[C, sound, φ, ls, mkRawNatLit left, h, hl])
+  g.assign (mkAppN (mkConst ``Valid.of_residue) #[C, φ, ls, mkRawNatLit left, h, hl])
   return goals.toList
 
 end Derive

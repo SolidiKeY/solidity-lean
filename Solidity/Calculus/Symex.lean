@@ -25,9 +25,6 @@ variable {C : Contract}
 
 section Sound
 
-variable (hS : Stmt.Sound C)
-include hS
-
 /-- One modality one step on is sound. -/
 theorem Fml.modalStep_sound (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) {ψ : Fml C Γ} (h : Fml.modalStep k m P κ φ = some ψ)
@@ -39,7 +36,7 @@ theorem Fml.modalStep_sound (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P :
   | cons s ω =>
     change some ((s.step k m).fml m ω κ φ) = some ψ at h
     cases h
-    exact hS k m s _ rfl σ ω κ φ hψ
+    exact Stmt.sound k m s _ rfl σ ω κ φ hψ
 
 /-- **One step of the strategy is sound**, at any fresh index. -/
 theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
@@ -67,7 +64,7 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     change (Fml.stepR k φ).map (Fml.upd m U) = some χ at h
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact Modality.afterC_imp hχ fun τ h σ' e hx => ih hφ σ' (h σ' e hx)
-  | modal m P κ φ => intro χ h σ hχ; exact Fml.modalStep_sound hS k m P κ φ h σ hχ
+  | modal m P κ φ => intro χ h σ hχ; exact Fml.modalStep_sound k m P κ φ h σ hχ
   | havoc φ ih =>
     intro χ h σ hχ
     change (Fml.stepR k φ).map Fml.havoc = some χ at h
@@ -96,12 +93,12 @@ theorem symex_sound {Γ : Ctx} : (n : Nat) → (φ : Fml C Γ) → ∀ σ, holds
     unfold symex at h
     split at h
     · rename_i ψ hψ
-      exact Fml.stepR_sound hS _ φ hψ σ (symex_sound n ψ σ h)
+      exact Fml.stepR_sound _ φ hψ σ (symex_sound n ψ σ h)
     · exact h
 
 /-- To prove `φ` valid, prove what `symex n` leaves of it valid. -/
 theorem symex_valid (n : Nat) {φ : Fml C []} (h : Valid (symex n φ)) : Valid φ :=
-  fun σ => symex_sound hS n φ σ (h σ)
+  fun σ => symex_sound n φ σ (h σ)
 
 /-- To prove `φ` valid, prove what one step leaves of it valid. -/
 theorem Fml.step_valid {φ : Fml C []} (h : Valid (φ.step.getD φ)) : Valid φ := by
@@ -109,7 +106,7 @@ theorem Fml.step_valid {φ : Fml C []} (h : Valid (φ.step.getD φ)) : Valid φ 
   cases hs : φ.step with
   | none => simpa only [hs, Option.getD_none] using h σ
   | some ψ =>
-    exact Fml.stepR_sound hS _ φ hs σ (by simpa only [hs, Option.getD_some] using h σ)
+    exact Fml.stepR_sound _ φ hs σ (by simpa only [hs, Option.getD_some] using h σ)
 
 end Sound
 
@@ -118,9 +115,6 @@ end Sound
 namespace Symex
 
 open Lean Elab Tactic Meta
-
-/-- The soundness of the rules, as the tactics cite it. -/
-def soundName : Lean.Name := ``Stmt.sound
 
 /-- The goal `Valid φ`, its contract and formula; `none` on any other goal. -/
 def validGoal? (g : MVarId) : MetaM (Option (Expr × Expr)) := do
@@ -251,7 +245,7 @@ statement. -/
 def evalSolStepCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
-  let lem := mkApp2 (mkConst ``Fml.step_valid) C (mkApp (mkConst Symex.soundName) C)
+  let lem := mkApp (mkConst ``Fml.step_valid) C
   Symex.reporting g do
     replaceMainGoal [← Symex.applyValid "sol_step" g lem (some m!"no modality left")]
 
@@ -263,8 +257,7 @@ def evalSolSymexCore : Tactic := fun _ => withMainContext do
   if (← getUnsolvedGoals).isEmpty then return
   let g ← getMainGoal
   let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
-  let lem := mkApp3 (mkConst ``symex_valid) C (mkApp (mkConst Symex.soundName) C)
-    (mkRawNatLit Symex.fuel)
+  let lem := mkApp2 (mkConst ``symex_valid) C (mkRawNatLit Symex.fuel)
   Symex.reporting g do replaceMainGoal [← Symex.applyValid "sol_symex" g lem]
 
 end Solidity
