@@ -49,7 +49,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a part 1 done 2026-10-09 |
+| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a part 1 partial 2026-10-09 |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
@@ -906,7 +906,7 @@ the closer port.
 ## M6c
 
 **Wave 6a, part 1 (2026-10-09, `w6-closer`): `DecideSyn`, `DecideComplete`
-on the scoped leaf; gate passed.**  `sol_decide` on `Valid φ`
+on the scoped leaf; Gate: partial.**  `sol_decide` on `Valid φ`
 (`φ : Fml C []`) erases only to call the reduction below it
 (`Valid.of_reduce`, `Calculus/DecideSyn.lean`: `Fml.posB` and the
 fragment checked by the kernel, the erasure computed once and quoted),
@@ -950,8 +950,9 @@ The Derived files call `sol_decide` only through today's leaves
 they are where they were.  `Examples/Tactics/Decide` (with its two new
 examples; 37.57–38.13 s without them) is 23% faster: a parameter is one
 case where the erased leaf split it into three, each unfolded and closed
-by `omega`/`grind`.  **Gate: pass** for both modules (ported together,
-timed together).
+by `omega`/`grind`.  **Gate: partial** (timings within 1.2×; atoms not
+re-keyed by `Idx`, decision 78; the Derived rows do not exercise the
+changed path), for both modules (ported together, timed together).
 
 ## What is left
 
@@ -965,8 +966,10 @@ timed together).
   `KeyNotation`, `DecideLang`, `Literals` and `Theory/**`.  Only modules
   that handle locals, updates or formula structure port.
 - **Waves:** 6a `Closer`, `DecideSyn`, `DecideComplete`, `NFmlClose`, with
-  symbolic atoms keyed by `Idx` (`DecideSyn` and `DecideComplete` done,
-  "M6c" above; `Closer` and `NFmlClose` left); 6b `Decide.lean` alone (10k lines, one
+  symbolic atoms keyed by `Idx` (`DecideSyn`, `DecideComplete`: the scoped
+  entry `Valid.of_reduce` and typed parameters only; their atoms stay
+  name-keyed `LFml`, decision 78, pending the lead's call; `Closer` and
+  `NFmlClose` left); 6b `Decide.lean` alone (10k lines, one
   agent); 6c `NFmlUpdateRules`, `StateParts`, `Rewrite`, `TheoryRewrite`,
   `ChainRewrites`, `ChainBranches`, then `NFmlDerive`, `NFmlLogic`,
   `RewriteChains`.
