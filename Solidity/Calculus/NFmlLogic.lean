@@ -28,6 +28,14 @@ modality (W4 `modal`): a formula here has none.
 
 An update never panics (`Upd.apply_ne_panic`), which is what lets an update
 rule's premise read a halt as the box reads a revert.
+
+Since M6c 6c (decisions 89, 90) the scoped sequent (`Calculus/Proves.lean`)
+has every rule of this one (`rewrite` among them, a modality still open
+or not), and a leaf `sol_prove` leaves on `⊢` is a scoped sequent: this
+calculus is the decision procedure's IR (decision 7), what a scoped leaf
+erases to (`Proves.close_leaf`), the leaves of `sol_prove` on a `⊨` goal
+(`Calculus/Derive.lean`) and the sequents written over today's terms
+(`Examples/Tactics/TermTaclets.lean`).
 -/
 
 namespace Solidity

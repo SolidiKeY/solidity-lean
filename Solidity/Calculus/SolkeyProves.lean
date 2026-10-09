@@ -50,7 +50,22 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
   | close ns hlen hnd h hc hB => exact .close ns hlen hnd h hc hB
   | merge hU hW _ ih => exact .merge hU hW ih
   | updRw q hq _ ih => exact .updRw q hq ih
+  | rewrite q hq _ ih => exact .rewrite q hq ih
   | closeHolds h hm => exact .closeHolds h hm
+
+/-- A Theory rewrite keeps a formula in the fragment: it changes only the
+sides of its equations. -/
+theorem Fml.inSolkey_rwEqC (q : Solidity.Term C × Solidity.Term C) :
+    {Γ : Ctx} → (φ : Fml C Γ) → (φ.rwEqC q).inSolkey = φ.inSolkey
+  | _, .tt | _, .eq .. | _, .defined _ => rfl
+  | _, .not φ => Fml.inSolkey_rwEqC q φ
+  | _, .and φ ψ | _, .imp φ ψ => by
+    simp only [Fml.rwEqC_and, Fml.rwEqC_imp, Fml.inSolkey, Fml.inSolkey_rwEqC q φ,
+      Fml.inSolkey_rwEqC q ψ]
+  | _, .upd _ _ φ | _, .havoc φ | _, .all _ _ φ | _, .bind _ _ _ φ | _, .anon _ φ =>
+    Fml.inSolkey_rwEqC q φ
+  | _, .modal m P κ φ => by
+    simp only [Fml.rwEqC_modal, Fml.inSolkey, Fml.inSolkey_rwEqC q φ]
 
 /-- The first statement of a modality in the fragment is in it, and so are
 the rest, the frames and the postcondition. -/
@@ -149,6 +164,7 @@ theorem Proves.toSolkey {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ
   | close ns hlen hnd h hc hB => exact .close ns hlen hnd h hc hB
   | merge hU hW _ ih => exact .merge hU hW (ih hφ)
   | updRw q hq _ ih => exact .updRw q hq (ih hφ)
+  | rewrite q hq _ ih => exact .rewrite q hq (ih (by rw [Fml.inSolkey_rwEqC]; exact hφ))
   | closeHolds h hm => exact .closeHolds h hm
 
 /-- **On the fragment, solkey's rules derive exactly what the calculus
@@ -221,6 +237,11 @@ theorem Proves.solkey_blocked {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C
     | _ => exact absurd hφ Bool.false_ne_true
   | merge hU hW _ ih => exact .merge hU hW (ih hφ)
   | updRw q hq _ ih => exact .updRw q hq (ih hφ)
+  | @rewrite Γ H φ q hq _ ih =>
+    refine .rewrite q hq (ih ?_)
+    cases φ with
+    | modal m P κ ψ => cases P <;> exact hφ
+    | _ => exact absurd hφ Bool.false_ne_true
 
 /-- `[ while (false) { } ] true`, the loop unwound at most `0` times. -/
 def loopFalse : Fml C [] :=

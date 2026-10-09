@@ -49,7 +49,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2, 6b (`Decide.lean`) and 6c part 1 (`NFmlUpdateRules`, `StateParts`) partial 2026-10-09 |
+| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2, 6b (`Decide.lean`) and 6c part 1 (`NFmlUpdateRules`, `StateParts`) partial 2026-10-09; 6c `w6c-rw` (`Rewrite`, `TheoryRewrite`, `NFmlDerive`, `NFmlLogic`) partial |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
@@ -982,10 +982,9 @@ the closer port.
     the ledger (`{ y := net(a) }`), also outside the fragment.  Both still
     print `false`.
 
-86. *Proposed (M6c 6c, `w6c-upd`; renumber at the merge if another lane
-    took 86–88), the lead's call:* the update rules on scoped formulas are
-    **one way** (`UpdRuleS.sound`: `holds σ ψ → holds σ φ`, the direction
-    a derivation uses), where the erased ones are equivalences.  The
+86. *Proposed (M6c 6c, `w6c-upd`), the lead's call:* the update rules
+    on scoped formulas are **one way** (`UpdRuleS.sound`:
+    `holds σ ψ → holds σ φ`, the direction a derivation uses), where the erased ones are equivalences.  The
     converse fails on the typed state: `{U} φ` reads `φ` in every typed
     state the update's result erases to, and a merged update can reach a
     typed state the two updates in turn do not (`{x := 300}{x := 1} φ`
@@ -1025,6 +1024,62 @@ the closer port.
     `ChainRewrites`, `ChainBranches`, `NFmlLogic`, `RewriteChains`,
     `Decide` and `Hyp` still read `NFml`; they go when those port.  This
     is not decision 7's fallback (the gate rows did not move).
+89. *Proposed (M6c 6c, `w6c-rw`; 86–88 at the lane, renumbered at the
+    merge), the lead's call:* `sol_prove` on a scoped sequent leaves
+    the walk's own sequents (`Seq.SLeaf`, `Seq.leafS`), not today's
+    sequents of their erasures: the closer still reads the erasure
+    (`Derive.residue`, `synClose`, the decision procedure's IR), and a leaf
+    it does not close is the scoped goal `H ⊢ φ`.  Its first line erases it
+    to the goal today's leaf had (`Proves.close_leaf`,
+    `Proves.close_leaf_dropWt`: `Fml.closeErase`, the first `np` `∀`s
+    stripped, the connectives in front peeled into today's context), so the
+    lines after it are unchanged; that line keeps today's text (`refine
+    NFml.Proves.close_dropWt ?_`, `refine NFml.Proves.close ?_`: a global
+    macro tries `core_leaf_close` first, today's rule on today's goal
+    after), as decisions 80 and 82 keep written proofs' steps, so no replay
+    of `Derived1`–`14`, `Suggestions` or `#solkey_derive?` moves.  The
+    walk's spelling `refine close ?_` stays `Proves.close` on the whole
+    erasure (a leaf of `sol_derive`), so `Benchmark/Mapping`'s
+    `remove_spec`, which wrote it after `sol_prove`, now writes today's
+    `refine NFml.Proves.close ?_` (one line; the leaf it closes is the
+    same).  The `⊨` route (`Derive.lean`'s `sol_prove` on `Valid φ`) keeps
+    today's leaves: it has no sequent, its leaf is the erasure of the
+    strategy's whole output, and moving it to `⊢`'s walk changes the leaves
+    of the `⊨` examples (`Constructors`, `LoopsImport`, `Purchase`, …).
+90. *Proposed (M6c 6c), the lead's call:* the scoped `Proves` has today's
+    `Proves.rewrite` as a rule: a Theory equation (`TermTaclet.sound`, or a
+    law's `Term.Theq`) in every equation of the sequent, the context's
+    preconditions and the goal (`Hyps.rwEqC`, `Fml.rwEqC`,
+    `Calculus/SeqRewrite.lean`), through updates, quantifiers, hidden
+    binders and the postcondition of a modality still open; sound over the
+    typed state (`Fml.rwEqC_holds`, `Hyps.wrap_rwEqC`) and kept by
+    `Proves.toAll`/`toSolkey`/`solkey_blocked` (`Fml.inSolkey_rwEqC`).  It
+    replaces the derived `Proves.rewrite` (by `closeHolds`, no modality
+    left, the goal's top equations only); `Proves.rewrite'` writes the
+    result out, and `rw`/`sol_rw` on a scoped goal reach every side it
+    rewrites (`Walk.eqSides`, `Walk.hypSides`).  This is decision 49's
+    "rewrites under an open program come back" for the sequent
+    (`SelectOnSaveConsr`'s two new examples).  Decision 49's four chain
+    examples (`Examples/ChainRewrites`, §Literals) stay on `ψ`: their links
+    (`applyOnRigid` through the connectives, `NFml.push`; `concrete`;
+    `simplifyUpdate`) are `Calculus/ChainBranches.lean`'s and
+    `Calculus/ChainRewrites.lean`'s on `Update.lean`'s lines, and a scoped
+    line takes only `~[sequentialToParallel]~>` while its program is open
+    (`Calculus/Chains.lean`, `Fml.MergeBy`); they come back with the chain
+    port of those modules (the scoped update rules of lane `w6c-upd`,
+    `UpdRuleS`, are their base), not here.
+91. *Proposed (M6c 6c), the lead's call:* `NFmlLogic` and `NFmlDerive`
+    stay, as the decision procedure's IR (decision 7's documented IR), not
+    as a failed gate (their gate passed): every rule of `NFml.Proves` has
+    its scoped twin, and `NFml.Proves` is what a scoped leaf erases to,
+    the leaves of the `⊨` route, and the sequents written over today's
+    terms (`Examples/Tactics/TermTaclets.lean`, `Calculus/CloseTests.lean`);
+    `Derive.residue`/`synClose` are the closer on the erasure.
+    `TheoryRewrite.lean` is a symbol library (`theoryRewrite` reads a closed
+    term's erasure; the scoped `rw` calls it on the erasures of closed
+    scoped terms, `Walk.rwTheory`); `Rewrite.lean`'s tactics stay
+    `NFml.Proves`'s, the scoped ones are `Calculus/RewriteSyntax.lean`'s
+    with the same text.
 
 ## M6c
 
@@ -1253,6 +1308,74 @@ still erase the leaf, `Closers.lean`'s `Derive.onErased`, and the chains'
 rewrite links read the erasure: `Rewrite`, `ChainRewrites`), and
 `simplifyUpdate` drops less than the erased form (decision 87).
 
+**Wave 6c, `Rewrite`, `TheoryRewrite`, `NFmlDerive`, `NFmlLogic`
+(2026-10-09, `w6c-rw`); Gate: partial.**  The closer's sequent calculus is
+the scoped one (decisions 89–91): `sol_prove`'s leaves on `⊢` are scoped
+sequents (`Seq.SLeaf`, `Proves.close_leaf`, `Calculus/ProvesDerive.lean`),
+and the scoped `Proves` has today's `rewrite` (`Calculus/SeqRewrite.lean`,
+new), in every equation of the sequent while a modality is still open:
+`rw [findOnSave]` rewrites a postcondition under `[ alice.age = 1; ]` and
+a precondition beside it (`Examples/Tactics/SelectOnSaveConsr.lean`, two
+examples).  One pin moved (`Benchmark/Mapping`'s `remove_spec`, decision
+89); no `sorry`, `axiom` or `maxHeartbeats` added (`sorry` in 12 files, 30
+overrides, as before); `Proves.of_residue`, `Proves.close_leaf_dropWt`
+and `Proves.sound` on `propext`, `Classical.choice`, `Quot.sound`.  The
+build (`Solidity`, `solkeycheck`, `SolidityCorpus`, `SolkeyTestSuite`)
+green; `check-orphans` (302 reachable), `check-doc-paths`: OK.
+
+Gate (the W6 baselines' method, measured at `7aa21dd4`: each file copied
+under `Solidity/Scratch/`, a fresh worker, the end of work (the first
+sample within 5 ticks of the final CPU), the minimum of three runs, one
+worker at a time; load 1.5–5.3 at the starts, the first modules the
+highest, while two other lanes built):
+
+| Module | W6 end of work | 6c `w6c-rw` (three runs) | ratio | CPU (min) |
+|---|---|---|---|---|
+| `TestSuite/Derived1` | 7.32 s | **7.40 s** (9.17, 7.40, 7.45) | 1.01 | 9.03 s |
+| `TestSuite/Derived2` | 8.63 s | **8.77 s** (8.77, 8.89, 9.11) | 1.02 | 10.59 s |
+| `TestSuite/Derived3` | 13.01 s | **13.39 s** (13.39, 13.40, 13.69) | 1.03 | 14.93 s |
+| `TestSuite/Derived4` | 17.57 s | **18.52 s** (18.65, 18.71, 18.52) | 1.05 | 20.72 s |
+| `TestSuite/Derived5` | 6.95 s | **7.30 s** (7.30, 7.67, 7.90) | 1.05 | 8.77 s |
+| `TestSuite/Derived6` | 11.42 s | **11.91 s** (12.97, 11.91, 12.18) | 1.04 | 13.61 s |
+| `TestSuite/Derived7` | 50.43 s | **50.92 s** (52.80, 55.77, 55.26; at load 1.1: 50.92, 51.18) | 1.01 | 53.32 s |
+| `TestSuite/Derived8` | 26.38 s | **27.45 s** (27.50, 30.70, 27.45) | 1.04 | 28.83 s |
+| `TestSuite/Derived9` | 7.16 s | **7.36 s** (7.49, 7.41, 7.36) | 1.03 | 8.88 s |
+| `TestSuite/Derived10` | 11.11 s | **11.61 s** (11.61, 11.67, 11.62) | 1.05 | 13.29 s |
+| `TestSuite/Derived11` | 3.16 s | **3.30 s** (3.30, 3.36, 3.36) | 1.04 | 3.49 s |
+| `TestSuite/Derived12` | 13.17 s | **13.67 s** (13.83, 13.77, 13.67) | 1.04 | 14.62 s |
+| `TestSuite/Derived13` | 6.36 s | **6.53 s** (6.60, 6.59, 6.53) | 1.03 | 6.63 s |
+| `TestSuite/Derived14` | 10.89 s | **11.39 s** (11.43, 11.46, 11.39) | 1.05 | 12.06 s |
+| Derived1–14, sum | 193.6 s | **199.5 s** | 1.03 | |
+| `Examples/Tactics/Decide` | 49.14 s | **34.74 s** (35.62, 35.25, 34.74) | 0.71 | 35.63 s |
+
+The 3–5% over the W6 baselines is the machine's, not the change's: the
+baseline (`77c6e047`, checked out in the lane's worktree, its artifacts
+from the cache) timed the same way in the same hour, at load 0.9–2.6,
+gives `Derived1` 7.40 s (7.46, 7.47, 7.40; CPU 9.04 s), `Derived4`
+18.32 s (18.32, 18.82, 18.72; 20.40 s) and `Derived7` 50.76 s (53.46,
+50.76, 51.02; 53.39 s): 1.00, 1.01 and 1.00 of this lane's.  Only the
+leaves `sol_prove` leaves changed path (the `Derived` files have four:
+two in `Derived1`, one in `Derived7` and one in `Derived12`), and the walk's kernel check differs only in its
+leaf (`leafS` maps `leafRes`'s result).  `Examples/Tactics/Decide` is
+where 6b's review fix left it (34.32 s, 1.01).  **Gate: partial**
+(timings within 1.2×; the `⊨` route's leaves stay today's, decision 89;
+decision 49's four chain examples are not restored, decision 90; the
+closer and its sequents on the erasure stay the IR, decision 91).
+
+Review fix (2026-10-09): `Fml.rwEqC` and `Hyps.rwEqC`, which the kernel
+unfolds in `Proves.rewrite'`'s `rfl`s, matched on indexed families (G0's
+condition 1, no exemption recorded); they are now recursors with `match`
+twins (`Fml.rwEqCM`, `Hyps.rwEqCM`, link theorems `…_eq_rwEqCM`), their
+clauses stated by `rfl` (`Fml.rwEqC_not`, …).  `rw`/`sol_rw` on a
+scoped goal re-quoted the whole context when it rewrote a precondition,
+dropping the marks of explicit `∀`s (`Seq.paramCount` then read the
+explicit `∀` as a parameter, decision 28); `Walk.rwHyps` now rewrites
+only the preconditions and keeps every other entry as written, and a
+goal's marks are restored (`Symex.restoreMarks`).  Pinned in
+`Examples/Tactics/SelectOnSaveConsr.lean` (`some (0)` after the rewrite;
+`some (1)` before the fix).  The rule map's scoped `rewrite` rows now name
+it a rule (decision 90).
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
@@ -1278,7 +1401,10 @@ rewrite links read the erasure: `Rewrite`, `ChainRewrites`), and
   `Calculus/UpdRuleScoped.lean`, `Calculus/StatePartsScoped.lean`, one
   way, decisions 86–88; unused until `Rewrite` and `ChainRewrites` port),
   `Rewrite`, `TheoryRewrite`, `ChainRewrites`, `ChainBranches`, then
-  `NFmlDerive`, `NFmlLogic`, `RewriteChains`.
+  `NFmlDerive`, `NFmlLogic`, `RewriteChains` (`Rewrite`, `TheoryRewrite`,
+  `NFmlDerive`, `NFmlLogic`: lane `w6c-rw`, partial, decisions 89–91: the
+  leaves and the sequent's rewrite scoped, the `⊨` route's leaves and the
+  closer's IR left; decision 49's chain examples wait for `ChainBranches`).
 - **Gate per module:** the `TestSuite/Derived*` files and
   `Examples/Tactics/Decide` within 1.2× of the erased form's timings
   (the W6 baselines, Gates: the end-of-work column and its gate).
@@ -1287,7 +1413,7 @@ rewrite links read the erasure: `Rewrite`, `ChainRewrites`), and
   `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.
 
 **Besides M6c:**
-- The lead's calls on proposals 78–88; the user's on decision 11 (whether
+- The lead's calls on proposals 78–91; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").
 - At the merge into `master`: the SolKey reader's require back to
