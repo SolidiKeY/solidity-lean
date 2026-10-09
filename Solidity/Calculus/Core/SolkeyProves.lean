@@ -16,7 +16,7 @@ sequent, now that a step of `⊢ₖ` asks its rule to be solkey's
   two derive the same (`Proves.solkey_iff`);
 * off it they differ (`Proves.solkey_lt_calculus`): `⊢` derives
   `[ while (false) { } ] true` by `loopExit`, and `⊢ₖ` does not, since a
-  step it cannot take leaves it only `closeFalse` (`Proves.solkey_stuck`),
+  step it cannot take leaves it only `closeFalse` (`Proves.solkey_blocked`),
   which its soundness refutes.
 -/
 
@@ -160,7 +160,7 @@ theorem Proves.solkey_iff {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ}
 /-! ## Off the fragment -/
 
 /-- A modality whose first statement `⊢ₖ` has no rule for. -/
-def Fml.stuckK : {Γ : Ctx} → Fml C Γ → Bool
+def Fml.blockedK : {Γ : Ctx} → Fml C Γ → Bool
   | _, .modal m (.cons s _) _ _ => !s.keyStep m
   | _, _ => false
 
@@ -196,8 +196,8 @@ theorem Hyps.closable_wrap {Γ₀ : Ctx} : {Γ : Ctx} → (H : Hyps C Γ₀ Γ) 
 /-- **A step `⊢ₖ` cannot take leaves it nothing but `closeFalse`**: a
 derivation by solkey's rules of a modality whose first statement has no rule
 of solkey's is a refutation of its context. -/
-theorem Proves.solkey_stuck {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ}
-    (h : Proves C .solkey Γ₀ H φ) (hφ : φ.stuckK = true) : Proves C .solkey Γ₀ H .ff := by
+theorem Proves.solkey_blocked {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ}
+    (h : Proves C .solkey Γ₀ H φ) (hφ : φ.blockedK = true) : Proves C .solkey Γ₀ H .ff := by
   induction h with
   | update _ _ hR _ | unfold _ _ hR _ | bind _ _ hR _ | split _ _ _ hR _ _ | check _ _ _ hR _ _
   | done _ _ hR _ | branches _ _ _ hR _ | cases _ _ _ _ hR _ _ | inv _ _ _ _ hR _ _ _
@@ -238,6 +238,6 @@ theorem loopFalse_derived : Proves C .all [] .nil (loopFalse (C := C)) := by
 theorem Proves.solkey_lt_calculus :
     ∃ φ : Fml C [], Proves C .all [] .nil φ ∧ ¬ Proves C .solkey [] .nil φ :=
   ⟨loopFalse, loopFalse_derived, fun h =>
-    (Proves.sound (h.solkey_stuck rfl) (TState.init C) : ¬ True) trivial⟩
+    (Proves.sound (h.solkey_blocked rfl) (TState.init C) : ¬ True) trivial⟩
 
 end Solidity.Core

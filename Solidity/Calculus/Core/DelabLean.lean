@@ -6,8 +6,9 @@ import Solidity.Calculus.Core.Delab
 `Calculus/Core/Delab.lean`'s printer for `Core.Taclet`, for the other scoped
 judgement, `Core.LeanTaclet` (`Calculus/Core/Rules.lean`): the rule as
 `dl[LeanTaclet C k]{ ⟨[ s; ]⟩ ⇝ p }`, its statement and premise erased with
-their schema variables (`Core.Delab.tr`, `Calculus/Core/DelabErase.lean`) and printed by `Rules.lean`'s
-printers, a loop's invariant rule with solkey's branch labels.
+their schema variables (`Core.Delab.tr`, `Calculus/Core/DelabErase.lean`) and printed by today's printers
+(`Calculus/RuleSyntax.lean`), a loop's invariant rule with solkey's branch
+labels.
 -/
 
 namespace Solidity.Core.Delab
@@ -15,25 +16,42 @@ namespace Solidity.Core.Delab
 open Lean Meta PrettyPrinter Delaborator SubExpr
 open Solidity (ppStmt ppPremise? ppOn isEscape escapeTerm)
 
-/-- `functionCallArgCapture`'s premise (`Premise.argCapture`, blocked on its
-schema variable `ret`): `⟨[ T se = v; ‹Core.Stmt.call f as' ret body›; ]⟩`,
-the capture as `Syntax.lean` writes it and the call with the captured
-arguments as a term, as `Rules.lean` prints today's rule. -/
-def argCapturePremise? (p : Expr) : MetaM (Option (TSyntax `dl_premise)) := do
+/-- `Arg.separatedFrom [] as = true`, of today's arguments `as`. -/
+def sepTy (c as : Expr) : Expr :=
+  mkApp3 (mkConst ``Eq [levelOne]) (mkConst ``Bool)
+    (mkApp3 (mkConst ``Solidity.Arg.separatedFrom) c (mkApp (mkConst ``List.nil [levelZero])
+      (mkConst ``Solidity.Var)) as) (mkConst ``Bool.true)
+
+/-- `functionCallArgCapture`, its call `s` and premise `p`
+(`Premise.argCapture`, blocked on its schema variable `ret`), as today's
+table printed the rule: the call as today's term of the twins
+(`‹Surface.Stmt.call f args hsep ret body›`; a call of schema variables
+whose arguments are not all simple is neither `fbs` nor `ic`), the premise
+`⟨[ T se = v; ‹Surface.Stmt.call f as' ⋯ ret body›; ]⟩`, the capture as
+`Syntax.lean` writes it and the call with the captured arguments as a term. -/
+def argCapture? (s p : Expr) :
+    MetaM (Option (TSyntax `sol_stmt × TSyntax `dl_premise)) := do
   let p ← instantiateMVars p
+  let s ← instantiateMVars s
   unless p.isAppOfArity ``Solidity.Core.Premise.argCapture 13 do return none
+  unless s.isAppOfArity ``Solidity.Core.Stmt.call 10 do return none
   let a := p.getAppArgs
   let c := a[0]!
-  withTwins p false fun env => do
+  withTwins (schema := true) (mkApp2 (mkConst ``Prod.mk [levelZero, levelZero]) s p) false fun env => do
+    let tw (x : Expr) : MetaM (Option Expr) := (twin? x).run env
+    let (some as, some ret, some body, some as') :=
+        (← tw (s.getArg! 7), ← tw (s.getArg! 8), ← tw (s.getArg! 9), ← tw a[10]!) | return none
     let v ← (tr [] a[9]!).run env
     let x := mkApp2 (mkConst ``Solidity.Var.fresh) (toExpr "se") a[2]!
     let init := mkApp2 (mkConst ``Option.some [levelZero]) (mkApp2 (mkConst ``Solidity.Val) c a[8]!) v
     let decl ← ppStmt (mkApp4 (mkConst ``Solidity.Surface.Stmt.declLocal) c a[8]! x init)
-    let call := mkIdent (← unresolveNameGlobal ``Solidity.Core.Stmt.call)
-    let t ← `($call $(← escapeTerm a[3]!) $(← escapeTerm a[10]!) $(← escapeTerm a[11]!)
-      $(← escapeTerm a[12]!))
-    let call ← `(sol_stmt| ‹$t:term›)
-    return some (← `(dl_premise| ⟨[ $decl:sol_stmt; $call:sol_stmt; ]⟩))
+    withLocalDeclD `hsep (sepTy c as) fun hsep => do
+      let call (as h : Expr) : MetaM (TSyntax `sol_stmt) := do
+        let t ← escapeTerm (mkAppN (mkConst ``Solidity.Surface.Stmt.call) #[c, a[3]!, as, h, ret, body])
+        `(sol_stmt| ‹$t:term›)
+      let st ← call as hsep
+      let st' ← call as' hsepPlaceholder
+      return some (st, ← `(dl_premise| ⟨[ $decl:sol_stmt; $st':sol_stmt; ]⟩))
 
 /-- `Core.LeanTaclet C k m s p`: `dl[LeanTaclet C k]{ ⟨[ s; ]⟩ ⇝ p }`, as
 `Rules.lean`'s `delabTaclet` prints today's. -/
@@ -45,11 +63,9 @@ def delabLeanTaclet : Delab := do
   let m ← whnf (e.getArg! 2)
   let J ← `($(mkIdent (← unresolveNameGlobal ``LeanTaclet))
     $((← (List.range 2).toArray.mapM fun i => withNaryArg i delab))*)
-  if let some p ← argCapturePremise? (e.getArg! 6) then
-    -- the call, its arguments a schema variable, as a term (`‹…›`)
-    let s ← `(sol_stmt| ‹$(← escapeTerm (e.getArg! 5)):term›)
+  if let some (s, p) ← argCapture? (e.getArg! 5) (e.getArg! 6) then
     return ← `(dl[ $J ]{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
-  let out? ← withTwins e false fun env => do
+  let out? ← withTwins (schema := true) e false fun env => do
     let st ← (tr [] (e.getArg! 5)).run env
     let p ← (tr [] (e.getArg! 6)).run env
     let st' ← whnf st

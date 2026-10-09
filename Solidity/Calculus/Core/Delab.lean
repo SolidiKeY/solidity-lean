@@ -88,6 +88,27 @@ def fmtFml (e : Expr) : MetaM String := do
 
 /-! ## The delaborators -/
 
+/-- The statements of an erased program with schema variables in it, a
+program variable as a statement (`body;`). -/
+def progItems? (P : Expr) : MetaM (Option (Array (TSyntax `sol_stmt))) := do
+  let some (ss, t) ← Solidity.ppProgParts? P | return none
+  match t with
+  | some x => return some (ss.push (← `(sol_stmt| $x:ident)))
+  | none => return some ss
+
+/-- solkey's `blockEmpty`, scoped: a block of schema variables and the
+statements it runs, `⟨[ { body; }; ]⟩ ⇝ ⟨[ body; ]⟩`.  Its locals' pop at the
+end (`Premise.unfold`'s `Ext`) is what erasure loses, and prints as nothing,
+as a frame's end does in a premise. -/
+def blockLine? (e : Expr) : MetaM (Option (TSyntax `sol_stmt × TSyntax `dl_premise)) := do
+  unless (← whnfR (e.getArg! 5)).isAppOf ``Stmt.block do return none
+  withTwins (schema := true) e false fun env => do
+    let st ← (tr [] (e.getArg! 5)).run env
+    let p ← whnf ((← (tr [] (e.getArg! 6)).run env))
+    unless p.isAppOf ``Solidity.Premise.unfold do return none
+    let (some ss, some ps) := (← progItems? st, ← progItems? p.appArg!) | return none
+    return some (← `(sol_stmt| { $[$ss;]* }), ← `(dl_premise| ⟨[ $[$ps;]* ]⟩))
+
 /-- `Core.Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, as `delabTaclet` prints
 today's, its goals labelled by solkey's labels. -/
 @[delab app.Solidity.Core.Taclet]
@@ -96,7 +117,12 @@ def delabTaclet : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 7)
   let m ← whnf (e.getArg! 2)
-  let out? ← withTwins e false fun env => do
+  if let some (s, p) ← blockLine? e then
+    return ← match_expr m with
+      | Modality.box => `(dl{ [ $s:sol_stmt; ] ⇝ $p })
+      | Modality.diamond => `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
+      | _ => `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
+  let out? ← withTwins (schema := true) e false fun env => do
       let st ← (tr [] (e.getArg! 5)).run env
       let p ← (tr [] (e.getArg! 6)).run env
       let st' ← whnf st
@@ -211,8 +237,20 @@ def delabProves : Delab := do
   else if let some r ← Solidity.fvarName? R then `(dl{ $[$out],* ⟹[$(Solidity.nameIdent r)] $φ:dl_fml })
   else failure
 
+/-- The side condition `CallRet.isRets ret = b` of a scoped taclet's type,
+its `b`. -/
+partial def callSide : Expr → Option Expr
+  | .forallE _ t b _ =>
+    if t.isAppOfArity ``autoParam 2 then
+      match (t.getArg! 0).eq? with
+      | some (_, l, r) => if l.isAppOf ``CallRet.isRets then some r else callSide b
+      | none => callSide b
+    else callSide b
+  | _ => none
+
 /-- A scoped taclet's type: its side conditions and carried proofs out of
-sight, as `Rules.lean`'s `delabTacletSide`. -/
+sight, as today's `delabTacletSide` had them, a call without targets
+printed `ic` (`pp.sol.ic`). -/
 @[delab forallE]
 def delabTacletSide : Delab := do
   unless ← ppOn do failure
@@ -221,8 +259,11 @@ def delabTacletSide : Delab := do
   -- `Core.CallbackTaclet` is declared by a module importing this one (`Core/Callback.lean`)
   unless b.isAppOf ``Core.Taclet || b.isAppOf ``Core.LeanTaclet ||
       b.isAppOf `Solidity.Core.CallbackTaclet do failure
-  withTheReader SubExpr (fun s => { s with expr := Solidity.dropSide e })
-    (Solidity.delabTacletBinders #[] #[])
+  -- a call without targets is KeY's `ic` (`hrets : CallRet.isRets ret = false`)
+  let ic := (callSide e).any (·.isConstOf ``Bool.false)
+  withTheReader Lean.Core.Context (fun c => { c with options := c.options.setBool `pp.sol.ic ic }) <|
+    withTheReader SubExpr (fun s => { s with expr := Solidity.dropSide e })
+      (Solidity.delabTacletBinders #[] #[])
 
 end Delab
 

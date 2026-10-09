@@ -1181,7 +1181,7 @@ macro "sol_decide" : tactic => `(tactic|
    (refine (NFml.valid_iff_reduce _ (by
       first
       | decide +kernel
-      | fail "sol_decide: the formula is outside the fragment (a modality, a push of a memory object, a copy of memory whose guards are not literals, a copy from storage outside its allocation's pair, a memory past memSize, a read of the ledger, an alias no update binds, or one through an index used after a write)")).2 ?_
+      | fail "sol_decide: the formula is outside the fragment (a push of a memory object, a copy of memory whose guards are not literals, a copy from storage outside its allocation's pair, a memory past memSize, a read of the ledger, an alias no update binds, or one through an index used after a write)")).2 ?_
     sol_reduce
     first
     | exact LFml.syn_valid _ (by decide +kernel)

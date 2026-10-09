@@ -189,7 +189,7 @@ def delabCallbackTaclet : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 7)
   let m ← whnf (e.getArg! 2)
-  let out? ← withTwins e false fun env => do
+  let out? ← withTwins (schema := true) e false fun env => do
     let st ← (tr [] (e.getArg! 5)).run env
     let p ← (tr [] (e.getArg! 6)).run env
     let st' ← whnf st

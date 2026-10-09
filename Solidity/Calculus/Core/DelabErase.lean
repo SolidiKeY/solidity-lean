@@ -69,12 +69,24 @@ def isCtx (ty : Expr) : MetaM Bool := do
 
 /-- The erased type of a scoped one: `Idx Γ t` is `Var`, a block or frames
 `Prog C`, any other family `F C Γ x̄` the family of the same name, its
-contexts dropped. -/
-def legacyType? (ty : Expr) : MetaM (Option Expr) := do
+contexts dropped.  With `schema` (a rule's schema variables, `withTwins`),
+the parts of a call that have no family of the same name are their
+erasures' types too: `Args C Γ ps` is `List (Arg C)` (`Args.erase`),
+`Binders ρ` is `List (PrimTy × Var)`, `CodeBinder κ` is `Option Var`
+(`CodeBinder.toOption`). -/
+def legacyType? (ty : Expr) (schema : Bool := false) : MetaM (Option Expr) := do
   let ty ← whnfR (← instantiateMVars ty)
   let .const n _ := ty.getAppFn | return none
   let args := ty.getAppArgs
   if n == ``Idx then return some (mkConst ``Solidity.Var)
+  if schema then
+    if n == ``Args then
+      return some (mkApp (mkConst ``List [levelZero]) (mkApp (mkConst ``Solidity.Arg) args[0]!))
+    if n == ``Binders then
+      return some (mkApp (mkConst ``List [levelZero])
+        (mkApp2 (mkConst ``Prod [levelZero, levelZero]) (mkConst ``PrimTy) (mkConst ``Solidity.Var)))
+    if n == ``CodeBinder then
+      return some (mkApp (mkConst ``Option [levelZero]) (mkConst ``Solidity.Var))
   -- the storage hole is today's `Hole`
   if n == ``SHole then
     return some (mkAppN (mkConst ``Solidity.Hole) #[args[0]!, args[2]!])
@@ -96,11 +108,20 @@ prints as (a local, `blockEndName`), when frames are printed. -/
 structure Env where
   twins : Std.HashMap FVarId Expr := {}
   blockEnd : Option Expr := none
+  /-- A rule's schema variables are being printed: a call or a `try` whose
+  parts are schema variables is today's of their twins (`fbs`, `ic`,
+  `try call returns (rets) …`). -/
+  schema : Bool := false
 
 abbrev TrM := ReaderT Env MetaM
 
 /-- A position that is no local the term declared. -/
 def unknownVar : Expr := mkApp (mkConst ``Solidity.Var.user) (toExpr "_")
+
+/-- The twin of `e`, when it is a schema variable that has one. -/
+def twin? (e : Expr) : TrM (Option Expr) := do
+  let .fvar fv := (← instantiateMVars e).consumeMData | return none
+  return (← read).twins.get? fv
 
 /-- The name of a position, from the names `ns` the term declared
 (innermost first). -/
@@ -213,6 +234,17 @@ partial def bindersPairs? (bs : Expr) : MetaM (Option (Expr × List Expr)) := do
   let ty := mkApp2 (mkConst ``Prod [levelZero, levelZero]) (mkConst ``PrimTy) (mkConst ``Solidity.Var)
   return some (← mkListLit ty xs.toList, names)
 
+/-- A branch's binders as `bindersPairs?` reads them; a schema variable
+(`rets`) its twin, the `Panic` code's (`code.binders`) today's
+`codeBinders` of its twin, neither naming a local the term reads. -/
+def branchBinders? (bs : Expr) : TrM (Option (Expr × List Expr)) := do
+  if let some x ← twin? bs then return some (x, [])
+  let bs' := (← instantiateMVars bs).consumeMData
+  if bs'.isAppOf ``CodeBinder.binders && bs'.getAppNumArgs > 0 then
+    if let some x ← twin? bs'.appArg! then
+      return some (mkApp (mkConst ``Solidity.codeBinders) x, [])
+  bindersPairs? bs
+
 /-- The length of a context, when it computes. -/
 partial def ctxLength? (Γ : Expr) : MetaM (Option Nat) := do
   let Γ ← whnf Γ
@@ -277,6 +309,11 @@ def withProofHoles (n' : Lean.Name) (xs : Array Expr) : MetaM (Option Expr) := d
     ty := b.instantiate1 a'
   if ← (try Meta.check f; pure true catch _ => pure false) then return some f
   return none
+
+/-- A print-only proof of a call's `hsep`: `Eq.refl true`, not a proof of
+its separation; it prints as `⋯` (proofs are elided) and is no `sorryAx`. -/
+def hsepPlaceholder : Expr :=
+  mkApp2 (mkConst ``Eq.refl [levelOne]) (mkConst ``Bool) (mkConst ``Bool.true)
 
 mutual
 
@@ -365,6 +402,12 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     return mkApp2 (mkConst ``Solidity.Premise.done) args[0]! args[3]!
   if n == ``Stmt.call && args.size == 10 then
     if let some r ← callStmt? ns args then return r
+  -- `expand_function_body(fbs)`: the statements a call of schema variables
+  -- runs, today's `Surface.Stmt.expandBody` of their twins
+  if n == ``Premise.expandCall && args.size ≥ 3 then
+    if let (some as, some ret, some body) :=
+        (← twin? args[args.size - 3]!, ← twin? args[args.size - 2]!, ← twin? args.back!) then
+      return ← mkAppM ``Solidity.Premise.unfold #[← mkAppM ``Solidity.Surface.Stmt.expandBody #[as, ret, body]]
   if n == ``Stmt.tryCall && args.size == 15 then
     if let some r ← tryStmt? ns args then return r
   if n == ``Premise.branches && args.size == 3 then
@@ -374,7 +417,7 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     for b in bs do
       let b ← whnf b
       unless b.isAppOfArity ``Branch.mk 6 do return e
-      let some (xs, names) ← bindersPairs? (b.getArg! 4) | return e
+      let some (xs, names) ← branchBinders? (b.getArg! 4) | return e
       let (ps, _) ← progPieces (names ++ ns) (b.getArg! 5)
       out := out.push (← mkAppM ``Prod.mk #[xs, ← Piece.build c ps])
     let ty := mkApp2 (mkConst ``Prod [levelZero, levelZero]) (pairsTy) (stmtsTy c)
@@ -464,6 +507,11 @@ partial def generic (ns : List Expr) (e : Expr) (n : Lean.Name) : TrM (Option Ex
 read under the return variables and the parameters. -/
 partial def callStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) := do
   let c := args[0]!
+  let hsep := hsepPlaceholder
+  -- KeY's `fbs`/`ic`: a call whose parts are schema variables, today's call
+  -- of their twins (its `hsep` a placeholder: it prints as nothing)
+  if let (some as, some ret, some body) := (← twin? args[7]!, ← twin? args[8]!, ← twin? args[9]!) then
+    return some (mkAppN (mkConst ``Solidity.Surface.Stmt.call) #[c, args[6]!, as, hsep, ret, body])
   let some (as, pNames) ← argsList? ns args[7]! | return none
   let ret ← whnf args[8]!
   let (ret', rNames, pre) ← match ret.getAppFn.constName? with
@@ -485,7 +533,6 @@ partial def callStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) :
     | _ => return none
   let (ps, _) ← progPieces (rNames ++ pNames) args[9]!
   let body ← Piece.build c (pre ++ ps)
-  let hsep := mkApp2 (mkConst ``Eq.refl [levelOne]) (mkConst ``Bool) (mkConst ``Bool.true)
   let argTy := mkApp (mkConst ``Solidity.Arg) c
   return some (mkAppN (mkConst ``Solidity.Surface.Stmt.call)
     #[c, args[6]!, ← mkListLit argTy as.toList, hsep, ret', body])
@@ -495,12 +542,13 @@ it: `ok` read under the returned values, `panic` under the code. -/
 partial def tryStmt? (ns : List Expr) (args : Array Expr) : TrM (Option Expr) := do
   let c := args[0]!
   let some call ← extCall? ns args[8]! | return none
-  let some (rets, rNames) ← bindersPairs? args[9]! | return none
+  let some (rets, rNames) ← branchBinders? args[9]! | return none
   let code ← whnf args[12]!
-  let (code', cNames) ← match code.getAppFn.constName? with
-    | some ``CodeBinder.none => pure (← mkAppOptM ``Option.none #[mkConst ``Solidity.Var], [])
-    | some ``CodeBinder.some => pure (← mkAppM ``Option.some #[code.appArg!], [code.appArg!])
-    | _ => return none
+  let (code', cNames) ← if let some x ← twin? args[12]! then pure (x, []) else
+      match code.getAppFn.constName? with
+      | some ``CodeBinder.none => pure (← mkAppOptM ``Option.none #[mkConst ``Solidity.Var], [])
+      | some ``CodeBinder.some => pure (← mkAppM ``Option.some #[code.appArg!], [code.appArg!])
+      | _ => return none
   let blk (ms : List Expr) (P : Expr) : TrM Expr := do
     let (ps, _) ← progPieces ms P
     Piece.build c ps
@@ -696,18 +744,19 @@ def blockEndName : Lean.Name := `core_block_end
 partial def twinsFrom {α : Type} (fvs : Array FVarId) (i : Nat) (env : Env) (k : Env → MetaM α) :
     MetaM α := do
   let some fv := fvs[i]? | k env
-  match ← legacyType? (← fv.getDecl).type with
+  match ← legacyType? (← fv.getDecl).type env.schema with
   | some ty => withLocalDeclD (← fv.getDecl).userName ty fun x =>
       twinsFrom fvs (i + 1) { env with twins := env.twins.insert fv x } k
   | none => twinsFrom fvs (i + 1) env k
 
 /-- `k` with a twin for every free variable of `e` of a scoped type, and,
-when `frames`, the statement `}` prints as. -/
+when `frames`, the statement `}` prints as; `schema` for a rule's schema
+variables (`Env.schema`). -/
 def withTwins {α : Type} (e : Expr) (frames : Bool) (k : Env → MetaM α)
-    (contract? : Option Expr := none) : MetaM α := do
+    (contract? : Option Expr := none) (schema : Bool := false) : MetaM α := do
   let e ← instantiateMVars e
   let fvs := (collectFVars {} e).fvarIds
-  if !frames then return ← twinsFrom fvs 0 {} k
+  if !frames then return ← twinsFrom fvs 0 { schema } k
   -- the contract, for the type of the `}` statement
   let c? ← match contract? with
     | some c => pure (some c)

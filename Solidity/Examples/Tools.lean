@@ -220,7 +220,8 @@ nor `ic` (calls whose arguments are all simple, `functionBodyExpand`'s and
 info: Solidity.Core.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {f : Name}
   {ps : Core.Ctx} {args : Core.Args C Γ ps} {rs Γ' : Core.Ctx} {ret : Core.CallRet Γ rs Γ'} {Γf : Core.Ctx}
   {body : Core.Prog C (rs ++ ps) Γf} {p : PrimTy} {v : Core.Val C Γ p} {as' : Core.Args C (Core.LTy.val p :: Γ) ps},
-  dl[Core.LeanTaclet C k]{ ⟨[ ‹Core.Stmt.call f args ret body›; ]⟩ ⇝ ⟨[ T se = v; ‹Core.Stmt.call f as' ret body›; ]⟩ }
+  dl[Core.LeanTaclet C k]{ ⟨[ ‹Surface.Stmt.call f args hsep ret body›; ]⟩ ⇝
+    ⟨[ T se = v; ‹Surface.Stmt.call f as' ⋯ ret body›; ]⟩ }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
@@ -232,6 +233,17 @@ info: solkey: ifTrue (concrete_solidity)
 no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 -/
 #guard_msgs in #taclet ifTrue
+
+/-! Every rule prints as a rule line (`#check_rule_text`, `Tools/Taclet.lean`). -/
+
+/--
+info: all 159 rules of `Solidity.Core.Taclet` print as rule lines
+---
+info: all 9 rules of `Solidity.Core.LeanTaclet` print as rule lines
+---
+info: all 3 rules of `Solidity.Core.CallbackTaclet` print as rule lines
+-/
+#guard_msgs in #check_rule_text
 
 /-! A send's labelled goals (`Premise.cases`), and its callback rule; each is
 sound as its premise is the one `Stmt.step` builds (`toStep`). -/

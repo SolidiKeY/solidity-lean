@@ -20,6 +20,8 @@ string), looked up backwards in the table
 (`RuleShapes.tacletOrigins`, `Calculus/RuleShapes.lean`).  A
 scoped taclet is sound as its premise is the one `Stmt.step` builds
 (`Core.Taclet.toStep`), which `Core.Stmt.Sound` makes sound.
+
+`#check_rule_text` checks that every rule prints as a rule line.
 -/
 
 namespace Solidity.Tools
@@ -124,5 +126,50 @@ def withKeyForms {α : Type} (x : TermElabM α) : TermElabM α :=
     | none => logInfo (← keyTacletInfo id.getId.toString)
   | _ => throwUnsupportedSyntax
 
+/-! ## `#check_rule_text`
+
+Every rule prints as a rule line: for each constructor of the three
+families, its conclusion, printed with the notation on (`pp.sol.dl`, and
+`pp.sol.ic` where its side condition makes the call KeY's `ic`), is a
+`dl{ … }` (or `dl[J C k]{ … }`) line in today's KeY text, with no scoped
+term left escaped: no escape `‹…›` mentions `Core.` (`‹Core.…›`,
+`‹(Core.…).snd›`, `‹@Core.…›`).  The constructors whose line does not print
+are listed.  Today's rule table, which the scoped lines were once diffed
+against (`docs/intrinsic.md`, decision 35), is gone; the lines are pinned
+where each rule is shown (`#taclet`, `#check`). -/
+
+/-- The rule line of a constructor: its conclusion, printed on one line. -/
+def ruleLine (c : Lean.Name) : MetaM String := do
+  let ty := (← getConstInfo c).type
+  let ic := (Core.Delab.callSide ty).any (·.isConstOf ``Bool.false)
+  forallTelescope ty fun _ body =>
+    withOptions (fun o => (o.setBool `pp.sol.dl true).setBool `pp.sol.ic ic) do
+      return (← Meta.ppExpr body).pretty 100000
+
+/-- Whether a printed conclusion is a rule line: the judgement's
+delaborator wrote it, and no escape `‹…›` in it mentions `Core.` (a scoped
+term, however parenthesized or explicit; `‹Surface.…›` passes). -/
+def isRuleLine (t : String) : Bool :=
+  t.startsWith "dl" && !((t.splitOn "‹").drop 1).any fun s =>
+    (((s.splitOn "›").headD "").splitOn "Core.").length > 1
+
+/-- The constructors of the family `J` whose line does not print, and how
+many there are in all. -/
+def unprinted (J : Lean.Name) : MetaM (Nat × Array Lean.Name) := do
+  let some (.inductInfo i) := (← getEnv).find? J | throwError "no `{J}`"
+  let mut bad := #[]
+  for c in i.ctors do
+    unless isRuleLine (← ruleLine c) do bad := bad.push c
+  return (i.ctors.length, bad)
+
+/-- `#check_rule_text`: every rule of the three families prints as a rule
+line; the ones that do not, by name. -/
+elab "#check_rule_text" : command => liftTermElabM do
+  for J in ruleFamilies do
+    let (n, bad) ← unprinted J
+    if bad.isEmpty then logInfo m!"all {n} rules of `{J}` print as rule lines"
+    else
+      logInfo m!"{n - bad.size} of {n} rules of `{J}` print as rule lines; not these:\n\
+        {"\n".intercalate (bad.toList.map (·.getString!))}"
 
 end Solidity.Tools
