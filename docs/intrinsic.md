@@ -1156,6 +1156,13 @@ the closer port.
     Under the diamond it asks `U` to return in every state
     (`Upd.totalS`: locals and literals), and refuses otherwise.
 
+**Lead, 2026-10-09 (5):** proposals 78–94 are approved. M6c continues (W7):
+the closer's atoms by position and `Closer` on scoped formulas, the scoped
+update rules and merges given their consumers, the open-program links
+scoped, decision 49's four examples restored, the `⊨` route on the `⊢`
+walk; then `NFml`, `Fml.erase` and `Semantics/Erased.lean` go wherever
+nothing reads them, and what stays is recorded as decision 7's IR.
+
 ## M6c
 
 The closer on `Fml C Γ`, in W6's lanes (each with its gate table and
