@@ -1483,21 +1483,22 @@ theorem canon_reachable (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2
   exact ⟨[], Build.rootsProg C st, o, ho, hst⟩
 
 /-- **Nothing inferable is missing**: a property of storage that holds
-initially and that every program keeps, by the typed run from any state
-whose erasure is well-typed and canonical, holds of every canonical, tight
-storage. -/
+initially and that every program keeps, by the typed run from any typed
+state whose storage is canonical, holds of every canonical, tight storage.
+The typed state is well-typed and its heap canonical by construction
+(`State.erase_wt`, `State.erase_canonHeap`), so the step asks only the
+storage's canonicity, which a typed storage does not give (decision 75). -/
 theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) (P : List (Name × Semantics.SVal) → Prop)
     (hinit : P C.initStorage)
     (hstep : ∀ (Γ' : Ctx) (σ : State C []) (o : Out C σ.H Γ')
-      (prog : Prog C [] Γ'), RunWT C [] σ.erase → Canon C [] σ.erase.glob →
+      (prog : Prog C [] Γ'), CanonStorage C σ.erase.storage →
       prog.run σ = .ok o → P σ.erase.storage → P o.st.erase.storage)
     (st : List (Name × Semantics.SVal)) (hc : CanonStorage C st) (ht : TightStorage C st)
     (hf : FitsStorage C st) : P st := by
   obtain ⟨_, ⟨o, ho, rfl⟩, hst⟩ := storage_tight hnd hok hc ht hf
   rw [← hst]
-  exact hstep _ _ o _ (by rw [Reachable.init_erase]; exact RunWT.init hnd rfl rfl)
-    (by rw [Reachable.init_erase]; exact Canon.init rfl) ho
+  exact hstep _ _ o _ (by rw [Reachable.init_erase]; exact (Canon.init rfl).storage) ho
     (by rw [Reachable.init_erase]; exact hinit)
 
 /-! ## Reachable storages are tight
