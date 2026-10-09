@@ -8,7 +8,7 @@ import Solidity.Calculus.NFmlClose
 What the scoped strategy leaves (`symex`, `Calculus/Step.lean`)
 is closed by today's closer (Decision 6: `Fml.erase` is the bridge until
 the closer is ported): a scoped formula is valid when its erasure is
-(`Valid.of_erase`), and the erasure goes to `Close.lean`'s `sol_close` or to
+(`Valid.of_erase`), and the erasure goes to `NFmlClose.lean`'s `sol_close` or to
 `Derive.proves`, the closer `sol_prove` runs.
 
 A first-order formula reads as its erasure (`holds_erase_fo`); a leaf has
@@ -136,6 +136,33 @@ def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
       else (ih (x :: ns)).bind fun B => if B.contains x then none else some B)
     (bind := fun _ x _ _ ih ns => if ns.contains x then none else (ih (x :: ns)).map (x :: ·))
     (anon := fun _ _ ih ns => ih ns) φ
+
+/-! ## The compiled twins
+
+Each kernel-evaluated check is its compiled twin (Gate G0, condition 2). -/
+
+theorem Upd.freshK_eq_freshM {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) :
+    U.freshK ns = U.freshM ns := by
+  induction U with
+  | nil => rfl
+  | snoc U _ ih | pop U _ ih | drop U _ ih => simp only [Upd.freshM, ← ih]; rfl
+  | decl U x _ ih => simp only [Upd.freshM, ← ih]; rfl
+
+theorem Fml.plainB_eq_plainM {Γ : Ctx} (φ : Fml C Γ) (ns : List Var) :
+    φ.plainB ns = φ.plainM ns := by
+  induction φ generalizing ns with
+  | tt | eq | defined | upd | modal | havoc | bind | anon => simp only [Fml.plainM]; rfl
+  | not φ ih | all x p φ ih => simp only [Fml.plainM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.plainM, ← ihφ, ← ihψ]; rfl
+
+theorem Fml.posB_eq_posM {Γ : Ctx} (φ : Fml C Γ) (ns : List Var) :
+    φ.posB ns = φ.posM ns := by
+  induction φ generalizing ns with
+  | tt | eq | defined | not | modal => simp only [Fml.posM]; rfl
+  | havoc φ ih | anon xs φ ih | upd m U φ ih | all x p φ ih | bind m x t φ ih =>
+    simp only [Fml.posM, ← ih]; rfl
+  | imp a φ _ ih => simp only [Fml.posM, ← ih]; rfl
+  | and φ ψ ihφ ihψ => simp only [Fml.posM, ← ihφ, ← ihψ]; rfl
 
 /-! ## The checks are sound -/
 

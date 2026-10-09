@@ -187,6 +187,14 @@ def Upd.freshB {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
   Upd.rec (motive := fun _ _ => Bool) true (fun _ _ ih => ih)
     (fun U x _ ih => ih && !x.memB (U.names ns)) (fun _ _ ih => ih) (fun _ _ ih => ih) U
 
+/-- `Upd.freshB` is its compiled twin (Gate G0, condition 2). -/
+theorem Upd.freshB_eq_freshBM {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) :
+    U.freshB ns = U.freshBM ns := by
+  induction U with
+  | nil => rfl
+  | snoc U _ ih | pop U _ ih | drop U _ ih => simp only [Upd.freshBM, ← ih]; rfl
+  | decl U x _ ih => simp only [Upd.freshBM, ← ih]; rfl
+
 theorem Upd.freshB_sound {Γ : Ctx} {ns : List Var} {Δ : Ctx} (U : Upd C Γ Δ)
     (h : U.freshB ns = true) : U.Fresh ns := by
   induction U with
@@ -220,6 +228,14 @@ def Fml.foFreshB {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Bool :=
     (havoc := fun _ _ _ => false)
     (all := fun x _ _ ih ns => !x.memB ns && ih (x :: ns))
     (bind := fun _ _ _ _ _ _ => false) (anon := fun _ _ _ _ => false) φ ns
+
+/-- `Fml.foFreshB` is its compiled twin (Gate G0, condition 2). -/
+theorem Fml.foFreshB_eq_foFreshBM {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) :
+    φ.foFreshB ns = φ.foFreshBM ns := by
+  induction φ generalizing ns with
+  | tt | eq | defined | upd | modal | havoc | bind | anon => simp only [Fml.foFreshBM]; rfl
+  | not φ ih | all x p φ ih => simp only [Fml.foFreshBM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.foFreshBM, ← ihφ, ← ihψ]; rfl
 
 theorem Fml.foFreshB_sound {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns : List Var},
     φ.foFreshB ns = true → φ.Plain ns ∧ φ.FO = true := by
@@ -285,6 +301,16 @@ def Fml.bindsB {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Option (List Var) :=
       bif x.memB ns then none
       else (ih (x :: ns)).bind fun B => bif x.memB B then none else some (x :: B))
     (anon := fun _ _ ih ns => ih ns) φ ns
+
+/-- `Fml.bindsB` is its compiled twin (Gate G0, condition 2). -/
+theorem Fml.bindsB_eq_bindsBM {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) :
+    φ.bindsB ns = φ.bindsBM ns := by
+  induction φ generalizing ns with
+  | tt | eq | defined | not | modal => simp only [Fml.bindsBM]; rfl
+  | havoc φ ih | anon xs φ ih | upd m U φ ih | all x p φ ih | bind m x t φ ih =>
+    simp only [Fml.bindsBM, ← ih]; rfl
+  | imp a φ _ ih => simp only [Fml.bindsBM, ← ih]; rfl
+  | and φ ψ ihφ ihψ => simp only [Fml.bindsBM, ← ihφ, ← ihψ]; rfl
 
 /-- `Fml.Closable`, decided: what `Proves.close` asks of the leaf, its
 context in front. -/
