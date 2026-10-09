@@ -798,6 +798,11 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     canonical and tight but no literal writes it.  `Reachable → FitsStorage`
     is not proved here.
 
+**Lead, 2026-10-09 (4):** proposals 54–77 are approved. 75 (store typing
+tied to the typed state), 76 (`Stmt.step` total, behind the Derived9–11
+and ProofTree gates) and 77 (`Reachable → FitsStorage`) are W6 lanes beside
+the closer port.
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
