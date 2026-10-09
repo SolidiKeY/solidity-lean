@@ -4,17 +4,17 @@ import Solidity.Semantics.Core.Storage
 # Typed storage erases to untyped storage
 
 Every typed storage operation (`Semantics/Core/Storage.lean`) erases to its
-untyped namesake in `Semantics.lean`, which is therefore never stuck on an
+untyped namesake in `Semantics.lean`, which is therefore never `undef` on an
 erased input: each lemma reads `untyped op (erase x) = toRes erase (typed op
-x)`, and `toRes` has no `stuck`.  This is the storage half of the typed
-run's bridge to the scoped one (`docs/intrinsic.md`, M4b).
+x)`, and `toRes` has no `undef`.  This is the storage half of a typed step
+read on the erasure (`Semantics/Core/TypedStepErase.lean`, M4b).
 
 A struct is copied member by member in order (solc), and the untyped
 `overlay` looks each member up by name, which agrees because a struct's
 members have distinct names (`structDef_nodup`: solc refuses a struct that
 repeats one, and so does the elaborator, decision 16).
 
-`copyStToM` is never stuck on a type without mappings (`SVal.copyStToM_ok`),
+`copyStToM` is never `undef` on a type without mappings (`SVal.copyStToM_ok`),
 and `SVal.ofU` reads an untyped value back at its type.  The typed copies
 between storage and memory are `Semantics/Core/Heap.lean`'s.
 -/
@@ -795,7 +795,7 @@ theorem popAt_erase (hs : σ.storage = st.erase) {E : Ty} (keep : Bool)
         rw [hnew, saveStorage_erase hs]
         with_unfolding_all rfl
 
-/-- `delete b` on storage, as `Stmt.run` writes it: the value found, reset,
+/-- `delete b` on storage, as the untyped operations write it: the value found, reset,
 saved. -/
 theorem delete_erase (hs : σ.storage = st.erase) {T : Ty} (r : SRef C T) :
     (do
@@ -835,7 +835,7 @@ end Storage
 
 /-! ## Copies, and untyped values read back
 
-Storage to memory copies the erasure without getting stuck on a type without
+Storage to memory copies the erasure without an `undef` on a type without
 mappings; an untyped value reads back at its type (`SVal.ofU`) exactly when
 it has that type's shape. -/
 

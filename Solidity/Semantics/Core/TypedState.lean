@@ -14,10 +14,10 @@ type.  An allocation grows the heap (`TState.adopt`, from a `Grown` heap)
 and weakens the locals along the extension (`TEnv.wk`), which only rewrites
 a memory local's proof: the identities stay, so the erasure does too.
 
-`TState.erase` is `Core.State` of the same run, so each operation's
+`TState.erase` is the `Core.State` the closer reads, so each operation's
 agreement is one lemma here (`TState.adopt_erase`, `TState.copyStToM_erase`,
-…), the steps of the typed run's bridge to the scoped one
-(`Semantics/Core/TypedRunErase.lean`).
+…), from which each typed step's erasure follows
+(`Semantics/Core/TypedStepErase.lean`).
 -/
 
 namespace Solidity.Core

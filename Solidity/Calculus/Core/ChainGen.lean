@@ -47,9 +47,9 @@ def generate (φ : Expr) : TermElabM Gen := do
         | none => pure ""
       catch _ => pure ""
     steps := steps.push (n, l.fml, l.erased)
-  if run.stuck then
+  if run.modalStop then
     return { splice := run.splice, erased := run.erased, steps, rewrites := #[],
-             stop := some (stuckNote run) }
+             stop := some (modalStopNote run) }
   if steps.size ≥ runFuel then
     return { splice := run.splice, erased := run.erased, steps, rewrites := #[],
              stop := some m!"the strategy ran {runFuel} steps: go on from the last line" }

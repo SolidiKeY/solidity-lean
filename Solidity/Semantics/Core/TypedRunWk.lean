@@ -298,7 +298,7 @@ end TState
 
 /-! ## Frames, run -/
 
-/-- What the frames after a program do (`Frames.run`, typed): the rest run,
+/-- What the frames after a program do: the rest run,
 a scope's locals popped or thinned, the heap's growth carried. -/
 def Frames.trun {Γ₀ : Ctx} : {Γ : Ctx} → (σ : TState C Γ) → Frames C Γ Γ₀ → TRes (Out C σ.H Γ₀)
   | _, σ, .nil => .ok ⟨σ, List.prefix_refl _⟩

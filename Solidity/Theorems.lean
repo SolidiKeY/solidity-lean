@@ -223,7 +223,7 @@ still represents, or both revert (a panic, a failed `assert`, is solc's
 revert with `Panic(0x01)` data), or the world refuses a payment the program
 makes and the machine alone reverts.  `L` bounds every array's length, which
 solc caps at `2^64`.  There is no fourth case: on the fragment the typed run
-neither diverges nor is exhausted, and the typed run has no stuck state. -/
+neither diverges nor is exhausted, and the typed run halts in no other way. -/
 theorem compiler_correct {P : Core.Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : Core.TState C Γ}
     {mc : Machine} {L b : Nat}
     (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax) :

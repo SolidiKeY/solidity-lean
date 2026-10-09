@@ -78,7 +78,7 @@ def _root_.Solidity.Semantics.State.valueOf (σ : State) (x : Var) : Option Valu
 /-- A run's outcome. -/
 def fmtHalt : Halt → String
   | .revert => "revert"
-  | .stuck => "stuck (the program is outside the interpreter's typing)"
+  | .undef => "undef (an ill-sorted state, outside the typing)"
   | .panic => "panic (an `assert` failed)"
   | .diverge => "diverge (a loop that never ends)"
 

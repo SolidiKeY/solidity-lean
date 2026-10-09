@@ -6,7 +6,7 @@ import Solidity.Semantics.Core.Heap
 Every typed heap operation (`Semantics/Core/Heap.lean`) agrees with its
 untyped namesake in `Semantics.lean` on a state whose heap is the erasure
 (`σ.heap = hp.erase`, and `σ.nextId = H.length` where it allocates), which is
-therefore never stuck there: `getObj` finds every object, an allocation lands
+therefore never `undef` there: `getObj` finds every object, an allocation lands
 at the next position, `copyStToM` allocates the same objects in the same
 order, and `copyMToSt` never runs out of unvisited identities, since a
 reference's target has a smaller type (`RemOk`), so the cycle guard
@@ -419,7 +419,7 @@ theorem MVal.copyBelow_erase (hh : σ.heap = hp.erase) : (k : Nat) → (T : Ty) 
     MVal.copyAt_erase hh k (MVal.copyBelow hp k) (fun T h v rem hr =>
       MVal.copyBelow_erase hh k T h v rem hr) T h v rem hr
 
-/-- `copyMem` on the erasure: the typed copy, never stuck. -/
+/-- `copyMem` on the erasure: the typed copy, never `undef`. -/
 theorem MVal.copyMem_erase (hh : σ.heap = hp.erase) {T : Ty} (v : MVal H T) :
     Semantics.copyMem σ (MVal.erase T v) = .ok (v.copyMToSt hp).erase := by
   unfold Semantics.copyMem
@@ -518,12 +518,12 @@ theorem readField_erase (hh : σ.heap = hp.erase) {s f : Name} {T : Ty}
       | .struct fields =>
         match lookupBy f fields with
         | some v => pure v
-        | none => .error .stuck
-      | .array _ _ => .error .stuck : Semantics.Res Semantics.MVal) =
+        | none => .error .undef
+      | .array _ _ => .error .undef : Semantics.Res Semantics.MVal) =
       .ok (MVal.erase T (hp.field r h)) := by
   simp only [getObj_erase hh r, bind, Except.bind]
   show (match lookupBy f (MFields.erase (structDef s) (hp.get r)) with
-    | some v => pure v | none => .error .stuck : Semantics.Res Semantics.MVal) = _
+    | some v => pure v | none => .error .undef : Semantics.Res Semantics.MVal) = _
   rw [MFields.lookupBy_erase (structDef s) (hp.get r) h]
   rfl
 
@@ -536,7 +536,7 @@ theorem readIndex_erase (hh : σ.heap = hp.erase) {R : RefTy} {E : Ty}
       | .array elems _ =>
         if h : 0 ≤ i ∧ i.toNat < elems.length then pure (elems.get ⟨i.toNat, h.2⟩)
         else .error .revert
-      | .struct _ => .error .stuck : Semantics.Res Semantics.MVal) =
+      | .struct _ => .error .undef : Semantics.Res Semantics.MVal) =
       toRes (MVal.erase E) (hp.index r a i) := by
   simp only [getObj_erase hh r, bind, Except.bind, MObj.erase_arr a (hp.get r), Heap.index]
   by_cases h0 : 0 ≤ i

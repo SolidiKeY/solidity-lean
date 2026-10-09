@@ -11,12 +11,12 @@ no goal left the function is proved, and the command offers the theorem
 as a suggestion (`Try this:`; a click replaces the `#verify C.f` with it;
 `#verify C` prints it as text).  Otherwise it searches for a counterexample (`refuteSpec`,
 `Counterexample.lean`): one found refutes the specification, certified if
-the kernel checked it; none found leaves the function stuck, with the goals
+the kernel checked it; none found leaves the function open (`gaveUp`), with the goals
 `sol_spec_try` could not close.  `#verify C` does so for every function of
 `C` with an obligation.
 
 Each function runs under the ambient `maxHeartbeats`, counted from its own
-start; running out is reported as stuck, not as a failure of the command.
+start; running out is reported as `gaveUp`, not as a failure of the command.
 A verdict is only as strong as its word: `✓` is a proof the kernel checked
 (and no `sorry` in it), `✗ (certified)` a kernel-checked `¬ ⊨ spec[C]{f}` of
 the scoped obligation, `✗ (tested)` a state in which the typed run runs the
@@ -35,7 +35,7 @@ inductive Verdict where
   it fails. -/
   | refuted (r : Refutation)
   /-- The goals `sol_spec_try` left, and why there are none if it gave up. -/
-  | stuck (goals : List MVarId) (note : String := "")
+  | gaveUp (goals : List MVarId) (note : String := "")
   | error (msg : String)
 
 /-- An exception's message, its first line. -/
@@ -66,7 +66,7 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
   let res ← tryCatchRuntimeEx (withCurrHeartbeats run) fun e => do pure (.error (← errText e))
   match res with
   | .ok [] =>
-    if (← instantiateMVars goal).hasSorry then return .stuck [] "the proof contains `sorry`"
+    if (← instantiateMVars goal).hasSorry then return .gaveUp [] "the proof contains `sorry`"
     return .proved
   | _ =>
     let gs := match res with
@@ -78,7 +78,7 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
     match ← withCurrHeartbeats (refuteSpec n C f) with
     | .error msg => return .error msg
     | .ok (_, some r) => return .refuted r
-    | .ok (_, none) => return .stuck gs note
+    | .ok (_, none) => return .gaveUp gs note
 
 /-- The theorem a proved `f` of the contract `c` is: the scoped obligation
 `#verify` proved, written `⊨ spec[C]{f}` where `open scoped
@@ -94,8 +94,8 @@ def Verdict.report (C : Contract) (c : Lean.Name) (f : String) (inScope : Bool) 
     Verdict → MetaM MessageData
   | .proved => pure m!"✓ {f}\n{provedTheorem c f inScope}"
   | .refuted r => pure (reportMsg (r.head f) (r.lines C))
-  | .stuck [] note => pure m!"? {f}: gave up: {note}"
-  | .stuck (g :: gs) _ =>
+  | .gaveUp [] note => pure m!"? {f}: gave up: {note}"
+  | .gaveUp (g :: gs) _ =>
     pure m!"? {f}: {gs.length + 1} goals left, the first:\n{MessageData.ofGoal g}"
   | .error msg => pure m!"! {f}: {msg}"
 

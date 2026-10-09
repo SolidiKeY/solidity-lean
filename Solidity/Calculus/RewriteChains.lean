@@ -946,7 +946,7 @@ def rwSelect (C φ ψ : Lean.Expr) (n : String) (rs : Array Lean.Expr)
   let ψ ← instantiateMVars ψ
   let (qs, parts) ← rwResults C φ rs
   let mut gives := #[]
-  let mut stuck := false
+  let mut unknownCtx := false
   for (r, q?) in rs.toList.zip qs do
     let some q := q? | continue
     let st ← saveState
@@ -956,10 +956,10 @@ def rwSelect (C φ ψ : Lean.Expr) (n : String) (rs : Array Lean.Expr)
       continue
     let mut pf := none
     if φ.hasFVar then
-      let some p ← rwProof C r φ q | stuck := true; st.restore; continue
+      let some p ← rwProof C r φ q | unknownCtx := true; st.restore; continue
       pf := some p
     return (r, q, pf)
-  if stuck then
+  if unknownCtx then
     throwError "~[{n}]~>: on{indentExpr φ}\nit looks at the line's modality or postcondition, \
       which are not known: state the line for a concrete one"
   if !gives.isEmpty then

@@ -21,7 +21,7 @@ What the types settle:
   callee has none of the contract's locals.  A formula's reading
   (`Fml C []`) is one such invariant once the formulas are read on typed
   states.
-* **No stuck arms, no failed entries**: a condition is a `Bool`
+* **No `undef` arms, no failed entries**: a condition is a `Bool`
   (`Val.evalT`), a call's frame is always entered (`CallRet.enterT`), and a
   `try`'s call is always made (`ExtCall.keyT`).
 * **The heap only grows**: an outcome carries the extension of the heap

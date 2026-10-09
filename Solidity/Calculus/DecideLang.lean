@@ -92,7 +92,7 @@ def _root_.Solidity.Semantics.SVal.saveLive : SVal → List Seg → SVal → Res
       | some old => do
           let updated ← old.saveLive rest new
           .ok (.struct (setBy name updated fields))
-      | none => .error .stuck
+      | none => .error .undef
   | .array elems shadow fx, .at i :: rest, new =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then do
         let updated ← (elems.get ⟨i.toNat, h.2⟩).saveLive rest new
@@ -106,10 +106,10 @@ def _root_.Solidity.Semantics.SVal.saveLive : SVal → List Seg → SVal → Res
       | none => do
           let updated ← dflt.saveLive rest new
           .ok (.map (setBy i updated entries) dflt)
-  | .prim _, _ :: _, _ => .error .stuck
-  | .struct _, .at _ :: _, _ => .error .stuck
-  | .array _ _ _, .field _ :: _, _ => .error .stuck
-  | .map _ _, .field _ :: _, _ => .error .stuck
+  | .prim _, _ :: _, _ => .error .undef
+  | .struct _, .at _ :: _, _ => .error .undef
+  | .array _ _ _, .field _ :: _, _ => .error .undef
+  | .map _ _, .field _ :: _, _ => .error .undef
 
 /-- A live write is read back live: `balances[k] = 5;` then `balances[k]` is `5`. -/
 theorem findLive_saveLive_same {old new updated : SVal} {path : List Seg}
@@ -312,7 +312,7 @@ def AOp.apply : AOp → Value → SVal → Res SVal
     | [] => .error .revert
     | last :: restRev =>
       .ok (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
-  | _, _, .prim _ | _, _, .struct _ | _, _, .map _ _ => .error .stuck
+  | _, _, .prim _ | _, _, .struct _ | _, _, .map _ _ => .error .undef
 
 /-- A write at the slot-level path `qs` of `v`, past the live length too, as
 KeY's plain `save` is: the word `w` (`none`), or `op` on the node there.  A
@@ -448,7 +448,7 @@ def isMapV : SVal → Bool
   | _ => false
 
 /-- A mapping returns `true`, anything else halts. -/
-def kmapF (n : SVal) : Res Value := if isMapV n then .ok (.bool true) else .error .stuck
+def kmapF (n : SVal) : Res Value := if isMapV n then .ok (.bool true) else .error .undef
 
 /-- The value is a fixed-size array (marked, `SVal.array`'s `fixed`). -/
 def isFixV : SVal → Bool
@@ -458,7 +458,7 @@ def isFixV : SVal → Bool
 /-- A value of the shape returns `true`, anything else halts. -/
 def KShape.test : KShape → SVal → Res Value
   | .map, n => kmapF n
-  | .fixed, n => if isFixV n then .ok (.bool true) else .error .stuck
+  | .fixed, n => if isFixV n then .ok (.bool true) else .error .undef
 
 /-- `a`'s value, or `b`'s where `a` halts. -/
 def orElseR (a b : Res Value) : Res Value :=
@@ -480,7 +480,7 @@ object. -/
 def LId.evalR (B : MemNames.Births) (i : LId) : Res Nat :=
   match B.eval i.root i.path with
   | some n => .ok n
-  | none => .error .stuck
+  | none => .error .undef
 
 mutual
 
@@ -504,7 +504,7 @@ def LTerm.eval (σ : State) : LTerm → Res Value
     (a.eval σ >>= Value.asInt) >>= fun i => (b.eval σ >>= Value.asInt) >>= fun j =>
       if i = j then t.eval σ else e.eval σ
   | .zero a => a.eval σ >>= fun v => .ok (zeroV v)
-  | .err => .error .stuck
+  | .err => .error .undef
   | .env k => .ok (.int (σ.envVal k))
   | .findP s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.find qs >>= SVal.asValue
   | .cpok s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun sv =>
@@ -542,18 +542,18 @@ def LMem.run (σ : State) : LMem → Res (State × MemNames.Births)
   | .addM m k R => m.run σ >>= fun r =>
       if k = r.2.length then
         allocDefault r.1 R >>= fun a => .ok (a.1, r.2 ++ [MemNames.Birth.ofCopy r.1 a.1 a.2])
-      else .error .stuck
+      else .error .undef
   | .newArr m k R n => n.eval σ >>= Value.asInt >>= fun c => m.run σ >>= fun r =>
       if k = r.2.length then
         copyStToM r.1 (newArrVal R c) >>= fun a => a.2.asRef >>= fun id =>
           .ok (a.1, r.2 ++ [MemNames.Birth.ofCopy r.1 a.1 id])
-      else .error .stuck
+      else .error .undef
   | .copySt m k s q => s.eval σ >>= fun v => q.eval σ >>= fun qs => v.findLive qs >>= fun sv =>
       m.run σ >>= fun r =>
       if k = r.2.length then
         copyStToM r.1 sv >>= fun a => a.2.asRef >>= fun id =>
           .ok (a.1, r.2 ++ [MemNames.Birth.ofCopy r.1 a.1 id])
-      else .error .stuck
+      else .error .undef
   | .write m i a v => m.run σ >>= fun r => LId.evalR r.2 i >>= fun n => a.addr σ n >>= fun ad =>
       v.eval σ r.2 >>= fun mv => writeAddr r.1 mv ad >>= fun μ => .ok (μ, r.2)
 
@@ -561,7 +561,7 @@ def LMem.run (σ : State) : LMem → Res (State × MemNames.Births)
 def LSel.addr (σ : State) (n : Nat) : LSel → Res Addr
   | .fld f => .ok (.memoryField n f)
   | .idx t => t.eval σ >>= Value.asInt >>= fun j => .ok (.memoryIndex n j)
-  | .size => .error .stuck
+  | .size => .error .undef
 
 /-- The slot a memory value fills, its names read in the births `B`. -/
 def LMV.eval (σ : State) (B : MemNames.Births) : LMV → Res MVal

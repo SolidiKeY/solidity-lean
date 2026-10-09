@@ -287,7 +287,7 @@ theorem build_findLive {o : List Seg → Obs} {Ks : List (List Seg)} (hc : Prefi
             simp [SVal.findLive, obsOf, this]
         · simp only [ChildOk, hl, if_false] at hk
           have : (SVal.array ((List.range n).map fun i => build o Ks d (P ++ [.at (i : Int)])) []
-              fx).findLive (.field f :: rest) = .error .stuck := by
+              fx).findLive (.field f :: rest) = .error .undef := by
             by_cases hf : f = "length"
             · subst hf
               have : fx = true := by cases fx <;> simp_all
@@ -372,23 +372,23 @@ state it is `LTerm.eval` (`LTerm.evalA_sim`). -/
 /-- The word a location shows. -/
 def Obs.find : Obs → Res Value
   | .word v => .ok v
-  | _ => .error .stuck
+  | _ => .error .undef
 
 /-- Whether a location is there. -/
 def Obs.has : Obs → Res Value
-  | .absent => .error .stuck
+  | .absent => .error .undef
   | _ => .ok (.bool true)
 
 /-- The length of an array. -/
 def Obs.len : Obs → Res Value
   | .arr n _ => .ok (.int n)
-  | _ => .error .stuck
+  | _ => .error .undef
 
 /-- Whether a location is a mapping (a fixed-size array). -/
 def Obs.test : KShape → Obs → Res Value
   | .map, .map => .ok (.bool true)
   | .fixed, .arr _ true => .ok (.bool true)
-  | _, _ => .error .stuck
+  | _, _ => .error .undef
 
 mutual
 
@@ -415,7 +415,7 @@ def LTerm.evalA (E : Var → Res Value) (o : List Seg → Obs) : LTerm → Res V
       if i = j then t.evalA E o else e.evalA E o
   | key{ delValue(a) } => a.evalA E o >>= fun v => .ok (zeroV v)
   | .err | .env _ | .findP _ _ | .find _ _ | .has _ _ | .kmap _ _ _ | .len _ _ | .sok _
-  | .cpok _ _ => .error .stuck
+  | .cpok _ _ => .error .undef
 
 /-- A path over the locals `E` and the reads `o`. -/
 def LPath.evalA (E : Var → Res Value) (o : List Seg → Obs) : LPath → Res (List Seg)
@@ -1003,7 +1003,7 @@ theorem LTerm.evalA_kite (a b t e : LTerm) : (LTerm.kite a b t e).evalA E o =
       if i = j then t.evalA E o else e.evalA E o := rfl
 theorem LTerm.evalA_zero (a : LTerm) :
     (LTerm.zero a).evalA E o = a.evalA E o >>= fun v => .ok (zeroV v) := rfl
-theorem LTerm.evalA_err : LTerm.err.evalA E o = .error .stuck := rfl
+theorem LTerm.evalA_err : LTerm.err.evalA E o = .error .undef := rfl
 theorem LTerm.evalA_var (x : Var) : (LTerm.var x).evalA E o = E x := rfl
 end
 

@@ -24,7 +24,7 @@ of `Semantics/Core/Storage.lean`, so the kernel reduces it) needs a type
 without mappings and cannot fail, and `MVal.copyMToSt` (memory to
 storage) recurses on the type, by rank (fuel `rankBound`, which reads no
 struct name) and inside one rank structurally, as `SVal.dflt` does: a reference's target has a smaller type, so there is no
-cycle to guard against and no stuck arm.
+cycle to guard against and no `undef` arm.
 
 The untyped heap is the erasure: object `i` at key `i`, `nextId` the length
 of the typing (`Semantics/Core/HeapErase.lean` proves the agreement).

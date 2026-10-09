@@ -49,7 +49,7 @@ inductive Modality where
   | box
   deriving DecidableEq, Repr, Inhabited, Lean.ToExpr
 
-/-- What a modality says of a run that reverts (or is stuck): every box
+/-- What a modality says of a run that reverts (or is `undef`): every box
 formula holds of it, no diamond formula does. -/
 def Modality.onHalt : Modality → Prop
   | .diamond => False
@@ -345,14 +345,14 @@ def readAddr (σ : State) : Addr → Res MVal
     | .struct fields =>
       match lookupBy f fields with
       | some v => pure v
-      | none => .error .stuck
-    | .array _ _ => .error .stuck
+      | none => .error .undef
+    | .array _ _ => .error .undef
   | .memoryIndex id i => do
     match ← σ.getObj id with
     | .array elems _ =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then pure (elems.get ⟨i.toNat, h.2⟩)
       else .error .revert
-    | .struct _ => .error .stuck
+    | .struct _ => .error .undef
 
 /-- What a term of each sort reads to in the interpreter. -/
 @[reducible] def Srt.Ev : Srt → Type
@@ -381,7 +381,7 @@ def Op1.eval (σ : State) : Op1 a s → a.Ev → s.Ev
   | .netOf x, ra => do
     match ← σ.getEnv x with
     | .ledger l => pure (.int ((lookupBy (← (← ra).asInt) l).getD 0))
-    | .val _ | .spath .. | .mref _ | .store _ | .unset => .error .stuck
+    | .val _ | .spath .. | .mref _ | .store _ | .unset => .error .undef
   | .delValue, ra => do pure (Theory.StValue.primDefault (← ra))
   | .field f, rp => do
     let (r, segs) ← rp
@@ -390,12 +390,12 @@ def Op1.eval (σ : State) : Op1 a s → a.Ev → s.Ev
     let (r, segs) ← rp
     match ← σ.findStorage r segs with
     | .array elems _ _ => pure (r, segs ++ [.at elems.length])
-    | .prim _ | .struct _ | .map _ _ => .error .stuck
+    | .prim _ | .struct _ | .map _ _ => .error .undef
   | .select r, rs => do
     let τ ← rs
     match ← τ.findStorage r [] with
     | .struct fields => pure { τ with storage := fields }
-    | .prim _ | .array .. | .map .. => .error .stuck
+    | .prim _ | .array .. | .map .. => .error .undef
   | .sval, rt => do pure (← rt).toSVal
   | .newArr R, rn => do pure (newArrVal R (← (← rn).asInt))
   | .alloc R, rm => do
@@ -409,7 +409,7 @@ def Op1.eval (σ : State) : Op1 a s → a.Ev → s.Ev
   | .ref, ri => do pure (.ref (← ri))
   | .wt vs, rs => do
     let τ ← rs
-    if storageWtB vs τ.storage then pure (.bool true) else .error .stuck
+    if storageWtB vs τ.storage then pure (.bool true) else .error .undef
 
 /-- A binary symbol read in `σ`, its arguments' readings given. -/
 def Op2.eval (σ : State) : Op2 a b s → a.Ev → b.Ev → s.Ev
@@ -438,7 +438,7 @@ def Op2.eval (σ : State) : Op2 a b s → a.Ev → b.Ev → s.Ev
     let (r, segs) ← rp
     match ← τ.findStorage r segs with
     | .array elems _ _ => pure (r, segs ++ [.at elems.length])
-    | .prim _ | .struct _ | .map _ _ => .error .stuck
+    | .prim _ | .struct _ | .map _ _ => .error .undef
   | .delAt, rs, rp => do
     let τ ← rs
     let (r, segs) ← rp
@@ -511,17 +511,17 @@ def Tm.eval (σ : State) : Tm C s → s.Ev
   | .pvV x => do
     match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .undef
   | .pvP x => aliasPath σ x
   | .pvS x => do
     match ← σ.getEnv x with
     | .store st => pure { σ with storage := st }
-    | .val _ | .spath .. | .mref _ | .ledger _ | .unset => .error .stuck
+    | .val _ | .spath .. | .mref _ | .ledger _ | .unset => .error .undef
   | .pvI x => do
     match ← σ.getEnv x with
     | .mref id => pure id
     | .unset => .error .revert
-    | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
+    | .val _ | .spath .. | .store _ | .ledger _ => .error .undef
   | .app0 o => o.eval σ
   | .app1 o a => o.eval σ (a.eval σ)
   | .app2 o a b => o.eval σ (a.eval σ) (b.eval σ)
@@ -557,7 +557,7 @@ open Theory Theory.StValue
 /-- A Theory value as an interpreter result: a primitive, or a halt. -/
 def Theory.StValue.toRes : StValue → Res Value
   | .prim p => .ok p
-  | .st _ => .error .stuck
+  | .st _ => .error .undef
 
 /-- An interpreter result as a Theory value: a halt reads as nothing. -/
 def Res.toSt : Res Value → StValue

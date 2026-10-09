@@ -2,36 +2,30 @@ import Solidity.Typing.State
 import Solidity.Semantics.Core
 
 /-!
-# Type soundness: a scoped run keeps the state well-typed
+# Type soundness on the erasure: the evaluators are typed
 
 The typed syntax rules out every *static* mismatch: a member exists, an
 operator takes its operand, a copy holds no mapping, a pushed default is
 well-formed, and, since the scoped syntax (`Syntax/Core.lean`), a local is a
-position in a context `Γ`, read and written at the type `Γ` gives it.  So
-the theorem has no locals judgement to assume (the old `Stmt.wt`): what a
-run must keep is that the values are of their types.
+position in a context `Γ`, read and written at the type `Γ` gives it.  The
+typed run (`Semantics/Core/TypedRun.lean`) rules out the dynamic ones: its
+states hold values of their types, so their erasure is well-typed by
+construction (`TState.erase_wt`, `Typing/TypedWT.lean`).
 
-`RunWT C H σ` is the invariant: the global part `StateWT`
-(`Typing/State.lean`: storage inhabits `C`'s layout, the heap the store
-typing `H`, the allocation counter is fresh) and every local of its type
-(`LTy.WT`: a number in a `uint` local, a path the layout types at an
-alias's type, an identity `H` claims at a memory local's type).  The locals
-part is still a predicate because values, storage and heap are untyped until
-`docs/intrinsic.md`'s M4.
-
-The headline is `Stmt.run_wt`/`Prog.run_wt`: a statement run from a
-`RunWT` state ends, if it ends in a state, in a `RunWT` state under a store
-typing that only grew (a memory allocation adds claims).  A halt (`revert`,
-`stuck`) is a run the theorem says nothing about, as there is no state to
-type.
-
-The proof goes one evaluator at a time, in the order `Semantics.lean`
-defines them: the paths resolve to a place the layout types at the path's
-type (`Loc.resolve_wt`), the memory reads find a slot of the path's type
-(`MLoc.read_wt`), a value evaluates to one of its type (`Val.eval_wt`),
-and each statement's write stores what the place holds.  The scopes only
-push and pop locals, so they keep any invariant of this shape
-(`RunInv`), which `Reachability.lean` and `Constructibility.lean` reuse.
+`RunWT C H σ` is that invariant on an erased state: the global part
+`StateWT` (`Typing/State.lean`: storage inhabits `C`'s layout, the heap the
+store typing `H`, the allocation counter is fresh) and every local of its
+type (`LTy.WT`: a number in a `uint` local, a path the layout types at an
+alias's type, an identity `H` claims at a memory local's type).  What is
+proved here is what the closer and the other invariants read of it: the
+erasure's evaluators (`Semantics/Core.lean`) find values of their types —
+the paths resolve to a place the layout types at the path's type
+(`Loc.resolve_wt`), the memory reads find a slot of the path's type
+(`MLoc.read_wt`), a value evaluates to one of its type (`Val.eval_wt`) —
+and each statement's write on the global part stores what the place holds.
+`RunInv` is the shape of an invariant with a part on the global state and
+one on each local, which `Typing/TypedRunInv.lean` carries along the typed
+run and `Reachability.lean` and `Constructibility.lean` instantiate.
 -/
 
 namespace Solidity
@@ -741,16 +735,13 @@ theorem CallRet.leave_all {P : (t : LTy) → t.Denote C → Prop} {Γ rs Γ' : C
   | rets bs => exact Env.All.append _ hr he
   | mem R x hd hm => exact ⟨hr.1, he⟩
 
-/-! ## Invariants of scoped runs
+/-! ## Invariants of runs
 
 What a run keeps is a part on the global state and a part on each local,
-the latter kept as the store typing grows.  The scopes (a branch, a block,
-a loop's iteration, a call's frame, a `try`'s clause) only push and pop
-locals, so they keep any such invariant once their sub-programs do; the
-statements without sub-programs are each invariant's own (`Stmt.run_wt`,
-`Stmt.run_canon`, `Stmt.run_tight`). -/
+the latter kept as the store typing grows (`Typing/TypedRunInv.lean` carries
+it along the typed run). -/
 
-/-- An invariant of scoped runs: a part on the global state, a part on each
+/-- An invariant of runs: a part on the global state, a part on each
 local, kept as the store typing `H` grows, and blind to the locals. -/
 structure RunInv (C : Contract) where
   glob : HeapTy → Semantics.State → Prop
@@ -768,8 +759,9 @@ variable (I : RunInv C)
 def Holds {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
   I.glob H σ.glob ∧ Env.All (I.loc H) σ.env
 
-/-- A run keeps the invariant: from a state it holds of, it ends, if in a
-state, in one it holds of under a store typing that only grew. -/
+/-- A step on erased states keeps the invariant: from a state it holds of,
+it ends, if in a state, in one it holds of under a store typing that only
+grew (what a typed leaf erases to, `RunInv.TKeeps.of_agrees`). -/
 def Keeps {Γ Γ' : Ctx} (f : State C Γ → Res (State C Γ')) : Prop :=
   ∀ (H : HeapTy) (σ : State C Γ) (σ' : State C Γ'), I.Holds H σ → f σ = .ok σ' →
     ∃ H', H.Extends H' ∧ I.Holds H' σ'
@@ -787,177 +779,6 @@ theorem Holds.withEnv {Γ Δ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.Holds 
 theorem Holds.drop {Γ Δ : Ctx} {H : HeapTy} {σ : State C Δ} (h : I.Holds H σ) (x : Ext Γ Δ) :
     I.Holds H (σ.drop x) :=
   ⟨h.1, Env.All.drop x h.2⟩
-
-theorem Keeps.drop {Γ Δ Δ' : Ctx} {f : State C Γ → Res (State C Δ)} (hf : I.Keeps f)
-    (x : Ext Δ' Δ) : I.Keeps (fun σ => (f σ).map (State.drop x)) := by
-  intro H σ σ' hσ h
-  have h : (f σ).map (State.drop x) = .ok σ' := h
-  cases hr : f σ with
-  | error e => rw [hr] at h; exact nomatch h
-  | ok τ =>
-    rw [hr] at h
-    cases h
-    obtain ⟨H', hext, hτ⟩ := hf H σ τ hσ hr
-    exact ⟨H', hext, hτ.drop x⟩
-
-theorem keeps_seq {Γ Γ₁ Γ₂ : Ctx} {s : State C Γ → Res (State C Γ₁)}
-    {P : State C Γ₁ → Res (State C Γ₂)} (hs : I.Keeps s) (hP : I.Keeps P) :
-    I.Keeps (Run.seq s P) := by
-  intro H σ σ' hσ h
-  unfold Run.seq at h
-  split at h
-  · rename_i τ hτ
-    obtain ⟨H₁, hext₁, h₁⟩ := hs H σ τ hσ hτ
-    obtain ⟨H₂, hext₂, h₂⟩ := hP H₁ τ σ' h₁ h
-    exact ⟨H₂, hext₁.trans hext₂, h₂⟩
-  · exact nomatch h
-
-theorem keeps_nil {Γ : Ctx} : I.Keeps (pure : State C Γ → Res (State C Γ)) := by
-  intro H σ σ' hσ h
-  cases h
-  exact ⟨H, .refl H, hσ⟩
-
-theorem keeps_ite {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (h₁ : Ext Γ Γ₁)
-    {thn : State C Γ → Res (State C Γ₁)} (h₂ : Ext Γ Γ₂) {els : State C Γ → Res (State C Γ₂)}
-    (hthn : I.Keeps thn) (hels : I.Keeps els) : I.Keeps (Run.ite c h₁ thn h₂ els) := by
-  intro H σ σ' hσ h
-  unfold Run.ite at h
-  obtain ⟨cv, _, h⟩ := bind_ok_inv h
-  split at h
-  · exact hthn.drop h₁ H σ σ' hσ h
-  · exact hels.drop h₂ H σ σ' hσ h
-  · exact nomatch h
-
-theorem keeps_block {Γ Γ₁ : Ctx} (x : Ext Γ Γ₁) {body : State C Γ → Res (State C Γ₁)}
-    (hb : I.Keeps body) : I.Keeps (Run.block x body) :=
-  hb.drop x
-
-theorem keeps_require {Γ : Ctx} (c : Val C Γ .bool) :
-    I.Keeps (fun σ => do guardOk (← c.eval σ) σ) := by
-  intro H σ σ' hσ h
-  obtain ⟨cv, _, h⟩ := bind_ok_inv h
-  unfold guardOk at h
-  split at h
-  · cases h; exact ⟨H, .refl H, hσ⟩
-  · exact nomatch h
-  · exact nomatch h
-
-theorem keeps_assert {Γ : Ctx} (c : Val C Γ .bool) :
-    I.Keeps (fun σ => do assertOk (← c.eval σ) σ) := by
-  intro H σ σ' hσ h
-  obtain ⟨cv, _, h⟩ := bind_ok_inv h
-  unfold assertOk at h
-  split at h
-  · cases h; exact ⟨H, .refl H, hσ⟩
-  · exact nomatch h
-  · exact nomatch h
-
-theorem keeps_revert {Γ : Ctx} :
-    I.Keeps (fun _ : State C Γ => (.error .revert : Res (State C Γ))) :=
-  fun _ _ _ _ h => nomatch h
-
-end RunInv
-
-/-- **Induction over a loop's run**: `P` holds of the first state and of
-every state an iteration from a state in `P` goes on in, and `Q` of every
-outcome an iteration from a state in `P` is done with, and of a divergence:
-then `Q` holds of the loop's run. -/
-theorem Loop.run_induct {α : Type} {body : α → Res α} {c : α → Res Value} {P : α → Prop}
-    {Q : Res α → Prop} {σ : α} (h0 : P σ)
-    (hstep : ∀ τ, P τ →
-      match Loop.step body c τ with
-      | .inl τ' => P τ'
-      | .inr r => Q r)
-    (hdiv : Q (.error .diverge)) : Q (Loop.run body c σ) := by
-  have key : ∀ (n : Nat) (τ : α) (r : Res α), P τ → Loop.iterN body c n τ = .inr r → Q r := by
-    intro n
-    induction n with
-    | zero => intro τ r _ h; exact nomatch h
-    | succ n ih =>
-      intro τ r hp h
-      have hs := hstep τ hp
-      simp only [Loop.iterN] at h
-      revert hs h
-      cases Loop.step body c τ with
-      | inl τ' => exact fun he hp => ih τ' r hp he
-      | inr r' =>
-        intro he hp
-        cases (show Sum.inr r' = (Sum.inr r : α ⊕ Res α) from he)
-        exact hp
-  unfold Loop.run
-  split
-  · rename_i hex
-    obtain ⟨n, hn⟩ := Classical.choose_spec hex
-    exact key n σ _ h0 hn
-  · exact hdiv
-
-namespace RunInv
-
-variable {I : RunInv C}
-
-theorem keeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁)
-    {body : State C Γ → Res (State C Γ₁)} (hb : I.Keeps body) : I.Keeps (Run.loop c x body) := by
-  intro H σ σ' hσ h
-  unfold Run.loop at h
-  refine Loop.run_induct (P := fun τ => ∃ H', H.Extends H' ∧ I.Holds H' τ)
-    (Q := fun r => ∀ τ, r = .ok τ → ∃ H', H.Extends H' ∧ I.Holds H' τ)
-    ⟨H, .refl H, hσ⟩ (fun τ ⟨H₁, hext₁, h₁⟩ => ?_) (fun _ h => nomatch h) _ h
-  simp only [Loop.step]
-  rcases Val.eval τ c with _ | (_ | b)
-  · exact fun _ h => nomatch h
-  · exact fun _ h => nomatch h
-  · cases b
-    · exact fun _ h => by cases h; exact ⟨H₁, hext₁, h₁⟩
-    · cases hr : (body τ).map (State.drop x) with
-      | error _ => exact fun _ h => nomatch h
-      | ok τ' =>
-        obtain ⟨H₂, hext₂, h₂⟩ := hb.drop x H₁ τ τ' h₁ hr
-        exact ⟨H₂, hext₁.trans hext₂, h₂⟩
-
-theorem keeps_call {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
-    (x : Ext (rs ++ ps) Γf) {body : State C (rs ++ ps) → Res (State C Γf)}
-    (hargs : ∀ (H : HeapTy) (σ : State C Γ) (a : Env C ps), I.Holds H σ → args.eval σ = .ok a →
-      Env.All (I.loc H) a)
-    (henter : ∀ (H : HeapTy) (τ τ' : Semantics.State) (r : Env C rs), I.glob H τ →
-      ret.enter τ = .ok (τ', r) → ∃ H', H.Extends H' ∧ I.glob H' τ' ∧ Env.All (I.loc H') r)
-    (hb : I.Keeps body) : I.Keeps (Run.call args ret x body) := by
-  intro H σ σ' hσ h
-  unfold Run.call at h
-  obtain ⟨a, ha, h⟩ := bind_ok_inv h
-  obtain ⟨⟨τ, r⟩, he, h⟩ := bind_ok_inv h
-  obtain ⟨υ, hυ, h⟩ := bind_ok_inv h
-  cases h
-  obtain ⟨H₁, hext₁, hg₁, hr₁⟩ := henter H σ.glob τ r hσ.1 he
-  obtain ⟨H₂, hext₂, h₂⟩ := hb H₁ (State.ofGlob τ (Env.append rs r a)) υ
-    ⟨I.reglob _ hg₁, Env.All.append rs hr₁ (env_mono hext₁ (hargs H σ a hσ ha))⟩ hυ
-  exact ⟨H₂, hext₁.trans hext₂, h₂.1, CallRet.leave_all ret
-    (env_mono (hext₁.trans hext₂) hσ.2) (Env.All.take rs (Env.All.drop x h₂.2))⟩
-
-theorem keeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
-    (h₁ : Ext (ρ ++ Γ) Γ₁) {ok : State C (ρ ++ Γ) → Res (State C Γ₁)}
-    (h₂ : Ext Γ Γ₂) {err : State C Γ → Res (State C Γ₂)} (code : CodeBinder κ)
-    (h₃ : Ext (κ ++ Γ) Γ₃) {pnc : State C (κ ++ Γ) → Res (State C Γ₃)}
-    (h₄ : Ext Γ Γ₄) {other : State C Γ → Res (State C Γ₄)}
-    (hdec : ∀ (H : HeapTy) (vs : List Value) (r : Env C ρ) (rest : List Value),
-      rets.decode vs = .ok (r, rest) → Env.All (I.loc H) r)
-    (hcode : ∀ (H : HeapTy) (c : Value) (r : Env C κ), code.decode c = .ok r → Env.All (I.loc H) r)
-    (hok : I.Keeps ok) (herr : I.Keeps err) (hpnc : I.Keeps pnc) (hoth : I.Keeps other) :
-    I.Keeps (Run.tryCall call rets h₁ ok h₂ err code h₃ pnc h₄ other) := by
-  intro H σ σ' hσ h
-  unfold Run.tryCall at h
-  obtain ⟨k, _, h⟩ := bind_ok_inv h
-  split at h
-  · exact nomatch h
-  · rename_i vs _
-    obtain ⟨⟨r, rest⟩, hr, h⟩ := bind_ok_inv h
-    exact hok.drop ((Ext.append Γ ρ).trans h₁) H _ σ'
-      (hσ.withEnv (Env.All.append ρ (hdec H vs r rest hr) hσ.2)) h
-  · exact herr.drop h₂ H σ σ' hσ h
-  · rename_i c _
-    obtain ⟨r, hr, h⟩ := bind_ok_inv h
-    exact hpnc.drop ((Ext.append Γ κ).trans h₃) H _ σ'
-      (hσ.withEnv (Env.All.append κ (hcode H c r hr) hσ.2)) h
-  · exact hoth.drop h₄ H σ σ' hσ h
 
 end RunInv
 
@@ -1496,315 +1317,7 @@ theorem CallRet.enter_wt {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' : Sema
 
 end Effects
 
-/-! ## One statement at a time -/
-
-section Leaves
-
-variable {Γ : Ctx}
-
-theorem keeps_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
-    (wtInv C).Keeps (Run.assign l r) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
-    (hwt.glob.write (Loc.resolve_wt hwt l hr) (Src.value_wt hwt hsv) hτ)⟩
-
-theorem keeps_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
-    (wtInv C).Keeps (Run.rebind i r) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
-  cases h
-  obtain ⟨hwt₁, hty⟩ := ARhs.eval_wt hwt he
-  exact ⟨H, .refl H, RunWT.setLocal hwt₁ i (ARhs.alias_wt hty)⟩
-
-theorem keeps_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
-    (wtInv C).Keeps (Run.assignLocal i r) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨w, hv, h⟩ := bind_ok_inv h
-  cases h
-  exact ⟨H, .refl H, RunWT.setLocal hwt i (Val.eval_wt hwt r hv)⟩
-
-theorem keeps_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
-    (wtInv C).Keeps (Run.declLocal p init) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  unfold Run.declLocal at h
-  cases init with
-  | none => cases h; exact ⟨H, .refl H, RunWT.push hwt (LTy.WT.default p)⟩
-  | some e =>
-    obtain ⟨w, hv, h⟩ := bind_ok_inv h
-    cases h
-    exact ⟨H, .refl H, RunWT.push hwt (Val.eval_wt hwt e hv)⟩
-
-theorem keeps_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
-    (wtInv C).Keeps (Run.declStorage R init) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  cases init with
-  | none =>
-    cases h
-    exact ⟨H, .refl H, RunWT.push hwt (t := .alias R) (fun _ _ h => nomatch h)⟩
-  | some r =>
-    obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
-    cases h
-    obtain ⟨hwt₁, hty⟩ := ARhs.eval_wt hwt he
-    exact ⟨H, .refl H, RunWT.push hwt₁ (ARhs.alias_wt hty)⟩
-
-theorem keeps_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
-    (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) :
-    (wtInv C).Keeps (Run.opAssign op l r) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨v, _, h⟩ := bind_ok_inv h
-  exact ⟨H, .refl H, OpLoc.store_wt hwt (compound_isArith hop) l hp h⟩
-
-theorem keeps_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    (wtInv C).Keeps (Run.incDec op l) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
-  cases h
-  exact ⟨H, .refl H, (OpLoc.bump_wt hwt l hp hb).1⟩
-
-theorem keeps_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
-    (hp : p.isNumeric = true) (l : OpLoc C Γ p) : (wtInv C).Keeps (Run.assignIncDec i op l) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
-  cases h
-  obtain ⟨hwt₁, hw⟩ := OpLoc.bump_wt hwt l hp hb
-  exact ⟨H, .refl H, RunWT.setLocal hwt₁ i hw⟩
-
-theorem keeps_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
-    (hd : (v.isSome || E.defaultOkS) = true) : (wtInv C).Keeps (Run.push b v) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-  refine ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
-    (pushAt_wt hwt.glob (SPath.resolve_wt hwt b hr) ?_ hτ)⟩
-  intro slot w hslot hw
-  cases v with
-  | none =>
-    cases hw
-    exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
-  | some r =>
-    obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
-    cases hw
-    exact SVal.strip_hasTy (Src.value_wt hwt hv)
-
-theorem keeps_pop {E : Ty} (b : SPath C Γ (.array E)) : (wtInv C).Keeps (Run.pop b) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
-    (popAt_wt hwt.glob (SPath.resolve_wt hwt b hr) hτ)⟩
-
-theorem keeps_transfer (r a : Val C Γ .uint) : (wtInv C).Keeps (Run.transfer r a) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  iterate 4 bind_inv h
-  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H) (hwt.glob.transferAt hτ)⟩
-
-theorem keeps_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
-    (wtInv C).Keeps (Run.send pv r a) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  iterate 4 bind_inv h
-  unfold sendAt at h
-  split at h
-  · exact nomatch h
-  · split at h <;> cases h
-    · exact ⟨H, .refl H, RunWT.setLocal (RunWT.withGlob hwt (.refl H) hwt.glob.pay) pv rfl⟩
-    · exact ⟨H, .refl H, RunWT.setLocal (RunWT.withGlob hwt (.refl H) hwt.glob.pay) pv rfl⟩
-    · exact ⟨H, .refl H, RunWT.setLocal hwt pv rfl⟩
-
-theorem keeps_declMem (R : RefTy) (init : Option (MRhs C Γ R))
-    (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) :
-    (wtInv C).Keeps (Run.declMem R init) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  cases init with
-  | none =>
-    obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
-    cases h
-    obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.glob.heapTyNodup hwt.glob.heap
-      hwt.glob.heapWf (defaultOk_of_defaultOkS (by simpa using hd)) ha
-    exact ⟨H', hout.ext,
-      RunWT.push (RunWT.withGlob hwt hout.ext (hwt.glob.ofCopyOut hout)) (t := .mem R)
-        (LTy.WT.mem_some hid)⟩
-  | some r =>
-    obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
-    cases h
-    obtain ⟨H', hext, hwt₁, hid⟩ := MRhs.eval_wt hwt he
-    exact ⟨H', hext, RunWT.push hwt₁ (t := .mem R) (LTy.WT.mem_some hid)⟩
-
-theorem keeps_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
-    (wtInv C).Keeps (Run.rebindMem i r) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
-  cases h
-  obtain ⟨H', hext, hwt₁, hid⟩ := MRhs.eval_wt hwt he
-  exact ⟨H', hext, RunWT.setLocal hwt₁ i (LTy.WT.mem_some hid)⟩
-
-theorem keeps_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
-    (wtInv C).Keeps (Run.assignFromMem l p) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-  obtain ⟨id, hid, h⟩ := bind_ok_inv h
-  obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-  have hm := MPath.mval_wt hwt p hm0
-  rw [MVal.asRef_ok hid] at hm
-  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
-    (hwt.glob.write (Loc.resolve_wt hwt l hr) (copyMem_hasTy hwt.glob.heap hm hsv) hτ)⟩
-
-theorem keeps_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
-    (wtInv C).Keeps (Run.assignMem l r) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
-  exact ⟨H, .refl H, MLoc.write_wt hwt l (MSrc.mval_wt hwt hmv) h⟩
-
-theorem keeps_delete {T : Ty} (l : Loc C Γ T) : (wtInv C).Keeps (Run.delete l) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-  obtain ⟨cur, hcur, h⟩ := bind_ok_inv h
-  obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-  have hty := Loc.resolve_wt hwt l hr
-  exact ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
-    (hwt.glob.save hty (SVal.defaultOf_hasTy (findStorage_hasTy hwt.glob.storage hty hcur)) hτ)⟩
-
-theorem keeps_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) :
-    (wtInv C).Keeps (Run.deleteMem p) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  cases p with
-  | var i _ =>
-    obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
-    cases h
-    obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.glob.heapTyNodup hwt.glob.heap
-      hwt.glob.heapWf (defaultOk_of_defaultOkS hd) ha
-    exact ⟨H', hout.ext,
-      RunWT.setLocal (RunWT.withGlob hwt hout.ext (hwt.glob.ofCopyOut hout)) i
-        (LTy.WT.mem_some hid)⟩
-  | loc l =>
-    obtain ⟨a, ha, h⟩ := bind_ok_inv h
-    obtain ⟨τ, hτ, rfl⟩ := map_ok_inv h
-    have hat := MLoc.addr_wt hwt l ha
-    cases T with
-    | prim p =>
-      refine ⟨H, .refl H, RunWT.withGlob hwt (.refl H)
-        (writeAddr_wt hwt.glob hat (Value.toMVal_hasTyH ?_) hτ)⟩
-      cases p <;> rfl
-    | ref R =>
-      obtain ⟨⟨τ₁, id⟩, hal, hτ⟩ := bind_ok_inv hτ
-      obtain ⟨H', hout, hid⟩ := allocDefault_typed hwt.glob.heapTyNodup hwt.glob.heap
-        hwt.glob.heapWf (defaultOk_of_defaultOkS hd) hal
-      exact ⟨H', hout.ext, RunWT.withGlob hwt hout.ext
-        (writeAddr_wt (hwt.glob.ofCopyOut hout) (hat.mono hout.ext) hid hτ)⟩
-
-theorem keeps_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
-    (hn : R.newArrOk = true) : (wtInv C).Keeps (Run.assignNew l n) := by
-  intro H σ σ' hwt h
-  replace hwt : RunWT C H σ := hwt
-  bind_inv h
-  obtain ⟨nv, _, h⟩ := bind_ok_inv h
-  obtain ⟨⟨τ, mv⟩, hcopy, h⟩ := bind_ok_inv h
-  obtain ⟨id, hid, h⟩ := bind_ok_inv h
-  obtain ⟨H', hout, hmv⟩ := copyStToM_typed hwt.glob.heapTyNodup hwt.glob.heap hwt.glob.heapWf
-    (newArrVal_hasTy hn nv) hcopy
-  rw [MVal.asRef_ok hid] at hmv
-  have hτwt : StateWT H' C.layout τ := hwt.glob.ofCopyOut hout
-  have hwt₁ : RunWT C H' (σ.withGlob τ) := RunWT.withGlob hwt hout.ext hτwt
-  cases l with
-  | store l =>
-    obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
-    obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
-    obtain ⟨τ', hτ', rfl⟩ := map_ok_inv h
-    exact ⟨H', hout.ext, RunWT.withGlob hwt₁ (.refl H')
-      (hτwt.write (Loc.resolve_wt hwt₁ l hr) (copyMem_hasTy hτwt.heap hmv hsv) hτ')⟩
-  | mem l => exact ⟨H', hout.ext, MLoc.write_wt hwt₁ l hmv h⟩
-
-end Leaves
-
-/-! ## The headline -/
-
-mutual
-
-/-- **Type soundness, statement level.**  A statement run from a
-well-typed state ends, if in a state, in a well-typed one in the context its
-type says; the store typing only grows.  From `uint x = 1;` the new local
-holds a number; from `alice.age = x;` storage still inhabits the layout.
-A statement is typed by its context: there is no locals judgement to
-assume. -/
-theorem Stmt.keeps_wt : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (wtInv C).Keeps (Stmt.runR s)
-  | _, _, .assign l r => keeps_assign l r
-  | _, _, .rebind i r => keeps_rebind i r
-  | _, _, .assignLocal i r => keeps_assignLocal i r
-  | _, _, .declLocal p _ init => keeps_declLocal p init
-  | _, _, .declStorage R _ init => keeps_declStorage R init
-  | _, _, .opAssign op hop hp l r => keeps_opAssign op hop hp l r
-  | _, _, .incDec op hp l => keeps_incDec op hp l
-  | _, _, .assignIncDec i op hp l _ => keeps_assignIncDec i op hp l
-  | _, _, .push b v hd => keeps_push b v hd
-  | _, _, .pop b => keeps_pop b
-  | _, _, .transfer r a => keeps_transfer r a
-  | _, _, .send pv r a => keeps_send pv r a
-  | _, _, .declMem R _ init hd _ => keeps_declMem R init hd
-  | _, _, .rebindMem i r => keeps_rebindMem i r
-  | _, _, .assignFromMem l p => keeps_assignFromMem l p
-  | _, _, .assignMem l r => keeps_assignMem l r
-  | _, _, .delete l => keeps_delete l
-  | _, _, .deleteMem p hd => keeps_deleteMem p hd
-  | _, _, .assignNew l n hn => keeps_assignNew l n hn
-  | _, _, .ite c thn els =>
-    RunInv.keeps_ite c thn.ext els.ext (Prog.keeps_wt thn) (Prog.keeps_wt els)
-  | _, _, .require c => RunInv.keeps_require c
-  | _, _, .assert c => RunInv.keeps_assert c
-  | _, _, .revert => RunInv.keeps_revert
-  | _, _, .call _ args ret body =>
-    RunInv.keeps_call args ret body.ext (fun _ _ _ hwt h => Args.eval_wt hwt args h)
-      (fun _ _ _ _ hτ h => CallRet.enter_wt ret hτ h) (Prog.keeps_wt body)
-  | _, _, .tryCall call rets ok err code pnc other =>
-    RunInv.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
-      (fun _ _ _ _ h => Binders.decode_wt rets h) (fun _ _ _ h => CodeBinder.decode_wt code h)
-      (Prog.keeps_wt ok) (Prog.keeps_wt err) (Prog.keeps_wt pnc) (Prog.keeps_wt other)
-  | _, _, .loop _ c body => RunInv.keeps_loop c body.ext (Prog.keeps_wt body)
-  | _, _, .block body => RunInv.keeps_block body.ext (Prog.keeps_wt body)
-
-/-- **Type soundness, block level.** -/
-theorem Prog.keeps_wt : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (wtInv C).Keeps (Prog.runR P)
-  | _, _, .nil => RunInv.keeps_nil
-  | _, _, .cons s P => RunInv.keeps_seq (Stmt.keeps_wt s) (Prog.keeps_wt P)
-
-end
-
-/-- **Type soundness**: a statement run from a well-typed state ends, if in
-a state, in a well-typed one, under a store typing that only grew. -/
-theorem Stmt.run_wt {Γ Γ' : Ctx} (s : Stmt C Γ Γ') {H : HeapTy} {σ : State C Γ}
-    {σ' : State C Γ'} (hwt : RunWT C H σ) (h : s.run σ = .ok σ') :
-    ∃ H', H.Extends H' ∧ RunWT C H' σ' :=
-  Stmt.keeps_wt s H σ σ' hwt h
-
-/-- **Type soundness, for a block.** -/
-theorem Prog.run_wt {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy} {σ : State C Γ}
-    {σ' : State C Γ'} (hwt : RunWT C H σ) (h : P.run σ = .ok σ') :
-    ∃ H', H.Extends H' ∧ RunWT C H' σ' :=
-  Prog.keeps_wt P H σ σ' hwt h
-
-/-! ## Where a run starts, and what the headline buys -/
+/-! ## Where a run starts -/
 
 /-- A contract starts well-typed: each root at its type's default, no
 locals, an empty heap. -/
@@ -1812,14 +1325,5 @@ theorem RunWT.init {σ : State C []} (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) (hst : σ.storage = C.initStorage)
     (hheap : σ.heap = []) : RunWT C [] σ :=
   ⟨StateWT.init (σ := σ.glob) hnd hok hst hheap, trivial⟩
-
-/-- **Storage stays well-typed.**  Assume `wellFormed(storage)` once and it
-holds after every run: after `Person storage p = alice; p.age = 10;`
-storage still inhabits `StandardExample`'s layout. -/
-theorem Prog.run_storage_wt {Γ Γ' : Ctx} {H : HeapTy} {σ : State C Γ} {σ' : State C Γ'}
-    {P : Prog C Γ Γ'} (hwt : RunWT C H σ) (h : P.run σ = .ok σ') :
-    wellTypedStorageB C.layout σ'.storage = true :=
-  let ⟨_, _, hwt'⟩ := Prog.run_wt P hwt h
-  hwt'.glob.storage
 
 end Solidity.Core

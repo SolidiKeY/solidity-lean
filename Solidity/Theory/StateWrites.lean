@@ -66,13 +66,13 @@ def heapRes (σ : State) (mv : MVal) : Addr → Res (List (Nat × MObj))
   | .memoryField id f => do
     match ← σ.getObj id with
     | .struct fields => pure (setBy id (.struct (setBy f mv fields)) σ.heap)
-    | .array _ _ => .error .stuck
+    | .array _ _ => .error .undef
   | .memoryIndex id i => do
     match ← σ.getObj id with
     | .array elems fx =>
       if 0 ≤ i ∧ i.toNat < elems.length then pure (setBy id (.array (elems.set i.toNat mv) fx) σ.heap)
       else .error .revert
-    | .struct _ => .error .stuck
+    | .struct _ => .error .undef
 
 theorem writeAddr_eq (σ : State) (mv : MVal) (a : Addr) :
     writeAddr σ mv a = (do let h ← heapRes σ mv a; pure { σ with heap := h }) := by
@@ -134,31 +134,31 @@ namespace Close
 a memory local has none. -/
 def bindingVal : Binding → Res Value
   | .val v => .ok v
-  | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
+  | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .undef
 
 /-- The path an alias holds: `p` after `Person storage p = alice;` is
 `alice`. -/
 def bindingPath : Binding → Res (Name × List Seg)
   | .spath r segs => .ok (r, segs)
   | .unset => .error .revert
-  | .val _ | .mref _ | .store _ | .ledger _ => .error .stuck
+  | .val _ | .mref _ | .store _ | .ledger _ => .error .undef
 
 /-- The object a memory local holds: `m` after `Person memory m;`; an unset
 one reverts, as `MPath.mval` does. -/
 def bindingRef : Binding → Res Nat
   | .mref id => .ok id
   | .unset => .error .revert
-  | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
+  | .val _ | .spath .. | .store _ | .ledger _ => .error .undef
 
 /-- The storage a storage variable holds: `old` after `{old := storage}`. -/
 def bindingStore : Binding → Res (List (Name × SVal))
   | .store st => .ok st
-  | .val _ | .spath .. | .mref _ | .ledger _ | .unset => .error .stuck
+  | .val _ | .spath .. | .mref _ | .ledger _ | .unset => .error .undef
 
 /-- The ledger a ledger variable holds: `oldNet` after `{oldNet := net}`. -/
 def bindingLedger : Binding → Res (List (Int × Int))
   | .ledger l => .ok l
-  | .val _ | .spath .. | .mref _ | .store _ | .unset => .error .stuck
+  | .val _ | .spath .. | .mref _ | .store _ | .unset => .error .undef
 
 end Close
 

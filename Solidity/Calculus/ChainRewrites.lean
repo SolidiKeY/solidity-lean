@@ -1555,7 +1555,7 @@ at the root `r` for its storage (`Op1.eval`). -/
 def State.selectRoot (r : Name) (τ : State) : Res State := do
   match ← τ.findStorage r [] with
   | .struct fields => pure { τ with storage := fields }
-  | .prim _ | .array .. | .map .. => .error .stuck
+  | .prim _ | .array .. | .map .. => .error .undef
 
 theorem STerm.select_eval (σ : State) (s : STerm C) (r : Name) :
     (STerm.select s r).eval σ = (s.eval σ >>= State.selectRoot r) := rfl

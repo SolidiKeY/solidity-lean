@@ -9,8 +9,9 @@ state (`Core.TState`, `Semantics/Core/TypedState.lean`) holds storage values
 of their types, a heap whose objects are of the types its typing lists, and
 locals of their types, so its erasure is a `RunWT` state under the store
 typing its heap typing lists (`HTy.toHeapTy`), with no run to follow
-(`TState.erase_wt`).  `Stmt.run_wt`, which follows the scoped run, is then
-what the typed run needs no proof of.
+(`TState.erase_wt`): type soundness of the typed run, with no
+preservation proof (the scoped run's `Stmt.run_wt` went with that run,
+`docs/intrinsic.md`, decision 40).
 
 The untyped typing (`SVal.hasTy`, `MObj.hasTyH`) reads a struct's members
 by name, the typed value by position; the two agree since no struct has two

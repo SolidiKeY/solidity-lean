@@ -193,7 +193,7 @@ theorem ternarySimple : ⊨ dl!{ ⟨ bool f = false; uint x = f ? 10 : 20; ⟩ x
 /-! ## Operands in storage
 
 Under the box: `⊨` quantifies over every state, including those without
-`alice`, where the write is stuck (`Close.lean`). -/
+`alice`, where the write is `undef` (`Close.lean`). -/
 
 /-- `addition-storage-read.key`: `alice.age = 10; uint r = alice.age + 1;` -/
 theorem additionStorageRead :

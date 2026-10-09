@@ -339,7 +339,7 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     let (es, ms) ← updParts ns args[4]!
     let φ ← tr ms args[5]!
     if es.isEmpty then return φ
-    -- built unchecked: a stuck update stays scoped, and prints as `‹…›`
+    -- built unchecked: a blocked update stays scoped, and prints as `‹…›`
     if isSurface φ then
       return mkApp4 (mkConst ``Solidity.Surface.Fml.upd) args[0]! args[3]!
         (← updList args[0]! args[4]! es) φ
@@ -654,7 +654,7 @@ partial def framePieces (ns : List Expr) (κ : Expr) : TrM (Array Piece × List 
 /-- An update's pieces, erased, and the names of the context it leaves:
 right-hand sides read at `ns`, targets at the names its declarations push;
 a pop is nothing.  A schema variable is its twin, spliced in front; any
-other stuck update is itself, and prints as `‹…›`. -/
+other blocked update is itself, and prints as `‹…›`. -/
 partial def updParts (ns : List Expr) (U : Expr) : TrM (Array Piece × List Expr) := do
   let U ← whnf (← instantiateMVars U)
   let args := U.getAppArgs
@@ -701,7 +701,7 @@ partial def rhs (ns : List Expr) (x r : Expr) : TrM Expr := do
   | _ => return r
 
 /-- The erased update of the pieces `es`, of the contract `c`: `u ++ [e, …]`;
-the scoped update `U` itself (`‹…›`) when it is stuck on a term that is no
+the scoped update `U` itself (`‹…›`) when it is blocked on a term that is no
 schema variable. -/
 partial def updList (c U : Expr) (es : Array Piece) : TrM Expr := do
   if es.any (fun | .many P => !P.isFVar | .one _ => false) then return U

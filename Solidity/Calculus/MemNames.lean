@@ -525,18 +525,18 @@ theorem copyStElems_getElem : ∀ {σ τ : State} {es : List SVal} {mes : List M
 theorem readAddr_field_struct {τ : State} {n : Nat} {fs : List (Name × MVal)} (f : Name)
     (hobj : lookupBy n τ.heap = some (.struct fs)) :
     readAddr τ (.memoryField n f) =
-      match lookupBy f fs with | some v => .ok v | none => .error .stuck := by
+      match lookupBy f fs with | some v => .ok v | none => .error .undef := by
   simp only [readAddr, State.getObj, hobj, bind, Except.bind]
   cases lookupBy f fs <;> rfl
 
 theorem readAddr_index_struct {τ : State} {n : Nat} {fs : List (Name × MVal)} (k : Int)
     (hobj : lookupBy n τ.heap = some (.struct fs)) :
-    readAddr τ (.memoryIndex n k) = .error .stuck := by
+    readAddr τ (.memoryIndex n k) = .error .undef := by
   simp only [readAddr, State.getObj, hobj, bind, Except.bind]
 
 theorem readAddr_field_array {τ : State} {n : Nat} {es : List MVal} {fx : Bool} (f : Name)
     (hobj : lookupBy n τ.heap = some (.array es fx)) :
-    readAddr τ (.memoryField n f) = .error .stuck := by
+    readAddr τ (.memoryField n f) = .error .undef := by
   simp only [readAddr, State.getObj, hobj, bind, Except.bind]
 
 theorem readAddr_index_array {τ : State} {n : Nat} {es : List MVal} {fx : Bool} (k : Int)
@@ -547,7 +547,7 @@ theorem readAddr_index_array {τ : State} {n : Nat} {es : List MVal} {fx : Bool}
   split <;> rfl
 
 theorem findLive_array_field {es sh : List SVal} {fx : Bool} {f : Name} {rest : List Seg}
-    (hf : f ≠ "length") : (SVal.array es sh fx).findLive (.field f :: rest) = .error .stuck := by
+    (hf : f ≠ "length") : (SVal.array es sh fx).findLive (.field f :: rest) = .error .undef := by
   simp only [SVal.findLive]
 
 theorem findLive_array_at {es sh : List SVal} {fx : Bool} {k : Int} {rest : List Seg} :
@@ -864,7 +864,7 @@ theorem find_array_at {es sh : List SVal} {fx : Bool} {k : Int} {rest : List Seg
   simp only [SVal.find, List.get_eq_getElem]
 
 theorem find_array_field {es sh : List SVal} {fx : Bool} {f : Name} {rest : List Seg}
-    (hf : f ≠ "length") : (SVal.array es sh fx).find (.field f :: rest) = .error .stuck := by
+    (hf : f ≠ "length") : (SVal.array es sh fx).find (.field f :: rest) = .error .undef := by
   simp only [SVal.find]
 
 /-- **A path through a view of memory as storage** (KeY's `findOnCopy` and

@@ -25,8 +25,8 @@ list of roots.  `wt(storage)` (`Fml.wt`) assumes most of what Solidity
 guarantees of a deployed contract's storage: every root there, in order,
 canonical and tight, which is exactly reachable (`shape_iff_reachable`,
 for every word, key and slot in range), and every word in its type's range
-(`storageWtB`, `wt_iff_reachable`).  Reachable is by the typed interpreter,
-for a program on the bridge (`Reachable`).
+(`storageWtB`, `wt_iff_reachable`).  Reachable is by the typed interpreter
+(`Reachable`).
 It does not bound a dynamic array's length, which solc keeps at most
 `2^64` (`push` panics, 0x41, on an array already that long), and the
 model's `push` (`pushOn`) never panics.  The delta cuts both ways.  A
@@ -50,7 +50,7 @@ excludes it, so the Lean theorem need not imply solkey's obligation.
   stored as a mapping keeps a write through `delete`, so an `assert` that
   the element is reset fails.
 * **Diamond**: `∀x̄. wt(storage) → ⟨ f(x̄); ⟩ true`.  The diamond does not
-  hold of every storage: a write into a root that is not there is stuck, and
+  hold of every storage: a write into a root that is not there is `undef`, and
   `total + 0` reverts on a `uint` root holding `-1`.
 
 **Why one atomic term.**  `wt` is a symbol of the term language, `Op1.wt`,
