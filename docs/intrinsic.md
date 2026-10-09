@@ -864,6 +864,34 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     and `Stmt.Sound` (about 70 sites); AGENTS.md asks that such a change be
     timed against `TestSuite/Derived9–11` and `Examples/ProofTree` before
     and after, so it is a lane of its own with those gates.
+    *Implemented (W6 lane `w6-step`, 2026-10-09):* `Stmt.step` returns
+    `Premise C Γ Γ'`, every arm of `Calculus/Arms.lean` and
+    `Calculus/Blocks.lean` too (`OpLoc.unfoldRecv`, `Args.capture` and
+    `Prog.frame` stay `Option`: they are tests, not rules).  The one arm
+    that returned `none`, `shortStep` off `&&`/`||`, is unreachable
+    (`localStep` calls it only where `op.shortCircuits`) and now returns
+    `.done false`, sound for any statement (`sound_done_false`).  The
+    program rules of `Proves` take `d : s.step … m = .update U` (and kin),
+    `Taclet.toStep` is `s.step k m = p`, `Stmt.Sound` and the arms'
+    `…_sound` take `hs : …Step … = q`; `Fml.modalStep` (and
+    `Fml.modalFocus`) wrap the premise in `some` once, where they used
+    `Option.map`; `Stmt.stepIn R` stays `Option` (`.solkey` refuses a
+    `LeanTaclet`'s statement).  `Stmt.rule_exists` is now
+    `Rule C k m s (s.step k m)` (`Main.rule_exists`: `s ⇝[k, m] s.step k m`;
+    `Stmt.solkey_rule_exists`: `Taclet C k m s (s.step k m)`).  Its replay
+    table changed in two rows, both re-derived by `#derive_ruleExists?`:
+    `assignLocal` gains a `!` per unreachable `shortStep` leaf (the
+    `contradiction` that closed a `none`), and `deleteMem` loses its
+    `/Ty` and `/ArrTy` splits (the step now reduces through
+    `Premise.clearMem`'s match on the type, which `some` had hidden from
+    `whnf`).  No pin changed.
+    **Gates** (end of work, as the W6 baselines; minimum of three runs at
+    load 1.1–1.7, a fourth discarded where another lane's build put the
+    load at 3–24): `Derived9` 7.06 s (7.16; 0.99×), `Derived10` 11.33 s
+    (11.11; 1.02×), `Derived11` 3.20 s (3.16; 1.01×), `Examples/ProofTree`
+    9.93 s (9.81; 1.01×); CPU 8.48, 12.94, 3.42, 9.92 s against 8.62,
+    12.75, 3.36, 9.85.  Every row within 1.2×, none slower beyond noise:
+    kept.
 77. *Proposed (M7 review), the lead's call:* `Reachable C st ↔ Canon ∧
     Tight` (`reachable_iff`, `shape_iff_reachable`, `wt_iff_reachable`)
     holds for a storage that fits (`FitsStorage C st`): a consequence of
@@ -910,8 +938,9 @@ the closer port.
   `solkeycheck` executable (built only; no rule name or annotation changed),
   the reader's `keycheck` executable as a target and the VS Code extension's
   tests.
-- From the M7 review: proposals 75 (the canonicity invariant on the typed
-  state) and 76 (`Stmt.step` total), each a lane with its gates.
+- From the M7 review: proposal 75 (the canonicity invariant on the typed
+  state), a lane with its gates (76, `Stmt.step` total, is done: lane
+  `w6-step`).
 - Lean docstrings still call the erased side "today's" in places and cite
   this record's sections (at `ad728b16`).
 - `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on
