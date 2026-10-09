@@ -42,7 +42,7 @@ def Premise.Sound (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise
 every typed state, at any fresh index (`Stmt.Sound`, over `State`). -/
 def Stmt.Sound (C : Contract) : Prop :=
   ∀ (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ'),
-    s.step k m = some p → ∀ σ : State C Γ, Premise.Sound m s p σ
+    s.step k m = p → ∀ σ : State C Γ, Premise.Sound m s p σ
 
 /-! ## Scope ends -/
 

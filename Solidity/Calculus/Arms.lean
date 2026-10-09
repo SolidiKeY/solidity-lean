@@ -192,25 +192,25 @@ variable (k : Nat) {Γ : Ctx}
 simple path, an entry of one at a simple index take the hole's own rule;
 any other unfolds its receiver or its index first. -/
 def SHole.readStep {T : Ty} (lhs : SHole C Γ T)
-    (root : (r : Name) → C.rootType r = some T → Option (Premise C Γ Γ))
+    (root : (r : Name) → C.rootType r = some T → Premise C Γ Γ)
     (field : {s : Name} → SPath C Γ (.struct s) → (f : Name) → C.fieldType s f = some T →
-      Option (Premise C Γ Γ))
+      Premise C Γ Γ)
     (index : {R : RefTy} → {kp : PrimTy} → IndexTy R kp T → SPath C Γ (.ref R) → Simple C Γ kp →
-      Option (Premise C Γ Γ)) :
-    Loc C Γ T → Option (Premise C Γ Γ)
+      Premise C Γ Γ) :
+    Loc C Γ T → Premise C Γ Γ
   | .root r h => root r h
   | .field b f hf =>
     if b.isSimple then field b f hf
     -- storageFieldRead_unfold_rightFst
-    else some (.captureSP (fsp k) b (lhs.up.fill (.loc (.field (.alias .here) f hf))))
+    else .captureSP (fsp k) b (lhs.up.fill (.loc (.field (.alias .here) f hf)))
   | @Loc.index _ _ _ kp _ it b i =>
     if b.isSimple then
       match i with
       | .simple ie => index it b ie
       -- storageIndexRead_unfold_rightSndIndex
-      | i => some (.capture kp (fie k) i (lhs.up.fill (.loc (.index it b.up (.simple (.local .here))))))
+      | i => .capture kp (fie k) i (lhs.up.fill (.loc (.index it b.up (.simple (.local .here)))))
     -- storageIndexRead_unfold_rightFst
-    else some (.captureSP (fsp k) b (lhs.up.fill (.loc (.index it (.alias .here) i.up))))
+    else .captureSP (fsp k) b (lhs.up.fill (.loc (.index it (.alias .here) i.up)))
 
 /-- **Step 1** for a memory location read into the hole `lhs`
 (`MHole.readStep`): a member of a memory local, or an element of one at a
@@ -218,109 +218,111 @@ simple index, takes the hole's own rule; any other unfolds its receiver or
 its index first. -/
 def MHole.readStep {T : Ty} (lhs : MHole C Γ T)
     (field : {s : Name} → (mv : Idx Γ (.mem (.struct s))) → (Ty.ref (.struct s)).mapFree = true →
-      (f : Name) → C.fieldType s f = some T → Option (Premise C Γ Γ))
+      (f : Name) → C.fieldType s f = some T → Premise C Γ Γ)
     (index : {R : RefTy} → ArrTy R T → (mv : Idx Γ (.mem R)) → (Ty.ref R).mapFree = true →
-      Simple C Γ .uint → Option (Premise C Γ Γ)) :
-    MLoc C Γ T → Option (Premise C Γ Γ)
+      Simple C Γ .uint → Premise C Γ Γ) :
+    MLoc C Γ T → Premise C Γ Γ
   | .field (.var mv hmv) f hf => field mv hmv f hf
   -- memoryFieldRead_unfold_rightFst
   | .field (.loc l) f hf =>
-    some (.captureMV (fmv k) (.loc l) (lhs.up.fill (.field (.var .here (MPath.loc l).mapFree) f hf)))
+    .captureMV (fmv k) (.loc l) (lhs.up.fill (.field (.var .here (MPath.loc l).mapFree) f hf))
   | .index a (.var mv hmv) (.simple ie) => index a mv hmv ie
   -- memoryIndexRead_unfold_rightSndIndex
   | .index a (.var mv hmv) i =>
-    some (.capture .uint (fie k) i (lhs.up.fill (.index a (.var mv.there hmv) (.simple (.local .here)))))
+    .capture .uint (fie k) i (lhs.up.fill (.index a (.var mv.there hmv) (.simple (.local .here))))
   -- memoryIndexRead_unfold_rightFst
   | .index a (.loc l) i =>
-    some (.captureMV (fmv k) (.loc l) (lhs.up.fill (.index a (.var .here (MPath.loc l).mapFree) i.up)))
+    .captureMV (fmv k) (.loc l) (lhs.up.fill (.index a (.var .here (MPath.loc l).mapFree) i.up))
 
 /-- `lhs = c ? a : b;` becomes a branch on `c` (`ternaryToIf`), which is
 captured first when it is not simple (`ternaryCaptureCond`). -/
 def ternaryStep {p : PrimTy} (lhs : VHole C Γ p) :
-    Val C Γ .bool → Val C Γ p → Val C Γ p → Option (Premise C Γ Γ)
+    Val C Γ .bool → Val C Γ p → Val C Γ p → Premise C Γ Γ
   | .simple se, a, b =>
-    some (.unfold (.cons (.ite (.simple se) (.cons (lhs.fill a) .nil) (.cons (lhs.fill b) .nil)) .nil)
-      .refl)
-  | c, a, b => some (.capture .bool (fse k) c (lhs.up.fill (.ternary (.simple (.local .here)) a.up b.up)))
+    .unfold (.cons (.ite (.simple se) (.cons (lhs.fill a) .nil) (.cons (lhs.fill b) .nil)) .nil)
+      .refl
+  | c, a, b => .capture .bool (fse k) c (lhs.up.fill (.ternary (.simple (.local .here)) a.up b.up))
 
 /-- A value written to a target whose parts are all simple: a simple one by
 `simple` (Step 3), a conditional lowered, any other captured (the
 `…ValueRhsCapture`/`…UnfoldSource` rules: `T se = nse; lhs = se;`). -/
-def VHole.step {p : PrimTy} (lhs : VHole C Γ p) (simple : Simple C Γ p → Option (Premise C Γ Γ)) :
-    Val C Γ p → Option (Premise C Γ Γ)
+def VHole.step {p : PrimTy} (lhs : VHole C Γ p) (simple : Simple C Γ p → Premise C Γ Γ) :
+    Val C Γ p → Premise C Γ Γ
   | .simple se => simple se
   | .ternary c a b => ternaryStep k lhs c a b
-  | e => some (.capture p (fse k) e (lhs.up.fill (.simple (.local .here))))
+  | e => .capture p (fse k) e (lhs.up.fill (.simple (.local .here)))
 
 /-- A value written by `other`, unless it is a conditional, lowered first. -/
-def VHole.lower {p : PrimTy} (lhs : VHole C Γ p) (other : Option (Premise C Γ Γ)) :
-    Val C Γ p → Option (Premise C Γ Γ)
+def VHole.lower {p : PrimTy} (lhs : VHole C Γ p) (other : Premise C Γ Γ) :
+    Val C Γ p → Premise C Γ Γ
   | .ternary c a b => ternaryStep k lhs c a b
   | _ => other
 
 /-- `v = se && nse;`, `v = se || nse;`: the right operand evaluated only when
 the left does not decide (`logicalAndShortCircuitRhs`,
-`logicalOrShortCircuitRhs`). -/
+`logicalOrShortCircuitRhs`).  `localStep` calls it only where
+`op.shortCircuits`, so on `&&` and `||` over `bool`: any other operator is
+`false` (`.done false`), never reached. -/
 def shortStep {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp) (ha : op.accepts p' = true)
-    (hq : op.ret p' = p) (a : Simple C Γ p') (b : Val C Γ p') : Option (Premise C Γ Γ) :=
+    (hq : op.ret p' = p) (a : Simple C Γ p') (b : Val C Γ p') : Premise C Γ Γ :=
   match op, p', p, ha, hq, i, a, b with
   | .and, .bool, .bool, _, _, i, a, b =>
-    some (.unfold (.cons (.ite (.simple a)
+    .unfold (.cons (.ite (.simple a)
       (.cons (.assignLocal i b)
         (.cons (.assignLocal i (.binop .and rfl rfl (.simple (.local i)) (.simple (.bool true)))) .nil))
-      (.cons (.assignLocal i (.simple (.bool false))) .nil)) .nil) .refl)
+      (.cons (.assignLocal i (.simple (.bool false))) .nil)) .nil) .refl
   | .or, .bool, .bool, _, _, i, a, b =>
-    some (.unfold (.cons (.ite (.simple a)
+    .unfold (.cons (.ite (.simple a)
       (.cons (.assignLocal i (.simple (.bool true))) .nil)
       (.cons (.assignLocal i b)
         (.cons (.assignLocal i (.binop .or rfl rfl (.simple (.local i)) (.simple (.bool false)))) .nil)))
-      .nil) .refl)
-  | _, _, _, _, _, _, _, _ => none
+      .nil) .refl
+  | _, _, _, _, _, _, _, _ => .done false
 
 /-- A local assigned (`localStep`): a simple value, a read of a simple
 location, an operator over simple operands is an update; anything else
 unfolds the part that is not simple. -/
-def localStep {p : PrimTy} (i : Idx Γ (.val p)) : Val C Γ p → Option (Premise C Γ Γ)
+def localStep {p : PrimTy} (i : Idx Γ (.val p)) : Val C Γ p → Premise C Γ Γ
   -- localValueAssign
-  | .simple s => some (.setLocal i (.simple s))
+  | .simple s => .setLocal i (.simple s)
   -- storageRootReadSelect, storageFieldReadFind, storageIndexReadMappingFind,
   -- storageIndexReadArrayFind, or Step 1
-  | .read l => (SHole.local i).readStep k (fun r h => some (.setLocal i (.read (.root r h))))
-      (fun b f h => some (.setLocal i (.read (.field b f h))))
-      (fun it b ie => some (.setLocal i (.read (.index it b (.simple ie))))) l
+  | .read l => (SHole.local i).readStep k (fun r h => .setLocal i (.read (.root r h)))
+      (fun b f h => .setLocal i (.read (.field b f h)))
+      (fun it b ie => .setLocal i (.read (.index it b (.simple ie)))) l
   -- binopAssignment
-  | .binop op ha hq (.simple a) (.simple b) => some (.setLocal i (.binop op ha hq (.simple a) (.simple b)))
+  | .binop op ha hq (.simple a) (.simple b) => .setLocal i (.binop op ha hq (.simple a) (.simple b))
   | @Val.binop _ _ p' _ op ha hq (.simple a) b =>
     -- logicalAndShortCircuitRhs, logicalOrShortCircuitRhs
     if op.shortCircuits then shortStep i op ha hq a b
     -- binopUnfoldRight
-    else some (.capture p' (fse k) b
-      (.assignLocal i.there (.binop op ha hq (.simple a.up) (.simple (.local .here)))))
+    else .capture p' (fse k) b
+      (.assignLocal i.there (.binop op ha hq (.simple a.up) (.simple (.local .here))))
   -- binopUnfoldLeft
   | @Val.binop _ _ p' _ op ha hq a b =>
-    some (.capture p' (fse k) a
-      (.assignLocal i.there (.binop op ha hq (.simple (.local .here)) b.up)))
+    .capture p' (fse k) a
+      (.assignLocal i.there (.binop op ha hq (.simple (.local .here)) b.up))
   -- unopAssignment
-  | .unop op ha hq (.simple a) => some (.setLocal i (.unop op ha hq (.simple a)))
+  | .unop op ha hq (.simple a) => .setLocal i (.unop op ha hq (.simple a))
   -- unopCapture
   | @Val.unop _ _ p' _ op ha hq a =>
-    some (.capture p' (fse k) a (.assignLocal i.there (.unop op ha hq (.simple (.local .here)))))
+    .capture p' (fse k) a (.assignLocal i.there (.unop op ha hq (.simple (.local .here))))
   -- ternaryToIf, ternaryCaptureCond
   | .ternary c a b => ternaryStep k (.local i) c a b
   -- memoryFieldRead, memoryIndexReadArrayValue, or Step 1
   | .readMem l => (MHole.local i).readStep k
-      (fun mv hmv f hf => some (.setLocal i (.readMem (.field (.var mv hmv) f hf))))
-      (fun a mv hmv ie => some (.setLocal i (.readMem (.index a (.var mv hmv) (.simple ie))))) l
+      (fun mv hmv f hf => .setLocal i (.readMem (.field (.var mv hmv) f hf)))
+      (fun a mv hmv ie => .setLocal i (.readMem (.index a (.var mv hmv) (.simple ie)))) l
   | .len b hp =>
     -- storageLengthRead
-    if b.isSimple then some (.setLocal i (.len b hp))
+    if b.isSimple then .setLocal i (.len b hp)
     -- storageLengthRead_unfold_rightFst
-    else some (.captureSP (fsp k) b (.assignLocal i.there (.len (.alias .here) hp)))
+    else .captureSP (fsp k) b (.assignLocal i.there (.len (.alias .here) hp))
   -- memoryLengthRead
-  | .mlen (.var mv hm) hp => some (.setLocal i (.mlen (.var mv hm) hp))
+  | .mlen (.var mv hm) hp => .setLocal i (.mlen (.var mv hm) hp)
   -- memoryLengthRead_unfold_rightFst
   | .mlen (.loc l) hp =>
-    some (.captureMV (fmv k) (.loc l) (.assignLocal i.there (.mlen (.var .here (MPath.loc l).mapFree) hp)))
+    .captureMV (fmv k) (.loc l) (.assignLocal i.there (.mlen (.var .here (MPath.loc l).mapFree) hp))
 
 /-- The elements of the array are mappings (`marr`; `darr` its negation). -/
 def SPath.elemMapping {T : Ty} (_ : SPath C Γ T) : Bool := T.elemIsMapping
@@ -331,34 +333,34 @@ def SPath.elemPrim {T : Ty} (_ : SPath C Γ T) : Bool := T.elemIsPrim
 /-- An alias bound (`rebindStep`): to an alias or a location of simple parts
 (`storageLocalRootRebind`, `…BindLocalRoot`), a location unfolded until it
 is one, a push (`storageLocalRootPushBind`) on a simple receiver. -/
-def rebindStep {R : RefTy} (i : Idx Γ (.alias R)) : ARhs C Γ R → Option (Premise C Γ Γ)
+def rebindStep {R : RefTy} (i : Idx Γ (.alias R)) : ARhs C Γ R → Premise C Γ Γ
   -- storageLocalRootRebind
-  | .path (.alias j) => some (.upd1 (.local i (.path (SPath.alias j).lower)))
+  | .path (.alias j) => .upd1 (.local i (.path (SPath.alias j).lower))
   -- storageLocalRootRebind, storageFieldReadBindLocalRoot,
   -- storageIndexReadMappingBindLocalRoot, storageIndexReadArrayBindLocalRoot(MappingElement)
   | .path (.loc l) => (SHole.rebind i).readStep k
-      (fun r h => some (.upd1 (.local i (.path (Loc.root (Γ := Γ) r h).lower))))
-      (fun b f h => some (.upd1 (.local i (.path (Loc.field b f h).lower))))
-      (fun it b ie => some (.upd1 (.local i (.path (Loc.index it b (.simple ie)).lower)))) l
+      (fun r h => .upd1 (.local i (.path (Loc.root (Γ := Γ) r h).lower)))
+      (fun b f h => .upd1 (.local i (.path (Loc.field b f h).lower)))
+      (fun it b ie => .upd1 (.local i (.path (Loc.index it b (.simple ie)).lower))) l
   | .push b hd =>
     -- storageLocalRootPushBind, storageLocalRootPushBindMappingElement
     if b.isSimple then
-      some (.update ((Upd.nil.snoc (.storage (.app2 (.extend (.ref R)) .storage b.lower))).snoc
-        (.local i (.path (.app1 .next rfl b.lower)))))
+      .update ((Upd.nil.snoc (.storage (.app2 (.extend (.ref R)) .storage b.lower))).snoc
+        (.local i (.path (.app1 .next rfl b.lower))))
     -- storageLocalRootPush_unfold_leftFstReceiver
-    else some (.captureSP (fsp k) b (.rebind i.there (.push (.alias .here) hd)))
+    else .captureSP (fsp k) b (.rebind i.there (.push (.alias .here) hd))
 
 /-- A copy into a target whose parts are simple (`copyStep`): a simple
 source is copied (Step 3), a member or entry of a simple path bound to an
 alias first (`storageFieldRead_unfold_rightSndResult`,
 `storageIndexRead_unfold_rightSndResult`), any other unfolded (Step 1). -/
 def copyStep {R : RefTy} (l : Loc C Γ (.ref R)) (hm : (Ty.ref R).mapFree = true) :
-    SPath C Γ (.ref R) → Option (Premise C Γ Γ)
-  | .alias y => some (.save l (.copy (.alias y) hm))
-  | .loc l' => (SHole.copy l hm).readStep k (fun _ _ => some (.save l (.copy (.loc l') hm)))
-      (fun b f hf => some (.captureSP (fsp k) (.loc (.field b f hf)) (.assign l.up (.copy (.alias .here) hm))))
-      (fun it b ie => some (.captureSP (fsp k) (.loc (.index it b (.simple ie)))
-        (.assign l.up (.copy (.alias .here) hm)))) l'
+    SPath C Γ (.ref R) → Premise C Γ Γ
+  | .alias y => .save l (.copy (.alias y) hm)
+  | .loc l' => (SHole.copy l hm).readStep k (fun _ _ => .save l (.copy (.loc l') hm))
+      (fun b f hf => .captureSP (fsp k) (.loc (.field b f hf)) (.assign l.up (.copy (.alias .here) hm)))
+      (fun it b ie => .captureSP (fsp k) (.loc (.index it b (.simple ie)))
+        (.assign l.up (.copy (.alias .here) hm))) l'
 
 /-- `T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se;`
 (`storageIndexWriteCaptureAllComplexRecv`, and
@@ -384,62 +386,62 @@ def indexRefCaptureAll {R R' : RefTy} {kp : PrimTy} (it : IndexTy R kp (.ref R')
 
 /-- A storage write (`assignStep`): the receiver unfolded first, then the
 index, then the source. -/
-def assignStep : {T : Ty} → Loc C Γ T → Src C Γ T → Option (Premise C Γ Γ)
+def assignStep : {T : Ty} → Loc C Γ T → Src C Γ T → Premise C Γ Γ
   -- storageRootWriteStore, storageRootWriteValueRhsCapture
   | _, .root r h, .val e =>
-    (VHole.store (.root r h)).step k (fun se => some (.save (.root r h) (.val (.simple se)))) e
+    (VHole.store (.root r h)).step k (fun se => .save (.root r h) (.val (.simple se))) e
   -- storageRootWriteCopySource
-  | _, .root r h, .copy (.alias j) hm => some (.save (.root r h) (.copy (.alias j) hm))
+  | _, .root r h, .copy (.alias j) hm => .save (.root r h) (.copy (.alias j) hm)
   -- storageRootWriteCopySource, storageFieldReadStoreRoot,
   -- storageIndexReadMappingStoreRoot, storageIndexReadArrayStoreRoot, or Step 1
   | _, .root r h, .copy (.loc l) hm =>
-    let done := some (.save (.root r h) (.copy (.loc l) hm))
+    let done := .save (.root r h) (.copy (.loc l) hm)
     (SHole.copy (.root r h) hm).readStep k (fun _ _ => done) (fun _ _ _ => done) (fun _ _ _ => done) l
   | _, .field b f h, .val e =>
     -- storageFieldWriteSave, fieldWriteValueRhsCapture
     if b.isSimple then
-      (VHole.store (.field b f h)).step k (fun se => some (.save (.field b f h) (.val (.simple se)))) e
+      (VHole.store (.field b f h)).step k (fun se => .save (.field b f h) (.val (.simple se))) e
     -- storageFieldWrite_unfold_leftFst
-    else (VHole.store (.field b f h)).lower k (some (.unfold
+    else (VHole.store (.field b f h)).lower k (.unfold
       (.cons (.declLocal _ (fse k) (some e))
         (.cons (.declStorage _ (fsp k) (some (.path b.up)))
           (.cons (.assign (.field (.alias .here) f h) (.val (.simple (.local (.there .here))))) .nil)))
-      (.push (.push .refl)))) e
+      (.push (.push .refl))) e
   | _, .field b f h, .copy p hm =>
     -- storageFieldWriteCopySource, or the source unfolded
     if b.isSimple then copyStep k (.field b f h) hm p
     -- storageFieldWriteStorageRef_unfold_leftFst
-    else some (.captureSP (fsp k) b (.assign (.field (.alias .here) f h) (.copy p.up hm)))
+    else .captureSP (fsp k) b (.assign (.field (.alias .here) f h) (.copy p.up hm))
   | _, .index it b i, .val e =>
     if b.isSimple then
       match i with
       -- storageIndexWriteMappingSave, storageIndexWriteArraySave, indexWriteValueRhsCapture
       | .simple ie => (VHole.store (.index it b (.simple ie))).step k
-          (fun se => some (.save (.index it b (.simple ie)) (.val (.simple se)))) e
+          (fun se => .save (.index it b (.simple ie)) (.val (.simple se))) e
       -- storageIndexWriteCaptureAllNonSimpleIndex
-      | i => (VHole.store (.index it b i)).lower k (some (indexCaptureAll k it b i e)) e
+      | i => (VHole.store (.index it b i)).lower k (indexCaptureAll k it b i e) e
     -- storageIndexWriteCaptureAllComplexRecv
-    else (VHole.store (.index it b i)).lower k (some (indexCaptureAll k it b i e)) e
+    else (VHole.store (.index it b i)).lower k (indexCaptureAll k it b i e) e
   | _, .index it b i, .copy p hm =>
     if b.isSimple then
       match i with
       -- storageIndexWriteMappingCopySource, storageIndexWriteArrayCopySource
       | .simple ie => copyStep k (.index it b (.simple ie)) hm p
       -- storageIndexWriteStorageRefCaptureAllNonSimpleIndex
-      | i => some (indexRefCaptureAll k it b i p hm)
+      | i => indexRefCaptureAll k it b i p hm
     -- storageIndexWriteStorageRefCaptureAllComplexRecv
-    else some (indexRefCaptureAll k it b i p hm)
+    else indexRefCaptureAll k it b i p hm
 
 /-- A storage location written from memory (`assignFromMemStep`): the
 receiver first, then the index; the memory path copied as it is. -/
-def assignFromMemStep {R : RefTy} : Loc C Γ (.ref R) → MPath C Γ (.ref R) → Option (Premise C Γ Γ)
+def assignFromMemStep {R : RefTy} : Loc C Γ (.ref R) → MPath C Γ (.ref R) → Premise C Γ Γ
   -- memoryToStorageStoreRoot
-  | .root r h, p => some (.saveMem (.root r h) p)
+  | .root r h, p => .saveMem (.root r h) p
   | .field b f h, p =>
     -- memoryToStorageFieldCopyRoot
-    if b.isSimple then some (.saveMem (.field b f h) p)
+    if b.isSimple then .saveMem (.field b f h) p
     -- memoryToStorageField_unfold_leftFst
-    else some (.captureSP (fsp k) b (.assignFromMem (.field (.alias .here) f h) p.up))
+    else .captureSP (fsp k) b (.assignFromMem (.field (.alias .here) f h) p.up)
   | @Loc.index _ _ R' kp _ it b i, p =>
     let capture : Premise C Γ Γ :=
       .unfold (.cons (.declStorage R' (fsp k) (some (.path b)))
@@ -449,30 +451,30 @@ def assignFromMemStep {R : RefTy} : Loc C Γ (.ref R) → MPath C Γ (.ref R) �
     if b.isSimple then
       match i with
       -- memoryToStorageIndexMappingCopyRoot, memoryToStorageIndexArrayCopyRoot
-      | .simple ie => some (.saveMem (.index it b (.simple ie)) p)
+      | .simple ie => .saveMem (.index it b (.simple ie)) p
       -- memoryToStorageIndexCaptureAllNonSimpleIndex
-      | _ => some capture
+      | _ => capture
     -- memoryToStorageIndexCaptureAllComplexRecv
-    else some capture
+    else capture
 
 /-- `delete l;` (`deleteStep`): the receiver first, then the index. -/
-def deleteStep {T : Ty} : Loc C Γ T → Option (Premise C Γ Γ)
+def deleteStep {T : Ty} : Loc C Γ T → Premise C Γ Γ
   -- storageRootDelete
-  | .root r h => some (.delAt (.root r h))
+  | .root r h => .delAt (.root r h)
   | .field b f h =>
     -- storageFieldDelete
-    if b.isSimple then some (.delAt (.field b f h))
+    if b.isSimple then .delAt (.field b f h)
     -- storageFieldDelete_unfold_leftFst
-    else some (.captureSP (fsp k) b (.delete (.field (.alias .here) f h)))
+    else .captureSP (fsp k) b (.delete (.field (.alias .here) f h))
   | @Loc.index _ _ _ kp _ it b i =>
     if b.isSimple then
       match i with
       -- storageIndexDelete, storageIndexArrayDelete
-      | .simple ie => some (.delAt (.index it b (.simple ie)))
+      | .simple ie => .delAt (.index it b (.simple ie))
       -- storageIndexDeleteNonSimpleIndexCapture
-      | i => some (.capture kp (fie k) i (.delete (.index it b.up (.simple (.local .here)))))
+      | i => .capture kp (fie k) i (.delete (.index it b.up (.simple (.local .here))))
     -- storageIndexDelete_unfold_leftFst
-    else some (.captureSP (fsp k) b (.delete (.index it (.alias .here) i.up)))
+    else .captureSP (fsp k) b (.delete (.index it (.alias .here) i.up))
 
 /-! ### Compound assignment and `++`/`--` -/
 
@@ -520,7 +522,7 @@ def OpLoc.unfoldRecv {p : PrimTy} (s : {t : LTy} → OpLoc C (t :: Γ) p → Stm
 
 /-- `l ⊕= r;` (`opStep`): the source first, then the receiver. -/
 def opStep {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)
-    (l : OpLoc C Γ p) : Val C Γ p → Option (Premise C Γ Γ)
+    (l : OpLoc C Γ p) : Val C Γ p → Premise C Γ Γ
   -- localOpAssign, storageRootOpAssign, storageFieldOpAssign,
   -- storageIndexMappingOpAssign, storageIndexArrayOpAssign, memoryFieldOpAssign,
   -- memoryIndexArrayOpAssign; or storageFieldOpAssignUnfoldLeftFst,
@@ -528,24 +530,24 @@ def opStep {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true) (hp : p
   -- memoryIndexOpAssignUnfoldLeftFst
   | .simple se =>
     match l.unfoldRecv k (fun l' => .opAssign op hop hp l' (.simple se.up)) with
-    | some q => some q
-    | none => some (.upd1 (l.set (l.op op se.lower)))
+    | some q => q
+    | none => .upd1 (l.set (l.op op se.lower))
   -- compoundAssignValueRhsCapture
-  | r => some (.capture p (fse k) r (.opAssign op hop hp l.up (.simple (.local .here))))
+  | r => .capture p (fse k) r (.opAssign op hop hp l.up (.simple (.local .here)))
 
 /-- `1`, the step of `++`/`--`. -/
 abbrev Tm.one {Γ : Ctx} : Tm C Γ .val := Tm.lit (.int 1)
 
 /-- `l++;` (`incStep`): the receiver first. -/
 def incStep {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    Option (Premise C Γ Γ) :=
+    Premise C Γ Γ :=
   -- storageFieldIncrementUnfoldLeftFst, storageIndexIncrementUnfoldLeftFst,
   -- memoryFieldIncrementUnfoldLeftFst, memoryIndexIncrementUnfoldLeftFst
   match l.unfoldRecv k (fun l' => .incDec op hp l') with
-  | some q => some q
+  | some q => q
   -- localIncrement, storageRootIncrement, storageFieldIncrement,
   -- storageIndexIncrement, memoryFieldIncrement, memoryIndexArrayIncrement
-  | none => some (.upd1 (l.set (l.op op.binOp .one)))
+  | none => .upd1 (l.set (l.op op.binOp .one))
 
 /-- The value `t++` has: the bumped one for `++t`, the old one for `t++`
 (`Update.lean`'s `Term.bumped`). -/
@@ -557,77 +559,77 @@ def Tm.bumped (op : IncDec) (p : PrimTy) (t : Tm C Γ .val) : Tm C Γ .val :=
 `storageIndexIncrementAssignment`, `memoryFieldIncrementAssignment`,
 `memoryIndexArrayIncrementAssignment`). -/
 def assignIncStep {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (l : OpLoc C Γ p) :
-    Option (Premise C Γ Γ) :=
-  some (.update ((Upd.nil.snoc (l.set (l.op op.binOp .one))).snoc
-    (.local i (.val (Tm.bumped op p l.cur)))))
+    Premise C Γ Γ :=
+  .update ((Upd.nil.snoc (l.set (l.op op.binOp .one))).snoc
+    (.local i (.val (Tm.bumped op p l.cur))))
 
 /-! ### Arrays and payments -/
 
 /-- `b.push(v);` (`pushStep`): the receiver first, then the argument. -/
 def pushStep {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
-    (hd : (v.isSome || E.defaultOkS) = true) : Option (Premise C Γ Γ) :=
+    (hd : (v.isSome || E.defaultOkS) = true) : Premise C Γ Γ :=
   if b.isSimple then
     match E, b, v with
     | E, b, none =>
       -- storagePushLengthSave
-      if b.elemPrim then some (.upd1 (.storage (.app2 (.pushSlot E) .storage b.lower)))
+      if b.elemPrim then .upd1 (.storage (.app2 (.pushSlot E) .storage b.lower))
       -- storagePushLengthSaveReferenceElement
-      else some (.upd1 (.storage (.app2 (.extend E) .storage b.lower)))
+      else .upd1 (.storage (.app2 (.extend E) .storage b.lower))
     -- storagePushValueSave
     | _, b, some (.val (.simple se)) =>
-      some (.upd1 (.storage (.app3 .push .storage b.lower (Src.val (Γ := Γ) (.simple se)).lower)))
+      .upd1 (.storage (.app3 .push .storage b.lower (Src.val (Γ := Γ) (.simple se)).lower))
     -- storagePushValue_unfold_rightSndArgument
-    | _, b, some (.val e) => some (.capture _ (fse k) e (.push b.up (some (.val (.simple (.local .here)))) rfl))
+    | _, b, some (.val e) => .capture _ (fse k) e (.push b.up (some (.val (.simple (.local .here)))) rfl)
     -- storagePushValueCopySource
-    | _, b, some (.copy p hm) => some (.upd1 (.storage (.app3 .push .storage b.lower (Src.copy p hm).lower)))
+    | _, b, some (.copy p hm) => .upd1 (.storage (.app3 .push .storage b.lower (Src.copy p hm).lower))
   -- storagePush_unfold_leftFstReceiver, storagePushValue_unfold_leftFstReceiver
-  else some (.captureSP (fsp k) b (.push (.alias .here) (v.map Src.up) (by
-    cases v <;> exact hd)))
+  else .captureSP (fsp k) b (.push (.alias .here) (v.map Src.up) (by
+    cases v <;> exact hd))
 
 /-- `b.pop();` (`popStep`): the receiver first. -/
-def popStep {E : Ty} (b : SPath C Γ (.array E)) : Option (Premise C Γ Γ) :=
+def popStep {E : Ty} (b : SPath C Γ (.array E)) : Premise C Γ Γ :=
   if b.isSimple then
     -- storagePopSaveMappingElement
-    if b.elemMapping then some (.upd1 (.storage (.app2 .shrink .storage b.lower)))
+    if b.elemMapping then .upd1 (.storage (.app2 .shrink .storage b.lower))
     -- storagePopSave
-    else some (.upd1 (.storage (.app2 .pop .storage b.lower)))
+    else .upd1 (.storage (.app2 .pop .storage b.lower))
   -- storagePop_unfold_leftFstReceiver
-  else some (.captureSP (fsp k) b (.pop (.alias .here)))
+  else .captureSP (fsp k) b (.pop (.alias .here))
 
 /-- `{net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se)}`. -/
 abbrev UpdElem.payTo (r a : Simple C Γ .uint) : UpdElem C Γ Γ := .pay r.lower a.lower
 
 /-- `r.transfer(a);` (`transferStep`): the receiver first, then the amount. -/
-def transferStep (m : Modality) : Val C Γ .uint → Val C Γ .uint → Option (Premise C Γ Γ)
+def transferStep (m : Modality) : Val C Γ .uint → Val C Γ .uint → Premise C Γ Γ
   | .simple sadr, .simple se => match m with
     -- transferNoCallbackBox
-    | .box => some (.upd1 (.payTo sadr se))
+    | .box => .upd1 (.payTo sadr se)
     -- transferDiamond (Lean)
-    | .diamond => some (.done false)
+    | .diamond => .done false
   -- transfer_unfold_rightSndArgument
-  | .simple sadr, a => some (.capture .uint (fse k) a (.transfer (.simple sadr.up) (.simple (.local .here))))
+  | .simple sadr, a => .capture .uint (fse k) a (.transfer (.simple sadr.up) (.simple (.local .here)))
   -- transfer_unfold_leftFstReceiver
-  | r, a => some (.capture .uint (fse k) r (.transfer (.simple (.local .here)) a.up))
+  | r, a => .capture .uint (fse k) r (.transfer (.simple (.local .here)) a.up)
 
 /-- `pv = r.send(a);` (`sendStep`): the receiver first, then the amount;
 both simple, the send's two outcomes. -/
 def sendStep (m : Modality) (pv : Idx Γ (.val .bool)) :
-    Val C Γ .uint → Val C Γ .uint → Option (Premise C Γ Γ)
+    Val C Γ .uint → Val C Γ .uint → Premise C Γ Γ
   | .simple sadr, .simple se =>
     let us : List (Upd C Γ Γ) :=
       [(Upd.nil.snoc (.payTo sadr se)).snoc (.local pv (.val (Tm.lit (.bool true)))),
         Upd.nil.snoc (.local pv (.val (Tm.lit (.bool false))))]
     match m with
     -- sendNoCallbackBox
-    | .box => some (.cases [] us)
+    | .box => .cases [] us
     -- sendNoCallbackDiamond
     | .diamond =>
-      some (.cases [.isBoolD (.app2 (.binop .le .uint) (Tm.lit (.int 0)) se.lower) true] us)
+      .cases [.isBoolD (.app2 (.binop .le .uint) (Tm.lit (.int 0)) se.lower) true] us
   -- send_unfold_rightSndArgument
   | .simple sadr, a =>
-    some (.capture .uint (fse k) a (.send pv.there (.simple sadr.up) (.simple (.local .here))))
+    .capture .uint (fse k) a (.send pv.there (.simple sadr.up) (.simple (.local .here)))
   -- send_unfold_leftFstReceiver
-  | r, a => some (.capture .uint (fse k) r (.send pv.there (.simple (.local .here)) a.up))
+  | r, a => .capture .uint (fse k) r (.send pv.there (.simple (.local .here)) a.up)
 
 /-! ### Memory -/
 
@@ -636,95 +638,95 @@ def sendStep (m : Modality) (pv : Idx Γ (.val .bool)) :
 (`memoryFieldReadAliasRoot`, `memoryIndexReadArrayMemory`), a deep copy of
 storage (`memoryStorageCopy`, `memoryStorageCopyUnfold`), a fresh array
 (`memoryArrayFreshAlloc`). -/
-def rebindMemStep {R : RefTy} (i : Idx Γ (.mem R)) : MRhs C Γ R → Option (Premise C Γ Γ)
-  | .alias (.var j hj) => some (.upd1 (.local i (.mref (MPath.var j hj).lower)))
+def rebindMemStep {R : RefTy} (i : Idx Γ (.mem R)) : MRhs C Γ R → Premise C Γ Γ
+  | .alias (.var j hj) => .upd1 (.local i (.mref (MPath.var j hj).lower))
   | .alias (.loc l) => (MHole.rebind i).readStep k
-      (fun mv hmv f hf => some (.upd1 (.local i (.mref (MPath.loc (.field (.var mv hmv) f hf)).lower))))
+      (fun mv hmv f hf => .upd1 (.local i (.mref (MPath.loc (.field (.var mv hmv) f hf)).lower)))
       (fun a mv hmv ie =>
-        some (.upd1 (.local i (.mref (MPath.loc (.index a (.var mv hmv) (.simple ie))).lower)))) l
+        .upd1 (.local i (.mref (MPath.loc (.index a (.var mv hmv) (.simple ie))).lower))) l
   | .copy sp hm =>
-    if sp.isSimple then some (.allocCopy i (.app2 .sfind .storage sp.lower))
-    else some (.captureSP (fsp k) sp (.rebindMem i.there (.copy (.alias .here) hm)))
-  | .newArr n _ => some (.allocCopy i (.app1 (.newArr R) rfl n.lower))
+    if sp.isSimple then .allocCopy i (.app2 .sfind .storage sp.lower)
+    else .captureSP (fsp k) sp (.rebindMem i.there (.copy (.alias .here) hm))
+  | .newArr n _ => .allocCopy i (.app1 (.newArr R) rfl n.lower)
 
 /-- A memory reference written to the target `l` (`memRefStep`): a memory
 local or a bindable location is written (`memoryFieldWriteCopy`,
 `memoryIndexWriteCopy`), any other source unfolded (Step 1). -/
-def memRefStep {R : RefTy} (l : MLoc C Γ (.ref R)) : MPath C Γ (.ref R) → Option (Premise C Γ Γ)
-  | .var y hy => some (.writeMem l (.ref (.var y hy)))
+def memRefStep {R : RefTy} (l : MLoc C Γ (.ref R)) : MPath C Γ (.ref R) → Premise C Γ Γ
+  | .var y hy => .writeMem l (.ref (.var y hy))
   | .loc sl => (MHole.write l).readStep k
-      (fun mv hmv f hf => some (.writeMem l (.ref (.loc (.field (.var mv hmv) f hf)))))
-      (fun a mv hmv ie => some (.writeMem l (.ref (.loc (.index a (.var mv hmv) (.simple ie)))))) sl
+      (fun mv hmv f hf => .writeMem l (.ref (.loc (.field (.var mv hmv) f hf))))
+      (fun a mv hmv ie => .writeMem l (.ref (.loc (.index a (.var mv hmv) (.simple ie))))) sl
 
 /-- A memory location written (`assignMemStep`): the receiver first, then
 the index, then the source. -/
-def assignMemStep : {T : Ty} → MLoc C Γ T → MSrc C Γ T → Option (Premise C Γ Γ)
+def assignMemStep : {T : Ty} → MLoc C Γ T → MSrc C Γ T → Premise C Γ Γ
   -- memoryFieldWrite, memoryFieldWriteUnfoldSource
   | _, .field (.var mv hmv) f hf, .val e => (VHole.mem (.field (.var mv hmv) f hf)).step k
-      (fun se => some (.writeMem (.field (.var mv hmv) f hf) (.val (.simple se)))) e
+      (fun se => .writeMem (.field (.var mv hmv) f hf) (.val (.simple se))) e
   | _, .field (.var mv hmv) f hf, .ref src => memRefStep k (.field (.var mv hmv) f hf) src
   -- memoryFieldWrite_unfold_leftFst
   | _, .field (.loc l) f hf, r =>
-    some (.captureMV (fmv k) (.loc l) (.assignMem (.field (.var .here (MPath.loc l).mapFree) f hf) r.up))
+    .captureMV (fmv k) (.loc l) (.assignMem (.field (.var .here (MPath.loc l).mapFree) f hf) r.up)
   -- memoryIndexWriteArray, memoryIndexWriteUnfoldSource
   | _, .index a (.var mv hmv) (.simple ie), .val e => (VHole.mem (.index a (.var mv hmv) (.simple ie))).step k
-      (fun se => some (.writeMem (.index a (.var mv hmv) (.simple ie)) (.val (.simple se)))) e
+      (fun se => .writeMem (.index a (.var mv hmv) (.simple ie)) (.val (.simple se))) e
   | _, .index a (.var mv hmv) (.simple ie), .ref src => memRefStep k (.index a (.var mv hmv) (.simple ie)) src
   -- memoryIndexWriteCaptureAllNonSimpleIndex
   | _, .index a (.var mv hmv) i, .val e =>
-    some (.unfold (.cons (.declLocal _ (fse k) (some e))
+    .unfold (.cons (.declLocal _ (fse k) (some e))
       (.cons (.declLocal .uint (fie k) (some i.up))
       (.cons (.assignMem (.index a (.var mv.there.there hmv) (.simple (.local .here)))
-        (.val (.simple (.local (.there .here))))) .nil))) (.push (.push .refl)))
+        (.val (.simple (.local (.there .here))))) .nil))) (.push (.push .refl))
   -- memoryIndexWriteMemRefCaptureAllNonSimpleIndex
   | _, .index a (.var mv hmv) i, .ref src =>
-    some (.capture .uint (fie k) i (.assignMem (.index a (.var mv.there hmv) (.simple (.local .here)))
-      (.ref src.up)))
+    .capture .uint (fie k) i (.assignMem (.index a (.var mv.there hmv) (.simple (.local .here)))
+      (.ref src.up))
   -- memoryIndexWriteCaptureAllComplexRecv
   | _, @MLoc.index _ _ R _ a (.loc l) i, .val e =>
-    some (.unfold (.cons (.declLocal _ (fse k) (some e))
+    .unfold (.cons (.declLocal _ (fse k) (some e))
       (.cons (.declMem R (fmv k) (some (.alias (MPath.loc l).up)) rfl (MPath.loc l).mapFree)
       (.cons (.declLocal .uint (fie k) (some i.up.up))
       (.cons (.assignMem (.index a (.var (.there .here) (MPath.loc l).mapFree) (.simple (.local .here)))
         (.val (.simple (.local (.there (.there .here)))))) .nil))))
-      (.push (.push (.push .refl))))
+      (.push (.push (.push .refl)))
   -- memoryIndexWriteMemRefCaptureAllComplexRecv
   | _, @MLoc.index _ _ R _ a (.loc l) i, .ref src =>
-    some (.unfold (.cons (.declMem R (fmv k) (some (.alias (.loc l))) rfl (MPath.loc l).mapFree)
+    .unfold (.cons (.declMem R (fmv k) (some (.alias (.loc l))) rfl (MPath.loc l).mapFree)
       (.cons (.declLocal .uint (fie k) (some i.up))
       (.cons (.assignMem (.index a (.var (.there .here) (MPath.loc l).mapFree) (.simple (.local .here)))
-        (.ref src.up.up)) .nil))) (.push (.push .refl)))
+        (.ref src.up.up)) .nil))) (.push (.push .refl))
 
 /-- `delete p;` on memory (`deleteMemStep`): a memory local bound to a fresh
 default object, a member or element of one reset by the rule its type
 picks, any other receiver bound first, a complex index captured. -/
-def deleteMemStep : {T : Ty} → MPath C Γ T → T.defaultOkS = true → Option (Premise C Γ Γ)
+def deleteMemStep : {T : Ty} → MPath C Γ T → T.defaultOkS = true → Premise C Γ Γ
   -- memoryRootDeleteFreshRebind
   | _, @MPath.var _ _ R i _, _ =>
-    some (.update ((Upd.nil.snoc (.local i (.mref (.app1 (.alloc R) rfl .memory)))).snoc
-      (.memory (.app1 (.addM R) rfl .memory))))
+    .update ((Upd.nil.snoc (.local i (.mref (.app1 (.alloc R) rfl .memory)))).snoc
+      (.memory (.app1 (.addM R) rfl .memory)))
   -- memoryFieldDeletePrimitive, memoryFieldDeleteReference
   | _, .loc (@MLoc.field _ _ _ T (.var mv hmv) f hf), _ =>
-    some (.clearMem (MLoc.field (.var mv hmv) f hf).lower T)
+    .clearMem (MLoc.field (.var mv hmv) f hf).lower T
   -- memoryFieldDelete_unfold_leftFst
   | _, .loc (.field (.loc l) f hf), hd =>
-    some (.captureMV (fmv k) (.loc l) (.deleteMem (.loc (.field (.var .here (MPath.loc l).mapFree) f hf)) hd))
+    .captureMV (fmv k) (.loc l) (.deleteMem (.loc (.field (.var .here (MPath.loc l).mapFree) f hf)) hd)
   -- memoryIndexDeletePrimitive, memoryIndexDeleteReference
   | _, .loc (@MLoc.index _ _ _ T a (.var mv hmv) (.simple ie)), _ =>
-    some (.clearMem (MLoc.index a (.var mv hmv) (.simple ie)).lower T)
+    .clearMem (MLoc.index a (.var mv hmv) (.simple ie)).lower T
   -- memoryIndexDeleteNonSimpleIndexCapture
   | _, .loc (.index a (.var mv hmv) i), hd =>
-    some (.capture .uint (fie k) i (.deleteMem (.loc (.index a (.var mv.there hmv) (.simple (.local .here)))) hd))
+    .capture .uint (fie k) i (.deleteMem (.loc (.index a (.var mv.there hmv) (.simple (.local .here)))) hd)
   -- memoryIndexDelete_unfold_leftFst
   | _, .loc (.index a (.loc l) i), hd =>
-    some (.captureMV (fmv k) (.loc l) (.deleteMem (.loc (.index a (.var .here (MPath.loc l).mapFree) i.up)) hd))
+    .captureMV (fmv k) (.loc l) (.deleteMem (.loc (.index a (.var .here (MPath.loc l).mapFree) i.up)) hd)
 
 /-- `tgt = new T(se);` (`newArrayCapture`): the fresh array bound to a fresh
 memory local first. -/
 def assignNewStep {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint) (h : R.newArrOk = true) :
-    Option (Premise C Γ Γ) :=
-  some (.unfold (.cons (.declMem R (fmv k) (some (.newArr n h)) rfl (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree)
-    (.cons (l.up.fill (.var .here (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree)) .nil)) (.push .refl))
+    Premise C Γ Γ :=
+  .unfold (.cons (.declMem R (fmv k) (some (.newArr n h)) rfl (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree)
+    (.cons (l.up.fill (.var .here (MRhs.newArr (C := C) (Γ := Γ) n h).mapFree)) .nil)) (.push .refl)
 
 /-! ### Control flow -/
 
@@ -732,24 +734,24 @@ def assignNewStep {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint) (h : R
 other (`ifElseUnfold`), the branches read with the capture on top: weakened
 by `Prog.wk up`, which the kernel runs on every captured condition. -/
 def iteStep {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) :
-    Option (Premise C Γ Γ) :=
+    Premise C Γ Γ :=
   match c with
-  | .simple s => some (.split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false) thn els)
-  | c => some (.capture .bool (fse k) c
-      (.ite (.simple (.local .here)) (thn.wk up).2.2 (els.wk up).2.2))
+  | .simple s => .split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false) thn els
+  | c => .capture .bool (fse k) c
+      (.ite (.simple (.local .here)) (thn.wk up).2.2 (els.wk up).2.2)
 
 /-- `require(c);`: two goals on a simple condition (`requireSimple`), the
 condition captured otherwise (`requireConditionCapture`). -/
-def requireStep : Val C Γ .bool → Option (Premise C Γ Γ)
-  | .simple s => some (.split .capture (Fml.isBool s.lower true) (Fml.isBool s.lower false) .nil
-      (.cons .revert .nil))
-  | c => some (.capture .bool (fse k) c (.require (.simple (.local .here))))
+def requireStep : Val C Γ .bool → Premise C Γ Γ
+  | .simple s => .split .capture (Fml.isBool s.lower true) (Fml.isBool s.lower false) .nil
+      (.cons .revert .nil)
+  | c => .capture .bool (fse k) c (.require (.simple (.local .here)))
 
 /-- `assert(c);`: the check of a simple condition (`assertSimple`), the
 condition captured otherwise (`assertConditionCapture`). -/
-def assertStep : Val C Γ .bool → Option (Premise C Γ Γ)
-  | .simple s => some (.check (Fml.isBool s.lower true))
-  | c => some (.capture .bool (fse k) c (.assert (.simple (.local .here))))
+def assertStep : Val C Γ .bool → Premise C Γ Γ
+  | .simple s => .check (Fml.isBool s.lower true)
+  | c => .capture .bool (fse k) c (.assert (.simple (.local .here)))
 
 end Rules
 

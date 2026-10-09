@@ -45,7 +45,7 @@ under solkey's names where solkey has the rule:
   rewrites of the goal) are derived from it (`Calculus/UpdateRules.lean`).
 
 A program rule fires the rule the strategy fires (`Stmt.step`, one per
-statement): its premise is `s.step k m = some p`, which `rfl` proves and
+statement): its premise is `s.step k m = p`, which `rfl` proves and
 `Taclet.step_eq` gives from a named taclet (`Calculus/Taclet.lean`).
 The rule must be one of `R`'s (`hR : R.admits m s = true`, last, proved by
 default): every rule under `.all`; under `.solkey` the statement must be one
@@ -100,20 +100,20 @@ has its rule (`RuleSet.admits`), none where it does not. -/
 def Stmt.stepIn (R : RuleSet) (k : Nat) (m : Modality) {Γ Γ' : Ctx}
     (s : Stmt C Γ Γ') : Option (Premise C Γ Γ') :=
   match R with
-  | .solkey => cond (s.keyStep m) (s.step k m) none
-  | .all => s.step k m
+  | .solkey => cond (s.keyStep m) (some (s.step k m)) none
+  | .all => some (s.step k m)
 
 theorem Stmt.stepIn_all (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
-    s.stepIn .all k m = s.step k m := rfl
+    s.stepIn .all k m = some (s.step k m) := rfl
 
 /-- A step with the rules of `R` is the strategy's. -/
 theorem Stmt.step_of_stepIn {R : RuleSet} {k : Nat} {m : Modality} {Γ Γ' : Ctx}
-    {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (h : s.stepIn R k m = some p) : s.step k m = some p := by
+    {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (h : s.stepIn R k m = some p) : s.step k m = p := by
   cases R with
-  | all => exact h
+  | all => exact Option.some.inj h
   | solkey =>
     cases hk : s.keyStep m with
-    | true => simpa only [Stmt.stepIn, hk, cond_true] using h
+    | true => simpa only [Stmt.stepIn, hk, cond_true, Option.some.injEq] using h
     | false => simp only [Stmt.stepIn, hk, cond_false, reduceCtorEq] at h
 
 /-- A step with the rules of `R` is one `R` has the rule of. -/
@@ -128,13 +128,13 @@ theorem Stmt.admits_of_stepIn {R : RuleSet} {k : Nat} {m : Modality} {Γ Γ' : C
 
 /-- The strategy's step is one with the rules of `R` where `R` has the rule. -/
 theorem Stmt.stepIn_of_step {R : RuleSet} {k : Nat} {m : Modality} {Γ Γ' : Ctx}
-    {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (hR : R.admits m s = true) (h : s.step k m = some p) :
+    {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (hR : R.admits m s = true) (h : s.step k m = p) :
     s.stepIn R k m = some p := by
   cases R with
-  | all => exact h
+  | all => exact congrArg some h
   | solkey =>
     have hk : s.keyStep m = true := hR
-    simpa only [Stmt.stepIn, hk, cond_true] using h
+    simp only [Stmt.stepIn, hk, cond_true, h]
 
 /-- **A rule solkey does not have fires only where `Stmt.keyStep` says so.** -/
 theorem LeanTaclet.keyStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
@@ -248,7 +248,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   rest of the program goes on. -/
   | update {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {U : Upd C Γ Γ'}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.update U))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .update U)
       (h : Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
@@ -256,7 +256,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   fresh locals popped after them (`pop .capture`). -/
   | unfold {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.unfold P e))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .unfold P e)
       (h : Proves C R Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
@@ -265,7 +265,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | bind {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {x : Var} {t : LTy}
       {P : Prog C (t :: Γ) Γ'}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.bind x t P))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .bind x t P)
       (h : Proves C R Γ₀ (H.bind m x t) (.modal m P (.seq ω κ) φ))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
@@ -274,7 +274,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | split {Γ Γ₁ Γ₂ Δ₁ Δ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : BlockKind} {c c' : Fml C Γ}
       {P : Prog C Γ Δ₁} {Q : Prog C Γ Δ₂}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.split b c c' P Q))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .split b c c' P Q)
       (thn : Proves C R Γ₀ (H.pre c) (.modalK m P (.pop b P.ext (.seq ω κ)) φ))
       (els : Proves C R Γ₀ (H.pre c') (.modalK m Q (.pop b Q.ext (.seq ω κ)) φ))
       (hR : R.admits m s = true := by rule_admits) :
@@ -283,14 +283,14 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   assumed ("Holds"), and the condition ("Violated"). -/
   | check {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {c : Fml C Γ}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.check c))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .check c)
       (thn : Proves C R Γ₀ (H.pre c) (.modalK m ω κ φ)) (els : Proves C R Γ₀ H c)
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that closes the modality (`revertBox`, `revertDiamond`). -/
   | done {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : Bool}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.done b))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .done b)
       (h : Proves C R Γ₀ H (if b then .tt else .ff))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
@@ -301,7 +301,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   statement behind any context. -/
   | branches {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {bs : List (Branch C Γ)}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.branches bs))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .branches bs)
       (hne : bs.isEmpty = false)
       (h : ∀ b ∈ bs, Proves C R Γ₀ H
         (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))
@@ -312,7 +312,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   | cases {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {fs : List (Fml C Γ)}
       {us : List (Upd C Γ Γ)}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.cases fs us))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .cases fs us)
       (hne : (fs.isEmpty && us.isEmpty) = false)
       (fml : ∀ f ∈ fs, Proves C R Γ₀ H f)
       (upd : ∀ U ∈ us, Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ))
@@ -328,7 +328,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {U : Upd C Γ Δ} {c c' : Fml C Δ}
       {hu : Ext Γ Δ₀} {hb : Ext Δ₀ Δ} {P : Prog C Δ₀ Γ₃} {post : Fml C Δ₀}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m =
-        some (.inv I xs hv U c c' hu hb P post))
+        .inv I xs hv U c c' hu hb P post)
       (init : Proves C R Γ₀ H I)
       (thn : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c)
         (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
@@ -341,7 +341,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   variables): the block replaces the statement. -/
   | inline {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {P : Prog C Γ Γ''} {e : Thin Γ' Γ''}
-      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = some (.inline P e))
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .inline P e)
       (h : Proves C R Γ₀ H (.modal m P (.drop e (.seq ω κ)) φ))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)

@@ -51,7 +51,7 @@ def Fml.modalFocus (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P : Prog C �
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) : Option (Focus C × Fml C Γ) :=
   Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames C Γ₁ Γ₀ → Option (Focus C × Fml C Γ)) P
     (fun κ => some (.empty, κ.exit m φ))
-    (fun s ω κ => (s.step k m).map fun p => (.stmt k m s, p.fml m ω κ φ)) κ
+    (fun s ω κ => some (.stmt k m s, (s.step k m).fml m ω κ φ)) κ
 
 /-- `Fml.stepR` with the statement it fires on: the recursor, which the
 kernel unfolds (Gate G0, condition 2).  Never run as compiled code. -/
@@ -174,10 +174,7 @@ theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
     show (Fml.modalFocus k m P κ φ).map Prod.snd = Fml.modalStep k m P κ φ
     cases P with
     | nil => rfl
-    | cons s ω =>
-      show ((s.step k m).map fun p => (Focus.stmt k m s, p.fml m ω κ φ)).map Prod.snd =
-        (s.step k m).map fun p => p.fml m ω κ φ
-      cases s.step k m <;> rfl
+    | cons s ω => rfl
   | and φ ψ ihφ ihψ =>
     show (match φ.stepFocusR k with
       | some (f, φ') => some (f, Fml.and φ' ψ)
@@ -598,13 +595,9 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
       cases h
       exact holds_exit m κ φ σ hψ
     | cons s ω =>
-      have h : ((s.step k m).map fun p => (Focus.stmt k m s, p.fml m ω κ φ)) = some (f, ψ) := h
-      cases hp : s.step k m with
-      | none => rw [hp] at h; cases h
-      | some p =>
-        rw [hp] at h
-        cases h
-        exact Stmt.sound k m s p hp σ ω κ φ hψ
+      have h : some (Focus.stmt k m s, (s.step k m).fml m ω κ φ) = some (f, ψ) := h
+      cases h
+      exact Stmt.sound k m s _ rfl σ ω κ φ hψ
   | _, .and φ₁ φ₂, f, ψ, h, σ, hψ => by
     have h : (match φ₁.stepFocusR k with
       | some (f, φ') => some (f, Fml.and φ' φ₂)

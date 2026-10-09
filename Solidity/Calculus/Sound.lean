@@ -46,7 +46,7 @@ theorem Stmt.sound : Stmt.Sound C :=
 says** (`Premise.Runs`): the arms' statement, which the reading with
 callbacks reads (`Calculus/CallbackSound.lean`). -/
 theorem Stmt.runs (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (p : Premise C Γ Γ')
-    (hp : s.step k m = some p) (σ : State C Γ) : Premise.Runs m s p σ :=
+    (hp : s.step k m = p) (σ : State C Γ) : Premise.Runs m s p σ :=
   Stmt.stepSound k m s σ p hp
 
 /-- **Soundness of the scoped sequent over the typed state**: what `H ⊢ φ`

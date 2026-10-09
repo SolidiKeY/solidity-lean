@@ -74,18 +74,17 @@ theorem LeanTaclet.not_inSolkey {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stm
 
 /-- **On the fragment, the rule the strategy fires is solkey's.** -/
 theorem Stmt.step_taclet {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (h : s.inSolkey m = true) (hs : s.step k m = some p) :
+    {p : Premise C Γ Γ'} (h : s.inSolkey m = true) (hs : s.step k m = p) :
     Taclet C k m s p :=
   match Rule.ofStep hs with
   | .key d => d
   | .lean d => absurd h (by rw [d.not_inSolkey]; decide)
 
-/-- **On the fragment, solkey has the rule**: `Stmt.step` leaves a premise,
-and one of solkey's taclets rewrites the statement to it. -/
+/-- **On the fragment, solkey has the rule**: one of solkey's taclets
+rewrites the statement to the premise `Stmt.step` leaves. -/
 theorem Stmt.solkey_rule_exists (k : Nat) {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    (h : s.inSolkey m = true) : ∃ p, s.step k m = some p ∧ Taclet C k m s p :=
-  let ⟨p, hs, _⟩ := Stmt.rule_exists k m s
-  ⟨p, hs, Stmt.step_taclet h hs⟩
+    (h : s.inSolkey m = true) : Taclet C k m s (s.step k m) :=
+  Stmt.step_taclet h rfl
 
 /-- Whether a statement is a loop. -/
 def Stmt.isLoop : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
@@ -115,7 +114,7 @@ calculus, and no taclet of solkey's rewrites it. -/
 theorem Stmt.solkey_lt_calculus (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ)
     (c : Val C Γ .bool) (body : Prog C Γ Γ₁) :
     (∃ p, Rule C k m (.loop a c body) p) ∧ ∀ p, ¬ Taclet C k m (.loop a c body) p :=
-  ⟨let ⟨p, _, d⟩ := Stmt.rule_exists k m (.loop a c body); ⟨p, d⟩,
+  ⟨⟨_, Stmt.rule_exists k m (.loop a c body)⟩,
     fun _ d => Bool.noConfusion (d.not_loop : true = false)⟩
 
 
@@ -124,7 +123,7 @@ theorem Stmt.solkey_lt_calculus (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : L
 /-- **A step of `⊢ₖ` fires one of solkey's taclets**: where `.solkey` admits
 the statement (`Stmt.keyStep`), the rule `Stmt.step` fires is a `Taclet`. -/
 theorem Stmt.taclet_of_admits {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (hR : RuleSet.admits .solkey m s = true) (hs : s.step k m = some p) :
+    {p : Premise C Γ Γ'} (hR : RuleSet.admits .solkey m s = true) (hs : s.step k m = p) :
     Taclet C k m s p :=
   match Rule.ofStep hs with
   | .key d => d

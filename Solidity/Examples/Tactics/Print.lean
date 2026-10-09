@@ -70,8 +70,7 @@ private def readS : Stmt SE [.val .uint] [.val .uint] :=
 /-- info: dl{ { _ := find(storage, alice.age) } ⟨[ ]⟩ } -/
 #guard_msgs in
 run_meta do
-  let some p := readS.step 1 .box | throwError "no rule"
-  let e := Premise.quote (mkConst ``StandardExample) p
+  let e := Premise.quote (mkConst ``StandardExample) (readS.step 1 .box)
   Meta.check e
   logInfo m!"{e}"
 
@@ -113,9 +112,7 @@ private def stepsShow (φ : Solidity.Surface.Fml SE) (n : Nat) : MetaM Unit :=
 /-- The premise of the rule on the first statement of a program, quoted. -/
 private def headPremiseOf {C : Contract} (c : Expr) (m : Modality) :
     {Γ Γ' : Ctx} → Prog C Γ Γ' → MetaM Expr
-  | _, _, .cons s _ => do
-    let some p := s.step 1 m | throwError "no rule"
-    return Premise.quote c p
+  | _, _, .cons s _ => return Premise.quote c (s.step 1 m)
   | _, _, .nil => throwError "no statement"
 
 /-- The premise of the rule on the first statement of `φ`'s program, read in

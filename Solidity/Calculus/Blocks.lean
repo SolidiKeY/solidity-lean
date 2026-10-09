@@ -79,35 +79,35 @@ def Binders.declsThen {Δ : Ctx} : {ρ : Ctx} → Binders ρ → Prog C (ρ ++ �
 inlined (`internalCallExpand`; `functionBodyExpand` for one that returns to
 targets). -/
 def callStep (k : Nat) {Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
-    (body : Prog C (rs ++ ps) Γf) : Option (Premise C Γ Γ') :=
-  CallRet.casesOn (motive := fun rs Γ' _ => Prog C (rs ++ ps) Γf → Option (Premise C Γ Γ')) ret
+    (body : Prog C (rs ++ ps) Γf) : Premise C Γ Γ' :=
+  CallRet.casesOn (motive := fun rs Γ' _ => Prog C (rs ++ ps) Γf → Premise C Γ Γ') ret
     (fun body => match args.capture with
-      | some ⟨p, v, as'⟩ => some (.capture p (fse k) v (.call f as' .none body))
-      | none => some (.unfold (args.declsThen
-          (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil)) (Ext.append Γ ps)))
+      | some ⟨p, v, as'⟩ => .capture p (fse k) v (.call f as' .none body)
+      | none => .unfold (args.declsThen
+          (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil)) (Ext.append Γ ps))
     (fun p r res body => match args.capture with
-      | some ⟨p', v, as'⟩ => some (.capture p' (fse k) v (.call f as' (.val p r (res.map .there)) body))
+      | some ⟨p', v, as'⟩ => .capture p' (fse k) v (.call f as' (.val p r (res.map .there)) body)
       | none =>
         let result : Prog C (.val p :: (ps ++ Γ)) (.val p :: (ps ++ Γ)) := match res with
           | none => .nil
           | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil
-        some (.unfold (args.declsThen (.cons (.declLocal p r none)
+        .unfold (args.declsThen (.cons (.declLocal p r none)
           (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) result)))
-          (.push (Ext.append Γ ps))))
+          (.push (Ext.append Γ ps)))
     (fun {rs} bs body => match args.capture with
-      | some ⟨p', v, as'⟩ => some (.inline
+      | some ⟨p', v, as'⟩ => .inline
           (.cons (.declLocal p' (fse k) (some v)) (.cons (.call f as' (.rets bs) body) .nil))
-          (Thin.keepAll rs (.drop .refl)))
-      | none => some (.inline (args.declsThen (bs.declsThen
+          (Thin.keepAll rs (.drop .refl))
+      | none => .inline (args.declsThen (bs.declsThen
           (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
-          (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))))
+          (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))))
     (fun R r hd hm body => match args.capture with
-      | some ⟨p', v, as'⟩ => some (.inline
+      | some ⟨p', v, as'⟩ => .inline
           (.cons (.declLocal p' (fse k) (some v)) (.cons (.call f as' (.mem R r hd hm) body) .nil))
-          (.keep (.drop .refl)))
-      | none => some (.inline (args.declsThen (.cons (.declMem R r none hd hm)
+          (.keep (.drop .refl))
+      | none => .inline (args.declsThen (.cons (.declMem R r none hd hm)
           (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
-          (.keep (Thin.ofExt (Ext.append Γ ps)))))
+          (.keep (Thin.ofExt (Ext.append Γ ps))))
     body
 
 end Calls
@@ -122,10 +122,10 @@ def CodeBinder.binders : {κ : Ctx} → CodeBinder κ → Binders κ
 (`tryCallNoCallbackBox`), `false` under the diamond (`tryCallDiamond`, Lean). -/
 def tryStep (m : Modality) {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁)
     (err : Prog C Γ Γ₂) (code : CodeBinder κ) (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) :
-    Option (Premise C Γ Γ) :=
+    Premise C Γ Γ :=
   match m with
-  | .box => some (.branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩])
-  | .diamond => some (.done false)
+  | .box => .branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩]
+  | .diamond => .done false
 
 /-! ## The loop frame -/
 
@@ -270,25 +270,25 @@ its invariant (`whileInvariantBox`, `whileInvariantDiamond`), closed to
 `false` when its body has no frame (`whileClose`) or, under the diamond,
 it has no variant (`whileNoVariantDiamond`). -/
 def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool)
-    (body : Prog C Γ Γ₁) : Option (Premise C Γ Γ) :=
+    (body : Prog C Γ Γ₁) : Premise C Γ Γ :=
   match a with
   -- loopExit
-  | .unwind 0 => some (.check (.eqD c.lower (Tm.lit (.bool false))))
+  | .unwind 0 => .check (.eqD c.lower (Tm.lit (.bool false)))
   -- whileUnwind
   | .unwind (n + 1) =>
-    some (.unfold (.cons (.ite c (.cons (.block body) (.cons (.loop (.unwind n) c body) .nil)) .nil) .nil)
-      .refl)
+    .unfold (.cons (.ite c (.cons (.block body) (.cons (.loop (.unwind n) c body) .nil)) .nil) .nil)
+      .refl
   | .inv I dec =>
     match body.frame with
     -- whileClose
-    | none => some (.done false)
+    | none => .done false
     | some (xs, hv) =>
       match m, dec with
       -- whileInvariantBox
       | .box, _ =>
-        some (.inv (.isBoolD I.lower true) xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
+        .inv (.isBoolD I.lower true) xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
           (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
-          .refl (.push .refl) body (.isBoolD I.lower true))
+          .refl (.push .refl) body (.isBoolD I.lower true)
       -- whileInvariantDiamond
       | .diamond, some d =>
         let U : Upd C Γ (.val .bool :: .val .uint :: Γ) :=
@@ -300,10 +300,10 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
               (.imp (.isBoolD (.pvV (p := .bool) .here) true)
                 (.and (.isBoolD (.app2 (.binop .le .uint) (Tm.lit (.int 0)) d') true)
                   (.isBoolD (.app2 (.binop .lt .uint) d' (.pvV (p := .uint) (.there .here))) true))))
-        some (.inv (.isBoolD I.lower true) xs hv U
+        .inv (.isBoolD I.lower true) xs hv U
           (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
-          (.push .refl) (.push .refl) (body.wk up).2.2 post)
+          (.push .refl) (.push .refl) (body.wk up).2.2 post
       -- whileNoVariantDiamond
-      | .diamond, none => some (.done false)
+      | .diamond, none => .done false
 
 end Solidity

@@ -66,7 +66,7 @@ theorem CallbackTaclet.toTaclet {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stm
 
 /-- **A callback taclet's premise is the one `Stmt.step` builds.** -/
 theorem CallbackTaclet.toStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {p : Premise C Γ Γ'} (d : CallbackTaclet C k m s p) : s.step k m = some p :=
+    {p : Premise C Γ Γ'} (d : CallbackTaclet C k m s p) : s.step k m = p :=
   d.toTaclet.toStep
 
 /-! ## The judgement -/

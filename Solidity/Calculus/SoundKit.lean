@@ -477,7 +477,7 @@ end Shapes
 Each arm of `Stmt.step` proves, for its statement, that the premise it
 gives is sound in a typed state `σ` (`Premise.Sound`): its theorem is named
 after the arm (`localStep_sound`) and takes `σ` first, then the arm's arguments, the premise `q` and
-`hq : …Step k … = some q`.  No arm takes a condition: decisions 15 and 16
+`hq : …Step k … = q`.  No arm takes a condition: decisions 15 and 16
 took two away (a push at the bound is exhausted; no struct repeats a member
 name), and 17' the last (a memory local may be unset, so the box
 `memoryLocalDeclInitDrop`'s binder has the instance its premise needs). -/
@@ -765,7 +765,7 @@ theorem ExecS.split_det {s : Stmt C Γ Γ} {Δ : Ctx} {P : Prog C Γ Δ} (σ : S
 over `State`), in every typed state: its premise asks of the run what
 `Premise.Runs` says. -/
 def Stmt.StepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
-  ∀ σ : State C Γ, ∀ p, s.step k m = some p → Premise.Runs m s p σ
+  ∀ σ : State C Γ, ∀ p, s.step k m = p → Premise.Runs m s p σ
 
 /-- A one-statement sequence runs as its statement. -/
 theorem Prog.runSt_single {Γ' : Ctx} (σ : State C Γ) (s : Stmt C Γ Γ') :

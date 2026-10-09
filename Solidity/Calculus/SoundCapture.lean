@@ -244,20 +244,20 @@ theorem SHole.sound_indexCapture {T : Ty} (lhs : SHole C Γ T) {R : RefTy} {kp :
 /-- **A storage read unfolded into a hole** (`SHole.readStep`) is sound
 when the hole's own rules are. -/
 theorem SHole.readStep_sound (k : Nat) {T : Ty} (lhs : SHole C Γ T)
-    {root : (r : Name) → C.rootType r = some T → Option (Premise C Γ Γ)}
+    {root : (r : Name) → C.rootType r = some T → Premise C Γ Γ}
     {field : {s : Name} → SPath C Γ (.struct s) → (f : Name) → C.fieldType s f = some T →
-      Option (Premise C Γ Γ)}
+      Premise C Γ Γ}
     {index : {R : RefTy} → {kp : PrimTy} → IndexTy R kp T → SPath C Γ (.ref R) → Simple C Γ kp →
-      Option (Premise C Γ Γ)}
+      Premise C Γ Γ}
     (l : Loc C Γ T)
-    (hroot : ∀ r h p, l = .root r h → root r h = some p →
+    (hroot : ∀ r h p, l = .root r h → root r h = p →
       Premise.Runs m (lhs.fill (.loc (.root r h))) p σ)
     (hfield : ∀ {s : Name} (b : SPath C Γ (.struct s)) f hf p, l = .field b f hf →
-      field b f hf = some p → Premise.Runs m (lhs.fill (.loc (.field b f hf))) p σ)
+      field b f hf = p → Premise.Runs m (lhs.fill (.loc (.field b f hf))) p σ)
     (hindex : ∀ {R : RefTy} {kp : PrimTy} (it : IndexTy R kp T) b (ie : Simple C Γ kp) p,
-      l = .index it b (.simple ie) → index it b ie = some p →
+      l = .index it b (.simple ie) → index it b ie = p →
       Premise.Runs m (lhs.fill (.loc (.index it b (.simple ie)))) p σ)
-    (p : Premise C Γ Γ) (hp : lhs.readStep k root field index l = some p) :
+    (p : Premise C Γ Γ) (hp : lhs.readStep k root field index l = p) :
     Premise.Runs m (lhs.fill (.loc l)) p σ := by
   cases l with
   | root r h => exact hroot r h p rfl hp
@@ -321,15 +321,15 @@ theorem MHole.sound_indexCapture {T : Ty} (lhs : MHole C Γ T) {R : RefTy} (a : 
 the hole's own rules are. -/
 theorem MHole.readStep_sound (k : Nat) {T : Ty} (lhs : MHole C Γ T)
     {field : {s : Name} → (mv : Idx Γ (.mem (.struct s))) → (Ty.ref (.struct s)).mapFree = true →
-      (f : Name) → C.fieldType s f = some T → Option (Premise C Γ Γ)}
+      (f : Name) → C.fieldType s f = some T → Premise C Γ Γ}
     {index : {R : RefTy} → ArrTy R T → (mv : Idx Γ (.mem R)) → (Ty.ref R).mapFree = true →
-      Simple C Γ .uint → Option (Premise C Γ Γ)}
-    (hfield : ∀ {s : Name} (mv : Idx Γ (.mem (.struct s))) hmv f hf p, field mv hmv f hf = some p →
+      Simple C Γ .uint → Premise C Γ Γ}
+    (hfield : ∀ {s : Name} (mv : Idx Γ (.mem (.struct s))) hmv f hf p, field mv hmv f hf = p →
       Premise.Runs m (lhs.fill (.field (.var mv hmv) f hf)) p σ)
     (hindex : ∀ {R : RefTy} (a : ArrTy R T) (mv : Idx Γ (.mem R)) hmv (ie : Simple C Γ .uint) p,
-      index a mv hmv ie = some p →
+      index a mv hmv ie = p →
         Premise.Runs m (lhs.fill (.index a (.var mv hmv) (.simple ie))) p σ)
-    (l : MLoc C Γ T) (p : Premise C Γ Γ) (hp : lhs.readStep k field index l = some p) :
+    (l : MLoc C Γ T) (p : Premise C Γ Γ) (hp : lhs.readStep k field index l = p) :
     Premise.Runs m (lhs.fill l) p σ := by
   cases l with
   | field b f hf =>
@@ -401,7 +401,7 @@ theorem VHole.sound_ternaryToIf {p : PrimTy} (lhs : VHole C Γ p) (se : Simple C
 
 /-- **A conditional into a hole** (`ternaryStep`). -/
 theorem ternaryStep_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p) (c : Val C Γ .bool)
-    (a b : Val C Γ p) (q : Premise C Γ Γ) (hq : ternaryStep k lhs c a b = some q) :
+    (a b : Val C Γ p) (q : Premise C Γ Γ) (hq : ternaryStep k lhs c a b = q) :
     Premise.Runs m (lhs.fill (.ternary c a b)) q σ := by
   cases c with
   | simple se => cases hq; exact VHole.sound_ternaryToIf σ lhs se a b
@@ -409,9 +409,9 @@ theorem ternaryStep_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p) (c : Val C
 
 /-- **A value into a hole** (`VHole.step`): sound when the hole's own rule is. -/
 theorem VHole.step_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p)
-    {simple : Simple C Γ p → Option (Premise C Γ Γ)}
-    (hsimple : ∀ se q, simple se = some q → Premise.Runs m (lhs.fill (.simple se)) q σ)
-    (e : Val C Γ p) (q : Premise C Γ Γ) (hq : lhs.step k simple e = some q) :
+    {simple : Simple C Γ p → Premise C Γ Γ}
+    (hsimple : ∀ se q, simple se = q → Premise.Runs m (lhs.fill (.simple se)) q σ)
+    (e : Val C Γ p) (q : Premise C Γ Γ) (hq : lhs.step k simple e = q) :
     Premise.Runs m (lhs.fill e) q σ := by
   cases e with
   | simple se => exact hsimple se q hq
@@ -420,9 +420,9 @@ theorem VHole.step_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p)
 
 /-- **A value into a hole, lowered first** (`VHole.lower`). -/
 theorem VHole.lower_sound (k : Nat) {p : PrimTy} (lhs : VHole C Γ p)
-    {other : Option (Premise C Γ Γ)} (e : Val C Γ p)
-    (hother : ∀ q, other = some q → Premise.Runs m (lhs.fill e) q σ)
-    (q : Premise C Γ Γ) (hq : lhs.lower k other e = some q) :
+    {other : Premise C Γ Γ} (e : Val C Γ p)
+    (hother : ∀ q, other = q → Premise.Runs m (lhs.fill e) q σ)
+    (q : Premise C Γ Γ) (hq : lhs.lower k other e = q) :
     Premise.Runs m (lhs.fill e) q σ := by
   cases e with
   | ternary c a b => exact ternaryStep_sound σ k lhs c a b q hq

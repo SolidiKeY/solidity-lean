@@ -426,7 +426,7 @@ bounds the iterations left. -/
 theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
     (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
     (hf : body.frame = some (xs, hv)) (σ : State C Γ) {p : Premise C Γ Γ}
-    (hp : loopStep k .diamond (.inv I (some d)) c body = some p) :
+    (hp : loopStep k .diamond (.inv I (some d)) c body = p) :
     Premise.Runs .diamond (.loop (.inv I (some d)) c body) p σ := by
   unfold loopStep at hp
   rw [hf] at hp
@@ -572,9 +572,9 @@ end Inv
 its invariant, or closed to `false`. -/
 theorem Stmt.sound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ)
     (c : Val C Γ .bool) (body : Prog C Γ Γ₁) (σ : State C Γ) (p : Premise C Γ Γ)
-    (hp : Stmt.step k m (.loop a c body) = some p) :
+    (hp : Stmt.step k m (.loop a c body) = p) :
     Premise.Runs m (.loop a c body) p σ := by
-  change loopStep k m a c body = some p at hp
+  change loopStep k m a c body = p at hp
   cases a with
   | unwind n =>
     cases n with

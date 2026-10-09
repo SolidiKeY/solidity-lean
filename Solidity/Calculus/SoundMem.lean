@@ -70,7 +70,7 @@ theorem sound_memCopyCapture {R : RefTy} (i : Idx Γ (.mem R)) (sp : SPath C Γ 
 
 /-- **A memory local bound** (`rebindMemStep`). -/
 theorem rebindMemStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R)
-    (q : Premise C Γ Γ) (hs : rebindMemStep k i r = some q) :
+    (q : Premise C Γ Γ) (hs : rebindMemStep k i r = q) :
     Premise.Runs m (.rebindMem i r) q σ := by
   cases r with
   | alias p =>
@@ -98,7 +98,7 @@ theorem rebindMemStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.mem R)) (r : MRh
 
 /-- **A memory reference written** (`memRefStep`). -/
 theorem memRefStep_sound (k : Nat) {R : RefTy} (l : MLoc C Γ (.ref R))
-    (src : MPath C Γ (.ref R)) (q : Premise C Γ Γ) (hs : memRefStep k l src = some q) :
+    (src : MPath C Γ (.ref R)) (q : Premise C Γ Γ) (hs : memRefStep k l src = q) :
     Premise.Runs m (.assignMem l (.ref src)) q σ := by
   cases src with
   | var y hy => cases hs; exact sound_writeMem σ l _
@@ -286,7 +286,7 @@ theorem sound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref 
 
 /-- **A memory location written** (`assignMemStep`). -/
 theorem assignMemStep_sound (k : Nat) {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T)
-    (q : Premise C Γ Γ) (hs : assignMemStep k l r = some q) :
+    (q : Premise C Γ Γ) (hs : assignMemStep k l r = q) :
     Premise.Runs m (.assignMem l r) q σ := by
   cases l with
   | field b f hf =>
@@ -364,7 +364,7 @@ theorem sound_deleteMemIndexRecv {R : RefTy} {T : Ty} (a : ArrTy R T) (b : MPath
 
 /-- **`delete p;` on memory** (`deleteMemStep`). -/
 theorem deleteMemStep_sound (k : Nat) {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true)
-    (q : Premise C Γ Γ) (hs : deleteMemStep k p hd = some q) :
+    (q : Premise C Γ Γ) (hs : deleteMemStep k p hd = q) :
     Premise.Runs m (.deleteMem p hd) q σ := by
   cases p with
   | var i hm => cases hs; exact sound_deleteMemVar σ i hm hd

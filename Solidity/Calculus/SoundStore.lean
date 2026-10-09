@@ -137,7 +137,7 @@ theorem sound_copyCapture {R : RefTy} (l : Loc C Γ (.ref R)) (p : SPath C Γ (.
 /-- **A copy into a target of simple parts** (`copyStep`). -/
 theorem copyStep_sound (k : Nat) {R : RefTy} (l : Loc C Γ (.ref R))
     (hm : (Ty.ref R).mapFree = true) (p : SPath C Γ (.ref R))
-    (q : Premise C Γ Γ) (hs : copyStep k l hm p = some q) :
+    (q : Premise C Γ Γ) (hs : copyStep k l hm p = q) :
     Premise.Runs m (.assign l (.copy p hm)) q σ := by
   cases p with
   | alias y => cases hs; exact sound_save σ l _
@@ -282,7 +282,7 @@ theorem sound_indexRefCaptureAll (k : Nat) {R R' : RefTy} {kp : PrimTy}
 
 /-- **A storage write** (`assignStep`). -/
 theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
-    (q : Premise C Γ Γ) (hs : assignStep k l r = some q) :
+    (q : Premise C Γ Γ) (hs : assignStep k l r = q) :
     Premise.Runs m (.assign l r) q σ := by
   cases l with
   | root rn h =>
@@ -400,7 +400,7 @@ theorem sound_fromMemIndexUnfold (k : Nat) {R R' : RefTy} {kp : PrimTy}
 /-- **A storage location written from memory** (`assignFromMemStep`). -/
 theorem assignFromMemStep_sound (k : Nat) {R : RefTy} (l : Loc C Γ (.ref R))
     (p : MPath C Γ (.ref R)) (q : Premise C Γ Γ)
-    (hs : assignFromMemStep k l p = some q) : Premise.Runs m (.assignFromMem l p) q σ := by
+    (hs : assignFromMemStep k l p = q) : Premise.Runs m (.assignFromMem l p) q σ := by
   cases l with
   | root rn h => cases hs; exact sound_saveMem σ _ p
   | field b f h =>
@@ -451,7 +451,7 @@ theorem sound_deleteIndexCapture {R : RefTy} {kp : PrimTy} {T : Ty} (it : IndexT
 
 /-- **`delete l;`** (`deleteStep`). -/
 theorem deleteStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (q : Premise C Γ Γ)
-    (hs : deleteStep k l = some q) : Premise.Runs m (.delete l) q σ := by
+    (hs : deleteStep k l = q) : Premise.Runs m (.delete l) q σ := by
   cases l with
   | root rn h => cases hs; exact sound_delAt σ _
   | field b f h =>
@@ -512,7 +512,7 @@ theorem sound_pushRecvCapture {E : Ty} (b : SPath C Γ (.array E)) (v : Option (
 /-- **`b.push(v);`** (`pushStep`). -/
 theorem pushStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     (hd : (v.isSome || E.defaultOkS) = true) (q : Premise C Γ Γ)
-    (hs : pushStep k b v hd = some q) : Premise.Runs m (.push b v hd) q σ := by
+    (hs : pushStep k b v hd = q) : Premise.Runs m (.push b v hd) q σ := by
   simp only [pushStep] at hs
   split at hs
   · cases v with
@@ -542,7 +542,7 @@ theorem sound_popCapture {E : Ty} (b : SPath C Γ (.array E)) (x : Var) :
 
 /-- **`b.pop();`** (`popStep`). -/
 theorem popStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (q : Premise C Γ Γ)
-    (hs : popStep k b = some q) : Premise.Runs m (.pop b) q σ := by
+    (hs : popStep k b = q) : Premise.Runs m (.pop b) q σ := by
   simp only [popStep] at hs
   split at hs
   · have hp : Premise.Runs m (.pop b) (.upd1 (.storage (.app2
