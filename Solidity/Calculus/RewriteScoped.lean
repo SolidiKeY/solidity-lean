@@ -1,4 +1,4 @@
-import Solidity.Calculus.UpdRuleScoped
+import Solidity.Calculus.StatePartsScoped
 import Solidity.Calculus.Merge
 import Solidity.Calculus.Literals
 import Solidity.Calculus.SeqRewrite
@@ -25,6 +25,7 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 | `concrete n s` | `true ∧ A ⇝ A`, `false → A ⇝ true`, `v ≐ v ⇝ true`, … below `n` updates | `Fml.concreteAlongS_holds` (iff) | `concrete_*`, `eqClose` |
 | `litEq r n s`, `lawEq r n s` | a literal law or a term taclet in the equations along the skeleton `s` below `n` updates: a whole side, and in `defined(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
 | `mergeIn p n` | the `n + 1` updates at the end of the path `p` (through `∧`, the right of `→`, updates and binders) merged | `Fml.mergeRun_leads` | `sequentialToParallel2` |
+| `stateMerge r i` | the update at `i` merged with the next over its storage or memory write (`MergeNameS`) | `MergeNameS.top_sound` | `sequentialToParallel2` |
 | `simplifyUpdate i b` | the update at `i` without what it pops later (the box) and its shadowed writes (`Upd.simpS`), the scope ends after it merged in first where `b` | `Fml.simpAtB_holds` | `simplifyUpdate1/2/3` |
 
 `sequentialToParallel` while the program is open is `Calculus/Merge.lean`'s.
@@ -691,6 +692,12 @@ end of the path `p` merged into one (`Fml.mergeRun`). -/
 def FmlRw.mergeIn (p : List PathStep) (n : Nat) : FmlRw C :=
   ⟨fun φ => Fml.atPath (fun ψ => ψ.mergeRun 0 n) p φ,
     fun h σ hψ => Fml.atPath_sound (fun h' σ' => Fml.mergeRun_leads 0 n _ h' σ') p h σ hψ⟩
+
+/-- **A merge over a storage or memory write** (`Calculus/StatePartsScoped.lean`:
+`{L ‖ storage := S}{V}`, `{memory := M}{V}`, `{L ‖ memory := M}{V}`) at
+position `i` of the spine. -/
+def FmlRw.stateMerge (r : MergeNameS) (i : Nat) : FmlRw C :=
+  FmlRw.atSpine (fun m U φ => r.top m U φ) (fun h σ hψ => r.top_sound _ _ _ _ h σ hψ) i
 
 /-! ## `simplifyUpdate` -/
 

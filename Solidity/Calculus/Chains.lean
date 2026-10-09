@@ -402,7 +402,9 @@ literal law at each instance (found in the line's erasure `erased`, as past
 the program) in each update's right-hand sides; a term taclet onto a term
 that cannot halt in each box update's; a law in the equations along the
 skeleton below each number of updates (`FmlRw.litEq`, `FmlRw.lawEq`);
-`simplifyUpdate` at each update.  Their postconditions in slots and a
+`simplifyUpdate` at each update; for `sequentialToParallel`, the merges
+over a storage or memory write at each update (`FmlRw.stateMerge`) and the
+merges under a branch (`FmlRw.mergeIn`), the spine's own being `mergeCands`'.  Their postconditions in slots and a
 modality `m` computed as the diamond and as the box; and why a law found no
 instance. -/
 def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) :
@@ -439,6 +441,9 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) :
         for b in [false, true] do
           rs := rs.push (mkApp3 (mkConst ``FmlRw.simplifyUpdate) C (toExpr i) (toExpr b))
     else if n == `sequentialToParallel then
+      for i in List.range k do
+        for r in [``MergeNameS.storage, ``MergeNameS.memory, ``MergeNameS.localsMemory] do
+          rs := rs.push (mkApp3 (mkConst ``FmlRw.stateMerge) C (mkConst r) (toExpr i))
       let below := (updPaths φb 16).filter (·.any fun d => d matches .andL | .andR | .impR)
       for p in below do
         for j in (List.range 7).reverse do

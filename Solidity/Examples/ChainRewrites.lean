@@ -813,6 +813,29 @@ info: fun φ =>
 #check fun (φ : Post StandardExample []) =>
   dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
 
+/-- `sequentialToParallel` over a storage write with the revert still to
+run (`FmlRw.stateMerge`, `Upd.mergeSt?`): the read after the write reads
+the written storage. -/
+example (φ : Post StandardExample [.val .uint]) :
+    dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) }
+      [ revert(); ] φ }
+    ~[sequentialToParallel]~>
+      dl![.box]{ { storage := save(storage, alice.age, 42) ‖
+        x := find(save(storage, alice.age, 42), alice.age) } [ revert(); ] φ } := by
+  sol_chain
+
+/-- Over locals and a memory write (`Upd.mergeMemL?`, `ChainRewrites`'
+locals-then-memory merge): the write after reads the allocation and the
+heap it leaves. -/
+example (φ : Post StandardExample [.mem (.struct "Person")]) :
+    dl![.box]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+      { memory := write(memory, carol.age, 42) } [ revert(); ] φ }
+    ~[sequentialToParallel]~>
+      dl![.box]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+        memory := write(addM(memory, Person), freshId(addM(memory, Person)).age, 42) }
+        [ revert(); ] φ } := by
+  sol_chain
+
 end Open
 
 /-! ## 4 · What is refused, and what is printed -/
