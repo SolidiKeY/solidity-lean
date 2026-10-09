@@ -110,7 +110,8 @@ A formula is written in `dl!{ … }` over a named contract (`local instance :
 InContract := ⟨StandardExample⟩`) under `open scoped Solidity.Scoped`
 (`Calculus/Surface.lean`), which reads it as a scoped `Fml C []`. Import
 `Solidity.Calculus.Surface`, `Solidity.Calculus.Closers` and
-`Solidity.Calculus.NFmlClose` for the tactics,
+`Solidity.Calculus.NFmlClose` for the tactics (and
+`Solidity.Calculus.SolSpec` for `sol_spec`),
 `Solidity.Calculus.LastLine` for chains, `Solidity.Tools.Inspect` for `#wp`,
 `#step` and the tree. `Examples/` shows each of
 these once; `.claude/rules/derivations.md` is the convention.

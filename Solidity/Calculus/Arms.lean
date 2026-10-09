@@ -3,13 +3,12 @@ import Solidity.Calculus.Shift
 /-!
 # The rule of each statement, on scoped statements
 
-`Completeness.lean`'s arms of `Stmt.step` over the scoped syntax
-(`docs/intrinsic.md`, M6a): for each statement, the premise of the one
-taclet of `Calculus/Rules.lean` whose side conditions hold, in the order
-`Completeness.lean` tries them (Step 1 unfolds a read, Step 2 decomposes a
-write, Step 3 is an update).  Each arm names the taclet it fires; the
-premise's erasure is what that taclet leaves (`Examples/Tactics/Step.lean`
-pins it, statement by statement, against today's strategy).
+master's arms of `Stmt.step` (`Calculus/Completeness.lean` at `ad728b16`)
+over the scoped syntax (`docs/intrinsic.md`, M6a): for each statement, the
+premise of the one taclet of `Calculus/Rules.lean` whose side conditions
+hold, in the order master tried them (Step 1 unfolds a read, Step 2
+decomposes a write, Step 3 is an update).  Each arm names the taclet it
+fires (`Examples/Tactics/Step.lean` runs every arm in the kernel).
 
 What scoping adds to a rule, as `docs/intrinsic.md` ("how `dl{ … }` will
 write a scoped taclet") lays out:
@@ -188,9 +187,10 @@ section Rules
 variable (k : Nat) {Γ : Ctx}
 
 /-- **Step 1** for a storage location read into the hole `lhs`
-(`Completeness.lean`'s `Hole.readStep`): a state variable, a member of a
-simple path, an entry of one at a simple index take the hole's own rule;
-any other unfolds its receiver or its index first. -/
+(master's `Hole.readStep`, `Calculus/Completeness.lean` at `ad728b16`): a
+state variable, a member of a simple path, an entry of one at a simple index
+take the hole's own rule; any other unfolds its receiver or its index
+first. -/
 def SHole.readStep {T : Ty} (lhs : SHole C Γ T)
     (root : (r : Name) → C.rootType r = some T → Premise C Γ Γ)
     (field : {s : Name} → SPath C Γ (.struct s) → (f : Name) → C.fieldType s f = some T →

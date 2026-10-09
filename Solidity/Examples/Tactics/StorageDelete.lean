@@ -29,7 +29,7 @@ extent, a struct its mapping members).  Reading it back:
 | `p`, with nothing known of it | `wt(storage)`, `sol_prove` | `deleteRootUnknown` |
 
 A read *below* a deleted struct reads the default of a member of a value
-`sol_close` does not know (`Close.lean`), so those claims are checked on a run
+`sol_close` does not know (`NFmlClose.lean`), so those claims are checked on a run
 of the interpreter from `State.exampleStore`, printed by `#eval`: a `Person`'s
 default is built by the well-founded `defaultForTy`, which `rfl` cannot unfold.
 

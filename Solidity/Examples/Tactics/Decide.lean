@@ -125,7 +125,7 @@ A read at or below a deleted location, before any key, reads the default of
 what was there (`find_defaultOf`): `0` for a `uint` that held one. -/
 
 /-- `alice.account.balance = 100; delete alice.account;` — the member below
-the deleted struct reads `0`.  The gap `Close.lean` lists: `sol_close` does
+the deleted struct reads `0`.  The gap `NFmlClose.lean` lists: `sol_close` does
 not read below a deleted struct. -/
 theorem deleteBelow :
     ⊨ dl!{ [ alice.account.balance = 100; delete alice.account; ]

@@ -199,7 +199,7 @@ optional variant) or `.unwind (k : Nat)`. `Stmt.step`
 | Annotation | Box | Diamond |
 |---|---|---|
 | `.unwind (k+1)` | `whileUnwind`: `unfold [if (c) { body while[k] (c) body }]` | same |
-| `.unwind 0` | `loopExit`: `Premise.check (c = false) []`, the goals "loop exited" (`c = false ⟹ ⟨[ ω ]⟩ φ`) and "unwound to the end" (`c = false`), by `Proves.checkLean` | same |
+| `.unwind 0` | `loopExit`: `Premise.check (c = false) []`, the goals "loop exited" (`c = false ⟹ ⟨[ ω ]⟩ φ`) and "unwound to the end" (`c = false`), by `Proves.check` (walk: `apply checkLean r`) | same |
 | `.inv I dec` | `whileInvariantBox`, below | `whileInvariantDiamond` with `dec = some v`; with `none`, `whileNoVariantDiamond`, the premise `done false` (sound, unprovable; solkey unwinds instead) |
 | `.inv I dec`, a body with no frame | `whileClose`: `done false` | same |
 
@@ -290,7 +290,7 @@ does. (Before the intrinsic refactor: `Premise.invFml`, `Proves.invLean`,
 `Hyp.loopAnon` and a third goal `cov`.)
 `sol_close` reads `{anon(…)}` (`Close.holds_anon`, `State.getEnv_anon_cons`:
 a read of an anonymised local is `anonRead (b x)`, a binding nobody knows);
-`sol_decide` and `sol_prove`'s closer do not (`Fml.inL` is `false` on `anon`,
+`sol_decide` and `sol_prove`'s closer do not (`NFml.inL` is `false` on `anon`, scoped: `Fml.inLS`,
 as on `havoc`), so `sol_prove` leaves such a leaf to `sol_close`. Under the
 diamond the closer is slow: a counting loop closes, a loop with a `break`
 (whose flag is read through the cover) and a sum do not within the default

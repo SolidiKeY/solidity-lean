@@ -192,7 +192,7 @@ theorem ternarySimple : ⊨ dl!{ ⟨ bool f = false; uint x = f ? 10 : 20; ⟩ x
 /-! ## Operands in storage
 
 Under the box: the closer does not close the diamond of a write
-(`Close.lean`, "What does not close"). -/
+(`NFmlClose.lean`, "What does not close"). -/
 
 /-- `addition-storage-read.key`: `alice.age = 10; uint r = alice.age + 1;` -/
 theorem additionStorageRead :

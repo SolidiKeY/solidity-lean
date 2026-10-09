@@ -3,7 +3,8 @@ import Solidity.Semantics.Properties
 /-!
 # Storage layout typing
 
-The interpreter's storage (`State.storage`) is untyped; a `Layout`
+The erased state's storage (`Semantics.State.storage`, what the typed
+`Storage C` erases to and the closer's terms read) is untyped; a `Layout`
 declares the static types of the storage roots, with struct bodies from
 `Semantics.structDef`.  `SVal.hasTy` says a storage value inhabits a type,
 and `wellTypedStorageB` lifts that to whole storages.  The workhorse is

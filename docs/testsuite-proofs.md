@@ -342,10 +342,14 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   their one change is the revert case of a modality (`holds_revert` in
   `Calculus/NFmlClose.lean`, the modal case of `Fml.toL_holds` in
   `Calculus/Decide.lean`), whose `simp only` now unfolds
-  `Modality.afterRun`.  Only an `assert` panics
-  (today's `Semantics/NoPanic`, deleted at W4 `sem-del`: `Prog.run_noPanic`
-  for a program with no `assert`, by a lemma per operation, now
-  `Semantics/NoPanicOps.lean`, and the `no_panic` tactic).
+  `Modality.afterRun`.  That only an `assert` panics was proved of the
+  untyped run (master's `Semantics/NoPanic`, `Prog.run_noPanic` for a
+  program with no `assert`, deleted at W4 `sem-del`); over the typed run it
+  holds only on the EVM fragment (`compiler_correct`), and its restatement
+  is left (`docs/intrinsic.md`, "What is left").  The lemmas per operation
+  stay (`Semantics/NoPanicOps.lean`, the `no_panic` tactic), and an
+  expression of the typed run does not panic (`Val.evalT_noPanic`,
+  `Semantics/StepErase.lean`).
 - **The taclet.** `Taclet.assertSimple` is KeY's: `⟨[ assert(se); ]⟩ ⇝
   se = true ⟹ ⟨[ ]⟩ ; se = true`, "Holds" and "Violated" (the new premise
   `Premise.check`, `Proves.check` with goals `thn` and `els`, `checkRule`,

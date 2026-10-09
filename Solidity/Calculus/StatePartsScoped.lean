@@ -33,7 +33,9 @@ Gate G0's first two conditions hold as in `Calculus/UpdRuleScoped.lean`:
 the walk over `V` (`Upd.graftF`) is the recursor, its `match` twin
 `Upd.graftFM` linked by `Upd.graftF_eq_graftFM`; a head is read by
 `Upd.casesOn` (`Upd.mergeMem?`) or `Fml.updHead?` (`MergeNameS.top`), and
-`match` stays on one `Tm`, `Rhs` or `UpdElem` (a family with no index).
+`match` stays on one `Tm`, `Rhs` or `UpdElem`, whose context is a
+parameter (`Tm` and `Rhs` are indexed by a sort or type only, `UpdElem`
+not at all), so no cast compares contexts.
 -/
 
 namespace Solidity

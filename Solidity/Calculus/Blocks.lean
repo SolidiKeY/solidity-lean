@@ -3,9 +3,9 @@ import Solidity.Calculus.Arms
 /-!
 # The rules of the statements that hold blocks
 
-`Completeness.lean`'s arms for calls, `try` and loops over the scoped
-syntax (`docs/intrinsic.md`, M6a), and the loop frame they need
-(today's `Prog.loopFrame`).
+master's arms for calls, `try` and loops (`Calculus/Completeness.lean` at
+`ad728b16`) over the scoped syntax (`docs/intrinsic.md`, M6a), and the loop
+frame they need (master's `Prog.loopFrame`, at `ad728b16`).
 
 * **A call** (`internalCallExpand`, `functionBodyExpand`) is inlined as
   KeY's `expand_function_body` writes it: the parameters declared with the
@@ -23,8 +23,8 @@ syntax (`docs/intrinsic.md`, M6a), and the loop frame they need
   (`loopExit`), or is proved by its invariant (`whileInvariantBox`,
   `whileInvariantDiamond`).  The invariant rule's frame anonymises the
   locals of the loop's context the body writes; the body's own locals are
-  popped every iteration, so, unlike `Prog.loopFrame`, it does not list
-  them (a deviation of the erasure, not of the rule).
+  popped every iteration, so, unlike master's `Prog.loopFrame`, it does not
+  list them (the frame differs from master's, not the rule).
 -/
 
 namespace Solidity
@@ -133,7 +133,7 @@ section Frame
 
 variable {Γ : Ctx}
 
-/-- `v` reads something other than locals (today's `Val.readsState`). -/
+/-- `v` reads something other than locals (master's `Val.readsState`, at `ad728b16`). -/
 def Val.readsState : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple (.env ..) => true
   | _, .simple _ => false
@@ -189,8 +189,8 @@ def OpLoc.writesAt (d : Nat) {p : PrimTy} : OpLoc C Γ p → List (LTy × Nat)
 
 mutual
 
-/-- **A statement a callee of mutability `μ` may run** (today's
-`Stmt.within`): one writing locals only (`view`, reading no state if
+/-- **A statement a callee of mutability `μ` may run** (master's
+`Stmt.within`, at `ad728b16`): one writing locals only (`view`, reading no state if
 `pure`), or storage and the ledger (`nonpayable`). -/
 def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
   | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
@@ -226,7 +226,7 @@ end
 mutual
 
 /-- The locals of the context `d` locals below `s`'s that `s` may write,
-by type and position there (today's `Stmt.writes`, less the
+by type and position there (master's `Stmt.writes` at `ad728b16`, less the
 locals `s`'s own scopes declare). -/
 def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × Nat)
   | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => List (LTy × Nat)) s
@@ -252,7 +252,8 @@ def Prog.writesAt (d : Nat) : {Γ Γ' : Ctx} → Prog C Γ Γ' → List (LTy × 
 
 end
 
-/-- **The frame of a loop body** (today's `Prog.loopFrame`): the
+/-- **The frame of a loop body** (master's `Prog.loopFrame`, at
+`ad728b16`): the
 locals of the loop's context it writes, and whether it writes the storage
 and the ledger too; `none` when it does more. -/
 def Prog.frame {Γ₁ : Ctx} (P : Prog C Γ Γ₁) : Option (List ((t : LTy) × Idx Γ t) × Bool) :=

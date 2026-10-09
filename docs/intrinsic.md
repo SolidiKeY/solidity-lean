@@ -34,6 +34,12 @@ versions.  It names files by the paths they had at each step, which is why
 | Closer (W6) | a leaf erased to `NFml`, closed over the untyped state | in part on `Fml C Γ`: `sol_decide` reduces a scoped leaf by position (`Calculus/DecideScoped.lean`), `sol_close` reads parameters at their types, `sol_prove`'s leaves on `⊢` are scoped sequents with `rw` (`Calculus/SeqRewrite.lean`), the chains rewrite while the program is open (`Calculus/RewriteScoped.lean`), the update rules and merges have scoped ports (`UpdRuleScoped`, `StatePartsScoped`, no consumer yet); below that `NFml` stays the decision procedure's IR (decisions 83, 88, 91, 93) |
 | SolKey reader | `Corresp.LeanShape` over `Stmt.*` | ported on its branch `intrinsic` (decisions 51–54, 73, 74) |
 
+Not restated from master: termination (`symex_terminates`,
+`symex_normalizes`) and progress (`Fml.active_iff_step`,
+`Fml.step_wellFounded`), retired at W2 `symex`/W4 `calc-del` because the
+scoped strategy is fuelled; `never_stuck`, because the typed run has no
+stuck outcome.
+
 What stays extrinsic, on purpose: the EVM fragment (`inFrag`, a fact about
 the target); function and modifier bodies in `Contract` (typed at each call);
 taclet soundness and the closer's completeness (theorems by nature); storage
@@ -92,8 +98,55 @@ carry what they could (`defaultOk`, `Invariant.fo`, `inFrag`), weakened
 statements restated (`Problem.deploy_of_valid`) or recorded
 (`reachable_iff`'s `FitsStorage`), the tools' scoped readings
 (`side_cond`, `apply unfoldStep`, `notScopedNotation`), and the bare
-`simp`s replaced by `simp only`.  Three findings were left as proposals
-75–77, all three W6 lanes (Decisions).
+`simp`s it found replaced by `simp only`.  Three findings were left as
+proposals 75–77, all three W6 lanes (Decisions).
+
+## Final review (2026-10-09)
+
+The confirmed findings of the final review, applied:
+- *chains*: `Fml.StepBy.unique` concludes `r = r'` again
+  (`StepRule.eq_of_focus`: the premise by `Rule.premise_unique`, the
+  derivation by proof irrelevance); `Fml.Steps.measure_le`,
+  `Fml.Steps.eq_of_measure` ported; `Fml.OneStep.stepBy` in
+  `Calculus/ChainRules.lean` (`Focus.rule`, by `Stmt.rule_exists`).
+  Master's `Fml.StepBy.ofOneStep` (from `Fml.rule`, which the scoped side
+  does not have) is not ported: `OneStep.stepBy` and `StepBy.unique`
+  cover it.
+- *Gate G0, condition 2*: the six twins without a link theorem have one
+  (`Upd.freshB_eq_freshBM`, `Fml.foFreshB_eq_foFreshBM`,
+  `Fml.bindsB_eq_bindsBM`, `Upd.freshK_eq_freshM`, `Fml.plainB_eq_plainM`,
+  `Fml.posB_eq_posM`).
+- *soundness premise*: `symex_sound`, `symex_valid`, `Fml.step_valid`,
+  `Valid.of_proves`, `Valid.of_residue` take no `Stmt.Sound C`
+  (`Stmt.sound` inside; `Symex.soundName` deleted).
+- *canonicity*: `canonInv.ekeeps` asks a leaf for canonical storage only;
+  the memory writes are storage frames (`memWriteField_storage` …
+  `writeAddr_storage`, `MLoc.write_storage`), their heap halves deleted.
+- *dead code*: the per-statement `StateWT` preservation layer
+  (`Typing/Soundness.lean`, `Typing/State.lean`'s copy typing,
+  `Typing/StoragePreservation.lean`'s `save_hasTy` and kin, with the
+  `strip_hasTy`/`defaultOf_hasTy` chains), `Semantics/ToSem.lean`'s
+  lemmas (the definitions stay, for `#run`), five `Agree.lean` lemmas,
+  nine calculus lemmas (`Premise.sound_of_halt`, `sound_unfoldH`, …) and
+  the duplicate `Stmt.sound_block`.
+- *docs*: `sol_close` cited at `Calculus/NFmlClose.lean`; master's arms
+  and strategy cited at `ad728b16` (`Step`, `Arms`, `Blocks`,
+  `SoundLoops`); `docs/README.md` indexes this record; `AGENTS.md` names
+  `Solidity.Calculus.SolSpec` for `sol_spec`; `.claude/rules/typing.md`
+  states `reachable_iff` under `FitsStorage`; termination and progress
+  recorded as not restated ("What changed"); `docs/loops.md`'s
+  `Proves.check` and `NFml.inL`.
+- *bare `simp`*: the 33 lines this branch wrote in
+  `Typing/Constructibility.lean` are `simp only`/`simpa only`.
+
+Left: "Only an `assert` panics" over the typed run ("What is left"); the
+bare `simp`s that predate the branch (`Typing/Constructibility.lean`,
+`Semantics/Properties.lean`, `Typing/StoragePreservation.lean`,
+`Typing/Storage.lean`, `Semantics/Storage.lean`; no more than master's).
+Checks: `lean_build` of `Solidity`, `solkeycheck`, `SolidityCorpus` and
+`SolkeyTestSuite` green (321 jobs); `check-orphans`, `check-doc-paths`,
+`check-rule-text` OK; the duplicate-name scan as at W6; `sorry` 19 lines,
+`axiom` 1, as before.
 
 ## Gates
 
@@ -1190,6 +1243,13 @@ baseline; a module that fails stays on `NFml` for good, decision 7):
 - Then delete `NFml`, `Fml.erase` and `Semantics/Erased.lean`.
 
 **Besides M6c:**
+- "Only an `assert` panics" over the typed run: master's
+  `Prog.run_noPanic` (`Semantics/NoPanic`, under `mayPanic = false`) went
+  with the untyped run at W4 `sem-del` and has no typed counterpart; it
+  holds today only on the EVM fragment (`compiler_correct`).  To restate:
+  `Stmt.asserts` into `Semantics/`, and `P.asserts = false → P.run σ ≠
+  .error .panic` by the recursor, as `Ends.lean` does for `TRes.Ends`, from
+  `Val.evalT_noPanic` and a lemma per write.
 - The lead's calls on proposals 78–94; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").

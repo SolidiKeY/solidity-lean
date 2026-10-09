@@ -34,7 +34,7 @@ syntax (name := showSequent) "show_sequent" "[" term "]{ " sepBy(dl_hyp, ", ") s
 syntax "show_sequent!" "{ " sepBy(dl_hyp, ", ") seq_arrow dl_fml " }" : tactic
 
 /-- The goal `Proves C R Γ₀ H φ`, erased: its rule set, its context as
-`Logic.lean`'s entries and its formula, `k` run with them in scope. -/
+`Hyp.lean`'s entries and its formula, `k` run with them in scope. -/
 def erasedGoal {α : Type} (ty : Expr) (k : Expr → Array Expr → Expr → MetaM α) : MetaM α := do
   let ty ← whnfR (← instantiateMVars ty)
   unless ty.isAppOfArity ``Proves 6 do throwError "show_sequent: not a scoped goal{indentExpr ty}"

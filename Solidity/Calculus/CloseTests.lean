@@ -5,7 +5,7 @@ import Solidity.Calculus.Closers
 /-!
 # Tests of `sol_close`
 
-Goals `sol_close` is expected to close (`Close.lean`), each a leaf the
+Goals `sol_close` is expected to close (`NFmlClose.lean`), each a leaf the
 scoped strategy leaves (`open scoped Solidity.Scoped`), erased to
 today's formulas.
 -/
@@ -60,7 +60,7 @@ example : ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; uint x = 0;
   sol_symex
   sol_close
 
-/-! ## The cover goal of a diamond with a false condition -/
+/-! ## A diamond whose other branch the precondition rules out -/
 
 example : ⊨ dl!{ a == 1 ∧ b == 2 → ⟨ if (a == b) { revert(); } else { x = 1; }; ⟩ x == 1 } := by
   sol_symex

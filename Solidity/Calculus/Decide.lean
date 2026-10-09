@@ -8,7 +8,7 @@ import Solidity.Typing.CanonTest
 /-!
 # Deciding the storage goals: `sol_decide`
 
-`sol_close` (`Close.lean`) is a tactic: it proves what its `simp` set and
+`sol_close` (`NFmlClose.lean`) is a tactic: it proves what its `simp` set and
 the facts the formula states reach, and a goal it leaves open may be valid.
 Two storage keys the formula does not separate are the typical case:
 `[ balances[k] = 5; balances[j] = 5; ] balances[k] == 5` is valid, since
@@ -108,7 +108,7 @@ within `memSize` of them, and the reads the clauses of
 `Calculus/MemRead.lean` resolve; a write of a memory object into storage
 (`alice = carol;`), as a copy of its view (`memL`, `LStor.view`), where the
 memory's and the identity's guards are literals.  Outside it: a `push` of a
-memory object, a read of the ledger (`net(a)`).  Of the gaps `Close.lean`
+memory object, a read of the ledger (`net(a)`).  Of the gaps `NFmlClose.lean`
 lists, this closes the keys the formula does not separate, the reads below
 a deleted struct, the memory defaults and the distinct allocations.
 

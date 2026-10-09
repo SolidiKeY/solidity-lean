@@ -4,7 +4,7 @@ import Solidity.Semantics.Properties
 /-!
 # Read after write, as facts about one state
 
-`sol_close` (`Close.lean`) applies the updates `sol_symex` leaves in an
+`sol_close` (`NFmlClose.lean`) applies the updates `sol_symex` leaves in an
 arbitrary state, so what it has to know of a write is not a rewrite rule on
 `save` terms (mini-solkey's `Ch14_Updates`) but what the state the write
 returns reads at each place.  This module is that knowledge, one lemma per
@@ -35,7 +35,7 @@ typed.  A write that halts proves nothing and needs nothing, since the box
 is the only modality under which `sol_close` names one.
 -/
 
-/-- The rewrites `sol_close` closes a goal with (`Close.lean`). -/
+/-- The rewrites `sol_close` closes a goal with (`NFmlClose.lean`). -/
 register_simp_attr close_rw
 
 /-- The bare box and diamond, which `sol_close` tries after every lemma of

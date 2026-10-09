@@ -5,7 +5,7 @@ import Solidity.Update
 # Quoting formulas back into Lean
 
 A formula computed at compile time — by `dl[C]{ … }` reading one
-(`Notation.lean`), or by `sol_symex` running the strategy on one
+(`SurfaceNotation.lean`), or by `sol_symex` running the strategy on one
 (`Symex.lean`) — has to become an `Expr` again to stand in a goal.  The
 quoter is written by hand, as `Prog.quote` is, because a derived `ToExpr`
 would spell the contract out instead of naming it: the result must mention

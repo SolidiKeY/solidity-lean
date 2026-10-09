@@ -89,9 +89,8 @@ theorem State.findStorage_of_findLive {σ : State} {r : Name} {p : List Seg} {w 
 includes insertion at a previously absent mapping key.
 
 The general form — the read at, below, above and *off* the written path — is
-`Theory/Storage.lean`'s `find_write_extends`/`_same`/`_prefix`/`_frame` (and
-their `find_save_*` forms over solkey's own `save` term, leaf included), and
-needs no hypothesis that the write succeeded.
+`Theory/Storage.lean`'s `find_save_same`/`_extends`/`_prefix`/`_frame`, over
+solkey's own `save` term, and needs no hypothesis that the write succeeded.
 This one is kept because the whole typing layer is stated against it. -/
 theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
     (h : old.save path new = .ok updated) :

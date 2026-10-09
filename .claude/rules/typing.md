@@ -19,8 +19,10 @@ evaluators are typed; and `Typing/Reachability.lean` that every reachable storag
 declared read sort holds of what a well-typed run reads.
 
 `Typing/Constructibility.lean` is the converse: canonical and tight
-(`SVal.tight`) is exactly reachable (`reachable_iff`, for `Ty.okDeep`
-roots), by a typed builder that reaches past an array's end through aliases
+(`SVal.tight`) is exactly reachable for a storage whose words, keys and
+slots fit (`reachable_iff`, for `Ty.okDeep` roots, under `FitsStorage`; not
+implied by `Reachable`, `huge_reachable_not_fits`, decision 77 of
+`docs/intrinsic.md`), by a typed builder that reaches past an array's end through aliases
 `slot d`. A new statement needs its erasure lemma (`TRun.x_erase`,
 `Semantics/StepErase.lean`) and its cases in `Stmt.keeps_canon`
 (Reachability) and `Stmt.keeps_tight` (Constructibility), a leaf through

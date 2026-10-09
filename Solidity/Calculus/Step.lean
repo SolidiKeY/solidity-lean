@@ -7,10 +7,9 @@ master's `Stmt.step` (`Calculus/Completeness.lean` at `ad728b16`) and
 `symex` on the scoped formulas of `Calculus/Fml.lean` (`docs/intrinsic.md`, M6a): the rule of a
 statement is one function of its constructors (`Stmt.step`), and the strategy
 fires the rule of the first statement of a formula until none is left.  The
-fresh names are numbered as `Symex.lean` numbers them, one above every index
-in the formula (`Fml.fresh`), so the erasure of what `symex` leaves is what
-today's `symex` leaves of the erasure, its cover goals dropped
-(`Examples/Tactics/Symex.lean` pins it).
+fresh names are numbered as master's `Symex.lean` numbered them, one above
+every index in the formula (`Fml.fresh`); `Examples/Tactics/Symex.lean` pins
+the results, which agreed with master's strategy until W4 `calc-del`.
 
 The kernel evaluates these functions when a goal is closed by them, so they
 follow Gate G0's conditions:
@@ -37,8 +36,9 @@ follow Gate G0's conditions:
 Every statement has a rule: `Stmt.step` dispatches to the arms of
 `Calculus/Arms.lean` (expressions, storage, memory, payments, `if`,
 `require`, `assert`) and `Calculus/Blocks.lean` (calls, `try`,
-loops), each the taclet `Completeness.lean` fires; the strategy stops only
-where today's does (a closed goal).
+loops), each arm the rule of a constructor of `Taclet`/`LeanTaclet`
+(`Calculus/Rules.lean`; `Taclet.toStep`, `Calculus/Taclet.lean`); the
+strategy stops only at a modality-free goal.
 
 A rule that declares fresh locals (`T se = nse; v = se ⊕ e;`) leaves them in
 a scope of their own, which ends after the statement (`Premise.unfold`, a
@@ -58,8 +58,8 @@ variable {C : Contract}
 
 /-- **The rule for a statement** under the modality `m`, its fresh locals
 named at index `k`: one `casesOn` over the statement (Gate G0, condition 1),
-each arm the rule `Completeness.lean`'s `Stmt.step` fires
-(`Calculus/Arms.lean`, `Calculus/Blocks.lean`).  Every statement
+each arm the rule `Taclet.toStep` names (`Calculus/Arms.lean`,
+`Calculus/Blocks.lean`).  Every statement
 has one, so the step is total (decision 76). -/
 def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Premise C Γ Γ' :=
   Stmt.casesOn (motive_1 := fun Γ Γ' _ => Premise C Γ Γ') s

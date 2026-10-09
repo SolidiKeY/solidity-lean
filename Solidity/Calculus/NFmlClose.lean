@@ -928,7 +928,7 @@ elab "sol_close_unwrap" : tactic => do
     replaceMainGoal [← normValid g]
 
 /-- `sol_close`: prove a formula with no modality left in an arbitrary state
-(`Close.lean`).  Run `sol_symex` first; with no goal left it does nothing. -/
+(`Calculus/NFmlClose.lean`).  Run `sol_symex` first; with no goal left it does nothing. -/
 macro "sol_close" : tactic => `(tactic|
   all_goals
    (sol_close_unwrap
