@@ -34,9 +34,8 @@ is not simple, Step 2 decomposes a write (source, receiver, index, in that
 order), Step 3 turns a statement whose parts are simple into an update.  The
 rule names are solkey's (`Calculus/Core/Rules.lean`).
 
-Writes are under the box: `⊨` quantifies over every state, including those
-without `alice`, where `alice.age = 1;` is `undef`, so the diamond of a write is
-not valid (`Close.lean`).  The programs of solkey's `taclets` suite, and the
+Writes are under the box: the closer does not close the diamond of a write
+(`Close.lean`, "What does not close").  The programs of solkey's `taclets` suite, and the
 claims that need the contract's initial store, are `StorageSuite.lean`.
 
 A Step 1 rule whose read lands in a hole (`storageFieldRead_unfold_rightFst`,

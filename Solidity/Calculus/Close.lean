@@ -39,10 +39,11 @@ hypothesis: nothing evaluated is trusted, the kernel checks the proof.
 
 What does not close, and why:
 
-* a write under the diamond: `⊨` quantifies over every state, including
-  those without `alice`, where `alice.age = 1;` is `undef`, so
-  `⟨ alice.age = 1; ⟩ true` is not valid.  Write the box, or put the
-  well-formedness of the storage in the premise;
+* a write under the diamond: the closer reads the write's update on the
+  erasure's untyped term model, where `find`/`save` at `alice` is not known
+  to be defined, so `⟨ alice.age = 1; ⟩ true` stays open at
+  `{ storage := save(storage, alice.age, 1) } true`.  Write the box, or put
+  the well-formedness of the storage in the premise;
 * two symbolic keys the formula does not tell apart: there is no case
   split on `k = j`, so `[ balances[k] = 5; balances[j] = 6; ] balances[k] == 5`
   stays open (it is false at `k = j`);

@@ -299,9 +299,10 @@ I.cost + 2`, and the premise (`body` alone, `ω` alone, under modal-free
 
 **Typing and declarations.** In the scoped syntax (`Syntax/Core.lean`) a
 loop is `Stmt C Γ Γ`: its condition and annotation are read in `Γ`, its body
-is a `Prog C Γ Γb` whose locals the scoped run pops every iteration
-(`Run.loop`), as for `ite`, and type soundness keeps the state typed at `Γ`
-at every head (`Invariant.keeps_loop`, `Typing/Soundness.lean`). The untyped
+is a `Prog C Γ Γb` whose locals the typed run pops every iteration
+(`TRun.loop`), as for `ite`; the invariants of `Typing/` are kept at every
+head (`RunInv.tkeeps_loop`, `Typing/TypedRunInv.lean`), and the state is
+typed by construction (`TState.erase_wt`). The untyped
 interpreter keeps a local declared in the body bound, and declares it again
 each iteration (`declLocal` overwrites, as solc re-initialises); it is in the
 frame, and the invariant, typed at `Γ`, cannot name it.

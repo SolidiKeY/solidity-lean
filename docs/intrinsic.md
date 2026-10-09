@@ -6324,7 +6324,8 @@ of `x = 10` through an alias moved to `Examples/Tools.lean` over
 `Surface.Prog.runT`, output unchanged; its kernel examples of M3's run
 (guard, assert, solc's `++` order, the calls, the loop) are deleted, the
 first four's typed twins standing in `Semantics/Core/TypedRun.lean` and the
-loop's in `Examples/Tactics/Loops.lean` (`countTo3Run`); the
+loop's in `Examples/Tactics/Loops.lean` (`countTo3Run`, and `countUpRun`,
+a body local popped every iteration, added by the review fixes); the
 `TypedRunErase` example (the scoped run ends where the typed one does)
 went with its theorem.  The fresh names are unchanged.
 

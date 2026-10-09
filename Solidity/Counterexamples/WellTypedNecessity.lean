@@ -19,7 +19,8 @@ return a number where `total : uint`?  Split by what the question is about:
 
 So any claim that a sorted read denotes the value really stored needs
 `wellFormed(storage)` in the proof obligation and its preservation by every
-write: `Prog.run_wt` is that preservation.
+write: `Core.TState.erase_wt` (`Typing/TypedWT.lean`) is that fact, by
+construction.
 -/
 
 namespace Solidity

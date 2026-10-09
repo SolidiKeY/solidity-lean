@@ -299,6 +299,27 @@ theorem countTo3Run :
   · rw [Core.Prog.trun, ← h]
     decide +kernel
 
+/-- A loop whose body declares a local, popped at the end of every iteration. -/
+def countUp : Surface.Prog StandardExample :=
+  sol{ uint i = 0; while (i < 3) { uint j = i + 1; i = j; } assert(i == 3); }
+
+open Lean Elab Command in
+run_cmd liftCoreM do
+  if let some e ← Core.Prog.defineCore `Solidity.Examples.Loops.countUpCore ``StandardExample []
+      countUp then
+    throwError "countUpCore: {e}"
+
+/-- The body's `j` is gone at every head: `i` is `3` where the loop ends, and
+the `assert` passes. -/
+theorem countUpRun :
+    ((Core.Prog.trun (Core.TState.ofStorage Core.Storage.standardExample) countUpCore).toOption.map
+      fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 3 := by
+  rcases Core.Prog.trunF_approx 4 countUpCore (Core.TState.ofStorage Core.Storage.standardExample)
+    with h | h
+  · exact absurd (congrArg Core.TRes.halt? h) (by decide +kernel)
+  · rw [Core.Prog.trun, ← h]
+    decide +kernel
+
 /-! ## Unwinding
 
 `whileUnwind` is solkey's taclet of that name with a bound: a loop that may

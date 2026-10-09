@@ -142,8 +142,7 @@ info: @Core.Taclet.send_unfold_rightSndArgument : ∀ {C : Contract} {k : Nat} {
 
 /-- `⟨ uint to = 9; ok = to.send(5); ⟩ true`: under the diamond the amount's
 sign first (`"non-negative amount"`), then the two outcomes.  The receiver is
-bound: a booking at a local that holds nothing has no address to book, and
-the diamond fails on it. -/
+a declared local. -/
 theorem sendDiamond : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign

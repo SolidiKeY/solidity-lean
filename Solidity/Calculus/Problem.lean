@@ -50,8 +50,7 @@ excludes it, so the Lean theorem need not imply solkey's obligation.
   stored as a mapping keeps a write through `delete`, so an `assert` that
   the element is reset fails.
 * **Diamond**: `∀x̄. wt(storage) → ⟨ f(x̄); ⟩ true`.  The diamond does not
-  hold of every storage: a write into a root that is not there is `undef`, and
-  `total + 0` reverts on a `uint` root holding `-1`.
+  hold of every storage: `total + 0` reverts on a `uint` root holding `-1`.
 
 **Why one atomic term.**  `wt` is a symbol of the term language, `Op1.wt`,
 read by the interpreter as a test of the storage it is given, and stated

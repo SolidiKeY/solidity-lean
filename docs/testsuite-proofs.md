@@ -443,7 +443,7 @@ one.
   its type's range, every mapping key in its key type's (`SVal.wordsB`).
   So `shape_iff_reachable`: for `TestSuite`'s roots (no duplicate,
   `Ty.okDeep`) a storage passes the shape test exactly when a scoped
-  program reaches it (by the scoped interpreter); `wt_iff_reachable`: it passes `wt` exactly when it is
+  program reaches it (by the typed run, `Reachable`); `wt_iff_reachable`: it passes `wt` exactly when it is
   reachable and its words fit.  The words are a test of their own: a
   literal is in its type's range (`Simple.lit`, since 2026-10-07), but no
   theorem yet shows that a run keeps every word in range.  Why an
