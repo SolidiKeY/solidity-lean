@@ -306,6 +306,10 @@ structure Run where
   lines : List Line
   modalStop : Bool
 
+/-- Whether the program of the run's first line is still open: the strategy
+has a line to give, or, under a modality variable, a step that reads it. -/
+def Run.isOpen (r : Run) : Bool := !r.lines.isEmpty || r.modalStop
+
 /-- The runs of this declaration, by every line they pass (as
 today's chains' `runCache` did). -/
 initialize runCache : EnvExtension (Std.HashMap Expr (Run × Nat)) ←
@@ -1178,7 +1182,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       | `(chain_arrow| ~=>) => pure (some none)
       | _ => pure none
     if let some (some (r, .table `sequentialToParallel)) := rw? then
-      if legacy.isNone && !(← runChain cur).lines.isEmpty then
+      if legacy.isNone && (← runChain cur).isOpen then
         -- the program is still open: the merge on the scoped line
         let (sp, cands) ← mergeCands cur
         let fits ← writtenMatcher C w
@@ -1199,7 +1203,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
     if let some (some (r, a)) := rw? then
       if legacy.isNone then
         let run ← runChain cur
-        if !run.lines.isEmpty then
+        if run.isOpen then
           -- the program is still open: the rewrite on the scoped line
           let (sp, cands, failed) ← scopedRwCands cur a run.erased[0]!
           let note := match failed with
@@ -1440,7 +1444,7 @@ syntax (name := leadsAnyStx) "leads% " term:max term:max : term
     return mkApp4 (mkConst ``Fml.Leads) C Γ A B
   -- a line of the derivation with its update spine merged (the program open)
   for (L, _) in cands do
-    if (← runChain L).lines.isEmpty then continue
+    if !(← runChain L).isOpen then continue
     let (sp, ms) ← mergeCands L
     if let some c ← ms.findM? (fun c => fits sp c.fml c.erased) then
       return mkApp4 (mkConst ``Fml.Leads) C Γ A c.fml

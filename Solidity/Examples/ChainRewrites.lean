@@ -575,9 +575,13 @@ leaves, so a step and a rewrite are links of one chain.  A literal law in
 an update's right-hand sides (`FmlRw.lit`), `applyOnRigid` along the
 skeleton of the formula under the update (`FmlRw.applyOnRigid`: the update
 cannot halt, or the box), and `concrete` (`FmlRw.concrete`), each proved by
-`rfl` over the postcondition and the program it does not look at. -/
+`rfl` over the postcondition and the program it does not look at.  A
+term taclet in a box update (`FmlRw.lawUpd`) is the box's.  Under a
+modality variable `m` each rewrite runs as the diamond and as the box, and
+applies where both give the same line with `m` read back. -/
 
 section Open
+variable (m : Modality)
 
 /-- `applyOnRigid` and `concrete` with the revert still to run, then the
 step that runs it (`revertBox`). -/
@@ -637,6 +641,69 @@ while the program is open
 example (φ : Post StandardExample []) :
     dl!{ { se1 := 1 / 0 == 0 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
     ~[applyOnRigid]~> _ := by
+  sol_chain
+
+/-- `findOnSave` in a box update, onto a literal (`FmlRw.lawUpd`), with the
+revert still to run, then the step that runs it. -/
+example (φ : Post StandardExample [.val .uint]) :
+    dl![.box]{ { x := find(save(storage, alice.age, 42), alice.age) } [ revert(); ] φ }
+    ~[findOnSave]~> dl![.box]{ { x := 42 } [ revert(); ] φ }
+    ~[revertBox]~> dl![.box]{ { x := 42 } true } := by
+  sol_chain
+
+-- Under the diamond the law is not applied in the update: `{ x := 42 }`
+-- runs where the read halts.
+/--
+error: ~[findOnSave]~>: findOnSave does not apply to
+  dl{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨ revert(); ⟩ φ }
+while the program is open
+-/
+#guard_msgs in
+example (φ : Post StandardExample [.val .uint]) :
+    dl!{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨ revert(); ⟩ φ }
+    ~[findOnSave]~> _ := by
+  sol_chain
+
+/-- `add_literals` under `m` with the revert still to run: a literal law is
+exact, so the diamond and the box give one line. -/
+example (φ : Post StandardExample [.val .uint]) :
+    dl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ }
+    ~[add_literals]~> dl![m]{ { x := 260 } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain
+
+/-- The check's branches folded under `m`: `{ se1 := false }` cannot halt,
+so `applyOnRigid` applies under the diamond too. -/
+example (φ : Post StandardExample []) :
+    dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~[applyOnRigid]~>
+      dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+        (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain
+
+-- Under `m` an update that may halt is not pushed through: the diamond
+-- refuses it.
+/--
+error: ~[applyOnRigid]~>: applyOnRigid does not apply to
+  dl{ { se1 := 1 / 0 == 0 } (se1 ≐ false → ⟨[ revert(); ]⟩ φ) }
+while the program is open
+-/
+#guard_msgs in
+example (φ : Post StandardExample []) :
+    dl![m]{ { se1 := 1 / 0 == 0 } (se1 ≐ false → ⟨[ revert(); ]⟩ φ) }
+    ~[applyOnRigid]~> _ := by
+  sol_chain
+
+-- Nor a term taclet in the update: it is the box's.
+/--
+error: ~[findOnSave]~>: findOnSave does not apply to
+  dl{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨[ revert(); ]⟩ φ }
+while the program is open
+-/
+#guard_msgs in
+example (φ : Post StandardExample [.val .uint]) :
+    dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨[ revert(); ]⟩ φ }
+    ~[findOnSave]~> _ := by
   sol_chain
 
 end Open

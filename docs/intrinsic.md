@@ -1278,13 +1278,17 @@ program `ChainRewrites`, `ChainBranches` and `RewriteChains` stay on
   state) and 76 (`Stmt.step` total), each a lane with its gates.
 - Lean docstrings still call the erased side "today's" in places and cite
   this record's sections (at `ad728b16`).
-- `dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }`,
-  a modality variable over two branches that compare a local an update
-  binds, fails to elaborate under `open scoped Solidity.Scoped` ("(kernel)
-  application type mismatch": an `NFml` under a `Surface.Fml`
-  constructor), as a first line and as a written line; one branch alone,
-  or `.box`/`.diamond` for `m`, reads.  Found in 6c, not fixed (the
-  reading, not the chains); `Examples/ChainRewrites` §3⁗ is written at
-  `.box` and `.diamond`.
+- Fixed in 6c's review: a rewrite link under a modality variable whose
+  first step reads the modality (`[ revert(); ]` next: the diamond's and the
+  box's derivations part at once, `Run.modalStop`) fell to the erasure's
+  path and failed in the kernel ("application type mismatch": an `NFml`
+  under a `Surface.Fml` constructor); recorded here before as a reading
+  bug of two-branch lines.  `sol_chain` now takes such a line as open
+  (`Run.isOpen`, `Calculus/Chains.lean`), so the scoped rewrites run on it
+  as the diamond and as the box (`scopedRwCands`), the merge too;
+  `Examples/ChainRewrites` §3⁗ pins it under `m` (`add_literals`, the
+  two-branch `applyOnRigid` and `concrete`, and the refusals of a halting
+  update and of `findOnSave` in the update), and `FmlRw.lawUpd` under the
+  box and refused under the diamond.
 - `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on
   its `frames = true` path; nothing calls it with both set.
