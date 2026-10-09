@@ -1,4 +1,5 @@
 import Solidity.Evm.Expr
+import Solidity.Semantics.NoPanic
 
 /-!
 # Statements over the typed run
@@ -19,8 +20,9 @@ body, whose frame sits above the caller's locals: the first keeps the
 caller's locals, the second its fragile aliases in bounds.  The refused
 outcome carries them too, since the interpreter goes on from a machine the
 world paid (`compile_correct`'s third case).  A panic is the outcome of an
-`assert` only (`Stmt.asserts`), so code without one never panics
-(`compile_exact`).
+`assert` only (`Stmt.asserts`, `Semantics/NoPanic.lean`, where
+`Prog.run_noPanic` says so of every typed run), so code without one never
+panics (`compile_exact`).
 -/
 
 namespace Solidity.Evm
@@ -30,28 +32,6 @@ open SemanticsProperties
 open Solidity (Ctx Idx Ext TEnv State SRef TRes HTy)
 
 variable {C : Contract}
-
-/-! ## Assertions -/
-
-mutual
-/-- Whether a statement has an `assert` (in a branch, a block or a called
-body): only those panic. -/
-def Stmt.asserts {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
-  | .assert _ => true
-  | .ite _ t e => Prog.asserts t || Prog.asserts e
-  | .block body => Prog.asserts body
-  | .call _ _ _ body => Prog.asserts body
-  | .tryCall _ _ ok err _ pnc other =>
-    Prog.asserts ok || Prog.asserts err || Prog.asserts pnc || Prog.asserts other
-  | .loop _ _ body => Prog.asserts body
-  | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
-  | .incDec .. | .assignIncDec .. | .push .. | .pop _ | .transfer .. | .send .. | .declMem ..
-  | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .revert => false
-def Prog.asserts {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
-  | .nil => false
-  | .cons s P => Stmt.asserts s || Prog.asserts P
-end
 
 /-! ## What a statement keeps -/
 

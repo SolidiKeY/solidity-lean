@@ -61,6 +61,7 @@ lemma (`TermTaclet.sound`).
 | `Semantics/Agree.lean` | `EnvAgreeExcept`: states agreeing off scratch names, and a frame lemma per evaluator and state operation; `Avoids`. |
 | `Semantics/WellFormed.lean` | `storageWtB`: well-formed storage (the shape `SVal.canon ∧ SVal.tight`, and words in range, `SVal.wordsB`) as a test the term `wt(storage)` runs; `SVal.isDfltB`, a default the kernel can recognise. |
 | `Semantics/DecEq.lean` | `DecidableEq SVal`. |
+| `Semantics/NoPanic.lean` | Only an `assert` panics, over the typed run: `Stmt.asserts`/`Prog.asserts`, each step but `assert` does not panic (`TRun.*_noPanic`), so a program with no `assert` never does (`Prog.run_noPanic`, `Prog.run_ne_panic`), on every typed state. |
 | `Semantics/NoPanicSimp.lean` | The simp set `no_panic_simp` of the `*_noPanic` lemmas. |
 | `Semantics/NoPanicOps.lean` | No operation of the interpreter panics: `NoPanic` of the state reads and writes, the evaluation of program expressions, copies and allocations; the `no_panic` tactic (what the term model keeps). |
 | `Semantics/Value.lean` | `PrimTy.Denote`: a typed primitive value (a `uint` an `Int` in range); its erasure `PrimTy.erase` and reading back `PrimTy.ofValue?`; `toRes`, a revert as `none` (`docs/intrinsic.md`, M4a); `PrimTy.key`, a mapping key as the integer solc hashes (a `bool` as `0`/`1`). |
@@ -255,7 +256,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Evm/Examples.lean` | Programs of `StandardExample`, `CallsExample` and `TestSuite` (`Evm.Examples.setAge` …) resolved and compiled by `Evm/Compile.lean`, run by `decide +kernel`. |
 | `Evm/Sim.lean` | `Sim` over the scoped syntax (M5, W1): the locals by position, typed (`Look C Γ`, `Seen`: a value, an alias's `SRef`), declarations as `Look.cons` (`Sim.consVal`/`consAlias`/`consFragile`/`consDead`), a scope's end as `Sim.drop`, the fragment's flags (`Sim.flags`, `meet`, `storeDrop`), a call's frame (`Sim.enter`, `Sim.return`); compiled code at base `b` stores to no level below `b` (`storesFrom_compileStmt`, `storesFrom_callFrame`, `exec_mem`). |
 | `Evm/Expr.lean` | The expression lemmas over the typed run (W1): `State.sem`, `Look.ofTEnv` (`TEnv.get` as `Look`), `ValOutT`/`LocOutT`, `simple_sim`, `spath_sim`, `loc_sim`, `val_sim`. |
-| `Evm/Stmt.lean` | One lemma per statement of the fragment over the typed run (W1), a storage write read back typed (`into_ok`): `StmtOut` (with `Keeps`: cells below the frame, array lengths), `Stmt.asserts`, `assign_sim` … `transfer_sim`. |
+| `Evm/Stmt.lean` | One lemma per statement of the fragment over the typed run (W1), a storage write read back typed (`into_ok`): `StmtOut` (with `Keeps`: cells below the frame, array lengths), `assign_sim` … `transfer_sim`. |
 | `Evm/Correct.lean` | `stmt_sim`/`prog_sim` over the scoped syntax and `Prog.run` (within `maxHeartbeats 10000`) (one lemma per family, `ite_sim`, `block_sim`, `callNone_sim`/`callVal_sim`), then `compile_correct`, `compile_exact`, `compile_box`, `compile_net`, `compile_storage`; no `not_stuck` (no stuck outcome). |
 | `Evm/Interpreter.lean` | The compiler's interpreter theorems over `Prog.run` (`setAge_interpreter`, `overflow_interpreter`, `payOwner_interpreter`, `callTwice_interpreter`), from `Evm/Examples.lean`'s machine runs. |
 

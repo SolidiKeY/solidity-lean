@@ -26,6 +26,7 @@ import Solidity.Semantics.Erased
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
 import Solidity.Semantics.StepErase
+import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame
 import Solidity.Semantics.RunFuel
