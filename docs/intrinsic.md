@@ -49,7 +49,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2, 6b (`Decide.lean`) and 6c part 1 (`NFmlUpdateRules`, `StateParts`) partial 2026-10-09; 6c `w6c-rw` (`Rewrite`, `TheoryRewrite`, `NFmlDerive`, `NFmlLogic`) partial |
+| M6c | **in progress** | the closer and `Decide` on `Fml C Γ` ("M6c", "What is left"); 6a parts 1 and 2, 6b (`Decide.lean`) and 6c part 1 (`NFmlUpdateRules`, `StateParts`) partial 2026-10-09; 6c `w6c-rw` (`Rewrite`, `TheoryRewrite`, `NFmlDerive`, `NFmlLogic`) and `w6c-chain` (the chains' rewrites while the program is open) partial |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
@@ -1081,6 +1081,47 @@ the closer port.
     `NFml.Proves`'s, the scoped ones are `Calculus/RewriteSyntax.lean`'s
     with the same text.
 
+92. *Proposed (M6c 6c, `w6c-chain`; 86–88 at the lane, renumbered at
+    the merge), the lead's call:* a chain's rewrite links on `Fml C Γ` are a
+    new module, `Calculus/RewriteScoped.lean` (`FmlRw`, `Fml.RwBy`, the
+    link `Link.rw`), each rewrite sound on the typed reading itself
+    (`holds`), not by commutation with the erasure as `Decide.lean` is
+    (decision 83): a `Leads` link needs both directions between a line
+    and its erasure, and they hold only of a first-order formula
+    (`holds_erase_fo`); an update reads the typed states it ends in, a
+    modality erases to `false`.  Ported: a literal law in an update's
+    right-hand sides under any modality (`FmlRw.lit`, exact:
+    `Upd.rwC_apply_eq`), a term taclet onto a term that cannot halt in a
+    box update's (`FmlRw.lawUpd`, `holds_upd_rwC`), `applyOnRigid` along
+    the skeleton under an update that cannot halt or the box
+    (`FmlRw.applyOnRigid`, `Fml.pushS_sound`: one direction, the
+    first-order parts applied by `Fml.substU`), `concrete`
+    (`FmlRw.concrete`, an equivalence); `sequentialToParallel` was already
+    `Calculus/Merge.lean`'s.  The functions use `match` on the indexed
+    families (G0 condition 1), the exemption `Calculus/Merge.lean` has:
+    they run once a link.
+93. *Proposed (M6c 6c), the lead's call:* a scoped rewrite is tried only
+    while the program is open (the strategy still has a line to give), as
+    the scoped merge is; a line with no program left goes on on its
+    erasure as before (`Fml.ViaE`, `Calculus/ChainRewrites.lean`,
+    `ChainBranches.lean`, `RewriteChains.lean`), so no existing chain's
+    statement, line or pin changes.  Those three modules stay on `NFml`
+    past the program, decision 7's fallback, as the rewrites' IR: porting
+    them restates on scoped updates the merges that substitute a storage or
+    memory write (`withStM`, `Upd.mergeStL`, `Upd.mergeMem`), the
+    `simplifyUpdate` that asks a postcondition's fresh variables, the
+    member-wise and covered laws (`Upd.covers`, `Term.base?`, `EvalLaw`)
+    and `applyOnPV`, about 4k lines of soundness over the untyped
+    interpreter, for no line a chain past the program does not already
+    reach.
+94. *Proposed (M6c 6c), the lead's call:* the scoped `applyOnRigid`
+    applies a first-order antecedent under the box too, where
+    `NFml.pushBox` keeps it whole: a first-order formula reads only the
+    state's erasure (`Fml.substU_holds`), so `a[U] → [U]B` gives
+    `[U](a → B)` wherever `U` returns, and `[U]` is true where it halts.
+    Under the diamond it asks `U` to return in every state
+    (`Upd.totalS`: locals and literals), and refuses otherwise.
+
 ## M6c
 
 **Wave 6a, part 1 (2026-10-09, `w6-closer`): `DecideSyn`, `DecideComplete`
@@ -1376,6 +1417,60 @@ goal's marks are restored (`Symex.restoreMarks`).  Pinned in
 `some (1)` before the fix).  The rule map's scoped `rewrite` rows now name
 it a rule (decision 90).
 
+**Wave 6c (2026-10-09, `w6c-chain`): `ChainRewrites`, `ChainBranches`,
+`RewriteChains` on scoped lines; Gate: partial.**
+`Calculus/RewriteScoped.lean` (new, no `sorry`; decisions 92–94): rewrite
+links on the scoped line while the program is open, so a step of the
+strategy and a rewrite are links of one chain again (decision 49's loss):
+`Examples/ChainRewrites` §3⁗ folds `uint8 x = 250; x += 10;`'s check
+(`sequentialToParallel`, `add_literals`, `leq_literals`, `applyOnRigid`,
+`concrete`) with `[ revert(); ] φ` still to run, and `revertBox`
+(`revertDiamond`) runs after the rewrites; a halting update under the
+diamond is refused (pinned).  `Link.rw` (`Calculus/ChainKit.lean`), the
+candidates and the kernel's `rfl` (`scopedRwCands`, `Fml.RwBy` in
+`solveCore`, `Calculus/Chains.lean`); the merge's arrow prints without its
+macro scope (`sequentialToParallel`, not `sequentialToParallel✝`).  No
+existing proof or pin moved; no `sorry`, `axiom` or `maxHeartbeats`
+added.  `lean_build` of the default targets green (25 modules depend on
+the new one, none of `SolidityCorpus` or `SolkeyTestSuite`);
+`check-orphans` and `check-doc-paths` OK.
+
+Gate (the W6 baselines' method, `u6sample.py`: each file copied under
+`Solidity/Scratch/`, a fresh worker, the end of work, the minimum of three
+runs, one worker at a time, imports built; the base is `77c6e047`,
+measured in the same session from the same worktree checked out there;
+load 1.6–2.9 at the starts after a wait for another lane's build to end,
+whose three runs of `ChainRewrites` at load 10–13 are not counted):
+
+| Module | base `77c6e047` (min) | 6c (three runs) | ratio | CPU base → 6c |
+|---|---|---|---|---|
+| `Examples/ChainRewrites` (with §3⁗) | 6.40 s | **7.01 s** (7.01, 7.38, 7.25) | 1.10 | 7.42 → 8.21 s |
+| `Examples/ChainRewrites` (without §3⁗) | 6.40 s | **6.45 s** (6.45, 6.52, 6.57) | 1.01 | 7.42 → 7.44 s |
+| `Examples/Chains/Storage` | 7.66 s | **7.68 s** (7.68, 7.80, 7.74) | 1.00 | 8.09 → 8.12 s |
+| `Examples/Chains/StorageArrays` | 3.49 s | **3.42 s** (3.53, 3.42, 3.58) | 0.98 | 3.49 → 3.39 s |
+| `Examples/Chains/StorageCoverage` | 14.45 s | **14.49 s** (14.51, 14.49, 14.67) | 1.00 | 15.12 → 15.16 s |
+| `Examples/Chains/StorageDelete` | 7.49 s | **7.28 s** (7.50, 7.28, 7.48) | 0.97 | 7.48 → 7.27 s |
+| `Examples/Chains/Arithmetic` | 1.00 s | **0.97 s** (0.97, 0.97, 1.01) | 0.97 | 0.85 → 0.81 s |
+| `Examples/Chains/CheckedArithmetic` | 1.20 s | **1.19 s** (1.20, 1.19, 1.22) | 0.99 | 1.05 → 1.05 s |
+| `Examples/Chains/Memory` | 5.18 s | **4.92 s** (4.93, 4.92, 4.99) | 0.95 | 5.71 → 5.40 s |
+| `Examples/Chains/MemoryArrays` | 6.25 s | **6.37 s** (6.41, 6.42, 6.37) | 1.02 | 6.91 → 7.00 s |
+| `Examples/Chains/MemoryCoverage` | 12.22 s | **11.90 s** (12.06, 11.90, 11.96) | 0.97 | 12.57 → 12.22 s |
+| `Examples/Chains/MemoryDelete` | 9.32 s | **9.43 s** (9.43, 9.49, 9.48) | 1.01 | 9.78 → 9.88 s |
+| `Examples/Chains/MemoryToStorage` | 5.59 s | **5.42 s** (5.47, 5.42, 5.54) | 0.97 | 5.81 → 5.64 s |
+| `Examples/Chains/StorageToMemory` | 2.52 s | **2.47 s** (2.52, 2.50, 2.47) | 0.98 | 2.55 → 2.53 s |
+| `Examples/Chains/Payment` | 1.02 s | **1.02 s** (1.04, 1.04, 1.02) | 1.00 | 0.93 → 0.94 s |
+| `Examples/Chains/EvaluationOrder` | 0.97 s | **0.98 s** (0.98, 1.00, 1.00) | 1.01 | 0.86 → 0.84 s |
+
+The W6 baselines have two of these rows: `ChainRewrites` 6.36 s and
+`Chains/Storage` 7.45 s (gates 7.63 s and 8.94 s); 6c is within both.
+`ChainRewrites` without its new section is where it was (1.01): the
+elaborator tries a scoped rewrite only while a program is open, which no
+existing link does; the new section costs 0.6 s (four chains, eleven
+scoped links).  **Gate: partial** (every row within 1.2×; the rewrites
+while the program is open are on `Fml C Γ`, decisions 92 and 94; past the
+program `ChainRewrites`, `ChainBranches` and `RewriteChains` stay on
+`NFml` as the rewrites' IR, decision 93).
+
 ## What is left
 
 **M6c: the closer on `Fml C Γ`**, gated.  Today a leaf is erased
@@ -1404,7 +1499,13 @@ it a rule (decision 90).
   `NFmlDerive`, `NFmlLogic`, `RewriteChains` (`Rewrite`, `TheoryRewrite`,
   `NFmlDerive`, `NFmlLogic`: lane `w6c-rw`, partial, decisions 89–91: the
   leaves and the sequent's rewrite scoped, the `⊨` route's leaves and the
-  closer's IR left; decision 49's chain examples wait for `ChainBranches`).
+  closer's IR left; decision 49's chain examples wait for `ChainBranches`;
+  `ChainRewrites`, `ChainBranches`, `RewriteChains`: lane `w6c-chain`,
+  partial, the rewrites while the program is open on `Fml C Γ` in
+  `Calculus/RewriteScoped.lean`, past it on `NFml`, decisions 92–94; not
+  ported while open: laws in a line's equations, `simplifyUpdate`,
+  `sequentialToParallel` under a branch, `applyOnPV`, `applyStorageBox`,
+  the covered and member-wise laws, `EvalLaw`, `~=>`).
 - **Gate per module:** the `TestSuite/Derived*` files and
   `Examples/Tactics/Decide` within 1.2× of the erased form's timings
   (the W6 baselines, Gates: the end-of-work column and its gate).
@@ -1413,7 +1514,7 @@ it a rule (decision 90).
   `NFml`, `NFml`, `Fml.erase` and `Semantics/Erased.lean` go.
 
 **Besides M6c:**
-- The lead's calls on proposals 78–91; the user's on decision 11 (whether
+- The lead's calls on proposals 78–94; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").
 - At the merge into `master`: the SolKey reader's require back to
@@ -1427,5 +1528,17 @@ it a rule (decision 90).
   state) and 76 (`Stmt.step` total), each a lane with its gates.
 - Lean docstrings still call the erased side "today's" in places and cite
   this record's sections (at `ad728b16`).
+- Fixed in 6c's review: a rewrite link under a modality variable whose
+  first step reads the modality (`[ revert(); ]` next: the diamond's and the
+  box's derivations part at once, `Run.modalStop`) fell to the erasure's
+  path and failed in the kernel ("application type mismatch": an `NFml`
+  under a `Surface.Fml` constructor); recorded here before as a reading
+  bug of two-branch lines.  `sol_chain` now takes such a line as open
+  (`Run.isOpen`, `Calculus/Chains.lean`), so the scoped rewrites run on it
+  as the diamond and as the box (`scopedRwCands`), the merge too;
+  `Examples/ChainRewrites` §3⁗ pins it under `m` (`add_literals`, the
+  two-branch `applyOnRigid` and `concrete`, and the refusals of a halting
+  update and of `findOnSave` in the update), and `FmlRw.lawUpd` under the
+  box and refused under the diamond.
 - `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on
   its `frames = true` path; nothing calls it with both set.

@@ -3,6 +3,7 @@ import Solidity.Calculus.Taclet
 import Solidity.Calculus.HoldsErase
 import Solidity.Calculus.Sound
 import Solidity.Calculus.Merge
+import Solidity.Calculus.RewriteScoped
 import Solidity.Calculus.RewriteChains
 
 /-!
@@ -11,7 +12,9 @@ import Solidity.Calculus.RewriteChains
 The chains' relations on the scoped formulas of
 `Calculus/Fml.lean` (W2 of `docs/intrinsic.md`): a step `φ ~> ψ`
 (`Fml.OneStep`, `Fml.step`), a named step `φ ~[r]~> ψ` (`Fml.StepBy`),
-several `φ ~*> ψ` (`Fml.Steps`), and a chain of them (`Fml.Via`).
+several `φ ~*> ψ` (`Fml.Steps`), and a chain of them (`Fml.Via`), a
+link a merge (`Link.merge`, `Calculus/Merge.lean`) or a rewrite of the
+scoped line (`Link.rw`, `Calculus/RewriteScoped.lean`) too.
 `Calculus/Chains.lean` elaborates and proves them.
 
 **Naming a rule.**  The strategy is a function (`Stmt.step`) and the
@@ -503,6 +506,9 @@ inductive Link (C : Contract) : Type where
   /-- `~[sequentialToParallel]~>` while the program is open: the `n + 1`
   updates from position `k` of the spine merged (`Calculus/Merge.lean`). -/
   | merge (k n : Nat)
+  /-- `~[n]~>` while the program is open: a rewrite of the scoped line
+  (`Calculus/RewriteScoped.lean`), named `n` as the chain writes it. -/
+  | rw (n : String) (r : FmlRw C)
 
 /-- The relation an arrow stands for. -/
 @[reducible] def Link.Rel : Link C → Fml C Γ → Fml C Γ → Prop
@@ -510,6 +516,7 @@ inductive Link (C : Contract) : Type where
   | .many => fun φ ψ => Nonempty (Fml.Steps φ ψ)
   | .rule r => Fml.StepBy r
   | .merge k n => Fml.MergeBy k n
+  | .rw n r => Fml.RwBy n r
 
 /-- `φ ~> φ₁ ~*> φ₂ …`: every link of a chain that starts at `φ` holds. -/
 @[reducible] def Fml.Via : Fml C Γ → List (Link C × Fml C Γ) → Prop
@@ -709,6 +716,7 @@ theorem Link.Rel.sound : {l : Link C} → l.Rel φ ψ → Fml.Leads φ ψ
   | .many, ⟨c⟩ => c.sound
   | .rule _, h => Fml.StepBy.sound h
   | .merge k n, h => Fml.mergeRun_leads k n _ h
+  | .rw _ r, h => r.sound h
 
 /-- **A chain leads from its first line to its last.** -/
 theorem Fml.Via.leads : {φ : Fml C Γ} → {ws : List (Link C × Fml C Γ)} → Fml.Via φ ws →
@@ -867,6 +875,7 @@ instance : Fml.SoundRel (@Fml.OneStep C Γ) := ⟨Fml.OneStep.sound⟩
 instance : Fml.SoundRel (@Fml.Steps C Γ) := ⟨Fml.Steps.sound⟩
 instance {r : StepRule C} : Fml.SoundRel (@Fml.StepBy C Γ r) := ⟨Fml.StepBy.sound⟩
 instance {k n : Nat} : Fml.SoundRel (@Fml.MergeBy C Γ k n) := ⟨fun h => Fml.mergeRun_leads k n _ h⟩
+instance {n : String} {r : FmlRw C} : Fml.SoundRel (@Fml.RwBy C Γ n r) := ⟨fun h => r.sound h⟩
 instance : Fml.SoundRel (@Fml.Leads C Γ) := ⟨id⟩
 
 /-- A `calc` with a merge in it composes to `~~>`; one of steps alone still

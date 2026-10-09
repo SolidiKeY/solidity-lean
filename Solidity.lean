@@ -71,6 +71,7 @@ import Solidity.Calculus.DelabLean
 import Solidity.Calculus.Graft
 import Solidity.Calculus.SeqRewrite
 import Solidity.Calculus.Merge
+import Solidity.Calculus.RewriteScoped
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.UpdRuleScoped
 import Solidity.Calculus.StatePartsScoped
