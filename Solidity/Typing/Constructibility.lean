@@ -244,7 +244,7 @@ theorem save_save : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Seman
       cases dflt.save rest b <;> simp [setBy_setBy_self]
   | .field _ :: _, .prim _, _, _, _, h | .at _ :: _, .prim _, _, _, _, h
   | .at _ :: _, .struct _, _, _, _, h | .field _ :: _, .array .., _, _, _, h
-  | .field _ :: _, .map .., _, _, _, h => by simp [Semantics.SVal.save] at h
+  | .field _ :: _, .map .., _, _, _, h => by simp only [Semantics.SVal.save, reduceCtorEq] at h
 
 /-! ### Chains of writes at one path -/
 
@@ -308,7 +308,7 @@ theorem Wrote.up {st st' : List (Name × Semantics.SVal)} {r : Name} {segs rest 
 theorem save_field {fs : List (Name × Semantics.SVal)} {n : Name} {c : Semantics.SVal} (w : Semantics.SVal)
     (h : lookupBy n fs = some c) :
     (Semantics.SVal.struct fs).save [.field n] w = .ok (.struct (setBy n w fs)) := by
-  simp [Semantics.SVal.save, h, SVal.save_nil]; rfl
+  simp only [Semantics.SVal.save, h, SVal.save_nil]; rfl
 
 theorem save_at_map (es : List (Int × Semantics.SVal)) (dflt : Semantics.SVal) (k : Int) (w : Semantics.SVal) :
     (Semantics.SVal.map es dflt).save [.at k] w = .ok (.map (setBy k w es) dflt) := by
@@ -354,11 +354,12 @@ theorem defaultOf_default (T : Ty) : (defaultForTy T).defaultOf = defaultForTy T
   induction T using defaultForTy.induct
     (motive2 := fun l => SVal.defaultOf.defaultOfFields (defaultForFields l) = defaultForFields l)
     with
-  | case1 => simp [defaultForTy, Semantics.SVal.defaultOf]
-  | case2 => simp [defaultForTy, Semantics.SVal.defaultOf]
-  | case3 => simp [defaultForTy, Semantics.SVal.defaultOf]
+  | case1 => simp only [defaultForTy, Semantics.SVal.defaultOf]
+  | case2 => simp only [defaultForTy, Semantics.SVal.defaultOf]
+  | case3 => simp only [defaultForTy, Semantics.SVal.defaultOf]
   | case4 name ih => rw [defaultForTy]; simp only [Semantics.SVal.defaultOf, ih]
-  | case5 elem => simp [defaultForTy, Semantics.SVal.defaultOf, SVal.defaultOf.defaultOfElems]
+  | case5 elem => simp only [defaultForTy, Semantics.SVal.defaultOf, SVal.defaultOf.defaultOfElems,
+      List.append_nil]
   | case6 elem n ih =>
     rw [defaultForTy]; simp only [Semantics.SVal.defaultOf]
     congr 1
@@ -450,7 +451,7 @@ theorem save_ok_any : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Sem
       simp only [hu']; exact ⟨_, rfl⟩
   | .field _ :: _, .prim _, _, _, _, h | .at _ :: _, .prim _, _, _, _, h
   | .at _ :: _, .struct _, _, _, _, h | .field _ :: _, .array .., _, _, _, h
-  | .field _ :: _, .map .., _, _, _, h => by simp [Semantics.SVal.save] at h
+  | .field _ :: _, .map .., _, _, _, h => by simp only [Semantics.SVal.save, reduceCtorEq] at h
 
 theorem Wrote.any {st₀ st : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg} {X : Semantics.SVal}
     (h : Wrote st₀ st r segs X) (Y : Semantics.SVal) : ∃ st', Wrote st₀ st' r segs Y := by
@@ -582,7 +583,8 @@ def fill {Γ : Ctx} (d : Nat) : (T : Ty) → SPath C Γ T → Semantics.SVal →
       bound d (.array E) q
         (if hE : E.defaultOkS = true then
           (Prog.rep (elems.length + shadow.length)
-              (.push (.alias .here : SPath C _ (.array E)) none (by simp [hE]))).append
+              (.push (.alias .here : SPath C _ (.array E)) none (by simp only [Option.isSome_none,
+                  hE, Bool.or_true]))).append
             ((fillShadow d E .here elems.length shadow).append
               (fillElems d (ArrTy.dyn (E := E)) .here 0 elems))
         else .nil)
@@ -679,8 +681,9 @@ theorem resolve_index_arr {σ : EState C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R 
         (Loc.index (.arr ak) (.alias a) (.simple (numLit .uint rfl (j : Int))))).resolve σ =
       .ok (r, segs ++ [.at (j : Int)]) := by
   rw [numLit_eq (inRange_of_lt hb)]
-  simp [SPath.resolve, Loc.resolve, aliasPath_bound h, Val.eval, Simple.eval, Value.keyAt, Value.asInt,
-    Semantics.State.checkIndex, hf, hj, bind, Except.bind, pure, Except.pure]
+  simp only [SPath.resolve, Loc.resolve, bind, Except.bind, aliasPath_bound h, Val.eval, Simple.eval,
+      pure, Except.pure, Value.keyAt, Value.asInt, Semantics.State.checkIndex, hf, Int.ofNat_zero_le,
+      Int.toNat_natCast, hj, and_self, ↓reduceIte]
 
 theorem keyLit_keyAt (σ : EState C Γ) {k : PrimTy} {key : Int} (hr : k.keyFits key = true) :
     ((Val.simple (keyLit (C := C) (Γ := Γ) k key)).eval σ >>= Value.keyAt k) = .ok key := by
@@ -706,7 +709,7 @@ theorem resolve_index_map {σ : EState C Γ} {k : PrimTy} {V : Ty} {key : Int}
   · exact nomatch hk
   · rename_i w hw
     rw [hk]
-    simp [Semantics.State.checkIndex, hf, bind, Except.bind, pure, Except.pure]
+    simp only [Semantics.State.checkIndex, bind, Except.bind, hf, pure, Except.pure]
 
 /-! #### Typed runs
 
@@ -822,8 +825,8 @@ theorem run_push {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r 
     exact hl
   · refine Eq.trans (?_ : _ = σ.erase.withGlob <$> σ.erase.glob.saveStorage r segs
       (.array (es ++ [defaultForTy E]) [] fx)) (by rw [hτ]; rfl)
-    simp [SPath.resolve, aliasPath_bound hb, pushAt, hf, Semantics.pushSlot, Src.pushVal, bind,
-      Except.bind, pure, Except.pure]
+    simp only [bind, Except.bind, SPath.resolve, aliasPath_bound hb, pushAt, hf, Src.pushVal, pure,
+        Except.pure, Semantics.pushSlot]
 
 theorem run_pop {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r : Name}
     {segs : List Seg} {es sh : List Semantics.SVal} {last : Semantics.SVal} {fx : Bool}
@@ -836,7 +839,8 @@ theorem run_pop {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r :
     ((SPath.resolveT_ends σ _).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _) ?_
   refine Eq.trans (?_ : _ = σ.erase.withGlob <$> σ.erase.glob.saveStorage r segs
     (.array es ((if E.isMapping then last else last.defaultOf) :: sh) fx)) (by rw [hτ]; rfl)
-  simp [SPath.resolve, aliasPath_bound hb, popAt, hf, bind, Except.bind]
+  simp only [bind, Except.bind, SPath.resolve, aliasPath_bound hb, popAt, hf, List.reverse_append,
+      List.reverse_cons, List.reverse_nil, List.nil_append, List.cons_append, List.reverse_reverse]
 
 theorem run_delete {σ : State C Γ} {T : Ty} {l : Loc C Γ T} {r : Name} {segs : List Seg}
     {cur : Semantics.SVal} (hl : l.resolve σ.erase = .ok (r, segs))
@@ -847,7 +851,7 @@ theorem run_delete {σ : State C Γ} {T : Ty} {l : Loc C Γ T} {r : Name} {segs 
     ((Loc.resolveT_ends σ l).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _) ?_
   refine Eq.trans (?_ : _ = σ.erase.withGlob <$> σ.erase.glob.saveStorage r segs cur.defaultOf)
     (by rw [hτ]; rfl)
-  simp [hl, hf, bind, Except.bind]
+  simp only [bind, Except.bind, hl, hf]
 
 theorem run_primProg {σ : State C Γ} {p : PrimTy} {l : Loc C Γ (.prim p)} {r : Name}
     {segs : List Seg} {v : Semantics.SVal} (hl : l.resolve σ.erase = .ok (r, segs))
@@ -866,8 +870,8 @@ theorem run_primProg {σ : State C Γ} {p : PrimTy} {l : Loc C Γ (.prim p)} {r 
     exact SRuns.of_agrees (TRun.assign_erase l _)
       ((Src.valueT_ends σ _).bind fun _ => (Loc.resolveT_ends σ _).bind fun _ =>
         (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _)
-      (by simp [Src.value, Val.eval, Simple.eval, hl, Value.toSVal, bind, Except.bind, pure,
-        Except.pure, hτ]; rfl)
+      (by simp only [bind, Except.bind, Src.value, Val.eval, Simple.eval, pure, Except.pure,
+          Value.toSVal, hl, State.writeStorage_prim, hτ]; rfl)
 
 /-- The alias a `bound` block declares, bound to `q`. -/
 theorem run_decl {d : Nat} {R : RefTy} {σ : State C Γ} {q : SPath C Γ (.ref R)} {r : Name}
@@ -1007,7 +1011,8 @@ theorem fillElems_run {R : RefTy} {E : Ty} {d : Nat} (ak : ArrTy R E) {a : Idx �
     simp only [fillElems]
     simp only [List.length_cons, List.replicate_succ] at hW
     have hq := resolve_index_arr (C := C) ak (j := pre.length) hB
-      (Wrote.findStorage (σ := σ.erase.glob) hW) (by simp)
+      (Wrote.findStorage (σ := σ.erase.glob) hW) (by simp only [List.length_append, List.length_cons,
+          List.length_replicate, Nat.lt_add_right_iff_pos, Nat.zero_lt_succ])
       (by simp only [List.length_cons] at hlen; omega)
     obtain ⟨σ₁, hrun₁, hW₁, he₁⟩ := child_step (d := d) (hIH w (List.mem_cons_self ..)) hc.1
       ht.1 hfit.1 hE hq hW (save_at_live ..) (save_at_live ..)
@@ -1069,7 +1074,7 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
     have hdef : ∀ T : Ty,
         (if T.isMapping = true then defaultForTy T else (defaultForTy T).defaultOf) =
           defaultForTy T := by
-      intro T; split <;> simp [defaultOf_default]
+      intro T; split <;> simp only [defaultOf_default]
     cases E with
     | prim p =>
       have hw : w = defaultForTy (.prim p) := hprim rfl w (List.mem_cons_self ..)
@@ -1080,7 +1085,9 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
       · rw [he₂]; exact he₁
     | ref R =>
       dsimp only
-      have hq := resolve_index_arr (C := C) (ArrTy.dyn (E := .ref R)) (j := i) hB₁ hf₁ (by simp)
+      have hq := resolve_index_arr (C := C) (ArrTy.dyn (E := .ref R)) (j := i) hB₁ hf₁ (by
+        simp only [List.length_append, List.length_replicate, List.length_cons, List.length_nil,
+          Nat.zero_add, Nat.lt_add_one])
         (by simp only [List.length_cons] at hlen; omega)
       -- in the block: the slot bound, popped, then filled through its alias
       obtain ⟨σ₂, hd₂, he₂⟩ := run_decl (d := d + 1) hq
@@ -1220,7 +1227,8 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
           rw [defaultForTy] at h0; rw [he₁]; exact h0
         by_cases hE : E.defaultOkS = true
         · obtain ⟨σ₂, hrun₂, hW₂, henv₂⟩ := pushes_run (C := C) (E := E) (a := .here)
-            (by simp [hE]) (elems.length + shadow.length) [] σ₁ σ.erase.storage hB h0'
+            (by simp only [Option.isSome_none, hE,
+                Bool.or_true]) (elems.length + shadow.length) [] σ₁ σ.erase.storage hB h0'
             (by simp only [List.length_nil, Nat.zero_add]; exact hlen)
           obtain ⟨σ₃, hrun₃, hW₃, he₃⟩ := fillShadow_run (C := C) (d := d) hE shadow []
             elems.length σ₂ σ.erase.storage (fun w _ => fill_ok w) hcs hts hfs (by omega) hpr
@@ -1230,7 +1238,8 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
             (by simp only [List.length_nil, Nat.zero_add]; omega)
             ((hB.of_env henv₂).of_env he₃) (by simpa using hW₃)
           have hbody : TRuns σ₁ ((Prog.rep (elems.length + shadow.length)
-              (.push (.alias .here : SPath C _ (.array E)) none (by simp [hE]))).append
+              (.push (.alias .here : SPath C _ (.array E)) none (by simp only [Option.isSome_none,
+                  hE, Bool.or_true]))).append
               ((fillShadow d E .here elems.length shadow).append
                 (fillElems d (ArrTy.dyn (E := E)) .here 0 elems))) σ₄ :=
             TRuns.append hrun₂ (TRuns.append hrun₃ hrun₄)
@@ -1454,8 +1463,8 @@ theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true)
     (hf : FitsStorage C st) : P st := by
   obtain ⟨_, ⟨o, ho, rfl⟩, hst⟩ := storage_tight hnd hok hc ht hf
   rw [← hst]
-  exact hstep _ _ o _ (by rw [Reachable.init_erase]; exact RunWT.init hnd hok rfl rfl)
-    (by rw [Reachable.init_erase]; exact Canon.init hok rfl) ho
+  exact hstep _ _ o _ (by rw [Reachable.init_erase]; exact RunWT.init hnd rfl rfl)
+    (by rw [Reachable.init_erase]; exact Canon.init rfl) ho
     (by rw [Reachable.init_erase]; exact hinit)
 
 /-! ## Reachable storages are tight
@@ -1776,7 +1785,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
               obtain ⟨Tf, hd, hv⟩ := canonFields_lookup hfs hl
               rw [hseg] at hd; cases hd
               have hchild : (Semantics.SVal.struct fields).find [.field n] = .ok old := by
-                simp [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
+                simp only [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
               exact tightFields_setBy ht hseg (save_tight hv (tightFields_lookup ht hl hseg) hokm
                 hs hk₂ (fun hp => (hlive hp).child hchild) hn hup)
             · exact nomatch hf
@@ -1874,7 +1883,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
               cases hf
               have hchild : (Semantics.SVal.map es d).find [.at i] = .ok old := by
-                simp [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
+                simp only [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
               exact ⟨fun h => absurd h (by simp [hkey]), tightEntries_setBy htes
                 (save_tight (canonEntries_lookup hes hl) (tightEntries_lookup htes hl) hokm hs hk₂
                   (fun hp => (hlive hp).child hchild) hn hup)⟩
@@ -1882,7 +1891,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
               cases hf
               have hchild : (Semantics.SVal.map es d).find [.at i] = .ok d := by
-                simp [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
+                simp only [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
               subst hdd
               exact ⟨fun h => absurd h (by simp [hkey]), tightEntries_setBy htes
                 (save_tight hd (defaultForTy_tight (okDeep_defaultOkS hokm)) hokm hs hk₂
@@ -1980,7 +1989,8 @@ theorem Semantics.SVal.strip_tight : ∀ {v : Semantics.SVal} {T : Ty}, v.tight 
   | .struct fields, .ref (.struct _), h => Semantics.SVal.stripFields_tight h
   | .array _ _ _, .ref (.array _), h =>
     ⟨(fun hE => by obtain ⟨h1, -⟩ := h.1 hE; subst h1; exact ⟨rfl, rfl⟩),
-      (fun _ w hw => by simp at hw), Semantics.SVal.stripElems_tight h.2.2.1, trivial⟩
+      (fun _ w hw => by simp only [List.not_mem_nil] at hw), Semantics.SVal.stripElems_tight h.2.2.1,
+          trivial⟩
   | .array _ _ _, .ref (.fixed _ _), h => ⟨rfl, Semantics.SVal.stripElems_tight h.2⟩
   | .map _ _, _, h => by simpa only [Semantics.SVal.strip] using h
   | .struct _, .prim _, _ | .struct _, .ref (.array _), _ | .struct _, .ref (.mapping _ _), _
@@ -2310,7 +2320,8 @@ theorem pushSlot_tight {E : Ty} {shadow : List Semantics.SVal} (hE : E.defaultOk
     (hsh : tightElems E shadow) :
     (Semantics.pushSlot E shadow).1.tight E ∧ (∀ w ∈ (Semantics.pushSlot E shadow).2, w ∈ shadow) := by
   cases shadow with
-  | nil => exact ⟨defaultForTy_tight hE, fun w hw => by simp [Semantics.pushSlot] at hw⟩
+  | nil => exact ⟨defaultForTy_tight hE, fun w hw => by simp only [Semantics.pushSlot,
+      List.not_mem_nil] at hw⟩
   | cons c rest =>
     refine ⟨?_, fun w hw => List.mem_cons_of_mem _ hw⟩
     simp only [Semantics.pushSlot]
@@ -2493,7 +2504,8 @@ section Run
 
 variable {Γ : Ctx} {H : HeapTy} {σ σ' : Semantics.State}
 
-theorem IdxLive.nil (V : Semantics.SVal) : IdxLive V [] := fun _ _ h => by simp at h
+theorem IdxLive.nil (V : Semantics.SVal) : IdxLive V [] := fun _ _ h => by simp only [List.nil_eq,
+    List.append_eq_nil_iff, List.cons_ne_self, and_false] at h
 
 /-- A word written back at a checked path: `alice.age += 1;`. -/
 theorem Semantics.Tight.saveWord (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {r : Name}
@@ -3319,11 +3331,10 @@ theorem defaultOkS_of_deep (h : C.vars.all (·.2.okDeep) = true) :
 theorem reachable_tight (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
     {st : List (Name × Semantics.SVal)} (h : Reachable C st) : TightStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
-  have hok := defaultOkS_of_deep hdeep
   have hwt : RunWT C [] (State.init C).erase := by
-    rw [Reachable.init_erase]; exact RunWT.init hnd hok rfl rfl
+    rw [Reachable.init_erase]; exact RunWT.init hnd rfl rfl
   have hc : Canon C [] (State.init C).erase.glob := by
-    rw [Reachable.init_erase]; exact Canon.init hok rfl
+    rw [Reachable.init_erase]; exact Canon.init rfl
   have ht : Tight C (State.init C).erase := by
     rw [Reachable.init_erase]; exact Tight.init (deepOk_of_all hdeep)
   exact (Prog.run_tight (deepOk_of_all hdeep) P hwt hc ht hrun).storage
@@ -3332,7 +3343,7 @@ theorem reachable_tight (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·
 well-formed defaults all the way down. -/
 theorem reachable_shape (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
     {st : List (Name × Semantics.SVal)} (h : Reachable C st) : CanonStorage C st ∧ TightStorage C st :=
-  ⟨(reachable_canon hnd (defaultOkS_of_deep hdeep) h).2, reachable_tight hnd hdeep h⟩
+  ⟨(reachable_canon hnd h).2, reachable_tight hnd hdeep h⟩
 
 /-- **The reachable storages, exactly**: for a contract whose types have
 well-formed defaults all the way down, a storage whose words, keys and slots

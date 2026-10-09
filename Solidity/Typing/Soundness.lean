@@ -289,32 +289,6 @@ theorem evalUnop_wt {op : UnOp} {p q : PrimTy} {v w : Value}
     · exact nomatch hu
     · cases hu; exact int_toSVal_hasTy (by simp_all [UnOp.accepts, UnOp.ret, PrimTy.isNumeric]) _
 
-/-! ## Well-formed defaults
-
-The syntax carries `defaultOkS`, which the kernel evaluates; the typing
-lemmas want `defaultOk`, which it cannot (it recurses through `structDef`
-by well-founded recursion).  They agree on every struct `defaultOkS`
-admits, checked here once per struct. -/
-
-theorem defaultOk_struct_of_mem {s : Name} (h : s ∈ defaultOkStructs) :
-    defaultOk (.ref (.struct s)) = true := by
-  simp only [defaultOkStructs, List.mem_cons, List.not_mem_nil, or_false] at h
-  rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
-      rfl | rfl | rfl | rfl | rfl | rfl <;>
-    simp [defaultOk, defaultOkFields, structDef, lookupBy]
-
-/-- `Person memory m;` and `persons.push();` build a default of the type
-they name: `defaultOkS` is enough for `defaultForTy_hasTy`. -/
-theorem defaultOk_of_defaultOkS : ∀ {T : Ty}, T.defaultOkS = true → defaultOk T = true
-  | .prim _, _ => by simp [defaultOk]
-  | .ref (.struct _), h => defaultOk_struct_of_mem (by simpa [Ty.defaultOkS] using h)
-  | .ref (.array _), _ => by simp [defaultOk]
-  | .ref (.fixed _ _), h => by
-    rw [defaultOk]; exact defaultOk_of_defaultOkS (by simpa [Ty.defaultOkS] using h)
-  | .ref (.mapping _ _), h => by
-    rw [defaultOk]; exact defaultOk_of_defaultOkS (by simpa [Ty.defaultOkS] using h)
-
-
 /-! ## The global invariant under the state operations -/
 
 namespace Semantics.StateWT
@@ -403,12 +377,10 @@ theorem compound_isArith {op : BinOp} (h : op.hasCompoundAssign = true) : op.isA
   cases op <;> simp_all [BinOp.hasCompoundAssign, BinOp.isArith]
 
 /-- `b.push(v)` at an array of `E`s appends an `E`.  The slot the push
-lands on is an `E` whenever `E`'s default is well-formed; a push with an
-argument does not look at it. -/
+lands on is an `E`; a push with an argument does not look at it. -/
 theorem pushAt_wt (hwt : StateWT H C.layout σ) {E : Ty} {r : Name} {segs : List Seg}
     {val : SVal → Res SVal} (hty : C.layout.tyAt r segs = some (.ref (.array E)))
-    (hval : ∀ slot v, (defaultOk E = true → slot.hasTy E = true) → val slot = .ok v →
-      v.hasTy E = true)
+    (hval : ∀ slot v, slot.hasTy E = true → val slot = .ok v → v.hasTy E = true)
     (h : pushAt σ E r segs val = .ok σ') : StateWT H C.layout σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
@@ -416,8 +388,7 @@ theorem pushAt_wt (hwt : StateWT H C.layout σ) {E : Ty} {r : Name} {segs : List
   | array elems shadow fx =>
     simp only [SVal.hasTy, Bool.and_eq_true] at hsvt
     obtain ⟨newElem, hnew, h⟩ := bind_ok_inv h
-    have hslot : defaultOk E = true → (pushSlot E shadow).1.hasTy E = true :=
-      fun hok => (pushSlot_hasTy hsvt.2 hok).1
+    have hslot : (pushSlot E shadow).1.hasTy E = true := (pushSlot_hasTy hsvt.2).1
     refine hwt.save hty ?_ h
     simp only [SVal.hasTy, Bool.and_eq_true]
     refine ⟨⟨hsvt.1.1, hasTyElems_append hsvt.1.2 ?_⟩, pushSlot_rest_hasTy hsvt.2⟩
@@ -428,7 +399,7 @@ theorem pushAt_wt (hwt : StateWT H C.layout σ) {E : Ty} {r : Name} {segs : List
 
 /-- `b.push()` as a place: the array stays typed. -/
 theorem pushPlaceAt_wt (hwt : StateWT H C.layout σ) {E : Ty} {r : Name} {segs : List Seg} {n : Int}
-    (hty : C.layout.tyAt r segs = some (.ref (.array E))) (hok : defaultOk E = true)
+    (hty : C.layout.tyAt r segs = some (.ref (.array E)))
     (h : pushPlaceAt σ E r segs = .ok (σ', n)) : StateWT H C.layout σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   have hsvt := findStorage_hasTy hwt.storage hty hsv
@@ -441,7 +412,7 @@ theorem pushPlaceAt_wt (hwt : StateWT H C.layout σ) {E : Ty} {r : Name} {segs :
     simp only [SVal.hasTy, Bool.and_eq_true]
     refine ⟨⟨hsvt.1.1, hasTyElems_append hsvt.1.2 ?_⟩, pushSlot_rest_hasTy hsvt.2⟩
     simp only [SVal.hasTy.hasTyElems, Bool.and_true]
-    exact (pushSlot_hasTy hsvt.2 hok).1
+    exact (pushSlot_hasTy hsvt.2).1
   | prim _ => exact nomatch h
   | struct _ => exact nomatch h
   | map _ _ => exact nomatch h
@@ -598,7 +569,7 @@ theorem newArrVal_hasTy {R : RefTy} (h : R.newArrOk = true) (n : Int) :
   cases R with
   | array E =>
     simp only [RefTy.newArrOk, Bool.and_eq_true] at h
-    have hE := defaultForTy_hasTy (defaultOk_of_defaultOkS h.2)
+    have hE := defaultForTy_hasTy (ty := E)
     simp only [newArrVal, SVal.hasTy, SVal.hasTy.hasTyElems, Bool.and_true, Bool.not_false,
       Bool.true_and]
     induction n.toNat with
@@ -627,7 +598,6 @@ theorem Semantics.lookupBy_map_snd {k : Name} {f : Ty → SVal} :
 heap.  `StandardExample` starts in `State.exampleStore`
 (`exampleStore_wt`). -/
 theorem Semantics.StateWT.init {σ : State} (hnd : nodupKeysB C.vars = true)
-    (hok : C.vars.all (·.2.defaultOkS) = true)
     (hst : σ.storage = C.initStorage) (hheap : σ.heap = []) : StateWT [] C.layout σ where
   layoutNodup := hnd
   heapTyNodup := rfl
@@ -638,13 +608,13 @@ theorem Semantics.StateWT.init {σ : State} (hnd : nodupKeysB C.vars = true)
       | some v => v.hasTy g.2
       | none => false) = true
     simp only [Contract.initStorage, lookupBy_map_snd, lookupBy_eq_of_nodup hnd hg, Option.map]
-    exact defaultForTy_hasTy (defaultOk_of_defaultOkS (List.all_eq_true.mp hok g hg))
+    exact defaultForTy_hasTy
   heap := rfl
   heapWf := fun i _ => by rw [hheap]; rfl
 
 /-- `StandardExample`'s store is well-typed. -/
 theorem exampleStore_wt : StateWT [] StandardExample.layout State.exampleStore :=
-  StateWT.init (by decide) (by decide) initStorage_standardExample.symm rfl
+  StateWT.init (by decide) initStorage_standardExample.symm rfl
 
 end Solidity
 
@@ -1247,7 +1217,7 @@ theorem ARhs.eval_wt (hwt : RunWT C H σ) {R : RefTy} {r : ARhs C Γ R} {σ₁ :
     obtain ⟨⟨τ, n⟩, hpush, h⟩ := bind_ok_inv h
     cases h
     have hty := SPath.resolve_wt hwt b hr
-    exact ⟨hwt.withGlob (.refl H) (pushPlaceAt_wt hwt.glob hty (defaultOk_of_defaultOkS hd) hpush),
+    exact ⟨hwt.withGlob (.refl H) (pushPlaceAt_wt hwt.glob hty hpush),
       tyAt_append_seg hty rfl⟩
 
 /-- An alias bound by what `r` names is of `r`'s type. -/
@@ -1311,8 +1281,7 @@ theorem CallRet.enter_wt {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' : Sema
   | mem R x hd hm =>
     obtain ⟨⟨τ₁, id⟩, ha, h⟩ := bind_ok_inv h
     cases h
-    obtain ⟨H', hout, hid⟩ := allocDefault_typed hτ.heapTyNodup hτ.heap hτ.heapWf
-      (defaultOk_of_defaultOkS hd) ha
+    obtain ⟨H', hout, hid⟩ := allocDefault_typed hτ.heapTyNodup hτ.heap hτ.heapWf ha
     exact ⟨H', hout.ext, hτ.ofCopyOut hout, LTy.WT.mem_some hid, trivial⟩
 
 end Effects
@@ -1322,8 +1291,7 @@ end Effects
 /-- A contract starts well-typed: each root at its type's default, no
 locals, an empty heap. -/
 theorem RunWT.init {σ : EState C []} (hnd : nodupKeysB C.vars = true)
-    (hok : C.vars.all (·.2.defaultOkS) = true) (hst : σ.storage = C.initStorage)
-    (hheap : σ.heap = []) : RunWT C [] σ :=
-  ⟨StateWT.init (σ := σ.glob) hnd hok hst hheap, trivial⟩
+    (hst : σ.storage = C.initStorage) (hheap : σ.heap = []) : RunWT C [] σ :=
+  ⟨StateWT.init (σ := σ.glob) hnd hst hheap, trivial⟩
 
 end Solidity

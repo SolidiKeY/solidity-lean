@@ -490,9 +490,8 @@ theorem defaultForFields_names : ∀ l : List (Name × Ty),
   | [] => by simp [defaultForFields]
   | (n, t) :: rest => by simp [defaultForFields, defaultForFields_names rest]
 
-/-- A fresh default is canonical: `Person memory m;` and `values.push();`
-start from one, and so does every root. -/
-theorem defaultForTy_canon : ∀ {T : Ty}, defaultOk T = true → (defaultForTy T).canon T := by
+/-- A fresh default is canonical, under `defaultOk`. -/
+theorem defaultForTy_canon_of : ∀ {T : Ty}, defaultOk T = true → (defaultForTy T).canon T := by
   intro T
   induction T using defaultForTy.induct
     (motive2 := fun l => ∀ (s : Name), defaultOkFields s l = true →
@@ -527,18 +526,22 @@ theorem defaultForTy_canon : ∀ {T : Ty}, defaultOk T = true → (defaultForTy 
     simp only [defaultForFields, canonFields, hlook]
     exact ⟨iht hok, ihrest s hrest⟩
 
+/-- **A fresh default is canonical**: `Person memory m;` and
+`values.push();` start from one, and so does every root. -/
+theorem defaultForTy_canon {T : Ty} : (defaultForTy T).canon T :=
+  defaultForTy_canon_of (defaultOk_true T)
+
 /-- The slot `persons.push();` lands on is canonical, and so are the
 recycled slots left. -/
 theorem pushSlot_canon {E : Ty} {shadow : List Semantics.SVal} (hsh : canonElems E shadow) :
-    (defaultOk E = true → (Semantics.pushSlot E shadow).1.canon E) ∧
-      canonElems E (Semantics.pushSlot E shadow).2 := by
+    (Semantics.pushSlot E shadow).1.canon E ∧ canonElems E (Semantics.pushSlot E shadow).2 := by
   cases shadow with
-  | nil => exact ⟨fun hok => defaultForTy_canon hok, trivial⟩
+  | nil => exact ⟨defaultForTy_canon, trivial⟩
   | cons c rest =>
-    refine ⟨fun hok => ?_, hsh.2⟩
+    refine ⟨?_, hsh.2⟩
     simp only [Semantics.pushSlot]
     split
-    · exact defaultForTy_canon hok
+    · exact defaultForTy_canon
     · exact hsh.1
 
 /-! ## Copies
@@ -1048,14 +1051,14 @@ theorem write (hc : Canon C H σ) {r : Name} {segs : List Seg} {T : Ty} {new : S
 end Canon
 
 /-- A contract starts canonical: each root at its type's default. -/
-theorem Canon.init {σ : Semantics.State} (hok : C.vars.all (·.2.defaultOkS) = true)
+theorem Canon.init {σ : Semantics.State}
     (hst : σ.storage = C.initStorage) : Canon C [] σ := by
   refine ⟨⟨?_, fun r T hr => ?_⟩, fun _ _ h => nomatch h⟩
-  · rw [hst]; simp [Contract.initStorage]
+  · rw [hst]; simp only [Contract.initStorage, List.map_map, List.map_inj_left, Function.comp_apply,
+      implies_true]
   · refine ⟨defaultForTy T, ?_, ?_⟩
     · rw [hst]; simp [Contract.initStorage, Semantics.lookupBy_map_snd, hr]
-    · have hmem := lookupBy_eq_some_mem hr
-      exact defaultForTy_canon (defaultOk_of_defaultOkS (List.all_eq_true.mp hok _ hmem))
+    · exact defaultForTy_canon
 
 /-! ## The statements' effects are canonical -/
 
@@ -1066,7 +1069,7 @@ variable {H : HeapTy} {σ σ' : Semantics.State}
 /-- `b.push(v)` keeps storage canonical. -/
 theorem pushAt_canon (hc : Canon C H σ) {E : Ty} {r : Name} {segs : List Seg}
     {val : Semantics.SVal → Res Semantics.SVal} (hty : C.layout.tyAt r segs = some (.ref (.array E)))
-    (hval : ∀ slot v, (defaultOk E = true → slot.canon E) → val slot = .ok v → v.canon E)
+    (hval : ∀ slot v, slot.canon E → val slot = .ok v → v.canon E)
     (h : pushAt σ E r segs val = .ok σ') : Canon C H σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   obtain ⟨elems, shadow, rfl, he, hsh⟩ := canon_array (hc.find hty hsv)
@@ -1076,13 +1079,13 @@ theorem pushAt_canon (hc : Canon C H σ) {E : Ty} {r : Name} {segs : List Seg}
 
 /-- `b.push()` as a place keeps storage canonical. -/
 theorem pushPlaceAt_canon (hc : Canon C H σ) {E : Ty} {r : Name} {segs : List Seg} {n : Int}
-    (hty : C.layout.tyAt r segs = some (.ref (.array E))) (hok : defaultOk E = true)
+    (hty : C.layout.tyAt r segs = some (.ref (.array E)))
     (h : pushPlaceAt σ E r segs = .ok (σ', n)) : Canon C H σ' := by
   obtain ⟨sv, hsv, h⟩ := bind_ok_inv h
   obtain ⟨elems, shadow, rfl, he, hsh⟩ := canon_array (hc.find hty hsv)
   obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
   cases h
-  exact hc.save hty (by exact ⟨rfl, canonElems_append he ⟨(pushSlot_canon hsh).1 hok, trivial⟩,
+  exact hc.save hty (by exact ⟨rfl, canonElems_append he ⟨(pushSlot_canon hsh).1, trivial⟩,
     (pushSlot_canon hsh).2⟩) hσ₁
 
 /-- `b.pop()` keeps storage canonical: the popped slot is cleared into the
@@ -1196,7 +1199,7 @@ theorem bumpMem_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {op : In
 
 /-- `Person memory m;` allocates a canonical `Person`. -/
 theorem allocDefault_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {R : RefTy} {id : Nat}
-    (hok : defaultOk (Ty.ref R) = true) (h : allocDefault σ R = .ok (σ', id)) :
+    (h : allocDefault σ R = .ok (σ', id)) :
     ∃ H', CopyOutC H σ H' σ' ∧ MVal.hasTyH H' (.ref id) (.ref R) = true := by
   simp only [allocDefault] at h
   cases hcopy : copyStToM σ (defaultForRef R) with
@@ -1205,7 +1208,7 @@ theorem allocDefault_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {R 
     obtain ⟨σ₁, mv⟩ := out
     rw [hcopy] at h
     obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.heapTyNodup hwt.heap hwt.heapWf hc.heap
-      (defaultForTy_hasTy hok) (defaultForTy_canon hok) hcopy
+      defaultForTy_hasTy defaultForTy_canon hcopy
     cases mv with
     | prim _ => exact nomatch h
     | ref rid =>
@@ -1219,7 +1222,7 @@ theorem newArrVal_canon {R : RefTy} (h : R.newArrOk = true) (n : Int) :
   cases R with
   | array E =>
     simp only [RefTy.newArrOk, Bool.and_eq_true] at h
-    have hE := defaultForTy_canon (defaultOk_of_defaultOkS h.2)
+    have hE := defaultForTy_canon (T := E)
     refine ⟨rfl, ?_, trivial⟩
     show canonElems E (List.replicate n.toNat (defaultForTy E))
     induction n.toNat with
@@ -1241,20 +1244,6 @@ theorem writeAddr_canon (hwt : StateWT H C.layout σ) (hc : Canon C H σ) {T : T
     exact memWriteIndex_canon hwt hc hid hR h
 
 end Effects
-
-/-- Binding the locals an outcome of an external call binds only binds
-locals to values (`Calculus/Problem.lean` reads a constructor's parameters
-so, on the untyped interpreter). -/
-theorem bindData_induct {P : Semantics.State → Prop} (hset : ∀ τ x w, P τ → P (τ.setEnv x (.val w))) :
-    ∀ {xs : List (PrimTy × Var)} {vs : List Value} {σ σ' : Semantics.State}, P σ →
-      bindData xs vs σ = .ok σ' → P σ'
-  | [], _, _, _, hp, h => by cases h; exact hp
-  | _ :: _, [], _, _, _, h => by simp [bindData] at h
-  | (_, x) :: _, w :: _, σ, _, hp, h => by
-    simp only [bindData] at h
-    split at h
-    · exact bindData_induct hset (hset σ x w hp) h
-    · cases h
 
 end Solidity
 
@@ -1464,8 +1453,7 @@ theorem ARhs.eval_canon (hwt : RunWT C H σ) (hc : Canon C H σ.glob) {R : RefTy
     obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
     obtain ⟨⟨τ, n⟩, hpush, h⟩ := bind_ok_inv h
     cases h
-    exact (pushPlaceAt_canon hc (SPath.resolve_wt hwt b hr) (defaultOk_of_defaultOkS hd)
-      hpush).of_eq rfl rfl
+    exact (pushPlaceAt_canon hc (SPath.resolve_wt hwt b hr) hpush).of_eq rfl rfl
 
 /-- Entering a call keeps the state canonical: a memory return is a
 canonical default. -/
@@ -1479,7 +1467,7 @@ theorem CallRet.enter_canon {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' : S
   | mem R x hd hm =>
     obtain ⟨⟨τ₁, id⟩, ha, h⟩ := bind_ok_inv h
     cases h
-    obtain ⟨H', hout, hid⟩ := allocDefault_canon hτ hc (defaultOk_of_defaultOkS hd) ha
+    obtain ⟨H', hout, hid⟩ := allocDefault_canon hτ hc ha
     exact ⟨H', hout.out.ext, ⟨hτ.ofCopyOut hout.out, ⟨hout.out.storage ▸ hc.storage, hout.canon⟩⟩,
       LTy.WT.mem_some hid, trivial⟩
 
@@ -1622,7 +1610,7 @@ theorem keepsC_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E
     cases v with
     | none =>
       cases hw
-      exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
+      exact hslot
     | some r =>
       obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
       cases hw
@@ -1631,7 +1619,7 @@ theorem keepsC_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E
     cases v with
     | none =>
       cases hw
-      exact hslot (defaultOk_of_defaultOkS (by simpa using hd))
+      exact hslot
     | some r =>
       obtain ⟨v, hv, hw⟩ := bind_ok_inv hw
       cases hw
@@ -1698,8 +1686,7 @@ theorem keepsC_declMem (R : RefTy) (init : Option (MRhs C Γ R))
   | none =>
     obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
     cases h
-    obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hcn.canon
-      (defaultOk_of_defaultOkS (by simpa using hd)) ha
+    obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hcn.canon ha
     have h₁ := RunCanon.ofCopyOutC hwt hcn.canon hout
     exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.push (t := .mem R) (LTy.WT.mem_some hid))
       (h₁.canon.of_eq rfl rfl)⟩
@@ -1781,7 +1768,7 @@ theorem keepsC_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) 
   | var i _ =>
     obtain ⟨⟨τ, id⟩, ha, h⟩ := bind_ok_inv h
     cases h
-    obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc (defaultOk_of_defaultOkS hd) ha
+    obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc ha
     have h₁ := RunCanon.ofCopyOutC hwt hc hout
     exact ⟨H', hout.out.ext, RunCanon.mk' (h₁.wt.setLocal i (LTy.WT.mem_some hid))
       (h₁.canon.of_eq rfl rfl)⟩
@@ -1797,7 +1784,7 @@ theorem keepsC_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) 
       cases p <;> rfl
     | ref R =>
       obtain ⟨⟨τ₁, id⟩, hal, hτ⟩ := bind_ok_inv hτ
-      obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc (defaultOk_of_defaultOkS hd) hal
+      obtain ⟨H', hout, hid⟩ := allocDefault_canon hwt.glob hc hal
       have hg₁ : StateWT H' C.layout τ₁ := hwt.glob.ofCopyOut hout.out
       have hc₁ : Canon C H' τ₁ := ⟨hout.out.storage ▸ hc.storage, hout.canon⟩
       exact ⟨H', hout.out.ext, RunCanon.mk'
@@ -1938,14 +1925,13 @@ theorem Reachable.init_erase : (State.init C).erase = EState.ofSem C.initState :
 program reaches from `C`'s initial state holds `C`'s roots in order, each
 well-typed and canonical: no run of `StandardExample` leaves `alice` without
 her `account`. -/
-theorem reachable_canon (hnd : nodupKeysB C.vars = true)
-    (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × Semantics.SVal)}
+theorem reachable_canon (hnd : nodupKeysB C.vars = true) {st : List (Name × Semantics.SVal)}
     (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
   have hwt : RunWT C [] (State.init C).erase := by
-    rw [Reachable.init_erase]; exact RunWT.init hnd hok rfl rfl
+    rw [Reachable.init_erase]; exact RunWT.init hnd rfl rfl
   have hc : Canon C [] (State.init C).erase.glob := by
-    rw [Reachable.init_erase]; exact Canon.init hok rfl
+    rw [Reachable.init_erase]; exact Canon.init rfl
   obtain ⟨_, _, hwt', hcn⟩ := Prog.run_canon P hwt hc hrun
   exact ⟨hwt'.glob.storage, hcn.storage⟩
 
@@ -1963,9 +1949,6 @@ def Balances : Contract := contract!{ mapping(uint => uint) balances; }
 /-- One `Account` root. -/
 def Accounts : Contract := contract!{ Account acct; }
 
-/-- One `uint` root. -/
-def Counter : Contract := contract!{ uint total; }
-
 /-- `uint x;` starts at `0`. -/
 theorem defaultForTy_uint : defaultForTy Ty.uint = SVal.int 0 := by
   simp [defaultForTy]
@@ -1977,7 +1960,7 @@ theorem map_default_not_reachable :
     wellTypedStorageB Balances.layout [("balances", .map [] (.int 5))] = true ∧
       ¬ Reachable Balances [("balances", .map [] (.int 5))] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "balances" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv
@@ -1991,7 +1974,7 @@ theorem struct_missing_field_not_reachable :
     wellTypedStorageB Accounts.layout [("acct", .struct [("balance", .int 0)])] = true ∧
       ¬ Reachable Accounts [("acct", .struct [("balance", .int 0)])] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "acct" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv
@@ -2006,7 +1989,7 @@ theorem map_dup_key_not_reachable :
         [("balances", .map [(1, .int 0), (1, .int 1)] (.int 0))] = true ∧
       ¬ Reachable Balances [("balances", .map [(1, .int 0), (1, .int 1)] (.int 0))] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "balances" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv

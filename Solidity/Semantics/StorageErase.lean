@@ -529,13 +529,6 @@ A struct is copied member by member, in order (solc); the untyped `overlay`
 finds each member of the old value by name.  The two agree because no
 struct has two members of one name (`structDef_nodup`). -/
 
-/-- **Every struct of the table has distinct member names**: solc refuses
-a struct that repeats one (`refusedStructs`, decision 16), and so does the
-elaborator, so none is in `structDef`. -/
-theorem structDef_nodup (s : Name) : Semantics.nodupKeysB (structDef s) = true := by
-  unfold structDef
-  split <;> rfl
-
 theorem tyRank_le_fieldsRank : {fs : List (Name × Ty)} → {fT : Name × Ty} → fT ∈ fs →
     tyRank fT.2 ≤ fieldsRank fs
   | _ :: _, _, .head _ => Nat.le_max_left _ _

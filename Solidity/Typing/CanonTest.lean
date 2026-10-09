@@ -131,9 +131,10 @@ theorem Semantics.SVal.tightEntriesB_iff {V : Ty} :
 
 end
 
-/-- A default of a type whose structs' defaults are well-formed is
-canonical: the slot `persons.push()` takes where nothing was popped. -/
-theorem defaultForTy_canonB {T : Ty} (h : T.okDeep = true) : (defaultForTy T).canonB T = true :=
-  SVal.canonB_iff.2 (defaultForTy_canon (defaultOk_of_defaultOkS (okDeep_defaultOkS h)))
+/-- A default is canonical: the slot `persons.push()` takes where nothing
+was popped.  The premise is vacuous since `defaultOk_true`; the closer's
+callers keep it until M6c (`docs/intrinsic.md`, "What is left"). -/
+theorem defaultForTy_canonB {T : Ty} (_h : T.okDeep = true) : (defaultForTy T).canonB T = true :=
+  SVal.canonB_iff.2 defaultForTy_canon
 
 end Solidity

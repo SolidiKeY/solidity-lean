@@ -1232,13 +1232,6 @@ def Surface.Val.eval (σ : State) : {p : PrimTy} → Surface.Val C p → Res Val
 
 end
 
-/-- The storage value a source stores: a value, or the copied subtree. -/
-def Surface.Src.value (σ : State) {T : Ty} : Surface.Src C T → Res SVal
-  | .val v => do pure (← v.eval σ).toSVal
-  | .copy p _ => do
-    let (r, segs) ← p.resolve σ
-    σ.findStorage r segs
-
 /-- The default `uint x;` binds. -/
 def PrimTy.default : PrimTy → Value
   | .bool => .bool false
@@ -1258,24 +1251,6 @@ def memWriteIndex (σ : State) (id : Nat) (i : Int) (mv : MVal) : Res State := d
     else .error .revert
   | .struct _ => .error .undef
 
-/-- `l = mv` into a memory location. -/
-def Surface.MLoc.write (σ : State) (mv : MVal) {T : Ty} : Surface.MLoc C T → Res State
-  | .field b f _ => do
-    let id ← (← b.mval σ).asRef
-    memWriteField σ id f mv
-  | .index _ b i => do
-    let id ← (← b.mval σ).asRef
-    let iv ← (← i.eval σ).asInt
-    memWriteIndex σ id iv mv
-
-/-- The slot a memory source writes: a value, or the object a reference
-names.  A reference is read as one (`asRef`), as the calculus's
-`write(memory, l, mpath)` reads it: a slot holding a primitive where a
-reference is expected is `undef`, not copied as it is. -/
-def Surface.MSrc.mval (σ : State) {T : Ty} : Surface.MSrc C T → Res MVal
-  | .val v => do pure (← v.eval σ).toMVal
-  | .ref p => do pure (.ref (← (← p.mval σ).asRef))
-
 /-- What `new R(n)` allocates, as the storage value it is a copy of: `n`
 default elements (a struct element its own fresh object, as solc allocates
 one per element). -/
@@ -1287,14 +1262,6 @@ def newArrVal : RefTy → Int → SVal
 def writeAddr (σ : State) (mv : MVal) : Addr → Res State
   | .memoryField id f => memWriteField σ id f mv
   | .memoryIndex id i => memWriteIndex σ id i mv
-
-/-- The address of a memory location: the object, and the member or the
-index.  An index is checked where it is written (`memWriteIndex`). -/
-def Surface.MLoc.addr (σ : State) {T : Ty} : Surface.MLoc C T → Res Addr
-  | .field b f _ => do pure (.memoryField (← (← b.mval σ).asRef) f)
-  | .index _ b i => do
-    let id ← (← b.mval σ).asRef
-    pure (.memoryIndex id (← (← i.eval σ).asInt))
 
 /-- `delete` at a memory address, of a location of type `T`: a primitive is
 reset to its default, a reference to a fresh default object (solc; KeY's
@@ -1314,39 +1281,12 @@ def opStore (σ : State) (op : BinOp) (p : PrimTy) (root : Name) (segs : List Se
   let new ← checkArith (.prim p) new
   σ.saveStorage root segs new.toSVal
 
-/-- `x ⊕= v` on a stack local. -/
-def Semantics.opLocal (σ : State) (op : BinOp) (p : PrimTy) (x : Var) (v : Value) : Res State := do
-  let old ← match ← σ.getEnv x with
-    | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .undef
-  let new ← applyBinOp op old v
-  let new ← checkArith (.prim p) new
-  pure (σ.setEnv x (.val new))
-
 /-- `a ⊕= v` at a memory address. -/
 def opMem (σ : State) (op : BinOp) (p : PrimTy) (loc : Addr) (v : Value) : Res State := do
   let old ← readLoc σ loc
   let new ← applyBinOp op old v
   let new ← checkArith (.prim p) new
   writeLoc σ loc new
-
-/-- A compound assignment's write of `v` into its target. -/
-def Surface.OpLoc.store (σ : State) (op : BinOp) : {p : PrimTy} → Surface.OpLoc C p → Value → Res State
-  | p, .local x, v => opLocal σ op p x v
-  | p, .root r _, v => opStore σ op p r [] v
-  | p, .field b f h, v => do
-    let (rt, segs) ← (Surface.Loc.field b f h).resolve σ
-    opStore σ op p rt segs v
-  | p, .index it b i, v => do
-    let (rt, segs) ← (Surface.Loc.index it b (.simple i)).resolve σ
-    opStore σ op p rt segs v
-  | p, .mfield b f _, v => do
-    let id ← (← b.mval σ).asRef
-    opMem σ op p (.memoryField id f) v
-  | p, .mindex _ b i, v => do
-    let id ← (← b.mval σ).asRef
-    let iv ← (← i.eval σ).asInt
-    opMem σ op p (.memoryIndex id iv) v
 
 /-- `x++` at a resolved storage location: read, bump, check, write back;
 the value is the new one for `++x`, the old one for `x++`. -/
@@ -1358,15 +1298,6 @@ def bumpStore (σ : State) (op : IncDec) (p : PrimTy) (root : Name) (segs : List
   let σ' ← σ.saveStorage root segs new.toSVal
   pure (σ', if op.isPre then new else old)
 
-/-- `x++` on a stack local. -/
-def Semantics.bumpLocal (σ : State) (op : IncDec) (p : PrimTy) (x : Var) : Res (State × Value) := do
-  let old ← match ← σ.getEnv x with
-    | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .undef
-  let oldInt ← old.asInt
-  let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
-  pure (σ.setEnv x (.val new), if op.isPre then new else old)
-
 /-- `x++` at a memory address. -/
 def bumpMem (σ : State) (op : IncDec) (p : PrimTy) (loc : Addr) : Res (State × Value) := do
   let old ← readLoc σ loc
@@ -1374,24 +1305,6 @@ def bumpMem (σ : State) (op : IncDec) (p : PrimTy) (loc : Addr) : Res (State ×
   let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
   let σ' ← writeLoc σ loc new
   pure (σ', if op.isPre then new else old)
-
-/-- `l++`: the state it leaves, and its value. -/
-def Surface.OpLoc.bump (σ : State) (op : IncDec) : {p : PrimTy} → Surface.OpLoc C p → Res (State × Value)
-  | p, .local x => bumpLocal σ op p x
-  | p, .root r _ => bumpStore σ op p r []
-  | p, .field b f h => do
-    let (rt, segs) ← (Surface.Loc.field b f h).resolve σ
-    bumpStore σ op p rt segs
-  | p, .index it b i => do
-    let (rt, segs) ← (Surface.Loc.index it b (.simple i)).resolve σ
-    bumpStore σ op p rt segs
-  | p, .mfield b f _ => do
-    let id ← (← b.mval σ).asRef
-    bumpMem σ op p (.memoryField id f)
-  | p, .mindex _ b i => do
-    let id ← (← b.mval σ).asRef
-    let iv ← (← i.eval σ).asInt
-    bumpMem σ op p (.memoryIndex id iv)
 
 /-- `push` at a resolved array: the element `val` gives (from the slot the
 push lands on) appended. -/
@@ -1412,12 +1325,6 @@ def pushPlaceAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) : Res (Sta
     let σ' ← σ.saveStorage root segs (.array (elems ++ [slot]) shadow' fx)
     pure (σ', elems.length)
   | .prim _ | .struct _ | .map _ _ => .error .undef
-
-/-- What a push appends: the slot, or its argument, laid on fresh slots
-(`SVal.strip`: a copy copies the live elements only). -/
-def Surface.Src.pushVal (σ : State) {T : Ty} : Option (Surface.Src C T) → SVal → Res SVal
-  | none, slot => pure slot
-  | some r, _ => do pure (← r.value σ).strip
 
 /-- `pop` at a resolved array: the last element cleared into the shadow, or
 moved there as it is when `keep` (an array of mappings: `delete` leaves a
@@ -1457,18 +1364,6 @@ def transferAt (σ : State) (addr amt : Int) : Res State :=
 which reaches the recipient's `receive` (or fallback) function. -/
 def sendKey (addr amt : Int) : ExtKey := ⟨addr, "", [.int amt]⟩
 
-/-- `pv = a.send(v);` with both evaluated: whether the recipient takes the
-payment is the transaction's (`TxEnv.ext`, at `sendKey`).  Taken, as the
-oracle's `ok` or with no entry (an address with no code accepts), it is
-booked as `transfer` books it and `pv` is `true`; refused (any other entry),
-nothing is booked and `pv` is `false`: a `send` does not revert.  A
-negative amount reverts, as `transfer`'s. -/
-def Semantics.sendAt (σ : State) (pv : Var) (addr amt : Int) : Res State :=
-  if amt < 0 then .error .revert
-  else match lookupBy (sendKey addr amt) σ.tx.ext with
-    | none | some (.ok _) => .ok ((σ.pay addr amt).setEnv pv (.val (.bool true)))
-    | some _ => .ok (σ.setEnv pv (.val (.bool false)))
-
 /-- Whether `v` is a value of the type `p`: what decoding a word of returned
 data at `p` accepts. -/
 def Semantics.PrimVal.fits : Value → PrimTy → Bool
@@ -1486,26 +1381,6 @@ def bindData : List (PrimTy × Var) → List Value → State → Res State
   | (p, x) :: xs, v :: vs, σ =>
     if v.fits p then bindData xs vs (σ.setEnv x (.val v)) else .error .revert
   | _ :: _, [], _ => .error .revert
-
-/-- The call as it is made, its receiver and arguments evaluated. -/
-def Surface.ExtCall.key (σ : State) (c : Surface.ExtCall C) : Res ExtKey := do
-  let a ← (← c.addr.eval σ).asInt
-  let vs ← c.args.mapM fun a => a.2.eval σ
-  pure ⟨a, c.fn, vs⟩
-
-/-- A condition's outcome: `true` goes on, `false` reverts. -/
-def Semantics.guardOk (v : Value) (σ : State) : Res State :=
-  match v with
-  | .bool true => pure σ
-  | .bool false => .error .revert
-  | .int _ => .error .undef
-
-/-- An assertion's outcome: `true` goes on, `false` panics. -/
-def Semantics.assertOk (v : Value) (σ : State) : Res State :=
-  match v with
-  | .bool true => pure σ
-  | .bool false => .error .panic
-  | .int _ => .error .undef
 
 /-! ## Each contract starts in its store -/
 

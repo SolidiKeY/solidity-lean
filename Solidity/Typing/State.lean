@@ -797,7 +797,7 @@ end
 theorem allocDefault_typed {H : HeapTy} {s s' : State} {ref : RefTy}
     {id : Nat}
     (hnd : nodupKeysB H = true) (hheap : heapTypedB H s.heap = true)
-    (hwf : HeapWellFormed s) (hok : defaultOk (Ty.ref ref) = true)
+    (hwf : HeapWellFormed s)
     (halloc : allocDefault s ref = Except.ok (s', id)) :
     ∃ H', CopyOut H s H' s' ∧
       MVal.hasTyH H' (MVal.ref id) (Ty.ref ref) = true := by
@@ -808,7 +808,7 @@ theorem allocDefault_typed {H : HeapTy} {s s' : State} {ref : RefTy}
       obtain ⟨s₁, mv⟩ := out
       rw [hcopy] at halloc
       have hdefault : (defaultForRef ref).hasTy (Ty.ref ref) = true :=
-        defaultForTy_hasTy hok
+        defaultForTy_hasTy
       obtain ⟨H', hout, hmv⟩ :=
         copyStToM_typed hnd hheap hwf hdefault hcopy
       cases mv with

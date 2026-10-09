@@ -20,12 +20,10 @@ the whole storage well-typed.
   ported — `docs/kernel-port.md`'s "Port later").
 - The written values the interpreter produces are typed:
   `SVal.defaultOf_hasTy` (the `delete` default preserves the type,
-  mapping members untouched), `defaultForTy_hasTy` under `defaultOk`
-  (the fuel bound of `defaultForTyFuel` is real: a type nested deeper
-  than the fuel bottoms out at `SVal.int 0`, ill-typed at reference
-  types — refuted concretely in `PreservationNecessity`), and
-  `int_hasTy_numeric` / `applyBinOp_arith_int` for the arithmetic
-  write-back paths.
+  mapping members untouched), `defaultForTy_hasTy` (a fresh default
+  inhabits its type: `defaultOk_true`, since no struct repeats a member
+  name), and `int_hasTy_numeric` / `applyBinOp_arith_int` for the
+  arithmetic write-back paths.
 -/
 
 namespace Solidity
@@ -383,6 +381,38 @@ theorem SVal.overlayElems_hasTy {elem : Ty} {olds news : List SVal}
 
 end
 
+theorem lookupBy_isSome_of_mem [DecidableEq κ] {l : List (κ × α)}
+    {k : κ} {v : α} (hmem : (k, v) ∈ l) :
+    (lookupBy k l).isSome = true := by
+  induction l with
+  | nil => cases hmem
+  | cons p rest ih =>
+      obtain ⟨k', v'⟩ := p
+      by_cases hk : k = k'
+      · simp [lookupBy, hk]
+      · cases hmem with
+        | head => exact absurd rfl hk
+        | tail _ hmem => simpa [lookupBy, hk] using ih hmem
+
+/-- On a nodup-keyed association list, membership determines lookup. -/
+theorem lookupBy_eq_of_nodup [DecidableEq κ] {l : List (κ × α)} {k : κ}
+    {v : α} (hnd : nodupKeysB l = true) (hmem : (k, v) ∈ l) :
+    lookupBy k l = some v := by
+  induction l with
+  | nil => cases hmem
+  | cons p rest ih =>
+      obtain ⟨k', v'⟩ := p
+      simp only [nodupKeysB, Bool.and_eq_true] at hnd
+      cases hmem with
+      | head => simp [lookupBy]
+      | tail _ hmem =>
+          by_cases hk : k = k'
+          · subst hk
+            have := lookupBy_isSome_of_mem hmem
+            rw [Option.isNone_iff_eq_none.mp hnd.1] at this
+            exact Bool.noConfusion this
+          · simpa [lookupBy, hk] using ih hnd.2 hmem
+
 /-! ## The `defaultForTy` side condition
 
 The depth charge the fuelled version carried is gone with the fuel:
@@ -419,8 +449,29 @@ decreasing_by
              · simp; omega)
 end
 
-/-- Fresh defaults inhabit their type. -/
-theorem defaultForTy_hasTy : ∀ {ty : Ty}, defaultOk ty = true ->
+/-- **Every type's fresh default is well-formed**: no struct of the table
+repeats a member name (`structDef_nodup`), so each row is the one its name
+looks up to. -/
+theorem defaultOk_true : ∀ (ty : Ty), defaultOk ty = true := by
+  intro ty
+  induction ty using defaultForTy.induct
+    (motive2 := fun l => ∀ (s : Name), (∀ nt ∈ l, lookupBy nt.1 (structDef s) = some nt.2) →
+      defaultOkFields s l = true) with
+  | case1 | case2 | case3 | case5 => rw [defaultOk]
+  | case4 name ih =>
+      rw [defaultOk]
+      exact ih name fun nt hm => lookupBy_eq_of_nodup (structDef_nodup name) hm
+  | case6 elem n ih => rw [defaultOk]; exact ih
+  | case7 key value ih => rw [defaultOk]; exact ih
+  | case8 => rw [defaultOkFields]
+  | case9 n t rest iht ihrest =>
+      rename_i s h
+      have hl : lookupBy n (structDef s) = some t := h (n, t) List.mem_cons_self
+      rw [defaultOkFields, iht, hl, ihrest s fun nt hm => h nt (List.mem_cons_of_mem _ hm)]
+      simp only [beq_self_eq_true, Bool.and_self]
+
+/-- Fresh defaults inhabit their type, under `defaultOk`. -/
+theorem defaultForTy_hasTy_of : ∀ {ty : Ty}, defaultOk ty = true ->
     (defaultForTy ty).hasTy ty = true := by
   intro ty
   induction ty using defaultForTy.induct
@@ -456,6 +507,10 @@ theorem defaultForTy_hasTy : ∀ {ty : Ty}, defaultOk ty = true ->
       simp only [defaultForFields, SVal.hasTy.hasTyFields, hlook,
         Bool.and_eq_true]
       exact ⟨iht hok, ihrest s hrest⟩
+
+/-- **Fresh defaults inhabit their type.** -/
+theorem defaultForTy_hasTy {ty : Ty} : (defaultForTy ty).hasTy ty = true :=
+  defaultForTy_hasTy_of (defaultOk_true ty)
 
 /-- An int inhabits every numeric type (`hasTy` carries no range
 information; ranges are `checkArith`'s business). -/
@@ -626,38 +681,6 @@ check one value against two types — see the refutation that was the
 removed `PreservationNecessity` counterexample (`docs/kernel-port.md`'s
 "Port later"). -/
 
-theorem lookupBy_isSome_of_mem [DecidableEq κ] {l : List (κ × α)}
-    {k : κ} {v : α} (hmem : (k, v) ∈ l) :
-    (lookupBy k l).isSome = true := by
-  induction l with
-  | nil => cases hmem
-  | cons p rest ih =>
-      obtain ⟨k', v'⟩ := p
-      by_cases hk : k = k'
-      · simp [lookupBy, hk]
-      · cases hmem with
-        | head => exact absurd rfl hk
-        | tail _ hmem => simpa [lookupBy, hk] using ih hmem
-
-/-- On a nodup-keyed association list, membership determines lookup. -/
-theorem lookupBy_eq_of_nodup [DecidableEq κ] {l : List (κ × α)} {k : κ}
-    {v : α} (hnd : nodupKeysB l = true) (hmem : (k, v) ∈ l) :
-    lookupBy k l = some v := by
-  induction l with
-  | nil => cases hmem
-  | cons p rest ih =>
-      obtain ⟨k', v'⟩ := p
-      simp only [nodupKeysB, Bool.and_eq_true] at hnd
-      cases hmem with
-      | head => simp [lookupBy]
-      | tail _ hmem =>
-          by_cases hk : k = k'
-          · subst hk
-            have := lookupBy_isSome_of_mem hmem
-            rw [Option.isNone_iff_eq_none.mp hnd.1] at this
-            exact Bool.noConfusion this
-          · simpa [lookupBy, hk] using ih hnd.2 hmem
-
 /-! ## State-level preservation -/
 
 /-- THE preservation lemma: `saveStorage` at a layout-typed path with a
@@ -716,8 +739,8 @@ theorem pushSlot_prim {elemTy : Ty} {c : SVal} {rest : List SVal}
       | array _ _ => cases pt <;> simp [SVal.hasTy] at hc
       | map _ _ => cases pt <;> simp [SVal.hasTy] at hc
 
-/-- The slots that are left after a `push` still inhabit the element type —
-they are a tail of the ones that were there, so this needs no `defaultOk`. -/
+/-- The slots that are left after a `push` still inhabit the element type:
+they are a tail of the ones that were there. -/
 theorem pushSlot_rest_hasTy {elemTy : Ty} {shadow : List SVal}
     (hsh : SVal.hasTy.hasTyElems elemTy shadow = true) :
     SVal.hasTy.hasTyElems elemTy (pushSlot elemTy shadow).2 = true := by
@@ -728,18 +751,17 @@ theorem pushSlot_rest_hasTy {elemTy : Ty} {shadow : List SVal}
       exact hsh.2
 
 theorem pushSlot_hasTy {elemTy : Ty} {shadow : List SVal}
-    (hsh : SVal.hasTy.hasTyElems elemTy shadow = true)
-    (hok : defaultOk elemTy = true) :
+    (hsh : SVal.hasTy.hasTyElems elemTy shadow = true) :
     (pushSlot elemTy shadow).1.hasTy elemTy = true ∧
       SVal.hasTy.hasTyElems elemTy (pushSlot elemTy shadow).2 = true := by
   cases shadow with
-  | nil => exact ⟨defaultForTy_hasTy hok, rfl⟩
+  | nil => exact ⟨defaultForTy_hasTy, rfl⟩
   | cons c rest =>
       simp only [SVal.hasTy.hasTyElems, Bool.and_eq_true] at hsh
       refine ⟨?_, hsh.2⟩
       simp only [pushSlot]
       split
-      · exact defaultForTy_hasTy hok
+      · exact defaultForTy_hasTy
       · exact hsh.1
 
 end Semantics

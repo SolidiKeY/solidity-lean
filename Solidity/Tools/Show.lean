@@ -68,13 +68,6 @@ def fmtTx (σ : State) : List String :=
   (if σ.net.isEmpty then [] else
     ["net = " ++ "{" ++ ", ".intercalate (σ.net.map fun (a, b) => s!"{a}: {b}") ++ "}"])
 
-/-- The value the local `x` holds, if it holds a value: what a call
-returned, read back from its final state. -/
-def _root_.Solidity.Semantics.State.valueOf (σ : State) (x : Var) : Option Value :=
-  match lookupBy x σ.env with
-  | some (.val v) => some v
-  | _ => none
-
 /-- A run's outcome. -/
 def fmtHalt : Halt → String
   | .revert => "revert"

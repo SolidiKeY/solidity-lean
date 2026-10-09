@@ -18,11 +18,12 @@ rule can run cannot be written: `alice.balance = 1;` (no such member),
 `alice = 1;` (a `uint` for a `Person`) and `wallet = wallet;` (a copy of a
 mapping) are elaboration errors.
 
-Locals are `Var`s (`AST.lean`), and the syntax does not track which are in
-scope: a stack local carries its `PrimTy`, an alias (`Person storage p`) and
-a memory local (`Person memory m`) their reference type, all by the
-constructor they are written with.  That is what lets a rule declare fresh
-variables (`se1`, `sp1`) without re-typing the rest of the program.
+`Surface.Stmt` keeps locals as names (`Var`s, `AST.lean`) with no scope: a
+stack local carries its `PrimTy`, an alias (`Person storage p`) and a
+memory local (`Person memory m`) their reference type, all by the
+constructor they are written with.  It is the elaborator's output and the
+printers' input; `resolve` turns each name into a position of the scoped
+statement's context.
 
 `sol[C]{ … }` reads Solidity statements, elaborates them against the
 contract `C`, checks their locals (`resolve`, `Syntax/Resolve.lean`), and
@@ -42,7 +43,7 @@ ending in a block (`if (c) { … }`, `unchecked { … }`) may leave out its `;`
 (`solSemi`), and `else if` nests an `if` in the `else` branch.
 
 `while`, `for`, `do … while`, `break` and `continue` are lowered to one
-loop, `Stmt.loop`, solkey's lowered `while`, by solkey's `LoopLowering`
+loop, `Surface.Stmt.loop`, solkey's lowered `while`, by solkey's `LoopLowering`
 (`lowerLoops`): a jump sets a flag, and a `return` inside a loop too.  The
 `/// @custom:key` lines above a loop are its annotation (`LoopAnn`), which
 chooses the rule that proves it.
@@ -50,7 +51,7 @@ chooses the rule that proves it.
 A contract declares its internal functions (`contract!{ function f(uint x)
 returns (uint r) { … } }`), each calling only the ones declared before it.
 A call (`f(a);`, `y = f(a);`, `uint y = f(a);`) is elaborated by inlining:
-`Stmt.call` carries the callee's parameters bound to the arguments, its
+`Surface.Stmt.call` carries the callee's parameters bound to the arguments, its
 return variable and the body, every local of the callee renamed fresh for
 this call (`elabCall`), as KeY's `FunctionBodyStatement` carries the function
 it stands for.  A call is a statement or a whole right-hand side, as KeY
@@ -3676,7 +3677,7 @@ partial def hoist : RawExpr → ElabM (Surface.Prog C × RawExpr)
         let decl ← match (if pa.indexFree then some pa else if pb.indexFree then some pb else none) with
           | some p => pure (Surface.Stmt.declMem R x (some (.alias p)) rfl pa.mapFree)
           | none => match hd : (Ty.ref R).defaultOkS with
-            | true => pure (Surface.Stmt.declMem R x none (by simp [hd]) pa.mapFree)
+            | true => pure (Surface.Stmt.declMem R x none (by simp only [Option.isSome_none, hd, Bool.or_true]) pa.mapFree)
             | false => throw s!"a conditional of two indexed memory {Ty.ref R}s, whose default is not well-formed"
         pure (P ++ [decl, .ite c [.rebindMem x (.alias pa)] [.rebindMem x (.alias pb)]],
           .name (toString x))
@@ -3905,7 +3906,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     | some ⟨R, r⟩ =>
       let ⟨hm⟩ ← ElabM.lift (memOk R)
       match hd : (Ty.ref R).defaultOkS with
-      | true => pure (Surface.Stmt.declMem R r none (by simp [hd]) hm :: P)
+      | true => pure (Surface.Stmt.declMem R r none (by simp only [Option.isSome_none, hd, Bool.or_true]) hm :: P)
       | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
   -- several returns of a call that is a statement: declared on entry, at their defaults
   let P := if targets then P else mrets.map (fun (p, r, _) => Surface.Stmt.declLocal p r none) ++ P
@@ -4127,7 +4128,7 @@ partial def elabStmt1 : RawStmt → ElabM (Surface.Prog C)
       | none =>
         let ⟨hm⟩ ← ElabM.lift (memOk R)
         match hd : (Ty.ref R).defaultOkS with
-        | true => pure (Surface.Stmt.declMem R (Var.ofName x) none (by simp [hd]) hm)
+        | true => pure (Surface.Stmt.declMem R (Var.ofName x) none (by simp only [Option.isSome_none, hd, Bool.or_true]) hm)
         | false => throw s!"{x}: a memory object whose default is not well-formed"
     declare C x (.mem R)
     pure [s]
@@ -4179,7 +4180,7 @@ partial def elabStmt1 : RawStmt → ElabM (Surface.Prog C)
     match args with
     | [] =>
       match hd : E.defaultOkS with
-      | true => pure [.push b none (by simp [hd])]
+      | true => pure [.push b none (by simp only [Option.isSome_none, hd, Bool.or_true])]
       | false => throw "push() of an element whose default is not well-formed"
     | [a] =>
       match E with

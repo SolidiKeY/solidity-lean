@@ -13,8 +13,9 @@ The static vocabulary everything else is written in:
   declared (KeY's `\newLocalVars`), numbered so that it cannot clash
   (mini-solkey's `Ch02_Elab`).
 
-The typed syntax built from these is `Syntax.lean`; the interpreter is
-`Semantics.lean`.
+The syntax as written is `Syntax.lean`, scoped in `Syntax/Scoped.lean`
+(contexts in `Scope.lean`); the run is `Semantics/Run.lean` over
+`State C Γ`, and `Semantics.lean` holds the state's untyped operations.
 -/
 
 namespace Solidity
@@ -253,8 +254,7 @@ def structDef : Name -> List (Name × Ty)
 
 /-- Struct declarations solc refuses ("Identifier already declared"): two
 members of one name.  None is in `structDef`, so every struct of the table
-has distinct member names (`structDef_nodup`,
-`Semantics/StorageErase.lean`); a type that names one is an
+has distinct member names (`structDef_nodup`, below); a type that names one is an
 elaboration error (`unknownStructMsg`), pinned on `BadDup`. -/
 def refusedStructs : List (Name × List (Name × Ty)) :=
   [("BadDup", [("a", Ty.uint), ("a", Ty.bool)])]
@@ -390,6 +390,13 @@ def nodupKeysB [DecidableEq κ] : List (κ × α) -> Bool
   | (k, _) :: rest => (lookupBy k rest).isNone && nodupKeysB rest
 
 end Semantics
+
+/-- **Every struct of the table has distinct member names**: solc refuses
+a struct that repeats one (`refusedStructs`, decision 16), and so does the
+elaborator, so none is in `structDef`. -/
+theorem structDef_nodup (s : Name) : Semantics.nodupKeysB (Semantics.structDef s) = true := by
+  unfold Semantics.structDef
+  split <;> rfl
 
 mutual
   /-- The KeY sort of a static type, as `SolidityInfo.registerPredefinedTypes`

@@ -4,7 +4,8 @@ import Solidity.Semantics.Ops
 /-!
 # The typed run
 
-`Semantics/Erased.lean`'s interpreter on typed values (`docs/intrinsic.md`,
+The run on typed values, whose steps erase to `Semantics/Erased.lean`'s
+evaluators (`docs/intrinsic.md`,
 "M4 lane", wiring items 3 and 4): a state is a `State` (typed storage, a
 heap and its typing, the locals typed over it), a storage path resolves to
 an `SRef` (an index by `SRef.atKey`, a mapping's key as it is hashed), a
@@ -17,14 +18,14 @@ A dynamic array holds fewer than `2^256` elements (`SVal.array`, `MObj`), so
 a length is a `uint` (`Storage.len`, `Heap.lenU`).  A push onto `2^256 - 1`
 elements exhausts the resources: the run halts with `exhausted`
 (`Storage.full`, decision 15), which both modalities accept, as KeY, which
-models no gas, reads every run that runs out of it; the untyped run, which
-has no bound, may go on (`docs/solc-alignment.md`, "Array lengths").
+models no gas, reads every run that runs out of it; the untyped push, which
+has no bound, goes on (`docs/solc-alignment.md`, "Array lengths").
 
 The heap only grows, and a call sets its caller's locals aside while the body
 runs, so each step returns its state with the extension of the heap typing
 (`Out`): the caller's locals are weakened along it when the call returns.
 
-As in `Semantics/Erased.lean`, each statement's step is one function
+Each statement's step is one function
 (`TRun.*`) given its sub-programs' runs, `Stmt.run`/`Prog.run` are the
 recursor over them (`Stmt.runR`, Gate G0 conditions 1 and 2) with a
 `match` twin for the compiler (`Stmt.runC`, linked by `Stmt.runR_eq`).
@@ -477,8 +478,7 @@ def CallRet.leaveT {H : HTy} {Γ : Ctx} (e : TEnv C H Γ) {rs Γ' : Ctx} (ret : 
 
 /-! ## Loops
 
-`Semantics/Erased.lean`'s `Loop` on typed results: the condition is a
-`Bool`. -/
+A loop on typed results: the condition is a `Bool`. -/
 
 namespace TLoop
 
@@ -919,7 +919,7 @@ end Equations
 
 /-! ## Examples
 
-`Semantics/Erased.lean`'s runs, on typed states: the storage the contract
+The example programs of `Semantics/Erased.lean`, run on typed states: the storage the contract
 deploys with, no memory, no locals. -/
 
 section Examples

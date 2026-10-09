@@ -2,14 +2,13 @@ import Solidity.Semantics
 import Solidity.Semantics.NoPanicSimp
 
 /-!
-# The interpreter's operations never panic
+# The term model's operations never panic
 
-`Halt.panic` is the one halt no modality accepts, and the interpreter raises
-it in one place, a failed `assert` (`assertOk`).  Every other operation halts
-with `revert` or `undef`: the state's reads and writes, the evaluation of a
-program expression, the copies and allocations.  A term or an update reads
-the state through these operations, so neither panics (`Calculus/NoPanic.lean`);
-a statement with no `assert` in it never does.
+`Halt.panic` is the one halt no modality accepts.  The untyped operations
+the term model keeps halt with `revert` or `undef` only: the state's reads
+and writes, the evaluation of a program expression, the copies and
+allocations, a payment.  A term or an update reads the state through these
+operations, so neither panics (`Calculus/NoPanic.lean`).
 
 Each lemma follows its operation's definition, the recursive ones by the same
 recursion; `no_panic` discharges an unfolded definition.  Split out of
@@ -340,18 +339,6 @@ end
 attribute [no_panic_simp] Surface.SPath.resolve_noPanic Surface.Loc.resolve_noPanic Surface.MPath.mval_noPanic
   Surface.MLoc.read_noPanic Surface.Val.eval_noPanic
 
-@[no_panic_simp]
-theorem Surface.Src.value_noPanic (σ : State) {T : Ty} (r : Surface.Src C T) : NoPanic (r.value σ) := by
-  cases r <;> simp only [Surface.Src.value] <;> no_panic
-
-@[no_panic_simp]
-theorem Surface.MSrc.mval_noPanic (σ : State) {T : Ty} (r : Surface.MSrc C T) : NoPanic (r.mval σ) := by
-  cases r <;> simp only [Surface.MSrc.mval] <;> no_panic
-
-@[no_panic_simp]
-theorem Surface.MLoc.addr_noPanic (σ : State) {T : Ty} (l : Surface.MLoc C T) : NoPanic (l.addr σ) := by
-  cases l <;> simp only [Surface.MLoc.addr] <;> no_panic
-
 theorem NoPanic.mapM {α β : Type} {f : α → Res β} (hf : ∀ a, NoPanic (f a)) :
     (l : List α) → NoPanic (l.mapM f)
   | [] => by simp only [List.mapM_nil, ne_eq, NoPanic.pure, not_false_eq_true]
@@ -359,11 +346,6 @@ theorem NoPanic.mapM {α β : Type} {f : α → Res β} (hf : ∀ a, NoPanic (f 
     simp only [List.mapM_cons]
     exact NoPanic.bind (hf a) fun _ _ => NoPanic.bind (NoPanic.mapM hf l) fun _ _ => by simp only [
         ne_eq, NoPanic.pure, not_false_eq_true]
-
-@[no_panic_simp] theorem Surface.ExtCall.key_noPanic (σ : State) (c : Surface.ExtCall C) : NoPanic (c.key σ) := by
-  have hm : NoPanic (c.args.mapM fun a => a.2.eval σ) :=
-    NoPanic.mapM (fun _ => Surface.Simple.eval_noPanic σ _) _
-  unfold Surface.ExtCall.key; no_panic
 
 @[no_panic_simp]
 theorem bindData_noPanic : (xs : List (PrimTy × Var)) → (vs : List Value) → (σ : State) →
@@ -382,12 +364,6 @@ theorem bindData_noPanic : (xs : List (PrimTy × Var)) → (vs : List Value) →
   unfold transferAt; split <;> simp only [ne_eq, Except.error.injEq, reduceCtorEq,
       not_false_eq_true, NoPanic.ok]
 
-@[no_panic_simp] theorem sendAt_noPanic (σ : State) (pv : Var) (addr amt : Int) :
-    NoPanic (sendAt σ pv addr amt) := by
-  unfold sendAt; split
-  · simp only [ne_eq, Except.error.injEq, reduceCtorEq, not_false_eq_true]
-  · split <;> exact NoPanic.ok _
-
 @[no_panic_simp] theorem readLoc_noPanic (σ : State) (a : Addr) : NoPanic (readLoc σ a) := by
   unfold readLoc; no_panic
 
@@ -395,28 +371,8 @@ theorem bindData_noPanic : (xs : List (PrimTy × Var)) → (vs : List Value) →
     NoPanic (writeLoc σ a v) := by
   unfold writeLoc; no_panic
 
-@[no_panic_simp] theorem guardOk_noPanic (v : Value) (σ : State) : NoPanic (guardOk v σ) := by
-  unfold guardOk; no_panic
-
 @[no_panic_simp]
 theorem memClear_noPanic (σ : State) (a : Addr) (T : Ty) : NoPanic (memClear σ a T) := by
   cases T <;> simp only [memClear] <;> no_panic
-
-@[no_panic_simp] theorem Surface.OpLoc.store_noPanic (σ : State) (op : BinOp) {p : PrimTy} (l : Surface.OpLoc C p)
-    (v : Value) : NoPanic (l.store σ op v) := by
-  cases l <;> simp only [Surface.OpLoc.store, opLocal, opStore, opMem] <;> no_panic
-
-@[no_panic_simp] theorem Surface.OpLoc.bump_noPanic (σ : State) (op : IncDec) {p : PrimTy} (l : Surface.OpLoc C p) :
-    NoPanic (l.bump σ op) := by
-  cases l <;> simp only [Surface.OpLoc.bump, bumpLocal, bumpStore, bumpMem] <;> no_panic
-
-@[no_panic_simp] theorem Surface.MLoc.write_noPanic (σ : State) (mv : MVal) {T : Ty} (l : Surface.MLoc C T) :
-    NoPanic (l.write σ mv) := by
-  cases l <;> simp only [Surface.MLoc.write, memWriteField, memWriteIndex] <;> no_panic
-
-@[no_panic_simp]
-theorem Surface.Src.pushVal_noPanic (σ : State) {T : Ty} (o : Option (Surface.Src C T)) (slot : SVal) :
-    NoPanic (Surface.Src.pushVal σ o slot) := by
-  cases o <;> simp only [Surface.Src.pushVal] <;> no_panic
 
 end Solidity

@@ -842,8 +842,8 @@ theorem Binders.defaultsT_erase {H : HTy} : {ρ : Ctx} → (bs : Binders ρ) →
 theorem State.withEnv_erase {Δ : Ctx} (σ : State C Γ) (e : TEnv C σ.H Δ) :
     (σ.withEnv e).erase = σ.erase.withEnv (TEnv.erase Δ e) := rfl
 
-/-- Entering a call: the frame the untyped run builds on the erased caller is
-the erasure of the typed one. -/
+/-- Entering a call: the frame `CallRet.enter` builds on the erased caller
+is the erasure of the typed one. -/
 theorem CallRet.enterT_erase {rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (σ : State C Γ)
     (a : TEnv C σ.H ps) {β : Type} (K : EState C (rs ++ ps) → Res β) :
     (do
