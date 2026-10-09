@@ -17,7 +17,7 @@ slot readers count (`LStor.slotLenU`, `findDefinitionSize`).
 -/
 
 open Solidity NFml.Proves
-open scoped Core.Scoped
+open scoped Scoped
 
 theorem Solkey.TestSuite.testDanglingReferenceSurvivesPush.proved :
     ⊢ Solkey.TestSuite.testDanglingReferenceSurvivesPush.problem := by

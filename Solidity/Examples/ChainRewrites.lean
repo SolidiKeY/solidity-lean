@@ -1,8 +1,8 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.Rewrite
 import Solidity.Examples.Chains.Storage
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # The lines after the program, as chain links
@@ -14,15 +14,15 @@ applied, and Theory laws read the terms down to values.  Each such line is a
 link `~[r]~>` of a chain, `r` the rule KeY names
 (`sequentialToParallel`, `simplifyUpdate`, `applyStorageBox`, …) or the law
 (`findOnSave`); the rewrite behind it is `Calculus/ChainRewrites.lean`'s, on
-the erasure of the chain's last scoped line (`Core.Fml.ViaE`,
-`Calculus/Core/Chains.lean`), and a chain with one composes to `~~>`, a proof
-of its first line from its last (`Core.Fml.ViaE.valid_close`).  The file reads
-the scoped calculus (`open scoped Solidity.Core.Scoped`): a line with no
+the erasure of the chain's last scoped line (`Fml.ViaE`,
+`Calculus/Chains.lean`), and a chain with one composes to `~~>`, a proof
+of its first line from its last (`Fml.ViaE.valid_close`).  The file reads
+the scoped calculus (`open scoped Solidity.Scoped`): a line with no
 program is a scoped line too, the rewrites going on from its erasure, and a
-postcondition `φ : Core.Post C Γ` stands at the context of the line's user
+postcondition `φ : Post C Γ` stands at the context of the line's user
 locals, its fresh ones dropped.  While the program is still open,
 `sequentialToParallel` merges the scoped line's spine itself
-(`Calculus/Core/Merge.lean`).
+(`Calculus/Merge.lean`).
 
 * §1 — the headline as the calculus draws it (`Chains.Storage.BalanceWrite.chain`),
   for any modality `m` and postcondition `φ`, down to its last line, and on to
@@ -47,7 +47,7 @@ spine, and a law at any instance; the elaborator takes the first that gives
 the line written (with the line left `_`, the first that applies:
 `sequentialToParallel` then merges the whole spine).  Over `m` and `φ` a
 rewrite must compute without them.  The merges do.  `simplifyUpdate` asks
-`φ` only whether it reads a fresh variable, which `Core.Post.noFresh` denies, so
+`φ` only whether it reads a fresh variable, which `Post.noFresh` denies, so
 it drops the rules' captures (`pv`, `acc`, `se1`) over `φ` by `sol_chain`,
 not `rfl`; a user variable `φ` may read stays.  `applyOnRigidBox` asks `m`
 nothing where the update cannot halt; `applyStorageBox`, `applyOnRigidBox`
@@ -60,7 +60,7 @@ An update `simplifyUpdate` empties goes with it (KeY's `applySkip`), since
 
 namespace Solidity.Examples.ChainRewrites
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -73,7 +73,7 @@ printed names for the rules' fresh variables (`pv`, `acc` for `se1`, `sp1`).
 What follows is past it. -/
 
 section Headline
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 section ExampleNames
 
@@ -92,7 +92,7 @@ theorem balanceWrite :
 
 /-- `alice.account.balance = 10;` to its last line, for every modality and
 postcondition, and on to the write alone: `φ` names no fresh variable
-(`Core.Post.noFresh`), so it reads neither `pv` nor `acc`, which the chain keeps,
+(`Post.noFresh`), so it reads neither `pv` nor `acc`, which the chain keeps,
 and `simplifyUpdate` drops both.  `sol_rws` names the rewrites past the
 program (`balanceWrite`'s merge, then `simplifyUpdate`; `sol_rws?` finds
 them). -/
@@ -138,7 +138,7 @@ example : dl![m]{ { se1 := 10 } φ } ~[simplifyUpdate]~> dl!{ φ } := by sol_cha
 
 /-- A capture dropped over `φ` behind a user variable, which stays: `φ` may
 read `x`. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { x := 1 ‖ se1 := 10 } { sp1 := alice.account } φ }
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { x := 1 ‖ se1 := 10 } { sp1 := alice.account } φ }
     ~[simplifyUpdate]~> dl![m]{ { x := 1 ‖ se1 := 10 } φ } := by sol_chain
 
 /-- Over a concrete postcondition a user variable it does not read goes too,
@@ -175,7 +175,7 @@ theorem headlineValueChain :
   sol_chain
 
 /-- `alice.account.balance = 10;` reads back `10`: the chain is a proof, its last scoped line
-closed by `Core.Proves.close` (`Core.Fml.ViaE.valid_close`). -/
+closed by `Proves.close` (`Fml.ViaE.valid_close`). -/
 theorem headlineValue : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance ≐ 10 } :=
   headlineValueChain.valid_close fun _ => Theory.StValue.Equiv.refl _
 
@@ -273,7 +273,7 @@ writes merge under `m` too, into one element (`Upd.mergeSt`): the merge
 compares the modalities, which `sol_chain` decides by `cases m`. -/
 
 section AnyModality
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-- `findOnSave` in the update under `m`: the update holds the write it reads back. -/
 example : dl![m]{ { storage := save(storage, alice.age, 42) ‖
@@ -281,7 +281,7 @@ example : dl![m]{ { storage := save(storage, alice.age, 42) ‖
     ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } x ≐ 42 } := by sol_chain
 
 /-- `findOnDelAtSave` likewise: the delete over the write, read at its path. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { storage := delAt(save(storage, alice.age, 42), alice.age) ‖
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { storage := delAt(save(storage, alice.age, 42), alice.age) ‖
       x := find(delAt(save(storage, alice.age, 42), alice.age), alice.age) } φ }
     ~[findOnDelAtSave]~>
       dl![m]{ { storage := delAt(save(storage, alice.age, 42), alice.age) ‖ x := 0 } φ } := by sol_chain
@@ -290,7 +290,7 @@ example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { storage := del
 `alice.account.balance = 100;` and `delete alice.account;`, the balance reads its
 default, the account being no mapping (which would keep its members).  The update
 holds the delete the read goes through, so the law applies under `m`. -/
-example (φ : Core.Post StandardExample [.val .uint]) (hk : STerm.KindFreeAt st!{ save(storage, alice.account.balance, 100) } pt!{ alice.account }) :
+example (φ : Post StandardExample [.val .uint]) (hk : STerm.KindFreeAt st!{ save(storage, alice.account.balance, 100) } pt!{ alice.account }) :
     dl![m]{ { storage := delAt(save(storage, alice.account.balance, 100), alice.account) ‖
       b := find(delAt(save(storage, alice.account.balance, 100), alice.account), alice.account.balance) } φ }
     ~[findOnDelAtBelow]~>
@@ -301,7 +301,7 @@ example (φ : Core.Post StandardExample [.val .uint]) (hk : STerm.KindFreeAt st!
 `findMemberCons`, `selectOnSaveMember`, then `findOnSave` at the member.  Each
 intermediate form reads what the first does (`Term.base_eval`), so the steps
 need no modality. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { storage := save(storage, alice.age, 42) ‖
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { storage := save(storage, alice.age, 42) ‖
       x := find(save(storage, alice.age, 42), alice.age) } φ }
     ~[findMemberCons]~>
       dl![m]{ { storage := save(storage, alice.age, 42) ‖
@@ -322,7 +322,7 @@ example : dl![m]{ { storage := save(storage, alice.age, 1) } { storage := save(s
 writes the storage over it: the locals are substituted into the update after,
 the shadowed write goes (`Upd.mergeStL`), and an index check moves with the
 storage it is performed in, `balances[10]@S`. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { se1 := 10 ‖ storage := save(storage, alice.age, 1) ‖ sp1 := alice.account }
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { se1 := 10 ‖ storage := save(storage, alice.age, 1) ‖ sp1 := alice.account }
       { storage := save(storage, balances[se1], 2) ‖ x := find(storage, balances[se1]) } φ }
     ~[sequentialToParallel]~>
       dl![m]{ { se1 := 10 ‖ sp1 := alice.account ‖
@@ -332,7 +332,7 @@ example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { se1 := 10 ‖ 
 
 /-- `alice.age = 42; uint x = alice.age;` read back to `42` inside the chain,
 for every modality and postcondition. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
     ~[sequentialToParallel]~>
         dl![m]{ { storage := save(storage, alice.age, 42) ‖
@@ -359,10 +359,10 @@ after it (`Upd.mergeMem`), and a storage write into one with memory terms
 `read(addM(m, R), freshId(addM(m, R)).account)`, is the normal form. -/
 
 section MemoryReads
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-- A memory write merged into the storage write and the read after it. -/
-example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { memory := write(memory, carol.age, 42) }
+example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { memory := write(memory, carol.age, 42) }
       { storage := save(storage, alice, copyMem(mtSt, memory, carol)) ‖
         v := find(save(storage, alice, copyMem(mtSt, memory, carol)), alice.age) } φ where Person memory carol }
     ~[sequentialToParallel]~>
@@ -373,7 +373,7 @@ example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person")]) :
 
 /-- `findCopyMem` then `readOnWrite`, under `m`: the update holds the storage
 write the first reads back and the memory write the second does. -/
-example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { memory := write(memory, carol.age, 42) ‖
+example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { memory := write(memory, carol.age, 42) ‖
         storage := save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
         v := find(save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)), alice.age) } φ where Person memory carol }
     ~[findCopyMem]~>
@@ -390,7 +390,7 @@ set_option maxHeartbeats 2000000 in
 /-- A storage-to-memory copy read back: the three updates merged into one
 (the copy's identity and memory into the read, the storage write into the
 copy), then `readCopySt`, then `findOnSave`. -/
-example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { storage := save(storage, alice.age, 25) }
+example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { storage := save(storage, alice.age, 25) }
       { carol := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
       { v := read(memory, carol.age) } φ }
     ~[sequentialToParallel]~>
@@ -413,7 +413,7 @@ example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person")]) :
 
 /-- `readAddEqual`: a primitive member of a fresh object is its default,
 under `m` where the update holds the allocation. -/
-example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
         v := read(addM(memory, Person), freshId(addM(memory, Person)).age) } φ }
     ~[readAddEqual]~>
       dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
@@ -422,7 +422,7 @@ example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person")]) :
 
 /-- `readAddDifferent` then `readAddEqual`: a second allocation leaves the
 first object, whose member then reads its default. -/
-example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person"), .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+example (φ : Post StandardExample [.val .uint, .mem (.struct "Person"), .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
         david := freshId(addM(addM(memory, Person), Person)) ‖
         memory := addM(addM(memory, Person), Person) ‖
         v := read(addM(addM(memory, Person), Person), freshId(addM(memory, Person)).age) } φ }
@@ -441,7 +441,7 @@ example (φ : Core.Post StandardExample [.val .uint, .mem (.struct "Person"), .m
 /-- `readAddDifferentIdentity`: the reference member of the first object,
 read past the second allocation; the read of the fresh root's member is the
 normal form. -/
-example (φ : Core.Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person"), .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+example (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person"), .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
         david := freshId(addM(addM(memory, Person), Person)) ‖
         memory := addM(addM(memory, Person), Person) ‖
         carolAcc := read(addM(addM(memory, Person), Person), freshId(addM(memory, Person)).account) } φ }
@@ -455,7 +455,7 @@ example (φ : Core.Post StandardExample [.mem (.struct "Account"), .mem (.struct
 /-- `readWriteDifferent` and `readWriteDifferentIdentity`: a write to
 `carol.age` leaves `carol.account.balance` and `carol.account`, under `m`
 where the update holds the write. -/
-example (φ : Core.Post StandardExample [.mem (.struct "Account"), .val .uint, .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+example (φ : Post StandardExample [.mem (.struct "Account"), .val .uint, .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
       { memory := write(memory, carol.age, 42) ‖
         v := read(write(memory, carol.age, 42), carol.account.balance) ‖
         carolAcc := read(write(memory, carol.age, 42), carol.account) } φ }
@@ -472,7 +472,7 @@ example (φ : Core.Post StandardExample [.mem (.struct "Account"), .val .uint, .
   sol_chain
 
 /-- `readOnWriteIdentity`: a reference written is read back as its identity. -/
-example (φ : Core.Post StandardExample [.mem (.struct "Account"), .mem (.struct "Account"), .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
+example (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struct "Account"), .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
         acc := freshId(addM(addM(memory, Person), Account)) ‖
         memory := addM(addM(memory, Person), Account) }
       { memory := write(memory, carol.account, acc) ‖
@@ -500,14 +500,14 @@ the postcondition `φ` is a part it never looks at, and the line is proved by
 `rfl` over it. -/
 
 section Literals
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-- `add_literals` in an update's right-hand side under `m`: the sum is exact. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { x := 250 + 10 } φ } ~[add_literals]~> dl![m]{ { x := 260 } φ } := by sol_chain
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { x := 250 + 10 } φ } ~[add_literals]~> dl![m]{ { x := 260 } φ } := by sol_chain
 
 /-- `leq_literals` in an update: the comparison a check captured, `uint8`'s
 range read as `x <= 255`. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } φ }
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } φ }
     ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } φ } := by sol_chain
 
 /-- `add_literals` in an equation of the line, and under `defined(…)`. -/
@@ -519,26 +519,26 @@ each rigid leaf is substituted, and the goals keep the update in front.
 The second branch is a postcondition `ψ` where the check's trace has its
 reverting branch, `⟨[ revert(); ]⟩ φ`: a rewrite runs on a line's erasure,
 which has no modality since W4 `modal` (`docs/intrinsic.md`). -/
-example (ψ : Core.Post StandardExample []) : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
+example (ψ : Post StandardExample []) : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
     ~[applyOnRigid]~>
       dl![m]{ (false ≐ true → { se1 := false } φ) ∧
         (false ≐ false → { se1 := false } ψ) } := by sol_chain
 
 /-- `concrete`: the literal equations close (`eqClose`), the connectives
 fold (`concrete_impl_2`, `concrete_impl_1`, `concrete_and_1`). -/
-example (ψ : Core.Post StandardExample []) : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+example (ψ : Post StandardExample []) : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
       (false ≐ false → { se1 := false } ψ) }
     ~[concrete]~> dl![m]{ { se1 := false } ψ } := by sol_chain
 
 /-- `sequentialToParallel` under a branch: the first spine the skeleton finds. -/
-example (φ : Core.Post StandardExample [.val .uint, .val .uint]) (ψ : Core.Post StandardExample [.val .uint]) :
+example (φ : Post StandardExample [.val .uint, .val .uint]) (ψ : Post StandardExample [.val .uint]) :
     dl![m]{ (x ≐ 1 → { x := 1 } { y := x } φ) ∧ (x ≐ 2 → ψ) }
     ~[sequentialToParallel]~> dl![m]{ (x ≐ 1 → { x := 1 ‖ y := 1 } φ) ∧ (x ≐ 2 → ψ) } := by sol_chain
 
 set_option maxHeartbeats 300000 in
 /-- The check's trace, folded: the captured comparison, the update pushed
 through, the branch closed, and the capture dropped. -/
-example (φ ψ : Core.Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
+example (φ ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
     ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
     ~[applyOnRigid]~>
       dl![m]{ (false ≐ true → { x := 260 ‖ se1 := false } φ) ∧
@@ -557,7 +557,7 @@ error: ~[add_literals]~>: add_literals does not apply to
 of add_literals closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ { x := 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 } φ }
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { x := 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 } φ }
     ~[add_literals]~> dl![m]{ { x := 0 } φ } := by sol_chain
 
 end Literals
@@ -565,7 +565,7 @@ end Literals
 /-! ## 4 · What is refused, and what is printed -/
 
 section Refused
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /--
 error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox, applyOnPV, concrete), not a term taclet (`TermTaclet`), not a law of a memory read (`EvalLaw`), not a literal law (`LitLaw`)
@@ -628,7 +628,7 @@ error: ~[simplifyUpdate]~>: on
 it looks at the line's modality or postcondition, which are not known: state the line for a concrete one
 -/
 #guard_msgs in
-example (φ : Core.Post StandardExample [.val .uint, .val .uint]) : dl![m]{ { x := 10 } { y := 1 } φ } ~[simplifyUpdate]~> dl![m]{ { y := 1 } φ } := by sol_chain
+example (φ : Post StandardExample [.val .uint, .val .uint]) : dl![m]{ { x := 10 } { y := 1 } φ } ~[simplifyUpdate]~> dl![m]{ { y := 1 } φ } := by sol_chain
 
 -- A storage write may halt: `applyStorageBox` is the box's.
 /--

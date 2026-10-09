@@ -1,5 +1,5 @@
 import Solidity.Typing.TypedWT
-import Solidity.Semantics.Core.StateErase
+import Solidity.Semantics.StateErase
 import Solidity.Calculus.RuleShapes
 import Solidity.SortCheck.Annotations
 
@@ -9,7 +9,7 @@ import Solidity.SortCheck.Annotations
 The table ↔ semantics edge of the conformance loop: every read-sort
 annotation in `TacletAnnotations.tacletReadAnns` is *faithful* — the sort a
 taclet's value read declares agrees with the value the interpreter finds
-there, in every state that agrees (`Agree`, `Semantics/Core/StateErase.lean`) with a
+there, in every state that agrees (`Agree`, `Semantics/StateErase.lean`) with a
 scoped state the invariant `RunWT` (`Typing/Soundness.lean`) holds of.
 `solkeycheck` keeps the table equal to the `.key` text; this module keeps it
 true of the interpreter, so a table updated to match a buggy
@@ -37,12 +37,12 @@ once its constructors read at a type of the right class (`ReadClass`), and
 `Read.sortOk` does the rest from the typing of the evaluators.
 
 **Which statements.**  A row names a KeY taclet; `RuleShapes.tacletOrigins`
-names the scoped `Core.Taclet` constructors that transcribe it (`ctorsOf`).
+names the scoped `Taclet` constructors that transcribe it (`ctorsOf`).
 For each of the 36 read-bearing constructors, `faithful_<ctor>` quantifies
 over the constructor's schema variables and takes the statement from the
 constructor's own type (`stmtOf`), so the statement is the rule's `\find`,
 not a restatement of it; `faithful_theorem` states it from the type, the
-binders being the ones the rule's schema variables bind (`Calculus/Core/Rules.lean`).  `rows_covered` checks that every row with a value
+binders being the ones the rule's schema variables bind (`Calculus/Rules.lean`).  `rows_covered` checks that every row with a value
 read is claimed by constructors in `faithfulCtors`, each of which carries its
 theorem.
 -/
@@ -80,52 +80,52 @@ def Read.ty : Read C → Ty
 /-- The read's locals are used as declared: it is the erasure, under the
 names `ns`, of a read in the scoped syntax over `Γ` (`resolve` finds one when
 it accepts the statement). -/
-def Read.Typed (ns : List Var) (Γ : Core.Ctx) : Read C → Prop
-  | .storage T p => ∃ p' : Core.SPath C Γ T, p'.erase ns = p
-  | .memory T p => ∃ p' : Core.MPath C Γ T, p'.erase ns = p
-  | @Read.slen _ E p => ∃ p' : Core.SPath C Γ (.array E), p'.erase ns = p
-  | @Read.mlen _ E p => ∃ p' : Core.MPath C Γ (.array E), p'.erase ns = p
+def Read.Typed (ns : List Var) (Γ : Ctx) : Read C → Prop
+  | .storage T p => ∃ p' : SPath C Γ T, p'.erase ns = p
+  | .memory T p => ∃ p' : MPath C Γ T, p'.erase ns = p
+  | @Read.slen _ E p => ∃ p' : SPath C Γ (.array E), p'.erase ns = p
+  | @Read.mlen _ E p => ∃ p' : MPath C Γ (.array E), p'.erase ns = p
 
 /-- A read of the scoped syntax over `Γ`: a storage or memory path at its
 type, or a length.  It erases, under the names `ns`, to a `Read` its locals
 are used as declared in (`CRead.erase_typed`). -/
-inductive CRead (C : Contract) (Γ : Core.Ctx) where
-  | storage (T : Ty) (p : Core.SPath C Γ T)
-  | memory (T : Ty) (p : Core.MPath C Γ T)
-  | slen {E : Ty} (p : Core.SPath C Γ (.array E))
-  | mlen {E : Ty} (p : Core.MPath C Γ (.array E))
+inductive CRead (C : Contract) (Γ : Ctx) where
+  | storage (T : Ty) (p : SPath C Γ T)
+  | memory (T : Ty) (p : MPath C Γ T)
+  | slen {E : Ty} (p : SPath C Γ (.array E))
+  | mlen {E : Ty} (p : MPath C Γ (.array E))
 
 /-- The read under the names `ns`. -/
-def CRead.erase {Γ : Core.Ctx} (ns : List Var) : CRead C Γ → Read C
+def CRead.erase {Γ : Ctx} (ns : List Var) : CRead C Γ → Read C
   | .storage T p => .storage T (p.erase ns)
   | .memory T p => .memory T (p.erase ns)
   | .slen p => .slen (p.erase ns)
   | .mlen p => .mlen (p.erase ns)
 
 /-- `alice.age` is read from storage, `m.age` from memory. -/
-def CRead.domain {Γ : Core.Ctx} : CRead C Γ → ReadDomain
+def CRead.domain {Γ : Ctx} : CRead C Γ → ReadDomain
   | .storage .. | .slen _ => .storage
   | .memory .. | .mlen _ => .memory
 
 /-- `alice.age` is read at `uint`, and so is a length. -/
-def CRead.ty {Γ : Core.Ctx} : CRead C Γ → Ty
+def CRead.ty {Γ : Ctx} : CRead C Γ → Ty
   | .storage T _ | .memory T _ => T
   | .slen _ | .mlen _ => .uint
 
-theorem CRead.erase_typed {Γ : Core.Ctx} (ns : List Var) :
+theorem CRead.erase_typed {Γ : Ctx} (ns : List Var) :
     (R : CRead C Γ) → (R.erase ns).Typed ns Γ
   | .storage _ p | .memory _ p | .slen p | .mlen p => ⟨p, rfl⟩
 
-theorem CRead.erase_domain {Γ : Core.Ctx} (ns : List Var) :
+theorem CRead.erase_domain {Γ : Ctx} (ns : List Var) :
     (R : CRead C Γ) → (R.erase ns).domain = R.domain
   | .storage .. | .memory .. | .slen _ | .mlen _ => rfl
 
-theorem CRead.erase_ty {Γ : Core.Ctx} (ns : List Var) : (R : CRead C Γ) → (R.erase ns).ty = R.ty
+theorem CRead.erase_ty {Γ : Ctx} (ns : List Var) : (R : CRead C Γ) → (R.erase ns).ty = R.ty
   | .storage .. | .memory .. | .slen _ | .mlen _ => rfl
 
 /-- The place `x ⊕= e` and `x++` read: `alice.age` in storage, `m.age` in
 memory; a stack local is not read from a state component. -/
-def OpLoc.read? {Γ : Core.Ctx} : {p : PrimTy} → Core.OpLoc C Γ p → Option (CRead C Γ)
+def OpLoc.read? {Γ : Ctx} : {p : PrimTy} → OpLoc C Γ p → Option (CRead C Γ)
   | _, .local _ => none
   | p, .root r h => some (.storage (.prim p) (.loc (.root r h)))
   | p, .field b f h => some (.storage (.prim p) (.loc (.field b f h)))
@@ -136,16 +136,16 @@ def OpLoc.read? {Γ : Core.Ctx} : {p : PrimTy} → Core.OpLoc C Γ p → Option 
 /-- The value read a statement performs: `x = alice.age;` reads `alice.age`,
 `alice = bob;` reads `bob`, `m = alice;` reads `alice`, `alice.age += 1;`
 reads `alice.age`. -/
-def Stmt.read? {Γ Γ' : Core.Ctx} : Core.Stmt C Γ Γ' → Option (CRead C Γ)
-  | @Core.Stmt.assignLocal _ _ p _ (.read l) => some (.storage (.prim p) (.loc l))
-  | @Core.Stmt.assignLocal _ _ p _ (.readMem l) => some (.memory (.prim p) (.loc l))
-  | @Core.Stmt.assignLocal _ _ _ _ (.len b _) => some (.slen b)
-  | @Core.Stmt.assignLocal _ _ _ _ (.mlen b _) => some (.mlen b)
-  | @Core.Stmt.assign _ _ _ _ (@Core.Src.copy _ _ R sp _) => some (.storage (.ref R) sp)
-  | @Core.Stmt.push _ _ _ _ (some (@Core.Src.copy _ _ R sp _)) _ => some (.storage (.ref R) sp)
-  | @Core.Stmt.rebindMem _ _ R _ (.copy sp _) => some (.storage (.ref R) sp)
-  | @Core.Stmt.rebindMem _ _ R _ (.alias mp) => some (.memory (.ref R) mp)
-  | @Core.Stmt.assignFromMem _ _ R _ mp => some (.memory (.ref R) mp)
+def Stmt.read? {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (CRead C Γ)
+  | @Stmt.assignLocal _ _ p _ (.read l) => some (.storage (.prim p) (.loc l))
+  | @Stmt.assignLocal _ _ p _ (.readMem l) => some (.memory (.prim p) (.loc l))
+  | @Stmt.assignLocal _ _ _ _ (.len b _) => some (.slen b)
+  | @Stmt.assignLocal _ _ _ _ (.mlen b _) => some (.mlen b)
+  | @Stmt.assign _ _ _ _ (@Src.copy _ _ R sp _) => some (.storage (.ref R) sp)
+  | @Stmt.push _ _ _ _ (some (@Src.copy _ _ R sp _)) _ => some (.storage (.ref R) sp)
+  | @Stmt.rebindMem _ _ R _ (.copy sp _) => some (.storage (.ref R) sp)
+  | @Stmt.rebindMem _ _ R _ (.alias mp) => some (.memory (.ref R) mp)
+  | @Stmt.assignFromMem _ _ R _ mp => some (.memory (.ref R) mp)
   | .opAssign _ _ _ l _ => OpLoc.read? l
   | .incDec _ _ l => OpLoc.read? l
   | .assignIncDec _ _ _ l _ => OpLoc.read? l
@@ -229,17 +229,17 @@ class the declared sort is supported by, finds a value the sort claims, in
 every state that agrees with a `RunWT` state: `x = total;` finds a number
 where `total : uint`, `alice.age += 1` finds an `int`, `m = alice;` finds a
 `Struct` node. -/
-theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.EState C Γ}
-    {τ : Semantics.State} (hwt : Core.RunWT C H σ) (hag : Core.Agree ns σ τ) {R : Read C}
+theorem Read.sortOk {Γ : Ctx} {ns : List Var} {H : HeapTy} {σ : EState C Γ}
+    {τ : Semantics.State} (hwt : RunWT C H σ) (hag : Agree ns σ τ) {R : Read C}
     (hw : R.Typed ns Γ) {cls : ReadClass} (hfit : cls.fits R.ty = true) {rs : ReadSort}
     (hsup : cls.supports R.domain rs = true) : R.SortOk τ H rs := by
   cases R with
   | storage T p =>
     intro r segs v hr hv
     obtain ⟨p', rfl⟩ := hw
-    rw [Core.SPath.resolve_erase hag] at hr
+    rw [SPath.resolve_erase hag] at hr
     rw [hag.findStorage] at hv
-    have hty := findStorage_hasTy hwt.glob.storage (Core.SPath.resolve_wt hwt p' hr) hv
+    have hty := findStorage_hasTy hwt.glob.storage (SPath.resolve_wt hwt p' hr) hv
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -254,8 +254,8 @@ theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.ESta
   | memory T p =>
     intro mv hmv
     obtain ⟨p', rfl⟩ := hw
-    rw [Core.MPath.mval_erase hag] at hmv
-    have hty := Core.MPath.mval_wt hwt p' hmv
+    rw [MPath.mval_erase hag] at hmv
+    have hty := MPath.mval_wt hwt p' hmv
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -270,8 +270,8 @@ theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.ESta
   | slen p =>
     intro v hv
     obtain ⟨p', rfl⟩ := hw
-    have hty := Core.Val.eval_wt hwt (Core.Val.len (p := .uint) p' rfl)
-      (by rw [← Core.Val.eval_erase hag]; exact hv)
+    have hty := Val.eval_wt hwt (Val.len (p := .uint) p' rfl)
+      (by rw [← Val.eval_erase hag]; exact hv)
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -286,8 +286,8 @@ theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.ESta
     intro v hv
     obtain ⟨p', rfl⟩ := hw
     have hty := Value.toMVal_hasTyH (H := H)
-      (Core.Val.eval_wt hwt (Core.Val.mlen (p := .uint) p' rfl)
-        (by rw [← Core.Val.eval_erase hag]; exact hv))
+      (Val.eval_wt hwt (Val.mlen (p := .uint) p' rfl)
+        (by rw [← Val.eval_erase hag]; exact hv))
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -300,34 +300,34 @@ theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.ESta
       · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
 
 /-- The claims hold in every typed state, so after any run: a typed state's
-erasure is well-typed by construction (`TState.erase_wt`), and the next
+erasure is well-typed by construction (`State.erase_wt`), and the next
 statement's read finds what its sort declares.
 `Person storage p = alice; p.age = 10;` then `x = alice.age;` still reads a
 number. -/
-theorem Read.sortOk_typed {Γ : Core.Ctx} {ns : List Var} (hnd : nodupKeysB C.vars = true)
-    (σ : Core.TState C Γ) {τ : Semantics.State} {R : Read C} {cls : ReadClass} {rs : ReadSort}
-    (hag : Core.Agree ns σ.erase τ) (hR : R.Typed ns Γ) (hfit : cls.fits R.ty = true)
+theorem Read.sortOk_typed {Γ : Ctx} {ns : List Var} (hnd : nodupKeysB C.vars = true)
+    (σ : State C Γ) {τ : Semantics.State} {R : Read C} {cls : ReadClass} {rs : ReadSort}
+    (hag : Agree ns σ.erase τ) (hR : R.Typed ns Γ) (hfit : cls.fits R.ty = true)
     (hsup : cls.supports R.domain rs = true) : ∃ H', R.SortOk τ H' rs :=
-  ⟨_, Read.sortOk (Core.TState.erase_wt hnd σ) hag hR hfit hsup⟩
+  ⟨_, Read.sortOk (State.erase_wt hnd σ) hag hR hfit hsup⟩
 
 /-! ## Rows, constructors, statements -/
 
-/-- A constructor's type, `Core.Taclet C k m s p` under its side conditions
-(`Calculus/Core/Rules.lean`): the statement `s` it is about. -/
-class TacletAbout (α : Prop) (C : outParam Contract) (Γ Γ' : outParam Core.Ctx)
-    (s : outParam (Core.Stmt C Γ Γ')) : Prop where
+/-- A constructor's type, `Taclet C k m s p` under its side conditions
+(`Calculus/Rules.lean`): the statement `s` it is about. -/
+class TacletAbout (α : Prop) (C : outParam Contract) (Γ Γ' : outParam Ctx)
+    (s : outParam (Stmt C Γ Γ')) : Prop where
 
-instance {k : Nat} {m : Modality} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'}
-    {p : Core.Premise C Γ Γ'} : TacletAbout (Core.Taclet C k m s p) C Γ Γ' s := ⟨⟩
+instance {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
+    {p : Premise C Γ Γ'} : TacletAbout (Taclet C k m s p) C Γ Γ' s := ⟨⟩
 
-instance {P α : Prop} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'} [TacletAbout α C Γ Γ' s] :
+instance {P α : Prop} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} [TacletAbout α C Γ Γ' s] :
     TacletAbout (P → α) C Γ Γ' s := ⟨⟩
 
 /-- The statement a taclet constructor is about: the rule's `\find`, read off
 its type (past its side conditions, which a faithfulness statement does not
 need: it holds of the statement whichever rule fires). -/
-def stmtOf {α : Prop} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'} [TacletAbout α C Γ Γ' s] (_ : α) :
-    Core.Stmt C Γ Γ' := s
+def stmtOf {α : Prop} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} [TacletAbout α C Γ Γ' s] (_ : α) :
+    Stmt C Γ Γ' := s
 
 /-- The KeY taclets constructor `n` transcribes (`RuleShapes.tacletOrigins`),
 by name. -/
@@ -358,18 +358,18 @@ def rowsSupported (n : Lean.Name) (dom : ReadDomain) (cls : ReadClass) : Bool :=
 is the statement's read, and under any names of `Γ`'s locals, in every
 state that agrees with a `RunWT` state over `Γ`, the declared sort holds of
 what the read finds. -/
-def RowFaithful (row : TacletReadAnn) {Γ Γ' : Core.Ctx} (s : Core.Stmt C Γ Γ') : Prop :=
+def RowFaithful (row : TacletReadAnn) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
   ∀ r ∈ valueReads row, ∃ R, Stmt.read? s = some R ∧ R.domain = r.domain ∧
-    ∀ (ns : List Var) (H : HeapTy) (σ : Core.EState C Γ) (τ : Semantics.State),
-      Core.RunWT C H σ → Core.Agree ns σ τ → (R.erase ns).SortOk τ H r.sort
+    ∀ (ns : List Var) (H : HeapTy) (σ : EState C Γ) (τ : Semantics.State),
+      RunWT C H σ → Agree ns σ τ → (R.erase ns).SortOk τ H r.sort
 
 /-- Every row constructor `n` transcribes is faithful at `s`. -/
-def CtorFaithful (n : Lean.Name) {Γ Γ' : Core.Ctx} (s : Core.Stmt C Γ Γ') : Prop :=
+def CtorFaithful (n : Lean.Name) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
   ∀ row ∈ rowsOf n, RowFaithful row s
 
 /-- A row is faithful at a statement whose read is of a class the row's
 declared sorts are all supported by: `find<[int]>` at `total += 1;`. -/
-theorem rowFaithful_of {row : TacletReadAnn} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'}
+theorem rowFaithful_of {row : TacletReadAnn} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
     {R : CRead C Γ} {dom : ReadDomain} {cls : ReadClass} (hR : Stmt.read? s = some R)
     (hdom : R.domain = dom) (hfit : cls.fits R.ty = true)
     (hrow : (valueReads row).all (fun r => r.domain == dom && cls.supports dom r.sort) = true) :
@@ -383,7 +383,7 @@ theorem rowFaithful_of {row : TacletReadAnn} {Γ Γ' : Core.Ctx} {s : Core.Stmt 
 
 /-- A constructor is faithful at a statement whose read is of a class every
 row's declared sorts are supported by. -/
-theorem ctorFaithful_of {n : Lean.Name} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ Γ'} {R : CRead C Γ}
+theorem ctorFaithful_of {n : Lean.Name} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {R : CRead C Γ}
     {dom : ReadDomain} {cls : ReadClass} (hR : Stmt.read? s = some R) (hdom : R.domain = dom)
     (hfit : cls.fits R.ty = true) (hrows : rowsSupported n dom cls = true) :
     CtorFaithful n s := fun row hrow =>
@@ -392,10 +392,10 @@ theorem ctorFaithful_of {n : Lean.Name} {Γ Γ' : Core.Ctx} {s : Core.Stmt C Γ 
 /-! ## The read-bearing constructors
 
 One theorem per constructor with a value read, `faithful_<ctor>`, stated by
-`faithful_theorem r dom cls` in `Calculus/Core/Rules.lean`'s order of the
+`faithful_theorem r dom cls` in `Calculus/Rules.lean`'s order of the
 rows: it quantifies over the constructor's schema variables (its binders,
-read off its type) and states `CtorFaithful ``Core.Taclet.r (stmtOf
-(@Core.Taclet.r …))`, so the statement is the rule's `\find`, not a
+read off its type) and states `CtorFaithful ``Taclet.r (stmtOf
+(@Taclet.r …))`, so the statement is the rule's `\find`, not a
 restatement of it, and each theorem covers every statement the rule fires
 on; the proof is `ctorFaithful_of` at the domain `dom` and the class `cls`,
 what the constructor's schema fixes (an `⊕=` target is `numeric` by `hp`, a
@@ -406,10 +406,10 @@ section Gen
 open Lean Elab Command Term Meta
 
 /-- `faithful_theorem r dom cls`: the theorem `faithful_r`, that the scoped
-taclet `Core.Taclet.r` is faithful (`CtorFaithful`) at its own statement,
+taclet `Taclet.r` is faithful (`CtorFaithful`) at its own statement,
 for all its schema variables, by `ctorFaithful_of` at `dom` and `cls`. -/
 elab "faithful_theorem " r:ident dom:term:max cls:term:max : command => do
-  let ctor := `Solidity.Core.Taclet ++ r.getId
+  let ctor := `Solidity.Taclet ++ r.getId
   let thm := (← getCurrNamespace) ++ (`faithful).appendAfter ("_" ++ r.getId.toString)
   let (ty, pf) ← liftTermElabM do
     let info ← getConstInfo ctor
@@ -477,42 +477,42 @@ structure Proved where
 
 /-- The read-bearing constructors, each with its faithfulness theorem. -/
 def faithfulCtors : List Proved := [
-  ⟨``Core.Taclet.storageRootWriteCopySource, _, @faithful_storageRootWriteCopySource⟩,
-  ⟨``Core.Taclet.storageRootReadSelect, _, @faithful_storageRootReadSelect⟩,
-  ⟨``Core.Taclet.storageFieldWriteCopySource, _, @faithful_storageFieldWriteCopySource⟩,
-  ⟨``Core.Taclet.storageFieldReadFind, _, @faithful_storageFieldReadFind⟩,
-  ⟨``Core.Taclet.storageLengthRead, _, @faithful_storageLengthRead⟩,
-  ⟨``Core.Taclet.memoryLengthRead, _, @faithful_memoryLengthRead⟩,
-  ⟨``Core.Taclet.storageFieldReadStoreRoot, _, @faithful_storageFieldReadStoreRoot⟩,
-  ⟨``Core.Taclet.storageIndexReadMappingFind, _, @faithful_storageIndexReadMappingFind⟩,
-  ⟨``Core.Taclet.storageIndexReadMappingStoreRoot, _, @faithful_storageIndexReadMappingStoreRoot⟩,
-  ⟨``Core.Taclet.storageIndexWriteMappingCopySource, _, @faithful_storageIndexWriteMappingCopySource⟩,
-  ⟨``Core.Taclet.storageIndexReadArrayFind, _, @faithful_storageIndexReadArrayFind⟩,
-  ⟨``Core.Taclet.storageIndexReadArrayStoreRoot, _, @faithful_storageIndexReadArrayStoreRoot⟩,
-  ⟨``Core.Taclet.storageIndexWriteArrayCopySource, _, @faithful_storageIndexWriteArrayCopySource⟩,
-  ⟨``Core.Taclet.storagePushValueCopySource, _, @faithful_storagePushValueCopySource⟩,
-  ⟨``Core.Taclet.memoryStorageCopy, _, @faithful_memoryStorageCopy⟩,
-  ⟨``Core.Taclet.storageRootOpAssign, _, @faithful_storageRootOpAssign⟩,
-  ⟨``Core.Taclet.storageFieldOpAssign, _, @faithful_storageFieldOpAssign⟩,
-  ⟨``Core.Taclet.storageIndexMappingOpAssign, _, @faithful_storageIndexMappingOpAssign⟩,
-  ⟨``Core.Taclet.storageIndexArrayOpAssign, _, @faithful_storageIndexArrayOpAssign⟩,
-  ⟨``Core.Taclet.storageRootIncrement, _, @faithful_storageRootIncrement⟩,
-  ⟨``Core.Taclet.storageFieldIncrement, _, @faithful_storageFieldIncrement⟩,
-  ⟨``Core.Taclet.storageIndexIncrement, _, @faithful_storageIndexIncrement⟩,
-  ⟨``Core.Taclet.storageRootIncrementAssignment, _, @faithful_storageRootIncrementAssignment⟩,
-  ⟨``Core.Taclet.storageFieldIncrementAssignment, _, @faithful_storageFieldIncrementAssignment⟩,
-  ⟨``Core.Taclet.storageIndexIncrementAssignment, _, @faithful_storageIndexIncrementAssignment⟩,
-  ⟨``Core.Taclet.memoryToStorageFieldCopyRoot, _, @faithful_memoryToStorageFieldCopyRoot⟩,
-  ⟨``Core.Taclet.memoryFieldRead, _, @faithful_memoryFieldRead⟩,
-  ⟨``Core.Taclet.memoryFieldReadAliasRoot, _, @faithful_memoryFieldReadAliasRoot⟩,
-  ⟨``Core.Taclet.memoryIndexReadArrayValue, _, @faithful_memoryIndexReadArrayValue⟩,
-  ⟨``Core.Taclet.memoryIndexReadArrayMemory, _, @faithful_memoryIndexReadArrayMemory⟩,
-  ⟨``Core.Taclet.memoryFieldOpAssign, _, @faithful_memoryFieldOpAssign⟩,
-  ⟨``Core.Taclet.memoryIndexArrayOpAssign, _, @faithful_memoryIndexArrayOpAssign⟩,
-  ⟨``Core.Taclet.memoryFieldIncrement, _, @faithful_memoryFieldIncrement⟩,
-  ⟨``Core.Taclet.memoryIndexArrayIncrement, _, @faithful_memoryIndexArrayIncrement⟩,
-  ⟨``Core.Taclet.memoryFieldIncrementAssignment, _, @faithful_memoryFieldIncrementAssignment⟩,
-  ⟨``Core.Taclet.memoryIndexArrayIncrementAssignment, _, @faithful_memoryIndexArrayIncrementAssignment⟩ ]
+  ⟨``Taclet.storageRootWriteCopySource, _, @faithful_storageRootWriteCopySource⟩,
+  ⟨``Taclet.storageRootReadSelect, _, @faithful_storageRootReadSelect⟩,
+  ⟨``Taclet.storageFieldWriteCopySource, _, @faithful_storageFieldWriteCopySource⟩,
+  ⟨``Taclet.storageFieldReadFind, _, @faithful_storageFieldReadFind⟩,
+  ⟨``Taclet.storageLengthRead, _, @faithful_storageLengthRead⟩,
+  ⟨``Taclet.memoryLengthRead, _, @faithful_memoryLengthRead⟩,
+  ⟨``Taclet.storageFieldReadStoreRoot, _, @faithful_storageFieldReadStoreRoot⟩,
+  ⟨``Taclet.storageIndexReadMappingFind, _, @faithful_storageIndexReadMappingFind⟩,
+  ⟨``Taclet.storageIndexReadMappingStoreRoot, _, @faithful_storageIndexReadMappingStoreRoot⟩,
+  ⟨``Taclet.storageIndexWriteMappingCopySource, _, @faithful_storageIndexWriteMappingCopySource⟩,
+  ⟨``Taclet.storageIndexReadArrayFind, _, @faithful_storageIndexReadArrayFind⟩,
+  ⟨``Taclet.storageIndexReadArrayStoreRoot, _, @faithful_storageIndexReadArrayStoreRoot⟩,
+  ⟨``Taclet.storageIndexWriteArrayCopySource, _, @faithful_storageIndexWriteArrayCopySource⟩,
+  ⟨``Taclet.storagePushValueCopySource, _, @faithful_storagePushValueCopySource⟩,
+  ⟨``Taclet.memoryStorageCopy, _, @faithful_memoryStorageCopy⟩,
+  ⟨``Taclet.storageRootOpAssign, _, @faithful_storageRootOpAssign⟩,
+  ⟨``Taclet.storageFieldOpAssign, _, @faithful_storageFieldOpAssign⟩,
+  ⟨``Taclet.storageIndexMappingOpAssign, _, @faithful_storageIndexMappingOpAssign⟩,
+  ⟨``Taclet.storageIndexArrayOpAssign, _, @faithful_storageIndexArrayOpAssign⟩,
+  ⟨``Taclet.storageRootIncrement, _, @faithful_storageRootIncrement⟩,
+  ⟨``Taclet.storageFieldIncrement, _, @faithful_storageFieldIncrement⟩,
+  ⟨``Taclet.storageIndexIncrement, _, @faithful_storageIndexIncrement⟩,
+  ⟨``Taclet.storageRootIncrementAssignment, _, @faithful_storageRootIncrementAssignment⟩,
+  ⟨``Taclet.storageFieldIncrementAssignment, _, @faithful_storageFieldIncrementAssignment⟩,
+  ⟨``Taclet.storageIndexIncrementAssignment, _, @faithful_storageIndexIncrementAssignment⟩,
+  ⟨``Taclet.memoryToStorageFieldCopyRoot, _, @faithful_memoryToStorageFieldCopyRoot⟩,
+  ⟨``Taclet.memoryFieldRead, _, @faithful_memoryFieldRead⟩,
+  ⟨``Taclet.memoryFieldReadAliasRoot, _, @faithful_memoryFieldReadAliasRoot⟩,
+  ⟨``Taclet.memoryIndexReadArrayValue, _, @faithful_memoryIndexReadArrayValue⟩,
+  ⟨``Taclet.memoryIndexReadArrayMemory, _, @faithful_memoryIndexReadArrayMemory⟩,
+  ⟨``Taclet.memoryFieldOpAssign, _, @faithful_memoryFieldOpAssign⟩,
+  ⟨``Taclet.memoryIndexArrayOpAssign, _, @faithful_memoryIndexArrayOpAssign⟩,
+  ⟨``Taclet.memoryFieldIncrement, _, @faithful_memoryFieldIncrement⟩,
+  ⟨``Taclet.memoryIndexArrayIncrement, _, @faithful_memoryIndexArrayIncrement⟩,
+  ⟨``Taclet.memoryFieldIncrementAssignment, _, @faithful_memoryFieldIncrementAssignment⟩,
+  ⟨``Taclet.memoryIndexArrayIncrementAssignment, _, @faithful_memoryIndexArrayIncrementAssignment⟩ ]
 
 /-- **Every row is covered.**  Each annotation row with a value read names a
 KeY taclet some `Taclet` constructor transcribes, and every constructor

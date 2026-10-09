@@ -1,7 +1,7 @@
 import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -89,7 +89,7 @@ def ERC20 : Contract := contract!{
 
 local instance : InContract := ⟨ERC20⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## `transfer` -/
 

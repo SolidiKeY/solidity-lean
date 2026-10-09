@@ -2,8 +2,8 @@ import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Checked arithmetic: the overflow that reverts
@@ -29,14 +29,14 @@ Past the program the stack merges, every binding kept (the overwritten `x := 250
 
 namespace Solidity.Examples.Chains.CheckedArithmetic
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
 /-! ## Example: Overflow Reverts -/
 
 section
-variable (φ : Core.Post StandardExample [.val .uint])
+variable (φ : Post StandardExample [.val .uint])
 
 namespace OverflowReverts
 

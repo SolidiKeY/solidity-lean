@@ -10,9 +10,9 @@ the locals, the `net` payment ledger and the contract's funds
 the evaluators of program expressions, the storage and memory reads and
 writes, a call's binding and decoding.  The closer's terms read it
 (`Update.lean`'s `Tm.eval`), and the typed state erases to it
-(`Semantics/Core/StateErase.lean`).
+(`Semantics/StateErase.lean`).
 
-Statements run in the typed interpreter (`Semantics/Core/TypedRun.lean`,
+Statements run in the typed interpreter (`Semantics/Run.lean`,
 `docs/intrinsic.md`); there is no untyped run of a statement (decisions 39
 and 40).  The conventions the
 operations follow are solc's where KeY is more liberal
@@ -515,7 +515,7 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
 path's resolution does (`State.checkIndex` in `Loc.resolve`) before the slot
 is read: on a path a program resolved it is `find`, and past the end it
 reverts where `find` would read the slot.  The EVM compiler states what its
-storage holds with it (`Evm.Core.compile_storage`), and `sol_decide` reads with it
+storage holds with it (`Evm.compile_storage`), and `sol_decide` reads with it
 (`Calculus/Decide.lean`). -/
 def SVal.findLive : SVal -> List Seg -> Res SVal
   | v, [] => .ok v

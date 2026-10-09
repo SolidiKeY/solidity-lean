@@ -1,14 +1,14 @@
-import Solidity.Calculus.Core.Step
-import Solidity.Calculus.Core.Quote
-import Solidity.Calculus.Core.Print
+import Solidity.Calculus.Step
+import Solidity.Calculus.Quote
+import Solidity.Calculus.Print
 import Solidity.Calculus.NFmlClose
 
 /-!
 # Every statement's rule, on scoped formulas
 
-`Calculus/Core/Step.lean`'s `Stmt.step`, arm by arm: each program below is
+`Calculus/Step.lean`'s `Stmt.step`, arm by arm: each program below is
 read into the scoped syntax (`Prog.resolve`), run to its end by
-`Core.symex`, quoted and added as a theorem `Core.symex n φ = ψ` by
+`symex`, quoted and added as a theorem `symex n φ = ψ` by
 `Eq.refl`, so the kernel evaluates every arm (a call's `Prog.wk`, a loop's
 frame).  Until W4 `calc-del` each result's erasure was also compared with
 what today's strategy left (each branch's cover goal dropped, the same
@@ -16,7 +16,7 @@ fresh names); that strategy is deleted with today's rule table.
 
 `Examples/Tactics/CoreSymex.lean` prints three results; here a program only
 has to agree.  A loop body's own locals are left out of the invariant
-rule's `{anon(…)}` by the scoped frame (`Calculus/Core/Blocks.lean`), so the
+rule's `{anon(…)}` by the scoped frame (`Calculus/Blocks.lean`), so the
 loops below declare none.
 -/
 
@@ -27,17 +27,17 @@ open Solidity Lean Meta
 /-- The fuel: enough for every program below. -/
 private def fuel : Nat := 2000
 
-/-- Run `Core.symex` on the program of `φ` (a modality) read into the
+/-- Run `symex` on the program of `φ` (a modality) read into the
 scoped syntax and add
-`name : Core.symex fuel φ' = ψ`, checked by the kernel. -/
+`name : symex fuel φ' = ψ`, checked by the kernel. -/
 private def agree (c : Expr) {C : Contract} (name : Lean.Name) (φ : Solidity.Surface.Fml C) :
     MetaM Unit := do
   let .modal m P _ := φ | throwError "not a modality"
-  let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) [] P | throwError "the program does not resolve"
-  let φc : Core.Fml C [] := .modal m Pc .nil .tt
-  let ψ := Core.symex fuel φc
-  let lhs := mkAppN (mkConst ``Core.symex) #[c, Core.Quote.qCtxRaw [], toExpr fuel, Core.Fml.quote c φc]
-  let rhs := Core.Fml.quote c ψ
+  let .ok ⟨_, Pc⟩ := Prog.resolve (C := C) [] P | throwError "the program does not resolve"
+  let φc : Fml C [] := .modal m Pc .nil .tt
+  let ψ := symex fuel φc
+  let lhs := mkAppN (mkConst ``symex) #[c, Quote.qCtxRaw [], toExpr fuel, Fml.quote c φc]
+  let rhs := Fml.quote c ψ
   addDecl (.thmDecl { name, levelParams := [], type := ← mkEq lhs rhs, value := ← mkEqRefl rhs })
 
 /-! ## Storage: reads, writes, copies, deletes -/

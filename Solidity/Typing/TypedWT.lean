@@ -1,25 +1,25 @@
 import Solidity.Typing.Soundness
-import Solidity.Semantics.Core.TypedState
+import Solidity.Semantics.State
 
 /-!
 # A typed state erases to a well-typed one
 
 `RunWT` by construction (`docs/intrinsic.md`, W1, lane `typing`): a typed
-state (`Core.TState`, `Semantics/Core/TypedState.lean`) holds storage values
+state (`State`, `Semantics/State.lean`) holds storage values
 of their types, a heap whose objects are of the types its typing lists, and
 locals of their types, so its erasure is a `RunWT` state under the store
 typing its heap typing lists (`HTy.toHeapTy`), with no run to follow
-(`TState.erase_wt`): type soundness of the typed run, with no
+(`State.erase_wt`): type soundness of the typed run, with no
 preservation proof (the scoped run's `Stmt.run_wt` went with that run,
 `docs/intrinsic.md`, decision 40).
 
 The untyped typing (`SVal.hasTy`, `MObj.hasTyH`) reads a struct's members
 by name, the typed value by position; the two agree since no struct has two
-members of one name (`Core.structDef_nodup`, decision 16).  The theorem
+members of one name (`structDef_nodup`, decision 16).  The theorem
 takes the layout's keys distinct.
 -/
 
-namespace Solidity.Core
+namespace Solidity
 
 open Semantics (structDef lookupBy nodupKeysB HeapTy lookupBy_eq_of_nodup wellTypedStorageB
   tyAtSegs segTy)
@@ -255,7 +255,7 @@ theorem TEnv.erase_wt {H : HTy} : (Γ : Ctx) → (e : TEnv C H Γ) →
 /-- **A typed state erases to a well-typed one**, under the store typing its
 heap typing lists: `RunWT` by construction, for a contract whose state
 variables have distinct names. -/
-theorem TState.erase_wt {Γ : Ctx} (hnd : nodupKeysB C.vars = true) (σ : TState C Γ) :
+theorem State.erase_wt {Γ : Ctx} (hnd : nodupKeysB C.vars = true) (σ : State C Γ) :
     RunWT C (HTy.toHeapTy 0 σ.H) σ.erase :=
   ⟨⟨hnd, HTy.nodup_toHeapTy _, Storage.erase_wt hnd σ.storage,
       Objs.erase_typed 0 σ.H σ.heap,
@@ -263,7 +263,7 @@ theorem TState.erase_wt {Γ : Ctx} (hnd : nodupKeysB C.vars = true) (σ : TState
     TEnv.erase_wt Γ σ.env⟩
 
 /-- The initial state of `StandardExample` erases to a well-typed one. -/
-example : RunWT StandardExample [] (TState.init StandardExample).erase :=
-  TState.erase_wt (by decide) (TState.init StandardExample)
+example : RunWT StandardExample [] (State.init StandardExample).erase :=
+  State.erase_wt (by decide) (State.init StandardExample)
 
-end Solidity.Core
+end Solidity

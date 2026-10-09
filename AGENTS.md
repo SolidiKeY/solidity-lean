@@ -26,8 +26,8 @@ carries its callee's body with every local renamed fresh — KeY's
 `InternalCall`, which `internalCallExpand` inlines (`functionBodyExpand` for
 a call with targets, `CallRet.rets`: a tuple assignment's, a spec
 obligation's).  **Callbacks** are
-a second reading of the modalities (`Semantics/Core/Callback.lean`, `holdsC`, the
-`CallbackTaclet`s and `ProvesC` of `Calculus/Core/Callback.lean`), not a change
+a second reading of the modalities (`Semantics/Callback.lean`, `holdsC`, the
+`CallbackTaclet`s and `ProvesC` of `Calculus/Callback.lean`), not a change
 to `Stmt.run`.
 
 **`sol{ … }` is Solidity, with two spellings of its own** (`Syntax.lean`):
@@ -65,7 +65,7 @@ when you need to know where something lives.
 
 Layering: types and names in `AST.lean`, the typed syntax in `Syntax.lean`,
 the interpreter in `Semantics.lean`, terms and formulas in `Update.lean`, the
-taclets in `Calculus/Core/Rules.lean`, everything proved about them after. Keep
+taclets in `Calculus/Rules.lean`, everything proved about them after. Keep
 imports acyclic and local. Add new modules to `Solidity.lean`:
 `node scripts/check-orphans.mjs` fails on a module nothing imports.
 
@@ -94,7 +94,7 @@ chains, `Solidity.Tools.ProofTree` for the tree. `Examples/` shows each of
 these once; `.claude/rules/derivations.md` is the convention.
 
 **The taclets.** A taclet is one constructor of `Taclet C k m s p`
-(`Calculus/Core/Rules.lean`), named as solkey names it, typed `dl{ ⟨[ s; ]⟩ ⇝ p }`.
+(`Calculus/Rules.lean`), named as solkey names it, typed `dl{ ⟨[ s; ]⟩ ⇝ p }`.
 `#taclet storageFieldWriteSave` (or a KeY name as a string) prints it with the
 solkey taclets it transcribes and its soundness theorem. Every statement has
 exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
@@ -106,7 +106,7 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
 - **by a walk**: `apply Proves.valid`, then one `apply` per rule — `intro`
   (solkey's `impRight`), `update r`, `unfold r`, `split r` (goals
   `thn`/`els`/`cov`), `splitBox r` (under the box: KeY's two goals
-  `thn`/`els`, `Calculus/Core/Symex.lean`), `Proves.check r` (an `assert`; goals `thn`/`els`; qualified,
+  `thn`/`els`, `Calculus/Symex.lean`), `Proves.check r` (an `assert`; goals `thn`/`els`; qualified,
   since `check` is also the elaborator's), `done r`, `empty`
   (`emptyModality`), `allIntro` (`allRight`) — and
   `refine close ?_; sol_symex; sol_close` at each leaf. `sol_derive?` writes
@@ -116,7 +116,7 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
 - **by a chain**: `(chain .box φ).valid h`, with `h` proving its last line
   (`Fml.Via.valid`, `Fml.Steps.valid`, `Fml.Leads.valid`).
 
-**Chains** (`Calculus/Core/Chains.lean`) state a derivation with every line
+**Chains** (`Calculus/Chains.lean`) state a derivation with every line
 written, as one chain term proved `by sol_chain`:
 `A ~[r]~> B ~*> C ~[sequentialToParallel]~> D ~[findOnSave]~> E` — `~[r]~>`
 a rule of the strategy (a wrong name is an elaboration error), `~>` one
@@ -124,7 +124,7 @@ step, `~*>` several, and past the program the rewrite links
 `~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/ChainRewrites.lean`).
 `Fml.Via.leads` makes a chain `A ~~> E`, and `Fml.Leads.via` composes
 segments of a long one. `#derivation φ` prints the strategy's lines, in the
-rules' fresh names (`se1`, `sp1`); `#chain φ` (`Calculus/Core/ChainGen.lean`)
+rules' fresh names (`se1`, `sp1`); `#chain φ` (`Calculus/ChainGen.lean`)
 writes the whole chain, the program and then one rewrite a link to a last
 line, as the declaration to paste (`#chain_rest c` from the end of the chain
 `c`; `sol_chain?` on a `φ ~~> ψ` goal). A line keeps a modality open with
@@ -133,7 +133,7 @@ last line is `dl![.box]{ … }`.
 When a line is not reached, `sol_chain`'s error shows the derivation it
 computed.
 
-**The proof tree API** (`Calculus/Core/ProofTree.lean`, `Tools/ProofTree.lean`) is
+**The proof tree API** (`Calculus/ProofTree.lean`, `Tools/ProofTree.lean`) is
 solkey's view of `⊢ φ`, a tree of sequents grown by running the strategy as a
 walk; every node is an elaborated `apply`, nothing is trusted.
 `ProofTree.ofFormula C φ : TermElabM Tree`; `Tree.rows` are solkey's

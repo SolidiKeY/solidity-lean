@@ -1,5 +1,5 @@
 import Solidity.Typing.State
-import Solidity.Semantics.Core
+import Solidity.Semantics.Erased
 
 /-!
 # Type soundness on the erasure: the evaluators are typed
@@ -8,9 +8,9 @@ The typed syntax rules out every *static* mismatch: a member exists, an
 operator takes its operand, a copy holds no mapping, a pushed default is
 well-formed, and, since the scoped syntax (`Syntax/Core.lean`), a local is a
 position in a context `Γ`, read and written at the type `Γ` gives it.  The
-typed run (`Semantics/Core/TypedRun.lean`) rules out the dynamic ones: its
+typed run (`Semantics/Run.lean`) rules out the dynamic ones: its
 states hold values of their types, so their erasure is well-typed by
-construction (`TState.erase_wt`, `Typing/TypedWT.lean`).
+construction (`State.erase_wt`, `Typing/TypedWT.lean`).
 
 `RunWT C H σ` is that invariant on an erased state: the global part
 `StateWT` (`Typing/State.lean`: storage inhabits `C`'s layout, the heap the
@@ -18,7 +18,7 @@ store typing `H`, the allocation counter is fresh) and every local of its
 type (`LTy.WT`: a number in a `uint` local, a path the layout types at an
 alias's type, an identity `H` claims at a memory local's type).  What is
 proved here is what the closer and the other invariants read of it: the
-erasure's evaluators (`Semantics/Core.lean`) find values of their types —
+erasure's evaluators (`Semantics/Erased.lean`) find values of their types —
 the paths resolve to a place the layout types at the path's type
 (`Loc.resolve_wt`), the memory reads find a slot of the path's type
 (`MLoc.read_wt`), a value evaluates to one of its type (`Val.eval_wt`) —
@@ -653,7 +653,7 @@ end Solidity
 The locals are typed by their context: `Env.All (LTy.WT C H) σ.env` says each
 local holds what its type says, and `RunWT` adds the global part. -/
 
-namespace Solidity.Core
+namespace Solidity
 
 open Semantics hiding State
 open SemanticsProperties (HeapWellFormed)
@@ -1326,4 +1326,4 @@ theorem RunWT.init {σ : EState C []} (hnd : nodupKeysB C.vars = true)
     (hheap : σ.heap = []) : RunWT C [] σ :=
   ⟨StateWT.init (σ := σ.glob) hnd hok hst hheap, trivial⟩
 
-end Solidity.Core
+end Solidity

@@ -28,11 +28,11 @@ context, a `List Var` aligned with it, and write the same Solidity as
 locals (`Thin`); it runs at elaboration time, so it may `match` on the
 indexed families, which kernel-evaluated code may not (condition 1).
 
-Until M4 these families live in `Solidity.Core` beside `Syntax.lean`'s,
+Until M4 these families live in `Solidity` beside `Syntax.lean`'s,
 which the elaborator still emits (Decision 8).
 -/
 
-namespace Solidity.Core
+namespace Solidity
 
 /-! ## Expressions -/
 
@@ -841,4 +841,4 @@ example : example₁.ext.depth = 6 := by decide
 
 end Example
 
-end Solidity.Core
+end Solidity

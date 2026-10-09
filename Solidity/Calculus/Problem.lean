@@ -1,6 +1,6 @@
 import Solidity.Typing.CanonTest
 import Solidity.Calculus.SurfaceSpec
-import Solidity.Semantics.Core.StateErase
+import Solidity.Semantics.StateErase
 
 /-!
 # Obligations, as solkey states them
@@ -184,7 +184,7 @@ it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) : NFml.holds C.initState (NFml.wt C) :=
   holds_wt.2 (wt_of_reachable hnd hdeep
-    ⟨[], .nil, ⟨Core.TState.init C, List.prefix_refl _⟩, rfl, Core.Storage.init_erase C⟩
+    ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, rfl, Storage.init_erase C⟩
     (storageWordsB_init hnd))
 
 /-! ## The obligations -/
@@ -230,7 +230,7 @@ def Surface.Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except Str
   let call : List RawStmt := [.call (.name "constructor") (ps.map fun (n, _) => RawExpr.name n)]
   let Γ : ECtx := ps.map fun (n, p) => (n, LocalTy.val p)
   let P ← ((elabStmts C call).run { funs := C.funs }).run' (Γ, 1)
-  let _ ← Core.Prog.resolveCheck (ECtx.toNCtx Γ) P
+  let _ ← Prog.resolveCheck (ECtx.toNCtx Γ) P
   pure (Surface.Problem.ctorFml m (ps.map fun (n, p) => (p, Var.ofName n)) P)
 
 /-- `problem[C]{constructor}`: `Problem.ctor C .diamond`, the unspecified

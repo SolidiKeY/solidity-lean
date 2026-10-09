@@ -1,14 +1,14 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Storage rule coverage: one chain per rule
 
 The paper's coverage table (`sections/storage-coverage.tex`), one row per rule: a statement, run as a chain
-term (`Calculus/Core/Chains.lean`, `.claude/rules/derivations.md`) over any modality `m` and postcondition `φ`.
+term (`Calculus/Chains.lean`, `.claude/rules/derivations.md`) over any modality `m` and postcondition `φ`.
 Each theorem is named after the row's rule as the paper prints it.  The row's rule is the chain's one
 printed `⇝`: its own `~[r]~>` link, or, where it ends the program, one `~*>` with the `emptyModality` after it
 (the paper never shows the `⟨[ ]⟩` line), so that such a row is a lone `~*>`, a `def`.  The steps the table
@@ -35,7 +35,7 @@ condition has no rule here (`if (true)` is `ifElseSplit`).
 
 namespace Solidity.Examples.Chains.StorageCoverage
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- The state of the rows: `values` and `tokens` arrays, `ledgers` an array of mappings,
 `tokenById` and `personById` mappings, `flag` a boolean. -/
@@ -52,12 +52,12 @@ def Coverage : Contract := contract!{
 local instance : InContract := ⟨Coverage⟩
 
 section
-variable (m : Modality) (φ : Core.Post Coverage [])
+variable (m : Modality) (φ : Post Coverage [])
 
 /-! ### Field and root writes -/
 
 /-- `alice.account.balance = balanceVal;` with `balanceVal` 10. -/
-theorem storageFieldWrite_unfold_leftFst (φ : Core.Post Coverage [.val .uint]) :
+theorem storageFieldWrite_unfold_leftFst (φ : Post Coverage [.val .uint]) :
     dl![m]{ { balanceVal := 10 } ⟨[ alice.account.balance = balanceVal; ]⟩ φ }
     ~[storageFieldWrite_unfold_leftFst]~> dl![m]{ { balanceVal := 10 }
         ⟨[ uint se1 = balanceVal; Account storage sp1 = alice.account; sp1.balance = se1; ]⟩ φ }
@@ -71,7 +71,7 @@ theorem storageFieldWrite_unfold_leftFst (φ : Core.Post Coverage [.val .uint]) 
 #last_line storageFieldWrite_unfold_leftFst
 
 /-- `alice.account = acc;` with `acc` bound to `bob.account`: the value found at the alias's path is written. -/
-theorem storageFieldWriteCopySource (φ : Core.Post Coverage [.alias (.struct "Account")]) :
+theorem storageFieldWriteCopySource (φ : Post Coverage [.alias (.struct "Account")]) :
     dl![m]{ { acc := bob.account } ⟨[ alice.account = acc; ]⟩ φ }
     ~*> dl![m]{ { acc := bob.account }
         { storage := save(storage, alice.account, find(storage, acc)) } φ }
@@ -81,7 +81,7 @@ theorem storageFieldWriteCopySource (φ : Core.Post Coverage [.alias (.struct "A
 #last_line storageFieldWriteCopySource
 
 /-- `alice.age = ageVal;` with `ageVal` 42. -/
-theorem storageFieldWriteSave (φ : Core.Post Coverage [.val .uint]) :
+theorem storageFieldWriteSave (φ : Post Coverage [.val .uint]) :
     dl![m]{ { ageVal := 42 } ⟨[ alice.age = ageVal; ]⟩ φ }
     ~*> dl![m]{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }
     ~[sequentialToParallel]~> dl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
@@ -97,7 +97,7 @@ def storageRootWriteCopySource :
 
 -- `pVal` is a `uint` and the root `total`: a `Person` value is no source.
 /-- `total = pVal;` with `pVal` 7. -/
-theorem storageRootWriteStore (φ : Core.Post Coverage [.val .uint]) :
+theorem storageRootWriteStore (φ : Post Coverage [.val .uint]) :
     dl![m]{ { pVal := 7 } ⟨[ total = pVal; ]⟩ φ }
     ~*> dl![m]{ { pVal := 7 } { storage := save(storage, total, pVal) } φ }
     ~[sequentialToParallel]~> dl![m]{ { pVal := 7 ‖ storage := save(storage, total, 7) } φ } := by
@@ -107,7 +107,7 @@ theorem storageRootWriteStore (φ : Core.Post Coverage [.val .uint]) :
 /-! ### Declarations and rebinding -/
 
 /-- `Account storage acc = alice.account;`: the declaration dropped, then the alias bound. -/
-theorem storageLocalDeclInitDrop (φ : Core.Post Coverage [.alias (.struct "Account")]) :
+theorem storageLocalDeclInitDrop (φ : Post Coverage [.alias (.struct "Account")]) :
     dl![m]{ ⟨[ Account storage acc = alice.account; ]⟩ φ }
     ~[storageLocalDeclInitDrop]~> dl![m]{ ⟨[ acc = alice.account; ]⟩ φ }
     ~*> dl![m]{ { acc := alice.account } φ } := by
@@ -115,7 +115,7 @@ theorem storageLocalDeclInitDrop (φ : Core.Post Coverage [.alias (.struct "Acco
 #last_line storageLocalDeclInitDrop
 
 /-- `uint v = alice.age;` from a storage where it is 42. -/
-theorem localValueDeclInitDrop (φ : Core.Post Coverage [.val .uint]) :
+theorem localValueDeclInitDrop (φ : Post Coverage [.val .uint]) :
     dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint v = alice.age; ]⟩ φ }
     ~[localValueDeclInitDrop]~> dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ v = alice.age; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { v := find(storage, alice.age) } φ }
@@ -126,21 +126,21 @@ theorem localValueDeclInitDrop (φ : Core.Post Coverage [.val .uint]) :
 #last_line localValueDeclInitDrop
 
 /-- `Account storage acc;`: `acc` is bound to no path (`unset`, Lean only). -/
-def storageLocalDeclSkip (φ : Core.Post Coverage [.alias (.struct "Account")]) :
+def storageLocalDeclSkip (φ : Post Coverage [.alias (.struct "Account")]) :
     dl![m]{ ⟨[ Account storage acc; ]⟩ φ }
     ~*> dl![m]{ { acc := unset } φ } := by
   sol_chain
 #last_line storageLocalDeclSkip
 
 /-- `uint v;`: `v` is the default. -/
-def valueDeclSkip (φ : Core.Post Coverage [.val .uint]) :
+def valueDeclSkip (φ : Post Coverage [.val .uint]) :
     dl![m]{ ⟨[ uint v; ]⟩ φ }
     ~*> dl![m]{ { v := 0 } φ } := by
   sol_chain
 #last_line valueDeclSkip
 
 /-- `p = bob;` with `p` bound to `alice`: the alias is rebound, the later binding wins. -/
-theorem storageLocalRootRebind (φ : Core.Post Coverage [.alias (.struct "Person")]) :
+theorem storageLocalRootRebind (φ : Post Coverage [.alias (.struct "Person")]) :
     dl![m]{ { p := alice } ⟨[ p = bob; ]⟩ φ }
     ~*> dl![m]{ { p := alice } { p := bob } φ }
     ~[sequentialToParallel]~> dl![m]{ { p := alice ‖ p := bob } φ } := by
@@ -150,7 +150,7 @@ theorem storageLocalRootRebind (φ : Core.Post Coverage [.alias (.struct "Person
 /-! ### Field and root reads -/
 
 /-- `v = alice.account.balance;` from a storage where it is 10. -/
-theorem storageFieldRead_unfold_rightFst (φ : Core.Post Coverage [.val .uint]) :
+theorem storageFieldRead_unfold_rightFst (φ : Post Coverage [.val .uint]) :
     dl![m]{ { storage := save(storage, alice.account.balance, 10) } ⟨[ v = alice.account.balance; ]⟩ φ }
     ~[storageFieldRead_unfold_rightFst]~> dl![m]{ { storage := save(storage, alice.account.balance, 10) }
         ⟨[ Account storage sp1 = alice.account; v = sp1.balance; ]⟩ φ }
@@ -166,7 +166,7 @@ theorem storageFieldRead_unfold_rightFst (φ : Core.Post Coverage [.val .uint]) 
 #last_line storageFieldRead_unfold_rightFst
 
 /-- `acc = bob.account;` with `acc` bound to `alice.account`. -/
-theorem storageFieldReadBindLocalRoot (φ : Core.Post Coverage [.alias (.struct "Account")]) :
+theorem storageFieldReadBindLocalRoot (φ : Post Coverage [.alias (.struct "Account")]) :
     dl![m]{ { acc := alice.account } ⟨[ acc = bob.account; ]⟩ φ }
     ~*> dl![m]{ { acc := alice.account } { acc := bob.account } φ }
     ~[sequentialToParallel]~> dl![m]{ { acc := alice.account ‖ acc := bob.account } φ } := by
@@ -181,7 +181,7 @@ def storageFieldReadStoreRoot :
 #last_line storageFieldReadStoreRoot
 
 /-- `v = alice.age;` from a storage where it is 42. -/
-theorem storageFieldReadFind (φ : Core.Post Coverage [.val .uint]) :
+theorem storageFieldReadFind (φ : Post Coverage [.val .uint]) :
     dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ v = alice.age; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, alice.age, 42) } { v := find(storage, alice.age) } φ }
     ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
@@ -191,7 +191,7 @@ theorem storageFieldReadFind (φ : Core.Post Coverage [.val .uint]) :
 #last_line storageFieldReadFind
 
 /-- `v = total;` from a storage where it is 7. -/
-theorem storageRootReadSelect (φ : Core.Post Coverage [.val .uint]) :
+theorem storageRootReadSelect (φ : Post Coverage [.val .uint]) :
     dl![m]{ { storage := save(storage, total, 7) } ⟨[ v = total; ]⟩ φ }
     ~*> dl![m]{ { storage := save(storage, total, 7) } { v := find(storage, total) } φ }
     ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, total, 7) ‖
@@ -214,7 +214,7 @@ theorem storageFieldDelete_unfold_leftFst :
 
 -- `bucket.tokens` for `alice.account.tokens`.
 /-- `delete bucket.tokens[i];` with `i` 2. -/
-theorem storageIndexDelete_unfold_leftFst (φ : Core.Post Coverage [.val .uint]) :
+theorem storageIndexDelete_unfold_leftFst (φ : Post Coverage [.val .uint]) :
     dl![m]{ { i := 2 } ⟨[ delete bucket.tokens[i]; ]⟩ φ }
     ~[storageIndexDelete_unfold_leftFst]~>
       dl![m]{ { i := 2 } ⟨[ Token[] storage sp1 = bucket.tokens; delete sp1[i]; ]⟩ φ }
@@ -240,7 +240,7 @@ def storageFieldDelete :
 #last_line storageFieldDelete
 
 /-- `delete tokenById[id];` with `id` 3. -/
-theorem storageIndexDelete (φ : Core.Post Coverage [.val .uint]) :
+theorem storageIndexDelete (φ : Post Coverage [.val .uint]) :
     dl![m]{ { id := 3 } ⟨[ delete tokenById[id]; ]⟩ φ }
     ~*> dl![m]{ { id := 3 } { storage := delAt(storage, tokenById[id]) } φ }
     ~[sequentialToParallel]~> dl![m]{ { id := 3 ‖ storage := delAt(storage, tokenById[3]) } φ } := by
@@ -248,7 +248,7 @@ theorem storageIndexDelete (φ : Core.Post Coverage [.val .uint]) :
 #last_line storageIndexDelete
 
 /-- `delete tokens[i];` with `i` 2. -/
-theorem storageIndexArrayDelete (φ : Core.Post Coverage [.val .uint]) :
+theorem storageIndexArrayDelete (φ : Post Coverage [.val .uint]) :
     dl![m]{ { i := 2 } ⟨[ delete tokens[i]; ]⟩ φ }
     ~*> dl![m]{ { i := 2 } { storage := delAt(storage, tokens[i]) } φ }
     ~[sequentialToParallel]~> dl![m]{ { i := 2 ‖ storage := delAt(storage, tokens[2]) } φ } := by
@@ -259,7 +259,7 @@ theorem storageIndexArrayDelete (φ : Core.Post Coverage [.val .uint]) :
 
 -- `basket.items[i] = tokVal;` stands for `alice.account.tokens[i] = tokVal;`.
 /-- `basket.items[i] = tokVal;` with `tokVal` 7 and `i` 2. -/
-theorem storageIndexWriteCaptureAllComplexRecv (φ : Core.Post Coverage [.val .uint, .val .uint]) :
+theorem storageIndexWriteCaptureAllComplexRecv (φ : Post Coverage [.val .uint, .val .uint]) :
     dl![m]{ { tokVal := 7 ‖ i := 2 } ⟨[ basket.items[i] = tokVal; ]⟩ φ }
     ~[storageIndexWriteCaptureAllComplexRecv]~> dl![m]{ { tokVal := 7 ‖ i := 2 }
         ⟨[ uint se1 = tokVal; uint[] storage sp1 = basket.items; uint ie1 = i; sp1[ie1] = se1; ]⟩ φ }
@@ -274,7 +274,7 @@ theorem storageIndexWriteCaptureAllComplexRecv (φ : Core.Post Coverage [.val .u
 #last_line storageIndexWriteCaptureAllComplexRecv
 
 /-- `alice.account.token = tokRef;` with `tokRef` bound to `bob.account.token`. -/
-theorem storageFieldWriteStorageRef_unfold_leftFst (φ : Core.Post Coverage [.alias (.struct "Token")]) :
+theorem storageFieldWriteStorageRef_unfold_leftFst (φ : Post Coverage [.alias (.struct "Token")]) :
     dl![m]{ { tokRef := bob.account.token } ⟨[ alice.account.token = tokRef; ]⟩ φ }
     ~[storageFieldWriteStorageRef_unfold_leftFst]~> dl![m]{ { tokRef := bob.account.token }
         ⟨[ Account storage sp1 = alice.account; sp1.token = tokRef; ]⟩ φ }
@@ -288,7 +288,7 @@ theorem storageFieldWriteStorageRef_unfold_leftFst (φ : Core.Post Coverage [.al
 
 -- `bucket.tokens` for `alice.account.tokens`.
 /-- `bucket.tokens[i] = tokRef;` with `i` 2 and `tokRef` bound to `bob.account.token`. -/
-theorem storageIndexWriteStorageRefCaptureAllComplexRecv (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
+theorem storageIndexWriteStorageRefCaptureAllComplexRecv (φ : Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 2 ‖ tokRef := bob.account.token } ⟨[ bucket.tokens[i] = tokRef; ]⟩ φ }
     ~[storageIndexWriteStorageRefCaptureAllComplexRecv]~> dl![m]{ { i := 2 ‖ tokRef := bob.account.token }
         ⟨[ Token[] storage sp1 = bucket.tokens; uint ie1 = i; sp1[ie1] = tokRef; ]⟩ φ }
@@ -304,7 +304,7 @@ theorem storageIndexWriteStorageRefCaptureAllComplexRecv (φ : Core.Post Coverag
 /-! ### Writes with a source that is not simple -/
 
 /-- `alice.age = ageVal + 1;` with `ageVal` 42: the source captured, the sum folded to 43. -/
-theorem fieldWriteValueRhsCapture (φ : Core.Post Coverage [.val .uint]) :
+theorem fieldWriteValueRhsCapture (φ : Post Coverage [.val .uint]) :
     dl![m]{ { ageVal := 42 } ⟨[ alice.age = ageVal + 1; ]⟩ φ }
     ~[fieldWriteValueRhsCapture]~> dl![m]{ { ageVal := 42 } ⟨[ uint se1 = ageVal + 1; alice.age = se1; ]⟩ φ }
     ~*> dl![m]{ { ageVal := 42 } { se1 := ageVal + 1 } ⟨[ alice.age = se1; ]⟩ φ }
@@ -330,7 +330,7 @@ theorem storageFieldWriteCaptureSrc :
 
 -- Lean's `storageFieldRead_unfold_rightFst`: the receiver `bob.account` is unfolded first.
 /-- `tokens[i] = bob.account.token;` with `i` 2: two aliases, then the copy. -/
-theorem storageIndexWriteStorageRefRhsCapture (φ : Core.Post Coverage [.val .uint]) :
+theorem storageIndexWriteStorageRefRhsCapture (φ : Post Coverage [.val .uint]) :
     dl![m]{ { i := 2 } ⟨[ tokens[i] = bob.account.token; ]⟩ φ }
     ~[storageFieldRead_unfold_rightFst]~>
       dl![m]{ { i := 2 } ⟨[ Account storage sp1 = bob.account; tokens[i] = sp1.token; ]⟩ φ }
@@ -348,7 +348,7 @@ theorem storageIndexWriteStorageRefRhsCapture (φ : Core.Post Coverage [.val .ui
 /-! ### A write at an index: copy or save -/
 
 /-- `tokens[i] = tokRef;` with `i` 2 and `tokRef` bound to `bob.account.token`. -/
-theorem storageIndexWriteArrayCopySource (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
+theorem storageIndexWriteArrayCopySource (φ : Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 2 ‖ tokRef := bob.account.token } ⟨[ tokens[i] = tokRef; ]⟩ φ }
     ~*> dl![m]{ { i := 2 ‖ tokRef := bob.account.token }
         { storage := save(storage, tokens[i], find(storage, tokRef)) } φ }
@@ -358,7 +358,7 @@ theorem storageIndexWriteArrayCopySource (φ : Core.Post Coverage [.alias (.stru
 #last_line storageIndexWriteArrayCopySource
 
 /-- `tokenById[id] = tokRef;` with `id` 3 and `tokRef` bound to `bob.account.token`. -/
-theorem storageIndexWriteMappingCopySource (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
+theorem storageIndexWriteMappingCopySource (φ : Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { id := 3 ‖ tokRef := bob.account.token } ⟨[ tokenById[id] = tokRef; ]⟩ φ }
     ~*> dl![m]{ { id := 3 ‖ tokRef := bob.account.token }
         { storage := save(storage, tokenById[id], find(storage, tokRef)) } φ }
@@ -369,7 +369,7 @@ theorem storageIndexWriteMappingCopySource (φ : Core.Post Coverage [.alias (.st
 
 -- `values[i] = tokVal;` stands for `tokens[i] = tokVal;`.
 /-- `values[i] = tokVal;` with `i` 2 and `tokVal` 7. -/
-theorem storageIndexWriteArraySave (φ : Core.Post Coverage [.val .uint, .val .uint]) :
+theorem storageIndexWriteArraySave (φ : Post Coverage [.val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ tokVal := 7 } ⟨[ values[i] = tokVal; ]⟩ φ }
     ~*> dl![m]{ { i := 2 ‖ tokVal := 7 } { storage := save(storage, values[i], tokVal) } φ }
     ~[sequentialToParallel]~> dl![m]{ { i := 2 ‖ tokVal := 7 ‖ storage := save(storage, values[2], 7) } φ } := by
@@ -377,7 +377,7 @@ theorem storageIndexWriteArraySave (φ : Core.Post Coverage [.val .uint, .val .u
 #last_line storageIndexWriteArraySave
 
 /-- `balances[addr] = amount;` with `addr` 3 and `amount` 10. -/
-theorem storageIndexWriteMappingSave (φ : Core.Post Coverage [.val .uint, .val .uint]) :
+theorem storageIndexWriteMappingSave (φ : Post Coverage [.val .uint, .val .uint]) :
     dl![m]{ { addr := 3 ‖ amount := 10 } ⟨[ balances[addr] = amount; ]⟩ φ }
     ~*> dl![m]{ { addr := 3 ‖ amount := 10 } { storage := save(storage, balances[addr], amount) } φ }
     ~[sequentialToParallel]~> dl![m]{ { addr := 3 ‖ amount := 10 ‖ storage := save(storage, balances[3], 10) } φ } := by
@@ -388,7 +388,7 @@ theorem storageIndexWriteMappingSave (φ : Core.Post Coverage [.val .uint, .val 
 
 -- `bucket.tokens` for `alice.account.tokens`.
 /-- `tok = bucket.tokens[i];` with `i` 2. -/
-theorem storageIndexRead_unfold_rightFst (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
+theorem storageIndexRead_unfold_rightFst (φ : Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ tok = bucket.tokens[i]; ]⟩ φ where Token storage tok }
     ~[storageIndexRead_unfold_rightFst]~>
       dl![m]{ { i := 2 } ⟨[ Token[] storage sp1 = bucket.tokens; tok = sp1[i]; ]⟩ φ where Token storage tok }
@@ -398,7 +398,7 @@ theorem storageIndexRead_unfold_rightFst (φ : Core.Post Coverage [.alias (.stru
 #last_line storageIndexRead_unfold_rightFst
 
 /-- `tok = tokens[i];` with `i` 2. -/
-theorem storageIndexReadArrayBindLocalRoot (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
+theorem storageIndexReadArrayBindLocalRoot (φ : Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ tok = tokens[i]; ]⟩ φ where Token storage tok }
     ~*> dl![m]{ { i := 2 } { tok := tokens[i] } φ }
     ~[sequentialToParallel]~> dl![m]{ { i := 2 ‖ tok := tokens[2] } φ } := by
@@ -406,7 +406,7 @@ theorem storageIndexReadArrayBindLocalRoot (φ : Core.Post Coverage [.alias (.st
 #last_line storageIndexReadArrayBindLocalRoot
 
 /-- `led = ledgers[i];` with `i` 2. -/
-theorem storageIndexReadArrayBindLocalRootMappingElement (φ : Core.Post Coverage [.alias (.mapping (.prim .uint) (.prim .uint)), .val .uint]) :
+theorem storageIndexReadArrayBindLocalRootMappingElement (φ : Post Coverage [.alias (.mapping (.prim .uint) (.prim .uint)), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ led = ledgers[i]; ]⟩ φ where mapping(uint => uint) storage led }
     ~*> dl![m]{ { i := 2 } { led := ledgers[i] } φ }
     ~[sequentialToParallel]~> dl![m]{ { i := 2 ‖ led := ledgers[2] } φ } := by
@@ -414,7 +414,7 @@ theorem storageIndexReadArrayBindLocalRootMappingElement (φ : Core.Post Coverag
 #last_line storageIndexReadArrayBindLocalRootMappingElement
 
 /-- `tok = tokenById[id];` with `id` 3. -/
-theorem storageIndexReadMappingBindLocalRoot (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
+theorem storageIndexReadMappingBindLocalRoot (φ : Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { id := 3 } ⟨[ tok = tokenById[id]; ]⟩ φ where Token storage tok }
     ~*> dl![m]{ { id := 3 } { tok := tokenById[id] } φ }
     ~[sequentialToParallel]~> dl![m]{ { id := 3 ‖ tok := tokenById[3] } φ } := by
@@ -422,7 +422,7 @@ theorem storageIndexReadMappingBindLocalRoot (φ : Core.Post Coverage [.alias (.
 #last_line storageIndexReadMappingBindLocalRoot
 
 /-- `alice = people[i];` with `i` 2: a struct read, which has no literal. -/
-theorem storageIndexReadArrayStoreRoot (φ : Core.Post Coverage [.val .uint]) :
+theorem storageIndexReadArrayStoreRoot (φ : Post Coverage [.val .uint]) :
     dl![m]{ { i := 2 } ⟨[ alice = people[i]; ]⟩ φ }
     ~*> dl![m]{ { i := 2 } { storage := save(storage, alice, find(storage, people[i])) } φ }
     ~[sequentialToParallel]~>
@@ -431,7 +431,7 @@ theorem storageIndexReadArrayStoreRoot (φ : Core.Post Coverage [.val .uint]) :
 #last_line storageIndexReadArrayStoreRoot
 
 /-- `alice = personById[id];` with `id` 3: a struct read, which has no literal. -/
-theorem storageIndexReadMappingStoreRoot (φ : Core.Post Coverage [.val .uint]) :
+theorem storageIndexReadMappingStoreRoot (φ : Post Coverage [.val .uint]) :
     dl![m]{ { id := 3 } ⟨[ alice = personById[id]; ]⟩ φ }
     ~*> dl![m]{ { id := 3 } { storage := save(storage, alice, find(storage, personById[id])) } φ }
     ~[sequentialToParallel]~>
@@ -441,7 +441,7 @@ theorem storageIndexReadMappingStoreRoot (φ : Core.Post Coverage [.val .uint]) 
 
 /-- `v = values[i];` with `i` 2, from a storage where `values[2]` is 7, under the box: the read checks the
 index in the state it runs in (`values[2]@S`), which `findOnSave` reads past only there. -/
-theorem storageIndexReadArrayFind (φ : Core.Post Coverage [.val .uint, .val .uint]) :
+theorem storageIndexReadArrayFind (φ : Post Coverage [.val .uint, .val .uint]) :
     dl![.box]{ { i := 2 ‖ storage := save(storage, values[2], 7) } ⟨[ v = values[i]; ]⟩ φ }
     ~*> dl![.box]{ { i := 2 ‖ storage := save(storage, values[2], 7) }
         { v := find(storage, values[i]) } φ }
@@ -453,7 +453,7 @@ theorem storageIndexReadArrayFind (φ : Core.Post Coverage [.val .uint, .val .ui
 
 /-- `v = balances[addr];` with `addr` 3, from a storage where `balances[3]` is 10, under the box, as
 `storageIndexReadArrayFind`. -/
-theorem storageIndexReadMappingFind (φ : Core.Post Coverage [.val .uint, .val .uint]) :
+theorem storageIndexReadMappingFind (φ : Post Coverage [.val .uint, .val .uint]) :
     dl![.box]{ { addr := 3 ‖ storage := save(storage, balances[3], 10) } ⟨[ v = balances[addr]; ]⟩ φ }
     ~*> dl![.box]{ { addr := 3 ‖ storage := save(storage, balances[3], 10) }
         { v := find(storage, balances[addr]) } φ }
@@ -467,7 +467,7 @@ theorem storageIndexReadMappingFind (φ : Core.Post Coverage [.val .uint, .val .
 
 -- `bucket.tokens` for `alice.account.tokens`.
 /-- `bucket.tokens.push(tok);` with `tok` bound to `bob.account.token`. -/
-theorem storagePushValue_unfold_leftFstReceiver (φ : Core.Post Coverage [.alias (.struct "Token")]) :
+theorem storagePushValue_unfold_leftFstReceiver (φ : Post Coverage [.alias (.struct "Token")]) :
     dl![m]{ { tok := bob.account.token } ⟨[ bucket.tokens.push(tok); ]⟩ φ }
     ~[storagePushValue_unfold_leftFstReceiver]~>
       dl![m]{ { tok := bob.account.token } ⟨[ Token[] storage sp1 = bucket.tokens; sp1.push(tok); ]⟩ φ }
@@ -481,7 +481,7 @@ theorem storagePushValue_unfold_leftFstReceiver (φ : Core.Post Coverage [.alias
 #last_line storagePushValue_unfold_leftFstReceiver
 
 /-- `tokens.push(tokRef);` with `tokRef` bound to `bob.account.token`. -/
-theorem storagePushValueCopySource (φ : Core.Post Coverage [.alias (.struct "Token")]) :
+theorem storagePushValueCopySource (φ : Post Coverage [.alias (.struct "Token")]) :
     dl![m]{ { tokRef := bob.account.token } ⟨[ tokens.push(tokRef); ]⟩ φ }
     ~*> dl![m]{ { tokRef := bob.account.token }
         { storage := save(save(storage, tokens[tokens.length], find(storage, tokRef)), tokens.length,
@@ -493,7 +493,7 @@ theorem storagePushValueCopySource (φ : Core.Post Coverage [.alias (.struct "To
 #last_line storagePushValueCopySource
 
 /-- `values.push(valueVal);` with `valueVal` 7. -/
-theorem storagePushValueSave (φ : Core.Post Coverage [.val .uint]) :
+theorem storagePushValueSave (φ : Post Coverage [.val .uint]) :
     dl![m]{ { valueVal := 7 } ⟨[ values.push(valueVal); ]⟩ φ }
     ~*> dl![m]{ { valueVal := 7 }
         { storage := save(save(storage, values[values.length], valueVal), values.length, values.length + 1) } φ }
@@ -531,7 +531,7 @@ def storagePushLengthSaveReferenceElement :
 /-! ### `push` bound to a local -/
 
 /-- `sp = bucket.tokens.push();` -/
-theorem storageLocalRootPush_unfold_leftFstReceiver (φ : Core.Post Coverage [.alias (.struct "Token")]) :
+theorem storageLocalRootPush_unfold_leftFstReceiver (φ : Post Coverage [.alias (.struct "Token")]) :
     dl![m]{ ⟨[ sp = bucket.tokens.push(); ]⟩ φ where Token storage sp }
     ~[storageLocalRootPush_unfold_leftFstReceiver]~>
       dl![m]{ ⟨[ Token[] storage sp1 = bucket.tokens; sp = sp1.push(); ]⟩ φ where Token storage sp }
@@ -544,7 +544,7 @@ theorem storageLocalRootPush_unfold_leftFstReceiver (φ : Core.Post Coverage [.a
 #last_line storageLocalRootPush_unfold_leftFstReceiver
 
 /-- `sp = tokens.push();` -/
-def storageLocalRootPushBind (φ : Core.Post Coverage [.alias (.struct "Token")]) :
+def storageLocalRootPushBind (φ : Post Coverage [.alias (.struct "Token")]) :
     dl![m]{ ⟨[ sp = tokens.push(); ]⟩ φ where Token storage sp }
     ~*>
       dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] } φ } := by
@@ -552,7 +552,7 @@ def storageLocalRootPushBind (φ : Core.Post Coverage [.alias (.struct "Token")]
 #last_line storageLocalRootPushBind
 
 /-- `led = ledgers.push();` -/
-def storageLocalRootPushBindMappingElement (φ : Core.Post Coverage [.alias (.mapping (.prim .uint) (.prim .uint))]) :
+def storageLocalRootPushBindMappingElement (φ : Post Coverage [.alias (.mapping (.prim .uint) (.prim .uint))]) :
     dl![m]{ ⟨[ led = ledgers.push(); ]⟩ φ where mapping(uint => uint) storage led }
     ~*> dl![m]{
         { storage := save(storage, ledgers.length, ledgers.length + 1) ‖ led := ledgers[ledgers.length] } φ } := by
@@ -646,7 +646,7 @@ theorem assertConditionCapture :
 
 /-- `require(ok);` with `ok` `true`: the two goals, the failing one `true` under the box, and the condition
 folded. -/
-theorem requireSimple (φ : Core.Post Coverage [.val .bool]) :
+theorem requireSimple (φ : Post Coverage [.val .bool]) :
     dl![.box]{ { ok := true } ⟨[ require(ok); ]⟩ φ }
     ~*> dl![.box]{ { ok := true } ((ok ≐ true → φ) ∧ (ok ≐ false → ⟨[ revert(); ]⟩ φ)) }
     ~[revertBox]~> dl![.box]{ { ok := true } ((ok ≐ true → φ) ∧ (ok ≐ false → true)) }
@@ -656,7 +656,7 @@ theorem requireSimple (φ : Core.Post Coverage [.val .bool]) :
 #last_line requireSimple
 
 /-- `assert(ok);` with `ok` `true`: the two goals, the condition assumed and owed, folded. -/
-theorem assertSimple (φ : Core.Post Coverage [.val .bool]) :
+theorem assertSimple (φ : Post Coverage [.val .bool]) :
     dl![m]{ { ok := true } ⟨[ assert(ok); ]⟩ φ }
     ~*> dl![m]{ { ok := true } ((ok ≐ true → φ) ∧ ok ≐ true) }
     ~[applyOnRigid]~> dl![m]{ (true ≐ true → { ok := true } φ) ∧ true ≐ true }
@@ -680,7 +680,7 @@ simple condition (`ifElseSplit`) and `!ok` is captured (`ifElseUnfold`). -/
 /-- `if (alice.age > ageVal) { s0 = 1; } else { s1 = 1; }` with `ageVal` 30, from a storage where `alice.age`
 is 42: the condition captured (the row's rule), split on, the comparison folded to `true` (`greater_literals`),
 the `then` branch kept (`applyOnPV`, `concrete`). -/
-theorem ifElseUnfold (φ : Core.Post Coverage [.val .uint, .val .uint, .val .uint]) :
+theorem ifElseUnfold (φ : Post Coverage [.val .uint, .val .uint, .val .uint]) :
     dl![m]{
       { storage := save(storage, alice.age, 42) ‖ ageVal := 30 } ⟨[ if (alice.age > ageVal) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
     ~[ifElseUnfold]~> dl![m]{
@@ -740,7 +740,7 @@ theorem ifElseUnfold (φ : Core.Post Coverage [.val .uint, .val .uint, .val .uin
 
 /-- `if (ok) { s0 = 1; } else { s1 = 1; }` with `ok` `true`: both branches run, the condition read
 (`applyOnRigid`), and the `then` branch kept (`concrete`). -/
-theorem ifElseSplit (φ : Core.Post Coverage [.val .bool, .val .uint, .val .uint]) :
+theorem ifElseSplit (φ : Post Coverage [.val .bool, .val .uint, .val .uint]) :
     dl![m]{ { ok := true } ⟨[ if (ok) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
     ~[ifElseSplit]~> dl![m]{
         { ok := true }
@@ -774,7 +774,7 @@ example : dl!{ ⟨ values[++i] = val; ⟩ true }
     = dl!{ ∀ uint val; ∀ uint i; ⟨ uint se1 = val; uint se2; se2 = ++i; values[se2] = se1; ⟩ true } := rfl
 
 /-- `values[++i] = val;` with `i` 2 and `val` 7: the captures, the increment, the write at `3`. -/
-theorem storageIndexWriteCaptureAllNonSimpleIndex (φ : Core.Post Coverage [.val .uint, .val .uint]) :
+theorem storageIndexWriteCaptureAllNonSimpleIndex (φ : Post Coverage [.val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ val := 7 } ⟨[ values[++i] = val; ]⟩ φ }
     ~*> dl![m]{ { i := 2 ‖ val := 7 } { se1 := val } { se2 := 0 } ⟨[ se2 = ++i; values[se2] = se1; ]⟩ φ }
     ~[localAssignIncrement]~> dl![m]{ { i := 2 ‖ val := 7 } { se1 := val } { se2 := 0 } { i := i + 1 ‖ se2 := i + 1 }
@@ -793,7 +793,7 @@ example : dl!{ ⟨ tokens[++i] = tokRef; ⟩ true where Token storage tokRef }
     = dl!{ ⟨ uint se1; se1 = ++i; tokens[se1] = tokRef; ⟩ true where Token storage tokRef } := rfl
 
 /-- `tokens[++i] = tokRef;` with `i` 2 and `tokRef` bound to `bob.account.token`. -/
-theorem storageIndexWriteStorageRefCaptureAllNonSimpleIndex (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
+theorem storageIndexWriteStorageRefCaptureAllNonSimpleIndex (φ : Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 2 ‖ tokRef := bob.account.token } ⟨[ tokens[++i] = tokRef; ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ tokRef := bob.account.token } { se1 := 0 }
         ⟨[ se1 = ++i; tokens[se1] = tokRef; ]⟩ φ }
@@ -814,7 +814,7 @@ example : dl!{ ⟨ values[i] = makeValue(); ⟩ true }
 
 /-- `values[i] = makeValue();` with `i` 2, from a storage where `total` is 7: the call's body inlined
 (`internalCallExpand`), its result written. -/
-theorem indexWriteValueRhsCapture (φ : Core.Post Coverage [.val .uint]) :
+theorem indexWriteValueRhsCapture (φ : Post Coverage [.val .uint]) :
     dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } ⟨[ values[i] = makeValue(); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); values[i] = se1; ]⟩ φ }
@@ -841,7 +841,7 @@ example : dl!{ ⟨ total = makeValue(); ⟩ true }
     = dl!{ ⟨ uint se1; se1 = makeValue(); total = se1; ⟩ true } := rfl
 
 /-- `total = makeValue();` from a storage where `total` is 7. -/
-theorem storageRootWriteValueRhsCapture (φ : Core.Post Coverage []) :
+theorem storageRootWriteValueRhsCapture (φ : Post Coverage []) :
     dl![m]{ { storage := save(storage, total, 7) } ⟨[ total = makeValue(); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); total = se1; ]⟩ φ }
@@ -865,7 +865,7 @@ example : dl!{ ⟨ tok = tokens[++i]; ⟩ true where Token storage tok }
     = dl!{ ⟨ uint se1; se1 = ++i; tok = tokens[se1]; ⟩ true where Token storage tok } := rfl
 
 /-- `tok = tokens[++i];` with `i` 2: `tok` bound to `tokens[3]`. -/
-theorem storageIndexRead_unfold_rightSndIndex (φ : Core.Post Coverage [.alias (.struct "Token"), .val .uint]) :
+theorem storageIndexRead_unfold_rightSndIndex (φ : Post Coverage [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ tok = tokens[++i]; ]⟩ φ where Token storage tok }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 } { se1 := 0 } ⟨[ se1 = ++i; tok = tokens[se1]; ]⟩ φ where Token storage tok }
     ~[localAssignIncrement]~> dl![m]{ { i := 2 } { se1 := 0 } { i := i + 1 ‖ se1 := i + 1 }
@@ -880,7 +880,7 @@ example : dl!{ ⟨ values.push(makeValue()); ⟩ true }
     = dl!{ ⟨ uint se1; se1 = makeValue(); values.push(se1); ⟩ true } := rfl
 
 /-- `values.push(makeValue());` from a storage where `total` is 7. -/
-theorem storagePushValue_unfold_rightSndArgument (φ : Core.Post Coverage []) :
+theorem storagePushValue_unfold_rightSndArgument (φ : Post Coverage []) :
     dl![m]{ { storage := save(storage, total, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { storage := save(storage, total, 7) } { se1 := 0 }
         ⟨[ se1 = makeValue(); values.push(se1); ]⟩ φ }
@@ -910,7 +910,7 @@ example : dl!{ ⟨ require(checkBalance()); ⟩ true }
     = dl!{ ⟨ bool se1; se1 = checkBalance(); require(se1); ⟩ true } := rfl
 
 /-- `require(checkBalance());`: the call inlined, its `true` required. -/
-theorem requireConditionCapture_call (φ : Core.Post Coverage []) :
+theorem requireConditionCapture_call (φ : Post Coverage []) :
     dl![.box]{ ⟨[ require(checkBalance()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![.box]{ { se1 := false } ⟨[ se1 = checkBalance(); require(se1); ]⟩ φ }
     ~[internalCallExpand]~> dl![.box]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; require(se1); ]⟩ φ }
@@ -934,7 +934,7 @@ example : dl!{ ⟨ assert(checkInvariant()); ⟩ true }
 /-- `assert(checkInvariant());`: the call inlined, its `true` asserted.  An
 `assert` checks rather than branches (`assertSimple`): no revert, so the chain
 runs under any `m`. -/
-theorem assertConditionCapture_call (φ : Core.Post Coverage []) :
+theorem assertConditionCapture_call (φ : Post Coverage []) :
     dl![m]{ ⟨[ assert(checkInvariant()); ]⟩ φ }
     ~[valueDeclSkip]~> dl![m]{ { se1 := false } ⟨[ se1 = checkInvariant(); assert(se1); ]⟩ φ }
     ~[internalCallExpand]~> dl![m]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; assert(se1); ]⟩ φ }

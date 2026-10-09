@@ -2,10 +2,10 @@ import Solidity.Tools.Run
 import Solidity.Tools.Inspect
 import Solidity.Tools.ProofTree
 import Solidity.Calculus.NFmlDerive
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.Chains
-import Solidity.Semantics.Core.TypedRunFuel
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.Chains
+import Solidity.Semantics.RunFuel
 
 /-!
 # Loops
@@ -15,7 +15,7 @@ loop (`docs/loops.md`).  The elaborator lowers them to `Stmt.loop`, solkey's
 lowered `while`, by solkey's `LoopLowering` (`lowerLoops`): the flags `brk`,
 `cnt`, `ret`, made only when used; the pins below are its shapes.  A loop
 runs as the least fixed point of its unwinding (`TLoop.run`), so `#run` runs
-it and a concrete one is decided with fuel (`Core.Prog.trunF_approx`).  The calculus
+it and a concrete one is decided with fuel (`Prog.runF_approx`).  The calculus
 unwinds a loop to the bound its `/// @custom:key unwind k` clause gives
 (`whileUnwind`, solkey's taclet with a bound) and leaves it there by
 `loopExit`; a loop with an invariant is proved by it (`whileInvariantBox`,
@@ -29,7 +29,7 @@ open Semantics NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## The lowering
 
@@ -276,27 +276,27 @@ n = 0
 /-! ## A loop decided
 
 The kernel does not reduce `TLoop.run` (it is classical), but the run with
-fuel (`Core.Prog.trunF`, each loop entered at most `n` iterations), which it
+fuel (`Prog.runF`, each loop entered at most `n` iterations), which it
 does compute, is the typed run wherever it does not run out
-(`Core.Prog.trunF_approx`): `while (i < 3) { i++; }` from `i = 0` is done at
+(`Prog.runF_approx`): `while (i < 3) { i++; }` from `i = 0` is done at
 the fourth iteration (three bodies, then the condition false). -/
 
 def countTo3 : Surface.Prog StandardExample := sol{ uint i = 0; while (i < 3) { i++; } }
 
 open Lean Elab Command in
 run_cmd liftCoreM do
-  if let some e ← Core.Prog.defineCore `Solidity.Examples.Loops.countTo3Core ``StandardExample []
+  if let some e ← Prog.defineCore `Solidity.Examples.Loops.countTo3Core ``StandardExample []
       countTo3 then
     throwError "countTo3Core: {e}"
 
 /-- `i` is `3` where the loop ends, from the initial store. -/
 theorem countTo3Run :
-    ((Core.Prog.trun (Core.TState.ofStorage Core.Storage.standardExample) countTo3Core).toOption.map
-      fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 3 := by
-  rcases Core.Prog.trunF_approx 4 countTo3Core (Core.TState.ofStorage Core.Storage.standardExample)
+    ((Prog.run (State.ofStorage Storage.standardExample) countTo3Core).toOption.map
+      fun o => (TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 3 := by
+  rcases Prog.runF_approx 4 countTo3Core (State.ofStorage Storage.standardExample)
     with h | h
-  · exact absurd (congrArg Core.TRes.halt? h) (by decide +kernel)
-  · rw [Core.Prog.trun, ← h]
+  · exact absurd (congrArg TRes.halt? h) (by decide +kernel)
+  · rw [Prog.run, ← h]
     decide +kernel
 
 /-- A loop whose body declares a local, popped at the end of every iteration. -/
@@ -305,19 +305,19 @@ def countUp : Surface.Prog StandardExample :=
 
 open Lean Elab Command in
 run_cmd liftCoreM do
-  if let some e ← Core.Prog.defineCore `Solidity.Examples.Loops.countUpCore ``StandardExample []
+  if let some e ← Prog.defineCore `Solidity.Examples.Loops.countUpCore ``StandardExample []
       countUp then
     throwError "countUpCore: {e}"
 
 /-- The body's `j` is gone at every head: `i` is `3` where the loop ends, and
 the `assert` passes. -/
 theorem countUpRun :
-    ((Core.Prog.trun (Core.TState.ofStorage Core.Storage.standardExample) countUpCore).toOption.map
-      fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 3 := by
-  rcases Core.Prog.trunF_approx 4 countUpCore (Core.TState.ofStorage Core.Storage.standardExample)
+    ((Prog.run (State.ofStorage Storage.standardExample) countUpCore).toOption.map
+      fun o => (TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 3 := by
+  rcases Prog.runF_approx 4 countUpCore (State.ofStorage Storage.standardExample)
     with h | h
-  · exact absurd (congrArg Core.TRes.halt? h) (by decide +kernel)
-  · rw [Core.Prog.trun, ← h]
+  · exact absurd (congrArg TRes.halt? h) (by decide +kernel)
+  · rw [Prog.run, ← h]
     decide +kernel
 
 /-! ## Unwinding
@@ -330,24 +330,24 @@ false, which fails where the loop runs longer than its bound.  A loop with no
 clause is `unwind 0`. -/
 
 /--
-info: Solidity.Core.LeanTaclet.whileUnwind : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx} {m : Modality} {n : Nat} {x : Core.Ctx}
-  {body : Core.Prog C Γ x} {cond : Core.Val C Γ PrimTy.bool},
-  dl[Core.LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1 while (cond) body; ]⟩ ⇝
+info: Solidity.LeanTaclet.whileUnwind : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {m : Modality} {n : Nat} {x : Ctx}
+  {body : Prog C Γ x} {cond : Val C Γ PrimTy.bool},
+  dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1 while (cond) body; ]⟩ ⇝
     ⟨[ if (cond) {body;/// @custom:key unwind n while (cond) body;}; ]⟩ }
 solkey: whileUnwind (loop_expand), past the pin
 printed: none (a solkey taclet not printed)
-sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet whileUnwind
 
 /--
-info: Solidity.Core.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx} {m : Modality} {x : Core.Ctx}
-  {body : Core.Prog C Γ x} {cond : Core.Val C Γ PrimTy.bool},
-  dl[Core.LeanTaclet C k]{ ⟨[ while (cond) body; ]⟩ ⇝
+info: Solidity.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {m : Modality} {x : Ctx}
+  {body : Prog C Γ x} {cond : Val C Γ PrimTy.bool},
+  dl[LeanTaclet C k]{ ⟨[ while (cond) body; ]⟩ ⇝
     "loop exited": cond = false ⟹ ⟨[ ]⟩ ; "unwound to the end": cond = false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
-sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet loopExit
 
@@ -378,7 +378,7 @@ loops solkey now writes, each unwound as often as it runs. -/
 section
 local instance : InContract := ⟨SolcControlFlow⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- `doWhileFalseRunsBodyOnce` (solc `statements/do_while_loop_continue.sol`):
 `do { … } while (false)` runs its body once, and the `continue` it skips
@@ -415,29 +415,29 @@ checked after it only where the condition holds again.  The fresh `b` and
 `variant` print as `se` and `ie`, the fresh names they are. -/
 
 /--
-info: Solidity.Core.LeanTaclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Core.Ctx} {body : Core.Prog C Γ x}
-  {xs : List ((t : Core.LTy) × Core.Idx Γ t)} {hv : Bool} {dec : Option (Core.Val C Γ PrimTy.uint)}
-  {cond inv : Core.Val C Γ PrimTy.bool},
-  dl[Core.LeanTaclet C k]{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
+info: Solidity.LeanTaclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ PrimTy.uint)}
+  {cond inv : Val C Γ PrimTy.bool},
+  dl[LeanTaclet C k]{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { se := cond } (se = true ⟹ ⟨[ body ]⟩ inv = true ; se = false ⟹ ⟨[ ]⟩)) }
 solkey: whileInvariantBox (loop_inv), past the pin
 printed: none (a solkey taclet not printed)
-sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet whileInvariantBox
 
 /--
-info: Solidity.Core.LeanTaclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Core.Ctx} {body : Core.Prog C Γ x}
-  {xs : List ((t : Core.LTy) × Core.Idx Γ t)} {hv : Bool} {cond inv : Core.Val C Γ PrimTy.bool}
-  {dec : Core.Val C Γ PrimTy.uint},
-  dl[Core.LeanTaclet C k]{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
+info: Solidity.LeanTaclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ PrimTy.bool}
+  {dec : Val C Γ PrimTy.uint},
+  dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
       (inv = true ∧ { se := cond } (se = true → 0 <= dec ∧ dec < ie)) ; se = false ⟹ ⟨[ ]⟩)) }
 solkey: whileInvariantDiamond (loop_inv), past the pin
 printed: none (a solkey taclet not printed)
-sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet whileInvariantDiamond
 
@@ -610,23 +610,23 @@ the ledger.  Such a loop closes to `false` (`whileClose`), as one under the
 diamond with no variant does (`whileNoVariantDiamond`). -/
 
 /--
-info: Solidity.Core.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {Γ x : Core.Ctx} {body : Core.Prog C Γ x}
-  {m : Modality} {inv : Core.Val C Γ PrimTy.bool} {dec : Option (Core.Val C Γ PrimTy.uint)}
-  {cond : Core.Val C Γ PrimTy.bool},
-  dl[Core.LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
+info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
+  {m : Modality} {inv : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)}
+  {cond : Val C Γ PrimTy.bool},
+  dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
-sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet whileClose
 
 /--
-info: Solidity.Core.LeanTaclet.whileNoVariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Core.Ctx} {body : Core.Prog C Γ x}
-  {inv cond : Core.Val C Γ PrimTy.bool} {dec : Option (Core.Val C Γ PrimTy.uint)},
-  dl[Core.LeanTaclet C k]{ ⟨ /// @custom:key invariant inv while (cond) body; ⟩ ⇝ false }
+info: Solidity.LeanTaclet.whileNoVariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
+  {inv cond : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)},
+  dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv while (cond) body; ⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
-sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet whileNoVariantDiamond
 

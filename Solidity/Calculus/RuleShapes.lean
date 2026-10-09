@@ -1,9 +1,9 @@
-import Solidity.Calculus.Core.Callback
+import Solidity.Calculus.Callback
 
 /-!
 # Where each taclet comes from
 
-`Calculus/Core/Rules.lean` names each `Core.Taclet` constructor after the
+`Calculus/Rules.lean` names each `Taclet` constructor after the
 solkey taclet it transcribes, but a name is a promise, not a check: an operator family is one
 constructor for five or fourteen taclets, a constructor can cover two KeY
 shapes the Lean syntax does not tell apart, and a KeY taclet can have no
@@ -15,7 +15,7 @@ origin on; the table is keyed by constructor *name* instead, and two checks
 keep it honest.  Each key is a double-backtick name, which fails elaboration
 if the constructor does not exist; `#check_constructor_table` then reads the
 constructor list from the environment and fails unless every constructor has
-exactly one row.  A constructor added to `Calculus/Core/Rules.lean` without
+exactly one row.  A constructor added to `Calculus/Rules.lean` without
 an origin does not build here.
 
 The other direction is `taclets_partitioned`: every taclet of
@@ -89,7 +89,7 @@ namespace RuleShapes
 
 /-! ## The origin of each constructor
 
-In `Calculus/Core/Rules.lean`'s order.  A `merged` row is a constructor whose `\find`
+In `Calculus/Rules.lean`'s order.  A `merged` row is a constructor whose `\find`
 covers several taclets: an operator family, a KeY split by the source's
 kind (a value against a reference, `…MemRef…`) or by the receiver's (a
 mapping against an array). -/
@@ -98,285 +98,285 @@ mapping against an array). -/
 /-- Every `Taclet` constructor, and the solkey taclets it transcribes. -/
 def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   -- Step 1: unfold a storage read
-  (``Core.Taclet.storageFieldRead_unfold_rightFst, .taclet .storageFieldRead_unfold_rightFst),
-  (``Core.Taclet.storageIndexRead_unfold_rightFst, .taclet .storageIndexRead_unfold_rightFst),
-  (``Core.Taclet.storageIndexRead_unfold_rightSndIndex, .taclet .storageIndexRead_unfold_rightSndIndex),
-  (``Core.Taclet.storageFieldRead_unfold_rightSndResult,
+  (``Taclet.storageFieldRead_unfold_rightFst, .taclet .storageFieldRead_unfold_rightFst),
+  (``Taclet.storageIndexRead_unfold_rightFst, .taclet .storageIndexRead_unfold_rightFst),
+  (``Taclet.storageIndexRead_unfold_rightSndIndex, .taclet .storageIndexRead_unfold_rightSndIndex),
+  (``Taclet.storageFieldRead_unfold_rightSndResult,
     .merged [.storageFieldRead_unfold_rightSndResult, .storageFieldWriteCaptureSrc]),
-  (``Core.Taclet.storageIndexRead_unfold_rightSndResult,
+  (``Taclet.storageIndexRead_unfold_rightSndResult,
     .merged [.storageIndexRead_unfold_rightSndResult, .storageIndexWriteStorageRefRhsCapture]),
   -- Step 2: decompose a storage write
-  (``Core.Taclet.storageFieldWrite_unfold_leftFst, .taclet .storageFieldWrite_unfold_leftFst),
-  (``Core.Taclet.storageFieldWriteStorageRef_unfold_leftFst,
+  (``Taclet.storageFieldWrite_unfold_leftFst, .taclet .storageFieldWrite_unfold_leftFst),
+  (``Taclet.storageFieldWriteStorageRef_unfold_leftFst,
     .taclet .storageFieldWriteStorageRef_unfold_leftFst),
-  (``Core.Taclet.storageIndexWriteCaptureAllComplexRecv,
+  (``Taclet.storageIndexWriteCaptureAllComplexRecv,
     .taclet .storageIndexWriteCaptureAllComplexRecv),
-  (``Core.Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv,
+  (``Taclet.storageIndexWriteStorageRefCaptureAllComplexRecv,
     .taclet .storageIndexWriteStorageRefCaptureAllComplexRecv),
-  (``Core.Taclet.storageIndexWriteCaptureAllNonSimpleIndex,
+  (``Taclet.storageIndexWriteCaptureAllNonSimpleIndex,
     .taclet .storageIndexWriteCaptureAllNonSimpleIndex),
-  (``Core.Taclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex,
+  (``Taclet.storageIndexWriteStorageRefCaptureAllNonSimpleIndex,
     .taclet .storageIndexWriteStorageRefCaptureAllNonSimpleIndex),
-  (``Core.Taclet.storageRootWriteValueRhsCapture, .taclet .storageRootWriteValueRhsCapture),
-  (``Core.Taclet.fieldWriteValueRhsCapture, .taclet .fieldWriteValueRhsCapture),
-  (``Core.Taclet.indexWriteValueRhsCapture, .taclet .indexWriteValueRhsCapture),
-  (``Core.Taclet.storageFieldDelete_unfold_leftFst, .taclet .storageFieldDelete_unfold_leftFst),
-  (``Core.Taclet.storageIndexDelete_unfold_leftFst, .taclet .storageIndexDelete_unfold_leftFst),
-  (``Core.Taclet.storageIndexDeleteNonSimpleIndexCapture,
+  (``Taclet.storageRootWriteValueRhsCapture, .taclet .storageRootWriteValueRhsCapture),
+  (``Taclet.fieldWriteValueRhsCapture, .taclet .fieldWriteValueRhsCapture),
+  (``Taclet.indexWriteValueRhsCapture, .taclet .indexWriteValueRhsCapture),
+  (``Taclet.storageFieldDelete_unfold_leftFst, .taclet .storageFieldDelete_unfold_leftFst),
+  (``Taclet.storageIndexDelete_unfold_leftFst, .taclet .storageIndexDelete_unfold_leftFst),
+  (``Taclet.storageIndexDeleteNonSimpleIndexCapture,
     .taclet .storageIndexDeleteNonSimpleIndexCapture),
   -- Declarations
-  (``Core.Taclet.localValueDeclInitDrop, .taclet .localValueDeclInitDrop),
-  (``Core.Taclet.valueDeclSkip, .taclet .valueDeclSkip),
-  (``Core.Taclet.storageLocalDeclInitDrop, .taclet .storageLocalDeclInitDrop),
-  (``Core.Taclet.storageLocalDeclSkip, .taclet .storageLocalDeclSkip),
-  (``Core.Taclet.memoryLocalDeclInitDrop, .taclet .memoryLocalDeclInitDrop),
-  (``Core.Taclet.memoryReferenceDeclFreshAlloc, .taclet .memoryReferenceDeclFreshAlloc),
+  (``Taclet.localValueDeclInitDrop, .taclet .localValueDeclInitDrop),
+  (``Taclet.valueDeclSkip, .taclet .valueDeclSkip),
+  (``Taclet.storageLocalDeclInitDrop, .taclet .storageLocalDeclInitDrop),
+  (``Taclet.storageLocalDeclSkip, .taclet .storageLocalDeclSkip),
+  (``Taclet.memoryLocalDeclInitDrop, .taclet .memoryLocalDeclInitDrop),
+  (``Taclet.memoryReferenceDeclFreshAlloc, .taclet .memoryReferenceDeclFreshAlloc),
   -- Step 3: storage reads and writes as updates
-  (``Core.Taclet.localValueAssign, .taclet .localValueAssign),
-  (``Core.Taclet.storageRootReadSelect, .taclet .storageRootReadSelect),
-  (``Core.Taclet.storageFieldReadFind, .taclet .storageFieldReadFind),
-  (``Core.Taclet.storageIndexReadMappingFind, .taclet .storageIndexReadMappingFind),
-  (``Core.Taclet.storageIndexReadArrayFind, .taclet .storageIndexReadArrayFind),
-  (``Core.Taclet.storageRootWriteStore, .taclet .storageRootWriteStore),
-  (``Core.Taclet.storageRootWriteCopySource, .taclet .storageRootWriteCopySource),
-  (``Core.Taclet.storageFieldReadStoreRoot, .taclet .storageFieldReadStoreRoot),
-  (``Core.Taclet.storageIndexReadMappingStoreRoot, .taclet .storageIndexReadMappingStoreRoot),
-  (``Core.Taclet.storageIndexReadArrayStoreRoot, .taclet .storageIndexReadArrayStoreRoot),
-  (``Core.Taclet.storageFieldWriteSave, .taclet .storageFieldWriteSave),
-  (``Core.Taclet.storageFieldWriteCopySource, .taclet .storageFieldWriteCopySource),
-  (``Core.Taclet.storageIndexWriteMappingSave, .taclet .storageIndexWriteMappingSave),
-  (``Core.Taclet.storageIndexWriteArraySave, .taclet .storageIndexWriteArraySave),
-  (``Core.Taclet.storageIndexWriteMappingCopySource, .taclet .storageIndexWriteMappingCopySource),
-  (``Core.Taclet.storageIndexWriteArrayCopySource, .taclet .storageIndexWriteArrayCopySource),
-  (``Core.Taclet.storageLocalRootRebind, .taclet .storageLocalRootRebind),
-  (``Core.Taclet.storageFieldReadBindLocalRoot, .taclet .storageFieldReadBindLocalRoot),
-  (``Core.Taclet.storageIndexReadMappingBindLocalRoot, .taclet .storageIndexReadMappingBindLocalRoot),
-  (``Core.Taclet.storageIndexReadArrayBindLocalRoot, .taclet .storageIndexReadArrayBindLocalRoot),
-  (``Core.Taclet.storageIndexReadArrayBindLocalRootMappingElement,
+  (``Taclet.localValueAssign, .taclet .localValueAssign),
+  (``Taclet.storageRootReadSelect, .taclet .storageRootReadSelect),
+  (``Taclet.storageFieldReadFind, .taclet .storageFieldReadFind),
+  (``Taclet.storageIndexReadMappingFind, .taclet .storageIndexReadMappingFind),
+  (``Taclet.storageIndexReadArrayFind, .taclet .storageIndexReadArrayFind),
+  (``Taclet.storageRootWriteStore, .taclet .storageRootWriteStore),
+  (``Taclet.storageRootWriteCopySource, .taclet .storageRootWriteCopySource),
+  (``Taclet.storageFieldReadStoreRoot, .taclet .storageFieldReadStoreRoot),
+  (``Taclet.storageIndexReadMappingStoreRoot, .taclet .storageIndexReadMappingStoreRoot),
+  (``Taclet.storageIndexReadArrayStoreRoot, .taclet .storageIndexReadArrayStoreRoot),
+  (``Taclet.storageFieldWriteSave, .taclet .storageFieldWriteSave),
+  (``Taclet.storageFieldWriteCopySource, .taclet .storageFieldWriteCopySource),
+  (``Taclet.storageIndexWriteMappingSave, .taclet .storageIndexWriteMappingSave),
+  (``Taclet.storageIndexWriteArraySave, .taclet .storageIndexWriteArraySave),
+  (``Taclet.storageIndexWriteMappingCopySource, .taclet .storageIndexWriteMappingCopySource),
+  (``Taclet.storageIndexWriteArrayCopySource, .taclet .storageIndexWriteArrayCopySource),
+  (``Taclet.storageLocalRootRebind, .taclet .storageLocalRootRebind),
+  (``Taclet.storageFieldReadBindLocalRoot, .taclet .storageFieldReadBindLocalRoot),
+  (``Taclet.storageIndexReadMappingBindLocalRoot, .taclet .storageIndexReadMappingBindLocalRoot),
+  (``Taclet.storageIndexReadArrayBindLocalRoot, .taclet .storageIndexReadArrayBindLocalRoot),
+  (``Taclet.storageIndexReadArrayBindLocalRootMappingElement,
     .taclet .storageIndexReadArrayBindLocalRootMappingElement),
-  (``Core.Taclet.storageRootDelete, .taclet .storageRootDelete),
-  (``Core.Taclet.storageFieldDelete, .taclet .storageFieldDelete),
-  (``Core.Taclet.storageIndexDelete, .taclet .storageIndexDelete),
-  (``Core.Taclet.storageIndexArrayDelete, .taclet .storageIndexArrayDelete),
+  (``Taclet.storageRootDelete, .taclet .storageRootDelete),
+  (``Taclet.storageFieldDelete, .taclet .storageFieldDelete),
+  (``Taclet.storageIndexDelete, .taclet .storageIndexDelete),
+  (``Taclet.storageIndexArrayDelete, .taclet .storageIndexArrayDelete),
   -- Lengths: KeY reads `sp.length` as the member `length`, so the member-read taclets
-  (``Core.Taclet.storageLengthRead, .taclet .storageFieldReadFind),
-  (``Core.Taclet.storageLengthRead_unfold_rightFst, .taclet .storageFieldRead_unfold_rightFst),
-  (``Core.Taclet.memoryLengthRead, .taclet .memoryFieldRead),
-  (``Core.Taclet.memoryLengthRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
+  (``Taclet.storageLengthRead, .taclet .storageFieldReadFind),
+  (``Taclet.storageLengthRead_unfold_rightFst, .taclet .storageFieldRead_unfold_rightFst),
+  (``Taclet.memoryLengthRead, .taclet .memoryFieldRead),
+  (``Taclet.memoryLengthRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
   -- Operators: `+ - * ** / %`, then the comparisons, then `&& ||`
-  (``Core.Taclet.binopAssignment, .merged [.additionAssignment, .subtractionAssignment,
+  (``Taclet.binopAssignment, .merged [.additionAssignment, .subtractionAssignment,
     .multiplicationAssignment, .powerAssignment, .divisionAssignment, .moduloAssignment,
     .lessThanAssignment, .greaterThanAssignment, .lessEqualAssignment, .greaterEqualAssignment,
     .boolEqualityAssignment, .boolInequalityAssignment,
     .logicalAndAssignment, .logicalOrAssignment]),
-  (``Core.Taclet.binopUnfoldLeft, .merged [.addition_unfold_left, .subtraction_unfold_left,
+  (``Taclet.binopUnfoldLeft, .merged [.addition_unfold_left, .subtraction_unfold_left,
     .multiplication_unfold_left, .power_unfold_left, .division_unfold_left, .modulo_unfold_left,
     .lessThanCaptureLhs, .greaterThanCaptureLhs, .lessEqualCaptureLhs, .greaterEqualCaptureLhs,
     .boolEqualityCaptureLhs, .boolInequalityCaptureLhs,
     .logicalAndCaptureLhs, .logicalOrCaptureLhs]),
   -- no `&&`/`||` instance: those are the short-circuit rows below
-  (``Core.Taclet.binopUnfoldRight, .merged [.addition_unfold_right, .subtraction_unfold_right,
+  (``Taclet.binopUnfoldRight, .merged [.addition_unfold_right, .subtraction_unfold_right,
     .multiplication_unfold_right, .power_unfold_right, .division_unfold_right,
     .modulo_unfold_right,
     .lessThanCaptureRhs, .greaterThanCaptureRhs, .lessEqualCaptureRhs, .greaterEqualCaptureRhs,
     .boolEqualityCaptureRhs, .boolInequalityCaptureRhs]),
-  (``Core.Taclet.logicalAndShortCircuitRhs, .taclet .logicalAndShortCircuitRhs),
-  (``Core.Taclet.logicalOrShortCircuitRhs, .taclet .logicalOrShortCircuitRhs),
-  (``Core.Taclet.unopAssignment, .merged [.unaryMinusAssignment, .logicalNotAssignment]),
-  (``Core.Taclet.unopCapture, .merged [.unaryMinusCapture, .logicalNotCapture]),
+  (``Taclet.logicalAndShortCircuitRhs, .taclet .logicalAndShortCircuitRhs),
+  (``Taclet.logicalOrShortCircuitRhs, .taclet .logicalOrShortCircuitRhs),
+  (``Taclet.unopAssignment, .merged [.unaryMinusAssignment, .logicalNotAssignment]),
+  (``Taclet.unopCapture, .merged [.unaryMinusCapture, .logicalNotCapture]),
   -- The conditional: `lhs` is a local, a storage or a memory location
-  (``Core.Taclet.ternaryToIf, .merged [.ternaryToIf, .ternaryToIfStorage]),
-  (``Core.Taclet.ternaryCaptureCond, .taclet .ternaryCaptureCond),
+  (``Taclet.ternaryToIf, .merged [.ternaryToIf, .ternaryToIfStorage]),
+  (``Taclet.ternaryCaptureCond, .taclet .ternaryCaptureCond),
   -- Compound assignment (`+= -= *= /= %=`) and `++`/`--` (pre, post)
-  (``Core.Taclet.localOpAssign, .merged [.localAddAssign, .localSubAssign, .localMulAssign,
+  (``Taclet.localOpAssign, .merged [.localAddAssign, .localSubAssign, .localMulAssign,
     .localDivAssign, .localModAssign]),
-  (``Core.Taclet.storageRootOpAssign, .merged [.storageRootAddAssign, .storageRootSubAssign,
+  (``Taclet.storageRootOpAssign, .merged [.storageRootAddAssign, .storageRootSubAssign,
     .storageRootMulAssign, .storageRootDivAssign, .storageRootModAssign]),
-  (``Core.Taclet.storageFieldOpAssign, .merged [.storageFieldAddAssign, .storageFieldSubAssign,
+  (``Taclet.storageFieldOpAssign, .merged [.storageFieldAddAssign, .storageFieldSubAssign,
     .storageFieldMulAssign, .storageFieldDivAssign, .storageFieldModAssign]),
-  (``Core.Taclet.storageIndexMappingOpAssign, .merged [.storageIndexMappingAddAssign,
+  (``Taclet.storageIndexMappingOpAssign, .merged [.storageIndexMappingAddAssign,
     .storageIndexMappingSubAssign, .storageIndexMappingMulAssign, .storageIndexMappingDivAssign,
     .storageIndexMappingModAssign]),
-  (``Core.Taclet.storageIndexArrayOpAssign, .merged [.storageIndexArrayAddAssign,
+  (``Taclet.storageIndexArrayOpAssign, .merged [.storageIndexArrayAddAssign,
     .storageIndexArraySubAssign, .storageIndexArrayMulAssign, .storageIndexArrayDivAssign,
     .storageIndexArrayModAssign]),
-  (``Core.Taclet.memoryFieldOpAssign, .merged [.memoryFieldAddAssign, .memoryFieldSubAssign,
+  (``Taclet.memoryFieldOpAssign, .merged [.memoryFieldAddAssign, .memoryFieldSubAssign,
     .memoryFieldMulAssign, .memoryFieldDivAssign, .memoryFieldModAssign]),
-  (``Core.Taclet.memoryIndexArrayOpAssign, .merged [.memoryIndexArrayAddAssign,
+  (``Taclet.memoryIndexArrayOpAssign, .merged [.memoryIndexArrayAddAssign,
     .memoryIndexArraySubAssign, .memoryIndexArrayMulAssign, .memoryIndexArrayDivAssign,
     .memoryIndexArrayModAssign]),
-  (``Core.Taclet.storageFieldOpAssignUnfoldLeftFst, .merged [.storageFieldAddAssign_unfold_leftFst,
+  (``Taclet.storageFieldOpAssignUnfoldLeftFst, .merged [.storageFieldAddAssign_unfold_leftFst,
     .storageFieldSubAssign_unfold_leftFst, .storageFieldMulAssign_unfold_leftFst,
     .storageFieldDivAssign_unfold_leftFst, .storageFieldModAssign_unfold_leftFst]),
-  (``Core.Taclet.storageIndexOpAssignUnfoldLeftFst, .merged [.storageIndexAddAssign_unfold_leftFst,
+  (``Taclet.storageIndexOpAssignUnfoldLeftFst, .merged [.storageIndexAddAssign_unfold_leftFst,
     .storageIndexSubAssign_unfold_leftFst, .storageIndexMulAssign_unfold_leftFst,
     .storageIndexDivAssign_unfold_leftFst, .storageIndexModAssign_unfold_leftFst]),
-  (``Core.Taclet.memoryFieldOpAssignUnfoldLeftFst, .merged [.memoryFieldAddAssign_unfold_leftFst,
+  (``Taclet.memoryFieldOpAssignUnfoldLeftFst, .merged [.memoryFieldAddAssign_unfold_leftFst,
     .memoryFieldSubAssign_unfold_leftFst, .memoryFieldMulAssign_unfold_leftFst,
     .memoryFieldDivAssign_unfold_leftFst, .memoryFieldModAssign_unfold_leftFst]),
-  (``Core.Taclet.memoryIndexOpAssignUnfoldLeftFst, .merged [.memoryIndexAddAssign_unfold_leftFst,
+  (``Taclet.memoryIndexOpAssignUnfoldLeftFst, .merged [.memoryIndexAddAssign_unfold_leftFst,
     .memoryIndexSubAssign_unfold_leftFst, .memoryIndexMulAssign_unfold_leftFst,
     .memoryIndexDivAssign_unfold_leftFst, .memoryIndexModAssign_unfold_leftFst]),
-  (``Core.Taclet.compoundAssignValueRhsCapture, .merged [.addAssignValueRhsCapture,
+  (``Taclet.compoundAssignValueRhsCapture, .merged [.addAssignValueRhsCapture,
     .subAssignValueRhsCapture, .mulAssignValueRhsCapture, .divAssignValueRhsCapture,
     .modAssignValueRhsCapture]),
-  (``Core.Taclet.localIncrement, .merged [.localPreincrement, .localPredecrement,
+  (``Taclet.localIncrement, .merged [.localPreincrement, .localPredecrement,
     .localPostincrement, .localPostdecrement]),
-  (``Core.Taclet.storageRootIncrement, .merged [.storageRootPreincrement, .storageRootPredecrement,
+  (``Taclet.storageRootIncrement, .merged [.storageRootPreincrement, .storageRootPredecrement,
     .storageRootPostincrement, .storageRootPostdecrement]),
-  (``Core.Taclet.storageFieldIncrement, .merged [.storageFieldPreincrement,
+  (``Taclet.storageFieldIncrement, .merged [.storageFieldPreincrement,
     .storageFieldPredecrement, .storageFieldPostincrement, .storageFieldPostdecrement]),
-  (``Core.Taclet.storageIndexIncrement, .merged [
+  (``Taclet.storageIndexIncrement, .merged [
     .storageIndexMappingPreincrement, .storageIndexMappingPredecrement,
     .storageIndexMappingPostincrement, .storageIndexMappingPostdecrement,
     .storageIndexArrayPreincrement, .storageIndexArrayPredecrement,
     .storageIndexArrayPostincrement, .storageIndexArrayPostdecrement]),
-  (``Core.Taclet.memoryFieldIncrement, .merged [.memoryFieldPreincrement, .memoryFieldPredecrement,
+  (``Taclet.memoryFieldIncrement, .merged [.memoryFieldPreincrement, .memoryFieldPredecrement,
     .memoryFieldPostincrement, .memoryFieldPostdecrement]),
-  (``Core.Taclet.memoryIndexArrayIncrement, .merged [.memoryIndexArrayPreincrement,
+  (``Taclet.memoryIndexArrayIncrement, .merged [.memoryIndexArrayPreincrement,
     .memoryIndexArrayPredecrement, .memoryIndexArrayPostincrement,
     .memoryIndexArrayPostdecrement]),
-  (``Core.Taclet.storageFieldIncrementUnfoldLeftFst, .merged [
+  (``Taclet.storageFieldIncrementUnfoldLeftFst, .merged [
     .storageFieldPreincrement_unfold_leftFst, .storageFieldPredecrement_unfold_leftFst,
     .storageFieldPostincrement_unfold_leftFst, .storageFieldPostdecrement_unfold_leftFst]),
-  (``Core.Taclet.storageIndexIncrementUnfoldLeftFst, .merged [
+  (``Taclet.storageIndexIncrementUnfoldLeftFst, .merged [
     .storageIndexPreincrement_unfold_leftFst, .storageIndexPredecrement_unfold_leftFst,
     .storageIndexPostincrement_unfold_leftFst, .storageIndexPostdecrement_unfold_leftFst]),
-  (``Core.Taclet.memoryFieldIncrementUnfoldLeftFst, .merged [
+  (``Taclet.memoryFieldIncrementUnfoldLeftFst, .merged [
     .memoryFieldPreincrement_unfold_leftFst, .memoryFieldPredecrement_unfold_leftFst,
     .memoryFieldPostincrement_unfold_leftFst, .memoryFieldPostdecrement_unfold_leftFst]),
-  (``Core.Taclet.memoryIndexIncrementUnfoldLeftFst, .merged [
+  (``Taclet.memoryIndexIncrementUnfoldLeftFst, .merged [
     .memoryIndexPreincrement_unfold_leftFst, .memoryIndexPredecrement_unfold_leftFst,
     .memoryIndexPostincrement_unfold_leftFst, .memoryIndexPostdecrement_unfold_leftFst]),
   -- `vp = v++`: KeY has one taclet for the assignment and one for the declaration
-  (``Core.Taclet.localAssignIncrement, .merged [
+  (``Taclet.localAssignIncrement, .merged [
     .localAssignPreincrement, .localAssignPredecrement,
     .localAssignPostincrement, .localAssignPostdecrement,
     .localDeclPreincrement, .localDeclPredecrement,
     .localDeclPostincrement, .localDeclPostdecrement]),
-  (``Core.Taclet.storageRootIncrementAssignment, .merged [
+  (``Taclet.storageRootIncrementAssignment, .merged [
     .storageRootPreincrementAssignment, .storageRootPredecrementAssignment,
     .storageRootPostincrementAssignment, .storageRootPostdecrementAssignment]),
-  (``Core.Taclet.storageFieldIncrementAssignment, .merged [
+  (``Taclet.storageFieldIncrementAssignment, .merged [
     .storageFieldPreincrementAssignment, .storageFieldPredecrementAssignment,
     .storageFieldPostincrementAssignment, .storageFieldPostdecrementAssignment]),
-  (``Core.Taclet.storageIndexIncrementAssignment, .merged [
+  (``Taclet.storageIndexIncrementAssignment, .merged [
     .storageIndexMappingPreincrementAssignment, .storageIndexMappingPredecrementAssignment,
     .storageIndexMappingPostincrementAssignment, .storageIndexMappingPostdecrementAssignment,
     .storageIndexArrayPreincrementAssignment, .storageIndexArrayPredecrementAssignment,
     .storageIndexArrayPostincrementAssignment, .storageIndexArrayPostdecrementAssignment]),
-  (``Core.Taclet.memoryFieldIncrementAssignment, .merged [
+  (``Taclet.memoryFieldIncrementAssignment, .merged [
     .memoryFieldPreincrementAssignment, .memoryFieldPredecrementAssignment,
     .memoryFieldPostincrementAssignment, .memoryFieldPostdecrementAssignment]),
-  (``Core.Taclet.memoryIndexArrayIncrementAssignment, .merged [
+  (``Taclet.memoryIndexArrayIncrementAssignment, .merged [
     .memoryIndexArrayPreincrementAssignment, .memoryIndexArrayPredecrementAssignment,
     .memoryIndexArrayPostincrementAssignment, .memoryIndexArrayPostdecrementAssignment]),
   -- Arrays
-  (``Core.Taclet.storagePushValueSave, .taclet .storagePushValueSave),
-  (``Core.Taclet.storagePushValueCopySource, .taclet .storagePushValueCopySource),
-  (``Core.Taclet.storagePushLengthSave, .taclet .storagePushLengthSave),
-  (``Core.Taclet.storagePushLengthSaveReferenceElement,
+  (``Taclet.storagePushValueSave, .taclet .storagePushValueSave),
+  (``Taclet.storagePushValueCopySource, .taclet .storagePushValueCopySource),
+  (``Taclet.storagePushLengthSave, .taclet .storagePushLengthSave),
+  (``Taclet.storagePushLengthSaveReferenceElement,
     .taclet .storagePushLengthSaveReferenceElement),
-  (``Core.Taclet.storagePushValue_unfold_rightSndArgument,
+  (``Taclet.storagePushValue_unfold_rightSndArgument,
     .taclet .storagePushValue_unfold_rightSndArgument),
-  (``Core.Taclet.storagePushValue_unfold_leftFstReceiver,
+  (``Taclet.storagePushValue_unfold_leftFstReceiver,
     .taclet .storagePushValue_unfold_leftFstReceiver),
-  (``Core.Taclet.storagePush_unfold_leftFstReceiver, .taclet .storagePush_unfold_leftFstReceiver),
-  (``Core.Taclet.storagePop_unfold_leftFstReceiver, .taclet .storagePop_unfold_leftFstReceiver),
-  (``Core.Taclet.storagePopSave, .taclet .storagePopSave),
-  (``Core.Taclet.storagePopSaveMappingElement, .taclet .storagePopSaveMappingElement),
-  (``Core.Taclet.storageLocalRootPush_unfold_leftFstReceiver,
+  (``Taclet.storagePush_unfold_leftFstReceiver, .taclet .storagePush_unfold_leftFstReceiver),
+  (``Taclet.storagePop_unfold_leftFstReceiver, .taclet .storagePop_unfold_leftFstReceiver),
+  (``Taclet.storagePopSave, .taclet .storagePopSave),
+  (``Taclet.storagePopSaveMappingElement, .taclet .storagePopSaveMappingElement),
+  (``Taclet.storageLocalRootPush_unfold_leftFstReceiver,
     .taclet .storageLocalRootPush_unfold_leftFstReceiver),
-  (``Core.Taclet.storageLocalRootPushBind, .taclet .storageLocalRootPushBind),
-  (``Core.Taclet.storageLocalRootPushBindMappingElement,
+  (``Taclet.storageLocalRootPushBind, .taclet .storageLocalRootPushBind),
+  (``Taclet.storageLocalRootPushBindMappingElement,
     .taclet .storageLocalRootPushBindMappingElement),
   -- Transfer
-  (``Core.Taclet.transfer_unfold_leftFstReceiver, .taclet .transfer_unfold_leftFstReceiver),
-  (``Core.Taclet.transfer_unfold_rightSndArgument, .taclet .transfer_unfold_rightSndArgument),
-  (``Core.Taclet.transferNoCallbackBox, .taclet .transferNoCallbackBox),
-  (``Core.Taclet.send_unfold_leftFstReceiver, .taclet .send_unfold_leftFstReceiver),
-  (``Core.Taclet.send_unfold_rightSndArgument, .taclet .send_unfold_rightSndArgument),
-  (``Core.Taclet.sendNoCallbackBox, .taclet .sendNoCallbackBox),
-  (``Core.Taclet.sendNoCallbackDiamond, .taclet .sendNoCallbackDiamond),
+  (``Taclet.transfer_unfold_leftFstReceiver, .taclet .transfer_unfold_leftFstReceiver),
+  (``Taclet.transfer_unfold_rightSndArgument, .taclet .transfer_unfold_rightSndArgument),
+  (``Taclet.transferNoCallbackBox, .taclet .transferNoCallbackBox),
+  (``Taclet.send_unfold_leftFstReceiver, .taclet .send_unfold_leftFstReceiver),
+  (``Taclet.send_unfold_rightSndArgument, .taclet .send_unfold_rightSndArgument),
+  (``Taclet.sendNoCallbackBox, .taclet .sendNoCallbackBox),
+  (``Taclet.sendNoCallbackDiamond, .taclet .sendNoCallbackDiamond),
   -- Memory: `msrc` is a value or a memory reference, so a row covers `…MemRef…` except
   -- for the index captures, which KeY and the table split by the source
-  (``Core.Taclet.memoryFieldRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
-  (``Core.Taclet.memoryIndexRead_unfold_rightFst, .taclet .memoryIndexRead_unfold_rightFst),
-  (``Core.Taclet.memoryIndexRead_unfold_rightSndIndex, .taclet .memoryIndexRead_unfold_rightSndIndex),
-  (``Core.Taclet.memoryFieldRead, .taclet .memoryFieldRead),
-  (``Core.Taclet.memoryIndexReadArrayValue, .taclet .memoryIndexReadArrayValue),
-  (``Core.Taclet.memoryRootRebind, .taclet .memoryRootRebind),
-  (``Core.Taclet.memoryFieldReadAliasRoot, .taclet .memoryFieldRead),
-  (``Core.Taclet.memoryIndexReadArrayMemory, .taclet .memoryIndexReadArrayMemory),
-  (``Core.Taclet.memoryFieldWrite, .taclet .memoryFieldWrite),
-  (``Core.Taclet.memoryIndexWriteArray, .taclet .memoryIndexWriteArray),
-  (``Core.Taclet.memoryFieldWriteCopy, .taclet .memoryFieldWrite),
-  (``Core.Taclet.memoryIndexWriteCopy, .taclet .memoryIndexWriteArray),
-  (``Core.Taclet.memoryFieldWrite_unfold_leftFst,
+  (``Taclet.memoryFieldRead_unfold_rightFst, .taclet .memoryFieldRead_unfold_rightFst),
+  (``Taclet.memoryIndexRead_unfold_rightFst, .taclet .memoryIndexRead_unfold_rightFst),
+  (``Taclet.memoryIndexRead_unfold_rightSndIndex, .taclet .memoryIndexRead_unfold_rightSndIndex),
+  (``Taclet.memoryFieldRead, .taclet .memoryFieldRead),
+  (``Taclet.memoryIndexReadArrayValue, .taclet .memoryIndexReadArrayValue),
+  (``Taclet.memoryRootRebind, .taclet .memoryRootRebind),
+  (``Taclet.memoryFieldReadAliasRoot, .taclet .memoryFieldRead),
+  (``Taclet.memoryIndexReadArrayMemory, .taclet .memoryIndexReadArrayMemory),
+  (``Taclet.memoryFieldWrite, .taclet .memoryFieldWrite),
+  (``Taclet.memoryIndexWriteArray, .taclet .memoryIndexWriteArray),
+  (``Taclet.memoryFieldWriteCopy, .taclet .memoryFieldWrite),
+  (``Taclet.memoryIndexWriteCopy, .taclet .memoryIndexWriteArray),
+  (``Taclet.memoryFieldWrite_unfold_leftFst,
     .merged [.memoryFieldWrite_unfold_leftFst, .memoryFieldWriteMemRef_unfold_leftFst]),
-  (``Core.Taclet.memoryIndexWriteCaptureAllComplexRecv,
+  (``Taclet.memoryIndexWriteCaptureAllComplexRecv,
     .taclet .memoryIndexWriteCaptureAllComplexRecv),
-  (``Core.Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv,
+  (``Taclet.memoryIndexWriteMemRefCaptureAllComplexRecv,
     .taclet .memoryIndexWriteMemRefCaptureAllComplexRecv),
-  (``Core.Taclet.memoryIndexWriteCaptureAllNonSimpleIndex,
+  (``Taclet.memoryIndexWriteCaptureAllNonSimpleIndex,
     .taclet .memoryIndexWriteCaptureAllNonSimpleIndex),
-  (``Core.Taclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex,
+  (``Taclet.memoryIndexWriteMemRefCaptureAllNonSimpleIndex,
     .taclet .memoryIndexWriteMemRefCaptureAllNonSimpleIndex),
-  (``Core.Taclet.memoryFieldWriteUnfoldSource, .taclet .fieldWriteValueRhsCapture),
-  (``Core.Taclet.memoryIndexWriteUnfoldSource, .taclet .indexWriteValueRhsCapture),
-  (``Core.Taclet.memoryRootDeleteFreshRebind, .taclet .memoryRootDeleteFreshRebind),
-  (``Core.Taclet.memoryFieldDeletePrimitive, .taclet .memoryFieldDeletePrimitive),
-  (``Core.Taclet.memoryFieldDeleteReference, .taclet .memoryFieldDeleteReference),
-  (``Core.Taclet.memoryIndexDeletePrimitive, .taclet .memoryIndexDeletePrimitive),
-  (``Core.Taclet.memoryIndexDeleteReference, .taclet .memoryIndexDeleteReference),
-  (``Core.Taclet.memoryFieldDelete_unfold_leftFst, .taclet .memoryFieldDelete_unfold_leftFst),
-  (``Core.Taclet.memoryIndexDelete_unfold_leftFst, .taclet .memoryIndexDelete_unfold_leftFst),
-  (``Core.Taclet.memoryIndexDeleteNonSimpleIndexCapture,
+  (``Taclet.memoryFieldWriteUnfoldSource, .taclet .fieldWriteValueRhsCapture),
+  (``Taclet.memoryIndexWriteUnfoldSource, .taclet .indexWriteValueRhsCapture),
+  (``Taclet.memoryRootDeleteFreshRebind, .taclet .memoryRootDeleteFreshRebind),
+  (``Taclet.memoryFieldDeletePrimitive, .taclet .memoryFieldDeletePrimitive),
+  (``Taclet.memoryFieldDeleteReference, .taclet .memoryFieldDeleteReference),
+  (``Taclet.memoryIndexDeletePrimitive, .taclet .memoryIndexDeletePrimitive),
+  (``Taclet.memoryIndexDeleteReference, .taclet .memoryIndexDeleteReference),
+  (``Taclet.memoryFieldDelete_unfold_leftFst, .taclet .memoryFieldDelete_unfold_leftFst),
+  (``Taclet.memoryIndexDelete_unfold_leftFst, .taclet .memoryIndexDelete_unfold_leftFst),
+  (``Taclet.memoryIndexDeleteNonSimpleIndexCapture,
     .taclet .memoryIndexDeleteNonSimpleIndexCapture),
-  (``Core.Taclet.memoryArrayFreshAlloc, .taclet .memoryArrayFreshAlloc),
-  (``Core.Taclet.newArrayCapture, .taclet .newArrayCapture),
+  (``Taclet.memoryArrayFreshAlloc, .taclet .memoryArrayFreshAlloc),
+  (``Taclet.newArrayCapture, .taclet .newArrayCapture),
   -- Storage and memory: `mpath` is any memory path, a member one included
-  (``Core.Taclet.memoryStorageCopy, .taclet .memoryStorageCopy),
-  (``Core.Taclet.memoryStorageCopyUnfold, .taclet .memoryStorageCopyUnfold),
-  (``Core.Taclet.memoryToStorageStoreRoot, .taclet .memoryToStorageStoreRoot),
-  (``Core.Taclet.memoryToStorageFieldCopyRoot,
+  (``Taclet.memoryStorageCopy, .taclet .memoryStorageCopy),
+  (``Taclet.memoryStorageCopyUnfold, .taclet .memoryStorageCopyUnfold),
+  (``Taclet.memoryToStorageStoreRoot, .taclet .memoryToStorageStoreRoot),
+  (``Taclet.memoryToStorageFieldCopyRoot,
     .merged [.memoryToStorageFieldCopyRoot, .memoryToStorageFieldCopyField]),
-  (``Core.Taclet.memoryToStorageIndexMappingCopyRoot, .taclet .memoryToStorageIndexMappingCopyRoot),
-  (``Core.Taclet.memoryToStorageIndexArrayCopyRoot, .taclet .memoryToStorageIndexArrayCopyRoot),
-  (``Core.Taclet.memoryToStorageField_unfold_leftFst, .taclet .memoryToStorageField_unfold_leftFst),
-  (``Core.Taclet.memoryToStorageIndexCaptureAllComplexRecv,
+  (``Taclet.memoryToStorageIndexMappingCopyRoot, .taclet .memoryToStorageIndexMappingCopyRoot),
+  (``Taclet.memoryToStorageIndexArrayCopyRoot, .taclet .memoryToStorageIndexArrayCopyRoot),
+  (``Taclet.memoryToStorageField_unfold_leftFst, .taclet .memoryToStorageField_unfold_leftFst),
+  (``Taclet.memoryToStorageIndexCaptureAllComplexRecv,
     .taclet .memoryToStorageIndexCaptureAllComplexRecv),
-  (``Core.Taclet.memoryToStorageIndexCaptureAllNonSimpleIndex,
+  (``Taclet.memoryToStorageIndexCaptureAllNonSimpleIndex,
     .taclet .memoryToStorageIndexCaptureAllNonSimpleIndex),
   -- Control flow: an `if` without `else` is one with an empty `else`
-  (``Core.Taclet.ifElseUnfold, .merged [.ifUnfold, .ifElseUnfold]),
-  (``Core.Taclet.ifElseSplit, .merged [.ifSplit, .ifElseSplit]),
-  (``Core.Taclet.requireConditionCapture, .taclet .requireConditionCapture),
-  (``Core.Taclet.requireSimple, .taclet .requireSimple),
-  (``Core.Taclet.assertConditionCapture, .taclet .assertConditionCapture),
-  (``Core.Taclet.assertSimple, .taclet .assertSimple),
-  (``Core.Taclet.revertBox, .taclet .revertBox),
-  (``Core.Taclet.revertDiamond, .taclet .revertDiamond),
+  (``Taclet.ifElseUnfold, .merged [.ifUnfold, .ifElseUnfold]),
+  (``Taclet.ifElseSplit, .merged [.ifSplit, .ifElseSplit]),
+  (``Taclet.requireConditionCapture, .taclet .requireConditionCapture),
+  (``Taclet.requireSimple, .taclet .requireSimple),
+  (``Taclet.assertConditionCapture, .taclet .assertConditionCapture),
+  (``Taclet.assertSimple, .taclet .assertSimple),
+  (``Taclet.revertBox, .taclet .revertBox),
+  (``Taclet.revertDiamond, .taclet .revertDiamond),
   -- Calls
   -- a call's body runs as a block of its own frame, popped (or dropped from
   -- under its return variables) after it: the expansion claims `functionFrameEmpty`
-  (``Core.Taclet.functionBodyExpand, .merged [.functionBodyExpand, .functionFrameEmpty]),
+  (``Taclet.functionBodyExpand, .merged [.functionBodyExpand, .functionFrameEmpty]),
   -- solkey `671f6762a9` splits it off `functionBodyExpand`: a call without targets
-  (``Core.Taclet.internalCallExpand, .merged [.internalCallExpand, .functionFrameEmpty]),
-  (``Core.Taclet.tryCallNoCallbackBox, .taclet .tryCallNoCallbackBox),
+  (``Taclet.internalCallExpand, .merged [.internalCallExpand, .functionFrameEmpty]),
+  (``Taclet.tryCallNoCallbackBox, .taclet .tryCallNoCallbackBox),
   -- Blocks: a block is a statement (`Stmt.block`), its end a frame (`Frames.pop .block`)
-  (``Core.Taclet.blockEmpty, .taclet .blockEmpty) ]
+  (``Taclet.blockEmpty, .taclet .blockEmpty) ]
 
-#check_constructor_table Core.Taclet, tacletOrigins.map Prod.fst
+#check_constructor_table Taclet, tacletOrigins.map Prod.fst
 
-/-- The callback taclets (`Calculus/Core/Callback.lean`'s `CallbackTaclet`, the other
+/-- The callback taclets (`Calculus/Callback.lean`'s `CallbackTaclet`, the other
 `transferSemantics`), and the solkey taclets they transcribe. -/
 def callbackOrigins : List (Lean.Name × KeyOrigin) := [
-  (``Core.CallbackTaclet.transferWithCallbackBox, .taclet .transferWithCallbackBox),
-  (``Core.CallbackTaclet.sendWithCallbackBox, .taclet .sendWithCallbackBox),
-  (``Core.CallbackTaclet.tryCallWithCallbackBox, .taclet .tryCallWithCallbackBox) ]
+  (``CallbackTaclet.transferWithCallbackBox, .taclet .transferWithCallbackBox),
+  (``CallbackTaclet.sendWithCallbackBox, .taclet .sendWithCallbackBox),
+  (``CallbackTaclet.tryCallWithCallbackBox, .taclet .tryCallWithCallbackBox) ]
 
-#check_constructor_table Core.CallbackTaclet, callbackOrigins.map Prod.fst
+#check_constructor_table CallbackTaclet, callbackOrigins.map Prod.fst
 
 /-! ## KeY's taclet at an operator
 
@@ -396,24 +396,24 @@ def operatorOrder : List (Lean.Name × List Lean.Name) :=
   let cmp := [``BinOp.lt, ``BinOp.gt, ``BinOp.le, ``BinOp.ge, ``BinOp.eqB, ``BinOp.neB]
   let compound := [``BinOp.add, ``BinOp.sub, ``BinOp.mul, ``BinOp.div, ``BinOp.mod]
   let incDec := [``IncDec.preInc, ``IncDec.preDec, ``IncDec.postInc, ``IncDec.postDec]
-  [(``Core.Taclet.binopAssignment, arith ++ cmp ++ [``BinOp.and, ``BinOp.or]),
-   (``Core.Taclet.binopUnfoldLeft, arith ++ cmp ++ [``BinOp.and, ``BinOp.or]),
-   (``Core.Taclet.binopUnfoldRight, arith ++ cmp),
-   (``Core.Taclet.unopAssignment, [``UnOp.neg, ``UnOp.not]),
-   (``Core.Taclet.unopCapture, [``UnOp.neg, ``UnOp.not])] ++
-  ([``Core.Taclet.localOpAssign, ``Core.Taclet.storageRootOpAssign, ``Core.Taclet.storageFieldOpAssign,
-    ``Core.Taclet.storageIndexMappingOpAssign, ``Core.Taclet.storageIndexArrayOpAssign,
-    ``Core.Taclet.memoryFieldOpAssign, ``Core.Taclet.memoryIndexArrayOpAssign,
-    ``Core.Taclet.storageFieldOpAssignUnfoldLeftFst, ``Core.Taclet.storageIndexOpAssignUnfoldLeftFst,
-    ``Core.Taclet.memoryFieldOpAssignUnfoldLeftFst, ``Core.Taclet.memoryIndexOpAssignUnfoldLeftFst,
-    ``Core.Taclet.compoundAssignValueRhsCapture].map (·, compound)) ++
-  ([``Core.Taclet.localIncrement, ``Core.Taclet.storageRootIncrement, ``Core.Taclet.storageFieldIncrement,
-    ``Core.Taclet.memoryFieldIncrement, ``Core.Taclet.memoryIndexArrayIncrement,
-    ``Core.Taclet.storageFieldIncrementUnfoldLeftFst, ``Core.Taclet.storageIndexIncrementUnfoldLeftFst,
-    ``Core.Taclet.memoryFieldIncrementUnfoldLeftFst, ``Core.Taclet.memoryIndexIncrementUnfoldLeftFst,
-    ``Core.Taclet.storageRootIncrementAssignment, ``Core.Taclet.storageFieldIncrementAssignment,
-    ``Core.Taclet.memoryFieldIncrementAssignment, ``Core.Taclet.memoryIndexArrayIncrementAssignment,
-    ``Core.Taclet.localAssignIncrement].map
+  [(``Taclet.binopAssignment, arith ++ cmp ++ [``BinOp.and, ``BinOp.or]),
+   (``Taclet.binopUnfoldLeft, arith ++ cmp ++ [``BinOp.and, ``BinOp.or]),
+   (``Taclet.binopUnfoldRight, arith ++ cmp),
+   (``Taclet.unopAssignment, [``UnOp.neg, ``UnOp.not]),
+   (``Taclet.unopCapture, [``UnOp.neg, ``UnOp.not])] ++
+  ([``Taclet.localOpAssign, ``Taclet.storageRootOpAssign, ``Taclet.storageFieldOpAssign,
+    ``Taclet.storageIndexMappingOpAssign, ``Taclet.storageIndexArrayOpAssign,
+    ``Taclet.memoryFieldOpAssign, ``Taclet.memoryIndexArrayOpAssign,
+    ``Taclet.storageFieldOpAssignUnfoldLeftFst, ``Taclet.storageIndexOpAssignUnfoldLeftFst,
+    ``Taclet.memoryFieldOpAssignUnfoldLeftFst, ``Taclet.memoryIndexOpAssignUnfoldLeftFst,
+    ``Taclet.compoundAssignValueRhsCapture].map (·, compound)) ++
+  ([``Taclet.localIncrement, ``Taclet.storageRootIncrement, ``Taclet.storageFieldIncrement,
+    ``Taclet.memoryFieldIncrement, ``Taclet.memoryIndexArrayIncrement,
+    ``Taclet.storageFieldIncrementUnfoldLeftFst, ``Taclet.storageIndexIncrementUnfoldLeftFst,
+    ``Taclet.memoryFieldIncrementUnfoldLeftFst, ``Taclet.memoryIndexIncrementUnfoldLeftFst,
+    ``Taclet.storageRootIncrementAssignment, ``Taclet.storageFieldIncrementAssignment,
+    ``Taclet.memoryFieldIncrementAssignment, ``Taclet.memoryIndexArrayIncrementAssignment,
+    ``Taclet.localAssignIncrement].map
     (·, incDec))
 
 /-- KeY's taclet for the row of the constructor `c` at the operator `op` (a
@@ -428,13 +428,13 @@ def keyTacletAt (c op : Lean.Name) : Option KeyTaclet := do
 #guard operatorOrder.all fun (c, ops) =>
   match tacletOrigins.lookup c with
   | some (.merged ts) =>
-    ts.length == ops.length || (c == ``Core.Taclet.localAssignIncrement && ts.length == 2 * ops.length)
+    ts.length == ops.length || (c == ``Taclet.localAssignIncrement && ts.length == 2 * ops.length)
   | _ => false
 
-#guard keyTacletAt ``Core.Taclet.binopAssignment ``BinOp.eqB == some .boolEqualityAssignment
-#guard keyTacletAt ``Core.Taclet.storageFieldIncrement ``IncDec.postDec ==
+#guard keyTacletAt ``Taclet.binopAssignment ``BinOp.eqB == some .boolEqualityAssignment
+#guard keyTacletAt ``Taclet.storageFieldIncrement ``IncDec.postDec ==
   some .storageFieldPostdecrement
-#guard keyTacletAt ``Core.Taclet.localAssignIncrement ``IncDec.postInc ==
+#guard keyTacletAt ``Taclet.localAssignIncrement ``IncDec.postInc ==
   some .localAssignPostincrement
 
 /-! ## Which KeY taclets the table claims -/
@@ -448,7 +448,7 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
 
 /-- The taclets of `solidityProgramRules.key` that **no** row claims, and why.
 
-* `emptyModality` — a rule of `⊢`, not of a statement: `Core.Proves.empty`
+* `emptyModality` — a rule of `⊢`, not of a statement: `Proves.empty`
   (`emptyModality`), which the proof tree prints under this name.  The
   table lists `Taclet` constructors only, so it does not claim it.
 * `blockReturn`, `functionFrameReturn` — architectural.  Returns are
@@ -469,10 +469,10 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
 * `transferNoCallbackDiamond`, `transferWithCallbackDiamond` — a payment
   under the diamond.  solkey's diamond rules owe a "non-negative amount" goal
   and book the payment; here a payment has a rule under the box only, and the
-  diamond closes to `false` (`Core.LeanTaclet.transferDiamond`): whether the world
+  diamond closes to `false` (`LeanTaclet.transferDiamond`): whether the world
   pays is the compiler theorem's, not the calculus's.
 * `sendWithCallbackDiamond` — a send that may call back, under the diamond:
-  the callback reading is the box's only (`Calculus/Core/Callback.lean`).  A send
+  the callback reading is the box's only (`Calculus/Callback.lean`).  A send
   with no callback has its diamond (`sendNoCallbackDiamond`): a refused send
   is an outcome of the run (`Semantics.sendAt`), not the world's.
 
@@ -518,11 +518,11 @@ constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
 def leanTaclets : List Lean.Name :=
-  [``Core.LeanTaclet.functionCallArgCapture, ``Core.LeanTaclet.tryCallDiamond, ``Core.LeanTaclet.transferDiamond,
-    ``Core.LeanTaclet.whileUnwind, ``Core.LeanTaclet.loopExit, ``Core.LeanTaclet.whileInvariantBox,
-    ``Core.LeanTaclet.whileInvariantDiamond, ``Core.LeanTaclet.whileClose, ``Core.LeanTaclet.whileNoVariantDiamond]
+  [``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond,
+    ``LeanTaclet.whileUnwind, ``LeanTaclet.loopExit, ``LeanTaclet.whileInvariantBox,
+    ``LeanTaclet.whileInvariantDiamond, ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond]
 
-#check_constructor_table Core.LeanTaclet, leanTaclets
+#check_constructor_table LeanTaclet, leanTaclets
 
 /-! ## `\heuristics` agree within a row
 

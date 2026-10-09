@@ -1,4 +1,4 @@
-import Solidity.Calculus.Core.Delab
+import Solidity.Calculus.Delab
 import Solidity.Examples.Tactics.CoreSymex
 import Solidity.Tools.Inspect
 import Solidity.Tools.Taclet
@@ -6,16 +6,16 @@ import Solidity.Tools.Taclet
 /-!
 # Scoped taclets and formulas, printed
 
-`Calculus/Core/Delab.lean`'s printers pinned: scoped taclets print
+`Calculus/Delab.lean`'s printers pinned: scoped taclets print
 their rule lines as today's did (today's `Calculus/Rules`, deleted at W4
 `calc-del`), all but five (`functionBodyExpand`, `internalCallExpand`,
 `tryCallNoCallbackBox`, `functionCallArgCapture`, `tryCallDiamond`), also under
 `#taclet` (`Tools/Inspect.lean`), and a formula the
-scoped strategy leaves prints, from its `Expr`, as `Core.Fml.show` prints
+scoped strategy leaves prints, from its `Expr`, as `Fml.show` prints
 the value: calls (with a tuple and a memory return) and `try` among them.
 The premises of `branches`, `cases`, `inv` and `inline` print from their
 `Expr` (a premise read alone names the locals of its context `_`), and a
-`Core.Proves` goal prints as today's sequent.
+`Proves` goal prints as today's sequent.
 -/
 
 namespace Solidity.Examples.Tactics.CorePrint
@@ -27,82 +27,82 @@ local instance : InContract := ⟨StandardExample⟩
 private abbrev SE := StandardExample
 
 /--
-info: @Core.Taclet.localValueAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : PrimTy}
-  {v : Core.Idx Γ (Core.LTy.val x)} {se : Core.Simple C Γ x}, dl{ ⟨[ v = se; ]⟩ ⇝ { v := se } ⟨[ ]⟩ }
+info: @Taclet.localValueAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : PrimTy}
+  {v : Idx Γ (LTy.val x)} {se : Simple C Γ x}, dl{ ⟨[ v = se; ]⟩ ⇝ { v := se } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.localValueAssign
+#guard_msgs in #check @Taclet.localValueAssign
 
 /--
-info: @Core.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : Name}
-  {nsp : Core.SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : Ty},
+info: @Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : Name}
+  {nsp : SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : Ty},
   dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete sp.fld; ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.storageFieldDelete_unfold_leftFst
+#guard_msgs in #check @Taclet.storageFieldDelete_unfold_leftFst
 
 /--
-info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {se : Core.Simple C Γ PrimTy.bool}
-  {x : Core.Ctx} {thenStm : Core.Prog C Γ x} {x_1 : Core.Ctx} {elseStm : Core.Prog C Γ x_1},
+info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool}
+  {x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
     "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.ifElseSplit
+#guard_msgs in #check @Taclet.ifElseSplit
 
 /-! `#taclet` on a scoped taclet: its line, today's solkey taclets.  The
 rule is one that prints as today's did (all but the five above do). -/
 
 /--
-info: Solidity.Core.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
-  {x : Name} {nsp : Core.SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : Ty},
+info: Solidity.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
+  {x : Name} {nsp : SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : Ty},
   dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete sp.fld; ]⟩ }
 solkey: storageFieldDelete_unfold_leftFst (simplify_prog)
 printed: storageFieldDelete_unfold_leftFst
-sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
-#guard_msgs in #taclet Core.Taclet.storageFieldDelete_unfold_leftFst
+#guard_msgs in #taclet Taclet.storageFieldDelete_unfold_leftFst
 
-/-! A rule's premise for a statement, quoted (`Core.Premise.quote`), checked
+/-! A rule's premise for a statement, quoted (`Premise.quote`), checked
 by the kernel's type checker and printed: a position outside the term is
 `_`, as `Idx.name` names it. -/
 
-private def readS : Core.Stmt SE [.val .uint] [.val .uint] :=
+private def readS : Stmt SE [.val .uint] [.val .uint] :=
   .assignLocal .here (.read (.field (.loc (.root "alice" rfl)) "age" rfl))
 
 /-- info: dl{ { _ := find(storage, alice.age) } ⟨[ ]⟩ } -/
 #guard_msgs in
 run_meta do
   let some p := readS.step 1 .box | throwError "no rule"
-  let e := Core.Premise.quote (mkConst ``StandardExample) p
+  let e := Premise.quote (mkConst ``StandardExample) p
   Meta.check e
   logInfo m!"{e}"
 
 /-! A formula whose program runs into a branch's end: `}`, then the rest. -/
 
-/-- info: dl{ ∀ uint x; x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1 } : Core.Fml SE [] -/
+/-- info: dl{ ∀ uint x; x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1 } : Fml SE [] -/
 #guard_msgs in
-#check (Core.Fml.all (.user "x") .uint
+#check (Fml.all (.user "x") .uint
   (.imp (.eqD (.app2 (.binop .gt .uint) (.pvV .here) (.app0 (.lit (.int 0))))
       (.app0 (.lit (.bool true))))
     (.modal .box
       (.cons (.declLocal .uint (.user "y") (some (.simple (.local .here))))
         (.cons (.assignLocal (.there .here) (.simple (.local .here))) .nil))
       (.pop .block (.push .refl) (.seq (.cons (.assignLocal .here (.simple (.lit 2 rfl))) .nil) .nil))
-      (.eqD (.pvV .here) (.app0 (.lit (.int 1)))))) : Core.Fml SE [])
+      (.eqD (.pvV .here) (.app0 (.lit (.int 1)))))) : Fml SE [])
 
 /-- `∀ x₁; … ∀ xₙ; ψ` over the value locals of `Γ` (innermost first). -/
-private def closeAll {C : Contract} : (Γ : Core.NCtx) → Core.Fml C Γ.ctx → MetaM (Core.Fml C [])
+private def closeAll {C : Contract} : (Γ : NCtx) → Fml C Γ.ctx → MetaM (Fml C [])
   | [], ψ => pure ψ
   | (x, .val p) :: Γ, ψ => closeAll Γ (.all x p ψ)
   | _, _ => throwError "a local that is not a value"
 
 /-- The scoped strategy's formula after `n` steps on `φ`, its program read
 under the value locals `Γ`, each bound by `∀`, printed from its quoted
-`Expr` and checked against `Core.Fml.show` on the value. -/
+`Expr` and checked against `Fml.show` on the value. -/
 private def stepsShowOf {C : Contract} (c : Expr) (φ : Solidity.Surface.Fml C) (n : Nat)
-    (Γ : Core.NCtx := []) : MetaM Unit := do
+    (Γ : NCtx := []) : MetaM Unit := do
   let .modal m P _ := φ | throwError "not a modality"
-  let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
-  let ψ := Core.symex n (← closeAll Γ (.modal m Pc .nil .tt))
-  let a ← Core.Delab.fmtFml (Core.Fml.quote c ψ)
+  let .ok ⟨_, Pc⟩ := Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
+  let ψ := symex n (← closeAll Γ (.modal m Pc .nil .tt))
+  let a ← Delab.fmtFml (Fml.quote c ψ)
   let b ← ψ.show c []
   unless a == b do throwError "from the Expr\n{a}\nbut the value prints\n{b}"
   logInfo a
@@ -112,18 +112,18 @@ private def stepsShow (φ : Solidity.Surface.Fml SE) (n : Nat) : MetaM Unit :=
 
 /-- The premise of the rule on the first statement of a program, quoted. -/
 private def headPremiseOf {C : Contract} (c : Expr) (m : Modality) :
-    {Γ Γ' : Core.Ctx} → Core.Prog C Γ Γ' → MetaM Expr
+    {Γ Γ' : Ctx} → Prog C Γ Γ' → MetaM Expr
   | _, _, .cons s _ => do
     let some p := s.step 1 m | throwError "no rule"
-    return Core.Premise.quote c p
+    return Premise.quote c p
   | _, _, .nil => throwError "no statement"
 
 /-- The premise of the rule on the first statement of `φ`'s program, read in
 the context `Γ`, quoted, checked by the kernel's type checker and printed. -/
-private def headPremise {C : Contract} (c : Expr) (Γ : Core.NCtx) (φ : Solidity.Surface.Fml C) :
+private def headPremise {C : Contract} (c : Expr) (Γ : NCtx) (φ : Solidity.Surface.Fml C) :
     MetaM Unit := do
   let .modal m P _ := φ | throwError "not a modality"
-  let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
+  let .ok ⟨_, Pc⟩ := Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
   let e ← headPremiseOf c m Pc
   Meta.check e
   logInfo m!"{e}"
@@ -148,14 +148,14 @@ info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 ≐ true → 
 
 /-! After a call with a tuple return, the statements read their locals past
 the return variables (`CallRet.outNames`): `uint y = a;`, not the caller's
-`x`.  The call prints from the `Expr` as `Core.Fml.show` prints it from the
+`x`.  The call prints from the `Expr` as `Fml.show` prints it from the
 value, folded with the statements after it that assign its returns;
 returns that none assigns but one reads print as the declarations they
 are. -/
 
-private def retsφ : Core.Fml SE [] :=
+private def retsφ : Fml SE [] :=
   .all (.user "x") .uint (.modal .box
-    (.cons (.call "h" .nil (.rets ((Core.Binders.nil.snoc .uint (.user "a")).snoc .uint (.user "b"))) .nil)
+    (.cons (.call "h" .nil (.rets ((Binders.nil.snoc .uint (.user "a")).snoc .uint (.user "b"))) .nil)
       (.cons (.declLocal .uint (.user "y") (some (.simple (.local (.there .here))))) .nil))
     .nil .tt)
 
@@ -163,7 +163,7 @@ private def retsφ : Core.Fml SE [] :=
 #guard_msgs in
 run_meta do
   let c := mkConst ``StandardExample
-  let a ← Core.Delab.fmtFml (Core.Fml.quote c retsφ)
+  let a ← Delab.fmtFml (Fml.quote c retsφ)
   let b ← retsφ.show c []
   unless a == b do throwError "from the Expr\n{a}\nbut the value prints\n{b}"
   logInfo a
@@ -171,10 +171,10 @@ run_meta do
 /-! An update that is a schema variable prints as itself, its elements on
 top of it after it (a position it did not declare is `_`). -/
 
-/-- info: fun U => dl{ { U ‖ _ := 1 } true } : Core.Upd SE [] [Core.LTy.val PrimTy.uint] → Core.Fml SE [] -/
+/-- info: fun U => dl{ { U ‖ _ := 1 } true } : Upd SE [] [LTy.val PrimTy.uint] → Fml SE [] -/
 #guard_msgs in
-#check fun (U : Core.Upd SE [] [.val .uint]) =>
-  (Core.Fml.upd .box (U.snoc (.local .here (.val (.app0 (.lit (.int 1)))))) .tt : Core.Fml SE [])
+#check fun (U : Upd SE [] [.val .uint]) =>
+  (Fml.upd .box (U.snoc (.local .here (.val (.app0 (.lit (.int 1)))))) .tt : Fml SE [])
 
 /-! ## Calls and `try`
 
@@ -218,7 +218,7 @@ private def retsCallφ : Solidity.Surface.Fml Rets :=
 
 private def pairφ : Solidity.Surface.Fml Rets := dl!{ [ (a, b) = pair(3); ] true }
 
-private def abΓ : Core.NCtx := [(.user "b", .val .uint), (.user "a", .val .uint)]
+private def abΓ : NCtx := [(.user "b", .val .uint), (.user "a", .val .uint)]
 
 /--
 info: [ uint a; uint b; (a, b) = pair(3); Person memory m = mk(2); uint y = m.age; ] true
@@ -283,7 +283,7 @@ private def sendφ : Solidity.Surface.Fml SE := dl!{ [ ok = owner.send(3); ] tru
 
 private def sendSimpleφ : Solidity.Surface.Fml SE := dl!{ [ ok = to.send(3); ] true }
 
-private def okToΓ : Core.NCtx := [(.user "ok", .val .bool), (.user "to", .val .uint)]
+private def okToΓ : NCtx := [(.user "ok", .val .bool), (.user "to", .val .uint)]
 
 private def loopφ : Solidity.Surface.Fml SE :=
   dl!{ [ /// @custom:key invariant i <= 3
@@ -322,7 +322,7 @@ info: ∀ uint i; i <= 3 ∧ { anon(i) } { havoc } (i <= 3 → { se1 := i < 3 } 
 
 /-! ## Sequents
 
-`Core.Proves C R Γ₀ H φ` prints as today's sequent: the context's entries
+`Proves C R Γ₀ H φ` prints as today's sequent: the context's entries
 left of `⟹`, a variable context as `..H`; an update of pops and the hidden
 binder print as nothing. -/
 
@@ -330,17 +330,17 @@ binder print as nothing. -/
 info: dl{ ∀ uint x, x = 1, { y := x } ⟹ [ x = y; ] true } : Prop
 -/
 #guard_msgs in
-#check (Core.Proves SE .all [] (((Core.Hyps.nil.all (.user "x") .uint).pre
+#check (Proves SE .all [] (((Hyps.nil.all (.user "x") .uint).pre
     (.eqD (.pvV .here) (.app0 (.lit (.int 1))))).upd .box
-      (Core.Upd.nil.decl (.user "y") (.val (.pvV .here))))
+      (Upd.nil.decl (.user "y") (.val (.pvV .here))))
   (.modal .box (.cons (.assignLocal (.there .here) (.simple (.local .here))) .nil) .nil .tt))
 
 /--
-info: fun H => dl{ ..H ⟹ₖ _ = 1 } : Core.Hyps SE [] [Core.LTy.val PrimTy.uint] → Prop
+info: fun H => dl{ ..H ⟹ₖ _ = 1 } : Hyps SE [] [LTy.val PrimTy.uint] → Prop
 -/
 #guard_msgs in
-#check fun (H : Core.Hyps SE [] [.val .uint]) =>
-  Core.Proves SE .solkey [] (H.bind .box (.user "z") (.val .bool)) (.eqD (.pvV (.there .here)) (.app0 (.lit (.int 1))))
+#check fun (H : Hyps SE [] [.val .uint]) =>
+  Proves SE .solkey [] (H.bind .box (.user "z") (.val .bool)) (.eqD (.pvV (.there .here)) (.app0 (.lit (.int 1))))
 
 -- A goal of a walk prints as the line it is.
 /--
@@ -348,10 +348,10 @@ trace: case h.thn
 ⊢ dl{ ∀ bool b, b ≐ true ⟹ true }
 -/
 #guard_msgs in
-example : Core.Proves SE .all [] .nil (.all (.user "b") .bool
+example : Proves SE .all [] .nil (.all (.user "b") .bool
     (.modal .box (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt)) := by
-  apply Core.Proves.allIntro
-  apply Core.Proves.split rfl
+  apply Proves.allIntro
+  apply Proves.split rfl
   · trace_state
     exact .updIntro (.closeTrue rfl)
   · exact .updIntro (.closeTrue rfl)

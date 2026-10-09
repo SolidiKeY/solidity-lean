@@ -1,6 +1,6 @@
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -49,26 +49,26 @@ open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## The taclets
 
 `thn` and `els` are schema variables for whole blocks (KeY's `#s0`). -/
 
 /--
-info: @Core.Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {nse : Core.Val C Γ PrimTy.bool}
-  {x : Core.Ctx} {thenStm : Core.Prog C Γ x} {x_1 : Core.Ctx} {elseStm : Core.Prog C Γ x_1},
+info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {nse : Val C Γ PrimTy.bool}
+  {x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
   dl{ ⟨[ if (nse) thenStm else elseStm; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thenStm else elseStm; ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.ifElseUnfold
+#guard_msgs in #check @Taclet.ifElseUnfold
 
 /--
-info: @Core.Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {se : Core.Simple C Γ PrimTy.bool}
-  {x : Core.Ctx} {thenStm : Core.Prog C Γ x} {x_1 : Core.Ctx} {elseStm : Core.Prog C Γ x_1},
+info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool}
+  {x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
     "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.ifElseSplit
+#guard_msgs in #check @Taclet.ifElseSplit
 
 /-! ## Example: a branch on two locals
 
@@ -230,7 +230,7 @@ info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0;
   | .ok _ => false
 
 /- Declared alike in both branches, then at another type in a later one. -/
-#guard (Core.Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
+#guard (Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
     if (c) { bool t = true; } } : Surface.Prog StandardExample)).toBool
 
 /-! ## Under the diamond: the condition decides

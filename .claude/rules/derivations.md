@@ -17,13 +17,13 @@ Two directories, by proof style:
   The convention:
   1. **One chain term, every line written.** A worked chain is
      `theorem chain : A ~[r]~> B ~*> C ~[findOnSave]~> D … := by sol_chain`
-     over a scoped line (`dl![m]{ … }` on `Core.Post`): `Core.Fml.Via`, and
-     `Core.Fml.ViaE` once rewrites go on past the program
-     (`Calculus/Core/ChainKit.lean`), propositions. No `calc`, no `_` line,
+     over a scoped line (`dl![m]{ … }` on `Post`): `Fml.Via`, and
+     `Fml.ViaE` once rewrites go on past the program
+     (`Calculus/ChainKit.lean`), propositions. No `calc`, no `_` line,
      the statement shows the whole trace. Every worked chain reads the scoped
-     calculus; `φ : Core.Post C Γ` stands at the context of the line's user
+     calculus; `φ : Post C Γ` stands at the context of the line's user
      locals (the fresh ones, a rule's or the elaborator's captures, dropped).
-     `~~>` (`Core.Fml.Leads`, `Core.Fml.LeadsE` past the program) and `calc`
+     `~~>` (`Fml.Leads`, `Fml.LeadsE` past the program) and `calc`
      are the notation's (`ChainNotation`), not a worked chain's. (A lone
      `~*>` is the derivation itself, data: a `def`.)
   2. **No binding is dropped.** No `~[simplifyUpdate]~>`: the fresh captures
@@ -31,7 +31,7 @@ Two directories, by proof style:
   3. **To the last step.** Past the program the stack merges
      (`~[sequentialToParallel]~>`) and every read is resolved by its laws,
      until no rewrite but `simplifyUpdate` applies. `#last_line chain`
-     (`Calculus/Core/LastLine.lean`) follows every chain and is silent exactly
+     (`Calculus/LastLine.lean`) follows every chain and is silent exactly
      there; otherwise it says which rewrite still applies and what it gives.
   4. **One link per rewrite**: `~[findMemberCons]~>`,
      `~[selectOnSaveMember]~>`, `~[selectOnDelAtMember]~>`,
@@ -80,7 +80,7 @@ A tactic example is over a named contract
   one `apply` per taclet (`unfold r`, `update r`, `split r`, `Proves.check r`,
   `done r`, `empty`, `intro`), and `apply close; sol_close` at the end. Each rule the
   walk takes is named in the proof, so renaming a rule breaks the example.
-  `sol_derive?` writes the walk out (`Calculus/Core/ProofTree.lean`), as
+  `sol_derive?` writes the walk out (`Calculus/ProofTree.lean`), as
   `#chain` writes a chain.
 
 Every theorem has a docstring with its Solidity. Every file has its own

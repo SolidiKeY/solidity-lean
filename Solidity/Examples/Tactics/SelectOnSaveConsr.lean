@@ -1,8 +1,8 @@
 import Solidity.Calculus.Rewrite
 import Solidity.Calculus.RewriteChains
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.RewriteSyntax
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.RewriteSyntax
 
 /-!
 # Select on save meets a `consr` path
@@ -54,15 +54,15 @@ derivation still sees of it is the side condition `p.hasSeg`, that a
 has fixed `p`, so the law is named bare.
 
 The formulas and the sequent are the scoped ones (`open scoped
-Solidity.Core.Scoped`): the leaf `ageWriteRead` reads by hand is its
+Solidity.Scoped`): the leaf `ageWriteRead` reads by hand is its
 erasure, computed (`refine close ?_; sol_symex`), today's `Update.lean`
 terms over today's interpreter, where the `consr` path is; the merge, the
 split and the rewrite of `ageWriteReadKeY` are the scoped sequent's
-(`Calculus/Core/UpdateRules.lean`, read by today's lines in
-`Calculus/Core/RewriteSyntax.lean`), and the read `x` is a hidden binder of
+(`Calculus/UpdateRules.lean`, read by today's lines in
+`Calculus/RewriteSyntax.lean`), and the read `x` is a hidden binder of
 its context, which prints as nothing.
 
-The same lines as one chain (`Calculus/Core/Chains.lean`) are
+The same lines as one chain (`Calculus/Chains.lean`) are
 `ChainRewrites.ageWriteReadKeYValue`; `ChainRewrites.ageReadMembers` goes on past
 `find(save(storage, alice.age, 42), alice.age)` to solkey's read of the write, a
 member at a time.
@@ -74,7 +74,7 @@ open NFml.Proves Semantics SemanticsProperties Close
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- `alice.age = 42; uint x = alice.age;` leaves `x == 42`. -/
 theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 } := by

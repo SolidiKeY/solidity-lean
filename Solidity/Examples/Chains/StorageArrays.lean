@@ -3,8 +3,8 @@ import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # The additional storage array cases as chains
@@ -30,7 +30,7 @@ for the pre-state slot.
 
 namespace Solidity.Examples.Chains.StorageArrays
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Example: Additional Storage Array Cases -/
 
@@ -41,7 +41,7 @@ def Pushes : Contract := contract!{
 }
 local instance : InContract := ⟨Pushes⟩
 section
-variable (m : Modality) (φ : Core.Post Pushes [])
+variable (m : Modality) (φ : Post Pushes [])
 
 namespace PushStorageSource
 def names : FreshTable := [("bobAcc", "sp1")]
@@ -52,7 +52,7 @@ local instance : FreshNames := .ofTable names
 `⇝*`: the nested initialiser aliased one member at a time (`bobAcc`, then `tokRef` through it), then the
 push; the merge binds `tokRef` to `bob.account.token`, as printed.  A struct read has no literal: no law reads
 `bob.account.token` through the write below it. -/
-theorem chain (φ : Core.Post Pushes [.alias (.struct "Token")]) :
+theorem chain (φ : Post Pushes [.alias (.struct "Token")]) :
     dl![m]{ { storage := save(storage, bob.account.token.value, 10) }
         ⟨[ Token storage tokRef = bob.account.token; tokens.push(tokRef); ]⟩ φ }
     ~*> dl![m]{
@@ -111,7 +111,7 @@ def bare :
 the paper's one `⇝*`, the old-length slot bound by `storageLocalRootPushBind` and read; the read merges under
 the push, the alias standing for the pre-state slot, and stays a read of that slot (recycled, whatever it
 holds), as printed: no law reads a slot through a push's length write. -/
-theorem bound (φ : Core.Post Pushes [.val .uint, .alias (.struct "Token")]) :
+theorem bound (φ : Post Pushes [.val .uint, .alias (.struct "Token")]) :
     dl![m]{ ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~*> dl![m]{
         { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
@@ -131,7 +131,7 @@ local instance : FreshNames := .ofTable PushStorageSource.names
 `bob.account.token.value` is 10: the push lvalue normalises to `tokens.push(tokRef)` (the elaborator's), which
 copies the value the alias finds, so the chain is `PushStorageSource`'s.  The element is written before the
 length, the printed order reversed. -/
-theorem refSource (φ : Core.Post Pushes [.alias (.struct "Token")]) :
+theorem refSource (φ : Post Pushes [.alias (.struct "Token")]) :
     dl![m]{ { storage := save(storage, bob.account.token.value, 10) }
         ⟨[ Token storage tokRef = bob.account.token; tokens.push() = tokRef; ]⟩ φ }
     ~*> dl![m]{
@@ -152,7 +152,7 @@ theorem refSource (φ : Core.Post Pushes [.alias (.struct "Token")]) :
 /-- `tokens.push().value = 11;`, from its first step `uint pv = 11; Token storage sp = tokens.push(); sp.value = pv;`
 (the member of a call is refused): the paper's one `⇝*`, the slot bound and written, then the three updates
 merged. -/
-theorem field (φ : Core.Post Pushes [.alias (.struct "Token"), .val .uint]) :
+theorem field (φ : Post Pushes [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ ⟨[ uint pv = 11; Token storage sp = tokens.push(); sp.value = pv; ]⟩ φ }
     ~*> dl![m]{
         { pv := 11 }
@@ -191,7 +191,7 @@ local instance : FreshNames := .ofTable names
 `tokRef` through it), the push normalised to `bucket.tokens.push(tokRef)` (the elaborator's), the receiver
 aliased (`sp`) and the push; the merge binds `tokRef` to `bob.account.token` and puts the push on the
 original path, not the temporary alias.  A struct read has no literal. -/
-theorem chain (φ : Core.Post Pushes [.alias (.struct "Token")]) :
+theorem chain (φ : Post Pushes [.alias (.struct "Token")]) :
     dl![m]{ { storage := save(storage, bob.account.token.value, 10) }
         ⟨[ Token storage tokRef = bob.account.token; bucket.tokens.push() = tokRef; ]⟩ φ }
     ~*> dl![m]{
@@ -215,7 +215,7 @@ Token storage sp = bucket.tokens.push(); sp.value = pv;` (the member of a call i
 `⇝*`, `pv` snapshotted and the receiver aliased (`sp1`); its second, the slot bound through `sp1` (`sp`) and
 written; then the merge, which binds `sp` to `bucket.tokens[bucket.tokens.length]` and puts the write on the
 original path. -/
-theorem field (φ : Core.Post Pushes [.alias (.struct "Token"), .val .uint, .val .uint]) :
+theorem field (φ : Post Pushes [.alias (.struct "Token"), .val .uint, .val .uint]) :
     dl![m]{ { valueVal := 42 } ⟨[ uint pv = valueVal; Token storage sp = bucket.tokens.push(); sp.value = pv; ]⟩ φ }
     ~*> dl![m]{ { valueVal := 42 } { pv := valueVal }
         ⟨[ Token[] storage sp1 = bucket.tokens; sp = sp1.push(); sp.value = pv; ]⟩ φ }
@@ -248,7 +248,7 @@ local instance : FreshNames := .ofTable names
 /-- `values.push(makeValue());` with `seed` 7: the argument captured (`pv`, the elaborator's), the call
 inlined and run (its local `se2` is the printed `makeValue()`), then the value pushed, the paper's one `⇝*`;
 the merge, and the read of `seed` resolved (`findOnSave`).  The length is `values.length`. -/
-theorem chain (φ : Core.Post Pushes []) :
+theorem chain (φ : Post Pushes []) :
     dl![m]{ { storage := save(storage, seed, 7) } ⟨[ values.push(makeValue()); ]⟩ φ }
     ~*> dl![m]{
         { storage := save(storage, seed, 7) }
@@ -276,7 +276,7 @@ local instance : FreshNames := .ofTable [("pv", "se1")]
 /-- `values.push() = makeValue();` with `seed` 7: a push used as a target is the push of its right-hand side
 (the paper's `⇝`, the elaborator's), then as for `values.push(makeValue())`, whose chain this is: the program
 is the same once elaborated.  The element is written before the length. -/
-theorem lvalue (φ : Core.Post Pushes []) :
+theorem lvalue (φ : Post Pushes []) :
     dl![m]{ { storage := save(storage, seed, 7) } ⟨[ values.push() = makeValue(); ]⟩ φ }
     ~*> dl![m]{
         { storage := save(storage, seed, 7) }

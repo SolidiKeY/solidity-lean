@@ -1,17 +1,17 @@
-import Solidity.Calculus.Core.Step
-import Solidity.Calculus.Core.Quote
-import Solidity.Calculus.Core.Print
+import Solidity.Calculus.Step
+import Solidity.Calculus.Quote
+import Solidity.Calculus.Print
 import Solidity.Calculus.NFmlClose
 
 /-!
 # The strategy on scoped formulas
 
-`Calculus/Core/Step.lean`'s `symex` on three programs of the worked
+`Calculus/Step.lean`'s `symex` on three programs of the worked
 examples, each read into the scoped syntax (`Prog.resolve`), run to its end
-by the compiled code, quoted back (`Core.Fml.quote`) and checked by the
+by the compiled code, quoted back (`Fml.quote`) and checked by the
 kernel: `coreSymex` adds the theorem `symex n φ = ψ`, proved by `Eq.refl`.
 
-What is printed is the scoped result (`Core.Fml.show`): a scope end pops
+What is printed is the scoped result (`Fml.show`): a scope end pops
 its locals invisibly.  Until W4 `calc-del` each result was also checked
 against today's strategy (its erasure, each branch's cover dropped, with the
 same fresh names); that strategy is deleted, and the results printed here
@@ -31,17 +31,17 @@ private abbrev SE := StandardExample
 /-- The fuel: enough for every program below. -/
 private def fuel : Nat := 1000
 
-/-- Run `Core.symex` on `φ` read into the scoped syntax, add `name : Core.symex fuel φ' = ψ` checked by
+/-- Run `symex` on `φ` read into the scoped syntax, add `name : symex fuel φ' = ψ` checked by
 the kernel, and print `ψ`. -/
 private def coreSymex (name : Lean.Name) (φ : Solidity.Surface.Fml SE) : MetaM Unit := do
   let c := mkConst ``StandardExample
   let .modal m P _ := φ | throwError "not a modality"
-  let .ok ⟨_, Pc⟩ := Core.Prog.resolve (C := SE) [] P | throwError "the program does not resolve"
-  let φc : Core.Fml SE [] := .modal m Pc .nil .tt
-  let ψ := Core.symex fuel φc
-  let ctx := Core.Quote.qCtxRaw []
-  let lhs := mkAppN (mkConst ``Core.symex) #[c, ctx, toExpr fuel, Core.Fml.quote c φc]
-  let rhs := Core.Fml.quote c ψ
+  let .ok ⟨_, Pc⟩ := Prog.resolve (C := SE) [] P | throwError "the program does not resolve"
+  let φc : Fml SE [] := .modal m Pc .nil .tt
+  let ψ := symex fuel φc
+  let ctx := Quote.qCtxRaw []
+  let lhs := mkAppN (mkConst ``symex) #[c, ctx, toExpr fuel, Fml.quote c φc]
+  let rhs := Fml.quote c ψ
   let ty ← mkEq lhs rhs
   addDecl (.thmDecl { name, levelParams := [], type := ty, value := ← mkEqRefl rhs })
   logInfo (← ψ.show c [])

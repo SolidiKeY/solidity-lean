@@ -1,9 +1,9 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Deploy
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Deploy
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -18,7 +18,7 @@ Changes from the published text, as solkey's benchmark file makes them: the
 written without the conversion (stream A's `payable(x)`); the `payable`
 `receive()` is dropped, since nothing here calls it.  The constructor is
 the contract's (`Contract.ctor`), and the runs deploy the wallet with it
-(`Core.Contract.deployT`, checked by the kernel).  `getBalance()`, which
+(`Contract.deployT`, checked by the kernel).  `getBalance()`, which
 solkey's copy drops because `address(this).balance` crashed its parser, is
 back (`getBalance`).
 
@@ -27,7 +27,7 @@ back (`getBalance`).
 The payment runs with `transferNoCallbackBox`, as solkey's net rules do, which
 books the ledger and leaves `address(this).balance`; with callbacks the
 recipient could change the ledger before control returns
-(`Semantics/Core/Callback.lean`).
+(`Semantics/Callback.lean`).
 -/
 
 namespace Solidity.Examples.Benchmark.EtherWallet
@@ -50,7 +50,7 @@ def EtherWallet : Contract := contract!{
 
 local instance : InContract := ⟨EtherWallet⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- `constructor()`: the caller is the owner, from any storage. -/
 theorem ctor : ⊢ dl!{ [ constructor(); ] owner == msg.sender } := by
@@ -98,33 +98,33 @@ open Lean Elab Command in
 run_cmd liftCoreM do
   let ns := `Solidity.Examples.Benchmark.EtherWallet
   for (n, P) in [(`ctorCore, ctorP), (`withdrawCore, withdrawP), (`overdrawCore, overdrawP)] do
-    if let some e ← Core.Prog.defineCore (ns ++ n) (ns ++ `EtherWallet) [] P then
+    if let some e ← Prog.defineCore (ns ++ n) (ns ++ `EtherWallet) [] P then
       throwError "{n}: {e}"
 
-/-- The wallet `7` deploys (`Core.Contract.deployT`), then holding `100`
+/-- The wallet `7` deploys (`Contract.deployT`), then holding `100`
 (what the dropped `receive()` would take). -/
-noncomputable def deployed : Option (Core.TState EtherWallet []) :=
-  (Core.Contract.deployT EtherWallet ctorCore { msgSender := ⟨7, rfl⟩ }).toOption.map
+noncomputable def deployed : Option (State EtherWallet []) :=
+  (Contract.deployT EtherWallet ctorCore { msgSender := ⟨7, rfl⟩ }).toOption.map
     fun σ => { σ with selfBalance := ⟨100, rfl⟩ }
 
 /-- `ensures net(owner) == \old(net(owner)) - _amount`: `7`'s entry is `30`
 less, and the funds as the transaction found them. -/
 theorem withdrawRunNet :
-    (deployed.bind fun σ => (Core.Prog.trun σ withdrawCore).toOption.map
+    (deployed.bind fun σ => (Prog.run σ withdrawCore).toOption.map
       fun o => ((Semantics.lookupBy 7 o.st.net).getD 0, o.st.selfBalance.1)) = some (-30, 100) := by
   decide +kernel
 
 /-- More than the funds: the ledger books it all the same.  That the contract
 can pay is not the ledger's to check; on the EVM the payment is refused and
-the call reverts (`Evm.Core.compile_correct`). -/
+the call reverts (`Evm.compile_correct`). -/
 theorem withdrawRunOverdrawn :
-    (deployed.bind fun σ => (Core.Prog.trun σ overdrawCore).toOption.map
+    (deployed.bind fun σ => (Prog.run σ overdrawCore).toOption.map
       fun o => (Semantics.lookupBy 7 o.st.net).getD 0) = some (-130) := by
   decide +kernel
 
 /-- Anyone but the owner: `withdraw` reverts. -/
 theorem withdrawRunOther :
-    (deployed.map fun σ => (Core.Prog.trun { σ with tx := { msgSender := ⟨3, rfl⟩ } }
+    (deployed.map fun σ => (Prog.run { σ with tx := { msgSender := ⟨3, rfl⟩ } }
       withdrawCore).halt?) = some (some .revert) := by
   decide +kernel
 

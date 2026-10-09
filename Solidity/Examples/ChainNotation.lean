@@ -1,17 +1,17 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.Payment
 
 /-!
 # Chains: `φ ~> ψ`, `φ ~[r]~> ψ`, `φ ~*> ψ`, `φ ~~> ψ`, and `calc`
 
-A derivation, stated (`Calculus/Core/Chains.lean`): both ends written in
+A derivation, stated (`Calculus/Chains.lean`): both ends written in
 `dl!{ … }`, and in between as many lines as you like (mini-solkey's chain
-examples).  The scoped calculus (`open scoped Solidity.Core.Scoped`): a line
+examples).  The scoped calculus (`open scoped Solidity.Scoped`): a line
 after the first is computed by the strategy, its text checked against the
 computed line's erasure.
 
@@ -20,8 +20,8 @@ computed line's erasure.
 * `φ ~> ψ` — the strategy's step does;
 * `φ ~*> ψ` — several steps;
 * `φ ~*> φ₁ ~[r]~> φ₂ ~*> …` — a chain, every link holding; `sol_chain`;
-* `φ ~~> ψ` — to prove `φ`, prove `ψ` (`Core.Fml.Leads`; past the program,
-  where `ψ` is `Update.lean`'s line, `Core.Fml.LeadsE`): what a chain composes
+* `φ ~~> ψ` — to prove `φ`, prove `ψ` (`Fml.Leads`; past the program,
+  where `ψ` is `Update.lean`'s line, `Fml.LeadsE`): what a chain composes
   to, and how segments compose (`Fml.Leads.via`, `Fml.LeadsE.viaE`);
 * `calc` — the same chain, one line per step, each with its reason, its line
   computed from the one before (`by sol_chain`).
@@ -31,7 +31,7 @@ are the rules' fresh variables).  A line keeps two unknowns:
 `dl![m]{ … }` reads it at a modality `m` (`⟨[ P ]⟩ ψ` is `P` under `m`, and
 an update with no modality under it is judged at `m`, so a box derivation's
 last line is `dl![.box]{ … }`), and a name where a formula stands is a
-postcondition `φ : Core.Post C Γ`, at the context `Γ` it stands in (the
+postcondition `φ : Post C Γ`, at the context `Γ` it stands in (the
 parameters a line reads and the locals its program declares, its fresh ones
 dropped).  The headline (§2, §4) is the printed trace, for every `m` and `φ`
 (`Examples/Chains/Storage.lean`'s `BalanceWrite.chain`); what is *proved
@@ -43,7 +43,7 @@ chains of `Examples/Chains/`, and are cited here, not drawn again.
 
 namespace Solidity.Examples.ChainNotation
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -98,7 +98,7 @@ formula with its updates merged, for any modality `m` and postcondition `φ`),
 as `#derivation` prints it: the rules' names, and their fresh variables. -/
 
 section Headline
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /--
 info:
@@ -125,7 +125,7 @@ example : dl!{ ⟨ alice.account.balance = 10; ⟩ φ }
   sol_chain
 
 /-- A step over `φ` needs its fresh index, which `rfl` cannot compute over `φ`, and `sol_chain`
-proves it from `Core.Post.noFresh`.  (`se1` written, not declared, is a parameter, `∀ uint se1;`.) -/
+proves it from `Post.noFresh`.  (`se1` written, not declared, is a parameter, `∀ uint se1;`.) -/
 example : dl![m]{ ⟨[ se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ]⟩ φ }
     ~[localValueAssign]~>
       dl![m]{ { se1 := 10 } ⟨[ Account storage sp1 = alice.account; sp1.balance = se1; ]⟩ φ } := by
@@ -133,11 +133,11 @@ example : dl![m]{ ⟨[ se1 = 10; Account storage sp1 = alice.account; sp1.balanc
 
 -- A formula that is no `Post` may name a fresh variable, or have a modality.
 /--
-error: sol_chain: ψ is free in the line: only a modality `m` and postconditions `φ : Core.Post C Γ` may be
+error: sol_chain: ψ is free in the line: only a modality `m` and postconditions `φ : Post C Γ` may be
   dl{ ⟨[ alice.account.balance = 10; ]⟩ ψ }
 -/
 #guard_msgs in
-example (ψ : Core.Fml StandardExample []) : dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ ψ }
+example (ψ : Fml StandardExample []) : dl![m]{ ⟨[ alice.account.balance = 10; ]⟩ ψ }
     ~> dl![m]{ ⟨[ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ]⟩ ψ } := by
   sol_chain
 
@@ -164,8 +164,8 @@ example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
 The headline's trace (`Chains.Storage.BalanceWrite.chain`, one chain term, for every modality
 `m` and postcondition `φ`) proves its first line from its last.  Here under the box, where the
 write is valid, at the postcondition the statement is written for: past the program the chain
-goes on on the erasure (`Core.Fml.ViaE`), its last scoped line closed by `Core.Proves.close`
-(`Core.Fml.ViaE.valid_close`), the erasure's last line by `sol_close`.  The chain keeps its
+goes on on the erasure (`Fml.ViaE`), its last scoped line closed by `Proves.close`
+(`Fml.ViaE.valid_close`), the erasure's last line by `sol_close`.  The chain keeps its
 captures, which `sol_close` does not drop: `simplifyUpdate` drops them first. -/
 
 theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
@@ -194,7 +194,7 @@ example : dl!{ [ alice.age = v; ] alice.age == v }
 /-- A merge while the program is open, then the strategy's step: a scoped
 `calc` of a `~[sequentialToParallel]~>` and a `~>` composes to `~~>`, its
 last line a scoped one, the program still open. -/
-example (m : Modality) (φ : Core.Post StandardExample []) :
+example (m : Modality) (φ : Post StandardExample []) :
     dl![m]{ { se1 := 10 } { sp1 := alice.account } ⟨[ sp1.balance = se1; alice.age = 5; ]⟩ φ }
     ~~> dl![m]{ { se1 := 10 ‖ sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
           ⟨[ alice.age = 5; ]⟩ φ } :=
@@ -209,7 +209,7 @@ example (m : Modality) (φ : Core.Post StandardExample []) :
 /-! ## 5 · A branch
 
 `ifElseSplit` makes the two goals one formula, `(c → …) ∧ (c' → …)`
-(`Calculus/Core/Fml.lean`'s `Premise.fml`), each branch's program ending at
+(`Calculus/Fml.lean`'s `Premise.fml`), each branch's program ending at
 its block's `}` (`core_item`).  The chain runs the `then` branch, then the
 `else` branch. -/
 
@@ -227,7 +227,7 @@ example : dl!{ ⟨ balances[a] = 1; if (true) { x = 2; } else { x = 1; }; ⟩ ba
 
 /-! ## 6 · The evidence is unique
 
-A formula has one next line and fires one statement (`Core.Fml.StepBy.unique`),
+A formula has one next line and fires one statement (`Fml.StepBy.unique`),
 so two derivations of the same length between the same ends are one: every
 one-step derivation of the first link of `Chains.Storage.AgeWrite.chain`
 (`alice.age = ageVal;` with `ageVal` 42) is `ageWrite`, at the diamond and
@@ -235,19 +235,19 @@ any postcondition. -/
 
 /-- The first link of `Chains.Storage.AgeWrite.chain`, as data: `alice.age = ageVal;` with `ageVal`
 42, the write, the program done. -/
-def ageWrite (φ : Core.Post StandardExample [.val .uint]) :
+def ageWrite (φ : Post StandardExample [.val .uint]) :
     dl!{ { ageVal := 42 } ⟨ alice.age = ageVal; ⟩ φ }
     ~*> dl!{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ } := by
   sol_chain
 
-example (φ : Core.Post StandardExample [.val .uint])
+example (φ : Post StandardExample [.val .uint])
     (d : dl!{ { ageVal := 42 } ⟨ alice.age = ageVal; ⟩ φ }
       ~*> dl!{ { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ })
     (h : d.length = 1) : d = ageWrite φ :=
-  Core.Fml.Steps.eq_of_length d _ (h.trans rfl)
+  Fml.Steps.eq_of_length d _ (h.trans rfl)
 
-/-- The strategy of `Calculus/Core/Step.lean` (`symex`) is a chain, of the same six steps. -/
-example : (Core.Fml.Steps.ofSymex 200
+/-- The strategy of `Calculus/Step.lean` (`symex`) is a chain, of the same six steps. -/
+example : (Fml.Steps.ofSymex 200
     dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }).length = 6 := by
   decide
 
@@ -264,7 +264,7 @@ info: dl{ ∀ uint v; ⟨ alice.age = v; ⟩ find(storage, alice.age) = v }
 
 -- A captured equality, inequality or product prints in KeY's text and reads back.
 /--
-info: dl{ ∀ uint b; ∀ uint a; { x := a == b ‖ y := a != b ‖ z := a * b } true } : Core.Fml StandardExample []
+info: dl{ ∀ uint b; ∀ uint a; { x := a == b ‖ y := a != b ‖ z := a * b } true } : Fml StandardExample []
 -/
 #guard_msgs in
 #check dl!{ { x := a == b ‖ y := a != b ‖ z := a * b } true }
@@ -284,7 +284,7 @@ info: dl{ ∀ uint v; ⟨[ alice.age = v; ]⟩ φ }
     ~[storageFieldWriteSave]~> dl{ ∀ uint v; { storage := save(storage, alice.age, v) } φ } : Prop
 -/
 #guard_msgs in
-variable (m : Modality) (φ : Core.Post StandardExample [.val .uint]) in
+variable (m : Modality) (φ : Post StandardExample [.val .uint]) in
 #check dl![m]{ ⟨[ alice.age = v; ]⟩ φ }
     ~[storageFieldWriteSave]~> dl![m]{ { storage := save(storage, alice.age, v) } φ }
 
@@ -338,11 +338,11 @@ end Modality
 
 -- A line holds no other Lean term than a modality and postconditions…
 /--
-error: sol_chain: ψ₀ is free in the line: only a modality `m` and postconditions `φ : Core.Post C Γ` may be
+error: sol_chain: ψ₀ is free in the line: only a modality `m` and postconditions `φ : Post C Γ` may be
   dl{ ψ₀ ∧ (∀ uint x; ⟨ x = 1; ⟩ true) }
 -/
 #guard_msgs in
-example (ψ₀ : Core.Fml StandardExample []) : ∃ ψ, Core.Fml.and ψ₀ dl!{ ⟨ x = 1; ⟩ true } ~> ψ :=
+example (ψ₀ : Fml StandardExample []) : ∃ ψ, Fml.and ψ₀ dl!{ ⟨ x = 1; ⟩ true } ~> ψ :=
   ⟨_, by sol_chain⟩
 
 -- … and one modality.
@@ -351,13 +351,13 @@ error: sol_chain: the line is under two modalities: take `cases` on one
   dl{ (∀ uint x; ⟨[ x = 1; ]⟩ true) ∧ (∀ uint x; ⟨[ x = 2; ]⟩ true) }
 -/
 #guard_msgs in
-example (m m' : Modality) : ∃ ψ, Core.Fml.and dl![m]{ ⟨[ x = 1; ]⟩ true } dl![m']{ ⟨[ x = 2; ]⟩ true }
+example (m m' : Modality) : ∃ ψ, Fml.and dl![m]{ ⟨[ x = 1; ]⟩ true } dl![m']{ ⟨[ x = 2; ]⟩ true }
     ~> ψ := ⟨_, by sol_chain⟩
 
 /-! ## 9 · Past a finished goal
 
 Once the first goal of a branch is done, `(c → {U} φ) ∧ …`, the step on the
-next one asks `φ` whether a modality is left, which only `Core.Post.inactive`
+next one asks `φ` whether a modality is left, which only `Post.inactive`
 knows: a `require`, an `assert` and an `if`, each to its end, at a modality
 and over any postcondition.  These are the calculus's traces: every rule of a
 `require`, an `assert` and an `if` is the same under either modality, so the
@@ -371,16 +371,16 @@ once captured: `{ se1 := find(storage, flags[a]) }`.  The postcondition
 stands where the parameters `y` and `a` are in scope. -/
 
 section Past
-variable (m : Modality) (φ : Core.Post StandardExample [.val .uint, .val .uint])
+variable (m : Modality) (φ : Post StandardExample [.val .uint, .val .uint])
 
 /-- `revert();` ends the calculus's traces: under the box it closes to `true`,
 whatever follows… -/
-example (φ : Core.Post StandardExample [.val .uint]) :
+example (φ : Post StandardExample [.val .uint]) :
     dl![.box]{ ⟨[ revert(); y = 1; ]⟩ φ } ~[revertBox]~> dl![.box]{ true } := by
   sol_chain
 
 /-- …and under the diamond to `false`. -/
-example (φ : Core.Post StandardExample [.val .uint]) :
+example (φ : Post StandardExample [.val .uint]) :
     dl!{ ⟨ revert(); y = 1; ⟩ φ } ~[revertDiamond]~> dl!{ false } := by
   sol_chain
 
@@ -426,7 +426,7 @@ theorem assertTrace : dl![m]{ ⟨[ assert(flags[a]); y = 1; ]⟩ φ }
 
 /-- A split behind a stack of updates, under `m`: the overflow of `Chains.CheckedArithmetic`, the lines
 its box and diamond chains share, up to the revert where the two modalities part. -/
-example (φ : Core.Post StandardExample [.val .uint]) : dl![m]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ ⟨[ uint8 x = 250; x += 10; ]⟩ φ }
     ~*> dl![m]{ { x := 250 } ⟨[ x += 10; require(x <= 255); ]⟩ φ }
     ~[localOpAssign]~> dl![m]{ { x := 250 } { x := x + 10 } ⟨[ require(x <= 255); ]⟩ φ }
     ~*> dl![m]{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
@@ -506,10 +506,10 @@ info:
       (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ)) ∧ (true ≐ false → { x := 1 } φ) }
 -/
 #guard_msgs in
-variable (φ : Core.Post StandardExample [.val .uint]) in
+variable (φ : Post StandardExample [.val .uint]) in
 #derivation dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
 
-example (φ : Core.Post StandardExample [.val .uint]) :
+example (φ : Post StandardExample [.val .uint]) :
     dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
     ~*> dl![m]{ (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ)) ∧
           (true ≐ false → { x := 1 } φ) } := by
@@ -519,13 +519,13 @@ end Past
 
 /-! ## A chain ends
 
-`#last_line chain` (`Calculus/Core/LastLine.lean`): the chain's end is a last line — no
+`#last_line chain` (`Calculus/LastLine.lean`): the chain's end is a last line — no
 program left, one parallel update in front of each goal, and no rewrite `~=>`
 tries still applies to it.  Silent where it is; a stack of updates and an
 unresolved read are reported with the rewrite that goes on. -/
 
 section Ends
-variable (m : Modality) (φ : Core.Post StandardExample [.val .uint])
+variable (m : Modality) (φ : Post StandardExample [.val .uint])
 
 #guard_msgs in
 #last_line Chains.Storage.AgeWriteRead.chain
@@ -548,7 +548,7 @@ sequentialToParallel still applies (under either modality), and gives
 #last_line stacked
 
 /-- The stack merged, the read of the write not yet resolved: `~~>` past the program
-(`Core.Fml.LeadsE`), its last line `Update.lean`'s. -/
+(`Fml.LeadsE`), its last line `Update.lean`'s. -/
 theorem unresolved : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
           x := find(save(storage, alice.age, 42), alice.age) } φ } := by
@@ -576,8 +576,8 @@ example : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
   sol_chain
 
 /-! A chain term ends at its last line; a long one is cut into segments, the
-second starting where the first ends, composed by `Core.Fml.LeadsE.viaE` (by
-`Core.Fml.Leads.via` where both are scoped). -/
+second starting where the first ends, composed by `Fml.LeadsE.viaE` (by
+`Fml.Leads.via` where both are scoped). -/
 
 /-- `uint x = alice.age;` over `alice.age` at `42`: the program and the merge. -/
 theorem readSeg :
@@ -623,11 +623,11 @@ theorem composed :
 #last_line composed
 
 /-! `sol_chain?` writes a `~~>` out as the chain it is, and `sol_rws?` names the rewrites
-from one line to another (`Calculus/Core/ChainGen.lean`). -/
+from one line to another (`Calculus/ChainGen.lean`). -/
 
 /--
 info: Try this:
-  exact Solidity.Core.Fml.ViaE.leads (show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+  exact Solidity.Fml.ViaE.leads (show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
         ~*> cdl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
         ~[sequentialToParallel]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
         ~[findOnSave]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } by sol_chain)

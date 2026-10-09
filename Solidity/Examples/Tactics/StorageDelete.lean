@@ -1,9 +1,9 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Rewrite
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.RewriteSyntax
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.RewriteSyntax
 import Solidity.Tools.Inspect
 
 /-!
@@ -43,7 +43,7 @@ open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Example 15: `delete alice.account;` — a simple receiver
 
@@ -237,7 +237,7 @@ section Fixed
 
 local instance : InContract := ⟨TestSuite⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! From the initial store, solkey's `testFixedArrayDeleteKeepsLength`,
 `testFixedStructArrayDeleteResetsElements`,
@@ -279,9 +279,9 @@ box (`Proves.updRw`).  Then the update is applied to the goal and dropped
 rule of the calculus, so none of them waits for the program to be gone
 (`deleteFrameMid_theory`).
 
-The sequent is the scoped one (`Calculus/Core/Proves.lean`'s `merge` and
-`updRw`, the steps after the program of `Calculus/Core/UpdateRules.lean`,
-read by today's lines, `Calculus/Core/RewriteSyntax.lean`): its context also
+The sequent is the scoped one (`Calculus/Proves.lean`'s `merge` and
+`updRw`, the steps after the program of `Calculus/UpdateRules.lean`,
+read by today's lines, `Calculus/RewriteSyntax.lean`): its context also
 holds the hidden binders of the declarations and the scope ends, which print
 as nothing, so a merge line takes the scope ends in and merges past the
 binders. -/
@@ -292,7 +292,7 @@ open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 open Theory Theory.StValue in
 /-- `alice.account.balance = 5; delete alice.account.balance;` read two
@@ -333,7 +333,7 @@ info: Try this:
     apply update .storageFieldReadBindLocalRoot
     apply update .storageFieldDelete
     apply unfold .localValueDeclInitDrop
-    refine Core.Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst
+    refine Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst
     apply unfold .storageLocalDeclInitDrop
     apply update .storageFieldReadBindLocalRoot
     apply update .storageFieldReadFind
@@ -366,7 +366,7 @@ example :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldDelete
   apply unfold .localValueDeclInitDrop
-  refine Core.Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst
+  refine Proves.unfold rfl ?_ -- storageFieldRead_unfold_rightFst
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind

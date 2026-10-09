@@ -4,9 +4,9 @@ import Solidity.Tools.Counterexample
 # `#verify`: prove a specification, or refute it
 
 `#verify C.f` states the obligation of the function `f` of the contract `C`,
-scoped (`cspec[C]{f}`, `Calculus/Core/Spec.lean`: `spec[C]{f}` under `open
-scoped Solidity.Core.Scoped`), and tries `sol_spec_try` on `⊨` of it
-(`Core.Valid`).  With
+scoped (`cspec[C]{f}`, `Calculus/Spec.lean`: `spec[C]{f}` under `open
+scoped Solidity.Scoped`), and tries `sol_spec_try` on `⊨` of it
+(`Valid`).  With
 no goal left the function is proved, and the command offers the theorem
 as a suggestion (`Try this:`; a click replaces the `#verify C.f` with it;
 `#verify C` prints it as text).  Otherwise it searches for a counterexample (`refuteSpec`,
@@ -44,7 +44,7 @@ def errText (e : Exception) : MetaM String := do
   pure ((msg.splitOn "\n").headD msg)
 
 /-- **Verify `f`**: elaborate the scoped `cspec[C]{f}`, run `sol_spec_try` on
-`Core.Valid` of it, and search for a counterexample where goals are left. -/
+`Valid` of it, and search for a counterexample where goals are left. -/
 def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrHeartbeats do
   let C ← unsafe evalConst Contract n
   let cE := Lean.mkConst n
@@ -57,7 +57,7 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
   let φE ← match φE? with
     | .ok e => pure e
     | .error msg => return .error msg
-  let goal ← mkFreshExprMVar (mkApp2 (Lean.mkConst ``Core.Valid) cE φE)
+  let goal ← mkFreshExprMVar (mkApp2 (Lean.mkConst ``Valid) cE φE)
   let tac ← `(tactic| sol_spec_try)
   let run : TermElabM (Except String (List MVarId)) := do
     pure (.ok (← Tactic.run goal.mvarId! (Tactic.evalTactic tac)))
@@ -82,8 +82,8 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
 
 /-- The theorem a proved `f` of the contract `c` is: the scoped obligation
 `#verify` proved, written `⊨ spec[C]{f}` where `open scoped
-Solidity.Core.Scoped` is in effect (`inScope`; `spec[C]{f}` is then
-`cspec[C]{f}`), `valid% cspec[C]{f}` (`Core.Valid`) elsewhere. -/
+Solidity.Scoped` is in effect (`inScope`; `spec[C]{f}` is then
+`cspec[C]{f}`), `valid% cspec[C]{f}` (`Valid`) elsewhere. -/
 def provedTheorem (c : Lean.Name) (f : String) (inScope : Bool) : String :=
   if inScope then s!"theorem {f}_spec : ⊨ spec[{c}]\{{f}} := by sol_spec"
   else s!"theorem {f}_spec : valid% cspec[{c}]\{{f}} := by sol_spec"
@@ -109,7 +109,7 @@ open Command in
 def elabVerify : Lean.Elab.Command.CommandElab := fun stx => liftTermElabM do
   let ns ← getCurrNamespace
   let short (c : Lean.Name) : Lean.Name := c.replacePrefix ns .anonymous
-  let inScope ← Core.surfaceOn
+  let inScope ← surfaceOn
   let one (c : Lean.Name) (C : Contract) (f : String) (suggest : Bool) : TermElabM Unit := do
     match ← verifyFunction c f with
     | .proved =>

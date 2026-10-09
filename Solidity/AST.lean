@@ -254,7 +254,7 @@ def structDef : Name -> List (Name × Ty)
 /-- Struct declarations solc refuses ("Identifier already declared"): two
 members of one name.  None is in `structDef`, so every struct of the table
 has distinct member names (`structDef_nodup`,
-`Semantics/Core/StorageErase.lean`); a type that names one is an
+`Semantics/StorageErase.lean`); a type that names one is an
 elaboration error (`unknownStructMsg`), pinned on `BadDup`. -/
 def refusedStructs : List (Name × List (Name × Ty)) :=
   [("BadDup", [("a", Ty.uint), ("a", Ty.bool)])]

@@ -12,7 +12,7 @@ order of the source; the replays are what `#solkey_derive? … pending`
 -/
 
 open Solidity NFml.Proves
-open scoped Core.Scoped
+open scoped Scoped
 
 theorem Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.proved : ⊢ Solkey.TestSuite.storageIndexWriteComplexReceiverCopySource.problem := by
   sol_prove

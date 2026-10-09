@@ -1,7 +1,7 @@
 import Solidity.Calculus.NFmlClose
-import Solidity.Evm.CoreExamples
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Evm.Examples
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -33,7 +33,7 @@ open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Bitwise and shifts -/
 
@@ -113,7 +113,7 @@ theorem uncheckedWrap :
 /-- Division inside `unchecked` still reverts on a zero divisor. -/
 example : ¬ (⊨ dl!{ ⟨ uint x = 1; uint y = 0; unchecked { x = x / y; }; ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _)) (by decide +kernel)
+    (h (State.init _)) (by decide +kernel)
 
 /-! ## What the elaborator writes -/
 
@@ -139,7 +139,7 @@ example : Surface.Prog.toStr (sol{ uint x = 1; x &= ~x; x <<= 2; }) =
 The operators compile to their opcodes with no guard (`uTail`), and the
 compiler's correctness covers them (`tail_sim`). -/
 
-open Evm.Core.Examples in
+open Evm.Examples in
 /-- `total = 12 & 10 | 1 << 4;` stores `24`; `unchecked { total = total + 1; }`
 at `2^256 - 1` stores `0`, where the checked `total += 1;` reverts. -/
 theorem machine_run :

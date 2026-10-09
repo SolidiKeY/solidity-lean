@@ -1,7 +1,7 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -16,7 +16,7 @@ state, and one per operator family where solkey has a file per operator.
 
 A `.key` file states its claim in the contract's initial store, where every
 array is empty; a claim that is only about that store is a typed run
-(`Core.Prog.trun`) from `Storage.standardExample`, checked by
+(`Prog.run`) from `Storage.standardExample`, checked by
 `decide +kernel`, or printed by `#eval` (`Surface.Prog.localAfterT`) where it
 reads a struct's default or runs a loop.  A length premise (`1 < values.length`) is dropped instead:
 under the box a write out of bounds reverts, which satisfies the formula, so
@@ -29,7 +29,7 @@ open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## 1 · Roots and fields -/
 
@@ -148,7 +148,7 @@ theorem localDeclSkip :
 /-! ### Runs, checked by the kernel
 
 The claims about the initial store alone: each block resolved, quoted and
-declared (`Core.Prog.defineCore`), then run typed (`Core.Prog.trun`) from
+declared (`Prog.defineCore`), then run typed (`Prog.run`) from
 `Storage.standardExample`, whose erasure is `State.exampleStore`'s storage,
 by `decide +kernel`. -/
 
@@ -172,17 +172,17 @@ run_cmd liftCoreM do
       (`arrayOutOfBoundsCore, arrayOutOfBoundsP), (`pushValueCore, pushValueP),
       (`pushNonsimpleArgCore, pushNonsimpleArgP), (`popNonemptyGoneCore, popNonemptyGoneP),
       (`popEmptyCore, popEmptyP), (`popAfterPushReadCore, popAfterPushReadP)] do
-    if let some e ← Core.Prog.defineCore (ns ++ n) ``StandardExample [] P then
+    if let some e ← Prog.defineCore (ns ++ n) ``StandardExample [] P then
       throwError "{n}: {e}"
 
 /-- The typed run from the initial store. -/
-private abbrev runEx {Γ' : Core.Ctx} (P : Core.Prog StandardExample [] Γ') :=
-  Core.Prog.trun (Core.TState.ofStorage Core.Storage.standardExample) P
+private abbrev runEx {Γ' : Ctx} (P : Prog StandardExample [] Γ') :=
+  Prog.run (State.ofStorage Storage.standardExample) P
 
 /-- The innermost local, a `uint`, where the run from the initial store ends. -/
-private def resultEx {Γ : Core.Ctx} (P : Core.Prog StandardExample [] (.val .uint :: Γ)) :
+private def resultEx {Γ : Ctx} (P : Prog StandardExample [] (.val .uint :: Γ)) :
     Option Int :=
-  (runEx P).toOption.map fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1
+  (runEx P).toOption.map fun o => (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
 
 /-- A write through an alias bound to no path reverts (`aliasPath`); solc
 rejects the program statically. -/
@@ -404,13 +404,13 @@ theorem assertHolds : ⊨ dl!{ [ age = 10; assert(age == 10); result = 1; ] resu
 `require`, the box does not hold … -/
 theorem assertFails : ¬ (⊨ dl!{ [ assert(false); result = 1; ] true }) :=
   fun h => Modality.afterRunTR_not_panic
-    (h (Core.TState.init _) ⟨0, by decide⟩)
+    (h (State.init _) ⟨0, by decide⟩)
     (by decide +kernel)
 
 /-- … and the diamond of nothing. -/
 theorem assertFailsDiamond : ¬ (⊨ dl!{ ⟨ assert(false); result = 1; ⟩ result == 1 }) :=
   fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _) ⟨0, by decide⟩) (by decide +kernel)
+    (h (State.init _) ⟨0, by decide⟩) (by decide +kernel)
 
 /-- `age = 10; require(age == 10); result = 1;` -/
 theorem requireHolds : ⊨ dl!{ [ age = 10; require(age == 10); result = 1; ] result == 1 } := by
@@ -425,7 +425,7 @@ theorem requireFails : ⊨ dl!{ [ require(false); result = 1; ] false } := by
 /-- … the diamond `c ∧ φ` (solkey `docs/require-assert.md`). -/
 theorem requireFailsDiamond : ¬ (⊨ dl!{ ⟨ require(false); result = 1; ⟩ result == 1 }) :=
   fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _) ⟨0, by decide⟩) (by decide +kernel)
+    (h (State.init _) ⟨0, by decide⟩) (by decide +kernel)
 
 /-! ## 7 · Fixed-size arrays
 
@@ -441,7 +441,7 @@ section Fixed
 
 local instance : InContract := ⟨TestSuite⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- `fixedValues[2] = 1; uint result = fixedValues[2];`
 (`TestSuite.testFixedArrayIndexInBounds`). -/

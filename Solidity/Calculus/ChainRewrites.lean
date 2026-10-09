@@ -64,7 +64,7 @@ is about the body read it: `simplify` (the variables it reads),
 `applyOnRigid` and the `apply…Box` (a first-order body), `law` (its
 equations).  `simplifyFresh` reads only the body's fresh variables, which a
 postcondition `φ : Post C` has none of: over `φ` it computes by `simp` from
-`Post.noFresh`, not by `rfl` (`Chain.proveRw`, `Calculus/Core/Chains.lean`).
+`Post.noFresh`, not by `rfl` (`Chain.proveRw`, `Calculus/Chains.lean`).
 
 **The modality of an update.**  An update carries the modality it was
 produced under, and merging `{U}_m {V}_m'` needs `m = m'`: a halting update

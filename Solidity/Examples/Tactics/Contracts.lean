@@ -1,14 +1,14 @@
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.FunContract
-import Solidity.Calculus.Core.WalkSyntax
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.FunContract
+import Solidity.Calculus.WalkSyntax
 
 /-!
 # Calls by contract
 
 A call proved by its callee's contract (`useContract`,
-`Calculus/Core/FunContract.lean`) instead of its inlined body: the goal
+`Calculus/FunContract.lean`) instead of its inlined body: the goal
 `"pre"` owes `requires` with the parameters bound to the arguments, the goal
 `"post"` takes the snapshots `{old := storage ‖ oldNet := net}` that `\old`
 reads, forgets storage and ledger (`{havoc}`) for a `nonpayable` callee
@@ -28,7 +28,7 @@ closes by the strategy.
 behind its parameters and preconditions; the mutability `μ` is checked on
 the callee's body (`Prog.within`, by `rfl`): `addOne` is `pure`,
 `getTotal` reads storage (`view`), `deposit` writes it (`nonpayable`).
-The statements read scoped (`open scoped Solidity.Core.Scoped`).
+The statements read scoped (`open scoped Solidity.Scoped`).
 -/
 namespace Solidity.Examples.Tactics.Contracts
 
@@ -46,7 +46,7 @@ def ContractsExample : Contract := contract!{
 
 local instance : InContract := ⟨ContractsExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- `y = addOne(x);` by `addOne`'s contract, a `pure` callee: nothing but
 the result is forgotten. -/
@@ -167,14 +167,14 @@ theorem callAddOneWalk : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
 
 /-- Whether the first call of a formula's first program has a body within
 `μ` (`Prog.within`). -/
-def calleeWithin (μ : Mutability) : {Γ : Core.Ctx} → Core.Fml ContractsExample Γ → Option Bool
+def calleeWithin (μ : Mutability) : {Γ : Ctx} → Fml ContractsExample Γ → Option Bool
   | _, .modal _ P _ _ => progWithin μ P
   | _, .imp _ ψ | _, .all _ _ ψ | _, .bind _ _ _ ψ | _, .upd _ _ ψ => calleeWithin μ ψ
   | _, _ => none
 where
-  progWithin (μ : Mutability) : {Γ Γ' : Core.Ctx} → Core.Prog ContractsExample Γ Γ' → Option Bool
+  progWithin (μ : Mutability) : {Γ Γ' : Ctx} → Prog ContractsExample Γ Γ' → Option Bool
     | _, _, .nil => none
-    | _, _, .cons (.call _ _ _ body) _ => some (Core.Prog.within μ body)
+    | _, _, .cons (.call _ _ _ body) _ => some (Prog.within μ body)
     | _, _, .cons _ P => progWithin μ P
 
 /-- `addOne` is `pure`, `getTotal` `view` only, `deposit` `nonpayable` only. -/
@@ -189,11 +189,11 @@ example : [Mutability.pure, .view, .nonpayable].map
   decide
 
 /-- The frame fact of a `view` callee: its typed run leaves storage and
-ledger as they were (`Prog.trun_frame`). -/
-example {Γ Γ' : Core.Ctx} (P : Core.Prog ContractsExample Γ Γ')
-    (hw : Core.Prog.within .view P = true) (σ : Core.TState ContractsExample Γ)
-    (o : Core.Out ContractsExample σ.H Γ') (h : Core.Prog.trun σ P = .ok o) :
+ledger as they were (`Prog.run_frame`). -/
+example {Γ Γ' : Ctx} (P : Prog ContractsExample Γ Γ')
+    (hw : Prog.within .view P = true) (σ : State ContractsExample Γ)
+    (o : Out ContractsExample σ.H Γ') (h : Prog.run σ P = .ok o) :
     o.st.storage = σ.storage ∧ o.st.net = σ.net :=
-  (Core.Prog.trun_frame P hw 0 h).1.keeps (by decide)
+  (Prog.run_frame P hw 0 h).1.keeps (by decide)
 
 end Solidity.Examples.Tactics.Contracts

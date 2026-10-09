@@ -1,8 +1,8 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.NFmlClose
 import Solidity.Theory.Storage
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -44,7 +44,7 @@ open NFml.Proves Semantics
 
 local instance : InContract := ⟨TestSuite⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Part 1 · The calculus -/
 

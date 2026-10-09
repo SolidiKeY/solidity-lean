@@ -1,27 +1,27 @@
 import Solidity.Typing.Soundness
-import Solidity.Semantics.Core.TypedStepErase
-import Solidity.Semantics.Core.TypedRunWk
+import Solidity.Semantics.StepErase
+import Solidity.Semantics.RunWk
 
 /-!
 # Invariants of the typed run, on its erasure
 
 `Typing/Soundness.lean`'s `RunInv` (a part on the erased global state, a
 part on each erased local) carried along the typed run
-(`Semantics/Core/TypedRun.lean`): `RunInv.TKeeps t` says the step `t`, from
+(`Semantics/Run.lean`): `RunInv.TKeeps t` says the step `t`, from
 a typed state whose erasure the invariant holds of, ends, if in a state, in
 one whose erasure it holds of, under a store typing that only grew.  The
 scopes (a branch, a block, a loop's iteration, a call's frame, a `try`'s
 clause) only push and pop locals, so they keep any such invariant once their
 sub-programs do (`tkeeps_ite` … `tkeeps_tryCall`, a loop by
 `TLoop.run_induct`); a statement without sub-programs keeps it when what it erases to does
-(`TKeeps.of_agrees`, through `Semantics/Core/TypedStepErase.lean`), which is
+(`TKeeps.of_agrees`, through `Semantics/StepErase.lean`), which is
 each invariant's own lemma (`Typing/Reachability.lean`'s canonical
 storage, `Typing/Constructibility.lean`'s tight one).  The typed state is
 well-typed by construction (`Typing/TypedWT.lean`), so type soundness itself
 needs no such proof.
 -/
 
-namespace Solidity.Core
+namespace Solidity
 
 open Semantics (Value Res HeapTy bind_ok_inv)
 
@@ -30,7 +30,7 @@ variable {C : Contract}
 /-- A typed step that ends in a state: what it erases to ends in that state's
 erasure. -/
 theorem StepAgrees.ok {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : EState C Γ → Res (EState C Γ')}
-    (ha : StepAgrees t u) {σ : TState C Γ} {o : Out C σ.H Γ'} (h : t σ = .ok o) :
+    (ha : StepAgrees t u) {σ : State C Γ} {o : Out C σ.H Γ'} (h : t σ = .ok o) :
     u σ.erase = .ok o.st.erase := by
   have hu := ha σ
   rw [h] at hu
@@ -44,11 +44,11 @@ variable {I : RunInv C}
 erasure it holds of, the step ends, if in a state, in one whose erasure it
 holds of under a store typing that only grew. -/
 def TKeeps {Γ Γ' : Ctx} (I : RunInv C) (t : TStep C Γ Γ') : Prop :=
-  ∀ (H : HeapTy) (σ : TState C Γ) (o : Out C σ.H Γ'), I.Holds H σ.erase → t σ = .ok o →
+  ∀ (H : HeapTy) (σ : State C Γ) (o : Out C σ.H Γ'), I.Holds H σ.erase → t σ = .ok o →
     ∃ H', H.Extends H' ∧ I.Holds H' o.st.erase
 
 /-- **A leaf, through its erasure**: a typed step keeps the invariant when
-what it erases to does (`Semantics/Core/TypedStepErase.lean`). -/
+what it erases to does (`Semantics/StepErase.lean`). -/
 theorem TKeeps.of_agrees {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : EState C Γ → Res (EState C Γ')}
     (ha : StepAgrees t u) (hk : I.Keeps u) : I.TKeeps t := by
   intro H σ o hσ h
@@ -66,7 +66,7 @@ theorem TKeeps.drop {Γ Δ Δ' : Ctx} {t : TStep C Γ Δ} (hf : I.TKeeps t) (x :
     obtain ⟨H', hext, h'⟩ := hf H σ o₁ hσ hr
     refine ⟨H', hext, ?_⟩
     show I.Holds H' (o₁.st.drop x).erase
-    rw [TState.drop_erase]
+    rw [State.drop_erase]
     exact h'.drop x
 
 theorem tkeeps_seq {Γ Γ₁ Γ₂ : Ctx} {s : TStep C Γ Γ₁} {P : TStep C Γ₁ Γ₂} (hs : I.TKeeps s)
@@ -130,7 +130,7 @@ theorem tkeeps_assert {Γ : Ctx} (c : Val C Γ .bool) : I.TKeeps (TRun.assert c)
     · cases h
 
 theorem tkeeps_revert {Γ : Ctx} :
-    I.TKeeps (fun _ : TState C Γ => (.error .revert : TRes (Out C _ Γ))) :=
+    I.TKeeps (fun _ : State C Γ => (.error .revert : TRes (Out C _ Γ))) :=
   fun _ _ _ _ h => nomatch h
 
 theorem tkeeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {body : TStep C Γ Γ₁}
@@ -152,7 +152,7 @@ theorem tkeeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {bo
         obtain ⟨H₂, hext₂, h₂⟩ := hb H₁ τ.st τ' h₁ hr
         refine ⟨H₂, hext₁.trans hext₂, ?_⟩
         show I.Holds H₂ (τ'.st.drop x).erase
-        rw [TState.drop_erase]
+        rw [State.drop_erase]
         exact h₂.drop x
 
 theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
@@ -185,7 +185,7 @@ theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRe
       cases h
       obtain ⟨H₂, hext₂, h₂⟩ := hb H₁ _ o₂ h₁ hr
       refine ⟨H₂, hext₁.trans hext₂, ?_⟩
-      rw [TState.withEnv_erase]
+      rw [State.withEnv_erase]
       refine h₂.withEnv ?_
       rw [CallRet.leaveT_erase, TEnv.erase_wk, ← TEnv.take_erase, ← TEnv.drop_erase]
       exact CallRet.leave_all ret (env_mono (hext₁.trans hext₂) hσ.2)
@@ -213,7 +213,7 @@ theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall 
       rw [hr, ok_bind] at h
       dsimp only at h
       refine hok.drop ((Ext.append Γ ρ).trans h₁) H (σ.withEnv (TEnv.append ρ r σ.env)) o ?_ h
-      rw [TState.withEnv_erase, TEnv.append_erase]
+      rw [State.withEnv_erase, TEnv.append_erase]
       have hd := Binders.decodeT_erase (C := C) (H := σ.H) rets vs
       rw [hr] at hd
       exact hσ.withEnv (Env.All.append ρ (hdec H vs _ rest hd) hσ.2)
@@ -224,7 +224,7 @@ theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall 
     | ok r =>
       rw [hr, ok_bind] at h
       refine hpnc.drop ((Ext.append Γ κ).trans h₃) H (σ.withEnv (TEnv.append κ r σ.env)) o ?_ h
-      rw [TState.withEnv_erase, TEnv.append_erase]
+      rw [State.withEnv_erase, TEnv.append_erase]
       have hd := CodeBinder.decodeT_erase (C := C) (H := σ.H) code c
       rw [hr] at hd
       exact hσ.withEnv (Env.All.append κ (hcode H c _ hd) hσ.2)
@@ -232,4 +232,4 @@ theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall 
 
 end RunInv
 
-end Solidity.Core
+end Solidity

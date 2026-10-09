@@ -3,8 +3,8 @@ import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # The storage `delete` examples as chains
@@ -22,13 +22,13 @@ short of the printed `10`, `0`, `0`.
 
 namespace Solidity.Examples.Chains.StorageDelete
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Example: Storage Delete Cases -/
 
 local instance : InContract := ⟨TestSuite⟩
 section
-variable (m : Modality) (φ : Core.Post TestSuite [])
+variable (m : Modality) (φ : Post TestSuite [])
 
 namespace SubtreeDelete
 variable (hk : STerm.KindFreeAt st!{ save(save(select(storage, alice), account.balance, 100), account.token.value, 7) } pt!{ account })
@@ -41,7 +41,7 @@ resolved as solkey reads a path, a member at a time: from its head (`findMemberC
 writes seen from `alice` (`selectOnDelAtMember`, `selectOnSaveMemberIn`, the writes under the delete), and
 the word below the deleted node read back to its default (`findOnDelAtBelow`), under `hk`: the `account`
 node of `alice`, after the writes, is no mapping. -/
-theorem chain (φ : Core.Post TestSuite [.val .uint, .val .uint]) :
+theorem chain (φ : Post TestSuite [.val .uint, .val .uint]) :
     dl![m]{ ⟨[ alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;
         b = alice.account.balance; v = alice.account.token.value; ]⟩ φ }
     ~*> dl![m]{ { se1 := 100 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
@@ -179,7 +179,7 @@ delete ledger.balances[1]; nonce = ledger.nonce; gone = ledger.balances[1];`: th
 (`storageIndexDelete`, no bounds branch, `S₆`), then `nonce` and `gone`; the merge, the value deleted at
 `gone`'s key read as its default (`findOnDelAtValue`), the keyed delete framed out of `nonce`
 (`findOnDelAtFrame`), and `nonce` read from its head (`findMemberCons`). -/
-theorem chain (φ : Core.Post TestSuite [.val .uint, .val .uint, .val .uint]) :
+theorem chain (φ : Post TestSuite [.val .uint, .val .uint, .val .uint]) :
     dl![m]{ ⟨[ ledger.nonce = 5; ledger.balances[1] = 10; delete ledger; kept = ledger.balances[1];
         delete ledger.balances[1]; nonce = ledger.nonce; gone = ledger.balances[1]; ]⟩ φ }
     ~*> dl![m]{
@@ -367,7 +367,7 @@ before the statement (`uint idx; idx = ++i; delete toks[idx];`, the paper's firs
 `toks`, `idx` and `i`; `storageIndexArrayDelete` writing `delAt` at the element (the in-bounds branch
 only); the length read through `arr`; the merge, which resolves the element to `bucket.tokens[2 + 1]`; the
 delete does not touch the length (`lenOnDelAtFrame`), and the index folds to `3`. -/
-theorem chain (φ : Core.Post TestSuite [.val .uint, .val .uint]) :
+theorem chain (φ : Post TestSuite [.val .uint, .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ delete bucket.tokens[++i]; len = bucket.tokens.length; ]⟩ φ }
     ~*> dl![m]{ { i := 2 } { toks := bucket.tokens } { idx := 0 } { i := i + 1 ‖ idx := i + 1 }
           ⟨[ delete toks[idx]; len = bucket.tokens.length; ]⟩ φ }

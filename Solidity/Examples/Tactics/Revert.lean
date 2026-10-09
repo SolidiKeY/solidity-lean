@@ -1,6 +1,6 @@
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -54,7 +54,7 @@ does (`Branch.lean`), a non-simple condition captured first
 program, the second reverts.  Under `⊢` the revert rules are
 `apply done .revertBox` and `apply done .revertDiamond` (`Proves.done`).
 A `transfer` the contract cannot fund is the EVM's to refuse, which the box
-does not see (`Evm.Core.compile_box`); the rule books it (`transferNoCallbackBox`,
+does not see (`Evm.compile_box`); the rule books it (`transferNoCallbackBox`,
 `Payment.lean`).
 
 The same programs as chains, at every modality and postcondition, are in
@@ -67,32 +67,32 @@ open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## The taclets -/
 
 /--
-info: @Core.Taclet.revertBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}, dl{ [ revert(); ] ⇝ true }
+info: @Taclet.revertBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx}, dl{ [ revert(); ] ⇝ true }
 -/
-#guard_msgs in #check @Core.Taclet.revertBox
+#guard_msgs in #check @Taclet.revertBox
 
 /--
-info: @Core.Taclet.revertDiamond : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}, dl{ ⟨ revert(); ⟩ ⇝ false }
+info: @Taclet.revertDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx}, dl{ ⟨ revert(); ⟩ ⇝ false }
 -/
-#guard_msgs in #check @Core.Taclet.revertDiamond
+#guard_msgs in #check @Taclet.revertDiamond
 
 /--
-info: @Core.Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
-  {se : Core.Simple C Γ PrimTy.bool},
+info: @Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
+  {se : Simple C Γ PrimTy.bool},
   dl{ ⟨[ require(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Reverts": se ≐ false ⟹ ⟨[ revert(); ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.requireSimple
+#guard_msgs in #check @Taclet.requireSimple
 
 /--
-info: @Core.Taclet.requireConditionCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
-  {nse : Core.Val C Γ PrimTy.bool}, dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
+info: @Taclet.requireConditionCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
+  {nse : Val C Γ PrimTy.bool}, dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.requireConditionCapture
+#guard_msgs in #check @Taclet.requireConditionCapture
 
 /-! ## The box: a guard that fails proves anything
 
@@ -130,7 +130,7 @@ the program reverts. -/
 `b` is `1` the `require` reverts. -/
 example : ¬ (⊨ dl!{ ⟨ require(a == b); x = a; ⟩ x == b }) :=
   fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _) ⟨0, by decide⟩ ⟨1, by decide⟩
+    (h (State.init _) ⟨0, by decide⟩ ⟨1, by decide⟩
       ⟨0, by decide⟩) (by decide +kernel)
 
 /-! ## `assert`: a check, under both modalities
@@ -157,10 +157,10 @@ assertSimple {
 -/
 
 /--
-info: @Core.Taclet.assertSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {se : Core.Simple C Γ PrimTy.bool},
+info: @Taclet.assertSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool},
   dl{ ⟨[ assert(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Violated": se ≐ true }
 -/
-#guard_msgs in #check @Core.Taclet.assertSimple
+#guard_msgs in #check @Taclet.assertSimple
 
 /-- `a == b → [ assert(a == b); x = a; ] x == b`: the box owes the assertion
 too, so it needs the precondition the diamond needs. -/
@@ -188,7 +188,7 @@ theorem assertBox : ⊢ dl!{ a == b → [ assert(a == b); x = a; ] x == b } := b
 assertion fails, and a panic satisfies no box formula. -/
 example : ¬ (⊨ dl!{ [ assert(a == b); x = a; ] x == b }) :=
   fun h => Modality.afterRunTR_not_panic
-    (h (Core.TState.init _) ⟨0, by decide⟩ ⟨1, by decide⟩ ⟨0, by decide⟩)
+    (h (State.init _) ⟨0, by decide⟩ ⟨1, by decide⟩ ⟨0, by decide⟩)
     (by decide +kernel)
 
 /-! The regression the obligation forms rest on: `[ assert(false); ] true`
@@ -196,7 +196,7 @@ is neither valid nor derivable, `[ require(false); ] true` is both. -/
 
 /-- A failed `assert` is no box formula's: `[ assert(false); ] true` is not valid. -/
 theorem assertFalse_box_not_valid : ¬ (⊨ dl!{ [ assert(false); ] true }) :=
-  fun h => Modality.afterRunTR_not_panic (h (Core.TState.init _))
+  fun h => Modality.afterRunTR_not_panic (h (State.init _))
     (by decide +kernel)
 
 /-- ... and so not derivable (`Proves.valid`). -/
@@ -240,7 +240,7 @@ theorem revertDropsRest : ⊢ dl!{ [ revert(); total = 5; ] total == 7 } := by
 
 /-- The diamond of a revert is never true, whatever the postcondition. -/
 example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
-  (h (Core.TState.init _)) (by decide +kernel)
+  (h (State.init _)) (by decide +kernel)
 
 /-- Only the rule for the goal's modality fires. -/
 example : ⊢ dl!{ [ revert(); ] true } := by

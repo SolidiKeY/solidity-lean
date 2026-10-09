@@ -29,7 +29,7 @@ def elabProg (ss : List RawStmt) : Except String (Surface.Prog C) := do
   let k := RawStmt.maxIdxs ss + 1
   let ss ← freshenBlocks (C.vars.map (·.1)) [] ss
   let P ← ((elabStmts C ss).run { funs := C.funs }).run' ([], k)
-  let _ ← Core.Prog.resolveCheck [] P
+  let _ ← Prog.resolveCheck [] P
   pure P
 
 /-- `elabProg`, an error naming the statement of the block it arose in (its
@@ -42,13 +42,13 @@ where
     -- a block's locals renamed apart (`freshenBlocks`)
     let ss ← (freshenBlocks (C.vars.map (·.1)) (st.1.map (·.1)) ss).mapError (i, ·)
     goWt i ss st (ECtx.toNCtx st.1)
-  goWt (i : Nat) : List RawStmt → ECtx × Nat → Core.NCtx → Except (Nat × String) (Surface.Prog C)
+  goWt (i : Nat) : List RawStmt → ECtx × Nat → NCtx → Except (Nat × String) (Surface.Prog C)
     | [], _, _ => pure []
     | s :: ss, st, Γ =>
       match ((elabStmt C s).run { funs := C.funs }).run st with
       | .error e => .error (i, e)
       | .ok (P, st) =>
-        match Core.Prog.resolveCheck Γ P with
+        match Prog.resolveCheck Γ P with
         | .error e => .error (i, e)
         | .ok Γ => do pure (P ++ (← goWt (i + 1) ss st Γ))
 
@@ -203,7 +203,7 @@ example : Surface.Prog.toStr (sol{ bool c = true; Person[] memory xs = new Perso
 
 /-- The error of a check, if any. -/
 private def checkErr (P : Surface.Prog StandardExample) : String :=
-  match Core.Prog.resolveCheck [] P with
+  match Prog.resolveCheck [] P with
   | .error e => e
   | .ok _ => ""
 

@@ -13,7 +13,7 @@ The sequents are today's, and stay so until the closer is ported (M6c,
 `docs/intrinsic.md`): they hold terms only, with no local, no update and no
 program, which is the closer's input (`Seq.leafRes` hands every scoped
 leaf to it as such a sequent), and they are stated over any contract.  The
-scoped `rw [r]` (`Calculus/Core/RewriteSyntax.lean`) runs these same term
+scoped `rw [r]` (`Calculus/RewriteSyntax.lean`) runs these same term
 taclets on a scoped goal's closed terms.
 -/
 

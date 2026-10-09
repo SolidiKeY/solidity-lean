@@ -1,15 +1,15 @@
-import Solidity.Calculus.Core.Derive
-import Solidity.Calculus.Core.Notation
-import Solidity.Calculus.Core.Delab
-import Solidity.Calculus.Core.WalkSyntax
-import Solidity.Calculus.Core.ProvesDerive
-import Solidity.Calculus.Core.SolkeyProves
+import Solidity.Calculus.Derive
+import Solidity.Calculus.Notation
+import Solidity.Calculus.Delab
+import Solidity.Calculus.WalkSyntax
+import Solidity.Calculus.ProvesDerive
+import Solidity.Calculus.SolkeyProves
 
 /-!
 # The scoped strategy tools
 
-The tactics of `Calculus/Core/Symex.lean` and `Calculus/Core/Derive.lean`
-on scoped goals `Core.Valid φ` (`cdl!{ … }`): `sol_symex` then `sol_close`,
+The tactics of `Calculus/Symex.lean` and `Calculus/Derive.lean`
+on scoped goals `Valid φ` (`cdl!{ … }`): `sol_symex` then `sol_close`,
 `sol_prove` as one kernel evaluation, and `sol_derive?`'s walk, one
 `refine` per rule cited by its taclet, each leaf closed (`Proves.close`
 and today's closer on its erasure), pinned and replayed; `sol_prove` and
@@ -22,63 +22,63 @@ open Solidity
 
 local instance : InContract := ⟨StandardExample⟩
 
-example : Core.Valid cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
+example : Valid cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
   sol_prove
 
-example : Core.Valid cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
+example : Valid cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
   sol_symex
   sol_close
 
-example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   sol_prove
 
 /--
 info: Try this:
-  refine Core.Proves.valid (R := RuleSet.all) ?_
-    refine Core.Proves.allRight ?_
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.unfold (Core.Taclet.step_eq .ifElseUnfold)
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
+  refine Proves.valid (R := RuleSet.all) ?_
+    refine Proves.allRight ?_
+    apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+    apply Proves.update (Taclet.step_eq .binopAssignment)
+    apply Proves.unfold (Taclet.step_eq .ifElseUnfold)
+    apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+    apply Proves.update (Taclet.step_eq .binopAssignment)
+    apply Proves.split (Taclet.step_eq .ifElseSplit)
     case thn =>
-      apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.updIntro ?_
-      exact Core.Proves.closeTrue rfl
+      apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+      refine Proves.updIntro ?_
+      refine Proves.updIntro ?_
+      exact Proves.closeTrue rfl
     case els =>
-      apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.updIntro ?_
-      exact Core.Proves.closeTrue rfl
+      apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+      refine Proves.updIntro ?_
+      refine Proves.updIntro ?_
+      exact Proves.closeTrue rfl
 -/
 #guard_msgs in
-example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
+example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
   sol_derive?
 
 /-- The suggestion replayed. -/
-example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
-  refine Core.Proves.valid (R := RuleSet.all) ?_
-  refine Core.Proves.allRight ?_
-  apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-  apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-  apply Core.Proves.unfold (Core.Taclet.step_eq .ifElseUnfold)
-  apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-  apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-  apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
+example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
+  refine Proves.valid (R := RuleSet.all) ?_
+  refine Proves.allRight ?_
+  apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+  apply Proves.update (Taclet.step_eq .binopAssignment)
+  apply Proves.unfold (Taclet.step_eq .ifElseUnfold)
+  apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+  apply Proves.update (Taclet.step_eq .binopAssignment)
+  apply Proves.split (Taclet.step_eq .ifElseSplit)
   case thn =>
-    apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.updIntro ?_
-    exact Core.Proves.closeTrue rfl
+    apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+    refine Proves.updIntro ?_
+    refine Proves.updIntro ?_
+    exact Proves.closeTrue rfl
   case els =>
-    apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.updIntro ?_
-    exact Core.Proves.closeTrue rfl
+    apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+    refine Proves.updIntro ?_
+    refine Proves.updIntro ?_
+    exact Proves.closeTrue rfl
 
-example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
+example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
   sol_derive
 
 /-! A leaf with a formula left closes as today's does: `Proves.close` on its
@@ -86,119 +86,119 @@ erasure, then `sol_symex; sol_close`. -/
 
 /--
 info: Try this:
-  refine Core.Proves.valid (R := RuleSet.all) ?_
-    refine Core.Proves.allRight ?_
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.unfold (Core.Taclet.step_eq .ifElseUnfold)
-    apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-    apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-    apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
+  refine Proves.valid (R := RuleSet.all) ?_
+    refine Proves.allRight ?_
+    apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+    apply Proves.update (Taclet.step_eq .binopAssignment)
+    apply Proves.unfold (Taclet.step_eq .ifElseUnfold)
+    apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+    apply Proves.update (Taclet.step_eq .binopAssignment)
+    apply Proves.split (Taclet.step_eq .ifElseSplit)
     case thn =>
-      apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+      refine Proves.updIntro ?_
+      refine Proves.updIntro ?_
+      refine Proves.close [] rfl List.nodup_nil ?_
       sol_symex
       sol_close
     case els =>
-      apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.updIntro ?_
-      refine Core.Proves.close [] rfl List.nodup_nil ?_
+      apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+      refine Proves.updIntro ?_
+      refine Proves.updIntro ?_
+      refine Proves.close [] rfl List.nodup_nil ?_
       sol_symex
       sol_close
 -/
 #guard_msgs in
-example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   sol_derive?
 
 /-- The suggestion replayed. -/
-example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
-  refine Core.Proves.valid (R := RuleSet.all) ?_
-  refine Core.Proves.allRight ?_
-  apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-  apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-  apply Core.Proves.unfold (Core.Taclet.step_eq .ifElseUnfold)
-  apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-  apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-  apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
+example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+  refine Proves.valid (R := RuleSet.all) ?_
+  refine Proves.allRight ?_
+  apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+  apply Proves.update (Taclet.step_eq .binopAssignment)
+  apply Proves.unfold (Taclet.step_eq .ifElseUnfold)
+  apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+  apply Proves.update (Taclet.step_eq .binopAssignment)
+  apply Proves.split (Taclet.step_eq .ifElseSplit)
   case thn =>
-    apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.close [] rfl List.nodup_nil ?_
+    apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+    refine Proves.updIntro ?_
+    refine Proves.updIntro ?_
+    refine Proves.close [] rfl List.nodup_nil ?_
     sol_symex
     sol_close
   case els =>
-    apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.close [] rfl List.nodup_nil ?_
+    apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+    refine Proves.updIntro ?_
+    refine Proves.updIntro ?_
+    refine Proves.close [] rfl List.nodup_nil ?_
     sol_symex
     sol_close
 
 /-- `sol_derive` leaves the leaves, as today's does. -/
-example : Core.Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
+example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   sol_derive
   all_goals
-    refine Core.Proves.close [] rfl List.nodup_nil ?_
+    refine Proves.close [] rfl List.nodup_nil ?_
     sol_symex
     sol_close
 
 /-! ## solkey's rules alone (`⊢ₖ`)
 
-On `Core.Proves C .solkey …` the walk steps with `Stmt.stepIn .solkey`
-(`Calculus/Core/ProvesDerive.lean`): on the fragment it fires solkey's
+On `Proves C .solkey …` the walk steps with `Stmt.stepIn .solkey`
+(`Calculus/ProvesDerive.lean`): on the fragment it fires solkey's
 taclets, and each step rule's `hR` is proved by `rule_admits`
 (`Stmt.keyStep` by `rfl`). -/
 
-example : Core.Proves StandardExample .solkey [] .nil
+example : Proves StandardExample .solkey [] .nil
     cdl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 } := by
   sol_prove
 
-example : Core.Proves StandardExample .solkey [] .nil
+example : Proves StandardExample .solkey [] .nil
     cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
   sol_prove
 
 /-- The walk under `⊢ₖ`: every step rule's `hR` by `rule_admits`. -/
-example : Core.Proves StandardExample .solkey [] .nil
+example : Proves StandardExample .solkey [] .nil
     cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
-  refine Core.Proves.allRight ?_
-  apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-  apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-  apply Core.Proves.unfold (Core.Taclet.step_eq .ifElseUnfold)
-  apply Core.Proves.bind (Core.Taclet.step_eq .localValueDeclInitDrop)
-  apply Core.Proves.update (Core.Taclet.step_eq .binopAssignment)
-  apply Core.Proves.split (Core.Taclet.step_eq .ifElseSplit)
+  refine Proves.allRight ?_
+  apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+  apply Proves.update (Taclet.step_eq .binopAssignment)
+  apply Proves.unfold (Taclet.step_eq .ifElseUnfold)
+  apply Proves.bind (Taclet.step_eq .localValueDeclInitDrop)
+  apply Proves.update (Taclet.step_eq .binopAssignment)
+  apply Proves.split (Taclet.step_eq .ifElseSplit)
   case thn =>
-    apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.updIntro ?_
-    exact Core.Proves.closeTrue rfl
+    apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+    refine Proves.updIntro ?_
+    refine Proves.updIntro ?_
+    exact Proves.closeTrue rfl
   case els =>
-    apply Core.Proves.update (Core.Taclet.step_eq .storageRootWriteStore)
-    refine Core.Proves.updIntro ?_
-    refine Core.Proves.updIntro ?_
-    exact Core.Proves.closeTrue rfl
+    apply Proves.update (Taclet.step_eq .storageRootWriteStore)
+    refine Proves.updIntro ?_
+    refine Proves.updIntro ?_
+    exact Proves.closeTrue rfl
 
 -- Off the fragment `sol_prove` gives up under `⊢ₖ`: solkey has no rule
--- for a loop (`Core.loopFalse`, `[ while (false) { } ] true`).
+-- for a loop (`loopFalse`, `[ while (false) { } ] true`).
 /--
 error: sol_prove: the walk does not reach the end of the sequent: a step with no rule, a leaf `Proves.close` does not take (`Fml.closableB`: a modality left, a negated or assumed part not first-order, or a hidden binder's name reused), or more than 20000 steps
 -/
 #guard_msgs in
-example : Core.Proves StandardExample .solkey [] .nil (Core.loopFalse (C := StandardExample)) := by
+example : Proves StandardExample .solkey [] .nil (loopFalse (C := StandardExample)) := by
   sol_prove
 
-/-- The calculus derives it (`Core.loopFalse_derived`). -/
-example : Core.Proves StandardExample .all [] .nil (Core.loopFalse (C := StandardExample)) := by
+/-- The calculus derives it (`loopFalse_derived`). -/
+example : Proves StandardExample .all [] .nil (loopFalse (C := StandardExample)) := by
   sol_prove
 
 /-! ## Today's short walk
 
-Under `open scoped Solidity.Core.Scoped` `sol_derive?` writes today's walk
-text, which the scope's macros read (`Calculus/Core/WalkSyntax.lean`):
+Under `open scoped Solidity.Scoped` `sol_derive?` writes today's walk
+text, which the scope's macros read (`Calculus/WalkSyntax.lean`):
 solkey's aliases, one `apply` per rule, `refine close ?_` at a leaf, the
 steps KeY does not show left unwritten.  A `∀` written in the formula is
 not a parameter (`cdl!` marks it, decision 28): it gets its `apply
@@ -206,7 +206,7 @@ allRight` line. -/
 
 section Surface
 
-open scoped Core.Scoped
+open scoped Scoped
 
 open NFml.Proves
 

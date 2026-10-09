@@ -1,8 +1,8 @@
 import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Show
 
 /-!
@@ -46,7 +46,7 @@ solc_problems Solc.Loops legacy
 
 namespace Solidity.Examples.LoopsImport
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- info: 9 functions (4 diamond, 3 box, 0 skip, 2 internal): 9 elaborated, 0 skipped, 0 excluded, 0 unsupported -/
 #guard_msgs in

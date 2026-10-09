@@ -467,8 +467,8 @@ one.
 (`Frontend/Problems.lean`) defines `Solkey.TestSuite.f.problem.legacy : Fml _`
 for each program, not compiled, and `solc_scoped_problems Solkey.TestSuite
 main decl` (`TestSuite/CoreProblems.lean`) the statement proved,
-`Solkey.TestSuite.f.problem : Core.Fml _ []`, checked to erase to it; the
-`Derived` modules state `⊢` scoped (`open scoped Solidity.Core.Scoped`).
+`Solkey.TestSuite.f.problem : Fml _ []`, checked to erase to it; the
+`Derived` modules state `⊢` scoped (`open scoped Solidity.Scoped`).
 `#solkey_problem` prints one in solkey's `--print-problem` syntax (same
 modality, same parameters as program variables of their KeY sort, plus
 `wt(storage) ->`); two are pinned in `TestSuite/Problems.lean`; the

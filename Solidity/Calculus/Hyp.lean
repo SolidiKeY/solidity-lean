@@ -4,7 +4,7 @@ import Solidity.Calculus.NFmlUpdateRules
 # Today's sequents: the context, the rule sets, fresh indices
 
 What `Calculus/NFmlLogic.lean`'s judgement `Γ ⊢ φ` shares with the scoped one
-(`Calculus/Core/Proves.lean`) and with the closer's drivers on the erasure
+(`Calculus/Proves.lean`) and with the closer's drivers on the erasure
 (`Calculus/NFmlDerive.lean`, `Calculus/TheoryRewrite.lean`, `Calculus/Problem.lean`):
 the context of a sequent (`Hyp`, put back in front of a formula by
 `Hyp.wrap`), the rule sets a derivation may use (`RuleSet`), the fresh index
@@ -168,8 +168,8 @@ end Print
 /-! ## Reading a sequent
 
 The arrow and the keywords of `sequent[C]{ Γ ⟹ φ }` (moved out of
-`Calculus/Core/Sequents.lean`, which reads them;
-`Calculus/Core/Sequents.lean` reads them on a scoped goal), the sequent's
+`Calculus/Sequents.lean`, which reads them;
+`Calculus/Sequents.lean` reads them on a scoped goal), the sequent's
 formula written (`sequentFml`), and a quoted formula's first layers as
 context entries (`peelHyps`). -/
 

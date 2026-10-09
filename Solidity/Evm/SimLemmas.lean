@@ -5,7 +5,7 @@ import Solidity.Evm.Exp
 /-!
 # The machine lemmas of the simulation
 
-What `Evm/CoreSim.lean`, `Evm/CoreExpr.lean` and `Evm/CoreStmt.lean` build
+What `Evm/Sim.lean`, `Evm/Expr.lean` and `Evm/Stmt.lean` build
 the simulation from, none of it about the syntax: the guard sequences of
 `Evm/Layout.lean` computed on the machine (`add_tail`/`sub_tail`/`mul_tail`
 are solc's overflow checks, exact on words below `2^256`; `mul_ok_iff` is the

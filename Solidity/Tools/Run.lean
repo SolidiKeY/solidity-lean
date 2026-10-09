@@ -1,6 +1,6 @@
 import Solidity.Tools.Common
-import Solidity.Semantics.Core.TypedRun
-import Solidity.Semantics.Core.TypedToSem
+import Solidity.Semantics.Run
+import Solidity.Semantics.ToSem
 
 /-!
 # `#run`: call a contract's function in the typed run
@@ -29,8 +29,8 @@ otherwise — and elaborated by `elabProg`, which inlines the body
 (`Stmt.call`) as for any other call.  The value returned is then the local
 `_r` of the final state; of several, `(uint _r0, uint _r1) = f(a, b);` and
 the locals `_r0`, `_r1`, … (`runStmt`).  The program is resolved to the
-scoped syntax (`Core.Prog.resolve`) and run typed (`Core.Prog.trun`,
-`Semantics/Core/TypedRun.lean`) from the start state read at the contract's
+scoped syntax (`Prog.resolve`) and run typed (`Prog.run`,
+`Semantics/Run.lean`) from the start state read at the contract's
 types (`typedState?`): its storage, ledger, funds and transaction.  A start
 state that is not of those types, or that has locals or memory, is an error.
 `DiffTest.lean` builds its calls the same way, but a call of several returns
@@ -45,7 +45,7 @@ return.
 #deploy Mini(7) with msg.sender := 3
 ```
 
-`#deploy C(args)` deploys `C` in the typed run (`Core.Contract.deployT`'s
+`#deploy C(args)` deploys `C` in the typed run (`Contract.deployT`'s
 reading): it runs `constructor(args);` (`ctorProg`, the initializers and the
 constructor's body) from `Contract.deployState`, whose ledger and funds hold what
 `msg.value := n` sends; `with` takes the transaction's fields only.  The
@@ -108,37 +108,37 @@ def State.withRoots (σ : Semantics.State) (roots : List (Name × Semantics.SVal
   { σ with storage := roots.foldl (fun st (r, v) => setBy r v st) σ.storage }
 
 /-- No locals and no memory: what the typed run's start state has
-(`Core.TState C []`, its heap empty). -/
+(`State C []`, its heap empty). -/
 def noLocals (σ : Semantics.State) : Bool :=
   σ.env.isEmpty && σ.heap.isEmpty && σ.nextId == 0
 
 /-- A state of no locals and no memory (`none` for any other), read at the contract's types: the
 storage (`SFields.ofU`), the funds and the transaction's words as `uint`s,
 the ledger as it is; `none` where one is not of its type. -/
-def typedState? (C : Contract) (σ : Semantics.State) : Option (Core.TState C []) := do
+def typedState? (C : Contract) (σ : Semantics.State) : Option (State C []) := do
   guard (noLocals σ)
-  let st ← Core.SFields.ofU σ.storage C.vars
+  let st ← SFields.ofU σ.storage C.vars
   let u (n : Int) : Option PrimTy.uint.Denote := PrimTy.ofValue? .uint (.int n)
   let bal ← u σ.selfBalance
   let snd ← u σ.tx.msgSender
   let val ← u σ.tx.msgValue
   let now ← u σ.tx.timestamp
   let addr ← u σ.tx.selfAddress
-  let tx : Core.TTx :=
+  let tx : TTx :=
     { msgSender := snd, msgValue := val, timestamp := now, selfAddress := addr, ext := σ.tx.ext }
-  pure (Core.TState.mk st [] Core.Heap.empty () σ.net bal tx)
+  pure (State.mk st [] Heap.empty () σ.net bal tx)
 
 /-- **A block run from an untyped state**, in the typed run: `P` resolved
-from no locals (`Core.Prog.resolve`), run by `Core.Prog.trun` from `σ` read
+from no locals (`Prog.resolve`), run by `Prog.run` from `σ` read
 at the contract's types (`typedState?`), and its end state named back
-(`Core.TState.toSem`, under the block's names) or its halt erased
+(`State.toSem`, under the block's names) or its halt erased
 (`THalt.erase`); `undef` where `P` does not resolve or `σ` is not of the
 contract's types, so that no typed run starts.  What the examples' `#eval`s
 run (`docs/intrinsic.md`, decision 48). -/
 def _root_.Solidity.Surface.Prog.runT {C : Contract} (σ : Semantics.State) (P : Surface.Prog C) : Res Semantics.State :=
-  match Core.Prog.resolve [] P, typedState? C σ with
+  match Prog.resolve [] P, typedState? C σ with
   | .ok ⟨Γ', Q⟩, some τ =>
-    match Core.Prog.trun τ Q with
+    match Prog.run τ Q with
     | .ok o => .ok (o.st.toSem Γ'.names)
     | .error h => .error h.erase
   | _, _ => .error .undef
@@ -156,8 +156,8 @@ def _root_.Solidity.Contract.deployRun (C : Contract) (P : Surface.Prog C)
   else Surface.Prog.runT (C.deployState tx) P
 
 /-- The locals of a typed environment, innermost first: each one's level at
-base `0` (`Evm.Core.lvl`), and its type and value if it is a value local. -/
-def localCells {C : Contract} {H : Core.HTy} : (Γ : Core.Ctx) → Core.TEnv C H Γ →
+base `0` (`Evm.lvl`), and its type and value if it is a value local. -/
+def localCells {C : Contract} {H : HTy} : (Γ : Ctx) → TEnv C H Γ →
     List (Nat × Option (PrimTy × Value))
   | [], _ => []
   | t :: Γ, e =>
@@ -166,20 +166,20 @@ def localCells {C : Contract} {H : Core.HTy} : (Γ : Core.Ctx) → Core.TEnv C H
       | _, _ => (Γ.length, none)) :: localCells Γ e.2
 
 /-- The value locals of a typed environment, by the names of its context. -/
-def localVals {C : Contract} {H : Core.HTy} {Γ : Core.Ctx} (names : List Var)
-    (e : Core.TEnv C H Γ) : List (Var × Value) :=
+def localVals {C : Contract} {H : HTy} {Γ : Ctx} (names : List Var)
+    (e : TEnv C H Γ) : List (Var × Value) :=
   (names.zip (localCells Γ e)).filterMap fun (x, _, c) => c.map fun (_, v) => (x, v)
 
 /-- What `#run` prints: the outcome, the value returned, the storage. -/
 def runReport [FreshNames] (C : Contract) (σ : Semantics.State) (f : String) (args : List RawExpr) :
     Except String (List String) := do
   let P ← elabProg C [← runStmt C f args]
-  let ⟨Γ', Q⟩ ← Core.Prog.resolve [] P
+  let ⟨Γ', Q⟩ ← Prog.resolve [] P
   unless noLocals σ do
     throw "a start state with locals or memory is not supported by the typed run"
   let some τ := typedState? C σ | throw "the start state is not of the contract's types"
   let n : Nat := ((lookupBy f C.funs).map (·.rets.length)).getD 0
-  pure <| match Core.Prog.trun τ Q with
+  pure <| match Prog.run τ Q with
     | .error h => [fmtHalt h.erase]
     | .ok o =>
       let vals := localVals Γ'.names o.st.env
@@ -236,16 +236,16 @@ open Lean Elab Command Term Meta in
   | _ => throwUnsupportedSyntax
 
 /-- What `#deploy` prints: the deployment's outcome in the typed run
-(`Core.Contract.deployT`'s: a constructor that is not `payable` refuses
+(`Contract.deployT`'s: a constructor that is not `payable` refuses
 value, else `constructor(args);` runs from `Contract.deployState`), the
 contract's funds and its storage. -/
 def deployReport [FreshNames] (C : Contract) (args : List RawExpr) (tx : TxEnv) :
     Except String (List String) := do
   let P ← ctorProg C args
-  let ⟨_, Q⟩ ← Core.Prog.resolve [] P
+  let ⟨_, Q⟩ ← Prog.resolve [] P
   let some τ := typedState? C (C.deployState tx) | throw "the deployment's start is not of the contract's types"
   if !((C.ctor.map (·.payable)).getD false) && tx.msgValue != 0 then return [fmtHalt .revert]
-  pure <| match Core.Prog.trun τ Q with
+  pure <| match Prog.run τ Q with
     | .error h => [fmtHalt h.erase]
     | .ok o => ["ok", s!"balance {o.st.selfBalance.1}"] ++ fmtStorage C o.st.storage.erase
 

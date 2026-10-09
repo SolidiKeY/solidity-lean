@@ -43,9 +43,9 @@ writes the fixture rewrites the literal, which makes Lake re-check the
 importing module.
 
 `solc_scoped N`, after the import, is the lint of the scoped syntax
-(`docs/intrinsic.md`, M2): it declares `N.f.core : Core.Prog N Γ Γ'` for
+(`docs/intrinsic.md`, M2): it declares `N.f.core : Prog N Γ Γ'` for
 every program `N.f` the import made, resolved from its parameters
-(`resolve`) and quoted (`Core.Prog.defineCore`), so the kernel checks the
+(`resolve`) and quoted (`Prog.defineCore`), so the kernel checks the
 scoped form of every imported function; a program that does not resolve is
 an error.  It is a command of its own, run in a module of its own for the
 large imports, because the kernel's check costs about what the import's own
@@ -395,7 +395,7 @@ def elabSolcScoped : CommandElab := fun stx => do
       let P ← unsafe evalConst (Surface.Prog C) n
       let err ← match paramCtx r.params with
         | .error e => pure (some e)
-        | .ok Γ => Core.Prog.defineCore (n ++ `core) N (ECtx.toNCtx Γ) P
+        | .ok Γ => Prog.defineCore (n ++ `core) N (ECtx.toNCtx Γ) P
       match err with
       | some e => errs := errs.push s!"{r.name}: {e}"
       | none => k := k + 1

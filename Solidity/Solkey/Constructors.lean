@@ -1,8 +1,8 @@
 import Solidity.Tools.Run
 import Solidity.Frontend.Problems
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.Deploy
+import Solidity.Calculus.Closers
+import Solidity.Calculus.Deploy
 
 /-!
 # Constructors, imported from solc's AST
@@ -28,7 +28,7 @@ Lean books the payment there too (`docs/solkey-feedback.md`).
 -/
 
 open Solidity NFml.Proves
-open scoped Core.Scoped
+open scoped Scoped
 
 solc_import "../../tests/solc/Counter.ast.json" hash 0x2d54a4ea32c96108 as Solkey.Counter
 
@@ -93,17 +93,17 @@ private def counterDeployP : Surface.Prog Solkey.Counter := sol[Solkey.Counter]{
 
 open Lean Elab Command in
 run_cmd liftCoreM do
-  if let some e ← Core.Prog.defineCore `counterDeployCore ``Solkey.Counter [] counterDeployP then
+  if let some e ← Prog.defineCore `counterDeployCore ``Solkey.Counter [] counterDeployP then
     throwError "counterDeployCore: {e}"
 
 /-- What the deployment with `7` stores: `limit = 5`, `count = 7`. -/
-private def counterStorage : Core.Storage Solkey.Counter :=
+private def counterStorage : Storage Solkey.Counter :=
   .cons (.prim ⟨5, rfl⟩) (.cons (.prim ⟨7, rfl⟩) .nil)
 
 /-- A deployment with `7`: the initializer, then the body (the typed
-deployment, `Core.Contract.deployT`, by the kernel). -/
+deployment, `Contract.deployT`, by the kernel). -/
 theorem counterDeploy :
-    (Core.Contract.deployT Solkey.Counter counterDeployCore {}).toOption.map
+    (Contract.deployT Solkey.Counter counterDeployCore {}).toOption.map
       (·.storage.beq counterStorage) = some true := by
   decide +kernel
 

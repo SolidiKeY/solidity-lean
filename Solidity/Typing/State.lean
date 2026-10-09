@@ -137,7 +137,7 @@ def heapTypedB (H : HeapTy) (heap : List (Nat × MObj)) : Bool :=
 unique, storage well-typed, heap matching `H`, allocation counter fresh.
 The executable model of the `wellFormed` assumption the solkey proof
 obligations need; `Soundness.lean` adds the locals (`RunWT`), which every
-erased typed state satisfies (`TState.erase_wt`). -/
+erased typed state satisfies (`State.erase_wt`). -/
 structure StateWT (H : HeapTy) (L : Layout) (s : State) : Prop where
   layoutNodup : nodupKeysB L.globals = true
   heapTyNodup : nodupKeysB H = true

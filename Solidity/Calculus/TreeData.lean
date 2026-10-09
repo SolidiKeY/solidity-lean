@@ -3,8 +3,8 @@ import Solidity.Calculus.RuleKit
 /-!
 # The proof tree as data, and the script it writes
 
-solkey's proof tree (`ProofSession.tree()`), as `Calculus/Core/ProofTree.lean`
-grows it on today's goal and `Calculus/Core/ProofTree.lean` on a scoped one:
+solkey's proof tree (`ProofSession.tree()`), as `Calculus/ProofTree.lean`
+grows it on today's goal and `Calculus/ProofTree.lean` on a scoped one:
 a node's goal, sequent, branch label and what was done to it (`Act`,
 `Tree`), solkey's rows and branch labels (`Tree.rows`, `Tree.branchLabel`),
 the web prover's shape (`Tree.toJson`), the GUI's view (`Tree.display`), and

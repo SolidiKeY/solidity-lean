@@ -1,9 +1,9 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.Chains
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.Chains
 import Solidity.Tools.Inspect
 
 /-!
@@ -57,7 +57,7 @@ def Operands : Contract := contract!{
 
 local instance : InContract := ⟨Operands⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## 1 · `values.push(makeValue());`
 
@@ -88,7 +88,7 @@ private def pushLvalueP : Surface.Prog Operands := sol{ values.push() = 42; uint
 
 open Lean Elab Command in
 run_cmd liftCoreM do
-  if let some e ← Core.Prog.defineCore `Solidity.Examples.Tactics.CallOperands.pushLvalueCore
+  if let some e ← Prog.defineCore `Solidity.Examples.Tactics.CallOperands.pushLvalueCore
       ``Operands [] pushLvalueP then
     throwError "pushLvalueCore: {e}"
 
@@ -96,8 +96,8 @@ run_cmd liftCoreM do
 storage, whose `values` is empty: the push used as a target appends `42`
 (the typed run from `Operands`' initial state, by the kernel). -/
 theorem pushLvalueRun :
-    ((Core.Prog.trun (Core.TState.init Operands) pushLvalueCore).toOption.map
-      fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 42 := by
+    ((Prog.run (State.init Operands) pushLvalueCore).toOption.map
+      fun o => (TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 42 := by
   decide +kernel
 
 /-! ## 3 · A push used as a target, with a storage source (`TestSuite`)

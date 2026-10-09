@@ -1,10 +1,10 @@
 import Solidity.Tools.Inspect
-import Solidity.Calculus.Core.Notation
+import Solidity.Calculus.Notation
 
 /-!
 # The proof tree of a scoped goal, pinned
 
-`Calculus/Core/ProofTree.lean`'s tree of `⊢ φ` for a scoped `φ`
+`Calculus/ProofTree.lean`'s tree of `⊢ φ` for a scoped `φ`
 (`cdl!{ … }`), printed by `#proof_tree`, `#proof_node` and
 `#proof_tree_json` as today's are (`Examples/ProofTree.lean`).  Where the
 trees differ from today's:
@@ -97,7 +97,7 @@ state: inner
 branch: -
 parent: 0
 children: [2, 4]
-tactics: apply Core.Proves.split (Core.Taclet.toStep .ifElseSplit)
+tactics: apply Proves.split (Taclet.toStep .ifElseSplit)
 -/
 #guard_msgs in
 #proof_node 1 cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
@@ -204,7 +204,7 @@ state: closed
 branch: -
 parent: 2
 children: []
-tactics: refine Core.Proves.close [] rfl List.nodup_nil ?_; sol_symex; sol_close
+tactics: refine Proves.close [] rfl List.nodup_nil ?_; sol_symex; sol_close
 -/
 #guard_msgs in
 #proof_node 3 cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
@@ -223,6 +223,6 @@ refused, not grown on an ill-typed goal. -/
 
 /-- error: #proof_tree: the formula is not closed at the empty context -/
 #guard_msgs in
-#proof_tree (Core.Fml.tt : Core.Fml StandardExample [.val .uint])
+#proof_tree (Fml.tt : Fml StandardExample [.val .uint])
 
 end Solidity.Examples.Tactics.CoreProofTree

@@ -12,13 +12,13 @@ Generate, then paste. Never search for a chain line by line.
    storage the program reads written with `save`, e.g.
    `dl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 10) } ⟨[ … ]⟩ φ }`.
 2. **Generate.** In the example's namespace, with its `InContract` and
-   `FreshNames` in scope, `variable (m : Modality) (φ : Core.Post C Γ)` (`Γ`
+   `FreshNames` in scope, `variable (m : Modality) (φ : Post C Γ)` (`Γ`
    the first line's parameters and the user locals its program declares,
    `[.val .uint]` for `ageVal`; a capture is never in it) and any
    premise a law needs as a `variable (hk : …)`, write `#chain <first line>`
    and read the info message (`lean_diagnostic_messages` on that file, that
    line): `theorem chain : … := by sol_chain`, every line written, one
-   declaration however long (`Core.Fml.Via`/`Core.Fml.ViaE`), and the fresh
+   declaration however long (`Fml.Via`/`Fml.ViaE`), and the fresh
    variables as table rows.  A wrong `Γ` is the elaborator's type mismatch
    on `φ`, which names the context it stands at.
    A chain `c` that stops short: `#chain_rest c` prints the lines to append

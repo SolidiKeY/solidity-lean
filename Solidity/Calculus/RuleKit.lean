@@ -8,7 +8,7 @@ The parts of a taclet that outlive today's rule table (`Calculus/Rules`, deleted
 where a read or a value lands (`Hole`, `MHole`, `VHole`, `NewLhs` and
 their `fill`), the side conditions a taclet states and `side_cond` proves,
 what a taclet leaves (`Premise`, the printers' target for the scoped
-premises too: `Calculus/Core/Delab.lean` prints a scoped premise through
+premises too: `Calculus/Delab.lean` prints a scoped premise through
 its erasure), solkey's branch labels (`Taclet.branchLabels`,
 `Taclet.labelledBy`), and the printers of a premise and of a taclet's binders
 (`ppPremise?`, `delabTacletBinders`).  Moved out of `Rules.lean`
@@ -177,7 +177,7 @@ macro_rules
           Surface.MLoc.isTarget, Surface.MPath.isBindable, Surface.Val.notTernary, Surface.Hole.isTarget, Surface.MHole.isTarget,
           Surface.VHole.isTarget, Surface.SPath.elemMapping, Surface.SPath.elemPrim, Ty.elemIsMapping, Ty.elemIsPrim,
           Ty.isMapping, Ty.isPrimitive]; done)
-      | fail "the rule's side condition does not hold: `Core.Stmt.step` fires another rule here")
+      | fail "the rule's side condition does not hold: `Stmt.step` fires another rule here")
 
 /-- The predicates a side condition is stated with. -/
 def sidePreds : List Lean.Name :=
@@ -226,7 +226,7 @@ inductive Surface.Premise (C : Contract) where
   | cases (fs : List (NFml C)) (us : List (Surface.Upd C))
   /-- A loop's invariant rule (`whileInvariantBox`, `whileInvariantDiamond`):
   the invariant `I` now ("invariant initially valid"), and, whatever the
-  body's frame holds (`{anon(P)}`, `Core.Fml.anonHavoc`), from where `I` holds and
+  body's frame holds (`{anon(P)}`, `Fml.anonHavoc`), from where `I` holds and
   after `U` (the variant's value, under the diamond), the body `P` to `post`
   where the condition `c` holds, the rest where `c'` does, and under the
   diamond one of them ("invariant preserved and used"). -/

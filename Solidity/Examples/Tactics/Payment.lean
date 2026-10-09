@@ -1,6 +1,6 @@
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.Sequents
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.Sequents
 import Solidity.Tools.Inspect
 
 /-!
@@ -13,10 +13,10 @@ which books the payment on the ledger and nothing else: the update
 which books nothing (solkey's `\if(sadr = self)`).  Under the diamond a
 payment has no rule (`LeanTaclet.transferDiamond` closes it to `false`).
 Whether the world pays is not the rule's: on the EVM a refused payment
-reverts, which the box does not see (`Evm.Core.compile_box`).  The worked
+reverts, which the box does not see (`Evm.compile_box`).  The worked
 examples' traces are `Examples/Chains/Payment.lean`'s; here the sequents
 themselves, each with its whole context, are the goals of a walk, each a
-checked line `show sequent!{ Γ ⟹ ψ }` (`Calculus/Core/Sequents.lean`).
+checked line `show sequent!{ Γ ⟹ ψ }` (`Calculus/Sequents.lean`).
 
 `pv = sadr.send(se);` has a rule under either modality (§4), with a goal per
 outcome: `"send succeeded"`, the same booking with `pv` true, and `"send
@@ -36,20 +36,20 @@ open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## 1 · The rule -/
 
 /--
-info: @Core.Taclet.transferNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx} {sadr se : Core.Simple C Γ PrimTy.uint},
+info: @Taclet.transferNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {sadr se : Simple C Γ PrimTy.uint},
   dl{ [ sadr .transfer(se); ] ⇝ { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.transferNoCallbackBox
+#guard_msgs in #check @Taclet.transferNoCallbackBox
 
 /-! ## 2 · The walk -/
 
 /-- `[ to.transfer(5); ] true` as a `⊢` walk: one rule, one goal, a checked
-sequent (`Calculus/Core/Sequents.lean`); the chain, from the receiver `3`, is
+sequent (`Calculus/Sequents.lean`); the chain, from the receiver `3`, is
 `Chains.Payment.Transfer5.chain`. -/
 theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   apply update .transferNoCallbackBox
@@ -80,24 +80,24 @@ theorem transferOwnerValid : ⊨ dl!{ [ owner.transfer(5); ] true } := by
 /-! ## 4 · `send`: a goal per outcome -/
 
 /--
-info: @Core.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx} {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)}
-  {sadr se : Core.Simple C Γ PrimTy.uint},
+info: @Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
+  {sadr se : Simple C Γ PrimTy.uint},
   dl{ [ pv = sadr .send(se); ] ⇝
     "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.sendNoCallbackBox
+#guard_msgs in #check @Taclet.sendNoCallbackBox
 
 /--
-info: @Core.Taclet.sendNoCallbackDiamond : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}
-  {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)} {sadr se : Core.Simple C Γ PrimTy.uint},
+info: @Taclet.sendNoCallbackDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
+  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr se : Simple C Γ PrimTy.uint},
   dl{ ⟨ pv = sadr .send(se); ⟩ ⇝
     "non-negative amount": 0 <= se ;
       "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[
         ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.sendNoCallbackDiamond
+#guard_msgs in #check @Taclet.sendNoCallbackDiamond
 
 /-- `[ ok = to.send(5); ] true` as a `⊢` walk: `sendNoCallbackBox`'s two
 goals, `"send succeeded"` and `"send failed"`, each a checked sequent; it
@@ -127,18 +127,18 @@ theorem sendCapturedValid : ⊨ dl!{ [ ok = owner.send(x + 2); ] true } := by
   sol_close
 
 /--
-info: @Core.Taclet.send_unfold_leftFstReceiver : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
-  {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)} {nadr e : Core.Val C Γ PrimTy.uint},
+info: @Taclet.send_unfold_leftFstReceiver : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
+  {pv : Idx Γ (LTy.val PrimTy.bool)} {nadr e : Val C Γ PrimTy.uint},
   dl{ ⟨[ pv = nadr .send(e); ]⟩ ⇝ ⟨[ uint se = nadr; pv = se .send(e); ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.send_unfold_leftFstReceiver
+#guard_msgs in #check @Taclet.send_unfold_leftFstReceiver
 
 /--
-info: @Core.Taclet.send_unfold_rightSndArgument : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
-  {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)} {sadr : Core.Simple C Γ PrimTy.uint} {nse : Core.Val C Γ PrimTy.uint},
+info: @Taclet.send_unfold_rightSndArgument : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
+  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr : Simple C Γ PrimTy.uint} {nse : Val C Γ PrimTy.uint},
   dl{ ⟨[ pv = sadr .send(nse); ]⟩ ⇝ ⟨[ uint se = nse; pv = sadr .send(se); ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.send_unfold_rightSndArgument
+#guard_msgs in #check @Taclet.send_unfold_rightSndArgument
 
 /-- `⟨ uint to = 9; ok = to.send(5); ⟩ true`: under the diamond the amount's
 sign first (`"non-negative amount"`), then the two outcomes.  The receiver is

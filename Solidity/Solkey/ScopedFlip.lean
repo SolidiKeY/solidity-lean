@@ -1,6 +1,6 @@
 import Solidity.Frontend.Problems
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Surface
 
 /-!
 # The scoped flip's switches, on one box function
@@ -18,7 +18,7 @@ rewrites the fixture and its hash.
 -/
 
 open Solidity NFml.Proves
-open scoped Core.Scoped
+open scoped Scoped
 
 solc_import "../../tests/solc/ScopedFlip.ast.json" hash 0x7c6221bb7e6edb3f as Solkey.ScopedFlip
 
@@ -32,7 +32,7 @@ solc_scoped_problems Solkey.ScopedFlip main decl
 
 -- `N.f.problem` is the scoped statement, an entry of `N.problems`
 example : Solkey.ScopedFlip.additionStorageWrite.problem =
-    Solkey.ScopedFlip.problems.getD 0 (Core.Fml.tt (C := Solkey.ScopedFlip)) := rfl
+    Solkey.ScopedFlip.problems.getD 0 (Fml.tt (C := Solkey.ScopedFlip)) := rfl
 
 /--
 info: \programVariables {

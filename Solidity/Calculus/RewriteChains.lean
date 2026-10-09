@@ -9,7 +9,7 @@ import Solidity.Calculus.Literals
 # Chains past the program: rewrite links on `Update.lean`'s lines
 
 A worked chain (`Examples/Chains/`) runs the scoped strategy
-(`Calculus/Core/Chains.lean`) and, past the program, goes on from the
+(`Calculus/Chains.lean`) and, past the program, goes on from the
 erasure of its last line by rewrites (`Calculus/ChainRewrites.lean`): the
 stack merges into one parallel update, and a Theory law reads a term down
 to its value.  This module is that second half, on `Update.lean`'s formulas:
@@ -130,7 +130,7 @@ def NFml.Via.last : NFml C → List (NFml.Link C × NFml C) → NFml C
 
 /-! ## The notation
 
-The arrows are the scoped chains' too (`Calculus/Core/Chains.lean`), which
+The arrows are the scoped chains' too (`Calculus/Chains.lean`), which
 read a chain whose first line is scoped and hand any other here. -/
 
 
@@ -178,7 +178,7 @@ def expandChainStx : Macro := fun stx => do
       | `(chain_arrow| ~[ $r:ident ]~>) =>
         pure (← `(link% ($prev) $r ($b)), ← `(stepBy% ($prev) $r ($b)))
       | _ => Macro.throwErrorAt l[0] "a step of the strategy (`~>`, `~*>`) is a scoped chain's: \
-          write the first line scoped (`open scoped Solidity.Core.Scoped`)"
+          write the first line scoped (`open scoped Solidity.Scoped`)"
     links := links.push (link.1, link.2, b)
     prev := b
   match links with
@@ -468,14 +468,14 @@ def RwArrow.ofLaw (k c : Lean.Name) : RwArrow :=
   if k == ``EvalLaw then .evalLaw c else if k == ``LitLaw then .litLaw c else .law c
 
 /-- What `~[r]~>` names: `none` for a rule of the strategy (a constructor of
-the scoped `Core.Taclet` or `Core.LeanTaclet`, `emptyModality`), else a
+the scoped `Taclet` or `LeanTaclet`, `emptyModality`), else a
 rewrite; any other name is an error, and so is a name that resolves to more
 than one constant. -/
 def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
   let n := r.getId
   let env ← getEnv
-  if n == `emptyModality || env.contains (`Solidity.Core.Taclet ++ n) ||
-      env.contains (`Solidity.Core.LeanTaclet ++ n) then
+  if n == `emptyModality || env.contains (`Solidity.Taclet ++ n) ||
+      env.contains (`Solidity.LeanTaclet ++ n) then
     return none
   if rwTable.contains n then return some (.table n)
   if env.contains (``TermTaclet ++ n) then return some (.law (``TermTaclet ++ n))
@@ -1093,7 +1093,7 @@ elab "sol_chain" : tactic => withMainContext do
 
 /-- `#derivation φ`: the derivation the strategy takes from `φ`, one line per
 step with the rule that reached it; the scoped chains'
-(`Calculus/Core/Chains.lean`). -/
+(`Calculus/Chains.lean`). -/
 syntax "#derivation " term : command
 
 end Tactic
@@ -1144,13 +1144,13 @@ elab_rules : term
     let b ← elabTermEnsuringType b (mkApp (mkConst ``NFml) C)
     let some arrow ← rwArrow? r
       | throwError "~[{r}]~>: a rule of the strategy is a scoped chain's step: write the line \
-          before it scoped (`open scoped Solidity.Core.Scoped`)"
+          before it scoped (`open scoped Solidity.Scoped`)"
     let l ← rwLabelOf C a b r arrow
     return mkAppN (mkConst ``NFml.RwBy) #[C, toExpr r.getId.toString, l, a, b]
   | `(link% $a $r $b) => do
     let some arrow ← rwArrow? r
       | throwError "~[{r}]~>: a rule of the strategy is a scoped chain's step: write the line \
-          before it scoped (`open scoped Solidity.Core.Scoped`)"
+          before it scoped (`open scoped Solidity.Scoped`)"
     let a ← elabTerm a none
     let C ← lineContract a r
     let b ← elabTermEnsuringType b (mkApp (mkConst ``NFml) C)
@@ -1186,11 +1186,11 @@ link after it, `dl!{ … }` read three times. -/
       | `(chain_arrow| ~[ $r:ident ]~>) =>
         match ← rwArrow? r with
         | none => throwError "~[{r}]~>: a rule of the strategy is a scoped chain's step: write \
-            the first line scoped (`open scoped Solidity.Core.Scoped`)"
+            the first line scoped (`open scoped Solidity.Scoped`)"
         | some arrow =>
           return mkApp3 (mkConst ``Link.rw) C (toExpr r.getId.toString) (← rwLabelOf C a b r arrow)
       | _ => throwError "a step of the strategy (`~>`, `~*>`) is a scoped chain's: write the \
-          first line scoped (`open scoped Solidity.Core.Scoped`)"
+          first line scoped (`open scoped Solidity.Scoped`)"
     ws := ws.push (mkAppN (mkConst ``Prod.mk [0, 0]) #[mkApp (mkConst ``Link) C, fml, link, b])
   return mkApp3 (mkConst ``NFml.Via) C a (← mkListLit pairTy ws.toList)
 

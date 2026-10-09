@@ -19,19 +19,19 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 | `Ch04_Semantics` | `Semantics.lean` (`Stmt.run`), `Semantics/Agree.lean` |
 | `Ch05_Logic` | `Update.lean` (terms, updates, `Fml`, both modalities) |
 | `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/SurfaceNotation.lean` (`dl[C]{}`) |
-| `Ch06_Taclets` | `Calculus/Core/Rules.lean`, `Calculus/Core/Sound*.lean` (`Stmt.sound`), `Calculus/Core/Proves.lean` (`Proves`), `Calculus/Core/Taclet.lean` |
-| `Ch07_Symex` | `Calculus/Core/Symex.lean`, `Calculus/NFmlClose.lean` |
+| `Ch06_Taclets` | `Calculus/Rules.lean`, `Calculus/Sound*.lean` (`Stmt.sound`), `Calculus/Proves.lean` (`Proves`), `Calculus/Taclet.lean` |
+| `Ch07_Symex` | `Calculus/Symex.lean`, `Calculus/NFmlClose.lean` |
 | `Ch08_EVM`-`Ch10_Correctness` | `Evm/` (`docs/compiler-verification.md`) |
-| `Ch11_Completeness` | `Calculus/Core/Step.lean` (`Stmt.step`), `Calculus/Core/RuleExists.lean` (`Stmt.rule_exists`); progress (`Fml.active_iff_step`) retired at W4 `calc-del` of `docs/intrinsic.md` |
+| `Ch11_Completeness` | `Calculus/Step.lean` (`Stmt.step`), `Calculus/RuleExists.lean` (`Stmt.rule_exists`); progress (`Fml.active_iff_step`) retired at W4 `calc-del` of `docs/intrinsic.md` |
 | `Ch12_Termination` | retired at W4 `calc-del` (the scoped strategy is fuelled) |
-| `Ch13_Chains` | `Calculus/Core/Chains.lean` |
+| `Ch13_Chains` | `Calculus/Chains.lean` |
 | `Ch14_Updates` | `Calculus/NFmlUpdateRules.lean` |
 | `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `Fml.valid_iff_cons`) |
 | `Examples/` | `Solidity/Examples/` |
 
 Beyond mini-solkey: type soundness and reachability (`Typing/`), sort
 faithfulness (`SortCheck/Faithfulness.lean`), the callback semantics
-(`Semantics/Core/Callback.lean`, `Calculus/Core/Callback.lean`), function
+(`Semantics/Callback.lean`, `Calculus/Callback.lean`), function
 specifications (`Calculus/SurfaceSpec.lean`), the solkey corpus (`SolidityCorpus`,
 `docs/corpus-parity.md`), and the `SolKey` reader's correspondence against
 `Taclet` (`~/projects/side-projects/lean/solkey`).
@@ -39,12 +39,12 @@ specifications (`Calculus/SurfaceSpec.lean`), the solkey corpus (`SolidityCorpus
 ## Still open
 
 - **The bridge (2026-10-07, ends at M4 of `docs/intrinsic.md`).** The scoped
-  syntax `Solidity.Core` (`Scope.lean`, `Syntax/Core.lean`) lives beside
+  syntax `Solidity` (`Scope.lean`, `Syntax/Core.lean`) lives beside
   `Syntax.lean`'s `Stmt C`, which the elaborator still emits, until it
   replaces it: the one deliberate exception to porting in place.
   `Syntax/Resolve.lean` maps between them (`erase`, `resolve`), and the
   elaborator's locals check is `resolve`.  `Syntax/CoreQuote.lean` quotes
-  the scoped form (`Core.Prog.quote`, hash-consed), and `solc_scoped` declares
+  the scoped form (`Prog.quote`, hash-consed), and `solc_scoped` declares
   every imported program scoped for the kernel to check (the lint, M2.3,
   2026-10-07).  They go at M4 with the untyped `Stmt C` and its quoter,
   when the import emits the scoped form itself.
@@ -169,7 +169,7 @@ their names.
 | The invariant | An `Invariant C` is a formula with no local and no transfer (solkey's `CInv(storage, net)`); the frame lemmas need it closed.  It may read the ledger, which a callback havocs, and `address(this).balance`, which it keeps (`State.havoc`). |
 | `ProvesC` | The ordinary taclets lift on a statement that pays nothing and runs no other, and whose premise pays nothing; a goal with no transfer left is `Proves`'s (`holdsC_iff_holds`).  Validity with callbacks implies validity without (`valid_of_validC`). |
 | External calls (`try`) | The callee is never run.  Without callbacks how a call ends is the transaction's (`TxEnv.ext`, a table read by `Stmt.run`, which no formula reads); a call with no entry reaches an address with no code and reverts in the caller, and so does data that does not decode (`bindData`).  `tryCallNoCallbackBox` has a goal per clause, for every value of the locals it binds (`Premise.branches`, `Fml.alls`), so a proof holds whatever the table says.  With callbacks a `try` is a point where control leaves (`Stmt.hasTransfer`), and `ExecS` runs it nondeterministically, its success from a `havoc`ked state keeping the invariant. |
-| Function contracts | A derived rule over `Stmt.run`, not a `Proves` constructor (`Calculus/Core/FunContract.lean`): `useContract` has KeY's goals "pre" (`[ params := args ] requires`) and "post" (`[ params := args ] {old := storage ‖ oldNet := net} {havoc} ∀ T r. (ensures → [ res = r; ..ω ] φ)`), box only, its conclusion `⊨`, so it applies at the first statement of a goal.  A contract is a fact about the callee's block from any state (`FunContract`), proved from its obligation `requires → {old := storage ‖ oldNet := net} [ T r; body ] (ensures ∧ typed(r))` (solkey's planned `requires -> [g(args)@C] ensures`, no invariant); it owes the result's type (`rangeFml`), as `∀ T r` ranges over the type.  The mutability is read off the inlined body, since `FunDecl` keeps no `pure`/`view` (only `payable`) (`Calculus/Core/Blocks.lean`'s `Stmt.within`): `pure` (a `view` body that reads no state, with the same frame) and `view` keep storage and ledger, so "post" has no `{havoc}`; `nonpayable` (storage writes, `transfer`) gets `State.havoc`'s.  A body with memory, a push, a pop, an alias or a `try` has no mutability, hence no contract: "post" havocs no heap.  The callee's parameters are the call's fresh names, so a contract is stated at a call; recursion stays out. |
+| Function contracts | A derived rule over `Stmt.run`, not a `Proves` constructor (`Calculus/FunContract.lean`): `useContract` has KeY's goals "pre" (`[ params := args ] requires`) and "post" (`[ params := args ] {old := storage ‖ oldNet := net} {havoc} ∀ T r. (ensures → [ res = r; ..ω ] φ)`), box only, its conclusion `⊨`, so it applies at the first statement of a goal.  A contract is a fact about the callee's block from any state (`FunContract`), proved from its obligation `requires → {old := storage ‖ oldNet := net} [ T r; body ] (ensures ∧ typed(r))` (solkey's planned `requires -> [g(args)@C] ensures`, no invariant); it owes the result's type (`rangeFml`), as `∀ T r` ranges over the type.  The mutability is read off the inlined body, since `FunDecl` keeps no `pure`/`view` (only `payable`) (`Calculus/Blocks.lean`'s `Stmt.within`): `pure` (a `view` body that reads no state, with the same frame) and `view` keep storage and ledger, so "post" has no `{havoc}`; `nonpayable` (storage writes, `transfer`) gets `State.havoc`'s.  A body with memory, a push, a pop, an alias or a `try` has no mutability, hence no contract: "post" havocs no heap.  The callee's parameters are the call's fresh names, so a contract is stated at a call; recursion stays out. |
 
 ### `send`
 
@@ -179,7 +179,7 @@ their names.
 | The statement | `Stmt.send pv r a`, `pv` a `bool` local, beside `Stmt.transfer`.  `bool ok = r.send(a);` elaborates as `bool ok; ok = r.send(a);`: `valueDeclSkip` where solkey fires `localValueDeclInitDrop` (same node count; the default is set, then overwritten by the send); a bare `r.send(a);` does not parse, as solkey has no rule for it. |
 | Labelled goals | `Premise.cases fs us`: each formula of `fs`, then `{U} ⟨[ ..ω ]⟩ φ` for each update, read as one conjunction (`Premise.fml`) and as `Proves.cases`'s two hypotheses.  `Premise.Correct` asks that the run be one of the updates; the formulas are extra goals.  `Derive.casesGoals` lists the goals by recursion, with no `List.append` for `decide +kernel`. |
 | The diamond | Ported (`sendNoCallbackDiamond`), unlike `transfer`'s: a refusal is an outcome of the run.  Its "non-negative amount" goal is solkey's and not needed for soundness (the booking halts on a negative amount). |
-| With callbacks | A send is a point where control leaves (`Stmt.forks`, `Stmt.hasTransfer`).  `ExecS` books it as the transfer of its amount and then halts where that does, leaves the invariant broken, resumes in a `havoc`ked state keeping it with `pv` true, or fails with nothing booked and `pv` false (`sendFailed`), the last whatever the oracle says: a callee may always revert.  `ProvesC.send` reads `CallbackTaclet.sendWithCallbackBox`'s premise as solkey's three goals, sound by `Core.holdsC_sendCb`; the ordinary send rules do not lift (the statement forks).  `Examples/Tactics/Callback.lean`'s `callToKeepsInv` is `PiggyBankNet.callTo` under a storage invariant. |
+| With callbacks | A send is a point where control leaves (`Stmt.forks`, `Stmt.hasTransfer`).  `ExecS` books it as the transfer of its amount and then halts where that does, leaves the invariant broken, resumes in a `havoc`ked state keeping it with `pv` true, or fails with nothing booked and `pv` false (`sendFailed`), the last whatever the oracle says: a callee may always revert.  `ProvesC.send` reads `CallbackTaclet.sendWithCallbackBox`'s premise as solkey's three goals, sound by `holdsC_sendCb`; the ordinary send rules do not lift (the statement forks).  `Examples/Tactics/Callback.lean`'s `callToKeepsInv` is `PiggyBankNet.callTo` under a storage invariant. |
 | Cost | `Stmt.run` and the proofs by cases on it grow by one arm; `TestSuite/Derived1.lean` re-checks in 7.7 s on a fresh worker on this branch and on master alike. |
 | A ledger read past a storage write | `Modality.wp_box_saveStorage` also hands the closer `τ.net = σ.net`, so `net-send-simple.key`'s `sendTo`, which stores the outcome (`sent = ok;`), closes as solkey states it (`Net.netSendSimple`), and so does `[ to.transfer(5); total = 1; ] net(to) = 2` (`Net.netTransferThenStore`).  Re-checks after it, on fresh workers: `Examples/Tactics/CrossDomain.lean` 54 s and `Memory.lean` 52 s (the `lean-verify` skill lists 75–90 s for each), `StorageSuite.lean` 21 s.  The `TestSuite/Derived*` replays close their leaves inside the residue and do not use the lemma. |
 | Review (2026-10-06) | Fixed: sort rows for the four send taclets that read `net` (`SortCheck/Annotations.lean`, 119 rows; `solkeycheck`'s check, run as an `#eval` of `conforms`, is at zero against `1b4341a303`, and four rows ahead of the `100f7f24c3` pin); the corpus rows `net_send_simple` (proved) and `net_call_withcallback_simple` (unsupported: no tuples yet) in `tests/solkey/expected.tsv` and `docs/corpus-parity.md`, from `1b4341a303`'s `net/` (the header stays at `78f42fde33` until the TestSuite fixture is re-imported); `PiggySend.sendTo` keeps `sent = ok;`; `sol_derive?` prints a send's goal split on its `apply` line (`apply cases … <;> (try simp only […]) <;> (try and_intros)`), so a replay touches only the rule's goals, pinned with `sol_prove?` in `Examples/ProofTree.lean`; `#taclet` cites `upd_send_cases`, pinned in `Examples/Tools.lean`; the unfold rules pinned in `Payment.lean`; bare `simp`s of the lane replaced by `simp only`. `(bool ok, ) = a.call{value: v}("")` waits for tuples. |

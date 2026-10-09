@@ -1,22 +1,22 @@
-import Solidity.Calculus.Core.SolSpec
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.SoundLoops
-import Solidity.Semantics.Core.TypedRunFuel
+import Solidity.Calculus.SolSpec
+import Solidity.Calculus.Surface
+import Solidity.Calculus.SoundLoops
+import Solidity.Semantics.RunFuel
 import Solidity.Tools.Common
 
 /-!
 # Counterexamples: scoped formulas evaluated in a typed state
 
-`holds σ φ` (`Calculus/Core/Logic.lean`) is a `Prop`: a quantifier ranges
+`holds σ φ` (`Calculus/Logic.lean`) is a `Prop`: a quantifier ranges
 over `2^256` values, an update over the typed states that erase to where it
 ends, `{havoc}` over every storage, so it cannot be computed.
-`Core.Fml.eval3` is its three-valued shadow over the typed state
-(`TState`): terms and updates are read on the erasure, the programs under a
-modality are run by the typed run with fuel (`Prog.trunF`,
-`Semantics/Core/TypedRunFuel.lean`: a loop entered at most `loopFuel`
+`Fml.eval3` is its three-valued shadow over the typed state
+(`State`): terms and updates are read on the erasure, the programs under a
+modality are run by the typed run with fuel (`Prog.runF`,
+`Semantics/RunFuel.lean`: a loop entered at most `loopFuel`
 iterations, `unknown` past them), a quantifier and a hidden binder are
 tried on a finite domain (`ff` as soon as one instance is), an update is
-read in the one typed state its end lifts to (`TState.lift?`: the heap
+read in the one typed state its end lifts to (`State.lift?`: the heap
 empty, the storage and the transaction its own), and the connectives are
 Kleene's.  An answer is never wrong, only sometimes missing:
 `Fml.eval3_tt` and `Fml.eval3_ff` say that `tt` implies `holds σ φ` and
@@ -31,7 +31,7 @@ type's range, storages are canonical (`Typing/Reachability.lean`: every
 struct member present in order, a mapping's keys unique and its default the
 type's), their words in range, and `msg.value` is `0` for a function that
 is not `payable`.  The candidate is untyped data (`Cand`), read as a typed
-state by `TState.ofSem?` (the storage decoded at the contract's types).
+state by `State.ofSem?` (the storage decoded at the contract's types).
 
 The search is testing: small pools of values per primitive type (the
 bounds, `0`, `1`, `2`, and the spec's own literals), all-default storages
@@ -49,9 +49,9 @@ candidate's storage on closed terms (`certifyRefl`).  That needs every
 premise to evaluate to `tt` in `σ₀`, and so fails when one is quantified
 over a `uint`, as the layout premise of a mapping is; the witness is then
 only **tested**.  What the kernel runs is written by the recursor
-(`Fml.eval3`, `Fml.peel`, `Prog.trunF`; Gate G0 conditions 1 and 2), each
+(`Fml.eval3`, `Fml.peel`, `Prog.runF`; Gate G0 conditions 1 and 2), each
 with a compiled `match` twin the search runs (`Fml.eval3C`, `Fml.peelC`,
-`Prog.trunFC`) and a theorem that they agree.
+`Prog.runFC`) and a theorem that they agree.
 -/
 
 namespace Solidity.Tools
@@ -92,7 +92,7 @@ end Tri
 
 end Solidity.Tools
 
-namespace Solidity.Core
+namespace Solidity
 
 open Solidity.Tools (Tri)
 open Semantics (Value)
@@ -157,7 +157,7 @@ def Storage.decode (C : Contract) (st : List (Name × Semantics.SVal)) : Option 
 
 /-- **The typed state of an untyped one**, with no locals: the storage
 decoded, the words of the transaction and the funds read as `uint`s. -/
-def TState.ofSem? (C : Contract) (s : Semantics.State) : Option (TState C []) := do
+def State.ofSem? (C : Contract) (s : Semantics.State) : Option (State C []) := do
   let u (n : Int) : Option PrimTy.uint.Denote := PrimTy.ofValue? .uint (.int n)
   let st ← Storage.decode C s.storage
   let bal ← u s.selfBalance
@@ -170,9 +170,9 @@ def TState.ofSem? (C : Contract) (s : Semantics.State) : Option (TState C []) :=
          tx := { msgSender := sender, selfAddress := self, msgValue := value, timestamp := time,
                  ext := s.tx.ext } }
 
-/-- `TState.ofSem?`, the initial state where it fails. -/
-def TState.ofSemD (C : Contract) (s : Semantics.State) : TState C [] :=
-  (TState.ofSem? C s).getD (TState.init C)
+/-- `State.ofSem?`, the initial state where it fails. -/
+def State.ofSemD (C : Contract) (s : Semantics.State) : State C [] :=
+  (State.ofSem? C s).getD (State.init C)
 
 /-! ## Comparing untyped storages in the kernel
 
@@ -271,7 +271,7 @@ end
 
 An update is read on the erasure (`Upd.apply`), and what follows it in
 every typed state that erases to where it ends (`holds`).  One of them is
-enough to refute it: `TState.lift?` reads the end back as a typed state
+enough to refute it: `State.lift?` reads the end back as a typed state
 where the heap is empty and the storage and the transaction are the
 starting state's (a snapshot `old := storage` is that storage), every
 local a value of its type, an unset alias or memory local, a ledger. -/
@@ -336,7 +336,7 @@ theorem TEnv.lift?_erase (st : Storage C) : (Δ : Ctx) → (e : Env C Δ) → (e
 `σ`'s storage and transaction: `none` where `σ`'s heap typing is not empty
 or `τ` holds memory, another storage or transaction, or a local no typed
 value of its type erases to. -/
-def TState.lift? {Γ Δ : Ctx} (σ : TState C Γ) (τ : EState C Δ) : Option (TState C Δ) :=
+def State.lift? {Γ Δ : Ctx} (σ : State C Γ) (τ : EState C Δ) : Option (State C Δ) :=
   if σ.H.isEmpty && τ.heap.isEmpty && τ.nextId == 0 &&
       Semantics.SVal.fieldsBeqK τ.storage σ.storage.erase &&
       decide (τ.tx = σ.tx.erase) then do
@@ -346,9 +346,9 @@ def TState.lift? {Γ Δ : Ctx} (σ : TState C Γ) (τ : EState C Δ) : Option (T
            selfBalance := bal, tx := σ.tx }
   else none
 
-theorem TState.lift?_spec {Γ Δ : Ctx} {σ : TState C Γ} {τ : EState C Δ} {σ' : TState C Δ}
+theorem State.lift?_spec {Γ Δ : Ctx} {σ : State C Γ} {τ : EState C Δ} {σ' : State C Δ}
     (h : σ.lift? τ = some σ') : σ'.erase = τ ∧ σ.H <+: σ'.H := by
-  unfold TState.lift? at h
+  unfold State.lift? at h
   split at h
   · rename_i hc
     simp only [Bool.and_eq_true, List.isEmpty_iff, beq_iff_eq, decide_eq_true_eq] at hc
@@ -364,7 +364,7 @@ theorem TState.lift?_spec {Γ Δ : Ctx} {σ : TState C Γ} {τ : EState C Δ} {�
       exact Semantics.PrimVal.int.inj this
     cases τ
     simp only at hheap hid hst htx hb
-    simp only [TState.erase, TEnv.lift?_erase σ.storage Δ _ env henv, hheap, hid, hst, htx, hb]
+    simp only [State.erase, TEnv.lift?_erase σ.storage Δ _ env henv, hheap, hid, hst, htx, hb]
     rfl
   · cases h
 
@@ -379,7 +379,7 @@ def loopFuel : Nat := 1000
 /-- The values a hidden binder of type `t` is tried on in `σ`: the domain
 for a value, unset for an alias or a memory local, `σ`'s storage and ledger
 for a snapshot. -/
-def TDom.bind {Γ : Ctx} (dom : TDom) (σ : TState C Γ) : (t : LTy) → List (t.TDenote C σ.H)
+def TDom.bind {Γ : Ctx} (dom : TDom) (σ : State C Γ) : (t : LTy) → List (t.TDenote C σ.H)
   | .val p => dom p
   | .alias _ => [none]
   | .mem _ => [none]
@@ -398,20 +398,20 @@ def Tri.afterT {α : Type} (m : Modality) (k : α → Tri) : TRes α → Tri
     | .box => .tt
     | .diamond => .ff
 
-/-- The program, then its frames, run with fuel (`Prog.trunFrames`). -/
-def Prog.trunFramesF {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : TState C Γ) (P : Prog C Γ Γ₁)
-    (κ : Frames C Γ₁ Γ₀) : TRes (TState C Γ₀) := do
-  let o ← Prog.trunF n P σ
-  let o' ← Frames.trunF n o.st κ
+/-- The program, then its frames, run with fuel (`Prog.runFrames`). -/
+def Prog.runFramesF {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : State C Γ) (P : Prog C Γ Γ₁)
+    (κ : Frames C Γ₁ Γ₀) : TRes (State C Γ₀) := do
+  let o ← Prog.runF n P σ
+  let o' ← Frames.runF n o.st κ
   pure o'.st
 
-theorem Prog.trunFramesF_approx {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : TState C Γ) (P : Prog C Γ Γ₁)
-    (κ : Frames C Γ₁ Γ₀) : TRes.Approx (Prog.trunFramesF n σ P κ) (Prog.trunFrames σ P κ) :=
-  (Prog.trunF_approx n P σ).bind fun o => (Frames.trunF_approx n o.st κ).bind fun _ => .refl _
+theorem Prog.runFramesF_approx {Γ Γ₁ Γ₀ : Ctx} (n : Nat) (σ : State C Γ) (P : Prog C Γ Γ₁)
+    (κ : Frames C Γ₁ Γ₀) : TRes.Approx (Prog.runFramesF n σ P κ) (Prog.runFrames σ P κ) :=
+  (Prog.runF_approx n P σ).bind fun o => (Frames.runF_approx n o.st κ).bind fun _ => .refl _
 
 /-- **`holds`, evaluated**, compiled: `dom p` is the finite domain a
 quantifier over `p` is tried on.  The twin of `Fml.eval3` (`Fml.eval3_eq`). -/
-def Fml.eval3C (dom : TDom) : {Γ : Ctx} → TState C Γ → Fml C Γ → Tri
+def Fml.eval3C (dom : TDom) : {Γ : Ctx} → State C Γ → Fml C Γ → Tri
   | _, _, .tt => .tt
   | _, σ, .eq a b =>
     match a.eval σ.erase, b.eval σ.erase with
@@ -432,7 +432,7 @@ def Fml.eval3C (dom : TDom) : {Γ : Ctx} → TState C Γ → Fml C Γ → Tri
     | .ok τ => match σ.lift? τ with
       | some σ' => if φ.eval3C dom σ' = .ff then .ff else .unknown
       | none => .unknown
-  | _, σ, .modal m P κ φ => Tri.afterT m (fun τ => φ.eval3C dom τ) (Prog.trunFramesF loopFuel σ P κ)
+  | _, σ, .modal m P κ φ => Tri.afterT m (fun τ => φ.eval3C dom τ) (Prog.runFramesF loopFuel σ P κ)
   | _, σ, .havoc φ =>
     if φ.eval3C dom σ = .ff || φ.eval3C dom (σ.havoc σ.storage []) = .ff then .ff else .unknown
   | _, σ, .all _ p φ =>
@@ -442,7 +442,7 @@ def Fml.eval3C (dom : TDom) : {Γ : Ctx} → TState C Γ → Fml C Γ → Tri
   | _, σ, .anon xs φ =>
     if φ.eval3C dom (σ.anon xs fun x => TEnv.get x.2 σ.env) = .ff then .ff else .unknown
 
-theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : TState C Γ,
+theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : State C Γ,
     (φ.eval3C dom σ = .tt → holds σ φ) ∧ (φ.eval3C dom σ = .ff → ¬ holds σ φ)
   | _, .tt, _ => ⟨fun _ => trivial, nofun⟩
   | _, .eq a b, σ => by
@@ -496,13 +496,13 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
         simp only
         split
         · rename_i hff
-          obtain ⟨he, hp⟩ := TState.lift?_spec hl
+          obtain ⟨he, hp⟩ := State.lift?_spec hl
           exact ⟨nofun, fun _ hall => (Fml.eval3C_sound dom φ σ').2 hff (hall σ' he hp)⟩
         · exact ⟨nofun, nofun⟩
   | _, .modal m P κ φ, σ => by
     simp only [Fml.eval3C, holds]
-    have happ := Prog.trunFramesF_approx loopFuel σ P κ
-    cases hr : Prog.trunFramesF loopFuel σ P κ with
+    have happ := Prog.runFramesF_approx loopFuel σ P κ
+    cases hr : Prog.runFramesF loopFuel σ P κ with
     | ok τ =>
       rw [hr] at happ
       rw [← happ.eq nofun]
@@ -535,7 +535,7 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
       refine ⟨nofun, fun _ hall => ?_⟩
       rcases h with h | h
       · exact (Fml.eval3C_sound dom φ σ).2 h
-          (by simpa only [TState.havoc_self] using hall σ.storage σ.net)
+          (by simpa only [State.havoc_self] using hall σ.storage σ.net)
       · exact (Fml.eval3C_sound dom φ _).2 h (hall _ _)
     · exact ⟨nofun, nofun⟩
   | _, .all _ p φ, σ => by
@@ -562,8 +562,8 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
 /-- **`holds`, evaluated**, by its recursor (Gate G0 conditions 1 and 2):
 what the kernel runs in a certificate.  Compiled as `Fml.eval3C`. -/
 @[implemented_by Fml.eval3C]
-def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : TState C Γ) (φ : Fml C Γ) : Tri :=
-  Fml.rec (motive := fun Γ _ => TState C Γ → Tri)
+def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Tri :=
+  Fml.rec (motive := fun Γ _ => State C Γ → Tri)
     (fun _ => .tt)
     (fun a b σ => match a.eval σ.erase, b.eval σ.erase with
       | .ok x, .ok y => if x = y then .tt else .ff
@@ -581,7 +581,7 @@ def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : TState C Γ) (φ : Fml C Γ) : Tri :
       | .ok τ => match σ.lift? τ with
         | some σ' => if ih σ' = .ff then .ff else .unknown
         | none => .unknown)
-    (fun m P κ _ ih σ => Tri.afterT m (fun τ => ih τ) (Prog.trunFramesF loopFuel σ P κ))
+    (fun m P κ _ ih σ => Tri.afterT m (fun τ => ih τ) (Prog.runFramesF loopFuel σ P κ))
     (fun _ ih σ => if ih σ = .ff || ih (σ.havoc σ.storage []) = .ff then .ff else .unknown)
     (fun _ p _ ih σ =>
       if (dom p).any fun v => ih (σ.push (t := .val p) v) = .ff then .ff else .unknown)
@@ -590,7 +590,7 @@ def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : TState C Γ) (φ : Fml C Γ) : Tri :
       if ih (σ.anon xs fun x => TEnv.get x.2 σ.env) = .ff then .ff else .unknown)
     φ σ
 
-theorem Fml.eval3_eq (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : TState C Γ,
+theorem Fml.eval3_eq (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : State C Γ,
     φ.eval3 dom σ = φ.eval3C dom σ
   | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => rfl
   | _, .not φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
@@ -603,28 +603,28 @@ theorem Fml.eval3_eq (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : 
   | _, .bind _ _ _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
   | _, .anon _ φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
 
-theorem Fml.eval3_sound (dom : TDom) {Γ : Ctx} (φ : Fml C Γ) (σ : TState C Γ) :
+theorem Fml.eval3_sound (dom : TDom) {Γ : Ctx} (φ : Fml C Γ) (σ : State C Γ) :
     (φ.eval3 dom σ = .tt → holds σ φ) ∧ (φ.eval3 dom σ = .ff → ¬ holds σ φ) := by
   rw [Fml.eval3_eq]
   exact Fml.eval3C_sound dom φ σ
 
 /-- **A `tt` is a truth**: `φ` holds in `σ`. -/
-theorem Fml.eval3_tt {dom : TDom} {Γ : Ctx} {σ : TState C Γ} {φ : Fml C Γ}
+theorem Fml.eval3_tt {dom : TDom} {Γ : Ctx} {σ : State C Γ} {φ : Fml C Γ}
     (h : φ.eval3 dom σ = .tt) : holds σ φ :=
   (Fml.eval3_sound dom φ σ).1 h
 
 /-- **An `ff` is a counterexample**: `φ` does not hold in `σ`. -/
-theorem Fml.eval3_ff {dom : TDom} {Γ : Ctx} {σ : TState C Γ} {φ : Fml C Γ}
+theorem Fml.eval3_ff {dom : TDom} {Γ : Ctx} {σ : State C Γ} {φ : Fml C Γ}
     (h : φ.eval3 dom σ = .ff) : ¬ holds σ φ :=
   (Fml.eval3_sound dom φ σ).2 h
 
 /-- A typed state where `φ` evaluates to `ff` refutes `⊨ φ`: the statement a
 certificate proves. -/
-theorem Fml.not_valid_of_eval3 {dom : TDom} (σ : TState C []) {φ : Fml C []}
+theorem Fml.not_valid_of_eval3 {dom : TDom} (σ : State C []) {φ : Fml C []}
     (h : φ.eval3 dom σ = .ff) : ¬ Valid φ :=
   fun hv => Fml.eval3_ff h (hv σ)
 
-end Solidity.Core
+end Solidity
 
 namespace Solidity.Tools
 
@@ -789,7 +789,7 @@ def Cand.shrink (C : Contract) (ok : Cand → Bool) : Nat → Cand → Cand
 
 /-- **The domain a quantifier and a hidden binder are tried on**: the pools
 of `lits` (`uintPool`, `intPool`) read at their types. -/
-def poolDom (lits : List Int) : Core.TDom
+def poolDom (lits : List Int) : TDom
   | .bool => [true, false]
   | .uint => (uintPool lits).filterMap fun n => PrimTy.ofValue? .uint (.int n)
   | .int => (intPool lits).filterMap fun n => PrimTy.ofValue? .int (.int n)
@@ -798,7 +798,7 @@ end Solidity.Tools
 
 /-! ## Reading a scoped formula against a candidate -/
 
-namespace Solidity.Core
+namespace Solidity
 
 open Solidity.Tools (Tri)
 open Semantics (Value)
@@ -807,19 +807,19 @@ variable {C : Contract}
 
 /-- The leading parameters of a scoped formula, outermost first: its `∀`s
 and the hidden binders of value type in front of it (a specification's
-parameters, `Calculus/Core/Spec.lean`). -/
+parameters, `Calculus/Spec.lean`). -/
 def Fml.params : {Γ : Ctx} → Fml C Γ → List (Var × PrimTy)
   | _, .all x p φ => (x, p) :: Fml.params φ
   | _, .bind _ x (.val p) φ => (x, p) :: Fml.params φ
   | _, _ => []
 
 /-- A state and a formula under it, at some context. -/
-abbrev Peeled (C : Contract) := (Δ : Ctx) × TState C Δ × Fml C Δ
+abbrev Peeled (C : Contract) := (Δ : Ctx) × State C Δ × Fml C Δ
 
 /-- The leading parameters bound to `vals`, by name, as far as each is
 given: the state and the formula under them.  Compiled; the twin of
 `Fml.peel` (`Fml.peel_eq`). -/
-def Fml.peelC (vals : List (Var × Value)) : {Γ : Ctx} → TState C Γ → Fml C Γ → Peeled C
+def Fml.peelC (vals : List (Var × Value)) : {Γ : Ctx} → State C Γ → Fml C Γ → Peeled C
   | _, σ, .all x p φ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
     | some w => Fml.peelC vals (σ.push (t := .val p) w) φ
     | none => ⟨_, σ, .all x p φ⟩
@@ -832,9 +832,9 @@ def Fml.peelC (vals : List (Var × Value)) : {Γ : Ctx} → TState C Γ → Fml 
 conditions 1 and 2): what a certificate peels in the kernel.  Compiled as
 `Fml.peelC`. -/
 @[implemented_by Fml.peelC]
-def Fml.peel (vals : List (Var × Value)) {Γ : Ctx} (σ : TState C Γ) (φ : Fml C Γ) :
+def Fml.peel (vals : List (Var × Value)) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) :
     Peeled C :=
-  Fml.rec (motive := fun Γ _ => TState C Γ → Peeled C)
+  Fml.rec (motive := fun Γ _ => State C Γ → Peeled C)
     (fun σ => ⟨_, σ, .tt⟩) (fun a b σ => ⟨_, σ, .eq a b⟩) (fun t σ => ⟨_, σ, .defined t⟩)
     (fun φ _ σ => ⟨_, σ, .not φ⟩) (fun φ ψ _ _ σ => ⟨_, σ, .and φ ψ⟩)
     (fun φ ψ _ _ σ => ⟨_, σ, .imp φ ψ⟩) (fun m U φ _ σ => ⟨_, σ, .upd m U φ⟩)
@@ -843,7 +843,7 @@ def Fml.peel (vals : List (Var × Value)) {Γ : Ctx} (σ : TState C Γ) (φ : Fm
       | some w => ih (σ.push (t := .val p) w)
       | none => ⟨_, σ, .all x p φ⟩)
     (fun {Γ} m x t φ ih σ =>
-      LTy.casesOn (motive := fun t => Fml C (t :: Γ) → (TState C (t :: Γ) → Peeled C) → Peeled C) t
+      LTy.casesOn (motive := fun t => Fml C (t :: Γ) → (State C (t :: Γ) → Peeled C) → Peeled C) t
         (fun p φ ih => match (vals.lookup x).bind (PrimTy.ofValue? p) with
           | some w => ih (σ.push (t := .val p) w)
           | none => ⟨_, σ, .bind m x (.val p) φ⟩)
@@ -853,7 +853,7 @@ def Fml.peel (vals : List (Var × Value)) {Γ : Ctx} (σ : TState C Γ) (φ : Fm
     φ σ
 
 theorem Fml.peel_eq (vals : List (Var × Value)) : {Γ : Ctx} → (φ : Fml C Γ) →
-    ∀ σ : TState C Γ, Fml.peel vals σ φ = Fml.peelC vals σ φ
+    ∀ σ : State C Γ, Fml.peel vals σ φ = Fml.peelC vals σ φ
   | _, .all _ _ φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
   | _, .bind _ _ (.val _) φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
   | _, .bind _ _ (.alias _) _, _ | _, .bind _ _ (.mem _) _, _ | _, .bind _ _ .old _, _
@@ -863,7 +863,7 @@ theorem Fml.peel_eq (vals : List (Var × Value)) : {Γ : Ctx} → (φ : Fml C Γ
 
 /-- What fails under the peeled binders fails under the binders: each is a
 `∀` (or a hidden binder, read as one) of the values it is peeled at. -/
-theorem Fml.not_holds_of_peelC (vals : List (Var × Value)) : {Γ : Ctx} → (σ : TState C Γ) →
+theorem Fml.not_holds_of_peelC (vals : List (Var × Value)) : {Γ : Ctx} → (σ : State C Γ) →
     (φ : Fml C Γ) → ¬ holds (Fml.peelC vals σ φ).2.1 (Fml.peelC vals σ φ).2.2 → ¬ holds σ φ
   | _, σ, .all x p φ, h => by
     cases hw : (vals.lookup x).bind (PrimTy.ofValue? p) with
@@ -883,14 +883,14 @@ theorem Fml.not_holds_of_peelC (vals : List (Var × Value)) : {Γ : Ctx} → (σ
   | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h => h
 
 /-- `φ` read under its leading parameters bound to `vals` (`Fml.peel`). -/
-def Fml.eval3Peel (dom : TDom) (vals : List (Var × Value)) {Γ : Ctx} (σ : TState C Γ)
+def Fml.eval3Peel (dom : TDom) (vals : List (Var × Value)) {Γ : Ctx} (σ : State C Γ)
     (φ : Fml C Γ) : Tri :=
   match Fml.peel vals σ φ with
   | ⟨_, σ', ψ⟩ => ψ.eval3 dom σ'
 
 /-- **A certificate**: a typed state where `φ`, its leading parameters bound
 to `vals`, evaluates to `ff` refutes `⊨ φ`. -/
-theorem Fml.not_valid_of_eval3Peel {dom : TDom} (vals : List (Var × Value)) (σ : TState C [])
+theorem Fml.not_valid_of_eval3Peel {dom : TDom} (vals : List (Var × Value)) (σ : State C [])
     {φ : Fml C []} (h : Fml.eval3Peel dom vals σ φ = .ff) : ¬ Valid φ := by
   intro hv
   have key := Fml.not_holds_of_peelC vals σ φ
@@ -912,7 +912,7 @@ def Fml.conjN {Γ : Ctx} : Nat → Fml C Γ → List (Fml C Γ)
 it ends with, or how it halts; under implications, a binder at its first
 value, an update in the typed state it lifts to.  `none` where the run is
 past its fuel or the update lifts to no typed state. -/
-def Fml.outcome (dom : TDom) : {Γ : Ctx} → TState C Γ →
+def Fml.outcome (dom : TDom) : {Γ : Ctx} → State C Γ →
     Fml C Γ → Option (Except Semantics.Halt (List (Name × Semantics.SVal)))
   | _, σ, .imp _ ψ => Fml.outcome dom σ ψ
   | _, σ, .all _ p ψ => match dom p with
@@ -928,7 +928,7 @@ def Fml.outcome (dom : TDom) : {Γ : Ctx} → TState C Γ →
         | some r => some r
         | none => some (.ok σ'.storage.erase)
       | none => none
-  | _, σ, .modal _ P κ _ => match Prog.trunFramesF loopFuel σ P κ with
+  | _, σ, .modal _ P κ _ => match Prog.runFramesF loopFuel σ P κ with
     | .ok τ => some (.ok τ.storage.erase)
     | .error .diverge => none
     | .error e => some (.error e.erase)
@@ -938,14 +938,14 @@ def Fml.outcome (dom : TDom) : {Γ : Ctx} → TState C Γ →
 the run ends in, or the indices of the conjuncts that evaluate to `ff`
 where it ends; `none` where the run is past its fuel or the update lifts to
 no typed state. -/
-def Fml.postFails (dom : TDom) (n : Nat) : {Γ : Ctx} → TState C Γ →
+def Fml.postFails (dom : TDom) (n : Nat) : {Γ : Ctx} → State C Γ →
     Fml C Γ → Option (Option Semantics.Halt × List Nat)
   | _, σ, .upd _ U ψ => match U.apply σ.erase with
     | .error h => some (some h, [])
     | .ok τ => match σ.lift? τ with
       | some σ' => Fml.postFails dom n σ' ψ
       | none => none
-  | _, σ, .modal _ P κ φ => match Prog.trunFramesF loopFuel σ P κ with
+  | _, σ, .modal _ P κ φ => match Prog.runFramesF loopFuel σ P κ with
     | .ok τ =>
       some (none, ((List.range n).zip (Fml.conjN n φ)).filterMap fun (i, ψ) =>
         if ψ.eval3 dom τ = .ff then some i else none)
@@ -953,7 +953,7 @@ def Fml.postFails (dom : TDom) (n : Nat) : {Γ : Ctx} → TState C Γ →
     | .error e => some (some e.erase, [])
   | _, _, _ => none
 
-end Solidity.Core
+end Solidity
 
 namespace Solidity.Tools
 
@@ -997,7 +997,7 @@ def Cand.vals (c : Cand) : List (Var × Value) := c.args.map fun (n, v) => (Var.
 
 /-- The typed state a candidate starts in, with no locals: its parameters are
 the formula's binders. -/
-def Cand.tstate (C : Contract) (c : Cand) : Core.TState C [] := Core.TState.ofSemD C c.state
+def Cand.tstate (C : Contract) (c : Cand) : State C [] := State.ofSemD C c.state
 
 /-- The obligation of `f` in pieces, and what the search needs of `f`: its
 declaration, the scoped obligation, how many premises are met by
@@ -1006,7 +1006,7 @@ as the specification writes them), its parameters of value type, the
 literals of the clauses. -/
 structure SpecProblem (C : Contract) where
   decl : FunDecl
-  fml : Core.Fml C []
+  fml : Fml C []
   assumed : Nat
   checked : Nat
   posts : List (NFml C)
@@ -1018,7 +1018,7 @@ structure SpecProblem (C : Contract) where
 parameters, the literals. -/
 def SpecProblem.of (C : Contract) (f : String) : Except String (SpecProblem C) := do
   let (assumed, checked, _, _, posts) ← specPieces C f
-  let fml ← Core.specObligation C f
+  let fml ← specObligation C f
   let some d := lookupBy f C.funs | throw s!"{f} is not a function of the contract"
   let params := d.params.filterMap fun (n, T) => match T with
     | .prim p => some (n, p)
@@ -1040,12 +1040,12 @@ The update and the call run once (the typed run, with fuel), and each
 conjunct is read in the state they leave. -/
 def SpecProblem.try (P : SpecProblem C) (c : Cand) : Option (Option Witness) :=
   let dom := poolDom (P.domLits c)
-  let ⟨_, σ, ψ⟩ := Core.Fml.peel c.vals (c.tstate C) P.fml
+  let ⟨_, σ, ψ⟩ := Fml.peel c.vals (c.tstate C) P.fml
   match ψ with
   | .imp pre body =>
-    let pres := (Core.Fml.conjN (P.assumed + P.checked) pre).drop P.assumed
+    let pres := (Fml.conjN (P.assumed + P.checked) pre).drop P.assumed
     if !pres.all (fun φ => φ.eval3 dom σ = .tt) then none else
-    match Core.Fml.postFails dom P.posts.length σ body with
+    match Fml.postFails dom P.posts.length σ body with
     | none => some none
     | some (some .panic, _) =>
       some (some { state := c.state, args := c.args, failing := [],
@@ -1054,7 +1054,7 @@ def SpecProblem.try (P : SpecProblem C) (c : Cand) : Option (Option Witness) :=
     | some (none, []) => some none
     | some (none, failing) =>
       some (some { state := c.state, args := c.args, failing,
-                   outcome := Core.Fml.outcome dom σ body })
+                   outcome := Fml.outcome dom σ body })
   | _ => none
 
 /-- Whether a candidate is a counterexample. -/
@@ -1100,13 +1100,13 @@ def SpecProblem.search (P : SpecProblem C) (budget : Nat) : Search := Id.run do
 pooled `uint`s (every combination first), the storage all-default, then
 random storages of `C`'s layout; what is found is shrunk.  A candidate is
 one where the formula under its arguments evaluates to `ff`. -/
-def searchFml (C : Contract) (φ : Core.Fml C []) (budget : Nat := 2000) : Search := Id.run do
-  let ps := (Core.Fml.params φ).filterMap fun (x, p) => match x with
+def searchFml (C : Contract) (φ : Fml C []) (budget : Nat := 2000) : Search := Id.run do
+  let ps := (Fml.params φ).filterMap fun (x, p) => match x with
     | .user n => some (n, p)
     | .fresh .. => none
   -- the candidate's arguments bound, so that the witness is what refutes
   let refutes (c : Cand) : Bool :=
-    Core.Fml.eval3Peel (poolDom c.argInts) c.vals (c.tstate C) φ = .ff
+    Fml.eval3Peel (poolDom c.argInts) c.vals (c.tstate C) φ = .ff
   let combos := products (ps.map fun (_, p) => poolVals [] p)
   let combos := if combos.length * 2 ≤ budget then combos else []
   let mut tried := 0
@@ -1124,9 +1124,9 @@ def searchFml (C : Contract) (φ : Core.Fml C []) (budget : Nat := 2000) : Searc
       if refutes c then found := some c; break
   let some c := found | return { witness := none, tried, admitted := tried }
   let c := c.shrink C refutes 64
-  let ⟨_, σ, ψ⟩ := Core.Fml.peel c.vals (c.tstate C) φ
+  let ⟨_, σ, ψ⟩ := Fml.peel c.vals (c.tstate C) φ
   return { witness := some { state := c.state, args := c.args, failing := [],
-                             outcome := Core.Fml.outcome (poolDom c.argInts) σ ψ },
+                             outcome := Fml.outcome (poolDom c.argInts) σ ψ },
            tried, admitted := tried }
 
 /-! ## Printing a witness -/
@@ -1159,8 +1159,8 @@ deriving instance ToExpr for Semantics.TxEnv
 deriving instance ToExpr for Semantics.State
 
 /-- **The certificate**: the kernel checks `¬ ⊨ φ` of the scoped `φ` as
-`Core.Fml.not_valid_of_eval3Peel` at the typed state of `σ`
-(`TState.ofSemD`), its leading parameters bound to the witness's arguments
+`Fml.not_valid_of_eval3Peel` at the typed state of `σ`
+(`State.ofSemD`), its leading parameters bound to the witness's arguments
 `vals` (`Fml.peel`, as the search read it), deciding
 `Fml.eval3Peel (poolDom lits) vals _ φ = .ff` by evaluation: the decoding
 of `σ`'s storage, the typed run and the formula under the parameters.  The
@@ -1169,13 +1169,13 @@ declaration is checked, never added. -/
 def certifyRefl (cE φE : Expr) (lits : List Int) (vals : List (Var × Value))
     (σ : Semantics.State) (heartbeats : Nat := 100000) : MetaM Bool := do
   let domE := mkApp (mkConst ``poolDom) (toExpr lits)
-  let σE := mkApp2 (mkConst ``Core.TState.ofSemD) cE (toExpr σ)
+  let σE := mkApp2 (mkConst ``State.ofSemD) cE (toExpr σ)
   let valsE := toExpr vals
-  let ev ← mkAppM ``Core.Fml.eval3Peel #[domE, valsE, σE, φE]
+  let ev ← mkAppM ``Fml.eval3Peel #[domE, valsE, σE, φE]
   let eq ← mkEq ev (mkConst ``Tri.ff)
   let h ← mkDecideProof eq
-  let type := mkNot (← mkAppM ``Core.Valid #[φE])
-  let value ← mkAppM ``Core.Fml.not_valid_of_eval3Peel #[valsE, σE, h]
+  let type := mkNot (← mkAppM ``Valid #[φE])
+  let value ← mkAppM ``Fml.not_valid_of_eval3Peel #[valsE, σE, h]
   let decl := Declaration.thmDecl {
     name := `_counterexample_certificate, levelParams := [], type, value }
   let opts := maxHeartbeats.set (← getOptions) heartbeats
@@ -1214,8 +1214,8 @@ def refuteSpec (n : Lean.Name) (C : Contract) (f : String) (budget : Nat := 2000
     let c : Cand := { st := w.state.storage, args := w.args }
     let lits := P.domLits c
     -- the kernel is asked only what the evaluator already answered
-    let certified ← if Core.Fml.eval3Peel (poolDom lits) c.vals (Core.TState.ofSemD C w.state)
-        P.fml = .ff then certifyRefl cE (Core.Fml.quote cE P.fml) lits c.vals w.state
+    let certified ← if Fml.eval3Peel (poolDom lits) c.vals (State.ofSemD C w.state)
+        P.fml = .ff then certifyRefl cE (Fml.quote cE P.fml) lits c.vals w.state
       else pure false
     let fails := w.failing.map fun i => postLabel C P.decl cE i (P.posts.getD i NFml.tt)
     pure (.ok (s, some { witness := w, certified, fails }))
@@ -1244,8 +1244,8 @@ end Search
 /-- `#counterexample C.f`: a counterexample to the specification of the
 function `f` of the contract `C`; `#counterexample C`: to each of its
 functions with an obligation; `#counterexample φ`: to the closed scoped
-formula `φ : Core.Fml C []` (`dl!{ … }` under `open scoped
-Solidity.Core.Scoped`, or `cdl!{ … }`). -/
+formula `φ : Fml C []` (`dl!{ … }` under `open scoped
+Solidity.Scoped`, or `cdl!{ … }`). -/
 syntax (name := counterexampleCmd) "#counterexample " term : command
 
 open Lean Elab Command Term Meta in
@@ -1270,21 +1270,21 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
     synthesizeSyntheticMVarsNoPostponing
     let φE ← instantiateMVars φE
     let ty ← whnf (← inferType φE)
-    unless ty.isAppOfArity ``Core.Fml 2 && (← whnfR ty.appArg!).isAppOf ``List.nil do
-      throwError "#counterexample: not a closed scoped formula `Core.Fml C []` (`cdl!\{ … }`, or \
-        `dl!\{ … }` under `open scoped Solidity.Core.Scoped`){indentExpr φE}"
+    unless ty.isAppOfArity ``Fml 2 && (← whnfR ty.appArg!).isAppOf ``List.nil do
+      throwError "#counterexample: not a closed scoped formula `Fml C []` (`cdl!\{ … }`, or \
+        `dl!\{ … }` under `open scoped Solidity.Scoped`){indentExpr φE}"
     if φE.hasFVar || φE.hasMVar then
       throwError "#counterexample: the formula is not closed{indentExpr φE}"
     let cE := ty.appFn!.appArg!
     unless (← whnfR cE).isConst do throwError "#counterexample: not a named contract: {cE}"
     let C ← unsafe evalExpr Contract (Lean.mkConst ``Contract) cE
-    let φ ← unsafe evalExpr (Core.Fml C []) ty φE
+    let φ ← unsafe evalExpr (Fml C []) ty φE
     let s := searchFml C φ
     let some w := s.witness
       | logInfo m!"no counterexample found in {s.tried} candidates"
     let c : Cand := { st := w.state.storage, args := w.args }
-    let certified ← if Core.Fml.eval3Peel (poolDom c.argInts) c.vals
-        (Core.TState.ofSemD C w.state) φ = .ff then certifyRefl cE φE c.argInts c.vals w.state
+    let certified ← if Fml.eval3Peel (poolDom c.argInts) c.vals
+        (State.ofSemD C w.state) φ = .ff then certifyRefl cE φE c.argInts c.vals w.state
       else pure false
     logReport m!"counterexample ({if certified then "certified" else "tested"}):"
       ((w.lines C).map toMessageData)

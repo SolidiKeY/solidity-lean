@@ -1,5 +1,5 @@
-import Solidity.Calculus.Core.ProofTree
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.ProofTree
+import Solidity.Calculus.Surface
 import Solidity.Tools.Common
 
 /-!
@@ -13,7 +13,7 @@ import Solidity.Tools.Common
 
 The three requests solkey's web prover answers about a proof
 (`WebProver`'s `tree`, `node` and the summary that comes with them), on the
-tree `Core.ProofTree.ofFormula` grows for `⊢ φ` (`Calculus/Core/ProofTree.lean`):
+tree `ProofTree.ofFormula` grows for `⊢ φ` (`Calculus/ProofTree.lean`):
 
 * `#proof_tree φ` — the tree as solkey's GUI lays it out, one line
   `serial: rule` per node under KeY's name, a sub-branch per goal of a split
@@ -55,14 +55,14 @@ the switch) or any other term. -/
 def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr)) := do
   -- today's notation (`dl!{ … }`, `dl[C]{ … }`) is today's elaborator's,
   -- left unread so that it is not elaborated twice, unless the switch
-  -- (`open scoped Solidity.Core.Scoped`) makes it scoped
+  -- (`open scoped Solidity.Scoped`) makes it scoped
   if let some (.atom _ v) := t.raw.getHead? then
-    if v.startsWith "dl" && !(← Core.surfaceOn) then return none
+    if v.startsWith "dl" && !(← surfaceOn) then return none
   let φ ← try elabTerm t none catch _ => return none
   synthesizeSyntheticMVarsNoPostponing
   let φ ← instantiateMVars φ
   let ty ← whnf (← inferType φ)
-  unless ty.isAppOfArity ``Core.Fml 2 do return none
+  unless ty.isAppOfArity ``Fml 2 do return none
   let some n := (← whnfR ty.appFn!.appArg!).constName? | return none
   if φ.hasFVar || φ.hasMVar then throwError "the formula is not closed{indentExpr φ}"
   return some (φ, mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
@@ -70,8 +70,8 @@ def elabCoreFormula? (t : Lean.Term) : TermElabM (Option (Lean.Expr × Lean.Expr
 
 /-- What a command says of a term that is not a closed scoped formula. -/
 def notScoped {α : Type} (cmd : String) : MetaM α :=
-  throwError "{cmd}: not a closed scoped formula `Core.Fml C Γ` (`cdl!\{ … }`, or `dl!\{ … }` \
-    under `open scoped Solidity.Core.Scoped`)"
+  throwError "{cmd}: not a closed scoped formula `Fml C Γ` (`cdl!\{ … }`, or `dl!\{ … }` \
+    under `open scoped Solidity.Scoped`)"
 
 /-! ## The proof tree -/
 
@@ -79,9 +79,9 @@ def notScoped {α : Type} (cmd : String) : MetaM α :=
 def coreProofTree? (t : Lean.Term) : TermElabM (Option ProofTree.Tree) := do
   let some (φ, _) ← elabCoreFormula? t | return none
   let ty ← whnf (← inferType φ)
-  unless ← isDefEq (ty.getArg! 1) (mkApp (mkConst ``List.nil [0]) (mkConst ``Core.LTy)) do
+  unless ← isDefEq (ty.getArg! 1) (mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)) do
     throwError "#proof_tree: the formula is not closed at the empty context"
-  return some (← Core.ProofTree.ofFormula ty.appFn!.appArg! φ)
+  return some (← ProofTree.ofFormula ty.appFn!.appArg! φ)
 
 /-- What `#proof_node n φ` shows of the node `n` of `tree`, as
 `Tools/ProofTree.lean` shows it. -/

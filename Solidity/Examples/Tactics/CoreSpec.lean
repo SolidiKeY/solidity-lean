@@ -1,10 +1,10 @@
-import Solidity.Calculus.Core.Spec
-import Solidity.Calculus.Core.Delab
+import Solidity.Calculus.Spec
+import Solidity.Calculus.Delab
 
 /-!
 # Obligations and specifications, scoped
 
-`Calculus/Core/Spec.lean` pinned: a constructor's obligation and a
+`Calculus/Spec.lean` pinned: a constructor's obligation and a
 specification's, read in their parameters' context, print as today's do
 (a hidden binder printing as nothing), and erase to today's.
 -/
@@ -34,7 +34,7 @@ local instance : InContract := ⟨Ledger⟩
 info: dl{
   ∀ uint a;
     { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖ selfBalance := msg.value }
-      ⟨ constructor(a); ⟩ true } : Core.Fml Ledger []
+      ⟨ constructor(a); ⟩ true } : Fml Ledger []
 -/
 #guard_msgs in #check cproblem!{ constructor }
 
@@ -52,7 +52,7 @@ info: dl{
         selfBalance := selfBalance + msg.value }
       [ uint result; result = add(amount); ]
         (result = find(old, count) + amount ∧
-            net(msg.sender) = net(oldNet, msg.sender) + msg.value) } : Core.Fml Ledger []
+            net(msg.sender) = net(oldNet, msg.sender) + msg.value) } : Fml Ledger []
 -/
 #guard_msgs in #check cspec!{ add }
 
@@ -60,14 +60,14 @@ info: dl{
 info: dl{
   ((0 <= a ∧ a <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧ msg.value = 0) →
     { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖ selfBalance := msg.value }
-      [ constructor(a); ] true } : Core.Fml Ledger []
+      [ constructor(a); ] true } : Fml Ledger []
 -/
 #guard_msgs in #check cspec!{ constructor }
 
 /-! Declared, so the kernel checks the scoped terms. -/
 
-def addObligation : Core.Fml Ledger [] := cspec!{ add }
-def ctorObligation : Core.Fml Ledger [] := cproblem!{ constructor }
+def addObligation : Fml Ledger [] := cspec!{ add }
+def ctorObligation : Fml Ledger [] := cproblem!{ constructor }
 
 /-- The two formulas are the same term (their quotations equal). -/
 def sameAs (a b : Except String (Surface.Fml Ledger)) : Bool :=
@@ -78,9 +78,9 @@ def sameAs (a b : Except String (Surface.Fml Ledger)) : Bool :=
 
 /-! Each scoped obligation erases to today's. -/
 
-#guard sameAs ((Core.specObligation Ledger "add").map (·.eraseS [])) (Surface.specObligation Ledger "add")
-#guard sameAs ((Core.specObligation Ledger "constructor").map (·.eraseS []))
+#guard sameAs ((specObligation Ledger "add").map (·.eraseS [])) (Surface.specObligation Ledger "add")
+#guard sameAs ((specObligation Ledger "constructor").map (·.eraseS []))
   (Surface.specObligation Ledger "constructor")
-#guard sameAs ((Core.Problem.ctor Ledger .diamond).map (·.eraseS [])) (Surface.Problem.ctor Ledger .diamond)
+#guard sameAs ((Problem.ctor Ledger .diamond).map (·.eraseS [])) (Surface.Problem.ctor Ledger .diamond)
 
 end Solidity.Examples.Tactics.CoreSpec

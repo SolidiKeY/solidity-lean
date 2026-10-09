@@ -1,5 +1,5 @@
 import Solidity.Typing.TypedRunInv
-import Solidity.Semantics.Core.TypedEnds
+import Solidity.Semantics.Ends
 
 /-!
 # What every reachable state satisfies beyond its types
@@ -24,11 +24,11 @@ struct with a mapping member can exist (the member would need a claim at a
 mapping type, which no object satisfies), and a copy back never produces a
 struct missing its mapping.
 
-`Prog.trun_canon` is the preservation theorem (the typed run keeps
+`Prog.run_canon` is the preservation theorem (the typed run keeps
 `canonInv`, a `RunInv` with `Canon` on the erased global part, each step
 through what it erases to, `TypedRunInv.lean`), `reachable_canon` its
 corollary from a contract's initial state (`Reachable`: a scoped program
-`Core.Prog C [] Γ'` runs there by the typed interpreter), and the two
+`Prog C [] Γ'` runs there by the typed interpreter), and the two
 refutations the removed untyped layer left as `sorry` follow: a storage whose
 mapping default is not the default (`map_default_not_reachable`) and one
 whose struct misses a member (`struct_missing_field_not_reachable`) are
@@ -1260,7 +1260,7 @@ end Solidity
 
 /-! ## The run keeps the state canonical -/
 
-namespace Solidity.Core
+namespace Solidity
 
 open Semantics hiding State
 open SemanticsProperties (HeapWellFormed)
@@ -1844,7 +1844,7 @@ canonical state ends in one: after `alice.age = 3;` `alice` still has both
 members, after `balances[7] += 1;` key `7` is there once, after
 `alice = m;` the copy has every member `m`'s object has, which is all of
 them. -/
-theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv C).TKeeps (Stmt.trunR s)
+theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv C).TKeeps (Stmt.runR s)
   | _, _, .assign l r => keepsC_assign l r
   | _, _, .rebind i r => keepsC_rebind i r
   | _, _, .assignLocal i r => keepsC_assignLocal i r
@@ -1882,7 +1882,7 @@ theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv 
   | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_canon body)
 
 /-- **Canonicity, block level.** -/
-theorem Prog.keeps_canon : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (canonInv C).TKeeps (Prog.trunR P)
+theorem Prog.keeps_canon : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (canonInv C).TKeeps (Prog.runR P)
   | _, _, .nil => RunInv.tkeeps_nil
   | _, _, .cons s P => RunInv.tkeeps_seq (Stmt.keeps_canon s) (Prog.keeps_canon P)
 
@@ -1891,13 +1891,13 @@ end
 /-- **Canonicity**: a block run by the typed run from a state whose erasure
 is well-typed and canonical ends, if in a state, in one, under a store typing
 that only grew. -/
-theorem Prog.trun_canon {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy} {σ : TState C Γ}
+theorem Prog.run_canon {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy} {σ : State C Γ}
     {o : Out C σ.H Γ'} (hwt : RunWT C H σ.erase) (hc : Canon C H σ.erase.glob)
-    (h : P.trun σ = .ok o) : ∃ H', H.Extends H' ∧ RunWT C H' o.st.erase ∧ Canon C H' o.st.erase.glob :=
+    (h : P.run σ = .ok o) : ∃ H', H.Extends H' ∧ RunWT C H' o.st.erase ∧ Canon C H' o.st.erase.glob :=
   let ⟨H', hext, h'⟩ := Prog.keeps_canon P H σ o (RunCanon.mk' hwt hc) h
   ⟨H', hext, RunCanon.wt h', RunCanon.canon h'⟩
 
-end Solidity.Core
+end Solidity
 
 namespace Solidity
 
@@ -1920,19 +1920,19 @@ theorem Contract.deployState_empty (C : Contract) :
     C.deployState {} = { C.initState with net := [(0, 0)] } := rfl
 
 /-- A storage is reachable when a scoped program runs, by the typed
-interpreter (`Core.Prog.trun`, `Semantics/Core/TypedRun.lean`), from the
+interpreter (`Prog.run`, `Semantics/Run.lean`), from the
 contract's initial state to a state whose storage erases to it.  The
 program's locals are used as declared, and its values are of their types, by
 construction; what the typed run keeps on the erasure
-(`Core.Prog.trun_canon`, `Core.Prog.trun_tight`) holds of a reachable
+(`Prog.run_canon`, `Prog.run_tight`) holds of a reachable
 storage.  A `bool` mapping key is hashed as `0`/`1` (decisions 10 and 14). -/
 def Reachable (C : Contract) (st : List (Name × Semantics.SVal)) : Prop :=
-  ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (o : Core.Out C (Core.TState.init C).H Γ'),
-    P.trun (Core.TState.init C) = .ok o ∧ o.st.storage.erase = st
+  ∃ (Γ' : Ctx) (P : Prog C [] Γ') (o : Out C (State.init C).H Γ'),
+    P.run (State.init C) = .ok o ∧ o.st.storage.erase = st
 
 /-- The erasure of the state a contract starts in. -/
-theorem Reachable.init_erase : (Core.TState.init C).erase = Core.EState.ofSem C.initState :=
-  Core.TState.init_erase C
+theorem Reachable.init_erase : (State.init C).erase = EState.ofSem C.initState :=
+  State.init_erase C
 
 /-- **Reachable ⇒ well-typed and canonical.**  Every storage a scoped
 program reaches from `C`'s initial state holds `C`'s roots in order, each
@@ -1942,11 +1942,11 @@ theorem reachable_canon (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × Semantics.SVal)}
     (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
-  have hwt : Core.RunWT C [] (Core.TState.init C).erase := by
-    rw [Reachable.init_erase]; exact Core.RunWT.init hnd hok rfl rfl
-  have hc : Canon C [] (Core.TState.init C).erase.glob := by
+  have hwt : RunWT C [] (State.init C).erase := by
+    rw [Reachable.init_erase]; exact RunWT.init hnd hok rfl rfl
+  have hc : Canon C [] (State.init C).erase.glob := by
     rw [Reachable.init_erase]; exact Canon.init hok rfl
-  obtain ⟨_, _, hwt', hcn⟩ := Core.Prog.trun_canon P hwt hc hrun
+  obtain ⟨_, _, hwt', hcn⟩ := Prog.run_canon P hwt hc hrun
   exact ⟨hwt'.glob.storage, hcn.storage⟩
 
 /-! ## What is not reachable

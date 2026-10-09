@@ -4,8 +4,8 @@ import Solidity.Calculus.RewriteChains
 # Chains past the program, written out: `#last_line`, `sol_rws`, the search
 
 The rewrite half of a worked chain (`Calculus/RewriteChains.lean`): what the
-scoped chains' commands (`Calculus/Core/ChainGen.lean`,
-`Calculus/Core/LastLine.lean`) run past the program, on the erasure of the
+scoped chains' commands (`Calculus/ChainGen.lean`,
+`Calculus/LastLine.lean`) run past the program, on the erasure of the
 strategy's last line.
 
 * `#last_line chain` checks that a chain of rewrites (`Fml.Via`, one link,
@@ -550,11 +550,11 @@ elab "#last_line " c:ident : command => Command.runTermElabM fun _ => do
         {MessageData.joinSep problems.toList "\n"}"
 
 /-- `#chain φ`: the chain from `φ` to its last line, as one chain term to
-paste; the scoped chains' (`Calculus/Core/ChainGen.lean`). -/
+paste; the scoped chains' (`Calculus/ChainGen.lean`). -/
 syntax "#chain " term : command
 
 /-- `#chain_rest c`: what the chain `c` still lacks to a last line; the
-scoped chains' (`Calculus/Core/ChainGen.lean`). -/
+scoped chains' (`Calculus/ChainGen.lean`). -/
 syntax "#chain_rest " ident : command
 
 end NFml.Chain

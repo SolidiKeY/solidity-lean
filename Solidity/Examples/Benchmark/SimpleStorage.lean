@@ -1,8 +1,8 @@
 import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -52,7 +52,7 @@ def SimpleStorage : Contract := contract!{
 
 local instance : InContract := ⟨SimpleStorage⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- `set(x)`: `ensures storedData == x`.  It runs to the end (no revert), so
 the diamond holds too. -/

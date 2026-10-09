@@ -23,7 +23,7 @@ kernel checks its result where it is declared (`Prog.defineCore`; the lint
 `solc_scoped`, `Frontend/Import.lean`, declares every imported program so).
 -/
 
-namespace Solidity.Core
+namespace Solidity
 
 open Lean (mkConst mkAppN toExpr)
 
@@ -326,10 +326,10 @@ private def callsBlock : Solidity.Surface.Prog CallsExample :=
 
 open Lean Elab Command in
 run_cmd liftCoreM do
-  for (n, cn, err) in [(`Solidity.Core.tourCore, ``StandardExample,
-        ← Prog.defineCore `Solidity.Core.tourCore ``StandardExample [] tour),
-      (`Solidity.Core.callsCore, ``CallsExample,
-        ← Prog.defineCore `Solidity.Core.callsCore ``CallsExample [] callsBlock)] do
+  for (n, cn, err) in [(`Solidity.tourCore, ``StandardExample,
+        ← Prog.defineCore `Solidity.tourCore ``StandardExample [] tour),
+      (`Solidity.callsCore, ``CallsExample,
+        ← Prog.defineCore `Solidity.callsCore ``CallsExample [] callsBlock)] do
     if let some e := err then throwError "{n} ({cn}): {e}"
 
 example : Prog.erase [] tourCore = tour := rfl
@@ -337,4 +337,4 @@ example : Prog.erase [] callsCore = callsBlock := rfl
 
 end Pins
 
-end Solidity.Core
+end Solidity

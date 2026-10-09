@@ -386,7 +386,7 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
       `(RawFml.and (RawFml.imp $φ $ψ) (RawFml.imp $ψ $φ))
   | stx@`(dl_fml| { havoc } $_:dl_fml) =>
       Macro.throwErrorAt stx "`{ havoc }` is what a callback rule leaves, not a formula to write: \
-        `dl[C]{ … }` is read scoped, over the typed run (`Core.Prog.trun`)"
+        `dl[C]{ … }` is read scoped, over the typed run (`Prog.run`)"
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
       -- judged as the modality under it, else as the formula's (the diamond in `dl!{ … }`)
       let dflt ← match r.either with
@@ -1096,7 +1096,7 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Surface.Fml C)
       if (List.range' k₀ (k₁ - k₀)).any taken.contains then
         set (Γ, max k (taken.foldl max 0 + 1))
         Q ← elabStmt C s
-      Γw ← ElabM.lift (Core.Prog.resolveCheck Γw Q)
+      Γw ← ElabM.lift (Prog.resolveCheck Γw Q)
       P' := P' ++ Q
     pure (.modal m P' (← elabFml taken φ))
   | .lean i => pure (NFml.slot i).toSurface

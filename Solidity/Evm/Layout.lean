@@ -34,7 +34,7 @@ is the prefix-sum arithmetic of mini-solkey's `offset_disjoint`.
 
 ## The code sequences
 
-The guards solc emits, which `Evm/CoreCompile.lean`'s compiler assembles: a
+The guards solc emits, which `Evm/Compile.lean`'s compiler assembles: a
 checked `+`/`-`/`*` reverts on overflow (`uTail`, and `sTail` at `int`, two's
 complement, with `SLT`/`SGT`/`SDIV`/`SMOD`), `/`/`%` on a zero divisor and
 `-2^255 / -1`, `-x` on `-2^255` (`negCode`), `**` on overflow (`expCode`,

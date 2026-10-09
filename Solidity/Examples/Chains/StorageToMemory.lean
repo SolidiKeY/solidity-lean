@@ -1,8 +1,8 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.FreshNames
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Storage-to-memory copies, as chains
@@ -12,7 +12,7 @@ over any modality `m` and postcondition `φ` (`Examples/Chains/Storage.lean` say
 printed names (`FreshNames` tables).  The root `r` the copy allocates is `freshId(copySt(memory, …))`.
 
 Where the worked example prints the updates merged before the copy (the alias `sp`, `aliceTok`), the chain merges
-there too (`~[sequentialToParallel]~>` under the open modality, `Calculus/Core/Merge.lean`; in `FieldCopy` all but
+there too (`~[sequentialToParallel]~>` under the open modality, `Calculus/Merge.lean`; in `FieldCopy` all but
 `sp`, which a hidden binder separates from the stack), and again past the program.  The read of the
 copy is then resolved one law a link (`Calculus/ChainRewrites.lean`): `readCopySt` reads the copy out of the
 storage it copied, `findOnSave` the write.  Every capture stays to the last line, which `#last_line` checks.
@@ -22,12 +22,12 @@ through a write below it.
 
 namespace Solidity.Examples.Chains.StorageToMemory
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
 section
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-! ## Example: Symbolic Execution of Storage-to-Memory Copy with Lazy Read -/
 
@@ -36,7 +36,7 @@ namespace RootCopy
 snapshot of `alice`, and the read is a read of it.  The line the declaration leaves says `carol` is a memory
 local.  The updates merged, the read of the copy is a read of the storage copied (`readCopySt`), which the
 write answers (`findOnSave`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ ⟨[ alice.age = 25; Person memory carol = alice; v = carol.age; ]⟩ φ }
     ~[storageFieldWriteSave]~>
       dl![m]{ { storage := save(storage, alice.age, 25) } ⟨[ Person memory carol = alice; v = carol.age; ]⟩ φ }
@@ -83,10 +83,10 @@ through the alias `aliceAcc` and saved, the declaration dropped, the member sour
 `sp` (the worked example's `⇝*` binds it), and the updates merged before the copy, as the example prints them,
 but for `sp`: the declaration's hidden binder (`memoryLocalDeclInitDrop`) stands between the stack and `sp`'s
 update, and a merge does not move a stack that declares locals (`pv`, `aliceAcc`) under a binder
-(`Calculus/Core/Merge.lean`), so `sp` joins the rest past the program.  Then `acc` a copy of the object `sp`
+(`Calculus/Merge.lean`), so `sp` joins the rest past the program.  Then `acc` a copy of the object `sp`
 names, and `v = acc.balance;` a read of the copy: the updates merged, the read of the copy a read of the
 storage copied (`readCopySt`), which the write answers (`findOnSave`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Account"), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .val .uint]) :
     dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     ~[storageFieldWrite_unfold_leftFst]~> dl![m]{
         ⟨[ uint pv = 10; Account storage aliceAcc = alice.account; aliceAcc.balance = pv;
@@ -154,7 +154,7 @@ local instance : FreshNames := .ofTable names
 declaration dropped, the source captured in `aliceTok`, bound through `aliceAcc` (the example's `⇝*`), the
 updates merged, which binds `aliceTok` to `alice.account.token`, and the copy installed.  The copy holds the
 token read in the starting storage; a struct read has no literal. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Token")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Token")]) :
     dl![m]{ { storage := save(storage, alice.account.token.value, 5) } ⟨[ Token memory t = alice.account.token; ]⟩ φ }
     ~[memoryLocalDeclInitDrop]~> dl![m]{
         { storage := save(storage, alice.account.token.value, 5) } ⟨[ t = alice.account.token; ]⟩ φ

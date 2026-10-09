@@ -1,14 +1,14 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Memory rule coverage: one chain per rule
 
 The paper's coverage table (`sections/memory-coverage.tex`), one row per rule: a statement, run as a chain
-term (`Calculus/Core/Chains.lean`, `.claude/rules/derivations.md`) over any modality `m` and postcondition `φ`.
+term (`Calculus/Chains.lean`, `.claude/rules/derivations.md`) over any modality `m` and postcondition `φ`.
 Each theorem is named after the row's rule as the paper prints it (with a suffix where two rows share one);
 where Lean's rule has another name, a comment says so.  The row's rule is the chain's one printed `⇝`: its
 own `~[r]~>` link, or, where it ends the program, one `~*>` with the `emptyModality` after it (the paper never
@@ -39,7 +39,7 @@ the statement.
 
 namespace Solidity.Examples.Chains.MemoryCoverage
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- Memory needs no state; `makeValue()` is the call of its row. -/
 def MemCoverage : Contract := contract!{
@@ -50,12 +50,12 @@ def MemCoverage : Contract := contract!{
 local instance : InContract := ⟨MemCoverage⟩
 
 section
-variable (m : Modality) (φ : Core.Post MemCoverage [])
+variable (m : Modality) (φ : Post MemCoverage [])
 
 /-! ### Field writes -/
 
 /-- `carol.account.balance = balanceVal;` with `balanceVal` 10. -/
-theorem memoryFieldWrite_unfold_leftFst (φ : Core.Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
+theorem memoryFieldWrite_unfold_leftFst (φ : Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ { balanceVal := 10 } ⟨[ carol.account.balance = balanceVal; ]⟩ φ where Person memory carol }
     ~[memoryFieldWrite_unfold_leftFst]~> dl![m]{ { balanceVal := 10 }
         ⟨[ Account memory mv1 = carol.account; mv1.balance = balanceVal; ]⟩ φ where Person memory carol }
@@ -70,7 +70,7 @@ theorem memoryFieldWrite_unfold_leftFst (φ : Core.Post MemCoverage [.mem (.stru
 
 -- Lean's `memoryFieldWrite_unfold_leftFst`.
 /-- `carol.account.token = tok;`, the reference `tok` written through the alias. -/
-theorem memoryFieldWriteMemRef_unfold_leftFst (φ : Core.Post MemCoverage [.mem (.struct "Token"), .mem (.struct "Person")]) :
+theorem memoryFieldWriteMemRef_unfold_leftFst (φ : Post MemCoverage [.mem (.struct "Token"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ carol.account.token = tok; ]⟩ φ where Person memory carol, Token memory tok }
     ~[memoryFieldWrite_unfold_leftFst]~> dl![m]{ ⟨[ Account memory mv1 = carol.account; mv1.token = tok; ]⟩ φ
         where Person memory carol, Token memory tok }
@@ -85,7 +85,7 @@ theorem memoryFieldWriteMemRef_unfold_leftFst (φ : Core.Post MemCoverage [.mem 
 
 /-- `carol.age = ageVal + 1;` with `ageVal` 42: the source captured, the capture and the value written
 folded to 43. -/
-theorem memoryFieldWriteUnfoldSource (φ : Core.Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
+theorem memoryFieldWriteUnfoldSource (φ : Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ { ageVal := 42 } ⟨[ carol.age = ageVal + 1; ]⟩ φ where Person memory carol }
     ~[memoryFieldWriteUnfoldSource]~> dl![m]{ { ageVal := 42 } ⟨[ uint se1 = ageVal + 1; carol.age = se1; ]⟩ φ
         where Person memory carol }
@@ -98,7 +98,7 @@ theorem memoryFieldWriteUnfoldSource (φ : Core.Post MemCoverage [.mem (.struct 
 
 -- Lean's `memoryFieldWriteCopy`: a memory path is a source as it stands.
 /-- `carol.account = david.account;`: the identity `david.account` holds is written, which has no literal. -/
-def memoryFieldWriteCaptureSrc (φ : Core.Post MemCoverage [.mem (.struct "Person"), .mem (.struct "Person")]) :
+def memoryFieldWriteCaptureSrc (φ : Post MemCoverage [.mem (.struct "Person"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ carol.account = david.account; ]⟩ φ where Person memory carol, Person memory david }
     ~*> dl![m]{ { memory := write(memory, carol.account, read(memory, david.account)) } φ
         where Person memory carol, Person memory david } := by
@@ -107,7 +107,7 @@ def memoryFieldWriteCaptureSrc (φ : Core.Post MemCoverage [.mem (.struct "Perso
 
 -- Lean's `memoryFieldWriteCopy`.
 /-- `carol.account = acc;`: the reference `acc` is written. -/
-def memoryFieldWrite (φ : Core.Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
+def memoryFieldWrite (φ : Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ carol.account = acc; ]⟩ φ where Person memory carol, Account memory acc }
     ~*> dl![m]{ { memory := write(memory, carol.account, acc) } φ
         where Person memory carol, Account memory acc } := by
@@ -116,7 +116,7 @@ def memoryFieldWrite (φ : Core.Post MemCoverage [.mem (.struct "Account"), .mem
 
 -- Lean's `memoryFieldWrite`.
 /-- `carol.age = ageVal;` with `ageVal` 42. -/
-theorem memoryFieldWrite_value (φ : Core.Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
+theorem memoryFieldWrite_value (φ : Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ { ageVal := 42 } ⟨[ carol.age = ageVal; ]⟩ φ where Person memory carol }
     ~*> dl![m]{ { ageVal := 42 } { memory := write(memory, carol.age, ageVal) } φ }
     ~[sequentialToParallel]~> dl![m]{ { ageVal := 42 ‖ memory := write(memory, carol.age, 42) } φ } := by
@@ -126,14 +126,14 @@ theorem memoryFieldWrite_value (φ : Core.Post MemCoverage [.mem (.struct "Perso
 /-! ### Aliases, declarations and allocation -/
 
 /-- `carol = david;`: the root is rebound to `david`'s identity. -/
-def memoryRootRebind (φ : Core.Post MemCoverage [.mem (.struct "Person"), .mem (.struct "Person")]) :
+def memoryRootRebind (φ : Post MemCoverage [.mem (.struct "Person"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ carol = david; ]⟩ φ where Person memory carol, Person memory david }
     ~*> dl![m]{ { carol := david } φ where Person memory carol, Person memory david } := by
   sol_chain
 #last_line memoryRootRebind
 
 /-- `Account memory acc = carol.account;`: the declaration dropped, then the alias bound. -/
-theorem memoryLocalDeclInitDrop (φ : Core.Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
+theorem memoryLocalDeclInitDrop (φ : Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ Account memory acc = carol.account; ]⟩ φ where Person memory carol }
     ~[memoryLocalDeclInitDrop]~> dl![m]{ ⟨[ acc = carol.account; ]⟩ φ
         where Person memory carol, Account memory acc }
@@ -142,14 +142,14 @@ theorem memoryLocalDeclInitDrop (φ : Core.Post MemCoverage [.mem (.struct "Acco
 #last_line memoryLocalDeclInitDrop
 
 /-- `Person memory carol;`: a fresh object, its identity bound to `carol`. -/
-def memoryReferenceDeclFreshAlloc (φ : Core.Post MemCoverage [.mem (.struct "Person")]) :
+def memoryReferenceDeclFreshAlloc (φ : Post MemCoverage [.mem (.struct "Person")]) :
     dl![m]{ ⟨[ Person memory carol; ]⟩ φ }
     ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } φ } := by
   sol_chain
 #last_line memoryReferenceDeclFreshAlloc
 
 /-- `xs = new uint[](n);` with `n` 3. -/
-theorem memoryArrayFreshAlloc (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint]) :
+theorem memoryArrayFreshAlloc (φ : Post MemCoverage [.mem (.array (.prim .uint)), .val .uint]) :
     dl![m]{ { n := 3 } ⟨[ xs = new uint[](n); ]⟩ φ where uint[] memory xs }
     ~*> dl![m]{ { n := 3 }
         { xs := freshId(copySt(memory, newArr(uint[], n))) ‖ memory := copySt(memory, newArr(uint[], n)) } φ }
@@ -160,7 +160,7 @@ theorem memoryArrayFreshAlloc (φ : Core.Post MemCoverage [.mem (.array (.prim .
 
 -- `basket.items` for `carol.account.values`.
 /-- `basket.items = new uint[](n);` with `n` 3: the array allocated into a local, then written. -/
-theorem newArrayCapture (φ : Core.Post MemCoverage [.mem (.struct "Basket"), .val .uint]) :
+theorem newArrayCapture (φ : Post MemCoverage [.mem (.struct "Basket"), .val .uint]) :
     dl![m]{ { n := 3 } ⟨[ basket.items = new uint[](n); ]⟩ φ where Basket memory basket }
     ~[newArrayCapture]~> dl![m]{ { n := 3 } ⟨[ uint[] memory mv1 = new uint[](n); basket.items = mv1; ]⟩ φ
         where Basket memory basket }
@@ -181,7 +181,7 @@ theorem newArrayCapture (φ : Core.Post MemCoverage [.mem (.struct "Basket"), .v
 /-- `v = carol.account.balance;` from a memory where it is 10: past the merge the read of `carol.account`
 passes the write to `balance` (`readWriteDifferentIdentity`), and the member read is that write's value
 (`readOnWrite`). -/
-theorem memoryFieldRead_unfold_rightFst (φ : Core.Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
+theorem memoryFieldRead_unfold_rightFst (φ : Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ { memory := write(memory, read(memory, carol.account).balance, 10) } ⟨[ v = carol.account.balance; ]⟩ φ
         where Person memory carol }
     ~[memoryFieldRead_unfold_rightFst]~> dl![m]{
@@ -212,7 +212,7 @@ theorem memoryFieldRead_unfold_rightFst (φ : Core.Post MemCoverage [.mem (.stru
 #last_line memoryFieldRead_unfold_rightFst
 
 /-- `carolAcc = david.account;`: the identity `david.account` holds is bound. -/
-def memoryFieldReadAliasRoot (φ : Core.Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
+def memoryFieldReadAliasRoot (φ : Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ carolAcc = david.account; ]⟩ φ where Person memory david, Account memory carolAcc }
     ~*> dl![m]{ { carolAcc := read(memory, david.account) } φ
         where Person memory david, Account memory carolAcc } := by
@@ -222,7 +222,7 @@ def memoryFieldReadAliasRoot (φ : Core.Post MemCoverage [.mem (.struct "Account
 -- Lean's `memoryFieldWrite_unfold_leftFst`: the strategy unfolds the target first, and the source read is
 -- captured by `memoryFieldWriteUnfoldSource`.
 /-- `carol.account.balance = acc.balance;` from a memory where `acc.balance` is 10. -/
-theorem memoryFieldRead_unfold_rightSndResult (φ : Core.Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
+theorem memoryFieldRead_unfold_rightSndResult (φ : Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
     dl![m]{ { memory := write(memory, acc.balance, 10) } ⟨[ carol.account.balance = acc.balance; ]⟩ φ
         where Person memory carol, Account memory acc }
     ~[memoryFieldWrite_unfold_leftFst]~> dl![m]{ { memory := write(memory, acc.balance, 10) }
@@ -258,7 +258,7 @@ theorem memoryFieldRead_unfold_rightSndResult (φ : Core.Post MemCoverage [.mem 
 
 /-- `carol.age = acc.balance;` from a memory where `acc.balance` is 10: the value-source rule captures the
 read. -/
-theorem memoryFieldWriteUnfoldSource_read (φ : Core.Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
+theorem memoryFieldWriteUnfoldSource_read (φ : Post MemCoverage [.mem (.struct "Account"), .mem (.struct "Person")]) :
     dl![m]{ { memory := write(memory, acc.balance, 10) } ⟨[ carol.age = acc.balance; ]⟩ φ
         where Person memory carol, Account memory acc }
     ~[memoryFieldWriteUnfoldSource]~> dl![m]{ { memory := write(memory, acc.balance, 10) }
@@ -276,7 +276,7 @@ theorem memoryFieldWriteUnfoldSource_read (φ : Core.Post MemCoverage [.mem (.st
 #last_line memoryFieldWriteUnfoldSource_read
 
 /-- `v = carol.age;` from a memory where it is 42. -/
-theorem memoryFieldRead (φ : Core.Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
+theorem memoryFieldRead (φ : Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ { memory := write(memory, carol.age, 42) } ⟨[ v = carol.age; ]⟩ φ where Person memory carol }
     ~*> dl![m]{ { memory := write(memory, carol.age, 42) } { v := read(memory, carol.age) } φ }
     ~[sequentialToParallel]~> dl![m]{ { memory := write(memory, carol.age, 42) ‖
@@ -286,7 +286,7 @@ theorem memoryFieldRead (φ : Core.Post MemCoverage [.mem (.struct "Person"), .v
 #last_line memoryFieldRead
 
 /-- `carolAlias = carol;`: the alias is bound to `carol`'s identity. -/
-def memoryRootRebind_alias (φ : Core.Post MemCoverage [.mem (.struct "Person"), .mem (.struct "Person")]) :
+def memoryRootRebind_alias (φ : Post MemCoverage [.mem (.struct "Person"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ carolAlias = carol; ]⟩ φ where Person memory carol, Person memory carolAlias }
     ~*> dl![m]{ { carolAlias := carol } φ where Person memory carol, Person memory carolAlias } := by
   sol_chain
@@ -295,21 +295,21 @@ def memoryRootRebind_alias (φ : Core.Post MemCoverage [.mem (.struct "Person"),
 /-! ### `delete` -/
 
 /-- `delete carol;`: `carol` is rebound to a fresh object. -/
-def memoryRootDeleteFreshRebind (φ : Core.Post MemCoverage [.mem (.struct "Person")]) :
+def memoryRootDeleteFreshRebind (φ : Post MemCoverage [.mem (.struct "Person")]) :
     dl![m]{ ⟨[ delete carol; ]⟩ φ where Person memory carol }
     ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } φ } := by
   sol_chain
 #last_line memoryRootDeleteFreshRebind
 
 /-- `delete carol.age;`: the member is written its default. -/
-def memoryFieldDeletePrimitive (φ : Core.Post MemCoverage [.mem (.struct "Person")]) :
+def memoryFieldDeletePrimitive (φ : Post MemCoverage [.mem (.struct "Person")]) :
     dl![m]{ ⟨[ delete carol.age; ]⟩ φ where Person memory carol }
     ~*> dl![m]{ { memory := write(memory, carol.age, 0) } φ } := by
   sol_chain
 #last_line memoryFieldDeletePrimitive
 
 /-- `delete carol.account;`: the member is written a fresh object. -/
-def memoryFieldDeleteReference (φ : Core.Post MemCoverage [.mem (.struct "Person")]) :
+def memoryFieldDeleteReference (φ : Post MemCoverage [.mem (.struct "Person")]) :
     dl![m]{ ⟨[ delete carol.account; ]⟩ φ where Person memory carol }
     ~*>
       dl![m]{ { memory := write(addM(memory, Account), carol.account, freshId(addM(memory, Account))) } φ } := by
@@ -317,7 +317,7 @@ def memoryFieldDeleteReference (φ : Core.Post MemCoverage [.mem (.struct "Perso
 #last_line memoryFieldDeleteReference
 
 /-- `delete carolValues[i];` with `i` 2. -/
-theorem memoryIndexDeletePrimitive (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint]) :
+theorem memoryIndexDeletePrimitive (φ : Post MemCoverage [.mem (.array (.prim .uint)), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ delete carolValues[i]; ]⟩ φ where uint[] memory carolValues }
     ~*> dl![m]{ { i := 2 } { memory := write(memory, carolValues[i], 0) } φ }
     ~[sequentialToParallel]~> dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[2], 0) } φ } := by
@@ -325,7 +325,7 @@ theorem memoryIndexDeletePrimitive (φ : Core.Post MemCoverage [.mem (.array (.p
 #last_line memoryIndexDeletePrimitive
 
 /-- `delete carolTokens[i];` with `i` 2. -/
-theorem memoryIndexDeleteReference (φ : Core.Post MemCoverage [.mem (.array (.ref (.struct "Token"))), .val .uint]) :
+theorem memoryIndexDeleteReference (φ : Post MemCoverage [.mem (.array (.ref (.struct "Token"))), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ delete carolTokens[i]; ]⟩ φ where Token[] memory carolTokens }
     ~*> dl![m]{ { i := 2 }
         { memory := write(addM(memory, Token), carolTokens[i], freshId(addM(memory, Token))) } φ }
@@ -335,7 +335,7 @@ theorem memoryIndexDeleteReference (φ : Core.Post MemCoverage [.mem (.array (.r
 #last_line memoryIndexDeleteReference
 
 /-- `delete carol.account.token;` -/
-theorem memoryFieldDelete_unfold_leftFst (φ : Core.Post MemCoverage [.mem (.struct "Person")]) :
+theorem memoryFieldDelete_unfold_leftFst (φ : Post MemCoverage [.mem (.struct "Person")]) :
     dl![m]{ ⟨[ delete carol.account.token; ]⟩ φ where Person memory carol }
     ~[memoryFieldDelete_unfold_leftFst]~> dl![m]{ ⟨[ Account memory mv1 = carol.account; delete mv1.token; ]⟩ φ
         where Person memory carol }
@@ -349,7 +349,7 @@ theorem memoryFieldDelete_unfold_leftFst (φ : Core.Post MemCoverage [.mem (.str
 
 -- `bucket.tokens` for `carol.account.tokens`.
 /-- `delete bucket.tokens[i];` with `i` 2. -/
-theorem memoryIndexDelete_unfold_leftFst (φ : Core.Post MemCoverage [.mem (.struct "TokenBucket"), .val .uint]) :
+theorem memoryIndexDelete_unfold_leftFst (φ : Post MemCoverage [.mem (.struct "TokenBucket"), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ delete bucket.tokens[i]; ]⟩ φ where TokenBucket memory bucket }
     ~[memoryIndexDelete_unfold_leftFst]~> dl![m]{ { i := 2 } ⟨[ Token[] memory mv1 = bucket.tokens; delete mv1[i]; ]⟩ φ
         where TokenBucket memory bucket }
@@ -366,7 +366,7 @@ theorem memoryIndexDelete_unfold_leftFst (φ : Core.Post MemCoverage [.mem (.str
 
 -- `bucket.tokens` for `carol.account.tokens`.
 /-- `bucket.tokens[i] = carolToken;` with `i` 2. -/
-theorem memoryIndexWriteMemRefCaptureAllComplexRecv (φ : Core.Post MemCoverage [.mem (.struct "Token"), .mem (.struct "TokenBucket"), .val .uint]) :
+theorem memoryIndexWriteMemRefCaptureAllComplexRecv (φ : Post MemCoverage [.mem (.struct "Token"), .mem (.struct "TokenBucket"), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ bucket.tokens[i] = carolToken; ]⟩ φ where TokenBucket memory bucket, Token memory carolToken }
     ~[memoryIndexWriteMemRefCaptureAllComplexRecv]~> dl![m]{ { i := 2 }
         ⟨[ Token[] memory mv1 = bucket.tokens; uint ie1 = i; mv1[ie1] = carolToken; ]⟩ φ
@@ -382,7 +382,7 @@ theorem memoryIndexWriteMemRefCaptureAllComplexRecv (φ : Core.Post MemCoverage 
 
 -- Lean's `memoryFieldRead_unfold_rightFst`: the receiver `david.account` is unfolded first.
 /-- `carolTokens[i] = david.account.token;` with `i` 2: the identity the member holds is written. -/
-theorem memoryIndexWriteMemRefRhsCapture (φ : Core.Post MemCoverage [.mem (.struct "Person"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
+theorem memoryIndexWriteMemRefRhsCapture (φ : Post MemCoverage [.mem (.struct "Person"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ carolTokens[i] = david.account.token; ]⟩ φ
         where Token[] memory carolTokens, Person memory david }
     ~[memoryFieldRead_unfold_rightFst]~> dl![m]{ { i := 2 }
@@ -401,7 +401,7 @@ theorem memoryIndexWriteMemRefRhsCapture (φ : Core.Post MemCoverage [.mem (.str
 
 -- Lean's `memoryIndexWriteCopy`.
 /-- `carolTokens[i] = carolToken;` with `i` 2: the reference is written. -/
-theorem memoryIndexWriteArray (φ : Core.Post MemCoverage [.mem (.struct "Token"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
+theorem memoryIndexWriteArray (φ : Post MemCoverage [.mem (.struct "Token"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ carolTokens[i] = carolToken; ]⟩ φ
         where Token[] memory carolTokens, Token memory carolToken }
     ~*> dl![m]{ { i := 2 } { memory := write(memory, carolTokens[i], carolToken) } φ
@@ -413,7 +413,7 @@ theorem memoryIndexWriteArray (φ : Core.Post MemCoverage [.mem (.struct "Token"
 
 -- Lean's `memoryIndexWriteArray`.
 /-- `carolValues[i] = val;` with `i` 2 and `val` 7. -/
-theorem memoryIndexWriteArray_value (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
+theorem memoryIndexWriteArray_value (φ : Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ val := 7 } ⟨[ carolValues[i] = val; ]⟩ φ where uint[] memory carolValues }
     ~*> dl![m]{ { i := 2 ‖ val := 7 } { memory := write(memory, carolValues[i], val) } φ }
     ~[sequentialToParallel]~> dl![m]{ { i := 2 ‖ val := 7 ‖ memory := write(memory, carolValues[2], 7) } φ } := by
@@ -424,7 +424,7 @@ theorem memoryIndexWriteArray_value (φ : Core.Post MemCoverage [.mem (.array (.
 
 -- `basket.items` for `carol.account.values`.
 /-- `v = basket.items[i];` with `i` 2, from a memory where `basket.items[2]` is 7. -/
-theorem memoryIndexRead_unfold_rightFst (φ : Core.Post MemCoverage [.mem (.struct "Basket"), .val .uint, .val .uint]) :
+theorem memoryIndexRead_unfold_rightFst (φ : Post MemCoverage [.mem (.struct "Basket"), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ memory := write(memory, read(memory, basket.items)[2], 7) } ⟨[ v = basket.items[i]; ]⟩ φ
         where Basket memory basket }
     ~[memoryIndexRead_unfold_rightFst]~> dl![m]{ { i := 2 ‖ memory := write(memory, read(memory, basket.items)[2], 7) }
@@ -452,7 +452,7 @@ theorem memoryIndexRead_unfold_rightFst (φ : Core.Post MemCoverage [.mem (.stru
 #last_line memoryIndexRead_unfold_rightFst
 
 /-- `carolToken = davidTokens[i];` with `i` 2: the identity at the index is bound. -/
-theorem memoryIndexReadArrayMemory (φ : Core.Post MemCoverage [.mem (.struct "Token"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
+theorem memoryIndexReadArrayMemory (φ : Post MemCoverage [.mem (.struct "Token"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ carolToken = davidTokens[i]; ]⟩ φ
         where Token[] memory davidTokens, Token memory carolToken }
     ~*> dl![m]{ { i := 2 } { carolToken := read(memory, davidTokens[i]) } φ
@@ -464,7 +464,7 @@ theorem memoryIndexReadArrayMemory (φ : Core.Post MemCoverage [.mem (.struct "T
 
 -- Lean's `memoryFieldWriteUnfoldSource`.
 /-- `carol.age = carolValues[i];` with `i` 2, from a memory where `carolValues[2]` is 7. -/
-theorem memoryIndexRead_unfold_rightSndResult (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .mem (.struct "Person"), .val .uint]) :
+theorem memoryIndexRead_unfold_rightSndResult (φ : Post MemCoverage [.mem (.array (.prim .uint)), .mem (.struct "Person"), .val .uint]) :
     dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[2], 7) } ⟨[ carol.age = carolValues[i]; ]⟩ φ
         where Person memory carol, uint[] memory carolValues }
     ~[memoryFieldWriteUnfoldSource]~> dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[2], 7) }
@@ -484,7 +484,7 @@ theorem memoryIndexRead_unfold_rightSndResult (φ : Core.Post MemCoverage [.mem 
 #last_line memoryIndexRead_unfold_rightSndResult
 
 /-- `v = carolValues[i];` with `i` 2, from a memory where `carolValues[2]` is 7. -/
-theorem memoryIndexReadArrayValue (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
+theorem memoryIndexReadArrayValue (φ : Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[2], 7) } ⟨[ v = carolValues[i]; ]⟩ φ
         where uint[] memory carolValues }
     ~*> dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[2], 7) }
@@ -499,7 +499,7 @@ theorem memoryIndexReadArrayValue (φ : Core.Post MemCoverage [.mem (.array (.pr
 
 /-- `carol.age += ageVal;` with `ageVal` 5, from a memory where `carol.age` is 42: the sum written folds
 to `47`. -/
-theorem memoryFieldOpAssign (φ : Core.Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
+theorem memoryFieldOpAssign (φ : Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ { ageVal := 5 ‖ memory := write(memory, carol.age, 42) } ⟨[ carol.age += ageVal; ]⟩ φ
         where Person memory carol }
     ~*> dl![m]{ { ageVal := 5 ‖ memory := write(memory, carol.age, 42) }
@@ -514,7 +514,7 @@ theorem memoryFieldOpAssign (φ : Core.Post MemCoverage [.mem (.struct "Person")
 -- Lean's `memoryFieldOpAssign`: the quotient is written, and a divisor of `0` halts in the update.
 /-- `carol.age /= ageVal;` with `ageVal` 2, from a memory where `carol.age` is 42: the quotient written
 folds to `21` (`div_literals`). -/
-theorem memoryFieldDivAssign (φ : Core.Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
+theorem memoryFieldDivAssign (φ : Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ { ageVal := 2 ‖ memory := write(memory, carol.age, 42) } ⟨[ carol.age /= ageVal; ]⟩ φ
         where Person memory carol }
     ~*> dl![m]{ { ageVal := 2 ‖ memory := write(memory, carol.age, 42) }
@@ -528,7 +528,7 @@ theorem memoryFieldDivAssign (φ : Core.Post MemCoverage [.mem (.struct "Person"
 
 -- Lean's `memoryFieldIncrement`.
 /-- `carol.age++;` from a memory where `carol.age` is 42: the sum written folds to `43`. -/
-theorem memoryFieldIncrement (φ : Core.Post MemCoverage [.mem (.struct "Person")]) :
+theorem memoryFieldIncrement (φ : Post MemCoverage [.mem (.struct "Person")]) :
     dl![m]{ { memory := write(memory, carol.age, 42) } ⟨[ carol.age++; ]⟩ φ where Person memory carol }
     ~*> dl![m]{ { memory := write(memory, carol.age, 42) }
         { memory := write(memory, carol.age, read(memory, carol.age) + 1) } φ }
@@ -541,7 +541,7 @@ theorem memoryFieldIncrement (φ : Core.Post MemCoverage [.mem (.struct "Person"
 
 /-- `carolValues[i] += val;` with `i` 2 and `val` 7, from a memory where `carolValues[2]` is 10: the sum
 written folds to `17`. -/
-theorem memoryIndexArrayOpAssign (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
+theorem memoryIndexArrayOpAssign (φ : Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ val := 7 ‖ memory := write(memory, carolValues[2], 10) } ⟨[ carolValues[i] += val; ]⟩ φ
         where uint[] memory carolValues }
     ~*> dl![m]{ { i := 2 ‖ val := 7 ‖ memory := write(memory, carolValues[2], 10) }
@@ -569,7 +569,7 @@ example : dl!{ ⟨ basket.items[++i] = val; ⟩ true where Basket memory basket 
 
 /-- `basket.items[++i] = val;` with `i` 2 and `val` 7: the captures, the increment, the write at `2 + 1`,
 folded to `3`. -/
-theorem memoryIndexWriteCaptureAllComplexRecv (φ : Core.Post MemCoverage [.mem (.struct "Basket"), .val .uint, .val .uint]) :
+theorem memoryIndexWriteCaptureAllComplexRecv (φ : Post MemCoverage [.mem (.struct "Basket"), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ val := 7 } ⟨[ basket.items[++i] = val; ]⟩ φ where Basket memory basket }
     ~*> dl![m]{ { i := 2 ‖ val := 7 } { se1 := val } { mv2 := read(memory, basket.items) } { se3 := 0 }
         ⟨[ se3 = ++i; mv2[se3] = se1; ]⟩ φ where Basket memory basket }
@@ -593,7 +593,7 @@ example : dl!{ ⟨ carolValues[++i] = val; ⟩ true where uint[] memory carolVal
         where uint[] memory carolValues) } := rfl
 
 /-- `carolValues[++i] = val;` with `i` 2 and `val` 7: the write at `2 + 1`, folded to `3`. -/
-theorem memoryIndexWriteCaptureAllNonSimpleIndex (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
+theorem memoryIndexWriteCaptureAllNonSimpleIndex (φ : Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ val := 7 } ⟨[ carolValues[++i] = val; ]⟩ φ where uint[] memory carolValues }
     ~*> dl![m]{ { i := 2 ‖ val := 7 } { se1 := val } { se2 := 0 } ⟨[ se2 = ++i; carolValues[se2] = se1; ]⟩ φ
         where uint[] memory carolValues }
@@ -612,7 +612,7 @@ example : dl!{ ⟨ carolTokens[++i] = carolToken; ⟩ true where Token[] memory 
         where Token[] memory carolTokens, Token memory carolToken } := rfl
 
 /-- `carolTokens[++i] = carolToken;` with `i` 2: the write at `2 + 1`, folded to `3`. -/
-theorem memoryIndexWriteMemRefCaptureAllNonSimpleIndex (φ : Core.Post MemCoverage [.mem (.struct "Token"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
+theorem memoryIndexWriteMemRefCaptureAllNonSimpleIndex (φ : Post MemCoverage [.mem (.struct "Token"), .mem (.array (.ref (.struct "Token"))), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ carolTokens[++i] = carolToken; ]⟩ φ
         where Token[] memory carolTokens, Token memory carolToken }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 } { se1 := 0 } ⟨[ se1 = ++i; carolTokens[se1] = carolToken; ]⟩ φ
@@ -636,7 +636,7 @@ example : dl!{ ⟨ carolValues[i] = makeValue(); ⟩ true where uint[] memory ca
 
 /-- `carolValues[i] = makeValue();` with `i` 2, from a storage where `total` is 7: the call's body inlined
 (`internalCallExpand`), its result written.  The captures and the value written resolve to 7. -/
-theorem memoryIndexWriteUnfoldSource (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint]) :
+theorem memoryIndexWriteUnfoldSource (φ : Post MemCoverage [.mem (.array (.prim .uint)), .val .uint]) :
     dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } ⟨[ carolValues[i] = makeValue(); ]⟩ φ
         where uint[] memory carolValues }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ storage := save(storage, total, 7) } { se1 := 0 }
@@ -666,7 +666,7 @@ example : dl!{ ⟨ v = carolValues[++i]; ⟩ true where uint[] memory carolValue
 
 /-- `v = carolValues[++i];` with `i` 2, from a memory where `carolValues[3]` is 7: the index folds to `3`,
 and the read resolves to `7` (`readOnWrite`). -/
-theorem memoryIndexRead_unfold_rightSndIndex (φ : Core.Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
+theorem memoryIndexRead_unfold_rightSndIndex (φ : Post MemCoverage [.mem (.array (.prim .uint)), .val .uint, .val .uint]) :
     dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[3], 7) } ⟨[ v = carolValues[++i]; ]⟩ φ
         where uint[] memory carolValues }
     ~[valueDeclSkip]~> dl![m]{ { i := 2 ‖ memory := write(memory, carolValues[3], 7) } { se1 := 0 }

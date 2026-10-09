@@ -1,8 +1,8 @@
 import Solidity.FreshNames
 import Solidity.Calculus.RewriteChains
 import Solidity.Examples.Chains.Storage
-import Solidity.Calculus.Core.ChainGen
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.ChainGen
+import Solidity.Calculus.Surface
 
 /-!
 # Printed names for the rules' fresh variables
@@ -23,7 +23,7 @@ A table changes spellings only: each line is the term its default spelling
 gives (`headlineLast`, `captured`), so the chains of `Examples/Chains/` check
 as they do in the default spelling.
 
-The formulas read the scoped calculus (`open scoped Solidity.Core.Scoped`,
+The formulas read the scoped calculus (`open scoped Solidity.Scoped`,
 sections `Scoped`), a table changing the scoped lines' spellings as it does
 today's, `sol_chain`'s error included.
 -/
@@ -33,15 +33,15 @@ namespace Solidity.Examples.ExampleNames
 local instance : InContract := ⟨StandardExample⟩
 
 section Scoped
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- The headline's last line, in the default spelling. -/
-def headlineLast : Core.Fml StandardExample [] :=
+def headlineLast : Fml StandardExample [] :=
   dl!{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
         alice.account.balance == 10 }
 
 /-- A capture in a formula, numbered past the parameter `se1`. -/
-def capturedDl : Core.Fml StandardExample [] := dl!{ ⟨ values[total + 1] += 2; ⟩ se1 == 0 }
+def capturedDl : Fml StandardExample [] := dl!{ ⟨ values[total + 1] += 2; ⟩ se1 == 0 }
 
 end Scoped
 
@@ -70,7 +70,7 @@ namespace Headline
 local instance : FreshNames := .ofTable Chains.Storage.BalanceWrite.names
 
 section Scoped
-open scoped Core.Scoped
+open scoped Scoped
 
 -- `acc` reads as `sp1`, and `se1` prints as `pv`
 #guard Var.ofName "acc" == .fresh "sp" 1 && toString (Var.fresh "se" 1) == "pv"

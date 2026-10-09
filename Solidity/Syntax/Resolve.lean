@@ -31,7 +31,7 @@ points run `Prog.resolveCheck` on every block they produce
 innermost statement it rejects and the local.
 -/
 
-namespace Solidity.Core
+namespace Solidity
 
 variable {C : Contract}
 
@@ -270,7 +270,7 @@ mutual
 /-- No binder of the statement reuses a name in scope (`ns`) or of an
 enclosing frame (`out`), and a call's arguments are separated: what makes
 the erasure, one map from names to bindings, read as the scoped state
-(`Agree`, `Semantics/Core/StateErase.lean`).  What `resolve` returns (`Prog.resolve_fresh`). -/
+(`Agree`, `Semantics/StateErase.lean`).  What `resolve` returns (`Prog.resolve_fresh`). -/
 def Stmt.Fresh (out : List Var) : {Γ Γ' : Ctx} → List Var → Stmt C Γ Γ' → Prop
   | _, _, ns, .declLocal _ x _ => x ∉ ns ∧ x ∉ out
   | _, _, ns, .declStorage _ x _ => x ∉ ns ∧ x ∉ out
@@ -977,4 +977,4 @@ def _root_.Solidity.ECtx.toNCtx [FreshNames] (Γ : ECtx) : NCtx :=
     | .mem R => .mem R
     | .store => .old)
 
-end Solidity.Core
+end Solidity

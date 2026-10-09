@@ -1,6 +1,6 @@
 import Solidity.Calculus.PrintedRules
-import Solidity.Calculus.Core.Callback
-import Solidity.Calculus.Core.DelabLean
+import Solidity.Calculus.Callback
+import Solidity.Calculus.DelabLean
 import Solidity.Tools.Common
 
 /-!
@@ -12,14 +12,14 @@ import Solidity.Tools.Common
 ```
 
 `#taclet r` prints a rule: its statement (the delaborator shows it as
-`dl{ ⟨[ s; ]⟩ ⇝ p }`, `Calculus/Core/Delab.lean`), the solkey taclets it
+`dl{ ⟨[ s; ]⟩ ⇝ p }`, `Calculus/Delab.lean`), the solkey taclets it
 transcribes and their `\heuristics`, the printed rule, and what makes it
-sound.  `r` is a constructor of the scoped `Core.Taclet`, `Core.LeanTaclet`
-or `Core.CallbackTaclet`, or a KeY taclet's name (an identifier or a
+sound.  `r` is a constructor of the scoped `Taclet`, `LeanTaclet`
+or `CallbackTaclet`, or a KeY taclet's name (an identifier or a
 string), looked up backwards in the table
 (`RuleShapes.tacletOrigins`, `Calculus/RuleShapes.lean`).  A
 scoped taclet is sound as its premise is the one `Stmt.step` builds
-(`Core.Taclet.toStep`), which `Core.Stmt.Sound` makes sound.
+(`Taclet.toStep`), which `Stmt.Sound` makes sound.
 
 `#check_rule_text` checks that every rule prints as a rule line.
 -/
@@ -49,10 +49,10 @@ def keyLine (n : Lean.Name) : String :=
   | some (.merged ts) => "solkey (merged): " ++ ", ".intercalate (ts.map KeyTaclet.fmt)
   | none =>
     -- solkey's taclets past the pinned checkout (`ed7849d5b6`), unwinding bounded here
-    if n == ``Core.LeanTaclet.whileUnwind then "solkey: whileUnwind (loop_expand), past the pin"
-    else if n == ``Core.LeanTaclet.whileInvariantBox then
+    if n == ``LeanTaclet.whileUnwind then "solkey: whileUnwind (loop_expand), past the pin"
+    else if n == ``LeanTaclet.whileInvariantBox then
       "solkey: whileInvariantBox (loop_inv), past the pin"
-    else if n == ``Core.LeanTaclet.whileInvariantDiamond then
+    else if n == ``LeanTaclet.whileInvariantDiamond then
       "solkey: whileInvariantDiamond (loop_inv), past the pin"
     else "solkey: none (a rule solkey does not have)"
 
@@ -68,13 +68,13 @@ def texLine (n : Lean.Name) : String :=
   | none => "printed: not tabled"
 
 /-- What makes the constructor `n` sound: its premise is the one `Stmt.step`
-builds (`toStep`), which `Core.Stmt.Sound` makes sound; a callback rule's
-reading is `Core.ProvesC.sound_of`'s. -/
+builds (`toStep`), which `Stmt.Sound` makes sound; a callback rule's
+reading is `ProvesC.sound_of`'s. -/
 def soundLine (n : Lean.Name) : String :=
   let family := n.getPrefix
-  if family == ``Core.CallbackTaclet then
-    s!"sound: {family}.toStep (the premise is Stmt.step's; Core.Stmt.Sound, Core.ProvesC.sound_of)"
-  else s!"sound: {family}.toStep (the premise is Stmt.step's; Core.Stmt.Sound)"
+  if family == ``CallbackTaclet then
+    s!"sound: {family}.toStep (the premise is Stmt.step's; Stmt.Sound, ProvesC.sound_of)"
+  else s!"sound: {family}.toStep (the premise is Stmt.step's; Stmt.Sound)"
 
 /-- Everything `#taclet` says of the constructor `n`. -/
 def tacletInfo (n : Lean.Name) : MetaM MessageData := do
@@ -83,14 +83,14 @@ def tacletInfo (n : Lean.Name) : MetaM MessageData := do
 
 /-- The rule families, in the order a bare name is looked up. -/
 def ruleFamilies : List Lean.Name :=
-  [``Core.Taclet, ``Core.LeanTaclet, ``Core.CallbackTaclet]
+  [``Taclet, ``LeanTaclet, ``CallbackTaclet]
 
 /-- The constructor a name denotes: `storageFieldWriteSave`,
-`Taclet.storageFieldWriteSave`, `Core.Taclet.storageFieldWriteSave`, or a
+`Taclet.storageFieldWriteSave`, `Taclet.storageFieldWriteSave`, or a
 full name. -/
 def resolveRule (id : Lean.Name) : MetaM (Option Lean.Name) := do
   let env ← getEnv
-  let cands := id :: (`Solidity ++ id) :: (`Solidity.Core ++ id) :: ruleFamilies.map (· ++ id)
+  let cands := id :: (`Solidity ++ id) :: (`Solidity ++ id) :: ruleFamilies.map (· ++ id)
   return cands.find? fun c => env.contains c && ruleFamilies.contains c.getPrefix &&
     (env.find? c).any (·.isCtor)
 
@@ -141,7 +141,7 @@ where each rule is shown (`#taclet`, `#check`). -/
 /-- The rule line of a constructor: its conclusion, printed on one line. -/
 def ruleLine (c : Lean.Name) : MetaM String := do
   let ty := (← getConstInfo c).type
-  let ic := (Core.Delab.callSide ty).any (·.isConstOf ``Bool.false)
+  let ic := (Delab.callSide ty).any (·.isConstOf ``Bool.false)
   forallTelescope ty fun _ body =>
     withOptions (fun o => (o.setBool `pp.sol.dl true).setBool `pp.sol.ic ic) do
       return (← Meta.ppExpr body).pretty 100000

@@ -3,8 +3,8 @@ import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # The memory `delete` examples as chains
@@ -32,13 +32,13 @@ writes a fresh default object into the field or element; the alias keeps the old
 
 namespace Solidity.Examples.Chains.MemoryDelete
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Example: Memory Delete Cases -/
 
 section
 local instance : InContract := ⟨StandardExample⟩
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 namespace RootDelete
 
@@ -48,7 +48,7 @@ the module docstring says why), the run to the delete (`⇝*`),
 `delete` rebinding `carol` to a fresh default object (`⇝`), the two reads (`⇝*`) and the merge.  The
 alias keeps the old object: `newAge` reads the fresh one, the default `0` (`readAddEqual`); `oldAge` reads
 past that allocation (`readAddDifferent`) the write, `33` (`readOnWrite`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person"), .val .uint, .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person"), .val .uint, .val .uint]) :
     dl![m]{
       ⟨[ Person memory carol; Person memory carolAlias = carol; carol.age = 33; delete carol; oldAge = carolAlias.age;
         newAge = carol.age; ]⟩ φ }
@@ -126,7 +126,7 @@ there (`readOnWriteIdentity`); then `oldBal` read past the delete's write and al
 (`readWriteDifferent`, `readAddDifferent`) to the write through `carolAcc`, `100`, and `newBal`, `acc`'s
 `balance`, past the delete's write to the fresh object's default, `0` (`readAddEqual`).  The member gets a
 fresh default object, and `carolAcc` keeps the old one. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person"), .val .uint, .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person"), .val .uint, .val .uint]) :
     dl![m]{
       ⟨[ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100; delete carol.account;
         oldBal = carolAcc.balance; newBal = carol.account.balance; ]⟩ φ }
@@ -399,7 +399,7 @@ allocation to the write through `tk`, `9`; `newValue`, `mv4`'s `value`, past the
 fresh object's default, `0`; `i`, `idx` and the element `[1 + 1]` fold to `2` (`add_literals`, inside
 the memory terms too).  The element position is overwritten with a fresh default object, and `tk` keeps
 the old one. -/
-theorem chain (φ : Core.Post TestSuite [.mem (.struct "Token"), .mem (.struct "TokenBucket"), .val .uint, .val .uint, .val .uint]) :
+theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "TokenBucket"), .val .uint, .val .uint, .val .uint]) :
     dl![m]{
       { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
         ⟨[ Token memory tk = b.tokens[++i]; tk.value = 9; delete b.tokens[i];

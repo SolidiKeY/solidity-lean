@@ -15,7 +15,7 @@ reads `st` or `nt`, of which nothing is known.  A snapshot taken before it
 local, so `find(old, …)` still reads the storage the snapshot took.
 
 The set is `close_rw`'s; a module that leaves `{havoc}` at a leaf imports
-this one (`Calculus/Core/FunContract.lean`).
+this one (`Calculus/FunContract.lean`).
 -/
 
 namespace Solidity

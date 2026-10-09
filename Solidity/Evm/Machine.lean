@@ -3,7 +3,7 @@ import Solidity.Semantics
 /-!
 # An EVM-style stack machine
 
-The target of `Evm/CoreCompile.lean`: mini-solkey's `Ch08_EVM` machine with the
+The target of `Evm/Compile.lean`: mini-solkey's `Ch08_EVM` machine with the
 control flow, the arithmetic and the value transfer the typed fragment
 needs.  Instruction meanings follow the EVM as Nethermind's
 [EVMYulLean](https://github.com/NethermindEth/EVMYulLean) formalises it:
@@ -43,7 +43,7 @@ needs.  Instruction meanings follow the EVM as Nethermind's
 * `KECCAK256` takes its inputs from the stack (real code first `MSTORE`s them),
   in two forms: `keccakMap` for a mapping entry, `keccakArr` for array data.
 * **Locals live in memory**, one cell per local, addressed by the local's
-  level (`Evm/CoreCompile.lean`'s `lvl`, as Vyper keeps locals in memory);
+  level (`Evm/Compile.lean`'s `lvl`, as Vyper keeps locals in memory);
   solc keeps them on the stack.
 * **The world is the accounts' balances** (the Yellow Paper's `σ[a].b`):
   `bal a` for every address `a`, the contract's own at `self`
@@ -51,7 +51,7 @@ needs.  Instruction meanings follow the EVM as Nethermind's
   KeY's `net` is a ghost of the interpreter, what each account lost since the
   transaction began, `bal₀ a - bal a`, at every account but the contract's
   own, whose entry is never moved (`Sim.net`, `Sim.netSelf`,
-  `Evm/CoreSim.lean`).  A recipient's code is
+  `Evm/Sim.lean`).  A recipient's code is
   not run; whether it accepts a payment is `accepts`, which no instruction
   changes, and the compiler theorem holds for every one.  `caller`,
   `callvalue`, `timestamp` are the transaction's (`CALLER`, `CALLVALUE`,

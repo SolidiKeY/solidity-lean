@@ -2,9 +2,9 @@ import Solidity.Tools.Run
 import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.DecideComplete
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Deploy
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Deploy
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -65,7 +65,7 @@ def Coin : Contract := contract!{
 
 local instance : InContract := ⟨Coin⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## The constructor -/
 
@@ -161,10 +161,10 @@ the credit of `send` when the two differ (`sendMovesSender`,
 `sendMovesReceiver`), on one state. -/
 
 /-- `7`, deploying and calling. -/
-def tx : Core.TTx := { msgSender := ⟨7, rfl⟩ }
+def tx : TTx := { msgSender := ⟨7, rfl⟩ }
 
-/-! Each block is resolved, quoted and declared (`Core.Prog.defineCore`) and
-deployed in the typed run (`Core.Contract.deployT`), by the kernel
+/-! Each block is resolved, quoted and declared (`Prog.defineCore`) and
+deployed in the typed run (`Contract.deployT`), by the kernel
 (`decide +kernel`). -/
 
 private def ctorP : Surface.Prog Coin := sol{ constructor(); }
@@ -175,25 +175,25 @@ open Lean Elab Command in
 run_cmd liftCoreM do
   let ns := `Solidity.Examples.Benchmark.Coin
   for (n, P) in [(`ctorCore, ctorP), (`mintSendCore, mintSendP), (`mintCore, mintP)] do
-    if let some e ← Core.Prog.defineCore (ns ++ n) (ns ++ `Coin) [] P then
+    if let some e ← Prog.defineCore (ns ++ n) (ns ++ `Coin) [] P then
       throwError "{n}: {e}"
 
 /-- `balances[a]` after `P` deploys and runs, `7` calling: read typed (an
 entry, else the mapping's default, `SVal.find`), since the erasure of a
 typed storage does not reduce in the kernel. -/
-def balanceAfter {Γ' : Core.Ctx} (P : Core.Prog Coin [] Γ') (a : Int) : Option Int :=
-  (Core.Contract.deployT Coin P tx).toOption.bind fun σ =>
+def balanceAfter {Γ' : Ctx} (P : Prog Coin [] Γ') (a : Int) : Option Int :=
+  (Contract.deployT Coin P tx).toOption.bind fun σ =>
     ((σ.storage.get (f := "balances") (T := .ref (.mapping (.prim .uint) (.prim .uint))) rfl).find
       (.key a .nil)).map fun v => v.view.1
 
 /-- What a deployment by `7` stores: `minter` is `7`, `balances` has no
 entry and `0` at every key. -/
-private def deployedStorage : Core.Storage Coin :=
+private def deployedStorage : Storage Coin :=
   .cons (.prim ⟨7, rfl⟩) (.cons (.map .nil (.prim ⟨0, rfl⟩)) .nil)
 
 /-- The deployer is the minter, and no one holds a coin. -/
 theorem deployRun :
-    (Core.Contract.deployT Coin ctorCore tx).toOption.map (·.storage.beq deployedStorage) =
+    (Contract.deployT Coin ctorCore tx).toOption.map (·.storage.beq deployedStorage) =
       some true := by
   decide +kernel
 
@@ -205,8 +205,8 @@ theorem sendRunReceiver : balanceAfter mintSendCore 9 = some 4 := by decide +ker
 
 /-- Anyone but the minter: deployed by `3`, a `mint` by `7` reverts. -/
 theorem mintRunOther :
-    (Core.Contract.deployT Coin ctorCore { msgSender := ⟨3, rfl⟩ }).toOption.map
-      (fun σ => (Core.Prog.trun { σ with tx := tx } mintCore).halt?) = some (some .revert) := by
+    (Contract.deployT Coin ctorCore { msgSender := ⟨3, rfl⟩ }).toOption.map
+      (fun σ => (Prog.run { σ with tx := tx } mintCore).halt?) = some (some .revert) := by
   decide +kernel
 
 end Solidity.Examples.Benchmark.Coin

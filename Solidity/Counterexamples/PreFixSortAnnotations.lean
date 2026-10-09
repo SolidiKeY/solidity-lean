@@ -55,30 +55,30 @@ def flagStore : Semantics.State :=
     env := [(.user "x", .val (.bool false))] }
 
 /-- `peopleStore`, as a scoped state with no locals. -/
-def peopleCore : Core.EState People [] := Core.EState.ofSem peopleStore
+def peopleCore : EState People [] := EState.ofSem peopleStore
 
 /-- `flagStore`, as a scoped state with its local `bool x`. -/
-def flagCore : Core.EState Flags [.val .bool] := Core.EState.ofGlob flagStore (.bool false, ())
+def flagCore : EState Flags [.val .bool] := EState.ofGlob flagStore (.bool false, ())
 
 /-- `People`'s store is well-typed. -/
-theorem peopleStore_wt : Core.RunWT People [] peopleCore :=
+theorem peopleStore_wt : RunWT People [] peopleCore :=
   ⟨StateWT.ofB (L := People.layout) (by decide), trivial⟩
 
 /-- `Flags`'s store is well-typed, `x` a `bool`. -/
-theorem flagStore_wt : Core.RunWT Flags [] flagCore :=
+theorem flagStore_wt : RunWT Flags [] flagCore :=
   ⟨StateWT.ofB (H := []) (L := Flags.layout) (by decide), rfl, trivial⟩
 
-theorem peopleStore_agree : Core.Agree [] peopleCore peopleStore :=
+theorem peopleStore_agree : Agree [] peopleCore peopleStore :=
   ⟨rfl, List.nodup_nil, rfl, fun _ h => nomatch h⟩
 
-theorem flagStore_agree : Core.Agree [.user "x"] flagCore flagStore :=
+theorem flagStore_agree : Agree [.user "x"] flagCore flagStore :=
   ⟨rfl, List.nodup_cons.2 ⟨List.not_mem_nil, List.nodup_nil⟩, rfl, by decide⟩
 
 /-! ## The copy rule -/
 
 /-- `alice = bob;`, as `storageRootWriteCopySource` matches it. -/
-def aliceCopy : Core.Stmt People [] [] :=
-  stmtOf (@Core.Taclet.storageRootWriteCopySource People 0 .box [] "alice" (.struct "Person") rfl
+def aliceCopy : Stmt People [] [] :=
+  stmtOf (@Taclet.storageRootWriteCopySource People 0 .box [] "alice" (.struct "Person") rfl
     (.loc (.root "bob" rfl)) rfl rfl)
 
 /-- The pre-fix `storageRootWriteCopySource` row is not faithful: at
@@ -96,23 +96,23 @@ theorem preFix_rootCopy_not_faithful :
 /-- The fixed row (sort-free `find<[StValue]>`) is faithful there, as
 `faithful_storageRootWriteCopySource` says of every instance. -/
 theorem current_rootCopy_faithful :
-    CtorFaithful ``Core.Taclet.storageRootWriteCopySource aliceCopy :=
+    CtorFaithful ``Taclet.storageRootWriteCopySource aliceCopy :=
   faithful_storageRootWriteCopySource
 
 /-- The pre-fix struct twin (`find<[Struct]>`) is faithful at every statement
 the copy rule fires on: `alice = bob;` copies a reference, never a `bool`. -/
-theorem preFix_rootCopyStruct_faithful {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
+theorem preFix_rootCopyStruct_faithful {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
     {gsp : Name} {R : RefTy} {hgsp : C.rootType gsp = some (.ref R)}
-    {sp : Core.SPath C Γ (.ref R)} {hm : (Ty.ref R).mapFree = true} {hsp : sp.isSimple = true} :
+    {sp : SPath C Γ (.ref R)} {hm : (Ty.ref R).mapFree = true} {hsp : sp.isSimple = true} :
     RowFaithful preFixStorageRootWriteCopySourceStruct
-      (stmtOf (@Core.Taclet.storageRootWriteCopySource C k m Γ gsp R hgsp sp hm hsp)) :=
+      (stmtOf (@Taclet.storageRootWriteCopySource C k m Γ gsp R hgsp sp hm hsp)) :=
   rowFaithful_of (dom := .storage) (cls := .reference) rfl rfl rfl (by decide)
 
 /-! ## The read rule -/
 
 /-- `x = flag;`, as `storageRootReadSelect` matches it. -/
-def flagRead : Core.Stmt Flags [.val .bool] [.val .bool] :=
-  stmtOf (@Core.Taclet.storageRootReadSelect Flags 0 .box [.val .bool] .bool .here "flag" rfl)
+def flagRead : Stmt Flags [.val .bool] [.val .bool] :=
+  stmtOf (@Taclet.storageRootReadSelect Flags 0 .box [.val .bool] .bool .here "flag" rfl)
 
 /-- The pre-fix `storageRootReadSelect` row (`find<[int]>`, no varcond) is not
 faithful: `x = flag;` reads a `bool`. -/
@@ -127,7 +127,7 @@ theorem preFix_readSelect_not_faithful :
 
 /-- The current row (`\hasSort`) is faithful there. -/
 theorem current_readSelect_faithful :
-    CtorFaithful ``Core.Taclet.storageRootReadSelect flagRead :=
+    CtorFaithful ``Taclet.storageRootReadSelect flagRead :=
   faithful_storageRootReadSelect
 
 end PreFixSortAnnotations

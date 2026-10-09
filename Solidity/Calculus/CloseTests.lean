@@ -1,12 +1,12 @@
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 
 /-!
 # Tests of `sol_close`
 
 Goals `sol_close` is expected to close (`Close.lean`), each a leaf the
-scoped strategy leaves (`open scoped Solidity.Core.Scoped`), erased to
+scoped strategy leaves (`open scoped Solidity.Scoped`), erased to
 today's formulas.
 -/
 
@@ -16,7 +16,7 @@ open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Boolean connectives on literals -/
 

@@ -25,7 +25,7 @@ Two ways one context sits in another:
 binds them.
 -/
 
-namespace Solidity.Core
+namespace Solidity
 
 /-- What a local holds: a value of a primitive type, a storage alias, a
 memory reference, or (in a specification) the storage or ledger before the
@@ -296,4 +296,4 @@ def CodeBinder.names {κ : Ctx} : CodeBinder κ → List Var
   | .none => []
   | .some x => [x]
 
-end Solidity.Core
+end Solidity

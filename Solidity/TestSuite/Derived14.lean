@@ -17,12 +17,12 @@ declaration or assignment writes its components in order.
 `tupleReturnDiscardsComponents` (`returnStats`' four conditionals and its
 `&&`) run their callees on literals: each split's condition is ground under
 its updates, and the strategy keeps only the branch it takes
-(`Core.Seq.refutes`, closed by `Core.Proves.closeFalse`), so one path each
+(`Seq.refutes`, closed by `Proves.closeFalse`), so one path each
 is run, not 27 and 32.
 -/
 
 open Solidity NFml.Proves
-open scoped Core.Scoped
+open scoped Scoped
 
 theorem Solkey.TestSuite.sendToOwner.proved : ⊢ Solkey.TestSuite.sendToOwner.problem := by
   sol_prove

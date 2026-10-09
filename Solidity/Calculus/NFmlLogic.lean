@@ -6,7 +6,7 @@ import Solidity.Calculus.TermTaclets
 # The closer's sequent calculus: `Γ ⊢ φ`
 
 `Proves Γ φ` is the sequent calculus the closer runs on a leaf the scoped
-strategy leaves (`Calculus/Core/Logic.lean` is the calculus on programs):
+strategy leaves (`Calculus/Logic.lean` is the calculus on programs):
 the context `Γ` holds what sits in front of the current formula — the
 preconditions, the updates, the quantified locals — and the rules move a
 connective into it (`impRight`, `allRight`, `{U}` by `updIntro`), merge and

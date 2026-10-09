@@ -39,7 +39,7 @@ redundant there and load-bearing in solkey.
 **Lean evidence.** `Semantics.checkArith` (`Semantics.lean`); the EVM compiler
 proves the guard: `checkArith_uint`, `checkArith_int`, `tail_sim`
 (`Evm/SimLemmas.lean`), `overflow_run`/`overflow_interpreter`
-(`Evm/CoreExamples.lean`, `Evm/CoreInterpreter.lean`).
+(`Evm/Examples.lean`, `Evm/Interpreter.lean`).
 
 **Fix.** Either split each arithmetic taclet on the range (revert branch under
 `\diamond`, closed branch under `\box`, as Java KeY's `inInt`/`expandInInt`), or
@@ -61,11 +61,11 @@ in Lean only under the layout premises `layoutAt` states (`Calculus/SurfaceSpec.
 solkey's obligation states none.
 
 **Lean evidence.** Every typed state's erasure is `RunWT`
-(`Core.TState.erase_wt`, `Typing/TypedWT.lean`), so the invariant can be
+(`State.erase_wt`, `Typing/TypedWT.lean`), so the invariant can be
 assumed once. It is not tight:
 `SVal.canon` adds what `hasTy` forgets (mapping default is the type's default,
 mapping keys are unique, a struct carries exactly its declared members), and
-`Prog.trun_canon`, `reachable_canon`, `map_default_not_reachable` and
+`Prog.run_canon`, `reachable_canon`, `map_default_not_reachable` and
 `struct_missing_field_not_reachable` (`Typing/Reachability.lean`) prove that
 canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
 `no_hidden_invariant` (`Typing/Constructibility.lean`) prove canonical and tight
@@ -100,12 +100,12 @@ into a fresh local. It is on solkey's own backlog (`docs/net.md` §4 item 1;
 `docs/bugs.md`, "Internal calls are never inlined").
 
 **Lean evidence.** The rule of the Lean calculus solkey lacks here:
-`LeanTaclet.functionCallArgCapture` (`Calculus/Core/Rules.lean`), the
-strategy's step by `Core.LeanTaclet.toStep` (`Calculus/Core/Taclet.lean`) and
-so sound by `Core.Stmt.sound` (`Calculus/Core/Sound.lean`). Its hypotheses are the
+`LeanTaclet.functionCallArgCapture` (`Calculus/Rules.lean`), the
+strategy's step by `LeanTaclet.toStep` (`Calculus/Taclet.lean`) and
+so sound by `Stmt.sound` (`Calculus/Sound.lean`). Its hypotheses are the
 taclet's side conditions: the captured argument mentions no callee parameter,
 and the callee body and result are free of the fresh `pv`. On programs whose
-calls take simple arguments and, under the diamond, pay no one (`Stmt.inSolkey m`, `Calculus/Core/SolkeyFragment.lean`)
+calls take simple arguments and, under the diamond, pay no one (`Stmt.inSolkey m`, `Calculus/SolkeyFragment.lean`)
 solkey's rules alone derive what the whole calculus does (`Proves.toSolkey`).
 
 **Fix.** Add the rule with those side conditions. Until then a program with a complex
@@ -209,7 +209,7 @@ None is wrong on the corpus; each matters for a future taclet.
   proof tree prints `if b_1 true`.
 - **Overlapping taclets are separated by strategy cost, not by guards.** Lean's
   side conditions leave one rule per statement (`Rule.premise_unique`,
-  `Calculus/Core/Taclet.lean`); the cases where solkey leaves two taclets open
+  `Calculus/Taclet.lean`); the cases where solkey leaves two taclets open
   (an unfold or capture against a terminal rule on a non-simple part, a
   conditional written to storage or memory, a copy between two storage members,
   a memory reference from a non-bindable source) are those its docstring lists.
@@ -339,7 +339,7 @@ Found while porting solkey's constructor obligations (`Problem.ctorFml`,
   contract. The bound belongs to the proof, as a goal.
 - **Invariant rules ported (L4).** `whileInvariantBox` and
   `whileInvariantDiamond` are Lean's `LeanTaclet`s of those names, shape for
-  shape, sound against `Loop.run` (`Calculus/Core/SoundLoops.lean`). What Lean does
+  shape, sound against `Loop.run` (`Calculus/SoundLoops.lean`). What Lean does
   differently, each a side condition KeY's types give for free:
   - *the cover.* Lean's locals are untyped, so `b` may be neither `TRUE` nor
     `FALSE`; under the diamond the premise also owes `b = TRUE ∨ b = FALSE`,

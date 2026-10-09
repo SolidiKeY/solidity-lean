@@ -2,8 +2,8 @@ import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Memory array examples as chains
@@ -33,12 +33,12 @@ conventions), in the printed names (`FreshNames` tables: `idx`, `pv`, `acc`, `mv
 
 namespace Solidity.Examples.Chains.MemoryArrays
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
 section
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-! ## Example: Index Read and Write on a Memory Array -/
 
@@ -47,7 +47,7 @@ namespace IndexRead
 /-- `v = carolValues[i];` with `i` 2, from a memory where `carolValues[2]` is 10: read out of the heap at
 the index (the paper's `⇝`, the rule and its empty program); past the merge the read is the write's value
 (`readOnWrite`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
     dl![m]{
       { i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
         { memory := write(memory, carolValues[2], 10) } ⟨[ v = carolValues[i]; ]⟩ φ }
@@ -72,7 +72,7 @@ end IndexRead
 namespace IndexWrite
 
 /-- `carolValues[i] = 100;` with `i` 2: written into the heap at the index (the paper's `⇝`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint]) :
     dl![m]{
       { i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
         ⟨[ carolValues[i] = 100; ]⟩ φ }
@@ -97,7 +97,7 @@ namespace FixedArray
 printed program's `assert`s are not drawn: each splits the line into its three goals, and the update
 notation prints a comparison's result (`se1 := 3 == 3`) only as a `‹…›` escape
 (`Calculus/RuleSyntax.lean`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3)]) :
+theorem chain (φ : Post StandardExample [.mem (.fixed (.prim .uint) 3)]) :
     dl![m]{ ⟨[ uint[3] memory x; x[1] = 5; ]⟩ φ }
     ~[memoryReferenceDeclFreshAlloc]~> dl![m]{
         { x := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) } ⟨[ x[1] = 5; ]⟩ φ }
@@ -122,7 +122,7 @@ local instance : FreshNames := .ofTable names
 printed trace binds the source as `tok`), then the element is written with the identity the member holds
 (the paper's `⇝*`).  The last line keeps the reads of `david`'s members: no law reads a member of a fresh
 object to its identity. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .mem (.fixed (.ref (.struct "Token")) 3), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.fixed (.ref (.struct "Token")) 3), .val .uint]) :
     dl![m]{
       { i := 2 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
         { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -159,7 +159,7 @@ local instance : FreshNames := .ofTable names
 member is written with the element's identity (the paper's `⇝*`; the printed `tok` is not declared).  Past
 the merge the read of `carol.account` passes the later allocation of `davidTokens`
 (`readAddDifferentIdentity`); the element of the fresh `davidTokens` is an identity, which no law reads. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.ref (.struct "Token")) 3), .mem (.struct "Person"), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.fixed (.ref (.struct "Token")) 3), .mem (.struct "Person"), .val .uint]) :
     dl![m]{
       { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         { davidTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
@@ -205,13 +205,13 @@ local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes TestSuite names).isEmpty
 
 section
-variable (m : Modality) (φ : Core.Post TestSuite [])
+variable (m : Modality) (φ : Post TestSuite [])
 
 /-- `Token memory tk = b.tokens[i];` with `i` 2, for the printed `Token memory tok = carol.account.tokens[i];`
 (`TokenBucket memory b` for `carol.account`): the declaration dropped, the receiver bound (`mv`), its
 declaration dropped, then the element read — the paper's three `⇝` and its `⇝*`.  The reads stay, as in
 `valueWrite`. -/
-theorem tokenRead (φ : Core.Post TestSuite [.mem (.struct "Token"), .mem (.struct "TokenBucket"), .val .uint]) :
+theorem tokenRead (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "TokenBucket"), .val .uint]) :
     dl![m]{
       { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) }
         ⟨[ Token memory tk = b.tokens[i]; ]⟩ φ }
@@ -258,7 +258,7 @@ local instance : FreshNames := .ofTable names
 then read at (the paper's `⇝*`); the merge resolves the index to `1 + 1`, which folds to `2` in `i`, `idx`
 and the read (`add_literals`, inside a memory term too), and the read of the write resolves to `10`
 (`readOnWrite`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
     dl![m]{
       { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
         { memory := write(memory, carolValues[2], 10) } ⟨[ v = carolValues[++i]; ]⟩ φ }
@@ -300,7 +300,7 @@ local instance : FreshNames := .ofTable names
 /-- `carolValues[++i] = val;` with `i` 1 and `val` 7: the right-hand side is snapshot before the index
 runs, then the element written by the captured index (the paper's `⇝*`); the merge resolves the index to
 `1 + 1` and the value to `7`, and the index folds to `2` in `i`, `idx` and the write. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.fixed (.prim .uint) 3), .val .uint, .val .uint]) :
     dl![m]{
       { i := 1 ‖ val := 7 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
         ⟨[ carolValues[++i] = val; ]⟩ φ }
@@ -331,7 +331,7 @@ local instance : FreshNames := .ofTable names
 dropped (the paper's first `⇝`, which here comes after the capture), and `tok` bound to the element's
 identity; the merge resolves the index to `1 + 1`, which folds to `2` in `i`, `idx` and the read.  The read
 of the element stays: it is an identity of the fresh `carolTokens`, which no law reads. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Token"), .mem (.fixed (.ref (.struct "Token")) 3), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .mem (.fixed (.ref (.struct "Token")) 3), .val .uint]) :
     dl![m]{
       { i := 1 ‖ carolTokens := freshId(addM(memory, Token[3])) ‖ memory := addM(memory, Token[3]) }
         ⟨[ Token memory tok = carolTokens[++i]; ]⟩ φ }
@@ -383,7 +383,7 @@ merge `seed` is read in the starting storage (`findOnSave`, in the write too) an
 starting storage is an update of its
 own: `sequentialToParallel` merges an update that writes memory only where its other elements bind
 locals (`Upd.merge`). -/
-theorem incrementIndex (φ : Core.Post Calls [.mem (.fixed (.prim .uint) 3), .val .uint]) :
+theorem incrementIndex (φ : Post Calls [.mem (.fixed (.prim .uint) 3), .val .uint]) :
     dl![m]{
       { storage := save(storage, seed, 7) }
         { i := 1 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
@@ -434,7 +434,7 @@ theorem incrementIndex (φ : Core.Post Calls [.mem (.fixed (.prim .uint) 3), .va
 /-- `carolValues[i] = makeValue();` with `i` 2, from a storage where `seed` is 7: the call captured,
 inlined, and written (the paper's `⇝*`); past the merge `seed` is read in the starting storage
 (`findOnSave`), in the captures and in the write. -/
-theorem simpleIndex (φ : Core.Post Calls [.mem (.fixed (.prim .uint) 3), .val .uint]) :
+theorem simpleIndex (φ : Post Calls [.mem (.fixed (.prim .uint) 3), .val .uint]) :
     dl![m]{
       { storage := save(storage, seed, 7) }
         { i := 2 ‖ carolValues := freshId(addM(memory, uint[3])) ‖ memory := addM(memory, uint[3]) }
@@ -473,7 +473,7 @@ variable (m : Modality)
 (`Basket memory b` for `carol.account`): the right-hand side, the receiver and the index are each bound
 (the paper's `⇝`), and the element is written (its `⇝*`); the merge resolves the receiver to `mv`'s read.
 That read stays: no law reads a member of a fresh object to its identity. -/
-theorem valueWrite (φ : Core.Post TestSuite [.mem (.struct "Basket"), .val .uint, .val .uint]) :
+theorem valueWrite (φ : Post TestSuite [.mem (.struct "Basket"), .val .uint, .val .uint]) :
     dl![m]{
       { i := 2 ‖ val := 7 ‖ b := freshId(addM(memory, Basket)) ‖ memory := addM(memory, Basket) }
         ⟨[ b.items[i] = val; ]⟩ φ }

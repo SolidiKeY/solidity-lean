@@ -7,8 +7,8 @@ import Solidity.Calculus.TreeData
 /-!
 # The closer's walk as one kernel evaluation: `sol_prove` on a leaf
 
-A leaf the scoped strategy leaves (`Calculus/Core/Derive.lean`,
-`Calculus/Core/ProvesDerive.lean`) is erased to a sequent of
+A leaf the scoped strategy leaves (`Calculus/Derive.lean`,
+`Calculus/ProvesDerive.lean`) is erased to a sequent of
 `Logic.lean`'s calculus and handed here.  `Derive.residue` runs that
 calculus's walk as a function: on a sequent `Γ ⟹ φ` it drops an empty
 modality, moves a precondition, a quantified local or an update into the
@@ -62,7 +62,7 @@ abbrev Leaf (C : Contract) := List (Hyp C) × NFml C
 `if (v < 0)` after `int v = -3;` takes one branch only.  KeY splits, applies
 the update to the condition in each branch's antecedent, simplifies it, and
 closes the branch it became `false` in (`closeFalse`).  The scoped walk
-(`Seq.ground`, `Calculus/Core/ProvesDerive.lean`) does
+(`Seq.ground`, `Calculus/ProvesDerive.lean`) does
 the same at the split, on the erasure: where the condition reads only locals the context
 binds, through its updates, to terms of literals and value operators
 (`groundCond`, a cheap syntactic test), it asks the closer to refute each
@@ -970,7 +970,7 @@ elab_rules : tactic
     setGoals (s.open_ ++ rest.erase g)
     ProofTree.suggest tk (NFml.Derive.replayLines s.found)
 
-/-! ## The leaves' storage writes, counted (`#solkey_scan`, `Core.Seq.scanLeaves`) -/
+/-! ## The leaves' storage writes, counted (`#solkey_scan`, `Seq.scanLeaves`) -/
 
 /-- How many storage writes the context's updates hold. -/
 def NFml.Derive.storageWrites (Γ : List (Hyp C)) : Nat :=

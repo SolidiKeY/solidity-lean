@@ -4,9 +4,9 @@ import Solidity.Calculus.NFmlQuote
 # The strategy's tactics: their syntax, and the formula goal they work on
 
 The tactics both calculi elaborate, declared once so that today's
-(`Calculus/Core/Symex.lean`, `Calculus/Core/ProofTree.lean`, `Calculus/Core/Derive.lean`)
-and the scoped one (`Calculus/Core/Symex.lean`, `Calculus/Core/Derive.lean`,
-`Calculus/Core/Closers.lean`) each add an elaborator to the same syntax:
+(`Calculus/Symex.lean`, `Calculus/ProofTree.lean`, `Calculus/Derive.lean`)
+and the scoped one (`Calculus/Symex.lean`, `Calculus/Derive.lean`,
+`Calculus/Closers.lean`) each add an elaborator to the same syntax:
 `sol_step`, `sol_symex`, `sol_derive`, `sol_derive?`, `sol_chain?`,
 `sol_prove` and `sol_prove?`.  The syntax kinds keep their names
 (`Solidity.tacticSol_step`, `Solidity.ProofTree.tacticSol_derive?`, …), which
@@ -83,8 +83,8 @@ open Lean Elab Tactic Meta in
 /-- `sol_symex` on a goal `⊨ φ` of the closer's formulas, which have no
 modality: the strategy has nothing to fire, and `φ` is computed as `symex`
 would leave it (`normValid`).  The goal a scoped leaf leaves for today's closer, the erasure
-`Valid ((H.wrap φ).erase ns)` (`Core.Proves.close`), is one.  Declared before
-today's strategy (`Symex.lean`) and the scoped one (`Core/Symex.lean`), it is
+`Valid ((H.wrap φ).erase ns)` (`Proves.close`), is one.  Declared before
+today's strategy (`Symex.lean`) and the scoped one (`Symex.lean`), it is
 tried after them. -/
 elab_rules : tactic
   | `(tactic| sol_symex) => do

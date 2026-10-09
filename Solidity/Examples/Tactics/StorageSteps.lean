@@ -1,6 +1,6 @@
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.Sequents
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.Sequents
 import Solidity.Tools.Inspect
 
 /-!
@@ -19,7 +19,7 @@ is a theorem `⊨ dl!{ … }`, proved one of two ways:
   `unfold r` for Steps 1 and 2, `update r` for Step 3, `empty` for
   `emptyModality`, `intro` for a precondition.  Put the cursor after an `apply`
   to see the next line as a sequent `dl{ Γ ⟹ φ }`, which the headline states
-  as a checked line, `show sequent!{ Γ ⟹ φ }` (`Calculus/Core/Sequents.lean`).
+  as a checked line, `show sequent!{ Γ ⟹ φ }` (`Calculus/Sequents.lean`).
   `refine close ?_` leaves the
   calculus; the `sol_symex` after it runs nothing, it only normalises the goal
   for `sol_close`.  The headline is proved both ways.
@@ -32,7 +32,7 @@ rule the derivation draws.
 The three steps: Step 1 unfolds a read whose receiver or index
 is not simple, Step 2 decomposes a write (source, receiver, index, in that
 order), Step 3 turns a statement whose parts are simple into an update.  The
-rule names are solkey's (`Calculus/Core/Rules.lean`).
+rule names are solkey's (`Calculus/Rules.lean`).
 
 Writes are under the box: the closer does not close the diamond of a write
 (`Close.lean`, "What does not close").  The programs of solkey's `taclets` suite, and the
@@ -52,7 +52,7 @@ open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## 0 · The headline: `alice.account.balance = 10;` -/
 
@@ -265,7 +265,7 @@ theorem arrayIndexRead : ⊨ dl!{ [ uint v = values[i]; ] v == values[i] } := by
 initial store `values` is empty, so at `i = 0` the read halts. -/
 theorem arrayIndexReadDiamond : ¬ (⊨ dl!{ ⟨ uint v = values[i]; ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _) ⟨0, by decide⟩) (by decide +kernel)
+    (h (State.init _) ⟨0, by decide⟩) (by decide +kernel)
 
 /-- `values[i] = 100;` -/
 theorem arrayIndexWrite : ⊨ dl!{ [ values[i] = 100; ] values[i] == 100 } := by
@@ -417,7 +417,7 @@ theorem arrayPop : ⊨ dl!{ [ people.pop(); ] true } := by
 a `pop` of an empty array reverts. -/
 theorem arrayPopDiamond : ¬ (⊨ dl!{ ⟨ people.pop(); ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _)) (by decide +kernel)
+    (h (State.init _)) (by decide +kernel)
 
 /-- `Person storage p = bob; people.push(p);` — the pushed element is a copy of
 what the alias finds (`storagePushValueCopySource`). -/

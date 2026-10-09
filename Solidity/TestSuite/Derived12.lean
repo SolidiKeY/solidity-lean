@@ -15,7 +15,7 @@ memory is not seen), from `storageNewIntoField` to
 -/
 
 open Solidity NFml.Proves
-open scoped Core.Scoped
+open scoped Scoped
 
 theorem Solkey.TestSuite.storageToMemory.proved : ⊢ Solkey.TestSuite.storageToMemory.problem := by
   sol_prove

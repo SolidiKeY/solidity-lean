@@ -1,7 +1,7 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -20,7 +20,7 @@ typed interpreter from the example store, checked by the kernel (solkey's
 `net-*.key` files; `net-manual-update.key`, a raw update with no program,
 has no counterpart).  `net-msg-value.key` reads `msg.value` and
 `msg.sender`, the transaction's values (`Simple.env`), into storage (§4).
-On the EVM the ledger is the money that moved (`Evm.Core.compile_net`).
+On the EVM the ledger is the money that moved (`Evm.compile_net`).
 `ok = a.send(v);` books the same payment or none, as the transaction's
 oracle says, and its claims hold of both (§5, `net-send-simple.key`).
 -/
@@ -31,7 +31,7 @@ open NFml.Proves Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## 1 · The frame -/
 
@@ -140,8 +140,8 @@ theorem netTransfersAccumulate :
 
 /-! ## 3 · The ledger, run
 
-Each block is resolved, quoted and declared (`Core.Prog.defineCore`), then
-run typed (`Core.Prog.trun`) from `Storage.standardExample`, the storage of
+Each block is resolved, quoted and declared (`Prog.defineCore`), then
+run typed (`Prog.run`) from `Storage.standardExample`, the storage of
 `State.exampleStore`, by the kernel (`decide +kernel`). -/
 
 private def payNineP : Surface.Prog StandardExample := sol{ uint to = 9; to.transfer(5); }
@@ -154,18 +154,18 @@ run_cmd liftCoreM do
   let ns := `Solidity.Examples.Tactics.Net
   for (n, P) in [(`payNineCore, payNineP), (`payOwnerCore, payOwnerP), (`paySelfCore, paySelfP),
       (`sendNineCore, sendNineP)] do
-    if let some e ← Core.Prog.defineCore (ns ++ n) ``StandardExample [] P then
+    if let some e ← Prog.defineCore (ns ++ n) ``StandardExample [] P then
       throwError "{n}: {e}"
 
 /-- The initial store, typed. -/
-private abbrev start : Core.TState StandardExample [] :=
-  Core.TState.ofStorage Core.Storage.standardExample
+private abbrev start : State StandardExample [] :=
+  State.ofStorage Storage.standardExample
 
 /-- The ledger at `a` (`State.getNet`) after `P` runs from `σ`; `none` on a
 halt. -/
-def netAfter {Γ' : Core.Ctx} (σ : Core.TState StandardExample []) (P : Core.Prog StandardExample [] Γ')
+def netAfter {Γ' : Ctx} (σ : State StandardExample []) (P : Prog StandardExample [] Γ')
     (a : Int) : Option Int :=
-  (Core.Prog.trun σ P).toOption.map fun o => (lookupBy a o.st.net).getD 0
+  (Prog.run σ P).toOption.map fun o => (lookupBy a o.st.net).getD 0
 
 /-- `uint to = 9; to.transfer(5);` debits `9` by `5` (`net-transfer-simple.key`). -/
 theorem netTransferSimple : netAfter start payNineCore 9 = some (-5) := by decide +kernel
@@ -187,7 +187,7 @@ theorem netSelfRun : netAfter start paySelfCore 0 = some 0 := by decide +kernel
 /-- The funds are not the transfer's: `address(this).balance` reads `3`
 after a payment of `5` from `3`. -/
 theorem transferLeavesFunds :
-    ((Core.Prog.trun { start with selfBalance := ⟨3, rfl⟩ } payNineCore).toOption.map
+    ((Prog.run { start with selfBalance := ⟨3, rfl⟩ } payNineCore).toOption.map
       fun o => ((lookupBy 9 o.st.net).getD 0, o.st.selfBalance.1)) = some (-5, 3) := by
   decide +kernel
 
@@ -251,8 +251,8 @@ theorem netSendRun : netAfter start sendNineCore 9 = some (-5) := by decide +ker
 
 /-- With the recipient refusing, nothing is booked and `ok` is `false`. -/
 theorem netSendRefusedRun :
-    ((Core.Prog.trun { start with tx := { ext := [(sendKey 9 5, .error)] } } sendNineCore).toOption.map
-      fun o => ((lookupBy 9 o.st.net).getD 0, (Core.TEnv.get .here o.st.env : PrimTy.bool.Denote))) =
+    ((Prog.run { start with tx := { ext := [(sendKey 9 5, .error)] } } sendNineCore).toOption.map
+      fun o => ((lookupBy 9 o.st.net).getD 0, (TEnv.get .here o.st.env : PrimTy.bool.Denote))) =
       some (0, false) := by
   decide +kernel
 

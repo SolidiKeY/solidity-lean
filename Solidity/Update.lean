@@ -24,8 +24,8 @@ the state the update is applied in.  Nothing runs when a rule produces one.
 
 A formula (`Fml`) is first-order (`=`, `¬`, `∧`, `→`, `∀`) plus `{U} φ`,
 `{havoc}` and `{anon(xs)}`: the closer's input, a leaf of the scoped
-calculus erased (`Core.Fml.erase`), with no modality and no program.  The
-modalities are the scoped calculus's (`Calculus/Core/Fml.lean`, read by the
+calculus erased (`Fml.erase`), with no modality and no program.  The
+modalities are the scoped calculus's (`Calculus/Fml.lean`, read by the
 typed run).  A formula *as written*, with the diamond `⟨ P ⟩ φ` and the box
 `[ P ] φ` over the untyped statements, is `Surface.Fml`: the elaborator's
 output (`dl!{ … }`) and the printers' target, with no reading (decision 11).
@@ -698,7 +698,7 @@ def IntOp.apply : IntOp → Int → Int → Int
   | .sub, a, b => a - b
 
 /-- The operator as a Lean term, for the quoters (`Calculus/NFmlQuote.lean`,
-`Calculus/Core/Quote.lean`). -/
+`Calculus/Quote.lean`). -/
 def IntOp.quote : IntOp → Lean.Expr
   | .add => Lean.mkConst ``IntOp.add
   | .sub => Lean.mkConst ``IntOp.sub
@@ -954,8 +954,8 @@ def NFml.Valid (φ : NFml C) : Prop := ∀ σ, NFml.holds σ φ
 `Surface.Fml` is `Fml` with the two modalities over the untyped statements
 (`Syntax.lean`): what `dl!{ … }` reads, a specification's obligation and a
 problem state (`Calculus/SurfaceSpec.lean`, `Calculus/Problem.lean`), and what the
-printers print (`RuleSyntax.lean`'s `ppFml`, `Core.Fml.eraseS`).  It has no
-reading: `Core.Fml.resolveN` makes it a scoped formula, read by the typed
+printers print (`RuleSyntax.lean`'s `ppFml`, `Fml.eraseS`).  It has no
+reading: `Fml.resolveN` makes it a scoped formula, read by the typed
 run, and `Surface.Fml.toFml` the closer's `Fml` when it has no modality.
 The constructors are `Fml`'s, in the same order, with `modal` after
 `upd`. -/
@@ -1007,7 +1007,7 @@ def Surface.Fml.toFml : Surface.Fml C → Except String (NFml C)
   | .imp φ ψ => return .imp (← φ.toFml) (← ψ.toFml)
   | .upd m U φ => return .upd m U (← φ.toFml)
   | .modal .. => throw "a modality is read by the scoped calculus: `cdl!{ … }`, or \
-      `dl!{ … }` under `open scoped Solidity.Core.Scoped`"
+      `dl!{ … }` under `open scoped Solidity.Scoped`"
   | .havoc φ => return .havoc (← φ.toFml)
   | .all x p φ => return .all x p (← φ.toFml)
   | .anon xs φ => return .anon xs (← φ.toFml)

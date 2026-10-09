@@ -1,7 +1,7 @@
 import Solidity.Calculus.SurfaceSpec
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.SolSpec
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.SolSpec
 import Solidity.Tools.Inspect
 
 /-!
@@ -59,7 +59,7 @@ def ERC20 : Contract := contract!{
 section
 local instance : InContract := ⟨ERC20⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 /-- `approve(spender, amount)`: `ensures \result && allowance[msg.sender][spender] == amount`. -/
 theorem erc_approve : ⊨ spec!{ approve } := by sol_spec
 set_option maxHeartbeats 1000000 in
@@ -91,7 +91,7 @@ def Tally : Contract := contract!{
 section
 local instance : InContract := ⟨Tally⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 /-! `pay()`'s obligation: `msg.value` is booked to the sender's ledger entry
 in front of the call, `\old(net(msg.sender))` reads the snapshot `oldNet`,
 and `assignable \nothing` owes every word of the storage where it was.  The
@@ -108,7 +108,7 @@ info: dl{
               (find(old, total) = find(old, total) → find(storage, total) = find(old, total)) ∧
                 (∀ uint k1;
                     find(old, seen[k1]) = find(old, seen[k1]) →
-                      find(storage, seen[k1]) = find(old, seen[k1]))) } : Core.Fml Tally []
+                      find(storage, seen[k1]) = find(old, seen[k1]))) } : Fml Tally []
 -/
 #guard_msgs in #check spec!{ pay }
 
@@ -144,7 +144,7 @@ def Ordered : Contract := contract!{
 section
 local instance : InContract := ⟨Ordered⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /--
 info: dl{
@@ -152,7 +152,7 @@ info: dl{
         (0 <= y ∧ y <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
           msg.value = 0) →
     [ uint result_lo; uint result_hi; (result_lo, result_hi) = order(x, y); ]
-      result_lo <= result_hi } : Core.Fml Ordered []
+      result_lo <= result_hi } : Fml Ordered []
 -/
 #guard_msgs in #check spec!{ order }
 

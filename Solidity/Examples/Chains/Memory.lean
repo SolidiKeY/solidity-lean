@@ -3,8 +3,8 @@ import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Memory examples as chains
@@ -32,12 +32,12 @@ postcondition `φ` (`Examples/Chains/Storage.lean` says how to read one), in the
 
 namespace Solidity.Examples.Chains.Memory
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
 section
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-! ## Example: Symbolic Execution of Memory Aliasing -/
 
@@ -48,7 +48,7 @@ carolAcc.balance = 100;` — the alias binds the identity `carol.account` holds,
 and the write goes through it.  The last line keeps the read of that identity:
 no law reads a struct member of a fresh object to its identity (the printed
 `idConstructor(ρ, [account])`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ Person memory carol; Account memory carolAcc = carol.account; carolAcc.balance = 100; ]⟩ φ }
     ~[memoryReferenceDeclFreshAlloc]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -81,7 +81,7 @@ namespace FieldCopy
 identity it holds is written, not a copy.  One rule where the printed trace
 unfolds the source into a local `acc` first, so the paper's `⇝` and `⇝*` are one
 `~*>`. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person")]) :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ carol.account = david.account; ]⟩ φ }
@@ -111,7 +111,7 @@ local instance : FreshNames := .ofTable names
 
 /-- `carol.account.balance = 10;` — the receiver is bound to a memory local
 `acc`, then written through.  The value `10` is simple, so no `pv` is declared. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person")]) :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ carol.account.balance = 10; ]⟩ φ }
     ~[memoryFieldWrite_unfold_leftFst]~> dl![m]{
@@ -145,7 +145,7 @@ local instance : FreshNames := .ofTable names
 bound first, then the member read out of the heap.  Past the merge the read of
 `carol.account` passes the write to `balance` (`readWriteDifferentIdentity`),
 and the member read is that write's value (`readOnWrite`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         { memory := write(memory, read(memory, carol.account).balance, 10) } ⟨[ v = carol.account.balance; ]⟩ φ }
@@ -204,7 +204,7 @@ namespace DeclDrop
 
 /-- `Person memory carol; Person memory carolAlias = carol;` — the alias binds
 `carol`'s identity, and nothing is written. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person")]) :
     dl![m]{ ⟨[ Person memory carol; Person memory carolAlias = carol; ]⟩ φ }
     ~[memoryReferenceDeclFreshAlloc]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -233,7 +233,7 @@ local instance : FreshNames := .ofTable names
 /-- `Token memory t = carol.account.token;` — the declaration dropped, then
 each receiver bound by a read of the identity it holds.  As in `Aliasing`, no
 law reads a member of the fresh `carol` to its identity. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Token"), .mem (.struct "Person")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .mem (.struct "Person")]) :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         ⟨[ Token memory t = carol.account.token; ]⟩ φ }
@@ -267,7 +267,7 @@ namespace RootAlias
 
 /-- `v = carol;` — a memory local assigned a memory local is rebound to its
 identity (`v` is a `Person` by what the program assigns it). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person")]) :
     dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ v = carol; ]⟩ φ }
     ~*> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } { v := carol } φ }
     ~[sequentialToParallel]~> dl![m]{
@@ -283,7 +283,7 @@ namespace RootAssign
 
 /-- `carol = david;` — the same rule, with a memory target: `carol` is
 rebound to `david`'s identity, and the heap is untouched. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person")]) :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ carol = david; ]⟩ φ }
@@ -312,7 +312,7 @@ local instance : FreshNames := .ofTable names
 before the write; the paper's one `⇝*` declares, binds and writes it.  The sum
 folds to `7` in `pv` and in the write at once (`add_literals`, which rewrites
 inside a memory term too). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .val .uint, .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint, .val .uint]) :
     dl![m]{
       { a := 3 ‖ b := 4 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         ⟨[ carol.age = a + b; ]⟩ φ }
@@ -340,7 +340,7 @@ namespace Rebind
 /-- `carolAcc = david.account;` — a memory field on the right rebinds the
 local to the identity the member holds; past the merge the read passes the
 later allocation of `carolAcc`'s object (`readAddDifferentIdentity`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person")]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person")]) :
     dl![m]{
       { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) } ⟨[ carolAcc = david.account; ]⟩ φ }
@@ -400,7 +400,7 @@ memory return is an `InternalCall`, decision 19):
 a copy of `alice` (`memoryStorageCopy`), bound (`mv := mv4`); and the member
 written.  The copy reads `alice` as a struct, which has no literal: nothing
 reads a member of it in the last line. -/
-theorem chain (m : Modality) (φ : Core.Post Calls []) :
+theorem chain (m : Modality) (φ : Post Calls []) :
     dl![m]{ { storage := save(storage, alice.age, 10) } ⟨[ choosePersonMem().account = makeAccount(); ]⟩ φ }
     ~[internalCallExpand]~> dl![m]{
         { storage := save(storage, alice.age, 10) }

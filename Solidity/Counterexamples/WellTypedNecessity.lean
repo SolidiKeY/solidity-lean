@@ -19,7 +19,7 @@ return a number where `total : uint`?  Split by what the question is about:
 
 So any claim that a sorted read denotes the value really stored needs
 `wellFormed(storage)` in the proof obligation and its preservation by every
-write: `Core.TState.erase_wt` (`Typing/TypedWT.lean`) is that fact, by
+write: `State.erase_wt` (`Typing/TypedWT.lean`) is that fact, by
 construction.
 -/
 
@@ -39,8 +39,8 @@ def Total : Contract := contract!{ uint total; }
 def badStore : Semantics.State := { storage := [("total", .bool true)] }
 
 /-- `x = total;`, as `storageRootReadSelect` matches it. -/
-def totalRead : Core.Stmt Total [.val .uint] [.val .uint] :=
-  stmtOf (@Core.Taclet.storageRootReadSelect Total 0 .box [.val .uint] .uint .here "total" rfl)
+def totalRead : Stmt Total [.val .uint] [.val .uint] :=
+  stmtOf (@Taclet.storageRootReadSelect Total 0 .box [.val .uint] .uint .here "total" rfl)
 
 /-- The row is the live table's: one value read, `\hasSort`-generic. -/
 theorem readSelect_row :

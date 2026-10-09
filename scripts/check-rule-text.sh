@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The rule table (`Solidity/Calculus/Core/Rules.lean`) is written in the
+# The rule table (`Solidity/Calculus/Rules.lean`) is written in the
 # calculus's notation: every constructor of `Taclet` and `LeanTaclet` states its
 # conclusion as a `dl{ … }` (or `dl[J C k]{ … }`) line, solkey's `\find` and
 # `\replacewith`, but the ones stated by hand and listed below with why.
@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 node - <<'JS'
 const { readFileSync } = require('node:fs');
-const src = readFileSync('Solidity/Calculus/Core/Rules.lean', 'utf8');
+const src = readFileSync('Solidity/Calculus/Rules.lean', 'utf8');
 // stated by hand: a block's end is a frame (`Premise.unfold`'s `Ext`), and an
 // argument's capture closes the call over its frame (`Premise.argCapture`)
 const byHand = { Taclet: ['blockEmpty'], LeanTaclet: ['functionCallArgCapture'] };

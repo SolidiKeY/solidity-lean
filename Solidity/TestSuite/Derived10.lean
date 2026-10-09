@@ -11,7 +11,7 @@ order of the source; the replays are what `#solkey_derive? … pending`
 -/
 
 open Solidity NFml.Proves
-open scoped Core.Scoped
+open scoped Scoped
 
 theorem Solkey.TestSuite.testMemoryDeleteAlias.proved : ⊢ Solkey.TestSuite.testMemoryDeleteAlias.problem := by
   sol_prove

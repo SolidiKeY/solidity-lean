@@ -1,14 +1,14 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Arithmetic: the compound storage update
 
 The calculus's worked example `alice.age += 1;` as one chain term over any modality `m` and postcondition `φ`
-(`Calculus/Core/Chains.lean`, `.claude/rules/derivations.md`), through `storageFieldOpAssign`.
+(`Calculus/Chains.lean`, `.claude/rules/derivations.md`), through `storageFieldOpAssign`.
 
 Every line is written.  The paper's one `⇝` is the rule with the empty program after it, one `~*>`; past the
 program the stack merges (`~[sequentialToParallel]~>`) and the read is resolved one law a link, to the last
@@ -18,14 +18,14 @@ line, so the read ends at a literal and the sum folds.
 
 namespace Solidity.Examples.Chains.Arithmetic
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
 /-! ## Example: Compound Storage Update -/
 
 section
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 namespace CompoundStorageUpdate
 

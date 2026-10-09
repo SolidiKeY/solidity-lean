@@ -5,7 +5,7 @@ import Solidity.Solkey.TestSuite
 
 The lint of the scoped syntax (`docs/intrinsic.md`, M2) over the TestSuite
 import: each of its programs resolved from its parameters, quoted and
-declared `Solkey.TestSuite.f.core : Core.Prog Solkey.TestSuite Γ Γ'`, the
+declared `Solkey.TestSuite.f.core : Prog Solkey.TestSuite Γ Γ'`, the
 kernel checking it (`solc_scoped`, `Frontend/Import.lean`).  A module of its
 own: the kernel's check costs about a third of the import's, which
 `Solkey/TestSuite.lean` keeps.

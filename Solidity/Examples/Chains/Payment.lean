@@ -1,14 +1,14 @@
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
 import Solidity.FreshNames
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Payment: `transfer`, as chains
 
 The calculus's worked examples of `transfer` (the paper's payment section), each one chain term under the
-box, the only modality with a transfer rule (`Calculus/Core/Chains.lean`, `.claude/rules/derivations.md`).
+box, the only modality with a transfer rule (`Calculus/Chains.lean`, `.claude/rules/derivations.md`).
 `transferNoCallbackBox` books the payment on the ledger and nothing else: the update
 `{ net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) }`, `sadr`'s entry down by
 the amount unless `sadr` is the contract itself, which books nothing.  The receiver's capture is a
@@ -27,7 +27,7 @@ for every receiver and amount, is `Examples/Tactics/Payment.lean`'s.
 
 namespace Solidity.Examples.Chains.Payment
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -36,7 +36,7 @@ def names : FreshTable := [("pv", "se1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
-variable (φ : Core.Post StandardExample [])
+variable (φ : Post StandardExample [])
 
 /-! ## Example: Symbolic Execution of `to.transfer(5)` -/
 
@@ -44,7 +44,7 @@ namespace Transfer5
 
 /-- `to.transfer(5);` with `to` 3: the booking and its `⟨[ ]⟩`, the paper's one step; the merge puts the
 receiver in it. -/
-theorem chain (φ : Core.Post StandardExample [.val .uint]) :
+theorem chain (φ : Post StandardExample [.val .uint]) :
     dl![.box]{ { to := 3 } ⟨[ to.transfer(5); ]⟩ φ }
     ~*> dl![.box]{ { to := 3 } { net := if(to = this) then net else store(net, at(to), net(to) - 5) } φ }
     ~[sequentialToParallel]~>
@@ -61,7 +61,7 @@ namespace TransferSum
 /-- `to.transfer(x + 2);` with `to` 3 and `x` 7: the amount is nonsimple, so it is captured first
 (`transfer_unfold_rightSndArgument`) and its declaration dropped with the binding it leaves; the booking
 reads the capture.  The merge puts `7 + 2` for `pv`, which folds to 9. -/
-theorem chain (φ : Core.Post StandardExample [.val .uint, .val .uint]) :
+theorem chain (φ : Post StandardExample [.val .uint, .val .uint]) :
     dl![.box]{ { to := 3 ‖ x := 7 } ⟨[ to.transfer(x + 2); ]⟩ φ }
     ~[transfer_unfold_rightSndArgument]~>
       dl![.box]{ { to := 3 ‖ x := 7 } ⟨[ uint pv = x + 2; to.transfer(pv); ]⟩ φ }

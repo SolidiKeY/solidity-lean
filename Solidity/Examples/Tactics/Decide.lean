@@ -1,7 +1,7 @@
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Closer
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -32,7 +32,7 @@ open NFml.Proves Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Two symbolic keys
 
@@ -316,7 +316,7 @@ section Ledger
 
 local instance : InContract := ⟨TestSuite⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 set_option maxHeartbeats 1600000 in
 /-- The whole program of `LedgerDelete.lean`, both `delete`s included, in
@@ -605,7 +605,7 @@ end Solidity.Examples.Tactics.Decide
 
 /-! ## On the closer's formulas
 
-Read without `open scoped Solidity.Core.Scoped`: the fragment (`NFml.inL`)
+Read without `open scoped Solidity.Scoped`: the fragment (`NFml.inL`)
 of the closer's input.  (`deleteWithoutWriteUntyped`, a refutation over
 today's untyped run, and `sol_decide` refusing a modality went with the
 modality at W4 `modal`.) -/

@@ -1,7 +1,7 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -36,24 +36,24 @@ open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## The taclets -/
 
 /--
-info: @Core.Taclet.binopAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : PrimTy}
-  {v : Core.Idx Γ (Core.LTy.val x)} {p : PrimTy} {op : BinOp} {hq : op.ret p = x} {se₁ se₂ : Core.Simple C Γ p},
+info: @Taclet.binopAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : PrimTy}
+  {v : Idx Γ (LTy.val x)} {p : PrimTy} {op : BinOp} {hq : op.ret p = x} {se₁ se₂ : Simple C Γ p},
   dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.binopAssignment
+#guard_msgs in #check @Taclet.binopAssignment
 
 /--
-info: @Core.Taclet.logicalAndShortCircuitRhs : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
-  {v : Core.Idx Γ (Core.LTy.val (BinOp.and.ret PrimTy.bool))} {se : Core.Simple C Γ PrimTy.bool}
-  {nse : Core.Val C Γ PrimTy.bool},
+info: @Taclet.logicalAndShortCircuitRhs : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
+  {v : Idx Γ (LTy.val (BinOp.and.ret PrimTy.bool))} {se : Simple C Γ PrimTy.bool}
+  {nse : Val C Γ PrimTy.bool},
   dl{ ⟨[ v = se && nse; ]⟩ ⇝ ⟨[ if (se) {v = nse;v = v && true;} else {v = false;}; ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.logicalAndShortCircuitRhs
+#guard_msgs in #check @Taclet.logicalAndShortCircuitRhs
 
 /-! ## Arithmetic -/
 
@@ -85,7 +85,7 @@ theorem divisionByZeroBox : ⊨ dl!{ [ uint r = 8 / 0; ] r == 0 } := by sol_syme
 
 /-- … and no diamond formula does. -/
 example : ¬ (⊨ dl!{ ⟨ uint r = 8 / 0; ⟩ r == 0 }) := fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _)) (by decide +kernel)
+    (h (State.init _)) (by decide +kernel)
 
 /-- `localDivAssign`'s zero-divisor branch: `x /= y` with `y == 0`. -/
 theorem divAssignByZeroBox : ⊨ dl!{ [ uint x = 10; uint y = 0; x /= y; ] x == 0 } := by
@@ -96,7 +96,7 @@ theorem divAssignByZeroBox : ⊨ dl!{ [ uint x = 10; uint y = 0; x /= y; ] x == 
 `x /= 0` silently produced `0`. -/
 example : ¬ (⊨ dl!{ ⟨ uint x = 10; uint y = 0; x /= y; ⟩ x == 0 }) :=
   fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _)) (by decide +kernel)
+    (h (State.init _)) (by decide +kernel)
 
 /-- Checked arithmetic: `2²⁵⁶ - 1 + 1` overflows and reverts. -/
 theorem overflowBox :
@@ -108,11 +108,11 @@ theorem overflowBox :
 example : ¬ (⊨ dl!{ ⟨ uint x = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
                       uint r = x + 1; ⟩ true }) :=
   fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _)) (by decide +kernel)
+    (h (State.init _)) (by decide +kernel)
 
 /-- `0 - 1` is below the `uint` range: it reverts too. -/
 example : ¬ (⊨ dl!{ ⟨ uint r = 0 - 1; ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
-    (h (Core.TState.init _)) (by decide +kernel)
+    (h (State.init _)) (by decide +kernel)
 
 /-! ## Comparisons -/
 

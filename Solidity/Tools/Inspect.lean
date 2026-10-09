@@ -1,8 +1,8 @@
 import Solidity.Calculus.Decide
-import Solidity.Calculus.Core.Delab
-import Solidity.Calculus.Core.Quote
-import Solidity.Calculus.Core.ProofTree
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.Delab
+import Solidity.Calculus.Quote
+import Solidity.Calculus.ProofTree
+import Solidity.Calculus.Surface
 import Solidity.Tools.ProofTree
 import Solidity.Tools.Taclet
 
@@ -14,9 +14,9 @@ import Solidity.Tools.Taclet
 #step cdl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
 ```
 
-* `#wp φ` runs the scoped strategy to the end (`Core.symex 200`, what
+* `#wp φ` runs the scoped strategy to the end (`symex 200`, what
   `sol_symex` does) and prints what is left, the first-order formula whose
-  validity is `φ`'s.  When its erasure (`Core.Fml.erase`) is in
+  validity is `φ`'s.  When its erasure (`Fml.erase`) is in
   `sol_decide`'s fragment (`NFml.inL`) it also prints its reduction
   (`NFml.reduce`): the updates pushed in and every read of a write
   eliminated, a formula over the initial state alone, printed by `LFml.fmt`
@@ -24,12 +24,12 @@ import Solidity.Tools.Taclet
   `delAt(s, p)`, `if(i = j) then a else b`, `write(m, idC(idp0, nil), at(i),
   v)`, `=`, `∧`, `→`, `¬`, `∀ uint x; φ`).
 * `#step φ` takes one step and names the rule the scoped strategy fires
-  (`ruleAtC?`, `Core.ruleOf?`), as a line of `#derivation`.
+  (`ruleAtC?`, `ruleOf?`), as a line of `#derivation`.
 
-`φ` is a closed scoped formula of a named contract, `φ : Core.Fml C Γ`
-(`cdl!{ … }`, or `dl!{ … }` under `open scoped Solidity.Core.Scoped`): the
+`φ` is a closed scoped formula of a named contract, `φ : Fml C Γ`
+(`cdl!{ … }`, or `dl!{ … }` under `open scoped Solidity.Scoped`): the
 strategy runs as compiled code (`unsafe evalExpr`), its result is quoted
-(`Core.Fml.quote`) against the contract's name and printed by `Core.Delab`'s
+(`Fml.quote`) against the contract's name and printed by `Delab`'s
 printer (`elabCoreFormula?`, `Tools/ProofTree.lean`).
 
 A file that inspects the calculus imports this module alone: it brings the
@@ -225,45 +225,45 @@ syntax "#step " term : command
 
 /-- What `#wp` shows of a scoped `φ`: the formula the scoped strategy leaves,
 quoted, and the reduction of its erasure when it is in the fragment. -/
-def wpQuotedC [FreshNames] (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) :
+def wpQuotedC [FreshNames] (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) :
     Lean.Expr × Option String :=
-  let ψ := Core.symex 200 φ
+  let ψ := symex 200 φ
   let ψ' := ψ.erase []
-  -- a modality left has no erasure the closer reads (`Core.Fml.erase`)
+  -- a modality left has no erasure the closer reads (`Fml.erase`)
   (ψ.quote c, if !ψ.active && ψ'.inL Sym.empty then some (LFml.fmt ψ'.reduce) else none)
 
 /-- What `#step` shows of a scoped `φ`: the formula one step leaves, quoted. -/
-def stepQuotedC (c : Lean.Expr) {Γ : Core.Ctx} (φ : Core.Fml C Γ) : Option Lean.Expr :=
+def stepQuotedC (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) : Option Lean.Expr :=
   φ.step.map (·.quote c)
 
 
 /-- The rule one step fires on the scoped formula `φ`, by name: at the first
 statement with a rule, looking through updates, a precondition, binders and
-a conjunction's left goal first, as `Core.Fml.stepAt` looks (`ruleOf?`);
+a conjunction's left goal first, as `Fml.stepAt` looks (`ruleOf?`);
 `emptyModality` where the first modality's program is done. -/
 partial def ruleAtC? (φ : Lean.Expr) : MetaM (Option Lean.Name) := do
-  let k ← mkAppM ``Core.Fml.fresh #[φ]
+  let k ← mkAppM ``Fml.fresh #[φ]
   let rec go (e : Lean.Expr) : MetaM (Option Lean.Name) := do
     let e ← whnf e
     let args := e.getAppArgs
     match e.getAppFn.constName? with
-    | some ``Core.Fml.and =>
+    | some ``Fml.and =>
       match ← go args[2]! with
       | some n => return some n
       | none => go args[3]!
-    | some ``Core.Fml.imp => go args[3]!
-    | some ``Core.Fml.upd => go args[5]!
-    | some ``Core.Fml.havoc => go args[2]!
-    | some ``Core.Fml.all => go args[4]!
-    | some ``Core.Fml.bind => go args[5]!
-    | some ``Core.Fml.anon => go args[3]!
-    | some ``Core.Fml.modal =>
+    | some ``Fml.imp => go args[3]!
+    | some ``Fml.upd => go args[5]!
+    | some ``Fml.havoc => go args[2]!
+    | some ``Fml.all => go args[4]!
+    | some ``Fml.bind => go args[5]!
+    | some ``Fml.anon => go args[3]!
+    | some ``Fml.modal =>
       let P ← whnf args[5]!
-      if P.isAppOf ``Core.Prog.nil then return some `emptyModality
-      unless P.isAppOf ``Core.Prog.cons do return none
+      if P.isAppOf ``Prog.nil then return some `emptyModality
+      unless P.isAppOf ``Prog.cons do return none
       let s := P.getArg! (P.getAppNumArgs - 2)
-      let some (c, _) ← Core.ruleOf? k args[4]! s | return none
-      return some (← Core.ProofTree.keyName c s)
+      let some (c, _) ← ruleOf? k args[4]! s | return none
+      return some (← ProofTree.keyName c s)
     | _ => return none
   go φ
 

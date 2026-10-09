@@ -98,14 +98,14 @@ Rejected:
 |---|---|
 | Fuel everywhere (`Stmt.run n σ s`) | A `Nat` through every theorem that recurses on `Stmt.run`; box becomes `∀ n`, diamond `∃ n`, and monotonicity in `n` a lemma every proof needs. |
 | A constant bound inside the loop only (fuel `2^257`) | Unwinding is not exact at the bound: a loop stopping at iteration `B + 1` is `diverge` while its unwinding is not, so `whileUnwind` is unsound for the diamond. |
-| An inductive `Exec` beside `Stmt.run` | Two denotations. Every taclet's `Premise.Correct`/`SameOk` (`Calculus/Core/SoundKit.lean`) is over `Prog.run`, the corpus is decided by kernel evaluation of it (`corpus_decide`), and the callback relation anchors to it (`ExecS.det`). `Stmt.run` is the only semantics. |
+| An inductive `Exec` beside `Stmt.run` | Two denotations. Every taclet's `Premise.Correct`/`SameOk` (`Calculus/SoundKit.lean`) is over `Prog.run`, the corpus is decided by kernel evaluation of it (`corpus_decide`), and the callback relation anchors to it (`ExecS.det`). `Stmt.run` is the only semantics. |
 | `partial_fixpoint` | `Res = Except Halt` is not a CCPO, and the kernel cannot unfold the result. |
 
 **Cost: computability.** The existential makes `Loop.run` classical, but
 `@[implemented_by Loop.runImpl]` (a `partial def` that iterates until done,
 which the kernel never sees) keeps `Stmt.run` compiled: `#eval` and `#run`
 run loops (and do not return from one that never ends). Kernel reduction of a
-loop-free program is unaffected, so `corpus_decide` and `Evm/CoreExamples.lean`
+loop-free program is unaffected, so `corpus_decide` and `Evm/Examples.lean`
 keep working. A concrete loop is decided by `Loop.run_of_iterN : iterN n σ =
 .inr r → Loop.run … σ = r` (`Prog.run_loop_of_iterN` for a block), with `n`
 found by `#eval` and the iteration computed by `rfl`.
@@ -116,17 +116,17 @@ run alike: `Prog.run_frame`) and `Loop.run_induct` (an invariant of the loop
 head: `frame_of_within`); `Loop.run_unfold` is the
 unwinding. The typing proofs recurse on the typed run, reading its states'
 erasure (`Typing/TypedRunInv.lean`), and take a loop's case from
-`Core.TLoop.run_induct`, once for every invariant (`RunInv.tkeeps_loop`: the
+`TLoop.run_induct`, once for every invariant (`RunInv.tkeeps_loop`: the
 invariant at the loop head, the body's locals popped each iteration; M3's
 scoped run went at decision 40). In more detail:
 
 `Stmt.run_frame`/`Prog.run_frame` (`Semantics/Agree.lean`: states agreeing off
 `ns` iterate alike), `RunWT` (a typed state's erasure is well-typed by
-construction, `Typing/TypedWT.lean`), `Core.Prog.trun_canon` and
-`Core.Prog.trun_tight` (`Typing/Reachability.lean`,
+construction, `Typing/TypedWT.lean`), `Prog.run_canon` and
+`Prog.run_tight` (`Typing/Reachability.lean`,
 `Typing/Constructibility.lean`; `reachable_iff` stays true, since a loop
 reaches nothing a finite sequence of body runs does not), and
-`Stmt.exec_run`/`ExecS` (`Semantics/Core/Callback.lean`: a loop whose body has no
+`Stmt.exec_run`/`ExecS` (`Semantics/Callback.lean`: a loop whose body has no
 transfer is `det`). Set `Stmt.forks (.loop …) := Prog.hasTransfer body`, not
 `true`: a forking statement with no `ExecS` constructor has no runs, so every
 modality over it would hold vacuously. `Stmt.run_call_expand` is unaffected;
@@ -134,7 +134,7 @@ modality over it would hold vacuously. `Stmt.run_call_expand` is unaffected;
 `none`; `Stmt.weight` is Decision 3.
 
 **A loop that transfers, with callbacks**, has `ExecS` constructors
-(`Semantics/Core/Callback.lean`): the condition halts, the loop
+(`Semantics/Callback.lean`): the condition halts, the loop
 exits, iterates (`loopIter`), stops in its body, or diverges
 (`loopDiverge`). An inductive relation has no derivation of an infinite run,
 so `loopDiverge` over-approximates: a loop whose body pays may always
@@ -184,12 +184,12 @@ with `break` must say what holds when `brk` is set.
 
 Unwinding and the invariant rule both apply to one loop. To keep "one rule
 per statement" (`Stmt.rule_exists`, `Rule.iff_step` in
-`Calculus/Core/RuleExists.lean`; `Rule.premise_unique` in
-`Calculus/Core/Taclet.lean`), the choice is syntax. `LoopAnn C` is either
+`Calculus/RuleExists.lean`; `Rule.premise_unique` in
+`Calculus/Taclet.lean`), the choice is syntax. `LoopAnn C` is either
 `.inv (I : Val C .bool) (dec : Option (Val C .uint))` (an invariant and an
 optional variant) or `.unwind (k : Nat)`. `Stmt.step`
-(`Calculus/Core/Step.lean`, its loop arm `loopStep` in
-`Calculus/Core/Blocks.lean`) dispatches:
+(`Calculus/Step.lean`, its loop arm `loopStep` in
+`Calculus/Blocks.lean`) dispatches:
 
 | Annotation | Box | Diamond |
 |---|---|---|
@@ -228,7 +228,7 @@ could decrease.
 
 ## Decision 4: the invariant rule and its soundness (built)
 
-solkey's two goals, as `whileInvariantBox` writes them (`Calculus/Core/Rules.lean`),
+solkey's two goals, as `whileInvariantBox` writes them (`Calculus/Rules.lean`),
 in the context's update `{U}`:
 
 ```
@@ -249,17 +249,17 @@ variant is checked only when the condition holds again**, as solkey checks
 it. Lean reads `dec` where KeY compares it with a skolem (`dec = variant`),
 so under the diamond `dec` must be defined wherever the invariant holds.
 
-**The anonymising update `{anon(body)}`** is `Core.Fml.anonHavoc`
-(`Calculus/Core/Fml.lean`; today's, in `Semantics/Mutability`, went at W4
+**The anonymising update `{anon(body)}`** is `Fml.anonHavoc`
+(`Calculus/Fml.lean`; today's, in `Semantics/Mutability`, went at W4
 `modal`), solkey's `#loopAnon`: `{anon(xs)}`, where `xs` is the body's
-frame, `Core.Prog.frame` (`Calculus/Core/Blocks.lean`: the locals of the
+frame, `Prog.frame` (`Calculus/Blocks.lean`: the locals of the
 loop's context the body writes, the lowering's flags included), and
 `{havoc}` inside it when the body writes storage or pays
-(`Core.Prog.within .nonpayable`, storage and ledger together). A body outside
+(`Prog.within .nonpayable`, storage and ledger together). A body outside
 `nonpayable` (memory, a push or a pop, an alias, an external call) has no
 frame, and its loop closes to `false` (`whileClose`). The frame lemma is
-`TState.eq_anonHavoc` (`Semantics/Core/TypedRunFrame.lean`);
-`Core.holds_anonHavoc` (`Calculus/Core/SoundLoops.lean`) turns it into the
+`State.eq_anonHavoc` (`Semantics/RunFrame.lean`);
+`holds_anonHavoc` (`Calculus/SoundLoops.lean`) turns it into the
 premise at every loop head.
 
 **The flags are typed by the invariant.** An anonymised `brk`, `ret` or
@@ -267,7 +267,7 @@ premise at every loop head.
 conjoins `f || !f` (defined exactly when `f` is a `bool`) to an invariant for
 each flag the condition tests, which KeY's `boolean` type gives.
 
-**Soundness** (`Calculus/Core/SoundLoops.lean`, `Stmt.sound_loop`). Box
+**Soundness** (`Calculus/SoundLoops.lean`, `Stmt.sound_loop`). Box
 (`Premise.sound_whileInvBox`): by `TLoop.run_induct`, every loop head is in the frame of the first and
 satisfies the invariant; where the condition is `TRUE` the body's box keeps
 it (and rules out a panic), where it is `FALSE` the rest's goal holds.
@@ -276,9 +276,9 @@ by the variant's value after the first, which is a `uint` below the one
 before wherever the loop goes on; neither the condition (the cover) nor the
 body (a diamond) can halt.
 
-**In Lean.** `Premise.inv` (`Calculus/Core/Fml.lean`), read by
+**In Lean.** `Premise.inv` (`Calculus/Fml.lean`), read by
 `Premise.fml`, so `sol_symex` steps it as any premise; `Proves.inv`
-(`Calculus/Core/Proves.lean`, `apply invBox r`, `apply invLean r` under the
+(`Calculus/Proves.lean`, `apply invBox r`, `apply invLean r` under the
 diamond) for a walk, its goals `init` ("invariant initially valid") and
 `thn`, `els` past the context's anonymising update `Hyps.anonHavoc` ("body
 preserves invariant", "use case"), which the proof tree labels as solkey
@@ -302,7 +302,7 @@ loop is `Stmt C Γ Γ`: its condition and annotation are read in `Γ`, its body
 is a `Prog C Γ Γb` whose locals the typed run pops every iteration
 (`TRun.loop`), as for `ite`; the invariants of `Typing/` are kept at every
 head (`RunInv.tkeeps_loop`, `Typing/TypedRunInv.lean`), and the state is
-typed by construction (`TState.erase_wt`). The untyped
+typed by construction (`State.erase_wt`). The untyped
 interpreter keeps a local declared in the body bound, and declares it again
 each iteration (`declLocal` overwrites, as solc re-initialises); it is in the
 frame, and the invariant, typed at `Γ`, cannot name it.
@@ -325,12 +325,12 @@ is structural; the one loop solc emits for the current fragment
 Backward jumps need absolute `JUMP`/`JUMPDEST` with a program counter and
 fuel; a "code at offset `o` is `compile s`" invariant in place of
 `exec_append` and the skip-count lemmas that every case of `stmt_sim` uses;
-a third arm in `ValOut`/`StmtOut` (`Evm/CoreStmt.lean`) for "out of fuel
+a third arm in `ValOut`/`StmtOut` (`Evm/Stmt.lean`) for "out of fuel
 at every fuel"; and a new bound on a loop's pushes, since
 `L + pushesP P ≤ 2^64` no longer holds (the interpreter's `push` would revert
 at `2^64` as solc does, or the bound becomes a run-time invariant of `Sim`).
 That is comparable to rewriting the compiler's correctness proof (about 2,300 lines).
-**Decision:** `inFrag` (`Evm/CoreCompile.lean`) refuses a loop, as it refuses
+**Decision:** `inFrag` (`Evm/Compile.lean`) refuses a loop, as it refuses
 memory, and `docs/compiler-verification.md` lists it. Loops also unblock its
 gaps "storage copies of a dynamic array" and "`push()` of a struct", so the
 EVM stage is worth doing once, for all.
@@ -339,12 +339,12 @@ EVM stage is worth doing once, for all.
 
 | Stage | Scope (files) | Risk |
 |---|---|---|
-| **L1 Syntax and semantics** (built) | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Core/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/NFmlQuote.lean`, `Calculus/SurfaceNotation.lean`. | Done: `Stmt.run` stays structural (the loop arm calls the body's run under a binder), `#eval` runs `Loop.runImpl`. |
+| **L1 Syntax and semantics** (built) | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Calculus/NFmlQuote.lean`, `Calculus/SurfaceNotation.lean`. | Done: `Stmt.run` stays structural (the loop arm calls the body's run under a binder), `#eval` runs `Loop.runImpl`. |
 | **L2 Typing** (built) | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Done. |
-| **L3 Unwinding** (built) | `Calculus/Core/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
-| **L4 Invariant rule** (built) | `Update.lean` (`Fml.anon`, `State.anon`), `Calculus/Core/Blocks.lean` (`Prog.frame`, the frame `Stmt.within`'s; today's `Semantics/Mutability` went at W4 `modal`), `Calculus/Core/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic` (`Hyp.anon`, `Proves.invLean`), `Termination`, `Close` (`holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
+| **L3 Unwinding** (built) | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
+| **L4 Invariant rule** (built) | `Update.lean` (`Fml.anon`, `State.anon`), `Calculus/Blocks.lean` (`Prog.frame`, the frame `Stmt.within`'s; today's `Semantics/Mutability` went at W4 `modal`), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic` (`Hyp.anon`, `Proves.invLean`), `Termination`, `Close` (`holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
-| **L6 Callbacks** | `Calculus/Core/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
+| **L6 Callbacks** | `Calculus/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
 | **L7 EVM** | `Evm/{Machine,Compile,Correctness}.lean`, as above. | High: the largest stage. |
 
 L1 to L4 make loops provable. L5 is what Ballot and BlindAuction need once
@@ -367,11 +367,11 @@ A finder and a skeptic per area; what the skeptic confirmed, fixed:
   (solkey's) and `returnBeforeSiblingLoop` in `tests/solc/Loops.sol`.
 - **Unbounded runs in the counterexample search.** `Fml.eval3` ran programs
   through `Prog.run`, whose compiled `Loop.runImpl` heeds no heartbeats.  It
-  now runs the typed run with fuel, `Prog.trunF`
-  (`Semantics/Core/TypedRunFuel.lean`, read by `Tools/Counterexample.lean`):
+  now runs the typed run with fuel, `Prog.runF`
+  (`Semantics/RunFuel.lean`, read by `Tools/Counterexample.lean`):
   each loop at most `loopFuel` iterations, `unknown` past them, proved to
-  agree with `Prog.trun` wherever it does not say `diverge`
-  (`Prog.trunF_approx`).  The kernel reduces it, so a counterexample
+  agree with `Prog.run` wherever it does not say `diverge`
+  (`Prog.runF_approx`).  The kernel reduces it, so a counterexample
   through a loop is certified (`Examples/Verify.lean`).
 - **Loop specifications as solkey reads them.** `scripts/solc-ast.mjs`
   joins the `///` lines above a loop and splits them at a line that starts
@@ -393,8 +393,8 @@ A finder and a skeptic per area; what the skeptic confirmed, fixed:
   restriction is written above (Typing and declarations) and in the rule
   map.
 - **`invBox`**: under the box the invariant rule has solkey's two goals past
-  `init` in the walk and the proof tree (`Calculus/Core/Symex.lean`,
-  `Calculus/Core/ProofTree.lean`), `cov` proved by `closeTrue`, as `splitBox`.
+  `init` in the walk and the proof tree (`Calculus/Symex.lean`,
+  `Calculus/ProofTree.lean`), `cov` proved by `closeTrue`, as `splitBox`.
 - **Pins.** `#taclet whileNoVariantDiamond`, `#step` pins of `whileClose`
   and `whileNoVariantDiamond` firing, the `sol_derive?` walks of an unwound
   loop and an invariant loop (`Examples/ProofTree.lean`), a loop inside a

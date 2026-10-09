@@ -1,9 +1,9 @@
 import Solidity.Corpus.Basic
 import Solidity.Calculus.Problem
-import Solidity.Calculus.Core.Sound
-import Solidity.Calculus.Core.Spec
-import Solidity.Calculus.Core.HoldsErase
-import Solidity.Calculus.Core.Close
+import Solidity.Calculus.Sound
+import Solidity.Calculus.Spec
+import Solidity.Calculus.HoldsErase
+import Solidity.Calculus.Close
 import Solidity.Solkey.TestSuite
 
 /-!
@@ -19,7 +19,7 @@ reads `TestSuite/Report.lean`'s pin, and `Corpus/TestSuite.lean` states each
 derived obligation at the initial storage as a corollary of its theorem.
 
 **Why the imported contract's initial state.**  The corollaries are
-read over the imported contract's typed states, `Core.TState
+read over the imported contract's typed states, `State
 Solkey.TestSuite []`, and need `wt(storage)` there, which is read over its
 roots: the hand-written contract's typed start is a state of another
 contract, which has neither `fixedByKey` nor `boolKeyed` and names two roots
@@ -66,13 +66,13 @@ end Solidity.Corpus
 /-! ## Obligations at a store, from `⊢`
 
 The `TestSuite` obligations are derived by the scoped `⊢`
-(`Core.Proves`, `docs/intrinsic.md`, W3c): `N.f.proved : ⊢ N.f.problem`, the
-program resolved (`Core.Prog`).  Its corollary at the initial storage is
+(`Proves`, `docs/intrinsic.md`, W3c): `N.f.proved : ⊢ N.f.problem`, the
+program resolved (`Prog`).  Its corollary at the initial storage is
 stated over the typed run of that program, as every other corpus row is
 (`Corpus/Basic.lean`): `N.f.problem` is `wt(storage) → ⟨ Q ⟩ true`, and
 `Q`'s typed run from the initial state ends normally, or is exhausted
 (`Runs`, decision 15).  It is the scoped
-`⊢`'s soundness (`Core.Proves.valid`) at that state, whose storage is
+`⊢`'s soundness (`Proves.valid`) at that state, whose storage is
 well-formed (`initState_wt`); nothing is left to evaluate. -/
 
 namespace Solidity.Corpus
@@ -80,45 +80,45 @@ namespace Solidity.Corpus
 variable {C : Contract}
 
 /-- solkey's `\<{ f(); }\>(true)` at `σ`, for an obligation `φ` of no
-parameters: `φ` is `wt(storage) → ⟨ Q ⟩ true` (`Core.Problem.fml`) and
+parameters: `φ` is `wt(storage) → ⟨ Q ⟩ true` (`Problem.fml`) and
 `Q`'s typed run from `σ` ends normally, or is exhausted (`Runs`,
 decision 15). -/
-def Obligation.Diamond (σ : Core.TState C []) (φ : Core.Fml C []) : Prop :=
-  ∃ (Γ' : Core.Ctx) (Q : Core.Prog C [] Γ'), φ = Core.Problem.fml .diamond [] Q ∧ Runs .diamond σ Q
+def Obligation.Diamond (σ : State C []) (φ : Fml C []) : Prop :=
+  ∃ (Γ' : Ctx) (Q : Prog C [] Γ'), φ = Problem.fml .diamond [] Q ∧ Runs .diamond σ Q
 
 /-- solkey's `\[{ f(); }\](true)` at `σ`, for an obligation `φ` of no
 parameters: `φ` is `wt(storage) → [ Q ] true` and `Q`'s typed run from `σ`
 does not panic. -/
-def Obligation.Box (σ : Core.TState C []) (φ : Core.Fml C []) : Prop :=
-  ∃ (Γ' : Core.Ctx) (Q : Core.Prog C [] Γ'), φ = Core.Problem.fml .box [] Q ∧ Runs .box σ Q
+def Obligation.Box (σ : State C []) (φ : Fml C []) : Prop :=
+  ∃ (Γ' : Ctx) (Q : Prog C [] Γ'), φ = Problem.fml .box [] Q ∧ Runs .box σ Q
 
 /-- **A derived obligation of no parameters holds at the initial state**:
 its program, run typed from there, under its modality.  `wt(storage)` there
-is `initState_wt`'s, read scoped (`Core.holds_erase_fo`). -/
-theorem runs_of_proved {m : Modality} {Γ' : Core.Ctx} {Q : Core.Prog C [] Γ'}
-    (h : Core.Proves C .all [] .nil (Core.Problem.fml m [] Q))
-    (hw : NFml.holds C.initState (NFml.wt C)) : Runs m (Core.TState.init C) Q := by
-  have hwt : Core.holds (Core.TState.init C) (Core.Fml.wt C) :=
-    (Core.holds_erase_fo (ns := []) (Core.Fml.wt C) (by simp only [Core.Fml.wt, Core.Fml.Plain]) rfl
-      (Core.Agree.nil (Core.TState.init C).erase)).2
-      (by rw [show Core.withLocals (Core.TState.init C).erase.glob [] = C.initState by
-        rw [Core.TState.init_erase]; rfl]; exact hw)
-  exact h.valid (Core.TState.init C) hwt
+is `initState_wt`'s, read scoped (`holds_erase_fo`). -/
+theorem runs_of_proved {m : Modality} {Γ' : Ctx} {Q : Prog C [] Γ'}
+    (h : Proves C .all [] .nil (Problem.fml m [] Q))
+    (hw : NFml.holds C.initState (NFml.wt C)) : Runs m (State.init C) Q := by
+  have hwt : holds (State.init C) (Fml.wt C) :=
+    (holds_erase_fo (ns := []) (Fml.wt C) (by simp only [Fml.wt, Fml.Plain]) rfl
+      (Agree.nil (State.init C).erase)).2
+      (by rw [show withLocals (State.init C).erase.glob [] = C.initState by
+        rw [State.init_erase]; rfl]; exact hw)
+  exact h.valid (State.init C) hwt
 
 /-- A derived diamond obligation with no parameters holds at the initial
 state (`runs_of_proved`). -/
-theorem diamond_of_proved {Γ' : Core.Ctx} {Q : Core.Prog C [] Γ'}
-    (h : Core.Proves C .all [] .nil (Core.Problem.fml .diamond [] Q))
+theorem diamond_of_proved {Γ' : Ctx} {Q : Prog C [] Γ'}
+    (h : Proves C .all [] .nil (Problem.fml .diamond [] Q))
     (hw : NFml.holds C.initState (NFml.wt C)) :
-    Obligation.Diamond (Core.TState.init C) (Core.Problem.fml .diamond [] Q) :=
+    Obligation.Diamond (State.init C) (Problem.fml .diamond [] Q) :=
   ⟨_, Q, rfl, runs_of_proved h hw⟩
 
 /-- A derived box obligation with no parameters holds at the initial state
 (`runs_of_proved`). -/
-theorem box_of_proved {Γ' : Core.Ctx} {Q : Core.Prog C [] Γ'}
-    (h : Core.Proves C .all [] .nil (Core.Problem.fml .box [] Q))
+theorem box_of_proved {Γ' : Ctx} {Q : Prog C [] Γ'}
+    (h : Proves C .all [] .nil (Problem.fml .box [] Q))
     (hw : NFml.holds C.initState (NFml.wt C)) :
-    Obligation.Box (Core.TState.init C) (Core.Problem.fml .box [] Q) :=
+    Obligation.Box (State.init C) (Problem.fml .box [] Q) :=
   ⟨_, Q, rfl, runs_of_proved h hw⟩
 
 /-! A corollary of `Corpus/TestSuite.lean` uses the axioms of its `⊢`

@@ -1,8 +1,8 @@
 import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -73,7 +73,7 @@ def Counter : Contract := contract!{
 
 local instance : InContract := ⟨Counter⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-- `inc()`: `ensures count == \old(count) + 1`. -/
 theorem inc_spec : ⊢ dl!{ c == count → [ inc(); ] count == c + 1 } := by
@@ -98,7 +98,7 @@ info: dl{
   ((0 <= find(storage, count) ∧
             find(storage, count) <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
         msg.value = 0 ∧ find(storage, count) >= 1) →
-    { old := storage } [ dec(); ] find(storage, count) = find(old, count) - 1 } : Core.Fml Counter []
+    { old := storage } [ dec(); ] find(storage, count) = find(old, count) - 1 } : Fml Counter []
 -/
 #guard_msgs in #check spec!{ dec }
 

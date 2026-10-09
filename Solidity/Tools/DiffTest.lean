@@ -1,5 +1,5 @@
-import Solidity.Evm.CoreCompile
-import Solidity.Semantics.Core.TypedRun
+import Solidity.Evm.Compile
+import Solidity.Semantics.Run
 import Solidity.Typing.Storage
 import Solidity.Tools.Run
 
@@ -13,15 +13,15 @@ import Solidity.Tools.Run
 
 For each function of the contract (or the one function named), `runs`
 times: draw a well-typed storage, arguments and a transaction, call the
-function in the typed run (`Core.Prog.trun`, `Semantics/Core/TypedRun.lean`)
-and run its compiled code on the machine (`Evm.run`, `Evm.Core.compileProg`)
+function in the typed run (`Prog.run`, `Semantics/Run.lean`)
+and run its compiled code on the machine (`Evm.run`, `Evm.compileProg`)
 from the storage laid out as solc lays it out, and compare.
 
-**What is compared is what `compile_correct` claims** (`Evm/CoreCorrect.lean`),
+**What is compared is what `compile_correct` claims** (`Evm/Correct.lean`),
 from a start where its hypotheses hold:
 
 * the call is the program `#run` builds (`callProg`), resolved to the scoped
-  syntax (`Core.Prog.resolve`), and kept only if it is in the compiled
+  syntax (`Prog.resolve`), and kept only if it is in the compiled
   fragment, `inFragP (Frag.init []) Q = some F'`; otherwise the function is
   reported skipped;
 * the start machine represents the start state (`Sim C L b F σ.sem ρ m`): its
@@ -208,7 +208,7 @@ def genStart (C : Contract) (d : FunDecl) : Gen (Option (Start × List RawExpr))
     ({ storage := st, args := args.map (·.2), sender, value, time, balance, self }, args.map (·.1))
 
 /-- A typed run's outcome, for the report. -/
-def fmtTRes {α : Type} : Core.TRes α → String
+def fmtTRes {α : Type} : TRes α → String
   | .ok _ => "ok"
   | .error h => fmtHalt h.erase
 
@@ -221,8 +221,8 @@ def fmtOut : Evm.Out → String
 
 /-- Where the final machine fails to represent the final typed state, one
 line each; empty when it does.  `names` are the final context's names. -/
-def differences {Γ : Core.Ctx} (C : Contract) (names : List Var) (keys : List Nat)
-    (σ' : Core.TState C Γ) (m' : Machine) : List String :=
+def differences {Γ : Ctx} (C : Contract) (names : List Var) (keys : List Nat)
+    (σ' : State C Γ) (m' : Machine) : List String :=
   let store := match encodeStorage C keys σ'.storage.erase with
     | .error e => [s!"storage: the typed run's final storage is not representable: {e}"]
     | .ok ws => ws.filterMap fun (s, w) =>
@@ -244,7 +244,7 @@ def differences {Γ : Core.Ctx} (C : Contract) (names : List Var) (keys : List N
 /-- One run of `Q` from `s`: whether both reverted when the two agree, else
 the lines of the mismatch.  The machine has no panic: a failed `assert`
 reverts there (`compile_correct`'s panic case). -/
-def runOnce (C : Contract) {Γ' : Core.NCtx} (Q : Core.Prog C [] Γ'.ctx) (s : Start) :
+def runOnce (C : Contract) {Γ' : NCtx} (Q : Prog C [] Γ'.ctx) (s : Start) :
     Except (List String) Bool :=
   let keys0 := s.storage.flatMap (SVal.mapKeys ·.2)
   match encodeStorage C keys0 s.storage, typedState? C s.state with
@@ -258,12 +258,12 @@ def runOnce (C : Contract) {Γ' : Core.NCtx} (Q : Core.Prog C [] Γ'.ctx) (s : S
         caller := s.sender
         callvalue := s.value
         timestamp := s.time }
-    let res := Core.Prog.trun σ Q
-    let out := Evm.run (Evm.Core.compileProg 0 Q) m
+    let res := Prog.run σ Q
+    let out := Evm.run (Evm.compileProg 0 Q) m
     match res, out with
     | .error .revert, .revert => pure true
     | .error .panic, .revert => pure true
-    | .ok _, .revert => if Evm.Core.Prog.pays Q then pure true
+    | .ok _, .revert => if Evm.Prog.pays Q then pure true
       else throw ["typed run ok, machine revert, and no payment to refuse"]
     | .ok o, .ok m' 0 =>
       let keys := (keys0 ++ o.st.storage.erase.flatMap (SVal.mapKeys ·.2)).eraseDups
@@ -290,12 +290,12 @@ def testFun [FreshNames] (C : Contract) (name : String) (runs seed j : Nat) (f :
     let P ← match callProg C f args with
       | .ok P => pure P
       | .error e => return [s!"skipped: {f} ({e})"]
-    let ⟨_, Q⟩ ← match Core.Prog.resolve [] P with
+    let ⟨_, Q⟩ ← match Prog.resolve [] P with
       | .ok r => pure r
       | .error e => return [s!"skipped: {f} ({e})"]
-    unless (Evm.Core.inFragP (Evm.Core.Frag.init []) Q).isSome do
+    unless (Evm.inFragP (Evm.Frag.init []) Q).isSome do
       return [s!"skipped: {f} (outside the compiled fragment)"]
-    unless Evm.Core.Prog.pushes Q + 4 ≤ Lmax do return [s!"skipped: {f} (too many pushes)"]
+    unless Evm.Prog.pushes Q + 4 ≤ Lmax do return [s!"skipped: {f} (too many pushes)"]
     match runOnce C Q s with
     | .ok rev =>
       agreed := agreed + 1

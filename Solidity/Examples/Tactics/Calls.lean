@@ -1,8 +1,8 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.NFmlDerive
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -34,23 +34,23 @@ open NFml.Proves
 
 local instance : InContract := ⟨CallsExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## The rules -/
 
 /--
-info: @Core.Taclet.functionBodyExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {f : Name} {x : Core.Ctx}
-  {args : Core.Args C Γ x} {x_1 x_2 : Core.Ctx} {ret : Core.CallRet Γ x_1 x_2} {x_3 : Core.Ctx}
-  {body : Core.Prog C (x_1 ++ x) x_3}, dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }
+info: @Taclet.functionBodyExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {f : Name} {x : Ctx}
+  {args : Args C Γ x} {x_1 x_2 : Ctx} {ret : CallRet Γ x_1 x_2} {x_3 : Ctx}
+  {body : Prog C (x_1 ++ x) x_3}, dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.functionBodyExpand
+#guard_msgs in #check @Taclet.functionBodyExpand
 
 /--
-info: @Core.Taclet.internalCallExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {f : Name} {x : Core.Ctx}
-  {args : Core.Args C Γ x} {x_1 x_2 : Core.Ctx} {ret : Core.CallRet Γ x_1 x_2} {x_3 : Core.Ctx}
-  {body : Core.Prog C (x_1 ++ x) x_3}, dl{ ⟨[ ic; ]⟩ ⇝ ⟨[ expand_function_body(ic); ]⟩ }
+info: @Taclet.internalCallExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {f : Name} {x : Ctx}
+  {args : Args C Γ x} {x_1 x_2 : Ctx} {ret : CallRet Γ x_1 x_2} {x_3 : Ctx}
+  {body : Prog C (x_1 ++ x) x_3}, dl{ ⟨[ ic; ]⟩ ⇝ ⟨[ expand_function_body(ic); ]⟩ }
 -/
-#guard_msgs in #check @Core.Taclet.internalCallExpand
+#guard_msgs in #check @Taclet.internalCallExpand
 
 /-! ## Calls run their bodies -/
 
@@ -453,7 +453,7 @@ open NFml.Proves
 
 local instance : InContract := ⟨CallsExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## solkey's `TestSuite` shapes, derived
 

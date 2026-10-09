@@ -21,7 +21,7 @@ not say; `SVal.tight` is exactly them:
 
 Everything canonical and tight is reachable when its words, mapping keys
 and array slots are in range (`SVal.fits`: a literal is in its type's
-range, `Simple.lit`), by one scoped program (`Core.Build.rootsProg`, over
+range, `Simple.lit`), by one scoped program (`Build.rootsProg`, over
 `Syntax/Core.lean`): a word is assigned; a struct is filled member by member
 through an alias bound to it; a dynamic array is pushed to its whole run of
 slots, then each slot past the end is bound to an alias, popped, and filled
@@ -37,9 +37,9 @@ proof tracks the root's value, on the erasure, as a chain of writes at one
 path (`Wrote`), which is why every fill starts from the default and from a
 path where writing what is there changes nothing.
 
-The other direction is `Prog.trun_tight`, an invariant the typed run keeps
+The other direction is `Prog.run_tight`, an invariant the typed run keeps
 on the erasure (`RunInv`, `Typing/TypedRunInv.lean`) beside
-`Prog.trun_canon`'s, for a
+`Prog.run_canon`'s, for a
 contract whose types have well-formed
 defaults all the way down (`Ty.okDeep`).  It needs two facts about paths:
 a word is written only into a live slot (`IdxLive`, from
@@ -510,7 +510,7 @@ end Solidity
 is declared in a block of its own, so it ends with the fill, and the
 aliases the fill's caller is filling through are read by position. -/
 
-namespace Solidity.Core
+namespace Solidity
 
 open Semantics hiding State
 open SemanticsProperties (lookupBy_eq_some_mem lookupBy_defaultForFields SVal.find_nil
@@ -710,52 +710,52 @@ theorem resolve_index_map {σ : EState C Γ} {k : PrimTy} {V : Ty} {key : Int}
 
 /-! #### Typed runs
 
-The builder's programs run by the typed run (`Prog.trun`).  A run from `σ`
+The builder's programs run by the typed run (`Prog.run`).  A run from `σ`
 to `τ` is `TRuns σ P τ`; what the proofs track is the states' erasure,
 where the builder's storage algebra (`Wrote`) lives.  Each statement's step
-is read on the erasure (`SRuns.of_agrees`, `Semantics/Core/TypedStepErase.lean`):
+is read on the erasure (`SRuns.of_agrees`, `Semantics/StepErase.lean`):
 it ends (no step of the builder loops, and no push lands on `2^256 - 1`
 elements, `TRes.Ends`), so it ends in the state its erasure says. -/
 
 /-- `P` runs, by the typed run, from `σ` to `τ`. -/
-def TRuns {Γ' : Ctx} (σ : TState C Γ) (P : Prog C Γ Γ') (τ : TState C Γ') : Prop :=
-  ∃ o : Out C σ.H Γ', P.trun σ = .ok o ∧ o.st = τ
+def TRuns {Γ' : Ctx} (σ : State C Γ) (P : Prog C Γ Γ') (τ : State C Γ') : Prop :=
+  ∃ o : Out C σ.H Γ', P.run σ = .ok o ∧ o.st = τ
 
 /-- `s` runs, by the typed run, from `σ` to `τ`. -/
-def SRuns {Γ' : Ctx} (σ : TState C Γ) (s : Stmt C Γ Γ') (τ : TState C Γ') : Prop :=
-  ∃ o : Out C σ.H Γ', s.trun σ = .ok o ∧ o.st = τ
+def SRuns {Γ' : Ctx} (σ : State C Γ) (s : Stmt C Γ Γ') (τ : State C Γ') : Prop :=
+  ∃ o : Out C σ.H Γ', s.run σ = .ok o ∧ o.st = τ
 
-theorem TRuns.nil (σ : TState C Γ) : TRuns σ (.nil : Prog C Γ Γ) σ := ⟨_, rfl, rfl⟩
+theorem TRuns.nil (σ : State C Γ) : TRuns σ (.nil : Prog C Γ Γ) σ := ⟨_, rfl, rfl⟩
 
-theorem TRuns.cons {Γ₁ Γ₂ : Ctx} {σ : TState C Γ} {s : Stmt C Γ Γ₁} {P : Prog C Γ₁ Γ₂}
-    {τ : TState C Γ₁} {υ : TState C Γ₂} (hs : SRuns σ s τ) (hP : TRuns τ P υ) :
+theorem TRuns.cons {Γ₁ Γ₂ : Ctx} {σ : State C Γ} {s : Stmt C Γ Γ₁} {P : Prog C Γ₁ Γ₂}
+    {τ : State C Γ₁} {υ : State C Γ₂} (hs : SRuns σ s τ) (hP : TRuns τ P υ) :
     TRuns σ (.cons s P) υ := by
   obtain ⟨o, ho, rfl⟩ := hs
   obtain ⟨o', ho', rfl⟩ := hP
-  exact ⟨_, by rw [Prog.trun_cons_ok ho, ho']; rfl, rfl⟩
+  exact ⟨_, by rw [Prog.run_cons_ok ho, ho']; rfl, rfl⟩
 
-theorem TRuns.cons_inv {Γ₁ Γ₂ : Ctx} {σ : TState C Γ} {s : Stmt C Γ Γ₁} {P : Prog C Γ₁ Γ₂}
-    {υ : TState C Γ₂} (h : TRuns σ (.cons s P) υ) : ∃ τ, SRuns σ s τ ∧ TRuns τ P υ := by
+theorem TRuns.cons_inv {Γ₁ Γ₂ : Ctx} {σ : State C Γ} {s : Stmt C Γ Γ₁} {P : Prog C Γ₁ Γ₂}
+    {υ : State C Γ₂} (h : TRuns σ (.cons s P) υ) : ∃ τ, SRuns σ s τ ∧ TRuns τ P υ := by
   obtain ⟨o, ho, rfl⟩ := h
-  cases hs : s.trun σ with
+  cases hs : s.run σ with
   | error e =>
-    have he : Prog.trun σ (.cons s P) = .error e := by
-      show TRun.seq s.trunR P.trunR σ = _
-      simp only [TRun.seq, Stmt.trun] at hs ⊢
+    have he : Prog.run σ (.cons s P) = .error e := by
+      show TRun.seq s.runR P.runR σ = _
+      simp only [TRun.seq, Stmt.run] at hs ⊢
       rw [hs]
     rw [he] at ho
     cases ho
   | ok o₁ =>
-    rw [Prog.trun_cons_ok hs] at ho
-    cases hp : Prog.trun o₁.st P with
+    rw [Prog.run_cons_ok hs] at ho
+    cases hp : Prog.run o₁.st P with
     | error e => rw [hp] at ho; cases ho
     | ok o₂ =>
       rw [hp] at ho
       cases ho
       exact ⟨o₁.st, ⟨o₁, hs, rfl⟩, ⟨o₂, hp, rfl⟩⟩
 
-theorem TRuns.append : {Γ Δ Ε : Ctx} → {σ : TState C Γ} → {P : Prog C Γ Δ} →
-    {Q : Prog C Δ Ε} → {τ : TState C Δ} → {υ : TState C Ε} → TRuns σ P τ → TRuns τ Q υ →
+theorem TRuns.append : {Γ Δ Ε : Ctx} → {σ : State C Γ} → {P : Prog C Γ Δ} →
+    {Q : Prog C Δ Ε} → {τ : State C Δ} → {υ : State C Ε} → TRuns σ P τ → TRuns τ Q υ →
     TRuns σ (P.append Q) υ
   | _, _, _, _, .nil, _, _, _, hP, hQ => by
     obtain ⟨o, ho, rfl⟩ := hP
@@ -779,14 +779,14 @@ theorem TRes.Agrees.ok_of_ends {α β : Type} {f : α → β} {t : TRes α} {u :
 /-- A statement whose typed step ends, read on the erasure: where what it
 erases to ends in `τ`, the typed step ends in a state erasing to `τ`. -/
 theorem SRuns.of_agrees {Γ' : Ctx} {s : Stmt C Γ Γ'} {u : EState C Γ → Res (EState C Γ')}
-    {σ : TState C Γ} {τ : EState C Γ'} (ha : StepAgrees s.trunR u) (he : (s.trun σ).Ends)
+    {σ : State C Γ} {τ : EState C Γ'} (ha : StepAgrees s.runR u) (he : (s.run σ).Ends)
     (hu : u σ.erase = .ok τ) : ∃ σ', SRuns σ s σ' ∧ σ'.erase = τ :=
   let ⟨o, ho, hoe⟩ := TRes.Agrees.ok_of_ends (ha σ) hu he
   ⟨o.st, ⟨o, ho, rfl⟩, hoe⟩
 
 /-- A push of a default ends when the array it lands on, read on the
 erasure, has fewer than `2^256 - 1` elements. -/
-theorem push_none_ends {σ : TState C Γ} {E : Ty} (b : SPath C Γ (.array E))
+theorem push_none_ends {σ : State C Γ} {E : Ty} (b : SPath C Γ (.array E))
     (hp : ∀ r segs elems sh fx, b.resolve σ.erase = .ok (r, segs) →
       σ.erase.glob.findStorage r segs = .ok (.array elems sh fx) → elems.length + 1 < 2 ^ 256) :
     (TRun.push b none σ).Ends := by
@@ -805,7 +805,7 @@ theorem push_none_ends {σ : TState C Γ} {E : Ty} (b : SPath C Γ (.array E))
     simp only [bind, Except.bind, pure, Except.pure, hfull, Bool.false_eq_true, ↓reduceIte]
     exact (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
 
-theorem run_push {σ : TState C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r : Name}
+theorem run_push {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r : Name}
     {segs : List Seg} {es : List Semantics.SVal} {fx : Bool}
     (hd : (none.isSome || E.defaultOkS) = true) (hb : Bound σ.erase a r segs)
     (hf : σ.erase.glob.findStorage r segs = .ok (.array es [] fx)) (hl : es.length + 1 < 2 ^ 256)
@@ -825,7 +825,7 @@ theorem run_push {σ : TState C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r
     simp [SPath.resolve, aliasPath_bound hb, pushAt, hf, Semantics.pushSlot, Src.pushVal, bind,
       Except.bind, pure, Except.pure]
 
-theorem run_pop {σ : TState C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r : Name}
+theorem run_pop {σ : State C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r : Name}
     {segs : List Seg} {es sh : List Semantics.SVal} {last : Semantics.SVal} {fx : Bool}
     (hb : Bound σ.erase a r segs)
     (hf : σ.erase.glob.findStorage r segs = .ok (.array (es ++ [last]) sh fx)) {τ : Semantics.State}
@@ -838,7 +838,7 @@ theorem run_pop {σ : TState C Γ} {E : Ty} {a : Idx Γ (.alias (.array E))} {r 
     (.array es ((if E.isMapping then last else last.defaultOf) :: sh) fx)) (by rw [hτ]; rfl)
   simp [SPath.resolve, aliasPath_bound hb, popAt, hf, bind, Except.bind]
 
-theorem run_delete {σ : TState C Γ} {T : Ty} {l : Loc C Γ T} {r : Name} {segs : List Seg}
+theorem run_delete {σ : State C Γ} {T : Ty} {l : Loc C Γ T} {r : Name} {segs : List Seg}
     {cur : Semantics.SVal} (hl : l.resolve σ.erase = .ok (r, segs))
     (hf : σ.erase.glob.findStorage r segs = .ok cur) {τ : Semantics.State}
     (hτ : σ.erase.glob.saveStorage r segs cur.defaultOf = .ok τ) :
@@ -849,7 +849,7 @@ theorem run_delete {σ : TState C Γ} {T : Ty} {l : Loc C Γ T} {r : Name} {segs
     (by rw [hτ]; rfl)
   simp [hl, hf, bind, Except.bind]
 
-theorem run_primProg {σ : TState C Γ} {p : PrimTy} {l : Loc C Γ (.prim p)} {r : Name}
+theorem run_primProg {σ : State C Γ} {p : PrimTy} {l : Loc C Γ (.prim p)} {r : Name}
     {segs : List Seg} {v : Semantics.SVal} (hl : l.resolve σ.erase = .ok (r, segs))
     (hv : v.canon (.prim p)) (hfit : v.fits (.prim p)) {τ : Semantics.State}
     (hτ : σ.erase.glob.saveStorage r segs v = .ok τ) :
@@ -870,7 +870,7 @@ theorem run_primProg {σ : TState C Γ} {p : PrimTy} {l : Loc C Γ (.prim p)} {r
         Except.pure, hτ]; rfl)
 
 /-- The alias a `bound` block declares, bound to `q`. -/
-theorem run_decl {d : Nat} {R : RefTy} {σ : TState C Γ} {q : SPath C Γ (.ref R)} {r : Name}
+theorem run_decl {d : Nat} {R : RefTy} {σ : State C Γ} {q : SPath C Γ (.ref R)} {r : Name}
     {segs : List Seg} (hq : q.resolve σ.erase = .ok (r, segs)) :
     ∃ σ₀, SRuns σ (.declStorage R (slot d) (some (.path q))) σ₀ ∧
       σ₀.erase = σ.erase.push (t := .alias R) (some (r, segs)) :=
@@ -878,17 +878,17 @@ theorem run_decl {d : Nat} {R : RefTy} {σ : TState C Γ} {q : SPath C Γ (.ref 
     (((SPath.resolveT_ends σ q).bind fun _ => TRes.Ends.ok _).bind fun _ => TRes.Ends.ok _)
     (by simp only [ARhs.eval, hq, bind, Except.bind, pure, Except.pure])
 
-theorem trun_block {Γ₁ : Ctx} (σ : TState C Γ) (P : Prog C Γ Γ₁) :
-    Stmt.trun σ (.block P) = (Prog.trun σ P).map fun o => ⟨o.st.drop P.ext, o.ext⟩ := rfl
+theorem run_block {Γ₁ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁) :
+    Stmt.run σ (.block P) = (Prog.run σ P).map fun o => ⟨o.st.drop P.ext, o.ext⟩ := rfl
 
 /-- A block that binds an alias to `q` and runs `body` through it. -/
-theorem run_bound {d : Nat} {R : RefTy} {σ : TState C Γ} {q : SPath C Γ (.ref R)}
-    {body : Prog C (.alias R :: Γ) (.alias R :: Γ)} {σ₀ σ₁ : TState C (.alias R :: Γ)}
+theorem run_bound {d : Nat} {R : RefTy} {σ : State C Γ} {q : SPath C Γ (.ref R)}
+    {body : Prog C (.alias R :: Γ) (.alias R :: Γ)} {σ₀ σ₁ : State C (.alias R :: Γ)}
     (h0 : SRuns σ (.declStorage R (slot d) (some (.path q))) σ₀) (hb : TRuns σ₀ body σ₁) :
     TRuns σ (bound d R q body) (σ₁.drop (.push .refl)) := by
   obtain ⟨o, ho, rfl⟩ := TRuns.cons h0 hb
   refine TRuns.cons ⟨⟨o.st.drop (.push .refl), o.ext⟩, ?_, rfl⟩ (TRuns.nil _)
-  rw [trun_block, ho, Ext.eq_of_depth (Prog.ext _) (.push .refl)]
+  rw [run_block, ho, Ext.eq_of_depth (Prog.ext _) (.push .refl)]
   rfl
 
 end Steps
@@ -899,7 +899,7 @@ end Steps
 context, it leaves `v` there, changing nothing else, the locals as they
 were. -/
 def FillOK (C : Contract) (v : Semantics.SVal) : Prop :=
-  ∀ (T : Ty) (d : Nat) (Γ : Ctx) (q : SPath C Γ T) (σ : TState C Γ) (r : Name) (segs : List Seg),
+  ∀ (T : Ty) (d : Nat) (Γ : Ctx) (q : SPath C Γ T) (σ : State C Γ) (r : Name) (segs : List Seg),
     v.canon T → v.tight T → v.fits T → T.defaultOkS = true → q.resolve σ.erase = .ok (r, segs) →
     Wrote σ.erase.storage σ.erase.storage r segs (defaultForTy T) →
     ∃ σ', TRuns σ (fill d T q v) σ' ∧ Wrote σ.erase.storage σ'.erase.storage r segs v ∧
@@ -917,7 +917,7 @@ theorem Wrote.saveCore {σ : EState C Γ} {st₀ : List (Name × Semantics.SVal)
   exact ⟨τ, hτ, hW⟩
 
 /-- A child filled below the node at `r.segs`: the node, `N`, becomes `N'`. -/
-theorem child_step {d : Nat} {T : Ty} {q : SPath C Γ T} {σ : TState C Γ}
+theorem child_step {d : Nat} {T : Ty} {q : SPath C Γ T} {σ : State C Γ}
     {st₀ : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg} {seg : Seg}
     {N N' w : Semantics.SVal}
     (hw : FillOK C w) (hc : w.canon T) (ht : w.tight T) (hf : w.fits T) (hok : T.defaultOkS = true)
@@ -934,7 +934,7 @@ theorem Bound.of_env {σ σ' : EState C Γ} {R : RefTy} {a : Idx Γ (.alias R)} 
   unfold Bound; rw [he]; exact h
 
 theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} {a : Idx Γ (.alias (.struct s))} :
-    ∀ (todo pre : List (Name × Semantics.SVal)) (sdRest : List (Name × Ty)) (σ : TState C Γ)
+    ∀ (todo pre : List (Name × Semantics.SVal)) (sdRest : List (Name × Ty)) (σ : State C Γ)
       (st₀ : List (Name × Semantics.SVal)),
       (∀ nw ∈ todo, FillOK C nw.2) → canonFields s todo → tightFields s todo → fitsFields s todo →
       todo.map (·.1) = sdRest.map (·.1) →
@@ -994,7 +994,7 @@ theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} {a : Idx Γ (.al
 
 theorem fillElems_run {R : RefTy} {E : Ty} {d : Nat} (ak : ArrTy R E) {a : Idx Γ (.alias R)}
     {r : Name} {segs : List Seg} (hE : E.defaultOkS = true) :
-    ∀ (L pre sh : List Semantics.SVal) (fx : Bool) (σ : TState C Γ)
+    ∀ (L pre sh : List Semantics.SVal) (fx : Bool) (σ : State C Γ)
       (st₀ : List (Name × Semantics.SVal)),
       (∀ w ∈ L, FillOK C w) → canonElems E L → tightElems E L → fitsElems E L →
       pre.length + L.length ≤ 2 ^ 256 → Bound σ.erase a r segs →
@@ -1022,7 +1022,7 @@ theorem fillElems_run {R : RefTy} {E : Ty} {d : Nat} (ak : ArrTy R E) {a : Idx �
 the bound. -/
 theorem pushes_run {E : Ty} {a : Idx Γ (.alias (.array E))} {r : Name} {segs : List Seg}
     (hd : (none.isSome || E.defaultOkS) = true) :
-    ∀ (n : Nat) (es : List Semantics.SVal) (σ : TState C Γ) (st₀ : List (Name × Semantics.SVal)),
+    ∀ (n : Nat) (es : List Semantics.SVal) (σ : State C Γ) (st₀ : List (Name × Semantics.SVal)),
       Bound σ.erase a r segs → Wrote st₀ σ.erase.storage r segs (.array es [] false) →
       es.length + n < 2 ^ 256 →
       ∃ σ', TRuns σ (Prog.rep n
@@ -1043,7 +1043,7 @@ theorem pushes_run {E : Ty} {a : Idx Γ (.alias (.array E))} {r : Name} {segs : 
 
 theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : Name}
     {segs : List Seg} (hE : E.defaultOkS = true) :
-    ∀ (S SH : List Semantics.SVal) (i : Nat) (σ : TState C Γ) (st₀ : List (Name × Semantics.SVal)),
+    ∀ (S SH : List Semantics.SVal) (i : Nat) (σ : State C Γ) (st₀ : List (Name × Semantics.SVal)),
       (∀ w ∈ S, FillOK C w) → canonElems E S → tightElems E S → fitsElems E S →
       i + S.length ≤ 2 ^ 256 →
       (E.isPrimitive = true → ∀ w ∈ S, w = defaultForTy E) → Bound σ.erase a r segs →
@@ -1103,8 +1103,8 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
         (show Wrote st₀ σ₃.erase.storage r segs _ by rw [he₃]; exact hWτ)
         (hsh _) (hsh w)
       refine ⟨σ₄.drop (.push .refl), TRuns.append hrun₁ (run_bound hd₂ (TRuns.cons hs₃ hrun₄)),
-        by rw [TState.drop_erase]; simpa using hW₄, ?_⟩
-      rw [TState.drop_erase]
+        by rw [State.drop_erase]; simpa using hW₄, ?_⟩
+      rw [State.drop_erase]
       show σ₄.erase.env.2 = σ.erase.env
       rw [he₄, he₃, he₂]
       exact he₁
@@ -1112,7 +1112,7 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
 theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty}
     {a : Idx Γ (.alias (.mapping (.prim k) V))} {r : Name} {segs : List Seg}
     (hV : V.defaultOkS = true) :
-    ∀ (todo done : List (Int × Semantics.SVal)) (σ : TState C Γ)
+    ∀ (todo done : List (Int × Semantics.SVal)) (σ : State C Γ)
       (st₀ : List (Name × Semantics.SVal)),
       (∀ kw ∈ todo, FillOK C kw.2) → canonEntries V todo → tightEntries V todo →
       fitsEntries (.prim k) V todo → nodupKeysB (done ++ todo) = true → Bound σ.erase a r segs →
@@ -1194,8 +1194,8 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
           (by rw [he₁]; rfl)
           (by rw [he₁]; rw [defaultForTy] at h0; simpa using h0)
         refine ⟨σ'.drop (.push .refl), run_bound hd₁ hrun, by
-          rw [TState.drop_erase]; simpa using hW, ?_⟩
-        rw [TState.drop_erase]
+          rw [State.drop_erase]; simpa using hW, ?_⟩
+        rw [State.drop_erase]
         show σ'.erase.env.2 = σ.erase.env
         rw [he, he₁]; rfl
       | array _ => simp [SVal.canon] at hc
@@ -1234,19 +1234,19 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
               ((fillShadow d E .here elems.length shadow).append
                 (fillElems d (ArrTy.dyn (E := E)) .here 0 elems))) σ₄ :=
             TRuns.append hrun₂ (TRuns.append hrun₃ hrun₄)
-          refine ⟨σ₄.drop (.push .refl), ?_, by rw [TState.drop_erase]; simpa using hW₄, ?_⟩
+          refine ⟨σ₄.drop (.push .refl), ?_, by rw [State.drop_erase]; simpa using hW₄, ?_⟩
           · show TRuns σ (bound d (.array E) q (if hE : E.defaultOkS = true then _ else _)) _
             rw [dif_pos hE]
             exact run_bound hd₁ hbody
-          · rw [TState.drop_erase]
+          · rw [State.drop_erase]
             show σ₄.erase.env.2 = σ.erase.env
             rw [he₄, he₃, henv₂, he₁]; rfl
         · obtain ⟨rfl, rfl⟩ := hne (by simpa using hE)
-          refine ⟨σ₁.drop (.push .refl), ?_, by rw [TState.drop_erase]; exact h0', ?_⟩
+          refine ⟨σ₁.drop (.push .refl), ?_, by rw [State.drop_erase]; exact h0', ?_⟩
           · show TRuns σ (bound d (.array E) q (if hE : E.defaultOkS = true then _ else _)) _
             rw [dif_neg hE]
             exact run_bound hd₁ (TRuns.nil _)
-          · rw [TState.drop_erase, he₁]; rfl
+          · rw [State.drop_erase, he₁]; rfl
       | fixed E n =>
         obtain ⟨hfx, hlen, hce, -⟩ := hc
         subst hfx; subst hlen
@@ -1261,8 +1261,8 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
           hce hte hfe (by simpa using hlen) (by rw [he₁]; rfl)
           (by rw [defaultForTy] at h0; rw [he₁]; simpa using h0)
         refine ⟨σ'.drop (.push .refl), run_bound hd₁ hrun, by
-          rw [TState.drop_erase]; simpa using hW, ?_⟩
-        rw [TState.drop_erase]
+          rw [State.drop_erase]; simpa using hW, ?_⟩
+        rw [State.drop_erase]
         show σ'.erase.env.2 = σ.erase.env
         rw [he, he₁]; rfl
   | .map entries dflt => by
@@ -1293,8 +1293,8 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
             entries [] σ₁ σ.erase.storage (fun kw _ => fill_ok kw.2) hce hte hf
             (by simpa using hnd) (by rw [he₁]; rfl) h0'
           refine ⟨σ'.drop (.push .refl), run_bound hd₁ hrun, by
-            rw [TState.drop_erase]; simpa using hW, ?_⟩
-          rw [TState.drop_erase]
+            rw [State.drop_erase]; simpa using hW, ?_⟩
+          rw [State.drop_erase]
           show σ'.erase.env.2 = σ.erase.env
           rw [he, he₁]; rfl
 termination_by v => sizeOf v
@@ -1308,7 +1308,7 @@ decreasing_by
 /-! ### Every root -/
 
 theorem rootsProg_run :
-    ∀ (todo done cf : List (Name × Semantics.SVal)) (σ : TState C []),
+    ∀ (todo done cf : List (Name × Semantics.SVal)) (σ : State C []),
       σ.erase.storage = done ++ cf → cf.map (·.1) = todo.map (·.1) →
       nodupKeysB (done ++ todo) = true →
       (∀ rv ∈ cf, ∃ T, lookupBy rv.1 C.vars = some T ∧ rv.2 = defaultForTy T) →
@@ -1366,7 +1366,7 @@ end Fills
 
 end Build
 
-end Solidity.Core
+end Solidity
 
 namespace Solidity
 
@@ -1408,7 +1408,7 @@ run by the typed run from `C`'s initial state, leaves exactly `st`. -/
 theorem storage_tight (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.defaultOkS) = true)
     {st : List (Name × Semantics.SVal)} (hc : CanonStorage C st) (ht : TightStorage C st)
     (hf : FitsStorage C st) :
-    ∃ σ, Core.Build.TRuns (Core.TState.init C) (Core.Build.rootsProg C st) σ ∧
+    ∃ σ, Build.TRuns (State.init C) (Build.rootsProg C st) σ ∧
       σ.erase.storage = st := by
   have hstnd : nodupKeysB st = true := nodupKeysB_of_map_fst_eq hc.1 hnd
   have hroots : ∀ rv ∈ st, ∃ T, lookupBy rv.1 C.vars = some T ∧ rv.2.canon T ∧ rv.2.tight T ∧
@@ -1427,8 +1427,8 @@ theorem storage_tight (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.d
     intro rv hmem
     obtain ⟨g, hg, rfl⟩ := List.mem_map.mp hmem
     exact ⟨g.2, lookupBy_eq_of_nodup hnd hg, rfl⟩
-  obtain ⟨σ, hrun, hst⟩ := Core.Build.rootsProg_run st [] C.initStorage
-    (Core.TState.init C) (by rw [Reachable.init_erase]; rfl)
+  obtain ⟨σ, hrun, hst⟩ := Build.rootsProg_run st [] C.initStorage
+    (State.init C) (by rw [Reachable.init_erase]; rfl)
     (by rw [hc.1]; simp [Contract.initStorage])
     (by simpa using hstnd) hdefs hroots
   exact ⟨σ, hrun, by simpa using hst⟩
@@ -1438,7 +1438,7 @@ theorem canon_reachable (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2
     {st : List (Name × Semantics.SVal)} (hc : CanonStorage C st) (ht : TightStorage C st)
     (hf : FitsStorage C st) : Reachable C st := by
   obtain ⟨_, ⟨o, ho, rfl⟩, hst⟩ := storage_tight hnd hok hc ht hf
-  exact ⟨[], Core.Build.rootsProg C st, o, ho, hst⟩
+  exact ⟨[], Build.rootsProg C st, o, ho, hst⟩
 
 /-- **Nothing inferable is missing**: a property of storage that holds
 initially and that every program keeps, by the typed run from any state
@@ -1447,14 +1447,14 @@ storage. -/
 theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) (P : List (Name × Semantics.SVal) → Prop)
     (hinit : P C.initStorage)
-    (hstep : ∀ (Γ' : Core.Ctx) (σ : Core.TState C []) (o : Core.Out C σ.H Γ')
-      (prog : Core.Prog C [] Γ'), Core.RunWT C [] σ.erase → Canon C [] σ.erase.glob →
-      prog.trun σ = .ok o → P σ.erase.storage → P o.st.erase.storage)
+    (hstep : ∀ (Γ' : Ctx) (σ : State C []) (o : Out C σ.H Γ')
+      (prog : Prog C [] Γ'), RunWT C [] σ.erase → Canon C [] σ.erase.glob →
+      prog.run σ = .ok o → P σ.erase.storage → P o.st.erase.storage)
     (st : List (Name × Semantics.SVal)) (hc : CanonStorage C st) (ht : TightStorage C st)
     (hf : FitsStorage C st) : P st := by
   obtain ⟨_, ⟨o, ho, rfl⟩, hst⟩ := storage_tight hnd hok hc ht hf
   rw [← hst]
-  exact hstep _ _ o _ (by rw [Reachable.init_erase]; exact Core.RunWT.init hnd hok rfl rfl)
+  exact hstep _ _ o _ (by rw [Reachable.init_erase]; exact RunWT.init hnd hok rfl rfl)
     (by rw [Reachable.init_erase]; exact Canon.init hok rfl) ho
     (by rw [Reachable.init_erase]; exact hinit)
 
@@ -2238,7 +2238,7 @@ decreasing_by all_goals
 /-! ### The state -/
 
 /-- What a run keeps beyond `Canon`, of the global state: tight storage.
-The scoped state adds its aliases (`Core.Tight`). -/
+The scoped state adds its aliases (`Tight`). -/
 structure Semantics.Tight (C : Contract) (σ : Semantics.State) : Prop where
   storage : TightStorage C σ.storage
 
@@ -2545,7 +2545,7 @@ end Solidity
 
 /-! ### Over the scoped syntax -/
 
-namespace Solidity.Core
+namespace Solidity
 
 open Semantics hiding State
 open SemanticsProperties (lookupBy_eq_some_mem lookupBy_setBy_self lookupBy_setBy_ne)
@@ -2849,7 +2849,7 @@ end Effects
 
 section Leaves
 
-variable {Γ : Ctx} {H : HeapTy} {σ : TState C Γ}
+variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
 
 theorem tight_assign (hd : DeepOk C) (hwt : RunWT C H σ.erase) (hc : Canon C H σ.erase.glob) (ht : Tight C σ.erase)
     {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) {o : Out C σ.H Γ} (h : TRun.assign l r σ = .ok o) : Tight C o.st.erase := by
@@ -3154,7 +3154,7 @@ end RunTight
 a state whose erasure is canonical and tight, leaves one whose erasure is
 tight. -/
 theorem tkeepsT_of {Γ Γ' : Ctx} {t : TStep C Γ Γ'} (hc : (canonInv C).TKeeps t)
-    (ht : ∀ (H : HeapTy) (σ : TState C Γ) (o : Out C σ.H Γ'), RunWT C H σ.erase →
+    (ht : ∀ (H : HeapTy) (σ : State C Γ) (o : Out C σ.H Γ'), RunWT C H σ.erase →
       Canon C H σ.erase.glob → Tight C σ.erase → t σ = .ok o → Tight C o.st.erase) :
     (tightInv C).TKeeps t := by
   intro H σ o h hrun
@@ -3201,7 +3201,7 @@ mutual
 /-- **Tightness, statement level**: a statement run from a well-typed,
 canonical, tight state ends in a tight one. -/
 theorem Stmt.keeps_tight (hd : DeepOk C) :
-    {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (tightInv C).TKeeps (Stmt.trunR s)
+    {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (tightInv C).TKeeps (Stmt.runR s)
   | _, _, .assign l r =>
     tkeepsT_of (keepsC_assign l r) fun _ _ _ hwt hc ht h => tight_assign hd hwt hc ht l r h
   | _, _, .rebind i r =>
@@ -3269,7 +3269,7 @@ theorem Stmt.keeps_tight (hd : DeepOk C) :
 
 /-- **Tightness, block level.** -/
 theorem Prog.keeps_tight (hd : DeepOk C) :
-    {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (tightInv C).TKeeps (Prog.trunR P)
+    {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (tightInv C).TKeeps (Prog.runR P)
   | _, _, .nil => RunInv.tkeeps_nil
   | _, _, .cons s P => RunInv.tkeeps_seq (Stmt.keeps_tight hd s) (Prog.keeps_tight hd P)
 
@@ -3278,9 +3278,9 @@ end
 /-- **Tightness**: a block run by the typed run from a state whose erasure
 is well-typed, canonical and tight ends, if in a state, in one whose erasure
 is tight. -/
-theorem Prog.trun_tight (hd : DeepOk C) {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy}
-    {σ : TState C Γ} {o : Out C σ.H Γ'} (hwt : RunWT C H σ.erase) (hc : Canon C H σ.erase.glob)
-    (ht : Tight C σ.erase) (h : P.trun σ = .ok o) : Tight C o.st.erase :=
+theorem Prog.run_tight (hd : DeepOk C) {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy}
+    {σ : State C Γ} {o : Out C σ.H Γ'} (hwt : RunWT C H σ.erase) (hc : Canon C H σ.erase.glob)
+    (ht : Tight C σ.erase) (h : P.run σ = .ok o) : Tight C o.st.erase :=
   let ⟨_, _, h'⟩ := Prog.keeps_tight hd P H σ o (RunTight.mk' (RunCanon.mk' hwt hc) ht) h
   RunTight.tight h'
 
@@ -3292,7 +3292,7 @@ theorem Tight.init (hd : DeepOk C) : Tight C (EState.ofSem C.initState) := by
   subst hv
   exact defaultForTy_tight (okDeep_defaultOkS (hd r T hr))
 
-end Solidity.Core
+end Solidity
 
 namespace Solidity
 
@@ -3320,13 +3320,13 @@ theorem reachable_tight (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·
     {st : List (Name × Semantics.SVal)} (h : Reachable C st) : TightStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
   have hok := defaultOkS_of_deep hdeep
-  have hwt : Core.RunWT C [] (Core.TState.init C).erase := by
-    rw [Reachable.init_erase]; exact Core.RunWT.init hnd hok rfl rfl
-  have hc : Canon C [] (Core.TState.init C).erase.glob := by
+  have hwt : RunWT C [] (State.init C).erase := by
+    rw [Reachable.init_erase]; exact RunWT.init hnd hok rfl rfl
+  have hc : Canon C [] (State.init C).erase.glob := by
     rw [Reachable.init_erase]; exact Canon.init hok rfl
-  have ht : Core.Tight C (Core.TState.init C).erase := by
-    rw [Reachable.init_erase]; exact Core.Tight.init (deepOk_of_all hdeep)
-  exact (Core.Prog.trun_tight (deepOk_of_all hdeep) P hwt hc ht hrun).storage
+  have ht : Tight C (State.init C).erase := by
+    rw [Reachable.init_erase]; exact Tight.init (deepOk_of_all hdeep)
+  exact (Prog.run_tight (deepOk_of_all hdeep) P hwt hc ht hrun).storage
 
 /-- **Reachable ⇒ canonical and tight**, for a contract whose types have
 well-formed defaults all the way down. -/

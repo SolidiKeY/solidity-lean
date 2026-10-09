@@ -13,7 +13,7 @@ runtime sorts), `Typing/StoragePreservation.lean` (writes keep a value's
 type), `Typing/State.lean` (`StateWT`, the full-state invariant).
 
 `Typing/TypedWT.lean` shows a typed state's erasure is well-typed by
-construction (`TState.erase_wt`); `Typing/Soundness.lean` that the erasure's
+construction (`State.erase_wt`); `Typing/Soundness.lean` that the erasure's
 evaluators are typed; and `Typing/Reachability.lean` that every reachable storage is canonical
 (`reachable_canon`). `SortCheck/Faithfulness.lean` uses both: a taclet's
 declared read sort holds of what a well-typed run reads.
@@ -22,7 +22,7 @@ declared read sort holds of what a well-typed run reads.
 (`SVal.tight`) is exactly reachable (`reachable_iff`, for `Ty.okDeep`
 roots), by a typed builder that reaches past an array's end through aliases
 `slot d`. A new statement needs its erasure lemma (`TRun.x_erase`,
-`Semantics/Core/TypedStepErase.lean`) and its cases in `Stmt.keeps_canon`
+`Semantics/StepErase.lean`) and its cases in `Stmt.keeps_canon`
 (Reachability) and `Stmt.keeps_tight` (Constructibility), a leaf through
 `RunInv.TKeeps.of_agrees`.
 

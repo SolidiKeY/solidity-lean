@@ -1,7 +1,7 @@
 import Solidity.Tools.ProofTree
 import Solidity.Calculus.NFmlDerive
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 
 /-!
 # Dangling aliases, pinned
@@ -20,9 +20,9 @@ lands in the recycled array, whose length the slot readers count
 These are solkey `TestSuite`'s dangling-alias functions over
 `StandardExample` (`persons`, `people`, `matrix`), each a `sol_prove?` that suggests
 `sol_prove`.  If a clause stops applying, or the strategy picks another
-rule, they fail.  They read scoped (`open scoped Solidity.Core.Scoped`):
+rule, they fail.  They read scoped (`open scoped Solidity.Scoped`):
 the scoped strategy, its leaves' erasures closed by today's closer, with
-today's budgets (`Core.Derive.residueOf`).
+today's budgets (`Derive.residueOf`).
 -/
 
 namespace Solidity.Examples.Tactics.Dangling
@@ -31,7 +31,7 @@ open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## A write past the end, made live by a `push()`
 
@@ -109,16 +109,16 @@ and the reduction by about 1.6 times a round.  Two rounds close; four
 `closeSize` (1799 nodes, reduction 44719), so the largest reduction
 `leafFits` builds before refusing; seven are refused by the leaf's size.
 The leaves are the erasures of what the scoped strategy leaves
-(`Core.Derive.residueOf`), today's closer's input. -/
+(`Derive.residueOf`), today's closer's input. -/
 
 /-- Two rounds through one alias. -/
-def rounds2 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def rounds2 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push(); ] persons[0].age == 2 }
 
 /-- Four rounds through one alias: twelve statements after the binding. -/
-def rounds4 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def rounds4 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();
@@ -126,7 +126,7 @@ def rounds4 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 4; persons.push(); ] persons[0].age == 4 }
 
 /-- Six rounds: the most whose leaf is within `closeSize`. -/
-def rounds6 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();
@@ -135,13 +135,13 @@ def rounds6 : Core.Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 5; persons.push();
     persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
 
-#guard Core.Derive.proves rounds2
-#guard (Core.Derive.residueOf rounds4).map
+#guard Derive.proves rounds2
+#guard (Derive.residueOf rounds4).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
 
-#guard (Core.Derive.residueOf rounds6).map
+#guard (Derive.residueOf rounds6).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]

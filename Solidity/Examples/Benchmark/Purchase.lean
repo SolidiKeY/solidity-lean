@@ -1,8 +1,8 @@
 import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.NFmlClose
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
 /-!
@@ -264,7 +264,7 @@ def Purchase : Contract := contract!{
 
 local instance : InContract := ⟨Purchase⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## The modifiers, inlined
 

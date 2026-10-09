@@ -501,7 +501,7 @@ solkey's `selectOnSaveCons` rewrites a storage term wherever it stands; a
 term taclet here rewrites a value, so the member-wise laws take the storage
 context the rewritten term stands in: `find(K[select(save(s, r.p, v), r)], q)`
 for a context `K` of saves, deletes and selects around the hole, which the
-arrow `~[selectOnSaveMemberIn]~>` finds (`Calculus/Core/Chains.lean`). -/
+arrow `~[selectOnSaveMemberIn]~>` finds (`Calculus/Chains.lean`). -/
 
 /-- A storage term with a hole: the storage argument of saves, deletes and
 selects, down to the hole. -/

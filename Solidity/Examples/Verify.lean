@@ -11,17 +11,17 @@ premise of a mapping is a `\forall` over a `uint`, which the certificate
 cannot evaluate), one refuted by a failed `assert`, and one given up on: true,
 but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula.
 
-Both read the scoped calculus (`open scoped Solidity.Core.Scoped`,
+Both read the scoped calculus (`open scoped Solidity.Scoped`,
 `docs/intrinsic.md`): `#verify` states `⊨ spec[C]{f}` of the scoped
-obligation (`Core.Valid`), and a certificate is the kernel's `¬ ⊨` of that
+obligation (`Valid`), and a certificate is the kernel's `¬ ⊨` of that
 statement; `#counterexample` evaluates scoped formulas over the typed state
-and the typed run with fuel (`Core.Fml.eval3`, `Tools/Counterexample.lean`).
+and the typed run with fuel (`Fml.eval3`, `Tools/Counterexample.lean`).
 -/
 
 namespace Solidity.Examples.Verify
 
 open Solidity.Tools
-open scoped Core.Scoped
+open scoped Scoped
 
 def Counter : Contract := contract!{
   uint count;
@@ -55,7 +55,7 @@ info: Try this:
 -/
 #guard_msgs in #verify Counter.inc
 
-/-- The suggestion, pasted: the scoped obligation (`Core.Valid`). -/
+/-- The suggestion, pasted: the scoped obligation (`Valid`). -/
 theorem inc_spec : ⊨ spec[Counter]{inc} := by sol_spec
 
 /--
@@ -136,7 +136,7 @@ info: counterexample (certified):
 /-- info: no counterexample found in 2000 candidates -/
 #guard_msgs in #counterexample dl!{ [ count = a; ] count == a }
 
-/-! A loop runs at most `loopFuel` iterations in the search (`Prog.trunF`,
+/-! A loop runs at most `loopFuel` iterations in the search (`Prog.runF`,
 the typed run with fuel): bounded by `a`, which the pools draw at
 `2^256 - 1`, its run is `unknown` past them, not endless.  A loop that ends within them is
 run, and its counterexample certified; `i` is the program's local, not a

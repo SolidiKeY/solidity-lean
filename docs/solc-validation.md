@@ -1,6 +1,6 @@
 # Validating the semantics and the rules against solc
 
-Every theorem here is about the typed run (`Core.Prog.trun`) and the rule
+Every theorem here is about the typed run (`Prog.run`) and the rule
 table. This plan finds out
 whether they say what solc-compiled code does: which checks to run, in what
 order, and what each can show. Status: a plan. "What exists" lists what is
@@ -17,18 +17,18 @@ local package cache; paths below are relative to it). The installed `solc` is
 ## The chain of trust
 
 ```
-Solidity source ──(1) sol{…} / contract!{…}──▶ Core.Prog C ──(2) Prog.trun──▶ TState
+Solidity source ──(1) sol{…} / contract!{…}──▶ Prog C ──(2) Prog.run──▶ State
       │                                           │
       └──(3) solc (legacy | via-IR) ──▶ EVM bytecode ──(4) EVM──▶ storage slots
 ```
 
 Proved: the rules are sound for (2) (`Rule.sound`, `Proves.sound`,
-`Core.ProvesC.sound_of`/`ProvesC.valid`); the repository's compiler agrees with (2) (`compile_correct`)
+`ProvesC.sound_of`/`ProvesC.valid`); the repository's compiler agrees with (2) (`compile_correct`)
 on the programs it compiles (`inFrag`: no memory, loops or `try`) from a
 state it simulates.  (2) is never stuck, by construction: the typed run halts
 only by `revert`, `panic`, `diverge` or `exhausted` (`THalt`), and its states
 hold values of their types, so their erasure is well-typed
-(`TState.erase_wt`, `Typing/TypedWT.lean`) and the closer's term model, which
+(`State.erase_wt`, `Typing/TypedWT.lean`) and the closer's term model, which
 reads that erasure, meets its ill-sorted value (`Halt.undef`) on no state a
 run reaches (`docs/intrinsic.md`, decisions 39, 40 and 50).  There is no
 untyped run of a statement left to be stuck.
@@ -37,7 +37,7 @@ as solc does, and that (2) plus the layout equals (3) plus (4). **Every proof
 reaches solc-compiled contracts only through that square.** A rule is wrong
 about Solidity only through one of four links:
 
-- **L1. The typed run is wrong** (`Semantics/Core/TypedRun.lean`, with
+- **L1. The typed run is wrong** (`Semantics/Run.lean`, with
   `Semantics.lean`'s operations); the rule is sound against it.
 - **L2. The elaborator misreads `sol{…}`** (`Syntax.lean`, `hoist`): evaluation
   order, what it captures, what it accepts.
@@ -60,7 +60,7 @@ outside solc's language.
 **What `compile_correct` checks.** It looks like a check of L1, but Lean checks
 the proof against the definitions, not the definitions against the EVM. It pins
 the typed run only as far as three trusted definitions are right: `Instr.step`
-(the EVM), `Evm.Core.compileStmt` (what solc emits), and `Sim` with the theorem's shape.
+(the EVM), `Evm.compileStmt` (what solc emits), and `Sim` with the theorem's shape.
 A machine written *from the interpreter* makes it hold by construction. That
 was `transfer`'s case until `CALL` moved real balances (check C below): it
 was `transferAt` re-spelled, a `net` field no EVM has beside the
@@ -144,13 +144,13 @@ lemma set for I.
   and `send` the right reading is no callback, the recipient free to revert.
   `a.call{value: v}("")` forwards all gas; the front end lowers
   `(bool ok, ) = a.call{value: v}("")` to `bool ok = a.send(v)`, as solkey does,
-  so only `Semantics/Core/Callback.lean`'s havoc (`holdsC`) reads it faithfully
+  so only `Semantics/Callback.lean`'s havoc (`holdsC`) reads it faithfully
   (`docs/solc-alignment.md`).
 
 ## Deterministic checks
 
 **A. The trusted base, in CI.** `#print axioms` on `Rule.sound`, `Proves.sound`,
-`Core.ProvesC.sound_of`, `symex_sound`, `Evm.Core.compile_correct`; fail on anything beyond `propext`,
+`ProvesC.sound_of`, `symex_sound`, `Evm.compile_correct`; fail on anything beyond `propext`,
 `Quot.sound`, `Classical.choice`, or on `sorry`, `native_decide`, `implemented_by` in
 the closure (`Calculus/RuleShapes.lean:44` and `Typing/State.lean` use them; the
 closure decides). A day; every other check assumes it (L4).
@@ -175,7 +175,7 @@ citations when re-pinning.
   machine with EVM.
 - `compileStmt` against `solc --ir` statement by statement (compiled `transfer` as
   `send`, with an interpreter that did not revert, and the theorem would still hold).
-  Name `Evm/CoreCompile.lean`'s pieces after the helpers they mirror; where shapes cannot
+  Name `Evm/Compile.lean`'s pieces after the helpers they mirror; where shapes cannot
   match are the documented deltas.
 
 ## Differential testing on an EVM
@@ -188,7 +188,7 @@ dependency:
 - a **printer** from `Stmt C` to Solidity (`Solidity.Tools.Emit`), its round trip
   `sol[C]{ print P } = P` checked by `#guard` per program (it prints elaborated
   programs, so a mismatch is the interpreter's fault);
-- the **start state as a program**: `Core.Build.rootsProg` (`Typing/Constructibility.lean`;
+- the **start state as a program**: `Build.rootsProg` (`Typing/Constructibility.lean`;
   `reachable_iff`: it builds every reachable storage whose words, keys and
   slots are in range) printed as `setUp()`, so no
   storage is encoded into slots and past-end slots come from push, pop and aliases;
@@ -258,7 +258,7 @@ which is wrong. Runner: `solc --ir` with `test/tools/yulInterpreter/`, or evmone
 Mutate `Semantics.lean` one decision at a time (RHS after target, a `checkArith`
 dropped, `pop` not clearing, `delete` resetting mappings, a push not reusing its slot,
 an unbounded alias bind, `**` unchecked, `transfer` not debiting) and require the suite
-to kill each. Mutate `Calculus/Core/Rules.lean` too (drop a guard, swap a capture order): if
+to kill each. Mutate `Calculus/Rules.lean` too (drop a guard, swap a capture order): if
 `Taclet.sound` still builds, the semantics does not constrain that detail (a freedom or
 a hole in the typed run); if G misses it, G is too weak. A survivor is a decision no test
 observes. Proofs do not build on a mutant, hence `solcases` must not import them.
@@ -278,7 +278,7 @@ compiler (CompCert's approach to an untrusted pass).
 3. **A structural match per program**: `fun_f_<id>` is `f`'s statements in order, each a
    composition of helper calls on fresh `expr_<n>` variables. A validator parses
    `solc --ir` (or `--ir-ast-json`), matches the body to the `Stmt`, discharges each call
-   with its lemma, and emits a Lean proof that the Yul simulates `Prog.trun P` under the
+   with its lemma, and emits a Lean proof that the Yul simulates `Prog.run P` under the
    layout.
 4. **Trusted**: the Yul optimizer and Yul-to-EVM assembly. `--ir-optimized` is still Yul,
    but the match weakens into an equivalence proof. Legacy has no IR: D covers it alone.
@@ -321,7 +321,7 @@ of a struct over a recycled slot).
 
 Proved: every statement has exactly one rule, the strategy's (`Stmt.rule_exists`,
 `Rule.iff_step`, `Rule.premise_unique`). Symbolic execution is fuelled
-(`Core.symex n`): a program it does not finish leaves a modality, which
+(`symex n`): a program it does not finish leaves a modality, which
 `sol_prove` rejects; its progress and termination (`Fml.active_iff_step`,
 `symex_terminates`) were retired at W4 `calc-del` (`docs/intrinsic.md`). Not proved: `⊨ φ ↔ ⊨ symex n φ`
 (`symex_sound` is one direction). How much of Solidity the fragment covers is a

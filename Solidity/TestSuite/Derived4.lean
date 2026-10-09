@@ -11,7 +11,7 @@ sets the premise aside (`Proves.close_dropWt`).
 -/
 
 open Solidity NFml.Proves
-open scoped Core.Scoped
+open scoped Scoped
 
 theorem Solkey.TestSuite.unaryMinusSimple.proved : ⊢ Solkey.TestSuite.unaryMinusSimple.problem := by
   sol_prove

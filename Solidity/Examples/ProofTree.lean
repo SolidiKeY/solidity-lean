@@ -1,13 +1,13 @@
 import Solidity.Tools.ProofTree
 import Solidity.Tools.Inspect
-import Solidity.Calculus.Core.Derive
-import Solidity.Calculus.Core.Closers
+import Solidity.Calculus.Derive
+import Solidity.Calculus.Closers
 import Solidity.Calculus.NFmlDerive
 
 /-!
 # The proof tree, pinned
 
-solkey's view of a proof, a tree of sequents (`Calculus/Core/ProofTree.lean`), and
+solkey's view of a proof, a tree of sequents (`Calculus/ProofTree.lean`), and
 the tactics that write a proof out, as `#guard_msgs` tests:
 
 * `#proof_tree`, `#proof_node` and `#proof_tree_json` (`Tools/ProofTree.lean`)
@@ -19,10 +19,10 @@ the tactics that write a proof out, as `#guard_msgs` tests:
 If the strategy picks another rule, or a printer changes, these fail.
 
 The sections `Scoped` read the scoped calculus (`open scoped
-Solidity.Core.Scoped`, `docs/intrinsic.md`, W3): a tree of `⊢ φ` over
-`Core.Proves` (`Calculus/Core/ProofTree.lean`), a walk of its rules
-(`Calculus/Core/Derive.lean`) written in today's walk text, which the
-scope's macros read (`Calculus/Core/WalkSyntax.lean`; the steps KeY does
+Solidity.Scoped`, `docs/intrinsic.md`, W3): a tree of `⊢ φ` over
+`Proves` (`Calculus/ProofTree.lean`), a walk of its rules
+(`Calculus/Derive.lean`) written in today's walk text, which the
+scope's macros read (`Calculus/WalkSyntax.lean`; the steps KeY does
 not show, a scope's end, a hidden binder and the parameters' `∀`, are not
 written).  There a parameter is bound by `∀`, so a tree starts with
 `allRight`; a rule that leaves no statement goes on into the
@@ -31,7 +31,7 @@ goals under either modality, its branch's `}` printed; a leaf closes by
 `Proves.close` and today's closer on its erasure, behind diamond updates
 too (`Fml.closableB`: an update's reading asks only of the typed states it
 may end in).  `sol_prove?`
-is the scoped one (`Calculus/Core/Closers.lean`), its replay today's
+is the scoped one (`Calculus/Closers.lean`), its replay today's
 text.  The chains the tactics write (`sol_chain?`, `#chain`, `sol_rws?`)
 are pinned in `Examples/Tactics/CoreChains.lean`.  What stays today's: the
 guards on today's closer (the closer's input, the leaves' erasure).
@@ -44,7 +44,7 @@ open NFml.Proves
 local instance : InContract := ⟨StandardExample⟩
 
 section Scoped
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## The tree
 
@@ -98,7 +98,7 @@ state: inner
 branch: if true true
 parent: 1
 children: [3]
-tactics: apply Core.Proves.update (Core.Taclet.toStep .localValueAssign); apply Core.Proves.updIntro
+tactics: apply Proves.update (Taclet.toStep .localValueAssign); apply Proves.updIntro
 -/
 #guard_msgs in
 #proof_node 2 dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
@@ -126,7 +126,7 @@ info: {"stats": {"nodes": 6, "branches": 2},
 #proof_tree_json dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }
 
 /-! The labels are the ones the rules write (`"if s#se true": …`, dropped by
-the macro), `Taclet.branchLabels`; this reads `Calculus/Core/Rules.lean` and fails
+the macro), `Taclet.branchLabels`; this reads `Calculus/Rules.lean` and fails
 where the two disagree.  A label names what its schema variable stands for
 at the node, as KeY's `NodeInfo.setBranchLabel` does: `if true true` above,
 the condition's fresh local below. -/
@@ -140,7 +140,7 @@ where
 
 #guard_msgs in
 #eval show IO Unit from do
-  let src ← IO.FS.readFile "Solidity/Calculus/Core/Rules.lean"
+  let src ← IO.FS.readFile "Solidity/Calculus/Rules.lean"
   for (r, ls) in Taclet.branchLabels do
     let some rest := (src.splitOn s!"  | {r} ")[1]? | throw (IO.userError s!"no rule {r}")
     -- the rule's text: up to the next constructor, docstring, comment or blank line
@@ -234,15 +234,15 @@ declaring, `bindIntro`. -/
 
 example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
   refine ⟨?_, ?_⟩
-  refine Core.Proves.valid (R := RuleSet.all) ?_
-  refine Core.Proves.allRight ?_
-  refine Core.Proves.bindIntro ?_
-  apply Core.Proves.cases (Core.Taclet.step_eq .sendNoCallbackBox) rfl <;>
+  refine Proves.valid (R := RuleSet.all) ?_
+  refine Proves.allRight ?_
+  refine Proves.bindIntro ?_
+  apply Proves.cases (Taclet.step_eq .sendNoCallbackBox) rfl <;>
       (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
         and_true]) <;>
     (try and_intros)
-  · exact Core.Proves.closeTrue rfl
-  · exact Core.Proves.closeTrue rfl
+  · exact Proves.closeTrue rfl
+  · exact Proves.closeTrue rfl
   exact ⟨rfl, rfl⟩
 
 /-! Under the diamond the leaves sit behind the diamond's updates, which
@@ -305,7 +305,7 @@ info: Try this:
 example : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
   sol_prove?
 
-/-! A split has KeY's two goals (`Core.Proves.split`): no `cov`. -/
+/-! A split has KeY's two goals (`Proves.split`): no `cov`. -/
 
 /--
 info: 0: allRight
@@ -345,7 +345,7 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
   sol_derive?
 
 /-- The suggestion replayed: today's walk text, which the scope's macros
-read (`Calculus/Core/WalkSyntax.lean`). -/
+read (`Calculus/WalkSyntax.lean`). -/
 example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
   apply splitBox .ifElseSplit
   case thn =>
@@ -539,8 +539,8 @@ info: Try this:
 example : ⊢ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
   sol_prove?
 
-/-- `wt(storage)`, the premise of a diamond obligation (`Core.Fml.wt`). -/
-def wtStd : Core.Fml StandardExample [] := Core.Fml.wt StandardExample
+/-- `wt(storage)`, the premise of a diamond obligation (`Fml.wt`). -/
+def wtStd : Fml StandardExample [] := Fml.wt StandardExample
 
 /--
 info: Try this:
@@ -600,7 +600,7 @@ example : ⊢ dl!{ x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
   apply intro
   run_tac do
     let ty ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
-    Lean.logInfo m!"{← Core.Seq.paramCount ty.appFn!.appArg! (← Core.Symex.evaluable ty.appArg!)}"
+    Lean.logInfo m!"{← Seq.paramCount ty.appFn!.appArg! (← Symex.evaluable ty.appArg!)}"
   sol_prove
 
 end Scoped
@@ -622,7 +622,7 @@ heartbeats. -/
   return [← at_ 1000 2000, ← at_ 1000 1000, ← at_ 0 2000]
 
 section Scoped
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! The reduction's compiled code reads a pushed array's old length and
 value only where the read needs them (`CaseTree.toTermLazy`).  Run
@@ -631,10 +631,10 @@ twelve onto each of two, interleaved: 106 s), and `sol_prove?`'s size test
 (`Derive.leafFits`) builds the reduction before it counts it.  Here the leaf
 is within `closeSize` and its reduction past `elimSize`: refused in
 milliseconds.  The leaves are the scoped strategy's, erased
-(`Core.Derive.residueOf`). -/
+(`Derive.residueOf`). -/
 
 /-- Twenty-two pushes onto one array. -/
-def pushes22 : Core.Fml StandardExample [] :=
+def pushes22 : Fml StandardExample [] :=
   dl!{ [
     values.push(0); values.push(1); values.push(2); values.push(3); values.push(4);
     values.push(5); values.push(6); values.push(7); values.push(8); values.push(9);
@@ -643,7 +643,7 @@ def pushes22 : Core.Fml StandardExample [] :=
     values.push(20); values.push(21); ]
     values.length > 0 }
 
-#guard (Core.Derive.residueOf pushes22).map
+#guard (Derive.residueOf pushes22).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
@@ -654,16 +654,16 @@ residue; six leave one leaf past the bound, which neither the closer nor
 `sol_prove?`'s reducing steps attempt (`Derive.leafFits`). -/
 
 /-- Four writes of `total` from its own read. -/
-def writes4 : Core.Fml StandardExample [] :=
+def writes4 : Fml StandardExample [] :=
   dl!{ [ total = 0; total += 1; total += 1; total += 1; total += 1; ] total == 4 }
 
 /-- Six writes of `total` from its own read. -/
-def writes6 : Core.Fml StandardExample [] :=
+def writes6 : Fml StandardExample [] :=
   dl!{ [ total = 0; total += 1; total += 1; total += 1; total += 1; total += 1;
     total += 1; ] total == 6 }
 
-#guard Core.Derive.proves writes4
-#guard (Core.Derive.residueOf writes6).map
+#guard Derive.proves writes4
+#guard (Derive.residueOf writes6).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     NFml.Derive.leafFits l.1 l.2) == some [false]
 
@@ -672,12 +672,12 @@ def writes6 : Core.Fml StandardExample [] :=
 330 nodes, within `closeSize`, whose reduction has 79587. -/
 
 /-- Ten deletes of `wallet`, then a read of its mapping member. -/
-def deletes10 : Core.Fml StandardExample [] :=
+def deletes10 : Fml StandardExample [] :=
   dl!{ [ delete wallet; delete wallet; delete wallet; delete wallet; delete wallet;
     delete wallet; delete wallet; delete wallet; delete wallet; delete wallet; ]
     wallet.stash[owner] == 0 }
 
-#guard (Core.Derive.residueOf deletes10).map
+#guard (Derive.residueOf deletes10).map
   (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
     (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
       NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
@@ -695,7 +695,7 @@ end Scoped
   | _ => false
 
 section Scoped
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## A failed `assert`
 
@@ -758,7 +758,7 @@ A call in a body is KeY's `InternalCall`, inlined by `internalCallExpand`;
 a tuple assignment's call returns to its targets, a `FunctionBodyStatement`
 inlined by `functionBodyExpand`, the targets assigned after it.  The call
 is a node (the premise its function builds whnf'd to its constructor,
-`Calculus/Core/ProofTree.lean`), and the callee's body, a block, ends by
+`Calculus/ProofTree.lean`), and the callee's body, a block, ends by
 `blockEmpty`. -/
 
 /-- Two functions, of one return and of two. -/
@@ -841,7 +841,7 @@ closed: 0 open goal(s), 13 node(s), 1 branch(es)
 /-! ## Loops (`Examples/Tactics/Loops.lean`)
 
 `whileUnwind` is `unfoldLean`, `loopExit` is `checkLean`; under the box the
-invariant rule is `invBox` (`Core.Proves.inv`), solkey's two goals past
+invariant rule is `invBox` (`Proves.inv`), solkey's two goals past
 `init`. -/
 
 /--

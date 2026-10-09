@@ -96,10 +96,10 @@ section Inspect
 local instance : InContract := ⟨StandardExample⟩
 
 /-! The formulas read the scoped calculus (`open scoped
-Solidity.Core.Scoped`, `Tools/Inspect.lean`): a parameter is bound by
+Solidity.Scoped`, `Tools/Inspect.lean`): a parameter is bound by
 `∀`, and `#step` names the rule `Stmt.step` fires. -/
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! What symbolic execution leaves is a formula of updates; reduced, it
 reads the initial state alone: it holds wherever `alice.age` is a location
@@ -190,24 +190,24 @@ forms (`consr(sp, fld)`, `pp.sol.key`), and a fresh name beside the schema
 variable it copies is primed (`sp'`). -/
 
 /--
-info: Solidity.Core.Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {x : Name}
-  {sp : Core.SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : PrimTy} {se : Core.Simple C Γ x_1},
+info: Solidity.Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : Name}
+  {sp : SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : PrimTy} {se : Simple C Γ x_1},
   dl{ ⟨[ sp.fld = se; ]⟩ ⇝ { storage := save(storage, consr(sp, fld), se) } ⟨[ ]⟩ }
 solkey: storageFieldWriteSave (simplify_prog)
 printed: storageFieldWriteSave
-sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet storageFieldWriteSave
 
 /--
 info: solkey: storageFieldWriteCaptureSrc (simplify_prog), transcribed by
 
-Solidity.Core.Taclet.storageFieldRead_unfold_rightSndResult : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx}
-  {x : RefTy} {loc : Core.Loc C Γ (Ty.ref x)} {x_1 : Name} {sp : Core.SPath C Γ (Ty.struct x_1)} {fld : Name}
+Solidity.Taclet.storageFieldRead_unfold_rightSndResult : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
+  {x : RefTy} {loc : Loc C Γ (Ty.ref x)} {x_1 : Name} {sp : SPath C Γ (Ty.struct x_1)} {fld : Name}
   {hm : (Ty.ref x).mapFree = true}, dl{ ⟨[ loc = sp.fld; ]⟩ ⇝ ⟨[ T storage sp' = sp.fld; loc = sp'; ]⟩ }
 solkey (merged): storageFieldRead_unfold_rightSndResult (simplify_prog), storageFieldWriteCaptureSrc (simplify_prog)
 printed (merged): storageFieldRead_unfold_rightSndResult, storageFieldWriteCaptureSrc
-sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet "storageFieldWriteCaptureSrc"
 
@@ -217,14 +217,14 @@ nor `ic` (calls whose arguments are all simple, `functionBodyExpand`'s and
 `internalCallExpand`'s). -/
 
 /--
-info: Solidity.Core.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Core.Ctx} {f : Name}
-  {ps : Core.Ctx} {args : Core.Args C Γ ps} {rs Γ' : Core.Ctx} {ret : Core.CallRet Γ rs Γ'} {Γf : Core.Ctx}
-  {body : Core.Prog C (rs ++ ps) Γf} {p : PrimTy} {v : Core.Val C Γ p} {as' : Core.Args C (Core.LTy.val p :: Γ) ps},
-  dl[Core.LeanTaclet C k]{ ⟨[ ‹Surface.Stmt.call f args hsep ret body›; ]⟩ ⇝
+info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {f : Name}
+  {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx}
+  {body : Prog C (rs ++ ps) Γf} {p : PrimTy} {v : Val C Γ p} {as' : Args C (LTy.val p :: Γ) ps},
+  dl[LeanTaclet C k]{ ⟨[ ‹Surface.Stmt.call f args hsep ret body›; ]⟩ ⇝
     ⟨[ T se = v; ‹Surface.Stmt.call f as' ⋯ ret body›; ]⟩ }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
-sound: Solidity.Core.LeanTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet functionCallArgCapture
 
@@ -237,11 +237,11 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 /-! Every rule prints as a rule line (`#check_rule_text`, `Tools/Taclet.lean`). -/
 
 /--
-info: all 159 rules of `Solidity.Core.Taclet` print as rule lines
+info: all 159 rules of `Solidity.Taclet` print as rule lines
 ---
-info: all 9 rules of `Solidity.Core.LeanTaclet` print as rule lines
+info: all 9 rules of `Solidity.LeanTaclet` print as rule lines
 ---
-info: all 3 rules of `Solidity.Core.CallbackTaclet` print as rule lines
+info: all 3 rules of `Solidity.CallbackTaclet` print as rule lines
 -/
 #guard_msgs in #check_rule_text
 
@@ -249,8 +249,8 @@ info: all 3 rules of `Solidity.Core.CallbackTaclet` print as rule lines
 sound as its premise is the one `Stmt.step` builds (`toStep`). -/
 
 /--
-info: Solidity.Core.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}
-  {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)} {sadr se : Core.Simple C Γ PrimTy.uint},
+info: Solidity.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
+  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr se : Simple C Γ PrimTy.uint},
   dl{ [ pv = sadr .send(se); ] ⇝
     "send succeeded":
         { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[
@@ -258,21 +258,21 @@ info: Solidity.Core.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ 
       "send failed": { pv := false } ⟨[ ]⟩ }
 solkey: sendNoCallbackBox (simplify_prog)
 printed: none (a solkey taclet not printed)
-sound: Solidity.Core.Taclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound)
+sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet sendNoCallbackBox
 
 /--
-info: Solidity.Core.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Core.Ctx}
-  {pv : Core.Idx Γ (Core.LTy.val PrimTy.bool)} {sadr se : Core.Simple C Γ PrimTy.uint},
-  dl[Core.CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
+info: Solidity.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
+  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr se : Simple C Γ PrimTy.uint},
+  dl[CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
     "send succeeded":
         { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[
         ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }
 solkey: sendWithCallbackBox (simplify_prog)
 printed: none (a solkey taclet not printed)
-sound: Solidity.Core.CallbackTaclet.toStep (the premise is Stmt.step's; Core.Stmt.Sound, Core.ProvesC.sound_of)
+sound: Solidity.CallbackTaclet.toStep (the premise is Stmt.step's; Stmt.Sound, ProvesC.sound_of)
 -/
 #guard_msgs in #taclet sendWithCallbackBox
 
@@ -391,7 +391,7 @@ solkey's `TestSuite.sol` pins it: a binary operator's right operand first
       assert(matrix[0][0] == 77); assert(matrix[1][0] == 0); })).isOk)
 
 /-! `x = 10` through an alias, typed from `StandardExample`'s store: the
-write lands in `alice` (`Semantics/Core.lean`'s pin of M3's run until its
+write lands in `alice` (`Semantics/Erased.lean`'s pin of M3's run until its
 deletion, `docs/intrinsic.md`, decision 40). -/
 
 /-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 10)) -/

@@ -1,8 +1,8 @@
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.RewriteChains
 import Solidity.FreshNames
-import Solidity.Calculus.Core.LastLine
-import Solidity.Calculus.Core.Surface
+import Solidity.Calculus.LastLine
+import Solidity.Calculus.Surface
 
 /-!
 # Memory-to-storage copies, as chains
@@ -33,7 +33,7 @@ write, and `readWriteDifferentIdentity` (the write at `balance` leaves
 
 namespace Solidity.Examples.Chains.MemoryToStorage
 
-open scoped Core.Scoped
+open scoped Scoped
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -41,13 +41,13 @@ local instance : InContract := ⟨StandardExample⟩
 
 namespace RootCopy
 
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-- `carol.age = 42; alice = carol; v = alice.age;` — a memory object copied
 into a storage root (`copyMem`), and read back from storage: the write, the
 copy with the read (the paper's one `⇝`), the merge, the read sent back into
 memory (`findCopyMem`), the write read (`readOnWrite`). -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         ⟨[ carol.age = 42; alice = carol; v = alice.age; ]⟩ φ }
@@ -104,14 +104,14 @@ def names : FreshTable := [("acc", "sp1")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-- `carolAcc.balance = 50; alice.account = carolAcc; v = alice.account.balance;`
 — into a member of a storage root, read back through the alias `acc`: the
 write, the copy with the read unfolded, the alias bound and the read, the
 merge; then the read walked down to the copy (`findMemberCons`,
 `selectOnSaveMember`), sent back into memory, and the write read. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Account"), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .val .uint]) :
     dl![m]{
       { carolAcc := freshId(addM(memory, Account)) ‖ memory := addM(memory, Account) }
         ⟨[ carolAcc.balance = 50; alice.account = carolAcc; v = alice.account.balance; ]⟩ φ }
@@ -208,7 +208,7 @@ def names : FreshTable := [("carolAcc", "mv1"), ("sp", "sp2")]
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-- `carol.account.balance = 50; alice.account = carol.account;
 v = alice.account.balance;` — the source a member of a memory object: its
@@ -218,7 +218,7 @@ read walks down to the copy and `findCopyMem` sends it back into memory, at
 `i_rhs`; `readWriteDifferentIdentity` reads `i_rhs` back to `i_acc` (the
 write at `balance` does not touch `account`), and `readOnWrite` reads the
 write. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Person"), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
         ⟨[ carol.account.balance = 50; alice.account = carol.account; v = alice.account.balance; ]⟩ φ }
@@ -373,7 +373,7 @@ def names : FreshTable := [("aliceAcc", "sp1"), ("aliceTok", "sp2"), ("sp", "sp3
 local instance : FreshNames := .ofTable names
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
-variable (m : Modality) (φ : Core.Post StandardExample [])
+variable (m : Modality) (φ : Post StandardExample [])
 
 /-- `carolToken.value = 99; alice.account.token = carolToken;
 v = alice.account.token.value;` — the target is the nonsimple path: its
@@ -383,7 +383,7 @@ is no printed `tok` alias.  The paper's one `⇝` to `S₁` binds `aliceAcc`,
 copies, and reads through two more aliases, one per selector; then the
 merge, the read walked down to the copy a member at a time, sent back into
 memory, and the write read, to `99`. -/
-theorem chain (φ : Core.Post StandardExample [.mem (.struct "Token"), .val .uint]) :
+theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
     dl![m]{
       { carolToken := freshId(addM(memory, Token)) ‖ memory := addM(memory, Token) }
         ⟨[ carolToken.value = 99; alice.account.token = carolToken; v = alice.account.token.value; ]⟩ φ }

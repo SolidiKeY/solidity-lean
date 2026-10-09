@@ -1,7 +1,7 @@
 import Solidity.Calculus.Rewrite
-import Solidity.Calculus.Core.Surface
-import Solidity.Calculus.Core.Closers
-import Solidity.Calculus.Core.RewriteSyntax
+import Solidity.Calculus.Surface
+import Solidity.Calculus.Closers
+import Solidity.Calculus.RewriteSyntax
 
 /-!
 # Update simplification: one update instead of a stack
@@ -13,10 +13,10 @@ rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨`, and with
 `refine merge rfl ?_`/`refine simplify ?_` on `⊢`.  The goals are under the box: a
 write under the diamond is not valid (`Close.lean`).
 
-The formulas read scoped (`open scoped Solidity.Core.Scoped`): the rules
+The formulas read scoped (`open scoped Solidity.Scoped`): the rules
 rewrite a leaf's erasure (`sol_upd`, `sol_merge`,
-`Calculus/Core/Closers.lean`), today's update.  The sequent rules `merge`
-and `simplify` are the scoped sequent's (`Calculus/Core/RewriteSyntax.lean`
+`Calculus/Closers.lean`), today's update.  The sequent rules `merge`
+and `simplify` are the scoped sequent's (`Calculus/RewriteSyntax.lean`
 reads today's lines).
 -/
 
@@ -26,7 +26,7 @@ open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 
-open scoped Core.Scoped
+open scoped Scoped
 
 /-! ## Rule by rule
 
@@ -162,9 +162,9 @@ theorem twoWrites_merge : ⊨ dl!{ [ balances[a] = 1; balances[b] = 2; ] true } 
 Under `⊢` the updates are in the context, the latest last.  `merge` joins
 the last two (`sequentialToParallel`, `rfl` checks the merge);
 `simplify` cleans the last one.  The sequent is the scoped one: `merge` is
-a rule of the calculus (`Calculus/Core/Proves.lean`), so it need not wait for
+a rule of the calculus (`Calculus/Proves.lean`), so it need not wait for
 the modalities to be gone, and `simplify` drops what the update pops after
-it (`Calculus/Core/UpdateRules.lean`); the context also holds the hidden
+it (`Calculus/UpdateRules.lean`); the context also holds the hidden
 binders of `se1` and `sp1` and their scope's end, which print as nothing. -/
 
 /--
