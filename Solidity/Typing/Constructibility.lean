@@ -190,9 +190,10 @@ theorem setBy_of_lookupBy [DecidableEq κ] {k : κ} {v : α} :
   | [], h => nomatch h
   | (k', v') :: rest, h => by
     by_cases hk : k = k'
-    · subst hk; simp [lookupBy] at h; subst h; simp [setBy]
+    · subst hk; simp only [lookupBy, ↓reduceIte, Option.some.injEq] at h; subst h; simp only [setBy,
+                    ↓reduceIte]
     · simp only [lookupBy, if_neg hk] at h
-      simp [setBy, hk, setBy_of_lookupBy h]
+      simp only [setBy, hk, ↓reduceIte, setBy_of_lookupBy h]
 
 /-- Saving twice at one path keeps the second: `alice.age = 1; alice.age = 2;`. -/
 theorem save_save : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Semantics.SVal),
@@ -206,7 +207,7 @@ theorem save_save : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Seman
       obtain ⟨u, hu, h⟩ := bind_ok_inv h
       cases h
       simp only [Semantics.SVal.save, lookupBy_setBy_self, save_save b hu]
-      cases old.save rest b <;> simp [setBy_setBy_self]
+      cases old.save rest b <;> simp only [setBy_setBy_self]
     · exact nomatch h
   | .at i :: rest, .array elems sh fx, v₁, a, b, h => by
     simp only [Semantics.SVal.save] at h
@@ -221,12 +222,13 @@ theorem save_save : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Seman
       simp only [Semantics.SVal.save, dif_pos hb', dif_pos hb]
       have hget : (((elems ++ sh).set i.toNat u).take elems.length ++
           ((elems ++ sh).set i.toNat u).drop elems.length).get ⟨i.toNat, hb'.2⟩ = u := by
-        simp [List.take_append_drop, List.getElem_set_self]
+        simp only [List.get_eq_getElem, List.take_append_drop, List.getElem_set_self]
       rw [hget, save_save b hu]
       have htl : (((elems ++ sh).set i.toNat u).take elems.length).length = elems.length := by
-        simp
+        simp only [List.length_take, List.length_set, List.length_append, Nat.le_add_right,
+            Nat.min_eq_left]
       cases ((elems ++ sh).get ⟨i.toNat, hb.2⟩).save rest b <;>
-        simp [List.take_append_drop, htl]
+        simp only [htl, List.take_append_drop, List.set_set]
     · exact nomatch h
   | .at i :: rest, .map entries dflt, v₁, a, b, h => by
     simp only [Semantics.SVal.save] at h
@@ -235,12 +237,12 @@ theorem save_save : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Seman
       obtain ⟨u, hu, h⟩ := bind_ok_inv h
       cases h
       simp only [Semantics.SVal.save, lookupBy_setBy_self, hold, save_save b hu]
-      cases old.save rest b <;> simp [setBy_setBy_self]
+      cases old.save rest b <;> simp only [setBy_setBy_self]
     · rename_i hold
       obtain ⟨u, hu, h⟩ := bind_ok_inv h
       cases h
       simp only [Semantics.SVal.save, lookupBy_setBy_self, hold, save_save b hu]
-      cases dflt.save rest b <;> simp [setBy_setBy_self]
+      cases dflt.save rest b <;> simp only [setBy_setBy_self]
   | .field _ :: _, .prim _, _, _, _, h | .at _ :: _, .prim _, _, _, _, h
   | .at _ :: _, .struct _, _, _, _, h | .field _ :: _, .array .., _, _, _, h
   | .field _ :: _, .map .., _, _, _, h => by simp only [Semantics.SVal.save, reduceCtorEq] at h
@@ -259,7 +261,7 @@ theorem Wrote.trans {st₀ st₁ st₂ : List (Name × Semantics.SVal)} {r : Nam
     simp only [save_save Y hu] at h₂
     obtain ⟨u', hu', h₂⟩ := bind_ok_inv h₂
     cases h₂
-    simp [hu', setBy_setBy_self]; rfl
+    simp only [hu', bind_pure_comp, setBy_setBy_self]; rfl
   · exact nomatch h₁
 
 /-- After a write, saving the same value again changes nothing. -/
@@ -272,7 +274,7 @@ theorem Wrote.noop {st₀ st : List (Name × Semantics.SVal)} {r : Name} {segs :
     cases h
     rw [lookupBy_setBy_self]
     simp only [save_save X hu, hu]
-    simp [setBy_setBy_self]; rfl
+    simp only [setBy_setBy_self, bind_pure_comp]; rfl
   · exact nomatch h
 
 /-- After a write, the path reads what was written. -/
@@ -289,7 +291,7 @@ theorem Wrote.find {st₀ st : List (Name × Semantics.SVal)} {r : Name} {segs :
 theorem Wrote.findStorage {σ : Semantics.State} {st₀ : List (Name × Semantics.SVal)} {r : Name} {segs : List Seg}
     {X : Semantics.SVal} (h : Wrote st₀ σ.storage r segs X) : σ.findStorage r segs = .ok X := by
   obtain ⟨V, hV, hf⟩ := h.find
-  simp [State.findStorage, hV, hf]
+  simp only [State.findStorage, hV, hf]
 
 /-- A write below `segs` is a write at `segs` of what is there, updated. -/
 theorem Wrote.up {st st' : List (Name × Semantics.SVal)} {r : Name} {segs rest : List Seg}
@@ -318,22 +320,27 @@ theorem save_at_map (es : List (Int × Semantics.SVal)) (dflt : Semantics.SVal) 
 theorem save_at_shadow (es sh : List Semantics.SVal) (x w : Semantics.SVal) (fx : Bool) :
     (Semantics.SVal.array es (x :: sh) fx).save [.at (es.length : Int)] w = .ok (.array es (w :: sh) fx) := by
   have hb : 0 ≤ (es.length : Int) ∧ (es.length : Int).toNat < (es ++ x :: sh).length := by
-    simp
+    simp only [Int.ofNat_zero_le, Int.toNat_natCast, List.length_append, List.length_cons,
+        Nat.lt_add_right_iff_pos, Nat.zero_lt_succ, and_self]
   simp only [Semantics.SVal.save]
   rw [dif_pos hb]
-  simp [bind, Except.bind, List.set_append_right]
+  simp only [bind, Except.bind, Int.toNat_natCast, Nat.le_refl, List.set_append_right, Nat.sub_self,
+      List.set_cons_zero, List.take_left', List.drop_left']
 
 /-- A live element written: `values[j] = w;`. -/
 theorem save_at_live (es rest sh : List Semantics.SVal) (x w : Semantics.SVal) (fx : Bool) :
     (Semantics.SVal.array (es ++ x :: rest) sh fx).save [.at (es.length : Int)] w =
       .ok (.array (es ++ w :: rest) sh fx) := by
   have hb : 0 ≤ (es.length : Int) ∧ (es.length : Int).toNat < (es ++ x :: rest ++ sh).length := by
-    simp
+    simp only [Int.ofNat_zero_le, Int.toNat_natCast, List.append_assoc, List.cons_append,
+        List.length_append, List.length_cons, Nat.lt_add_right_iff_pos, Nat.zero_lt_succ, and_self]
   simp only [Semantics.SVal.save]
   rw [dif_pos hb]
   have hset : (es ++ x :: rest ++ sh).set (es.length : Int).toNat w = (es ++ w :: rest) ++ sh := by
-    simp [List.set_append_right]
-  have hl : (es ++ x :: rest).length = (es ++ w :: rest).length := by simp
+    simp only [List.append_assoc, List.cons_append, Int.toNat_natCast, Nat.le_refl,
+        List.set_append_right, Nat.sub_self, List.set_cons_zero]
+  have hl : (es ++ x :: rest).length = (es ++ w :: rest).length := by simp only [List.length_append,
+                                                                          List.length_cons]
   simp only [bind, Except.bind, hset, hl, List.take_left', List.drop_left']
 
 /-- Saving what a path already holds, one step below a no-op write, is a no-op. -/
@@ -366,7 +373,7 @@ theorem defaultOf_default (T : Ty) : (defaultForTy T).defaultOf = defaultForTy T
     | zero => rfl
     | succ k ihk => simp only [List.replicate_succ, SVal.defaultOf.defaultOfElems, ih, ihk]
   | case7 key value ih => rw [defaultForTy]; rfl
-  | case8 => simp [defaultForFields, SVal.defaultOf.defaultOfFields]
+  | case8 => simp only [defaultForFields, SVal.defaultOf.defaultOfFields]
   | case9 n t rest iht ihrest =>
     simp only [defaultForFields, SVal.defaultOf.defaultOfFields, iht, ihrest]
 
@@ -377,34 +384,37 @@ theorem struct_ok {s : Name} (h : s ∈ defaultOkStructs) :
   simp only [defaultOkStructs, List.mem_cons, List.not_mem_nil, or_false] at h
   rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
       rfl | rfl | rfl | rfl | rfl | rfl <;>
-    refine ⟨by decide, ?_⟩ <;> simp [structDef, Ty.defaultOkS, defaultOkStructs]
+    refine ⟨by decide, ?_⟩ <;> simp only [structDef, List.mem_cons, List.not_mem_nil, or_false,
+                                   forall_eq, Ty.defaultOkS, String.reduceEq, imp_self,
+                                   forall_eq_or_imp, defaultOkStructs, or_self, decide_true,
+                                   and_self, or_true]
 
 theorem lookupBy_append_left_none [DecidableEq κ] {k : κ} {l₂ : List (κ × α)} :
     ∀ {l₁ : List (κ × α)}, lookupBy k l₁ = none → lookupBy k (l₁ ++ l₂) = lookupBy k l₂
   | [], _ => rfl
   | (k', v') :: rest, h => by
     by_cases hk : k = k'
-    · simp [lookupBy, hk] at h
+    · simp only [lookupBy, hk, ↓reduceIte, reduceCtorEq] at h
     · simp only [lookupBy, if_neg hk] at h
-      simp [lookupBy, hk, lookupBy_append_left_none h]
+      simp only [List.cons_append, lookupBy, hk, ↓reduceIte, lookupBy_append_left_none h]
 
 theorem setBy_append_left_none [DecidableEq κ] {k : κ} {v : α} {l₂ : List (κ × α)} :
     ∀ {l₁ : List (κ × α)}, lookupBy k l₁ = none → setBy k v (l₁ ++ l₂) = l₁ ++ setBy k v l₂
   | [], _ => rfl
   | (k', v') :: rest, h => by
     by_cases hk : k = k'
-    · simp [lookupBy, hk] at h
+    · simp only [lookupBy, hk, ↓reduceIte, reduceCtorEq] at h
     · simp only [lookupBy, if_neg hk] at h
-      simp [setBy, hk, setBy_append_left_none h]
+      simp only [List.cons_append, setBy, hk, ↓reduceIte, setBy_append_left_none h]
 
 /-- Writing a member that is there, in the middle: `alice.age = 3;`. -/
 theorem setBy_mid [DecidableEq κ] {k : κ} {v x : α} {l₁ l₂ : List (κ × α)}
     (h : lookupBy k l₁ = none) : setBy k v (l₁ ++ (k, x) :: l₂) = l₁ ++ (k, v) :: l₂ := by
-  rw [setBy_append_left_none h]; simp [setBy]
+  rw [setBy_append_left_none h]; simp only [setBy, ↓reduceIte]
 
 theorem lookupBy_mid [DecidableEq κ] {k : κ} {x : α} {l₁ l₂ : List (κ × α)}
     (h : lookupBy k l₁ = none) : lookupBy k (l₁ ++ (k, x) :: l₂) = some x := by
-  rw [lookupBy_append_left_none h]; simp [lookupBy]
+  rw [lookupBy_append_left_none h]; simp only [lookupBy, ↓reduceIte]
 
 theorem nodupKeysB_mid [DecidableEq κ] {k : κ} {x : α} {l₂ : List (κ × α)} :
     ∀ {l₁ : List (κ × α)}, nodupKeysB (l₁ ++ (k, x) :: l₂) = true → lookupBy k l₁ = none
@@ -415,7 +425,7 @@ theorem nodupKeysB_mid [DecidableEq κ] {k : κ} {x : α} {l₂ : List (κ × α
     · subst hk
       rw [lookupBy_mid (nodupKeysB_mid h.2)] at h
       exact nomatch h.1
-    · simp [lookupBy, hk, nodupKeysB_mid h.2]
+    · simp only [lookupBy, hk, ↓reduceIte, nodupKeysB_mid h.2]
 
 /-- A write succeeds where another write along the same path did. -/
 theorem save_ok_any : ∀ {segs : List Seg} {v v₁ a : Semantics.SVal} (b : Semantics.SVal),
@@ -950,11 +960,11 @@ theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} {a : Idx Γ (.al
         Wrote st₀ σ'.erase.storage r segs (.struct (pre ++ todo)) ∧ σ'.erase.env = σ.erase.env
   | [], pre, sdRest, σ, st₀, _, _, _, _, hmap, _, _, _, hW => by
     cases sdRest with
-    | cons _ _ => simp at hmap
+    | cons _ _ => simp only [List.map_nil, List.map_cons, List.nil_eq, reduceCtorEq] at hmap
     | nil => exact ⟨σ, TRuns.nil σ, by simpa only [List.append_nil, defaultForFields] using hW, rfl⟩
   | (n, w) :: todo, pre, sdRest, σ, st₀, hIH, hc, ht, hfit, hmap, hsd, hnd, hB, hW => by
     cases sdRest with
-    | nil => simp at hmap
+    | nil => simp only [List.map_cons, List.map_nil, reduceCtorEq] at hmap
     | cons nt sdRest =>
       obtain ⟨n', t⟩ := nt
       simp only [List.map_cons, List.cons.injEq] at hmap
@@ -977,7 +987,9 @@ theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} {a : Idx Γ (.al
         have hs : (Semantics.SVal.struct (pre ++ defaultForFields ((n, T) :: sdRest))).save [.field n] w =
             .ok (.struct ((pre ++ [(n, w)]) ++ defaultForFields sdRest)) := by
           simp only [defaultForFields]
-          rw [save_field _ (lookupBy_mid hpre), setBy_mid hpre]; simp
+          rw [save_field _ (lookupBy_mid hpre), setBy_mid hpre]; simp only [List.append_assoc,
+                                                                     List.cons_append,
+                                                                     List.nil_append]
         obtain ⟨σ₁, hrun₁, hW₁, he₁⟩ := child_step (hIH (n, w) (List.mem_cons_self ..)) hc.1
           ht.1 hfit.1 hok (resolve_field _ hB) hW hN hs
         obtain ⟨σ₂, hrun₂, hW₂, he₂⟩ := fillFields_run todo (pre ++ [(n, w)]) sdRest σ₁ st₀
@@ -990,7 +1002,7 @@ theorem fillFields_run {d : Nat} {s r : Name} {segs : List Seg} {a : Idx Γ (.al
               intro he
               have := lookupBy_isSome_of_mem (k := nt.1) (v := nt.2) hm
               rw [he, hnd.1] at this; exact nomatch this
-            simp [lookupBy, hne])
+            simp only [lookupBy, hne, ↓reduceIte])
           hnd.2 (hB.of_env he₁) hW₁
         exact ⟨σ₂, TRuns.append hrun₁ hrun₂,
           by simpa only [List.append_assoc, List.cons_append, List.nil_append] using hW₂,
@@ -1075,7 +1087,7 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
       (fun w hm => hIH w (List.mem_cons_of_mem _ hm)) hc.2 ht.2 hfit.2
       (by simp only [List.length_cons] at hlen; omega)
       (fun hp w hm => hprim hp w (List.mem_cons_of_mem _ hm)) hB
-      (by simpa [Nat.add_assoc, Nat.add_comm 1] using hW)
+      (by simpa only [Nat.add_assoc, Nat.add_comm 1, List.length_cons] using hW)
     have hB₁ : Bound σ₁.erase a r segs := hB.of_env he₁
     rw [List.replicate_succ'] at hW₁
     have hf₁ := Wrote.findStorage (σ := σ₁.erase.glob) hW₁
@@ -1114,7 +1126,7 @@ theorem fillShadow_run {E : Ty} {d : Nat} {a : Idx Γ (.alias (.array E))} {r : 
         intro x
         have := save_at_shadow (List.replicate i (defaultForTy (.ref R))) (S ++ SH)
           (defaultForTy (.ref R)) x false
-        simpa using this
+        simpa only [List.length_replicate] using this
       obtain ⟨σ₄, hrun₄, hW₄, he₄⟩ := child_step (d := d) (hIH w (List.mem_cons_self ..))
         hc.1 ht.1 hfit.1 hE (resolve_alias hBτ)
         (show Wrote st₀ σ₃.erase.storage r segs _ by rw [he₃]; exact hWτ)
@@ -1153,7 +1165,7 @@ theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty}
         .ok (.map (done ++ [(key, defaultForTy V)]) (defaultForTy V)) := by
       rw [save_at_map, show done = done ++ [] from (List.append_nil _).symm,
         setBy_append_left_none hkey]
-      simp [setBy]
+      simp only [setBy, List.append_nil]
     obtain ⟨τ, hτ, hWτ⟩ :=
       Wrote.saveCore hW (.map (done ++ [(key, defaultForTy V)]) (defaultForTy V))
     have hτd : σ.erase.glob.saveStorage r (segs ++ [.at key]) (defaultForTy V).defaultOf =
@@ -1174,7 +1186,8 @@ theorem fillEntries_run {d : Nat} {k : PrimTy} {V : Ty}
       (fun kw hm => hIH kw (List.mem_cons_of_mem _ hm)) hc.2 ht.2 hfit.2.2
       (by simpa only [List.append_assoc, List.cons_append, List.nil_append] using hnd)
       (hBτ.of_env he₂) hW₂
-    refine ⟨σ₃, ?_, by simpa using hW₃, ?_⟩
+    refine ⟨σ₃, ?_, by simpa only [List.append_assoc, List.cons_append, List.nil_append] using hW₃,
+                           ?_⟩
     · simp only [fillEntries]
       exact TRuns.cons hs₁ (TRuns.append hrun₂ hrun₃)
     · rw [he₃, he₂, he₁]
@@ -1186,7 +1199,7 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
   | .prim pv => by
     intro T d Γ q σ r segs hc ht hf hok hq h0
     cases T with
-    | ref R => cases pv <;> cases R <;> simp [SVal.canon] at hc
+    | ref R => cases pv <;> cases R <;> simp only [SVal.canon] at hc
     | prim p =>
       cases q with
       | loc l =>
@@ -1197,12 +1210,12 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
   | .struct fields => by
     intro T d Γ q σ r segs hc ht hf hok hq h0
     cases T with
-    | prim p => simp [SVal.canon] at hc
+    | prim p => simp only [SVal.canon] at hc
     | ref R =>
       cases R with
       | struct s =>
         obtain ⟨hnames, hcf⟩ := hc
-        have hs : s ∈ defaultOkStructs := by simpa [Ty.defaultOkS] using hok
+        have hs : s ∈ defaultOkStructs := by simpa only [Ty.defaultOkS, decide_eq_true_eq] using hok
         obtain ⟨hnd, hmok⟩ := struct_ok hs
         obtain ⟨σ₁, hd₁, he₁⟩ := run_decl (d := d) hq
         obtain ⟨σ', hrun, hW, he⟩ := fillFields_run (C := C) (d := d) (s := s) (a := .here)
@@ -1217,17 +1230,17 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
         rw [State.drop_erase]
         show σ'.erase.env.2 = σ.erase.env
         rw [he, he₁]; rfl
-      | array _ => simp [SVal.canon] at hc
-      | fixed _ _ => simp [SVal.canon] at hc
-      | mapping _ _ => simp [SVal.canon] at hc
+      | array _ => simp only [SVal.canon] at hc
+      | fixed _ _ => simp only [SVal.canon] at hc
+      | mapping _ _ => simp only [SVal.canon] at hc
   | .array elems shadow fx => by
     intro T d Γ q σ r segs hc ht hf hok hq h0
     cases T with
-    | prim p => simp [SVal.canon] at hc
+    | prim p => simp only [SVal.canon] at hc
     | ref R =>
       cases R with
-      | struct _ => simp [SVal.canon] at hc
-      | mapping _ _ => simp [SVal.canon] at hc
+      | struct _ => simp only [SVal.canon] at hc
+      | mapping _ _ => simp only [SVal.canon] at hc
       | array E =>
         obtain ⟨hfx, hce, hcs⟩ := hc
         subst hfx
@@ -1264,7 +1277,7 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
           · rw [State.drop_erase]
             show σ₄.erase.env.2 = σ.erase.env
             rw [he₄, he₃, henv₂, he₁]; rfl
-        · obtain ⟨rfl, rfl⟩ := hne (by simpa using hE)
+        · obtain ⟨rfl, rfl⟩ := hne (by simpa only [Bool.not_eq_true] using hE)
           refine ⟨σ₁.drop (.push .refl), ?_, by rw [State.drop_erase]; exact h0', ?_⟩
           · show TRuns σ (bound d (.array E) q (if hE : E.defaultOkS = true then _ else _)) _
             rw [dif_neg hE]
@@ -1276,7 +1289,7 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
         obtain ⟨hsh, hte⟩ := ht
         obtain ⟨hlen, hfe⟩ := hf
         subst hsh
-        have hE : E.defaultOkS = true := by simpa [Ty.defaultOkS] using hok
+        have hE : E.defaultOkS = true := by simpa only [Ty.defaultOkS] using hok
         obtain ⟨σ₁, hd₁, he₁⟩ := run_decl (d := d) hq
         obtain ⟨σ', hrun, hW, he⟩ := fillElems_run (C := C) (d := d)
           (ArrTy.fixed (E := E) (n := elems.length)) (a := .here)
@@ -1292,17 +1305,17 @@ theorem fill_ok : ∀ v : Semantics.SVal, FillOK C v
   | .map entries dflt => by
     intro T d Γ q σ r segs hc ht hf hok hq h0
     cases T with
-    | prim p => simp [SVal.canon] at hc
+    | prim p => simp only [SVal.canon] at hc
     | ref R =>
       cases R with
-      | struct _ => simp [SVal.canon] at hc
-      | array _ => simp [SVal.canon] at hc
-      | fixed _ _ => simp [SVal.canon] at hc
+      | struct _ => simp only [SVal.canon] at hc
+      | array _ => simp only [SVal.canon] at hc
+      | fixed _ _ => simp only [SVal.canon] at hc
       | mapping K V =>
         obtain ⟨hnd, hce, hd, -⟩ := hc
         subst hd
         obtain ⟨hkey, hte⟩ := ht
-        have hV : V.defaultOkS = true := by simpa [Ty.defaultOkS] using hok
+        have hV : V.defaultOkS = true := by simpa only [Ty.defaultOkS] using hok
         cases K with
         | ref R' =>
           obtain rfl := hkey rfl
@@ -1341,11 +1354,11 @@ theorem rootsProg_run :
       ∃ σ', TRuns σ (rootsProg C todo) σ' ∧ σ'.erase.storage = done ++ todo
   | [], done, cf, σ, hst, hmap, _, _, _ => by
     cases cf with
-    | cons _ _ => simp at hmap
+    | cons _ _ => simp only [List.map_cons, List.map_nil, reduceCtorEq] at hmap
     | nil => exact ⟨σ, TRuns.nil σ, by simpa only [List.append_nil] using hst⟩
   | (r, v) :: todo, done, cf, σ, hst, hmap, hnd, hcf, htodo => by
     cases cf with
-    | nil => simp at hmap
+    | nil => simp only [List.map_nil, List.map_cons, List.nil_eq, reduceCtorEq] at hmap
     | cons rx cf =>
       obtain ⟨r', x⟩ := rx
       simp only [List.map_cons, List.cons.injEq] at hmap
@@ -1376,9 +1389,11 @@ theorem rootsProg_run :
           unfold Wrote putSt at hW₁
           simp only [hlook, SVal.save_nil, bind, Except.bind, pure, Except.pure,
             Except.ok.injEq] at hW₁
-          rw [← hW₁, hst, setBy_mid hdone]; simp
+          rw [← hW₁, hst, setBy_mid hdone]; simp only [List.append_assoc, List.cons_append,
+                                                List.nil_append]
         obtain ⟨σ₂, hrun₂, hst₂⟩ := rootsProg_run todo (done ++ [(r, v)]) cf σ₁ hst₁ hmap
-          (by simpa using hnd) (fun rv hm => hcf rv (List.mem_cons_of_mem _ hm))
+          (by simpa only [List.append_assoc, List.cons_append,
+                  List.nil_append] using hnd) (fun rv hm => hcf rv (List.mem_cons_of_mem _ hm))
           (fun rv hm => htodo rv (List.mem_cons_of_mem _ hm))
         exact ⟨σ₂, TRuns.append hrun₁ hrun₂,
           by simpa only [List.append_assoc, List.cons_append, List.nil_append] using hst₂⟩
@@ -1416,7 +1431,8 @@ theorem nodupKeysB_of_map_fst_eq {α β : Type} :
     ∀ {l : List (Name × α)} {l' : List (Name × β)}, l.map (·.1) = l'.map (·.1) →
       nodupKeysB l' = true → nodupKeysB l = true
   | [], [], _, _ => rfl
-  | [], _ :: _, h, _ | _ :: _, [], h, _ => by simp at h
+  | [], _ :: _, h, _ | _ :: _, [], h, _ => by simp only [List.map_nil, List.map_cons, List.nil_eq,
+                                                  reduceCtorEq] at h
   | (a, x) :: l, (b, y) :: l', h, hnd => by
     simp only [List.map_cons, List.cons.injEq] at h
     obtain ⟨rfl, h⟩ := h
@@ -1425,7 +1441,7 @@ theorem nodupKeysB_of_map_fst_eq {α β : Type} :
     cases hl : lookupBy a l with
     | none => rfl
     | some _ =>
-      have := lookupBy_isSome_of_map_fst (k := a) h.symm (by simp [hl])
+      have := lookupBy_isSome_of_map_fst (k := a) h.symm (by simp only [hl, Option.isSome_some])
       rw [hnd.1] at this; exact nomatch this
 
 /-- **Canonical and tight ⇒ reachable, by one program**: `Build.rootsProg`,
@@ -1457,7 +1473,7 @@ theorem storage_tight (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.d
     (by rw [hc.1]; simp only [Contract.initStorage, List.map_map, List.map_inj_left,
       Function.comp_apply, implies_true])
     (by simpa only [List.nil_append] using hstnd) hdefs hroots
-  exact ⟨σ, hrun, by simpa using hst⟩
+  exact ⟨σ, hrun, by simpa only [List.nil_append] using hst⟩
 
 /-- **Canonical and tight ⇒ reachable**, for words, keys and slots in range. -/
 theorem canon_reachable (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2.defaultOkS) = true)
@@ -1513,36 +1529,42 @@ theorem struct_okDeep {s : Name} (h : s ∈ defaultOkStructs) :
   simp only [defaultOkStructs, List.mem_cons, List.not_mem_nil, or_false] at h
   rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
       rfl | rfl | rfl | rfl | rfl | rfl <;>
-    simp [structDef, Ty.okDeep, defaultOkStructs]
+    simp only [structDef, List.mem_cons, List.not_mem_nil, or_false, forall_eq, Ty.okDeep,
+        String.reduceEq, imp_self, forall_eq_or_imp, defaultOkStructs, or_self, decide_true,
+        and_self, or_true]
 
 theorem okDeep_defaultOkS : ∀ {T : Ty}, T.okDeep = true → T.defaultOkS = true
   | .prim _, _ => rfl
-  | .ref (.struct _), h => by simpa [Ty.okDeep, Ty.defaultOkS] using h
+  | .ref (.struct _), h => by simpa only [Ty.defaultOkS, decide_eq_true_eq, Ty.okDeep] using h
   | .ref (.array _), _ => rfl
   | .ref (.fixed E _), h => by
-    simp only [Ty.okDeep] at h; simpa [Ty.defaultOkS] using okDeep_defaultOkS (T := E) h
+    simp only [Ty.okDeep] at h; simpa only [Ty.defaultOkS] using okDeep_defaultOkS (T := E) h
   | .ref (.mapping _ V), h => by
-    simp only [Ty.okDeep] at h; simpa [Ty.defaultOkS] using okDeep_defaultOkS (T := V) h
+    simp only [Ty.okDeep] at h; simpa only [Ty.defaultOkS] using okDeep_defaultOkS (T := V) h
 
 theorem okDeep_segTy {T T' : Ty} {seg : Seg} (h : T.okDeep = true) (hs : segTy T seg = some T') :
     T'.okDeep = true := by
   cases T with
-  | prim _ => cases seg <;> simp [segTy] at hs
+  | prim _ => cases seg <;> simp only [segTy, reduceCtorEq] at hs
   | ref R =>
     cases R with
     | struct s =>
       cases seg with
       | field n =>
         simp only [segTy] at hs
-        exact struct_okDeep (by simpa [Ty.okDeep] using h) (n, T') (lookupBy_eq_some_mem hs)
-      | «at» _ => simp [segTy] at hs
-    | array E => cases seg <;> simp [segTy] at hs; subst hs; simpa [Ty.okDeep] using h
-    | fixed E _ => cases seg <;> simp [segTy] at hs; subst hs; simpa [Ty.okDeep] using h
-    | mapping _ V => cases seg <;> simp [segTy] at hs; subst hs; simpa [Ty.okDeep] using h
+        exact struct_okDeep (by simpa only [Ty.okDeep, decide_eq_true_eq] using h) (n,
+                                    T') (lookupBy_eq_some_mem hs)
+      | «at» _ => simp only [segTy, reduceCtorEq] at hs
+    | array E => cases seg <;> simp only [segTy, reduceCtorEq,
+                                   Option.some.injEq] at hs; subst hs; simpa only [Ty.okDeep] using h
+    | fixed E _ => cases seg <;> simp only [segTy, reduceCtorEq,
+                                     Option.some.injEq] at hs; subst hs; simpa only [Ty.okDeep] using h
+    | mapping _ V => cases seg <;> simp only [segTy, reduceCtorEq,
+                                       Option.some.injEq] at hs; subst hs; simpa only [Ty.okDeep] using h
 
 theorem okDeep_tyAtSegs : ∀ {segs : List Seg} {T T' : Ty}, T.okDeep = true →
     tyAtSegs T segs = some T' → T'.okDeep = true
-  | [], T, T', h, hs => by simp [tyAtSegs] at hs; subst hs; exact h
+  | [], T, T', h, hs => by simp only [tyAtSegs, Option.some.injEq] at hs; subst hs; exact h
   | seg :: rest, T, T', h, hs => by
     simp only [tyAtSegs] at hs
     split at hs
@@ -1584,49 +1606,51 @@ def IdxLive (v : Semantics.SVal) (segs : List Seg) : Prop :=
 /-! ### Tight lists -/
 
 theorem tightElems_iff {E : Ty} : ∀ {l : List Semantics.SVal}, tightElems E l ↔ ∀ v ∈ l, v.tight E
-  | [] => by simp [tightElems]
-  | v :: rest => by simp [tightElems, tightElems_iff (l := rest)]
+  | [] => by simp only [tightElems, List.not_mem_nil, false_implies, implies_true]
+  | v :: rest => by simp only [tightElems, tightElems_iff (l := rest), List.mem_cons,
+                        forall_eq_or_imp]
 
 theorem tightEntries_iff {V : Ty} :
     ∀ {l : List (Int × Semantics.SVal)}, tightEntries V l ↔ ∀ kv ∈ l, kv.2.tight V
-  | [] => by simp [tightEntries]
-  | (k, v) :: rest => by simp [tightEntries, tightEntries_iff (l := rest)]
+  | [] => by simp only [tightEntries, List.not_mem_nil, false_implies, implies_true]
+  | (k, v) :: rest => by simp only [tightEntries, tightEntries_iff (l := rest), Prod.forall,
+                             List.mem_cons, forall_eq_or_imp]
 
 theorem tightFields_lookup {s : Name} {fields : List (Name × Semantics.SVal)} {n : Name} {v : Semantics.SVal}
     {T : Ty} (h : tightFields s fields) (hl : lookupBy n fields = some v)
     (hT : lookupBy n (structDef s) = some T) : v.tight T := by
   induction fields with
-  | nil => simp [lookupBy] at hl
+  | nil => simp only [lookupBy, reduceCtorEq] at hl
   | cons p rest ih =>
     obtain ⟨n', v'⟩ := p
     simp only [tightFields] at h
     by_cases hn : n = n'
     · subst hn
-      simp [lookupBy] at hl; subst hl
-      simpa [hT] using h.1
-    · simp [lookupBy, hn] at hl
+      simp only [lookupBy, ↓reduceIte, Option.some.injEq] at hl; subst hl
+      simpa only [hT] using h.1
+    · simp only [lookupBy, hn, ↓reduceIte] at hl
       exact ih h.2 hl
 
 theorem tightFields_setBy {s : Name} {fields : List (Name × Semantics.SVal)} {n : Name} {w : Semantics.SVal} {T : Ty}
     (h : tightFields s fields) (hd : lookupBy n (structDef s) = some T) (hw : w.tight T) :
     tightFields s (setBy n w fields) := by
   induction fields with
-  | nil => simp [setBy, tightFields, hd, hw]
+  | nil => simp only [setBy, tightFields, hd, hw, and_self]
   | cons p rest ih =>
     obtain ⟨k, v⟩ := p
     simp only [tightFields] at h
     by_cases hn : n = k
-    · subst hn; simp [setBy, tightFields, hd, hw, h.2]
+    · subst hn; simp only [setBy, ↓reduceIte, tightFields, hd, hw, h.2, and_self]
     · simp only [setBy, if_neg hn, tightFields]; exact ⟨h.1, ih h.2⟩
 
 theorem tightEntries_setBy {V : Ty} {entries : List (Int × Semantics.SVal)} {i : Int} {w : Semantics.SVal}
     (h : tightEntries V entries) (hw : w.tight V) : tightEntries V (setBy i w entries) := by
   induction entries with
-  | nil => simp [setBy, tightEntries, hw]
+  | nil => simp only [setBy, tightEntries, hw, and_self]
   | cons p rest ih =>
     obtain ⟨j, v⟩ := p
     by_cases hi : i = j
-    · subst hi; simp [setBy, tightEntries, hw, h.2]
+    · subst hi; simp only [setBy, ↓reduceIte, tightEntries, hw, h.2, and_self]
     · simp only [setBy, if_neg hi, tightEntries]; exact ⟨h.1, ih h.2⟩
 
 theorem tightEntries_lookup {V : Ty} {entries : List (Int × Semantics.SVal)} {i : Int} {v : Semantics.SVal}
@@ -1646,19 +1670,20 @@ theorem defaultForTy_tight : ∀ {T : Ty}, T.defaultOkS = true → (defaultForTy
   induction T using defaultForTy.induct
     (motive2 := fun l => ∀ (s : Name), (∀ nt ∈ l, lookupBy nt.1 (structDef s) = some nt.2 ∧
       nt.2.defaultOkS = true) → tightFields s (defaultForFields l)) with
-  | case1 => intro _; simp [defaultForTy, SVal.tight]
-  | case2 => intro _; simp [defaultForTy, SVal.tight]
-  | case3 => intro _; simp [defaultForTy, SVal.tight]
+  | case1 => intro _; simp only [defaultForTy, SVal.tight]
+  | case2 => intro _; simp only [defaultForTy, SVal.tight]
+  | case3 => intro _; simp only [defaultForTy, SVal.tight]
   | case4 name ih =>
     intro h
-    have hs : name ∈ defaultOkStructs := by simpa [Ty.defaultOkS] using h
+    have hs : name ∈ defaultOkStructs := by simpa only [Ty.defaultOkS, decide_eq_true_eq] using h
     obtain ⟨hnd, hok⟩ := struct_ok hs
     rw [defaultForTy]
     exact ih name fun nt hm => ⟨lookupBy_eq_of_nodup hnd hm, hok nt hm⟩
-  | case5 elem => intro _; simp [defaultForTy, SVal.tight, tightElems]
+  | case5 elem => intro _; simp only [defaultForTy, SVal.tight, and_self, implies_true,
+                               List.not_mem_nil, false_implies, tightElems]
   | case6 elem n ih =>
     intro h
-    have hE : elem.defaultOkS = true := by simpa [Ty.defaultOkS] using h
+    have hE : elem.defaultOkS = true := by simpa only [Ty.defaultOkS] using h
     rw [defaultForTy]
     refine ⟨rfl, tightElems_iff.mpr fun v hv => ?_⟩
     rw [List.eq_of_mem_replicate hv]; exact ih hE
@@ -1666,7 +1691,7 @@ theorem defaultForTy_tight : ∀ {T : Ty}, T.defaultOkS = true → (defaultForTy
     intro _
     rw [defaultForTy]
     exact ⟨fun _ => rfl, trivial⟩
-  | case8 => simp [defaultForFields, tightFields]
+  | case8 => simp only [defaultForFields, tightFields]
   | case9 n t rest iht ihrest =>
     rename_i s h
     obtain ⟨hl, hok⟩ := h (n, t) (List.mem_cons_self ..)
@@ -1691,7 +1716,7 @@ theorem find_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {w :
       cases seg with
       | field n =>
         cases T with
-        | prim _ => simp [segTy] at hseg
+        | prim _ => simp only [segTy, reduceCtorEq] at hseg
         | ref r =>
           cases r with
           | struct s =>
@@ -1704,15 +1729,15 @@ theorem find_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {w :
               rw [hseg] at hd; cases hd
               exact find_tight hv (tightFields_lookup ht hl hseg) hokm hs hf
             · exact nomatch hf
-          | array _ => simp [segTy] at hseg
-          | fixed _ _ => simp [segTy] at hseg
-          | mapping _ _ => simp [segTy] at hseg
+          | array _ => simp only [segTy, reduceCtorEq] at hseg
+          | fixed _ _ => simp only [segTy, reduceCtorEq] at hseg
+          | mapping _ _ => simp only [segTy, reduceCtorEq] at hseg
       | «at» i =>
         cases T with
-        | prim _ => simp [segTy] at hseg
+        | prim _ => simp only [segTy, reduceCtorEq] at hseg
         | ref r =>
           cases r with
-          | struct _ => simp [segTy] at hseg
+          | struct _ => simp only [segTy, reduceCtorEq] at hseg
           | array E =>
             obtain ⟨elems, sh, rfl, he, hsh⟩ := canon_array h
             simp only [segTy, Option.some.injEq] at hseg
@@ -1735,7 +1760,8 @@ theorem find_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {w :
             split at hf
             · have hm := List.get_mem (elems ++ []) ⟨i.toNat, by omega⟩
               refine find_tight (canonElems_mem (canonElems_append he hsh) hm) ?_ hokm hs hf
-              exact tightElems_iff.mp hte _ (by simp)
+              exact tightElems_iff.mp hte _ (by simp only [List.get_eq_getElem, List.append_nil,
+                                                    List.getElem_mem])
             · exact nomatch hf
           | mapping K V =>
             obtain ⟨es, d, rfl, -, hes, hdd, hd⟩ := canon_map h
@@ -1752,7 +1778,7 @@ theorem find_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {w :
 theorem IdxLive.child {v c : Semantics.SVal} {seg : Seg} {rest : List Seg} (h : IdxLive v (seg :: rest))
     (hc : v.find [seg] = .ok c) : IdxLive c rest := by
   intro pre i hrest es sh fx hf
-  refine h (seg :: pre) i (by simp [hrest]) es sh fx ?_
+  refine h (seg :: pre) i (by simp only [hrest, List.cons_append]) es sh fx ?_
   have := SVal.find_append v [seg] pre
   simp only [List.singleton_append] at this
   rw [this, hc]; exact hf
@@ -1762,9 +1788,9 @@ theorem save_prim_cons {v : Semantics.SVal} {p : PrimTy} (hc : v.canon (.prim p)
     (rest : List Seg) (new : Semantics.SVal) : ∃ e, v.save (seg :: rest) new = .error e := by
   cases v with
   | prim _ => cases seg <;> exact ⟨_, rfl⟩
-  | struct _ => cases p <;> simp [SVal.canon] at hc
-  | array _ _ _ => cases p <;> simp [SVal.canon] at hc
-  | map _ _ => cases p <;> simp [SVal.canon] at hc
+  | struct _ => cases p <;> simp only [SVal.canon] at hc
+  | array _ _ _ => cases p <;> simp only [SVal.canon] at hc
+  | map _ _ => cases p <;> simp only [SVal.canon] at hc
 
 /-- Saving a tight value at a path whose mappings are indexed by numbers,
 into a live slot when it is a word, keeps the tree tight. -/
@@ -1788,7 +1814,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
       cases seg with
       | field n =>
         cases T with
-        | prim _ => simp [segTy] at hseg
+        | prim _ => simp only [segTy, reduceCtorEq] at hseg
         | ref r =>
           cases r with
           | struct s =>
@@ -1806,15 +1832,15 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
               exact tightFields_setBy ht hseg (save_tight hv (tightFields_lookup ht hl hseg) hokm
                 hs hk₂ (fun hp => (hlive hp).child hchild) hn hup)
             · exact nomatch hf
-          | array _ => simp [segTy] at hseg
-          | fixed _ _ => simp [segTy] at hseg
-          | mapping _ _ => simp [segTy] at hseg
+          | array _ => simp only [segTy, reduceCtorEq] at hseg
+          | fixed _ _ => simp only [segTy, reduceCtorEq] at hseg
+          | mapping _ _ => simp only [segTy, reduceCtorEq] at hseg
       | «at» i =>
         cases T with
-        | prim _ => simp [segTy] at hseg
+        | prim _ => simp only [segTy, reduceCtorEq] at hseg
         | ref r =>
           cases r with
-          | struct _ => simp [segTy] at hseg
+          | struct _ => simp only [segTy, reduceCtorEq] at hseg
           | array E =>
             obtain ⟨elems, sh, rfl, he, hsh⟩ := canon_array h
             simp only [segTy, Option.some.injEq] at hseg
@@ -1842,7 +1868,8 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
                   · exact tightElems_iff.mp hte _ hx
                   · exact tightElems_iff.mp hts _ hx
                 · exact hupt
-              refine ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hokm]), ?_,
+              refine ⟨fun hf => absurd hf (by simp only [okDeep_defaultOkS hokm, Bool.true_eq_false,
+                                                  not_false_eq_true]), ?_,
                 tightElems_iff.mpr fun x hx => hall x (List.mem_of_mem_take hx),
                 tightElems_iff.mpr fun x hx => hall x (List.mem_of_mem_drop hx)⟩
               intro hp
@@ -1851,7 +1878,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
                 obtain ⟨p, rfl⟩ : ∃ p, E = .prim p := by
                   cases E with
                   | prim p => exact ⟨p, rfl⟩
-                  | ref _ => simp [Ty.isPrimitive] at hp
+                  | ref _ => simp only [Ty.isPrimitive, Bool.false_eq_true] at hp
                 obtain ⟨e, he'⟩ := save_prim_cons hcc s' r' new
                 rw [he'] at hup; exact nomatch hup
               | nil =>
@@ -1859,7 +1886,8 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
                 subst hs
                 have hl := hlive hp [] i rfl elems sh false (SemanticsProperties.SVal.find_nil _)
                 have hdrop : ((elems ++ sh).set i.toNat up).drop elems.length = sh := by
-                  rw [List.set_append_left _ _ hl.2, List.drop_left' (by simp)]
+                  rw [List.set_append_left _ _ hl.2,
+                    List.drop_left' (by simp only [List.length_set])]
                 rw [hdrop]
                 exact hpr hp
             · exact nomatch hf
@@ -1874,7 +1902,8 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
               obtain ⟨up, hup, hf⟩ := bind_ok_inv hf
               cases hf
               have hm := List.get_mem (elems ++ []) ⟨i.toNat, hb.2⟩
-              have hmm : (elems ++ []).get ⟨i.toNat, hb.2⟩ ∈ elems := by simp
+              have hmm : (elems ++ []).get ⟨i.toNat, hb.2⟩ ∈ elems := by
+                simp only [List.get_eq_getElem, List.append_nil, List.getElem_mem]
               have hcc := canonElems_mem (canonElems_append he hsh) hm
               have hchild : (Semantics.SVal.array elems [] true).find [.at i] =
                   .ok ((elems ++ []).get ⟨i.toNat, hb.2⟩) := by
@@ -1882,10 +1911,10 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
               have hupt := save_tight hcc (tightElems_iff.mp hte _ hmm) hokm hs hk₂
                 (fun hp => (hlive hp).child hchild) hn hup
               refine ⟨?_, tightElems_iff.mpr fun x hx => ?_⟩
-              · simp
+              · simp only [List.append_nil, List.drop_eq_nil_iff, List.length_set, Nat.le_refl]
               · have hx' := List.mem_of_mem_take hx
                 rcases mem_set_or hx' with hx' | rfl
-                · exact tightElems_iff.mp hte _ (by simpa using hx')
+                · exact tightElems_iff.mp hte _ (by simpa only [List.append_nil] using hx')
                 · exact hupt
             · exact nomatch hf
           | mapping K V =>
@@ -1901,7 +1930,8 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
               cases hf
               have hchild : (Semantics.SVal.map es d).find [.at i] = .ok old := by
                 simp only [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
-              exact ⟨fun h => absurd h (by simp [hkey]), tightEntries_setBy htes
+              exact ⟨fun h => absurd h (by simp only [hkey, Bool.true_eq_false, not_false_eq_true]),
+                                               tightEntries_setBy htes
                 (save_tight (canonEntries_lookup hes hl) (tightEntries_lookup htes hl) hokm hs hk₂
                   (fun hp => (hlive hp).child hchild) hn hup)⟩
             · rename_i hl
@@ -1910,7 +1940,8 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
               have hchild : (Semantics.SVal.map es d).find [.at i] = .ok d := by
                 simp only [Semantics.SVal.find, hl, SemanticsProperties.SVal.find_nil]
               subst hdd
-              exact ⟨fun h => absurd h (by simp [hkey]), tightEntries_setBy htes
+              exact ⟨fun h => absurd h (by simp only [hkey, Bool.true_eq_false, not_false_eq_true]),
+                                               tightEntries_setBy htes
                 (save_tight hd (defaultForTy_tight (okDeep_defaultOkS hokm)) hokm hs hk₂
                   (fun hp => (hlive hp).child hchild) hn hup)⟩
 
@@ -1919,14 +1950,15 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
 theorem defaultOf_prim {v : Semantics.SVal} {p : PrimTy} (h : v.canon (.prim p)) :
     v.defaultOf = defaultForTy (.prim p) := by
   cases v with
-  | prim pv => cases p <;> cases pv <;> simp_all [SVal.canon, Semantics.SVal.defaultOf, defaultForTy]
-  | struct _ => cases p <;> simp [SVal.canon] at h
-  | array _ _ _ => cases p <;> simp [SVal.canon] at h
-  | map _ _ => cases p <;> simp [SVal.canon] at h
+  | prim pv => cases p <;> cases pv <;> simp_all only [SVal.canon, Semantics.SVal.defaultOf,
+                                            defaultForTy]
+  | struct _ => cases p <;> simp only [SVal.canon] at h
+  | array _ _ _ => cases p <;> simp only [SVal.canon] at h
+  | map _ _ => cases p <;> simp only [SVal.canon] at h
 
 theorem defaultOfElems_prim {p : PrimTy} : ∀ {elems : List Semantics.SVal}, canonElems (.prim p) elems →
     ∀ w ∈ SVal.defaultOf.defaultOfElems elems, w = defaultForTy (.prim p)
-  | [], _, w, hw => by simp [SVal.defaultOf.defaultOfElems] at hw
+  | [], _, w, hw => by simp only [SVal.defaultOf.defaultOfElems, List.not_mem_nil] at hw
   | v :: rest, h, w, hw => by
     simp only [SVal.defaultOf.defaultOfElems, List.mem_cons] at hw
     rcases hw with rfl | hw
@@ -1935,7 +1967,8 @@ theorem defaultOfElems_prim {p : PrimTy} : ∀ {elems : List Semantics.SVal}, ca
 
 theorem member_okDeep {s n : Name} {T : Ty} (hs : (Ty.ref (.struct s)).okDeep = true)
     (h : lookupBy n (structDef s) = some T) : T.okDeep = true :=
-  struct_okDeep (by simpa [Ty.okDeep] using hs) (n, T) (lookupBy_eq_some_mem h)
+  struct_okDeep (by simpa only [Ty.okDeep, decide_eq_true_eq] using hs) (n,
+                        T) (lookupBy_eq_some_mem h)
 
 mutual
 
@@ -1947,14 +1980,15 @@ theorem Semantics.SVal.defaultOf_tight : ∀ {v : Semantics.SVal} {T : Ty}, v.ca
   | .struct fields, .ref (.struct s), hc, ht, hok =>
     Semantics.SVal.defaultOfFields_tight hc.2 ht (fun hl => member_okDeep hok hl)
   | .array elems sh false, .ref (.array E), hc, ht, hok => by
-    have hE : E.okDeep = true := by simpa [Ty.okDeep] using hok
-    refine ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hE]), fun hp w hw => ?_, trivial,
+    have hE : E.okDeep = true := by simpa only [Ty.okDeep] using hok
+    refine ⟨fun hf => absurd hf (by simp only [okDeep_defaultOkS hE, Bool.true_eq_false,
+                                        not_false_eq_true]), fun hp w hw => ?_, trivial,
       tightElems_iff.mpr fun w hw => ?_⟩
     · rcases List.mem_append.mp hw with hw | hw
       · obtain ⟨p, rfl⟩ : ∃ p, E = .prim p := by
           cases E with
           | prim p => exact ⟨p, rfl⟩
-          | ref _ => simp [Ty.isPrimitive] at hp
+          | ref _ => simp only [Ty.isPrimitive, Bool.false_eq_true] at hp
         exact defaultOfElems_prim hc.2.1 w hw
       · exact ht.2.1 hp w hw
     · rcases List.mem_append.mp hw with hw | hw
@@ -2068,9 +2102,11 @@ theorem Semantics.SVal.overlay_tight {old new : Semantics.SVal} {T : Ty} (hoc : 
           | ref r =>
               cases r with
               | array E =>
-                  have hE : E.okDeep = true := by simpa [Ty.okDeep] using hok
+                  have hE : E.okDeep = true := by simpa only [Ty.okDeep] using hok
                   simp only [Semantics.SVal.overlay]
-                  refine ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hE]), fun hp w hw => ?_,
+                  refine ⟨fun hf => absurd hf (by simp only [okDeep_defaultOkS hE,
+                                                      Bool.true_eq_false, not_false_eq_true]),
+                                                      fun hp w hw => ?_,
                     Semantics.SVal.overlayElems_tight (canonElems_append hoc.2.1 hoc.2.2)
                       (tightElems_iff.mpr fun x hx => ?_) hnc.2.1 hnt.2.2.1 hE,
                     tightElems_iff.mpr fun x hx => ?_⟩
@@ -2078,7 +2114,7 @@ theorem Semantics.SVal.overlay_tight {old new : Semantics.SVal} {T : Ty} (hoc : 
                     · obtain ⟨p, rfl⟩ : ∃ p, E = .prim p := by
                         cases E with
                         | prim p => exact ⟨p, rfl⟩
-                        | ref _ => simp [Ty.isPrimitive] at hp
+                        | ref _ => simp only [Ty.isPrimitive, Bool.false_eq_true] at hp
                       exact defaultOfElems_prim (canonElems_drop _ hoc.2.1) w hw
                     · exact hot.2.1 hp w (List.mem_of_mem_drop hw)
                   · rcases List.mem_append.mp hx with hx | hx
@@ -2091,15 +2127,16 @@ theorem Semantics.SVal.overlay_tight {old new : Semantics.SVal} {T : Ty} (hoc : 
                           tightElems_iff.mp hot.2.2.1 y (List.mem_of_mem_drop hy)) hE) x hx
                     · exact tightElems_iff.mp hot.2.2.2 x (List.mem_of_mem_drop hx)
               | fixed E n =>
-                  have hE : E.okDeep = true := by simpa [Ty.okDeep] using hok
+                  have hE : E.okDeep = true := by simpa only [Ty.okDeep] using hok
                   have holen : oel.length = n := hoc.2.1
                   have hnlen : nel.length = n := hnc.2.1
                   obtain ⟨hsh, hote⟩ := hot
                   subst hsh
                   simp only [Semantics.SVal.overlay]
                   refine ⟨?_, Semantics.SVal.overlayElems_tight (canonElems_append hoc.2.2.1 hoc.2.2.2)
-                    (by simpa using hote) hnc.2.2.1 hnt.2 hE⟩
-                  rw [hnlen, ← holen]; simp [SVal.defaultOf.defaultOfElems]
+                    (by simpa only [List.append_nil] using hote) hnc.2.2.1 hnt.2 hE⟩
+                  rw [hnlen, ← holen]; simp only [List.drop_length, defaultOf.defaultOfElems,
+                                           Nat.sub_self, List.drop_nil, List.append_nil]
               | struct _ => exact hnc.elim
               | mapping _ _ => exact hnc.elim
       | prim _ => simp only [Semantics.SVal.overlay]; exact SVal.strip_tight hnt
@@ -2176,12 +2213,14 @@ theorem plain_tight : ∀ {v : Semantics.SVal} {T : Ty}, v.plain → v.canon T �
     plainFields_tight hp hc.2 (fun hl => member_okDeep hok hl)
   | .array elems sh _, .ref (.array E), hp, hc, hok => by
     obtain ⟨rfl, hpe⟩ := hp
-    have hE : E.okDeep = true := by simpa [Ty.okDeep] using hok
-    exact ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hE]), fun _ w hw => by simp at hw,
+    have hE : E.okDeep = true := by simpa only [Ty.okDeep] using hok
+    exact ⟨fun hf => absurd hf (by simp only [okDeep_defaultOkS hE, Bool.true_eq_false,
+                                       not_false_eq_true]),
+                                       fun _ w hw => by simp only [List.not_mem_nil] at hw,
       plainElems_tight hpe hc.2.1 hE, trivial⟩
   | .array elems sh _, .ref (.fixed E _), hp, hc, hok => by
     obtain ⟨rfl, hpe⟩ := hp
-    exact ⟨rfl, plainElems_tight hpe hc.2.2.1 (by simpa [Ty.okDeep] using hok)⟩
+    exact ⟨rfl, plainElems_tight hpe hc.2.2.1 (by simpa only [Ty.okDeep] using hok)⟩
   | .map _ _, .prim _, hp, _, _ | .map _ _, .ref _, hp, _, _ => hp.elim
   | .struct _, .prim _, _, _, _ | .struct _, .ref (.array _), _, _, _
   | .struct _, .ref (.mapping _ _), _, _, _ | .struct _, .ref (.fixed _ _), _, _, _ => trivial
@@ -2325,7 +2364,7 @@ end Semantics.Tight
 theorem append_single_ne {l l' : List Seg} {a b : Seg} (h : l ++ [a] = l' ++ [b]) :
     l = l' ∧ a = b := by
   have := List.append_inj' h rfl
-  simpa using this
+  simpa only [List.cons.injEq, and_true] using this
 
 /-! ### Pushes and pops -/
 
@@ -2352,16 +2391,17 @@ theorem pushed_tight {E : Ty} {elems shadow shadow' : List Semantics.SVal} {x : 
     (hx : x.tight E) (hsub : ∀ w ∈ shadow', w ∈ shadow) :
     (Semantics.SVal.array (elems ++ [x]) shadow' false).tight (.ref (.array E)) := by
   obtain ⟨-, hpr, hte, hts⟩ := ht
-  refine ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hE]), fun hp w hw => hpr hp w (hsub w hw),
+  refine ⟨fun hf => absurd hf (by simp only [okDeep_defaultOkS hE, Bool.true_eq_false,
+                                      not_false_eq_true]), fun hp w hw => hpr hp w (hsub w hw),
     tightElems_iff.mpr fun w hw => ?_, tightElems_iff.mpr fun w hw => tightElems_iff.mp hts w (hsub w hw)⟩
   rcases List.mem_append.mp hw with hw | hw
   · exact tightElems_iff.mp hte w hw
-  · simp at hw; subst hw; exact hx
+  · simp only [List.mem_cons, List.not_mem_nil, or_false] at hw; subst hw; exact hx
 
 theorem arr_okDeep {E : Ty} (hd : DeepOk C) {r : Name} {segs : List Seg}
     (hT : C.layout.tyAt r segs = some (.ref (.array E))) : E.okDeep = true := by
   obtain ⟨T, hr, hs⟩ := Layout.tyAt_split hT
-  simpa [Ty.okDeep] using okDeep_tyAtSegs (hd r T hr) hs
+  simpa only [Ty.okDeep] using okDeep_tyAtSegs (hd r T hr) hs
 
 theorem pushAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {E : Ty} {r : Name}
     {segs : List Seg} {val : Semantics.SVal → Res Semantics.SVal} (hT : C.layout.tyAt r segs = some (.ref (.array E)))
@@ -2374,7 +2414,7 @@ theorem pushAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C
   obtain ⟨elems, shadow, rfl, -, -⟩ := canon_array (hc.find hT hsv)
   obtain ⟨newElem, hnew, h⟩ := bind_ok_inv h
   obtain ⟨hs1, hs2⟩ := pushSlot_tight (okDeep_defaultOkS hE) hts.2.2.2
-  exact ht.save hd hc hT hk (fun hp => by simp [Ty.isPrimitive] at hp)
+  exact ht.save hd hc hT hk (fun hp => by simp only [Ty.isPrimitive, Bool.false_eq_true] at hp)
     (pushed_tight hE hts (hval _ _ hs1 hnew) hs2) h
 
 theorem pushPlaceAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {E : Ty} {r : Name}
@@ -2388,7 +2428,7 @@ theorem pushPlaceAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Ti
   obtain ⟨σ₁, hσ₁, h⟩ := bind_ok_inv h
   cases h
   obtain ⟨hs1, hs2⟩ := pushSlot_tight (okDeep_defaultOkS hE) hts.2.2.2
-  exact ht.save hd hc hT hk (fun hp => by simp [Ty.isPrimitive] at hp)
+  exact ht.save hd hc hT hk (fun hp => by simp only [Ty.isPrimitive, Bool.false_eq_true] at hp)
     (pushed_tight hE hts hs1 hs2) hσ₁
 
 theorem popAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C σ) {E : Ty} {r : Name}
@@ -2408,15 +2448,17 @@ theorem popAt_tight (hd : DeepOk C) (hc : Canon C H σ) (ht : Semantics.Tight C 
       intro v hv; rw [← hrev] at hv; exact List.mem_reverse.mp hv
     have hlc := canonElems_mem he (hmem last List.mem_cons_self)
     have hlt := tightElems_iff.mp hte last (hmem last List.mem_cons_self)
-    refine ht.save hd hc hT hk (fun hp => by simp [Ty.isPrimitive] at hp) ?_ h
-    refine ⟨fun hf => absurd hf (by simp [okDeep_defaultOkS hE]), fun hp w hw => ?_,
+    refine ht.save hd hc hT hk (fun hp => by simp only [Ty.isPrimitive,
+                                                 Bool.false_eq_true] at hp) ?_ h
+    refine ⟨fun hf => absurd hf (by simp only [okDeep_defaultOkS hE, Bool.true_eq_false,
+                                        not_false_eq_true]), fun hp w hw => ?_,
       tightElems_iff.mpr fun v hv => tightElems_iff.mp hte v
         (hmem v (List.mem_cons_of_mem _ (List.mem_reverse.mp hv))), ?_⟩
     · rcases List.mem_cons.mp hw with rfl | hw
       · obtain ⟨p, rfl⟩ : ∃ p, E = .prim p := by
           cases E with
           | prim p => exact ⟨p, rfl⟩
-          | ref _ => simp [Ty.isPrimitive] at hp
+          | ref _ => simp only [Ty.isPrimitive, Bool.false_eq_true] at hp
         simp only [Ty.isMapping, Bool.false_eq_true, ↓reduceIte]
         exact defaultOf_prim hlc
       · exact hpr hp w hw
@@ -3410,8 +3452,8 @@ theorem dirty_word_not_reachable :
       exact ⟨_, rfl, rfl, trivial, trivial, trivial⟩
     · exact nomatch hr
   · have ht := reachable_tight (by decide) (by decide) h "xs" _ _ rfl rfl
-    have := ht.2.1 rfl (.int 5) (by simp)
-    simp [defaultForTy] at this
+    have := ht.2.1 rfl (.int 5) (by simp only [List.mem_cons, List.not_mem_nil, or_false])
+    simp only [defaultForTy, Semantics.SVal.prim.injEq, PrimVal.int.injEq, Int.reduceEq] at this
 
 /-- A slot past the end of a fixed-size array: canonical, not reachable. -/
 theorem fixed_past_end_not_reachable :

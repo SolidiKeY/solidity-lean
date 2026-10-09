@@ -19,23 +19,23 @@ open Semantics
 @[simp] theorem lookupBy_setBy_self [DecidableEq κ] (k : κ) (v : α)
     (l : List (κ × α)) : lookupBy k (setBy k v l) = some v := by
   induction l with
-  | nil => simp [setBy, lookupBy]
+  | nil => simp only [setBy, lookupBy, ↓reduceIte]
   | cons hd tl ih =>
       obtain ⟨k', v'⟩ := hd
-      by_cases h : k = k' <;> simp [setBy, lookupBy, h, ih]
+      by_cases h : k = k' <;> simp only [h, setBy, ↓reduceIte, lookupBy, ih]
 
 theorem lookupBy_setBy_ne [DecidableEq κ] {k k' : κ} (h : k ≠ k')
     (v : α) (l : List (κ × α)) :
     lookupBy k (setBy k' v l) = lookupBy k l := by
   induction l with
-  | nil => simp [setBy, lookupBy, h]
+  | nil => simp only [setBy, lookupBy, h, ↓reduceIte]
   | cons hd tl ih =>
       obtain ⟨k'', v''⟩ := hd
       by_cases h₂ : k' = k''
       · subst h₂
-        simp [setBy, lookupBy, h]
+        simp only [setBy, ↓reduceIte, lookupBy, h]
       · by_cases h₃ : k = k'' <;>
-          simp [setBy, lookupBy, h₂, h₃, ih]
+          simp only [h₃, setBy, h₂, ↓reduceIte, lookupBy, ih]
 
 /-! ## A live read is a slot read -/
 
@@ -43,15 +43,15 @@ theorem lookupBy_setBy_ne [DecidableEq κ] {k k' : κ} (h : k ≠ k')
 returns, what the slot read does: `persons[0].age` with one person. -/
 theorem SVal.find_of_findLive : ∀ {v w : SVal} {p : List Seg}, v.findLive p = .ok w →
     v.find p = .ok w
-  | v, w, [], h => by simpa [SVal.findLive, SVal.find] using h
-  | .prim _, w, a :: p, h => by cases a <;> simp [SVal.findLive] at h
+  | v, w, [], h => by simpa only [SVal.find, Except.ok.injEq, SVal.findLive] using h
+  | .prim _, w, a :: p, h => by cases a <;> simp only [SVal.findLive, reduceCtorEq] at h
   | .struct fields, w, .field n :: p, h => by
     simp only [SVal.findLive] at h
     simp only [SVal.find]
     split at h
     · rename_i hl; (try rw [hl]); exact SVal.find_of_findLive h
-    · simp at h
-  | .struct _, w, .at _ :: _, h => by simp [SVal.findLive] at h
+    · simp only [reduceCtorEq] at h
+  | .struct _, w, .at _ :: _, h => by simp only [SVal.findLive, reduceCtorEq] at h
   | .array elems shadow _, w, .at i :: p, h => by
     simp only [SVal.findLive] at h
     split at h
@@ -61,19 +61,19 @@ theorem SVal.find_of_findLive : ∀ {v w : SVal} {p : List Seg}, v.findLive p = 
       simp only [SVal.find, dif_pos hi']
       rw [List.get_eq_getElem, List.getElem_append_left hi.2]
       exact SVal.find_of_findLive h
-    · simp at h
+    · simp only [reduceCtorEq] at h
   | .array elems shadow fx, w, .field n :: p, h => by
     by_cases hn : n = "length"
     · subst hn; simp only [SVal.findLive] at h; simp only [SVal.find]
       cases fx
       · exact SVal.find_of_findLive h
-      · simp at h
-    · simp [SVal.findLive] at h
+      · simp only [↓reduceIte, reduceCtorEq] at h
+    · simp only [SVal.findLive, reduceCtorEq] at h
   | .map entries dflt, w, .at i :: p, h => by
     simp only [SVal.findLive] at h
     simp only [SVal.find]
     split at h <;> rename_i hl <;> (try rw [hl]) <;> exact SVal.find_of_findLive h
-  | .map _ _, w, .field _ :: _, h => by simp [SVal.findLive] at h
+  | .map _ _, w, .field _ :: _, h => by simp only [SVal.findLive, reduceCtorEq] at h
 
 theorem State.findStorage_of_findLive {σ : State} {r : Name} {p : List Seg} {w : SVal}
     (h : σ.findLive r p = .ok w) : σ.findStorage r p = .ok w := by
@@ -81,7 +81,7 @@ theorem State.findStorage_of_findLive {σ : State} {r : Name} {p : List Seg} {w 
   unfold State.findStorage
   split at h
   · rename_i hl; (try rw [hl]); exact SVal.find_of_findLive h
-  · simp at h
+  · simp only [reduceCtorEq] at h
 
 /-! ## Storage read-after-write -/
 
@@ -97,16 +97,16 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
     updated.find path = .ok new := by
   induction path generalizing old updated with
   | nil =>
-      simp [SVal.save] at h
+      simp only [SVal.save, Except.ok.injEq] at h
       subst updated
-      simp [SVal.find]
+      simp only [SVal.find]
   | cons seg rest ih =>
       cases seg with
       | field name =>
-          cases old <;> try { simp [SVal.save] at h }
+          cases old <;> try { simp only [SVal.save, reduceCtorEq] at h }
           rename_i fields
           cases hv : lookupBy name fields with
-          | none => simp [SVal.save, hv] at h
+          | none => simp only [SVal.save, hv, reduceCtorEq] at h
           | some old =>
               simp only [SVal.save, hv] at h
               cases hs : old.save rest new with
@@ -115,9 +115,9 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
                   rw [hs] at h
                   injection h with h'
                   subst updated
-                  simp [SVal.find, lookupBy_setBy_self, ih hs]
+                  simp only [SVal.find, lookupBy_setBy_self, ih hs]
       | «at» i =>
-          cases old <;> try { simp [SVal.save] at h }
+          cases old <;> try { simp only [SVal.save, reduceCtorEq] at h }
           · rename_i elems shadow fx
             simp only [SVal.save] at h
             split at h
@@ -129,8 +129,11 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
                   rw [hs] at h
                   injection h with h'
                   subst updated
-                  simp [SVal.find, List.take_append_drop, hb, ih hs]
-                  simp at hb; omega
+                  simp only [SVal.find, hb, List.take_append_drop, List.length_set,
+                      List.length_append, Int.toNat_lt, Int.natCast_add, true_and,
+                      List.get_eq_getElem, List.getElem_set_self, ih hs, dite_eq_ite,
+                      ite_eq_left_iff, Int.not_lt, reduceCtorEq, imp_false, Int.not_le]
+                  simp only [List.length_append] at hb; omega
             next hb => contradiction
           · rename_i entries dflt
             cases hv : lookupBy i entries with
@@ -142,7 +145,7 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
                     rw [hs] at h
                     injection h with h'
                     subst updated
-                    simp [SVal.find, lookupBy_setBy_self, ih hs]
+                    simp only [SVal.find, lookupBy_setBy_self, ih hs]
             | some old =>
                 simp only [SVal.save, hv] at h
                 cases hs : old.save rest new with
@@ -151,7 +154,7 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
                     rw [hs] at h
                     injection h with h'
                     subst updated
-                    simp [SVal.find, lookupBy_setBy_self, ih hs]
+                    simp only [SVal.find, lookupBy_setBy_self, ih hs]
 
 /-- State-level read-after-write, lifted through the storage-root map. -/
 theorem State.findStorage_saveStorage_same {s s' : State} {root : Name}
@@ -160,7 +163,7 @@ theorem State.findStorage_saveStorage_same {s s' : State} {root : Name}
     s'.findStorage root path = .ok new := by
   unfold State.saveStorage at h
   cases hv : lookupBy root s.storage with
-  | none => simp [hv] at h
+  | none => simp only [hv, reduceCtorEq] at h
   | some old =>
       simp only [hv] at h
       cases hs : old.save path new with
@@ -169,8 +172,7 @@ theorem State.findStorage_saveStorage_same {s s' : State} {root : Name}
           rw [hs] at h
           injection h with h'
           subst s'
-          simp [State.findStorage, lookupBy_setBy_self,
-            SVal.find_save_same hs]
+          simp only [State.findStorage, lookupBy_setBy_self, SVal.find_save_same hs]
 
 /-- A successful storage update changes only the storage component. -/
 theorem State.saveStorage_frame {s s' : State} {root : Name}
@@ -180,7 +182,7 @@ theorem State.saveStorage_frame {s s' : State} {root : Name}
       s'.env = s.env ∧ s'.net = s.net ∧ s'.selfBalance = s.selfBalance ∧ s'.tx = s.tx := by
   unfold State.saveStorage at h
   cases hv : lookupBy root s.storage with
-  | none => simp [hv] at h
+  | none => simp only [hv, reduceCtorEq] at h
   | some old =>
       simp only [hv] at h
       cases hs : old.save path new with
@@ -209,13 +211,13 @@ def HeapWellFormed (s : State) : Prop :=
 /-- The freshly returned identifier reads back the allocated object. -/
 @[simp] theorem State.alloc_fresh (s : State) (obj : MObj) :
     (s.alloc obj).1.getObj (s.alloc obj).2 = .ok obj := by
-  simp [State.alloc, State.getObj, lookupBy_setBy_self]
+  simp only [State.getObj, State.alloc, lookupBy_setBy_self]
 
 /-- Allocation leaves every other heap lookup unchanged. -/
 theorem State.alloc_preserves_getObj {s : State} {obj : MObj} {id : Nat}
     (hne : id ≠ s.nextId) :
     (s.alloc obj).1.getObj id = s.getObj id := by
-  simp [State.alloc, State.getObj, lookupBy_setBy_ne hne]
+  simp only [State.getObj, State.alloc, lookupBy_setBy_ne hne]
 
 /-- Allocation does not change storage, local bindings, the network
 ledger, or the contract balance. -/
@@ -307,7 +309,7 @@ theorem bind {s : State} {x : Res (State × α)}
       obtain ⟨t, a⟩ := ta
       have hst : StateFrame s t := hx t a hxv
       have hfu : f (t, a) = .ok (u, b) := by
-        simpa [hxv] using h
+        simpa only [hxv] using h
       exact StateFrame.trans hst (hf t a hst u b hfu)
 
 theorem alloc_ref (s : State) (obj : MObj) :
@@ -334,7 +336,7 @@ theorem copyStToM_frame (s : State) (v : SVal) :
       | bool b => exact FramePreserving.pure s (MVal.bool b)
   | map entries dflt =>
       intro t mv h
-      simp [copyStToM] at h
+      simp only [copyStToM, reduceCtorEq] at h
   | struct fields =>
       rw [copyStToM]
       apply FramePreserving.bind (copyStFields_frame s fields)
@@ -403,7 +405,7 @@ theorem bind {s : State} {x : Res (State × α)}
   | error e => rw [hxv] at h; contradiction
   | ok ta =>
       obtain ⟨t, a⟩ := ta
-      have hfu : f (t, a) = .ok (u, b) := by simpa [hxv] using h
+      have hfu : f (t, a) = .ok (u, b) := by simpa only [hxv] using h
       exact Nat.le_trans (hx t a hxv) (hf t a u b hfu)
 
 theorem alloc_ref (s : State) (obj : MObj) :
@@ -425,7 +427,7 @@ theorem copyStToM_nextId (s : State) (v : SVal) :
       cases p with
       | int v => exact NextIdGrows.pure s (MVal.int v)
       | bool b => exact NextIdGrows.pure s (MVal.bool b)
-  | map entries dflt => intro t mv h; simp [copyStToM] at h
+  | map entries dflt => intro t mv h; simp only [copyStToM, reduceCtorEq] at h
   | struct fields =>
       rw [copyStToM]
       apply NextIdGrows.bind (copyStFields_nextId s fields)
@@ -470,12 +472,12 @@ theorem allocDefault_nextId {s t : State} {ref : RefTy} {n : Nat}
     (h : allocDefault s ref = .ok (t, n)) : s.nextId ≤ t.nextId := by
   unfold allocDefault at h
   cases hc : copyStToM s (defaultForRef ref) with
-  | error e => rw [hc] at h; exact absurd h (by simp)
+  | error e => rw [hc] at h; exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
   | ok tv =>
       obtain ⟨t', mv⟩ := tv
       rw [hc] at h
       cases mv with
-      | prim p => exact absurd h (by simp)
+      | prim p => exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
       | ref m =>
           simp only [Except.ok.injEq, Prod.mk.injEq] at h
           exact h.1 ▸ copyStToM_nextId s _ t' _ hc
@@ -488,12 +490,16 @@ interpreter, not yet written (`denoteMem_new`). -/
 theorem copyStToM_nextId_lt {s t : State} {v : SVal} {n : Nat}
     (h : copyStToM s v = .ok (t, .ref n)) : s.nextId < t.nextId := by
   cases v with
-  | prim p => cases p <;> exact absurd h (by simp)
-  | map entries dflt => exact absurd h (by simp)
+  | prim p => cases p <;> exact absurd h (by simp only [copyStToM_int, Except.ok.injEq,
+                                                 Prod.mk.injEq, reduceCtorEq, and_false,
+                                                 not_false_eq_true, copyStToM_bool])
+  | map entries dflt => exact absurd h (by simp only [copyStToM_map, reduceCtorEq,
+                                               not_false_eq_true])
   | struct fields =>
       rw [copyStToM] at h
       cases hf : copyStFields s fields with
-      | error e => rw [hf] at h; exact absurd h (by simp [bind, Except.bind])
+      | error e => rw [hf] at h; exact absurd h (by simp only [bind, Except.bind, reduceCtorEq,
+                                                        not_false_eq_true])
       | ok tf =>
           obtain ⟨t', mfields⟩ := tf
           rw [hf] at h
@@ -504,7 +510,8 @@ theorem copyStToM_nextId_lt {s t : State} {v : SVal} {n : Nat}
   | array elems =>
       rw [copyStToM] at h
       cases he : copyStElems s elems with
-      | error e => rw [he] at h; exact absurd h (by simp [bind, Except.bind])
+      | error e => rw [he] at h; exact absurd h (by simp only [bind, Except.bind, reduceCtorEq,
+                                                        not_false_eq_true])
       | ok te =>
           obtain ⟨t', melems⟩ := te
           rw [he] at h
@@ -518,12 +525,12 @@ theorem allocDefault_nextId_lt {s t : State} {ref : RefTy} {n : Nat}
     (h : allocDefault s ref = .ok (t, n)) : s.nextId < t.nextId := by
   unfold allocDefault at h
   cases hc : copyStToM s (defaultForRef ref) with
-  | error e => rw [hc] at h; exact absurd h (by simp)
+  | error e => rw [hc] at h; exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
   | ok tv =>
       obtain ⟨t', mv⟩ := tv
       rw [hc] at h
       cases mv with
-      | prim p => exact absurd h (by simp)
+      | prim p => exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
       | ref m =>
           simp only [Except.ok.injEq, Prod.mk.injEq] at h
           exact h.1 ▸ copyStToM_nextId_lt hc
@@ -566,7 +573,7 @@ theorem bind {s : State} {x : Res (State × α)} {f : State × α → Res (State
   | error e => rw [hxv] at h; contradiction
   | ok ta =>
       obtain ⟨t, a⟩ := ta
-      have hfu : f (t, a) = .ok (u, b) := by simpa [hxv] using h
+      have hfu : f (t, a) = .ok (u, b) := by simpa only [hxv] using h
       exact (hx t a hxv).trans (hf t a u b hfu)
 
 theorem alloc_ref (s : State) (obj : MObj) :
@@ -584,7 +591,7 @@ theorem copyStToM_heapExt (s : State) (v : SVal) : HeapExtR s (copyStToM s v) :=
       cases p with
       | int v => exact HeapExtR.pure s (MVal.int v)
       | bool b => exact HeapExtR.pure s (MVal.bool b)
-  | map entries dflt => intro t mv h; simp [copyStToM] at h
+  | map entries dflt => intro t mv h; simp only [copyStToM, reduceCtorEq] at h
   | struct fields =>
       rw [copyStToM]
       apply HeapExtR.bind (copyStFields_heapExt s fields)
@@ -628,12 +635,12 @@ theorem allocDefault_heapExt {s t : State} {R : RefTy} {n : Nat}
     (h : allocDefault s R = .ok (t, n)) : s.HeapExt t := by
   unfold allocDefault at h
   cases hc : copyStToM s (defaultForRef R) with
-  | error e => rw [hc] at h; exact absurd h (by simp)
+  | error e => rw [hc] at h; exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
   | ok tv =>
       obtain ⟨t', mv⟩ := tv
       rw [hc] at h
       cases mv with
-      | prim p => exact absurd h (by simp)
+      | prim p => exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
       | ref m =>
           simp only [Except.ok.injEq, Prod.mk.injEq] at h
           exact h.1 ▸ copyStToM_heapExt s _ t' _ hc
@@ -642,12 +649,16 @@ theorem allocDefault_heapExt {s t : State} {R : RefTy} {n : Nat}
 theorem copyStToM_ref_lt {s t : State} {v : SVal} {n : Nat}
     (h : copyStToM s v = .ok (t, .ref n)) : n < t.nextId := by
   cases v with
-  | prim p => cases p <;> exact absurd h (by simp)
-  | map entries dflt => exact absurd h (by simp)
+  | prim p => cases p <;> exact absurd h (by simp only [copyStToM_int, Except.ok.injEq,
+                                                 Prod.mk.injEq, reduceCtorEq, and_false,
+                                                 not_false_eq_true, copyStToM_bool])
+  | map entries dflt => exact absurd h (by simp only [copyStToM_map, reduceCtorEq,
+                                               not_false_eq_true])
   | struct fields =>
       rw [copyStToM] at h
       cases hf : copyStFields s fields with
-      | error e => rw [hf] at h; exact absurd h (by simp [bind, Except.bind])
+      | error e => rw [hf] at h; exact absurd h (by simp only [bind, Except.bind, reduceCtorEq,
+                                                        not_false_eq_true])
       | ok tf =>
           obtain ⟨t', mfields⟩ := tf
           rw [hf] at h
@@ -658,7 +669,8 @@ theorem copyStToM_ref_lt {s t : State} {v : SVal} {n : Nat}
   | array elems =>
       rw [copyStToM] at h
       cases he : copyStElems s elems with
-      | error e => rw [he] at h; exact absurd h (by simp [bind, Except.bind])
+      | error e => rw [he] at h; exact absurd h (by simp only [bind, Except.bind, reduceCtorEq,
+                                                        not_false_eq_true])
       | ok te =>
           obtain ⟨t', melems⟩ := te
           rw [he] at h
@@ -672,12 +684,12 @@ theorem allocDefault_id_lt {s t : State} {R : RefTy} {n : Nat}
     (h : allocDefault s R = .ok (t, n)) : n < t.nextId := by
   unfold allocDefault at h
   cases hc : copyStToM s (defaultForRef R) with
-  | error e => rw [hc] at h; exact absurd h (by simp)
+  | error e => rw [hc] at h; exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
   | ok tv =>
       obtain ⟨t', mv⟩ := tv
       rw [hc] at h
       cases mv with
-      | prim p => exact absurd h (by simp)
+      | prim p => exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
       | ref m =>
           simp only [Except.ok.injEq, Prod.mk.injEq] at h
           obtain ⟨rfl, rfl⟩ := h
@@ -702,43 +714,43 @@ function composition and needs no port; `commuteSimpleUpdates` /
 theorem setBy_setBy_self [DecidableEq κ] (k : κ) (v v' : α)
     (l : List (κ × α)) : setBy k v' (setBy k v l) = setBy k v' l := by
   induction l with
-  | nil => simp [setBy]
+  | nil => simp only [setBy, ↓reduceIte]
   | cons hd tl ih =>
       obtain ⟨k'', v''⟩ := hd
-      by_cases h : k = k'' <;> simp [setBy, h, ih]
+      by_cases h : k = k'' <;> simp only [h, setBy, ↓reduceIte, ih]
 
 /-- KeY `applyOnPV`/`applyOnPVLastInParallel` for locals: read after
 write at the point of application. -/
 @[simp] theorem State.getEnv_setEnv_self (s : State) (n : Var)
     (b : Binding) : (s.setEnv n b).getEnv n = .ok b := by
-  simp [State.getEnv, State.setEnv]
+  simp only [State.getEnv, State.setEnv, lookupBy_setBy_self]
 
 /-- KeY `applyOnDifferentPV` for locals: a write to a different name
 frames. -/
 theorem State.getEnv_setEnv_ne {n n' : Var} (h : n' ≠ n) (s : State)
     (b : Binding) : (s.setEnv n b).getEnv n' = s.getEnv n' := by
-  simp [State.getEnv, State.setEnv, lookupBy_setBy_ne h]
+  simp only [State.getEnv, State.setEnv, lookupBy_setBy_ne h]
 
 /-- KeY `simplifyUpdate1-3` (semantic core): the later write to the same
 local absorbs the earlier one. -/
 theorem State.setEnv_setEnv_absorb (s : State) (n : Var)
     (b b' : Binding) : (s.setEnv n b).setEnv n b' = s.setEnv n b' := by
-  simp [State.setEnv, setBy_setBy_self]
+  simp only [State.setEnv, setBy_setBy_self]
 
 /-- Ledger instance of `applyOnPV`: read after transfer booking. -/
 @[simp] theorem State.getNet_setNet_self (s : State) (a v : Int) :
     (s.setNet a v).getNet a = v := by
-  simp [State.getNet, State.setNet]
+  simp only [State.getNet, State.setNet, lookupBy_setBy_self, Option.getD_some]
 
 /-- Ledger instance of `applyOnDifferentPV`. -/
 theorem State.getNet_setNet_ne {a a' : Int} (h : a' ≠ a) (s : State)
     (v : Int) : (s.setNet a v).getNet a' = s.getNet a' := by
-  simp [State.getNet, State.setNet, lookupBy_setBy_ne h]
+  simp only [State.getNet, State.setNet, lookupBy_setBy_ne h]
 
 /-- Ledger overwrite absorption. -/
 theorem State.setNet_setNet_absorb (s : State) (a : Int) (v v' : Int) :
     (s.setNet a v).setNet a v' = s.setNet a v' := by
-  simp [State.setNet, setBy_setBy_self]
+  simp only [State.setNet, setBy_setBy_self]
 
 /-! ## Paths, runs and results
 
@@ -748,7 +760,7 @@ here once rather than in each of them. -/
 /-- A member that `lookupBy` finds is in the list: `age` is a member of `Person`. -/
 theorem lookupBy_eq_some_mem [DecidableEq κ] {k : κ} {v : α} :
     ∀ {l : List (κ × α)}, lookupBy k l = some v → (k, v) ∈ l
-  | [], h => by simp [lookupBy] at h
+  | [], h => by simp only [lookupBy, reduceCtorEq] at h
   | (k', v') :: l, h => by
     simp only [lookupBy] at h
     split at h
@@ -768,13 +780,13 @@ theorem SVal.save_nil (v new : SVal) : v.save [] new = .ok new := by cases v <;>
 theorem SVal.find_append : ∀ (v : SVal) (segs rest : List Seg),
     v.find (segs ++ rest) = (v.find segs >>= fun w => w.find rest)
   | v, [], rest => by simp only [List.nil_append, SVal.find_nil]; rfl
-  | .prim _, _ :: _, _ => by simp [SVal.find]; rfl
+  | .prim _, _ :: _, _ => by simp only [List.cons_append, SVal.find]; rfl
   | .struct fields, .field name :: segs, rest => by
     simp only [List.cons_append, SVal.find]
     split
     · exact SVal.find_append _ _ _
     · rfl
-  | .struct _, .at _ :: _, _ => by simp [SVal.find]; rfl
+  | .struct _, .at _ :: _, _ => by simp only [List.cons_append, SVal.find]; rfl
   | .array elems _ _, .at i :: segs, rest => by
     simp only [List.cons_append, SVal.find]
     split
@@ -787,26 +799,26 @@ theorem SVal.find_append : ∀ (v : SVal) (segs rest : List Seg),
       · exact SVal.find_append _ _ _
       · rfl
     · have e : ∀ l, SVal.find (.array elems sh fx) (.field name :: l) = .error .undef := by
-        intro l; simp [SVal.find]
+        intro l; simp only [SVal.find]
       simp only [List.cons_append, e]; rfl
   | .map entries dflt, .at i :: segs, rest => by
     simp only [List.cons_append, SVal.find]
     split
     · exact SVal.find_append _ _ _
     · exact SVal.find_append _ _ _
-  | .map _ _, .field _ :: _, _ => by simp [SVal.find]; rfl
+  | .map _ _, .field _ :: _, _ => by simp only [List.cons_append, SVal.find]; rfl
 
 /-- `SVal.find_append` for the live read. -/
 theorem SVal.findLive_append : ∀ (v : SVal) (segs rest : List Seg),
     v.findLive (segs ++ rest) = (v.findLive segs >>= fun w => w.findLive rest)
   | v, [], rest => by simp only [List.nil_append, SVal.findLive_nil]; rfl
-  | .prim _, _ :: _, _ => by simp [SVal.findLive]; rfl
+  | .prim _, _ :: _, _ => by simp only [List.cons_append, SVal.findLive]; rfl
   | .struct fields, .field name :: segs, rest => by
     simp only [List.cons_append, SVal.findLive]
     split
     · exact SVal.findLive_append _ _ _
     · rfl
-  | .struct _, .at _ :: _, _ => by simp [SVal.findLive]; rfl
+  | .struct _, .at _ :: _, _ => by simp only [List.cons_append, SVal.findLive]; rfl
   | .array elems _ _, .at i :: segs, rest => by
     simp only [List.cons_append, SVal.findLive]
     split
@@ -819,14 +831,14 @@ theorem SVal.findLive_append : ∀ (v : SVal) (segs rest : List Seg),
       · exact SVal.findLive_append _ _ _
       · rfl
     · have e : ∀ l, SVal.findLive (.array elems sh fx) (.field name :: l) = .error .undef := by
-        intro l; simp [SVal.findLive]
+        intro l; simp only [SVal.findLive]
       simp only [List.cons_append, e]; rfl
   | .map entries dflt, .at i :: segs, rest => by
     simp only [List.cons_append, SVal.findLive]
     split
     · exact SVal.findLive_append _ _ _
     · exact SVal.findLive_append _ _ _
-  | .map _ _, .field _ :: _, _ => by simp [SVal.findLive]; rfl
+  | .map _ _, .field _ :: _, _ => by simp only [List.cons_append, SVal.findLive]; rfl
 
 /-- A write along `segs ++ rest`, where `segs` reads `sub`, writes `rest` into
 `sub` and puts the result back at `segs`: `alice.age = 1;` rebuilds `alice`
@@ -839,7 +851,7 @@ theorem SVal.save_append : ∀ (v : SVal) (segs rest : List Seg) (new sub : SVal
     cases v.save rest new with
     | error e => rfl
     | ok a => exact (SVal.save_nil v a).symm
-  | .prim _, _ :: _, _, _, _, h => by simp [SVal.find] at h
+  | .prim _, _ :: _, _, _, _, h => by simp only [SVal.find, reduceCtorEq] at h
   | .struct fields, .field name :: segs, rest, new, sub, h => by
     simp only [List.cons_append, SVal.save]
     simp only [SVal.find] at h
@@ -849,7 +861,7 @@ theorem SVal.save_append : ∀ (v : SVal) (segs rest : List Seg) (new sub : SVal
       rw [SVal.save_append old segs rest new sub h]
       cases sub.save rest new <;> rfl
     · rename_i hn; rw [hn] at h; cases h
-  | .struct _, .at _ :: _, _, _, _, h => by simp [SVal.find] at h
+  | .struct _, .at _ :: _, _, _, _, h => by simp only [SVal.find, reduceCtorEq] at h
   | .array elems sh _, .at i :: segs, rest, new, sub, h => by
     simp only [List.cons_append, SVal.save]
     simp only [SVal.find] at h
@@ -863,11 +875,12 @@ theorem SVal.save_append : ∀ (v : SVal) (segs rest : List Seg) (new sub : SVal
       cases fx
       · cases segs with
         | nil =>
-          simp [SVal.find] at h; subst h
-          cases rest <;> simp [SVal.save] <;> rfl
-        | cons s segs => simp [SVal.find] at h
-      · simp [SVal.find] at h
-    · simp [SVal.find] at h
+          simp only [SVal.find, Bool.false_eq_true, ↓reduceIte, Except.ok.injEq] at h; subst h
+          cases rest <;> simp only [List.append_nil, SVal.save, List.cons_append,
+                             List.nil_append] <;> rfl
+        | cons s segs => simp only [SVal.find, Bool.false_eq_true, ↓reduceIte, reduceCtorEq] at h
+      · simp only [SVal.find, ↓reduceIte, reduceCtorEq] at h
+    · simp only [SVal.find, reduceCtorEq] at h
   | .map entries dflt, .at i :: segs, rest, new, sub, h => by
     simp only [List.cons_append, SVal.save]
     simp only [SVal.find] at h
@@ -876,7 +889,7 @@ theorem SVal.save_append : ∀ (v : SVal) (segs rest : List Seg) (new sub : SVal
       cases sub.save rest new <;> rfl
     · rename_i hold; rw [hold] at h; rw [SVal.save_append _ segs rest new sub h]
       cases sub.save rest new <;> rfl
-  | .map _ _, .field _ :: _, _, _, _, h => by simp [SVal.find] at h
+  | .map _ _, .field _ :: _, _, _, _, h => by simp only [SVal.find, reduceCtorEq] at h
 
 /-- `SVal.find_append` at a root: `folks[7].age` is `folks[7]`, then `.age`. -/
 theorem State.findStorage_append (σ : State) (r : Name) (segs rest : List Seg) :
@@ -913,7 +926,7 @@ theorem State.saveStorage_eq (σ : State) (r : Name) (segs : List Seg) (x : SVal
   unfold State.saveStorage State.storeRes
   cases lookupBy r σ.storage with
   | none => rfl
-  | some v => cases h : v.save segs x <;> simp [h, bind, Except.bind, pure, Except.pure]
+  | some v => cases h : v.save segs x <;> simp only [bind, Except.bind, h, pure, Except.pure]
 
 /-- A write that returned wrote below a root that was there. -/
 theorem State.saveStorage_ok_inv {σ σ' : State} {r : Name} {segs : List Seg} {new : SVal}
@@ -922,7 +935,7 @@ theorem State.saveStorage_ok_inv {σ σ' : State} {r : Name} {segs : List Seg} {
       σ' = { σ with storage := setBy r up σ.storage } := by
   unfold State.saveStorage at h
   cases hV : lookupBy r σ.storage with
-  | none => simp [hV] at h
+  | none => simp only [hV, reduceCtorEq] at h
   | some V =>
     simp only [hV] at h
     cases hs : V.save segs new with
@@ -933,7 +946,7 @@ theorem State.saveStorage_ok_inv {σ σ' : State} {r : Name} {segs : List Seg} {
 theorem defaultOfElems_eq_map :
     ∀ l : List SVal, SVal.defaultOf.defaultOfElems l = l.map SVal.defaultOf
   | [] => rfl
-  | v :: l => by simp [SVal.defaultOf.defaultOfElems, defaultOfElems_eq_map l]
+  | v :: l => by simp only [SVal.defaultOf.defaultOfElems, defaultOfElems_eq_map l, List.map_cons]
 
 /-- A deleted struct's member is the member deleted: `delete alice;` makes `alice.age` `0`. -/
 theorem lookupBy_defaultOfFields (n : Name) : ∀ fields : List (Name × SVal),
@@ -948,7 +961,7 @@ theorem lookupBy_defaultOfFields (n : Name) : ∀ fields : List (Name × SVal),
 /-- A fresh struct's member is its type's default: a fresh `Person`'s `age` is `0`. -/
 theorem lookupBy_defaultForFields (n : Name) : ∀ l : List (Name × Ty),
     lookupBy n (defaultForFields l) = (lookupBy n l).map defaultForTy
-  | [] => by simp [defaultForFields, lookupBy]
+  | [] => by simp only [defaultForFields, lookupBy, Option.map_none]
   | (m, T) :: l => by
     rw [defaultForFields]
     simp only [lookupBy]
@@ -967,7 +980,8 @@ theorem Res.error_bind {α β : Type} (e : Halt) (f : α → Res β) :
 /-- A bind returned: its first step did, and the rest did from there. -/
 theorem Res.bind_eq_ok {α β : Type} {x : Res α} {f : α → Res β} {b : β} :
     (x >>= f) = .ok b ↔ ∃ a, x = .ok a ∧ f a = .ok b := by
-  cases x <;> simp [bind, Except.bind]
+  cases x <;> simp only [bind, Except.bind, reduceCtorEq, false_and, exists_false, Except.ok.injEq,
+                  exists_eq_left']
 
 end SemanticsProperties
 end Solidity

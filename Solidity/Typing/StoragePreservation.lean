@@ -39,14 +39,14 @@ theorem SVal.defaultOfElems_length (elems : List SVal) :
     (SVal.defaultOf.defaultOfElems elems).length = elems.length := by
   induction elems with
   | nil => rfl
-  | cons _ _ ih => simp [SVal.defaultOf.defaultOfElems, ih]
+  | cons _ _ ih => simp only [defaultOf.defaultOfElems, List.length_cons, ih]
 
 /-- A copy keeps a list of elements as long as the copied one. -/
 theorem SVal.stripElems_length' (elems : List SVal) :
     (SVal.strip.stripElems elems).length = elems.length := by
   induction elems with
   | nil => rfl
-  | cons _ _ ih => simp [SVal.strip.stripElems, ih]
+  | cons _ _ ih => simp only [strip.stripElems, List.length_cons, ih]
 
 /-- A copy over old elements is as long as the new ones. -/
 theorem SVal.overlayElems_length (olds news : List SVal) :
@@ -55,8 +55,8 @@ theorem SVal.overlayElems_length (olds news : List SVal) :
   | nil => cases olds <;> rfl
   | cons x xs ih =>
     cases olds with
-    | nil => simp [SVal.overlay.overlayElems, SVal.stripElems_length']
-    | cons o os => simp [SVal.overlay.overlayElems, ih]
+    | nil => simp only [overlay.overlayElems, stripElems_length', List.length_cons]
+    | cons o os => simp only [overlay.overlayElems, List.length_cons, ih]
 
 /-! ## Lookups in a nodup-keyed list -/
 
@@ -68,10 +68,10 @@ theorem lookupBy_isSome_of_mem [DecidableEq κ] {l : List (κ × α)}
   | cons p rest ih =>
       obtain ⟨k', v'⟩ := p
       by_cases hk : k = k'
-      · simp [lookupBy, hk]
+      · simp only [lookupBy, hk, ↓reduceIte, Option.isSome_some]
       · cases hmem with
         | head => exact absurd rfl hk
-        | tail _ hmem => simpa [lookupBy, hk] using ih hmem
+        | tail _ hmem => simpa only [lookupBy, hk, ↓reduceIte] using ih hmem
 
 /-- On a nodup-keyed association list, membership determines lookup. -/
 theorem lookupBy_eq_of_nodup [DecidableEq κ] {l : List (κ × α)} {k : κ}
@@ -83,14 +83,14 @@ theorem lookupBy_eq_of_nodup [DecidableEq κ] {l : List (κ × α)} {k : κ}
       obtain ⟨k', v'⟩ := p
       simp only [nodupKeysB, Bool.and_eq_true] at hnd
       cases hmem with
-      | head => simp [lookupBy]
+      | head => simp only [lookupBy, ↓reduceIte]
       | tail _ hmem =>
           by_cases hk : k = k'
           · subst hk
             have := lookupBy_isSome_of_mem hmem
             rw [Option.isNone_iff_eq_none.mp hnd.1] at this
             exact Bool.noConfusion this
-          · simpa [lookupBy, hk] using ih hnd.2 hmem
+          · simpa only [lookupBy, hk, ↓reduceIte] using ih hnd.2 hmem
 
 /-! ## The `defaultForTy` side condition
 
@@ -113,8 +113,8 @@ termination_by ty => (tyRank ty, sizeOf ty)
 decreasing_by
   · exact Prod.Lex.left _ _ (structDef_rank_lt _)
   all_goals first
-    | (apply Prod.Lex.left; simp [tyRank]; done)
-    | (apply Prod.Lex.right; simp; omega)
+    | (apply Prod.Lex.left; simp only [tyRank, Nat.lt_add_one]; done)
+    | (apply Prod.Lex.right; simp only [Ty.ref.sizeOf_spec, RefTy.mapping.sizeOf_spec]; omega)
 
 def defaultOkFields (s : Name) : List (Name × Ty) -> Bool
   | [] => true
@@ -125,7 +125,8 @@ termination_by l => (fieldsRank l, sizeOf l)
 decreasing_by
   all_goals (apply lex_le_lt
              · simp only [fieldsRank]; omega
-             · simp; omega)
+             · simp only [List.cons.sizeOf_spec, Prod.mk.sizeOf_spec,
+                   Nat.lt_add_left_iff_pos]; omega)
 end
 
 /-- **Every type's fresh default is well-formed**: no struct of the table
@@ -156,16 +157,16 @@ theorem defaultForTy_hasTy_of : ∀ {ty : Ty}, defaultOk ty = true ->
   induction ty using defaultForTy.induct
     (motive2 := fun l => ∀ (s : Name), defaultOkFields s l = true ->
       SVal.hasTy.hasTyFields s (defaultForFields l) = true) with
-  | case1 => intro _; simp [defaultForTy, SVal.hasTy]
-  | case2 => intro _; simp [defaultForTy, SVal.hasTy]
-  | case3 => intro _; simp [defaultForTy, SVal.hasTy]
+  | case1 => intro _; simp only [defaultForTy, SVal.hasTy]
+  | case2 => intro _; simp only [defaultForTy, SVal.hasTy]
+  | case3 => intro _; simp only [defaultForTy, SVal.hasTy]
   | case4 name ih =>
       intro h
       simp only [defaultOk] at h
       simpa only [defaultForTy, SVal.hasTy] using ih name h
   | case5 elem =>
       intro _
-      simp [defaultForTy, SVal.hasTy, SVal.hasTy.hasTyElems]
+      simp only [defaultForTy, SVal.hasTy, Bool.not_false, SVal.hasTy.hasTyElems, Bool.and_self]
   | case6 elem n ih =>
       intro h
       simp only [defaultOk] at h
@@ -178,7 +179,7 @@ theorem defaultForTy_hasTy_of : ∀ {ty : Ty}, defaultOk ty = true ->
       simp only [defaultForTy, SVal.hasTy, SVal.hasTy.hasTyEntries,
         Bool.true_and]
       exact ih h
-  | case8 => simp [defaultForFields, SVal.hasTy.hasTyFields]
+  | case8 => simp only [defaultForFields, SVal.hasTy.hasTyFields]
   | case9 n t rest iht ihrest =>
       rename_i s h
       simp only [defaultOkFields, Bool.and_eq_true, beq_iff_eq] at h
@@ -198,7 +199,7 @@ theorem SVal.asValue_toSVal {v : SVal} {w : Value}
   cases v with
   | prim p =>
       cases p <;> simp only [SVal.asValue] at h <;>
-        simp [<- Except.ok.inj h, Value.toSVal]
+        simp only [Value.toSVal, <- Except.ok.inj h]
   | struct fields => exact nomatch h
   | array elems => exact nomatch h
   | map entries dflt => exact nomatch h
@@ -241,16 +242,16 @@ theorem pushSlot_prim {elemTy : Ty} {c : SVal} {rest : List SVal}
     (hp : elemTy.isPrimitive = true) (hc : c.hasTy elemTy = true) :
     (pushSlot elemTy (c :: rest)).1 = c.defaultOf := by
   cases elemTy with
-  | ref r => simp [Ty.isPrimitive] at hp
+  | ref r => simp only [Ty.isPrimitive, Bool.false_eq_true] at hp
   | prim pt =>
       cases c with
       | prim p =>
           cases pt <;> cases p <;>
-            simp_all [pushSlot, SVal.defaultOf, defaultForTy, SVal.hasTy,
-              Ty.isPrimitive]
-      | struct _ => cases pt <;> simp [SVal.hasTy] at hc
-      | array _ _ => cases pt <;> simp [SVal.hasTy] at hc
-      | map _ _ => cases pt <;> simp [SVal.hasTy] at hc
+            simp_all only [Ty.isPrimitive, SVal.hasTy, Bool.false_eq_true, pushSlot, ↓reduceIte,
+                defaultForTy, SVal.defaultOf]
+      | struct _ => cases pt <;> simp only [SVal.hasTy, Bool.false_eq_true] at hc
+      | array _ _ => cases pt <;> simp only [SVal.hasTy, Bool.false_eq_true] at hc
+      | map _ _ => cases pt <;> simp only [SVal.hasTy, Bool.false_eq_true] at hc
 
 end Semantics
 end Solidity
