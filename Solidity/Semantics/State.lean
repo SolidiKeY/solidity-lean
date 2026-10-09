@@ -4,7 +4,7 @@ import Solidity.Semantics.HeapErase
 /-!
 # The typed state
 
-What `Core.State` becomes at M4 (`docs/intrinsic.md`, "M4 lane", wiring
+What `EState` becomes at M4 (`docs/intrinsic.md`, "M4 lane", wiring
 items 1 and 2), over the typed values of `Semantics/Storage.lean` and
 `Semantics/Heap.lean`: a local holds a value of its type
 (`LTy.TDenote`), an alias a typed storage reference, a memory local a
@@ -14,7 +14,7 @@ type.  An allocation grows the heap (`State.adopt`, from a `Grown` heap)
 and weakens the locals along the extension (`TEnv.wk`), which only rewrites
 a memory local's proof: the identities stay, so the erasure does too.
 
-`State.erase` is the `Core.State` the closer reads, so each operation's
+`State.erase` is the `EState` the closer reads, so each operation's
 agreement is one lemma here (`State.adopt_erase`, `State.copyStToM_erase`,
 …), from which each typed step's erasure follows
 (`Semantics/StepErase.lean`).
@@ -47,7 +47,7 @@ def TDenote.wk {H H' : HTy} (e : H <+: H') : (t : LTy) → t.TDenote C H → t.T
   | .old, st => st
   | .oldNet, l => l
 
-/-- What `Core.State` holds for the local. -/
+/-- What `EState` holds for the local. -/
 def TDenote.erase {H : HTy} : (t : LTy) → t.TDenote C H → t.Denote C
   | .val p, v => PrimTy.erase (p := p) v
   | .alias _, a => a.map SRef.erase
@@ -94,7 +94,7 @@ def wk {H' : HTy} (e : H <+: H') : (Γ : Ctx) → TEnv C H Γ → TEnv C H' Γ
   | [], _ => ()
   | t :: Γ, x => (LTy.TDenote.wk e t x.1, TEnv.wk e Γ x.2)
 
-/-- `Core.State`'s locals. -/
+/-- `EState`'s locals. -/
 def erase : (Γ : Ctx) → TEnv C H Γ → Env C Γ
   | [], _ => ()
   | t :: Γ, x => (LTy.TDenote.erase t x.1, TEnv.erase Γ x.2)
@@ -159,7 +159,7 @@ namespace State
 
 variable {Γ : Ctx}
 
-/-- `Core.State` of the same state: the storage and the heap erased, the next
+/-- `EState` of the same state: the storage and the heap erased, the next
 identity the heap's length, the locals erased. -/
 def erase (σ : State C Γ) : EState C Γ :=
   { storage := σ.storage.erase, heap := σ.heap.erase, nextId := σ.H.length,

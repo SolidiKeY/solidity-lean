@@ -4,13 +4,13 @@ import Solidity.Semantics.Agree
 /-!
 # A scoped state and its erasure
 
-The bridge between `Semantics/Erased.lean`'s scoped state (`State C Γ`: the
+The bridge between `Semantics/Erased.lean`'s scoped state (`EState C Γ`: the
 locals of `Γ` by position, and the global part) and `Semantics.lean`'s
 untyped one (the locals a list of named bindings), which the closer's terms
 read (`docs/intrinsic.md`, M3; the statements' bridge, `run_erase`, was
 deleted at W4 `sem-del` with the untyped run's last typed-side users).
 
-`State.erase ns σ` names the locals of `σ` by `ns` and encodes each
+`EState.erase ns σ` names the locals of `σ` by `ns` and encodes each
 (`LTy.enc`).  `Agree ns σ τ`: the global parts are equal, and every local of
 `σ` is bound in `τ` under its name, encoded; `τ` may bind more.  The global
 operations the closer's updates run are natural in the locals (`*_nat`,
