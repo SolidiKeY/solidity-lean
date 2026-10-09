@@ -254,6 +254,7 @@ open Tactic in
 def scopedSearch (g : MVarId) : TacticM NFml.Derive.Search := do
   let_expr Proves C R _ Γ H φ := ← g.getType | throwError "expected a scoped `⊢ φ`"
   NFml.Derive.proveSearch g (stopAtOpen := true) (prove := fun g => Seq.prove g C R Γ H φ)
+    (fits := Seq.goalFits)
 
 syntax (name := solkeyDerive) "#solkey_derive? " ident (&" only " ident)? (&" from " num)?
   (&" count " num)? (&" timed")? (&" pending")? : command

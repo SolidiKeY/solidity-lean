@@ -78,7 +78,7 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
   let mut open_ : List MVarId := []
   for l in leaves do
     let name ← l.getTag
-    match ← NFml.Derive.searchLeaf l with
+    match ← NFml.Derive.searchLeaf l Seq.goalFits with
     | some (t, h) =>
       found := found ++ [(name, t)]
       hb := hb + h

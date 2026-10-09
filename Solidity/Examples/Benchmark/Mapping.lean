@@ -124,7 +124,7 @@ value, and the leaf is closed on its erasure, over untyped storages where
 typing. -/
 theorem remove_spec : ⊢ dl!{ myMap[a] + 0 == myMap[a] → [ remove(a); ] myMap[a] == 0 } := by
   sol_prove
-  refine close ?_
+  refine NFml.Proves.close ?_
   sol_symex
   refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
   sol_reduce

@@ -878,12 +878,14 @@ open Lean Elab Tactic Meta
 heartbeats it used; `none` when none does.  Each try runs with its own
 heartbeats and its state rolled back when it fails.  A leaf under a `wt`
 premise is closed with it set aside (`Proves.close_dropWt`); one past
-`fitsClose` is not reduced (`goalFits`). -/
-def searchLeaf (l : MVarId) : TacticM (Option (Array String × Nat)) := do
+`fitsClose` is not reduced (`fits`: `goalFits`, or the scoped leaf's
+`Seq.goalFits`, `Calculus/ProvesDerive.lean`). -/
+def searchLeaf (l : MVarId) (fits : MVarId → MetaM Bool := goalFits) :
+    TacticM (Option (Array String × Nat)) := do
   let env ← getEnv
   let wt := ((← instantiateMVars (← l.getType)).find? fun e =>
     e.isConstOf ``Term.wt || e.isConstOf ``Op1.wt).isSome
-  for src in leafTacs wt (← goalFits l) do
+  for src in leafTacs wt (← fits l) do
     let t ← src.mapM fun line =>
       match Parser.runParserCategory env `tactic line with
       | .ok stx => pure (⟨stx⟩ : TSyntax `tactic)
@@ -914,7 +916,8 @@ scoped one), then `searchLeaf` on each leaf it leaves, the open ones left
 as goals; with `stopAtOpen`, the search ends at the first open leaf.  The
 one loop of `sol_prove?` and `#solkey_derive?`. -/
 def proveSearch (g : MVarId) (stopAtOpen : Bool := false)
-    (prove : MVarId → MetaM (List MVarId) := prove) : TacticM Search := do
+    (prove : MVarId → MetaM (List MVarId) := prove) (fits : MVarId → MetaM Bool := goalFits) :
+    TacticM Search := do
   let h0 ← IO.getNumHeartbeats
   let leaves ← prove g
   let mut hb : Nat := (← IO.getNumHeartbeats) - h0
@@ -922,7 +925,7 @@ def proveSearch (g : MVarId) (stopAtOpen : Bool := false)
   let mut open_ : List MVarId := []
   for l in leaves do
     let name ← l.getTag
-    match ← searchLeaf l with
+    match ← searchLeaf l fits with
     | some (t, h) =>
       found := found ++ [(name, t)]
       hb := hb + h
