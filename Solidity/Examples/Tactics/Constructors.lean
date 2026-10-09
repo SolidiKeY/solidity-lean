@@ -144,7 +144,7 @@ info: \programVariables {
 /-- The obligation, derived: every argument deploys. -/
 theorem miniProblem : ⊨ problem!{ constructor } := by
   sol_prove
-  refine NFml.Proves.close ?_
+  refine Proves.close [] rfl List.nodup_nil ?_
   sol_symex
   sol_close_mt
 

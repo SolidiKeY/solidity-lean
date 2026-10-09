@@ -63,17 +63,19 @@ assert(i == n); -/
 invariant proves the `assert` after it. -/
 theorem invariantCountsToBound : ⊨ Solc.Loops.invariantCountsToBound.problem := by
   sol_prove
-  refine NFml.Proves.close_dropWt ?_
-  sol_symex
-  sol_close
+  all_goals
+    refine NFml.Proves.close_dropWt ?_
+    sol_symex
+    sol_close
 
 /-- `invariantBreak`: the invariant holds at the head the `break` leaves
 from too. -/
 theorem invariantBreak : ⊨ Solc.Loops.invariantBreak.problem := by
   sol_prove
-  refine NFml.Proves.close_dropWt ?_
-  sol_symex
-  sol_close
+  all_goals
+    refine NFml.Proves.close_dropWt ?_
+    sol_symex
+    sol_close
 
 /-- `whileCountsUp`, under the diamond, unwound three times (`unwind 3`, a
 clause only Lean reads). -/
@@ -89,9 +91,10 @@ theorem doWhileRunsBodyFirst : ⊨ Solc.Loops.doWhileRunsBodyFirst.problem := by
 solkey's `KeyNatspec` joins them. -/
 theorem invariantTwoLines : ⊨ Solc.Loops.invariantTwoLines.problem := by
   sol_prove
-  refine NFml.Proves.close_dropWt ?_
-  sol_symex
-  sol_close
+  all_goals
+    refine NFml.Proves.close_dropWt ?_
+    sol_symex
+    sol_close
 
 /-! `loopNestedReturn` and `returnBeforeSiblingLoop` are `internal`: no
 obligation, only their programs, the `return` lowered to a flag. -/
