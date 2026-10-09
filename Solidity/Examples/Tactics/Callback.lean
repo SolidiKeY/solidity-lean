@@ -234,16 +234,15 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
 /-! ## The rules -/
 
 /--
-info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
-  {sadr se : Simple C Γ PrimTy.uint},
+info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {sadr se : Simple C Γ PrimTy.uint},
   dl[CallbackTaclet C k]{ [ sadr .transfer(se); ] ⇝
     { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @CallbackTaclet.transferWithCallbackBox
 
 /--
-info: @CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
-  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr se : Simple C Γ PrimTy.uint},
+info: @CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
+  {sadr se : Simple C Γ PrimTy.uint},
   dl[CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
     "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }

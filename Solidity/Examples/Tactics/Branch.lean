@@ -56,15 +56,15 @@ open scoped Scoped
 `thn` and `els` are schema variables for whole blocks (KeY's `#s0`). -/
 
 /--
-info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {nse : Val C Γ PrimTy.bool}
-  {x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
+info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {nse : Val C Γ PrimTy.bool} {x : Ctx}
+  {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
   dl{ ⟨[ if (nse) thenStm else elseStm; ]⟩ ⇝ ⟨[ bool se = nse; if (se) thenStm else elseStm; ]⟩ }
 -/
 #guard_msgs in #check @Taclet.ifElseUnfold
 
 /--
-info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool}
-  {x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
+info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool} {x : Ctx}
+  {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
     "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
 -/

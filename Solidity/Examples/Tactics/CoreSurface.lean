@@ -61,8 +61,7 @@ end Scoped
 /-! ## The callback taclets -/
 
 /--
-info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
-  {sadr se : Simple C Γ PrimTy.uint},
+info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {sadr se : Simple C Γ PrimTy.uint},
   dl[CallbackTaclet C k]{ [ sadr .transfer(se); ] ⇝
     { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) } ⟨[ ]⟩ }
 -/

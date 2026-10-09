@@ -202,8 +202,8 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 /--
 info: solkey: storageFieldWriteCaptureSrc (simplify_prog), transcribed by
 
-Solidity.Taclet.storageFieldRead_unfold_rightSndResult : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
-  {x : RefTy} {loc : Loc C Γ (Ty.ref x)} {x_1 : Name} {sp : SPath C Γ (Ty.struct x_1)} {fld : Name}
+Solidity.Taclet.storageFieldRead_unfold_rightSndResult : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : RefTy}
+  {loc : Loc C Γ (Ty.ref x)} {x_1 : Name} {sp : SPath C Γ (Ty.struct x_1)} {fld : Name}
   {hm : (Ty.ref x).mapFree = true}, dl{ ⟨[ loc = sp.fld; ]⟩ ⇝ ⟨[ T storage sp' = sp.fld; loc = sp'; ]⟩ }
 solkey (merged): storageFieldRead_unfold_rightSndResult (simplify_prog), storageFieldWriteCaptureSrc (simplify_prog)
 printed (merged): storageFieldRead_unfold_rightSndResult, storageFieldWriteCaptureSrc
@@ -217,9 +217,9 @@ nor `ic` (calls whose arguments are all simple, `functionBodyExpand`'s and
 `internalCallExpand`'s). -/
 
 /--
-info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {f : Name}
-  {ps : Ctx} {args : Args C Γ ps} {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx}
-  {body : Prog C (rs ++ ps) Γf} {p : PrimTy} {v : Val C Γ p} {as' : Args C (LTy.val p :: Γ) ps},
+info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {f : Name} {ps : Ctx}
+  {args : Args C Γ ps} {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {p : PrimTy}
+  {v : Val C Γ p} {as' : Args C (LTy.val p :: Γ) ps},
   dl[LeanTaclet C k]{ ⟨[ ‹Surface.Stmt.call f args hsep ret body›; ]⟩ ⇝
     ⟨[ T se = v; ‹Surface.Stmt.call f as' ⋯ ret body›; ]⟩ }
 solkey: none (a rule solkey does not have)
@@ -249,8 +249,8 @@ info: all 3 rules of `Solidity.CallbackTaclet` print as rule lines
 sound as its premise is the one `Stmt.step` builds (`toStep`). -/
 
 /--
-info: Solidity.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
-  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr se : Simple C Γ PrimTy.uint},
+info: Solidity.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
+  {sadr se : Simple C Γ PrimTy.uint},
   dl{ [ pv = sadr .send(se); ] ⇝
     "send succeeded":
         { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[
@@ -263,8 +263,8 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 #guard_msgs in #taclet sendNoCallbackBox
 
 /--
-info: Solidity.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
-  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr se : Simple C Γ PrimTy.uint},
+info: Solidity.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
+  {sadr se : Simple C Γ PrimTy.uint},
   dl[CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
     "send succeeded":
         { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[

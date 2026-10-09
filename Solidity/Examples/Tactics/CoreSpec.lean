@@ -51,8 +51,7 @@ info: dl{
     { old := storage ‖ oldNet := net ‖ net := store(net, at(msg.sender), net(msg.sender) + msg.value) ‖
         selfBalance := selfBalance + msg.value }
       [ uint result; result = add(amount); ]
-        (result = find(old, count) + amount ∧
-            net(msg.sender) = net(oldNet, msg.sender) + msg.value) } : Fml Ledger []
+        (result = find(old, count) + amount ∧ net(msg.sender) = net(oldNet, msg.sender) + msg.value) } : Fml Ledger []
 -/
 #guard_msgs in #check cspec!{ add }
 

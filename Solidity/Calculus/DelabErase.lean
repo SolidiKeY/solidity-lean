@@ -57,6 +57,18 @@ def legacyNames (n : Lean.Name) : List Lean.Name :=
 def legacyName? (env : Environment) (n : Lean.Name) : Option Lean.Name :=
   (legacyNames n).find? env.contains
 
+/-- The scoped families with no erased twin of their name, which
+`legacyType?` erases by hand or which carry no context. -/
+def untwinnedFamilies : List Lean.Name :=
+  [``Idx, ``Args, ``Binders, ``CodeBinder, ``SHole, ``Prog, ``Frames, ``LTy]
+
+/-- Whether `n` names a scoped family, whose values `tr` erases: one with an
+erased twin, or one of `untwinnedFamilies`.  (The scoped side once had a
+prefix of its own, `Solidity.Core`; no name of the erased side or of the
+shared vocabulary has a twin.) -/
+def isScopedFamily (env : Environment) (n : Lean.Name) : Bool :=
+  (legacyName? env n).isSome || untwinnedFamilies.contains n
+
 /-- Whether an erased formula is one as written: `Surface.Fml`, because a
 modality is in it. -/
 def isSurface (e : Expr) : Bool :=
@@ -161,7 +173,8 @@ def lowerFns : List Lean.Name :=
     ``Src.lower, ``MSrc.lower, ``Simple.keyLower, ``Val.keyLower]
 
 /-- A part of the program or a term, read with one local more on top:
-`Val.up` and its kin. -/
+`Val.up` and its kin (the one other `Solidity` name ending in `up` is a
+theorem, `Wrote.up`, which no term heads). -/
 def isUp (n : Lean.Name) : Bool := (`Solidity).isPrefixOf n && n.getString! == "up"
 
 /-- The `fill` of a scoped hole, and today's of the same hole. -/
@@ -603,7 +616,7 @@ partial def trArg (ns : List Expr) (a : Expr) : TrM Expr := do
     let a' ← whnf a
     if a'.isAppOf ``Option.some then return ← mkAppM ``Option.some #[← trArg ns a'.appArg!]
     return ← mkAppOptM ``Option.none #[some inner]
-  if (`Solidity).isPrefixOf n then return ← tr ns a
+  if isScopedFamily (← getEnv) n then return ← tr ns a
   return a
 
 /-- The pieces of a block, and the names it leaves. -/

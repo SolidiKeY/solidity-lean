@@ -41,16 +41,15 @@ open scoped Scoped
 /-! ## The taclets -/
 
 /--
-info: @Taclet.binopAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : PrimTy}
-  {v : Idx Γ (LTy.val x)} {p : PrimTy} {op : BinOp} {hq : op.ret p = x} {se₁ se₂ : Simple C Γ p},
+info: @Taclet.binopAssignment : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : PrimTy} {v : Idx Γ (LTy.val x)}
+  {p : PrimTy} {op : BinOp} {hq : op.ret p = x} {se₁ se₂ : Simple C Γ p},
   dl{ ⟨[ v = se₁ ⊕ se₂; ]⟩ ⇝ { v := se₁ ⊕ se₂ } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.binopAssignment
 
 /--
 info: @Taclet.logicalAndShortCircuitRhs : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
-  {v : Idx Γ (LTy.val (BinOp.and.ret PrimTy.bool))} {se : Simple C Γ PrimTy.bool}
-  {nse : Val C Γ PrimTy.bool},
+  {v : Idx Γ (LTy.val (BinOp.and.ret PrimTy.bool))} {se : Simple C Γ PrimTy.bool} {nse : Val C Γ PrimTy.bool},
   dl{ ⟨[ v = se && nse; ]⟩ ⇝ ⟨[ if (se) {v = nse;v = v && true;} else {v = false;}; ]⟩ }
 -/
 #guard_msgs in #check @Taclet.logicalAndShortCircuitRhs

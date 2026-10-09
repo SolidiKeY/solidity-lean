@@ -40,10 +40,9 @@ open scoped Scoped
 /-! ## The rules -/
 
 /--
-info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {call : ExtCall C Γ} {x : Ctx}
-  {rets : Binders x} {x_1 : Ctx} {body : Prog C (x ++ Γ) x_1} {x_2 : Ctx}
-  {errorBody : Prog C Γ x_2} {x_3 : Ctx} {code : CodeBinder x_3} {x_4 : Ctx}
-  {panicBody : Prog C (x_3 ++ Γ) x_4} {x_5 : Ctx} {otherBody : Prog C Γ x_5},
+info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {call : ExtCall C Γ} {x : Ctx} {rets : Binders x}
+  {x_1 : Ctx} {body : Prog C (x ++ Γ) x_1} {x_2 : Ctx} {errorBody : Prog C Γ x_2} {x_3 : Ctx} {code : CodeBinder x_3}
+  {x_4 : Ctx} {panicBody : Prog C (x_3 ++ Γ) x_4} {x_5 : Ctx} {otherBody : Prog C Γ x_5},
   dl{ [ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody; ] ⇝
     "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ] ; "Panic caught": ∀ code. [ panicBody ] ;
       "other failure caught": [ otherBody ] }
@@ -51,12 +50,11 @@ info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {ca
 #guard_msgs in #check @Taclet.tryCallNoCallbackBox
 
 /--
-info: @LeanTaclet.tryCallDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {call : ExtCall C Γ} {x : Ctx}
-  {rets : Binders x} {x_1 : Ctx} {body : Prog C (x ++ Γ) x_1} {x_2 : Ctx}
-  {errorBody : Prog C Γ x_2} {x_3 : Ctx} {code : CodeBinder x_3} {x_4 : Ctx}
-  {panicBody : Prog C (x_3 ++ Γ) x_4} {x_5 : Ctx} {otherBody : Prog C Γ x_5},
-  dl[LeanTaclet C k]{ ⟨
-    try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody; ⟩ ⇝ false }
+info: @LeanTaclet.tryCallDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {call : ExtCall C Γ} {x : Ctx} {rets : Binders x}
+  {x_1 : Ctx} {body : Prog C (x ++ Γ) x_1} {x_2 : Ctx} {errorBody : Prog C Γ x_2} {x_3 : Ctx} {code : CodeBinder x_3}
+  {x_4 : Ctx} {panicBody : Prog C (x_3 ++ Γ) x_4} {x_5 : Ctx} {otherBody : Prog C Γ x_5},
+  dl[LeanTaclet C k]{ ⟨ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody;
+    ⟩ ⇝ false }
 -/
 #guard_msgs in #check @LeanTaclet.tryCallDiamond
 

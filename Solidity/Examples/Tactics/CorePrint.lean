@@ -27,8 +27,8 @@ local instance : InContract := ⟨StandardExample⟩
 private abbrev SE := StandardExample
 
 /--
-info: @Taclet.localValueAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : PrimTy}
-  {v : Idx Γ (LTy.val x)} {se : Simple C Γ x}, dl{ ⟨[ v = se; ]⟩ ⇝ { v := se } ⟨[ ]⟩ }
+info: @Taclet.localValueAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : PrimTy} {v : Idx Γ (LTy.val x)}
+  {se : Simple C Γ x}, dl{ ⟨[ v = se; ]⟩ ⇝ { v := se } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.localValueAssign
 
@@ -40,8 +40,8 @@ info: @Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {
 #guard_msgs in #check @Taclet.storageFieldDelete_unfold_leftFst
 
 /--
-info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool}
-  {x : Ctx} {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
+info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool} {x : Ctx}
+  {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
     "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
 -/
@@ -51,8 +51,8 @@ info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ct
 rule is one that prints as today's did (all but the five above do). -/
 
 /--
-info: Solidity.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
-  {x : Name} {nsp : SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : Ty},
+info: Solidity.Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : Name}
+  {nsp : SPath C Γ (Ty.struct x)} {fld : Name} {x_1 : Ty},
   dl{ ⟨[ delete nsp.fld; ]⟩ ⇝ ⟨[ T storage sp = nsp; delete sp.fld; ]⟩ }
 solkey: storageFieldDelete_unfold_leftFst (simplify_prog)
 printed: storageFieldDelete_unfold_leftFst

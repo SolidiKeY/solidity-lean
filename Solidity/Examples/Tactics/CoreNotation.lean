@@ -65,8 +65,7 @@ scope in its postcondition only. -/
 
 /--
 info: dl{
-  ⟨ if (alice.age == 4) {uint z = 1;total = z;} else {total = 2;}; ⟩
-    find(storage, total) = 1 } : Fml StandardExample []
+  ⟨ if (alice.age == 4) {uint z = 1;total = z;} else {total = 2;}; ⟩ find(storage, total) = 1 } : Fml StandardExample []
 -/
 #guard_msgs in
 #check cdl!{ ⟨ if (alice.age == 4) { uint z = 1; total = z; } else { total = 2; }; ⟩ total == 1 }

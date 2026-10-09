@@ -89,8 +89,8 @@ info: @Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : 
 #guard_msgs in #check @Taclet.sendNoCallbackBox
 
 /--
-info: @Taclet.sendNoCallbackDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx}
-  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr se : Simple C Γ PrimTy.uint},
+info: @Taclet.sendNoCallbackDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
+  {sadr se : Simple C Γ PrimTy.uint},
   dl{ ⟨ pv = sadr .send(se); ⟩ ⇝
     "non-negative amount": 0 <= se ;
       "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[

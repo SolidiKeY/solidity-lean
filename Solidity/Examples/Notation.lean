@@ -49,10 +49,9 @@ info: @Taclet.storageFieldRead_unfold_rightFst : ∀ {C : Contract} {k : Nat} {m
 /-! ### Step 2: a write, source, receiver and index captured in that order -/
 
 /--
-info: @Taclet.storageIndexWriteCaptureAllComplexRecv : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
-  {x : RefTy} {x_1 x_2 : PrimTy} {it : IndexTy x x_1 (Ty.prim x_2)} {nsp : SPath C Γ (Ty.ref x)}
-  {e₁ : Val C Γ x_1} {e₂ : Val C Γ x_2},
-  dl{ ⟨[ nsp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se; ]⟩ }
+info: @Taclet.storageIndexWriteCaptureAllComplexRecv : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : RefTy}
+  {x_1 x_2 : PrimTy} {it : IndexTy x x_1 (Ty.prim x_2)} {nsp : SPath C Γ (Ty.ref x)} {e₁ : Val C Γ x_1}
+  {e₂ : Val C Γ x_2}, dl{ ⟨[ nsp[e₁] = e₂; ]⟩ ⇝ ⟨[ T se = e₂; T storage sp = nsp; T ie = e₁; sp[ie] = se; ]⟩ }
 -/
 #guard_msgs in #check @Taclet.storageIndexWriteCaptureAllComplexRecv
 
@@ -68,9 +67,9 @@ info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality
 /-! ### Memory `delete`, `new T[](n)`, `.length` -/
 
 /--
-info: @Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {R : RefTy}
-  {x : Name} {mv : Idx Γ (LTy.mem (RefTy.struct x))} {hmv : (Ty.ref (RefTy.struct x)).mapFree = true}
-  {rfld : Name} {hd : (Ty.ref R).defaultOkS = true},
+info: @Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {R : RefTy} {x : Name}
+  {mv : Idx Γ (LTy.mem (RefTy.struct x))} {hmv : (Ty.ref (RefTy.struct x)).mapFree = true} {rfld : Name}
+  {hd : (Ty.ref R).defaultOkS = true},
   dl{ ⟨[ delete mv.rfld; ]⟩ ⇝ { memory := write(addM(memory), mv.rfld, freshId(addM(memory))) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.memoryFieldDeleteReference
@@ -79,16 +78,15 @@ info: @Taclet.memoryFieldDeleteReference : ∀ {C : Contract} {k : Nat} {m : Mod
 location. -/
 
 /--
-info: @Taclet.newArrayCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {R : RefTy}
-  {tgt : NewLhs C Γ R} {se : Simple C Γ PrimTy.uint} {hn : R.newArrOk = true},
+info: @Taclet.newArrayCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {R : RefTy} {tgt : NewLhs C Γ R}
+  {se : Simple C Γ PrimTy.uint} {hn : R.newArrOk = true},
   dl{ ⟨[ tgt = new T(se); ]⟩ ⇝ ⟨[ T memory mv = new T(se); tgt = mv; ]⟩ }
 -/
 #guard_msgs in #check @Taclet.newArrayCapture
 
 /--
-info: @Taclet.storageLengthRead : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : PrimTy}
-  {v : Idx Γ (LTy.val x)} {E : Ty} {sp : SPath C Γ E.array} {hlen : x = PrimTy.uint},
-  dl{ ⟨[ v = sp.length; ]⟩ ⇝ { v := sp.length } ⟨[ ]⟩ }
+info: @Taclet.storageLengthRead : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : PrimTy} {v : Idx Γ (LTy.val x)}
+  {E : Ty} {sp : SPath C Γ E.array} {hlen : x = PrimTy.uint}, dl{ ⟨[ v = sp.length; ]⟩ ⇝ { v := sp.length } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.storageLengthRead
 
@@ -103,9 +101,8 @@ info: @Taclet.valueDeclSkip : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : 
 /-! ### Compound assignment and `++`: `⊕` and `⊕⊕` are operator schema variables -/
 
 /--
-info: @Taclet.storageRootOpAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {p : PrimTy} {op : BinOp}
-  {gsp : Name} {se : Simple C Γ p},
-  dl{ ⟨[ gsp ⊕= se; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, gsp) ⊕ se) } ⟨[ ]⟩ }
+info: @Taclet.storageRootOpAssign : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {p : PrimTy} {op : BinOp} {gsp : Name}
+  {se : Simple C Γ p}, dl{ ⟨[ gsp ⊕= se; ]⟩ ⇝ { storage := save(storage, gsp, find(storage, gsp) ⊕ se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.storageRootOpAssign
 
@@ -131,14 +128,14 @@ info: @Taclet.storagePushValueSave : ∀ {C : Contract} {k : Nat} {m : Modality}
 
 /--
 info: @Taclet.memoryFieldWrite : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : Name}
-  {mv : Idx Γ (LTy.mem (RefTy.struct x))} {hmv : (Ty.ref (RefTy.struct x)).mapFree = true} {fld : Name}
-  {x_1 : PrimTy} {se : Simple C Γ x_1}, dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
+  {mv : Idx Γ (LTy.mem (RefTy.struct x))} {hmv : (Ty.ref (RefTy.struct x)).mapFree = true} {fld : Name} {x_1 : PrimTy}
+  {se : Simple C Γ x_1}, dl{ ⟨[ mv.fld = se; ]⟩ ⇝ { memory := write(memory, mv.fld, se) } ⟨[ ]⟩ }
 -/
 #guard_msgs in #check @Taclet.memoryFieldWrite
 
 /--
-info: @Taclet.memoryStorageCopy : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : RefTy}
-  {mv : Idx Γ (LTy.mem x)} {sp : SPath C Γ (Ty.ref x)} {hm : (Ty.ref x).mapFree = true},
+info: @Taclet.memoryStorageCopy : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {x : RefTy} {mv : Idx Γ (LTy.mem x)}
+  {sp : SPath C Γ (Ty.ref x)} {hm : (Ty.ref x).mapFree = true},
   dl{ ⟨[ mv = sp; ]⟩ ⇝
     { mv := freshId(copySt(memory, find(storage, sp))) ‖ memory := copySt(memory, find(storage, sp)) } ⟨[ ]⟩ }
 -/
@@ -157,9 +154,7 @@ info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality
     Taclet C k m (Stmt.assign (Loc.field sp fld hfld) (Src.val (Val.simple se)))
       (Premise.update
         (Upd.nil.snoc
-          (UpdElem.storage
-            (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.field sp.lower fld)
-              (Tms.SValT.val se.lower)))))
+          (UpdElem.storage (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.field sp.lower fld) (Tms.SValT.val se.lower)))))
 -/
 #guard_msgs in
 set_option pp.sol.dl false in
@@ -197,8 +192,7 @@ prints as the equation of their lowerings. -/
 /--
 info: dl{
   ∀ uint b;
-    ∀ uint a;
-      ¬a = b → [ balances[a] = 1; balances[b] = 2; ] find(storage, balances[a]) = 1 } : Fml StandardExample []
+    ∀ uint a; ¬a = b → [ balances[a] = 1; balances[b] = 2; ] find(storage, balances[a]) = 1 } : Fml StandardExample []
 -/
 #guard_msgs in #check dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] balances[a] == 1 }
 

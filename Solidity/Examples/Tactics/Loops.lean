@@ -341,8 +341,8 @@ sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 #guard_msgs in #taclet whileUnwind
 
 /--
-info: Solidity.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {m : Modality} {x : Ctx}
-  {body : Prog C Γ x} {cond : Val C Γ PrimTy.bool},
+info: Solidity.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {m : Modality} {x : Ctx} {body : Prog C Γ x}
+  {cond : Val C Γ PrimTy.bool},
   dl[LeanTaclet C k]{ ⟨[ while (cond) body; ]⟩ ⇝
     "loop exited": cond = false ⟹ ⟨[ ]⟩ ; "unwound to the end": cond = false }
 solkey: none (a rule solkey does not have)
@@ -416,8 +416,7 @@ checked after it only where the condition holds again.  The fresh `b` and
 
 /--
 info: Solidity.LeanTaclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ PrimTy.uint)}
-  {cond inv : Val C Γ PrimTy.bool},
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ PrimTy.uint)} {cond inv : Val C Γ PrimTy.bool},
   dl[LeanTaclet C k]{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { se := cond } (se = true ⟹ ⟨[ body ]⟩ inv = true ; se = false ⟹ ⟨[ ]⟩)) }
@@ -429,8 +428,7 @@ sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /--
 info: Solidity.LeanTaclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ PrimTy.bool}
-  {dec : Val C Γ PrimTy.uint},
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ PrimTy.bool} {dec : Val C Γ PrimTy.uint},
   dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
@@ -610,9 +608,8 @@ the ledger.  Such a loop closes to `false` (`whileClose`), as one under the
 diamond with no variant does (`whileNoVariantDiamond`). -/
 
 /--
-info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {m : Modality} {inv : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)}
-  {cond : Val C Γ PrimTy.bool},
+info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x} {m : Modality}
+  {inv : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)} {cond : Val C Γ PrimTy.bool},
   dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)

@@ -132,26 +132,40 @@ Every rule prints as a rule line: for each constructor of the three
 families, its conclusion, printed with the notation on (`pp.sol.dl`, and
 `pp.sol.ic` where its side condition makes the call KeY's `ic`), is a
 `dl{ … }` (or `dl[J C k]{ … }`) line in today's KeY text, with no scoped
-term left escaped: no escape `‹…›` mentions `Core.` (`‹Core.…›`,
-`‹(Core.…).snd›`, `‹@Core.…›`).  The constructors whose line does not print
+term left escaped: no escape `‹…›` names a scoped constant, printed with
+full names (`‹Solidity.Val.…›`, `‹(Solidity.Upd.…).snd›`,
+`‹@Solidity.Val.…›`; `‹Solidity.Surface.…›` passes).  The constructors whose line does not print
 are listed.  Today's rule table, which the scoped lines were once diffed
 against (`docs/intrinsic.md`, decision 35), is gone; the lines are pinned
 where each rule is shown (`#taclet`, `#check`). -/
 
-/-- The rule line of a constructor: its conclusion, printed on one line. -/
-def ruleLine (c : Lean.Name) : MetaM String := do
+/-- The rule line of a constructor: its conclusion, printed on one line
+(with full names when `full`). -/
+def ruleLine (c : Lean.Name) (full : Bool := false) : MetaM String := do
   let ty := (← getConstInfo c).type
   let ic := (Delab.callSide ty).any (·.isConstOf ``Bool.false)
   forallTelescope ty fun _ body =>
-    withOptions (fun o => (o.setBool `pp.sol.dl true).setBool `pp.sol.ic ic) do
+    withOptions (fun o => ((o.setBool `pp.sol.dl true).setBool `pp.sol.ic ic).setBool
+        `pp.fullNames full) do
       return (← Meta.ppExpr body).pretty 100000
 
-/-- Whether a printed conclusion is a rule line: the judgement's
-delaborator wrote it, and no escape `‹…›` in it mentions `Core.` (a scoped
-term, however parenthesized or explicit; `‹Surface.…›` passes). -/
-def isRuleLine (t : String) : Bool :=
+/-- Whether a full name printed in an escape is a scoped constant: it, or a
+namespace it is in, is a scoped family (`Delab.isScopedFamily`). -/
+def isScopedName (env : Environment) (tok : String) : Bool :=
+  let rec go : Lean.Name → Bool
+    | .anonymous => false
+    | n@(.str p _) => n != `Solidity && (Delab.isScopedFamily env n || go p)
+    | .num p _ => go p
+  tok.startsWith "Solidity." && go tok.toName
+
+/-- Whether a conclusion printed with full names is a rule line: the
+judgement's delaborator wrote it, and no escape `‹…›` in it names a scoped
+constant (a scoped term, however parenthesized or explicit). -/
+def isRuleLine (env : Environment) (t : String) : Bool :=
   t.startsWith "dl" && !((t.splitOn "‹").drop 1).any fun s =>
-    (((s.splitOn "›").headD "").splitOn "Core.").length > 1
+    (((s.splitOn "›").headD "").split fun c =>
+      !(c.isAlphanum || c == '_' || c == '.' || c == '\'' || c == '?' || c == '!' ||
+        c.toNat > 127)).any (isScopedName env)
 
 /-- The constructors of the family `J` whose line does not print, and how
 many there are in all. -/
@@ -159,7 +173,7 @@ def unprinted (J : Lean.Name) : MetaM (Nat × Array Lean.Name) := do
   let some (.inductInfo i) := (← getEnv).find? J | throwError "no `{J}`"
   let mut bad := #[]
   for c in i.ctors do
-    unless isRuleLine (← ruleLine c) do bad := bad.push c
+    unless isRuleLine (← getEnv) (← ruleLine c (full := true)) do bad := bad.push c
   return (i.ctors.length, bad)
 
 /-- `#check_rule_text`: every rule of the three families prints as a rule

@@ -151,8 +151,7 @@ info: dl{
   ((0 <= x ∧ x <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
         (0 <= y ∧ y <= 115792089237316195423570985008687907853269984665640564039457584007913129639935) ∧
           msg.value = 0) →
-    [ uint result_lo; uint result_hi; (result_lo, result_hi) = order(x, y); ]
-      result_lo <= result_hi } : Fml Ordered []
+    [ uint result_lo; uint result_hi; (result_lo, result_hi) = order(x, y); ] result_lo <= result_hi } : Fml Ordered []
 -/
 #guard_msgs in #check spec!{ order }
 

@@ -82,15 +82,14 @@ info: @Taclet.revertDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx}, dl{ ⟨ r
 #guard_msgs in #check @Taclet.revertDiamond
 
 /--
-info: @Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
-  {se : Simple C Γ PrimTy.bool},
+info: @Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool},
   dl{ ⟨[ require(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Reverts": se ≐ false ⟹ ⟨[ revert(); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.requireSimple
 
 /--
-info: @Taclet.requireConditionCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
-  {nse : Val C Γ PrimTy.bool}, dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
+info: @Taclet.requireConditionCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {nse : Val C Γ PrimTy.bool},
+  dl{ ⟨[ require(nse); ]⟩ ⇝ ⟨[ bool se = nse; require(se); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.requireConditionCapture
 

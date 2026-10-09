@@ -40,15 +40,15 @@ open scoped Scoped
 
 /--
 info: @Taclet.functionBodyExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {f : Name} {x : Ctx}
-  {args : Args C Γ x} {x_1 x_2 : Ctx} {ret : CallRet Γ x_1 x_2} {x_3 : Ctx}
-  {body : Prog C (x_1 ++ x) x_3}, dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }
+  {args : Args C Γ x} {x_1 x_2 : Ctx} {ret : CallRet Γ x_1 x_2} {x_3 : Ctx} {body : Prog C (x_1 ++ x) x_3},
+  dl{ ⟨[ fbs; ]⟩ ⇝ ⟨[ expand_function_body(fbs); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.functionBodyExpand
 
 /--
 info: @Taclet.internalCallExpand : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {f : Name} {x : Ctx}
-  {args : Args C Γ x} {x_1 x_2 : Ctx} {ret : CallRet Γ x_1 x_2} {x_3 : Ctx}
-  {body : Prog C (x_1 ++ x) x_3}, dl{ ⟨[ ic; ]⟩ ⇝ ⟨[ expand_function_body(ic); ]⟩ }
+  {args : Args C Γ x} {x_1 x_2 : Ctx} {ret : CallRet Γ x_1 x_2} {x_3 : Ctx} {body : Prog C (x_1 ++ x) x_3},
+  dl{ ⟨[ ic; ]⟩ ⇝ ⟨[ expand_function_body(ic); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.internalCallExpand
 
