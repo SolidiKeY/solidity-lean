@@ -14,7 +14,8 @@ has a second elaborator that erases the leaf (`Derive.eraseLeaf`:
 `Fml.posB`, checked by the kernel, then `Valid.of_erase`) and runs the same
 tactic on today's goal.  Today's macro is tried first and fails on a scoped
 goal; on today's goal the second elaborator steps aside.  `sol_spec_prep`'s
-is `Calculus/SolSpec.lean`'s.  `sol_prove?` runs the scoped `sol_prove`
+is `Calculus/SolSpec.lean`'s; `sol_decide`'s is ported (M6c) and erases
+only to reduce (`Calculus/DecideComplete.lean`).  `sol_prove?` runs the scoped `sol_prove`
 and today's leaf search after it.
 -/
 
@@ -24,9 +25,6 @@ open Lean Elab Tactic
 
 @[tactic Solidity.tacticSol_close_eval]
 def evalSolCloseEvalCore : Tactic := fun stx => Derive.onErased "sol_close_eval" stx stx
-
-@[tactic Solidity.Decide.tacticSol_decide]
-def evalSolDecideCore : Tactic := fun stx => Derive.onErased "sol_decide" stx stx
 
 @[tactic Solidity.Decide.tacticSol_decide_heuristic]
 def evalSolDecideHeuristicCore : Tactic := fun stx =>

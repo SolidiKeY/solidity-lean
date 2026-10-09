@@ -1,4 +1,5 @@
 import Solidity.Calculus.Decide
+import Solidity.Calculus.Close
 
 /-!
 # Closing a reduction by its terms: `LFml.syn`
@@ -35,6 +36,10 @@ over the semantics.  It is incomplete — it does not split on keys the
 premises leave open, instantiate a quantified premise (a layout premise at a
 quantified key), or reason about arithmetic beyond the cancellation —
 and `sol_decide` falls back to the full procedure where it says no.
+
+On a scoped leaf (M6c) `sol_decide` erases only to call the reduction
+(`Valid.of_reduce`); the leaf's parameters stay its leading quantifiers, and
+`syn` starts with their locals known to return (`LFml.syn_valid_alls`).
 -/
 
 namespace Solidity
@@ -996,6 +1001,85 @@ theorem LFml.syn_holds : (φ : LFml) → ∀ (σ : Semantics.State) (known : Lis
 theorem LFml.syn_valid (φ : LFml) (h : φ.syn [] [] = true) : ∀ σ, φ.holds σ :=
   fun σ => LFml.syn_holds φ σ [] [] (fun _ hu => by simp at hu) (fun _ hp => by simp at hp) h
 
+
+/-! ## A scoped leaf (M6c)
+
+`sol_decide` takes the scoped leaf `Valid φ` (`φ : Fml C []`) itself and
+erases it only to call the reduction below it (`Valid.of_reduce`).  The
+leaf's parameters, its leading `∀ p x`, stay quantifiers: the context the
+leaf's body is read in, one local per position, each of its type.  Erased,
+they are the reduction's leading `LFml.all`s (`LFml.alls`), and their
+locals are atoms that return, at a value of their type (`Bound`): `syn`
+starts from them known (`LFml.syn_valid_alls`), and the constraints'
+step reads them typed (`Calculus/DecideComplete.lean`), where the erased
+leaf read them as names bound to anything. -/
+
+/-- `∀ p₁ x₁ … ∀ pₙ xₙ. φ`, the outermost first. -/
+def LFml.alls : List (Var × PrimTy) → LFml → LFml
+  | [], φ => φ
+  | (x, p) :: xs, φ => .all x p (LFml.alls xs φ)
+
+/-- The local `q.1` holds a value of the type `q.2`. -/
+def Bound (σ : Semantics.State) (q : Var × PrimTy) : Prop :=
+  ∃ v, σ.getEnv q.1 = .ok (.val v) ∧ q.2.admits v
+
+/-- A bound local returns. -/
+theorem Bound.returns {σ : Semantics.State} {q : Var × PrimTy} (h : Bound σ q) :
+    Returns σ (.var q.1) := by
+  obtain ⟨v, hv, -⟩ := h
+  exact ⟨v, by simp only [LTerm.eval, hv, Res.ok_bind, Close.bindingVal]⟩
+
+/-- **The leading quantifiers, by their locals**: `alls xs body` holds where
+`body` holds in every state that binds each local of `xs` at its type.
+`ys` are the quantifiers already passed. -/
+theorem LFml.alls_holds (body : LFml) : (xs ys : List (Var × PrimTy)) → (σ : Semantics.State) →
+    (xs.map Prod.fst).Nodup → (∀ q ∈ ys, q.1 ∉ xs.map Prod.fst) → (∀ q ∈ ys, Bound σ q) →
+    (∀ σ', (∀ q ∈ xs ++ ys, Bound σ' q) → body.holds σ') → (LFml.alls xs body).holds σ
+  | [], ys, σ, _, _, hb, h => h σ (by simpa only [List.nil_append] using hb)
+  | (x, p) :: xs, ys, σ, hn, hy, hb, h => by
+    intro v hv
+    have hn' := List.nodup_cons.1 (by simpa only [List.map_cons] using hn)
+    refine LFml.alls_holds body xs ((x, p) :: ys) _ hn'.2 ?_ ?_ ?_
+    · intro q hq
+      rcases List.mem_cons.1 hq with rfl | hq
+      · exact hn'.1
+      · exact fun hm => hy q hq (by simp only [List.map_cons, List.mem_cons]; exact .inr hm)
+    · intro q hq
+      rcases List.mem_cons.1 hq with rfl | hq
+      · exact ⟨v, State.getEnv_setEnv_self _ _ _, hv⟩
+      · have hne : q.1 ≠ x := fun he =>
+          hy q hq (by simp only [List.map_cons, List.mem_cons]; exact .inl he)
+        obtain ⟨w, hw, ha⟩ := hb q hq
+        exact ⟨w, by rw [State.getEnv_setEnv_ne hne]; exact hw, ha⟩
+    · intro σ' hσ'
+      refine h σ' fun q hq => hσ' q ?_
+      simp only [List.mem_append, List.mem_cons] at hq ⊢
+      rcases hq with (rfl | hq) | hq
+      · exact .inr (.inl rfl)
+      · exact .inl hq
+      · exact .inr (.inr hq)
+
+/-- **`syn` with the leading quantifiers' locals known to return.** -/
+theorem LFml.syn_valid_alls (xs : List (Var × PrimTy)) (body : LFml)
+    (hn : decide (xs.map Prod.fst).Nodup = true)
+    (h : body.syn (xs.map fun q => LTerm.var q.1) [] = true) :
+    ∀ σ, (LFml.alls xs body).holds σ := by
+  intro σ
+  refine LFml.alls_holds body xs [] σ (of_decide_eq_true hn) (fun _ hq => nomatch hq)
+    (fun _ hq => nomatch hq) fun σ' hb => ?_
+  refine LFml.syn_holds body σ' _ [] (fun u hu => ?_) (fun _ hp => nomatch hp) h
+  obtain ⟨q, hq, rfl⟩ := List.mem_map.1 hu
+  exact (hb q (by simpa only [List.append_nil] using hq)).returns
+
 end Decide
+
+open Decide in
+/-- **The boundary**: a scoped leaf is valid where the reduction of its
+erasure holds in every state.  `ψ` is the erasure, computed once
+(`he`, by `rfl`); `Fml.posB` takes the leaf's hidden binders. -/
+theorem Valid.of_reduce {C : Contract} {φ : Fml C []} (hp : (φ.posB []).isSome = true)
+    {ψ : NFml C} (he : φ.erase [] = ψ) (hf : ψ.inL Sym.empty = true)
+    (h : ∀ σ, ψ.reduce.holds σ) : Valid φ :=
+  Valid.of_erase hp (he ▸ (NFml.valid_iff_reduce ψ hf).2 h)
 
 end Solidity

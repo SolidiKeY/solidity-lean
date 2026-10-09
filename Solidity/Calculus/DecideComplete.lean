@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideSyn
+import Solidity.Calculus.Symex
 
 /-!
 # The reads are realizable: `sol_decide` decides
@@ -34,6 +35,12 @@ them, and nothing is lost.
 * **`sol_decide`** rewrites by both equivalences, splits on the locals and
   on the shape of every location with a read below it, and closes what is
   left by `omega` or `grind`.
+* **On a scoped leaf** (M6c) it erases only to reduce (`Valid.of_reduce`,
+  `Calculus/DecideSyn.lean`), and reads the leaf's parameters, the
+  reduction's leading quantifiers, at their types (`Typed`,
+  `LFml.valid_alls_of_cons`): a `uint` parameter is an integer in range
+  rather than a name split three ways.  That direction is sound, not an
+  equivalence: the storage is still read untyped.
 
 **What is decided.**  After the splits the goal is quantifier-free up to the
 values the reads return: equalities between reads and the shapes and words
@@ -1132,6 +1139,20 @@ macro "sol_decide_unfoldA" : tactic => `(tactic|
   set_option linter.unusedSimpArgs false in
   simp only [decide_evalA, close_rw, and_assoc, *] at *)
 
+/-- The constraints' step after the splits: unfold, and close with `omega`
+or `grind`, splitting on the shape of every location with a read below it
+where they do not. -/
+macro "sol_decide_finishA" : tactic => `(tactic| (
+    all_goals sol_decide_unfoldA
+    all_goals first
+      | omega
+      | grind
+      | (sol_decide_parents
+         all_goals simp only [ChildOk, Obs.test, Obs.find, Obs.has, Obs.len, Res.ok_bind,
+           Res.error_bind, orElseR_ok, orElseR_error, Bool.false_eq_true, false_and, and_self,
+           if_true, if_false] at *
+         all_goals first | omega | grind)))
+
 /-- The finishing step with the constraints (`LFml.valid_iff_cons`), on a
 goal `∀ σ, ψ.holds σ` with `ψ` computed and reading the initial storage
 only: the reads become free (`o`), the constraints hypotheses; split on the
@@ -1143,15 +1164,7 @@ macro "sol_decide_cons" : tactic => `(tactic| (
     intro σ o hc
     sol_cons_split hc
     sol_decide_splitA
-    all_goals sol_decide_unfoldA
-    all_goals first
-      | omega
-      | grind
-      | (sol_decide_parents
-         all_goals simp only [ChildOk, Obs.test, Obs.find, Obs.has, Obs.len, Res.ok_bind,
-           Res.error_bind, orElseR_ok, orElseR_error, Bool.false_eq_true, false_and, and_self,
-           if_true, if_false] at *
-         all_goals first | omega | grind)))
+    sol_decide_finishA))
 
 /-- `sol_decide` without the constraints: the reduction, then
 `sol_decide_heuristic`, which reads the initial storage as unrelated atoms.
@@ -1187,6 +1200,227 @@ macro "sol_decide" : tactic => `(tactic|
     | exact LFml.syn_valid _ (by decide +kernel)
     | sol_decide_cons
     | sol_decide_heuristic))
+
+
+/-! ## A scoped leaf, its parameters typed (M6c)
+
+The leaf's parameters are the reduction's leading quantifiers
+(`LFml.alls`, `Calculus/DecideSyn.lean`), one per position of the context
+the leaf's body is read in.  Where the erased leaf read each as a name bound
+to anything, split three ways (it halts, is an integer, is a boolean), the
+constraints' step reads it at its type (`Typed`): a `uint` is an integer in
+range, a `bool` a boolean, with no split.  The other locals of the
+reduction, a hidden binder's, are split as before. -/
+
+/-- What a local of type `p` reads: a value of `p`, in range. -/
+def _root_.Solidity.PrimTy.atom : PrimTy → Res Value → Prop
+  | .bool, r => ∃ b, r = .ok (.bool b)
+  | .uint, r => ∃ n, r = .ok (.int n) ∧ 0 ≤ n ∧ n < uintBound
+  | .int, r => ∃ n, r = .ok (.int n) ∧ -intBound ≤ n ∧ n < intBound
+
+theorem atom_of_admits : {p : PrimTy} → {v : Value} → p.admits v → p.atom (.ok v)
+  | .bool, .bool b, _ => ⟨b, rfl⟩
+  | .uint, .int n, h => ⟨n, rfl, h⟩
+  | .int, .int n, h => ⟨n, rfl, h⟩
+  | .bool, .int _, h | .uint, .bool _, h | .int, .bool _, h => False.elim h
+
+/-- Each local of `xs` reads a value of its type under `E`. -/
+def Typed : List (Var × PrimTy) → (Var → Res Value) → Prop
+  | [], _ => True
+  | q :: xs, E => q.2.atom (E q.1) ∧ Typed xs E
+
+theorem typed_of_bound {σ : Semantics.State} : (xs : List (Var × PrimTy)) →
+    (∀ q ∈ xs, Bound σ q) → Typed xs (envOf σ)
+  | [], _ => trivial
+  | q :: xs, h => by
+    refine ⟨?_, typed_of_bound xs fun q hq => h q (List.mem_cons_of_mem _ hq)⟩
+    obtain ⟨v, hv, ha⟩ := h q List.mem_cons_self
+    simp only [envOf, hv, Res.ok_bind, Close.bindingVal]
+    exact atom_of_admits ha
+
+/-- **The constraints' step, the parameters typed**: `alls xs body` holds
+in every state where `body`, reading the initial storage only, holds over
+free reads under the constraints, its parameters read at their types. -/
+theorem LFml.valid_alls_of_cons (xs : List (Var × PrimTy)) (body : LFml)
+    (hn : decide (xs.map Prod.fst).Nodup = true) (hi : body.initOnly = true)
+    (H : ∀ σ (o : List Seg → Obs), Typed xs (envOf σ) →
+      consAll (envOf σ) o body.reads → body.holdsA (envOf σ) o) :
+    ∀ σ, (LFml.alls xs body).holds σ := by
+  intro σ
+  refine LFml.alls_holds body xs [] σ (of_decide_eq_true hn) (fun _ hq => nomatch hq)
+    (fun _ hq => nomatch hq) fun σ' hb => ?_
+  refine (LFml.holdsA_iff σ' body hi).1 (H σ' (obsAt σ') ?_ ?_)
+  · exact typed_of_bound xs fun q hq => hb q (by simpa only [List.append_nil] using hq)
+  · exact (consAll_iff _).2 fun Q _ => consA_obsAt σ' Q
+
+/-- The parameters as free locals: what holds in every state holds for
+every value of them. -/
+theorem LFml.valid_alls_of_body : (xs : List (Var × PrimTy)) → (body : LFml) →
+    (∀ σ, body.holds σ) → ∀ σ, (LFml.alls xs body).holds σ
+  | [], _, h => h
+  | (_, _) :: xs, body, h => fun _ _ _ => LFml.valid_alls_of_body xs body h _
+
+/-! ### The tactic on a scoped leaf -/
+
+open Lean Meta in
+/-- The leading `LFml.all`s of a computed reduction: the pairs `(x, p)`,
+the outermost first, and the body. -/
+partial def peelAlls (e : Expr) (acc : Array Expr := #[]) : MetaM (Array Expr × Expr) := do
+  if e.isAppOfArity ``LFml.all 3 then
+    peelAlls (e.getArg! 2) (acc.push (← mkAppM ``Prod.mk #[e.getArg! 0, e.getArg! 1]))
+  else return (acc, e)
+
+open Lean Meta in
+/-- The goal `∀ σ, LFml.holds σ ψ` with `ψ` computed: the parameters `xs`
+as a list, and the body. -/
+def allsGoal (g : MVarId) : MetaM (Expr × Expr) := do
+  let ty ← instantiateMVars (← g.getType)
+  let .forallE _ _ b _ := ty | throwError "sol_decide: expected `∀ σ, …`"
+  let_expr LFml.holds _ r := b | throwError "sol_decide: expected `LFml.holds σ …`"
+  let (xs, body) ← peelAlls r
+  let pair := mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Var) (mkConst ``PrimTy)
+  return (← mkListLit pair xs.toList, body)
+
+open Lean Meta in
+/-- `decide (xs.map Prod.fst).Nodup = true`, checked by the kernel. -/
+def nodupLemma (xs : Expr) : MetaM Expr := do
+  let fst := mkApp2 (mkConst ``Prod.fst [0, 0]) (mkConst ``Var) (mkConst ``PrimTy)
+  let p ← mkDecide (← mkAppM ``List.Nodup #[← mkAppM ``List.map #[fst, xs]])
+  NFml.Derive.kernelLemma (← mkEq p (mkConst ``Bool.true)) (← mkEqRefl (mkConst ``Bool.true))
+
+open Lean Meta in
+/-- `b = true` for a closed `Bool` term `b`, checked by the kernel. -/
+def trueLemma (b : Expr) : MetaM Expr := do
+  NFml.Derive.kernelLemma (← mkEq b (mkConst ``Bool.true)) (← mkEqRefl (mkConst ``Bool.true))
+
+open Lean Elab Tactic Meta in
+/-- `syn` on the body, the parameters known to return (`LFml.syn_valid_alls`). -/
+elab "sol_decide_syn_alls" : tactic => withMainContext do
+  let g ← getMainGoal
+  let (xs, body) ← allsGoal g
+  let hn ← nodupLemma xs
+  let known ← mkAppM ``List.map #[← withLocalDeclD `q (← mkAppM ``Prod #[mkConst ``Var,
+    mkConst ``PrimTy]) fun q => do mkLambdaFVars #[q] (mkApp (mkConst ``LTerm.var)
+      (← mkAppM ``Prod.fst #[q])), xs]
+  let nilKeys ← mkListLit (← mkAppM ``Prod #[mkConst ``Bool, ← mkAppM ``Prod
+    #[mkConst ``LTerm, mkConst ``LTerm]]) []
+  let h ← trueLemma (mkApp3 (mkConst ``LFml.syn) known nilKeys body)
+  let prf := mkApp4 (mkConst ``LFml.syn_valid_alls) xs body hn h
+  unless ← isDefEq (← inferType prf) (← g.getType) do
+    throwError "sol_decide: the reduction is not its parameters' quantifiers over a body"
+  g.assign prf
+  replaceMainGoal []
+
+open Lean Elab Tactic Meta in
+/-- Read the parameters at their types (`Typed`, the hypothesis `ht`), and
+split every other local the goal `LFml.holdsA E o …` reads: it halts, is
+an integer, or is a boolean. -/
+elab "sol_decide_atoms" ht:ident : tactic => withMainContext do
+  let d ← getLocalDeclFromUserName ht.getId
+  let_expr Typed xs _ := ← instantiateMVars d.type
+    | throwError "sol_decide: expected `Typed xs E`"
+  let some (_, qs) := xs.listLit? | throwError "sol_decide: the parameters are not a list"
+  let mut typed : Array Var := #[]
+  for q in qs do
+    let x ← unsafe evalExpr Var (mkConst ``Var) (q.getArg! 2)
+    typed := typed.push x
+    if (q.getArg! 3).isConstOf ``PrimTy.bool then
+      evalTactic (← `(tactic| obtain ⟨⟨_, _⟩, $ht:ident⟩ := $ht:ident))
+    else
+      evalTactic (← `(tactic| obtain ⟨⟨_, _, _, _⟩, $ht:ident⟩ := $ht:ident))
+  evalTactic (← `(tactic| clear $ht:ident))
+  let g ← getMainGoal
+  let ty ← instantiateMVars (← g.getType)
+  let_expr LFml.holdsA E _ r := ty | throwError "sol_decide: expected `LFml.holdsA E o …`"
+  let xs ← unsafe evalExpr (List Var) (mkApp (mkConst ``List [levelZero]) (mkConst ``Var))
+    (mkApp (mkConst ``LFml.vars) r)
+  for x in xs.eraseDups do
+    if typed.contains x then continue
+    let tt ← Term.exprToSyntax (mkApp E (toExpr x))
+    evalTactic (← `(tactic| all_goals
+      rcases res_value_cases $tt with ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩))
+
+open Lean Elab Tactic Meta in
+/-- The constraints' step with the parameters typed
+(`LFml.valid_alls_of_cons`), on a goal `∀ σ, LFml.holds σ (alls xs body)`
+whose body reads the initial storage only. -/
+elab "sol_decide_typed" : tactic => withMainContext do
+  let g ← getMainGoal
+  let (xs, body) ← allsGoal g
+  let hn ← nodupLemma xs
+  let hi ← trueLemma (mkApp (mkConst ``LFml.initOnly) body)
+  let [g'] ← g.apply (mkApp4 (mkConst ``LFml.valid_alls_of_cons) xs body hn hi)
+    | throwError "sol_decide: unexpected goals"
+  replaceMainGoal [g']
+  evalTactic (← `(tactic| (
+    sol_reads
+    intro σ o ht hc
+    sol_cons_split hc
+    sol_decide_atoms ht
+    sol_decide_finishA)))
+
+open Lean Elab Tactic Meta in
+/-- The parameters as free locals (`LFml.valid_alls_of_body`), for the
+finish without the constraints. -/
+elab "sol_decide_body" : tactic => withMainContext do
+  let g ← getMainGoal
+  let (xs, body) ← allsGoal g
+  let [g'] ← g.apply (mkApp2 (mkConst ``LFml.valid_alls_of_body) xs body)
+    | throwError "sol_decide: unexpected goals"
+  replaceMainGoal [g']
+
+open Lean Elab Tactic Meta in
+/-- The scoped leaf `Valid ψ` as `∀ σ, (NFml.reduce φ).holds σ`, `φ` its
+erasure computed and quoted (`Valid.of_reduce`): `Fml.posB` and the
+fragment checked by the kernel. -/
+def reduceScoped (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
+  let bool := mkConst ``Bool
+  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
+  let hpTy := mkApp3 (mkConst ``Eq [1]) bool
+    (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
+      (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
+  let hp ← try NFml.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
+    catch _ => throwError "sol_decide: the leaf is not one its erasure closes (`Fml.posB`): a \
+      hidden binder under a negation, a precondition or a modality, or named twice, or what \
+      is negated or assumed is not first-order (an update, a modality or a `havoc` there)"
+  let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
+  let φ ← match C.constName?, ψ.hasFVar || ψ.hasMVar with
+    | some n, false =>
+      unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)
+        (mkApp3 (mkConst ``NFml.quote) C (Solidity.quoteConstName n) erased)
+    | _, _ => withTransparency .all <| Meta.reduce erased (skipTypes := true) (skipProofs := true)
+  let he := mkApp2 (mkConst ``Eq.refl [1]) (mkApp (mkConst ``NFml) C) φ
+  let hf ← try trueLemma (mkApp3 (mkConst ``NFml.inL) C (mkConst ``Sym.empty) φ)
+    catch _ => throwError "sol_decide: the formula is outside the fragment (a push of a memory \
+      object, a copy of memory whose guards are not literals, a copy from storage outside its \
+      allocation's pair, a memory past memSize, a read of the ledger, an alias no update \
+      binds, or one through an index used after a write)"
+  let goal := Lean.mkForall `σ .default (mkConst ``Semantics.State)
+    (mkApp2 (mkConst ``LFml.holds) (.bvar 0) (mkApp2 (mkConst ``NFml.reduce) C φ))
+  let g' ← mkFreshExprSyntheticOpaqueMVar goal (← g.getTag)
+  g.assign (mkAppN (mkConst ``Valid.of_reduce) #[C, ψ, hp, φ, he, hf, g'])
+  return g'.mvarId!
+
+open Lean Elab Tactic Meta in
+/-- **`sol_decide` on a scoped leaf** (`Valid ψ`, after `sol_symex`): the
+leaf erased only to reduce it (`Valid.of_reduce`), then closed by its terms
+with its parameters known (`LFml.syn_valid_alls`), or by the constraints
+with its parameters typed (`LFml.valid_alls_of_cons`), or by
+`sol_decide_heuristic` with them free.  Today's `sol_decide` runs on
+today's goal. -/
+@[tactic Solidity.Decide.tacticSol_decide]
+def evalSolDecideScoped : Tactic := fun _ => withMainContext do
+  let g ← getMainGoal
+  let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
+  Symex.reporting g do
+    replaceMainGoal [← reduceScoped g C ψ]
+    evalTactic (← `(tactic| (
+      sol_reduce
+      first
+      | sol_decide_syn_alls
+      | sol_decide_typed
+      | (sol_decide_body; sol_decide_heuristic))))
 
 end Decide
 
