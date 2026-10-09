@@ -402,11 +402,11 @@ def assignStep : {T : Ty} → Loc C Γ T → Src C Γ T → Premise C Γ Γ
     if b.isSimple then
       (VHole.store (.field b f h)).step k (fun se => .save (.field b f h) (.val (.simple se))) e
     -- storageFieldWrite_unfold_leftFst
-    else (VHole.store (.field b f h)).lower k ((.unfold
+    else (VHole.store (.field b f h)).lower k (.unfold
       (.cons (.declLocal _ (fse k) (some e))
         (.cons (.declStorage _ (fsp k) (some (.path b.up)))
           (.cons (.assign (.field (.alias .here) f h) (.val (.simple (.local (.there .here))))) .nil)))
-      (.push (.push .refl)))) e
+      (.push (.push .refl))) e
   | _, .field b f h, .copy p hm =>
     -- storageFieldWriteCopySource, or the source unfolded
     if b.isSimple then copyStep k (.field b f h) hm p
@@ -419,9 +419,9 @@ def assignStep : {T : Ty} → Loc C Γ T → Src C Γ T → Premise C Γ Γ
       | .simple ie => (VHole.store (.index it b (.simple ie))).step k
           (fun se => .save (.index it b (.simple ie)) (.val (.simple se))) e
       -- storageIndexWriteCaptureAllNonSimpleIndex
-      | i => (VHole.store (.index it b i)).lower k ((indexCaptureAll k it b i e)) e
+      | i => (VHole.store (.index it b i)).lower k (indexCaptureAll k it b i e) e
     -- storageIndexWriteCaptureAllComplexRecv
-    else (VHole.store (.index it b i)).lower k ((indexCaptureAll k it b i e)) e
+    else (VHole.store (.index it b i)).lower k (indexCaptureAll k it b i e) e
   | _, .index it b i, .copy p hm =>
     if b.isSimple then
       match i with
@@ -643,7 +643,7 @@ def rebindMemStep {R : RefTy} (i : Idx Γ (.mem R)) : MRhs C Γ R → Premise C 
   | .alias (.loc l) => (MHole.rebind i).readStep k
       (fun mv hmv f hf => .upd1 (.local i (.mref (MPath.loc (.field (.var mv hmv) f hf)).lower)))
       (fun a mv hmv ie =>
-        (.upd1 (.local i (.mref (MPath.loc (.index a (.var mv hmv) (.simple ie))).lower)))) l
+        .upd1 (.local i (.mref (MPath.loc (.index a (.var mv hmv) (.simple ie))).lower))) l
   | .copy sp hm =>
     if sp.isSimple then .allocCopy i (.app2 .sfind .storage sp.lower)
     else .captureSP (fsp k) sp (.rebindMem i.there (.copy (.alias .here) hm))

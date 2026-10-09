@@ -91,9 +91,9 @@ def callStep (k : Nat) {Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) (r
         let result : Prog C (.val p :: (ps ++ Γ)) (.val p :: (ps ++ Γ)) := match res with
           | none => .nil
           | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil
-        (.unfold (args.declsThen (.cons (.declLocal p r none)
+        .unfold (args.declsThen (.cons (.declLocal p r none)
           (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) result)))
-          (.push (Ext.append Γ ps))))
+          (.push (Ext.append Γ ps)))
     (fun {rs} bs body => match args.capture with
       | some ⟨p', v, as'⟩ => .inline
           (.cons (.declLocal p' (fse k) (some v)) (.cons (.call f as' (.rets bs) body) .nil))

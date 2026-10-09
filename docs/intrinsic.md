@@ -885,13 +885,17 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     `/Ty` and `/ArrTy` splits (the step now reduces through
     `Premise.clearMem`'s match on the type, which `some` had hidden from
     `whnf`).  No pin changed.
-    **Gates** (end of work, as the W6 baselines; minimum of three runs at
-    load 1.1–1.7, a fourth discarded where another lane's build put the
-    load at 3–24): `Derived9` 7.06 s (7.16; 0.99×), `Derived10` 11.33 s
-    (11.11; 1.02×), `Derived11` 3.20 s (3.16; 1.01×), `Examples/ProofTree`
-    9.93 s (9.81; 1.01×); CPU 8.48, 12.94, 3.42, 9.92 s against 8.62,
-    12.75, 3.36, 9.85.  Every row within 1.2×, none slower beyond noise:
-    kept.
+    **Gates** (end of work, as the W6 baselines; the minimum of the runs
+    kept, baseline in parentheses): `Derived9` 7.06 s (7.16; 0.99×), runs
+    7.23, 7.22, 7.06, the first at load 3.6; `Derived10` 11.33 s (11.11;
+    1.02×), runs 11.58, 11.33, 12.02, the first at load 3.2; `Derived11`
+    3.20 s (3.16; 1.01×), runs 4.88, 3.28, 3.20, the first at load 4.0,
+    after an aborted run (2.26 s, 1.66 GB against about 2.18 GB for a full
+    one) that was dropped; `Examples/ProofTree` 9.93 s (9.81; 1.01×), runs
+    10.05, 9.93, the minimum of two, a first run discarded (load 6.8 rising
+    to 24.6 under another lane's build, 43.3 s).  CPU 8.48, 12.94, 3.42,
+    9.92 s against 8.62, 12.75, 3.36, 9.85.  Every row within 1.2×, none
+    slower beyond noise: kept.
 77. *Proposed (M7 review), the lead's call:* `Reachable C st ↔ Canon ∧
     Tight` (`reachable_iff`, `shape_iff_reachable`, `wt_iff_reachable`)
     holds for a storage that fits (`FitsStorage C st`): a consequence of
