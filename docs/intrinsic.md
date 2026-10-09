@@ -2378,6 +2378,9 @@ whole: fourteen `Derived` workers at once exceed the memory cap.
    `check-testsuite.sh`.  Time flipped Derived9–11 against 22.9 s.
 
 ## W4 — delete the old calculus and runs (3 lanes, plus a reader dry run)
+**Status (2026-10-09): done** at the W4b integration (below), pending the
+lead's calls on proposals 55–61.
+
 Before the lanes branch, the lead makes `Surface` the default and removes the `open scoped` lines with sed.
 
 1. **`sem-del`**
@@ -6503,6 +6506,100 @@ binders, W5's qualified-name reason):
   `‹Core.Stmt.call f args ret body›` ⇝ `⟨[ T se = v; ‹Core.Stmt.call f as'
   ret body›; ]⟩`); new pin `#check_rule_text`.
 - The fresh names (`se1`, `sp1`) are unchanged; every other pin unchanged.
+
+### W4b integration (2026-10-09, on `intrinsic`)
+
+`w4b-run40`, `w4b-rules36` and `w4b-printers` merged in that order (three
+merge commits).  Conflicts: `Calculus/Core/Delab.lean` (`rules36` moved the
+translation to `Calculus/Core/DelabErase.lean`, decision 53; `run40`'s
+"stuck" → "blocked" comments and `printers`' changes to the translation,
+`legacyType?`'s `schema`, `Env.schema`, `twin?`, `branchBinders?`,
+`hsepPlaceholder`, the `fbs`/`ic` and `expand_function_body(fbs)` arms of
+`tr`, `twinsFrom`/`withTwins`, were re-applied there; `progItems?`,
+`blockLine?`, `callSide` and `pp.sol.ic` stay in `Core.Delab`),
+`Calculus/Core/DelabLean.lean`, `docs/module-map.md` (union) and this file
+(every lane section kept).
+
+- **Proposals renumbered**: `run40` and `rules36` each proposed a 55–57;
+  `run40`'s keep 55–58, `rules36`'s are 59–61 in the numbered list.
+- **Decision 58 carried over**: `rules36`'s `Proves.solkey_stuck` and
+  `Fml.stuckK` (`Calculus/Core/SolkeyProves.lean`) are
+  `Proves.solkey_blocked` and `Fml.blockedK`, so `rg stuck` finds prose only.
+  No pin prints either.
+- **Checks**: `lean_build` with `SolidityCorpus` and `SolkeyTestSuite`
+  added to `defaultTargets` for the run (reverted after): 314 jobs, green
+  on the first build, no error to fix.  `dups.py`: only the known `as`
+  line (`Evm/Repr`, `Examples/Verify`).  `check-orphans`: 300 reachable;
+  the three orphans are the git-excluded `Solidity/Scratch/` modules.
+  `check-doc-paths`, `check-rule-text`: OK.  `check-testsuite.sh` against
+  solkey `1b4341a303` (extracted with `git archive`): ok (438 functions =
+  435 derived + 1 pending + 1 divergent + 1 excluded; 2 skip).  No new
+  `sorry` (the one new match is `DelabErase`'s docstring "no `sorryAx`"),
+  `axiom` (1) or `maxHeartbeats` override (30).
+- **Pins changed**: the union of the lanes' (each lane section has the
+  detail): `Theorems.lean`'s `solkey_lt_calculus`/`solkey_rule_lt_calculus`
+  rows and the new `solkey_eq_calculus`, `solkey_step_taclet` (`rules36`);
+  `Examples/Tactics/Calls`, `Examples/Tactics/TryCatch`, `Examples/Tools`'
+  `#taclet functionCallArgCapture` and the new `#check_rule_text`
+  (`printers`); the M3 kernel examples and the alias-write `#eval` moved to
+  `Examples/Tools` (`run40`).  This integration changed none.  The fresh
+  names (`se1`, `sp1`) are unchanged.
+
+**M0 re-timed** (the W3 gates' method: each file copied under
+`Solidity/Scratch/`, opened in a fresh worker, `/proc` sampled every 20 ms,
+wall from the worker's start to its last CPU, the worker stopped 6 s after;
+the merged tree (`64d115c`) against a detached worktree at `78182e5`,
+alternated, two runs a tree (three or four on the noisy rows), the minimum
+kept; load 0.9–2.4).  The wall includes the worker's wait for `lake
+setup-file`, which varied by up to 8 s between runs of the same file at the
+same CPU, so the CPU column is the steadier measure:
+
+| M0 row | M0 | `78182e5` | merged | ratio | CPU, `78182e5` → merged |
+|---|---|---|---|---|---|
+| `TestSuite/Derived9` | 7.0 s | 7.96 s | 7.96 s | 1.00 | 8.68 → 8.65 s |
+| `TestSuite/Derived10` | 9.3 s | 12.07 s | 12.08 s | 1.00 | 12.98 → 12.99 s |
+| `TestSuite/Derived11` | 2.8 s | 4.00 s | 3.97 s | 0.99 | 3.44 → 3.44 s |
+| `TestSuite/Problems` (`legacy`) | 1.2 s | 1.60 s | 1.55 s | 0.97 | 0.68 → 0.66 s |
+| `TestSuite/CoreProblems` | — | 2.14 s | 2.15 s | 1.00 | 1.24 → 1.23 s |
+| `Solkey/TestSuite` | 10.4 s | 11.80 s | 11.84 s | 1.00 | 11.19 → 11.11 s |
+| `Examples/Benchmark/Syntax` | 1.2 s | 2.17 s | 2.18 s | 1.00 | 1.54 → 1.52 s |
+| `Examples/ProofTree` | 10.1 s | 10.53 s | 10.63 s | 1.01 | 9.80 → 9.93 s |
+| `Examples/Chains/Storage` | 7.5 s | 8.34 s | 8.23 s | 0.99 | 8.03 → 7.90 s |
+| `Evm/CoreExamples` (`Evm/Examples`' row) | 9.5 s | 8.42 s | 8.52 s | 1.01 | 7.95 → 8.05 s |
+| `Evm/CoreCorrect` (`Evm/Correctness`' rows; changed by `run40`) | 25.6 s | 2.45 s | 2.40 s | 0.98 | 6.02 → 6.05 s |
+
+Nothing slowed: every row within ±1.5% of the tree before the lanes, in
+wall and in CPU.  Only `Evm/CoreCorrect` of these files changed (`run40`).
+
+**W4 status: done, pending the lead's calls** (proposals 55–61, with the
+earlier open ones).  No run of a statement other than the typed one is
+left: today's untyped run (`sem-del`), the old calculus (`calc-del`), the
+modality of today's formulas (`modal`), M3's scoped run, `TypedRunErase`
+and `Halt.stuck` (`run40`) are gone; the step rules read the rule set and
+`⊢ₖ` is solkey's judgement (`rules36`); the printers print every rule as a
+rule line (`printers`).  What stays is what W4 keeps by design: `Surface.Stmt`
+and `Surface`'s formulas (the elaborator's output and the printers'
+target), `NFml` (the closer's input), and the erased state the closer's
+untyped terms read (`Semantics.lean`'s operations and `Semantics/Core.lean`'s
+`State C Γ`/`Env`, decision 40, until M6c).
+
+**Left**:
+- The read-only finder/skeptic review pass (none of the three lanes ran
+  it, nor did this integration: no subagent tool here).
+- `check-corpus.sh` and running `solkeycheck` itself (built only; no rule
+  name or annotation changed in the three lanes).
+- The SolKey reader (side-projects `lean/solkey`, branch `intrinsic`):
+  switch its import to `Calculus/Core/DelabErase` and check it builds
+  (`rules36`'s note; the names stay `Solidity.Core.Delab.tr`/`withTwins`,
+  and `printers`' new arguments are defaulted, so the reader's calls are
+  unchanged).
+- `printers`' cosmetic: `withTwins` does not pass `schema` on its
+  `frames = true` path (now in `Calculus/Core/DelabErase.lean`); nothing
+  calls it with both set.
+- Prose for W5/M7: `compiler-verification.md`, `kernel-port.md` and
+  `AGENTS.md` still describe `Stmt.run`; `docs/testsuite-proofs.md`
+  (line 2319) cites today's `Proves.solkey_lt_calculus`.
+- Lead decisions: proposals 55–61.
 
 ## Baselines (M0)
 
