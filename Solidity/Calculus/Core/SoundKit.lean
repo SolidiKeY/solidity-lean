@@ -1,7 +1,8 @@
 import Solidity.Calculus.Core.Logic
 import Solidity.Calculus.NoPanic
 import Solidity.Calculus.Core.ProvesSound
-import Solidity.Typing.StraightRun
+import Solidity.Semantics.Core.TypedEnds
+import Solidity.Semantics.Core.TypedStepErase
 import Solidity.Semantics.Core.Callback
 
 /-!
@@ -19,11 +20,10 @@ typing (`Stmt.trunSt_ext`, from `Out.ext`), which an update's reading asks.
 An update rule needs that its update, applied to the erasure, ends in the
 erasure of the state the typed run ends in, and halts where the run halts
 under the diamond (`Premise.sound_update`); the update is a term of
-`Update.lean`, so an arm states its equation over M3's run, which the typed
-run erases to (`Stmt.trun_erase`, the bridge: `Premise.sound_update_run`).
-Also here: the term lemmas on M3's state the arms read (`Val.eval_lower`
-and kin, `Res.Sim`), and a modality's typed run erased (`Frames.trun_erase`,
-`Prog.trunFrames_erase`).
+`Update.lean`, so an arm states its equation against what the statement's
+typed step erases to (`StepAgrees`, `Semantics/Core/TypedStepErase.lean`:
+`Premise.sound_update_erased`).  Also here: the term lemmas on the erased
+state the arms read (`Val.eval_lower` and kin, `Res.Sim`).
 -/
 
 namespace Solidity.Core
@@ -230,27 +230,6 @@ theorem Loc.resolve_noPanic {T : Ty} (l : Loc C Γ T) : NoPanic (l.resolve σ) :
   exact h
 
 end NoPanicE
-
-/-! ## A state with a local pushed -/
-
-section Push
-
-variable {Γ : Ctx} {t : LTy} (σ : State C Γ) (w : t.Denote C)
-
-theorem State.push_setLocal {u : LTy} (i : Idx Γ u) (x : u.Denote C) :
-    (σ.push w).setLocal i.there x = (σ.setLocal i x).push w := rfl
-
-theorem State.push_withGlob (g : Semantics.State) :
-    (σ.push w).withGlob g = (σ.withGlob g).push w := rfl
-
-theorem State.drop_push : (σ.push w).drop (.push .refl) = σ := rfl
-
-theorem State.get_push_here : (Env.get .here (σ.push w).env : t.Denote C) = w := rfl
-
-theorem State.get_push_there {u : LTy} (i : Idx Γ u) :
-    (Env.get i.there (σ.push w).env : u.Denote C) = Env.get i σ.env := rfl
-
-end Push
 
 open Solidity (Modality)
 
@@ -887,29 +866,30 @@ theorem Premise.sound_captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
 
 end ShapesSim
 
-/-! ## An update, through the bridge
+/-! ## An update, through its erasure
 
 An update rule's update is a term of `Update.lean`, read on the erasure, so
-what it needs of the typed run (`Premise.sound_update`) follows from the
-equation with M3's run (`U.apply σ.erase = s.run σ.erase`) by the bridge
-(`Stmt.trun_erase`), where the typed run does not diverge: a typed
-`diverge` agrees with any untyped outcome, so under the diamond the
-arm shows that it does not happen (no update arm's statement loops; a push
-at the bound is exhausted, `TRun.push_nd`, which agrees with anything too
-and which both modalities accept). -/
+what it needs of the typed run (`Premise.sound_update`) follows from its
+statement's typed step read on the erasure (`StepAgrees`,
+`Semantics/Core/TypedStepErase.lean`): the update ends where what the step
+erases to ends, up to the halt, and the typed run does not diverge under the
+diamond.  A typed `diverge` agrees with any untyped outcome, so under the
+diamond the arm shows that it does not happen (no update arm's statement
+loops; a push at the bound is exhausted, `TRun.push_nd`, which agrees with
+anything too and which both modalities accept). -/
 
 section Bridge
 
 variable {Γ Γ' : Ctx} {m : Modality}
 
-/-- **An update, through the bridge, up to the halt**: an update that ends
-as the scoped run of the statement does from the erasure, up to the halt
+/-- **An update, through the erasure, up to the halt**: an update that ends
+as what the statement's typed run agrees with (`X`), up to the halt
 (`Res.Sim`), is sound over the typed state, where the typed run does not
 diverge under the diamond. -/
-theorem Premise.sound_updateSim_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
-    (hs : Res.Sim (U.apply σ.erase) (s.run σ.erase))
+theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
+    {X : Res (State C Γ')} (ha : TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (s.trun σ) X)
+    (hs : Res.Sim (U.apply σ.erase) X)
     (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.Runs m s (.update U) σ := by
-  have ha := Stmt.trun_erase σ s
   have hU := Upd.apply_noPanic σ.erase U
   apply Premise.sound_update σ
   · intro τ hτ
@@ -919,7 +899,7 @@ theorem Premise.sound_updateSim_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ :
     | ok o =>
       rw [ht] at hτ ha
       obtain rfl : o.st = τ := Except.ok.inj hτ
-      have ha' : s.run σ.erase = .ok o.st.erase := ha
+      have ha' : X = .ok o.st.erase := ha
       rw [ha'] at hs
       revert hs
       cases U.apply σ.erase with
@@ -934,14 +914,14 @@ theorem Premise.sound_updateSim_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ :
       obtain rfl : e' = e := Except.error.inj he
       cases e' with
       | revert =>
-        have ha' : s.run σ.erase = .error .revert := ha
+        have ha' : X = .error .revert := ha
         rw [ha'] at hs
         revert hs
         cases U.apply σ.erase with
         | ok => intro hs; exact hs.elim
         | error e'' => exact fun _ => ⟨nofun, fun _ _ => ⟨e'', rfl⟩⟩
       | panic =>
-        have ha' : s.run σ.erase = .error .panic := ha
+        have ha' : X = .error .panic := ha
         rw [ha'] at hs
         revert hs hU
         cases U.apply σ.erase with
@@ -950,12 +930,23 @@ theorem Premise.sound_updateSim_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ :
       | diverge => exact ⟨nofun, fun hm _ => absurd ht (hd hm)⟩
       | exhausted => exact ⟨nofun, fun _ hx => absurd rfl hx⟩
 
-/-- **An update, through the bridge**: an update that ends as the scoped run
-of the statement does from the erasure. -/
-theorem Premise.sound_update_run {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : TState C Γ)
-    (hs : U.apply σ.erase = s.run σ.erase)
-    (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.Runs m s (.update U) σ :=
-  Premise.sound_updateSim_run σ (hs ▸ Res.Sim.refl _) hd
+/-- **An update, through the erasure, up to the halt**, given the statement's
+step read on the erasure. -/
+theorem Premise.sound_updateSim_erased {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
+    {u : State C Γ → Res (State C Γ')} (ha : StepAgrees t u) (σ : TState C Γ)
+    (hs : Res.Sim (U.apply σ.erase) (u σ.erase))
+    (hd : m = .diamond → (s.trun σ).NoDiv) (ht : ∀ σ : TState C Γ, s.trun σ = t σ := by
+      intro _; rfl) : Premise.Runs m s (.update U) σ :=
+  Premise.sound_updateSim_agrees σ ((ht σ).symm ▸ ha σ) hs hd
+
+/-- **An update, through the erasure**: an update that ends as the
+statement's typed step does on the erasure (`StepAgrees`). -/
+theorem Premise.sound_update_erased {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
+    {u : State C Γ → Res (State C Γ')} (ha : StepAgrees t u) (σ : TState C Γ)
+    (hs : U.apply σ.erase = u σ.erase)
+    (hd : m = .diamond → (s.trun σ).NoDiv) (ht : ∀ σ : TState C Γ, s.trun σ = t σ := by
+      intro _; rfl) : Premise.Runs m s (.update U) σ :=
+  Premise.sound_updateSim_erased ha σ (hs ▸ Res.Sim.refl _) hd ht
 
 theorem holds_conj {σ : TState C Γ} :
     (l : List (Fml C Γ)) → (holds σ (Fml.conj l) ↔ ∀ ψ ∈ l, holds σ ψ)
@@ -966,25 +957,26 @@ theorem holds_conj {σ : TState C Γ} :
     rw [holds_conj (ψ :: l)]
     simp only [List.mem_cons, forall_eq_or_imp]
 
-/-- **Labelled goals, through the bridge**: the formulas `fs`, then the rest
+/-- **Labelled goals, through the erasure**: the formulas `fs`, then the rest
 after each update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas holding,
-the statement runs as one of the updates up to the halt from the erasure. -/
-theorem Premise.sound_cases_run {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
-    (σ : TState C Γ)
-    (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ.erase) (s.run σ.erase))
-    (hd : m = .diamond → (s.trun σ).NoDiv) : Premise.Sound m s (.cases fs us) σ := by
+the statement's step on the erasure ends as one of the updates, up to the
+halt. -/
+theorem Premise.sound_cases_erased {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
+    {t : TStep C Γ Γ} {u : State C Γ → Res (State C Γ)} (ha : StepAgrees t u) (σ : TState C Γ)
+    (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ.erase) (u σ.erase))
+    (hd : m = .diamond → (s.trun σ).NoDiv) (ht : ∀ σ : TState C Γ, s.trun σ = t σ := by
+      intro _; rfl) : Premise.Sound m s (.cases fs us) σ := by
   intro Γ₁ Γ₀ ω κ φ hp
   have hp' := (holds_conj _).1 hp
   obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
-  exact (Premise.sound_updateSim_run σ hs hd).sound ω κ φ
+  exact (Premise.sound_updateSim_erased ha σ hs hd ht).sound ω κ φ
     (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
 
 end Bridge
 
-/-! ## A shifted part reads as it did, typed
+/-! ## A shifted part reads as it did
 
-`Calculus/Core/Logic.lean`'s "A shifted part reads as it did" over the
-typed state: a rule reads the parts of its `\find` under its fresh local
+A rule reads the parts of its `\find` under its fresh local
 (`Val.up` and its kin, `Calculus/Core/Shift.lean`), and the state with a
 local pushed is the state lifted along `up` (`TState.push_lift`), so each
 is `Semantics/Core/TypedRunWk.lean`'s `*_wk` at `up`. -/
@@ -1153,53 +1145,5 @@ theorem TState.drop_self {Γ : Ctx} (e : Ext Γ Γ) (σ : TState C Γ) : σ.drop
 theorem TRes.map_drop_self {Γ : Ctx} (e : Ext Γ Γ) (r : TRes (TState C Γ)) :
     r.map (TState.drop e) = r := by
   rw [Ext.self_eq_refl e]; cases r <;> rfl
-
-/-! ## A modality's run erased
-
-The typed run of a program and its frames erases to M3's
-(`Prog.trun_erase`, for the frames too), which `Calculus/Core/HoldsErase.lean`
-relates to the erased program's: what reads a modality on the erasure
-(`Calculus/Core/Deploy.lean`) goes through these. -/
-
-/-- The frames' typed run erases to M3's (`Prog.trun_erase`'s, for the
-frames). -/
-theorem Frames.trun_erase {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C Γ Γ₀) →
-    StepAgrees (fun σ => Frames.trun σ κ) (fun τ => Frames.run τ κ)
-  | _, .nil => fun _ => rfl
-  | _, .seq ω κ => fun σ => by
-    have h := TRun.seq_erase (fun σ => Prog.trun σ ω) (fun τ => Prog.run τ ω)
-      (fun σ => Frames.trun σ κ) (fun τ => Frames.run τ κ) (fun σ => Prog.trun_erase σ ω)
-      (Frames.trun_erase κ) σ
-    have e : Frames.run σ.erase (.seq ω κ) =
-        Run.seq (fun τ => Prog.run τ ω) (fun τ => Frames.run τ κ) σ.erase := by
-      show (do Frames.run (← Prog.run σ.erase ω) κ) = _
-      unfold Run.seq
-      dsimp only
-      cases Prog.run σ.erase ω <;> rfl
-    show TRes.Agrees _ (TRun.seq (fun σ => Prog.trun σ ω) (fun σ => Frames.trun σ κ) σ)
-      (Frames.run σ.erase (.seq ω κ))
-    rw [e]
-    exact h
-  | _, .pop _ h κ => fun σ => by
-    show TRes.Agrees _ (Frames.trun (σ.drop h) κ) (Frames.run (σ.erase.drop h) κ)
-    rw [← TState.drop_erase h σ]
-    exact Frames.trun_erase κ (σ.drop h)
-  | _, .drop h κ => fun σ => by
-    show TRes.Agrees _ (Frames.trun (σ.thin h) κ) (Frames.run (σ.erase.thin h) κ)
-    rw [← TState.thin_erase h σ]
-    exact Frames.trun_erase κ (σ.thin h)
-
-/-- A modality's typed run, then its frames, erases to M3's. -/
-theorem Prog.trunFrames_erase {Γ Γ₁ Γ₀ : Ctx} (σ : TState C Γ) (P : Prog C Γ Γ₁)
-    (κ : Frames C Γ₁ Γ₀) :
-    TRes.Agrees TState.erase (Prog.trunFrames σ P κ) (do Frames.run (← Prog.run σ.erase P) κ) := by
-  unfold Prog.trunFrames
-  refine TRes.Agrees.bind (Prog.trun_erase σ P) fun o => ?_
-  have hk := Frames.trun_erase κ o.st
-  dsimp only at hk
-  revert hk
-  cases Frames.trun o.st κ with
-  | ok o' => intro hk; exact hk
-  | error e => intro hk; cases e <;> exact hk
 
 end Solidity.Core

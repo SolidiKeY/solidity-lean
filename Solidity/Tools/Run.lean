@@ -132,16 +132,16 @@ def typedState? (C : Contract) (σ : State) : Option (Core.TState C []) := do
 from no locals (`Core.Prog.resolve`), run by `Core.Prog.trun` from `σ` read
 at the contract's types (`typedState?`), and its end state named back
 (`Core.TState.toSem`, under the block's names) or its halt erased
-(`THalt.erase`); `stuck` where `P` does not resolve or `σ` is not of the
-contract's types.  What the examples' `#eval`s run since today's
-`Stmt.run` was deleted (W4 `modal`, `docs/intrinsic.md`). -/
+(`THalt.erase`); `undef` where `P` does not resolve or `σ` is not of the
+contract's types, so that no typed run starts.  What the examples' `#eval`s
+run (`docs/intrinsic.md`, decision 48). -/
 def _root_.Solidity.Surface.Prog.runT {C : Contract} (σ : State) (P : Surface.Prog C) : Res State :=
   match Core.Prog.resolve [] P, typedState? C σ with
   | .ok ⟨Γ', Q⟩, some τ =>
     match Core.Prog.trun τ Q with
     | .ok o => .ok (o.st.toSem Γ'.names)
     | .error h => .error h.erase
-  | _, _ => .error .stuck
+  | _, _ => .error .undef
 
 /-- What the local `x` holds after `P` runs from `σ` (`Surface.Prog.runT`). -/
 def _root_.Solidity.Surface.Prog.localAfterT {C : Contract} (σ : State) (P : Surface.Prog C)

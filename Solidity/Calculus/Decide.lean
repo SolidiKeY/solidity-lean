@@ -382,7 +382,7 @@ variable {C : Contract}
 
 /-- A path whose key is not an integer: what an alias bound to a value
 resolves to. -/
-def LPath.stuck : LPath := .at (.root "") .err
+def LPath.undef : LPath := .at (.root "") .err
 
 /-- What a storage write stores: a word, or the subtree at a path of a
 storage (`alice = bob;`). -/
@@ -434,7 +434,7 @@ def _root_.Solidity.Op1.toL : Op1 a s → a.LTy → s.LTy
   | .netOf _, _ => .err
   | .delValue, _ => .err
   | .field f, x => key{ x.f }
-  | .next, _ => .stuck
+  | .next, _ => .undef
   | .select _, _ => .init
   | .sval, x => .word x
   | .newArr R, x => .arr R x
@@ -518,7 +518,7 @@ def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy
   | .read, m, a => (readM m a).getD .err
   | .mlen, m, i => (lenM m i).getD .err
   | .at, x, y => key{ x[y] }
-  | .nextIn, _, _ => .stuck
+  | .nextIn, _, _ => .undef
   | .delAt, x, y => key{ delAt(x, y) }
   | .pushSlot E, x, y => key{ arr(slot(E), x, y, true) }
   | .pop, x, y => key{ arr(pop(false), x, y, true) }
@@ -542,7 +542,7 @@ def _root_.Solidity.Op3.toL : Op3 a b c s → a.LTy → b.LTy → c.LTy → s.LT
   | .push, x, y, .sub s q =>
     key{ save(arr(slot(‹.uint›), x, y, true), y[find(x, y.length)], find(s, q)) }
   | .push, x, _, .arr _ _ | .push, x, _, .mem _ _ => x
-  | .atIn, _, _, _ => .stuck
+  | .atIn, _, _, _ => .undef
   | .write, m, a, v => writeM m a v
 
 /-- The type `addM(memory)` allocates. -/
@@ -638,7 +638,7 @@ def _root_.Solidity.Tm.toL (ρ : Sym) : Tm C s → s.LTy
   | .pvP x =>
     match lookupBy x ρ.env with
     | some (.path q) => q
-    | _ => .stuck
+    | _ => .undef
   | .pvS _ => .init
   | .pvI x =>
     match lookupBy x ρ.env with
@@ -838,7 +838,7 @@ def payGuard (a : LTerm) : LTerm :=
 
 theorem payGuard_eval (σ : State) (a : LTerm) {y : Value} {j : Int} (ha : a.eval σ = .ok y)
     (hj : y.asInt = .ok j) : (payGuard a).eval σ =
-      if j < 0 then .error .stuck else .ok (.bool true) := by
+      if j < 0 then .error .undef else .ok (.bool true) := by
   cases y with
   | bool b => simp only [Value.asInt, reduceCtorEq] at hj
   | int n =>
@@ -2142,7 +2142,7 @@ theorem PTerm.toL_step (h : Rel σ ρ τ) {n : Nat}
       simp only [Tm.toL, hl]
     · obtain ⟨v, _, h₂⟩ := hx
       simp only [bind, Except.bind, h₂, Close.bindingPath, reduceCtorEq, false_and, exists_const,
-          LPath.stuck, LPath.eval, LTerm.eval]
+          LPath.undef, LPath.eval, LTerm.eval]
     · obtain ⟨r, segs, h₁, h₂, hlive⟩ := hx
       simp only [h₂, h₁, Res.ok_bind, Close.bindingPath]
       constructor
@@ -5745,7 +5745,7 @@ theorem delBelow_sim {σ : State} {v : SVal} {G : SVal → Res Value} {atMap atE
 
 /-- A word has nothing below it. -/
 theorem find_prim_cons (p : PrimVal) (f : Seg) (t : List Seg) :
-    (SVal.prim p).findLive (f :: t) = .error .stuck := by
+    (SVal.prim p).findLive (f :: t) = .error .undef := by
   cases f <;> rfl
 
 /-- The case tree comparing a write at `P` with a read at `Q` agrees with a
@@ -6143,7 +6143,7 @@ theorem arrHas_sim {σ : State} {op : AOp} {wv : Value} {L old opq : LTerm} {v c
               simp only [Value.asInt, Except.ok.injEq] at hxi
               subst hxi
               have hT : (inRange k L).eval σ =
-                  (if 0 ≤ j ∧ j ≤ es.length then (.ok (.bool true) : Res Value) else .error .stuck) := by
+                  (if 0 ≤ j ∧ j ≤ es.length then (.ok (.bool true) : Res Value) else .error .undef) := by
                 simp only [inRange, LTerm.eval, hx, hL', evalBinop, applyBinOp, Value.asInt,
                   Value.asBool, checkArith, pickBranch, bind, Except.bind, pure, Except.pure]
                 by_cases h0 : 0 ≤ j <;> by_cases h1 : j ≤ (es.length : Int) <;>
@@ -9907,7 +9907,7 @@ theorem LTerm.eval_kite (σ : State) (a b t e : LTerm) : (LTerm.kite a b t e).ev
 theorem LTerm.eval_zero (σ : State) (a : LTerm) :
     (LTerm.zero a).eval σ = a.eval σ >>= fun v => .ok (zeroV v) := rfl
 /-- A read above a write: `alice` after `alice.age = 3;` is no word. -/
-theorem LTerm.eval_err (σ : State) : LTerm.err.eval σ = .error .stuck := rfl
+theorem LTerm.eval_err (σ : State) : LTerm.err.eval σ = .error .undef := rfl
 theorem LTerm.eval_env (σ : State) (k : EnvKey) :
     (LTerm.env k).eval σ = .ok (.int (σ.envVal k)) := rfl
 theorem LTerm.eval_findP (σ : State) (s : LStor) (q : LPath) : (LTerm.findP s q).eval σ =

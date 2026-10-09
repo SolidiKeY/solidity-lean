@@ -1,11 +1,11 @@
-import Solidity.Typing.Soundness
-import Solidity.Typing.StraightRun
+import Solidity.Typing.TypedRunInv
+import Solidity.Semantics.Core.TypedEnds
 
 /-!
 # What every reachable state satisfies beyond its types
 
-`Soundness.lean` shows `RunWT` is *sufficient*: every scoped run keeps it.
-This module asks what else a run keeps, which `SVal.hasTy` forgets — the
+A typed state's erasure is well-typed by construction (`RunWT`,
+`TypedWT.lean`).  This module asks what else the typed run keeps, which `SVal.hasTy` forgets — the
 facts that let one refute that a well-typed storage is reachable at all.
 `SVal.canon` adds exactly those:
 
@@ -24,15 +24,15 @@ struct with a mapping member can exist (the member would need a claim at a
 mapping type, which no object satisfies), and a copy back never produces a
 struct missing its mapping.
 
-`Prog.run_canon` is the preservation theorem (the scoped run's
-`RunInv` with `Canon` on the global part, `canonInv`), `reachable_canon`
-its corollary from a contract's initial state (`Reachable`: a scoped program
-`Core.Prog C [] Γ'` runs there by the typed interpreter, so the
-scoped one ends in the erased state, `ReachableS`), and the two refutations the
-removed untyped layer left as `sorry` follow: a storage whose mapping default
-is not the default (`map_default_not_reachable`) and one whose struct misses
-a member (`struct_missing_field_not_reachable`) are well-typed and reached by
-no scoped run (`ReachableS`), hence not `Reachable`.
+`Prog.trun_canon` is the preservation theorem (the typed run keeps
+`canonInv`, a `RunInv` with `Canon` on the erased global part, each step
+through what it erases to, `TypedRunInv.lean`), `reachable_canon` its
+corollary from a contract's initial state (`Reachable`: a scoped program
+`Core.Prog C [] Γ'` runs there by the typed interpreter), and the two
+refutations the removed untyped layer left as `sorry` follow: a storage whose
+mapping default is not the default (`map_default_not_reachable`) and one
+whose struct misses a member (`struct_missing_field_not_reachable`) are
+well-typed and not `Reachable`.
 
 The converse is `Constructibility.lean`: canonical is not enough, and
 canonical and tight (`SVal.tight`) is exactly reachable.
@@ -1492,8 +1492,10 @@ section Leaves
 variable {Γ : Ctx}
 
 theorem keepsC_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
-    (canonInv C).Keeps (Run.assign l r) := by
+    (canonInv C).TKeeps (TRun.assign l r) :=
+  RunInv.TKeeps.of_agrees (TRun.assign_erase l r) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   have hc := RunCanon.canon hcn
@@ -1506,8 +1508,10 @@ theorem keepsC_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
     ((hc.write hT (Src.value_canon hwt hc hsv) hτ).of_eq rfl rfl)⟩
 
 theorem keepsC_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
-    (canonInv C).Keeps (Run.rebind i r) := by
+    (canonInv C).TKeeps (TRun.rebind i r) :=
+  RunInv.TKeeps.of_agrees (TRun.rebind_erase i r) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨⟨σ₁, root, segs⟩, he, h⟩ := bind_ok_inv h
@@ -1517,8 +1521,10 @@ theorem keepsC_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
     ((ARhs.eval_canon hwt hcn.canon he).of_eq rfl rfl)⟩
 
 theorem keepsC_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
-    (canonInv C).Keeps (Run.assignLocal i r) := by
+    (canonInv C).TKeeps (TRun.assignLocal i r) :=
+  RunInv.TKeeps.of_agrees (TRun.assignLocal_erase i r) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨w, hv, h⟩ := bind_ok_inv h
@@ -1527,11 +1533,12 @@ theorem keepsC_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
     (hcn.canon.of_eq rfl rfl)⟩
 
 theorem keepsC_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
-    (canonInv C).Keeps (Run.declLocal p init) := by
+    (canonInv C).TKeeps (TRun.declLocal p init) :=
+  RunInv.TKeeps.of_agrees (TRun.declLocal_erase p init) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
-  unfold Run.declLocal at h
   cases init with
   | none =>
     cases h
@@ -1542,8 +1549,10 @@ theorem keepsC_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
     exact ⟨H, .refl H, RunCanon.mk' (hwt.push (Val.eval_wt hwt e hv)) (hcn.canon.of_eq rfl rfl)⟩
 
 theorem keepsC_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
-    (canonInv C).Keeps (Run.declStorage R init) := by
+    (canonInv C).TKeeps (TRun.declStorage R init) :=
+  RunInv.TKeeps.of_agrees (TRun.declStorage_erase R init) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   cases init with
@@ -1560,8 +1569,10 @@ theorem keepsC_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
 
 theorem keepsC_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) :
-    (canonInv C).Keeps (Run.opAssign op l r) := by
+    (canonInv C).TKeeps (TRun.opAssign op l r) :=
+  RunInv.TKeeps.of_agrees (TRun.opAssign_erase op hop hp l r) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨v, _, h⟩ := bind_ok_inv h
@@ -1569,8 +1580,10 @@ theorem keepsC_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = 
     (OpLoc.store_canon hwt hcn.canon (compound_isArith hop) l hp h)⟩
 
 theorem keepsC_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    (canonInv C).Keeps (Run.incDec op l) := by
+    (canonInv C).TKeeps (TRun.incDec op l) :=
+  RunInv.TKeeps.of_agrees (TRun.incDec_erase op hp l) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
@@ -1580,8 +1593,10 @@ theorem keepsC_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : 
 
 theorem keepsC_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    (canonInv C).Keeps (Run.assignIncDec i op l) := by
+    (canonInv C).TKeeps (TRun.assignIncDec i op l) :=
+  RunInv.TKeeps.of_agrees (TRun.assignIncDec_erase i op hp l) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨⟨σ₁, w⟩, hb, h⟩ := bind_ok_inv h
@@ -1591,8 +1606,10 @@ theorem keepsC_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     ((OpLoc.bump_canon hwt hcn.canon l hp hb).of_eq rfl rfl)⟩
 
 theorem keepsC_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
-    (hd : (v.isSome || E.defaultOkS) = true) : (canonInv C).Keeps (Run.push b v) := by
+    (hd : (v.isSome || E.defaultOkS) = true) : (canonInv C).TKeeps (TRun.push b v) :=
+  RunInv.TKeeps.of_agrees (TRun.push_erase b v) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   have hc := RunCanon.canon hcn
@@ -1620,8 +1637,10 @@ theorem keepsC_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E
       cases hw
       exact SVal.strip_canon (Src.value_canon hwt hc hv)
 
-theorem keepsC_pop {E : Ty} (b : SPath C Γ (.array E)) : (canonInv C).Keeps (Run.pop b) := by
+theorem keepsC_pop {E : Ty} (b : SPath C Γ (.array E)) : (canonInv C).TKeeps (TRun.pop b) :=
+  RunInv.TKeeps.of_agrees (TRun.pop_erase b) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨⟨root, segs⟩, hr, h⟩ := bind_ok_inv h
@@ -1630,8 +1649,10 @@ theorem keepsC_pop {E : Ty} (b : SPath C Γ (.array E)) : (canonInv C).Keeps (Ru
   exact ⟨H, .refl H, RunCanon.mk' (hwt.withGlob (.refl H) (popAt_wt hwt.glob hT hτ))
     ((popAt_canon hcn.canon hT hτ).of_eq rfl rfl)⟩
 
-theorem keepsC_transfer (r a : Val C Γ .uint) : (canonInv C).Keeps (Run.transfer r a) := by
+theorem keepsC_transfer (r a : Val C Γ .uint) : (canonInv C).TKeeps (TRun.transfer r a) :=
+  RunInv.TKeeps.of_agrees (TRun.transfer_erase r a) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   iterate 4 bind_inv h
@@ -1643,8 +1664,10 @@ theorem keepsC_transfer (r a : Val C Γ .uint) : (canonInv C).Keeps (Run.transfe
   · cases hτ; rw [Semantics.State.pay_eq]; exact hcn.canon.of_eq rfl rfl
 
 theorem keepsC_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
-    (canonInv C).Keeps (Run.send pv r a) := by
+    (canonInv C).TKeeps (TRun.send pv r a) :=
+  RunInv.TKeeps.of_agrees (TRun.send_erase pv r a) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨_, _, h⟩ := bind_ok_inv h
@@ -1664,9 +1687,11 @@ theorem keepsC_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
     · exact ⟨H, .refl H, RunCanon.mk' (hwt.setLocal pv rfl) (hcn.canon.of_eq rfl rfl)⟩
 
 theorem keepsC_declMem (R : RefTy) (init : Option (MRhs C Γ R))
-    (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) :
-    (canonInv C).Keeps (Run.declMem R init) := by
+    (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
+    (canonInv C).TKeeps (TRun.declMem R init hm) :=
+  RunInv.TKeeps.of_agrees (TRun.declMem_erase R init hm) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   cases init with
@@ -1686,8 +1711,10 @@ theorem keepsC_declMem (R : RefTy) (init : Option (MRhs C Γ R))
       (h₁.canon.of_eq rfl rfl)⟩
 
 theorem keepsC_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
-    (canonInv C).Keeps (Run.rebindMem i r) := by
+    (canonInv C).TKeeps (TRun.rebindMem i r) :=
+  RunInv.TKeeps.of_agrees (TRun.rebindMem_erase i r) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨⟨σ₁, id⟩, he, h⟩ := bind_ok_inv h
@@ -1697,8 +1724,10 @@ theorem keepsC_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
     (h₁.canon.of_eq rfl rfl)⟩
 
 theorem keepsC_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
-    (canonInv C).Keeps (Run.assignFromMem l p) := by
+    (canonInv C).TKeeps (TRun.assignFromMem l p) :=
+  RunInv.TKeeps.of_agrees (TRun.assignFromMem_erase l p) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   have hc := RunCanon.canon hcn
@@ -1715,16 +1744,20 @@ theorem keepsC_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ
     ((hc.write hT (copyMToSt_canon hwt.glob.heap hc.heap hm hsv) hτ).of_eq rfl rfl)⟩
 
 theorem keepsC_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
-    (canonInv C).Keeps (Run.assignMem l r) := by
+    (canonInv C).TKeeps (TRun.assignMem l r) :=
+  RunInv.TKeeps.of_agrees (TRun.assignMem_erase l r) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   obtain ⟨mv, hmv, h⟩ := bind_ok_inv h
   exact ⟨H, .refl H, RunCanon.mk' (MLoc.write_wt hwt l (MSrc.mval_wt hwt hmv) h)
     (MLoc.write_canon hwt hcn.canon l h)⟩
 
-theorem keepsC_delete {T : Ty} (l : Loc C Γ T) : (canonInv C).Keeps (Run.delete l) := by
+theorem keepsC_delete {T : Ty} (l : Loc C Γ T) : (canonInv C).TKeeps (TRun.delete l) :=
+  RunInv.TKeeps.of_agrees (TRun.delete_erase l) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   have hc := RunCanon.canon hcn
@@ -1737,8 +1770,10 @@ theorem keepsC_delete {T : Ty} (l : Loc C Γ T) : (canonInv C).Keeps (Run.delete
     ((hc.save hty (SVal.defaultOf_canon (hc.find hty hcur)) hτ).of_eq rfl rfl)⟩
 
 theorem keepsC_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) :
-    (canonInv C).Keeps (Run.deleteMem p) := by
+    (canonInv C).TKeeps (TRun.deleteMem p) :=
+  RunInv.TKeeps.of_agrees (TRun.deleteMem_erase p) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   have hc := RunCanon.canon hcn
@@ -1770,8 +1805,10 @@ theorem keepsC_deleteMem {T : Ty} (p : MPath C Γ T) (hd : T.defaultOkS = true) 
         ((writeAddr_canon hg₁ hc₁ (hat.mono hout.out.ext) hτ).of_eq rfl rfl)⟩
 
 theorem keepsC_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
-    (hn : R.newArrOk = true) : (canonInv C).Keeps (Run.assignNew l n) := by
+    (hn : R.newArrOk = true) : (canonInv C).TKeeps (TRun.assignNew l n hn) :=
+  RunInv.TKeeps.of_agrees (TRun.assignNew_erase l n hn) <| by
   intro H σ σ' hcn h
+  dsimp only at h
   replace hcn : RunCanon C H σ := hcn
   have hwt := RunCanon.wt hcn
   have hc := RunCanon.canon hcn
@@ -1781,7 +1818,7 @@ theorem keepsC_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
   obtain ⟨id, hid, h⟩ := bind_ok_inv h
   obtain ⟨H', hout, hmv⟩ := copyStToM_canon hwt.glob.heapTyNodup hwt.glob.heap hwt.glob.heapWf
     hc.heap (newArrVal_hasTy hn nv) (newArrVal_canon hn nv) hcopy
-  rw [MVal.asRef_ok hid] at hmv
+  rw [MVal.asRef_ok (show mv.asRef = .ok id from hid)] at hmv
   have hg₁ : StateWT H' C.layout τ := hwt.glob.ofCopyOut hout.out
   have hc₁ : Canon C H' τ := ⟨hout.out.storage ▸ hc.storage, hout.canon⟩
   have h₁ := RunCanon.ofCopyOutC hwt hc hout
@@ -1807,7 +1844,7 @@ canonical state ends in one: after `alice.age = 3;` `alice` still has both
 members, after `balances[7] += 1;` key `7` is there once, after
 `alice = m;` the copy has every member `m`'s object has, which is all of
 them. -/
-theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv C).Keeps (Stmt.runR s)
+theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv C).TKeeps (Stmt.trunR s)
   | _, _, .assign l r => keepsC_assign l r
   | _, _, .rebind i r => keepsC_rebind i r
   | _, _, .assignLocal i r => keepsC_assignLocal i r
@@ -1820,7 +1857,7 @@ theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv 
   | _, _, .pop b => keepsC_pop b
   | _, _, .transfer r a => keepsC_transfer r a
   | _, _, .send pv r a => keepsC_send pv r a
-  | _, _, .declMem R _ init hd _ => keepsC_declMem R init hd
+  | _, _, .declMem R _ init hd hm => keepsC_declMem R init hd hm
   | _, _, .rebindMem i r => keepsC_rebindMem i r
   | _, _, .assignFromMem l p => keepsC_assignFromMem l p
   | _, _, .assignMem l r => keepsC_assignMem l r
@@ -1828,35 +1865,36 @@ theorem Stmt.keeps_canon : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (canonInv 
   | _, _, .deleteMem p hd => keepsC_deleteMem p hd
   | _, _, .assignNew l n hn => keepsC_assignNew l n hn
   | _, _, .ite c thn els =>
-    RunInv.keeps_ite c thn.ext els.ext (Prog.keeps_canon thn) (Prog.keeps_canon els)
-  | _, _, .require c => RunInv.keeps_require c
-  | _, _, .assert c => RunInv.keeps_assert c
-  | _, _, .revert => RunInv.keeps_revert
+    RunInv.tkeeps_ite c thn.ext els.ext (Prog.keeps_canon thn) (Prog.keeps_canon els)
+  | _, _, .require c => RunInv.tkeeps_require c
+  | _, _, .assert c => RunInv.tkeeps_assert c
+  | _, _, .revert => RunInv.tkeeps_revert
   | _, _, .call _ args ret body =>
-    RunInv.keeps_call args ret body.ext
+    RunInv.tkeeps_call args ret body.ext
       (fun _ _ _ hcn h => Args.eval_wt (RunCanon.wt hcn) args h)
       (fun _ _ _ _ hτ h => CallRet.enter_canon ret hτ.1 hτ.2 h) (Prog.keeps_canon body)
   | _, _, .tryCall call rets ok err code pnc other =>
-    RunInv.keeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
+    RunInv.tkeeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
       (fun _ _ _ _ h => Binders.decode_wt rets h) (fun _ _ _ h => CodeBinder.decode_wt code h)
       (Prog.keeps_canon ok) (Prog.keeps_canon err) (Prog.keeps_canon pnc)
       (Prog.keeps_canon other)
-  | _, _, .loop _ c body => RunInv.keeps_loop c body.ext (Prog.keeps_canon body)
-  | _, _, .block body => RunInv.keeps_block body.ext (Prog.keeps_canon body)
+  | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_canon body)
+  | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_canon body)
 
 /-- **Canonicity, block level.** -/
-theorem Prog.keeps_canon : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (canonInv C).Keeps (Prog.runR P)
-  | _, _, .nil => RunInv.keeps_nil
-  | _, _, .cons s P => RunInv.keeps_seq (Stmt.keeps_canon s) (Prog.keeps_canon P)
+theorem Prog.keeps_canon : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (canonInv C).TKeeps (Prog.trunR P)
+  | _, _, .nil => RunInv.tkeeps_nil
+  | _, _, .cons s P => RunInv.tkeeps_seq (Stmt.keeps_canon s) (Prog.keeps_canon P)
 
 end
 
-/-- **Canonicity**: a block run from a well-typed canonical state ends, if
-in a state, in one, under a store typing that only grew. -/
-theorem Prog.run_canon {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy} {σ : State C Γ}
-    {σ' : State C Γ'} (hwt : RunWT C H σ) (hc : Canon C H σ.glob) (h : P.run σ = .ok σ') :
-    ∃ H', H.Extends H' ∧ RunWT C H' σ' ∧ Canon C H' σ'.glob :=
-  let ⟨H', hext, h'⟩ := Prog.keeps_canon P H σ σ' (RunCanon.mk' hwt hc) h
+/-- **Canonicity**: a block run by the typed run from a state whose erasure
+is well-typed and canonical ends, if in a state, in one, under a store typing
+that only grew. -/
+theorem Prog.trun_canon {Γ Γ' : Ctx} (P : Prog C Γ Γ') {H : HeapTy} {σ : TState C Γ}
+    {o : Out C σ.H Γ'} (hwt : RunWT C H σ.erase) (hc : Canon C H σ.erase.glob)
+    (h : P.trun σ = .ok o) : ∃ H', H.Extends H' ∧ RunWT C H' o.st.erase ∧ Canon C H' o.st.erase.glob :=
+  let ⟨H', hext, h'⟩ := Prog.keeps_canon P H σ o (RunCanon.mk' hwt hc) h
   ⟨H', hext, RunCanon.wt h', RunCanon.canon h'⟩
 
 end Solidity.Core
@@ -1881,65 +1919,41 @@ way). -/
 theorem Contract.deployState_empty (C : Contract) :
     C.deployState {} = { C.initState with net := [(0, 0)] } := rfl
 
-/-- A storage the scoped interpreter reaches (`Semantics/Core.lean`): a
-scoped program runs from the initial state to a state holding it.  The step
-between `Reachable` and the invariants of the scoped run
-(`Core.Prog.run_canon`, `Core.Prog.run_tight`), which `Reachable.reachableS`
-takes. -/
-def ReachableS (C : Contract) (st : List (Name × SVal)) : Prop :=
-  ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (σ : Core.State C Γ'),
-    P.run (Core.State.ofSem C.initState) = .ok σ ∧ σ.storage = st
-
 /-- A storage is reachable when a scoped program runs, by the typed
 interpreter (`Core.Prog.trun`, `Semantics/Core/TypedRun.lean`), from the
 contract's initial state to a state whose storage erases to it.  The
 program's locals are used as declared, and its values are of their types, by
-construction.  The scoped run ends in the erased state
-(`Reachable.reachableS`; no struct repeats a member name, decision 16), so
-what that run keeps holds of a reachable storage; a `bool` mapping key is
-hashed as `0`/`1` by both runs (decisions 10 and 14). -/
+construction; what the typed run keeps on the erasure
+(`Core.Prog.trun_canon`, `Core.Prog.trun_tight`) holds of a reachable
+storage.  A `bool` mapping key is hashed as `0`/`1` (decisions 10 and 14). -/
 def Reachable (C : Contract) (st : List (Name × SVal)) : Prop :=
   ∃ (Γ' : Core.Ctx) (P : Core.Prog C [] Γ') (o : Core.Out C (Core.TState.init C).H Γ'),
     P.trun (Core.TState.init C) = .ok o ∧ o.st.storage.erase = st
 
-/-- **Reachable by the typed run ⇒ reachable by the scoped one**, in the
-erased state (`Core.Prog.run_of_trun`). -/
-theorem Reachable.reachableS {st : List (Name × SVal)} (h : Reachable C st) : ReachableS C st := by
-  obtain ⟨Γ', P, o, hrun, rfl⟩ := h
-  have hr := Core.Prog.run_of_trun hrun
-  rw [Core.TState.init_erase] at hr
-  exact ⟨Γ', P, o.st.erase, hr, rfl⟩
+/-- The erasure of the state a contract starts in. -/
+theorem Reachable.init_erase : (Core.TState.init C).erase = Core.State.ofSem C.initState :=
+  Core.TState.init_erase C
 
-/-- **Reachable by the scoped run ⇒ well-typed and canonical.**  Every
-storage a scoped program reaches from `C`'s initial state holds `C`'s roots
-in order, each well-typed and canonical. -/
-theorem reachableS_canon (hnd : nodupKeysB C.vars = true)
-    (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × SVal)}
-    (h : ReachableS C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
-  obtain ⟨Γ', P, σ, hrun, rfl⟩ := h
-  obtain ⟨_, _, hwt, hcn⟩ := Core.Prog.run_canon P (Core.RunWT.init hnd hok rfl rfl)
-    (Canon.init hok rfl) hrun
-  exact ⟨hwt.glob.storage, hcn.storage⟩
-
-/-- **Reachable ⇒ well-typed and canonical.**  No run of `StandardExample`
-leaves `alice` without her `account`. -/
+/-- **Reachable ⇒ well-typed and canonical.**  Every storage a scoped
+program reaches from `C`'s initial state holds `C`'s roots in order, each
+well-typed and canonical: no run of `StandardExample` leaves `alice` without
+her `account`. -/
 theorem reachable_canon (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) {st : List (Name × SVal)}
-    (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st :=
-  reachableS_canon hnd hok h.reachableS
-
-/-- Not reached by the scoped run ⇒ not `Reachable`: the witnesses below are
-stated over `ReachableS`, the stronger claim. -/
-theorem not_reachable_of_not_reachableS {st : List (Name × SVal)}
-    (h : ¬ ReachableS C st) : ¬ Reachable C st :=
-  fun hr => h hr.reachableS
+    (h : Reachable C st) : wellTypedStorageB C.layout st = true ∧ CanonStorage C st := by
+  obtain ⟨Γ', P, o, hrun, rfl⟩ := h
+  have hwt : Core.RunWT C [] (Core.TState.init C).erase := by
+    rw [Reachable.init_erase]; exact Core.RunWT.init hnd hok rfl rfl
+  have hc : Canon C [] (Core.TState.init C).erase.glob := by
+    rw [Reachable.init_erase]; exact Canon.init hok rfl
+  obtain ⟨_, _, hwt', hcn⟩ := Core.Prog.trun_canon P hwt hc hrun
+  exact ⟨hwt'.glob.storage, hcn.storage⟩
 
 /-! ## What is not reachable
 
 Three storages `wellTypedStorageB` accepts and no scoped program reaches
-(`ReachableS`, so no `Reachable` program either,
-`not_reachable_of_not_reachableS`): the facts `SVal.hasTy` forgets are
-exactly what refutes them. -/
+(`Reachable`): the facts `SVal.hasTy` forgets are exactly what refutes
+them. -/
 
 section Witnesses
 
@@ -1956,14 +1970,14 @@ def Counter : Contract := contract!{ uint total; }
 theorem defaultForTy_uint : defaultForTy Ty.uint = SVal.int 0 := by
   simp [defaultForTy]
 
-/-- A mapping whose absent keys read `5`: well-typed, not reached by a scoped run,
+/-- A mapping whose absent keys read `5`: well-typed, not reachable,
 since
 every mapping's default is its type's default. -/
 theorem map_default_not_reachable :
     wellTypedStorageB Balances.layout [("balances", .map [] (.int 5))] = true ∧
-      ¬ ReachableS Balances [("balances", .map [] (.int 5))] := by
+      ¬ Reachable Balances [("balances", .map [] (.int 5))] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachableS_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "balances" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv
@@ -1972,27 +1986,27 @@ theorem map_default_not_reachable :
   cases hd
 
 /-- An `Account` without its `token`: well-typed (`hasTy` checks the members
-present), not reached by a scoped run, since every struct carries all its members. -/
+present), not reachable, since every struct carries all its members. -/
 theorem struct_missing_field_not_reachable :
     wellTypedStorageB Accounts.layout [("acct", .struct [("balance", .int 0)])] = true ∧
-      ¬ ReachableS Accounts [("acct", .struct [("balance", .int 0)])] := by
+      ¬ Reachable Accounts [("acct", .struct [("balance", .int 0)])] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachableS_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "acct" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv
   have hn := hcv.1
   simp [structDef] at hn
 
-/-- A mapping with key `1` twice: well-typed, not reached by a scoped run,
+/-- A mapping with key `1` twice: well-typed, not reachable,
 since keys only
 grow by `setBy`. -/
 theorem map_dup_key_not_reachable :
     wellTypedStorageB Balances.layout
         [("balances", .map [(1, .int 0), (1, .int 1)] (.int 0))] = true ∧
-      ¬ ReachableS Balances [("balances", .map [(1, .int 0), (1, .int 1)] (.int 0))] := by
+      ¬ Reachable Balances [("balances", .map [(1, .int 0), (1, .int 1)] (.int 0))] := by
   refine ⟨by decide, fun h => ?_⟩
-  obtain ⟨-, -, hc⟩ := reachableS_canon (by decide) (by decide) h
+  obtain ⟨-, -, hc⟩ := reachable_canon (by decide) (by decide) h
   obtain ⟨v, hv, hcv⟩ := hc "balances" _ rfl
   simp only [lookupBy, if_pos] at hv
   cases hv

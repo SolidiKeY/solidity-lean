@@ -91,7 +91,7 @@ followed, a primitive ends it. -/
 def Semantics.MVal.readPath (τ : State) : MVal → List Seg → Res MVal
   | mv, [] => .ok mv
   | .ref id, s :: rest => readAddr τ (.ofSeg id s) >>= fun mv => mv.readPath τ rest
-  | .prim _, _ :: _ => .error .stuck
+  | .prim _, _ :: _ => .error .undef
 
 /-- The slot at the end of a path from the object `id`. -/
 def Semantics.State.readPath (τ : State) (id : Nat) (p : List Seg) : Res MVal :=
@@ -100,7 +100,7 @@ def Semantics.State.readPath (τ : State) (id : Nat) (p : List Seg) : Res MVal :
 theorem Semantics.MVal.readPath_snoc (τ : State) : (mv : MVal) → (p : List Seg) → (s : Seg) →
     mv.readPath τ (p ++ [s]) = mv.readPath τ p >>= fun mv' => match mv' with
       | .ref id => readAddr τ (.ofSeg id s)
-      | .prim _ => .error .stuck
+      | .prim _ => .error .undef
   | .ref id, [], s => by
     simp only [List.nil_append, MVal.readPath, Res.ok_bind']
     cases readAddr τ (.ofSeg id s) <;> rfl
@@ -307,7 +307,7 @@ theorem copyStToM_default_readPath : (p : List Seg) → ∀ {T : Ty} {σ τ : St
             · simp [Ty.memberTy, Ty.at] at hT'
           | field f =>
             have hread : readAddr τ' (.ofSeg τ₁.nextId (.field f)) =
-                match lookupBy f mfields with | some v => .ok v | none => .error .stuck := by
+                match lookupBy f mfields with | some v => .ok v | none => .error .undef := by
               simp [Addr.ofSeg, readAddr, hobj, bind, Except.bind, pure, Except.pure] <;> rfl
             have hlk := copyStFields_default_lookup hf f
             refine ⟨fun mv' hmv' => ?_, fun T' hT' => ?_⟩
@@ -556,12 +556,12 @@ or any key of a mapping; a word or a struct takes none. -/
 def idxOk (k : Int) : SVal → Res Unit
   | .array elems _ _ => if 0 ≤ k ∧ k.toNat < elems.length then .ok () else .error .revert
   | .map _ _ => .ok ()
-  | .prim _ | .struct _ => .error .stuck
+  | .prim _ | .struct _ => .error .undef
 
 /-- The slot one past an array's end, once the array is named. -/
 def pastEnd (rs : Name × List Seg) : SVal → Res (Name × List Seg)
   | .array elems _ _ => .ok (rs.1, rs.2 ++ [.at elems.length])
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
+  | .prim _ | .struct _ | .map _ _ => .error .undef
 
 /-- `values[k]` with `k` in bounds. -/
 @[simp] theorem idxOk_array (k : Int) (elems shadow : List SVal) (fx : Bool) :
@@ -986,7 +986,7 @@ def pushOn (σ : State) (E : Ty) (r : Name) (segs : List Seg) (val : SVal → Re
     SVal → Res State
   | .array elems shadow fx => val (pushSlot E shadow).1 >>= fun v =>
       σ.saveStorage r segs (.array (elems ++ [v]) (pushSlot E shadow).2 fx)
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
+  | .prim _ | .struct _ | .map _ _ => .error .undef
 
 /-- What `values.pop()` does to the array, once it is named. -/
 def popOn (σ : State) (keep : Bool) (r : Name) (segs : List Seg) : SVal → Res State
@@ -996,12 +996,12 @@ def popOn (σ : State) (keep : Bool) (r : Name) (segs : List Seg) : SVal → Res
     | last :: restRev =>
       σ.saveStorage r segs
         (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
+  | .prim _ | .struct _ | .map _ _ => .error .undef
 
 /-- The length of an array, once it is named. -/
 def arrLen : SVal → Res Value
   | .array elems _ _ => .ok (.int elems.length)
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
+  | .prim _ | .struct _ | .map _ _ => .error .undef
 
 /-- `values.push(5)` reads `values`, then writes it back one longer. -/
 theorem pushAt_eq (σ : State) (E : Ty) (r : Name) (segs : List Seg) (val : SVal → Res SVal) :
@@ -1284,8 +1284,8 @@ storage member of the same name. -/
 theorem copyStFields_lookup {σ τ : State} :
     ∀ {fields : List (Name × SVal)} {mfields : List (Name × MVal)},
       copyStFields σ fields = .ok (τ, mfields) → ∀ f,
-        (match lookupBy f mfields with | some mv => mv.asValue | none => .error .stuck) =
-          (match lookupBy f fields with | some v => v.asValue | none => .error .stuck)
+        (match lookupBy f mfields with | some mv => mv.asValue | none => .error .undef) =
+          (match lookupBy f fields with | some v => v.asValue | none => .error .undef)
   | [], mfields, h, f => by
     simp [copyStFields] at h
     obtain ⟨_, rfl⟩ := h
@@ -1356,9 +1356,9 @@ theorem copyMToSt_prim (σ : State) (rem : List Nat) (p : PrimVal) :
 theorem copyMFields_lookup {σ : State} {rem : List Nat} :
     ∀ {fields : List (Name × MVal)} {sfields : List (Name × SVal)},
       copyMFields σ rem fields = .ok sfields → ∀ f,
-        (match lookupBy f sfields with | some v => .ok v | none => .error .stuck) =
+        (match lookupBy f sfields with | some v => .ok v | none => .error .undef) =
           (match lookupBy f fields with
-            | some mv => copyMToSt σ rem mv | none => (.error .stuck : Res SVal))
+            | some mv => copyMToSt σ rem mv | none => (.error .undef : Res SVal))
   | [], sfields, h, f => by
     rw [copyMFields] at h
     simp only [Except.ok.injEq] at h

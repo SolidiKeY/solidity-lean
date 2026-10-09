@@ -13,7 +13,7 @@ with the premise; the scoped one is a function to `Option`, so here the
 derivation is found after the fact.
 
 The proof is one lemma per statement constructor (`Stmt.<c>.ruleExists`),
-each its own declaration.  It takes `Stmt.step` apart where it is stuck: on
+each its own declaration.  It takes `Stmt.step` apart where it is blocked: on
 a part of the statement (a path, a value, a location: `cases` on it), or on
 a computed test (`b.isSimple`, `args.capture`, `body.frame`: `cases` on its
 value, which stays in scope as a hypothesis), until the step is `some P`;
@@ -26,7 +26,7 @@ is `none` is ruled out by the hypotheses of its branch.
 The search runs once, under `#derive_ruleExists?`, which offers a
 `#replay_ruleExists` table: for each statement constructor, the rules of
 its leaves in order.  The file keeps the table; the replay takes the same
-splits (no search: they are read off the stuck step) and tries only the
+splits (no search: they are read off the blocked step) and tries only the
 named rule at each leaf.
 -/
 
@@ -38,9 +38,9 @@ variable {C : Contract}
 
 namespace RuleExists
 
-/-- What the step is stuck on: a local to take apart, or a computed value
+/-- What the step is blocked on: a local to take apart, or a computed value
 to take apart in place. -/
-inductive Stuck where
+inductive Blocker where
   | fvar (x : Expr)
   | gen (d : Expr)
 
@@ -70,17 +70,17 @@ def partFamilies : List Lean.Name :=
 
 mutual
 
-/-- The stuck point of the stuck term `e` (in `whnf`), and `e` rebuilt
-(definitionally) so that the stuck point is a subterm of it: a matcher
+/-- The blocked point of the blocked term `e` (in `whnf`), and `e` rebuilt
+(definitionally) so that the blocked point is a subterm of it: a matcher
 unfolded to its recursor, the recursor's major premise the term that
-blocks it, followed down while it is itself stuck.  With `gen`, a value a
+blocks it, followed down while it is itself blocked.  With `gen`, a value a
 function computes is split in place when it is a test (a `Bool`) or when
-what it is stuck on is not a part of the statement's syntax. -/
-partial def stuckOf (e : Expr) (gen : Bool := true) : MetaM (Option (Expr × Stuck)) := do
+what it is blocked on is not a part of the statement's syntax. -/
+partial def blockerOf (e : Expr) (gen : Bool := true) : MetaM (Option (Expr × Blocker)) := do
   let .const n ls := e.getAppFn | return none
   if ← isMatcher n then
     let v ← instantiateValueLevelParams (← getConstInfo n) ls
-    return ← stuckOf (← whnfCore (v.beta e.getAppArgs)) gen
+    return ← blockerOf (← whnfCore (v.beta e.getAppArgs)) gen
   let some (.recInfo r) := (← getEnv).find? n | return none
   let i := r.getMajorIdx
   unless i < e.getAppNumArgs do return none
@@ -88,13 +88,13 @@ partial def stuckOf (e : Expr) (gen : Bool := true) : MetaM (Option (Expr × Stu
   let some (a', s) ← majorOf a gen | return none
   return some (mkAppN e.getAppFn (e.getAppArgs.set! i a'), s)
 
-/-- The major premise `a` of a stuck recursor: a local, a value computed by a
-function (split in place, see `stuckOf`), or a stuck term followed down. -/
-partial def majorOf (a : Expr) (gen : Bool) : MetaM (Option (Expr × Stuck)) := do
+/-- The major premise `a` of a blocked recursor: a local, a value computed by a
+function (split in place, see `blockerOf`), or a blocked term followed down. -/
+partial def majorOf (a : Expr) (gen : Bool) : MetaM (Option (Expr × Blocker)) := do
   if a.isFVar then return some (a, .fvar a)
   if gen && (← generalizable a) then
     if (← whnfR (← inferType a)).isConstOf ``Bool then return some (a, .gen a)
-    let deep ← stuckOf (← whnfD a) false
+    let deep ← blockerOf (← whnfD a) false
     let isPart ← match deep with
       | some (_, .fvar x) => do
         let t ← whnfR (← inferType x)
@@ -103,7 +103,7 @@ partial def majorOf (a : Expr) (gen : Bool) : MetaM (Option (Expr × Stuck)) := 
     unless isPart do return some (a, .gen a)
   let w ← whnfD a
   if w.isFVar then return some (w, .fvar w)
-  stuckOf w gen
+  blockerOf w gen
 
 end
 
@@ -291,7 +291,7 @@ def ruleGoal (g : MVarId) : MetaM (Expr × Expr × Expr) := do
 mutual
 
 /-- Prove the main goal `∃ p, e = some p ∧ Rule C k m s p`: split the
-step where it is stuck until it computes, then each leaf by its rule,
+step where it is blocked until it computes, then each leaf by its rule,
 following `plan` (the replay) or searching (`plan` is `none`).  Returns the
 plan of the goal, and what is left of the one given. -/
 partial def go (plan : Option (List Tok)) (depth : Nat := 0) :
@@ -308,7 +308,7 @@ partial def go (plan : Option (List Tok)) (depth : Nat := 0) :
     catch _ =>
       throwError "rule_exists: a branch with no rule is not ruled out{indentExpr (← g.getType)}"
     return (#[], plan)
-  let some (e'', s) ← stuckOf e' | throwError "rule_exists: the step is stuck on nothing to split{indentExpr e'}"
+  let some (e'', s) ← blockerOf e' | throwError "rule_exists: the step is blocked on nothing to split{indentExpr e'}"
   let g ← g.replaceTargetDefEq (← replaceStep (← g.getType) e'')
   let gs ← match s with
     | .fvar x => do

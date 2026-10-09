@@ -55,7 +55,7 @@ state, and a `U` that writes the storage would have to be substituted for
 it.  So the local captures of a stack merge, and two storage writes stay
 two updates.  A variable read at another sort than `U` binds it
 (`x := 1`, then `p.age` for an alias `p`) becomes a term that halts
-(`Term.stuck`), as the read would.  `applyOnRigid` excludes that case
+(`Term.undef`), as the read would.  `applyOnRigid` excludes that case
 (`NFml.sortedFor`): an equation reads its terms in the Theory, where a halt
 still denotes something, and a storage or path variable of the wrong sort
 denotes something other than its substitution.
@@ -78,26 +78,26 @@ variable {C : Contract}
 /-! ## Terms that halt, and terms that cannot -/
 
 /-- A value term that always halts: a conditional on a number. -/
-def Term.stuck : Term C := .ite (.lit (.int 0)) (.lit (.int 0)) (.lit (.int 0))
+def Term.undef : Term C := .ite (.lit (.int 0)) (.lit (.int 0)) (.lit (.int 0))
 
 /-- A path that always halts: its index does. -/
-def PTerm.stuck : PTerm C := .at (.root "") Term.stuck
+def PTerm.undef : PTerm C := .at (.root "") Term.undef
 
 /-- An identity that always halts: its source does. -/
-def ITerm.stuck : ITerm C := .copy .memory (.val Term.stuck)
+def ITerm.undef : ITerm C := .copy .memory (.val Term.undef)
 
 /-- A storage that always halts: its path does. -/
-def STerm.stuck : STerm C := .delAt .storage PTerm.stuck
+def STerm.undef : STerm C := .delAt .storage PTerm.undef
 
 /-- `x`, read as a value after `{ x := alice }` (`x` an alias), halts; so does its
 substitution. -/
-@[simp] theorem Term.stuck_eval (σ : State) : (Term.stuck : Term C).eval σ = .error .stuck := rfl
+@[simp] theorem Term.undef_eval (σ : State) : (Term.undef : Term C).eval σ = .error .undef := rfl
 /-- `p.age`, `p` bound to a number by `{ p := 1 }`, halts; so does its substitution. -/
-@[simp] theorem PTerm.stuck_eval (σ : State) : (PTerm.stuck : PTerm C).eval σ = .error .stuck := rfl
+@[simp] theorem PTerm.undef_eval (σ : State) : (PTerm.undef : PTerm C).eval σ = .error .undef := rfl
 /-- `m.age`, `m` bound to a path, halts; so does its substitution. -/
-@[simp] theorem ITerm.stuck_eval (σ : State) : (ITerm.stuck : ITerm C).eval σ = .error .stuck := rfl
+@[simp] theorem ITerm.undef_eval (σ : State) : (ITerm.undef : ITerm C).eval σ = .error .undef := rfl
 /-- `old`, bound to a number by `{ old := 1 }`, halts as a storage; so does its substitution. -/
-@[simp] theorem STerm.stuck_eval (σ : State) : (STerm.stuck : STerm C).eval σ = .error .stuck := rfl
+@[simp] theorem STerm.undef_eval (σ : State) : (STerm.undef : STerm C).eval σ = .error .undef := rfl
 
 /-- A term that cannot halt: a literal value, a state variable and members
 of it. -/
@@ -145,7 +145,7 @@ def UpdElem.binding (σ₀ : State) : UpdElem C → Res Binding
     let (r, segs) ← p.eval σ₀
     pure (.spath r segs)
   | .mref _ i => do pure (.mref (← i.eval σ₀))
-  | _ => .error .stuck
+  | _ => .error .undef
 
 /-- An element that writes `x` binds `x` to its binding: `x := a + 1` binds
 `x` to the value of `a + 1` in the pre-state, or halts where that does. -/
@@ -201,21 +201,21 @@ neither (`Upd.envOnly`). -/
 def Upd.valOf (U : Upd C) (x : Var) : Term C :=
   match U.lastWrite x with
   | some (.val _ t) => t
-  | some _ => Term.stuck
+  | some _ => Term.undef
   | none => .pv x
 
 /-- `{U}p` for an alias `p`. -/
 def Upd.pathOf (U : Upd C) (x : Var) : PTerm C :=
   match U.lastWrite x with
   | some (.path _ p) => p
-  | some _ => PTerm.stuck
+  | some _ => PTerm.undef
   | none => .pv x
 
 /-- `{U}m` for a memory local `m`. -/
 def Upd.refOf (U : Upd C) (x : Var) : ITerm C :=
   match U.lastWrite x with
   | some (.mref _ i) => i
-  | some _ => ITerm.stuck
+  | some _ => ITerm.undef
   | none => .pv x
 
 /-- `{U}old` for a storage variable `old`: `U` binds no storage
@@ -223,7 +223,7 @@ def Upd.refOf (U : Upd C) (x : Var) : ITerm C :=
 halts where `U` binds it to a value, a path or an identity. -/
 def Upd.storOf (U : Upd C) (x : Var) : STerm C :=
   match U.lastWrite x with
-  | some _ => STerm.stuck
+  | some _ => STerm.undef
   | none => .pv x
 
 /-- `{U}t`: KeY's `applyOnPV`/`applyOnDifferentPV`, through every symbol.
@@ -236,7 +236,7 @@ def Tm.subst (U : Upd C) : Tm C s → Tm C s
   | .app0 o => .app0 o
   | Term.netOf x a =>
     match U.lastWrite x with
-    | some _ => Term.stuck
+    | some _ => Term.undef
     | none => .app1 (.netOf x) (a.subst U)
   | .app1 o a => .app1 o (a.subst U)
   | .app2 o a b => .app2 o (a.subst U) (b.subst U)
@@ -310,7 +310,7 @@ theorem Tm.subst_eval (h : SubstAgree U ns σ τ) :
       split
       · rename_i e hx
         obtain ⟨b, hb, hnl⟩ := h.written x e hx
-        simp only [Srt.Agree, Term.stuck_eval, tm_eval, hb, bind, Except.bind]
+        simp only [Srt.Agree, Term.undef_eval, tm_eval, hb, bind, Except.bind]
         cases b with
         | ledger l => exact absurd rfl (hnl l)
         | _ => rfl
@@ -502,7 +502,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
           split at hb <;> simp only [pure, Except.pure, Except.ok.injEq, reduceCtorEq] at hb
         | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
             reduceCtorEq] at hvar
-      simp only [STerm.stuck_eval, tm_eval, hτ, bind, Except.bind]
+      simp only [STerm.undef_eval, tm_eval, hτ, bind, Except.bind]
       cases b with
       | store st => exact absurd rfl (hb' st)
       | _ => rfl
@@ -537,7 +537,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [Term.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
+          simp only [Term.undef_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | mref _ i =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hi : i.eval σ with
@@ -545,7 +545,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [Term.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
+          simp only [Term.undef_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
@@ -573,7 +573,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [ht, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [PTerm.stuck_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
+          simp only [PTerm.undef_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
       | mref _ i =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hi : i.eval σ with
@@ -581,7 +581,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [hi, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [PTerm.stuck_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
+          simp only [PTerm.undef_eval, tm_eval, aliasPath, bind, Except.bind, State.getEnv, hl]
       | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
@@ -609,7 +609,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [ht, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [ITerm.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
+          simp only [ITerm.undef_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | path _ p =>
         simp only [UpdElem.binding, bind, Except.bind] at hb
         cases hp : p.eval σ with
@@ -617,7 +617,7 @@ theorem Upd.substAgree {U : Upd C} (hU : U.envOnly = true) {σ τ : State}
         | ok r =>
           simp only [hp, pure, Except.pure, Except.ok.injEq] at hb
           subst hb
-          simp only [ITerm.stuck_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
+          simp only [ITerm.undef_eval, tm_eval, bind, Except.bind, State.getEnv, hl]
       | storage | memory | selfBalance | net | pay | store | saveNet | saveNetMt | unset | netMt | setBalance => simp only [UpdElem.var?,
           reduceCtorEq] at hvar
     · rename_i hx
@@ -892,12 +892,12 @@ theorem UpdElem.elimSelf_diamond {e : UpdElem C} (he : e.isSelf = true) {σ : St
 /-! ### Substitution is denotation after the update
 
 `holds` reads an equation through `denote`, which is total: a halting term
-denotes something (`Res.toSt`), and so does `Term.stuck`, `PTerm.stuck` and
-`STerm.stuck` — not always what the variable they replace denotes after the
-update.  A value variable is fine (`Term.stuck` and an unbound value both
+denotes something (`Res.toSt`), and so does `Term.undef`, `PTerm.undef` and
+`STerm.undef` — not always what the variable they replace denotes after the
+update.  A value variable is fine (`Term.undef` and an unbound value both
 denote `st mtSt`); a path or storage variable written at another sort is not:
 `find(x, a)` after `{ x := 1 }` denotes `st mtSt`, its substitution
-`find(STerm.stuck, a)` reads `a` in the storage.  KeY's terms are sorted and
+`find(STerm.undef, a)` reads `a` in the storage.  KeY's terms are sorted and
 cannot say it; here `Tm.sortedFor U` excludes it. -/
 
 /-- `U` writes `x`, if at all, as an alias. -/
@@ -1036,7 +1036,7 @@ theorem Tm.subst_denote (h : SubstAgree U ns σ τ) :
       split
       · rename_i e hx
         obtain ⟨b, hb, hnl⟩ := h.written x e hx
-        show Equiv (Term.stuck.denote σ) _
+        show Equiv (Term.undef.denote σ) _
         simp only [tm_denote, hb]
         cases b with
         | ledger l => exact absurd rfl (hnl l)

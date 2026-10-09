@@ -13,8 +13,8 @@ writes, a call's binding and decoding.  The closer's terms read it
 (`Semantics/Core/StateErase.lean`).
 
 Statements run in the typed interpreter (`Semantics/Core/TypedRun.lean`,
-`docs/intrinsic.md`); this module's statement run (`Stmt.run`, `Loop.run`,
-`Contract.deploy`) was deleted at W4 `modal`.  The conventions the
+`docs/intrinsic.md`); there is no untyped run of a statement (decisions 39
+and 40).  The conventions the
 operations follow are solc's where KeY is more liberal
 (`docs/solc-alignment.md`): arithmetic is **checked** (`checkArith`), an
 array read or write out of bounds reverts, as does `pop()` on an empty
@@ -25,9 +25,9 @@ recipient takes the payment (`sendAt`), which the transaction's oracle says
 (`TxEnv.ext`).
 
 An operation ends in a value or halts: `revert`, `panic` (an `assert`
-failed: solc's `Panic(0x01)`), `stuck` (a state that does not fit the
-operation, e.g. a local read before it is bound: the closer's term model on
-an ill-sorted term), or `diverge`.  The copy from memory back to storage
+failed: solc's `Panic(0x01)`), `undef` (the closer's term model on an
+ill-sorted term: a state that does not fit the operation, which no typed
+state erases to), or `diverge`.  The copy from memory back to storage
 terminates on the visited-set complement `rem` (`copyMToSt`); everything
 else is structural.
 -/
@@ -267,9 +267,14 @@ structure State where
   tx : TxEnv := {}
   deriving Repr
 
+/-- How an operation of the untyped model halts.  `undef` is the term
+model's ill-sorted value: an operation applied to a value of a sort it does
+not take (a `bool` read as a `uint`, a path into a root that is not there).
+No run produces it: the typed run's states erase to well-sorted ones
+(`docs/intrinsic.md`, decisions 39, 40 and 50). -/
 inductive Halt where
   | revert
-  | stuck
+  | undef
   | panic
   /-- A loop that never ends: a box accepts it, a diamond does not, as they
   do a revert. -/
@@ -451,7 +456,7 @@ def SVal.find : SVal -> List Seg -> Res SVal
   | SVal.struct fields, Seg.field name :: rest =>
       match lookupBy name fields with
       | some v => v.find rest
-      | none => .error .stuck
+      | none => .error .undef
   | SVal.array elems shadow _, Seg.at i :: rest =>
       if h : 0 ≤ i ∧ i.toNat < (elems ++ shadow).length then
         ((elems ++ shadow).get ⟨i.toNat, h.2⟩).find rest
@@ -463,7 +468,7 @@ def SVal.find : SVal -> List Seg -> Res SVal
   -- fixed-size array has no `length` slot: its length is its type's (KeY's
   -- `selectOnTypedFixedSize`), and a program's `.length` of one is a literal.
   | SVal.array elems _ fx, Seg.field "length" :: rest =>
-      if fx then .error .stuck else (SVal.int elems.length).find rest
+      if fx then .error .undef else (SVal.int elems.length).find rest
   | SVal.map entries dflt, Seg.at i :: rest =>
       match lookupBy i entries with
       | some v => v.find rest
@@ -471,10 +476,10 @@ def SVal.find : SVal -> List Seg -> Res SVal
   -- The shape mismatches, enumerated rather than left to a wildcard: a
   -- primitive under any selector, a struct under `at`, an array under a
   -- field other than the `length` arm above, a mapping under a field.
-  | SVal.prim _, _ :: _ => .error .stuck
-  | SVal.struct _, Seg.at _ :: _ => .error .stuck
-  | SVal.array _ _ _, Seg.field _ :: _ => .error .stuck
-  | SVal.map _ _, Seg.field _ :: _ => .error .stuck
+  | SVal.prim _, _ :: _ => .error .undef
+  | SVal.struct _, Seg.at _ :: _ => .error .undef
+  | SVal.array _ _ _, Seg.field _ :: _ => .error .undef
+  | SVal.map _ _, Seg.field _ :: _ => .error .undef
 
 def SVal.save : SVal -> List Seg -> SVal -> Res SVal
   | _, [], new => .ok new
@@ -483,7 +488,7 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
       | some old => do
           let updated ← old.save rest new
           .ok (SVal.struct (setBy name updated fields))
-      | none => .error .stuck
+      | none => .error .undef
   | SVal.array elems shadow fx, Seg.at i :: rest, new =>
       if h : 0 ≤ i ∧ i.toNat < (elems ++ shadow).length then do
         let updated ← ((elems ++ shadow).get ⟨i.toNat, h.2⟩).save rest new
@@ -501,10 +506,10 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
   -- The same four mismatches as `find`, with one asymmetry: there is no
   -- `Seg.field "length"` arm, because assigning `a.length` has been a
   -- solc compile error since 0.6.
-  | SVal.prim _, _ :: _, _ => .error .stuck
-  | SVal.struct _, Seg.at _ :: _, _ => .error .stuck
-  | SVal.array _ _ _, Seg.field _ :: _, _ => .error .stuck
-  | SVal.map _ _, Seg.field _ :: _, _ => .error .stuck
+  | SVal.prim _, _ :: _, _ => .error .undef
+  | SVal.struct _, Seg.at _ :: _, _ => .error .undef
+  | SVal.array _ _ _, Seg.field _ :: _, _ => .error .undef
+  | SVal.map _ _, Seg.field _ :: _, _ => .error .undef
 
 /-- A read that checks every index against the live length, as a program
 path's resolution does (`State.checkIndex` in `Loc.resolve`) before the slot
@@ -517,34 +522,34 @@ def SVal.findLive : SVal -> List Seg -> Res SVal
   | SVal.struct fields, Seg.field name :: rest =>
       match lookupBy name fields with
       | some v => v.findLive rest
-      | none => .error .stuck
+      | none => .error .undef
   | SVal.array elems _ _, Seg.at i :: rest =>
       if h : 0 ≤ i ∧ i.toNat < elems.length then
         (elems.get ⟨i.toNat, h.2⟩).findLive rest
       else .error .revert
   | SVal.array elems _ fx, Seg.field "length" :: rest =>
-      if fx then .error .stuck else (SVal.int elems.length).findLive rest
+      if fx then .error .undef else (SVal.int elems.length).findLive rest
   | SVal.map entries dflt, Seg.at i :: rest =>
       match lookupBy i entries with
       | some v => v.findLive rest
       | none => dflt.findLive rest
-  | SVal.prim _, _ :: _ => .error .stuck
-  | SVal.struct _, Seg.at _ :: _ => .error .stuck
-  | SVal.array _ _ _, Seg.field _ :: _ => .error .stuck
-  | SVal.map _ _, Seg.field _ :: _ => .error .stuck
+  | SVal.prim _, _ :: _ => .error .undef
+  | SVal.struct _, Seg.at _ :: _ => .error .undef
+  | SVal.array _ _ _, Seg.field _ :: _ => .error .undef
+  | SVal.map _ _, Seg.field _ :: _ => .error .undef
 
 namespace State
 
 def findStorage (s : State) (root : Name) (segs : List Seg) : Res SVal :=
   match lookupBy root s.storage with
   | some v => v.find segs
-  | none => .error .stuck
+  | none => .error .undef
 
 /-- `SVal.findLive` at a root. -/
 def findLive (s : State) (root : Name) (segs : List Seg) : Res SVal :=
   match lookupBy root s.storage with
   | some v => v.findLive segs
-  | none => .error .stuck
+  | none => .error .undef
 
 def saveStorage (s : State) (root : Name) (segs : List Seg) (new : SVal) :
     Res State :=
@@ -552,7 +557,7 @@ def saveStorage (s : State) (root : Name) (segs : List Seg) (new : SVal) :
   | some v => do
       let updated ← v.save segs new
       .ok { s with storage := setBy root updated s.storage }
-  | none => .error .stuck
+  | none => .error .undef
 
 /-- `arr[i]` is in bounds where the program takes the index: solc's
 `Panic(0x32)`, checked once, when the path is resolved (a read, a write, an
@@ -563,7 +568,7 @@ def checkIndex (s : State) (root : Name) (segs : List Seg) (i : Int) : Res Unit 
   match ← s.findStorage root segs with
   | .array elems _ _ => if 0 ≤ i ∧ i.toNat < elems.length then pure () else .error .revert
   | .map _ _ => pure ()
-  | .prim _ | .struct _ => .error .stuck
+  | .prim _ | .struct _ => .error .undef
 
 /-- A storage write of what an assignment's right-hand side denotes: a word
 is stored; a struct or an array is copied over what is there
@@ -578,7 +583,7 @@ def writeStorage (s : State) (root : Name) (segs : List Seg) (new : SVal) : Res 
 def getEnv (s : State) (name : Var) : Res Binding :=
   match lookupBy name s.env with
   | some b => .ok b
-  | none => .error .stuck
+  | none => .error .undef
 
 def setEnv (s : State) (name : Var) (b : Binding) : State :=
   { s with env := setBy name b s.env }
@@ -586,7 +591,7 @@ def setEnv (s : State) (name : Var) (b : Binding) : State :=
 def getObj (s : State) (id : Nat) : Res MObj :=
   match lookupBy id s.heap with
   | some obj => .ok obj
-  | none => .error .stuck
+  | none => .error .undef
 
 def setObj (s : State) (id : Nat) (obj : MObj) : State :=
   { s with heap := setBy id obj s.heap }
@@ -628,7 +633,7 @@ def copyStToM (s : State) : SVal -> Res (State × MVal)
       let (s, melems) ← copyStElems s elems
       let (s, id) := s.alloc (MObj.array melems fx)
       .ok (s, MVal.ref id)
-  | SVal.map _ _ => .error .stuck
+  | SVal.map _ _ => .error .undef
 
 def copyStFields (s : State) :
     List (Name × SVal) -> Res (State × List (Name × MVal))
@@ -652,11 +657,11 @@ def allocDefault (s : State) (ref : RefTy) : Res (State × Nat) :=
   match copyStToM s (defaultForRef ref) with
   | .ok (s, MVal.ref id) => .ok (s, id)
   -- A primitive default has no identity to bind.  The `.error` arm maps
-  -- a propagated halt to `.stuck`, which is what the wildcard did and is
-  -- currently exact: `copyStToM`'s only failure is `.stuck` (its mapping
+  -- a propagated halt to `.undef`, which is what the wildcard did and is
+  -- currently exact: `copyStToM`'s only failure is `.undef` (its mapping
   -- arm).  Propagating `e` instead would need that as a theorem.
-  | .ok (_, MVal.prim _) => .error .stuck
-  | .error _ => .error .stuck
+  | .ok (_, MVal.prim _) => .error .undef
+  | .error _ => .error .undef
 
 -- `hmem` is used only by `decreasing_by`, which the linter does not see.
 set_option linter.unusedVariables false in
@@ -666,7 +671,7 @@ mutual
 
 `rem` is the set of heap identities still unvisited **on this path**:
 following a reference consumes its identity, so a cycle runs out of
-identities and is stuck, while sharing across siblings (a DAG) is
+identities and is `undef`, while sharing across siblings (a DAG) is
 unaffected — `copyMFields`/`copyMElems` hand each child the same `rem`.
 This replaces the old fuel counter, whose exhaustion arm was a case the
 type did not force anyone to think about; the recursion now terminates on
@@ -684,7 +689,7 @@ def copyMToSt (s : State) (rem : List Nat) : MVal -> Res SVal
             let selems ← copyMElems s (rem.erase id) elems
             .ok (SVal.array selems [] fx)
         | .error e => .error e
-      else .error .stuck
+      else .error .undef
 termination_by (rem.length, 0)
 decreasing_by all_goals
   (apply Prod.Lex.left
@@ -719,11 +724,11 @@ def copyMem (s : State) (v : MVal) : Res SVal :=
 
 def Value.asInt : Value -> Res Int
   | Value.int v => .ok v
-  | Value.bool _ => .error .stuck
+  | Value.bool _ => .error .undef
 
 def Value.asBool : Value -> Res Bool
   | Value.bool b => .ok b
-  | Value.int _ => .error .stuck
+  | Value.int _ => .error .undef
 
 /-- An index of key type `k` as the word it is hashed as: a number is itself,
 a `bool` the word `0` or `1`, as solc pads it (`docs/solc-alignment.md`,
@@ -740,14 +745,14 @@ theorem Value.keyAt_numeric {k : PrimTy} (hk : k.isNumeric = true) (v : Value) :
 def SVal.asValue : SVal -> Res Value
   | SVal.int v => .ok (Value.int v)
   | SVal.bool b => .ok (Value.bool b)
-  | SVal.struct _ => .error .stuck
-  | SVal.array _ _ _ => .error .stuck
-  | SVal.map _ _ => .error .stuck
+  | SVal.struct _ => .error .undef
+  | SVal.array _ _ _ => .error .undef
+  | SVal.map _ _ => .error .undef
 
 def MVal.asValue : MVal -> Res Value
   | MVal.int v => .ok (Value.int v)
   | MVal.bool b => .ok (Value.bool b)
-  | MVal.ref _ => .error .stuck
+  | MVal.ref _ => .error .undef
 
 def Value.toSVal : Value -> SVal
   | Value.int v => SVal.int v
@@ -912,15 +917,15 @@ def readLoc (s : State) : Addr -> Res Value
       | MObj.struct fields =>
           match lookupBy fld fields with
           | some v => v.asValue
-          | none => .error .stuck
-      | MObj.array _ _ => .error .stuck
+          | none => .error .undef
+      | MObj.array _ _ => .error .undef
   | Addr.memoryIndex id i => do
       match ← s.getObj id with
       | MObj.array elems _ =>
           if h : 0 ≤ i ∧ i.toNat < elems.length then
             (elems.get ⟨i.toNat, h.2⟩).asValue
           else .error .revert
-      | MObj.struct _ => .error .stuck
+      | MObj.struct _ => .error .undef
 
 /-- Write a primitive value at a memory address. -/
 def writeLoc (s : State) (loc : Addr) (v : Value) : Res State :=
@@ -929,14 +934,14 @@ def writeLoc (s : State) (loc : Addr) (v : Value) : Res State :=
       match ← s.getObj id with
       | MObj.struct fields =>
           .ok (s.setObj id (MObj.struct (setBy fld v.toMVal fields)))
-      | MObj.array _ _ => .error .stuck
+      | MObj.array _ _ => .error .undef
   | Addr.memoryIndex id i => do
       match ← s.getObj id with
       | MObj.array elems fx =>
           if 0 ≤ i ∧ i.toNat < elems.length then
             .ok (s.setObj id (MObj.array (elems.set i.toNat v.toMVal) fx))
           else .error .revert
-      | MObj.struct _ => .error .stuck
+      | MObj.struct _ => .error .undef
 
 /-! ## The stores
 
@@ -1102,7 +1107,7 @@ def aliasPath (σ : State) (x : Var) : Res (Name × List Seg) := do
   match ← σ.getEnv x with
   | .spath root segs => pure (root, segs)
   | .unset => .error .revert
-  | .val _ | .mref _ | .store _ | .ledger _ => .error .stuck
+  | .val _ | .mref _ | .store _ | .ledger _ => .error .undef
 
 /-- A word is stored as it is. -/
 @[simp] theorem State.writeStorage_prim (σ : State) (r : Name) (segs : List Seg) (p : PrimVal) :
@@ -1125,7 +1130,7 @@ def pickBranch (cv : Value) (t e : Res Value) : Res Value :=
   match cv with
   | .bool true => t
   | .bool false => e
-  | .int _ => .error .stuck
+  | .int _ => .error .undef
 
 /-- `a ⊕ b` on values, the right operand evaluated only when the left does not decide. -/
 def evalBinop (op : BinOp) (p : PrimTy) (lv : Value) (b : Res Value) : Res Value :=
@@ -1142,25 +1147,25 @@ def Simple.eval (σ : State) {p : PrimTy} : Simple C p → Res Value
   | .local x => do
     match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .undef
   | .env k _ => pure (.int (σ.envVal k))
 
 /-- The length of the array at a storage path: `values.length`. -/
 def arrayLen (σ : State) (r : Name) (segs : List Seg) : Res Value := do
   match ← σ.findStorage r segs with
   | .array elems _ _ => pure (.int elems.length)
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
+  | .prim _ | .struct _ | .map _ _ => .error .undef
 
 /-- The length of the memory array `id`: `xs.length`. -/
 def memArrayLen (σ : State) (id : Nat) : Res Value := do
   match ← σ.getObj id with
   | .array elems _ => pure (.int elems.length)
-  | .struct _ => .error .stuck
+  | .struct _ => .error .undef
 
 /-- A memory slot read as the object it references: a primitive has none. -/
 def Semantics.MVal.asRef : MVal → Res Nat
   | .ref id => pure id
-  | .prim _ => .error .stuck
+  | .prim _ => .error .undef
 
 mutual
 
@@ -1188,7 +1193,7 @@ def MPath.mval (σ : State) : {T : Ty} → MPath C T → Res MVal
     match ← σ.getEnv x with
     | .mref id => pure (.ref id)
     | .unset => .error .revert
-    | .val _ | .spath .. | .store _ | .ledger _ => .error .stuck
+    | .val _ | .spath .. | .store _ | .ledger _ => .error .undef
   | _, .loc l => l.read σ
 
 def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal
@@ -1198,8 +1203,8 @@ def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal
     | .struct fields =>
       match lookupBy f fields with
       | some v => pure v
-      | none => .error .stuck
-    | .array _ _ => .error .stuck
+      | none => .error .undef
+    | .array _ _ => .error .undef
   | _, .index _ b i => do
     let id ← (← b.mval σ).asRef
     let iv ← (← i.eval σ).asInt
@@ -1207,7 +1212,7 @@ def MLoc.read (σ : State) : {T : Ty} → MLoc C T → Res MVal
     | .array elems _ =>
       if h : 0 ≤ iv ∧ iv.toNat < elems.length then pure (elems.get ⟨iv.toNat, h.2⟩)
       else .error .revert
-    | .struct _ => .error .stuck
+    | .struct _ => .error .undef
 
 /-- The value a value expression denotes in `σ`.  `&&` and `||` evaluate
 their right operand only when the left does not decide. -/
@@ -1243,7 +1248,7 @@ def PrimTy.default : PrimTy → Value
 def memWriteField (σ : State) (id : Nat) (f : Name) (mv : MVal) : Res State := do
   match ← σ.getObj id with
   | .struct fields => .ok (σ.setObj id (.struct (setBy f mv fields)))
-  | .array _ _ => .error .stuck
+  | .array _ _ => .error .undef
 
 /-- A write into a memory array's element. -/
 def memWriteIndex (σ : State) (id : Nat) (i : Int) (mv : MVal) : Res State := do
@@ -1251,7 +1256,7 @@ def memWriteIndex (σ : State) (id : Nat) (i : Int) (mv : MVal) : Res State := d
   | .array elems fx =>
     if 0 ≤ i ∧ i.toNat < elems.length then .ok (σ.setObj id (.array (elems.set i.toNat mv) fx))
     else .error .revert
-  | .struct _ => .error .stuck
+  | .struct _ => .error .undef
 
 /-- `l = mv` into a memory location. -/
 def MLoc.write (σ : State) (mv : MVal) {T : Ty} : MLoc C T → Res State
@@ -1266,7 +1271,7 @@ def MLoc.write (σ : State) (mv : MVal) {T : Ty} : MLoc C T → Res State
 /-- The slot a memory source writes: a value, or the object a reference
 names.  A reference is read as one (`asRef`), as the calculus's
 `write(memory, l, mpath)` reads it: a slot holding a primitive where a
-reference is expected is stuck, not copied as it is. -/
+reference is expected is `undef`, not copied as it is. -/
 def MSrc.mval (σ : State) {T : Ty} : MSrc C T → Res MVal
   | .val v => do pure (← v.eval σ).toMVal
   | .ref p => do pure (.ref (← (← p.mval σ).asRef))
@@ -1313,7 +1318,7 @@ def opStore (σ : State) (op : BinOp) (p : PrimTy) (root : Name) (segs : List Se
 def opLocal (σ : State) (op : BinOp) (p : PrimTy) (x : Var) (v : Value) : Res State := do
   let old ← match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .undef
   let new ← applyBinOp op old v
   let new ← checkArith (.prim p) new
   pure (σ.setEnv x (.val new))
@@ -1357,7 +1362,7 @@ def bumpStore (σ : State) (op : IncDec) (p : PrimTy) (root : Name) (segs : List
 def bumpLocal (σ : State) (op : IncDec) (p : PrimTy) (x : Var) : Res (State × Value) := do
   let old ← match ← σ.getEnv x with
     | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .stuck
+    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .undef
   let oldInt ← old.asInt
   let new ← checkArith (.prim p) (.int (if op.isIncrement then oldInt + 1 else oldInt - 1))
   pure (σ.setEnv x (.val new), if op.isPre then new else old)
@@ -1397,7 +1402,7 @@ def pushAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) (val : SVal →
     let (slot, shadow') := pushSlot E shadow
     let newElem ← val slot
     σ.saveStorage root segs (.array (elems ++ [newElem]) shadow' fx)
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
+  | .prim _ | .struct _ | .map _ _ => .error .undef
 
 /-- `b.push()` as a place: the slot appended, and its index. -/
 def pushPlaceAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) : Res (State × Int) := do
@@ -1406,7 +1411,7 @@ def pushPlaceAt (σ : State) (E : Ty) (root : Name) (segs : List Seg) : Res (Sta
     let (slot, shadow') := pushSlot E shadow
     let σ' ← σ.saveStorage root segs (.array (elems ++ [slot]) shadow' fx)
     pure (σ', elems.length)
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
+  | .prim _ | .struct _ | .map _ _ => .error .undef
 
 /-- What a push appends: the slot, or its argument, laid on fresh slots
 (`SVal.strip`: a copy copies the live elements only). -/
@@ -1426,7 +1431,7 @@ def popAt (σ : State) (keep : Bool) (root : Name) (segs : List Seg) : Res State
     | last :: restRev =>
       σ.saveStorage root segs
         (.array restRev.reverse ((if keep then last else last.defaultOf) :: shadow) fx)
-  | .prim _ | .struct _ | .map _ _ => .error .stuck
+  | .prim _ | .struct _ | .map _ _ => .error .undef
 
 /-- `v` paid by the contract to `a`, on the ledger: `a`'s entry down by `v`,
 solkey's `\if(a = self) \then(net) \else(storeSt(net, at(a), selectSt(net, at(a)) - v))`.
@@ -1493,14 +1498,14 @@ def guardOk (v : Value) (σ : State) : Res State :=
   match v with
   | .bool true => pure σ
   | .bool false => .error .revert
-  | .int _ => .error .stuck
+  | .int _ => .error .undef
 
 /-- An assertion's outcome: `true` goes on, `false` panics. -/
 def assertOk (v : Value) (σ : State) : Res State :=
   match v with
   | .bool true => pure σ
   | .bool false => .error .panic
-  | .int _ => .error .stuck
+  | .int _ => .error .undef
 
 /-! ## Each contract starts in its store -/
 

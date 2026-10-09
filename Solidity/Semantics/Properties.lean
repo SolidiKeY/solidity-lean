@@ -255,7 +255,7 @@ end HeapWellFormed
 
 @[simp] theorem copyStToM_map (s : State)
     (entries : List (Int × SVal)) (dflt : SVal) :
-    copyStToM s (.map entries dflt) = .error .stuck := rfl
+    copyStToM s (.map entries dflt) = .error .undef := rfl
 
 /-! ## Deep-copy frame properties -/
 
@@ -787,7 +787,7 @@ theorem SVal.find_append : ∀ (v : SVal) (segs rest : List Seg),
       cases fx
       · exact SVal.find_append _ _ _
       · rfl
-    · have e : ∀ l, SVal.find (.array elems sh fx) (.field name :: l) = .error .stuck := by
+    · have e : ∀ l, SVal.find (.array elems sh fx) (.field name :: l) = .error .undef := by
         intro l; simp [SVal.find]
       simp only [List.cons_append, e]; rfl
   | .map entries dflt, .at i :: segs, rest => by
@@ -819,7 +819,7 @@ theorem SVal.findLive_append : ∀ (v : SVal) (segs rest : List Seg),
       cases fx
       · exact SVal.findLive_append _ _ _
       · rfl
-    · have e : ∀ l, SVal.findLive (.array elems sh fx) (.field name :: l) = .error .stuck := by
+    · have e : ∀ l, SVal.findLive (.array elems sh fx) (.field name :: l) = .error .undef := by
         intro l; simp [SVal.findLive]
       simp only [List.cons_append, e]; rfl
   | .map entries dflt, .at i :: segs, rest => by
@@ -907,7 +907,7 @@ def _root_.Solidity.Semantics.State.storeRes (σ : State) (r : Name) (segs : Lis
   | some v => do
     let u ← v.save segs x
     pure (setBy r u σ.storage)
-  | none => .error .stuck
+  | none => .error .undef
 
 theorem State.saveStorage_eq (σ : State) (r : Name) (segs : List Seg) (x : SVal) :
     σ.saveStorage r segs x = (do let s ← σ.storeRes r segs x; pure { σ with storage := s }) := by

@@ -1,6 +1,7 @@
 # Validating the semantics and the rules against solc
 
-Every theorem here is about `Stmt.run` and the rule table. This plan finds out
+Every theorem here is about the typed run (`Core.Prog.trun`) and the rule
+table. This plan finds out
 whether they say what solc-compiled code does: which checks to run, in what
 order, and what each can show. Status: a plan. "What exists" lists what is
 built; the lettered checks A to O are not built unless stated. Read "The chain
@@ -16,30 +17,28 @@ local package cache; paths below are relative to it). The installed `solc` is
 ## The chain of trust
 
 ```
-Solidity source ──(1) sol{…} / contract!{…}──▶ Stmt C ──(2) Stmt.run──▶ State
+Solidity source ──(1) sol{…} / contract!{…}──▶ Core.Prog C ──(2) Prog.trun──▶ TState
       │                                           │
       └──(3) solc (legacy | via-IR) ──▶ EVM bytecode ──(4) EVM──▶ storage slots
 ```
 
 Proved: the rules are sound for (2) (`Rule.sound`, `Proves.sound`,
-`Core.ProvesC.sound_of`/`ProvesC.valid`); the repository's compiler agrees with (2) (`compile_correct`),
-and on the programs it compiles (`wtProg`: no memory, loops or `try`) from a
-state it simulates, (2) is never stuck (`not_stuck`); a run keeps the state
-well-typed (`Stmt.run_wt`, over the scoped syntax, `Typing/Soundness.lean`;
-`run_erase` relates it to (2) for `Fresh` programs, which is every program
-`resolve` returns in its default strict mode (`Prog.resolve_fresh`), the
-elaborator's `sol{}`/`dl!{}` programs among them (`freshenBlocks`); a
-`cdl!{}` modality's program is resolved with `strict := false` and is
-covered only when it is `Fresh` (`Fml.Plain`, `Calculus/Core/HoldsErase.lean`)). Not proved: that (2) is never stuck outside
-the compiler's fragment. `Stmt.run_wt` is preservation only; `stuck` stays
-reachable from a value or a storage of the wrong shape until the typed values
-and storage of `docs/intrinsic.md`'s M4 delete it.
+`Core.ProvesC.sound_of`/`ProvesC.valid`); the repository's compiler agrees with (2) (`compile_correct`)
+on the programs it compiles (`inFrag`: no memory, loops or `try`) from a
+state it simulates.  (2) is never stuck, by construction: the typed run halts
+only by `revert`, `panic`, `diverge` or `exhausted` (`THalt`), and its states
+hold values of their types, so their erasure is well-typed
+(`TState.erase_wt`, `Typing/TypedWT.lean`) and the closer's term model, which
+reads that erasure, meets its ill-sorted value (`Halt.undef`) on no state a
+run reaches (`docs/intrinsic.md`, decisions 39, 40 and 50).  There is no
+untyped run of a statement left to be stuck.
 Not proved, and not provable without a model of solc: that (1) reads a program
 as solc does, and that (2) plus the layout equals (3) plus (4). **Every proof
 reaches solc-compiled contracts only through that square.** A rule is wrong
 about Solidity only through one of four links:
 
-- **L1. `Stmt.run` is wrong** (`Semantics.lean`); the rule is sound against it.
+- **L1. The typed run is wrong** (`Semantics/Core/TypedRun.lean`, with
+  `Semantics.lean`'s operations); the rule is sound against it.
 - **L2. The elaborator misreads `sol{…}`** (`Syntax.lean`, `hoist`): evaluation
   order, what it captures, what it accepts.
 - **L3. The rule is sound but too strong**: its premise asks for more than the
@@ -60,8 +59,8 @@ outside solc's language.
 
 **What `compile_correct` checks.** It looks like a check of L1, but Lean checks
 the proof against the definitions, not the definitions against the EVM. It pins
-`Stmt.run` only as far as three trusted definitions are right: `Instr.step`
-(the EVM), `compileStmt` (what solc emits), and `Sim` with the theorem's shape.
+the typed run only as far as three trusted definitions are right: `Instr.step`
+(the EVM), `Evm.Core.compileStmt` (what solc emits), and `Sim` with the theorem's shape.
 A machine written *from the interpreter* makes it hold by construction. That
 was `transfer`'s case until `CALL` moved real balances (check C below): it
 was `transferAt` re-spelled, a `net` field no EVM has beside the
@@ -184,7 +183,7 @@ citations when re-pinning.
 **D. The harness.** Lean generates a program `P`, prints it as a Solidity case
 (`source`, `setUp`, `calls`), a Node harness compiles it with solc under legacy and
 via-IR, with and without the optimizer, at pinned versions, runs it on an EVM, decodes
-the storage by `--storage-layout`, and diffs with `Prog.run`. The Lean side, with no
+the storage by `--storage-layout`, and diffs with the typed run (`Surface.Prog.runT`). The Lean side, with no
 dependency:
 - a **printer** from `Stmt C` to Solidity (`Solidity.Tools.Emit`), its round trip
   `sol[C]{ print P } = P` checked by `#guard` per program (it prints elaborated
@@ -248,7 +247,7 @@ so a changed verdict fails CI.
   `optimizer`, `evmVersion`) name the configuration that must show the bug, which tests
   the harness too.
 
-**G. Each rule against solc directly**, bypassing `Stmt.run`. For each
+**G. Each rule against solc directly**, bypassing the typed run. For each
 `Taclet`/`LeanTaclet` constructor (`#enum_ctors`, `Calculus/RuleShapes.lean`): a
 canonical instance and start state; evaluate the rule's premise through the updates and
 `Tm.denote` over `State.abs` (a different path from the interpreter); compile the
@@ -261,13 +260,13 @@ dropped, `pop` not clearing, `delete` resetting mappings, a push not reusing its
 an unbounded alias bind, `**` unchecked, `transfer` not debiting) and require the suite
 to kill each. Mutate `Calculus/Core/Rules.lean` too (drop a guard, swap a capture order): if
 `Taclet.sound` still builds, the semantics does not constrain that detail (a freedom or
-a hole in `Stmt.run`); if G misses it, G is too weak. A survivor is a decision no test
+a hole in the typed run); if G misses it, G is too weak. A survivor is a decision no test
 observes. Proofs do not build on a mutant, hence `solcases` must not import them.
 
 ## Translation validation through solc's Yul
 
 **I.** For a program that matters (a benchmark, a published specification), *prove*
-that solc's output agrees with `Stmt.run`, checking each output instead of trusting the
+that solc's output agrees with the typed run, checking each output instead of trusting the
 compiler (CompCert's approach to an untrusted pass).
 1. A **Yul semantics in Lean** for what `--ir` emits. EVMYulLean (below) is one but
    pulls Mathlib, so the bridge lives in a sibling repository requiring both, as the
@@ -279,7 +278,7 @@ compiler (CompCert's approach to an untrusted pass).
 3. **A structural match per program**: `fun_f_<id>` is `f`'s statements in order, each a
    composition of helper calls on fresh `expr_<n>` variables. A validator parses
    `solc --ir` (or `--ir-ast-json`), matches the body to the `Stmt`, discharges each call
-   with its lemma, and emits a Lean proof that the Yul simulates `Prog.run P` under the
+   with its lemma, and emits a Lean proof that the Yul simulates `Prog.trun P` under the
    layout.
 4. **Trusted**: the Yul optimizer and Yul-to-EVM assembly. `--ir-optimized` is still Yul,
    but the match weakens into an equivalence proof. Legacy has no IR: D covers it alone.
@@ -296,7 +295,7 @@ verdict alone.
 
 **J. A rule-to-solc map**, `docs/rule-solc-map.md` beside `docs/lean-key-rule-map.md`:
 per constructor, the legacy function and line, the IR function and line with its
-`YulUtilFunctions.cpp` helper, the `Stmt.run` clause, and witnesses (B facts, G cases).
+`YulUtilFunctions.cpp` helper, the typed run's clause (`TRun.*`), and witnesses (B facts, G cases).
 One agent per rule family; `scripts/check-rule-solc-map.mjs`
 checks that every constructor has a row and every cited witness
 exists.
@@ -333,10 +332,9 @@ equivalences in substance (`Modality.after_sameOk` is an `↔`; `UpdRule.sound` 
 `Fml.simpUpds_holds` hold both ways). Missing: `Premise.Correct` as an equivalence and
 `symex_complete : holds σ φ → holds σ (symex n φ)`. Then a loop-free formula is valid
 exactly when its modality-free form is: relative completeness, so the calculus is never
-why a proof fails, and L3 becomes a theorem. `SameOk` identifies `revert` with `stuck`,
-so the converse needs "not stuck", proved only on the compiler's fragment (`not_stuck`);
-`Stmt.run_wt` preserves types and does not exclude `stuck` (M4 of `docs/intrinsic.md`
-deletes it). The callback calculus is
+why a proof fails, and L3 becomes a theorem.  The typed run has no `stuck` (it halts by
+`THalt` alone), so the converse needs no side condition of that kind.  The callback
+calculus is
 incomplete by design (havoc); loops (`docs/loops.md`) make completeness relative to
 invariants.
 
@@ -353,7 +351,7 @@ decidability; test them (O).
 **O. Testing the heuristic automation** (`sol_close`, `sol_spec`, `grind` glue).
 - *Known-valid goals from runs*: state a generated program's exact final state as the
   postcondition; `#verify` must answer ✓, a perturbed conjunct ✗ with a certified
-  witness. A "stuck" on a valid goal is a gap; count gaps in a TSV and fail CI when the
+  witness. A "gave up" on a valid goal is a gap; count gaps in a TSV and fail CI when the
   count rises.
 - *Two-sided agreement*: each generated goal is proved or refuted by `Fml.eval3`
   (`Tools/Counterexample.lean`); on a `sol_decide` failure, `z3` or `bv_decide` on the
@@ -378,7 +376,7 @@ use them as data, as external programs, or from a sibling repository.
   after `pop()` it reads the zeroed slot), #204 (`push()` only bumps the length, so a
   write through a dangling reference survives the re-grow: the recorded
   push-over-a-recycled-slot delta). D's printer should emit their case format; a sibling
-  repository can run `Stmt.run` and their interpreter on the same programs with no EVM in
+  repository can run the typed run and their interpreter on the same programs with no EVM in
   the loop, and later prove a simulation, so `Taclet.sound` reaches a semantics tested
   against the EVM. Methods to copy: a pinning test per fix (99 witness modules), a classed
   divergence log, fault-injected detectors.

@@ -294,7 +294,7 @@ structure Run where
   splice : Splice
   erased : Array Expr
   lines : List Line
-  stuck : Bool
+  modalStop : Bool
 
 /-- The runs of this declaration, by every line they pass (as
 today's chains' `runCache` did). -/
@@ -371,7 +371,7 @@ def runChain (φ : Expr) : MetaM Run := do
   let line (q : LineQ) : Line :=
     let (f, ψ) := unpair q.pair
     { fml := unpunch sp ψ, focus := unpunch sp f, fresh := q.fresh, erased := #[q.erased] }
-  let (erased, ls, stuck) ← match m? with
+  let (erased, ls, modalStop) ← match m? with
     | none =>
       let (ls, e) ← closedRun n C Γ φ'
       pure (#[e], ls.map line, false)
@@ -392,7 +392,7 @@ def runChain (φ : Expr) : MetaM Run := do
         | _, _ => ([], true)
       let (ls, s) := shared ds bs
       pure (#[ed, eb], ls, s)
-  let r : Run := { splice := sp, erased, lines := ls, stuck }
+  let r : Run := { splice := sp, erased, lines := ls, modalStop }
   modifyEnv fun env => runCache.modifyState env fun c => Id.run do
     let mut c := c.insert φ (r, 0)
     if ls.length < runFuel then
@@ -944,8 +944,8 @@ def showLinesErr (φ : Expr) (lines : List Line) : MetaM MessageData := do
     out := out ++ m!"\n  ~[{r}]~>\n    {← showLine l.fml}"
   return out
 
-def stuckNote (run : Run) : MessageData :=
-  match run.stuck, run.splice.modality with
+def modalStopNote (run : Run) : MessageData :=
+  match run.modalStop, run.splice.modality with
   | true, some m => m!"\n  (the line after {modalityStop m})"
   | _, _ => m!""
 
@@ -1158,7 +1158,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         return shown?.getD (.ofSyntax stx)
     let notReached (ls : List Line) : TermElabM Unit := do
       throwError "sol_chain: the derivation of{← indentLine cur}\ndoes not reach{← written}\n\
-        Its lines:\n{← showLinesErr cur ls}{stuckNote run}"
+        Its lines:\n{← showLinesErr cur ls}{modalStopNote run}"
     match arrow with
     | `(chain_arrow| ~*>) =>
       -- a line given as a term is the relation's, unchecked here (`∃ ψ, φ ~*> ψ`)
@@ -1188,7 +1188,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         cur := B
         continue
       let some B := run.lines.head? |
-        match run.stuck, run.splice.modality with
+        match run.modalStop, run.splice.modality with
         | true, some m => throwError "sol_chain: the line after{← indentLine cur}\n{modalityStop m}"
         | _, _ => throwError "sol_chain: no rule applies to{← indentLine cur}"
       unless ← matchWritten run.splice C w B.fml B.erased do notReached [B]
@@ -1197,7 +1197,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       cur := B.fml
     | _ =>
       let some B := run.lines.head? |
-        match run.stuck, run.splice.modality with
+        match run.modalStop, run.splice.modality with
         | true, some m => throwError "sol_chain: the line after{← indentLine cur}\n{modalityStop m}"
         | _, _ => throwError "sol_chain: no rule applies to{← indentLine cur}"
       unless ← matchWritten run.splice C w B.fml B.erased do notReached [B]
@@ -1350,7 +1350,7 @@ def nextLine (A B : Expr) : MetaM (Run × Line) := do
     return (run, q)
   unless q.fml == B do
     throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}\n\
-      Its lines:\n{← showLinesErr A [q]}{stuckNote run}"
+      Its lines:\n{← showLinesErr A [q]}{modalStopNote run}"
   return (run, q)
 
 /-- Whether a goal is a scoped chain's. -/
@@ -1400,7 +1400,7 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
         else (run.lines.head?.map fun l => (l.fml, l.erased)).toList
       let some (B', _) ← cands.findM? fun (B', er) => fits B' run.splice er
         | throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{indentD (.ofSyntax wStx)}\n\
-            Its lines:\n{← showLines A run.lines}{stuckNote run}"
+            Its lines:\n{← showLines A run.lines}{modalStopNote run}"
       unless ← isDefEq B B' do throwError "sol_chain: the computed line is not the next one"
       if ty.isAppOf ``Core.Fml.StepBy then
         let some q := run.lines.head? | throwError "sol_chain: no rule applies to{← indentLine A}"
@@ -1487,7 +1487,7 @@ elab_rules : command
     let φ ← instantiateMVars φ
     unless ← isCoreLine φ do throwUnsupportedSyntax
     let run ← runChain φ
-    logInfo ((← showLines φ run.lines) ++ stuckNote run)
+    logInfo ((← showLines φ run.lines) ++ modalStopNote run)
 
 /-! ## Printing -/
 

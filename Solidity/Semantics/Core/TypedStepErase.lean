@@ -1,29 +1,31 @@
 import Solidity.Semantics.Core.TypedRun
 
 /-!
-# The typed run erases to the scoped run
+# A typed step, erased
 
-`Prog.trun_erase` (`docs/intrinsic.md`, "M4 lane", wiring item 4): running
-`P` on a typed state `σ` (`Semantics/Core/TypedRun.lean`) and erasing the
-state it ends in agrees with running `P` on `σ.erase` with
-`Semantics/Core.lean`'s interpreter.  The relation is `TRes.Agrees`: the
-same state, the same `revert` or `panic`; a typed `diverge` (a loop with no
-last iteration) and a typed `exhausted` (a push onto an array of
-`2^256 - 1` elements, `Storage.full`, where the untyped run, which has no
-bound, goes on) are matched by any untyped outcome.  So the untyped run is
-never stuck where the typed one ends.
+Each step of the typed run (`TRun.*`, `Semantics/Core/TypedRun.lean`) read on
+the erasure: from a typed state `σ`, the state the step ends in, erased,
+is what the erasure's evaluators (`Semantics/Core.lean`: `Val.eval`,
+`Loc.resolve`, `OpLoc.store`, …) and `Semantics.lean`'s operations make of
+`σ.erase` (`StepAgrees`, one lemma a statement, the right-hand side written
+out).  The relation is `TRes.Agrees`: the same state, the same `revert` or
+`panic`; a typed `diverge` and a typed `exhausted` (a push onto an array of
+`2^256 - 1` elements, `Storage.full`, where the untyped operation, which has
+no bound, goes on) are matched by any untyped outcome.
 
-Every program is on the bridge: a storage copy overlays a struct by position
-in the typed run and by name in the untyped one (`SVal.overlay_erase`), which
-agree since no struct repeats a member name (`structDef_nodup`, decision 16).  A
-`bool` mapping key is hashed as `0`/`1` by both runs (`Value.keyAt`,
-`PrimTy.key`; decisions 10 and 14).
+These are what the closer's terms, which are read on the erasure, see of a
+step: the update rules' soundness (`Calculus/Core/SoundArms.lean`) and the
+invariants of `Typing/` (`RunInv.TKeeps.of_agrees`) go through them.
+There is no untyped run of a statement (`docs/intrinsic.md`, decision 40):
+the scopes are the typed run's alone.
+
+A storage copy overlays a struct by position in the typed run and by name in
+the erasure (`SVal.overlay_erase`), which agree since no struct repeats a
+member name (`structDef_nodup`, decision 16).  A `bool` mapping key is
+hashed as `0`/`1` by both (`Value.keyAt`, `PrimTy.key`; decisions 10 and 14).
 
 Each operation's agreement is one lemma, from the storage and heap ones of
-`Semantics/Core/StorageErase.lean` and `Semantics/Core/HeapErase.lean`; the
-statements are each `TRun.*` step against its `Run.*` namesake, given its
-sub-programs' agreement (`StepAgrees`), and the run is the recursor over
-them.
+`Semantics/Core/StorageErase.lean` and `Semantics/Core/HeapErase.lean`.
 -/
 
 namespace Solidity.Core
@@ -218,8 +220,8 @@ theorem MLoc.readT_erase (σ : TState C Γ) : {T : Ty} → (l : MLoc C Γ T) →
       | .struct fields =>
         match lookupBy f fields with
         | some v => pure v
-        | none => .error .stuck
-      | .array _ _ => .error .stuck)
+        | none => .error .undef
+      | .array _ _ => .error .undef)
     exact TRes.Agrees.of_eq (Heap.readField_erase (σ := σ.erase.glob) rfl r h)
   | _, .index a b i => by
     simp only [MLoc.addrT, MLoc.read, bind_assoc, pure_bind]
@@ -230,7 +232,7 @@ theorem MLoc.readT_erase (σ : TState C Γ) : {T : Ty} → (l : MLoc C Γ T) →
       | .array elems _ =>
         if h : 0 ≤ k.1 ∧ k.1.toNat < elems.length then pure (elems.get ⟨k.1.toNat, h.2⟩)
         else .error .revert
-      | .struct _ => .error .stuck)
+      | .struct _ => .error .undef)
     have e := Heap.readIndex_erase (σ := σ.erase.glob) rfl r a k.1
     exact e ▸ TRes.Agrees.ofOpt _
 
@@ -508,7 +510,7 @@ theorem readLoc_erase (σ : TState C Γ) {p : PrimTy} (a : MAddr σ.H (.prim p))
     simp only [Semantics.readLoc, MAddr.erase, Heap.getObj_erase (σ := σ.erase.glob) rfl r, bind,
       Except.bind]
     show (match lookupBy _ (MFields.erase _ (σ.heap.get r)) with
-      | some v => v.asValue | none => .error .stuck) = _
+      | some v => v.asValue | none => .error .undef) = _
     rw [MFields.lookupBy_erase _ (σ.heap.get r) h]
     exact MVal.asValue_erase_prim _
   | index r a i =>
@@ -894,10 +896,16 @@ end Eval
 
 /-! ## Statements -/
 
-/-- A typed step against an untyped one: from every typed state, the results
-agree on the erased one. -/
+/-- A typed step against what its erasure does: from every typed state, the
+results agree on the erased one. -/
 def StepAgrees {Γ Γ' : Ctx} (t : TStep C Γ Γ') (u : State C Γ → Res (State C Γ')) : Prop :=
   ∀ σ : TState C Γ, TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (t σ) (u σ.erase)
+
+/-- What a typed step erases to, read off its agreement (`TRun.assign_erase`
+and its kin): the right-hand side the lemma writes out, by name, for the
+statements of the update rules' soundness. -/
+abbrev StepAgrees.erased {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : State C Γ → Res (State C Γ')}
+    (_ : StepAgrees t u) : State C Γ → Res (State C Γ') := u
 
 theorem TRes.Agrees.emap {α β γ δ : Type} {f : α → β} {g : γ → δ} {t : TRes α} {u : Res β}
     (h : TRes.Agrees f t u) {k : α → γ} {k' : β → δ} (hk : ∀ a, k' (f a) = g (k a)) :
@@ -924,7 +932,10 @@ namespace TRun
 variable {Γ : Ctx}
 
 theorem assign_erase {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
-    StepAgrees (TRun.assign l r) (Run.assign l r) := fun σ => by
+    StepAgrees (TRun.assign l r) (fun τ => do
+      let sv ← r.value τ
+      let (root, segs) ← l.resolve τ
+      τ.withGlob <$> τ.glob.writeStorage root segs sv) := fun σ => by
   refine TRes.Agrees.bind (r.valueT_erase σ) fun sv => ?_
   refine TRes.Agrees.bind (l.resolveT_erase σ) fun ref => ?_
   show TRes.Agrees _ (do
@@ -935,17 +946,24 @@ theorem assign_erase {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
   cases σ.storage.write ref sv <;> rfl
 
 theorem rebind_erase {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
-    StepAgrees (TRun.rebind i r) (Run.rebind i r) := fun σ =>
+    StepAgrees (TRun.rebind i r) (fun τ => do
+      let (τ', p) ← r.eval τ
+      pure (τ'.setLocal i (some p))) := fun σ =>
   TRes.Agrees.bind (r.evalT_erase σ) fun x =>
     TRes.Agrees.of_eq (congrArg Except.ok (TState.setLocal_erase (σ.withStorage x.1) i (some x.2)).symm)
 
 theorem assignLocal_erase {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
-    StepAgrees (TRun.assignLocal i r) (Run.assignLocal i r) := fun σ =>
+    StepAgrees (TRun.assignLocal i r) (fun τ => do
+      pure (τ.setLocal i (← r.eval τ))) := fun σ =>
   TRes.Agrees.bind (r.evalT_erase σ) fun x =>
     TRes.Agrees.of_eq (congrArg Except.ok (TState.setLocal_erase σ i x).symm)
 
 theorem declLocal_erase (p : PrimTy) (init : Option (Val C Γ p)) :
-    StepAgrees (TRun.declLocal p init) (Run.declLocal p init) :=
+    StepAgrees (TRun.declLocal p init) (fun τ => do
+      let v ← match init with
+        | none => pure (PrimTy.default p)
+        | some e => e.eval τ
+      pure (τ.push (t := .val p) v)) :=
   fun σ => by
   cases init with
   | none =>
@@ -957,7 +975,12 @@ theorem declLocal_erase (p : PrimTy) (init : Option (Val C Γ p)) :
     exact TRes.Agrees.bind (e.evalT_erase σ) fun _ => rfl
 
 theorem declStorage_erase (R : RefTy) (init : Option (ARhs C Γ R)) :
-    StepAgrees (TRun.declStorage R init) (Run.declStorage R init) := fun σ => by
+    StepAgrees (TRun.declStorage R init) (fun τ =>
+      match init with
+      | none => pure (τ.push (t := .alias R) none)
+      | some r => do
+        let (τ', p) ← r.eval τ
+        pure (τ'.push (t := .alias R) (some p))) := fun σ => by
   cases init with
   | none => rfl
   | some r =>
@@ -965,21 +988,27 @@ theorem declStorage_erase (R : RefTy) (init : Option (ARhs C Γ R)) :
 
 theorem opAssign_erase {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) :
-    StepAgrees (TRun.opAssign op l r) (Run.opAssign op l r) := fun σ =>
+    StepAgrees (TRun.opAssign op l r) (fun τ => do
+      l.store τ op (← r.eval τ)) := fun σ =>
   TRes.Agrees.bind (r.evalT_erase σ) fun v => l.storeT_erase σ hop hp v
 
 theorem incDec_erase {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    StepAgrees (TRun.incDec op l) (Run.incDec op l) := fun σ =>
+    StepAgrees (TRun.incDec op l) (fun τ => do
+      pure (← l.bump τ op).1) := fun σ =>
   TRes.Agrees.bind (l.bumpT_erase σ op hp) fun _ => rfl
 
 theorem assignIncDec_erase {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    StepAgrees (TRun.assignIncDec i op l) (Run.assignIncDec i op l) := fun σ =>
+    StepAgrees (TRun.assignIncDec i op l) (fun τ => do
+      let (τ', v) ← l.bump τ op
+      pure (τ'.setLocal i v)) := fun σ =>
   TRes.Agrees.bind (l.bumpT_erase σ op hp) fun x =>
     TRes.Agrees.of_eq (congrArg Except.ok (TState.setLocal_erase x.1.st i x.2).symm)
 
 theorem pop_erase {E : Ty} (b : SPath C Γ (.array E)) :
-    StepAgrees (TRun.pop b) (Run.pop b) := fun σ => by
+    StepAgrees (TRun.pop b) (fun τ => do
+      let (root, segs) ← b.resolve τ
+      τ.withGlob <$> popAt τ.glob E.isMapping root segs) := fun σ => by
   refine TRes.Agrees.bind (b.resolveT_erase σ) fun ref => ?_
   show TRes.Agrees _ (do
       let st ← TRes.ofOpt (σ.storage.pop E.isMapping ref)
@@ -989,7 +1018,10 @@ theorem pop_erase {E : Ty} (b : SPath C Γ (.array E)) :
   cases σ.storage.pop E.isMapping ref <;> rfl
 
 theorem transfer_erase (r a : Val C Γ .uint) :
-    StepAgrees (TRun.transfer r a) (Run.transfer r a) := fun σ => by
+    StepAgrees (TRun.transfer r a) (fun τ => do
+      let addr ← (← r.eval τ).asInt
+      let amt ← (← a.eval τ).asInt
+      τ.withGlob <$> transferAt τ.glob addr amt) := fun σ => by
   refine TRes.Agrees.bind (r.evalT_erase σ) fun addr => ?_
   rw [PrimTy.asInt_erase_uint, ok_bind]
   refine TRes.Agrees.bind (a.evalT_erase σ) fun amt => ?_
@@ -999,7 +1031,9 @@ theorem transfer_erase (r a : Val C Γ .uint) :
   rfl
 
 theorem push_erase {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)) :
-    StepAgrees (TRun.push b v) (Run.push b v) := fun σ => by
+    StepAgrees (TRun.push b v) (fun τ => do
+      let (root, segs) ← b.resolve τ
+      τ.withGlob <$> pushAt τ.glob E root segs (Src.pushVal τ v)) := fun σ => by
   refine TRes.Agrees.bind (b.resolveT_erase σ) fun ref => ?_
   cases v with
   | none =>
@@ -1061,7 +1095,10 @@ theorem push_erase {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
         rfl
 
 theorem send_erase (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
-    StepAgrees (TRun.send pv r a) (Run.send pv r a) := fun σ => by
+    StepAgrees (TRun.send pv r a) (fun τ => do
+      let addr ← (← r.eval τ).asInt
+      let amt ← (← a.eval τ).asInt
+      sendAt τ pv addr amt) := fun σ => by
   refine TRes.Agrees.bind (r.evalT_erase σ) fun addr => ?_
   rw [PrimTy.asInt_erase_uint, ok_bind]
   refine TRes.Agrees.bind (a.evalT_erase σ) fun amt => ?_
@@ -1087,7 +1124,14 @@ theorem TState.allocDefault_glob (σ : TState C Γ) (R : RefTy) (hm : (Ty.ref R)
   TState.withGlob_adopt σ _
 
 theorem declMem_erase (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R).mapFree = true) :
-    StepAgrees (TRun.declMem R init hm) (Run.declMem R init) := fun σ => by
+    StepAgrees (TRun.declMem R init hm) (fun τ =>
+      match init with
+      | none => do
+        let (τ', id) ← Semantics.allocDefault τ.glob R
+        pure ((τ.withGlob τ').push (t := .mem R) (some id))
+      | some r => do
+        let (τ', id) ← r.eval τ
+        pure (τ'.push (t := .mem R) (some id))) := fun σ => by
   cases init with
   | none =>
     show TRes.Agrees _ _ (do
@@ -1102,12 +1146,17 @@ theorem declMem_erase (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R)
     exact TRes.Agrees.bind (r.evalT_erase σ) fun _ => rfl
 
 theorem rebindMem_erase {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
-    StepAgrees (TRun.rebindMem i r) (Run.rebindMem i r) := fun σ =>
+    StepAgrees (TRun.rebindMem i r) (fun τ => do
+      let (τ', id) ← r.eval τ
+      pure (τ'.setLocal i (some id))) := fun σ =>
   TRes.Agrees.bind (r.evalT_erase σ) fun g =>
     TRes.Agrees.of_eq (congrArg Except.ok (TState.setLocal_erase g.st i g.val).symm)
 
 theorem assignFromMem_erase {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
-    StepAgrees (TRun.assignFromMem l p) (Run.assignFromMem l p) := fun σ => by
+    StepAgrees (TRun.assignFromMem l p) (fun τ => do
+      let sv ← Semantics.copyMem τ.glob (.ref (← (← p.mval τ).asRef))
+      let (root, segs) ← l.resolve τ
+      τ.withGlob <$> τ.glob.writeStorage root segs sv) := fun σ => by
   refine TRes.Agrees.bind (p.mvalT_erase σ) fun m => ?_
   show TRes.Agrees _ _ (do
     let sv ← Semantics.copyMem σ.erase.glob (MVal.erase (.ref R) m)
@@ -1124,7 +1173,8 @@ theorem assignFromMem_erase {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ 
   cases σ.storage.write ref (σ.copyMToSt m) <;> rfl
 
 theorem assignMem_erase {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
-    StepAgrees (TRun.assignMem l r) (Run.assignMem l r) := fun σ => by
+    StepAgrees (TRun.assignMem l r) (fun τ => do
+      l.write τ (← r.mval τ)) := fun σ => by
   refine TRes.Agrees.bind (r.mvalT_erase σ) fun mv => ?_
   show TRes.Agrees _ _ (l.write σ.erase (MVal.erase T mv))
   rw [MLoc.write_eq]
@@ -1137,7 +1187,10 @@ theorem assignMem_erase {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
   cases σ.heap.writeAddr a mv <;> rfl
 
 theorem delete_erase {T : Ty} (l : Loc C Γ T) :
-    StepAgrees (TRun.delete l) (Run.delete l) := fun σ => by
+    StepAgrees (TRun.delete l) (fun τ => do
+      let (root, segs) ← l.resolve τ
+      let cur ← τ.glob.findStorage root segs
+      τ.withGlob <$> τ.glob.saveStorage root segs cur.defaultOf) := fun σ => by
   refine TRes.Agrees.bind (l.resolveT_erase σ) fun ref => ?_
   show TRes.Agrees _ (do
       let st ← TRes.ofOpt (σ.storage.delete ref)
@@ -1182,7 +1235,12 @@ theorem clearT_erase (σ : TState C Γ) {T : Ty} (a : MAddr σ.H T) (hm : T.mapF
       rw [show (σ.allocDefaultG R hm).st.erase.env = σ.erase.env from TState.erase_env_adopt σ _]
 
 theorem deleteMem_erase {T : Ty} (p : MPath C Γ T) :
-    StepAgrees (TRun.deleteMem p) (Run.deleteMem p) := fun σ => by
+    StepAgrees (TRun.deleteMem p) (fun τ =>
+      match p with
+      | @MPath.var _ _ R i _ => do
+        let (τ', id) ← Semantics.allocDefault τ.glob R
+        pure ((τ.withGlob τ').setLocal i (some id))
+      | .loc l => do τ.withGlob <$> memClear τ.glob (← l.addr τ) T) := fun σ => by
   cases p with
   | var i hm =>
     show TRes.Agrees _ _ (do
@@ -1203,7 +1261,17 @@ theorem TState.withGlob_copyStToMG {T : Ty} (σ : TState C Γ) (v : SVal T)
 
 theorem assignNew_erase {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
     (h : R.newArrOk = true) :
-    StepAgrees (TRun.assignNew l n h) (Run.assignNew l n) := fun σ => by
+    StepAgrees (TRun.assignNew l n h) (fun τ => do
+      let sv := newArrVal R (← (← n.eval τ).asInt)
+      let (τ₁, mv) ← Semantics.copyStToM τ.glob sv
+      let id ← mv.asRef
+      let σ' := τ.withGlob τ₁
+      match l with
+      | .store l => do
+        let sv' ← Semantics.copyMem τ₁ (.ref id)
+        let (root, segs) ← l.resolve σ'
+        σ'.withGlob <$> τ₁.writeStorage root segs sv'
+      | .mem l => l.write σ' (.ref id)) := fun σ => by
   have key : ∀ {β : Type} (K : Semantics.State → Nat → Res β),
       (do
         let sv := newArrVal R (← (← n.eval σ.erase).asInt)
@@ -1280,316 +1348,14 @@ theorem assignNew_erase {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
       cases G.st.heap.writeAddr a G.val <;> rfl
     exact gen _
 
-theorem ite_erase {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (h₁ : Ext Γ Γ₁) (thn : TStep C Γ Γ₁)
-    (thnU : State C Γ → Res (State C Γ₁)) (h₂ : Ext Γ Γ₂) (els : TStep C Γ Γ₂)
-    (elsU : State C Γ → Res (State C Γ₂)) (hthn : StepAgrees thn thnU)
-    (hels : StepAgrees els elsU) :
-    StepAgrees (TRun.ite c h₁ thn h₂ els) (Run.ite c h₁ thnU h₂ elsU) := fun σ => by
-  refine TRes.Agrees.bind (c.evalT_erase σ) fun v => ?_
-  cases v
-  · exact (hels σ).emap fun o => (TState.drop_erase h₂ o.st).symm
-  · exact (hthn σ).emap fun o => (TState.drop_erase h₁ o.st).symm
-
 theorem require_erase (c : Val C Γ .bool) :
-    StepAgrees (TRun.require c) (fun σ => do guardOk (← c.eval σ) σ) := fun σ =>
+    StepAgrees (TRun.require c) (fun τ => do guardOk (← c.eval τ) τ) := fun σ =>
   TRes.Agrees.bind (c.evalT_erase σ) fun v => by cases v <;> rfl
 
 theorem assert_erase (c : Val C Γ .bool) :
-    StepAgrees (TRun.assert c) (fun σ => do assertOk (← c.eval σ) σ) := fun σ =>
+    StepAgrees (TRun.assert c) (fun τ => do assertOk (← c.eval τ) τ) := fun σ =>
   TRes.Agrees.bind (c.evalT_erase σ) fun v => by cases v <;> rfl
 
-theorem block_erase {Γ₁ : Ctx} (h : Ext Γ Γ₁) (body : TStep C Γ Γ₁)
-    (bodyU : State C Γ → Res (State C Γ₁)) (hb : StepAgrees body bodyU) :
-    StepAgrees (TRun.block h body) (Run.block h bodyU) := fun σ =>
-  (hb σ).emap fun o => (TState.drop_erase h o.st).symm
-
-theorem seq_erase {Γ₁ Γ₂ : Ctx} (s : TStep C Γ Γ₁) (sU : State C Γ → Res (State C Γ₁))
-    (P : TStep C Γ₁ Γ₂) (PU : State C Γ₁ → Res (State C Γ₂)) (hs : StepAgrees s sU)
-    (hP : StepAgrees P PU) : StepAgrees (TRun.seq s P) (Run.seq sU PU) := fun σ => by
-  have h := hs σ
-  unfold TRun.seq Run.seq
-  revert h
-  cases s σ with
-  | ok o =>
-    intro h
-    rw [show sU σ.erase = .ok o.st.erase from h]
-    exact (hP o.st).mapLeft fun _ => rfl
-  | error e =>
-    intro h
-    cases e with
-    | revert => rw [show sU σ.erase = .error .revert from h]; rfl
-    | panic => rw [show sU σ.erase = .error .panic from h]; rfl
-    | diverge => trivial
-    | exhausted => trivial
-
-theorem call_erase {Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
-    (hb : Ext (rs ++ ps) Γf) (body : TStep C (rs ++ ps) Γf)
-    (bodyU : State C (rs ++ ps) → Res (State C Γf))
-    (hbody : StepAgrees body bodyU) :
-    StepAgrees (TRun.call args ret hb body) (Run.call args ret hb bodyU) := fun σ => by
-  refine TRes.Agrees.bind (args.evalT_erase σ) fun a => ?_
-  show TRes.Agrees _ _ (do
-    let (τ, r) ← ret.enter σ.erase.glob
-    let υ ← bodyU (State.ofGlob τ (Env.append rs r (TEnv.erase ps a)))
-    pure (υ.withEnv (ret.leave σ.erase.env (Env.take rs (Env.drop hb υ.env)))))
-  have key := CallRet.enterT_erase ret σ a (fun s => do
-    let υ ← bodyU s
-    pure (υ.withEnv (ret.leave σ.erase.env (Env.take rs (Env.drop hb υ.env)))))
-  refine (congrArg (TRes.Agrees _ _) key).mpr ?_
-  refine TRes.Agrees.bind (hbody _) fun o => TRes.Agrees.of_eq (congrArg Except.ok ?_)
-  rw [TState.withEnv_erase, CallRet.leaveT_erase, TEnv.erase_wk, ← TEnv.take_erase,
-    ← TEnv.drop_erase]
-  rfl
-
-theorem tryCall_erase {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
-    (h₁ : Ext (ρ ++ Γ) Γ₁) (ok : TStep C (ρ ++ Γ) Γ₁) (okU : State C (ρ ++ Γ) → Res (State C Γ₁))
-    (h₂ : Ext Γ Γ₂) (err : TStep C Γ Γ₂) (errU : State C Γ → Res (State C Γ₂))
-    (code : CodeBinder κ) (h₃ : Ext (κ ++ Γ) Γ₃) (pnc : TStep C (κ ++ Γ) Γ₃)
-    (pncU : State C (κ ++ Γ) → Res (State C Γ₃)) (h₄ : Ext Γ Γ₄) (other : TStep C Γ Γ₄)
-    (otherU : State C Γ → Res (State C Γ₄)) (hok : StepAgrees ok okU) (herr : StepAgrees err errU)
-    (hpnc : StepAgrees pnc pncU) (hother : StepAgrees other otherU) :
-    StepAgrees (TRun.tryCall call rets h₁ ok h₂ err code h₃ pnc h₄ other)
-      (Run.tryCall call rets h₁ okU h₂ errU code h₃ pncU h₄ otherU) := fun σ => by
-  unfold TRun.tryCall Run.tryCall
-  rw [ExtCall.keyT_erase, ok_bind, show σ.erase.tx.ext = σ.tx.ext from rfl]
-  cases lookupBy (call.keyT σ) σ.tx.ext with
-  | none => rfl
-  | some x =>
-    cases x with
-    | ok vs =>
-      refine TRes.Agrees.bind (rets.decodeT_erase (H := σ.H) vs) fun x => ?_
-      rcases x with ⟨r, rest⟩
-      show TRes.Agrees _ ((ok (σ.withEnv (TEnv.append ρ r σ.env))).map _)
-        ((okU (σ.erase.withEnv (Env.append ρ (TEnv.erase ρ r) σ.erase.env))).map _)
-      rw [show σ.erase.withEnv (Env.append ρ (TEnv.erase ρ r) σ.erase.env) =
-        (σ.withEnv (TEnv.append ρ r σ.env)).erase by
-          rw [TState.withEnv_erase, TEnv.append_erase]; rfl]
-      exact (hok _).emap fun o => (TState.drop_erase _ o.st).symm
-    | error => exact (herr σ).emap fun o => (TState.drop_erase _ o.st).symm
-    | panic c =>
-      refine TRes.Agrees.bind (code.decodeT_erase (H := σ.H) c) fun r => ?_
-      show TRes.Agrees _ ((pnc (σ.withEnv (TEnv.append κ r σ.env))).map _)
-        ((pncU (σ.erase.withEnv (Env.append κ (TEnv.erase κ r) σ.erase.env))).map _)
-      rw [show σ.erase.withEnv (Env.append κ (TEnv.erase κ r) σ.erase.env) =
-        (σ.withEnv (TEnv.append κ r σ.env)).erase by
-          rw [TState.withEnv_erase, TEnv.append_erase]; rfl]
-      exact (hpnc _).emap fun o => (TState.drop_erase _ o.st).symm
-    | other => exact (hother σ).emap fun o => (TState.drop_erase _ o.st).symm
-
 end TRun
-
-/-! ### Loops -/
-
-/-- One unwinding step's outcome against the untyped one: the same state to
-go on from, or results that agree (a typed `diverge` or `exhausted` against
-anything). -/
-def SumAgrees {α β : Type} (f : α → β) (x : α ⊕ TRes α) (y : β ⊕ Res β) : Prop :=
-  match x with
-  | .inl a => y = .inl (f a)
-  | .inr t => (t = .error .diverge ∨ t = .error .exhausted) ∨ ∃ u, y = .inr u ∧ TRes.Agrees f t u
-
-theorem SumAgrees.inr {α β : Type} {f : α → β} {t : TRes α} {u : Res β}
-    (h : TRes.Agrees f t u) : SumAgrees f (.inr t) (.inr u) := Or.inr ⟨u, rfl, h⟩
-
-theorem loop_step_erase {α β : Type} {f : α → β} {body : α → TRes α} {bodyU : β → Res β}
-    {c : α → TRes Bool} {cU : β → Res Value}
-    (hbody : ∀ a, TRes.Agrees f (body a) (bodyU (f a)))
-    (hc : ∀ a, TRes.Agrees (fun b : Bool => PrimTy.erase (p := .bool) b) (c a) (cU (f a))) (a : α) :
-    SumAgrees f (TLoop.step body c a) (Loop.step bodyU cU (f a)) := by
-  unfold TLoop.step Loop.step
-  have h := hc a
-  revert h
-  cases c a with
-  | ok b =>
-    intro h
-    rw [show cU (f a) = .ok (.bool b) from h]
-    cases b with
-    | false => exact SumAgrees.inr rfl
-    | true =>
-      show SumAgrees f (match body a with
-          | .error h => .inr (.error h)
-          | .ok τ => .inl τ)
-        (match bodyU (f a) with
-          | .error h => .inr (.error h)
-          | .ok τ => .inl τ)
-      have hb := hbody a
-      revert hb
-      cases body a with
-      | ok a' => intro hb; rw [show bodyU (f a) = .ok (f a') from hb]; rfl
-      | error e =>
-        intro hb
-        cases e with
-        | revert => rw [show bodyU (f a) = .error .revert from hb]; exact SumAgrees.inr rfl
-        | panic => rw [show bodyU (f a) = .error .panic from hb]; exact SumAgrees.inr rfl
-        | diverge => exact Or.inl (Or.inl rfl)
-        | exhausted => exact Or.inl (Or.inr rfl)
-  | error e =>
-    intro h
-    cases e with
-    | revert => rw [show cU (f a) = .error .revert from h]; exact SumAgrees.inr rfl
-    | panic => rw [show cU (f a) = .error .panic from h]; exact SumAgrees.inr rfl
-    | diverge => exact Or.inl (Or.inl rfl)
-    | exhausted => exact Or.inl (Or.inr rfl)
-
-theorem loop_iterN_erase {α β : Type} {f : α → β} {body : α → TRes α} {bodyU : β → Res β}
-    {c : α → TRes Bool} {cU : β → Res Value}
-    (hbody : ∀ a, TRes.Agrees f (body a) (bodyU (f a)))
-    (hc : ∀ a, TRes.Agrees (fun b : Bool => PrimTy.erase (p := .bool) b) (c a) (cU (f a))) :
-    (n : Nat) → (a : α) → SumAgrees f (TLoop.iterN body c n a) (Loop.iterN bodyU cU n (f a))
-  | 0, _ => rfl
-  | n + 1, a => by
-    have hs := loop_step_erase hbody hc a
-    simp only [TLoop.iterN, Loop.iterN]
-    revert hs
-    cases TLoop.step body c a with
-    | inl a' =>
-      intro hs
-      rw [show Loop.step bodyU cU (f a) = .inl (f a') from hs]
-      exact loop_iterN_erase hbody hc n a'
-    | inr t =>
-      intro hs
-      rcases hs with hd | ⟨u, hu, ht⟩
-      · exact Or.inl hd
-      · rw [hu]
-        exact Or.inr ⟨u, rfl, ht⟩
-
-theorem loop_run_erase {α β : Type} {f : α → β} {body : α → TRes α} {bodyU : β → Res β}
-    {c : α → TRes Bool} {cU : β → Res Value}
-    (hbody : ∀ a, TRes.Agrees f (body a) (bodyU (f a)))
-    (hc : ∀ a, TRes.Agrees (fun b : Bool => PrimTy.erase (p := .bool) b) (c a) (cU (f a)))
-    (a : α) : TRes.Agrees f (TLoop.run body c a) (Loop.run bodyU cU (f a)) := by
-  by_cases hex : ∃ r n, TLoop.iterN body c n a = .inr r
-  · obtain ⟨r, n, hn⟩ := hex
-    rw [TLoop.run_of_iterN hn]
-    have hs := loop_iterN_erase hbody hc n a
-    rw [hn] at hs
-    rcases hs with hd | ⟨u, hu, hr⟩
-    · rcases hd with rfl | rfl <;> trivial
-    · rw [Loop.run_of_iterN hu]
-      exact hr
-  · rw [TLoop.run_of_not_done fun n => ?_]
-    · trivial
-    · cases h : TLoop.iterN body c n a with
-      | inl a' => exact ⟨a', rfl⟩
-      | inr r => exact absurd ⟨r, n, h⟩ hex
-
-namespace TRun
-
-variable {Γ : Ctx}
-
-theorem loop_erase {Γ₁ : Ctx} (c : Val C Γ .bool) (h : Ext Γ Γ₁) (body : TStep C Γ Γ₁)
-    (bodyU : State C Γ → Res (State C Γ₁))
-    (hbody : StepAgrees body bodyU) : StepAgrees (TRun.loop c h body) (Run.loop c h bodyU) :=
-  fun σ => loop_run_erase (f := fun o : Out C σ.H Γ => o.st.erase)
-    (fun o => TRes.Agrees.emap (g := fun o' : Out C σ.H Γ => o'.st.erase) (hbody o.st)
-      fun o' => (TState.drop_erase h o'.st).symm)
-    (fun o => c.evalT_erase o.st) ⟨σ, List.prefix_refl _⟩
-
-end TRun
-
-/-! ## The run -/
-
-mutual
-
-theorem Stmt.trunR_erase : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
-    StepAgrees s.trunR s.runR
-  | _, _, .assign l r => TRun.assign_erase l r
-  | _, _, .rebind i r => TRun.rebind_erase i r
-  | _, _, .assignLocal i r => TRun.assignLocal_erase i r
-  | _, _, .declLocal p _ init => TRun.declLocal_erase p init
-  | _, _, .declStorage R _ init => TRun.declStorage_erase R init
-  | _, _, .opAssign op hop hp l r => TRun.opAssign_erase op hop hp l r
-  | _, _, .incDec op hp l => TRun.incDec_erase op hp l
-  | _, _, .assignIncDec i op hp l _ => TRun.assignIncDec_erase i op hp l
-  | _, _, .push b v _ => TRun.push_erase b v
-  | _, _, .pop b => TRun.pop_erase b
-  | _, _, .transfer r a => TRun.transfer_erase r a
-  | _, _, .send pv r a => TRun.send_erase pv r a
-  | _, _, .declMem R _ init _ hm => TRun.declMem_erase R init hm
-  | _, _, .rebindMem i r => TRun.rebindMem_erase i r
-  | _, _, .assignFromMem l p => TRun.assignFromMem_erase l p
-  | _, _, .assignMem l r => TRun.assignMem_erase l r
-  | _, _, .delete l => TRun.delete_erase l
-  | _, _, .deleteMem p _ => TRun.deleteMem_erase p
-  | _, _, .assignNew l n hn => TRun.assignNew_erase l n hn
-  | _, _, .ite c thn els =>
-    TRun.ite_erase c thn.ext thn.trunR thn.runR els.ext els.trunR els.runR
-      (Prog.trunR_erase thn) (Prog.trunR_erase els)
-  | _, _, .require c => TRun.require_erase c
-  | _, _, .assert c => TRun.assert_erase c
-  | _, _, .revert => fun _ => rfl
-  | _, _, .call _ args ret body =>
-    TRun.call_erase args ret body.ext body.trunR body.runR (Prog.trunR_erase body)
-  | _, _, .tryCall call rets ok err code pnc other =>
-    TRun.tryCall_erase call rets ok.ext ok.trunR ok.runR err.ext err.trunR err.runR code
-      pnc.ext pnc.trunR pnc.runR other.ext other.trunR other.runR
-      (Prog.trunR_erase ok) (Prog.trunR_erase err)
-      (Prog.trunR_erase pnc) (Prog.trunR_erase other)
-  | _, _, .loop _ c body =>
-    TRun.loop_erase c body.ext body.trunR body.runR (Prog.trunR_erase body)
-  | _, _, .block body =>
-    TRun.block_erase body.ext body.trunR body.runR (Prog.trunR_erase body)
-
-theorem Prog.trunR_erase : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
-    StepAgrees P.trunR P.runR
-  | _, _, .nil => fun _ => rfl
-  | _, _, .cons s P =>
-    TRun.seq_erase s.trunR s.runR P.trunR P.runR (Stmt.trunR_erase s)
-      (Prog.trunR_erase P)
-
-end
-
-/-- **The typed run erases to the scoped run**: from a typed state, the state
-a statement leaves erases to the one `Stmt.run` leaves from the erased state,
-and it reverts or panics where that one does. -/
-theorem Stmt.trun_erase {Γ Γ' : Ctx} (σ : TState C Γ) (s : Stmt C Γ Γ') :
-    TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (s.trun σ) (s.run σ.erase) :=
-  Stmt.trunR_erase s σ
-
-/-- **The typed run erases to the scoped run**, for a sequence. -/
-theorem Prog.trun_erase {Γ Γ' : Ctx} (σ : TState C Γ) (P : Prog C Γ Γ') :
-    TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (P.trun σ) (P.run σ.erase) :=
-  Prog.trunR_erase P σ
-
-/-- A typed run that ends, ends the untyped run in its erasure. -/
-theorem Prog.run_of_trun {Γ Γ' : Ctx} {σ : TState C Γ} {P : Prog C Γ Γ'}
-    {o : Out C σ.H Γ'} (ho : P.trun σ = .ok o) : P.run σ.erase = .ok o.st.erase := by
-  have := Prog.trun_erase σ P
-  rw [ho] at this
-  exact this
-
-/-- A typed run that reverts or panics halts the untyped run the same way:
-the untyped run is never stuck where the typed one is neither diverging nor
-exhausted. -/
-theorem Prog.run_halt_of_trun {Γ Γ' : Ctx} {σ : TState C Γ} {P : Prog C Γ Γ'}
-    {e : THalt} (he : e ≠ .diverge) (hx : e ≠ .exhausted) (ho : P.trun σ = .error e) :
-    P.run σ.erase = .error e.erase := by
-  have := Prog.trun_erase σ P
-  rw [ho] at this
-  cases e with
-  | revert => exact this
-  | panic => exact this
-  | diverge => exact absurd rfl he
-  | exhausted => exact absurd rfl hx
-
-/-- From a contract's deployed storage. -/
-theorem Prog.trun_init_erase {Γ' : Ctx} (P : Prog C [] Γ') :
-    TRes.Agrees (fun o : Out C (TState.init C).H Γ' => o.st.erase) (P.trun (TState.init C))
-      (P.run (State.ofSem { storage := C.initStorage })) := by
-  rw [← TState.init_erase]
-  exact Prog.trun_erase _ P
-
-/-! ## Examples -/
-
-/-- `solc`'s order of `++` holds of the scoped run too: the typed run ends
-(`Semantics/Core/TypedRun.lean`), and the scoped run ends in its erasure. -/
-example : ∃ τ, Prog.run (TState.ofStorage Storage.testSuite).erase incOrderCore = .ok τ := by
-  cases h : Prog.trun (TState.ofStorage Storage.testSuite) incOrderCore with
-  | ok o => exact ⟨_, Prog.run_of_trun h⟩
-  | error e =>
-    have : (Prog.trun (TState.ofStorage Storage.testSuite) incOrderCore).halt? = none := by
-      decide +kernel
-    rw [h] at this
-    cases this
 
 end Solidity.Core

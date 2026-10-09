@@ -15,7 +15,7 @@ namespace Solidity.Core.Delab
 open Lean Meta PrettyPrinter Delaborator SubExpr
 open Solidity (ppStmt ppPremise? ppOn isEscape escapeTerm)
 
-/-- `functionCallArgCapture`'s premise (`Premise.argCapture`, stuck on its
+/-- `functionCallArgCapture`'s premise (`Premise.argCapture`, blocked on its
 schema variable `ret`): `⟨[ T se = v; ‹Core.Stmt.call f as' ret body›; ]⟩`,
 the capture as `Syntax.lean` writes it and the call with the captured
 arguments as a term, as `Rules.lean` prints today's rule. -/

@@ -6,7 +6,7 @@ import Solidity.Semantics.NoPanicSimp
 
 `Halt.panic` is the one halt no modality accepts, and the interpreter raises
 it in one place, a failed `assert` (`assertOk`).  Every other operation halts
-with `revert` or `stuck`: the state's reads and writes, the evaluation of a
+with `revert` or `undef`: the state's reads and writes, the evaluation of a
 program expression, the copies and allocations.  A term or an update reads
 the state through these operations, so neither panics (`Calculus/NoPanic.lean`);
 a statement with no `assert` in it never does.
@@ -41,7 +41,7 @@ theorem NoPanic.ne_of_eq {α : Type} {x : Res α} {e : Halt} (hx : NoPanic x)
 @[no_panic_simp] theorem NoPanic.ok {α : Type} (a : α) : NoPanic (.ok a : Res α) := nofun
 @[no_panic_simp] theorem NoPanic.pure {α : Type} (a : α) : NoPanic (Pure.pure a : Res α) := nofun
 @[no_panic_simp] theorem NoPanic.revert {α : Type} : NoPanic (.error .revert : Res α) := nofun
-@[no_panic_simp] theorem NoPanic.stuck {α : Type} : NoPanic (.error .stuck : Res α) := nofun
+@[no_panic_simp] theorem NoPanic.undef {α : Type} : NoPanic (.error .undef : Res α) := nofun
 @[no_panic_simp] theorem NoPanic.map {α β : Type} (f : α → β) (x : Res α) :
     NoPanic (f <$> x) ↔ NoPanic x := by
   cases x <;> simp only [Functor.map, Except.map, ne_eq, Except.error.injEq, NoPanic.ok,

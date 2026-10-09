@@ -8,7 +8,7 @@ theorem as a `Try this:` suggestion), one refuted with a certified
 counterexample (the kernel checked `¬ ⊨ spec[C]{f}`), one refuted by its
 `assignable` frame, one refuted by a tested counterexample only (the layout
 premise of a mapping is a `\forall` over a `uint`, which the certificate
-cannot evaluate), one refuted by a failed `assert`, and one stuck: true,
+cannot evaluate), one refuted by a failed `assert`, and one given up on: true,
 but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula.
 
 Both read the scoped calculus (`open scoped Solidity.Core.Surface`,
@@ -80,7 +80,7 @@ info: ✗ incBoth (certified):
 is left, and no counterexample is found. -/
 def squareGoals : Lean.Elab.Term.TermElabM Nat := do
   match ← verifyFunction ``Counter "square" with
-  | .stuck gs _ => pure gs.length
+  | .gaveUp gs _ => pure gs.length
   | _ => pure 0
 
 /-- info: 1 -/

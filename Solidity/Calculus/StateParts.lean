@@ -687,7 +687,7 @@ def Tm.substSt (L : Upd C) (S : STerm C) : Tm C u → Tm C u
   | .app0 o => .app0 o
   | Term.netOf x a =>
     match L.lastWrite x with
-    | some _ => Term.stuck
+    | some _ => Term.undef
     | none => .app1 (.netOf x) (Tm.substSt L S a)
   | PTerm.next p => .app2 .nextIn S (Tm.substSt L S p)
   | .app1 o a => .app1 o (Tm.substSt L S a)
@@ -758,7 +758,7 @@ theorem Tm.substSt_eval (h : SubstAgree L ns σ σ₁) (hs : S.eval σ = .ok τ)
       · rename_i e hx
         obtain ⟨b, hb, hnl⟩ := h.written x e hx
         show Srt.AgreePart .val _ _
-        simp only [Srt.AgreePart, Term.stuck_eval, Tm.eval, Op1.eval, bind, Except.bind]
+        simp only [Srt.AgreePart, Term.undef_eval, Tm.eval, Op1.eval, bind, Except.bind]
         rw [show State.getEnv { σ₁ with storage := τ.storage } x = .ok b from hb]
         cases b with
         | ledger l => exact absurd rfl (hnl l)

@@ -129,7 +129,7 @@ cannot close as goals.
 `sol_spec_try`, and on leftover goals searches for a counterexample
 (`refuteSpec`, `Tools/Counterexample.lean`). Verdicts: proved (offered as a
 `Try this:` theorem), refuted (certified when the kernel checked
-`¬ ⊨ spec[C]{f}`, else tested by the interpreter), or stuck. `#verify C`
+`¬ ⊨ spec[C]{f}`, else tested by the interpreter), or given up on. `#verify C`
 runs every function with an obligation. Pinned in `Examples/Verify.lean`.
 
 **What is proved.** With `sol_spec`: `Examples/Benchmark/{Counter,

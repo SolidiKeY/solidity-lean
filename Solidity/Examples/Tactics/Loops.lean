@@ -14,8 +14,8 @@ import Solidity.Semantics.Core.TypedRunFuel
 loop (`docs/loops.md`).  The elaborator lowers them to `Stmt.loop`, solkey's
 lowered `while`, by solkey's `LoopLowering` (`lowerLoops`): the flags `brk`,
 `cnt`, `ret`, made only when used; the pins below are its shapes.  A loop
-runs as the least fixed point of its unwinding (`Loop.run`), so `#run` runs
-it and a concrete one is decided by `Prog.run_loop_of_iterN`.  The calculus
+runs as the least fixed point of its unwinding (`TLoop.run`), so `#run` runs
+it and a concrete one is decided with fuel (`Core.Prog.trunF_approx`).  The calculus
 unwinds a loop to the bound its `/// @custom:key unwind k` clause gives
 (`whileUnwind`, solkey's taclet with a bound) and leaves it there by
 `loopExit`; a loop with an invariant is proved by it (`whileInvariantBox`,
@@ -197,7 +197,7 @@ try address(7).get() { bool brk1 = false; while (!brk1 && (i < 3)) { if (i == 1)
 
 /-! ## Runs
 
-`#run` runs a loop by iterating it (`Loop.runImpl`, which the kernel never
+`#run` runs a loop by iterating it (`TLoop.runImpl`, which the kernel never
 sees): `sum(4)` is `1 + 2 + 3 + 4`; `firstOdd(6)` the last odd number up to
 `6`, skipping the even ones by `continue` and leaving by `break`; a
 `do … while` runs its body once even when the condition is false at once;
@@ -294,6 +294,27 @@ theorem countTo3Run :
     ((Core.Prog.trun (Core.TState.ofStorage Core.Storage.standardExample) countTo3Core).toOption.map
       fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 3 := by
   rcases Core.Prog.trunF_approx 4 countTo3Core (Core.TState.ofStorage Core.Storage.standardExample)
+    with h | h
+  · exact absurd (congrArg Core.TRes.halt? h) (by decide +kernel)
+  · rw [Core.Prog.trun, ← h]
+    decide +kernel
+
+/-- A loop whose body declares a local, popped at the end of every iteration. -/
+def countUp : Surface.Prog StandardExample :=
+  sol{ uint i = 0; while (i < 3) { uint j = i + 1; i = j; } assert(i == 3); }
+
+open Lean Elab Command in
+run_cmd liftCoreM do
+  if let some e ← Core.Prog.defineCore `Solidity.Examples.Loops.countUpCore ``StandardExample []
+      countUp then
+    throwError "countUpCore: {e}"
+
+/-- The body's `j` is gone at every head: `i` is `3` where the loop ends, and
+the `assert` passes. -/
+theorem countUpRun :
+    ((Core.Prog.trun (Core.TState.ofStorage Core.Storage.standardExample) countUpCore).toOption.map
+      fun o => (Core.TEnv.get .here o.st.env : PrimTy.uint.Denote).1) = some 3 := by
+  rcases Core.Prog.trunF_approx 4 countUpCore (Core.TState.ofStorage Core.Storage.standardExample)
     with h | h
   · exact absurd (congrArg Core.TRes.halt? h) (by decide +kernel)
   · rw [Core.Prog.trun, ← h]

@@ -725,7 +725,7 @@ structure ExtCall (C : Contract) where
 source, so that a loop has one rule: unwound at most `k` times (Lean only:
 solkey's strategy unwinds without a bound), or by its invariant `I` and,
 under the diamond, its variant `dec` (solkey's `/// @custom:key invariant`
-and `decreases`).  `Stmt.run` does not read it. -/
+and `decreases`).  The typed run does not read it. -/
 inductive LoopAnn (C : Contract) where
   | unwind (k : Nat)
   | inv (I : Val C .bool) (dec : Option (Val C .uint))
@@ -3252,7 +3252,7 @@ def RawStmt.declaredAll (s : RawStmt) : List String :=
   | s => s.declared?.toList
 
 /-- **A body's `return`s, lowered** to assignments to its return variables
-`r` (`return x + 1;` is `r = x + 1;`, `lowerReturn`), so that `Stmt.run` has no abrupt
+`r` (`return x + 1;` is `r = x + 1;`, `lowerReturn`), so that the run has no abrupt
 completion.  What follows a `return` in its block is dead and dropped; the
 statements after an `if` one of whose branches returns move into both
 branches, which is where they run: `if (c) { return a; } s;` is

@@ -13,7 +13,7 @@ a zero divisor, a negative exponent).  Arithmetic is on `Int`, as the untyped
 
 `BinOp.evalT_erase` and `UnOp.evalT_erase` are the agreement with
 `evalBinop` and `applyUnOp`/`unopCheck`: on an operand type the operator
-accepts, the untyped operator is the typed one erased, so it is never stuck
+accepts, the untyped operator is the typed one erased, so it is never `undef`
 (`asInt`/`asBool`, `checkArith`'s junk arms).  `-x` is accepted at `int`
 only (`UnOp.accepts`), as solc accepts it.
 -/
@@ -130,7 +130,7 @@ theorem evalBinop_arith {op : BinOp} (hA : op.isArith = true) {p : PrimTy}
   | some n => exact PrimTy.checkArith_ofInt hp n
 
 /-- **`evalBinop` is `evalT` erased**, at an operand type the operator
-accepts: the untyped operator is never stuck there. -/
+accepts: the untyped operator is never `undef` there. -/
 theorem evalT_erase (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : p.Denote) :
     evalBinop op p (PrimTy.erase a) (.ok (PrimTy.erase b)) = toRes PrimTy.erase (op.evalT a b) := by
   cases p <;> cases op <;> (first | exact absurd h (by decide) | skip)

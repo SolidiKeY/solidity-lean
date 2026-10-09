@@ -1,4 +1,4 @@
-import Solidity.Typing.Soundness
+import Solidity.Typing.TypedWT
 import Solidity.Semantics.Core.StateErase
 import Solidity.Calculus.RuleShapes
 import Solidity.SortCheck.Annotations
@@ -299,17 +299,16 @@ theorem Read.sortOk {Γ : Core.Ctx} {ns : List Var} {H : HeapTy} {σ : Core.Stat
         rw [hn]; rfl
       · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
 
-/-- The claims hold after any run: from a well-typed state, run a block, and
-the next statement's read finds what its sort declares.
+/-- The claims hold in every typed state, so after any run: a typed state's
+erasure is well-typed by construction (`TState.erase_wt`), and the next
+statement's read finds what its sort declares.
 `Person storage p = alice; p.age = 10;` then `x = alice.age;` still reads a
 number. -/
-theorem Read.sortOk_after_run {Γ Γ₁ : Core.Ctx} {ns : List Var} {H : HeapTy}
-    {σ : Core.State C Γ} {σ₁ : Core.State C Γ₁} {τ : State} {P : Core.Prog C Γ Γ₁} {R : Read C}
-    {cls : ReadClass} {rs : ReadSort} (hwt : Core.RunWT C H σ) (hrun : P.run σ = .ok σ₁)
-    (hag : Core.Agree ns σ₁ τ) (hR : R.Typed ns Γ₁) (hfit : cls.fits R.ty = true)
+theorem Read.sortOk_typed {Γ : Core.Ctx} {ns : List Var} (hnd : nodupKeysB C.vars = true)
+    (σ : Core.TState C Γ) {τ : State} {R : Read C} {cls : ReadClass} {rs : ReadSort}
+    (hag : Core.Agree ns σ.erase τ) (hR : R.Typed ns Γ) (hfit : cls.fits R.ty = true)
     (hsup : cls.supports R.domain rs = true) : ∃ H', R.SortOk τ H' rs :=
-  let ⟨H', _, hwt'⟩ := Core.Prog.run_wt P hwt hrun
-  ⟨H', Read.sortOk hwt' hag hR hfit hsup⟩
+  ⟨_, Read.sortOk (Core.TState.erase_wt hnd σ) hag hR hfit hsup⟩
 
 /-! ## Rows, constructors, statements -/
 

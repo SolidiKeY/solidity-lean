@@ -25,7 +25,7 @@ import Solidity.Semantics.Core.HeapErase
 import Solidity.Semantics.Core
 import Solidity.Semantics.Core.TypedState
 import Solidity.Semantics.Core.TypedRun
-import Solidity.Semantics.Core.TypedRunErase
+import Solidity.Semantics.Core.TypedStepErase
 import Solidity.Semantics.Core.TypedRunWk
 import Solidity.Semantics.Core.TypedRunFrame
 import Solidity.Semantics.Core.TypedRunFuel
@@ -200,7 +200,8 @@ import Solidity.Typing.Storage
 import Solidity.Typing.StoragePreservation
 import Solidity.Typing.State
 import Solidity.Typing.Soundness
-import Solidity.Typing.StraightRun
+import Solidity.Typing.TypedRunInv
+import Solidity.Semantics.Core.TypedEnds
 import Solidity.Typing.TypedWT
 import Solidity.Typing.Reachability
 import Solidity.Typing.Constructibility

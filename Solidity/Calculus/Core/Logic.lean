@@ -42,9 +42,10 @@ when `r` allocates.  So every type has a value
 (`LTy.tdenote_nonempty`) and the binder is universal under both modalities
 (`Modality.forallB`).
 
-Before the formulas: the term, update and run lemmas on the erasure that the
-rules' soundness (`Calculus/Core/Sound*.lean`) reads, M3's run being the
-bridge (`Stmt.trun_erase`) from the typed run to `Update.lean`'s terms.
+Before the formulas: the term and update lemmas on the erasure that the
+rules' soundness (`Calculus/Core/Sound*.lean`) reads, each typed step read
+on the erasure (`Semantics/Core/TypedStepErase.lean`) being what relates the
+typed run to `Update.lean`'s terms.
 -/
 
 namespace Solidity.Core
@@ -172,115 +173,10 @@ def _root_.Solidity.Modality.afterC {α : Type} (m : Modality) (p : α → Prop)
   | .ok τ => p τ
   | .error _ => m.onHalt
 
-/-- What the frames do after the program: the rest run, a scope's locals
-popped or dropped. -/
-def Frames.run {Γ₀ : Ctx} : {Γ : Ctx} → State C Γ → Frames C Γ Γ₀ → Res (State C Γ₀)
-  | _, σ, .nil => pure σ
-  | _, σ, .seq ω κ => do Frames.run (← Prog.run σ ω) κ
-  | _, σ, .pop _ h κ => Frames.run (σ.drop h) κ
-  | _, σ, .drop h κ => Frames.run (σ.thin h) κ
-
 /-- The locals `xs` set as `b` says: a loop body's frame anonymised. -/
 def State.anon {Γ : Ctx} (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
     (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) : State C Γ :=
   xs.foldl (fun τ x => τ.setLocal x.2 (b x)) σ
-
-/-! ## A shifted part reads as it did
-
-A rule reads the parts of its `\find` under its fresh locals (`Val.up` and
-its kin): pushed a local, the state reads them as before. -/
-
-section Shift
-
-variable {Γ : Ctx} {t : LTy}
-
-theorem State.glob_push (σ : State C Γ) (w : t.Denote C) : (σ.push w).glob = σ.glob := rfl
-
-theorem Simple.eval_up {p : PrimTy} (s : Simple C Γ p) (σ : State C Γ) (w : t.Denote C) :
-    (s.up (t := t)).eval (σ.push w) = s.eval σ := by
-  cases s <;> rfl
-
-mutual
-
-theorem SPath.resolve_up (σ : State C Γ) (w : t.Denote C) : {T : Ty} → (b : SPath C Γ T) →
-    (b.up (t := t)).resolve (σ.push w) = b.resolve σ
-  | _, .alias _ => rfl
-  | _, .loc l => Loc.resolve_up σ w l
-
-theorem Loc.resolve_up (σ : State C Γ) (w : t.Denote C) : {T : Ty} → (l : Loc C Γ T) →
-    (l.up (t := t)).resolve (σ.push w) = l.resolve σ
-  | _, .root .. => rfl
-  | _, .field b f h => by
-    show (do let (r, segs) ← b.up.resolve (σ.push w); pure (r, segs ++ [Seg.field f])) = _
-    rw [SPath.resolve_up σ w b]; rfl
-  | _, .index it b i => by
-    show (do
-      let (r, segs) ← b.up.resolve (σ.push w)
-      let i ← (← i.up.eval (σ.push w)).keyAt _
-      (σ.push w).glob.checkIndex r segs i
-      pure (r, segs ++ [Seg.at i])) = _
-    rw [SPath.resolve_up σ w b, Val.eval_up σ w i]; rfl
-
-theorem MPath.mval_up (σ : State C Γ) (w : t.Denote C) : {T : Ty} → (b : MPath C Γ T) →
-    (b.up (t := t)).mval (σ.push w) = b.mval σ
-  | _, .var .. => rfl
-  | _, .loc l => MLoc.read_up σ w l
-
-theorem MLoc.read_up (σ : State C Γ) (w : t.Denote C) : {T : Ty} → (l : MLoc C Γ T) →
-    (l.up (t := t)).read (σ.push w) = l.read σ
-  | _, .field b f h => by
-    show (do
-      let id ← (← b.up.mval (σ.push w)).asRef
-      match ← (σ.push w).glob.getObj id with
-      | .struct fields =>
-        match lookupBy f fields with
-        | some v => pure v
-        | none => .error .stuck
-      | .array _ _ => .error .stuck) = _
-    rw [MPath.mval_up σ w b]; rfl
-  | _, .index a b i => by
-    show (do
-      let id ← (← b.up.mval (σ.push w)).asRef
-      let iv ← (← i.up.eval (σ.push w)).asInt
-      match ← (σ.push w).glob.getObj id with
-      | .array elems _ =>
-        if h : 0 ≤ iv ∧ iv.toNat < elems.length then pure (elems.get ⟨iv.toNat, h.2⟩)
-        else .error .revert
-      | .struct _ => .error .stuck) = _
-    rw [MPath.mval_up σ w b, Val.eval_up σ w i]; rfl
-
-theorem Val.eval_up (σ : State C Γ) (w : t.Denote C) : {p : PrimTy} → (v : Val C Γ p) →
-    (v.up (t := t)).eval (σ.push w) = v.eval σ
-  | _, .simple s => Simple.eval_up s σ w
-  | _, .read l => by
-    show (do
-      let (r, segs) ← l.up.resolve (σ.push w)
-      (← (σ.push w).glob.findStorage r segs).asValue) = _
-    rw [Loc.resolve_up σ w l]; rfl
-  | _, .binop op _ _ a b => by
-    show (do evalBinop op _ (← a.up.eval (σ.push w)) (b.up.eval (σ.push w))) = _
-    rw [Val.eval_up σ w a, Val.eval_up σ w b]; rfl
-  | _, .unop op _ _ a => by
-    show (do unopCheck op _ (← applyUnOp op (← a.up.eval (σ.push w)))) = _
-    rw [Val.eval_up σ w a]; rfl
-  | _, .ternary c a b => by
-    show (do pickBranch (← c.up.eval (σ.push w)) (a.up.eval (σ.push w)) (b.up.eval (σ.push w))) = _
-    rw [Val.eval_up σ w c, Val.eval_up σ w a, Val.eval_up σ w b]; rfl
-  | _, .readMem l => by
-    show (do (← l.up.read (σ.push w)).asValue) = _
-    rw [MLoc.read_up σ w l]; rfl
-  | _, .len b _ => by
-    show (do
-      let (r, segs) ← b.up.resolve (σ.push w)
-      arrayLen (σ.push w).glob r segs) = _
-    rw [SPath.resolve_up σ w b]; rfl
-  | _, .mlen b _ => by
-    show (do memArrayLen (σ.push w).glob (← (← b.up.mval (σ.push w)).asRef)) = _
-    rw [MPath.mval_up σ w b]; rfl
-
-end
-
-end Shift
 
 /-! ## Rules -/
 

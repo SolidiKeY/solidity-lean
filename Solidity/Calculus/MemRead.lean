@@ -469,7 +469,7 @@ def objKind (μ : State) (n : Nat) : Res (Option Nat) :=
 
 theorem memArrayLen_objKind (μ : State) (n : Nat) :
     memArrayLen μ n = objKind μ n >>= fun o => match o with
-      | none => .error .stuck
+      | none => .error .undef
       | some l => .ok (.int l) := by
   unfold memArrayLen objKind
   cases μ.getObj n with
@@ -798,7 +798,7 @@ theorem dfltSel_sim (σ : State) {τ : State} {T : Ty} {n : Nat}
 def resolveR (h : List (Nat × MObj)) (r : Nat) (p : List Seg) : Res Nat :=
   match resolveFrom h r p with
   | some n => .ok n
-  | none => .error .stuck
+  | none => .error .undef
 
 theorem resolveR_ok {h : List (Nat × MObj)} {r n : Nat} {p : List Seg} :
     resolveR h r p = .ok n ↔ resolveFrom h r p = some n := by

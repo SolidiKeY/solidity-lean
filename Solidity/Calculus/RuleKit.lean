@@ -205,9 +205,9 @@ condition assumed in each: `se = true` and `se = false`), a goal and a check
 KeY's "Holds" and "Violated" branches), or the whole
 modality closed (`true`, `false`), or a goal per way an external call may
 end (`try`).
-A condition can be stuck (a local read
+A condition can be `undef` (a local read
 before it is bound), so a branch's two conditions need not cover every
-state: a box goal is true of a stuck run anyway, and a diamond goal owes
+state: a box goal is true of an `undef` run anyway, and a diamond goal owes
 that one of them holds (`Proves.split`). -/
 inductive Premise (C : Contract) where
   | update (U : Upd C)

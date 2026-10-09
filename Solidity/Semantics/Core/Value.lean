@@ -10,8 +10,8 @@ type's range.  Arithmetic stays on `Int`, so the kernel never unfolds
 
 `PrimTy.erase` is the value the untyped interpreter holds for it
 (`Semantics.Value`), and `PrimTy.ofValue?` reads one back, where the untyped
-value has the type.  Until the typed interpreter replaces `Stmt.run` (M4),
-these are the bridge.
+value has the type: what a typed step's erasure reads
+(`Semantics/Core/TypedStepErase.lean`).
 -/
 
 namespace Solidity
@@ -118,7 +118,7 @@ namespace Core
 /-- An `Option` as a run's result: `none` is a revert, the one way a typed
 operation fails.  A typed operation's agreement with its untyped namesake
 reads `untyped (erase x) = toRes erase (typed x)`, so the untyped one is
-never stuck there. -/
+never `undef` there. -/
 def toRes {α β : Type} (f : α → β) : Option α → Semantics.Res β
   | some a => .ok (f a)
   | none => .error .revert

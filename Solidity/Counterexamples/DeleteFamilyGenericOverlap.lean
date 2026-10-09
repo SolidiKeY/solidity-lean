@@ -50,7 +50,7 @@ sort the outer read used — and the copy taclets read `find<[StValue]>`.
 On `delete s.p; x = s.p;` (struct-typed `p`, root target `x`,
 `storageRootWriteCopySource`) the unfolding reaches
 `delValue<[StValue]>(selectSt<[StValue]>(node, p))`, and `StValue` is
-neither `Struct` nor below `Prim` (checked below): the term is stuck,
+neither `Struct` nor below `Prim` (checked below): no rule rewrites the term,
 and no later cast can revive it (`findStValueCast` matches
 `find<[StValue]>` under a cast, not a bare `delValue<[StValue]>` inside
 a `save`). Delete-then-copy therefore fails to symbolically execute.

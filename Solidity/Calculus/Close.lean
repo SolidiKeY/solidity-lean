@@ -39,10 +39,11 @@ hypothesis: nothing evaluated is trusted, the kernel checks the proof.
 
 What does not close, and why:
 
-* a write under the diamond: `⊨` quantifies over every state, including
-  those without `alice`, where `alice.age = 1;` is stuck, so
-  `⟨ alice.age = 1; ⟩ true` is not valid.  Write the box, or put the
-  well-formedness of the storage in the premise;
+* a write under the diamond: the closer reads the write's update on the
+  erasure's untyped term model, where `find`/`save` at `alice` is not known
+  to be defined, so `⟨ alice.age = 1; ⟩ true` stays open at
+  `{ storage := save(storage, alice.age, 1) } true`.  Write the box, or put
+  the well-formedness of the storage in the premise;
 * two symbolic keys the formula does not tell apart: there is no case
   split on `k = j`, so `[ balances[k] = 5; balances[j] = 6; ] balances[k] == 5`
   stays open (it is false at `k = j`);
@@ -311,7 +312,7 @@ theorem asValue_eq_ok {v : SVal} {p : PrimVal} : v.asValue = .ok p ↔ v = .prim
 theorem mval_asValue_prim (p : PrimVal) : (MVal.prim p).asValue = .ok p := by
   cases p <;> rfl
 /-- A memory slot holding a reference reads no value. -/
-theorem mval_asValue_ref (id : Nat) : (MVal.ref id).asValue = .error .stuck := rfl
+theorem mval_asValue_ref (id : Nat) : (MVal.ref id).asValue = .error .undef := rfl
 /-- A memory slot holding the object `3` references it. -/
 theorem mval_asRef_ref (id : Nat) : (MVal.ref id).asRef = .ok id := rfl
 /-- `delete alice.age;` leaves `0`. -/
@@ -372,7 +373,7 @@ theorem evalBinop_or (p : PrimTy) (lv : Value) (b : Res Value) :
 /-- `c ? a : b` on a condition that is `true`, `false`, or not a boolean. -/
 theorem pickBranch_eq (cv : Value) (t e : Res Value) :
     pickBranch cv t e =
-      if cv = .bool true then t else if cv = .bool false then e else .error .stuck := by
+      if cv = .bool true then t else if cv = .bool false then e else .error .undef := by
   cases cv with
   | int _ => rfl
   | bool b => cases b <;> rfl
@@ -738,7 +739,7 @@ which the closer names as it names `σ.getEnv x` of a local `σ` does not bind
 def anonRead (o : Option Binding) : Res Binding :=
   match o with
   | some v => .ok v
-  | none => .error .stuck
+  | none => .error .undef
 
 /-- `{anon(i)} φ`: `φ` whatever `i` holds. -/
 theorem holds_anon (xs : List Var) (φ : NFml C) :

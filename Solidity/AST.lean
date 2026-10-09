@@ -201,7 +201,7 @@ port and noted at their arm. -/
 The trailing catch-all is forced — the key is a `Name`, so the match
 cannot be closed — and it is the one silent default left in this file: an
 unknown struct name has zero fields, so `defaultForTy` builds an empty
-node for it instead of being stuck.  Harmless while the contract corpus
+node for it instead of being `undef`.  Harmless while the contract corpus
 is closed; making it loud would mean an `Option` result threaded through
 `defaultForTy`, `tyHasMapping`, `Reachability` and `WellFormedConsumers`. -/
 def structDef : Name -> List (Name × Ty)
@@ -348,7 +348,7 @@ mutual
 /-- Does a type contain a (nested) mapping? solc ≥ 0.7 refuses to
 compile a storage-to-storage assignment of such a type ("Types in
 storage containing (nested) mappings cannot be assigned to"), so the
-interpreter is stuck on one — the program does not exist. -/
+elaborator refuses one — the program does not exist. -/
 def tyHasMapping : Ty -> Bool
   | Ty.prim _ => false
   | Ty.ref (RefTy.mapping _ _) => true

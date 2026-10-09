@@ -803,7 +803,7 @@ locals and balances representing the final state and ledger — or both
 revert (a panic, a failed `assert`, is solc's revert with `Panic(0x01)`
 data, and only code with an `assert` panics), or, in code that pays, the
 world refuses a payment and the machine alone reverts.  There is no fourth
-case: on the fragment the typed run neither diverges nor is stuck.
+case: on the fragment the typed run neither diverges nor is exhausted.
 
 Example: from a state where `total = 3`,
 ```solidity
