@@ -248,6 +248,16 @@ info: fun φ =>
 #check fun (φ : Post StandardExample []) =>
   dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
 
+/-- The same line under the diamond, `⟨ revert(); ⟩` (a regression: its
+postcondition under the capture once printed ill-typed), a chain's line
+like the others. -/
+example (φ : Post StandardExample []) :
+    dl!{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
+    ~[applyOnRigid]~> dl!{ (false ≐ true → { se1 := false } φ) ∧
+      (false ≐ false → { se1 := false } ⟨ revert(); ⟩ φ) }
+    ~[concrete]~> dl!{ { se1 := false } ⟨ revert(); ⟩ φ } := by
+  sol_chain
+
 /-- `sequentialToParallel` over a storage write with the revert still to
 run (`FmlRw.stateMerge`, `Upd.mergeSt?`): the read after the write reads
 the written storage. -/
