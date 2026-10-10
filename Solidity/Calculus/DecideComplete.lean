@@ -38,7 +38,7 @@ them, and nothing is lost.
   on the shape of every location with a read below it, and closes what is
   left by `omega` or `grind`.
 * **On a scoped leaf** (M6c) it reduces the leaf itself, its locals by
-  position (`Valid.of_reduceS`, `Calculus/DecideScoped.lean`), and reads
+  position (`Valid.of_reduceS`, `Calculus/DecideTyped.lean`), and reads
   the leaf's parameters, the
   reduction's leading quantifiers, at their types (`Typed`,
   `LFml.valid_alls_of_cons`): a `uint` parameter is an integer in range

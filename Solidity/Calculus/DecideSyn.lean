@@ -38,7 +38,8 @@ quantified key), or reason about arithmetic beyond the cancellation —
 and `sol_decide` falls back to the full procedure where it says no.
 
 On a scoped leaf (M6c) `sol_decide` reduces the leaf by position
-(`Valid.of_reduceS`, `Calculus/DecideScoped.lean`); the leaf's parameters
+(`Fml.reduceS`, `Calculus/DecideScoped.lean`; sound by `Valid.of_reduceS`,
+`Calculus/DecideTyped.lean`); the leaf's parameters
 stay its leading quantifiers, and
 `syn` starts with their locals known to return (`LFml.syn_valid_alls`).
 -/
@@ -1006,7 +1007,8 @@ theorem LFml.syn_valid (φ : LFml) (h : φ.syn [] [] = true) : ∀ σ, φ.holds 
 /-! ## A scoped leaf (M6c)
 
 `sol_decide` takes the scoped leaf `Valid φ` (`φ : Fml C []`) itself and
-reduces it by position (`Valid.of_reduceS`, `Calculus/DecideScoped.lean`).
+reduces it by position (`Fml.reduceS`, `Calculus/DecideScoped.lean`; sound by `Valid.of_reduceS`,
+`Calculus/DecideTyped.lean`).
 The leaf's parameters, its leading `∀ p x`, stay quantifiers: the context
 the leaf's body is read in, one local per position, each of its type.
 Reduced, they are the reduction's leading `LFml.all`s (`LFml.alls`), and their

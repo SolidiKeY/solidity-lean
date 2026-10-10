@@ -9,7 +9,7 @@ import Solidity.Calculus.ProvesSound
 `Fml.toLS` (`Calculus/DecideScoped.lean`) pushes a scoped leaf's updates in
 by position.  Its soundness is proved here on the leaf itself, over the
 typed state and its run (`holds`, `Calculus/Logic.lean`), not through the
-leaf's erasure (decision 83's rest): `Fml.toLS_sound` follows the leaf's
+leaf's erasure (decision 83's rest): `Fml.toLSM_sound` follows the leaf's
 binders, updates and connectives as `holds` reads them, and
 `Valid.of_reduceS` puts it together with the elimination (`LFml.elim_holds`).
 
