@@ -42,8 +42,9 @@ open (`Fml.RwBy`).
 
 **Past the program** a merge or rewrite with a scoped form goes on on
 the scoped line where it gives the line written (decision 93, revisited at
-W7: a line whose spine a hidden binder `bind` interrupts, a local the
-program declared, has none of the merges).  Else a rewrite arrow
+W7; `sol_chain.scopedPast`): not `simplifyUpdate`, whose scoped form keeps
+the hidden binders of the locals it drops, and no merge where a hidden
+binder, a local the program declared, sits between two updates.  Else a rewrite arrow
 (`~[sequentialToParallel]~>`, `~[findOnSave]~>`, `~=>`) goes on from the
 erasure of the line before it, as does one to a line written `_`
 (`Fml.ViaE`): `Update.lean`'s line, its postcondition `φ : Post C Γ` read
@@ -155,6 +156,15 @@ def Fml.rwResultsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ)
 /-- `⟨[ s; … } ω ]⟩ φ`: a modality `m` that is a variable, its program
 running into the end of a block (`Delab`'s `core_item`). -/
 syntax:max "⟨" "[ " (sol_stmt "; ")* "} " core_item* "]" "⟩ " dl_fml:50 : dl_fml
+
+/-- Past the program, a chain's merge or rewrite runs on the scoped line
+where it gives the line written (decision 93, revisited); `false` puts every
+link past the program on the erasure, as `sol_chain?` writes a chain that
+must end in `Fml.LeadsE`'s shape. -/
+register_option sol_chain.scopedPast : Bool := {
+  defValue := true
+  descr := "past the program, sol_chain's merges and rewrites run on the scoped line where they fit"
+}
 
 namespace Chain
 
@@ -1213,7 +1223,8 @@ def openRwNames : List Lean.Name :=
 /-- One rewrite of the line `L` while its program is open (a merge of its
 spine, or `openRwNames`), each with the line it leaves, that line's splice
 and erasures, its link (`Link.merge`, `Link.rw`), and the proof of
-`L ~~> it`, built when asked; with `closed`, past the program too. -/
+`L ~~> it`, built when asked; with `closed`, past the program too, but for
+`simplifyUpdate`. -/
 def openRwSteps (L : Expr) (closed := false) :
     TermElabM (List (Expr × Splice × Array Expr × Expr × TermElabM Expr)) := do
   let run ← runChain L
@@ -1229,6 +1240,7 @@ def openRwSteps (L : Expr) (closed := false) :
       mkAppM ``Fml.mergeRun_leads #[toExpr c.k, toExpr c.n, L, h]
     out := out ++ [(c.fml, sp, c.erased, mkApp3 (mkConst ``Link.merge) C (toExpr c.k) (toExpr c.n), pf)]
   for n in openRwNames do
+    if !run.isOpen && n == `simplifyUpdate then continue
     let (sp, cs, _) ← scopedRwCands L (.table n) run.erased[0]!
     for c in cs do
       let pf : TermElabM Expr := do
@@ -1294,7 +1306,14 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
     -- past it where one gives the line written (decision 93, revisited at
     -- W7); else on the erasure
     let isOpen ← if legacy.isNone && rw?.isSome then (·.isOpen) <$> runChain cur else pure false
-    let onScoped := legacy.isNone && rw?.isSome && (isOpen || w matches .text ..)
+    -- past the program `simplifyUpdate` stays on the erasure: its scoped form
+    -- keeps the hidden binders of the locals it drops (decision 87's unread
+    -- locals are not ported), which the closer does not read past
+    let pastOk := match rw? with
+      | some (some (_, .table n)) => n != `simplifyUpdate
+      | _ => true
+    let onScoped := legacy.isNone && rw?.isSome &&
+      (isOpen || (pastOk && w matches .text .. && sol_chain.scopedPast.get (← getOptions)))
     -- past the program a written line the scoped reading refuses is the erasure's
     let fitsS (fits : Splice → Expr → Array Expr → TermElabM Bool) (sp : Splice) (B : Expr)
         (er : Array Expr) : TermElabM Bool := do

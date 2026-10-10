@@ -26,8 +26,9 @@ locals, its fresh ones dropped.  While the program is still open,
 update, `applyOnRigid`, `concrete` and `simplifyUpdate` rewrite the
 scoped line (`Calculus/RewriteScoped.lean`): §3‴'s branches keep their
 reverting program.  Past the program a merge or rewrite with a scoped form
-runs on the scoped line where it gives the line written (§2's merge and
-`simplifyUpdate`), the others on the erasure.
+runs on the scoped line where it gives the line written (§2's merge), the
+others on the erasure (`simplifyUpdate` among them: its scoped form keeps
+the hidden binders of the locals it drops).
 
 * §1 — the headline as the calculus draws it (`Chains.Storage.BalanceWrite.chain`),
   for any modality `m` and postcondition `φ`, down to its last line, and on to
