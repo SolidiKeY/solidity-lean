@@ -355,8 +355,10 @@ elab_rules : tactic
         pure #["exact Solidity.Fml.Leads.self _"]
       else do
         let ls ← chainText gen A
-        let head := if !gen.rewrites.isEmpty then
-            "exact Solidity.Fml.ViaE.leads (set_option sol_chain.scopedPast false in show "
+        -- `Fml.LeadsE`'s chain keeps every link past the program on the erasure
+        let past := if sol_chain.scopedPast.get (← getOptions) then
+          "set_option sol_chain.scopedPast false in " else ""
+        let head := if !gen.rewrites.isEmpty then s!"exact Solidity.Fml.ViaE.leads ({past}show "
           else if links.size == 1 then "exact Solidity.Fml.SoundRel.leads (show "
           else "exact Solidity.Fml.Via.leads (show "
         let body := #[head ++ ls[0]!] ++ (ls.extract 1 ls.size).map ("    " ++ ·)

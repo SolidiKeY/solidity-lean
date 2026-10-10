@@ -163,11 +163,10 @@ example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
 
 The headline's trace (`Chains.Storage.BalanceWrite.chain`, one chain term, for every modality
 `m` and postcondition `φ`) proves its first line from its last.  Here under the box, where the
-write is valid, at the postcondition the statement is written for: past the program the merge
-runs on the scoped line (decision 93, revisited), and `simplifyUpdate` goes on on the erasure
-(`Fml.ViaE`), its last scoped line closed by `Proves.close` (`Fml.ViaE.valid_close`), the
-erasure's last line by `sol_close`.  The chain keeps its captures, which `sol_close` does not
-drop: `simplifyUpdate` drops them first. -/
+write is valid, at the postcondition the statement is written for: past the program the chain
+goes on on the erasure (`Fml.ViaE`), its last scoped line closed by `Proves.close`
+(`Fml.ViaE.valid_close`), the erasure's last line by `sol_close`.  The chain keeps its
+captures, which `sol_close` does not drop: `simplifyUpdate` drops them first. -/
 
 theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
   refine (show dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
@@ -624,13 +623,11 @@ theorem composed :
 #last_line composed
 
 /-! `sol_chain?` writes a `~~>` out as the chain it is, and `sol_rws?` names the rewrites
-from one line to another (`Calculus/ChainGen.lean`).  A `~~>` past the program is
-`Fml.LeadsE`, on the erasure from the derivation's last line, so the chain written for it
-keeps every link past the program there (`sol_chain.scopedPast false`). -/
+from one line to another (`Calculus/ChainGen.lean`). -/
 
 /--
 info: Try this:
-  exact Solidity.Fml.ViaE.leads (set_option sol_chain.scopedPast false in show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+  exact Solidity.Fml.ViaE.leads (show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
         ~*> cdl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
         ~[sequentialToParallel]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
         ~[findOnSave]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } by sol_chain)
