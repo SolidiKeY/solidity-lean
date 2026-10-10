@@ -69,7 +69,8 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W4 | done 2026-10-09 | prep (`theorems`, `contracts`, `moves`), then `sem-del` (the untyped run), `calc-del` (the untyped calculus), `modal` (the modality off `Update.lean`'s formulas), `reader-dry`; W4b: `run40` (decisions 40, 50), `rules36` (36, 53), `printers` (item 14) |
 | W5 | done 2026-10-09 | the rename (`scripts/w5-rename.sh`, since deleted), its pins, review fixes, the reader ported |
 | W6 | done 2026-10-09 | lanes `w6-canon` (decision 75 implemented, 77 recorded false), `w6-step` (76: `Stmt.step` total), `w6-closer` (M6c 6a, 6b, and 6c's lanes `w6c-upd`, `w6c-rw`, `w6c-chain`); merged in that order into `intrinsic`; the final gates ("Gates") |
-| W7+ | **left** | the rest of M6c; the lead's calls on proposals 78–94 |
+| W7 `w7-route` | done 2026-10-11 | the `⊨` route on the `⊢` walk; only an `assert` panics, typed; decision 77's conditional form; bare `simp`s (decisions 95–98) |
+| W7+ | **left** | the rest of M6c; the lead's calls on proposals 95–98 |
 
 ## Checks at the end (W6)
 
@@ -1163,6 +1164,56 @@ scoped, decision 49's four examples restored, the `⊨` route on the `⊢`
 walk; then `NFml`, `Fml.erase` and `Semantics/Erased.lean` go wherever
 nothing reads them, and what stays is recorded as decision 7's IR.
 
+95. *Proposed (W7 `w7-route`; renumber at the merge), the lead's call:*
+    `sol_prove` on `⊨ φ` is `Proves.valid` at `.all` and then the `⊢`
+    walk (`evalSolProveValid`, `Calculus/ProvesDerive.lean`), decision 89
+    extended: its leaves are the walk's sequents `H ⊢ ψ`, closed as a `⊢`
+    leaf is (`refine NFml.Proves.close_dropWt ?_`, read as
+    `core_leaf_close_wt` there).  The erased route (`Derive.proves`,
+    `Derive.residueOf`, `Valid.of_proves`, `Valid.of_residue`) is deleted.
+    Pins moved, each re-derived: `Examples/Tactics/LoopsImport`'s three
+    invariant obligations leave one sequent per branch where the erased
+    residue left one formula, so their leaf script runs under `all_goals`;
+    `Examples/Tactics/Constructors`' `miniProblem` reads its parameter `a`
+    typed, which the walk's first line strips (`Seq.leafErase`, decision
+    28), so its first line is the walk's own `Proves.close` on the whole
+    erasure (`refine Proves.close [] rfl List.nodup_nil ?_`, what
+    `sol_derive?` writes); the residue pins of `Examples/Tactics/Dangling`
+    and `Examples/ProofTree` (`rounds2`/`4`/`6`, `pushes22`, `writes4`/`6`,
+    `deletes10`) read the walk's leaves (`Seq.residue`, `Seq.leafErase`)
+    where they read the erased residue, and print the same.
+96. *Proposed (W7 `w7-route`), the lead's call:* "only an `assert`
+    panics" is `Prog.run_noPanic` over the typed run
+    (`Semantics/NoPanic.lean`: `P.asserts = false → (P.run σ).NoPanic`,
+    `Prog.run_ne_panic`), by the run's recursor and one lemma per `TRun`
+    step; `Stmt.asserts`/`Prog.asserts` moved there from `Evm/Stmt.lean`
+    (same definitions, now `Solidity.Stmt.asserts`), and the module's
+    `MSrc.mvalT_noPanic` is private, since `Calculus/SoundMem.lean` states
+    the same lemma above it.
+97. *Proposed (W7 `w7-route`), the lead's call:* decision 77's
+    conditional form is `reachable_fits` (`Typing/Fits.lean`) under
+    `FixedFits C`: every fixed-size array type a path reaches from a root
+    has at most `2^256` elements (stated with `tyAtSegs`, so no new
+    recursion over `structDef`; `Huge` fails it, `huge_not_fixedFits`).
+    The third run invariant `fitsInv` is on the erasure as `canonInv` and
+    `tightInv` are, but carries only what the types do not give
+    (`SVal.bnd`: live and recycled slots of a dynamic array below
+    `2^256`, every mapping key in its key type's range; aliases bound
+    along keys in range, `LTy.KeysFit`), and its storage leaves read the
+    typed step (`TRun.*`) through `Semantics/StorageErase.lean`, so the
+    reference's keys come from `PrimTy.key` of a typed index
+    (`Loc.resolveT_keysFit`) and a push's bound from `Storage.full`
+    (`Storage.len_of_full`); words in range and fixed lengths come from the
+    typed state at the end (`SVal.erase_fits`).  `reachable_iff_fits`
+    states the characterisation with no premise on the storage;
+    `reachable_iff` keeps its `FitsStorage` form for a contract that fails
+    `FixedFits`.
+98. *Proposed (W7 `w7-route`), the lead's call:* `no_hidden_invariant`'s
+    step premise reads the typed state: `CanonStorage C σ.erase.storage →
+    prog.run σ = .ok o → P σ.erase.storage → P o.st.erase.storage`, with
+    no `RunWT` or heap `Canon` on the erasure (both hold of every typed
+    state, `State.erase_wt`, `State.erase_canonHeap`).
+
 ## M6c
 
 The closer on `Fml C Γ`, in W6's lanes (each with its gate table and
@@ -1201,6 +1252,39 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   (`Calculus/RewriteScoped.lean`, `Examples/ChainRewrites` §3⁗), so a step
   and a rewrite are links of one chain again; past the program the chains
   stay on `NFml` (`Fml.ViaE`; decisions 92–94).
+- **W7 `w7-route`** (2026-10-11, decisions 95–98): the `⊨` route runs
+  the `⊢` walk, its leaves scoped sequents (`evalSolProveValid`; the
+  erased route deleted, four pin files re-derived, decision 95); "only an
+  `assert` panics" over the typed run (`Semantics/NoPanic.lean`,
+  `Prog.run_noPanic`); decision 77's conditional form
+  (`Typing/Fits.lean`: `reachable_fits` under `FixedFits`,
+  `reachable_iff_fits`, the third run invariant `fitsInv`);
+  `no_hidden_invariant`'s step on the typed state; the bare `simp`s of
+  `Semantics/Properties.lean`, `Typing/Storage.lean`,
+  `Typing/StoragePreservation.lean` and `Typing/Constructibility.lean`
+  replaced by the `simp only` lists `simp?` printed (`Semantics/Storage.lean`
+  had none).
+  **Gates** (2026-10-11, the W6 method: end of work, one fresh worker at
+  a time, load 1.5–2.7, the cgroup at 9–16 GB; one run each, two for the
+  rows furthest from 1.0, the minimum kept; ratio to the W6 baseline):
+  `Derived1` 7.80 s (1.07), `Derived2` 8.91 (1.03), `Derived3` 13.32
+  (1.02), `Derived4` 17.92 (1.02), `Derived5` 7.27 (1.05; runs 7.64,
+  7.27), `Derived6` 12.26 (1.07; 12.68, 12.26), `Derived7` 54.09 (1.07),
+  `Derived8` 27.45 (1.04; 29.00, 27.45), `Derived9` 7.59 (1.06),
+  `Derived10` 11.61 (1.05), `Derived11` 3.35 (1.06), `Derived12` 13.66
+  (1.04), `Derived13` 6.61 (1.04), `Derived14` 11.34 (1.04); the sum
+  203.2 s (1.05; gate 232.3).  `Examples/Tactics/Decide` 35.87 s (0.73;
+  W6 final 34.51), `Examples/ProofTree` 10.34 (1.05),
+  `Examples/Chains/Storage` 7.75 (1.04), `Examples/ChainRewrites` 7.51
+  (1.18 of the baseline, 1.03 of W6's final 7.30, which §3⁗ set; gate
+  7.63).  Controls this lane does not reach, the same session:
+  `Examples/Benchmark/Syntax` 1.46 s (1.04) and `Solkey/TestSuite` 11.18
+  (1.03), so the machine ran 3–4% slower than at W6; the Derived files'
+  path (`sol_prove` on `⊢`) is unchanged by the lane (`evalSolProveValid`
+  answers only a `Valid` goal).  Dropped: two runs killed when another
+  session took the cgroup past 32 GiB (`Derived6`, `Derived10`), and two
+  control runs under another lane's build (load 4.9–20).  Every row
+  within 1.2×: passed.
 - **W6 lanes beside it**: `w6-canon` tied the canonicity invariant to the
   typed state (decision 75) and found 77 false (`huge_reachable_not_fits`);
   `w6-step` made `Stmt.step` total (decision 76, two replay rows
@@ -1217,9 +1301,6 @@ What reads them:
   `Derive.onErased`, still erase the leaf);
 - *chains past the program*: `ChainRewrites`, `ChainBranches`,
   `RewriteChains`, `RewriteChainGen`, `ChainGen`, `LastLine`;
-- *the `⊨` route*: `Derive.lean`'s `sol_prove` on `Valid φ` has no
-  sequent, so its leaves are the erasure of the strategy's output
-  (decision 89);
 - *today's notation and sequents*: `Update.lean` (where `NFml` is
   defined), `RuleSyntax`'s `dl{}`/`⊨`, `SurfaceNotation`, `SurfaceSpec`,
   `Literals`, `TermTaclets` and `CloseTests`, `Rewrite.lean`'s tactics;
@@ -1245,25 +1326,12 @@ baseline; a module that fails stays on `NFml` for good, decision 7):
   rewrite links; `lawUpd` under a modality variable.
 - Restore decision 49's four chain examples (`Examples/ChainRewrites`
   §Literals, still on `ψ`).
-- The `⊨` route onto the `⊢` walk (decision 89; it changes the leaves of
-  the `⊨` examples).
 - Then delete `NFml`, `Fml.erase` and `Semantics/Erased.lean`.
 
 **Besides M6c:**
-- "Only an `assert` panics" over the typed run: master's
-  `Prog.run_noPanic` (`Semantics/NoPanic`, under `mayPanic = false`) went
-  with the untyped run at W4 `sem-del` and has no typed counterpart; it
-  holds today only on the EVM fragment (`compiler_correct`).  To restate:
-  `Stmt.asserts` into `Semantics/`, and `P.asserts = false → P.run σ ≠
-  .error .panic` by the recursor, as `Ends.lean` does for `TRes.Ends`, from
-  `Val.evalT_noPanic` and a lemma per write.
-- The lead's calls on proposals 78–94; the user's on decision 11 (whether
+- The lead's calls on proposals 95–98; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").
-- Decision 77's conditional form (`Reachable → FitsStorage` given every
-  fixed size at most `2^256`): a third run invariant, about 20 leaves
-  mirroring `tight_*`.  `no_hidden_invariant`'s `hstep` premise still reads
-  `RunWT` and `Canon` on the erasure.
 - At the merge into `master`: the SolKey reader's require back to
   `../../../solidity-lean` (side-projects `lean/solkey`, branch
   `intrinsic`) and that branch merged.
