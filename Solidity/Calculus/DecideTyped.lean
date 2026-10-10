@@ -22,8 +22,8 @@ the leaf's context counted along its binders) and otherwise reads as `σ`.
 The symbols are untyped (decision 83: a scoped term reads its symbols on
 the state's global part), so a term's reading goes through `τu` and the
 reduction's lemmas over the untyped interpreter (`Term.toL_eval`, …); a
-position no update bound (a hidden binder at a memory type before its
-update binds it) is in `τ` only, and the fragment never reads it
+position no update bound (a hidden binder, at any type, bound to nothing
+until an update binds it) is in `τ` only, and the fragment never reads it
 (`Tm.inLS`).
 
 The binders: a quantifier is the reduction's `LFml.all` over its key, and
@@ -508,7 +508,8 @@ theorem AgreeU.push (h : AgreeU ρ τ τu) (a : Act) (ha : a = .keep ∨ ∃ b, 
     · rfl
     · simp only [SymS.push, lookupBy, hy, ↓reduceIte]
 
-/-- A local pushed bound to nothing: a hidden binder at a memory type. -/
+/-- A local pushed bound to nothing: a hidden binder (at any type), bound
+to nothing until an update binds it. -/
 theorem RelU.pushFree (h : RelU σ ρ τ τu) {t : LTy} (v : t.Denote C) :
     RelU σ (ρ.push .keep) (τ.push v) τu := by
   obtain ⟨hk, he⟩ := h.toAgreeU.key_fresh

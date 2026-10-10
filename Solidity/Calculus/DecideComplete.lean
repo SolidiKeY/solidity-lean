@@ -1376,11 +1376,13 @@ elab "sol_decide_body" : tactic => withMainContext do
   replaceMainGoal [g']
 
 /-- The closer on a scoped leaf's reduction (`Fml.reduceS`, decision 81):
-within the bound `NFml.Derive.elimSize` keeps for the erased one, and
+within the bound `NFml.Derive.elimSize` (`Calculus/Closer.lean`) the erased
+route keeps too, and
 with no layout, since a typed state's storage is typed but not canonical
 (`LayoutOk` asks `SVal.canonB` of each root; `SVal.map`'s default is any
 value of its type). -/
-def LFml.closeS (φ : LFml) : Bool := (φ.fits 8000).isSome && LFml.close [] φ
+def LFml.closeS (φ : LFml) : Bool :=
+  (φ.fits NFml.Derive.elimSize).isSome && LFml.close [] φ
 
 /-- **The closer, on a scoped leaf's reduction**: what it accepts holds in
 every state. -/

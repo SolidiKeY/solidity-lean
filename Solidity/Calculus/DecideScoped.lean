@@ -662,8 +662,11 @@ def SymS.act (ρ : SymS) (n? : Option Nat) : Act → SymS
 def SymS.key (ρ : SymS) : Var := slotVar ρ.next
 
 /-- A local pushed under the next key: bound by the act, or to nothing (a
-hidden binder at a type other than a value's, or a declaration outside the
-fragment), which the fragment then never reads. -/
+hidden binder, at any type, bound to nothing until an update binds it, or a
+declaration outside the fragment), which the fragment then never reads.  A
+value-typed hidden local read before its update is therefore outside the
+fragment (`Tm.inLS`), where the erased route read it at its name's last
+binding. -/
 def SymS.push (ρ : SymS) : Act → SymS
   | .bind b => ⟨(ρ.key, some b) :: ρ.loc, { ρ.sym with env := (ρ.key, b) :: ρ.sym.env }, ρ.next + 1⟩
   | _ => ⟨(ρ.key, lookupBy ρ.key ρ.sym.env) :: ρ.loc, ρ.sym, ρ.next + 1⟩

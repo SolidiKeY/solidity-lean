@@ -929,7 +929,10 @@ the closer port.
     route and `sol_prove`'s leaves, until `NFml` goes).  The scoped
     reduction reads no name: every binder's local is held under its
     position's key (`slotVar k`), a quantifier's local is the atom `pos k`,
-    and a hidden binder pushes a position bound to nothing.  The closer
+    and a hidden binder (at any type) pushes a position bound to nothing
+    until an update binds it: a value-typed hidden local read before its
+    update is outside the fragment (`Tm.inLS`), where the erased route read
+    it at its name's last binding, so the fragment is narrower there.  The closer
     reads an atom at its key (`Atom.key`, `Facts.vars`), so it runs
     unchanged on both.  Printed as `pos(k)` (`key{}`) or the key
     (`#wp`'s `LTerm.fmt`): the binders' names are not carried (proposal
@@ -967,6 +970,10 @@ the closer port.
     layout), between the syntactic closing and the constraints; the
     parameters are bound at their types by the reduction's leading
     `LFml.all`s (`Facts.bind`).  No layout: proposal w7-closer-96.
+    Its bound is `NFml.Derive.elimSize`, moved to `Calculus/Closer.lean`
+    so both routes read one constant.  Pinned in `Examples/Tactics/Decide`:
+    `closerOnReduction` (a leaf `syn` does not close and the closer does)
+    and `closerFallsThrough` (one past both, closed by the constraints).
 82. *Proposed (M6c 6a part 2), the lead's call:* the scoped
     `sol_close_unwrap` (`Calculus/Derive.lean`, the first step of
     `sol_close`, `sol_close_mt`, `sol_spec_close`) erases the leaf with

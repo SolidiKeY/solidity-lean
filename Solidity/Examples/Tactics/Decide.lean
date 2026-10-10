@@ -12,13 +12,17 @@ on whatever facts the formula states; it cannot split on two keys being
 equal.  `sol_decide` (`Calculus/Decide.lean`) reduces the leaf, its
 locals and its binders' locals by position (`Fml.reduceS`,
 `Calculus/DecideScoped.lean`), into a statement about the initial state in
-which every read of a write is a case tree over key equalities, sound over
-the typed state (`Valid.of_reduceS`, `Calculus/DecideTyped.lean`); then
-rewrites by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
-into a statement about free reads under the constraints a storage puts on
-them, and closes that.  Nothing is lost by those two steps, so a leaf it
-does not close is either not valid over untyped states, outside the
-fragment, or beyond the final `omega`/`grind`.
+which every read of a write is a case tree over key equalities.  That
+reduction is sound over the typed state (`Valid.of_reduceS`,
+`Calculus/DecideTyped.lean`), not an equivalence.  The second step, into a
+statement about free reads under the constraints a storage puts on them,
+is one (`NFml.valid_iff_cons`, `Calculus/DecideComplete.lean`), and the
+result is closed.  Only the erased route's reduction is exact
+(`NFml.valid_iff_reduce`), so on a scoped leaf a goal it does not close may
+still be valid: besides being outside the fragment or beyond the final
+`omega`/`grind`, it may hold only because of what the one-way reduction
+drops (decision 83, and the note on the scoped route in
+`Calculus/DecideComplete.lean`).
 
 Every goal is stated with `⊨`, which (under `open scoped Scoped`) ranges
 over typed states.  `sol_decide` reads the leaf's parameters at their
@@ -255,6 +259,35 @@ theorem parameterReturns : ⊨ dl!{ ⟨ uint x = a; ⟩ x == a } := by
 theorem parameterInRange : ⊨ dl!{ a < 10 → ⟨ uint y = a + 1; ⟩ y == a + 1 } := by
   sol_symex
   sol_decide
+
+/-! ## The closer on the scoped reduction
+
+`sol_decide` tries, on the reduction (`Valid.of_reduceS`, then
+`sol_reduce`), `syn` with the parameters known, then the closer
+(`sol_decide_close`, `LFml.closeS`: decision 81), then the constraints with
+the parameters typed (`sol_decide_typed`).  The steps below are the ones
+`sol_decide` takes, written out. -/
+
+/-- `⟨ uint x = a; ⟩ x >= 0` — `syn` decides equalities only; the order a
+`uint` parameter's range gives is the closer's. -/
+theorem closerOnReduction : ⊨ dl!{ ⟨ uint x = a; ⟩ x >= 0 } := by
+  sol_symex
+  refine Valid.of_reduceS (by decide +kernel) ?_
+  sol_reduce
+  fail_if_success sol_decide_syn_alls
+  sol_decide_close
+
+/-- `balances[a] = b; balances[b] = a;` (`keyThroughKey`) — neither `syn`
+nor the closer reads `balances[balances[a]]` through both writes: the step
+after them, the constraints, does. -/
+theorem closerFallsThrough :
+    ⊨ dl!{ [ balances[a] = b; balances[b] = a; ] balances[balances[a]] == a } := by
+  sol_symex
+  refine Valid.of_reduceS (by decide +kernel) ?_
+  sol_reduce
+  fail_if_success sol_decide_syn_alls
+  fail_if_success sol_decide_close
+  sol_decide_typed
 
 /-! ## Pushes, pops and copies
 

@@ -1149,6 +1149,10 @@ info: key!{ binop(add, int, delValue(x), address(this).balance) && msg.value >= 
 /-- info: key!{ save(storage, "storage", se1) } : LStor -/
 #guard_msgs in #check LStor.save .init (.root "storage") (.var (.name (.fresh "se" 1)))
 
+-- a position of a scoped leaf's context
+/-- info: key!{ pos(2) + 1 } : LTerm -/
+#guard_msgs in #check (LTerm.binop .add .uint (.var (.pos 2)) (.lit (.int 1)) : LTerm)
+
 -- over variables: a literal name is a string
 /-- info: fun s q w => key{ find(save(s, q, w), q."age") } : LStor → LPath → LTerm → LTerm -/
 #guard_msgs in #check fun (s : LStor) (q : LPath) (w : LTerm) => key{ find(save(s, q, w), q."age") }

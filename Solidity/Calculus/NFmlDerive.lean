@@ -532,22 +532,6 @@ def topWt : List (Hyp C) → List (Name × Ty)
   | .all _ _ :: Γ => topWt Γ
   | .upd _ _ :: _ | .havoc :: _ | .anon _ :: _ => []
 
-/-- The most nodes the closer takes in a leaf's formula with its updates
-pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
-of the one before it appears twice in the next, so this tree doubles with
-each such write.  It is the cheap first test: computing the reduction of a
-leaf far past it would itself be slow. -/
-def closeSize : Nat := 2000
-
-/-- The most nodes the closer takes in the reduction (`LFml.elim`), which
-is what it walks, counted as a tree.  The reduction does not grow with the
-tree: a read below a `delete` carries the read before it two or three
-times, so `n` deletes of `ledgerUses[aᵢ]` and a read of
-`ledgerUses[k].ledger.balances[m]` give a tree of 1171 nodes at `n = 10`
-but a reduction of 5624250 (×3 per delete).  The largest reduction
-`synClose` closes in solkey's `TestSuite` has 6079 nodes. -/
-def elimSize : Nat := 8000
-
 /-- The closer's input is within bounds: the leaf `l` within `closeSize`
 nodes, and its reduction within `elimSize`.  Both counts stop at their
 bound, so the test costs at most their sum in steps; the reduction is
