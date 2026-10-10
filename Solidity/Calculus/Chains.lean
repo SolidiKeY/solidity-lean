@@ -402,7 +402,9 @@ literal law at each instance (found in the line's erasure `erased`, as past
 the program) in each update's right-hand sides; a term taclet onto a term
 that cannot halt in each box update's; a law in the equations along the
 skeleton below each number of updates (`FmlRw.litEq`, `FmlRw.lawEq`);
-`simplifyUpdate` at each update; for `sequentialToParallel`, the merges
+`simplifyUpdate` at each update; `applyOnPV` along the skeleton under
+each update (`FmlRw.applyOnPV`); `applyOnRigidBox` and `applyStorageBox`
+as `applyOnRigid`; for `sequentialToParallel`, the merges
 over a storage or memory write at each update (`FmlRw.stateMerge`) and the
 merges under a branch (`FmlRw.mergeIn`), the spine's own being `mergeCands`'.  Their postconditions in slots and a
 modality `m` computed as the diamond and as the box; and why a law found no
@@ -427,11 +429,18 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) :
   let mut failed := none
   match a with
   | .table n =>
-    if n == `applyOnRigid then
+    if n == `applyOnRigid || n == `applyOnRigidBox || n == `applyStorageBox then
+      -- under the box `applyOnRigid` applies any update (`FmlRw.applyOnRigid`),
+      -- the erasure's `applyOnRigidBox` and `applyStorageBox` with it
       for i in List.range k do
         let s := skels[i + 1]!
         if s.pushable then
           rs := rs.push (mkApp3 (mkConst ``FmlRw.applyOnRigid) C (toExpr i) (toExpr s))
+    else if n == `applyOnPV then
+      for i in List.range k do
+        let s := skels[i + 1]!
+        if s.hasLit then
+          rs := rs.push (mkApp3 (mkConst ``FmlRw.applyOnPV) C (toExpr i) (toExpr s))
     else if n == `concrete then
       for i in List.range (k + 1) do
         let s := skels[i]!
@@ -1194,7 +1203,8 @@ def withErasedPosts (es : Array Expr) (k : Array Expr → TermElabM (Array Expr)
 
 /-- The rewrites `~~>` tries on a line while its program is open, after the
 merges: KeY's names, no law (a law is named, `~[r]~>`). -/
-def openRwNames : List Lean.Name := [`sequentialToParallel, `applyOnRigid, `concrete, `simplifyUpdate]
+def openRwNames : List Lean.Name :=
+  [`sequentialToParallel, `applyOnRigid, `applyOnPV, `concrete, `simplifyUpdate]
 
 /-- One rewrite of the line `L` while its program is open (a merge of its
 spine, or `openRwNames`), each with the line it leaves, that line's splice

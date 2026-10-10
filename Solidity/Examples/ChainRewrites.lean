@@ -759,7 +759,7 @@ example (φ : Post StandardExample [.val .uint]) :
 /--
 error: ~~>: the line after is no line of the derivation of
   dl{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
-nor reached from one by sequentialToParallel, applyOnRigid, concrete, simplifyUpdate (at most 3 of them) while the program is open
+nor reached from one by sequentialToParallel, applyOnRigid, applyOnPV, concrete, simplifyUpdate (at most 3 of them) while the program is open
   (the line after depends on the modality m, through a rule that reads it (`revertBox`, `revertDiamond`, a loop's invariant rule): go on after `cases m`)
 -/
 #guard_msgs in
@@ -834,6 +834,18 @@ example (φ : Post StandardExample [.mem (.struct "Person")]) :
       dl![.box]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
         memory := write(addM(memory, Person), freshId(addM(memory, Person)).age, 42) }
         [ revert(); ] φ } := by
+  sol_chain
+
+/-- `applyOnPV` with the revert still to run (`FmlRw.applyOnPV`): the update
+writes the storage, so it is not applied whole, but the capture it leaves
+holding `true` is read as `true` in the branches' conditions, which
+`concrete` then folds. -/
+example (φ : Post StandardExample []) :
+    dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true }
+      ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
+    ~[applyOnPV]~> dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true }
+      ((true ≐ true → φ) ∧ (true ≐ false → [ revert(); ] φ)) }
+    ~[concrete]~> dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true } φ } := by
   sol_chain
 
 end Open

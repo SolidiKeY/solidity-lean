@@ -26,6 +26,7 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 | `litEq r n s`, `lawEq r n s` | a literal law or a term taclet in the equations along the skeleton `s` below `n` updates: a whole side, and in `defined(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
 | `mergeIn p n` | the `n + 1` updates at the end of the path `p` (through `∧`, the right of `→`, updates and binders) merged | `Fml.mergeRun_leads` | `sequentialToParallel2` |
 | `stateMerge r i` | the update at `i` merged with the next over its storage or memory write (`MergeNameS`) | `MergeNameS.top_sound` | `sequentialToParallel2` |
+| `applyOnPV i s` | `{U}(x ≐ c → A) ⇝ {U}(v ≐ c → A)`, `U` leaving the literal `v` in `x`, in the atoms along `s` | `Fml.applyOnPVTop_sound` | `applyOnPV` |
 | `simplifyUpdate i b` | the update at `i` without what it pops later (the box) and its shadowed writes (`Upd.simpS`), the scope ends after it merged in first where `b` | `Fml.simpAtB_holds` | `simplifyUpdate1/2/3` |
 
 `sequentialToParallel` while the program is open is `Calculus/Merge.lean`'s.
@@ -578,7 +579,7 @@ theorem Fml.lawAlongS_holds (hq : Term.Theq q.1 q.2) (hx : exact = true → Term
   | _, .imp _ _ l r, .imp a b, σ =>
     imp_congr (Fml.lawAlongS_holds hq hx l a σ) (Fml.lawAlongS_holds hq hx r b σ)
   | _, .not _ s, .not a, σ => not_congr (Fml.lawAlongS_holds hq hx s a σ)
-  | _, .upd s, .upd m U ψ, σ => holds_upd_congr (fun τ => Fml.lawAlongS_holds hq hx s ψ τ) σ
+  | _, .upd s, .upd _ _ ψ, σ => holds_upd_congr (fun τ => Fml.lawAlongS_holds hq hx s ψ τ) σ
   | _, .and .., .tt, _ | _, .and .., .eq .., _ | _, .and .., .defined _, _
   | _, .and .., .not _, _ | _, .and .., .imp .., _ | _, .and .., .upd .., _
   | _, .and .., .modal .., _ | _, .and .., .havoc _, _ | _, .and .., .all .., _
@@ -698,6 +699,178 @@ def FmlRw.mergeIn (p : List PathStep) (n : Nat) : FmlRw C :=
 position `i` of the spine. -/
 def FmlRw.stateMerge (r : MergeNameS) (i : Nat) : FmlRw C :=
   FmlRw.atSpine (fun m U φ => r.top m U φ) (fun h σ hψ => r.top_sound _ _ _ _ h σ hψ) i
+
+/-! ## A local's literal under its update: `applyOnPV`
+
+KeY's `applyOnPV` reads a program variable behind an update as the update
+binds it, `{x := v} x ⇝ v`, where the update cannot be applied whole
+(it writes the storage, or halts): a local the update leaves holding a
+literal (`Upd.held`) is that literal in the atoms along the skeleton
+below it (not past a further update), the update kept in front.  Wherever
+the update returns, the state it leaves holds the literal there
+(`Upd.held_ok`); where it halts nothing below it is read.
+`ChainBranches`' `NFml.applyOnPVTop` on the erasure. -/
+
+section ApplyOnPV
+
+variable {Γ Δ : Ctx}
+
+/-- The literal a term is, if it is one. -/
+def Tm.litVal? {Γ : Ctx} : Tm C Γ .val → Option Semantics.Value
+  | .app0 (.lit v) => some v
+  | _ => none
+
+/-- The literal a local holds after an update, if it holds one. -/
+def Held.litVal? {p : PrimTy} : Held C Γ (.val p) → Option Semantics.Value
+  | .rhs (.val t) => t.litVal?
+  | _ => none
+
+theorem Tm.litVal?_eval {Γ : Ctx} (σ : EState C Γ) :
+    (t : Tm C Γ .val) → {v : Semantics.Value} → t.litVal? = some v → t.eval σ = .ok v
+  | .app0 (.lit _), _, h => by cases h; rfl
+  | .pvV _, _, h | .netOf .., _, h | .app1 .., _, h | .app2 .., _, h | .app3 .., _, h => by
+    cases h
+  | .app0 (.env _), _, h => by cases h
+
+/-- A local holding a literal after an update holds it in the state the
+update leaves. -/
+theorem Held.litVal?_get {σ₀ : EState C Γ} {σ₁ : EState C Δ} {p : PrimTy} {i : Idx Δ (.val p)}
+    {x : Held C Γ (.val p)} (hok : Held.OK σ₀ σ₁ i x) {v : Semantics.Value}
+    (h : x.litVal? = some v) : Env.get i σ₁.env = v := by
+  cases x with
+  | pos j => cases h
+  | rhs r =>
+    cases r with
+    | val t =>
+      have hok : t.eval σ₀ = .ok (Env.get i σ₁.env) := hok
+      rw [Tm.litVal?_eval σ₀ t h] at hok
+      exact (Except.ok.inj hok).symm
+
+/-- A term with each value local `s` leaves holding a literal read as it. -/
+def Tm.litPV (s : Subst C Γ Δ) : {k : Srt} → Tm C Δ k → Tm C Δ k
+  | _, .pvV i => match (s i).litVal? with
+    | some v => .app0 (.lit v)
+    | none => .pvV i
+  | _, .netOf i a => .netOf i (Tm.litPV s a)
+  | _, .app1 o ho x => .app1 o ho (Tm.litPV s x)
+  | _, .app2 o x y => .app2 o (Tm.litPV s x) (Tm.litPV s y)
+  | _, .app3 o x y z => .app3 o (Tm.litPV s x) (Tm.litPV s y) (Tm.litPV s z)
+  | _, t => t
+
+/-- Whether `Tm.litPV` reads a local as a literal in the term. -/
+def Tm.litPVFires (s : Subst C Γ Δ) : {k : Srt} → Tm C Δ k → Bool
+  | _, .pvV i => ((s i).litVal?).isSome
+  | _, .netOf _ a => Tm.litPVFires s a
+  | _, .app1 _ _ x => Tm.litPVFires s x
+  | _, .app2 _ x y => Tm.litPVFires s x || Tm.litPVFires s y
+  | _, .app3 _ x y z => Tm.litPVFires s x || Tm.litPVFires s y || Tm.litPVFires s z
+  | _, _ => false
+
+/-- **A local read as the literal it holds** reads and denotes as before. -/
+theorem Tm.litPV_eq {s : Subst C Γ Δ} {σ₀ : EState C Γ} {τ : EState C Δ}
+    (hok : ∀ {t : LTy} (i : Idx Δ t), Held.OK σ₀ τ i (s i)) :
+    {k : Srt} → (t : Tm C Δ k) → (t.litPV s).eval τ = t.eval τ ∧ (t.litPV s).denote τ = t.denote τ
+  | _, .pvV i => by
+    simp only [Tm.litPV]
+    split
+    · rename_i v hv
+      have hg := Held.litVal?_get (hok i) hv
+      exact ⟨by rw [← hg]; rfl, by rw [← hg]; rfl⟩
+    · exact ⟨rfl, rfl⟩
+  | _, .netOf i a => by
+    obtain ⟨he, hd⟩ := Tm.litPV_eq hok a
+    exact ⟨by simp only [Tm.litPV, Tm.eval, he], by simp only [Tm.litPV, Tm.denote, hd]⟩
+  | _, .app1 o ho x => by
+    obtain ⟨he, hd⟩ := Tm.litPV_eq hok x
+    exact ⟨by simp only [Tm.litPV, Tm.eval, he], by simp only [Tm.litPV, Tm.denote, hd]⟩
+  | _, .app2 o x y => by
+    obtain ⟨hex, hdx⟩ := Tm.litPV_eq hok x
+    obtain ⟨hey, hdy⟩ := Tm.litPV_eq hok y
+    exact ⟨by simp only [Tm.litPV, Tm.eval, hex, hey], by simp only [Tm.litPV, Tm.denote, hex, hey, hdx, hdy]⟩
+  | _, .app3 o x y z => by
+    obtain ⟨hex, hdx⟩ := Tm.litPV_eq hok x
+    obtain ⟨hey, hdy⟩ := Tm.litPV_eq hok y
+    obtain ⟨hez, hdz⟩ := Tm.litPV_eq hok z
+    exact ⟨by simp only [Tm.litPV, Tm.eval, hex, hey, hez],
+      by simp only [Tm.litPV, Tm.denote, hdx, hdy, hdz]⟩
+  | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ => ⟨rfl, rfl⟩
+
+/-- The atoms along the skeleton `s`, not past an update, with the locals
+`h` leaves holding a literal read as it. -/
+def Fml.litPVAlong (h : Subst C Γ Δ) : Skel → Fml C Δ → Fml C Δ
+  | .lit, .eq a b => .eq (a.litPV h) (b.litPV h)
+  | .lit, .defined t => .defined (t.litPV h)
+  | .and _ _ l r, .and a b => .and (Fml.litPVAlong h l a) (Fml.litPVAlong h r b)
+  | .imp _ _ l r, .imp a b => .imp (Fml.litPVAlong h l a) (Fml.litPVAlong h r b)
+  | .not _ s, .not a => .not (Fml.litPVAlong h s a)
+  | _, φ => φ
+
+/-- Whether `Fml.litPVAlong` reads a local as a literal. -/
+def Fml.litPVFires (h : Subst C Γ Δ) : Skel → Fml C Δ → Bool
+  | .lit, .eq a b => a.litPVFires h || b.litPVFires h
+  | .lit, .defined t => t.litPVFires h
+  | .and _ _ l r, .and a b | .imp _ _ l r, .imp a b =>
+    Fml.litPVFires h l a || Fml.litPVFires h r b
+  | .not _ s, .not a => Fml.litPVFires h s a
+  | _, _ => false
+
+theorem Fml.litPVAlong_holds {h : Subst C Γ Δ} {σ₀ : EState C Γ} (σ : State C Δ)
+    (hok : ∀ {t : LTy} (i : Idx Δ t), Held.OK σ₀ σ.erase i (h i)) :
+    (s : Skel) → (φ : Fml C Δ) → (holds σ (Fml.litPVAlong h s φ) ↔ holds σ φ)
+  | .lit, .eq a b => by
+    show Theory.StValue.Equiv ((a.litPV h).denote σ.erase) ((b.litPV h).denote σ.erase) ↔
+      Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase)
+    rw [(Tm.litPV_eq hok a).2, (Tm.litPV_eq hok b).2]
+  | .lit, .defined t => by
+    show (∃ x, (t.litPV h).eval σ.erase = .ok x) ↔ (∃ x, t.eval σ.erase = .ok x)
+    rw [(Tm.litPV_eq hok t).1]
+  | .and _ _ l r, .and a b =>
+    and_congr (Fml.litPVAlong_holds σ hok l a) (Fml.litPVAlong_holds σ hok r b)
+  | .imp _ _ l r, .imp a b =>
+    imp_congr (Fml.litPVAlong_holds σ hok l a) (Fml.litPVAlong_holds σ hok r b)
+  | .not _ s, .not a => not_congr (Fml.litPVAlong_holds σ hok s a)
+  | .lit, .tt | .lit, .not _ | .lit, .and .. | .lit, .imp .. | .lit, .upd .. | .lit, .modal ..
+  | .lit, .havoc _ | .lit, .all .. | .lit, .bind .. | .lit, .anon .. => Iff.rfl
+  | .and .., .tt | .and .., .eq .. | .and .., .defined _ | .and .., .not _ | .and .., .imp ..
+  | .and .., .upd .. | .and .., .modal .. | .and .., .havoc _ | .and .., .all ..
+  | .and .., .bind .. | .and .., .anon .. => Iff.rfl
+  | .imp .., .tt | .imp .., .eq .. | .imp .., .defined _ | .imp .., .not _ | .imp .., .and ..
+  | .imp .., .upd .. | .imp .., .modal .. | .imp .., .havoc _ | .imp .., .all ..
+  | .imp .., .bind .. | .imp .., .anon .. => Iff.rfl
+  | .not .., .tt | .not .., .eq .. | .not .., .defined _ | .not .., .and .. | .not .., .imp ..
+  | .not .., .upd .. | .not .., .modal .. | .not .., .havoc _ | .not .., .all ..
+  | .not .., .bind .. | .not .., .anon .. => Iff.rfl
+  | .upd _, _ | .opaque, _ => Iff.rfl
+
+/-- `applyOnPV` under `{U}_m φ`, `φ` of skeleton `s`. -/
+def Fml.applyOnPVTop (s : Skel) (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
+    Option (Fml C Γ) :=
+  if Fml.litPVFires U.held s φ then some (.upd m U (Fml.litPVAlong U.held s φ)) else none
+
+theorem Fml.applyOnPVTop_sound {s : Skel} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
+    {ψ : Fml C Γ} (h : Fml.applyOnPVTop s m U φ = some ψ) (σ : State C Γ) (hψ : holds σ ψ) :
+    holds σ (.upd m U φ) := by
+  unfold Fml.applyOnPVTop at h
+  split at h
+  · cases h
+    show Modality.afterC m _ (U.apply σ.erase)
+    have hψ : Modality.afterC m _ (U.apply σ.erase) := hψ
+    cases hU : U.apply σ.erase with
+    | error => rw [hU] at hψ; exact hψ
+    | ok τ =>
+      rw [hU] at hψ
+      intro σ' he hx
+      have hok : ∀ {t : LTy} (i : Idx Δ t), Held.OK σ.erase σ'.erase i (U.held i) := by
+        rw [he]; exact Upd.held_ok U hU
+      exact (Fml.litPVAlong_holds σ' hok s φ).1 (hψ σ' he hx)
+  · cases h
+
+end ApplyOnPV
+
+/-- **`applyOnPV`** under the update at position `i` of the spine, along the
+skeleton `s` of the formula under it. -/
+def FmlRw.applyOnPV (i : Nat) (s : Skel) : FmlRw C :=
+  FmlRw.atSpine (fun m U φ => Fml.applyOnPVTop s m U φ) (fun h σ hψ => Fml.applyOnPVTop_sound h σ hψ) i
 
 /-! ## `simplifyUpdate` -/
 
