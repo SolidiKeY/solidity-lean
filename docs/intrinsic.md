@@ -1181,7 +1181,10 @@ nothing reads them, and what stays is recorded as decision 7's IR.
     `sol_derive?` writes); the residue pins of `Examples/Tactics/Dangling`
     and `Examples/ProofTree` (`rounds2`/`4`/`6`, `pushes22`, `writes4`/`6`,
     `deletes10`) read the walk's leaves (`Seq.residue`, `Seq.leafErase`)
-    where they read the erased residue, and print the same.
+    where they read the erased residue, and print the same.  The `⊨`
+    route's step bound moved from `Derive.fuel` (5000) to the walk's
+    `Seq.fuel` (`NFml.Derive.budget`); `Derive.fuel` now bounds only
+    `sol_derive`'s walk.
 96. *Proposed (W7 `w7-route`), the lead's call:* "only an `assert`
     panics" is `Prog.run_noPanic` over the typed run
     (`Semantics/NoPanic.lean`: `P.asserts = false → (P.run σ).NoPanic`,

@@ -11,8 +11,9 @@ import Solidity.Calculus.NFmlDerive
 `Calculus/ProvesDerive.lean`'s `Seq.prove`, decision 89 extended): the
 strategy and the closer as one kernel evaluation, the leaves it leaves
 the walk's own sequents.  This module has what that walk shares with
-the tactics that write it out: the steps the strategy is given (`fuel`),
-`sol_close_unwrap` on a scoped leaf `Valid ψ` (its erasure, `Valid.of_erase`,
+the tactics that write it out: `Derive.fuel`, the steps `sol_derive`'s
+walk is given (`sol_prove`'s walk is bounded by `Seq.fuel`,
+`NFml.Derive.budget`), `sol_close_unwrap` on a scoped leaf `Valid ψ` (its erasure, `Valid.of_erase`,
 then the closer's), and `sol_derive`/`sol_derive?`, the strategy as one
 `apply` per rule.
 -/

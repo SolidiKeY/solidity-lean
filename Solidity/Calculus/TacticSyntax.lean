@@ -7,8 +7,8 @@ The strategy's tactics, declared once so that the scoped calculus and the
 closer each add an elaborator to the same syntax: `sol_step`, `sol_symex`,
 `sol_derive`, `sol_derive?`, `sol_chain?`, `sol_prove` and `sol_prove?`.
 The scoped elaborators are `Calculus/Symex.lean`'s (`sol_step`,
-`sol_symex`), `Calculus/Derive.lean`'s (`sol_prove`, `sol_derive?`),
-`Calculus/ProvesDerive.lean`'s (`sol_prove`) and `Calculus/Closers.lean`'s
+`sol_symex`), `Calculus/Derive.lean`'s (`sol_derive?`),
+`Calculus/ProvesDerive.lean`'s (`sol_prove`, on `⊢ φ` and on `Valid φ`) and `Calculus/Closers.lean`'s
 (`sol_prove?`); the closer's, on an `NFml.Valid` goal, are
 `Calculus/NFmlDerive.lean`'s (`sol_prove`, `sol_prove?`) and this module's
 (`sol_symex`).  The syntax kinds keep their names
