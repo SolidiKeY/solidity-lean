@@ -376,6 +376,7 @@ At the root, the notation's own tests:
 | Module | What it shows |
 |---|---|
 | `Examples/ChainNotation.lean`, `ChainRewrites.lean`, `ExampleNames.lean` | How a chain is written and checked, its rewrite links, the printed names of fresh variables. |
+| `Examples/ChainRewritesOpen.lean` | The rewrite links while the program is open, on the scoped line (`Calculus/RewriteScoped.lean`), a step of the strategy after them in the same chain. |
 | `Examples/Notation.lean` | What taclets, premises and sequents print, pinned. |
 | `Examples/Verify.lean`, `Tools.lean` | `#verify`, `#counterexample` and the other commands, pinned. |
 | `Examples/ProofTree.lean` | The proof tree's commands, `sol_derive?` and `sol_prove?`, pinned. |

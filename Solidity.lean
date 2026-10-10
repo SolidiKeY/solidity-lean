@@ -179,6 +179,7 @@ import Solidity.Examples.ChainNotation
 import Solidity.Examples.Tactics.UpdateRules
 import Solidity.Examples.Tactics.UpdRulesScoped
 import Solidity.Examples.ChainRewrites
+import Solidity.Examples.ChainRewritesOpen
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.ExampleNames
 import Solidity.Examples.Tactics.Specs
