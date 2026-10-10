@@ -25,7 +25,9 @@ locals, its fresh ones dropped.  While the program is still open,
 (`Calculus/Merge.lean`), and the literal laws, a term taclet in a box
 update, `applyOnRigid`, `concrete` and `simplifyUpdate` rewrite the
 scoped line (`Calculus/RewriteScoped.lean`): §3‴'s branches keep their
-reverting program.
+reverting program.  Past the program a merge or rewrite with a scoped form
+runs on the scoped line where it gives the line written (§2's merge and
+`simplifyUpdate`), the others on the erasure.
 
 * §1 — the headline as the calculus draws it (`Chains.Storage.BalanceWrite.chain`),
   for any modality `m` and postcondition `φ`, down to its last line, and on to
@@ -846,6 +848,16 @@ example (φ : Post StandardExample []) :
     ~[applyOnPV]~> dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true }
       ((true ≐ true → φ) ∧ (true ≐ false → [ revert(); ] φ)) }
     ~[concrete]~> dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true } φ } := by
+  sol_chain
+
+/-- Past the program a merge or rewrite with a scoped form runs on the
+scoped line too, where it gives the line written (decision 93, revisited):
+here the merge over the storage write (`FmlRw.stateMerge`).  The
+strategy's own last line declares `x` behind a hidden binder, which no
+scoped merge crosses, so `ageWriteReadValue` goes on on the erasure. -/
+example : dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x ≐ 42 }
+    ~[sequentialToParallel]~> dl![.box]{ { storage := save(storage, alice.age, 42) ‖
+      x := find(save(storage, alice.age, 42), alice.age) } x ≐ 42 } := by
   sol_chain
 
 end Open

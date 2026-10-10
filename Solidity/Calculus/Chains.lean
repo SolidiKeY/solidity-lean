@@ -40,8 +40,12 @@ metavariable that `sol_chain` computes from the line before and checks
 against the text (`pendingLines`), a rewrite's too while the program is
 open (`Fml.RwBy`).
 
-**Past the program**, a rewrite arrow (`~[sequentialToParallel]~>`,
-`~[findOnSave]~>`, `~=>`) goes on from the erasure of the line before it
+**Past the program** a merge or rewrite with a scoped form goes on on
+the scoped line where it gives the line written (decision 93, revisited at
+W7: a line whose spine a hidden binder `bind` interrupts, a local the
+program declared, has none of the merges).  Else a rewrite arrow
+(`~[sequentialToParallel]~>`, `~[findOnSave]~>`, `~=>`) goes on from the
+erasure of the line before it, as does one to a line written `_`
 (`Fml.ViaE`): `Update.lean`'s line, its postcondition `φ : Post C Γ` read
 as `Update.lean`'s `φ.erase ns` (`Post.erase`), and from there
 `Calculus/RewriteChains.lean`'s rewrite links, elaborated and proved by its
@@ -1209,11 +1213,11 @@ def openRwNames : List Lean.Name :=
 /-- One rewrite of the line `L` while its program is open (a merge of its
 spine, or `openRwNames`), each with the line it leaves, that line's splice
 and erasures, its link (`Link.merge`, `Link.rw`), and the proof of
-`L ~~> it`, built when asked. -/
-def openRwSteps (L : Expr) :
+`L ~~> it`, built when asked; with `closed`, past the program too. -/
+def openRwSteps (L : Expr) (closed := false) :
     TermElabM (List (Expr × Splice × Array Expr × Expr × TermElabM Expr)) := do
   let run ← runChain L
-  unless run.isOpen do return []
+  unless run.isOpen || closed do return []
   let (C, Γ) ← lineType L
   let fml := mkApp2 (mkConst ``Fml) C Γ
   let mut out := []
@@ -1286,71 +1290,81 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         else pure ((← NFml.Chain.rwArrow? r).map fun a => (some (r, a)))
       | `(chain_arrow| ~=>) => pure (some none)
       | _ => pure none
+    -- a merge or rewrite on the scoped line: while its program is open, and
+    -- past it where one gives the line written (decision 93, revisited at
+    -- W7); else on the erasure
+    let isOpen ← if legacy.isNone && rw?.isSome then (·.isOpen) <$> runChain cur else pure false
+    let onScoped := legacy.isNone && rw?.isSome && (isOpen || w matches .text ..)
+    -- past the program a written line the scoped reading refuses is the erasure's
+    let fitsS (fits : Splice → Expr → Array Expr → TermElabM Bool) (sp : Splice) (B : Expr)
+        (er : Array Expr) : TermElabM Bool := do
+      if isOpen then return ← fits sp B er
+      let s ← saveState
+      try Term.withoutErrToSorry (fits sp B er) catch _ => s.restore; pure false
     if let some (some (r, .table `sequentialToParallel)) := rw? then
-      if legacy.isNone && (← runChain cur).isOpen then
-        -- the program is still open: the merge on the scoped line
+      if onScoped then
         let (sp, cands) ← mergeCands cur
         let fits ← writtenMatcher C w
-        let pick ← cands.findM? fun c => fits sp c.fml c.erased
-        let some c := pick | do
-          -- under a branch (`FmlRw.mergeIn`)
-          let (sp', below, _) ← scopedRwCands cur (.table `sequentialToParallel) (← runChain cur).erased[0]!
-          if let some c ← below.findM? fun c => fits sp' c.fml c.erased then
-            let n := toExpr r.getId.toString
-            ws := ws.push (mk (mkApp3 (mkConst ``Link.rw) C n c.rw) c.fml)
-            if links.size == 1 then
-              single := some (mkAppN (mkConst ``Fml.RwBy) #[C, Γ, n, c.rw, cur, c.fml])
-            cur := c.fml
-            continue
-          if cands.isEmpty && below.isEmpty then
-            throwError "~[{r}]~>: {r} does not apply to{← indentLine cur}"
-          throwError "~[{r}]~>: no merge of the update spine of{← indentLine cur}\n\
-            is the line written{indentD (.ofSyntax l[1])}\n\
-            The merges:{← (cands.map (·.fml) ++ below.map (·.fml)).foldlM (fun acc c => do
-              pure (acc ++ m!"\n  ~[sequentialToParallel]~>{← indentLine c}")) m!""}"
-        let lnk := mkApp3 (mkConst ``Link.merge) C (toExpr c.k) (toExpr c.n)
-        ws := ws.push (mk lnk c.fml)
-        if links.size == 1 then
-          single := some (mkAppN (mkConst ``Fml.MergeBy) #[C, Γ, toExpr c.k, toExpr c.n, cur, c.fml])
-        cur := c.fml
-        continue
-    if let some (some (r, a)) := rw? then
-      if legacy.isNone then
-        let run ← runChain cur
-        if run.isOpen then
-          -- the program is still open: the rewrite on the scoped line
-          let (sp, cands, failed) ← scopedRwCands cur a run.erased[0]!
-          let note := match failed with
-            | some m => m!"\n({m})"
-            | none => m!""
-          if cands.isEmpty then
-            throwError "~[{r}]~>: {r} does not apply to{← indentLine cur}\n\
-              while the program is open{note}"
-          let fits ← writtenMatcher C w
-          let some c ← cands.findM? fun c => fits sp c.fml c.erased |
-            throwError "~[{r}]~>: no rewrite by {r} of{← indentLine cur}\n\
-              is the line written{indentD (.ofSyntax l[1])}\n\
-              It gives:{← cands.foldlM (fun acc c => do
-                pure (acc ++ m!"\n  ~[{r}]~>{← indentLine c.fml}")) m!""}"
+        if let some c ← cands.findM? fun c => fitsS fits sp c.fml c.erased then
+          let lnk := mkApp3 (mkConst ``Link.merge) C (toExpr c.k) (toExpr c.n)
+          ws := ws.push (mk lnk c.fml)
+          if links.size == 1 then
+            single := some (mkAppN (mkConst ``Fml.MergeBy) #[C, Γ, toExpr c.k, toExpr c.n, cur, c.fml])
+          cur := c.fml
+          continue
+        -- over a state write, under a branch (`FmlRw.stateMerge`, `FmlRw.mergeIn`)
+        let (sp', below, _) ← scopedRwCands cur (.table `sequentialToParallel) (← runChain cur).erased[0]!
+        if let some c ← below.findM? fun c => fitsS fits sp' c.fml c.erased then
           let n := toExpr r.getId.toString
           ws := ws.push (mk (mkApp3 (mkConst ``Link.rw) C n c.rw) c.fml)
           if links.size == 1 then
             single := some (mkAppN (mkConst ``Fml.RwBy) #[C, Γ, n, c.rw, cur, c.fml])
           cur := c.fml
           continue
-    if let some none := rw? then
-      if legacy.isNone && (← runChain cur).isOpen then
-        -- `~=>` while the program is open: the first merge or rewrite of
-        -- the scoped line that gives the line written (`openRwSteps`)
+        if isOpen then
+          if cands.isEmpty && below.isEmpty then
+            throwError "~[{r}]~>: {r} does not apply to{← indentLine cur}"
+          throwError "~[{r}]~>: no merge of the update spine of{← indentLine cur}\n\
+            is the line written{indentD (.ofSyntax l[1])}\n\
+            The merges:{← (cands.map (·.fml) ++ below.map (·.fml)).foldlM (fun acc c => do
+              pure (acc ++ m!"\n  ~[sequentialToParallel]~>{← indentLine c}")) m!""}"
+    if let some (some (r, a)) := rw? then
+      if onScoped then
+        let run ← runChain cur
+        let (sp, cands, failed) ← scopedRwCands cur a run.erased[0]!
         let fits ← writtenMatcher C w
-        let some (B, _, _, lnk, _) ← (← openRwSteps cur).findM? fun (B, sp, er, _, _) =>
-            fits sp B er |
+        if let some c ← cands.findM? fun c => fitsS fits sp c.fml c.erased then
+          let n := toExpr r.getId.toString
+          ws := ws.push (mk (mkApp3 (mkConst ``Link.rw) C n c.rw) c.fml)
+          if links.size == 1 then
+            single := some (mkAppN (mkConst ``Fml.RwBy) #[C, Γ, n, c.rw, cur, c.fml])
+          cur := c.fml
+          continue
+        if isOpen then
+          let note := match failed with
+            | some m => m!"\n({m})"
+            | none => m!""
+          if cands.isEmpty then
+            throwError "~[{r}]~>: {r} does not apply to{← indentLine cur}\n\
+              while the program is open{note}"
+          throwError "~[{r}]~>: no rewrite by {r} of{← indentLine cur}\n\
+            is the line written{indentD (.ofSyntax l[1])}\n\
+            It gives:{← cands.foldlM (fun acc c => do
+              pure (acc ++ m!"\n  ~[{r}]~>{← indentLine c.fml}")) m!""}"
+    if let some none := rw? then
+      if onScoped then
+        -- `~=>`: the first merge or rewrite of the scoped line that gives the
+        -- line written (`openRwSteps`)
+        let fits ← writtenMatcher C w
+        if let some (B, _, _, lnk, _) ← (← openRwSteps cur (closed := true)).findM?
+            fun (B, sp, er, _, _) => fitsS fits sp B er then
+          ws := ws.push (mk lnk B)
+          cur := B
+          continue
+        if isOpen then
           throwError "~=>: no merge nor rewrite ({", ".intercalate (openRwNames.map toString)}) \
             of{← indentLine cur}\nis the line written{indentD (.ofSyntax l[1])}\n\
             while the program is open"
-        ws := ws.push (mk lnk B)
-        cur := B
-        continue
     if let some rw := rw? then
       -- a rewrite: from the erasure of the scoped line, `Update.lean`'s
       let (L₀, m?) ← match legacy with
@@ -1861,6 +1875,15 @@ def delabRwBy : Delab := do
   let .lit (.strVal n) := e.getArg! 2 | failure
   return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 4))
     #[(← `(chain_arrow| ~[$(mkIdent (.mkSimple n)):ident]~>), ← ppCoreLine (e.getArg! 5))]
+
+/-- `φ ~[sequentialToParallel]~> ψ`, a merge of the scoped line's spine
+(`Calculus/Merge.lean`). -/
+@[delab app.Solidity.Fml.MergeBy]
+def delabMergeBy : Delab := do
+  let e ← getExpr
+  guard (e.getAppNumArgs == 6)
+  return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 4))
+    #[(← `(chain_arrow| ~[$(mkIdent `sequentialToParallel):ident]~>), ← ppCoreLine (e.getArg! 5))]
 
 @[delab app.Solidity.Fml.Via]
 def delabVia : Delab := do
