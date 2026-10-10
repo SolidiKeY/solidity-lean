@@ -42,8 +42,10 @@ open (`Fml.RwBy`).
 
 **Past the program** a merge or rewrite with a scoped form goes on on
 the scoped line where it gives the line written (decision 93, revisited at
-W7; `sol_chain.scopedPast`): not `simplifyUpdate`, whose scoped form keeps
-the hidden binders of the locals it drops, and no merge where a hidden
+W7; `sol_chain.scopedPast`): the merges, `applyOnRigid` (`applyOnRigidBox`,
+`applyStorageBox`), `concrete`, `applyOnPV`; not a law, whose line reads the
+same on the erasure at less cost, nor `simplifyUpdate`, whose scoped form
+keeps the hidden binders of the locals it drops; and no merge where a hidden
 binder, a local the program declared, sits between two updates.  Else a rewrite arrow
 (`~[sequentialToParallel]~>`, `~[findOnSave]~>`, `~=>`) goes on from the
 erasure of the line before it, as does one to a line written `_`
@@ -1306,12 +1308,14 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
     -- past it where one gives the line written (decision 93, revisited at
     -- W7); else on the erasure
     let isOpen ← if legacy.isNone && rw?.isSome then (·.isOpen) <$> runChain cur else pure false
-    -- past the program `simplifyUpdate` stays on the erasure: its scoped form
+    -- past the program a law and `simplifyUpdate` stay on the erasure: a law's
+    -- line reads the same there, at less cost; `simplifyUpdate`'s scoped form
     -- keeps the hidden binders of the locals it drops (decision 87's unread
     -- locals are not ported), which the closer does not read past
     let pastOk := match rw? with
       | some (some (_, .table n)) => n != `simplifyUpdate
-      | _ => true
+      | some none => true
+      | _ => false
     let onScoped := legacy.isNone && rw?.isSome &&
       (isOpen || (pastOk && w matches .text .. && sol_chain.scopedPast.get (← getOptions)))
     -- past the program a written line the scoped reading refuses is the erasure's
