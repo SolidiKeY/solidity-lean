@@ -236,7 +236,7 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
     withBinds C (elabFmlC taken posts φ) (ls.map fun (x, t) => (Var.ofName x, t.toLTy)) Γ
   | φ, Γ => do
     let ψ ← elabAtomN C φ
-    ElabM.lift (NFml.resolveN (fun _ => none) Γ ψ)
+    ElabM.lift (NFml.resolveIn (fun _ => none) Γ ψ)
 
 /-- `elabDl`'s parameters of `φ` (the names read, a declared one
 included), the elaborator's scope (a declared name's parameter left out),

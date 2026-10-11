@@ -24,7 +24,7 @@ problem) becomes a scoped one, `Fml C Γ`, over a named context
 * **A modality's program** is elaborated scoped from the formula's context
   (`Calculus/Notation.lean`), and its postcondition read in the context the
   program leaves: a local declared in a branch is out of scope after it.
-  An atom is read as the closer's formula (`NFml.resolveN`).
+  An atom is read as the closer's formula (`NFml.resolveIn`).
 * **The context's locals are closed over** by `Fml.closeN`: a value local by
   `∀` (`Fml.all`, its type's range), any other by a hidden binder
   (`Fml.bind`, every value), or every one by a hidden binder.
@@ -206,7 +206,8 @@ def Upd.resolveN (hint : Var → Option LTy) (Γ : NCtx) :
 as positions in `Γ`: a quantifier pushes its local, an update the locals it
 declares, a program the ones it leaves (`Prog.resolve`).  `hint` types the
 locals an update binds (`elemTy`).  Only `Calculus/Spec.lean`'s
-`specObligation` reads it now; it goes with `Surface.Fml` (W8.4). -/
+`specObligation` reads it now, which the W8.2 `obligations` lane reads
+scoped: it goes when that lane is merged. -/
 def Fml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → Solidity.Surface.Fml C →
     Except String (Fml C Γ.ctx)
   | _, .tt => pure .tt
@@ -231,21 +232,21 @@ def Fml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → Solidity.Surface.
 `Γ`: a quantifier pushes its local, an update the locals it declares.  What
 `dl!{ … }`'s scoped reader makes of an atom (`Calculus/Notation.lean`'s
 `elabFmlC`). -/
-def NFml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → NFml C → Except String (Fml C Γ.ctx)
+def NFml.resolveIn (hint : Var → Option LTy) : (Γ : NCtx) → NFml C → Except String (Fml C Γ.ctx)
   | _, .tt => pure .tt
   | Γ, .eq a b => do pure (.eq (← Tm.resolveN Γ a) (← Tm.resolveN Γ b))
   | Γ, .defined t => do pure (.defined (← Tm.resolveN Γ t))
-  | Γ, .not φ => do pure (.not (← NFml.resolveN hint Γ φ))
-  | Γ, .and φ ψ => do pure (.and (← NFml.resolveN hint Γ φ) (← NFml.resolveN hint Γ ψ))
-  | Γ, .imp φ ψ => do pure (.imp (← NFml.resolveN hint Γ φ) (← NFml.resolveN hint Γ ψ))
+  | Γ, .not φ => do pure (.not (← NFml.resolveIn hint Γ φ))
+  | Γ, .and φ ψ => do pure (.and (← NFml.resolveIn hint Γ φ) (← NFml.resolveIn hint Γ ψ))
+  | Γ, .imp φ ψ => do pure (.imp (← NFml.resolveIn hint Γ φ) (← NFml.resolveIn hint Γ ψ))
   | Γ, .upd m U φ => do
     let ⟨Δ, U'⟩ ← Upd.resolveN hint Γ Γ .nil U
-    pure (.upd m U' (← NFml.resolveN hint Δ φ))
-  | Γ, .havoc φ => do pure (.havoc (← NFml.resolveN hint Γ φ))
-  | Γ, .all x p φ => do pure (.all x p (← NFml.resolveN hint ((x, .val p) :: Γ) φ))
+    pure (.upd m U' (← NFml.resolveIn hint Δ φ))
+  | Γ, .havoc φ => do pure (.havoc (← NFml.resolveIn hint Γ φ))
+  | Γ, .all x p φ => do pure (.all x p (← NFml.resolveIn hint ((x, .val p) :: Γ) φ))
   | Γ, .anon xs φ => do
     let ys ← xs.mapM (Γ.findAny ·)
-    pure (.anon ys (← NFml.resolveN hint Γ φ))
+    pure (.anon ys (← NFml.resolveIn hint Γ φ))
 
 end Resolve
 
