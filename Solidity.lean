@@ -93,6 +93,7 @@ import Solidity.Calculus.FunContract
 import Solidity.Calculus.Symex
 import Solidity.Calculus.Close
 import Solidity.Calculus.Derive
+import Solidity.Calculus.LeafDerive
 import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.Closers

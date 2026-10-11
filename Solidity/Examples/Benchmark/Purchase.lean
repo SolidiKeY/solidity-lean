@@ -283,9 +283,8 @@ info: if (msgSender != seller) { revert(); } else { } uint se1 = 0; if (state !=
 theorem ctor_spec :
     ⊢ dl!{ [ constructor(); ] (seller == msgSender ∧ value + value == msgValue) } := by
   sol_prove
-  refine close ?_
-  sol_symex
-  sol_close
+  sol_leaf
+  sol_decide
 
 -- `skip;`: the constructor has no obligation
 /--
@@ -303,11 +302,8 @@ theorem abort_spec :
 run of it ends. -/
 theorem abort_onlySeller : ⊢ dl!{ msgSender != seller → [ abort(); ] false } := by
   sol_prove
-  refine close ?_
-  sol_symex
-  refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-  sol_reduce
-  sol_decide_cons
+  sol_leaf
+  sol_decide
 
 /-- `confirmPurchase()`: `requires state == State.Created && msg.value ==
 2 * value` (`value + value`: a formula term has no `*`), `ensures state ==

@@ -7,7 +7,7 @@ import Solidity.TestSuite.ScopedProblems
 `additionStorageWrite` to `ifElseSplit` in the order of the source; the replays are what
 `#solkey_derive?` (`Frontend/Problems.lean`) prints.  The closer reads
 `wt(storage)` as the layout a well-formed storage holds; a leaf it leaves
-sets the premise aside (`Proves.close_dropWt`).
+is closed on its scoped form (`sol_leaf`).
 -/
 
 open Solidity
@@ -42,19 +42,13 @@ theorem Solkey.TestSuite.storageIndexMappingAddAssign.proved : ⊢ Solkey.TestSu
 
 theorem Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.storageIndexArrayAddAssignOutOfBoundsReverts.problem := by
   sol_prove
-  refine NFml.Proves.close_dropWt ?_
-  sol_symex
-  refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-  sol_reduce
-  sol_decide_cons
+  sol_leaf
+  sol_decide
 
 theorem Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.storageIndexArrayReadOutOfBoundsReverts.problem := by
   sol_prove
-  refine NFml.Proves.close_dropWt ?_
-  sol_symex
-  refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-  sol_reduce
-  sol_decide_cons
+  sol_leaf
+  sol_decide
 
 theorem Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.proved : ⊢ Solkey.TestSuite.storageIndexReadComplexReceiverBindLocalRoot.problem := by
   sol_prove

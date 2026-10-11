@@ -89,8 +89,7 @@ theorem deployMini :
         selfBalance := msg.value }
       ⟨ constructor(a); ⟩ (x == 5 ∧ y == a ∧ z == 0) } := by
   sol_prove
-  refine NFml.Proves.close ?_
-  sol_symex
+  sol_leaf
   sol_close_mt
 
 -- the update prints as solkey writes it
@@ -147,8 +146,7 @@ obligation. -/
 theorem miniDeploy : ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
     selfBalance := msg.value } ⟨ constructor(7); ⟩ true } := by
   sol_prove
-  refine NFml.Proves.close ?_
-  sol_symex
+  sol_leaf
   sol_close_mt
 
 /-- A derived obligation of no parameters is a theorem about the typed

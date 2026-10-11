@@ -60,8 +60,7 @@ invariant proves the `assert` after it. -/
 theorem invariantCountsToBound : ⊨ Solc.Loops.invariantCountsToBound.problem := by
   sol_prove
   all_goals
-    refine NFml.Proves.close_dropWt ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- `invariantBreak`: the invariant holds at the head the `break` leaves
@@ -69,8 +68,7 @@ from too. -/
 theorem invariantBreak : ⊨ Solc.Loops.invariantBreak.problem := by
   sol_prove
   all_goals
-    refine NFml.Proves.close_dropWt ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- `whileCountsUp`, under the diamond, unwound three times (`unwind 3`, a
@@ -88,8 +86,7 @@ solkey's `KeyNatspec` joins them. -/
 theorem invariantTwoLines : ⊨ Solc.Loops.invariantTwoLines.problem := by
   sol_prove
   all_goals
-    refine NFml.Proves.close_dropWt ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! `loopNestedReturn` and `returnBeforeSiblingLoop` are `internal`: no

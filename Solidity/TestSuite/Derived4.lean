@@ -7,7 +7,7 @@ import Solidity.TestSuite.ScopedProblems
 `unaryMinusSimple` to `mappingReadAsKey` in the order of the source; the replays are what
 `#solkey_derive?` (`Frontend/Problems.lean`) prints.  The closer reads
 `wt(storage)` as the layout a well-formed storage holds; a leaf it leaves
-sets the premise aside (`Proves.close_dropWt`).
+is closed on its scoped form (`sol_leaf`).
 -/
 
 open Solidity

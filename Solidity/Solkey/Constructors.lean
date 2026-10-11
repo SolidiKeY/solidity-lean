@@ -107,12 +107,11 @@ info: \problem {
 
 /-- The deployment obligation, derived.  `sol_prove`'s closer refuses a
 context that holds `mtSt` (`Decide` has no clause for it yet), even with
-`true` to prove, so its one leaf, today's sequent of its erasure, is
-closed by `sol_close_mt`. -/
+`true` to prove, so its one leaf is closed on its scoped form (`sol_leaf`)
+by `sol_close_mt`. -/
 theorem Solkey.EtherWallet.constructor.proved : ⊢ Solkey.EtherWallet.constructor.problem := by
   sol_prove
-  refine NFml.Proves.close ?_
-  sol_symex
+  sol_leaf
   sol_close_mt
 
 /--

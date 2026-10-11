@@ -258,7 +258,8 @@ def elabSolkeyDerive : CommandElab := fun stx => do
   for r in rows do
     let f := N ++ Lean.Name.mkSimple r.name
     let t0 ← IO.monoMsNow
-    -- the tactics' names (`Proves.close_dropWt`) resolve as in a `Derived` module
+    -- the tactics' names (`NFml.Proves.close_dropWt`, the fallback's) resolve as in a
+    -- `Derived` module
     let res : Except String (Array String) ← withScope (fun sc =>
         { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <| liftTermElabM do
       -- the scoped `⊢ N.f.problem` (`Calculus/Surface.lean`)

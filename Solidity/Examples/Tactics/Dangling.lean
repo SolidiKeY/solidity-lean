@@ -103,13 +103,13 @@ Each round adds a stale write and a pop below the slot reader, whose
 guards repeat at every read: the leaf grows quadratically with the rounds
 and the reduction by about 1.6 times a round.  Two rounds close; four
 (twelve statements) make a leaf within `closeSize` whose reduction is past
-`elimSize`, refused in milliseconds (`Derive.leafFits`), as `pushes22` in
+`elimSize`, refused in milliseconds (`Seq.leafFitsOn`), as `pushes22` in
 `Examples/ProofTree.lean`.  Six are the most whose leaf is within
 `closeSize` (1799 nodes, reduction 44719), so the largest reduction
-`leafFits` builds before refusing; seven are refused by the leaf's size.
+`leafFitsOn` builds before refusing; seven are refused by the leaf's size.
 The leaves are the walk's (`Seq.residue`, the `⊢` walk `sol_prove` runs),
-erased as a leaf's first line erases it (`Seq.leafErase`), today's
-closer's input. -/
+read as the scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`,
+`Fml.toLS`). -/
 
 /-- Two rounds through one alias. -/
 def rounds2 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
@@ -138,16 +138,12 @@ def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
 #guard (Seq.residue .all (some 0) false .nil rounds2).map List.isEmpty == some true
 #guard (Seq.residue .all (some 0) false .nil rounds4).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    match Seq.leafErase (some 0) l.2.1 l.2.2 with
-    | some (Γ, φ) => (((Hyp.wrap (NFml.Derive.dropWt Γ) φ).seqUpd.toL Decide.Sym.empty).fits
-        NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits Γ φ
-    | none => false) == some [true]
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits NFml.Derive.closeSize).isSome &&
+      !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
 #guard (Seq.residue .all (some 0) false .nil rounds6).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    match Seq.leafErase (some 0) l.2.1 l.2.2 with
-    | some (Γ, φ) => (((Hyp.wrap (NFml.Derive.dropWt Γ) φ).seqUpd.toL Decide.Sym.empty).fits
-        NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits Γ φ
-    | none => false) == some [true]
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits NFml.Derive.closeSize).isSome &&
+      !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
 end Solidity.Examples.Tactics.Dangling

@@ -27,14 +27,13 @@ not show, a scope's end, a hidden binder and the parameters' `∀`, are not
 written).  There a parameter is bound by `∀`, so a tree starts with
 `allRight`; a rule that leaves no statement goes on into the
 rest of the program, so no `emptyModality` follows it; a split has KeY's two
-goals under either modality, its branch's `}` printed; a leaf closes by
-`Proves.close` and today's closer on its erasure, behind diamond updates
-too (`Fml.closableB`: an update's reading asks only of the typed states it
-may end in).  `sol_prove?`
-is the scoped one (`Calculus/Closers.lean`), its replay today's
-text.  The chains the tactics write (`sol_chain?`, `#chain`, `sol_rws?`)
-are pinned in `Examples/Tactics/Chains.lean`.  What stays today's: the
-guards on today's closer (the closer's input, the leaves' erasure).
+goals under either modality, its branch's `}` printed; under `sol_prove` a
+leaf closes on its scoped form (`Calculus/LeafDerive.lean`,
+`Proves.closeHolds`), behind diamond updates too (an update's reading asks
+only of the typed states it may end in), and one it leaves by `sol_leaf`
+and a closer.  `sol_prove?` is the scoped one (`Calculus/Closers.lean`).
+The chains the tactics write (`sol_chain?`, `#chain`, `sol_rws?`) are
+pinned in `Examples/Tactics/Chains.lean`.
 
 A node's tactics (`#proof_node`) are the ones it elaborated,
 `apply Proves.update (Taclet.toStep .localValueAssign); apply
@@ -444,23 +443,22 @@ example : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := b
   sol_prove?
 
 /-! Two writes at keys the premises do not separate: the leaf is left, and
-closed by `sol_decide`'s next step, which splits on `k == j`. -/
+closed on the scoped leaf (`sol_leaf`, the sequent as `⊨ ψ`) by
+`sol_decide`, whose steps after the closer split on `k == j`. -/
 
 /--
 info: Try this:
   sol_prove
-    refine NFml.Proves.close ?_
-    sol_symex
-    refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_
-    sol_reduce
-    sol_decide_cons
+    sol_leaf
+    sol_decide
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ balances[k] = 5; balances[j] = 5; ] balances[k] == 5 } := by
   sol_prove?
 
 /-! A parallel update: `r = ++x;` leaves `{ x := x + 1 ‖ r := x + 1 }`,
-which the closer reads only once `NFml.seqUpd` has split it. -/
+which the scoped closer reads with both elements in the state before it
+(`ElemS.parOk`, `RelU.par`). -/
 
 /--
 info: Try this:
@@ -471,9 +469,9 @@ example : ⊢ dl!{ ⟨ uint x = 5; uint r = ++x; ⟩ r == 6 && x == 6 } := by
   sol_prove?
 
 /-! A split whose condition is ground under its updates keeps only the
-branch it takes (`Seq.ground`, `Seq.refutes`): the `revert()` branches are closed by
+branch it takes (`Hyps.groundS`, `Seq.refutes`): the `revert()` branches are closed by
 `Proves.closeFalse`, not run (two steps fewer in each).  The second reads `y` through twelve updates
-`y := y * y`, each local listed once (`Upd.groundStep`), not `2¹²` times. -/
+`y := y * y`, each position listed once (`Upd.groundStepS`), not `2¹²` times. -/
 
 /--
 info: Try this:
@@ -494,8 +492,8 @@ example : ⊢ dl!{ [ uint y = 1; y = y * y; y = y * y; y = y * y; y = y * y; y =
   sol_prove?
 
 /-! Memory: `Person memory carol;` leaves the pair
-`{ carol := freshId(addM(memory)) ‖ memory := addM(memory) }`, which
-`NFml.seqUpd` keeps whole (`Derive.memAlloc?`); `alice = carol;` copies the
+`{ carol := freshId(addM(memory)) ‖ memory := addM(memory) }`, which the
+scoped closer reads as one allocation (`pairLS`); `alice = carol;` copies the
 memory object into storage as its view.  Both leaves close inside the
 residue. -/
 
@@ -613,10 +611,7 @@ example : ⊢ dl!{ x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
 
 end Scoped
 
-/-! The rest of this section reads today's closer, the input the scoped
-`sol_prove` hands its leaves to (`Seq.leafRes`).
-
-A replay must fit one declaration's `maxHeartbeats` (`Derive.replayFits`,
+/-! A replay must fit one declaration's `maxHeartbeats` (`Derive.replayFits`,
 which `#solkey_derive?` reports as pending and `sol_prove?` warns of).  A
 statement's own elaboration needs more than a limit low enough to refuse a
 small replay, so the test is pinned on its own, at a limit of 1000 raw
@@ -636,10 +631,10 @@ open scoped Scoped
 value only where the read needs them (`CaseTree.toTermLazy`).  Run
 strictly, the work doubled with each push (twelve onto one array: 23 ms;
 twelve onto each of two, interleaved: 106 s), and `sol_prove?`'s size test
-(`Derive.leafFits`) builds the reduction before it counts it.  Here the leaf
+(`Seq.leafFitsOn`) builds the reduction before it counts it.  Here the leaf
 is within `closeSize` and its reduction past `elimSize`: refused in
-milliseconds.  The leaves are the `⊢` walk's (`Seq.residue`), erased as a
-leaf's first line erases it (`Seq.leafErase`). -/
+milliseconds.  The leaves are the `⊢` walk's (`Seq.residue`), read as the
+scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`, `Fml.toLS`). -/
 
 /-- Twenty-two pushes onto one array. -/
 def pushes22 : Fml StandardExample [] :=
@@ -653,15 +648,13 @@ def pushes22 : Fml StandardExample [] :=
 
 #guard (Seq.residue .all (some 0) false .nil pushes22).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    match Seq.leafErase (some 0) l.2.1 l.2.2 with
-    | some (Γ, φ) => (((Hyp.wrap (NFml.Derive.dropWt Γ) φ).seqUpd.toL Decide.Sym.empty).fits
-        NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits Γ φ
-    | none => false) == some [true]
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits NFml.Derive.closeSize).isSome &&
+      !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
 /-! The size bound (`Derive.closeSize`): a storage written from its own
 read doubles the leaf with each write.  Four `total += 1;` close inside the
 residue; six leave one leaf past the bound, which neither the closer nor
-`sol_prove?`'s reducing steps attempt (`Derive.leafFits`). -/
+`sol_prove?`'s reducing steps attempt (`Seq.leafFitsOn`). -/
 
 /-- Four writes of `total` from its own read. -/
 def writes4 : Fml StandardExample [] :=
@@ -675,9 +668,7 @@ def writes6 : Fml StandardExample [] :=
 #guard (Seq.residue .all (some 0) false .nil writes4).map List.isEmpty == some true
 #guard (Seq.residue .all (some 0) false .nil writes6).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    match Seq.leafErase (some 0) l.2.1 l.2.2 with
-    | some (Γ, φ) => NFml.Derive.leafFits Γ φ
-    | none => false) == some [false]
+    Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [false]
 
 /-! The reduction is bounded apart (`Derive.elimSize`): a read below a
 `delete` carries the read before it twice, so ten deletes make a leaf of
@@ -691,10 +682,8 @@ def deletes10 : Fml StandardExample [] :=
 
 #guard (Seq.residue .all (some 0) false .nil deletes10).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    match Seq.leafErase (some 0) l.2.1 l.2.2 with
-    | some (Γ, φ) => (((Hyp.wrap (NFml.Derive.dropWt Γ) φ).seqUpd.toL Decide.Sym.empty).fits
-        NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits Γ φ
-    | none => false) == some [true]
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits NFml.Derive.closeSize).isSome &&
+      !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
 end Scoped
 

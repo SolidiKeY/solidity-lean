@@ -821,16 +821,25 @@ def prove (g : MVarId) : MetaM (List MVarId) := do
   return goals.toList
 
 /-- The tactics `sol_prove?` tries on a leaf, in order, each a sequence of
-lines: `sol_decide`'s two steps after its `LFml.syn` try, which the closer
+lines.  On a leaf the scoped walk left (`isScoped`), first the scoped ones:
+`sol_leaf` (the sequent as `⊨ ψ`, `Calculus/ProvesDerive.lean`), then
+`sol_decide` on the scoped leaf (its layout read from `wt(storage)`), then
+`sol_close` and `sol_spec_close`.  Then today's, on the erasure:
+`sol_decide`'s two steps after its `LFml.syn` try, which the closer
 subsumes, each on its own so that the replay does not try the other; then
 `sol_close` and `sol_spec_close` (`omega`, `grind`).  A leaf past
-`fitsClose` (`small = false`) gets only the last two, whose `simp`,
-`omega` and `grind` heed heartbeats. -/
-def leafTacs (wt : Bool := false) (small : Bool := true) : Array (Array String) :=
+`fitsClose` (`small = false`) gets no step that reduces it, only `sol_close`
+and `sol_spec_close`, whose `simp`, `omega` and `grind` heed heartbeats. -/
+def leafTacs (wt : Bool := false) (small : Bool := true) (isScoped : Bool := false) :
+    Array (Array String) :=
+  let sc := if isScoped then
+      (if small then #[#["sol_leaf", "sol_decide"]] else #[]) ++
+        #[#["sol_leaf", "sol_close"], #["sol_leaf", "sol_spec_close"]]
+    else #[]
   let pre := #[if wt then "refine NFml.Proves.close_dropWt ?_" else "refine NFml.Proves.close ?_",
     "sol_symex"]
   let red := pre ++ #["refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_", "sol_reduce"]
-  (if small then #[red.push "sol_decide_cons", red.push "sol_decide_heuristic"] else #[]) ++
+  sc ++ (if small then #[red.push "sol_decide_cons", red.push "sol_decide_heuristic"] else #[]) ++
     #[pre.push "sol_close", pre.push "sol_spec_close"]
 
 open Lean Meta in
@@ -867,9 +876,9 @@ premise is closed with it set aside (`Proves.close_dropWt`); one past
 def searchLeaf (l : MVarId) (fits : MVarId → MetaM Bool := goalFits) :
     TacticM (Option (Array String × Nat)) := do
   let env ← getEnv
-  let wt := ((← instantiateMVars (← l.getType)).find? fun e =>
-    e.isConstOf ``Term.wt || e.isConstOf ``Op1.wt).isSome
-  for src in leafTacs wt (← fits l) do
+  let ty ← instantiateMVars (← l.getType)
+  let wt := (ty.find? fun e => e.isConstOf ``Term.wt || e.isConstOf ``Op1.wt).isSome
+  for src in leafTacs wt (← fits l) (ty.isAppOfArity ``Solidity.Proves 6) do
     let t ← src.mapM fun line =>
       match Parser.runParserCategory env `tactic line with
       | .ok stx => pure (⟨stx⟩ : TSyntax `tactic)
@@ -879,7 +888,7 @@ def searchLeaf (l : MVarId) (fits : MVarId → MetaM Bool := goalFits) :
     let ok ← tryCatchRuntimeEx
       (withCurrHeartbeats do
         setGoals [l]
-        for x in t do Term.withoutErrToSorry (evalTactic x)
+        for x in t do Term.withoutErrToSorry (withoutRecover (evalTactic x))
         pure (← getUnsolvedGoals).isEmpty)
       fun _ => pure false
     if ok then return some (src, (← IO.getNumHeartbeats) - h0)
@@ -956,13 +965,5 @@ elab_rules : tactic
         declaration, past `maxHeartbeats`"
     setGoals (s.open_ ++ rest.erase g)
     ProofTree.suggest tk (NFml.Derive.replayLines s.found)
-
-/-! ## The leaves' storage writes, counted (`#solkey_scan`, `Seq.scanLeaves`) -/
-
-/-- How many storage writes the context's updates hold. -/
-def NFml.Derive.storageWrites (Γ : List (Hyp C)) : Nat :=
-  Γ.foldl (fun n h => match h with
-    | .upd _ U => n + (U.filter fun | .storage _ => true | _ => false).length
-    | _ => n) 0
 
 end Solidity
