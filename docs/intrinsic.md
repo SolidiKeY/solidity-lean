@@ -1,7 +1,7 @@
 # Making the model intrinsic
 
 The record of the intrinsic refactor (branch `intrinsic`, 2026-10-07 to
-2026-10-09): locals scoped in the syntax (`Stmt C Γ Γ'`, positions `Idx`), a
+2026-10-11): locals scoped in the syntax (`Stmt C Γ Γ'`, positions `Idx`), a
 state typed by its context, a run with no `stuck`, a compiler total on the
 scoped syntax, and the calculus over scoped formulas.  Done but for the rest
 of the closer (M6c, "What is left").  `docs/module-map.md` says where each
@@ -995,7 +995,10 @@ the closer port.
     leaf it does not close may be valid (the two `fail_if_success`
     examples of `Examples/Tactics/Decide` that hold in typed states stay
     open).  `NFml.valid_iff_cons`, the equivalence, stays for today's
-    leaves (`sol_prove`'s, `NFmlDerive`'s leaf search).
+    leaves (`sol_prove`'s, `NFmlDerive`'s leaf search).  master's
+    `negativeKey` pin (`values[-1]` forcing a mapping) is now a
+    `#guard_msgs` pin of its refusal: the typed elaborator rejects `-1`
+    as a `uint`, as solc does, so a negative key is unrepresentable.
 80. *Proposed (M6c 6a), the lead's call:* `Closers.lean`'s erased
     elaborator of `sol_decide` (`Derive.onErased`) is deleted; the scoped
     one is `DecideComplete.lean`'s.  The parts (`sol_decide_cons`,
@@ -1389,9 +1392,12 @@ nothing reads them, and what stays is recorded as decision 7's IR.
     halt); refusing it off the box would make the open and the closed
     reading of one link disagree.  `~[applyStorageBox]~>` is the box's
     only and asks an update of the storage and locals
-    (`FmlRw.applyStorageBox`, `Upd.stOnly`), as the erasure's
-    `NFml.applyStorageBoxTop`; both refusals pinned under the diamond in
-    `Examples/ChainRewritesOpen.lean`.
+    (`FmlRw.applyStorageBox`, `Upd.stOnly`); both refusals pinned under
+    the diamond in `Examples/ChainRewritesOpen.lean`.  It is wider than
+    the erasure's `NFml.applyStorageBoxTop`, which asks a lone
+    `{storage := s}`: on `[{x := 1 ‖ storage := s}] φ` the link applies
+    while the program is open and is refused past it (final review; the
+    scoped form kept, since narrowing it loses a sound step).
 
 ## M6c
 
@@ -1413,7 +1419,9 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
 - **6b** (`Decide.lean`): `Calculus/DecideScoped.lean`, the reduction by
   position (`Fml.reduceS`, `Fml.inLS`, `Valid.of_reduceS`), sound through
   its commutation with the erased one (`Fml.toLS_eq`), so `Decide.lean`'s
-  proofs stay on `NFml` (decision 83; 84–85, two fragment pins).  The
+  proofs stay on `NFml` (decision 83; 84–85, two fragment pins;
+  superseded by W7 `w7-closer`: `Fml.toLS_eq` is gone, `Valid.of_reduceS`
+  is proved over the typed state, `Fml.toLSM_sound`).  The
   kernel-evaluated functions are recursors with `match` twins (G0's
   conditions 1 and 2).
 - **6c `w6c-upd`** (`NFmlUpdateRules`, `StateParts`): scoped ports beside
@@ -1657,8 +1665,12 @@ namespace, an `NFml*` module it imports, `Fml.erase`, or the erased state
   modality's leaves), `Calculus/Problem.lean` (`NFml.wt`),
   `Theory/Bridge/Denote.lean` (`eqD`'s reading).
 - *the decision procedure and the closers' front ends*:
-  `Calculus/Decide.lean` (`NFml.toL`, `NFml.inL`; decision 83: the scoped
-  reduction is proved through it, `Fml.toLS_eq`),
+  `Calculus/Decide.lean` (`NFml.toL`, `NFml.inL`,
+  `NFml.valid_iff_reduce`: the erased closers' path, `Derive.onErased` and
+  the Derived replays; the scoped reduction reuses its `Sym`/`LFml` and
+  reads its terms and elements on the erasure through its lemmas,
+  `Tm.toLS_eq`, `Term.toL_eval`, `Surface.UpdElem.toL_sound`,
+  `pair_sound`: decision 83 as superseded by W7),
   `Calculus/DecideComplete.lean` (`NFml.valid_iff_reduce`),
   `Calculus/DecideLang.lean`, `Tools/Inspect.lean` (`NFml.inL`),
   `Calculus/Closer.lean`, `Calculus/Closers.lean` (`Derive.onErased`:
@@ -1748,6 +1760,9 @@ fails stays on the IR:
   `sol_chain.scopedPast` on by default and the laws, `~~>` and `calc`
   steps on the scoped line; `sol_apply_upd`, `sol_fold_terms` on the
   scoped leaf.
+- A write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩
+  true`, pinned in `Examples/ProofTree.lean`): the closer reads the IR
+  over untyped states with no contract roots.
 - Each of these shortens the reader list ("M6c"); `NFml`, `Fml.erase` and
   `Semantics/Erased.lean` go only when it is empty.
 

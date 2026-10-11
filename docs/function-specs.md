@@ -145,12 +145,14 @@ obligations, not `spec!`.
 - **The diamond over reachable states.** Every obligation is a box, so a
   reverting run satisfies it. A diamond spec needs the layout as constraints
   on reachable states (`Typing/Constructibility.lean`, `Typing/Storage.lean`).
-- **A quantified invariant as an `Invariant C`** (today's `Semantics/Callback`, deleted at W4 `sem-del`):
-  `Invariant.closed` is `fml.vars = []`, and `Fml.vars` keeps a bound name.
-  Loops' quantified invariants need the same (`docs/loops.md`).
+- **A spec's invariant as an `Invariant C`.** `Invariant`
+  (`Calculus/CallbackHolds.lean`) is closed by its type (`Fml C []`) and
+  first-order by `fo`, which admits a quantifier, over the typed `ExecS` of
+  `Semantics/Callback.lean`; what is missing is a compiler from a spec's
+  invariant to one, and a strategy for `ProvesC` (below).
 - **The invariant under callbacks** (`ValidC`, `ProvesC`,
   `Calculus/Callback.lean`) per function: `ProvesC` has no strategy yet.
-- **`sol_decide` on `old`, `net` and `Fml.all`**: all outside `Fml.inL`.
+- **`sol_decide` on `old`, `net` and `Fml.all`**: all outside `NFml.inL`/`Fml.inLS`.
 - **The benchmarks' `net(a)` clauses** (EtherWallet, Purchase,
   SimpleAuction) are not tried.
 - **The corpus's 23 `concretized` rows** (TestSuite 14, SolcExpressions 4,

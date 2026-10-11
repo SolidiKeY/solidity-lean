@@ -501,7 +501,10 @@ def FmlRw.applyOnRigid (i : Nat) (s : Skel) : FmlRw C :=
   FmlRw.atSpine (fun m U φ => Fml.pushAt s m U φ) (fun h σ hψ => Fml.pushAt_sound h σ hψ) i
 
 /-- `applyOnRigid` on a box update that writes no global part but the
-storage (`Upd.stOnly`), as the erasure's `Proves.applyStorageBox` asks. -/
+storage (`Upd.stOnly`): storage writes and locals.  Wider than the
+erasure's `Proves.applyStorageBox` (`NFml.applyStorageBoxTop`), which asks
+a lone `{storage := s}`, so the same link may apply while the program is
+open and be refused past it (proposal 105). -/
 def Fml.pushStAt (s : Skel) {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
     Option (Fml C Γ) :=
   if (m.isBoxS && U.stOnly) = true then Fml.pushAt s m U φ else none

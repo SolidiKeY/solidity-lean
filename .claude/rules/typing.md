@@ -9,8 +9,10 @@ paths:
 The typed syntax is what well-typedness was: a statement no rule can run
 cannot be written, so no theorem of the calculus carries a typing hypothesis.
 What is left here is about *values*: `Typing/Storage.lean` (`SVal.hasTy`, the
-runtime sorts), `Typing/StoragePreservation.lean` (writes keep a value's
-type), `Typing/State.lean` (`StateWT`, the full-state invariant).
+runtime sorts), `Typing/StoragePreservation.lean` (what the erased
+operations produce is typed: a fresh default, arithmetic ints, lengths,
+nodup lookups), `Typing/State.lean` (`StateWT`, the invariant of a state's
+global part; `RunWT` in `Typing/Soundness.lean` adds the locals).
 
 `Typing/TypedWT.lean` shows a typed state's erasure is well-typed by
 construction (`State.erase_wt`); `Typing/Soundness.lean` that the erasure's

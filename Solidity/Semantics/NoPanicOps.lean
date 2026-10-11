@@ -12,8 +12,9 @@ operations, so neither panics (`Calculus/NoPanic.lean`).
 
 Each lemma follows its operation's definition, the recursive ones by the same
 recursion; `no_panic` discharges an unfolded definition.  Split out of
-today's `Semantics/NoPanic`, deleted at W4 `sem-del` (`docs/intrinsic.md`):
-the term model keeps these.
+master's `Semantics/NoPanic` at W4 `sem-del` (`docs/intrinsic.md`); that
+module now states "only an `assert` panics" over the typed run
+(`Prog.run_noPanic`), and the term model keeps these.
 -/
 
 namespace Solidity

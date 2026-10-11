@@ -25,8 +25,7 @@ whose dispatcher branches on what no side condition decides by computing
 is a copy, a conditional written to a member) are proved by hand first.
 
 `RuleKit.lean` is imported for today's `Premise` and holes, which the
-printers (`Calculus/Delab.lean`) and `Premise.erase`, the premise's
-erasure to today's, use.
+printers (`Calculus/Delab.lean`) read.
 -/
 
 namespace Solidity
@@ -681,24 +680,5 @@ theorem Rule.premise_unique {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C 
 /-- `Taclet.toStep`, under its first name. -/
 theorem Taclet.step_eq {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
     {p : Premise C Γ Γ'} (h : Taclet C k m s p) : s.step k m = p := h.toStep
-
-/-! ## Erasure: today's premise -/
-
-/-- `Rules.lean`'s premise, the positions named by `ns`: a capture's scope
-and a hidden binder are erased, a branch's block is its statements. -/
-def Premise.erase {Γ Γ' : Ctx} (ns : List Var) : Premise C Γ Γ' → Surface.Premise C
-  | .update U => .update (U.erase ns)
-  | .unfold P _ => .unfold (P.erase ns)
-  | .bind x _ P => .unfold (P.erase (x :: ns))
-  | .split _ c c' P Q => .split (c.erase ns) (c'.erase ns) (P.erase ns) (Q.erase ns)
-  | .check c => .check (c.erase ns) []
-  | .done b => .done b
-  | .branches bs => .branches (bs.map fun b => (b.bs.toList, b.P.erase (b.bs.names ++ ns)))
-  | .cases fs us => .cases (fs.map (·.erase ns)) (us.map (·.erase ns))
-  | .inv I _ _ U c c' _ hb P post =>
-    let ms := (U.names ns).drop hb.depth
-    .inv (I.erase ns) (U.erase ns) (c.erase (U.names ns)) (c'.erase (U.names ns)) (P.erase ms)
-      (post.erase ms)
-  | .inline P _ => .unfold (P.erase ns)
 
 end Solidity

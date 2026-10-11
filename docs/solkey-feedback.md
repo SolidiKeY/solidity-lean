@@ -72,9 +72,11 @@ canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
 is exactly reachable (for words, keys and slots in range, `SVal.fits`), so no
 hidden invariant is missing. Reachable is by the typed run
 (`Reachable`; for words, keys and slots in range, `FitsStorage`, exactly the
-canonical and tight storages). `uint` range is not yet proved an invariant of the
-model (literals are in range since 2026-10-07, `Simple.lit`, but no theorem says
-a run keeps every word in range), which is why item 1 owns it.
+canonical and tight storages). Word range holds by construction of the typed
+state (a word is a `PrimTy.Denote`), and `reachable_fits`/`reachable_iff_fits`
+(`Typing/Fits.lean`, decision 97 of `docs/intrinsic.md`) prove that reachable
+storage fits for any contract solc accepts (`FixedFits`). What item 1 still
+owns is the solkey side: its `wellFormed` taclets.
 
 **Fix.** Shape it like `heapRules.key`'s `wellFormed(heap)`: *proving* taclets
 per store constructor (`save`, `delAt`, the push/pop `save`s), *using* taclets

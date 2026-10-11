@@ -77,9 +77,6 @@ section Equations
 
 variable {k : Nat} {Γ : Ctx}
 
-theorem Fml.stepFocusR_modal {Γ₁ Γ₀ : Ctx} (m : Modality) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
-    (φ : Fml C Γ₀) : Fml.stepFocusR k (.modal m P κ φ) = Fml.modalFocus k m P κ φ := rfl
-
 theorem Fml.stepFocusR_and_left {φ ψ φ' : Fml C Γ} {f : Focus C}
     (h : φ.stepFocusR k = some (f, φ')) : (Fml.and φ ψ).stepFocusR k = some (f, .and φ' ψ) := by
   show (match φ.stepFocusR k with

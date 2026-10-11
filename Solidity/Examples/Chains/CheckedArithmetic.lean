@@ -63,7 +63,7 @@ theorem box :
 #last_line box
 
 /-- `⟨ uint8 x = 250; x += 10; ⟩ φ`: the same trace, but the diamond's revert is `false`, and so is the
-last line.  A chain proves its first line from its last (`Fml.Via.leads`), and from `false` that says
+last line.  A chain proves its first line from its last (`Fml.ViaE.leads`), and from `false` that says
 nothing: the formula is not proved, since the check must pass and it does not. -/
 theorem diamond :
     dl!{ ⟨ uint8 x = 250; x += 10; ⟩ φ }

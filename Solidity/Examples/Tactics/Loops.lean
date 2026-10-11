@@ -441,7 +441,8 @@ sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /-- A counting loop: from `i = 0`, `i <= n` holds at every head, so the loop
 ends at `n`.  The `require` keeps `n` a number on the leaf's erasure, which
-is closed over untyped states (`Calculus/CloseErase.lean`, until M6c),
+is closed over untyped states (`Calculus/CloseErase.lean`, decision 7's IR;
+`docs/intrinsic.md`, "What is left"),
 where a local may hold anything. -/
 theorem countToN :
     ⊨ dl!{ [ require(n >= 0); uint i = 0;

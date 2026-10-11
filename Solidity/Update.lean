@@ -880,16 +880,6 @@ theorem Semantics.EnvAgreeExcept.anon {ns : List Var} {σ τ : State} (h : EnvAg
   ⟨h.storage, h.heap, h.nextId, h.net, fun n hn => by
     simp only [State.anon, lookupBy_anonEnv, h.env n hn], h.selfBalance, h.tx⟩
 
-/-- Every state that agrees with `σ` off `xs` is, up to agreement, `σ` with
-`xs` anonymised: bound as they are there. -/
-theorem Semantics.State.anon_agree {xs : List Var} {σ τ : State} (h : EnvAgreeExcept xs σ τ) :
-    EnvAgreeExcept [] (σ.anon xs fun x => lookupBy x τ.env) τ :=
-  ⟨h.storage, h.heap, h.nextId, h.net, fun n _ => by
-    simp only [State.anon, lookupBy_anonEnv]
-    split
-    · rfl
-    · exact h.env n ‹_›, h.selfBalance, h.tx⟩
-
 /-! ## Formulas -/
 
 /-- A formula about programs of the contract `C`. -/

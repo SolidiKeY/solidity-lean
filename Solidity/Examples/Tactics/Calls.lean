@@ -379,7 +379,8 @@ theorem tupleReturnDiscardsComponents :
   sol_close
 
 /-- A storage target among the targets (a box: the leaf is closed on its
-erasure over untyped states, `Calculus/CloseErase.lean`, until M6c, and
+erasure over untyped states, `Calculus/CloseErase.lean`, decision 7's IR,
+`docs/intrinsic.md` "What is left", and
 there the write to `total` may fail). -/
 theorem tupleReturnAssignsExisting :
     ⊨ dl[Tuples]{ [ uint hi; (total, hi) = returnOrdered(9, 4); ] (total == 4 ∧ hi == 9) } := by

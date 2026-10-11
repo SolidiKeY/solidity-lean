@@ -35,7 +35,7 @@ faithfulness (`SortCheck/Faithfulness.lean`), the callback semantics
 specifications (`Calculus/SurfaceSpec.lean`), the solkey corpus (`SolidityCorpus`,
 `docs/corpus-parity.md`), and the `SolKey` reader's correspondence against
 `Taclet` (`~/projects/side-projects/lean/solkey`).  The intrinsic refactor
-(`docs/intrinsic.md`, 2026-10-07 to 10-09) scoped the syntax, typed the state
+(`docs/intrinsic.md`, 2026-10-07 to 10-11) scoped the syntax, typed the state
 and the run, and moved the calculus onto both.
 
 ## Still open
@@ -49,12 +49,16 @@ and the run, and moved the calculus onto both.
   output and the printers' target, which `resolve` scopes
   (`Syntax/Resolve.lean`, also the elaborator's locals check; decision 11);
   and the closer's input below.
-- **The closer (M6c).** A leaf is closed by its erasure (`Fml.erase`,
-  `Calculus/CloseErase.lean`): `NFml` (`Update.lean`) over the untyped state
-  of `Semantics.lean`, which `Semantics/Erased.lean`'s `EState` and the
-  typed state erase to.  Porting `Closer`, `Decide*`, `NFmlClose`, the update
-  rules and the chain rewrites onto `Fml C Γ` is M6c, gated per module
-  (`docs/intrinsic.md`, "What is left").
+- **The closer (M6c, done with an IR).** `sol_decide` reduces and closes
+  the scoped leaf by position (`Calculus/DecideScoped.lean`,
+  `Calculus/DecideTyped.lean`: `Valid.of_reduceS`, sound over the typed
+  state), `sol_close` reads a leaf's parameters at their types,
+  `sol_prove` walks scoped sequents, the update rules rewrite the scoped
+  leaf, and a chain's links are scoped while the program is open.  Below
+  these the leaf still erases (`Fml.erase`, `Calculus/CloseErase.lean`) to
+  `NFml` (`Update.lean`) over the untyped state of `Semantics.lean`, as
+  decision 7's IR; `docs/intrinsic.md` lists its readers ("M6c") and the
+  optional ports ("What is left").
 
 - **Calls.** Parameters and return values of reference type (`Person storage
   p`, `uint[] memory xs`) are elaboration errors (`Syntax.lean`).  An external
@@ -149,7 +153,7 @@ their names.
 | Constructors | `constructor(…) { … }` is `Contract.ctor`, not a function, and `uint x = 5;` a root with an initializer (`Contract.inits`).  A deployment is the program `constructor(args);`, a top-level statement only, not in a function's body, a branch, a loop or a block (the reader's `top` flag, cleared by `elabBranch`): the elaborator inlines the constructor as any call (`elabCtor`, `functionBodyExpand`'s `CallRet.rets []`), the initializers prepended after its parameters are bound and before its modifiers, as solkey's `ExpandFunctionBody` does.  No new `Taclet`: the start is an update, solkey's `{storage := mtSt ‖ net := storeSt(mtSt, at(msgSender), msgValue) ‖ selfBalance := msgValue}` (`Problem.deployUpd`, the term `mtSt`), and `Contract.deploy` runs the elaborated program from `Contract.deployState` (it takes the program, since `elabStmts` is `partial` and could not be unfolded inside it).  The obligation owes no `wt(storage)` (`deploy_wt` would be a theorem of its own).  `constant`/`immutable` with an initializer follow solkey in `contract!` (a root with an initializer), and stay a `Gap` in the solc import. |
 | `unchecked { ... }` | No `Stmt` constructor: the wrapping `BinOp`s `+% -% *% **%`, which the elaborator (`uncheckStmts`) writes in place of the block's checked ones, so every rule over `op` covers them.  A function called from the block stays checked, as in solc.  On the EVM they are `ADD`/`SUB`/`MUL`/`EXP` with no guard. |
 | `**`, bitwise, shifts | `**` is checked `uint` exponentiation (`int ** k` is not ported).  `BinOp.band`/`bor`/`bxor`/`shl`/`shr` and `UnOp.bnot` are solc's at `uint256` (a shift by 256 or more is `0`), `uint` only: two's-complement `int` is not modelled.  No solkey taclet exists and none is added; the rules over `op` cover them.  Their compound forms elaborate to `l = l op e;`. |
-| Environment values | `msg.sender`, `msg.value`, `block.timestamp`, `address(this).balance` and `address(this)` (`this` in a formula, the ledger's own account) are a simple value `Simple.env k` (term `Term.env k`), as solkey's `netHeader.key` declares them as program variables; no taclet reads them.  `msg.*` and `block.timestamp` are the state's `tx : TxEnv`, kept by every statement and replaced by a callback (a re-entrant call is its own transaction); the balance is `State.selfBalance`, the funds the transaction found, which `transfer` leaves (it books `net` only, and not at `this`).  On the EVM: `CALLER`, `CALLVALUE`, `TIMESTAMP`, `ADDRESS`, tied to the state by `EnvSim`; `address(this).balance` is not compiled, since `SELFBALANCE` reads the account a `CALL` debits. |
+| Environment values | `msg.sender`, `msg.value`, `block.timestamp`, `address(this).balance` and `address(this)` (`this` in a formula, the ledger's own account) are a simple value `Simple.env k` (term `Term.env k`), as solkey's `netHeader.key` declares them as program variables; no taclet reads them.  `msg.*` and `block.timestamp` are the state's `tx : TTx` (erasing to `TxEnv`), kept by every statement and replaced by a callback (a re-entrant call is its own transaction); the balance is `State.selfBalance`, the funds the transaction found, which `transfer` leaves (it books `net` only, and not at `this`).  On the EVM: `CALLER`, `CALLVALUE`, `TIMESTAMP`, `ADDRESS`, tied to the state by `EnvSim`; `address(this).balance` is not compiled, since `SELFBALANCE` reads the account a `CALL` debits. |
 
 ### Semantics
 
@@ -198,7 +202,7 @@ their names.
 
 | Question | Decision |
 |---|---|
-| Specifications | Compiled as solkey compiles them (`Calculus/SurfaceSpec.lean`): a clause reads a storage term, `\old(count)` is `find(old, count)` with `old` a storage variable bound by `{old := storage}`, and `\forall T x; e` is `Fml.all` over `PrimTy.admits` (so a quantified invariant is not `closed`).  Lean adds two premises solkey's total typed reads need not: each parameter's range and the layout of the state the clauses read (`layoutFmls`).  `sol_decide` keeps `find(old, p)` and leaves `\forall` outside its fragment. |
+| Specifications | Compiled as solkey compiles them (`Calculus/SurfaceSpec.lean`): a clause reads a storage term, `\old(count)` is `find(old, count)` with `old` a storage variable bound by `{old := storage}`, and `\forall T x; e` is `Fml.all` over `PrimTy.admits`.  Lean adds two premises solkey's total typed reads need not: each parameter's range and the layout of the state the clauses read (`layoutFmls`).  `sol_decide` keeps `find(old, p)` and leaves `\forall` outside its fragment. |
 
 ### Several returns, tuples and blocks
 

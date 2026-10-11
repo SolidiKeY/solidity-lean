@@ -1107,11 +1107,6 @@ theorem Upd.lastSt_eval {Γ : Ctx} {σ₀ : EState C Γ} : {Δ : Ctx} → (U : U
 
 end StGlob
 
-/-- **`sequentialToParallel` runs as the two updates in turn.** -/
-theorem Upd.apply_seqPar {Γ Δ₁ Δ₂ : Ctx} (U : Upd C Γ Δ₁) (σ₀ : EState C Γ) (V : Upd C Δ₁ Δ₂)
-    {W : Upd C Γ Δ₂} (h : U.seqPar V = some W) : W.apply σ₀ = (U.apply σ₀ >>= V.apply) :=
-  Upd.apply_graft U σ₀ (fun _ hU x hx => Upd.lastSt_eval U hU x hx) V h
-
 /-- **The merged update gives the two**: `{U ‖ {U}V} φ` gives `{U}{V} φ`
 under the modality of both, `st` the storage `U` leaves where any. -/
 theorem holds_upd_graft {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ Δ₁} {V : Upd C Δ₁ Δ₂}
@@ -1253,8 +1248,6 @@ def Upd.rwC {Γ : Ctx} (q : Solidity.Term C × Solidity.Term C) : {Δ : Ctx} →
 section RwC
 
 variable {Γ : Ctx}
-
-theorem EState.glob_env (σ : EState C Γ) : withLocals σ.glob [] = σ.glob := rfl
 
 /-- A closed term reads as its erasure in the global part. -/
 theorem Tm.eval_toNil (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →

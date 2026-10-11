@@ -74,7 +74,8 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 
 /-! A write under the diamond is valid over typed states, but its leaf is
 closed on its erasure, over every untyped state (one with no `alice` among
-them) until M6c: the leaf stays open and shows its sequent. -/
+them), while the closer reads the erasure (decision 7's IR;
+`docs/intrinsic.md`, "What is left"): the leaf stays open and shows its sequent. -/
 /--
 info: 0: storageFieldWriteSave
 1: OPEN GOAL

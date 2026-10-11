@@ -12,9 +12,12 @@ so that a scoped chain merges its stack while the program is still open
 The merge of two updates and why it is sound are
 `Calculus/Graft.lean`'s (`Upd.seqPar`, `holds_upd_seqPar`), which the
 sequent's `merge` reads too; here they are found on a line's update spine,
-through its quantifiers and hidden binders.  A chain's merge substitutes no
-storage (`Upd.graft` with no `Upd.lastSt`): the chains' `storage` merges are
-`Calculus/ChainRewrites.lean`'s, past the program.
+through its quantifiers and hidden binders.  This module's spine merge
+(`Fml.mergeRun`) substitutes no storage (`Upd.graft` with no `Upd.lastSt`).
+A merge over a storage or memory write is `FmlRw.stateMerge`
+(`Calculus/RewriteScoped.lean`, `Upd.mergeSt?`/`Upd.mergeMem?` of
+`Calculus/StatePartsScoped.lean`) while the program is open, and
+`Calculus/ChainRewrites.lean`'s past it.
 
 The merge is a function the kernel evaluates (`Fml.mergeRun`), and its
 soundness one theorem: `Fml.mergeRun_leads`.  It is written with `match` on

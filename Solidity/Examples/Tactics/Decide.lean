@@ -16,8 +16,9 @@ which every read of a write is a case tree over key equalities.  That
 reduction is sound over the typed state (`Valid.of_reduceS`,
 `Calculus/DecideTyped.lean`), not an equivalence.  The second step, into a
 statement about free reads under the constraints a storage puts on them,
-is one (`NFml.valid_iff_cons`, `Calculus/DecideComplete.lean`), and the
-result is closed.  Only the erased route's reduction is exact
+is on a scoped leaf `LFml.valid_alls_of_cons`: sound, not an equivalence
+(decision 79); `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`) is
+the erased route's equivalence.  The result is then closed.  Only the erased route's reduction is exact
 (`NFml.valid_iff_reduce`), so on a scoped leaf a goal it does not close may
 still be valid: besides being outside the fragment or beyond the final
 `omega`/`grind`, it may hold only because of what the one-way reduction
@@ -26,10 +27,11 @@ drops (decision 83, and the note on the scoped route in
 
 Every goal is stated with `⊨`, which (under `open scoped Scoped`) ranges
 over typed states.  `sol_decide` reads the leaf's parameters at their
-types (a `uint` is an integer in range), and its storage through the
-leaf's erasure, over **every** untyped storage: one whose `balances` is an
-array, whose `alice.account.balance` holds a `bool`, or that has no
-`alice` at all.  The erasure drops the storage's typing, so a goal it does
+types (a `uint` is an integer in range), and its storage untyped (the
+reduction is read in the typed state's erasure, `Valid.of_reduceS`), over
+**every** untyped storage: one whose `balances` is an array, whose
+`alice.account.balance` holds a `bool`, or that has no `alice` at all.
+Reading the storage untyped drops its typing, so a goal it does
 not close may still be valid (`docs/intrinsic.md`, M6c).  Under the box a write that halts
 proves the formula, so the programs below may write anywhere; a read of
 the initial storage is another matter: its erasure owes `wt(storage)`
@@ -197,6 +199,21 @@ theorem belowAnIndex : ⊨ dl!{ [ uint y = values[5]; ] ⟨ values[3] = 1; ⟩ t
 theorem firstOfARow : ⊨ dl!{ [ uint y = matrix[i][j]; ] ⟨ matrix[i][0] = 1; ⟩ true } := by
   sol_symex
   fail_if_success sol_decide_unconstrained
+  sol_decide
+
+/- `negativeKey`: `uint y = values[-1];` then `values[7] = 1;` — on master, where the
+syntax was untyped, this pinned a negative key making `values` a mapping.
+The typed elaborator refuses it: `-1` is no `uint`, as solc refuses it
+(`docs/intrinsic.md`, decision 79). -/
+/--
+error: Solidity elaboration failed: operator - does not take uint
+---
+error: Unexpected syntax
+  sol_symex
+-/
+#guard_msgs in
+example : ⊨ dl!{ [ uint y = values[-1]; ] ⟨ values[7] = 1; ⟩ true } := by
+  sol_symex
   sol_decide
 
 /-- `uint y = alice.account.balance;` then `delete alice.account;` — a read
@@ -399,12 +416,15 @@ theorem ledger :
   sol_decide
 
 /-- **What survives `delete ledger`**: a `delete` keeps a mapping's entries,
-resets a fixed-size array's elements in place, and empties a dynamic array,
-and `⊨` includes states where `ledger.balances` is any of them.  Where it is a
-mapping `survives` is `20`; where it is a fixed-size array (a `uint[3]`, say)
-it is `0`; where it is a dynamic array the read reverts, which the box allows.
-The reduction tests the location above the key for a mapping, then for a
-fixed-size array (`delBelow`, `LStor.mapU`). -/
+resets a fixed-size array's elements in place, and empties a dynamic array.
+The reduction reads the storage untyped, where `ledger.balances` may be any
+of them, so `sol_decide` proves the disjunctive postcondition: where it is a
+mapping `survives` is `20`; where it is a fixed-size array (a `uint[3]`,
+say) it is `0`; where it is a dynamic array the read reverts, which the box
+allows.  In a typed state `ledger.balances` has its declared type, a
+mapping (`survivesMappingOnly`).  The reduction tests the location above
+the key for a mapping, then for a fixed-size array (`delBelow`,
+`LStor.mapU`). -/
 theorem survives :
     ⊨ dl!{ [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
            (survives != 20 → survives == 0) } := by
@@ -421,10 +441,12 @@ theorem survivesMappingOnly :
   sol_prove
 
 
-/-- `fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1];` — `x` is
-`0` where `fixedValues` holds a fixed-size array (`delete` resets its elements
-in place), `7` where it holds a mapping (which `delete` leaves alone: a state
-`⊨` quantifies over), and the read reverts where it holds a dynamic array. -/
+/-- `fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1];` — the
+reduction reads the storage untyped, where `x` is `0` if `fixedValues` holds a
+fixed-size array (`delete` resets its elements in place), `7` if it holds a
+mapping (which `delete` leaves alone), and the read reverts if it holds a
+dynamic array; so `sol_decide` proves the disjunction.  In a typed state
+`fixedValues` has its declared type, `uint[3]`. -/
 theorem fixedDelete :
     ⊨ dl!{ [ fixedValues[1] = 7; delete fixedValues; uint x = fixedValues[1]; ]
            (x != 7 → x == 0) } := by

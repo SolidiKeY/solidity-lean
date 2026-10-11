@@ -1215,8 +1215,11 @@ The leaf's parameters are the reduction's leading quantifiers
 the leaf's body is read in.  Where the erased leaf read each as a name bound
 to anything, split three ways (it halts, is an integer, is a boolean), the
 constraints' step reads it at its type (`Typed`): a `uint` is an integer in
-range, a `bool` a boolean, with no split.  The other locals of the
-reduction, a hidden binder's, are split as before. -/
+range, a `bool` a boolean, with no split.  A hidden binder's local is no
+atom: its position is bound to what the update after it binds
+(`SymS.push`), and a read before that is outside the fragment (`Tm.inLS`);
+only the erased route (`NFml.toL`, `Atom.name`) still splits a free name
+three ways. -/
 
 /-- What a local of type `p` reads: a value of `p`, in range. -/
 def _root_.Solidity.PrimTy.atom : PrimTy → Res Value → Prop

@@ -266,26 +266,6 @@ theorem bump_new_wt {p : PrimTy} {m : Int} {n : Value} (hp : p.isNumeric = true)
 theorem compound_isArith {op : BinOp} (h : op.hasCompoundAssign = true) : op.isArith = true := by
   cases op <;> simp_all [BinOp.hasCompoundAssign, BinOp.isArith]
 
-/-- The memory place a memory target resolves to holds a `p`: `m.age`
-with `m : Person memory`, `ns[i]` with `ns : uint[] memory`. -/
-def AddrTy (H : HeapTy) (p : PrimTy) : Addr → Prop
-  | .memoryField id f => ∃ s, lookupBy id H = some (.ref (.struct s)) ∧
-      lookupBy f (structDef s) = some (.prim p)
-  | .memoryIndex id _ => ∃ R, lookupBy id H = some (.ref R) ∧ R.arrElem? = some (.prim p)
-
-/-- The memory place a memory location resolves to holds a `T`. -/
-def AddrTyT (H : HeapTy) (T : Ty) : Addr → Prop
-  | .memoryField id f => ∃ s, lookupBy id H = some (.ref (.struct s)) ∧
-      lookupBy f (structDef s) = some T
-  | .memoryIndex id _ => ∃ R, lookupBy id H = some (.ref R) ∧ R.arrElem? = some T
-
-/-- A typed place stays typed as the store typing grows (an allocation). -/
-theorem AddrTyT.mono {H H' : HeapTy} {T : Ty} {a : Addr} (hext : H.Extends H')
-    (h : AddrTyT H T a) : AddrTyT H' T a := by
-  cases a with
-  | memoryField id f => obtain ⟨s, hid, hf⟩ := h; exact ⟨s, hext _ _ hid, hf⟩
-  | memoryIndex id i => obtain ⟨R, hid, hR⟩ := h; exact ⟨R, hext _ _ hid, hR⟩
-
 /-- `new uint[](n)` copies in a value of its type: `n` well-formed defaults. -/
 theorem newArrVal_hasTy {R : RefTy} (h : R.newArrOk = true) (n : Int) :
     (newArrVal R n).hasTy (.ref R) = true := by
@@ -698,26 +678,6 @@ theorem Val.eval_wt (hwt : RunWT C H σ) :
     split at h
     · cases h; rfl
     all_goals exact nomatch h
-
-/-- A memory location resolves to a place of its type. -/
-theorem MLoc.addr_wt (hwt : RunWT C H σ) :
-    ∀ {T : Ty} (l : MLoc C Γ T) {a : Addr}, l.addr σ = .ok a → AddrTyT H T a
-  | _, @MLoc.field _ _ s _ b f hf, a, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    cases h
-    have hb := MPath.mval_wt hwt b hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact ⟨s, hb, hf⟩
-  | _, .index ak b i, a, h => by
-    obtain ⟨m0, hm0, h⟩ := bind_ok_inv h
-    obtain ⟨id, hid, h⟩ := bind_ok_inv h
-    bind_inv h
-    obtain ⟨iv, _, h⟩ := bind_ok_inv h
-    cases h
-    have hb := MPath.mval_wt hwt b hm0
-    rw [MVal.asRef_ok hid, MVal.hasTyH_ref] at hb
-    exact ⟨_, hb, ak.arrElem⟩
 
 end Eval
 

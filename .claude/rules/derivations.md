@@ -96,9 +96,9 @@ reading `Calculus/Notation.lean`); if a goal prints with a `‹…›` escape,
 extend the printer (`Calculus/RuleSyntax.lean`, `Calculus/Delab.lean`).
 
 **Valid means every typed state** (`Valid`, `Calculus/Logic.lean`), but the
-closer reads a leaf's erasure over every untyped state (until M6c,
-`docs/intrinsic.md`), including ones without the contract's roots, so a
-write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩ true`,
+closer reads a leaf's erasure over every untyped state (decision 7's IR;
+`docs/intrinsic.md`, "What is left"), including ones without the contract's
+roots, so a write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩ true`,
 pinned in `Examples/ProofTree.lean`). Write the box, or state the
 precondition. A claim about the contract's initial store is a typed run
 (`Surface.Prog.runT` from `State.exampleStore`, `Tools/Run.lean`), pinned

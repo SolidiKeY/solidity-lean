@@ -38,7 +38,9 @@ whose struct misses a member (`struct_missing_field_not_reachable`) are
 well-typed and not `Reachable`.
 
 The converse is `Constructibility.lean`: canonical is not enough, and
-canonical and tight (`SVal.tight`) is exactly reachable.
+canonical and tight (`SVal.tight`) is exactly reachable for a storage that
+fits (`reachable_iff`), with no premise on the storage under `FixedFits`
+(`reachable_iff_fits`, `Typing/Fits.lean`).
 -/
 
 namespace Solidity

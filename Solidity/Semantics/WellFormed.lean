@@ -16,10 +16,13 @@ to be a function, and it sits below `Update.lean`, before any typing module.
 * its words: `SVal.wordsB`, every word in its type's range and every
   mapping key in its key type's, as solc stores them (`PrimVal.fits`).
 
-`Calculus/Problem.lean` proves that a storage passes the shape test exactly
-when it is reachable.  The words are a test of their own: a literal is in its
-type's range (`Simple.lit`), but no theorem yet shows that a run keeps every
-word in range.  A well-formed storage is a reachable one whose words fit.
+`Calculus/Problem.lean` proves that a storage whose words, keys and slots
+fit passes the shape test exactly when it is reachable
+(`shape_iff_reachable`).  A typed state's words are in range by their types,
+and under `FixedFits` every reachable storage fits (`reachable_fits`,
+`Typing/Fits.lean`); the words stay a test of their own for a storage `wt`
+is asked about directly.  A well-formed storage is a reachable one whose
+words fit.
 -/
 
 namespace Solidity
