@@ -191,22 +191,21 @@ theorem ternaryOfMemoryReferences :
   sol_close
 
 /-! A local of a block, and a branch after it that declares the same name at
-another type: Solidity scopes the first to its block.  The untyped program
-has no blocks, so the elaborator writes the block flat and renames its local
-apart (`x_1`, `freshenBlocks`): the locals check (`resolve`,
-`Syntax/Resolve.lean`) reads a branch as a scope and refuses a binder of a
+another type: Solidity scopes the first to its block.  The elaborator
+writes the block flat and renames its local apart (`x_1`,
+`freshenBlocks`): it reads a branch as a scope and refuses a binder of a
 name in scope, so the program is `Fresh`.
 The same holds for a `for` loop's init. -/
 
 /-- info: bool c = true; bool x_1 = true; if (c) { uint x = 1; } else { } -/
 #guard_msgs in
-#eval IO.println (Surface.Prog.toStr
-  (sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } } : Surface.Prog StandardExample))
+#eval IO.println (Prog.toStr []
+  (sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } } : Prog StandardExample [] _))
 
 /-- info: bool c = true; int i_1 = 0; while (i_1 < 1) { i_1++; } if (c) { uint i = 1; } else { } -/
 #guard_msgs in
-#eval IO.println (Surface.Prog.toStr
-  (sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } } : Surface.Prog StandardExample))
+#eval IO.println (Prog.toStr []
+  (sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } } : Prog StandardExample [] _))
 
 /-! Two loops of one index: the first's is renamed apart, the second keeps
 its name. -/
@@ -215,22 +214,22 @@ its name. -/
 info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0; while (i < 3) { n += i; i++; }
 -/
 #guard_msgs in
-#eval IO.println (Surface.Prog.toStr (sol{ uint n = 0; for (uint i = 0; i < 2; i++) { n += i; }
-    for (uint i = 0; i < 3; i++) { n += i; } } : Surface.Prog StandardExample))
+#eval IO.println (Prog.toStr [] (sol{ uint n = 0; for (uint i = 0; i < 2; i++) { n += i; }
+    for (uint i = 0; i < 3; i++) { n += i; } } : Prog StandardExample [] _))
 
 -- a local declared again in its own scope is still refused
 /-- error: Solidity elaboration failed: x is already declared, or names a state variable -/
-#guard_msgs in #check (sol{ uint x = 2; { uint x = 3; } } : Surface.Prog StandardExample)
+#guard_msgs in #check (sol{ uint x = 2; { uint x = 3; } } : Prog StandardExample [] _)
 
 -- a flat block's local declared twice in it: refused at the block's index
-#guard match elabProgAt StandardExample
+#guard match elabProgAtS StandardExample
     sol_raw!{ uint a = 0; { uint x = 1; uint x = 2; } uint x = 3; } with
   | .error (i, _) => i == 1
   | .ok _ => false
 
 /- Declared alike in both branches, then at another type in a later one. -/
-#guard (Prog.resolveCheck [] (sol{ bool c = true; if (c) { uint t = 1; } else { uint t = 2; }
-    if (c) { bool t = true; } } : Surface.Prog StandardExample)).toBool
+example : Prog StandardExample [] [.val .bool] := sol{ bool c = true;
+  if (c) { uint t = 1; } else { uint t = 2; } if (c) { bool t = true; } }
 
 /-! ## Under the diamond: the condition decides
 

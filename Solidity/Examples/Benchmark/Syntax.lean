@@ -1,5 +1,5 @@
 import Solidity.Syntax.Splice
-import Solidity.Syntax.PrintInlined
+import Solidity.Syntax.Inlined
 
 /-!
 # What elaborates away

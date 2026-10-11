@@ -2,7 +2,7 @@ import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Surface
-import Solidity.Syntax.PrintInlined
+import Solidity.Syntax.Inlined
 import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
