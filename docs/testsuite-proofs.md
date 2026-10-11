@@ -477,13 +477,14 @@ one.
   storage, and its words are defaults — with its two side conditions (`nodupKeysB`, `okDeep` of the
   roots) by `decide +kernel`.
 
-**The statements.**  `solc_problems Solkey.TestSuite legacy`
-(`Frontend/Problems.lean`) defines `Solkey.TestSuite.f.problem.legacy : Fml _`
-for each program, not compiled, and `solc_scoped_problems Solkey.TestSuite
-main decl` (`TestSuite/ScopedProblems.lean`) the statement proved,
-`Solkey.TestSuite.f.problem : Fml _ []`, checked to erase to it; the
-`Derived` modules state `⊢` scoped (`open scoped Solidity.Scoped`).
-`#solkey_problem` prints one in solkey's `--print-problem` syntax (same
+**The statements.**  `solc_scoped_problems Solkey.TestSuite decl`
+(`TestSuite/ScopedProblems.lean`) declares the statement proved,
+`Solkey.TestSuite.f.problem : Fml _ []`, written on the scoped program
+`Solkey.TestSuite.f : Prog _ Γ Γ'` (`obligation`, `Frontend/Problems.lean`),
+as the entries of the table `Solkey.TestSuite.problems`; the `Derived`
+modules state `⊢` scoped (`open scoped Solidity.Scoped`).
+`#solkey_problem` prints that statement, or the one `obligation` writes
+where none is declared, in solkey's `--print-problem` syntax (same
 modality, same parameters as program variables of their KeY sort, plus
 `wt(storage) ->`); two are pinned in `TestSuite/Problems.lean`; the
 `#solkey_derive?` suggestions are pinned in `TestSuite/Suggestions.lean`.
