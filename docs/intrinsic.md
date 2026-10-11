@@ -3611,6 +3611,149 @@ are unchanged.
   under a hidden binder or an update); `Env.mem_erase_thin` to move out of
   `HoldsErase` before W9.5.
 
+### W9.3 `walk` record (2026-10-11, branch `w9-walk`)
+
+`sol_prove`'s walk (the `⊢` route) closes a leaf on its scoped form; the
+erased closer is the fallback for a leaf the scoped one does not read.
+
+- **Step 0.**  `lean_build` of the default targets passed on the merge of
+  `decide` and `rw` (`13b0b810`): no integration commit.
+- **`Calculus/LeafDerive.lean`** (new, imported by `ProvesDerive`).
+  `Seq.leafCheckS H φ` reads the wrapped leaf (`Hyps.wrap`): `none` where a
+  modality is left or the fragment does not read it, else whether it closes
+  (`Seq.checkCore`: `Fml.dropWtS` in the fragment, `Fml.toLS` within
+  `closeSize`, `LFml.closeS` of `Fml.reduceS` with `Fml.layoutS`);
+  `Seq.leafCheckS_sound` is `Proves.closeHolds` of `Valid.of_reduceSL` and
+  `LFml.closeS_valid`.  A leaf not read as it is is read prepared
+  (`Fml.prepS`, `holds_of_prepS`).  The kernel-evaluated functions
+  (`checkCore`, `Fml.prepS`, `Tm.stablePathS`, `Hyps.groundInS`,
+  `Upd.resolveS`, `Fml.litPos`, `Thin.posWk`) are recursors with `match`
+  twins and link theorems.
+- **The walk** (`Calculus/ProvesDerive.lean`).  `Seq.leafS`: `some true`
+  closes, `some false` leaves the leaf (no erased try: the erased closer
+  has the same bounds and knows no more of a leaf the fragment reads),
+  `none` falls back to `Seq.leafRes` (`Fml.closeErase`, `Derive.residue`).
+  `Seq.refutes` reads the ground test by position (`Hyps.groundS`) and the
+  same leaf; the erased `Seq.ground` and `Derive.groundCond` … `litVars`
+  are gone.  `Seq.leafQuoteS` marks as before; `Seq.scanLeaves` counts
+  writes on the scoped context (`Hyps.storageWrites`).
+- **The spike's classes.**
+  1. *Layout* and 2. *two parallel elements*: W9.2 (`Valid.of_reduceSL`,
+     `ElemS.parOk`).
+  3. *Push alias*: `Upd.pushSplit` (the scoped `pushAlias?`: `{storage :=
+     extend(storage, a) ‖ x := next(a)}` as the push, then `x :=
+     a[a.length - 1]` read after it), sound by `holds_push_alias`
+     (`stable_evalS`, `lastSlotS_eval`, `next_eval_of_extend`; the typed
+     state between the two updates is the one the parallel update ends in
+     with the alias reset).  10 TestSuite leaves.
+  4. *`wt(storage)` under the parameters' `∀`*: W9.2's `Fml.dropWtS`; on a
+     leaf a tactic closes, `sol_leaf_wt` (`Valid.of_dropWtS`).
+  5. *The ground test*: `Hyps.groundS`, which agrees with the erased test
+     on all 437 TestSuite statements (the walk's leaf counts equal).
+  6. *`pick`/`Fml.stripN`* (decision 27): not ported.  The scoped leaf keeps
+     its parameters bound (`LFml.all`), read at their types
+     (`Facts.bind`), which closes every leaf the free reading closed (0 of
+     910 TestSuite leaves differ); `pick` stays on the fallback.
+  7. *A scoped `seqUpd`*: not needed.  No leaf in the default targets or the
+     TestSuite has an update of three elements (`UView.many`) or a pair
+     outside `parOk`/`pairLS` that the erased closer closes; such a leaf
+     falls back.
+  8. *`Seq.residue` without the erasure*: a leaf the scoped closer reads
+     never evaluates the erasure, in the kernel or in compiled code.
+  9. *(new, Lean only)* a hidden binder of a value read as the `∀` it is
+     (`Fml.bindAsAll`, in `Fml.prepS`): `spec!{f}` obligations bind their
+     parameters so (`Examples/Benchmark/SimpleStorage.lean` `spec_set`,
+     `Examples/Benchmark/Mapping.lean` `spec_nested_set`); rule-map row
+     `sequentialToParallel1-3`.
+- **Coverage.**  TestSuite (437 statements, compiled walk): 910 leaves
+  closed scoped, all 910 the erased closer closed; 8 left: 7 read and not
+  closed, 1 not read.  With the fallback disabled (an experiment, not
+  committed), the default targets built but for the two
+  `#solkey_obligations` pins the experiment's `sorry` moved: the fallback
+  closes no leaf there or in the TestSuite.
+- **Fallback classes** (leaves the scoped closer does not read; in each
+  example the erased closer does not close them either, and the replay is
+  `sol_leaf` and an erasing closer):
+  - an alias whose index reads the storage, used after a storage write: a
+    nested push's returned alias (`testStorageNestedPushReturnAlias`,
+    `TestSuite/Derived7.lean`; `sol_leaf; sol_close`);
+  - a deployment's update, three elements over `mtSt`
+    (`Examples/Tactics/Constructors.lean` `deployMini`, `miniDeploy`;
+    `Solkey/Constructors.lean`; `sol_leaf; sol_close_mt`);
+  - a loop's frame (`anon`, `havoc`): `Examples/Tactics/LoopsImport.lean`
+    (`sol_leaf; sol_close`);
+  - a modality left in the leaf: neither closer reads it, the walk fails.
+- **`sol_leaf`** (`Seq.leafValid`): a leaf `H ⊢ φ` as `⊨ ψ`, `ψ` the wrapped
+  sequent quoted (`Proves.closeValid`, `Symex.normValid`), `Fml.modalFree`
+  checked by the kernel; `sol_leaf_wt` sets `wt(storage)` aside.
+  `Derive.leafTacs` tries on a scoped leaf `sol_leaf` then `sol_decide`
+  (within `Seq.leafFitsS`: `Seq.leafFitsOn`, the scoped `closeSize` and
+  `elimSize`), `sol_close`, `sol_spec_close`, and today's lines after.
+  `Derive.searchLeaf` runs each try `withoutRecover`: a scoped tactic that
+  logs its error and admits the goal (`Symex.reporting`) no longer counts
+  as closing it.  `Derived*` import no `Closers`, so the scoped leaf's
+  `sol_decide` (`Calculus/DecideComplete.lean`), not
+  `sol_decide_cons`, is the replay.
+- **Replays re-derived** (`sol_prove?`, `#solkey_derive?`):
+  `TestSuite/Derived1.lean` (2), `Derived12.lean`, `Examples/Benchmark/Mapping.lean`
+  `remove_spec`, `Examples/Benchmark/Purchase.lean` `ctor_spec`,
+  `abort_onlySeller`: `sol_leaf; sol_decide`; `Derived7.lean`
+  `testStorageNestedPushReturnAlias`, `Examples/Tactics/LoopsImport.lean`
+  (3): `sol_leaf; sol_close`; `Examples/Tactics/Constructors.lean` (2),
+  `Solkey/Constructors.lean`: `sol_leaf; sol_close_mt`.  None searches.
+  `Purchase.ctor_spec` had passed `maxHeartbeats` once the walk ran both
+  closers on its leaf (the erased `sol_close` replay alone takes 181M raw
+  heartbeats); with the erased closer only on leaves the scoped one does
+  not read, and the replay `sol_decide`, it fits.
+- **Pins moved.**
+  - `Examples/ProofTree.lean`: `balances[k] = 5; balances[j] = 5;`'s
+    suggestion is `sol_leaf; sol_decide` (was today's five lines through
+    `NFml.valid_iff_reduce`): the leaf is closed scoped.  `pushes22`,
+    `writes6`, `deletes10` read the scoped leaf (`Fml.toLS` within
+    `closeSize`, `Seq.leafFitsOn`) instead of its erasure (`Seq.leafErase`,
+    `Derive.leafFits`): the same values, and the scoped sizes equal the
+    erased ones (pushes22 1723/13498 nodes, deletes10 330/79587, writes6
+    3122 past `closeSize`).  `writes4` (`isEmpty`) did not move.
+  - `Examples/Tactics/Dangling.lean`: `rounds4`, `rounds6` read the scoped
+    leaf likewise (935/15931, 1799/44719: the sizes the prose gives);
+    `rounds2` (`isEmpty`) and the four `sol_prove?` pins (`sol_prove`) did
+    not move.
+  - `TestSuite/Suggestions.lean`: `testStorageNestedPushReturnAlias` is
+    `sol_leaf; sol_close`.
+  - The open `⟨ alice.age = 1; ⟩ true` leaf stays open: no Lean-only
+    clause "a typed storage has every root" was added.
+- **Timing** (each file copied under `Solidity/Scratch/`, a fresh worker
+  through the MCP, one at a time after a warm-up, `/proc` sampled every
+  20 ms, wall to the last CPU tick; base `13b0b810` in this worktree,
+  filled from the artifact cache; load 1–2.5, cgroup 15–18 GB, the `close`
+  lane running):
+
+  | Row | base | W9.3 `walk` | gate |
+  |---|---|---|---|
+  | `Derived1`–`14` (sum) | 223.0 s | 191.4 s | 237.8 s |
+  | `Derived7` | 54.2 s | 48.1 s | 61.7 s |
+  | `ProofTree` | 10.7 s | 9.9 s | 11.7 s |
+  | `Solkey/TestSuite` | 7.5 s (CPU 6.9) | 8.8 s (CPU 6.9) | 13.2 s |
+
+  Per file, base / walk: `Derived1` 9.2/9.0, `2` 10.8/9.0, `3` 14.1/13.1,
+  `4` 23.3/16.2, `5` 7.9/7.0, `6` 12.8/11.0, `7` 54.2/48.1, `8` 27.1/25.3,
+  `9` 8.5/6.7, `10` 16.0/10.6, `11` 4.0/3.3, `12` 14.3/12.9, `13` 8.8/10.0
+  (CPU 6.6/6.4), `14` 12.2/9.4.
+- **Checks.**  Per-file diagnostics clean (`LeafDerive`, `ProvesDerive`,
+  `NFmlDerive`, the replays and pins above, `Derived1`–`14`,
+  `TestSuite/Suggestions`); `lean_build` of the default targets and
+  `SolkeyTestSuite` (the `Derived` modules first in three batches of a
+  temporary library in `lakefile.toml`, not committed, so that Lake runs at
+  most five at once: cgroup peak 23.4 GB; then the three targets
+  together); `check-orphans`, `check-doc-paths`; `sorry` count
+  unchanged (20 lines, prose and strings); axioms of `Proves.of_residue`,
+  `Seq.leafCheckS_sound`, `holds_push_alias`, `Proves.closeValid`,
+  `Valid.of_dropWtS`: `propext`, `Classical.choice`, `Quot.sound`.
+- **Left.**  The erased fallback (`Seq.leafRes`, `Proves.close`,
+  `close_leaf`, the erased lines of `Derive.leafTacs`) until W9.5; the
+  fallback classes above need an erasing closer (`sol_close`,
+  `sol_close_mt`: the `close` lane's).
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
@@ -3634,8 +3777,9 @@ fails stays on the IR:
   steps on the scoped line; `sol_apply_upd`, `sol_fold_terms` on the
   scoped leaf.
 - A write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩
-  true`, pinned in `Examples/ProofTree.lean`): the closer reads the IR
-  over untyped states with no contract roots.
+  true`, pinned in `Examples/ProofTree.lean`): the closer reads the
+  reduction over untyped states with no contract roots (since W9.3 on the
+  scoped leaf, with no layout without a `wt(storage)` premise).
 - Each of these shortens the reader list ("M6c"); `NFml`, `Fml.erase` and
   `Semantics/Erased.lean` go only when it is empty.
 
