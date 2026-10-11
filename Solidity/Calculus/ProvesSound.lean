@@ -208,7 +208,7 @@ theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LT
 end Wrap
 
 /-- Rewriting the context and the goal is rewriting the sequent. -/
-theorem Hyps.wrap_rwEqC (q : Solidity.Term C × Solidity.Term C) {Γ₀ : Ctx} :
+theorem Hyps.wrap_rwEqC (q : Tm C [] .val × Tm C [] .val) {Γ₀ : Ctx} :
     {Γ : Ctx} → (H : Hyps C Γ₀ Γ) → (φ : Fml C Γ) →
       (H.rwEqC q).wrap (φ.rwEqC q) = (H.wrap φ).rwEqC q
   | _, .nil, _ => rfl

@@ -13,9 +13,10 @@ The sequents are today's, the closer's IR (decision 91,
 `docs/intrinsic.md`): they hold terms only, with no local, no update and no
 program, as a scoped leaf erases to (`Proves.close_leaf`), and they are
 stated over any contract.  The scoped `rw [r]`
-(`Calculus/RewriteSyntax.lean`, the scoped `Proves.rewrite`) runs these
-same term taclets on a scoped goal's closed terms, a program still open
-or not (`Examples/Tactics/SelectOnSaveConsr.lean`).
+(`Calculus/RewriteSyntax.lean`, the scoped `Proves.rewrite`) runs their
+scoped twins (`TermTacletS`, `Calculus/TermLib.lean`) on a scoped goal's
+closed terms, a program still open or not
+(`Examples/Tactics/SelectOnSaveConsr.lean`).
 -/
 
 namespace Solidity.Examples.Tactics.TermTaclets

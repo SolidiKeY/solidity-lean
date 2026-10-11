@@ -21,7 +21,7 @@ import Solidity.Calculus.SoundCalls
   (`TLoop.run_variant`).  A condition is a `bool` of the typed state, so it
   is `true` or `false` wherever it is read; what the rule's terms read on
   the erasure is the typed value (`holds_isBoolD_lower`, from
-  `Val.evalT_erase`, `Val.evalT_ends` and the term bridge `Tm.denote_eval`).
+  `Val.evalT_erase`, `Val.evalT_ends` and the term bridge `Tm.denote_eval`, `Calculus/SeqRewrite.lean`).
 -/
 
 namespace Solidity
@@ -48,45 +48,6 @@ theorem evalBinop_cmp_true {op : BinOp} (hop : op = .lt ∨ op = .le) {a : Value
         have h' : decide _ = true := Semantics.PrimVal.bool.inj (Except.ok.inj h)
         refine ⟨x, y, rfl, rfl, fun hh => ?_, fun hh => ?_⟩ <;>
           first | exact of_decide_eq_true h' | cases hh
-
-/-! ## A condition read on the erasure -/
-
-section Bridge
-
-open Theory Theory.StValue
-open Semantics (bind_ok_inv)
-
-variable {Γ : Ctx}
-
-/-- **The term bridge** on scoped terms (`Theory/Bridge/Denote.lean`): a term's denotation agrees with its
-reading wherever the reading returns. -/
-theorem Tm.denote_eval (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) →
-    Srt.Bridge s (t.denote σ) (t.eval σ)
-  | _, .pvV _ => by intro x h; cases h; rfl
-  | _, .pvP i => by
-    intro r segs h
-    have h' : aliasPath σ i = .ok (r, segs) := h
-    simp only [Tm.denote, h']
-  | _, .pvS _ => by intro τ h; cases h; exact StValue.Equiv.refl _
-  | _, .pvI _ => trivial
-  | _, .netOf i a => by
-    intro x h
-    obtain ⟨va, ha, h⟩ := bind_ok_inv h
-    obtain ⟨n, hn, h⟩ := bind_ok_inv h
-    cases h
-    cases va with
-    | bool => cases hn
-    | int n' =>
-      cases hn
-      simp only [Tm.denote, Tm.denote_eval σ a _ ha]
-  | _, .app0 o => Op0.denote_eval o
-  | _, .app1 o _ a => Op1.denote_eval o (Tm.denote_eval σ a)
-  | _, .app2 o a b => Op2.denote_eval o (Tm.denote_eval σ a) (Tm.denote_eval σ b)
-  | _, .app3 o a b c =>
-    Op3.denote_eval o (Tm.denote_eval σ a) (Tm.denote_eval σ b) (Tm.denote_eval σ c)
-
-
-end Bridge
 
 section Cond
 

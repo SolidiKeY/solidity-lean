@@ -496,13 +496,13 @@ theorem Proves.simplify' {Δ : Ctx} {U U₂ : Upd C Γ Δ} {φ : Fml C Δ} (hs :
 
 /-- `Proves.rewrite`, the rewritten context and goal written out. -/
 theorem Proves.rewrite' {H' : Hyps C Γ₀ Γ} {φ φ' : Fml C Γ}
-    (q : Solidity.Term C × Solidity.Term C) (hq : Solidity.Term.Theq q.1 q.2)
+    (q : Tm C [] .val × Tm C [] .val) (hq : Tm.Theq q.1 q.2)
     (hH : H.rwEqC q = H') (hs : φ.rwEqC q = φ') (h : Proves C R Γ₀ H' φ') : Proves C R Γ₀ H φ :=
   Proves.rewrite q hq (hH ▸ hs ▸ h)
 
 /-- `Proves.updRw`, the rewritten update written out. -/
 theorem Proves.updRw' {Δ : Ctx} {U U₂ : Upd C Γ Δ} {φ : Fml C Δ}
-    (q : Solidity.Term C × Solidity.Term C) (hq : Solidity.Term.EvalRefines q.1 q.2)
+    (q : Tm C [] .val × Tm C [] .val) (hq : Tm.EvalRefines q.1 q.2)
     (hs : U.rwC q = U₂) (h : Proves C R Γ₀ (H.upd .box U₂) φ) : Proves C R Γ₀ (H.upd .box U) φ :=
   Proves.updRw q hq (hs ▸ h)
 

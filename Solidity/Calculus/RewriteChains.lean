@@ -447,7 +447,7 @@ def lawSides? (ty : Lean.Expr) : Option (Lean.Expr × Lean.Expr) :=
   if ty.isAppOfArity ``TermTaclet 3 || ty.isAppOfArity ``LitLaw 3 then
     let args := ty.getAppArgs
     some (args[1]!, args[2]!)
-  else if ty.isAppOfArity ``EvalLaw 4 then
+  else if ty.isAppOfArity ``EvalLaw 4 || ty.isAppOfArity `Solidity.TermTacletS 4 then
     let args := ty.getAppArgs
     some (args[2]!, args[3]!)
   else none
@@ -630,7 +630,10 @@ def lawInstances (c : Lean.Name) (φ : Lean.Expr) :
     let (_, _, ty) ← forallMetaTelescope (← inferType (← mkConstWithFreshMVarLevels c))
     let ty ← whnfR (← instantiateMVars ty)
     let some (lhs, _) := lawSides? ty | throwError "not a law: {c}"
-    instantiateMVars lhs
+    -- a scoped law's side, written by `Tms`' reducible symbols, by its
+    -- constructor (`Tm.app2`, …), as the line's terms are
+    if ty.isAppOf `Solidity.TermTacletS then whnfR (← instantiateMVars lhs)
+    else instantiateMVars lhs
   let mut out := #[]
   let mut failed := none
   for e in subtermsLike lhs0 φ do

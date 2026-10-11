@@ -533,13 +533,25 @@ structure RwCand where
   fml : Expr
   erased : Array Expr
 
+/-- The scoped twin of the term taclet `c`: `TermTacletS`'s constructor
+of its name, or `c` itself where it states a `TermTacletS`. -/
+def scopedLaw? (c : Lean.Name) : MetaM (Option Lean.Name) := do
+  let env ← getEnv
+  let cS := c.replacePrefix ``TermTaclet ``TermTacletS
+  if cS != c && env.contains cS then return some cS
+  let some ci := env.find? c | return none
+  forallTelescopeReducing ci.type fun _ ty => do
+    return if (← whnfR ty).isAppOf ``TermTacletS then some c else none
+
 /-- The rewrites `~[r]~>` names on the scoped line `φ` while its program is
 open (`Calculus/RewriteScoped.lean`), each with the line it leaves, in the
 order they are tried: `applyOnRigid` at each update of the spine, along the
 skeleton of the formula under it; `concrete` below each number of updates; a
 literal law at each instance (found in the line's erasure `erased`, as past
-the program) in each update's right-hand sides; a term taclet onto a term
-that cannot halt in each box update's; a law in the equations along the
+the program) in each update's right-hand sides; a term taclet onto a literal
+in each box update's, its scoped twin (`TermTacletS`, `scopedLaw?`) matched
+against the line's closed terms read at the empty scope
+(`Tm.closedNilVals`); a law in the equations along the
 skeleton below each number of updates (`FmlRw.litEq`, `FmlRw.lawEq`);
 `simplifyUpdate` at each update (absorbing the scope ends after it where the line under it is an update); `applyOnPV` along the skeleton under
 each update (`FmlRw.applyOnPV`); `applyOnRigidBox` as `applyOnRigid`,
@@ -618,10 +630,18 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) (branches
         if s.hasLit then
           rs := rs.push (mkAppN (mkConst ``FmlRw.litEq) #[C, t, t', pf, toExpr i, toExpr s])
   | .law c =>
-    let (is, f) ← NFml.Chain.lawInstances c erased
+    -- the scoped twin of the law (`TermTacletS`), matched against the line's
+    -- closed terms read at the empty scope
+    let (is, f) ← match ← scopedLaw? c with
+      | some cS =>
+        let ts ← Tm.closedNilVals φb
+        if h : 0 < ts.size then
+          NFml.Chain.lawInstances cS (← mkListLit (← inferType ts[0]) ts.toList)
+        else pure (#[], none)
+      | none => pure (#[], some m!"{c} has no scoped twin (`TermTacletS`)")
     failed := f
     for (t, t', pf) in is do
-      if ← isDefEq (mkApp3 (mkConst ``Surface.Tm.total) C (mkConst ``Srt.val) t') (mkConst ``Bool.true) then
+      if ← isDefEq (← mkAppM ``Tm.isLit #[t']) (mkConst ``Bool.true) then
         let ht ← mkEqRefl (mkConst ``Bool.true)
         for i in List.range k do
           rs := rs.push (mkAppN (mkConst ``FmlRw.lawUpd) #[C, t, t', pf, ht, toExpr i])

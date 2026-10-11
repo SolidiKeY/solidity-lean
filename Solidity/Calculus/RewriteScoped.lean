@@ -20,11 +20,11 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 | `FmlRw` | line before ⇝ line after | sound by | solkey |
 |---|---|---|---|
 | `lit r i` | a literal law in the right-hand sides of the update at spine position `i`, any modality | `Upd.rwC_apply_eq` (iff) | `add_literals`, `leq_literals`, … |
-| `lawUpd r ht i` | a term taclet onto a term that cannot halt, in the box update at `i` | `holds_upd_rwC` | `updRw` |
+| `lawUpd r ht i` | a term taclet (`TermTacletS`) onto a literal, in the box update at `i` | `holds_upd_rwC` | `updRw` |
 | `applyOnRigid i s` | `{U}(A ∧ B)`, `{U}(a → B)`, `{U}¬a`, `{U}a` with `a` first-order: `U` applied to the first-order parts (`Fml.substU`), kept in front of the rest; `U` at `i`, cannot halt or under the box | `Fml.pushS_sound` | `applyOnRigidFormula` |
 | `applyStorageBox i s` | `applyOnRigid` where `U` is a box update of the storage and locals (`Fml.pushStAt`) | `Fml.pushS_sound` | `applyOnRigidFormula` (the erasure's `applyStorageBox`) |
 | `concrete n s` | `true ∧ A ⇝ A`, `false → A ⇝ true`, `v ≐ v ⇝ true`, … below `n` updates | `Fml.concreteAlongS_holds` (iff) | `concrete_*`, `eqClose` |
-| `litEq r n s`, `lawEq r n s` | a literal law or a term taclet in the equations along the skeleton `s` below `n` updates: a whole side, and in `defined(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
+| `litEq r n s`, `lawEq r n s` | a literal law or a term taclet (`TermTacletS`) in the equations along the skeleton `s` below `n` updates: a whole side, and in `defined(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
 | `mergeIn p n` | the `n + 1` updates at the end of the path `p` (through `∧`, the right of `→`, updates and binders) merged | `Fml.mergeRun_leads` | `sequentialToParallel2` |
 | `stateMerge r i` | the update at `i` merged with the next over its storage or memory write (`MergeNameS`) | `MergeNameS.top_sound` | `sequentialToParallel2` |
 | `applyOnPV i s` | `{U}(x ≐ c → A) ⇝ {U}(v ≐ c → A)`, `U` leaving the literal `v` in `x`, in the atoms along `s` | `Fml.applyOnPVTop_sound` | `applyOnPV` |
@@ -147,16 +147,16 @@ def FmlRw.atSpine (g : {Γ Δ : Ctx} → Modality → Upd C Γ Δ → Fml C Δ �
 
 section Laws
 
-variable {Γ : Ctx} {q : Solidity.Term C × Solidity.Term C}
+variable {Γ : Ctx} {q : Tm C [] .val × Tm C [] .val}
 
-/-- Whether `Tm.pickC` rewrites `t`: a closed value term reading `q.1` on
-its erasure, `q.2` a term at the scope. -/
-def Tm.firesC (q : Solidity.Term C × Solidity.Term C) : {s : Srt} → Tm C Γ s → Bool
-  | .val, t => (t.toNil?).isSome && t.erase [] == q.1 && (Tm.ofClosed? (Γ := Γ) q.2).isSome
+/-- Whether `Tm.pickC` rewrites `t`: a closed value term reading `q.1` at
+the empty scope. -/
+def Tm.firesC (q : Tm C [] .val × Tm C [] .val) : {s : Srt} → Tm C Γ s → Bool
+  | .val, t => t.closedAs q.1
   | _, _ => false
 
 /-- Whether `Tm.rwC` rewrites something in `t`. -/
-def Tm.hasC (q : Solidity.Term C × Solidity.Term C) : {s : Srt} → Tm C Γ s → Bool
+def Tm.hasC (q : Tm C [] .val × Tm C [] .val) : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => false
   | _, .netOf _ a => Tm.hasC q a
   | _, t@(.app0 _) => Tm.firesC q t
@@ -165,7 +165,7 @@ def Tm.hasC (q : Solidity.Term C × Solidity.Term C) : {s : Srt} → Tm C Γ s �
   | _, t@(.app3 _ x y z) => Tm.firesC q t || Tm.hasC q x || Tm.hasC q y || Tm.hasC q z
 
 /-- Whether `Rhs.rwC` rewrites something. -/
-def Rhs.hasC (q : Solidity.Term C × Solidity.Term C) : {t : LTy} → Rhs C Γ t → Bool
+def Rhs.hasC (q : Tm C [] .val × Tm C [] .val) : {t : LTy} → Rhs C Γ t → Bool
   | _, .val t => t.hasC q
   | _, .path p => p.hasC q
   | _, .mref i => i.hasC q
@@ -173,7 +173,7 @@ def Rhs.hasC (q : Solidity.Term C × Solidity.Term C) : {t : LTy} → Rhs C Γ t
   | _, _ => false
 
 /-- Whether `UpdElem.rwC` rewrites something. -/
-def UpdElem.hasC {Δ : Ctx} (q : Solidity.Term C × Solidity.Term C) : UpdElem C Γ Δ → Bool
+def UpdElem.hasC {Δ : Ctx} (q : Tm C [] .val × Tm C [] .val) : UpdElem C Γ Δ → Bool
   | .local _ r => r.hasC q
   | .storage s => s.hasC q
   | .memory m => m.hasC q
@@ -181,7 +181,7 @@ def UpdElem.hasC {Δ : Ctx} (q : Solidity.Term C × Solidity.Term C) : UpdElem C
   | .net r _ a | .pay r a | .netMt r a => r.hasC q || a.hasC q
 
 /-- Whether `Upd.rwC` rewrites something. -/
-def Upd.hasC (q : Solidity.Term C × Solidity.Term C) : {Δ : Ctx} → Upd C Γ Δ → Bool
+def Upd.hasC (q : Tm C [] .val × Tm C [] .val) : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .nil => false
   | _, .snoc U e => Upd.hasC q U || e.hasC q
   | _, .decl U _ r => Upd.hasC q U || r.hasC q
@@ -196,25 +196,42 @@ theorem LitLaw.evalEq {t t' : Solidity.Term C} (r : LitLaw t t') : Term.EvalEq t
   rw [h g]
   rfl
 
-theorem Tm.pickC_eval_eq (hq : Term.EvalEq q.1 q.2) (σ : EState C Γ) :
+/-- `Term.EvalEq` on scoped terms. -/
+def Tm.EvalEq (t t' : Tm C [] .val) : Prop := ∀ σ : EState C [], t.eval σ = t'.eval σ
+
+/-- A literal law's sides, the closer's closed terms, at the empty scope
+(`Tm.ofClosed?`): the law `FmlRw.lit` and `FmlRw.litEq` read on the line. -/
+def Term.closedPairS? (t t' : Solidity.Term C) : Option (Tm C [] .val × Tm C [] .val) := do
+  pure (← Tm.ofClosed? t, ← Tm.ofClosed? t')
+
+theorem LitLaw.closedPairS {t t' : Solidity.Term C} (r : LitLaw t t')
+    {q : Tm C [] .val × Tm C [] .val} (h : Term.closedPairS? t t' = some q) :
+    Tm.Theq q.1 q.2 ∧ Tm.EvalEq q.1 q.2 := by
+  obtain ⟨a, ha, h⟩ := Option.bind_eq_some_iff.1 h
+  obtain ⟨b, hb, h⟩ := Option.bind_eq_some_iff.1 h
+  cases h
+  refine ⟨fun σ => ?_, fun σ => ?_⟩
+  · show Equiv (a.denote σ) (b.denote σ)
+    rw [Tm.denote_ofClosed σ t ha, Tm.denote_ofClosed σ t' hb]
+    exact r.theq σ.glob
+  · show a.eval σ = b.eval σ
+    rw [Tm.eval_ofClosed σ t ha, Tm.eval_ofClosed σ t' hb]
+    exact r.evalEq σ.glob
+
+theorem Tm.pickC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) :
     {s : Srt} → {t d : Tm C Γ s} → d.eval σ = t.eval σ → (Tm.pickC q t d).eval σ = t.eval σ
   | .val, t, d, hd => by
     simp only [Tm.pickC]
     split
     · rename_i hc
-      simp only [Bool.and_eq_true, Option.isSome_iff_exists, beq_iff_eq] at hc
-      obtain ⟨⟨t₀, ht₀⟩, he⟩ := hc
-      cases ho : Tm.ofClosed? (Γ := Γ) q.2 with
-      | none => exact hd
-      | some u =>
-        show u.eval σ = t.eval σ
-        rw [Tm.eval_toNil σ t ht₀, he, Tm.eval_ofClosed σ q.2 ho, hq]
+      show (Tm.ofNil q.2).eval σ = t.eval σ
+      rw [Tm.eval_ofNil σ, Tm.eval_closedAs hc σ, hq]
     · exact hd
   | .path, _, _, hd | .st, _, _, hd | .sv, _, _, hd | .ident, _, _, hd | .addr, _, _, hd
   | .mem, _, _, hd | .mv, _, _, hd => hd
 
 /-- **An exact law keeps what every term returns.** -/
-theorem Tm.rwC_eval_eq (hq : Term.EvalEq q.1 q.2) (σ : EState C Γ) :
+theorem Tm.rwC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) :
     {s : Srt} → (t : Tm C Γ s) → (t.rwC q).eval σ = t.eval σ
   | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => rfl
   | _, .netOf i a => by simp only [Tm.rwC, Tm.eval, Tm.rwC_eval_eq hq σ a]
@@ -225,16 +242,16 @@ theorem Tm.rwC_eval_eq (hq : Term.EvalEq q.1 q.2) (σ : EState C Γ) :
   | _, .app3 o x y z => Tm.pickC_eval_eq hq σ (by
       simp only [Tm.eval, Tm.rwC_eval_eq hq σ x, Tm.rwC_eval_eq hq σ y, Tm.rwC_eval_eq hq σ z])
 
-theorem Rhs.rwC_eval_eq (hq : Term.EvalEq q.1 q.2) (σ : EState C Γ) {t : LTy} (r : Rhs C Γ t) :
+theorem Rhs.rwC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) {t : LTy} (r : Rhs C Γ t) :
     (r.rwC q).eval σ = r.eval σ := by
   cases r <;> simp only [Rhs.rwC, Rhs.eval, Tm.rwC_eval_eq hq σ]
 
-theorem UpdElem.rwC_write_eq (hq : Term.EvalEq q.1 q.2) {Δ : Ctx} (σ₀ : EState C Γ)
+theorem UpdElem.rwC_write_eq (hq : Tm.EvalEq q.1 q.2) {Δ : Ctx} (σ₀ : EState C Γ)
     (e : UpdElem C Γ Δ) (τ : EState C Δ) : (e.rwC q).write σ₀ τ = e.write σ₀ τ := by
   cases e <;> simp only [UpdElem.rwC, UpdElem.write, Rhs.rwC_eval_eq hq σ₀, Tm.rwC_eval_eq hq σ₀]
 
 /-- **An exact law keeps where every update ends.** -/
-theorem Upd.rwC_apply_eq (hq : Term.EvalEq q.1 q.2) (σ₀ : EState C Γ) :
+theorem Upd.rwC_apply_eq (hq : Tm.EvalEq q.1 q.2) (σ₀ : EState C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → (U.rwC q).apply σ₀ = U.apply σ₀
   | _, .nil => rfl
   | _, .snoc U e => by
@@ -244,7 +261,7 @@ theorem Upd.rwC_apply_eq (hq : Term.EvalEq q.1 q.2) (σ₀ : EState C Γ) :
   | _, .pop U h => by simp only [Upd.rwC, Upd.apply, Upd.rwC_apply_eq hq σ₀ U]
   | _, .drop U h => by simp only [Upd.rwC, Upd.apply, Upd.rwC_apply_eq hq σ₀ U]
 
-theorem holds_upd_rwC_iff (hq : Term.EvalEq q.1 q.2) {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ}
+theorem holds_upd_rwC_iff (hq : Tm.EvalEq q.1 q.2) {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ}
     {φ : Fml C Δ} (σ : State C Γ) : holds σ (.upd m (U.rwC q) φ) ↔ holds σ (.upd m U φ) := by
   show Modality.afterC m _ ((U.rwC q).apply σ.erase) ↔ Modality.afterC m _ (U.apply σ.erase)
   rw [Upd.rwC_apply_eq hq]
@@ -252,12 +269,12 @@ theorem holds_upd_rwC_iff (hq : Term.EvalEq q.1 q.2) {m : Modality} {Δ : Ctx} {
 end Laws
 
 /-- An exact law in the update's right-hand sides, under any modality. -/
-def Fml.updRwEq (q : Solidity.Term C × Solidity.Term C) {Γ Δ : Ctx} (m : Modality)
+def Fml.updRwEq (q : Tm C [] .val × Tm C [] .val) {Γ Δ : Ctx} (m : Modality)
     (U : Upd C Γ Δ) (φ : Fml C Δ) : Option (Fml C Γ) :=
   if U.hasC q then some (.upd m (U.rwC q) φ) else none
 
 /-- A law in the right-hand sides of a box update. -/
-def Fml.updRwBox (q : Solidity.Term C × Solidity.Term C) {Γ Δ : Ctx} :
+def Fml.updRwBox (q : Tm C [] .val × Tm C [] .val) {Γ Δ : Ctx} :
     Modality → Upd C Γ Δ → Fml C Δ → Option (Fml C Γ)
   | .box, U, φ => if U.hasC q then some (.upd .box (U.rwC q) φ) else none
   | .diamond, _, _ => none
@@ -267,15 +284,17 @@ namespace FmlRw
 /-- **A literal law** (`add_literals`, …) in the right-hand sides of the
 update at position `i`, under any modality: it is exact. -/
 def lit {t t' : Solidity.Term C} (r : LitLaw t t') (i : Nat) : FmlRw C :=
-  FmlRw.atSpine (fun m U φ => Fml.updRwEq (t, t') m U φ) (fun {_ _ m U φ ψ} h σ hψ => by
-    dsimp only [Fml.updRwEq] at h
-    split at h
-    · cases h; exact (holds_upd_rwC_iff (q := (t, t')) r.evalEq σ).1 hψ
-    · cases h) i
+  FmlRw.atSpine (fun m U φ => (Term.closedPairS? t t').bind fun q => Fml.updRwEq q m U φ)
+    (fun {_ _ m U φ ψ} h σ hψ => by
+      obtain ⟨q, hq, h⟩ := Option.bind_eq_some_iff.1 h
+      dsimp only [Fml.updRwEq] at h
+      split at h
+      · cases h; exact (holds_upd_rwC_iff (r.closedPairS hq).2 σ).1 hψ
+      · cases h) i
 
-/-- **A term taclet** onto a term that cannot halt, in the right-hand sides
-of the box update at position `i` (solkey's `updRw`). -/
-def lawUpd {t t' : Solidity.Term C} (r : TermTaclet t t') (ht : t'.total = true) (i : Nat) :
+/-- **A term taclet** onto a literal, in the right-hand sides of the box
+update at position `i` (solkey's `updRw`). -/
+def lawUpd {t t' : Tm C [] .val} (r : TermTacletS t t') (ht : t'.isLit = true) (i : Nat) :
     FmlRw C :=
   FmlRw.atSpine (fun m U φ => Fml.updRwBox (t, t') m U φ) (fun {_ _ m U φ ψ} h σ hψ => by
     cases m with
@@ -283,7 +302,7 @@ def lawUpd {t t' : Solidity.Term C} (r : TermTaclet t t') (ht : t'.total = true)
     | box =>
       dsimp only [Fml.updRwBox] at h
       split at h
-      · cases h; exact holds_upd_rwC (q := (t, t')) (Term.EvalRefines.of_theq r.sound ht) σ hψ
+      · cases h; exact holds_upd_rwC (q := (t, t')) (Tm.EvalRefines.of_theq r.sound ht) σ hψ
       · cases h) i
 
 end FmlRw
@@ -527,7 +546,7 @@ def FmlRw.applyStorageBox (i : Nat) (s : Skel) : FmlRw C :=
 
 A law read in the atoms along the skeleton (`Skel`): a whole side of an
 equation that is its left side (`Tm.sideC`, the Theory's equation,
-`Term.Theq`), and, for an exact law (a literal law, `Term.EvalEq`), every
+`Tm.Theq`), and, for an exact law (a literal law, `Tm.EvalEq`), every
 closed occurrence in a `defined(…)` term (`Tm.rwC`).  Each is an
 equivalence, so it applies at any position, negative ones included. -/
 
@@ -537,19 +556,19 @@ variable {Γ : Ctx}
 
 /-- An atom with the law `q` read in it; `exact` for a law whose two sides
 return alike. -/
-def Fml.lawAtom (q : Solidity.Term C × Solidity.Term C) (exact : Bool) : Fml C Γ → Fml C Γ
+def Fml.lawAtom (q : Tm C [] .val × Tm C [] .val) (exact : Bool) : Fml C Γ → Fml C Γ
   | .eq a b => .eq (a.sideC q) (b.sideC q)
   | .defined t => if exact then .defined (t.rwC q) else .defined t
   | φ => φ
 
 /-- Whether `Fml.lawAtom` rewrites something. -/
-def Fml.lawAtomFires (q : Solidity.Term C × Solidity.Term C) (exact : Bool) : Fml C Γ → Bool
+def Fml.lawAtomFires (q : Tm C [] .val × Tm C [] .val) (exact : Bool) : Fml C Γ → Bool
   | .eq a b => Tm.firesC q a || Tm.firesC q b
   | .defined t => exact && t.hasC q
   | _ => false
 
 /-- The law `q` in the atoms along the skeleton `s`. -/
-def Fml.lawAlongS (q : Solidity.Term C × Solidity.Term C) (exact : Bool) :
+def Fml.lawAlongS (q : Tm C [] .val × Tm C [] .val) (exact : Bool) :
     {Γ : Ctx} → Skel → Fml C Γ → Fml C Γ
   | _, .lit, φ => Fml.lawAtom q exact φ
   | _, .and _ _ l r, .and a b => .and (Fml.lawAlongS q exact l a) (Fml.lawAlongS q exact r b)
@@ -559,7 +578,7 @@ def Fml.lawAlongS (q : Solidity.Term C × Solidity.Term C) (exact : Bool) :
   | _, _, φ => φ
 
 /-- Whether `Fml.lawAlongS` rewrites something. -/
-def Fml.lawFiresS (q : Solidity.Term C × Solidity.Term C) (exact : Bool) :
+def Fml.lawFiresS (q : Tm C [] .val × Tm C [] .val) (exact : Bool) :
     {Γ : Ctx} → Skel → Fml C Γ → Bool
   | _, .lit, φ => Fml.lawAtomFires q exact φ
   | _, .and _ _ l r, .and a b => Fml.lawFiresS q exact l a || Fml.lawFiresS q exact r b
@@ -568,9 +587,9 @@ def Fml.lawFiresS (q : Solidity.Term C × Solidity.Term C) (exact : Bool) :
   | _, .upd s, .upd _ _ ψ => Fml.lawFiresS q exact s ψ
   | _, _, _ => false
 
-variable {q : Solidity.Term C × Solidity.Term C} {exact : Bool}
+variable {q : Tm C [] .val × Tm C [] .val} {exact : Bool}
 
-theorem Fml.lawAtom_holds (hq : Term.Theq q.1 q.2) (hx : exact = true → Term.EvalEq q.1 q.2)
+theorem Fml.lawAtom_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalEq q.1 q.2)
     (φ : Fml C Γ) (σ : State C Γ) : holds σ (Fml.lawAtom q exact φ) ↔ holds σ φ := by
   cases φ with
   | eq a b =>
@@ -599,7 +618,7 @@ theorem holds_upd_congr {Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {ψ ψ' : Fm
   rw [key]
 
 /-- **A law along the skeleton keeps what the line says.** -/
-theorem Fml.lawAlongS_holds (hq : Term.Theq q.1 q.2) (hx : exact = true → Term.EvalEq q.1 q.2) :
+theorem Fml.lawAlongS_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalEq q.1 q.2) :
     {Γ : Ctx} → (s : Skel) → (φ : Fml C Γ) → ∀ σ : State C Γ,
       (holds σ (Fml.lawAlongS q exact s φ) ↔ holds σ φ)
   | _, .lit, φ, σ => Fml.lawAtom_holds hq hx φ σ
@@ -628,11 +647,11 @@ theorem Fml.lawAlongS_holds (hq : Term.Theq q.1 q.2) (hx : exact = true → Term
   | _, .opaque, _, _ => Iff.rfl
 
 /-- The law along the skeleton, where it rewrites something. -/
-def Fml.lawOnS (q : Solidity.Term C × Solidity.Term C) (exact : Bool) (s : Skel) (φ : Fml C Γ) :
+def Fml.lawOnS (q : Tm C [] .val × Tm C [] .val) (exact : Bool) (s : Skel) (φ : Fml C Γ) :
     Option (Fml C Γ) :=
   if Fml.lawFiresS q exact s φ then some (Fml.lawAlongS q exact s φ) else none
 
-theorem Fml.lawOnS_sound (hq : Term.Theq q.1 q.2) (hx : exact = true → Term.EvalEq q.1 q.2)
+theorem Fml.lawOnS_sound (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalEq q.1 q.2)
     {s : Skel} {φ ψ : Fml C Γ} (h : Fml.lawOnS q exact s φ = some ψ) (σ : State C Γ)
     (hψ : holds σ ψ) : holds σ φ := by
   unfold Fml.lawOnS at h
@@ -648,13 +667,15 @@ namespace FmlRw
 updates of the spine: a whole side of an equation, and every closed
 occurrence in a `defined(…)` term. -/
 def litEq {t t' : Solidity.Term C} (r : LitLaw t t') (n : Nat) (s : Skel) : FmlRw C :=
-  FmlRw.below (fun φ => Fml.lawOnS (t, t') true s φ)
-    (fun h σ hψ => Fml.lawOnS_sound (q := (t, t')) r.theq (fun _ => r.evalEq) h σ hψ) n
+  FmlRw.below (fun φ => (Term.closedPairS? t t').bind fun q => Fml.lawOnS q true s φ)
+    (fun h σ hψ => by
+      obtain ⟨q, hq, h⟩ := Option.bind_eq_some_iff.1 h
+      exact Fml.lawOnS_sound (r.closedPairS hq).1 (fun _ => (r.closedPairS hq).2) h σ hψ) n
 
 /-- **A term taclet** in the equations along the skeleton `s` below `n`
 updates of the spine: a whole side of an equation (solkey's `\find` on an
 equation's side). -/
-def lawEq {t t' : Solidity.Term C} (r : TermTaclet t t') (n : Nat) (s : Skel) : FmlRw C :=
+def lawEq {t t' : Tm C [] .val} (r : TermTacletS t t') (n : Nat) (s : Skel) : FmlRw C :=
   FmlRw.below (fun φ => Fml.lawOnS (t, t') false s φ)
     (fun h σ hψ => Fml.lawOnS_sound (q := (t, t')) r.sound (fun h => absurd h Bool.false_ne_true)
       h σ hψ) n

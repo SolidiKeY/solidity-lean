@@ -55,7 +55,7 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
 
 /-- A Theory rewrite keeps a formula in the fragment: it changes only the
 sides of its equations. -/
-theorem Fml.inSolkey_rwEqC (q : Solidity.Term C × Solidity.Term C) :
+theorem Fml.inSolkey_rwEqC (q : Tm C [] .val × Tm C [] .val) :
     {Γ : Ctx} → (φ : Fml C Γ) → (φ.rwEqC q).inSolkey = φ.inSolkey
   | _, .tt | _, .eq .. | _, .defined _ => rfl
   | _, .not φ => Fml.inSolkey_rwEqC q φ

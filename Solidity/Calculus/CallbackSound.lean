@@ -29,7 +29,7 @@ fact of the state's erasure, which the callee's run and the updates read.
   succeeded", "call succeeded"); a send that fails and a `try` whose call
   reverts run their clause from where they were made.
 
-`Fml.closedB`, `Frames.popsOnly`, `Fml.reclose?` and the `openInv`s use
+`Frames.popsOnly`, `Fml.reclose?` and the `openInv`s use
 `match` on the indexed families, against Gate G0's first condition: an
 exemption, timed (`docs/intrinsic.md`, W3c `tactics`), since they run once
 a rule.
@@ -534,89 +534,6 @@ theorem ProvesC.valid {I : Invariant C} {φ : Fml C []}
     (d : ProvesC I.fml [] .nil φ) : ValidC I φ :=
   ProvesC.sound_of I.fo I.noTransfer d
 
-/-! ## The invariant assumed, at the end of a resumed program
-
-"Resume after callback" assumes the invariant past a frame end that drops
-every local (`Fml.closedAt`), and a goal past a program that ends where
-it is resumed is the postcondition past the frames' scope ends
-(`Frames.exit`).  Where both are the same closed first-order formula (no
-local in it, read on the erasure), the assumption is the goal:
-`Proves.assumeInv`, KeY's `close` on `I ⟹ I`. -/
-
-/-- A first-order formula with no local and no `∀`: it reads the global
-part only. -/
-def Fml.closedB {Γ : Ctx} : Fml C Γ → Bool
-  | .tt => true
-  | .eq a b => a.toNil?.isSome && b.toNil?.isSome
-  | .defined t => t.toNil?.isSome
-  | .not φ => Fml.closedB φ
-  | .and φ ψ | .imp φ ψ => Fml.closedB φ && Fml.closedB ψ
-  | _ => false
-
-/-- **A closed formula reads as its erasure, in the global part.** -/
-theorem holds_closedB {Γ : Ctx} : (φ : Fml C Γ) → φ.closedB = true → (σ : State C Γ) →
-    (holds σ φ ↔ NFml.holds σ.erase.glob (φ.erase []))
-  | .tt, _, _ => Iff.rfl
-  | .eq a b, h, σ => by
-    have h' : a.toNil?.isSome = true ∧ b.toNil?.isSome = true := Bool.and_eq_true_iff.mp h
-    obtain ⟨a₀, ha⟩ := Option.isSome_iff_exists.1 h'.1
-    obtain ⟨b₀, hb⟩ := Option.isSome_iff_exists.1 h'.2
-    show Theory.StValue.Equiv _ _ ↔ Theory.StValue.Equiv _ _
-    rw [Tm.denote_toNil σ.erase a ha, Tm.denote_toNil σ.erase b hb]
-  | .defined t, h, σ => by
-    obtain ⟨t₀, ht⟩ := Option.isSome_iff_exists.1 h
-    show (∃ x, _) ↔ (∃ x, _)
-    rw [Tm.eval_toNil σ.erase t ht]
-  | .not φ, h, σ => not_congr (holds_closedB φ h σ)
-  | .and φ ψ, h, σ => by
-    have h' : φ.closedB = true ∧ ψ.closedB = true := Bool.and_eq_true_iff.mp h
-    exact and_congr (holds_closedB φ h'.1 σ) (holds_closedB ψ h'.2 σ)
-  | .imp φ ψ, h, σ => by
-    have h' : φ.closedB = true ∧ ψ.closedB = true := Bool.and_eq_true_iff.mp h
-    exact imp_congr (holds_closedB φ h'.1 σ) (holds_closedB ψ h'.2 σ)
-  | .upd .., h, _ | .modal .., h, _ | .havoc _, h, _ | .all .., h, _ | .bind .., h, _
-  | .anon .., h, _ => nomatch h
-
-/-- Frames that only end scopes. -/
-def Frames.popsOnly {Γ Γ₀ : Ctx} : Frames C Γ Γ₀ → Bool
-  | .nil => true
-  | .seq .nil κ => Frames.popsOnly κ
-  | .seq (.cons ..) _ => false
-  | .pop _ _ κ | .drop _ κ => Frames.popsOnly κ
-
-/-- Past scope ends, a closed formula holds where it holds before them. -/
-theorem holds_exit_closed {Γ₀ : Ctx} {φ : Fml C Γ₀} {g : Semantics.State}
-    (hφ : φ.closedB = true) (h : NFml.holds g (φ.erase [])) :
-    {Γ : Ctx} → (κ : Frames C Γ Γ₀) → κ.popsOnly = true → ∀ σ : State C Γ, σ.erase.glob = g →
-      holds σ (κ.exit .box φ)
-  | _, .nil, _, σ, e => (holds_closedB φ hφ σ).2 (e ▸ h)
-  | _, .seq .nil κ, hκ, σ, e => holds_exit_closed hφ h κ hκ σ e
-  | _, .pop _ e' κ, hκ, σ, e => by
-    show Modality.afterC .box _ ((Upd.nil.pop e').apply σ.erase)
-    intro σ' he _
-    exact holds_exit_closed hφ h κ hκ σ' (by rw [he]; exact e)
-  | _, .drop e' κ, hκ, σ, e => by
-    show Modality.afterC .box _ ((Upd.nil.drop e').apply σ.erase)
-    intro σ' he _
-    exact holds_exit_closed hφ h κ hκ σ' (by rw [he]; exact e)
-
-/-- **The invariant assumed is the goal**: `…, {havoc}, I ⟹ I`, the
-assumption past a frame end that drops every local, the goal past the
-program's scope ends, the two the same closed first-order formula. -/
-theorem Proves.assumeInv {R : RuleSet} {Γ₀ Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {I : Fml C []}
-    {κ : Frames C Γ Δ} {φ : Fml C Δ} (hκ : κ.popsOnly = true := by rfl)
-    (hI : I.closedB = true := by rfl) (hφ : φ.closedB = true := by rfl)
-    (he : φ.erase [] = I.erase [] := by rfl) (hb : H.boxOnly = true := by rfl)
-    (hm : ((H.pre (Fml.closedAt I)).wrap (κ.exit .box φ)).modalFree = true := by
-      first | rfl | decide) :
-    Proves C R Γ₀ (H.pre (Fml.closedAt I)) (κ.exit .box φ) := by
-  refine .closeHolds (fun σ => H.wrap_valid (φ := .imp (Fml.closedAt I) (κ.exit .box φ)) hb
-    (fun τ hτ => ?_) σ) hm
-  have hτ : Modality.afterC .box _ ((Upd.nil.drop (Thin.nilTo Γ)).apply τ.erase) := hτ
-  have h₁ := (holds_closedB I hI _).1 (hτ (τ.withEnv (Δ := []) ()) rfl (List.prefix_refl _))
-  rw [← he] at h₁
-  exact holds_exit_closed hφ h₁ κ hκ τ rfl
-
 /-! ## The invariant assumed, opened at its scope
 
 Past a frame end that drops every local, the invariant assumed reads the
@@ -624,9 +541,10 @@ global part only; where it is a closed first-order formula it is that
 formula read at the scope it is assumed in (`Fml.reclose?`), first-order,
 which the closer reads (`Proves.openInv`, at a leaf). -/
 
-/-- A closed term, read at another scope. -/
+/-- A closed term, read at another scope: at the empty scope
+(`Tm.toNil?`), then at `Γ'` (`Tm.ofNil`). -/
 def Tm.reclose? {Γ Γ' : Ctx} {s : Srt} (t : Tm C Γ s) : Option (Tm C Γ' s) :=
-  if t.toNil?.isSome then Tm.ofClosed? (t.erase []) else none
+  t.toNil?.map Tm.ofNil
 
 /-- A closed first-order formula, read at another scope. -/
 def Fml.reclose? {Γ Γ' : Ctx} : Fml C Γ → Option (Fml C Γ')
@@ -659,22 +577,14 @@ def Hyps.openInv {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Hyps C Γ₀
 theorem Tm.reclose_eval {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
     (h : t.reclose? = some t') (σ : EState C Γ) (τ : EState C Γ') (hg : σ.glob = τ.glob) :
     t'.eval τ = t.eval σ := by
-  unfold Tm.reclose? at h
-  split at h
-  · rename_i hs
-    obtain ⟨t₀, ht₀⟩ := Option.isSome_iff_exists.1 hs
-    rw [Tm.eval_ofClosed τ _ h, Tm.eval_toNil σ t ht₀, hg]
-  · cases h
+  obtain ⟨t₀, ht₀, rfl⟩ := Option.map_eq_some_iff.1 h
+  rw [Tm.eval_ofNil τ, Tm.eval_toNilS σ t ht₀, EState.nil_eq_of_glob hg]
 
 theorem Tm.reclose_denote {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
     (h : t.reclose? = some t') (σ : EState C Γ) (τ : EState C Γ') (hg : σ.glob = τ.glob) :
     t'.denote τ = t.denote σ := by
-  unfold Tm.reclose? at h
-  split at h
-  · rename_i hs
-    obtain ⟨t₀, ht₀⟩ := Option.isSome_iff_exists.1 hs
-    rw [Tm.denote_ofClosed τ _ h, Tm.denote_toNil σ t ht₀, hg]
-  · cases h
+  obtain ⟨t₀, ht₀, rfl⟩ := Option.map_eq_some_iff.1 h
+  rw [Tm.denote_ofNil τ, Tm.denote_toNilS σ t ht₀, EState.nil_eq_of_glob hg]
 
 /-- **A closed formula reads alike at another scope**, over the same global
 part. -/
@@ -707,6 +617,53 @@ theorem holds_reclose {Γ Γ' : Ctx} : (φ : Fml C Γ) → {φ' : Fml C Γ'} →
     exact imp_congr (holds_reclose φ hφ σ τ hg) (holds_reclose ψ hψ σ τ hg)
   | .upd .., _, h, _, _, _ | .modal .., _, h, _, _, _ | .havoc _, _, h, _, _, _
   | .all .., _, h, _, _, _ | .bind .., _, h, _, _, _ | .anon .., _, h, _, _, _ => nomatch h
+
+/-! ### The invariant assumed, at the end of a resumed program
+
+"Resume after callback" assumes the invariant past a frame end that drops
+every local (`Fml.closedAt`), and a goal past a program that ends where
+it is resumed is the postcondition past the frames' scope ends
+(`Frames.exit`).  Where the goal is the invariant read at its scope (a
+closed first-order formula, `Fml.reclose?`), the assumption is the goal:
+`Proves.assumeInv`, KeY's `close` on `I ⟹ I`. -/
+
+/-- Frames that only end scopes. -/
+def Frames.popsOnly {Γ Γ₀ : Ctx} : Frames C Γ Γ₀ → Bool
+  | .nil => true
+  | .seq .nil κ => Frames.popsOnly κ
+  | .seq (.cons ..) _ => false
+  | .pop _ _ κ | .drop _ κ => Frames.popsOnly κ
+
+/-- Past scope ends, a closed formula holds where the formula it reads as
+at the empty scope holds, over the same global part. -/
+theorem holds_exit_closed {Γ₀ : Ctx} {φ : Fml C Γ₀} {I : Fml C []} (hφ : φ.reclose? = some I)
+    {τ₀ : State C []} (h : holds τ₀ I) :
+    {Γ : Ctx} → (κ : Frames C Γ Γ₀) → κ.popsOnly = true → ∀ σ : State C Γ,
+      σ.erase.glob = τ₀.erase.glob → holds σ (κ.exit .box φ)
+  | _, .nil, _, σ, e => (holds_reclose φ hφ σ τ₀ e).1 h
+  | _, .seq .nil κ, hκ, σ, e => holds_exit_closed hφ h κ hκ σ e
+  | _, .pop _ e' κ, hκ, σ, e => by
+    show Modality.afterC .box _ ((Upd.nil.pop e').apply σ.erase)
+    intro σ' he _
+    exact holds_exit_closed hφ h κ hκ σ' (by rw [he]; exact e)
+  | _, .drop e' κ, hκ, σ, e => by
+    show Modality.afterC .box _ ((Upd.nil.drop e').apply σ.erase)
+    intro σ' he _
+    exact holds_exit_closed hφ h κ hκ σ' (by rw [he]; exact e)
+
+/-- **The invariant assumed is the goal**: `…, {havoc}, I ⟹ I`, the
+assumption past a frame end that drops every local, the goal past the
+program's scope ends, read as `I` at the empty scope. -/
+theorem Proves.assumeInv {R : RuleSet} {Γ₀ Γ Δ : Ctx} {H : Hyps C Γ₀ Γ} {I : Fml C []}
+    {κ : Frames C Γ Δ} {φ : Fml C Δ} (hκ : κ.popsOnly = true := by rfl)
+    (he : φ.reclose? = some I := by rfl) (hb : H.boxOnly = true := by rfl)
+    (hm : ((H.pre (Fml.closedAt I)).wrap (κ.exit .box φ)).modalFree = true := by
+      first | rfl | decide) :
+    Proves C R Γ₀ (H.pre (Fml.closedAt I)) (κ.exit .box φ) := by
+  refine .closeHolds (fun σ => H.wrap_valid (φ := .imp (Fml.closedAt I) (κ.exit .box φ)) hb
+    (fun τ hτ => ?_) σ) hm
+  have hτ : Modality.afterC .box _ ((Upd.nil.drop (Thin.nilTo Γ)).apply τ.erase) := hτ
+  exact holds_exit_closed he (hτ (τ.withEnv (Δ := []) ()) rfl (List.prefix_refl _)) κ hκ τ rfl
 
 /-- An assumption gives it opened. -/
 theorem holds_openInv {Γ : Ctx} (a : Fml C Γ) (τ : State C Γ) (h : holds τ a) :

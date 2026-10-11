@@ -27,8 +27,9 @@ reducing by `rfl` and `decide`.  The ones a kernel check evaluates
 with its `match` form as the compiled twin (`…M`) and a link theorem
 (`…_eq_…M`), as Gate G0 asks (`Calculus/DecideScoped.lean`).
 
-`holds_eqD_iffS` (the scoped `holds_eqD_iff`) needs the term bridge
-`Tm.denote_eval`, so it is stated beside it, in `Calculus/SoundLoops.lean`.
+`holds_eqD_iffS` (the scoped `holds_eqD_iff`) is in
+`Calculus/SoundLoops.lean`: it needs the term bridge `Tm.denote_eval`
+(`Calculus/SeqRewrite.lean`), which imports this module.
 -/
 
 namespace Solidity
