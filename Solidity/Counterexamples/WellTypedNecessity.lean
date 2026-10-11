@@ -60,10 +60,11 @@ theorem readSelect_needs_storage :
     nodupKeysB ([] : HeapTy) = true ∧ heapTypedB [] badStore.heap = true ∧
     HeapWellFormed badStore ∧
     wellTypedStorageB Total.layout badStore.storage = false ∧
+    Env.All (LTy.WT Total []) badCore.env ∧
     Stmt.read? totalRead = some (.storage (.prim .uint) (.loc (.root "total" rfl))) ∧
     ¬ (Read.storage (.prim .uint) (.loc (.root "total" rfl)) : Read Total [.val .uint]).SortOk
       badCore [] (.generic .hasSort) := by
-  refine ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, rfl, ?_⟩
+  refine ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, ⟨rfl, trivial⟩, rfl, ?_⟩
   intro h
   exact absurd (h "total" [] (.bool true) rfl rfl) (by decide)
 
