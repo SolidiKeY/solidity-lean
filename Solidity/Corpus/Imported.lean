@@ -94,22 +94,17 @@ def Obligation.Box (σ : State C []) (φ : Fml C []) : Prop :=
 
 /-- **A derived obligation of no parameters holds at the initial state**:
 its program, run typed from there, under its modality.  `wt(storage)` there
-is `initState_wt`'s, read scoped (`holds_erase_fo`). -/
+is `initStorage_wt`'s. -/
 theorem runs_of_proved {m : Modality} {Γ' : Ctx} {Q : Prog C [] Γ'}
     (h : Proves C .all [] .nil (Problem.fml m [] Q))
-    (hw : NFml.holds C.initState (NFml.wt C)) : Runs m (State.init C) Q := by
-  have hwt : holds (State.init C) (Fml.wt C) :=
-    (holds_erase_fo (ns := []) (Fml.wt C) (by simp only [Fml.wt, Fml.Plain]) rfl
-      (Agree.nil (State.init C).erase)).2
-      (by rw [show withLocals (State.init C).erase.glob [] = C.initState by
-        rw [State.init_erase]; rfl]; exact hw)
-  exact h.valid (State.init C) hwt
+    (hw : holds (State.init C) (Fml.wt C)) : Runs m (State.init C) Q :=
+  h.valid (State.init C) hw
 
 /-- A derived diamond obligation with no parameters holds at the initial
 state (`runs_of_proved`). -/
 theorem diamond_of_proved {Γ' : Ctx} {Q : Prog C [] Γ'}
     (h : Proves C .all [] .nil (Problem.fml .diamond [] Q))
-    (hw : NFml.holds C.initState (NFml.wt C)) :
+    (hw : holds (State.init C) (Fml.wt C)) :
     Obligation.Diamond (State.init C) (Problem.fml .diamond [] Q) :=
   ⟨_, Q, rfl, runs_of_proved h hw⟩
 
@@ -117,7 +112,7 @@ theorem diamond_of_proved {Γ' : Ctx} {Q : Prog C [] Γ'}
 (`runs_of_proved`). -/
 theorem box_of_proved {Γ' : Ctx} {Q : Prog C [] Γ'}
     (h : Proves C .all [] .nil (Problem.fml .box [] Q))
-    (hw : NFml.holds C.initState (NFml.wt C)) :
+    (hw : holds (State.init C) (Fml.wt C)) :
     Obligation.Box (State.init C) (Problem.fml .box [] Q) :=
   ⟨_, Q, rfl, runs_of_proved h hw⟩
 

@@ -50,5 +50,5 @@ open Solidity in
 well-formed (`initStorage_wt`: the empty program reaches it, and its words
 are defaults). -/
 theorem Solkey.TestSuite.initState_wt :
-    NFml.holds Solkey.TestSuite.initState (NFml.wt Solkey.TestSuite) :=
+    holds (State.init Solkey.TestSuite) (Fml.wt Solkey.TestSuite) :=
   initStorage_wt (by decide +kernel) (by decide +kernel)

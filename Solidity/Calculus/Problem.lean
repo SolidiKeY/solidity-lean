@@ -3,6 +3,7 @@ import Solidity.Calculus.SurfaceSpec
 import Solidity.Semantics.StateErase
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Quote
+import Solidity.Calculus.Logic
 
 /-!
 # Obligations, as solkey states them
@@ -120,11 +121,15 @@ theorem storageShapeB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name
 /-! ## The premise -/
 
 /-- `wt(storage)`: the storage is one `C` can be in. -/
-def NFml.wt (C : Contract) : NFml C := .defined (.wt C.vars .storage)
+def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
+  .defined (.app1 (.wt C.vars) rfl (.app0 .storage))
 
-theorem holds_wt {σ : Semantics.State} : NFml.holds σ (NFml.wt C) ↔ storageWtB C.vars σ.storage = true := by
-  simp only [NFml.wt, NFml.holds, Surface.Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
-  cases storageWtB C.vars σ.storage with
+/-- `wt(storage)` holds in a typed state exactly when its storage passes
+the test. -/
+theorem holds_wt {Γ : Ctx} {σ : State C Γ} :
+    holds σ (Fml.wt C) ↔ storageWtB C.vars σ.erase.glob.storage = true := by
+  simp only [Fml.wt, holds, Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
+  cases storageWtB C.vars σ.erase.glob.storage with
   | true => exact ⟨fun _ => rfl, fun _ => ⟨_, rfl⟩⟩
   | false => exact ⟨fun ⟨_, h⟩ => (nomatch h), fun h => (nomatch h)⟩
 
@@ -184,10 +189,11 @@ theorem storageWordsB_init (hnd : nodupKeysB C.vars = true) :
 /-- The contract's initial storage is well-formed (the empty program reaches
 it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) : NFml.holds C.initState (NFml.wt C) :=
-  holds_wt.2 (wt_of_reachable hnd hdeep
+    (hdeep : C.vars.all (·.2.okDeep) = true) : holds (State.init C) (Fml.wt C) := by
+  rw [holds_wt, Reachable.init_erase]
+  exact wt_of_reachable hnd hdeep
     ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, rfl, Storage.init_erase C⟩
-    (storageWordsB_init hnd))
+    (storageWordsB_init hnd)
 
 /-! ## The obligations
 
@@ -199,10 +205,6 @@ position the deepest), which `∀` binds over each type's range
 /-- The parameters `xs` as a named context, the first parameter the
 outermost (deepest) local. -/
 def paramsN (xs : List (PrimTy × Var)) : NCtx := xs.reverse.map fun (p, x) => (x, .val p)
-
-/-- `wt(storage)`: the storage is one `C` can be in (`NFml.wt`). -/
-def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
-  .defined (.app1 (.wt C.vars) rfl (.app0 .storage))
 
 /-- solkey's obligation for a function of body `P` and parameters `xs`
 under the modality `m`, `P` read in their context: `∀xs. wt(storage) → [ P ]
@@ -270,21 +272,26 @@ elab_rules (kind := problemCtor) : term
 macro_rules (kind := problemCtorBang)
   | `(problem!{ constructor }) => `(problem[InContract.contract]{ constructor })
 
+/-- Whether a term is `wt(storage)`. -/
+def Problem.isWt {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
+  | _, .app1 (.wt _) _ (.app0 .storage) => true
+  | _, _ => false
+
+/-- Whether an update is the deployment's, `Problem.deployUpd`'s shape. -/
+def Problem.isDeploy {Γ Δ : Ctx} : Upd C Γ Δ → Bool
+  | .snoc (.snoc (.snoc .nil (.storage (.app0 (.mtSt _))))
+      (.netMt (.app0 (.env .msgSender)) (.app0 (.env .msgValue))))
+      (.setBalance (.app0 (.env .msgValue))) => true
+  | _ => false
+
 /-- The parameters an obligation binds, whether it is a deployment, and its
-modality, read back off the formula (its locals named `ns`): what
-`Problem.text` prints. -/
-def Problem.parts : {Γ : Ctx} → List Var → Fml C Γ → Option (List (PrimTy × Var) × Bool × Modality)
-  | _, ns, .all x p φ => (Problem.parts (x :: ns) φ).map fun (xs, r) => ((p, x) :: xs, r)
-  | _, ns, .imp (.defined t) (.modal m _ _ .tt) =>
-    match t.erase ns with
-    | .app1 (.wt _) (.app0 .storage) => some ([], false, m)
-    | _ => none
-  | _, ns, .upd m U (.modal m' _ _ .tt) =>
-    match U.erase ns with
-    | [.storage (.app0 (.mtSt _)), .netMt (.env .msgSender) (.env .msgValue),
-        .setBalance (.env .msgValue)] => if m = m' then some ([], true, m) else none
-    | _ => none
-  | _, _, _ => none
+modality, read back off the formula: what `Problem.text` prints. -/
+def Problem.parts : {Γ : Ctx} → Fml C Γ → Option (List (PrimTy × Var) × Bool × Modality)
+  | _, .all x p φ => (Problem.parts φ).map fun (xs, r) => ((p, x) :: xs, r)
+  | _, .imp (.defined t) (.modal m _ _ .tt) => if Problem.isWt t then some ([], false, m) else none
+  | _, .upd m U (.modal m' _ _ .tt) =>
+    if Problem.isDeploy U && m = m' then some ([], true, m) else none
+  | _, _ => none
 
 /-- KeY's sort of a parameter, as solkey declares it: `int` for every
 integer type. -/
@@ -300,7 +307,7 @@ problem writes `{storage := mtSt || net := mtSt}`, an empty ledger and free
 funds, where the interpreter's deployment books the payment
 (`Contract.deployState`). -/
 def Problem.text (contract fn : String) (φ : Fml C []) : String :=
-  match Problem.parts [] φ with
+  match Problem.parts φ with
   | none => "(not an obligation)"
   | some (xs, deploy, m) =>
     let vars := if xs.isEmpty then "" else
