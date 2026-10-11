@@ -193,6 +193,7 @@ import Solidity.Examples.Tactics.Step
 import Solidity.Examples.Tactics.Print
 import Solidity.Examples.Tactics.Rules
 import Solidity.Examples.Tactics.Notation
+import Solidity.Examples.Tactics.DlNotation
 import Solidity.Examples.Tactics.Chains
 import Solidity.Examples.Tactics.Spec
 import Solidity.Examples.Tactics.ProofTree

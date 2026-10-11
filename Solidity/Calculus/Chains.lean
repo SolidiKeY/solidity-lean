@@ -17,9 +17,11 @@ dispatch on the goal's head constant the same way.
 show: the scope ends of a rule's fresh locals (`Frames.pop .capture`), the
 rest of the program as a frame, the hidden binder.  So a written line after
 the first is not read into the chain: the strategy computes it, and the
-written text must be the computed line read in names, its erasure
-(`Fml.erase`; `matchWritten`): `dl!{ … }`'s reading of the text, the
-postcondition `φ` where the line has it.  A line printed with a block's end
+written text must be the computed line read in names: the two compare by
+their keys (`Fml.lineKey`; `matchWritten`), the erasure (`Fml.erase`)
+where there is no modality and a modality's program as its text
+(`Prog.toStrs`), the text read scoped with its parameters open
+(`elabDlOpen`), the postcondition `φ` where the line has it.  A line printed with a block's end
 (`}`, `Delab`'s `core_item`) reads without it.  The statement holds
 the computed lines, which `Delab` prints as written.
 
@@ -119,11 +121,98 @@ structure LineQ where
 /-- The names a line's context gets in its erasure: none known. -/
 def Ctx.blankNames (Γ : Ctx) : List Var := List.replicate Γ.length (.user "_")
 
-/-- The erasure of `φ`, quoted: the closer's formula when it has no
-modality, else as written (`Fml.eraseS`, `Surface.Fml.quoteAuto`), as a
-written line is read. -/
-def Fml.erasedQuoted (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) : Lean.Expr :=
-  Solidity.Surface.Fml.quoteAuto c (φ.eraseS Γ.blankNames)
+/-- What a line is compared by (`Fml.lineKey`): the closer's formula where
+there is no modality, and a modality's program as its text. -/
+inductive LineKey (C : Contract) where
+  /-- A part with no modality: its erasure (`Fml.erase`). -/
+  | fml (φ : NFml C)
+  | not (k : LineKey C)
+  | and (k l : LineKey C)
+  | imp (k l : LineKey C)
+  | upd (m : Modality) (U : Surface.Upd C) (k : LineKey C)
+  /-- `⟨ P ⟩ k` or `[ P ] k`: the statements of the program and of its
+  frames, each as `Prog.toStrs` prints it (`Prog.keyStrs`: a block
+  flattened, a scope end nothing). -/
+  | modal (m : Modality) (P : List String) (k : LineKey C)
+  | havoc (k : LineKey C)
+  | all (x : Var) (p : PrimTy) (k : LineKey C)
+  | anon (xs : List Var) (k : LineKey C)
+
+/-- The statements of a block, one string each, as `Prog.toStrs` prints
+them, but a block statement (`{ … }`, what a call's expansion leaves) its
+statements, as the erasure (`Prog.erase`) and a line's print flatten it. -/
+partial def Prog.keyStrs (skip : Nat) (ns : List Var) {Γ Γ' : Ctx} : Prog C Γ Γ' → List String
+  | .nil => []
+  | .cons s P =>
+    match skip with
+    | k + 1 => Prog.keyStrs k (s.outNames ns) P
+    | 0 =>
+      match s with
+      | .block body => Prog.keyStrs 0 ns body ++ Prog.keyStrs 0 ns P
+      | s =>
+        match Stmt.tupleCallStr? ns s P with
+        | some (c, k) => c :: Prog.keyStrs k (s.outNames ns) P
+        | none =>
+          match Stmt.memCallStr? ns s P with
+          | some c => c :: Prog.keyStrs 1 (s.outNames ns) P
+          | none => s.toStr ns :: Prog.keyStrs 0 (s.outNames ns) P
+
+/-- The statements the frames hold, one string each (`Prog.keyStrs`): a
+scope end is nothing, as `}` is in a written line. -/
+def Frames.keyStrs (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → List String
+  | _, _, .nil => []
+  | _, _, .seq ω κ => Prog.keyStrs 0 ns ω ++ κ.keyStrs (ω.outNames ns)
+  | _, _, .pop _ h κ => κ.keyStrs (ns.drop h.depth)
+  | _, _, .drop h κ => κ.keyStrs (h.names ns)
+
+/-- **A line's comparison key**, the positions named by `ns`: `Fml.erase`
+where no modality is (`Fml.active`), and the modality with the program's
+text (`Prog.keyStrs`, then the frames') where one is; a hidden binder and an
+update of pops only are nothing, as in the erasure. -/
+def Fml.lineKey : {Γ : Ctx} → List Var → Fml C Γ → LineKey C
+  | _, ns, φ =>
+    if !φ.active then .fml (φ.erase ns) else
+    match φ with
+    | .not φ => .not (φ.lineKey ns)
+    | .and φ ψ => .and (φ.lineKey ns) (ψ.lineKey ns)
+    | .imp φ ψ => .imp (φ.lineKey ns) (ψ.lineKey ns)
+    | .upd m U φ =>
+      match U.erase ns with
+      | [] => φ.lineKey (U.names ns)
+      | U' => .upd m U' (φ.lineKey (U.names ns))
+    | .modal m P κ φ =>
+      .modal m (Prog.keyStrs 0 ns P ++ κ.keyStrs (P.outNames ns))
+        (φ.lineKey (κ.outNames (P.outNames ns)))
+    | .havoc φ => .havoc (φ.lineKey ns)
+    | .all x p φ => .all x p (φ.lineKey (x :: ns))
+    | .bind _ x _ φ => φ.lineKey (x :: ns)
+    | .anon xs φ => .anon (xs.map fun x => x.2.name ns) (φ.lineKey ns)
+    | φ => .fml (φ.erase ns)
+
+/-- A key, quoted: a part with no modality as the closer's formula itself
+(`NFml.quote`), so that a line with none is its erasure, which the rewrites
+past the program read (`erasedLine`). -/
+def LineKey.quote (c : Lean.Expr) : LineKey C → Lean.Expr
+  | .fml φ => NFml.quote c φ
+  | .not k => Lean.mkAppN (Lean.mkConst ``LineKey.not) #[c, k.quote c]
+  | .and k l => Lean.mkAppN (Lean.mkConst ``LineKey.and) #[c, k.quote c, l.quote c]
+  | .imp k l => Lean.mkAppN (Lean.mkConst ``LineKey.imp) #[c, k.quote c, l.quote c]
+  | .upd m U k =>
+    Lean.mkAppN (Lean.mkConst ``LineKey.upd) #[c, Lean.toExpr m, Surface.Upd.quote c U, k.quote c]
+  | .modal m P k =>
+    Lean.mkAppN (Lean.mkConst ``LineKey.modal) #[c, Lean.toExpr m, Lean.toExpr P, k.quote c]
+  | .havoc k => Lean.mkAppN (Lean.mkConst ``LineKey.havoc) #[c, k.quote c]
+  | .all x p k => Lean.mkAppN (Lean.mkConst ``LineKey.all) #[c, Lean.toExpr x, Lean.toExpr p, k.quote c]
+  | .anon xs k => Lean.mkAppN (Lean.mkConst ``LineKey.anon) #[c, Lean.toExpr xs, k.quote c]
+
+/-- The key of `φ` (`Fml.lineKey`), its context named `ns`, quoted: what a
+written line's reading is compared with (`readingMatches`). -/
+def Fml.lineKeyQ (c : Lean.Expr) {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Lean.Expr :=
+  (φ.lineKey ns).quote c
+
+/-- The key of a written line read open (`elabDlOpen`), quoted. -/
+def Fml.openKeyQ (c : Lean.Expr) (r : (Γ : NCtx) × Fml C Γ.ctx) : Lean.Expr :=
+  r.2.lineKeyQ c r.1.names
 
 /-- The lines of the derivation of `φ`, at most `n` of them. -/
 def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
@@ -134,13 +223,13 @@ def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
     | some (f, ψ) =>
       let pair := Lean.ShareCommon.shareCommon
         (Lean.mkApp2 (Lean.mkConst ``Prod.mk [0, 0]) (f.quoteRaw c) ((Quote.qFml Γ ψ).run c))
-      ⟨pair, k, ψ.erasedQuoted c⟩ :: Fml.chainLines c n ψ
+      ⟨pair, k, ψ.lineKeyQ c Γ.blankNames⟩ :: Fml.chainLines c n ψ
     | none => []
 
 /-- The lines of the derivation of `φ` and its erasure, quoted: one
 evaluation. -/
 def Fml.chainRunQ (c : Lean.Expr) {Γ : Ctx} (n : Nat) (φ : Fml C Γ) : List LineQ × Lean.Expr :=
-  (Fml.chainLines c n φ, φ.erasedQuoted c)
+  (Fml.chainLines c n φ, φ.lineKeyQ c Γ.blankNames)
 
 /-- The merges of `φ`'s update spine (`Fml.mergeRun`), quoted: for each
 position `k` and count `n`, the longest first, that merges, the line and its
@@ -148,13 +237,13 @@ erasure. -/
 def Fml.mergeCandsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) :
     List (Nat × Nat × Lean.Expr × Lean.Expr) :=
   (List.range 8).flatMap fun k => (List.range 8).reverse.filterMap fun n =>
-    (φ.mergeRun k (n + 1)).map fun ψ => (k, n + 1, (Quote.qFml Γ ψ).run c, ψ.erasedQuoted c)
+    (φ.mergeRun k (n + 1)).map fun ψ => (k, n + 1, (Quote.qFml Γ ψ).run c, ψ.lineKeyQ c Γ.blankNames)
 
 /-- Each rewrite of `fs` on `φ` (`Calculus/RewriteScoped.lean`), quoted: the
 line it leaves and that line's erasure, or `none`. -/
 def Fml.rwResultsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ)
     (fs : List (Fml C Γ → Option (Fml C Γ))) : List (Option (Lean.Expr × Lean.Expr)) :=
-  fs.map fun f => (f φ).map fun ψ => ((Quote.qFml Γ ψ).run c, ψ.erasedQuoted c)
+  fs.map fun f => (f φ).map fun ψ => ((Quote.qFml Γ ψ).run c, ψ.lineKeyQ c Γ.blankNames)
 
 /-- `⟨[ s; … } ω ]⟩ φ`: a modality `m` that is a variable, its program
 running into the end of a block (`Delab`'s `core_item`). -/
@@ -980,9 +1069,33 @@ def holeTerms (φ : TSyntax `dl_fml) : TermElabM (Array Syntax × Array Expr) :=
       instantiateMVars e
   return (holes, es)
 
-/-- The readings of a written formula, `Update.lean`'s, its Lean formulas
-in slots (`Fml.slot i`, the `i`th hole), quoted: at the diamond and at the
-box when `m` is a variable, once otherwise. -/
+/-- The `i` of an erased slot (`Fml.chainSlot i`, erased: `{anon(ns)}` over
+`find(storage, ⟪i⟫)`) and its names `ns`, quoted. -/
+def erasedSlot? (e : Expr) : Option (Nat × Expr) := do
+  guard (e.isAppOfArity ``Solidity.NFml.anon 3)
+  let body := e.getArg! 2
+  guard (body.isAppOfArity ``Solidity.NFml.defined 2)
+  let isSlotLit (x : Expr) : Bool := match x with
+    | .lit (.strVal s) => s.startsWith "⟪"
+    | _ => false
+  let some (.lit (.strVal s)) := body.find? isSlotLit | none
+  guard (s.endsWith "⟫")
+  let i ← ((s.drop 1).dropRight 1).toNat?
+  pure (i, e.getArg! 1)
+
+/-- A written slot, read: `Fml.slotC j` erased (`{anon()}` over
+`find(storage, ⟪j⟫)`), as the slot of the `j`th hole (`slotExpr`), which a
+computed line's slot is mapped to (`toWrittenSlots`). -/
+def writtenSlots (c : Expr) (e : Expr) : Expr :=
+  e.replace fun x => do
+    let (j, _) ← erasedSlot? x
+    pure (slotExpr c j)
+
+/-- The readings of a written formula, its Lean formulas in slots (the
+`j`th hole's `slotExpr j`), each the key of the scoped reading with its
+parameters open (`elabDlOpen`, `Fml.lineKey`), quoted; with no modality,
+today's reading, the closer's formula (`elabDlN`).  At the diamond and at
+the box when `m` is a variable, once otherwise. -/
 def readings (c : Lean.Term) (m? : Option Expr) (holes : Array Syntax) (φ : TSyntax `dl_fml) :
     TermElabM (Array Expr) := do
   let μs : Array (Option Lean.Name) := match m? with
@@ -999,9 +1112,17 @@ def readings (c : Lean.Term) (m? : Option Expr) (holes : Array Syntax) (φ : TSy
   let reads ← μs.mapM fun μ => do
     let raw ← liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
     -- applications built directly: in a quotation `$a $b` reads `$b` as a chain arrow
-    let rd : Lean.Term := Syntax.mkApp (mkCIdent ``elabDl) #[c, raw, mkCIdent ``Bool.false]
-    let qt : Lean.Term := Syntax.mkApp (mkCIdent ``Solidity.Surface.Fml.quoteAuto) #[q]
-    pure (Syntax.mkApp (mkCIdent ``Except.map) #[qt, rd])
+    if rawHasModal raw then
+      let rd : Lean.Term := Syntax.mkApp (mkCIdent ``elabDlOpen) #[c, raw]
+      let qt : Lean.Term := Syntax.mkApp (mkCIdent ``Fml.openKeyQ) #[q]
+      pure (Syntax.mkApp (mkCIdent ``Except.map) #[qt, rd])
+    else
+      -- with no modality, the closer's formula (`elabDlN`), whose terms are
+      -- read by name: a line past the program need not declare a memory
+      -- local it no longer writes
+      let rd : Lean.Term := Syntax.mkApp (mkCIdent ``elabDlN) #[c, raw, mkCIdent ``Bool.false]
+      let qt : Lean.Term := Syntax.mkApp (mkCIdent ``NFml.quote) #[q]
+      pure (Syntax.mkApp (mkCIdent ``Except.map) #[qt, rd])
   let ty := mkApp (mkConst ``List [0]) (mkApp2 (mkConst ``Except [0, 0]) (mkConst ``String)
     (mkConst ``Lean.Expr))
   let e ← elabTermEnsuringType (← `([$reads,*])) ty
@@ -1009,40 +1130,21 @@ def readings (c : Lean.Term) (m? : Option Expr) (holes : Array Syntax) (φ : TSy
   let e ← instantiateMVars e
   let rs ← unsafe evalQuoted (List (Except String Lean.Expr)) ty e
   rs.toArray.mapM fun
-    | .ok r => pure r
+    | .ok r => pure (writtenSlots C r)
     | .error msg => throwError "Solidity elaboration failed: {msg}"
 
-/-- The `i` of an erased slot (`Fml.chainSlot i`, erased: `{anon(ns)}` over
-`find(storage, ⟪i⟫)`) and its names `ns`, quoted. -/
-def erasedSlot? (e : Expr) : Option (Nat × Expr) := do
-  guard (e.isAppOfArity ``Solidity.NFml.anon 3 || e.isAppOfArity ``Solidity.Surface.Fml.anon 3)
-  let body := e.getArg! 2
-  guard (body.isAppOfArity ``Solidity.NFml.defined 2 ||
-    body.isAppOfArity ``Solidity.Surface.Fml.defined 2)
-  let isSlotLit (x : Expr) : Bool := match x with
-    | .lit (.strVal s) => s.startsWith "⟪"
-    | _ => false
-  let some (.lit (.strVal s)) := body.find? isSlotLit | none
-  guard (s.endsWith "⟫")
-  let i ← ((s.drop 1).dropRight 1).toNat?
-  pure (i, e.getArg! 1)
-
-/-- An erasure with each slot read as the written formula's: `Fml.slot j`,
+/-- A key with each slot read as the written formula's: `slotExpr j`,
 `j` the hole of the postcondition in slot `i`. -/
 def toWrittenSlots (c : Expr) (sp : Splice) (holes : Array Expr) (e : Expr) : Expr :=
   e.replace fun x => do
     let (i, _) ← erasedSlot? x
     let p ← sp.posts[i]?
     let j ← holes.findIdx? fun h => h == p.appArg! || h == p
-    -- in a line as written, the slot as written
-    if x.isAppOfArity ``Solidity.Surface.Fml.anon 3 then
-      let s := slotExpr c j
-      pure (mkApp2 (mkConst ``Solidity.Surface.Fml.defined) c s.appArg!)
-    else pure (slotExpr c j)
+    pure (slotExpr c j)
 
-/-- An erased line and the lines under its leading `∀`s. -/
+/-- A key and the keys under its leading `∀`s. -/
 partial def underAlls (e : Expr) : List Expr :=
-  if e.isAppOfArity ``Solidity.NFml.all 4 || e.isAppOfArity ``Solidity.Surface.Fml.all 4 then
+  if e.isAppOfArity ``Solidity.NFml.all 4 || e.isAppOfArity ``LineKey.all 4 then
     e :: underAlls e.appArg!
   else [e]
 

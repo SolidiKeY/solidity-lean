@@ -21,9 +21,10 @@ problem) becomes a scoped one, `Fml C Γ`, over a named context
   is assigned (`Upd.snoc`), any other is declared (`Upd.decl`), shadowing a
   local of another type: KeY's update binds a program variable, here a
   position.
-* **A modality's program** is resolved by `Prog.resolve`, and its
-  postcondition read in the context the program leaves: a local declared in
-  a branch is out of scope after it.
+* **A modality's program** is elaborated scoped from the formula's context
+  (`Calculus/Notation.lean`), and its postcondition read in the context the
+  program leaves: a local declared in a branch is out of scope after it.
+  An atom is read as the closer's formula (`NFml.resolveN`).
 * **The context's locals are closed over** by `Fml.closeN`: a value local by
   `∀` (`Fml.all`, its type's range), any other by a hidden binder
   (`Fml.bind`, every value), or every one by a hidden binder.
@@ -204,7 +205,8 @@ def Upd.resolveN (hint : Var → Option LTy) (Γ : NCtx) :
 /-- A formula as written (`Update.lean`'s `Surface.Fml`), its locals read
 as positions in `Γ`: a quantifier pushes its local, an update the locals it
 declares, a program the ones it leaves (`Prog.resolve`).  `hint` types the
-locals an update binds (`elemTy`). -/
+locals an update binds (`elemTy`).  Only `Calculus/Spec.lean`'s
+`specObligation` reads it now; it goes with `Surface.Fml` (W8.4). -/
 def Fml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → Solidity.Surface.Fml C →
     Except String (Fml C Γ.ctx)
   | _, .tt => pure .tt
@@ -224,6 +226,26 @@ def Fml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → Solidity.Surface.
   | Γ, .anon xs φ => do
     let ys ← xs.mapM (Γ.findAny ·)
     pure (.anon ys (← Fml.resolveN hint Γ φ))
+
+/-- The closer's formula (no modality), its locals read as positions in
+`Γ`: a quantifier pushes its local, an update the locals it declares.  What
+`dl!{ … }`'s scoped reader makes of an atom (`Calculus/Notation.lean`'s
+`elabFmlC`). -/
+def NFml.resolveN (hint : Var → Option LTy) : (Γ : NCtx) → NFml C → Except String (Fml C Γ.ctx)
+  | _, .tt => pure .tt
+  | Γ, .eq a b => do pure (.eq (← Tm.resolveN Γ a) (← Tm.resolveN Γ b))
+  | Γ, .defined t => do pure (.defined (← Tm.resolveN Γ t))
+  | Γ, .not φ => do pure (.not (← NFml.resolveN hint Γ φ))
+  | Γ, .and φ ψ => do pure (.and (← NFml.resolveN hint Γ φ) (← NFml.resolveN hint Γ ψ))
+  | Γ, .imp φ ψ => do pure (.imp (← NFml.resolveN hint Γ φ) (← NFml.resolveN hint Γ ψ))
+  | Γ, .upd m U φ => do
+    let ⟨Δ, U'⟩ ← Upd.resolveN hint Γ Γ .nil U
+    pure (.upd m U' (← NFml.resolveN hint Δ φ))
+  | Γ, .havoc φ => do pure (.havoc (← NFml.resolveN hint Γ φ))
+  | Γ, .all x p φ => do pure (.all x p (← NFml.resolveN hint ((x, .val p) :: Γ) φ))
+  | Γ, .anon xs φ => do
+    let ys ← xs.mapM (Γ.findAny ·)
+    pure (.anon ys (← NFml.resolveN hint Γ φ))
 
 end Resolve
 
