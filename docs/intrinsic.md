@@ -1928,6 +1928,112 @@ same session; load 0.3–1.2, cgroup 7.3–7.5 GB):
 Every row within its gate.  `Solkey/TestSuite` is 2% faster: its import
 no longer runs `resolve`'s check on every statement.
 
+### W8.2 lane `obligations` record (2026-10-11)
+
+The imported programs and every obligation are scoped; nothing in the
+lane's files reads `Surface.Prog` or `Surface.Fml` but the closer's
+`Surface.specObligation` (below).
+
+- **`solc_import`** declares `N.f : Prog N Γp Γ'` (`Γp` the parameters,
+  newest first) from `elabProgAtS.go`, one `Prog.quoteShared` literal each
+  (`Prog.define`), and the constructor's the same way.  `solc_scoped N` is
+  a check that every elaborated row is a scoped program of `N` (its info
+  text kept).  The differential check against W8.1's baseline dump
+  (`elabdump_base.keep.txt`): all 465 programs of the seven imports are
+  byte for byte the resolved-and-quoted programs of the baseline (the
+  hash of the value) and print the same text (`Prog.toStr`).
+- **`obligation`** (`Frontend/Problems.lean`) writes `N.f.problem : Fml N
+  []` on `N.f`: the `∀`s (the first parameter outermost), `Fml.wt` or
+  `Problem.deployUpd`, the modality, as constructors (what
+  `Problem.fml`/`ctorFml` compute, so `Symex.paramCount` reads the
+  binders).  `solc_problems N` declares each, compiled;
+  `solc_scoped_problems N [decl]` the one table `N.problems` (its pin
+  kept).  The legacy statements, `legacyProblem`, `legacyStatement`, the
+  erase guard, `scopedStatement?` and `Surface.Problem.*` are gone;
+  `#solkey_problem`/`#solkey_scan` read `N.f.problem`, or the statement
+  `obligation` writes where none is declared (`statement?`; the two
+  TestSuite pins in `TestSuite/Problems.lean`), `#solkey_derive?` and
+  `#solkey_obligations` the scoped `⊢` only.
+- **`Calculus/Problem.lean`** holds the scoped `paramsN`, `Fml.wt`,
+  `Problem.fml`, `deployUpd`, `ctorFml`, `ctor` (the call elaborated in
+  the parameters' context, `elabStmtsP` placed by `SProg.chain`), `parts`
+  and `text` (on `Fml C []`; `problem[C]{constructor}` is the scoped
+  one).  `Calculus/Spec.lean` lost `Problem.resolve`/`ofLegacy`;
+  `Calculus/Deploy.lean` its erasing `Problem.text`.
+- **`specObligation`** (scoped) is built from `specPieces`, whose call is
+  now the scoped `SProg`: the clauses by `NFml.resolveN` (local, the
+  clauses of `Fml.resolveN` with no program), the snapshots by
+  `Upd.resolveN`, the call placed past them by `SProg.chain` (`specModal`).
+  A scratch comparison (`Fml.quote`) against the old route
+  (`Fml.resolveN` of `Surface.specObligation`) over every function of the
+  eleven specified example contracts: identical.  `Surface.specObligation`
+  (and `spec!{f}` outside the scoped switch) stays for the examples W8.3
+  moves; it erases the scoped call (`specParts`).
+
+Proposed decisions:
+
+- **106-obligations.**  The scoped `specObligation` stays in
+  `Calculus/Spec.lean`, not `Calculus/SurfaceSpec.lean` as the plan put
+  it: it needs `Calculus/NotationResolve.lean` (`Upd.resolveN`,
+  `Fml.closeN`), whose import would put `NFmlDerive` (which imports
+  `SurfaceSpec`) behind the strategy (`Step`).  `Calculus/Problem.lean`
+  imports `NotationResolve` and `Calculus/Quote.lean`: every module that
+  imports it already did.
+- **107-obligations.**  The imported programs are not compiled: compiling
+  the 449 scoped literals cost 5.9 s of the TestSuite import (LCNF mono
+  3.7 s, IR 1.8 s; profiled), 17.6 s against 11.0 s, past its gate.  So an
+  obligation's entry holds the program's value (the literal `N.f`
+  declares), as the W3 table did, and compiled code evaluates it there
+  (`sol_prove`, `#solkey_problem`); `#solc_show N.f` (new) prints a
+  program by evaluating its value, which the LoopsImport pins use in
+  place of `#eval … Surface.Prog.show N.f`.  `N.f` is still the kernel's
+  check of each program (in `Solkey/TestSuite`, not `TestSuiteScoped`).
+- **108-obligations.**  `solc_scoped_problems` drops `main` (there is no
+  legacy statement to sit beside): `solc_scoped_problems N [decl]`.
+
+**Pins.**  No info or error text moved.  Command lines changed under
+unchanged pins: `solc_scoped_problems … main [decl]` → `… [decl]`
+(`TestSuite/ScopedProblems`, `Solkey/ScopedFlip`, `Solkey/Constructors`,
+`Examples/Tactics/LoopsImport`); the `solc_problems … legacy` lines removed
+(`Solkey/ScopedFlip`'s, an empty pin, `Solkey/Constructors`,
+`TestSuite/Problems`, `LoopsImport`); `LoopsImport`'s three
+`#eval IO.println (Surface.Prog.show N.f)` are `#solc_show N.f`, same
+text.  `Examples/Tactics/Spec`: the `Surface.Problem.ctor` erasure guard
+is replaced by a `Problem.text` pin of the deployment's obligation.
+`Solkey/Constructors`' `counterDeployCore` is `sol[…]{…}` at
+`Prog Solkey.Counter [] []` (it was `Prog.defineCore`).
+`TestSuite/Report`'s counts (449 functions, 437 statements) and pins,
+`TestSuite/Suggestions`' pins and `Derived1–14` (unedited) check.
+
+**Checks.**  Every touched file and its importers through the Lean
+server: the 14 `Derived` modules built one at a time (scratch modules
+importing each), `TestSuite/Report`, `TestSuite/Suggestions`,
+`Corpus/TestSuite`, `Corpus/Imported`, `Examples/Tactics/{Constructors,
+Specs,SolSpec,Spec,LoopsImport}`, the five `Benchmark` contracts with
+specifications, `Examples/{Verify,Tools}`, `Tools/{Counterexample,Verify}`.
+`check-doc-paths`, `check-orphans` (scratch modules only) pass.
+
+**Timing** (the end-of-work method, min of the runs; base is this lane's
+worktree at `624c492a`, same session; load 1.5–2.7, cgroup 9–12 GB):
+
+| Module | base | W8.2 `obligations` | ratio | gate |
+|---|---|---|---|---|
+| `Solkey/TestSuite` | 10.99 s | 6.74 s (7.48, 6.74, 7.25) | 0.61 | 12.5 s (M0) |
+| `Solkey/TestSuiteScoped` | 3.61 s | 0.60 s (0.65, 0.60) | 0.17 | no row |
+| `TestSuite/Problems` | 0.89 s | 0.87 s (0.99, 0.88, 0.87) | 0.98 | 0.97 s (1.2× 0.81) |
+| `TestSuite/ScopedProblems` | 1.44 s | 1.05 s (1.10, 1.05) | 0.73 | 1.67 s (1.2× 1.39) |
+| `TestSuite/Derived10` | 11.64 s | 11.63 s (11.63, 12.47, 14.59) | 1.00 | 13.33 s |
+
+The import is faster: it no longer compiles its programs (the Surface ones
+were compiled), and the scoped check moved into it is cheaper than
+`TestSuiteScoped`'s resolve-and-quote.  `Derived10`'s runs above its min
+had another lane's build running (load 2.7–14.6).
+
+**Left** (other lanes or W8.3/W8.4): `Surface.specObligation`,
+`specBody`, `specParts` and the unscoped `spec!{f}` (the examples outside
+`open scoped Solidity.Scoped` read them); `docs/testsuite-proofs.md` still
+describes `solc_problems … legacy` (not this lane's file).
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
