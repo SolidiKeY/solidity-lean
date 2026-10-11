@@ -21,12 +21,12 @@ versions.  It names files by the paths they had at each step, which is why
 
 | | Before | After |
 |---|---|---|
-| Syntax | `Stmt C`, locals by name, unscoped (a branch's local outlived it), a locals check `Stmt.wt` beside it | `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): a local is a position `Idx Γ t` carrying its type (`Scope.lean`), branches, loop bodies and blocks are scopes, a call's body is closed over its own frame; the elaborator emits it directly (`Syntax/Elab.lean`) and the printers print it (`Calculus/PrintStmt.lean`): the untyped `Surface.Stmt` and `resolve` went at W8 (decision 11) |
+| Syntax | `Stmt C`, locals by name, unscoped (a branch's local outlived it), a locals check `Stmt.wt` beside it | `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): a local is a position `Idx Γ t` carrying its type (`Scope.lean`), branches, loop bodies and blocks are scopes, a call's body is closed over its own frame; the elaborator emits it directly, a local by `NCtx.find` (`Syntax/Elab.lean`), and the printers print it (`Calculus/PrintStmt.lean`): the untyped `Surface.Stmt` and `resolve` went at W8 (decision 11) |
 | State | untyped `Semantics.State`: values, storage and heap by name, with junk | `State C Γ` (`Semantics/State.lean`): typed values (`PrimTy.Denote`, a `uint` an `Int` in range), typed storage (`SVal T` over `structDef`, `Storage C`), a typed heap (`HRef H R`, no mapping object), locals computed from the context (`TEnv`) |
 | Run | `Stmt.run` on the untyped state, halting by `revert`, `panic`, `diverge` or `stuck` | `Stmt.run` (`Semantics/Run.lean`) on the typed state, halting by `revert`, `panic`, `diverge` or `exhausted` (a push at the bound, decision 15): never stuck; the only run of a statement (W4) |
 | Untyped side kept | | the state's operations (`Semantics.lean`), which the typed ones erase to (`StorageErase`, `HeapErase`, `StepErase`), and the erased state `EState C Γ` (`Semantics/Erased.lean`): what the closer's terms read |
 | Compiler | `compileStmt` with `wtStmt`, `not_stuck` | over the scoped syntax, locals at their level (`Evm/Compile.lean`), `inFrag` the fragment alone, `compile_correct` over the typed run (`Evm/Correct.lean`), no `not_stuck` |
-| Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; `dl!{}` with a modality reads scoped (`Surface.Fml` went at W8) |
+| Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; a `dl!{}` with a modality reads scoped, one without reads as `NFml` (`Surface.Fml` went at W8) |
 | Rules | `Taclet C k m s p` on `Stmt C`, `Taclet.sound` by case | the same 159 lines read scoped (`Calculus/Rules.lean`, `open scoped Solidity.Schema`); `Taclet.toStep` (`Calculus/Taclet.lean`) says each is the rule `Stmt.step` fires, so soundness is `Stmt.sound` (`Calculus/Sound.lean`) with no proof per taclet; `blockEmpty` and `functionFrameEmpty` claimed; no cover goal (KeY's two goals); the step rules read the rule set (`⊢ₖ`, decision 36) |
 | Sequent | `Proves` over `Hyp` | `Proves C R Γ₀ H φ` over a telescope `Hyps` (`Calculus/Proves.lean`); `Proves.valid` with no hypothesis; a leaf closed by its erasure (`Proves.close`, `Calculus/CloseErase.lean`) |
 | Tools | on `Fml C` | `sol_symex`, `sol_prove`, `sol_derive?`, chains, `#chain`, the proof tree, `#wp`, `#step`, specs, contracts, callbacks on `Fml C Γ`; the same text through `open scoped Solidity.Scoped` (`Calculus/Surface.lean`) |
@@ -2946,6 +2946,62 @@ elaborates it, and that the SolKey reader's require is pinned at
 `w8-pre-delete`.  `docs/README.md`'s row for this record mentions W8.
 
 **Checks** (lane `docs`, no Lean): `./scripts/check-doc-paths.sh` passes.
+
+### W8.5 lane `review` record (2026-10-11, branch `w8-w85gatedocsreview-review`)
+
+The read-only review of W8 (AGENTS.md's milestone pass), on `intrinsic` at
+`9d9fdf67`, with no Lean server: a finder and a skeptic per area, against
+the code before W8 (`30611d7c`, `575cfba7^`) where a check compares.  No
+Lean file was edited and no pin moved.
+
+**Checked, no defect.**
+- *Elaborator.*  Since W8.1's dump, `Syntax/Elab.lean` has changed only in
+  error texts (`Surface.primName p` is `p.toStr`, the same string),
+  docstrings, the moved `NCtx`/`NCtx.find` (texts as `resolve`'s) and the
+  deleted erasing entry points; no capture, `freshCapture` or raw pass
+  changed.  W8.2's `obligations` lane compared the direct scoped import
+  with the baseline's resolved hashes (465 programs, byte for byte), so
+  capture order and fresh numbering stand as the W8.1 dump left them.
+- *`CallRet.mem`.*  `elabCallRet` builds it in the frame (`[.mem R] ++ ps`,
+  names `r :: as.names`, matching `Γf = Γr ++ Γp`, newest first), with
+  `defaultOkS` checked; the caller binds it at `.here` of
+  `(r, .mem R) :: Γs` (`elabMemCall`), where `CallRet.outNames` leaves it.
+- *Printers.*  `PrintStmt`'s argument positions (`Prog.cons`, `Frames.*`,
+  `Upd.*`, `Fml.bind`/`modal`/`all`, `Stmt.call`, `CallRet.*`) match the
+  constructors; `.there` and `up` move down the stack, a schema index under
+  `.there` prints as itself, `Frames.pop`/`drop` and `Upd.pop`/`drop` keep
+  the names they keep, a hidden binder pushes its name.
+- *Deletions.*  No `Surface` program family is left in `Solidity/`
+  (`Surface.Tm`/`UpdElem`/`Upd` are the closer's IR, decision 7).
+
+**Confirmed defects** (not fixed: the lane is read-only).
+1. **A chain line after `whileUnwind` cannot be written.**
+   `Calculus/Chains.lean:144` (`Prog.keyStrs`) flattens a `Stmt.block` only
+   at the top of a block; nested in a branch it prints braced
+   (`Syntax/Scoped.lean:540`).  `whileUnwind` leaves one there
+   (`Calculus/Blocks.lean:280`: `if (c) { {body} while … }`), while the
+   elaborator never emits `Stmt.block` (`.block b => elabBranch b`) and the
+   printer flattens it (`PrintStmt`'s `stmtPiecesS`).  So the line `#chain`
+   writes keys flat and the computed one braced, and `sol_chain` does not
+   reach it.  `erasedQuoted` matched it (`Stmt.erase` flattened a block at
+   every depth).  No pin covers a chain through a loop.  Fix: flatten
+   blocks in branches in the key too.
+2. `docs/intrinsic.md:24` and `:29` ("What changed") still say the
+   elaborator emits `Surface.Stmt`, `resolve` scopes it, and `Surface.Fml`
+   is `dl!{}`'s text.
+3. `docs/kernel-port.md:178`: "`resolve` reads it back as the closed frame"
+   (the elaborator builds the frame).
+4. `Examples/Tactics/Sequents.lean:7`: "its erasure against the line read
+   as today's"; `show sequent!` compares the printed lines (proposal 119).
+5. `Calculus/Chains.lean:114` (`LineQ.erased`) and `:229`: what is called
+   the line's erasure is its key (`Fml.lineKey`), the erasure only where
+   the line has no modality.
+
+**Fixed** (same branch, after the review): 1. `Stmt.keyStr`
+(`Calculus/Chains.lean`) prints a branch's, a loop body's and a `try`
+clause's statements by `Prog.keyStrs`, so the key flattens a block at every
+depth; `loopChain` (`Examples/Tactics/Chains.lean`) pins a chain through
+`whileUnwind`.  2–5: the texts reworded.  No other pin moved.
 
 ## What is left
 

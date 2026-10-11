@@ -20,7 +20,7 @@ the first is not read into the chain: the strategy computes it, and the
 written text must be the computed line read in names: the two compare by
 their keys (`Fml.lineKey`; `matchWritten`), the erasure (`Fml.erase`)
 where there is no modality and a modality's program as its text
-(`Prog.toStrs`), the text read scoped with its parameters open
+(`Prog.keyStrs`), the text read scoped with its parameters open
 (`elabDlOpen`), the postcondition `φ` where the line has it.  A line printed with a block's end
 (`}`, `Delab`'s `core_item`) reads without it.  The statement holds
 the computed lines, which `Delab` prints as written.
@@ -111,8 +111,9 @@ def Focus.quoteRaw (c : Lean.Expr) : Focus C → Lean.Expr
 
 /-- A line of a derivation as compiled code leaves it: the line and the
 statement the step that reached it fired on (`Prod.mk f φ`, hash-consed
-together), the step's fresh index, and the line's erasure (`Fml.erase`,
-`Update.lean`'s formula, quoted). -/
+together), the step's fresh index, and the line's key (`Fml.lineKey`,
+quoted: the erasure where there is no modality, a modality's program as
+text). -/
 structure LineQ where
   pair : Lean.Expr
   fresh : Nat
@@ -138,9 +139,35 @@ inductive LineKey (C : Contract) where
   | all (x : Var) (p : PrimTy) (k : LineKey C)
   | anon (xs : List Var) (k : LineKey C)
 
+mutual
+
+/-- A statement as `Stmt.toStr` prints it, but a branch's, a loop body's and
+a `try` clause's statements by `Prog.keyStrs`: a block is flattened at every
+depth, as a line's print and the elaborator flatten it (`whileUnwind` leaves
+`if (c) { {body} while … }`). -/
+partial def Stmt.keyStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
+  | .ite c thn els =>
+    s!"if ({c.toStr ns true}) {braced (Prog.keyStrs 0 ns thn)} else {braced (Prog.keyStrs 0 ns els)}"
+  | .tryCall c rets ok err code pnc other =>
+    let args := ", ".intercalate (c.args.map fun a => a.2.toStr ns)
+    let rs := rets.toList
+    let retsS := if rs.isEmpty then "" else
+      s!" returns ({", ".intercalate (rs.map fun (p, x) => s!"{Ty.toStr (.prim p)} {x}")})"
+    let codeS := match code.names with
+      | [x] => s!"uint {x}"
+      | _ => "uint"
+    s!"try address({c.addr.toStr ns}).{c.fn}({args}){retsS} \
+      {braced (Prog.keyStrs 0 (rets.names ++ ns) ok)} \
+      catch Error(string memory) {braced (Prog.keyStrs 0 ns err)} \
+      catch Panic({codeS}) {braced (Prog.keyStrs 0 (code.names ++ ns) pnc)} \
+      catch {braced (Prog.keyStrs 0 ns other)}"
+  | .loop a c body =>
+    s!"{a.toStr ns}while ({c.toStr ns true}) {braced (Prog.keyStrs 0 ns body)}"
+  | s => s.toStr ns
+
 /-- The statements of a block, one string each, as `Prog.toStrs` prints
 them, but a block statement (`{ … }`, what a call's expansion leaves) its
-statements, as a line's print flattens it. -/
+statements, as a line's print flattens it, at every depth (`Stmt.keyStr`). -/
 partial def Prog.keyStrs (skip : Nat) (ns : List Var) {Γ Γ' : Ctx} : Prog C Γ Γ' → List String
   | .nil => []
   | .cons s P =>
@@ -155,7 +182,9 @@ partial def Prog.keyStrs (skip : Nat) (ns : List Var) {Γ Γ' : Ctx} : Prog C Γ
         | none =>
           match Stmt.memCallStr? ns s P with
           | some c => c :: Prog.keyStrs 1 (s.outNames ns) P
-          | none => s.toStr ns :: Prog.keyStrs 0 (s.outNames ns) P
+          | none => s.keyStr ns :: Prog.keyStrs 0 (s.outNames ns) P
+
+end
 
 /-- The statements the frames hold, one string each (`Prog.keyStrs`): a
 scope end is nothing, as `}` is in a written line. -/
@@ -226,21 +255,24 @@ def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
       ⟨pair, k, ψ.lineKeyQ c Γ.blankNames⟩ :: Fml.chainLines c n ψ
     | none => []
 
-/-- The lines of the derivation of `φ` and its erasure, quoted: one
+/-- The lines of the derivation of `φ` and its key (`Fml.lineKey`, quoted:
+the erasure where there is no modality, a modality's program as text): one
 evaluation. -/
 def Fml.chainRunQ (c : Lean.Expr) {Γ : Ctx} (n : Nat) (φ : Fml C Γ) : List LineQ × Lean.Expr :=
   (Fml.chainLines c n φ, φ.lineKeyQ c Γ.blankNames)
 
 /-- The merges of `φ`'s update spine (`Fml.mergeRun`), quoted: for each
 position `k` and count `n`, the longest first, that merges, the line and its
-erasure. -/
+key (`Fml.lineKey`, quoted: the erasure where there is no modality, a
+modality's program as text). -/
 def Fml.mergeCandsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) :
     List (Nat × Nat × Lean.Expr × Lean.Expr) :=
   (List.range 8).flatMap fun k => (List.range 8).reverse.filterMap fun n =>
     (φ.mergeRun k (n + 1)).map fun ψ => (k, n + 1, (Quote.qFml Γ ψ).run c, ψ.lineKeyQ c Γ.blankNames)
 
 /-- Each rewrite of `fs` on `φ` (`Calculus/RewriteScoped.lean`), quoted: the
-line it leaves and that line's erasure, or `none`. -/
+line it leaves and that line's key (`Fml.lineKey`, quoted: the erasure where
+there is no modality, a modality's program as text), or `none`. -/
 def Fml.rwResultsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ)
     (fs : List (Fml C Γ → Option (Fml C Γ))) : List (Option (Lean.Expr × Lean.Expr)) :=
   fs.map fun f => (f φ).map fun ψ => ((Quote.qFml Γ ψ).run c, ψ.lineKeyQ c Γ.blankNames)
