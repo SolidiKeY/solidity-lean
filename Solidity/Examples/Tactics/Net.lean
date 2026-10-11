@@ -140,22 +140,15 @@ theorem netTransfersAccumulate :
 
 /-! ## 3 · The ledger, run
 
-Each block is resolved, quoted and declared (`Prog.defineCore`), then
-run typed (`Prog.run`) from `Storage.standardExample`, the storage of
-`State.exampleStore`, by the kernel (`decide +kernel`). -/
+Each block is elaborated scoped (`sol{ … }` at `Prog C [] _`) and checked
+by the kernel as its definition, then run typed (`Prog.run`) from
+`Storage.standardExample`, the storage of `State.exampleStore`, by the kernel
+(`decide +kernel`). -/
 
-private def payNineP : Surface.Prog StandardExample := sol{ uint to = 9; to.transfer(5); }
-private def payOwnerP : Surface.Prog StandardExample := sol{ owner = 7; owner.transfer(5); }
-private def paySelfP : Surface.Prog StandardExample := sol{ uint to = 0; to.transfer(5); }
-private def sendNineP : Surface.Prog StandardExample := sol{ uint to = 9; bool ok = to.send(5); }
-
-open Lean Elab Command in
-run_cmd liftCoreM do
-  let ns := `Solidity.Examples.Tactics.Net
-  for (n, P) in [(`payNineCore, payNineP), (`payOwnerCore, payOwnerP), (`paySelfCore, paySelfP),
-      (`sendNineCore, sendNineP)] do
-    if let some e ← Prog.defineCore (ns ++ n) ``StandardExample [] P then
-      throwError "{n}: {e}"
+private def payNineCore := (sol{ uint to = 9; to.transfer(5); } : Prog StandardExample [] _)
+private def payOwnerCore := (sol{ owner = 7; owner.transfer(5); } : Prog StandardExample [] _)
+private def paySelfCore := (sol{ uint to = 0; to.transfer(5); } : Prog StandardExample [] _)
+private def sendNineCore := (sol{ uint to = 9; bool ok = to.send(5); } : Prog StandardExample [] _)
 
 /-- The initial store, typed. -/
 private abbrev start : State StandardExample [] :=

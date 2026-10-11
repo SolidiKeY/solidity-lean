@@ -418,7 +418,7 @@ type's default (`memory-decl-fresh.key`, `memory-decl-default.key`). -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.exampleStore
+#eval Prog.localAfterT State.exampleStore
   sol{ Person memory carol; uint result = carol.age; } "result"
 
 /-! `Person memory carol; Person memory david; Account memory mv = david.account;
@@ -431,7 +431,7 @@ same claim over copies of storage objects, for every state. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 60))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.exampleStore
+#eval Prog.localAfterT State.exampleStore
   sol{ Person memory carol; Person memory david; Account memory mv = david.account;
        carol.account = mv; carol.account.balance = 60; uint result = david.account.balance; }
   "result"
@@ -442,7 +442,7 @@ carries. -/
 
 /-- info: Except.error (Solidity.Semantics.Halt.revert) -/
 #guard_msgs in
-#eval Surface.Prog.runT State.exampleStore (sol{ uint[] memory v; v[0] = 100; } : Surface.Prog StandardExample)
+#eval Prog.runT State.exampleStore (sol{ uint[] memory v; v[0] = 100; } : Prog StandardExample [] _)
 
 /-! ## 6 · Memory `delete`
 
@@ -588,9 +588,9 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 -/
 #guard_msgs in
 #eval
-  let P : Surface.Prog StandardExample := sol{ Person memory carol; Person memory carolAlias = carol;
+  let P : Prog StandardExample [] _ := sol{ Person memory carol; Person memory carolAlias = carol;
     carol.age = 33; delete carol; uint oldAge = carolAlias.age; uint newAge = carol.age; }
-  (Surface.Prog.localAfterT State.exampleStore P "oldAge", Surface.Prog.localAfterT State.exampleStore P "newAge")
+  (Prog.localAfterT State.exampleStore P "oldAge", Prog.localAfterT State.exampleStore P "newAge")
 
 /-! `carolAcc.balance = 100; delete carol.account;` — the old account keeps
 `100`, the member reads the fresh default `0`. -/
@@ -601,10 +601,10 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 -/
 #guard_msgs in
 #eval
-  let P : Surface.Prog StandardExample := sol{ Person memory carol; Account memory carolAcc = carol.account;
+  let P : Prog StandardExample [] _ := sol{ Person memory carol; Account memory carolAcc = carol.account;
     carolAcc.balance = 100; delete carol.account; uint oldBal = carolAcc.balance;
     uint newBal = carol.account.balance; }
-  (Surface.Prog.localAfterT State.exampleStore P "oldBal", Surface.Prog.localAfterT State.exampleStore P "newBal")
+  (Prog.localAfterT State.exampleStore P "oldBal", Prog.localAfterT State.exampleStore P "newBal")
 
 /-! ## 7 · `new T[](n)` and `.length`
 
@@ -688,9 +688,9 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 -/
 #guard_msgs in
 #eval
-  let P : Surface.Prog StandardExample := sol{ uint[] memory xs = new uint[](3); uint len = xs.length;
+  let P : Prog StandardExample [] _ := sol{ uint[] memory xs = new uint[](3); uint len = xs.length;
     uint x = xs[2]; }
-  (Surface.Prog.localAfterT State.exampleStore P "len", Surface.Prog.localAfterT State.exampleStore P "x")
+  (Prog.localAfterT State.exampleStore P "len", Prog.localAfterT State.exampleStore P "x")
 
 /--
 info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 5)),
@@ -698,13 +698,13 @@ info: (Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int
 -/
 #guard_msgs in
 #eval
-  let P : Surface.Prog TestSuite := sol[TestSuite]{ Token[] memory ts = new Token[](2);
+  let P : Prog TestSuite [] _ := sol[TestSuite]{ Token[] memory ts = new Token[](2);
     ts[0].value = 5; uint a = ts[0].value; uint b = ts[1].value; }
-  (Surface.Prog.localAfterT State.testSuiteStore P "a", Surface.Prog.localAfterT State.testSuiteStore P "b")
+  (Prog.localAfterT State.testSuiteStore P "a", Prog.localAfterT State.testSuiteStore P "b")
 
 /-- info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 2)) -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.testSuiteStore
+#eval Prog.localAfterT State.testSuiteStore
   (sol[TestSuite]{ basketA.items = new uint[](2); uint len = basketA.items.length; }) "len"
 
 /-! ## 8 · Fixed-size arrays in memory
@@ -727,13 +727,13 @@ theorem memoryFixedWriteRead :
 /-- info: [true, true, true, true] -/
 #guard_msgs in
 #eval [
-  (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[3] memory x; assert(x.length == 3);
+  (Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[3] memory x; assert(x.length == 3);
     x[1] = 5; assert(x[1] == 5); assert(x[0] == 0); })).isOk,
-  (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[2][3] memory y; assert(y.length == 3);
+  (Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[2][3] memory y; assert(y.length == 3);
     assert(y[0].length == 2); })).isOk,
-  (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[2][] memory z = new uint[2][](4);
+  (Prog.runT State.testSuiteStore (sol[TestSuite]{ uint[2][] memory z = new uint[2][](4);
     assert(z.length == 4); assert(z[1].length == 2); })).isOk,
-  (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t;
+  (Prog.runT State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t;
     assert(t.items.length == 3); t.items[1] = 5; assert(t.items[1] == 5);
     assert(t.items[0] == 0); })).isOk]
 
@@ -742,7 +742,7 @@ member fixed: `triple.items` is still three long, and `delete` keeps it so. -/
 
 /-- info: true -/
 #guard_msgs in
-#eval (Surface.Prog.runT State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t = triple;
+#eval (Prog.runT State.testSuiteStore (sol[TestSuite]{ FixedTriple memory t = triple;
   t.items[0] = 9; triple = t; assert(triple.items[0] == 9);
   assert(triple.items.length == 3); delete triple; assert(triple.items[0] == 0); })).isOk
 

@@ -147,14 +147,14 @@ A statement no rule can run cannot be written (`Syntax.lean`). -/
 
 /-- error: Solidity elaboration failed: a value where a storage reference is expected -/
 #guard_msgs in
-#check (sol{ alice = 1; } : Surface.Prog StandardExample)
+#check (sol{ alice = 1; } : Prog StandardExample [] _)
 
 /-- error: Solidity elaboration failed: struct Person has no member salary -/
 #guard_msgs in
-#check (sol{ alice.salary = 1; } : Surface.Prog StandardExample)
+#check (sol{ alice.salary = 1; } : Prog StandardExample [] _)
 
 /-- error: Solidity elaboration failed: a storage copy of a type that holds a mapping -/
 #guard_msgs in
-#check (sol{ wallet = wallet; } : Surface.Prog StandardExample)
+#check (sol{ wallet = wallet; } : Prog StandardExample [] _)
 
 end Solidity.Examples.Tactics.Tour

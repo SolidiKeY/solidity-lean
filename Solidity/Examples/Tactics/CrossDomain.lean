@@ -272,7 +272,7 @@ copy member by member, one level down, so this one is a run from
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 8))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.exampleStore
+#eval Prog.localAfterT State.exampleStore
   sol{ Person memory carol; carol.account.balance = 8; alice = carol;
        carol.account.balance = 9; uint result = alice.account.balance; } "result"
 

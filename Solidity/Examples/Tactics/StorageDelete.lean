@@ -178,10 +178,10 @@ then both members read back as `0`. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.exampleStore (sol{
+#eval Prog.localAfterT State.exampleStore (sol{
     alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;
     uint b = alice.account.balance; uint v = alice.account.token.value; uint r = b + v;
-  } : Surface.Prog StandardExample) "r"
+  } : Prog StandardExample [] _) "r"
 
 /-! `alice.age = 30; delete alice; uint result = alice.age;` (`storage-root-delete-struct.key`). -/
 
@@ -189,9 +189,9 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.exampleStore (sol{
+#eval Prog.localAfterT State.exampleStore (sol{
     alice.age = 30; delete alice; uint result = alice.age;
-  } : Surface.Prog StandardExample) "result"
+  } : Prog StandardExample [] _) "result"
 
 /-! `folks[1].age = 44; delete folks[1]; uint result = folks[1].age;` — a struct
 entry of a mapping (`storage-index-delete-mapping-struct.key`). -/
@@ -200,9 +200,9 @@ entry of a mapping (`storage-index-delete-mapping-struct.key`). -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.exampleStore (sol{
+#eval Prog.localAfterT State.exampleStore (sol{
     folks[1].age = 44; delete folks[1]; uint result = folks[1].age;
-  } : Surface.Prog StandardExample) "result"
+  } : Prog StandardExample [] _) "result"
 
 /-! A struct's mapping members survive its `delete` (solkey `selectStDelNodeMap`),
 its value members do not (`selectStDelNodePrim`): after
@@ -213,17 +213,17 @@ the owner `0`. -/
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 42))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.exampleStore (sol{
+#eval Prog.localAfterT State.exampleStore (sol{
     wallet.owner = 7; wallet.stash[1] = 42; delete wallet; uint kept = wallet.stash[1];
-  } : Surface.Prog StandardExample) "kept"
+  } : Prog StandardExample [] _) "kept"
 
 /--
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.exampleStore (sol{
+#eval Prog.localAfterT State.exampleStore (sol{
     wallet.owner = 7; wallet.stash[1] = 42; delete wallet; uint o = wallet.owner;
-  } : Surface.Prog StandardExample) "o"
+  } : Prog StandardExample [] _) "o"
 
 /-! ## A fixed-size array keeps its length
 
@@ -247,17 +247,17 @@ and `testFixedMappingArrayDeleteKeepsEntries`: each run ends normally. -/
 /-- info: [true, true, true, true, true] -/
 #guard_msgs in
 #eval [
-  (Surface.Prog.runT State.testSuiteStore (sol{ require(2 < fixedValues.length); fixedValues[1] = 7;
+  (Prog.runT State.testSuiteStore (sol{ require(2 < fixedValues.length); fixedValues[1] = 7;
     delete fixedValues; assert(2 < fixedValues.length); assert(fixedValues[1] == 0); })).isOk,
-  (Surface.Prog.runT State.testSuiteStore (sol{ require(1 < fixedTokens.length);
+  (Prog.runT State.testSuiteStore (sol{ require(1 < fixedTokens.length);
     fixedTokens[1].value = 7; delete fixedTokens; assert(1 < fixedTokens.length);
     assert(fixedTokens[1].value == 0); })).isOk,
-  (Surface.Prog.runT State.testSuiteStore (sol{ require(2 < triple.items.length); triple.items[1] = 7;
+  (Prog.runT State.testSuiteStore (sol{ require(2 < triple.items.length); triple.items[1] = 7;
     triple.tag = 3; delete triple; assert(2 < triple.items.length);
     assert(triple.items[1] == 0); assert(triple.tag == 0); })).isOk,
-  (Surface.Prog.runT State.testSuiteStore (sol{ require(2 < triple.items.length); triple.items[1] = 7;
+  (Prog.runT State.testSuiteStore (sol{ require(2 < triple.items.length); triple.items[1] = 7;
     triple2 = triple; assert(triple2.items[1] == 7); })).isOk,
-  (Surface.Prog.runT State.testSuiteStore (sol{ require(1 < fixedMaps.length); fixedMaps[1][2] = 5;
+  (Prog.runT State.testSuiteStore (sol{ require(1 < fixedMaps.length); fixedMaps[1][2] = 5;
     delete fixedMaps; assert(fixedMaps[1][2] == 5); })).isOk]
 
 end Fixed

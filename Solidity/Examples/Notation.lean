@@ -165,8 +165,8 @@ set_option pp.sol.dl false in
 /-- info: dl{ true } : Premise StandardExample [] [] -/
 #guard_msgs in #check (Premise.done true : Premise StandardExample [] [])
 
-/-! A block of statements, resolved (`Prog.resolve`), its locals left
-in scope after it, quoted (`Premise.quote`) and type-checked
+/-! A block of statements, elaborated scoped (`sol{ … }` at `Prog C [] _`),
+its locals left in scope after it, quoted (`Premise.quote`) and type-checked
 (`Meta.check`, the elaborator's checker). -/
 
 /--
@@ -174,8 +174,7 @@ info: dl{ ⟨[ uint x = 1; alice.age = x; ]⟩ } : Premise StandardExample [] [L
 -/
 #guard_msgs in
 run_meta do
-  let .ok ⟨_, P⟩ := Prog.resolve (C := StandardExample) [] sol{ uint x = 1; alice.age = x; }
-    | throwError "the block does not resolve"
+  let P : Prog StandardExample [] _ := sol{ uint x = 1; alice.age = x; }
   let e := Premise.quote (Lean.mkConst ``StandardExample) (.unfold P .refl)
   Lean.Meta.check e
   Lean.logInfo m!"{e} : {← Lean.Meta.inferType e}"

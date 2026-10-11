@@ -117,11 +117,11 @@ example : ¬ (⊨ dl!{ ⟨ uint x = 1; uint y = 0; unchecked { x = x / y; }; ⟩
 /-! ## What the elaborator writes -/
 
 /-- `unchecked` is its wrapping operators, printed as they read back. -/
-example : Surface.Prog.toStr (sol{ uint x = 1; unchecked { x += 1; x = x * 2 - 1; x++; }; }) =
+example : Prog.toStr [] (sol{ uint x = 1; unchecked { x += 1; x = x * 2 - 1; x++; }; }) =
     "uint x = 1; x = x +% 1; x = (x *% 2) -% 1; x = x +% 1;" := by decide
 
 /-- `&=` is `x = x & e;`. -/
-example : Surface.Prog.toStr (sol{ uint x = 1; x &= ~x; x <<= 2; }) =
+example : Prog.toStr [] (sol{ uint x = 1; x &= ~x; x <<= 2; }) =
     "uint x = 1; x = x & ~x; x = x << 2;" := by decide
 
 /-- error: Solidity elaboration failed: operator & does not take int -/

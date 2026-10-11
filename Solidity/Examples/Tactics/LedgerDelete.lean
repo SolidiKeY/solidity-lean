@@ -114,13 +114,13 @@ theorem deleteLedger : ⊨ dl!{ [ ledger.nonce = 42; delete ledger; ] true } := 
   sol_close
 
 /-- The whole program. -/
-def ledgerProgram : Surface.Prog TestSuite := sol{
+def ledgerProgram := (sol{
   ledger.nonce = 5; ledger.balances[1] = 10; ledger.balances[2] = 20;
   delete ledger.balances[1];
   uint gone = ledger.balances[1]; uint kept = ledger.balances[2]; uint before = ledger.nonce;
   delete ledger;
   uint after = ledger.nonce; uint survives = ledger.balances[2];
-}
+} : Prog TestSuite [] _)
 
 /-! `after`: the value member is reset by `delete ledger`. -/
 
@@ -128,7 +128,7 @@ def ledgerProgram : Surface.Prog TestSuite := sol{
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.testSuiteStore ledgerProgram "after"
+#eval Prog.localAfterT State.testSuiteStore ledgerProgram "after"
 
 /-! `survives`: the mapping entry is not. -/
 
@@ -136,7 +136,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 20))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.testSuiteStore ledgerProgram "survives"
+#eval Prog.localAfterT State.testSuiteStore ledgerProgram "survives"
 
 /-! `ledger.nonce = 5; ledger.balances[1] = 10; delete ledger;
 uint kept = ledger.balances[1]; delete ledger.balances[1]; uint nonce0 = ledger.nonce;
@@ -147,7 +147,7 @@ uint gone = ledger.balances[1];` — deleting the entry is what clears it:
 info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 1000))
 -/
 #guard_msgs in
-#eval Surface.Prog.localAfterT State.testSuiteStore
+#eval Prog.localAfterT State.testSuiteStore
   sol{ ledger.nonce = 5; ledger.balances[1] = 10; delete ledger;
        uint kept = ledger.balances[1]; delete ledger.balances[1];
        uint nonce0 = ledger.nonce; uint gone = ledger.balances[1];
