@@ -2321,6 +2321,91 @@ x` for a hidden binder, after which the two `where` pins of
 `docs/testsuite-proofs.md`'s `solc_problems … legacy`; the read-only
 review pass (W8.5).
 
+### W8.3 lane `ex-calls-print` record (2026-10-11, branch `w8-w83examplesandleafconsumersmigrate-ex-calls-print`)
+
+`Examples/Tactics/{CallOperands,Calls,Loops,Branch,TryCatch,Step,Print,Symex}.lean`
+read and print the scoped syntax only: no `Surface.Prog`, `Surface.Fml`,
+`Prog.resolve`, `Prog.resolveCheck`, `Prog.defineCore` or `elabProgAt` is
+left in them.  `Examples/Tactics/Surface.lean` needed nothing: its pin
+already reads `: Fml StandardExample []` (W8.2 `reader-tools`).
+
+- **Programs.**  `Surface.Prog.toStr (sol{…} : Surface.Prog C)` is
+  `Prog.toStr [] (sol{…} : Prog C [] _)`, `Surface.Prog.show` is
+  `Prog.show []`, `Surface.Prog.runT` is `Prog.runT`, `elabProgAt` is
+  `elabProgAtS`.  A block that was declared `Surface.Prog C` and then
+  `Prog.defineCore`d is declared scoped by `sol{…}` at its type
+  (`countTo3Core`, `countUpCore`, `pushLvalueCore`, `pingNoCodeCore`, same
+  names).  `Calls.lean`'s `calleeStr` reads the last statement's call
+  scoped and prints its body in the frame's names
+  (`CallRet.names ++ Args.names`).
+- **Inlined calls.**  `Surface.Prog.inlined` has no scoped twin (a call's
+  body lives in its own frame), so the new `Syntax/Inlined.lean` prints a
+  block with its calls inlined (`Prog.inlinedStr`, `Prog.inlinedShow`):
+  the arguments' declarations, the return variables', the body (inlined in
+  turn), the result, as `Surface.Stmt.expandBody` built them.  The four
+  pins (`Loops`' `find`, `pair`, `ModifierRuns.f`; `CallOperands`'
+  `choosePersonMem`) print as before.
+- **Formulas.**  `Step`'s `agree`, `Symex`'s `coreSymex`, `Print`'s
+  `stepsShowOf` and `headPremise` take `Fml C []` from `dl!{ … }` (each file
+  imports `Calculus/Notation.lean`, where the scoped reader is); no
+  `Prog.resolve`, no rebuilt `.modal m P .nil .tt` (the reader writes that
+  term).  `Print`'s formulas with free locals were read under an `NCtx`
+  and closed by `∀`s (`closeAll`); they are written with the `∀`s now
+  (`dl!{ ∀ uint a; ∀ uint b; [ (a, b) = pair(3); ] true }`), the formula
+  and text the pins had, and `headPremise` reads the program under them.
+- **Refused programs.**  `Loops`' four elaboration-error pins state the
+  scoped type with its output context (`Prog StandardExample [] [.val
+  .uint]`): with `_` the error is preceded by "don't know how to synthesize
+  placeholder".  `Branch`'s `Prog.resolveCheck` guard (alike in both
+  branches, at another type in a later one) is an `example` at
+  `Prog StandardExample [] [.val .bool]`: the scoped elaborator accepting it
+  is the check.
+
+Proposed decisions:
+
+- **116 (`ex-calls-print`).**  `Syntax/Inlined.lean` (above
+  `Syntax/Scoped.lean` only) replaces `Surface.Prog.inlined` for display:
+  a string printer, not a scoped program (a call's body is closed over its
+  frame, so inlining it as a `Prog` would need the weakening `Stmt.wk` and
+  the frame's pops; the pins only print it).  A memory return prints as the
+  `T memory r;` the erasure's body began with.  `Syntax/Splice.lean`'s
+  `inlined` pin can take it in W8.4.
+- **117 (`ex-calls-print`).**  A scoped `sol{ … }` inside `#eval do … ←`
+  fails to elaborate ("Invalid projection: Type of b✝ is not known"),
+  even ascribed; `TryCatch`'s two runs declare their programs first
+  (`pingP`, `pingPanicP`).  Left as found for W8.4 (the splice's shared
+  `let`s under `do`, presumably); a `sol{}` outside `do` is unaffected.
+
+**Pins.**  No printed text moved (every `#guard_msgs` and every `rfl`
+string is as before).  Command lines changed under unchanged pins:
+`Print`'s `stepsShowOf … Γ`/`headPremise … Γ` drop the context argument
+(`abΓ`, `okToΓ`, `closeAll` gone); `TryCatch`'s two `#eval`s run the
+declared `pingP`/`pingPanicP`; the inlined pins call
+`Prog.inlinedShow`/`Prog.inlinedStr`.
+
+**Checks.**  Every touched file through the Lean server: no errors, no
+warnings (`Syntax/Inlined.lean` included); their only importer outside
+`Solidity.lean` is `Print` (of `Symex`), checked.  `check-orphans` (the
+scratch modules only) and `check-doc-paths` pass.
+
+**Timing** (the end-of-work method, each file copied under
+`Solidity/Scratch/`, base the same file at `cebf1880` in this worktree,
+same session; load 0.8–1.4, cgroup 8.1 GB).  No W6/W7 gate row imports
+these files; the lane's rows against the base:
+
+| Module | base (`cebf1880`) | `ex-calls-print` | ratio |
+|---|---|---|---|
+| `Examples/Tactics/Print` | 3.71 s (3.72, 3.71) | 3.43 s (3.43, 3.49) | 0.92 |
+| `Examples/Tactics/Calls` | 64.91 s | 64.69 s | 1.00 |
+| `Examples/Tactics/Loops` | 26.63 s | 26.31 s | 0.99 |
+| `Examples/Tactics/Step` | 29.08 s | 29.15 s | 1.00 |
+| `Examples/Tactics/CallOperands` | 20.49 s | 20.49 s | 1.00 |
+| `Examples/Tactics/TryCatch` | 5.33 s | 5.26 s | 0.99 |
+| `Examples/Tactics/Branch` | 7.84 s | 7.83 s | 1.00 |
+| `Examples/Tactics/Symex` | 1.22 s | 1.17 s | 0.96 |
+
+Every row within 1.2× of its base (`Print`'s W8.2 merge row: 3.73 s).
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
