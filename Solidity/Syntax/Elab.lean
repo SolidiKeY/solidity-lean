@@ -51,10 +51,6 @@ abbrev NCtx.ctx (Γ : NCtx) : Ctx := Γ.map (·.2)
 /-- The names. -/
 abbrev NCtx.names (Γ : NCtx) : List Var := Γ.map (·.1)
 
-theorem NCtx.ctx_append (A B : NCtx) : (A ++ B).ctx = A.ctx ++ B.ctx := List.map_append
-
-theorem NCtx.names_append (A B : NCtx) : (A ++ B).names = A.names ++ B.names := List.map_append
-
 /-- How a declaration writes the type: `uint`, `Person storage`, `Person memory`. -/
 def LTy.toStr : LTy → String
   | .val p => p.toStr
@@ -76,66 +72,23 @@ def NCtx.find [FreshNames] (x : Var) (t : LTy) :
       | .ok ⟨i, h⟩ => .ok ⟨.there i, h⟩
       | .error e => .error e
 
-/-- The binders as a named context. -/
-def Binders.nctx {ρ : Ctx} : Binders ρ → NCtx
-  | .nil => []
-  | .snoc bs p x => (x, .val p) :: bs.nctx
-
-theorem Binders.nctx_ctx {ρ : Ctx} (bs : Binders ρ) : bs.nctx.ctx = ρ := by
-  induction bs with
-  | nil => rfl
-  | snoc bs p x ih => exact congrArg (List.cons _) ih
-
-theorem Binders.nctx_names {ρ : Ctx} (bs : Binders ρ) : bs.nctx.names = bs.names := by
-  induction bs with
-  | nil => rfl
-  | snoc bs p x ih => exact congrArg (List.cons _) ih
-
 /-- `bs` with the locals `l` bound after it, in order. -/
 def Binders.snocAll {ρ : Ctx} (bs : Binders ρ) : List (PrimTy × Var) → (ρ' : Ctx) × Binders ρ'
   | [] => ⟨ρ, bs⟩
   | (p, x) :: l => (bs.snoc p x).snocAll l
 
-theorem Binders.toList_snocAll {ρ : Ctx} (bs : Binders ρ) (l : List (PrimTy × Var)) :
-    (bs.snocAll l).2.toList = bs.toList ++ l := by
-  induction l generalizing ρ with
-  | nil => exact (List.append_nil _).symm
-  | cons a l ih =>
-    obtain ⟨p, x⟩ := a
-    rw [snocAll, ih]
-    simp only [toList, List.append_assoc, List.cons_append, List.nil_append]
-
 /-- The locals `l` bound in order. -/
 def Binders.ofList (l : List (PrimTy × Var)) : (ρ : Ctx) × Binders ρ := Binders.nil.snocAll l
-
-theorem Binders.toList_ofList (l : List (PrimTy × Var)) : (Binders.ofList l).2.toList = l :=
-  (Binders.toList_snocAll .nil l).trans (List.nil_append l)
 
 def CodeBinder.ofOption : Option Var → (κ : Ctx) × CodeBinder κ
   | Option.none => ⟨[], .none⟩
   | Option.some x => ⟨[.val .uint], .some x⟩
-
-def CodeBinder.nctx {κ : Ctx} : CodeBinder κ → NCtx
-  | .none => []
-  | .some x => [(x, .val .uint)]
-
-theorem CodeBinder.nctx_ctx {κ : Ctx} (c : CodeBinder κ) : c.nctx.ctx = κ := by
-  cases c <;> rfl
-
-theorem CodeBinder.nctx_names {κ : Ctx} (c : CodeBinder κ) : c.nctx.names = c.names := by
-  cases c <;> rfl
 
 /-- A block read in a context equal to its own (an appended context `ρ ++ Γ`
 read as the named context built for it, equal to it but not by
 definition). -/
 def Prog.castIn {C : Contract} {Γ₁ Γ₂ Δ : Ctx} (h : Γ₁ = Γ₂) (P : Prog C Γ₁ Δ) : Prog C Γ₂ Δ :=
   h ▸ P
-
-/-- A `Panic` clause's binder as an option. -/
-def CodeBinder.toOption {κ : Ctx} : CodeBinder κ → Option Var
-  | .none => Option.none
-  | .some x => Option.some x
-
 
 /-- What a local in scope holds. -/
 inductive LocalTy where
@@ -743,7 +696,9 @@ def Args.separated {Γ : Ctx} (ns : List Var) : {ps : Ctx} → Args C Γ ps → 
 
 mutual
 /-- A memory path that indexes nothing: a local and its members, which a
-read cannot revert on (memory has no null and no mapping). -/
+read cannot revert on when the local is set (memory has no null and no
+mapping); an unset one, which only a hidden binder holds (decision 17'),
+reverts. -/
 def MPath.indexFree {Γ : Ctx} : {T : Ty} → MPath C Γ T → Bool
   | _, .var .. => true
   | _, .loc l => l.indexFree
@@ -1749,9 +1704,11 @@ is `uint se1; se1 = i++; values[se1] = 1;`, and
 Person storage p = sp1;`, the alias declared before the branches, which are
 scopes.  A memory one is `Person memory mv1 = mx;
 if (c) { mv1 = mx; } else { mv1 = my; }`: declared bound to a branch that
-indexes nothing (`MPath.indexFree`, a read that cannot revert), or, when
-both index, to a fresh default object (`Person memory mv1;`, an object
-nothing reaches), and rebound in each branch.  Under the right
+indexes nothing (`MPath.indexFree`, a read that cannot revert on a set
+local; an unset one, which only a hidden binder holds (decision 17'),
+reverts there where solc reads the other branch), or, when both index, to
+a fresh default object (`Person memory mv1;`, an object nothing reaches),
+and rebound in each branch.  Under the right
 operand of `&&`/`||` or in a branch of a conditional an effect would be
 evaluated where the program does not evaluate it, so there it is an error. -/
 partial def hoist : RawExpr → ElabM (SProg C × RawExpr)

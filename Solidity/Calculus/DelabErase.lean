@@ -89,11 +89,6 @@ abbrev TrM := ReaderT Env MetaM
 /-- A position that is no local the term declared. -/
 def unknownVar : Expr := mkApp (mkConst ``Solidity.Var.user) (toExpr "_")
 
-/-- The twin of `e`, when it is a schema variable that has one. -/
-def twin? (e : Expr) : TrM (Option Expr) := do
-  let .fvar fv := (← instantiateMVars e).consumeMData | return none
-  return (← read).twins.get? fv
-
 /-- The name of a position, from the names `ns` the term declared
 (innermost first). -/
 partial def trIdx (ns : List Expr) (e : Expr) : TrM Expr := do

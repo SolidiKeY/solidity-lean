@@ -31,8 +31,8 @@ is `P` under `m`, and an update with no modality under
 it is judged at `m`, so the last line of a box derivation is
 `dl![.box]{ { x := 1 } x == 1 }`.  In `dl!{ φ }` such an update is judged at
 the diamond, and `⟨[ ]⟩` is refused.  A name where a formula stands, or
-`‹t›`, is a Lean formula: the postcondition `φ` (a `Post C`,
-`Chains.lean`), which prints back as its name.  The reader runs as compiled
+`‹t›`, is a Lean formula: the postcondition `φ` (a `NFml.Post C`,
+`Calculus/RewriteChains.lean`), which prints back as its name.  The reader runs as compiled
 code, which no Lean variable can enter, so each of these stands in for
 something closed while the formula is read, and one walk (`fillSlots`) puts
 the Lean terms back: a formula is read as a slot (`NFml.slot`), and the
@@ -538,11 +538,6 @@ def cmpFml {C : Contract} (op : BinOp) (p : PrimTy) (a b : Term C) : NFml C :=
 `defined(⟪i⟫)`, a local no program can name, with index `0` and no modality,
 as the formula it stands for (`Post`, `Chains.lean`). -/
 def NFml.slot {C : Contract} (i : Nat) : NFml C := .defined (.pv (.user s!"⟪{i}⟫"))
-
-/-- Whether a formula is a slot. -/
-def NFml.isSlot {C : Contract} : NFml C → Bool
-  | .defined (.pv (.user s)) => s.startsWith "⟪"
-  | _ => false
 
 /-! ## Elaboration -/
 
@@ -1201,7 +1196,7 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
     TermElabM Lean.Expr := do
   let holes := fmlHoles φ
   let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
-  -- a hole that is no postcondition (`φ : Post C` writes no fresh variable)
+  -- a hole that is no postcondition (`φ : NFml.Post C` writes no fresh variable)
   -- may write fresh variables the reading cannot see: captures are then
   -- numbered past every written index
   let opaqueHole ← holes.anyM fun h => do
@@ -1240,7 +1235,7 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
       -- A misspelt `true` is not a new variable of the signature.
       if let `($x:ident) := t then
         if (← resolveLocalName x.getId).isNone && (← resolveGlobalName x.getId).isEmpty then
-          throwError "a name where a formula stands is a Lean formula (φ : Post C): unknown `{x}`"
+          throwError "a name where a formula stands is a Lean formula (φ : NFml.Post C): unknown `{x}`"
       withoutAutoBoundImplicit do elabTermEnsuringType t ty
   match fillSlots m? φs d b with
   | .ok e => return e

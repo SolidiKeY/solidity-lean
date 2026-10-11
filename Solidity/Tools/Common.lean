@@ -14,8 +14,7 @@ Two things every command of `Tools/` needs, written once:
   `#difftest` draws words anywhere in range, `#counterexample` from pools of
   interesting values;
 * **the command front end**: what an identifier `C` or `C.f` names
-  (`resolveTarget`), a closed formula of a named contract (`elabFormula`),
-  a term of type `Except String (List String)` elaborated and run
+  (`resolveTarget`), a term of type `Except String (List String)` elaborated and run
   (`evalLines`), and a report of a head line and indented lines
   (`logReport`).
 -/
@@ -128,22 +127,6 @@ def resolveFunction (cmd : String) (id : Lean.Name) :
   match ← resolveTarget cmd id with
   | .function c C f => pure (c, C, f)
   | .contract .. => throwError "{cmd}: expected a function `{id}.f`, not the contract {id}"
-
-/-- **Elaborate a closed formula of a named contract**: the formula, the
-contract, and the contract's name quoted (`Lean.mkConst n []`). -/
-def elabFormula (cmd : String) (t : Lean.Term) :
-    TermElabM (Lean.Expr × Lean.Expr × Lean.Expr) := do
-  let φ ← elabTerm t none
-  synthesizeSyntheticMVarsNoPostponing
-  let φ ← instantiateMVars φ
-  let ty ← whnf (← inferType φ)
-  unless ty.isAppOfArity ``NFml 1 do throwError "{cmd}: not a formula{indentExpr φ}"
-  let C := ty.appArg!
-  let some n := (← whnfR C).constName? | throwError "{cmd}: not a named contract: {C}"
-  if φ.hasFVar || φ.hasMVar then throwError "{cmd}: the formula is not closed{indentExpr φ}"
-  let c := mkApp2 (mkConst ``Lean.mkConst) (toExpr n)
-    (mkApp (mkConst ``List.nil [0]) (mkConst ``Lean.Level))
-  return (φ, C, c)
 
 /-- **Run a report**: elaborate `t : Except String (List String)`, evaluate
 it, and return its lines, or fail with its message. -/

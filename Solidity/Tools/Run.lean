@@ -246,7 +246,7 @@ def deployReport [FreshNames] (C : Contract) (args : List RawExpr) (tx : TxEnv) 
     | .ok o => ["ok", s!"balance {o.st.selfBalance.1}"] ++ fmtStorage C o.st.storage.erase
 
 /-- `#deploy C(a, b) [with msg.sender := n, msg.value := m, …]`: deploy the
-contract `C` in the interpreter and print its outcome. -/
+contract `C` in the typed run and print its outcome. -/
 syntax (name := deployCmd) "#deploy " ident "(" sol_expr,* ")" (" with " runEnv,+)? : command
 
 open Lean Elab Command Term Meta in

@@ -86,11 +86,10 @@ def ruleFamilies : List Lean.Name :=
   [``Taclet, ``LeanTaclet, ``CallbackTaclet]
 
 /-- The constructor a name denotes: `storageFieldWriteSave`,
-`Taclet.storageFieldWriteSave`, `Taclet.storageFieldWriteSave`, or a
-full name. -/
+`Taclet.storageFieldWriteSave`, or a full name. -/
 def resolveRule (id : Lean.Name) : MetaM (Option Lean.Name) := do
   let env ← getEnv
-  let cands := id :: (`Solidity ++ id) :: (`Solidity ++ id) :: ruleFamilies.map (· ++ id)
+  let cands := id :: (`Solidity ++ id) :: ruleFamilies.map (· ++ id)
   return cands.find? fun c => env.contains c && ruleFamilies.contains c.getPrefix &&
     (env.find? c).any (·.isCtor)
 

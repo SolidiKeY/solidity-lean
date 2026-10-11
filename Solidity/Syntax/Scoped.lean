@@ -763,17 +763,13 @@ def Prog.ext : {Γ Γ' : Ctx} → Prog C Γ Γ' → Ext Γ Γ'
       (fun s P => (Stmt.ext s).trans (Prog.ext P))
   termination_by structural _ _ P => P
 
-theorem Prog.ext_nil {Γ : Ctx} : (Prog.nil : Prog C Γ Γ).ext = .refl := rfl
-
-theorem Prog.ext_cons {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) :
-    (Prog.cons s P).ext = s.ext.trans P.ext := rfl
-
 end Pushes
 
 /-! ## An example
 
-Every scope at once over `StandardExample`, printed as `Syntax.lean` prints
-the same statements (`tour`, `Stmt.memCallStr?`, `Stmt.tupleCallStr?`). -/
+Every scope at once over `StandardExample`, printed as `Syntax/Splice.lean`'s
+`tour` prints the same statements (`Prog.show`, `Stmt.memCallStr?`,
+`Stmt.tupleCallStr?`). -/
 
 section Example
 

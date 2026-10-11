@@ -66,8 +66,8 @@ def usedInBinders : Lean.Expr → Nat → Bool
   | _, _ => false
 
 /-- The binders of a taclet's type and its line.  The proof a name carries
-(`hfld : C.fieldType R fld = …` for `fld`, `hgsp` for `gsp`, `hop` for `op`;
-`hsep` for the arguments of a call `fbs`) stays out of sight, unless another
+(`hfld : C.fieldType R fld = …` for `fld`, `hgsp` for `gsp`, `hop` for
+`op`) stays out of sight, unless another
 binder's type names it, the line saying it; binders of one type are
 grouped, as Lean groups them. -/
 partial def delabTacletBinders (names : Array Lean.Name)
@@ -92,7 +92,7 @@ partial def delabTacletBinders (names : Array Lean.Name)
     `(∀ $bs*, $body)
   -- `hx`, of a fact about the binder `x` before it
   let s := n.eraseMacroScopes.toString
-  let carried ← if s == "hsep" then pure true else if !s.startsWith "h" then pure false else
+  let carried ← if !s.startsWith "h" then pure false else
     match (← getLCtx).findFromUserName? (Lean.Name.mkSimple (s.drop 1)) with
     | some d => pure (names.contains d.userName && t.containsFVar d.fvarId)
     | none => pure false

@@ -618,12 +618,6 @@ theorem Fml.eval3_ff {dom : TDom} {Γ : Ctx} {σ : State C Γ} {φ : Fml C Γ}
     (h : φ.eval3 dom σ = .ff) : ¬ holds σ φ :=
   (Fml.eval3_sound dom φ σ).2 h
 
-/-- A typed state where `φ` evaluates to `ff` refutes `⊨ φ`: the statement a
-certificate proves. -/
-theorem Fml.not_valid_of_eval3 {dom : TDom} (σ : State C []) {φ : Fml C []}
-    (h : φ.eval3 dom σ = .ff) : ¬ Valid φ :=
-  fun hv => Fml.eval3_ff h (hv σ)
-
 end Solidity
 
 namespace Solidity.Tools

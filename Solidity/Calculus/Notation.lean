@@ -293,10 +293,6 @@ def elabDlOpen (φ : RawFml) : Except String ((Γ : NCtx) × Fml C Γ.ctx) :=
   let (params, declared, taken) := dlParams C φ false
   elabDlIn C φ false declared taken params
 
-/-- `elabDlCN`'s formula. -/
-def elabDlC (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C []) :=
-  (elabDlCN C φ pastAll).map (·.2)
-
 end Read
 
 /-! ## Putting the Lean terms back -/

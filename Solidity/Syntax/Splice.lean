@@ -199,7 +199,9 @@ example : Prog.toStr [] (sol{ bool c = true; Person storage p = c ? alice : bob;
     Person storage p = sp1;" := rfl
 
 /-- A memory one declares its `mv1` before the branches, bound to a branch
-that indexes nothing, and rebinds it in each: the branches are scopes. -/
+that indexes nothing (a read that cannot revert on a set local; an unset
+one, which only a hidden binder holds, reverts there where solc reads the
+other branch), and rebinds it in each: the branches are scopes. -/
 example : Prog.toStr [] (sol{ bool c = true; Person memory mx = alice; Person memory my = bob;
     Person memory m = c ? mx : my; }) =
     "bool c = true; Person memory mx = alice; Person memory my = bob; \
