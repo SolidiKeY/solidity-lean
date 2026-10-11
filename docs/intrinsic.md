@@ -305,30 +305,51 @@ noise: `Derived10` at 11.24 s against 11.2 s (0.4%; the baseline was
 0.09 s under it, the 6a–6b lanes measured 11.20–11.21 s, the file and its
 path unchanged), within its W6 gate (13.33 s).
 
-**W7 `w7-rewrites`** (2026-10-11, `445c76f3` and the split after it; the
-method above, the 32 GiB cgroup at 7.2–7.8 GB, load 0.5–2.0; the other W7
-lanes idle; three runs where a row is gated, one otherwise):
+**W7 `w7-rewrites`** (2026-10-11, after the review fixes at `6f24cbc4`;
+the method above, the 32 GiB cgroup at 7.4–7.9 GB, load 0.3–1.4; the other
+W7 lanes idle; three runs where a row is gated, one otherwise):
 
 | Module | W6 baseline | gate (1.2×) | **W7 `w7-rewrites`** | ratio | CPU |
 |---|---|---|---|---|---|
-| `Examples/ChainRewrites` (§3⁗ moved out, w7-rewrites-96) | 6.36 s | 7.63 s | **7.35 s** (7.35, 7.41, 7.43) | 1.16 | 8.58 s |
-| `Examples/ChainRewritesOpen` (new) | — | — | 3.39 s | — | 3.78 s |
-| `Examples/Chains/Storage` | 7.45 s | 8.94 s | **7.57 s** (7.58, 7.60, 7.57) | 1.02 | 8.20 s |
-| `Examples/ProofTree` | 9.81 s | 11.77 s | 10.10 s | 1.03 | 10.29 s |
-| `Evm/Correct` (control, untouched) | 1.68 s | — | 1.70 s | 1.01 | 6.15 s |
+| `Examples/ChainRewrites` (§3⁗ moved out, w7-rewrites-96) | 6.36 s | 7.63 s | **6.88 s** (6.88, 6.88, 6.85) | 1.08 | 8.07 s |
+| `Examples/ChainRewritesOpen` (new) | — | — | 3.48 s | — | 3.90 s |
+| `Examples/Chains/Storage` | 7.45 s | 8.94 s | **7.58 s** (7.60, 7.58, 7.55) | 1.02 | 8.21 s |
+| `Examples/ProofTree` | 9.81 s | 11.77 s | 10.04 s | 1.02 | 10.26 s |
+| `Evm/Correct` (control, untouched) | 1.68 s | — | 1.74 s | 1.04 | 6.31 s |
+| `Examples/Tactics/UpdateRules` (`sol_upd`, `sol_merge` scoped) | — | — | 2.89 s | — | 2.99 s |
 
-`Examples/Chains/*` against `w6c-chain`'s runs (`Arithmetic`,
+**The unchanged content, timed against this lane's base.**  `intrinsic`'s
+copy of `Examples/ChainRewrites` (at `1616405c`, the base of this lane),
+whole and without §3⁗, three runs each on the base checked out in this
+worktree and on this branch, same cgroup and load:
+
+| Checkout | whole | without §3⁗ |
+|---|---|---|
+| `1616405c` (base) | 7.43, 7.50, 7.43 s | 6.46, 6.42, 6.40 s |
+| `9d1f186f` (before the fixes) | 7.97, 7.92 s | 6.88, 6.89, 6.87 s (+7%) |
+| `6f24cbc4` (after) | 7.45, 7.43 s | 6.44, 6.44, 6.48 s (+0.5%) |
+
+The +7% on identical text was **this lane's**, not `intrinsic`'s post-W6
+commits (the record said otherwise at `83ec42c4`, untimed; the base is
+within 2% of W6's final run, 7.30 and 6.33 s).  Bisected (without §3⁗, one
+or two runs each): `fa3e54fa` 6.69–6.73 s (`openRwPath` in `leads%` and
+`leadsSteps`: the `~~>` statement `headlineWrite` alone took 0.12 s more,
+the depth-3 search run from every open line of a derivation before the
+past-program reading), `8052d96d` 6.69–6.75 s, `df08c553` 6.99–7.05 s
+(`applyOnPV` and three `stateMerge`s per update widened that search),
+`7af11076` 7.78 s (scoped links past the program, off from `445c76f3`).
+Fixed at `6f24cbc4`: the search is breadth first with each line expanded
+once, bounded (`openRwNodes`, its own heartbeats per line), and not run
+where the line written keeps no program (`Written.mayBeOpen`; on the proof
+side `openRwFrom`, a line with no `Fml.modal`), since a rewrite while the
+program is open keeps it.  Every row passes its gate.
+`Examples/Chains/*` against `w6c-chain`'s runs, at `445c76f3` (not re-timed
+after the fixes; the scratch builds of all thirteen pass): `Arithmetic`,
 `CheckedArithmetic`, `EvaluationOrder`, `Memory`, `MemoryArrays`,
 `MemoryCoverage`, `MemoryDelete`, `MemoryToStorage`, `StorageToMemory`,
-`Payment`, `StorageArrays`, `StorageCoverage`, `StorageDelete`): 1.02,
+`Payment`, `StorageArrays`, `StorageCoverage`, `StorageDelete`: 1.02,
 1.25, 1.04, 4.86, 6.26, 11.81, 9.15, 5.49, 2.55, 1.09, 3.51, 14.16, 7.24 s,
-0.96–1.06 of them.  `Examples/ChainRewrites` whole, before the split:
-10.07–10.23 s (CPU 11.7 s), 26 examples more than W6's file.  Diagnosed
-on `intrinsic`'s copy of the file, with this branch's modules: 7.90–7.94 s
-(the option off), 8.38 s (on, merges only; 8.32–8.74 s with every rewrite
-past the program scoped), 6.93 s without §3⁗ (W6: 6.33 s); its imports
-alone 0.67 s.  Every row passes its gate; the unchanged content's +8%
-against W6's final run is not this lane's path ("What is left").
+0.96–1.06 of them.
 `TestSuite/Derived*` and the M0 rows were not re-timed: no module on
 their path changed but `DelabErase` (printing).
 
@@ -1220,6 +1241,31 @@ w7-rewrites-97. *Proposed (W7 `w7-rewrites`), the lead's call:* decision
     (the line's frames drop it), so it is an unread local in scope, which
     the scoped `simplifyUpdate` keeps (decision 87).  The dropped capture
     is a separate example past the program, on the erasure.
+w7-rewrites-98. *Proposed (W7 `w7-rewrites`, review), the lead's call:*
+    decision 92's exemption from G0 condition 1 (`match` on the indexed
+    families, since they run once a link) extends to the walks this lane
+    added to `Calculus/RewriteScoped.lean`: `Fml.lawAlongS`,
+    `Fml.lawFiresS`, `Fml.lawAtom`, `Fml.lawAtomFires`, `Fml.stepIn`,
+    `Fml.atPath`, `Tm.litPV`, `Tm.litPVFires`, `Fml.litPVAlong`,
+    `Fml.litPVFires`, `Fml.applyOnPVTop` (named in its module docstring).
+    It does not extend to what `sol_upd` and `sol_merge` run on a whole
+    leaf: `Upd.unsetAt`, `Upd.redecl` and `Upd.shadow` are recursors with
+    `match` twins and link theorems (`Upd.shadow_eq_shadowM`, …), the
+    declaration's `Idx` read by `Idx.casesOn` with no cast
+    (`Upd.declAt`).
+w7-rewrites-99. *Proposed (W7 `w7-rewrites`, review), the lead's call:*
+    while the program is open, `~[applyOnRigidBox]~>` is
+    `FmlRw.applyOnRigid` (under the box any update, under the diamond or
+    `m` one that cannot halt), which is how the erasure reads the same
+    link (`NFml.applyOnRigidBoxTop`: `U.total || m = .box`, the example
+    "`applyOnRigidBox` too applies under `m`" in `Examples/ChainRewrites`)
+    and how KeY's `applyOnRigidFormula` applies (its updates cannot
+    halt); refusing it off the box would make the open and the closed
+    reading of one link disagree.  `~[applyStorageBox]~>` is the box's
+    only and asks an update of the storage and locals
+    (`FmlRw.applyStorageBox`, `Upd.stOnly`), as the erasure's
+    `NFml.applyStorageBoxTop`; both refusals pinned under the diamond in
+    `Examples/ChainRewritesOpen.lean`.
 
 **Lead, 2026-10-09 (5):** proposals 78–94 are approved. M6c continues (W7):
 the closer's atoms by position and `Closer` on scoped formulas, the scoped
@@ -1295,7 +1341,22 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   `selfAssign` closes with no lemma, a typed local always holds a value;
   the `applySkip` example replaced, a scoped line keeps a declaration);
   `Examples/ChainRewrites`' `~~>` refusal lists `applyOnPV`.  Gate:
-  "W7 `w7-rewrites`" below.
+  "W7 `w7-rewrites`" below.  Review fixes (`f4bd70a5`, `6f24cbc4`):
+  `UpdRuleS.sequentialToParallel` and `UpdRuleS.simplifyUpdate` back in
+  the taclets' `\find`/`\replacewith` shape, the binder-crossing merge
+  and the pop absorption separate Lean-only constructors
+  (`UpdRuleS.mergeHidden`, `absorbPops`, `trans`; `UpdRuleNameS.top_rule`
+  builds from them); `Upd.unsetAt`, `Upd.redecl`, `Upd.shadow` by the
+  recursor (w7-rewrites-98); `openRwPath` breadth first, bounded
+  (`openRwNodes`, heartbeats and runtime errors caught per line), not run
+  for a written line with no program, and written out by `sol_chain?` as
+  `~[r]~>` links (`openRwFrom`, `Gen.openRws`), so the two `~~>` examples
+  replay it (`Examples/ChainRewrites`, `Examples/ChainRewritesOpen`); the
+  suggestion pinned in `Examples/Tactics/Chains.lean`, where
+  `Examples/ProofTree.lean`'s docstring puts the chains' suggestions (it
+  does not import the chain tactics, and importing them would load its
+  gated row); `applyStorageBox` box-only (w7-rewrites-99);
+  `simplifyUpdate`'s absorbing candidate only over an update.
 - **W6 lanes beside it**: `w6-canon` tied the canonicity invariant to the
   typed state (decision 75) and found 77 false (`huge_reachable_not_fits`);
   `w6-step` made `Stmt.step` total (decision 76, two replay rows
@@ -1346,12 +1407,6 @@ baseline; a module that fails stays on `NFml` for good, decision 7):
   `sol_chain.scopedPast` on by default and the laws, `~~>` and `calc`
   steps on the scoped line; `sol_apply_upd`, `sol_fold_terms` on the
   scoped leaf.
-- `Examples/ChainRewrites`' unchanged content takes 7.90 s on this branch
-  against 7.30 s at W6's final gate (+8%; "W7 `w7-rewrites`" gate), not by
-  this lane's path (the option off, imports 0.67 s, `Chains/*` unchanged):
-  to bisect at the merge against `intrinsic`'s post-W6 commits
-  (`1f970637`, `eecff456`, `063d6a94`, `34246653`), which touch the
-  closer and chain proofs its `valid_close` examples run.
 - The `⊨` route onto the `⊢` walk (decision 89; it changes the leaves of
   the `⊨` examples).
 - Then delete `NFml`, `Fml.erase` and `Semantics/Erased.lean`.
