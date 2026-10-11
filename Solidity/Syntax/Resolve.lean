@@ -25,10 +25,10 @@ elaborator declares at the head of the body (`Person memory mv2;`) and
 after the call.  `erase` puts it back.
 
 Each `resolve` returns its result with the proof that it erases to its
-input, so `resolve_erase` holds by construction.  The elaborator's entry
-points run `Prog.resolveCheck` on every block they produce
-(`Syntax/Splice.lean`): that is the locals check, and its error names the
-innermost statement it rejects and the local.
+input, so `resolve_erase` holds by construction.  The elaborator emits the
+scoped syntax itself (`Syntax/Elab.lean`); `Prog.resolveCheck` is the locals
+check of the readers that still take the block as written, and its error
+names the innermost statement it rejects and the local.
 -/
 
 namespace Solidity
@@ -966,15 +966,5 @@ theorem Prog.resolve_sepArgs {strict : Bool} {Γ Γ' : NCtx} {us : List (Solidit
       (strict = true → r.2.Fresh [] Γ.names)) h).2.1
 
 end Resolve
-
-/-- The elaborator's locals in scope as a named context: `old` is a
-specification's storage snapshot.  A name is read as the file's
-`FreshNames` spells it (`acc` may be `sp1`). -/
-def _root_.Solidity.ECtx.toNCtx [FreshNames] (Γ : ECtx) : NCtx :=
-  Γ.map fun (x, t) => (Var.ofName x, match t with
-    | .val p _ => .val p
-    | .alias R => .alias R
-    | .mem R => .mem R
-    | .store => .old)
 
 end Solidity

@@ -1,6 +1,6 @@
 import Lean
 import Solidity.Frontend.SolcJson
-import Solidity.Syntax.Quote
+import Solidity.Syntax.Splice
 
 /-!
 # `solc_import`: a contract from solc's AST, at elaboration time

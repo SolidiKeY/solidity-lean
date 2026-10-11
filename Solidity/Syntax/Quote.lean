@@ -1,5 +1,5 @@
 import Lean.Util.ShareCommon
-import Solidity.Syntax.Splice
+import Solidity.Syntax.Elab
 
 /-!
 # Quoting the scoped syntax
@@ -19,8 +19,10 @@ equal contexts of sibling scopes too.  Unshared, the tree is 26–37 times
 larger (the spike's measure).
 
 The quoter is a pure function: the compiled elaborator runs it, and the
-kernel checks its result where it is declared (`Prog.defineCore`; the lint
-`solc_scoped`, `Frontend/Import.lean`, declares every imported program so).
+kernel checks its result where it is spliced (`sol{ … }` at a scoped type,
+`Syntax/Splice.lean`) or declared (`Prog.define`; `Prog.defineCore` resolves
+a block as written first, as the lint `solc_scoped`, `Frontend/Import.lean`,
+declares every imported program).
 -/
 
 namespace Solidity
@@ -299,42 +301,24 @@ def Prog.quoteType (Γe Γ'e : Lean.Expr) : Lean.Expr := mkAppN (mkConst ``Prog)
 
 open Lean in
 /-- Declare `n : Prog C Γ Γ'`, the block `P` of the contract the constant
-`cn` names resolved from `Γ` and quoted, checked by the kernel: `none`, or
-why it is rejected (by `resolve`, or by the kernel). -/
+`cn` names, quoted (`quoteShared`) and checked by the kernel: `none`, or why
+the kernel rejects it. -/
+def Prog.define (n cn : Lean.Name) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : CoreM (Option String) := do
+  let c := mkConst cn
+  let (v, Γe, Γ'e) := Prog.quoteShared c P
+  let decl := Declaration.defnDecl {
+    name := n, levelParams := [], type := Prog.quoteType c Γe Γ'e, value := v,
+    hints := .abbrev, safety := .safe }
+  tryCatchRuntimeEx (do addDecl decl; pure none)
+    fun ex => do pure (some s!"the kernel rejects the scoped program: {← ex.toMessageData.toString}")
+
+open Lean in
+/-- `Prog.define` of the block `P` as written, resolved from `Γ` first
+(`resolve`): `none`, or why it is rejected (by `resolve`, or by the kernel). -/
 def Prog.defineCore [FreshNames] (n cn : Lean.Name) (Γ : NCtx) (P : List (Solidity.Surface.Stmt C)) :
     CoreM (Option String) := do
   match Prog.resolve Γ P with
   | .error e => pure (some e)
-  | .ok ⟨_, P'⟩ =>
-    let c := mkConst cn
-    let (v, Γe, Γ'e) := Prog.quoteShared c P'
-    let decl := Declaration.defnDecl {
-      name := n, levelParams := [], type := Prog.quoteType c Γe Γ'e, value := v,
-      hints := .abbrev, safety := .safe }
-    tryCatchRuntimeEx (do addDecl decl; pure none)
-      fun ex => do pure (some s!"the kernel rejects the scoped program: {← ex.toMessageData.toString}")
-
-/-! ## Pins
-
-`tour` (`Syntax/Splice.lean`) and a block of calls, declared scoped: the
-kernel accepts both, and each erases back to the block it was resolved from. -/
-
-section Pins
-
-private def callsBlock : Solidity.Surface.Prog CallsExample :=
-  sol[CallsExample]{ uint y = addTwo(3); uint z = larger(y, 7); }
-
-open Lean Elab Command in
-run_cmd liftCoreM do
-  for (n, cn, err) in [(`Solidity.tourCore, ``StandardExample,
-        ← Prog.defineCore `Solidity.tourCore ``StandardExample [] tour),
-      (`Solidity.callsCore, ``CallsExample,
-        ← Prog.defineCore `Solidity.callsCore ``CallsExample [] callsBlock)] do
-    if let some e := err then throwError "{n} ({cn}): {e}"
-
-example : Prog.erase [] tourCore = tour := rfl
-example : Prog.erase [] callsCore = callsBlock := rfl
-
-end Pins
+  | .ok ⟨_, P'⟩ => Prog.define n cn P'
 
 end Solidity

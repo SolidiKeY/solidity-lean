@@ -7,8 +7,9 @@ import Solidity.Syntax
 import Solidity.Scope
 import Solidity.Syntax.Scoped
 import Solidity.Syntax.Resolve
-import Solidity.Syntax.Splice
+import Solidity.Syntax.Elab
 import Solidity.Syntax.Quote
+import Solidity.Syntax.Splice
 import Solidity.FreshNames
 import Solidity.Semantics
 import Solidity.Semantics.DecEq

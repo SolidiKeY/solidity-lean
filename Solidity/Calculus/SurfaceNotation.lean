@@ -976,7 +976,7 @@ where
     | .newArr T _ => match elabTy C T with
       | .ok (.ref R) => some (.mem R)
       | _ => none
-    | _ => match synth C Δ r with
+    | _ => match synth C (ECtx.toNCtx Δ) r with
       | .ok (.mpath (.ref R) _) => some (.mem R)
       | .ok (.path (.ref R) _) => some (.alias R)
       | .ok (.val p _) => if p == .uint then none else some (.val p)
@@ -996,7 +996,7 @@ where
       let acc : ECtx × ECtx := match s with
         | .assign (.name x) r => hint x (ofRhs Δ r)
         -- `sp = sp1.push();`: the slot appended, an element of the array
-        | .assignPush (.name x) b => hint x (match synth C Δ b with
+        | .assignPush (.name x) b => hint x (match synth C (ECtx.toNCtx Δ) b with
           | .ok (.path (.ref (.array (.ref R))) _) => some (.alias R)
           | _ => none)
         | .declMemory T x _ => declared x T .mem
@@ -1031,9 +1031,10 @@ where
 /-- `a == b`: the operands typed as Solidity types them (the first that is
 not a literal gives the type), then lowered. -/
 def elabCompare (Γ : ECtx) (a b : RawExpr) : Except String (Term C × Term C) := do
-  let t ← if a.isLit then synth C Γ b else synth C Γ a
+  let Γn := ECtx.toNCtx Γ
+  let t ← if a.isLit then synth C Γn b else synth C Γn a
   let some ⟨p, _⟩ := t.toVal? | throw "`==` compares values, not storage or memory references"
-  pure ((← check C Γ p a).lower, (← check C Γ p b).lower)
+  pure (((← check C Γn p a).erase Γn.names).lower, ((← check C Γn p b).erase Γn.names).lower)
 
 /-- Run `x`, then restore the locals in scope (not the capture counter). -/
 def inScope (x : ElabM α) : ElabM α := do

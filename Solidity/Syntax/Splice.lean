@@ -1,22 +1,23 @@
-import Solidity.Syntax.Resolve
+import Solidity.Syntax.Quote
 
 /-!
-# Elaborating a block, checked, as a term
+# Elaborating a block, as a term
 
-The elaborator's entry points: `elabProg`, `elabProgAt` (and its `go`, which
-`solc_import` runs per function) and `ctorProg` run the elaborator
-(`Syntax.lean`) and then the locals check, `resolve` (`Syntax/Resolve.lean`),
-from the locals in scope where the block starts; `sol[C]{ … }` and
-`sol{ … }` splice the checked block as a term, a `Surface.Prog C`
-(`Surface.Prog.quote`).  The scoped program is only checked here;
-`Prog.defineCore` (`Syntax/Quote.lean`) declares it, for `solc_scoped`.  The other
-entry points run the same check: a specification's call (`specPieces`), a
-constructor's obligation (`Problem.ctor`) and each statement of a `dl!{ … }`
-modality (`Calculus/SurfaceNotation.lean`).
+The elaborator's entry points (`Syntax/Elab.lean`): `elabProgS`,
+`elabProgAtS` (and its `go`, which `solc_import` runs per function) and
+`ctorProgS` elaborate a block from the locals in scope where it starts into
+the scoped syntax (`Prog C Γ Γ'`, `Syntax/Scoped.lean`), each local typed at
+its position as it is read, so a block that elaborates is in scope;
+`sol[C]{ … }` and `sol{ … }` splice it as a term.  The branches of an `if`
+and of a `try`, a loop's body and a call's body are scopes, as in solc, so a
+local a branch declares cannot be read after it, and a later branch may
+declare the same name at another type.
 
-`resolve` reads the branches of an `if` and of a `try`, a loop's body and a
-call's body as scopes, as solc does, so a local a branch declares cannot be
-read after it, and a later branch may declare the same name at another type.
+`elabProg`, `elabProgAt` and `ctorProg` are the same block erased to the
+statement as written (`Surface.Prog C`, `Prog.erase`), for the readers not
+yet moved to the scoped syntax: `sol[C]{ … }` splices it where a
+`Surface.Prog C` (or nothing) is expected, the scoped block
+(`Prog.quoteShared`) anywhere else.
 -/
 
 namespace Solidity
@@ -27,39 +28,63 @@ variable [FreshNames] (C : Contract)
 
 /-- Elaborate a block against `C`, from no locals.  A capture is numbered
 past every fresh variable the block writes. -/
-def elabProg (ss : List RawStmt) : Except String (Surface.Prog C) := do
+def elabProgS (ss : List RawStmt) : Except String (Blk C []) := do
   let k := RawStmt.maxIdxs ss + 1
   let ss ← freshenBlocks (C.vars.map (·.1)) [] ss
-  let P ← ((elabStmts C ss).run { funs := C.funs }).run' ([], k)
-  let _ ← Prog.resolveCheck [] P
-  pure P
+  let P ← ((elabStmtsP C ss).run { funs := C.funs }).run' ([], k)
+  SProg.chain [] [] P
 
-/-- `elabProg`, an error naming the statement of the block it arose in (its
-position): the same block, statement by statement, each checked
-(`resolve`) from the locals the ones before it leave. -/
-def elabProgAt (ss : List RawStmt) : Except (Nat × String) (Surface.Prog C) :=
-  go 0 ss ([], RawStmt.maxIdxs ss + 1)
-where
-  go (i : Nat) (ss : List RawStmt) (st : ECtx × Nat) : Except (Nat × String) (Surface.Prog C) := do
-    -- a block's locals renamed apart (`freshenBlocks`)
-    let ss ← (freshenBlocks (C.vars.map (·.1)) (st.1.map (·.1)) ss).mapError (i, ·)
-    goWt i ss st (ECtx.toNCtx st.1)
-  goWt (i : Nat) : List RawStmt → ECtx × Nat → NCtx → Except (Nat × String) (Surface.Prog C)
-    | [], _, _ => pure []
-    | s :: ss, st, Γ =>
-      match ((elabStmt C s).run { funs := C.funs }).run st with
+/-- The statements `ss`, the `i`th first, from the state `st`, each appended
+to `acc`, the block so far, which leaves the context named `ns`. -/
+def elabProgAtS.goWt {Γ₀ : Ctx} (i : Nat) : List RawStmt → ECtx × Nat → List Var → Blk C Γ₀ →
+    Except (Nat × String) (Blk C Γ₀)
+  | [], _, _, acc => pure acc
+  | s :: ss, st, ns, acc =>
+    match ((elabStmtP C s).run { funs := C.funs }).run st with
+    | .error e => .error (i, e)
+    | .ok (P, st) =>
+      match SProg.chain ns acc.1 P with
       | .error e => .error (i, e)
-      | .ok (P, st) =>
-        match Prog.resolveCheck Γ P with
+      | .ok b =>
+        match Blk.append acc b with
         | .error e => .error (i, e)
-        | .ok Γ => do pure (P ++ (← goWt (i + 1) ss st Γ))
+        | .ok acc' => elabProgAtS.goWt (i + 1) ss st (b.2.outNames ns) acc'
+
+/-- `elabProgS`, from the state `st`, an error naming the statement of the
+block it arose in (its position, from `i`): the same block, statement by
+statement, each typed from the locals the ones before it leave. -/
+def elabProgAtS.go (i : Nat) (ss : List RawStmt) (st : ECtx × Nat) :
+    Except (Nat × String) (Blk C (ECtx.toNCtx st.1).ctx) := do
+  -- a block's locals renamed apart (`freshenBlocks`)
+  let ss ← (freshenBlocks (C.vars.map (·.1)) (st.1.map (·.1)) ss).mapError (i, ·)
+  elabProgAtS.goWt C i ss st (ECtx.toNCtx st.1).names ⟨_, .nil⟩
+
+/-- `elabProgS`, an error naming the statement of the block it arose in. -/
+def elabProgAtS (ss : List RawStmt) : Except (Nat × String) (Blk C []) :=
+  elabProgAtS.go C 0 ss ([], RawStmt.maxIdxs ss + 1)
 
 /-- A deployment's program, `constructor(args);`, elaborated (`elabCtor`):
 nothing for a contract that declares no constructor and no initializer. -/
-def ctorProg (args : List RawExpr) : Except String (Surface.Prog C) :=
-  if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then .ok []
-  else elabProg C [.call (.name "constructor") args]
+def ctorProgS (args : List RawExpr) : Except String (Blk C []) :=
+  if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then .ok ⟨[], .nil⟩
+  else elabProgS C [.call (.name "constructor") args]
 
+/-- `elabProgS`, as written. -/
+def elabProg (ss : List RawStmt) : Except String (Surface.Prog C) :=
+  (elabProgS C ss).map (·.2.erase [])
+
+/-- `elabProgAtS.go`, as written. -/
+def elabProgAt.go (i : Nat) (ss : List RawStmt) (st : ECtx × Nat) :
+    Except (Nat × String) (Surface.Prog C) :=
+  (elabProgAtS.go C i ss st).map (·.2.erase (ECtx.toNCtx st.1).names)
+
+/-- `elabProgAtS`, as written. -/
+def elabProgAt (ss : List RawStmt) : Except (Nat × String) (Surface.Prog C) :=
+  (elabProgAtS C ss).map (·.2.erase [])
+
+/-- `ctorProgS`, as written. -/
+def ctorProg (args : List RawExpr) : Except String (Surface.Prog C) :=
+  (ctorProgS C args).map (·.2.erase [])
 
 end Elab
 
@@ -67,7 +92,7 @@ end Elab
 
 /-- `sol[C]{ s₁; s₂; … }`: the statements, elaborated against the named
 contract `C`. -/
-syntax "sol[" term "]{" (sol_stmt solSemi)* "}" : term
+syntax (name := solBracket) "sol[" term "]{" (sol_stmt solSemi)* "}" : term
 
 /-- `sol{ … }`: `sol[C]{ … }` for the file's `InContract` contract. -/
 syntax "sol{" (sol_stmt solSemi)* "}" : term
@@ -97,16 +122,29 @@ def elabAgainst (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermEl
     (fun msg => throwError "Solidity elaboration failed: {msg}") c f
 
 open Lean Elab Term Meta in
-elab_rules : term
-  | `(sol[ $c ]{ $[$ss:sol_stmt;]* }) => do
+/-- Whether a block is spliced as written: where a `Surface.Prog C` (a list)
+or nothing is expected. -/
+def asWritten (ety? : Option Lean.Expr) : TermElabM Bool := do
+  let some ety := ety? | return true
+  let ety ← whnfR (← instantiateMVars ety)
+  return ety.isMVar || ety.isAppOf ``List
+
+open Lean Elab Term Meta in
+@[term_elab solBracket]
+def elabSolBracket : TermElab := fun stx ety? => do
+  match stx with
+  | `(sol[ $c ]{ $[$ss:sol_stmt;]* }) =>
     let raw ← `(sol_raw!{ $[$ss;]* })
     -- an error is reported at the statement it arose in
     let errTy := mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Nat) (mkConst ``String)
     let ref ← getRef
     let stmts : Array Syntax := ss.map TSyntax.raw
+    let written ← asWritten ety?
     elabAgainstWith (ε := Nat × String) errTy (fun ((i, msg) : Nat × String) =>
         throwErrorAt (stmts[i]?.getD ref) "Solidity elaboration failed: {msg}") c
-      fun q => `((elabProgAt $c $raw).map (Surface.Prog.quote $q))
+      fun q => if written then `((elabProgAt $c $raw).map (Surface.Prog.quote $q))
+        else `((elabProgAtS $c $raw).map fun b => (Prog.quoteShared $q b.2).1)
+  | _ => throwUnsupportedSyntax
 
 macro_rules
   | `(sol{ $[$ss;]* }) => `(sol[InContract.contract]{ $[$ss;]* })
@@ -323,6 +361,56 @@ example : Surface.Prog.toStr (sol{ uint8 x = 250; x += 10; }) =
 #guard_msgs in #check sol{ Person[] storage ps = alice; }
 
 
+
+
+/-! ### Scoped
+
+`sol{ … }` at a scoped type is the block typed in place (`elabProgS`), the
+one `resolve` makes of the block as written: `tour` and a block of calls,
+declared from their erasure resolved (`Prog.defineCore`), are the kernel's
+and the same terms, and each erases back to the block as written. -/
+
+section Pins
+
+private def callsBlock : Solidity.Surface.Prog CallsExample :=
+  sol[CallsExample]{ uint y = addTwo(3); uint z = larger(y, 7); }
+
+open Lean Elab Command in
+run_cmd liftCoreM do
+  for (n, cn, err) in [(`Solidity.tourCore, ``StandardExample,
+        ← Prog.defineCore `Solidity.tourCore ``StandardExample [] tour),
+      (`Solidity.callsCore, ``CallsExample,
+        ← Prog.defineCore `Solidity.callsCore ``CallsExample [] callsBlock)] do
+    if let some e := err then throwError "{n} ({cn}): {e}"
+
+example : Prog.erase [] tourCore = tour := rfl
+example : Prog.erase [] callsCore = callsBlock := rfl
+
+example : (sol{
+  uint x = alice.age + 1;
+  Person storage p = alice;
+  p.age = x;
+  balances[x] = 10;
+  if (x > 3) { alice.age = 0; } else { revert(); };
+  delete bob.account;
+  folks[1] = bob;
+  require(flags[x] || x == 2);
+} : Prog StandardExample [] _) = tourCore := rfl
+
+example : (sol[CallsExample]{ uint y = addTwo(3); uint z = larger(y, 7); } :
+    Prog CallsExample [] _) = callsCore := rfl
+
+/--
+info: uint y;
+y = addTwo(3);
+uint z;
+z = larger(y, 7);
+-/
+#guard_msgs in
+#eval IO.println (Prog.show [] (sol[CallsExample]{ uint y = addTwo(3); uint z = larger(y, 7); } :
+  Prog CallsExample [] _))
+
+end Pins
 
 end Examples
 
