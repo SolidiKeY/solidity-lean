@@ -73,8 +73,8 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
-| W8 | W8.1, W8.2, W8.3 done 2026-10-11 (the rest planned) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
-| left | — | the lead's calls on proposals 95–105 and 106–117 (W8.2–W8.3); optional ports on the IR ("What is left") |
+| W8 | W8.1–W8.4 done 2026-10-11 (W8.5 planned) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
+| left | — | the lead's calls on proposals 95–105, 106–117 (W8.2–W8.3) and 118–128 (W8.4); W8.5; optional ports on the IR ("What is left") |
 
 ## Checks at the end (W6)
 
@@ -2636,6 +2636,158 @@ Solidity.Scoped` switch); if `Contract.deployRunS` is renamed back to
 follow; the lead's calls on proposals 116–117; the read-only review pass
 (W8.5).
 
+### W8.4 record (2026-10-11, step `delete`, on `intrinsic`)
+
+Tagged `w8-pre-delete` (`f16586b1`) before the step, for the SolKey
+reader, whose port to the scoped constructors is a later task on
+side-projects (its require stays at the tag).  The untyped statement and
+everything that existed only for it are deleted, about 4,200 lines.
+
+**Syntax.**  `Syntax.lean` keeps the grammar, the raw syntax, the contract,
+`ArrTy`/`IndexTy`, `RefTy.newArrOk`, `IncDec.show`, `braced` and the
+quoters' helpers; `Surface.Stmt`/`Prog`, the sixteen program-term families,
+the surface `Arg`, `codeBinders`, `expandBody`, the printers and quoters
+are gone, and the module docstring is rewritten.  `Syntax/Resolve.lean` is
+deleted: `NCtx`, `NCtx.find`, `LTy.toStr`, `Binders.nctx`/`snocAll`/
+`ofList`, `CodeBinder.ofOption`/`nctx`/`toOption` and `Prog.castIn` moved
+to `Syntax/Elab.lean` (its only reader); `Prog.sepArgs`, `Stmt.Fresh`,
+`Prog.Fresh` and the cast lemmas had no reader left and are not moved.
+`Syntax/Elab.lean` loses `elabStmt`/`elabStmts`/`elabStmtsS`,
+`Syntax/Splice.lean` the erasing entry points and the expected-type
+dispatch (`sol{}` is always the scoped block; the lambda's binder now has
+its type, proposal 117), `Syntax/Quote.lean` `Prog.defineCore`.
+`Surface.primName` is `PrimTy.toStr`.
+
+**Semantics and `Update.lean`.**  The surface evaluators
+(`Semantics.lean`), their frame lemmas (`Semantics/Agree.lean`), no-panic
+lemmas (`Semantics/NoPanicOps.lean`) and the program-term `*_erase`
+lemmas (`Semantics/StateErase.lean`; `aliasPath_erase` and the state
+lemmas stay) are gone; `Semantics/Erased.lean`'s example programs are
+plain definitions of scoped `sol[C]{}` blocks.  `Update.lean` loses
+`Surface.Fml`, `NFml.toSurface`, `Surface.Fml.toFml` and the surface
+lowerings (`Term.keyAt` stays); `Calculus/Lower.lean` its `lower_erase`.
+
+**Calculus.**  `Calculus/Fml.lean` loses `Frames.erase` and `Fml.eraseS`;
+`Calculus/Closable.lean` `Frames.Fresh`.  `RuleSyntax.lean`: the readers
+write the scoped constants directly (`coreFamily?` keeps the term
+families: `Tms`, `Fml`, `Tm`, `Upd`, `UpdElem`), the unscoped taclet
+reading (`schemaTaclet`, `schemaPremise`, `schemaInv`), `stmt{ s; }` and
+the `dl{ premise }` macro are gone (taclet lines read under `open scoped
+Solidity.Schema`), and so are the surface printers (`ppExpr`, `ppStmt`,
+`ppProg?`, …, `delabStmt`, `copyDecls`/`withDecls`); the builders the
+scoped printer uses stay.  `RuleKit.lean` keeps the branch labels
+(`labelledBy` on the scoped heads) and `delabTacletBinders`.
+`DelabErase.lean` translates terms, updates and the closer's formulas only
+(`untwinnedFamilies`, `withErased`, `asSurface` gone).  `PrintStmt.lean`,
+`Delab.lean`, `DelabLean.lean`, `Callback.lean`, `ProofTree.lean` lose the
+`…Legacy` printers, `hypsParts`, `condOfLegacy?` and `pp.sol.twinCheck`.
+`SurfaceNotation.lean` reads the closer's `NFml` (a modality is
+`Notation.lean`'s), `NFmlQuote.lean` loses `Surface.Fml.quote`,
+`Hyp.lean` and `Sequents.lean` their surface cases, `SurfaceSpec.lean`
+`specBody`/`specParts`/`Surface.specObligation` and the unscoped `spec`
+reading, `Print.lean` `legacyShow`, `Tools/Run.lean` the surface wrappers
+(`Contract.deployRunS` is `deployRun` again).  `rg
+'Surface\.(Stmt|Prog|Fml|Val|SPath|Loc|MPath|MLoc|Simple|OpLoc|CallRet|Src|MSrc|ARhs|MRhs|NewLhs|LoopAnn|ExtCall|ExtArg|Premise|Hole|VHole|MHole|Problem)' Solidity`
+is empty.
+
+**Pins that moved.**  `Syntax/Splice.lean`'s string pins read `Prog.toStr
+[]` (same strings), its constructor trees are scoped, the inlined pin is
+`Prog.inlinedStr` (same string), and the three `resolveCheck` guards are
+elaboration-error pins of `sol{}` text (proposal 126);
+`Examples/Tools.lean`'s `functionCallArgCapture` (proposal 118);
+`Examples/Tactics/DlNotation.lean`'s two `where` pins now print the
+scoped formula with its clause (proposal 120: type suffix `Fml
+StandardExample []`, text unchanged); `Calculus/Print.lean`'s pin of the
+erasure's printing, and `Examples/Tactics/Spec.lean`'s two `sameAs`
+guards, are gone with what they compared against.  No other pin moved.
+
+What the step had to choose (proposals, lane `delete`):
+
+- **118**: `functionCallArgCapture`'s two calls print as the scoped terms
+  `‹Stmt.call f args ret body›`, `‹Stmt.call f as' ret body›` (the twins'
+  `hsep` is gone); `#check_rule_text` lets the escape
+  `‹Solidity.Stmt.call …›` pass, as it let `‹Solidity.Surface.…›` pass,
+  and counts the program families among `scopedOnlyRoots` otherwise.
+- **119**: `show_sequent` compares the line the goal prints as (its context
+  folded in front, `Hyps.wrap`, a block's end not shown) with the line read
+  scoped (`cdl[C]{ … }`), printed alike; it unified the two erasures.
+- **120**: `Delab.ppFmlE` prints `φ where T memory x` for a memory local a
+  copy out of storage binds (`MRhs.copy`) under a hidden binder, the
+  scoped form of `copyDecls`; only a formula standing alone (`dl{ … }`)
+  gets the clause, as before.
+- **121**: `Fml.Plain` of a modality is `False` (it asked the box and
+  `Prog.Fresh`/`Frames.Fresh`, which went with the erasure); its only
+  reader, `holds_erase_fo`, asks `Fml.FO`, false of a modality.
+- **122**: `spec[C]{f}` and `spec!{f}` read as `cspec[C]{f}` everywhere
+  (`Calculus/Spec.lean`), not only under `open scoped Solidity.Scoped`.
+- **123**: a program schema variable lowered to a term prints, through
+  `Delab.tr`, as the local of its name (`loweredVar?`: `Term.pv`,
+  `PTerm.pv`, `ITerm.pv`); `RuleSyntax.lean`'s `loweredExpr?` is gone.
+- **124**: `Contract.deployRunS` is `Contract.deployRun` again.
+- **125**: `Prog.sepArgs`, `Stmt.Fresh`/`Prog.Fresh` and the cast lemmas
+  are deleted, not moved: nothing reads them.
+- **126**: the `resolveCheck` guards' messages are not reachable from
+  `sol{}` text (the elaborator checks a local's type before `NCtx.find`
+  would): the pins are the elaborator's own (`unknown name x`, `a number
+  where a bool is expected`, `a bool where a uint is expected`, `unknown
+  name y` after a branch).
+- **127**: taclet lines read only under `open scoped Solidity.Schema` (the
+  unscoped reading went with `Surface.Premise`); `dl{ p }` keeps its syntax,
+  which the premise printer writes, and loses its macro.
+- **128**: `Syntax/Splice.lean` declares `callsCore` (`Semantics/Run.lean`'s)
+  from `elabProgS` and `Prog.define`; `tourCore` is gone.
+
+**Checks.**  The full build with `SolidityCorpus` and `SolkeyTestSuite`
+(328 jobs) green (once more after an OOM kill, exit 137); `dups.py` (the
+three known), `check-orphans` (a scratch module only), `check-doc-paths`,
+`check-rule-text` pass.  No `sorry`, `axiom` or `maxHeartbeats` added.
+
+**Timing** (the end-of-work method, `scratchpad/w84m.sh`, one run a row,
+load 0.9–9.7 falling as the build ended, cgroup 7.7 GB):
+
+| Module | W6 baseline | gate (1.2×) | W8.3 merge | **W8.4** | ratio (W6) |
+|---|---|---|---|---|---|
+| `TestSuite/Derived1` | 7.32 s | 8.78 s | 7.56 s | **7.50 s** | 1.02 |
+| `TestSuite/Derived2` | 8.63 s | 10.36 s | 8.97 s | **8.72 s** | 1.01 |
+| `TestSuite/Derived3` | 13.01 s | 15.61 s | 13.34 s | **13.30 s** | 1.02 |
+| `TestSuite/Derived4` | 17.57 s | 21.08 s | 17.85 s | **17.81 s** | 1.01 |
+| `TestSuite/Derived5` | 6.95 s | 8.34 s | 7.07 s | **7.14 s** | 1.03 |
+| `TestSuite/Derived6` | 11.42 s | 13.70 s | 11.64 s | **11.70 s** | 1.02 |
+| `TestSuite/Derived7` | 50.43 s | 60.52 s | 51.26 s | **51.48 s** (54.47 at load 2.6) | 1.02 |
+| `TestSuite/Derived8` | 26.38 s | 31.66 s | 27.11 s | **26.92 s** | 1.02 |
+| `TestSuite/Derived9` | 7.16 s | 8.59 s | 7.24 s | **7.25 s** | 1.01 |
+| `TestSuite/Derived10` | 11.11 s | 13.33 s | 11.47 s | **11.56 s** | 1.04 |
+| `TestSuite/Derived11` | 3.16 s | 3.79 s | 3.29 s | **3.36 s** | 1.06 |
+| `TestSuite/Derived12` | 13.17 s | 15.80 s | 13.51 s | **13.66 s** | 1.04 |
+| `TestSuite/Derived13` | 6.36 s | 7.63 s | 6.48 s | **6.54 s** | 1.03 |
+| `TestSuite/Derived14` | 10.89 s | 13.07 s | 11.00 s | **11.20 s** | 1.03 |
+| Derived1–14, sum | 193.6 s | 232.3 s | 197.8 s | **198.1 s** | 1.02 |
+| `Examples/Tactics/Decide` | 49.14 s | 58.97 s | 37.62 s | **37.50 s** | 0.76 |
+| `Examples/ProofTree` | 9.81 s | 11.77 s | 9.83 s | **9.75 s** | 0.99 |
+| `Examples/Chains/Storage` | 7.45 s | 8.94 s | 7.55 s | **7.58 s** | 1.02 |
+| `Examples/ChainRewrites` | 6.36 s | 7.63 s | 6.81 s | **6.85 s** | 1.08 |
+| `Examples/ChainRewritesOpen` | — | — | 3.48 s | **3.54 s** | — |
+| `TestSuite/Problems` (M0) | 0.81 s | 0.97 s | 0.83 s | **0.86 s** | 1.06 |
+| `TestSuite/ScopedProblems` (M0) | 1.39 s | 1.67 s | 1.04 s | **1.11 s** | 0.80 |
+| `Solkey/TestSuite` (M0) | 10.83 s | 13.00 s | 6.78 s | **6.77 s** | 0.63 |
+| `Examples/Benchmark/Syntax` (M0) | 1.41 s | 1.69 s | 1.60 s | **1.61 s** | 1.14 |
+| `Evm/Examples` (M0) | 7.75 s | 9.30 s | 7.25 s | **7.34 s** | 0.95 |
+| `Evm/Correct` (M0) | 1.68 s | 2.02 s | 1.72 s | **1.77 s** | 1.05 |
+
+**Gate passed**: every row within 1.2× of its W6 baseline.  Against the
+M0 limits, `Derived10` 11.56 (11.2, over by 3%) and `Benchmark/Syntax`
+1.61 (1.44, over by 12%) as at W8.3: `sol{}` was already scoped where that
+module reads it, so the step wins nothing back there.
+
+**Left** (for W8.5 and after): the `(sol{…} : Prog C [] _)` ascriptions
+in the examples, which `sol{}` no longer needs, and the workarounds of
+proposal 117 in `Evm/Examples.lean` and `Examples/Tactics/TryCatch.lean`
+(binding the program before a `do` block), both left as they are; the
+SolKey reader's port to the scoped constructors (side-projects, from tag
+`w8-pre-delete`); docstrings that still call the erased side "as written";
+the read-only finder/skeptic review (W8.5); the lead's calls on proposals
+118–128.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
@@ -2665,7 +2817,7 @@ fails stays on the IR:
   `Semantics/Erased.lean` go only when it is empty.
 
 **Besides M6c:**
-- Decision 11's removal of the surface syntax ("W8 plan").
+- Decision 11's removal of the surface syntax: W8.5 ("W8.4 record").
 - At the merge into `master`: the SolKey reader's require back to
   `../../../solidity-lean` (side-projects `lean/solkey`, branch
   `intrinsic`) and that branch merged.
