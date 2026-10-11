@@ -162,20 +162,12 @@ the credit of `send` when the two differ (`sendMovesSender`,
 /-- `7`, deploying and calling. -/
 def tx : TTx := { msgSender := ⟨7, rfl⟩ }
 
-/-! Each block is resolved, quoted and declared (`Prog.defineCore`) and
-deployed in the typed run (`Contract.deployT`), by the kernel
-(`decide +kernel`). -/
+/-! Each block is elaborated scoped and deployed in the typed run
+(`Contract.deployT`), by the kernel (`decide +kernel`). -/
 
-private def ctorP : Surface.Prog Coin := sol{ constructor(); }
-private def mintSendP : Surface.Prog Coin := sol{ constructor(); mint(7, 10); send(9, 4); }
-private def mintP : Surface.Prog Coin := sol{ mint(7, 10); }
-
-open Lean Elab Command in
-run_cmd liftCoreM do
-  let ns := `Solidity.Examples.Benchmark.Coin
-  for (n, P) in [(`ctorCore, ctorP), (`mintSendCore, mintSendP), (`mintCore, mintP)] do
-    if let some e ← Prog.defineCore (ns ++ n) (ns ++ `Coin) [] P then
-      throwError "{n}: {e}"
+def ctorCore := (sol{ constructor(); } : Prog Coin [] _)
+def mintSendCore := (sol{ constructor(); mint(7, 10); send(9, 4); } : Prog Coin [] _)
+def mintCore := (sol{ mint(7, 10); } : Prog Coin [] _)
 
 /-- `balances[a]` after `P` deploys and runs, `7` calling: read typed (an
 entry, else the mapping's default, `SVal.find`), since the erasure of a

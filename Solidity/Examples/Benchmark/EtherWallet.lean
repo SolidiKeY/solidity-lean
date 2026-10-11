@@ -89,16 +89,9 @@ theorem getBalanceFunds :
 
 `7` deploys the wallet, sends it `100` wei, and withdraws `30`. -/
 
-private def ctorP : Surface.Prog EtherWallet := sol{ constructor(); }
-private def withdrawP : Surface.Prog EtherWallet := sol{ withdraw(30); }
-private def overdrawP : Surface.Prog EtherWallet := sol{ withdraw(130); }
-
-open Lean Elab Command in
-run_cmd liftCoreM do
-  let ns := `Solidity.Examples.Benchmark.EtherWallet
-  for (n, P) in [(`ctorCore, ctorP), (`withdrawCore, withdrawP), (`overdrawCore, overdrawP)] do
-    if let some e ← Prog.defineCore (ns ++ n) (ns ++ `EtherWallet) [] P then
-      throwError "{n}: {e}"
+def ctorCore := (sol{ constructor(); } : Prog EtherWallet [] _)
+def withdrawCore := (sol{ withdraw(30); } : Prog EtherWallet [] _)
+def overdrawCore := (sol{ withdraw(130); } : Prog EtherWallet [] _)
 
 /-- The wallet `7` deploys (`Contract.deployT`), then holding `100`
 (what the dropped `receive()` would take). -/

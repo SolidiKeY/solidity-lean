@@ -2,6 +2,7 @@ import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Surface
+import Solidity.Syntax.PrintInlined
 import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 
@@ -273,7 +274,7 @@ parameter bound fresh, then the body; the event is gone. -/
 /--
 info: if (msgSender != seller) { revert(); } else { } uint se1 = 0; if (state != se1) { revert(); } else { } state = 3; seller.transfer(thisBalance);
 -/
-#guard_msgs in #eval IO.println (Surface.Prog.toStr (Surface.Prog.inlined (sol{ abort(); })))
+#guard_msgs in #eval IO.println (Prog.inlinedStr [] sol{ abort(); })
 
 /-! ## The clauses -/
 
