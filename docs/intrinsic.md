@@ -3338,6 +3338,53 @@ Branch `w9-terms`, additive: nothing on the IR moved, no pin changed.
 - **Checks.** Per-file diagnostics clean (`TermLib`, `SoundLoops`);
   `lean_build` of the default targets; `check-orphans`, `check-doc-paths`.
 
+### W9.0 spike record (2026-10-11, not committed)
+
+**The leaf closer on the scoped leaf** (`Proves.closeHolds` + `Valid.of_reduceS`
++ `LFml.closeS`, walked by `Seq.run`), timed against the erased route
+(`Fml.closeErase` + `NFml.Derive`):
+
+| Row | Erased | Scoped | Ratio |
+|---|---|---|---|
+| `Derived7`, whole file | 49.79 s | 42.05 s | 0.84 |
+| `Derived12`, whole file | 13.14 s | 11.24 s | 0.855 |
+
+The compiled walk costs the same on both routes.  **Go for W9.3**, once
+these leaf classes are closed scoped:
+1. *The layout* (26 leaves in `Derived7`, 27 in `Derived12`).  `LFml.closeS`
+   reads `[]` (`Calculus/DecideComplete.lean`).  Proposal 100: the layout
+   comes from the scoped `wt(storage)` premise, and `Valid.of_reduceS` needs
+   a `LayoutOk` premise for it.
+2. *A parallel update of two elements that is not an allocation pair*
+   (23 and 9 leaves; `{x := x+1 ‖ se := x}`).  The fragment refuses it
+   (`Calculus/DecideScoped.lean`).  Read with both elements in the
+   pre-state, it closes at 0.9×; the proof, a twin of `RelU.two`, is
+   missing.
+3. *A push alias* (`{storage := extend(a) ‖ sp := next(a)}`, 4 leaves):
+   `pushAlias?` (`Calculus/NFmlDerive.lean`) has no scoped twin.
+4. *`wt(storage)` under the parameters' `∀`*: the scoped `dropWt`.
+5. Two more: the split refutation's ground test (`Seq.ground`,
+   `Calculus/ProvesDerive.lean`; without it, up to 3× on split-heavy
+   theorems), and the replays of the leaves the closer leaves open.
+
+Decision 78's class (a value-typed hidden local read before its update)
+does not occur in `Derived7` or `Derived12`.
+
+**Chains past the program** (`Examples/ChainRewrites`): 6.74 s as is,
+7.19 s with `sol_chain.scopedPast` on (1.07×, gate 8.2 s).  Go on speed,
+but not on coverage.  Forced scoped, a link past the program fails at:
+1. a merge across a hidden binder;
+2. a merge that keeps a shadowed storage write (`Upd.mergeStL` drops it);
+3. `simplifyUpdate` dropping an unread local with its binder;
+4. `applyStorageBox` on `==` (the `defined(…)` conjuncts);
+5. a law in an update's right-hand side (`lawUpd` is box-only);
+6. the memory read laws;
+7. `findMemberCons`'s side condition, which reads a position as a root
+   name.
+
+`~~>` past the program reads the erasure by design (`Fml.LeadsE`).  W9.4
+ports these seven classes first, then re-times.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
