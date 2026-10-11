@@ -73,6 +73,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
+| W8 | planned 2026-10-11 | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
 | left | — | the lead's calls on proposals 95–105; optional ports on the IR ("What is left") |
 
 ## Checks at the end (W6)
@@ -1749,6 +1750,110 @@ Only docstrings name `NFml` in `Calculus/DecideScoped.lean`,
 `Examples/ChainRewrites.lean`, `Examples/Tactics/Chains.lean` and
 `TestSuite/Suggestions.lean`.
 
+## W8 plan (decision 11)
+
+Decision 11: remove `Surface.Stmt`, `Surface.Prog`, `Surface.Fml`.
+
+### Inventory (branch `intrinsic`)
+
+59 files name `Surface.Stmt`, `Surface.Prog` or `Surface.Fml`. Counting the bridges (`erase`, `resolve`, `eraseS`, `resolveN`, `solc_scoped`, `scopedOf`), 73 files are touched. Grouped by role:
+
+| Role | Files |
+|---|---|
+| **Definitions** | `Syntax.lean` (`Surface.Stmt`/`Prog`, 16 program-term families, `toStr`, quoters, the elaborator); `Update.lean` (`Surface.Fml`, `NFml.toSurface`, `Surface.X.lower`); `RuleKit` (`Surface.Hole`/`MHole`/`VHole`/`Premise`); `Problem` (`Surface.Problem.*`); `SurfaceSpec` (`specObligation`, `primName`) |
+| **Bridges** | `Syntax/Resolve` (erase/resolve); `Calculus/Fml` (`Frames.erase`, `eraseS`); `NotationResolve` (`Fml.resolveN`); `Spec` (`ofLegacy`); `Semantics/StateErase` (`*_erase`); `Evm/Examples` (`scopedOf`); `Corpus/Basic` |
+| **Untyped eval of program terms** | `Semantics.lean`, `Agree`, `NoPanicOps`. Only `StateErase` reads these, and only `SortCheck/Faithfulness` reads that. |
+| **Frontends** | `Splice` (`sol{}`), `Quote` (`defineCore`), `SurfaceNotation`/`Notation` (`dl!{}`), `SurfaceSpec`/`Spec` (`spec!`), `Problem`, `Deploy`, `Frontend/Import` (`solc_import`, `solc_scoped`), `Frontend/Problems` |
+| **Printers** | `RuleSyntax` `pp*` (on Surface Exprs), `RuleKit.ppPremise?`, `DelabErase` (twins → Surface), `Delab`, `DelabLean`, `Print` (`Fml.show` via erase), `NFmlQuote`, `Hyp`, `Sequents`, `Chains` (`erasedQuoted`), `ProofTree` |
+| **Tools** | `Tools/Run`, `Tools/DiffTest` |
+| **Consumers and pins** | about 35 `Examples/*` files, `Evm/{Examples,Interpreter}`, `Semantics/Erased` pins, `Solkey/*`, `TestSuite/{Problems,ScopedProblems}` |
+
+**The program-term families go**: `Simple`, `SPath`, `Loc`, `MPath`, `MLoc`, `Val`, `Src`, `ARhs`, `MRhs`, `NewLhs`, `MSrc`, `OpLoc`, `CallRet`, `ExtArg`, `ExtCall`, `LoopAnn`, the surface `Arg`, and the holes and `Premise`. Their only other reader is the untyped eval chain, which ends in `Faithfulness`; W8.3 restates `Faithfulness` on scoped paths.
+
+**What stays**: `Surface.Tm`/`MAddr`/`UpdElem`/`Upd` (about 2,250 occurrences in about 40 closer files), `NFml` and `Update.lean`'s symbols. These are the closer's IR (decision 7). Renaming that namespace is a separate, optional follow-up.
+
+### Waves
+
+| Wave | Mode | Content |
+|---|---|---|
+| **W8.1** | `on_main` | The elaborator moves to `Syntax/Elab.lean` (above `Scoped`) and emits `Prog C Γ Γ'`. Wrappers that erase keep every consumer unchanged. `sol{}` picks erased or scoped by its expected type. |
+| **W8.2** | 3 lanes | `printers`: new `PrintStmt.lean`, `Delab`, `Print`. `obligations`: `solc_import`, `solc_problems`, `spec!`, `Problem`. `reader-tools`: `dl!{}`, `Chains`, `Tools/Run`, `Corpus/Basic`. |
+| **W8.3** | 3 lanes | Examples, `Evm` and `Faithfulness` move to scoped, split by file. |
+| **W8.4** | `on_main` | Delete Surface and resolve/erase across the low modules. |
+| **W8.5** | lanes | Timing gate (the only Lean agent), docs, read-only review. |
+
+Every wave leaves the build green, for two reasons:
+- **Adding comes before deleting.** The scoped API is added beside the Surface one, and the Surface one goes only in W8.4.
+- **Old and new can coexist.** `sol{}` and `dl!{}` take the legacy path only when the expected type is a Surface type, so each file migrates on its own.
+
+The lanes' files are disjoint, and there are at most three Lean agents at once.
+
+### Keeping solc's evaluation order, captures and fresh names
+
+W8.1 changes only the constructors the elaborator emits. These RawStmt-level passes stay untouched:
+- `freshenBlocks`, `lowerLoops`, `lowerReturns`, `wrapMods`, `renameStmts`, `orderNamed`;
+- `hoist`, `captureExpr`, `freshCapture` and their numbering;
+- the narrow and cast captures, and the `ElabScope.inlined` ranges.
+
+`hoist` already returns the *raw* residual. So a statement's captures are emitted first, and its values are typed afterwards, in the context those captures leave. No typed value crosses an emission.
+
+How the typing works:
+- Names resolve with `NCtx.find`, so resolve's error texts survive.
+- A block is `Σ Γ', Prog C Γ Γ'`, appended with a decided `Ctx` equality and a cast.
+- Branches, loops and try blocks are nested blocks.
+- A call builds `Args` in the caller's context, then the frame (which the elaborator already switches to), then `CallRet.val`/`rets`/`none`/`mem` directly. Resolve used to move a memory return into the frame; now it is built there.
+
+**Differential check.** Before W8.1, a scratch module (not committed) dumps the old elaborator's `toStr` and a quote hash for all 449 imported functions and the TestSuite programs. After W8.1, the erasing wrappers must reproduce that dump byte for byte, and every `sol{}` pin must still hold.
+
+### Keeping the pins' text
+
+`PrintStmt` builds exactly the syntax that today's `ppStmt`/`ppExpr`/`ppPremise?` builds from the erasure, reusing their builders.
+
+How names are found:
+- Names come from the binders: `declLocal x`, `Args`, `Binders`, `CodeBinder`, `Upd.decl`, `Fml.all`/`bind`, `Premise.bind`.
+- A position indexes a name stack.
+- A schema variable prints as its user name, also under `.there`/`up`, as DelabErase's twin rules do today.
+- Pops, captures and hidden binders print as nothing; a block end prints `}`.
+- Terms and updates still print through `Delab.tr` to the IR, which stays.
+
+**Twin check.** While both printers exist, the option `pp.sol.twinCheck` prints both ways over the pin files and errors on any difference. No `#guard_msgs` may move.
+
+Pins that move on purpose (each lane lists them):
+- type suffixes: `: Surface.Fml X` becomes `: Fml X []`;
+- constructor-tree `rfl` examples, restated in scoped constructors;
+- the three hand-built `resolveCheck` guards, replaced by elaboration-error pins.
+
+String pins such as `Surface.Prog.toStr (sol{…}) = "…"` become `Prog.toStr []` with the same strings.
+
+### The 449 imported functions and 437 TestSuite statements
+
+- `solc_import` declares `N.f : Prog N Γp Γ'` directly: one hash-consed literal each, checked by the kernel.
+- `solc_scoped` becomes a check that every program is there, and keeps its info pin.
+- `solc_problems` states `N.f.problem : Fml N []` directly. The 437 legacy statements and the erase guard go.
+- The one-table declaration stays (0.4 s against 3.4 s).
+- `Report.lean`'s counts are unchanged, and `Derived1–14` are not edited: they already state `⊢ N.f.problem` at the scoped type.
+
+### Speed risk (AGENTS.md warning)
+
+Each place below needs a timing gate: within 1.2× of the M0 baseline.
+
+Things that could get slower:
+- **The import absorbs the scoped check.** This partly undoes the module split made for timing (`solc_scoped`, `ScopedProblems`): the scoped check "costs about what the import's own does". The total stays about the same, because the Surface literal's check goes. In the spike, a scoped literal costs the kernel 0.8 ms against 0.15 ms, about +0.3 s over 449 literals in imports that never ran `solc_scoped`. If `Solkey/TestSuite` (11.18 s) goes past 1.2× its limit, `N.f` is declared from `TestSuiteScoped` again.
+- **`sol{}` quotes scoped DAGs**, 1.34–1.96× larger. The risk is `Benchmark/Syntax`, which is already 3% over its limit (1.48 s against 1.44 s).
+- **The printers whnf scoped Exprs**, which can cost more than walking the erasure; the `Delab.tr` pass over the program goes, which offsets some of it. Watch `Examples/ProofTree` (9.8 s) and `Examples/Tactics/Print`.
+
+Things that get faster:
+- resolve leaves the elaborator (0.045 ms per block, negligible).
+- `decide +kernel` no longer evaluates resolve, in the corpus (`corpus_decide`), `Evm/Examples` and the `Tools/Run` checks.
+- The legacy statements and the guard (`solc_scoped_problems`) go.
+
+The elaboration logic is unchanged but for its output constructors, so it should be neutral. W8.5 re-times all of this against the gate table.
+
+### Not in scope
+
+- **The SolKey reader** (side-projects) matches on `Surface.*` after `Delab.tr`. Its port is a later task. Its require stays at the tag `w8-pre-delete` until then, and these waves do not touch it.
+- **Docstrings** that still call the Surface side "as written" are fixed in W8.5.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
@@ -1778,9 +1883,7 @@ fails stays on the IR:
   `Semantics/Erased.lean` go only when it is empty.
 
 **Besides M6c:**
-- The lead's calls on proposals 95–105; the user's on decision 11 (whether
-  `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
-  `Stmt`").
+- Decision 11's removal of the surface syntax ("W8 plan").
 - At the merge into `master`: the SolKey reader's require back to
   `../../../solidity-lean` (side-projects `lean/solkey`, branch
   `intrinsic`) and that branch merged.
