@@ -73,21 +73,21 @@ info: dl{
 
 /-- The clauses normalised: the missing `Error` and `Panic` clauses are the
 catch-all's block, and the receiver `I(a)` is `a`. -/
-example : Surface.Prog.toStr (sol{ uint a = 7;
+example : Prog.toStr [] (sol{ uint a = 7;
     try I(a).ping() { pings += 1; } catch { fails += 1; } }) =
     "uint a = 7; try address(a).ping() { pings += 1; } \
       catch Error(string memory) { fails += 1; } catch Panic(uint) { fails += 1; } \
       catch { fails += 1; }" := rfl
 
 /-- A missing catch-all reverts: the call's failure passes on to the caller. -/
-example : Surface.Prog.toStr (sol{ uint a = 7;
+example : Prog.toStr [] (sol{ uint a = 7;
     try I(a).get(1) returns (uint v) { last = v; } catch Panic(uint c) { last = c; } }) =
     "uint a = 7; try address(a).get(1) returns (uint v) { last = v; } \
       catch Error(string memory) { revert(); } catch Panic(uint c) { last = c; } \
       catch { revert(); }" := rfl
 
 /-- A receiver that is not simple is read into a local before the call. -/
-example : Surface.Prog.toStr (sol{ try I(last).ping() { pings += 1; } catch { fails += 1; } }) =
+example : Prog.toStr [] (sol{ try I(last).ping() { pings += 1; } catch { fails += 1; } }) =
     "uint se1 = last; try address(se1).ping() { pings += 1; } \
       catch Error(string memory) { fails += 1; } catch Panic(uint) { fails += 1; } \
       catch { fails += 1; }" := rfl
@@ -99,10 +99,13 @@ def pingOk : Semantics.State where
   storage := Pinger.initStorage
   tx := { ext := [(⟨7, "ping", []⟩, .ok [])] }
 
+private def pingP : Prog Pinger [] [.val .uint] :=
+  sol{ uint a = 7; try I(a).ping() { pings += 1; } catch { fails += 1; } }
+
 /-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 1)) -/
 #guard_msgs in
 #eval do
-  let σ ← Surface.Prog.runT pingOk (sol{ uint a = 7; try I(a).ping() { pings += 1; } catch { fails += 1; } })
+  let σ ← Prog.runT pingOk pingP
   σ.findStorage "pings" []
 
 /-- The same call reverting with `Panic(0x11)`: the `Panic` clause runs, with
@@ -111,21 +114,17 @@ def pingPanic : Semantics.State where
   storage := Pinger.initStorage
   tx := { ext := [(⟨7, "ping", []⟩, .panic (.int 17))] }
 
+private def pingPanicP : Prog Pinger [] [.val .uint] := sol{ uint a = 7;
+  try I(a).ping() { pings += 1; } catch Panic(uint c) { last = c; } catch { fails += 1; } }
+
 /-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 17)) -/
 #guard_msgs in
 #eval do
-  let σ ← Surface.Prog.runT pingPanic (sol{ uint a = 7;
-    try I(a).ping() { pings += 1; } catch Panic(uint c) { last = c; } catch { fails += 1; } })
+  let σ ← Prog.runT pingPanic pingPanicP
   σ.findStorage "last" []
 
-private def pingNoCodeP : Surface.Prog Pinger := sol{ uint a = 7;
+def pingNoCodeCore : Prog Pinger [] [.val .uint] := sol{ uint a = 7;
   try I(a).ping() { pings += 1; } catch { fails += 1; } }
-
-open Lean Elab Command in
-run_cmd liftCoreM do
-  if let some e ← Prog.defineCore `Solidity.Examples.Tactics.TryCatch.pingNoCodeCore
-      ``Pinger [] pingNoCodeP then
-    throwError "pingNoCodeCore: {e}"
 
 /-- With no entry, the address has no code: the caller reverts (the typed
 run from `Pinger`'s initial state, by the kernel). -/
