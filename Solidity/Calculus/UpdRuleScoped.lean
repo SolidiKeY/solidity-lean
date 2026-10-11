@@ -9,9 +9,15 @@ and its updates `Upd C Γ Δ`, read over the typed state (`holds`):
 | KeY taclet | here | erased form |
 |---|---|---|
 | `sequentialToParallel1/2/3`: `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` | `UpdRuleS.sequentialToParallel` (`Upd.seqPar`, `Calculus/Graft.lean`) | `UpdRule.sequentialToParallel` |
-| `simplifyUpdate1/2/3` (`\dropEffectlessElementaries`) | `UpdRuleS.simplifyUpdate` (`Upd.simp`, `Calculus/UpdateRules.lean`), under the box | `UpdRule.simplifyUpdate` |
+| `simplifyUpdate1/2/3` (`\dropEffectlessElementaries`) | `UpdRuleS.simplifyUpdate` (`Upd.simpS`: `Upd.simp`, `Calculus/UpdateRules.lean`, under the box; the shadowed writes, `Upd.shadow`, under either modality) | `UpdRule.simplifyUpdate` |
 | `applySkip1/2/3`: `{skip}φ ⇝ φ` | `UpdRuleS.applySkip` | `UpdRule.applySkip` |
 | `applyOnRigidFormula`, `applyOnPV`, `applyOnDifferentPV` | `UpdRuleS.applyOnRigid` (`Fml.substU`) | `UpdRule.applyOnRigid` |
+| — (Lean only) | `UpdRuleS.mergeHidden` (`Fml.mergeB`: `sequentialToParallel` through hidden binders), `UpdRuleS.absorbPops` (`Fml.absorbPops`: scope ends merged in), `UpdRuleS.trans` | — |
+
+`sol_upd sequentialToParallel` is `mergeHidden` (`Fml.mergeB`), and
+`sol_upd simplifyUpdate` is `absorbPops` then `simplifyUpdate`
+(`Fml.simpAt`, `Fml.simpAt_rule`): the taclets' own shapes are the two
+constructors named after them.
 
 **One way.**  Each rule rewrites `φ` to a `ψ` that gives it
 (`UpdRuleS.sound`: `holds σ ψ → holds σ φ`), the direction a derivation
@@ -29,9 +35,10 @@ left of an implication, where the erased form also rewrites.
 **What the scope changes.**  An update's locals are positions, so what
 the erased `dropEffectless` drops by name splits in two: an element that
 sets a local the same update pops later (a capture's `se1`, `sp1`) goes
-(`Upd.simp`, under the box, as `Proves.simplify`); an element that sets a
-local still in scope that `φ` does not read stays (the erased form drops
-it).  `applySkip` asks a formula with no modality (`Fml.modalFree`): such a
+(`Upd.simp`, under the box, as `Proves.simplify`), and so does a write a
+later one to the same local shadows (`Upd.shadow`, under either modality);
+an element that sets a local still in scope that `φ` does not read stays
+(the erased form drops it).  `applySkip` asks a formula with no modality (`Fml.modalFree`): such a
 formula holds in a typed state by its erasure and its heap typing alone
 (`holds_congr_erase`), and the states `{}` reads `φ` in are those.
 `applyOnRigid` under the diamond asks an update that cannot halt
@@ -45,10 +52,13 @@ form) is not ported.
 
 The kernel evaluates these functions (the examples' `rfl`), so they keep
 Gate G0's first two conditions: the walks over a whole formula or update
-(`Fml.rwAtS`, `Fml.simpUpdsS`, `Upd.totalB`, `Upd.size`) are written by
-the recursor, each with its `match` form as the `implemented_by` twin
-(`Fml.rwAtSM`, …) and a link theorem (`Fml.rwAtS_eq_rwAtSM`, …), the
-proofs stated on the twins; a look at a formula's or an update's head is
+(`Fml.rwAtS`, `Fml.simpUpdsS`, `Fml.mergeB`, `Fml.cleanB`, `Upd.totalB`,
+`Upd.size`, `Upd.unsetAt`, `Upd.redecl`, `Upd.shadow`) are written by the
+recursor, each with its `match` form as the `implemented_by` twin
+(`Fml.rwAtSM`, …, `Upd.shadowM`) and a link theorem
+(`Fml.rwAtS_eq_rwAtSM`, …, `Upd.shadow_eq_shadowM`), the proofs stated on
+the twins; `Upd.redecl` reads the declaration's `Idx` by `Idx.casesOn`
+with no cast (`Upd.declAt`); a look at a formula's or an update's head is
 `Fml.casesOn`/`Upd.casesOn` (`Fml.updHead?`, `Upd.skipS`).  `match` stays
 on the helpers that take one `Tm` or `Rhs` apart (`Tm.totalB`,
 `Tm.totalP`, `Rhs.totalB`), decision 83's.  `Upd.seqPar`, `Upd.simp` and
@@ -344,11 +354,10 @@ def UpdElem.unsetSnoc {Γ Δ : Ctx} (box : Bool) (i : Nat) (W : Upd C Γ Δ) :
   | .local j r => if j.toNat = i ∧ (box || r.totalB) = true then W else .snoc W (.local j r)
   | e => .snoc W e
 
-/-- `U` with its writes to the local at position `i` dropped, down to its
-first declaration, pop or frame end (`UpdElem.unsetSnoc`). -/
-def Upd.unsetAt {Γ : Ctx} (box : Bool) (i : Nat) : {Δ : Ctx} → Upd C Γ Δ → Upd C Γ Δ
+/-- `Upd.unsetAt`'s compiled twin. -/
+def Upd.unsetAtM {Γ : Ctx} (box : Bool) (i : Nat) : {Δ : Ctx} → Upd C Γ Δ → Upd C Γ Δ
   | _, .nil => .nil
-  | _, .snoc U e => UpdElem.unsetSnoc box i (Upd.unsetAt box i U) e
+  | _, .snoc U e => UpdElem.unsetSnoc box i (Upd.unsetAtM box i U) e
   | _, .decl U x r => .decl U x r
   | _, .pop U h => .pop U h
   | _, .drop U h => .drop U h
@@ -358,29 +367,97 @@ def UpdElem.setsAt {Γ Δ : Ctx} (n : Nat) : UpdElem C Γ Δ → Bool
   | .local j _ => j.toNat == n
   | _ => false
 
-/-- `W ‖ i := r` as `W` with the declaration of `i` it shadows given `r`:
-`W` declares `i` last, and after it sets only other locals and global
-parts; the declaration's right-hand side cannot halt, or `box`. -/
-def Upd.redecl {Γ : Ctx} (box : Bool) : {Δ : Ctx} → Upd C Γ Δ → {t : LTy} → Idx Δ t →
+/-- `Upd.redecl`'s compiled twin. -/
+def Upd.redeclM {Γ : Ctx} (box : Bool) : {Δ : Ctx} → Upd C Γ Δ → {t : LTy} → Idx Δ t →
     Rhs C Γ t → Option (Upd C Γ Δ)
   | _, .snoc U e, _, i, r =>
-    if e.setsAt i.toNat then none else (Upd.redecl box U i r).map (.snoc · e)
+    if e.setsAt i.toNat then none else (Upd.redeclM box U i r).map (.snoc · e)
   | _, .decl U x r0, _, .here, r =>
     if (box || r0.totalB) = true then some (.decl U x r) else none
   | _, _, _, _, _ => none
 
-/-- `U` with every write shadowed by a later one to the same local in the
-same scope dropped (`Upd.unsetAt`), and a declaration a later write
-shadows given that write's right-hand side (`Upd.redecl`). -/
-def Upd.shadow {Γ : Ctx} (box : Bool) : {Δ : Ctx} → Upd C Γ Δ → Upd C Γ Δ
+/-- `Upd.shadow`'s compiled twin. -/
+def Upd.shadowM {Γ : Ctx} (box : Bool) : {Δ : Ctx} → Upd C Γ Δ → Upd C Γ Δ
   | _, .nil => .nil
   | _, .snoc U (.local j r) =>
-    let W := (Upd.shadow box U).unsetAt box j.toNat
-    (W.redecl box j r).getD (.snoc W (.local j r))
-  | _, .snoc U e => .snoc (Upd.shadow box U) e
-  | _, .decl U x r => .decl (Upd.shadow box U) x r
-  | _, .pop U h => .pop (Upd.shadow box U) h
-  | _, .drop U h => .drop (Upd.shadow box U) h
+    let W := (Upd.shadowM box U).unsetAtM box j.toNat
+    (W.redeclM box j r).getD (.snoc W (.local j r))
+  | _, .snoc U e => .snoc (Upd.shadowM box U) e
+  | _, .decl U x r => .decl (Upd.shadowM box U) x r
+  | _, .pop U h => .pop (Upd.shadowM box U) h
+  | _, .drop U h => .drop (Upd.shadowM box U) h
+
+/-- `U` with its writes to the local at position `i` dropped, down to its
+first declaration, pop or frame end (`UpdElem.unsetSnoc`), by the
+recursor. -/
+@[implemented_by Upd.unsetAtM]
+def Upd.unsetAt {Γ : Ctx} (box : Bool) (i : Nat) {Δ : Ctx} (U : Upd C Γ Δ) : Upd C Γ Δ :=
+  Upd.rec (motive := fun Δ _ => Upd C Γ Δ) .nil (fun _ e ih => UpdElem.unsetSnoc box i ih e)
+    (fun U x r _ => .decl U x r) (fun U h _ => .pop U h) (fun U h _ => .drop U h) U
+
+theorem Upd.unsetAt_eq_unsetAtM {Γ : Ctx} (box : Bool) (i : Nat) {Δ : Ctx} (U : Upd C Γ Δ) :
+    U.unsetAt box i = U.unsetAtM box i := by
+  induction U with
+  | snoc U e ih => simp only [Upd.unsetAtM, ← ih]; rfl
+  | _ => rfl
+
+/-- `{U ‖ x := r}` where `i` is the local `x` declares (`Idx.casesOn`), with
+no cast: `Δ'.tail` is the context under it. -/
+def Upd.declAt {Γ Δ : Ctx} {t₀ t : LTy} (U : Upd C Γ Δ) (x : Var) (i : Idx (t₀ :: Δ) t)
+    (r : Rhs C Γ t) : Option (Upd C Γ (t₀ :: Δ)) :=
+  Idx.casesOn (motive := fun Δ' t _ => Rhs C Γ t → Upd C Γ Δ'.tail → Option (Upd C Γ Δ')) i
+    (fun r U => some (.decl U x r)) (fun _ _ _ => none) r U
+
+/-- `W ‖ i := r` as `W` with the declaration of `i` it shadows given `r`:
+`W` declares `i` last, and after it sets only other locals and global
+parts; the declaration's right-hand side cannot halt, or `box`; by the
+recursor. -/
+@[implemented_by Upd.redeclM]
+def Upd.redecl {Γ : Ctx} (box : Bool) {Δ : Ctx} (U : Upd C Γ Δ) :
+    {t : LTy} → Idx Δ t → Rhs C Γ t → Option (Upd C Γ Δ) :=
+  Upd.rec (motive := fun Δ _ => {t : LTy} → Idx Δ t → Rhs C Γ t → Option (Upd C Γ Δ))
+    (fun _ _ => none)
+    (fun _ e ih => fun i r => if e.setsAt i.toNat then none else (ih i r).map (.snoc · e))
+    (fun U x r₀ _ => fun i r => if (box || r₀.totalB) = true then U.declAt x i r else none)
+    (fun _ _ _ => fun _ _ => none) (fun _ _ _ => fun _ _ => none) U
+
+theorem Upd.redecl_eq_redeclM {Γ : Ctx} (box : Bool) {Δ : Ctx} (U : Upd C Γ Δ) :
+    ∀ {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t), U.redecl box i r = U.redeclM box i r := by
+  induction U with
+  | snoc U e ih => intro t i r; simp only [Upd.redeclM, ← ih]; rfl
+  | decl U x r₀ ih =>
+    intro t i r
+    cases i <;> first | rfl | (show (if _ then none else none) = none; split <;> rfl)
+  | _ => intro t i r; rfl
+
+/-- `W ‖ e` with a write to a local that shadows earlier ones: those
+dropped (`Upd.unsetAt`), and the declaration it shadows given its
+right-hand side where that fits (`Upd.redecl`). -/
+def UpdElem.shadowSnoc {Γ Δ : Ctx} (box : Bool) (W : Upd C Γ Δ) : UpdElem C Γ Δ → Upd C Γ Δ
+  | .local j r =>
+    let W' := W.unsetAt box j.toNat
+    (W'.redecl box j r).getD (.snoc W' (.local j r))
+  | e => .snoc W e
+
+/-- `U` with every write shadowed by a later one to the same local in the
+same scope dropped (`Upd.unsetAt`), and a declaration a later write
+shadows given that write's right-hand side (`Upd.redecl`), by the
+recursor. -/
+@[implemented_by Upd.shadowM]
+def Upd.shadow {Γ : Ctx} (box : Bool) {Δ : Ctx} (U : Upd C Γ Δ) : Upd C Γ Δ :=
+  Upd.rec (motive := fun Δ _ => Upd C Γ Δ) .nil (fun _ e ih => UpdElem.shadowSnoc box ih e)
+    (fun _ x r ih => .decl ih x r) (fun _ h ih => .pop ih h) (fun _ h ih => .drop ih h) U
+
+theorem Upd.shadow_eq_shadowM {Γ : Ctx} (box : Bool) {Δ : Ctx} (U : Upd C Γ Δ) :
+    U.shadow box = U.shadowM box := by
+  induction U with
+  | nil => rfl
+  | snoc U e ih =>
+    cases e with
+    | «local» j r =>
+      simp only [Upd.shadowM, ← ih, ← Upd.unsetAt_eq_unsetAtM, ← Upd.redecl_eq_redeclM]; rfl
+    | _ => simp only [Upd.shadowM, ← ih]; rfl
+  | decl U x r ih | pop U h ih | drop U h ih => simp only [Upd.shadowM, ← ih]; rfl
 
 /-- Two states alike but in the local at position `i`. -/
 def EState.AgreeBut {Δ : Ctx} (i : Nat) (τ τ' : EState C Δ) : Prop :=
@@ -477,7 +554,7 @@ dropped returns to a state alike but in that local**; where it halts the
 other halts too, or the drop was the box's. -/
 theorem Upd.unsetAt_apply {Γ : Ctx} (box : Bool) (i : Nat) (σ₀ : EState C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) →
-      ResRel box (EState.AgreeBut i) (U.apply σ₀) ((U.unsetAt box i).apply σ₀)
+      ResRel box (EState.AgreeBut i) (U.apply σ₀) ((U.unsetAtM box i).apply σ₀)
   | _, .nil => ResRel.refl (EState.AgreeBut.refl i) _
   | _, .decl U x r => ResRel.refl (EState.AgreeBut.refl i) _
   | _, .pop U h => ResRel.refl (EState.AgreeBut.refl i) _
@@ -485,14 +562,14 @@ theorem Upd.unsetAt_apply {Γ : Ctx} (box : Bool) (i : Nat) (σ₀ : EState C Γ
   | _, .snoc U e => by
     have ih := Upd.unsetAt_apply box i σ₀ U
     show ResRel box _ (U.apply σ₀ >>= e.write σ₀)
-      ((UpdElem.unsetSnoc box i (U.unsetAt box i) e).apply σ₀)
+      ((UpdElem.unsetSnoc box i (U.unsetAtM box i) e).apply σ₀)
     cases e with
     | «local» j r =>
       simp only [UpdElem.unsetSnoc]
       split
       · rename_i hd
         generalize U.apply σ₀ = a at ih ⊢
-        generalize (U.unsetAt box i).apply σ₀ = b at ih ⊢
+        generalize (U.unsetAtM box i).apply σ₀ = b at ih ⊢
         cases a with
         | error => cases b with
           | error => trivial
@@ -515,9 +592,9 @@ theorem Upd.unsetAt_apply {Γ : Ctx} (box : Bool) (i : Nat) (σ₀ : EState C Γ
               rw [Env.get_set_other j k (by rw [hd.1]; exact Ne.symm hk)]
               exact ih.2 k hk
       · show ResRel box _ (U.apply σ₀ >>= (UpdElem.local j r).write σ₀)
-          ((U.unsetAt box i).apply σ₀ >>= (UpdElem.local j r).write σ₀)
+          ((U.unsetAtM box i).apply σ₀ >>= (UpdElem.local j r).write σ₀)
         generalize U.apply σ₀ = a at ih ⊢
-        generalize (U.unsetAt box i).apply σ₀ = b at ih ⊢
+        generalize (U.unsetAtM box i).apply σ₀ = b at ih ⊢
         cases a with
         | error => cases b with
           | error => trivial
@@ -597,10 +674,10 @@ theorem UpdElem.write_setLocal {Γ Δ : Ctx} (σ₀ : EState C Γ) (e : UpdElem 
 it** returns where the two did, to the same state. -/
 theorem Upd.redecl_apply {Γ : Ctx} (box : Bool) (σ₀ : EState C Γ) :
     {Δ : Ctx} → (W : Upd C Γ Δ) → {t : LTy} → (i : Idx Δ t) → (r : Rhs C Γ t) →
-      {W' : Upd C Γ Δ} → W.redecl box i r = some W' →
+      {W' : Upd C Γ Δ} → W.redeclM box i r = some W' →
       ResRel box (· = ·) ((Upd.snoc W (.local i r)).apply σ₀) (W'.apply σ₀)
   | _, .snoc U e, _, i, r, W', h => by
-    simp only [Upd.redecl] at h
+    simp only [Upd.redeclM] at h
     split at h
     · cases h
     · rename_i he
@@ -629,7 +706,7 @@ theorem Upd.redecl_apply {Γ : Ctx} (box : Bool) (σ₀ : EState C Γ) :
       exact ResRel.trans_eq hc (ResRel.bind_write box σ₀ e
         (fun _ _ h => by cases h; exact ResRel.refl (fun _ => rfl) _) _ _ ih)
   | _, .decl U x r0, _, .here, r, W', h => by
-    simp only [Upd.redecl] at h
+    simp only [Upd.redeclM] at h
     split at h
     · rename_i hb
       cases h
@@ -658,21 +735,21 @@ theorem Upd.redecl_apply {Γ : Ctx} (box : Bool) (σ₀ : EState C Γ) :
           | ok v => rfl
     · cases h
   | _, .nil, _, _, _, _, h | _, .pop .., _, _, _, _, h | _, .drop .., _, _, _, _, h => by
-    simp only [Upd.redecl] at h; cases h
-  | _, .decl .., _, .there _, _, _, h => by simp only [Upd.redecl] at h; cases h
+    simp only [Upd.redeclM] at h; cases h
+  | _, .decl .., _, .there _, _, _, h => by simp only [Upd.redeclM] at h; cases h
 
 /-- **Where an update returns, it with its shadowed writes dropped returns
 to the same state**; where it halts the other halts too, or the drop was
 the box's. -/
 theorem Upd.shadow_apply {Γ : Ctx} (box : Bool) (σ₀ : EState C Γ) :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → ResRel box (· = ·) (U.apply σ₀) ((U.shadow box).apply σ₀)
+    {Δ : Ctx} → (U : Upd C Γ Δ) → ResRel box (· = ·) (U.apply σ₀) ((U.shadowM box).apply σ₀)
   | _, .nil => ResRel.refl (fun _ => rfl) _
   | _, .decl U x r => by
     have ih := Upd.shadow_apply box σ₀ U
     show ResRel box _ (do let τ ← U.apply σ₀; pure (τ.push (← r.eval σ₀)))
-      (do let τ ← (U.shadow box).apply σ₀; pure (τ.push (← r.eval σ₀)))
+      (do let τ ← (U.shadowM box).apply σ₀; pure (τ.push (← r.eval σ₀)))
     generalize U.apply σ₀ = a at ih ⊢
-    generalize (U.shadow box).apply σ₀ = b at ih ⊢
+    generalize (U.shadowM box).apply σ₀ = b at ih ⊢
     cases a with
     | error => cases b with
       | error => trivial
@@ -689,28 +766,28 @@ theorem Upd.shadow_apply {Γ : Ctx} (box : Bool) (σ₀ : EState C Γ) :
         exact ResRel.refl (fun _ => rfl) _
   | _, .pop U h => by
     have ih := Upd.shadow_apply box σ₀ U
-    show ResRel box _ ((U.apply σ₀).map (EState.drop h)) (((U.shadow box).apply σ₀).map (EState.drop h))
+    show ResRel box _ ((U.apply σ₀).map (EState.drop h)) (((U.shadowM box).apply σ₀).map (EState.drop h))
     generalize U.apply σ₀ = a at ih ⊢
-    generalize (U.shadow box).apply σ₀ = b at ih ⊢
+    generalize (U.shadowM box).apply σ₀ = b at ih ⊢
     cases a <;> cases b <;> first | exact ih | trivial | exact congrArg _ ih | exact ih.elim
   | _, .drop U h => by
     have ih := Upd.shadow_apply box σ₀ U
-    show ResRel box _ ((U.apply σ₀).map (EState.thin h)) (((U.shadow box).apply σ₀).map (EState.thin h))
+    show ResRel box _ ((U.apply σ₀).map (EState.thin h)) (((U.shadowM box).apply σ₀).map (EState.thin h))
     generalize U.apply σ₀ = a at ih ⊢
-    generalize (U.shadow box).apply σ₀ = b at ih ⊢
+    generalize (U.shadowM box).apply σ₀ = b at ih ⊢
     cases a <;> cases b <;> first | exact ih | trivial | exact congrArg _ ih | exact ih.elim
   | _, .snoc U e => by
     have ih := Upd.shadow_apply box σ₀ U
     cases e with
     | «local» j r =>
-      have hu := Upd.unsetAt_apply box j.toNat σ₀ (U.shadow box)
+      have hu := Upd.unsetAt_apply box j.toNat σ₀ (U.shadowM box)
       have hs : ResRel box (· = ·) ((Upd.snoc U (.local j r)).apply σ₀)
-          ((Upd.snoc ((U.shadow box).unsetAt box j.toNat) (.local j r)).apply σ₀) := by
+          ((Upd.snoc ((U.shadowM box).unsetAtM box j.toNat) (.local j r)).apply σ₀) := by
         show ResRel box _ (U.apply σ₀ >>= (UpdElem.local j r).write σ₀)
-          (((U.shadow box).unsetAt box j.toNat).apply σ₀ >>= (UpdElem.local j r).write σ₀)
+          (((U.shadowM box).unsetAtM box j.toNat).apply σ₀ >>= (UpdElem.local j r).write σ₀)
         generalize U.apply σ₀ = a at ih ⊢
-        generalize (U.shadow box).apply σ₀ = b at ih hu
-        generalize ((U.shadow box).unsetAt box j.toNat).apply σ₀ = c at hu ⊢
+        generalize (U.shadowM box).apply σ₀ = b at ih hu
+        generalize ((U.shadowM box).unsetAtM box j.toNat).apply σ₀ = c at hu ⊢
         cases a with
         | error =>
           cases c with
@@ -736,9 +813,9 @@ theorem Upd.shadow_apply {Γ : Ctx} (box : Bool) (σ₀ : EState C Γ) :
               cases r.eval σ₀ with
               | error => trivial
               | ok v => exact (hu.setLocal_eq v).symm
-      show ResRel box _ _ (Upd.apply σ₀ ((((U.shadow box).unsetAt box j.toNat).redecl box j r).getD
-        (.snoc ((U.shadow box).unsetAt box j.toNat) (.local j r))))
-      cases hd : ((U.shadow box).unsetAt box j.toNat).redecl box j r with
+      show ResRel box _ _ (Upd.apply σ₀ ((((U.shadowM box).unsetAtM box j.toNat).redeclM box j r).getD
+        (.snoc ((U.shadowM box).unsetAtM box j.toNat) (.local j r))))
+      cases hd : ((U.shadowM box).unsetAtM box j.toNat).redeclM box j r with
       | none => exact hs
       | some W' => exact ResRel.trans_eq hs (Upd.redecl_apply box σ₀ _ j r hd)
     | _ =>
@@ -749,11 +826,12 @@ theorem Upd.shadow_apply {Γ : Ctx} (box : Bool) (σ₀ : EState C Γ) :
 any write, under the diamond a write that cannot halt. -/
 theorem holds_upd_shadow {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
     (σ : State C Γ) (h : holds σ (.upd m (U.shadow m.isBoxS) φ)) : holds σ (.upd m U φ) := by
+  rw [Upd.shadow_eq_shadowM] at h
   show Modality.afterC m _ (U.apply σ.erase)
-  have h : Modality.afterC m _ ((U.shadow m.isBoxS).apply σ.erase) := h
+  have h : Modality.afterC m _ ((U.shadowM m.isBoxS).apply σ.erase) := h
   have hr := Upd.shadow_apply m.isBoxS σ.erase U
   generalize U.apply σ.erase = a at hr ⊢
-  generalize (U.shadow m.isBoxS).apply σ.erase = b at hr h
+  generalize (U.shadowM m.isBoxS).apply σ.erase = b at hr h
   cases a with
   | error =>
     cases m with
@@ -913,21 +991,21 @@ theorem Fml.mergeB_sound {m : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fm
 /-! ## The rules -/
 
 /-- The update rules on scoped formulas, each a rewrite `φ ⇝ ψ` whose `ψ`
-gives `φ`.  Hover a constructor for the KeY taclet it is. -/
+gives `φ`.  Hover a constructor for the KeY taclet it is; the last three
+are Lean only (hidden binders and scope ends, which KeY's updates do not
+have, and a rule after a rule). -/
 inductive UpdRuleS : {Γ : Ctx} → Fml C Γ → Fml C Γ → Prop
   /-- `sequentialToParallel2 { \find({u}{u2}phi) \replacewith({u || {u}u2}phi) }`,
-  where `{u}u2` reads (`Upd.seqPar`), through the hidden binders between
-  the two (`Fml.mergeB`). -/
-  | sequentialToParallel {Γ Δ : Ctx} {m : Modality} {u : Upd C Γ Δ} {φ : Fml C Δ}
-      {χ : Fml C Γ} (hw : φ.mergeB m Γ u = some χ) :
-      UpdRuleS (.upd m u φ) χ
+  where `{u}u2` reads (`Upd.seqPar`). -/
+  | sequentialToParallel {Γ Δ₁ Δ₂ : Ctx} {m : Modality} {u : Upd C Γ Δ₁} {u2 : Upd C Δ₁ Δ₂}
+      {w : Upd C Γ Δ₂} {φ : Fml C Δ₂} (hw : u.seqPar u2 = some w) :
+      UpdRuleS (.upd m u (.upd m u2 φ)) (.upd m w φ)
   /-- `simplifyUpdate2 { \find({u}phi)
   \varcond(\dropEffectlessElementaries(u, phi, result)) \replacewith(result) }`:
   the elements setting a local `u` pops later, under the box, and the
-  writes a later one shadows (`Upd.simpS`), the scope ends after `u`
-  merged into it first (`Fml.simpAt`). -/
-  | simplifyUpdate {Γ Δ : Ctx} {m : Modality} {u : Upd C Γ Δ} {φ : Fml C Δ} {χ : Fml C Γ}
-      (h : Fml.simpAt m u φ = some χ) : UpdRuleS (.upd m u φ) χ
+  writes a later one shadows (`Upd.simpS`). -/
+  | simplifyUpdate {Γ Δ : Ctx} {m : Modality} {u : Upd C Γ Δ} {φ : Fml C Δ} :
+      UpdRuleS (.upd m u φ) (.upd m (u.simpS m) φ)
   /-- `applySkip2 { \find({skip}phi) \replacewith(phi) }`, `phi` with no modality. -/
   | applySkip {Γ : Ctx} {m : Modality} {φ : Fml C Γ} (hm : φ.modalFree = true) :
       UpdRuleS (.upd m .nil φ) φ
@@ -938,6 +1016,16 @@ inductive UpdRuleS : {Γ : Ctx} → Fml C Γ → Fml C Γ → Prop
   | applyOnRigid {Γ Δ : Ctx} {m : Modality} {u : Upd C Γ Δ} {φ : Fml C Δ} {φ' : Fml C Γ}
       (hs : Fml.substU u φ = some φ') (ht : m = .box ∨ u.totalB = true) :
       UpdRuleS (.upd m u φ) φ'
+  /-- Lean only: `sequentialToParallel` through the hidden binders between
+  the two updates (`Fml.mergeB`), the scope ends after them absorbed. -/
+  | mergeHidden {Γ Δ : Ctx} {m : Modality} {u : Upd C Γ Δ} {φ : Fml C Δ} {χ : Fml C Γ}
+      (hw : φ.mergeB m Γ u = some χ) : UpdRuleS (.upd m u φ) χ
+  /-- Lean only: the scope ends `φ` begins with, under `m`, merged into `u`
+  (`Fml.absorbPops`; they print as nothing). -/
+  | absorbPops {Γ Δ : Ctx} {m : Modality} {u : Upd C Γ Δ} {φ : Fml C Δ} :
+      UpdRuleS (.upd m u φ) (Fml.absorbPops m u φ)
+  /-- Lean only: one rule after another. -/
+  | trans {Γ : Ctx} {φ ψ χ : Fml C Γ} : UpdRuleS φ ψ → UpdRuleS ψ χ → UpdRuleS φ χ
 
 /-- **Soundness of the update rules**: what a rule rewrites to gives what
 it rewrote.
@@ -946,10 +1034,26 @@ Example: `x = 1; y = x;` leaves `{ x := 1 } { y := x } y = 1`;
 `sequentialToParallel` rewrites it to `{ x := 1 ‖ y := 1 } y = 1`, which
 gives it. -/
 theorem UpdRuleS.sound {Γ : Ctx} {φ ψ : Fml C Γ} : UpdRuleS φ ψ → ∀ σ, holds σ ψ → holds σ φ
-  | .sequentialToParallel hw, σ, h => Fml.mergeB_sound hw σ h
-  | .simplifyUpdate hs, σ, h => Fml.simpAt_holds hs σ h
+  | .sequentialToParallel hw, σ, h => holds_upd_seqPar hw σ h
+  | .simplifyUpdate, σ, h => holds_upd_simpS σ h
   | .applySkip hm, σ, h => (holds_upd_nil _ hm σ).2 h
   | .applyOnRigid hs ht, σ, h => holds_upd_of_substU' hs ht σ h
+  | .mergeHidden hw, σ, h => Fml.mergeB_sound hw σ h
+  | .absorbPops, σ, h => Fml.absorbPops_holds σ h
+  | .trans h₁ h₂, σ, h => h₁.sound σ (h₂.sound σ h)
+
+/-- `Fml.simpAt` is `absorbPops`, then `simplifyUpdate`. -/
+theorem Fml.simpAt_rule {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
+    {χ : Fml C Γ} (h : Fml.simpAt m U φ = some χ) : UpdRuleS (.upd m U φ) χ := by
+  unfold Fml.simpAt at h
+  split at h
+  · rename_i m' W ψ hh
+    split at h
+    · cases h
+      have he := Fml.updHead?_eq hh
+      exact .trans .absorbPops (by rw [he]; exact .simplifyUpdate)
+    · cases h
+  · cases h
 
 /-! ## One rule at a time -/
 
@@ -993,8 +1097,8 @@ def UpdRuleNameS.top {Γ Δ : Ctx} (r : UpdRuleNameS) (m : Modality) (U : Upd C 
 theorem UpdRuleNameS.top_rule {Γ Δ : Ctx} {r : UpdRuleNameS} {m : Modality} {U : Upd C Γ Δ}
     {φ : Fml C Δ} {ψ : Fml C Γ} (h : r.top m U φ = some ψ) : UpdRuleS (.upd m U φ) ψ := by
   cases r with
-  | sequentialToParallel => exact .sequentialToParallel h
-  | simplifyUpdate => exact .simplifyUpdate h
+  | sequentialToParallel => exact .mergeHidden h
+  | simplifyUpdate => exact Fml.simpAt_rule h
   | applySkip => exact Upd.skipS_rule h
   | applyOnRigid =>
     change (if m = .box ∨ U.totalB = true then Fml.substU U φ else none) = some ψ at h
