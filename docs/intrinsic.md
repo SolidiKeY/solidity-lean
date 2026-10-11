@@ -1928,6 +1928,79 @@ same session; load 0.3–1.2, cgroup 7.3–7.5 GB):
 Every row within its gate.  `Solkey/TestSuite` is 2% faster: its import
 no longer runs `resolve`'s check on every statement.
 
+### W8.2 `printers` record (2026-10-11)
+
+`Calculus/PrintStmt.lean` (above `Calculus/DelabErase.lean`) prints the
+scoped syntax from its `Expr`: `ppStmtS`, `ppProgS`, `ppBlockS`, `ppExprS`,
+`ppPremiseS`, `ppFmlS`, each building the syntax `RuleSyntax.lean`'s
+`ppStmt`/`ppExpr`/`ppProg?`/`ppTupleCall?`/`ppMemCall?`/`ppRetTarget?`/`ppFml`
+and `RuleKit`'s `ppPremise?` build from the erasure, with their builders.  No
+statement, block, premise or formula is erased; terms and updates still go
+through `Delab.tr` (the closer's IR).  The name-stack walker is its API
+(`idxName`, `SPiece`, `progPiecesS`, `framePiecesS`, `updShape`,
+`withPrinter`), for the SolKey reader's port.  Switched to it:
+`Calculus/Delab.lean` (taclets, `blockEmpty`, premises, formulas, sequents
+by `hypsPartsS`), `Calculus/DelabLean.lean` (`tacletLine?`),
+`Calculus/Print.lean` (`showStmts` of `Prog.quoteShared`, no
+`Stmt.erase`/`Frames.erase`), `Calculus/ProofTree.lean` (`condOf?` on the
+scoped `Stmt.ite`, names by `hypsNamesS`).  Each keeps its printing through
+the erasure (`…Legacy`, `condOfLegacy?`), which the option
+`pp.sol.twinCheck` runs beside it: a difference is an error, thrown so that
+it shows in the printed text too (a message's expressions are printed
+lazily, where a logged error is lost).  What the step had to choose
+(proposals `printers`-106 to 110):
+
+- **106**: a taclet's labels are read from the scoped head through
+  `labelHead` (`Stmt.ite` is `Surface.Stmt.ite` for
+  `Taclet.labelledBy`, which `RuleKit` keeps until W8.4).
+- **107**: `functionCallArgCapture`'s two calls still print as the terms
+  of their erasure's twins (`‹Surface.Stmt.call f args hsep ret body›`,
+  pinned in `Examples/Tools.lean`); its capture `T se = v` is built by
+  hand.  W8.4 moves that pin when `Surface.Stmt` goes.
+- **108**: a memory call is grouped with the binding after it only for
+  `CallRet.mem` (the erasure also grouped a call returning nothing whose
+  body begins `T memory m;`, which no elaborated program has, W8.1).
+- **109**: a tuple call none of whose returns is assigned prints as the
+  declarations `(uint a, uint b) = f(x);` when a later statement prints a
+  return's name (the erasure searched the later statements' terms for
+  it); an `↔` is two implications whose formulas are the same terms at the
+  same names (the erasure compared the erased formulas).
+- **110**: where the erasure printed nothing or an escape, this printer may
+  print: a `Binders` variable in a premise read outside a rule (the
+  erasure has no twin for it there), a closed call whose arguments are not
+  separated (printed with its arguments; the erasure's `f()`; the
+  elaborator writes none).  Differences of this kind are the twin check's
+  only expected reports; none occurs in the pinned files.
+
+**Checks.**  The twin check over copies of `Examples/ProofTree.lean`,
+`Examples/Tactics/{Print,Symex,Step,ProofTree,Loops,Chains,Sequents,Surface}.lean`
+and `Examples/Tools.lean` (its `#taclet` pins), and over every constructor
+of `Taclet` and `LeanTaclet` (168, both printers compared directly): no
+difference, no `#guard_msgs` moved, no pin changed.  A control (a
+`Binders` variable outside a rule, proposal 110) shows a difference as a
+failed print.  The default build (294 jobs), `SolidityCorpus` and
+`TestSuite/Suggestions` are green; `check-orphans` (the scratch modules
+only), `check-doc-paths` pass.
+
+**Timing** (the end-of-work method; base `624c492a` restored in the same
+worktree, timed in the same session, load 1.9–2.3, cgroup 9–10 GB; a first
+version, which erased every update and term `viewF` looked through, ran
+`Examples/ProofTree` at 11.4–13.8 s and was replaced by `updShape` and lazy
+term erasure in `eqDPartsS`):
+
+| Module | base | W8.2 `printers` | ratio | gate |
+|---|---|---|---|---|
+| `Examples/ProofTree` | 10.04 s (10.85, 10.04) | 9.91 s (10.10, 9.91) | 0.99 | 11.77 s (M0 1.2×) |
+| `Examples/Tactics/Print` | 3.93 s (4.11, 3.93) | 3.71 s (3.74, 3.71) | 0.94 | no row; 1.2× of the base |
+
+**Left for W8.4**: delete the `…Legacy` printers, `withErased`,
+`hypsParts`, `condOfLegacy?` and `pp.sol.twinCheck` with the erasure;
+`Calculus/Callback.lean`'s `CallbackTaclet` and `ProvesC` delaborators and
+`Calculus/Sequents.lean` still read the erasure (`Delab.tr`, `hypsParts`;
+not this lane's files), and `Chains`' `withErasedPosts`; the pin of
+proposal 107; `Calculus/Print.lean`'s examples compare against
+`Fml.eraseS` (`legacyShow`).
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
