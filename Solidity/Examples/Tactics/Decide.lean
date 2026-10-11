@@ -10,15 +10,19 @@ import Solidity.Tools.Inspect
 `sol_close` (`Calculus/NFmlClose.lean`) finishes a goal with `simp` and `grind`
 on whatever facts the formula states; it cannot split on two keys being
 equal.  `sol_decide` (`Calculus/Decide.lean`) reduces the leaf, its
-locals by position (`Fml.reduceS`, `Calculus/DecideScoped.lean`), into a
-statement about the initial state in which every read of a write is a
-case tree over key equalities, the reduction of the leaf's erasure exactly
-(`Fml.toLS_eq`, then `NFml.valid_iff_reduce`, an equivalence); then
-rewrites by a second one, `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`),
-into a statement about free reads under the constraints a storage puts on
-them, and closes that.  Nothing is lost by those two steps, so a leaf it
-does not close is either not valid over untyped states, outside the
-fragment, or beyond the final `omega`/`grind`.
+locals and its binders' locals by position (`Fml.reduceS`,
+`Calculus/DecideScoped.lean`), into a statement about the initial state in
+which every read of a write is a case tree over key equalities.  That
+reduction is sound over the typed state (`Valid.of_reduceS`,
+`Calculus/DecideTyped.lean`), not an equivalence.  The second step, into a
+statement about free reads under the constraints a storage puts on them,
+is one (`NFml.valid_iff_cons`, `Calculus/DecideComplete.lean`), and the
+result is closed.  Only the erased route's reduction is exact
+(`NFml.valid_iff_reduce`), so on a scoped leaf a goal it does not close may
+still be valid: besides being outside the fragment or beyond the final
+`omega`/`grind`, it may hold only because of what the one-way reduction
+drops (decision 83, and the note on the scoped route in
+`Calculus/DecideComplete.lean`).
 
 Every goal is stated with `⊨`, which (under `open scoped Scoped`) ranges
 over typed states.  `sol_decide` reads the leaf's parameters at their
@@ -256,6 +260,35 @@ theorem parameterInRange : ⊨ dl!{ a < 10 → ⟨ uint y = a + 1; ⟩ y == a + 
   sol_symex
   sol_decide
 
+/-! ## The closer on the scoped reduction
+
+`sol_decide` tries, on the reduction (`Valid.of_reduceS`, then
+`sol_reduce`), `syn` with the parameters known, then the closer
+(`sol_decide_close`, `LFml.closeS`: decision 81), then the constraints with
+the parameters typed (`sol_decide_typed`).  The steps below are the ones
+`sol_decide` takes, written out. -/
+
+/-- `⟨ uint x = a; ⟩ x >= 0` — `syn` decides equalities only; the order a
+`uint` parameter's range gives is the closer's. -/
+theorem closerOnReduction : ⊨ dl!{ ⟨ uint x = a; ⟩ x >= 0 } := by
+  sol_symex
+  refine Valid.of_reduceS (by decide +kernel) ?_
+  sol_reduce
+  fail_if_success sol_decide_syn_alls
+  sol_decide_close
+
+/-- `balances[a] = b; balances[b] = a;` (`keyThroughKey`) — neither `syn`
+nor the closer reads `balances[balances[a]]` through both writes: the step
+after them, the constraints, does. -/
+theorem closerFallsThrough :
+    ⊨ dl!{ [ balances[a] = b; balances[b] = a; ] balances[balances[a]] == a } := by
+  sol_symex
+  refine Valid.of_reduceS (by decide +kernel) ?_
+  sol_reduce
+  fail_if_success sol_decide_syn_alls
+  fail_if_success sol_decide_close
+  sol_decide_typed
+
 /-! ## Pushes, pops and copies
 
 A push or a pop is one write of the array (`LStor.arr`): a read below it
@@ -440,7 +473,7 @@ private def aCopy : LMem :=
 /-- info: true -/
 #guard_msgs in -- `readOnWrite` at a symbolic index: one `kite`; `initElement` below it
 #eval xsNew.readT ⟨0, []⟩ (.idx (.lit (.int 1))) ==
-  some (.kite (.lit (.int 1)) (.var (.user "i")) (.lit (.int 7)) (.lit (.int 0)))
+  some (.kite (.lit (.int 1)) (.var (.name (.user "i"))) (.lit (.int 7)) (.lit (.int 0)))
 
 /-- info: true -/
 #guard_msgs in -- `memoryArrayFreshAlloc`: the length allocated
@@ -462,8 +495,8 @@ private def aCopy : LMem :=
 
 /-- info: true -/
 #guard_msgs in -- the write guard (Lean only): an index below the length
-#eval xsNew.writeG ⟨0, []⟩ (.idx (.var (.user "j"))) ==
-  some (ltG (.var (.user "j")) (.lit (.int 3)))
+#eval xsNew.writeG ⟨0, []⟩ (.idx (.var (.name (.user "j")))) ==
+  some (ltG (.var (.name (.user "j"))) (.lit (.int 3)))
 
 /-- info: [true, false] -/
 #guard_msgs in -- `refDesc` (Lean only): a reference written names an older root
@@ -521,8 +554,8 @@ private def aCopy : LMem :=
 /-- info: true -/
 #guard_msgs in -- `initElement`: an element of a fresh `uint[3]` is `0` below the length
 #eval (LMem.addM .init 0 (.struct "FixedTriple")).readT ⟨0, [.field "items"]⟩
-    (.idx (.var (.user "i"))) ==
-  some (seqL (ltR (.var (.user "i")) (.lit (.int 3))) (.lit (.int 0)))
+    (.idx (.var (.name (.user "i")))) ==
+  some (seqL (ltR (.var (.name (.user "i"))) (.lit (.int 3))) (.lit (.int 0)))
 
 /-- info: true -/
 #guard_msgs in -- `defaultValueBool`: a fresh `bool` member is `false`
@@ -650,10 +683,10 @@ open scoped Scoped
 
 /-- info: false -/
 #guard_msgs in -- a copy from storage outside its pair is outside the fragment
-#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inLS Decide.SymS.empty
+#eval (dl!{ { memory := copySt(memory, find(storage, alice)) } true }).inLS true Decide.SymS.empty
 
 /-- info: false -/
 #guard_msgs in -- a read of the ledger is outside the fragment
-#eval (dl!{ { y := net(a) } y == 0 }).inLS Decide.SymS.empty
+#eval (dl!{ { y := net(a) } y == 0 }).inLS true Decide.SymS.empty
 
 end Solidity.Examples.Tactics.Decide

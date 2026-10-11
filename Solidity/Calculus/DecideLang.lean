@@ -321,12 +321,41 @@ def staleSave : Option AOp → Value → SVal → List Seg → Res SVal
   | none, w, v, qs => v.save qs w.toSVal
   | some op, w, v, qs => v.find qs >>= fun c => op.apply w c >>= fun c' => v.save qs c'
 
+/-- The key the state a reduction is read in holds the local at the
+context position `k` under (counted from the outermost, `Fml.toLS`): a
+name no program spells (`#`), so a position never meets a program's local. -/
+def slotVar (k : Nat) : Var := .fresh "#" k
+
+/-- An atom of the reduction, a local it reads: on a scoped leaf the local
+at a position of its context (`pos k`, decision 78), the names its binders
+give only printed; on an erased leaf (`NFml.toL`, the `⊨` route and
+`sol_prove`'s leaves until `NFml` goes) the local of that name.  Both read
+the state at their `key`. -/
+inductive Atom where
+  | pos (k : Nat)
+  | name (x : Var)
+  deriving Inhabited, Repr, DecidableEq, Lean.ToExpr
+
+/-- The local the state holds the atom under. -/
+def Atom.key : Atom → Var
+  | .pos k => slotVar k
+  | .name x => x
+
+/-- The atom a binder's key reads: a position's slot is that position. -/
+def Atom.ofKey : Var → Atom
+  | .fresh "#" k => .pos k
+  | x => .name x
+
+theorem Atom.key_ofKey (x : Var) : (Atom.ofKey x).key = x := by
+  unfold Atom.ofKey
+  split <;> rfl
+
 mutual
 
 /-- A value, read in the initial state. -/
 inductive LTerm where
   | lit (v : Value)
-  | var (x : Var)
+  | var (a : Atom)
   | binop (op : BinOp) (p : PrimTy) (a b : LTerm)
   | unop (op : UnOp) (p : PrimTy) (a : LTerm)
   | ite (c a b : LTerm)
@@ -488,7 +517,7 @@ mutual
 balances[k])` returns `5` where `balances[k]` is a location. -/
 def LTerm.eval (σ : State) : LTerm → Res Value
   | .lit v => .ok v
-  | .var x => σ.getEnv x >>= Close.bindingVal
+  | .var a => σ.getEnv a.key >>= Close.bindingVal
   | .binop op p a b => a.eval σ >>= fun x => evalBinop op p x (b.eval σ)
   | .unop op p a => a.eval σ >>= fun x => applyUnOp op x >>= unopCheck op p
   | .ite c a b => c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ)
@@ -570,12 +599,16 @@ def LMV.eval (σ : State) (B : MemNames.Births) : LMV → Res MVal
 
 end
 
+/-- An atom reads the state at its key. -/
+theorem LTerm.eval_var (σ : State) (a : Atom) :
+    (LTerm.var a).eval σ = σ.getEnv a.key >>= Close.bindingVal := rfl
+
 mutual
 
 /-- The free locals of a term: those the initial state is asked for. -/
 def LTerm.vars : LTerm → List Var
   | .lit _ | .err | .env _ => []
-  | .var x => [x]
+  | .var a => [a.key]
   | .binop _ _ a b | .seq a b => a.vars ++ b.vars
   | .unop _ _ a | .zero a => a.vars
   | .orElse a b => a.vars ++ b.vars
@@ -635,7 +668,7 @@ theorem LTerm.eval_setEnv {σ : State} {x : Var} {b : Binding} :
   | .lit _, _ | .err, _ => rfl
   | .env k, _ => by simp only [LTerm.eval, State.envVal_setEnv]
   | .var y, h => by
-    have hy : y ≠ x := fun e => h (by simp only [LTerm.vars, e, List.mem_cons, List.not_mem_nil,
+    have hy : y.key ≠ x := fun e => h (by simp only [LTerm.vars, e, List.mem_cons, List.not_mem_nil,
         or_false])
     simp only [LTerm.eval, State.getEnv_setEnv_ne hy]
   | .binop _ _ a b', h | .seq a b', h | .orElse a b', h => by

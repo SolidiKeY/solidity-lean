@@ -38,7 +38,8 @@ quantified key), or reason about arithmetic beyond the cancellation —
 and `sol_decide` falls back to the full procedure where it says no.
 
 On a scoped leaf (M6c) `sol_decide` reduces the leaf by position
-(`Valid.of_reduceS`, `Calculus/DecideScoped.lean`); the leaf's parameters
+(`Fml.reduceS`, `Calculus/DecideScoped.lean`; sound by `Valid.of_reduceS`,
+`Calculus/DecideTyped.lean`); the leaf's parameters
 stay its leading quantifiers, and
 `syn` starts with their locals known to return (`LFml.syn_valid_alls`).
 -/
@@ -1006,7 +1007,8 @@ theorem LFml.syn_valid (φ : LFml) (h : φ.syn [] [] = true) : ∀ σ, φ.holds 
 /-! ## A scoped leaf (M6c)
 
 `sol_decide` takes the scoped leaf `Valid φ` (`φ : Fml C []`) itself and
-reduces it by position (`Valid.of_reduceS`, `Calculus/DecideScoped.lean`).
+reduces it by position (`Fml.reduceS`, `Calculus/DecideScoped.lean`; sound by `Valid.of_reduceS`,
+`Calculus/DecideTyped.lean`).
 The leaf's parameters, its leading `∀ p x`, stay quantifiers: the context
 the leaf's body is read in, one local per position, each of its type.
 Reduced, they are the reduction's leading `LFml.all`s (`LFml.alls`), and their
@@ -1026,9 +1028,9 @@ def Bound (σ : Semantics.State) (q : Var × PrimTy) : Prop :=
 
 /-- A bound local returns. -/
 theorem Bound.returns {σ : Semantics.State} {q : Var × PrimTy} (h : Bound σ q) :
-    Returns σ (.var q.1) := by
+    Returns σ (.var (Atom.ofKey q.1)) := by
   obtain ⟨v, hv, -⟩ := h
-  exact ⟨v, by simp only [LTerm.eval, hv, Res.ok_bind, Close.bindingVal]⟩
+  exact ⟨v, by simp only [LTerm.eval, Atom.key_ofKey, hv, Res.ok_bind, Close.bindingVal]⟩
 
 /-- **The leading quantifiers, by their locals**: `alls xs body` holds where
 `body` holds in every state that binds each local of `xs` at its type.
@@ -1063,7 +1065,7 @@ theorem LFml.alls_holds (body : LFml) : (xs ys : List (Var × PrimTy)) → (σ :
 /-- **`syn` with the leading quantifiers' locals known to return.** -/
 theorem LFml.syn_valid_alls (xs : List (Var × PrimTy)) (body : LFml)
     (hn : decide (xs.map Prod.fst).Nodup = true)
-    (h : body.syn (xs.map fun q => LTerm.var q.1) [] = true) :
+    (h : body.syn (xs.map fun q => LTerm.var (Atom.ofKey q.1)) [] = true) :
     ∀ σ, (LFml.alls xs body).holds σ := by
   intro σ
   refine LFml.alls_holds body xs [] σ (of_decide_eq_true hn) (fun _ hq => nomatch hq)
