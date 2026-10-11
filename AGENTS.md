@@ -17,8 +17,9 @@ context (`Scope.lean`), so a local read out of scope or at another type cannot
 be written. The run (`Stmt.run`, `Semantics/Run.lean`) is over a state typed by
 the context (`State C Γ`: typed storage, heap and locals) and halts only by
 revert, panic, divergence or exhaustion: it is never stuck. The elaborator
-emits it (`Syntax/Elab.lean`) and the printers print it
-(`Calculus/PrintStmt.lean`). Formulas are `Fml C Γ`
+emits it directly (`Syntax/Elab.lean`) and the printers print it
+(`Calculus/PrintStmt.lean`): no untyped statement, program or formula as
+written remains (decision 11, resolved at W8). Formulas are `Fml C Γ`
 (`Calculus/Fml.lean`). The closer reads scoped formulas (M6c): `sol_decide`
 reduces a scoped leaf by position and closes it there
 (`Calculus/DecideScoped.lean`, `Calculus/DecideTyped.lean`), `sol_close`

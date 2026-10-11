@@ -73,7 +73,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
-| W8 | done 2026-10-11 (W8.1–W8.5) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan", "W8 result") |
+| W8 | done 2026-10-11 (W8.1–W8.5, close-out) | decision 11 resolved: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan", "W8 result") |
 | left | — | the lead's calls on proposals 106–117 (W8.2–W8.3) and 118–128 (W8.4); the SolKey reader's port to the scoped families; optional ports on the IR and the IR's rename ("What is left") |
 
 ## Checks at the end (W6)
@@ -3023,6 +3023,62 @@ scripts/check-orphans.mjs` 314 reachable, the one orphan the git-excluded
 `./scripts/check-rule-text.sh` passes.  No `.lean` file changed in the
 merge, so the gate lane's table stands.  The three worktrees are removed;
 their branches stay.
+
+### W8 close-out (2026-10-11, on `intrinsic` at `f36fd067`)
+
+**Decision 11 resolved.**  No Lean file names `Surface.Stmt`,
+`Surface.Prog` or `Surface.Fml` (`rg 'Surface\.(Stmt|Prog|Fml)' Solidity`
+is empty; only this record and its history do).  What still lives under
+`Surface` is the closer's IR, kept by decision 7, not a dead family:
+`Surface.Tm`, `Surface.MAddr`, `Surface.Upd`, `Surface.UpdElem`
+(`Update.lean`, read by `NFml` and the rewrites; the optional rename to
+`NFml` is in "What is left") and two meta helpers, `Surface.elemTy`
+(`Calculus/SurfaceNotation.lean`) and `Surface.cmpParts?`
+(`Calculus/RuleSyntax.lean`, `Calculus/PrintStmt.lean`).  The modules
+`Calculus/Surface.lean` (the `open scoped Solidity.Scoped` switch),
+`Calculus/SurfaceNotation.lean` and `Calculus/SurfaceSpec.lean` keep their
+names.
+
+**Checks.**  `lean_build` with `SolidityCorpus` and `SolkeyTestSuite` added
+to the default targets for the run: green, 328 jobs, no module
+OOM-killed (`lakefile.toml` reverted).  `dups.py`: only `as`, `delabFml`,
+`delabProves`.  `node scripts/check-orphans.mjs`: 314 reachable, the one
+orphan the git-excluded `Solidity/Scratch/ElabDump.lean`.
+`./scripts/check-doc-paths.sh` OK (eleven ambiguous basenames, all
+resolving); `./scripts/check-rule-text.sh` passes.  No `.lean` file
+changed in the close-out; `AGENTS.md` and `docs/module-map.md` lose their
+last mention of the surface statement.
+
+**Gate**, re-timed as in "Gates" (each module copied under
+`Solidity/Scratch/`, opened in a fresh worker through the MCP, every import
+built, `/proc` sampled every 20 ms, the worker killed after each run; end of
+work, the minimum of three interleaved passes; CPU the minimum of the
+runs).  This lane the only Lean agent; load (1 min) 1.6 falling to 0.7,
+cgroup 8.6 GB.  Driver `scratchpad/w8c.sh` (`w85.sh` on this worktree),
+results under `w8c_*` in `scratchpad/results.txt`.
+
+| Module | baseline | gate (1.2×) | W8.5 | **W8 close-out** (three runs) | ratio | CPU |
+|---|---|---|---|---|---|---|
+| `TestSuite/Derived6` | 11.42 s (W6) | 13.70 s | 11.72 s | **11.75 s** (12.00, 11.75, 11.77) | 1.03 | 13.26 s |
+| `TestSuite/Derived10` | 11.11 s (W6) | 13.33 s | 11.45 s | **11.51 s** (11.87, 11.55, 11.51) | 1.04 | 13.12 s |
+| `TestSuite/Derived14` | 10.89 s (W6) | 13.07 s | 11.15 s | **11.23 s** (11.54, 11.29, 11.23) | 1.03 | 11.94 s |
+| `Examples/ProofTree` | 9.81 s (W6) | 11.77 s | 9.80 s | **9.80 s** (10.07, 9.80, 9.84) | 1.00 | 10.01 s |
+| `TestSuite/Problems` (M0) | 0.81 s (W6) | 0.97 s | 0.88 s | **0.86 s** (0.89, 0.86, 0.92) | 1.06 | 0.89 s |
+| `TestSuite/ScopedProblems` (M0) | 1.39 s (W6) | 1.67 s | 1.06 s | **1.06 s** (1.10, 1.09, 1.06) | 0.76 | 1.08 s |
+| `Solkey/TestSuite` (M0) | 10.83 s (W6) | 13.00 s | 6.67 s | **6.73 s** (6.83, 6.73, 6.75) | 0.62 | 7.12 s |
+| `Examples/Benchmark/Syntax` (M0) | 1.41 s (W6) | 1.69 s | 1.60 s | **1.62 s** (1.64, 1.67, 1.62) | 1.15 | 1.96 s |
+| `Evm/Examples` (M0) | 7.75 s (W6) | 9.30 s | 7.33 s | **7.27 s** (7.43, 7.33, 7.27) | 0.94 | 7.67 s |
+| `Solkey/TestSuiteScoped` | 3.61 s (W8.2 base) | 4.33 s | 0.61 s | **0.61 s** (0.61, 0.61, 0.61) | 0.17 | 0.55 s |
+| `Examples/Tactics/Print` | 3.93 s (W8.2 base) | 4.72 s | 3.55 s | **3.57 s** (3.62, 3.57, 3.66) | 0.91 | 3.73 s |
+| `Calculus/SurfaceNotation` | 7.25 s (W8.2 merge) | 8.70 s | 7.19 s | **7.28 s** (7.33, 7.33, 7.28) | 1.00 | 9.27 s |
+| `Corpus/SolcStructs` | 1.22 s (W8.2 base) | 1.46 s | 1.02 s | **1.04 s** (1.06, 1.04, 1.09) | 0.85 | 1.41 s |
+
+**Gate passed**: every row, and every run of every row, within 1.2× of its
+baseline; every row within 1% of W8.5 but `Problems`/`Evm/Examples`
+(faster) and `Derived10` (+0.5%).  Against the M0 limits (M0 + 20%), as at
+W8.5: `Benchmark/Syntax` 1.62 s against 1.44 s (over by 12%; scoped
+`sol{}` DAGs since W8.3), `Derived10` 11.51 s against 11.2 s (over by 3%,
+as since W7); the rest under theirs.
 
 ## What is left
 

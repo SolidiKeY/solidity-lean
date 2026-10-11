@@ -373,7 +373,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/CallbackRuns.lean` | The typed callback reading used: the deterministic run of a program that pays is a callback run (`Prog.exec_run`), and every callback run of one that does not is its deterministic run, decided by the kernel (`ExecP.forall_iff`); a send's three goals under `ProvesC`. |
 | `Examples/Tactics/Derive.lean` | The scoped strategy tools pinned: `sol_prove`, `sol_symex`/`sol_close`, `sol_derive?`'s walk (replayed) and `sol_derive` on `Valid` goals, `sol_derive` leaving the leaves; `sol_prove` and a walk under `⊢ₖ` (`rule_admits`), and `sol_prove` refusing `loopFalse` there while it proves it under `⊢`. |
 | `Examples/Tactics/ProofTree.lean` | The proof tree of a scoped goal pinned: `#proof_tree`, `#proof_node`, `#proof_tree_json` on `cdl!{}`. |
-| `Examples/Tactics/Surface.lean` | The switch `open scoped Solidity.Scoped` pinned: the same text read as `Surface`'s and scoped; the callback taclets printed. |
+| `Examples/Tactics/Surface.lean` | The switch `open scoped Solidity.Scoped` pinned: the same text read outside the scope (no modality: the closer's `NFml`) and inside it; the callback taclets printed. |
 | `Examples/Tactics/Sequents.lean` | Scoped walks with checked `show sequent!{ … }` lines. |
 | `Examples/Tactics/SolSpec.lean` | `Examples/Tactics/Specs.lean`'s obligations scoped and proved by the same `sol_spec`. |
 
