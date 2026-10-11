@@ -4,8 +4,8 @@ import Solidity.Scope
 /-!
 # The typed syntax, scoped
 
-`Syntax.lean`'s families with the locals in scope as an index
-(`docs/intrinsic.md`, M2): every part is read in a context `Γ : Ctx`
+The typed syntax, with the locals in scope as an index
+(`docs/intrinsic.md`, M2): every value is indexed by its type, every part is read in a context `Γ : Ctx`
 (`Scope.lean`), a local is a position `Idx Γ t` that carries its type, and a
 statement `Stmt C Γ Γ'` says which context it leaves.  So a local read
 before it is declared, or at another type than declared, cannot be written:
@@ -23,15 +23,14 @@ binding).
 
 Names are labels on binders (`declLocal p x`, `Args.snoc`, `Binders`), not
 part of the index (Gate G0, condition 3).  The printers keep them beside the
-context, a `List Var` aligned with it, and write the same Solidity as
-`Syntax.lean`'s.  `Stmt.wk` weakens a statement into a context with more
+context, a `List Var` aligned with it, and write the Solidity the block was
+read from.  `Stmt.wk` weakens a statement into a context with more
 locals (`Thin`).  `Stmt.wk`/`Prog.wk` and `Idx.wk` use `match` and are also
 evaluated by the kernel, once per `ifElseUnfold`, call or invariant rule
 fired: the documented exceptions to condition 1 (`Calculus/Step.lean`).
 
-The elaborator (`Syntax/Elab.lean`) emits these families.  `Syntax.lean`'s
-`Surface.*` are their erasure (`Prog.erase`, `Syntax/Resolve.lean`), read by
-the readers not yet scoped.
+The elaborator (`Syntax/Elab.lean`) emits these families, and the printers
+(`Calculus/PrintStmt.lean`) read them.
 -/
 
 namespace Solidity

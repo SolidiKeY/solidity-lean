@@ -41,14 +41,14 @@ printer, as `dl{ … }` (a hidden binder printing as nothing).  A `∀` written
 in the formula, past the parameters, is marked explicit on its variable
 (`Fml.markExplicit`, decision 28), which only the tactics read.  `cdl[C]{ φ }`,
 `cdl[C, m]{ φ }`, `cdl!{ φ }`, `cdl![m]{ φ }` are `dl[C]{ φ }`'s spellings,
-and `dl[C]{ φ }` itself reads this way when `φ` has a modality and no
-`Surface.Fml` is expected (`elabDlAuto`; decision 11, W8.2), its parameters
-bound by hidden binders rather than `∀`.
+and `dl[C]{ φ }` itself reads this way when `φ` has a modality
+(`elabDlAuto`; decision 11), its parameters bound by hidden binders rather
+than `∀`.
 -/
 
 namespace Solidity
 
-open Solidity (RawFml RawStmt RawUpdElem ECtx LocalTy ElabM inScope nextFree elabStmt elabUpd
+open Solidity (RawFml RawStmt RawUpdElem ECtx LocalTy ElabM inScope nextFree elabUpd
   scopeHints elabFml elabTy Reading expandFml fmlHoles fmlHole?)
 open Semantics (lookupBy setBy)
 
@@ -118,8 +118,9 @@ def alignScope (Γ : NCtx) (Γe : ECtx) : ECtx :=
     Γe.filter fun (n, _) => !names.contains (Var.ofName n)
 
 /-- A program of the formula, scoped from the formula's context `Γ`,
-statement by statement as `elabFml` reads it: a capture takes the least
-index the formula's written fresh variables leave.  Each statement is
+statement by statement: a capture takes the least index the formula's
+written fresh variables leave (`nextFree`), and a statement whose captures
+would run into a written index is numbered past them all.  Each statement is
 elaborated from the reader's scope (`elabStmtP`) and placed where the one
 before leaves (`SProg.chain`), as `elabProgAtS` places them. -/
 def elabModalProg (taken : List Nat) (P : List RawStmt) (Γ : NCtx) : ElabM (Blk C Γ.ctx) := do
@@ -441,21 +442,18 @@ def rawHasModal (raw : Lean.Syntax) : Bool :=
   (raw.find? fun s => s.isIdent && s.getId.eraseMacroScopes.toString.endsWith "RawFml.modal").isSome
 
 open Lean Elab Term Meta in
-/-- Whether `dl[C]{ φ }` reads scoped: `φ` has a modality and no
-`Surface.Fml` is expected (the formula as written, until W8.4). -/
-def readsScoped (φ : TSyntax `dl_fml) (ty? : Option Lean.Expr) : TermElabM Bool := do
+/-- Whether `dl[C]{ φ }` reads scoped: `φ` has a modality. -/
+def readsScoped (φ : TSyntax `dl_fml) : TermElabM Bool := do
   let r : Reading := { either := some (mkCIdent ``Modality.diamond), holes := fmlHoles φ }
   let some raw ← (try some <$> liftMacroM (expandFml r φ) catch _ => pure none) | return false
-  unless rawHasModal raw do return false
-  let some ty := ty? | return true
-  return !(← whnfR (← instantiateMVars ty)).isAppOfArity ``Surface.Fml 1
+  return rawHasModal raw
 
 open Lean Elab Term Meta in
 /-- `dl[C]{ φ }` and `dl[C, m]{ φ }`: `cdl[C]{ φ }` (`elabCdlAt`) when
 `readsScoped`, but with its parameters bound by hidden binders, printing
 as nothing, as today's `dl!` leaves them free (the flip's `cdl!` binds a
-value one by `∀`); today's reading (`elabDlAt`: the closer's `NFml`, or a
-`Surface.Fml` where one is expected) otherwise. -/
+value one by `∀`); today's reading (`elabDlAt`, the closer's `NFml`)
+otherwise. -/
 @[term_elab dlAt, term_elab dlAtM]
 def elabDlAuto : TermElab := fun stx ty? => do
   let (c, m?, φ) ← match stx with
@@ -463,7 +461,7 @@ def elabDlAuto : TermElab := fun stx ty? => do
     | `(dl[ $c, $m ]{ $φ:dl_fml }) => pure (c, some m, φ)
     | _ => throwUnsupportedSyntax
   if let some ty := ty? then tryPostponeIfMVar ty
-  unless ← readsScoped φ ty? do throwUnsupportedSyntax
+  unless ← readsScoped φ do throwUnsupportedSyntax
   elabCdlAt c m? φ (useAll := false)
 
 

@@ -438,32 +438,15 @@ def assertOk {α : Type} (v : Value) (a : α) : Res α :=
 
 /-! ## Examples
 
-Scoped programs, each block resolved, quoted and declared
-(`Prog.defineCore`), which the typed run's examples run
-(`Semantics/Run.lean`). -/
+Scoped programs the typed run's examples run (`Semantics/Run.lean`). -/
 
 section Examples
 
-private def guardLow : Solidity.Surface.Prog StandardExample := sol[StandardExample]{ require(age > 3); }
-private def assertLow : Solidity.Surface.Prog StandardExample := sol[StandardExample]{ assert(age > 3); }
-private def incOrder : Solidity.Surface.Prog TestSuite := sol[TestSuite]{ uint i = 1; uint x = i++ + i;
-  assert(x == 2); assert(i == 2); }
-private def indexOrder : Solidity.Surface.Prog TestSuite := sol[TestSuite]{ uint i = 0; values.push(100);
+def guardLowCore := sol[StandardExample]{ require(age > 3); }
+def assertLowCore := sol[StandardExample]{ assert(age > 3); }
+def incOrderCore := sol[TestSuite]{ uint i = 1; uint x = i++ + i; assert(x == 2); assert(i == 2); }
+def indexOrderCore := sol[TestSuite]{ uint i = 0; values.push(100);
   values.push(100); values.push(100); values[++i] = ++i; assert(values[2] == 1); }
-
-open Lean Elab Command in
-run_cmd liftCoreM do
-  let defs : List (Lean.Name × Lean.Name × Option String) := [
-    (`guardLowCore, ``StandardExample,
-      ← Prog.defineCore `Solidity.guardLowCore ``StandardExample [] guardLow),
-    (`assertLowCore, ``StandardExample,
-      ← Prog.defineCore `Solidity.assertLowCore ``StandardExample [] assertLow),
-    (`incOrderCore, ``TestSuite,
-      ← Prog.defineCore `Solidity.incOrderCore ``TestSuite [] incOrder),
-    (`indexOrderCore, ``TestSuite,
-      ← Prog.defineCore `Solidity.indexOrderCore ``TestSuite [] indexOrder)]
-  for (n, cn, err) in defs do
-    if let some e := err then throwError "{n} ({cn}): {e}"
 
 end Examples
 

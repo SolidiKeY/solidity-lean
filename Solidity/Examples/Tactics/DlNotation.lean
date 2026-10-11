@@ -7,8 +7,7 @@ import Solidity.Calculus.Delab
 `Calculus/SurfaceNotation.lean`'s reader (`dl[C]{ φ }`, `dl!{ φ }`,
 `dl![m]{ φ }`) on one contract: a formula with no modality reads as the
 closer's `NFml`, one with a modality as the scoped `Fml C []`
-(`Calculus/Notation.lean`'s `elabDlAuto`, decision 11) unless a
-`Surface.Fml` is expected.  Moved out of `Calculus/SurfaceNotation.lean`
+(`Calculus/Notation.lean`'s `elabDlAuto`, decision 11).  Moved out of `Calculus/SurfaceNotation.lean`
 at W8.2, which cannot read a modality scoped (the reader is above it) nor
 print a scoped formula (`Calculus/Delab.lean`).
 -/
@@ -22,13 +21,13 @@ open Semantics
 local instance : InContract := ⟨StandardExample⟩
 
 /-- A declaration's local is in scope in the postcondition. -/
-example : Surface.Fml StandardExample := dl[StandardExample]{ ⟨ uint x = 10; ⟩ x == 10 }
+example : Fml StandardExample [] := dl[StandardExample]{ ⟨ uint x = 10; ⟩ x == 10 }
 
 /-- A write, then a read of it into a local, under the box. -/
-example : Surface.Fml StandardExample := dl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }
+example : Fml StandardExample [] := dl!{ [ alice.age = 10; uint y = alice.age; ] y == 10 }
 
 /-- `a` and `x` are bound by nothing: parameters, `uint` locals. -/
-example : Surface.Fml StandardExample := dl!{ a == 1 → ⟨ x = a; ⟩ x == 1 }
+example : Fml StandardExample [] := dl!{ a == 1 → ⟨ x = a; ⟩ x == 1 }
 
 /-- `==` on program expressions is `=` on their lowerings. -/
 example : dl!{ alice.age == 10 } = dl!{ find(storage, alice.age) = 10 } := rfl
@@ -38,7 +37,7 @@ example : NFml StandardExample :=
   dl!{ { x := 10 ‖ storage := save(storage, alice.age, 10) } find(storage, alice.age) = x }
 
 /-- An alias bound by an update is an alias under it, in a program too. -/
-example : Surface.Fml StandardExample := dl!{ { p := alice } ⟨ p.age = 3; ⟩ p.age == 3 }
+example : Fml StandardExample [] := dl!{ { p := alice } ⟨ p.age = 3; ⟩ p.age == 3 }
 
 /-- `x := unset` binds a storage alias to no path (`storageLocalDeclSkip`);
 a value local, a memory local or a state variable is refused. -/
@@ -110,20 +109,20 @@ info: dl{
 
 /-- A dropped memory declaration: `carolAcc` is typed from `carol.account`
 (`scopeHints`), and a read of a reference binds a memory local. -/
-example : Surface.Fml StandardExample :=
+example : Fml StandardExample [] :=
   dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
        ⟨ carolAcc = carol.account; carolAcc.balance = 1; ⟩ true }
-example : Surface.Fml StandardExample :=
+example : Fml StandardExample [] :=
   dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
        { carolAcc := read(memory, carol.account) } ⟨ carolAcc.balance = 1; ⟩ true }
 
 /-- … with the memory locals the program declares before it, in a branch too. -/
-example : Surface.Fml StandardExample :=
+example : Fml StandardExample [] :=
   dl!{ ⟨ Person memory d; if (a == 1) { acc = d.account; } else { acc = d.account; }; acc.balance = 1; ⟩
        true }
 
 /-- A name the program declares is left to its declaration. -/
-example : Surface.Fml StandardExample :=
+example : Fml StandardExample [] :=
   dl!{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
        ⟨ Person memory d; d = carol; ⟩ true }
 
@@ -140,19 +139,19 @@ info: dl{
 #check dl!{ { xs := freshId(copySt(memory, newArr(uint[], 3))) ‖ memory := copySt(memory, newArr(uint[], 3)) }
   true }
 
--- A `where` clause pinned on today's reading: the scoped printer prints its
--- hidden binder as nothing until `Delab` prints it (the `printers` lane).
-/-- info: dl{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } : Surface.Fml StandardExample -/
+-- A `where` clause: the memory local a copy out of storage binds, its
+-- declaration dropped, prints as the clause that reads it back.
+/-- info: dl{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } : Fml StandardExample [] -/
 #guard_msgs in
-#check (dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } : Surface.Fml StandardExample)
+#check dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol }
 
 /--
 info: dl{
   { sp2 := alice.account } ⟨ acc = sp2; ⟩ read(memory, acc.balance) = 1 where
-    Account memory acc } : Surface.Fml StandardExample
+    Account memory acc } : Fml StandardExample []
 -/
-#guard_msgs in #check (dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ acc.balance == 1
-  where Account memory acc } : Surface.Fml StandardExample)
+#guard_msgs in #check dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ acc.balance == 1
+  where Account memory acc }
 
 -- An allocation reads back at a struct or an array only.
 /-- error: Solidity elaboration failed: `addM(m, T)`: a value type is not allocated in memory -/

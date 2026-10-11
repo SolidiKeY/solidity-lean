@@ -385,10 +385,9 @@ theorem copyMem_congr {ns : List Var} {s₁ s₂ : State}
 end Semantics
 end Solidity
 
-/-! ## What a program mentions
+/-! ## Avoiding names
 
-The variables a piece of syntax mentions, declared ones included: a rule's
-fresh names are fresh when the statement avoids them (`Avoids`). -/
+A rule's fresh names are fresh when what it reads avoids them (`Avoids`). -/
 
 namespace Solidity
 
@@ -412,67 +411,11 @@ theorem Avoids.tail {x : Var} {vs ns : List Var} (h : Avoids (x :: vs) ns) : Avo
 theorem Avoids.head {x : Var} {vs ns : List Var} (h : Avoids (x :: vs) ns) : x ∉ ns :=
   h x List.mem_cons_self
 
-def Surface.Src.vars {T : Ty} : Surface.Src C T → List Var
-  | .val v => v.vars
-  | .copy p _ => p.vars
-
-def Surface.ARhs.vars {R : RefTy} : Surface.ARhs C R → List Var
-  | .path p => p.vars
-  | .push b _ => b.vars
-
-def Surface.MRhs.vars {R : RefTy} : Surface.MRhs C R → List Var
-  | .alias p => p.vars
-  | .copy p _ => p.vars
-  | .newArr n _ => n.vars
-
-def Surface.NewLhs.vars {R : RefTy} : Surface.NewLhs C R → List Var
-  | .store l => l.vars
-  | .mem l => l.vars
-
-def Surface.MSrc.vars {T : Ty} : Surface.MSrc C T → List Var
-  | .val v => v.vars
-  | .ref p => p.vars
-
-def Surface.OpLoc.vars {p : PrimTy} : Surface.OpLoc C p → List Var
-  | .local x => [x]
-  | .root .. => []
-  | .field b _ _ => b.vars
-  | .index _ b i => b.vars ++ i.vars
-  | .mfield b _ _ => b.vars
-  | .mindex _ b i => b.vars ++ i.vars
-
-/-- The variables of an optional part. -/
-def optVars {α : Type} (f : α → List Var) : Option α → List Var
-  | none => []
-  | some a => f a
-
-/-- The variables of a call's arguments: each parameter and what its
-argument reads. -/
-def Arg.vars : List (Arg C) → List Var
-  | [] => []
-  | a :: as => a.x :: a.e.vars ++ Arg.vars as
-
-/-- The variables an external call reads. -/
-def Surface.ExtCall.vars (c : Surface.ExtCall C) : List Var :=
-  c.addr.vars ++ c.args.flatMap fun a => a.2.vars
-
-/-- The return variable of a call, and the local it lands in. -/
-def Surface.CallRet.vars : Surface.CallRet → List Var
-  | .none => []
-  | .val _ r res => r :: res.toList
-  | .rets rs => rs.map (·.2)
-
-/-- The variables a loop's annotation reads. -/
-def Surface.LoopAnn.vars : Surface.LoopAnn C → List Var
-  | .unwind _ => []
-  | .inv I dec => I.vars ++ optVars Surface.Val.vars dec
-
-
 /-! ## Frames
 
-What a piece of syntax does not mention, it does not see: two states that
-agree off `ns` evaluate a part that avoids `ns` alike, and the state
-operations take them to states that agree off `ns` again.  Binding a scratch
+What a piece of syntax does not mention, it does not see: the state
+operations take two states that agree off `ns` to states that agree off `ns`
+again.  Binding a scratch
 `sp1` changes nothing `alice.age = 10;` reads or writes. -/
 
 section Frame
@@ -482,55 +425,6 @@ variable {ns : List Var} {σ τ : State}
 theorem aliasPath_frame (hag : EnvAgreeExcept ns σ τ) {x : Var} (hx : x ∉ ns) :
     aliasPath σ x = aliasPath τ x := by
   unfold aliasPath; rw [getEnv_congr hag hx]
-
-theorem Surface.Simple.eval_frame (hag : EnvAgreeExcept ns σ τ) {p : PrimTy} :
-    (s : Surface.Simple C p) → Avoids s.vars ns → s.eval σ = s.eval τ
-  | .lit .., _ | .bool _, _ => rfl
-  | .local x, h => by simp only [Surface.Simple.eval, getEnv_congr hag (h x (by simp [Surface.Simple.vars]))]
-  | .env k _, _ => by simp only [Surface.Simple.eval, State.envVal_congr hag]
-
-mutual
-
-theorem Surface.SPath.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
-    {T : Ty} → (p : Surface.SPath C T) → Avoids p.vars ns → p.resolve σ = p.resolve τ
-  | _, .alias x, h => aliasPath_frame hag (h x (by
-      simp only [Surface.SPath.vars, List.mem_cons, List.not_mem_nil, or_false]))
-  | _, .loc l, h => l.resolve_frame hag h
-
-theorem Surface.Loc.resolve_frame (hag : EnvAgreeExcept ns σ τ) :
-    {T : Ty} → (l : Surface.Loc C T) → Avoids l.vars ns → l.resolve σ = l.resolve τ
-  | _, .root .., _ => rfl
-  | _, .field b _ _, h => by simp only [Surface.Loc.resolve, b.resolve_frame hag h]
-  | _, .index _ b i, h => by
-    simp only [Surface.Loc.resolve, b.resolve_frame hag h.left, i.eval_frame hag h.right,
-      checkIndex_congr hag]
-
-theorem Surface.MPath.mval_frame (hag : EnvAgreeExcept ns σ τ) :
-    {T : Ty} → (p : Surface.MPath C T) → Avoids p.vars ns → p.mval σ = p.mval τ
-  | _, .var x _, h => by simp only [Surface.MPath.mval, getEnv_congr hag (h x (by simp [Surface.MPath.vars]))]
-  | _, .loc l, h => l.read_frame hag h
-
-theorem Surface.MLoc.read_frame (hag : EnvAgreeExcept ns σ τ) :
-    {T : Ty} → (l : Surface.MLoc C T) → Avoids l.vars ns → l.read σ = l.read τ
-  | _, .field b _ _, h => by simp only [Surface.MLoc.read, b.mval_frame hag h, getObj_congr hag]
-  | _, .index _ b i, h => by
-    simp only [Surface.MLoc.read, b.mval_frame hag h.left, i.eval_frame hag h.right, getObj_congr hag]
-
-theorem Surface.Val.eval_frame (hag : EnvAgreeExcept ns σ τ) :
-    {p : PrimTy} → (v : Surface.Val C p) → Avoids v.vars ns → v.eval σ = v.eval τ
-  | _, .simple s, h => s.eval_frame hag h
-  | _, .read l, h => by simp only [Surface.Val.eval, l.resolve_frame hag h, findStorage_congr hag]
-  | _, .binop _ _ _ a b, h => by
-    simp only [Surface.Val.eval, a.eval_frame hag h.left, b.eval_frame hag h.right]
-  | _, .unop _ _ _ a, h => by simp only [Surface.Val.eval, a.eval_frame hag h]
-  | _, .ternary c a b, h => by
-    simp only [Surface.Val.eval, c.eval_frame hag h.left.left, a.eval_frame hag h.left.right,
-      b.eval_frame hag h.right]
-  | _, .readMem l, h => by simp only [Surface.Val.eval, l.read_frame hag h]
-  | _, .len b _, h => by simp only [Surface.Val.eval, b.resolve_frame hag h, arrayLen, findStorage_congr hag]
-  | _, .mlen b _, h => by simp only [Surface.Val.eval, b.mval_frame hag h, memArrayLen, getObj_congr hag]
-
-end
 
 /-! ### The state operations respect agreement -/
 

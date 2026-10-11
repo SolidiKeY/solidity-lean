@@ -14,7 +14,7 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 
 | mini-solkey | here |
 |---|---|
-| `Ch01_Syntax`, `Ch02_Elab` | `AST.lean`, `Scope.lean`, `Syntax/Scoped.lean` (`Stmt C Γ Γ'`), `Syntax.lean` (`sol[C]{}`, its output `Surface.Stmt C`), `Syntax/Resolve.lean` |
+| `Ch01_Syntax`, `Ch02_Elab` | `AST.lean`, `Scope.lean`, `Syntax/Scoped.lean` (`Stmt C Γ Γ'`), `Syntax.lean` (the grammar), `Syntax/Elab.lean` (`sol[C]{}`, its output `Prog C Γ Γ'`) |
 | `Ch03_Theory` | `Theory/` |
 | `Ch04_Semantics` | `Semantics/Run.lean` (`Stmt.run`, typed), `Semantics/State.lean`, `Semantics.lean` (the untyped state's operations), `Semantics/Agree.lean` |
 | `Ch05_Logic` | `Calculus/Fml.lean` (`Fml C Γ`, both modalities), `Calculus/Logic.lean` (`holds`), `Update.lean` (terms, updates, the closer's `NFml`) |
@@ -44,13 +44,11 @@ and the run, and moved the calculus onto both.
   `docs/intrinsic.md`).** The scoped syntax (`Scope.lean`,
   `Syntax/Scoped.lean`) replaced `Syntax.lean`'s `Stmt C` in every
   semantics, rule and proof: the untyped run, its calculus and the bridge
-  theorems (`run_erase`) are deleted.  What stays of the untyped side has no
-  semantics of its own: `Surface.Stmt` (`Syntax.lean`), the erasure
-  (`Prog.erase`, `Syntax/Resolve.lean`) of the scoped syntax the elaborator
-  emits (`Syntax/Elab.lean`), still the printers' target; `resolveCheck` is
-  no longer the elaborator's check, only the locals check of the readers
-  that take the block as written (decision 11); and the closer's input
-  below.
+  theorems (`run_erase`) are deleted.  The untyped statement went at W8
+  (decision 11): the elaborator emits the scoped syntax
+  (`Syntax/Elab.lean`) and the printers print it
+  (`Calculus/PrintStmt.lean`).  What stays of the untyped side is the
+  closer's input below.
 - **The closer (M6c, done with an IR).** `sol_decide` reduces and closes
   the scoped leaf by position (`Calculus/DecideScoped.lean`,
   `Calculus/DecideTyped.lean`: `Valid.of_reduceS`, sound over the typed

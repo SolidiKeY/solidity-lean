@@ -1,5 +1,6 @@
 import Solidity.Calculus.Hyp
 import Solidity.Calculus.NFmlQuote
+import Solidity.Calculus.Lower
 
 /-!
 # Reading concrete formulas: `dl[C]{ φ }`
@@ -19,12 +20,10 @@ shows reads back through `dl[C]{ φ }` (or `dl!{ φ }`) as the formula it is —
 at its modality, `dl![m]{ φ }`, when it has `⟨[ ]⟩` or is a box's: an update
 prints `{U} ψ` whatever the modality it is judged at.  The reading is
 mini-solkey's: the macros build a raw formula, `elabDl` resolves its names
-at compile time (`elabAgainst`, as `sol[C]{ … }` does), and
-`Surface.Fml.quoteAuto` splices the result (`NFml.quote`,
-`Calculus/NFmlQuote.lean`, for a formula with no modality;
-`Surface.Fml.quote` otherwise).  A formula with a modality is read scoped
-(`Fml C []`, `Calculus/Notation.lean`'s `elabDlAuto`) unless a
-`Surface.Fml` is expected; the examples are there.
+at compile time (`elabAgainst`, as `sol[C]{ … }` does), and `NFml.quote`
+(`Calculus/NFmlQuote.lean`) splices the result, the closer's formula.  A
+formula with a modality is read scoped (`Fml C []`,
+`Calculus/Notation.lean`'s `elabDlAuto`); the examples are there.
 
 **Lean terms in a formula.**  `dl![m]{ φ }` (`dl[C, m]{ φ }`) reads `φ` at
 the modality `m`, a Lean term — a variable, `.box`, `.diamond`: `⟨[ P ]⟩ ψ`
@@ -101,8 +100,8 @@ What a name is:
   dropped: `carol = alice;` is what `memoryLocalDeclInitDrop` leaves of
   `Person memory carol = alice;` and `storageLocalDeclInitDrop` of `Person
   storage carol = alice;`, and a line is read on its own.  The printer writes
-  the clause for such a line (`copyDecls`); `Account storage p` and `uint v`
-  declare the other kinds.
+  the clause for such a line; `Account storage p` and `uint v` declare the
+  other kinds.
 
 A type where a term stands — what `addM(m, T)` and `newArr(T, n)` allocate —
 is written as Solidity writes it: `Person`, `uint[]`, `Token[3]`.
@@ -1036,7 +1035,7 @@ def elabCompare (Γ : ECtx) (a b : RawExpr) : Except String (Term C × Term C) :
   let Γn := ECtx.toNCtx Γ
   let t ← if a.isLit then synth C Γn b else synth C Γn a
   let some ⟨p, _⟩ := t.toVal? | throw "`==` compares values, not storage or memory references"
-  pure (((← check C Γn p a).erase Γn.names).lower, ((← check C Γn p b).erase Γn.names).lower)
+  pure (((← check C Γn p a).lower.erase Γn.names), ((← check C Γn p b).lower.erase Γn.names))
 
 /-- Run `x`, then restore the locals in scope (not the capture counter). -/
 def inScope (x : ElabM α) : ElabM α := do
@@ -1045,13 +1044,11 @@ def inScope (x : ElabM α) : ElabM α := do
   modify fun (_, k) => (Γ, k)
   pure r
 
-/-- A formula: a program elaborates in the scope in front of it, and its
-declarations are in scope in its postcondition.  `taken` are the indices of
-the fresh variables the formula writes: a capture the program makes while it
-is read takes the least index above the last that none of them has
-(`nextFree`), statement by statement; a statement whose captures would run
-into a written index is numbered past them all. -/
-def elabFml (taken : List Nat) : RawFml → ElabM (Surface.Fml C)
+/-- A formula with no modality, the closer's (a modality is the scoped
+reader's, `Calculus/Notation.lean`).  `taken` are the indices of the fresh
+variables the formula writes, which `Calculus/Notation.lean`'s reading of a
+program keeps clear of (`nextFree`). -/
+def elabFml (taken : List Nat) : RawFml → ElabM (NFml C)
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
@@ -1072,7 +1069,7 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Surface.Fml C)
     pure (.not (.eqD a b))
   | .cmp op a b => do
     let (Γ, _) ← get
-    pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b)).toSurface
+    pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b))
   | .all p x φ => inScope do
     modify fun (Γ, k) => (setBy x (.val p) Γ, k)
     pure (.all (Var.ofName x) p (← elabFml taken φ))
@@ -1084,27 +1081,8 @@ def elabFml (taken : List Nat) : RawFml → ElabM (Surface.Fml C)
     let (U', Γ') ← elabUpd C Γ U
     set (Γ', k)
     pure (.upd m U' (← elabFml taken φ))
-  | .modal m P φ => inScope do
-    modify fun (Γ, k) => (scopeHints C Γ P, k)
-    let mut P' : Surface.Prog C := []
-    -- the locals check (`resolve`), from the locals in scope at the modality
-    let mut Γw := ECtx.toNCtx (← get).1
-    -- a block's locals renamed apart (`freshenBlocks`)
-    let P ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) ((← get).1.map (·.1)) P)
-    for s in P do
-      let (Γ, k) ← get
-      let k₀ := nextFree taken k
-      set (Γ, k₀)
-      let mut Q ← elabStmt C s
-      let (_, k₁) ← get
-      -- captures that would run into a written index: past them all
-      if (List.range' k₀ (k₁ - k₀)).any taken.contains then
-        set (Γ, max k (taken.foldl max 0 + 1))
-        Q ← elabStmt C s
-      Γw ← ElabM.lift (Prog.resolveCheck Γw Q)
-      P' := P' ++ Q
-    pure (.modal m P' (← elabFml taken φ))
-  | .lean i => pure (NFml.slot i).toSurface
+  | .modal .. => throw "a modality is read by the scoped calculus (`Calculus/Notation.lean`)"
+  | .lean i => pure (NFml.slot i)
   | .decl ds φ => inScope do
     for d in ds do
       let (x, t) ← match d with
@@ -1129,7 +1107,7 @@ gap exactly where the elaborator numbered a capture it does not show, the
 locals of a callee its call statement carries.  With `pastAll`, a capture
 is numbered past every written index instead: a Lean formula in the formula
 (`‹…›`) may write fresh variables the reading does not see (`elabDlAt`). -/
-def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (Surface.Fml C) :=
+def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (NFml C) :=
   let (used, declared) := φ.names
   let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
   -- an enum's name (`State` in `State.Locked`) is no parameter
@@ -1145,10 +1123,10 @@ def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (Surface.Fml 
   let taken := if pastAll then List.range' 1 (taken.foldl max 0) else taken
   ((elabFml C taken φ).run { funs := C.funs }).run' (params, 1)
 
-/-- `elabDl` of a formula with no modality: the closer's formula
-(`Calculus/Chains.lean` reads a written line past the program with it). -/
-def elabDlN (φ : RawFml) (pastAll : Bool := false) : Except String (NFml C) := do
-  (← elabDl C φ pastAll).toFml
+/-- `elabDl`, under the name `Calculus/Chains.lean` reads a written line past
+the program with. -/
+abbrev elabDlN (φ : RawFml) (pastAll : Bool := false) : Except String (NFml C) :=
+  elabDl C φ pastAll
 
 end Read
 
@@ -1162,9 +1140,9 @@ def slotExpr (c : Lean.Expr) (i : Nat) : Lean.Expr :=
   mkApp2 (mkConst ``NFml.defined) c
     (mkApp2 (mkConst ``Term.pv) c (mkApp (mkConst ``Var.user) (mkStrLit s!"⟪{i}⟫")))
 
-/-- The `i` of a quoted `NFml.slot i`, or of one as written. -/
+/-- The `i` of a quoted `NFml.slot i`. -/
 def slotIdx? (e : Lean.Expr) : Option Nat := do
-  guard (e.isAppOfArity ``NFml.defined 2 || e.isAppOfArity ``Surface.Fml.defined 2)
+  guard (e.isAppOfArity ``NFml.defined 2)
   let t := e.appArg!
   guard (t.isAppOfArity ``Term.pv 2)
   let x := t.appArg!
@@ -1176,30 +1154,19 @@ def slotIdx? (e : Lean.Expr) : Option Nat := do
 /-- The formula whose readings at the diamond (`d`) and at the box (`b`) are
 given, with its Lean terms back: `m` where `d` has the diamond and `b` the
 box, the formula `φs[i]` at the slot `i`.  Elsewhere the two agree.  A quoted
-formula has no binders, so a term is put back as it is; in a formula as
-written (`Surface.Fml`), as `NFml.toSurface φ`. -/
+formula has no binders, so a term is put back as it is. -/
 partial def fillSlots (m? : Option Lean.Expr) (φs : Array Lean.Expr) (d b : Lean.Expr) :
     Except String Lean.Expr := do
   if let some m := m? then
     if d.isConstOf ``Modality.diamond && b.isConstOf ``Modality.box then return m
   if let some i := slotIdx? d then
     if let some φ := φs[i]? then
-      if slotIdx? b == some i then
-        if d.isAppOfArity ``Surface.Fml.defined 2 then
-          return mkApp2 (mkConst ``NFml.toSurface) d.appFn!.appArg! φ
-        return φ
+      if slotIdx? b == some i then return φ
   match d, b with
   | .app f x, .app g y => return .app (← fillSlots m? φs f g) (← fillSlots m? φs x y)
   | _, _ => if d == b then pure d else throw "the readings at the diamond and at the box differ"
 
 end Fill
-
-/-- The formula read, quoted: the closer's `Fml` when it has no modality,
-else as written (`Surface.Fml`), which only the scoped calculus reads. -/
-def Surface.Fml.quoteAuto {C : Contract} (q : Lean.Expr) (φ : Surface.Fml C) : Lean.Expr :=
-  match φ.toFml with
-  | .ok ψ => NFml.quote q ψ
-  | .error _ => Surface.Fml.quote q φ
 
 /-! ## `dl[C]{ … }` and `dl!{ … }` -/
 
@@ -1249,7 +1216,7 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
-    elabAgainst c fun q => `((elabDl $c $raw $pastAll).map (Surface.Fml.quoteAuto $q))
+    elabAgainst c fun q => `((elabDl $c $raw $pastAll).map (NFml.quote $q))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
     | some m =>
@@ -1260,15 +1227,13 @@ def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
         let rd ← read ``Modality.diamond
         let rb ← read ``Modality.box
         let e ← elabAgainst c fun q =>
-          `((do pure (Surface.Fml.and (← elabDl $c $rd $pastAll) (← elabDl $c $rb $pastAll))).map
-              (Surface.Fml.quoteAuto $q))
+          `((do pure (NFml.and (← elabDl $c $rd $pastAll) (← elabDl $c $rb $pastAll))).map
+              (NFml.quote $q))
         let #[_, d, b] := e.getAppArgs | throwError "dl[C, m]: not two readings{indentExpr e}"
         pure (d, b)
   if holes.isEmpty && d == b then return d
-  -- a Lean formula is the closer's, put back as written under a modality
-  let ty ← do
-    let t ← whnfR (← inferType d)
-    pure (if t.isAppOfArity ``Surface.Fml 1 then mkApp (mkConst ``NFml) t.appArg! else t)
+  -- a Lean formula is the closer's
+  let ty ← whnfR (← inferType d)
   let φs ← holes.mapM fun h => do
     let some t := fmlHole? h | throwError "dl[C]: not a formula hole"
     withRef h do

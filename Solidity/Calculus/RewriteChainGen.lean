@@ -392,7 +392,6 @@ back as `e`; Lean's own printing where the notation escapes. -/
 def writeLine (C e : Expr) (m? : Option Expr) : TermElabM Lean.Term := do
   let φ ← ppFml e
   if isEscape φ then return ← escapeTerm e
-  let φ ← withDecls e φ
   let mods : Array (Option Lean.Term) ← match m? with
     | some m => pure #[some ⟨mkIdent (← m.fvarId!.getUserName)⟩]
     | none => pure #[none, some (ProofTree.dotIdent `box), some (ProofTree.dotIdent `diamond)]

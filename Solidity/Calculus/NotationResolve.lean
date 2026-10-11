@@ -3,8 +3,8 @@ import Solidity.Calculus.Step
 /-!
 # Names to positions in formulas
 
-`Syntax/Resolve.lean` reads a program's names as positions; this module
-does the same for `Update.lean`'s terms, updates and formulas, so that a
+The elaborator reads a program's names as positions (`NCtx.find`,
+`Syntax/Elab.lean`); this module does the same for `Update.lean`'s terms, updates and formulas, so that a
 formula read with names (`dl!{ … }`, a specification's obligation, a
 problem) becomes a scoped one, `Fml C Γ`, over a named context
 `Γ : NCtx` (`docs/intrinsic.md`, M6b).

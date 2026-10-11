@@ -126,22 +126,6 @@ def NFml.quote : NFml C → Lean.Expr
   | .all x p φ => mkAppN (mkConst ``NFml.all) #[c, toExpr x, toExpr p, NFml.quote φ]
   | .anon xs φ => mkAppN (mkConst ``NFml.anon) #[c, toExpr xs, NFml.quote φ]
 
-/-- A formula as written (`Surface.Fml`), quoted. -/
-def Surface.Fml.quote : Surface.Fml C → Lean.Expr
-  | .tt => mkAppN (mkConst ``Surface.Fml.tt) #[c]
-  | .eq a b => mkAppN (mkConst ``Surface.Fml.eq) #[c, Surface.Tm.quote c a, Surface.Tm.quote c b]
-  | .defined t => mkAppN (mkConst ``Surface.Fml.defined) #[c, Surface.Tm.quote c t]
-  | .not φ => mkAppN (mkConst ``Surface.Fml.not) #[c, Surface.Fml.quote φ]
-  | .and φ ψ => mkAppN (mkConst ``Surface.Fml.and) #[c, Surface.Fml.quote φ, Surface.Fml.quote ψ]
-  | .imp φ ψ => mkAppN (mkConst ``Surface.Fml.imp) #[c, Surface.Fml.quote φ, Surface.Fml.quote ψ]
-  | .upd m U φ =>
-    mkAppN (mkConst ``Surface.Fml.upd) #[c, toExpr m, Surface.Upd.quote c U, Surface.Fml.quote φ]
-  | .modal m P φ =>
-    mkAppN (mkConst ``Surface.Fml.modal) #[c, toExpr m, Surface.Prog.quote c P, Surface.Fml.quote φ]
-  | .havoc φ => mkAppN (mkConst ``Surface.Fml.havoc) #[c, Surface.Fml.quote φ]
-  | .all x p φ => mkAppN (mkConst ``Surface.Fml.all) #[c, toExpr x, toExpr p, Surface.Fml.quote φ]
-  | .anon xs φ => mkAppN (mkConst ``Surface.Fml.anon) #[c, toExpr xs, Surface.Fml.quote φ]
-
 /-- The expression `Lean.mkConst n []`: the `c` a quoter takes for the
 contract named `n`, when the quoter runs as compiled code (`evalExpr`). -/
 def quoteConstName (n : Lean.Name) : Lean.Expr :=

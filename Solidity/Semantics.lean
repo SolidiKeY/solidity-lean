@@ -1139,17 +1139,6 @@ def evalBinop (op : BinOp) (p : PrimTy) (lv : Value) (b : Res Value) : Res Value
   | .or, .bool true => pure (.bool true)
   | _, _ => do checkArith (op.retTy (.prim p)) (← applyBinOp op lv (← b))
 
-/-- The value a simple value denotes: a literal, a stack local's, or the
-environment's. -/
-def Surface.Simple.eval (σ : State) {p : PrimTy} : Surface.Simple C p → Res Value
-  | .lit n _ => pure (.int n)
-  | .bool b => pure (.bool b)
-  | .local x => do
-    match ← σ.getEnv x with
-    | .val v => pure v
-    | .spath .. | .mref _ | .store _ | .ledger _ | .unset => .error .undef
-  | .env k _ => pure (.int (σ.envVal k))
-
 /-- The length of the array at a storage path: `values.length`. -/
 def arrayLen (σ : State) (r : Name) (segs : List Seg) : Res Value := do
   match ← σ.findStorage r segs with
@@ -1166,71 +1155,6 @@ def memArrayLen (σ : State) (id : Nat) : Res Value := do
 def Semantics.MVal.asRef : MVal → Res Nat
   | .ref id => pure id
   | .prim _ => .error .undef
-
-mutual
-
-/-- The storage path a path denotes in `σ`: `alice.account` is
-`(alice, [account])`, `sp.age` whatever `sp` is bound to, then `age`. -/
-def Surface.SPath.resolve (σ : State) : {T : Ty} → Surface.SPath C T → Res (Name × List Seg)
-  | _, .alias x => aliasPath σ x
-  | _, .loc l => l.resolve σ
-
-def Surface.Loc.resolve (σ : State) : {T : Ty} → Surface.Loc C T → Res (Name × List Seg)
-  | _, .root r _ => pure (r, [])
-  | _, .field b f _ => do
-    let (r, segs) ← b.resolve σ
-    pure (r, segs ++ [.field f])
-  | _, .index (k := k) _ b i => do
-    let (r, segs) ← b.resolve σ
-    let i ← (← i.eval σ).keyAt k
-    σ.checkIndex r segs i
-    pure (r, segs ++ [.at i])
-
-/-- The slot a memory path holds in `σ`: a memory local's reference (an
-unset one reverts, as an unset alias does), or what a location holds. -/
-def Surface.MPath.mval (σ : State) : {T : Ty} → Surface.MPath C T → Res MVal
-  | _, .var x _ => do
-    match ← σ.getEnv x with
-    | .mref id => pure (.ref id)
-    | .unset => .error .revert
-    | .val _ | .spath .. | .store _ | .ledger _ => .error .undef
-  | _, .loc l => l.read σ
-
-def Surface.MLoc.read (σ : State) : {T : Ty} → Surface.MLoc C T → Res MVal
-  | _, .field b f _ => do
-    let id ← (← b.mval σ).asRef
-    match ← σ.getObj id with
-    | .struct fields =>
-      match lookupBy f fields with
-      | some v => pure v
-      | none => .error .undef
-    | .array _ _ => .error .undef
-  | _, .index _ b i => do
-    let id ← (← b.mval σ).asRef
-    let iv ← (← i.eval σ).asInt
-    match ← σ.getObj id with
-    | .array elems _ =>
-      if h : 0 ≤ iv ∧ iv.toNat < elems.length then pure (elems.get ⟨iv.toNat, h.2⟩)
-      else .error .revert
-    | .struct _ => .error .undef
-
-/-- The value a value expression denotes in `σ`.  `&&` and `||` evaluate
-their right operand only when the left does not decide. -/
-def Surface.Val.eval (σ : State) : {p : PrimTy} → Surface.Val C p → Res Value
-  | _, .simple s => s.eval σ
-  | _, .read l => do
-    let (r, segs) ← l.resolve σ
-    (← σ.findStorage r segs).asValue
-  | _, @Surface.Val.binop _ p _ op _ _ a b => do evalBinop op p (← a.eval σ) (b.eval σ)
-  | _, @Surface.Val.unop _ p _ op _ _ a => do unopCheck op p (← applyUnOp op (← a.eval σ))
-  | _, .ternary c a b => do pickBranch (← c.eval σ) (a.eval σ) (b.eval σ)
-  | _, .readMem l => do (← l.read σ).asValue
-  | _, .len b _ => do
-    let (r, segs) ← b.resolve σ
-    arrayLen σ r segs
-  | _, .mlen b _ => do memArrayLen σ (← (← b.mval σ).asRef)
-
-end
 
 /-- The default `uint x;` binds. -/
 def PrimTy.default : PrimTy → Value

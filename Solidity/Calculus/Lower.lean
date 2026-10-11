@@ -5,8 +5,7 @@ import Solidity.Calculus.Fml
 
 `Update.lean`'s lowering (Maude's `lower(LV, C)`) on the scoped syntax: a
 program expression read in `Γ` becomes a term read in `Γ`, a local its
-position.  `lower_erase` says it is the old lowering of the erased
-expression, the bridge `Fml.erase` needs for an update rule's premise.
+position.
 -/
 
 namespace Solidity
@@ -75,87 +74,5 @@ def Src.lower {Γ : Ctx} {T : Ty} : Src C Γ T → Tm C Γ .sv
 def MSrc.lower {Γ : Ctx} {T : Ty} : MSrc C Γ T → Tm C Γ .mv
   | .val v => .app1 .mval rfl v.lower
   | .ref p => .app1 .ref rfl p.lower
-
-/-! ## Lowering commutes with erasure -/
-
-theorem Tm.keyAt_erase {Γ : Ctx} (ns : List Var) (k : PrimTy) (t : Tm C Γ .val) :
-    (Tm.keyAt k t).erase ns = Solidity.Term.keyAt k (t.erase ns) := by
-  cases k <;> rfl
-
-theorem Simple.lower_erase {Γ : Ctx} {p : PrimTy} (ns : List Var) (s : Simple C Γ p) :
-    s.lower.erase ns = (s.erase ns).lower := by
-  cases s <;> rfl
-
-mutual
-
-theorem SPath.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (b : SPath C Γ T) →
-    b.lower.erase ns = (b.erase ns).lower
-  | _, .alias _ => rfl
-  | _, .loc l => l.lower_erase ns
-
-theorem Loc.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (l : Loc C Γ T) →
-    l.lower.erase ns = (l.erase ns).lower
-  | _, .root .. => rfl
-  | _, .field b f _ => by
-    show Surface.Tm.app1 _ (b.lower.erase ns) = _
-    rw [b.lower_erase ns]; rfl
-  | _, .index (k := k) _ b i => by
-    show Surface.Tm.app2 _ (b.lower.erase ns) ((Tm.keyAt k i.lower).erase ns) = _
-    rw [b.lower_erase ns, Tm.keyAt_erase, i.lower_erase ns]; rfl
-
-theorem MPath.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (b : MPath C Γ T) →
-    b.lower.erase ns = (b.erase ns).lower
-  | _, .var .. => rfl
-  | _, .loc l => by
-    show Surface.Tm.app2 _ _ (l.lower.erase ns) = _
-    rw [l.lower_erase ns]; rfl
-
-theorem MLoc.lower_erase {Γ : Ctx} (ns : List Var) : {T : Ty} → (l : MLoc C Γ T) →
-    l.lower.erase ns = (l.erase ns).lower
-  | _, .field b f _ => by
-    show Surface.Tm.app1 _ (b.lower.erase ns) = _
-    rw [b.lower_erase ns]; rfl
-  | _, .index _ b i => by
-    show Surface.Tm.app2 _ (b.lower.erase ns) (i.lower.erase ns) = _
-    rw [b.lower_erase ns, i.lower_erase ns]; rfl
-
-theorem Val.lower_erase {Γ : Ctx} (ns : List Var) : {p : PrimTy} → (v : Val C Γ p) →
-    v.lower.erase ns = (v.erase ns).lower
-  | _, .simple s => s.lower_erase ns
-  | _, .read l => by
-    show Surface.Tm.app2 _ _ (l.lower.erase ns) = _
-    rw [l.lower_erase ns]; rfl
-  | _, .binop _ _ _ a b => by
-    show Surface.Tm.app2 _ (a.lower.erase ns) (b.lower.erase ns) = _
-    rw [a.lower_erase ns, b.lower_erase ns]; rfl
-  | _, .unop _ _ _ a => by
-    show Surface.Tm.app1 _ (a.lower.erase ns) = _
-    rw [a.lower_erase ns]; rfl
-  | _, .ternary c a b => by
-    show Surface.Tm.app3 _ (c.lower.erase ns) (a.lower.erase ns) (b.lower.erase ns) = _
-    rw [c.lower_erase ns, a.lower_erase ns, b.lower_erase ns]; rfl
-  | _, .readMem l => by
-    show Surface.Tm.app2 _ _ (l.lower.erase ns) = _
-    rw [l.lower_erase ns]; rfl
-  | _, .len b _ => by
-    show Surface.Tm.app2 _ _ (b.lower.erase ns) = _
-    rw [b.lower_erase ns]; rfl
-  | _, .mlen b _ => by
-    show Surface.Tm.app2 _ _ (b.lower.erase ns) = _
-    rw [b.lower_erase ns]; rfl
-
-end
-
-theorem Src.lower_erase {Γ : Ctx} {T : Ty} (ns : List Var) (s : Src C Γ T) :
-    s.lower.erase ns = (s.erase ns).lower := by
-  cases s with
-  | val v => show Surface.Tm.app1 _ (v.lower.erase ns) = _; rw [v.lower_erase ns]; rfl
-  | copy p _ => show Surface.Tm.app2 _ _ (p.lower.erase ns) = _; rw [p.lower_erase ns]; rfl
-
-theorem MSrc.lower_erase {Γ : Ctx} {T : Ty} (ns : List Var) (s : MSrc C Γ T) :
-    s.lower.erase ns = (s.erase ns).lower := by
-  cases s with
-  | val v => show Surface.Tm.app1 _ (v.lower.erase ns) = _; rw [v.lower_erase ns]; rfl
-  | ref p => show Surface.Tm.app1 _ (p.lower.erase ns) = _; rw [p.lower_erase ns]; rfl
 
 end Solidity

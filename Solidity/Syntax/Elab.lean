@@ -1,4 +1,4 @@
-import Solidity.Syntax.Resolve
+import Solidity.Syntax.Scoped
 
 /-!
 # The elaborator
@@ -6,8 +6,8 @@ import Solidity.Syntax.Resolve
 `sol[C]{ … }` reads Solidity statements (`Syntax.lean`'s grammar, `RawStmt`)
 and this module types them against the contract `C`, into the scoped syntax
 (`Syntax/Scoped.lean`): a local is the position `Idx Γ t` of the newest
-local of its name in the context it is read in (`NCtx.find`), so its error
-texts are `resolve`'s.  Synthesis returns a path or a value with its type;
+local of its name in the context it is read in (`NCtx.find`), which says
+when a name is not declared or is declared at another type.  Synthesis returns a path or a value with its type;
 checking takes the expected primitive type, which is how a literal gets one.
 Every proof a constructor needs comes from a `match h : …` on the check that
 justifies it.  A local shadows nothing: a declaration may not reuse the name
@@ -33,15 +33,109 @@ clauses and a call's body are nested blocks, each from the context it is
 entered in; a call's body from its frame, its return variables on its
 parameters (`CallRet`, `Args`).
 
-`elabStmt`, `elabStmts` keep their types, `Surface.Prog C` (the untyped
-statement as written, decision 11 of `docs/intrinsic.md`): they erase the
-scoped block (`Prog.erase`), for the readers not yet moved to the scoped
-one.  The entry points are `Syntax/Splice.lean`'s.
+The entry points are `Syntax/Splice.lean`'s.
 -/
 
 namespace Solidity
 
 open Semantics
+
+/-! ## Named contexts -/
+
+/-- Named locals, innermost first: a context with its names beside it. -/
+abbrev NCtx := List (Var × LTy)
+
+/-- The types. -/
+abbrev NCtx.ctx (Γ : NCtx) : Ctx := Γ.map (·.2)
+
+/-- The names. -/
+abbrev NCtx.names (Γ : NCtx) : List Var := Γ.map (·.1)
+
+theorem NCtx.ctx_append (A B : NCtx) : (A ++ B).ctx = A.ctx ++ B.ctx := List.map_append
+
+theorem NCtx.names_append (A B : NCtx) : (A ++ B).names = A.names ++ B.names := List.map_append
+
+/-- How a declaration writes the type: `uint`, `Person storage`, `Person memory`. -/
+def LTy.toStr : LTy → String
+  | .val p => p.toStr
+  | .alias R => s!"{Ty.ref R} storage"
+  | .mem R => s!"{Ty.ref R} memory"
+  | .old => "storage"
+  | .oldNet => "ledger"
+
+/-- The newest local named `x`, which must be of type `t`. -/
+def NCtx.find [FreshNames] (x : Var) (t : LTy) :
+    (Γ : NCtx) → Except String {i : Idx Γ.ctx t // i.name Γ.names = x}
+  | [] => .error s!"{x} is not declared"
+  | (y, u) :: Γ =>
+    if hy : y = x then
+      if hu : u = t then by subst hu hy; exact .ok ⟨.here, rfl⟩
+      else .error s!"{x} is declared as {u.toStr}, used as {t.toStr}"
+    else
+      match NCtx.find x t Γ with
+      | .ok ⟨i, h⟩ => .ok ⟨.there i, h⟩
+      | .error e => .error e
+
+/-- The binders as a named context. -/
+def Binders.nctx {ρ : Ctx} : Binders ρ → NCtx
+  | .nil => []
+  | .snoc bs p x => (x, .val p) :: bs.nctx
+
+theorem Binders.nctx_ctx {ρ : Ctx} (bs : Binders ρ) : bs.nctx.ctx = ρ := by
+  induction bs with
+  | nil => rfl
+  | snoc bs p x ih => exact congrArg (List.cons _) ih
+
+theorem Binders.nctx_names {ρ : Ctx} (bs : Binders ρ) : bs.nctx.names = bs.names := by
+  induction bs with
+  | nil => rfl
+  | snoc bs p x ih => exact congrArg (List.cons _) ih
+
+/-- `bs` with the locals `l` bound after it, in order. -/
+def Binders.snocAll {ρ : Ctx} (bs : Binders ρ) : List (PrimTy × Var) → (ρ' : Ctx) × Binders ρ'
+  | [] => ⟨ρ, bs⟩
+  | (p, x) :: l => (bs.snoc p x).snocAll l
+
+theorem Binders.toList_snocAll {ρ : Ctx} (bs : Binders ρ) (l : List (PrimTy × Var)) :
+    (bs.snocAll l).2.toList = bs.toList ++ l := by
+  induction l generalizing ρ with
+  | nil => exact (List.append_nil _).symm
+  | cons a l ih =>
+    obtain ⟨p, x⟩ := a
+    rw [snocAll, ih]
+    simp only [toList, List.append_assoc, List.cons_append, List.nil_append]
+
+/-- The locals `l` bound in order. -/
+def Binders.ofList (l : List (PrimTy × Var)) : (ρ : Ctx) × Binders ρ := Binders.nil.snocAll l
+
+theorem Binders.toList_ofList (l : List (PrimTy × Var)) : (Binders.ofList l).2.toList = l :=
+  (Binders.toList_snocAll .nil l).trans (List.nil_append l)
+
+def CodeBinder.ofOption : Option Var → (κ : Ctx) × CodeBinder κ
+  | Option.none => ⟨[], .none⟩
+  | Option.some x => ⟨[.val .uint], .some x⟩
+
+def CodeBinder.nctx {κ : Ctx} : CodeBinder κ → NCtx
+  | .none => []
+  | .some x => [(x, .val .uint)]
+
+theorem CodeBinder.nctx_ctx {κ : Ctx} (c : CodeBinder κ) : c.nctx.ctx = κ := by
+  cases c <;> rfl
+
+theorem CodeBinder.nctx_names {κ : Ctx} (c : CodeBinder κ) : c.nctx.names = c.names := by
+  cases c <;> rfl
+
+/-- A block read in a context equal to its own (an appended context `ρ ++ Γ`
+read as the named context built for it, equal to it but not by
+definition). -/
+def Prog.castIn {C : Contract} {Γ₁ Γ₂ Δ : Ctx} (h : Γ₁ = Γ₂) (P : Prog C Γ₁ Δ) : Prog C Γ₂ Δ :=
+  h ▸ P
+
+/-- A `Panic` clause's binder as an option. -/
+def CodeBinder.toOption {κ : Ctx} : CodeBinder κ → Option Var
+  | .none => Option.none
+  | .some x => Option.some x
+
 
 /-- What a local in scope holds. -/
 inductive LocalTy where
@@ -82,9 +176,6 @@ def elabDeclTy (C : Contract) : RawTy → Except String (Ty × Nat)
     | some (p, n) => pure (.prim p, n)
     | none => do pure (← elabTy C (.named s), 256)
   | T => do pure (← elabTy C T, 256)
-
-/-- `PrimTy.toStr`, under the name `Calculus/SurfaceSpec.lean` uses. -/
-abbrev Surface.primName (p : PrimTy) : String := p.toStr
 
 /-- A synthesised expression, read in `Γ`: a storage path, a memory path, or
 a value. -/
@@ -402,14 +493,14 @@ end
 /-! ### Block locals, renamed apart
 
 The elaborator writes a raw block, a `for` loop's initialisation,
-`unchecked { … }` and a modifier's `_;` flat into the untyped program, which
-has no blocks, so `resolve` keeps their locals in scope until the scope that
+`unchecked { … }` and a modifier's `_;` flat into the block around them, so
+their locals stay in scope (hidden, `SProg.chain`) until the scope that
 holds them ends (a branch, a loop's body, a call's body, the program).  A
 local of such a block whose name is declared again later in that scope is
 renamed apart first, `x` to `x_1` (KeY's `VariableNamer` spelling, the least
 index naming nothing in the program): Solidity's scope ends at the block, so
-no reader after it sees the change, and the program `resolve` returns is
-`Fresh` (`Prog.resolve_fresh`, `docs/intrinsic.md`, M2–M3 review). -/
+no reader after it sees the change, and no local of the program shadows
+another (`docs/intrinsic.md`, M2–M3 review). -/
 
 /-- A statement with the blocks it holds rewritten by `f`, its own
 expressions as they are. -/
@@ -460,7 +551,7 @@ mutual
 
 /-- The statements `ss` of one block, `live` the names in Solidity's scope
 before them, `later` the names declared after the block in the scope
-`resolve` reads it in.  A `flat` block's own local named in `later` is
+that holds it.  A `flat` block's own local named in `later` is
 renamed apart. -/
 partial def freshenList (flat : Bool) (live later : List String) :
     List RawStmt → FreshenM (List RawStmt)
@@ -483,7 +574,7 @@ partial def freshenList (flat : Bool) (live later : List String) :
 
 /-- A statement's blocks renamed apart: a raw block, `unchecked` and a `for`
 loop's initialisation are flat; a branch, a loop's body and a `try`'s
-clauses are scopes of `resolve`'s, so nothing after them is `later`. -/
+clauses are scopes of their own, so nothing after them is `later`. -/
 partial def freshenStmt (live later : List String) : RawStmt → FreshenM RawStmt
   | .block b => do pure (.block (← freshenList true live later b))
   | .unchecked b => do pure (.unchecked (← freshenList true live later b))
@@ -531,7 +622,7 @@ def NCtx.lookupTy (x : Var) : NCtx → Option LTy
   | (y, t) :: Γ => if y = x then some t else NCtx.lookupTy x Γ
 
 /-- The position of the newest local named `x`, of type `t`
-(`NCtx.find`, whose errors are `resolve`'s). -/
+(`NCtx.find`, with its errors). -/
 def NCtx.idx [FreshNames] (Γ : NCtx) (x : Var) (t : LTy) : Except String (Idx Γ.ctx t) :=
   (Γ.find x t).map (·.1)
 
@@ -640,8 +731,11 @@ def Val.vars {Γ : Ctx} (ns : List Var) : {p : PrimTy} → Val C Γ p → List V
 
 end
 
-/-- The arguments of a call are separated (`Arg.separatedFrom`): no argument
-that is not simple reads a parameter bound before it. -/
+/-- The arguments of a call are separated: no argument that is not simple
+reads a parameter bound before it.  Inlined, the parameters are bound one
+after another (KeY's `expand_function_body`), and an argument captured
+before the call (`functionCallArgCapture`) is read before any of them; the
+two agree on a separated call. -/
 def Args.separated {Γ : Ctx} (ns : List Var) : {ps : Ctx} → Args C Γ ps → Bool
   | _, .nil => true
   | _, .snoc as _ _ e =>
@@ -673,8 +767,8 @@ def litAt (Γ : NCtx) (p : PrimTy) (n : Int) : Except String (Simple C Γ.ctx p)
   match h : p.inRange n with
   | true => pure (.lit n h)
   | false =>
-    if p.isNumeric then throw s!"the literal {n} is out of the range of {Surface.primName p}"
-    else throw s!"a number where a {Surface.primName p} is expected"
+    if p.isNumeric then throw s!"the literal {n} is out of the range of {p.toStr}"
+    else throw s!"a number where a {p.toStr} is expected"
 
 /-- Arithmetic on two literals as solc folds it, exactly (a rational
 constant): `+`, `-`, `*`, and `/` when it divides.  The rest is not folded. -/
@@ -759,7 +853,7 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
       throw s!"{(if a.isLit then b else a).toStr}: an operand of reference type {t.ty}"
     match h : op.accepts p with
     | true => pure (.val _ (.binop op h rfl (← check Γ p a) (← check Γ p b)))
-    | false => throw s!"operator {BinOp.sym op} does not take {Surface.primName p}"
+    | false => throw s!"operator {BinOp.sym op} does not take {p.toStr}"
   | .ternary c a b => do
     let t ← if a.isLit then synth Γ b else synth Γ a
     let some ⟨p, _⟩ := t.toVal? | throw "a conditional of reference type"
@@ -769,7 +863,7 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
     let some ⟨p, v⟩ := t.toVal? | throw s!"{a.toStr}: an operand of reference type {t.ty}"
     match h : op.accepts p with
     | true => pure (.val _ (.unop op h rfl v))
-    | false => throw s!"operator {UnOp.sym op} does not take {Surface.primName p}"
+    | false => throw s!"operator {UnOp.sym op} does not take {p.toStr}"
   | .incDec .. => throw "`++` or `−−` under a short-circuit operator or in a conditional's branch"
   | .newArr .. => throw "`new` stands only on the right of `=`"
   | .call f _ => throw s!"the call {f}(…) under a short-circuit operator or in a conditional's branch"
@@ -781,8 +875,8 @@ termination_by e => (sizeOf e, 0)
 /-- `e` checked at `p` through its synthesised type. -/
 def checkVia (Γ : NCtx) (p : PrimTy) (e : RawExpr) : Except String (Val C Γ.ctx p) := do
   let some ⟨q, v⟩ := (← synth Γ e).toVal? |
-    throw s!"a storage reference where a {Surface.primName p} is expected"
-  if h : q = p then pure (h ▸ v) else throw s!"a {Surface.primName q} where a {Surface.primName p} is expected"
+    throw s!"a storage reference where a {p.toStr} is expected"
+  if h : q = p then pure (h ▸ v) else throw s!"a {q.toStr} where a {p.toStr} is expected"
 termination_by (sizeOf e, 1)
 
 def check (Γ : NCtx) (p : PrimTy) : RawExpr → Except String (Val C Γ.ctx p)
@@ -1595,7 +1689,7 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
     for ((n, T), a) in m.params.zip m.args do
       let .prim p := T | throw s!"modifier {m.name}: the parameter {n} has a reference type"
       let y := toString (← freshCapture "se")
-      decls := decls ++ [.decl (.named (Surface.primName p)) y (some a)]
+      decls := decls ++ [.decl (.named (p.toStr)) y (some a)]
       ρ := (n, y) :: ρ
     let code ← renameStmts ρ m.body
     pure (decls ++ (← ElabM.lift (code.mapM (RawStmt.fillHole inner))))
@@ -1653,7 +1747,7 @@ is `uint se1; se1 = i++; values[se1] = 1;`, and
 `Person storage p = c ? alice : bob;` is
 `Person storage sp1; if (c) { sp1 = alice; } else { sp1 = bob; }
 Person storage p = sp1;`, the alias declared before the branches, which are
-scopes (`Syntax/Resolve.lean`).  A memory one is `Person memory mv1 = mx;
+scopes.  A memory one is `Person memory mv1 = mx;
 if (c) { mv1 = mx; } else { mv1 = my; }`: declared bound to a branch that
 indexes nothing (`MPath.indexFree`, a read that cannot revert), or, when
 both index, to a fresh default object (`Person memory mv1;`, an object
@@ -1750,7 +1844,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
           .of Γ' (.assignIncDec ix op hp (t.wk th) ((OpLoc.recvSimple_wk th t).trans hs))] ++
           (← narrowCheck C p n e),
         .name (toString x))
-    | false => throw s!"++ or −− at {Surface.primName p}"
+    | false => throw s!"++ or −− at {p.toStr}"
   | .named f ns args => do
     -- the members' order; an effect may not move
     let flds := (structDef f).map (·.1)
@@ -1927,11 +2021,11 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       Γr := [(toString r, .mem R)]
       mret := some ⟨R, r⟩
       pure (RetKind.mem R r)
-    | [(_, .ref R)], some (_, q) => throw s!"{f} returns a memory {Ty.ref R}, not a {Surface.primName q}"
+    | [(_, .ref R)], some (_, q) => throw s!"{f} returns a memory {Ty.ref R}, not a {q.toStr}"
     | [(n, .prim p)], res => do
-      if d.retMem then throw s!"{f}: `memory` on its return of value type {Surface.primName p}"
+      if d.retMem then throw s!"{f}: `memory` on its return of value type {p.toStr}"
       if let some (_, q) := res then
-        unless q = p do throw s!"{f} returns a {Surface.primName p}, not a {Surface.primName q}"
+        unless q = p do throw s!"{f} returns a {p.toStr}, not a {q.toStr}"
       let w := (lookupBy n d.widths).getD 256
       if resW < w then throw s!"{f} returns a {tyName p w}, where a {tyName p resW} is expected"
       let r ← freshCapture "se"
@@ -2257,12 +2351,12 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     match hop : op.hasCompoundAssign, hp : p.isNumeric with
     | true, true => pure (pre ++ [.of Γ (.opAssign op hop hp t (← checkIn C Γ p r))] ++ post)
     | false, _ => throw s!"no compound assignment for {BinOp.sym op}"
-    | _, false => throw s!"a compound assignment at {Surface.primName p}"
+    | _, false => throw s!"a compound assignment at {p.toStr}"
   | .incDec op l => do
     let (pre, ⟨Γ, p, t⟩) ← elabOpTarget C l
     match hp : p.isNumeric with
     | true => pure (pre ++ [.of Γ (.incDec op hp t)] ++ (← narrowCheck C p (widthIn C (← ctx) l) l))
-    | false => throw s!"++ or −− at {Surface.primName p}"
+    | false => throw s!"++ or −− at {p.toStr}"
   | .assignIncDec x op l => do
     let (pre, ⟨Γ, p, t, hs⟩) ← elabIncTarget C l
     match ← ElabM.lift (synth C Γ x) with
@@ -2272,8 +2366,8 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       | true => if h : q = p then
                   pure (pre ++ [.of Γ (.assignIncDec (h ▸ y) op hp t hs)] ++
                     (← narrowCheck C p (widthIn C (← ctx) l) l))
-                else throw s!"a {Surface.primName p} assigned to a {Surface.primName q}"
-      | false => throw s!"++ or −− at {Surface.primName p}"
+                else throw s!"a {p.toStr} assigned to a {q.toStr}"
+      | false => throw s!"++ or −− at {p.toStr}"
     | _ => throw "the result of ++ or −− goes to a stack local"
   | .call (.field e "push") args => do
     let ⟨Γ, t⟩ ← synthM C e
@@ -2499,28 +2593,6 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
   | _ => throw s!"{rhs.toStr}: the right-hand side of a tuple assignment is a tuple or a call"
 
 end
-
-/-! ### The statement as written
-
-The readers not yet moved to the scoped syntax read a block's erasure
-(`Prog.erase`, `Syntax/Resolve.lean`), from the names of the locals in
-scope: the same statements `Syntax.lean`'s elaborator wrote. -/
-
-/-- A block of statements, from the locals in scope. -/
-def elabStmtsS (ss : List RawStmt) : ElabM ((Γ : NCtx) × Blk C Γ.ctx) := do
-  let Γ ← nctx
-  pure ⟨Γ, ← ElabM.lift (SProg.chain Γ.names Γ.ctx (← elabStmtsP C ss))⟩
-
-/-- A statement, as written (`Surface.Prog C`). -/
-def elabStmt (s : RawStmt) : ElabM (Surface.Prog C) := do
-  let Γ ← nctx
-  let ⟨_, P⟩ ← ElabM.lift (SProg.chain Γ.names Γ.ctx (← elabStmtP C s))
-  pure (P.erase Γ.names)
-
-/-- A block, as written (`Surface.Prog C`). -/
-def elabStmts (ss : List RawStmt) : ElabM (Surface.Prog C) := do
-  let ⟨Γ, _, P⟩ ← elabStmtsS C ss
-  pure (P.erase Γ.names)
 
 end Elab
 

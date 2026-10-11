@@ -220,8 +220,7 @@ nor `ic` (calls whose arguments are all simple, `functionBodyExpand`'s and
 info: Solidity.LeanTaclet.functionCallArgCapture : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {f : Name} {ps : Ctx}
   {args : Args C Γ ps} {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {p : PrimTy}
   {v : Val C Γ p} {as' : Args C (LTy.val p :: Γ) ps},
-  dl[LeanTaclet C k]{ ⟨[ ‹Surface.Stmt.call f args hsep ret body›; ]⟩ ⇝
-    ⟨[ T se = v; ‹Surface.Stmt.call f as' ⋯ ret body›; ]⟩ }
+  dl[LeanTaclet C k]{ ⟨[ ‹Stmt.call f args ret body›; ]⟩ ⇝ ⟨[ T se = v; ‹Stmt.call f as' ret body›; ]⟩ }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)

@@ -14,8 +14,8 @@ deleted at W4 `sem-del` with the untyped run's last typed-side users).
 (`LTy.enc`).  `Agree ns σ τ`: the global parts are equal, and every local of
 `σ` is bound in `τ` under its name, encoded; `τ` may bind more.  The global
 operations the closer's updates run are natural in the locals (`*_nat`,
-`*_wl`), so an expression reads alike in agreeing states (`Val.eval_erase`
-and its siblings).  `Agree.erase`: a state agrees with its erasure.
+`*_wl`), so a term reads alike in agreeing states (`aliasPath_erase` here,
+`Tm.eval_erase` in `Calculus/HoldsErase.lean`).  `Agree.erase`: a state agrees with its erasure.
 -/
 
 namespace Solidity
@@ -505,80 +505,17 @@ theorem copyMem (hag : Agree ns σ τ) (v : MVal) : Semantics.copyMem τ v = Sem
 
 end Agree
 
-/-! ## Expressions read alike -/
+/-! ## An alias reads alike -/
 
 section Eval
 
 variable {Γ : Ctx} {ns : List Var} {σ : EState C Γ} {τ : Semantics.State}
-
-theorem Simple.eval_erase (hag : Agree ns σ τ) {p : PrimTy} :
-    (s : Simple C Γ p) → Surface.Simple.eval τ (s.erase ns) = s.eval σ
-  | .lit .. => rfl
-  | .bool _ => rfl
-  | .local i => by
-    simp only [Simple.erase, Surface.Simple.eval, hag.getEnv i, Simple.eval]
-    rfl
-  | .env k _ => by simp only [Simple.erase, Surface.Simple.eval, hag.envVal k, Simple.eval]
 
 theorem aliasPath_erase (hag : Agree ns σ τ) {R : RefTy} (i : Idx Γ (.alias R)) :
     Semantics.aliasPath τ (i.name ns) = aliasPath σ i := by
   simp only [Semantics.aliasPath, hag.getEnv i, aliasPath]
   generalize (Env.get i σ.env : Option (Name × List Seg)) = v
   rcases v with _ | ⟨r, segs⟩ <;> rfl
-
-mutual
-
-theorem SPath.resolve_erase (hag : Agree ns σ τ) :
-    {T : Ty} → (p : SPath C Γ T) → Surface.SPath.resolve τ (p.erase ns) = p.resolve σ
-  | _, .alias i => aliasPath_erase hag i
-  | _, .loc l => l.resolve_erase hag
-
-theorem Loc.resolve_erase (hag : Agree ns σ τ) :
-    {T : Ty} → (l : Loc C Γ T) → Surface.Loc.resolve τ (l.erase ns) = l.resolve σ
-  | _, .root .. => rfl
-  | _, .field b _ _ => by
-    simp only [Loc.erase, Surface.Loc.resolve, b.resolve_erase hag, Loc.resolve]
-  | _, .index _ b i => by
-    simp only [Loc.erase, Surface.Loc.resolve, b.resolve_erase hag, i.eval_erase hag,
-      hag.checkIndex, Loc.resolve]
-
-theorem MPath.mval_erase (hag : Agree ns σ τ) :
-    {T : Ty} → (p : MPath C Γ T) → Surface.MPath.mval τ (p.erase ns) = p.mval σ
-  | _, .var i _ => by
-    simp only [MPath.erase, Surface.MPath.mval, hag.getEnv i, MPath.mval, memRef]
-    cases Env.get i σ.env <;> rfl
-  | _, .loc l => l.read_erase hag
-
-theorem MLoc.read_erase (hag : Agree ns σ τ) :
-    {T : Ty} → (l : MLoc C Γ T) → Surface.MLoc.read τ (l.erase ns) = l.read σ
-  | _, .field b _ _ => by
-    simp only [MLoc.erase, Surface.MLoc.read, b.mval_erase hag, hag.getObj, MLoc.read]
-    rfl
-  | _, .index _ b i => by
-    simp only [MLoc.erase, Surface.MLoc.read, b.mval_erase hag, i.eval_erase hag, hag.getObj,
-      MLoc.read]
-    rfl
-
-theorem Val.eval_erase (hag : Agree ns σ τ) :
-    {p : PrimTy} → (v : Val C Γ p) → Surface.Val.eval τ (v.erase ns) = v.eval σ
-  | _, .simple s => s.eval_erase hag
-  | _, .read l => by
-    simp only [Val.erase, Surface.Val.eval, l.resolve_erase hag, hag.findStorage, Val.eval]
-  | _, .binop _ _ _ a b => by
-    simp only [Val.erase, Surface.Val.eval, a.eval_erase hag, b.eval_erase hag, Val.eval]
-  | _, .unop _ _ _ a => by
-    simp only [Val.erase, Surface.Val.eval, a.eval_erase hag, Val.eval]
-  | _, .ternary c a b => by
-    simp only [Val.erase, Surface.Val.eval, c.eval_erase hag, a.eval_erase hag,
-      b.eval_erase hag, Val.eval]
-  | _, .readMem l => by
-    simp only [Val.erase, Surface.Val.eval, l.read_erase hag, Val.eval]
-  | _, .len b _ => by
-    simp only [Val.erase, Surface.Val.eval, b.resolve_erase hag, hag.arrayLen, Val.eval]
-  | _, .mlen b _ => by
-    simp only [Val.erase, Surface.Val.eval, b.mval_erase hag, hag.memArrayLen, Val.eval]
-
-end
 
 end Eval
 

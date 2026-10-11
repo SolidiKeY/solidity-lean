@@ -5,17 +5,17 @@ import Solidity.Syntax.Quote
 /-!
 # Printing scoped formulas
 
-A formula of `Calculus/Fml.lean` printed as the `dl{ … }` printers of
-`Calculus/RuleSyntax.lean` print its erasure (`Fml.eraseS`): the same KeY text.
+A formula of `Calculus/Fml.lean` printed in the `dl{ … }` notation of
+`Calculus/RuleSyntax.lean`: the KeY text.
 Terms and updates are printed by those printers themselves, on the erased
 part quoted (`Calculus/NFmlQuote.lean`); a block is quoted as it is
 (`Prog.quoteShared`) and printed by `Calculus/PrintStmt.lean`'s printer of
 the scoped syntax (`ppProgS`), its names those of its context.  This module
 only walks the formula, with the names of its context beside it.
 
-What erasure loses prints as KeY would have it: a frame's statements follow
-the program, a block's end is `}`, and a capture's end, a pop of an update
-and a hidden binder (`Fml.bind`) print as nothing.
+What has no KeY text prints as KeY would have it: a frame's statements
+follow the program, a block's end is `}`, and a capture's end, a pop of an
+update and a hidden binder (`Fml.bind`) print as nothing.
 
 The contract is passed as the expression `c` that names it
 (`mkConst ``StandardExample`), as the quoters take it.
@@ -148,28 +148,16 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
 def Fml.show {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM String :=
   return (← φ.showP c ns).1
 
-/-! ## Examples
-
-Each prints as its erasure does (`legacyShow`, the `dl{ … }` printer of
-`RuleSyntax.lean` on `Fml.eraseS`), except where erasure loses a block's end. -/
+/-! ## Examples -/
 
 section Example
-
-open Solidity (ppFml)
 
 private abbrev SE := StandardExample
 private abbrev cSE : Lean.Expr := mkConst ``StandardExample
 
-/-- `Update.lean`'s formula as written, as `RuleSyntax.lean` prints it. -/
-def legacyShow (φ : Solidity.Surface.Fml C) : MetaM String := do
-  fmtCat `dl_fml (← ppFml (Solidity.Surface.Fml.quote c φ))
-
-/-- The formula, checked to print as its erasure (`Fml.eraseS`). -/
-def showSame {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM Unit := do
-  let a ← φ.show c ns
-  let b ← legacyShow c (φ.eraseS ns)
-  unless a == b do throwError "prints\n{a}\nbut its erasure prints\n{b}"
-  logInfo a
+/-- The formula, printed. -/
+def showFml {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM Unit := do
+  logInfo (← φ.show c ns)
 
 private def x : Var := .user "x"
 private def y : Var := .user "y"
@@ -189,7 +177,7 @@ private def upd₁ : Fml SE [] :=
     (.eqD (pv (.there .here)) (lit 3))
 
 /-- info: { x := 3 ‖ p := alice.age } x = 3 -/
-#guard_msgs in #eval showSame cSE [] upd₁
+#guard_msgs in #eval showFml cSE [] upd₁
 
 /-- A connective under `∀`, `¬`, `∨`, `∃`, `↔` and a comparison. -/
 private def conn₁ : Fml SE [] :=
@@ -198,7 +186,7 @@ private def conn₁ : Fml SE [] :=
     (.and (.imp .tt .ff) (.imp .ff .tt)))
 
 /-- info: ∀ uint x; (x < 3 → true ∨ false) ∧ (true ↔ false) -/
-#guard_msgs in #eval showSame cSE [] conn₁
+#guard_msgs in #eval showFml cSE [] conn₁
 
 /-- A program, scoped: the branch's `y` is not in scope after it. -/
 private def prog₁ : Prog SE [] [.val .uint] :=
@@ -209,7 +197,7 @@ private def prog₁ : Prog SE [] [.val .uint] :=
     (.cons .revert .nil)) .nil
 
 /-- info: [ uint x = 1; if (x > 0) {uint y = x;x = y;} else {revert();}; ] x = 1 -/
-#guard_msgs in #eval showSame cSE [] (.modal .box prog₁ .nil (.eqD (pv .here) (lit 1)))
+#guard_msgs in #eval showFml cSE [] (.modal .box prog₁ .nil (.eqD (pv .here) (lit 1)))
 
 /-- The branches of `prog₁`'s `if`. -/
 private def thn₁ : Prog SE [.val .uint] [.val .uint, .val .uint] :=
@@ -219,8 +207,7 @@ private def els₁ : Prog SE [.val .uint] [.val .uint] := .cons .revert .nil
 /-- `x > 0`, as the condition of a goal. -/
 private def pos₁ : Fml SE [.val .uint] := .eqD (.app2 (.binop .gt .uint) (pv .here) (lit 0)) tru
 
-/-- `ifElseSplit` on `if (x > 0) …; x = 2;`: each branch ends with a `}`,
-which erasure loses. -/
+/-- `ifElseSplit` on `if (x > 0) …; x = 2;`: each branch ends with a `}`. -/
 private def split₁ : Fml SE [.val .uint] :=
   Premise.fml .box (.cons (.assignLocal .here (litV 2)) .nil) .nil (.eqD (pv .here) (lit 1))
     (Premise.split .block pos₁ (.not pos₁) thn₁ els₁)
@@ -229,11 +216,6 @@ private def split₁ : Fml SE [.val .uint] :=
 info: (x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1) ∧ (¬x > 0 → [ revert(); } x = 2; ] x = 1)
 -/
 #guard_msgs in #eval do logInfo (← split₁.show cSE [x])
-
-/--
-info: (x > 0 → [ uint y = x; x = y; x = 2; ] x = 1) ∧ (¬x > 0 → [ revert(); x = 2; ] x = 1)
--/
-#guard_msgs in #eval do logInfo (← legacyShow cSE (split₁.eraseS [x]))
 
 /-- `T storage sp1 = alice; x = sp1.age;` in place of `x = alice.age;`, its
 capture popped after it, invisibly; then the frames left: the pop is an
@@ -245,10 +227,10 @@ private def unfold₁ : Fml SE [.val .uint] :=
       (.push .refl))
 
 /-- info: ⟨ Person storage sp1 = alice; x = sp1.age; ⟩ x = 1 -/
-#guard_msgs in #eval showSame cSE [x] unfold₁
+#guard_msgs in #eval showFml cSE [x] unfold₁
 
 /-- info: x = 1 -/
-#guard_msgs in #eval showSame cSE [.fresh "sp" 1, x]
+#guard_msgs in #eval showFml cSE [.fresh "sp" 1, x]
   (Frames.exit (C := SE) (Γ := [.alias (.struct "Person"), .val .uint]) .diamond
     (.pop .capture (.push .refl) .nil) (.eqD (pv .here) (lit 1)))
 
@@ -260,10 +242,10 @@ private def bind₁ : Fml SE [.val .uint] :=
     (Premise.bind (.user "v") (.val .uint) (.cons (.assignLocal .here (locV (.there .here))) .nil))
 
 /-- info: [ v = x; x = v; ] x = 1 -/
-#guard_msgs in #eval showSame cSE [x] bind₁
+#guard_msgs in #eval showFml cSE [x] bind₁
 
 /-- info: { anon(x) } { havoc } ¬defined(x) -/
-#guard_msgs in #eval showSame cSE [x]
+#guard_msgs in #eval showFml cSE [x]
   (Fml.anon (C := SE) [⟨_, (.here : Idx [.val .uint] (.val .uint))⟩] (.havoc (.not (.defined (pv .here)))))
 
 end Example

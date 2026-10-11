@@ -20,7 +20,7 @@ It starts where solkey's constructor obligation starts:
 `{storage := mtSt ‖ net := storeSt(mtSt, at(msgSender), msgValue) ‖
 selfBalance := msgValue}`, the empty storage, a ledger holding the
 deployer's payment, and the value sent as the contract's funds.  In the
-interpreter that is `Contract.deployState`, and `Contract.deployRunS` runs the
+interpreter that is `Contract.deployState`, and `Contract.deployRun` runs the
 elaborated program from it (`Contract.deployT`'s reading).
 
 Its obligation is `problem!{constructor}` with no specification
@@ -77,7 +77,7 @@ z = 0
 #guard_msgs in #deploy Mini(7)
 
 /-- The constructor is not `payable`: a deployment with value reverts. -/
-theorem deployValue : Mini.deployRunS sol{ constructor(7); } { msgValue := 1 } = .error .revert := rfl
+theorem deployValue : Mini.deployRun sol{ constructor(7); } { msgValue := 1 } = .error .revert := rfl
 
 /-! ## Deploying it in the calculus -/
 

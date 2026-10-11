@@ -21,7 +21,8 @@ range over every value: the premise `R` still gives each its range.
 
 The plain obligations (`Problem.fml`, `Problem.ctorFml`, `Problem.ctor`)
 are `Calculus/Problem.lean`'s; this module adds the scoped notation of
-both, `cspec[C]{f}` and `cproblem[C]{constructor}`.
+both, `cspec[C]{f}` (which `spec[C]{f}` and `spec!{f}` are) and
+`cproblem[C]{constructor}`.
 -/
 
 namespace Solidity
@@ -93,6 +94,7 @@ elab_rules : term
     elabAgainst c fun q => `((Problem.ctor ($c) Modality.diamond).map (Fml.quote $q))
 
 macro_rules
+  | `(spec[ $c:term ]{ $f:ident }) => `(cspec[$c]{ $f })
   | `(cspec!{ $f:ident }) => `(cspec[InContract.contract]{ $f })
   | `(cproblem!{ constructor }) => `(cproblem[InContract.contract]{ constructor })
 

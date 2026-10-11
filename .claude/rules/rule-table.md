@@ -51,9 +51,8 @@ syntax, and every constructor's premise is the one it builds:
 - Every theorem has a docstring with a small Solidity example.
 - Example contracts are **named** `Contract` constants: the quoters and the
   kernel re-check rely on it. A new syntax constructor needs an arm in every
-  quoter (`Syntax/Quote.lean`, `Calculus/Quote.lean`, and the erased side's
-  in `Syntax.lean`, `Calculus/SurfaceNotation.lean`), and an arm in
-  `Syntax/Resolve.lean`'s `resolve`/`erase`.
+  quoter (`Syntax/Quote.lean`, `Calculus/Quote.lean`) and in the printer
+  (`Calculus/PrintStmt.lean`).
 
 ## Adding or changing a rule
 

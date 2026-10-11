@@ -5,7 +5,7 @@ import Solidity.Calculus.Fml
 
 The syntactic side conditions under which a scoped formula and its erasure
 (`Fml.erase`) agree, so that today's closer may decide a goal: every binder
-fresh (`Upd.Fresh`, `Frames.Fresh`, `Prog.Fresh`).  `Fml.Plain` and
+fresh (`Upd.Fresh`).  `Fml.Plain` and
 `Fml.FO` together are the two-way condition
 (`Calculus/HoldsErase.lean`'s `holds_erase_fo`); `Fml.Closable` the
 one-way one a goal closed by its erasure's validity needs
@@ -32,19 +32,11 @@ def Upd.Fresh {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Prop
   | _, .pop U _ => U.Fresh ns
   | _, .drop U _ => U.Fresh ns
 
-/-- Every block the frames hold binds fresh names. -/
-def Frames.Fresh : {Γ Γ₀ : Ctx} → List Var → Frames C Γ Γ₀ → Prop
-  | _, _, _, .nil => True
-  | _, _, ns, .seq ω κ => ω.Fresh [] ns ∧ κ.Fresh (ω.outNames ns)
-  | _, _, ns, .pop _ h κ => κ.Fresh (ns.drop h.depth)
-  | _, _, ns, .drop h κ => κ.Fresh (h.names ns)
-
 /-- A formula whose binders are all fresh, and with no hidden binder nor an
 anonymising update: their untyped readings range over more states than the
 typed ones (the untyped `anon` over any binding, the erased hidden binder
-over whatever the name held).  Its updates and modalities are boxes: the
-erasure's run has more outcomes than the typed one, so only the box reads
-a modality on the erasure. -/
+over whatever the name held), nor a modality, which has no erasure.  Its
+updates are boxes. -/
 def Fml.Plain : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, _, .tt => True
   | _, _, .eq _ _ => True
@@ -53,8 +45,7 @@ def Fml.Plain : {Γ : Ctx} → List Var → Fml C Γ → Prop
   | _, ns, .and φ ψ => φ.Plain ns ∧ ψ.Plain ns
   | _, ns, .imp φ ψ => φ.Plain ns ∧ ψ.Plain ns
   | _, ns, .upd m U φ => m = .box ∧ U.Fresh ns ∧ φ.Plain (U.names ns)
-  | _, ns, .modal m P κ φ =>
-    m = .box ∧ P.Fresh [] ns ∧ κ.Fresh (P.outNames ns) ∧ φ.Plain (κ.outNames (P.outNames ns))
+  | _, _, .modal .. => False
   | _, ns, .havoc φ => φ.Plain ns
   | _, ns, .all x _ φ => x ∉ ns ∧ φ.Plain (x :: ns)
   | _, _, .bind .. => False

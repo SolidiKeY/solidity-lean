@@ -135,18 +135,6 @@ def condOf? (H s : Expr) : MetaM (Option String) := do
       return some (toString (← PrettyPrinter.ppCategory `sol_expr c))
   catch _ => return none
 
-/-- `condOf?` through the erasure (`pp.sol.twinCheck`'s reference). -/
-def condOfLegacy? (C H s : Expr) : MetaM (Option String) := do
-  try
-    unless (← whnf s).isAppOf ``Stmt.ite do return none
-    Delab.withTwins s false fun env => do
-      let (_, _, ns) ← (Delab.hypsParts C H).run env
-      let st ← whnf (← (Delab.tr ns s).run env)
-      unless st.isAppOf ``Solidity.Surface.Stmt.ite do return none
-      let c ← Solidity.ppExpr (st.getArg! 1)
-      return some (toString (← PrettyPrinter.ppCategory `sol_expr c))
-  catch _ => return none
-
 /-- The goal `Proves C R Γ₀ H φ`, its parts. -/
 def goalParts? (ty : Expr) : Option (Expr × Expr × Expr) :=
   if ty.isAppOfArity ``Proves 6 then
@@ -172,7 +160,7 @@ def silentAt (g : MVarId) : MetaM (Option (TSyntax `tactic)) := g.withContext do
 rule, a leaf. -/
 def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
   let ty ← whnfR (← instantiateMVars (← g.getType))
-  let some (C, H, φ0) := goalParts? ty | return #[]
+  let some (_, H, φ0) := goalParts? ty | return #[]
   let φ ← whnf φ0
   match_expr φ with
   | Fml.imp _ _ _ _ =>
@@ -202,11 +190,6 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let name ← keyName c s
     -- an `if`'s condition, as `ifElseSplit`'s labels name it
     let se ← if premise == ``Premise.split then condOf? H s else pure none
-    if premise == ``Premise.split && (← Delab.twinCheckOn) then
-      let old ← condOfLegacy? C H s
-      unless se == old do
-        throwError m!"twin check (an if's condition): the scoped printer prints {se}, \
-          the erasure's {old}"
     let ctorId ← short ctor
     let tac ← if premise == ``Premise.branches || premise == ``Premise.cases then
         `(tactic| apply $ctorId:ident $d:term rfl)

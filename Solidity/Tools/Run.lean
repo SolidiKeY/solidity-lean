@@ -127,35 +127,6 @@ def typedState? (C : Contract) (σ : Semantics.State) : Option (State C []) := d
     { msgSender := snd, msgValue := val, timestamp := now, selfAddress := addr, ext := σ.tx.ext }
   pure (State.mk st [] Heap.empty () σ.net bal tx)
 
-/-- **A block as written run from an untyped state**, in the typed run
-(`Prog.runT` on the scoped block, which `sol{ … }` gives where a `Prog` is
-expected; this one goes with `Surface.Prog`, W8.4): `P` resolved
-from no locals (`Prog.resolve`), run by `Prog.run` from `σ` read
-at the contract's types (`typedState?`), and its end state named back
-(`State.toSem`, under the block's names) or its halt erased
-(`THalt.erase`); `undef` where `P` does not resolve or `σ` is not of the
-contract's types, so that no typed run starts.  What the examples' `#eval`s
-run (`docs/intrinsic.md`, decision 48). -/
-def _root_.Solidity.Surface.Prog.runT {C : Contract} (σ : Semantics.State) (P : Surface.Prog C) : Res Semantics.State :=
-  match Prog.resolve [] P, typedState? C σ with
-  | .ok ⟨Γ', Q⟩, some τ =>
-    match Prog.run τ Q with
-    | .ok o => .ok (o.st.toSem Γ'.names)
-    | .error h => .error h.erase
-  | _, _ => .error .undef
-
-/-- What the local `x` holds after `P` runs from `σ` (`Surface.Prog.runT`). -/
-def _root_.Solidity.Surface.Prog.localAfterT {C : Contract} (σ : Semantics.State) (P : Surface.Prog C)
-    (x : String) : Res Binding := do
-  (← Surface.Prog.runT σ P).getEnv (.user x)
-
-/-- A deployment in the typed run, its end state named back: `#deploy`'s
-(`deployReport`), as a value. -/
-def _root_.Solidity.Contract.deployRun (C : Contract) (P : Surface.Prog C)
-    (tx : TxEnv) : Res Semantics.State :=
-  if !((C.ctor.map (·.payable)).getD false) && tx.msgValue != 0 then .error .revert
-  else Surface.Prog.runT (C.deployState tx) P
-
 /-- **A scoped block run from an untyped state**, in the typed run: `P`
 run by `Prog.run` from `σ` read at the contract's types (`typedState?`), and
 its end state named back (`State.toSem`, under the block's names) or its
@@ -175,9 +146,9 @@ def _root_.Solidity.Prog.localAfterT {C : Contract} {Γ' : Ctx} (σ : Semantics.
     (P : Prog C [] Γ') (x : String) : Res Binding := do
   (← Prog.runT σ P).getEnv (.user x)
 
-/-- A deployment of a scoped program in the typed run, its end state named
-back (`Contract.deployRun` on the scoped block). -/
-def _root_.Solidity.Contract.deployRunS (C : Contract) {Γ' : Ctx} (P : Prog C [] Γ')
+/-- A deployment in the typed run, its end state named back: `#deploy`'s
+(`deployReport`), as a value. -/
+def _root_.Solidity.Contract.deployRun (C : Contract) {Γ' : Ctx} (P : Prog C [] Γ')
     (tx : TxEnv) : Res Semantics.State :=
   if !((C.ctor.map (·.payable)).getD false) && tx.msgValue != 0 then .error .revert
   else Prog.runT (C.deployState tx) P

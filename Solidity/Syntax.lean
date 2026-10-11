@@ -2,35 +2,25 @@ import Solidity.AST
 import Solidity.SpecSyntax
 
 /-!
-# The typed syntax and its elaboration
+# The grammar and the contract
 
-A program is written against a **contract**, the storage roots it declares,
-and every expression is indexed by its type: `Val C p` is a value of
-primitive type `p`, `SPath C T` a storage path of type `T`, `Surface.Stmt C`
-a statement (mini-solkey's `Ch02_Elab`).  A statement here is the syntax as
-written (decision 11 of `docs/intrinsic.md`): the erasure of the scoped
-statement (`Syntax/Scoped.lean`) that the elaborator emits
-(`Syntax/Elab.lean`), for the readers not yet scoped, with no run, no taclet
-and no `wt`.  A member access carries the proof
-that the member exists, an operator the proof that it takes its operand
-type, a copy the proof that its type holds no mapping.  So a statement no
-rule can run cannot be written: `alice.balance = 1;` (no such member),
-`alice = 1;` (a `uint` for a `Person`) and `wallet = wallet;` (a copy of a
-mapping) are elaboration errors.
-
-`Surface.Stmt` keeps locals as names (`Var`s, `AST.lean`) with no scope: a
-stack local carries its `PrimTy`, an alias (`Person storage p`) and a
-memory local (`Person memory m`) their reference type, all by the
-constructor they are written with.  It is the printers' input; `resolve`
-turns each name into a position of the scoped statement's context.
+What a program is written in, before it is typed: Solidity's grammar
+(`sol_stmt`, `sol_expr`, `sol_ty`), the raw syntax it is read into
+(`RawStmt`, `RawExpr`), the contract a program is written against
+(`contract!{ … }`, `Contract`) and the types the typed syntax is indexed by
+(`ArrTy`, `IndexTy`).  The typed syntax itself is `Syntax/Scoped.lean`'s:
+every value indexed by its type and every local by its position in the
+context it is read in, so a statement no rule can run cannot be written
+(`alice.balance = 1;`, no such member; `alice = 1;`, a `uint` for a
+`Person`; `wallet = wallet;`, a copy of a mapping).
 
 `sol[C]{ … }` reads Solidity statements, elaborates them against the
 contract `C` (`Syntax/Elab.lean`), each local typed at its position, and
 splices the result into the file as a term (`Syntax/Splice.lean`);
-`sol{ … }` is the same against the file's `InContract` instance.  The elaborator is an
-ordinary function run at compile time; its result is turned back into a
-term with every proof `Eq.refl`, so the kernel re-checks each one: nothing
-the elaborator computed is trusted.
+`sol{ … }` is the same against the file's `InContract` instance.  The
+elaborator is an ordinary function run at compile time; its result is
+turned back into a term with every proof `Eq.refl`, so the kernel re-checks
+each one: nothing the elaborator computed is trusted.
 
 Two spellings differ from Solidity's.  A decrement is `x−−`, `−−x` (two
 U+2212 MINUS SIGN): `--` opens a comment in Lean, so it cannot appear in a
@@ -42,7 +32,7 @@ ending in a block (`if (c) { … }`, `unchecked { … }`) may leave out its `;`
 (`solSemi`), and `else if` nests an `if` in the `else` branch.
 
 `while`, `for`, `do … while`, `break` and `continue` are lowered to one
-loop, `Surface.Stmt.loop`, solkey's lowered `while`, by solkey's `LoopLowering`
+loop, `Stmt.loop`, solkey's lowered `while`, by solkey's `LoopLowering`
 (`lowerLoops`): a jump sets a flag, and a `return` inside a loop too.  The
 `/// @custom:key` lines above a loop are its annotation (`LoopAnn`), which
 chooses the rule that proves it.
@@ -50,8 +40,8 @@ chooses the rule that proves it.
 A contract declares its internal functions (`contract!{ function f(uint x)
 returns (uint r) { … } }`), each calling only the ones declared before it.
 A call (`f(a);`, `y = f(a);`, `uint y = f(a);`) is elaborated by inlining:
-`Surface.Stmt.call` carries the callee's parameters bound to the arguments, its
-return variable and the body, every local of the callee renamed fresh for
+`Stmt.call` carries the callee's parameters bound to the arguments, its
+return variables and the body, every local of the callee renamed fresh for
 this call (`elabCall`), as KeY's `FunctionBodyStatement` carries the function
 it stands for.  A call is a statement or a whole right-hand side, as KeY
 writes it (`res = f(a)@C;`); one inside an expression is captured before its
@@ -61,15 +51,14 @@ statement.  A push used as a target, `values.push() = e;`, is the push
 after it moved into the branches that do not return (`lowerReturns`).
 
 A function may return a memory reference (`returns (Person memory p)`), and
-its call is then KeY's expansion written out, with no return of its own
-(`CallRet.none`): the callee's fresh return variable is declared at the head
-of the body (`Person memory mv2;`, a fresh default object, as solc
-allocates one on entry), and the statement after the call binds the
-caller's local to its identity (`Person memory mv1 = mv2;`, `m = mv2;`,
-KeY's `resultVar = freshReturn`).  The printers write the two statements as
-the call they are (`Person memory mv1 = choosePersonMem();`), which reads
-back to them.  A member of a call's value is a member of that capture
-(`choosePersonMem().account = a;`).
+its call is then KeY's expansion written out: the callee's fresh return
+variable is declared at the head of the body (`Person memory mv2;`, a fresh
+default object, as solc allocates one on entry), and the statement after
+the call binds the caller's local to its identity (`Person memory mv1 =
+mv2;`, `m = mv2;`, KeY's `resultVar = freshReturn`).  The printers write the
+two statements as the call they are (`Person memory mv1 =
+choosePersonMem();`), which reads back to them.  A member of a call's value
+is a member of that capture (`choosePersonMem().account = a;`).
 -/
 
 namespace Solidity
@@ -409,20 +398,10 @@ macro_rules
   | `(ty!($T[])) => `(Ty.array ty!($T))
   | `(ty!($T[$n])) => `(Ty.fixed ty!($T) $n)
 
-/-! ## Expressions
+/-! ## The types an index carries
 
-The sorts of the schema variables are types here:
-
-| sort | name | is |
-|---|---|---|
-| `Simple C p` | `se` | a literal or a stack local |
-| `SPath C T` | `sp`, `nsp` | a storage path: an alias or a location |
-| `Loc C T` | `gsp`, `sp.fld`, `sp[e]` | a state variable, a member, an entry |
-| `Val C p` | `e`, `nse` | a value: simple, a read, an operator, a conditional |
-| `MPath C T`, `MLoc C T` | `mv`, `nmp` | the same in memory, which has no roots |
-
-`isSimple` tells `sp` from `nsp` and `se` from `nse`: which one a statement
-has decides which rule runs, not which statements can be written. -/
+What the typed syntax (`Syntax/Scoped.lean`) indexes a path by: how an
+array or a mapping is indexed. -/
 
 /-- An array type and its element type: a dynamic array `E[]`, or a
 fixed-size one `E[n]`.  Both are indexed by position and bounds-checked
@@ -442,481 +421,13 @@ inductive IndexTy : RefTy → PrimTy → Ty → Type where
   | map {k : PrimTy} {V : Ty} : IndexTy (.mapping (.prim k) V) k V
   | arr {R : RefTy} {E : Ty} (a : ArrTy R E) : IndexTy R .uint E
 
-/-- A simple value (`se`): a literal, a stack local, or a value of the
-environment (`msg.sender`), which solkey's `netHeader.key` declares as program
-variables, so a `SimpleExpression` like a local. -/
-inductive Surface.Simple (C : Contract) : PrimTy → Type where
-  /-- A number of its type's range (`PrimTy.inRange`): solc rejects a literal
-  out of it, so no program has one. -/
-  | lit {p : PrimTy} (n : Int) (h : p.inRange n = true) : Surface.Simple C p
-  | bool (b : Bool) : Surface.Simple C .bool
-  | local {p : PrimTy} (x : Var) : Surface.Simple C p
-  /-- `msg.sender`, `msg.value`, `block.timestamp`, `address(this).balance`:
-  a `uint` (an `address` is one). -/
-  | env {p : PrimTy} (k : EnvKey) (hp : p = .uint) : Surface.Simple C p
-
-mutual
-
-/-- A storage path of type `T`: an alias (`lsv`), or a location. -/
-inductive Surface.SPath (C : Contract) : Ty → Type where
-  | alias {R : RefTy} (x : Var) : Surface.SPath C (.ref R)
-  | loc {T : Ty} (l : Surface.Loc C T) : Surface.SPath C T
-
-/-- A storage location: what `delete` and a write reach through. -/
-inductive Surface.Loc (C : Contract) : Ty → Type where
-  /-- A state variable (`gsp`), `alice`. -/
-  | root {T : Ty} (r : Name) (h : C.rootType r = some T) : Surface.Loc C T
-  /-- A member, `alice.age`. -/
-  | field {s : Name} {T : Ty} (b : Surface.SPath C (.struct s)) (f : Name)
-      (h : C.fieldType s f = some T) : Surface.Loc C T
-  /-- A mapping entry `balances[i]`, or an array element `values[i]`. -/
-  | index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (b : Surface.SPath C (.ref R))
-      (i : Surface.Val C k) : Surface.Loc C V
-
-/-- A memory path (`mv`, `nmp`): a memory local, or a memory location. -/
-inductive Surface.MPath (C : Contract) : Ty → Type where
-  /-- A memory local, of a type that holds no mapping (memory has none). -/
-  | var {R : RefTy} (x : Var) (hm : (Ty.ref R).mapFree = true) : Surface.MPath C (.ref R)
-  | loc {T : Ty} (l : Surface.MLoc C T) : Surface.MPath C T
-
-/-- A member or an element of a memory object (memory has no mappings). -/
-inductive Surface.MLoc (C : Contract) : Ty → Type where
-  | field {s : Name} {T : Ty} (b : Surface.MPath C (.struct s)) (f : Name)
-      (h : C.fieldType s f = some T) : Surface.MLoc C T
-  | index {R : RefTy} {E : Ty} (a : ArrTy R E) (b : Surface.MPath C (.ref R)) (i : Surface.Val C .uint) : Surface.MLoc C E
-
-/-- A value of primitive type `p`. -/
-inductive Surface.Val (C : Contract) : PrimTy → Type where
-  | simple {p : PrimTy} (s : Surface.Simple C p) : Surface.Val C p
-  /-- A storage read, `alice.age`. -/
-  | read {p : PrimTy} (l : Surface.Loc C (.prim p)) : Surface.Val C p
-  /-- `a ⊕ b`, at the type `q` that `⊕` returns at `p`. -/
-  | binop {p q : PrimTy} (op : BinOp) (h : op.accepts p = true) (hq : op.ret p = q)
-      (a b : Surface.Val C p) : Surface.Val C q
-  | unop {p q : PrimTy} (op : UnOp) (h : op.accepts p = true) (hq : op.ret p = q)
-      (a : Surface.Val C p) : Surface.Val C q
-  /-- `c ? a : b`, which evaluates only the branch it takes. -/
-  | ternary {p : PrimTy} (c : Surface.Val C .bool) (a b : Surface.Val C p) : Surface.Val C p
-  /-- A memory read, `m.age`. -/
-  | readMem {p : PrimTy} (l : Surface.MLoc C (.prim p)) : Surface.Val C p
-  /-- The length of a storage array, `values.length` (KeY's field `length`,
-  `find(storage, sp.size)`). -/
-  | len {p : PrimTy} {E : Ty} (b : Surface.SPath C (.array E)) (hp : p = .uint) : Surface.Val C p
-  /-- The length of a memory array, `xs.length` (`read(memory, mv.size)`). -/
-  | mlen {p : PrimTy} {E : Ty} (b : Surface.MPath C (.array E)) (hp : p = .uint) : Surface.Val C p
-
-end
-
-/-- The source of a storage write: a value, or a storage path copied (of a
-type that holds no mapping; solc rejects the copy otherwise). -/
-inductive Surface.Src (C : Contract) : Ty → Type where
-  | val {p : PrimTy} (v : Surface.Val C p) : Surface.Src C (.prim p)
-  | copy {R : RefTy} (p : Surface.SPath C (.ref R)) (h : (Ty.ref R).mapFree = true) : Surface.Src C (.ref R)
-
-/-- What a storage alias is bound to: a path, or the slot `b.push()`
-appends (whose default must be well-formed). -/
-inductive Surface.ARhs (C : Contract) (R : RefTy) where
-  | path (p : Surface.SPath C (.ref R))
-  | push (b : Surface.SPath C (.array (.ref R))) (hd : (Ty.ref R).defaultOkS = true)
-
 /-- `new R(n)` can be written: `R` is an array type whose elements a
 memory object can hold (no mapping) and whose default is well-formed. -/
 def RefTy.newArrOk : RefTy → Bool
   | .array E => E.mapFree && E.defaultOkS
   | _ => false
 
-/-- What a memory local is bound to: a memory object by identity
-(`m = n;`), a fresh deep copy of a storage object (`m = alice;`), or a fresh
-array of `n` default elements (`m = new uint[](n);`, the size simple: the
-elaborator captures another first). -/
-inductive Surface.MRhs (C : Contract) (R : RefTy) where
-  | alias (p : Surface.MPath C (.ref R))
-  | copy (p : Surface.SPath C (.ref R)) (hm : (Ty.ref R).mapFree = true)
-  | newArr (n : Surface.Simple C .uint) (h : R.newArrOk = true)
-
-mutual
-/-- What a memory path names holds no mapping: its local's type does not, and
-a member or an element of a type that holds none holds none. -/
-theorem Surface.MPath.mapFree {C : Contract} : {T : Ty} → Surface.MPath C T → T.mapFree = true
-  | _, .var _ hm => hm
-  | _, .loc l => l.mapFree
-theorem Surface.MLoc.mapFree {C : Contract} : {T : Ty} → Surface.MLoc C T → T.mapFree = true
-  | _, .field b _ h => Ty.mapFree_field b.mapFree h
-  | _, .index .dyn b _ => b.mapFree
-  | _, .index .fixed b _ => b.mapFree
-end
-
-/-- What a memory local is bound to holds no mapping. -/
-theorem Surface.MRhs.mapFree {C : Contract} {R : RefTy} : Surface.MRhs C R → (Ty.ref R).mapFree = true
-  | .alias p => p.mapFree
-  | .copy _ hm => hm
-  | .newArr _ h => by
-    cases R <;> simp only [RefTy.newArrOk, Bool.and_eq_true, Bool.false_eq_true] at h
-    exact h.1
-
-/-- Where a fresh array lands when it is not bound to a memory local
-(KeY's `newArrayCapture`, `Path[complex] lhs`): a storage location
-(`basket.items = new uint[](2);`) or a memory one (`xs[0] = new uint[](3);`). -/
-inductive Surface.NewLhs (C : Contract) : RefTy → Type where
-  | store {R : RefTy} (l : Surface.Loc C (.ref R)) : Surface.NewLhs C R
-  | mem {R : RefTy} (l : Surface.MLoc C (.ref R)) : Surface.NewLhs C R
-
-/-- What a memory location is written: a value, or a memory reference. -/
-inductive Surface.MSrc (C : Contract) : Ty → Type where
-  | val {p : PrimTy} (v : Surface.Val C p) : Surface.MSrc C (.prim p)
-  | ref {R : RefTy} (p : Surface.MPath C (.ref R)) : Surface.MSrc C (.ref R)
-
-/-- The target of `l ⊕= e` and `l++`: a local, a state variable, a member,
-or an entry at a simple index. -/
-inductive Surface.OpLoc (C : Contract) : PrimTy → Type where
-  | local {p : PrimTy} (x : Var) : Surface.OpLoc C p
-  | root {p : PrimTy} (r : Name) (h : C.rootType r = some (.prim p)) : Surface.OpLoc C p
-  | field {s : Name} {p : PrimTy} (b : Surface.SPath C (.struct s)) (f : Name)
-      (h : C.fieldType s f = some (.prim p)) : Surface.OpLoc C p
-  | index {R : RefTy} {k p : PrimTy} (it : IndexTy R k (.prim p)) (b : Surface.SPath C (.ref R))
-      (i : Surface.Simple C k) : Surface.OpLoc C p
-  | mfield {s : Name} {p : PrimTy} (b : Surface.MPath C (.struct s)) (f : Name)
-      (h : C.fieldType s f = some (.prim p)) : Surface.OpLoc C p
-  | mindex {R : RefTy} {p : PrimTy} (a : ArrTy R (.prim p)) (b : Surface.MPath C (.ref R))
-      (i : Surface.Simple C .uint) : Surface.OpLoc C p
-
-/-! ### Which parts are simple -/
-
-/-- `se`: a literal or a local. -/
-def Surface.Val.isSimple {C : Contract} {p : PrimTy} : Surface.Val C p → Bool
-  | .simple _ => true
-  | _ => false
-
-/-- `sp`: an alias or a state variable. -/
-def Surface.SPath.isSimple {C : Contract} {T : Ty} : Surface.SPath C T → Bool
-  | .alias _ => true
-  | .loc (.root ..) => true
-  | .loc _ => false
-
-/-- `mv`: a memory local. -/
-def Surface.MPath.isSimple {C : Contract} {T : Ty} : Surface.MPath C T → Bool
-  | .var .. => true
-  | .loc _ => false
-
-mutual
-/-- A memory path that indexes nothing: a local and its members, which a
-read cannot revert on (memory has no null and no mapping). -/
-def Surface.MPath.indexFree {C : Contract} : {T : Ty} → Surface.MPath C T → Bool
-  | _, .var .. => true
-  | _, .loc l => l.indexFree
-def Surface.MLoc.indexFree {C : Contract} : {T : Ty} → Surface.MLoc C T → Bool
-  | _, .field b _ _ => b.indexFree
-  | _, .index .. => false
-end
-
-/-- A target whose receiver, if it has one, is simple: `x`, `total`,
-`sp.fld`, `sp[ie]`, `mv.fld`, `mv[ie]`. -/
-def Surface.OpLoc.recvSimple {C : Contract} {p : PrimTy} : Surface.OpLoc C p → Bool
-  | .field b _ _ | .index _ b _ => b.isSimple
-  | .mfield b _ _ | .mindex _ b _ => b.isSimple
-  | _ => true
-
-/-- `v`, if it is simple. -/
-def Surface.Val.toSimple? {C : Contract} {p : PrimTy} : Surface.Val C p → Option (Surface.Simple C p)
-  | .simple s => some s
-  | _ => none
-
-/-! ### The locals a part mentions -/
-
-section Vars
-variable {C : Contract}
-
-def Surface.Simple.vars {p : PrimTy} : Surface.Simple C p → List Var
-  | .local x => [x]
-  | .lit .. | .bool _ | .env .. => []
-
-mutual
-
-def Surface.SPath.vars : {T : Ty} → Surface.SPath C T → List Var
-  | _, .alias x => [x]
-  | _, .loc l => l.vars
-
-def Surface.Loc.vars : {T : Ty} → Surface.Loc C T → List Var
-  | _, .root .. => []
-  | _, .field b _ _ => b.vars
-  | _, .index _ b i => b.vars ++ i.vars
-
-def Surface.MPath.vars : {T : Ty} → Surface.MPath C T → List Var
-  | _, .var x _ => [x]
-  | _, .loc l => l.vars
-
-def Surface.MLoc.vars : {T : Ty} → Surface.MLoc C T → List Var
-  | _, .field b _ _ => b.vars
-  | _, .index _ b i => b.vars ++ i.vars
-
-def Surface.Val.vars : {p : PrimTy} → Surface.Val C p → List Var
-  | _, .simple s => s.vars
-  | _, .read l => l.vars
-  | _, .binop _ _ _ a b => a.vars ++ b.vars
-  | _, .unop _ _ _ a => a.vars
-  | _, .ternary c a b => c.vars ++ a.vars ++ b.vars
-  | _, .readMem l => l.vars
-  | _, .len b _ => b.vars
-  | _, .mlen b _ => b.vars
-
-end
-
-end Vars
-
-/-! ## Calls
-
-A call carries its callee inlined, as KeY's `FunctionBodyStatement` carries
-the function it stands for: the parameters with the arguments bound to them,
-the return variable and where its value lands, and the body.  Every local of
-the callee is a name the elaborator made fresh for this call, so running the
-body in the caller's locals is running it in a frame of its own. -/
-
-/-- An argument: the value `e` passed for the parameter `x` of type `p`. -/
-structure Arg (C : Contract) where
-  p : PrimTy
-  x : Var
-  e : Surface.Val C p
-
-/-- What a call returns: nothing, or the value of its return variable `r` of
-type `p` (declared at the call, KeY's fresh named return), which lands in the
-caller's local `res` when the call is assigned (`y = f(a);`).  A memory
-reference is returned through the caller's locals, with `none`: the body
-declares the return variable, and the statement after the call binds it
-(the module docstring).  A function of several returns returns them all
-with `rets`, KeyTaclets' `FunctionBodyStatement` with targets: each return
-variable is declared at the call, at its type's default (solc's), and the
-targets are ordinary statements after the call (`t = r;`), solkey's
-`R r0; …; function-frame{…} t0 = r0;` without the frame.  `rets` is the
-call of a tuple assignment (`(lo, hi) = f(a);`) and of a specification's
-obligation (`result = f(x);`), the two KeY reads as a
-`FunctionBodyStatement` (`functionBodyExpand`); every other call is KeY's
-`InternalCall` (`internalCallExpand`), a callee of several returns called as
-a statement declaring them in its body. -/
-inductive Surface.CallRet where
-  | none
-  | val (p : PrimTy) (r : Var) (res : Option Var)
-  | rets (rs : List (PrimTy × Var))
-  deriving DecidableEq, Repr, Inhabited
-
-/-- The arguments of a call are **separated**: no argument that is not
-simple reads a parameter bound before it.  Inlined, the parameters are bound
-one after another (KeY's `expand_function_body`), and an argument captured
-before the call (`functionCallArgCapture`) is read before any of them; the
-two agree on a separated call.  The elaborator's parameters are fresh, so its
-calls are. -/
-def Arg.separatedFrom {C : Contract} : List Var → List (Arg C) → Bool
-  | _, [] => true
-  | bound, a :: as =>
-    (a.e.isSimple || a.e.vars.all fun y => !bound.contains y) && Arg.separatedFrom (a.x :: bound) as
-
-/-- An argument of an external call, at its type. -/
-abbrev Surface.ExtArg (C : Contract) := (p : PrimTy) × Surface.Simple C p
-
-/-- `a.f(e₁, …, eₙ)`, a call of the function `f` of the contract at the
-address `a`: solkey's `ExternalCall`, whose receiver and arguments cannot
-revert or have an effect.  Here they are simple, `sol{ … }` capturing any
-other first; a contract conversion `I(a)` elaborates away to `a`. -/
-structure Surface.ExtCall (C : Contract) where
-  addr : Surface.Simple C .uint
-  fn : Name
-  args : List (Surface.ExtArg C)
-
-/-- What a loop is proved by (`docs/loops.md`, Decision 3), chosen by the
-source, so that a loop has one rule: unwound at most `k` times (Lean only:
-solkey's strategy unwinds without a bound), or by its invariant `I` and,
-under the diamond, its variant `dec` (solkey's `/// @custom:key invariant`
-and `decreases`).  The typed run does not read it. -/
-inductive Surface.LoopAnn (C : Contract) where
-  | unwind (k : Nat)
-  | inv (I : Surface.Val C .bool) (dec : Option (Surface.Val C .uint))
-
-/-! ## Statements -/
-
-/-- A statement of contract `C`, as written. -/
-inductive Surface.Stmt (C : Contract) where
-  /-- A storage write, `alice.age = 10;`, `alice = bob;`, `sp.age = 1;`. -/
-  | assign {T : Ty} (l : Loc C T) (r : Src C T)
-  /-- `lsv = sp;`, `lsv = sp.push();`: the alias now points there. -/
-  | rebind {R : RefTy} (x : Var) (r : ARhs C R)
-  /-- `v = e;` -/
-  | assignLocal {p : PrimTy} (x : Var) (r : Val C p)
-  /-- `uint v = e;`, `uint v;` -/
-  | declLocal (p : PrimTy) (x : Var) (init : Option (Val C p))
-  /-- `Person storage lsv = sp;`, `Person storage lsv;` -/
-  | declStorage (R : RefTy) (x : Var) (init : Option (ARhs C R))
-  /-- `l += e;`: `+= -= *= /= %=` (solkey's five), at a numeric type. -/
-  | opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
-      (hp : p.isNumeric = true) (l : OpLoc C p) (r : Val C p)
-  /-- `x++;`, `--alice.age;` -/
-  | incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C p)
-  /-- `v = x++;`, from a target whose receiver is simple (`sol{ … }` captures
-  another first; no taclet takes one). -/
-  | assignIncDec {p : PrimTy} (x : Var) (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C p)
-      (hs : l.recvSimple = true)
-  /-- `values.push(x);`, `persons.push(alice);`, `values.push();` (the last
-  needs the element type's default to be well-formed). -/
-  | push {E : Ty} (b : SPath C (.array E)) (v : Option (Src C E))
-      (hd : (v.isSome || E.defaultOkS) = true)
-  /-- `values.pop();` -/
-  | pop {E : Ty} (b : SPath C (.array E))
-  /-- `a.transfer(v);` -/
-  | transfer (r a : Val C .uint)
-  /-- `pv = a.send(v);`: the payment, and whether it went through in the
-  `bool` local `pv` (a refused send returns `false` and reverts nothing). -/
-  | send (pv : Var) (r a : Val C .uint)
-  /-- `Person memory m;` (a fresh default object), `Person memory m = n;` -/
-  | declMem (R : RefTy) (x : Var) (init : Option (MRhs C R))
-      (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true)
-  /-- `m = n;`: the memory local now names `n`'s object. -/
-  | rebindMem {R : RefTy} (x : Var) (r : MRhs C R)
-  /-- `alice = m;`: a storage location written with a deep copy of a memory
-  object. -/
-  | assignFromMem {R : RefTy} (l : Loc C (.ref R)) (p : MPath C (.ref R))
-  /-- `m.age = 3;`, `m.account = n.account;` -/
-  | assignMem {T : Ty} (l : MLoc C T) (r : MSrc C T)
-  /-- `delete alice.account;` -/
-  | delete {T : Ty} (l : Loc C T)
-  /-- `delete m;`, `delete m.age;`, `delete m.items[i];`: a memory local
-  bound to a fresh default object, a member or an element reset (a
-  reference one to a fresh default object, as solc and KeY allocate one). -/
-  | deleteMem {T : Ty} (p : MPath C T) (hd : T.defaultOkS = true)
-  /-- `basket.items = new uint[](n);`, `xs[0] = new uint[](n);`: a fresh
-  array written to a location that is not a memory local. -/
-  | assignNew {R : RefTy} (l : NewLhs C R) (n : Simple C .uint) (h : R.newArrOk = true)
-  /-- `if (c) { … } else { … }` -/
-  | ite (c : Val C .bool) (thn els : List (Surface.Stmt C))
-  /-- `require(c);` -/
-  | require (c : Val C .bool)
-  /-- `assert(c);` -/
-  | assert (c : Val C .bool)
-  /-- `revert();` -/
-  | revert
-  /-- `f(e₁, …, eₙ);`, `y = f(e₁, …, eₙ);`: an internal call of `f`, its
-  arguments bound to its parameters, its body inlined (see `Arg`). -/
-  | call (f : Name) (args : List (Arg C)) (hsep : Arg.separatedFrom [] args = true) (ret : CallRet)
-      (body : List (Surface.Stmt C))
-  /-- `try a.f(e) returns (uint v) { ok } catch Error(string memory) { err }
-  catch Panic(uint c) { panic } catch { other }`: an external call, and a
-  block per way it may end.  As solkey's `TryStatement.of` normalises it,
-  every clause is present: a missing `Error` or `Panic` clause is the
-  catch-all's block, a missing catch-all `revert();`.  `rets` are the locals
-  the call's return data binds in `ok`, `code` the `Panic` code's in `panic`;
-  an `Error`'s message and a catch-all's data are not modelled. -/
-  | tryCall (call : ExtCall C) (rets : List (PrimTy × Var)) (ok err : List (Surface.Stmt C))
-      (code : Option Var) (panic other : List (Surface.Stmt C))
-  /-- `while (c) { … }`, solkey's lowered `while`: `for`, `do … while`,
-  `break`, `continue` and a `return` inside a loop are lowered to it by the
-  elaborator (`lowerLoops`), so its body ends only normally or by halting. -/
-  | loop (a : LoopAnn C) (c : Val C .bool) (body : List (Surface.Stmt C))
-
-/-- A block. -/
-abbrev Surface.Prog (C : Contract) := List (Surface.Stmt C)
-
-/-- The locals the `Panic` code binds: `code`, a `uint`, if the clause names it. -/
-def codeBinders (code : Option Var) : List (PrimTy × Var) :=
-  code.toList.map fun x => (.uint, x)
-
-/-- `T x = e;`: a parameter bound to its argument. -/
-def Arg.decl {C : Contract} (a : Arg C) : Surface.Stmt C := .declLocal a.p a.x (some a.e)
-
-/-- `T r;`: the return variable declared, at its default. -/
-def Surface.CallRet.decl {C : Contract} : Surface.CallRet → Surface.Prog C
-  | .none => []
-  | .val p r _ => [.declLocal p r Option.none]
-  | .rets rs => rs.map fun (p, r) => .declLocal p r Option.none
-
-/-- `res = r;`: the returned value assigned where the call is. -/
-def Surface.CallRet.result {C : Contract} : Surface.CallRet → Surface.Prog C
-  | .val p r (some res) => [.assignLocal (p := p) res (.simple (.local r))]
-  | _ => []
-
-/-- A call inlined, KeY's `expand_function_body`: the parameters declared
-with the arguments, the return variable declared, the body, the result
-assigned.  `y = f(a);`, `f` being `function f(uint x) returns (uint r)
-{ r = x + 1; }`, is `uint x' = a; uint r'; r' = x' + 1; y = r';`. -/
-def Surface.Stmt.expandBody {C : Contract} (args : List (Arg C)) (ret : Surface.CallRet) (body : Surface.Prog C) : Surface.Prog C :=
-  args.map Arg.decl ++ ret.decl ++ body ++ ret.result
-
-/-! ## Printing
-
-`Prog.toStr` writes a block back as the Solidity it came from, which
-`sol{ … }` reads again.  An operator application is parenthesised unless it
-is the whole expression. -/
-
-section Print
-
-variable {C : Contract} [FreshNames]
-
-def Surface.Simple.toStr {p : PrimTy} : Surface.Simple C p → String
-  | .lit n _ => toString n
-  | .bool b => toString b
-  | .local x => toString x
-  | .env k _ => k.toStr
-
-mutual
-
-def Surface.SPath.toStr {T : Ty} : Surface.SPath C T → String
-  | .alias x => toString x
-  | .loc l => l.toStr
-
-def Surface.Loc.toStr {T : Ty} : Surface.Loc C T → String
-  | .root r _ => r
-  | .field b f _ => s!"{b.toStr}.{f}"
-  | .index _ b i => s!"{b.toStr}[{i.toStr true}]"
-
-def Surface.MPath.toStr {T : Ty} : Surface.MPath C T → String
-  | .var x _ => toString x
-  | .loc l => l.toStr
-
-def Surface.MLoc.toStr {T : Ty} : Surface.MLoc C T → String
-  | .field b f _ => s!"{b.toStr}.{f}"
-  | .index _ b i => s!"{b.toStr}[{i.toStr true}]"
-
-/-- `top` is whether the value stands alone, so needs no parentheses. -/
-def Surface.Val.toStr {p : PrimTy} : Surface.Val C p → (top : Bool := false) → String
-  | .simple s, _ => s.toStr
-  | .read l, _ => l.toStr
-  | .binop op _ _ a b, top =>
-    let s := s!"{a.toStr} {BinOp.sym op} {b.toStr}"
-    if top then s else s!"({s})"
-  | .unop op _ _ a, _ => s!"{UnOp.sym op}{a.toStr}"
-  | .ternary c a b, top =>
-    let s := s!"{c.toStr} ? {a.toStr} : {b.toStr}"
-    if top then s else s!"({s})"
-  | .readMem l, _ => l.toStr
-  | .len b _, _ => s!"{b.toStr}.length"
-  | .mlen b _, _ => s!"{b.toStr}.length"
-
-end
-
-def Surface.Src.toStr {T : Ty} : Surface.Src C T → String
-  | .val v => v.toStr true
-  | .copy p _ => p.toStr
-
-def Surface.ARhs.toStr {R : RefTy} : Surface.ARhs C R → String
-  | .path p => p.toStr
-  | .push b _ => s!"{b.toStr}.push()"
-
-def Surface.OpLoc.toStr {p : PrimTy} : Surface.OpLoc C p → String
-  | .local x => toString x
-  | .root r _ => r
-  | .field b f _ => s!"{b.toStr}.{f}"
-  | .index _ b i => s!"{b.toStr}[{i.toStr}]"
-  | .mfield b f _ => s!"{b.toStr}.{f}"
-  | .mindex _ b i => s!"{b.toStr}[{i.toStr}]"
-
-def Surface.MRhs.toStr {R : RefTy} : Surface.MRhs C R → String
-  | .alias p => p.toStr
-  | .copy p _ => p.toStr
-  | .newArr n _ => s!"new {Ty.toStr (.ref R)}({n.toStr})"
-
-def Surface.NewLhs.toStr {R : RefTy} : Surface.NewLhs C R → String
-  | .store l => l.toStr
-  | .mem l => l.toStr
-
-def Surface.MSrc.toStr {T : Ty} : Surface.MSrc C T → String
-  | .val v => v.toStr true
-  | .ref p => p.toStr
+/-! ## Printing helpers -/
 
 /-- `x++`, `−−x`: a decrement is spelled with two minus signs `−` (U+2212),
 since `--` opens a comment in Lean (`Syntax.lean`, the grammar). -/
@@ -924,157 +435,11 @@ def IncDec.show (op : IncDec) (x : String) : String :=
   let t := if op.isIncrement then "++" else "−−"
   if op.isPre then t ++ x else x ++ t
 
-/-- A call of a function returning a memory reference and the statement
-after it that binds its fresh return variable, the one the body declares
-first: `Person memory mv1 = choosePersonMem();`, `m = choosePersonMem();`,
-the statement they are elaborated from. -/
-def Surface.Stmt.memCallStr? : Surface.Stmt C → Surface.Stmt C → Option String
-  | .call f args _ .none (.declMem _ r none _ _ :: _), .declMem R x (some (.alias (.var r' _))) _ _ =>
-    if r' = r then
-      some s!"{Ty.toStr (.ref R)} memory {x} = {f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
-    else none
-  | .call f args _ .none (.declMem _ r none _ _ :: _), .rebindMem x (.alias (.var r' _)) =>
-    if r' = r then some s!"{x} = {f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
-    else none
-  | _, _ => none
-
-/-- The target a statement after a call of several returns assigns one of
-them to (`lo = se2;`): the return's position among `rs`, and the target. -/
-def Surface.Stmt.retTarget? (rs : List (PrimTy × Var)) : Surface.Stmt C → Option (Nat × String)
-  | .assignLocal x (.simple (.local r)) => (rs.findIdx? (·.2 == r)).map (·, toString x)
-  | .assign l (.val (.simple (.local r))) => (rs.findIdx? (·.2 == r)).map (·, l.toStr)
-  | .assignMem l (.val (.simple (.local r))) => (rs.findIdx? (·.2 == r)).map (·, l.toStr)
-  | _ => none
-
-/-- The statements after a call of several returns that assign them, in
-their order, from the `start`-th return on. -/
-def Surface.Stmt.retTargets (rs : List (PrimTy × Var)) (start : Nat) : List (Surface.Stmt C) → List (Nat × String)
-  | [] => []
-  | s :: P =>
-    match s.retTarget? rs with
-    | some (i, t) => if start ≤ i then (i, t) :: Surface.Stmt.retTargets rs (i + 1) P else []
-    | none => []
-
-/-- A call of several returns and the statements after it that assign them,
-written as the tuple assignment they are elaborated from:
-`(lo, , sum) = returnStats(3, 1, 2);`, with the number of statements after
-the call it covers.  A call of one return with its target (a specification's
-obligation, `Calculus/SurfaceSpec.lean`) is `result = f(x);`. -/
-def Surface.Stmt.tupleCallStr? : Surface.Stmt C → List (Surface.Stmt C) → Option (String × Nat)
-  | .call f args _ (.rets rs) _, P =>
-    let ts := Surface.Stmt.retTargets rs 0 P
-    let call := s!"{f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
-    if ts.isEmpty then
-      -- every value discarded: `(, ) = f(x);`, a call with targets still
-      if rs.length < 2 then none
-      else some (s!"({String.mk (List.replicate (rs.length - 1) ',')}) = {call}", 0)
-    else if rs.length == 1 then some (s!"{((ts.head?).map (·.2)).getD ""} = {call}", ts.length)
-    else
-      let slots := (List.range rs.length).map fun i => ((ts.find? (·.1 == i)).map (·.2)).getD ""
-      some (s!"({", ".intercalate slots}) = {call}", ts.length)
-  | _, _ => none
-
-/-- A loop's annotation, as the `///` lines above it: none for `.unwind 0`. -/
-def Surface.LoopAnn.toStr : Surface.LoopAnn C → String
-  | .unwind 0 => ""
-  | .unwind k => s!"/// @custom:key unwind {k} "
-  | .inv I dec =>
-    s!"/// @custom:key invariant {I.toStr true} " ++
-      ((dec.map fun d => s!"/// @custom:key decreases {d.toStr true} ").getD "")
-
 /-- A block's statements in braces: `{ x = 1; }`, and `{ }` for none. -/
 def braced (ss : List String) : String :=
   if ss.isEmpty then "{ }" else s!"\{ {" ".intercalate ss} }"
 
-mutual
-
-def Surface.Stmt.toStr : Surface.Stmt C → String
-  | .assign l r => s!"{l.toStr} = {r.toStr};"
-  | .rebind x r => s!"{x} = {r.toStr};"
-  | .assignLocal x r => s!"{x} = {r.toStr true};"
-  | .declLocal p x init =>
-    match init with
-    | none => s!"{Ty.toStr (.prim p)} {x};"
-    | some e => s!"{Ty.toStr (.prim p)} {x} = {e.toStr true};"
-  | .declStorage R x init =>
-    match init with
-    | none => s!"{Ty.toStr (.ref R)} storage {x};"
-    | some e => s!"{Ty.toStr (.ref R)} storage {x} = {e.toStr};"
-  | .declMem R x init _ _ =>
-    match init with
-    | none => s!"{Ty.toStr (.ref R)} memory {x};"
-    | some r => s!"{Ty.toStr (.ref R)} memory {x} = {r.toStr};"
-  | .rebindMem x r => s!"{x} = {r.toStr};"
-  | .assignMem l r => s!"{l.toStr} = {r.toStr};"
-  | .assignFromMem l p => s!"{l.toStr} = {p.toStr};"
-  | .opAssign op _ _ l r => s!"{l.toStr} {BinOp.sym op}= {r.toStr true};"
-  | .incDec op _ l => s!"{IncDec.show op l.toStr};"
-  | .push b v _ =>
-    match v with
-    | none => s!"{b.toStr}.push();"
-    | some r => s!"{b.toStr}.push({r.toStr});"
-  | .pop b => s!"{b.toStr}.pop();"
-  | .transfer r a => s!"{r.toStr}.transfer({a.toStr true});"
-  | .send pv r a => s!"{pv} = {r.toStr}.send({a.toStr true});"
-  | .assignIncDec x op _ l _ => s!"{x} = {IncDec.show op l.toStr};"
-  | .delete l => s!"delete {l.toStr};"
-  | .deleteMem p _ => s!"delete {p.toStr};"
-  | .assignNew (R := R) l n _ => s!"{l.toStr} = new {Ty.toStr (.ref R)}({n.toStr});"
-  | .ite c thn els =>
-    s!"if ({c.toStr true}) {braced (Surface.Prog.toStrs 0 thn)} else {braced (Surface.Prog.toStrs 0 els)}"
-  | .require c => s!"require({c.toStr true});"
-  | .assert c => s!"assert({c.toStr true});"
-  | .revert => "revert();"
-  | .call f args _ ret _ =>
-    let call := s!"{f}({", ".intercalate (args.map fun a => a.e.toStr true)});"
-    match ret with
-    | .val _ _ (some y) => s!"{y} = {call}"
-    | _ => call
-  | .tryCall c rets ok err code pnc other =>
-    let args := ", ".intercalate (c.args.map fun a => a.2.toStr)
-    let rets := if rets.isEmpty then "" else
-      s!" returns ({", ".intercalate (rets.map fun (p, x) => s!"{Ty.toStr (.prim p)} {x}")})"
-    let code := match code with
-      | some x => s!"uint {x}"
-      | none => "uint"
-    s!"try address({c.addr.toStr}).{c.fn}({args}){rets} {braced (Surface.Prog.toStrs 0 ok)} \
-      catch Error(string memory) {braced (Surface.Prog.toStrs 0 err)} \
-      catch Panic({code}) {braced (Surface.Prog.toStrs 0 pnc)} \
-      catch {braced (Surface.Prog.toStrs 0 other)}"
-  | .loop a c body => s!"{a.toStr}while ({c.toStr true}) {braced (Surface.Prog.toStrs 0 body)}"
-
-/-- The statements of a block, one string each; a memory call and the
-statement binding its result are one (`Stmt.memCallStr?`), and so are a call
-of several returns and the statements assigning them (`Stmt.tupleCallStr?`),
-the statements after the first skipped (`skip` of them). -/
-def Surface.Prog.toStrs (skip : Nat) : List (Surface.Stmt C) → List String
-  | [] => []
-  | s :: P =>
-    match skip with
-    | k + 1 => Surface.Prog.toStrs k P
-    | 0 =>
-      match Surface.Stmt.tupleCallStr? s P with
-      | some (c, k) => c :: Surface.Prog.toStrs k P
-      | none =>
-      match P with
-      | t :: _ =>
-        match Surface.Stmt.memCallStr? s t with
-        | some c => c :: Surface.Prog.toStrs 1 P
-        | none => s.toStr :: Surface.Prog.toStrs 0 P
-      | [] => [s.toStr]
-
-end
-
-/-- A block, as the Solidity it came from. -/
-def Surface.Prog.toStr (P : List (Surface.Stmt C)) : String := " ".intercalate (Surface.Prog.toStrs 0 P)
-
-/-- One statement per line, for display. -/
-def Surface.Prog.show (P : List (Surface.Stmt C)) : String :=
-  "\n".intercalate (Surface.Prog.toStrs 0 P)
-
-end Print
-
-/-! ## Surface syntax -/
+/-! ## The grammar -/
 
 declare_syntax_cat sol_expr (behavior := both)
 syntax:max num : sol_expr
@@ -2209,183 +1574,6 @@ def ArrTy.quote : {R : RefTy} → {E : Ty} → ArrTy R E → Lean.Expr
 def IndexTy.quote : {R : RefTy} → {k : PrimTy} → {V : Ty} → IndexTy R k V → Lean.Expr
   | _, _, _, @IndexTy.map k V => mkAppN (mkConst ``IndexTy.map) #[toExpr k, toExpr V]
   | _, _, _, @IndexTy.arr R E a => mkAppN (mkConst ``IndexTy.arr) #[toExpr R, toExpr E, ArrTy.quote a]
-
-variable {C : Contract} (c : Lean.Expr)
-
-def Surface.Simple.quote : (p : PrimTy) → Surface.Simple C p → Lean.Expr
-  | p, .lit n _ => mkAppN (mkConst ``Surface.Simple.lit) #[c, toExpr p, toExpr n, rflTrue]
-  | _, .bool b => mkAppN (mkConst ``Surface.Simple.bool) #[c, toExpr b]
-  | p, .local x => mkAppN (mkConst ``Surface.Simple.local) #[c, toExpr p, toExpr x]
-  | p, .env k _ => mkAppN (mkConst ``Surface.Simple.env) #[c, toExpr p, toExpr k,
-      rflPrim p]
-
-mutual
-
-def Surface.SPath.quote : (T : Ty) → Surface.SPath C T → Lean.Expr
-  | .ref R, .alias x => mkAppN (mkConst ``Surface.SPath.alias) #[c, toExpr R, toExpr x]
-  | T, .loc l => mkAppN (mkConst ``Surface.SPath.loc) #[c, toExpr T, Surface.Loc.quote T l]
-
-def Surface.Loc.quote : (T : Ty) → Surface.Loc C T → Lean.Expr
-  | T, .root r _ => mkAppN (mkConst ``Surface.Loc.root) #[c, toExpr T, toExpr r, rflSome T]
-  | T, @Surface.Loc.field _ s _ b f _ =>
-    mkAppN (mkConst ``Surface.Loc.field) #[c, toExpr s, toExpr T, Surface.SPath.quote _ b, toExpr f, rflSome T]
-  | V, @Surface.Loc.index _ R k _ it b i =>
-    mkAppN (mkConst ``Surface.Loc.index) #[c, toExpr R, toExpr k, toExpr V, IndexTy.quote it,
-      Surface.SPath.quote _ b, Surface.Val.quote k i]
-
-def Surface.MPath.quote : (T : Ty) → Surface.MPath C T → Lean.Expr
-  | .ref R, .var x _ => mkAppN (mkConst ``Surface.MPath.var) #[c, toExpr R, toExpr x, rflTrue]
-  | T, .loc l => mkAppN (mkConst ``Surface.MPath.loc) #[c, toExpr T, Surface.MLoc.quote T l]
-
-def Surface.MLoc.quote : (T : Ty) → Surface.MLoc C T → Lean.Expr
-  | T, @Surface.MLoc.field _ s _ b f _ =>
-    mkAppN (mkConst ``Surface.MLoc.field) #[c, toExpr s, toExpr T, Surface.MPath.quote _ b, toExpr f, rflSome T]
-  | E, @Surface.MLoc.index _ R _ a b i =>
-    mkAppN (mkConst ``Surface.MLoc.index) #[c, toExpr R, toExpr E, ArrTy.quote a, Surface.MPath.quote _ b,
-      Surface.Val.quote .uint i]
-
-def Surface.Val.quote : (p : PrimTy) → Surface.Val C p → Lean.Expr
-  | p, .simple s => mkAppN (mkConst ``Surface.Val.simple) #[c, toExpr p, Surface.Simple.quote c p s]
-  | p, .read l => mkAppN (mkConst ``Surface.Val.read) #[c, toExpr p, Surface.Loc.quote _ l]
-  | _, @Surface.Val.binop _ p q op _ _ a b =>
-    mkAppN (mkConst ``Surface.Val.binop) #[c, toExpr p, toExpr q, toExpr op, rflTrue,
-      rflPrim q, Surface.Val.quote p a, Surface.Val.quote p b]
-  | _, @Surface.Val.unop _ p q op _ _ a =>
-    mkAppN (mkConst ``Surface.Val.unop) #[c, toExpr p, toExpr q, toExpr op, rflTrue,
-      rflPrim q, Surface.Val.quote p a]
-  | p, .ternary cv a b =>
-    mkAppN (mkConst ``Surface.Val.ternary) #[c, toExpr p, Surface.Val.quote .bool cv, Surface.Val.quote p a, Surface.Val.quote p b]
-  | p, .readMem l => mkAppN (mkConst ``Surface.Val.readMem) #[c, toExpr p, Surface.MLoc.quote _ l]
-  | p, @Surface.Val.len _ _ E b _ => mkAppN (mkConst ``Surface.Val.len) #[c, toExpr p, toExpr E, Surface.SPath.quote _ b,
-      rflPrim p]
-  | p, @Surface.Val.mlen _ _ E b _ => mkAppN (mkConst ``Surface.Val.mlen) #[c, toExpr p, toExpr E, Surface.MPath.quote _ b,
-      rflPrim p]
-
-end
-
-def Surface.Src.quote : (T : Ty) → Surface.Src C T → Lean.Expr
-  | _, @Surface.Src.val _ p v => mkAppN (mkConst ``Surface.Src.val) #[c, toExpr p, Surface.Val.quote c p v]
-  | _, @Surface.Src.copy _ R p _ => mkAppN (mkConst ``Surface.Src.copy) #[c, toExpr R, Surface.SPath.quote c _ p, rflTrue]
-
-def Surface.ARhs.quote (R : RefTy) : Surface.ARhs C R → Lean.Expr
-  | .path p => mkAppN (mkConst ``Surface.ARhs.path) #[c, toExpr R, Surface.SPath.quote c _ p]
-  | .push b _ => mkAppN (mkConst ``Surface.ARhs.push) #[c, toExpr R, Surface.SPath.quote c _ b, rflTrue]
-
-def Surface.MRhs.quote (R : RefTy) : Surface.MRhs C R → Lean.Expr
-  | .alias p => mkAppN (mkConst ``Surface.MRhs.alias) #[c, toExpr R, Surface.MPath.quote c _ p]
-  | .copy p _ => mkAppN (mkConst ``Surface.MRhs.copy) #[c, toExpr R, Surface.SPath.quote c _ p, rflTrue]
-  | .newArr n _ => mkAppN (mkConst ``Surface.MRhs.newArr) #[c, toExpr R, Surface.Simple.quote c .uint n, rflTrue]
-
-def Surface.NewLhs.quote : (R : RefTy) → Surface.NewLhs C R → Lean.Expr
-  | R, .store l => mkAppN (mkConst ``Surface.NewLhs.store) #[c, toExpr R, Surface.Loc.quote c _ l]
-  | R, .mem l => mkAppN (mkConst ``Surface.NewLhs.mem) #[c, toExpr R, Surface.MLoc.quote c _ l]
-
-def Surface.MSrc.quote : (T : Ty) → Surface.MSrc C T → Lean.Expr
-  | _, @Surface.MSrc.val _ p v => mkAppN (mkConst ``Surface.MSrc.val) #[c, toExpr p, Surface.Val.quote c p v]
-  | _, @Surface.MSrc.ref _ R p => mkAppN (mkConst ``Surface.MSrc.ref) #[c, toExpr R, Surface.MPath.quote c _ p]
-
-def Surface.OpLoc.quote : (p : PrimTy) → Surface.OpLoc C p → Lean.Expr
-  | p, .local x => mkAppN (mkConst ``Surface.OpLoc.local) #[c, toExpr p, toExpr x]
-  | p, .root r _ => mkAppN (mkConst ``Surface.OpLoc.root) #[c, toExpr p, toExpr r, rflSome (.prim p)]
-  | p, @Surface.OpLoc.field _ s _ b f _ =>
-    mkAppN (mkConst ``Surface.OpLoc.field) #[c, toExpr s, toExpr p, Surface.SPath.quote c _ b, toExpr f,
-      rflSome (.prim p)]
-  | p, @Surface.OpLoc.index _ R k _ it b i =>
-    mkAppN (mkConst ``Surface.OpLoc.index) #[c, toExpr R, toExpr k, toExpr p, IndexTy.quote it,
-      Surface.SPath.quote c _ b, Surface.Simple.quote c k i]
-  | p, @Surface.OpLoc.mfield _ s _ b f _ =>
-    mkAppN (mkConst ``Surface.OpLoc.mfield) #[c, toExpr s, toExpr p, Surface.MPath.quote c _ b, toExpr f,
-      rflSome (.prim p)]
-  | p, @Surface.OpLoc.mindex _ R _ a b i =>
-    mkAppN (mkConst ``Surface.OpLoc.mindex) #[c, toExpr R, toExpr p, ArrTy.quote a, Surface.MPath.quote c _ b,
-      Surface.Simple.quote c .uint i]
-
-def Arg.quoteList : List (Arg C) → Lean.Expr
-  | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``Arg) #[c]]
-  | a :: as => mkAppN (mkConst ``List.cons [0]) #[mkAppN (mkConst ``Arg) #[c],
-      mkAppN (mkConst ``Arg.mk) #[c, toExpr a.p, toExpr a.x, Surface.Val.quote c a.p a.e], Arg.quoteList as]
-
-def Surface.CallRet.quote : Surface.CallRet → Lean.Expr
-  | .none => mkConst ``Surface.CallRet.none
-  | .val p r res => mkAppN (mkConst ``Surface.CallRet.val) #[toExpr p, toExpr r, toExpr res]
-  | .rets rs => mkAppN (mkConst ``Surface.CallRet.rets) #[toExpr rs]
-
-/-- An external call, each argument a `Sigma.mk` of its type and value. -/
-def Surface.ExtCall.quote (call : Surface.ExtCall C) : Lean.Expr :=
-  let argTy := mkAppN (mkConst ``Surface.ExtArg) #[c]
-  let args := call.args.foldr (fun a acc => mkAppN (mkConst ``List.cons [0]) #[argTy,
-      mkAppN (mkConst ``Sigma.mk [0, 0]) #[mkConst ``PrimTy, mkAppN (mkConst ``Surface.Simple) #[c], toExpr a.1,
-        Surface.Simple.quote c a.1 a.2], acc])
-    (mkAppN (mkConst ``List.nil [0]) #[argTy])
-  mkAppN (mkConst ``Surface.ExtCall.mk) #[c, Surface.Simple.quote c .uint call.addr, toExpr call.fn, args]
-
-def Surface.LoopAnn.quote : Surface.LoopAnn C → Lean.Expr
-  | .unwind k => mkAppN (mkConst ``Surface.LoopAnn.unwind) #[c, toExpr k]
-  | .inv I dec =>
-    mkAppN (mkConst ``Surface.LoopAnn.inv) #[c, Surface.Val.quote c .bool I,
-      optE (mkAppN (mkConst ``Surface.Val) #[c, toExpr PrimTy.uint]) (dec.map (Surface.Val.quote c .uint))]
-
-mutual
-
-def Surface.Stmt.quote : Surface.Stmt C → Lean.Expr
-  | @Surface.Stmt.assign _ T l r => mkAppN (mkConst ``Surface.Stmt.assign) #[c, toExpr T, Surface.Loc.quote c T l, Surface.Src.quote c T r]
-  | @Surface.Stmt.rebind _ R x r => mkAppN (mkConst ``Surface.Stmt.rebind) #[c, toExpr R, toExpr x, Surface.ARhs.quote c R r]
-  | @Surface.Stmt.assignLocal _ p x r =>
-    mkAppN (mkConst ``Surface.Stmt.assignLocal) #[c, toExpr p, toExpr x, Surface.Val.quote c p r]
-  | .declLocal p x init =>
-    mkAppN (mkConst ``Surface.Stmt.declLocal) #[c, toExpr p, toExpr x,
-      optE (mkAppN (mkConst ``Surface.Val) #[c, toExpr p]) (init.map (Surface.Val.quote c p))]
-  | .declStorage R x init =>
-    mkAppN (mkConst ``Surface.Stmt.declStorage) #[c, toExpr R, toExpr x,
-      optE (mkAppN (mkConst ``Surface.ARhs) #[c, toExpr R]) (init.map (Surface.ARhs.quote c R))]
-  | @Surface.Stmt.opAssign _ p op _ _ l r =>
-    mkAppN (mkConst ``Surface.Stmt.opAssign) #[c, toExpr p, toExpr op, rflTrue, rflTrue,
-      Surface.OpLoc.quote c p l, Surface.Val.quote c p r]
-  | @Surface.Stmt.incDec _ p op _ l =>
-    mkAppN (mkConst ``Surface.Stmt.incDec) #[c, toExpr p, toExpr op, rflTrue, Surface.OpLoc.quote c p l]
-  | @Surface.Stmt.assignIncDec _ p x op _ l _ =>
-    mkAppN (mkConst ``Surface.Stmt.assignIncDec) #[c, toExpr p, toExpr x, toExpr op, rflTrue,
-      Surface.OpLoc.quote c p l, rflTrue]
-  | @Surface.Stmt.push _ E b v _ =>
-    mkAppN (mkConst ``Surface.Stmt.push) #[c, toExpr E, Surface.SPath.quote c _ b,
-      optE (mkAppN (mkConst ``Surface.Src) #[c, toExpr E]) (v.map (Surface.Src.quote c E)), rflTrue]
-  | @Surface.Stmt.pop _ E b => mkAppN (mkConst ``Surface.Stmt.pop) #[c, toExpr E, Surface.SPath.quote c _ b]
-  | .transfer r a => mkAppN (mkConst ``Surface.Stmt.transfer) #[c, Surface.Val.quote c .uint r, Surface.Val.quote c .uint a]
-  | .send pv r a =>
-    mkAppN (mkConst ``Surface.Stmt.send) #[c, toExpr pv, Surface.Val.quote c .uint r, Surface.Val.quote c .uint a]
-  | .declMem R x init _ _ =>
-    mkAppN (mkConst ``Surface.Stmt.declMem) #[c, toExpr R, toExpr x,
-      optE (mkAppN (mkConst ``Surface.MRhs) #[c, toExpr R]) (init.map (Surface.MRhs.quote c R)), rflTrue, rflTrue]
-  | @Surface.Stmt.rebindMem _ R x r => mkAppN (mkConst ``Surface.Stmt.rebindMem) #[c, toExpr R, toExpr x, Surface.MRhs.quote c R r]
-  | @Surface.Stmt.assignFromMem _ R l p =>
-    mkAppN (mkConst ``Surface.Stmt.assignFromMem) #[c, toExpr R, Surface.Loc.quote c _ l, Surface.MPath.quote c _ p]
-  | @Surface.Stmt.assignMem _ T l r => mkAppN (mkConst ``Surface.Stmt.assignMem) #[c, toExpr T, Surface.MLoc.quote c T l, Surface.MSrc.quote c T r]
-  | @Surface.Stmt.delete _ T l => mkAppN (mkConst ``Surface.Stmt.delete) #[c, toExpr T, Surface.Loc.quote c T l]
-  | @Surface.Stmt.deleteMem _ T p _ =>
-    mkAppN (mkConst ``Surface.Stmt.deleteMem) #[c, toExpr T, Surface.MPath.quote c T p, rflTrue]
-  | @Surface.Stmt.assignNew _ R l n _ =>
-    mkAppN (mkConst ``Surface.Stmt.assignNew) #[c, toExpr R, Surface.NewLhs.quote c R l, Surface.Simple.quote c .uint n,
-      rflTrue]
-  | .ite cond thn els =>
-    mkAppN (mkConst ``Surface.Stmt.ite) #[c, Surface.Val.quote c .bool cond, Surface.Prog.quote thn, Surface.Prog.quote els]
-  | .require cond => mkAppN (mkConst ``Surface.Stmt.require) #[c, Surface.Val.quote c .bool cond]
-  | .assert cond => mkAppN (mkConst ``Surface.Stmt.assert) #[c, Surface.Val.quote c .bool cond]
-  | .revert => mkAppN (mkConst ``Surface.Stmt.revert) #[c]
-  | .call f args _ ret body =>
-    mkAppN (mkConst ``Surface.Stmt.call)
-      #[c, toExpr f, Arg.quoteList c args, rflTrue, Surface.CallRet.quote ret, Surface.Prog.quote body]
-  | .tryCall call rets ok err code pnc other =>
-    mkAppN (mkConst ``Surface.Stmt.tryCall)
-      #[c, Surface.ExtCall.quote c call, toExpr rets, Surface.Prog.quote ok, Surface.Prog.quote err, toExpr code,
-        Surface.Prog.quote pnc, Surface.Prog.quote other]
-  | .loop a cond body =>
-    mkAppN (mkConst ``Surface.Stmt.loop) #[c, Surface.LoopAnn.quote c a, Surface.Val.quote c .bool cond, Surface.Prog.quote body]
-
-def Surface.Prog.quote : List (Surface.Stmt C) → Lean.Expr
-  | [] => mkAppN (mkConst ``List.nil [0]) #[mkAppN (mkConst ``Surface.Stmt) #[c]]
-  | s :: P => mkAppN (mkConst ``List.cons [0]) #[mkAppN (mkConst ``Surface.Stmt) #[c], Surface.Stmt.quote s, Surface.Prog.quote P]
-
-end
 
 end Quote
 

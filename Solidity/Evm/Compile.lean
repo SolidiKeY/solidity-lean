@@ -1,5 +1,5 @@
 import Solidity.Evm.Layout
-import Solidity.Syntax.Resolve
+import Solidity.Syntax.Scoped
 import Solidity.Semantics.StorageErase
 
 /-!

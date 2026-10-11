@@ -178,7 +178,7 @@ end Solidity
 namespace Solidity.Delab
 
 open Lean Meta PrettyPrinter Delaborator SubExpr
-open Solidity (ppStmt ppPremise? ppOn isEscape)
+open Solidity (ppOn isEscape)
 
 /-- `CallbackTaclet C k m s p`: `dl[CallbackTaclet C k]{ [ s; ] ⇝ p }`,
 as `Rules.lean`'s delaborator prints today's, the goals labelled as the
@@ -189,16 +189,7 @@ def delabCallbackTaclet : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 7)
   let m ← whnf (e.getArg! 2)
-  let out? ← withTwins (schema := true) e false fun env => do
-    let st ← (tr [] (e.getArg! 5)).run env
-    let p ← (tr [] (e.getArg! 6)).run env
-    let st' ← whnf st
-    let rule? := Solidity.Taclet.labelledBy (st'.getAppFn.constName?.getD Lean.Name.anonymous)
-      (m.isConstOf ``Modality.diamond)
-    let labels := (do (← Solidity.Taclet.branchLabels.lookup (← rule?))).getD []
-    let some p ← ppPremise? p labels (m.isConstOf ``Modality.box) | return none
-    return some (← ppStmt st, p)
-  let some (s, p) := out? | failure
+  let some (s, p) ← tacletLine? e (e.getArg! 5) (e.getArg! 6) m | failure
   if isEscape s then failure
   let args ← (List.range 2).toArray.mapM fun i => withNaryArg i delab
   let J ← `($(mkIdent (← unresolveNameGlobal ``CallbackTaclet)) $args*)
@@ -208,23 +199,21 @@ def delabCallbackTaclet : Delab := do
   | _ => `(dl[ $J ]{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
 
 /-- `ProvesC I Γ₀ H φ`: the sequent `dl{ ..H, h₁, … ⟹ᶜ[I] φ }`, the
-context erased as `delabProves` erases it. -/
+context printed as `delabProves` prints it. -/
 @[delab app.Solidity.ProvesC]
 def delabProvesC : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
   guard (e.getAppNumArgs == 6)
   let c := e.getArg! 0
-  let out? ← withTwins (contract? := some c) e true fun env => do
-    let some (rest, hs, ns) ← (try some <$> (hypsParts c (e.getArg! 4)).run env catch _ => pure none)
+  let out? ← withPrinter (contract? := some c) e true do
+    let some (rest, hs, ns) ← (try some <$> hypsPartsS c (e.getArg! 4) catch _ => pure none)
       | return none
-    let φ ← (tr ns (e.getArg! 5)).run env
+    let φ ← ppFmlS ns (e.getArg! 5)
     let mut out : Array (TSyntax `dl_hyp) := #[]
     if let some r := rest then out := out.push (← `(dl_hyp| ..$(mkIdent r):ident))
-    for h in hs do
-      let some h ← Solidity.ppHyp? h | return none
-      out := out.push ⟨← fixBlockEnds h⟩
-    return some (out, (⟨← fixBlockEnds (← Solidity.ppFml φ)⟩ : TSyntax `dl_fml))
+    for h in hs do out := out.push ⟨← fixBlockEnds h⟩
+    return some (out, (⟨← fixBlockEnds φ⟩ : TSyntax `dl_fml))
   let some (out, φ) := out? | failure
   guard !(isEscape φ)
   let I ← withNaryArg 1 delab

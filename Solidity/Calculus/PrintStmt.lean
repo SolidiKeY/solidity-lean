@@ -5,13 +5,11 @@ import Solidity.Calculus.DelabErase
 
 The printer of the scoped syntax (`Syntax/Scoped.lean`, `Calculus/Fml.lean`)
 read from its `Expr`, schema variables and all: `ppStmtS`, `ppProgS`,
-`ppBlockS`, `ppExprS`, `ppPremiseS`, `ppFmlS`.  It builds the syntax
-`RuleSyntax.lean`'s `ppStmt`/`ppExpr`/`ppProg?`/`ppFml` and `RuleKit`'s
-`ppPremise?` build from the erasure, with their builders (`ppVar?`, `ppTy`,
-`mkBinExpr`, `dotExpr`, `ppIncDec`, `ppUpd`, `ppTerm`), so the KeY text is the
-same: no statement, block or premise is erased to `Surface` on the way.
-Terms and updates still go through `Delab.tr` to `Surface.Tm`/`Surface.Upd`,
-the closer's IR (`Calculus/DelabErase.lean`).
+`ppBlockS`, `ppExprS`, `ppPremiseS`, `ppFmlS`, in the grammar of
+`RuleSyntax.lean`, with its builders (`ppVar?`, `ppTy`, `mkBinExpr`,
+`dotExpr`, `ppIncDec`, `ppUpd`, `ppTerm`), so the KeY text is the one the
+rule lines write.  Terms and updates go through `Delab.tr` to
+`Surface.Tm`/`Surface.Upd`, the closer's IR (`Calculus/DelabErase.lean`).
 
 **The name-stack walker** (the API a reader of the scoped syntax uses, the
 SolKey reader's port among them): the names of the context a part is read
@@ -30,21 +28,11 @@ carry.
   end (`pop .capture`, an update's pops, a hidden binder) prints as nothing,
   a block's end in a formula's frames as `}` (`blockEndName`, which
   `Calculus/Delab.lean`'s `fixBlockEnds` turns into the token).
-
-The option `pp.sol.twinCheck` makes the delaborators print both ways (this
-printer and the erasure's) and fail with an error where they differ
-(`twinCompare`), until the erasure goes (W8.4 of `docs/intrinsic.md`).
 -/
 
 namespace Solidity
 
 open Lean Meta
-
-register_option pp.sol.twinCheck : Bool := {
-  defValue := false
-  descr := "the scoped printers also print through the erasure (`Delab.tr`) and fail with an \
-            error where the two differ"
-}
 
 namespace Delab
 
@@ -66,9 +54,8 @@ partial def idxName (ns : List Expr) (e : Expr) : MetaM Expr := do
   if e.isFVar then return e
   return unknownVar
 
-/-- An option of a scoped part, as its erasure has it: `some x`, or nothing
-(a variable or a stuck option prints as `none`, as `Delab.trArg` erases
-it). -/
+/-- An option of a scoped part: `some x`, or nothing (a variable or a stuck
+option prints as `none`). -/
 def optSome? (o : Expr) : MetaM (Option Expr) := do
   let o ← whnf o
   if o.isAppOfArity ``Option.some 2 then return some o.appArg!
@@ -84,17 +71,30 @@ partial def bindersS? (bs : Expr) : MetaM (Option (Array (Expr × Expr) × List 
   let x := bs.getArg! 3
   return some (xs.push (bs.getArg! 2, x), x :: names)
 
+/-- What a formula's `where` clause is read from (`Delab.ppFmlE`): the
+memory locals hidden binders put in scope, with their types, and the locals
+a copy out of storage binds (`carol = alice;`, `MRhs.copy`), each by its
+name. -/
+structure Wheres where
+  hidden : IO.Ref (Array (Expr × Expr))
+  copied : IO.Ref (Array Expr)
+
 /-- The printer's state: the erasure's twins (what `Delab.tr` reads, for
-terms and updates), and whether a block's end in a formula's frames
-prints (`}`). -/
+terms and updates), whether a block's end in a formula's frames prints
+(`}`), and where a `where` clause is collected. -/
 structure PEnv where
   tr : Env := {}
   blockEnds : Bool := false
+  wheres : Option Wheres := none
 
 abbrev PrM := ReaderT PEnv MetaM
 
 /-- `Delab.tr`'s monad, run on the printer's twins. -/
 def runTr {α : Type} (x : TrM α) : PrM α := do x.run (← read).tr
+
+/-- The `fill`s of the holes (`Calculus/Arms.lean`): a hole schema variable
+filled prints as the rule line writes it (`lhs = nsp.fld`). -/
+def holeFillNames : List Lean.Name := [``SHole.fill, ``MHole.fill, ``VHole.fill, ``NewLhs.fill]
 
 /-! ## Blocks as pieces -/
 
@@ -141,7 +141,7 @@ partial def stmtPiecesS (ns : List Expr) (s : Expr) : MetaM (Array SPiece × Lis
   let s := (← instantiateMVars s).consumeMData
   if s.isFVar then return (#[.stmt ns s], ns)
   -- a hole filled declares nothing; read before `whnf` unfolds its `fill`
-  if holeFills.any (s.isAppOf ·.1) then return (#[.stmt ns s], ns)
+  if holeFillNames.any s.isAppOf then return (#[.stmt ns s], ns)
   let s ← whnf s
   if s.isAppOf ``Stmt.block then
     let (ps, _) ← progPiecesS ns s.appArg!
@@ -188,8 +188,8 @@ partial def framePiecesS (ns : List Expr) (κ : Expr) : PrM (Array SPiece × Lis
 
 /-! ## Expressions -/
 
-/-- A program expression of any sort read at `ns` (`ppExpr` of its
-erasure); indices and proofs are not shown. -/
+/-- A program expression of any sort read at `ns`; indices and proofs are
+not shown. -/
 partial def ppExprS (ns : List Expr) (e : Expr) : MetaM (TSyntax `sol_expr) := do
   let e := (← instantiateMVars e).consumeMData
   if let some n ← fvarName? e then return ← `(sol_expr| $(nameIdent n):ident)
@@ -287,13 +287,9 @@ partial def ppCallPartsS (ns : List Expr) (f args : Expr) :
 
 /-! ## Statements and blocks -/
 
-/-- The name of an erased statement's head, the scoped one's: what
-`Taclet.labelledBy` reads (`Stmt.ite` is `Surface.Stmt.ite` there). -/
+/-- The name of a statement's head: what `Taclet.labelledBy` reads. -/
 def labelHead (s : Expr) : Lean.Name :=
-  match s.getAppFn.constName? with
-  | some n => if (`Solidity.Stmt).isPrefixOf n then
-      n.replacePrefix `Solidity.Stmt `Solidity.Surface.Stmt else n
-  | none => .anonymous
+  s.getAppFn.constName?.getD .anonymous
 
 /-- Whether the syntax `stx` has the identifier `x`. -/
 partial def hasIdent (x : Lean.Name) (stx : Syntax) : Bool :=
@@ -305,7 +301,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   let e := (← instantiateMVars e).consumeMData
   let escape := do `(sol_stmt| ‹$(← escapeTerm e):term›)
   -- a hole that is a schema variable, filled: `lhs = e`, as the rule line writes it
-  if holeFills.any (e.isAppOfArity ·.1 5) then
+  if holeFillNames.any (e.isAppOfArity · 5) then
     if let some h ← fvarName? (← stripUps (e.getArg! 3)) then
       return ← `(sol_stmt| $(nameIdent h):ident = $(← ppExprS ns (e.getArg! 4)))
   -- a statement schema variable `s`
@@ -350,6 +346,8 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
     | none => `(sol_stmt| $T:sol_ty memory $x:ident)
     | some r => `(sol_stmt| $T:sol_ty memory $x:ident = $(← ppExprS ns r):sol_expr)
   | Stmt.rebindMem _ _ _ i r =>
+    if let some w := (← read).wheres then
+      if (← whnf r).isAppOf ``MRhs.copy then w.copied.modify (·.push (← idxName ns i))
     let some x ← var? i | escape
     `(sol_stmt| $x:ident = $(← ppExprS ns r):sol_expr)
   | Stmt.assignFromMem _ _ _ l p =>
@@ -548,9 +546,8 @@ partial def ppRetTargetS (t : SPiece) : PrM (Option (TSyntax `sol_expr × Expr))
   | _ => return none
 
 /-- A call that returns to targets (`CallRet.rets`) and the statements after
-it assigning them, as the one statement they are elaborated from (as
-`ppTupleCall?` prints its erasure), with the number of pieces after the call
-it covers. -/
+it assigning them, as the one statement they are elaborated from, with the
+number of pieces after the call it covers. -/
 partial def ppTupleCallS (s : SPiece) (rest : List SPiece) :
     PrM (Option (TSyntax `sol_stmt × Nat)) := do
   let .stmt ns s := s | return none
@@ -608,7 +605,7 @@ partial def ppTupleCallS (s : SPiece) (rest : List SPiece) :
 /-- A call returning a memory reference (`CallRet.mem`) and the statement
 after it binding the return variable, as the one statement they are
 elaborated from: `Person memory mv1 = choosePersonMem();`,
-`m = choosePersonMem();` (as `ppMemCall?` prints their erasure). -/
+`m = choosePersonMem();`. -/
 partial def ppMemCallS (s t : SPiece) : PrM (Option (TSyntax `sol_stmt)) := do
   let .stmt ns s := s | return none
   let .stmt ns' t := t | return none
@@ -637,9 +634,8 @@ partial def ppMemCallS (s t : SPiece) : PrM (Option (TSyntax `sol_stmt)) := do
   | _ => return none
 
 /-- The statements of a block of pieces with no variable in it, a tuple
-call and a memory call each as the one statement it is elaborated from (as
-`ppProg?` prints the erasure); none if a variable or a stuck part is in
-it. -/
+call and a memory call each as the one statement it is elaborated from;
+none if a variable or a stuck part is in it. -/
 partial def ppItemsS (ps : Array SPiece) : PrM (Option (Array (TSyntax `sol_stmt))) := do
   unless ps.all SPiece.isStmt do return none
   let mut out : Array (TSyntax `sol_stmt) := #[]
@@ -660,7 +656,7 @@ partial def ppItemsS (ps : Array SPiece) : PrM (Option (Array (TSyntax `sol_stmt
 
 /-- A block with variables in it, `s :: P ++ ω`: its statements one by one
 (a program variable as a statement, `P;`) and the rest `ω` when the block
-ends in a variable (as `ppProgParts?` prints the erasure). -/
+ends in a variable. -/
 partial def ppPartsS (ps : Array SPiece) :
     PrM (Option (Array (TSyntax `sol_stmt) × Option Ident)) := do
   let mut out : Array (TSyntax `sol_stmt) := #[]
@@ -694,7 +690,7 @@ partial def ppBlockS (ns : List Expr) (P : Expr) : PrM (TSyntax `sol_block) := d
 
 end
 
-/-- A block read at `ns`, its statements (`ppProg?` of its erasure). -/
+/-- A block read at `ns`, its statements. -/
 def ppProgS (ns : List Expr) (P : Expr) : PrM (Option (Array (TSyntax `sol_stmt))) := do
   ppItemsS (← progExprPieces ns P)
 
@@ -724,7 +720,7 @@ partial def updShape (ns : List Expr) (U : Expr) : MetaM (Bool × List Expr) := 
   if U.isAppOf ``Upd.nil then return (false, ns)
   return (true, ns)
 
-/-- A formula as its erasure shows it, read at `ns`: the hidden binders and
+/-- A formula as it prints, read at `ns`: the hidden binders and
 the updates that print as nothing gone through, the rest computed.  A
 postcondition variable (`↑φ`) and a schema variable stay. -/
 partial def viewF (ns : List Expr) (e : Expr) : PrM (List Expr × Expr) := do
@@ -735,7 +731,11 @@ partial def viewF (ns : List Expr) (e : Expr) : PrM (List Expr × Expr) := do
   if let some n := e.getAppFn.constName? then
     if isUp n && e.getAppNumArgs > 0 then return ← viewF ns.tail e.appArg!
   let e ← whnf e
-  if e.isAppOfArity ``Fml.bind 6 then return ← viewF (e.getArg! 3 :: ns) (e.getArg! 5)
+  if e.isAppOfArity ``Fml.bind 6 then
+    if let some w := (← read).wheres then
+      let t ← whnf (e.getArg! 4)
+      if t.isAppOfArity ``LTy.mem 1 then w.hidden.modify (·.push (e.getArg! 3, t.appArg!))
+    return ← viewF (e.getArg! 3 :: ns) (e.getArg! 5)
   if e.isAppOfArity ``Fml.upd 6 then
     let (shown, ms) ← updShape ns (e.getArg! 4)
     if !shown then return ← viewF ms (e.getArg! 5)
@@ -822,7 +822,7 @@ def updS (ns : List Expr) (U : Expr) : PrM (TSyntax `dl_upd × List Expr) := do
   let c ← contractOf U
   return (← ppUpd (← runTr (updList c U es)), ms)
 
-/-- A scoped formula read at `ns`, as `ppFml` prints its erasure. -/
+/-- A scoped formula read at `ns`, as `ppFml` prints the closer's. -/
 partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
   let (ns, e) ← viewF ns e
   if let some x ← fmlVar? e then return ← `(dl_fml| $x:ident)
@@ -914,8 +914,7 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
 
 /-! ## Premises -/
 
-/-- A scoped premise read at `ns`, as `ppPremise?` prints its erasure: its
-goals labelled by `labels` (solkey's, `Taclet.branchLabels`), the blocks of
+/-- A scoped premise read at `ns`: its goals labelled by `labels` (solkey's, `Taclet.branchLabels`), the blocks of
 `branches` in the box's brackets when `box`. -/
 partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
     (box : Bool := false) : PrM (Option (TSyntax `dl_premise)) := do
@@ -1027,34 +1026,12 @@ end Print
 (`withTwins`, for the terms and updates `Delab.tr` erases), block ends
 printed when `frames` (and `e` has a contract). -/
 def withPrinter {α : Type} (e : Expr) (frames : Bool) (k : PrM α)
-    (contract? : Option Expr := none) (schema : Bool := false) : MetaM α := do
+    (contract? : Option Expr := none) (wheres : Option Wheres := none) : MetaM α := do
   let ends ← if !frames then pure false else
     match contract? with
     | some _ => pure true
     | none => try (do let _ ← contractOf (← instantiateMVars e); pure true) catch _ => pure false
-  withTwins e false (schema := schema) fun env => k.run { tr := env, blockEnds := ends }
-
-/-- Whether the twin check is on (`pp.sol.twinCheck`). -/
-def twinCheckOn : MetaM Bool := return pp.sol.twinCheck.get (← getOptions)
-
-/-- Under `pp.sol.twinCheck`: an error where `new` (this printer's) and
-`old` (the erasure's) print differently.  It is thrown, not only logged, so a
-delaborator's difference shows in the printed text even where its messages
-are dropped (a message's expressions are printed lazily). -/
-def twinCompare (what : String) (new old : Option Syntax) (cat : Lean.Name := `term) :
-    MetaM Unit := do
-  let fmt (s : Option Syntax) : MetaM String := do
-    match s with
-    | some s =>
-      try return toString ((← PrettyPrinter.ppCategory cat s).pretty 100000)
-      catch _ => return "‹does not format›"
-    | none => return "‹none›"
-  let a ← fmt new
-  let b ← fmt old
-  unless a == b do
-    let msg := m!"twin check ({what}): the scoped printer prints\n{a}\nthe erasure's\n{b}"
-    logError msg
-    throwError msg
+  withTwins e fun env => k.run { tr := env, blockEnds := ends, wheres }
 
 end Delab
 

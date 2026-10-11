@@ -6,8 +6,7 @@ import Solidity.Semantics.NoPanicSimp
 
 `Halt.panic` is the one halt no modality accepts.  The untyped operations
 the term model keeps halt with `revert` or `undef` only: the state's reads
-and writes, the evaluation of a program expression, the copies and
-allocations, a payment.  A term or an update reads the state through these
+and writes, the copies and allocations, a payment.  A term or an update reads the state through these
 operations, so neither panics (`Calculus/NoPanic.lean`).
 
 Each lemma follows its operation's definition, the recursive ones by the same
@@ -269,76 +268,6 @@ theorem pushAt_noPanic (σ : State) (E : Ty) (r : Name) (segs : List Seg) {val :
 @[no_panic_simp] theorem popAt_noPanic (σ : State) (keep : Bool) (r : Name) (segs : List Seg) :
     NoPanic (popAt σ keep r segs) := by
   unfold popAt; no_panic
-
-/-! ## Program expressions
-
-A statement's halt and its update's halt may come from different reads (the
-two evaluate in another order); neither is a panic. -/
-
-@[no_panic_simp] theorem Surface.Simple.eval_noPanic (σ : State) {p : PrimTy} (s : Surface.Simple C p) :
-    NoPanic (s.eval σ) := by
-  cases s <;> simp only [Surface.Simple.eval] <;> no_panic
-
-mutual
-theorem Surface.SPath.resolve_noPanic (σ : State) : {T : Ty} → (p : Surface.SPath C T) → NoPanic (p.resolve σ)
-  | _, .alias x => by simp only [Surface.SPath.resolve, ne_eq, aliasPath_noPanic, not_false_eq_true]
-  | _, .loc l => by simp only [Surface.SPath.resolve]; exact Surface.Loc.resolve_noPanic σ l
-
-theorem Surface.Loc.resolve_noPanic (σ : State) : {T : Ty} → (l : Surface.Loc C T) → NoPanic (l.resolve σ)
-  | _, .root r _ => by simp only [Surface.Loc.resolve, ne_eq, NoPanic.pure, not_false_eq_true]
-  | _, .field b f _ => by
-    have hb := Surface.SPath.resolve_noPanic σ b
-    simp only [Surface.Loc.resolve]; no_panic
-  | _, .index _ b i => by
-    have hb := Surface.SPath.resolve_noPanic σ b
-    have hi := Surface.Val.eval_noPanic σ i
-    simp only [Surface.Loc.resolve]; no_panic
-
-theorem Surface.MPath.mval_noPanic (σ : State) : {T : Ty} → (p : Surface.MPath C T) → NoPanic (p.mval σ)
-  | _, .var x _ => by simp only [Surface.MPath.mval]; no_panic
-  | _, .loc l => by simp only [Surface.MPath.mval]; exact Surface.MLoc.read_noPanic σ l
-
-theorem Surface.MLoc.read_noPanic (σ : State) : {T : Ty} → (l : Surface.MLoc C T) → NoPanic (l.read σ)
-  | _, .field b f _ => by
-    have hb := Surface.MPath.mval_noPanic σ b
-    simp only [Surface.MLoc.read]; no_panic
-  | _, .index _ b i => by
-    have hb := Surface.MPath.mval_noPanic σ b
-    have hi := Surface.Val.eval_noPanic σ i
-    simp only [Surface.MLoc.read]; no_panic
-
-theorem Surface.Val.eval_noPanic (σ : State) : {p : PrimTy} → (v : Surface.Val C p) → NoPanic (v.eval σ)
-  | _, .simple s => by simp only [Surface.Val.eval, ne_eq, Surface.Simple.eval_noPanic, not_false_eq_true]
-  | _, .read l => by
-    have hl := Surface.Loc.resolve_noPanic σ l
-    simp only [Surface.Val.eval]; no_panic
-  | _, .binop _ _ _ a b => by
-    have ha := Surface.Val.eval_noPanic σ a
-    have hb := Surface.Val.eval_noPanic σ b
-    simp only [Surface.Val.eval]
-    exact NoPanic.bind ha fun _ _ => evalBinop_noPanic _ _ _ hb
-  | _, .unop _ _ _ a => by
-    have ha := Surface.Val.eval_noPanic σ a
-    simp only [Surface.Val.eval]; no_panic
-  | _, .ternary c a b => by
-    have hc := Surface.Val.eval_noPanic σ c
-    have ha := Surface.Val.eval_noPanic σ a
-    have hb := Surface.Val.eval_noPanic σ b
-    simp only [Surface.Val.eval]
-    exact NoPanic.bind hc fun _ _ => pickBranch_noPanic _ ha hb
-  | _, .readMem l => by
-    have hl := Surface.MLoc.read_noPanic σ l
-    simp only [Surface.Val.eval]; no_panic
-  | _, .len b _ => by
-    have hb := Surface.SPath.resolve_noPanic σ b
-    simp only [Surface.Val.eval]; no_panic
-  | _, .mlen b _ => by
-    have hb := Surface.MPath.mval_noPanic σ b
-    simp only [Surface.Val.eval]; no_panic
-end
-
-attribute [no_panic_simp] Surface.SPath.resolve_noPanic Surface.Loc.resolve_noPanic Surface.MPath.mval_noPanic
-  Surface.MLoc.read_noPanic Surface.Val.eval_noPanic
 
 theorem NoPanic.mapM {α β : Type} {f : α → Res β} (hf : ∀ a, NoPanic (f a)) :
     (l : List α) → NoPanic (l.mapM f)

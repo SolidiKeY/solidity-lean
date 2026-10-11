@@ -4,9 +4,8 @@ import Solidity.Syntax.Elab
 /-!
 # Quoting the scoped syntax
 
-`Syntax/Scoped.lean`'s programs turned back into terms, as `Syntax.lean`'s
-`Surface.Prog.quote` does for the surface ones: by hand (no `deriving ToExpr` for an
-indexed family whose constructors carry proofs), the contract the constant
+`Syntax/Scoped.lean`'s programs turned back into terms by hand (no
+`deriving ToExpr` for an indexed family whose constructors carry proofs), the contract the constant
 it names, every proof `Eq.refl` (`rflTrue`, `rflSome`, `rflPrim`), so the
 kernel re-checks each one.
 
@@ -19,10 +18,9 @@ equal contexts of sibling scopes too.  Unshared, the tree is 26–37 times
 larger (the spike's measure).
 
 The quoter is a pure function: the compiled elaborator runs it, and the
-kernel checks its result where it is spliced (`sol{ … }` at a scoped type,
-`Syntax/Splice.lean`) or declared (`Prog.define`; `Prog.defineCore` resolves
-a block as written first, as the lint `solc_scoped`, `Frontend/Import.lean`,
-declares every imported program).
+kernel checks its result where it is spliced (`sol{ … }`,
+`Syntax/Splice.lean`) or declared (`Prog.define`, as `solc_import`,
+`Frontend/Import.lean`, declares every imported program).
 -/
 
 namespace Solidity
@@ -311,14 +309,5 @@ def Prog.define (n cn : Lean.Name) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : CoreM (O
     hints := .abbrev, safety := .safe }
   tryCatchRuntimeEx (do addDecl decl; pure none)
     fun ex => do pure (some s!"the kernel rejects the scoped program: {← ex.toMessageData.toString}")
-
-open Lean in
-/-- `Prog.define` of the block `P` as written, resolved from `Γ` first
-(`resolve`): `none`, or why it is rejected (by `resolve`, or by the kernel). -/
-def Prog.defineCore [FreshNames] (n cn : Lean.Name) (Γ : NCtx) (P : List (Solidity.Surface.Stmt C)) :
-    CoreM (Option String) := do
-  match Prog.resolve Γ P with
-  | .error e => pure (some e)
-  | .ok ⟨_, P'⟩ => Prog.define n cn P'
 
 end Solidity

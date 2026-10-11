@@ -211,24 +211,15 @@ end Expand
 section Elab
 open Elab Term Meta
 
-/-- A quoted formula as written with no modality in it (`Surface.Fml`) as
-the closer's (`Fml`): the constructors of the same names. -/
-partial def toFmlE (e : Expr) : Expr :=
-  if e.isAppOfArity ``NFml.toSurface 2 then e.appArg! else
-  match e.getAppFn with
-  | .const (.str pre c) us =>
-    if pre == ``Surface.Fml then mkAppN (.const (.str ``NFml c) us) (e.getAppArgs.map toFmlE) else e
-  | _ => e
-
 /-- The first `n` layers of a quoted formula as context entries: `Fml.imp a _`
 is `Hyp.pre a`, `Fml.upd m U _` is `Hyp.upd m U`. -/
 def peelHyps (C : Expr) : Nat → Expr → MetaM (List Expr × Expr)
   | 0, e => pure ([], e)
   | n + 1, e => do
-    if e.isAppOfArity ``NFml.imp 3 || e.isAppOfArity ``Surface.Fml.imp 3 then
+    if e.isAppOfArity ``NFml.imp 3 then
       let (hs, φ) ← peelHyps C n (e.getArg! 2)
-      return (mkApp2 (mkConst ``Hyp.pre) C (toFmlE (e.getArg! 1)) :: hs, φ)
-    if e.isAppOfArity ``NFml.upd 4 || e.isAppOfArity ``Surface.Fml.upd 4 then
+      return (mkApp2 (mkConst ``Hyp.pre) C (e.getArg! 1) :: hs, φ)
+    if e.isAppOfArity ``NFml.upd 4 then
       let (hs, φ) ← peelHyps C n (e.getArg! 3)
       return (mkApp3 (mkConst ``Hyp.upd) C (e.getArg! 1) (e.getArg! 2) :: hs, φ)
     throwError "sequent: not a context entry{indentExpr e}"

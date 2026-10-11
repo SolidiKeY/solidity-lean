@@ -26,9 +26,7 @@ A formula (`Fml`) is first-order (`=`, `¬`, `∧`, `→`, `∀`) plus `{U} φ`,
 `{havoc}` and `{anon(xs)}`: the closer's input, a leaf of the scoped
 calculus erased (`Fml.erase`), with no modality and no program.  The
 modalities are the scoped calculus's (`Calculus/Fml.lean`, read by the
-typed run).  A formula *as written*, with the diamond `⟨ P ⟩ φ` and the box
-`[ P ] φ` over the untyped statements, is `Surface.Fml`: the elaborator's
-output (`dl!{ … }`) and the printers' target, with no reading (decision 11).
+typed run).
 
 Unlike KeY's, these terms can halt: they are read by the interpreter's own
 functions, so `a + b` reverts on overflow and `values[i]` on an index out of
@@ -939,80 +937,6 @@ def NFml.holds (σ : State) : NFml C → Prop
 /-- Valid: true in every state. -/
 def NFml.Valid (φ : NFml C) : Prop := ∀ σ, NFml.holds σ φ
 
-/-! ## Formulas as written
-
-`Surface.Fml` is `Fml` with the two modalities over the untyped statements
-(`Syntax.lean`): what `dl!{ … }` reads, a specification's obligation and a
-problem state (`Calculus/SurfaceSpec.lean`, `Calculus/Problem.lean`), and what the
-printers print (`RuleSyntax.lean`'s `ppFml`, `Fml.eraseS`).  It has no
-reading: `Calculus/Notation.lean` reads a formula with a modality
-scoped, and `Surface.Fml.toFml` the closer's `Fml` when it has no modality.
-The constructors are `Fml`'s, in the same order, with `modal` after
-`upd`. -/
-
-/-- A formula as written. -/
-inductive Surface.Fml (C : Contract) where
-  | tt
-  | eq (a b : Term C)
-  | defined (t : Term C)
-  | not (φ : Surface.Fml C)
-  | and (φ ψ : Surface.Fml C)
-  | imp (φ ψ : Surface.Fml C)
-  | upd (m : Modality) (U : Upd C) (φ : Surface.Fml C)
-  /-- `⟨ P ⟩ φ` or `[ P ] φ`. -/
-  | modal (m : Modality) (P : Surface.Prog C) (φ : Surface.Fml C)
-  | havoc (φ : Surface.Fml C)
-  | all (x : Var) (p : PrimTy) (φ : Surface.Fml C)
-  | anon (xs : List Var) (φ : Surface.Fml C)
-
-instance : Inhabited (Surface.Fml C) := ⟨.tt⟩
-
-/-- `false` is `¬true`. -/
-abbrev Surface.Fml.ff : Surface.Fml C := .not .tt
-
-/-- `a = b` with both sides defined (`Fml.eqD`). -/
-abbrev Surface.Fml.eqD (a b : Term C) : Surface.Fml C :=
-  .and (.defined a) (.and (.defined b) (.eq a b))
-
-/-- A formula with no modality, as written. -/
-def NFml.toSurface : NFml C → Surface.Fml C
-  | .tt => .tt
-  | .eq a b => .eq a b
-  | .defined t => .defined t
-  | .not φ => .not φ.toSurface
-  | .and φ ψ => .and φ.toSurface ψ.toSurface
-  | .imp φ ψ => .imp φ.toSurface ψ.toSurface
-  | .upd m U φ => .upd m U φ.toSurface
-  | .havoc φ => .havoc φ.toSurface
-  | .all x p φ => .all x p φ.toSurface
-  | .anon xs φ => .anon xs φ.toSurface
-
-/-- The closer's formula, when there is no modality. -/
-def Surface.Fml.toFml : Surface.Fml C → Except String (NFml C)
-  | .tt => pure .tt
-  | .eq a b => pure (.eq a b)
-  | .defined t => pure (.defined t)
-  | .not φ => return .not (← φ.toFml)
-  | .and φ ψ => return .and (← φ.toFml) (← ψ.toFml)
-  | .imp φ ψ => return .imp (← φ.toFml) (← ψ.toFml)
-  | .upd m U φ => return .upd m U (← φ.toFml)
-  | .modal .. => throw "a modality is read by the scoped calculus: `cdl!{ … }`, or \
-      `dl!{ … }` under `open scoped Solidity.Scoped`"
-  | .havoc φ => return .havoc (← φ.toFml)
-  | .all x p φ => return .all x p (← φ.toFml)
-  | .anon xs φ => return .anon xs (← φ.toFml)
-
-/-- `∀ p₁ x₁. … ∀ pₙ xₙ. φ`, as written. -/
-def Surface.Fml.alls : List (PrimTy × Var) → Surface.Fml C → Surface.Fml C
-  | [], φ => φ
-  | (p, x) :: xs, φ => .all x p (Surface.Fml.alls xs φ)
-
-/-- `φ₁ ∧ … ∧ φₙ`, `true` when there are none, as written. -/
-def Surface.Fml.conj : List (Surface.Fml C) → Surface.Fml C
-  | [] => .tt
-  | [φ] => φ
-  | φ :: ψs => .and φ (Surface.Fml.conj ψs)
-
 /-! ## Goals over bound locals
 
 A `try` has a goal per way its call may end, each for every value of the
@@ -1489,11 +1413,7 @@ theorem holds_frame : (φ : NFml C) → Avoids φ.vars ns → ∀ {σ τ : State
 
 end Frame
 
-/-! ## Lowering program expressions to terms
-
-A value position lowers with `lower`, a path position with `lowerPath`, once,
-at the rule (Maude's `lower(LV, C)`).  Lowering keeps meaning:
-`lower_eval` below. -/
+/-! ## Keys as words -/
 
 /-- An index of key type `k` as the word it is hashed as: a `bool` key `b`
 is `b ? 1 : 0`, as solc pads it (`Value.keyAt`; the solc frontend writes it so,
@@ -1502,60 +1422,6 @@ def Term.keyAt : PrimTy → Term C → Term C
   | .bool, t => .ite t (.lit (.int 1)) (.lit (.int 0))
   | .uint, t => t
   | .int, t => t
-
-def Surface.Simple.lower {p : PrimTy} : Surface.Simple C p → Term C
-  | .lit n _ => .lit (.int n)
-  | .bool b => .lit (.bool b)
-  | .local x => .pv x
-  | .env k _ => .env k
-
-mutual
-
-def Surface.SPath.lower : {T : Ty} → Surface.SPath C T → PTerm C
-  | _, .alias x => .pv x
-  | _, .loc l => l.lower
-
-def Surface.Loc.lower : {T : Ty} → Surface.Loc C T → PTerm C
-  | _, .root r _ => .root r
-  | _, .field b f _ => .field b.lower f
-  | _, .index (k := k) _ b i => .at b.lower (Term.keyAt k i.lower)
-
-def Surface.MPath.lower : {T : Ty} → Surface.MPath C T → ITerm C
-  | _, .var x _ => .pv x
-  | _, .loc l => .read .memory l.lower
-
-def Surface.MLoc.lower : {T : Ty} → Surface.MLoc C T → Surface.MAddr C
-  | _, .field b f _ => .field b.lower f
-  | _, .index _ b i => .at b.lower i.lower
-
-def Surface.Val.lower : {p : PrimTy} → Surface.Val C p → Term C
-  | _, .simple s => s.lower
-  | _, .read l => .find .storage l.lower
-  | _, @Surface.Val.binop _ p _ op _ _ a b => .binop op p a.lower b.lower
-  | _, @Surface.Val.unop _ p _ op _ _ a => .unop op p a.lower
-  | _, .ternary c a b => .ite c.lower a.lower b.lower
-  | _, .readMem l => .read .memory l.lower
-  | _, .len b _ => .len .storage b.lower
-  | _, .mlen b _ => .mlen .memory b.lower
-
-end
-
-/-- An index's term: the word its key is hashed as (`Term.keyAt`), what
-`Loc.lower` writes; a rule names it so, and it prints as the index. -/
-@[reducible] def Surface.Simple.keyLower {k : PrimTy} (s : Surface.Simple C k) : Term C := Term.keyAt k s.lower
-@[reducible] def Surface.Val.keyLower {k : PrimTy} (v : Surface.Val C k) : Term C := Term.keyAt k v.lower
-
-/-- A write's source as a storage value: the value, or the copied subtree. -/
-def Surface.Src.lower {T : Ty} : Surface.Src C T → SValT C
-  | .val v => .val v.lower
-  | .copy p _ => .find .storage p.lower
-
-/-- A memory write's source. -/
-def Surface.MSrc.lower {T : Ty} : Surface.MSrc C T → MValT C
-  | .val v => .val v.lower
-  | .ref p => .ref p.lower
-
-/-! ### Lowering keeps meaning -/
 
 /-- A key's term reads the word the key is hashed as. -/
 theorem Term.keyAt_eval (σ : State) (k : PrimTy) (t : Term C) {β : Type} (f : Int → Res β) :
@@ -1570,69 +1436,5 @@ theorem Term.keyAt_eval (σ : State) (k : PrimTy) (t : Term C) {β : Type} (f : 
     | ok v => cases v with
       | int _ => rfl
       | bool b => cases b <;> rfl
-
-/-- A simple value's term reads what it does: `x` is `x`. -/
-@[simp] theorem Surface.Simple.lower_eval (σ : State) {p : PrimTy} (s : Surface.Simple C p) :
-    s.lower.eval σ = s.eval σ := by
-  cases s <;> rfl
-
-mutual
-
-/-- A path's term is the path it resolves to: `alice.account` lowers to
-`alice.account`, `sp.age` to whatever `sp` is bound to, then `age`. -/
-theorem Surface.SPath.lower_eval (σ : State) : {T : Ty} → (p : Surface.SPath C T) →
-    p.lower.eval σ = p.resolve σ
-  | _, .alias _ => rfl
-  | _, .loc l => l.lower_eval σ
-
-theorem Surface.Loc.lower_eval (σ : State) : {T : Ty} → (l : Surface.Loc C T) →
-    l.lower.eval σ = l.resolve σ
-  | _, .root .. => rfl
-  | _, .field b f _ => by
-    simp only [Surface.Loc.lower, tm_eval, Surface.Loc.resolve, b.lower_eval σ]
-  | _, .index (k := k) _ b i => by
-    simp only [Surface.Loc.lower, tm_eval, Surface.Loc.resolve, b.lower_eval σ]
-    simp only [Term.keyAt_eval, i.lower_eval σ]
-
-theorem Surface.MPath.lower_eval (σ : State) : {T : Ty} → (p : Surface.MPath C T) →
-    p.lower.eval σ = (do (← p.mval σ).asRef)
-  | _, .var x _ => by
-    simp only [Surface.MPath.lower, tm_eval, Surface.MPath.mval, bind, Except.bind]
-    cases σ.getEnv x with
-    | error _ => rfl
-    | ok b => cases b <;> rfl
-  | _, .loc l => by
-    simp only [Surface.MPath.lower, tm_eval, Surface.MPath.mval, ← l.lower_eval σ, bind_assoc, pure_bind]
-
-theorem Surface.MLoc.lower_eval (σ : State) : {T : Ty} → (l : Surface.MLoc C T) →
-    (do readAddr σ (← l.lower.eval σ)) = l.read σ
-  | _, .field b f _ => by
-    simp only [Surface.MLoc.lower, tm_eval, Surface.MLoc.read, b.lower_eval σ, bind_assoc, pure_bind]
-    rfl
-  | _, .index _ b i => by
-    simp only [Surface.MLoc.lower, tm_eval, Surface.MLoc.read, b.lower_eval σ, i.lower_eval σ, bind_assoc, pure_bind]
-    rfl
-
-/-- A value's term reads what it does: `alice.age + 1` lowers to
-`find(storage, alice.age) + 1`. -/
-theorem Surface.Val.lower_eval (σ : State) : {p : PrimTy} → (v : Surface.Val C p) →
-    v.lower.eval σ = v.eval σ
-  | _, .simple s => s.lower_eval σ
-  | _, .read l => by
-    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, l.lower_eval σ, pure_bind]
-  | _, .binop _ _ _ a b => by
-    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, a.lower_eval σ, b.lower_eval σ]
-  | _, .unop _ _ _ a => by
-    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, a.lower_eval σ]
-  | _, .ternary c a b => by
-    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, c.lower_eval σ, a.lower_eval σ, b.lower_eval σ]
-  | _, .readMem l => by
-    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, ← l.lower_eval σ, bind_assoc, pure_bind]
-  | _, .len b _ => by
-    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, b.lower_eval σ, pure_bind]
-  | _, .mlen b _ => by
-    simp only [Surface.Val.lower, tm_eval, Surface.Val.eval, b.lower_eval σ, bind_assoc, pure_bind]
-
-end
 
 end Solidity

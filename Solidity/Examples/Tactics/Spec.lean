@@ -69,19 +69,6 @@ info: dl{
 def addObligation : Fml Ledger [] := cspec!{ add }
 def ctorObligation : Fml Ledger [] := cproblem!{ constructor }
 
-/-- The two formulas are the same term (their quotations equal). -/
-def sameAs (a b : Except String (Surface.Fml Ledger)) : Bool :=
-  match a, b with
-  | .ok φ, .ok ψ =>
-    Surface.Fml.quote (Lean.mkConst ``Ledger) φ == Surface.Fml.quote (Lean.mkConst ``Ledger) ψ
-  | _, _ => false
-
-/-! Each specification's obligation erases to the closer's (`specParts`). -/
-
-#guard sameAs ((specObligation Ledger "add").map (·.eraseS [])) (Surface.specObligation Ledger "add")
-#guard sameAs ((specObligation Ledger "constructor").map (·.eraseS []))
-  (Surface.specObligation Ledger "constructor")
-
 /-! The deployment's obligation in solkey's problem syntax (`Problem.text`). -/
 
 /--

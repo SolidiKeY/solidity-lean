@@ -135,7 +135,9 @@ families, its conclusion, printed with the notation on (`pp.sol.dl`, and
 term left escaped: no escape `‹…›` names a scoped constant, printed with
 full names (`‹Solidity.Val.…›`, `‹(Solidity.Upd.…).snd›`,
 `‹@Solidity.Val.…›`, `‹Solidity.Ext.push …›`, `‹Solidity.Tms.STerm.save …›`;
-`‹Solidity.Surface.…›` passes).  The constructors whose line does not print
+`‹Solidity.Surface.…›`, the closer's, passes, and so does
+`‹Solidity.Stmt.call …›`, `functionCallArgCapture`'s call, which has no
+line of KeY's: `Calculus/DelabLean.lean`).  The constructors whose line does not print
 are listed.  Today's rule table, which the scoped lines were once diffed
 against (`docs/intrinsic.md`, decision 35), is gone; the lines are pinned
 where each rule is shown (`#taclet`, `#check`). -/
@@ -150,21 +152,28 @@ def ruleLine (c : Lean.Name) (full : Bool := false) : MetaM String := do
         `pp.fullNames full) do
       return (← Meta.ppExpr body).pretty 100000
 
-/-- The scoped families and namespaces that have no erased twin and are not
-among `Delab.untwinnedFamilies`, which the prefix `Solidity.Core` once kept
-apart: every root of a type or a namespace that was declared under it, but the
-shared vocabulary that only gained lemmas there (`Contract`, `PrimTy`,
-`BinOp`, `Op0`–`Op3`, `Srt`, `Binds`, `Res`, `Value`, `Delab`). -/
+/-- The scoped families and namespaces that have no erased twin, which the
+prefix `Solidity.Core` once kept apart: the program's (`Stmt`, `Val`, …,
+the holes, `Premise`), and every root of a type or a namespace that was
+declared under it, but the shared vocabulary that only gained lemmas there
+(`Contract`, `PrimTy`, `BinOp`, `Op0`–`Op3`, `Srt`, `Binds`, `Res`, `Value`,
+`Delab`). -/
 def scopedOnlyRoots : List Lean.Name :=
-  [``Solidity.Agree, ``Solidity.ArrView, ``Solidity.BlockKind, ``Solidity.Branch,
+  [``Solidity.Stmt, ``Solidity.Prog, ``Solidity.Simple, ``Solidity.SPath, ``Solidity.Loc,
+   ``Solidity.MPath, ``Solidity.MLoc, ``Solidity.Val, ``Solidity.Src, ``Solidity.ARhs,
+   ``Solidity.MRhs, ``Solidity.NewLhs, ``Solidity.MSrc, ``Solidity.OpLoc, ``Solidity.CallRet,
+   ``Solidity.ExtCall, ``Solidity.LoopAnn, ``Solidity.Args, ``Solidity.Binders,
+   ``Solidity.CodeBinder, ``Solidity.SHole, ``Solidity.MHole, ``Solidity.VHole,
+   ``Solidity.Frames, ``Solidity.Premise, ``Solidity.LTy,
+   ``Solidity.Agree, ``Solidity.ArrView, ``Solidity.BlockKind, ``Solidity.Branch,
    ``Solidity.CallbackTaclet, ``Solidity.COut, ``Solidity.Ctx, ``Solidity.EState,
    ``Solidity.Env, ``Solidity.ExecF, ``Solidity.ExecP, ``Solidity.ExecS, ``Solidity.Ext,
-   ``Solidity.FrameFresh, ``Solidity.Fold, ``Solidity.FShape, ``Solidity.Grew,
+   ``Solidity.Fold, ``Solidity.FShape, ``Solidity.Grew,
    ``Solidity.Grown, ``Solidity.Heap, ``Solidity.Held, ``Solidity.HRef, ``Solidity.HTy,
    ``Solidity.Hyps, ``Solidity.LeanTaclet, ``Solidity.MFields, ``Solidity.MObj,
    ``Solidity.MVal, ``Solidity.Natural, ``Solidity.NaturalA, ``Solidity.NCtx, ``Solidity.Objs,
    ``Solidity.Out, ``Solidity.Path, ``Solidity.Proves, ``Solidity.ProvesC, ``Solidity.RemOk,
-   ``Solidity.Resolved, ``Solidity.Rhs, ``Solidity.Rule, ``Solidity.RunInv, ``Solidity.RunWT,
+   ``Solidity.Rhs, ``Solidity.Rule, ``Solidity.RunInv, ``Solidity.RunWT,
    ``Solidity.SFields, ``Solidity.Shape, ``Solidity.SList, ``Solidity.SMap, ``Solidity.SRef,
    ``Solidity.StateInv, ``Solidity.StChg, ``Solidity.Storage, ``Solidity.Subst,
    ``Solidity.SVal, ``Solidity.SVec, ``Solidity.Taclet, ``Solidity.TEnv, ``Solidity.TGFrame,
@@ -181,7 +190,7 @@ def isScopedName (env : Environment) (tok : String) : Bool :=
     | n@(.str p _) => n != `Solidity &&
         (Delab.isScopedFamily env n || scopedOnlyRoots.contains n || go p)
     | .num p _ => go p
-  tok.startsWith "Solidity." && go tok.toName
+  tok.startsWith "Solidity." && tok != "Solidity.Stmt.call" && go tok.toName
 
 /-- Whether a conclusion printed with full names is a rule line: the
 judgement's delaborator wrote it, and no escape `‹…›` in it names a scoped

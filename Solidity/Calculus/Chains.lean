@@ -140,7 +140,7 @@ inductive LineKey (C : Contract) where
 
 /-- The statements of a block, one string each, as `Prog.toStrs` prints
 them, but a block statement (`{ … }`, what a call's expansion leaves) its
-statements, as the erasure (`Prog.erase`) and a line's print flatten it. -/
+statements, as a line's print flattens it. -/
 partial def Prog.keyStrs (skip : Nat) (ns : List Var) {Γ Γ' : Ctx} : Prog C Γ Γ' → List String
   | .nil => []
   | .cons s P =>
