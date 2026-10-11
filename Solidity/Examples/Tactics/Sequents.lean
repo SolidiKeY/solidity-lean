@@ -4,9 +4,11 @@ import Solidity.Calculus.Sequents
 # Checked sequent lines on scoped goals, pinned
 
 `Calculus/Sequents.lean`: under `open scoped Solidity.Scoped`,
-`show sequent!{ Γ ⟹ φ }` checks that a scoped goal prints as the line
-(its erasure against the line read as today's), as a walk over today's
-goals states them (today's `Calculus/Sequents`).  A block's `}` is not
+`show sequent!{ Γ ⟹ φ }` checks that a scoped goal prints as the line:
+the goal's printed line (its context folded in front, `Hyps.wrap`, and its
+entries counted, `Delab.hypsPartsS`) against the line read scoped and
+printed alike, as a walk over today's goals states them (today's
+`Calculus/Sequents`).  A block's `}` is not
 written; a hidden binder is no entry, and an entry folded into the formula
 is not the line.
 -/

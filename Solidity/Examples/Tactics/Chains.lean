@@ -256,6 +256,29 @@ theorem ageWriteChain :
 
 #last_line ageWriteChain
 
+/-- Through a loop, as `#chain` writes it: `whileUnwind` leaves the body as
+a block inside the branch (`if (c) { {body} while … }`), which the line
+reads flattened, at any depth (`Stmt.keyStr`). -/
+theorem loopChain :
+    cdl![m]{ ∀ uint i; ⟨[ i = 0;
+      /// @custom:key unwind 1
+      while (i < 1) { i++; }; ]⟩ φ }
+    ~[localValueAssign]~> cdl![m]{ ∀ uint i; { i := 0 } ⟨[
+      /// @custom:key unwind 1
+      while (i < 1) {i++;}; ]⟩ φ }
+    ~[whileUnwind]~> cdl![m]{ ∀ uint i; { i := 0 } ⟨[ if (i < 1) {i++;while (i < 1) {i++;};}; ]⟩ φ }
+    ~[ifElseUnfold]~> cdl![m]{ ∀ uint i; { i := 0 } ⟨[ bool se1 = i < 1; if (se1) {i++;while (i < 1) {i++;};}; ]⟩ φ }
+    ~[localValueDeclInitDrop]~> cdl![m]{ ∀ uint i; { i := 0 } ⟨[ se1 = i < 1; if (se1) {i++;while (i < 1) {i++;};}; ]⟩ φ }
+    ~[binopAssignment]~> cdl![m]{ ∀ uint i; { i := 0 } { se1 := i < 1 } ⟨[ if (se1) {i++;while (i < 1) {i++;};}; ]⟩ φ }
+    ~[ifElseSplit]~> cdl![m]{
+        ∀ uint i; { i := 0 } { se1 := i < 1 } ((se1 ≐ true → ⟨[ i++; while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 ≐ false → φ)) }
+    ~[blockEmpty]~> cdl![m]{
+        ∀ uint i; { i := 0 } { se1 := i < 1 } ((se1 ≐ true → ⟨[ i++; while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 ≐ false → φ)) }
+    ~[localIncrement]~> cdl![m]{
+        ∀ uint i;
+          { i := 0 } { se1 := i < 1 } ((se1 ≐ true → { i := i + 1 } ⟨[ while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 ≐ false → φ)) } := by
+  sol_chain
+
 end
 
 /-! ## Under the box -/
