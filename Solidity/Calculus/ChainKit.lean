@@ -4,6 +4,7 @@ import Solidity.Calculus.HoldsErase
 import Solidity.Calculus.Sound
 import Solidity.Calculus.Merge
 import Solidity.Calculus.RewriteScoped
+import Solidity.Calculus.RewritePast
 import Solidity.Calculus.RewriteChains
 
 /-!
