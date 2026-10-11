@@ -244,7 +244,8 @@ statement. -/
 @[tactic Solidity.tacticSol_step]
 def evalSolStepCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
-  let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
+  let some (C, _) ← Symex.validGoal? g
+    | throwError m!"sol_step: expected a goal `⊨ φ`{indentExpr (← g.getType)}"
   let lem := mkApp (mkConst ``Fml.step_valid) C
   Symex.reporting g do
     replaceMainGoal [← Symex.applyValid "sol_step" g lem (some m!"no modality left")]

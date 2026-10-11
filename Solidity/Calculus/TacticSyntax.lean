@@ -93,7 +93,7 @@ elab_rules : tactic
     if (← getUnsolvedGoals).isEmpty then return
     let g ← getMainGoal
     let ty ← instantiateMVars (← g.getType)
-    let_expr NFml.Valid _ _ := ty | throwUnsupportedSyntax
+    let_expr NFml.Valid _ _ := ty | throwError m!"sol_symex: expected a goal `⊨ φ`{indentExpr ty}"
     replaceMainGoal [← normValid g]
 
 /-- `sol_derive`: run the strategy as a derivation, until no goal has a

@@ -207,14 +207,8 @@ The typed elaborator refuses it: `-1` is no `uint`, as solc refuses it
 (`docs/intrinsic.md`, decision 79). -/
 /--
 error: Solidity elaboration failed: operator - does not take uint
----
-error: Unexpected syntax
-  sol_symex
 -/
-#guard_msgs in
-example : ⊨ dl!{ [ uint y = values[-1]; ] ⟨ values[7] = 1; ⟩ true } := by
-  sol_symex
-  sol_decide
+#guard_msgs in #check dl!{ [ uint y = values[-1]; ] ⟨ values[7] = 1; ⟩ true }
 
 /-- `uint y = alice.account.balance;` then `delete alice.account;` — a read
 above one that returns: `alice.account` is there, so it can be deleted. -/
