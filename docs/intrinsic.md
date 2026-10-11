@@ -2401,6 +2401,76 @@ one fresh worker at a time, killed after; base = the files at `intrinsic`
 54 ms at base), the four inlined `#eval`s costing what they did
 (110–124 ms each, both).
 
+### W8.3 lane `ex-storage-memory` record (2026-10-11, branch `w8-w83examplesandleafconsumersmigrate-ex-storage-memory`)
+
+Fourteen example files read the scoped syntax: `Examples/Tactics/{StorageSuite,
+StorageDelete,Memory,LedgerDelete,Net,Values,Operators,Checked,CrossDomain,
+Constructors,CallbackRuns,Tour}.lean`, `Examples/Chains/Memory.lean`,
+`Examples/Notation.lean`.  None of them names `Surface.Prog` any more.
+
+- **Strings and runs.**  `Surface.Prog.toStr (sol{ … })` is
+  `Prog.toStr [] (sol{ … })`, with the same strings, still by `decide` (`rfl` in `Chains/Memory.lean`).
+  `Surface.Prog.runT`/`localAfterT` are `Prog.runT`/`Prog.localAfterT`
+  (`Tools/Run.lean`), and `Mini.deployRun` is `Mini.deployRunS`.  An
+  ascription `: Surface.Prog C` is `: Prog C [] _`.
+- **Kernel claims on the scoped program.**  In `StorageSuite`, `Net`,
+  `Constructors` and `CallbackRuns`, the `run_cmd … Prog.defineCore` blocks
+  are gone.  Each `…Core` is now a definition,
+  `private def xCore := (sol{ … } : Prog C [] _)`, which the kernel checks
+  like `Prog.define`'s.  The `decide +kernel` and `rfl` claims unfold it
+  directly, with no `resolve`.  The ascription goes in the body because a
+  `_` in a declared type is not filled from the body.  For the same reason,
+  `StorageSuite`'s two `fail_if_success have` refusals are
+  `have := (sol{ … } : Prog TestSuite [] _)`; a positive control
+  (`fixedValues[2] = 1;`) was checked to elaborate in that form.
+- **`Examples/Notation.lean`'s premise pin** binds the block
+  `let P : Prog StandardExample [] _ := sol{ … }` in place of
+  `Prog.resolve [] sol{ … }`.  The printed premise is unchanged.
+- **Not moved.**
+  - The bare `#check sol{ … }` error pins have no expected type, so they
+    still go through the erased path.  They take the scoped one at W8.4
+    with the same text, because `elabProgAt` is `elabProgAtS` followed by
+    an erasure, so the errors are the same.
+  - `Operators.machine_run`'s `slotAfter sol{ … }` reads at
+    `Evm/Examples.lean`'s `Surface.Prog` type until the `Evm` lane moves
+    `slotAfter`.  It needs no change of text here.
+  - The `import Solidity.Calculus.Surface` lines stay: that module is the
+    `open scoped Solidity.Scoped` switch, not the surface syntax.
+
+**Pins.**  No `#guard_msgs` text moved.  The pins whose statement changed,
+with the same expected text:
+
+| File | Pins | Change |
+|---|---|---|
+| `Tactics/Checked.lean` | 1 `#eval` pin, 6 `decide` string examples | `Surface.Prog.toStr` → `Prog.toStr []` |
+| `Tactics/Operators.lean` | 2 `decide` string examples | same |
+| `Chains/Memory.lean` | 1 `rfl` string example | same, ascription `: Prog Calls [] _` |
+| `Tactics/StorageSuite.lean` | 9 `#eval` pins (`localAfterT`/`runT`) | the scoped run tools |
+| `Tactics/StorageDelete.lean` | its `#eval` pins on a run | same |
+| `Tactics/Memory.lean` | its `#eval` pins on a run (some bind `let P : Prog C [] _`) | same |
+| `Tactics/LedgerDelete.lean` | 3 `#eval` pins (`ledgerProgram` scoped) | same |
+| `Tactics/Values.lean`, `Tactics/CrossDomain.lean` | 1 `#eval` pin each | same |
+| `Tactics/Tour.lean` | 3 `#check` error pins | ascription `: Prog StandardExample [] _` |
+| `Tactics/Constructors.lean` | `deployValue` (`rfl`) | `Mini.deployRunS` |
+| `Notation.lean` | the `run_meta` premise pin | the block bound scoped, no `resolve` |
+
+No constructor-tree pin is among these files.
+
+**Checks.**  Every touched file has no errors and no warnings (checked
+through the MCP).  Only `Solidity.lean` imports them.  No gate row imports
+these modules, so the W6/W7 gate rows cannot move, and W8.5 re-times
+them.  The lane's own files were timed with the end-of-work method
+(`intrinsic` at `cebf1880` against this branch, one fresh worker each,
+load 0.9–1.8):
+
+| Module | base | lane | ratio |
+|---|---|---|---|
+| `Examples/Tactics/StorageSuite` | 23.78 s | 23.37 s | 0.98 |
+| `Examples/Tactics/Net` | 7.80 s | 7.72 s | 0.99 |
+| `Examples/Tactics/Constructors` | 6.63 s | 6.47 s | 0.98 |
+| `Examples/Tactics/Checked` | 7.06 s | 7.10 s | 1.01 |
+| `Examples/Tactics/Memory` | 67.36 s | 67.68 s | 1.00 |
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.

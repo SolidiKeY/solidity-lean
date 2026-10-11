@@ -28,14 +28,8 @@ namespace Solidity.Examples.Tactics.CallbackRuns
 
 open Solidity Solidity
 
-private def pays : Solidity.Surface.Prog StandardExample := sol[StandardExample]{
-  uint to = 9; to.transfer(2); }
-
-open Lean Elab Command in
-run_cmd liftCoreM do
-  if let some e ← Prog.defineCore `Solidity.Examples.Tactics.CallbackRuns.paysCore
-      ``StandardExample [] pays then
-    throwError "paysCore: {e}"
+private def paysCore := (sol[StandardExample]{
+  uint to = 9; to.transfer(2); } : Prog StandardExample [] _)
 
 /-- The program pays. -/
 example : Prog.hasTransfer paysCore = true := rfl
