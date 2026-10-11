@@ -6,6 +6,7 @@ import Solidity.SpecSyntax
 import Solidity.Syntax
 import Solidity.Scope
 import Solidity.Syntax.Scoped
+import Solidity.Syntax.PrintInlined
 import Solidity.Syntax.Resolve
 import Solidity.Syntax.Elab
 import Solidity.Syntax.Quote
