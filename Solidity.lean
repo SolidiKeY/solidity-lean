@@ -26,6 +26,7 @@ import Solidity.Semantics.Erased
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
 import Solidity.Semantics.StepErase
+import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame
 import Solidity.Semantics.RunFuel
@@ -214,6 +215,7 @@ import Solidity.Semantics.Ends
 import Solidity.Typing.TypedWT
 import Solidity.Typing.Reachability
 import Solidity.Typing.Constructibility
+import Solidity.Typing.Fits
 import Solidity.Typing.CanonTest
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage

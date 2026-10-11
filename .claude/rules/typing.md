@@ -21,12 +21,14 @@ declared read sort holds of what a well-typed run reads.
 `Typing/Constructibility.lean` is the converse: canonical and tight
 (`SVal.tight`) is exactly reachable for a storage whose words, keys and
 slots fit (`reachable_iff`, for `Ty.okDeep` roots, under `FitsStorage`; not
-implied by `Reachable`, `huge_reachable_not_fits`, decision 77 of
-`docs/intrinsic.md`), by a typed builder that reaches past an array's end through aliases
+implied by `Reachable` in general (`huge_reachable_not_fits`), implied under
+`FixedFits` (`reachable_fits`; `reachable_iff_fits` drops the premise),
+`Typing/Fits.lean`, decisions 77 and 97 of `docs/intrinsic.md`), by a typed builder that reaches past an array's end through aliases
 `slot d`. A new statement needs its erasure lemma (`TRun.x_erase`,
 `Semantics/StepErase.lean`) and its cases in `Stmt.keeps_canon`
-(Reachability) and `Stmt.keeps_tight` (Constructibility), a leaf through
-`RunInv.TKeeps.of_agrees`.
+(Reachability), `Stmt.keeps_tight` (Constructibility) and `Stmt.keeps_fits`
+(Fits), a leaf through `RunInv.TKeeps.of_agrees`, and in
+`Stmt.asserts`/`Stmt.run_noPanic` (`Semantics/NoPanic.lean`).
 
 The run is `Semantics/Run.lean`'s, over typed states; `Semantics.lean` keeps
 the untyped state's operations, which the typed ones erase to

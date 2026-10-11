@@ -9,7 +9,8 @@ What the scoped strategy leaves (`symex`, `Calculus/Step.lean`)
 is closed by today's closer (Decision 6: `Fml.erase` is the bridge until
 the closer is ported): a scoped formula is valid when its erasure is
 (`Valid.of_erase`), and the erasure goes to `NFmlClose.lean`'s `sol_close` or to
-`Derive.proves`, the closer `sol_prove` runs.
+`NFml.Derive.proves`, the closer `sol_prove`'s walk runs on each leaf
+(`Calculus/ProvesDerive.lean`).
 
 A first-order formula reads as its erasure (`holds_erase_fo`); a leaf has
 more: updates, of either modality (the reading of an update asks only of

@@ -631,8 +631,8 @@ strictly, the work doubled with each push (twelve onto one array: 23 ms;
 twelve onto each of two, interleaved: 106 s), and `sol_prove?`'s size test
 (`Derive.leafFits`) builds the reduction before it counts it.  Here the leaf
 is within `closeSize` and its reduction past `elimSize`: refused in
-milliseconds.  The leaves are the scoped strategy's, erased
-(`Derive.residueOf`). -/
+milliseconds.  The leaves are the `⊢` walk's (`Seq.residue`), erased as a
+leaf's first line erases it (`Seq.leafErase`). -/
 
 /-- Twenty-two pushes onto one array. -/
 def pushes22 : Fml StandardExample [] :=
@@ -644,10 +644,12 @@ def pushes22 : Fml StandardExample [] :=
     values.push(20); values.push(21); ]
     values.length > 0 }
 
-#guard (Derive.residueOf pushes22).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
-      NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
+#guard (Seq.residue .all (some 0) false .nil pushes22).map
+  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
+    match Seq.leafErase (some 0) l.2.1 l.2.2 with
+    | some (Γ, φ) => (((Hyp.wrap (NFml.Derive.dropWt Γ) φ).seqUpd.toL Decide.Sym.empty).fits
+        NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits Γ φ
+    | none => false) == some [true]
 
 /-! The size bound (`Derive.closeSize`): a storage written from its own
 read doubles the leaf with each write.  Four `total += 1;` close inside the
@@ -663,10 +665,12 @@ def writes6 : Fml StandardExample [] :=
   dl!{ [ total = 0; total += 1; total += 1; total += 1; total += 1; total += 1;
     total += 1; ] total == 6 }
 
-#guard Derive.proves writes4
-#guard (Derive.residueOf writes6).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    NFml.Derive.leafFits l.1 l.2) == some [false]
+#guard (Seq.residue .all (some 0) false .nil writes4).map List.isEmpty == some true
+#guard (Seq.residue .all (some 0) false .nil writes6).map
+  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
+    match Seq.leafErase (some 0) l.2.1 l.2.2 with
+    | some (Γ, φ) => NFml.Derive.leafFits Γ φ
+    | none => false) == some [false]
 
 /-! The reduction is bounded apart (`Derive.elimSize`): a read below a
 `delete` carries the read before it twice, so ten deletes make a leaf of
@@ -678,10 +682,12 @@ def deletes10 : Fml StandardExample [] :=
     delete wallet; delete wallet; delete wallet; delete wallet; delete wallet; ]
     wallet.stash[owner] == 0 }
 
-#guard (Derive.residueOf deletes10).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
-      NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
+#guard (Seq.residue .all (some 0) false .nil deletes10).map
+  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
+    match Seq.leafErase (some 0) l.2.1 l.2.2 with
+    | some (Γ, φ) => (((Hyp.wrap (NFml.Derive.dropWt Γ) φ).seqUpd.toL Decide.Sym.empty).fits
+        NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits Γ φ
+    | none => false) == some [true]
 
 end Scoped
 

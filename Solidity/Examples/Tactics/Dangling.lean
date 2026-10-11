@@ -21,8 +21,8 @@ These are solkey `TestSuite`'s dangling-alias functions over
 `StandardExample` (`persons`, `people`, `matrix`), each a `sol_prove?` that suggests
 `sol_prove`.  If a clause stops applying, or the strategy picks another
 rule, they fail.  They read scoped (`open scoped Solidity.Scoped`):
-the scoped strategy, its leaves' erasures closed by today's closer, with
-today's budgets (`Derive.residueOf`).
+the `⊢` walk, its leaves' erasures closed by today's closer, with
+today's budgets (`Seq.residue`).
 -/
 
 namespace Solidity.Examples.Tactics.Dangling
@@ -108,8 +108,9 @@ and the reduction by about 1.6 times a round.  Two rounds close; four
 `Examples/ProofTree.lean`.  Six are the most whose leaf is within
 `closeSize` (1799 nodes, reduction 44719), so the largest reduction
 `leafFits` builds before refusing; seven are refused by the leaf's size.
-The leaves are the erasures of what the scoped strategy leaves
-(`Derive.residueOf`), today's closer's input. -/
+The leaves are the walk's (`Seq.residue`, the `⊢` walk `sol_prove` runs),
+erased as a leaf's first line erases it (`Seq.leafErase`), today's
+closer's input. -/
 
 /-- Two rounds through one alias. -/
 def rounds2 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
@@ -135,15 +136,19 @@ def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 5; persons.push();
     persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
 
-#guard Derive.proves rounds2
-#guard (Derive.residueOf rounds4).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
-      NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
+#guard (Seq.residue .all (some 0) false .nil rounds2).map List.isEmpty == some true
+#guard (Seq.residue .all (some 0) false .nil rounds4).map
+  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
+    match Seq.leafErase (some 0) l.2.1 l.2.2 with
+    | some (Γ, φ) => (((Hyp.wrap (NFml.Derive.dropWt Γ) φ).seqUpd.toL Decide.Sym.empty).fits
+        NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits Γ φ
+    | none => false) == some [true]
 
-#guard (Derive.residueOf rounds6).map
-  (fun (ls, _) => ls.map fun (l : List (Hyp StandardExample) × NFml StandardExample) =>
-    (((Hyp.wrap (NFml.Derive.dropWt l.1) l.2).seqUpd.toL Decide.Sym.empty).fits
-      NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits l.1 l.2) == some [true]
+#guard (Seq.residue .all (some 0) false .nil rounds6).map
+  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
+    match Seq.leafErase (some 0) l.2.1 l.2.2 with
+    | some (Γ, φ) => (((Hyp.wrap (NFml.Derive.dropWt Γ) φ).seqUpd.toL Decide.Sym.empty).fits
+        NFml.Derive.closeSize).isSome && !NFml.Derive.leafFits Γ φ
+    | none => false) == some [true]
 
 end Solidity.Examples.Tactics.Dangling

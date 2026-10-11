@@ -144,8 +144,9 @@ theorem MVal.keySort_le_memValue (m : MVal) :
 theorem SVal.isRefVal_iff_keySort_struct (v : SVal) :
     v.isRefVal = true ↔ v.keySort = KeySort.struct := by
   cases v with
-  | prim p => cases p <;> simp [SVal.isRefVal, SVal.keySort, PrimVal.keySort]
-  | _ => simp [SVal.isRefVal, SVal.keySort]
+  | prim p => cases p <;> simp only [isRefVal, Bool.false_eq_true, keySort, PrimVal.keySort,
+                              reduceCtorEq]
+  | _ => simp only [isRefVal, keySort]
 
 /-- On primitive types the static and runtime sorts agree: a well-typed
 `int`/`uint` cell holds an `int`, a `bool` cell a `bool`. -/
@@ -155,11 +156,11 @@ theorem hasTy_keySort_of_primitive {ty : Ty} {v : SVal}
   cases ty with
   | prim pt =>
       cases v with
-      | prim pv => cases pt <;> cases pv <;> simp [SVal.hasTy] at h <;> rfl
-      | struct fields => simp [SVal.hasTy] at h
-      | array elems => simp [SVal.hasTy] at h
-      | map entries dflt => simp [SVal.hasTy] at h
-  | ref r => simp [Ty.isPrimitive] at hprim
+      | prim pv => cases pt <;> cases pv <;> simp only [SVal.hasTy, Bool.false_eq_true] at h <;> rfl
+      | struct fields => simp only [SVal.hasTy, Bool.false_eq_true] at h
+      | array elems => simp only [SVal.hasTy, Bool.false_eq_true] at h
+      | map entries dflt => simp only [SVal.hasTy, Bool.false_eq_true] at h
+  | ref r => simp only [Ty.isPrimitive, Bool.false_eq_true] at hprim
 
 /-- Every declared global root is present with a value of its type. -/
 def wellTypedStorageB (L : Layout) (storage : List (Name × SVal)) : Bool :=
@@ -176,20 +177,20 @@ theorem hasTyFields_lookup {s : Name} {fields : List (Name × SVal)}
     (hlook : lookupBy n fields = some v) :
     ∃ ty, lookupBy n (structDef s) = some ty ∧ v.hasTy ty = true := by
   induction fields with
-  | nil => simp [lookupBy] at hlook
+  | nil => simp only [lookupBy, reduceCtorEq] at hlook
   | cons p rest ih =>
       obtain ⟨n', v'⟩ := p
       simp only [SVal.hasTy.hasTyFields, Bool.and_eq_true] at hwt
       by_cases hn : n = n'
       · subst hn
-        simp [lookupBy] at hlook
+        simp only [lookupBy, ↓reduceIte, Option.some.injEq] at hlook
         subst hlook
         cases hdef : lookupBy n (structDef s) with
-        | none => rw [hdef] at hwt; simp at hwt
+        | none => rw [hdef] at hwt; simp only [Bool.false_eq_true, false_and] at hwt
         | some ty =>
             rw [hdef] at hwt
             exact ⟨ty, rfl, hwt.1⟩
-      · simp [lookupBy, hn] at hlook
+      · simp only [lookupBy, hn, ↓reduceIte] at hlook
         exact ih hwt.2 hlook
 
 theorem hasTyElems_mem {elem : Ty} {elems : List SVal} {v : SVal}
@@ -214,16 +215,16 @@ theorem hasTyEntries_lookup {value : Ty} {entries : List (Int × SVal)}
     (hwt : SVal.hasTy.hasTyEntries value entries = true)
     (hlook : lookupBy i entries = some v) : v.hasTy value = true := by
   induction entries with
-  | nil => simp [lookupBy] at hlook
+  | nil => simp only [lookupBy, reduceCtorEq] at hlook
   | cons p rest ih =>
       obtain ⟨i', v'⟩ := p
       simp only [SVal.hasTy.hasTyEntries, Bool.and_eq_true] at hwt
       by_cases hi : i = i'
       · subst hi
-        simp [lookupBy] at hlook
+        simp only [lookupBy, ↓reduceIte, Option.some.injEq] at hlook
         subst hlook
         exact hwt.1
-      · simp [lookupBy, hi] at hlook
+      · simp only [lookupBy, hi, ↓reduceIte] at hlook
         exact ih hwt.2 hlook
 
 theorem hasTy_numeric {ty : Ty} {v : SVal} (hnum : isNumericTy ty = true)
@@ -232,19 +233,20 @@ theorem hasTy_numeric {ty : Ty} {v : SVal} (hnum : isNumericTy ty = true)
   | prim pt =>
       cases v with
       | prim pv =>
-          cases pt <;> simp [isNumericTy, PrimTy.isNumeric] at hnum <;>
-            cases pv <;> simp [SVal.hasTy] at h <;> exact ⟨_, rfl⟩
-      | struct fields => simp [SVal.hasTy] at h
-      | array elems => simp [SVal.hasTy] at h
-      | map entries dflt => simp [SVal.hasTy] at h
-  | ref r => simp [isNumericTy] at hnum
+          cases pt <;> simp only [isNumericTy, PrimTy.isNumeric, Bool.false_eq_true] at hnum <;>
+            cases pv <;> simp only [SVal.hasTy, Bool.false_eq_true] at h <;> exact ⟨_, rfl⟩
+      | struct fields => simp only [SVal.hasTy, Bool.false_eq_true] at h
+      | array elems => simp only [SVal.hasTy, Bool.false_eq_true] at h
+      | map entries dflt => simp only [SVal.hasTy, Bool.false_eq_true] at h
+  | ref r => simp only [isNumericTy, Bool.false_eq_true] at hnum
 
 theorem hasTy_isRefVal {ty : Ty} {v : SVal} (href : ty.isReference = true)
     (h : v.hasTy ty = true) : v.isRefVal = true := by
   cases ty with
   | ref ref => cases ref <;> cases v <;>
-      simp_all [SVal.hasTy, SVal.isRefVal]
-  | _ => simp [Ty.isReference, Ty.isPrimitive] at href
+      simp_all only [SVal.hasTy, Bool.false_eq_true, SVal.isRefVal, Bool.and_eq_true,
+          Bool.not_eq_eq_eq_not, Bool.not_true, beq_iff_eq]
+  | _ => simp only [Ty.isReference, Ty.isPrimitive, Bool.not_true, Bool.false_eq_true] at href
 
 /-! ## `find` preserves typing -/
 
@@ -255,18 +257,18 @@ theorem find_hasTy {segs : List Seg} :
   induction segs with
   | nil =>
       intro v ty ty' w hty hsegs hfind
-      simp [tyAtSegs] at hsegs
-      simp [SVal.find] at hfind
+      simp only [tyAtSegs, Option.some.injEq] at hsegs
+      simp only [SVal.find, Except.ok.injEq] at hfind
       subst hsegs hfind
       exact hty
   | cons seg rest ih =>
       intro v ty ty' w hty hsegs hfind
       simp only [tyAtSegs] at hsegs
       cases hseg : segTy ty seg with
-      | none => rw [hseg] at hsegs; simp at hsegs
+      | none => rw [hseg] at hsegs; simp only [reduceCtorEq] at hsegs
       | some tym =>
           rw [hseg] at hsegs
-          simp at hsegs
+          simp only at hsegs
           cases seg with
           | field n =>
               -- `segTy ty (field n)` forces `ty = ref (struct s)`.
@@ -275,11 +277,11 @@ theorem find_hasTy {segs : List Seg} :
                   cases ref with
                   | struct s =>
                       simp only [segTy] at hseg
-                      cases v <;> simp [SVal.hasTy] at hty
+                      cases v <;> simp only [SVal.hasTy, Bool.false_eq_true] at hty
                       case struct fields =>
                         simp only [SVal.find] at hfind
                         cases hlook : lookupBy n fields with
-                        | none => rw [hlook] at hfind; simp at hfind
+                        | none => rw [hlook] at hfind; simp only [reduceCtorEq] at hfind
                         | some v' =>
                             rw [hlook] at hfind
                             obtain ⟨tyf, hdef, htyv⟩ :=
@@ -287,41 +289,44 @@ theorem find_hasTy {segs : List Seg} :
                             rw [hseg] at hdef
                             cases hdef
                             exact ih htyv hsegs hfind
-                  | array elem => simp [segTy] at hseg
-                  | fixed elem _ => simp [segTy] at hseg
-                  | mapping key value => simp [segTy] at hseg
-              | _ => simp [segTy] at hseg
+                  | array elem => simp only [segTy, reduceCtorEq] at hseg
+                  | fixed elem _ => simp only [segTy, reduceCtorEq] at hseg
+                  | mapping key value => simp only [segTy, reduceCtorEq] at hseg
+              | _ => simp only [segTy, reduceCtorEq] at hseg
           | «at» i =>
               cases ty with
               | ref ref =>
                   cases ref with
-                  | struct s => simp [segTy] at hseg
+                  | struct s => simp only [segTy, reduceCtorEq] at hseg
                   | array elem =>
                       simp only [segTy] at hseg
                       cases hseg
-                      cases v <;> simp [SVal.hasTy] at hty
+                      cases v <;> simp only [SVal.hasTy, Bool.false_eq_true, Bool.and_eq_true,
+                                      Bool.not_eq_eq_eq_not, Bool.not_true] at hty
                       case array elems shadow fx =>
                         simp only [SVal.find] at hfind
                         split at hfind
                         · exact ih
                             (hasTyElems_mem_append hty.1.2 hty.2 ((elems ++ shadow).get_mem _))
                             hsegs hfind
-                        · simp at hfind
+                        · simp only [reduceCtorEq] at hfind
                   | fixed elem n =>
                       simp only [segTy] at hseg
                       cases hseg
-                      cases v <;> simp [SVal.hasTy] at hty
+                      cases v <;> simp only [SVal.hasTy, Bool.false_eq_true, Bool.and_eq_true,
+                                      beq_iff_eq] at hty
                       case array elems shadow fx =>
                         simp only [SVal.find] at hfind
                         split at hfind
                         · exact ih
                             (hasTyElems_mem_append hty.1.2 hty.2 ((elems ++ shadow).get_mem _))
                             hsegs hfind
-                        · simp at hfind
+                        · simp only [reduceCtorEq] at hfind
                   | mapping key value =>
                       simp only [segTy] at hseg
                       cases hseg
-                      cases v <;> simp [SVal.hasTy] at hty
+                      cases v <;> simp only [SVal.hasTy, Bool.false_eq_true,
+                                      Bool.and_eq_true] at hty
                       case map entries dflt =>
                         simp only [SVal.find] at hfind
                         cases hlook : lookupBy i entries with
@@ -332,7 +337,7 @@ theorem find_hasTy {segs : List Seg} :
                             rw [hlook] at hfind
                             exact ih (hasTyEntries_lookup hty.1 hlook)
                               hsegs hfind
-              | _ => simp [segTy] at hseg
+              | _ => simp only [segTy, reduceCtorEq] at hseg
 
 theorem findStorage_hasTy {L : Layout} {s : State} {root : Name}
     {segs : List Seg} {ty' : Ty} {v : SVal}
@@ -342,14 +347,14 @@ theorem findStorage_hasTy {L : Layout} {s : State} {root : Name}
     v.hasTy ty' = true := by
   simp only [Layout.tyAt] at hty
   cases hglob : lookupBy root L.globals with
-  | none => rw [hglob] at hty; simp at hty
+  | none => rw [hglob] at hty; simp only [reduceCtorEq] at hty
   | some ty0 =>
       rw [hglob] at hty
       have hmem := lookupBy_eq_some_mem hglob
       have hall := (List.all_eq_true.mp hst) _ hmem
       simp only [State.findStorage] at hfind
       cases hroot : lookupBy root s.storage with
-      | none => rw [hroot] at hfind; simp at hfind
+      | none => rw [hroot] at hfind; simp only [reduceCtorEq] at hfind
       | some v0 =>
           rw [hroot] at hfind
           rw [hroot] at hall
@@ -362,13 +367,13 @@ theorem tyAtSegs_append_seg {ty t t' : Ty} {segs : List Seg} {seg : Seg}
     tyAtSegs ty (segs ++ [seg]) = some t' := by
   induction segs generalizing ty with
   | nil =>
-      simp [tyAtSegs] at h
+      simp only [tyAtSegs, Option.some.injEq] at h
       subst h
-      simp [tyAtSegs, hseg]
+      simp only [List.nil_append, tyAtSegs, hseg]
   | cons s0 rest ih =>
       simp only [tyAtSegs] at h
       cases h0 : segTy ty s0 with
-      | none => rw [h0] at h; simp at h
+      | none => rw [h0] at h; simp only [reduceCtorEq] at h
       | some tym =>
           rw [h0] at h
           simp only [List.cons_append, tyAtSegs, h0]
@@ -389,7 +394,7 @@ theorem tyAt_append_seg {L : Layout} {root : Name} {segs : List Seg}
     L.tyAt root (segs ++ [seg]) = some t' := by
   simp only [Layout.tyAt] at h ⊢
   cases hglob : lookupBy root L.globals with
-  | none => rw [hglob] at h; simp at h
+  | none => rw [hglob] at h; simp only [reduceCtorEq] at h
   | some ty0 =>
       rw [hglob] at h
       exact tyAtSegs_append_seg h hseg

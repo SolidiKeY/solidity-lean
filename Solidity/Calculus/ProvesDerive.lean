@@ -3,11 +3,12 @@ import Solidity.Calculus.Derive
 /-!
 # `sol_prove` on a scoped sequent: `⊢ φ` as one kernel evaluation
 
-`Calculus/Derive.lean`'s `sol_prove` proves `Valid φ`; under
-`open scoped Solidity.Scoped` an obligation is stated `⊢ φ`, the
+Under `open scoped Solidity.Scoped` an obligation is stated `⊢ φ`, the
 scoped sequent `Proves C .all [] .nil φ` (`Calculus/Surface.lean`),
 so the strategy has to build a derivation, as today's `Proves.of_residue`
-does (`Calculus/NFmlDerive.lean`).
+does (`Calculus/NFmlDerive.lean`).  A goal `Valid φ` (`⊨ φ`) goes the
+same way: `Proves.valid`, then this walk (decision 89 extended), so its
+leaves are scoped sequents too.
 
 `Seq.run` walks the sequent as `Proves` has its rules: `intro`,
 `allIntro`, `updIntro`, `bindIntro` take the formula's head into the
@@ -876,6 +877,26 @@ def evalSolProveSeq : Tactic := fun _ => withMainContext do
   let rest := (← getUnsolvedGoals).erase g
   Symex.reporting g do
     let leaves ← Seq.prove g C R Γ H φ
+    setGoals (leaves ++ rest)
+
+open Lean Elab Tactic Meta in
+/-- `sol_prove` on a scoped goal `Valid φ` (`⊨ φ`): `Proves.valid` at the
+rule set `.all`, then the walk on `⊢ φ` (`Seq.prove`), one goal `leafᵢ` per
+leaf the closer leaves, each the walk's own sequent `H ⊢ ψ` (decision 89
+extended to the `⊨` route). -/
+@[tactic Solidity.tacticSol_prove]
+def evalSolProveValid : Tactic := fun _ => withMainContext do
+  let g ← getMainGoal
+  let some (C, φ) ← Symex.validGoal? g | throwUnsupportedSyntax
+  let rest := (← getUnsolvedGoals).erase g
+  Symex.reporting g do
+    let R := mkConst ``RuleSet.all
+    let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+    let H := mkApp2 (mkConst ``Hyps.nil) C nilCtx
+    let g' ← mkFreshExprSyntheticOpaqueMVar
+      (mkAppN (mkConst ``Proves) #[C, R, nilCtx, nilCtx, H, φ]) (← g.getTag)
+    g.assign (mkAppN (mkConst ``Proves.valid) #[C, R, φ, g'])
+    let leaves ← Seq.prove g'.mvarId! C R nilCtx H φ
     setGoals (leaves ++ rest)
 
 end Solidity

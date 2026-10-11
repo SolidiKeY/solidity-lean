@@ -57,9 +57,9 @@ def evalSolUpdCore : Tactic := fun stx => Derive.onErased "sol_upd" stx stx
 
 /-! ## `sol_prove?` on a scoped goal
 
-The scoped `sol_prove` (`Valid φ`, `Calculus/Derive.lean`; `⊢ φ`,
-`Calculus/ProvesDerive.lean`), then each leaf it leaves (on `⊢`, a scoped
-sequent erased by its first line, `Proves.close_leaf`), closed by the first
+The scoped `sol_prove` (`Valid φ` and `⊢ φ`, `Calculus/ProvesDerive.lean`),
+then each leaf it leaves (a scoped sequent erased by its first line,
+`Proves.close_leaf`), closed by the first
 of today's leaf tactics (`Derive.searchLeaf`, its bounds read on the
 erasure, `Seq.goalFits`); the replay suggested as today's
 (`Derive.replayLines`). -/
