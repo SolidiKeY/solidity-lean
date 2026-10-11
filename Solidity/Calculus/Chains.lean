@@ -34,7 +34,8 @@ leaves, so a step and a rewrite are links of one chain.
 
 **`~~>` and `calc`**: `A ~~> B` reads `B` as a line of `A`'s derivation (or
 one with its spine merged, or up to `openRwDepth` merges and rewrites past
-one while the program is open, `openRwPath`), else as `Update.lean`'s line
+one while the program is open, `openRwPath`, a bounded search that
+`sol_chain?` writes out as links), else as `Update.lean`'s line
 past the program (`Fml.LeadsE`); a `calc` step `_ R B` leaves `B` a
 metavariable that `sol_chain` computes from the line before and checks
 against the text (`pendingLines`), a rewrite's too while the program is
@@ -419,9 +420,9 @@ literal law at each instance (found in the line's erasure `erased`, as past
 the program) in each update's right-hand sides; a term taclet onto a term
 that cannot halt in each box update's; a law in the equations along the
 skeleton below each number of updates (`FmlRw.litEq`, `FmlRw.lawEq`);
-`simplifyUpdate` at each update; `applyOnPV` along the skeleton under
-each update (`FmlRw.applyOnPV`); `applyOnRigidBox` and `applyStorageBox`
-as `applyOnRigid`; for `sequentialToParallel`, the merges
+`simplifyUpdate` at each update (absorbing the scope ends after it where the line under it is an update); `applyOnPV` along the skeleton under
+each update (`FmlRw.applyOnPV`); `applyOnRigidBox` as `applyOnRigid`,
+`applyStorageBox` on a box update of the storage (`FmlRw.applyStorageBox`); for `sequentialToParallel`, the merges
 over a storage or memory write at each update (`FmlRw.stateMerge`) and the
 merges under a branch (`FmlRw.mergeIn`), the spine's own being `mergeCands`'.  Their postconditions in slots and a
 modality `m` computed as the diamond and as the box; and why a law found no
@@ -446,13 +447,20 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) (branches
   let mut failed := none
   match a with
   | .table n =>
-    if n == `applyOnRigid || n == `applyOnRigidBox || n == `applyStorageBox then
-      -- under the box `applyOnRigid` applies any update (`FmlRw.applyOnRigid`),
-      -- the erasure's `applyOnRigidBox` and `applyStorageBox` with it
+    if n == `applyOnRigid || n == `applyOnRigidBox then
+      -- under the box `applyOnRigid` applies any update, under the diamond one
+      -- that cannot halt (`FmlRw.applyOnRigid`): the erasure's
+      -- `applyOnRigidBox` too (`NFml.applyOnRigidBoxTop`, w7-rewrites-99)
       for i in List.range k do
         let s := skels[i + 1]!
         if s.pushable then
           rs := rs.push (mkApp3 (mkConst ``FmlRw.applyOnRigid) C (toExpr i) (toExpr s))
+    else if n == `applyStorageBox then
+      -- the box's only, on an update of the storage and locals (`FmlRw.applyStorageBox`)
+      for i in List.range k do
+        let s := skels[i + 1]!
+        if s.pushable then
+          rs := rs.push (mkApp3 (mkConst ``FmlRw.applyStorageBox) C (toExpr i) (toExpr s))
     else if n == `applyOnPV then
       for i in List.range k do
         let s := skels[i + 1]!
@@ -463,8 +471,11 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) (branches
         let s := skels[i]!
         if s.hasLit then rs := rs.push (mkApp3 (mkConst ``FmlRw.concrete) C (toExpr i) (toExpr s))
     else if n == `simplifyUpdate then
+      -- the scope ends after the update absorbed only where the line under it
+      -- is an update (`Fml.simpAtB`)
       for i in List.range k do
         for b in [false, true] do
+          if b && !(skels[i + 1]! matches .upd _) then continue
           rs := rs.push (mkApp3 (mkConst ``FmlRw.simplifyUpdate) C (toExpr i) (toExpr b))
     else if n == `sequentialToParallel then
       for i in List.range k do
@@ -1224,12 +1235,21 @@ merges: KeY's names, no law (a law is named, `~[r]~>`). -/
 def openRwNames : List Lean.Name :=
   [`sequentialToParallel, `applyOnRigid, `applyOnPV, `concrete, `simplifyUpdate]
 
-/-- One rewrite of the line `L` while its program is open (a merge of its
-spine, or `openRwNames`), each with the line it leaves, that line's splice
-and erasures, its link (`Link.merge`, `Link.rw`), and the proof of
-`L ~~> it`, built when asked. -/
-def openRwSteps (L : Expr) :
-    TermElabM (List (Expr × Splice × Array Expr × Expr × TermElabM Expr)) := do
+/-- One rewrite of a line while its program is open: the line it leaves,
+that line's splice and erasures, the KeY name a chain writes it by, its
+link (`Link.merge`, `Link.rw`), and the proof of `L ~~> it`, built when
+asked. -/
+structure OpenStep where
+  fml : Expr
+  splice : Splice
+  erased : Array Expr
+  name : Lean.Name
+  link : Expr
+  proof : TermElabM Expr
+
+/-- The rewrites of the line `L` while its program is open: the merges of
+its spine, then `openRwNames`. -/
+def openRwSteps (L : Expr) : TermElabM (List OpenStep) := do
   let run ← runChain L
   unless run.isOpen do return []
   let (C, Γ) ← lineType L
@@ -1241,7 +1261,8 @@ def openRwSteps (L : Expr) :
       let lhs := mkAppN (mkConst ``Fml.mergeRun) #[C, Γ, toExpr c.k, toExpr c.n, L]
       let h ← kernelReflOrCases sp.modality lhs (mkApp2 (mkConst ``Option.some [0]) fml c.fml)
       mkAppM ``Fml.mergeRun_leads #[toExpr c.k, toExpr c.n, L, h]
-    out := out ++ [(c.fml, sp, c.erased, mkApp3 (mkConst ``Link.merge) C (toExpr c.k) (toExpr c.n), pf)]
+    let lnk := mkApp3 (mkConst ``Link.merge) C (toExpr c.k) (toExpr c.n)
+    out := out ++ [OpenStep.mk c.fml sp c.erased `sequentialToParallel lnk pf]
   for n in openRwNames do
     let (sp, cs, _) ← scopedRwCands L (.table n) run.erased[0]!
     for c in cs do
@@ -1250,27 +1271,72 @@ def openRwSteps (L : Expr) :
         let h ← kernelReflOrCases sp.modality lhs (mkApp2 (mkConst ``Option.some [0]) fml c.fml)
         mkExpectedTypeHint (mkAppN (mkConst ``FmlRw.sound) #[C, c.rw, Γ, L, c.fml, h])
           (mkApp4 (mkConst ``Fml.Leads) C Γ L c.fml)
-      out := out ++ [(c.fml, sp, c.erased, mkApp3 (mkConst ``Link.rw) C (toExpr n.toString) c.rw, pf)]
+      let lnk := mkApp3 (mkConst ``Link.rw) C (toExpr n.toString) c.rw
+      out := out ++ [OpenStep.mk c.fml sp c.erased n lnk pf]
   return out
-
-/-- At most `n` rewrites of the line `L` while its program is open
-(`openRwSteps`), breadth first, to a line `fits` accepts: that line and the
-proof of `L ~~> it`. -/
-partial def openRwPath (L : Expr) (fits : Expr → Splice → Array Expr → TermElabM Bool) :
-    Nat → TermElabM (Option (Expr × TermElabM Expr))
-  | 0 => return none
-  | n + 1 => do
-    let steps ← openRwSteps L
-    for (B, sp, er, _, pf) in steps do
-      if ← fits B sp er then return some (B, pf)
-    for (B, _, _, _, pf) in steps do
-      if B == L then continue
-      if let some (D, pf') ← openRwPath B fits n then
-        return some (D, do mkAppM ``Fml.Leads.comp #[← pf, ← pf'])
-    return none
 
 /-- How many rewrites `~~>` looks for while the program is open. -/
 def openRwDepth : Nat := 3
+
+/-- How many lines `openRwPath` expands at most. -/
+def openRwNodes : Nat := 48
+
+/-- At most `depth` rewrites of the line `L` while its program is open
+(`openRwSteps`), breadth first, each line expanded once and at most
+`openRwNodes` of them, each with its own heartbeats: the rewrites to the
+first line `fits` accepts, and why the search stopped short, if it did (a
+step that failed or ran out of heartbeats is a leaf). -/
+def openRwPath (L : Expr) (fits : Expr → Splice → Array Expr → TermElabM Bool)
+    (depth : Nat := openRwDepth) : TermElabM (Option (List OpenStep) × Option MessageData) := do
+  let mut frontier : Array (Expr × List OpenStep) := #[(L, [])]
+  let mut seen : Std.HashSet Expr := ({} : Std.HashSet Expr).insert L
+  let mut nodes := 0
+  let mut note : Option MessageData := none
+  for _ in [0:depth] do
+    let mut next := #[]
+    for (X, path) in frontier do
+      if nodes ≥ openRwNodes then
+        return (none, some m!"the search stopped after {openRwNodes} lines")
+      nodes := nodes + 1
+      let r : Except Exception (List OpenStep) ←
+        tryCatchRuntimeEx (.ok <$> withCurrHeartbeats (openRwSteps X)) fun e => pure (.error e)
+      match r with
+      | .error e => note := note <|> some m!"a step of the search failed: {e.toMessageData}"
+      | .ok steps =>
+        for st in steps do
+          if ← fits st.fml st.splice st.erased then return (some (path ++ [st]), none)
+        for st in steps do
+          unless seen.contains st.fml do
+            seen := seen.insert st.fml
+            next := next.push (st.fml, path ++ [st])
+    frontier := next
+  return (none, note)
+
+/-- The proof of `L ~~> B` along the rewrites `path` from `L`. -/
+def OpenStep.leads (L : Expr) : List OpenStep → TermElabM Expr
+  | [] => mkAppM ``Fml.Leads.self #[L]
+  | [st] => st.proof
+  | st :: rest => do mkAppM ``Fml.Leads.comp #[← st.proof, ← OpenStep.leads st.fml rest]
+
+/-- Whether a line written may keep a program: a rewrite while the program
+is open keeps it, so a line written with none (no program brackets, no
+term escape, no formula variable but a postcondition) is not looked for
+among them (`openRwPath`), and reads past the program. -/
+partial def Written.mayBeOpen (w : Written) : TermElabM Bool := do
+  match w with
+  | .text _ _ φ => go φ.raw
+  | _ => return true
+where
+  go (s : Syntax) : TermElabM Bool := do
+    match s with
+    | .atom _ v => return v == "⟨" || v == "[" || v == "‹"
+    | .node _ k args =>
+      if k == ``Solidity.dlFmlVar then
+        let some d := (← getLCtx).findFromUserName? s[0].getId | return true
+        let ty ← whnfR (← instantiateMVars d.type)
+        return !(ty.isAppOf ``Solidity.Post || ty.isAppOf ``Solidity.NFml.Post)
+      args.anyM go
+    | _ => return false
 
 /-! ## The chain, elaborated -/
 
@@ -1380,10 +1446,10 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         -- `~=>`: the first merge or rewrite of the scoped line that gives the
         -- line written (`openRwSteps`)
         let fits ← writtenMatcher C w
-        if let some (B, _, _, lnk, _) ← (← openRwSteps cur).findM?
-            fun (B, sp, er, _, _) => fitsS fits sp B er then
-          ws := ws.push (mk lnk B)
-          cur := B
+        if let some st ← (← openRwSteps cur).findM?
+            fun st => fitsS fits st.splice st.fml st.erased then
+          ws := ws.push (mk st.link st.fml)
+          cur := st.fml
           continue
         if isOpen then
           throwError "~=>: no merge nor rewrite ({", ".intercalate (openRwNames.map toString)}) \
@@ -1623,18 +1689,25 @@ syntax (name := leadsAnyStx) "leads% " term:max term:max : term
     if let some c ← ms.findM? (fun c => fits sp c.fml c.erased) then
       return mkApp4 (mkConst ``Fml.Leads) C Γ A c.fml
   -- rewrites of a line whose program is still open (`Calculus/RewriteScoped.lean`)
-  for (L, _) in cands do
-    if !(← runChain L).isOpen then continue
-    if let some (B, _) ← openRwPath L (fun B sp er => fits sp B er) openRwDepth then
-      return mkApp4 (mkConst ``Fml.Leads) C Γ A B
+  let mut stopped : Option MessageData := none
+  if ← w.mayBeOpen then
+    for (L, _) in cands do
+      if !(← runChain L).isOpen then continue
+      let (path?, note) ← openRwPath L (fun B sp er => fits sp B er)
+      stopped := stopped <|> note
+      if let some st := path?.bind (·.getLast?) then
+        return mkApp4 (mkConst ``Fml.Leads) C Γ A st.fml
+  let stopNote := match stopped with
+    | some m => m!"\n({m})"
+    | none => m!""
   unless (← whnfR Γ).isAppOf ``List.nil do
-    throwError "~~>: the line after is no line of the derivation of{← indentLine A}"
+    throwError "~~>: the line after is no line of the derivation of{← indentLine A}{stopNote}"
   -- past the program the line after is `Update.lean`'s; where the derivation
   -- stops on a modality variable, the program is still open
   if run.modalStop then
     throwError "~~>: the line after is no line of the derivation of{← indentLine A}\n\
       nor reached from one by {", ".intercalate (openRwNames.map toString)} \
-      (at most {openRwDepth} of them) while the program is open{modalStopNote run}"
+      (at most {openRwDepth} of them) while the program is open{modalStopNote run}{stopNote}"
   let (Z, erased) := match run.lines.getLast? with
     | some l => (l.fml, l.erased)
     | none => (A, run.erased)

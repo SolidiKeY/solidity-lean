@@ -22,6 +22,7 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 | `lit r i` | a literal law in the right-hand sides of the update at spine position `i`, any modality | `Upd.rwC_apply_eq` (iff) | `add_literals`, `leq_literals`, … |
 | `lawUpd r ht i` | a term taclet onto a term that cannot halt, in the box update at `i` | `holds_upd_rwC` | `updRw` |
 | `applyOnRigid i s` | `{U}(A ∧ B)`, `{U}(a → B)`, `{U}¬a`, `{U}a` with `a` first-order: `U` applied to the first-order parts (`Fml.substU`), kept in front of the rest; `U` at `i`, cannot halt or under the box | `Fml.pushS_sound` | `applyOnRigidFormula` |
+| `applyStorageBox i s` | `applyOnRigid` where `U` is a box update of the storage and locals (`Fml.pushStAt`) | `Fml.pushS_sound` | `applyOnRigidFormula` (the erasure's `applyStorageBox`) |
 | `concrete n s` | `true ∧ A ⇝ A`, `false → A ⇝ true`, `v ≐ v ⇝ true`, … below `n` updates | `Fml.concreteAlongS_holds` (iff) | `concrete_*`, `eqClose` |
 | `litEq r n s`, `lawEq r n s` | a literal law or a term taclet in the equations along the skeleton `s` below `n` updates: a whole side, and in `defined(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
 | `mergeIn p n` | the `n + 1` updates at the end of the path `p` (through `∧`, the right of `→`, updates and binders) merged | `Fml.mergeRun_leads` | `sequentialToParallel2` |
@@ -42,7 +43,12 @@ kernel computes it past them by `rfl`.
 
 These functions run once a link, not once a step, and use `match` on the
 indexed families, against Gate G0's first condition: an exemption, as
-`Calculus/Merge.lean`'s merge is.
+`Calculus/Merge.lean`'s merge is (decision 92, and w7-rewrites-98 for the
+walks W7 added: `Fml.lawAlongS`, `Fml.lawFiresS`, `Fml.lawAtom`, `Fml.lawAtomFires`,
+`Fml.stepIn`, `Fml.atPath`, `Tm.litPV`, `Tm.litPVFires`, `Fml.litPVAlong`,
+`Fml.litPVFires`, `Fml.applyOnPVTop`).  What `sol_upd` and `sol_merge`
+run on a whole leaf (`Upd.simpS`, `Fml.mergeB`) is
+`Calculus/UpdRuleScoped.lean`'s, by the recursor.
 -/
 
 namespace Solidity
@@ -494,6 +500,26 @@ of the formula under that update. -/
 def FmlRw.applyOnRigid (i : Nat) (s : Skel) : FmlRw C :=
   FmlRw.atSpine (fun m U φ => Fml.pushAt s m U φ) (fun h σ hψ => Fml.pushAt_sound h σ hψ) i
 
+/-- `applyOnRigid` on a box update that writes no global part but the
+storage (`Upd.stOnly`), as the erasure's `Proves.applyStorageBox` asks. -/
+def Fml.pushStAt (s : Skel) {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
+    Option (Fml C Γ) :=
+  if (m.isBoxS && U.stOnly) = true then Fml.pushAt s m U φ else none
+
+theorem Fml.pushStAt_sound {s : Skel} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
+    {ψ : Fml C Γ} (h : Fml.pushStAt s m U φ = some ψ) (σ : State C Γ) (hψ : holds σ ψ) :
+    holds σ (.upd m U φ) := by
+  unfold Fml.pushStAt at h
+  split at h
+  · exact Fml.pushAt_sound h σ hψ
+  · cases h
+
+/-- **`applyStorageBox`** at position `i` of the spine, along the skeleton
+`s`: `applyOnRigid` where the update is a box update of the storage and
+locals only (`Fml.pushStAt`). -/
+def FmlRw.applyStorageBox (i : Nat) (s : Skel) : FmlRw C :=
+  FmlRw.atSpine (fun m U φ => Fml.pushStAt s m U φ) (fun h σ hψ => Fml.pushStAt_sound h σ hψ) i
+
 /-! ## A law in the line's equations
 
 A law read in the atoms along the skeleton (`Skel`): a whole side of an
@@ -875,9 +901,10 @@ def FmlRw.applyOnPV (i : Nat) (s : Skel) : FmlRw C :=
 /-! ## `simplifyUpdate` -/
 
 /-- `simplifyUpdate` on `{U}_m φ` (`Fml.simpAt`), with the scope ends `φ`
-begins with merged in first only where `absorb` says: the elaborator asks
-it only where the line under `U` is an update, never a postcondition the
-kernel cannot look into. -/
+begins with merged in first only where `absorb` says: the elaborator
+(`scopedRwCands`) tries `absorb := false` first, and `absorb := true` only
+where the line under `U` is an update (its skeleton `.upd _`), never a
+postcondition the kernel cannot look into. -/
 def Fml.simpAtB (absorb : Bool) {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
     Option (Fml C Γ) :=
   if absorb then Fml.simpAt m U φ

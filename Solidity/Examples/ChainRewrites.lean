@@ -537,9 +537,13 @@ example : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
     ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by sol_chain
 
 /-- The two as one `~~>`: the line after is two rewrites past the first,
-found while the program is open (`openRwPath`). -/
+found while the program is open (`openRwPath`) and written out as
+`sol_chain?` finds them, so a re-check does not search. -/
 example : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
-    ~~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by sol_chain
+    ~~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by
+  exact Solidity.Fml.Via.leads (show cdl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~[applyOnRigid]~> cdl![m]{ (false ≐ true → { se1 := false } φ) ∧ (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> cdl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } by sol_chain)
 
 /-- `sequentialToParallel` under a branch: the first spine the skeleton finds. -/
 example (φ : Post StandardExample [.val .uint, .val .uint]) (ψ : Post StandardExample [.val .uint]) :

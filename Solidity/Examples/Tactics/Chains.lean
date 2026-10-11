@@ -341,6 +341,22 @@ example (φ : Post StandardExample [.val .uint]) :
     dl![m]{ ⟨[ alice.age = v; ]⟩ φ } ~~> dl![m]{ { storage := save(storage, alice.age, v) } φ } := by
   sol_chain?
 
+/-! While the program is open, `~~>` reaches a line up to three merges and
+rewrites past one of the derivation (`openRwPath`, a bounded search);
+`sol_chain?` writes them out as links, which a re-check does not search
+for (`Examples/ChainRewritesOpen.lean`). -/
+/--
+info: Try this:
+  exact Solidity.Fml.Via.leads (show cdl![m]{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
+        ~[sequentialToParallel]~> cdl![m]{ { x := 250 ‖ x := 250 + 10 } ⟨[ revert(); ]⟩ φ }
+        ~[simplifyUpdate]~> cdl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ } by sol_chain)
+-/
+#guard_msgs in
+example (φ : Post StandardExample [.val .uint]) :
+    dl![m]{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
+    ~~> dl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain?
+
 end
 
 /-! ## `#chain`, `sol_rws`: past the program

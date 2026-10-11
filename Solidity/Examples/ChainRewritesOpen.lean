@@ -155,6 +155,40 @@ example (φ : Post StandardExample [.val .uint]) :
     ~[findOnSave]~> _ := by
   sol_chain
 
+/-- `applyStorageBox` with the revert still to run: under the box, a write
+of the storage applied to the first-order part (`FmlRw.applyStorageBox`). -/
+example (φ : Post StandardExample []) :
+    dl![.box]{ { storage := save(storage, alice.age, 42) }
+      (find(storage, alice.age) ≐ 42 ∧ [ revert(); ] φ) }
+    ~[applyStorageBox]~> _ := by
+  sol_chain
+
+-- `applyStorageBox` is the box's (the write halts where its path does not
+-- resolve), and so is `applyOnRigidBox` for an update that may halt.
+/--
+error: ~[applyStorageBox]~>: applyStorageBox does not apply to
+  dl{ { storage := save(storage, alice.age, 42) } (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+while the program is open
+-/
+#guard_msgs in
+example (φ : Post StandardExample []) :
+    dl![.diamond]{ { storage := save(storage, alice.age, 42) }
+      (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+    ~[applyStorageBox]~> _ := by
+  sol_chain
+
+/--
+error: ~[applyOnRigidBox]~>: applyOnRigidBox does not apply to
+  dl{ { storage := save(storage, alice.age, 42) } (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+while the program is open
+-/
+#guard_msgs in
+example (φ : Post StandardExample []) :
+    dl![.diamond]{ { storage := save(storage, alice.age, 42) }
+      (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+    ~[applyOnRigidBox]~> _ := by
+  sol_chain
+
 /-- `simplifyUpdate` under `m` with the revert still to run: the declaration
 `x := 250` takes the write that shadows it (`Upd.redecl`, KeY's shadowed
 elementary dropped); its right-hand side cannot halt, so under the diamond
@@ -165,11 +199,14 @@ example (φ : Post StandardExample [.val .uint]) :
     ~[simplifyUpdate]~> dl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ } := by
   sol_chain
 
-/-- The same as one `~~>` (`openRwPath`). -/
+/-- The same as one `~~>`, written out as `sol_chain?` finds it
+(`openRwPath`), so a re-check does not search. -/
 example (φ : Post StandardExample [.val .uint]) :
     dl![m]{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
     ~~> dl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ } := by
-  sol_chain
+  exact Solidity.Fml.Via.leads (show cdl![m]{ { x := 250 } { x := x + 10 } ⟨[ revert(); ]⟩ φ }
+        ~[sequentialToParallel]~> cdl![m]{ { x := 250 ‖ x := 250 + 10 } ⟨[ revert(); ]⟩ φ }
+        ~[simplifyUpdate]~> cdl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ } by sol_chain)
 
 /-- Under the box a shadowed write that may halt goes too: where it halts,
 the box line holds. -/
