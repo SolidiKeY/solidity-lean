@@ -185,7 +185,7 @@ const STRUCT_RENAMES = {};
 
 /**
  * `TestSuite.sol` is not translated: `solc_import` reads it from solc's AST
- * (`Solidity/Solkey/TestSuite.lean`), `solc_problems` states each obligation
+ * (`Solidity/Solkey/TestSuite.lean`), `solc_scoped_problems` states each obligation
  * as solkey does, and `Solidity/TestSuite/Report.lean` pins which are derived
  * by `⊢`.  Its rows are read off those pins (`readImported`), so re-running
  * this script after a new theorem lands re-pins the table with no hand edit.

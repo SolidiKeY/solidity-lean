@@ -6,21 +6,22 @@ import Solidity.Calculus.ProvesDerive
 /-!
 # The obligations of an imported contract
 
-`solc_problems N`, after `solc_import … as N`, defines for each function
-`f` that elaborated its obligation as solkey states it,
+`solc_scoped_problems N`, after `solc_import … as N`, states for each
+function `f` that elaborated its obligation as solkey states it,
 `N.f.problem : Fml N []` (`Problem.fml`, `Calculus/Problem.lean`): the
 modality is the function's tag, the binders its parameters (`∀`, the first
-outermost), the program `N.f`'s, read in their context (`obligation`).  The constructor's, `N.constructor.problem`, is a
-deployment's (`Problem.ctorFml`): the program `constructor(x̄);` from
-solkey's deployment update, with no `wt(storage)` premise.  A statement is
-a constant, so `sol_prove` names it and the elaborator never unfolds it;
-it is compiled, since `sol_prove` evaluates its sequent with compiled code.
+outermost), the program `N.f`'s, read in their context (`obligation`).  The
+constructor's, `N.constructor.problem`, is a deployment's (as
+`Problem.ctorFml` computes it): the program `constructor(x̄);` from
+solkey's deployment update, with no `wt(storage)` premise.
 
-`solc_scoped_problems N` declares the same statements as one declaration,
-the list `N.problems`, which the kernel checks once, each `N.f.problem`
-its entry (`List.getD`, read back by `Symex.evaluable`; 437 statements:
-0.4 s against 3.4 s); with `decl`, not compiled (the scoped `sol_prove`
-reads an obligation by its value).  An info names how many.
+The statements are one declaration, the list `N.problems`, which the
+kernel checks once, each `N.f.problem` a constant naming its entry
+(`List.getD`, read back by `Symex.evaluable`; 437 statements: 0.4 s
+against 3.4 s as constants of their own), so `sol_prove` names it and the
+elaborator never unfolds it.  With `decl` the table is not compiled: the
+scoped `sol_prove` reads an obligation by its value.  An info names how
+many.
 
 An obligation is proved by a theorem named `N.f.proved : ⊢ N.f.problem`,
 the scoped sequent `Proves N .all [] .nil N.f.problem`, in a module of its
@@ -40,7 +41,7 @@ is elaborated at the width (`paramCtx`).
 
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
   (`Problem.text`), to compare with `--print-problem`: `N.f.problem`, or the
-  statement `solc_problems` would declare where it has not run.
+  statement `solc_scoped_problems` would declare where it has not run.
 * `#solkey_scan N` runs `sol_prove`'s walk on every statement with
   compiled code and lists what it leaves, with times: a search, to choose the
   theorems to state.  It is not used in a checked file.  `#solkey_scan N
@@ -105,9 +106,9 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
   return some φ
 
 /-- Declare each obligation of the import `N`, `N.f.problem : Fml N []`
-(`obligation`): as constants of their own, or with `table` as the entries
-of one declaration `N.problems`; compiled when `compile`.  How many. -/
-def declareObligations (N : Lean.Name) (table compile : Bool) : CommandElabM Nat := do
+(`obligation`), as the entries of one declaration `N.problems`; compiled
+when `compile`.  How many. -/
+def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
   let rows ← reportRows N
   let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
   let fmlTy := mkApp2 (mkConst ``Fml) (mkConst N) nilCtx
@@ -117,7 +118,7 @@ def declareObligations (N : Lean.Name) (table compile : Bool) : CommandElabM Nat
   for r in rows do
     unless r.status == .elaborated do continue
     if r.tag.modality?.isSome && r.binders?.isNone then
-      logWarning m!"solc_problems: {r.name} has a parameter of no value type, so no statement"
+      logWarning m!"solc_scoped_problems: {r.name} has a parameter of no value type, so no statement"
     match obligation env N r with
     | .error e => errs0 := errs0.push e
     | .ok none => pure ()
@@ -126,61 +127,45 @@ def declareObligations (N : Lean.Name) (table compile : Bool) : CommandElabM Nat
     let mut errs := errs0
     let mut defined : Array Lean.Name := #[]
     try
-      if table then
-        -- one declaration holds every statement, so the kernel checks the
-        -- contract's types and contexts once rather than once an obligation
-        -- (437: 0.4 s against 3.4 s); each `N.f.problem` is its entry,
-        -- which `Symex.evaluable` reads back
-        let tn := N ++ `problems
-        let tt := mkApp2 (mkConst ``Fml.tt) (mkConst N) nilCtx
-        let value := Lean.ShareCommon.shareCommon (← mkListLit fmlTy (entries.toList.map (·.2)))
+      -- one declaration holds every statement, so the kernel checks the
+      -- contract's types and contexts once rather than once an obligation
+      -- (437: 0.4 s against 3.4 s); each `N.f.problem` is its entry,
+      -- which `Symex.evaluable` reads back
+      let tn := N ++ `problems
+      let tt := mkApp2 (mkConst ``Fml.tt) (mkConst N) nilCtx
+      let value := Lean.ShareCommon.shareCommon (← mkListLit fmlTy (entries.toList.map (·.2)))
+      addDecl <| Declaration.defnDecl {
+        name := tn, levelParams := [], type := mkApp (mkConst ``List [0]) fmlTy,
+        value, hints := .abbrev, safety := .safe }
+      defined := defined.push tn
+      for (dn, _) in entries, i in [0:entries.size] do
         addDecl <| Declaration.defnDecl {
-          name := tn, levelParams := [], type := mkApp (mkConst ``List [0]) fmlTy,
-          value, hints := .abbrev, safety := .safe }
-        defined := defined.push tn
-        for (dn, _) in entries, i in [0:entries.size] do
-          addDecl <| Declaration.defnDecl {
-            name := dn, levelParams := [], type := fmlTy,
-            value := mkApp4 (mkConst ``List.getD [0]) fmlTy (mkConst tn) (mkRawNatLit i) tt,
-            hints := .abbrev, safety := .safe }
-          defined := defined.push dn
-      else
-        for (dn, φ) in entries do
-          addDecl <| Declaration.defnDecl {
-            name := dn, levelParams := [], type := fmlTy, value := φ,
-            hints := .abbrev, safety := .safe }
-          defined := defined.push dn
+          name := dn, levelParams := [], type := fmlTy,
+          value := mkApp4 (mkConst ``List.getD [0]) fmlTy (mkConst tn) (mkRawNatLit i) tt,
+          hints := .abbrev, safety := .safe }
+        defined := defined.push dn
       if compile then compileDecls defined
     catch ex => errs := errs.push s!"the kernel rejects them: {← ex.toMessageData.toString}"
     pure errs
   unless errs.isEmpty do
-    throwError "solc_problems: {errs.size} obligations are not stated:\n{"\n".intercalate errs.toList}"
+    throwError "solc_scoped_problems: {errs.size} obligations are not stated:\n{"\n".intercalate errs.toList}"
   return entries.size
 
-/-- `solc_problems N`: each obligation, `N.f.problem : Fml N []`
-(`obligation`), a constant of its own, compiled. -/
-syntax (name := solcProblems) "solc_problems " ident : command
-
-@[command_elab solcProblems]
-def elabSolcProblems : CommandElab := fun stx => do
-  let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
-  discard <| declareObligations N false true
-
-/-- `solc_scoped_problems N`: `solc_problems N`'s statements as the entries
-of one table `N.problems`, compiled, or with `decl` not compiled (the
-scoped `sol_prove` reads an obligation by its value, `Symex.evaluable`); an
-info names how many. -/
+/-- `solc_scoped_problems N`: each obligation `N.f.problem : Fml N []`
+(`obligation`), an entry of one table `N.problems`, compiled, or with
+`decl` not compiled (the scoped `sol_prove` reads an obligation by its
+value, `Symex.evaluable`); an info names how many. -/
 syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" decl")? : command
 
 @[command_elab solcScopedProblems]
 def elabSolcScopedProblems : CommandElab := fun stx => do
   let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
-  let k ← declareObligations N true stx[2].isNone
+  let k ← declareObligations N stx[2].isNone
   logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped"
 
 /-- `N.f`'s statement, as compiled code evaluates it: `N.f.problem` (its
 value, where it has no code: `Symex.evaluable`), else the one
-`solc_problems` would declare (`obligation`). -/
+`solc_scoped_problems` would declare (`obligation`). -/
 def statement? (N f : Lean.Name) : CommandElabM (Option Expr) := do
   let env ← getEnv
   if env.contains (f ++ `problem) then

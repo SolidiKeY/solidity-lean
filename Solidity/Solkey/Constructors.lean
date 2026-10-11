@@ -21,8 +21,8 @@ A constructor is a row named `constructor` and, when it elaborates, the
 program `N.constructor`, a deployment `constructor(x̄);`
 (`Solidity/Frontend/Import.lean`).  `Counter`'s is specified (its contract
 has an invariant), so it has no plain statement; `EtherWallet`'s is not,
-and `solc_problems` states it from the deployment update
-(`Problem.ctorFml`).  That is solkey's specified constructor's update:
+and `solc_scoped_problems` states it from the deployment update
+(`obligation`, as `Problem.ctorFml` computes it).  That is solkey's specified constructor's update:
 solkey's unspecified problem writes `{storage := mtSt || net := mtSt}`, and
 Lean books the payment there too (`docs/solkey-feedback.md`).
 -/
@@ -41,21 +41,6 @@ warning: solc_import: the initializers are left out: an initializer calls `cap`,
 -/
 #guard_msgs in
 solc_import "../../tests/solc/InitGap.ast.json" hash 0x83328c56fa8af038 as Solkey.InitGap
-
-/-! Each import's programs are scoped, `N.f : Prog N Γ Γ'`, checked by the
-kernel at the import (`solc_scoped` counts them). -/
-
-/-- info: 2 programs declared scoped -/
-#guard_msgs in solc_scoped Solkey.Counter
-
-/-- info: 2 programs declared scoped -/
-#guard_msgs in solc_scoped Solkey.EtherWallet
-
-/-- info: 1 program declared scoped -/
-#guard_msgs in solc_scoped Solkey.CtorGap
-
-/-- info: 1 program declared scoped -/
-#guard_msgs in solc_scoped Solkey.InitGap
 
 /-! `EtherWallet`'s obligations (`solc_scoped_problems`): each stated on
 its program `N.f`, read in its parameters' context, `N.f.problem`. -/

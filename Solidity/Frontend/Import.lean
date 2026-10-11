@@ -28,7 +28,7 @@ importing file) and defines
   (`tagOf`: which obligation solkey states, if any) and parameters, what
   became of it and why, with the source line.  A function whose obligation
   is a specification's, or that has none (`internal`), is still a program:
-  only its plain statement is not made (`solc_problems`).
+  only its plain statement is not made (`solc_scoped_problems`).
 
 Each body is printed as `sol` text (`SolcJson.lean`), parsed as
 `sol_raw!{ … }` and elaborated to a `List RawStmt` term by the macros, the
@@ -46,10 +46,6 @@ Lake does not track the fixture, so the command names its hash (FNV-1a 64
 over the bytes) and refuses a fixture of another one; the script that
 writes the fixture rewrites the literal, which makes Lake re-check the
 importing module.
-
-`solc_scoped N`, after the import, checks that every row the import
-elaborated is a scoped program `N.f : Prog N Γ Γ'` (`docs/intrinsic.md`,
-M2, W8), and names how many.
 
 A function that does not elaborate is a row, not an error: the import
 never fails on one function.  Each body's elaboration has its own
@@ -130,7 +126,7 @@ partial def atRef (ref : Syntax) (stx : Syntax) : Syntax :=
 
 /-- The value type a parameter's type names, with its width: what a
 parameter may be (`paramCtx`), and what its obligation binds
-(`solc_problems`). -/
+(`solc_scoped_problems`). -/
 def paramTy? (t : String) : Option (PrimTy × Nat) :=
   match PrimTy.ofName? t, narrowTy? t with
   | some p, _ => some (p, 256)
@@ -360,29 +356,6 @@ def elabSolcImport : CommandElab := fun stx => do
   liftCoreM <| addAndCompile <| .defnDecl {
     name := rep, levelParams := [], type := rowsTy, value := toExpr (ctorRow.toList ++ rows.toList),
     hints := .abbrev, safety := .safe }
-
-/-- `solc_scoped N`: every row of the import `N` that elaborated is a
-scoped program, `N.f : Prog N Γ Γ'`; an info names how many. -/
-syntax (name := solcScoped) "solc_scoped " ident : command
-
-@[command_elab solcScoped]
-def elabSolcScoped : CommandElab := fun stx => do
-  let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
-  let rows ← liftTermElabM <| unsafe evalConst (List ImportRow) (N ++ `report)
-  let env ← getEnv
-  let mut errs : Array String := #[]
-  let mut k := 0
-  for r in rows do
-    if r.status != .elaborated then continue
-    let n := N ++ Lean.Name.mkSimple r.name
-    match env.find? n with
-    | some ci =>
-      if ci.type.isAppOfArity ``Prog 3 && ci.type.appFn!.appFn!.appArg!.isConstOf N then k := k + 1
-      else errs := errs.push s!"{r.name}: not a scoped program of {N}"
-    | none => errs := errs.push s!"{r.name}: no program {n}"
-  unless errs.isEmpty do
-    throwError "solc_scoped: {errs.size} programs are not scoped:\n{"\n".intercalate errs.toList}"
-  logInfo m!"{k} program{if k == 1 then "" else "s"} declared scoped"
 
 /-- The value of the imported program `n` (a literal: the import does not
 compile it), its contexts' terms and its parameters' names, newest first. -/

@@ -37,9 +37,6 @@ its parameters bound by `∀`, `wt(storage)` assumed, proved by
 
 solc_import "../../../tests/solc/Loops.ast.json" hash 0x499c9a4ed86a4b11 as Solc.Loops
 
-/-- info: 9 programs declared scoped -/
-#guard_msgs in solc_scoped Solc.Loops
-
 /-- info: 7 obligations declared scoped -/
 #guard_msgs in solc_scoped_problems Solc.Loops
 

@@ -16,9 +16,9 @@ parameters are `∀` binders over their type's 256-bit range (`Fml.all`): a
 `uint` ranges over `[0, 2²⁵⁶)` and an `int` over `[-2²⁵⁵, 2²⁵⁵)`, where
 KeY's `int` is unbounded.  The width is not bound: an `int8` parameter
 ranges over `[-2²⁵⁵, 2²⁵⁵)` too, which is neither solc's `[-128, 128)` nor
-KeY's every integer, because `solc_problems` keeps only the parameter's
-`PrimTy`; the obligation is then stronger than Solidity's, over more
-inputs.
+KeY's every integer, because `solc_scoped_problems` keeps only the
+parameter's `PrimTy`; the obligation is then stronger than Solidity's, over
+more inputs.
 
 **The premise is the model's own.**  solkey's `storage` is a free `Struct`
 term whose integer fields are unbounded, and no solidity taclet mentions a

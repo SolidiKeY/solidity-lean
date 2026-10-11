@@ -2,6 +2,5 @@
 -- from solc's AST (`Solidity/Solkey/TestSuite.lean`), its obligations and
 -- what is derived of them (`Solidity/TestSuite/`).
 import Solidity.Solkey.TestSuite
-import Solidity.Solkey.TestSuiteScoped
 import Solidity.TestSuite.Report
 import Solidity.TestSuite.Suggestions
