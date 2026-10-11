@@ -20,22 +20,19 @@ box context.  Every other leaf is closed on its scoped form
 `wt(storage)` premise read as a layout, its updates pushed in by position
 and the reduction closed by `LFml.closeS`, sound by `Proves.closeHolds`.
 A leaf that closer does not read (outside its fragment: the classes
-`docs/intrinsic.md`'s "W9.3 `walk` record" lists) falls back to
-`Proves.close` and today's closer on its erasure (`Fml.closeErase`,
-`Derive.residue`, `Derive.synClose`, `Calculus/NFmlDerive.lean`).  A leaf
-neither closes stays the walk's own sequent `H ⊢ φ` (`Seq.SLeaf`,
-`Seq.leafS`; M6c 6c, decision 89), a goal of the scoped calculus:
-`sol_leaf` leaves it as `⊨ ψ` (`Proves.closeValid`) for a closer, and
+`docs/intrinsic.md`'s "W9.3 `walk` record" lists), or reads and does not
+close, stays the walk's own sequent `H ⊢ φ` (`Seq.SLeaf`, `Seq.leafS`; M6c
+6c, decision 89), a goal of the scoped calculus: `sol_leaf` leaves it as
+`⊨ ψ` (`Proves.closeValid`) for a closer, the scoped `sol_close` among
+them.  Since W9.4 there is no erased fallback in the walk:
 `Proves.close_leaf` (today's text `refine NFml.Proves.close_dropWt ?_`,
-`core_leaf_close_wt`) still erases it, for a leaf of the fallback's class.
+`core_leaf_close_wt`) still erases a leaf, for a script that asks.
 `Seq.run_sound` reads the walk back as the derivation; the kernel checks
-it as one evaluation (`Seq.residue R np full H φ = some ls`, where `full` only
-orders `pick`'s two residues: `Seq.pickH`, `pickH_eq`), and the tactic
+it as one evaluation (`Seq.residue R H φ = some ls`), and the tactic
 leaves one goal `leafᵢ` per leaf, as `sol_prove` on `Valid` does.
 
 The walk is generic in what a leaf is (`α`), so the compiled run that
-quotes the leaves for the tactic (`Seq.leafQuoteS`, which marks the residue
-that closed each leaf) and the kernel's
+quotes the leaves for the tactic (`Seq.leafQuoteS`) and the kernel's
 (`Seq.leafS`) are one function.  It is written with `casesOn` (Gate G0,
 condition 1); `n` bounds the steps down a path, `b` the steps of the whole
 walk, handed from a goal to the next.
@@ -48,14 +45,10 @@ A split whose condition is ground under the context (`Hyps.groundS`, by
 position) and whose branch the closer refutes keeps only the other branch,
 the refuted one closed by `Proves.closeFalse` (`refutes`): `returnEarly`
 runs one path of its callee, not 27.  The scoped closer keeps the
-parameters bound, its reduction reading each at its type.  The fallback
-hands a leaf's erasure to today's residue with the parameters free, as
-today's leaves have them (`Fml.stripN`); where that leaves goals and the
-leaf with the parameters' `∀` kept closes, that one (`pick`, decision 27):
-a diamond that reads a parameter's range closes only so.  An explicit
-`∀ uint x;` is never stripped (decision 28): the tactic counts the
+parameters bound, its reduction reading each at its type.  An explicit
+`∀ uint x;` is marked on a leaf left (decision 28): the tactic counts the
 parameters, the leading `∀`s up to the first one `cdl!` marked explicit
-(`Symex.paramCount`), and hands the count to the walk (`np`).
+(`Symex.paramCount`), and hands the count to the quoting (`np`).
 -/
 
 namespace Solidity
@@ -182,102 +175,24 @@ theorem _root_.Solidity.NFml.Valid.of_stripN : {n : Option Nat} → {φ : Solidi
   | some (_ + 1), .upd _ _ _, h | some (_ + 1), .havoc _, h | some (_ + 1), .anon _ _, h
   | some (_ + 1), .defined _, h => h
 
-/-- Today's residue `r` of an erased leaf `e`, with the `np` parameters'
-quantifiers stripped (`Fml.stripN`), as today's leaves have them free;
-where that leaves goals but the quantified leaf, its parameters in the
-context (`.all`), leaves none, nothing: a diamond's leaf that reads a
-parameter's range (a mapping's key, an interval) closes only so.  An
-explicit `∀` past the parameters is kept either way. -/
-def pick {β : Type} (np : Option Nat) (r : Solidity.NFml C → Option (List β × Nat))
-    (e : Solidity.NFml C) : Option (List β) :=
-  match r (e.stripN np) with
-  | some ([], _) => some []
-  | r₁ => match np, e with
-    | some 0, _ => r₁.map (·.1)
-    | _, .all .. =>
-      match r e with
-      | some ([], _) => some []
-      | _ => r₁.map (·.1)
-    | _, _ => r₁.map (·.1)
-
-/-- `pick`, the quantified leaf tried first when `full` says so: the same
-leaves (`pickH_eq`), with one residue where `pick` would run two.  The
-tactic sets `full` when the compiled walk's leaves close only with their
-parameters (`leafQuoteI`), so that the kernel does not run the stripped
-residue there first. -/
-def pickH {β : Type} (full : Bool) (np : Option Nat) (r : Solidity.NFml C → Option (List β × Nat))
-    (e : Solidity.NFml C) : Option (List β) :=
-  bif full then
-    (match e with
-    | .all .. =>
-      match r e with
-      | some ([], _) => some []
-      | _ => pick np r e
-    | _ => pick np r e)
-  else pick np r e
-
-theorem pickH_eq {β : Type} (full : Bool) (np : Option Nat)
-    (r : Solidity.NFml C → Option (List β × Nat)) (e : Solidity.NFml C) :
-    pickH full np r e = pick np r e := by
-  cases full
-  · rfl
-  · simp only [pickH, cond_true]
-    split
-    · split
-      · rename_i b h
-        unfold pick
-        split
-        · rfl
-        · rename_i r₁ hr₁
-          split
-          · exact absurd (by simpa only [Solidity.NFml.stripN] using h) (hr₁ b)
-          · simp only [h]
-          · rename_i hne; exact absurd rfl (hne _ _ _)
-      · rfl
-    · rfl
-
-/-- A leaf: `Proves.close`'s side condition and the erasure in one pass
-(`Fml.closeErase`, which is `Fml.closableB` beside `Fml.erase`), and the
-residue `r` of the erasure (`pick`, by `pickH`). -/
-def leafWith {β : Type} (full : Bool) (np : Option Nat)
-    (r : Solidity.NFml C → Option (List β × Nat)) {Γ : Ctx}
-    (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List β) :=
-  match (H.wrap φ).closeErase [] with
-  | some e => pickH full np r e.2
-  | none => none
-
-/-- A leaf for the kernel: today's residue (`Derive.residue`). -/
-def leafRes (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
-    Option (List (NFml.Derive.Leaf C)) :=
-  leafWith full np (NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
-    NFml.Derive.budget []) H φ
-
 /-! ### The leaves left: scoped sequents
 
 A leaf the closer does not close stays the walk's own sequent `H ⊢ φ`
-(`SLeaf`, decision 89), not today's sequent of its erasure: the closer
-reads the erasure (`leafRes`, today's residue and `synClose`), and the
-goal it leaves is scoped.  A tactic that closes it erases it first
-(`Proves.close_leaf`, `Seq.leafErase`): the same goal of today's calculus
-that today's leaf had. -/
+(`SLeaf`, decision 89), a goal of the scoped calculus, which `sol_leaf`
+leaves as `⊨ ψ` for a closer. -/
 
 /-- A leaf the walk leaves: a sequent of the outer scope `[]`. -/
 abbrev SLeaf (C : Contract) := (Γ : Ctx) × Hyps C [] Γ × Fml C Γ
 
 /-- A leaf for the kernel, read by the scoped closer (`leafCheckS`,
-`Calculus/LeafDerive.lean`): closed (`[]`) where it closes it, the sequent
-itself where it reads it and does not.  A leaf it does not read (a class it
-has no clause for: `docs/intrinsic.md`, "W9.3 `walk` record") falls back to
-today's residue of its erasure (`leafRes`): closed where that leaves
-nothing, the sequent where it leaves a goal.  Today's residue leaves at
-most one goal of a leaf: it only moves the connectives in front into the
-context (`Derive.residue`). -/
-def leafS (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
-    Option (List (SLeaf C)) :=
+`Calculus/LeafDerive.lean`): closed (`[]`) where it closes it, else the
+sequent itself, whether the closer reads it and does not close it or does
+not read it (a class it has no clause for: `docs/intrinsic.md`, "W9.3
+`walk` record"; since W9.4 no erased fallback). -/
+def leafS {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (SLeaf C)) :=
   match leafCheckS H φ with
   | some true => some []
-  | some false => some [⟨_, H, φ⟩]
-  | none => (leafRes np full H φ).map fun ls => bif ls.isEmpty then [] else [⟨_, H, φ⟩]
+  | _ => some [⟨_, H, φ⟩]
 
 /-- Whether every entry of a context is a `∀` or a hidden binder, and how
 many `∀`s it has. -/
@@ -346,44 +261,22 @@ def SLeaf.quote (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) 
       #[hyps Γe, fml Γe, ← Quote.qHyps [] np Γ H, ← Quote.qFml Γ φ]
     return Lean.mkAppN (Lean.mkConst ``Sigma.mk [.zero, .zero]) #[ctxE, β, Γe, pair]
 
-/-- `leafS` for the tactic, and which of `pick`'s residues closed the leaf:
-`.inr true` when only the quantified one did, `.inr false` otherwise, then
-the leaf quoted (`.inl`, `SLeaf.quote`) where it is left. -/
+/-- `leafS` for the tactic: the leaf quoted (`SLeaf.quote`) where it is
+left. -/
 def leafQuoteS (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
-    Option (List (Lean.Expr ⊕ Bool)) :=
+    Option (List Lean.Expr) :=
   match leafCheckS H φ with
-  | some true => some [.inr false]
-  | some false => some [.inr false, .inl (SLeaf.quote c np H φ)]
-  | none =>
-  match (H.wrap φ).closeErase [] with
-  | some e =>
-    let r := NFml.Derive.residue (C := C) NFml.Derive.budget NFml.Derive.synClose
-      NFml.Derive.budget []
-    match r (e.2.stripN np) with
-    | some ([], _) => some [.inr false]
-    | r₁ =>
-      let rest : Option (List (Lean.Expr ⊕ Bool)) :=
-        r₁.map fun _ => [.inr false, .inl (SLeaf.quote c np H φ)]
-      match np, e.2 with
-      | some 0, _ => rest
-      | _, .all .. =>
-        match r e.2 with
-        | some ([], _) => some [.inr true]
-        | _ => rest
-      | _, _ => rest
-  | none => none
+  | some true => some []
+  | _ => some [SLeaf.quote c np H φ]
 
 /-- The steps the walk is given, down a path and in all (today's
 `Derive.budget`). -/
 def fuel : Nat := NFml.Derive.budget
 
 /-- **`sol_prove`'s check**: the leaves the walk leaves, none when every
-leaf closes; `np` the sequent's parameters (`pick`); `full` only orders
-`pick`'s two residues (`pickH`).  A split's branch is refuted as `pick`
-reads its leaf. -/
-def residue (R : RuleSet) (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ)
-    (φ : Fml C Γ) : Option (List (SLeaf C)) :=
-  (run R (leafS np full) (refutes (leafS np false)) fuel H φ fuel).map (·.1)
+leaf closes.  A split's branch is refuted as its leaf is read. -/
+def residue (R : RuleSet) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (SLeaf C)) :=
+  (run R leafS (refutes leafS) fuel H φ fuel).map (·.1)
 
 /-- How many storage writes an update holds. -/
 def _root_.Solidity.Upd.storageWrites {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Nat
@@ -404,15 +297,15 @@ leaves the walk leaves, closed by `sol_prove`'s closer (`leafS`) or
 rule. -/
 def scanLeaves (walk : Bool) (φ : Fml C []) : Option (Nat × Nat) :=
   let leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List (SLeaf C)) :=
-    fun H φ => if walk then some [⟨_, H, φ⟩] else leafS none false H φ
-  (run .all leaf (refutes (leafS none false)) fuel .nil φ fuel).map fun (ls, _) =>
+    fun H φ => if walk then some [⟨_, H, φ⟩] else leafS H φ
+  (run .all leaf (refutes leafS) fuel .nil φ fuel).map fun (ls, _) =>
     (ls.length, ls.foldl (fun m l => max m l.2.1.storageWrites) 0)
 
-/-- `residue`, the leaves quoted, each walk leaf marked by the residue that
-closed it (`leafQuoteS`). -/
+/-- `residue`, the leaves quoted (`leafQuoteS`), `np` the sequent's
+parameters (their marks, `Quote.qHyps`). -/
 def residueQuote (R : RuleSet) (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ)
-    (φ : Fml C Γ) : Option (List (Lean.Expr ⊕ Bool)) :=
-  (run R (leafQuoteS c np) (refutes (leafS np false)) fuel H φ fuel).map (·.1)
+    (φ : Fml C Γ) : Option (List Lean.Expr) :=
+  (run R (leafQuoteS c np) (refutes leafS) fuel H φ fuel).map (·.1)
 
 /-! ### A leaf erased
 
@@ -431,15 +324,12 @@ def leafEraseQuote (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] �
   (leafErase np H φ).map fun l => (Solidity.Hyp.quoteList c l.1, Solidity.NFml.quote c l.2)
 
 /-- The closer's bounds on a leaf, which `sol_prove?` asks before it
-reduces it: the scoped closer's (`leafFitsOn`) on a leaf it reads, else
-`leafFits` of its erasure (`synClose`'s bounds) on one the fallback reads. -/
-def leafFitsS (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Bool :=
+reduces it: the scoped closer's (`leafFitsOn`) on a leaf it reads; a leaf it
+does not read fits (the reducing tries fail on it). -/
+def leafFitsS {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Bool :=
   match leafCheckS H φ with
   | some _ => leafFitsOn (H.wrap φ)
-  | none =>
-    match leafErase np H φ with
-    | some l => NFml.Derive.leafFits l.1 l.2
-    | none => true
+  | none => true
 
 /-- What `peel` takes in front stays in front. -/
 theorem peel_wrap : (Γ : List (Solidity.Hyp C)) → (φ : Solidity.NFml C) →
@@ -601,72 +491,14 @@ theorem run_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) 
 
 end Sound
 
-/-- What `pick` leaves of today's residue is valid once its leaves are
-proved. -/
-theorem pick_valid {np : Option Nat} {e : Solidity.NFml C} {ls : List (NFml.Derive.Leaf C)}
-    (h : pick np (NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
-      NFml.Derive.budget []) e = some ls)
-    (hl : ∀ l ∈ ls, NFml.Proves .all l.1 l.2) : NFml.Valid e := by
-  have hv : ∀ {e' : Solidity.NFml C} {ls' : List (NFml.Derive.Leaf C)} {b : Nat},
-      NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
-        NFml.Derive.budget [] e' = some (ls', b) →
-      (∀ l ∈ ls', NFml.Proves .all l.1 l.2) → NFml.Valid e' :=
-    fun hr hl' => NFml.Proves.valid (NFml.Proves.of_synResidue hr hl')
-  have hs : ∀ {r : Option (List (NFml.Derive.Leaf C) × Nat)},
-      NFml.Derive.residue NFml.Derive.budget NFml.Derive.synClose
-        NFml.Derive.budget [] (e.stripN np) = r → r.map (·.1) = some ls →
-      NFml.Valid e := fun hr h => by
-    obtain ⟨⟨ls', b'⟩, hr', he⟩ := Option.map_eq_some_iff.1 h
-    cases he
-    exact NFml.Valid.of_stripN (hv (hr.trans hr') hl)
-  unfold pick at h
-  split at h
-  · rename_i b h1
-    exact NFml.Valid.of_stripN (hv h1 NFml.Derive.leaves_nil)
-  · split at h
-    · exact hs rfl h
-    · split at h
-      · rename_i b h2
-        exact hv h2 NFml.Derive.leaves_nil
-      · exact hs rfl h
-    · exact hs rfl h
-
-/-- A leaf `leafRes` takes is proved once today's leaves are. -/
-theorem leafRes_sound {R : RuleSet} (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ)
-    (φ : Fml C Γ) (ls : List (NFml.Derive.Leaf C)) (h : leafRes np full H φ = some ls)
-    (hl : ∀ l ∈ ls, NFml.Proves .all l.1 l.2) : Proves C R [] H φ := by
-  unfold leafRes leafWith at h
-  split at h
-  · rename_i e he
-    rw [pickH_eq] at h
-    rw [Fml.closeErase_eq] at he
-    obtain ⟨B, hB, rfl⟩ := Option.map_eq_some_iff.1 he
-    have hc : (H.wrap φ).closableB [] = true := by
-      simp only [Fml.closableB, hB, Option.isSome_some]
-    exact Proves.close [] rfl List.nodup_nil (pick_valid h hl) hc (fun _ _ h => nomatch h)
-  · cases h
-
-/-- What `leafS` reads of today's residue. -/
-theorem leafS_res {R : RuleSet} (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ)
-    (φ : Fml C Γ) (ls : List (SLeaf C))
-    (h : (leafRes np full H φ).map (fun ls => bif ls.isEmpty then [] else [⟨_, H, φ⟩]) = some ls)
-    (hl : ∀ l ∈ ls, Proves C R [] l.2.1 l.2.2) : Proves C R [] H φ := by
-  obtain ⟨ls', h', rfl⟩ := Option.map_eq_some_iff.1 h
-  cases hls : ls'.isEmpty
-  · exact hl ⟨_, H, φ⟩ (by simp only [hls, cond_false, List.mem_singleton])
-  · exact leafRes_sound np full H φ ls' h' (by
-      rw [List.isEmpty_iff.1 hls]; exact fun _ h => nomatch h)
-
 /-- A leaf `leafS` takes is proved once the sequent it leaves is. -/
-theorem leafS_sound {R : RuleSet} (np : Option Nat) (full : Bool) {Γ : Ctx} (H : Hyps C [] Γ)
-    (φ : Fml C Γ) (ls : List (SLeaf C)) (h : leafS np full H φ = some ls)
-    (hl : ∀ l ∈ ls, Proves C R [] l.2.1 l.2.2) : Proves C R [] H φ := by
+theorem leafS_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) (ls : List (SLeaf C))
+    (h : leafS H φ = some ls) (hl : ∀ l ∈ ls, Proves C R [] l.2.1 l.2.2) : Proves C R [] H φ := by
   unfold leafS at h
   split at h
   · exact leafCheckS_sound ‹_›
   · cases h
     exact hl ⟨_, H, φ⟩ (List.mem_singleton_self _)
-  · exact leafS_res np full H φ ls h hl
 
 theorem SLeaf.nil {R : RuleSet} : ∀ l ∈ ([] : List (SLeaf C)), Proves C R [] l.2.1 l.2.2 :=
   fun _ h => nomatch h
@@ -712,16 +544,16 @@ theorem Proves.close_leaf_dropWt {R : RuleSet} {np : Option Nat} {Γ : Ctx} {H :
 
 /-- **`sol_prove`'s proof of a sequent**: the walk's residue, each leaf it
 leaves proved. -/
-theorem Proves.of_residue {R : RuleSet} {np : Option Nat} {Γ : Ctx} {H : Hyps C [] Γ}
-    {φ : Fml C Γ} {full : Bool} {ls : List (Seq.SLeaf C)}
-    (h : Seq.residue R np full H φ = some ls)
+theorem Proves.of_residue {R : RuleSet} {Γ : Ctx} {H : Hyps C [] Γ}
+    {φ : Fml C Γ} {ls : List (Seq.SLeaf C)}
+    (h : Seq.residue R H φ = some ls)
     (hl : ∀ l ∈ ls, Proves C R [] l.2.1 l.2.2) : Proves C R [] H φ := by
   obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
   cases he
   exact Seq.run_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
-    (fun H φ ls h hl => Seq.leafS_sound np full H φ ls h hl)
+    (fun H φ ls h hl => Seq.leafS_sound H φ ls h hl)
     (Seq.refutes_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
-      (fun H φ ls h hl => Seq.leafS_sound np false H φ ls h hl))
+      (fun H φ ls h hl => Seq.leafS_sound H φ ls h hl))
     _ H φ _ _ _ hr hl
 
 /-! ## The tactic -/
@@ -768,39 +600,30 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
   let np := toExpr npV
   let leafTy := mkApp (mkConst ``SLeaf) C
   let resTy := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``List [0]) leafTy)
-  let mut full := false
-  let lemmaFor (full : Bool) (ls : Expr) : MetaM Expr := do
+  let lemmaFor (ls : Expr) : MetaM Expr := do
     let someLs := mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``List [0]) leafTy) ls
     let type := mkApp3 (mkConst ``Eq [1]) resTy
-      (mkAppN (mkConst ``residue) #[C, R, np, toExpr full, Γ, H, φ]) someLs
+      (mkAppN (mkConst ``residue) #[C, R, Γ, H, φ]) someLs
     NFml.Derive.kernelLemma type (mkApp2 (mkConst ``Eq.refl [1]) resTy someLs)
-  let assignWith (full : Bool) (ls h : Expr) (hl : Expr) : MetaM Unit :=
-    g.assign (mkAppN (mkConst ``Proves.of_residue) #[C, R, np, Γ, H, φ, toExpr full, ls, h, hl])
+  let assignWith (ls h : Expr) (hl : Expr) : MetaM Unit :=
+    g.assign (mkAppN (mkConst ``Proves.of_residue) #[C, R, Γ, H, φ, ls, h, hl])
   let nil := mkApp (mkConst ``List.nil [0]) leafTy
   -- the compiled walk first, then one kernel check of its leaves, as
   -- today's `sol_prove` (`Derive.prove`): a kernel try at no leaves costs a
   -- second evaluation where the closer leaves some, in the declaration's
   -- heartbeats
-  let qTy := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``List [0])
-    (mkApp2 (mkConst ``Sum [0, 0]) (mkConst ``Expr) (mkConst ``Bool)))
-  let some marked ← unsafe evalExpr (Option (List (Expr ⊕ Bool))) qTy
+  let qTy := mkApp (mkConst ``Option [0]) (mkApp (mkConst ``List [0]) (mkConst ``Expr))
+  let some leaves ← unsafe evalExpr (Option (List Expr)) qTy
       (mkAppN (mkConst ``residueQuote) #[C, R, quoteConstName n, np, Γ, H, φe])
     | throwError "sol_prove: the walk does not reach the end of the sequent: a step with no \
-        rule, a leaf `Proves.close` does not take (`Fml.closableB`: a modality left, a negated \
-        or assumed part not first-order, or a hidden binder's name reused), or more than \
-        {fuel} steps"
-  let leaves := marked.filterMap fun | .inl l => some l | .inr _ => none
-  -- the quantified residue first where more of the walk's leaves close
-  -- only with their parameters than not (`pickH`): the same leaves
-  let marks := marked.filterMap fun | .inr b => some b | .inl _ => none
-  full := 2 * (marks.filter id).length > marks.length
+        rule, or more than {fuel} steps"
   if leaves.isEmpty then
-    let h ← try lemmaFor full nil
+    let h ← try lemmaFor nil
       catch e => throwError "sol_prove: the kernel rejects the walk:{indentD e.toMessageData}"
-    assignWith full nil h (mkApp2 (mkConst ``SLeaf.nil) C R)
+    assignWith nil h (mkApp2 (mkConst ``SLeaf.nil) C R)
     return []
   let ls ← mkListLit leafTy leaves
-  let h ← try lemmaFor full ls
+  let h ← try lemmaFor ls
     catch e => throwError "sol_prove: the kernel rejects the residue:{indentD e.toMessageData}"
   -- a leaf `⟨Γ', (H', φ')⟩`: its goal `H' ⊢ φ'`
   let parts (l : Expr) : Expr × Expr × Expr :=
@@ -821,7 +644,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
     let (Γ', H', φ') := parts l
     hl := mkAppN (mkConst ``SLeaf.cons) #[C, R, Γ', H', φ', rest, p, hl]
     rest := mkAppN (mkConst ``List.cons [0]) #[leafTy, l, rest]
-  assignWith full ls h hl
+  assignWith ls h hl
   return goals.toList
 
 /-- `leafFitsS` on a leaf goal `H ⊢ φ` the walk left, run as compiled
@@ -831,8 +654,7 @@ def goalFits (l : MVarId) : MetaM Bool := do
   let_expr Proves C _ Γ₀ Γ H φ := ty | NFml.Derive.goalFits l
   if ty.hasFVar || ty.hasMVar || !(← whnfR Γ₀).isAppOf ``List.nil then return true
   let φe ← Symex.evaluable φ
-  let np := toExpr (← paramCount H φe)
-  unsafe evalExpr Bool (mkConst ``Bool) (mkAppN (mkConst ``leafFitsS) #[C, np, Γ, H, φe])
+  unsafe evalExpr Bool (mkConst ``Bool) (mkAppN (mkConst ``leafFitsS) #[C, Γ, H, φe])
 
 /-- `Proves.close_leaf` (with `wt`, `Proves.close_leaf_dropWt`) on the main
 goal, a leaf `H ⊢ φ` of the outer scope: its erasure computed and quoted
@@ -907,13 +729,8 @@ def leafValid (wt : Bool) : TacticM Unit := withMainContext do
 
 end Seq
 
-/-- `sol_leaf`: a leaf `H ⊢ φ` that `sol_prove` left, as `⊨ ψ` with `ψ`
-the sequent wrapped (`Proves.closeHolds`); `sol_leaf_wt` sets its premise
-`wt(storage)` aside (`Valid.of_dropWtS`). -/
-syntax "sol_leaf" : tactic
-/-- `sol_leaf` with the premise `wt(storage)` set aside. -/
-syntax "sol_leaf_wt" : tactic
-
+/-- `sol_leaf` (declared in `Calculus/ProofTree.lean`, whose tree closes a
+leaf by it): `Seq.leafValid`. -/
 elab_rules : tactic
   | `(tactic| sol_leaf) => Seq.leafValid false
   | `(tactic| sol_leaf_wt) => Seq.leafValid true

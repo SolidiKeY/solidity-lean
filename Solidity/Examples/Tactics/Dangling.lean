@@ -1,5 +1,4 @@
 import Solidity.Tools.ProofTree
-import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 
@@ -21,8 +20,8 @@ These are solkey `TestSuite`'s dangling-alias functions over
 `StandardExample` (`persons`, `people`, `matrix`), each a `sol_prove?` that suggests
 `sol_prove`.  If a clause stops applying, or the strategy picks another
 rule, they fail.  They read scoped (`open scoped Solidity.Scoped`):
-the `⊢` walk, its leaves' erasures closed by today's closer, with
-today's budgets (`Seq.residue`).
+the `⊢` walk, its leaves closed by the scoped closer within its bounds
+(`Seq.residue`, `Decide.closeSize`).
 -/
 
 namespace Solidity.Examples.Tactics.Dangling
@@ -135,15 +134,15 @@ def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 5; persons.push();
     persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
 
-#guard (Seq.residue .all (some 0) false .nil rounds2).map List.isEmpty == some true
-#guard (Seq.residue .all (some 0) false .nil rounds4).map
+#guard (Seq.residue .all .nil rounds2).map List.isEmpty == some true
+#guard (Seq.residue .all .nil rounds4).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits NFml.Derive.closeSize).isSome &&
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
-#guard (Seq.residue .all (some 0) false .nil rounds6).map
+#guard (Seq.residue .all .nil rounds6).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits NFml.Derive.closeSize).isSome &&
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
 end Solidity.Examples.Tactics.Dangling

@@ -223,11 +223,9 @@ info: Try this:
     apply cases .sendNoCallbackBox <;>
         (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
       (try and_intros)
-    · refine close ?_
-      sol_symex
+    · sol_leaf
       sol_close
-    · refine close ?_
-      sol_symex
+    · sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -279,14 +277,11 @@ info: Try this:
     apply cases .sendNoCallbackDiamond <;>
         (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
       (try and_intros)
-    · refine close ?_
-      sol_symex
+    · sol_leaf
       sol_close
-    · refine close ?_
-      sol_symex
+    · sol_leaf
       sol_close
-    · refine close ?_
-      sol_symex
+    · sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -338,13 +333,11 @@ info: Try this:
   apply splitBox .ifElseSplit
     case thn =>
       apply update .localValueAssign
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
     case els =>
       apply update .localValueAssign
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -357,13 +350,11 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 } := by
   apply splitBox .ifElseSplit
   case thn =>
     apply update .localValueAssign
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     apply update .localValueAssign
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! ## `sol_derive?`: the walk
@@ -382,13 +373,11 @@ info: Try this:
     apply update .binopAssignment
     apply split .requireSimple
     case thn =>
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
     case els =>
       apply done .revertDiamond
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -406,8 +395,7 @@ info: Try this:
     apply update .transferNoCallbackBox
     apply unfold .localValueDeclInitDrop
     apply update .storageFieldReadFind
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 -/
 #guard_msgs in
@@ -621,7 +609,7 @@ heartbeats. -/
 #guard_msgs in
 #eval show Lean.CoreM (List Bool) from do
   let at_ (max hb : Nat) : Lean.CoreM Bool :=
-    withTheReader Lean.Core.Context ({ · with maxHeartbeats := max }) (NFml.Derive.replayFits hb)
+    withTheReader Lean.Core.Context ({ · with maxHeartbeats := max }) (Derive.replayFits hb)
   return [← at_ 1000 2000, ← at_ 1000 1000, ← at_ 0 2000]
 
 section Scoped
@@ -646,9 +634,9 @@ def pushes22 : Fml StandardExample [] :=
     values.push(20); values.push(21); ]
     values.length > 0 }
 
-#guard (Seq.residue .all (some 0) false .nil pushes22).map
+#guard (Seq.residue .all .nil pushes22).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits NFml.Derive.closeSize).isSome &&
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
 /-! The size bound (`Derive.closeSize`): a storage written from its own
@@ -665,8 +653,8 @@ def writes6 : Fml StandardExample [] :=
   dl!{ [ total = 0; total += 1; total += 1; total += 1; total += 1; total += 1;
     total += 1; ] total == 6 }
 
-#guard (Seq.residue .all (some 0) false .nil writes4).map List.isEmpty == some true
-#guard (Seq.residue .all (some 0) false .nil writes6).map
+#guard (Seq.residue .all .nil writes4).map List.isEmpty == some true
+#guard (Seq.residue .all .nil writes6).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
     Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [false]
 
@@ -680,9 +668,9 @@ def deletes10 : Fml StandardExample [] :=
     delete wallet; delete wallet; delete wallet; delete wallet; delete wallet; ]
     wallet.stash[owner] == 0 }
 
-#guard (Seq.residue .all (some 0) false .nil deletes10).map
+#guard (Seq.residue .all .nil deletes10).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits NFml.Derive.closeSize).isSome &&
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
 end Scoped
@@ -735,12 +723,10 @@ info: Try this:
     apply update .binopAssignment
     apply Proves.check .assertSimple
     case thn =>
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
     case els =>
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -861,16 +847,13 @@ info: Try this:
       apply update .localIncrement
       apply checkLean .loopExit
       case thn =>
-        refine close ?_
-        sol_symex
+        sol_leaf
         sol_close
       case els =>
-        refine close ?_
-        sol_symex
+        sol_leaf
         sol_close
     case els =>
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -890,22 +873,18 @@ info: Try this:
       apply update .localValueAssign
       apply invBox .whileInvariantBox
       case init =>
-        refine close ?_
-        sol_symex
+        sol_leaf
         sol_close
       case thn =>
         apply update .binopAssignment
-        refine close ?_
-        sol_symex
+        sol_leaf
         sol_close
       case els =>
-        refine close ?_
-        sol_symex
+        sol_leaf
         sol_close
     case els =>
       apply done .revertBox
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
 -/
 #guard_msgs in

@@ -3687,9 +3687,6 @@ def LFml.fits : Nat → LFml → Option Nat
   | n + 1, .and φ ψ | n + 1, .imp φ ψ => (φ.fits n).bind fun m => ψ.fits m
   | n + 1, .all _ _ φ => φ.fits n
 
-end Decide
-
-namespace NFml.Derive
 
 /-- The most nodes the closer takes in a leaf's formula with its updates
 pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
@@ -3706,6 +3703,16 @@ times, so `n` deletes of `ledgerUses[aᵢ]` and a read of
 but a reduction of 5624250 (×3 per delete).  The largest reduction
 `synClose` closes in solkey's `TestSuite` has 6079 nodes. -/
 def elimSize : Nat := 8000
+
+end Decide
+
+namespace NFml.Derive
+
+/-- `Decide.closeSize`, under the closer's name. -/
+abbrev closeSize : Nat := Decide.closeSize
+
+/-- `Decide.elimSize`, under the closer's name. -/
+abbrev elimSize : Nat := Decide.elimSize
 
 end NFml.Derive
 

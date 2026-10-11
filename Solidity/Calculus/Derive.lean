@@ -117,17 +117,17 @@ solkey's names, `impRight`, `allRight`, `emptyModality`,
 statement fires, named as solkey names it (`ruleOf?`,
 `Calculus/Completeness.lean`) and cited by its taclet
 (`Taclet.step_eq .rule`, `LeanTaclet.toStep .rule`).  A goal with no
-modality is a leaf: `sol_derive` leaves it, `sol_derive?` closes it as
-today's suggestion does where it can (`Proves.close`, then today's
-`sol_symex; sol_close` on the erasure, as the tree's leaves close).
+modality is a leaf: `sol_derive` leaves it, `sol_derive?` closes it where
+it can (`sol_leaf`, then the scoped `sol_close`, as the tree's leaves
+close).
 
 Under `open scoped Solidity.Scoped` (`Walk.surfaceOn`) `sol_derive?`
 writes today's short walk instead, which the scope's macros read
 (`Calculus/WalkSyntax.lean`): `apply Proves.valid`, solkey's aliases
 (`apply impRight`, `apply allRight`, `apply emptyModality`), one `apply
 update .r` (`unfold`, `splitBox`, `split`, `done`, `Proves.check`, `cases`,
-`branches`, `invBox`, the `…Lean` forms) per rule, `refine close ?_` at a
-leaf (`true` too, as today's), and nothing for the steps KeY does not show
+`branches`, `invBox`, the `…Lean` forms) per rule, `sol_leaf; sol_close` at
+a leaf (`true` too), and nothing for the steps KeY does not show
 (`core_silent`: a scope's end, a hidden binder, the parameters' `∀`).  The
 walk runs those very lines, so the suggestion is what was checked; where a
 short line fails, the explicit `refine` stands in. -/
@@ -289,16 +289,14 @@ def movesAt (g : MVarId) (short : Bool := false) :
     return explicit
   | _ => return #[]
 
-/-- A leaf closed as a walk ends, at the empty outer scope: its lines, or
-none where the closer does not close it (the state rolled back). -/
-def closeLeaf (g : MVarId) (short : Bool := false) : TacticM (Option (Array String)) := do
+/-- A leaf closed as a walk ends, at the empty outer scope: `sol_leaf` and
+the scoped `sol_close`, its lines, or none where the closer does not close
+it (the state rolled back). -/
+def closeLeaf (g : MVarId) : TacticM (Option (Array String)) := do
   let ty ← instantiateMVars (← g.getType)
   let_expr Proves _ _ Γ₀ _ _ _ := ty | return none
   unless (← whnfR Γ₀).isAppOf ``List.nil do return none
-  let first ← if short then `(tactic| refine $(mkIdent `close) ?_)
-    else `(tactic| refine $(← ProofTree.short ``Proves.close) [] $(mkIdent `rfl)
-      $(← ProofTree.short ``List.nodup_nil) ?_)
-  let tacs := #[first, ← `(tactic| sol_symex), ← `(tactic| sol_close)]
+  let tacs := #[← `(tactic| sol_leaf), ← `(tactic| sol_close)]
   let s ← saveState
   let ok ← tryCatchRuntimeEx
     (withCurrHeartbeats do return (← ProofTree.runOn g tacs).isEmpty) fun _ => pure false
@@ -331,7 +329,7 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
       break
   let some (tacs, note, gs) := step
     | if close then
-        if let some lines ← closeLeaf g short then return lines
+        if let some lines ← closeLeaf g then return lines
       leaves.modify (·.push g); return #["sorry"]
   let head := (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
   let head := match note with
@@ -411,8 +409,9 @@ def evalSolDeriveCore : Tactic := fun _ => withMainContext do
 
 open Lean Elab Tactic Meta in
 /-- `sol_derive?` on a scoped goal: the walk, offered as its script, one
-`refine` per rule (today's short walk under the scope, `Walk.surfaceOn`); a leaf closed by its erasure where it can be
-(`Walk.closeLeaf`), else left as a goal (`sorry` in the script). -/
+`refine` per rule (today's short walk under the scope, `Walk.surfaceOn`); a leaf closed by `sol_leaf` and the scoped
+`sol_close` where it can be (`Walk.closeLeaf`), else left as a goal
+(`sorry` in the script). -/
 @[tactic Solidity.ProofTree.tacticSol_derive?]
 def evalSolDeriveQCore : Tactic := fun stx => withMainContext do
   let g ← getMainGoal

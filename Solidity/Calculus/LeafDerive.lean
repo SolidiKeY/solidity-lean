@@ -611,7 +611,7 @@ def checkCoreM (ψ : Fml C []) : Option Bool :=
   let ψ' := ψ.dropWtS
   if ψ'.inLS true SymS.empty then
     let l := ψ'.toLS SymS.empty
-    some ((l.fits NFml.Derive.closeSize).isSome && LFml.closeS ψ.layoutS l.elim)
+    some ((l.fits Decide.closeSize).isSome && LFml.closeS ψ.layoutS l.elim)
   else none
 
 /-- **The scoped closer on a leaf `ψ` of no modality**: `none` where it
@@ -622,7 +622,7 @@ and its reduction closed by `LFml.closeS` with the premise's layout. -/
 @[implemented_by checkCoreM]
 def checkCore (ψ : Fml C []) : Option Bool :=
   bif ψ.dropWtS.inLS true SymS.empty then
-    some (((ψ.dropWtS.toLS SymS.empty).fits NFml.Derive.closeSize).isSome &&
+    some (((ψ.dropWtS.toLS SymS.empty).fits Decide.closeSize).isSome &&
       LFml.closeS ψ.layoutS ψ.dropWtS.reduceS)
   else none
 
@@ -654,7 +654,7 @@ def fitsCore (ψ : Fml C []) : Bool :=
   let ψ' := ψ.dropWtS
   ψ'.inLS true SymS.empty &&
     (let l := ψ'.toLS SymS.empty
-     (l.fits NFml.Derive.closeSize).isSome && (l.elim.fits NFml.Derive.elimSize).isSome)
+     (l.fits Decide.closeSize).isSome && (l.elim.fits Decide.elimSize).isSome)
 
 /-- **The closer's bounds on a wrapped leaf** (`Derive.leafFits` by
 position), which `sol_prove?` asks before it tries a step that reduces the

@@ -274,7 +274,7 @@ def elabSolkeyDerive : CommandElab := fun stx => do
             out.set (some (← scopedSearch g.mvarId!))
           let some s ← out.get | return .error "the search did not run"
           if let some l := s.open_.head? then return .error s!"{← l.getTag} stays open"
-          unless ← NFml.Derive.replayFits s.heartbeats do
+          unless ← Derive.replayFits s.heartbeats do
             let hb := if timed then s!" ({s.heartbeats / 1000} heartbeats)" else ""
             return .error s!"its replay is past maxHeartbeats as one declaration{hb}"
           return .ok (NFml.Derive.replayLines s.found))

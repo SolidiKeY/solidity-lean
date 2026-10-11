@@ -5,32 +5,36 @@ import Solidity.Calculus.Rewrite
 import Solidity.Calculus.UpdRuleScoped
 
 /-!
-# Today's closers on a scoped leaf
+# The closers on a scoped leaf
 
-After `sol_symex` on a scoped goal (`Valid ψ`, `⊨ dl!{ … }` under
-`open scoped Solidity.Scoped`), a leaf is closed by today's closers on
-its erasure, as `sol_close` and `sol_close_mt` are through their first
-step, `sol_close_unwrap` (`Calculus/Derive.lean`): each of
-`sol_close_eval`, `sol_apply_upd` and `sol_fold_terms` has a second
-elaborator that erases the leaf (`Derive.eraseLeaf`: `Fml.posB`, checked
-by the kernel, then `Valid.of_erase`) and runs the same tactic on today's
-goal; `sol_decide`'s parts reduce the scoped leaf by position instead
-(below).  Today's macro is tried first and fails on a scoped
-goal; on today's goal the second elaborator steps aside.  `sol_upd` and
-`sol_merge` rewrite the scoped formula itself (M6c, W7
-`w7-rewrites`): `Calculus/UpdRuleScoped.lean`'s rules, the leaf staying
-scoped.  `sol_spec_prep`'s
-is `Calculus/SolSpec.lean`'s; `sol_decide`'s is ported (M6c) and erases
-only to reduce (`Calculus/DecideComplete.lean`).  `sol_prove?` runs the scoped `sol_prove`
-and today's leaf search after it.
+After `sol_symex` on a scoped goal (`Valid ψ`, `⊨ dl!{ … }`), or `sol_leaf`
+on a leaf `sol_prove` left, a leaf is closed on its scoped form:
+`sol_close`, `sol_close_mt` and `sol_spec_close` read it through
+`sol_close_unwrap` (`CloseS.valid_of_holdsE`, `Calculus/CloseScoped.lean`),
+with no erasure.  `sol_close_eval` on the bare leaf `Valid ψ`, before its
+state is introduced, takes the same first step here.  `sol_decide`'s parts
+reduce the scoped leaf by position (below).  `sol_apply_upd` and
+`sol_fold_terms` have no scoped reading yet: their second elaborator erases
+the leaf (`Derive.eraseLeaf`: `Fml.posB`, checked by the kernel, then
+`Valid.of_erase`) and runs the same tactic on today's goal.  Today's macro
+is tried first and fails on a scoped goal; on today's goal the second
+elaborator steps aside.  `sol_upd` and `sol_merge` rewrite the scoped
+formula itself (M6c, W7 `w7-rewrites`): `Calculus/UpdRuleScoped.lean`'s
+rules, the leaf staying scoped.  `sol_prove?` runs the scoped `sol_prove`
+and the scoped leaf search after it.
 -/
 
 namespace Solidity
 
 open Lean Elab Tactic
 
+/-- `sol_close_eval` on a bare scoped leaf `Valid ψ`: the leaf as `holdsE`
+reads it (`sol_close_unwrap`), its state introduced, then the scoped step
+(`Calculus/CloseScoped.lean`). -/
 @[tactic Solidity.tacticSol_close_eval]
-def evalSolCloseEvalCore : Tactic := fun stx => Derive.onErased "sol_close_eval" stx stx
+def evalSolCloseEvalCore : Tactic := fun _ => withMainContext do
+  let some _ ← Symex.validGoal? (← getMainGoal) | throwUnsupportedSyntax
+  evalTactic (← `(tactic| (sol_close_unwrap; intro σ; sol_close_eval)))
 
 /-! ## `sol_decide`'s parts on a scoped goal (decision 80)
 
@@ -112,11 +116,10 @@ def evalSolUpdCore : Tactic := fun stx => withMainContext do
 /-! ## `sol_prove?` on a scoped goal
 
 The scoped `sol_prove` (`Valid φ` and `⊢ φ`, `Calculus/ProvesDerive.lean`),
-then each leaf it leaves (a scoped sequent erased by its first line,
-`Proves.close_leaf`), closed by the first
-of today's leaf tactics (`Derive.searchLeaf`, its bounds read on the
-erasure, `Seq.goalFits`); the replay suggested as today's
-(`Derive.replayLines`). -/
+then each leaf it leaves (a scoped sequent, `sol_leaf` its first line),
+closed by the first of the scoped leaf tactics (`Derive.searchLeaf`,
+`Derive.leafTacs`, its bounds read on the scoped leaf, `Seq.goalFits`); the
+replay suggested as today's (`Derive.replayLines`). -/
 
 open Meta in
 /-- `sol_prove?` on a scoped goal; on today's goal it steps aside. -/
@@ -143,7 +146,7 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
       found := found ++ [(name, #["sorry"])]
   if let some l := open_.head? then
     logInfo m!"sol_prove?: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
-  else unless ← NFml.Derive.replayFits hb do
+  else unless ← Derive.replayFits hb do
     logWarning m!"sol_prove?: the replay needs about {hb / 1000} heartbeats in one \
       declaration, past `maxHeartbeats`"
   setGoals (open_ ++ rest)

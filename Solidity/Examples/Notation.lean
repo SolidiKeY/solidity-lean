@@ -18,8 +18,7 @@ Everything here is the scoped calculus's: the rule lines are
 `Premise`'s, the rules of `⊢` `Proves`'s, and the formulas and
 the derivation read scoped (`open scoped Solidity.Scoped`, section
 `Scoped`): a parameter is bound by `∀`, a formula is a `Fml C []`.
-A sequent is read as it prints under `open scoped Solidity.Sequent`
-(section `Sequents`).
+A sequent is read as it prints (section `Sequents`).
 -/
 
 namespace Solidity.Examples.Notation
@@ -276,15 +275,14 @@ info: @Proves.impRight : ∀ {C : Contract} {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
 
 /-! ### Sequents as input
 
-Under `open scoped Solidity.Sequent` (`Calculus/SequentNotation.lean`)
-a sequent is read as it prints: `dl{ ..H, a ⟹[R] φ }` is the scoped
+A sequent is read as it prints (`Calculus/SequentNotation.lean`; since
+W9.4 with no `open`): `dl{ ..H, a ⟹[R] φ }` is the scoped
 judgement `Proves C R Γ₀ (H.pre a) φ`, its context a telescope
 (`Hyps`) built from the left.  `sequentialToParallel` is the
 constructor `merge`, past the hidden binders `bs` between the two updates
 (Lean only), its side conditions computed. -/
 
 section Sequents
-open scoped Solidity.Sequent
 
 /-- `sequentialToParallel` with no hidden binder between the two updates:
 `{U}, {V}` become the one parallel update `W` (`Upd.seqPar`). -/

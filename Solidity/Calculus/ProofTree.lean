@@ -28,11 +28,11 @@ What the scoped calculus adds is not a node:
   tactics of that node: KeY has no step there.
 
 A leaf is closed by `closeTrue` (`true` behind a context of scope ends and
-box updates), else as a walk ends: `Proves.close` takes the sequent, its
-context in front, to its erasure (`Calculus/CloseErase.lean`), which
-today's `sol_symex; sol_close` closes (`closeTacs`), then by the tactics
-`Config.closers` lists.  `Proves.close` takes a leaf behind updates of
-either modality (`Fml.closableB`).
+box updates), else as a walk ends: `sol_leaf` takes the sequent, its
+context in front, to `⊨ ψ` (`Proves.closeValid`), which the scoped
+`sol_close` closes (`closeTacs`, `Calculus/CloseScoped.lean`), then by the
+tactics `Config.closers` lists.  `sol_leaf` takes a leaf behind updates of
+either modality.
 
 A rule of an operator family prints as KeY's taclet at its operator
 (`RuleShapes.keyTacletAt`).
@@ -59,12 +59,21 @@ theorem emptyModality {Γ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {κ 
 
 end Proves
 
+/-- `sol_leaf`: a leaf `H ⊢ φ` that `sol_prove` left, as `⊨ ψ` with `ψ`
+the sequent wrapped (`Proves.closeHolds`); `sol_leaf_wt` sets its premise
+`wt(storage)` aside (`Valid.of_dropWtS`).  Elaborated in
+`Calculus/ProvesDerive.lean` (`Seq.leafValid`); declared here, where a
+tree closes its leaves by it. -/
+syntax "sol_leaf" : tactic
+/-- `sol_leaf` with the premise `wt(storage)` set aside. -/
+syntax "sol_leaf_wt" : tactic
+
 namespace ProofTree
 
 open Lean Meta Elab Tactic
 open Solidity.ProofTree (Tree Act short dotIdent runOn)
 
-/-- How the tree is grown: whether a leaf is closed by its erasure
+/-- How the tree is grown: whether a leaf is closed as a walk ends
 (`closeTacs`), the tactics tried after it (each list a closing script), and
 at most how many nodes. -/
 structure Config where
@@ -76,13 +85,11 @@ structure Config where
 def closeTrueTacs : MetaM (Array (TSyntax `tactic)) := do
   return #[← `(tactic| exact $(← short ``Proves.closeTrue) rfl)]
 
-/-- The tactics a leaf is closed by, as a walk ends: `Proves.close` at the
-empty outer scope (a tree's goal is `[] ⊢ φ`), then today's closer on the
-erasure. -/
+/-- The tactics a leaf is closed by, as a walk ends: `sol_leaf` at the
+empty outer scope (a tree's goal is `[] ⊢ φ`), the sequent as `⊨ ψ`, then
+the scoped `sol_close` (`Calculus/CloseScoped.lean`). -/
 def closeTacs : MetaM (Array (TSyntax `tactic)) := do
-  return #[← `(tactic| refine $(← short ``Proves.close) [] $(mkIdent `rfl)
-      $(← short ``List.nodup_nil) ?_),
-    ← `(tactic| sol_symex), ← `(tactic| sol_close)]
+  return #[← `(tactic| sol_leaf), ← `(tactic| sol_close)]
 
 /-- The `Proves` constructor of a premise kind. -/
 def provesCtor (premise : Lean.Name) : Option Lean.Name :=

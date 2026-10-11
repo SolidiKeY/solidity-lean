@@ -732,26 +732,27 @@ def prove (g : MVarId) : MetaM (List MVarId) := do
   return goals.toList
 
 /-- The tactics `sol_prove?` tries on a leaf, in order, each a sequence of
-lines.  On a leaf the scoped walk left (`isScoped`), first the scoped ones:
+lines.  On a leaf the scoped walk left (`isScoped`), the scoped ones only:
 `sol_leaf` (the sequent as `⊨ ψ`, `Calculus/ProvesDerive.lean`), then
 `sol_decide` on the scoped leaf (its layout read from `wt(storage)`), then
-`sol_close` and `sol_spec_close`.  Then today's, on the erasure:
-`sol_decide`'s two steps after its `LFml.syn` try, which the closer
-subsumes, each on its own so that the replay does not try the other; then
-`sol_close` and `sol_spec_close` (`omega`, `grind`).  A leaf past
-`fitsClose` (`small = false`) gets no step that reduces it, only `sol_close`
-and `sol_spec_close`, whose `simp`, `omega` and `grind` heed heartbeats. -/
+`sol_close` and `sol_spec_close` (`Calculus/CloseScoped.lean`).  On a leaf
+of the closer's own sequent, today's, on the erasure: `sol_decide`'s two
+steps after its `LFml.syn` try, which the closer subsumes, each on its own
+so that the replay does not try the other; then `sol_close` and
+`sol_spec_close` (`omega`, `grind`).  A leaf past `fitsClose` (`small =
+false`) gets no step that reduces it, only `sol_close` and
+`sol_spec_close`, whose `simp`, `omega` and `grind` heed heartbeats. -/
 def leafTacs (wt : Bool := false) (small : Bool := true) (isScoped : Bool := false) :
     Array (Array String) :=
-  let sc := if isScoped then
-      (if small then #[#["sol_leaf", "sol_decide"]] else #[]) ++
-        #[#["sol_leaf", "sol_close"], #["sol_leaf", "sol_spec_close"]]
-    else #[]
-  let pre := #[if wt then "refine NFml.Proves.close_dropWt ?_" else "refine NFml.Proves.close ?_",
-    "sol_symex"]
-  let red := pre ++ #["refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_", "sol_reduce"]
-  sc ++ (if small then #[red.push "sol_decide_cons", red.push "sol_decide_heuristic"] else #[]) ++
-    #[pre.push "sol_close", pre.push "sol_spec_close"]
+  if isScoped then
+    (if small then #[#["sol_leaf", "sol_decide"]] else #[]) ++
+      #[#["sol_leaf", "sol_close"], #["sol_leaf", "sol_spec_close"]]
+  else
+    let pre := #[if wt then "refine NFml.Proves.close_dropWt ?_" else "refine NFml.Proves.close ?_",
+      "sol_symex"]
+    let red := pre ++ #["refine (NFml.valid_iff_reduce _ (by decide +kernel)).2 ?_", "sol_reduce"]
+    (if small then #[red.push "sol_decide_cons", red.push "sol_decide_heuristic"] else #[]) ++
+      #[pre.push "sol_close", pre.push "sol_spec_close"]
 
 open Lean Meta in
 /-- `leafFits` on the leaf goal `l`, run as compiled code; `true` on a goal
@@ -843,7 +844,7 @@ def proveSearch (g : MVarId) (stopAtOpen : Bool := false)
 `maxHeartbeats`.  Each try ran with heartbeats of its own; the replay runs
 them all in one declaration, so their sum is what it needs, up to the
 elaboration of the statement and the `case` lines. -/
-def replayFits (hb : Nat) : CoreM Bool := do
+def _root_.Solidity.Derive.replayFits (hb : Nat) : CoreM Bool := do
   let max := (← read).maxHeartbeats
   return max == 0 || hb ≤ max
 
@@ -871,7 +872,7 @@ elab_rules : tactic
     let s ← NFml.Derive.proveSearch g
     if let some l := s.open_.head? then
       logInfo m!"sol_prove?: no tactic closes {← l.getTag}:{indentExpr (← l.getType)}"
-    else unless ← NFml.Derive.replayFits s.heartbeats do
+    else unless ← Derive.replayFits s.heartbeats do
       logWarning m!"sol_prove?: the replay needs about {s.heartbeats / 1000} heartbeats in one \
         declaration, past `maxHeartbeats`"
     setGoals (s.open_ ++ rest.erase g)
