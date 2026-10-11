@@ -3280,3 +3280,7 @@ fails stays on the IR:
   this record's sections (at `ad728b16` and `b8565d23`).
 - `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on
   its `frames = true` path; nothing calls it with both set.
+
+**Lead, 2026-10-11 (2):** proposals 106–128 (W8) are approved. Decision 11
+is done: no untyped statement, program or formula remains; `NFml` and its
+term vocabulary stay as the closer's IR (decision 7).
