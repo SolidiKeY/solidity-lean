@@ -55,9 +55,10 @@ derivation still sees of it is the side condition `p.hasSeg`, that a
 has fixed `p`, so the law is named bare.
 
 The formulas and the sequent are the scoped ones (`open scoped
-Solidity.Scoped`): the leaf `ageWriteRead` reads by hand is its
-erasure, computed (`refine close ?_; sol_symex`), today's `Update.lean`
-terms over today's interpreter, where the `consr` path is; the merge, the
+Solidity.Scoped`): the leaf `ageWriteRead` reads by hand is the scoped
+leaf (`sol_leaf`) read on the erased state (`sol_close_unwrap`,
+`CloseS.holdsE`, its terms a constructor at a time), the interpreter, where
+the `consr` path is; the merge, the
 split and the rewrite of `ageWriteReadKeY` are the scoped sequent's
 (`Calculus/UpdateRules.lean`, read by today's lines in
 `Calculus/RewriteSyntax.lean`), and the read `x` is a hidden binder of
@@ -85,29 +86,21 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   apply update .storageFieldReadFind
   apply empty
   -- dl{ { storage := save(storage, alice.age, 42) }, { x := find(storage, alice.age) } ⟹ x = 42 }
-  refine close ?_
-  -- the leaf's erasure, computed
-  sol_symex
-  unfold NFml.Valid
+  sol_leaf
+  sol_close_unwrap
   intro σ
-  rw [holds_upd, Surface.Upd.apply, List.foldlM_cons, Modality.wp_bind, UpdElem.write_storage,
-    Modality.wp_bind, STerm.eval_save, Term.eval_lit,
-    Modality.wp_bind, Modality.wp_ok, STerm.eval_storage, Modality.wp_bind, Modality.wp_ok,
-    PTerm.eval_field, PTerm.eval_root, Modality.wp_bind, Modality.wp_bind, Modality.wp_ok,
-    Modality.wp_ok]
-  dsimp only
+  -- the leaf read on the erased state (`CloseS.holdsE`), a term at a time
+  simp only [CloseS.holdsE, CloseS.apply_snoc, CloseS.apply_nil, CloseS.write_storage,
+    CloseS.write_local, CloseS.rhs_val, CloseS.eval_save, CloseS.eval_find, CloseS.eval_lit,
+    CloseS.eval_storage, CloseS.eval_field, CloseS.eval_root, Modality.wp_bind, Modality.wp_ok,
+    LTy.forallE, CloseS.glob_push, CloseS.glob_withGlob, CloseS.setLocal_push_here,
+    CloseS.eval_pvV, CloseS.denote_pvV, CloseS.denote_lit, CloseS.get_push_here]
   rw [Modality.wp_box]
-  intro τ hsave
-  rw [Modality.wp_ok, List.foldlM_nil, Modality.wp_pure, holds_upd, Surface.Upd.apply, List.foldlM_cons,
-    Modality.wp_bind, UpdElem.write_val, Modality.wp_bind, Term.eval_find, STerm.eval_storage,
-    Modality.wp_bind, Modality.wp_ok]
-  rw [PTerm.eval_field, PTerm.eval_root, Modality.wp_bind, Modality.wp_bind, Modality.wp_ok,
-    Modality.wp_ok, Modality.wp_bind]
-  dsimp only
+  intro τ hsave y
   -- select on save, by hand: what did the write leave at `alice`?
   unfold State.saveStorage at hsave
   unfold State.findStorage
-  cases hv : lookupBy "alice" σ.storage with
+  cases hv : lookupBy "alice" σ.erase.glob.storage with
   | none =>
     rw [hv] at hsave
     cases hsave
@@ -135,11 +128,9 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
         fail_if_success rw [Semantics.SVal.find]
         rw [List.nil_append, Semantics.SVal.find, lookupBy_setBy_self]
         dsimp only
-        rw [Semantics.SVal.find, Modality.wp_ok, asValue_toSVal, Modality.wp_ok, Modality.wp_ok,
-          List.foldlM_nil, Modality.wp_pure]
+        rw [Semantics.SVal.find, Modality.wp_ok, asValue_toSVal, Modality.wp_ok]
         -- `x = 42`
-        rw [holds_eqD, Close.Term.eval_pv, State.getEnv_setEnv_self, Modality.wp_bind,
-          Modality.wp_ok, bindingVal_val, Modality.wp_ok, Term.eval_lit, Modality.wp_ok]
+        exact ⟨⟨_, rfl⟩, ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩
     | _ =>
       rw [List.nil_append, Semantics.SVal.save] at hsave
       cases hsave

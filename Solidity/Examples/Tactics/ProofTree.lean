@@ -13,8 +13,8 @@ trees differ from today's:
 * a rule that leaves no statement goes on into the rest of the program, or
   past the frames to the postcondition, in one step (`Fml.modalK`, Gate G0's
   condition 6), so there is no `emptyModality` after it;
-* a leaf is closed by `closeTrue`, else by `Proves.close` and today's closer
-  on its erasure, behind a diamond update too (`Fml.closableB`).
+* a leaf is closed by `closeTrue`, else by `sol_leaf` and the scoped
+  `sol_close`, behind a diamond update too.
 -/
 
 namespace Solidity.Examples.Tactics.ProofTree
@@ -178,8 +178,8 @@ info: {"stats": {"nodes": 6, "branches": 2},
 #guard_msgs in
 #proof_tree_json cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] true }
 
-/-! A leaf with a formula left closes as a walk ends: `Proves.close` and
-today's closer on the erasure. -/
+/-! A leaf with a formula left closes as a walk ends: `sol_leaf` and the
+scoped `sol_close`. -/
 
 /--
 info: 0: allRight
@@ -204,7 +204,7 @@ state: closed
 branch: -
 parent: 2
 children: []
-tactics: refine Proves.close [] rfl List.nodup_nil ?_; sol_symex; sol_close
+tactics: sol_leaf; sol_close
 -/
 #guard_msgs in
 #proof_node 3 cdl!{ [ if (true) { x = 2; } else { x = 1; }; ] x != 0 }

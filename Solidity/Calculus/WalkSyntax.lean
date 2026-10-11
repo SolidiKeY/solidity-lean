@@ -41,10 +41,10 @@ Where the scoped calculus takes a step today's names otherwise:
   explicit `∀ uint x;` (`cdl!` marks it, decision 28) is left to its own
   `apply allRight`;
 * `refine close ?_` is the erased fallback (`Proves.close`, the leaf's
-  erasure for today's closers), which only a leaf the scoped closers do not
-  close still needs (`Examples/Tactics/SelectOnSaveConsr.lean`'s
-  `ageWriteRead`, the interpreter by hand); since W9.4 `sol_leaf` is the
-  leaf step the walks and the tree write.
+  erasure for today's closers): since W9.4 `sol_leaf` is the leaf step the
+  walks and the tree write, and no example leaf needs the fallback; the
+  erased closer's own tests (`Calculus/CloseTests.lean`) and a chain's last
+  line past the program (`Calculus/ChainKit.lean`) still take it.
 
 Each reading is a `scoped macro_rules` of the namespace `Solidity.Scoped`,
 tried before today's `apply`: the scoped rule first, today's last where
