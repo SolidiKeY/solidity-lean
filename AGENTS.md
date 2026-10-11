@@ -38,7 +38,7 @@ writes, a push and a pop are nested writes over `size`, and
 (`{ sp := alice.account }`); a read marks the *value* side instead
 (`find`/`select`/`read`).
 
-**Calls are inlined** (`Syntax.lean`, `Syntax/Scoped.lean`): a contract declares its functions
+**Calls are inlined** (`Syntax.lean`, `Syntax/Elab.lean`, `Syntax/Scoped.lean`): a contract declares its functions
 (`contract!{ function f(uint x) returns (uint r) { … } }`), a function may
 call only the ones declared before it, and a call statement (`Stmt.call`)
 carries its callee's body, closed over a frame of its own — KeY's

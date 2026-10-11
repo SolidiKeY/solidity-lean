@@ -2827,8 +2827,10 @@ quoters' helpers.  `Semantics.lean`, `Semantics/Agree.lean`,
 surface evaluators and lemmas but remain, with the state's operations.
 
 **Pins that moved**, each lane's list collected.  The printed text of
-every `#guard_msgs` pin is as before, except for the removed pins and the
-elaboration errors listed below.
+every `#guard_msgs` pin is as before, except for the rows below that
+change printed text (type suffixes, a hole's `Post C Γ` type,
+`Semantics.State`, `‹Stmt.call …›`), the elaboration errors, and the
+removed pins.
 
 | Step | Pins | Change | Why |
 |---|---|---|---|
@@ -2838,7 +2840,7 @@ elaboration errors listed below.
 | W8.2 `obligations` | `solc_problems … legacy` lines (5 files) | removed | no legacy statement |
 | W8.2 `obligations` | `LoopsImport`'s three `Surface.Prog.show N.f` | `#solc_show N.f`, same text | proposal 112 |
 | W8.2 `obligations` | `Examples/Tactics/Spec`'s `Surface.Problem.ctor` erasure guard | a `Problem.text` pin of the deployment's obligation | `Surface.Problem` removed |
-| W8.2 `reader-tools` | `Examples/Tactics/DlNotation.lean` (from `SurfaceNotation`): five pins, `Examples/Tactics/Surface.lean`: one | type suffix `: Surface.Fml X` → `: Fml X []` | a modality reads scoped |
+| W8.2 `reader-tools` | `Examples/Tactics/DlNotation.lean` (from `SurfaceNotation`): four pins, `Examples/Tactics/Surface.lean`: one | type suffix `: Surface.Fml X` → `: Fml X []` | a modality reads scoped |
 | W8.2 `reader-tools` | `fun m φ => dl![m]{ … }`, the `trace_state` pin, the `ture` error | `NFml` → `Post StandardExample [.val .uint]`, `(φ : Post C)` → `(φ : Post C Γ)` | a scoped hole is a `Post C Γ` |
 | W8.2 `reader-tools` | `fun φ => (⊨ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the module sees the scoped `State` |
 | W8.3 (all lanes) | string pins `Surface.Prog.toStr (sol{…}) = "…"` (16 in `Benchmark/Syntax`, `ExampleNames`; more in `Checked`, `Operators`, `Chains/Memory`, `Calls`, …) | `Prog.toStr [] (sol{…})`, same strings | `Surface.Prog` removed |
@@ -2878,7 +2880,7 @@ elaboration errors listed below.
 **Docstrings.**  A scan of `Solidity/`, `AGENTS.md`, `.claude/` and
 `docs/` (this record aside) for the surface names (`Surface.Stmt`,
 `Surface.Prog`, `Surface.Fml`, `Surface.Premise`, `Surface.Problem`,
-`Syntax/Resolve`, `Prog.resolve`, `resolveCheck`, `defineCore`), for "as
+`Syntax/Resolve`, `Prog.resolve`, a bare `resolve`, `resolveCheck`, `defineCore`), for "as
 written (`Surface.…`)", and for the identifiers W8.4 deleted
 (`expandBody`, `copyDecls`, `withErased`, `legacyShow`, `specParts`,
 `scopedOf`, `deployRunS`, …) finds nothing left: W8.4 and its review
