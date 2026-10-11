@@ -42,7 +42,9 @@ def pastStepOf? (L : Expr) (n : String) (a : NFml.Chain.RwArrow) : TermElabM (Op
   let st ← saveState
   try
     let (_, cands, _) ← scopedRwCands L a run.erased[0]! (past := true) (keep := (!plainReadAny ·))
-    return cands.head?.map fun c => { name := n, fml := c.fml, erased := c.erased, rw := c.rw }
+    -- a rewrite that leaves a line printed alike (a hidden binder absorbed) is no step
+    return (cands.find? (·.erased != run.erased)).map fun c =>
+      { name := n, fml := c.fml, erased := c.erased, rw := c.rw }
   catch _ =>
     st.restore
     return none
@@ -113,9 +115,36 @@ def pastKey (B : Expr) : MetaM Expr := do
   return mkApp2 (mkConst ``Solidity.NFml.dropAlls) C
     (mkAppN (mkConst ``Fml.erase) #[C, Γ, mkApp (mkConst ``List.nil [0]) (mkConst ``Solidity.Var), B])
 
-/-- Whether the line `B` is the one the line written `Bw` names (`Fml.LeadsK`). -/
-def namesLine (Bw B : Expr) : MetaM Bool := do
-  kernelDefEq (← pastKey B) (← pastKey Bw)
+/-- Whether the line `B` is the one the line written names, read as its
+erasure `L` (`Fml.LeadsK`). -/
+def namesLine (L B : Expr) : MetaM Bool := do
+  kernelDefEq (← pastKey B) L
+
+/-- The derivation's last line from `A` (`A` itself where no step applies). -/
+def lastLineOf (A : Expr) : TermElabM Expr := do
+  return ((← runChain A).lines.getLast?.map (·.fml)).getD A
+
+/-- The scoped last line of a chain's statement: past the program
+(`Fml.LeadsK`), the line the line written names, found again by the search
+from the derivation's last line. -/
+def scopedEnd? (ty : Expr) : TermElabM (Option Expr) := do
+  let ty ← instantiateMVars ty
+  if ty.isAppOfArity ``Fml.LeadsK 3 then
+    let A ← instantiateMVars (ty.getArg! 1)
+    let L ← instantiateMVars (ty.getArg! 2)
+    let Z ← lastLineOf A
+    let (path, _) ← pastSearch Z (some fun B => namesLine L B)
+    return path.map fun p => (p.back?.map (·.fml)).getD Z
+  match ty.getAppFnArgs with
+  | (``Fml.OneStep, #[_, _, _, B]) | (``Fml.Steps, #[_, _, _, B])
+  | (``Fml.StepBy, #[_, _, _, _, B]) | (``Fml.Leads, #[_, _, _, B]) => return some B
+  | (``Fml.Via, #[_, _, A, ws]) =>
+    let some ws ← Solidity.listElems? ws | return none
+    let some w := ws.back? | return some A
+    let w ← whnfR w
+    unless w.isAppOfArity ``Prod.mk 4 do return none
+    return some (w.getArg! 3)
+  | _ => return none
 
 /-- `L ~~> B` by the rewrite of the step `st` (`FmlRw.sound`), the kernel's. -/
 def PastStep.leads (L : Expr) (st : PastStep) : TermElabM Expr := do
@@ -262,8 +291,9 @@ elab_rules : command
       m!"\n\nfresh variables (a `FreshNames` table renames them):\n  [{", ".intercalate rows.toList}]"
     logInfo (m!"{"\n".intercalate (← g.decl φ).toList}" ++ table ++ g.stopNote)
 
-/-- The last line of a scoped chain's statement (a chain term, or `A ~~> B`;
-past the program the line written), and whether it is scoped (always). -/
+/-- The last line of a scoped chain's statement (a chain term, or `A ~~> B`),
+and whether it is scoped (`false`: past the program, the line written read
+as its erasure, `Fml.LeadsK`). -/
 def chainEnd? (ty : Expr) : MetaM (Option (Expr × Bool)) := do
   let ty ← instantiateMVars ty
   let lastOf (ws : Expr) (dflt : Expr) : MetaM (Option Expr) := do
@@ -275,7 +305,7 @@ def chainEnd? (ty : Expr) : MetaM (Option (Expr × Bool)) := do
   match ty.getAppFnArgs with
   | (``Fml.OneStep, #[_, _, _, B]) | (``Fml.Steps, #[_, _, _, B])
   | (``Fml.StepBy, #[_, _, _, _, B]) | (``Fml.Leads, #[_, _, _, B]) => return some (B, true)
-  | (``Fml.LeadsK, #[_, _, B]) => return some (B, true)
+  | (``Fml.LeadsK, #[_, _, L]) => return some (L, false)
   | (``Fml.Via, #[_, _, A, ws]) => return (← lastOf ws A).map (·, true)
   | _ => return none
 
@@ -286,7 +316,7 @@ elab_rules : command
     let n ← realizeGlobalConstNoOverloadWithInfo c
     let info ← getConstInfo n
     forallTelescope info.type fun _ ty => do
-      let some (B, _) ← chainEnd? ty | throwUnsupportedSyntax
+      let some B ← scopedEnd? ty | throwUnsupportedSyntax
       let B ← instantiateMVars B
       let g ← generate B
       let (links, sp, C, stop) := (g.links, g.splice, (← lineType B).1, g.stop)
@@ -366,13 +396,10 @@ partial def leadsSteps (A B : Expr) : TermElabM Expr := do
       {(note.map (m!"\n(" ++ · ++ m!")")).getD m!""}"
 
 
-/-- The derivation's last line from `A` (`A` itself where no step applies). -/
-def lastLineOf (A : Expr) : TermElabM Expr := do
-  return ((← runChain A).lines.getLast?.map (·.fml)).getD A
-
-/-- `A ~~> B` past the program (`Fml.LeadsK`): the derivation to its last
-line, then the rewrites `ns` of the scoped line in turn, each at the first
-place it applies, to the line `B` names. -/
+/-- `A ~~> B` past the program (`Fml.LeadsK`, `B` the line written read as
+its erasure): the derivation to its last line, then the rewrites `ns` of
+the scoped line in turn, each at the first place it applies, to the line
+`B` names. -/
 def pastLeads (A B : Expr) (ns : Array Lean.Name) : TermElabM Expr := do
   let Z ← lastLineOf A
   let mut pf ← leadsSteps A Z
@@ -384,8 +411,8 @@ def pastLeads (A B : Expr) (ns : Array Lean.Name) : TermElabM Expr := do
     pf ← mkAppM ``Fml.Leads.comp #[pf, ← st.leads cur]
     cur := st.fml
   unless ← namesLine B cur do
-    throwError "sol_rws: the rewrites give{← indentLine cur}\nnot{← indentLine B}"
-  let he ← mkExpectedTypeHint (← mkEqRefl (← pastKey B)) (← mkEq (← pastKey cur) (← pastKey B))
+    throwError "sol_rws: the rewrites give{← indentLine cur}\nnot{indentExpr B}"
+  let he ← mkExpectedTypeHint (← mkEqRefl B) (← mkEq (← pastKey cur) B)
   mkAppM ``Fml.Leads.leadsK #[pf, he]
 
 /-- Prove a goal `A ~~> B`: scoped, by the derivation; past the program, by
@@ -476,11 +503,15 @@ elab_rules : tactic
         pure #["exact Solidity.Fml.Leads.self _"]
       else do
         let ls ← chainText gen A
-        let head := if ty.isAppOf ``Fml.LeadsK then "exact Solidity.Fml.Via.leadsK (show "
-          else if links.size == 1 then "exact Solidity.Fml.SoundRel.leads (show "
-          else "exact Solidity.Fml.Via.leads (show "
+        -- one link is its own relation (`SoundRel.leads`), more are a `Fml.Via`
+        let past := ty.isAppOf ``Fml.LeadsK
+        let (head, tail) := if past && links.size == 1 then
+            ("exact Solidity.Fml.Leads.leadsK (Solidity.Fml.SoundRel.leads (show ", " by sol_chain))")
+          else if past then ("exact Solidity.Fml.Via.leadsK (show ", " by sol_chain)")
+          else if links.size == 1 then ("exact Solidity.Fml.SoundRel.leads (show ", " by sol_chain)")
+          else ("exact Solidity.Fml.Via.leads (show ", " by sol_chain)")
         let body := #[head ++ ls[0]!] ++ (ls.extract 1 ls.size).map ("    " ++ ·)
-        pure (body.modify (body.size - 1) (· ++ " by sol_chain)"))
+        pure (body.modify (body.size - 1) (· ++ tail))
     let text := "\n".intercalate lines.toList
     let stx ← match Parser.runParserCategory (← getEnv) `tactic text with
       | .ok s => pure s

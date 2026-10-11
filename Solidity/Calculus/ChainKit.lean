@@ -728,8 +728,8 @@ theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C []} (s : Fml.StepBy r �
 `φ ~~> ψ` on scoped lines is `Fml.Leads` (wherever `ψ` holds, `φ` does):
 what a chain composes to, and a segment's link to the next
 (`(seg₁ ..).leads.via (seg₂ ..)`).  Past the program the line written is
-read as the line it names (`Fml.LeadsK φ ψ`): some line the chain reaches
-whose erasure is `ψ`'s.  The line a
+read as the line it names (`Fml.LeadsK φ L`, `L` the line written read
+as its erasure): some line the chain reaches whose erasure is `L`.  The line a
 rewrite leaves keeps the update's bookkeeping (a scope end, a hidden
 binder) where the line written has its own, so the two are one line by
 their key, not as terms (`Calculus/Chains.lean`'s `Fml.lineKey`). -/
@@ -744,26 +744,27 @@ theorem Fml.Leads.via {ψ : Fml C Γ} {ws : List (Link C × Fml C Γ)} (h : Fml.
 theorem Fml.Leads.valid {φ ψ : Fml C []} (h : Fml.Leads φ ψ) (hψ : Valid ψ) : Valid φ :=
   fun σ => h σ (hψ σ)
 
-/-- `φ ~~> ψ` past the program: `φ` leads to a line `B` whose erasure, its
-parameters free, is `ψ`'s: the line written names it. -/
-def Fml.LeadsK (φ ψ : Fml C []) : Prop :=
-  ∃ B : Fml C [], ((B.erase []).dropAlls = (ψ.erase []).dropAlls) ∧ Fml.Leads φ B
+/-- `φ ~~> L` past the program: `φ` leads to a line `B` whose erasure, its
+parameters free, is `L`, the line written read as its erasure: the line
+written names it. -/
+def Fml.LeadsK (φ : Fml C []) (L : Solidity.NFml C) : Prop :=
+  ∃ B : Fml C [], (B.erase []).dropAlls = L ∧ Fml.Leads φ B
 
 /-- A `~~>` to a line the line written names. -/
-theorem Fml.Leads.leadsK {φ B ψ : Fml C []} (h : Fml.Leads φ B)
-    (he : (B.erase []).dropAlls = (ψ.erase []).dropAlls := by rfl) : Fml.LeadsK φ ψ :=
+theorem Fml.Leads.leadsK {φ B : Fml C []} {L : Solidity.NFml C} (h : Fml.Leads φ B)
+    (he : (B.erase []).dropAlls = L := by rfl) : Fml.LeadsK φ L :=
   ⟨B, he, h⟩
 
 /-- A chain past the program, as `~~>` to the line written. -/
-theorem Fml.Via.leadsK {φ ψ : Fml C []} {ws : List (Link C × Fml C [])} (v : Fml.Via φ ws)
-    (he : ((Fml.Via.last φ ws).erase []).dropAlls = (ψ.erase []).dropAlls := by rfl) :
-    Fml.LeadsK φ ψ :=
+theorem Fml.Via.leadsK {φ : Fml C []} {L : Solidity.NFml C} {ws : List (Link C × Fml C [])}
+    (v : Fml.Via φ ws) (he : ((Fml.Via.last φ ws).erase []).dropAlls = L := by rfl) :
+    Fml.LeadsK φ L :=
   v.leads.leadsK he
 
 /-- **`~~>` past the program is a proof** where every line the line written
 names is valid. -/
-theorem Fml.LeadsK.valid {φ ψ : Fml C []} (h : Fml.LeadsK φ ψ)
-    (hB : ∀ B : Fml C [], (B.erase []).dropAlls = (ψ.erase []).dropAlls → Valid B) : Valid φ := by
+theorem Fml.LeadsK.valid {φ : Fml C []} {L : Solidity.NFml C} (h : Fml.LeadsK φ L)
+    (hB : ∀ B : Fml C [], (B.erase []).dropAlls = L → Valid B) : Valid φ := by
   obtain ⟨B, he, hl⟩ := h
   exact hl.valid (hB B he)
 

@@ -205,24 +205,67 @@ section Absorb
 
 variable {Γ : Ctx} {u : LTy}
 
-/-- The first element of an absorbed update: `x := r`, `x` the binder's local. -/
-def UpdElem.absorbHead (x : Var) : UpdElem C (u :: Γ) (u :: Γ) → Option (Upd C Γ (u :: Γ))
-  | .local i r => match i, r with
-    | .here, r => r.down?.map (.decl .nil x)
-    | .there _, _ => none
+/-- Two locals at different positions are set in either order. -/
+theorem Env.set_comm : {Γ : Ctx} → {t t' : LTy} → (i : Idx Γ t) → (j : Idx Γ t') →
+    i.toNat ≠ j.toNat → (v : t.Denote C) → (w : t'.Denote C) → (e : Env C Γ) →
+    Env.set j w (Env.set i v e) = Env.set i v (Env.set j w e)
+  | _, _, _, .here, .here, h, _, _, _ => absurd rfl h
+  | _, _, _, .here, .there _, _, _, _, _ => rfl
+  | _, _, _, .there _, .here, _, _, _, _ => rfl
+  | _, _, _, .there i, .there j, h, v, w, e =>
+    congrArg (e.1, ·) (Env.set_comm i j (fun h' => h (congrArg (· + 1) h')) v w e.2)
+
+/-- Where the binder's local sits after an update that only declares on top
+of it. -/
+def Upd.baseIdx : {Δ : Ctx} → Upd C (u :: Γ) Δ → Option (Idx Δ u)
+  | _, .nil => some .here
+  | _, .snoc V _ => Upd.baseIdx V
+  | _, .decl V _ _ => (Upd.baseIdx V).map .there
+  | _, .pop .. => none
+  | _, .drop .. => none
+
+/-- Whether an element writes the local at `j`. -/
+def UpdElem.writesAt {Γ' Δ : Ctx} (j : Idx Δ u) : UpdElem C Γ' Δ → Bool
+  | .local i _ => i.toNat == j.toNat
+  | _ => false
+
+/-- The update with `x :=decl b` beneath it in place of the binder: every
+element read from above the binder, none writing its local, no scope ended
+(`Upd.absorb`'s part before the binder's local is set). -/
+def Upd.rebase (x : Var) (b : Rhs C Γ u) : {Δ : Ctx} → Upd C (u :: Γ) Δ → Option (Upd C Γ Δ)
+  | _, .nil => some (.decl .nil x b)
+  | _, .snoc V e => do
+    let j ← Upd.baseIdx V
+    if e.writesAt j then none else pure (.snoc (← Upd.rebase x b V) (← e.down?))
+  | _, .decl V y r => do pure (.decl (← Upd.rebase x b V) y (← r.down?))
+  | _, .pop .. => none
+  | _, .drop .. => none
+
+/-- `e`, the first write of the binder's local after `V`: `V` with the
+local declared beneath it, set to what `e` sets it to. -/
+def Upd.absorbFirst (x : Var) {Δ : Ctx} (V : Upd C (u :: Γ) Δ) :
+    UpdElem C (u :: Γ) Δ → Option (Upd C Γ Δ)
+  | .local (t := t) i r =>
+    if h : t = u then by
+      subst h
+      exact (do
+        let j ← Upd.baseIdx V
+        if i.toNat == j.toNat then Upd.rebase x (← r.down?) V else none)
+    else none
   | _ => none
 
-/-- `{V ‖ e}` absorbed, from `V` absorbed (`rec`): `e` alone on nothing is
-the head. -/
-def Upd.absorbSnoc (x : Var) : {Δ : Ctx} → Upd C (u :: Γ) Δ → UpdElem C (u :: Γ) Δ →
+/-- `{V ‖ e}` absorbed, from `V` absorbed (`rec`); else `e` is the first
+write of the binder's local (`Upd.absorbFirst`). -/
+def Upd.absorbSnoc (x : Var) {Δ : Ctx} (V : Upd C (u :: Γ) Δ) (e : UpdElem C (u :: Γ) Δ) :
     Option (Upd C Γ Δ) → Option (Upd C Γ Δ)
-  | _, .nil, e, _ => e.absorbHead x
-  | _, .snoc .., e, rec | _, .decl .., e, rec | _, .pop .., e, rec | _, .drop .., e, rec => do
-    pure (.snoc (← rec) (← e.down?))
+  | some V' => do pure (.snoc V' (← e.down?))
+  | none => Upd.absorbFirst x V e
 
-/-- An update applied below a hidden binder of `x : u`, whose first element
-sets `x` and which reads `x` nowhere: the update from above the binder, `x`
-declared by its first element (`bind x ({x := e ‖ U} φ) ⇝ {x :=decl e ‖ U} φ`). -/
+/-- An update applied below a hidden binder of `x : u`, which sets `x`
+before any element reads it, and reads it nowhere: the update from above
+the binder, `x` declared beneath it to what its first write sets it to
+(`bind x ({x := e ‖ U} φ) ⇝ {x :=decl e ‖ U} φ`, and `bind x ({y :=decl a ‖
+x := e ‖ U} φ) ⇝ {x :=decl e ‖ y :=decl a ‖ U} φ`). -/
 def Upd.absorb (x : Var) : {Δ : Ctx} → Upd C (u :: Γ) Δ → Option (Upd C Γ Δ)
   | _, .nil => none
   | _, .snoc V e => Upd.absorbSnoc x V e (Upd.absorb x V)
@@ -230,57 +273,223 @@ def Upd.absorb (x : Var) : {Δ : Ctx} → Upd C (u :: Γ) Δ → Option (Upd C �
   | _, .pop V h => (Upd.absorb x V).map (.pop · h)
   | _, .drop V h => (Upd.absorb x V).map (.drop · h)
 
-theorem UpdElem.apply_absorbHead (x : Var) (σ : EState C Γ) (v : u.Denote C) :
-    (e : UpdElem C (u :: Γ) (u :: Γ)) → {V' : Upd C Γ (u :: Γ)} → e.absorbHead x = some V' →
-      V'.apply σ = (Upd.snoc .nil e).apply (σ.push v)
-  | .local .here r, _, h => by
-    obtain ⟨r', hr, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (do let τ ← pure σ; pure (τ.push (← r'.eval σ))) =
-      (do let τ ← pure (σ.push v); pure (τ.setLocal .here (← r.eval (σ.push v))))
-    rw [Rhs.eval_down? σ v r hr]
-    cases r.eval (σ.push v) <;> rfl
-  | .local (.there _) _, _, h => by cases h
-  | .storage _, _, h | .memory _, _, h | .selfBalance .., _, h | .net .., _, h | .pay .., _, h
-  | .netMt .., _, h | .setBalance _, _, h => by cases h
+theorem EState.glob_setLocal {Δ : Ctx} {t : LTy} (τ : EState C Δ) (j : Idx Δ t) (w : t.Denote C) :
+    (τ.setLocal j w).glob = τ.glob := rfl
 
-/-- **The absorbed update runs from the state above the binder as the update
-from any value of the binder's local.** -/
-theorem Upd.apply_absorb (x : Var) (σ : EState C Γ) (v : u.Denote C) :
-    {Δ : Ctx} → (V : Upd C (u :: Γ) Δ) → {V' : Upd C Γ Δ} → V.absorb x = some V' →
-      V'.apply σ = V.apply (σ.push v)
-  | _, .nil, _, h => by cases h
-  | _, .snoc V e, V', h => by
-    have hs : ∀ {Δ : Ctx} (V : Upd C (u :: Γ) Δ) (e : UpdElem C (u :: Γ) Δ) {W' : Upd C Γ Δ},
-        (∀ {W : Upd C Γ Δ}, V.absorb x = some W → W.apply σ = V.apply (σ.push v)) →
-        Upd.absorbSnoc x V e (V.absorb x) = some W' → W'.apply σ = (Upd.snoc V e).apply (σ.push v) := by
-      intro Δ V e W' ih h
-      cases V
-      case nil => exact UpdElem.apply_absorbHead x σ v e h
-      all_goals
-        obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
-        obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
-        cases h
-        show (do e'.write σ (← W.apply σ)) = (do e.write (σ.push v) (← Upd.apply (σ.push v) _))
-        rw [ih hW]
-        cases Upd.apply (σ.push v) _ with
+theorem EState.net_setLocal {Δ : Ctx} {t : LTy} (τ : EState C Δ) (j : Idx Δ t) (w : t.Denote C) :
+    (τ.setLocal j w).net = τ.net := rfl
+
+theorem EState.withGlob_setLocal {Δ : Ctx} {t : LTy} (τ : EState C Δ) (j : Idx Δ t)
+    (w : t.Denote C) (g : Semantics.State) :
+    (τ.setLocal j w).withGlob g = (τ.withGlob g).setLocal j w := rfl
+
+theorem Except.map_eq_bind' {ε α β : Type} (f : α → β) (x : Except ε α) :
+    x.map f = x >>= fun a => pure (f a) := by
+  cases x <;> rfl
+
+theorem Except.ite_error_bind {ε α β : Type} (c : Prop) [Decidable c] (e : ε) (z : α)
+    (k : α → Except ε β) :
+    ((if c then Except.error e else pure z) >>= k) = if c then Except.error e else k z := by
+  by_cases h : c
+  · simp only [h, if_true]; rfl
+  · simp only [h, if_false]; rfl
+
+/-- An element that does not write the local at `j` commutes with setting it. -/
+theorem UpdElem.write_setLocalAt {Γ' Δ : Ctx} (σ₀ : EState C Γ') (j : Idx Δ u) (w : u.Denote C) :
+    (e : UpdElem C Γ' Δ) → e.writesAt j = false → (τ : EState C Δ) →
+      e.write σ₀ (τ.setLocal j w) = (e.write σ₀ τ).map (·.setLocal j w)
+  | .local i r, h, τ => by
+    have hne : i.toNat ≠ j.toNat := fun he => by simp only [UpdElem.writesAt, he, beq_self_eq_true,
+      Bool.true_eq_false] at h
+    show (do pure ((τ.setLocal j w).setLocal i (← r.eval σ₀))) =
+      Except.map (fun τ' : EState C Δ => τ'.setLocal j w) (do pure (τ.setLocal i (← r.eval σ₀)))
+    cases r.eval σ₀ with
+    | error => rfl
+    | ok a =>
+      show Except.ok (EState.withEnv _ (Env.set i a (Env.set j w τ.env))) =
+        Except.ok (EState.withEnv _ (Env.set j w (Env.set i a τ.env)))
+      rw [Env.set_comm i j hne]
+      rfl
+  | .storage _, _, τ | .memory _, _, τ | .selfBalance _ _, _, τ | .net _ _ _, _, τ
+  | .pay _ _, _, τ | .netMt _ _, _, τ | .setBalance _, _, τ => by
+    rw [Except.map_eq_bind']
+    simp only [UpdElem.write, EState.glob_setLocal, EState.net_setLocal, EState.withGlob_setLocal,
+      bind_assoc, pure_bind, Except.ite_error_bind]
+
+/-- **The update rebased runs as the update from the binder's local set to
+`b`.** -/
+theorem Upd.apply_rebase (x : Var) (b : Rhs C Γ u) (σ : EState C Γ) :
+    {Δ : Ctx} → (V : Upd C (u :: Γ) Δ) → {V' : Upd C Γ Δ} → V.rebase x b = some V' →
+      V'.apply σ = do let bv ← b.eval σ; V.apply (σ.push bv)
+  | _, .nil, _, h => by
+    cases h
+    show (do let τ ← pure σ; pure (τ.push (← b.eval σ))) = _
+    cases b.eval σ <;> rfl
+  | _, .snoc V e, _, h => by
+    simp only [Upd.rebase] at h
+    obtain ⟨j, -, h⟩ := Option.bind_eq_some_iff.1 h
+    split at h
+    · cases h
+    · obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
+      obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
+      cases h
+      show (do e'.write σ (← W.apply σ)) = _
+      rw [Upd.apply_rebase x b σ V hW]
+      cases b.eval σ with
+      | error => rfl
+      | ok bv =>
+        show (do e'.write σ (← V.apply (σ.push bv))) = (do e.write (σ.push bv) (← V.apply (σ.push bv)))
+        cases V.apply (σ.push bv) with
         | error => rfl
-        | ok τ => exact UpdElem.write_down? σ v e he τ
-    exact hs V e (fun hW => Upd.apply_absorb x σ v V hW) h
+        | ok τ => exact UpdElem.write_down? σ bv e he τ
   | _, .decl V y r, _, h => by
     obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    show (do let τ ← W.apply σ; pure (τ.push (← r'.eval σ))) =
+    show (do let τ ← W.apply σ; pure (τ.push (← r'.eval σ))) = _
+    rw [Upd.apply_rebase x b σ V hW]
+    cases b.eval σ with
+    | error => rfl
+    | ok bv =>
+      show (do let τ ← V.apply (σ.push bv); pure (τ.push (← r'.eval σ))) =
+        (do let τ ← V.apply (σ.push bv); pure (τ.push (← r.eval (σ.push bv))))
+      rw [Rhs.eval_down? σ bv r hr]
+  | _, .pop .., _, h => by cases h
+  | _, .drop .., _, h => by cases h
+
+/-- **An update that rebases leaves the binder's local as it found it.** -/
+theorem Upd.apply_setBase (x : Var) (b : Rhs C Γ u) (σ : EState C Γ) (v w : u.Denote C) :
+    {Δ : Ctx} → (V : Upd C (u :: Γ) Δ) → {V' : Upd C Γ Δ} → V.rebase x b = some V' →
+      {j : Idx Δ u} → V.baseIdx = some j →
+      V.apply (σ.push w) = (V.apply (σ.push v)).map (·.setLocal j w)
+  | _, .nil, _, _, _, hj => by
+    cases hj
+    rfl
+  | _, .snoc V e, _, h, j, hj => by
+    simp only [Upd.rebase] at h
+    obtain ⟨j', hj', h⟩ := Option.bind_eq_some_iff.1 h
+    have hjj : j' = j := Option.some.inj (hj'.symm.trans hj)
+    subst hjj
+    split at h
+    · cases h
+    · rename_i hn
+      obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
+      obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
+      have hn : e.writesAt j' = false := by simpa only [Bool.not_eq_true] using hn
+      show (do e.write (σ.push w) (← V.apply (σ.push w))) =
+        (do e.write (σ.push v) (← V.apply (σ.push v))).map _
+      rw [Upd.apply_setBase x b σ v w V hW hj']
+      cases V.apply (σ.push v) with
+      | error => rfl
+      | ok τ =>
+        show e.write (σ.push w) (τ.setLocal j' w) = (e.write (σ.push v) τ).map _
+        rw [← UpdElem.write_down? σ w e he, UpdElem.write_down? σ v e he]
+        exact UpdElem.write_setLocalAt (σ.push v) j' w e hn τ
+  | _, .decl V y r, _, h, j, hj => by
+    obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨j', hj', rfl⟩ := Option.map_eq_some_iff.1 hj
+    show (do let τ ← V.apply (σ.push w); pure (τ.push (← r.eval (σ.push w)))) =
+      (do let τ ← V.apply (σ.push v); pure (τ.push (← r.eval (σ.push v)))).map _
+    rw [Upd.apply_setBase x b σ v w V hW hj', ← Rhs.eval_down? σ w r hr, ← Rhs.eval_down? σ v r hr]
+    cases V.apply (σ.push v) with
+    | error => rfl
+    | ok τ => cases r'.eval σ <;> rfl
+  | _, .pop .., _, h, _, _ => by cases h
+  | _, .drop .., _, h, _, _ => by cases h
+
+theorem Semantics.Res.OkEq.bind' {α β : Type} {a b : Res α} (h : Res.OkEq a b) (f : α → Res β) :
+    Res.OkEq (a >>= f) (b >>= f) := fun y => by
+  cases ha : a with
+  | ok x =>
+    rw [(h x).1 ha]
+  | error e =>
+    cases hb : b with
+    | ok x => rw [(h x).2 hb] at ha; cases ha
+    | error e' => exact ⟨fun hh => (nomatch hh), fun hh => (nomatch hh)⟩
+
+theorem Semantics.Res.OkEq.map' {α β : Type} {a b : Res α} (h : Res.OkEq a b) (f : α → β) :
+    Res.OkEq (a.map f) (b.map f) := by
+  have e1 : a.map f = a >>= fun x => pure (f x) := by cases a <;> rfl
+  have e2 : b.map f = b >>= fun x => pure (f x) := by cases b <;> rfl
+  rw [e1, e2]
+  exact h.bind' _
+
+/-- **The absorbed update runs from the state above the binder as the update
+from any value of the binder's local**, up to which halt comes first. -/
+theorem Upd.apply_absorb (x : Var) (σ : EState C Γ) (v : u.Denote C) :
+    {Δ : Ctx} → (V : Upd C (u :: Γ) Δ) → {V' : Upd C Γ Δ} → V.absorb x = some V' →
+      Res.OkEq (V'.apply σ) (V.apply (σ.push v))
+  | _, .nil, _, h => by cases h
+  | _, .snoc V e, V', h => by
+    simp only [Upd.absorb] at h
+    cases hr : Upd.absorb x V with
+    | some W =>
+      rw [hr] at h
+      obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
+      cases h
+      have ih := Upd.apply_absorb x σ v V hr
+      show Res.OkEq (do e'.write σ (← W.apply σ)) (do e.write (σ.push v) (← V.apply (σ.push v)))
+      have hw : (fun τ => e'.write σ τ) = (fun τ => e.write (σ.push v) τ) :=
+        funext fun τ => UpdElem.write_down? σ v e he τ
+      rw [show (do e'.write σ (← W.apply σ)) = W.apply σ >>= fun τ => e'.write σ τ from rfl, hw]
+      exact ih.bind' _
+    | none =>
+      rw [hr] at h
+      simp only [Upd.absorbSnoc, Upd.absorbFirst] at h
+      cases e with
+      | «local» i r =>
+        rename_i t
+        simp only at h
+        split at h
+        · rename_i htu
+          subst htu
+          simp only at h
+          obtain ⟨j, hj, h⟩ := Option.bind_eq_some_iff.1 h
+          split at h
+          · rename_i hij
+            have hij : i = j := Idx.toNat_inj i j (by simpa only [beq_iff_eq] using hij)
+            subst hij
+            obtain ⟨r', hr', h⟩ := Option.bind_eq_some_iff.1 h
+            rw [Upd.apply_rebase x r' σ V h]
+            intro y
+            show (do let bv ← r'.eval σ; V.apply (σ.push bv)) = .ok y ↔
+              (do pure ((← V.apply (σ.push v)).setLocal i (← r.eval (σ.push v)))) = .ok y
+            rw [Rhs.eval_down? σ v r hr']
+            cases hrv : r.eval (σ.push v) with
+            | error e =>
+              cases V.apply (σ.push v) <;> exact ⟨fun hh => (nomatch hh), fun hh => (nomatch hh)⟩
+            | ok a =>
+              show V.apply (σ.push a) = .ok y ↔ _
+              rw [Upd.apply_setBase x r' σ v a V h hj]
+              cases V.apply (σ.push v) <;> exact Iff.rfl
+          · cases h
+        · cases h
+      | _ => cases h
+  | _, .decl V y r, _, h => by
+    obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    show Res.OkEq (do let τ ← W.apply σ; pure (τ.push (← r'.eval σ)))
       (do let τ ← V.apply (σ.push v); pure (τ.push (← r.eval (σ.push v))))
-    rw [Upd.apply_absorb x σ v V hW, Rhs.eval_down? σ v r hr]
+    rw [Rhs.eval_down? σ v r hr]
+    exact (Upd.apply_absorb x σ v V hW).bind' _
   | _, .pop V hp, _, h => by
     obtain ⟨W, hW, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (W.apply σ).map _ = (V.apply (σ.push v)).map _
-    rw [Upd.apply_absorb x σ v V hW]
+    exact (Upd.apply_absorb x σ v V hW).map' _
   | _, .drop V hp, _, h => by
     obtain ⟨W, hW, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (W.apply σ).map _ = (V.apply (σ.push v)).map _
-    rw [Upd.apply_absorb x σ v V hW]
+    exact (Upd.apply_absorb x σ v V hW).map' _
+
+/-- What holds after one outcome holds after another that returns the same states. -/
+theorem Modality.afterC_okEq {α : Type} {m : Modality} {p : α → Prop} {a b : Res α}
+    (h : Res.OkEq a b) (ha : m.afterC p a) : m.afterC p b := by
+  cases hb : b with
+  | ok y => rw [(h y).2 hb] at ha; exact ha
+  | error e =>
+    cases ha' : a with
+    | ok y => rw [(h y).1 ha'] at hb; cases hb
+    | error e' => rw [ha'] at ha; exact ha
 
 /-- **`bind x ({x := e ‖ U} φ)` from `{x :=decl e ‖ U} φ`.** -/
 theorem holds_bind_absorb {m m' : Modality} {x : Var} {Δ : Ctx} {V : Upd C (u :: Γ) Δ}
@@ -289,8 +498,8 @@ theorem holds_bind_absorb {m m' : Modality} {x : Var} {Δ : Ctx} {V : Upd C (u :
   Modality.forallB_intro fun w => by
     show m'.afterC (fun τ => ∀ σ' : State C _, σ'.erase = τ → (σ.push w).H <+: σ'.H → holds σ' ψ)
       (V.apply (σ.push w).erase)
-    rw [State.push_erase, ← Upd.apply_absorb x σ.erase _ V hV]
-    exact h
+    rw [State.push_erase]
+    exact Modality.afterC_okEq (Upd.apply_absorb x σ.erase _ V hV) h
 
 end Absorb
 
@@ -889,6 +1098,40 @@ theorem Fml.absorbMergeP_sound {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ}
     exact holds_upd_mono (fun τ hτ => holds_bind_absorb hV' τ hτ) σ (holds_upd_mergeP hr σ hφ)
   · cases h
 
+/-- `bind x ψ` with its local absorbed into the update `ψ` begins with,
+where that update sets it before reading it (`Upd.absorb`). -/
+def Fml.absorbBind {Δ : Ctx} (m : Modality) (x : Var) (t : LTy) : Fml C (t :: Δ) → Fml C Δ
+  | .upd m'' V χ => match V.absorb x with
+    | some V' => .upd m'' V' χ
+    | none => .bind m x t (.upd m'' V χ)
+  | ψ => .bind m x t ψ
+
+theorem Fml.absorbBind_holds {Δ : Ctx} {m : Modality} {x : Var} {t : LTy} (ψ : Fml C (t :: Δ))
+    (σ : State C Δ) (h : holds σ (Fml.absorbBind m x t ψ)) : holds σ (.bind m x t ψ) := by
+  unfold Fml.absorbBind at h
+  split at h
+  · rename_i m'' V χ
+    split at h
+    · rename_i V' hV
+      exact holds_bind_absorb hV σ h
+    · exact h
+  · exact h
+
+/-- The hidden binders a formula begins with absorbed, innermost first, into
+the update under them (`Fml.absorbBind`). -/
+def Fml.absorbBinds : {Δ : Ctx} → Fml C Δ → Fml C Δ
+  | _, .bind m x t ψ => Fml.absorbBind m x t (Fml.absorbBinds ψ)
+  | _, φ => φ
+
+theorem Fml.absorbBinds_holds : {Δ : Ctx} → (φ : Fml C Δ) → (σ : State C Δ) →
+    holds σ (Fml.absorbBinds φ) → holds σ φ
+  | _, .bind m x t ψ, σ, h => by
+    have h' := Fml.absorbBind_holds (Fml.absorbBinds ψ) σ h
+    exact Modality.forallB_imp (fun w hw => Fml.absorbBinds_holds ψ _ hw) h'
+  | _, .tt, _, h | _, .eq .., _, h | _, .defined _, _, h | _, .not _, _, h | _, .and .., _, h
+  | _, .imp .., _, h | _, .upd .., _, h | _, .modal .., _, h | _, .havoc _, _, h
+  | _, .all .., _, h | _, .anon .., _, h => h
+
 /-- `{U}_m φ` merged with the update at the head of `φ`, through a hidden
 binder: absorbed where the update sets its local first (`Fml.absorbMergeP`),
 or `U` moved under it with its scope ends (`Upd.liftG?`, as
@@ -899,9 +1142,13 @@ def Fml.merge2P (m : Modality) : {Γ Δ : Ctx} → Upd C Γ Δ → Fml C Δ → 
     match Fml.absorbMergeP m U x ψ with
     | some φ => some φ
     | none =>
-      if (t.notMem || U.keepsNext) = true then
-        (U.liftG? (t := t)).bind fun U' => (Fml.merge2P m U' ψ).map (.bind m' x t)
-      else none
+      -- the hidden binders under it absorbed too, innermost first
+      match Fml.absorbBinds (.bind m' x t ψ) with
+      | .upd m'' V χ => (Upd.mergeP? m U m'' V).map fun r => .upd r.1 r.2 χ
+      | _ =>
+        if (t.notMem || U.keepsNext) = true then
+          (U.liftG? (t := t)).bind fun U' => (Fml.merge2P m U' ψ).map (.bind m' x t)
+        else none
   | _, _, _, _ => none
 
 theorem Fml.merge2P_sound {m : Modality} : {Γ Δ : Ctx} → (U : Upd C Γ Δ) →
@@ -917,6 +1164,14 @@ theorem Fml.merge2P_sound {m : Modality} : {Γ Δ : Ctx} → (U : Upd C Γ Δ) �
       cases h
       exact fun σ hψ => Fml.absorbMergeP_sound hφ σ hψ
     · split at h
+      · rename_i m'' V χ' hab
+        obtain ⟨r, hr, rfl⟩ := Option.map_eq_some_iff.1 h
+        intro σ hψ
+        refine holds_upd_mono (fun τ hτ => Fml.absorbBinds_holds (.bind m' x t χ) τ ?_) σ
+          (holds_upd_mergeP hr σ hψ)
+        rw [hab]
+        exact hτ
+      split at h
       · rename_i ht
         obtain ⟨U', hU', h⟩ := Option.bind_eq_some_iff.1 h
         obtain ⟨χ', hχ', rfl⟩ := Option.map_eq_some_iff.1 h
@@ -1978,13 +2233,25 @@ theorem Fml.dropDeclsTop_sound {Δ : Ctx} {drop : Nat → Bool} {m : Modality} {
       intro σ' he hH
       exact Fml.thinS?_holds R.th ψ hψ σ' (hφ (σ'.thin R.th) (by rw [State.thin_erase, he]) hH)
 
+/-- `{U}_m ψ`, the scope ends `ψ` begins with merged in where `absorb`
+(`Fml.absorbPops`): asked only where `ψ` is an update, so that the kernel
+never looks into a postcondition. -/
+def Fml.absorbIf {Δ : Ctx} (absorb : Bool) (m : Modality) (U : Upd C Γ Δ) (ψ : Fml C Δ) : Fml C Γ :=
+  if absorb then Fml.absorbPops m U ψ else .upd m U ψ
+
+theorem Fml.absorbIf_holds {Δ : Ctx} {absorb : Bool} {m : Modality} {U : Upd C Γ Δ} {ψ : Fml C Δ}
+    (σ : State C Γ) (h : holds σ (Fml.absorbIf absorb m U ψ)) : holds σ (.upd m U ψ) := by
+  cases absorb
+  · exact h
+  · exact Fml.absorbPops_holds σ h
+
 /-- **`simplifyUpdate`** on `{U}_m ψ` past the program: the scope ends after
-it merged in, the shadowed writes dropped, then every declaration nothing
-reads afterwards, else the ones `U` pops itself; `none` where nothing
-goes. -/
-def Fml.simpPastTop {Δ : Ctx} (every : Bool) (m : Modality) (U : Upd C Γ Δ) (ψ : Fml C Δ) :
+it merged in (where `absorb`), the shadowed writes dropped, then every
+declaration nothing reads afterwards (`every`), else the ones `U` ends
+itself; `none` where nothing goes. -/
+def Fml.simpPastTop {Δ : Ctx} (every absorb : Bool) (m : Modality) (U : Upd C Γ Δ) (ψ : Fml C Δ) :
     Option (Fml C Γ) :=
-  match (Fml.absorbPops m U ψ).updHead? with
+  match (Fml.absorbIf absorb m U ψ).updHead? with
   | some ⟨m', W, ψ'⟩ =>
     let W' := W.shadow m'.isBoxS
     let popped := (Upd.declStack W').2.2
@@ -1994,13 +2261,13 @@ def Fml.simpPastTop {Δ : Ctx} (every : Bool) (m : Modality) (U : Upd C Γ Δ) (
       | none => none
   | none => none
 
-theorem Fml.simpPastTop_sound {Δ : Ctx} {every : Bool} {m : Modality} {U : Upd C Γ Δ} {ψ : Fml C Δ}
-    {φ : Fml C Γ} (h : Fml.simpPastTop every m U ψ = some φ) (σ : State C Γ) (hφ : holds σ φ) :
-    holds σ (.upd m U ψ) := by
+theorem Fml.simpPastTop_sound {Δ : Ctx} {every absorb : Bool} {m : Modality} {U : Upd C Γ Δ}
+    {ψ : Fml C Δ} {φ : Fml C Γ} (h : Fml.simpPastTop every absorb m U ψ = some φ) (σ : State C Γ)
+    (hφ : holds σ φ) : holds σ (.upd m U ψ) := by
   unfold Fml.simpPastTop at h
   split at h
   · rename_i m' W ψ' hW
-    refine Fml.absorbPops_holds σ ?_
+    refine Fml.absorbIf_holds (absorb := absorb) σ ?_
     rw [Fml.updHead?_eq hW]
     refine holds_upd_shadow σ ?_
     dsimp only at h
@@ -2050,16 +2317,16 @@ theorem Fml.dropBindTop_sound {Δ : Ctx} {t : LTy} {m₀ : Modality} {x : Var} {
   | _ => cases h
 
 /-- `{U}_m ψ` simplified where it can be, else as it is. -/
-def Fml.simpPastD {Γ : Ctx} (every : Bool) : Fml C Γ → Fml C Γ
-  | .upd m U ψ => (Fml.simpPastTop every m U ψ).getD (.upd m U ψ)
+def Fml.simpPastD {Γ : Ctx} (every absorb : Bool) : Fml C Γ → Fml C Γ
+  | .upd m U ψ => (Fml.simpPastTop every absorb m U ψ).getD (.upd m U ψ)
   | φ => φ
 
-theorem Fml.simpPastD_sound {Γ : Ctx} (every : Bool) (φ : Fml C Γ) (σ : State C Γ)
-    (h : holds σ (φ.simpPastD every)) : holds σ φ := by
+theorem Fml.simpPastD_sound {Γ : Ctx} (every absorb : Bool) (φ : Fml C Γ) (σ : State C Γ)
+    (h : holds σ (φ.simpPastD every absorb)) : holds σ φ := by
   cases φ with
   | upd m U ψ =>
     simp only [Fml.simpPastD] at h
-    cases hs : Fml.simpPastTop every m U ψ with
+    cases hs : Fml.simpPastTop every absorb m U ψ with
     | none => rw [hs] at h; exact h
     | some χ => rw [hs] at h; exact Fml.simpPastTop_sound hs σ h
   | _ => exact h
@@ -2067,27 +2334,27 @@ theorem Fml.simpPastD_sound {Γ : Ctx} (every : Bool) (φ : Fml C Γ) (σ : Stat
 /-- `simplifyUpdate` past the program at position `n` of the spine, a hidden
 binder in front of the update absorbed where the update sets it first, or
 dropped where the update pops its local and reads it nowhere. -/
-def Fml.simpPastAt (every : Bool) : {Γ : Ctx} → Nat → Fml C Γ → Option (Fml C Γ)
-  | _, n, .all x p φ => (Fml.simpPastAt every n φ).map (.all x p)
+def Fml.simpPastAt (every absorb : Bool) : {Γ : Ctx} → Nat → Fml C Γ → Option (Fml C Γ)
+  | _, n, .all x p φ => (Fml.simpPastAt every absorb n φ).map (.all x p)
   | _, 0, .bind m x t φ =>
     match (match φ with
-      | .upd m' V ψ => (V.absorb x).bind fun V' => Fml.simpPastTop every m' V' ψ
+      | .upd m' V ψ => (V.absorb x).bind fun V' => Fml.simpPastTop every absorb m' V' ψ
       | _ => none) with
     | some ψ => some ψ
     | none => match Fml.dropBindTop φ with
-      | some ψ => some (ψ.simpPastD every)
-      | none => (Fml.simpPastAt every 0 φ).map (.bind m x t)
-  | _, n + 1, .bind m x t φ => (Fml.simpPastAt every (n + 1) φ).map (.bind m x t)
-  | _, 0, .upd m U φ => Fml.simpPastTop every m U φ
-  | _, n + 1, .upd m U φ => (Fml.simpPastAt every n φ).map (.upd m U)
+      | some ψ => some (ψ.simpPastD every absorb)
+      | none => (Fml.simpPastAt every absorb 0 φ).map (.bind m x t)
+  | _, n + 1, .bind m x t φ => (Fml.simpPastAt every absorb (n + 1) φ).map (.bind m x t)
+  | _, 0, .upd m U φ => Fml.simpPastTop every absorb m U φ
+  | _, n + 1, .upd m U φ => (Fml.simpPastAt every absorb n φ).map (.upd m U)
   | _, _, _ => none
 
-theorem Fml.simpPastAt_sound (every : Bool) : {Γ : Ctx} → (n : Nat) → (φ : Fml C Γ) → {ψ : Fml C Γ} →
-    Fml.simpPastAt every n φ = some ψ → ∀ σ, holds σ ψ → holds σ φ
+theorem Fml.simpPastAt_sound (every absorb : Bool) : {Γ : Ctx} → (n : Nat) → (φ : Fml C Γ) → {ψ : Fml C Γ} →
+    Fml.simpPastAt every absorb n φ = some ψ → ∀ σ, holds σ ψ → holds σ φ
   | _, n, .all x p φ, ψ₀, h => by
-    have h : (Fml.simpPastAt every n φ).map (Fml.all x p) = some ψ₀ := by rw [← h]; cases n <;> rfl
+    have h : (Fml.simpPastAt every absorb n φ).map (Fml.all x p) = some ψ₀ := by rw [← h]; cases n <;> rfl
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs v => Fml.simpPastAt_sound every n φ hψ _ (hs v)
+    exact fun σ hs v => Fml.simpPastAt_sound every absorb n φ hψ _ (hs v)
   | _, 0, .bind m x t φ, ψ₀, h => by
     simp only [Fml.simpPastAt] at h
     split at h
@@ -2101,17 +2368,17 @@ theorem Fml.simpPastAt_sound (every : Bool) : {Γ : Ctx} → (n : Nat) → (φ :
     · split at h
       · rename_i ψ hψ
         cases h
-        exact fun σ hs => Fml.dropBindTop_sound hψ σ (Fml.simpPastD_sound every ψ σ hs)
+        exact fun σ hs => Fml.dropBindTop_sound hψ σ (Fml.simpPastD_sound every absorb ψ σ hs)
       · obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-        exact fun σ hs => Modality.forallB_imp (fun v => Fml.simpPastAt_sound every 0 φ hψ _) hs
+        exact fun σ hs => Modality.forallB_imp (fun v => Fml.simpPastAt_sound every absorb 0 φ hψ _) hs
   | _, n + 1, .bind m x t φ, ψ₀, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs => Modality.forallB_imp (fun v => Fml.simpPastAt_sound every (n + 1) φ hψ _) hs
+    exact fun σ hs => Modality.forallB_imp (fun v => Fml.simpPastAt_sound every absorb (n + 1) φ hψ _) hs
   | _, 0, .upd m U φ, _, h => fun σ hs => Fml.simpPastTop_sound h σ hs
   | _, n + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact fun σ hs => Modality.afterC_imp hs fun τ a σ' e hx =>
-      Fml.simpPastAt_sound every n φ hψ σ' (a σ' e hx)
+      Fml.simpPastAt_sound every absorb n φ hψ σ' (a σ' e hx)
   | _, n, .tt, _, h | _, n, .eq .., _, h | _, n, .defined _, _, h | _, n, .not _, _, h
   | _, n, .and .., _, h | _, n, .imp .., _, h | _, n, .modal .., _, h | _, n, .havoc _, _, h
   | _, n, .anon .., _, h => by
@@ -2120,10 +2387,10 @@ theorem Fml.simpPastAt_sound (every : Bool) : {Γ : Ctx} → (n : Nat) → (φ :
 /-- **`simplifyUpdate`** past the program, at position `n` of the spine
 (`Fml.simpPastAt`): every declaration nothing reads afterwards (`every`),
 else the ones the update ends itself, which does not ask the line after
-what it reads. -/
-def FmlRw.simplifyPast (n : Nat) (every : Bool) : FmlRw C where
-  apply := fun φ => Fml.simpPastAt every n φ
-  sound := fun h σ hψ => Fml.simpPastAt_sound every n _ h σ hψ
+what it reads; the scope ends after it merged in where `absorb`. -/
+def FmlRw.simplifyPast (n : Nat) (every absorb : Bool) : FmlRw C where
+  apply := fun φ => Fml.simpPastAt every absorb n φ
+  sound := fun h σ hψ => Fml.simpPastAt_sound every absorb n _ h σ hψ
 
 end SimpPast
 

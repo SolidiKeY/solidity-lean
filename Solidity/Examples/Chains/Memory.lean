@@ -253,8 +253,8 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .mem (.struct 
           { carolAcc := read(memory, carol.account) } { t := read(memory, carolAcc.token) } φ }
     ~[sequentialToParallel]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
-            carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
-            t := read(addM(memory, Person), read(addM(memory, Person), freshId(addM(memory, Person)).account).token) }
+            t := read(addM(memory, Person), read(addM(memory, Person), freshId(addM(memory, Person)).account).token) ‖
+            carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) }
           φ } := by
   sol_chain
 #last_line chain

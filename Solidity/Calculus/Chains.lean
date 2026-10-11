@@ -38,7 +38,8 @@ leaves, so a step and a rewrite are links of one chain.
 one with its spine merged, or up to `openRwDepth` merges and rewrites past
 one while the program is open, `openRwPath`, a bounded search that
 `sol_chain?` writes out as links), else past the program as the line it
-names (`Fml.LeadsK`: a line the rewrites reach whose erasure is `B`'s); a
+names (`Fml.LeadsK`: a line the rewrites reach whose erasure is `B` read as
+its erasure); a
 `calc` step `_ R B` leaves `B` a metavariable that `sol_chain` computes
 from the line before and checks against the text (`pendingLines`), a
 rewrite's too while the program is open (`Fml.RwBy`).
@@ -687,7 +688,12 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) (branches
       if past then
         for i in List.range k do
           for every in [false, true] do
-            rs := rs.push (mkApp3 (mkConst ``FmlRw.simplifyPast) C (toExpr i) (toExpr every))
+            -- the scope ends after the update merged in only where the line
+            -- under it is an update: the kernel never looks into a postcondition
+            for absorb in [true, false] do
+              if absorb && !(skels[i + 1]! matches .upd _) then continue
+              rs := rs.push (mkApp4 (mkConst ``FmlRw.simplifyPast) C (toExpr i) (toExpr every)
+                (toExpr absorb))
       -- the scope ends after the update absorbed only where the line under it
       -- is an update (`Fml.simpAtB`)
       for i in List.range k do
@@ -1918,7 +1924,7 @@ reads `B` as the line of `A`'s derivation it is written as (`Fml.Leads`),
 else as a scoped line with a program still open (a merged line, or one up
 to `openRwDepth` merges and rewrites past a line of the derivation,
 `Fml.Leads`), else past the program, the line it names (`Fml.LeadsK`,
-`B` read alone as a scoped line); where the
+`B` read as its erasure, from the erasure of the strategy's last line); where the
 derivation stops on a modality variable the program is still open, and
 that last reading is refused. -/
 
@@ -1970,15 +1976,24 @@ syntax (name := leadsAnyStx) "leads% " term:max term:max : term
     throwError "~~>: the line after is no line of the derivation of{← indentLine A}\n\
       nor reached from one by {", ".intercalate (openRwNames.map toString)} \
       (at most {openRwDepth} of them) while the program is open{modalStopNote run}{stopNote}"
-  -- the line written, read alone as a scoped line: the line a chain of
-  -- rewrites reaches is named by it (`Fml.LeadsK`)
-  let B ← elabTermEnsuringType bStx (mkApp2 (mkConst ``Fml) C Γ)
-  synthesizeSyntheticMVarsNoPostponing
-  return mkAppN (mkConst ``Fml.LeadsK) #[C, A, ← instantiateMVars B]
+  -- the line written, read as its erasure: it names the line a chain of
+  -- rewrites reaches (`Fml.LeadsK`); its order of locals is the line's own
+  let erased := match run.lines.getLast? with
+    | some l => l.erased
+    | none => run.erased
+  let L := dropAllsE (← erasedLine run.splice erased)
+  let b ← legacyWritten C run.splice.modality L w
+  return mkAppN (mkConst ``Fml.LeadsK) #[C, A, b]
 
 /-- `A ~~> B` on scoped lines prints as written. -/
 @[app_unexpander Fml.Leads]
 def unexpandLeads : PrettyPrinter.Unexpander
+  | `($_ $a:term $b:term) => `($a:term ~~> $b:term)
+  | _ => throw ()
+
+/-- `A ~~> B` past the program prints as written. -/
+@[app_unexpander Fml.LeadsK]
+def unexpandLeadsK : PrettyPrinter.Unexpander
   | `($_ $a:term $b:term) => `($a:term ~~> $b:term)
   | _ => throw ()
 

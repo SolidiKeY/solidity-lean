@@ -84,7 +84,7 @@ elab_rules : command
     let n ← realizeGlobalConstNoOverloadWithInfo c
     let info ← getConstInfo n
     forallTelescope info.type fun _ ty => do
-      let some (B, _) ← chainEnd? ty | throwUnsupportedSyntax
+      let some B ← scopedEnd? ty | throwUnsupportedSyntax
       let B ← instantiateMVars B
       unless (← whnfR (← lineType B).2).isAppOf ``List.nil do
         throwError "#last_line: the last line of {c} has a context of its own"
