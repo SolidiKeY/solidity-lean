@@ -1,8 +1,6 @@
 import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.TacticSyntax
-import Solidity.Theory.StateWrites
-import Solidity.Calculus.ReadWrite
-import Solidity.Theory.Bridge.Denote
+import Solidity.Calculus.CloseLemmas
 
 /-!
 # Closing the first-order goal: `sol_close`
@@ -37,12 +35,14 @@ by computation, that of symbolic keys (`balances[k]`, `balances[j]`) by a
 hypothesis `k != j` of the formula or a branch.  Every step is a lemma or a
 hypothesis: nothing evaluated is trusted, the kernel checks the proof.
 
-**A scoped leaf** (`open scoped Solidity.Scoped`) comes here erased,
-its parameters kept as its leading quantifiers (`sol_close_unwrap`,
-`Calculus/Derive.lean`, M6c): `Close.holds_all` introduces each with its
-type's range (`PrimTy.admits`), so `[ uint x = a; ] x >= 0` closes.
+**A scoped leaf** (`open scoped Solidity.Scoped`) does not come here: each
+step below steps aside on it (`Close.scopedGoal`) for
+`Calculus/CloseScoped.lean`'s, which read the scoped formula with
+`close_rw_s`, its parameters at their types.  This module's set stays for
+the closer's own formulas (`NFml.Valid`, the goal `refine close ?_` leaves).
+What either set knows of the interpreter is `Calculus/CloseLemmas.lean`'s.
 
-What does not close, and why:
+What does not close, and why (on either side):
 
 * a write under the diamond: the closer reads the write's update on the
   erasure's untyped term model, where `find`/`save` at `alice` is not known
@@ -70,184 +70,6 @@ namespace Solidity
 
 open Semantics SemanticsProperties
 
-/-! ## Weakest preconditions -/
-
-/-- `P` of what `x` returns, or `m.onHalt` when it halts: under the box
-`[ alice.age = 1; ] φ` holds of a state without `alice`, under the diamond
-it does not. -/
-def Modality.wp {α : Type} (m : Modality) (x : Res α) (P : α → Prop) : Prop :=
-  match x with
-  | .ok a => P a
-  | .error _ => m.onHalt
-
-section WP
-
-variable {α β : Type} {m : Modality}
-
-/-- `Modality.after` is `wp` at `State`: `⟨ x = 1; ⟩ x == 1` holds where
-running `x = 1;` returns a state with `x == 1`. -/
-theorem Modality.after_eq_wp (p : State → Prop) (r : Res State) : m.after p r = m.wp r p := by
-  cases r <;> rfl
-
-/-- A run that returns: `uint x = 10;` leaves `x == 10` to check. -/
-@[simp] theorem Modality.wp_ok {a : α} {P : α → Prop} : m.wp (.ok a) P ↔ P a := Iff.rfl
-
-/-- `wp_ok` for `pure`. -/
-@[simp] theorem Modality.wp_pure {a : α} {P : α → Prop} : m.wp (pure a) P ↔ P a := Iff.rfl
-
-/-- A run that halts: `revert();` proves every box formula, no diamond one. -/
-@[simp] theorem Modality.wp_error {e : Halt} {P : α → Prop} : m.wp (.error e) P ↔ m.onHalt :=
-  Iff.rfl
-
-/-- Under the box a halt is fine: `[ revert(); ] false`. -/
-@[simp] theorem Modality.onHalt_box : Modality.box.onHalt = True := rfl
-
-/-- Under the diamond it is not: `⟨ revert(); ⟩ true` fails. -/
-@[simp] theorem Modality.onHalt_diamond : Modality.diamond.onHalt = False := rfl
-
-/-- Sequencing: `y = x + 1` evaluates `x`, then adds, then range-checks, and
-the postcondition is asked of the last. -/
-theorem Modality.wp_bind {x : Res α} {f : α → Res β} {P : β → Prop} :
-    m.wp (x >>= f) P ↔ m.wp x (fun a => m.wp (f a) P) := by
-  cases x <;> exact Iff.rfl
-
-/-- A range check: `y = x + 1` at `uint` returns `x + 1` when it is below
-`2²⁵⁶`, and reverts otherwise. -/
-theorem Modality.wp_ite {c : Prop} [Decidable c] {x y : Res α} {P : α → Prop} :
-    m.wp (if c then x else y) P ↔ (c → m.wp x P) ∧ (¬ c → m.wp y P) := by
-  by_cases h : c <;> simp [h]
-
-/-- The box, of a step nothing is known about: whatever it returns. -/
-theorem Modality.wp_box {x : Res α} {P : α → Prop} :
-    Modality.box.wp x P ↔ ∀ a, x = .ok a → P a := by
-  cases x <;> simp [Modality.wp, Modality.onHalt]
-
-/-- The diamond: it returns, and what it returns satisfies `P`. -/
-theorem Modality.wp_diamond {x : Res α} {P : α → Prop} :
-    Modality.diamond.wp x P ↔ ∃ a, x = .ok a ∧ P a := by
-  cases x <;> simp [Modality.wp, Modality.onHalt]
-
-/-- **A storage write under the box**, named with what is known of its
-result: in `[ alice.age = 10; bob = alice; ] bob.age == 10`, the state `τ`
-after the first write reads `10` at `alice.age` and below it, reads as `σ`
-does at `bob` and at `alice.account`, and has the locals, the heap and the
-`net` ledger of `σ` (so a ledger read crosses it: `[ to.transfer(5); total =
-1; ] net(to) = 2`). -/
-theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : SVal}
-    {P : State → Prop} :
-    Modality.box.wp (σ.saveStorage r p v) P ↔
-      ∀ τ, σ.saveStorage r p v = .ok τ → τ.findStorage r p = .ok v →
-        (∀ q, Close.Prefix p q → τ.findStorage r q = v.find (Close.after p q)) →
-        (∀ r' q, r' ≠ r ∨ Close.Diverge p q → τ.findStorage r' q = σ.findStorage r' q) →
-        (∀ r' q k, r' ≠ r ∨ ¬ Close.Prefix p q → τ.checkIndex r' q k = σ.checkIndex r' q k) →
-        (∀ q k, Close.Prefix p q → τ.checkIndex r q k = v.find (Close.after p q) >>= Close.idxOk k) →
-        (∀ x, τ.getEnv x = σ.getEnv x) → (∀ a, readAddr τ a = readAddr σ a) →
-        (∀ a, Close.readVal τ a = Close.readVal σ a) →
-        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → τ.net = σ.net → P τ := by
-  rw [Modality.wp_box]
-  exact ⟨fun h τ hs _ _ _ _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs =>
-    h τ hs (State.findStorage_saveStorage_same hs)
-      (fun _ hq => Close.findStorage_saveStorage_below hs hq)
-      (fun _ _ hd => Close.findStorage_saveStorage_apart hs hd)
-      (fun _ _ k hq => Close.checkIndex_saveStorage_apart k hs hq)
-      (fun _ k hq => Close.checkIndex_saveStorage_below k hs hq)
-      (Close.getEnv_saveStorage hs) (Close.readAddr_saveStorage hs)
-      (fun a => by simp [Close.readVal, Close.readAddr_saveStorage hs])
-      (Close.env_saveStorage hs).1 (Close.env_saveStorage hs).2
-      (SemanticsProperties.State.saveStorage_frame hs).2.2.2.1⟩
-
-/-- **A subtree read under the box**: in `[ bob = alice; ] bob.age ==
-alice.age`, the tree `a` read at `alice` reads at `age` what the storage
-reads at `alice.age`. -/
-theorem Modality.wp_box_findStorage {σ : State} {r : Name} {p : List Seg}
-    {P : SVal → Prop} :
-    Modality.box.wp (σ.findStorage r p) P ↔
-      ∀ a, σ.findStorage r p = .ok a → (∀ q, a.find q = σ.findStorage r (p ++ q)) → P a := by
-  rw [Modality.wp_box]
-  exact ⟨fun h a hs _ => h a hs, fun h a hs => h a hs (Close.find_findStorage hs)⟩
-
-/-- **A memory write under the box**: after `m.age = 5;` the state reads `5`
-at `m.age`, as before at every address apart from it, and has the storage
-and the locals of the state before. -/
-theorem Modality.wp_box_writeAddr {σ : State} {mv : MVal} {a : Addr} {P : State → Prop} :
-    Modality.box.wp (writeAddr σ mv a) P ↔
-      ∀ τ, writeAddr σ mv a = .ok τ → readAddr τ a = .ok mv → Close.readVal τ a = mv.asValue →
-        (∀ a', Close.Apart a a' → readAddr τ a' = readAddr σ a') →
-        (∀ a', Close.Apart a a' → Close.readVal τ a' = Close.readVal σ a') →
-        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
-        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
-        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P τ := by
-  rw [Modality.wp_box]
-  refine ⟨fun h τ hs _ _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
-  obtain ⟨id, obj, rfl, hap⟩ := Close.writeAddr_setObj hs
-  have hsame := Close.readAddr_writeAddr_same hs
-  exact h _ hs hsame (by simp only [Close.readVal, hsame]; rfl) hap
-    (fun a' ha => by simp [Close.readVal, hap a' ha]) (fun _ _ => rfl) (fun _ _ _ => rfl)
-    (fun _ => rfl) rfl rfl
-
-/-- **A copy into memory under the box**: after `Person memory m = alice;`,
-`m.age` reads what `alice.age` held; storage and locals are as before. -/
-theorem Modality.wp_box_copyStToM {σ : State} {v : SVal} {P : State × MVal → Prop} :
-    Modality.box.wp (copyStToM σ v) P ↔
-      ∀ τ mv, copyStToM σ v = .ok (τ, mv) →
-        (∀ id f, mv = .ref id → f ≠ "length" →
-          Close.readVal τ (.memoryField id f) = v.find [.field f] >>= SVal.asValue) →
-        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
-        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
-        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P (τ, mv) := by
-  rw [Modality.wp_box]
-  refine ⟨fun h τ mv hs _ _ _ _ _ _ => h _ hs, fun h ⟨τ, mv⟩ hs => ?_⟩
-  obtain ⟨hst, hen⟩ := Close.copyStToM_frame' hs
-  exact h τ mv hs (fun id f hid hf => by subst hid; exact Close.copyStToM_member hs hf) hst
-    (Close.checkIndex_of_findStorage hst) hen (Close.env_copyStToM hs).1 (Close.env_copyStToM hs).2
-
-/-- **A fresh memory object under the box**: `Person memory m;` binds `m` to
-an object whose members read the defaults of `Person`'s. -/
-theorem Modality.wp_box_allocDefault {σ : State} {R : RefTy} {P : State × Nat → Prop} :
-    Modality.box.wp (allocDefault σ R) P ↔
-      ∀ τ id, allocDefault σ R = .ok (τ, id) →
-        (∀ f, f ≠ "length" →
-          Close.readVal τ (.memoryField id f) =
-            (defaultForRef R).find [.field f] >>= SVal.asValue) →
-        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
-        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
-        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P (τ, id) := by
-  rw [Modality.wp_box]
-  refine ⟨fun h τ id hs _ _ _ _ _ _ => h _ hs, fun h ⟨τ, id⟩ hs => ?_⟩
-  have hc := Close.allocDefault_copy hs
-  obtain ⟨hst, hen⟩ := Close.copyStToM_frame' hc
-  exact h τ id hs (fun f hf => Close.copyStToM_member hc hf) hst
-    (Close.checkIndex_of_findStorage hst) hen (Close.env_copyStToM hc).1 (Close.env_copyStToM hc).2
-
-/-- **A copy out of memory under the box**: after `alice = m;`, `alice.age`
-holds what `m.age` held. -/
-theorem Modality.wp_box_copyMem {σ : State} {id : Nat} {P : SVal → Prop} :
-    Modality.box.wp (copyMem σ (.ref id)) P ↔
-      ∀ v, copyMem σ (.ref id) = .ok v →
-        (∀ f, f ≠ "length" → v.find [.field f] =
-          readAddr σ (.memoryField id f) >>= Close.copyLeaf σ id) → P v := by
-  rw [Modality.wp_box]
-  exact ⟨fun h v hs _ => h v hs, fun h v hs => h v hs (fun _ hf => Close.copyMem_member hs hf)⟩
-
-/-- **A transfer under the box**: `to.transfer(5);` leaves the storage, the
-locals, the heap, `msg.sender` and `address(this).balance` as they were, and
-moves `5` on the ledger from `this` to `to` (`State.pay`). -/
-theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → Prop} :
-    Modality.box.wp (transferAt σ addr amt) P ↔
-      ∀ τ, transferAt σ addr amt = .ok τ →
-        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
-        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) → (∀ x, τ.getEnv x = σ.getEnv x) →
-        (∀ a, readAddr τ a = readAddr σ a) → (∀ a, Close.readVal τ a = Close.readVal σ a) →
-        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance →
-        τ.net = (σ.pay addr amt).net → P τ := by
-  rw [Modality.wp_box]
-  refine ⟨fun h τ hs _ _ _ _ _ _ _ _ => h τ hs, fun h τ hs => ?_⟩
-  obtain ⟨h₁, h₂, h₃⟩ := Close.transferAt_frame hs
-  obtain ⟨h₄, h₅, h₆⟩ := Close.transferAt_env hs
-  exact h τ hs h₁ (Close.checkIndex_of_findStorage h₁) h₂ h₃ (fun a => by simp [Close.readVal, h₃])
-    h₄ h₅ h₆
-
-end WP
 
 namespace Close
 
@@ -282,106 +104,9 @@ theorem bindingRef_mref (id : Nat) : bindingRef (.mref id) = .ok id := rfl
 theorem bindingRef_eq_ok {b : Binding} {id : Nat} :
     bindingRef b = .ok id ↔ b = .mref id := by
   cases b <;> simp [bindingRef]
-/-- An index read as an integer is one: `balances[k]` needs `k` a `uint`. -/
-@[simp] theorem asInt_eq_ok {v : Value} {i : Int} : v.asInt = .ok i ↔ v = .int i := by
-  cases v <;> simp [Value.asInt]
-/-- A condition read as a boolean is one: `!flag` needs `flag` a `bool`. -/
-theorem asBool_eq_ok {v : Value} {b : Bool} : v.asBool = .ok b ↔ v = .bool b := by
-  cases v <;> simp [Value.asBool]
-/-- A memory slot read as a reference holds one. -/
-theorem asRef_eq_ok {mv : MVal} {id : Nat} : mv.asRef = .ok id ↔ mv = .ref id := by
-  cases mv <;> simp [MVal.asRef, pure, Except.pure]
-/-- `alice.age = 10;` stores the word `10`. -/
-@[simp] theorem toSVal_int (v : Int) : Value.toSVal (.int v) = .int v := rfl
-/-- `flags[k] = true;` stores the word `true`. -/
-@[simp] theorem toSVal_bool (b : Bool) : Value.toSVal (.bool b) = .bool b := rfl
-/-- A value is stored in memory as the primitive it is: `m.age = 5;`. -/
-theorem toMVal_eq (v : Value) : Value.toMVal v = .prim v := by
-  cases v <;> rfl
-/-- A stored value reads back as itself: `age = amount;` then `age` is
-`amount`, whatever it holds. -/
-theorem asValue_toSVal (v : Value) : (Value.toSVal v).asValue = .ok v := by
-  cases v <;> rfl
-/-- The same for a value stored in memory: `m.age = amount;`. -/
-theorem asValue_toMVal (v : Value) : (Value.toMVal v).asValue = .ok v := by
-  cases v <;> rfl
-/-- Reading the word `10` gives `10`. -/
-@[simp] theorem asValue_int (v : Int) : (SVal.int v).asValue = .ok (.int v) := rfl
-/-- Reading the word `true` gives `true`. -/
-@[simp] theorem asValue_bool (b : Bool) : (SVal.bool b).asValue = .ok (.bool b) := rfl
-/-- A read that gives a word read one: `delete balances[a];` then leaves that
-word's default. -/
-theorem asValue_eq_ok {v : SVal} {p : PrimVal} : v.asValue = .ok p ↔ v = .prim p := by
-  rcases v with p' | _ | _ | _ <;> (try cases p') <;> cases p <;> simp [SVal.asValue]
-/-- A memory slot holding `10` reads `10`. -/
-theorem mval_asValue_prim (p : PrimVal) : (MVal.prim p).asValue = .ok p := by
-  cases p <;> rfl
-/-- A memory slot holding a reference reads no value. -/
-theorem mval_asValue_ref (id : Nat) : (MVal.ref id).asValue = .error .undef := rfl
-/-- A memory slot holding the object `3` references it. -/
-theorem mval_asRef_ref (id : Nat) : (MVal.ref id).asRef = .ok id := rfl
-/-- `delete alice.age;` leaves `0`. -/
-@[simp] theorem defaultOf_int (v : Int) : (SVal.int v).defaultOf = .int 0 := rfl
-/-- `delete flags[k];` leaves `false`. -/
-@[simp] theorem defaultOf_bool (b : Bool) : (SVal.bool b).defaultOf = .bool false := rfl
-/-- The index `1` of `values[1]` is the integer `1`. -/
-@[simp] theorem asInt_int (v : Int) : Value.asInt (.int v) = .ok v := rfl
-/-- The condition `true` is the boolean `true`. -/
-theorem asBool_bool (b : Bool) : Value.asBool (.bool b) = .ok b := rfl
-/-- A bounds check returns nothing to name: `∀ u : Unit, …` is the one case. -/
-theorem forall_unit {P : PUnit.{1} → Prop} : (∀ u, P u) ↔ P PUnit.unit :=
-  ⟨fun h => h _, fun h u => by cases u; exact h⟩
-/-- The same under the diamond. -/
-theorem exists_unit {P : PUnit.{1} → Prop} : (∃ u, P u) ↔ P PUnit.unit :=
-  ⟨fun ⟨u, h⟩ => by cases u; exact h, fun h => ⟨_, h⟩⟩
-/-- `pure` in a run is `ok`. -/
-theorem pure_eq_ok {α : Type} (a : α) : (pure a : Res α) = .ok a := rfl
-/-- A run followed by nothing is the run. -/
-theorem bind_ok_right {α : Type} (x : Res α) : (x >>= fun a => Except.ok a) = x := by
-  cases x <;> rfl
-
-/-- `12 & 10` on numerals: `Nat`'s `&&&`, which `Nat.reduceAnd` computes.  An
-operand is a numeral or the cast of one, a result computed before. -/
-theorem uintBitwise_ofNat (f : Nat → Nat → Nat) (a b : Nat) :
-    uintBitwise f (no_index (OfNat.ofNat a)) (no_index (OfNat.ofNat b)) = ((f a b : Nat) : Int) :=
-  rfl
-theorem uintBitwise_ofNat_cast (f : Nat → Nat → Nat) (a b : Nat) :
-    uintBitwise f (no_index (OfNat.ofNat a)) (b : Int) = ((f a b : Nat) : Int) := rfl
-theorem uintBitwise_cast_ofNat (f : Nat → Nat → Nat) (a b : Nat) :
-    uintBitwise f (a : Int) (no_index (OfNat.ofNat b)) = ((f a b : Nat) : Int) := rfl
 
 /-- `p.age`, with `p` an alias, is the path `p` holds, then `age`. -/
 theorem aliasPath_eq (σ : State) (x : Var) : aliasPath σ x = σ.getEnv x >>= bindingPath := rfl
-
-/-- Every operator but `&&` and `||` reads both operands: `x + 1` reads `x`,
-then `1`, adds, and range-checks the sum. -/
-theorem evalBinop_strict {op : BinOp} (h₁ : op ≠ .and) (h₂ : op ≠ .or) (p : PrimTy) (lv : Value)
-    (b : Res Value) :
-    evalBinop op p lv b =
-      b >>= fun rv => applyBinOp op lv rv >>= checkArith (op.retTy (.prim p)) := by
-  cases op <;> first | exact absurd rfl h₁ | exact absurd rfl h₂ | rfl
-
-/-- `a && b` reads `b` only when `a` is not `false`. -/
-theorem evalBinop_and (p : PrimTy) (lv : Value) (b : Res Value) :
-    evalBinop .and p lv b = if lv = .bool false then .ok (.bool false) else
-      b >>= fun rv => applyBinOp .and lv rv >>= checkArith (BinOp.and.retTy (.prim p)) := by
-  unfold evalBinop
-  split <;> simp_all [pure, Except.pure]
-
-/-- `a || b` reads `b` only when `a` is not `true`. -/
-theorem evalBinop_or (p : PrimTy) (lv : Value) (b : Res Value) :
-    evalBinop .or p lv b = if lv = .bool true then .ok (.bool true) else
-      b >>= fun rv => applyBinOp .or lv rv >>= checkArith (BinOp.or.retTy (.prim p)) := by
-  unfold evalBinop
-  split <;> simp_all [pure, Except.pure]
-
-/-- `c ? a : b` on a condition that is `true`, `false`, or not a boolean. -/
-theorem pickBranch_eq (cv : Value) (t e : Res Value) :
-    pickBranch cv t e =
-      if cv = .bool true then t else if cv = .bool false then e else .error .undef := by
-  cases cv with
-  | int _ => rfl
-  | bool b => cases b <;> rfl
 
 section Eval
 
@@ -674,17 +399,6 @@ theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = 
 /-- Binding a local leaves the storage. -/
 theorem storage_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).storage = σ.storage :=
   rfl
-/-- A ledger entry after a payment: the entry of the ledger the payment chose. -/
-theorem lookupBy_ite (c : Prop) [Decidable c] (k : Int) (l l' : List (Int × Int)) :
-    lookupBy k (if c then l else l') = if c then lookupBy k l else lookupBy k l' := by
-  split <;> rfl
-/-- A ledger entry after a write: the written amount at that address, the old
-one elsewhere. -/
-theorem lookupBy_setBy_int (k k' v : Int) (l : List (Int × Int)) :
-    lookupBy k (setBy k' v l) = if k = k' then some v else lookupBy k l := by
-  split
-  · subst_vars; exact SemanticsProperties.lookupBy_setBy_self _ _ _
-  · exact SemanticsProperties.lookupBy_setBy_ne ‹_› _ _
 
 /-- `true` holds. -/
 theorem holds_tt : NFml.holds σ (NFml.tt : NFml C) ↔ True := Iff.rfl
@@ -714,11 +428,6 @@ theorem Term.denote_lit (v : Value) : (Term.lit v : Term C).denote σ = .prim v 
 theorem Term.denote_pv (x : Var) : (Term.pv x : Term C).denote σ = match σ.getEnv x with
     | .ok (.val v) => .prim v
     | _ => .st .mtSt := rfl
-/-- `Equiv.prim_iff` with the primitive on the left. -/
-theorem equiv_prim_left_iff {p : Value} {v : Theory.StValue} :
-    Theory.StValue.Equiv (.prim p) v ↔ Theory.StValue.prim p = v :=
-  ⟨fun h => (Theory.StValue.Equiv.prim_iff.1 h.symm).symm,
-    fun h => h ▸ Theory.StValue.Equiv.refl _⟩
 /-- `defined t`: `t` returns, a diamond with nothing after. -/
 theorem holds_defined (t : Term C) : NFml.holds σ (.defined t) ↔
     Modality.diamond.wp (t.eval σ) fun _ => True := by
@@ -895,28 +604,59 @@ attribute [close_rw] Modality.wp_box_saveStorage Modality.wp_box_findStorage
 -- is named at once, since what a premise says is what the rest needs.
 attribute [close_rw_last] Modality.wp_box
 
+namespace Close
+
+open Lean Elab Tactic Meta in
+/-- Whether the main goal is a scoped leaf's: it or its context reads a
+typed state (`Solidity.State`, `EState`, `Valid`, `CloseS.holdsE`).  The
+steps below then step aside for `Calculus/CloseScoped.lean`'s, which read
+it with `close_rw_s`. -/
+def scopedGoal : TacticM Bool := withMainContext do
+  let names : List Lean.Name :=
+    [`Solidity.State, `Solidity.EState, `Solidity.Valid, `Solidity.CloseS.holdsE]
+  let hit (e : Expr) : Bool := (e.find? fun x => x.isConst && names.contains x.constName!).isSome
+  if hit (← instantiateMVars (← getMainTarget)) then return true
+  for d in ← getLCtx do
+    if !d.isImplementationDetail && hit (← instantiateMVars d.type) then return true
+  return false
+
+end Close
+
+open Lean Elab Tactic in
 /-- The first pass of `sol_close`: evaluate, and name every write with what
 is known of it. -/
-macro "sol_close_eval" : tactic => `(tactic| simp only [close_rw])
+elab "sol_close_eval" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic| simp only [close_rw]))
 
+open Lean Elab Tactic in
 /-- The second: each premise in scope for what follows it, so that the facts
 about a write rewrite the reads after it.  Nothing is named bare yet: a
 result a later fact decides (the array a push lands on) is decided first. -/
-macro "sol_close_facts" : tactic => `(tactic|
-  simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw])
+elab "sol_close_facts" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic|
+    simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw]))
 
+open Lean Elab Tactic in
 /-- The third: what is left is named bare, under the box. -/
-macro "sol_close_reads" : tactic => `(tactic|
-  simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw, close_rw_last])
+elab "sol_close_reads" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic|
+    simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw, close_rw_last]))
 
+open Lean Elab Tactic in
 /-- `sol_close_reads` on the goal and every hypothesis. -/
-macro "sol_close_reads_all" : tactic => `(tactic|
-  simp_all (config := { maxSteps := 400000 }) only [close_rw, close_rw_last])
+elab "sol_close_reads_all" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic|
+    simp_all (config := { maxSteps := 400000 }) only [close_rw, close_rw_last]))
 
 open Lean Elab Tactic Meta in
 /-- The goal `refine close ?_` leaves, `Valid (Hyp.wrap Γ φ)`, with the context
 put back and the taclet's instance computed (`normValid`): its terms are
-still the premise's, `(Simple.lit 1 _).lower` for `1`. -/
+still the premise's, `(Simple.lit 1 _).lower` for `1`.  A scoped leaf's
+(`Valid ψ`) is `Calculus/CloseScoped.lean`'s. -/
 elab "sol_close_unwrap" : tactic => do
   let g ← getMainGoal
   let ty ← instantiateMVars (← g.getType)
@@ -924,7 +664,9 @@ elab "sol_close_unwrap" : tactic => do
     replaceMainGoal [← normValid g]
 
 /-- `sol_close`: prove a formula with no modality left in an arbitrary state
-(`Calculus/NFmlClose.lean`).  Run `sol_symex` first; with no goal left it does nothing. -/
+(`Calculus/NFmlClose.lean`; a scoped leaf by `Calculus/CloseScoped.lean`'s
+steps of the same names).  Run `sol_symex` first; with no goal left it does
+nothing. -/
 macro "sol_close" : tactic => `(tactic|
   all_goals
    (sol_close_unwrap
@@ -938,6 +680,16 @@ macro "sol_close" : tactic => `(tactic|
     -- a bounds check returns `()`: nothing is left to choose
     all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
     all_goals first | omega | grind))
+
+open Lean Elab Tactic in
+/-- `sol_close_mt`'s first pass: `sol_close_eval` with the storage
+evaluators unfolded over a deployment's storage. -/
+elab "sol_close_mt_eval" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic|
+    simp (config := { decide := true }) only [close_rw, List.map_cons, List.map_nil,
+      defaultForTy, State.saveStorage, State.findStorage, lookupBy, setBy, SVal.save, SVal.find,
+      Close.storage_setEnv, Except.ok.injEq, exists_eq_left']))
 
 /-- `sol_close` from a deployment's storage, `{storage := mtSt ‖ …}` in
 front (`STerm.eval_mtSt`): the storage is then a list of the roots at their
@@ -953,9 +705,7 @@ macro "sol_close_mt" : tactic => `(tactic|
   all_goals
    (sol_close_unwrap
     intro σ
-    simp (config := { decide := true }) only [close_rw, List.map_cons, List.map_nil,
-      defaultForTy, State.saveStorage, State.findStorage, lookupBy, setBy, SVal.save, SVal.find,
-      Close.storage_setEnv, Except.ok.injEq, exists_eq_left']
+    sol_close_mt_eval
     all_goals try sol_close_facts
     all_goals try sol_close_reads
     all_goals try (intros; sol_close_reads_all)

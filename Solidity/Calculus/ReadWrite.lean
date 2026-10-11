@@ -42,6 +42,14 @@ register_simp_attr close_rw
 `close_rw`: a `simp` set listed later is consulted later. -/
 register_simp_attr close_rw_last
 
+/-- `close_rw` for a scoped leaf (`Calculus/CloseScoped.lean`): the same
+lemmas of the interpreter (`Calculus/CloseLemmas.lean`), the leaf's terms
+and updates read by position. -/
+register_simp_attr close_rw_s
+
+/-- `close_rw_last` for a scoped leaf. -/
+register_simp_attr close_rw_s_last
+
 /-- The evaluation of the reduced formulas `sol_decide` closes (`Decide.lean`). -/
 register_simp_attr decide_eval
 
