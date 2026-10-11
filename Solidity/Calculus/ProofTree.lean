@@ -123,9 +123,20 @@ structure Move where
   se : Option String := none
 
 /-- An `if`'s condition, printed with the names of the context `H`
-(`Delab.hypsParts`), as `ifElseSplit`'s labels name it: `se1` for a fresh
+(`Delab.hypsNamesS`), as `ifElseSplit`'s labels name it: `se1` for a fresh
 local. -/
-def condOf? (C H s : Expr) : MetaM (Option String) := do
+def condOf? (H s : Expr) : MetaM (Option String) := do
+  try
+    let st ← whnf s
+    unless st.isAppOfArity ``Stmt.ite 7 do return none
+    Delab.withPrinter s false do
+      let ns ← Delab.hypsNamesS H
+      let c ← Delab.ppExprS ns (st.getArg! 4)
+      return some (toString (← PrettyPrinter.ppCategory `sol_expr c))
+  catch _ => return none
+
+/-- `condOf?` through the erasure (`pp.sol.twinCheck`'s reference). -/
+def condOfLegacy? (C H s : Expr) : MetaM (Option String) := do
   try
     unless (← whnf s).isAppOf ``Stmt.ite do return none
     Delab.withTwins s false fun env => do
@@ -190,7 +201,12 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let d ← `(($(← short toStep) $(dotIdent (NFml.Chain.lastName c))))
     let name ← keyName c s
     -- an `if`'s condition, as `ifElseSplit`'s labels name it
-    let se ← if premise == ``Premise.split then condOf? C H s else pure none
+    let se ← if premise == ``Premise.split then condOf? H s else pure none
+    if premise == ``Premise.split && (← Delab.twinCheckOn) then
+      let old ← condOfLegacy? C H s
+      unless se == old do
+        throwError m!"twin check (an if's condition): the scoped printer prints {se}, \
+          the erasure's {old}"
     let ctorId ← short ctor
     let tac ← if premise == ``Premise.branches || premise == ``Premise.cases then
         `(tactic| apply $ctorId:ident $d:term rfl)

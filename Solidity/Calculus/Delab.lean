@@ -1,4 +1,4 @@
-import Solidity.Calculus.DelabErase
+import Solidity.Calculus.PrintStmt
 import Solidity.Calculus.Taclet
 import Solidity.Calculus.Proves
 
@@ -7,21 +7,22 @@ import Solidity.Calculus.Proves
 
 `Calculus/Print.lean` prints a closed formula (`Fml.show`, a value
 in `MetaM`).  A taclet is not closed: its schema variables are free (`v`,
-`se`, `thenStm`), so it is printed from its `Expr`, as `Rules.lean`'s
-delaborators print today's taclets.  The `Expr` of a scoped statement,
-premise or formula is translated into the `Expr` of its erasure, the
-`Update.lean`/`Syntax.lean` term that `Fml.erase` would compute
-(`Delab.tr`, `Calculus/DelabErase.lean`, where the schema variables'
-twins and the positions' names are explained), and printed with
-`RuleSyntax.lean`'s printers (`ppStmt`, `ppPremise?`, `ppFml`): the same KeY
-text, with no second printer to keep in step.  The end of a block in a
-formula's frames prints `}` (`core_item`, below), the one piece of text
-today's grammar has no production for.
+`se`, `thenStm`), so it is printed from its `Expr`, by
+`Calculus/PrintStmt.lean`'s printer of the scoped syntax (`ppStmtS`,
+`ppPremiseS`, `ppFmlS`): positions are the names their binders gave them, a
+schema variable its own name, terms and updates printed through their
+erasure (`Delab.tr`), with `RuleSyntax.lean`'s builders, so the KeY text is
+the one the rule lines write.  The end of a block in a formula's frames
+prints `}` (`core_item`, below), the one piece of text the grammar of
+`RuleSyntax.lean` has no production for.
 
 The delaborators: `Taclet C k m s p` as `dl{ ⟨[ s; ]⟩ ⇝ p }` (with
-solkey's branch labels), a premise as `dl{ p }`, a formula as `dl{ φ }`; a
-taclet's side conditions and carried proofs stay out of sight, as
-`delabTacletSide` does for today's.
+solkey's branch labels), a premise as `dl{ p }`, a formula as `dl{ φ }`, a
+sequent as `dl{ ..H, h ⟹ φ }`; a taclet's side conditions and carried
+proofs stay out of sight, as `delabTacletSide` does.  Each keeps its
+erasure's printing (`…Legacy`, `Delab.tr` then `RuleSyntax.lean`'s printers),
+which `pp.sol.twinCheck` compares it with, until the erasure goes (W8.4 of
+`docs/intrinsic.md`).
 -/
 
 namespace Solidity
@@ -78,9 +79,16 @@ partial def fixBlockEnds (stx : Syntax) : MetaM Syntax := do
     return (← `(dl_fml| ⟨ $[$pre;]* } $rest* ⟩ $φ)).raw
   return (← `(dl_fml| [ $[$pre;]* } $rest* ] $φ)).raw
 
-/-- A scoped formula with schema variables in it, in the notation. -/
-def ppFmlE (e : Expr) : MetaM (TSyntax `dl_fml) :=
+/-- A scoped formula with schema variables in it, in the notation, printed
+from its erasure (the twin check's reference). -/
+def ppFmlELegacy (e : Expr) : MetaM (TSyntax `dl_fml) :=
   withErased e true fun l => do return ⟨← fixBlockEnds (← ppFml l)⟩
+
+/-- A scoped formula with schema variables in it, in the notation. -/
+def ppFmlE (e : Expr) : MetaM (TSyntax `dl_fml) := do
+  let φ : TSyntax `dl_fml := ⟨← fixBlockEnds (← withPrinter e true (ppFmlS [] e))⟩
+  if ← twinCheckOn then twinCompare "formula" φ.raw (← ppFmlELegacy e).raw `dl_fml
+  return φ
 
 /-- A scoped formula, one line. -/
 def fmtFml (e : Expr) : MetaM String := do
@@ -98,9 +106,23 @@ def progItems? (P : Expr) : MetaM (Option (Array (TSyntax `sol_stmt))) := do
 
 /-- solkey's `blockEmpty`, scoped: a block of schema variables and the
 statements it runs, `⟨[ { body; }; ]⟩ ⇝ ⟨[ body; ]⟩`.  Its locals' pop at the
-end (`Premise.unfold`'s `Ext`) is what erasure loses, and prints as nothing,
-as a frame's end does in a premise. -/
+end (`Premise.unfold`'s `Ext`) prints as nothing, as a frame's end does in a
+premise. -/
 def blockLine? (e : Expr) : MetaM (Option (TSyntax `sol_stmt × TSyntax `dl_premise)) := do
+  let s ← whnfR (e.getArg! 5)
+  unless s.isAppOf ``Stmt.block do return none
+  withPrinter (schema := true) e false do
+    let p ← whnf (e.getArg! 6)
+    let ps ← if p.isAppOfArity ``Premise.unfold 6 || p.isAppOfArity ``Premise.inline 6 then
+        progExprPieces [] (p.getArg! 4)
+      else if p.isAppOfArity ``Premise.bind 6 then progExprPieces [p.getArg! 3] (p.getArg! 5)
+      else return none
+    let (some ss, some ps) := (← progItemsS (← progPiecesS [] s.appArg!).1, ← progItemsS ps)
+      | return none
+    return some (← `(sol_stmt| { $[$ss;]* }), ← `(dl_premise| ⟨[ $[$ps;]* ]⟩))
+
+/-- `blockLine?` through the erasure (the twin check's reference). -/
+def blockLineLegacy? (e : Expr) : MetaM (Option (TSyntax `sol_stmt × TSyntax `dl_premise)) := do
   unless (← whnfR (e.getArg! 5)).isAppOf ``Stmt.block do return none
   withTwins (schema := true) e false fun env => do
     let st ← (tr [] (e.getArg! 5)).run env
@@ -109,41 +131,74 @@ def blockLine? (e : Expr) : MetaM (Option (TSyntax `sol_stmt × TSyntax `dl_prem
     let (some ss, some ps) := (← progItems? st, ← progItems? p.appArg!) | return none
     return some (← `(sol_stmt| { $[$ss;]* }), ← `(dl_premise| ⟨[ $[$ps;]* ]⟩))
 
-/-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, as `delabTaclet` prints
-today's, its goals labelled by solkey's labels. -/
+/-- A rule's statement `s` and premise `p` under the modality `m`, printed,
+the goals labelled by solkey's labels: those of the taclet the statement's
+head names (`Taclet.labelledBy`), or with `inv` of `whileInvariantBox` for an
+invariant premise. -/
+def tacletLine? (e s p m : Expr) (inv : Bool := false) :
+    MetaM (Option (TSyntax `sol_stmt × TSyntax `dl_premise)) :=
+  withPrinter (schema := true) e false do
+    let p' ← whnf p
+    let s' ← whnf s
+    let rule? := if inv && p'.isAppOf ``Premise.inv then some "whileInvariantBox"
+      else Solidity.Taclet.labelledBy (labelHead s') (m.isConstOf ``Modality.diamond)
+    let labels := (do (← Solidity.Taclet.branchLabels.lookup (← rule?))).getD []
+    let some p ← ppPremiseS [] p labels (m.isConstOf ``Modality.box) | return none
+    return some (← ppStmtS [] s, p)
+
+/-- `tacletLine?` through the erasure (the twin check's reference). -/
+def tacletLineLegacy? (e s p m : Expr) (inv : Bool := false) :
+    MetaM (Option (TSyntax `sol_stmt × TSyntax `dl_premise)) :=
+  withTwins (schema := true) e false fun env => do
+    let st ← (tr [] s).run env
+    let p ← (tr [] p).run env
+    let st' ← whnf st
+    let rule? := if inv && p.isAppOf ``Surface.Premise.inv then some "whileInvariantBox"
+      else Solidity.Taclet.labelledBy (st'.getAppFn.constName?.getD Lean.Name.anonymous)
+        (m.isConstOf ``Modality.diamond)
+    let labels := (do (← Solidity.Taclet.branchLabels.lookup (← rule?))).getD []
+    let some p ← ppPremise? p labels (m.isConstOf ``Modality.box) | return none
+    return some (← ppStmt st, p)
+
+/-- `Taclet C k m s p` as `dl{ ⟨[ s; ]⟩ ⇝ p }` (none where it does not
+print), by this printer or (`legacy`) through the erasure. -/
+def tacletTerm? (e : Expr) (legacy : Bool := false) : MetaM (Option Lean.Term) := do
+  let m ← whnf (e.getArg! 2)
+  let mkTerm (l : TSyntax `sol_stmt × TSyntax `dl_premise) : MetaM Lean.Term := do
+    let (s, p) := l
+    match_expr m with
+    | Modality.box => `(dl{ [ $s:sol_stmt; ] ⇝ $p })
+    | Modality.diamond => `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
+    | _ => `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
+  if let some l ← (if legacy then blockLineLegacy? e else blockLine? e) then
+    return some (← mkTerm l)
+  let some l ← (if legacy then tacletLineLegacy? e (e.getArg! 5) (e.getArg! 6) m
+      else tacletLine? e (e.getArg! 5) (e.getArg! 6) m) | return none
+  if isEscape l.1 then return none
+  return some (← mkTerm l)
+
+/-- `Taclet C k m s p`: `dl{ ⟨[ s; ]⟩ ⇝ p }`, its goals labelled by solkey's
+labels. -/
 @[delab app.Solidity.Taclet]
 def delabTaclet : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
   guard (e.getAppNumArgs == 7)
-  let m ← whnf (e.getArg! 2)
-  if let some (s, p) ← blockLine? e then
-    return ← match_expr m with
-      | Modality.box => `(dl{ [ $s:sol_stmt; ] ⇝ $p })
-      | Modality.diamond => `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
-      | _ => `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
-  let out? ← withTwins (schema := true) e false fun env => do
-      let st ← (tr [] (e.getArg! 5)).run env
-      let p ← (tr [] (e.getArg! 6)).run env
-      let st' ← whnf st
-      let rule? := Solidity.Taclet.labelledBy (st'.getAppFn.constName?.getD Lean.Name.anonymous)
-        (m.isConstOf ``Modality.diamond)
-      let labels := (do (← Solidity.Taclet.branchLabels.lookup (← rule?))).getD []
-      let some p ← ppPremise? p labels (m.isConstOf ``Modality.box) | return none
-      return some (← ppStmt st, p)
-  let some (s, p) := out? | failure
-  if isEscape s then failure
-  match_expr m with
-  | Modality.box => `(dl{ [ $s:sol_stmt; ] ⇝ $p })
-  | Modality.diamond => `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p })
-  | _ => `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
+  let t? ← tacletTerm? e
+  if ← twinCheckOn then twinCompare "taclet" (t?.map (·.raw)) ((← tacletTerm? e true).map (·.raw))
+  let some t := t? | failure
+  return t
 
 /-- A scoped premise standing alone: `dl{ p }`. -/
 def delabPremise : Delab := do
   unless ← ppOn do failure
   fullApp
   let e ← getExpr
-  let some p ← withErased e false fun l => ppPremise? l | failure
+  let p? ← withPrinter e false (ppPremiseS [] e)
+  if ← twinCheckOn then
+    twinCompare "premise" (p?.map (·.raw)) ((← withErased e false fun l => ppPremise? l).map (·.raw))
+      `dl_premise
+  let some p := p? | failure
   `(dl{ $p:dl_premise })
 
 attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
@@ -210,32 +265,113 @@ partial def hypsParts (c H : Expr) : TrM (Option Lean.Name × Array Expr × List
     return (r, hs.push (mkApp2 (mkConst ``Solidity.Hyp.anon) c xs), ns)
   | _ => throwError "not a context"
 
-/-- `Proves C R Γ₀ H φ`: the sequent `dl{ ..H, h₁, … ⟹ φ }`, as
-`delabProves` prints today's (`⟹ₖ` for solkey's rules alone, `⟹[R]` over
-a variable rule set), its context's entries erased (`hypsParts`). -/
+/-- A sequent's context for the scoped printer: the rest `..H` when it is a
+variable, the entries printed (a precondition by `ppFmlS`, the rest as
+`Calculus/Hyp.lean`'s `Hyp`s of their erasure), and the names of the last
+scope.  What prints as nothing, as in `hypsParts`: an update of pops only,
+and the hidden binder.  An error where an entry does not print. -/
+partial def hypsPartsS (c H : Expr) : PrM (Option Lean.Name × Array (TSyntax `dl_hyp) × List Expr) := do
+  let H := (← instantiateMVars H).consumeMData
+  let unknown (Γ : Expr) : MetaM (List Expr) := do
+    return List.replicate ((← ctxLength? Γ).getD 0) unknownVar
+  let hyp (h : Expr) : MetaM (TSyntax `dl_hyp) := do
+    let some h ← Solidity.ppHyp? h | throwError "an entry that does not print"
+    return h
+  if let .fvar fv := H then
+    let ty ← whnfR (← fv.getType)
+    return (some (← fv.getDecl).userName, #[], ← unknown (ty.getArg! 2))
+  let H ← whnf H
+  let args := H.getAppArgs
+  match H.getAppFn.constName? with
+  | some ``Hyps.nil => return (none, #[], ← unknown args[1]!)
+  | some ``Hyps.pre =>
+    let (r, hs, ns) ← hypsPartsS c args[3]!
+    return (r, hs.push (← `(dl_hyp| $(← ppFmlS ns args[4]!):dl_fml)), ns)
+  | some ``Hyps.upd =>
+    let (r, hs, ns) ← hypsPartsS c args[4]!
+    let (es, ms) ← runTr (updParts ns args[6]!)
+    if es.isEmpty then return (r, hs, ms)
+    let U ← runTr (updList c args[6]! es)
+    return (r, hs.push (← hyp (mkApp3 (mkConst ``Solidity.Hyp.upd) c args[5]! U)), ms)
+  | some ``Hyps.havoc =>
+    let (r, hs, ns) ← hypsPartsS c args[3]!
+    return (r, hs.push (← hyp (mkApp (mkConst ``Solidity.Hyp.havoc) c)), ns)
+  | some ``Hyps.all =>
+    let (r, hs, ns) ← hypsPartsS c args[3]!
+    return (r, hs.push (← hyp (mkApp3 (mkConst ``Solidity.Hyp.all) c args[4]! args[5]!)),
+      args[4]! :: ns)
+  | some ``Hyps.bind =>
+    let (r, hs, ns) ← hypsPartsS c args[3]!
+    return (r, hs, args[5]! :: ns)
+  | some ``Hyps.anon =>
+    let (r, hs, ns) ← hypsPartsS c args[3]!
+    let some xs ← Solidity.listElems? args[4]! | throwError "anon"
+    let xs ← xs.mapM fun x => do idxName ns (← whnf x).appArg!
+    let xs ← mkListLit (mkConst ``Solidity.Var) xs.toList
+    return (r, hs.push (← hyp (mkApp2 (mkConst ``Solidity.Hyp.anon) c xs)), ns)
+  | _ => throwError "not a context"
+
+/-- The names of the last scope of a sequent's context `H` (`hypsPartsS`'s,
+nothing printed). -/
+partial def hypsNamesS (H : Expr) : PrM (List Expr) := do
+  let H := (← instantiateMVars H).consumeMData
+  let unknown (Γ : Expr) : MetaM (List Expr) := do
+    return List.replicate ((← ctxLength? Γ).getD 0) unknownVar
+  if let .fvar fv := H then return ← unknown ((← whnfR (← fv.getType)).getArg! 2)
+  let H ← whnf H
+  let args := H.getAppArgs
+  match H.getAppFn.constName? with
+  | some ``Hyps.nil => unknown args[1]!
+  | some ``Hyps.pre | some ``Hyps.havoc | some ``Hyps.anon => hypsNamesS args[3]!
+  | some ``Hyps.upd => return (← updShape (← hypsNamesS args[4]!) args[6]!).2
+  | some ``Hyps.all => return args[4]! :: (← hypsNamesS args[3]!)
+  | some ``Hyps.bind => return args[5]! :: (← hypsNamesS args[3]!)
+  | _ => throwError "not a context"
+
+/-- `Proves C R Γ₀ H φ` as a sequent, by this printer or (`legacy`) through
+the erasure (`hypsParts`); none where it does not print. -/
+def provesTerm? (e : Expr) (legacy : Bool := false) : MetaM (Option Lean.Term) := do
+  let c := e.getArg! 0
+  let R ← whnf (e.getArg! 1)
+  let out? ← if legacy then
+      withTwins (contract? := some c) e true fun env => do
+        let some (rest, hs, ns) ← (try some <$> (hypsParts c (e.getArg! 4)).run env catch _ => pure none)
+          | return none
+        let φ ← (tr ns (e.getArg! 5)).run env
+        let mut out : Array (TSyntax `dl_hyp) := #[]
+        if let some r := rest then out := out.push (← `(dl_hyp| ..$(mkIdent r):ident))
+        for h in hs do
+          let some h ← Solidity.ppHyp? h | return none
+          out := out.push ⟨← fixBlockEnds h⟩
+        return some (out, (⟨← fixBlockEnds (← ppFml φ)⟩ : TSyntax `dl_fml))
+    else
+      withPrinter (contract? := some c) e true do
+        let some (rest, hs, ns) ← (try some <$> hypsPartsS c (e.getArg! 4) catch _ => pure none)
+          | return none
+        let φ ← ppFmlS ns (e.getArg! 5)
+        let mut out : Array (TSyntax `dl_hyp) := #[]
+        if let some r := rest then out := out.push (← `(dl_hyp| ..$(mkIdent r):ident))
+        for h in hs do out := out.push ⟨← fixBlockEnds h⟩
+        return some (out, (⟨← fixBlockEnds φ⟩ : TSyntax `dl_fml))
+  let some (out, φ) := out? | return none
+  if isEscape φ then return none
+  if R.isConstOf ``RuleSet.all then return some (← `(dl{ $[$out],* ⟹ $φ:dl_fml }))
+  else if R.isConstOf ``RuleSet.solkey then return some (← `(dl{ $[$out],* ⟹ₖ $φ:dl_fml }))
+  else if let some r ← Solidity.fvarName? R then
+    return some (← `(dl{ $[$out],* ⟹[$(Solidity.nameIdent r)] $φ:dl_fml }))
+  else return none
+
+/-- `Proves C R Γ₀ H φ`: the sequent `dl{ ..H, h₁, … ⟹ φ }` (`⟹ₖ` for
+solkey's rules alone, `⟹[R]` over a variable rule set). -/
 @[delab app.Solidity.Proves]
 def delabProves : Delab := do
   unless ← ppOn do failure
   let e ← getExpr
   guard (e.getAppNumArgs == 6)
-  let c := e.getArg! 0
-  let R ← whnf (e.getArg! 1)
-  let out? ← withTwins (contract? := some c) e true fun env => do
-    let some (rest, hs, ns) ← (try some <$> (hypsParts c (e.getArg! 4)).run env catch _ => pure none)
-      | return none
-    let φ ← (tr ns (e.getArg! 5)).run env
-    let mut out : Array (TSyntax `dl_hyp) := #[]
-    if let some r := rest then out := out.push (← `(dl_hyp| ..$(mkIdent r):ident))
-    for h in hs do
-      let some h ← Solidity.ppHyp? h | return none
-      out := out.push ⟨← fixBlockEnds h⟩
-    return some (out, (⟨← fixBlockEnds (← ppFml φ)⟩ : TSyntax `dl_fml))
-  let some (out, φ) := out? | failure
-  guard !(isEscape φ)
-  if R.isConstOf ``RuleSet.all then `(dl{ $[$out],* ⟹ $φ:dl_fml })
-  else if R.isConstOf ``RuleSet.solkey then `(dl{ $[$out],* ⟹ₖ $φ:dl_fml })
-  else if let some r ← Solidity.fvarName? R then `(dl{ $[$out],* ⟹[$(Solidity.nameIdent r)] $φ:dl_fml })
-  else failure
+  let t? ← provesTerm? e
+  if ← twinCheckOn then twinCompare "sequent" (t?.map (·.raw)) ((← provesTerm? e true).map (·.raw))
+  let some t := t? | failure
+  return t
 
 /-- The side condition `CallRet.isRets ret = b` of a scoped taclet's type,
 its `b`. -/
