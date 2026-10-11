@@ -1399,6 +1399,12 @@ nothing reads them, and what stays is recorded as decision 7's IR.
     while the program is open and is refused past it (final review; the
     scoped form kept, since narrowing it loses a sound step).
 
+**Lead, 2026-10-11:** proposals 95–105 are approved. The refactor is
+complete on `intrinsic` with M6c done with IR (decision 7). Open for the
+user: decision 11 (`Surface.Stmt`), the merge into `master`, and the SolKey
+reader branch (side-projects `intrinsic`), whose require goes back to
+`../../../solidity-lean` at that merge.
+
 ## M6c
 
 The closer on `Fml C Γ`, in W6's lanes (each with its gate table and
