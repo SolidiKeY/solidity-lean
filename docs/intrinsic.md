@@ -3836,6 +3836,148 @@ scoped leaf without the erasure; no pin moved.
   CloseS.valid_of_holdsE`: `propext`, `Classical.choice`, `Quot.sound`;
   `lean_build` of the default targets; `check-orphans`, `check-doc-paths`.
 
+### W9.4 `fronts` record (2026-10-11, branch `w9-fronts`)
+
+The front ends and the notation stop producing `NFml`; the walk and the
+tree close a leaf by `sol_leaf` and the scoped closers.
+
+- **Step 0.**  `lean_build` of the default targets passed on master
+  `6aca012a` (`close` over `decide` and `walk`): no integration commit.
+  `TestSuite/Derived7` and `Examples/Tactics/LoopsImport` are clean.  The
+  walk's fallback classes are already closed scoped there: after
+  `sol_leaf` the goal is the scoped `⊨ ψ`, so `sol_close` and
+  `sol_close_mt` are the `close` lane's (`sol_close_unwrap` to
+  `CloseS.holdsE`; `Calculus/Closers.lean`'s erasing elaborator steps
+  aside once the state is introduced): the alias index after a storage
+  write (`testStorageNestedPushReturnAlias`), the deployment's `mtSt`
+  (`Tactics/Constructors`, `Solkey/Constructors`) and the loop frames
+  (`LoopsImport`, three) close without the erasure.
+- **`NRead`** (`Calculus/NotationResolve.lean`): a formula over names, read
+  where it stands, `(Γ : NCtx) → Except String (Fml C Γ.ctx)`, with the
+  connectives `NFml` had (`tt`, `eqD`, `all`, `upd`, `conj`, `bool`,
+  `cmp`, …).  `NFml.resolveN` is gone: `dl!{}`'s atoms
+  (`Calculus/Notation.lean`'s `elabAtomN`) and the specification compiler
+  (`Calculus/SurfaceSpec.lean`'s clauses, layout, frame, `specPieces`)
+  build `NRead`s, `Calculus/Spec.lean` reads them in the parameters'
+  context, and `Tools/Counterexample.lean`'s `SpecProblem.posts` are
+  `NRead`s, a frame conjunct printed resolved at `old`/`oldNet` and closed
+  by hidden binders (`Examples/Verify.lean`'s pin unchanged).
+- **`wt(storage)` scoped** (`Calculus/Problem.lean`): `NFml.wt` is gone;
+  `holds_wt` is over a typed state (`holds σ (Fml.wt C) ↔ storageWtB …
+  σ.erase.glob.storage`), `initStorage_wt : holds (State.init C) (Fml.wt
+  C)`, and `Corpus/Imported.lean`'s `runs_of_proved` takes it as it is (no
+  `holds_erase_fo` detour); `TestSuite/Problems.lean`'s `initState_wt`
+  likewise.  `Problem.parts` reads the obligation by position
+  (`Problem.isWt`, `Problem.isDeploy`), not its erasure.
+- **`#wp`** (`Tools/Inspect.lean`): the fragment test and the reduction are
+  the scoped ones (`Fml.inLS`, `Fml.reduceS`); a key `#k` prints by its
+  binder's name (`Fml.keyNames`, `keyedNames`, replaying `SymS.next`), so
+  the three `Examples/Tools.lean` pins and `Tactics/{Surface,Notation}`'s
+  did not move.
+- **`dl!{}` with no modality is `Fml C []`** (`elabDlAuto` reads every
+  formula; `SurfaceNotation`'s `elabDlAt` is gone): outside `open scoped
+  Solidity.Scoped` its parameters are hidden binders, inside `∀`.
+  `SurfaceNotation`'s `elabDl`/`elabFml` (the closer's reading) stay only
+  for `Calculus/Chains.lean`'s `elabDlN` (the `chains` lane's).
+- **`⊨`/`⊧`** (`Calculus/RuleSyntax.lean`, `elabValidHolds`): `Valid` and
+  `holds` of a scoped formula, the closer's of any other (the `chains`
+  lane's `NFml.Via` lines, which `Calculus/RewriteChains.lean` writes
+  without importing `Logic`); `Theorems.lean`'s scoped copies are gone;
+  `holds` prints `σ ⊧ φ` (`Calculus/Surface.lean`).  `Decide`'s two
+  `NFml` theorems and `DecideComplete`'s say `NFml.Valid`.
+- **Sequents** `dl{ ..H ⟹[R] φ }` are the scoped `Proves` wherever
+  `Calculus/SequentNotation.lean` is imported (its macros no longer
+  scoped; `Calculus/Surface.lean` imports it); the closer's are `open
+  scoped Solidity.NFmlSeq`'s (`Calculus/NFmlLogic.lean` opens it).  The
+  scoped taclets' formulas are written as `Fml`'s constructors (`fmlC`):
+  `coreNames` turns terms only (`coreFamily?` lost `NFml`), as TermLib's
+  `tm{}` rule needs.
+- **The leaf step** (`Calculus/ProofTree.lean`, which now declares
+  `sol_leaf`; `Calculus/Derive.lean`, `Calculus/NFmlDerive.lean`,
+  `Calculus/ProvesDerive.lean`): the tree's `closeTacs` and
+  `Walk.closeLeaf` are `sol_leaf; sol_close`; `Derive.leafTacs` gives a
+  scoped leaf the scoped lines only; `Seq.leafS` leaves a leaf the scoped
+  closer does not read (no erased fallback: `leafRes`, `pick`, `pickH`,
+  `full` and `Seq.residue`'s `np` are gone, `Seq.residue R H φ`), and
+  `Proves.close_leaf`, `Seq.leafErase`, `core_leaf_close` and the
+  `refine NFml.Proves.close ?_` macro on a scoped leaf are gone too.
+  `Tools/ProofTree.lean` imports `ProvesDerive` (the tree's leaves need
+  `sol_leaf`'s elaborator).  `Proves.close` stays for `Calculus/ChainKit.lean`'s
+  last line past the program and `Calculus/CloseTests.lean`'s erased
+  section; `refine close ?_` (`Calculus/WalkSyntax.lean`) is documented
+  as that fallback.  `sol_close_eval` on a bare scoped `Valid ψ` is
+  `sol_close_unwrap; intro σ; sol_close_eval` (`Calculus/Closers.lean`);
+  `sol_apply_upd` and `sol_fold_terms` still erase (no scoped reading).
+  `NFml.Derive.closeSize`/`elimSize` are `Decide.closeSize`/`elimSize`'s
+  abbreviations, `Derive.replayFits` left `NFml.Derive`.
+- **Examples.**  190 lines `refine close ?_` (and `refine Proves.close []
+  rfl List.nodup_nil ?_`), with the `sol_symex` after them, in 26 files
+  (scripts and pins) are `sol_leaf`, the closer after unchanged, but: `Tactics/LedgerDelete` `ledgerWriteThenDelete`
+  (the scoped `sol_close` ran out of 200000 heartbeats; `sol_decide`
+  closes it), `Benchmark/Coin` `spec_mint` (the hand-written steps fail on
+  the scoped leaf; `sol_spec_close` closes it under the same 400000
+  override, 300000 does not), `Tactics/{Callback,TryCatch}`'s havoc
+  leaves (`Hyp.valid_after_havoc` dropped: `CloseS.holdsE` reads `havoc`),
+  `Tactics/Revert`'s `true` leaves (`sol_close`).
+  `Tactics/SelectOnSaveConsr` `ageWriteRead` reads the scoped leaf by
+  hand on `CloseS.holdsE`, the `consr` path `[] ++ [.field "age"]` where it
+  was.  `Tactics/TermTaclets` is on scoped sequents over `StandardExample`
+  (`⊢ dl!{ … }`, `rw`/`sol_rw`, `Proves.eqRefl`).  `Tactics/Dangling` and
+  `Examples/ProofTree` name `Seq.residue .all .nil` and `Decide.closeSize`.
+  `Tools/Common.lean` imports `Syntax`, not `Update`.
+- **Pins moved.**
+  - `Examples/Tactics/DlNotation.lean`: the seven type pins `NFml
+    StandardExample` → `Fml StandardExample []` (the parallel update, `∨`/`↔`,
+    `∃`, `defined`/`≐`, `!=`/`<`, `Token[3]`, `newArr`); `dl{ a = 1 }` now
+    of a closed scoped tree (a hidden binder over `.pvV .here`); the
+    `⊨`/`⊧` pin `fun φ => (⊨ φ) ∧ ∀ (σ : State StandardExample []), σ ⊧ φ :
+    Fml StandardExample [] → Prop`.  Examples (not pins) rewritten: the two
+    equation trees and the push tree as scoped trees, the Lean-formula
+    holes at `Fml` types, and `{ p := unset } true` needs `where Person
+    storage p` (the scoped reader asks the alias's type).
+  - `Examples/ProofTree.lean`: eight `sol_derive?` pins, `refine close ?_ /
+    sol_symex` → `sol_leaf` at each leaf (the scoped `sol_close` closes
+    every one).  `Examples/Tactics/Derive.lean`: the explicit walk's
+    `refine Proves.close [] rfl List.nodup_nil ?_ / sol_symex` → `sol_leaf`;
+    the `⊢ₖ` refusal's message lost its `Proves.close` clause (a leaf
+    need not be closable now).  `Examples/Tactics/ProofTree.lean`:
+    `#proof_node 3`'s tactics are `sol_leaf; sol_close`.
+  - `Examples/Tactics/TermTaclets.lean`: the `rw [h]` pin lost `C :
+    Contract`; the `findOnSaveFrame` side-condition pin is `#guard_msgs
+    (drop error)` (the scoped `rw` steps aside and Lean's fails; the
+    closer's `sol_rw` message is not reached).
+  - The open `⟨ alice.age = 1; ⟩ true` leaf stays open.
+- **Timing** (each file copied under `Solidity/Scratch/`, a fresh worker,
+  `/proc` sampled every 20 ms, CPU of the worker; base master `6aca012a`
+  in this worktree):
+
+  | Module | base | W9.4 `fronts` | gate |
+  |---|---|---|---|
+  | `Examples/ProofTree` | 9.00 s | 8.10 s | 11.7 s |
+  | `Solkey/TestSuite` | 6.93 s | 6.95 s | 13.2 s |
+  | `Examples/Tactics/DlNotation` | 1.21 s | 1.20 s | — |
+
+- **Checks.**  Per-file diagnostics of every file touched; `lean_build` of
+  the default targets (after the last edit); `SolkeyTestSuite`,
+  `Corpus/TestSuite` and `Solkey/Constructors` through a temporary library
+  in `lakefile.toml` (not committed), the `Derived` modules five at a time;
+  `check-doc-paths`, `check-orphans`; `sorry` lines unchanged (20); axioms
+  of `Proves.of_residue`, `Seq.leafS_sound`, `holds_wt`,
+  `initStorage_wt`, `Corpus.runs_of_proved`: `propext`,
+  `Classical.choice`, `Quot.sound`.
+- **What still reads `NFml` here, and why.**  `SurfaceNotation`'s
+  `elabDl`/`elabFml`/`fillSlots`/`NFml.slot`/`boolFml`/`cmpFml` and
+  `Surface.Tm.quote` (`st!{}`, `pt!{}`): `Calculus/Chains.lean`'s lines past
+  the program (`elabDlN`, the `chains` lane).  `RuleSyntax`'s `schemaFml`
+  (`dl_schema{}`, `dl{ φ }`, the `NFmlSeq` sequents) and the `NFml`
+  delaborators: `Calculus/{Hyp,NFmlLogic,NFmlUpdateRules}.lean`, W9.5's.
+  `⊨`/`⊧`'s and `valid%`'s `NFml` branch: the `chains` lane's `NFml.Via`.
+  `Calculus/NFmlQuote.lean`: `Calculus/Quote.lean` imports it (the
+  `ToExpr` of `PrimVal`), `NFmlDerive`, `TheoryRewrite`.  `Proves.close`:
+  `ChainKit`'s bridge and `CloseTests`.  `Derive.eraseLeaf`:
+  `sol_apply_upd`, `sol_fold_terms`.  `NFmlDerive`'s erased `leafTacs`
+  branch: the closer's own sequents.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
