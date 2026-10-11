@@ -330,12 +330,10 @@ example (φ : Post StandardExample []) :
     ~[concrete]~> dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true } φ } := by
   sol_chain
 
-set_option sol_chain.scopedPast true in
-/-- Past the program, under `sol_chain.scopedPast`, `sequentialToParallel`
-merges the scoped line too, where that gives the line written (decision 93,
-revisited): here over the storage write (`FmlRw.stateMerge`).  The
-strategy's own last line declares `x` behind a hidden binder, which no
-scoped merge crosses, so `ageWriteReadValue` would go on on the erasure. -/
+/-- Past the program `sequentialToParallel` merges the scoped line too
+(decision 93, revisited at W9.4): here over the storage write
+(`FmlRw.stateMerge`); the strategy's own last line declares `x` behind a
+hidden binder, which the merge absorbs (`FmlRw.mergePast`). -/
 example : dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x ≐ 42 }
     ~[sequentialToParallel]~> dl![.box]{ { storage := save(storage, alice.age, 42) ‖
       x := find(save(storage, alice.age, 42), alice.age) } x ≐ 42 } := by

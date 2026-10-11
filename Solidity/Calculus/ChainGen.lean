@@ -200,11 +200,10 @@ def generate (φ : Expr) : TermElabM Gen := do
 
 /-- The links of a generated chain: the strategy's steps grouped
 (`groupSteps`), then one `~[r]~>` per rewrite; each with its line. -/
-def Gen.links (g : Gen) : Array (String × Expr × Bool) :=
-  let grouped := NFml.Chain.groupSteps (g.steps.map fun (n, l, _) => (n, l))
-  grouped.map (fun (a, l) => (a, l, true)) ++
-    g.openRws.map (fun (n, l, _) => (s!"~[{n}]~>", l, true)) ++
-    g.rewrites.map fun (n, l, _) => (s!"~[{n}]~>", l, true)
+def Gen.links (g : Gen) : Array (String × Expr) :=
+  NFml.Chain.groupSteps (g.steps.map fun (n, l, _) => (n, l)) ++
+    g.openRws.map (fun (n, l, _) => (s!"~[{n}]~>", l)) ++
+    g.rewrites.map fun (n, l, _) => (s!"~[{n}]~>", l)
 
 /-- The erasures of a line of a generated chain. -/
 def Gen.erasedOf (g : Gen) (l : Expr) : Array Expr :=
@@ -229,19 +228,14 @@ def wrappers (m? : Option Expr) (φ : TSyntax `dl_fml) : MetaM (Array Lean.Term)
       ← `(cdl![$(dot `diamond)]{ $φ:dl_fml })]
 
 /-- A line as text: the first wrapper that reads back as it. -/
-def lineText (sp : Splice) (C e : Expr) (isScoped : Bool) (erased : Array Expr) :
-    TermElabM (Array String) := do
-  let t ← if isScoped then ppCoreLine e else ppLegacyLine e
+def lineText (sp : Splice) (C e : Expr) (erased : Array Expr) : TermElabM (Array String) := do
+  let t ← ppCoreLine e
   let some φ := dlFmlOf? t | return ← Solidity.ProofTree.termLines t
   let cands ← wrappers sp.modality φ
   let mut pick := cands[0]!
   for c in cands do
     let ok ← withoutModifyingState do
-      try
-        if isScoped then matchWritten sp C (Written.of c) e erased
-        else
-          let q ← legacyWritten C sp.modality e (Written.of c)
-          pure (!q.hasExprMVar && (← isDefEq q e))
+      try matchWritten sp C (Written.of c) e erased
       catch _ => pure false
     if ok then
       pick := c
@@ -252,9 +246,9 @@ def lineText (sp : Splice) (C e : Expr) (isScoped : Bool) (erased : Array Expr) 
 def Gen.decl (g : Gen) (φ : Expr) (name : String := "chain") : TermElabM (Array String) := do
   let (C, _) ← lineType φ
   let ind (ls : Array String) : Array String := ls.map ("    " ++ ·)
-  let mut out := ind (← lineText g.splice C φ true g.erased)
-  for (arrow, l, isScoped) in g.links do
-    let line ← lineText g.splice C l isScoped (g.erasedOf l)
+  let mut out := ind (← lineText g.splice C φ g.erased)
+  for (arrow, l) in g.links do
+    let line ← lineText g.splice C l (g.erasedOf l)
     out := out ++ ind (#[s!"{arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("  " ++ ·))
   let kw := if g.links.size == 1 && (g.links[0]!.1 == "~*>") then "def" else "theorem"
   return #[s!"{kw} {name} :"] ++ out.modify (out.size - 1) (· ++ " := by") |>.push "  sol_chain"
@@ -324,8 +318,8 @@ elab_rules : command
         logInfo m!"{c} ends at a last line"
         return
       let mut out : Array String := #[]
-      for (arrow, l, sc) in links do
-        let line ← lineText sp C l sc (← runChain l).erased
+      for (arrow, l) in links do
+        let line ← lineText sp C l (← runChain l).erased
         out := out ++ #[s!"    {arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("      " ++ ·)
       let note := match stop with
         | some m => m!"\n\nthe chain stops early: {m}"
@@ -443,9 +437,9 @@ elab_rules : tactic
 line (`Gen.links`). -/
 def chainText (g : Gen) (φ : Expr) : TermElabM (Array String) := do
   let (C, _) ← lineType φ
-  let mut out := ← lineText g.splice C φ true g.erased
-  for (arrow, l, isScoped) in g.links do
-    let line ← lineText g.splice C l isScoped (g.erasedOf l)
+  let mut out := ← lineText g.splice C φ g.erased
+  for (arrow, l) in g.links do
+    let line ← lineText g.splice C l (g.erasedOf l)
     out := out ++ #[s!"{arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("  " ++ ·)
   return out
 
@@ -466,7 +460,7 @@ elab_rules : tactic
         let gen ← generate (← instantiateMVars B)
         unless gen.links.isEmpty do
           let lines ← chainText gen B
-          let start := (← lineText gen.splice (← lineType B).1 B true gen.erased).size
+          let start := (← lineText gen.splice (← lineType B).1 B gen.erased).size
           logInfoAt tk (m!"the chain goes on to a last line; append to its statement:\n\
             {"\n".intercalate (lines.extract start lines.size |>.map ("    " ++ ·)).toList}" ++
             gen.stopNote)

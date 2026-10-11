@@ -1474,35 +1474,6 @@ def legacyWritten (C : Expr) (m? : Option Expr) (L : Expr) : Written → TermEla
     | .ok e => pure e
     | .error msg => throwError "dl[C, m]: {msg}"
 
-/-- `Update.lean`'s postconditions of the lines `es`, `↑(φ.erase ns)`
-(`Post.erase`), as local postconditions `φ : Post C` while `k` runs on the
-lines with them in place, so that `Calculus/RewriteChains.lean`'s rewrites see and
-print them as their own; put back in what `k` returns. -/
-def withErasedPosts (es : Array Expr) (k : Array Expr → TermElabM (Array Expr)) :
-    TermElabM (Array Expr) := do
-  let es ← es.mapM instantiateMVars
-  let ref ← IO.mkRef (#[] : Array Expr)
-  for e in es do
-    forEachExpr' e fun x => do
-      if x.isAppOfArity ``NFml.Post.fml 2 && x.appArg!.isAppOfArity ``Post.erase 5 then
-        ref.modify fun ps => if ps.contains x.appArg! then ps else ps.push x.appArg!
-        return false
-      return true
-  let ps ← ref.get
-  let rec go (i : Nat) (xs : Array Expr) : TermElabM (Array Expr) := do
-    if h : i < ps.size then
-      let p := ps[i]
-      let n ← match p.getArg! 2 with
-        | .fvar fv => fv.getUserName
-        | _ => pure `φ
-      withLocalDeclD n (mkApp (mkConst ``NFml.Post) (p.getArg! 0)) fun x => go (i + 1) (xs.push x)
-    else
-      let sub (e : Expr) : Expr := e.replace fun y => (ps.idxOf? y).map (xs[·]!)
-      let rs ← k (es.map sub)
-      let rs ← rs.mapM instantiateMVars
-      return rs.map (·.replaceFVars xs ps)
-  go 0 #[]
-
 /-- The rewrites `~~>` tries on a line while its program is open, after the
 merges: KeY's names, no law (a law is named, `~[r]~>`). -/
 def openRwNames : List Lean.Name :=
@@ -1914,8 +1885,7 @@ def elabCalcStep (inner : Syntax) : TermElabM (Option Expr) := do
   if let some a := first? then
     if !a.hasMVar && (← isCoreLine a) then return ← elabCoreChain inner a
   st.restore
-  if Solidity.chainWritten inner then NFml.Chain.elabChain inner expectedType?
-  else elabTerm (← liftMacroM (Solidity.expandChainStx inner)) expectedType?
+  elabTerm (← liftMacroM (Solidity.expandChainStx inner)) expectedType?
 
 /-! ## `φ ~~> ψ` on scoped lines
 
@@ -1937,10 +1907,11 @@ syntax (name := leadsAnyStx) "leads% " term:max term:max : term
     let a ← elabTerm stx[1] none
     synthesizeSyntheticMVarsNoPostponing
     instantiateMVars a
-  let some A := first? | st.restore; elabTerm (← `(Solidity.NFml.Leads $(⟨stx[1]⟩) $(⟨stx[2]⟩))) none
+  let some A := first? | throwError "~~>: the first line is not known"
   unless !A.hasMVar && (← isCoreLine A) do
     st.restore
-    return ← elabTerm (← `(Solidity.NFml.Leads $(⟨stx[1]⟩) $(⟨stx[2]⟩))) none
+    throwError "~~>: the first line is a scoped formula: write it `dl!\{ … }` under \
+      `open scoped Solidity.Scoped`{indentExpr A}"
   let (C, Γ) ← lineType A
   let bStx := if stx[2].isOfKind ``Lean.Parser.Term.paren then stx[2][1] else stx[2]
   let w := Written.of bStx
@@ -1991,12 +1962,6 @@ def unexpandLeads : PrettyPrinter.Unexpander
   | `($_ $a:term $b:term) => `($a:term ~~> $b:term)
   | _ => throw ()
 
-/-- `A ~~> B` past the program prints as written. -/
-@[app_unexpander Fml.LeadsK]
-def unexpandLeadsK : PrettyPrinter.Unexpander
-  | `($_ $a:term $b:term) => `($a:term ~~> $b:term)
-  | _ => throw ()
-
 /-! ## `sol_chain` on scoped chains -/
 
 /-- The computed line `B` after `A`, its run. -/
@@ -2020,8 +1985,8 @@ partial def isCoreGoal (ty : Expr) : MetaM Bool := do
   return false
 
 /-- `sol_chain` on a scoped goal: each link by the kernel (`oneStepProof`,
-`stepByProof`, `stepsProof`), the erasure by `rfl`, and the links past it
-by `Calculus/RewriteChains.lean`'s `solveChain`. -/
+`stepByProof`, `stepsProof`, `kernelReflOrCases` for a rewrite or a merge),
+past the program too. -/
 partial def solveCore (g : MVarId) : TermElabM Unit := do
   let ty ← instantiateMVars (← g.getType)
   -- a `calc` step: its line after computed from the line before, and checked
@@ -2129,7 +2094,7 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
   | _ =>
     let ty' ← whnfR ty
     if ty' != ty then return ← solveCore (← g.replaceTargetDefEq ty')
-    NFml.Chain.solveChain g
+    throwError "sol_chain: the goal is no chain on scoped lines{indentExpr ty}"
 
 elab_rules : tactic
   | `(tactic| sol_chain) => Tactic.withMainContext do
@@ -2186,8 +2151,9 @@ def arrowOf (l : Expr) : MetaM (TSyntax `chain_arrow) := do
     `(chain_arrow| ~[$(mkIdent n):ident]~>)
   else failure
 
-/-- A line past the program, `Update.lean`'s: its postconditions
-`↑(φ.erase ns)` printed as `φ`. -/
+/-- A line read as its erasure, `Update.lean`'s (the line written after
+`~~>` past the program, `Fml.LeadsK`): its postconditions `↑(φ.erase ns)`
+printed as `φ`. -/
 def ppLegacyLine (e : Expr) : MetaM Lean.Term := do
   let ref ← IO.mkRef (#[] : Array Expr)
   forEachExpr' e fun x => do
@@ -2208,14 +2174,12 @@ def ppLegacyLine (e : Expr) : MetaM Lean.Term := do
   go 0 e
 
 /-- The links of a list of `(link, line)` pairs, printed. -/
-def linkLines (ws : Expr) (legacyLinks : Bool) : MetaM (Array (TSyntax `chain_arrow × Lean.Term)) := do
+def linkLines (ws : Expr) : MetaM (Array (TSyntax `chain_arrow × Lean.Term)) := do
   let some ws ← Solidity.listElems? ws | failure
   ws.mapM fun w => do
     let w ← whnfR w
     guard (w.isAppOfArity ``Prod.mk 4)
-    if legacyLinks then
-      pure (← NFml.Chain.arrowOf (w.getArg! 2), ← ppLegacyLine (w.getArg! 3))
-    else pure (← arrowOf (w.getArg! 2), ← ppCoreLine (w.getArg! 3))
+    pure (← arrowOf (w.getArg! 2), ← ppCoreLine (w.getArg! 3))
 
 @[delab app.Solidity.Fml.OneStep]
 def delabOneStep : Delab := do
@@ -2261,9 +2225,19 @@ def delabMergeBy : Delab := do
 def delabVia : Delab := do
   let e ← getExpr
   guard (e.getAppNumArgs == 4)
-  let arrows ← linkLines (e.getArg! 3) false
+  let arrows ← linkLines (e.getArg! 3)
   guard !arrows.isEmpty
   return NFml.Chain.chainNode (← ppCoreLine (e.getArg! 2)) arrows
+
+/-- `Fml.LeadsK A L`: `A ~~> B`, the line written `B` printed from its
+erasure `L`. -/
+@[delab app.Solidity.Fml.LeadsK]
+def delabLeadsK : Delab := do
+  let e ← getExpr
+  guard (e.getAppNumArgs == 3)
+  let a ← ppCoreLine (e.getArg! 1)
+  let b ← ppLegacyLine (e.getArg! 2)
+  `($a ~~> $b)
 
 end Print
 
