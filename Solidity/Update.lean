@@ -945,8 +945,8 @@ def NFml.Valid (φ : NFml C) : Prop := ∀ σ, NFml.holds σ φ
 (`Syntax.lean`): what `dl!{ … }` reads, a specification's obligation and a
 problem state (`Calculus/SurfaceSpec.lean`, `Calculus/Problem.lean`), and what the
 printers print (`RuleSyntax.lean`'s `ppFml`, `Fml.eraseS`).  It has no
-reading: `Fml.resolveN` makes it a scoped formula, read by the typed
-run, and `Surface.Fml.toFml` the closer's `Fml` when it has no modality.
+reading: `Calculus/Notation.lean` reads a formula with a modality
+scoped, and `Surface.Fml.toFml` the closer's `Fml` when it has no modality.
 The constructors are `Fml`'s, in the same order, with `modal` after
 `upd`. -/
 

@@ -73,8 +73,8 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
-| W8 | W8.1 done 2026-10-11 (the rest planned) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
-| left | — | the lead's calls on proposals 95–105; optional ports on the IR ("What is left") |
+| W8 | W8.1, W8.2 done 2026-10-11 (the rest planned) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
+| left | — | the lead's calls on proposals 95–105 and 106–115 (W8.2); optional ports on the IR ("What is left") |
 
 ## Checks at the end (W6)
 
@@ -2106,6 +2106,220 @@ had another lane's build running (load 2.7–14.6).
 `specBody`, `specParts` and the unscoped `spec!{f}` (the examples outside
 `open scoped Solidity.Scoped` read them); `docs/testsuite-proofs.md` still
 describes `solc_problems … legacy` (not this lane's file).
+
+### W8.2 `reader-tools` record (2026-10-11, branch `w8-w82consumersreadscopedprintersobligationsreader-reader-tools`)
+
+The formula reader, the chains' line matching and the run tools read the
+scoped syntax.
+
+- **The reader** (`Calculus/Notation.lean`).  `elabModalProg` elaborates a
+  formula's program scoped from the formula's named context: each
+  statement by `elabStmtP` from the reader's scope, placed where the one
+  before leaves by `SProg.chain`/`Blk.append`, as `elabProgAtS` does, with
+  the `taken`/`nextFree` capture numbering and `scopeHints` unchanged; no
+  `Prog.resolve`.  The reader's scope is first put in the order of the
+  formula's context (`alignScope`: `setBy` appends a quantifier's local,
+  which `SProg.chain`'s thinning by names would otherwise refuse), and the
+  context the program leaves is named by `Prog.outNames` (`NCtx.named`).
+  An atom is read as the closer's formula and resolved by
+  `NFml.resolveIn` (`Calculus/NotationResolve.lean`; named apart from the
+  `obligations` lane's `NFml.resolveN` in `Calculus/Spec.lean`, which has no
+  `hint`: keep one at the merge).  `Fml.resolveN` on `Surface.Fml` stays
+  in this lane only because `Calculus/Spec.lean`'s `specObligation` reads
+  it here; the `obligations` lane removes that use, so it goes at the
+  merge.
+- **`dl!{ … }` with a modality is scoped** (`elabDlAuto`, a `term_elab` on
+  `dl[C]{ … }` and `dl[C, m]{ … }`, now named `dlAt`/`dlAtM`): `cdl[C]{ … }`,
+  its parameters bound by hidden binders (`useAll := false`), when the raw
+  formula has a modality and no `Surface.Fml _` is expected
+  (an expected metavariable postpones once, then reads scoped); today's
+  reading otherwise (`NFml` with no modality).  The sequent forms expand
+  to these.  `Calculus/Surface.lean`'s flip now matters only for a
+  formula with no modality.  `Calculus/SurfaceNotation.lean`'s examples,
+  which need the scoped reader and `Delab`'s printer, moved to
+  `Examples/Tactics/DlNotation.lean`.
+- **Chains** (`Calculus/Chains.lean`).  `Fml.erasedQuoted` is replaced by
+  `Fml.lineKey` (`LineKey`, quoted by `LineKey.quote`): the erasure
+  (`Fml.erase`, quoted as the closer's `NFml`) where there is no modality,
+  and `LineKey.modal m strs k` where there is one, `strs` the program's and
+  the frames' statements as `Prog.toStrs` prints them, a block statement
+  flattened (`Prog.keyStrs`, `Frames.keyStrs`: the erasure flattens a
+  call's expanded body, and the printed line does).  A written line with a
+  modality is read scoped with its parameters open (`elabDlOpen`: no
+  closure, so `underAlls` strips the computed line's `∀`s as before), its
+  slots normalised to `slotExpr j` (`writtenSlots`); one with none is read
+  as today (`elabDlN`, the closer's formula; proposal 114).
+  `erasedSlot?`, `toWrittenSlots`, `underAlls` no longer name
+  `Surface.Fml`.  Every pin in `Examples/Chains/*`, `ChainRewrites*`,
+  `ChainNotation` passes unchanged.
+- **Tools and corpus.**  `Tools/Run.lean`: scoped `Prog.runT`,
+  `Prog.localAfterT`, `Contract.deployRunS` on `Prog C [] Γ'` (the
+  `Surface.Prog` versions stay until W8.4); `#run`/`#deploy` elaborate
+  scoped (`elabProgS`, `ctorProgS`), no `resolve`; `callProg` returns a
+  `Blk C []`, and `Tools/DiffTest.lean`'s `runOnce` takes `Prog C [] Γ'`.
+  `Corpus/Basic.lean`: `Diamond`, `outcome`, `runOk`, `diamond_of_runOk`
+  take `{Γ'} (P : Prog C [] Γ')`; the generated `Corpus/Solc*.lean` are
+  unchanged (`sol[C]{ … }` reads scoped at that expected type), and
+  `corpus_decide` evaluates no `resolve`.
+- **Not done: `Calculus/Hyp.lean`, `Calculus/Sequents.lean`.**  The
+  sequent check (`show_sequent`) compares the goal's `Delab.tr` erasure
+  (`Surface.Fml`, the printers lane's) with the line read as today's
+  (`readSequent` calls the legacy `elabDlAt` by name, so it is unchanged).
+  Its scoped cases (`Hyp.pre`/`Hyp.upd` take the closer's `NFml` and
+  `Surface.Upd`, so a scoped `Fml.imp`/`Fml.upd` has no well-typed entry)
+  belong with the goal side's printer: W8.4, after the printers lane.
+
+**Proposals.**
+
+- *114 (`reader-tools`):* a chain's written line with no modality is read as
+  today (`elabDlN`, terms by name), not scoped.  A line past the program
+  drops the `where` clause of a memory local it no longer writes
+  (`{ mv1 := read(memory, carol.account) } …` in
+  `Examples/Chains/MemoryCoverage.lean`), which the scoped reader would
+  read as a `uint` parameter and refuse; the closer's formula, which past
+  the program is what the rewrites read, is unchanged.  The no-modality
+  reading (`dl!{ … }` as `NFml`) outlives W8.4 anyway.
+- *115 (`reader-tools`, withdrawn at review):* `dl!{ … }` outside the flip
+  no longer binds its parameters as `cdl!{ … }` does.  `elabDlAuto` reads
+  through `elabCdlAt … (useAll := false)`, so `Fml.closeN false` binds every
+  parameter by a hidden binder, which prints as nothing, as today's `dl!`
+  left it free.  The flip's `cdl!` still binds a value parameter by
+  `∀ uint x;`.  Outside the flip no proof reads a modal `dl!` (one that is
+  not ascribed `Surface.Fml`), so only pins see the difference, and they
+  print as before.
+
+**Dependency on the `printers` lane.**  The scoped printer prints the
+hidden binder of a `where` clause as nothing.  The two `where` pins
+therefore stay on today's reading in this lane, ascribed
+`(dl!{ … } : Surface.Fml StandardExample)`, so their text is unchanged.
+`Delab` must print `where T memory x` for a hidden binder of a memory local
+that the program assigns without declaring, as `copyDecls` does on the
+erasure.  Once that printer lands, the pins switch to `Fml StandardExample []`.
+
+**Pins that moved** (all in `Examples/Tactics/DlNotation.lean`, moved from
+`Calculus/SurfaceNotation.lean`, unless said):
+
+| Pin | Change | Reason |
+|---|---|---|
+| `dl!{ ⟨ uint x = 10; ⟩ x == 10 }` | `: Surface.Fml StandardExample` → `: Fml StandardExample []` | scoped reading |
+| `dl!{ { carol := freshId(…) ‖ … } ⟨ carol.age = 5; ⟩ true }` | type suffix only | scoped reading |
+| `dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol }` | none: ascribed `Surface.Fml StandardExample` | the `printers` lane's `where` printer |
+| `dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ … where Account memory acc }` | none: ascribed `Surface.Fml StandardExample` | same |
+| `dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }` | type suffix only | scoped reading, hidden binder |
+| `fun m φ => dl![m]{ ⟨[ x = 1; ]⟩ φ }` | `φ : NFml StandardExample` → `Post StandardExample [.val .uint]` | a scoped hole is a `Post C Γ` |
+| `∀ φ, dl!{ ⟨ x = 1; ⟩ φ } = …` (`trace_state`) | `φ✝ : Post …`, `‹↑φ✝›` | same |
+| `dl!{ ⟨ x = 1; ⟩ ture }` error | `(φ : Post C)` → `(φ : Post C Γ)` | the scoped reader's message |
+| `fun φ => (⊨ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the new module sees the scoped `State` too |
+| `dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }` | type suffix only | scoped reading, hidden binder |
+| `Examples/Tactics/Surface.lean`: `dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }` outside the flip | type suffix only (`Fml StandardExample []`); the scoped pin below it keeps `∀ uint a;` | a modality reads scoped without the flip, hidden binder |
+
+The `rfl` examples and the error pins moved unchanged and pass.
+
+**Checks.**  `import Solidity`, `import SolidityCorpus` and
+`import SolkeyTestSuite` scratch modules: no errors; `check-orphans`
+(the scratch modules only), `check-doc-paths` pass.
+
+**Timing** (end-of-work, base the `intrinsic` worktree at `624c492a`,
+interleaved in one session; other lanes building, load 2–16, so the
+low-load pairs count):
+
+| Module | base | W8.2 reader-tools | ratio | gate |
+|---|---|---|---|---|
+| `Calculus/SurfaceNotation` + `Examples/Tactics/DlNotation` | 8.59 s (8.50, 8.86, 8.59) | 9.84 s: 8.57 s (8.85, 7.86, 8.57) + 1.27 s (1.50, 1.27) | 1.15 | 1.2× base; the base module held the examples that `DlNotation` now holds, so the two are summed |
+| `Examples/Tactics/StorageSteps` | 40.48 s | 41.08 s (40.30, 41.86) | 1.01 | 1.2× base |
+| `Corpus/SolcStructs` | 1.22 s (1.24, 1.20) | 1.00 s (1.00, 0.99) | 0.82 | 1.2× base: no `resolve` in the kernel |
+| `Examples/Chains/Storage` | 7.87 s (load 2.8; 10.11, 15.93 under load 7–15) | 7.57 s (load 2.5; 7.69, 9.86 under load) | 0.96 | 8.94 s (W6) |
+| `Examples/ChainRewrites` | 6.91 s | 6.85 s (6.84, 6.86) | 0.99 | 7.63 s (W6) |
+
+Every row within its gate.
+
+### W8 W8.2 consumers read scoped (printers, obligations, reader) merge (2026-10-11)
+
+`printers`, `obligations` and `reader-tools` merged into `intrinsic` in
+that order.  The lanes' proposals are renumbered consecutively: 106–110
+`printers` (as they were), 111–113 `obligations` (its 106–108), 114–115
+`reader-tools` (its 106–107; 115 withdrawn at its review).
+
+**Reconciled at the merge.**  `Fml.resolveN` (on `Surface.Fml`) is
+deleted from `Calculus/NotationResolve.lean`: its last reader,
+`Calculus/Spec.lean`'s `specObligation`, reads scoped since
+`obligations`.  The two readers of a closer formula in a context, the
+`reader-tools` lane's `NFml.resolveIn` (with a `hint`) and the
+`obligations` lane's `NFml.resolveN` (local to `Spec.lean`, no `hint`),
+are one: `NFml.resolveN hint` in `Calculus/NotationResolve.lean`, read by
+`Calculus/Notation.lean`'s `elabFmlC` and by `Spec.lean` with
+`fun _ => none` (the two definitions had the same clauses).
+`Update.lean`'s note on `Surface.Fml` no longer names `Fml.resolveN`.
+`docs/module-map.md` takes the `obligations` lane's lines for
+`Calculus/{Spec,Deploy,Problem,SurfaceSpec}.lean` and the `reader-tools`
+lane's for `Calculus/{NotationResolve,Notation,SurfaceNotation}.lean`.
+No pin moved at the merge beyond the lanes' own.
+
+**Checks.**  The full build with `SolidityCorpus` and `SolkeyTestSuite`
+(328 jobs) green at the first try; `dups.py` (the three known),
+`check-orphans` (the scratch module only), `check-doc-paths`,
+`check-rule-text` pass.
+
+**Timing** (the end-of-work method: each file copied under
+`Solidity/Scratch/`, one fresh worker at a time through the MCP, end of
+work sampled every 20 ms, the worker killed after; one run a row, the
+minimum kept where there are two; load 0.7–2.4 but for Derived1's first
+run, at 7.5; cgroup 7.8 GB):
+
+| Module | W6 baseline | gate (1.2×) | W7 merge | **W8.2 merge** | ratio (W6) |
+|---|---|---|---|---|---|
+| `TestSuite/Derived1` | 7.32 s | 8.78 s | 7.65 s | **7.50 s** (7.56, 7.50) | 1.02 |
+| `TestSuite/Derived2` | 8.63 s | 10.36 s | 8.91 s | **9.03 s** | 1.05 |
+| `TestSuite/Derived3` | 13.01 s | 15.61 s | 13.36 s | **13.63 s** | 1.05 |
+| `TestSuite/Derived4` | 17.57 s | 21.08 s | 17.87 s | **18.12 s** | 1.03 |
+| `TestSuite/Derived5` | 6.95 s | 8.34 s | 7.20 s | **7.18 s** | 1.03 |
+| `TestSuite/Derived6` | 11.42 s | 13.70 s | 11.79 s | **11.89 s** | 1.04 |
+| `TestSuite/Derived7` | 50.43 s | 60.52 s | 51.41 s | **52.92 s** | 1.05 |
+| `TestSuite/Derived8` | 26.38 s | 31.66 s | 26.83 s | **27.71 s** | 1.05 |
+| `TestSuite/Derived9` | 7.16 s | 8.59 s | 7.31 s | **7.26 s** | 1.01 |
+| `TestSuite/Derived10` | 11.11 s | 13.33 s | 11.59 s | **11.53 s** | 1.04 |
+| `TestSuite/Derived11` | 3.16 s | 3.79 s | 3.23 s | **3.23 s** | 1.02 |
+| `TestSuite/Derived12` | 13.17 s | 15.80 s | 13.54 s | **13.62 s** | 1.03 |
+| `TestSuite/Derived13` | 6.36 s | 7.63 s | 6.45 s | **6.47 s** | 1.02 |
+| `TestSuite/Derived14` | 10.89 s | 13.07 s | 11.08 s | **11.24 s** | 1.03 |
+| Derived1–14, sum | 193.6 s | 232.3 s | 198.2 s | **201.3 s** | 1.04 |
+| `Examples/Tactics/Decide` | 49.14 s | 58.97 s | 37.47 s | **37.48 s** | 0.76 |
+| `Examples/ProofTree` | 9.81 s | 11.77 s | 9.74 s | **9.73 s** | 0.99 |
+| `Examples/Chains/Storage` | 7.45 s | 8.94 s | 7.52 s | **7.70 s** | 1.03 |
+| `Examples/ChainRewrites` | 6.36 s | 7.63 s | 6.86 s | **6.84 s** | 1.08 |
+| `Examples/ChainRewritesOpen` | — | — | 3.43 s | **3.45 s** | — |
+| `TestSuite/Problems` (M0) | 0.81 s | 0.97 s | 0.85 s | **0.84 s** | 1.04 |
+| `TestSuite/ScopedProblems` (M0) | 1.39 s | 1.67 s | 1.45 s | **1.09 s** | 0.78 |
+| `Solkey/TestSuite` (M0) | 10.83 s | 13.00 s | 11.03 s | **6.71 s** | 0.62 |
+| `Examples/Benchmark/Syntax` (M0) | 1.41 s | 1.69 s | 1.48 s | **1.44 s** | 1.02 |
+| `Evm/Examples` (M0) | 7.75 s | 9.30 s | 7.91 s | **7.91 s** | 1.02 |
+| `Evm/Correct` (M0) | 1.68 s | 2.02 s | 1.71 s | **1.72 s** | 1.02 |
+
+The lanes' own rows, against their bases (`624c492a`): `Examples/Tactics/Print`
+3.73 s (base 3.93), `Calculus/SurfaceNotation` + `Examples/Tactics/DlNotation`
+7.25 + 1.18 = 8.43 s (base 8.59, the examples then in one module),
+`Corpus/SolcStructs` 1.01 s (1.22), `Examples/Tactics/StorageSteps`
+39.10 s (40.48).
+
+**Gate passed**: every row within 1.2× of its W6 baseline (and of the
+lanes' bases); against the M0 limits, `Derived10` 11.53 (11.2, over by 3%
+as at W7) and `Benchmark/Syntax` 1.44 (1.44, at its limit).
+`Solkey/TestSuite` and `ScopedProblems` are faster since `obligations`
+(proposal 112: the imported programs are not compiled).
+
+**Left** (from the lanes, for W8.3–W8.5): the `…Legacy` printers,
+`withErased`, `hypsParts`, `condOfLegacy?` and `pp.sol.twinCheck`, with
+the erasure (W8.4); `Calculus/Callback.lean`'s delaborators,
+`Calculus/Sequents.lean`, `Calculus/Hyp.lean` and `Chains`'
+`withErasedPosts` still read the erasure; the pin of proposal 107
+(`Examples/Tools.lean`); `Calculus/Print.lean`'s `legacyShow` examples;
+`Surface.specObligation`, `specBody`, `specParts` and the unscoped
+`spec!{f}` (examples outside the scoped switch), and the two `sameAs`
+guards of `Examples/Tactics/Spec.lean`; `Delab` printing `where T memory
+x` for a hidden binder, after which the two `where` pins of
+`Examples/Tactics/DlNotation.lean` drop their `Surface.Fml` ascription;
+`docs/testsuite-proofs.md`'s `solc_problems … legacy`; the read-only
+review pass (W8.5).
 
 ## What is left
 

@@ -8,11 +8,14 @@ import Solidity.Calculus.Proves
 # The flip switch: `open scoped Solidity.Scoped`
 
 With the scope open, today's notation reads the scoped calculus
-(`docs/intrinsic.md`, W2 `tree`): the same text, a scoped term.
+(`docs/intrinsic.md`, W2 `tree`): the same text, a scoped term.  A formula
+with a modality reads scoped without it (`elabDlAuto`, decision 11), so the
+switch matters only for one with none, which reads as the closer's `NFml`
+when it is off:
 
 * `dl!{ φ }`, `dl![m]{ φ }`, `dl[C]{ φ }`, `dl[C, m]{ φ }` and their sequent
   lines (`dl!{ Γ ⟹ φ }`) are `cdl…`'s (`Calculus/Notation.lean`): a
-  `Fml C []`;
+  `Fml C []`, with or without a modality;
 * `spec!{f}`, `spec[C]{f}` are `cspec…`'s, `problem!{constructor}` is
   `cproblem…`'s (`Calculus/Spec.lean`);
 * `⊨ φ` is `Valid φ` for a scoped `φ`, and today's `Valid φ` for any

@@ -23,9 +23,11 @@ somewhere in the formula, at the type the reading gave it:
   alias, `{ x := 10 }` over a parameter `x` assigns it;
 * **a program** binds, by hidden binders in front of its modality, the
   names it assigns without declaring them (`scopeHints`: what a rule leaves
-  of a dropped declaration, `carolAcc = carol.account;`), and leaves its
-  postcondition the context it ends in (`Prog.resolve`): a local declared in
-  a branch is not in scope after it, so a postcondition cannot read it;
+  of a dropped declaration, `carolAcc = carol.account;`), is elaborated
+  scoped from the formula's context (`elabModalProg`, the elaborator's
+  `elabStmtP` and `SProg.chain`), and leaves its postcondition the context
+  it ends in: a local declared in a branch is not in scope after it, so a
+  postcondition cannot read it;
 * `φ where Person memory carol` binds `carol` by a hidden binder;
 * **a Lean formula** where a formula stands (`φ`, `‹t›`) is a `Post C Γ`
   (or a `Fml C Γ`) at the context `Γ` of the place it stands in, which
@@ -38,7 +40,10 @@ The output is quoted (`Fml.quote`) and printed by `Delab`'s
 printer, as `dl{ … }` (a hidden binder printing as nothing).  A `∀` written
 in the formula, past the parameters, is marked explicit on its variable
 (`Fml.markExplicit`, decision 28), which only the tactics read.  `cdl[C]{ φ }`,
-`cdl[C, m]{ φ }`, `cdl!{ φ }`, `cdl![m]{ φ }` are `dl[C]{ φ }`'s spellings.
+`cdl[C, m]{ φ }`, `cdl!{ φ }`, `cdl![m]{ φ }` are `dl[C]{ φ }`'s spellings,
+and `dl[C]{ φ }` itself reads this way when `φ` has a modality and no
+`Surface.Fml` is expected (`elabDlAuto`; decision 11, W8.2), its parameters
+bound by hidden binders rather than `∀`.
 -/
 
 namespace Solidity
@@ -94,24 +99,74 @@ def _root_.Solidity.NCtx.dropFresh : Nat → (Γ : NCtx) → (Δ : NCtx) × Thin
     let ⟨Δ, h⟩ := NCtx.dropFresh n Γ
     if x.idx > 0 then ⟨Δ, .drop h⟩ else ⟨(x, t) :: Δ, .keep h⟩
 
-/-- A program of the formula, statement by statement as `elabFml` reads it:
-a capture takes the least index the formula's written fresh variables
-leave. -/
-def elabModalProg (taken : List Nat) (P : List RawStmt) : ElabM (Solidity.Surface.Prog C) := do
-  let mut P' : Solidity.Surface.Prog C := []
+/-- The names `ns` given to the context `Δ`, the newest first (`_` past the
+end of `ns`): the named context a scoped block leaves. -/
+def _root_.Solidity.NCtx.named : List Var → (Δ : Ctx) → {Γ : NCtx // Γ.ctx = Δ}
+  | _, [] => ⟨[], rfl⟩
+  | ns, t :: Δ =>
+    let ⟨Γ, h⟩ := NCtx.named ns.tail Δ
+    ⟨(ns.headD (.user "_"), t) :: Γ, congrArg (List.cons t) h⟩
+
+/-- The reader's scope `Γe` in the order of the named context `Γ`, the
+newest first, its locals `Γ` does not name after them: the elaborator
+places each statement where the one before leaves by thinning its context
+into `Γ` by names (`SStmt.place`), which keeps their order, while the
+reader's scope appends a quantifier's local (`setBy`). -/
+def alignScope (Γ : NCtx) (Γe : ECtx) : ECtx :=
+  let names := Γ.names.eraseDups
+  names.filterMap (fun x => Γe.find? fun (n, _) => Var.ofName n == x) ++
+    Γe.filter fun (n, _) => !names.contains (Var.ofName n)
+
+/-- A program of the formula, scoped from the formula's context `Γ`,
+statement by statement as `elabFml` reads it: a capture takes the least
+index the formula's written fresh variables leave.  Each statement is
+elaborated from the reader's scope (`elabStmtP`) and placed where the one
+before leaves (`SProg.chain`), as `elabProgAtS` places them. -/
+def elabModalProg (taken : List Nat) (P : List RawStmt) (Γ : NCtx) : ElabM (Blk C Γ.ctx) := do
+  modify fun (Γe, k) => (alignScope Γ Γe, k)
   -- a block's locals renamed apart (`freshenBlocks`)
   let P ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) ((← get).1.map (·.1)) P)
+  let mut acc : Blk C Γ.ctx := ⟨Γ.ctx, .nil⟩
+  let mut ns := Γ.names
   for s in P do
-    let (Γ, k) ← get
+    let (Γe, k) ← get
     let k₀ := nextFree taken k
-    set (Γ, k₀)
-    let mut Q ← elabStmt C s
+    set (Γe, k₀)
+    let mut Q ← elabStmtP C s
     let (_, k₁) ← get
     if (List.range' k₀ (k₁ - k₀)).any taken.contains then
-      set (Γ, max k (taken.foldl max 0 + 1))
-      Q ← elabStmt C s
-    P' := P' ++ Q
-  pure P'
+      set (Γe, max k (taken.foldl max 0 + 1))
+      Q ← elabStmtP C s
+    let b ← ElabM.lift (SProg.chain ns acc.1 Q)
+    acc ← ElabM.lift (Blk.append acc b)
+    ns := b.2.outNames ns
+  pure acc
+
+/-- An atom of a formula (an equation, `defined`, a comparison), as
+`elabFml` reads it: the closer's formula, its names in the reader's scope. -/
+def elabAtomN : RawFml → ElabM (NFml C)
+  | .tt => pure .tt
+  | .eq a b => do
+    let (Γ, _) ← get
+    pure (.eqD (← tVal C Γ a) (← tVal C Γ b))
+  | .teq a b => do
+    let (Γ, _) ← get
+    pure (.eq (← tVal C Γ a) (← tVal C Γ b))
+  | .defined t => do
+    let (Γ, _) ← get
+    pure (.defined (← tVal C Γ t))
+  | .peq a b => do
+    let (Γ, _) ← get
+    let (a, b) ← elabCompare C Γ a b
+    pure (.eqD a b)
+  | .pne a b => do
+    let (Γ, _) ← get
+    let (a, b) ← elabCompare C Γ a b
+    pure (.not (.eqD a b))
+  | .cmp op a b => do
+    let (Γ, _) ← get
+    pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b))
+  | _ => throw "internal: not an atom"
 
 /-- A `where` clause's locals, with their types. -/
 def whereLocals (ds : List RawStmt) : ElabM (List (String × LocalTy)) :=
@@ -160,8 +215,9 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
     let Γh := scopeHints C Γe P
     modify fun (_, k) => (Γh, k)
     withBinds C (fun Γb => do
-      let P' ← elabModalProg C taken P
-      let ⟨Γ', Q⟩ ← ElabM.lift (Prog.resolve Γb P' (strict := false))
+      let ⟨Δ, Q⟩ ← elabModalProg C taken P Γb
+      let ⟨Γ', h⟩ := NCtx.named (Q.outNames Γb.names) Δ
+      let Q : Prog C Γb.ctx Γ'.ctx := h ▸ Q
       if posts && φ matches .lean _ then
         let ⟨Γ₀, h⟩ := NCtx.dropFresh Γ'.length Γ'
         if Γ₀.length < Γ'.length then
@@ -180,16 +236,13 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
       modify fun (Γe, k) => (setBy x t Γe, k)
     withBinds C (elabFmlC taken posts φ) (ls.map fun (x, t) => (Var.ofName x, t.toLTy)) Γ
   | φ, Γ => do
-    let ψ ← elabFml C taken φ
-    ElabM.lift (Fml.resolveN (fun _ => none) Γ ψ)
+    let ψ ← elabAtomN C φ
+    ElabM.lift (NFml.resolveN (fun _ => none) Γ ψ)
 
-/-- **A formula against `C`, scoped**: `elabDl`'s parameters (the names
-read, a declared one included) bound outermost (`Fml.closeN`), each only if
-the formula reads it before anything binds it (tried without it, in order).
-A declared name's parameter is bound but not in the elaborator's scope, so
-the program's declaration shadows it, as `dl!` reads it.  With the number
-of parameters bound, the outermost binders (`Fml.markExplicit`). -/
-def elabDlCN (φ : RawFml) (pastAll : Bool := false) : Except String (Nat × Fml C []) := do
+/-- `elabDl`'s parameters of `φ` (the names read, a declared one
+included), the elaborator's scope (a declared name's parameter left out),
+and the indices of the fresh variables the formula writes. -/
+def dlParams (φ : RawFml) (pastAll : Bool) : ECtx × List String × List Nat :=
   let (used, declared) := φ.names
   let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
   let free := (used.filter fun x => (C.rootType x).isNone &&
@@ -202,18 +255,42 @@ def elabDlCN (φ : RawFml) (pastAll : Bool := false) : Except String (Nat × Fml
     | none, _ => if unsets.contains x then none else some (x, LocalTy.val .uint)
   let taken := ((used ++ declared).map fun x => (Var.ofName x).idx).filter (· > 0)
   let taken := if pastAll then List.range' 1 (taken.foldl max 0) else taken
+  (params, declared, taken)
+
+/-- `φ` read with the parameters `ps` in scope, open: at their context. -/
+def elabDlIn (φ : RawFml) (pastAll : Bool) (declared : List String) (taken : List Nat)
+    (ps : ECtx) : Except String ((Γ : NCtx) × Fml C Γ.ctx) :=
+  let Γ : NCtx := ps.map fun (x, t) => (Var.ofName x, t.toLTy)
+  -- a declared name's parameter is not in the program's scope, which may
+  -- declare it (as `dl!` reads it free, a `pv`)
+  let scope := ps.filter fun (x, _) => !declared.contains x
+  (((elabFmlC C taken (!pastAll) φ Γ).run { funs := C.funs }).run' (scope, 1)).map (⟨Γ, ·⟩)
+
+/-- **A formula against `C`, scoped**: `elabDl`'s parameters (the names
+read, a declared one included) bound outermost (`Fml.closeN`), each only if
+the formula reads it before anything binds it (tried without it, in order).
+A declared name's parameter is bound but not in the elaborator's scope, so
+the program's declaration shadows it, as `dl!` reads it.  With the number
+of parameters bound, the outermost binders (`Fml.markExplicit`).  A
+value parameter is bound by `∀` when `useAll` (`cdl!`), by a hidden binder,
+printing as nothing, otherwise (`dl!` outside the flip, `elabDlAuto`). -/
+def elabDlCN (φ : RawFml) (pastAll : Bool := false) (useAll : Bool := true) :
+    Except String (Nat × Fml C []) := do
+  let (params, declared, taken) := dlParams C φ pastAll
   let run (ps : ECtx) : Except String (Fml C []) :=
-    let Γ : NCtx := ps.map fun (x, t) => (Var.ofName x, t.toLTy)
-    -- a declared name's parameter is not in the program's scope, which may
-    -- declare it (as `dl!` reads it free, a `pv`)
-    let scope := ps.filter fun (x, _) => !declared.contains x
-    (((elabFmlC C taken (!pastAll) φ Γ).run { funs := C.funs }).run' (scope, 1)).map
-      (Fml.closeN true Γ)
+    (elabDlIn C φ pastAll declared taken ps).map fun r => Fml.closeN useAll r.1 r.2
   let mut ps := params
   for p in params do
     let ps' := ps.erase p
     if let .ok _ := run ps' then ps := ps'
   return (ps.length, ← run ps)
+
+/-- **A written line of a chain**, read as `elabDlCN` reads it but open:
+every parameter left in the context, unbound, as today's `elabDl` left it
+free (`Calculus/Chains.lean`'s `readings`). -/
+def elabDlOpen (φ : RawFml) : Except String ((Γ : NCtx) × Fml C Γ.ctx) :=
+  let (params, declared, taken) := dlParams C φ false
+  elabDlIn C φ false declared taken params
 
 /-- `elabDlCN`'s formula. -/
 def elabDlC (φ : RawFml) (pastAll : Bool := false) : Except String (Fml C []) :=
@@ -299,9 +376,10 @@ def elabAgainstQ (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermE
 open Lean Elab Term Meta in
 /-- `cdl[C, m]{ φ }`, `m` optional, as `elabDlAt` reads `dl[C, m]{ φ }`: a
 modality that is no constructor is read twice, at the diamond and at the
-box, and `fillSlotsC` puts it and the Lean formulas back. -/
-def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
-    TermElabM Lean.Expr := do
+box, and `fillSlotsC` puts it and the Lean formulas back.  `useAll` as
+`elabDlCN`'s. -/
+def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml)
+    (useAll : Bool := true) : TermElabM Lean.Expr := do
   let holes := fmlHoles φ
   let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
   -- a hole that is no postcondition may write fresh variables the reading
@@ -314,11 +392,12 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
         return !(← whnfR (← inferType e)).isAppOf ``Post
       catch _ => return true
   let pastAll := quote opaqueHole
+  let useAllQ := quote useAll
   let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
-    elabAgainstQ c fun q => `((elabDlCN $c $raw $pastAll).map fun r =>
+    elabAgainstQ c fun q => `((elabDlCN $c $raw $pastAll $useAllQ).map fun r =>
       Fml.markExplicit r.1 (Fml.quote $q r.2))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
@@ -331,8 +410,8 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
         let rb ← read ``Modality.box
         let e ← elabAgainstQ c fun q =>
           `(((do
-              let (n₁, d) ← elabDlCN $c $rd $pastAll
-              let (n₂, b) ← elabDlCN $c $rb $pastAll
+              let (n₁, d) ← elabDlCN $c $rd $pastAll $useAllQ
+              let (n₂, b) ← elabDlCN $c $rb $pastAll $useAllQ
               pure (n₁, n₂, Fml.and d b)) : Except String (Nat × Nat × Fml $c [])).map
                 fun r => Fml.markExplicitAnd r.1 r.2.1 (Fml.quote $q r.2.2))
         let #[_, _, d, b] := e.getAppArgs | throwError "cdl[C, m]: not two readings{indentExpr e}"
@@ -354,5 +433,38 @@ macro_rules
   | `(cdl!{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) => `(cdl[InContract.contract]{ ($[$as],* ⟹ $φ) })
   | `(cdl![ $m ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) =>
     `(cdl[InContract.contract, $m]{ ($[$as],* ⟹ $φ) })
+
+/-! ## `dl[C]{ … }` with a modality: scoped -/
+
+/-- Whether a raw formula, as `expandFml` writes it, has a modality. -/
+def rawHasModal (raw : Lean.Syntax) : Bool :=
+  (raw.find? fun s => s.isIdent && s.getId.eraseMacroScopes.toString.endsWith "RawFml.modal").isSome
+
+open Lean Elab Term Meta in
+/-- Whether `dl[C]{ φ }` reads scoped: `φ` has a modality and no
+`Surface.Fml` is expected (the formula as written, until W8.4). -/
+def readsScoped (φ : TSyntax `dl_fml) (ty? : Option Lean.Expr) : TermElabM Bool := do
+  let r : Reading := { either := some (mkCIdent ``Modality.diamond), holes := fmlHoles φ }
+  let some raw ← (try some <$> liftMacroM (expandFml r φ) catch _ => pure none) | return false
+  unless rawHasModal raw do return false
+  let some ty := ty? | return true
+  return !(← whnfR (← instantiateMVars ty)).isAppOfArity ``Surface.Fml 1
+
+open Lean Elab Term Meta in
+/-- `dl[C]{ φ }` and `dl[C, m]{ φ }`: `cdl[C]{ φ }` (`elabCdlAt`) when
+`readsScoped`, but with its parameters bound by hidden binders, printing
+as nothing, as today's `dl!` leaves them free (the flip's `cdl!` binds a
+value one by `∀`); today's reading (`elabDlAt`: the closer's `NFml`, or a
+`Surface.Fml` where one is expected) otherwise. -/
+@[term_elab dlAt, term_elab dlAtM]
+def elabDlAuto : TermElab := fun stx ty? => do
+  let (c, m?, φ) ← match stx with
+    | `(dl[ $c ]{ $φ:dl_fml }) => pure (c, none, φ)
+    | `(dl[ $c, $m ]{ $φ:dl_fml }) => pure (c, some m, φ)
+    | _ => throwUnsupportedSyntax
+  if let some ty := ty? then tryPostponeIfMVar ty
+  unless ← readsScoped φ ty? do throwUnsupportedSyntax
+  elabCdlAt c m? φ (useAll := false)
+
 
 end Solidity

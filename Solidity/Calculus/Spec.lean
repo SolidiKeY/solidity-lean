@@ -9,7 +9,8 @@ import Solidity.Calculus.Quote
 []` (`docs/intrinsic.md`, M6b, W8): a specification's obligation
 (`spec!{f}`, `specObligation`) is built from its pieces (`specPieces`) in
 the parameters' context.  Its premises and postconditions, closer formulas
-(`NFml`), are read with their locals as positions (`NFml.resolveN`); its
+(`NFml`), are read with their locals as positions (`NFml.resolveN`,
+`Calculus/NotationResolve.lean`); its
 snapshots are declared by its update at their own types (`Upd.resolveN`),
 `old := storage` an `LTy.old` and `oldNet := net` an `LTy.oldNet`
 (`UpdElem.ownTy?`), so `find(old, count)` reads a local of type `old`; the
@@ -35,25 +36,6 @@ section Resolve
 
 variable [FreshNames]
 
-/-- A closer formula (`NFml`, a specification's clause compiled) read in
-`Γ`, its locals as positions (`Fml.resolveN`'s clauses: an update declares
-the locals it binds, `Upd.resolveN`). -/
-def NFml.resolveN : (Γ : NCtx) → NFml C → Except String (Fml C Γ.ctx)
-  | _, .tt => pure .tt
-  | Γ, .eq a b => do pure (.eq (← Tm.resolveN Γ a) (← Tm.resolveN Γ b))
-  | Γ, .defined t => do pure (.defined (← Tm.resolveN Γ t))
-  | Γ, .not φ => do pure (.not (← NFml.resolveN Γ φ))
-  | Γ, .and φ ψ => do pure (.and (← NFml.resolveN Γ φ) (← NFml.resolveN Γ ψ))
-  | Γ, .imp φ ψ => do pure (.imp (← NFml.resolveN Γ φ) (← NFml.resolveN Γ ψ))
-  | Γ, .upd m U φ => do
-    let ⟨Δ, U'⟩ ← Upd.resolveN (fun _ => none) Γ Γ .nil U
-    pure (.upd m U' (← NFml.resolveN Δ φ))
-  | Γ, .havoc φ => do pure (.havoc (← NFml.resolveN Γ φ))
-  | Γ, .all x p φ => do pure (.all x p (← NFml.resolveN ((x, .val p) :: Γ) φ))
-  | Γ, .anon xs φ => do
-    let ys ← xs.mapM (Γ.findAny ·)
-    pure (.anon ys (← NFml.resolveN Γ φ))
-
 /-- The parameters of the function `f` (`constructor` the constructor). -/
 def specParams (C : Contract) (f : String) : Except String (List (PrimTy × Var)) := do
   let some d := if f == "constructor" then C.ctor else Semantics.lookupBy f C.funs
@@ -68,7 +50,7 @@ def specModal (Δ : NCtx) (P : SProg C) (posts : List (NFml C)) : Except String 
   let ⟨Γ', P'⟩ ← SProg.chain Δ.names Δ.ctx P
   let Γn : NCtx := (P'.outNames Δ.names).zip Γ'
   if h : Γn.ctx = Γ' then
-    let post ← NFml.resolveN Γn (NFml.conj posts)
+    let post ← NFml.resolveN (fun _ => none) Γn (NFml.conj posts)
     pure (.modal .box P' .nil (h ▸ post))
   else throw "internal: the call leaves a context its names do not cover"
 
@@ -81,7 +63,7 @@ binders: the update declares `old` and `oldNet` at `LTy.old` and
 def specObligation (C : Contract) (f : String) : Except String (Fml C []) := do
   let (a, b, U, P, posts) ← specPieces C f
   let Γ := paramsN (← specParams C f)
-  let pre ← NFml.resolveN Γ (NFml.conj (a ++ b))
+  let pre ← NFml.resolveN (fun _ => none) Γ (NFml.conj (a ++ b))
   let body ← if U.isEmpty then specModal Γ P posts else do
     let ⟨Δ, U'⟩ ← Upd.resolveN (fun _ => none) Γ Γ .nil U
     pure (.upd .box U' (← specModal Δ P posts))
