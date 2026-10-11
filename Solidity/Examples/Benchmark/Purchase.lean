@@ -160,7 +160,6 @@ contract Purchase {
 
 namespace Solidity.Examples.Benchmark.Purchase
 
-open NFml.Proves
 
 /-- `Purchase`, with `msg.sender`, `msg.value`, `address(this).balance` as
 state variables and the constructor marked `skip`. -/

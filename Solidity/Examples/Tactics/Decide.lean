@@ -38,7 +38,7 @@ the initial storage is another matter: its erasure owes `wt(storage)`
 
 namespace Solidity.Examples.Tactics.Decide
 
-open NFml.Proves Decide Semantics
+open Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -675,7 +675,7 @@ and `sol_decide` refusing a modality went with the modality at W4
 
 namespace Solidity.Examples.Tactics.Decide
 
-open NFml.Proves Decide Semantics
+open Decide Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

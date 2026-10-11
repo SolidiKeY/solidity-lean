@@ -11,7 +11,7 @@ order of the source; the replays are what `#solkey_derive? … pending`
 `wt(storage)` premise aside (`Proves.close_dropWt`).
 -/
 
-open Solidity NFml.Proves
+open Solidity
 open scoped Scoped
 
 theorem Solkey.TestSuite.testStoragePushFieldLvalue.proved : ⊢ Solkey.TestSuite.testStoragePushFieldLvalue.problem := by

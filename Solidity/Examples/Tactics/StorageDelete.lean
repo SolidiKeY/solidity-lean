@@ -39,7 +39,7 @@ The walks start with `apply Proves.valid`, which turns `⊨ φ` into the judgeme
 
 namespace Solidity.Examples.Tactics.StorageDelete
 
-open NFml.Proves Semantics
+open Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -288,7 +288,7 @@ binders. -/
 
 namespace Solidity.Examples.Tactics.StorageDelete
 
-open NFml.Proves Semantics
+open Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

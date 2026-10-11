@@ -46,7 +46,6 @@ have no box theorem about the pushed value.
 
 namespace Solidity.Examples.Tactics.CallOperands
 
-open NFml.Proves
 
 /-- `makeValue()` reads a state variable: its value is symbolic, as close to
 an opaque value as a body gets. -/

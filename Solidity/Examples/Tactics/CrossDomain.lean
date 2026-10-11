@@ -26,7 +26,7 @@ local has no root to fall back on (`Memory.lean`).
 
 namespace Solidity.Examples.Tactics.CrossDomain
 
-open NFml.Proves Semantics
+open Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

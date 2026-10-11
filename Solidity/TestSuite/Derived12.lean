@@ -14,7 +14,7 @@ memory is not seen), from `storageNewIntoField` to
 `mappingEntryThroughMemoryToMappingEntry`.
 -/
 
-open Solidity NFml.Proves
+open Solidity
 open scoped Scoped
 
 theorem Solkey.TestSuite.storageToMemory.proved : ⊢ Solkey.TestSuite.storageToMemory.problem := by

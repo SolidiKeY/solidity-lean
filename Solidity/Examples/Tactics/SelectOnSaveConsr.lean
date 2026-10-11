@@ -70,7 +70,7 @@ member at a time.
 
 namespace Solidity.Examples.Tactics.SelectOnSaveConsr
 
-open NFml.Proves Semantics SemanticsProperties Close
+open Semantics SemanticsProperties Close
 
 local instance : InContract := ⟨StandardExample⟩
 

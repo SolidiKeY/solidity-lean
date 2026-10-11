@@ -25,7 +25,7 @@ locals its body writes (`{anon(…)}`).
 
 namespace Solidity.Examples.Loops
 
-open Semantics NFml.Proves
+open Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

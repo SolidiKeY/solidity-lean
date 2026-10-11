@@ -29,7 +29,6 @@ Every obligation is proved by the strategy: `sol_symex` runs the rules,
 
 namespace Solidity.Examples.Tactics.Operators
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

@@ -30,7 +30,6 @@ it.  From there the body's statements run by their own rules.
 
 namespace Solidity.Examples.Tactics.Calls
 
-open NFml.Proves
 
 local instance : InContract := ⟨CallsExample⟩
 
@@ -450,7 +449,6 @@ end Solidity.Examples.Tactics.Calls
 
 namespace Solidity.Examples.Tactics.Calls
 
-open NFml.Proves
 
 local instance : InContract := ⟨CallsExample⟩
 

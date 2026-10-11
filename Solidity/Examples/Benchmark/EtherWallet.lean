@@ -32,7 +32,6 @@ recipient could change the ledger before control returns
 
 namespace Solidity.Examples.Benchmark.EtherWallet
 
-open NFml.Proves
 
 def EtherWallet : Contract := contract!{
   address owner;

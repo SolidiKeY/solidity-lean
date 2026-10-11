@@ -66,7 +66,6 @@ contract NestedMapping {
 
 namespace Solidity.Examples.Benchmark.Mapping
 
-open NFml.Proves
 
 /-- `Mapping`, as published, with solkey's clauses. -/
 def Mapping : Contract := contract!{

@@ -52,7 +52,6 @@ contract Counter {
 
 namespace Solidity.Examples.Benchmark.Counter
 
-open NFml.Proves
 
 /-- `Counter.sol`, as published, with solkey's clauses. -/
 def Counter : Contract := contract!{

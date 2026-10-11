@@ -27,7 +27,7 @@ solkey's unspecified problem writes `{storage := mtSt || net := mtSt}`, and
 Lean books the payment there too (`docs/solkey-feedback.md`).
 -/
 
-open Solidity NFml.Proves
+open Solidity
 open scoped Scoped
 
 solc_import "../../tests/solc/Counter.ast.json" hash 0x2d54a4ea32c96108 as Solkey.Counter

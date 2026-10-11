@@ -28,7 +28,6 @@ and a cast is a capture at its type.  What is not modelled is in
 
 namespace Solidity.Examples.Tactics.Checked
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

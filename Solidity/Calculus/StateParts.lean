@@ -263,10 +263,6 @@ theorem ResHeap.cases {α : Type} {x₁ x₂ : Res (State × α)} (hx : ResHeap 
   | .error e, .error _, hx => exact Or.inl ⟨e, rfl, by rw [hx]⟩
   | .ok (s₁, a), .ok (s₂, _), ⟨rfl, hs⟩ => exact Or.inr ⟨s₁, s₂, a, rfl, rfl, hs⟩
 
-theorem Semantics.State.alloc_heapEq (h : σ.HeapEq τ) (obj : MObj) :
-    (σ.alloc obj).2 = (τ.alloc obj).2 ∧ (σ.alloc obj).1.HeapEq (τ.alloc obj).1 := by
-  simp only [State.alloc, State.HeapEq, h.1, h.2, and_self]
-
 mutual
 theorem copyStToM_heap {σ τ : State} (h : σ.HeapEq τ) (v : SVal) : ResHeap (copyStToM σ v) (copyStToM τ v) := by
   match v with
@@ -704,9 +700,6 @@ variable {L : Surface.Upd C} {ns : List Var} {S : STerm C} {σ σ₁ τ : State}
 
 theorem Semantics.State.Keeps.rest (hk : σ.Keeps τ) : σ.Rest τ := by
   rw [← hk]; exact ⟨rfl, rfl, rfl⟩
-
-theorem Semantics.State.Keeps.heapEq (hk : σ.Keeps τ) : σ.HeapEq τ := by
-  rw [← hk]; exact ⟨rfl, rfl⟩
 
 /-- Two storage readings that agree off some locals are of one storage. -/
 theorem StPartEq.of_agree {a b : Res State} (h : ResultsAgree ns a b) : StPartEq a b := by

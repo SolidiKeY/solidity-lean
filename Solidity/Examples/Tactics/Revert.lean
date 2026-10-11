@@ -64,7 +64,6 @@ The same programs as chains, at every modality and postcondition, are in
 
 namespace Solidity.Examples.Tactics.Revert
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

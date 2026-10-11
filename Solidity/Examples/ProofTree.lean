@@ -39,7 +39,6 @@ guards on today's closer (the closer's input, the leaves' erasure).
 
 namespace Solidity.Examples.ProofTree
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

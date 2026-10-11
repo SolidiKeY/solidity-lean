@@ -10,7 +10,7 @@ import Solidity.TestSuite.ScopedProblems
 sets the premise aside (`Proves.close_dropWt`).
 -/
 
-open Solidity NFml.Proves
+open Solidity
 open scoped Scoped
 
 theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by

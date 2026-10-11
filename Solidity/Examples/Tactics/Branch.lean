@@ -45,7 +45,6 @@ hypothesis is `true ≐ false` is then closed by the logic, not by a rule.
 
 namespace Solidity.Examples.Tactics.Branch
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

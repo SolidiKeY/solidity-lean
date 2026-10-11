@@ -10,7 +10,7 @@ order of the source; the replays are what `#solkey_derive? … pending`
 (`Frontend/Problems.lean`) prints.
 -/
 
-open Solidity NFml.Proves
+open Solidity
 open scoped Scoped
 
 theorem Solkey.TestSuite.memoryIndexArrayMulAssignUnfold.proved : ⊢ Solkey.TestSuite.memoryIndexArrayMulAssignUnfold.problem := by

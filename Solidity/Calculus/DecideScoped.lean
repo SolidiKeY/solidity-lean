@@ -428,7 +428,7 @@ theorem _root_.Solidity.Op2.inL_mono (ρ : Sym) {a b s : Srt} (o : Op2 a b s) (t
     | exact absurd (hh₁ rfl) Bool.false_ne_true
     | exact absurd (hh₂ rfl) Bool.false_ne_true
     | (cases o <;> simp_all only [Op2.inL, Bool.and_false, Bool.false_and, Bool.and_true,
-        Bool.true_and, Bool.false_eq_true])
+        Bool.false_eq_true])
 
 theorem _root_.Solidity.Op3.inL_mono (ρ : Sym) {a b c s : Srt} (o : Op3 a b c s)
     (t : Surface.Tm C a) (u : Surface.Tm C c) (x : a.LTy) (y : b.LTy) (z : c.LTy)
@@ -442,7 +442,7 @@ theorem _root_.Solidity.Op3.inL_mono (ρ : Sym) {a b c s : Srt} (o : Op3 a b c s
     | exact absurd (hh₂ rfl) Bool.false_ne_true
     | exact absurd (hh₃ rfl) Bool.false_ne_true
     | (unfold Op3.inL at ho ⊢; split <;> simp_all only [Bool.and_false, Bool.false_and,
-        Bool.and_true, Bool.true_and, Bool.or_true, Bool.true_or, Bool.or_false, Bool.false_or,
+        Bool.and_true, Bool.true_and, Bool.or_true, Bool.true_or, Bool.false_or,
         Bool.false_eq_true, Bool.and_eq_true])
 
 theorem _root_.Solidity.Tm.inLSM_imp (hok : ρ.Ok ns) (hl : ns.length = Γ.length) :

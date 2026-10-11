@@ -27,7 +27,6 @@ reads today's lines).
 
 namespace Solidity.Examples.Tactics.UpdateRules
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

@@ -49,7 +49,7 @@ rules are pinned as the scoped calculus has them (`CallbackTaclet`).
 
 namespace Solidity.Examples.Tactics.Callback
 
-open NFml.Proves Semantics
+open Semantics
 
 /-- A vault: what the customer may still withdraw, what was paid out, what
 was deposited. -/

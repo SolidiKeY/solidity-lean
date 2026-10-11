@@ -41,7 +41,6 @@ only place soundness is used.
 
 namespace Solidity.Examples.Tactics.ApplySteps
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

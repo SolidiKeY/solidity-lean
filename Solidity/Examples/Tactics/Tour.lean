@@ -29,7 +29,6 @@ whose conclusion `Hole.fill lhs …` does not unify by name
 
 namespace Solidity.Examples.Tactics.Tour
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

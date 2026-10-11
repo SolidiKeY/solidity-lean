@@ -17,7 +17,7 @@ tests/solc/ScopedFlip.ast.json --wrapper Solidity/Solkey/ScopedFlip.lean`
 rewrites the fixture and its hash.
 -/
 
-open Solidity NFml.Proves
+open Solidity
 open scoped Scoped
 
 solc_import "../../tests/solc/ScopedFlip.ast.json" hash 0x7c6221bb7e6edb3f as Solkey.ScopedFlip

@@ -28,7 +28,7 @@ call may revert in the caller, and no formula says it does not.
 
 namespace Solidity.Examples.Tactics.TryCatch
 
-open NFml.Proves Semantics
+open Semantics
 
 /-- A pinger: how often a ping went through, and how often it failed. -/
 def Pinger : Contract := contract!{ uint pings; uint fails; uint last; }

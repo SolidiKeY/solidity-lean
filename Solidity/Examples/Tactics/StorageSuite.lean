@@ -25,7 +25,7 @@ under the box a write out of bounds reverts, which satisfies the formula, so
 
 namespace Solidity.Examples.Tactics.StorageSuite
 
-open NFml.Proves Semantics
+open Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

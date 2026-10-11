@@ -44,7 +44,7 @@ The arrays are the struct table's (`AST.lean`): a `Token[]` inside a
 
 namespace Solidity.Examples.Tactics.Memory
 
-open NFml.Proves Semantics
+open Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

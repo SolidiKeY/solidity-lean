@@ -12,7 +12,6 @@ today's formulas.
 
 namespace Solidity.CloseTests
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

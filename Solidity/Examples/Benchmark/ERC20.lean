@@ -45,7 +45,6 @@ not be in range, and there the second form overflows.
 
 namespace Solidity.Examples.Benchmark.ERC20
 
-open NFml.Proves
 
 /-- ERC20, with `msg.sender` passed as a parameter. -/
 def ERC20 : Contract := contract!{

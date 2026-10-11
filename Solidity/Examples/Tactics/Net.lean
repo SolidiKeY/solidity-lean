@@ -27,7 +27,7 @@ oracle says, and its claims hold of both (§5, `net-send-simple.key`).
 
 namespace Solidity.Examples.Tactics.Net
 
-open NFml.Proves Semantics
+open Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

@@ -48,7 +48,7 @@ that statement instead, `apply unfoldStep` (the strategy's premise by `rfl`), an
 
 namespace Solidity.Examples.Tactics.StorageSteps
 
-open NFml.Proves Semantics
+open Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 

@@ -27,7 +27,6 @@ today's budgets (`Seq.residue`).
 
 namespace Solidity.Examples.Tactics.Dangling
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

@@ -10,7 +10,7 @@ import Solidity.TestSuite.ScopedProblems
 sets the premise aside (`Proves.close_dropWt`).
 -/
 
-open Solidity NFml.Proves
+open Solidity
 open scoped Scoped
 
 theorem Solkey.TestSuite.unaryMinusSimple.proved : ⊢ Solkey.TestSuite.unaryMinusSimple.problem := by

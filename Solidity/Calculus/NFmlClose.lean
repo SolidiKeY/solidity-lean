@@ -791,10 +791,6 @@ theorem selfBalance_anon (σ : State) (xs : List Var) (b : Var → Option Bindin
 theorem net_anon (σ : State) (xs : List Var) (b : Var → Option Binding) :
     (σ.anon xs b).net = σ.net := rfl
 
-/-- What an anonymised local holds, bound: the binding, named. -/
-theorem anonRead_eq_ok {o : Option Binding} {v : Binding} : anonRead o = .ok v ↔ o = some v := by
-  cases o <;> simp only [anonRead, Except.ok.injEq, reduceCtorEq, Option.some.injEq]
-
 end Eval
 
 end Close

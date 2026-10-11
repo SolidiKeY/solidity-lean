@@ -942,9 +942,6 @@ variable {U : Surface.Upd C} {ns : List Var} {σ τ : State}
 
 open Theory Theory.StValue
 
-theorem SubstAgree.abs_eq (h : SubstAgree U ns σ τ) : σ.abs = τ.abs := by
-  simp only [State.abs, h.agree.storage]
-
 /-- `{U}x` denotes before the update what `x` denotes after it. -/
 theorem SubstAgree.val_denote (h : SubstAgree U ns σ τ) (x : Var) :
     Equiv ((U.valOf x).denote σ) ((Term.pv x : Term C).denote τ) := by

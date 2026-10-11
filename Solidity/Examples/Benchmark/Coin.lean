@@ -34,7 +34,6 @@ and each leaf closed by the closer (`LFml.close`), in one kernel evaluation.
 
 namespace Solidity.Examples.Benchmark.Coin
 
-open NFml.Proves
 
 /-- `Coin.sol`, as solkey's benchmark has it, with its clauses. -/
 def Coin : Contract := contract!{

@@ -40,7 +40,7 @@ carry the sorts the program's types give: `ledger` is not a mapping, and
 
 namespace Solidity.Examples.Tactics.LedgerDelete
 
-open NFml.Proves Semantics
+open Semantics
 
 local instance : InContract := ⟨TestSuite⟩
 

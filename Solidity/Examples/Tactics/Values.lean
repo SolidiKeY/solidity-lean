@@ -32,7 +32,6 @@ lowered to the statement `if` (`ternaryToIf`), and so short-circuits too.
 
 namespace Solidity.Examples.Tactics.Values
 
-open NFml.Proves
 
 local instance : InContract := ⟨StandardExample⟩
 

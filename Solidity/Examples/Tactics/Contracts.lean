@@ -32,7 +32,6 @@ The statements read scoped (`open scoped Solidity.Scoped`).
 -/
 namespace Solidity.Examples.Tactics.Contracts
 
-open NFml.Proves
 
 /-- A `pure`, a `view` and a `nonpayable` function. -/
 def ContractsExample : Contract := contract!{

@@ -34,7 +34,6 @@ contract SimpleStorage {
 
 namespace Solidity.Examples.Benchmark.SimpleStorage
 
-open NFml.Proves
 
 /-- `SimpleStorage.sol`, as published, with solkey's clauses. -/
 def SimpleStorage : Contract := contract!{

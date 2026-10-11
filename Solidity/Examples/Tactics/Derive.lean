@@ -208,7 +208,6 @@ section Surface
 
 open scoped Scoped
 
-open NFml.Proves
 
 /--
 info: Try this:
