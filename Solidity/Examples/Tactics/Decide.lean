@@ -300,6 +300,30 @@ theorem closerFallsThrough :
   fail_if_success sol_decide_close
   sol_decide_typed
 
+/-! ## Two elements in one update, and the layout
+
+An update of two elements both read in the state it is applied in
+(`{x := x + 1 ‖ se1 := x}`, what `x++` inside an expression leaves) is
+pushed in element by element, each act read before the update
+(`ElemS.parOk`, `RelU.par`).  A premise `wt(storage)` is set aside and read
+as the layout of its roots (`Fml.layoutS`, `Valid.of_reduceSL`, proposal
+100), which the closer reads. -/
+
+/-- `values[0] = x++;` — the slot holds the old `x`, and `x` the next. -/
+theorem postIncrementParallel :
+    ⊨ dl!{ a < 10 → [ uint x = a; values[0] = x++; ] (x == a + 1 && values[0] == a) } := by
+  sol_symex
+  sol_decide
+
+/-- `deleteWithoutWrite` on the scoped leaf: the closer reads `alice.account`
+canonical at its declared type (`LayoutOk`), so its member reads `0` after
+the `delete`. -/
+theorem deleteWithoutWriteScoped :
+    ⊨ dl!{ defined(wt(storage)) → [ delete alice.account; ] alice.account.balance == 0 } := by
+  sol_symex
+  sol_reduce
+  sol_decide_close
+
 /-! ## Pushes, pops and copies
 
 A push or a pop is one write of the array (`LStor.arr`): a read below it

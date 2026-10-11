@@ -3528,16 +3528,99 @@ Branch `w9-rw`: the scoped rewrites read the scoped term taclets
   `ChainRewritesOpen`, `Tactics/{SelectOnSaveConsr,StorageDelete,UpdateRules,Sequents,Callback}`);
   `lean_build` of the default targets; `check-orphans`, `check-doc-paths`.
 
+### W9.2 `decide` record (2026-10-11, branch `w9-decide`)
+
+The scoped decision procedure no longer reads the erasure; the erased
+lowering in `Calculus/Decide.lean` (`Surface.Tm.toL`, `NFml.toL`, its
+soundness) stays for its users until W9.5.  `Op*.toL` and the elimination
+are unchanged.
+
+- **`Calculus/DecideRel.lean`** (new, imported by `DecideTyped`).  The
+  relation by position: `RelB σ ρ B τ` (the positions are `ρ`'s keys,
+  distinct, fresh from `ρ.next`; `ρ`'s storage stack reads `τ`'s storage;
+  each bound position holds what its symbol reads, `BindRel`, its memory
+  names in the births `B`; the values of the transaction are `σ`'s) and
+  `RelU σ ρ τ` (`RelB` in the births of `ρ`'s memory, whose run leaves
+  `τ`'s heap, `MemAt`).  No untyped state `τu`, no `AgreeB`.  Over it the
+  erased reduction's soundness restated on `Tm C Γ s` and `Tm.eval`:
+  `TermOKS` … `MValOKS` with their steps and `RelU.all_ok` (by
+  `Tm.lsize`), `RelU.val`/`path`/`ident`/`memT`, `RelU.stor_eval`,
+  `RelU.slotPath_eval`, `RelU.stale_write`/`stale_push`, `RelU.storT`;
+  one right-hand side, element and declaration written into another state
+  than the one read (`RelU.rhs`, `RelU.elem`, `RelU.decl`, with what the
+  element reads of the memory or storage the first left: `needsMem`,
+  `needsStor`); updates (`RelU.zero`, `RelU.one`), the allocation's pair
+  (`RelU.pairCopy_key`, `RelU.pairKey`, `RelU.half`, `RelU.two`) and two
+  parallel elements (`RelU.par`).  The structural steps: `RelB.pop`,
+  `thin`, `push`, `setLocal`, `withGlob`, `write`, `grow`, `setMem`,
+  `RelU.pushQ`, `pushFree`.  Gone from `DecideTyped`: `Surface.Tm.ReadsIn`,
+  `AgreeB`, `AgreeU`, `Tm.eval_eraseB`, `Rhs`/`UpdElem.write_eraseB`, the
+  readers of `Term.toL_eval`, `pair_sound`, `Surface.UpdElem.toL_sound`;
+  gone from `DecideScoped`: the links to the erasure (`Tm.toLS_eq`,
+  `Tm.inLS_imp`, `ElemS.guard_eq`, `UpdElem.nact_eq`, `pairLS_eq`, …,
+  `ElemS.erase`).  The locals are still listed by key through
+  `Env.erase` (the state IR, W9.6), and `RelB.thin` reads
+  `Env.mem_erase_thin`, which lives in `HoldsErase` (to move at W9.5).
+- **`sameAt`, `allocPairS?` by `Tm.beqR`** (`DecideScoped` imports
+  `TermLib`).  `sameAt` asks one context (`decEq`), the same keys
+  (`SymS.names`) and one term; its soundness is semantic
+  (`sameAt_toLS`, `Tm.toLSM_congr`: the two readings lower to one
+  `LTerm`).  `allocPairS?` drops its `SymS` argument.
+- **Proposal 100.**  `Fml.layoutS` (the roots of a premise `wt(storage)`
+  under the leaf's parameters' quantifiers) and `Fml.dropWtS` (the premise
+  set aside), both by the recursor with `match` twins (`layoutSM`,
+  `dropWtSM`) and links.  `Valid.of_reduceSL` (`DecideComplete`, beside
+  `Valid.of_reduceS`): `∀ σ, LayoutOk (layoutS φ) σ → (dropWtS φ).reduceS`
+  holds gives `Valid φ`, through `holds_of_dropWtSM` and
+  `layoutOk_of_wtS`.  `LFml.closeS L φ` takes the layout (`closeS_valid`,
+  `closeS_valid_nil`); `sol_decide_close` accepts both goal shapes, and
+  `sol_reduce` the one with the layout.  `sol_decide` on a scoped leaf
+  takes this path when `layoutS` is not empty (`reduceScoped`), the
+  closer first, the other steps without the layout
+  (`LFml.forall_layout`).  Pinned: `deleteWithoutWriteScoped`.
+- **Two parallel elements** (`{x := x + 1 ‖ se1 := x}`): `Fml.toLS`/`inLS`
+  take an update of two elements that is no allocation's pair when
+  `ElemS.parOk` (both in the fragment; no memory set before a memory
+  read, no storage set before an alias), guarded by `seqL` of both
+  guards, both acts read in the pre-state (`UpdElem.actS ρ`); sound by
+  `RelU.par`.  Pinned: `postIncrementParallel`.
+- **Decision 80's parts on a scoped goal** (`Calculus/Closers.lean`,
+  `Decide.onReduced`): `sol_reduce`, `sol_reads`, `sol_decide_cons`,
+  `sol_decide_heuristic`, `sol_decide_unconstrained` on `Valid ψ` reduce by
+  position (`reduceScoped`) and then take their step on the reduction:
+  `sol_decide_cons` is the constraints with the parameters typed
+  (`sol_decide_typed`; `typedCons` factored out), `sol_reads` its first
+  part, the heuristic ones `sol_decide_body; sol_decide_heuristic`.  The
+  erased elaborators stay for today's goals; `Derive.onErased` is no longer
+  used for these five.
+- **Checks.**  Per-file diagnostics clean, no warning (`DecideScoped`,
+  `DecideRel`, `DecideTyped`, `DecideComplete`, `Closers`,
+  `Examples/Tactics/Decide`); `lean_build` of the default targets;
+  `check-orphans`, `check-doc-paths`; `sorry` count unchanged (20, all in
+  prose or strings); axioms of `Valid.of_reduceS`, `Valid.of_reduceSL`:
+  `propext`, `Classical.choice`, `Quot.sound`.  No pin moved; no leaf that
+  failed before closes in an existing pin (the two new capabilities are
+  pinned by the two new theorems).
+- **Timing, `Examples/Tactics/Decide`** (fresh worker, read from `ps`):
+  before 41 s wall, 39 s CPU; after (with the two new theorems) 42 s wall,
+  40 s CPU; gate 45.0 s (W7: 35.87 s; the machine shared with another lane).
+- **Deferred.**  The push alias (`pushAlias?`) and the ground split, the
+  re-timing on `Derived7`/`Derived12` (W9.3); a pair-shaped update whose
+  `pairLS` fails still leaves the fragment (no fallback to `parOk`); the
+  layout is read only from the first premise under the leading `∀`s (not
+  under a hidden binder or an update); `Env.mem_erase_thin` to move out of
+  `HoldsErase` before W9.5.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
 Each item below is gated against the final W7 table, and a module that
 fails stays on the IR:
 - `NFmlClose`'s `simp` set over typed symbols (decision 82); the
-  reduction's symbols over the typed state (a term still reads them on
-  the erasure, `Tm.toLS_eq`, decision 83); `Atom.name` with `NFml.toL`
-  (proposal 99); the scoped closer's layout from a `wt(storage)`
-  premise, if wanted (proposal 100).
+  reduction's symbols over the typed state (W9.2 reads a scoped term on
+  the scoped state, its symbols still untyped on `EState.glob`, decision
+  83); `Atom.name` with `NFml.toL` (proposal 99).  The scoped closer's
+  layout from a `wt(storage)` premise landed at W9.2 (proposal 100).
 - `simplifyUpdate` (scoped) dropping unread locals with their hidden
   binders (the formula strengthened out of the local's scope), and what an
   update pops under the diamond (decision 87's rest; W7 `w7-rewrites` did
