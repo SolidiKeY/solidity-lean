@@ -7,7 +7,8 @@ import Solidity.Calculus.NFmlClose
 netSk}`, fresh skolem constants for what a callee leaves: `φ` holds for
 every storage `st` and ledger `nt` put in the state (`State.havoc`).  The
 closer reads it so: `holds_havoc` names the two as universally bound
-variables, and `State.havoc_eq_mk` writes the state they make as the
+variables, and `State.havoc_eq_mk` (`Calculus/CloseLemmas.lean`) writes the
+state they make as the
 structure, so that `Close.getEnv_mk`, `Close.readAddr_mk` and their kin
 read its locals and heap as before, while a read of its storage or ledger
 reads `st` or `nt`, of which nothing is known.  A snapshot taken before it
@@ -29,11 +30,6 @@ variable {C : Contract} {σ : State}
 /-- `{havoc} φ`: `φ` for every storage and ledger the callee may leave. -/
 theorem holds_havoc (φ : NFml C) : NFml.holds σ (.havoc φ) ↔ ∀ st nt, NFml.holds (σ.havoc st nt) φ :=
   Iff.rfl
-
-/-- The state a `{havoc}` leaves, as the structure: its locals, heap,
-funds and transaction `σ`'s. -/
-theorem State.havoc_eq_mk (σ : State) (st : List (Name × SVal)) (nt : List (Int × Int)) :
-    σ.havoc st nt = State.mk st σ.heap σ.nextId σ.env nt σ.selfBalance σ.tx := rfl
 
 end Close
 

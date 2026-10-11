@@ -5,9 +5,10 @@ import Solidity.Calculus.Closers
 /-!
 # Tests of `sol_close`
 
-Goals `sol_close` is expected to close (`NFmlClose.lean`), each a leaf the
-scoped strategy leaves (`open scoped Solidity.Scoped`), erased to
-today's formulas.
+Goals `sol_close` is expected to close, each a leaf the scoped strategy
+leaves (`open scoped Solidity.Scoped`), read scoped
+(`Calculus/CloseScoped.lean`), and, after `refine close ?_`, the closer's
+own formula (`Calculus/NFmlClose.lean`).
 -/
 
 namespace Solidity.CloseTests
@@ -112,11 +113,11 @@ example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x 
 
 /-! ## Parameters read at their types (M6c)
 
-A scoped leaf keeps its parameters as quantifiers (`sol_close_unwrap`,
-`Calculus/Derive.lean`), so `sol_close` reads `a` as a `uint` in range (a
-parameter is a `uint`, `Calculus/Notation.lean`).  The erased leaf with
-`a` stripped to a free name, bound to anything (unset, a negative
-integer, a boolean), left these open. -/
+A scoped leaf keeps its parameters as quantifiers at their types
+(`CloseS.holdsE`, `Calculus/CloseScoped.lean`), so `sol_close` reads `a`
+as a `uint` in range (a parameter is a `uint`, `Calculus/Notation.lean`).
+The erased leaf with `a` stripped to a free name, bound to anything (unset,
+a negative integer, a boolean), left these open. -/
 
 /-- A `uint` parameter is at least `0`. -/
 example : ⊨ dl!{ [ uint x = a; ] x >= 0 } := by
@@ -132,6 +133,17 @@ example : ⊨ dl!{ ⟨ uint x = a; ⟩ x == a } := by
 example : ⊨ dl!{ a < 100 → ⟨ uint y = a + 1; ⟩ y <= 100 } := by
   sol_symex
   sol_close
+
+/-! ## The scoped leaf, read without its erasure (W9.3) -/
+
+/-- `sol_close_unwrap` takes a scoped leaf to `CloseS.holdsE` on the typed
+state's erasure, and `close_rw_s` reads it. -/
+example : ⊨ dl!{ [ x = 1; ] x == 1 } := by
+  sol_symex
+  sol_close_unwrap
+  intro σ
+  show CloseS.holdsE σ.erase _
+  sol_close_eval
 
 /-- With no goal left, `sol_close` does nothing. -/
 example : ⊨ dl!{ [ revert(); ] true } := by

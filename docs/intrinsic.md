@@ -3753,6 +3753,88 @@ erased closer is the fallback for a leaf the scoped one does not read.
   `close_leaf`, the erased lines of `Derive.leafTacs`) until W9.5; the
   fallback classes above need an erasing closer (`sol_close`,
   `sol_close_mt`: the `close` lane's).
+### W9.3 `close` record
+
+Branch `w9-close`: `sol_close`, `sol_close_mt` and `sol_spec_close` close a
+scoped leaf without the erasure; no pin moved.
+
+- **The leaf read on the erased state** (`Calculus/CloseScoped.lean`).  Read
+  as `holds` reads it, every update leaves `∀ σ', σ'.erase = τ → H <+: σ'.H →
+  …`, which `simp` can only use contextually: the spike's leaf (`[
+  balances[a] = 1; balances[b] = 2; uint x = 0; if (a == b) …`) took 5.4 s of
+  `simp` against the erased path's 1.8 s, and 4.5 s with the quantifier
+  pushed past the first-order rest.  So `sol_close_unwrap` takes the leaf
+  first to `CloseS.holdsE σ.erase ψ` (`valid_of_holdsE`, sound one way by
+  `holds_of_holdsE`): an update's rest read where it ends, a hidden binder
+  over its type's erased values (`LTy.forallE`: a primitive type's typed
+  values), a parameter over `p.Denote` (decision 82: `forall_uint`,
+  `forall_int`, then `0 ≤ n`, `n < uintBound` for `omega`), a negation and a
+  precondition only of a first-order formula (`fo`, `∀` included: the two
+  readings agree there, `holds_iff_holdsE`).  It is the erased leaf's
+  strength (`Fml.posB`'s class), plus the value binders' ranges; the heap
+  typing (`H`) drops out.  On the spike's leaf: 1.78 s of `simp`, as the
+  erased path.
+- **The set `close_rw_s`** (registered in `Calculus/ReadWrite.lean`, with
+  `close_rw_s_last`): `holdsE`'s equations; a term one constructor at a time
+  (`CloseS.eval_find` …, `close_rw`'s `Close.Term.eval_*` restated on
+  `Tm C Γ s`, a local by `EState.get`); `Upd.apply`, `UpdElem.write`,
+  `Rhs.eval`; the erased state through its operations only (`push`,
+  `setLocal`, `withGlob`, `glob`, `drop`, `thin`, `anon`: a stack of pushes
+  over `withGlob`, never `EState`'s fields).  The interpreter lemmas are
+  shared.  Names are qualified where the typed and untyped namespaces
+  overlap: `State.envVal` inside `namespace Solidity` is the typed state's,
+  and a draft that listed it bare left `msg.sender` unread.
+- **`Calculus/CloseLemmas.lean`** (new; `NFmlClose` imports and re-exports
+  it, so `DecideLang`/`Decide` see the same names): `Modality.wp` and its
+  lemmas, values, operators, the ledger, `Close.State.havoc_eq_mk` (from
+  `CloseHavoc`), and the symbols one constructor at a time
+  (`Close.Op0.eval_lit` … `Close.Op3.eval_write`), from which the scoped
+  term equations follow.  `close_rw`'s own lemmas (`Surface.Tm`, `NFml`,
+  `Binding`) stay in `NFmlClose`.
+- **Dispatch.**  `sol_close_eval`, `_facts`, `_reads`, `_reads_all` and the
+  new `sol_close_mt_eval` are elaborators in `NFmlClose` that step aside on a
+  scoped goal (`Close.scopedGoal`: the goal or its context names
+  `Solidity.State`, `EState`, `Valid` or `CloseS.holdsE`) for
+  `CloseScoped`'s; `sol_close`, `sol_close_mt`, `sol_spec_prep` and
+  `Benchmark/Coin`'s hand-written steps are unchanged text.
+  `Derive.evalSolCloseUnwrapCore` (the erasure) and `SolSpec`'s erasing
+  `sol_spec_prep` are gone; `Derive.eraseLeaf` loses `typed`.
+- **Erased callers that remain**: `refine close ?_` (`Proves.close`, an
+  `NFml.Valid` goal) and the leaf searches on it (`NFml.Derive.searchLeaf`,
+  `Walk.closeLeaf`, `sol_prove?`); `Calculus/Closers.lean`'s second
+  elaborators (`sol_close_eval` on a bare `Valid ψ`, `sol_decide_*`,
+  `sol_reduce`, `sol_reads`, `sol_apply_upd`, `sol_fold_terms`: the
+  `decide` lane's file, not edited here); `Decide`'s own `close_rw` passes.
+- **Pins.**  None moved: every `fail_if_success sol_close` still fails
+  (`Tactics/Decide`'s three, `CallOperands`' push row), and
+  `Constructors`' `sol_close_mt` limits stay open.  `CloseTests` gains one
+  example pinning the scoped reading (`show CloseS.holdsE σ.erase _`).
+  Checked: `CloseTests`, `Tactics/{Constructors,Specs,SolSpec,ProofTree,
+  ApplySteps,LoopsImport,SelectOnSaveConsr,UpdRulesScoped,Decide,StorageSteps,
+  Values,StorageSuite,Calls,Contracts,Derive,StorageDelete,Net,Loops,Revert,
+  Checked,Branch,UpdateRules,Payment,Operators,CallOperands,TryCatch,Tour,
+  Callback,LedgerDelete,Memory,CrossDomain}`, `Benchmark/{Coin,EtherWallet,
+  Mapping,Purchase}`, `ChainNotation`, `Notation`, `ProofTree`, `Verify`,
+  `Solkey/Constructors`, `Corpus/Basic`, `TestSuite/{Derived7,Suggestions}`.
+- **Timing** (each file copied under `Solidity/Scratch/`, a fresh worker
+  through the MCP, `/proc` sampled every 20 ms, wall to the last CPU tick,
+  idle gaps over 1 s, the worker waiting on `lake setup-file`, subtracted;
+  base `111e5119` on this worktree before any edit; load 0.6–2.6, the
+  `decide` lane running):
+
+  | Module | base | W9.3 `close` | gate |
+  |---|---|---|---|
+  | `Examples/Tactics/Decide` | 37.76 s (CPU 38.54 s) | 38.48 s, 38.71 s (CPU 39.23, 39.35 s) | 45.0 s |
+  | `Solkey/TestSuite` | 8.54 s (CPU 6.94 s) | 7.17 s, 6.88 s (CPU 7.35, 7.05 s) | 13.2 s |
+  | `Examples/Chains/Storage` | 7.61 s (CPU 7.98 s) | 7.86 s, 7.63 s (CPU 8.35, 7.98 s) | 9.0 s |
+
+  One more `Chains/Storage` run read 9.53 s (CPU 8.53 s) at load 2.1.
+  `Examples/Tactics/Values` (37 `sol_close`s on scoped leaves): 9.96 s (CPU
+  10.06 s), no base taken.
+- **Checks.**  Per-file diagnostics clean (`CloseLemmas`, `NFmlClose`,
+  `CloseScoped`, `Derive`, and the pins above); `#print axioms
+  CloseS.valid_of_holdsE`: `propext`, `Classical.choice`, `Quot.sound`;
+  `lean_build` of the default targets; `check-orphans`, `check-doc-paths`.
 
 ## What is left
 
@@ -3764,6 +3846,12 @@ fails stays on the IR:
   the scoped state, its symbols still untyped on `EState.glob`, decision
   83); `Atom.name` with `NFml.toL` (proposal 99).  The scoped closer's
   layout from a `wt(storage)` premise landed at W9.2 (proposal 100).
+- `NFmlClose`'s `simp` set over typed symbols (decision 82: done for the
+  scoped leaf at W9.3, `Calculus/CloseScoped.lean`); the
+  reduction's symbols over the typed state (a term still reads them on
+  the erasure, `Tm.toLS_eq`, decision 83); `Atom.name` with `NFml.toL`
+  (proposal 99); the scoped closer's layout from a `wt(storage)`
+  premise, if wanted (proposal 100).
 - `simplifyUpdate` (scoped) dropping unread locals with their hidden
   binders (the formula strengthened out of the local's scope), and what an
   update pops under the diamond (decision 87's rest; W7 `w7-rewrites` did
