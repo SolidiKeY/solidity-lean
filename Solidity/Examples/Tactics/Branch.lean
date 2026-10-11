@@ -100,15 +100,13 @@ theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x !=
     -- dl{ { se1 := a == b }, se1 ≐ true ⟹ [ x = 2; ] ¬x = 0 }
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     -- dl{ { se1 := a == b }, se1 ≐ false ⟹ [ x = 1; ] ¬x = 0 }
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! ## A literal condition
@@ -247,16 +245,14 @@ theorem branchDiamond :
   case thn =>
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ false ⟹
     --     ⟨ x = 1; } ⟩ x = 2 }
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- Without the precondition the diamond holds too: `a` and `b` are bound

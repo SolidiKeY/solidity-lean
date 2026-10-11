@@ -109,15 +109,13 @@ theorem requireBox : ⊢ dl!{ [ require(a == b); x = a; ] x == b } := by
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ [ revert(); x = a; ] x = b }
     apply done .revertBox
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ true }
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! ## The diamond: a guard that fails proves nothing
@@ -174,13 +172,11 @@ theorem assertBox : ⊢ dl!{ a == b → [ assert(a == b); x = a; ] x == b } := b
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b } ⟹ se1 ≐ true }
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- Without the precondition the box is not valid: where `a != b` the
@@ -207,13 +203,11 @@ theorem requireFalse_box : ⊢ dl!{ [ require(false); ] true } := by
   apply split .requireSimple
   case thn =>
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     apply done .revertBox
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- `a == b → ⟨ assert(a == b); x = a; ⟩ x == b`. -/
@@ -234,8 +228,8 @@ trace: ⊢ dl{ ⟹ true }
 theorem revertDropsRest : ⊢ dl!{ [ revert(); total = 5; ] total == 7 } := by
   apply done .revertBox
   trace_state
-  refine close ?_
-  exact fun _ => trivial
+  sol_leaf
+  sol_close
 
 /-- The diamond of a revert is never true, whatever the postcondition. -/
 example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => Modality.afterRunTR_diamond_fail
@@ -245,8 +239,8 @@ example : ¬ (⊨ dl!{ ⟨ revert(); ⟩ true }) := fun h => Modality.afterRunTR
 example : ⊢ dl!{ [ revert(); ] true } := by
   fail_if_success apply done .revertDiamond
   apply done .revertBox
-  refine close ?_
-  exact fun _ => trivial
+  sol_leaf
+  sol_close
 
 /-! ## Under `if`: a revert in one branch
 
@@ -262,14 +256,12 @@ theorem branchBox : ⊢ dl!{ [ if (a == b) { x = 1; } else { revert(); }; ] x ==
   case thn =>
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ [ revert(); } ] x = 1 }
     apply done .revertBox
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`: with the precondition,
@@ -284,14 +276,12 @@ theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x =
   case thn =>
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     apply done .revertDiamond
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ false ⟹ false }: the context is contradictory
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- `a == b → ⟨ if (a == b) { x = 1; } else { revert(); } ⟩ x == 1`. -/
@@ -305,14 +295,12 @@ theorem branchDiamond :
   case thn =>
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ revert(); } ⟩ x = 1 }
     apply done .revertDiamond
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 end Solidity.Examples.Tactics.Revert

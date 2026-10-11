@@ -50,8 +50,7 @@ theorem transferFrameStorage :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint z = total; owner.transfer(5);` — a state variable as the receiver is
@@ -67,8 +66,7 @@ theorem transferFrameRoot :
   apply update .storageRootReadSelect
   apply update .transferNoCallbackBox
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint z = balances[k]; to.transfer(5); uint y = balances[k];` — a mapping

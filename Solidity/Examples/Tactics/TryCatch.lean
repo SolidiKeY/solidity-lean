@@ -161,13 +161,11 @@ theorem getWalk :
     (try and_intros)
   · apply allRight
     apply update .storageRootWriteStore
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   all_goals
     apply update .storageRootWriteStore
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! ## Proving, with callbacks
@@ -194,16 +192,13 @@ theorem pingKeepsInv :
   apply ProvesC.tryCall .tryCallWithCallbackBox
   · -- invariant on exit
     apply ProvesC.plain _ rfl
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   · -- call succeeded: from any state the callee leaves in which `I` holds
     apply ProvesC.plain _ rfl
     sol_derive
     refine Proves.openInv ?_
-    refine close ?_
-    sol_symex
-    refine Hyp.valid_after_havoc (Γ := [.pre _]) (Δ := []) rfl ?_
+    sol_leaf
     sol_close
   · -- each `catch` block, from where the call was made
     simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]
@@ -211,8 +206,7 @@ theorem pingKeepsInv :
     · apply ProvesC.plain _ rfl
       sol_derive
       all_goals
-        refine close ?_
-        sol_symex
+        sol_leaf
         sol_close
 
 /-- What holds with callbacks holds without: the deterministic run is one of

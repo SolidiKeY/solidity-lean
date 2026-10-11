@@ -99,9 +99,8 @@ theorem ledgerWriteThenDelete :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
-  sol_close
+  sol_leaf
+  sol_decide
 
 /-- `delete ledger;` is `storageRootDelete`: one update. -/
 theorem deleteLedger : ⊨ dl!{ [ ledger.nonce = 42; delete ledger; ] true } := by
@@ -109,8 +108,7 @@ theorem deleteLedger : ⊨ dl!{ [ ledger.nonce = 42; delete ledger; ] true } := 
   apply update .storageFieldWriteSave
   apply update .storageRootDelete
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- The whole program. -/

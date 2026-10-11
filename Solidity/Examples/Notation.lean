@@ -251,8 +251,7 @@ theorem twoKeys : ⊢ dl!{ a != b → [ balances[a] = 1; balances[b] = 2; ] bala
   trace_state
   apply Proves.update (Taclet.toStep .storageIndexWriteMappingSave)
   trace_state
-  refine Proves.close [] rfl List.nodup_nil ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 end Scoped

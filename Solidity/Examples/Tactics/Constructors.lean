@@ -137,8 +137,7 @@ info: \programVariables {
 /-- The obligation, derived: every argument deploys. -/
 theorem miniProblem : ⊨ problem!{ constructor } := by
   sol_prove
-  refine Proves.close [] rfl List.nodup_nil ?_
-  sol_symex
+  sol_leaf
   sol_close_mt
 
 /-- `constructor(7);` deploys from every deployer, read off its derived

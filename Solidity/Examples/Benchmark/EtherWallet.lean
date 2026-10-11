@@ -76,8 +76,7 @@ theorem withdrawNet :
     ⊢ dl!{ owner != this → net(owner) = 40 → [ withdraw(30); ] net(owner) = 10 } := by
   sol_prove
   all_goals
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- `getBalance()` returns the funds. -/

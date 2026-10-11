@@ -72,8 +72,7 @@ theorem callAddOneWalk : ⊨ dl!{ [ uint y = addOne(4); ] y == 5 } := by
   apply update .binopAssignment      -- r' = x' + 1;
   apply update .localValueAssign     -- y = r';
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint y = double(3);` — `return x + x;` is an assignment to the return
@@ -119,8 +118,7 @@ theorem callCaptureWalk : ⊨ dl!{ x == 1 → [ uint y = addOne(x + 1); ] y == 3
   apply update .binopAssignment
   apply update .localValueAssign
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `if (x > 0) { y = addOne(1); } else { y = double(1); }`: a call in each branch. -/

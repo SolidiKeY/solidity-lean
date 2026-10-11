@@ -498,24 +498,20 @@ theorem countToNWalk : ⊢ dl!{ [ require(n >= 0); uint i = 0;
     apply update .localValueAssign
     apply invBox .whileInvariantBox
     case init =>
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
     case thn =>
       apply update .binopAssignment
       apply emptyModality
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
     case els =>
       apply emptyModality
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
   case els =>
     apply done .revertBox
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! The proof tree labels the invariant rule's goals as solkey does. -/
@@ -565,16 +561,13 @@ theorem countTo1Walk : ⊢ dl!{ ⟨ uint i = 0;
     apply update .localIncrement
     apply checkLean .loopExit
     case thn =>
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
     case els =>
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
   case els =>
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! The proof tree labels `loopExit`'s goals. -/

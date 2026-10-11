@@ -150,8 +150,7 @@ theorem callAddOneWalk : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
   case pre =>
     apply unfold .localValueDeclInitDrop
     apply update .localValueAssign
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case post =>
     apply unfold .localValueDeclInitDrop
@@ -160,8 +159,7 @@ theorem callAddOneWalk : ⊨ dl!{ x == 4 → [ y = addOne(x); ] y == 5 } := by
     apply allRight
     apply impRight
     apply update .localValueAssign
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- Whether the first call of a formula's first program has a body within

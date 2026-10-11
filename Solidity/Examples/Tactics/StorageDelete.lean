@@ -55,8 +55,7 @@ theorem deleteField : ⊨ dl!{ [ delete alice.account; ] true } := by
   apply Proves.valid
   apply update .storageFieldDelete
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## Example 16: `delete alice.account.token;` — a non-simple receiver
@@ -74,8 +73,7 @@ theorem deleteDeepField : ⊨ dl!{ [ delete alice.account.token; ] true } := by
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldDelete
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## Example 17: `delete people[i];` — an entry -/
@@ -85,8 +83,7 @@ theorem deleteIndex : ⊨ dl!{ [ delete people[i]; ] true } := by
   apply Proves.valid
   apply update .storageIndexArrayDelete
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `delete people[i + 1];` — a non-simple index is captured first
@@ -98,8 +95,7 @@ theorem deleteNonSimpleIndex : ⊨ dl!{ [ delete people[i + 1]; ] true } := by
   apply update .binopAssignment
   apply update .storageIndexArrayDelete
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## Reading after a delete -/
@@ -114,8 +110,7 @@ theorem deleteThenRead :
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `alice.age = 30; delete alice.age; uint result = alice.age;`
@@ -157,8 +152,7 @@ theorem deleteThenReadBeside :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `delete total;` then `total == 0`, with nothing written first: valid in
@@ -337,8 +331,7 @@ info: Try this:
     apply unfold .storageLocalDeclInitDrop
     apply update .storageFieldReadBindLocalRoot
     apply update .storageFieldReadFind
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 -/
 #guard_msgs in
@@ -370,8 +363,7 @@ example :
   apply unfold .storageLocalDeclInitDrop
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 open Theory Theory.StValue in
@@ -408,8 +400,7 @@ theorem deleteFrameMid_theory :
   sol_apply_upd
   sol_apply_upd
   -- dl{ ⟹ 7 + 1 = 8 }
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 end Solidity.Examples.Tactics.StorageDelete

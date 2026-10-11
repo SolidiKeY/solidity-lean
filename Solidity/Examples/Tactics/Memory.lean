@@ -63,8 +63,7 @@ theorem memoryDeclFreshAlloc :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person memory carolAlias = carol;` — aliasing by declaration: the
@@ -82,8 +81,7 @@ theorem memoryDeclAlias :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Token memory t = carol.account.token;` — the same one selector deeper:
@@ -111,8 +109,7 @@ theorem memoryDeclDeepAlias :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 2 · Writes and reads -/
@@ -143,8 +140,7 @@ theorem memoryDeepFieldWrite :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `carol.age = a + b;` — a computed value is captured before the write
@@ -160,8 +156,7 @@ theorem memoryFieldWriteCapturedRhs :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 3 · Aliasing -/
@@ -184,8 +179,7 @@ theorem memoryAliasWrite :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `carol.account = acc;` — a reference-valued field write stores the
@@ -207,8 +201,7 @@ theorem memoryFieldCopy :
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldWriteCopy
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `carol = david;` — a root assignment rebinds (`memoryRootRebind`); the heap
@@ -225,8 +218,7 @@ theorem memoryRootAssign :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `carolAcc = d.account;` — a memory field on the right is not captured: the
@@ -251,8 +243,7 @@ theorem memoryRootRebind :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 4 · Arrays
@@ -269,8 +260,7 @@ theorem memoryArrayAlloc : ⊨ dl!{ [ uint[] memory v; ] true } := by
   apply Proves.valid
   apply update .memoryReferenceDeclFreshAlloc
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `v[i] = 100; x = v[i];` — the write and the read, both simple
@@ -284,8 +274,7 @@ theorem memoryArrayWriteRead :
   apply unfold .localValueDeclInitDrop
   apply update .memoryIndexReadArrayValue
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `b.tokens[i].value = 42;` — a nested path under an index (the printed
@@ -313,8 +302,7 @@ theorem memoryNestedArrayWrite :
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 set_option maxHeartbeats 300000 in
@@ -337,8 +325,7 @@ theorem memoryArrayWriteRefSource :
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 set_option maxHeartbeats 400000 in
@@ -371,8 +358,7 @@ theorem memoryFieldWriteFromArrayElem :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Token memory t = b.tokens[i];` — a declaration from an element under a
@@ -399,8 +385,7 @@ theorem memoryDeclFromNestedArrayElem :
   apply update .memoryIndexReadArrayMemory
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 5 · Runs of the interpreter
@@ -469,8 +454,7 @@ theorem memoryRootDelete :
   apply update .memoryFieldRead
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `delete carol.age;` — a primitive member is reset to its default
@@ -486,8 +470,7 @@ theorem memoryFieldDeletePrim :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person memory carol; Account memory carolAcc = carol.account;
@@ -511,8 +494,7 @@ theorem memoryFieldDeleteRef :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `delete carolValues[i];` (box) — an element of an array of primitives
@@ -529,8 +511,7 @@ theorem memoryIndexDeletePrim :
   apply unfold .localValueDeclInitDrop
   apply update .memoryIndexReadArrayValue
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `delete carolTokens[i];` (box) — an element of an array of structs gets
@@ -542,8 +523,7 @@ theorem memoryIndexDeleteRef :
   apply update .memoryStorageCopy
   apply update .memoryIndexDeleteReference
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `delete carol.account.tokens[i];` (box; here `b.tokens[i]`, `TokenBucket`
@@ -559,8 +539,7 @@ theorem memoryNestedIndexDelete :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryIndexDeleteReference
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `delete carolValues[i + 1];` — a complex index is captured first
@@ -575,8 +554,7 @@ theorem memoryIndexDeleteCapture :
   apply update .binopAssignment
   apply update .memoryIndexDeletePrimitive
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! `Person memory carolAlias = carol; carol.age = 33; delete carol;` — the
@@ -623,8 +601,7 @@ theorem memoryNewArray :
   apply unfold .localValueDeclInitDrop
   apply update .memoryLengthRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `xs[0] = new uint[](3);` — a fresh array written into a memory element is
@@ -639,8 +616,7 @@ theorem memoryNewArrayCapture :
   apply update .memoryArrayFreshAlloc
   apply update .memoryIndexWriteCopy
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `basketA.items = new uint[](2);` — into storage, through a fresh memory
@@ -658,8 +634,7 @@ theorem storageNewArrayCapture :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageLengthRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `TokenBucket memory b = bucket; uint len = b.tokens.length;` — the
@@ -675,8 +650,7 @@ theorem memoryNestedLength :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryLengthRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! `new uint[](3)` holds three zeros; `new Token[](2)` two fresh `Token`s,

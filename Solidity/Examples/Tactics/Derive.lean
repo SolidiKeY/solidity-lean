@@ -11,8 +11,8 @@ import Solidity.Calculus.SolkeyProves
 The tactics of `Calculus/Symex.lean` and `Calculus/Derive.lean`
 on scoped goals `Valid φ` (`cdl!{ … }`): `sol_symex` then `sol_close`,
 `sol_prove` as one kernel evaluation, and `sol_derive?`'s walk, one
-`refine` per rule cited by its taclet, each leaf closed (`Proves.close`
-and today's closer on its erasure), pinned and replayed; `sol_prove` and
+`refine` per rule cited by its taclet, each leaf closed (`sol_leaf` and
+the scoped `sol_close`), pinned and replayed; `sol_prove` and
 a walk under `⊢ₖ`, solkey's rules alone.
 -/
 
@@ -81,8 +81,8 @@ example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } el
 example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] true } := by
   sol_derive
 
-/-! A leaf with a formula left closes as today's does: `Proves.close` on its
-erasure, then `sol_symex; sol_close`. -/
+/-! A leaf with a formula left closes on its scoped form: `sol_leaf`, then
+the scoped `sol_close`. -/
 
 /--
 info: Try this:
@@ -98,15 +98,13 @@ info: Try this:
       apply Proves.update (Taclet.step_eq .storageRootWriteStore)
       refine Proves.updIntro ?_
       refine Proves.updIntro ?_
-      refine Proves.close [] rfl List.nodup_nil ?_
-      sol_symex
+      sol_leaf
       sol_close
     case els =>
       apply Proves.update (Taclet.step_eq .storageRootWriteStore)
       refine Proves.updIntro ?_
       refine Proves.updIntro ?_
-      refine Proves.close [] rfl List.nodup_nil ?_
-      sol_symex
+      sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -127,23 +125,20 @@ example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } el
     apply Proves.update (Taclet.step_eq .storageRootWriteStore)
     refine Proves.updIntro ?_
     refine Proves.updIntro ?_
-    refine Proves.close [] rfl List.nodup_nil ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     apply Proves.update (Taclet.step_eq .storageRootWriteStore)
     refine Proves.updIntro ?_
     refine Proves.updIntro ?_
-    refine Proves.close [] rfl List.nodup_nil ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- `sol_derive` leaves the leaves, as today's does. -/
 example : Valid cdl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else { total = 2; }; ] total != 0 } := by
   sol_derive
   all_goals
-    refine Proves.close [] rfl List.nodup_nil ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! ## solkey's rules alone (`⊢ₖ`)
@@ -185,7 +180,7 @@ example : Proves StandardExample .solkey [] .nil
 -- Off the fragment `sol_prove` gives up under `⊢ₖ`: solkey has no rule
 -- for a loop (`loopFalse`, `[ while (false) { } ] true`).
 /--
-error: sol_prove: the walk does not reach the end of the sequent: a step with no rule, a leaf `Proves.close` does not take (`Fml.closableB`: a modality left, a negated or assumed part not first-order, or a hidden binder's name reused), or more than 20000 steps
+error: sol_prove: the walk does not reach the end of the sequent: a step with no rule, or more than 20000 steps
 -/
 #guard_msgs in
 example : Proves StandardExample .solkey [] .nil (loopFalse (C := StandardExample)) := by
@@ -199,7 +194,7 @@ example : Proves StandardExample .all [] .nil (loopFalse (C := StandardExample))
 
 Under `open scoped Solidity.Scoped` `sol_derive?` writes today's walk
 text, which the scope's macros read (`Calculus/WalkSyntax.lean`):
-solkey's aliases, one `apply` per rule, `refine close ?_` at a leaf, the
+solkey's aliases, one `apply` per rule, `sol_leaf; sol_close` at a leaf, the
 steps KeY does not show left unwritten.  A `∀` written in the formula is
 not a parameter (`cdl!` marks it, decision 28): it gets its `apply
 allRight` line. -/
@@ -221,13 +216,11 @@ info: Try this:
     apply splitBox .ifElseSplit
     case thn =>
       apply update .storageRootWriteStore
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
     case els =>
       apply update .storageRootWriteStore
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -246,13 +239,11 @@ example : ⊨ dl!{ ∀ uint a; [ uint x = a + 1; if (x > 3) { total = 1; } else 
   apply splitBox .ifElseSplit
   case thn =>
     apply update .storageRootWriteStore
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     apply update .storageRootWriteStore
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /--
@@ -265,13 +256,11 @@ info: Try this:
     apply update .binopAssignment
     apply splitBox .requireSimple
     case thn =>
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
     case els =>
       apply done .revertBox
-      refine close ?_
-      sol_symex
+      sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -288,13 +277,11 @@ example : ⊢ dl!{ a == 1 → [ uint x = a; require(x == 1); ] x == 1 } := by
   apply update .binopAssignment
   apply splitBox .requireSimple
   case thn =>
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     apply done .revertBox
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /--
@@ -303,11 +290,9 @@ info: Try this:
     apply cases .sendNoCallbackBox <;>
         (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
       (try and_intros)
-    · refine close ?_
-      sol_symex
+    · sol_leaf
       sol_close
-    · refine close ?_
-      sol_symex
+    · sol_leaf
       sol_close
 -/
 #guard_msgs in
@@ -321,11 +306,9 @@ example : ⊨ dl!{ [ ok = to.send(5); ] true } := by
       (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true,
         and_true]) <;>
     (try and_intros)
-  · refine close ?_
-    sol_symex
+  · sol_leaf
     sol_close
-  · refine close ?_
-    sol_symex
+  · sol_leaf
     sol_close
 
 end Surface

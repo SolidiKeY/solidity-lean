@@ -84,8 +84,7 @@ theorem withdrawSafe :
   apply ProvesC.callback .transferWithCallbackBox
   · -- invariant on exit: `{U} I`
     apply ProvesC.plain _ rfl
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   · -- resume after callback: `{U} {havoc} (I → [ ] I)`
     apply ProvesC.plain _ rfl
@@ -152,22 +151,18 @@ theorem callToKeepsInv :
   apply ProvesC.send .sendWithCallbackBox
   · -- invariant on exit: `{net := …} I`, the booking touching no storage
     apply ProvesC.plain _ rfl
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   · -- send succeeded: `ok` true, from any state the callee leaves keeping `I`
     apply ProvesC.plain _ rfl
     sol_derive
     refine Proves.openInv ?_
-    refine close ?_
-    sol_symex
-    refine Hyp.valid_after_havoc (Γ := [.all _ _, .pre _, .upd .box _, .upd .box _]) (Δ := []) rfl ?_
+    sol_leaf
     sol_close
   · -- send failed: `ok` false, nothing booked
     apply ProvesC.plain _ rfl
     sol_derive
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- What holds with callbacks holds without. -/

@@ -24,8 +24,8 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ ..H, c, {U} ⟹[R] φ }` | the scoped sequent `Proves C R Γ₀ ((H.pre c).upd m U) φ` (`Calculus/SequentNotation.lean`); under `open scoped Solidity.NFmlSeq` the closer's `NFml.Proves R (Γ ++ [.pre c] ++ [.upd m U]) φ` (`Calculus/NFmlLogic.lean`) |
 | `dl{ ..Γ ⟹ᶜ[I] φ }` | printing only: a scoped sequent with callbacks (`ProvesC`, `Calculus/Callback.lean`) |
 | `tm{ find(save(s, p, v), q) }` | a term (`Tm`), every name a Lean variable |
-| `⊨ φ` | `Valid φ`, scoped (`Calculus/Logic.lean`) |
-| `σ ⊧ φ` | `holds σ φ`, scoped |
+| `⊨ φ` | `Valid φ` of a scoped `φ` (`Calculus/Logic.lean`), the closer's `NFml.Valid φ` of any other |
+| `σ ⊧ φ` | `holds σ φ`, likewise |
 
 At a state variable a write is `save(storage, gsp, se)` and a read
 `find(storage, gsp)`, as solkey writes them; `store`/`select` still read.
@@ -335,13 +335,33 @@ syntax (name := dlJudgement) "dl[" term "]{ " "⟨" "[ " sol_stmt "; " "]" "⟩"
 @[inherit_doc dlJudgement] syntax "dl[" term "]{ " "⟨ " sol_stmt "; " "⟩" " ⇝ " dl_premise " }" : term
 syntax "dl{ " dl_premise " }" : term
 /-- `⊨ φ` for a formula given as a Lean term. -/
-syntax:25 "⊨ " term:26 : term
+syntax:25 (name := validSyntax) "⊨ " term:26 : term
 /-- `σ ⊧ φ`: the formula `φ` holds in the state `σ`. -/
-syntax:50 term:51 " ⊧ " term:51 : term
+syntax:50 (name := holdsSyntax) term:51 " ⊧ " term:51 : term
 
-macro_rules
-  | `(⊨ $φ:term) => `($(Lean.mkIdent `Solidity.Valid) $φ)
-  | `($σ:term ⊧ $φ:term) => `($(Lean.mkIdent `Solidity.holds) $σ $φ)
+open Lean Elab Term Meta in
+/-- `⊨ φ` is `Valid φ` and `σ ⊧ φ` is `holds σ φ` for a scoped formula
+(`Fml`, `Calculus/Logic.lean`); for any other, the closer's (`NFml.Valid`,
+`NFml.holds`: a chain's line past the program, `Calculus/RewriteChains.lean`). -/
+def elabValidHolds (σ? : Option Lean.Term) (φ : Lean.Term) : TermElabM Lean.Expr := do
+  let φ ← elabTerm φ none
+  synthesizeSyntheticMVarsNoPostponing
+  let φ ← instantiateMVars φ
+  let ty ← whnf (← inferType φ)
+  match σ?, ty.getAppFn.constName?, ty.getAppArgs with
+  | none, some `Solidity.Fml, #[_, _] => mkAppM `Solidity.Valid #[φ]
+  | none, _, _ => mkAppM ``NFml.Valid #[φ]
+  | some σ, some `Solidity.Fml, #[C, Γ] =>
+    let σ ← elabTermEnsuringType σ (mkApp2 (mkConst `Solidity.State) C Γ)
+    return mkApp4 (mkConst `Solidity.holds) C Γ σ φ
+  | some σ, _, _ =>
+    let σ ← elabTermEnsuringType σ (mkConst ``Semantics.State)
+    mkAppM ``NFml.holds #[σ, φ]
+
+open Lean Elab Term in
+elab_rules : term
+  | `(⊨ $φ:term) => elabValidHolds none φ
+  | `($σ:term ⊧ $φ:term) => elabValidHolds (some σ) φ
 
 /-! ## Side conditions
 

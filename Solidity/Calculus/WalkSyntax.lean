@@ -8,7 +8,8 @@ import Solidity.Calculus.TacticSyntax
 Under `open scoped Solidity.Scoped` a walk keeps today's text: one
 `apply` per rule, the rule named as solkey names it (`apply update
 .storageFieldWriteSave`, `apply unfold .localValueDeclInitDrop`, `apply
-empty`, `refine close ?_`, …).  On a scoped goal (`Proves`) each line
+empty`, …), and a leaf is left by `sol_leaf` for the scoped closers
+(`Calculus/ProofTree.lean`, `Calculus/ProvesDerive.lean`).  On a scoped goal (`Proves`) each line
 is the scoped rule of the same kind, its premise the named taclet's
 (`Taclet.step_eq`, `LeanTaclet.toStep`); on today's goal (a leaf's
 erasure) only the rules today's calculus kept are read today's way (`intro`,
@@ -38,7 +39,12 @@ Where the scoped calculus takes a step today's names otherwise:
 * `apply Proves.valid` binds the formula's parameters (`∀`, `cdl!`) with
   `allRight` at once, as today's walk leaves them free (`core_params`); an
   explicit `∀ uint x;` (`cdl!` marks it, decision 28) is left to its own
-  `apply allRight`.
+  `apply allRight`;
+* `refine close ?_` is the erased fallback (`Proves.close`, the leaf's
+  erasure for today's closers), which only a leaf the scoped closers do not
+  close still needs (`Examples/Tactics/SelectOnSaveConsr.lean`'s
+  `ageWriteRead`, the interpreter by hand); since W9.4 `sol_leaf` is the
+  leaf step the walks and the tree write.
 
 Each reading is a `scoped macro_rules` of the namespace `Solidity.Scoped`,
 tried before today's `apply`: the scoped rule first, today's last where

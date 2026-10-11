@@ -103,22 +103,14 @@ theorem mintOthers :
 
 set_option maxHeartbeats 400000 in
 /-- `mint(receiver, amount)`'s obligation: only the minter mints, the
-receiver credited, every other balance kept.  Each leaf by `sol_spec`'s steps
-with its reads done once, over the premises taken in (`sol_close_reads_all`),
-without `sol_close_facts` and `sol_close_reads` on the goal before them: the
-same proof in three quarters of the heartbeats.  Not by `sol_decide`: the
-frame clause needs the layout premise instantiated at the quantified key. -/
+receiver credited, every other balance kept.  Each leaf on its scoped form
+(`sol_leaf`) by `sol_spec_close`.  Not by `sol_decide`: the frame clause
+needs the layout premise instantiated at the quantified key. -/
 theorem spec_mint : ⊢ spec!{ mint } := by
   sol_derive
   all_goals
-    refine close ?_
-    sol_symex
-    sol_close_unwrap
-    intro σ
-    sol_close_eval
-    intros
-    sol_close_reads_all
-    all_goals sol_spec_finish
+    sol_leaf
+    sol_spec_close
 
 /-! ## `send` -/
 

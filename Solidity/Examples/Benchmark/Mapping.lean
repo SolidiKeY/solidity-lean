@@ -142,14 +142,14 @@ instantiate. -/
 theorem spec_set : ⊢ spec!{ set } := by
   sol_derive
   all_goals
-    refine close ?_
+    sol_leaf
     sol_spec
 /-- `remove(_addr)`'s obligation: the entry reset to `0`, every other key
 kept (by `sol_spec`, as `spec_set`). -/
 theorem spec_remove : ⊢ spec!{ remove } := by
   sol_derive
   all_goals
-    refine close ?_
+    sol_leaf
     sol_spec
 /-- `get(_addr)` has no clause: the obligation is the invariant-free `true`. -/
 theorem spec_get : ⊢ spec!{ get } := by
@@ -191,7 +191,7 @@ theorem spec_nested_set : ⊢ spec!{ set } := by
 theorem spec_nested_remove : ⊢ spec!{ remove } := by
   sol_derive
   all_goals
-    refine close ?_
+    sol_leaf
     sol_spec
 
 end NestedMapping

@@ -47,8 +47,7 @@ theorem storageToMemoryRootCopy :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `alice.account.balance = 10; Account memory acc = alice.account; uint v =
@@ -72,8 +71,7 @@ theorem storageToMemoryMemberCopy :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Token memory t = alice.account.token;` — two selectors: the storage path
@@ -103,8 +101,7 @@ theorem storageToMemoryNonsimplePath :
   apply unfold .localValueDeclInitDrop
   apply update .memoryFieldRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `alice.age = 27; Person memory carol = alice; alice.age = 30;` — a copy,
@@ -150,8 +147,7 @@ theorem memoryToStorageRootCopy :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `acc.balance = 10; alice.account = acc; uint v = alice.account.balance;` —
@@ -174,8 +170,7 @@ theorem memoryToStorageFromAlias :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `carol.account.balance = 50; alice.account = carol.account;` — a memory
@@ -198,8 +193,7 @@ theorem memoryToStorageFromMemberSource :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `t.value = 99; alice.account.token = t;` — the target is the nonsimple
@@ -231,8 +225,7 @@ theorem memoryToStorageNonsimplePath :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `carol.age = 8; alice = carol; carol.age = 9;` — a copy, not an alias: the

@@ -57,7 +57,7 @@ open scoped Scoped
 a run of steps, one flat branch, then `requireSimple`'s goals, each a
 sub-branch labelled as solkey labels it ("Holds", "Reverts").  `x == 1` is
 `binopAssignment` at `==`, which prints as KeY's `boolEqualityAssignment`.
-The leaves sit behind the diamond's updates, which `Proves.close` takes. -/
+The leaves sit behind the diamond's updates, which `sol_leaf` takes. -/
 
 /--
 info: 0: allRight
@@ -78,10 +78,11 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 #guard_msgs in
 #proof_tree dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 }
 
-/-! A write under the diamond is valid over typed states, but its leaf is
-closed on its erasure, over every untyped state (one with no `alice` among
-them), while the closer reads the erasure (decision 7's IR;
-`docs/intrinsic.md`, "What is left"): the leaf stays open and shows its sequent. -/
+/-! A write under the diamond is valid over typed states, but the closer
+reads its leaf on the erased state, over every untyped storage (one with no
+`alice` among its roots: `CloseS.holdsE`, and the reduction has no layout
+without a `wt(storage)` premise; `docs/intrinsic.md`, "What is left"): the
+leaf stays open and shows its sequent. -/
 /--
 info: 0: storageFieldWriteSave
 1: OPEN GOAL
@@ -251,7 +252,7 @@ example : (⊨ dl!{ [ ok = to.send(5); ] true }) ∧ (1 = 1 ∧ 2 = 2) := by
   exact ⟨rfl, rfl⟩
 
 /-! Under the diamond the leaves sit behind the diamond's updates, which
-`Proves.close` takes (`Fml.closableB`): here `to := 9`, `ok := true`,
+`sol_leaf` takes: here `to := 9`, `ok := true`,
 `ok := false`. -/
 
 /--

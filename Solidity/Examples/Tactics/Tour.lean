@@ -58,8 +58,7 @@ theorem runningExample_byHand :
   apply update .storageFieldReadFind  -- { x := find(storage, sp2.balance) }
   apply empty
   -- first order: apply the updates, then read back what was written
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- The same, with the strategy choosing the rules. -/
@@ -86,8 +85,7 @@ theorem aliasing :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 3. Frames -/
@@ -106,8 +104,7 @@ theorem mappingFrame :
   apply unfold .localValueDeclInitDrop
   apply update .storageIndexReadMappingFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `folks[k].account.balance = total; uint y = folks[k].account.balance;` — a
@@ -137,8 +134,7 @@ theorem nested :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 4. What elaboration rejects

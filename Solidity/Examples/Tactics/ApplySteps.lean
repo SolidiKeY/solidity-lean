@@ -22,8 +22,8 @@ rule at a time with `apply` — the way PLFA builds a typing derivation
 * `done r` — the taclet `r` closes the modality (`revertBox` to `true`,
   `revertDiamond` to `false`; `Revert.lean`);
 * `empty` — `⟨⟩ φ` (or `[] φ`) is `φ`;
-* `close` — leave the calculus once no modality is left: what is left is
-  `⊨ Γ → φ`, for `sol_symex` and `sol_close` (`refine close ?_`, which checks
+* `sol_leaf` — leave the calculus once no modality is left: what is left is
+  `⊨ Γ → φ`, scoped, for `sol_close` (`Proves.closeValid`, which checks
   that no modality is left).
 
 `sol_derive` runs the strategy as such a derivation: the rule `Stmt.step`
@@ -61,8 +61,7 @@ example : ⊢ dl!{ [ alice.age = 10; revert(); ] true } := by
   apply update .storageFieldWriteSave
   fail_if_success apply done .revertDiamond
   apply done .revertBox
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## The judgement is the strategy
@@ -83,8 +82,7 @@ theorem deepFieldWriteStep2 :
   -- dl{ ⟹ [ uint se1 = 10; Account storage sp1 = alice.account; sp1.balance = se1; ]
   --       find(storage, alice.account.balance) = 10 }
   sol_derive
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## Every constructor once
@@ -106,15 +104,13 @@ theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x
   case thn =>
     -- dl{ …, se1 ≐ true ⟹ x = 1 }: no statement left, `empty` does nothing
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     -- dl{ …, se1 ≐ false ⟹ ⟨ revert(); ⟩ x = 1 }
     apply done .revertDiamond
     -- dl{ …, se1 ≐ false ⟹ false }: `a = 1` and `x == 1` false contradict
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- A derivation is a proof of validity. -/

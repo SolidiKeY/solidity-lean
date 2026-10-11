@@ -20,9 +20,9 @@ is a theorem `⊨ dl!{ … }`, proved one of two ways:
   `emptyModality`, `intro` for a precondition.  Put the cursor after an `apply`
   to see the next line as a sequent `dl{ Γ ⟹ φ }`, which the headline states
   as a checked line, `show sequent!{ Γ ⟹ φ }` (`Calculus/Sequents.lean`).
-  `refine close ?_` leaves the
-  calculus; the `sol_symex` after it runs nothing, it only normalises the goal
-  for `sol_close`.  The headline is proved both ways.
+  `sol_leaf` leaves the
+  calculus, the sequent as `⊨ ψ` with `ψ` scoped, for `sol_close`.  The
+  headline is proved both ways.
 
 Where the derivation is the claim — the order in which Step 2 captures, a
 `push`, a memory target — and `sol_close` cannot read the result back, or reads
@@ -78,8 +78,7 @@ theorem deepFieldWrite :
   apply empty
   show sequent!{ { se1 := 10 }, { sp1 := alice.account },
     { storage := save(storage, sp1.balance, se1) } ⟹ find(storage, alice.account.balance) = 10 }
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- The same, with the strategy choosing the rules. -/
@@ -95,8 +94,7 @@ theorem fieldWriteSimple : ⊨ dl!{ [ alice.age = 7; ] alice.age == 7 } := by
   apply Proves.valid
   apply update .storageFieldWriteSave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint v = alice.age;` — a read with a simple receiver: `find` at once. -/
@@ -116,8 +114,7 @@ theorem deepFieldRead :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `alice.account.token.value = 5;` — one selector deeper, and the same chain:
@@ -137,8 +134,7 @@ theorem deeperFieldWrite :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldWriteSave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Account storage acc = bob.account; alice.account = acc;` — the write stores
@@ -158,8 +154,7 @@ theorem fieldWriteFromAlias :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldWriteCopySource
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint v = total;` — a root is read with `select`, not `find`. -/
@@ -168,8 +163,7 @@ theorem rootRead : ⊨ dl!{ [ uint v = total; ] v == total } := by
   apply unfold .localValueDeclInitDrop
   apply update .storageRootReadSelect
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `alice = bob;` — a whole-struct write from another root is a deep copy
@@ -181,8 +175,7 @@ theorem rootWriteFromGlobal :
   apply update .storageFieldReadFind
   apply update .storageRootWriteCopySource
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person storage p = bob; alice = p;` — the same copy from an alias. -/
@@ -195,8 +188,7 @@ theorem rootWriteFromAlias :
   apply update .storageLocalRootRebind
   apply update .storageRootWriteCopySource
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `tok = bob.account.token;` (`TestSuite`) — a root copied from a member
@@ -214,8 +206,7 @@ theorem globalRootCopy :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldReadStoreRoot
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 2 · Aliases -/
@@ -240,8 +231,7 @@ theorem localRebindThenWrite :
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldWriteSave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 3 · Arrays and mappings
@@ -257,8 +247,7 @@ theorem arrayIndexRead : ⊨ dl!{ [ uint v = values[i]; ] v == values[i] } := by
   apply unfold .localValueDeclInitDrop
   apply update .storageIndexReadArrayFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint v = values[i];` under the diamond is not valid: in `StandardExample`'s
@@ -272,8 +261,7 @@ theorem arrayIndexWrite : ⊨ dl!{ [ values[i] = 100; ] values[i] == 100 } := by
   apply Proves.valid
   apply update .storageIndexWriteArraySave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint v = balances[i];` — a mapping key needs no bounds. -/
@@ -282,8 +270,7 @@ theorem mappingIndexRead : ⊨ dl!{ [ uint v = balances[i]; ] v == balances[i] }
   apply unfold .localValueDeclInitDrop
   apply update .storageIndexReadMappingFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person storage p = bob; people[i] = p;` — a struct entry written from an
@@ -297,8 +284,7 @@ theorem arrayIndexWriteRefSource :
   apply update .storageLocalRootRebind
   apply update .storageIndexWriteArrayCopySource
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person storage p = people[i]; p.age = 3;` — an alias bound to an entry
@@ -325,8 +311,7 @@ theorem nonsimplePathIndexWrite :
   apply update .localValueAssign
   apply update .storageIndexWriteArraySave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `values[i + 1] = 5;` — a non-simple index: source first, then the
@@ -344,8 +329,7 @@ theorem nonSimpleIndexWrite : ⊨ dl!{ [ values[i + 1] = 5; ] values[i + 1] == 5
   apply update .binopAssignment
   apply update .storageIndexWriteArraySave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `matrix[i + 1][j + 1] = 77;` — both the receiver and the index are not
@@ -368,8 +352,7 @@ theorem receiverAndIndexCaptured :
   apply update .binopAssignment
   apply update .storageIndexWriteArraySave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `bucket.tokens[i] = tok;` (`TestSuite`) — a struct entry under a non-simple
@@ -384,8 +367,7 @@ theorem refIndexWriteNonsimpleReceiver : ⊨ dl[TestSuite]{ [ bucket.tokens[i] =
   apply update .localValueAssign
   apply update .storageIndexWriteArrayCopySource
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 4 · Push and pop
@@ -400,8 +382,7 @@ theorem arrayPush : ⊨ dl!{ [ values.push(42); ] true } := by
   apply Proves.valid
   apply update .storagePushValueSave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `people.pop();` -/
@@ -409,8 +390,7 @@ theorem arrayPop : ⊨ dl!{ [ people.pop(); ] true } := by
   apply Proves.valid
   apply update .storagePopSave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `people.pop();` under the diamond is not valid: `people` starts empty, and
@@ -427,8 +407,7 @@ theorem pushRefSource : ⊨ dl!{ [ Person storage p = bob; people.push(p); ] tru
   apply update .storageLocalRootRebind
   apply update .storagePushValueCopySource
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Token storage t = tok; bucket.tokens.push(t);` (`TestSuite`) — a
@@ -443,8 +422,7 @@ theorem pushNonsimpleReceiver :
   apply update .storageFieldReadBindLocalRoot
   apply update .storagePushValueCopySource
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `bucket.tokens.push();` (`TestSuite`) — the bare push on a non-simple
@@ -456,8 +434,7 @@ theorem bucketPushBare : ⊨ dl[TestSuite]{ [ bucket.tokens.push(); ] true } := 
   apply update .storageFieldReadBindLocalRoot
   apply update .storagePushLengthSaveReferenceElement
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `people.push();` — a struct element: the slot is taken as it is
@@ -467,8 +444,7 @@ theorem pushBare : ⊨ dl!{ [ people.push(); ] true } := by
   apply Proves.valid
   apply update .storagePushLengthSaveReferenceElement
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person storage p = people.push(); p.age = 11;` — the slot a bare push
@@ -481,8 +457,7 @@ theorem pushSlotWrite :
   apply update .storageLocalRootPushBind
   apply update .storageFieldWriteSave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `values.push(); values.pop();` — the pop's guard is read under the push. -/
@@ -491,8 +466,7 @@ theorem popAfterPush : ⊨ dl!{ [ values.push(); values.pop(); ] true } := by
   apply update .storagePushLengthSave
   apply update .storagePopSave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 5 · Compound assignment
@@ -512,8 +486,7 @@ theorem fieldCompoundAssign :
   apply unfold .localValueDeclInitDrop
   apply update .storageFieldReadFind
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint x = alice.age; uint y = x + 1; alice.age = y;` — the read–compute–write
@@ -538,8 +511,7 @@ theorem deepOpAssign : ⊨ dl!{ [ alice.account.balance += a; ] true } := by
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldOpAssign
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `values[1] = 40; values[1] /= 8;` (`storageIndexArrayOpAssign`,
@@ -556,8 +528,7 @@ theorem arrayLength : ⊨ dl!{ [ uint n = values.length; ] n == values.length } 
   apply unfold .localValueDeclInitDrop
   apply update .storageLengthRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint n = matrix[0].length;` — a receiver that is not simple is bound to
@@ -570,8 +541,7 @@ theorem nestedArrayLength : ⊨ dl!{ [ uint n = matrix[0].length; ] true } := by
   apply update .storageIndexReadArrayBindLocalRoot
   apply update .storageLengthRead
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 6 · `++` and `−−`
@@ -589,8 +559,7 @@ theorem deepIncrement : ⊨ dl!{ [ alice.account.balance++; ] true } := by
   apply update .storageFieldReadBindLocalRoot
   apply update .storageFieldIncrement
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `values[1] = 40; ++values[1];` (`storageIndexIncrement`). -/
@@ -645,8 +614,7 @@ theorem addFieldOperandCaptured :
   apply update .storageFieldReadFind
   apply update .binopAssignment
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `result = age + a;` — a state variable operand is not simple either: it is
@@ -665,8 +633,7 @@ theorem addResultCaptured :
   apply update .binopAssignment
   apply update .storageFieldWriteSave
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `assert(a == b);` — the condition is captured, then asserted
@@ -688,8 +655,7 @@ theorem memoryFieldIncrement : ⊨ dl!{ [ Person memory m; m.age++; ] true } := 
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldIncrement
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person memory m; result = m.age++;` (`memoryFieldIncrementAssignment`). -/
@@ -699,8 +665,7 @@ theorem memoryFieldIncrementAssign :
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldIncrementAssignment
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint[] memory a; ++a[i];` (`memoryIndexArrayIncrement`). -/
@@ -709,8 +674,7 @@ theorem memoryIndexIncrement : ⊨ dl!{ [ uint[] memory a; ++a[i]; ] true } := b
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryIndexArrayIncrement
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person memory m; m.account.balance++;` — the receiver is bound to a memory
@@ -723,8 +687,7 @@ theorem memoryDeepIncrement : ⊨ dl!{ [ Person memory m; m.account.balance++; ]
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldIncrement
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person memory m; m.age /= a;` — division is the same rule as the other
@@ -734,8 +697,7 @@ theorem memoryFieldOpAssign : ⊨ dl!{ [ Person memory m; m.age /= a; ] true } :
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryFieldOpAssign
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `uint[] memory v; v[i] *= a;` (`memoryIndexArrayOpAssign`). -/
@@ -744,8 +706,7 @@ theorem memoryIndexOpAssign : ⊨ dl!{ [ uint[] memory v; v[i] *= a; ] true } :=
   apply update .memoryReferenceDeclFreshAlloc
   apply update .memoryIndexArrayOpAssign
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- `Person memory m; m.account.balance += a;` (`memoryFieldOpAssignUnfoldLeftFst`). -/
@@ -758,8 +719,7 @@ theorem memoryDeepOpAssign :
   apply update .memoryFieldReadAliasRoot
   apply update .memoryFieldOpAssign
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 end Solidity.Examples.Tactics.StorageSteps

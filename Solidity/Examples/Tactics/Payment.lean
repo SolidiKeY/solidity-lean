@@ -57,8 +57,7 @@ theorem transferBox : ⊢ dl!{ [ to.transfer(5); ] true } := by
   apply empty
   show sequent!{ ∀ uint to,
       { net := if(to = this) then net else store(net, at(to), select(net, at(to)) - 5) } ⟹ true }
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-! ## 3 · Valid for every receiver and amount
@@ -109,13 +108,11 @@ theorem sendBox : ⊢ dl!{ [ ok = to.send(5); ] true } := by
   · show sequent!{ ∀ uint to,
         { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true } ⟹ true }
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   · show sequent!{ ∀ uint to, { ok := false } ⟹ true }
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-- `[ ok = owner.send(x + 2); ] true`: a storage receiver and an amount
@@ -148,8 +145,7 @@ theorem sendDiamond : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := b
   apply cases .sendNoCallbackDiamond
   · simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]
     show sequent!{ { to := 9 } ⟹ 0 <= 5 }
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]
   refine ⟨?_, ?_⟩
@@ -157,13 +153,11 @@ theorem sendDiamond : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := b
         { net := if(to = this) then net else store(net, at(to), net(to) - 5) ‖ ok := true }
         ⟹ true }
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   · show sequent!{ { to := 9 }, { ok := false } ⟹ true }
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 end Solidity.Examples.Tactics.Payment
