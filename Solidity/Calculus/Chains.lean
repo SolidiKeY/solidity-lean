@@ -672,7 +672,8 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) (branches
       -- (`FmlRw.simplifyPast`, `Calculus/RewritePast.lean`)
       if past then
         for i in List.range k do
-          rs := rs.push (mkApp2 (mkConst ``FmlRw.simplifyPast) C (toExpr i))
+          for every in [false, true] do
+            rs := rs.push (mkApp3 (mkConst ``FmlRw.simplifyPast) C (toExpr i) (toExpr every))
       -- the scope ends after the update absorbed only where the line under it
       -- is an update (`Fml.simpAtB`)
       for i in List.range k do
@@ -729,7 +730,8 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) (branches
     if past then
       let (es, f) ← lawUpdECands C nm φb c false erased
       rs := rs ++ es
-      if failed.isNone then failed := f
+      -- the erasure's side condition, as solkey's taclet states it
+      if f.isSome then failed := f
   | .evalLaw c =>
     -- a law of a memory read, in an update's right-hand sides under any
     -- modality, where the update holds the write it reads past: the
@@ -760,7 +762,15 @@ def scopedRwCands (φ : Expr) (a : NFml.Chain.RwArrow) (erased : Expr) (branches
         let g ← mergeModality m fd fb
         pure { rw := r, fml := unpunch sp g, erased := #[ed, eb] }
       | _ => none
-    return (sp, out, failed)
+    -- past the program, a rewrite that applies under one modality only
+    let parts := (ds.zip bs).any fun (d, b) => d.isSome != b.isSome
+    let boxOnly := (ds.zip bs).all fun (d, b) => d.isNone || b.isSome
+    let failed' := if past && out.isEmpty && failed.isNone && parts then
+        if boxOnly then some m!"it applies under the box only, where an update that halts \
+          makes the line true: go on after `cases {m}`"
+        else some m!"it applies under one modality only: go on after `cases {m}`"
+      else failed
+    return (sp, out, failed')
 
 /-- The derivation of `φ`: its postconditions in slots, and, under a
 modality `m`, run as the diamond and as the box, whose shared lines (read
@@ -1584,6 +1594,44 @@ where
 /-- `Link.one`, `Link.many`, `Link.rule r` and the pair type of a chain. -/
 def linkTy (C : Expr) : Expr := mkApp (mkConst ``Link) C
 
+/-- Why no rewrite past the program gives the line written `w` after `L`:
+the rewrite applies nowhere (and why: a side condition, a modality), or
+what it gives; `~=>`, what each rewrite that applies gives.  The line
+written is printed as it reads on the erasure. -/
+def pastRefusal (C L : Expr) (w : Written) (rw? : Option (Option (Ident × NFml.Chain.RwArrow))) :
+    TermElabM MessageData := do
+  let run ← runChain L
+  let written : TermElabM MessageData := do
+    let E := dropAllsE (← erasedLine run.splice run.erased)
+    let s ← saveState
+    try
+      let b ← legacyWritten C run.splice.modality E w
+      pure (indentExpr (← instantiateMVars b))
+    catch _ => s.restore; pure m!" the line written"
+  match rw? with
+  | some (some (r, a)) =>
+    let n := r.getId
+    let (sp, cands, failed) ← scopedRwCands L a run.erased[0]! (past := true)
+    if cands.isEmpty then
+      if n == `simplifyUpdate && !sp.posts.isEmpty then
+        return m!"~[{n}]~>: on{← indentLine L}\nit looks at the line's modality or postcondition, \
+          which are not known: state the line for a concrete one"
+      let note := match failed with
+        | some m => m!"\n({m})"
+        | none => m!""
+      return m!"~[{n}]~>: {n} does not apply to{← indentLine L}{note}"
+    let ls ← cands.mapM fun c => indentLine c.fml
+    return m!"~[{n}]~>: on{← indentLine L}\nit gives{MessageData.joinSep ls ""}\nnot{← written}"
+  | _ =>
+    let mut gives : Array MessageData := #[]
+    for (n, a) in ← NFml.Chain.rwAnyArrows do
+      let (_, cands, _) ← scopedRwCands L a run.erased[0]! (past := true)
+      if let some c := cands.head? then
+        gives := gives.push m!"{n} gives{← indentLine c.fml}"
+    let note := if gives.isEmpty then m!"\nno rewrite applies to it" else
+      m!"\n{MessageData.joinSep gives.toList "\n"}"
+    return m!"~=>: no rewrite gives{← written}\nfrom{← indentLine L}{note}"
+
 /-- A written chain whose first line `A` is a scoped formula: every line
 after it computed, checked against its text (`matchWritten`), past the
 program by `Calculus/RewriteChains.lean`'s rewrites on the erasure. -/
@@ -1695,8 +1743,21 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
           throwError "~=>: no merge nor rewrite ({", ".intercalate (openRwNames.map toString)}) \
             of{← indentLine cur}\nis the line written{indentD (.ofSyntax l[1])}\n\
             while the program is open"
+        -- past the program: the first rewrite of `rwAnyArrows`, in order,
+        -- that gives the line written
+        let run ← runChain cur
+        let mut found := none
+        for (n, a) in ← NFml.Chain.rwAnyArrows do
+          let (sp, cands, _) ← scopedRwCands cur a run.erased[0]! (past := true)
+          if let some c ← cands.findM? fun c => fitsS fits sp c.fml c.erased then
+            found := some (n, c)
+            break
+        if let some (n, c) := found then
+          ws := ws.push (mk (mkApp3 (mkConst ``Link.rw) C (toExpr n) c.rw) c.fml)
+          cur := c.fml
+          continue
     if onScoped && !isOpen then
-      logWarning m!"PASTFAIL {match rw? with | some (some (r, _)) => toString r.getId | _ => "~=>"}: no scoped rewrite of{← indentLine cur}\nis{indentD (.ofSyntax l[1])}"
+      throwError (← pastRefusal C cur w rw?)
     if let some rw := rw? then
       -- a rewrite: from the erasure of the scoped line, `Update.lean`'s
       let (L₀, m?) ← match legacy with

@@ -1595,22 +1595,61 @@ structure UThin (C : Contract) (Γ' Δ : Ctx) where
   th : Thin Δ' Δ
   U : Upd C Γ' Δ'
 
-/-- The update, where its thinning drops nothing. -/
-def UThin.close? {Δ : Ctx} : UThin C Γ' Δ → Option (Upd C Γ' Δ)
-  | ⟨.refl, U⟩ => some U
-  | _ => none
+/-- `Thin.norm`'s step at a kept local: a thinning that keeps everything
+below is the identity. -/
+def Thin.normKeep {t : LTy} : {Δ' Δ : Ctx} → Thin Δ' Δ → Thin (t :: Δ') (t :: Δ)
+  | _, _, .refl => .refl
+  | _, _, .keep h => .keep (.keep h)
+  | _, _, .drop h => .keep (.drop h)
 
-theorem UThin.close?_apply {Δ : Ctx} {R : UThin C Γ' Δ} {U' : Upd C Γ' Δ} (h : R.close? = some U')
-    (σ : EState C Γ') (x : Res (EState C Δ)) (hx : R.U.apply σ = x.map (EState.thin R.th)) :
-    U'.apply σ = x := by
-  obtain ⟨th, U⟩ := R
-  cases th with
+/-- A thinning that drops nothing written as the identity. -/
+def Thin.norm : {Δ' Δ : Ctx} → Thin Δ' Δ → Thin Δ' Δ
+  | _, _, .refl => .refl
+  | _, _, .keep h => Thin.normKeep (Thin.norm h)
+  | _, _, .drop h => .drop (Thin.norm h)
+
+theorem Env.thin_normKeep {t : LTy} {Δ' Δ : Ctx} (h : Thin Δ' Δ) (e : Env C (t :: Δ)) :
+    Env.thin (Thin.normKeep h) e = (e.1, Env.thin h e.2) := by
+  cases h <;> rfl
+
+theorem Env.thin_norm : {Δ' Δ : Ctx} → (h : Thin Δ' Δ) → (e : Env C Δ) →
+    Env.thin (Thin.norm h) e = Env.thin h e
+  | _, _, .refl, _ => rfl
+  | _, _, .keep h, e => by
+    show Env.thin (Thin.normKeep (Thin.norm h)) e = (e.1, Env.thin h e.2)
+    rw [Env.thin_normKeep, Env.thin_norm h e.2]
+  | _, _, .drop h, e => Env.thin_norm h e.2
+
+/-- The update, where the thinning is the identity. -/
+def Thin.closeU {Δ' Δ : Ctx} : Thin Δ' Δ → Upd C Γ' Δ' → Option (Upd C Γ' Δ)
+  | .refl, U => some U
+  | .keep _, _ => none
+  | .drop _, _ => none
+
+/-- The update, where its thinning drops nothing. -/
+def UThin.close? {Δ : Ctx} (R : UThin C Γ' Δ) : Option (Upd C Γ' Δ) :=
+  Thin.closeU (Thin.norm R.th) R.U
+
+theorem Thin.closeU_apply {Δ' Δ : Ctx} {n : Thin Δ' Δ} {U : Upd C Γ' Δ'} {U' : Upd C Γ' Δ}
+    (h : Thin.closeU n U = some U') (σ : EState C Γ') (x : Res (EState C Δ))
+    (hx : U.apply σ = x.map (EState.thin n)) : U'.apply σ = x := by
+  cases n with
   | refl =>
     cases h
     rw [hx]
     cases x <;> rfl
   | keep _ => cases h
   | drop _ => cases h
+
+theorem UThin.close?_apply {Δ : Ctx} {R : UThin C Γ' Δ} {U' : Upd C Γ' Δ} (h : R.close? = some U')
+    (σ : EState C Γ') (x : Res (EState C Δ)) (hx : R.U.apply σ = x.map (EState.thin R.th)) :
+    U'.apply σ = x := by
+  refine Thin.closeU_apply h σ x ?_
+  rw [hx]
+  have he : EState.thin (Thin.norm R.th) = EState.thin (C := C) R.th := by
+    funext τ
+    simp only [EState.thin, Env.thin_norm]
+  rw [he]
 
 /-- **An update with locals dropped**: its right-hand sides read in `Γ'`
 (`h`), the declarations `dropDecl` names left out (counted from the first),
@@ -1882,9 +1921,15 @@ section SimpPast
 
 variable {Γ : Ctx}
 
-/-- The declarations an update pops itself, counted from the first: a
+/-- Which positions of `Δ` a thinning keeps, the newest first. -/
+def Thin.mask : {Δ' Δ : Ctx} → Thin Δ' Δ → List Bool
+  | _, Δ, .refl => List.replicate Δ.length true
+  | _, _, .keep h => true :: Thin.mask h
+  | _, _, .drop h => false :: Thin.mask h
+
+/-- The declarations an update ends itself, counted from the first: a
 stack of the context's positions (`some k` the `k`th declaration), popped
-at each scope end. -/
+at each scope end and thinned at each drop. -/
 def Upd.declStack : {Δ : Ctx} → Upd C Γ Δ → Nat × List (Option Nat) × List Nat
   | _, .nil => (0, List.replicate Γ.length none, [])
   | _, .snoc U _ => Upd.declStack U
@@ -1894,7 +1939,10 @@ def Upd.declStack : {Δ : Ctx} → Upd C Γ Δ → Nat × List (Option Nat) × L
   | _, .pop U h =>
     let r := Upd.declStack U
     (r.1, r.2.1.drop h.depth, r.2.2 ++ (r.2.1.take h.depth).filterMap id)
-  | _, .drop U _ => Upd.declStack U
+  | _, .drop U h =>
+    let r := Upd.declStack U
+    let ps := r.2.1.zip (Thin.mask h)
+    (r.1, (ps.filter (·.2)).map (·.1), r.2.2 ++ (ps.filter (!·.2)).filterMap (·.1))
 
 /-- `{U}_m ψ` with the declarations of `U` that `drop` names dropped, `ψ`
 read without those still in scope. -/
@@ -1934,20 +1982,20 @@ theorem Fml.dropDeclsTop_sound {Δ : Ctx} {drop : Nat → Bool} {m : Modality} {
 it merged in, the shadowed writes dropped, then every declaration nothing
 reads afterwards, else the ones `U` pops itself; `none` where nothing
 goes. -/
-def Fml.simpPastTop {Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (ψ : Fml C Δ) : Option (Fml C Γ) :=
+def Fml.simpPastTop {Δ : Ctx} (every : Bool) (m : Modality) (U : Upd C Γ Δ) (ψ : Fml C Δ) :
+    Option (Fml C Γ) :=
   match (Fml.absorbPops m U ψ).updHead? with
   | some ⟨m', W, ψ'⟩ =>
     let W' := W.shadow m'.isBoxS
     let popped := (Upd.declStack W').2.2
-    let cands := [Fml.dropDeclsTop (fun _ => true) m' W' ψ',
-      Fml.dropDeclsTop (fun k => popped.contains k) m' W' ψ']
-    cands.findSome? fun r => r.bind fun φ => match φ.updHead? with
-      | some h => if h.U.size < U.size then some φ else none
+    let r := Fml.dropDeclsTop (fun k => every || popped.contains k) m' W' ψ'
+    r.bind fun φ => match φ.updHead? with
+      | some h => if h.U.size < W'.size then some φ else none
       | none => none
   | none => none
 
-theorem Fml.simpPastTop_sound {Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {ψ : Fml C Δ}
-    {φ : Fml C Γ} (h : Fml.simpPastTop m U ψ = some φ) (σ : State C Γ) (hφ : holds σ φ) :
+theorem Fml.simpPastTop_sound {Δ : Ctx} {every : Bool} {m : Modality} {U : Upd C Γ Δ} {ψ : Fml C Δ}
+    {φ : Fml C Γ} (h : Fml.simpPastTop every m U ψ = some φ) (σ : State C Γ) (hφ : holds σ φ) :
     holds σ (.upd m U ψ) := by
   unfold Fml.simpPastTop at h
   split at h
@@ -1956,8 +2004,7 @@ theorem Fml.simpPastTop_sound {Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {ψ : 
     rw [Fml.updHead?_eq hW]
     refine holds_upd_shadow σ ?_
     dsimp only at h
-    obtain ⟨r, hr, hr'⟩ := List.exists_of_findSome?_eq_some h
-    obtain ⟨φ'', hφ'', hr'⟩ := Option.bind_eq_some_iff.1 hr'
+    obtain ⟨φ'', hφ'', hr'⟩ := Option.bind_eq_some_iff.1 h
     have heq : φ'' = φ := by
       split at hr'
       · split at hr'
@@ -1965,10 +2012,7 @@ theorem Fml.simpPastTop_sound {Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {ψ : 
         · cases hr'
       · cases hr'
     subst heq
-    simp only [List.mem_cons, List.mem_nil_iff, or_false] at hr
-    rcases hr with rfl | rfl
-    · exact Fml.dropDeclsTop_sound hφ'' σ hφ
-    · exact Fml.dropDeclsTop_sound hφ'' σ hφ
+    exact Fml.dropDeclsTop_sound hφ'' σ hφ
   · cases h
 
 /-- `bind x ({U} χ)` with the binder dropped, where `U` pops its local and
@@ -2006,16 +2050,16 @@ theorem Fml.dropBindTop_sound {Δ : Ctx} {t : LTy} {m₀ : Modality} {x : Var} {
   | _ => cases h
 
 /-- `{U}_m ψ` simplified where it can be, else as it is. -/
-def Fml.simpPastD {Γ : Ctx} : Fml C Γ → Fml C Γ
-  | .upd m U ψ => (Fml.simpPastTop m U ψ).getD (.upd m U ψ)
+def Fml.simpPastD {Γ : Ctx} (every : Bool) : Fml C Γ → Fml C Γ
+  | .upd m U ψ => (Fml.simpPastTop every m U ψ).getD (.upd m U ψ)
   | φ => φ
 
-theorem Fml.simpPastD_sound {Γ : Ctx} (φ : Fml C Γ) (σ : State C Γ) (h : holds σ φ.simpPastD) :
-    holds σ φ := by
+theorem Fml.simpPastD_sound {Γ : Ctx} (every : Bool) (φ : Fml C Γ) (σ : State C Γ)
+    (h : holds σ (φ.simpPastD every)) : holds σ φ := by
   cases φ with
   | upd m U ψ =>
     simp only [Fml.simpPastD] at h
-    cases hs : Fml.simpPastTop m U ψ with
+    cases hs : Fml.simpPastTop every m U ψ with
     | none => rw [hs] at h; exact h
     | some χ => rw [hs] at h; exact Fml.simpPastTop_sound hs σ h
   | _ => exact h
@@ -2023,27 +2067,27 @@ theorem Fml.simpPastD_sound {Γ : Ctx} (φ : Fml C Γ) (σ : State C Γ) (h : ho
 /-- `simplifyUpdate` past the program at position `n` of the spine, a hidden
 binder in front of the update absorbed where the update sets it first, or
 dropped where the update pops its local and reads it nowhere. -/
-def Fml.simpPastAt : {Γ : Ctx} → Nat → Fml C Γ → Option (Fml C Γ)
-  | _, n, .all x p φ => (Fml.simpPastAt n φ).map (.all x p)
+def Fml.simpPastAt (every : Bool) : {Γ : Ctx} → Nat → Fml C Γ → Option (Fml C Γ)
+  | _, n, .all x p φ => (Fml.simpPastAt every n φ).map (.all x p)
   | _, 0, .bind m x t φ =>
     match (match φ with
-      | .upd m' V ψ => (V.absorb x).bind fun V' => Fml.simpPastTop m' V' ψ
+      | .upd m' V ψ => (V.absorb x).bind fun V' => Fml.simpPastTop every m' V' ψ
       | _ => none) with
     | some ψ => some ψ
     | none => match Fml.dropBindTop φ with
-      | some ψ => some ψ.simpPastD
-      | none => (Fml.simpPastAt 0 φ).map (.bind m x t)
-  | _, n + 1, .bind m x t φ => (Fml.simpPastAt (n + 1) φ).map (.bind m x t)
-  | _, 0, .upd m U φ => Fml.simpPastTop m U φ
-  | _, n + 1, .upd m U φ => (Fml.simpPastAt n φ).map (.upd m U)
+      | some ψ => some (ψ.simpPastD every)
+      | none => (Fml.simpPastAt every 0 φ).map (.bind m x t)
+  | _, n + 1, .bind m x t φ => (Fml.simpPastAt every (n + 1) φ).map (.bind m x t)
+  | _, 0, .upd m U φ => Fml.simpPastTop every m U φ
+  | _, n + 1, .upd m U φ => (Fml.simpPastAt every n φ).map (.upd m U)
   | _, _, _ => none
 
-theorem Fml.simpPastAt_sound : {Γ : Ctx} → (n : Nat) → (φ : Fml C Γ) → {ψ : Fml C Γ} →
-    Fml.simpPastAt n φ = some ψ → ∀ σ, holds σ ψ → holds σ φ
+theorem Fml.simpPastAt_sound (every : Bool) : {Γ : Ctx} → (n : Nat) → (φ : Fml C Γ) → {ψ : Fml C Γ} →
+    Fml.simpPastAt every n φ = some ψ → ∀ σ, holds σ ψ → holds σ φ
   | _, n, .all x p φ, ψ₀, h => by
-    have h : (Fml.simpPastAt n φ).map (Fml.all x p) = some ψ₀ := by rw [← h]; cases n <;> rfl
+    have h : (Fml.simpPastAt every n φ).map (Fml.all x p) = some ψ₀ := by rw [← h]; cases n <;> rfl
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs v => Fml.simpPastAt_sound n φ hψ _ (hs v)
+    exact fun σ hs v => Fml.simpPastAt_sound every n φ hψ _ (hs v)
   | _, 0, .bind m x t φ, ψ₀, h => by
     simp only [Fml.simpPastAt] at h
     split at h
@@ -2057,27 +2101,29 @@ theorem Fml.simpPastAt_sound : {Γ : Ctx} → (n : Nat) → (φ : Fml C Γ) → 
     · split at h
       · rename_i ψ hψ
         cases h
-        exact fun σ hs => Fml.dropBindTop_sound hψ σ (Fml.simpPastD_sound ψ σ hs)
+        exact fun σ hs => Fml.dropBindTop_sound hψ σ (Fml.simpPastD_sound every ψ σ hs)
       · obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-        exact fun σ hs => Modality.forallB_imp (fun v => Fml.simpPastAt_sound 0 φ hψ _) hs
+        exact fun σ hs => Modality.forallB_imp (fun v => Fml.simpPastAt_sound every 0 φ hψ _) hs
   | _, n + 1, .bind m x t φ, ψ₀, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs => Modality.forallB_imp (fun v => Fml.simpPastAt_sound (n + 1) φ hψ _) hs
+    exact fun σ hs => Modality.forallB_imp (fun v => Fml.simpPastAt_sound every (n + 1) φ hψ _) hs
   | _, 0, .upd m U φ, _, h => fun σ hs => Fml.simpPastTop_sound h σ hs
   | _, n + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact fun σ hs => Modality.afterC_imp hs fun τ a σ' e hx =>
-      Fml.simpPastAt_sound n φ hψ σ' (a σ' e hx)
+      Fml.simpPastAt_sound every n φ hψ σ' (a σ' e hx)
   | _, n, .tt, _, h | _, n, .eq .., _, h | _, n, .defined _, _, h | _, n, .not _, _, h
   | _, n, .and .., _, h | _, n, .imp .., _, h | _, n, .modal .., _, h | _, n, .havoc _, _, h
   | _, n, .anon .., _, h => by
     cases n <;> cases h
 
 /-- **`simplifyUpdate`** past the program, at position `n` of the spine
-(`Fml.simpPastAt`). -/
-def FmlRw.simplifyPast (n : Nat) : FmlRw C where
-  apply := fun φ => Fml.simpPastAt n φ
-  sound := fun h σ hψ => Fml.simpPastAt_sound n _ h σ hψ
+(`Fml.simpPastAt`): every declaration nothing reads afterwards (`every`),
+else the ones the update ends itself, which does not ask the line after
+what it reads. -/
+def FmlRw.simplifyPast (n : Nat) (every : Bool) : FmlRw C where
+  apply := fun φ => Fml.simpPastAt every n φ
+  sound := fun h σ hψ => Fml.simpPastAt_sound every n _ h σ hψ
 
 end SimpPast
 
