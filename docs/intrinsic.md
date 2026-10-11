@@ -3003,6 +3003,27 @@ clause's statements by `Prog.keyStrs`, so the key flattens a block at every
 depth; `loopChain` (`Examples/Tactics/Chains.lean`) pins a chain through
 `whileUnwind`.  2–5: the texts reworded.  No other pin moved.
 
+### W8 W8.5 gate, docs, review merge (2026-10-11)
+
+`w8-w85gatedocsreview-gate`, `-docs` and `-review` merged into
+`intrinsic` in that order.  Conflicts were textual only, in this record and
+`docs/kernel-port.md`: "What changed"'s Syntax and Formulas rows and the
+callee row of `kernel-port.md` take both lanes' wording; the milestones'
+W8 and `left` rows are the docs lane's (proposals 95–105 are approved);
+the three lane records are kept in full.  None of the lanes proposed a
+decision, so none is renumbered.  The review's defect 1 (the chain key
+after `whileUnwind`) is fixed on its branch and pinned (`loopChain`).
+
+**Checks** (merged tree): `lean_build` green with `SolidityCorpus` and
+`SolkeyTestSuite` added to the default targets for the run (328 jobs, no
+error; `lakefile.toml` reverted); `dups.py` lists only its known false
+positives (`as`, `delabFml`, `delabProves`); `node
+scripts/check-orphans.mjs` 314 reachable, the one orphan the git-excluded
+`Solidity/Scratch/ElabDump.lean`; `./scripts/check-doc-paths.sh` OK;
+`./scripts/check-rule-text.sh` passes.  No `.lean` file changed in the
+merge, so the gate lane's table stands.  The three worktrees are removed;
+their branches stay.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
