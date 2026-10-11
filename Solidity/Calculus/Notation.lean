@@ -372,7 +372,7 @@ def elabAgainstQ (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermE
   withOptions (debug.skipKernelTC.set · true) (elabAgainst c f)
 
 open Lean Elab Term Meta in
-/-- `cdl[C, m]{ φ }`, `m` optional, as `elabDlAt` reads `dl[C, m]{ φ }`: a
+/-- `cdl[C, m]{ φ }`, `m` optional: a
 modality that is no constructor is read twice, at the diamond and at the
 box, and `fillSlotsC` puts it and the Lean formulas back.  `useAll` as
 `elabDlCN`'s. -/

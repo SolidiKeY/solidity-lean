@@ -34,7 +34,10 @@ under solkey's names where solkey has the rule:
   condition is ground under the context (`Calculus/ProvesDerive.lean`);
 * `close`: a leaf whose erasure is valid (`Calculus/CloseErase.lean`),
   as today's closer reads a leaf, behind any context of updates, under either
-  modality, hidden binders and `∀`s;
+  modality, hidden binders and `∀`s.  Since W9.4 the erased fallback only:
+  a leaf is left by `sol_leaf` (`Proves.closeHolds`, `Proves.closeValid`)
+  for the scoped closers, and `close` is taken by a chain's last line past
+  the program (`Calculus/ChainKit.lean`) and the erased closer's tests;
 * the rules on the context's updates, today's `Proves`'s: `merge`
   (`sequentialToParallel`, over a storage write too, KeY's `mergeStorage`;
   past the hidden binders between the two updates) and `updRw` (a term

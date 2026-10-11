@@ -535,7 +535,7 @@ A parameter `cdl!` binds and a `∀ uint x;` written in the formula are the
 same term, `Fml.all`.  `cdl!` marks the written ones in its output, on the
 quoted variable (an `Expr.mdata` the kernel, the compiled code and
 unification do not see), so that the tactics can keep an explicit `∀` and
-its range at a leaf (`Seq.pick`, `Derive.eraseLeaf`) and write its
+its range at a leaf (`Seq.paramCount`, `Derive.eraseLeaf`) and write its
 `allRight` line in the short walk; a formula with no mark (a constant, a
 term the strategy computed) reads every leading `∀` as a parameter. -/
 

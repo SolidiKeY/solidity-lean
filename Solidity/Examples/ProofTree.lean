@@ -565,8 +565,8 @@ example : ⊢ .imp wtStd dl!{ ⟨ Person storage p = persons.push(); p.age = 1; 
 diamond's `x + 1` stays in range; under the box, `require(x >= 1 && …)`
 keeps `x - 1` in range and decides `y < 100`.  The explicit `∀` keeps `x`'s
 range at the leaf: `cdl!` marks it, so it is not a parameter, and only the
-parameters' `∀`s are stripped (decision 28; `Seq.pick` keeps theirs where
-only that closes, decision 27). -/
+parameters' `∀`s are bound as parameters (decision 28; the scoped closer
+reads each at its type). -/
 
 /--
 info: Try this:
